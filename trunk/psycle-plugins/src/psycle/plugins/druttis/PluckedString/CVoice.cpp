@@ -6,38 +6,52 @@
 //
 //============================================================================
 #include "CVoice.h"
+#include <psycle/helpers/math.hpp>
+#include <psycle/plugin_interface.hpp>
+float const LOWEST_FREQ = 20.0f;
+
 //============================================================================
 //				Init
 //============================================================================
 void CVoice::Init()
 {
-	float lowestFreq = 20.0f;
 	currentFreq = -1.0f;
-	length = (int) (globals->srate / lowestFreq + 1.0f);
-	lastLength = (float) length;
-	lastFreq = lowestFreq;
+	lastFreq = LOWEST_FREQ;
 	loopGain = 0.999f;
+
+	long length = (long) (globals->srate / LOWEST_FREQ) + 1;
+	lastLength = (float) length;
 	delayLine.Init(length);
 	combDelay.Init(length);
 	pluckAmp = 0.3f;
-	pluckPos = 0.25f;
-	combDelay.SetDelay(pluckPos * lastLength + 0.5f);
+	globals->pluckPos = 0.25f;
+	combDelay.SetDelay(globals->pluckPos * lastLength + 0.5f);
+
 	loopFilt.Init();
-	loopFilt.SetB1(-1.03f);
-	loopFilt.SetB2(0.2154f);
-	loopFilt.SetA1(-1.33373f);
-	loopFilt.SetA2(0.446191f);
+	loopFilt.SetRawCoeffs(-1.33373f,0.446191f,-1.03f,0.2154f);
 	loopFilt.SetGain(0.604595f);
-	Clear();
+
 	vca.SetAttack(0.0f);
 	vca.SetDecay(0.0f);
 	vca.SetSustain(1.0f);
-	vca.SetRelease(256.0f);
+	vca.SetRelease(256.0f*(globals->srate/44100.f));
 
 	globals->vib_speed = 192.0f / globals->srate;
 	globals->vib_amount = 0.05f;
 	globals->vib_delay = 256.0f;
 
+}
+//============================================================================
+//				UpdateSampleRate
+//============================================================================
+void CVoice::UpdateSampleRate()
+{
+	long length = (long) (globals->srate / 20.0f + 1.0f);
+	delayLine.Init(length);
+	SetFreq(lastFreq);
+	combDelay.Init(length);
+	Pluck(pluckAmp);
+	vca.SetRelease(256.0f*(globals->srate/44100.f));
 }
 //============================================================================
 //				Clear
@@ -66,24 +80,17 @@ void CVoice::SetFreq(float frequency)
 //============================================================================
 void CVoice::Pluck(float amplitude)
 {
+	combDelay.SetDelay(globals->pluckPos * lastLength + 0.5f);
 	pluckAmp = amplitude;
 	plucker = amplitude;
-}
-//============================================================================
-//				Pluck
-//============================================================================
-void CVoice::Pluck(float amplitude, float position)
-{
-	pluckPos = ((position < 0.0f) ? 0.0f : ((position > 1.0f) ? 1.0f : position));
-	combDelay.SetDelay(pluckPos * lastLength + 0.5f);
-	Pluck(amplitude);
+	combDelay.Clear();
 }
 //============================================================================
 //				Stop
 //============================================================================
 void CVoice::Stop()
 {
-	vca.Stop();
+	vca.Kill();
 	currentFreq = -1.0f;
 }
 //============================================================================
@@ -92,18 +99,16 @@ void CVoice::Stop()
 void CVoice::NoteOff()
 {
 	loopGain *= 0.995f;
-	vca.NoteOff();
+	vca.Stop();
 }
 //============================================================================
 //				NoteOn
 //============================================================================
 void CVoice::NoteOn(int note, int volume, int cmd, int val)
 {
-	float position = globals->pluckPos;
 	//
 	//
 	if (cmd == 0x0e) {
-//								position = (float) val / 255.0f;
 		noteDelay = val;
 	} else {
 		noteDelay = 0;
@@ -111,10 +116,10 @@ void CVoice::NoteOn(int note, int volume, int cmd, int val)
 	//
 	//
 	float sn = globals->schoolness * (float) sin((float) note * PI2 / 9.12345f);
-	SetFreq(GetFreq((float) note + sn));
+	SetFreq(CDsp::GetFreq((float) note + sn));
 	if ((cmd != 0x0d) || (currentFreq == -1)) {
 		Clear();
-		Pluck((float) volume / 255.0f, position);
+		Pluck((float) volume / 255.0f);
 		slideSpeed = 0.0f;
 		currentFreq = lastFreq;
 	} else {
@@ -127,7 +132,7 @@ void CVoice::NoteOn(int note, int volume, int cmd, int val)
 	//
 	vib_phase = 0.0f;
 	vib_dtime = 0.0f;
-	vca.NoteOn(0.0f);
+	vca.Begin();
 }
 
 

@@ -19,7 +19,6 @@ using namespace psycle::plugin_interface;
 #define MAC_VERSION		"1.2"
 int const IMAC_VERSION = 0x0120;
 #define MAC_AUTHOR		"Druttis"
-#define	MAX_TRACKS		64
 #define MAX_VOICES		2
 //============================================================================
 //				Parameters
@@ -249,7 +248,9 @@ void mi::Command()
 		"0Dxx : Slide to note   (xx: 00 = default speed (10), 01 = fast, ff = slow)\n"
 		"OExx : Cut note        (xx: speed) * cuts this note only\n"
 		"\n"
-		"Greets to the folks in #psycle & #musicdsp on efnet"
+		"Greets to the folks in #psycle & #musicdsp on efnet\n"
+		"\n"
+		"The asterisk (*) in the parameters means those that are affected by inertia"
 		,
 		MAC_AUTHOR " " MAC_NAME " v." MAC_VERSION,
 		0
@@ -294,7 +295,7 @@ void mi::ParameterTweak(int par, int val)
 			globals.amplitude = (float) val / 255.0f;
 			break;
 		case PARAM_VIBRATO_RATE:
-			globals.vibrato_rate = (float) val*globals.samplingrate / (44100.f*256.0f*GLOBAL_TICKS);
+			globals.vibrato_rate = (float) val*44100.f*GLOBAL_TICKS/ (256.0f*globals.samplingrate);
 			break;
 		case PARAM_VIBRATO_AMOUNT:
 			globals.vibrato_amount = (float) val / 255.0f;
@@ -321,7 +322,7 @@ void mi::ParameterTweak(int par, int val)
 			globals.filter_type = val;
 			break;
 		case PARAM_FILTER_FREQ:
-			SetAFloat(globals.filter_freq, (float) val *44100/ (255.0f*globals.samplingrate), globals.inertia);
+			SetAFloat(globals.filter_freq, (float) val *44100.f/ (255.0f*globals.samplingrate), globals.inertia);
 			break;
 		case PARAM_FILTER_RES:
 			SetAFloat(globals.filter_res, (float) val / 256.0f, globals.inertia);
@@ -372,13 +373,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		case PARAM_FILTER_FREQ:
 			// All them shoud be a bit logarithmic towards the end.
 			if(Vals[PARAM_FILTER_TYPE] == 0 || Vals[PARAM_FILTER_TYPE] == 2) {
-				std::sprintf(txt,"%.03f Hz",4000.f*(float)value/144.f);
+				std::sprintf(txt,"%.0f Hz",4000.f*(float)value/144.f);
 			} else if(Vals[PARAM_FILTER_TYPE] == 1) {
-				std::sprintf(txt,"%.03f Hz",4000.f*(float)value/100.f);
+				std::sprintf(txt,"%.0f Hz",4000.f*(float)value/100.f);
 			} else if(Vals[PARAM_FILTER_TYPE] == 3) {
-				std::sprintf(txt,"%.03f Hz",15000.f*(float)value/203.f);
+				std::sprintf(txt,"%.0f Hz",15000.f*(float)value/203.f);
 			} else {
-				std::sprintf(txt,"%.03f Hz",8000.f*(float)value/158.f);
+				std::sprintf(txt,"%.0f Hz",8000.f*(float)value/158.f);
 			}
 			break;
 		case PARAM_FILTER_RES:
@@ -466,14 +467,14 @@ void mi::SequencerTick()
 		globals.samplingrate = pCB->GetSamplingRate();
 		globals.attack = (float) Vals[PARAM_ATTACK] * (64.0f*globals.samplingrate/44100.f);
 		globals.release = (float) Vals[PARAM_RELEASE] * (64.0f*globals.samplingrate/44100.f);
-		globals.vibrato_rate = (float) Vals[PARAM_VIBRATO_RATE]*globals.samplingrate / (8.0f*44100.f);
-		globals.vibrato_delay = (float) Vals[PARAM_VIBRATO_DELAY]*globals.samplingrate / (8.0f*44100.f);
-		globals.vcf_attack = (float) Vals[PARAM_VCF_ATTACK] * (2.0f*globals.samplingrate/44100.f);
-		globals.vcf_decay = (float) Vals[PARAM_VCF_DECAY] * (2.0f*globals.samplingrate/44100.f);
-		globals.vcf_release = (float) Vals[PARAM_VCF_RELEASE] * (2.0f*globals.samplingrate/44100.f);
-		SetAFloat(globals.filter_freq, (float) Vals[PARAM_FILTER_FREQ] *44100/ (255.0f*globals.samplingrate), 0);
-		globals.note_cut = Vals[PARAM_NOTE_CUT] * (2.0f*globals.samplingrate/44100.f);
-		globals.inertia = Vals[PARAM_INERTIA] * (2.0f*globals.samplingrate/44100.f);
+		globals.vibrato_rate = (float) Vals[PARAM_VIBRATO_RATE]*44100.f*GLOBAL_TICKS/ (256.0f*globals.samplingrate);
+		globals.vibrato_delay = (float) Vals[PARAM_VIBRATO_DELAY]*globals.samplingrate*(256.0f/GLOBAL_TICKS)/44100.f;
+		globals.vcf_attack = (float) Vals[PARAM_VCF_ATTACK] * ((64.0f/GLOBAL_TICKS)*globals.samplingrate/44100.f);
+		globals.vcf_decay = (float) Vals[PARAM_VCF_DECAY] * ((64.0f/GLOBAL_TICKS)*globals.samplingrate/44100.f);
+		globals.vcf_release = (float) Vals[PARAM_VCF_RELEASE] * ((64.0f/GLOBAL_TICKS)*globals.samplingrate/44100.f);
+		SetAFloat(globals.filter_freq, (float) Vals[PARAM_FILTER_FREQ] *44100.f/ (255.0f*globals.samplingrate), 0);
+		globals.note_cut = Vals[PARAM_NOTE_CUT] * ((64.0f/GLOBAL_TICKS)*globals.samplingrate/44100.f);
+		globals.inertia = Vals[PARAM_INERTIA] * ((64.0f/GLOBAL_TICKS)*globals.samplingrate/44100.f);
 		SetAFloat(globals.filter_res,globals.filter_res.target, globals.inertia);
 	}
 
@@ -495,9 +496,9 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 	//
 	//				Route
-	if (note == 120) {
+	if (note==NOTE_NOTEOFF) {
 		tracks[channel][0].NoteOff();
-	} else if (note < 120) {
+	} else if (note<=NOTE_MAX) {
 		if (cmd == 0x0d) {
 			if (val == 0)
 				val = 16;

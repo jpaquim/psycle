@@ -2,7 +2,7 @@
 //
 //				BiQuad (2 pole, 2 zero) filter
 //
-//				druttis@darkface.pp.se
+//	BUGGY CODE. TAKE THE ONE FROM DSP FOR ANYTHING OTHER THAN THIS PLUGIN
 //
 //============================================================================
 #pragma once
@@ -13,7 +13,7 @@ using namespace psycle::helpers::math;
 class BiQuad
 {
 protected:
-	float				*inputs;
+	float				inputs[2];
 	float				gain;
 	float				lastOutput;
 	float				poleCoeffs[2];
@@ -23,17 +23,12 @@ public:
 	~BiQuad();
 	void Init();
 	void Clear();
-	void SetA1(float a1);
-	void SetA2(float a2);
-	void SetB1(float b1);
-	void SetB2(float b2);
-	void SetPoleCoeffs(float *coeffs);
-	void SetZeroCoeffs(float *coeffs);
-	void SetFreqAndRes(float freq, float res, float srate);
-	void SetEqualGainZeroes();
+	void SetRawCoeffs(float a1,float a2,float b1,float b2);
 	void SetGain(float newGain);
 	//------------------------------------------------------------------------
 	//				tick
+	//	This method is buggy. Instead of keeping a buffer of inputs and one
+	//  of outputs outputs, it keeps a buffer of half-processed inputs
 	//------------------------------------------------------------------------
 	inline float Tick(float sample)
 	{
@@ -57,6 +52,5 @@ public:
 		//
 		//
 		return lastOutput;
-		//return sample; //<Sartorius> ???
 	}
 };

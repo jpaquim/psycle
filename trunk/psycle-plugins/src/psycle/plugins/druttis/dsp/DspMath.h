@@ -42,53 +42,6 @@ inline float fand(float val, int mask) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// fastexp
-inline float fastexp(double x) {
-	#if defined _MSC_VER && defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
-	__asm
-	{
-		FLDL2E
-		FLD     QWORD PTR [x]																  ; x
-		FMUL                                  ; z = x*log2(e)
-		FIST    DWORD PTR [x]                 ; round(z)
-		SUB     ESP, 12
-
-		MOV     DWORD PTR [ESP], 0
-		MOV     DWORD PTR [ESP+4], 80000000H
-		FISUB   DWORD PTR [x]                 ; z - round(z)
-		MOV     EAX, DWORD PTR [x]
-		ADD     EAX,3FFFH
-		MOV     [ESP+8],EAX
-		JLE     my_underflow
-		CMP     EAX,8000H
-		JGE     my_overflow
-		F2XM1
-		FLD1
-		FADD                                  ; 2^(z-round(z))
-		FLD     TBYTE PTR [ESP]               ; 2^(round(z))
-
-		ADD     ESP,12
-		FMUL                                  ; 2^z = e^x
-		JMP								my_end
-my_underflow:
-		FSTP    ST
-		FLDZ                                  ; return 0
-		ADD     ESP,12
-		JMP								my_end
-my_overflow:
-		PUSH    07F800000H                    ; +infinity
-		FSTP    ST
-		FLD     DWORD PTR [ESP]               ; return infinity
-		ADD     ESP,16
-my_end:
-	}
-	///\todo [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
-	#else
-		return std::exp(x);
-	#endif
-}
-
-//////////////////////////////////////////////////////////////////////
 /// Converts milliseconds to samples
 inline int millis2samples(int ms, int samplerate) {
 	return ms * samplerate / 1000;
@@ -98,6 +51,12 @@ inline int millis2samples(int ms, int samplerate) {
 // Converts a note to a phase increment
 inline float note2incr(int size, float note, int samplerate) {
 	return (float) size * 440.0f * (float) pow(2.0, (note - 69.0) / 12.0) / (float) samplerate;
+}
+
+//////////////////////////////////////////////////////////////////////
+// Converts a note to a value in Hz.
+inline float note2freq(float note) {
+	return (float) 440.0f * (float) pow(2.0, (note - 69.0) / 12.0);
 }
 
 //////////////////////////////////////////////////////////////////////

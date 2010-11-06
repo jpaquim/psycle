@@ -11,10 +11,6 @@
 #include "Filter.h"
 #include "Formant.h"
 #include "Inertia.h"
-#include "Waveform.h"
-
-extern float* pfmtable;
-extern float* ppmtable;
 
 //////////////////////////////////////////////////////////////////////
 //

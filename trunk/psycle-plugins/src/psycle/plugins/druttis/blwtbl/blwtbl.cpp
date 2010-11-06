@@ -3,15 +3,33 @@
 
 #define DRUTTIS__BAND_LIMITED_WAVES_TABLES__SOURCE
 #include "blwtbl.h"
+#include "../dsp/DspMath.h"
+
+//Max sample rate = 96Khz
+int const MAX_FREQUENCY = 48000;
+
+//////////////////////////////////////////////////////////////////////
+//
+//				Increment to Frequency factor
+//
+//////////////////////////////////////////////////////////////////////
+float incr2freq = 0.0f;
 
 //////////////////////////////////////////////////////////////////////
 // Simple data
 namespace {
+	// sine period used in the calculation of bandlimited waves.
 	float *psinetable;
+	// sampling rate for which the bandlimited waves and fm/pm tables are calculated.
 	int samplingrate;
+	// amount of partial waves for the bandlimited waves for this samplerate.
 	int totalpartials;
+	// Translation frequency (Hz) -> partial index for the bandlimited waves.
+	// preverse[0] returns always index 0.
 	int *preverse[2];
+	//Amount of variance per frequency [0..1].
 	float *pfmtable;
+	//Amount of variance per frequency [0..WAVESIZE];
 	float *ppmtable;
 }
 
@@ -156,63 +174,32 @@ WAVESPEC wavespecs[] = {
 	{ "Sawtooth", false, SawtoothFunc, 0, 0 },
 	{ "Rev. Sawtooth", false, RevSawtoothFunc, 0, 0 }
 };
-#define NUMWAVEFORMS 10
+
+
 
 //////////////////////////////////////////////////////////////////////
-// InitWaveforms
-void InitWaveforms() {
+// InitLibrary
+void InitLibrary() {
 	int i;
-
-	// Create buffers
-	psinetable = new float [WAVESIZE];
-	preverse[0] = new int[65536];
-	preverse[1] = new int[65536];
-	pfmtable = new float[65536];
-	ppmtable = new float[65536];
-	
 	//Initialize environment
 	samplingrate = 0;
 	totalpartials = 0;
 	
+	// Create buffers
+	psinetable = new float [WAVESIZE];
+	preverse[0] = new int[MAX_FREQUENCY];
+	preverse[1] = new int[MAX_FREQUENCY];
+	pfmtable = new float[MAX_FREQUENCY];
+	ppmtable = new float[MAX_FREQUENCY];
 	// Create sine table
 	for (i = 0; i < WAVESIZE; i++) {
 		psinetable[i] = (float) sin((double) i * PI2 / (double) WAVESIZE);
 	}
-
 	// Initialize reverse lookup table 0
-	for (i = 0; i < 65536; i++) {
+	for (i = 0; i < MAX_FREQUENCY; i++) {
 		preverse[0][i] = 0;
 	}
-}
 
-//////////////////////////////////////////////////////////////////////
-// DeleteWaveforms
-void DeleteWaveforms() {
-	for (int i = 0; i < NUMWAVEFORMS; i++) {
-		if (wavespecs[i].pdata != 0) {
-			delete[] wavespecs[i].pdata;
-			wavespecs[i].pdata = 0;
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////
-// CleanupWaveforms
-void CleanupWaveforms() {
-	// Delete wave form data
-	DeleteWaveforms();
-
-	// Clear instances
-	for (int i = 0; i < NUMWAVEFORMS; i++) {
-		wavespecs[i].ninstances = 0;
-	}
-
-	// Delete buffers
-	delete[] preverse[1];
-	delete[] preverse[0];
-	delete[] ppmtable;
-	delete[] pfmtable;
-	delete[] psinetable;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -252,7 +239,8 @@ bool CreateWaveform(WAVESPEC *pspec) {
 	lastnumpartials = 0;
 	pin = 0;
 	pout = 0;
-	for (n = 128; --n >= 0; ) {
+	//For each note...
+	for (n = 119; n >= 0; n--) {
 		freq = 440.0f * (float) pow(2.0, (double) (n - 69) / 12.0);
 		numpartials = (int) (0.5f * (float) samplingrate / freq);
 		if (lastnumpartials < numpartials) {
@@ -268,8 +256,8 @@ bool CreateWaveform(WAVESPEC *pspec) {
 				}
 			}
 			pin = pout;
-			for (a = lastnumpartials; a < numpartials; a++) {
-				(pspec->func)(pout, WAVESIZE, a + 1);
+			for (a = lastnumpartials+1; a <= numpartials; a++) {
+				(pspec->func)(pout, WAVESIZE, a);
 			}
 			lastnumpartials = numpartials;
 		}
@@ -282,16 +270,60 @@ bool CreateWaveform(WAVESPEC *pspec) {
 			max = (float) fabs(pout[b]);
 		} 
 	}
+	max = 1.0f/max;
 	for (b = WAVESIZE * totalpartials; --b >= 0; ) {
-		pspec->pdata[b] /= max;
+		pspec->pdata[b] *= max;
 	}
 	return true;
 }
 
 //////////////////////////////////////////////////////////////////////
+// DeleteWaveforms
+void DeleteWaveforms() {
+	for (int i = 0; i < WF_NUM_WAVEFORMS; i++) {
+		if (wavespecs[i].pdata != 0) {
+			delete[] wavespecs[i].pdata;
+			wavespecs[i].pdata = 0;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// CloseLibrary
+void CloseLibrary() {
+	// Delete wave form data
+	DeleteWaveforms();
+
+	// Clear instances
+	for (int i = 0; i < WF_NUM_WAVEFORMS; i++) {
+		wavespecs[i].ninstances = 0;
+	}
+
+	// Delete buffers
+	delete[] preverse[1];
+	delete[] preverse[0];
+	delete[] ppmtable;
+	delete[] pfmtable;
+	delete[] psinetable;
+}
+
+//////////////////////////////////////////////////////////////////////
+// GetWaveInfo
+bool GetWaveInfo(WAVEFORM* pwave) {
+	if (!pwave) {
+		return false;
+	}
+	if ((pwave->index < 0) || (pwave->index >= WF_NUM_WAVEFORMS)) {
+		return false;
+	}
+	pwave->pname = wavespecs[pwave->index].pname;
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////
 // EnableWaveform
-bool EnableWaveform(int index) {
-	if ((index < 0) || (index >= NUMWAVEFORMS)) {
+bool EnableWaveform(wf_type index) {
+	if ((index < 0) || (index >= WF_NUM_WAVEFORMS)) {
 		return false;
 	}
 	if (wavespecs[index].ninstances == 0) {
@@ -303,8 +335,8 @@ bool EnableWaveform(int index) {
 
 //////////////////////////////////////////////////////////////////////
 // DisableWaveform
-bool DisableWaveform(int index) {
-	if ((index < 0) || (index >= NUMWAVEFORMS)) {
+bool DisableWaveform(wf_type index) {
+	if ((index < 0) || (index >= WF_NUM_WAVEFORMS)) {
 		return false;
 	}
 	if (wavespecs[index].ninstances > 0) {
@@ -333,14 +365,12 @@ float* GetPMTable() {
 
 //////////////////////////////////////////////////////////////////////
 // GetWaveform
-bool GetWaveform(int index, WAVEFORM *pwave) {
+bool GetWaveform(wf_type index, WAVEFORM *pwave) {
 	if (!pwave) {
-		//\todo: OUCH! pwave?
-		//DisableWaveform(pwave->index);
 		return false;
 	}
-	if ((index < 0) || (index >= NUMWAVEFORMS)) {
-		pwave->index = -1;
+	if ((index < 0) || (index >= WF_NUM_WAVEFORMS)) {
+		pwave->index = WF_INIT_STRUCT;
 		pwave->pname = 0;
 		pwave->pdata = 0;
 		pwave->preverse = preverse[0];
@@ -370,6 +400,8 @@ bool UpdateWaveforms(int sr) {
 		return true;
 	}
 	samplingrate = sr;
+	incr2freq = 2.0f * (float) sr / WAVEFSIZE;
+
 	
 	//Remove all waveform data
 	DeleteWaveforms();
@@ -378,7 +410,7 @@ bool UpdateWaveforms(int sr) {
 	lastnumpartials = 0;
 	totalpartials = 0;
 	reverseindex = 0;
-	for (n = 0; n < 128; ++n) {
+	for (n = 0; n < 120; ++n) {
 		freq = 440.0f * (float) pow(2.0, (double) (n - 69) / 12.0);
 		numpartials = (int) (0.5f * (float) samplingrate / freq);
 		if (lastnumpartials != numpartials) {
@@ -391,12 +423,12 @@ bool UpdateWaveforms(int sr) {
 			totalpartials++;
 		}
 	}
-	for (b = reverseindex; b < 65536; ++b) {
+	for (b = reverseindex; b < MAX_FREQUENCY; ++b) {
 		preverse[1][b] = totalpartials - 1;
 	}				
 	
 	// Recreate waveform data
-	for (n = 0; n < NUMWAVEFORMS; ++n) {
+	for (n = 0; n < WF_NUM_WAVEFORMS; ++n) {
 		if (wavespecs[n].ninstances > 0) {
 			if (!CreateWaveform(&wavespecs[n])) {
 				wavespecs[n].pdata = 0;
@@ -411,7 +443,7 @@ bool UpdateWaveforms(int sr) {
 		pfmtable[b] = 1.0f - (float) sqrt((float) (b + 1) / (float) a);
 		ppmtable[b] = pfmtable[b] * WAVEFSIZE;
 	}
-	for (b = a; b < 65536; ++b) {
+	for (b = a; b < MAX_FREQUENCY; ++b) {
 		pfmtable[b] = 0.0f;
 		ppmtable[b] = 0.0f;
 	}
@@ -424,13 +456,13 @@ bool UpdateWaveforms(int sr) {
 	namespace init {
 		void constructor() UNIVERSALIS__COMPILER__ATTRIBUTE(constructor) UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN;
 		void constructor() {
-			InitWaveforms();
+			InitLibrary();
 			UpdateWaveforms(44100);
 		}
 		
 		void destructor() UNIVERSALIS__COMPILER__ATTRIBUTE(destructor) UNIVERSALIS__COMPILER__DYN_LINK__HIDDEN;
 		void destructor() {
-			CleanupWaveforms();
+			CloseLibrary();
 		}
 	}
 #elif defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
@@ -440,14 +472,14 @@ bool UpdateWaveforms(int sr) {
 		bool result(true);
 		switch(reason_for_call) {
 			case DLL_PROCESS_ATTACH:
-				InitWaveforms();
+				InitLibrary();
 				UpdateWaveforms(44100);
 			case DLL_THREAD_ATTACH:
 				break;
 			case DLL_THREAD_DETACH:
 				break;
 			case DLL_PROCESS_DETACH:
-				CleanupWaveforms();
+				CloseLibrary();
 				break;
 			default:
 				result = false;

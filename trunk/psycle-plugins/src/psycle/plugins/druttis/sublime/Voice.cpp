@@ -6,6 +6,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include "Voice.h"
+#include <psycle/plugin_interface.hpp>
 //////////////////////////////////////////////////////////////////////
 //
 //				Voice constructor
@@ -86,9 +87,9 @@ void Voice::NoteOff()
 bool Voice::NoteOn(Voice *old, int note, int cmd, int val)
 {
 	// Only note off?
-	if (note > 119)
+	if (note >= psycle::plugin_interface::NOTE_NOTEOFF)
 	{
-		if (note == 120)
+		if (note==psycle::plugin_interface::NOTE_NOTEOFF)
 		{
 			if (old)
 			{
