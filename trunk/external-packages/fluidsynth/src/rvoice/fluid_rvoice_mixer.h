@@ -40,7 +40,7 @@ int fluid_rvoice_mixer_render(fluid_rvoice_mixer_t* mixer, int blockcount);
 int fluid_rvoice_mixer_get_bufs(fluid_rvoice_mixer_t* mixer, 
 				  fluid_real_t*** left, fluid_real_t*** right);
 
-fluid_rvoice_mixer_t* new_fluid_rvoice_mixer(int buf_count, int fx_buf_count);
+fluid_rvoice_mixer_t* new_fluid_rvoice_mixer(int buf_count, int fx_buf_count, int sample_rate);
 
 void delete_fluid_rvoice_mixer(fluid_rvoice_mixer_t*);
 
@@ -60,6 +60,11 @@ void fluid_rvoice_mixer_reset_fx(fluid_rvoice_mixer_t* mixer);
 
 void fluid_rvoice_mixer_set_threads(fluid_rvoice_mixer_t* mixer, int thread_count, 
 				    int prio_level);
+				    
+#ifdef LADSPA				    
+void fluid_rvoice_mixer_set_ladspa(fluid_rvoice_mixer_t* mixer, 
+				   fluid_LADSPA_FxUnit_t* ladspa);
+#endif
 
 #endif
 
