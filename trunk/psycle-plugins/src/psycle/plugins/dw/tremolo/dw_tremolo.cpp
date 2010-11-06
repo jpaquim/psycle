@@ -135,7 +135,7 @@ mi::~mi()
 void mi::Init()
 {
 	lfopos=0;
-	srMultiplier = 44100/(float)pCB->GetSamplingRate();		// this coefficient changes the increment to lfopos..  timing is defined by samples,
+	srMultiplier = 44100.f/(float)pCB->GetSamplingRate();		// this coefficient changes the increment to lfopos..  timing is defined by samples,
 															// so without it playing the same song in 22050 will halve the lfo speed.
 	float j;
 	for(int i=0;i<=MAPSIZE;++i)
@@ -159,7 +159,7 @@ void mi::Init()
 // Called on each tick while sequencer is playing
 void mi::SequencerTick()
 {
-	float newsr = 44100/(float)pCB->GetSamplingRate();
+	float newsr = 44100.f/(float)pCB->GetSamplingRate();
 	if(newsr!=srMultiplier)																																				// it doesn't need to happen this frequently-- plus, it won't register until
 		srMultiplier=newsr;																																				// an actual song is playing
 }

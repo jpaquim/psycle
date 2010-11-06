@@ -377,11 +377,11 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Less than note off value??? == NoteON!
 	
 	// Note off
-	if(note==120)
+	if(note==NOTE_NOTEOFF)
 	{
 		track[channel].set_note_off(0);
 	}
-	else if (note< 120)
+	else if (note<=NOTE_MAX)
 	// Note on
 	{
 		track[channel].set_note(note,Vals[4]);

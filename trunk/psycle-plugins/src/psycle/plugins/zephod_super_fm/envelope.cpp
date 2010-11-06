@@ -19,7 +19,7 @@ void envelope::reset()
 	}
 	else
 	{
-		envstate=ENV_CLICK;
+		envstate=ENV_ANTICLICK;
 		envcoef=envvol/32.0f;
 	}
 }

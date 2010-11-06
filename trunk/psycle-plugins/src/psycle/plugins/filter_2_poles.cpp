@@ -103,7 +103,8 @@ protected:
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
 	void erase_NaNs_Infinities_And_Denormals( float* inSample );
-	inline const Real Work(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+	inline const Real WorkLow(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+	inline const Real WorkHigh(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 
@@ -117,7 +118,7 @@ void Filter_2_Poles::SeqTick(const int note, const int, const int, const int com
 		modulation_phase_ = pi * 2 * value / 0x100;
 		break;
 	}
-	if ( note < 120 )
+	if ( note <= psycle::plugin_interface::NOTE_MAX )
 	{
 		///\todo: set cutoff_frequency by note.
 		//parameter(cutoff_frequency,pow(2.0, (float)(note-18)/12.0));
@@ -155,10 +156,23 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 
 void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 {
-	for(int sample(0) ; sample < samples ; ++sample)
-	{
-		l[sample] = static_cast<Sample>(Work(l[sample], buffers_[left] , coefficients_[left]));
-		r[sample] = static_cast<Sample>(Work(r[sample], buffers_[right], coefficients_[right]));
+	switch((*this)[response]) {
+	case low:
+		for(int sample(0) ; sample < samples ; ++sample)
+		{
+			l[sample] = static_cast<Sample>(WorkLow(l[sample], buffers_[left] , coefficients_[left]));
+			r[sample] = static_cast<Sample>(WorkLow(r[sample], buffers_[right], coefficients_[right]));
+		}
+		break;
+	case high:
+		for(int sample(0) ; sample < samples ; ++sample)
+		{
+			l[sample] = static_cast<Sample>(WorkHigh(l[sample], buffers_[left] , coefficients_[left]));
+			r[sample] = static_cast<Sample>(WorkHigh(r[sample], buffers_[right], coefficients_[right]));
+		}
+		break;
+	default:
+		throw Exception("unknown response type");
 	}
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
@@ -171,21 +185,19 @@ void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 	}
 }
 
-inline const Filter_2_Poles::Real Filter_2_Poles::Work(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
+inline const Filter_2_Poles::Real Filter_2_Poles::WorkLow(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
 	erase_all_nans_infinities_and_denormals(buffer, channels);
-	switch((*this)[response]) {
-		case low:
-			return buffer[1];
-			break;
-		case high:
-			return input - buffer[1];
-			break;
-		default:
-			throw Exception("unknown response type");
-	}
+	return buffer[1];
 }
 
+inline const Filter_2_Poles::Real Filter_2_Poles::WorkHigh(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
+{
+	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
+	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
+	erase_all_nans_infinities_and_denormals(buffer, channels);
+	return input - buffer[1];
+}
 }}

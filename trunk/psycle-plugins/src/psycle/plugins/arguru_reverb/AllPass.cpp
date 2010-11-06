@@ -22,6 +22,7 @@ void CAllPass::Initialize(int max_size, int time, int stph) {
 	universalis::os::aligned_memory_alloc(16, leftBuffer, bufferSize);
 	universalis::os::aligned_memory_alloc(16, rightBuffer, bufferSize);
 	Clear();
+	if(Counter>=bufferSize) Counter = 0;
 	SetDelay(time,stph);
 }
 

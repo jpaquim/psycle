@@ -54,12 +54,15 @@ void revmodel::setdefaultvalues(int samplerate)
 	allpassR[2].setfeedback(0.5f);
 	allpassL[3].setfeedback(0.5f);
 	allpassR[3].setfeedback(0.5f);
-	setwet(initialwet);
-	setroomsize(initialroom);
+
+	setroomsize(initialroom, false);
+	setdamp(initialdamp, false);
+	setwet(initialwet, false);
 	setdry(initialdry);
-	setdamp(initialdamp);
-	setwidth(initialwidth);
-	setmode(initialmode);
+	setwidth(initialwidth, false);
+	setmode(initialmode, false);
+
+	update();
 }
 
 void revmodel::mute()
@@ -175,10 +178,6 @@ void revmodel::update()
 	{
 		combL[i].setfeedback(roomsize1);
 		combR[i].setfeedback(roomsize1);
-	}
-
-	for(i=0; i<numcombs; i++)
-	{
 		combL[i].setdamp(damp1);
 		combR[i].setdamp(damp1);
 	}
@@ -189,10 +188,10 @@ void revmodel::update()
 // because as you develop the reverb model, you may
 // wish to take dynamic action when they are called.
 
-void revmodel::setroomsize(float value)
+void revmodel::setroomsize(float value, float doupdate)
 {
 	roomsize = (value*scaleroom) + offsetroom;
-	update();
+	if (doupdate) update();
 }
 
 float revmodel::getroomsize()
@@ -200,10 +199,10 @@ float revmodel::getroomsize()
 	return (roomsize-offsetroom)/scaleroom;
 }
 
-void revmodel::setdamp(float value)
+void revmodel::setdamp(float value, float doupdate)
 {
 	damp = value*scaledamp;
-	update();
+	if (doupdate) update();
 }
 
 float revmodel::getdamp()
@@ -211,10 +210,10 @@ float revmodel::getdamp()
 	return damp/scaledamp;
 }
 
-void revmodel::setwet(float value)
+void revmodel::setwet(float value, float doupdate)
 {
 	wet = value*scalewet;
-	update();
+	if(doupdate) update();
 }
 
 float revmodel::getwet()
@@ -232,10 +231,10 @@ float revmodel::getdry()
 	return dry/scaledry;
 }
 
-void revmodel::setwidth(float value)
+void revmodel::setwidth(float value, float doupdate)
 {
 	width = value;
-	update();
+	if(doupdate) update();
 }
 
 float revmodel::getwidth()
@@ -243,10 +242,10 @@ float revmodel::getwidth()
 	return width;
 }
 
-void revmodel::setmode(float value)
+void revmodel::setmode(float value, float doupdate)
 {
 	mode = value;
-	update();
+	if(doupdate) update();
 }
 
 float revmodel::getmode()

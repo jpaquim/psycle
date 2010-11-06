@@ -1,11 +1,10 @@
 #pragma once
 
-#define ENV_CLICK 5
-
 enum {
 	ENV_ATT=1,
 	ENV_DEC,
-	ENV_SUS,
+	ENV_FINITE_SUS,
+	ENV_NOTEOFF_SUS,
 	ENV_REL,
 	ENV_ANTICLICK,
 
@@ -65,13 +64,14 @@ float envelope::res(void)
 			if(envvol<susvol)
 			{
 				envvol=susvol;
-				envstate=ENV_SUS;
+				if(s == 0) envstate=ENV_NOTEOFF_SUS;
+				else envstate=ENV_FINITE_SUS;
 				suscounter=0;
 			}
 		}
 
 		// Sustain
-		if(envstate==ENV_SUS)
+		if(envstate==ENV_FINITE_SUS)
 		{
 			suscounter++;
 			
@@ -94,7 +94,7 @@ float envelope::res(void)
 			}
 		}
 
-		if(envstate==ENV_CLICK)
+		if(envstate==ENV_ANTICLICK)
 		{
 			envvol-=envcoef;
 
