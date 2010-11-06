@@ -222,7 +222,7 @@ void fluid_synth_settings(fluid_settings_t* settings)
   fluid_settings_register_int(settings, "synth.effects-channels",
 			      2, 2, 2, 0, NULL, NULL);
   fluid_settings_register_num(settings, "synth.sample-rate",
-			      44100.0f, 22050.0f, 96000.0f,
+			      44100.0f, 8000.0f, 96000.0f,
 			      0, NULL, NULL);
   fluid_settings_register_int(settings, "synth.device-id",
 			      0, 0, 126, 0, NULL, NULL);
@@ -623,7 +623,7 @@ new_fluid_synth(fluid_settings_t *settings)
 
   /* register the callbacks */
   fluid_settings_register_num(settings, "synth.sample-rate",
-			      44100.0f, 22050.0f, 96000.0f, 0,
+			      44100.0f, 8000.0f, 96000.0f, 0,
 			      (fluid_num_update_t) fluid_synth_update_sample_rate, synth);
   fluid_settings_register_num(settings, "synth.gain",
 			      0.2f, 0.0f, 10.0f, 0,
@@ -684,11 +684,6 @@ new_fluid_synth(fluid_settings_t *settings)
     nbuf = synth->audio_groups;
   }
 
-#ifdef LADSPA
-  /* Create and initialize the Fx unit.*/
-  synth->LADSPA_FxUnit = new_fluid_LADSPA_FxUnit(synth);
-#endif
-
   /* as soon as the synth is created it starts playing. */
   synth->state = FLUID_SYNTH_PLAYING;
   synth->sfont_info = NULL;
@@ -703,10 +698,16 @@ new_fluid_synth(fluid_settings_t *settings)
   /* In an overflow situation, a new voice takes about 50 spaces in the queue! */
   synth->eventhandler = new_fluid_rvoice_eventhandler(i, synth->polyphony*64, 
 						      synth->polyphony,
-						      nbuf, synth->effects_channels);
+						      nbuf, synth->effects_channels, (int)synth->sample_rate);
   if (synth->eventhandler == NULL)
     goto error_recovery; 
     
+#ifdef LADSPA
+  /* Create and initialize the Fx unit.*/
+  synth->LADSPA_FxUnit = new_fluid_LADSPA_FxUnit(synth);
+  fluid_rvoice_mixer_set_ladspa(synth->eventhandler->mixer, synth->LADSPA_FxUnit);
+#endif
+  
   /* allocate and add the default sfont loader */
   loader = new_fluid_defsfloader();
 
@@ -2904,7 +2905,7 @@ fluid_synth_nwrite_float(fluid_synth_t* synth, int len,
   fluid_real_t** left_in;
   fluid_real_t** right_in;
   double time = fluid_utime();
-  int i, num, available, count, bytes;
+  int i, j, num, available, count, bytes;
   float cpu_load;
 
   if (!synth->eventhandler->is_threadsafe)
@@ -2921,8 +2922,15 @@ fluid_synth_nwrite_float(fluid_synth_t* synth, int len,
     bytes = num * sizeof(float);
 
     for (i = 0; i < synth->audio_channels; i++) {
+#ifdef WITH_FLOAT
       FLUID_MEMCPY(left[i], left_in[i] + synth->cur, bytes);
       FLUID_MEMCPY(right[i], right_in[i] + synth->cur, bytes);
+#else //WITH_FLOAT
+      for (j = 0; j < num; j++) {
+          left[i][j] = (float) left_in[i][j + synth->cur];
+          right[i][j] = (float) right_in[i][j + synth->cur];
+      }
+#endif //WITH_FLOAT
     }
     count += num;
     num += synth->cur; /* if we're now done, num becomes the new synth->cur below */
@@ -2931,15 +2939,22 @@ fluid_synth_nwrite_float(fluid_synth_t* synth, int len,
   /* Then, run one_block() and copy till we have 'len' samples  */
   while (count < len) {
     fluid_rvoice_mixer_set_mix_fx(synth->eventhandler->mixer, 0);
-    fluid_synth_render_blocks(synth, 1);
+    fluid_synth_render_blocks(synth, 1); // TODO: 
     fluid_rvoice_mixer_get_bufs(synth->eventhandler->mixer, &left_in, &right_in);
 
     num = (FLUID_BUFSIZE > len - count)? len - count : FLUID_BUFSIZE;
     bytes = num * sizeof(float);
 
     for (i = 0; i < synth->audio_channels; i++) {
+#ifdef WITH_FLOAT
       FLUID_MEMCPY(left[i] + count, left_in[i], bytes);
       FLUID_MEMCPY(right[i] + count, right_in[i], bytes);
+#else //WITH_FLOAT
+      for (j = 0; j < num; j++) {
+          left[i][j + count] = (float) left_in[i][j];
+          right[i][j + count] = (float) right_in[i][j];
+      }
+#endif //WITH_FLOAT
     }
 
     count += num;
@@ -3295,13 +3310,6 @@ fluid_synth_render_blocks(fluid_synth_t* synth, int blockcount)
   //fluid_rvoice_mixer_set_mix_fx(synth->eventhandler->mixer, 
   //				!do_not_mix_fx_to_out);
   blockcount = fluid_rvoice_mixer_render(synth->eventhandler->mixer, blockcount);
-
- 
-#ifdef LADSPA
-  /* Run the signal through the LADSPA Fx unit */
-  fluid_LADSPA_run(synth->LADSPA_FxUnit, synth->left_buf, synth->right_buf, synth->fx_left_buf, synth->fx_right_buf);
-  fluid_check_fpe("LADSPA");
-#endif
 
 #if 0
   /* Signal return queue thread if there are any events pending */
@@ -4851,6 +4859,7 @@ fluid_synth_replace_tuning_LOCAL (fluid_synth_t *synth, fluid_tuning_t *old_tuni
     }
   }
 #else
+  if (old_tuning && old_tuning_unref)
   fluid_tuning_unref (old_tuning, old_tuning_unref);
 #endif
   if (!unref_new || !new_tuning) return;
@@ -4872,7 +4881,6 @@ fluid_synth_replace_tuning_LOCAL (fluid_synth_t *synth, fluid_tuning_t *old_tuni
     FLUID_LOG (FLUID_ERR, "Synth return event queue full");
   }
 #else
-  if (old_tuning && old_tuning_unref)
 	fluid_tuning_unref (new_tuning, 1);
 #endif 
 }

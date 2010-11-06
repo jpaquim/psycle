@@ -1,4 +1,5 @@
 #include "fake_glib.h"
+
 gboolean               g_threads_got_initialized = FALSE;
 
 void    g_thread_init   (GThreadFunctions       *vtable){g_threads_got_initialized= TRUE;}

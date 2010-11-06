@@ -2,7 +2,6 @@
 #include <malloc.h>
 #include <windows.h>
 
-
 typedef char   gchar;
 typedef short  gshort;
 typedef long   glong;
@@ -165,6 +164,28 @@ extern gboolean               g_threads_got_initialized;
 
 #define g_alloca(size)		 alloca (size)
 #define g_newa(struct_type, n_structs)	((struct_type*) g_alloca (sizeof (struct_type) * (gsize) (n_structs)))
+
+#if defined __linux__
+	#define ALIGNED_MEMORY_ALLOC(alignment, type, val, amount) { \
+		void * address; \
+		if(!posix_memalign(&address, alignment, amount * sizeof(type))) val = (type*)(address); }
+#elif defined _WIN32 && defined _MSC_VER
+	#define ALIGNED_MEMORY_ALLOC(alignment, type, val, amount) \
+		val = (type*)(_aligned_malloc(amount * sizeof(type), alignment));
+#else
+	#define ALIGNED_MEMORY_ALLOC(alignment, type, val, amount) \
+		val = new type[amount];
+#endif
+
+#if defined __linux__
+	#define ALIGNED_MEMORY_DEALLOC(type, address) std::free(address);
+#elif defined _WIN32 && defined _MSC_VER
+	#define ALIGNED_MEMORY_DEALLOC(type, address) _aligned_free(address);
+#else
+	#define ALIGNED_MEMORY_DEALLOC(type, address) delete[] address;
+#endif
+
+
 
 void g_usleep (gulong  microseconds);
 
