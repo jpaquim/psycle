@@ -185,6 +185,8 @@ void Player::start_threads() {
 #endif
 			if(m_SampleRate != sampleRate)
 			{
+				CSingleLock crit(&Global::_pSong->semaphore, TRUE);
+
 				m_SampleRate = sampleRate;
 				RecalcSPR();
 				CVSTHost::pHost->SetSampleRate(sampleRate);
@@ -390,21 +392,21 @@ void Player::clear_plan() {
 							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine)
 							{
-								if(pEntry->_note == notecommands::midicc && pMachine->_type != MACH_VST && pMachine->_type != MACH_VSTFX)
+								// If the midi command uses a command less than 0x80, then interpret it as
+								// send a tracker command to the specificed track of the specified machine.
+								if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
 								{
-									// for native machines,
-									// use the value in the "instrument" field of the event as a voice number
 									int voice(pEntry->_inst);
 									// make a copy of the pattern entry, because we're going to modify it.
 									PatternEntry entry(*pEntry);
 									entry._note = 255;
 									entry._inst = 255;
-									// check for out of range voice values (with the classic tracker way, it's the same as the pattern tracks)
+									// check for out of range voice values.
 									if(voice < pSong->SONGTRACKS)
 									{
 										pMachine->Tick(voice, &entry);
 									}
-									else if(voice == 0xff)
+									else if(voice == 0xFF)
 									{
 										// special voice value which means we want to send the same command to all voices
 										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
@@ -412,13 +414,13 @@ void Player::clear_plan() {
 											pMachine->Tick(voice, &entry);
 										}
 									}
-									else ; // probably an out of range voice value (with the classic tracker way, it's limited to the number of pattern tracks)
+									else {}//Invalid index. do nothing.
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
-								else // midi cc for vst, or other commands
+								// midi cc
+								else 
 								{
-									// for vst machines,
 									// classic tracking, use the track number as the channel/voice number
 									pMachine->Tick(track, pEntry);
 								}
@@ -454,7 +456,7 @@ void Player::clear_plan() {
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(( !pSong->_trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == 255)) // Is it not muted and is a note?
+				if(( !pSong->_trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == 255)) // Is it not muted and is a note or command?
 				{
 					int mac = pEntry->_mach;
 					if(mac != 255) prevMachines[track] = mac;
@@ -767,7 +769,6 @@ void Player::stop_threads() {
 				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
 				// Tick handler function
 				if(amount >= _samplesRemaining) amount = _samplesRemaining;
-				//if((_playing) && (amount >= _samplesRemaining)) amount = _samplesRemaining;
 				// Song play
 				if((_samplesRemaining <=0))
 				{
@@ -793,6 +794,8 @@ void Player::stop_threads() {
 					// Reset all machines
 					for(int c=0; c<MAX_MACHINES; c++)
 					{
+						//Note: This should be scheduled if possible too. Also note that it increments
+						// the routing_accumulator, which is is divided by numthreads in the infodlg.
 						if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
 					}
 

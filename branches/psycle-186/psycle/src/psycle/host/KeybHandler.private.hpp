@@ -12,7 +12,7 @@ namespace psycle { namespace host {
 				const int outnote = cmd.GetNote();
 				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
 				{ 
-					EnterNote(outnote,0,true);	// note end
+					EnterNote(outnote,255,0,true);	// note end
 				}
 				else
 				{
@@ -40,7 +40,7 @@ namespace psycle { namespace host {
 
 		void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		{
-			// undo code not required, enter not and msbput handle it
+			// undo code not required, enternote and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
 
 			if(viewMode == view_modes::pattern && bEditMode)
@@ -58,18 +58,17 @@ namespace psycle { namespace host {
 					}
 				}
 			}
-			else if (viewMode == view_modes::sequence && bEditMode)
+			/*else if (viewMode == view_modes::sequence && bEditMode)
 			{
 				bool success;
 				// add data
-		//		success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
-				success = false;
+				success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
 				if ( success )
 				{
 					CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
 					return;
 				}
-			}
+			}*/
 			else
 			{
 				ChordModeOffs = 0;
@@ -107,57 +106,40 @@ namespace psycle { namespace host {
 		// MidiPatternNote
 		//
 		// DESCRIPTION	  : Called by the MIDI input interface to insert pattern notes
-		// PARAMETERS     : int outnote - note to insert . int velocity - velocity of the note
+		// PARAMETERS     : int outnote - note to insert/stop . int velocity - velocity of the note, or zero if noteoff
 		// RETURNS		  : <void>
 		// 
 
-		//
-		// Mark!!!!! Please, check if the following function is ok. I have some doubts about the
-		// NoteOff. And check if "if(outnote >= 0 && outnote <= 120)" is necessary.
-		//
-
-		void CChildView::MidiPatternNote(int outnote, int velocity)
+		void CChildView::MidiPatternNote(int outnote, int channel, int velocity)
 		{
 			// undo code not required, enter note handles it
-		/*	if(outnote >= 0 && outnote <= 120)  // I really believe this is not necessary.
-			{									// outnote <= 120 is checked before calling this function
-												// and outnote CAN NOT be negative since it's taken from
-												//	(dwParam1 & 0xFF00) >>8;
-			*/
-				if(viewMode == view_modes::pattern && bEditMode)
-				{ 
-					// add note
-					if(velocity > 0 && outnote != notecommands::release)
-					{
-						EnterNote(outnote,velocity,false);
-					}
-					else
-					{
-						if(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong)
-						{
-							EnterNote(outnote,0,false);	// note end
-						}
-						else
-						{
-							Global::pInputHandler->StopNote(outnote,false);	// note end
-						}
-					}			
-				}
-				else 
+			if(viewMode == view_modes::pattern && bEditMode)
+			{ 
+				// add note
+				if(velocity > 0 || 
+					(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong))
 				{
-					// play note
-					if(velocity>0)
-						Global::pInputHandler->PlayNote(outnote,velocity,false);
-					else
-						Global::pInputHandler->StopNote(outnote,false);
+					EnterNote(outnote,channel,velocity,false);
 				}
-		//	}
+				else
+				{
+					Global::pInputHandler->StopNote(outnote,channel,false);	// note end
+				}			
+			}
+			else 
+			{
+				// play note
+				if(velocity>0)
+					Global::pInputHandler->PlayNote(outnote,channel,velocity,false);
+				else
+					Global::pInputHandler->StopNote(outnote,channel,false);
+			}
 		}
 
 		void CChildView::MidiPatternTweak(int command, int value)
 		{
 			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+			if (value < 0) value = 0;
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 
 			// build entry
@@ -239,7 +221,7 @@ namespace psycle { namespace host {
 		void CChildView::MidiPatternTweakSlide(int command, int value)
 		{
 			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
+			if (value < 0) value = 0;
 			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
 
 			// build entry
@@ -319,8 +301,8 @@ namespace psycle { namespace host {
 		void CChildView::MidiPatternCommand(int command, int value)
 		{
 			// UNDO CODE MIDI PATTERN
-			if (value < 0) value = (0x80-value);// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xff) value = 0xff; // no else incase of neg overflow
+			if (value < 0) value = 0;
+			if (value > 0xffff) value = 0xffff;
 
 			// build entry
 			PatternEntry entry;
@@ -470,10 +452,8 @@ namespace psycle { namespace host {
 
 		void CChildView::MidiPatternInstrument(int value)
 		{
-			// UNDO CODE MIDI PATTERN
-			if (value < 0) value = (0x80-value);// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xff) value = 0xff; // no else incase of neg overflow
-
+			if (value < 0) value = 0;
+			if (value >= MAX_INSTRUMENTS) value = MAX_INSTRUMENTS-1;
 			// build entry
 			PatternEntry entry;
 			entry._mach = _pSong->seqBus;
@@ -541,9 +521,8 @@ namespace psycle { namespace host {
 
 		void CChildView::MousePatternTweak(int machine, int command, int value)
 		{
-			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+			if (value < 0) value = 0;
+			if (value > 0xffff) value = 0xffff;
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -591,9 +570,8 @@ namespace psycle { namespace host {
 
 		void CChildView::MousePatternTweakSlide(int machine, int command, int value)
 		{
-			// UNDO CODE MIDI PATTERN TWEAK
-			if (value < 0) value = 0x8000-value;// according to doc psycle uses this weird negative format, but in reality there are no negatives for tweaks..
-			if (value > 0xffff) value = 0xffff;// no else incase of neg overflow
+			if (value < 0) value = 0;
+			if (value > 0xffff) value = 0xffff;
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
 				// write effect
@@ -638,14 +616,20 @@ namespace psycle { namespace host {
 			}
 		}
 
-
-		void CChildView::EnterNote(int note, int velocity, bool bTranspose)
+		// note:  note to insert or stop. If it is notecommands::release it means that 
+		//		the noteoff key has been pressed.
+		// instr: value for aux column. if instr = 255 then use the auxcolselected.
+		// velocity: volume to use. If velocity is zero, then do a noteoff.
+		// bTranspose: transpose the note with the currentOctave.
+		void CChildView::EnterNote(int note, int instr, int velocity, bool bTranspose)
 		{
 			int line;
-
-			// UNDO CODE ENTER NOTE
 			const int ps = _ps();
 			unsigned char * toffset;
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = _pSong->auxcolSelected;
 			
 			if (note < 0 || note >= notecommands::invalid ) return;
 
@@ -662,6 +646,7 @@ namespace psycle { namespace host {
 			// realtime note entering
 			if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
 			{
+				// If there is at least one track selected for recording, select the proper track
 				if(_pSong->_trackArmedCount)
 				{
 					if (velocity == 0)
@@ -671,17 +656,17 @@ namespace psycle { namespace host {
 						{
 							if (_pSong->_trackArmed[i])
 							{
-								if (Global::pInputHandler->notetrack[i] == note)
+								if (Global::pInputHandler->notetrack[i] == note && Global::pInputHandler->instrtrack[i] == instNo)
 								{
 									editcur.track = i;
 									break;
 								}
 							}
 						}
-						///\todo : errm.. == or !=  ????
+						/// if not found, stop and leave
 						if (i == _pSong->SONGTRACKS)
 						{
-							Global::pInputHandler->StopNote(note,false);
+							Global::pInputHandler->StopNote(note,instNo,false);
 							return;
 						}
 					}
@@ -690,78 +675,83 @@ namespace psycle { namespace host {
 						SelectNextTrack();
 					}
 				}
+				//If the FT2 recording behaviour is not selected, do not record, but play the note.
 				else if (!Global::pConfig->_RecordUnarmed)
 				{
 					// build entry
 					PatternEntry entry;
 					entry._note = note;
 					entry._mach = _pSong->seqBus;
+					if (velocity==0)
+						note = notecommands::release;
 
-					if ( note < notecommands::release)
+					if ( _pSong->seqBus < MAX_MACHINES && _pSong->_pMachine[_pSong->seqBus] != 0 ) 
 					{
-						if (Global::pConfig->_RecordTweaks)
+						// if the current machine is a sampler, check 
+						// if current sample is locked to a machine.
+						// if so, switch entry._mach to that machine number
+						if (((Machine*)_pSong->_pMachine[_pSong->seqBus])->_type == MACH_SAMPLER)
 						{
-							if (Global::pConfig->midi().raw())
+							if ((_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
+								&& (_pSong->_pInstrument[instNo]->_LOCKINST == true))
 							{
-								entry._cmd = 0x0c;
-								entry._parameter = velocity*2;
-							}
-							else if (Global::pConfig->midi().velocity().record())
-							{
-								// command
-								entry._cmd = Global::pConfig->midi().velocity().command();
-								int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
-								if (par > 255) 
-								{
-									par = 255;
-								}
-								else if (par < 0) 
-								{
-									par = 0;
-								}
-								entry._parameter = par;
+								entry._mach = _pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
 							}
 						}
 					}
 
-					if (note>notecommands::release)
+					if ( note < notecommands::release && Global::pConfig->_RecordTweaks && velocity < 127)
 					{
-						entry._inst = _pSong->auxcolSelected;
+						if (Global::pConfig->midi().raw())
+						{
+							entry._cmd = 0x0c;
+							entry._parameter = velocity*2;
+						}
+						else if (Global::pConfig->midi().velocity().record())
+						{
+							// command
+							entry._cmd = Global::pConfig->midi().velocity().command();
+							int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+							if (par > 255) 
+							{
+								par = 255;
+							}
+							else if (par < 0) 
+							{
+								par = 0;
+							}
+							entry._parameter = par;
+						}
 					}
 
 					Machine *tmac = _pSong->_pMachine[entry._mach];
-					// implement lock sample to machine here.
-					// if the current machine is a sampler, check 
-					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
-
 					if (tmac)
 					{
-						if (((Machine*)_pSong->_pMachine[_pSong->seqBus])->_type == MACH_SAMPLER)
+						// if the current machine is a sampler, check 
+						// if current sample is locked to a machine.
+						// if so, switch entry._mach to that machine number
+						if (tmac->_type == MACH_SAMPLER)
 						{
-							if ((_pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
-								&& (_pSong->_pInstrument[_pSong->auxcolSelected]->_LOCKINST == true))
+							if ((_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
+								&& (_pSong->_pInstrument[instNo]->_LOCKINST == true))
 							{
-								entry._mach = _pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine;
+								entry._mach = _pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
 								tmac = _pSong->_pMachine[entry._mach];
 								if (!tmac) return;
 							}
 						}
-						if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
+						if (note > notecommands::release || tmac->NeedsAuxColumn())
 						{
-							entry._inst = _pSong->auxcolSelected;
+							entry._inst = instNo;
 						}
-						else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
-						{
-							entry._inst = _pSong->auxcolSelected;
-						}
-						
-						if ( note < notecommands::release)
+
+						if ( note <= notecommands::release)
 						{
 							tmac->Tick(editcur.track, &entry);
 						}
 					}
 					Global::pInputHandler->notetrack[editcur.track]=note;
+					Global::pInputHandler->instrtrack[editcur.track]=instNo;
 					return;
 				}
 				line = Global::pPlayer->_lineCounter;
@@ -796,13 +786,14 @@ namespace psycle { namespace host {
 				}
 			}
 
-			// build entry
+			// build the entry to add it to the pattern
 			PatternEntry *entry = (PatternEntry*) toffset;
 			if (velocity==0)
 			{
-				Global::pInputHandler->StopNote(note,false);
-				if (entry->_note == note)
+				//This prevents writing a noteoff over its own noteon.
+				if (entry->_note == note && entry->_inst == instNo)
 				{
+					Global::pInputHandler->StopNote(note,instNo,false);
 					return;
 				}
 				note = notecommands::release;
@@ -811,25 +802,28 @@ namespace psycle { namespace host {
 			entry->_note = note;
 			entry->_mach = _pSong->seqBus;
 
-			if ( _pSong->seqBus < MAX_MACHINES && _pSong->_pMachine[_pSong->seqBus] != 0 ) 
+			if (note>notecommands::release)
 			{
-
-					// implement lock sample to machine here.
+				entry->_inst = _pSong->auxcolSelected;
+			}
+			else
+			{
+				if ( _pSong->seqBus < MAX_MACHINES && _pSong->_pMachine[_pSong->seqBus] != 0 ) 
+				{
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
 					// if so, switch entry._mach to that machine number
 					if (((Machine*)_pSong->_pMachine[_pSong->seqBus])->_type == MACH_SAMPLER)
 					{
-						if ((_pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
-							&& (_pSong->_pInstrument[_pSong->auxcolSelected]->_LOCKINST == true))
+						if ((_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
+							&& (_pSong->_pInstrument[instNo]->_LOCKINST == true))
 						{
-							entry->_mach = _pSong->_pInstrument[_pSong->auxcolSelected]->_lock_instrument_to_machine;
+							entry->_mach = _pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
 						}
 					}
-			}
-			if ( note < notecommands::release)
-			{
-				if (Global::pConfig->_RecordTweaks)
+				}
+
+				if ( note < notecommands::release && Global::pConfig->_RecordTweaks && velocity < 127)
 				{
 					if (Global::pConfig->midi().raw())
 					{
@@ -852,34 +846,19 @@ namespace psycle { namespace host {
 						entry->_parameter = par;
 					}
 				}
-			}
-
-			if (note>notecommands::release)
-			{
-				entry->_inst = _pSong->auxcolSelected;
-			}
-
-			//Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
-//altered for locking sample to machine by alk
-			Machine *tmac = _pSong->_pMachine[entry->_mach];
-			if (tmac)
-			{
-				if (tmac->_type == MACH_SAMPLER || tmac->_type == MACH_XMSAMPLER)
+				Machine *tmac = _pSong->_pMachine[entry->_mach];
+				if (tmac)
 				{
-					entry->_inst = _pSong->auxcolSelected;
-				}
-				else if (tmac->_type == MACH_VST) // entry->_inst is the MIDI channel for VSTi's
-				{
-					entry->_inst = _pSong->auxcolSelected;
-				}
-				
-				if ( note < notecommands::release)
-				{
+					if (tmac->NeedsAuxColumn())
+					{
+						entry->_inst = instNo;
+					}
 					tmac->Tick(editcur.track, entry);
 				}
 			}
 
 			Global::pInputHandler->notetrack[editcur.track]=note;
+			Global::pInputHandler->instrtrack[editcur.track]=instNo;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
 			if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
 			{
@@ -921,6 +900,7 @@ namespace psycle { namespace host {
 				entry->_note = notecommands::release;
 
 				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
+				Global::pInputHandler->instrtrack[editcur.track]=255;
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 

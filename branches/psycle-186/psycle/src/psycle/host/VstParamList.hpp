@@ -41,6 +41,8 @@ namespace psycle {
 			void UpdateText(int value);
 			void UpdateNew(int par,float value);
 			void InitializePrograms(void);
+			void SelectProgram(long index);
+
 		// Overrides
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

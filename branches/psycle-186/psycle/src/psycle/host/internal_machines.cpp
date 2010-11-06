@@ -457,10 +457,10 @@ namespace psycle
 					assert(pSendMachine);
 					if (!pSendMachine->recursive_processed_ && !pSendMachine->recursive_is_processing_)
 					{ 
+						nanoseconds const t0(cpu_time_clock());
 						bool soundready=false;
 						// Mix all the inputs and route them to the send fx.
 						{
-							nanoseconds const t0(cpu_time_clock());
 							if ( solocolumn_ >=0 && solocolumn_ < MAX_CONNECTIONS)
 							{
 								int j = solocolumn_;
@@ -514,12 +514,13 @@ namespace psycle
 								}
 							}
 							if (soundready) pSendMachine->Standby(false);
-							nanoseconds const t1(cpu_time_clock());
-							accumulate_processing_time(t1 - t0);
 						}
 
 						// tell the FX to work, now that the input is ready.
 						if(recurse){
+							//Time is only accumulated in recurse mode, because in shed mode the sched_process method already does it.
+							nanoseconds const t1(cpu_time_clock());
+							accumulate_processing_time(t1 - t0);
 							#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 								#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 							#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS

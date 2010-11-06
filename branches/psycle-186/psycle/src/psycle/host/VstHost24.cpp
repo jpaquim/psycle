@@ -21,7 +21,8 @@ using namespace universalis::os;
 ///\todo: When inserting a note in a pattern (editing), set the correct samplePos and ppqPos corresponding to the place the note is being put.
 //        (LiveSlice is a good example of what happens if it isn't correct)
 
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
+#include "cpu_time_clock.hpp"
 
 namespace psycle
 {
@@ -33,6 +34,12 @@ namespace psycle
 		{
 			using namespace seib::vst;
 			int plugin::pitchWheelCentre(8191);
+			const char* MIDI_CHAN_NAMES[16] = {
+				"MIDI Channel 01", "MIDI Channel 02","MIDI Channel 03","MIDI Channel 04",
+				"MIDI Channel 05","MIDI Channel 06","MIDI Channel 07","MIDI Channel 08",
+				"MIDI Channel 09","MIDI Channel 10","MIDI Channel 11","MIDI Channel 12",
+				"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
+			};
 
 			void host::CalcTimeInfo(long lMask)
 			{
@@ -521,6 +528,7 @@ namespace psycle
 			void plugin::PreWork(int numSamples,bool clear)
 			{
 				Machine::PreWork(numSamples,clear);
+				nanoseconds const t0(cpu_time_clock());
 				if(!WillProcessReplace())
 				{
 					helpers::dsp::Clear(_pOutSamplesL, numSamples);
@@ -544,13 +552,15 @@ namespace psycle
 								NSDelta[midiChannel] = 0;
 								NSActive[midiChannel] = false;
 							}
-							AddMIDI(0xE0 + midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
+							AddMIDI(0xE0 | midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
 							 
 							NSSamples[midiChannel]+=min(TWEAK_SLIDE_SAMPLES,ns);
 							ns-=TWEAK_SLIDE_SAMPLES;
 						}
 					}
 				}
+				nanoseconds const t1(cpu_time_clock());
+				Global::song().accumulate_routing_time(t1 - t0);
 			}
 			void plugin::Tick(int channel, PatternEntry * pData)
 			{
@@ -603,7 +613,7 @@ namespace psycle
 					}
 					else if(pData->_cmd == 0xC2) //Panning
 					{
-						AddMIDI(0xB0 | midiChannel, 0x0A,pData->_parameter*0.5f);
+						AddMIDI(0xB0 | midiChannel, 0x0A,pData->_parameter>>1);
 					}
 
 					if(note < notecommands::release) // Note on
@@ -618,7 +628,7 @@ namespace psycle
 						{
 							if (NSCurrent[midiChannel] != pitchWheelCentre)
 							{
-								AddMIDI(0xE0 + midiChannel,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
+								AddMIDI(0xE0 | midiChannel,LSB(pitchWheelCentre),MSB(pitchWheelCentre));
 							}
 							///\todo: sorry???
 							currentSemi[midiChannel] = 0;
@@ -689,11 +699,11 @@ namespace psycle
 						}
 //						else if (pData->_cmd == 0x0C) // channel volume.
 //						{
-///							AddMIDI(0xB0 | midiChannel,0x07,pData->_parameter*0.5f);
+						//	AddMIDI(0xB0 | midiChannel,0x07,pData->_parameter>>1);
 //						}
 						else if (pData->_cmd == 0x0C) // channel aftertouch.
 						{
-							AddMIDI(0xD0 | midiChannel,pData->_parameter*0.5f);
+							AddMIDI(0xD0 | midiChannel,pData->_parameter>>1);
 						}
 						else if(pData->_cmd == 0xC3) //slide to note . Used to change the speed.
 						{
@@ -723,22 +733,21 @@ namespace psycle
 							int speedToSlide = pData->_parameter;
 							
 							NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
-							NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
+							NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
 							NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
 							NSSamples[midiChannel] = 0;
 							NSActive[midiChannel] = true;
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
-						}
-						if (((pData->_cmd & 0xF0) == 0xD0) || ((pData->_cmd & 0xF0) == 0xE0))
 							oldNote[midiChannel] = oldNote[midiChannel] + semisToSlide;								
+						}
 					}
 				}
 			}
 
 			void plugin::Stop()
 			{
-				for(int i(0) ; i < 16 ; ++i) AddMIDI(0xb0 + i, 0x7b); // All Notes Off
-				for(int i(0) ; i < MAX_TRACKS ; ++i) AddNoteOff(i);
+				for(int chan(0) ; chan < 16 ; ++chan) AddMIDI(0xB0 | chan, 0x7B); // All Notes Off
+				for(int track(0) ; track < MAX_TRACKS ; ++track) AddNoteOff(track);
 			}
 
 			int plugin::GenerateAudioInTicks(int /*startSample*/,  int numSamples)

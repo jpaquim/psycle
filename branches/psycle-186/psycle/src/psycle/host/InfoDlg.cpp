@@ -68,8 +68,11 @@ namespace psycle { namespace host {
 		void CInfoDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			Song* _pSong = Global::_pSong;
-			if(nIDEvent==1 && !_pSong->_machineLock )
+			if(nIDEvent==1)
 			{
+				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
+				if (!lock.Lock(50)) return;
+
 				unsigned long num_threads_running = Global::pPlayer->num_threads();
 				char buffer[128];
 				
@@ -107,7 +110,8 @@ namespace psycle { namespace host {
 				if(item_count_ != n) UpdateInfo();
 
 				{ // total cpu percent (counts everything, not just machine processing + routing)
-					float const percent = 100.0f * _pSong->accumulated_processing_time().get_count() / (real_time_duration.get_count() *num_threads_running);
+					//Accumulated processing time does not count "num_threads_running since it is acummulated in the Player thread (single threaded)
+					float const percent = 100.0f * _pSong->accumulated_processing_time().get_count() / real_time_duration.get_count();
 					sprintf(buffer, "%.1f%%", percent);
 					m_cpuidlelabel.SetWindowText(buffer);
 				}

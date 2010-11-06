@@ -115,7 +115,6 @@ namespace psycle { namespace host {
 				CMidiInput::Instance()->SetDeviceId( DRIVER_SYNC, m_syncDriverIndex-1 );
 			}
 			CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = m_midiHeadroom;
-
 			Global::pConfig->_midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
 			CDialog::OnOK();
 		}
@@ -131,8 +130,13 @@ namespace psycle { namespace host {
 		void COutputDlg::OnConfig() 
 		{
 
-			int index = m_driverComboBox.GetCurSel();
-			m_ppDrivers[index]->Configure();
+			m_driverIndex = m_driverComboBox.GetCurSel();
+			if (m_driverIndex != m_oldDriverIndex)
+			{
+				m_ppDrivers[m_oldDriverIndex]->Enable(false);
+			}
+
+			m_ppDrivers[m_driverIndex]->Configure();
 			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
 		}
 

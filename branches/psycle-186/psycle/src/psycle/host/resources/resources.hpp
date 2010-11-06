@@ -40,7 +40,6 @@
 #define IDB_SPEAKER                     130
 #define IDD_DSOUNDCONFIG                131
 #define IDB_DIRECTX                     132
-#define IDD_MIDI_LEARN                  133
 #define IDD_MIDI_INPUT                  134
 #define IDD_INFO                        136
 #define IDB_CPU                         137
@@ -573,6 +572,7 @@
 #define IDC_PBG_CAN                     1401
 #define IDC_MIDI_RAW                    1401
 #define IDC_ROW_CAN                     1402
+#define IDC_MIDI_CHANNEL_IN_AUX         1402
 #define IDC_BEAT_CAN                    1403
 #define IDC_FONT_CAN                    1404
 #define IDC_4BEAT_CAN                   1405
@@ -983,7 +983,6 @@
 #define IDC_VAL                         1731
 #define IDC_CURVE_TYPE                  1732
 #define IDC_POS                         1733
-#define IDC_VAL2                        1734
 #define IDC_INTER_MAX                   1734
 #define IDC_VIEW_CONNECTIONS            1735
 #define IDC_INTER_MIN                   1735

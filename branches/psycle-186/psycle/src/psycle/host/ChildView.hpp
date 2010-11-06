@@ -216,7 +216,7 @@ namespace host {
 			void BlockGenChange(int x);
 			void ShowSwingFillDlg(bool bTrackMode);
 
-			void MidiPatternNote(int outnote , int velocity);	// called by the MIDI input to insert pattern notes
+			void MidiPatternNote(int outnote , int channel, int velocity);	// called by the MIDI input to insert pattern notes
 			void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
 			void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
 			void MidiPatternTweakSlide(int command, int value); // called by midi to insert pattern commands
@@ -224,7 +224,7 @@ namespace host {
 			void MidiPatternInstrument(int value); // called by midi to insert pattern commands
 			void MousePatternTweak(int machine, int command, int value);
 			void MousePatternTweakSlide(int machine, int command, int value);
-			void EnterNote(int note, int velocity=127, bool bTranspose=true);
+			void EnterNote(int note, int instr=255, int velocity=127, bool bTranspose=true);
 			void EnterNoteoffAny();
 			bool MSBPut(int nChar);
 			void PrevTrack(int x,bool wrap,bool updateDisplay=true);

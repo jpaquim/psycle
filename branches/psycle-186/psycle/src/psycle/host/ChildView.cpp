@@ -418,7 +418,6 @@ namespace psycle { namespace host {
 			if (_outputActive)
 			{
 				AudioDriver* pOut = Global::pConfig->_pOutputDriver;
-				if (pOut->Enabled()) return;
 
 				_outputActive = false;
 				if (!pOut->Initialized())
@@ -431,15 +430,15 @@ namespace psycle { namespace host {
 					Global::pPlayer->SampleRate(pOut->_samplesPerSec);
 					_outputActive = true;
 				}
-				if (pOut->Enable(true))
+				if (!pOut->Enabled())
 				{
-					_outputActive = true;
+					_outputActive = pOut->Enable(true);
 				}
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Open();
 
 				// set midi input mode to real-time or step
-				if(Global::pConfig->_midiMachineViewSeqMode)
+				if(viewMode == view_modes::machine && Global::pConfig->_midiMachineViewSeqMode)
 					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
 				else
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;

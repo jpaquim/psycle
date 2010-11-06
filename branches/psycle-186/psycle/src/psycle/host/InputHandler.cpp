@@ -29,8 +29,10 @@ namespace psycle
 			bDoingSelection = false;
 
 			// set up multi-channel playback
-			for(UINT i=0;i<MAX_TRACKS;i++)
-				notetrack[i]=120;
+			for(UINT i=0;i<MAX_TRACKS;i++) {
+				notetrack[i]=notecommands::release;
+				instrtrack[i]=255;
+			}
 			outtrack=0;
 
 			TRACE("Building default keys");
@@ -1125,12 +1127,15 @@ namespace psycle
 			return false;
 		}
 
-		void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
+		void InputHandler::StopNote(int note, int instr, bool bTranspose,Machine*pMachine)
 		{
 			assert(note>=0 && note < 128);
-
 			if(note<0)
 				return;
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = Global::_pSong->auxcolSelected;
 
 			// octave offset 
 			if(note<120)
@@ -1154,13 +1159,14 @@ namespace psycle
 
 			for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
 			{
-				if(notetrack[i]==note)
+				if(notetrack[i]==note && instrtrack[i]==instNo)
 				{
-					notetrack[i]=120;
+					notetrack[i]=notecommands::release;
+					instrtrack[i]=255;
 					// build entry
 					PatternEntry entry;
 					entry._note = 120;
-					entry._inst = Global::_pSong->auxcolSelected;
+					entry._inst = instNo;
 					entry._mach = Global::_pSong->seqBus;
 					entry._cmd = 0;
 					entry._parameter = 0;	
@@ -1176,10 +1182,14 @@ namespace psycle
 		}
 
 		// velocity range 0 -> 127
-		void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine)
+		void InputHandler::PlayNote(int note,int instr, int velocity,bool bTranspose,Machine*pMachine)
 		{
-			// stop any notes with the same value
-			StopNote(note,bTranspose,pMachine);
+			// stop any (stuck) notes with the same value
+			StopNote(note,instr,bTranspose,pMachine);
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = Global::_pSong->auxcolSelected;
 
 			if(note<0)
 				return;
@@ -1197,7 +1207,7 @@ namespace psycle
 			// build entry
 			PatternEntry entry;
 			entry._note = note;
-			entry._inst = Global::_pSong->auxcolSelected;
+			entry._inst = instNo;
 			entry._mach = Global::_pSong->seqBus;
 
 			if(velocity != 127 && Global::pConfig->midi().velocity().record())
@@ -1232,16 +1242,15 @@ namespace psycle
 
 			if (pMachine)
 			{
-				// implement lock sample to machine here.
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
 				if (pMachine->_type == MACH_SAMPLER)
 				{
-					if ((Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine != -1)
-						&& (Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_LOCKINST == true))
+					if ((Global::_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
+						&& (Global::_pSong->_pInstrument[instNo]->_LOCKINST == true))
 					{
-						entry._mach = Global::_pSong->_pInstrument[Global::_pSong->auxcolSelected]->_lock_instrument_to_machine;
+						entry._mach = Global::_pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
 						pMachine = Global::_pSong->_pMachine[entry._mach];
 						if ( !pMachine) return;
 					}
@@ -1252,7 +1261,7 @@ namespace psycle
 					int i;
 					for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
 					{
-						if (notetrack[i] == 120)
+						if (notetrack[i] == notecommands::release)
 						{
 							break;
 						}
@@ -1261,7 +1270,7 @@ namespace psycle
 					{
 						for (i = 0; i <= outtrack; i++)
 						{
-							if (notetrack[i] == 120)
+							if (notetrack[i] == notecommands::release)
 							{
 								break;
 							}
@@ -1274,13 +1283,14 @@ namespace psycle
 					outtrack=0;
 				}
 				// this should check to see if a note is playing on that track
-				if (notetrack[outtrack] < 120)
+				if (notetrack[outtrack] < notecommands::release)
 				{
-					StopNote(notetrack[outtrack], bTranspose, pMachine);
+					StopNote(notetrack[outtrack], instrtrack[outtrack], bTranspose, pMachine);
 				}
 
 				// play
 				notetrack[outtrack]=note;
+				instrtrack[outtrack]=instNo;
 				pMachine->Tick(outtrack,&entry);
 			}
 		}

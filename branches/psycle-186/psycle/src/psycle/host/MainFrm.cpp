@@ -319,7 +319,7 @@ namespace psycle { namespace host {
 
 			PsybarsUpdate();
 			CComboBox *cc =(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-			cc->SetCurSel(2);
+			cc->SetCurSel(AUX_PARAMS);
 
 
 			// Sequencer Bar
@@ -932,18 +932,10 @@ namespace psycle { namespace host {
 				{
 					if ( _pSong->seqBus < MAX_BUSES ) // it's a Generator
 					{
-						if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_SAMPLER ||_pSong->_pMachine[_pSong->seqBus]->_type == MACH_XMSAMPLER  )
+						if (_pSong->_pMachine[_pSong->seqBus]->NeedsAuxColumn())
 						{
-							cb2->SetCurSel(AUX_WAVES);
+							cb2->SetCurSel(AUX_INSTRUMENT);
 							_pSong->auxcolSelected = _pSong->instSelected;
-						}
-						else if (_pSong->_pMachine[_pSong->seqBus]->_type == MACH_VST)
-						{
-							if ( cb2->GetCurSel() == AUX_WAVES)
-							{
-								cb2->SetCurSel(AUX_MIDI);
-								_pSong->auxcolSelected = _pSong->midiSelected;
-							}
 						}
 						else
 						{
@@ -960,7 +952,7 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				cb2->SetCurSel(AUX_WAVES); // WAVES
+				cb2->SetCurSel(AUX_INSTRUMENT); // WAVES
 				_pSong->auxcolSelected = _pSong->instSelected;
 			}
 			UpdateComboIns();
@@ -1018,11 +1010,7 @@ namespace psycle { namespace host {
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
-			if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
-			{
-				_pSong->auxcolSelected=_pSong->midiSelected;
-			}
-			else if ( cc2->GetCurSel() == AUX_WAVES )	// WAVES
+			if ( cc2->GetCurSel() == AUX_INSTRUMENT )	// WAVES
 			{
 				_pSong->auxcolSelected=_pSong->instSelected;
 			}
@@ -1052,21 +1040,7 @@ namespace psycle { namespace host {
 				cc->ResetContent();
 			}
 
-			if ( cc2->GetCurSel() == AUX_MIDI )	// MIDI
-			{
-				char buffer[64];
-				if (updatelist) 
-				{
-					for (int i=0;i<16;i++)
-					{
-						sprintf(buffer, "%.2X: MIDI Channel %.2i", i,i+1);
-						cc->AddString(buffer);
-					}
-				}
-				listlen = 16;
-		//		_pSong->midiSelected=_pSong->auxcolSelected;
-			}
-			else if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
+			if ( cc2->GetCurSel() == AUX_PARAMS)	// Params
 			{
 				int nmac = _pSong->seqBus;
 				Machine *tmac = _pSong->_pMachine[nmac];
@@ -1109,31 +1083,19 @@ namespace psycle { namespace host {
 					listlen = 1;
 				}
 			}
-			else	// Waves
+			else
 			{
 				char buffer[64];
 				if (updatelist) 
 				{
-					int nmac = _pSong->seqBus;
-					Machine *tmac = _pSong->_pMachine[nmac];
-					if (tmac) 
+					Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
+					if (tmac && tmac->NeedsAuxColumn()) 
 					{
-						if ( tmac->_type == MACH_XMSAMPLER)
+						listlen= tmac->NumAuxColumnIndexes();
+						for (int i(0); i<listlen; i++)
 						{
-							for (int i(0); i<XMSampler::MAX_INSTRUMENT; i++)
-							{
-								sprintf(buffer, "%.2X: %s", i, XMSampler::rInstrument(i).Name().c_str());
-								cc->AddString(buffer);
-								listlen++;
-		
-							}
-						}
-
-						else for (int i=0;i<PREV_WAV_INS;i++)
-						{
-							sprintf(buffer, "%.2X: %s", i, _pSong->_pInstrument[i]->_sName);
+							sprintf(buffer, "%.2X: %s", i, tmac->AuxColumnName(i));
 							cc->AddString(buffer);
-							listlen++;
 						}
 					}
 				}
@@ -1158,11 +1120,7 @@ namespace psycle { namespace host {
 			CComboBox *cc=(CComboBox *)m_wndControl2.GetDlgItem(IDC_BAR_COMBOINS);
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 
-			if ( cc2->GetCurSel() == AUX_MIDI ) 
-			{
-				_pSong->midiSelected=cc->GetCurSel();
-			}
-			else if ( cc2->GetCurSel() == AUX_WAVES ) 
+			if ( cc2->GetCurSel() == AUX_INSTRUMENT ) 
 			{
 				_pSong->instSelected=cc->GetCurSel();
 				WaveEditorBackUpdate();
@@ -1185,24 +1143,18 @@ namespace psycle { namespace host {
 
 			if ( cc->GetCurSel() == i) return;
 
-			if (cc2->GetCurSel() == AUX_MIDI )
-			{
-				if (i>=0 && i <16)
-				{
-					_pSong->midiSelected=i;
-					_pSong->auxcolSelected=i;
-				}
-			}
-			else if ( cc2->GetCurSel() == AUX_PARAMS )
+			if ( cc2->GetCurSel() == AUX_PARAMS )
 			{
 				if (i>=0 && i < cc->GetCount() )
 				{
 					_pSong->auxcolSelected=i;
+					_pSong->paramSelected=i;
 				}
 			}
 			else
 			{
-				if(i>=0 && i <(PREV_WAV_INS))
+				//TODO: This will need improvement for proper dynamic auxCol selection
+				if(i>=0 && i <cc->GetCount())
 				{
 					_pSong->instSelected=i;
 					_pSong->auxcolSelected=i;
@@ -1363,7 +1315,7 @@ namespace psycle { namespace host {
 		void CMainFrame::ShowInstrumentEditor()
 		{
 			CComboBox *cc2=(CComboBox *)m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-			cc2->SetCurSel(AUX_WAVES);
+			cc2->SetCurSel(AUX_INSTRUMENT);
 			_pSong->auxcolSelected=_pSong->instSelected;
 			UpdateComboIns();
 

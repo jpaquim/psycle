@@ -9,7 +9,7 @@
 #include "Configuration.hpp"
 #include "MidiInput.hpp"
 #include <psycle/helpers/dsp.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include "Configuration.hpp"
 namespace psycle
 {

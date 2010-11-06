@@ -41,7 +41,7 @@ namespace psycle
 				VstIntPtr reserved;		///< zero (Reserved for future use)
 				VstEvent* events[MAX_VST_EVENTS];	///< event pointer array, variable size
 			} VstEventsDynamic;
-
+			extern const char* MIDI_CHAN_NAMES[16];
 			using namespace seib::vst;
 
 
@@ -119,6 +119,9 @@ namespace psycle
 				virtual void Tick() { Machine::Tick(); }
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
+				virtual bool NeedsAuxColumn() { return _type == MACH_VST; }
+				virtual const char* AuxColumnName(int idx) { return MIDI_CHAN_NAMES[idx]; }
+				virtual int NumAuxColumnIndexes() { return 16;}
 				// old fileformat {
 				virtual bool PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance);
 				virtual bool LoadFromMac(vst::plugin *pMac);

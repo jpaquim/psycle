@@ -16,9 +16,8 @@ namespace psycle { namespace host {
 
 		enum
 		{
-			AUX_MIDI = 0,
-			AUX_PARAMS,
-			AUX_WAVES
+			AUX_PARAMS=0,
+			AUX_INSTRUMENT
 		};
 
 		/// main frame window.

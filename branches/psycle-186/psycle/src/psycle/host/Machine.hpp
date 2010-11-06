@@ -354,6 +354,9 @@ namespace psycle
 					virtual int GetPluginCategory() { return 0; }
 					virtual bool IsShellMaster() { return false; }
 					virtual int GetShellIdx() { return 0; }
+					virtual bool NeedsAuxColumn() { return false; }
+					virtual const char* AuxColumnName(int idx) {return ""; }
+					virtual int NumAuxColumnIndexes() { return 0;}
 			///\}
 
 			///\name parameters

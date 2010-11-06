@@ -238,12 +238,14 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				int instNum = hexstring_to_integer(buffer);
-				if (instNum > MAX_INSTRUMENTS)
-					instNum = MAX_INSTRUMENTS;
-				else if (instNum < 0)
-					instNum = 0;
-				_pSong->_pInstrument[si]->_lock_instrument_to_machine = instNum;		
+				int macNum = hexstring_to_integer(buffer);
+				if (macNum >= MAX_BUSES)
+					macNum = MAX_BUSES-1;
+				else if (macNum < 0)
+					macNum = 0;
+				if ( ! _pSong->_pMachine[macNum] )
+					macNum = -1;
+				_pSong->_pInstrument[si]->_lock_instrument_to_machine = macNum;
 			}
 		}
 

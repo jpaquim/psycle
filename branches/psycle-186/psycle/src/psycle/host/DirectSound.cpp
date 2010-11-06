@@ -8,7 +8,7 @@
 #include "Configuration.hpp"
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <process.h>
 #include <psycle/helpers/dsp.hpp>
 namespace psycle
@@ -330,7 +330,15 @@ namespace psycle
 			universalis::cpu::exceptions::install_handler_in_thread();
 			DirectSound * pThis = (DirectSound*) pDirectSound;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-//			SetThreadAffinityMask(GetCurrentThread(), 1);
+			// Ask MMCSS to temporarily boost the thread priority
+			// to reduce glitches while the low-latency stream plays.
+			HANDLE hTask = NULL;
+			if(Is_Vista_or_Later()) 
+			{
+				DWORD taskIndex = 0;
+				hTask = Global::pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
+			}
+
 			//Prefill buffer:
 			for(int i=0; i< pThis->_buffersToDo;i++)
 			{
@@ -360,6 +368,7 @@ namespace psycle
 				::Sleep(10);
 			}
 			_event.SetEvent();
+			if (hTask != NULL) { Global::pAvRevertMmThreadCharacteristics(hTask); }
 			//			::_endthread();
 			return 0;
 		}

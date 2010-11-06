@@ -16,6 +16,7 @@ namespace psycle
 		using namespace psycle::plugin_interface;
 		/// \todo CPresetsDlg code sux big time concerning interface separation :-(
 		class CPresetDlg;
+		extern const char* MIDI_CHAN_NAMES[16];
 
 		/// calls that the plugin side can make to the host side
 		class PluginFxCallback : public CFxCallback
@@ -146,7 +147,13 @@ namespace psycle
 				public:  bool const & IsSynth() const throw() { return _isSynth; }
 				private: bool        _isSynth;
 
-				///\todo there was also std::uint32_t GetVersion() in v1.9
+				public: virtual bool NeedsAuxColumn() { return needsAux_; }
+				private: bool		needsAux_;
+
+				//\todo: Dynamic
+				virtual const char* AuxColumnName(int idx) { return MIDI_CHAN_NAMES[idx]; }
+				virtual int NumAuxColumnIndexes() { return 16;}
+
 			///\}
 
 			///\name parameter info
@@ -178,6 +185,7 @@ namespace psycle
 				public:
 					virtual int GenerateAudioInTicks( int startSample, int numSamples );
 					virtual float GetAudioRange(){ return 32768.0f; }
+					virtual void SetSampleRate(int sr);
 					virtual void Tick();
 					virtual void Tick(int channel, PatternEntry * pEntry);
 					virtual void Stop();
@@ -238,14 +246,14 @@ namespace psycle
 		void inline proxy:: GetData(void * pData)                                                          throw(exceptions::function_error) { try { plugin().GetData(pData);                                                } PSYCLE__HOST__CATCH_ALL(host()) }
 		int  inline proxy:: GetDataSize()                                                                  throw(exceptions::function_error) { try { return plugin().GetDataSize();                                          } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
 		void inline proxy:: Command()                                                                      throw(exceptions::function_error) { try { plugin().Command();                                                     } PSYCLE__HOST__CATCH_ALL(host()) }
-		void inline proxy:: unused0(const int i)                                                           throw(exceptions::function_error) { try { plugin().unused0(i);                                                  } PSYCLE__HOST__CATCH_ALL(host()) }
-		bool inline proxy:: unused1(const int i)                                                           throw(exceptions::function_error) { try { return const_cast<const CMachineInterface &>(plugin()).unused1(i); } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-		void inline proxy:: MidiEvent(const int channel, const int value, const int velocity)               throw(exceptions::function_error) { try { plugin().MidiEvent(channel, value, velocity);                            } PSYCLE__HOST__CATCH_ALL(host()) }
-		void inline proxy:: unused2(std::uint32_t const data)                                              throw(exceptions::function_error) { try { plugin().unused2(data);                                                   } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: unused0(const int i)                                                           throw(exceptions::function_error) { try { plugin().unused0(i);                                                    } PSYCLE__HOST__CATCH_ALL(host()) }
+		bool inline proxy:: unused1(const int i)                                                           throw(exceptions::function_error) { try { return const_cast<const CMachineInterface &>(plugin()).unused1(i);      } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		void inline proxy:: MidiEvent(const int channel, const int value, const int velocity)              throw(exceptions::function_error) { try { plugin().MidiEvent(channel, value, velocity);                           } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: unused2(std::uint32_t const data)                                              throw(exceptions::function_error) { try { plugin().unused2(data);                                                 } PSYCLE__HOST__CATCH_ALL(host()) }
 		bool inline proxy:: DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error) { try { return plugin().DescribeValue(txt, param, value);                       } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-		bool inline proxy:: HostEvent(const int wave, const int note, const float volume)                  throw(exceptions::function_error) { try { plugin().HostEvent(wave, note, volume);                                  } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		bool inline proxy:: HostEvent(const int eventNr, const int val1, const float val2)                 throw(exceptions::function_error) { try { return plugin().HostEvent(eventNr, val1, val2);                         } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
 		void inline proxy:: SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error) { try { plugin().SeqTick(channel, note, ins, cmd, val);                         } PSYCLE__HOST__CATCH_ALL(host()) }
-		void inline proxy:: unused3()                                                                      throw(exceptions::function_error) { try { plugin().unused3();                                                    } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: unused3()                                                                      throw(exceptions::function_error) { try { plugin().unused3();                                                     } PSYCLE__HOST__CATCH_ALL(host()) }
 		int  inline proxy:: Val(int parameter)                                                             throw(exceptions::function_error) { try { return plugin().Vals[parameter];                                        } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
 		void inline proxy:: callback()                                                                     throw(exceptions::function_error) { try { plugin().pCB = host().GetCallback();                                    } PSYCLE__HOST__CATCH_ALL(host()) }
 

@@ -205,7 +205,7 @@ namespace psycle { namespace host {
 						{
 							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
 						}
-						else Global::pInputHandler->PlayNote(outnote,127,true);
+						else Global::pInputHandler->PlayNote(outnote);
 					}
 					break;
 				case CT_Immediate:
@@ -225,9 +225,9 @@ namespace psycle { namespace host {
 			const int outnote = cmd.GetNote();
 			if(outnote != -1) {
 				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-					Global::pInputHandler->StopNote(outnote, true, &machine());
+					Global::pInputHandler->StopNote(outnote, 255,true, &machine());
 				else
-					Global::pInputHandler->StopNote(outnote, true);
+					Global::pInputHandler->StopNote(outnote);
 			}
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
@@ -330,6 +330,9 @@ namespace psycle { namespace host {
 		{
 			int const se=comboProgram.GetCurSel();
 			machine().SetProgram(se);
+			if (pParamGui && pParamGui->IsWindowVisible()){
+				pParamGui->SelectProgram(se);
+			}
 			SetFocus();
 		}
 		void CVstEffectWnd::OnCloseupProgram()
@@ -338,8 +341,11 @@ namespace psycle { namespace host {
 		}
 		void CVstEffectWnd::RefreshUI()
 		{
-			///\todo: anything more?
 			FillProgramCombobox();
+			if (pParamGui && pParamGui->IsWindowVisible()){
+				int const se=comboProgram.GetCurSel();
+				pParamGui->SelectProgram(se);
+			}
 		}
 		CBaseGui* CVstEffectWnd::CreateView()
 		{
@@ -824,12 +830,18 @@ namespace psycle { namespace host {
 		{
 			machine().SetProgram(nID - ID_SELECTPROGRAM_0);
 			comboProgram.SetCurSel(nID - ID_SELECTPROGRAM_0);
+			if (pParamGui && pParamGui->IsWindowVisible()){
+				pParamGui->SelectProgram(nID - ID_SELECTPROGRAM_0);
+			}
 		}
 		void CVstEffectWnd::OnProgramLess()
 		{
 			int numProgram = machine().GetProgram()-1;
 			machine().SetProgram(numProgram);
 			comboProgram.SetCurSel(numProgram);
+			if (pParamGui && pParamGui->IsWindowVisible()){
+				pParamGui->SelectProgram(numProgram);
+			}
 			UpdateWindow();
 		}
 		void CVstEffectWnd::OnUpdateProgramLess(CCmdUI *pCmdUI)
@@ -845,6 +857,9 @@ namespace psycle { namespace host {
 			int numProgram = machine().GetProgram()+1;
 			machine().SetProgram(numProgram);
 			comboProgram.SetCurSel(numProgram);
+			if (pParamGui && pParamGui->IsWindowVisible()){
+				pParamGui->SelectProgram(numProgram);
+			}
 			UpdateWindow();
 		}
 		void CVstEffectWnd::OnUpdateProgramMore(CCmdUI *pCmdUI)

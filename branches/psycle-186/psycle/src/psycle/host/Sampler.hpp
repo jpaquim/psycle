@@ -113,6 +113,10 @@ namespace psycle
 					_voices[i]._triggerNoteDelay = 0;
 				}
 			}
+			virtual bool NeedsAuxColumn() { return true; }
+			virtual const char* AuxColumnName(int idx);
+			virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENTS-1; } // last instrument is the preview instrument
+				
 			virtual void Stop(void);
 			void StopInstrument(int insIdx);
 			virtual void Tick(int channel, PatternEntry* pData);

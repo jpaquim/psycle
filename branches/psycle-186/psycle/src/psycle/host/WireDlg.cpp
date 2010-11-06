@@ -12,7 +12,7 @@
 #include "Machine.hpp"
 #include "internal_machines.hpp"
 #include <psycle/helpers/math/constants.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 
 namespace psycle { namespace host {
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
@@ -213,7 +213,7 @@ namespace psycle { namespace host {
 			{ 
 				//Linear -pi to pi.
 				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
-				//Hanning window 
+				//Hann window 
 				const float window = 0.50 - 0.50 * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
 				float j=0.0f;
 				for(int h=0;h<scope_spec_bands;h++)

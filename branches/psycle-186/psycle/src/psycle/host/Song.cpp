@@ -525,7 +525,7 @@ namespace psycle
 			// Clear sequence
 			Reset();
 			instSelected = 0;
-			midiSelected = 0;
+			paramSelected = 0;
 			auxcolSelected = 0;
 			_saved=false;
 			fileName ="Untitled.psy";
@@ -1089,8 +1089,8 @@ namespace psycle
 				filename = const_cast<char*>(strrchr(wavfile,'//'));
 				if (filename == NULL) {
 					filename = const_cast<char*>(wavfile);
-				}
-			}
+				} else {filename++;}
+			} else { filename++;}
 			WavAlloc(instrument, st_type == 2, Datalen, filename);
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
@@ -1317,7 +1317,7 @@ namespace psycle
 							pFile->Read(&temp, sizeof temp);  
 							seqBus = temp;
 							pFile->Read(&temp, sizeof temp);  
-							midiSelected = temp;
+							paramSelected = temp;
 							pFile->Read(&temp, sizeof temp);  
 							auxcolSelected = temp;
 							pFile->Read(&temp, sizeof temp);  
@@ -2461,7 +2461,7 @@ namespace psycle
 			temp = seqBus;
 			pFile->Write(&temp,sizeof(temp));
 
-			temp = midiSelected;
+			temp = paramSelected;
 			pFile->Write(&temp,sizeof(temp));
 			temp = auxcolSelected;
 			pFile->Write(&temp,sizeof(temp));

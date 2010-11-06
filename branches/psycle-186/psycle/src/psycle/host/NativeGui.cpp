@@ -478,7 +478,7 @@ namespace psycle { namespace host {
 						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
 						else
-							Global::pInputHandler->PlayNote(outnote,127,true, 0);
+							Global::pInputHandler->PlayNote(outnote);
 					}
 					break;
 
@@ -504,9 +504,9 @@ namespace psycle { namespace host {
 			{
 				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
 				{
-					Global::pInputHandler->StopNote(outnote,true,_pMachine);
+					Global::pInputHandler->StopNote(outnote,255,true,_pMachine);
 				}
-				else Global::pInputHandler->StopNote(outnote,true,NULL);
+				else Global::pInputHandler->StopNote(outnote);
 			}
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);

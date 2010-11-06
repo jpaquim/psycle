@@ -108,7 +108,9 @@ namespace psycle { namespace host {
 			}
 			m_program.SetCurSel(machine().GetProgram());
 		}
-
+		void CVstParamList::SelectProgram(long index) {
+			m_program.SetCurSel(machine().GetProgram());
+		}
 		void CVstParamList::UpdateParList()
 		{
 			const int nPar= m_parlist.GetCurSel();

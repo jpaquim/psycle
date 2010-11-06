@@ -496,9 +496,9 @@ namespace psycle
 			/// .
 			bool EnterData(UINT nChar,UINT nFlags);
 			/// .
-			void PlayNote(int note,int velocity=127,bool bTranspose=true,Machine*pMachine=NULL);
+			void PlayNote(int note,int instr=255, int velocity=127,bool bTranspose=true,Machine*pMachine=NULL);
 			/// .
-			void StopNote(int note,bool bTranspose=true,Machine*pMachine=NULL);
+			void StopNote(int note,int instr=255, bool bTranspose=true,Machine*pMachine=NULL);
 			///\}
 
 			void Stop();
@@ -541,6 +541,7 @@ namespace psycle
 
 			/// multi-key playback state stuff
 			int notetrack[MAX_TRACKS]; 
+			int instrtrack[MAX_TRACKS]; 
 			/// last track output to	
 			int outtrack;
 

@@ -2052,18 +2052,10 @@ namespace psycle
 		{
 			scoped_lock lock(*this);
 
-			// don't process twk , twf, Mcm Commands, or empty lines.
-			if ( pData->_note > notecommands::release )
+			 // don't process twk , twf of Mcm Commands, or empty commands
+			if ( pData->_note > notecommands::release && (pData->_note < notecommands::empty || pData->_cmd == 0) )
 			{
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				if ((pData->_cmd == 0 && pData->_volume == 255 && pData->_inst == 255) || pData->_note != notecommands::empty )return; // Return in everything but commands!
-	#else
-				if ((pData->_cmd == 0 && pData->_inst == 255 ) || pData->_note != notecommands::empty )return; // Return in everything but commands!
-	#endif
-#endif
+				return;
 			}
 
 			// define some variables to ease the case checking.

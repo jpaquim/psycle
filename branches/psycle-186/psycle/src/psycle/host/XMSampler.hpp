@@ -987,6 +987,9 @@ XMSampler::Channel::PerformFX().
 	virtual float GetAudioRange() { return 32768; }
 	virtual char* GetName(void) { return _psName; }
 	virtual void SetSampleRate(int sr);
+	virtual bool NeedsAuxColumn() { return true; }
+	virtual const char* AuxColumnName(int idx) { return rInstrument(idx).Name().c_str(); }
+	virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENT;}
 
 	virtual bool Load(RiffFile* riffFile);
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);

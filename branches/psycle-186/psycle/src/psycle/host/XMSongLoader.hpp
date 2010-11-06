@@ -32,27 +32,43 @@ namespace psycle { namespace host {
 		char * AllocReadStr(int size, size_t start=-1);
 
 		// inlines
-		inline char ReadInt1(size_t start=-1)
+		inline char ReadInt1()
+		{	
+			char i;
+			return Read(&i,1)?i:0;
+		}
+
+		inline short ReadInt2()
+		{
+			short i;
+			return Read(&i,2)?i:0;
+		}
+
+		inline int ReadInt4()
+		{
+			int i;
+			return Read(&i,4)?i:0;
+		}
+		inline char ReadInt1(size_t start)
 		{	
 			char i;
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
-		inline short ReadInt2(size_t start=-1)
+		inline short ReadInt2(size_t start)
 		{
 			short i;
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
-		inline int ReadInt4(size_t start=-1)
+		inline int ReadInt4(size_t start)
 		{
 			int i;
 			if(start>=0) Seek(start);
 			return Read(&i,4)?i:0;
 		}
-
 		int m_iInstrCnt;
 		int smpLen[256];
 		char smpFlags[256];
@@ -107,21 +123,38 @@ namespace psycle { namespace host {
 		char * AllocReadStr(std::int32_t size, size_t start=-1);
 
 		// inlines
-		inline unsigned char ReadUInt1(std::int32_t start=-1)
+		inline unsigned char ReadUInt1()
+		{	
+			std::uint8_t i(0);
+			return Read(&i,1)?i:0;
+		}
+
+		inline unsigned short ReadUInt2()
+		{
+			std::uint16_t i(0);
+			return Read(&i,2)?i:0;
+		}
+
+		inline unsigned int ReadUInt4()
+		{
+			std::uint32_t i(0);
+			return Read(&i,4)?i:0;
+		}
+		inline unsigned char ReadUInt1(std::int32_t start)
 		{	
 			std::uint8_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
-		inline unsigned short ReadUInt2(std::int32_t start=-1)
+		inline unsigned short ReadUInt2(std::int32_t start)
 		{
 			std::uint16_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
-		inline unsigned int ReadUInt4(std::int32_t start=-1)
+		inline unsigned int ReadUInt4(std::int32_t start)
 		{
 			std::uint32_t i(0);
 			if(start>=0) Seek(start);

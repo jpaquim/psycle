@@ -45,7 +45,9 @@ namespace psycle
 				lastInstrument[i]=255;
 			}
 		}
-
+		const char* Sampler::AuxColumnName(int idx) {
+			return Global::_pSong->_pInstrument[ idx]->_sName;
+		}
 		void Sampler::Init(void)
 		{
 			Machine::Init();
@@ -430,9 +432,10 @@ namespace psycle
 			int channel,
 			PatternEntry* pData)
 		{
-			if ( pData->_note > notecommands::release ) // don't process twk , twf of Mcm Commands
+			 // don't process twk , twf of Mcm Commands, or empty commands
+			if ( pData->_note > notecommands::release && (pData->_note < notecommands::empty || pData->_cmd == 0) )
 			{
-				if ( pData->_cmd == 0 || pData->_note != 255) return; // Return in everything but commands!
+				return;
 			}
 			if ( _mute ) return; // Avoid new note entering when muted.
 

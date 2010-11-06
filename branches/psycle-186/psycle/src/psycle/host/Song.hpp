@@ -69,7 +69,7 @@ namespace psycle
 			///\}
 			/// The index of the selected MIDI program for note entering
 			/// \todo This is a gui thing... should not be here.
-			int midiSelected;
+			int paramSelected;
 			/// The index for the auxcolumn selected (would be waveselected, midiselected, or an index to a machine parameter)
 			/// \todo This is a gui thing... should not be here.
 			int auxcolSelected;

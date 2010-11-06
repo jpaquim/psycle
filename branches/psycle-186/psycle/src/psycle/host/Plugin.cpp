@@ -31,6 +31,12 @@ namespace psycle
 		namespace loggers = universalis::os::loggers;
 		typedef CMachineInfo * (* GETINFO) ();
 		typedef CMachineInterface * (* CREATEMACHINE) ();
+		const char* MIDI_CHAN_NAMES[16] = {
+			"MIDI Channel 01", "MIDI Channel 02","MIDI Channel 03","MIDI Channel 04",
+			"MIDI Channel 05","MIDI Channel 06","MIDI Channel 07","MIDI Channel 08",
+			"MIDI Channel 09","MIDI Channel 10","MIDI Channel 11","MIDI Channel 12",
+			"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
+		};
 
 		PluginFxCallback Plugin::_callback;
 
@@ -233,6 +239,8 @@ namespace psycle
 				try
 				{
 					proxy().Init();
+					needsAux_ = proxy().HostEvent(plugin_interface::HE_NEEDS_AUX_COLUMN,0,0.0f);
+
 				}
 				catch(const std::exception &)
 				{
@@ -716,6 +724,10 @@ namespace psycle
 			{
 			}
 		}
+		void Plugin::SetSampleRate(int sr)
+		{
+			Tick();
+		}
 
 		void Plugin::Tick()
 		{
@@ -825,6 +837,16 @@ namespace psycle
 					}
 				}
 				Global::pPlayer->Tweaker = true;
+			}
+			else if (pData->_note == notecommands::midicc) {
+				try
+				{
+					proxy().MidiEvent(pData->_inst&0x0F, pData->_inst&0xF0, (pData->_cmd<<8) + pData->_parameter);
+				}
+				catch(const std::exception &)
+				{
+					return;
+				}
 			}
 			else {
 				try

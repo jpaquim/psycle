@@ -10,7 +10,7 @@
 #include "MidiInput.hpp"
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <process.h>
 namespace psycle
 {

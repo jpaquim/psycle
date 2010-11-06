@@ -170,6 +170,7 @@ namespace psycle
 				// messagebox to the user
 				AfxMessageBox( messageText, MB_ICONEXCLAMATION+MB_OK );
 			}
+			m_stats.channelMapUpdate = true;
 
 			// make sure we have good enough resolution from the system timer
 			// (Win95/98 default to 1ms accuracy, but Win2000/NT can default to 5ms.  This makes sure we
@@ -622,18 +623,10 @@ namespace psycle
 							// program change -> map generator/effect to channel
 
 							// machine active?
-							if( program < MAX_MACHINES )
-							{  
-								if (Global::_pSong->_pMachine[ program ] )
-								{
-									// ok, map
-									SetGenMap( channel, program );
-								}
-								else
-								{
-									// machine not active, can't map!
-									SetGenMap( channel, -1 );
-								}
+							if( program < MAX_MACHINES && Global::_pSong->_pMachine[ program ] )
+							{
+								// ok, map
+								SetGenMap( channel, program );
 							}
 							else
 							{
@@ -645,12 +638,7 @@ namespace psycle
 						break;
 
 						/*
-						case 11:
-							// mods
-							// data 2 contains the info
-							break;
-
-						case 14:
+						case 0x0D:
 							// pitch wheel
 							// data 2 contains the info
 							break;
@@ -902,7 +890,7 @@ namespace psycle
 					if( m_patIn >= MIDI_BUFFER_SIZE ) m_patIn = 0;
 					m_stats.flags |= FSTAT_IN_BUFFER;
 
-					// this the 1st message, we are NOT synced already, sync to audio engine now!
+					// this the 1st message, we are NOT synced yet, sync to audio engine now!
 					if( !m_synced )
 					{
 						// force sync
@@ -959,8 +947,7 @@ namespace psycle
 					int channel = statusLN;
 
 					CMainFrame & frame(*static_cast<CMainFrame*>(theApp.m_pMainWnd));
-					///\todo: Disabled because it makes the aux column be setup without user control. Needs improvement.
-					//frame.ChangeIns(channel);
+					m_stats.channelMap |= (1 << channel);
 
 					// branch on status code
 					switch( statusHN )
@@ -968,13 +955,13 @@ namespace psycle
 						// (also) note off
 						case 0x08:		
 							velocity=0;
-						// note on/off
+						//fallthrough
 						case 0x09:
     						// limit to playable range (above this is special codes)
     						if(note>119) 
     							note=119;
 							// TODO: watch this, it should be OK as long as we don't change things too much
-							frame.m_wndView.MidiPatternNote(note,velocity);
+							frame.m_wndView.MidiPatternNote(note,channel, velocity);
 							return;
 						default:break;
 					}
@@ -1213,15 +1200,10 @@ namespace psycle
 			// method here in that they differ in the way the MME functions have been
 			// implemented!?  Oh, and the DSound functions are also not working correctly!
 
-			// midi injection NOT enabled?
-			if( !m_midiInHandle[ DRIVER_MIDI ] || 
-				strcmp( Global::pConfig->_pOutputDriver->GetInfo()->_psName, "Windows WaveOut MME" ) != 0 )	// TODO: need to remove this string compare? (speed)
+			if(m_midiMode != MODE_REALTIME)
 			{
-				m_stats.flags &= ~FSTAT_ACTIVE;
 				return;
 			}
-
-			m_stats.flags |= FSTAT_ACTIVE;
 
 			int samplesPerSecond = Global::pConfig->_pOutputDriver->_samplesPerSec;
 			m_stats.bufferCount = m_patCount;
@@ -1295,7 +1277,7 @@ namespace psycle
 			// we will always have the notes being slightly advanced of the song.  How much will
 			// be a factor of the current sample-rate and amount of samples.  For example, at
 			// 44100hz with a 256 sample block the vary will be up to 5.8ms, at a lower sample
-			// rate, say 22050hz, but sample block size it increases up to 11.6ms.
+			// rate, say 22050hz, but same block size it increases up to 11.6ms.
 
 			// I have tried to combat this by interleaving the ->Tick(..) functions with several
 			// ->Work(..) functions, but this has always produced audio pops & clicks, so I have

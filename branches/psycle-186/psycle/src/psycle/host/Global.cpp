@@ -99,7 +99,7 @@ namespace psycle
 
 		   ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 		   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-		   osvi.dwMajorVersion = 0;
+		   osvi.dwMajorVersion = 6;
 		   osvi.dwMinorVersion = 0;
 
 		   VER_SET_CONDITION( dwlConditionMask, VER_MAJORVERSION, op );

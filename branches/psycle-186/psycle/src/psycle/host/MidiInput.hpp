@@ -152,7 +152,7 @@ namespace psycle
 			bool Close( );				
 
 			/// find out if we are open
-			bool Active() { return m_midiInHandle!=NULL; }
+			bool Active() { return m_midiInHandle[ DRIVER_MIDI ]!=NULL; }
 
 			/// for external access
 			MIDI_STATS * GetStatsPtr() { return &m_stats; }		

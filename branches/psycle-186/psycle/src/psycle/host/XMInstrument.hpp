@@ -265,7 +265,7 @@ namespace psycle { namespace host {
 		class Envelope {
 		public:
 			/// Invalid point. Used to indicate that sustain/normal loop is disabled.
-			static const int INVALID = -1;
+			static const unsigned int INVALID = 0xFFFFFFFF;
 			
 			/// ValueType is a float value from  0 to 1.0  (or -1.0 1.0, or whatever else) which can be used as a multiplier.
 			typedef float ValueType;

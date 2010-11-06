@@ -30,7 +30,7 @@
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 
-#include <universalis/os/aligned_memory_alloc.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include "cpu_time_clock.hpp"
 
 #if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
@@ -578,35 +578,28 @@ namespace psycle
 
 		void Machine::PreWork(int numSamples,bool clear)
 		{
-			recursive_processed_ = false;
-			recursive_is_processing_= false;
 			sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
 			nanoseconds const t0(cpu_time_clock());
 #if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
 				float *pSamplesL = _pSamplesL;   
-				float *pSamplesR = _pSamplesR;   
-				int i = _scopePrevNumSamples;
-				while (i > 0)   
+				float *pSamplesR = _pSamplesR;
+				int i = _scopePrevNumSamples & ~0x3; // & ~0x3 to ensure aligned to 16byte
+				if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
 				{   
-					if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
-					{   
-						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1)*sizeof(float));
-						pSamplesL+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-						pSamplesR+=(SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-						i -= (SCOPE_BUF_SIZE-(_scopeBufferIndex)-1);
-						_scopeBufferIndex = 0;   
-					}   
-					else   
-					{   
-						memcpy(&_pScopeBufferL[_scopeBufferIndex],pSamplesL,i*sizeof(float));   
-						memcpy(&_pScopeBufferR[_scopeBufferIndex],pSamplesR,i*sizeof(float));   
-						_scopeBufferIndex += i;   
-						i = 0;   
-					}   
-				} 
+					int const amountSamples=SCOPE_BUF_SIZE-_scopeBufferIndex;
+					helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], amountSamples);
+					helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], amountSamples);
+					pSamplesL+=amountSamples;
+					pSamplesR+=amountSamples;
+					i -= amountSamples;
+					_scopeBufferIndex = 0;
+				}
+				helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], i);
+				helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], i);
+				_scopeBufferIndex += i;
+				i = 0;
 			}
 			_scopePrevNumSamples=numSamples;
 #endif //!defined WINAMP_PLUGIN
@@ -615,9 +608,8 @@ namespace psycle
 				helpers::dsp::Clear(_pSamplesL, numSamples);
 				helpers::dsp::Clear(_pSamplesR, numSamples);
 			}
-		nanoseconds const t1(cpu_time_clock());
-		Global::song().accumulate_routing_time(t1 - t0);
-
+			nanoseconds const t1(cpu_time_clock());
+			Global::song().accumulate_routing_time(t1 - t0);
 		}
 
 
@@ -653,13 +645,11 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix) {
 			}
 		}
 	}
+	nanoseconds const t0(cpu_time_clock());
+	helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+	nanoseconds const t1(cpu_time_clock());
+	Global::song().accumulate_routing_time(t1 - t0);
 	recursive_is_processing_ = false;
-	{ // undernormalise
-		nanoseconds const t0(cpu_time_clock());
-		helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-		nanoseconds const t1(cpu_time_clock());
-		Global::song().accumulate_routing_time(t1 - t0);
-	}
 }
 
 /// tells the scheduler which machines to process before this one
@@ -750,7 +740,8 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 			if ( Global::pConfig->autoStopMachines )
 			{
-				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.count >= numSamples)	{
+				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.AccumRight < 0.00024*GetAudioRange()
+					&& rms.count >= numSamples)	{
 					rms.count=0;
 					rms.AccumLeft=0.;
 					rms.AccumRight=0.;

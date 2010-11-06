@@ -79,13 +79,15 @@ namespace psycle
 				CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
 				CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				_midiHeadroom = 100;
-				// enable velocity by default
+				// enable velocity, raw and chan as aux by default
 				{
 					midi().velocity().record()  = true;
 					midi().velocity().type()    = 0; // 0 is cmd
-					midi().velocity().command() = 0xc;
+					midi().velocity().command() = 0xC;
 					midi().velocity().from()    = 0;
 					midi().velocity().to()      = 0xff;
+					midi().raw()				= true;
+					midi().chan_as_aux()		= true;
 				}
 			}
 #endif // !defined WINAMP_PLUGIN
@@ -231,6 +233,7 @@ namespace psycle
 					reg.QueryValue("MidiTo"      + s, midi().group(i).to()     );
 				}
 				reg.QueryValue("MidiRawMcm", midi().raw());
+				reg.QueryValue("MidiChanAsAux", midi().chan_as_aux());
 			}
 #endif // !defined WINAMP_PLUGIN
 
@@ -448,6 +451,7 @@ namespace psycle
 				reg.SetValue("MidiTo"      + s, midi().group(i).to()     );
 			}
 			reg.SetValue("MidiRawMcm", midi().raw());
+			reg.SetValue("MidiChanAsAux", midi().chan_as_aux());
 			reg.SetValue("defaultPatLines", defaultPatLines);
 			reg.SetValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.SetValue("bFileSaveReminders", bFileSaveReminders);

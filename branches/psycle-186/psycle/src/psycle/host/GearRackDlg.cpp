@@ -164,13 +164,13 @@ namespace psycle { namespace host {
 					m_list.AddString(buffer);
 				}
 				CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-				if (cc->GetCurSel() == AUX_WAVES)
+				if (cc->GetCurSel() == AUX_INSTRUMENT)
 				{
 					selected = Global::_pSong->instSelected;
 				}
 				else
 				{
-					cc->SetCurSel(AUX_WAVES);
+					cc->SetCurSel(AUX_INSTRUMENT);
 					pParentMain->UpdateComboIns(true);
 					selected = Global::_pSong->instSelected;
 				}
@@ -194,14 +194,14 @@ namespace psycle { namespace host {
 			case 2:
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-					if (cc->GetCurSel() == AUX_WAVES)
+					if (cc->GetCurSel() == AUX_INSTRUMENT)
 					{
 						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(false);
 					}
 					else
 					{
-						cc->SetCurSel(AUX_WAVES);
+						cc->SetCurSel(AUX_INSTRUMENT);
 						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 						pParentMain->UpdateComboIns(true);
 					}
@@ -233,7 +233,7 @@ namespace psycle { namespace host {
 			case 2:
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_WAVES);
+					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
@@ -326,7 +326,7 @@ namespace psycle { namespace host {
 			case 2:
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_WAVES);
+					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();
@@ -361,7 +361,7 @@ namespace psycle { namespace host {
 			case 2:
 				{
 					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_WAVES);
+					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
 					pParentMain->m_wndInst.WaveUpdate();

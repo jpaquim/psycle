@@ -218,6 +218,12 @@ namespace psycle
 					bool       inline & raw()       throw() { return raw_; }
 				private:
 					bool                raw_;
+
+				public:
+					bool const inline & chan_as_aux() const throw() { return chan_as_aux_; }
+					bool       inline & chan_as_aux()       throw() { return chan_as_aux_; }
+				private:
+					bool                chan_as_aux_;
 			};
 
 		public:
