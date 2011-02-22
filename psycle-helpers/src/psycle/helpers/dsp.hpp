@@ -46,14 +46,14 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			__m128 volps = _mm_set_ps1(vol);
 			__m128 *psrc = (__m128*)pSrcSamples;
 			__m128 *pdst = (__m128*)pDstSamples;
-			do
+			while(numSamples>0)
 			{
 				__m128 tmpps = _mm_mul_ps(*psrc, volps);
 				*pdst = _mm_add_ps(*pdst, tmpps);
 				++psrc;
 				++pdst;
 				numSamples -= 4;
-			} while(numSamples > 0);
+			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			__asm
 			{
@@ -89,12 +89,12 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *pdst = (__m128*)pDstSamples;
-			do
+			while(numSamples>0)
 			{
 				*pdst = _mm_mul_ps(*pdst,volps);
 				pdst++;
 				numSamples-=4;
-			} while(numSamples>0);
+			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -127,14 +127,14 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(multi);
 			__m128 *psrc = (__m128*)pSrcSamples;
-			do
+			while(numSamples>0)
 			{
 				__m128 tmpps = _mm_mul_ps(*psrc,volps);
 				_mm_storeu_ps(pDstSamples,tmpps);
 				psrc++;
 				pDstSamples+=4;
 				numSamples-=4;
-			} while(numSamples>0);
+			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -165,14 +165,14 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	inline void Mov(float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples)
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-			do
+			while(numSamples>0)
 			{
 				__m128 tmpps = _mm_load_ps(pSrcSamples);
 				_mm_storeu_ps(pDstSamples,tmpps);
 				pSrcSamples+=4;
 				pDstSamples+=4;
 				numSamples-=4;
-			} while(numSamples>0);
+			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm
@@ -201,12 +201,12 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 zeroval = _mm_set_ps1(0.0f);
-			do
+			while(numSamples>0)
 			{
 				_mm_store_ps(pDstSamples,zeroval);
 				pDstSamples+=4;
 				numSamples-=4;
-			}while(numSamples>0);
+			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			// This code assumes aligned memory (to 16) and assigned by powers of 4!
 			__asm

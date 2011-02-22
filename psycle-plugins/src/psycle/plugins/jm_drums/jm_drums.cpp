@@ -370,7 +370,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	int vidx = GetVoice(channel);
-	if(note<120) // Note on
+	if(note<NOTE_NOTEOFF) // Note on
 	{
 		if (vidx != -1 )
 		{
@@ -406,7 +406,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 	else if (vidx != -1)
 	{
-		if (note==120)
+		if (note==NOTE_NOTEOFF)
 		{
 			DTrack[vidx].NoteOff(); // Note off
 		}

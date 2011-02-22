@@ -228,7 +228,7 @@ inline void mi::FilterTick()
 	}
 	else
 	{
-		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100/song_freq;
+		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100.f/song_freq;
 	}
 	WRAP_AROUND(vcflfophase);
 	Vals[e_paraVCFlfophase] = lrint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
@@ -759,7 +759,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 16: sprintf(txt,"Sync 1/64 note"); return true; break;
 		}
 		// filter lfo rates
-		fv=(float)44100*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+		fv=44100.f*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 		sprintf(txt,"%.4f hz",fv);
 		return true;
 		break;

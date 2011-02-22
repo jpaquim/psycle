@@ -40,7 +40,6 @@ using namespace psycle::helpers::math;
 #define MAX_ENV_TIME				16384
 #define MIN_ENV_TIME				1
 #define MAX_RATE								4096
-#define MAX_TRACKS				64 // for upcoming expansion
 #define NUMCOLUMNS 5
 #define MAXVCFMODE 21
 #define MAXLFOWAVE 15

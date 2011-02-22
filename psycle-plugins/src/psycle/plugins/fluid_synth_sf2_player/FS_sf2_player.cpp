@@ -140,7 +140,7 @@ CMachineParameter const paraInter = {
 };
 
 CMachineParameter const paraGain = {
-	"Global Gain", "Global Gain", 0, 256, MPF_STATE, 64
+	"Global Gain", "Global Gain", 0, 256, MPF_STATE, 48
 };
 
 CMachineParameter const paraNull = {
@@ -705,19 +705,32 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 }
 
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
+	if(ins >= MAXINSTR || channel >= MAX_TRACKS)
+	{
+		pCB->MessBox("Outside range","outside range",1);
+		return;
+	}
 	if(note<=NOTE_MAX) {
 		if(lastnote[ins][channel] != 255) fluid_synth_noteoff(synth, ins, lastnote[ins][channel]);
 		lastnote[ins][channel] = note;
 		if(cmd == 0xC) {
-			if(val > 127) val = 127;
+			val >>=1;
+			fluid_synth_cc(synth, ins, 0x07, 127);
 			fluid_synth_noteon(synth, ins, note, val);
 		} else {
+			fluid_synth_cc(synth, ins, 0x07, 127);
 			fluid_synth_noteon(synth, ins, note, 127);
 		}
 	}
-	if(note==NOTE_NOTEOFF) {
+	else if(note==NOTE_NOTEOFF) {
 		fluid_synth_noteoff(synth, ins, lastnote[ins][channel]);
 		lastnote[ins][channel] = 255;
+	}
+	else if(note==NOTE_NONE && lastnote[ins][channel] != 255) 
+	{
+		if(cmd == 0x0C) {
+			fluid_synth_cc(synth, ins, 0x07, val>>1);
+		}
 	}
 }
 
@@ -813,10 +826,25 @@ void mi::MidiEvent(int channel, int midievent, int value) {
 		case 0x80: fluid_synth_noteoff(synth, channel, value>>8);break;
 		case 0x90: fluid_synth_noteon(synth, channel, value>>8, value&0xFF);break;
 		case 0xB0: fluid_synth_cc(synth,channel, value>>8,value&0xFF);break;
-		case 0xC0: fluid_synth_program_change(synth, channel, value>>8);break;
+		case 0xC0: {
+			int val = value>>8;
+			if(channel == Vals[globalpar.curChannel]) {
+				Vals[e_paraProgram] = val;
+			}
+			globalpar.instr[globalpar.curChannel].prog = val;
+			fluid_synth_program_change(synth, channel, val);
+			break;
+			}
 		case 0xD0: fluid_synth_channel_pressure(synth, channel, value>>8);break;
-		case 0xE0: fluid_synth_pitch_bend(synth, channel, 
-					  ((value&0x7F)<<7) + ((value&0x7F00)>>8));break;
+		case 0xE0: {
+			int val = ((value&0x7F)<<7) + ((value&0x7F00)>>8);
+			if(channel == Vals[globalpar.curChannel]) {
+				Vals[e_paraPitchBend] = val;
+			}
+			globalpar.instr[globalpar.curChannel].pitch = val;
+			fluid_synth_pitch_bend(synth, channel, val);
+			break;
+			}
 		default:break;
 	}
 }

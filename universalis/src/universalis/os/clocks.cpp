@@ -267,11 +267,12 @@ namespace detail {
 			nanoseconds performance_counter() throw(exception) {
 				::LARGE_INTEGER counter, frequency;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+				//QueryPerformanceFrequency should (and tends to be) constant, but it looks like there have been buggy chips/bioses.
 				if(!::QueryPerformanceFrequency(&frequency)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				// for systems where the frequency may change over time, we need to remember the last counter and time values
 				int64_t static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_counter(0);
 				nanoseconds::tick_type static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_time(0);
-				nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
+				nanoseconds ns(double(counter.QuadPart - last_counter) / (frequency.QuadPart* 0.000000001) );
 				ns += nanoseconds(last_time);
 				last_time = ns.get_count();
 				last_counter = counter.QuadPart;
