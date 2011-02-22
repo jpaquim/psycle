@@ -1,0 +1,146 @@
+// generate the .png image file with: dot dependencies.dot -Tpng > dependencies.png
+digraph dependencies {
+	label = "module dependencies, transitive graph"
+	//rankdir = TB
+	//rankdir = LR
+	labelloc = t
+	fontname = verdana
+	fontsize = 14
+	bgcolor = khaki3
+	//concentrate = true // line concentrations
+	ratio = auto
+	node [
+		shape = Mrecord
+		style = rounded
+		color = lemonchiffon4
+		fillcolor = lemonchiffon1
+		fontname = verdana
+		fontsize = 10
+	]
+	
+	subgraph cluster_psycle {
+		label = "psycle"
+		bgcolor = lemonchiffon1
+		
+		node [ style = filled fillcolor = lemonchiffon2 ]
+		"stdc++"// [ label = "{ stdc++ | standard C++ library }" ];
+		//"stdc";
+		"posix";// [ label = "{ POSIX | Portable OS Interface }"];
+		"boost";// [ label = "{ boost | boost libraries }" ];
+		//"libsigc++";// [ label = "{ libsigc++ | signals and slots }" ];
+		"glibmm";// [ label = "{ glibmm | platform abstraction }" ];
+		//"gdkmm" [ label = "{ gdkmm | GUI Drawing Kit }" ];
+		"gtkmm";// [ label = "{ gtkmm | GUI Tool Kit }" ];
+		//"cairomm";
+		//"gnomecanvasmm";// [ label = "{ gnomecanvasmm | GNOME's canvas }" ];
+		//"pangomm";
+		//"atkmm";
+		"qt";// [ label = "{ Qt | Trolltech's libraries }"];
+		"libxml++";// [ label = "{ libXML++ | XML parsing }"];
+		"zlib";// [ label = "{ zlib | (de)compression }"];
+		"winapi";// [ label = "{ WinAPI | Microsoft's API }"];
+		"mfc";// [ label = "{ MFC | Microsoft's Foundation Classes }" ];
+		"gcc";// [ label = "{GCC | GNU C++ Compiler }" ];
+		"msvc";// [ label = "{ MSVC | Microsoft's Visual C++ compiler }" ];
+
+		//"boost" -> "stdc++";
+		//"glibmm" -> "stdc++";
+		//"glibmm" -> "glib";
+		//"glib" -> "stdc";
+		//"glibmm" -> "libsigc++";
+		//"gdkmm" -> "glibmm";
+		//"gdkmm" -> "stdc++";
+		//"gdkmm" -> "gdk";
+		//"gdk" -> "stdc";
+		//"gdkmm" -> "cairomm";
+		//"gtkmm" -> "pangomm";
+		//"gtkmm" -> "atkmm";
+		//"gtkmm" -> "gdkmm";
+		//"gtkmm" -> "glibmm";
+		//"gtkmm" -> "stdc++";
+		//"gtkmm" -> "gtk";
+		//"gtk" -> "stdc";
+		//"gnomecanvasmm" -> "gtkmm";
+		//"gnomecanvasmm" -> "stdc++";
+		//"gnomecanvasmm" -> "gnomecanvas";
+		//"gnomecanvas" -> "stdc";
+		//"qt" -> "stdc++";
+		//"libxml++" -> "stdc++";
+		//"zlib" -> "stdc";
+		//"mfc" -> "msvc";
+		
+		node [ style = filled fillcolor = palegoldenrod ]
+
+		"diversalis" [ label = "{ diversalis | platform description }" ];
+		"diversalis" -> "gcc";
+		"diversalis" -> "msvc";
+		
+		"universalis" [ label = "{ universalis | platform abstraction }" ];
+		"universalis" -> "diversalis";
+		"universalis" -> "boost";
+		"universalis" -> "glibmm";
+		"universalis" -> "posix";
+		"universalis" -> "stdc++";
+		"universalis" -> "winapi";
+		
+		"psycle-helpers" [ label = "{ psycle-helpers | math and DSP routines }" ];
+		"psycle-helpers" -> "universalis";
+		"psycle-helpers" -> "diversalis";
+	
+		"psycle-plugin-interface" [label = "{psycle-plugin-interface | interface for plugins }"];
+	
+		"psycle-core" [ label = "{ psycle-core | core engine }" ];
+		"psycle-core" -> "psycle-plugin-interface";
+		"psycle-core" -> "psycle-helpers";
+		"psycle-core" -> "universalis";
+		//"psycle-core" -> "boost";
+		"psycle-core" -> "zlib";
+		"psycle-core" -> "libxml++";
+	
+		"psycle-audiodrivers" [ label = "{ psycle-audiodrivers | output device drivers }"];
+		"psycle-audiodrivers" -> "universalis";
+		//"psycle-audiodrivers" -> "boost";
+	
+		"psycle-player" [ label = "{ psycle-player | simple command line player }"];
+		"psycle-player" -> "psycle-core";
+		"psycle-player" -> "psycle-audiodrivers";
+		//"psycle-player" -> "libxml++";
+	
+		"psycle-plugins" [ label = "{ psycle-plugins | loadable modules }"];
+		"psycle-plugins" -> "psycle-plugin-interface";
+		"psycle-plugins" -> "psycle-helpers";
+
+		"qpsycle" [ label = "{ qpsycle | Qt GUI front-end }" ];
+		"qpsycle" -> "qt";
+		"qpsycle" -> "psycle-core";
+		"qpsycle" -> "psycle-audiodrivers";
+		//"qpsycle" -> "universalis";
+		//"qpsycle" -> "boost";
+
+		"psycle-mfc" [ label = "{ psycle MFC | original psycle\nwith MFC GUI front-end }" ];
+		"psycle-mfc" -> "mfc";
+		"psycle-mfc" -> "psycle-plugin-interface";
+		"psycle-mfc" -> "psycle-helpers";
+		//"psycle-mfc" -> "universalis";
+		//"psycle-mfc" -> "boost";
+		
+		"freepsycle-engine" -> "universalis";
+		//"freepsycle-engine" -> "boost";
+		"freepsycle-engine" -> "psycle-helpers";
+		"freepsycle-plugins" -> "freepsycle-engine";
+		//"freepsycle-plugins" -> "universalis";
+		//"freepsycle-plugins" -> "boost";
+		"freepsycle-plugins" -> "psycle-helpers";
+		"freepsycle-host" -> "freepsycle-engine";
+		//"freepsycle-text" -> "freepsycle-engine";
+		"freepsycle-text" -> "freepsycle-host";
+		//"freepsycle-gui" -> "freepsycle-engine";
+		"freepsycle-gui" -> "freepsycle-host";
+		//"freepsycle-gui" -> "universalis";
+		//"freepsycle-gui" -> "boost" ;
+		//"freepsycle-gui" -> "glibmm";
+		"freepsycle-gui" -> "gtkmm";
+		//"freepsycle-gui" -> "gnomecanvasmm";
+		//"freepsycle-gui" -> "libsigc++";
+	}
+}

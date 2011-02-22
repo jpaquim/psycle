@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Config_MIDI.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"></td>
+</table>
+<p class=head2>Skinning Psycle</p>
+
+There are 3 areas of Psycle that can be customized graphically, or "skinned":  machines (generators, effects and the master machine), track headers (the box up at the top) and native machine knobs.  To change the colours of the machine or pattern view, see the <a href="Config_Visual.htm">Visual Configuration</a> section.
+<P>
+<a name="machines">
+<p class=head3>Machines</P>
+To skin machines, you create two files: a bitmap (.bmp) containing all the bits and pieces, and a psycle machines (.psm) file e.g. <P>
+<code>your_machine_bitmap.bmp<br>your_machine_bitmap.psm</code><P>
+The name of the two files MUST match except for the extension, must not contain any full stops (".") and must be placed in the same directory.  All the elements (solo, mute buttons etc.) are placed in the bitmap, and then the co-ordinates of each are referred to in the psm file.<P> 
+The elements required are as follows:
+<ul>
+<li>Master Machine
+<li>Generator (with unselected mute and solo buttons)
+<li>Effect (with unselected mute and bypass buttons)
+<li>VU element (full length - can be different for effects and generators)
+<li>VU peak (the chunk that remains when the rest of the VU goes down)
+<li>Pan handle (i.e. the bit you move along the slide)
+<li>Highlighted solo, bypass and mute buttons (mute buttons for generators and effects can be different)
+</ul>
+<P>
+TranceMyriad's modified version of alk's "mercury machines" skin will be used as an example:<P>
+<center><img src="alk-mercury machines (Trancemyriad mod).png" width="229" height="89" border="0"></center><P>
+After creating all the relevant components in the bitmap, the .psm file must be created to specify the co-ordinates of all the parts.  This file is divided into two parts.  The first section sets the co-ordinates of all graphics.  Co-ordinates are given as <code>top,left,width,height</code>:<P>
+<table>
+<tr><td><b>Line</b></td><td><b>Explanation</b></td>
+<tr><td><code>"master_source"=0,67,89,22</code></td><td>The master machine graphic.</td>
+<tr><td><code>"generator_source"=0,0,137,32</code></td><td>The generator graphic.</td>
+<tr><td><code>"generator_vu0_source"=0,64,2,3</code></td><td>A single block of the whole VU length (total length is specified later).</td>
+<tr><td><code>"generator_vu_peak_source"=41,64,2,3</code></td><td>The "peak" VU graphic (in this case an oridnary block of the VU has been used)</td>
+<tr><td><code>"generator_pan_source"=213,32,5,9</code></td><td>The pan slider (the bit you drag).</td>
+<tr><td><code>"generator_mute_source"=195,32,18,10</code></td><td>The position of the highlighted mute button.</td>
+<tr><td><code>"generator_solo_source"=195,42,20,10</code></td><td>The position of the solo button within the generator graphic.</td>
+<tr><td><code>"effect_source"=0,32,137,32</code></td><td>The effect graphic.</td>
+<tr><td><code>"effect_vu0_source"=0,64,2,3</code></td><td>A single block of the whole VU length (total length is specified later).</td>
+<tr><td><code>"effect_vu_peak_source"=41,64,2,0</code></td><td>The "peak" VU graphic.</td>
+<tr><td><code>"effect_pan_source"=215,41,5,9</code></td><td>The pan slider.</td>
+<tr><td><code>"effect_mute_source"=196,62,18,10</code></td><td>The position of the highlighted mute button</td>
+<tr><td><code>"effect_bypass_source"=195,52,20,10</code></td><td>The position of the highlighted bypass button.</td>
+</table>
+<P>
+<b>Note:</b>  The effects sources for the VU meter, pan source etc can be different to the generator sources.  To avoid having VU meters, set the height of <code>vu0_source</code> to zero.<P>
+The second part of the file specifies the destinations of the moving/changing components.  Co-ordinates here are given relative to the source graphic i.e. the top left of the generator/effect graphic becomes "0,0":
+
+<table>
+<tr><td><b>Line</b></td><td><b>Explanation</b></td>
+<tr><td><code>"generator_vu_dest"=52,19,79</code></td><td> (top, left, width) Whole VU meter i.e. the place where it will go on the generator.</td>
+<tr><td><code>"generator_pan_dest"=52,20,74</code></td><td> (top, left, width) Whole panning width minus the width of the slider.</td>
+<tr><td><code>"generator_mute_dest"=3,19</code></td><td>(top, left) Position of mute button.</td>
+<tr><td><code>"generator_solo_dest"=27,19</code></code></td><td>(top, left) Position of solo button.</td>
+<tr><td><code>"generator_name_dest"=16,4</td><td>(top, left)Position of the generator's name text.</td>
+<tr><td><code>"effect_vu_dest"=52,19,79</code></td><td>(top, left, width) Whole VU meter.</td>
+<tr><td><code>"effect_pan_dest"=52,20,74</code></td><td>(top, left, width) Whole panning width minus the width of the slider.</td>
+<tr><td><code>"effect_mute_dest"=3,19</code></td><td>top, left) Position of mute button.</td>
+<tr><td><code>"effect_bypass_dest"=27,19</code></td><td>top, left) Position of bypass button.</td>
+<tr><td><code>"effect_name_dest"=16,4</code></td><td>(top, left)Position of the generator's name text.</td>
+<tr><td><code>"transparency"=0000ff00</code></td><td>BGR value of the colour to be made transparent, in the format <code>00BBGGRR</code>.  Leave this value out if not required - it will speed up Psycle's graphics.</td>
+</table>
+<P>
+<a name="headers">
+<p class=head3>Track Headers</P>
+Track headers are skinned in exactly the same way as Psycle machines, except that .psh (Psycle header files) are used, and the parameters are different.<P>
+<img src="alk-mercury header (TranceMyriad adaptation).png" width="134" height="34" border="0">
+<P>(co-ordinates are <code>top,left,width,height</code>)<P>
+<table>
+<tr><td><b>Line</b></td><td><b>Explanation</b></td>
+<tr><td><code>"background_source"=0,0,112,21</code></td><td>Background image for the header.</td>
+<tr><td><code>"number_0_source"=5,24,9,8</code></td><td>Graphic for the number 0. The others have to follow as "123456789" and have the same size.</td>
+<tr><td><code>"record_on_source"=114,11,20,11</code></td><td>Highlighted record button.</td>
+<tr><td><code>"mute_on_source"=114,1,18,10</code></td><td>Highlighted mute button.</td>
+<tr><td><code>"solo_on_source"=114,21,20,11</code></td><td>Highlighted solo button.</td>
+</table>
+<P>
+
+<P>(co-ordinates are <code>top,left</code>, relative to the background image)
+<P>
+<table>
+<tr><td><b>Line</b></td><td><b>Explanation</b></td>
+<tr><td><code>"digit_x0_dest"=37,7</code></td><td>Position for the left digit (of the track number).</td>
+<tr><td><code>"digit_0x_dest"=46,7</code></td><td>Position for the right digit (of the track number).</td>
+<tr><td><code>"record_on_dest"=88,5</code></td><td>Position of the record button.</td>
+<tr><td><code>"mute_on_dest"=4,5</code></td><td>Position of the mute button.</td>
+<tr><td><code>"solo_on_dest"=64,5</code></td><td>Position of the solo button.</td>
+<tr><td><code>"solo_on_dest"=64,5</code></td><td><code>00BBGGRR</code> values for the transparency. Omit if not required.</td>
+</table>
+<P>
+<b>Note:</b> It is important that the numbers are placed <i><b>next to the equals sign!</b></i>
+<P>
+<a name="knobs">
+<p class=head3>Native Machine Knobs</P>
+Skinning the knobs for native machines is straightforward:  Create a 28 x 28 knob, with 64 positions, and line them up like this (except with all 64), going left-to-right from the lowest value to the highest:<P>
+<img src="knobexample.png" width="141" height="28" border="0">
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="Config_MIDI.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"></td>
+</table>
+
+</body>
+</html>

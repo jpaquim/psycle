@@ -1,0 +1,131 @@
+- Fix warnings on 64 bit platforms and type-puned pointer warning
+- Add byte swapping support (on synthesis or sample load?)
+- Build win32 package
+- Investigate why MIDI rendering causes burst of notes at start
+- libao audio output driver
+
+Bugs and incomplete code
+------------------------
+
+- Get TCP server working for windows
+- The synth consumes too much CPU when no voices are playing. 
+- Add daemon mode
+
+Validation
+----------
+
+- Validation tests: create soundfont with basic wave forms [sine,
+  square, triangle]; make test midi file; compare with SBLive output;
+  "regression" test
+- Validate chorus
+- Analyse performance
+
+Documentation
+-------------
+
+- Write documention on tuning
+- fluid_synth_program_select2() with name of soundfont instead of font_id
+- fluid_synth_set_gen2()
+- Web site
+- Documentation and announcement Virtools and Director
+- Add usage scenarios in the documentation
+- User and system configuration file
+
+Binaries
+--------
+
+- FluidSynth 
+  * Linux 
+  * Win
+  * MacOS X
+- fluid~  (Pd/Linux, MaxMSP/MacOSX, MaxMSP/Windows)
+- fluidsynth~ (MaxMSP/MacOSX, MaxMSP/Windows)
+- FluidXtra
+
+- old distributions
+
+Requests
+--------
+
+- Improve non-realtime rendering of MIDI to WAV files
+- Remove dependency of settings on audio driver and other (see
+  fluid_settings_init())
+- Add "unselect" command to shell to set a MIDI channel to not sound.
+- When specifying -i -s (no console and TCP server) log to TCP clients
+  with easier parsable messages ("warning:", "error:", etc)
+- GM soundfont? 
+- MacOS X MidiCore component
+- Windows DirectMusic component
+- add function to get initial soundfont generator value
+- ASIO driver
+- DirectSound 3D and EAX
+- Pause and resume the synthesizer/audio thread (run synthesizer as a daemon)
+
+- set loop on/off on a sample (1 - with name sample, 2 - name sf and name preset)     
+
+  Use set_gen?
+
+  set_gen: GEN_SAMPLEMODE (54): 
+       Loop during release: 1,
+       Loop: 3
+       No loop: 0 and all other values,
+
+
+
+
+
+Fluid 1.1:
+--------------------------------------------
+
+Top of the list
+- Use FIFOs to send events to the audio thread
+- Redo sfloader api using "interface" api
+- Clean multi-channel audio implementation
+- 3D audio output
+- Sample streaming, load/unload sample on demand 
+
+
+SFLoader API:
+- redo sfloader api using "interface" api
+
+Sample streaming
+- sample streaming, load/unload sample on demand 
+
+Design
+- turn ladspa fx unit and router in indepedent 
+  objects, remove their dependencies from the synth object
+
+MIDI player
+- Add API to manipulate and query MIDI file list
+- generalize use of fluid_event_t, remove fluid_midi_event_t
+
+Shell & command handler
+- Add "note" command that plays a note with a duration (sequencer)
+- MIDI file player commands (load/play/stop)
+- Relax dependency of the command handler on the synthesizer
+- Allow settings to be loaded before the synthesizer is created
+
+SoundFont Specs:
+- pitch control on stereo samples not managed as should
+
+MIDI Specs
+- handle tuning sysex messages
+- Omni and poly modes
+- sample dump
+- MIDI thru
+- Scalable Polyphony MIDI (SP-MIDI)
+- Downloadable Sounds ("DLS")
+- RMID (SMF w/DLS) File Format Specification
+
+
+Unsorted
+- Analyse/improve voice stealing algorithm (soft and hard limits?)
+- change sample rate dynamically after jack driver instantiation, or
+  create audio driver before initiating the synth
+- include readline in project
+- additional aux buses
+- rewrite midi file using new sequencer
+- direct access to audio buffer
+- soft clipping, compressor, limitor, or automatic gain control
+- 96kHz/24bits
+- OpenSoundControl
