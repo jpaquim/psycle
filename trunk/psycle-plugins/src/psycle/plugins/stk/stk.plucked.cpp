@@ -71,7 +71,7 @@ private:
 	Plucked * track[MAX_TRACKS];
 	ADSR				adsr[MAX_TRACKS];
 	float				vol_ctrl[MAX_TRACKS];
-	StkFloat n2f[NOTE_MAX];
+	StkFloat n2f[NOTE_MAX+1];
 	std::vector<int> w_tracks;
 	StkFloat samplerate;
 };
@@ -82,7 +82,7 @@ mi::mi()
 {
 	Vals=new int[MacInfo.numParameters];
 
-	for (int note=0;note<NOTE_MAX;note++)
+	for (int note=0;note<=NOTE_MAX;note++)
 	{
 		n2f[note]= std::pow(2., (note - offset) / 12);
 	}
@@ -235,10 +235,10 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 	if (no_channel) w_tracks.push_back(channel);
 
-	if(note!=255)
+	if(note!=NOTE_NONE)
 	{
 		// Note off
-		if(note==120)
+		if(note==NOTE_NOTEOFF)
 		{
 			adsr[channel].keyOff();
 		}

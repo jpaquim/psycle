@@ -3028,7 +3028,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 		if (globalpar.gain_envtype > 1)
 		{
-			fv=(float)44100*64*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+			fv=44100.f*64.f*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 			sprintf(txt,"%.4f hz",fv);
 			return true;
 		}
@@ -3243,7 +3243,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 		if (globalpar.gOscp[globalpar.curOsc].oscwenvtype > 1)
 		{
-			fv=(float)44100*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+			fv=44100.f*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 			sprintf(txt,"%.4f hz",fv);
 			return true;
 		}
@@ -3260,7 +3260,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 		if (globalpar.gOscp[globalpar.curOsc].oscfenvtype > 1)
 		{
-			fv=(float)44100*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+			fv=44100.f*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 			sprintf(txt,"%.4f hz",fv);
 			return true;
 		}
@@ -3291,7 +3291,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 		if (globalpar.gOscp[globalpar.curOsc].oscpenvtype > 1)
 		{
-			fv=(float)44100*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+			fv=44100.f*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 			sprintf(txt,"%.4f hz",fv);
 			return true;
 		}
@@ -3324,7 +3324,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		}
 		if (globalpar.gVcfp[globalpar.curVcf].vcfenvtype > 1)
 		{
-			fv=(float)44100*64*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+			fv=44100.f*64*(value*value*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 			sprintf(txt,"%.4f hz",fv);
 			return true;
 		}
@@ -3386,7 +3386,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 12: sprintf(txt,"Sync 1/64 note"); return true; break;
 		}
 		// filter lfo rates
-		fv=(float)44100*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+		fv=44100.f*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 		sprintf(txt,"%.4f hz",fv);
 		return true;
 		break;
@@ -3725,13 +3725,13 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			track[channel].sp_cmd = 0;
 		}
 	}
-	if(note<120)
+	if(note<=NOTE_MAX)
 	{
 		track[channel].NoteOn(note,cmd,val);
 	}
 
 	// Note off
-	if(note==120)
+	if(note==NOTE_NOTEOFF)
 	{
 		track[channel].NoteOff();
 	}

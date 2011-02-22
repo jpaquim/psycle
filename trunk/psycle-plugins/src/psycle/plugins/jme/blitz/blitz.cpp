@@ -828,7 +828,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 
 	if (channel < MAX_TRACKS){
 		float nextVol = 1.0f;
-		if ((note<120) & ((cmd == 0xCC)||cmd == 0x0C )){
+		if ((note<=NOTE_MAX) & ((cmd == 0xCC)||cmd == 0x0C )){
 			nextVol=(float)val/255.0f;
 			track[channel].InitEffect(cmd,val);
 		}
@@ -836,7 +836,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 		// Note Off												== 120
 		// Empty Note Row				== 255
 		// Less than note off value??? == NoteON!
-		if(note<120){ 
+		if(note<=NOTE_MAX){ 
 			if (cmd != 0xC3) track[channel].NoteOn(note-24,&globals,60,nextVol);
 			else {
 				if (track[channel].ampEnvStage) track[channel].NoteTie(note-24);
@@ -844,7 +844,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 			}
 		}
 		// Note off
-		if(note==120) track[channel].NoteOff();
+		if(note==NOTE_NOTEOFF) track[channel].NoteOff();
 	}
 }
 

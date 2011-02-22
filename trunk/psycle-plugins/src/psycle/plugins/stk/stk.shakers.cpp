@@ -44,7 +44,7 @@ CMachineInfo const MacInfo (
 	"stk Shakers",
 #endif
 	"Shakers",
-	"Sartorius, bohan and STK 4.2.0 developers",
+	"Sartorius, bohan and STK 4.4.0 developers",
 	"Help",
 	1
 );
@@ -211,7 +211,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
-	// Note Off												== 120
+	// Note Off						== 120
 	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
@@ -223,7 +223,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 
 	// Note off
-	if(note==120)
+	if(note==NOTE_NOTEOFF)
 	{
 		track[channel].noteOff(0.0);
 		noteonoff[channel]=false;

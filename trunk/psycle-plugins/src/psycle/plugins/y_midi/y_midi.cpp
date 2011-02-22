@@ -234,7 +234,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 }
 void mi::MidiEvent(int channel, int midievent, int value) {
-	switch(value) {
+	switch(midievent) {
 		case MIDI_NOTEOFF: MidiChannel(channel).Stop(value>>8);break;
 		case MIDI_NOTEON: MidiChannel(channel).Play(value>>8, value&0xFF);break;
 		case MIDI_PATCHCHANGE: {
@@ -243,7 +243,7 @@ void mi::MidiEvent(int channel, int midievent, int value) {
 				  }
 				  break;
 		default:
-			MidiChannel(channel).SendMidi(MidiChannel(channel).BuildEvent(midievent, value >> 8, value&0x7F));break;
+			MidiChannel(channel).SendMidi(MidiChannel(channel).BuildEvent(midievent, value >> 8, value&0x7F));
 		break;
 	}
 }
