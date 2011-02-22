@@ -2,6 +2,7 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 #pragma once
 #include "Psycle.hpp"
+#include "AudioDriver.hpp"
 
 #include <mmreg.h>
 namespace psycle {
@@ -23,6 +24,7 @@ namespace psycle {
 			void SaveToClipboard();
 			int kill_thread;
 			int threadopen;
+			CEvent _event;
 		// Dialog Data
 			//{{AFX_DATA(CSaveWavDlg)
 			enum { IDD = IDD_SAVEWAVDLG };
@@ -68,7 +70,7 @@ namespace psycle {
 
 			static int rate;
 			static int bits;
-			static int channelmode;
+			static channel_mode channelmode;
 			static int ditherpdf;
 			static int noiseshape;
 
@@ -113,7 +115,7 @@ namespace psycle {
 			bool saving;
 			bool dither;
 
-			void SaveWav(std::string file, int bits, int rate, int channelmode, bool isFloat);
+			void SaveWav(std::string file, int bits, int rate, channel_mode channelmode, bool isFloat);
 			
 			// Generated message map functions
 			//{{AFX_MSG(CSaveWavDlg)

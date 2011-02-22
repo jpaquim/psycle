@@ -20,6 +20,7 @@ namespace psycle
 	namespace host
 	{
 		class Machine; // forward declaration
+		class CProgressDialog;
 
 		/// songs hold everything comprising a "tracker module",
 		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
@@ -36,7 +37,6 @@ namespace psycle
 			std::string author;
 			/// the comments on the song
 			std::string comments;
-			unsigned _sampCount;
 			/// the initial beats per minute (BPM) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int m_BeatsPerMin;
@@ -82,9 +82,6 @@ namespace psycle
 			bool _trackArmed[MAX_TRACKS];
 			///\name machines
 			///\{
-			/// Sort of semaphore to not allow doing something with machines when they are changing (deleting,creating, etc..)
-			/// \todo change it by a real semaphore?
-			bool _machineLock;
 			/// the array of machines.
 			Machine* _pMachine[MAX_MACHINES];
 			/// Current selected machine number in the GUI
@@ -174,9 +171,9 @@ namespace psycle
 			void DestroyAllInstruments();
 			///  loads a file into this song object.
 			///\param fullopen  used in context of the winamp/foobar player plugins, where it allows to get the info of the file, without needing to open it completely.
-			bool Load(RiffFile* pFile, bool fullopen=true);
+			bool Load(RiffFile* pFile,CProgressDialog& progress,bool fullopen=true);
 			/// saves this song to a file.
-			bool Save(RiffFile* pFile,bool autosave=false);
+			bool Save(RiffFile* pFile,CProgressDialog& progress,bool autosave=false);
 			/// Used to detect if an especific pattern index is used in the sequence.
 			bool IsPatternUsed(int i);
 			//Used to check the contents of the pattern.
@@ -250,7 +247,11 @@ namespace psycle
 			bool _saved;
 			/// The index of the track which plays in solo.
 			int _trackSoloed;
-
+			
+			//Semaphore used for song (and machine) manipulation. The semaphore accepts at much two threads to run:
+			//Player::Work and ChildView::OnTimer (GUI update).
+			//There is a third CSingleLock in InfoDlg (which is not a perfect situation, but it's fast enough so it shouldn't disturb Player::Work).
+			//For an exclusive lock (i.e. the rest of the cases) use the CExclusiveLock.
 			CSemaphore mutable semaphore;
 
 			universalis::stdlib::nanoseconds accumulated_processing_time_, accumulated_routing_time_;

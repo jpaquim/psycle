@@ -11,29 +11,22 @@ namespace psycle { namespace host {
 		{
 		public:
 			CInfoDlg(CWnd* pParent = 0);
-			~CInfoDlg() {}
+			virtual ~CInfoDlg() {}
+
+		// Dialog Data
+			enum { IDD = IDD_INFO };
 
 			void UpdateInfo();
-
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CInfoDlg)
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CInfoDlg)
+
 			virtual BOOL OnInitDialog();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
-			//}}AFX_MSG
+			afx_msg void OnCpuPerf();
+
 			DECLARE_MESSAGE_MAP()
 		private:
 			void InitTimer();
-		// Dialog Data
-			//{{AFX_DATA(CInfoDlg)
-			enum { IDD = IDD_INFO };
 
 			CStatic	m_mem_virtual;
 			CStatic	m_mem_pagefile;
@@ -44,14 +37,10 @@ namespace psycle { namespace host {
 			CStatic	m_processor_label;
 			CStatic	m_cpuidlelabel;
 			CListCtrl	m_machlist;
-			//}}AFX_DATA
+			CButton m_cpu_perf;
 
 			unsigned int item_count_;
 			universalis::stdlib::nanoseconds last_update_time_;
 
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 }}

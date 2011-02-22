@@ -132,7 +132,7 @@ namespace psycle { namespace host {
 
 		void CMasterDlg::OnAutodec() 
 		{
-			if (m_autodec.GetState() &0x0003)
+			if (m_autodec.GetCheck())
 			{
 				_pMachine->decreaseOnClip=true;
 			}

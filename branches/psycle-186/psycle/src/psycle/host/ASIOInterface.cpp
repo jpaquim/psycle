@@ -3,7 +3,6 @@
 
 
 #include "ASIOInterface.hpp"
-#include "resources/resources.hpp"
 #include "Registry.hpp"
 #include "ASIOConfig.hpp"
 #include "Configuration.hpp"
@@ -16,18 +15,21 @@ namespace psycle
 	namespace host
 	{
 		using namespace helpers;
+		//#define ALLOW_NON_ASIO
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
-		#define ALLOW_NON_ASIO
 
 		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.2 Output" };
 		CCriticalSection ASIOInterface::_lock;
-		int ASIOInterface::_ASIObufferSize(1024);
+		AsioDrivers ASIOInterface::asioDrivers;
+		int ASIOInterface::_ASIObufferSamples(1024);
 		ASIOInterface::AsioStereoBuffer *ASIOInterface::ASIObuffers(0);
 		bool ASIOInterface::_firstrun(true);
 		bool ASIOInterface::_supportsOutputReady(false);
 		ASIOInterface::PortOut ASIOInterface::_selectedout;
 		std::vector<ASIOInterface::PortCapt> ASIOInterface::_selectedins;
+		std::uint32_t ASIOInterface::writePos(0);
+		std::uint32_t ASIOInterface::m_wrapControl(0);
 
 		AUDIODRIVERWORKFN ASIOInterface::_pCallback(0);
 		void* ASIOInterface::_pCallbackContext(0);
@@ -64,13 +66,14 @@ namespace psycle
 				fullname = fullname + ": 32 bit";
 				break;
 			case ASIOSTFloat32LSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
+			case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, Big Endian architecture
 				fullname = fullname + ": 32 bit float";
 				break;
 			case ASIOSTFloat64LSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
+			case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, Big Endian architecture
 				fullname = fullname + ": 64 bit float";
 				break;
-			case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, Big Endian architecture
-			case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, Big Endian architecture
+			default:
 				fullname = fullname + ": unsupported!";
 				break;
 			}
@@ -79,7 +82,7 @@ namespace psycle
 
 		void ASIOInterface::Error(const char msg[])
 		{
-			MessageBox(0, msg, "ASIO 2.0 Output driver", MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, "ASIO 2.2 Output driver", MB_OK | MB_ICONERROR);
 		}
 
 		ASIOInterface::ASIOInterface()
@@ -89,10 +92,38 @@ namespace psycle
 			_running = false;
 			_firstrun = true;
 			_pCallback = 0;
+		}
+		ASIOInterface::~ASIOInterface() throw()
+		{
+			if(_initialized) Reset();
+			//ASIOExit();
+			asioDrivers.removeCurrentDriver();
+		}
+		bool ASIOInterface::SupportsAsio()
+		{
+			char szNameBuf[MAX_ASIO_DRIVERS][33];
+			char* pNameBuf[MAX_ASIO_DRIVERS];
+			for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
+			return asioDrivers.getDriverNames((char**)pNameBuf,MAX_ASIO_DRIVERS);
+		}
+		void ASIOInterface::Initialize(HWND hwnd, AUDIODRIVERWORKFN pcallback, void* context)
+		{
+			_pCallbackContext = context;
+			_pCallback = pcallback;
+			_running = false;
+			RefreshAvailablePorts();
+			ReadConfig();
+			_initialized = true;
+		}
+
+
+		void ASIOInterface::RefreshAvailablePorts()
+		{
 			char szNameBuf[MAX_ASIO_DRIVERS][33];
 			char* pNameBuf[MAX_ASIO_DRIVERS];
 			for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
 			int drivers = asioDrivers.getDriverNames((char**)pNameBuf,MAX_ASIO_DRIVERS);
+			_drivEnum.resize(0);
 //			drivercount = 0;
 			ASIODriverInfo driverInfo;
 			driverInfo.sysRef = 0;
@@ -143,21 +174,6 @@ namespace psycle
 					asioDrivers.removeCurrentDriver();
 				}
 			}
-		}
-		ASIOInterface::~ASIOInterface() throw()
-		{
-			if(_initialized) Reset();
-			//ASIOExit();
-			asioDrivers.removeCurrentDriver();
-		}
-
-		void ASIOInterface::Initialize(HWND hwnd, AUDIODRIVERWORKFN pcallback, void* context)
-		{
-			_pCallbackContext = context;
-			_pCallback = pcallback;
-			_running = false;
-			ReadConfig();
-			_initialized = true;
 		}
 		void ASIOInterface::Reset()
 		{
@@ -228,7 +244,7 @@ namespace psycle
 			info[counter+1].channelNum = _selectedout.port->_idx + 1;
 			info[counter].buffers[0] = info[counter].buffers[1] = info[counter+1].buffers[0] = info[counter+1].buffers[1] = 0;
 			// create and activate buffers
-			if(ASIOCreateBuffers(info,numbuffers,_ASIObufferSize,&asioCallbacks) != ASE_OK)
+			if(ASIOCreateBuffers(info,numbuffers,_ASIObufferSamples,&asioCallbacks) != ASE_OK)
 			{
 				//ASIOExit();
 				asioDrivers.removeCurrentDriver();
@@ -242,8 +258,9 @@ namespace psycle
 			{
 				AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
 				ASIObuffers[i] = buffer;
-				universalis::os::aligned_memory_alloc(16, _selectedins[i].pleft, _ASIObufferSize);
-				universalis::os::aligned_memory_alloc(16, _selectedins[i].pright, _ASIObufferSize);
+				// 2* is a safety measure (Haven't been able to dig out why it crashes if it is exactly the size)
+				universalis::os::aligned_memory_alloc(16, _selectedins[i].pleft, 2 * _ASIObufferSamples* sizeof(float) );
+				universalis::os::aligned_memory_alloc(16, _selectedins[i].pright, 2 * _ASIObufferSamples *sizeof(float));
 				counter+=2;
 			}
 			AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
@@ -260,6 +277,8 @@ namespace psycle
 			}
 			// END -  CODE
 			_running = true;
+			writePos = 0;
+			m_wrapControl = 0;
 			CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
 			delete[] info;
 			return true;
@@ -277,87 +296,84 @@ namespace psycle
 				universalis::os::aligned_memory_dealloc(_selectedins[i].pleft);
 				universalis::os::aligned_memory_dealloc(_selectedins[i].pright);
 			}
+
 			delete[] ASIObuffers;
 			//ASIOExit();
 			asioDrivers.removeCurrentDriver();
 			return true;
 		}
-		void ASIOInterface::GetCapturePorts(std::vector<std::string>&ports)
+		void ASIOInterface::GetPlaybackPorts(std::vector<std::string> &ports)
 		{
+			ports.resize(0);
+			for (unsigned int j=0;j<_drivEnum.size();++j) {
+				for (unsigned int i=0;i<_drivEnum[j]._portout.size();++i) ports.push_back(_drivEnum[j]._portout[i].GetName());
+			}
+		}
+
+		void ASIOInterface::GetCapturePorts(std::vector<std::string> &ports)
+		{
+			ports.resize(0);
 			DriverEnum *driver =  _selectedout.driver;
 			if (!driver) return;
-			for (unsigned int i=0;i<driver->_portin.size();i++)
-			{
-				ports.push_back(driver->_portin[i].GetName());
-			}
+			for (unsigned int i=0;i<driver->_portin.size();i++) ports.push_back(driver->_portin[i].GetName());
 		}
 		bool ASIOInterface::AddCapturePort(int idx)
 		{
-			DriverEnum *driver = _selectedout.driver;
-			if  (driver->_portin.size()<= idx) return false;
-			
-			int pidx = driver->_portin[idx]._idx;
-			for (unsigned int i=0;i<_selectedins.size();++i)
-			{
-				if (_selectedins[i].port->_idx == pidx ) return false;
-			}
-
 			bool isplaying = _running;
+			DriverEnum *driver = _selectedout.driver;
+			if ( idx >= driver->_portin.size()) return false;
+			if ( idx < _portMapping.size() && _portMapping[idx] != -1) return true;
+			if (isplaying) Stop();
 			PortCapt port;
 			port.driver = driver;
 			port.port = &driver->_portin[idx];
-			if (isplaying)
-			{
-				Stop();
-			}
-			_portMapping.resize(_portMapping.size()+1);
-			_portMapping[idx]=(int)_selectedins.size();
 			_selectedins.push_back(port);
-			if (isplaying)
-			{
-				return Start();
+			if ( _portMapping.size() <= idx) {
+				int oldsize = _portMapping.size();
+				_portMapping.resize(idx+1);
+				for(int i=oldsize;i<_portMapping.size();i++) _portMapping[i]=-1;
 			}
+			_portMapping[idx]=(int)(_selectedins.size()-1);
+			if (isplaying) return Start();
+
 			return true;
 		}
 		bool ASIOInterface::RemoveCapturePort(int idx)
 		{
-			DriverEnum *driver = _selectedout.driver;
-			if  (driver->_portin.size()<= idx) return false;
-
-			bool restartplayback = false;
+			bool isplaying = _running;
+			int maxSize = 0;
 			std::vector<PortCapt> newports;
-			int pidx = driver->_portin[idx]._idx;
-			for (unsigned int i=0;i<_selectedins.size();++i)
+			DriverEnum *driver = _selectedout.driver;
+			if ( idx >= driver->_portin.size() || 
+				 idx >= _portMapping.size() || _portMapping[idx] == -1) return false;
+
+			if (isplaying) Stop();
+			for (unsigned int i=0;i<_portMapping.size();++i)
 			{
-				if (_selectedins[i].port->_idx == pidx )
-				{
-					if (_running)
-					{
-						Stop();
-						restartplayback=true;
-					}
-				}
-				else 
-				{
-					_portMapping[newports.size()]=_portMapping[i];
-					newports.push_back(_selectedins[i]);
+				if (i != idx && _portMapping[i] != -1) {
+					maxSize=i+1;
+					newports.push_back(_selectedins[_portMapping[i]]);
+					_portMapping[i]= (int)(newports.size()-1);
 				}
 			}
-			_portMapping.resize(newports.size());
+			_portMapping[idx] = -1;
+			if(maxSize < _portMapping.size()) _portMapping.resize(maxSize);
 			_selectedins = newports;
-			if (restartplayback) Start();
+			if (isplaying) Start();
 			return true;
 		}
 		void ASIOInterface::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
 		{
-			if ( _running)
+			if (!_running || idx >=_portMapping.size() || _portMapping[idx] == -1)
 			{
-				if (idx >=_selectedins.size()) return;
-				int mpos = _selectedins[_portMapping[idx]].machinepos;
-				*pleft=_selectedins[_portMapping[idx]].pleft+mpos;
-				*pright=_selectedins[_portMapping[idx]].pright+mpos;
-				_selectedins[_portMapping[idx]].machinepos+=numsamples;
+				*pleft=0;
+				*pright=0;
+				return;
 			}
+			int mpos = _selectedins[_portMapping[idx]].machinepos;
+			*pleft=_selectedins[_portMapping[idx]].pleft+mpos;
+			*pright=_selectedins[_portMapping[idx]].pright+mpos;
+			_selectedins[_portMapping[idx]].machinepos+=numsamples;
 		}
 		ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(int driverID)
 		{
@@ -408,9 +424,10 @@ namespace psycle
 			// Default configuration
 			bool saveatend(false);
 			_samplesPerSec=44100;
-			_ASIObufferSize = 1024;
-			_channelmode = 3; // always stereo
-			_bitDepth = 16; // asio don't care about bit depth
+			_ASIObufferSamples = 1024;
+			_channelMode = stereo; // always stereo
+			_sampleBits = 16; // asio doesn't care about bit depth
+			_sampleValidBits = 16; // asio doesn't care about bit depth
 			Registry reg;
 			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
 			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS) // settings in version 1.8
@@ -431,7 +448,7 @@ namespace psycle
 			}
 			bool configured(true);
 			int driverID(0);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _ASIObufferSize);
+			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _ASIObufferSamples);
 			configured &= ERROR_SUCCESS == reg.QueryValue("DriverID", driverID);
 			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
 			reg.CloseKey();
@@ -440,8 +457,8 @@ namespace psycle
 			_selectedout = GetOutPortFromidx(driverID);
 			if ( !_selectedout.driver) _selectedout = GetOutPortFromidx(0);
 			if ( !_selectedout.driver) { configured=false; return; }
-			if(_ASIObufferSize < _selectedout.driver->minSamples) _ASIObufferSize = _selectedout.driver->prefSamples;
-			else if(_ASIObufferSize > _selectedout.driver->maxSamples) _ASIObufferSize = _selectedout.driver->prefSamples;
+			if(_ASIObufferSamples < _selectedout.driver->minSamples) _ASIObufferSamples = _selectedout.driver->prefSamples;
+			else if(_ASIObufferSamples > _selectedout.driver->maxSamples) _ASIObufferSamples = _selectedout.driver->prefSamples;
 			if ( saveatend ) WriteConfig();
 		}
 
@@ -463,7 +480,7 @@ namespace psycle
 			}
 			int driverID(0);
 			driverID = GetidxFromOutPort(_selectedout);
-			reg.SetValue("BufferSize", _ASIObufferSize);
+			reg.SetValue("BufferSize", _ASIObufferSamples);
 			reg.SetValue("DriverID", driverID);
 			reg.SetValue("SamplesPerSec", _samplesPerSec);
 			reg.CloseKey();
@@ -475,31 +492,24 @@ namespace psycle
 			if(!_configured) ReadConfig();
 			CASIOConfig dlg;
 			dlg.pASIO = this;
-			dlg.m_bufferSize = _ASIObufferSize;
+			dlg.m_bufferSize = _ASIObufferSamples;
 			dlg.m_driverIndex = GetidxFromOutPort(_selectedout);
 			dlg.m_sampleRate = _samplesPerSec;
 			if(dlg.DoModal() != IDOK) return;
-			int oldbs = _ASIObufferSize;
-			PortOut oldout = _selectedout;
-			int oldsps = _samplesPerSec;
-			if(_initialized) Stop();
-			_ASIObufferSize = dlg.m_bufferSize;
+
+			PortOut port = GetOutPortFromidx(dlg.m_driverIndex);
+			bool supported = port.port->IsFormatSupported(port.driver,dlg.m_sampleRate);
+			if(!supported) {
+				Error("The Format selected is not supported. Keeping the previous configuration");
+				return;
+			}
+
+			_ASIObufferSamples = dlg.m_bufferSize;
 			_selectedout = GetOutPortFromidx(dlg.m_driverIndex);
 			_samplesPerSec = dlg.m_sampleRate;
-			_configured = true;
-			if(_initialized)
-			{
-				if (Start()) WriteConfig();
-				else
-				{
-					_ASIObufferSize = oldbs;
-					_selectedout = oldout;
-					_samplesPerSec = oldsps;
 
-					Start();
-				}
-			}
-			else WriteConfig();
+			_configured = true;
+			WriteConfig();
 		}
 
 		bool ASIOInterface::Enable(bool e)
@@ -507,24 +517,44 @@ namespace psycle
 			return e ? Start() : Stop();
 		}
 
-		int ASIOInterface::GetWritePos()
+		std::uint32_t ASIOInterface::GetPlayPosInSamples()
 		{
-			// Not yet implemted
 			if(!_running) return 0;
-			return GetPlayPos();
+			return writePos - GetOutputLatencySamples();
 		}
 
-		int ASIOInterface::GetPlayPos()
+		std::uint32_t ASIOInterface::GetWritePosInSamples()
 		{
-			// Not yet implemted
 			if(!_running) return 0;
-			int playPos = 0;//int(Pa_StreamTime(stream));
-			return playPos;
+			return writePos;
 		}
 
 		int ASIOInterface::GetBufferSize()
 		{ 
-			return _ASIObufferSize; 
+			return _ASIObufferSamples; 
+		}
+		bool ASIOInterface::PortEnum::IsFormatSupported(DriverEnum* driver, int samplerate)
+		{
+			if(!asioDrivers.loadDriver(const_cast<char*>(driver->_name.c_str())))
+			{
+				return false;
+			}
+			// initialize the driver
+			ASIODriverInfo driverInfo;
+			driverInfo.sysRef = 0;
+			if (ASIOInit(&driverInfo) != ASE_OK)
+			{
+				//ASIOExit();
+				asioDrivers.removeCurrentDriver();
+				return false;
+			}
+			if(ASIOSetSampleRate(samplerate) != ASE_OK)
+			{
+				asioDrivers.removeCurrentDriver();
+				return false;
+			}
+			asioDrivers.removeCurrentDriver();
+			return true;
 		}
 
 		void ASIOInterface::ControlPanel(int driverID)
@@ -565,9 +595,14 @@ namespace psycle
 			}
 		}
 
-		#define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
-		#define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
+		#define SwapDouble(v) SwapLongLong((long long)(v))
+		#define SwapFloat(v) SwapLong(long(v))
+		#define SwapLongLong(v) ((((v)>>56)&0xFF)|(((v)>>40)&0xFF00)|(((v)>>24)&0xFF0000)|(((v)>>8)&0xFF000000) \
+						       | (((v)&0xFF)<<56)|(((v)&0xFF00)<<40)|(((v)&0xFF0000)<<24)|(((v)&0xFF000000)<<8))
+		#define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) 
+		#define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8))
 
+		//ADVICE: Remember that psycle uses the range +32768.f to -32768.f. All conversions are done relative to this.
 		ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 		{
 			// the actual processing callback.
@@ -578,6 +613,11 @@ namespace psycle
 				universalis::cpu::exceptions::install_handler_in_thread();
 //				SetThreadAffinityMask(GetCurrentThread(), 1);
 				_firstrun = false;
+			}
+			writePos = timeInfo->timeInfo.samplePosition.lo;
+			if (timeInfo->timeInfo.samplePosition.hi != m_wrapControl) {
+				m_wrapControl = timeInfo->timeInfo.samplePosition.hi;
+				CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
 			}
 			//////////////////////////////////////////////////////////////////////////
 			// Inputs
@@ -594,10 +634,10 @@ namespace psycle
 						short* inr;
 						inl = (short*)ASIObuffers[counter].pleft[index];
 						inr = (short*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++)*0.0000152587890625;
-							*(_selectedins[counter].pright+i) = (*inr++)*0.0000152587890625;
+							_selectedins[counter].pleft[i] = (*inl++);
+							_selectedins[counter].pright[i] = (*inr++);
 						}
 					}
 					break;
@@ -609,17 +649,17 @@ namespace psycle
 						inr = (char*)ASIObuffers[counter].pright[index];
 						int t;
 						char* pt = (char*)&t;
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
 							pt[0] = *inl++;
 							pt[1] = *inl++;
 							pt[2] = *inl++;
-							*(_selectedins[counter].pleft+i) = t*0.00390625;
+							_selectedins[counter].pleft[i] = t*0.00390625f;
 
 							pt[0] = *inr++;
 							pt[1] = *inr++;
 							pt[2] = *inr++;
-							*(_selectedins[counter].pright+i) = t*0.00390625;
+							_selectedins[counter].pright[i] = t*0.00390625f;
 
 						}
 					}
@@ -630,16 +670,17 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++)*0.0000152587890625;
-							*(_selectedins[counter].pright+i) = (*inr++)*0.0000152587890625;
+							_selectedins[counter].pleft[i] = (*inl++)*0.0000152587890625;
+							_selectedins[counter].pright[i] = (*inr++)*0.0000152587890625;
 						}
 					}
 					break;
 				case ASIOSTFloat32LSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
 					{
-						helpers::dsp::MovMul(static_cast<float*>(ASIObuffers[counter].pleft[index]),_selectedins[counter].pleft,_ASIObufferSize,32768);
+						helpers::dsp::MovMul(static_cast<float*>(ASIObuffers[counter].pleft[index]),_selectedins[counter].pleft,_ASIObufferSamples,32768.0f);
+						helpers::dsp::MovMul(static_cast<float*>(ASIObuffers[counter].pright[index]),_selectedins[counter].pright,_ASIObufferSamples,32768.0f);
 					}
 					break;
 				case ASIOSTFloat64LSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
@@ -648,64 +689,64 @@ namespace psycle
 						double* inr;
 						inl = (double*)ASIObuffers[counter].pleft[index];
 						inr = (double*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++)*0.0000152587890625;
-							*(_selectedins[counter].pright+i) = (*inr++)*0.0000152587890625;
+							_selectedins[counter].pleft[i] = (*inl++)*32768.0;
+							_selectedins[counter].pright[i] = (*inr++)*32768.0;
 						}
 					}
 					break;
 					// these are used for 32 bit data buffer, with different alignment of the data inside
 					// 32 bit PCI bus systems can more easily used with these
-				case ASIOSTInt32LSB16:		// 32 bit data with 16 bit alignment
+				case ASIOSTInt32LSB16:		// 32 bit data with 16 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++);
-							*(_selectedins[counter].pright+i) = (*inr++);
+							_selectedins[counter].pleft[i] = (*inl++);
+							_selectedins[counter].pright[i] = (*inr++);
 						}
 					}
 					break;
-				case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
+				case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++)*0.25;
-							*(_selectedins[counter].pright+i) = (*inr++)*0.25;
+							_selectedins[counter].pleft[i] = (*inl++)*0.25f;
+							_selectedins[counter].pright[i] = (*inr++)*0.25f;
 						}
 					}
 					break;
-				case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
+				case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++)*0.0625;
-							*(_selectedins[counter].pright+i) = (*inr++)*0.0625;
+							_selectedins[counter].pleft[i] = (*inl++)*0.0625f;
+							_selectedins[counter].pright[i] = (*inr++)*0.0625f;
 						}
 					}
 					break;
-				case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
+				case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = (*inl++)*0.00390625;
-							*(_selectedins[counter].pright+i) = (*inr++)*0.00390625;
+							_selectedins[counter].pleft[i] = (*inl++)*0.00390625f;
+							_selectedins[counter].pright[i] = (*inr++)*0.00390625f;
 						}
 					}
 					break;
@@ -715,12 +756,12 @@ namespace psycle
 						short* inr;
 						inl = (short*)ASIObuffers[counter].pleft[index];
 						inr = (short*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
 							short val=SwapShort(*inl++);
-							*(_selectedins[counter].pleft+i) = 	val*0.0000152587890625f;
+							_selectedins[counter].pleft[i] = val;
 							val =SwapShort(*inr++);
-							*(_selectedins[counter].pright+i) = val*0.0000152587890625f;
+							_selectedins[counter].pright[i] = val;
 						}
 					}
 					break;
@@ -732,17 +773,17 @@ namespace psycle
 						inr = (char*)ASIObuffers[counter].pright[index];
 						int t;
 						char* pt = (char*)&t;
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
 							pt[2] = *inl++;
 							pt[1] = *inl++;
 							pt[0] = *inl++;
-							*(_selectedins[counter].pleft+i) = t*0.00390625;
+							_selectedins[counter].pleft[i] = t*0.00390625f;
 
 							pt[2] = *inr++;
 							pt[1] = *inr++;
 							pt[0] = *inr++;
-							*(_selectedins[counter].pright+i) = t*0.00390625;
+							_selectedins[counter].pright[i] = t*0.00390625f;
 
 						}
 					}
@@ -753,80 +794,98 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
 							long val = SwapLong(*inl++);
-							*(_selectedins[counter].pleft+i) = val *0.0000152587890625;
+							_selectedins[counter].pleft[i] = val *0.0000152587890625;
 							val = SwapLong(*inr++);
-							*(_selectedins[counter].pright+i) = val *0.0000152587890625;
+							_selectedins[counter].pright[i] = val *0.0000152587890625;
 						}
 					}
 					break;
-				case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
+				case ASIOSTInt32MSB16:		// 32 bit data with 16 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
-							*(_selectedins[counter].pleft+i) = SwapLong(*inl++);
-							*(_selectedins[counter].pright+i) = SwapLong(*inr++);
+							_selectedins[counter].pleft[i] = SwapLong(*inl++);
+							_selectedins[counter].pright[i] = SwapLong(*inr++);
 						}
 					}
 					break;
-				case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
+				case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
-						{
-							long val = SwapLong(*inl++);
-							*(_selectedins[counter].pleft+i) = val*0.25;
-							val = SwapLong(*inr++)
-							*(_selectedins[counter].pright+i) = val*0.25;
-						}
-					}
-					break;
-				case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
-					{
-						long* inl;
-						long* inr;
-						inl = (long*)ASIObuffers[counter].pleft[index];
-						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
 							long val = SwapLong(*inl++);
-							*(_selectedins[counter].pleft+i) = val*0.0625;
-							val = SwapLong(*inr++)
-							*(_selectedins[counter].pright+i) = val*0.0625;
+							_selectedins[counter].pleft[i] = val*0.25f;
+							val = SwapLong(*inr++);
+							_selectedins[counter].pright[i] = val*0.25f;
 						}
 					}
 					break;
-				case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
+				case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment (right aligned)
 					{
 						long* inl;
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSize; i++)
+						for (i = 0; i < _ASIObufferSamples; i++)
 						{
 							long val = SwapLong(*inl++);
-							*(_selectedins[counter].pleft+i) = val*0.00390625;
-							val = SwapLong(*inr++)
-							*(_selectedins[counter].pright+i) = val*0.00390625;
+							_selectedins[counter].pleft[i] = val*0.0625f;
+							val = SwapLong(*inr++);
+							_selectedins[counter].pright[i] = val*0.0625f;
 						}
 					}
 					break;
-				case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
-					memset (_selectedins[counter].pleft, 0, _ASIObufferSize * 4);
-					memset (_selectedins[counter].pright, 0, _ASIObufferSize * 4);
+				case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment (right aligned)
+					{
+						long* inl;
+						long* inr;
+						inl = (long*)ASIObuffers[counter].pleft[index];
+						inr = (long*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSamples; i++)
+						{
+							long val = SwapLong(*inl++);
+							_selectedins[counter].pleft[i] = val*0.00390625f;
+							val = SwapLong(*inr++);
+							_selectedins[counter].pright[i] = val*0.00390625f;
+						}
+					}
 					break;
-				case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
-					memset (_selectedins[counter].pleft, 0, _ASIObufferSize * 8);
-					memset (_selectedins[counter].pright, 0, _ASIObufferSize * 8);
+				case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on PowerPC implementation
+					{
+						float* inl;
+						float* inr;
+						inl = (float*)ASIObuffers[counter].pleft[index];
+						inr = (float*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSamples; i++)
+						{
+							_selectedins[counter].pleft[i] = SwapFloat(*inl++);
+							_selectedins[counter].pright[i] = SwapFloat(*inr++);
+						}
+					}
+					break;
+				case ASIOSTFloat64MSB: 		// IEEE 754 64 bit float, as found on PowerPC implementation
+					{
+						double* inl;
+						double* inr;
+						inl = (double*)ASIObuffers[counter].pleft[index];
+						inr = (double*)ASIObuffers[counter].pright[index];
+						for (i = 0; i < _ASIObufferSamples; i++)
+						{
+							_selectedins[counter].pleft[i] = SwapDouble(*inl++);
+							_selectedins[counter].pright[i] = SwapDouble(*inr++);
+						}
+					}
 					break;
 				}
 				_selectedins[counter].machinepos=0;
@@ -834,7 +893,7 @@ namespace psycle
 
 			//////////////////////////////////////////////////////////////////////////
 			// Outputs
-			float *pBuf = _pCallback(_pCallbackContext, _ASIObufferSize);
+			float *pBuf = _pCallback(_pCallbackContext, _ASIObufferSamples);
 			switch (_selectedout.port->_info.type)
 			{
 			case ASIOSTInt16LSB:
@@ -843,7 +902,7 @@ namespace psycle
 				int16_t* outr;
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = clipped_lrint<int16_t>(*pBuf++);
 					*outr++ = clipped_lrint<int16_t>(*pBuf++);
 					}
@@ -857,7 +916,7 @@ namespace psycle
 					outr = (char*)ASIObuffers[counter].pright[index];
 					int t;
 					char* pt = (char*)&t;
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 						*outl++ = pt[0];
 						*outl++ = pt[1];
@@ -877,10 +936,10 @@ namespace psycle
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
-					// Don't really know why, but the -100 is what made the clipping work correctly.
-					int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
-					int const min(-max - 1);
+				// Don't really know why, but the -100 is what made the clipping work correctly.
+				int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+				int const min(-max - 1);
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
 					*outr++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
 					//*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
@@ -894,7 +953,7 @@ namespace psycle
 					float* outr;
 					outl = (float*)ASIObuffers[counter].pleft[index];
 					outr = (float*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = (*pBuf++) / 32768.0f;
 					*outr++ = (*pBuf++) / 32768.0f;
 					}
@@ -906,7 +965,7 @@ namespace psycle
 					double* outr;
 					outl = (double*)ASIObuffers[counter].pleft[index];
 					outr = (double*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = (*pBuf++) / 32768.0;
 					*outr++ = (*pBuf++) / 32768.0;
 					}
@@ -914,49 +973,49 @@ namespace psycle
 				break;
 				// these are used for 32 bit data buffer, with different alignment of the data inside
 				// 32 bit PCI bus systems can more easily used with these
-		case ASIOSTInt32LSB16: // 32 bit data with 16 bit alignment
+		case ASIOSTInt32LSB16: // 32 bit data with 16 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = clipped_lrint<int32_t, 16>(*pBuf++);
 					*outr++ = clipped_lrint<int32_t, 16>(*pBuf++);
 					}
 				}
 				break;
-			case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment
+			case ASIOSTInt32LSB18:		// 32 bit data with 18 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
 					*outr++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
 					}
 				}
 				break;
-			case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment
+			case ASIOSTInt32LSB20:		// 32 bit data with 20 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
 					*outr++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
 					}
 				}
 				break;
-			case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment
+			case ASIOSTInt32LSB24:		// 32 bit data with 24 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
 					*outr++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
 					}
@@ -968,7 +1027,7 @@ namespace psycle
 				int16_t* outr;
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; i++) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
 					*outr++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
 					}
@@ -982,7 +1041,7 @@ namespace psycle
 					outr = (char*)ASIObuffers[counter].pright[index];
 					int t;
 					char* pt = (char*)&t;
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
 						*outl++ = pt[2];
 						*outl++ = pt[1];
@@ -1001,67 +1060,88 @@ namespace psycle
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
-					*outr++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
+					//See the LSB case above.
+					int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+					int const min(-max - 1);
+					*outl++ = SwapLong(psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max))));
+					*outr++ = SwapLong(psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max))));
+					//*outl++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
+					//*outr++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
 					}
 				}
 				break;
-			case ASIOSTInt32MSB16:		// 32 bit data with 18 bit alignment
+			case ASIOSTInt32MSB16:		// 32 bit data with 16 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
 					*outr++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
 					}
 				}
 				break;
-			case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment
+			case ASIOSTInt32MSB18:		// 32 bit data with 18 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
 					*outr++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
 					}
 				}
 				break;
-			case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment
+			case ASIOSTInt32MSB20:		// 32 bit data with 20 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
 					*outr++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
 					}
 				}
 				break;
-			case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment
+			case ASIOSTInt32MSB24:		// 32 bit data with 24 bit alignment (right aligned)
 				{
 				int32_t* outl;
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
-				for(int i = 0; i < _ASIObufferSize; ++i) {
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
 					*outl++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
 					*outr++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
 					}
 				}
 				break;
-			case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on Intel x86 architecture
-				memset (ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 4);
-				memset (ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 4);
+			case ASIOSTFloat32MSB:		// IEEE 754 32 bit float, as found on PowerPC implementation
+				{
+				float* outl;
+				float* outr;
+				outl = (float*)ASIObuffers[counter].pleft[index];
+				outr = (float*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
+					*outl++ = SwapFloat((*pBuf++) * 0.00030517578125);
+					*outr++ = SwapFloat((*pBuf++) * 0.00030517578125);
+					}
+				}
 				break;
-			case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on Intel x86 architecture
-				memset (ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 8);
-				memset (ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 8);
+			case ASIOSTFloat64MSB: 		// IEEE 754 64 bit double float, as found on PowerPC implementation
+				{
+				double* outl;
+				double* outr;
+				outl = (double*)ASIObuffers[counter].pleft[index];
+				outr = (double*)ASIObuffers[counter].pright[index];
+				for(int i = 0; i < _ASIObufferSamples; ++i) {
+					*outl++ = SwapDouble((*pBuf++) * 0.00030517578125);
+					*outr++ = SwapDouble((*pBuf++) * 0.00030517578125);
+					}
+				}
 				break;
 			}
 			// finally if the driver supports the ASIOOutputReady() optimization, do it here, all data are in place

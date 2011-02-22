@@ -252,7 +252,7 @@ namespace host {
 
 			curcol = seqTickOffs - (seqTickOffs%seqSteps);
 			
-			float curtime = (((Master*)(_pSong->_pMachine[MASTER_INDEX]))->sampleCount * Global::pPlayer->bpm) / (60.0f * Global::pConfig->_pOutputDriver->_samplesPerSec);
+			float curtime = (Global::player().sampleCount * Global::pPlayer->bpm) / (60.0f * Global::player().SampleRate());
 
 			if ( (float)(curcol*seqSteps) <= curtime && Global::pPlayer->_playing )
 			{

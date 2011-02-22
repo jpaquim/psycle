@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Psycle.hpp"
-#include <afxwin.h>
 
 namespace psycle { namespace host {
 

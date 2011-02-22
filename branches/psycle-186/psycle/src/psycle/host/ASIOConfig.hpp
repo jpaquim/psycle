@@ -3,10 +3,10 @@
 #pragma once
 #include "Psycle.hpp"
 
-#include "ASIOInterface.hpp"
-
 namespace psycle { namespace host {
 		/// asio config window.
+		class ASIOInterface;
+
 		class CASIOConfig : public CDialog
 		{
 		public:

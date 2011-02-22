@@ -3,8 +3,6 @@
 
 #include "XMInstrument.hpp"
 
-#include <afxwin.h>
-
 namespace psycle {
 namespace host {
 

@@ -18,10 +18,6 @@ namespace psycle { namespace host {
 		{
 			if (Global::pConfig->draw_vus)
 			{
-				if (_pSong->_machineLock)
-				{
-					return;
-				}
 				for (int c=0; c<MAX_MACHINES-1; c++)
 				{
 					Machine* pMac = _pSong->_pMachine[c];
@@ -44,10 +40,6 @@ namespace psycle { namespace host {
 		{
 			if (Global::pConfig->draw_vus)
 			{
-				if (_pSong->_machineLock)
-				{
-					return;
-				}
 				Machine* pMac = _pSong->_pMachine[c];
 				if (pMac)
 				{
@@ -66,11 +58,6 @@ namespace psycle { namespace host {
 
 		void CChildView::DrawMachineEditor(CDC *devc)
 		{
-			if (_pSong->_machineLock)
-			{
-				return;
-			}
-
 			CBrush fillbrush(Global::pConfig->mv_polycolour);
 			CBrush *oldbrush = devc->SelectObject(&fillbrush);
 			if (Global::pConfig->bBmpBkg) // Draw Background image

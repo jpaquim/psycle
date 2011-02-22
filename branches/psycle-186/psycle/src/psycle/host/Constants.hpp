@@ -52,8 +52,6 @@ namespace psycle
 		#define MULTIPLY2				MULTIPLY * MAX_LINES		
 		#define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	
 
-		/// \todo Lock latency acts like a semaphore (Sleep(LOCK_LATENCY)). Should we do a real semaphore instead?
-		#define xxxLOCK_LATENCY			256
 		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 		#define MAX_DELAY_BUFFER		65536
 		/// Sampler

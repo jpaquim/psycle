@@ -39,7 +39,7 @@ namespace psycle { namespace host {
 			CStatic	m_syncAdjust;
 			CStatic	m_eventsLost;
 			CStatic	m_bufferUsed;
-			CStatic m_clearEventsLost;
+			CButton m_clearEventsLost;
 			CListCtrl	m_channelMap;
 			CStatic m_ch1;
 			CStatic m_ch2;

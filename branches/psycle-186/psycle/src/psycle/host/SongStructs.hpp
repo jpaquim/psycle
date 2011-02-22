@@ -146,8 +146,9 @@ namespace psycle
 				tweakeffect, //old. for compatibility only.
 				midicc,
 				tweakslide,
-				//maintain these two as the last ones
+				//Place whatever it can be written in the pattern above invalid, and anything else below it
 				invalid,
+				midi_sync = 254,
 				empty = 255
 			};
 		}

@@ -37,7 +37,7 @@ namespace psycle
 			else
 				wasVST = false;
 		}
-		int Dummy::GenerateAudio(int numSamples)
+		int Dummy::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
 			UpdateVuAndStanbyFlag(numSamples);
 			recursive_processed_ = true;
@@ -271,7 +271,7 @@ namespace psycle
 			else return false;
 		}
 
-		int DuplicatorMac::GenerateAudio(int numSamples)
+		int DuplicatorMac::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
 			recursive_processed_ = true;
 			Standby(true);
@@ -305,16 +305,12 @@ namespace psycle
 			sprintf(_editName, _psName);
 			_initialized=false;
 			_captureidx=0;
-			pleftorig=_pSamplesL;
-			prightorig=_pSamplesR;
 			_gainvol=1.0f;
 		}
 		AudioRecorder::~AudioRecorder()
 		{
 			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 			if (_initialized) mydriver.RemoveCapturePort(_captureidx);
-			_pSamplesL=pleftorig;
-			_pSamplesR=prightorig;
 		}
 		void AudioRecorder::Init(void)
 		{
@@ -323,6 +319,7 @@ namespace psycle
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 				_initialized = mydriver.AddCapturePort(_captureidx);
+				strncpy(drivername,mydriver.GetInfo()->_psName,32);
 			}
 		}
 		void AudioRecorder::ChangePort(int newport)
@@ -333,24 +330,31 @@ namespace psycle
 				mydriver.Enable(false);
 				mydriver.RemoveCapturePort(_captureidx);
 				_initialized=false;
-				_pSamplesL=pleftorig;
-				_pSamplesR=prightorig;
 			}
 			_initialized = mydriver.AddCapturePort(newport);
 			_captureidx = newport;
+			strncpy(drivername,mydriver.GetInfo()->_psName,32);
 			mydriver.Enable(true);
 		}
-		int AudioRecorder::GenerateAudio(int numSamples)
+		int AudioRecorder::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
 			if (!_mute &&_initialized)
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-				mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
-				// prevent crashing if the audio driver is not working.
-				if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
-				helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
-				helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
-				helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+				AudioDriverInfo &myinfo = *mydriver.GetInfo();
+				if(strcmp(myinfo._psName, drivername)) {
+					_initialized = false;
+					return numSamples;
+				}
+				mydriver.GetReadBuffers(_captureidx,&pleftorig,&prightorig,numSamples);
+				if(pleftorig == NULL) {
+					helpers::dsp::Clear(_pSamplesL,numSamples);
+					helpers::dsp::Clear(_pSamplesR,numSamples);
+				}
+				else {
+					helpers::dsp::MovMul(pleftorig,_pSamplesL,numSamples,_gainvol);
+					helpers::dsp::MovMul(prightorig,_pSamplesR,numSamples,_gainvol);
+				}
 				UpdateVuAndStanbyFlag(numSamples);
 			}
 			else Standby(true);
@@ -420,30 +424,33 @@ namespace psycle
 				Global::player().Tweaker = true;
 			}
 		}
-		void Mixer::recursive_process(unsigned int frames) {
+		void Mixer::recursive_process(unsigned int frames, bool measure_cpu_usage) {
 			if(_mute || Bypass()) {
-				recursive_process_deps(frames);
+				recursive_process_deps(frames, true, measure_cpu_usage);
 				return;
 			}
 
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
-			recursive_process_deps(frames, false);
+			recursive_process_deps(frames, false, measure_cpu_usage);
 			// Step Two, prepare input signals for the Send Fx, and make them work
 			sched_returns_processed_curr=0;
-			FxSend(frames, true);
+			FxSend(frames, true, measure_cpu_usage);
 			{ // Step Three, Mix the returns of the Send Fx's with the leveled input signal
-				nanoseconds const t0(cpu_time_clock());
+				nanoseconds t0;
+				if(measure_cpu_usage){ t0 = cpu_time_clock();}
 				Mix(frames);
 				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 				Machine::UpdateVuAndStanbyFlag(frames);
-				nanoseconds const t1(cpu_time_clock());
-				accumulate_processing_time(t1 - t0);
+				if(measure_cpu_usage){
+					nanoseconds const t1(cpu_time_clock());
+					accumulate_processing_time(t1 - t0);
+				}
 			}
 
 			recursive_processed_ = true;
 		}
 
-		void Mixer::FxSend(int numSamples, bool recurse)
+		void Mixer::FxSend(int numSamples, bool recurse, bool measure_cpu_usage)
 		{
 			// Note: Since mixer allows to route returns to other sends, this needs
 			// to stop in non-recurse mode when the first of such routes is found
@@ -457,7 +464,8 @@ namespace psycle
 					assert(pSendMachine);
 					if (!pSendMachine->recursive_processed_ && !pSendMachine->recursive_is_processing_)
 					{ 
-						nanoseconds const t0(cpu_time_clock());
+						nanoseconds t0;
+						if(measure_cpu_usage){ t0  =cpu_time_clock();}
 						bool soundready=false;
 						// Mix all the inputs and route them to the send fx.
 						{
@@ -519,15 +527,17 @@ namespace psycle
 						// tell the FX to work, now that the input is ready.
 						if(recurse){
 							//Time is only accumulated in recurse mode, because in shed mode the sched_process method already does it.
-							nanoseconds const t1(cpu_time_clock());
-							accumulate_processing_time(t1 - t0);
+							if(measure_cpu_usage){ 
+								nanoseconds const t1(cpu_time_clock());
+								accumulate_processing_time(t1 - t0);
+							}
 							#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 								#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
 							#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 								universalis::cpu::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
 							#endif
 							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
-							pRetMachine->recursive_process(numSamples);
+							pRetMachine->recursive_process(numSamples, measure_cpu_usage);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
 							if(!pRetMachine->Standby())Standby(false);
 						}
@@ -632,13 +642,14 @@ namespace psycle
 		}
 
 		/// called by the scheduler to ask for the actual processing of the machine
-		bool Mixer::sched_process(unsigned int frames) {
-			nanoseconds const t0(cpu_time_clock());
+		bool Mixer::sched_process(unsigned int frames, bool measure_cpu_usage) {
+			nanoseconds t0;
+			if(measure_cpu_usage){ t0 = cpu_time_clock(); }
 
 			if( sched_returns_processed_curr < numreturns()) {
 				mixed = false;
 				// step 1: send signal to fx
-				FxSend(frames, false);
+				FxSend(frames, false, measure_cpu_usage);
 			} else {
 				// step 2: mix with return fx
 				Mix(frames);
@@ -647,9 +658,10 @@ namespace psycle
 				mixed = true;
 				sched_returns_processed_curr=0;
 			}
-
-			nanoseconds const t1(cpu_time_clock());
-			accumulate_processing_time(t1 - t0);
+			if(measure_cpu_usage){ 
+				nanoseconds const t1(cpu_time_clock());
+				accumulate_processing_time(t1 - t0);
+			}
 			if(mixed) ++processing_count_;
 			
 			return mixed;

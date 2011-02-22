@@ -11,10 +11,13 @@
 
 #include "Machine.hpp"
 #include "internal_machines.hpp"
+#include "Player.hpp"
 #include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 
 namespace psycle { namespace host {
+		int SCOPE_SPEC_SAMPLES = 1024;
+
 		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
 		{
 			m_pParent = pParent;
@@ -224,7 +227,7 @@ namespace psycle { namespace host {
 						th=j* constant; 
 					}
 					else if (scope_spec_mode == 1 ) {
-						//this makes it somewhat logaritmic.
+						//this makes it somewhat exponential.
 						th=(j*j*samplesFactorB)*constant; 
 					}
 					else {
@@ -410,7 +413,7 @@ namespace psycle { namespace host {
 						// buffered and working backwards - it does it this way to minimize chances of drawing 
 						// erroneous data across the buffering point
 
-						float add = (float(Global::pConfig->_pOutputDriver->_samplesPerSec)/(float(freq)))/64.0f;
+						float add = (float(Global::player().SampleRate())/(float(freq)))/64.0f;
 
 						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
 						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
@@ -459,10 +462,10 @@ namespace psycle { namespace host {
 						const float multleft= invol*mult/32768.0f *_pSrcMachine->_lVol;
 						const float multright= invol*mult/32768.0f *_pSrcMachine->_rVol;
 						const float invSamples = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
-					// calculate our bands using same buffer chasing technique
-					int index = _pSrcMachine->_scopeBufferIndex;
-					for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
-					{ 
+						// calculate our bands using same buffer chasing technique
+						int index = _pSrcMachine->_scopeBufferIndex;
+						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
+						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
 							const float wl=pSamplesL[index]*multleft;
@@ -813,11 +816,12 @@ namespace psycle { namespace host {
 				scope_osc_freq = m_slider.GetPos();
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slider2.SetRange(1,1+int(Global::player().SampleRate()*2.0f/(scope_osc_freq*scope_osc_freq)));
 				}
 				break;
 			case 2:
 				scope_spec_mode = m_slider.GetPos();
+				SCOPE_SPEC_SAMPLES = (m_slider.GetPos()==0)?256:(m_slider.GetPos()==1)?1024:4096;
 				SetMode();
 				InitSpectrum();
 				break;
@@ -895,7 +899,7 @@ namespace psycle { namespace host {
 			case 1:
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::pConfig->_pOutputDriver->_samplesPerSec*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_slider2.SetRange(1,1+int(Global::player().SampleRate()*2.0f/(scope_osc_freq*scope_osc_freq)));
 					m_slider2.SetPos(1);
 				}
 				else

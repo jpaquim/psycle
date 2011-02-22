@@ -20,7 +20,7 @@ namespace psycle { namespace host {
 		extern CPsycleApp theApp;
 
 		DWORD WINAPI __stdcall RecordThread(void *b);
-		int CSaveWavDlg::channelmode = -1;
+		channel_mode CSaveWavDlg::channelmode = no_mode;
 		int CSaveWavDlg::rate = -1;
 		int CSaveWavDlg::bits = -1;
 		int CSaveWavDlg::noiseshape = 0;
@@ -29,12 +29,11 @@ namespace psycle { namespace host {
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
 
-		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent)
+		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent),
+			_event(FALSE,TRUE)
 		{
-			//{{AFX_DATA_INIT(CSaveWavDlg)
 			m_recmode = 0;		
 			m_outputtype = 0;
-			//}}AFX_DATA_INIT
 			this->pChildView = pChildView;
 			this->pBlockSel = pBlockSel;
 		}
@@ -149,42 +148,18 @@ namespace psycle { namespace host {
 			m_progress.SetRange(0,1);
 			m_progress.SetPos(0);
 
-			if ((rate < 0) || (rate >5))
+			if ((rate < 0) || (rate >8))
 			{
-				if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 8000)
-				{
-					rate = 0;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 11025)
-				{
-					rate = 1;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 16000)
-				{
-					rate = 2;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 22050)
-				{
-					rate = 3;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 32000)
-				{
-					rate = 4;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 44100)
-				{
-					rate = 5;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 48000)
-				{
-					rate = 6;
-				}
-				else if (Global::pConfig->_pOutputDriver->_samplesPerSec <= 88200)
-				{
-					rate = 7;
-				}
-				else 
-				{
+				int outRate = Global::pConfig->_pOutputDriver->GetSamplesPerSec();
+				if (outRate <= 8000) { rate = 0; }
+				else if (outRate <= 11025) { rate = 1; }
+				else if (outRate <= 16000) { rate = 2; }
+				else if (outRate <= 22050) { rate = 3; }
+				else if (outRate <= 32000) { rate = 4; }
+				else if (outRate <= 44100) { rate = 5; }
+				else if (outRate <= 48000) { rate = 6; }
+				else if (outRate <= 88200) { rate = 7; }
+				else {
 					rate = 8;
 				}
 			}
@@ -200,21 +175,13 @@ namespace psycle { namespace host {
 			m_rate.AddString("96000 hz");
 			m_rate.SetCurSel(rate);
 
-			if ((bits < 0) || (bits > 3))
+			if ((bits < 0) || (bits > 4))
 			{
-				if (Global::pConfig->_pOutputDriver->_bitDepth <= 8)
-				{
-					bits = 0;
-				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 16)
-				{
-					bits = 1;
-				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 24)
-				{
-					bits = 2;
-				}
-				else if (Global::pConfig->_pOutputDriver->_bitDepth <= 32)
+				int outBits = Global::pConfig->_pOutputDriver->GetSampleValidBits();
+				if ( outBits<= 8 ) { bits = 0; }
+				else if (outBits <= 16) { bits = 1; }
+				else if (outBits <= 24) { bits = 2;	}
+				else //if (outBits <= 32)
 				{
 					bits = 4;
 				}
@@ -235,11 +202,11 @@ namespace psycle { namespace host {
 
 			if ((channelmode < 0) || (channelmode > 3))
 			{
-				channelmode = Global::pConfig->_pOutputDriver->_channelmode;
+				channelmode = Global::pConfig->_pOutputDriver->GetChannelMode();
 			}
 			m_channelmode.SetCurSel(channelmode);
 
-			m_dither.SetCheck(BST_CHECKED);
+			if(bits < 2) m_dither.SetCheck(BST_CHECKED);
 
 			m_pdf.AddString("Triangular");
 			m_pdf.AddString("Rectangular");
@@ -598,7 +565,7 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, int channelmode,bool isFloat)
+		void CSaveWavDlg::SaveWav(std::string file, int bits, int rate, channel_mode channelmode,bool isFloat)
 		{
 			saving=true;
 			Player *pPlayer = Global::pPlayer;
@@ -730,6 +697,7 @@ namespace psycle { namespace host {
 					pPlayer->Stop();
 					((CSaveWavDlg*)b)->SaveEnd();
 					((CSaveWavDlg*)b)->threadopen--;
+					((CSaveWavDlg*)b)->_event.SetEvent();
 					ExitThread(0);
 					//return 0;
 				}
@@ -741,6 +709,7 @@ namespace psycle { namespace host {
 			pPlayer->StopRecording();
 			((CSaveWavDlg*)b)->SaveEnd();
 			((CSaveWavDlg*)b)->threadopen--;
+			((CSaveWavDlg*)b)->_event.SetEvent();
 			ExitThread(0);
 			//return 0;
 		}
@@ -749,12 +718,9 @@ namespace psycle { namespace host {
 		{
 			if (saving || (threadopen > 0))
 			{
-				//while(threadopen > 0) 
-				{
-					current = 256;
-					kill_thread=1;
-					Sleep(100);
-				}
+				current = 256;
+				kill_thread=1;
+				CSingleLock event(&_event, TRUE);
 			}
 			else if (threadopen <= 0)
 			{
@@ -977,9 +943,9 @@ namespace psycle { namespace host {
 			const int real_bits[]={8,16,24,32};
 
 			///\todo: Investigate why i can't paste to audacity (psycle's fault?)
-			clipboardwavheader.head = 'FFIR';
-			clipboardwavheader.head2= 'EVAW';
-			clipboardwavheader.fmthead = ' tmf';
+			clipboardwavheader.head = 'RIFF';
+			clipboardwavheader.head2= 'WAVE';
+			clipboardwavheader.fmthead = 'fmt ';
 			clipboardwavheader.fmtsize = sizeof(WAVEFORMATEX) + 2; // !!!!!!!!!!!!!!!!????????? - works...
 			clipboardwavheader.fmtcontent.wFormatTag = WAVE_FORMAT_PCM;
 			clipboardwavheader.fmtcontent.nChannels = (channelmode == 3) ? 2 : 1;
@@ -988,7 +954,7 @@ namespace psycle { namespace host {
 			clipboardwavheader.fmtcontent.nBlockAlign = clipboardwavheader.fmtcontent.wBitsPerSample/8*clipboardwavheader.fmtcontent.nChannels;
 			clipboardwavheader.fmtcontent.nAvgBytesPerSec =clipboardwavheader.fmtcontent.nBlockAlign*clipboardwavheader.fmtcontent.nSamplesPerSec;
 			clipboardwavheader.fmtcontent.cbSize = 0;
-			clipboardwavheader.datahead = 'atad';
+			clipboardwavheader.datahead = 'data';
 
 			int length = *reinterpret_cast<int*>(clipboardmem[0]);
 
@@ -1067,7 +1033,7 @@ namespace psycle { namespace host {
 
 		void CSaveWavDlg::OnSelchangeComboChannels() 
 		{
-			channelmode = m_channelmode.GetCurSel();
+			channelmode = (channel_mode) m_channelmode.GetCurSel();
 		}
 
 		void CSaveWavDlg::OnSelchangeComboRate() 

@@ -114,7 +114,7 @@ namespace psycle
 				//////////////////////////////////////////////////////////////////////////
 				// Actions
 				virtual void Init(){ Machine::Init();}
-				virtual void PreWork(int numSamples,bool clear=true);
+				virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage);
 				virtual int GenerateAudioInTicks(int startSample,  int numSamples);
 				virtual void Tick() { Machine::Tick(); }
 				virtual void Tick(int track, PatternEntry * pData);
@@ -127,9 +127,9 @@ namespace psycle
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
-				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(*this); return 0; }
-				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(*this); return 0; }
-				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); return 0; }
+				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(*this); }
+				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(*this); }
+				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual bool Bypass(void) { return Machine::Bypass(); }

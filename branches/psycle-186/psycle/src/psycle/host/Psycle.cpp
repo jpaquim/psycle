@@ -38,6 +38,16 @@ namespace psycle { namespace host {
 
 		BOOL CPsycleApp::InitInstance()
 		{
+			// InitCommonControlsEx() is required on Windows XP if an application
+			// manifest specifies use of ComCtl32.dll version 6 or later to enable
+			// visual styles.  Otherwise, any window creation will fail.
+			INITCOMMONCONTROLSEX InitCtrls;
+			InitCtrls.dwSize = sizeof(InitCtrls);
+			// Set this to include all the common control classes you want to use
+			// in your application.
+			InitCtrls.dwICC = ICC_WIN95_CLASSES;
+			InitCommonControlsEx(&InitCtrls);
+
 			CWinApp::InitInstance();
 
 			// Allow only one instance of the program
@@ -51,6 +61,8 @@ namespace psycle { namespace host {
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
 			CMainFrame* pFrame = new CMainFrame();
+			if (!pFrame)
+				return FALSE;
 			m_pMainWnd = pFrame;
 
 			loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
@@ -79,10 +91,7 @@ namespace psycle { namespace host {
 					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
 				}
 				_global.pConfig->_pOutputDriver->Enable(false);
-				///\todo lock/unlock
-				Sleep(256);
 				_global.pConfig->_pMidiInput->Close();
-
 				return FALSE;
 			}
 
@@ -170,8 +179,6 @@ namespace psycle { namespace host {
 		{
 			_global.pConfig->Write();
 			_global.pConfig->_pOutputDriver->Enable(false);
-			///\todo lock/unlock
-			Sleep(256);
 			_global.pConfig->_pMidiInput->Close();
 			CNewMachine::DestroyPluginInfo();
 			return CWinApp::ExitInstance();
@@ -341,7 +348,6 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_EDIT5, m_sourceforge);
 			DDX_Control(pDX, IDC_EDIT2, m_psycledelics);
 			DDX_Control(pDX, IDC_STEINBERGCOPY, m_steincopyright);
-			DDX_Control(pDX, IDC_HEADERDLG, m_headerdlg);
 			DDX_Control(pDX, IDC_SHOWATSTARTUP, m_showabout);
 			DDX_Control(pDX, IDC_HEADER, m_headercontrib);
 			DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
@@ -366,7 +372,6 @@ namespace psycle { namespace host {
 				m_aboutbmp.ShowWindow(SW_HIDE);
 				m_contrib.ShowWindow(SW_SHOW);
 				m_headercontrib.ShowWindow(SW_SHOW);
-				m_headerdlg.ShowWindow(SW_SHOW);
 				m_psycledelics.ShowWindow(SW_SHOW);
 				m_sourceforge.ShowWindow(SW_SHOW);
 				m_asio.ShowWindow(SW_SHOW);
@@ -377,7 +382,6 @@ namespace psycle { namespace host {
 				m_aboutbmp.ShowWindow(SW_SHOW);
 				m_contrib.ShowWindow(SW_HIDE);
 				m_headercontrib.ShowWindow(SW_HIDE);
-				m_headerdlg.ShowWindow(SW_HIDE);
 				m_psycledelics.ShowWindow(SW_HIDE);
 				m_sourceforge.ShowWindow(SW_HIDE);
 				m_asio.ShowWindow(SW_HIDE);

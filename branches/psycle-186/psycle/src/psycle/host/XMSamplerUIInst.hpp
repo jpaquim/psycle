@@ -2,8 +2,6 @@
 #include "Psycle.hpp"
 
 #include "XMInstrument.hpp"
-#include <afxwin.h>
-#include <afxcmn.h>
 
 namespace psycle {
 namespace host {

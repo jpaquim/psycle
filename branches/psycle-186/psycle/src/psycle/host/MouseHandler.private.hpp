@@ -11,8 +11,6 @@ namespace psycle { namespace host {
 			
 			if(viewMode == view_modes::machine) // User is in machine view mode
 			{
-				if (_pSong->_machineLock) return;
-				
 				smac = -1; 		smacmode = smac_modes::move;
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
@@ -237,8 +235,6 @@ namespace psycle { namespace host {
 
 			if(viewMode == view_modes::machine)
 			{
-				if (_pSong->_machineLock) return;
-
 				smac = -1;		smacmode = smac_modes::move;
 				wiresource = -1;wiredest = -1;
 				wiremove = -1;

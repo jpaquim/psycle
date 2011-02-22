@@ -110,8 +110,13 @@ namespace psycle { namespace host {
 		// RETURNS		  : <void>
 		// 
 
-		void CChildView::MidiPatternNote(int outnote, int channel, int velocity)
+		void CChildView::MidiPatternNote(int outnote,int macidx, int instidx, int velocity)
 		{
+			Machine* mac = NULL;
+			if(macidx >=0 && macidx <MAX_BUSES)
+			{
+				mac = Global::_pSong->_pMachine[macidx];
+			}
 			// undo code not required, enter note handles it
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -119,20 +124,20 @@ namespace psycle { namespace host {
 				if(velocity > 0 || 
 					(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong))
 				{
-					EnterNote(outnote,channel,velocity,false);
+					EnterNote(outnote,/*macidx,*/ instidx,velocity,false);
 				}
 				else
 				{
-					Global::pInputHandler->StopNote(outnote,channel,false);	// note end
+					Global::pInputHandler->StopNote(outnote,instidx,false, mac);	// note end
 				}			
 			}
 			else 
 			{
 				// play note
 				if(velocity>0)
-					Global::pInputHandler->PlayNote(outnote,channel,velocity,false);
+					Global::pInputHandler->PlayNote(outnote,instidx,velocity,false,mac);
 				else
-					Global::pInputHandler->StopNote(outnote,channel,false);
+					Global::pInputHandler->StopNote(outnote,instidx,false,mac);
 			}
 		}
 

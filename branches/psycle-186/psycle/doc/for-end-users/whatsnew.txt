@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-1.8.8   | 2010 | beta						 | [JAZ] & bohan.
+1.8.8   | 2011 | beta						 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.6	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
@@ -42,6 +42,23 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.8 beta3
+------------
++ Added ability to send midi commands to native machines. Yannis Midi and fluidsynth now support it.
++ Finished WASAPI audio driver for Windows Vista and 7. Supports both, shared and exclusive mode.
+* Improvements on MME waveout and Directsound. Both support up to 32bits float now (if supported by driver/OS).
+* Improvements on fluidsynth and yannis midi usage. Now aux column is always filled, and the aux combobox filled properly.
+* Improvements on fluidsynth. If it doesn't find the soundfont on loading, it asks for the placement.
+* Improvements on the whole MIDI input. In keyboard mode it is possible to play a midi file sending midi commands to psycle and using one fluidsynth.
+Find the new options in the Midi Input page to select generator and instrument. Also the MIDI Monitor is useful now with Keyboard mode.
+In Sequenced mode, improved the synchronization code and now works with all the audio drivers (note: you need to send a clock start).
+* New option in the CPU Monitor to *not* measure the individual CPU usage. When using many machines, the effect is big.
+* Some more improvements  in multithreading. Now, song load/save/new don't stop and restart the audio driver.
+* "Skinned" mode for the UI controls, without the need of the manifest file (no more windows 98 look&feel). Several small style changes on the UI.
+! Fixes in wave input. Now it works with all drivers, supports multiple wave in machines and correctly selects the input port. (Note: changing audio driver with a wavein machine loaded is still not 100% safe, but it shouldn't crash).
+! Fixes in audio sample rate change, audio output selection change and midi input selection change.
+! beta 2 bugfixes
+
 v1.8.8 beta2
 ------------
 + Added range to the Interpolate curve dialog, and autodetect range if tweak or command found in selection.

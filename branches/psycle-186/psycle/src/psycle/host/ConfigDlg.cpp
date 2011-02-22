@@ -15,21 +15,32 @@ namespace psycle { namespace host {
 		CConfigDlg::CConfigDlg(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 			: CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 		{
+			AddControlPages();
 		}
 
 		CConfigDlg::CConfigDlg(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 			:CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 		{
+			AddControlPages();
 		}
 
 		CConfigDlg::~CConfigDlg()
 		{
 		}
 
+		void CConfigDlg::AddControlPages() {
+			m_psh.dwFlags |= PSH_NOAPPLYNOW; // Eliminate the Apply button
+
+			AddPage(&_skinDlg);
+			AddPage(&_keyDlg);
+			AddPage(&_dirDlg);
+			AddPage(&_outputDlg);
+			AddPage(&_midiDlg);
+		}
 		BEGIN_MESSAGE_MAP(CConfigDlg, CPropertySheet)
 		END_MESSAGE_MAP()
 
-		void CConfigDlg::Init(Configuration* pConfig,int dlgnum) 
+		void CConfigDlg::Init(Configuration* pConfig) 
 		{
 			_pConfig = pConfig;
 			_skinDlg._patternSeparatorColor = pConfig->pvc_separator;
@@ -139,11 +150,6 @@ namespace psycle { namespace host {
 				_skinDlg._skinPathBuf.clear();
 				_keyDlg ._skinPathBuf.clear();
 			}
-			if(dlgnum == 1 || dlgnum == 0) AddPage(&_skinDlg);
-			if(dlgnum == 2 || dlgnum == 0) AddPage(&_keyDlg);
-			if(dlgnum == 3 || dlgnum == 0) AddPage(&_dirDlg);
-			if(dlgnum == 4 || dlgnum == 0) AddPage(&_outputDlg);
-			if(dlgnum == 5 || dlgnum == 0) AddPage(&_midiDlg);
 		}
 
 		INT_PTR CConfigDlg::DoModal() 

@@ -24,7 +24,7 @@ namespace psycle
 			public:
 				inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) const { MessageBox(hWnd,ptxt,caption,type); }
 				inline virtual int GetTickLength() const { return Global::pPlayer->SamplesPerRow(); }
-				inline virtual int GetSamplingRate() const { return Global::pConfig->GetSamplesPerSec(); }
+				inline virtual int GetSamplingRate() const { return Global::player().SampleRate(); }
 				inline virtual int GetBPM() const { return Global::pPlayer->bpm; }
 				inline virtual int GetTPB() const { return Global::pPlayer->tpb; }
 				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/);

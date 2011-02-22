@@ -94,15 +94,13 @@ namespace psycle
 			}
 			long host::OnGetOutputLatency(CEffect &pEffect)
 			{
-				//\todo : return Global::pPlayer->->LatencyInSamples();
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
-				return pdriver->GetOutputLatency();
+				return pdriver->GetOutputLatencySamples();
 			}
 			long host::OnGetInputLatency(CEffect &pEffect)
 			{
-				//\todo : return Global::pPlayer->->LatencyInSamples();
 				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
-				return pdriver->GetInputLatency();
+				return pdriver->GetInputLatencySamples();
 			}
 			void host::Log(std::string message)
 			{
@@ -525,10 +523,11 @@ namespace psycle
 					ProcessEvents(reinterpret_cast<VstEvents*>(&mevents));
 				}
 			}
-			void plugin::PreWork(int numSamples,bool clear)
+			void plugin::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 			{
-				Machine::PreWork(numSamples,clear);
-				nanoseconds const t0(cpu_time_clock());
+				Machine::PreWork(numSamples,clear, measure_cpu_usage);
+				nanoseconds t0;
+				if(measure_cpu_usage) { t0 = cpu_time_clock(); }
 				if(!WillProcessReplace())
 				{
 					helpers::dsp::Clear(_pOutSamplesL, numSamples);
@@ -559,8 +558,10 @@ namespace psycle
 						}
 					}
 				}
-				nanoseconds const t1(cpu_time_clock());
-				Global::song().accumulate_routing_time(t1 - t0);
+				if(measure_cpu_usage) {
+					nanoseconds const t1(cpu_time_clock());
+					Global::song().accumulate_routing_time(t1 - t0);
+				}
 			}
 			void plugin::Tick(int channel, PatternEntry * pData)
 			{

@@ -2,7 +2,6 @@
 ///\brief interface file for psycle::host::CVstParamList.
 #pragma once
 #include "Psycle.hpp"
-#include <afxext.h>
 
 namespace psycle {
 	namespace host {

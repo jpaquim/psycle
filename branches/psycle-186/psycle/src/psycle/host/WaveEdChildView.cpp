@@ -1354,7 +1354,7 @@ namespace psycle { namespace host {
 			if(SilenceDlg.DoModal()!=IDCANCEL)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				unsigned long timeInSamps = Global::configuration().GetSamplesPerSec() * SilenceDlg.timeInSecs;
+				unsigned long timeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * SilenceDlg.timeInSecs;
 				if(!wdWave)
 				{
 					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
@@ -1685,10 +1685,10 @@ namespace psycle { namespace host {
 			EmptyClipboard();
 			hClipboardData = GlobalAlloc(GMEM_MOVEABLE, ( wdStereo ? length*4 + sizeof(fullheader) : length*2 + sizeof(fullheader)));
 			
-			wavheader.head = 'FFIR';
+			wavheader.head = 'RIFF';
 			wavheader.size = wdStereo ? (length*4 + sizeof(fullheader) - 8) : (length*2 + sizeof(fullheader) - 8);
-			wavheader.head2= 'EVAW';
-			wavheader.fmthead = ' tmf';
+			wavheader.head2= 'WAVE';
+			wavheader.fmthead = 'fmt ';
 			wavheader.fmtsize = sizeof(WAVEFORMATEX) + 2; // !!!!!!!!!!!!!!!!????????? - works...
 			wavheader.fmtcontent.wFormatTag = WAVE_FORMAT_PCM;
 			wavheader.fmtcontent.nChannels = wdStereo ? 2 : 1;
@@ -1697,7 +1697,7 @@ namespace psycle { namespace host {
 			wavheader.fmtcontent.nAvgBytesPerSec = wavheader.fmtcontent.wBitsPerSample/8*wavheader.fmtcontent.nChannels*wavheader.fmtcontent.nSamplesPerSec;
 			wavheader.fmtcontent.nBlockAlign = wdStereo ? 4 : 2 ;
 			wavheader.fmtcontent.cbSize = 0;
-			wavheader.datahead = 'atad';
+			wavheader.datahead = 'data';
 			wavheader.datasize = wdStereo ? length*4 : length*2;
 
 			pClipboardData = (char*) GlobalLock(hClipboardData);
@@ -1762,7 +1762,7 @@ namespace psycle { namespace host {
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+			if ((*(std::uint32_t*)pPasteData != 'RIFF') && (*((std::uint32_t*)pPasteData + 2)!='WAVE')) return;
 			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
 			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
@@ -1982,9 +1982,9 @@ namespace psycle { namespace host {
 				unsigned long destFadeIn(0);	
 
 				if(MixDlg.bFadeIn)
-					fadeInSamps = Global::configuration().GetSamplesPerSec() * MixDlg.fadeInTime;
+					fadeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * MixDlg.fadeInTime;
 				if(MixDlg.bFadeOut)
-					fadeOutSamps= Global::configuration().GetSamplesPerSec() * MixDlg.fadeOutTime;
+					fadeOutSamps= Global::configuration()._pOutputDriver->GetSamplesPerSec() * MixDlg.fadeOutTime;
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				_pSong->StopInstrument(wsInstrument);

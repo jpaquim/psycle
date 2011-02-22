@@ -169,8 +169,6 @@ namespace psycle
 		Song::Song()
 			:semaphore(2,2,NULL,NULL)
 		{
-			_machineLock = false;
-			
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			CreateNewPattern(0);
@@ -387,7 +385,6 @@ namespace psycle
 
 		void Song::DestroyAllMachines(bool write_locked)
 		{
-			_machineLock = true;
 			for(int c(0) ;  c < MAX_MACHINES; ++c)
 			{
 				if(_pMachine[c])
@@ -407,7 +404,6 @@ namespace psycle
 				}
 				_pMachine[c] = 0;
 			}
-			_machineLock = false;
 		}
 		void Song::StopInstrument(int instrumentIdx)
 		{
@@ -458,7 +454,6 @@ namespace psycle
 
 		void Song::Reset()
 		{
-			_sampCount=0;
 			// Cleaning pattern allocation info
 			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -1207,7 +1202,7 @@ namespace psycle
 			return 1;
 		}
 
-		bool Song::Load(RiffFile* pFile, bool fullopen)
+		bool Song::Load(RiffFile* pFile, CProgressDialog& progress, bool fullopen)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
 			char Header[9];
@@ -1216,10 +1211,7 @@ namespace psycle
 
 			if (strcmp(Header,"PSY3SONG")==0)
 			{
-				CProgressDialog Progress;
-				Progress.Create();
-				Progress.SetWindowText("Loading...");
-				Progress.ShowWindow(SW_SHOW);
+				progress.SetWindowText("Loading new format...");
 				UINT version = 0;
 				UINT size = 0;
 				UINT index = 0;
@@ -1247,13 +1239,12 @@ namespace psycle
 				}
 
 				DestroyAllMachines();
-				_machineLock = true;
 				DeleteInstruments();
 				DeleteAllPatterns();
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				while(pFile->Read(&Header, 4) && chunkcount)
 				{
-					Progress.m_Progress.SetPos(helpers::math::lround<int,float>((pFile->GetPos()*16384.0f)/filesize));
+					progress.m_Progress.SetPos(helpers::math::lround<int,float>((pFile->GetPos()*16384.0f)/filesize));
 					::Sleep(1); ///< Allow screen refresh.
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)
@@ -1511,7 +1502,7 @@ namespace psycle
 					}
 				}
 				// now that we have loaded all the modules, time to prepare them.
-				Progress.m_Progress.SetPos(16384);
+				progress.m_Progress.SetPos(16384);
 				::Sleep(1); ///< ???
 				// test all connections for invalid machines. disconnect invalid machines.
 				for(int i(0) ; i < MAX_MACHINES ; ++i)
@@ -1570,32 +1561,20 @@ namespace psycle
 				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
 #endif //!defined WINAMP_PLUGIN
 				machineSoloed = solo;
-				// allow stuff to work again
-				_machineLock = false;
-				Progress.OnCancel();
-				if((!pFile->Close()) || (chunkcount))
+				// Safe measures for damaged files.
+				if (!_pMachine[MASTER_INDEX] )
 				{
-					if (!_pMachine[MASTER_INDEX] )
-					{
-						_pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
-						_pMachine[MASTER_INDEX]->Init();
-					}
-					std::ostringstream s;
-					s << "Error reading from file '" << pFile->szName << "'" << std::endl;
-					if(chunkcount) s << "some chunks were missing in the file";
-					else s << "could not close the file";
-					MessageBox(0, s.str().c_str(), "File Error!!!", 0);
-					return false;
+					_pMachine[MASTER_INDEX] = new Master(MASTER_INDEX);
+					_pMachine[MASTER_INDEX]->Init();
 				}
+				
+				if(chunkcount) return false;
 				return true;
 			}
 			else if(std::strcmp(Header, "PSY2SONG") == 0)
 			{
-				CProgressDialog Progress;
-				Progress.Create();
-				Progress.SetWindowText("Loading old format...");
-				Progress.ShowWindow(SW_SHOW);
 //				int i;
+				progress.SetWindowText("Loading old format...");
 				int num,sampR;
 				bool _machineActive[128];
 				unsigned char busEffect[64];
@@ -1656,7 +1635,7 @@ namespace psycle
 						RemovePattern(i);
 					}
 				}
-				Progress.m_Progress.SetPos(2048);
+				progress.m_Progress.SetPos(2048);
 				::Sleep(1); ///< ???
 				// Instruments
 				pFile->Read(&instSelected, sizeof instSelected);
@@ -1733,7 +1712,7 @@ namespace psycle
 					pFile->Read(&_pInstrument[i]->_RRES, sizeof(_pInstrument[0]->_RRES));
 				}
 				
-				Progress.m_Progress.SetPos(4096);
+				progress.m_Progress.SetPos(4096);
 				::Sleep(1);
 				// Waves
 				//
@@ -1787,7 +1766,7 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(4096+2048);
+				progress.m_Progress.SetPos(4096+2048);
 				::Sleep(1);
 				// VST DLLs
 				//
@@ -1810,12 +1789,10 @@ namespace psycle
 					}
 				}
 				
-				Progress.m_Progress.SetPos(8192);
+				progress.m_Progress.SetPos(8192);
 				::Sleep(1);
 				// Machines
 				//
-				_machineLock = true;
-
 				pFile->Read(&_machineActive[0], sizeof(_machineActive));
 				Machine* pMac[128];
 				memset(pMac,0,sizeof(pMac));
@@ -1831,7 +1808,7 @@ namespace psycle
 					int x,y,type;
 					if (_machineActive[i])
 					{
-						Progress.m_Progress.SetPos(8192+i*(4096/128));
+						progress.m_Progress.SetPos(8192+i*(4096/128));
 						::Sleep(1);
 
 						pFile->Read(&x, sizeof(x));
@@ -2026,7 +2003,7 @@ namespace psycle
 				}
 
 				// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
-				Progress.m_Progress.SetPos(8192+4096);
+				progress.m_Progress.SetPos(8192+4096);
 				::Sleep(1);
 				if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false )
 				{
@@ -2122,7 +2099,7 @@ namespace psycle
 				}
 
 				 // Patch 2: VST Chunks.
-				Progress.m_Progress.SetPos(8192+4096+1024);
+				progress.m_Progress.SetPos(8192+4096+1024);
 				::Sleep(1);
 				bool chunkpresent=false;
 				pFile->Read(&chunkpresent,sizeof(chunkpresent));
@@ -2165,7 +2142,7 @@ namespace psycle
 				// The old fileformat stored the volumes on each output, 
 				// so what we have in inputConVol is really the output
 				// and we have to convert it.
-				Progress.m_Progress.SetPos(8192+4096+2048);
+				progress.m_Progress.SetPos(8192+4096+2048);
 				::Sleep(1);
 				for (int i=0; i<128; i++) // we go to fix this for each
 				{
@@ -2207,7 +2184,7 @@ namespace psycle
 				// Due to this, we have to move machines to where they really are, 
 				// and remap the inputs and outputs indexes again... ouch
 				// At the same time, we validate each wire, and the number count.
-				Progress.m_Progress.SetPos(8192+4096+2048+1024);
+				progress.m_Progress.SetPos(8192+4096+2048+1024);
 				::Sleep(1);
 				unsigned char invmach[128];
 				memset(invmach,255,sizeof(invmach));
@@ -2290,11 +2267,10 @@ namespace psycle
 					}
 				}
 
-				Progress.m_Progress.SetPos(16384);
+				progress.m_Progress.SetPos(16384);
 				::Sleep(1);
 				if(fullopen) converter.retweak(*this);
 				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
-				_machineLock = false;
 				seqBus=0;
 				// Clean the vst loader helpers.
 				for (int i=0; i<OLD_MAX_PLUGINS; i++)
@@ -2304,15 +2280,6 @@ namespace psycle
 						zapObject(vstL[i].pars);
 					}
 				}
-				Progress.OnCancel();
-				if (!pFile->Close())
-				{
-					std::ostringstream s;
-					s << "Error reading from file '" << pFile->szName << "'" << std::endl;
-					MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
-					return false;
-				}
-
 				return true;
 			}
 
@@ -2322,21 +2289,13 @@ namespace psycle
 		}
 
 
-		bool Song::Save(RiffFile* pFile,bool autosave)
+		bool Song::Save(RiffFile* pFile,CProgressDialog& progress,bool autosave)
 		{
 			// NEW FILE FORMAT!!!
 			// this is much more flexible, making maintenance a breeze compared to that old hell.
 			// now you can just update one module without breaking the whole thing.
 
 			// header, this has to be at the top of the file
-
-			CProgressDialog Progress;
-			if ( !autosave ) 
-			{
-				Progress.Create();
-				Progress.SetWindowText("Saving...");
-				Progress.ShowWindow(SW_SHOW);
-			}
 
 			int chunkcount = 3; // 3 chunks plus:
 			for (int i = 0; i < MAX_PATTERNS; i++)
@@ -2378,8 +2337,8 @@ namespace psycle
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.SetRange(0,chunkcount);
-				Progress.m_Progress.SetStep(1);
+				progress.m_Progress.SetRange(0,chunkcount);
+				progress.m_Progress.SetStep(1);
 			}
 
 			/*
@@ -2402,7 +2361,7 @@ namespace psycle
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				progress.m_Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2428,7 +2387,7 @@ namespace psycle
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				progress.m_Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2479,7 +2438,7 @@ namespace psycle
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				progress.m_Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2514,7 +2473,7 @@ namespace psycle
 			}
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.StepIt();
+				progress.m_Progress.StepIt();
 				::Sleep(1);
 			}
 
@@ -2566,7 +2525,7 @@ namespace psycle
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						progress.m_Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -2603,7 +2562,7 @@ namespace psycle
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						progress.m_Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -2638,7 +2597,7 @@ namespace psycle
 
 					if ( !autosave ) 
 					{
-						Progress.m_Progress.StepIt();
+						progress.m_Progress.StepIt();
 						::Sleep(1);
 					}
 				}
@@ -2696,19 +2655,9 @@ namespace psycle
 
 			if ( !autosave ) 
 			{
-				Progress.m_Progress.SetPos(chunkcount);
+				progress.m_Progress.SetPos(chunkcount);
 				::Sleep(1);
-
-				Progress.OnCancel();
 			}
-
-			if (!pFile->Close())
-			{
-				std::ostringstream s;
-				s << "Error writing to file '" << pFile->szName << "'" << std::endl;
-				MessageBox(NULL,s.str().c_str(),"File Error!!!",0);
-			}
-
 			return true;
 		}
 		void Song::DoPreviews(int amount)

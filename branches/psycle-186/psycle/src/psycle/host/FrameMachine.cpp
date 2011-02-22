@@ -525,7 +525,7 @@ namespace psycle { namespace host {
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
 						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+							Global::pInputHandler->PlayNote(outnote,255,127,true,_pMachine);
 						else
 							Global::pInputHandler->PlayNote(outnote);
 					}

@@ -1,115 +1,92 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveOutDialog.
 
-
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
-
-#if defined DIVERSALIS__COMPILER__MICROSOFT
-	#pragma warning(push)
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-#endif
-
-#include <mmsystem.h>
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "winmm")
-#endif
-
-#if defined DIVERSALIS__COMPILER__MICROSOFT
-	#pragma warning(pop)
-#endif
+#include "WaveOut.hpp"
 
 namespace psycle { namespace host {
-
-		CWaveOutDialog::CWaveOutDialog(CWnd* pParent) : CDialog(CWaveOutDialog::IDD, pParent)
+		CWaveOutDialog::CWaveOutDialog(CWnd* pParent)
+			: CDialog(CWaveOutDialog::IDD, pParent)
+			, m_device(-1)
+			, m_sampleRate(44100)
+			, m_bitDepth(16)
+			, m_dither(false)
+			, m_bufNum(6)
+			, m_bufSamples(1024)
+			, waveout(NULL)
 		{
-			//{{AFX_DATA_INIT(CWaveOutDialog)
-			m_BufNum = 0;
-			m_BufSize = 0;
-			m_Device = -1;
-			m_Dither = FALSE;
-			//}}AFX_DATA_INIT
 		}
 
 		void CWaveOutDialog::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CWaveOutDialog)
-			DDX_Control(pDX, IDC_CONFIG_LATENCY, m_Latency);
-			DDX_Control(pDX, IDC_CONFIG_BUFSIZE_SPIN, m_BufSizeSpin);
-			DDX_Control(pDX, IDC_CONFIG_BUFNUM_SPIN, m_BufNumSpin);
-			DDX_Control(pDX, IDC_CONFIG_BUFSIZE, m_BufSizeEdit);
-			DDX_Control(pDX, IDC_CONFIG_BUFNUM, m_BufNumEdit);
-			DDX_Control(pDX, IDC_CONFIG_DITHER, m_DitherCheck);
-			DDX_Control(pDX, IDC_CONFIG_DEVICE, m_DeviceList);
-			DDX_Control(pDX, IDC_CONFIG_SAMPLERATE, m_SampleRateBox);
-			DDX_Text(pDX, IDC_CONFIG_BUFNUM, m_BufNum);
-			DDV_MinMaxInt(pDX, m_BufNum, 2, 8);
-			DDX_Text(pDX, IDC_CONFIG_BUFSIZE, m_BufSize);
-			DDV_MinMaxInt(pDX, m_BufSize, 512, 32256);
-			DDX_CBIndex(pDX, IDC_CONFIG_DEVICE, m_Device);
-			DDX_Check(pDX, IDC_CONFIG_DITHER, m_Dither);
-			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_CONFIG_DEVICE, m_deviceList);
+			DDX_CBIndex(pDX, IDC_CONFIG_DEVICE, m_device);
+			DDX_Control(pDX, IDC_CONFIG_SAMPLERATE, m_sampleRateBox);
+			DDX_Control(pDX, IDC_WAVEOUT_BITDEPTH, m_bitDepthBox);
+			DDX_Control(pDX, IDC_CONFIG_BUFNUM, m_bufNumEdit);
+			DDX_Control(pDX, IDC_CONFIG_BUFNUM_SPIN, m_bufNumSpin);
+			DDX_Text(pDX, IDC_CONFIG_BUFNUM, m_bufNum);
+			DDX_Control(pDX, IDC_CONFIG_BUFSIZE, m_bufSamplesEdit);
+			DDX_Control(pDX, IDC_CONFIG_BUFSIZE_SPIN, m_bufSamplesSpin);
+			DDX_Text(pDX, IDC_CONFIG_BUFSIZE, m_bufSamples);
+			DDX_Control(pDX, IDC_CONFIG_LATENCY, m_latency);
 		}
 
 		BEGIN_MESSAGE_MAP(CWaveOutDialog, CDialog)
-			//{{AFX_MSG_MAP(CWaveOutDialog)
-			ON_EN_CHANGE(IDC_CONFIG_BUFNUM, OnChangeConfigBufnum)
-			ON_EN_CHANGE(IDC_CONFIG_BUFSIZE, OnChangeConfigBufsize)
-			ON_CBN_SELENDOK(IDC_CONFIG_SAMPLERATE, OnSelendokConfigSamplerate)
-			//}}AFX_MSG_MAP
+			ON_CBN_SELENDOK(IDC_CONFIG_SAMPLERATE, OnSelendokSamplerate)
+			ON_CBN_SELENDOK(IDC_WAVEOUT_BITDEPTH, OnSelendokBitDepth)
+			ON_EN_CHANGE(IDC_CONFIG_BUFNUM, OnChangeBufnum)
+			ON_EN_CHANGE(IDC_CONFIG_BUFSIZE, OnChangeBufsize)
 		END_MESSAGE_MAP()
-
-		#define MIN_NBUF 2
-		#define MAX_NBUF 8
-		#define MIN_SBUF 512
-		#define MAX_SBUF (32768 - 512)
 
 		BOOL CWaveOutDialog::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
+			std::vector<std::string> enums;
+			waveout->RefreshAvailablePorts();
+			waveout->GetPlaybackPorts(enums);
 			// device list
 			{
-				int n = waveOutGetNumDevs();
-			
-				for (int i = 0; i < n; i++)
+				for (int i = 0; i < enums.size(); i++)
 				{
-					WAVEOUTCAPS caps;
-					waveOutGetDevCaps(i, &caps, sizeof(WAVEOUTCAPS));
-
-					m_DeviceList.AddString(caps.szPname);
+					m_deviceList.AddString(enums[i].c_str());
 				}
 					
-				if (m_Device >= n)
-					m_Device = 0;
+				if (m_device >= enums.size())
+					m_device = 0;
 
-				m_DeviceList.SetCurSel(m_Device);
+				m_deviceList.SetCurSel(m_device);
 			}
 			// samplerate
 			{
 				CString str;
-				str.Format("%d", m_SampleRate);
+				str.Format("%d", m_sampleRate);
 				
-				int i = m_SampleRateBox.SelectString(-1, str);
+				int i = m_sampleRateBox.SelectString(-1, str);
 				if (i == CB_ERR)
-					i = m_SampleRateBox.SelectString(-1, "44100");
+					i = m_sampleRateBox.SelectString(-1, "44100");
 			}
-			// dither
-			m_DitherCheck.SetCheck(m_Dither ? 1 : 0);
+			// bit depth
+			{
+				switch(m_bitDepth) {
+				case 16: if (m_dither) m_bitDepthBox.SetCurSel(1);
+						 else  m_bitDepthBox.SetCurSel(0);
+						 break;
+				case 24: m_bitDepthBox.SetCurSel(2); break;
+				case 32: m_bitDepthBox.SetCurSel(3); break;
+				}
+			}
 			// buffers
 			{
-				CString str;
-				str.Format("%d", m_BufNum);
-				m_BufNumEdit.SetWindowText(str);
-				m_BufNumSpin.SetRange(MIN_NBUF, MAX_NBUF);
-				str.Format("%d", m_BufSize);
-				m_BufSizeEdit.SetWindowText(str);
-				m_BufSizeSpin.SetRange(MIN_SBUF, MAX_SBUF);
+				m_bufNumSpin.SetRange(numbuf_min, numbuf_max);
+				m_bufSamplesSpin.SetRange(numsamples_min, numsamples_max);
 				UDACCEL acc;
 				acc.nSec = 0;
-				acc.nInc = 512;
-				m_BufSizeSpin.SetAccel(1, &acc);
+				acc.nInc = 128;
+				m_bufSamplesSpin.SetAccel(1, &acc);
 			}
 			RecalcLatency();
 			return TRUE;
@@ -119,83 +96,72 @@ namespace psycle { namespace host {
 
 		void CWaveOutDialog::OnOK() 
 		{
-			CString str;
-			m_SampleRateBox.GetWindowText(str);
-			m_SampleRate = atoi(str);
-			
 			CDialog::OnOK();
 		}
 
 		void CWaveOutDialog::RecalcLatency()
 		{
 			CString str;
-			m_BufNumEdit.GetWindowText(str);
-			int nbuf = atoi(str);
-
-			if (nbuf < MIN_NBUF)
-			{
-				nbuf = MIN_NBUF;
-				str.Format("%d", nbuf);
-				m_BufNumEdit.SetWindowText(str);
-			}
-			else if (nbuf > MAX_NBUF)
-			{
-				nbuf = MAX_NBUF;
-				str.Format("%d", nbuf);
-				m_BufNumEdit.SetWindowText(str);
-			}
-
-			m_BufSizeEdit.GetWindowText(str);
-			int sbuf = atoi(str);
-
-			if (sbuf < MIN_SBUF)
-			{
-				sbuf = MIN_SBUF;
-				str.Format("%d", sbuf);
-				m_BufSizeEdit.SetWindowText(str);
-			}
-			else if (sbuf > MAX_SBUF)
-			{
-				sbuf = MAX_SBUF;
-				str.Format("%d", sbuf);
-				m_BufSizeEdit.SetWindowText(str);
-			}
-			
-			m_SampleRateBox.GetWindowText(str);
-			int sr = atoi(str);
-
-			int totalbytes = nbuf * sbuf;
-
-			int lat = (totalbytes * (1000 / 4)) / sr;
+			int lat = (m_bufSamples*m_bufNum* 1000) / m_sampleRate;
 
 			str.Format("Latency: %dms", lat);
-			m_Latency.SetWindowText(str);
+			m_latency.SetWindowText(str);
 		}
 
-		void CWaveOutDialog::OnChangeConfigBufnum() 
+		void CWaveOutDialog::OnChangeBufnum() 
 		{
-			if (!IsWindow(m_BufNumEdit.GetSafeHwnd()))
+			if (!IsWindow(m_bufNumEdit.GetSafeHwnd()))
 				return;
 
-			RecalcLatency();
-		}
+			CString str;
+			m_bufNumEdit.GetWindowText(str);
+			m_bufNum = atoi(str);
 
-		void CWaveOutDialog::OnChangeConfigBufsize() 
-		{
-			if (!IsWindow(m_BufSizeEdit.GetSafeHwnd()))
-				return;
-
-			RecalcLatency();
-		}
-
-		void CWaveOutDialog::OnSelendokConfigSamplerate() 
-		{
-			if (!IsWindow(m_SampleRateBox.GetSafeHwnd()))
-				return;
+			if(m_bufNum < numbuf_min) { m_bufNum = numbuf_min; str.Format("%d", m_bufNum); m_bufNumEdit.SetWindowText(str); }
+			else if(m_bufNum > numbuf_max) { m_bufNum = numbuf_max; str.Format("%d", m_bufNum); m_bufNumEdit.SetWindowText(str);}
 			
 			RecalcLatency();
 		}
 
-		}   // namespace
+		void CWaveOutDialog::OnChangeBufsize() 
+		{
+			if (!IsWindow(m_bufSamplesEdit.GetSafeHwnd()))
+				return;
+
+			CString str;
+			m_bufSamplesEdit.GetWindowText(str);
+			m_bufSamples = atoi(str);
+			if(m_bufSamples < numsamples_min) { m_bufSamples = numsamples_min; str.Format("%d", m_bufSamples); m_bufSamplesEdit.SetWindowText(str);}
+			else if(m_bufSamples > numsamples_max) { m_bufSamples = numsamples_max; str.Format("%d", m_bufSamples); m_bufSamplesEdit.SetWindowText(str);}
+
+			RecalcLatency();
+		}
+
+		void CWaveOutDialog::OnSelendokSamplerate() 
+		{
+			if (!IsWindow(m_sampleRateBox.GetSafeHwnd()))
+				return;
+			
+			CString str;
+			m_sampleRateBox.GetWindowText(str);
+			m_sampleRate = atoi(str);
+			RecalcLatency();
+		}
+
+		void CWaveOutDialog::OnSelendokBitDepth()
+		{
+			if (!IsWindow(m_bitDepthBox.GetSafeHwnd()))
+				return;
+			
+			int pos = m_bitDepthBox.GetCurSel();
+			switch(pos) {
+			case 0: m_bitDepth = 16; m_dither=false; break;
+			case 1: m_bitDepth = 16; m_dither=true; break;
+			case 2: m_bitDepth = 24; m_dither=false; break;
+			case 3:  m_bitDepth = 32; m_dither=false; break;
+			}
+		}
+
+	}   // namespace
 }   // namespace
 

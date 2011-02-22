@@ -158,8 +158,9 @@ namespace psycle { namespace host {
 			
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
+			EnableDocking(CBRS_ALIGN_ANY);
+
 			// create a view to occupy the client area of the frame
-			
 			if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
 			{
@@ -167,25 +168,24 @@ namespace psycle { namespace host {
 				return -1;
 			}
 			m_wndView.ValidateParent();
-
 			// Create Toolbars.
-			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP
-				| CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT| TBSTYLE_TRANSPARENT) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
-			if (!m_wndControl.Create(this, IDD_PSYBAR, CBRS_ALIGN_TOP | CBRS_SIZE_DYNAMIC, AFX_IDW_DIALOGBAR))
+			if (!m_wndControl.Create(this, IDD_PSYBAR, CBRS_ALIGN_TOP|CBRS_FLYBY, AFX_IDW_DIALOGBAR))
 			{
 				TRACE0("Failed to create dialogbar\n");
 				return -1;		// fail to create
 			}
-			if (!m_wndControl2.Create(this, IDD_PSYBAR2, CBRS_ALIGN_TOP | CBRS_SIZE_DYNAMIC, AFX_IDW_DIALOGBAR))
+			if (!m_wndControl2.Create(this, IDD_PSYBAR2, CBRS_ALIGN_TOP|CBRS_FLYBY, AFX_IDW_DIALOGBAR))
 			{
 				TRACE0("Failed to create dialogbar\n");
 				return -1;		// fail to create
 			}
+
 			if (!m_wndReBar.Create(this) ||
 				!m_wndReBar.AddBar(&m_wndToolBar) ||
 				!m_wndReBar.AddBar(&m_wndControl) ||
@@ -194,6 +194,7 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create rebar\n");
 				return -1;      // fail to create
 			}
+			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY);
 
 			// Status bar
 			if (!m_wndStatusBar.Create(this) ||
@@ -323,7 +324,8 @@ namespace psycle { namespace host {
 
 
 			// Sequencer Bar
-			m_wndSeq.Create(this,IDD_SEQUENCER,CBRS_LEFT,AFX_IDW_DIALOGBAR);
+			m_wndSeq.Create(this,IDD_SEQUENCER,CBRS_LEFT|CBRS_FLYBY, AFX_IDW_DIALOGBAR);
+
 			m_seqListbox.SubclassDlgItem(IDC_SEQLIST,&m_wndSeq );
 
 			// set multichannel audition checkbox status
@@ -1635,6 +1637,9 @@ namespace psycle { namespace host {
 						break;
 					case MACH_XMSAMPLER:
 						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
+						break;
+					case MACH_RECORDER:
+						if (m_wndView.WaveInMachineDialog) m_wndView.WaveInMachineDialog->DestroyWindow();
 						break;
 					case MACH_DUPLICATOR:
 //					case MACH_LFO:

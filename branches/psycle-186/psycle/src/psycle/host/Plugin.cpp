@@ -244,7 +244,9 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
 					throw;
+#endif
 				}
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
 				{
@@ -254,7 +256,9 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
+#ifndef NDEBUG 
 						throw;
+#endif
 					}
 				}
 			}
@@ -284,6 +288,10 @@ namespace psycle
 			}
 			catch(const std::exception & e)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
+
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath << std::endl
 					<< "Replacing with dummy." << std::endl
@@ -291,15 +299,20 @@ namespace psycle
 					<< e.what();
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
+#endif
 			}
 			catch(...)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath2 << std::endl
 					<< "Replacing with dummy." << std::endl
 					<< "Unkown type of exception";
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
+#endif
 			}
 			return true;
 		}
@@ -313,7 +326,11 @@ namespace psycle
 			}
 			catch(const std::exception & e)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
 				if(!exception) exception = &e;
+#endif
 			}
 			if(_dll)
 			{
@@ -365,8 +382,12 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
+#ifndef NDEBUG 
+					throw;
+#else
 							delete pData;
 							return false;
+#endif
 						}
 						delete pData;
 						return true;
@@ -386,6 +407,9 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw;
+#endif
 				// data won't be saved
 			}
 			UINT size = size2 + sizeof(count) + sizeof(int)*count;
@@ -408,6 +432,10 @@ namespace psycle
 				{
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
+#ifndef NDEBUG 
+					throw;
+#endif
+
 				}
 				pFile->Write(pData, size2); // Number of parameters
 				zapArray(pData);
@@ -458,6 +486,11 @@ namespace psycle
 							}
 							catch(const std::exception &)
 							{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 							}
 							ns = 0;
 						}
@@ -472,6 +505,11 @@ namespace psycle
 								}
 								catch(const std::exception &)
 								{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 								}
 								us += nextevent;
 							}
@@ -503,6 +541,11 @@ namespace psycle
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 										}
 									}
@@ -523,6 +566,11 @@ namespace psycle
 										}
 										catch(const std::exception &)
 										{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 										}
 										TriggerDelay[i]._cmd = 0;
 									}
@@ -542,6 +590,11 @@ namespace psycle
 										}
 										catch(const std::exception &)
 										{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 									}
@@ -561,6 +614,11 @@ namespace psycle
 										}
 										catch(const std::exception &)
 										{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
@@ -596,6 +654,11 @@ namespace psycle
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 											ArpeggioCount[i]++;
 											break;
@@ -607,6 +670,11 @@ namespace psycle
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 											ArpeggioCount[i]++;
 											break;
@@ -618,6 +686,11 @@ namespace psycle
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 											ArpeggioCount[i]=0;
 											break;
@@ -650,7 +723,11 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return false;
+#endif
 				}
 				return true;
 			}
@@ -692,7 +769,11 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return -1; // hmm
+#endif
 				}
 			}
 			else return -1; // hmm
@@ -709,6 +790,11 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 				}
 			}
 			else std::strcpy(parval,"Out of Range");
@@ -722,10 +808,16 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 			}
 		}
 		void Plugin::SetSampleRate(int sr)
 		{
+			Machine::SetSampleRate(sr);
 			Tick();
 		}
 
@@ -737,6 +829,11 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 			}
 		}
 
@@ -757,6 +854,11 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 					}
 					Global::pPlayer->Tweaker = true;
 				}
@@ -814,6 +916,11 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 						}
 						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer->SamplesPerRow();
 						TWSSamples = 0;
@@ -833,6 +940,11 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 						}
 					}
 				}
@@ -845,17 +957,28 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return;
+#endif
 				}
 			}
 			else {
 				try
 				{
+					if(channel == -1) {
+						//channel = GetFreePlayTrack(pData->_note, pData->_inst);
+					}
 					proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return;
+#endif
 				}
 			}
 		}

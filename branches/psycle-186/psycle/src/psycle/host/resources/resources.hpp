@@ -117,6 +117,7 @@
 #define IDB_SWITCHOFF                   275
 #define IDD_TRANSFORMPATTERN            277
 #define IDD_MIDI_REMAP                  278
+#define IDD_WASAPI_CONFIG               280
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -140,9 +141,13 @@
 #define IDC_DSOUND_LATENCY              1020
 #define IDC_DSOUND_SAMPLERATE_COMBO     1021
 #define IDC_DSOUND_DITHER               1022
+#define IDC_DSOUND_SAMPLERATE_COMBO3    1022
+#define IDC_WASAPI_BITS                 1022
 #define IDC_EXCLUSIVE                   1023
+#define IDC_DSOUND_24BITS               1023
 #define IDC_BROWSESONG                  1024
 #define IDC_DSOUND_BITDEPTH_COMBO       1024
+#define IDC_DSOUND_BITDEPTH             1024
 #define IDC_SONGEDIT                    1025
 #define IDC_BROWSEINST                  1026
 #define IDC_INSTEDIT                    1027
@@ -554,7 +559,9 @@
 #define IDC_MIDI_TO_14                  1383
 #define IDC_MIDI_TO_15                  1384
 #define IDC_LEARN_0                     1385
+#define IDC_MIDI_GEN_SELECT             1385
 #define IDC_LEARN_1                     1386
+#define IDC_MIDI_INSTR_SELECT           1386
 #define IDC_LEARN_2                     1387
 #define IDC_LEARN_3                     1388
 #define IDC_LEARN_4                     1389
@@ -572,7 +579,6 @@
 #define IDC_PBG_CAN                     1401
 #define IDC_MIDI_RAW                    1401
 #define IDC_ROW_CAN                     1402
-#define IDC_MIDI_CHANNEL_IN_AUX         1402
 #define IDC_BEAT_CAN                    1403
 #define IDC_FONT_CAN                    1404
 #define IDC_4BEAT_CAN                   1405
@@ -1045,6 +1051,7 @@
 #define IDC_OUTPUTCLIPBOARD             1791
 #define IDC_APPLYTOPATTERN              1791
 #define IDC_PSYCLEVSTBRIDGE             1791
+#define IDC_ACCESS_EXCLUSIVE            1791
 #define IDC_LINESTART                   1792
 #define IDC_OUTPUTCLIPBOARD2            1793
 #define IDC_OUTPUTSAMPLE                1793
@@ -1060,6 +1067,15 @@
 #define IDC_LIST2                       1804
 #define IDC_JBRIDGE                     1805
 #define IDC_ENABLEBRIDGE                1806
+#define IDC_CPU_PERF                    1808
+#define IDC_RADIO1                      1809
+#define IDC_ACCESS_SHARED               1809
+#define IDC_WAVEOUT_BITDEPTH            1810
+#define IDC_SPLIT1                      1811
+#define IDC_WASAPI_DEVICE               1812
+#define IDC_WASAPI_SAMPLERATE_COMBO     1813
+#define IDC_WASAPI_BUFFERSIZE_COMBO     1814
+#define IDC_WASAPI_LATENCY              1815
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1229,9 +1245,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        279
+#define _APS_NEXT_RESOURCE_VALUE        282
 #define _APS_NEXT_COMMAND_VALUE         34212
-#define _APS_NEXT_CONTROL_VALUE         1807
+#define _APS_NEXT_CONTROL_VALUE         1816
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

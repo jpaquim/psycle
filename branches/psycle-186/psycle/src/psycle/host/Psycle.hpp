@@ -49,7 +49,6 @@ namespace psycle { namespace host {
 			CEdit	m_sourceforge;
 			CEdit	m_psycledelics;
 			CStatic	m_steincopyright;
-			CStatic	m_headerdlg;
 			CButton	m_showabout;
 			CStatic	m_headercontrib;
 			CStatic	m_aboutbmp;

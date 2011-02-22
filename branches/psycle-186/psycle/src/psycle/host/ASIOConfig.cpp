@@ -3,43 +3,33 @@
 
 
 #include "ASIOConfig.hpp"
+#include "ASIOInterface.hpp"
+
 namespace psycle { namespace host {
-
-		#define MIN_NUMBUF 1
-		#define MAX_NUMBUF 16
-
-		#define MIN_BUFSIZE 256
-		#define MAX_BUFSIZE 32768
 
 		CASIOConfig::CASIOConfig(CWnd* pParent) : CDialog(CASIOConfig::IDD, pParent)
 		{
-			//{{AFX_DATA_INIT(CASIOConfig)
 			m_bufferSize = 1024;
 			m_driverIndex = -1;
-			//}}AFX_DATA_INIT
 		}
 
 		void CASIOConfig::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CASIOConfig)
 			DDX_Control(pDX, IDC_ASIO_DRIVER, m_driverComboBox);
 			DDX_Control(pDX, IDC_ASIO_LATENCY, m_latency);
 			DDX_Control(pDX, IDC_ASIO_SAMPLERATE_COMBO, m_sampleRateCombo);
 			DDX_CBIndex(pDX, IDC_ASIO_DRIVER, m_driverIndex);
 			DDX_Control(pDX, IDC_ASIO_BUFFERSIZE_COMBO, m_bufferSizeCombo);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CASIOConfig, CDialog)
-			//{{AFX_MSG_MAP(CASIOConfig)
 			ON_CBN_SELENDOK(IDC_ASIO_SAMPLERATE_COMBO, OnSelendokSamplerate)
 			ON_CBN_SELENDOK(IDC_ASIO_BUFFERSIZE_COMBO, OnSelendokBuffersize)
 			ON_WM_DESTROY()
 			ON_BN_CLICKED(IDC_CONTROL_PANEL, OnControlPanel)
 			ON_CBN_SELCHANGE(IDC_ASIO_DRIVER, OnSelchangeAsioDriver)
 			ON_BN_CLICKED(IDOK, OnBnClickedOk)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		void CASIOConfig::RecalcLatency()
@@ -49,7 +39,8 @@ namespace psycle { namespace host {
 			int sbuf = atoi(str);
 			m_sampleRateCombo.GetWindowText(str);
 			int sr = atoi(str);
-			int lat = (sbuf * (1000)) / sr;
+			//Multiplied by two becauase we have two buffers
+			int lat = (sbuf * 2 * 1000) / sr;
 			str.Format("Latency: %dms", lat);
 			m_latency.SetWindowText(str);
 		}
@@ -58,13 +49,14 @@ namespace psycle { namespace host {
 		{
 			CString str;
 			CDialog::OnInitDialog();
-
+			pASIO->RefreshAvailablePorts();
 			for (unsigned int i(0); i < pASIO->_drivEnum.size(); ++i)
 			{
 				char szFullName[160];
 				for (unsigned int j(0); j < pASIO->_drivEnum[i]._portout.size(); ++j)
 				{
 					strcpy(szFullName,pASIO->_drivEnum[i]._name.c_str());
+					strcat(szFullName," ");
 					strcat(szFullName,pASIO->_drivEnum[i]._portout[j].GetName().c_str());
 					m_driverComboBox.AddString(szFullName);
 				}
@@ -157,11 +149,11 @@ namespace psycle { namespace host {
 			m_bufferSizeCombo.ResetContent();
 			ASIOInterface::DriverEnum driver = pASIO->GetDriverFromidx(m_driverIndex);
 			int g = driver.granularity;
-			if (g < 0)
+			if (g <= 0)
 			{
 				for (int i = driver.minSamples; i <= driver.maxSamples; i *= 2)
 				{
-					if (i < pASIO->_ASIObufferSize)
+					if (i < pASIO->_ASIObufferSamples)
 					{
 						prefindex++;
 					}
@@ -178,7 +170,7 @@ namespace psycle { namespace host {
 
 				for (int i = driver.minSamples; i <= driver.maxSamples; i += g)
 				{
-					if (i < pASIO->_ASIObufferSize)
+					if (i < pASIO->_ASIObufferSamples)
 					{
 						prefindex++;
 					}

@@ -30,7 +30,7 @@ namespace psycle
 		#define MIDI_BUFFER_SIZE 1024
 		#define MIDI_PREDELAY_MS 200
 
-		#define VERSION_STRING "v2.2b"
+		#define VERSION_STRING "v2.3"
 
 		///\name FLAGS
 		///\{
@@ -82,6 +82,8 @@ namespace psycle
 			std::uint32_t timeStamp;
 			/// MIDI channel
 			int channel;
+			/// tracker track
+			int track;
 		};
 
 		class MIDI_CONFIG
@@ -96,24 +98,24 @@ namespace psycle
 		class MIDI_STATS
 		{
 		public:
-			/// error (latency) of the last sync event (samples)
-			int syncEventLatency;	
-			/// last sync adjustment value (samples)
-			int syncAdjuster;		
 			/// amount of MIDI messages currently in the buffer (events)
-			int bufferCount;		
+			int bufferCount;
 			/// capacity of the MIDI message buffer (events)
-			int bufferSize;			
+			int bufferSize;
 			/// how many events have been lost and not played? (events)
-			int eventsLost;			
+			int eventsLost;
+			/// clock deviation between the PC clock and the MIDI clock on last clock (ms)
+			int clockDeviation;
+			/// last sync adjustment value (samples)
+			int syncAdjuster;
 			/// how far off the audio engine is from the MIDI (ms)
-			int syncOffset;			
+			int syncOffset;
 			/// bitmapped channel active map	(CLEAR AFTER READ)
 			unsigned int channelMap;
 			/// strobe for the channel map list
 			bool channelMapUpdate;
 			/// 32 bits of boolean info (see FLAGS, CLEAR AFTER READ)
-			std::uint32_t flags;			
+			std::uint32_t flags;
 		};
 
 		enum MODES
@@ -141,15 +143,14 @@ namespace psycle
 			static CMidiInput * Instance() { return s_Instance; }
 
 			/// set MIDI input device identifier
-			void SetDeviceId(unsigned int driver, int devId);	
+			void SetDeviceId(unsigned int driver, int devId);
 			/// open the midi input devices
-			bool Open();				
-			/// start input (reset timestamps)
-			bool Sync();			
+			bool Open();
+		public:
 			/// resync the MIDI with the audio engine
-			void ReSync();			
+			void ReSync();
 			/// close the midi input device
-			bool Close( );				
+			bool Close( );
 
 			/// find out if we are open
 			bool Active() { return m_midiInHandle[ DRIVER_MIDI ]!=NULL; }
@@ -201,14 +202,17 @@ namespace psycle
 			/// the real callbacks
 			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
-			/// interal engine resync process
+			/// We've received a resync message
 			void InternalReSync( DWORD_PTR dwParam2 );
-			/// ???
+			/// We've received a clock message
 			void InternalClock( DWORD_PTR dwParam2 );
+			int GetTrackToPlay(int note, int velocity, int instNo);
 
 			/// the current instance pointer
 			static CMidiInput * s_Instance;	
 
+			/// midi device identifiers
+			int m_devId[ MAX_DRIVERS ];		
 			/// current input device handles
 			HMIDIIN m_midiInHandle[ MAX_DRIVERS ];	
 			/// for once-only tell of problems
@@ -222,23 +226,34 @@ namespace psycle
 			bool m_channelNoteOff[ MAX_MIDI_CHANNELS ];			
 			/// channel->controller->parameter map
 			int m_channelController[ MAX_MIDI_CHANNELS ][ MAX_CONTROLLERS ];		
+			/// helper variable used in setting a controller map
+			int m_channelSetting[ MAX_MIDI_CHANNELS ];	
 
+			/// external telling us we need a resync
+			bool m_reSync;			
+			/// have we been synced with the audio engine yet?
+			bool m_synced;			
+			/// are we in the process of syncing?
+			bool m_syncing;			
 			///\name audio-engine timing vars
 			///\{
-				/// .
-				std::uint32_t m_timingCounter;
-				/// .
+				/// Time (in millis) at which the MIDI port was started (can be used for own clock. Currently unused)
+				std::uint32_t m_pc_clock_base;
+				/// Time (in millis) at last resync (used to calculate the MIDI IN Clock deviation)
+				std::uint32_t m_resyncClockBase;
+				/// MIDI In clock (in millis) at the time of Resync. Used to verify clock deviation between MIDI IN clock calls
+				std::uint32_t m_resyncMidiStampTime;
+				/// play position (Sample being played), at the time of Resync. Used to verify clock deviation between MIDI IN clock calls
+				int m_resyncPlayPos;	
+				/// difference in samples between the clock position that we should be and the one we are
+				int m_fixOffset;
+				/// Adjusted MIDI In clock (in millis) at the time of Resync for the next event to be written into the audio buffer
+				std::uint32_t m_resyncAdjStampTime;
+				/// Accumulator (in samples) since last resync.
 				std::uint32_t m_timingAccumulator;
-				/// .
-				std::uint32_t m_prevTimingCounter;
-				/// the base sync stamp
-				std::uint32_t m_baseStampTime;	
-				/// .
-				std::uint32_t m_tickBase;
+				/// Accumulator (in millis) since last resync. (Used to know which events to process for this injectMIDI call).
+				std::uint32_t m_timingCounter;
 			///\}
-
-			/// midi device identifiers
-			int m_devId[ MAX_DRIVERS ];		
 
 			/// configuration information
 			MIDI_CONFIG	m_config;	
@@ -247,39 +262,18 @@ namespace psycle
 			
 			/// midi buffer
 			MIDI_BUFFER m_midiBuffer[ MIDI_BUFFER_SIZE ];	
-
-			/// used in setting a controller map
-			int m_channelSetting[ MAX_MIDI_CHANNELS ];	
-
 			///\name buffer indexes
 			///\{
-				/// .
-				int m_patIn;
-				/// .
-				int m_patOut;
-				/// .
-				int m_patCount;
-			///\}
+				/// Position in the buffer to receive a new event.
+				int m_bufWriteIdx;
+				/// Position in the buffer for the first event to be read.
+				int m_bufReadIdx;
+				/// Amount of valid events in the buffer, starting in m_bufReadIdx
+				int m_bufCount;
 
-			/// external telling us we need a resync
-			bool m_reSync;			
-			/// have we been synced with the audio engine yet?
-			bool m_synced;			
-			/// are we in the process of syncing?
-			bool m_syncing;			
-
-			///\name syncronization variables
-			///\{
-				/// .
-				std::uint32_t m_baseStampTimeFix;
-				/// .
-				int m_fixOffset;
-				/// .
-				int m_lastPlayPos;
-				/// .
-				int m_wraps;
-				/// adjusted play position
-				int m_adjustedPlayPos;	
+				unsigned char notetrack[MAX_TRACKS];
+				unsigned char instrtrack[MAX_TRACKS];
+				int currenttrack;
 			///\}
 		};
 	}

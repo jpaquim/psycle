@@ -12,7 +12,7 @@ class Dummy : public Machine
 public:
 	Dummy(int index);
 	Dummy(Machine *mac);
-	virtual int GenerateAudio(int numSamples);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
@@ -56,7 +56,7 @@ public:
 	virtual void Init(void);
 	virtual void Tick();
 	virtual void CustomTick(int channel,int i, PatternEntry& pData);
-	virtual int GenerateAudio(int numSamples);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual void GetParamName(int numparam,char *name);
@@ -106,9 +106,9 @@ public:
 	AudioRecorder();
 	AudioRecorder(int index);
 	virtual ~AudioRecorder();
-	virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
+	virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage) { Machine::PreWork(numSamples,false,measure_cpu_usage); }
 	virtual void Init(void);
-	virtual int GenerateAudio(int numSamples);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
@@ -118,6 +118,7 @@ public:
 
 	static char* _psName;
 
+	char drivername[32];
 	int _captureidx;
 	bool _initialized;
 	float _gainvol;
@@ -301,7 +302,7 @@ public:
 	virtual ~Mixer() throw();
 	virtual void Init(void);
 	virtual void Tick( int channel,PatternEntry* pData);
-	virtual void recursive_process(unsigned int frames);
+	virtual void recursive_process(unsigned int frames, bool measure_cpu_usage);
 	///\name used by the multi-threaded scheduler
 	///\{
 		protected:
@@ -310,9 +311,9 @@ public:
 			/// tells the scheduler which machines may be processed after this one
 			/*override*/ void sched_outputs(sched_deps&) const;
 			/// called by the scheduler to ask for the actual processing of the machine
-			/*override*/ bool sched_process(unsigned int frames);
+			/*override*/ bool sched_process(unsigned int frames, bool measure_cpu_usage);
 	///\}
-	void FxSend(int numSamples, bool recurse = true);
+	void FxSend(int numSamples, bool recurse, bool measure_cpu_usage);
 	void Mix(int numSamples);
 public:
 	virtual void GetWireVolume(int wireIndex, float &value){ value = GetWireVolume(wireIndex); }

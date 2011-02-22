@@ -4,10 +4,6 @@
 
 #include "Psycle.hpp"
 
-#ifndef __AFXMT_H__
-	#include <afxmt.h>
-#endif
-
 class CExclusiveLock
 {
 public:

@@ -11,7 +11,8 @@ namespace host {
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
-		const int SCOPE_SPEC_SAMPLES = 1024;
+		//const int SCOPE_SPEC_SAMPLES = 1024;
+		const int MAX_SCOPE_SPEC_SAMPLES = 4096;
 
 		class Song;
 
@@ -82,8 +83,8 @@ namespace host {
 			int pos;
 			int bar_heightsl[MAX_SCOPE_BANDS];
 			int bar_heightsr[MAX_SCOPE_BANDS];
-			float sth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
-			float cth[SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
+			float sth[MAX_SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
+			float cth[MAX_SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
 			// Generated message map functions
 			virtual BOOL OnInitDialog();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);

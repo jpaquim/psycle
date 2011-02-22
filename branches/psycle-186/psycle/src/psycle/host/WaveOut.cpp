@@ -3,7 +3,6 @@
 
 
 #include "WaveOut.hpp"
-#include "resources/resources.hpp"
 #include "WaveOutDialog.hpp"
 #include "Registry.hpp"
 #include "Configuration.hpp"
@@ -11,7 +10,10 @@
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/aligned_alloc.hpp>
+#include <psycle/helpers/dsp.hpp>
 #include <process.h>
+#include "cpu_time_clock.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -44,13 +46,30 @@ namespace psycle
 			EnumerateCapturePorts();
 			_initialized = true;
 		}
+		void WaveOut::RefreshAvailablePorts()
+		{
+			EnumeratePlaybackPorts();
+			EnumerateCapturePorts();
+		}
+		void WaveOut::EnumeratePlaybackPorts()
+		{
+			_playEnums.resize(0);
+			for (int i = 0; i < waveOutGetNumDevs(); i++)
+			{
+				WAVEOUTCAPS caps;
+				waveOutGetDevCaps(i, &caps, sizeof(WAVEOUTCAPS));
+				PortEnums port(caps.szPname, i);
+				_playEnums.push_back(port);
+			}
+		}
 		void WaveOut::EnumerateCapturePorts()
 		{
+			_capEnums.resize(0);
 			for (unsigned int i=0; i < waveInGetNumDevs(); ++i)
 			{
 				WAVEINCAPS caps;
-				waveInGetDevCaps(i,&caps,sizeof(caps));
-				PortEnums port(caps.szPname);
+				waveInGetDevCaps(i,&caps,sizeof(WAVEINCAPS));
+				PortEnums port(caps.szPname, i);
 				_capEnums.push_back(port);
 			}
 		}
@@ -71,17 +90,9 @@ namespace psycle
 			if(_running) return true;
 			if(!_pCallback) return false;
 
-			WAVEFORMATEX format;
-			format.wFormatTag = WAVE_FORMAT_PCM;
-			format.wBitsPerSample = 16;//_bitDepth;
-			format.nSamplesPerSec = _samplesPerSec;
-			format.cbSize = 0;
-			format.nChannels = 2;
-
-			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
-			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
-
-			if(::waveOutOpen(&_handle, _deviceID, &format, 0, 0, 0) != MMSYSERR_NOERROR)
+			WAVEFORMATPCMEX format;
+			PrepareWaveFormat(format,2,_samplesPerSec,_sampleBits, _sampleValidBits);
+			if(::waveOutOpen(&_handle, _deviceID, reinterpret_cast<LPWAVEFORMATEX>(&format), 0, 0, 0) != MMSYSERR_NOERROR)
 			{
 				Error("waveOutOpen() failed");
 				return false;
@@ -89,11 +100,13 @@ namespace psycle
 
 			_currentBlock = 0;
 			_writePos = 0;
+			m_readPosWraps = 0;
+			m_lastPlayPos = 0;
 
 			// allocate blocks
 			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 			{
-				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSize);
+				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSizeBytes);
 				pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
 			}
 
@@ -105,7 +118,7 @@ namespace psycle
 
 				WAVEHDR *ph = pBlock->pHeader;
 				ph->lpData = (char *)pBlock->pData;
-				ph->dwBufferLength = _blockSize;
+				ph->dwBufferLength = _blockSizeBytes;
 				ph->dwFlags = WHDR_DONE;
 				ph->dwLoops = 0;
 
@@ -169,64 +182,91 @@ namespace psycle
 			}
 			for(unsigned int i=0; i<_capPorts.size(); i++)
 			{
+				if(_capPorts[i]._handle == NULL)
+					continue;
 				if(::waveInReset(_capPorts[i]._handle) != MMSYSERR_NOERROR)
 				{
 					Error("waveInReset() failed");
 					return false;
 				}
 				///\todo: wait until WHDR_DONE like with waveout?
+				for(CBlock *pBlock = _capPorts[i]._blocks; pBlock < _capPorts[i]._blocks + _numBlocks; pBlock++)
+				{
+					if(pBlock->Prepared)
+					{
+						if(::waveInUnprepareHeader(_capPorts[i]._handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+						{
+							Error("waveInUnprepareHeader() failed");
+						}
+					}
+				}
 				waveInClose(_capPorts[i]._handle);
+				_capPorts[i]._handle = NULL;
 				universalis::os::aligned_memory_dealloc(_capPorts[i].pleft);
 				universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
+				for(CBlock *pBlock = _capPorts[i]._blocks; pBlock < _capPorts[i]._blocks + _numBlocks; pBlock++)
+				{
+					::GlobalUnlock(pBlock->Handle);
+					::GlobalFree(pBlock->Handle);
+					::GlobalUnlock(pBlock->HeaderHandle);
+					::GlobalFree(pBlock->HeaderHandle);
+				}
 			}
-			_capPorts.resize(0);
 
 			_running = false;
 			return true;
 		}
-		void WaveOut::GetCapturePorts(std::vector<std::string>&ports)
+		void WaveOut::GetPlaybackPorts(std::vector<std::string> &ports)
 		{
+			ports.resize(0);
+			for (unsigned int i=0;i<_playEnums.size();i++) ports.push_back(_playEnums[i].portname);
+		}
+		void WaveOut::GetCapturePorts(std::vector<std::string> &ports)
+		{
+			ports.resize(0);
 			for (unsigned int i=0;i<_capEnums.size();i++) ports.push_back(_capEnums[i].portname);
 		}
 		bool WaveOut::AddCapturePort(int idx)
 		{
 			bool isplaying = _running;
-			for (unsigned int i=0;i<_capPorts.size();++i)
-			{
-				if (_capPorts[i]._idx == idx ) return false;
-			}
+			if ( idx >= _capEnums.size()) return false;
+			if ( idx < _portMapping.size() && _portMapping[idx] != -1) return true;
+			
+			if (isplaying) Stop();
 			PortCapt port;
 			port._idx = idx;
-			if (isplaying)
-			{
-				Stop();
-			}
 			_capPorts.push_back(port);
-			_portMapping[idx]=(int)(_capPorts.size()-1);
-			if (isplaying)
-			{
-				return Start();
+			if ( _portMapping.size() <= idx) {
+				int oldsize = _portMapping.size();
+				_portMapping.resize(idx+1);
+				for(int i=oldsize;i<_portMapping.size();i++) _portMapping[i]=-1;
 			}
+			_portMapping[idx]=(int)(_capPorts.size()-1);
+			if (isplaying) return Start();
+
 			return true;
 		}
 		bool WaveOut::RemoveCapturePort(int idx)
 		{
-			bool restartplayback = false;
+			bool isplaying = _running;
+			int maxSize = 0;
 			std::vector<PortCapt> newports;
-			for (unsigned int i=0;i<_capPorts.size();++i)
+			if ( idx >= _capEnums.size() || 
+				 idx >= _portMapping.size() || _portMapping[idx] == -1) return false;
+
+			if (isplaying) Stop();
+			for (unsigned int i=0;i<_portMapping.size();++i)
 			{
-				if (_capPorts[i]._idx == idx )
-				{
-					if (_running)
-					{
-						Stop();
-						restartplayback=true;
-					}
+				if (i != idx && _portMapping[i] != -1) {
+					maxSize=i+1;
+					newports.push_back(_capPorts[_portMapping[i]]);
+					_portMapping[i]= (int)(newports.size()-1);
 				}
-				else newports.push_back(_capPorts[i]);
 			}
+			_portMapping[idx] = -1;
+			if(maxSize < _portMapping.size()) _portMapping.resize(maxSize);
 			_capPorts = newports;
-			if (restartplayback) Start();
+			if (isplaying) Start();
 			return true;
 		}
 		bool WaveOut::CreateCapturePort(PortCapt &port)
@@ -235,44 +275,59 @@ namespace psycle
 			//not try to open a port twice
 			if (port._handle) return true;
 
-			WAVEFORMATEX format;
-			// Set up wave format structure. 
-			ZeroMemory(&format, sizeof(WAVEFORMATEX));
-			format.wFormatTag = WAVE_FORMAT_PCM;
-			format.nChannels = 2;
-			format.wBitsPerSample = 16;//_bitDepth;
-			format.nSamplesPerSec = _samplesPerSec;
-			format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
-			format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
-			format.cbSize = 0;
+			WAVEFORMATPCMEX format;
+			PrepareWaveFormat(format,2,_samplesPerSec,_sampleBits, _sampleValidBits);
 
-			if ((hr = waveInOpen(&port._handle,port._idx,&format,NULL,NULL,CALLBACK_NULL)) != MMSYSERR_NOERROR )
+			if ((hr = waveInOpen(&port._handle,port._idx,reinterpret_cast<LPWAVEFORMATEX>(&format),NULL,NULL,CALLBACK_NULL)) != MMSYSERR_NOERROR )
 			{
-				Error(_T("Failed to create Capture DirectSound Device"));
+				Error(_T("waveInOpen() failed"));
 				return false;
 			}
+			// allocate blocks
+			for(CBlock *pBlock = port._blocks; pBlock < port._blocks + _numBlocks; pBlock++)
+			{
+				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSizeBytes);
+				pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
+			}
 
-/*			waveInAddBuffer(port._handle
-				LPWAVEHDR pwh,  
-				UINT cbwh       
-				);
-*/
+			// allocate block headers
+			for(CBlock *pBlock = port._blocks; pBlock < port._blocks + _numBlocks; pBlock++)
+			{
+				pBlock->HeaderHandle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, sizeof(WAVEHDR));
+				pBlock->pHeader = (WAVEHDR *)GlobalLock(pBlock->HeaderHandle);
+
+				WAVEHDR *ph = pBlock->pHeader;
+				ph->lpData = (char *)pBlock->pData;
+				ph->dwBufferLength = _blockSizeBytes;
+				ph->dwFlags = WHDR_DONE;
+				ph->dwLoops = 0;
+
+				pBlock->Prepared = false;
+			}
+			universalis::os::aligned_memory_alloc(16, port.pleft, _blockSizeBytes);
+			universalis::os::aligned_memory_alloc(16, port.pright, _blockSizeBytes);
+			ZeroMemory(port.pleft, 2*_blockSizeBytes);
+			ZeroMemory(port.pright, 2*_blockSizeBytes);
+			port._machinepos=0;
+
 			waveInStart(port._handle);
-
-			universalis::os::aligned_memory_alloc(16, port.pleft, _blockSize);
-			universalis::os::aligned_memory_alloc(16, port.pright, _blockSize);
 
 			return true;
 		}
 
 		void WaveOut::GetReadBuffers(int idx,float **pleft, float **pright,int numsamples)
 		{
-			if  (_running)
+			if (!_running || idx >= _portMapping.size() || _portMapping[idx] == -1 
+				|| _capPorts[_portMapping[idx]]._handle == NULL)
 			{
-				*pleft=_capPorts[_portMapping[idx]].pleft+_capPorts[_portMapping[idx]]._machinepos;
-				*pright=_capPorts[_portMapping[idx]].pright+_capPorts[_portMapping[idx]]._machinepos;
-				_capPorts[_portMapping[idx]]._machinepos+=numsamples;
+				*pleft=0;
+				*pright=0;
+				return;
 			}
+			int mpos = _capPorts[_portMapping[idx]]._machinepos;
+			*pleft=_capPorts[_portMapping[idx]].pleft+mpos;
+			*pright=_capPorts[_portMapping[idx]].pright+mpos;
+			_capPorts[_portMapping[idx]]._machinepos+=numsamples;
 		}
 
 		void WaveOut::PollerThread(void * pWaveOut)
@@ -281,14 +336,35 @@ namespace psycle
 			universalis::cpu::exceptions::install_handler_in_thread();
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-			//SetThreadAffinityMask(GetCurrentThread(), 1);
 			while(!pThis->_stopPolling)
 			{
-				for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
+				CBlock *pb = pThis->_blocks + pThis->_currentBlock;
+				int underruns=0;
+				while(pb->pHeader->dwFlags & WHDR_DONE)
 				{
-					pThis->DoBlocksRecording(pThis->_capPorts[i]);
+					for (unsigned int i =0; i < pThis->_capPorts.size(); i++)
+					{
+						if(pThis->_capPorts[i]._handle == NULL)
+							continue;
+						pThis->DoBlocksRecording(pThis->_capPorts[i]);
+					}
+					pThis->DoBlocks();
+					++pb;
+					if(pb == pThis->_blocks + pThis->_numBlocks) pb = pThis->_blocks;
+					if ( pb->pHeader->dwFlags & WHDR_DONE)
+					{
+						underruns++;
+						if ( underruns > pThis->_numBlocks )
+						{
+							// Audio dropout most likely happened
+							// (There's a possibility a dropout didn't happen, but the cpu usage
+							// is almost at 100%, so we force an exit of the loop for a "Sleep()" call,
+							// preventing psycle from being frozen.
+							break;
+						}
+					}
+					pThis->_currentBlock = pb - pThis->_blocks;
 				}
-				pThis->DoBlocks();
 				::Sleep(pThis->_pollSleep);
 			}
 			_event.SetEvent();
@@ -296,117 +372,84 @@ namespace psycle
 		}
 		void WaveOut::DoBlocksRecording(PortCapt& port)
 		{
-/*
-			PortCapt *pb = _capPorts[_currentBlock];
-			int underruns=0;
-			while(pb->pHeader->dwFlags & WHDR_DONE)
+			CBlock *pb = port._blocks + _currentBlock;
+
+			if(pb->Prepared)
 			{
-				if(pb->Prepared)
+				if(::waveInUnprepareHeader(port._handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 				{
-					if(::waveInUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-					{
-						Error("waveOutUnprepareHeader() failed");
-					}
-					pb->Prepared = false;
+					Error("waveInUnprepareHeader() failed");
 				}
-				int *pOut = (int *)pb->pData;
-				int bs = _blockSize / GetSampleSize();
-				float * pBuf = _pCallback(_callbackContext,bs);
-				if(_dither) QuantizeWithDither(pBuf, pOut,bs);
-				else Quantize(pBuf, pOut,bs);
-
-				_writePos += bs;
-
-				pb->pHeader->lpData = (char *)pb->pData;
-				pb->pHeader->dwBufferLength = _blockSize;
-				pb->pHeader->dwFlags = 0;
-				pb->pHeader->dwLoops = 0;
-
-				if(::waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-				{
-					Error("waveOutPrepareHeader() failed");
-				}
-				pb->Prepared = true;
-
-				if(::waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-				{
-					Error("waveOutWrite() failed");
-				}
-				++pb;
-				if(pb == _blocks + _numBlocks) pb = _blocks;
-				if ( pb->pHeader->dwFlags & WHDR_DONE)
-				{
-					underruns++;
-					if ( underruns > _numBlocks )
-					{
-						// Audio dropout most likely happened
-						// (There's a possibility a dropout didn't happen, but the cpu usage
-						// is almost at 100%, so we force an exit of the loop for a "Sleep()" call,
-						// preventing psycle from being frozen.
-						break;
-					}
-				}
+				pb->Prepared = false;
 			}
-			_currentBlock = pb - _blocks;
 
-			DeQuantizeAndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, blockSize2 / GetSampleSize());
+			WAVEHDR *ph = pb->pHeader;
+			ph->lpData = (char *)pb->pData;
+			ph->dwBufferLength = _blockSizeBytes;
+			ph->dwFlags = WHDR_DONE;
+			ph->dwLoops = 0;
+
+			if(::waveInPrepareHeader(port._handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+			{
+				Error("waveInPrepareHeader() failed");
+			}
+			pb->Prepared = true;
+			waveInAddBuffer(port._handle, pb->pHeader, sizeof(WAVEHDR));
+			// Put the audio in our float buffers.
+			int numSamples = _blockSizeBytes / GetSampleSizeBytes();
+			if (_sampleValidBits == 32) {
+				DeinterlaceFloat(reinterpret_cast<float*>(pb->pData), port.pleft,port.pright, numSamples);
+			}
+			else if (_sampleValidBits == 24) {
+				DeQuantize32AndDeinterlace(reinterpret_cast<int*>(pb->pData), port.pleft,port.pright, numSamples);
+			}
+			else {
+				DeQuantize16AndDeinterlace(reinterpret_cast<short int*>(pb->pData), port.pleft,port.pright, numSamples);
+			}
 			port._machinepos=0;
-*/
 		}
 
 		void WaveOut::DoBlocks()
 		{
 			CBlock *pb = _blocks + _currentBlock;
-			int underruns=0;
-			while(pb->pHeader->dwFlags & WHDR_DONE)
+			if(pb->Prepared)
 			{
-				if(pb->Prepared)
+				while (::waveOutUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
 				{
-					if(::waveOutUnprepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-					{
-						Error("waveOutUnprepareHeader() failed");
-					}
-					pb->Prepared = false;
 				}
-				int *pOut = (int *)pb->pData;
-				int bs = _blockSize / GetSampleSize();
-				float * pBuf = _pCallback(_callbackContext,bs);
-				if(_dither) QuantizeWithDither(pBuf, pOut,bs);
-				else Quantize(pBuf, pOut,bs);
-
-				_writePos += bs;
-
-				pb->pHeader->lpData = (char *)pb->pData;
-				pb->pHeader->dwBufferLength = _blockSize;
-				pb->pHeader->dwFlags = 0;
-				pb->pHeader->dwLoops = 0;
-
-				if(::waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-				{
-					Error("waveOutPrepareHeader() failed");
-				}
-				pb->Prepared = true;
-
-				if(::waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-				{
-					Error("waveOutWrite() failed");
-				}
-				++pb;
-				if(pb == _blocks + _numBlocks) pb = _blocks;
-				if ( pb->pHeader->dwFlags & WHDR_DONE)
-				{
-					underruns++;
-					if ( underruns > _numBlocks )
-					{
-						// Audio dropout most likely happened
-						// (There's a possibility a dropout didn't happen, but the cpu usage
-						// is almost at 100%, so we force an exit of the loop for a "Sleep()" call,
-						// preventing psycle from being frozen.
-						break;
-					}
-				}
+				pb->Prepared = false;
 			}
-			_currentBlock = pb - _blocks;
+			int *pBlock = (int *)pb->pData;
+			int numSamples = GetBufferSamples();
+			float * pFloatBlock = _pCallback(_callbackContext,numSamples);
+			if(_sampleValidBits == 32) {
+				dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pBlock), numSamples*2, 1.f/32768.f);
+			}
+			else if(_sampleValidBits == 24) {
+				Quantize24in32Bit(pFloatBlock, pBlock, numSamples);
+			}
+			else if (_sampleValidBits == 16) {
+				if(_dither) Quantize16WithDither(pFloatBlock, pBlock, numSamples);
+				else Quantize16(pFloatBlock, pBlock, numSamples);
+			}
+
+			_writePos += numSamples;
+
+			pb->pHeader->lpData = (char *)pb->pData;
+			pb->pHeader->dwBufferLength = _blockSizeBytes;
+			pb->pHeader->dwFlags = 0;
+			pb->pHeader->dwLoops = 0;
+
+			if(::waveOutPrepareHeader(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+			{
+				Error("waveOutPrepareHeader() failed");
+			}
+			pb->Prepared = true;
+
+			if(::waveOutWrite(_handle, pb->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
+			{
+				Error("waveOutWrite() failed");
+			}
 		}
 
 		void WaveOut::ReadConfig()
@@ -415,12 +458,13 @@ namespace psycle
 			bool saveatend(false);
 			_samplesPerSec=44100;
 			_deviceID=0;
-			_numBlocks = 7;
-			_blockSize = 4096;
+			_numBlocks = 6;
+			_blockSizeBytes = 4096;
 			_pollSleep = 10;
 			_dither = 0;
-			_channelmode = 3;
-			_bitDepth = 16;
+			_channelMode = stereo;
+			_sampleBits = 16;
+			_sampleValidBits = 16;
 
 			Registry reg;
 			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
@@ -442,12 +486,15 @@ namespace psycle
 			}
 			bool configured(true);
 			configured &= ERROR_SUCCESS == reg.QueryValue("NumBlocks", _numBlocks);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BlockSize", _blockSize);
+			configured &= ERROR_SUCCESS == reg.QueryValue("BlockSize", _blockSizeBytes);
 			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceID", _deviceID);
 			configured &= ERROR_SUCCESS == reg.QueryValue("PollSleep", _pollSleep);
 			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
+			configured &= ERROR_SUCCESS == reg.QueryValue("bitDepth", _sampleValidBits);
+			if (configured) { if(_sampleValidBits == 24) {_sampleBits = 32; }
+				else {_sampleBits = _sampleValidBits; }
+			}
 			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
-			//configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _bitDepth);
 			reg.CloseKey();
 			reg.CloseRootKey();
 			_configured = configured;
@@ -471,64 +518,56 @@ namespace psycle
 				}
 			}
 			reg.SetValue("NumBlocks", _numBlocks);
-			reg.SetValue("BlockSize", _blockSize);
+			reg.SetValue("BlockSize", _blockSizeBytes);
 			reg.SetValue("DeviceID", _deviceID);
 			reg.SetValue("PollSleep", _pollSleep);
 			reg.SetValue("Dither", _dither);
+			reg.SetValue("bitDepth", _sampleValidBits);
 			reg.SetValue("SamplesPerSec", _samplesPerSec);
-			//reg.SetValue("BitDepth", _bitDepth);
 			reg.CloseKey();
 			reg.CloseRootKey();
 		}
 
 		void WaveOut::Configure()
 		{
-			ReadConfig();
+			if(!_configured) ReadConfig();
 
 			CWaveOutDialog dlg;
-			dlg.m_BufNum = _numBlocks;
-			dlg.m_BufSize = _blockSize;
-			dlg.m_Device = _deviceID;
-			dlg.m_Dither = _dither;
-			dlg.m_SampleRate = _samplesPerSec;
+			dlg.m_device = _deviceID;
+			dlg.m_sampleRate = _samplesPerSec;
+			dlg.m_bitDepth = _sampleValidBits;
+			dlg.m_dither = _dither;
+			dlg.m_bufNum = _numBlocks;
+			dlg.m_bufSamples = GetBufferSamples();
+			dlg.waveout = this;
 
 			if(dlg.DoModal() != IDOK) return;
-			
-			int oldnb = _numBlocks;
-			int oldbs = _blockSize;
-			int olddid = _deviceID;
-			int olddither = _dither;
-			int oldsps = _samplesPerSec;
 
-			if(_initialized) Stop();
+			WAVEFORMATPCMEX wf;
+			PrepareWaveFormat(wf, 2, dlg.m_sampleRate, (dlg.m_bitDepth==24)?32:dlg.m_bitDepth, dlg.m_bitDepth);
+			bool supported = _playEnums[dlg.m_device].IsFormatSupported(wf,false);
+			if(!supported) {
+				Error("The Format selected is not supported. Keeping the previous configuration");
+				return;
+			}
 
-			_numBlocks = dlg.m_BufNum;
-			_blockSize = dlg.m_BufSize;
-			_deviceID = dlg.m_Device;
-			_dither = dlg.m_Dither;
-			_samplesPerSec = dlg.m_SampleRate;
+			_deviceID = dlg.m_device;
+			_samplesPerSec = dlg.m_sampleRate;
+			_sampleValidBits = dlg.m_bitDepth;
+			if(_sampleValidBits == 24) _sampleBits = 32;
+			else _sampleBits = _sampleValidBits;
+			_dither = dlg.m_dither;
+			_numBlocks = dlg.m_bufNum;
+			_blockSizeBytes = dlg.m_bufSamples * GetSampleSizeBytes();
 
 			_configured = true;
-
-			if(_initialized)
-			{
-				if(Start()) WriteConfig();
-				else
-				{
-					_numBlocks = oldnb;
-					_blockSize = oldbs;
-					_deviceID = olddid;
-					_dither = olddither;
-					_samplesPerSec = oldsps;
-					Start();
-				}
-			}
-			else WriteConfig();
+			WriteConfig();
 		}
 
-		int WaveOut::GetPlayPos()
+		std::uint32_t WaveOut::GetPlayPosInSamples()
 		{
-			if(!_running) return 0;
+			// WARNING! waveOutGetPosition in TIME_SAMPLES has max of 0x7FFFFF for 16bit stereo signals.
+			if(!_stopPolling) return 0;
 			MMTIME time;
 			time.wType = TIME_SAMPLES;
 			if(::waveOutGetPosition(_handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
@@ -539,28 +578,52 @@ namespace psycle
 			{
 				Error("waveOutGetPosition() doesn't support TIME_SAMPLES");
 			}
-			return time.u.sample & ((1 << 23) - 1);
+			
+			std::uint32_t retval = time.u.sample;
+			// sample counter wrap around?
+			if( m_lastPlayPos > retval)
+			{
+				m_readPosWraps++;
+				if(m_lastPlayPos > _writePos) {
+					m_readPosWraps = 0;
+					CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
+				}
+			}
+			m_lastPlayPos = retval;
+			return retval + (m_readPosWraps*0x800000);
 		}
 
-		int WaveOut::GetWritePos()
+		std::uint32_t WaveOut::GetWritePosInSamples()
 		{
-			if(!_running) return 0;
-			return _writePos & ((1 << 23) - 1);
+			if(!_stopPolling) return 0;
+			return _writePos;
 		}
 
 		bool WaveOut::Enable(bool e)
 		{
 			return e ? Start() : Stop();
 		}
-		MMRESULT WaveOut::IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID) 
+
+		bool WaveOut::PortEnums::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput) 
 		{ 
-			return (waveOutOpen( 
-				NULL,                 // ptr can be NULL for query 
-				uDeviceID,            // the device identifier 
-				pwfx,                 // defines requested format 
-				NULL,                 // no callback 
-				NULL,                 // no instance data 
-				WAVE_FORMAT_QUERY));  // query only, do not open device 
+			if(isInput) {
+				return MMSYSERR_NOERROR == waveInOpen(
+					NULL,                 // ptr can be NULL for query 
+					idx,            // the device identifier 
+					reinterpret_cast<WAVEFORMATEX*>(&pwfx),                 // defines requested format 
+					NULL,                 // no callback 
+					NULL,                 // no instance data 
+					WAVE_FORMAT_QUERY);  // query only, do not open device 
+			}
+			else {
+				return MMSYSERR_NOERROR == waveOutOpen( 
+					NULL,                 // ptr can be NULL for query 
+					idx,            // the device identifier 
+					reinterpret_cast<WAVEFORMATEX*>(&pwfx),                 // defines requested format 
+					NULL,                 // no callback 
+					NULL,                 // no instance data 
+					WAVE_FORMAT_QUERY);  // query only, do not open device 
+			}
 		} 
 	}
 }

@@ -27,6 +27,9 @@
 		#define VC_EXTRA_LEAN
 	#endif
 
+	#ifndef _SECURE_ATL
+		#define _SECURE_ATL 1
+	#endif
 	#if !defined NOMINMAX
 		/// tells microsoft's headers not to pollute the global namespace with min and max macros (which break a lot of libraries, including the standard c++ library!)
 		#define NOMINMAX
@@ -38,10 +41,12 @@
 		#include <afxwin.h> // mfc core and standard components
 		#include <afxext.h> // mfc extensions
 		//#include <afxdisp.h> // mfc automation classes
-		#include <afxdtctl.h> // mfc support for internet explorer common controls
-		#if !defined _AFX_NO_AFXCMN_SUPPORT
-			#include <afxcmn.h> // mfc support for windows common controls
+		#ifndef _AFX_NO_OLE_SUPPORT
+			#include <afxdtctl.h>           // MFC support for Internet Explorer 4 Common Controls
 		#endif
+		#ifndef _AFX_NO_AFXCMN_SUPPORT
+			#include <afxcmn.h>                     // MFC support for Windows Common Controls
+		#endif // _AFX_NO_AFXCMN_SUPPORT
 		#include <afxmt.h> // multithreading?
 	#else
 		#if !defined WIN32_EXTRA_LEAN

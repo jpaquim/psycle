@@ -576,10 +576,11 @@ namespace psycle
 			_isMixerSend=false;
 		}
 
-		void Machine::PreWork(int numSamples,bool clear)
+		void Machine::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 		{
 			sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
-			nanoseconds const t0(cpu_time_clock());
+			nanoseconds t0;
+			if (measure_cpu_usage){ t0 = cpu_time_clock(); }
 #if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
@@ -608,47 +609,58 @@ namespace psycle
 				helpers::dsp::Clear(_pSamplesL, numSamples);
 				helpers::dsp::Clear(_pSamplesR, numSamples);
 			}
-			nanoseconds const t1(cpu_time_clock());
-			Global::song().accumulate_routing_time(t1 - t0);
+			if(measure_cpu_usage) {
+				nanoseconds const t1(cpu_time_clock());
+				Global::song().accumulate_routing_time(t1 - t0);
+			}
 		}
 
 
 // Low level process function of machines. Takes care of audio generation and routing.
 // Each machine is expected to produce its output in its own _pSamplesX buffers.
-void Machine::recursive_process(unsigned int frames) {
-	recursive_process_deps(frames);
+void Machine::recursive_process(unsigned int frames, bool measure_cpu_usage) {
+	recursive_process_deps(frames, true, measure_cpu_usage);
 
-	nanoseconds const t1(cpu_time_clock());
+	nanoseconds t1;
+	if(measure_cpu_usage) { t1 = cpu_time_clock(); }
 
-	GenerateAudio(frames);
-
-	nanoseconds const t2(cpu_time_clock());
-	accumulate_processing_time(t2 - t1);
+	GenerateAudio(frames, measure_cpu_usage);
+	if(measure_cpu_usage) {
+		nanoseconds const t2(cpu_time_clock());
+		accumulate_processing_time(t2 - t1);
+	}
 }
 
-void Machine::recursive_process_deps(unsigned int frames, bool mix) {
+void Machine::recursive_process_deps(unsigned int frames, bool mix, bool measure_cpu_usage) {
 	recursive_is_processing_ = true;
 	for(int i(0); i < MAX_CONNECTIONS; ++i) {
 		if(_inputCon[i]) {
 			Machine * pInMachine = Global::song()._pMachine[_inputMachines[i]];
 			if(pInMachine) {
 				if(!pInMachine->recursive_processed_ && !pInMachine->recursive_is_processing_)
-					pInMachine->recursive_process(frames);
+					pInMachine->recursive_process(frames,measure_cpu_usage);
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
-					nanoseconds const t0(cpu_time_clock());
+					nanoseconds t0;
+					if(measure_cpu_usage) { t0 = cpu_time_clock(); }
 					helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, frames, pInMachine->_lVol * _inputConVol[i]);
 					helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, frames, pInMachine->_rVol * _inputConVol[i]);
-					nanoseconds const t1(cpu_time_clock());
-					Global::song().accumulate_routing_time(t1 - t0);
+					if(measure_cpu_usage) { 
+						nanoseconds const t1(cpu_time_clock());
+						Global::song().accumulate_routing_time(t1 - t0);
+					}
 				}
 			}
 		}
 	}
-	nanoseconds const t0(cpu_time_clock());
+
+	nanoseconds t0;
+	if(measure_cpu_usage) { t0 = cpu_time_clock(); }
 	helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-	nanoseconds const t1(cpu_time_clock());
-	Global::song().accumulate_routing_time(t1 - t0);
+	if(measure_cpu_usage) {
+		nanoseconds const t1(cpu_time_clock());
+		Global::song().accumulate_routing_time(t1 - t0);
+	}
 	recursive_is_processing_ = false;
 }
 
@@ -691,8 +703,9 @@ void Machine::sched_outputs(sched_deps & result) const {
 }
 
 /// called by the scheduler to ask for the actual processing of the machine
-bool Machine::sched_process(unsigned int frames) {
-	nanoseconds const t0(cpu_time_clock());
+bool Machine::sched_process(unsigned int frames, bool measure_cpu_usage) {
+	nanoseconds t0;
+	if(measure_cpu_usage){ t0 =cpu_time_clock(); }
 
 	if(!_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*Global::song()._pMachine[_inputMachines[i]]);
@@ -705,19 +718,23 @@ bool Machine::sched_process(unsigned int frames) {
 	}
 	helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 
-	nanoseconds const t1(cpu_time_clock());
-	Global::song().accumulate_routing_time(t1 - t0);
+	nanoseconds t1;
+	if(measure_cpu_usage) {
+		t1 =cpu_time_clock();
+		Global::song().accumulate_routing_time(t1 - t0);
+	}
 
-	GenerateAudio(frames);
-
-	nanoseconds const t2(cpu_time_clock());
-	accumulate_processing_time(t2 - t1);
+	GenerateAudio(frames,measure_cpu_usage);
+	if(measure_cpu_usage) {
+		nanoseconds const t2(cpu_time_clock());
+		accumulate_processing_time(t2 - t1);
+	}
 
 	++processing_count_;
 
 	return true;
 }
-int Machine::GenerateAudio(int numsamples) {
+int Machine::GenerateAudio(int numsamples, bool measure_cpu_usage) {
 	//Current implementation limited to work in ticks. check psycle-core's in trunk for the other implementation.
 	return GenerateAudioInTicks(0,numsamples);
 }
@@ -1062,7 +1079,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		Master::Master(int index)
 		{
 			_macIndex = index;
-			sampleCount = 0;
 			_outDry = 256;
 			decreaseOnClip=false;
 			_type = MACH_MASTER;
@@ -1073,7 +1089,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		void Master::Init(void)
 		{
 			Machine::Init();
-			sampleCount = 0;
 			//_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
 			//_RMAX = 1;
 			currentpeak=0.0f;
@@ -1084,7 +1099,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			_clip = false;
 		}
 
-		int Master::GenerateAudio(int numSamples)
+		int Master::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
 			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
 				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
@@ -1184,7 +1199,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			if( _lMax > currentpeak ) currentpeak = _lMax;
 			if( _rMax > currentpeak ) currentpeak = _rMax;
 
-			sampleCount+=numSamples;
 			recursive_processed_ = true;
 			return numSamples;
 		}

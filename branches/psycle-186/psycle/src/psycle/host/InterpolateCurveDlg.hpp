@@ -1,9 +1,7 @@
 ///\file
-///\brief interface file for psycle::host::CNewMachine.
+///\brief interface file for psycle::host::InterpolateCurveDlg.
 #pragma once
 #include "Psycle.hpp"
-#include <afxwin.h>
-
 namespace psycle { namespace host {
 
 	class CInterpolateCurve : public CDialog

@@ -4,6 +4,7 @@
 #include "WaveEdFrame.hpp"
 
 #include "Configuration.hpp"
+#include "AudioDriver.hpp"
 #include "MainFrm.hpp"
 
 #include "Song.hpp"
@@ -163,7 +164,7 @@ namespace psycle { namespace host {
 				sprintf(buff, "No Data in Selection.");
 			else
 			{
-				float slInSecs = sl / float(Global::configuration().GetSamplesPerSec());
+				float slInSecs = sl / float(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 				sprintf(buff, "Selection: %u (%0.3f secs.)", sl, slInSecs);
 			}
 			statusbar.SetPaneText(1, buff, true);
@@ -173,7 +174,7 @@ namespace psycle { namespace host {
 		{
 			char buff[48];
 			int	wl=_pSong->_pInstrument[ins]->waveLength;
-			float wlInSecs = wl / float(Global::configuration().GetSamplesPerSec());
+			float wlInSecs = wl / float(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 			sprintf(buff, "Size: %u (%0.3f secs.)", wl, wlInSecs);
 			statusbar.SetPaneText(2, buff, true);
 

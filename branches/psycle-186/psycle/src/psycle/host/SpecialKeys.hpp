@@ -2,7 +2,6 @@
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
 #include "Psycle.hpp"
-#include <afxwin.h>
 
 namespace psycle { namespace host {
 

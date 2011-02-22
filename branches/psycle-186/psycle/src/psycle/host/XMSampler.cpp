@@ -2494,7 +2494,7 @@ namespace psycle
 				Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow() );
 			}
 
-			int t= Global::pConfig->_pOutputDriver->_samplesPerSec * 60;
+			int t= Global::player().SampleRate() * 60;
 			int v=Global::_pSong->BeatsPerMin();
 			int z=Global::_pSong->LinesPerBeat();
 			Global::pPlayer->SamplesPerRow(	t / (v * z) );

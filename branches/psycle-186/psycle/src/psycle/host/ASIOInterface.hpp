@@ -18,6 +18,7 @@ namespace psycle
 		class ASIOInterface : public AudioDriver
 		{
 		public:
+			class DriverEnum;
 			class PortEnum
 			{
 			public:
@@ -34,6 +35,7 @@ namespace psycle
 					_info.type=info.type;			strcpy(_info.name,info.name);
 				}
 				std::string GetName();
+				bool IsFormatSupported(DriverEnum* driver, int samplerate);
 			public:
 				int _idx;
 				ASIOChannelInfo _info;
@@ -103,21 +105,24 @@ namespace psycle
 			inline virtual bool Configured() { return _configured; };
 			virtual bool Enabled() { return _running; };
 			virtual int GetBufferSize();
-			virtual void GetCapturePorts(std::vector<std::string>&ports);
+			virtual void RefreshAvailablePorts();
+			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
+			virtual void GetCapturePorts(std::vector<std::string> &ports);
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 			inline virtual AudioDriverInfo* GetInfo() { return &_info; };
 			virtual void Reset();
 			virtual bool Enable(bool e);
-			virtual int GetWritePos();
-			virtual int GetPlayPos();
+			virtual std::uint32_t GetWritePosInSamples();
+			virtual std::uint32_t GetPlayPosInSamples();
+			bool SupportsAsio();
 			DriverEnum GetDriverFromidx(int driverID);
 			PortOut GetOutPortFromidx(int driverID);
 			int GetidxFromOutPort(PortOut&port);
 			void ControlPanel(int driverID);
-			virtual int GetInputLatency() { return _inlatency; }
-			virtual int GetOutputLatency() { return _outlatency; }
+			virtual std::uint32_t GetInputLatencySamples() { return _inlatency; }
+			virtual std::uint32_t GetOutputLatencySamples() { return _outlatency; }
 
 			static void bufferSwitch(long index, ASIOBool processNow);
 			static ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
@@ -126,7 +131,7 @@ namespace psycle
 
 			std::vector<DriverEnum> _drivEnum;
 
-			static int _ASIObufferSize;
+			static int _ASIObufferSamples;
 			static AsioStereoBuffer *ASIObuffers;
 			static bool _firstrun;
 			static bool _supportsOutputReady;
@@ -161,14 +166,15 @@ namespace psycle
 		private:
 			static AudioDriverInfo _info;
 			static ::CCriticalSection _lock;
+			static AsioDrivers asioDrivers;
 			bool _initialized;
 			bool _configured;
 			bool _running;
 //			int _driverID;
-			AsioDrivers asioDrivers;
 			long _inlatency;
 			long _outlatency;
-
+			static std::uint32_t writePos;
+			static std::uint32_t m_wrapControl;
 
 			static PortOut _selectedout;
 			static std::vector<PortCapt> _selectedins;

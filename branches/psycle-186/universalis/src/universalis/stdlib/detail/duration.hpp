@@ -41,7 +41,7 @@ class basic_time_duration
 		tick_type ticks_;
 };
 
-class nanoseconds : public basic_time_duration<nanoseconds, long long int, 1000 * 1000 * 1000, 0> {
+class nanoseconds : public basic_time_duration<nanoseconds, unsigned long long int, 1000 * 1000 * 1000, 0> {
 	public:
 		nanoseconds(tick_type ns = 0) : basic_time_duration_type(ns) {}
 };

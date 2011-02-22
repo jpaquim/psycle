@@ -203,7 +203,7 @@ namespace psycle { namespace host {
 						const int outnote = cmd.GetNote();
 						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
 						{
-							Global::pInputHandler->PlayNote(outnote,127,true,&machine());
+							Global::pInputHandler->PlayNote(outnote,255,127,true,&machine());
 						}
 						else Global::pInputHandler->PlayNote(outnote);
 					}
@@ -489,7 +489,7 @@ namespace psycle { namespace host {
 				} else {
 					filePath = new char[_MAX_PATH];
 					ofn.lpstrFile = filePath;
-					ofn.nMaxFile = _MAX_PATH * 100 - 1;
+					ofn.nMaxFile = _MAX_PATH - 1;
 				}
 				filePath[0] = '\0';
 
@@ -530,7 +530,7 @@ namespace psycle { namespace host {
 						char *previous = ofn.lpstrFile;
 						unsigned long len;
 						bool dirFound = false;
-						ptr->returnMultiplePaths = new char*[_MAX_PATH];
+						ptr->returnMultiplePaths = new char*[100];
 						long i = 0;
 						while (*previous != 0)
 						{
@@ -563,7 +563,7 @@ namespace psycle { namespace host {
 							}
 						}
 						ptr->nbReturnPath = i;
-						delete filePath;
+						delete[] filePath;
 					}
 					else if ( ptr->returnPath == NULL || ptr->sizeReturnPath == 0)
 					{
@@ -576,11 +576,11 @@ namespace psycle { namespace host {
 					{
 						strncpy(ptr->returnPath,filePath,ptr->sizeReturnPath);
 						ptr->nbReturnPath = 1;
-						delete filePath;
+						delete[] filePath;
 					}
 					return true;
 				}
-				else delete filePath;
+				else delete[] filePath;
 			}
 			else if (ptr->command == kVstDirectorySelect)
 			{
@@ -589,14 +589,18 @@ namespace psycle { namespace host {
 				//
 				if (::SHGetMalloc(&pMalloc) == NOERROR)
 				{
-					char someString[_MAX_PATH];
+					char szInitPath[_MAX_PATH];
 					BROWSEINFO bi;
 					LPITEMIDLIST pidl;
+					if(ptr->initialPath)
+						strncpy(szInitPath, ptr->initialPath, _MAX_PATH - 1);
+					else
+						strcpy(szInitPath, "");
 					if ( ptr->returnPath == 0)
 					{
 						ptr->reserved = 1;
 						ptr->returnPath = new char[_MAX_PATH];
-						ptr->sizeReturnPath = _MAX_PATH;
+						ptr->sizeReturnPath = _MAX_PATH -1;
 						ptr->nbReturnPath = 1;
 					}
 					// Get help on BROWSEINFO struct - it's got all the bit settings.
@@ -604,7 +608,7 @@ namespace psycle { namespace host {
 					bi.hwndOwner = GetParent()->m_hWnd;
 
 					bi.pidlRoot = NULL;
-					bi.pszDisplayName = someString;
+					bi.pszDisplayName = szInitPath;
 					bi.lpszTitle = ptr->title;
 					bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
 					bi.lpfn = NULL; //&CVstEffectWnd::BrowseCallbackProc;
@@ -621,7 +625,7 @@ namespace psycle { namespace host {
 						//
 						pMalloc->Free(pidl);
 					}
-					if ( ptr->reserved ) { delete ptr->returnPath; ptr->reserved = 0; }
+					//if ( ptr->reserved ) { delete[] ptr->returnPath; ptr->reserved = 0; }
 					// Release the shell's allocator.
 					//
 					pMalloc->Release();
@@ -648,7 +652,7 @@ namespace psycle { namespace host {
 			}
 			else if ( ptr->reserved == 1) 
 			{
-				delete ptr->returnPath;
+				delete[] ptr->returnPath;
 				return true;
 			}
 			return false;

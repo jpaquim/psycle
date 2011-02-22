@@ -101,6 +101,7 @@ namespace psycle { namespace host {
 			if (m_driverIndex != m_oldDriverIndex)
 			{
 				m_ppDrivers[m_oldDriverIndex]->Enable(false);
+				CMidiInput::Instance()->Close();
 			}
 			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
 			if( m_oldMidiDriverIndex != m_midiDriverIndex )
@@ -129,15 +130,10 @@ namespace psycle { namespace host {
 
 		void COutputDlg::OnConfig() 
 		{
-
 			m_driverIndex = m_driverComboBox.GetCurSel();
-			if (m_driverIndex != m_oldDriverIndex)
-			{
-				m_ppDrivers[m_oldDriverIndex]->Enable(false);
-			}
-
+			m_ppDrivers[m_oldDriverIndex]->Enable(false);
 			m_ppDrivers[m_driverIndex]->Configure();
-			Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+			Global::pPlayer->SetSampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
 		}
 
 	}   // namespace

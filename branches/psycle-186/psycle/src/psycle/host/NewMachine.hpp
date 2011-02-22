@@ -12,9 +12,6 @@
 #include <typeinfo>
 #include <map>
 
-#include <afxwin.h>
-#include <afxcoll.h>
-
 namespace psycle { namespace host {
 
 
@@ -81,6 +78,13 @@ namespace psycle { namespace host {
 			*/
 		};
 
+		class LoadPluginInfoParams
+		{
+		public:
+			LoadPluginInfoParams():theEvent(FALSE,TRUE){}
+			CEvent theEvent;
+			bool verify;
+		};
 		/// new machine dialog window.
 		class CNewMachine : public CDialog
 		{
@@ -117,6 +121,7 @@ namespace psycle { namespace host {
 			static int selectedClass;
 			static int selectedMode;
 			static bool TestFilename(const std::string & name,int shellIdx);
+			static DWORD ProcessLoadPlugInfo(void* newMacDlg);
 		protected:
 			static std::map<std::string,std::string> NativeNames;
 			static std::map<std::string,std::string> VstNames;
@@ -138,6 +143,7 @@ namespace psycle { namespace host {
 			afx_msg void OnCheckAllow();
 			DECLARE_MESSAGE_MAP()
 		private:
+			static bool isopened;
 			static int _numPlugins;
 			static PluginInfo* _pPlugsInfo[MAX_BROWSER_PLUGINS];
 			static int _numDirs;

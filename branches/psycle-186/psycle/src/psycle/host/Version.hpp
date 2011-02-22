@@ -29,7 +29,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 8
-#define PSYCLE__VERSION__QUALITY "beta2"
+#define PSYCLE__VERSION__QUALITY "beta3"
 #define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$" // $Date$
 #define PSYCLE__VERSION__SOURCE_URL "Subversion $URL$"
 
@@ -78,4 +78,14 @@
 	// There's no reason this wouldn't work, it's weird.
 	// Anyway, all the version information is set via the above parameters,
 	// so that there's no need to change the resources.rc file.
+#endif
+
+#if defined _M_IX86
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_IA64
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif

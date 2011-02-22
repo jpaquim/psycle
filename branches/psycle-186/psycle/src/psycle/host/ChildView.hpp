@@ -216,7 +216,7 @@ namespace host {
 			void BlockGenChange(int x);
 			void ShowSwingFillDlg(bool bTrackMode);
 
-			void MidiPatternNote(int outnote , int channel, int velocity);	// called by the MIDI input to insert pattern notes
+			void MidiPatternNote(int outnote , int macidx, int channel, int velocity);	// called by the MIDI input to insert pattern notes
 			void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
 			void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
 			void MidiPatternTweakSlide(int command, int value); // called by midi to insert pattern commands

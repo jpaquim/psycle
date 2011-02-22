@@ -52,6 +52,7 @@ void CWaveInMacDlg::FillCombobox()
 {
 	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 	std::vector<std::string> ports;
+	mydriver.RefreshAvailablePorts();
 	mydriver.GetCapturePorts(ports);
 	for (unsigned int i =0; i < ports.size(); ++i)
 	{

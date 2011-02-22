@@ -29,7 +29,8 @@ namespace psycle { namespace host {
 			CPropertyPage::DoDataExchange(pDX);
 
 			DDX_Control(pDX, IDC_MIDI_RAW, raw);
-			DDX_Control(pDX, IDC_MIDI_CHANNEL_IN_AUX, chan_as_aux);
+			DDX_Control(pDX, IDC_MIDI_GEN_SELECT, gen_select_type);
+			DDX_Control(pDX, IDC_MIDI_INSTR_SELECT, inst_select_type);
 
 			#define $rad_tools_slow_you_down(id, var) \
 				DDX_Control(pDX, IDC_MIDI_RECORD_##id , var.record ); \
@@ -78,7 +79,8 @@ namespace psycle { namespace host {
 			CPropertyPage::OnInitDialog();
 
 			raw.SetCheck(Global::pConfig->midi().raw());
-			chan_as_aux.SetCheck(Global::pConfig->midi().chan_as_aux());
+			gen_select_type.SetCurSel(Global::pConfig->midi().gen_select_type());
+			inst_select_type.SetCurSel(Global::pConfig->midi().inst_select_type());
 
 			velocity.type.AddString("cmd");
 			velocity.type.AddString("ins");
@@ -128,8 +130,9 @@ namespace psycle { namespace host {
 
 		void CMidiInputDlg::OnOK() 
 		{
+			Global::pConfig->midi().gen_select_type() = (Configuration::midi_type::selector_t) gen_select_type.GetCurSel();
+			Global::pConfig->midi().inst_select_type() = (Configuration::midi_type::selector_t) inst_select_type.GetCurSel();
 			Global::pConfig->midi().raw() = raw.GetCheck();
-			Global::pConfig->midi().chan_as_aux() = chan_as_aux.GetCheck();
 			read_from_gui(velocity, Global::pConfig->midi().velocity());
 			read_from_gui(pitch, Global::pConfig->midi().pitch());
 			assert(groups.size() == Global::pConfig->midi().groups().size());

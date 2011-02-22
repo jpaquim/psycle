@@ -42,7 +42,8 @@ namespace psycle { namespace host {
 			typedef std::vector<group::with_message*> groups_type;
 			groups_type groups;
 			CButton raw;
-			CButton chan_as_aux;
+			CComboBox gen_select_type;
+			CComboBox inst_select_type;
 		};
 
 	}   // namespace

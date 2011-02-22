@@ -400,16 +400,18 @@ namespace psycle { namespace host {
 			}
 			if (nIDEvent == 159 && !Global::pPlayer->_recording)
 			{
-				//MessageBox("Saving Disabled");
-				//return;
 				CString filepath = Global::pConfig->GetSongDir().c_str();
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
-				_pSong->Save(&file,true);
-				/// \todo _pSong->Save() should not close a file which doesn't open. Add the following
-				// line when fixed. There are other places which need this too.
-				//file.Close();
+				CProgressDialog progress;
+				_pSong->Save(&file,progress, true);
+				if (!file.Close())
+				{
+					std::ostringstream s;
+					s << "Error writing to file '" << file.szName << "'" << std::endl;
+					MessageBox(s.str().c_str(),"File Error!!!",0);
+				}
 			}
 		}
 
@@ -427,13 +429,18 @@ namespace psycle { namespace host {
 				if (!pOut->Configured())
 				{
 					pOut->Configure();
-					Global::pPlayer->SampleRate(pOut->_samplesPerSec);
 					_outputActive = true;
 				}
 				if (!pOut->Enabled())
 				{
 					_outputActive = pOut->Enable(true);
 				}
+				else {
+					_outputActive = true;
+				}
+				Global::pPlayer->SetSampleRate(pOut->GetSamplesPerSec());
+				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Open();
 
@@ -442,9 +449,6 @@ namespace psycle { namespace host {
 					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
 				else
 					CMidiInput::Instance()->m_midiMode = MODE_STEP;
-
-				Global::pPlayer->SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			}
 		}
 
@@ -690,12 +694,16 @@ namespace psycle { namespace host {
 					filepath += Global::_pSong->fileName;
 					
 					OldPsyFile file;
+					CProgressDialog progress;
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
 						return FALSE;
 					}
-					if (!_pSong->Save(&file))
+					progress.Create();
+					progress.SetWindowText("Saving...");
+					progress.ShowWindow(SW_SHOW);
+					if (!_pSong->Save(&file, progress))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
@@ -713,8 +721,14 @@ namespace psycle { namespace host {
 						}
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
-					}				
-					//file.Close();  <- save handles this 
+					}
+					progress.OnCancel();
+					if (!file.Close())
+					{
+						std::ostringstream s;
+						s << "Error writing to file '" << file.szName << "'" << std::endl;
+						MessageBox(s.str().c_str(),"File Error!!!",0);
+					}
 				}
 				else 
 				{
@@ -779,7 +793,7 @@ namespace psycle { namespace host {
 					if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
 					int index = str.ReverseFind('\\');
 					OldPsyFile file;
-
+					CProgressDialog progress;
 					if (index != -1)
 					{
 						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
@@ -795,7 +809,11 @@ namespace psycle { namespace host {
 						MessageBox("Error creating file!", "Error!", MB_OK);
 						return FALSE;
 					}
-					if (!_pSong->Save(&file))
+
+					progress.Create();
+					progress.SetWindowText("Saving...");
+					progress.ShowWindow(SW_SHOW);
+					if (!_pSong->Save(&file,progress))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
@@ -816,7 +834,13 @@ namespace psycle { namespace host {
 						UndoMacSaved = UndoMacCounter;
 						SetTitleBarText();
 					}
-					//file.Close(); <- save handles this
+					progress.OnCancel();
+					if (!file.Close())
+					{
+						std::ostringstream s;
+						s << "Error writing to file '" << file.szName << "'" << std::endl;
+						MessageBox(s.str().c_str(),"File Error!!!",0);
+					}
 				}
 			}
 			else
@@ -910,26 +934,9 @@ namespace psycle { namespace host {
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
-				///\todo lock/unlock
-				Sleep(256);
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// midi implementation
-				Global::pConfig->_pMidiInput->Close();
-				///\todo lock/unlock
-				Sleep(256);
 
 				Global::_pSong->New();
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					_outputActive = false;
-				}
-				else
-				{
-					// midi implementation
-					Global::pConfig->_pMidiInput->Open();
-				}
+
 				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 				SetTitleBarText();
 				editPosition=0;
@@ -990,6 +997,7 @@ namespace psycle { namespace host {
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					OldPsyFile file;
+					CProgressDialog progress;
 					std::ostringstream szText;
 					szText << "Save changes to \"" << Global::_pSong->fileName
 						<< "\"?";
@@ -997,6 +1005,9 @@ namespace psycle { namespace host {
 					switch (result)
 					{
 					case IDYES:
+						progress.Create();
+						progress.SetWindowText("Saving...");
+						progress.ShowWindow(SW_SHOW);
 						if (!file.Create((char*)filepath.c_str(), true))
 						{
 							std::ostringstream szText;
@@ -1004,8 +1015,14 @@ namespace psycle { namespace host {
 							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
 							return FALSE;
 						}
-						_pSong->Save(&file);
-						//file.Close(); <- save handles this
+						_pSong->Save(&file,progress);
+						progress.OnCancel();
+						if (!file.Close())
+						{
+							std::ostringstream s;
+							s << "Error writing to file '" << file.szName << "'" << std::endl;
+							MessageBox(s.str().c_str(),"File Error!!!",0);
+						}
 						return TRUE;
 						break;
 					case IDNO:
@@ -1372,7 +1389,7 @@ namespace psycle { namespace host {
 		/// Show new machine dialog
 		void CChildView::NewMachine(int x, int y, int mac) 
 		{
-			CNewMachine dlg;
+			CNewMachine dlg(this);
 			if(mac >= 0)
 			{
 				if (mac < MAX_BUSES)
@@ -1462,15 +1479,6 @@ namespace psycle { namespace host {
 						}
 					}
 				}
-				// Stop driver to handle possible conflicts between threads.
-				// should be no conflicts because last thing create machine does is set active machine flag.
-				// busses are set last, so no messages will be sent until after machine is created anyway
-				/*
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				*/
 
 				if ( fb == -1)
 				{
@@ -1525,21 +1533,6 @@ namespace psycle { namespace host {
 					}
 					else MessageBox("Machine Creation Failed","Error!",MB_OK);
 				}
-				
-				/*
-				// Restarting the driver...
-				pParentMain->UpdateEnvInfo();
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					_outputActive = false;
-				}
-				else
-				{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-				}
-				*/
 			}
 			//Repaint();
 			pParentMain->RedrawGearRackList();
@@ -1557,9 +1550,9 @@ namespace psycle { namespace host {
 				{
 					SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL);
 				}
-				_outputActive = true;
-				EnableSound();
 			}
+			_outputActive = true;
+			EnableSound();
 			//Repaint();
 		}
 
@@ -1907,14 +1900,6 @@ namespace psycle { namespace host {
 				KillRedo();
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
-				///\todo lock/unlock
-				Sleep(256);
-				_outputActive = false;
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-				///\todo lock/unlock
-				Sleep(256);
 
 				CString str = ofn.lpstrFile;
 				int index = str.ReverseFind('.');
@@ -1929,19 +1914,12 @@ namespace psycle { namespace host {
 						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "XM file imported", MB_OK);
-*/
+						if (Global::pConfig->bShowSongInfoOnLoad)
+						{
+							CSongpDlg dlg(Global::_pSong);
+							dlg.SetReadOnly();
+							dlg.DoModal();
+						}
 					} else if (ext.CompareNoCase("IT") == 0)
 					{
 						ITModule2 it;
@@ -1956,19 +1934,12 @@ namespace psycle { namespace host {
 							return;
 						}
 						it.Close();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "IT file imported", MB_OK);
-*/
+						if (Global::pConfig->bShowSongInfoOnLoad)
+						{
+							CSongpDlg dlg(Global::_pSong);
+							dlg.SetReadOnly();
+							dlg.DoModal();
+						}
 					} else if (ext.CompareNoCase("S3M") == 0)
 					{
 						ITModule2 s3m;
@@ -1983,19 +1954,12 @@ namespace psycle { namespace host {
 							return;
 						}
 						s3m.Close();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "S3M file imported", MB_OK);
-*/
+						if (Global::pConfig->bShowSongInfoOnLoad)
+						{
+							CSongpDlg dlg(Global::_pSong);
+							dlg.SetReadOnly();
+							dlg.DoModal();
+						}
 					} else if (ext.CompareNoCase("MOD") == 0)
 					{
 						MODSongLoader modfile;
@@ -2004,19 +1968,12 @@ namespace psycle { namespace host {
 						editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
-						CSongpDlg dlg(Global::_pSong);
-						dlg.SetReadOnly();
-						dlg.DoModal();
-/*						char buffer[512];		
-						std::sprintf
-							(
-							buffer,"%s\n\n%s\n\n%s",
-							Global::song().name.c_str(),
-							Global::song().author.c_str(),
-							Global::song().comments.c_str()
-							);
-						MessageBox(buffer, "MOD file imported", MB_OK);
-*/
+						if (Global::pConfig->bShowSongInfoOnLoad)
+						{
+							CSongpDlg dlg(Global::_pSong);
+							dlg.SetReadOnly();
+							dlg.DoModal();
+						}
 					}
 				}
 
@@ -2031,16 +1988,7 @@ namespace psycle { namespace host {
 				{
 					Global::_pSong->fileName = str+".psy";
 				}
-				_outputActive = true;
-				if (!Global::pConfig->_pOutputDriver->Enable(true))
-				{
-					_outputActive = false;
-				}
-				else
-				{
-					// MIDI IMPLEMENTATION
-					Global::pConfig->_pMidiInput->Open();
-				}
+
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
@@ -2152,14 +2100,6 @@ namespace psycle { namespace host {
 		{
 			pParentMain->CloseAllMacGuis();
 			Global::pPlayer->Stop();
-			///\todo lock/unlock
-			Sleep(256);
-			_outputActive = false;
-			Global::pConfig->_pOutputDriver->Enable(false);
-			// MIDI IMPLEMENTATION
-			Global::pConfig->_pMidiInput->Close();
-			///\todo lock/unlock
-			Sleep(256);
 			
 			OldPsyFile file;
 			if (!file.Open(fName.c_str()))
@@ -2168,8 +2108,16 @@ namespace psycle { namespace host {
 				return;
 			}
 			editPosition = 0;
-			_pSong->Load(&file);
-			//file.Close(); <- load handles this
+			CProgressDialog progress;
+			progress.Create();
+			progress.ShowWindow(SW_SHOW);
+			if(!_pSong->Load(&file,progress) || !file.Close())
+			{
+				std::ostringstream s;
+				s << "Error reading from file '" << file.szName << "'" << std::endl;
+				MessageBox(s.str().c_str(), "File Error!!!", 0);
+			}
+			progress.OnCancel();
 			_pSong->_saved=true;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
@@ -2183,17 +2131,6 @@ namespace psycle { namespace host {
 				Global::_pSong->fileName = fName;
 			}
 			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
-			_outputActive = true;
-			if (!Global::pConfig->_pOutputDriver->Enable(true))
-			{
-				_outputActive = false;
-			}
-			else
-			{
-				// MIDI IMPLEMENTATION
-				
-				Global::pConfig->_pMidiInput->Open();
-			}
 
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
@@ -2212,14 +2149,6 @@ namespace psycle { namespace host {
 				CSongpDlg dlg(Global::_pSong);
 				dlg.SetReadOnly();
 				dlg.DoModal();
-/*				std::ostringstream songLoaded;
-				songLoaded << '\'' << _pSong->name << '\'' << std::endl
-					<< std::endl
-					<< _pSong->author << std::endl
-					<< std::endl
-					<< _pSong->comments;
-				MessageBox(songLoaded.str().c_str(), "Psycle song loaded", MB_OK);
-*/
 			}
 		}
 

@@ -10,6 +10,7 @@
 	#include "WasapiDriver.hpp"
 	#include "MidiInput.hpp"
 	#include "NewMachine.hpp"
+	#include "Player.hpp"
 #endif // !defined WINAMP_PLUGIN
 
 #include "Song.hpp"
@@ -51,21 +52,21 @@ namespace psycle
 			SetSkinDefaults();
 			// soundcard output device
 			{
-				_numOutputDrivers = 4;
+				_numOutputDrivers = Is_Vista_or_Later() ? 5 : 4;
+				int idx = 0;
 				_ppOutputDrivers = new AudioDriver*[_numOutputDrivers];
-				_ppOutputDrivers[0] = new AudioDriver;
-				if (Is_Vista_or_Later()) {
-					_ppOutputDrivers[1] = new WasapiDriver();
-				}
-				else {
-					_ppOutputDrivers[1] = new WaveOut();
-				}
-				_ppOutputDrivers[2] = new DirectSound();
-				_ppOutputDrivers[3] = new ASIOInterface();
-				if(((ASIOInterface*)(_ppOutputDrivers[3]))->_drivEnum.size() <= 0)
+				_ppOutputDrivers[idx++] = new SilentDriver();
+				_ppOutputDrivers[idx++] = new WaveOut();
+				_ppOutputDrivers[idx++] = new DirectSound();
+				_ppOutputDrivers[idx++] = new ASIOInterface();
+				if(((ASIOInterface*)(_ppOutputDrivers[3]))->SupportsAsio()==false)
 				{
 					_numOutputDrivers--;
+					idx--;
 					delete _ppOutputDrivers[3]; _ppOutputDrivers[3] = 0;
+				}
+				if (Is_Vista_or_Later()) {
+					_ppOutputDrivers[idx++] = new WasapiDriver();
 				}
 				_outputDriverIndex = 2;
 				_pOutputDriver = _ppOutputDrivers[_outputDriverIndex];
@@ -79,7 +80,7 @@ namespace psycle
 				CMidiInput::Instance()->SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
 				CMidiInput::Instance()->SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				_midiHeadroom = 100;
-				// enable velocity, raw and chan as aux by default
+				// enable velocity, raw and the default gen and inst selection
 				{
 					midi().velocity().record()  = true;
 					midi().velocity().type()    = 0; // 0 is cmd
@@ -87,7 +88,8 @@ namespace psycle
 					midi().velocity().from()    = 0;
 					midi().velocity().to()      = 0xff;
 					midi().raw()				= true;
-					midi().chan_as_aux()		= true;
+					midi().gen_select_type()	= midi_type::MS_USE_SELECTED;
+					midi().inst_select_type()	= midi_type::MS_USE_SELECTED;
 				}
 			}
 #endif // !defined WINAMP_PLUGIN
@@ -201,6 +203,9 @@ namespace psycle
 			reg.QueryValue("toolbarOnVsts", _toolbarOnVsts);
 			//reg.QueryValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.QueryValue("NavigationIgnoresStep", _NavigationIgnoresStep);
+			bool cpu_measurements;
+			reg.QueryValue("UseCPUMeasurements", cpu_measurements);
+			Global::player().measure_cpu_usage_ = cpu_measurements;
 			// midi
 			{
 				reg.QueryValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
@@ -233,7 +238,8 @@ namespace psycle
 					reg.QueryValue("MidiTo"      + s, midi().group(i).to()     );
 				}
 				reg.QueryValue("MidiRawMcm", midi().raw());
-				reg.QueryValue("MidiChanAsAux", midi().chan_as_aux());
+				reg.QueryValue("MidiGenSelectorType", midi().gen_select_type());
+				reg.QueryValue("MidiInstSelectorType", midi().inst_select_type());
 			}
 #endif // !defined WINAMP_PLUGIN
 
@@ -423,6 +429,9 @@ namespace psycle
 			reg.SetValue("toolbarOnVsts", _toolbarOnVsts);
 			//reg.SetValue("MoveCursorPaste", _MoveCursorPaste);
 			reg.SetValue("NavigationIgnoresStep", _NavigationIgnoresStep);
+			bool cpu_measurements = Global::player().measure_cpu_usage_;
+			reg.SetValue("UseCPUMeasurements", cpu_measurements);
+
 			reg.SetValue("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
 			reg.SetValue("OutputDriver", _outputDriverIndex);
 			reg.SetValue("MidiInputDriver", _midiDriverIndex);
@@ -451,7 +460,8 @@ namespace psycle
 				reg.SetValue("MidiTo"      + s, midi().group(i).to()     );
 			}
 			reg.SetValue("MidiRawMcm", midi().raw());
-			reg.SetValue("MidiChanAsAux", midi().chan_as_aux());
+			reg.SetValue("MidiGenSelectorType", midi().gen_select_type());
+			reg.SetValue("MidiInstSelectorType", midi().inst_select_type());
 			reg.SetValue("defaultPatLines", defaultPatLines);
 			reg.SetValue("bShowSongInfoOnLoad", bShowSongInfoOnLoad);
 			reg.SetValue("bFileSaveReminders", bFileSaveReminders);

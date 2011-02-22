@@ -1054,7 +1054,6 @@ namespace seib {
 			{
 				return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
 			}PSYCLE__HOST__CATCH_ALL(crashclass);
-			return 0;
 		}
 
 		/*****************************************************************************/
@@ -1127,7 +1126,6 @@ namespace seib {
 			{
 				return aEffect->getParameter(aEffect, index);
 			}PSYCLE__HOST__CATCH_ALL(crashclass);
-			return 0;
 		}
 
 		bool CEffect::OnSizeEditorWindow(long width, long height)
@@ -1418,7 +1416,7 @@ namespace seib {
 			if(lMask & kVstNanosValid)
 			{
 			#if defined _WIN64 || defined _WIN32
-				vstTimeInfo.nanoSeconds = timeGetTime();
+				vstTimeInfo.nanoSeconds = timeGetTime() * 1000000.0;
 				vstTimeInfo.flags |= kVstNanosValid;
 			#else
 				#error add the appropiate code.

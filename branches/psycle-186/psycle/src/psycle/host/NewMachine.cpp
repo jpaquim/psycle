@@ -23,6 +23,7 @@ namespace psycle { namespace host {
 		bool CNewMachine::pluginName = 1;
 		int CNewMachine::_numPlugins = -1;
 		int CNewMachine::selectedClass=internal;
+		bool CNewMachine::isopened=false;
 		int CNewMachine::selectedMode=modegen;
 
 		PluginInfo* CNewMachine::_pPlugsInfo[MAX_BROWSER_PLUGINS];
@@ -112,6 +113,7 @@ namespace psycle { namespace host {
 		CNewMachine::CNewMachine(CWnd* pParent)
 			: CDialog(CNewMachine::IDD, pParent)
 		{
+			isopened=true;
 			m_orderby = pluginOrder;
 			m_showdllName = pluginName;
 			shellIdx = 0;
@@ -121,6 +123,7 @@ namespace psycle { namespace host {
 
 		CNewMachine::~CNewMachine()
 		{
+			isopened=false;
 		}
 
 		void CNewMachine::DoDataExchange(CDataExchange* pDX)
@@ -386,7 +389,7 @@ namespace psycle { namespace host {
 				m_nameLabel.SetWindowText("Wave In Recorder");
 				m_descLabel.SetWindowText("Allows Psycle to get audio from an external source");
 				m_dllnameLabel.SetWindowText("Internal Machine");
-				m_versionLabel.SetWindowText("V1.0");
+				m_versionLabel.SetWindowText("V1.1");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_RECORDER;
 				selectedClass = internal;
@@ -495,7 +498,7 @@ namespace psycle { namespace host {
 #else
 #error unexpected platform
 #endif
-			LoadPluginInfo();
+			LoadPluginInfo(this->GetParentFrame());
 			UpdateList();
 			m_browser.Invalidate();
 			SetFocus();
@@ -503,7 +506,7 @@ namespace psycle { namespace host {
 		void CNewMachine::OnBnClickedButton1()
 		{
 			DestroyPluginInfo();
-			LoadPluginInfo();
+			LoadPluginInfo(GetParent());
 			UpdateList();
 			m_browser.Invalidate();
 			SetFocus();
@@ -543,160 +546,173 @@ namespace psycle { namespace host {
 				loggers::information()("Scanning plugins ...");
 
 				::AfxGetApp()->DoWaitCursor(1); 
-				int plugsCount(0);
-				int badPlugsCount(0);
-				_numPlugins = 0;
-				bool cacheValid = LoadCacheFile(plugsCount, badPlugsCount, verify);
-				// If cache found&loaded and no verify, we're ready, else start scan.
-				if (cacheValid && !verify) return;
 
-				class populate_plugin_list
-				{
-					public:
-						populate_plugin_list(std::vector<std::string> & result, std::string directory)
-						{
-							::CFileFind finder;
-							int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
-							while(loop)
-							{
-								loop = finder.FindNextFile();
-								if(finder.IsDirectory()) {
-									if(!finder.IsDots())
-									{
-										std::string sfilePath = finder.GetFilePath();
-										populate_plugin_list(result,sfilePath);
-									}
-								}
-								else
-								{
-									CString filePath=finder.GetFilePath();
-									filePath.MakeLower();
-									if(filePath.Right(4) == ".dll")
-									{
-										std::string sfilePath = filePath;
-										result.push_back(sfilePath);
-									}
-								}
-							}
-							finder.Close();
-						}
-				};
-
-				std::vector<std::string> nativePlugs;
-				std::vector<std::string> vstPlugs;
-
-				CProgressDialog Progress;
-				{
-					char c[1 << 10];
-					::GetCurrentDirectory(sizeof c, c);
-					std::string s(c);
-					loggers::information()("Scanning plugins ... Current Directory: " + s);
-				}
-				loggers::information()("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
-				loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::pConfig->GetVst32Dir());
-				loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::pConfig->GetVst64Dir());
-				loggers::information()("Scanning plugins ... Listing ...");
-
-				Progress.Create();
-				Progress.SetWindowText("Scanning plugins ... Listing ...");
-				Progress.ShowWindow(SW_SHOW);
-
-				populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
-#if	defined _WIN64
-				populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
-				if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
-				{
-					populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
-				}
-#elif defined _WIN32
-				populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
-				if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
-				{
-					populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
-				}
-#endif
-
-				int plugin_count = (int)(nativePlugs.size() + vstPlugs.size());
-
-				{
-					std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
-					loggers::information()(s.str());
-					Progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
-					Progress.SetWindowText(s.str().c_str());
-				}
-				std::ofstream out;
-				{
-					boost::filesystem::path log_dir(universalis::os::fs::home_app_local("psycle"));
-					// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
-					mkdir(log_dir.native_directory_string().c_str());
-#if defined _WIN64
-					out.open((log_dir / "psycle64.plugin-scan.log.txt").native_file_string().c_str());
-#elif defined _WIN32
-					out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
-#else
-#error unexpected platform
-#endif
-				}
-				out
-					<< "==========================================" << std::endl
-					<< "=== Psycle Plugin Scan Enumeration Log ===" << std::endl
-					<< std::endl
-					<< "If psycle is crashing on load, chances are it's a bad plugin, "
-					<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
-				
-				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
-				Progress.SetWindowText(s.str().c_str());
-
-				loggers::information()("Scanning plugins ... Testing Natives ...");
-				out
-					<< std::endl
-					<< "======================" << std::endl
-					<< "=== Native Plugins ===" << std::endl
-					<< std::endl;
-				out.flush();
-
-				///\todo: put this inside a low priority thread and wait until it finishes.
-				FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, cacheValid ? &Progress : 0);
-
-
-				out.flush();
-				{
-					std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
-					Progress.SetWindowText(s.str().c_str());
-				}
-
-				loggers::information()("Scanning plugins ... Testing VSTs ...");
-				out
-					<< std::endl
-					<< "===================" << std::endl
-					<< "=== VST Plugins ===" << std::endl
-					<< std::endl;
-				out.flush();
-
-				///\todo: put this inside a low priority thread and wait until it finishes.
-				FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, cacheValid ? &Progress : 0);
-
-				{
-					std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
-					out << std::endl << s.str() << std::endl;
-					out.flush();
-					loggers::information()(s.str().c_str());
-					Progress.SetWindowText(s.str().c_str());
-				}
-				out.close();
-				_numPlugins = plugsCount;
-
-				Progress.m_Progress.SetPos(16384);
-				Progress.SetWindowText("Saving scan cache file ...");
+				DWORD dwThreadId;
+				LoadPluginInfoParams params;
+				params.verify = verify;
+				//This almost works.. except for the fact that when closing the progress dialog, the focus is lost.
+				//CreateThread( NULL, 0, ProcessLoadPlugInfo, &params, 0, &dwThreadId );
+				//CSingleLock event(&params.theEvent, TRUE);
+				ProcessLoadPlugInfo(&params);
 
 				loggers::information()("Saving scan cache file ...");
 				SaveCacheFile();
-
-				Progress.OnCancel();
-				::AfxGetApp()->DoWaitCursor(-1); 
 				loggers::information()("Done.");
+				::AfxGetApp()->DoWaitCursor(-1); 
 			}
 		}
+
+		DWORD CNewMachine::ProcessLoadPlugInfo(void* pParam ) {
+			LoadPluginInfoParams* param = (LoadPluginInfoParams*)pParam;
+			int plugsCount(0);
+			int badPlugsCount(0);
+			_numPlugins = 0;
+			bool cacheValid = LoadCacheFile(plugsCount, badPlugsCount, param->verify);
+			// If cache found&loaded and no verify, we're ready, else start scan.
+			if (cacheValid && !param->verify) {
+				param->theEvent.SetEvent();
+				return 0;
+			}
+
+			class populate_plugin_list
+			{
+				public:
+					populate_plugin_list(std::vector<std::string> & result, std::string directory)
+					{
+						::CFileFind finder;
+						int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
+						while(loop)
+						{
+							loop = finder.FindNextFile();
+							if(finder.IsDirectory()) {
+								if(!finder.IsDots())
+								{
+									std::string sfilePath = finder.GetFilePath();
+									populate_plugin_list(result,sfilePath);
+								}
+							}
+							else
+							{
+								CString filePath=finder.GetFilePath();
+								filePath.MakeLower();
+								if(filePath.Right(4) == ".dll")
+								{
+									std::string sfilePath = filePath;
+									result.push_back(sfilePath);
+								}
+							}
+						}
+						finder.Close();
+					}
+			};
+
+			std::vector<std::string> nativePlugs;
+			std::vector<std::string> vstPlugs;
+
+			CProgressDialog progress;
+			{
+				char c[1 << 10];
+				::GetCurrentDirectory(sizeof c, c);
+				std::string s(c);
+				loggers::information()("Scanning plugins ... Current Directory: " + s);
+			}
+			loggers::information()("Scanning plugins ... Directory for Natives: " + Global::pConfig->GetPluginDir());
+			loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::pConfig->GetVst32Dir());
+			loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::pConfig->GetVst64Dir());
+			loggers::information()("Scanning plugins ... Listing ...");
+
+			progress.Create();
+			progress.SetWindowText("Scanning plugins ... Listing ...");
+			progress.ShowWindow(SW_SHOW);
+
+			populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
+#if	defined _WIN64
+			populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
+			if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
+			{
+				populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
+			}
+#elif defined _WIN32
+			populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
+			if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
+			{
+				populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
+			}
+#endif
+
+			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size());
+
+			{
+				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
+				loggers::information()(s.str());
+				progress.m_Progress.SetStep(16384 / std::max(1,plugin_count));
+				progress.SetWindowText(s.str().c_str());
+			}
+			std::ofstream out;
+			{
+				boost::filesystem::path log_dir(universalis::os::fs::home_app_local("psycle"));
+				// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
+				mkdir(log_dir.native_directory_string().c_str());
+#if defined _WIN64
+				out.open((log_dir / "psycle64.plugin-scan.log.txt").native_file_string().c_str());
+#elif defined _WIN32
+				out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
+#else
+#error unexpected platform
+#endif
+			}
+			out
+				<< "==========================================" << std::endl
+				<< "=== Psycle Plugin Scan Enumeration Log ===" << std::endl
+				<< std::endl
+				<< "If psycle is crashing on load, chances are it's a bad plugin, "
+				<< "specifically the last item listed, if it has no comment after the library file name." << std::endl;
+			
+			std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Natives ...";
+			progress.SetWindowText(s.str().c_str());
+
+			loggers::information()("Scanning plugins ... Testing Natives ...");
+			out
+				<< std::endl
+				<< "======================" << std::endl
+				<< "=== Native Plugins ===" << std::endl
+				<< std::endl;
+			out.flush();
+
+			FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, cacheValid ? &progress : 0);
+
+			out.flush();
+			{
+				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing VSTs ...";
+				progress.SetWindowText(s.str().c_str());
+			}
+
+			loggers::information()("Scanning plugins ... Testing VSTs ...");
+			out
+				<< std::endl
+				<< "===================" << std::endl
+				<< "=== VST Plugins ===" << std::endl
+				<< std::endl;
+			out.flush();
+
+			FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, cacheValid ? &progress : 0);
+
+			{
+				std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
+				out << std::endl << s.str() << std::endl;
+				out.flush();
+				loggers::information()(s.str().c_str());
+				progress.SetWindowText(s.str().c_str());
+			}
+			out.close();
+			_numPlugins = plugsCount;
+			progress.m_Progress.SetPos(16384);
+			progress.SetWindowText("Saving scan cache file ...");
+			progress.OnCancel();
+			param->theEvent.SetEvent();
+			return 0;
+		}
+
 
 		void CNewMachine::FindPlugins(int & currentPlugsCount, int & currentBadPlugsCount, std::vector<std::string> const & list, MachineType type, std::ostream & out, CProgressDialog * pProgress)
 		{

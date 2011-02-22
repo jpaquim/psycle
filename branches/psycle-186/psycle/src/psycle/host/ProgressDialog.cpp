@@ -7,24 +7,16 @@ namespace psycle { namespace host {
 
 		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)
 		{
-			//{{AFX_DATA_INIT(CProgressDialog)
-				// NOTE: the ClassWizard will add member initialization here
-			//}}AFX_DATA_INIT
 			m_pParent = pParent;
 		}
 
 		void CProgressDialog::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CProgressDialog)
 			DDX_Control(pDX, IDC_PROGRESS1, m_Progress);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
-			//{{AFX_MSG_MAP(CProgressDialog)
-				// NOTE: the ClassWizard will add message map macros here
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CProgressDialog::OnInitDialog() 

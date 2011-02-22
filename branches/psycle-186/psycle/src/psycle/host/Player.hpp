@@ -9,6 +9,7 @@
 #include <universalis/stdlib/thread.hpp>
 #include "Machine.hpp"
 #if !defined WINAMP_PLUGIN
+	#include "AudioDriver.hpp"
 	#include <psycle/helpers/riff.hpp>
 	#include <psycle/helpers/dither.hpp>
 #endif //!defined WINAMP_PLUGIN
@@ -26,6 +27,7 @@ namespace psycle
 			Player();
 			/// destructor.
 			virtual ~Player() throw();
+		private:
 			/// Moves the cursor one line forward, changing the pattern if needed.
 			void AdvancePosition();
 			/// Initial Loop. Read new line and execute Global commands/tweaks.
@@ -34,10 +36,13 @@ namespace psycle
 			void NotifyNewLine(void);
 			/// Final Loop. Read the line again for notes to send to the Machines
 			void ExecuteNotes(void);
-			/// Function to encapsulate all the three functions above.
+		public:
+			/// Function to encapsulate the three functions above.
 			void ExecuteLine();
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
+			/// Contains the number of samples until a line change comes in.
+			int _samplesRemaining;
 			/// Used to indicate that the SamplesPerRow has been manually changed ( right now, in effects "pattern delay" and "fine delay" )
 			bool _SPRChanged;
 			/// the line currently being played in the current pattern
@@ -53,14 +58,16 @@ namespace psycle
 			/// elapsed time since playing started in minutes.It just serves to complement the previous variable
 			///\todo There is no need for two vars.
 			int _playTimem;
+			/// the amount of samples elapsed since start to play (this is for the VstHost)
+			double sampleCount;
+			/// the offset of the machine work()/midi InjectMIDI() call versus this player Work() call.
+			double sampleOffset;
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
 			int bpm;
 			/// the current ticks per beat at which to play the song.
 			/// can be changed from the song itself using commands.
 			int tpb;
-			/// Contains the number of samples until a line change comes in.
-			int _samplesRemaining;
 			/// starts to play, also specifying a line to stop playing at.
 			void Start(int pos,int lineStart,int lineStop,bool initialize=true);
 			/// starts to play.
@@ -75,29 +82,36 @@ namespace psycle
 			bool _isWorking;
 			/// stops playing (thread safe).
 			void Stop();
+			bool measure_cpu_usage_;
+		private:
 			// stops playing (non thread safe)
 			void DoStop(void);
+		public:
 			/// work function. (Entrance for the callback function (audiodriver)
 			static float * Work(void* context, int nsamples);
 			float * Work(int numSamples);
 			
 			void SetBPM(int _bpm,int _tpb=0);
 
+			//Change the samplerate (Thread safe)
+			void SetSampleRate(const int sampleRate);
+		private:
+			//Change the samplerate (non Thread safe)
+			void SampleRate(const int sampleRate);
+		public:
+			const int SampleRate() { return m_SampleRate; }
 			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
 
-			/// Returns the number of samples that it takes for each row of the pattern to be played
-			const int SamplesPerRow(){ return m_SamplesPerRow;}
 			/// Sets the number of samples that it takes for each row of the pattern to be played
 			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
-			const int SampleRate() { return m_SampleRate; }
-			void SampleRate(const int sampleRate);
+			const int SamplesPerRow() { return m_SamplesPerRow; }
 
 			/// used by the plugins to indicate that they need redraw.
 			bool Tweaker;
 			///\name secondary output device, write to a file
 			///\{
 			/// starts the recording output device.
-			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, int channelmode =-1, bool isFloat = false, bool dodither=false, int ditherpdf=0, int noiseshape=0, std::vector<char*> *clipboardmem=0);
+			void StartRecording(std::string psFilename,int bitdepth=-1,int samplerate =-1, channel_mode channelmode =no_mode, bool isFloat = false, bool dodither=false, int ditherpdf=0, int noiseshape=0, std::vector<char*> *clipboardmem=0);
 			/// stops the recording output device.
 			void StopRecording(bool bOk = true);
 			bool ClipboardWriteMono(float sample);
@@ -114,14 +128,10 @@ namespace psycle
 		protected:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 			int prevMachines[MAX_TRACKS];
-			/// Stores the samplerate of playback when recording to wave offline (non-realtime), since it can be changed.
-			int backup_rate;
-			/// Stores the bitdepth of playback when recording to wave offline (non-realtime), since it can be changed.
-			int backup_bits;
-			/// Stores the channel mode (mono/stereo) of playback when recording to wave offline (non-realtime), since it can be changed.
-			int backup_channelmode;
+			/// Stores which instrument/aux value last used in each track.
+			int prevInstrument[MAX_TRACKS];
 			/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-			float _pBuffer[MAX_DELAY_BUFFER];
+			float* _pBuffer;
 #if !defined WINAMP_PLUGIN
 			/// file to which to output signal.
 			WaveFile _outputWaveFile;
@@ -175,7 +185,7 @@ namespace psycle
 			void suspend_and_compute_plan();
 			void compute_plan();
 			void clear_plan();
-			void process_loop() throw(std::exception);
+			void process_loop(std::size_t thread_number) throw(std::exception);
 			int samples_to_process_;
 	///\}
 		};

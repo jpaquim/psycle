@@ -134,12 +134,18 @@ namespace psycle
 				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
 				///
 				/// Note that the crashable argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
-				#define PSYCLE__HOST__CATCH_ALL(crashable) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+//				#define PSYCLE__HOST__CATCH_ALL(crashable) \
+//					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 
 				///\see PSYCLE__HOST__CATCH_ALL
-				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+//				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
+//					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+
+
+				#define PSYCLE__HOST__CATCH_ALL(crashable) catch(bool) {throw;}
+					//UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW
+				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) catch(bool){throw;}
+					//UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__NO_CLASS
 			}
 		}
 
@@ -267,8 +273,8 @@ namespace psycle
 			///\{
 				public:
 					virtual void Init();
-					virtual void PreWork(int numSamples,bool clear=true);
-					virtual int GenerateAudio(int numsamples);
+					virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage);
+					virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
 					virtual int GenerateAudioInTicks(int startSample, int numsamples);
 					virtual void Tick() {}
 					virtual void Tick(int track, PatternEntry * pData) {}
@@ -277,8 +283,8 @@ namespace psycle
 			///\name used by the single-threaded, recursive scheduler
 			///\{
 					/// virtual because the mixer machine has its own implementation
-					virtual void recursive_process(unsigned int frames);
-					void recursive_process_deps(unsigned int frames, bool mix = true);
+					virtual void recursive_process(unsigned int frames, bool measure_cpu_usage);
+					void recursive_process_deps(unsigned int frames, bool mix, bool measure_cpu_usage);
 			///\}
 			///\name used by the multi-threaded scheduler
 			///\{
@@ -289,7 +295,7 @@ namespace psycle
 					/// tells the scheduler which machines may be processed after this one
 					virtual void sched_outputs(sched_deps&) const;
 					/// called by the scheduler to ask for the actual processing of the machine
-					virtual bool sched_process(unsigned int frames);
+					virtual bool sched_process(unsigned int frames, bool measure_cpu_usage);
 			///\}
 
 			///\name (de)serialization
@@ -563,7 +569,7 @@ namespace psycle
 			Master();
 			Master(int index);
 			virtual void Init(void);
-			virtual int GenerateAudio(int numsamples);
+			virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
 			virtual float GetAudioRange(){ return 32768.0f; }
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile * pFile);
@@ -579,8 +585,6 @@ namespace psycle
 			float _lMax;
 			float _rMax;
 			static float* _pMasterSamples;
-			/// this is for the VstHost
-			double sampleCount;
 		protected:
 			static char* _psName;
 		};

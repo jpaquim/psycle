@@ -15,6 +15,7 @@
 #include "cpu_time_clock.hpp"
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/sched.hpp>
+#include <universalis/os/aligned_alloc.hpp>
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
 
 namespace psycle
@@ -34,6 +35,7 @@ namespace psycle
 			_isWorking = false;
 			Tweaker = false;
 			_samplesRemaining=0;
+			sampleCount=0;
 			_lineCounter=0;
 			_lineStop=-1;
 			_loopSong=true;
@@ -41,11 +43,15 @@ namespace psycle
 			_linejump=-1;
 			_loop_count=0;
 			_loop_line=0;
+			measure_cpu_usage_=false;
 			m_SampleRate=44100;
 			SetBPM(125,4);
-			for(int i=0;i<MAX_TRACKS;i++) prevMachines[i]=255;
+			for(int i=0;i<MAX_TRACKS;i++) {
+				prevMachines[i]=255;
+				prevInstrument[i]=255;
+			}
+			universalis::os::aligned_memory_alloc(16, _pBuffer, MAX_DELAY_BUFFER);
 			start_threads();
-
 		}
 
 		Player::~Player()
@@ -54,6 +60,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			if(_recording) _outputWaveFile.Close();
 #endif //!defined WINAMP_PLUGIN
+			universalis::os::aligned_memory_dealloc(_pBuffer);
 		}
 
 void Player::start_threads() {
@@ -123,13 +130,25 @@ void Player::start_threads() {
 				DoStop(); // This causes all machines to reset, and samplesperRow to init.				
 				Work(256);
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
-				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->sampleCount = 0;
 			}
 			_lineChanged = true;
 			_lineCounter = line;
 			_SPRChanged = false;
 			_playPosition= pos;
 			_playPattern = Global::_pSong->playOrder[_playPosition];
+			if(pos != 0 || line != 0) {
+				int songLength = 0;
+				for (int i=0; i <Global::_pSong->playLength; i++)
+				{
+					int pattern = Global::_pSong->playOrder[i];
+					// this should parse each line for ffxx commands if you want it to be truly accurate
+					songLength += (Global::_pSong->patternLines[pattern] * 60/(tpb * bpm));
+				}
+
+				sampleCount=songLength*m_SampleRate;
+			}
+			else sampleCount=0;
+
 			if (initialize)
 			{
 				_playTime = 0;
@@ -140,8 +159,12 @@ void Player::start_threads() {
 			if (initialize)
 			{
 				SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
-				SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
-				for(int i=0;i<MAX_TRACKS;i++) prevMachines[i] = 255;
+				SampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
+				for(int i=0;i<MAX_TRACKS;i++) 
+				{
+					prevMachines[i] = 255;
+					prevInstrument[i] = 255;
+				}
 				_playing = true;
 			}
 			CVSTHost::vstTimeInfo.flags |= kVstTransportPlaying;
@@ -172,21 +195,21 @@ void Player::start_threads() {
 				}
 			}
 			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
-			SampleRate(Global::pConfig->_pOutputDriver->_samplesPerSec);
+			SampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
 			CVSTHost::vstTimeInfo.flags &= ~kVstTransportPlaying;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 		}
-
+		void Player::SetSampleRate(const int sampleRate) {
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			SampleRate(sampleRate);
+		}
 		void Player::SampleRate(const int sampleRate)
 		{
-			///\todo update the source code of the plugins...
 #if PSYCLE__CONFIGURATION__RMS_VUS
 			helpers::dsp::numRMSSamples=sampleRate*0.05f;
 #endif
 			if(m_SampleRate != sampleRate)
 			{
-				CSingleLock crit(&Global::_pSong->semaphore, TRUE);
-
 				m_SampleRate = sampleRate;
 				RecalcSPR();
 				CVSTHost::pHost->SetSampleRate(sampleRate);
@@ -393,7 +416,7 @@ void Player::clear_plan() {
 							if(pMachine)
 							{
 								// If the midi command uses a command less than 0x80, then interpret it as
-								// send a tracker command to the specificed track of the specified machine.
+								// send a tracker command to the specified track of the specified machine.
 								if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
 								{
 									int voice(pEntry->_inst);
@@ -418,7 +441,7 @@ void Player::clear_plan() {
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
-								// midi cc
+								// tweaks or midi cc
 								else 
 								{
 									// classic tracking, use the track number as the channel/voice number
@@ -462,40 +485,47 @@ void Player::clear_plan() {
 					if(mac != 255) prevMachines[track] = mac;
 					else mac = prevMachines[track];
 					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
-//					if( mac != 255 ) // is there a machine number and it is either a note or a command?
 					{
+						int ins = pEntry->_inst;
+						if(pEntry->_inst != 255) prevInstrument[track] = pEntry->_inst;
+						else ins = prevInstrument[track];
+
 						if(mac < MAX_MACHINES) //looks like a valid machine index?
 						{
+							// make a copy of the pattern entry, because we're going to modify it.
+							PatternEntry entry(*pEntry);
+							entry._inst = ins;
+
 							Machine *pMachine = pSong->_pMachine[mac];
 							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
 							{
-								if(pEntry->_cmd == PatternCmd::NOTE_DELAY)
+								if(entry._cmd == PatternCmd::NOTE_DELAY)
 								{
 									// delay
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->TriggerDelayCounter[track] = ((pEntry->_parameter+1)*SamplesPerRow())/256;
+									memcpy(&pMachine->TriggerDelay[track], &entry, sizeof(PatternEntry));
+									pMachine->TriggerDelayCounter[track] = ((entry._parameter+1)*SamplesPerRow())/256;
 								}
-								else if(pEntry->_cmd == PatternCmd::RETRIGGER)
+								else if(entry._cmd == PatternCmd::RETRIGGER)
 								{
 									// retrigger
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									pMachine->RetriggerRate[track] = (pEntry->_parameter+1);
+									memcpy(&pMachine->TriggerDelay[track], &entry, sizeof(PatternEntry));
+									pMachine->RetriggerRate[track] = (entry._parameter+1);
 									pMachine->TriggerDelayCounter[track] = 0;
 								}
-								else if(pEntry->_cmd == PatternCmd::RETR_CONT)
+								else if(entry._cmd == PatternCmd::RETR_CONT)
 								{
 									// retrigger continue
-									memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
-									if(pEntry->_parameter&0xf0) pMachine->RetriggerRate[track] = (pEntry->_parameter&0xf0);
+									memcpy(&pMachine->TriggerDelay[track], &entry, sizeof(PatternEntry));
+									if(entry._parameter&0xf0) pMachine->RetriggerRate[track] = (entry._parameter&0xf0);
 								}
-								else if (pEntry->_cmd == PatternCmd::ARPEGGIO)
+								else if (entry._cmd == PatternCmd::ARPEGGIO)
 								{
 									// arpeggio
 									//\todo : Add Memory.
 									//\todo : This won't work... What about sampler's NNA's?
-									if (pEntry->_parameter)
+									if (entry._parameter)
 									{
-										memcpy(&pMachine->TriggerDelay[track], pEntry, sizeof(PatternEntry));
+										memcpy(&pMachine->TriggerDelay[track], &entry, sizeof(PatternEntry));
 										pMachine->ArpeggioCount[track] = 1;
 									}
 									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
@@ -503,7 +533,7 @@ void Player::clear_plan() {
 								else
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->Tick(track, pEntry);
+									pMachine->Tick(track, &entry);
 									pMachine->TriggerDelayCounter[track] = 0;
 									pMachine->ArpeggioCount[track] = 0;
 								}
@@ -626,7 +656,7 @@ void Player::thread_function(std::size_t thread_number) {
 
 	try {
 		try {
-			process_loop();
+			process_loop(thread_number);
 		} catch(...) {
 			loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
 			throw;
@@ -656,7 +686,7 @@ void Player::thread_function(std::size_t thread_number) {
 	}
 }
 
-void Player::process_loop() throw(std::exception) {
+void Player::process_loop(std::size_t thread_number) throw(std::exception) {
 	while(true) {
 		Machine * node_;
 		{ scoped_lock lock(mutex_);
@@ -672,7 +702,7 @@ void Player::process_loop() throw(std::exception) {
 				if(!this_thread_suspended_) {
 					this_thread_suspended_ = true;
 					++suspended_;
-					main_condition_.notify_one();
+					main_condition_.notify_all();
 				}
 				continue;
 			}
@@ -687,7 +717,7 @@ void Player::process_loop() throw(std::exception) {
 		}
 		Machine & node(*node_);
 
-		bool const done(node.sched_process(samples_to_process_));
+		bool const done(node.sched_process(samples_to_process_, measure_cpu_usage_));
 
 		int notify(0);
 		{ scoped_lock lock(mutex_);
@@ -701,6 +731,7 @@ void Player::process_loop() throw(std::exception) {
 				// check whether successors of the node we processed are now ready.
 				// iterate over all the outputs of the node we processed
 				output_nodes_.clear(); node.sched_outputs(output_nodes_);
+
 				for(Machine::sched_deps::const_iterator i(output_nodes_.begin()), e(output_nodes_.end()); i != e; ++i) {
 					Machine & output_node(*const_cast<Machine*>(*i));
 					bool output_node_ready(true);
@@ -724,7 +755,7 @@ void Player::process_loop() throw(std::exception) {
 			}
 		}
 		switch(notify) {
-			case -1: main_condition_.notify_one(); break; // wake up the main processing loop
+			case -1: main_condition_.notify_all(); break; // wake up the main processing loop
 			case 0: break; // no successor ready
 			case 1: break; // If there's only one successor ready, we don't notify since it can be processed in the same thread.
 			case 2: condition_.notify_one(); break; // notify one thread that we added nodes to the queue
@@ -754,9 +785,16 @@ void Player::stop_threads() {
 
 		float * Player::Work(void* context, int numSamples)
 		{
-			CSingleLock crit(&Global::_pSong->semaphore, TRUE);
+			CSingleLock crit(&Global::_pSong->semaphore, FALSE);
 			Player* pThis = (Player*)context;
-			return pThis->Work(numSamples);
+			//Avoid possible deadlocks
+			if(crit.Lock(100)) {
+				pThis->Work(numSamples);
+			}
+			else {
+				dsp::Clear(pThis->_pBuffer,numSamples*2);
+			}
+			return pThis->_pBuffer;
 		}
 		float * Player::Work(int numSamples)
 		{
@@ -764,6 +802,7 @@ void Player::stop_threads() {
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = _pBuffer;
 			nanoseconds const t0(cpu_time_clock());
+			sampleOffset = 0;
 			do
 			{
 				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
@@ -796,19 +835,19 @@ void Player::stop_threads() {
 					{
 						//Note: This should be scheduled if possible too. Also note that it increments
 						// the routing_accumulator, which is is divided by numthreads in the infodlg.
-						if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount);
+						if(pSong->_pMachine[c]) pSong->_pMachine[c]->PreWork(amount, true, measure_cpu_usage_);
 					}
 
 					//\todo: Sampler::DoPreviews( amount );
 					pSong->DoPreviews( amount );
 
-					CVSTHost::vstTimeInfo.samplePos = ((Master *) (pSong->_pMachine[MASTER_INDEX]))->sampleCount;
+					CVSTHost::vstTimeInfo.samplePos = sampleCount;
 
 #if !defined WINAMP_PLUGIN
 					// Inject Midi input data
 					CMidiInput::Instance()->InjectMIDI( amount );
 					if(threads_.empty()){ // single-threaded, recursive processing
-						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount);
+						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount, measure_cpu_usage_);
 					} else { // multi-threaded scheduling
 						// we push all the terminal nodes to the processing queue
 						{ scoped_lock lock(mutex_);
@@ -822,7 +861,7 @@ void Player::stop_threads() {
 							while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
 						}
 					}
-					pSong->_sampCount += amount;
+					sampleCount += amount;
 
 					if((_playing) && (_recording))
 					{
@@ -836,21 +875,21 @@ void Player::stop_threads() {
 						int i;
 						if ( _clipboardrecording)
 						{
-							switch(Global::pConfig->_pOutputDriver->_channelmode)
+							switch(Global::pConfig->_pOutputDriver->GetChannelMode())
 							{
-							case 0: // mono mix
+							case mono_mix: // mono mix
 								for(i=0; i<amount; i++)
 								{
 									if (!ClipboardWriteMono(((*pL++)+(*pR++))/2)) StopRecording(false);
 								}
 								break;
-							case 1: // mono L
+							case mono_left: // mono L
 								for(i=0; i<amount; i++)
 								{
 									if (!ClipboardWriteMono(*pL++)) StopRecording(false);
 								}
 								break;
-							case 2: // mono R
+							case mono_right: // mono R
 								for(i=0; i<amount; i++)
 								{
 									if (!ClipboardWriteMono(*pR++)) StopRecording(false);
@@ -863,22 +902,22 @@ void Player::stop_threads() {
 								}
 								break;
 							}						}
-						else switch(Global::pConfig->_pOutputDriver->_channelmode)
+						else switch(Global::pConfig->_pOutputDriver->GetChannelMode())
 						{
-						case 0: // mono mix
+						case mono_mix: // mono mix
 							for(i=0; i<amount; i++)
 							{
 								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
 								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
-						case 1: // mono L
+						case mono_left: // mono L
 							for(i=0; i<amount; i++)
 							{
 								if(_outputWaveFile.WriteMonoSample((*pL++)) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
-						case 2: // mono R
+						case mono_right: // mono R
 							for(i=0; i<amount; i++)
 							{
 								if(_outputWaveFile.WriteMonoSample((*pR++)) != DDC_SUCCESS) StopRecording(false);
@@ -894,7 +933,7 @@ void Player::stop_threads() {
 					}
 #else
 					if(threads_.empty()){ // single-threaded, recursive processing
-						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount);
+						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount, _measure_cpu_usage_);
 					} else { // multi-threaded scheduling
 						// we push all the terminal nodes to the processing queue
 						{ scoped_lock lock(mutex_);
@@ -908,13 +947,14 @@ void Player::stop_threads() {
 							while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
 						}
 					}
-					pSong->_sampCount += amount;
+					sampleCount += amount;
 #endif //!defined WINAMP_PLUGIN
 
 					Master::_pMasterSamples += amount * 2;
 					numSamples -= amount;
 				}
 				 _samplesRemaining -= amount;
+				 sampleOffset += amount;
 				 CVSTHost::vstTimeInfo.flags &= ~kVstTransportChanged;
 			} while(numSamples>0);
 			nanoseconds const t1(cpu_time_clock());
@@ -923,11 +963,16 @@ void Player::stop_threads() {
 		}
 		bool Player::ClipboardWriteMono(float sample)
 		{
+			// right now the implementation does not support these two being different
+			if (Global::pConfig->_pOutputDriver->GetSampleValidBits() !=
+				Global::pConfig->_pOutputDriver->GetSampleBits()) {
+					return false;
+			}
 			int *length = reinterpret_cast<int*>((*pClipboardmem)[0]);
 			int pos = *length%1000000;
 			int endpos = pos;
 			
-			switch( Global::pConfig->_pOutputDriver->_bitDepth)
+			switch( Global::pConfig->_pOutputDriver->GetSampleBits())
 			{
 			case 8: endpos+=1; break;
 			case 16: endpos+=2; break;
@@ -938,7 +983,7 @@ void Player::stop_threads() {
 			int d(0);
 			if(sample > 32767.0f) sample = 32767.0f;
 			else if(sample < -32768.0f) sample = -32768.0f;
-			switch( Global::pConfig->_pOutputDriver->_bitDepth)
+			switch( Global::pConfig->_pOutputDriver->GetSampleBits())
 			{
 			case 8:
 				d = int(sample/256.0f);
@@ -981,7 +1026,7 @@ void Player::stop_threads() {
 				if (!newbuf) return false;
 				pClipboardmem->push_back(newbuf);
 				// bitdepth == 24 is the only "odd" value, since it uses 3 chars each, nondivisible by 1000000
-				if ( Global::pConfig->_pOutputDriver->_bitDepth == 24)
+				if ( Global::pConfig->_pOutputDriver->GetSampleBits() == 24)
 				{
 					clipbufferindex--;
 					(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
@@ -1001,32 +1046,26 @@ void Player::stop_threads() {
 			return ClipboardWriteMono(right);
 		}
 
-		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, int channelmode, bool isFloat, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
+		void Player::StartRecording(std::string psFilename, int bitdepth, int samplerate, channel_mode channelmode, bool isFloat, bool dodither, int ditherpdf, int noiseshape, std::vector<char*> *clipboardmem)
 		{
 #if !defined WINAMP_PLUGIN
 			if(!_recording)
 			{
-				//\todo: Upgrade all the playing functions to use m_SampleRate instead of pOutputdriver->samplesPerSec
-				//       ensure correct re/initialization of variables (concretely, player::m_SampleRate and AudioDriver::_samplesPerSec)
-				backup_rate = Global::pConfig->_pOutputDriver->_samplesPerSec;
-				backup_bits = Global::pConfig->_pOutputDriver->_bitDepth;
-				backup_channelmode = Global::pConfig->_pOutputDriver->_channelmode;
-				if(samplerate > 0) { SampleRate(samplerate); Global::pConfig->_pOutputDriver->_samplesPerSec = samplerate; }
-				if(bitdepth > 0) Global::pConfig->_pOutputDriver->_bitDepth = bitdepth;
-				if(channelmode >= 0) Global::pConfig->_pOutputDriver->_channelmode = channelmode;
-				if(_dodither=dodither)	//(not a typo)
+				if(samplerate > 0) SampleRate(samplerate);
+				_dodither=dodither;
+				if(dodither)
 				{
 					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
-					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->_bitDepth);
+					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->GetSampleValidBits());
 					dither.SetPdf((helpers::dsp::Dither::Pdf::type)ditherpdf);
 					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape::type)noiseshape);
 				}
 				int channels = 2;
-				if(Global::pConfig->_pOutputDriver->_channelmode != 3) channels = 1;
+				if(channelmode != stereo) channels = 1;
 				Stop();
 				if (!psFilename.empty())
 				{
-					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), Global::pConfig->_pOutputDriver->_samplesPerSec, Global::pConfig->_pOutputDriver->_bitDepth, channels, isFloat) == DDC_SUCCESS)
+					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), samplerate, bitdepth, channels, isFloat) == DDC_SUCCESS)
 						_recording = true;
 					else
 					{
@@ -1059,10 +1098,7 @@ void Player::stop_threads() {
 #if !defined WINAMP_PLUGIN
 			if(_recording)
 			{
-				Global::pConfig->_pOutputDriver->_samplesPerSec = backup_rate;
-				SampleRate(backup_rate);
-				Global::pConfig->_pOutputDriver->_bitDepth = backup_bits;
-				Global::pConfig->_pOutputDriver->_channelmode = backup_channelmode;
+				SampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
 				if (!_clipboardrecording)
 					_outputWaveFile.Close();
 				_recording = false;

@@ -218,12 +218,23 @@ namespace psycle
 					bool       inline & raw()       throw() { return raw_; }
 				private:
 					bool                raw_;
-
+			public:
+				typedef enum {
+					MS_USE_SELECTED = 0,
+					MS_BANK,
+					MS_PROGRAM,
+					MS_MIDI_CHAN
+				} selector_t;
 				public:
-					bool const inline & chan_as_aux() const throw() { return chan_as_aux_; }
-					bool       inline & chan_as_aux()       throw() { return chan_as_aux_; }
+					selector_t const inline & gen_select_type() const throw() { return gen_select_type_; }
+					selector_t       inline & gen_select_type()       throw() { return gen_select_type_; }
 				private:
-					bool                chan_as_aux_;
+					selector_t                gen_select_type_;
+				public:
+					selector_t const inline & inst_select_type() const throw() { return inst_select_type_; }
+					selector_t       inline & inst_select_type()       throw() { return inst_select_type_; }
+				private:
+					selector_t                inst_select_type_;
 			};
 
 		public:
@@ -266,16 +277,6 @@ namespace psycle
 			void Write();
 			bool ReadVersion17();
 			void SetSkinDefaults();
-			inline int GetSamplesPerSec() const throw()
-			{
-				return _pOutputDriver->_samplesPerSec;
-			}
-			inline void SetSamplesPerSec(int samplerate) const throw()
-			{
-				_pOutputDriver->_samplesPerSec = samplerate;
-			}
-
-
 			bool _initialized;
 
 
