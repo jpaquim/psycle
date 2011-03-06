@@ -22,12 +22,12 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_SOLO, m_soloCheck);
 			DDX_Control(pDX, IDC_BYPASS, m_bypassCheck);
 			DDX_Control(pDX, IDC_MUTE, m_muteCheck);
-			DDX_Control(pDX, IDC_EDIT1, m_macname);
+			DDX_Control(pDX, IDC_MAC_NAME, m_macname);
 		}
 
 		BEGIN_MESSAGE_MAP(CMacProp, CDialog)
-			ON_EN_CHANGE(IDC_EDIT1, OnChangeEdit1)
-			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
+			ON_EN_CHANGE(IDC_MAC_NAME, OnChangeMacName)
+			ON_BN_CLICKED(IDC_DELETE, OnDelete)
 			ON_BN_CLICKED(IDC_MUTE, OnMute)
 			ON_BN_CLICKED(IDC_BYPASS, OnBypass)
 			ON_BN_CLICKED(IDC_SOLO, OnSolo)
@@ -64,12 +64,12 @@ namespace psycle { namespace host {
 			// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
-		void CMacProp::OnChangeEdit1() 
+		void CMacProp::OnChangeMacName() 
 		{
 			m_macname.GetWindowText(txt, 32);
 		}
 
-		void CMacProp::OnButton1() 
+		void CMacProp::OnDelete() 
 		{
 			// Delete MACHINE!
 			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)

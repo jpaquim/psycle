@@ -374,7 +374,7 @@ namespace psycle { namespace host {
 
 						if (Global::pConfig->_followSong)
 						{
-							CListBox* pSeqList = (CListBox*)pParentMain->m_wndSeq.GetDlgItem(IDC_SEQLIST);
+							CListBox* pSeqList = (CListBox*)pParentMain->m_seqBar.GetDlgItem(IDC_SEQLIST);
 							editcur.line=Global::pPlayer->_lineCounter;
 							if (editPosition != Global::pPlayer->_playPosition)
 							//if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
@@ -438,9 +438,6 @@ namespace psycle { namespace host {
 				else {
 					_outputActive = true;
 				}
-				Global::pPlayer->SetSampleRate(pOut->GetSamplesPerSec());
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
-
 				// MIDI IMPLEMENTATION
 				Global::pConfig->_pMidiInput->Open();
 
@@ -821,7 +818,8 @@ namespace psycle { namespace host {
 					else 
 					{
 						_pSong->_saved=true;
-						AppendToRecent(str.GetBuffer(1));
+						std::string recent = str.GetBuffer(1);
+						AppendToRecent(recent);
 						
 						if (pUndoList)
 						{
@@ -1189,7 +1187,7 @@ namespace psycle { namespace host {
 			{
 				Global::pConfig->_followSong = TRUE;
 				bEditMode = TRUE;
-				CButton*cb=(CButton*)pParentMain->m_wndSeq.GetDlgItem(IDC_FOLLOW);
+				CButton*cb=(CButton*)pParentMain->m_seqBar.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
 			}
 			pParentMain->StatusBarIdle();
@@ -2001,7 +1999,7 @@ namespace psycle { namespace host {
 			SetTitleBarText();
 		}
 
-		void CChildView::AppendToRecent(std::string fName)
+		void CChildView::AppendToRecent(std::string& fName)
 		{
 			int iCount;
 			char* nameBuff;

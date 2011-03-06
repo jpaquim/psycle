@@ -30,8 +30,8 @@ namespace psycle { namespace host {
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		protected:
 			virtual BOOL OnInitDialog();
-			afx_msg void OnChangeEdit1();
-			afx_msg void OnButton1();
+			afx_msg void OnChangeMacName();
+			afx_msg void OnDelete();
 			afx_msg void OnMute();
 			afx_msg void OnBypass();
 			afx_msg void OnSolo();

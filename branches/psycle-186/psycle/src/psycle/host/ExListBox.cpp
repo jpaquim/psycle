@@ -19,16 +19,7 @@ CThisEdit::~CThisEdit()
 {
 }
 BEGIN_MESSAGE_MAP(CThisEdit, CEdit)
-	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
-
-void CThisEdit::OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags )
-{
-	///\todo: the "if" code doesn't work, because those keys never call this function :OO
-	if ( nChar == VK_ESCAPE || nChar == VK_RETURN)
-		GetParent()->SetFocus();
-	else CEdit::OnKeyDown(nChar,nRepCnt,nFlags);
-}
 
 
 CExListBox::CExListBox()
@@ -41,6 +32,7 @@ CExListBox::~CExListBox()
 
 BEGIN_MESSAGE_MAP(CExListBox, CListBox)
 	ON_WM_RBUTTONDOWN()
+	ON_WM_KEYDOWN()
 	ON_EN_CHANGE(IDC_SEQEDITBOX, OnChangePatternName)
 	ON_EN_KILLFOCUS(IDC_SEQEDITBOX,OnKillFocusPatternName)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
@@ -54,6 +46,7 @@ void CExListBox::PreSubclassWindow()
 	CListBox::PreSubclassWindow();
 	EnableToolTips(TRUE);
 }
+
 void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 {
 	BOOL tmp = FALSE;

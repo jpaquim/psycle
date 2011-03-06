@@ -13,8 +13,6 @@ class CThisEdit : public CEdit
 {
 public:
 	CThisEdit();
-
-	afx_msg void OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 	// Implementation
 public:
 	virtual ~CThisEdit();

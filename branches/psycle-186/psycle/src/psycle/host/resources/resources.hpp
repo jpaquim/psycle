@@ -15,12 +15,14 @@
 #define ID_INDICATOR_OCTAVE             60
 #define IDR_MAINFRAME                   101
 #define IDD_PSYBAR                      102
+#define IDD_SONGBAR                     102
 #define IDB_LESS                        103
 #define IDD_WAVED_ZOOMBAR               103
 #define IDB_LESSLESS                    104
 #define IDB_MORE                        105
 #define IDB_MOREMORE                    106
 #define IDD_PSYBAR2                     108
+#define IDD_MACHINEBAR                  108
 #define IDB_LLEFT                       109
 #define IDB_LRIGHT                      110
 #define IDD_SEQUENCER                   112
@@ -179,9 +181,9 @@
 #define IDC_DOUBLEBUFFER                1042
 #define IDC_FONTC                       1043
 #define IDC_PATTERN_HEADER_SKIN         1044
-#define IDC_BUTTON23                    1045
-#define IDC_BUTTON24                    1046
-#define IDC_BUTTON25                    1047
+#define IDC_VUBAR_COLOUR                1045
+#define IDC_VUBACK_COLOUR               1046
+#define IDC_VUCLIP_COLOUR               1047
 #define IDC_ABOUTBMP                    1048
 #define IDC_MACHINE_SKIN                1048
 #define IDC_HEADER                      1049
@@ -249,22 +251,22 @@
 #define IDC_BUTTON3                     1093
 #define IDC_BUTTON4                     1094
 #define IDC_INS_DECOCTAVE               1094
-#define IDC_BUTTON14                    1095
 #define IDC_INS_TGENERAL                1095
-#define IDC_BUTTON15                    1096
+#define IDC_BPM_DECONE                  1095
+#define IDC_BPM_DECTEN                  1096
 #define IDC_BUTTON16                    1097
 #define IDC_BUTTON17                    1098
-#define IDC_BUTTON11                    1099
 #define IDC_OPENWAVEEDITOR              1099
+#define IDC_BPM_ADDONE                  1099
 #define IDC_BUTTON18                    1100
 #define IDC_BUTTON19                    1101
 #define IDC_BUTTON20                    1102
 #define IDC_BUTTON21                    1103
 #define IDC_BUTTON22                    1104
-#define IDC_BUTTON7                     1105
-#define IDC_BUTTON8                     1106
-#define IDC_BUTTON12                    1107
-#define IDC_BUTTON13                    1108
+#define IDC_KILL_INSTRUMENT             1105
+#define IDC_ENVEL_INSTRUMENT            1106
+#define IDC_PREV_INSTRUMENT             1107
+#define IDC_NEXT_INSTRUMENT             1108
 #define IDC_EDIT1                       1109
 #define IDC_EDIT2                       1110
 #define IDC_EDIT3                       1111
@@ -363,7 +365,7 @@
 #define IDC_DEC_TPB                     1190
 #define IDC_INC_TPB                     1191
 #define IDC_BAR_GENFX                   1192
-#define IDC_SSCOMBO2                    1193
+#define IDC_COMBOSTEP                   1193
 #define IDC_TRACKCOMBO                  1194
 #define IDC_AUXSELECT                   1195
 #define IDC_BAR_COMBOGEN                1196
@@ -691,8 +693,8 @@
 #define IDC_MACHINETITLE_CAN            1478
 #define IDC_MACHINEFONTTITLE_CAN        1479
 #define IDC_MACHINEFONTTOP_CAN2         1480
-#define IDC_BUTTON                      1481
 #define IDC_MACHINETOP_CAN2             1481
+#define IDC_MODE                        1481
 #define IDC_SLIDER                      1482
 #define IDC_MACHINEBOTTOM_CAN2          1482
 #define IDC_MACHINEFONTBOTTOM_CAN2      1483
@@ -1076,6 +1078,11 @@
 #define IDC_WASAPI_SAMPLERATE_COMBO     1813
 #define IDC_WASAPI_BUFFERSIZE_COMBO     1814
 #define IDC_WASAPI_LATENCY              1815
+#define IDC_BPM_ADDTEN                  1816
+#define IDC_MAC_NAME                    1817
+#define IDC_SCAN_NEW                    1818
+#define IDC_HOLD                        1819
+#define IDC_CONTRIBUTORS                1820
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1247,7 +1254,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        282
 #define _APS_NEXT_COMMAND_VALUE         34212
-#define _APS_NEXT_CONTROL_VALUE         1816
+#define _APS_NEXT_CONTROL_VALUE         1821
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

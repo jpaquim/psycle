@@ -369,7 +369,7 @@ namespace host {
 		private:
 
 			//Recent Files!!!!//
-			void AppendToRecent(std::string fName);
+			void AppendToRecent(std::string& fName);
 			void CallOpenRecent(int pos);
 			//Recent Files!!!!//
 

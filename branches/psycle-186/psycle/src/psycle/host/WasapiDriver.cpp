@@ -122,7 +122,7 @@ Exit:
 				hr = out.client->GetDevicePeriod(&out.period, NULL);
 				EXIT_ON_ERROR(hr)
 
-				_blockSizeBytes = portaudio::MakeFramesFromHns(out.period,_samplesPerSec) * GetSampleSizeBytes();
+				framesPerLatency = portaudio::MakeFramesFromHns(out.period, out.wavex.Format.nSamplesPerSec);
 				_numBlocks = 2;
 			}
 			else {
@@ -133,19 +133,16 @@ Exit:
 					// Add latency frames
 					framesPerLatency = portaudio::MakeFramesFromHns(out.period, out.wavex.Format.nSamplesPerSec);
 				}
-				// Align frames to HD Audio packet size of 128 bytes for Exclusive mode only.
-				// Not aligning on Windows Vista will cause Event timeout, although Windows 7 will
-				// return AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED error to realign buffer. Aligning is necessary
-				// for Exclusive mode only! when audio data is feeded directly to hardware.
-				framesPerLatency = portaudio::AlignFramesPerBuffer(framesPerLatency,
-						out.wavex.Format.nSamplesPerSec, out.wavex.Format.nBlockAlign);
-
-				// Calculate period
-				out.period = portaudio::MakeHnsPeriod(framesPerLatency, out.wavex.Format.nSamplesPerSec);
-				_blockSizeBytes = framesPerLatency * GetSampleSizeBytes();
 				_numBlocks = 2;
 			}
+			// Align frames to HD Audio packet size of 128 bytes 
+			framesPerLatency = portaudio::AlignFramesPerBuffer(framesPerLatency,
+					out.wavex.Format.nSamplesPerSec, out.wavex.Format.nBlockAlign);
 
+			// Calculate period
+			out.period = portaudio::MakeHnsPeriod(framesPerLatency, out.wavex.Format.nSamplesPerSec);
+			_blockSizeBytes = framesPerLatency * GetSampleSizeBytes();
+	
 			hr = out.client->Initialize(
 				out.shareMode,
 				out.streamFlags,
@@ -555,7 +552,7 @@ Exit:
 			}
 			bool configured(true);
 			bool shared;
-			bool samples;
+			int samples;
 			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceString", out.szDeviceID);
 			configured &= ERROR_SUCCESS == reg.QueryValue("Shared", shared);
 			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", dither);

@@ -4,34 +4,83 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-namespace host {
+	namespace host {
 
 		class CChildView;
 		class Machine;
+		class Song;
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
 		//const int SCOPE_SPEC_SAMPLES = 1024;
-		const int MAX_SCOPE_SPEC_SAMPLES = 4096;
-
-		class Song;
+		const int MAX_SCOPE_SPEC_SAMPLES = SCOPE_BUF_SIZE;
 
 		/// wire monitor window.
 		class CWireDlg : public CDialog
 		{
 		public:
 			CWireDlg(CChildView* pParent);
+		// Overrides
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+		// Implementation
+			// Generated message map functions
+			virtual BOOL OnInitDialog();
+		public:
 			BOOL Create();
 			afx_msg void OnCancel();
+		protected:
+			afx_msg void OnDelete();
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnMode();
+			afx_msg void OnHold();
+			afx_msg void OnVolumeDb();
+			afx_msg void OnVolumePer();
+			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+			DECLARE_MESSAGE_MAP()
+
+			void InitSpectrum();
+			void SetMode();
+			void OnChangeSliderMode(UINT nPos);
+			void OnChangeSliderRate(UINT nPos);
+			void OnChangeSliderVol(UINT nPos);
+			void UpdateVolPerDb();
+			inline int GetY(float f);
+
+		public:
 			UINT this_index;
 			int wireIndex;
 			int isrcMac;
-			bool Inval;
 			Machine* _pSrcMachine;
 			Machine* _pDstMachine;
 			int _dstWireIndex;
+		protected:
+		// Dialog Data
+			enum { IDD = IDD_WIREDIALOG };
+			CSliderCtrl	m_volslider;
+			CSliderCtrl	m_sliderMode;
+			CSliderCtrl	m_sliderRate;
+			CStatic	m_volabel_per;
+			CStatic	m_volabel_db;
+			CButton m_mode;
+
+			CChildView* m_pParent;
+			CBitmap* bufBM;
+			CBitmap* clearBM;
+			CPen linepenL;
+			CPen linepenR;
+			CPen linepenbL;
+			CPen linepenbR;
+			CRect rc;
+			CFont font;
+
+		protected:
 			float invol;
 			float mult;
+			float *pSamplesL;
+			float *pSamplesR;
 
 			int scope_mode;
 			int scope_peak_rate;
@@ -42,61 +91,21 @@ namespace host {
 			int scope_spec_mode;
 			int scope_phase_rate;
 
-			float peakL,peakR;
-			float peak2L,peak2R;
-			int peakLifeL,peakLifeR;
-
-			float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
-
-			float *pSamplesL;
-			float *pSamplesR;
-
-		// Dialog Data
-			enum { IDD = IDD_WIREDIALOG };
-			CSliderCtrl	m_slider;
-			CSliderCtrl	m_slider2;
-			CStatic	m_volabel_per;
-			CStatic	m_volabel_db;
-			CButton m_mode;
-			CSliderCtrl	m_volslider;
-		// Overrides
-		public:
-			virtual BOOL PreTranslateMessage(MSG* pMsg);
-		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
-		protected:
-			inline int GetY(float f);
-			void SetMode();
-			void InitSpectrum();
-			CChildView* m_pParent;
-			CBitmap* bufBM;
-			CBitmap* clearBM;
-			CPen linepenL;
-			CPen linepenR;
-			CPen linepenbL;
-			CPen linepenbR;
-			CRect rc;
-			CFont font;
+			//memories for oscillator.
 			BOOL hold;
 			BOOL clip;
 			int pos;
+			//memories for vu-meter
+			float peakL,peakR;
+			float peak2L,peak2R;
+			int peakLifeL,peakLifeR;
+			//Memories for phase
+			float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
+			//Memories and precalculated values for spectrum
 			int bar_heightsl[MAX_SCOPE_BANDS];
 			int bar_heightsr[MAX_SCOPE_BANDS];
 			float sth[MAX_SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
 			float cth[MAX_SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
-			// Generated message map functions
-			virtual BOOL OnInitDialog();
-			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnButton1();
-			afx_msg void OnTimer(UINT_PTR nIDEvent);
-			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnMode();
-			afx_msg void OnHold();
-			afx_msg void OnVolumeDb();
-			afx_msg void OnVolumePer();
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

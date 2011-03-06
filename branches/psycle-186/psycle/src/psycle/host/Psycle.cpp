@@ -358,7 +358,7 @@ namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 			//{{AFX_MSG_MAP(CAboutDlg)
-			ON_BN_CLICKED(IDC_BUTTON1, OnContributors)
+			ON_BN_CLICKED(IDC_CONTRIBUTORS, OnContributors)
 			ON_BN_CLICKED(IDC_SHOWATSTARTUP, OnShowatstartup)
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()

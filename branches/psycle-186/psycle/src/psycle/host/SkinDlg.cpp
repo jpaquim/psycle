@@ -56,9 +56,9 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_BG_COLOUR, OnColourMachine)
 			ON_BN_CLICKED(IDC_WIRE_COLOUR, OnColourWire)
 			ON_BN_CLICKED(IDC_POLY_COLOUR, OnColourPoly)
-			ON_BN_CLICKED(IDC_BUTTON23, OnVuBarColor)
-			ON_BN_CLICKED(IDC_BUTTON24, OnVuBackColor)
-			ON_BN_CLICKED(IDC_BUTTON25, OnVuClipBar)
+			ON_BN_CLICKED(IDC_VUBAR_COLOUR, OnVuBarColor)
+			ON_BN_CLICKED(IDC_VUBACK_COLOUR, OnVuBackColor)
+			ON_BN_CLICKED(IDC_VUCLIP_COLOUR, OnVuClipBar)
 			ON_BN_CLICKED(IDC_PATTERNBACKC, OnButtonPattern)
 			ON_BN_CLICKED(IDC_PATTERNBACKC2, OnButtonPattern2)
 			ON_BN_CLICKED(IDC_PATSEPARATORC, OnButtonPatternSeparator)
@@ -1524,15 +1524,16 @@ namespace psycle { namespace host {
 		void CSkinDlg::OnPatternFontFace()
 		{
 			LOGFONT lf;
-			std::memset(&lf, 0, sizeof lf);
+			ZeroMemory(&lf, sizeof(LOGFONT));
 			CClientDC dc(this);
 			lf.lfHeight = -MulDiv(_pattern_font_point/10, dc.GetDeviceCaps(LOGPIXELSY), 72);
-			strcpy(lf.lfFaceName, _pattern_fontface.c_str());
+			_tcscpy_s(lf.lfFaceName, LF_FACESIZE, _T(_pattern_fontface.c_str()));
 			if (_pattern_font_flags&1)
 			{
 				lf.lfWeight = FW_BOLD;
 			}
 			lf.lfItalic = (_pattern_font_flags&2)?true:false;
+			lf.lfQuality = DEFAULT_QUALITY;
 			
 			CFontDialog dlg(&lf,CF_SCREENFONTS);
 			if (dlg.DoModal() == IDOK)
@@ -1614,6 +1615,7 @@ namespace psycle { namespace host {
 				lf.lfWeight = FW_BOLD;
 			}
 			lf.lfItalic = (_generator_font_flags&2)?true:false;
+			lf.lfQuality = DEFAULT_QUALITY;
 			
 			CFontDialog dlg(&lf,CF_SCREENFONTS);
 			if (dlg.DoModal() == IDOK)
@@ -1657,6 +1659,7 @@ namespace psycle { namespace host {
 				lf.lfWeight = FW_BOLD;
 			}
 			lf.lfItalic = (_effect_font_flags&2)?true:false;
+			lf.lfQuality = DEFAULT_QUALITY;
 			
 			CFontDialog dlg(&lf,CF_SCREENFONTS);
 			if (dlg.DoModal() == IDOK)

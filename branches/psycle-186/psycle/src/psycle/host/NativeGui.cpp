@@ -50,7 +50,7 @@ namespace psycle { namespace host {
 			LOGFONT lf = LOGFONT();
 			lf.lfWeight = FW_BOLD;
 			lf.lfHeight = 80;
-			lf.lfQuality = ANTIALIASED_QUALITY;
+			lf.lfQuality = DEFAULT_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
 			if(!b_font_bold.CreatePointFontIndirect(&lf))
 			{
@@ -427,7 +427,7 @@ namespace psycle { namespace host {
 				{
 /*					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
-					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
 					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();

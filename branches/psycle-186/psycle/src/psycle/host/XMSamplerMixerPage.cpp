@@ -10,39 +10,39 @@ namespace psycle { namespace host {
 
 // Cuadro de diálogo de XMSamplerMixerPage
 
-const int XMSamplerMixerPage::dlgName[8] = {
-	IDC_NAME1,IDC_NAME2,IDC_NAME3,IDC_NAME4,
-	IDC_NAME5,IDC_NAME6,IDC_NAME7,IDC_NAME8
-};
-const int XMSamplerMixerPage::dlgVol[8] = {
-	IDC_SL_VOL1,IDC_SL_VOL2,IDC_SL_VOL3,IDC_SL_VOL4,
-	IDC_SL_VOL5,IDC_SL_VOL6,IDC_SL_VOL7,IDC_SL_VOL8
-};
-const int XMSamplerMixerPage::dlgSurr[8] = {
-	IDC_CH_SURR1,IDC_CH_SURR2,IDC_CH_SURR3,IDC_CH_SURR4,
-	IDC_CH_SURR5,IDC_CH_SURR6,IDC_CH_SURR7,IDC_CH_SURR8
-};
-const int XMSamplerMixerPage::dlgPan[8] = {
-	IDC_SL_PAN1,IDC_SL_PAN2,IDC_SL_PAN3,IDC_SL_PAN4,
-	IDC_SL_PAN5,IDC_SL_PAN6,IDC_SL_PAN7,IDC_SL_PAN8
+const int XMSamplerMixerPage::dlgCut[8] = {
+	IDC_SL_CUTOFF1,IDC_SL_CUTOFF2,IDC_SL_CUTOFF3,IDC_SL_CUTOFF4,
+	IDC_SL_CUTOFF5,IDC_SL_CUTOFF6,IDC_SL_CUTOFF7,IDC_SL_CUTOFF8
 };
 const int XMSamplerMixerPage::dlgRes[8] = {
 	IDC_SL_RES1,IDC_SL_RES2,IDC_SL_RES3,IDC_SL_RES4,
 	IDC_SL_RES5,IDC_SL_RES6,IDC_SL_RES7,IDC_SL_RES8
 };
-const int XMSamplerMixerPage::dlgCut[8] = {
-	IDC_SL_CUTOFF1,IDC_SL_CUTOFF2,IDC_SL_CUTOFF3,IDC_SL_CUTOFF4,
-	IDC_SL_CUTOFF5,IDC_SL_CUTOFF6,IDC_SL_CUTOFF7,IDC_SL_CUTOFF8
+const int XMSamplerMixerPage::dlgPan[8] = {
+	IDC_SL_PAN1,IDC_SL_PAN2,IDC_SL_PAN3,IDC_SL_PAN4,
+	IDC_SL_PAN5,IDC_SL_PAN6,IDC_SL_PAN7,IDC_SL_PAN8
+};
+const int XMSamplerMixerPage::dlgSurr[8] = {
+	IDC_CH_SURR1,IDC_CH_SURR2,IDC_CH_SURR3,IDC_CH_SURR4,
+	IDC_CH_SURR5,IDC_CH_SURR6,IDC_CH_SURR7,IDC_CH_SURR8
 };
 const int XMSamplerMixerPage::dlgMute[8] = {
 	IDC_CH_MUTE1,IDC_CH_MUTE2,IDC_CH_MUTE3,IDC_CH_MUTE4,
 	IDC_CH_MUTE5,IDC_CH_MUTE6,IDC_CH_MUTE7,IDC_CH_MUTE8
 };
+const int XMSamplerMixerPage::dlgVol[8] = {
+	IDC_SL_VOL1,IDC_SL_VOL2,IDC_SL_VOL3,IDC_SL_VOL4,
+	IDC_SL_VOL5,IDC_SL_VOL6,IDC_SL_VOL7,IDC_SL_VOL8
+};
+const int XMSamplerMixerPage::dlgName[8] = {
+	IDC_NAME1,IDC_NAME2,IDC_NAME3,IDC_NAME4,
+	IDC_NAME5,IDC_NAME6,IDC_NAME7,IDC_NAME8
+};
 
-int const XMSamplerMixerPage::volumeRange = 200;
-int const XMSamplerMixerPage::panningRange = 200;
 int const XMSamplerMixerPage::resRange = 127;
 int const XMSamplerMixerPage::cutoffRange = 127;
+int const XMSamplerMixerPage::panningRange = 200;
+int const XMSamplerMixerPage::volumeRange = 200;
 
 
 IMPLEMENT_DYNAMIC(XMSamplerMixerPage, CPropertyPage)
@@ -60,35 +60,18 @@ XMSamplerMixerPage::~XMSamplerMixerPage()
 void XMSamplerMixerPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_SL_CHANNELS, m_slChannels);
+	DDX_Control(pDX, IDC_SL_VOL_MASTER, m_slMaster);
+	DDX_Control(pDX, IDC_LEFT_VU, m_vu);
+	DDX_Control(pDX, IDC_VOICESPLAYING, m_voicesPl);
+	DDX_Control(pDX, IDC_R_SHOWCHAN, m_bShowChan);
+	DDX_Control(pDX, IDC_R_SHOWVOICE, m_bShowPlay);
 }
 
 
 BEGIN_MESSAGE_MAP(XMSamplerMixerPage, CPropertyPage)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF1, OnNMCustomdrawSlCutoff1)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF1, OnNMCustomdrawSlCutoff1)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF2, OnNMCustomdrawSlCutoff2)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF3, OnNMCustomdrawSlCutoff3)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF4, OnNMCustomdrawSlCutoff4)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF5, OnNMCustomdrawSlCutoff5)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF6, OnNMCustomdrawSlCutoff6)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF7, OnNMCustomdrawSlCutoff7)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CUTOFF8, OnNMCustomdrawSlCutoff8)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES1, OnNMCustomdrawSlRes1)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES2, OnNMCustomdrawSlRes2)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES3, OnNMCustomdrawSlRes3)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES4, OnNMCustomdrawSlRes4)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES5, OnNMCustomdrawSlRes5)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES6, OnNMCustomdrawSlRes6)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES7, OnNMCustomdrawSlRes7)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_RES8, OnNMCustomdrawSlRes8)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN1, OnNMCustomdrawSlPan1)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN2, OnNMCustomdrawSlPan2)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN3, OnNMCustomdrawSlPan3)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN4, OnNMCustomdrawSlPan4)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN5, OnNMCustomdrawSlPan5)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN6, OnNMCustomdrawSlPan6)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN7, OnNMCustomdrawSlPan7)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_PAN8, OnNMCustomdrawSlPan8)
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()
 	ON_BN_CLICKED(IDC_CH_SURR1, OnBnClickedChSurr1)
 	ON_BN_CLICKED(IDC_CH_SURR2, OnBnClickedChSurr2)
 	ON_BN_CLICKED(IDC_CH_SURR3, OnBnClickedChSurr3)
@@ -105,16 +88,6 @@ BEGIN_MESSAGE_MAP(XMSamplerMixerPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_CH_MUTE6, OnBnClickedChMute6)
 	ON_BN_CLICKED(IDC_CH_MUTE7, OnBnClickedChMute7)
 	ON_BN_CLICKED(IDC_CH_MUTE8, OnBnClickedChMute8)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL1, OnNMCustomdrawSlVol1)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL2, OnNMCustomdrawSlVol2)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL3, OnNMCustomdrawSlVol3)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL4, OnNMCustomdrawSlVol4)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL5, OnNMCustomdrawSlVol5)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL6, OnNMCustomdrawSlVol6)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL7, OnNMCustomdrawSlVol7)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL8, OnNMCustomdrawSlVol8)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_VOL_MASTER, OnNMCustomdrawSlVolMaster)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SL_CHANNELS, OnNMCustomdrawSlChannels)
 END_MESSAGE_MAP()
 
 
@@ -122,8 +95,8 @@ END_MESSAGE_MAP()
 BOOL XMSamplerMixerPage::OnSetActive()
 {
 	m_UpdatingGraphics=true;
-	((CSliderCtrl*)GetDlgItem(IDC_SL_CHANNELS))->SetRangeMax((Global::_pSong->SongTracks()>8)?(Global::_pSong->SongTracks()-8):0); // maxchans-visiblechans
-	if ( ((CButton*)GetDlgItem(IDC_R_SHOWVOICE))->GetCheck() == 0 ) { ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->SetCheck(1); }
+	m_slChannels.SetRangeMax((Global::_pSong->SongTracks()>8)?(Global::_pSong->SongTracks()-8):0); // maxchans-visiblechans
+	if ( m_bShowPlay.GetCheck() == 0 ) { m_bShowChan.SetCheck(1); }
 	for (int i=0;i<8;i++)
 	{
 		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(volumeRange);
@@ -132,8 +105,8 @@ BOOL XMSamplerMixerPage::OnSetActive()
 		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(cutoffRange);
 		UpdateChannel(i);
 	}
-	((CSliderCtrl*)GetDlgItem(IDC_SL_VOL_MASTER))->SetRangeMax(128);
-	((CProgressCtrl*)GetDlgItem(IDC_LEFT_VU))->SetRange(0,97);
+	m_slMaster.SetRangeMax(128);
+	m_vu.SetRange(0,97);
 	UpdateMaster();
 	return CPropertyPage::OnSetActive();
 }
@@ -156,7 +129,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 	XMSampler::Voice *voice = rChan.ForegroundVoice();
 	char chname[32];
 	CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
-	if ( ((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck()) 
+	if (m_bShowChan.GetCheck()) 
 	{
 		sprintf(chname,"%d",index+m_ChannelOffset);
 		name->SetWindowText(chname);
@@ -229,83 +202,38 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 void XMSamplerMixerPage::UpdateMaster(void)
 {
 	char chvoices[4];
-	CSliderCtrl*sld = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL_MASTER);
-	sld->SetPos(128-sampler->GlobalVolume());
-	CProgressCtrl* pctrl= (CProgressCtrl*)GetDlgItem(IDC_LEFT_VU);
-	pctrl->SetPos(sampler->_volumeDisplay);
-	CStatic* voices = (CStatic*)GetDlgItem(IDC_VOICESPLAYING);
+	m_slMaster.SetPos(128-sampler->GlobalVolume());
+	m_vu.SetPos(sampler->_volumeDisplay);
 	sprintf(chvoices,"%d",sampler->GetPlayingVoices());
-	voices->SetWindowText(chvoices);
+	m_voicesPl.SetWindowText(chvoices);
 }
 
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff1(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,0); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff2(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,1); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff3(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,2); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff4(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,3); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff5(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,4); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff6(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,5); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff7(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,6); }
-void XMSamplerMixerPage::OnNMCustomdrawSlCutoff8(NMHDR *pNMHDR, LRESULT *pResult) { SliderCutoff(pNMHDR,pResult,7); }
-void XMSamplerMixerPage::SliderCutoff(NMHDR *pNMHDR, LRESULT *pResult,int offset)
+void XMSamplerMixerPage::SliderCutoff(CSliderCtrl* slid, int offset)
 {
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	if ( !m_UpdatingGraphics)
+	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	if (m_bShowChan.GetCheck())
 	{
-		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgCut[offset]);
-		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
-		{
-			rChan.DefaultCutoff(slid->GetPos());
-		}
-		else rChan.Cutoff(slid->GetPos());
+		rChan.DefaultCutoff(slid->GetPos());
 	}
-	*pResult = 0;
+	else rChan.Cutoff(slid->GetPos());
 }
-
-void XMSamplerMixerPage::OnNMCustomdrawSlRes1(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,0); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes2(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,1); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes3(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,2); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes4(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,3); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes5(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,4); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes6(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,5); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes7(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,6); }
-void XMSamplerMixerPage::OnNMCustomdrawSlRes8(NMHDR *pNMHDR, LRESULT *pResult) { SliderRessonance(pNMHDR,pResult,7); }
-void XMSamplerMixerPage::SliderRessonance(NMHDR *pNMHDR, LRESULT *pResult,int offset)
+void XMSamplerMixerPage::SliderRessonance(CSliderCtrl* slid, int offset)
 {
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	if ( !m_UpdatingGraphics)
+	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	if (m_bShowChan.GetCheck())
 	{
-		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgRes[offset]);
-		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
-		{
-			rChan.DefaultRessonance(slid->GetPos());
-		}
-		else rChan.Ressonance(slid->GetPos());
+		rChan.DefaultRessonance(slid->GetPos());
 	}
-	*pResult = 0;
+	else rChan.Ressonance(slid->GetPos());
 }
-
-void XMSamplerMixerPage::OnNMCustomdrawSlPan1(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,0); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan2(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,1); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan3(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,2); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan4(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,3); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan5(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,4); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan6(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,5); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan7(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,6); }
-void XMSamplerMixerPage::OnNMCustomdrawSlPan8(NMHDR *pNMHDR, LRESULT *pResult) { SliderPanning(pNMHDR,pResult,7); }
-void XMSamplerMixerPage::SliderPanning(NMHDR *pNMHDR, LRESULT *pResult, int offset)
+void XMSamplerMixerPage::SliderPanning(CSliderCtrl* slid, int offset)
 {
-	if ( !m_UpdatingGraphics)
+	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	if (m_bShowChan.GetCheck())
 	{
-		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
-		{
-			CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgPan[offset]);
-			XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-			rChan.DefaultPanFactorFloat(slid->GetPos()/(float)panningRange);
-			*pResult = 0;
-		}
+		rChan.DefaultPanFactorFloat(slid->GetPos()/(float)panningRange);
 	}
+	//todo? else
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr1() { ClickSurround(0); }
@@ -318,6 +246,7 @@ void XMSamplerMixerPage::OnBnClickedChSurr7() { ClickSurround(6); }
 void XMSamplerMixerPage::OnBnClickedChSurr8() { ClickSurround(7); }
 void XMSamplerMixerPage::ClickSurround(int offset)
 {
+	//todo? playback mode
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[offset]);
@@ -341,6 +270,7 @@ void XMSamplerMixerPage::OnBnClickedChMute7() { ClickMute(6); }
 void XMSamplerMixerPage::OnBnClickedChMute8() { ClickMute(7); }
 void XMSamplerMixerPage::ClickMute(int offset)
 {
+	//todo? playback mode
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
@@ -353,43 +283,76 @@ void XMSamplerMixerPage::ClickMute(int offset)
 		}
 	}
 }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol1(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,0); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol2(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,1); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol3(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,2); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol4(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,3); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol5(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,4); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol6(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,5); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol7(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,6); }
-void XMSamplerMixerPage::OnNMCustomdrawSlVol8(NMHDR *pNMHDR, LRESULT *pResult) { SliderVolume(pNMHDR,pResult,7); }
-void XMSamplerMixerPage::SliderVolume(NMHDR *pNMHDR, LRESULT *pResult, int offset)
+void XMSamplerMixerPage::SliderVolume(CSliderCtrl* slid, int offset)
 {
-	if ( !m_UpdatingGraphics)
+	if (m_bShowChan.GetCheck())
 	{
-		if (((CButton*)GetDlgItem(IDC_R_SHOWCHAN))->GetCheck())
-		{
-			CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(dlgVol[offset]);
-			XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-			rChan.DefaultVolumeFloat((volumeRange-slid->GetPos())/(float)volumeRange);
-		}
+		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+		rChan.DefaultVolumeFloat((volumeRange-slid->GetPos())/(float)volumeRange);
 	}
-	*pResult = 0;
+	//todo? else
 }
 
-void XMSamplerMixerPage::OnNMCustomdrawSlVolMaster(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	if ( !m_UpdatingGraphics)
-	{
-		CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_VOL_MASTER);
-		sampler->GlobalVolume(128-slid->GetPos());
+
+void XMSamplerMixerPage::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+	CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+
+	switch(nSBCode){
+	case TB_BOTTOM: //fallthrough
+	case TB_LINEDOWN: //fallthrough
+	case TB_PAGEDOWN: //fallthrough
+	case TB_TOP: //fallthrough
+	case TB_LINEUP: //fallthrough
+	case TB_PAGEUP: //fallthrough
+	case TB_THUMBPOSITION: //fallthrough
+	case TB_THUMBTRACK:
+		if ( the_slider->GetDlgCtrlID() == m_slChannels.GetDlgCtrlID() ) {
+			m_ChannelOffset = m_slChannels.GetPos();
+		}
+		else {
+			int uId = the_slider->GetDlgCtrlID();
+			for (int i=0;i<8;i++)
+			{
+				if(uId == dlgCut[i]) { SliderCutoff((CSliderCtrl*)the_slider, i); break; }
+				if(uId == dlgRes[i]) { SliderRessonance((CSliderCtrl*)the_slider, i); break; }
+				if(uId == dlgPan[i]) { SliderPanning((CSliderCtrl*)the_slider, i); break; }
+			}
+		}
+		break;
+	case TB_ENDTRACK:
+		break;
 	}
-	*pResult = 0;
+	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
-void XMSamplerMixerPage::OnNMCustomdrawSlChannels(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SL_CHANNELS);
-	m_ChannelOffset = slid->GetPos();
-	*pResult = 0;
+void XMSamplerMixerPage::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+	CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+	int uId = the_slider->GetDlgCtrlID();
+
+	switch(nSBCode){
+	case TB_BOTTOM: //fallthrough
+	case TB_LINEDOWN: //fallthrough
+	case TB_PAGEDOWN: //fallthrough
+	case TB_TOP: //fallthrough
+	case TB_LINEUP: //fallthrough
+	case TB_PAGEUP: //fallthrough
+	case TB_THUMBPOSITION: //fallthrough
+	case TB_THUMBTRACK:
+		if ( uId == m_slMaster.GetDlgCtrlID()) {
+			sampler->GlobalVolume(128-m_slMaster.GetPos());
+		}
+		else {
+			for (int i=0;i<8;i++)
+			{
+				if(uId == dlgVol[i]) { SliderVolume((CSliderCtrl*)the_slider, i); break; }
+			}
+		}
+		break;
+	case TB_ENDTRACK:
+		break;
+	}
+	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
+
+
 }   // namespace
 }   // namespace

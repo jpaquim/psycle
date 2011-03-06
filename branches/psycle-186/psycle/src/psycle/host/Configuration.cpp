@@ -2,7 +2,9 @@
 ///\implementation psycle::host::Configuration.
 
 #include "Configuration.hpp"
+#include "Psycle.hpp"
 #include "Registry.hpp"
+#include <wingdi.h>
 #if !defined WINAMP_PLUGIN
 	#include "WaveOut.hpp"
 	#include "DirectSound.hpp"
@@ -636,7 +638,7 @@ namespace psycle
 			if(bBold) lf.lfWeight = FW_BOLD;
 			if(bItalic) lf.lfItalic = true;
 			lf.lfHeight = HeightPx;
-			lf.lfQuality = NONANTIALIASED_QUALITY;
+			lf.lfQuality = DEFAULT_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
 			if(!f.CreatePointFontIndirect(&lf))
 			{			

@@ -25,30 +25,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg BOOL OnSetActive(void);
-	afx_msg void OnNMCustomdrawSlCutoff1(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff2(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff3(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff4(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff5(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff6(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff7(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlCutoff8(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes1(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes2(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes3(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes4(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes5(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes6(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes7(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlRes8(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan1(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan2(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan3(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan4(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan5(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan6(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan7(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlPan8(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnBnClickedChSurr1();
 	afx_msg void OnBnClickedChSurr2();
 	afx_msg void OnBnClickedChSurr3();
@@ -65,21 +43,11 @@ public:
 	afx_msg void OnBnClickedChMute6();
 	afx_msg void OnBnClickedChMute7();
 	afx_msg void OnBnClickedChMute8();
-	afx_msg void OnNMCustomdrawSlVol1(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol2(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol3(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol4(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol5(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol6(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol7(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVol8(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlVolMaster(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSlChannels(NMHDR *pNMHDR, LRESULT *pResult);
 private:
-	void SliderVolume(NMHDR *pNMHDR, LRESULT *pResult, int offset);
-	void SliderPanning(NMHDR *pNMHDR, LRESULT *pResult, int offset);
-	void SliderCutoff(NMHDR *pNMHDR, LRESULT *pResult, int offset);
-	void SliderRessonance(NMHDR *pNMHDR, LRESULT *pResult, int offset);
+	void SliderVolume(CSliderCtrl* slid, int offset);
+	void SliderPanning(CSliderCtrl* slid, int offset);
+	void SliderCutoff(CSliderCtrl* slid, int offset);
+	void SliderRessonance(CSliderCtrl* slid, int offset);
 	void ClickSurround(int offset);
 	void ClickMute(int offset);
 
@@ -95,6 +63,13 @@ private:
 	static int const panningRange;
 	static int const resRange;
 	static int const cutoffRange;
+
+	CSliderCtrl m_slChannels;
+	CSliderCtrl m_slMaster;
+	CProgressCtrl m_vu;
+	CStatic	m_voicesPl;
+	CButton m_bShowChan;
+	CButton m_bShowPlay;
 
 	XMSampler *sampler;
 	// Indicates the index of the first channel shown (controlled by IDC_SL_CHANNELS)

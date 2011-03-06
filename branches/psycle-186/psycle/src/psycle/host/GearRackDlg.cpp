@@ -163,7 +163,7 @@ namespace psycle { namespace host {
 					sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
 					m_list.AddString(buffer);
 				}
-				CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+				CComboBox *cc=(CComboBox *)pParentMain->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() == AUX_INSTRUMENT)
 				{
 					selected = Global::_pSong->instSelected;
@@ -193,7 +193,7 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				{
-					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+					CComboBox *cc=(CComboBox *)pParentMain->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					if (cc->GetCurSel() == AUX_INSTRUMENT)
 					{
 						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
@@ -232,7 +232,7 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				{
-					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+					CComboBox *cc=(CComboBox *)pParentMain->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
@@ -325,7 +325,7 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				{
-					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+					CComboBox *cc=(CComboBox *)pParentMain->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);
@@ -360,7 +360,7 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				{
-					CComboBox *cc=(CComboBox *)pParentMain->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+					CComboBox *cc=(CComboBox *)pParentMain->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
 					pParentMain->UpdateComboIns(true);

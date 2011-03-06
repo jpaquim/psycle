@@ -29,19 +29,18 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_VOLUME_DB, m_volabel_db);
 			DDX_Control(pDX, IDC_VOLUME_PER, m_volabel_per);
 			DDX_Control(pDX, IDC_SLIDER1, m_volslider);
-			DDX_Control(pDX, IDC_SLIDER, m_slider);
-			DDX_Control(pDX, IDC_SLIDER2, m_slider2);
-			DDX_Control(pDX, IDC_BUTTON, m_mode);
+			DDX_Control(pDX, IDC_SLIDER, m_sliderMode);
+			DDX_Control(pDX, IDC_SLIDER2, m_sliderRate);
+			DDX_Control(pDX, IDC_MODE, m_mode);
 		}
 
 		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)
-			ON_BN_CLICKED(IDC_BUTTON1, OnButton1)
 			ON_WM_TIMER()
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER, OnCustomdrawSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnCustomdrawSlider2)
-			ON_BN_CLICKED(IDC_BUTTON, OnMode)
-			ON_BN_CLICKED(IDC_BUTTON2, OnHold)
+			ON_WM_HSCROLL()
+			ON_WM_VSCROLL()
+			ON_BN_CLICKED(IDC_DELETE, OnDelete)
+			ON_BN_CLICKED(IDC_MODE, OnMode)
+			ON_BN_CLICKED(IDC_HOLD, OnHold)
 			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
 			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
 		END_MESSAGE_MAP()
@@ -65,16 +64,25 @@ namespace psycle { namespace host {
 			scope_phase_rate = 20;
 			InitSpectrum();
 
-			Inval = false;
 			m_volslider.SetRange(0,256*4);
 			m_volslider.SetTicFreq(16*4);
-			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 
 			float val;
+			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
 			invol = val;
+			UpdateVolPerDb();
 			int t = (int)sqrtf(val*16384*4*4);
 			m_volslider.SetPos(256*4-t);
+			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX 
+				|| (_pSrcMachine->_type == MACH_DUMMY && ((Dummy*)_pSrcMachine)->wasVST)) // native to VST, divide.
+			{
+				mult = 32768.0f;
+			}
+			else // native to native, no need to convert.
+			{
+				mult = 1.0f;
+			}	
 
 			char buf[128];
 			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
@@ -91,21 +99,13 @@ namespace psycle { namespace host {
 			bufBM->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
 			clearBM = new CBitmap;
 			clearBM->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
-
+///\todo: test
+//CLEARTYPE_QUALITY
 			font.CreatePointFont(70,"Tahoma");
 
 			SetMode();
 			pos = 1;
 
-			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX 
-				|| (_pSrcMachine->_type == MACH_DUMMY && ((Dummy*)_pSrcMachine)->wasVST)) // native to VST, divide.
-			{
-				mult = 32768.0f;
-			}
-			else // native to native, no need to convert.
-			{
-				mult = 1.0f;
-			}	
 			return TRUE;
 		}
 
@@ -135,115 +135,108 @@ namespace psycle { namespace host {
 			universalis::os::aligned_memory_dealloc(pSamplesR);
 			delete this;
 		}
-
-		void CWireDlg::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
+		BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
 		{
-			char bufper[32];
-			char bufdb[32];
-		//	invol = (128-m_volslider.GetPos())*0.0078125f;
-			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
-
-			if (invol > 1.0f)
-			{	
-				sprintf(bufper,"%.2f%%",invol*100); 
-				sprintf(bufdb,"+%.1f dB",20.0f * log10(invol)); 
-			}
-			else if (invol == 1.0f)
-			{	
-				sprintf(bufper,"100.00%%"); 
-				sprintf(bufdb,"0.0 dB"); 
-			}
-			else if (invol > 0.0f)
-			{	
-				sprintf(bufper,"%.2f%%",invol*100); 
-				sprintf(bufdb,"%.1f dB",20.0f * log10(invol)); 
-			}
-			else 
-			{				
-				sprintf(bufper,"0.00%%"); 
-				sprintf(bufdb,"-Inf. dB"); 
-			}
-
-			m_volabel_per.SetWindowText(bufper);
-			m_volabel_db.SetWindowText(bufdb);
-
-			float f;
-			_pDstMachine->GetWireVolume(_dstWireIndex, f);
-			if (f != invol)
+			if (pMsg->message == WM_KEYDOWN)
 			{
-				m_pParent->AddMacViewUndo();
-				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
-			}
-
-		//	m_pParent->SetFocus();	
-			*pResult = 0;
-		}
-
-		void CWireDlg::OnButton1() 
-		{
-			m_pParent->AddMacViewUndo();
-			Inval = true;
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
-			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
-			OnCancel();
-		}
-
-		inline int CWireDlg::GetY(float f)
-		{
-			f*=(64.0f/32768.0f);
-			f=64-f;
-			if (f < 1) 
-			{
-				clip = TRUE;
-				return 1;
-			}
-			else if (f > 126) 
-			{
-				clip = TRUE;
-				return 126;
-			}
-			return int(f);
-		}
-
-		void CWireDlg::InitSpectrum()
-		{
-			const float barsize = float(SCOPE_SPEC_SAMPLES>>1)/scope_spec_bands;
-			//todo :A^X = 2^A
-			const float samplesFactor = SCOPE_SPEC_SAMPLES/17.65f;
-			const float samplesFactorB = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
-			for (int i=SCOPE_SPEC_SAMPLES-1;i>=0;i--)
-			{ 
-				//Linear -pi to pi.
-				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
-				//Hann window 
-				const float window = 0.50 - 0.50 * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
-				float j=0.0f;
-				for(int h=0;h<scope_spec_bands;h++)
-				{ 
-					float th;
-					if (scope_spec_mode == 0 ) {
-						//this is linear
-						th=j* constant; 
-					}
-					else if (scope_spec_mode == 1 ) {
-						//this makes it somewhat exponential.
-						th=(j*j*samplesFactorB)*constant; 
-					}
-					else {
-						//This simulates a constant note scale.
-						th = powf(2.0f,j/samplesFactor)*constant;
-					}
-					cth[i][h] = cosf(th) * window;
-					sth[i][h] = sinf(th) * window;
-					j+=barsize;
+				if (pMsg->wParam == VK_UP)
+				{
+					int v = m_volslider.GetPos();
+					v = std::max(0,v-1);
+					m_volslider.SetPos(v);
+					return true;
+				}
+				else if (pMsg->wParam == VK_DOWN)
+				{
+					int v = m_volslider.GetPos();
+					v=std::min(v+1,256*4);
+					m_volslider.SetPos(v);
+					return true;
+				}
+				else if (pMsg->wParam == VK_ESCAPE)
+				{
+					PostMessage (WM_CLOSE);
+					return true;
+				}
+				else
+				{
+					m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+					return true;
 				}
 			}
-			for (int i=SCOPE_SPEC_SAMPLES-1;i>=0;i--)	{
-				helpers::math::erase_all_nans_infinities_and_denormals(cth[i], scope_spec_bands);
+			else if (pMsg->message == WM_KEYUP)
+			{
+				if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN)
+				{
+					return true;
+				}
+				else if (pMsg->wParam == VK_ESCAPE)
+				{
+					return true;
+				}
+				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+				return true;
 			}
+			return CDialog::PreTranslateMessage(pMsg);
 		}
 
+
+		void CWireDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+			CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+			switch(nSBCode){
+/*			Unnecessary
+			case TB_ENDTRACK: //fallthrough
+*/
+			case TB_BOTTOM: //fallthrough
+			case TB_LINEDOWN: //fallthrough
+			case TB_PAGEDOWN: //fallthrough
+			case TB_TOP: //fallthrough
+			case TB_LINEUP: //fallthrough
+			case TB_PAGEUP: //fallthrough
+				if(the_slider == &m_sliderMode) {
+					OnChangeSliderMode(m_sliderMode.GetPos());
+				}
+				else if(the_slider == &m_sliderRate) {
+					OnChangeSliderRate(m_sliderRate.GetPos());
+				}
+				break;
+			case TB_THUMBPOSITION: //fallthrough
+			case TB_THUMBTRACK:
+				if(the_slider == &m_sliderMode) {
+					OnChangeSliderMode(nPos);
+				}
+				else if(the_slider == &m_sliderRate) {
+					OnChangeSliderRate(nPos);
+				}
+				break;
+			}
+			CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
+		}
+		void CWireDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+			CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+			switch(nSBCode){
+/*			Unnecessary
+			case TB_ENDTRACK: //fallthrough
+*/
+			case TB_BOTTOM: //fallthrough
+			case TB_LINEDOWN: //fallthrough
+			case TB_PAGEDOWN: //fallthrough
+			case TB_TOP: //fallthrough
+			case TB_LINEUP: //fallthrough
+			case TB_PAGEUP: //fallthrough
+				if(the_slider == &m_volslider) {
+					OnChangeSliderVol(m_volslider.GetPos());
+				}
+				break;
+			case TB_THUMBPOSITION: //fallthrough
+			case TB_THUMBTRACK:
+				if(the_slider == &m_volslider) {
+					OnChangeSliderVol(nPos);
+				}
+				break;
+			}
+			CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+		}
 		void CWireDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			if ( nIDEvent == 2304+this_index )
@@ -285,23 +278,23 @@ namespace psycle { namespace host {
 
 							if (awl>curpeakl)	{	curpeakl = awl;	}
 							if (awr>curpeakr)	{	curpeakr = awr;	}
-							}
+						}
 
 						curpeakl=128-helpers::math::lround<int,float>(sqrtf(curpeakl*vucorrection)); //conversion to a cardinal value.
 						curpeakr=128-helpers::math::lround<int,float>(sqrtf(curpeakr*vucorrection));
 
 						if (curpeakl<peak2L) //  it is a cardinal value, so smaller means higher peak.
-							{
+						{
 							if (curpeakl<0) curpeakl=0;
 							peak2L = peakL = curpeakl;		peakLifeL = 100; //100 paints. 2 seconds at 50Hz
-							}
+						}
 						else if (curpeakl<peakL)	{	peakL = curpeakl;	}
 
 						if (curpeakr<peak2R)//  it is a cardinal value, so smaller means higher peak.
-							{
+						{
 							if (curpeakr<0) curpeakr=0;
 							peak2R = peakR = curpeakr;		peakLifeR = 100;
-							}
+						}
 						else if (curpeakr<peakR)	{	peakR = curpeakr;	}
 
 						RECT rect;
@@ -364,15 +357,15 @@ namespace psycle { namespace host {
 								if (peakLifeL <= 0)	{	peak2L = 128;	}
 								if (peakLifeR <= 0)	{	peak2R = 128;	}
 							}
-							}
 						}
 						char buf[64];
 						sprintf(buf,"Refresh %.2fhz",1000.0f/scope_peak_rate);
-					oldFont= bufDC.SelectObject(&font);
+						oldFont= bufDC.SelectObject(&font);
 						bufDC.SetBkMode(TRANSPARENT);
 						bufDC.SetTextColor(0x505050);
 						bufDC.TextOut(4, 128-14, buf);
 						bufDC.SelectObject(oldFont);
+					}
 					break;
 				case 1: // oscilloscope
 					{
@@ -495,11 +488,8 @@ namespace psycle { namespace host {
 
 						for (int i = 0; i < scope_spec_bands; i++)
 						{
-							//int aml = 128 - (log(1+ampl[i])*heightcompensation[i]);
 							int aml = - (psycle::helpers::dsp::dB(ampl[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
-							//int aml = - psycle::helpers::dsp::dB(ampl[(int)((((pow(10.0f,i/(float)scope_spec_bands))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
 
-//							int aml = 128-helpers::math::lround<int,float>(sqrtf(ampl[i]));
 							if (aml < 0)
 							{
 								aml = 0;
@@ -523,10 +513,7 @@ namespace psycle { namespace host {
 							
 							rect.left+=width;
 
-							//int amr = 128 - (log(1+ampr[i])*heightcompensation[i]);
 							int amr = - (psycle::helpers::dsp::dB(ampr[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
-							//int amr = - psycle::helpers::dsp::dB(ampr[(int)((((pow(10.0f,i/(float)scope_spec_bands))-1.0f)/9.0f)*(SCOPE_SPEC_SAMPLES>>1))]+0.0000001f);
-//							int amr = 128-helpers::math::lround<int,float>(sqrtf(ampr[i]));
 							if (amr < 0)
 							{
 								amr = 0;
@@ -593,9 +580,9 @@ namespace psycle { namespace host {
 						float mvc, mvpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
 						mvc = mvpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
 
-					int index = _pSrcMachine->_scopeBufferIndex;
-					for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
-					{ 
+						int index = _pSrcMachine->_scopeBufferIndex;
+						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
+						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
 							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
@@ -808,36 +795,34 @@ namespace psycle { namespace host {
 			CDialog::OnTimer(nIDEvent);
 		}
 
-		void CWireDlg::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CWireDlg::OnChangeSliderMode(UINT nPos) 
 		{
 			switch (scope_mode)
 			{
 			case 1:
-				scope_osc_freq = m_slider.GetPos();
+				scope_osc_freq = nPos;
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::player().SampleRate()*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_sliderRate.SetRange(1,1+int(Global::player().SampleRate()*2.0f/(scope_osc_freq*scope_osc_freq)));
 				}
 				break;
 			case 2:
-				scope_spec_mode = m_slider.GetPos();
-				SCOPE_SPEC_SAMPLES = (m_slider.GetPos()==0)?256:(m_slider.GetPos()==1)?1024:4096;
+				scope_spec_mode = nPos;
+				SCOPE_SPEC_SAMPLES = (nPos==1)?256:(nPos==2)?1024:4096;
 				SetMode();
 				InitSpectrum();
 				break;
 			}
-		//	m_pParent->SetFocus();	
-			*pResult = 0;
 		}
 
-		void CWireDlg::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CWireDlg::OnChangeSliderRate(UINT nPos) 
 		{
 			switch (scope_mode)
 			{
 			case 0:
-				if (scope_peak_rate != m_slider2.GetPos())
+				if (scope_peak_rate != m_sliderRate.GetPos())
 				{
-					scope_peak_rate = m_slider2.GetPos();
+					scope_peak_rate = m_sliderRate.GetPos();
 					KillTimer(2304+this_index);
 					SetTimer(2304+this_index,scope_peak_rate,0);
 				}
@@ -845,40 +830,87 @@ namespace psycle { namespace host {
 			case 1:
 				if (hold)
 				{
-					pos = m_slider2.GetPos()&(SCOPE_BUF_SIZE-1);
+					pos = m_sliderRate.GetPos()&(SCOPE_BUF_SIZE-1);
 				}
 				else
 				{
 					pos = 1;
-					if (scope_osc_rate != m_slider2.GetPos())
+					if (scope_osc_rate != m_sliderRate.GetPos())
 					{
-						scope_osc_rate = m_slider2.GetPos();
+						scope_osc_rate = m_sliderRate.GetPos();
 						KillTimer(2304+this_index);
 						SetTimer(2304+this_index,scope_osc_rate,0);
 					}
 				}
 				break;
 			case 2:
-				if (scope_spec_rate != m_slider2.GetPos())
+				if (scope_spec_rate != m_sliderRate.GetPos())
 				{
-					scope_spec_rate = m_slider2.GetPos();
+					scope_spec_rate = m_sliderRate.GetPos();
 					KillTimer(2304+this_index);
 					SetTimer(2304+this_index,scope_spec_rate,0);
 				}
 				break;
 			case 3:
-				if (scope_phase_rate != m_slider2.GetPos())
+				if (scope_phase_rate != m_sliderRate.GetPos())
 				{
-					scope_phase_rate = m_slider2.GetPos();
+					scope_phase_rate = m_sliderRate.GetPos();
 					KillTimer(2304+this_index);
 					SetTimer(2304+this_index,scope_phase_rate,0);
 				}
 				break;
 			}
-		//	m_pParent->SetFocus();	
-			*pResult = 0;
 		}
 
+		void CWireDlg::OnChangeSliderVol(UINT nPos) 
+		{
+			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
+
+			UpdateVolPerDb();
+			float f;
+			_pDstMachine->GetWireVolume(_dstWireIndex, f);
+			if (f != invol)
+			{
+				m_pParent->AddMacViewUndo();
+				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
+			}
+		}
+
+		void CWireDlg::UpdateVolPerDb() {
+			char bufper[32];
+			char bufdb[32];
+			if (invol > 1.0f)
+			{	
+				sprintf(bufper,"%.2f%%",invol*100); 
+				sprintf(bufdb,"+%.1f dB",20.0f * log10(invol)); 
+			}
+			else if (invol == 1.0f)
+			{	
+				sprintf(bufper,"100.00%%"); 
+				sprintf(bufdb,"0.0 dB"); 
+			}
+			else if (invol > 0.0f)
+			{	
+				sprintf(bufper,"%.2f%%",invol*100); 
+				sprintf(bufdb,"%.1f dB",20.0f * log10(invol)); 
+			}
+			else 
+			{				
+				sprintf(bufper,"0.00%%"); 
+				sprintf(bufdb,"-Inf. dB"); 
+			}
+
+			m_volabel_per.SetWindowText(bufper);
+			m_volabel_db.SetWindowText(bufdb);
+		}
+		void CWireDlg::OnDelete() 
+		{
+			m_pParent->AddMacViewUndo();
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
+			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
+			OnCancel();
+		}
 		void CWireDlg::OnMode()
 		{
 			scope_mode++;
@@ -887,7 +919,6 @@ namespace psycle { namespace host {
 				scope_mode = 0;
 			}
 			SetMode();
-		//	m_pParent->SetFocus();	
 		}
 
 		void CWireDlg::OnHold()
@@ -899,14 +930,14 @@ namespace psycle { namespace host {
 			case 1:
 				if (hold)
 				{
-					m_slider2.SetRange(1,1+int(Global::player().SampleRate()*2.0f/(scope_osc_freq*scope_osc_freq)));
-					m_slider2.SetPos(1);
+					m_sliderRate.SetRange(1,1+int(Global::player().SampleRate()*2.0f/(scope_osc_freq*scope_osc_freq)));
+					m_sliderRate.SetPos(1);
 				}
 				else
 				{
 					pos = 1;
-					m_slider2.SetRange(10,100);
-					m_slider2.SetPos(scope_osc_rate);
+					m_sliderRate.SetRange(10,100);
+					m_sliderRate.SetPos(scope_osc_rate);
 				}
 			}
 			if (hold)
@@ -919,7 +950,70 @@ namespace psycle { namespace host {
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
 			}
-		//	m_pParent->SetFocus();	
+		}
+
+		void CWireDlg::OnVolumeDb() 
+		{
+			CVolumeDlg dlg;
+			dlg.volume = invol;
+			dlg.edit_type = 0;
+			if (dlg.DoModal() == IDOK)
+			{
+				m_pParent->AddMacViewUndo();
+
+				// update from dialog
+				int t = (int)sqrtf(dlg.volume*16384*4*4);
+				m_volslider.SetPos(256*4-t);
+			}
+		}
+
+		void CWireDlg::OnVolumePer() 
+		{
+			CVolumeDlg dlg;
+			dlg.volume = invol;
+			dlg.edit_type = 1;
+			if (dlg.DoModal() == IDOK)
+			{
+				m_pParent->AddMacViewUndo();
+				// update from dialog
+				int t = (int)sqrtf(dlg.volume*16384*4*4);
+				m_volslider.SetPos(256*4-t);
+			}
+		}
+
+		void CWireDlg::InitSpectrum()
+		{
+			const float barsize = float(SCOPE_SPEC_SAMPLES>>1)/scope_spec_bands;
+			for (int i=SCOPE_SPEC_SAMPLES-1;i>=0;i--)
+			{ 
+				//Linear -pi to pi.
+				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
+				//Hann window 
+				const float window = 0.50 - 0.50 * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
+				float j=0.0f;
+				for(int h=0;h<scope_spec_bands;h++)
+				{ 
+					float th;
+					if (scope_spec_mode == 1 ) {
+						//this is linear
+						th=j* constant; 
+					}
+					else if (scope_spec_mode == 2 ) {
+						//this makes it somewhat exponential.
+						th=(j*h*0.0078125/*1/128*/)*constant; 
+					}
+					else {
+						//This simulates a constant note scale.
+						th = (powf(2.0f,h/16.f)-1)*0.525f*barsize*constant;
+					}
+					cth[i][h] = cosf(th) * window;
+					sth[i][h] = sinf(th) * window;
+					j+=barsize;
+				}
+			}
+			for (int i=SCOPE_SPEC_SAMPLES-1;i>=0;i--)	{
+				helpers::math::erase_all_nans_infinities_and_denormals(cth[i], scope_spec_bands);
+			}
 		}
 
 		void CWireDlg::SetMode()
@@ -994,8 +1088,8 @@ namespace psycle { namespace host {
 					bufDC.SelectObject(oldFont);
 				}
 
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_peak_rate);
+				m_sliderRate.SetRange(10,100);
+				m_sliderRate.SetPos(scope_peak_rate);
 				sprintf(buf,"Scope Mode");
 				peakL = peakR = peak2L = peak2R = 128.0f;
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
@@ -1035,11 +1129,11 @@ namespace psycle { namespace host {
 				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
 				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
 
-				m_slider.SetRange(5, 100);
-				m_slider.SetPos(scope_osc_freq);
+				m_sliderMode.SetRange(5, 100);
+				m_sliderMode.SetPos(scope_osc_freq);
 				pos = 1;
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_osc_rate);
+				m_sliderRate.SetRange(10,100);
+				m_sliderRate.SetPos(scope_osc_rate);
 				sprintf(buf,"Oscilloscope");
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
@@ -1084,26 +1178,26 @@ namespace psycle { namespace host {
 
 					rect.top=0;
 					rect.bottom=256;
-					if (scope_spec_mode == 0) rect.left=6;
-					else if (scope_spec_mode == 1) rect.left=38;
-					else if (scope_spec_mode == 2) rect.left=99;
+					if (scope_spec_mode == 1) rect.left=6;
+					else if (scope_spec_mode == 2) rect.left=38;
+					else if (scope_spec_mode == 3) rect.left=99;
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"440");
 					bufDC.TextOut(rect.left, 0, buf);
 					bufDC.TextOut(rect.left, 128-12, buf);
 
-					if (scope_spec_mode == 0) rect.left=82;
-					else if (scope_spec_mode == 1) rect.left=146;
-					else if (scope_spec_mode == 2) rect.left=256-42;
+					if (scope_spec_mode == 1) rect.left=82;
+					else if (scope_spec_mode == 2) rect.left=146;
+					else if (scope_spec_mode == 3) rect.left=256-42;
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"7K");
 					bufDC.TextOut(rect.left, 0, buf);
 					bufDC.TextOut(rect.left, 128-12, buf);
-					if (scope_spec_mode == 0) rect.left=256-70;
-					else if (scope_spec_mode == 1) rect.left=256-37;
-					else if (scope_spec_mode == 2) rect.left=256-7;
+					if (scope_spec_mode == 1) rect.left=256-70;
+					else if (scope_spec_mode == 2) rect.left=256-37;
+					else if (scope_spec_mode == 3) rect.left=256-7;
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"16K");
@@ -1113,10 +1207,10 @@ namespace psycle { namespace host {
 
 					bufDC.SelectObject(oldFont);
 				}
-				m_slider.SetRange(0, 2);
-				m_slider.SetPos(scope_spec_mode);
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_spec_rate);
+				m_sliderMode.SetRange(1, 3);
+				m_sliderMode.SetPos(scope_spec_mode);
+				m_sliderRate.SetRange(10,100);
+				m_sliderRate.SetPos(scope_spec_rate);
 				sprintf(buf,"Spectrum Analyzer");
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
@@ -1163,8 +1257,8 @@ namespace psycle { namespace host {
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
 				sprintf(buf,"Stereo Phase");
 				o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
-				m_slider2.SetRange(10,100);
-				m_slider2.SetPos(scope_phase_rate);
+				m_sliderRate.SetRange(10,100);
+				m_sliderRate.SetPos(scope_phase_rate);
 				SetTimer(2304+this_index,scope_phase_rate,0);
 				break;
 			default:
@@ -1180,78 +1274,20 @@ namespace psycle { namespace host {
 
 		}
 
-
-		BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
+		inline int CWireDlg::GetY(float f)
 		{
-			if (pMsg->message == WM_KEYDOWN)
+			f*=(64.0f/32768.0f);
+			f=64-f;
+			if (f < 1) 
 			{
-				if (pMsg->wParam == VK_UP)
-				{
-					int v = m_volslider.GetPos();
-					v--;
-					if (v < 0)
-					{
-						v = 0;
-					}
-					m_volslider.SetPos(v);
-					return true;
-				}
-				else if (pMsg->wParam == VK_DOWN)
-				{
-					int v = m_volslider.GetPos();
-					v++;
-					if (v > 256*4)
-					{
-						v = 256*4;
-					}
-					m_volslider.SetPos(v);
-					return true;
-				}
-				else
-				{
-					m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-					return true;
-				}
+				clip = TRUE;
+				return 1;
 			}
-			else if (pMsg->message == WM_KEYUP)
+			else if (f > 126) 
 			{
-				if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN)
-				{
-					return true;
-				}
-				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-				return true;
+				clip = TRUE;
+				return 126;
 			}
-			return CDialog::PreTranslateMessage(pMsg);
-		}
-
-
-		void CWireDlg::OnVolumeDb() 
-		{
-			CVolumeDlg dlg;
-			dlg.volume = invol;
-			dlg.edit_type = 0;
-			if (dlg.DoModal() == IDOK)
-			{
-				m_pParent->AddMacViewUndo();
-
-				// update from dialog
-				int t = (int)sqrtf(dlg.volume*16384*4*4);
-				m_volslider.SetPos(256*4-t);
-			}
-		}
-
-		void CWireDlg::OnVolumePer() 
-		{
-			CVolumeDlg dlg;
-			dlg.volume = invol;
-			dlg.edit_type = 1;
-			if (dlg.DoModal() == IDOK)
-			{
-				m_pParent->AddMacViewUndo();
-				// update from dialog
-				int t = (int)sqrtf(dlg.volume*16384*4*4);
-				m_volslider.SetPos(256*4-t);
-			}
+			return int(f);
 		}
 }}

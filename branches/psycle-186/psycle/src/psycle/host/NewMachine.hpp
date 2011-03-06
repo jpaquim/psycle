@@ -155,7 +155,7 @@ namespace psycle { namespace host {
 			afx_msg void OnEnChangeEdit1();
 			afx_msg void OnStnClickedNamelabel();
 			afx_msg void OnEnChangeRichedit21();
-			afx_msg void OnBnClickedButton1();
+			afx_msg void OnScanNew();
 		};
 
 	}   // namespace

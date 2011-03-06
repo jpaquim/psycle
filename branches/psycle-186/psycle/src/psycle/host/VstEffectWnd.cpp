@@ -214,6 +214,9 @@ namespace psycle { namespace host {
 					break;
 				}
 			}
+			else if(nChar == VK_ESCAPE) {
+				PostMessage(WM_CLOSE);
+			}
 			this->SetFocus();
 
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);

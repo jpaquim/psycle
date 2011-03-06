@@ -150,7 +150,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_SHOWDLLNAME, OnShowdllname)
 			ON_BN_CLICKED(IDC_SHOWEFFNAME, OnShoweffname)
 			ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
-			ON_BN_CLICKED(IDC_BUTTON1, OnBnClickedButton1)
+			ON_BN_CLICKED(IDC_SCAN_NEW, OnScanNew)
 		END_MESSAGE_MAP()
 
 		BOOL CNewMachine::OnInitDialog() 
@@ -501,15 +501,13 @@ namespace psycle { namespace host {
 			LoadPluginInfo(this->GetParentFrame());
 			UpdateList();
 			m_browser.Invalidate();
-			SetFocus();
 		}
-		void CNewMachine::OnBnClickedButton1()
+		void CNewMachine::OnScanNew()
 		{
 			DestroyPluginInfo();
 			LoadPluginInfo(GetParent());
 			UpdateList();
 			m_browser.Invalidate();
-			SetFocus();
 		}
 
 		void CNewMachine::OnBytype() 

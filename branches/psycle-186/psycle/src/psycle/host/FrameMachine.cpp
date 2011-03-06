@@ -71,12 +71,11 @@ namespace psycle { namespace host {
 			visualtweakvalue=0.0f;
 
 			b_font.CreatePointFont(80,"Tahoma");
-//			b_font_bold.CreatePointFont(80,"Tahoma Bold");
 			CString sFace("Tahoma");
 			LOGFONT lf = LOGFONT();
 			lf.lfWeight = FW_BOLD;
 			lf.lfHeight = 80;
-			lf.lfQuality = NONANTIALIASED_QUALITY;
+			lf.lfQuality = DEFAULT_QUALITY;
 			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
 			if(!b_font_bold.CreatePointFontIndirect(&lf))
 			{
@@ -476,7 +475,7 @@ namespace psycle { namespace host {
 				{
 					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
-					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
+					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
 					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
@@ -537,11 +536,12 @@ namespace psycle { namespace host {
 					break;
 				}
 			}
+			else if(nChar == VK_ESCAPE) {
+				PostMessage(WM_CLOSE);
+			}
 			this->SetFocus();
 
-			//wndView->KeyDown(nChar,nRepCnt,nFlags);
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
-			//wndView->OnKeyDown(nChar,nRepCnt,nFlags);
 		}
 
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -558,9 +558,7 @@ namespace psycle { namespace host {
 				else Global::pInputHandler->StopNote(outnote);
 			}
 
-			//wndView->KeyUp(nChar, nRepCnt, nFlags);
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
-			//wndView->OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CFrameMachine::OnParametersRandomparameters() 

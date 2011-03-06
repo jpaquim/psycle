@@ -488,18 +488,7 @@ namespace psycle
 
 			case cdefFollowSong:	
 
-				//used by song follow toggle
-				//CButton*cb=(CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW);
-
-				if (((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck() == 0) 
-				{
-					((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->SetCheck(1);
-				} 
-				else
-				{
-					((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->SetCheck(0);
-				}
-				pMainFrame->OnFollowSong();
+				pMainFrame->ToggleFollowSong();
 				break;
 
 			case cdefKeyStopAny:
@@ -1036,15 +1025,15 @@ namespace psycle
 				if (pChildView->maxView == true) 
 				{
 					pChildView->maxView = false;
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,TRUE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,TRUE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_seqBar,TRUE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_songBar,TRUE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
 				} 
 				else
 				{			
 					pChildView->maxView = true;
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,FALSE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,FALSE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_seqBar,FALSE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_songBar,FALSE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
 				}
 				break;

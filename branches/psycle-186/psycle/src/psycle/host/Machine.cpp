@@ -432,9 +432,6 @@ namespace psycle
 
 			if (_pDstMachine)
 			{
-				//if ( value == 255 ) value =256; // FF = 255
-				//const float invol = value_mapper::map_256_1(value); // Convert a 0..256 value to a 0..1.0 value
-				
 				int c;
 				if ( (c = _pDstMachine->FindInputWire(srcIndex)) != -1)
 				{

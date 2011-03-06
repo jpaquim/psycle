@@ -134,6 +134,7 @@ namespace psycle { namespace host {
 			m_ppDrivers[m_oldDriverIndex]->Enable(false);
 			m_ppDrivers[m_driverIndex]->Configure();
 			Global::pPlayer->SetSampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
+			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 		}
 
 	}   // namespace
