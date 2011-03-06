@@ -117,6 +117,7 @@ Exit:
 			hr = GetStreamFormat(out, &out.wavex);
 			EXIT_ON_ERROR(hr)
 
+			UINT32 framesPerLatency;
 			if (out.shareMode == AUDCLNT_SHAREMODE_SHARED)
 			{
 				hr = out.client->GetDevicePeriod(&out.period, NULL);
@@ -126,7 +127,7 @@ Exit:
 				_numBlocks = 2;
 			}
 			else {
-				UINT32 framesPerLatency = GetBufferSamples();
+				framesPerLatency = GetBufferSamples();
 				if(framesPerLatency == 0) {
 					hr = out.client->GetDevicePeriod(NULL,&out.period);
 					EXIT_ON_ERROR(hr)
