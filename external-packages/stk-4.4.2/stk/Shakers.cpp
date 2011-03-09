@@ -783,7 +783,7 @@ int Shakers :: setupNum( int inst )
     defObjs_[0] = MARA_NUM_BEANS;
     setDecays(MARA_SOUND_DECAY,MARA_SYSTEM_DECAY);
     defDecays_[0] = MARA_SYSTEM_DECAY;
-    decayScale_[inst] = 0.9;
+    decayScale_[0] = 0.9;
     nFreqs_ = 1;
     baseGain_ = MARA_GAIN;
     temp = log(nObjects_) * baseGain_ / (StkFloat) nObjects_;

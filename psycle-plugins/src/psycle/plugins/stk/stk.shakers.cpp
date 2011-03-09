@@ -218,7 +218,8 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	if((note>=48) && (note<=71))
 	{
 	// 
-		track[channel].noteOn((StkFloat)(note-48),32767);
+		float freq= 220.f*pow(2.0f, ((float)note-41)/12.0f);
+		track[channel].noteOn(freq,32767);
 		noteonoff[channel]=true;
 	}
 
