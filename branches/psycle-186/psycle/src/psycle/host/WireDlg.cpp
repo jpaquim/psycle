@@ -55,12 +55,13 @@ namespace psycle { namespace host {
 			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
 			
 			scope_mode = 0;
+			m_sliderMode.ShowWindow(SW_HIDE);
 			scope_peak_rate = 20;
-			scope_osc_freq = 5;
+			scope_osc_freq = 10;
 			scope_osc_rate = 20;
 			scope_spec_bands = 128;
 			scope_spec_rate = 20;
-			scope_spec_mode = 1;
+			scope_spec_mode = 2;
 			scope_phase_rate = 20;
 			InitSpectrum();
 
@@ -72,8 +73,7 @@ namespace psycle { namespace host {
 			_pDstMachine->GetWireVolume(_dstWireIndex,val);
 			invol = val;
 			UpdateVolPerDb();
-			int t = (int)sqrtf(val*16384*4*4);
-			m_volslider.SetPos(256*4-t);
+			m_volslider.SetPos(helpers::dsp::AmountToSlider(val));
 			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX 
 				|| (_pSrcMachine->_type == MACH_DUMMY && ((Dummy*)_pSrcMachine)->wasVST)) // native to VST, divide.
 			{
@@ -864,7 +864,7 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnChangeSliderVol(UINT nPos) 
 		{
-			invol = ((256*4-m_volslider.GetPos())*(256*4-m_volslider.GetPos()))/(16384.0f*4*4);
+			invol = helpers::dsp::SliderToAmount(m_volslider.GetPos());
 
 			UpdateVolPerDb();
 			float f;
@@ -962,8 +962,8 @@ namespace psycle { namespace host {
 				m_pParent->AddMacViewUndo();
 
 				// update from dialog
-				int t = (int)sqrtf(dlg.volume*16384*4*4);
-				m_volslider.SetPos(256*4-t);
+				m_volslider.SetPos(helpers::dsp::AmountToSlider(dlg.volume));
+				invol = dlg.volume;
 			}
 		}
 
@@ -976,8 +976,8 @@ namespace psycle { namespace host {
 			{
 				m_pParent->AddMacViewUndo();
 				// update from dialog
-				int t = (int)sqrtf(dlg.volume*16384*4*4);
-				m_volslider.SetPos(256*4-t);
+				m_volslider.SetPos(helpers::dsp::AmountToSlider(dlg.volume));
+				invol = dlg.volume;
 			}
 		}
 
@@ -1087,7 +1087,7 @@ namespace psycle { namespace host {
 
 					bufDC.SelectObject(oldFont);
 				}
-
+				m_sliderMode.ShowWindow(SW_HIDE);
 				m_sliderRate.SetRange(10,100);
 				m_sliderRate.SetPos(scope_peak_rate);
 				sprintf(buf,"Scope Mode");
@@ -1129,6 +1129,7 @@ namespace psycle { namespace host {
 				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
 				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
 
+				m_sliderMode.ShowWindow(SW_SHOW);
 				m_sliderMode.SetRange(5, 100);
 				m_sliderMode.SetPos(scope_osc_freq);
 				pos = 1;
@@ -1257,6 +1258,7 @@ namespace psycle { namespace host {
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
 				sprintf(buf,"Stereo Phase");
 				o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
+				m_sliderMode.ShowWindow(SW_HIDE);
 				m_sliderRate.SetRange(10,100);
 				m_sliderRate.SetPos(scope_phase_rate);
 				SetTimer(2304+this_index,scope_phase_rate,0);

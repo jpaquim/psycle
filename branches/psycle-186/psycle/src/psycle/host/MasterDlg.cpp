@@ -116,7 +116,13 @@ namespace psycle { namespace host {
 		void CMasterDlg::SetSliderValues()
 		{
 			float val;
-			float db = helpers::dsp::dB(_pMachine->_outDry/256.0f);
+			float db;
+			if(_pMachine->_outDry>0) {
+				db = helpers::dsp::dB(_pMachine->_outDry/256.0f);
+			}
+			else {
+				db = -99.f;
+			}
 			m_slidermaster.SetPos(832-(int)((db+40.0f)*16.0f));
 			std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
 			for ( int i = 0; it != sliders_.end(); ++it, ++i ) {

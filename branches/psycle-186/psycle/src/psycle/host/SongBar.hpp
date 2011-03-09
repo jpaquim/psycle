@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "Psycle.hpp"
@@ -39,6 +40,7 @@ namespace psycle { namespace host {
 		afx_msg void OnSelchangeCombooctave();
 		afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 		afx_msg void OnClipbut();
+		afx_msg BOOL OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult );
 
 		CComboBox       m_trackcombo;
 		CComboBox       m_octavecombo;

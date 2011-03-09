@@ -745,6 +745,12 @@ Exit:
 					if (pwft->cbSize == 0) pEnum.MixFormat.Samples.wValidBitsPerSample = pwft->wBitsPerSample;
 					::CoTaskMemFree(pwft);
 				}
+				// Align frames to HD Audio packet size of 128 bytes 
+				int samples = portaudio::MakeFramesFromHns(pEnum.DefaultDevicePeriod,pEnum.MixFormat.Format.nSamplesPerSec);
+				samples = portaudio::AlignFramesPerBuffer(samples,
+							pEnum.MixFormat.Format.nSamplesPerSec, pEnum.MixFormat.Format.nBlockAlign);
+				pEnum.DefaultDevicePeriod = portaudio::MakeHnsPeriod(samples, pEnum.MixFormat.Format.nSamplesPerSec);
+
 				portList.push_back(pEnum);
 
 				CoTaskMemFree(pszDeviceId);

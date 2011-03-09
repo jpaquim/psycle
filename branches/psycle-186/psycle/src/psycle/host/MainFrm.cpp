@@ -86,6 +86,7 @@ namespace psycle { namespace host {
 			ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
 			ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
 			ON_BN_CLICKED(IDC_CLIPBUT, OnClipbut)
+			ON_NOTIFY_EX(TTN_NEEDTEXT, 0, OnToolTipNotify)
 //Machinebar start
 			ON_CBN_SELCHANGE(IDC_COMBOSTEP, OnSelchangeCombostep)
 			ON_CBN_CLOSEUP(IDC_COMBOSTEP, OnCloseupCombostep)
@@ -827,6 +828,9 @@ namespace psycle { namespace host {
 		void CMainFrame::OnCloseupCombooctave() { m_songBar.OnCloseupCombooctave(); }
 		void CMainFrame::OnSelchangeCombooctave() { m_songBar.OnSelchangeCombooctave(); }
 		void CMainFrame::OnClipbut() { m_songBar.OnClipbut(); }
+		BOOL CMainFrame::OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult ) {
+			return m_songBar.OnToolTipNotify(unId, pstNMHDR, pstResult);
+		}
 		void CMainFrame::SetAppSongBpm(int x) { m_songBar.SetAppSongBpm(x); }
 		void CMainFrame::SetAppSongTpb(int x) { m_songBar.SetAppSongTpb(x); }
 		void CMainFrame::ShiftOctave(int x) { m_songBar.ShiftOctave(x); }

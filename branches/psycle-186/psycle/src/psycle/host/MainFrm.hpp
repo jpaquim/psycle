@@ -120,6 +120,7 @@ namespace psycle { namespace host {
 			afx_msg void OnCloseupCombooctave();
 			afx_msg void OnSelchangeCombooctave();
 			afx_msg void OnClipbut();
+			afx_msg BOOL OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult );
 //SongBar end
 //Machinebar start
 			afx_msg void OnSelchangeCombostep();

@@ -48,7 +48,6 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		ON_WM_HSCROLL()
 	END_MESSAGE_MAP()
 
-
 	// SongBar message handlers
 
 	LONG SongBar::OnInitDialog ( UINT wParam, LONG lParam)
@@ -81,7 +80,12 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		m_trackcombo.SetCurSel(m_pSong->SONGTRACKS-4);
 
 		m_masterslider.SetRange(0,1024);
-		m_masterslider.SetPos(256);
+		float val = 1.0f;
+		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL) {
+			 val =((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry/256.f;
+		}
+		int nPos = helpers::dsp::AmountToSlider(val);
+		m_masterslider.SetPos(nPos);
 		m_masterslider.SetTicFreq(64);
 		m_masterslider.SetPageSize(64);
 
@@ -211,10 +215,11 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	}
 	void SongBar::UpdateMasterValue(int newvalue)
 	{
+		int value = 1024-helpers::dsp::AmountToSlider(newvalue/256.f);
 		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL)
 		{
-			if (m_masterslider.GetPos() != newvalue) {
-				m_masterslider.SetPos(newvalue);
+			if (m_masterslider.GetPos() != value) {
+				m_masterslider.SetPos(value);
 			}
 		}
 	}
@@ -229,13 +234,13 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		case TB_LINEUP: //fallthrough
 		case TB_PAGEUP: //fallthrough
 			if (  the_slider == &m_masterslider) {
-				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = m_masterslider.GetPos();
+				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256 * helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos());
 			}
 			break;
 		case TB_THUMBPOSITION: //fallthrough
 		case TB_THUMBTRACK:
 			if ( m_pSong->_pMachine[MASTER_INDEX] != NULL && the_slider == &m_masterslider) {
-				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = nPos;
+				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256.f* helpers::dsp::SliderToAmount(1024-nPos);
 			}
 			break;
 		case TB_ENDTRACK:
@@ -313,5 +318,24 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 				canvasl.FillSolidRect(0,5,225,4,vu2);
 		}
 	}
+
+
+BOOL SongBar::OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult )
+{
+	TOOLTIPTEXT* pstTTT = (TOOLTIPTEXT * )pstNMHDR;
+	UINT nID = pstNMHDR->idFrom;
+	if ((pstTTT->uFlags & TTF_IDISHWND))
+	{
+		// idFrom is actually the HWND of the tool
+		//nID = ::GetDlgCtrlID((HWND)nID);
+
+		char buf[256];
+		sprintf(buf, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos())));
+		pstTTT->lpszText = buf;
+		pstTTT->hinst = AfxGetResourceHandle();
+		return(TRUE);
+	}
+	return (FALSE);
+} 
 
 }}
