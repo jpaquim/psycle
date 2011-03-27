@@ -1,5 +1,4 @@
 #import "app_delegate.hpp"
-#include "accelerometer.hpp"
 
 #define DEGREES_TO_RADIANS(__ANGLE__) ((__ANGLE__) / 180.0 * M_PI)
 #define kRenderingFrequency 100.0
@@ -62,8 +61,6 @@ void accelerometer_callback(float x, float y, float z, void*) {
 	glMatrixMode(GL_MODELVIEW); 
 	glLoadIdentity(); 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
-
-	accelerometer_init(10, accelerometer_callback, 0);
 }
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application {

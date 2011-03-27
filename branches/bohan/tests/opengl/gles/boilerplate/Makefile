@@ -1,6 +1,6 @@
 
-app=hologram
-App=Hologram
+app=boilerplate
+App=Boilerplate
 env=../../../../cross-compilation/iphone/env.sh
 dest=/tmp/++$(app)
 bld=$(dest)/build
