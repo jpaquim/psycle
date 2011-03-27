@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <cstdlib> // for std::exit
 
 //#include <GL/glew.h>
 #include <GL/glut.h>

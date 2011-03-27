@@ -65,6 +65,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstdlib> // for std::exit
 
 #ifdef _WIN32
 	#include <windows.h>
