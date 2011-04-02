@@ -1,0 +1,42 @@
+<?xml version='1.0' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml'>
+	<head>
+		<meta http-equiv='content-type' content='application/xhtml+xml' />
+		<title>bohan webgl test</title>
+		<script type='text/javascript' src='init.js' />
+		<script type='text/javascript'>
+			// <![CDATA[
+
+			function getCanvas() {
+				if(!_canvas) _canvas = document.getElementById('canvas');
+				return _canvas;
+			}
+			var _canvas;
+			
+			function main() {
+				var canvas = getCanvas();
+				var glCtx = gl.getCtx(canvas);
+				log('gl context: ' + glCtx);
+			}
+			
+			function resize(window) {
+				var canvas = getCanvas();
+				var w = canvas.scrollWidth;
+				var h = canvas.scrollHeight;
+				log('resize: ' + w + ', ' + h);
+				canvas.width = w;
+				canvas.height = h;
+			}
+			
+			function log(text) { console.log(text) }
+			
+			// ]]>
+		</script>
+	</head>
+	<body onload='main();' onresize='resize(this);'>
+		<canvas id='canvas' style='border: 1px solid black; width: 90%; height: 90%'>Your browser doesn't support canvas.</canvas>
+		<br />
+	</body>
+</html>
+
