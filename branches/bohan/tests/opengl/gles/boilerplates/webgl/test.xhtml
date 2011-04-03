@@ -8,30 +8,46 @@
 		<script type='text/javascript'>
 			// <![CDATA[
 
-			function getCanvas() {
-				if(!_canvas) _canvas = document.getElementById('canvas');
-				return _canvas;
-			} var _canvas;
-			
 			function main(window) {
 				bohan.log.log(window.event);
-				var canvas = getCanvas();
-				var glCtx = bohan.gl.getCtx(canvas);
-				var vertexShaderStr = bohan.ajax.readText('shaders/test-1.vertex');
-				var fragmentShaderStr = bohan.ajax.readText('shaders/test-1.fragment');
-			}
-			
-			function resize(window) {
-				bohan.log.log(window.event);
-				bohan.gl.resizeCanvas(getCanvas());
+				var canvas = document.getElementById('canvas');
+				gl = new bohan.Gl(canvas);
+				addEventListener('resize', function(e) {
+					bohan.log.log(e);
+					gl.canvasResized();
+				}, false);
+				var program = gl.linkProgram('shaders/test-1.vertex', 'shaders/test-1.fragment');
+				var vertexAttribLoc = gl.ctx.getAttribLocation(program, 'vPosition');
+				gl.ctx.clearColor(0, 0, 0, 1);
+				var vertexPosObject = 0;
+				function draw() {
+					bohan.log.log('draw');
+					if(vertexPosObject === 0) {
+						var vVertices = new Float32Array([
+							 0.0,  0.5, 0.0,
+							-0.5, -0.5, 0.0,
+							 0.5, -0.5, 0.0
+						]);
+						vertexPosObject = gl.ctx.createBuffer();
+						gl.ctx.bindBuffer(gl.ctx.ARRAY_BUFFER, vertexPosObject);
+						gl.ctx.bufferData(gl.ctx.ARRAY_BUFFER, vVertices, gl.ctx.STATIC_DRAW);
+					}
+					gl.ctx.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+					gl.ctx.clear(gl.ctx.COLOR_BUFFER_BIT);
+					gl.ctx.useProgram(program);
+					gl.ctx.bindBuffer(gl.ctx.ARRAY_BUFFER, vertexPosObject);
+					gl.ctx.vertexAttribPointer(vertexAttribLoc, 3, gl.ctx.FLOAT, false, 0, 0);
+					gl.ctx.enableVertexAttribArray(vertexAttribLoc);
+					gl.ctx.drawArrays(gl.ctx.TRIANGLES, 0, 3);
+				}
+				draw(); setInterval(draw, 1000);
 			}
 			
 			// ]]>
 		</script>
 	</head>
-	<body onload='main(this);' onresize='resize(this);'>
+	<body onload='main(this);'>
 		<canvas id='canvas' style='border: 1px solid black; width: 90%; height: 90%'>Your browser doesn't support canvas.</canvas>
-		<br />
 	</body>
 </html>
 
