@@ -5,7 +5,6 @@
 		<meta http-equiv='content-type' content='application/xhtml+xml' />
 		<title>bohan webgl test</title>
 		<script type='text/javascript' src='init.js' />
-		<script id='v' type='text/plain' src='../../shaders/test-1.vertex' />
 		<script type='text/javascript'>
 			// <![CDATA[
 
@@ -18,16 +17,14 @@
 				bohan.log.log(window.event);
 				var canvas = getCanvas();
 				var glCtx = bohan.gl.getCtx(canvas);
-				bohan.log.log(document.getElementById('v'));
+				var vertexShaderStr = bohan.ajax.readText('shaders/test-1.vertex');
+				var fragmentShaderStr = bohan.ajax.readText('shaders/test-1.fragment');
 			}
 			
 			function resize(window) {
 				bohan.log.log(window.event);
 				bohan.gl.resizeCanvas(getCanvas());
 			}
-			
-			var vertexShaderStr = bohan.ajax.readText('shaders/test-1.vertex');
-			var fragmentShaderStr = bohan.ajax.readText('shaders/test-1.fragment');
 			
 			// ]]>
 		</script>
