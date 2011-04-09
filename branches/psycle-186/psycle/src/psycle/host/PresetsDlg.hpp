@@ -36,7 +36,7 @@ namespace host {
 			void SetParam(const int n,int val);
 			CPreset();
 			virtual ~CPreset();
-			void operator=(CPreset& newpreset);
+			CPreset& operator=(const CPreset& newpreset);
 		};
 
 		/// machine parameter preset window.

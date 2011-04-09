@@ -3,17 +3,18 @@
 
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
+#include "PsycleConfig.hpp"
 
 #include "Song.hpp"
 #include "Machine.hpp"
-#include "Configuration.hpp"
 
+int const ID_TIMER_MIDIMON = 1;
 namespace psycle { namespace host {
 
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
-		{
+	{
 			//{{AFX_DATA_INIT(CMidiMonitorDlg)
 			//}}AFX_DATA_INIT
 		}
@@ -118,12 +119,25 @@ namespace psycle { namespace host {
 			// initial update
 			FillChannelMap( true );
 
-			// start the dialog timer
-			InitTimer();
-
 			return TRUE;
 		}
-
+		void CMidiMonitorDlg::OnShowWindow(BOOL bShow, UINT nStatus) 
+		{
+			CDialog::OnShowWindow(bShow, nStatus);
+			if(bShow) {
+				// start the dialog timer
+				InitTimer();
+			}
+			else 
+			{
+				KillTimer(ID_TIMER_MIDIMON);
+			}
+		}
+		void CMidiMonitorDlg::OnClose() 
+		{
+			KillTimer(ID_TIMER_MIDIMON);
+			CDialog::OnClose();
+		}
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// InitTimer
 		//
@@ -134,9 +148,9 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::InitTimer()
 		{
 			// failed to setup timer?
-			if( !SetTimer( 1, 250, NULL ) )
+			if( !SetTimer( ID_TIMER_MIDIMON, 250, NULL ) )
 			{
-				AfxMessageBox( "Could not start the dialog's update timer?", MB_ICONERROR + MB_OK );
+				AfxMessageBox( "Could not start the dialog's update timer?", MB_ICONERROR | MB_OK );
 			}
 		}
 
@@ -149,7 +163,11 @@ namespace psycle { namespace host {
 
 		void CMidiMonitorDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
-			UpdateInfo();
+			if(nIDEvent == ID_TIMER_MIDIMON)
+			{
+				UpdateInfo();
+			}
+			CDialog::OnTimer(nIDEvent);
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -162,11 +180,11 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::UpdateInfo( void )
 		{
 			// fill in the numeric stats
-			MIDI_STATS * pStats = CMidiInput::Instance()->GetStatsPtr();
-			MIDI_CONFIG * pConfig = CMidiInput::Instance()->GetConfigPtr();
+			MIDI_STATS * pStats = Global::midi().GetStatsPtr();
+			MIDI_CONFIG * pConfig = Global::midi().GetConfigPtr();
 			m_midiVersion.SetWindowText( pConfig->versionStr );
 
-			if(CMidiInput::Instance()->m_midiMode == MODE_REALTIME) {
+			if(Global::midi().m_midiMode == MODE_REALTIME) {
 				char tmp[ 64 ];
 				sprintf( tmp, "%d\0", pStats->bufferCount );
 				m_bufferUsed.SetWindowText( tmp );
@@ -194,7 +212,7 @@ namespace psycle { namespace host {
 			}
 
 			// fill in the flags
-			if( !CMidiInput::Instance()->Active()) { 
+			if( !Global::midi().Active()) { 
 				pStats->flags &= ~FSTAT_ACTIVE;
 			} else {
 				pStats->flags |= FSTAT_ACTIVE;
@@ -287,7 +305,7 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::fnClearEventsLost( void )
 		{
 			// clear the events lost counter
-			MIDI_STATS * pStats = CMidiInput::Instance()->GetStatsPtr();
+			MIDI_STATS * pStats = Global::midi().GetStatsPtr();
 			pStats->eventsLost = 0;
 
 			// disable ourselves until next after next n updates
@@ -307,7 +325,7 @@ namespace psycle { namespace host {
 			// get the default background brush
 			HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
-			MIDI_STATS * pStats = CMidiInput::Instance()->GetStatsPtr();
+			MIDI_STATS * pStats = Global::midi().GetStatsPtr();
 
 			// set required static colours
 
@@ -349,8 +367,8 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::FillChannelMap( bool overridden )
 		{
 			// get the midi input interface
-			CMidiInput * pMidiInput = CMidiInput::Instance();
-			if( !overridden && (!pMidiInput || pMidiInput->GetStatsPtr()->channelMapUpdate == false) )
+			CMidiInput& midiInput = Global::midi();
+			if( !overridden && (midiInput.GetStatsPtr()->channelMapUpdate == false) )
 			{
 				return;
 			}
@@ -363,21 +381,21 @@ namespace psycle { namespace host {
 				int selIdx=-1;
 
 				//Generator/effect selector
-				switch(Global::configuration().midi().gen_select_type())
+				switch(Global::psycleconf().midi().gen_select_with())
 				{
-				case Configuration::midi_type::MS_USE_SELECTED:
+				case PsycleConfig::Midi::MS_USE_SELECTED:
 					selIdx = Global::_pSong->seqBus;
 					pMachine = Global::_pSong->_pMachine[ selIdx ];
 					break;
-				case Configuration::midi_type::MS_BANK:
-				case Configuration::midi_type::MS_PROGRAM:
-					 selIdx = pMidiInput->GetGenMap( ch );
+				case PsycleConfig::Midi::MS_BANK:
+				case PsycleConfig::Midi::MS_PROGRAM:
+					 selIdx = midiInput.GetGenMap( ch );
 					if( selIdx >= 0 && selIdx < MAX_MACHINES)
 					{
 						pMachine = Global::_pSong->_pMachine[ selIdx ];
 					}
 					break;
-				case Configuration::midi_type::MS_MIDI_CHAN:
+				case PsycleConfig::Midi::MS_MIDI_CHAN:
 					selIdx = ch;
 					pMachine = Global::_pSong->_pMachine[ selIdx ];
 					break;
@@ -387,16 +405,16 @@ namespace psycle { namespace host {
 				m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 				//instrument selection
-				switch(Global::configuration().midi().inst_select_type())
+				switch(Global::psycleconf().midi().inst_select_with())
 				{
-				case Configuration::midi_type::MS_USE_SELECTED:
+				case PsycleConfig::Midi::MS_USE_SELECTED:
 					selIdx = Global::_pSong->auxcolSelected;
 					break;
-				case Configuration::midi_type::MS_BANK:
-				case Configuration::midi_type::MS_PROGRAM:
-					selIdx = pMidiInput->GetInstMap( ch );
+				case PsycleConfig::Midi::MS_BANK:
+				case PsycleConfig::Midi::MS_PROGRAM:
+					selIdx = midiInput.GetInstMap( ch );
 					break;
-				case Configuration::midi_type::MS_MIDI_CHAN:
+				case PsycleConfig::Midi::MS_MIDI_CHAN:
 					selIdx = ch;
 					break;
 				}
@@ -408,10 +426,10 @@ namespace psycle { namespace host {
 				m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 				// note on/off status
-				if(pMidiInput->m_midiMode == MODE_REALTIME)
+				if(midiInput.m_midiMode == MODE_REALTIME)
 				{
 					m_channelMap.SetItem( ch, 3, LVIF_TEXT, 
-						pMidiInput->GetNoteOffStatus( ch )?"Yes":"No"
+						midiInput.GetNoteOffStatus( ch )?"Yes":"No"
 						, 0, 0, 0, NULL );
 				}
 				else
@@ -420,7 +438,7 @@ namespace psycle { namespace host {
 				}
 			}
 			// clear update strobe
-			pMidiInput->GetStatsPtr()->channelMapUpdate = false;
+			midiInput.GetStatsPtr()->channelMapUpdate = false;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////

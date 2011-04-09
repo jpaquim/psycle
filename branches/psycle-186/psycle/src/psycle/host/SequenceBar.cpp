@@ -6,7 +6,7 @@
 
 #include "SequenceBar.hpp"
 #include "InputHandler.hpp"
-#include "Configuration.hpp"
+#include "PsycleConfig.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include "Song.hpp"
@@ -65,13 +65,13 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 		//m_sequence.SubclassDlgItem(IDC_SEQLIST, this );
 
-		m_multiChannel.SetCheck(Global::pInputHandler->bMultiKey?1:0);
-		m_moveWhenPaste.SetCheck(Global::pInputHandler->bMoveCursorPaste?1:0);
-		m_patNames.SetCheck(Global::pConfig->_bShowPatternNames?1:0);
-		m_noteoffs.SetCheck(Global::pConfig->_RecordNoteoff?1:0);
-		m_tweaks.SetCheck(Global::pConfig->_RecordTweaks?1:0);
-		m_notesToEffects.SetCheck(Global::pConfig->_notesToEffects?1:0);
-		m_follow.SetCheck(Global::pConfig->_followSong?1:0);
+		m_multiChannel.SetCheck(Global::psycleconf().inputHandler().bMultiKey?1:0);
+		m_moveWhenPaste.SetCheck(Global::psycleconf().inputHandler().bMoveCursorPaste?1:0);
+		m_patNames.SetCheck(Global::psycleconf()._bShowPatternNames?1:0);
+		m_noteoffs.SetCheck(Global::psycleconf().inputHandler()._RecordNoteoff?1:0);
+		m_tweaks.SetCheck(Global::psycleconf().inputHandler()._RecordTweaks?1:0);
+		m_notesToEffects.SetCheck(Global::psycleconf().inputHandler()._notesToEffects?1:0);
+		m_follow.SetCheck(Global::psycleconf()._followSong?1:0);
 
 		bplus.LoadMappedBitmap(IDB_PLUS,0);
 		bminus.LoadMappedBitmap(IDB_MINUS,0);
@@ -108,7 +108,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		
 		if((ep!=m_pWndView->editPosition))// && ( m_sequence.GetSelCount() == 1))
 		{
-			if ((Global::pPlayer->_playing) && (Global::pConfig->_followSong))
+			if ((Global::pPlayer->_playing) && (Global::psycleconf()._followSong))
 			{
 				bool b = Global::pPlayer->_playBlock;
 				Global::pPlayer->Start(ep,0,false);
@@ -262,7 +262,8 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 				m_pSong->playOrder[m_pWndView->editPosition]=MAX_PATTERNS-1;
 			}
 
-			m_pSong->AllocNewPattern(m_pSong->playOrder[m_pWndView->editPosition],"",Global::pConfig->defaultPatLines,FALSE);
+			m_pSong->AllocNewPattern(m_pSong->playOrder[m_pWndView->editPosition],"",
+				Global::configuration().GetDefaultPatLines(),FALSE);
 
 			UpdatePlayOrder(true);
 			UpdateSequencer(m_pWndView->editPosition);
@@ -631,9 +632,9 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 	void SequenceBar::OnBnClickedFollow()
 	{
-		Global::pConfig->_followSong = m_follow.GetCheck()?true:false;
+		Global::psycleconf()._followSong = m_follow.GetCheck()?true:false;
 
-		if ( Global::pConfig->_followSong )
+		if ( Global::psycleconf()._followSong )
 		{
 			if  ( Global::pPlayer->_playing )
 			{
@@ -670,20 +671,20 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 	void SequenceBar::OnBnClickedRecordNoteoff()
 	{
-		if ( m_noteoffs.GetCheck() ) Global::pConfig->_RecordNoteoff=true;
-		else Global::pConfig->_RecordNoteoff=false;
+		if ( m_noteoffs.GetCheck() ) Global::psycleconf().inputHandler()._RecordNoteoff=true;
+		else Global::psycleconf().inputHandler()._RecordNoteoff=false;
 		m_pWndView->SetFocus();}
 
 	void SequenceBar::OnBnClickedRecordTweaks()
 	{
-		if ( m_tweaks.GetCheck() ) Global::pConfig->_RecordTweaks=true;
-		else Global::pConfig->_RecordTweaks=false;
+		if ( m_tweaks.GetCheck() ) Global::psycleconf().inputHandler()._RecordTweaks=true;
+		else Global::psycleconf().inputHandler()._RecordTweaks=false;
 		m_pWndView->SetFocus();
 	}
 
 	void SequenceBar::OnBnClickedShowpattername()
 	{
-		Global::pConfig->_bShowPatternNames=m_patNames.GetCheck();
+		Global::psycleconf()._bShowPatternNames=m_patNames.GetCheck();
 		
 		/*
 
@@ -692,7 +693,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		CRect borders;
 		GetWindowRect(&borders);
 		TRACE("borders.right = %i", borders.right);
-		if (Global::pConfig->_bShowPatternNames)
+		if (Global::psycleconf()._bShowPatternNames)
 		{
 		   //SetBorders(borders.left, borders.top, 6, borders.bottom);
 		}
@@ -712,20 +713,20 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	}
 	void SequenceBar::OnBnClickedMultichannelAudition()
 	{
-		Global::pInputHandler->bMultiKey = !Global::pInputHandler->bMultiKey;
+		Global::psycleconf().inputHandler().bMultiKey = !Global::psycleconf().inputHandler().bMultiKey;
 		m_pWndView->SetFocus();
 	}
 
 	void SequenceBar::OnBnClickedNotestoeffects()
 	{
-		if ( m_notesToEffects.GetCheck() ) Global::pConfig->_notesToEffects=true;
-		else Global::pConfig->_notesToEffects=false;
+		if ( m_notesToEffects.GetCheck() ) Global::psycleconf().inputHandler()._notesToEffects=true;
+		else Global::psycleconf().inputHandler()._notesToEffects=false;
 		m_pWndView->SetFocus();
 	}
 
 	void SequenceBar::OnBnClickedMovecursorpaste()
 	{
-		Global::pInputHandler->bMoveCursorPaste = !Global::pInputHandler->bMoveCursorPaste;
+		Global::psycleconf().inputHandler().bMoveCursorPaste = !Global::psycleconf().inputHandler().bMoveCursorPaste;
 		m_pWndView->SetFocus();
 	}
 
@@ -736,7 +737,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		int top = m_sequence.GetTopIndex();
 		m_sequence.ResetContent();
 		
-		if (Global::pConfig->_bShowPatternNames)
+		if (Global::psycleconf()._bShowPatternNames)
 		{
 			for(int n=0;n<m_pSong->playLength;n++)
 			{
@@ -830,7 +831,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			const int le=m_pSong->playOrder[ls];
 			m_sequence.DeleteString(ls);
 
-			if (Global::pConfig->_bShowPatternNames)
+			if (Global::psycleconf()._bShowPatternNames)
 				sprintf(buffer,"%.2X:%s",ls,m_pSong->patternName[le]);
 			else
 				sprintf(buffer,"%.2X: %.2X",ls,le);

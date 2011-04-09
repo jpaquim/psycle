@@ -75,7 +75,7 @@ namespace psycle { namespace host {
 						}
 					}
 				}
-				else if (Global::pConfig->_centerCursor)
+				else if (patView->_centerCursor)
 				{
 					if ( drawMode == draw_modes::horizontal_scroll ) 
 						rntOff = ntOff;
@@ -181,7 +181,7 @@ namespace psycle { namespace host {
 						}
 					}
 				}
-				else if (Global::pConfig->_centerCursor)
+				else if (patView->_centerCursor)
 				{
 					if ( drawMode == draw_modes::vertical_scroll ) 
 						rnlOff = nlOff;
@@ -913,7 +913,7 @@ namespace psycle { namespace host {
 			tOff = ntOff = rntOff; 
 			lOff = nlOff = rnlOff;
 
-			oldFont= devc->SelectObject(&Global::pConfig->seqFont);
+			oldFont= devc->SelectObject(&patView->pattern_font);
 
 			// 1 if there is a redraw header, we do that 
 			/////////////////////////////////////////////////////////////
@@ -929,18 +929,18 @@ namespace psycle { namespace host {
 					devc->FillSolidRect(&rect,pvc_separator[0]);
 					rect.left++;
 					rect.right = XOFFSET-1;
-					devc->FillSolidRect(&rect,pvc_background[0]);
-					devc->SetBkColor(Global::pConfig->pvc_background);	// This affects TXT background
-					devc->SetTextColor(Global::pConfig->pvc_font);
+					devc->FillSolidRect(&rect, pvc_background[0]);
+					devc->SetBkColor(patView->background);	// This affects TXT background
+					devc->SetTextColor(patView->font);
 					TXT(devc,"Line",1,1,XOFFSET-2,YOFFSET-2);
 				}
 				CDC memDC;
 				CBitmap *oldbmp;
 				memDC.CreateCompatibleDC(devc);
-				oldbmp = memDC.SelectObject(&patternheader);
+				oldbmp = memDC.SelectObject(&patView->patternheader);
 				int xOffset = XOFFSET-1;
 
-				if (PatHeaderCoords.bHasTransparency)
+				if (PatHeaderCoords->bHasTransparency)
 				{
 					for(int i=tOff;i<tOff+maxt;i++)
 					{
@@ -958,63 +958,63 @@ namespace psycle { namespace host {
 						TransparentBlt(devc,
 							xOffset+1+HEADER_INDENT,
 							1,
-							PatHeaderCoords.sBackground.width, 
-							PatHeaderCoords.sBackground.height,
+							PatHeaderCoords->sBackground.width, 
+							PatHeaderCoords->sBackground.height,
 							&memDC, 
-							&patternheadermask,
-							PatHeaderCoords.sBackground.x,
-							PatHeaderCoords.sBackground.y);
+							&patView->patternheadermask,
+							PatHeaderCoords->sBackground.x,
+							PatHeaderCoords->sBackground.y);
 						TransparentBlt(devc,
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-							1+PatHeaderCoords.dDigitX0.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
+							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+							1+PatHeaderCoords->dDigitX0.y, 
+							PatHeaderCoords->sNumber0.width,	 
+							PatHeaderCoords->sNumber0.height, 
 							&memDC, 
-							&patternheadermask,
-							PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y);
+							&patView->patternheadermask,
+							PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+							PatHeaderCoords->sNumber0.y);
 						TransparentBlt(devc,
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-							1+PatHeaderCoords.dDigit0X.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
+							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+							1+PatHeaderCoords->dDigit0X.y, 
+							PatHeaderCoords->sNumber0.width,	 
+							PatHeaderCoords->sNumber0.height, 
 							&memDC, 
-							&patternheadermask,
-							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y);
+							&patView->patternheadermask,
+							PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+							PatHeaderCoords->sNumber0.y);
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (Global::_pSong->_trackMuted[i])
 							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-								1+PatHeaderCoords.dMuteOn.y, 
-								PatHeaderCoords.sMuteOn.width, 
-								PatHeaderCoords.sMuteOn.height, 
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+								1+PatHeaderCoords->dMuteOn.y, 
+								PatHeaderCoords->sMuteOn.width, 
+								PatHeaderCoords->sMuteOn.height, 
 								&memDC, 
-								&patternheadermask,
-								PatHeaderCoords.sMuteOn.x, 
-								PatHeaderCoords.sMuteOn.y);
+								&patView->patternheadermask,
+								PatHeaderCoords->sMuteOn.x, 
+								PatHeaderCoords->sMuteOn.y);
 
 						if (Global::_pSong->_trackArmed[i])
 							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-								1+PatHeaderCoords.dRecordOn.y, 
-								PatHeaderCoords.sRecordOn.width, 
-								PatHeaderCoords.sRecordOn.height, 
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+								1+PatHeaderCoords->dRecordOn.y, 
+								PatHeaderCoords->sRecordOn.width, 
+								PatHeaderCoords->sRecordOn.height, 
 								&memDC, 
-								&patternheadermask,
-								PatHeaderCoords.sRecordOn.x, 
-								PatHeaderCoords.sRecordOn.y);
+								&patView->patternheadermask,
+								PatHeaderCoords->sRecordOn.x, 
+								PatHeaderCoords->sRecordOn.y);
 
 						if (Global::_pSong->_trackSoloed == i )
 							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-								1+PatHeaderCoords.dSoloOn.y, 
-								PatHeaderCoords.sSoloOn.width, 
-								PatHeaderCoords.sSoloOn.height, 
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+								1+PatHeaderCoords->dSoloOn.y, 
+								PatHeaderCoords->sSoloOn.width, 
+								PatHeaderCoords->sSoloOn.height, 
 								&memDC, 
-								&patternheadermask,
-								PatHeaderCoords.sSoloOn.x, 
-								PatHeaderCoords.sSoloOn.y);
+								&patView->patternheadermask,
+								PatHeaderCoords->sSoloOn.x, 
+								PatHeaderCoords->sSoloOn.y);
 						xOffset += ROWWIDTH;
 					}
 				}
@@ -1036,63 +1036,63 @@ namespace psycle { namespace host {
 						devc->BitBlt(
 							xOffset+1+HEADER_INDENT,
 							1,
-							PatHeaderCoords.sBackground.width, 
-							PatHeaderCoords.sBackground.height,
+							PatHeaderCoords->sBackground.width, 
+							PatHeaderCoords->sBackground.height,
 							&memDC, 
-							PatHeaderCoords.sBackground.x,
-							PatHeaderCoords.sBackground.y, 
+							PatHeaderCoords->sBackground.x,
+							PatHeaderCoords->sBackground.y, 
 							SRCCOPY);
 						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-							1+PatHeaderCoords.dDigitX0.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
+							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+							1+PatHeaderCoords->dDigitX0.y, 
+							PatHeaderCoords->sNumber0.width,	 
+							PatHeaderCoords->sNumber0.height, 
 							&memDC, 
-							PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y, 
+							PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+							PatHeaderCoords->sNumber0.y, 
 							SRCCOPY);
 						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-							1+PatHeaderCoords.dDigit0X.y, 
-							PatHeaderCoords.sNumber0.width,	 
-							PatHeaderCoords.sNumber0.height, 
+							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+							1+PatHeaderCoords->dDigit0X.y, 
+							PatHeaderCoords->sNumber0.width,	 
+							PatHeaderCoords->sNumber0.height, 
 							&memDC, 
-							PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-							PatHeaderCoords.sNumber0.y, 
+							PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+							PatHeaderCoords->sNumber0.y, 
 							SRCCOPY);
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (Global::_pSong->_trackMuted[i])
 							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-								1+PatHeaderCoords.dMuteOn.y, 
-								PatHeaderCoords.sMuteOn.width, 
-								PatHeaderCoords.sMuteOn.height, 
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+								1+PatHeaderCoords->dMuteOn.y, 
+								PatHeaderCoords->sMuteOn.width, 
+								PatHeaderCoords->sMuteOn.height, 
 								&memDC, 
-								PatHeaderCoords.sMuteOn.x, 
-								PatHeaderCoords.sMuteOn.y, 
+								PatHeaderCoords->sMuteOn.x, 
+								PatHeaderCoords->sMuteOn.y, 
 								SRCCOPY);
 
 						if (Global::_pSong->_trackArmed[i])
 							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-								1+PatHeaderCoords.dRecordOn.y, 
-								PatHeaderCoords.sRecordOn.width, 
-								PatHeaderCoords.sRecordOn.height, 
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+								1+PatHeaderCoords->dRecordOn.y, 
+								PatHeaderCoords->sRecordOn.width, 
+								PatHeaderCoords->sRecordOn.height, 
 								&memDC, 
-								PatHeaderCoords.sRecordOn.x, 
-								PatHeaderCoords.sRecordOn.y, 
+								PatHeaderCoords->sRecordOn.x, 
+								PatHeaderCoords->sRecordOn.y, 
 								SRCCOPY);
 
 						if (Global::_pSong->_trackSoloed == i )
 							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-								1+PatHeaderCoords.dSoloOn.y, 
-								PatHeaderCoords.sSoloOn.width, 
-								PatHeaderCoords.sSoloOn.height, 
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+								1+PatHeaderCoords->dSoloOn.y, 
+								PatHeaderCoords->sSoloOn.width, 
+								PatHeaderCoords->sSoloOn.height, 
 								&memDC, 
-								PatHeaderCoords.sSoloOn.x, 
-								PatHeaderCoords.sSoloOn.y, 
+								PatHeaderCoords->sSoloOn.x, 
+								PatHeaderCoords->sSoloOn.y, 
 								SRCCOPY);
 						xOffset += ROWWIDTH;
 					}
@@ -1173,7 +1173,7 @@ namespace psycle { namespace host {
 					rect.bottom=CH;  
 					rect.right=CW;
 					rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-					devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
+					devc->FillSolidRect(&rect,patView->separator2);
 				}
 			}
 			else
@@ -1205,7 +1205,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1217,7 +1217,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1250,7 +1250,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1262,7 +1262,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1301,7 +1301,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1314,7 +1314,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1344,7 +1344,7 @@ namespace psycle { namespace host {
 							oldbmp = memDC.SelectObject(&patternheader);
 							xOffset = XOFFSET-1;
 
-							if (PatHeaderCoords.bHasTransparency)
+							if (PatHeaderCoords->bHasTransparency)
 							{
 								for(int i=tOff;i<tOff+scrollT;i++)
 								{
@@ -1355,63 +1355,63 @@ namespace psycle { namespace host {
 									TransparentBlt(devc,
 										xOffset+1+HEADER_INDENT,
 										1,
-										PatHeaderCoords.sBackground.width, 
-										PatHeaderCoords.sBackground.height,
+										PatHeaderCoords->sBackground.width, 
+										PatHeaderCoords->sBackground.height,
 										&memDC, 
 										&patternheadermask,
-										PatHeaderCoords.sBackground.x,
-										PatHeaderCoords.sBackground.y);
+										PatHeaderCoords->sBackground.x,
+										PatHeaderCoords->sBackground.y);
 									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-										1+PatHeaderCoords.dDigitX0.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+										1+PatHeaderCoords->dDigitX0.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
 										&patternheadermask,
-										PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y);
+										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y);
 									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-										1+PatHeaderCoords.dDigit0X.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+										1+PatHeaderCoords->dDigit0X.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
 										&patternheadermask,
-										PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y);
+										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y);
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 									if (Global::_pSong->_trackMuted[i])
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-											1+PatHeaderCoords.dMuteOn.y, 
-											PatHeaderCoords.sMuteOn.width, 
-											PatHeaderCoords.sMuteOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+											1+PatHeaderCoords->dMuteOn.y, 
+											PatHeaderCoords->sMuteOn.width, 
+											PatHeaderCoords->sMuteOn.height, 
 											&memDC, 
 											&patternheadermask,
-											PatHeaderCoords.sMuteOn.x, 
-											PatHeaderCoords.sMuteOn.y);
+											PatHeaderCoords->sMuteOn.x, 
+											PatHeaderCoords->sMuteOn.y);
 
 									if (Global::_pSong->_trackArmed[i])
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-											1+PatHeaderCoords.dRecordOn.y, 
-											PatHeaderCoords.sRecordOn.width, 
-											PatHeaderCoords.sRecordOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+											1+PatHeaderCoords->dRecordOn.y, 
+											PatHeaderCoords->sRecordOn.width, 
+											PatHeaderCoords->sRecordOn.height, 
 											&memDC, 
 											&patternheadermask,
-											PatHeaderCoords.sRecordOn.x, 
-											PatHeaderCoords.sRecordOn.y);
+											PatHeaderCoords->sRecordOn.x, 
+											PatHeaderCoords->sRecordOn.y);
 
 									if (Global::_pSong->_trackSoloed == i )
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-											1+PatHeaderCoords.dSoloOn.y, 
-											PatHeaderCoords.sSoloOn.width, 
-											PatHeaderCoords.sSoloOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+											1+PatHeaderCoords->dSoloOn.y, 
+											PatHeaderCoords->sSoloOn.width, 
+											PatHeaderCoords->sSoloOn.height, 
 											&memDC, 
 											&patternheadermask,
-											PatHeaderCoords.sSoloOn.x, 
-											PatHeaderCoords.sSoloOn.y);
+											PatHeaderCoords->sSoloOn.x, 
+											PatHeaderCoords->sSoloOn.y);
 									xOffset += ROWWIDTH;
 								}
 							}
@@ -1426,63 +1426,63 @@ namespace psycle { namespace host {
 									devc->BitBlt(
 										xOffset+1+HEADER_INDENT,
 										1,
-										PatHeaderCoords.sBackground.width, 
-										PatHeaderCoords.sBackground.height,
+										PatHeaderCoords->sBackground.width, 
+										PatHeaderCoords->sBackground.height,
 										&memDC, 
-										PatHeaderCoords.sBackground.x,
-										PatHeaderCoords.sBackground.y, 
+										PatHeaderCoords->sBackground.x,
+										PatHeaderCoords->sBackground.y, 
 										SRCCOPY);
 									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-										1+PatHeaderCoords.dDigitX0.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+										1+PatHeaderCoords->dDigitX0.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
-										PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y, 
+										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y, 
 										SRCCOPY);
 									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-										1+PatHeaderCoords.dDigit0X.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+										1+PatHeaderCoords->dDigit0X.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
-										PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y, 
+										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y, 
 										SRCCOPY);
 
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 									if (Global::_pSong->_trackMuted[i])
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-											1+PatHeaderCoords.dMuteOn.y, 
-											PatHeaderCoords.sMuteOn.width, 
-											PatHeaderCoords.sMuteOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+											1+PatHeaderCoords->dMuteOn.y, 
+											PatHeaderCoords->sMuteOn.width, 
+											PatHeaderCoords->sMuteOn.height, 
 											&memDC, 
-											PatHeaderCoords.sMuteOn.x, 
-											PatHeaderCoords.sMuteOn.y, 
+											PatHeaderCoords->sMuteOn.x, 
+											PatHeaderCoords->sMuteOn.y, 
 											SRCCOPY);
 
 									if (Global::_pSong->_trackArmed[i])
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-											1+PatHeaderCoords.dRecordOn.y, 
-											PatHeaderCoords.sRecordOn.width, 
-											PatHeaderCoords.sRecordOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+											1+PatHeaderCoords->dRecordOn.y, 
+											PatHeaderCoords->sRecordOn.width, 
+											PatHeaderCoords->sRecordOn.height, 
 											&memDC, 
-											PatHeaderCoords.sRecordOn.x, 
-											PatHeaderCoords.sRecordOn.y, 
+											PatHeaderCoords->sRecordOn.x, 
+											PatHeaderCoords->sRecordOn.y, 
 											SRCCOPY);
 
 									if (Global::_pSong->_trackSoloed == i )
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-											1+PatHeaderCoords.dSoloOn.y, 
-											PatHeaderCoords.sSoloOn.width, 
-											PatHeaderCoords.sSoloOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+											1+PatHeaderCoords->dSoloOn.y, 
+											PatHeaderCoords->sSoloOn.width, 
+											PatHeaderCoords->sSoloOn.height, 
 											&memDC, 
-											PatHeaderCoords.sSoloOn.x, 
-											PatHeaderCoords.sSoloOn.y, 
+											PatHeaderCoords->sSoloOn.x, 
+											PatHeaderCoords->sSoloOn.y, 
 											SRCCOPY);
 									xOffset += ROWWIDTH;
 								}
@@ -1499,7 +1499,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1512,7 +1512,7 @@ namespace psycle { namespace host {
 							{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 								rect.left++;
 								rect.right+= ROWWIDTH-1;
 								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1542,7 +1542,7 @@ namespace psycle { namespace host {
 							oldbmp = memDC.SelectObject(&patternheader);
 							xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
-							if (PatHeaderCoords.bHasTransparency)
+							if (PatHeaderCoords->bHasTransparency)
 							{
 								for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
 								{
@@ -1553,63 +1553,63 @@ namespace psycle { namespace host {
 									TransparentBlt(devc,
 										xOffset+1+HEADER_INDENT,
 										1,
-										PatHeaderCoords.sBackground.width, 
-										PatHeaderCoords.sBackground.height,
+										PatHeaderCoords->sBackground.width, 
+										PatHeaderCoords->sBackground.height,
 										&memDC, 
 										&patternheadermask,
-										PatHeaderCoords.sBackground.x,
-										PatHeaderCoords.sBackground.y);
+										PatHeaderCoords->sBackground.x,
+										PatHeaderCoords->sBackground.y);
 									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-										1+PatHeaderCoords.dDigitX0.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+										1+PatHeaderCoords->dDigitX0.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
 										&patternheadermask,
-										PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y);
+										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y);
 									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-										1+PatHeaderCoords.dDigit0X.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+										1+PatHeaderCoords->dDigit0X.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
 										&patternheadermask,
-										PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y);
+										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y);
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 									if (Global::_pSong->_trackMuted[i])
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-											1+PatHeaderCoords.dMuteOn.y, 
-											PatHeaderCoords.sMuteOn.width, 
-											PatHeaderCoords.sMuteOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+											1+PatHeaderCoords->dMuteOn.y, 
+											PatHeaderCoords->sMuteOn.width, 
+											PatHeaderCoords->sMuteOn.height, 
 											&memDC, 
 											&patternheadermask,
-											PatHeaderCoords.sMuteOn.x, 
-											PatHeaderCoords.sMuteOn.y);
+											PatHeaderCoords->sMuteOn.x, 
+											PatHeaderCoords->sMuteOn.y);
 
 									if (Global::_pSong->_trackArmed[i])
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-											1+PatHeaderCoords.dRecordOn.y, 
-											PatHeaderCoords.sRecordOn.width, 
-											PatHeaderCoords.sRecordOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+											1+PatHeaderCoords->dRecordOn.y, 
+											PatHeaderCoords->sRecordOn.width, 
+											PatHeaderCoords->sRecordOn.height, 
 											&memDC, 
 											&patternheadermask,
-											PatHeaderCoords.sRecordOn.x, 
-											PatHeaderCoords.sRecordOn.y);
+											PatHeaderCoords->sRecordOn.x, 
+											PatHeaderCoords->sRecordOn.y);
 
 									if (Global::_pSong->_trackSoloed == i )
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-											1+PatHeaderCoords.dSoloOn.y, 
-											PatHeaderCoords.sSoloOn.width, 
-											PatHeaderCoords.sSoloOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+											1+PatHeaderCoords->dSoloOn.y, 
+											PatHeaderCoords->sSoloOn.width, 
+											PatHeaderCoords->sSoloOn.height, 
 											&memDC, 
 											&patternheadermask,
-											PatHeaderCoords.sSoloOn.x, 
-											PatHeaderCoords.sSoloOn.y);
+											PatHeaderCoords->sSoloOn.x, 
+											PatHeaderCoords->sSoloOn.y);
 									xOffset += ROWWIDTH;
 								}
 							}
@@ -1624,63 +1624,63 @@ namespace psycle { namespace host {
 									devc->BitBlt(
 										xOffset+1+HEADER_INDENT,
 										1,
-										PatHeaderCoords.sBackground.width, 
-										PatHeaderCoords.sBackground.height,
+										PatHeaderCoords->sBackground.width, 
+										PatHeaderCoords->sBackground.height,
 										&memDC, 
-										PatHeaderCoords.sBackground.x,
-										PatHeaderCoords.sBackground.y, 
+										PatHeaderCoords->sBackground.x,
+										PatHeaderCoords->sBackground.y, 
 										SRCCOPY);
 									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-										1+PatHeaderCoords.dDigitX0.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+										1+PatHeaderCoords->dDigitX0.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
-										PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y, 
+										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y, 
 										SRCCOPY);
 									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-										1+PatHeaderCoords.dDigit0X.y, 
-										PatHeaderCoords.sNumber0.width,	 
-										PatHeaderCoords.sNumber0.height, 
+										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+										1+PatHeaderCoords->dDigit0X.y, 
+										PatHeaderCoords->sNumber0.width,	 
+										PatHeaderCoords->sNumber0.height, 
 										&memDC, 
-										PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-										PatHeaderCoords.sNumber0.y, 
+										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+										PatHeaderCoords->sNumber0.y, 
 										SRCCOPY);
 
 									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 									if (Global::_pSong->_trackMuted[i])
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-											1+PatHeaderCoords.dMuteOn.y, 
-											PatHeaderCoords.sMuteOn.width, 
-											PatHeaderCoords.sMuteOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+											1+PatHeaderCoords->dMuteOn.y, 
+											PatHeaderCoords->sMuteOn.width, 
+											PatHeaderCoords->sMuteOn.height, 
 											&memDC, 
-											PatHeaderCoords.sMuteOn.x, 
-											PatHeaderCoords.sMuteOn.y, 
+											PatHeaderCoords->sMuteOn.x, 
+											PatHeaderCoords->sMuteOn.y, 
 											SRCCOPY);
 
 									if (Global::_pSong->_trackArmed[i])
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-											1+PatHeaderCoords.dRecordOn.y, 
-											PatHeaderCoords.sRecordOn.width, 
-											PatHeaderCoords.sRecordOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+											1+PatHeaderCoords->dRecordOn.y, 
+											PatHeaderCoords->sRecordOn.width, 
+											PatHeaderCoords->sRecordOn.height, 
 											&memDC, 
-											PatHeaderCoords.sRecordOn.x, 
-											PatHeaderCoords.sRecordOn.y, 
+											PatHeaderCoords->sRecordOn.x, 
+											PatHeaderCoords->sRecordOn.y, 
 											SRCCOPY);
 
 									if (Global::_pSong->_trackSoloed == i )
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-											1+PatHeaderCoords.dSoloOn.y, 
-											PatHeaderCoords.sSoloOn.width, 
-											PatHeaderCoords.sSoloOn.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+											1+PatHeaderCoords->dSoloOn.y, 
+											PatHeaderCoords->sSoloOn.width, 
+											PatHeaderCoords->sSoloOn.height, 
 											&memDC, 
-											PatHeaderCoords.sSoloOn.x, 
-											PatHeaderCoords.sSoloOn.y, 
+											PatHeaderCoords->sSoloOn.x, 
+											PatHeaderCoords->sSoloOn.y, 
 											SRCCOPY);
 									xOffset += ROWWIDTH;
 								}
@@ -1702,7 +1702,7 @@ namespace psycle { namespace host {
 							rect.right=XOFFSET; 
 							rect.top=YOFFSET+(maxl*ROWHEIGHT); 
 							rect.bottom=CH;
-							devc->FillSolidRect(&rect,pvc_separator[0]);
+							devc->FillSolidRect(&rect, pvc_separator[0]);
 						}
 
 						int xOffset = XOFFSET;
@@ -1714,7 +1714,7 @@ namespace psycle { namespace host {
 						{
 							rect.left=xOffset; 
 							rect.right=xOffset+ROWWIDTH; 
-							devc->FillSolidRect(&rect,pvc_separator[i+1]);
+							devc->FillSolidRect(&rect, pvc_separator[i+1]);
 							xOffset += ROWWIDTH;
 						}
 					}
@@ -1729,7 +1729,7 @@ namespace psycle { namespace host {
 						rect.bottom=CH;  
 						rect.right=CW;
 						rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-						devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
+						devc->FillSolidRect(&rect,patView->separator2);
 					}
 					*/
 				}
@@ -1757,7 +1757,7 @@ namespace psycle { namespace host {
 								{
 								rect.left = xOffset;
 								rect.right = xOffset+1;
-									devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 									rect.left++;
 									rect.right+= ROWWIDTH-1;
 									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1778,7 +1778,7 @@ namespace psycle { namespace host {
 								{
 									rect.left = xOffset;
 									rect.right = xOffset+1;
-									devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 									rect.left++;
 									rect.right+= ROWWIDTH-1;
 									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1805,7 +1805,7 @@ namespace psycle { namespace host {
 								{
 									rect.left = xOffset;
 									rect.right = xOffset+1;
-									devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 									rect.left++;
 									rect.right+= ROWWIDTH-1;
 									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1817,10 +1817,10 @@ namespace psycle { namespace host {
 								CDC memDC;
 								CBitmap *oldbmp;
 								memDC.CreateCompatibleDC(devc);
-								oldbmp = memDC.SelectObject(&patternheader);
+								oldbmp = memDC.SelectObject(&patView->patternheader);
 								xOffset = XOFFSET-1;
 
-								if (PatHeaderCoords.bHasTransparency)
+								if (PatHeaderCoords->bHasTransparency)
 								{
 									for(int i=tOff;i<tOff+scrollT;i++)
 									{
@@ -1831,63 +1831,63 @@ namespace psycle { namespace host {
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT,
 											1,
-											PatHeaderCoords.sBackground.width, 
-											PatHeaderCoords.sBackground.height,
+											PatHeaderCoords->sBackground.width, 
+											PatHeaderCoords->sBackground.height,
 											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords.sBackground.x,
-											PatHeaderCoords.sBackground.y);
+											&patView->patternheadermask,
+											PatHeaderCoords->sBackground.x,
+											PatHeaderCoords->sBackground.y);
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-											1+PatHeaderCoords.dDigitX0.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+											1+PatHeaderCoords->dDigitX0.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y);
+											&patView->patternheadermask,
+											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y);
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-											1+PatHeaderCoords.dDigit0X.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+											1+PatHeaderCoords->dDigit0X.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y);
+											&patView->patternheadermask,
+											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 										if (Global::_pSong->_trackMuted[i])
 											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-												1+PatHeaderCoords.dMuteOn.y, 
-												PatHeaderCoords.sMuteOn.width, 
-												PatHeaderCoords.sMuteOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+												1+PatHeaderCoords->dMuteOn.y, 
+												PatHeaderCoords->sMuteOn.width, 
+												PatHeaderCoords->sMuteOn.height, 
 												&memDC, 
-												&patternheadermask,
-												PatHeaderCoords.sMuteOn.x, 
-												PatHeaderCoords.sMuteOn.y);
+												&patView->patternheadermask,
+												PatHeaderCoords->sMuteOn.x, 
+												PatHeaderCoords->sMuteOn.y);
 
 										if (Global::_pSong->_trackArmed[i])
 											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-												1+PatHeaderCoords.dRecordOn.y, 
-												PatHeaderCoords.sRecordOn.width, 
-												PatHeaderCoords.sRecordOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+												1+PatHeaderCoords->dRecordOn.y, 
+												PatHeaderCoords->sRecordOn.width, 
+												PatHeaderCoords->sRecordOn.height, 
 												&memDC, 
-												&patternheadermask,
-												PatHeaderCoords.sRecordOn.x, 
-												PatHeaderCoords.sRecordOn.y);
+												&patView->patternheadermask,
+												PatHeaderCoords->sRecordOn.x, 
+												PatHeaderCoords->sRecordOn.y);
 
 										if (Global::_pSong->_trackSoloed == i )
 											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-												1+PatHeaderCoords.dSoloOn.y, 
-												PatHeaderCoords.sSoloOn.width, 
-												PatHeaderCoords.sSoloOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+												1+PatHeaderCoords->dSoloOn.y, 
+												PatHeaderCoords->sSoloOn.width, 
+												PatHeaderCoords->sSoloOn.height, 
 												&memDC, 
-												&patternheadermask,
-												PatHeaderCoords.sSoloOn.x, 
-												PatHeaderCoords.sSoloOn.y);
+												&patView->patternheadermask,
+												PatHeaderCoords->sSoloOn.x, 
+												PatHeaderCoords->sSoloOn.y);
 										xOffset += ROWWIDTH;
 									}
 								}
@@ -1902,63 +1902,63 @@ namespace psycle { namespace host {
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT,
 											1,
-											PatHeaderCoords.sBackground.width, 
-											PatHeaderCoords.sBackground.height,
+											PatHeaderCoords->sBackground.width, 
+											PatHeaderCoords->sBackground.height,
 											&memDC, 
-											PatHeaderCoords.sBackground.x,
-											PatHeaderCoords.sBackground.y, 
+											PatHeaderCoords->sBackground.x,
+											PatHeaderCoords->sBackground.y, 
 											SRCCOPY);
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-											1+PatHeaderCoords.dDigitX0.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+											1+PatHeaderCoords->dDigitX0.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y, 
+											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y, 
 											SRCCOPY);
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-											1+PatHeaderCoords.dDigit0X.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+											1+PatHeaderCoords->dDigit0X.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y, 
+											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y, 
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 										if (Global::_pSong->_trackMuted[i])
 											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-												1+PatHeaderCoords.dMuteOn.y, 
-												PatHeaderCoords.sMuteOn.width, 
-												PatHeaderCoords.sMuteOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+												1+PatHeaderCoords->dMuteOn.y, 
+												PatHeaderCoords->sMuteOn.width, 
+												PatHeaderCoords->sMuteOn.height, 
 												&memDC, 
-												PatHeaderCoords.sMuteOn.x, 
-												PatHeaderCoords.sMuteOn.y, 
+												PatHeaderCoords->sMuteOn.x, 
+												PatHeaderCoords->sMuteOn.y, 
 												SRCCOPY);
 
 										if (Global::_pSong->_trackArmed[i])
 											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-												1+PatHeaderCoords.dRecordOn.y, 
-												PatHeaderCoords.sRecordOn.width, 
-												PatHeaderCoords.sRecordOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+												1+PatHeaderCoords->dRecordOn.y, 
+												PatHeaderCoords->sRecordOn.width, 
+												PatHeaderCoords->sRecordOn.height, 
 												&memDC, 
-												PatHeaderCoords.sRecordOn.x, 
-												PatHeaderCoords.sRecordOn.y, 
+												PatHeaderCoords->sRecordOn.x, 
+												PatHeaderCoords->sRecordOn.y, 
 												SRCCOPY);
 
 										if (Global::_pSong->_trackSoloed == i )
 											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-												1+PatHeaderCoords.dSoloOn.y, 
-												PatHeaderCoords.sSoloOn.width, 
-												PatHeaderCoords.sSoloOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+												1+PatHeaderCoords->dSoloOn.y, 
+												PatHeaderCoords->sSoloOn.width, 
+												PatHeaderCoords->sSoloOn.height, 
 												&memDC, 
-												PatHeaderCoords.sSoloOn.x, 
-												PatHeaderCoords.sSoloOn.y, 
+												PatHeaderCoords->sSoloOn.x, 
+												PatHeaderCoords->sSoloOn.y, 
 												SRCCOPY);
 										xOffset += ROWWIDTH;
 									}
@@ -1978,7 +1978,7 @@ namespace psycle { namespace host {
 								{
 									rect.left = xOffset;
 									rect.right = xOffset+1;
-									devc->FillSolidRect(&rect,pvc_separator[i+tOff+1]);
+									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
 									rect.left++;
 									rect.right+= ROWWIDTH-1;
 									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
@@ -1990,10 +1990,10 @@ namespace psycle { namespace host {
 								CDC memDC;
 								CBitmap *oldbmp;
 								memDC.CreateCompatibleDC(devc);
-								oldbmp = memDC.SelectObject(&patternheader);
+								oldbmp = memDC.SelectObject(&patView->patternheader);
 								xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
-								if (PatHeaderCoords.bHasTransparency)
+								if (PatHeaderCoords->bHasTransparency)
 								{
 									for(int i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
 									{
@@ -2004,63 +2004,63 @@ namespace psycle { namespace host {
 										TransparentBlt(devc,
 											xOffset+1+HEADER_INDENT,
 											1,
-											PatHeaderCoords.sBackground.width, 
-											PatHeaderCoords.sBackground.height,
+											PatHeaderCoords->sBackground.width, 
+											PatHeaderCoords->sBackground.height,
 											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords.sBackground.x,
-											PatHeaderCoords.sBackground.y);
+											&patView->patternheadermask,
+											PatHeaderCoords->sBackground.x,
+											PatHeaderCoords->sBackground.y);
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-											1+PatHeaderCoords.dDigitX0.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+											1+PatHeaderCoords->dDigitX0.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y);
+											&patView->patternheadermask,
+											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y);
 										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-											1+PatHeaderCoords.dDigit0X.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+											1+PatHeaderCoords->dDigit0X.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y);
+											&patView->patternheadermask,
+											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 										if (Global::_pSong->_trackMuted[i])
 											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-												1+PatHeaderCoords.dMuteOn.y, 
-												PatHeaderCoords.sMuteOn.width, 
-												PatHeaderCoords.sMuteOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+												1+PatHeaderCoords->dMuteOn.y, 
+												PatHeaderCoords->sMuteOn.width, 
+												PatHeaderCoords->sMuteOn.height, 
 												&memDC, 
-												&patternheadermask,
-												PatHeaderCoords.sMuteOn.x, 
-												PatHeaderCoords.sMuteOn.y);
+												&patView->patternheadermask,
+												PatHeaderCoords->sMuteOn.x, 
+												PatHeaderCoords->sMuteOn.y);
 
 										if (Global::_pSong->_trackArmed[i])
 											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-												1+PatHeaderCoords.dRecordOn.y, 
-												PatHeaderCoords.sRecordOn.width, 
-												PatHeaderCoords.sRecordOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+												1+PatHeaderCoords->dRecordOn.y, 
+												PatHeaderCoords->sRecordOn.width, 
+												PatHeaderCoords->sRecordOn.height, 
 												&memDC, 
-												&patternheadermask,
-												PatHeaderCoords.sRecordOn.x, 
-												PatHeaderCoords.sRecordOn.y);
+												&patView->patternheadermask,
+												PatHeaderCoords->sRecordOn.x, 
+												PatHeaderCoords->sRecordOn.y);
 
 										if (Global::_pSong->_trackSoloed == i )
 											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-												1+PatHeaderCoords.dSoloOn.y, 
-												PatHeaderCoords.sSoloOn.width, 
-												PatHeaderCoords.sSoloOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+												1+PatHeaderCoords->dSoloOn.y, 
+												PatHeaderCoords->sSoloOn.width, 
+												PatHeaderCoords->sSoloOn.height, 
 												&memDC, 
-												&patternheadermask,
-												PatHeaderCoords.sSoloOn.x, 
-												PatHeaderCoords.sSoloOn.y);
+												&patView->patternheadermask,
+												PatHeaderCoords->sSoloOn.x, 
+												PatHeaderCoords->sSoloOn.y);
 										xOffset += ROWWIDTH;
 									}
 								}
@@ -2075,63 +2075,63 @@ namespace psycle { namespace host {
 										devc->BitBlt(
 											xOffset+1+HEADER_INDENT,
 											1,
-											PatHeaderCoords.sBackground.width, 
-											PatHeaderCoords.sBackground.height,
+											PatHeaderCoords->sBackground.width, 
+											PatHeaderCoords->sBackground.height,
 											&memDC, 
-											PatHeaderCoords.sBackground.x,
-											PatHeaderCoords.sBackground.y, 
+											PatHeaderCoords->sBackground.x,
+											PatHeaderCoords->sBackground.y, 
 											SRCCOPY);
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigitX0.x, 
-											1+PatHeaderCoords.dDigitX0.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
+											1+PatHeaderCoords->dDigitX0.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											PatHeaderCoords.sNumber0.x+(trackx0*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y, 
+											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y, 
 											SRCCOPY);
 										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords.dDigit0X.x, 
-											1+PatHeaderCoords.dDigit0X.y, 
-											PatHeaderCoords.sNumber0.width,	 
-											PatHeaderCoords.sNumber0.height, 
+											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
+											1+PatHeaderCoords->dDigit0X.y, 
+											PatHeaderCoords->sNumber0.width,	 
+											PatHeaderCoords->sNumber0.height, 
 											&memDC, 
-											PatHeaderCoords.sNumber0.x+(track0x*PatHeaderCoords.sNumber0.width), 
-											PatHeaderCoords.sNumber0.y, 
+											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
+											PatHeaderCoords->sNumber0.y, 
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 										if (Global::_pSong->_trackMuted[i])
 											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dMuteOn.x, 
-												1+PatHeaderCoords.dMuteOn.y, 
-												PatHeaderCoords.sMuteOn.width, 
-												PatHeaderCoords.sMuteOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
+												1+PatHeaderCoords->dMuteOn.y, 
+												PatHeaderCoords->sMuteOn.width, 
+												PatHeaderCoords->sMuteOn.height, 
 												&memDC, 
-												PatHeaderCoords.sMuteOn.x, 
-												PatHeaderCoords.sMuteOn.y, 
+												PatHeaderCoords->sMuteOn.x, 
+												PatHeaderCoords->sMuteOn.y, 
 												SRCCOPY);
 
 										if (Global::_pSong->_trackArmed[i])
 											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dRecordOn.x, 
-												1+PatHeaderCoords.dRecordOn.y, 
-												PatHeaderCoords.sRecordOn.width, 
-												PatHeaderCoords.sRecordOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
+												1+PatHeaderCoords->dRecordOn.y, 
+												PatHeaderCoords->sRecordOn.width, 
+												PatHeaderCoords->sRecordOn.height, 
 												&memDC, 
-												PatHeaderCoords.sRecordOn.x, 
-												PatHeaderCoords.sRecordOn.y, 
+												PatHeaderCoords->sRecordOn.x, 
+												PatHeaderCoords->sRecordOn.y, 
 												SRCCOPY);
 
 										if (Global::_pSong->_trackSoloed == i )
 											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords.dSoloOn.x, 
-												1+PatHeaderCoords.dSoloOn.y, 
-												PatHeaderCoords.sSoloOn.width, 
-												PatHeaderCoords.sSoloOn.height, 
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
+												1+PatHeaderCoords->dSoloOn.y, 
+												PatHeaderCoords->sSoloOn.width, 
+												PatHeaderCoords->sSoloOn.height, 
 												&memDC, 
-												PatHeaderCoords.sSoloOn.x, 
-												PatHeaderCoords.sSoloOn.y, 
+												PatHeaderCoords->sSoloOn.x, 
+												PatHeaderCoords->sSoloOn.y, 
 												SRCCOPY);
 										xOffset += ROWWIDTH;
 									}
@@ -2151,7 +2151,7 @@ namespace psycle { namespace host {
 							{
 								rect.left=xOffset; 
 								rect.right=xOffset+ROWWIDTH; 
-								devc->FillSolidRect(&rect,pvc_separator[i+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+1]);
 								xOffset += ROWWIDTH;
 							}
 						}
@@ -2166,7 +2166,7 @@ namespace psycle { namespace host {
 							rect.bottom=CH;  
 							rect.right=CW;
 							rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-							devc->FillSolidRect(&rect,Global::pConfig->pvc_separator2);
+							devc->FillSolidRect(&rect,patView->separator2);
 						}
 					}
 
@@ -2207,7 +2207,7 @@ namespace psycle { namespace host {
 								rect.right=XOFFSET; 
 								rect.top=YOFFSET+(maxl*ROWHEIGHT); 
 								rect.bottom=CH;
-								devc->FillSolidRect(&rect,pvc_separator[0]);
+								devc->FillSolidRect(&rect, pvc_separator[0]);
 							}
 
 							int xOffset = XOFFSET;
@@ -2219,7 +2219,7 @@ namespace psycle { namespace host {
 							{
 								rect.left=xOffset; 
 								rect.right=xOffset+ROWWIDTH; 
-								devc->FillSolidRect(&rect,pvc_separator[i+1]);
+								devc->FillSolidRect(&rect, pvc_separator[i+1]);
 								xOffset += ROWWIDTH;
 							}
 						}
@@ -2329,12 +2329,13 @@ namespace psycle { namespace host {
 			char tBuf[16];
 
 			COLORREF* pBkg;
+			int linesPerBar = (_pSong->LinesPerBeat()*patView->timesig);
 			for (int i=lstart;i<lend;i++) // Lines
 			{
 				// break this up into several more general loops for speed
 				if((linecount%_pSong->LinesPerBeat()) == 0)
 				{
-					if ((linecount%(_pSong->LinesPerBeat()*Global::pConfig->pv_timesig)) == 0) 
+					if ((linecount%linesPerBar) == 0) 
 						pBkg = pvc_row4beat;
 					else 
 						pBkg = pvc_rowbeat;
@@ -2346,7 +2347,7 @@ namespace psycle { namespace host {
 
 				if ((XOFFSET!=1))// && (tstart == 0))
 				{
-					if ((linecount == editcur.line) && (Global::pConfig->_linenumbersCursor))
+					if ((linecount == editcur.line) && (patView->_linenumbersCursor))
 					{
 						devc->SetBkColor(pvc_cursor[0]);
 						devc->SetTextColor(pvc_fontCur[0]);
@@ -2361,7 +2362,7 @@ namespace psycle { namespace host {
 						devc->SetBkColor(pBkg[0]);
 						devc->SetTextColor(pvc_font[0]);
 					}
-					if (Global::pConfig->_linenumbersHex)
+					if (patView->_linenumbersHex)
 					{
 						sprintf(tBuf," %.2X",linecount);
 						TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
@@ -2689,20 +2690,20 @@ namespace psycle { namespace host {
 
 		void CChildView::RecalculateColourGrid()
 		{
-			RecalculateColour(pvc_background, Global::pConfig->pvc_background, Global::pConfig->pvc_background2);
-			RecalculateColour(pvc_separator, Global::pConfig->pvc_separator, Global::pConfig->pvc_separator2);
-			RecalculateColour(pvc_row4beat, Global::pConfig->pvc_row4beat, Global::pConfig->pvc_row4beat2);
-			RecalculateColour(pvc_rowbeat, Global::pConfig->pvc_rowbeat, Global::pConfig->pvc_rowbeat2);
-			RecalculateColour(pvc_row, Global::pConfig->pvc_row, Global::pConfig->pvc_row2);
-			RecalculateColour(pvc_selection, Global::pConfig->pvc_selection, Global::pConfig->pvc_selection2);
-			RecalculateColour(pvc_playbar, Global::pConfig->pvc_playbar, Global::pConfig->pvc_playbar2);
-			RecalculateColour(pvc_cursor, Global::pConfig->pvc_cursor, Global::pConfig->pvc_cursor2);
-			RecalculateColour(pvc_font, Global::pConfig->pvc_font, Global::pConfig->pvc_font2);
-			RecalculateColour(pvc_fontPlay, Global::pConfig->pvc_fontPlay, Global::pConfig->pvc_fontPlay2);
-			RecalculateColour(pvc_fontCur, Global::pConfig->pvc_fontCur, Global::pConfig->pvc_fontCur2);
-			RecalculateColour(pvc_fontSel, Global::pConfig->pvc_fontSel, Global::pConfig->pvc_fontSel2);
-			RecalculateColour(pvc_selectionbeat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_rowbeat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_rowbeat2, Global::pConfig->pvc_selection2));
-			RecalculateColour(pvc_selection4beat, ColourDiffAdd(Global::pConfig->pvc_row, Global::pConfig->pvc_row4beat, Global::pConfig->pvc_selection), ColourDiffAdd(Global::pConfig->pvc_row2, Global::pConfig->pvc_row4beat2, Global::pConfig->pvc_selection2));
+			RecalculateColour(pvc_background, patView->background, patView->background2);
+			RecalculateColour(pvc_separator, patView->separator, patView->separator2);
+			RecalculateColour(pvc_row4beat, patView->row4beat, patView->row4beat2);
+			RecalculateColour(pvc_rowbeat, patView->rowbeat, patView->rowbeat2);
+			RecalculateColour(pvc_row, patView->row, patView->row2);
+			RecalculateColour(pvc_selection, patView->selection, patView->selection2);
+			RecalculateColour(pvc_playbar, patView->playbar, patView->playbar2);
+			RecalculateColour(pvc_cursor, patView->cursor, patView->cursor2);
+			RecalculateColour(pvc_font, patView->font, patView->font2);
+			RecalculateColour(pvc_fontPlay, patView->fontPlay, patView->fontPlay2);
+			RecalculateColour(pvc_fontCur, patView->fontCur, patView->fontCur2);
+			RecalculateColour(pvc_fontSel, patView->fontSel, patView->fontSel2);
+			RecalculateColour(pvc_selectionbeat, ColourDiffAdd(patView->row, patView->rowbeat, patView->selection), ColourDiffAdd(patView->row2, patView->rowbeat2, patView->selection2));
+			RecalculateColour(pvc_selection4beat, ColourDiffAdd(patView->row, patView->row4beat, patView->selection), ColourDiffAdd(patView->row2, patView->row4beat2, patView->selection2));
 		}
 
 }}

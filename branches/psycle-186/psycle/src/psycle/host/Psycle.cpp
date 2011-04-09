@@ -4,11 +4,15 @@
 #define _WIN32_DCOM
 
 #include "Psycle.hpp"
+#include "PsycleConfig.hpp"
+#include "SInstance.h"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
+
+#include "AudioDriver.hpp"
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
-#include "SInstance.h"
+
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/loggers.hpp>
 #include <diversalis/compiler.hpp>
@@ -54,10 +58,27 @@ namespace psycle { namespace host {
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
 			CInstanceChecker instanceChecker;
 
-			SetRegistryKey(_T("psycle")); // Change the registry key under which our settings are stored.
-			
-			LoadStdProfileSettings();  // Load standard INI file options (including MRU)
-			
+			//For the Bar states. Everything else is maintained in PsycleConf
+			SetRegistryKey(_T(PSYCLE__TAR_NAME)); // Change the registry key under which our settings are stored.
+
+			//Psycle maintains its own recent
+			//LoadStdProfileSettings();  // Load standard INI file options (including MRU)
+
+			loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
+
+			bool loaded = global_.psycleconf().LoadPsycleSettings();
+			if (loaded &&
+				instanceChecker.PreviousInstanceRunning() &&
+				!global_.psycleconf()._allowMultipleInstances)
+			{
+				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
+				if(*(m_lpCmdLine) != 0)
+				{
+					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
+				}
+				return FALSE;
+			}
+
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
 			CMainFrame* pFrame = new CMainFrame();
@@ -65,66 +86,40 @@ namespace psycle { namespace host {
 				return FALSE;
 			m_pMainWnd = pFrame;
 
-			loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
-
-			if(!Global::pConfig->Read()) // problem reading registry info. missing or damaged
+			if(!loaded) // problem reading registry info. missing or damaged
 			{
-				Global::pConfig->_initialized = false;
 				CConfigDlg dlg("Psycle Settings");
-				dlg.Init(Global::pConfig);
 				if (dlg.DoModal() == IDOK)
 				{
 					pFrame->m_wndView._outputActive = true;
-					Global::pConfig->_initialized = true;
 				}
 			}
 			else
 			{
 				pFrame->m_wndView._outputActive = true;
 			}
-			if (instanceChecker.PreviousInstanceRunning() && !Global::pConfig->_allowMultipleInstances)
-			{
-//				AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
-				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
-				if(*(m_lpCmdLine) != 0)
-				{
-					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
-				}
-				_global.pConfig->_pOutputDriver->Enable(false);
-				_global.pConfig->_pMidiInput->Close();
-				return FALSE;
-			}
-
-
+			global_.psycleconf().RefreshSettings();
 
 			// create and load the frame with its resources
 			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
 
-			// Sets Icon
 			instanceChecker.TrackFirstInstanceRunning();
+
+			// Sets Icon
 			HICON tIcon;
 			tIcon=LoadIcon(IDR_MAINFRAME);
 			pFrame->SetIcon(tIcon, true);
 			pFrame->SetIcon(tIcon, false);
-			
-			pFrame->m_wndView.LoadMachineSkin();
-			pFrame->m_wndView.LoadPatternHeaderSkin();
-			pFrame->m_wndView.LoadMachineBackground();
-			pFrame->m_wndView.RecalcMetrics();
-			pFrame->m_wndView.RecalculateColourGrid();
-
 
 			// The one and only window has been initialized, so show and update it.
-
 			pFrame->ShowWindow(SW_MAXIMIZE);
-			
-			// center master machine
+
+			// center master machine. Cannot be done until here because it's when we have the window size.
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-			
-			pFrame->UpdateWindow();
-			
-			LoadRecent(pFrame); // Import recent files from registry.
+
+			//Psycle maintains its own recent
+			//LoadRecent(pFrame); // Import recent files from registry.
 
 			if (*m_lpCmdLine)
 				ProcessCmdLine(m_lpCmdLine); // Process Command Line
@@ -132,13 +127,22 @@ namespace psycle { namespace host {
 			{
 				CNewMachine::LoadPluginInfo(false);
 				// Show splash screen
-				if (Global::pConfig->_showAboutAtStart)
+				if (global_.psycleconf()._showAboutAtStart)
 				{
 					OnAppAbout();
 				}
 				pFrame->CheckForAutosave();
 			}
 			return TRUE;
+		}
+
+		int CPsycleApp::ExitInstance() 
+		{
+			global_.psycleconf()._pOutputDriver->Enable(false);
+			global_.midi().Close();
+			global_.psycleconf().SavePsycleSettings();
+			CNewMachine::DestroyPluginInfo();
+			return CWinApp::ExitInstance();
 		}
 
 		BOOL CPsycleApp::PreTranslateMessage(MSG* pMsg)
@@ -149,6 +153,10 @@ namespace psycle { namespace host {
 			}
 			return CWinApp::PreTranslateMessage(pMsg);
 		}
+
+		/////////////////////////////////////////////////////////////////////////////
+		// CPsycleApp message handlers
+
 
 		// Returning false on WM_TIMER prevents the statusbar from being updated. So it's disabled for now.
 		BOOL CPsycleApp::IsIdleMessage( MSG* pMsg )
@@ -170,20 +178,6 @@ namespace psycle { namespace host {
 			return bMore;
 		}
 
-
-		/////////////////////////////////////////////////////////////////////////////
-		// CPsycleApp message handlers
-
-
-		int CPsycleApp::ExitInstance() 
-		{
-			_global.pConfig->Write();
-			_global.pConfig->_pOutputDriver->Enable(false);
-			_global.pConfig->_pMidiInput->Close();
-			CNewMachine::DestroyPluginInfo();
-			return CWinApp::ExitInstance();
-		}
-
 		void CPsycleApp::ProcessCmdLine(LPSTR cmdline)
 		{
 			if (*(cmdline) != 0)
@@ -198,138 +192,72 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CPsycleApp::LoadRecent(CMainFrame* pFrame)
-		{
-			//This one should be into Configuration class. It isn't, coz I'm not much
-			//into Psycle internal configuration loading routines.
-			//If YOU are, go and put it where it sould be put.
-			//
-			//I know there's a class "Registry" in psycle, but... I don't like using it.
-			//I think it's a little bit nonsense to use class that does not nuch more
-			//than API itself. The only one for plus is variable encapsulation.
-			//
-			//Fideloop.
-			//
-			::HMENU hRootMenuBar, hFileMenu;
-			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-			hFileMenu = ::GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 11);
-
-			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
-			key += "\\recent-files";
-			HKEY RegKey;
-			if(::RegOpenKeyEx(HKEY_CURRENT_USER , key.c_str(), 0, KEY_READ, &RegKey) == ERROR_SUCCESS)
-			{
-				DWORD nValues = 0;
-				::RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
-				if(nValues)
-				{
-					::MENUITEMINFO hNewItemInfo;
-					int iCount = 0;
-					char cntBuff[3];
-					DWORD cntSize = sizeof cntBuff;
-					char nameBuff[1 << 10];
-					DWORD nameSize = sizeof nameBuff;
-					::DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
-					while
-						(
-						::RegEnumValue
-						(
-						RegKey,
-						iCount,
-						cntBuff,
-						&cntSize,
-						0,
-						0,
-						reinterpret_cast<unsigned char*>(nameBuff),
-						&nameSize
-						) == ERROR_SUCCESS
-						)
-					{
-						::UINT ids[] =
-						{
-							ID_FILE_RECENT_01,
-								ID_FILE_RECENT_02,
-								ID_FILE_RECENT_03,
-								ID_FILE_RECENT_04
-						};
-						hNewItemInfo.cbSize = sizeof hNewItemInfo;
-						hNewItemInfo.fMask = MIIM_ID | MIIM_TYPE;
-						hNewItemInfo.fType = MFT_STRING;
-						hNewItemInfo.wID = ids[iCount];
-						hNewItemInfo.cch = (UINT)std::strlen(nameBuff);
-						hNewItemInfo.dwTypeData = nameBuff;
-						::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
-						cntSize = sizeof cntBuff;
-						nameSize = sizeof nameBuff;
-						++iCount;
-					}
-					::RegCloseKey(RegKey);
-				}
-			}
-		}
-
-		void CPsycleApp::SaveRecent(CMainFrame* pFrame)
-		{
-			HMENU hRootMenuBar, hFileMenu;
-			hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 11);
-
-			{
-				HKEY RegKey;
-				if(::RegOpenKeyEx(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS)
-				{
-					::RegDeleteKey(RegKey, "recent-files");
-				}
-				::RegCloseKey(RegKey);
-			}
-
-			std::string key(PSYCLE__PATH__REGISTRY__ROOT);
-			key += "\\recent-files";
-			HKEY RegKey;
-			DWORD Effect;
-			if
-				(
-				::RegCreateKeyEx
-				(
-				HKEY_CURRENT_USER,
-				key.c_str(),
-				0,
-				0,
-				REG_OPTION_NON_VOLATILE,
-				KEY_ALL_ACCESS,
-				0,
-				&RegKey,
-				&Effect
-				) == ERROR_SUCCESS
-				)
-			{
-				if(GetMenuItemID(pFrame->m_wndView.hRecentMenu, 0) == ID_FILE_RECENT_NONE)
-				{
-					::RegCloseKey(RegKey);
-					return;
-				}
-
-				for(int iCount(0) ; iCount < ::GetMenuItemCount(pFrame->m_wndView.hRecentMenu) ; ++iCount)
-				{
-					UINT nameSize = ::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-					char nameBuff[1 << 10];
-					::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-					std::ostringstream s;
-					s << iCount;
-					::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
-				}
-				::RegCloseKey(RegKey);
-			}
-		}
-
 		void CPsycleApp::OnAppAbout()
 		{
 			CAboutDlg dlg;
 			dlg.DoModal();
 		}
 
+		
+		void CPsycleApp::RestoreRecentFiles()
+		{
+			HMENU hRecentMenu = reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.hRecentMenu;
+			for(int iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
+			{
+				::DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
+			}
+			std::vector<std::string> recent = global_.psycleconf().GetRecentFiles();
+			for(int iCount = 0; iCount< recent.size();iCount++)
+			{
+				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.AppendToRecent(recent[iCount]);
+			}
+		}
+
+		bool CPsycleApp::BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath)
+		{
+
+			///\todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
+			bool val=false;
+			
+			LPMALLOC pMalloc;
+			// Gets the Shell's default allocator
+			//
+			if (::SHGetMalloc(&pMalloc) == NOERROR)
+			{
+				char pszBuffer[MAX_PATH];
+				BROWSEINFO bi;
+				LPITEMIDLIST pidl;
+				strncpy(pszBuffer, rpath.c_str(), MAX_PATH - 1);
+				// Get help on BROWSEINFO struct - it's got all the bit settings.
+				//
+				bi.hwndOwner = hWnd_;
+				bi.pidlRoot = NULL;
+				bi.pszDisplayName = pszBuffer;
+				bi.lpszTitle = title_;
+				bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+				bi.lpfn = NULL;
+				bi.lParam = 0;
+				// This next call issues the dialog box.
+				//
+				if ((pidl = ::SHBrowseForFolder(&bi)) != NULL)
+				{
+					if (::SHGetPathFromIDList(pidl, pszBuffer))
+					{
+						// At this point pszBuffer contains the selected path
+						//
+						val = true;
+						rpath =pszBuffer;
+					}
+					// Free the PIDL allocated by SHBrowseForFolder.
+					//
+					pMalloc->Free(pidl);
+				}
+				// Release the shell's allocator.
+				//
+				pMalloc->Release();
+			}
+			return val;
+		}
 		//////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
@@ -394,40 +322,40 @@ namespace psycle { namespace host {
 			CDialog::OnInitDialog();
 
 			m_contrib.SetWindowText
-					(
-						"Josep Mª Antolín. [JAZ]\t\tDeveloper since release 1.5" "\r\n"
-						"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
-						"James Redfern [alk]\t\tDeveloper and plugin coder" "\r\n"
-						"Magnus Jonsson [zealmange]\t\tDeveloper during 1.7.x and 1.9alpha" "\r\n"
-						"Jeremy Evers [pooplog]\t\tDeveloper in releases 1.7.x" "\r\n"
-						"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
-						"Marcin Kowalski [FideLoop]\t\tDeveloper in release 1.6" "\r\n"
-						"Mark McCormack\t\t\tMIDI (in) Support in release 1.6" "\r\n"
-						"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
-						"Juan Antonio Arguelles [Arguru] (RIP)\tOriginal Developer and maintainer until 1.0" "\r\n"
-						"Satoshi Fujiwara\t\t\tBase code for the Sampulse machine\r\n"
-						"Hermann Seib\t\t\tBase code of the new VSTHost in 1.8.5\r\n"
-						"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
-						"Patrick Haworth [TranceMyriad]\tAuthor of the Help File" "\r\n"
-						"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
-						"David Buist\t\t\tAdditional Graphics" "\r\n"
-						"frown\t\t\t\tAdditional Graphics" "\r\n"
-						"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
-						"Haralabos Michael\t\t\tInstaller and Debugging help" "\r\n\r\n"
-						"This release of Psycle also contains VST plugins from:" "\r\n"
-						"Digital Fish Phones\t( http://www.digitalfishphones.com/ )" "\r\n"
-						"DiscoDSP\t\t( http://www.discodsp.com/ )" "\r\n"
-						"SimulAnalog\t( http://www.simulanalog.org/ )" "\r\n"
-						"Jeroen Breebaart\t( http://www.jeroenbreebaart.com/ )" "\r\n"
-						"George Yohng\t( http://www.yohng.com/ )" "\r\n"
-						"Christian Budde\t( http://www.savioursofsoul.de/Christian/ )" "\r\n"
-						"DDMF\t\t( http://www.ddmf.eu/ )" "\r\n"
-						"Loser\t\t( http://loser.asseca.com/ )" "\r\n"
-						"E-phonic\t\t( http://www.e-phonic.com/ )" "\r\n"
-						"Argu\t\t( http://www.aodix.com/ )" "\r\n"
-						"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
-					);
-			m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
+			(
+				"Josep Mª Antolín. [JAZ]\t\tDeveloper since release 1.5" "\r\n"
+				"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
+				"James Redfern [alk]\t\tDeveloper and plugin coder" "\r\n"
+				"Magnus Jonsson [zealmange]\t\tDeveloper during 1.7.x and 1.9alpha" "\r\n"
+				"Jeremy Evers [pooplog]\t\tDeveloper in releases 1.7.x" "\r\n"
+				"Daniel Arena\t\t\tDeveloper in release 1.5 & 1.6" "\r\n"
+				"Marcin Kowalski [FideLoop]\t\tDeveloper in release 1.6" "\r\n"
+				"Mark McCormack\t\t\tMIDI (in) Support in release 1.6" "\r\n"
+				"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
+				"Juan Antonio Arguelles [Arguru] (RIP)\tOriginal Developer and maintainer until 1.0" "\r\n"
+				"Satoshi Fujiwara\t\t\tBase code for the Sampulse machine\r\n"
+				"Hermann Seib\t\t\tBase code of the new VSTHost in 1.8.5\r\n"
+				"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
+				"Patrick Haworth [TranceMyriad]\tAuthor of the Help File" "\r\n"
+				"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"
+				"David Buist\t\t\tAdditional Graphics" "\r\n"
+				"frown\t\t\t\tAdditional Graphics" "\r\n"
+				"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
+				"Haralabos Michael\t\t\tInstaller and Debugging help" "\r\n\r\n"
+				"This release of Psycle also contains VST plugins from:" "\r\n"
+				"Digital Fish Phones\t( http://www.digitalfishphones.com/ )" "\r\n"
+				"DiscoDSP\t\t( http://www.discodsp.com/ )" "\r\n"
+				"SimulAnalog\t( http://www.simulanalog.org/ )" "\r\n"
+				"Jeroen Breebaart\t( http://www.jeroenbreebaart.com/ )" "\r\n"
+				"George Yohng\t( http://www.yohng.com/ )" "\r\n"
+				"Christian Budde\t( http://www.savioursofsoul.de/Christian/ )" "\r\n"
+				"DDMF\t\t( http://www.ddmf.eu/ )" "\r\n"
+				"Loser\t\t( http://loser.asseca.com/ )" "\r\n"
+				"E-phonic\t\t( http://www.e-phonic.com/ )" "\r\n"
+				"Argu\t\t( http://www.aodix.com/ )" "\r\n"
+				"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
+			);
+			m_showabout.SetCheck(Global::psycleconf()._showAboutAtStart);
 
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
@@ -440,8 +368,8 @@ namespace psycle { namespace host {
 
 		void CAboutDlg::OnShowatstartup() 
 		{
-			if ( m_showabout.GetCheck() )  Global::pConfig->_showAboutAtStart = true;
-			else Global::pConfig->_showAboutAtStart=false;
+			if ( m_showabout.GetCheck() )  Global::psycleconf()._showAboutAtStart = true;
+			else Global::psycleconf()._showAboutAtStart=false;
 		}
 
 }}

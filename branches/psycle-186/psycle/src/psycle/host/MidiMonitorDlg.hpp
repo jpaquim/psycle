@@ -72,6 +72,9 @@ namespace psycle { namespace host {
 			virtual BOOL OnInitDialog();
 			virtual void fnClearEventsLost();
 			afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+			afx_msg void OnClose();
+
 			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		private:

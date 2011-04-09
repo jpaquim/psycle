@@ -12,15 +12,15 @@ namespace psycle { namespace host {
 			DECLARE_DYNCREATE(CMidiInputDlg)
 			DECLARE_MESSAGE_MAP()
 		public:
-			virtual void OnOK();
-		protected:
-			virtual BOOL OnInitDialog();
-		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);
-		public:
 			CMidiInputDlg();
 			virtual ~CMidiInputDlg();
 			int const static IDD = IDD_MIDI_INPUT;
+			virtual void OnOK();
+		protected:
+			virtual BOOL OnInitDialog();
+			virtual void DoDataExchange(CDataExchange* pDX);
+
+		public:
 			class group_with_message;
 			class group
 			{

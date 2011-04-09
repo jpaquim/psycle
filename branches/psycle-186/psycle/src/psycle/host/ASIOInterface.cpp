@@ -1,15 +1,13 @@
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
 
-
 #include "ASIOInterface.hpp"
-#include "Registry.hpp"
 #include "ASIOConfig.hpp"
-#include "Configuration.hpp"
+#include "ConfigStorage.hpp"
 #include "MidiInput.hpp"
 #include <psycle/helpers/dsp.hpp>
 #include <universalis/os/aligned_alloc.hpp>
-#include "Configuration.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -19,10 +17,10 @@ namespace psycle
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 
-		AudioDriverInfo ASIOInterface::_info = { "ASIO 2.2 Output" };
+		AudioDriverInfo ASIODriverSettings::info_ = { "ASIO 2.2 Output" };
+		ASIODriverSettings* ASIOInterface::settings_;
 		CCriticalSection ASIOInterface::_lock;
 		AsioDrivers ASIOInterface::asioDrivers;
-		int ASIOInterface::_ASIObufferSamples(1024);
 		ASIOInterface::AsioStereoBuffer *ASIOInterface::ASIObuffers(0);
 		bool ASIOInterface::_firstrun(true);
 		bool ASIOInterface::_supportsOutputReady(false);
@@ -34,6 +32,61 @@ namespace psycle
 		AUDIODRIVERWORKFN ASIOInterface::_pCallback(0);
 		void* ASIOInterface::_pCallbackContext(0);
 
+
+		ASIODriverSettings::ASIODriverSettings()
+		{
+			SetDefaultSettings();
+		}
+		ASIODriverSettings::ASIODriverSettings(const ASIODriverSettings& othersettings)
+			: AudioDriverSettings(othersettings)
+		{
+			SetDefaultSettings();
+		}
+		ASIODriverSettings& ASIODriverSettings::operator=(const ASIODriverSettings& othersettings)
+		{
+			AudioDriverSettings::operator=(othersettings);
+			return *this;
+		}
+		bool ASIODriverSettings::operator!=(ASIODriverSettings const &othersettings)
+		{
+			return
+				AudioDriverSettings::operator!=(othersettings) ||
+				driverID != othersettings.driverID;
+		}
+		AudioDriver* ASIODriverSettings::NewDriver()
+		{
+			return new ASIOInterface(this);
+		}
+
+		void ASIODriverSettings::SetDefaultSettings()
+		{
+			AudioDriverSettings::SetDefaultSettings();
+			driverID=0;
+		}
+
+		void ASIODriverSettings::Load(ConfigStorage & store)
+		{
+			int driverID(0);
+			if(store.OpenGroup("\\devices\\asio"))
+			{
+				unsigned int block;
+				unsigned int samples;
+				store.Read("BufferSize", block);
+				store.Read("DriverID", driverID);
+				store.Read("SamplesPerSec", samples);
+				store.CloseGroup();
+				setBlockFrames(block);
+				setSamplesPerSec(samples);
+			}
+		}
+		void ASIODriverSettings::Save(ConfigStorage & store)
+		{
+			store.CreateGroup("\\devices\\asio");
+			store.Write("BufferSize", blockFrames());
+			store.Write("DriverID", driverID);
+			store.Write("SamplesPerSec", samplesPerSec());
+			store.CloseGroup();
+		}
 
 		std::string ASIOInterface::PortEnum::GetName()
 		{
@@ -85,13 +138,13 @@ namespace psycle
 			MessageBox(0, msg, "ASIO 2.2 Output driver", MB_OK | MB_ICONERROR);
 		}
 
-		ASIOInterface::ASIOInterface()
+		ASIOInterface::ASIOInterface(ASIODriverSettings* settings)
 		{
 			_initialized = false;
-			_configured = false;
 			_running = false;
 			_firstrun = true;
 			_pCallback = 0;
+			settings_ = settings;
 		}
 		ASIOInterface::~ASIOInterface() throw()
 		{
@@ -106,13 +159,12 @@ namespace psycle
 			for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
 			return asioDrivers.getDriverNames((char**)pNameBuf,MAX_ASIO_DRIVERS);
 		}
-		void ASIOInterface::Initialize(HWND hwnd, AUDIODRIVERWORKFN pcallback, void* context)
+		void ASIOInterface::Initialize(AUDIODRIVERWORKFN pcallback, void* context)
 		{
 			_pCallbackContext = context;
 			_pCallback = pcallback;
 			_running = false;
 			RefreshAvailablePorts();
-			ReadConfig();
 			_initialized = true;
 		}
 
@@ -123,7 +175,7 @@ namespace psycle
 			char* pNameBuf[MAX_ASIO_DRIVERS];
 			for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
 			int drivers = asioDrivers.getDriverNames((char**)pNameBuf,MAX_ASIO_DRIVERS);
-			_drivEnum.resize(0);
+			drivEnum_.resize(0);
 //			drivercount = 0;
 			ASIODriverInfo driverInfo;
 			driverInfo.sysRef = 0;
@@ -169,7 +221,7 @@ namespace psycle
 							}
 						}
 						ASIOGetBufferSize(&driver.minSamples, &driver.maxSamples, &driver.prefSamples, &driver.granularity);
-						_drivEnum.push_back(driver);
+						drivEnum_.push_back(driver);
 					}
 					asioDrivers.removeCurrentDriver();
 				}
@@ -192,6 +244,17 @@ namespace psycle
 			}
 			// BEGIN -  Code 
 			asioDrivers.removeCurrentDriver();
+
+			_selectedout = GetOutPortFromidx(settings_->driverID);
+			if ( !_selectedout.driver) _selectedout = GetOutPortFromidx(0);
+			if ( _selectedout.driver) {
+				if(settings_->blockFrames() < _selectedout.driver->minSamples) 
+						settings_->setBlockFrames(_selectedout.driver->prefSamples);
+				else if(settings_->blockFrames() > _selectedout.driver->maxSamples) 
+						settings_->setBlockFrames(_selectedout.driver->prefSamples);
+			}
+
+
 			char bla[128]; strcpy(bla,_selectedout.driver->_name.c_str());
 			if(!asioDrivers.loadDriver(bla))
 			{
@@ -208,10 +271,10 @@ namespace psycle
 				_running = false;
 				return false;
 			}
-			if(ASIOSetSampleRate(_samplesPerSec) != ASE_OK)
+			if(ASIOSetSampleRate(settings_->samplesPerSec()) != ASE_OK)
 			{
-				_samplesPerSec = 44100;
-				if(ASIOSetSampleRate(_samplesPerSec) != ASE_OK)
+				settings_->setSamplesPerSec(44100);
+				if(ASIOSetSampleRate(settings_->samplesPerSec()) != ASE_OK)
 				{
 					//ASIOExit();
 					asioDrivers.removeCurrentDriver();
@@ -244,7 +307,7 @@ namespace psycle
 			info[counter+1].channelNum = _selectedout.port->_idx + 1;
 			info[counter].buffers[0] = info[counter].buffers[1] = info[counter+1].buffers[0] = info[counter+1].buffers[1] = 0;
 			// create and activate buffers
-			if(ASIOCreateBuffers(info,numbuffers,_ASIObufferSamples,&asioCallbacks) != ASE_OK)
+			if(ASIOCreateBuffers(info,numbuffers,settings_->blockFrames(),&asioCallbacks) != ASE_OK)
 			{
 				//ASIOExit();
 				asioDrivers.removeCurrentDriver();
@@ -259,8 +322,8 @@ namespace psycle
 				AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedins[i].port->_info.type);
 				ASIObuffers[i] = buffer;
 				// 2* is a safety measure (Haven't been able to dig out why it crashes if it is exactly the size)
-				universalis::os::aligned_memory_alloc(16, _selectedins[i].pleft, 2 * _ASIObufferSamples* sizeof(float) );
-				universalis::os::aligned_memory_alloc(16, _selectedins[i].pright, 2 * _ASIObufferSamples *sizeof(float));
+				universalis::os::aligned_memory_alloc(16, _selectedins[i].pleft, 2 * settings_->blockFrames()* sizeof(float) );
+				universalis::os::aligned_memory_alloc(16, _selectedins[i].pright, 2 * settings_->blockFrames() *sizeof(float));
 				counter+=2;
 			}
 			AsioStereoBuffer buffer(info[counter].buffers,info[counter+1].buffers,_selectedout.port->_info.type);
@@ -279,7 +342,7 @@ namespace psycle
 			_running = true;
 			writePos = 0;
 			m_wrapControl = 0;
-			CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
+			Global::midi().ReSync(); // MIDI IMPLEMENTATION
 			delete[] info;
 			return true;
 		}
@@ -305,8 +368,13 @@ namespace psycle
 		void ASIOInterface::GetPlaybackPorts(std::vector<std::string> &ports)
 		{
 			ports.resize(0);
-			for (unsigned int j=0;j<_drivEnum.size();++j) {
-				for (unsigned int i=0;i<_drivEnum[j]._portout.size();++i) ports.push_back(_drivEnum[j]._portout[i].GetName());
+			for (unsigned int j=0;j<drivEnum_.size();++j) {
+				for (unsigned int i=0;i<drivEnum_[j]._portout.size();++i) {
+					std::ostringstream stream;
+					stream << drivEnum_[j]._name << " "
+						<< drivEnum_[j]._portout[i].GetName();
+					ports.push_back(stream.str());
+				}
 			}
 		}
 
@@ -378,13 +446,13 @@ namespace psycle
 		ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(int driverID)
 		{
 			int counter=0;
-			for (unsigned int i(0); i < _drivEnum.size(); ++i)
+			for (unsigned int i(0); i < drivEnum_.size(); ++i)
 			{
-				if ( driverID < counter+_drivEnum[i]._portout.size())
+				if ( driverID < counter+drivEnum_[i]._portout.size())
 				{
-					return _drivEnum[i];
+					return drivEnum_[i];
 				}
-				counter+=(int)(_drivEnum[i]._portout.size());
+				counter+=(int)(drivEnum_[i]._portout.size());
 			}
 			DriverEnum driver;
 			return driver;
@@ -393,123 +461,53 @@ namespace psycle
 		{
 			PortOut port;
 			int counter=0;
-			for (unsigned int i(0); i < _drivEnum.size(); ++i)
+			for (unsigned int i(0); i < drivEnum_.size(); ++i)
 			{
-				if ( driverID < counter+_drivEnum[i]._portout.size())
+				if ( driverID < counter+drivEnum_[i]._portout.size())
 				{
-					port.driver = &_drivEnum[i];
-					port.port = &_drivEnum[i]._portout[driverID-counter];
+					port.driver = &drivEnum_[i];
+					port.port = &drivEnum_[i]._portout[driverID-counter];
 					return port;
 				}
-				counter+=(int)(_drivEnum[i]._portout.size());
+				counter+=(int)(drivEnum_[i]._portout.size());
 			}
 			return port;
 		}
 		int ASIOInterface::GetidxFromOutPort(PortOut&port)
 		{
 			int counter=0;
-			for (unsigned int i(0); i < _drivEnum.size(); ++i)
+			for (unsigned int i(0); i < drivEnum_.size(); ++i)
 			{
-				if ( &_drivEnum[i] == port.driver )
+				if ( &drivEnum_[i] == port.driver )
 				{
 					return counter+(port.port->_idx/2);
 
 				}
-				counter+=(int)(_drivEnum[i]._portout.size());
+				counter+=(int)(drivEnum_[i]._portout.size());
 			}
 			return 0;
-		}
-		void ASIOInterface::ReadConfig()
-		{
-			// Default configuration
-			bool saveatend(false);
-			_samplesPerSec=44100;
-			_ASIObufferSamples = 1024;
-			_channelMode = stereo; // always stereo
-			_sampleBits = 16; // asio doesn't care about bit depth
-			_sampleValidBits = 16; // asio doesn't care about bit depth
-			Registry reg;
-			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS) // settings in version 1.8
-			{
-				reg.CloseRootKey();
-				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
-				if(reg.OpenKey("configuration\\devices\\asio") != ERROR_SUCCESS)
-				{
-					reg.CloseRootKey();
-					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
-					if(reg.OpenKey("ASIOOut") != ERROR_SUCCESS)
-					{
-						reg.CloseRootKey();
-						return;
-					}
-				}
-				saveatend=true;
-			}
-			bool configured(true);
-			int driverID(0);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _ASIObufferSamples);
-			configured &= ERROR_SUCCESS == reg.QueryValue("DriverID", driverID);
-			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
-			reg.CloseKey();
-			reg.CloseRootKey();
-			_configured = configured;
-			_selectedout = GetOutPortFromidx(driverID);
-			if ( !_selectedout.driver) _selectedout = GetOutPortFromidx(0);
-			if ( !_selectedout.driver) { configured=false; return; }
-			if(_ASIObufferSamples < _selectedout.driver->minSamples) _ASIObufferSamples = _selectedout.driver->prefSamples;
-			else if(_ASIObufferSamples > _selectedout.driver->maxSamples) _ASIObufferSamples = _selectedout.driver->prefSamples;
-			if ( saveatend ) WriteConfig();
-		}
-
-		void ASIOInterface::WriteConfig()
-		{
-			Registry reg;
-			if (reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
-			{
-				Error("Unable to write configuration to the registry");
-				return;
-			}
-			if (reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS)
-			{
-				if (reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\asio") != ERROR_SUCCESS)
-				{
-					Error("Unable to write configuration to the registry");
-					return;
-				}
-			}
-			int driverID(0);
-			driverID = GetidxFromOutPort(_selectedout);
-			reg.SetValue("BufferSize", _ASIObufferSamples);
-			reg.SetValue("DriverID", driverID);
-			reg.SetValue("SamplesPerSec", _samplesPerSec);
-			reg.CloseKey();
-			reg.CloseRootKey();
 		}
 
 		void ASIOInterface::Configure()
 		{
-			if(!_configured) ReadConfig();
 			CASIOConfig dlg;
 			dlg.pASIO = this;
-			dlg.m_bufferSize = _ASIObufferSamples;
-			dlg.m_driverIndex = GetidxFromOutPort(_selectedout);
-			dlg.m_sampleRate = _samplesPerSec;
+			dlg.m_driverIndex = settings_->driverID;
+			dlg.m_sampleRate = settings_->samplesPerSec();
+			dlg.m_bufferSize = settings_->blockFrames();
 			if(dlg.DoModal() != IDOK) return;
-
+			Enable(false);
 			PortOut port = GetOutPortFromidx(dlg.m_driverIndex);
 			bool supported = port.port->IsFormatSupported(port.driver,dlg.m_sampleRate);
 			if(!supported) {
 				Error("The Format selected is not supported. Keeping the previous configuration");
 				return;
 			}
-
-			_ASIObufferSamples = dlg.m_bufferSize;
-			_selectedout = GetOutPortFromidx(dlg.m_driverIndex);
-			_samplesPerSec = dlg.m_sampleRate;
-
-			_configured = true;
-			WriteConfig();
+			_selectedout = port;
+			settings_->driverID = dlg.m_driverIndex;
+			settings_->setSamplesPerSec(dlg.m_sampleRate);
+			settings_->setBlockFrames(dlg.m_bufferSize);
+			Enable(true);
 		}
 
 		bool ASIOInterface::Enable(bool e)
@@ -529,10 +527,6 @@ namespace psycle
 			return writePos;
 		}
 
-		int ASIOInterface::GetBufferSize()
-		{ 
-			return _ASIObufferSamples; 
-		}
 		bool ASIOInterface::PortEnum::IsFormatSupported(DriverEnum* driver, int samplerate)
 		{
 			if(!asioDrivers.loadDriver(const_cast<char*>(driver->_name.c_str())))
@@ -611,14 +605,15 @@ namespace psycle
 			if(_firstrun)
 			{
 				universalis::cpu::exceptions::install_handler_in_thread();
-//				SetThreadAffinityMask(GetCurrentThread(), 1);
 				_firstrun = false;
 			}
 			writePos = timeInfo->timeInfo.samplePosition.lo;
 			if (timeInfo->timeInfo.samplePosition.hi != m_wrapControl) {
 				m_wrapControl = timeInfo->timeInfo.samplePosition.hi;
-				CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
+				Global::midi().ReSync();	// MIDI IMPLEMENTATION
 			}
+
+			const unsigned int _ASIObufferSamples = settings_->blockFrames();
 			//////////////////////////////////////////////////////////////////////////
 			// Inputs
 			unsigned int counter(0);
@@ -1177,6 +1172,7 @@ namespace psycle
 			// might not have even changed, maybe only the sample rate status of an
 			// AES/EBU or S/PDIF digital input at the audio device.
 			// You might have to update time/sample related conversion routines, etc.
+			settings_->setSamplesPerSec(sRate);
 		}
 
 		long ASIOInterface::asioMessages(long selector, long value, void* message, double* opt)

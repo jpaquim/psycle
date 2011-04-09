@@ -55,7 +55,7 @@ namespace psycle { namespace host {
 			FILETIME FileTime;
 			bool allow;
 			/*
-			void operator=(PluginInfo& newinfo)
+			PluginInfo& operator=(const PluginInfo& newinfo)
 			{
 				mode=newinfo.mode;
 				type=newinfo.type;
@@ -64,6 +64,7 @@ namespace psycle { namespace host {
 				strcpy(desc,newinfo.desc);
 				zapArray(dllname,new char[sizeof(newinfo.dllname)+1]);
 				strcpy(dllname,newinfo.dllname);
+				return *this;
 			}
 			friend bool operator!=(PluginInfo& info1,PluginInfo& info2)
 			{

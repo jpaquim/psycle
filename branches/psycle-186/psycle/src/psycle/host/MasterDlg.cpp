@@ -154,7 +154,7 @@ namespace psycle { namespace host {
 				{
 					sprintf(peak,"%.2fdB",helpers::dsp::dB(_pMachine->currentpeak*0.00003051f));
 				}
-				else strcpy(peak,"-99dB");
+				else strcpy(peak,"-inf dB");
 				m_masterpeak.SetWindowText(peak);
 				
 				SetSliderValues();

@@ -289,7 +289,7 @@ namespace psycle
 			catch(const std::exception & e)
 			{
 #ifndef NDEBUG 
-					throw;
+					throw e;
 #else
 
 				std::ostringstream s; s
@@ -327,7 +327,7 @@ namespace psycle
 			catch(const std::exception & e)
 			{
 #ifndef NDEBUG 
-					throw;
+					throw e;
 #else
 				if(!exception) exception = &e;
 #endif
@@ -860,7 +860,6 @@ namespace psycle
 					return;
 #endif
 					}
-					Global::pPlayer->Tweaker = true;
 				}
 			}
 			else if(pData->_note == notecommands::tweakslide)
@@ -948,7 +947,6 @@ namespace psycle
 						}
 					}
 				}
-				Global::pPlayer->Tweaker = true;
 			}
 			else if (pData->_note == notecommands::midicc) {
 				try

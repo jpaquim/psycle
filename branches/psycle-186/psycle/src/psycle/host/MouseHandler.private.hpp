@@ -29,20 +29,20 @@ namespace psycle { namespace host {
 							switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
 								{
 								/*							case MACHMODE_GENERATOR: //A wire can't end in a generator
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sGenerator.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sGenerator.height/2);
+								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sGenerator.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sGenerator.height/2);
 								break;
 								*/								
 								case MACHMODE_FX:
-									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
-									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
+									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
 									wireSX = point.x;
 									wireSY = point.y;
 									break;
 
 								case MACHMODE_MASTER:
-									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
-									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
+									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
 									wireSX = point.x;
 									wireSY = point.y;
 									break;
@@ -64,20 +64,20 @@ namespace psycle { namespace host {
 						switch (_pSong->_pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in master
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sMaster.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sMaster.height/2);
 							break;
 */							
 						default:
@@ -267,20 +267,20 @@ namespace psycle { namespace host {
 							switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
 							{
 /*							case MACHMODE_GENERATOR: //A wire can't end in a generator
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sGenerator.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sGenerator.height/2);
+								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sGenerator.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sGenerator.height/2);
 								break;
 */								
 							case MACHMODE_FX:
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sEffect.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sEffect.height/2);
+								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
 
 							case MACHMODE_MASTER:
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords.sMaster.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords.sMaster.height/2);
+								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
+								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
@@ -302,20 +302,20 @@ namespace psycle { namespace host {
 						switch (_pSong->_pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sGenerator.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sEffect.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sEffect.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in Master.
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords.sMaster.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords.sMaster.height/2);
+							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sMaster.width/2);
+							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sMaster.height/2);
 							break;
 */							
 						}
@@ -341,14 +341,14 @@ namespace psycle { namespace host {
 							_pSong->seqBus = _pSong->FindBusFromIndex(smac);
 							pParentMain->UpdateComboGen();
 							
-							panning = tmac->_panning*MachineCoords.dGeneratorPan.width;
+							panning = tmac->_panning*MachineCoords->dGeneratorPan.width;
 							panning /= 128;
-							tmpsrc.x=MachineCoords.dGeneratorPan.x; tmpsrc.y=MachineCoords.dGeneratorPan.y;
-							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan,panning)) //changing panning
+							tmpsrc.x=MachineCoords->dGeneratorPan.x; tmpsrc.y=MachineCoords->dGeneratorPan.y;
+							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords->sGeneratorPan,panning)) //changing panning
 							{
 								smacmode = smac_modes::panning;
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorMute,MachineCoords.sGeneratorMute)) //Mute 
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dGeneratorMute,MachineCoords->sGeneratorMute)) //Mute 
 							{
 								tmac->_mute = !tmac->_mute;
 								if (tmac->_mute)
@@ -362,7 +362,7 @@ namespace psycle { namespace host {
 									
 								}
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorSolo,MachineCoords.sGeneratorSolo)) //Solo 
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dGeneratorSolo,MachineCoords->sGeneratorSolo)) //Solo 
 							{
 								if (_pSong->machineSoloed == smac )
 								{
@@ -398,15 +398,15 @@ namespace psycle { namespace host {
 							break;
 
 						case MACHMODE_FX:
-							panning = tmac->_panning*MachineCoords.dEffectPan.width;
+							panning = tmac->_panning*MachineCoords->dEffectPan.width;
 							panning /= 128;
-							tmpsrc.x=MachineCoords.dEffectPan.x; tmpsrc.y=MachineCoords.dEffectPan.y;
-							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan,panning)) //changing panning
+							tmpsrc.x=MachineCoords->dEffectPan.x; tmpsrc.y=MachineCoords->dEffectPan.y;
+							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords->sEffectPan,panning)) //changing panning
 							{
 								smacmode = smac_modes::panning;
 								OnMouseMove(nFlags,point);
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectMute,MachineCoords.sEffectMute)) //Mute 
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dEffectMute,MachineCoords->sEffectMute)) //Mute 
 							{
 								tmac->_mute = !tmac->_mute;
 								if (tmac->_mute)
@@ -416,7 +416,7 @@ namespace psycle { namespace host {
 								updatePar = smac;
 								Repaint(draw_modes::machine);
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectMute)) //Solo 
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dEffectBypass,MachineCoords->sEffectMute)) //Solo 
 							{
 								tmac->Bypass(!tmac->Bypass());
 								if (tmac->Bypass())
@@ -445,7 +445,7 @@ namespace psycle { namespace host {
 				{	
 					int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
 
-					if (InRect(pointpos,point.y,PatHeaderCoords.dRecordOn,PatHeaderCoords.sRecordOn))
+					if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOn,PatHeaderCoords->sRecordOn))
 					{
 						_pSong->_trackArmed[ttm] = !_pSong->_trackArmed[ttm];
 						_pSong->_trackArmedCount = 0;
@@ -457,11 +457,11 @@ namespace psycle { namespace host {
 							}
 						}
 					}
-					else if (InRect(pointpos,point.y,PatHeaderCoords.dMuteOn,PatHeaderCoords.sMuteOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOn,PatHeaderCoords->sMuteOn))
 					{
 						_pSong->_trackMuted[ttm] = !_pSong->_trackMuted[ttm];
 					}
-					else if (InRect(pointpos,point.y,PatHeaderCoords.dSoloOn,PatHeaderCoords.sSoloOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOn,PatHeaderCoords->sSoloOn))
 					{
 						if (Global::_pSong->_trackSoloed != ttm )
 						{
@@ -497,7 +497,7 @@ namespace psycle { namespace host {
 
 					if (blockSelected
 						&& oldm.track >=blockSel.start.track && oldm.track <= blockSel.end.track
-						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && Global::pConfig->_windowsBlocks)
+						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && Global::psycleconf().inputHandler()._windowsBlocks)
 					{
 						blockswitch=true;
 						blockLastOrigin = blockSel;
@@ -588,11 +588,11 @@ namespace psycle { namespace host {
 						switch(_pSong->_pMachine[smac]->_mode)
 						{
 							case MACHMODE_GENERATOR:
-								ssrc = MachineCoords.sGenerator;break;
+								ssrc = MachineCoords->sGenerator;break;
 							case MACHMODE_FX:
-								ssrc = MachineCoords.sEffect;break;
+								ssrc = MachineCoords->sEffect;break;
 							case MACHMODE_MASTER:
-								ssrc = MachineCoords.sMaster;break;
+								ssrc = MachineCoords->sMaster;break;
 							default:
 								assert(false);ssrc=SSkinSource();break;
 						}
@@ -636,7 +636,7 @@ namespace psycle { namespace host {
 					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
 					Repaint(draw_modes::cursor);
 					pParentMain->StatusBarIdle();
-					if (!(nFlags & MK_SHIFT) && Global::pConfig->_windowsBlocks)
+					if (!(nFlags & MK_SHIFT) && Global::psycleconf().inputHandler()._windowsBlocks)
 					{
 						blockSelected=false;
 						blockSel.end.line=0;
@@ -694,17 +694,17 @@ namespace psycle { namespace host {
 							switch(_pSong->_pMachine[smac]->_mode)
 							{
 							case MACHMODE_GENERATOR:
-								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords.dGeneratorPan.x - (MachineCoords.sGeneratorPan.width/2))*128;
-								if (MachineCoords.dGeneratorPan.width)
+								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords->dGeneratorPan.x - (MachineCoords->sGeneratorPan.width/2))*128;
+								if (MachineCoords->dGeneratorPan.width)
 								{
-									newpan /= MachineCoords.dGeneratorPan.width;
+									newpan /= MachineCoords->dGeneratorPan.width;
 								}
 								break;
 							case MACHMODE_FX:
-								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords.dEffectPan.x - (MachineCoords.sEffectPan.width/2))*128;
-								if (MachineCoords.dEffectPan.width)
+								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords->dEffectPan.x - (MachineCoords->sEffectPan.width/2))*128;
+								if (MachineCoords->dEffectPan.width)
 								{
-									newpan /= MachineCoords.dEffectPan.width;
+									newpan /= MachineCoords->dEffectPan.width;
 								}
 								break;
 							}
@@ -976,15 +976,15 @@ namespace psycle { namespace host {
 						switch (pMac->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							tmpsrc.x=MachineCoords.dGeneratorPan.x; tmpsrc.y=MachineCoords.dGeneratorPan.y;
-							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sGeneratorPan)) //changing panning
+							tmpsrc.x=MachineCoords->dGeneratorPan.x; tmpsrc.y=MachineCoords->dGeneratorPan.y;
+							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords->sGeneratorPan)) //changing panning
 							{
 								smac=tmac;
 								smacmode = smac_modes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
-							else if (InRect(mcd_x,mcd_y, MachineCoords.dGeneratorMute,MachineCoords.sGeneratorMute)) //Mute 
+							else if (InRect(mcd_x,mcd_y, MachineCoords->dGeneratorMute,MachineCoords->sGeneratorMute)) //Mute 
 							{
 								pMac->_mute = !pMac->_mute;
 								if (pMac->_mute)
@@ -1000,7 +1000,7 @@ namespace psycle { namespace host {
 								Repaint(draw_modes::machine);
 								return;
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dGeneratorSolo,MachineCoords.sGeneratorSolo)) //Solo 
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dGeneratorSolo,MachineCoords->sGeneratorSolo)) //Solo 
 							{
 								if (_pSong->machineSoloed == tmac )
 								{
@@ -1039,15 +1039,15 @@ namespace psycle { namespace host {
 							}
 							break;
 						case MACHMODE_FX:
-							tmpsrc.x=MachineCoords.dEffectPan.x; tmpsrc.y=MachineCoords.dEffectPan.y;
-							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords.sEffectPan)) //changing panning
+							tmpsrc.x=MachineCoords->dEffectPan.x; tmpsrc.y=MachineCoords->dEffectPan.y;
+							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords->sEffectPan)) //changing panning
 							{
 								smac=tmac;
 								smacmode = smac_modes::panning;
 								OnMouseMove(nFlags,point);
 								return;
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectMute,MachineCoords.sEffectMute)) //Mute 
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dEffectMute,MachineCoords->sEffectMute)) //Mute 
 							{
 								pMac->_mute = !pMac->_mute;
 								if (pMac->_mute)
@@ -1059,7 +1059,7 @@ namespace psycle { namespace host {
 								Repaint(draw_modes::machine);
 								return;
 							}
-							else if (InRect(mcd_x,mcd_y,MachineCoords.dEffectBypass,MachineCoords.sEffectBypass)) //Bypass
+							else if (InRect(mcd_x,mcd_y,MachineCoords->dEffectBypass,MachineCoords->sEffectBypass)) //Bypass
 							{
 								pMac->Bypass(!pMac->Bypass());
 								if (pMac->Bypass())

@@ -25,6 +25,27 @@ namespace psycle
 	{
 		#define MAX_WAVEOUT_BLOCKS 8
 
+		class WaveOutSettings : public AudioDriverSettings
+		{
+		public:
+			WaveOutSettings();
+			WaveOutSettings(const WaveOutSettings& othersettings);
+			WaveOutSettings& operator=(const WaveOutSettings& othersettings);
+			virtual bool operator!=(WaveOutSettings const &);
+			virtual bool operator==(WaveOutSettings const & other) { return !((*this) != other); }
+			virtual AudioDriver* NewDriver();
+			virtual AudioDriverInfo& GetInfo() { return info_; }
+
+			virtual void SetDefaultSettings();
+			virtual void Load(ConfigStorage &);
+			virtual void Save(ConfigStorage &);
+
+			unsigned int deviceID_;
+			unsigned int pollSleep_;
+		private:
+			static AudioDriverInfo info_;
+		};
+
 		/// output device interface implemented by mme.
 		class WaveOut : public AudioDriver
 		{
@@ -65,12 +86,16 @@ namespace psycle
 			};
 
 		public:
-			WaveOut();
+			WaveOut(WaveOutSettings* settings);
 			virtual ~WaveOut() throw();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
-			virtual void Reset();
+			virtual AudioDriverSettings& settings() { return *settings_; }
+
+			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 			virtual bool Enable(bool e);
+			virtual void Reset();
+			virtual bool Initialized() { return _initialized; }
 			virtual bool Enabled() { return _running; }
+			virtual void Configure();
 			virtual void RefreshAvailablePorts();
 			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
 			virtual void GetCapturePorts(std::vector<std::string> &ports);
@@ -79,14 +104,10 @@ namespace psycle
 			virtual bool CreateCapturePort(PortCapt &port);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 
-			virtual std::uint32_t GetInputLatencySamples() { return (_numBlocks * _blockSizeBytes)/GetSampleSizeBytes(); }
-			virtual std::uint32_t GetOutputLatencySamples() { return (_numBlocks * _blockSizeBytes)/GetSampleSizeBytes(); }
+			virtual std::uint32_t GetInputLatencySamples() { return settings().blockCount() * settings().blockFrames(); }
+			virtual std::uint32_t GetOutputLatencySamples() { return settings().blockCount() * settings().blockFrames(); }
 			virtual std::uint32_t GetWritePosInSamples();
 			virtual std::uint32_t GetPlayPosInSamples();
-			virtual void Configure();
-			virtual bool Initialized() { return _initialized; }
-			virtual bool Configured() { return _configured; }
-			virtual AudioDriverInfo* GetInfo() { return &_info; }
 			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID);
 			static void PollerThread(void *pWaveOut);
 		protected:
@@ -103,13 +124,11 @@ namespace psycle
 
 		private:
 			bool _initialized;
-			bool _configured;
-			static AudioDriverInfo _info;
+			WaveOutSettings* settings_;
 			static AudioDriverEvent _event;
 //			static CCriticalSection _lock;
 
 			HWAVEOUT _handle;
-			int _deviceID;
 			int _currentBlock;
 			std::uint32_t _writePos;
 			/// number of "wraparounds" to compensate the WaveOutGetPosition() call.
@@ -117,8 +136,6 @@ namespace psycle
 			/// helper variable to detect the previous wraps.
 			int m_lastPlayPos;
 
-			int _pollSleep;
-			bool _dither;
 			bool _running;
 			bool _stopPolling;
 			CBlock _blocks[MAX_WAVEOUT_BLOCKS];

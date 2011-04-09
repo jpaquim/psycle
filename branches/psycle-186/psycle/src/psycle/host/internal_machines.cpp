@@ -5,7 +5,6 @@
 #include "Song.hpp"
 #include "Player.hpp"
 #include "AudioDriver.hpp"
-#include "Global.hpp"
 #include "cpu_time_clock.hpp"
 
 namespace psycle
@@ -319,7 +318,7 @@ namespace psycle
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 				_initialized = mydriver.AddCapturePort(_captureidx);
-				strncpy(drivername,mydriver.GetInfo()->_psName,32);
+				strncpy(drivername,mydriver.settings().GetInfo()._psName,32);
 			}
 		}
 		void AudioRecorder::ChangePort(int newport)
@@ -333,7 +332,7 @@ namespace psycle
 			}
 			_initialized = mydriver.AddCapturePort(newport);
 			_captureidx = newport;
-			strncpy(drivername,mydriver.GetInfo()->_psName,32);
+			strncpy(drivername,mydriver.settings().GetInfo()._psName,32);
 			mydriver.Enable(true);
 		}
 		int AudioRecorder::GenerateAudio(int numSamples, bool measure_cpu_usage)
@@ -341,7 +340,7 @@ namespace psycle
 			if (!_mute &&_initialized)
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-				AudioDriverInfo &myinfo = *mydriver.GetInfo();
+				AudioDriverInfo &myinfo = mydriver.settings().GetInfo();
 				if(strcmp(myinfo._psName, drivername)) {
 					_initialized = false;
 					return numSamples;
@@ -413,7 +412,6 @@ namespace psycle
 			{
 				int nv = (pData->_cmd<<8)+pData->_parameter;
 				SetParameter(pData->_inst,nv);
-				Global::player().Tweaker = true;
 			}
 			else if(pData->_note == notecommands::tweakslide)
 			{
@@ -421,7 +419,6 @@ namespace psycle
 				// doing simply "tweak" for now..
 				int nv = (pData->_cmd<<8)+pData->_parameter;
 				SetParameter(pData->_inst,nv);
-				Global::player().Tweaker = true;
 			}
 		}
 		void Mixer::recursive_process(unsigned int frames, bool measure_cpu_usage) {

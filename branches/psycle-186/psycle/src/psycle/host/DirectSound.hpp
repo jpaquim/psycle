@@ -16,6 +16,26 @@ namespace psycle
 {
 	namespace host
 	{
+
+		class DirectSoundSettings : public AudioDriverSettings
+		{
+		public:
+			DirectSoundSettings();
+			DirectSoundSettings(const DirectSoundSettings& othersettings);
+			DirectSoundSettings& operator=(const DirectSoundSettings& othersettings);
+			virtual bool operator!=(DirectSoundSettings const &);
+			virtual bool operator==(DirectSoundSettings const & other) { return !((*this) != other); }
+			virtual AudioDriver* NewDriver();
+			virtual AudioDriverInfo& GetInfo() { return info_; }
+
+			virtual void SetDefaultSettings();
+			virtual void Load(ConfigStorage &);
+			virtual void Save(ConfigStorage &);
+			GUID device_guid_;
+		private:
+			static AudioDriverInfo info_;
+		};
+
 		/// output device interface implemented by direct sound.
 		class DirectSound : public AudioDriver
 		{
@@ -42,11 +62,15 @@ namespace psycle
 				int _machinepos;
 			};
 		public:
-			DirectSound();
+			DirectSound(DirectSoundSettings* settings);
 			virtual ~DirectSound() throw();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context);
-			virtual void Reset();
+			inline virtual AudioDriverSettings& settings() { return *settings_; };
+
+			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 			virtual bool Enable(bool e);
+			virtual void Reset();
+			virtual void Configure();
+			virtual bool Initialized() { return _initialized; }
 			virtual bool Enabled() { return _running; }
 			virtual void RefreshAvailablePorts();
 			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
@@ -61,19 +85,12 @@ namespace psycle
 			virtual std::uint32_t GetOutputLatencySamples() { return _dsBufferSize/GetSampleSizeBytes(); }
 			virtual std::uint32_t GetWritePosInSamples();
 			virtual std::uint32_t GetPlayPosInSamples();
-//			int virtual GetMaxLatencyInSamples() { return settings().sampleSize() * _dsBufferSize; }
-			virtual void Configure();
-			virtual bool Initialized() { return _initialized; }
-			virtual bool Configured() { return _configured; }
-			virtual AudioDriverInfo* GetInfo() { return &_info; }
 		protected:
-			std::uint32_t DirectSound::GetIdxFromDevice(GUID* device);
-			void ReadConfig();
-			void WriteConfig();
 			void Error(const TCHAR msg[]);
-
 			bool Start();
 			bool Stop();
+
+			std::uint32_t DirectSound::GetIdxFromDevice(GUID* device);
 			static DWORD WINAPI NotifyThread(void* pDirectSound);
 			static DWORD WINAPI PollerThread(void* pDirectSound);
 			void DoBlocks();
@@ -83,10 +100,8 @@ namespace psycle
 			//Reposition the write block before the play cursor.
 			void RepositionMark(int &low, int pos);
 
-
 		private:
 			bool _initialized;
-			bool _configured;
 
 			HWND _hwnd;
 //			MMRESULT _timer;
@@ -96,12 +111,9 @@ namespace psycle
 			bool _playing;
 			//Controls if we want the thread to be running or not
 			bool _threadRun;
-			static AudioDriverInfo _info;
+			DirectSoundSettings* settings_;
 			static AudioDriverEvent _event;
 			CCriticalSection _lock;
-
-			GUID device_guid;
-			bool _dither;
 
 			std::uint32_t _dsBufferSize;
 			std::uint32_t _lowMark;

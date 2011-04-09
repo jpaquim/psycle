@@ -4,9 +4,9 @@
 
 #include "WaveOut.hpp"
 #include "WaveOutDialog.hpp"
-#include "Registry.hpp"
-#include "Configuration.hpp"
 #include "MidiInput.hpp"
+#include "ConfigStorage.hpp"
+
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/aligned_alloc.hpp>
@@ -18,18 +18,88 @@ namespace psycle
 {
 	namespace host
 	{
-		AudioDriverInfo WaveOut::_info = { "Windows WaveOut MME" };
+		AudioDriverInfo WaveOutSettings::info_ = { "Windows WaveOut MME" };
 		AudioDriverEvent WaveOut::_event;
-//		CCriticalSection WaveOut::_lock;
 
 		void WaveOut::Error(char const msg[])
 		{
 			MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
 		}
+		
+		WaveOutSettings::WaveOutSettings()
+		{
+			SetDefaultSettings();
+		}
+		WaveOutSettings::WaveOutSettings(const WaveOutSettings& othersettings)
+			: AudioDriverSettings(othersettings)
+		{
+			SetDefaultSettings();
+		}
+		WaveOutSettings& WaveOutSettings::operator=(const WaveOutSettings& othersettings)
+		{
+			AudioDriverSettings::operator=(othersettings);
+			return *this;
+		}
+		bool WaveOutSettings::operator!=(WaveOutSettings const &other)
+		{
+			return AudioDriverSettings::operator!=(other) ||
+				deviceID_ != other.deviceID_ ||
+				pollSleep_ != other.pollSleep_;
+		}
+		
+		AudioDriver* WaveOutSettings::NewDriver()
+		{
+			return new WaveOut(this);
+		}
 
-		WaveOut::WaveOut()
-			: _initialized(false)
-			, _configured(false)
+		void WaveOutSettings::SetDefaultSettings()
+		{
+			AudioDriverSettings::SetDefaultSettings();
+			deviceID_=0;
+			pollSleep_ = 10;
+			setBlockCount(6);
+			setBlockBytes(4096);
+		}
+		void WaveOutSettings::Load(ConfigStorage &store)
+		{
+			if(store.OpenGroup("\\devices\\mme"))
+			{
+				store.Read("DeviceID", deviceID_);
+				store.Read("PollSleep", pollSleep_);
+				unsigned int tmp = samplesPerSec();
+				store.Read("SamplesPerSec", tmp);
+				setSamplesPerSec(tmp);
+				bool dodither = dither();
+				store.Read("Dither", dodither);
+				setDither(dodither);
+				tmp = validBitDepth();
+				store.Read("bitDepth", tmp);
+				setValidBitDepth(tmp);
+				tmp = blockCount();
+				store.Read("NumBlocks", tmp);
+				setBlockCount(tmp);
+				tmp = blockBytes();
+				store.Read("BlockSize", tmp);
+				setBlockBytes(tmp);
+				store.CloseGroup();
+			}
+		}
+		void WaveOutSettings::Save(ConfigStorage &store)
+		{
+			store.CreateGroup("\\devices\\mme");
+			store.Write("DeviceID", deviceID_);
+			store.Write("PollSleep", pollSleep_);
+			store.Write("SamplesPerSec", samplesPerSec());
+			store.Write("Dither", dither());
+			store.Write("bitDepth", validBitDepth());
+			store.Write("NumBlocks", blockCount());
+			store.Write("BlockSize", blockBytes());
+			store.CloseGroup();
+		}
+
+		WaveOut::WaveOut(WaveOutSettings* settings)
+			: settings_(settings)
+			, _initialized(false)
 			, _running(false)
 			, _pCallback(0)
 		{
@@ -37,12 +107,11 @@ namespace psycle
 			_capPorts.resize(0);
 		}
 
-		void WaveOut::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
+		void WaveOut::Initialize(AUDIODRIVERWORKFN pCallback, void * context)
 		{
 			_callbackContext = context;
 			_pCallback = pCallback;
 			_running = false;
-			ReadConfig();
 			EnumerateCapturePorts();
 			_initialized = true;
 		}
@@ -91,8 +160,8 @@ namespace psycle
 			if(!_pCallback) return false;
 
 			WAVEFORMATPCMEX format;
-			PrepareWaveFormat(format,2,_samplesPerSec,_sampleBits, _sampleValidBits);
-			if(::waveOutOpen(&_handle, _deviceID, reinterpret_cast<LPWAVEFORMATEX>(&format), 0, 0, 0) != MMSYSERR_NOERROR)
+			PrepareWaveFormat(format,settings_->numChannels(),settings_->samplesPerSec(),settings_->bitDepth(), settings_->validBitDepth());
+			if(::waveOutOpen(&_handle, settings_->deviceID_, reinterpret_cast<LPWAVEFORMATEX>(&format), 0, 0, 0) != MMSYSERR_NOERROR)
 			{
 				Error("waveOutOpen() failed");
 				return false;
@@ -104,6 +173,8 @@ namespace psycle
 			m_lastPlayPos = 0;
 
 			// allocate blocks
+			unsigned int _blockSizeBytes = settings_->blockBytes();
+			unsigned int _numBlocks = settings_->blockCount();
 			for(CBlock *pBlock = _blocks; pBlock < _blocks + _numBlocks; pBlock++)
 			{
 				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSizeBytes);
@@ -132,7 +203,7 @@ namespace psycle
 			_event.ResetEvent();
 			::_beginthread(PollerThread, 0, this);
 			_running = true;
-			CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
+			Global::midi().ReSync();	// MIDI IMPLEMENTATION
 			return true;
 		}
 
@@ -142,6 +213,7 @@ namespace psycle
 			if(!_running) return true;
 			_stopPolling = true;
 			CSingleLock event(&_event, TRUE);
+			unsigned int _numBlocks = settings_->blockCount();
 			// Once we get here, the PollerThread should have stopped
 			if(::waveOutReset(_handle) != MMSYSERR_NOERROR)
 			{
@@ -276,8 +348,9 @@ namespace psycle
 			if (port._handle) return true;
 
 			WAVEFORMATPCMEX format;
-			PrepareWaveFormat(format,2,_samplesPerSec,_sampleBits, _sampleValidBits);
-
+			PrepareWaveFormat(format,settings_->numChannels(),settings_->samplesPerSec(),settings_->bitDepth(), settings_->validBitDepth());
+			unsigned int _blockSizeBytes = settings_->blockBytes();
+			unsigned int _numBlocks = settings_->blockCount();
 			if ((hr = waveInOpen(&port._handle,port._idx,reinterpret_cast<LPWAVEFORMATEX>(&format),NULL,NULL,CALLBACK_NULL)) != MMSYSERR_NOERROR )
 			{
 				Error(_T("waveInOpen() failed"));
@@ -289,7 +362,6 @@ namespace psycle
 				pBlock->Handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_SHARE, _blockSizeBytes);
 				pBlock->pData = (byte *)GlobalLock(pBlock->Handle);
 			}
-
 			// allocate block headers
 			for(CBlock *pBlock = port._blocks; pBlock < port._blocks + _numBlocks; pBlock++)
 			{
@@ -336,6 +408,7 @@ namespace psycle
 			universalis::cpu::exceptions::install_handler_in_thread();
 			WaveOut * pThis = (WaveOut*) pWaveOut;
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+			unsigned int _numBlocks = pThis->settings_->blockCount();
 			while(!pThis->_stopPolling)
 			{
 				CBlock *pb = pThis->_blocks + pThis->_currentBlock;
@@ -350,11 +423,11 @@ namespace psycle
 					}
 					pThis->DoBlocks();
 					++pb;
-					if(pb == pThis->_blocks + pThis->_numBlocks) pb = pThis->_blocks;
+					if(pb == pThis->_blocks + _numBlocks) pb = pThis->_blocks;
 					if ( pb->pHeader->dwFlags & WHDR_DONE)
 					{
 						underruns++;
-						if ( underruns > pThis->_numBlocks )
+						if ( underruns > _numBlocks )
 						{
 							// Audio dropout most likely happened
 							// (There's a possibility a dropout didn't happen, but the cpu usage
@@ -365,7 +438,7 @@ namespace psycle
 					}
 					pThis->_currentBlock = pb - pThis->_blocks;
 				}
-				::Sleep(pThis->_pollSleep);
+				::Sleep(pThis->settings_->pollSleep_);
 			}
 			_event.SetEvent();
 			::_endthread();
@@ -385,7 +458,7 @@ namespace psycle
 
 			WAVEHDR *ph = pb->pHeader;
 			ph->lpData = (char *)pb->pData;
-			ph->dwBufferLength = _blockSizeBytes;
+			ph->dwBufferLength = settings_->blockBytes();
 			ph->dwFlags = WHDR_DONE;
 			ph->dwLoops = 0;
 
@@ -396,7 +469,8 @@ namespace psycle
 			pb->Prepared = true;
 			waveInAddBuffer(port._handle, pb->pHeader, sizeof(WAVEHDR));
 			// Put the audio in our float buffers.
-			int numSamples = _blockSizeBytes / GetSampleSizeBytes();
+			int numSamples = settings_->blockFrames();
+			unsigned int _sampleValidBits = settings_->validBitDepth();
 			if (_sampleValidBits == 32) {
 				DeinterlaceFloat(reinterpret_cast<float*>(pb->pData), port.pleft,port.pright, numSamples);
 			}
@@ -421,6 +495,7 @@ namespace psycle
 			}
 			int *pBlock = (int *)pb->pData;
 			int numSamples = GetBufferSamples();
+			unsigned int _sampleValidBits = settings_->validBitDepth();
 			float * pFloatBlock = _pCallback(_callbackContext,numSamples);
 			if(_sampleValidBits == 32) {
 				dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pBlock), numSamples*2, 1.f/32768.f);
@@ -429,14 +504,14 @@ namespace psycle
 				Quantize24in32Bit(pFloatBlock, pBlock, numSamples);
 			}
 			else if (_sampleValidBits == 16) {
-				if(_dither) Quantize16WithDither(pFloatBlock, pBlock, numSamples);
+				if(settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock, numSamples);
 				else Quantize16(pFloatBlock, pBlock, numSamples);
 			}
 
 			_writePos += numSamples;
 
 			pb->pHeader->lpData = (char *)pb->pData;
-			pb->pHeader->dwBufferLength = _blockSizeBytes;
+			pb->pHeader->dwBufferLength = settings_->blockBytes();
 			pb->pHeader->dwFlags = 0;
 			pb->pHeader->dwLoops = 0;
 
@@ -452,97 +527,20 @@ namespace psycle
 			}
 		}
 
-		void WaveOut::ReadConfig()
-		{
-			// Default configuration
-			bool saveatend(false);
-			_samplesPerSec=44100;
-			_deviceID=0;
-			_numBlocks = 6;
-			_blockSizeBytes = 4096;
-			_pollSleep = 10;
-			_dither = 0;
-			_channelMode = stereo;
-			_sampleBits = 16;
-			_sampleValidBits = 16;
-
-			Registry reg;
-			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS) // settings in version 1.8
-			{
-				reg.CloseRootKey();
-				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
-				if(reg.OpenKey("configuration\\devices\\mme") != ERROR_SUCCESS)
-				{
-					reg.CloseRootKey();
-					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
-					if(reg.OpenKey("WaveOut") != ERROR_SUCCESS)
-					{
-						reg.CloseRootKey();
-						return;
-					}
-				}
-				saveatend=true;
-			}
-			bool configured(true);
-			configured &= ERROR_SUCCESS == reg.QueryValue("NumBlocks", _numBlocks);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BlockSize", _blockSizeBytes);
-			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceID", _deviceID);
-			configured &= ERROR_SUCCESS == reg.QueryValue("PollSleep", _pollSleep);
-			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
-			configured &= ERROR_SUCCESS == reg.QueryValue("bitDepth", _sampleValidBits);
-			if (configured) { if(_sampleValidBits == 24) {_sampleBits = 32; }
-				else {_sampleBits = _sampleValidBits; }
-			}
-			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
-			reg.CloseKey();
-			reg.CloseRootKey();
-			_configured = configured;
-			if(saveatend) WriteConfig();
-		}
-
-		void WaveOut::WriteConfig()
-		{
-			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
-			{
-				Error("Unable to write configuration to the registry");
-				return;
-			}
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS)
-			{
-				if (reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\mme") != ERROR_SUCCESS)
-				{
-					Error("Unable to write configuration to the registry");
-					return;
-				}
-			}
-			reg.SetValue("NumBlocks", _numBlocks);
-			reg.SetValue("BlockSize", _blockSizeBytes);
-			reg.SetValue("DeviceID", _deviceID);
-			reg.SetValue("PollSleep", _pollSleep);
-			reg.SetValue("Dither", _dither);
-			reg.SetValue("bitDepth", _sampleValidBits);
-			reg.SetValue("SamplesPerSec", _samplesPerSec);
-			reg.CloseKey();
-			reg.CloseRootKey();
-		}
 
 		void WaveOut::Configure()
 		{
-			if(!_configured) ReadConfig();
-
 			CWaveOutDialog dlg;
-			dlg.m_device = _deviceID;
-			dlg.m_sampleRate = _samplesPerSec;
-			dlg.m_bitDepth = _sampleValidBits;
-			dlg.m_dither = _dither;
-			dlg.m_bufNum = _numBlocks;
-			dlg.m_bufSamples = GetBufferSamples();
+			dlg.m_device = settings_->deviceID_;
+			dlg.m_sampleRate = settings_->samplesPerSec();
+			dlg.m_bitDepth = settings_->validBitDepth();
+			dlg.m_dither = settings_->dither();
+			dlg.m_bufNum = settings_->blockCount();
+			dlg.m_bufSamples = settings_->blockFrames();
 			dlg.waveout = this;
 
 			if(dlg.DoModal() != IDOK) return;
-
+			Enable(false);
 			WAVEFORMATPCMEX wf;
 			PrepareWaveFormat(wf, 2, dlg.m_sampleRate, (dlg.m_bitDepth==24)?32:dlg.m_bitDepth, dlg.m_bitDepth);
 			bool supported = _playEnums[dlg.m_device].IsFormatSupported(wf,false);
@@ -551,17 +549,13 @@ namespace psycle
 				return;
 			}
 
-			_deviceID = dlg.m_device;
-			_samplesPerSec = dlg.m_sampleRate;
-			_sampleValidBits = dlg.m_bitDepth;
-			if(_sampleValidBits == 24) _sampleBits = 32;
-			else _sampleBits = _sampleValidBits;
-			_dither = dlg.m_dither;
-			_numBlocks = dlg.m_bufNum;
-			_blockSizeBytes = dlg.m_bufSamples * GetSampleSizeBytes();
-
-			_configured = true;
-			WriteConfig();
+			settings_->deviceID_ = dlg.m_device;
+			settings_->setSamplesPerSec(dlg.m_sampleRate);
+			settings_->setValidBitDepth(dlg.m_bitDepth);
+			settings_->setDither(dlg.m_dither);
+			settings_->setBlockCount(dlg.m_bufNum);
+			settings_->setBlockFrames(dlg.m_bufSamples);
+			Enable(true);
 		}
 
 		std::uint32_t WaveOut::GetPlayPosInSamples()
@@ -586,7 +580,7 @@ namespace psycle
 				m_readPosWraps++;
 				if(m_lastPlayPos > _writePos) {
 					m_readPosWraps = 0;
-					CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
+					Global::midi().ReSync();	// MIDI IMPLEMENTATION
 				}
 			}
 			m_lastPlayPos = retval;

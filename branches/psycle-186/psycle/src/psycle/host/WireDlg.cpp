@@ -15,6 +15,8 @@
 #include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 
+int const ID_TIMER_WIRE = 2304;
+
 namespace psycle { namespace host {
 		int SCOPE_SPEC_SAMPLES = 1024;
 
@@ -116,7 +118,7 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnCancel()
 		{
-			KillTimer(2304+this_index);
+			KillTimer(ID_TIMER_WIRE);
 			_pSrcMachine->_pScopeBufferL = NULL;
 			_pSrcMachine->_pScopeBufferR = NULL;
 			_pSrcMachine->_scopeBufferIndex = 0;
@@ -239,7 +241,7 @@ namespace psycle { namespace host {
 		}
 		void CWireDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
-			if ( nIDEvent == 2304+this_index )
+			if ( nIDEvent == ID_TIMER_WIRE )
 			{
 				CClientDC dc(this);
 
@@ -823,8 +825,7 @@ namespace psycle { namespace host {
 				if (scope_peak_rate != m_sliderRate.GetPos())
 				{
 					scope_peak_rate = m_sliderRate.GetPos();
-					KillTimer(2304+this_index);
-					SetTimer(2304+this_index,scope_peak_rate,0);
+					SetTimer(ID_TIMER_WIRE,scope_peak_rate,0);
 				}
 				break;
 			case 1:
@@ -838,8 +839,7 @@ namespace psycle { namespace host {
 					if (scope_osc_rate != m_sliderRate.GetPos())
 					{
 						scope_osc_rate = m_sliderRate.GetPos();
-						KillTimer(2304+this_index);
-						SetTimer(2304+this_index,scope_osc_rate,0);
+						SetTimer(ID_TIMER_WIRE,scope_osc_rate,0);
 					}
 				}
 				break;
@@ -847,16 +847,14 @@ namespace psycle { namespace host {
 				if (scope_spec_rate != m_sliderRate.GetPos())
 				{
 					scope_spec_rate = m_sliderRate.GetPos();
-					KillTimer(2304+this_index);
-					SetTimer(2304+this_index,scope_spec_rate,0);
+					SetTimer(ID_TIMER_WIRE,scope_spec_rate,0);
 				}
 				break;
 			case 3:
 				if (scope_phase_rate != m_sliderRate.GetPos())
 				{
 					scope_phase_rate = m_sliderRate.GetPos();
-					KillTimer(2304+this_index);
-					SetTimer(2304+this_index,scope_phase_rate,0);
+					SetTimer(ID_TIMER_WIRE,scope_phase_rate,0);
 				}
 				break;
 			}
@@ -1037,7 +1035,7 @@ namespace psycle { namespace host {
 			{
 			case 0:
 				// vu
-				KillTimer(2304+this_index);
+				KillTimer(ID_TIMER_WIRE);
 
 				{
 					CFont* oldFont= bufDC.SelectObject(&font);
@@ -1096,11 +1094,11 @@ namespace psycle { namespace host {
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
 				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
 				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
-				SetTimer(2304+this_index,scope_peak_rate,0);
+				SetTimer(ID_TIMER_WIRE,scope_peak_rate,0);
 				break;
 			case 1:
 				// oscilloscope
-				KillTimer(2304+this_index);
+				KillTimer(ID_TIMER_WIRE);
 
 				{
 					// now draw our scope
@@ -1138,11 +1136,11 @@ namespace psycle { namespace host {
 				sprintf(buf,"Oscilloscope");
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
-				SetTimer(2304+this_index,scope_osc_rate,0);
+				SetTimer(ID_TIMER_WIRE,scope_osc_rate,0);
 				break;
 			case 2:
 				// spectrum analyzer
-				KillTimer(2304+this_index);
+				KillTimer(ID_TIMER_WIRE);
 				{
 					for (int i = 0; i < MAX_SCOPE_BANDS; i++)
 					{
@@ -1215,11 +1213,11 @@ namespace psycle { namespace host {
 				sprintf(buf,"Spectrum Analyzer");
 				_pSrcMachine->_pScopeBufferL = pSamplesL;
 				_pSrcMachine->_pScopeBufferR = pSamplesR;
-				SetTimer(2304+this_index,scope_osc_rate,0);
+				SetTimer(ID_TIMER_WIRE,scope_osc_rate,0);
 				break;
 			case 3:
 				// phase
-				KillTimer(2304+this_index);
+				KillTimer(ID_TIMER_WIRE);
 				{
 					CPen linepen(PS_SOLID, 8, 0x00303030);
 
@@ -1261,7 +1259,7 @@ namespace psycle { namespace host {
 				m_sliderMode.ShowWindow(SW_HIDE);
 				m_sliderRate.SetRange(10,100);
 				m_sliderRate.SetPos(scope_phase_rate);
-				SetTimer(2304+this_index,scope_phase_rate,0);
+				SetTimer(ID_TIMER_WIRE,scope_phase_rate,0);
 				break;
 			default:
 				sprintf(buf,"Scope Mode");

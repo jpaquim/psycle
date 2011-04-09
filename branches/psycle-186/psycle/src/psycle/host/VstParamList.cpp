@@ -176,9 +176,9 @@ namespace psycle { namespace host {
 				machine().SetParameter(m_parlist.GetCurSel(), nVal);
 				UpdateText(nVal);
 				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-				if(Global::configuration()._RecordTweaks)
+				if(Global::psycleconf().inputHandler()._RecordTweaks)
 				{
-					if(Global::configuration()._RecordMouseTweaksSmooth)
+					if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
 						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, m_parlist.GetCurSel(), nVal);
 					else
 						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, m_parlist.GetCurSel(), nVal);

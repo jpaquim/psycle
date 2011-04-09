@@ -6,10 +6,11 @@
 #include "SkinDlg.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInputDlg.hpp"
-#include "Configuration.hpp"
 #include "KeyConfigDlg.hpp"
 
 namespace psycle { namespace host {
+
+		class PsycleConfig;
 
 		/// config window.
 		class CConfigDlg : public CPropertySheet
@@ -18,28 +19,24 @@ namespace psycle { namespace host {
 		public:
 			CConfigDlg(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 			CConfigDlg(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-		// Attributes
+			virtual ~CConfigDlg();
+		// Operations
 		public:
+			void AddControlPages();
+		// Overrides
+		public:
+			virtual INT_PTR DoModal();
+		// Implementation
+		protected:
 			CDirectoryDlg _dirDlg;
 			CSkinDlg _skinDlg;
 			COutputDlg _outputDlg;
 			CMidiInputDlg _midiDlg;
 			CKeyConfigDlg _keyDlg;
-		// Operations
-		public:
-			void Init(Configuration* pConfig);
-			void AddControlPages();
-		// Overrides
-			public:
-			virtual INT_PTR DoModal();
-		// Implementation
-		public:
-			virtual ~CConfigDlg();
-			// Generated message map functions
-		protected:
-			Configuration* _pConfig;
+
+			PsycleConfig* _pConfig;
+
 			DECLARE_MESSAGE_MAP()
 		};
-
 	}   // namespace
 }   // namespace

@@ -6,10 +6,10 @@
  */
 
 #include "XMSamplerUIInst.hpp"
+#include "PsycleConfig.hpp"
 
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
-#include "Configuration.hpp"
 
 #include "Player.hpp"
 #include "XMInstrument.hpp"
@@ -954,7 +954,7 @@ void XMSamplerUIInst::OnBnClickedLoadins()
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	std::string tmpstr = Global::pConfig->GetCurrentInstrumentDir();
+	std::string tmpstr = Global::psycleconf().GetCurrentInstrumentDir();
 	ofn.lpstrInitialDir = tmpstr.c_str();
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 	// Display the Open dialog box. 

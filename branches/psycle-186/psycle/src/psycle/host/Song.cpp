@@ -36,6 +36,7 @@ namespace psycle
 	namespace host
 	{
 		extern CPsycleApp theApp;
+		int Song::defaultPatLines = 64;
 
 		/// the riff WAVE/fmt chunk.
 		class WavHeader
@@ -61,6 +62,10 @@ namespace psycle
 			float * pars;
 		};
 
+		void Song::SetDefaultPatLines(int lines)
+		{
+			defaultPatLines = lines;
+		}
 		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
 			Machine* pMachine(0);
@@ -470,8 +475,7 @@ namespace psycle
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
 			{
 				// All pattern reset
-				if(Global::pConfig) patternLines[i]=Global::pConfig->defaultPatLines;
-				else patternLines[i]=64;
+				patternLines[i]=defaultPatLines;
 				std::sprintf(patternName[i], "Untitled"); 
 			}
 			_trackArmedCount = 0;
@@ -525,21 +529,14 @@ namespace psycle
 			_saved=false;
 			fileName ="Untitled.psy";
 #if !defined WINAMP_PLUGIN
-			if((CMainFrame *)theApp.m_pMainWnd)
-			{
-				CreateMachine
-					(
-						MACH_MASTER, 
-						(viewSize.x - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width) / 2, 
-						(viewSize.y - static_cast<CMainFrame*>(theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height) / 2, 
-						0,
-						MASTER_INDEX
-					);
-			}
-			else
-			{
-				CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
-			}
+			CreateMachine
+				(
+					MACH_MASTER, 
+					(viewSize.x - Global::psycleconf().macView().MachineCoords.sMaster.width) / 2, 
+					(viewSize.y - Global::psycleconf().macView().MachineCoords.sMaster.height) / 2, 
+					0,
+					MASTER_INDEX
+				);
 #else
 			CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
 #endif //!defined WINAMP_PLUGIN
@@ -1947,20 +1944,40 @@ namespace psycle
 						}
 
 #if !defined WINAMP_PLUGIN
+						///TODO: Move this code to the ChildView, after loading.
+						SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
 						switch (pMac[i]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+							if ( x > viewSize.x-mcoords.sGenerator.width ) 
+							{
+								x = viewSize.x-mcoords.sGenerator.width;
+							}
+							if ( y > viewSize.y-mcoords.sGenerator.height ) 
+							{
+								y = viewSize.y-mcoords.sGenerator.height;
+							}
 							break;
 						case MACHMODE_FX:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+							if ( x > viewSize.x-mcoords.sEffect.width )
+							{
+								x = viewSize.x-mcoords.sEffect.width;
+							}
+							if ( y > viewSize.y-mcoords.sEffect.height ) 
+							{
+								y = viewSize.y-mcoords.sEffect.height;
+							}
 							break;
 
 						case MACHMODE_MASTER:
-							if ( x > viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width ) x = viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-							if ( y > viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height ) y = viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+							if ( x > viewSize.x-mcoords.sMaster.width ) 
+							{
+								x = viewSize.x-mcoords.sMaster.width;
+							}
+							if ( y > viewSize.y-mcoords.sMaster.height )
+							{
+								y = viewSize.y-mcoords.sMaster.height;
+							}
 							break;
 						}
 #endif //!defined WINAMP_PLUGIN
@@ -2711,7 +2728,7 @@ namespace psycle
 #endif //!defined WINAMP_PLUGIN
 			///\todo: Wrong song dir causes "machine cloning failed"! 
 			///\todo: the process should be chagned and save the data in memory.
-			CString filepath = Global::pConfig->GetSongDir().c_str();
+			CString filepath = Global::psycleconf().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;
@@ -2789,16 +2806,18 @@ namespace psycle
 			// randomize the dst's position
 
 #if !defined WINAMP_PLUGIN
+			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
+
 			int xs,ys,x,y;
 			if (src >= MAX_BUSES)
 			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+				xs = mcoords.sEffect.width;
+				ys = mcoords.sEffect.height;
 			}
 			else 
 			{
-				xs = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				ys = ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+				xs = mcoords.sGenerator.width;
+				ys = mcoords.sGenerator.height;
 			}
 			x=_pMachine[dst]->_x+32;
 			y=_pMachine[dst]->_y+ys+8;
@@ -2901,7 +2920,7 @@ namespace psycle
 
 			// save our file
 
-			CString filepath = Global::pConfig->GetSongDir().c_str();
+			CString filepath = Global::psycleconf().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;

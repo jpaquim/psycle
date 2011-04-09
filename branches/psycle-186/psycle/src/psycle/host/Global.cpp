@@ -5,6 +5,8 @@
 #include "Configuration.hpp"
 #if !defined WINAMP_PLUGIN
 	#include "InputHandler.hpp"
+	#include "PsycleConfig.hpp"
+	#include "MidiInput.hpp"
 #endif //!defined WINAMP_PLUGIN
 
 #include "Song.hpp"
@@ -12,10 +14,11 @@
 #include "VstHost24.hpp"
 #include <psycle/helpers/dsp.hpp>
 
-#define _GetProc(fun, type, name)  {                                                        \
-                                        fun = (type) GetProcAddress(hDInputDLL,name);       \
-                                        if (fun == NULL) { return false; }                  \
-                                    }                                                       \
+#define _GetProc(fun, type, name) \
+{                                                  \
+    fun = (type) GetProcAddress(hDInputDLL,name);  \
+    if (fun == NULL) { return false; }             \
+}
 
 
 namespace portaudio
@@ -49,45 +52,55 @@ namespace psycle
 {
 	namespace host
 	{
-		Song * Global::_pSong(0);
-		Player * Global::pPlayer(0);
-		helpers::dsp::resampler * Global::pResampler(0);
 		Configuration * Global::pConfig(0);
 #if !defined WINAMP_PLUGIN
 		InputHandler * Global::pInputHandler(0);
 #endif //!defined WINAMP_PLUGIN
-
+		Song * Global::_pSong(0);
+		helpers::dsp::resampler * Global::pResampler(0);
+#if !defined WINAMP_PLUGIN
+		CMidiInput * Global::pMidiInput(0);
+#endif //!defined WINAMP_PLUGIN
+		Player * Global::pPlayer(0);
 		vst::host *Global::pVstHost(0);
+
 		FAvSetMmThreadCharacteristics    Global::pAvSetMmThreadCharacteristics(NULL);
 		FAvRevertMmThreadCharacteristics Global::pAvRevertMmThreadCharacteristics(NULL);
-
 
 		Global::Global()
 		{
 			if (Is_Vista_or_Later()) {
 				portaudio::SetupAVRT();
 			}
-			_pSong = new Song;
-			pPlayer = new Player;
-			pConfig = new Configuration;
-			pResampler = new helpers::dsp::cubic_resampler;
+#if !defined WINAMP_PLUGIN
+			pConfig = new PsycleConfig();
+			pInputHandler = new InputHandler();
+#else
+			pConfig = new Configuration();
+#endif //!defined WINAMP_PLUGIN
+			_pSong = new Song();
+			pResampler = new helpers::dsp::cubic_resampler();
 			pResampler->quality(helpers::dsp::resampler::quality::linear);
 #if !defined WINAMP_PLUGIN
-			pInputHandler = new InputHandler;
+			pMidiInput = new CMidiInput();
 #endif //!defined WINAMP_PLUGIN
-			pVstHost = new vst::host;
+			pPlayer = new Player();
+			pVstHost = new vst::host();
 		}
 
 		Global::~Global()
 		{
-			delete _pSong; _pSong = 0;
+			delete pVstHost; pVstHost = 0;
 			delete pPlayer; pPlayer = 0;
+#if !defined WINAMP_PLUGIN
+			delete pMidiInput; pMidiInput = 0;
+#endif //!defined WINAMP_PLUGIN
 			delete pResampler; pResampler = 0;
-			delete pConfig; pConfig = 0;
+			delete _pSong; _pSong = 0;
 #if !defined WINAMP_PLUGIN
 			delete pInputHandler; pInputHandler = 0;
 #endif //!defined WINAMP_PLUGIN
-			delete pVstHost; pVstHost = 0;
+			delete pConfig; pConfig = 0;
 			portaudio::CloseAVRT();
 		}
 

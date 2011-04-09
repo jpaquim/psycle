@@ -33,7 +33,6 @@ namespace psycle
 			_recording = false;
 			_clipboardrecording = false;
 			_isWorking = false;
-			Tweaker = false;
 			_samplesRemaining=0;
 			sampleCount=0;
 			_lineCounter=0;
@@ -50,7 +49,7 @@ namespace psycle
 				prevMachines[i]=255;
 				prevInstrument[i]=255;
 			}
-			universalis::os::aligned_memory_alloc(16, _pBuffer, MAX_DELAY_BUFFER);
+			universalis::os::aligned_memory_alloc(16, _pBuffer, MAX_SAMPLES_WORKFN);
 			start_threads();
 		}
 
@@ -845,7 +844,7 @@ void Player::stop_threads() {
 
 #if !defined WINAMP_PLUGIN
 					// Inject Midi input data
-					CMidiInput::Instance()->InjectMIDI( amount );
+					Global::midi().InjectMIDI( amount );
 					if(threads_.empty()){ // single-threaded, recursive processing
 						pSong->_pMachine[MASTER_INDEX]->recursive_process(amount, measure_cpu_usage_);
 					} else { // multi-threaded scheduling

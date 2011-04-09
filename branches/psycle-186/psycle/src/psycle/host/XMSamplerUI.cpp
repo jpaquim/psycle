@@ -9,7 +9,6 @@
 
 namespace psycle { namespace host {
 
-extern CPsycleApp theApp;
 
 IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)
 

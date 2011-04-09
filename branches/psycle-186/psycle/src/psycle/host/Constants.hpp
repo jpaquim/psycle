@@ -53,7 +53,7 @@ namespace psycle
 		#define MAX_PATTERN_BUFFER_LEN	MULTIPLY2 * MAX_PATTERNS	
 
 		/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
-		#define MAX_DELAY_BUFFER		65536
+		#define MAX_SAMPLES_WORKFN		65536
 		/// Sampler
 		#define OVERLAPTIME				128
 		/// Maximum size of the audio block to be passed to the Work() function.

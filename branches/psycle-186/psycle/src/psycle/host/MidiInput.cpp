@@ -5,7 +5,7 @@
 #include "MidiInput.hpp"
 
 #include "InputHandler.hpp"
-#include "Configuration.hpp"
+#include "PsycleConfig.hpp"
 #include "ChildView.hpp"
 #include "MainFrm.hpp"
 
@@ -25,8 +25,6 @@ namespace psycle
 	{
 		extern CPsycleApp theApp;
 
-		CMidiInput * CMidiInput::s_Instance(0);	// the current instance
-
 		CMidiInput::CMidiInput() : 
 			m_midiInHandlesTried( false ),
 			m_bufWriteIdx( 0 ),
@@ -39,11 +37,6 @@ namespace psycle
 			m_synced( false ),
 			m_syncing( false )
 		{
-			assert(!Instance());
-
-			// assign instance
-			s_Instance = this;
-
 			// clear down buffers
 			std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
 			std::memset( m_channelSetting, -1, sizeof( int ) * MAX_MIDI_CHANNELS );
@@ -83,9 +76,6 @@ namespace psycle
 			{
 				Close();
 			}
-
-			// clear instance
-			s_Instance = NULL;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +157,7 @@ Exit:
 				m_midiInHandlesTried = true;
 
 				// messagebox to the user
-				AfxMessageBox( messageText, MB_ICONEXCLAMATION+MB_OK );
+				AfxMessageBox( messageText, MB_ICONEXCLAMATION | MB_OK );
 			}
 			m_stats.channelMapUpdate = true;
 			m_synced = false;
@@ -287,32 +277,15 @@ Exit:
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// PopulateListbox
 		//
-		// DESCRIPTION	  : Fill a listbox with a list of the available input devices
-		// PARAMETERS     : CComboBox * listbox - pointer to the listbox to fill
-		// RETURNS		  : std::uint32_t - amount of devices found
-
-		std::uint32_t CMidiInput::PopulateListbox( CComboBox * listbox, bool issync )
+		// DESCRIPTION	  : return the name of a device, via its index
+		// PARAMETERS     : idx - the position to get its description
+		// RETURNS		  : std::string - name of the device
+		void CMidiInput::GetDeviceDesc( int idx, std::string& result)
 		{
 			MIDIINCAPS mic;
-			std::uint32_t numDevs;
-
-			// clear listbox
-			listbox->ResetContent();
-
-			// always add the null dev
-			listbox->AddString( issync?"Same as MIDI Input Device":"None" );
-
-			// get the number of MIDI input devices
-			numDevs = midiInGetNumDevs();
-
-			// add each to the listbox
-			for( std::uint32_t idx = 0; idx < numDevs; idx++ )
-			{
-				midiInGetDevCaps( idx, &mic, sizeof( mic ) );
-				listbox->AddString( mic.szPname );
-			}
-
-			return numDevs; 
+			assert(idx < GetNumDevices());
+			midiInGetDevCaps( idx, &mic, sizeof( mic ) );
+			result = mic.szPname;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,26 +409,26 @@ Exit:
 
 		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
-			CMidiInput * pMidiInput = CMidiInput::Instance();
+			CMidiInput& midiInput = Global::midi();
 
 			// do nothing if there is no reference object or the object is not active
-			if( !pMidiInput || (!pMidiInput->GetHandle( DRIVER_MIDI ) && !pMidiInput->GetHandle( DRIVER_SYNC )))
+			if((!midiInput.GetHandle( DRIVER_MIDI ) && !midiInput.GetHandle( DRIVER_SYNC )))
 			{
 				return;
 			}
 
 			// strobe the master input
-			pMidiInput->GetStatsPtr()->flags |= FSTAT_MIDI_INPUT;
+			midiInput.GetStatsPtr()->flags |= FSTAT_MIDI_INPUT;
 
 			// link to reference object
-			switch( pMidiInput->m_midiMode )
+			switch( midiInput.m_midiMode )
 			{
 			case MODE_REALTIME:
-				pMidiInput->fnMidiCallback_Inject( handle, uMsg, dwInstance, dwParam1, dwParam2 );
+				midiInput.fnMidiCallback_Inject( handle, uMsg, dwInstance, dwParam1, dwParam2 );
 				break;
 
 			case MODE_STEP:
-				pMidiInput->fnMidiCallback_Step( handle, uMsg, dwInstance, dwParam1, dwParam2 );
+				midiInput.fnMidiCallback_Step( handle, uMsg, dwInstance, dwParam1, dwParam2 );
 				break;
 
 			default:
@@ -505,21 +478,21 @@ Exit:
 					int statusLN = (status & 0x0F);
 					int channel = statusLN;
 
-					switch(Global::configuration().midi().gen_select_type())
+					switch(Global::psycleconf().midi().gen_select_with())
 					{
-					case Configuration::midi_type::MS_USE_SELECTED:
+					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetGenMap( channel, Global::song().seqBus );
 						break;
-					case Configuration::midi_type::MS_MIDI_CHAN:
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetGenMap( channel, channel );
 						break;
 					}
-					switch(Global::configuration().midi().inst_select_type())
+					switch(Global::psycleconf().midi().inst_select_with())
 					{
-					case Configuration::midi_type::MS_USE_SELECTED:
+					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetInstMap( channel, Global::song().auxcolSelected );
 						break;
-					case Configuration::midi_type::MS_MIDI_CHAN:
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetInstMap( channel, channel );
 						break;
 					}
@@ -580,7 +553,7 @@ Exit:
 						case 0x0C:
 						{
 							// program change -> map generator/effect to channel
-							if(Global::configuration().midi().gen_select_type() == Configuration::midi_type::MS_PROGRAM)
+							if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								// machine active?
 								if( program < MAX_MACHINES && Global::_pSong->_pMachine[ program ] )
@@ -595,7 +568,7 @@ Exit:
 								}
 								return;
 							}
-							else if(Global::configuration().midi().inst_select_type() == Configuration::midi_type::MS_PROGRAM)
+							else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								SetInstMap( channel, program );
 								return;
@@ -684,7 +657,7 @@ Exit:
 								case 0:
 								{
 									// banks select -> map generator to channel
-									if(Global::configuration().midi().gen_select_type() == Configuration::midi_type::MS_BANK)
+									if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										// machine active?
 										if( program < MAX_MACHINES && Global::_pSong->_pMachine[ data2 ] )
@@ -700,7 +673,7 @@ Exit:
 										return;
 									}
 									// banks select -> map instrument to channel
-									else if(Global::configuration().midi().inst_select_type() == Configuration::midi_type::MS_BANK)
+									else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										SetInstMap( channel, data2 );
 										return;
@@ -843,7 +816,7 @@ Exit:
 										else
 											parameter = data2;
 									}
-									else if (Global::configuration().midi().raw())
+									else if (Global::psycleconf().midi().raw())
 									{
 										note = notecommands::midicc;
 										inst  = (status&0xF0) | (inst&0x0F);
@@ -856,32 +829,32 @@ Exit:
 										int i;
 										for(i =0 ; i < 16 ; ++i)
 										{
-											if(Global::pConfig->midi().group(i).record() && (Global::pConfig->midi().group(i).message() == data1 ))
+											if(Global::psycleconf().midi().group(i).record() && (Global::psycleconf().midi().group(i).message() == data1 ))
 											{
-												int const value(Global::pConfig->midi().group(i).from() + (Global::pConfig->midi().group(i).to() - Global::pConfig->midi().group(i).from()) * data2 / 127);
-												switch(Global::pConfig->midi().group(i).type())
+												int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
+												switch(Global::psycleconf().midi().group(i).type())
 												{
 													case 0:
 														note = notecommands::empty;
 														inst = 255;
-														cmd = Global::pConfig->midi().group(i).command();
+														cmd = Global::psycleconf().midi().group(i).command();
 														parameter = value;
 														break;
 													case 1:
 														note = notecommands::tweak;
-														inst = Global::pConfig->midi().group(i).command();
+														inst = Global::psycleconf().midi().group(i).command();
 														cmd = (value>>8)&255;
 														parameter = value&255;
 														break;
 													case 2:
 														note = notecommands::tweakslide;
-														inst = Global::pConfig->midi().group(i).command();
+														inst = Global::psycleconf().midi().group(i).command();
 														cmd = (value>>8)&255;
 														parameter = value&255;
 														break;
 													case 3:
 														note = notecommands::midicc;
-														inst = Global::pConfig->midi().group(i).command() | (inst&0x0F);
+														inst = Global::psycleconf().midi().group(i).command() | (inst&0x0F);
 														cmd = data1;
 														parameter = data2;
 														break;
@@ -1001,21 +974,21 @@ Exit:
 					int statusLN = (status & 0x0F);
 					int channel = statusLN;
 
-					switch(Global::configuration().midi().gen_select_type())
+					switch(Global::psycleconf().midi().gen_select_with())
 					{
-					case Configuration::midi_type::MS_USE_SELECTED:
+					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetGenMap( channel, Global::song().seqBus );
 						break;
-					case Configuration::midi_type::MS_MIDI_CHAN:
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetGenMap( channel, channel );
 						break;
 					}
-					switch(Global::configuration().midi().inst_select_type())
+					switch(Global::psycleconf().midi().inst_select_with())
 					{
-					case Configuration::midi_type::MS_USE_SELECTED:
+					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetInstMap( channel, Global::song().auxcolSelected );
 						break;
-					case Configuration::midi_type::MS_MIDI_CHAN:
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetInstMap( channel, channel );
 						break;
 					}
@@ -1054,7 +1027,7 @@ Exit:
 								case 0:
 								{
 									// banks select -> map generator to channel
-									if(Global::configuration().midi().gen_select_type() == Configuration::midi_type::MS_BANK)
+									if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										// machine active?
 										if( data2 < MAX_MACHINES && Global::_pSong->_pMachine[ data2 ] )
@@ -1070,7 +1043,7 @@ Exit:
 										return;
 									}
 									// banks select -> map instrument to channel
-									else if(Global::configuration().midi().inst_select_type() == Configuration::midi_type::MS_BANK)
+									else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										SetInstMap( channel, data2 );
 										return;
@@ -1083,7 +1056,7 @@ Exit:
 						case 0x0C:
 						{
 							// program change -> map generator/effect to channel
-							if(Global::configuration().midi().gen_select_type() == Configuration::midi_type::MS_PROGRAM)
+							if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								// machine active?
 								if( data1 < MAX_MACHINES && Global::_pSong->_pMachine[ data1 ] )
@@ -1098,7 +1071,7 @@ Exit:
 								}
 								return;
 							}
-							else if(Global::configuration().midi().inst_select_type() == Configuration::midi_type::MS_PROGRAM)
+							else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								SetInstMap( channel, data1 );
 								return;
@@ -1107,9 +1080,9 @@ Exit:
 						default:break;
 					}
 
-					if (Global::pConfig->_RecordTweaks)
+					if (Global::psycleconf().inputHandler()._RecordTweaks)
 					{
-						if (Global::pConfig->midi().raw() && status != 0xFE )
+						if (Global::psycleconf().midi().raw() && status != 0xFE )
 						{
 							frame.m_wndView.MidiPatternMidiCommand(status,(data1 << 8) | data2);
 						}
@@ -1121,19 +1094,19 @@ Exit:
 								// data 2 contains the info
 								for(int i(0) ; i < 16 ; ++i)
 								{
-									if(Global::pConfig->midi().group(i).record() && (Global::pConfig->midi().group(i).message() == data1 ))
+									if(Global::psycleconf().midi().group(i).record() && (Global::psycleconf().midi().group(i).message() == data1 ))
 									{
-										int const value(Global::pConfig->midi().group(i).from() + (Global::pConfig->midi().group(i).to() - Global::pConfig->midi().group(i).from()) * data2 / 127);
-										switch(Global::pConfig->midi().group(i).type())
+										int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
+										switch(Global::psycleconf().midi().group(i).type())
 										{
 											case 0:
-												frame.m_wndView.MidiPatternCommand(Global::pConfig->midi().group(i).command(), value);
+												frame.m_wndView.MidiPatternCommand(Global::psycleconf().midi().group(i).command(), value);
 												break;
 											case 1:
-												frame.m_wndView.MidiPatternTweak(Global::pConfig->midi().group(i).command(), value);
+												frame.m_wndView.MidiPatternTweak(Global::psycleconf().midi().group(i).command(), value);
 												break;
 											case 2:
-												frame.m_wndView.MidiPatternTweakSlide(Global::pConfig->midi().group(i).command(), value);
+												frame.m_wndView.MidiPatternTweakSlide(Global::psycleconf().midi().group(i).command(), value);
 												break;
 											case 3:
 												frame.m_wndView.MidiPatternMidiCommand(status, (data1 << 8) | data2);
@@ -1147,21 +1120,21 @@ Exit:
 							case 0x0E:
 								// pitch wheel
 								// data 2 contains the info
-								if (Global::pConfig->_RecordTweaks)
+								if (Global::psycleconf().inputHandler()._RecordTweaks)
 								{
-									if (Global::pConfig->midi().pitch().record())
+									if (Global::psycleconf().midi().pitch().record())
 									{
-										int const value(Global::pConfig->midi().pitch().from() + (Global::pConfig->midi().pitch().to() - Global::pConfig->midi().pitch().from()) * data / 0x3fff);
-										switch (Global::pConfig->midi().pitch().type())
+										int const value(Global::psycleconf().midi().pitch().from() + (Global::psycleconf().midi().pitch().to() - Global::psycleconf().midi().pitch().from()) * data / 0x3fff);
+										switch (Global::psycleconf().midi().pitch().type())
 										{
 										case 0:
-											frame.m_wndView.MidiPatternCommand(Global::pConfig->midi().pitch().command(), value);
+											frame.m_wndView.MidiPatternCommand(Global::psycleconf().midi().pitch().command(), value);
 											break;
 										case 1:
-											frame.m_wndView.MidiPatternTweak(Global::pConfig->midi().pitch().command(), value);
+											frame.m_wndView.MidiPatternTweak(Global::psycleconf().midi().pitch().command(), value);
 											break;
 										case 2:
-											frame.m_wndView.MidiPatternTweakSlide(Global::pConfig->midi().pitch().command(), value);
+											frame.m_wndView.MidiPatternTweakSlide(Global::psycleconf().midi().pitch().command(), value);
 											break;
 										case 3:
 											frame.m_wndView.MidiPatternMidiCommand(status | (inst&0x0F), (data1 << 8) | data2);

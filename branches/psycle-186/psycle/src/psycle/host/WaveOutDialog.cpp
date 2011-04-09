@@ -2,8 +2,6 @@
 ///\brief implementation file for psycle::host::CWaveOutDialog.
 
 #include "WaveOutDialog.hpp"
-#include "Registry.hpp"
-#include "Configuration.hpp"
 #include "WaveOut.hpp"
 
 namespace psycle { namespace host {

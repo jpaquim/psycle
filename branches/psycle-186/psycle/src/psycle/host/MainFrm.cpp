@@ -14,7 +14,6 @@
 #include "XMSamplerUI.hpp"
 #include "FrameMachine.hpp"
 #include "VstEffectWnd.hpp"
-#include "FrameMixerMachine.hpp"
 #include "WaveInMacDlg.hpp"
 #include "WireDlg.hpp"
 #include "WaveEdFrame.hpp"
@@ -56,12 +55,11 @@ namespace psycle { namespace host {
 			Global::pInputHandler->SetMainFrame(this);
 			_pSong = 0;
 			pGearRackDialog = 0;
-//			Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, 0); // GDI+ stuff
+			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
 		}
 
 		CMainFrame::~CMainFrame()
 		{
-//			Gdiplus::GdiplusShutdown(gdiplusToken); // GDI+ stuff
 			Global::pInputHandler->SetMainFrame(NULL);
 			if(pGearRackDialog) pGearRackDialog->OnCancel();
 		}
@@ -144,6 +142,7 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_INDICATOR_OCTAVE, OnUpdateIndicatorOctave)
 //statusbar end
 //menu start
+			ON_COMMAND(ID_APP_EXIT, OnClose)
 			ON_COMMAND(ID_VIEW_SONGBAR, OnViewSongbar)
 			ON_COMMAND(ID_VIEW_MACHINEBAR, OnViewMachinebar)
 			ON_COMMAND(ID_VIEW_SEQUENCERBAR, OnViewSequencerbar)
@@ -157,14 +156,13 @@ namespace psycle { namespace host {
 
 		int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{
-			m_wndView.pParentFrame = this;
-			
-			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
-			
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 				return -1;
 
+			_pSong=Global::_pSong;
+
 			// create a view to occupy the client area of the frame
+			m_wndView.pParentFrame = this;
 			if (!m_wndView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
 			{
@@ -226,7 +224,9 @@ namespace psycle { namespace host {
 
 			DragAcceptFiles(true);
 
-			Global::pConfig->CreateFonts();
+			HMENU hFileMenu = GetSubMenu(::GetMenu(m_hWnd), 0);
+			m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 11);
+
 
 			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_GRIPPER);
 
@@ -250,6 +250,8 @@ namespace psycle { namespace host {
 			// Finally initializing timer
 			// Show Machine view and init 
 			PsybarsUpdate();
+			m_wndView.RecalcMetrics();
+			m_wndView.RecalculateColourGrid();
 			m_wndView.OnMachineview();
 			m_wndView.InitTimer();
 		//	m_wndView.Repaint();
@@ -280,6 +282,24 @@ namespace psycle { namespace host {
 			CFrameWnd::Dump(dc);
 		}
 	#endif
+
+		BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+		{
+			// let the view have first crack at the command
+			if (m_wndView.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+				return TRUE;
+			
+			// otherwise, do default handling
+			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
+		}
+
+		void CMainFrame::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized) 
+		{
+			CFrameWnd::OnActivate(nState, pWndOther, bMinimized);
+			if (((nState == WA_ACTIVE) || (nState == WA_CLICKACTIVE)) && (bMinimized == FALSE))
+			{
+			}
+		}
 
 		void CMainFrame::OnDropFiles(HDROP hDropInfo)
 		{
@@ -319,51 +339,11 @@ namespace psycle { namespace host {
 
 		void CMainFrame::OnSetFocus(CWnd* pOldWnd)
 		{
+			CFrameWnd::OnSetFocus(pOldWnd);
 			// forward focus to the view window
 			m_wndView.Repaint();
 			m_wndView.SetFocus();
 			m_wndView.EnableSound();
-		}
-
-		BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
-		{
-			// let the view have first crack at the command
-			if (m_wndView.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-				return TRUE;
-			
-			// otherwise, do default handling
-			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-		}
-
-		void CMainFrame::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized) 
-		{
-			CFrameWnd::OnActivate(nState, pWndOther, bMinimized);
-			if (((nState == WA_ACTIVE) || (nState == WA_CLICKACTIVE)) && (bMinimized == FALSE))
-			{
-			}
-		}
-
-		void CMainFrame::OnClose() 
-		{
-			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
-			{
-				CloseAllMacGuis();
-				m_wndView._outputActive = false;
-				Global::pPlayer->Stop();
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Close();
-
-				//Recent File List;
-				((CPsycleApp*)AfxGetApp())->SaveRecent(this);
-
-				CString filepath = Global::pConfig->GetSongDir().c_str();
-				filepath += "\\autosave.psy";
-				DeleteFile(filepath);
-				SaveBarState(_T("General"));
-
-				CFrameWnd::OnClose();
-			}
 		}
 
 		void CMainFrame::OnDestroy() 
@@ -386,7 +366,7 @@ namespace psycle { namespace host {
 
 		void CMainFrame::CheckForAutosave()
 		{
-			CString filepath = Global::pConfig->GetSongDir().c_str();
+			CString filepath = Global::psycleconf().GetSongDir().c_str();
 			filepath += "\\autosave.psy";
 
 			OldPsyFile file;
@@ -400,10 +380,6 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CMainFrame::ClosePsycle()
-		{
-			OnClose();
-		}
 
 		void CMainFrame::StatusBarText(std::string txt)
 		{
@@ -421,7 +397,7 @@ namespace psycle { namespace host {
 			m_songBar.m_octavecombo.SetCurSel(_pSong->currentOctave);
 			
 			UpdateComboGen();
-			UpdateMasterValue(((Master*)Global::_pSong->_pMachine[MASTER_INDEX])->_outDry);
+			UpdateMasterValue(((Master*)_pSong->_pMachine[MASTER_INDEX])->_outDry);
 			
 		}
 
@@ -435,6 +411,28 @@ namespace psycle { namespace host {
 		////////////////// Some Menu Commands plus ShowMachineGui
 		//////////////////
 
+		void CMainFrame::OnClose() 
+		{
+			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
+			{
+				CloseAllMacGuis();
+				m_wndView._outputActive = false;
+				Global::pPlayer->Stop();
+				Global::pConfig->_pOutputDriver->Enable(false);
+				// MIDI IMPLEMENTATION
+				Global::midi().Close();
+
+				//Psycle manages its own list for recent files
+				//((CPsycleApp*)AfxGetApp())->SaveRecent(this);
+
+				CString filepath = Global::psycleconf().GetSongDir().c_str();
+				filepath += "\\autosave.psy";
+				DeleteFile(filepath);
+				SaveBarState(_T("General"));
+
+				CFrameWnd::OnClose();
+			}
+		}
 
 		void CMainFrame::OnViewSongbar() 
 		{
@@ -511,18 +509,18 @@ namespace psycle { namespace host {
 			m_wndInst.SetActiveWindow();
 		}
 
-		void CMainFrame::UpdateEnvInfo()
-		{
-			m_wndInfo.UpdateInfo();
-		}
-
-
 		void CMainFrame::OnPsyhelp() 
 		{
 			CString helppath(Global::pConfig->appPath().c_str());
 			helppath +=  "Docs\\psycle.chm";
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);
 		}
+
+		void CMainFrame::UpdateEnvInfo()
+		{
+			m_wndInfo.UpdateInfo();
+		}
+
 
 		void CMainFrame::ShowMachineGui(int tmac, CPoint point)
 		{
@@ -616,54 +614,33 @@ namespace psycle { namespace host {
 						break;
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
-						{
-							m_pWndMac[tmac] = new CFrameMachine(tmac);
-							((CFrameMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
-							((CFrameMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-							((CFrameMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
-
-							m_pWndMac[tmac]->LoadFrame(
-								IDR_MACHINEFRAME, 
-								WS_POPUPWINDOW | WS_CAPTION,
-								this);
-							((CFrameMachine*)m_pWndMac[tmac])->Generate();
-							((CFrameMachine*)m_pWndMac[tmac])->SelectMachine(ma);
-							char winname[32];
-							sprintf(winname,"%.2X : %s",((CFrameMachine*)m_pWndMac[tmac])->MachineIndex
-													,ma->_editName);
-							((CFrameMachine*)m_pWndMac[tmac])->SetWindowText(winname);
-							isguiopen[tmac] = true;
-							CenterWindowOnPoint(m_pWndMac[tmac], point);
-						}
-						break;
 					case MACH_MIXER:
 						{
-							m_pWndMac[tmac] = new CFrameMixerMachine(tmac);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->_pActive = &isguiopen[tmac];
-							((CFrameMixerMachine*)m_pWndMac[tmac])->wndView = &m_wndView;
-							((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex=_pSong->FindBusFromIndex(tmac);
+							CFrameMachine* newwin;
+							m_pWndMac[tmac] = newwin = new CFrameMachine(ma);
+							newwin->_pActive = &isguiopen[tmac];
+							newwin->wndView = &m_wndView;
 
-							m_pWndMac[tmac]->LoadFrame(
-								IDR_MACHINEFRAME, 
+							newwin->LoadFrame(IDR_MACHINEFRAME, 
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
-							((CFrameMixerMachine*)m_pWndMac[tmac])->Generate();
-							((CFrameMixerMachine*)m_pWndMac[tmac])->SelectMachine(ma);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;
-							winname << ((CFrameMixerMachine*)m_pWndMac[tmac])->MachineIndex << " : " << ma->_editName;
-							((CFrameMixerMachine*)m_pWndMac[tmac])->SetWindowText(winname.str().c_str());
+							winname << _pSong->FindBusFromIndex(ma->_macIndex) << " : " << ma->_editName;
+							newwin->SetWindowText(winname.str().c_str());
+							newwin->ShowWindow(SW_SHOWNORMAL);
 							isguiopen[tmac] = true;
+							newwin->PostOpenWnd();
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
 						break;
 					case MACH_VST:
 					case MACH_VSTFX:
 						{
-							CVstEffectWnd* newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
+							CVstEffectWnd* newwin;
+							m_pWndMac[tmac] = newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
 							newwin->_pActive = &isguiopen[tmac];
 							newwin->LoadFrame(IDR_VSTFRAME, 
-//							WS_OVERLAPPEDWINDOW,
 								WS_POPUPWINDOW | WS_CAPTION,
 								this);
 							std::ostringstream winname;
@@ -673,7 +650,6 @@ namespace psycle { namespace host {
 							newwin->SetTitleText(winname.str().c_str());
 							// C_Tuner.dll crashes if asking size before opening.
 //							newwin->ResizeWindow(0);
-							m_pWndMac[tmac] = newwin;
 							newwin->ShowWindow(SW_SHOWNORMAL);
 							newwin->PostOpenWnd();
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
@@ -929,7 +905,7 @@ namespace psycle { namespace host {
 		{
 			pCmdUI->Enable(); 
 			CString str;
-			str.Format("Pat %.2X", (Global::pPlayer->_playing) ? Global::pPlayer->_playPattern : Global::_pSong->playOrder[m_wndView.editPosition]); 
+			str.Format("Pat %.2X", (Global::pPlayer->_playing) ? Global::pPlayer->_playPattern : _pSong->playOrder[m_wndView.editPosition]); 
 			pCmdUI->SetText(str); 
 		}
 
@@ -947,7 +923,7 @@ namespace psycle { namespace host {
 			if (Global::pPlayer->_playing)
 			{
 				CString str;
-				str.Format( "%.2u:%.2u:%.2f", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, Global::pPlayer->_playTime);
+				str.Format( "%.02u:%.02u:%.02f", Global::pPlayer->_playTimem / 60, Global::pPlayer->_playTimem % 60, Global::pPlayer->_playTime);
 				pCmdUI->SetText(str); 
 			}
 		}
@@ -959,17 +935,17 @@ namespace psycle { namespace host {
 
 		void CMainFrame::OnUpdateIndicatorFollow(CCmdUI *pCmdUI) 
 		{
-			pCmdUI->Enable(Global::pConfig->_followSong);
+			pCmdUI->Enable(Global::psycleconf()._followSong);
 		}
 
 		void CMainFrame::OnUpdateIndicatorNoteoff(CCmdUI *pCmdUI) 
 		{
-			pCmdUI->Enable(Global::pConfig->_RecordNoteoff); 
+			pCmdUI->Enable(Global::psycleconf().inputHandler()._RecordNoteoff); 
 		}
 
 		void CMainFrame::OnUpdateIndicatorTweaks(CCmdUI *pCmdUI) 
 		{
-			pCmdUI->Enable(Global::pConfig->_RecordTweaks);
+			pCmdUI->Enable(Global::psycleconf().inputHandler()._RecordTweaks);
 		}
 
 		void CMainFrame::OnUpdateIndicatorOctave(CCmdUI *pCmdUI) 

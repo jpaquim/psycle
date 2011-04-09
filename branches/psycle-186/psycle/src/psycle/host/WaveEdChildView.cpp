@@ -2,12 +2,16 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include "WaveEdChildView.hpp"
 
-#include "Configuration.hpp"
+#include "PsycleConfig.hpp"
+#include "AudioDriver.hpp"
+
 #include "MainFrm.hpp"
 #include "WaveEdFrame.hpp"
 #include "Zap.hpp"
 #include <mmreg.h>
 #include <math.h>
+
+int const ID_TIMER_WAVED_REFRESH = 31415;
 
 namespace psycle { namespace host {
 
@@ -356,20 +360,18 @@ namespace psycle { namespace host {
 			prevHeadLoopS = prevBodyLoopS = prevHeadLoopE = prevBodyLoopE = 0;
 			prevBodyX = prevHeadX = 0;
 
-			SetTimer(31415, 750, 0);
-
 			return 0;
 		}
 
 		void CWaveEdChildView::OnDestroy()
 		{
-			CWnd::OnDestroy();
-
+			StopTimer();
+			zoombar.DestroyWindow();
 			cpen_lo.DeleteObject();
 			cpen_me.DeleteObject();
 			cpen_hi.DeleteObject();
 			cpen_white.DeleteObject();
-			zoombar.DestroyWindow();
+			CWnd::OnDestroy();
 		}
 
 
@@ -480,11 +482,25 @@ namespace psycle { namespace host {
 			csb->SetWindowPos(NULL, 75, 0, cx-190, cyZoombar, SWP_NOZORDER);
 			
 		}
-
+		void CWaveEdChildView::StartTimer()
+		{
+			int refreshIdx;
+			if(SystemParametersInfo(SPI_GETKEYBOARDPREF, 0, &refreshIdx,0) > 0)
+			{
+				SetTimer(ID_TIMER_WAVED_REFRESH, refreshIdx*250, 0);
+			}
+			else {	
+				SetTimer(ID_TIMER_WAVED_REFRESH, 750, 0);
+			}
+		}
+		void CWaveEdChildView::StopTimer()
+		{
+			KillTimer(ID_TIMER_WAVED_REFRESH);
+		}
 
 		void CWaveEdChildView::OnTimer(UINT_PTR nIDEvent)
 		{
-			if(nIDEvent==31415)
+			if(nIDEvent==ID_TIMER_WAVED_REFRESH)
 			{
 				cursorBlink = !cursorBlink;
 				CRect rect;

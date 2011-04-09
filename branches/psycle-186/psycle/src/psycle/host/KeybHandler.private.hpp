@@ -10,7 +10,7 @@ namespace psycle { namespace host {
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
-				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::pConfig->_followSong && Global::pConfig->_RecordNoteoff)
+				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::psycleconf()._followSong && Global::psycleconf().inputHandler()._RecordNoteoff)
 				{ 
 					EnterNote(outnote,255,0,true);	// note end
 				}
@@ -25,7 +25,7 @@ namespace psycle { namespace host {
 				editcur.line = ChordModeLine;
 				editcur.track = ChordModeTrack;
 				ChordModeOffs = 0;
-				AdvanceLine(patStep,Global::pConfig->_wrapAround,true);
+				AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,true);
 		//		pParentMain->StatusBarIdle();
 		//		Repaint(draw_modes::cursor);
 			}
@@ -45,7 +45,7 @@ namespace psycle { namespace host {
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{
-				if (!(Global::pPlayer->_playing && Global::pConfig->_followSong && bRepeat))
+				if (!(Global::pPlayer->_playing && Global::psycleconf()._followSong && bRepeat))
 				{
 					bool success;
 					// add data
@@ -122,7 +122,7 @@ namespace psycle { namespace host {
 			{ 
 				// add note
 				if(velocity > 0 || 
-					(Global::pConfig->_RecordNoteoff && Global::pPlayer->_playing && Global::pConfig->_followSong))
+					(Global::psycleconf().inputHandler()._RecordNoteoff && Global::pPlayer->_playing && Global::psycleconf()._followSong))
 				{
 					EnterNote(outnote,/*macidx,*/ instidx,velocity,false);
 				}
@@ -162,13 +162,13 @@ namespace psycle { namespace host {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{		
 						// play it
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
@@ -244,13 +244,13 @@ namespace psycle { namespace host {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -324,13 +324,13 @@ namespace psycle { namespace host {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -396,13 +396,13 @@ namespace psycle { namespace host {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -474,13 +474,13 @@ namespace psycle { namespace host {
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{		
 						Machine* pMachine = _pSong->_pMachine[_pSong->seqBus];
 
@@ -535,13 +535,13 @@ namespace psycle { namespace host {
 				const int ps = _ps();
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{	
 						return;
 					}
@@ -583,13 +583,13 @@ namespace psycle { namespace host {
 				const int ps = _ps();
 				int line = Global::pPlayer->_lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					if(_pSong->_trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::pConfig->_RecordUnarmed)
+					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 					{	
 						return;
 					}
@@ -649,7 +649,7 @@ namespace psycle { namespace host {
 			}
 			
 			// realtime note entering
-			if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+			if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 			{
 				// If there is at least one track selected for recording, select the proper track
 				if(_pSong->_trackArmedCount)
@@ -681,7 +681,7 @@ namespace psycle { namespace host {
 					}
 				}
 				//If the FT2 recording behaviour is not selected, do not record, but play the note.
-				else if (!Global::pConfig->_RecordUnarmed)
+				else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
 				{
 					// build entry
 					PatternEntry entry;
@@ -705,18 +705,18 @@ namespace psycle { namespace host {
 						}
 					}
 
-					if ( note < notecommands::release && Global::pConfig->_RecordTweaks && velocity < 127)
+					if ( note < notecommands::release && Global::psycleconf().inputHandler()._RecordTweaks && velocity < 127)
 					{
-						if (Global::pConfig->midi().raw())
+						if (Global::psycleconf().midi().raw())
 						{
 							entry._cmd = 0x0c;
 							entry._parameter = velocity*2;
 						}
-						else if (Global::pConfig->midi().velocity().record())
+						else if (Global::psycleconf().midi().velocity().record())
 						{
 							// command
-							entry._cmd = Global::pConfig->midi().velocity().command();
-							int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+							entry._cmd = Global::psycleconf().midi().velocity().command();
+							int par = Global::psycleconf().midi().velocity().from() + (Global::psycleconf().midi().velocity().to() - Global::psycleconf().midi().velocity().from()) * velocity / 127;
 							if (par > 255) 
 							{
 								par = 255;
@@ -784,7 +784,7 @@ namespace psycle { namespace host {
 						editcur.line = ChordModeLine;
 						editcur.track = ChordModeTrack;
 						ChordModeOffs = 0;
-						AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+						AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 					}
 					line = editcur.line;
 					toffset = _ptrackline(ps);
@@ -828,18 +828,18 @@ namespace psycle { namespace host {
 					}
 				}
 
-				if ( note < notecommands::release && Global::pConfig->_RecordTweaks && velocity < 127)
+				if ( note < notecommands::release && Global::psycleconf().inputHandler()._RecordTweaks && velocity < 127)
 				{
-					if (Global::pConfig->midi().raw())
+					if (Global::psycleconf().midi().raw())
 					{
 						entry->_cmd = 0x0c;
 						entry->_parameter = velocity * 2;
 					}
-					else if (Global::pConfig->midi().velocity().record())
+					else if (Global::psycleconf().midi().velocity().record())
 					{
 						// command
-						entry->_cmd = Global::pConfig->midi().velocity().command();
-						int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+						entry->_cmd = Global::psycleconf().midi().velocity().command();
+						int par = Global::psycleconf().midi().velocity().from() + (Global::psycleconf().midi().velocity().to() - Global::psycleconf().midi().velocity().from()) * velocity / 127;
 						if (par > 255) 
 						{
 							par = 255;
@@ -865,15 +865,15 @@ namespace psycle { namespace host {
 			Global::pInputHandler->notetrack[editcur.track]=note;
 			Global::pInputHandler->instrtrack[editcur.track]=instNo;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
-			if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+			if (!(Global::pPlayer->_playing&&Global::psycleconf()._followSong))
 			{
 				if (ChordModeOffs)
 				{
-					AdvanceLine(-1,Global::pConfig->_wrapAround,false); //Advance track?
+					AdvanceLine(-1,Global::psycleconf().inputHandler()._wrapAround,false); //Advance track?
 				}
 				else
 				{
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 				}
 			}
 
@@ -890,7 +890,7 @@ namespace psycle { namespace host {
 				unsigned char * toffset;
 				
 				// realtime note entering
-				if (Global::pPlayer->_playing&&Global::pConfig->_followSong)
+				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
 				{
 					toffset = _ptrack(ps)+(Global::pPlayer->_lineCounter*MULTIPLY);
 				}
@@ -909,9 +909,9 @@ namespace psycle { namespace host {
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-				if (!(Global::pPlayer->_playing&&Global::pConfig->_followSong))
+				if (!(Global::pPlayer->_playing&&Global::psycleconf()._followSong))
 				{
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 				}
 
 				bScrollDetatch=false;
@@ -950,16 +950,16 @@ namespace psycle { namespace host {
 				break;
 			}
 
-			if (Global::pConfig->_cursorAlwaysDown)
+			if (Global::psycleconf().inputHandler()._cursorAlwaysDown)
 			{
-				AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+				AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 			}
 			else
 			{
 				switch (editcur.col)
 				{
 				case 0:
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 					break;
 				case 1:
 				case 3:
@@ -974,7 +974,7 @@ namespace psycle { namespace host {
 				case 2:
 				case 4:
 					PrevCol(false,false);
-					AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 					break;
 				}
 			}
@@ -1005,7 +1005,7 @@ namespace psycle { namespace host {
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-			AdvanceLine(patStep,Global::pConfig->_wrapAround,false);
+			AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
 			Global::pInputHandler->bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
@@ -1019,7 +1019,7 @@ namespace psycle { namespace host {
 			unsigned char * offset = _ptrack(ps);
 			int patlines = _pSong->patternLines[ps];
 
-			if ( Global::pInputHandler->bFT2DelBehaviour )
+			if ( Global::psycleconf().inputHandler().bFT2DelBehaviour )
 			{
 				if(editcur.line==0)
 					return;
@@ -1075,7 +1075,7 @@ namespace psycle { namespace host {
 
 		void CChildView::PlayCurrentRow(void)
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::psycleconf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -1100,7 +1100,7 @@ namespace psycle { namespace host {
 
 		void CChildView::PlayCurrentNote(void)
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::psycleconf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -1646,7 +1646,7 @@ namespace psycle { namespace host {
 					++ts;
 				}
 				
-				if (Global::pInputHandler->bMoveCursorPaste)
+				if (Global::psycleconf().inputHandler().bMoveCursorPaste)
 				{
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
@@ -2142,7 +2142,7 @@ namespace psycle { namespace host {
 		void CChildView::DecPosition()
 		{
 		//	case cdefPlaySkipBack:
-			if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+			if (Global::pPlayer->_playing && Global::psycleconf()._followSong)
 			{
 				if (Global::pPlayer->_playPosition > 0 )
 				{
@@ -2183,7 +2183,7 @@ namespace psycle { namespace host {
 		void CChildView::IncPosition(bool bRepeat)
 		{
 		//	case cdefPlaySkipAhead:
-			if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+			if (Global::pPlayer->_playing && Global::psycleconf()._followSong)
 			{
 				if (Global::pPlayer->_playPosition < _pSong->playLength-1)
 				{
@@ -2216,7 +2216,7 @@ namespace psycle { namespace host {
 					}
 					else 
 					{
-						_pSong->AllocNewPattern(patternum,"",Global::pConfig->defaultPatLines,false);
+						_pSong->AllocNewPattern(patternum,"",Global::psycleconf().GetDefaultPatLines(),false);
 					}
 			
 					++_pSong->playLength;

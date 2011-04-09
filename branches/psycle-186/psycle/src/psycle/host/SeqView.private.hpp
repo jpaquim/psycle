@@ -42,14 +42,14 @@ namespace host {
 			
 		CFont* oldFont;
 			
-			oldFont= devc->SelectObject(&Global::pConfig->seqFont);
+			oldFont= devc->SelectObject(&patView->pattern_font);
 			
 		/////////////////////////// Draw Background
 			rect.top=0;
 			rect.left=0;
 			rect.bottom=CH;
 			rect.right=CW;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_background);
+			devc->FillSolidRect(&rect,patView->background);
 
 		/////////////////////////// Draw (Columns') Header
 
@@ -57,10 +57,10 @@ namespace host {
 			rect.bottom=SEQ_YOFFSET;
 			rect.left=0;
 			rect.right=CW;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+			devc->FillSolidRect(&rect,patView->separator);
 
-			devc->SetBkColor(Global::pConfig->pvc_background);
-			devc->SetTextColor(Global::pConfig->pvc_font);
+			devc->SetBkColor(patView->background);
+			devc->SetTextColor(patView->font);
 			
 			if ( seqTracksHoriz ) 
 			{
@@ -72,9 +72,9 @@ namespace host {
 				{
 					//rect.left= curXoffset;
 					//rect.right= curXoffset+SEQ_ROWWIDTH;
-					//devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+					//devc->FillSolidRect(&rect,patView->separator);
 					
-					devc->SetBkColor(Global::pConfig->pvc_rowbeat);	// This affects TXT background
+					devc->SetBkColor(patView->rowbeat);	// This affects TXT background
 					sprintf(cbuffer,"%d",curcol+1);
 					TXT(devc,cbuffer,curXoffset,0,SEQ_ROWWIDTH-1,SEQ_ROWHEIGHT-1);
 					
@@ -105,12 +105,12 @@ namespace host {
 						rect.left=0;
 						rect.bottom=curYoffset+SEQ_ROWHEIGHT;
 						rect.right=CW;
-						devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+						devc->FillSolidRect(&rect,patView->separator);
 						
 		//				rect.right= SEQ_XOFFSET;
-		//				devc->FillSolidRect(&rect,Global::pConfig->pvc_rowbeat);
-						devc->SetBkColor(Global::pConfig->pvc_rowbeat);
-						devc->SetTextColor(Global::pConfig->pvc_font);
+		//				devc->FillSolidRect(&rect,patView->rowbeat);
+						devc->SetBkColor(patView->rowbeat);
+						devc->SetTextColor(patView->font);
 						sprintf(cbuffer,"%.02X:%s",i,tmac->_editName);
 						TXT(devc,cbuffer,0,curYoffset,SEQ_XOFFSET-1,SEQ_ROWHEIGHT-1);
 
@@ -130,8 +130,8 @@ namespace host {
 								int psize=(_pSong->patternLines[_pSong->playOrder[j]]*SEQ_ROWWIDTH)/(_pSong->LinesPerBeat()*seqSteps);
 								rect.left=curXoffset;
 								//rect.right=curXoffset+psize;
-								//devc->FillSolidRect(rect,Global::pConfig->pvc_row4beat);
-								devc->SetBkColor(Global::pConfig->pvc_row4beat);
+								//devc->FillSolidRect(rect,patView->row4beat);
+								devc->SetBkColor(patView->row4beat);
 								sprintf(cbuffer,"%.2d:%s",_pSong->playOrder[j],_pSong->patternName[_pSong->playOrder[j]]);
 								TXT(devc,cbuffer,curXoffset,curYoffset,psize-1,SEQ_ROWHEIGHT-1);
 								curXoffset+=psize;
@@ -145,7 +145,7 @@ namespace host {
 									curcolf=(int)curcolf;
 									rect.left=curXoffset;
 									rect.right=	SEQ_XOFFSET+((curcolf+1)*SEQ_ROWWIDTH)-1;
-									devc->FillSolidRect(rect,Global::pConfig->pvc_row);
+									devc->FillSolidRect(rect,patView->row);
 									curXoffset=rect.right+1;
 									curcolf+=1;
 								}
@@ -153,7 +153,7 @@ namespace host {
 								{
 									rect.left=curXoffset;
 									rect.right=curXoffset+SEQ_ROWWIDTH-1;
-									devc->FillSolidRect(rect,Global::pConfig->pvc_row);
+									devc->FillSolidRect(rect,patView->row);
 									curXoffset+=SEQ_ROWWIDTH;
 									curcolf+=1;
 								}
@@ -165,7 +165,7 @@ namespace host {
 							{
 								rect.left=curXoffset;
 								rect.right=curXoffset+SEQ_ROWWIDTH-1;
-								devc->FillSolidRect(rect,Global::pConfig->pvc_row);
+								devc->FillSolidRect(rect,patView->row);
 								curXoffset+=SEQ_ROWWIDTH;
 							}
 						}
@@ -209,14 +209,14 @@ namespace host {
 			{
 				strcpy(cbuffer,"...");
 			}
-			devc->SetBkColor(Global::pConfig->pvc_cursor);
-			devc->SetTextColor(Global::pConfig->pvc_fontCur);
+			devc->SetBkColor(patView->cursor);
+			devc->SetTextColor(patView->fontCur);
 			
-		//	devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+		//	devc->FillSolidRect(&rect,patView->separator);
 			TXTFLAT(devc,cbuffer,rect.left,rect.top,SEQ_ROWWIDTH-1,SEQ_ROWHEIGHT-1);
 			
 			
-		//	brush1.CreateSolidBrush(Global::pConfig->pvc_cursor);
+		//	brush1.CreateSolidBrush(patView->cursor);
 		//	oldbrush = (CBrush*)devc->SelectObject(&brush1);
 
 		//	devc->FrameRect(rect,&brush1);
@@ -236,19 +236,19 @@ namespace host {
 			rect.bottom = curYoffset+SEQ_ROWHEIGHT;
 			rect.left=0;
 			rect.right=SEQ_XOFFSET;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_separator);
+			devc->FillSolidRect(&rect,patView->separator);
 		//	rect.top++;
 		//	rect.bottom+= SEQ_ROWHEIGHT-1;
-		//	devc->FillSolidRect(&rect,Global::pConfig->pvc_row);
-			devc->SetBkColor(Global::pConfig->pvc_row4beat);	
-			devc->SetTextColor(Global::pConfig->pvc_font);
+		//	devc->FillSolidRect(&rect,patView->row);
+			devc->SetBkColor(patView->row4beat);	
+			devc->SetTextColor(patView->font);
 			TXT(devc,"Timeline",0,curYoffset,SEQ_XOFFSET-1,SEQ_ROWHEIGHT-1);
 
 		//	rect.top++;
 			rect.left=SEQ_XOFFSET;
 			rect.right=CW;
 			rect.bottom--;
-			devc->FillSolidRect(&rect,Global::pConfig->pvc_row4beat);
+			devc->FillSolidRect(&rect,patView->row4beat);
 
 			curcol = seqTickOffs - (seqTickOffs%seqSteps);
 			
@@ -263,7 +263,7 @@ namespace host {
 					(curtime - (float)curcol) *  SEQ_ROWWIDTH /
 					seqSteps
 					);
-				devc->FillSolidRect(&rect,Global::pConfig->pvc_playbar);
+				devc->FillSolidRect(&rect,patView->playbar);
 			}
 
 

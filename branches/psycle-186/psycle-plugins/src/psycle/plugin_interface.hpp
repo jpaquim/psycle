@@ -56,11 +56,11 @@ class CMachineParameter {
 		char const *Name;
 		/// Longer description: "Cutoff Frequency (0-7f)"
 		char const *Description;
-		/// >= 0
+		/// recommended >= 0. If negative, minValue is represented as 0 in the pattern
 		int MinValue;
-		/// <= 65535
+		/// recommended <= 65535. Basically so that it can be represented in the pattern
 		int MaxValue;
-		/// flags.
+		/// flags. (see below)
 		int Flags;
 		/// default value for params that have MPF_STATE flag set
 		int DefValue;

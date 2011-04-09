@@ -3,9 +3,8 @@
 #pragma once
 
 #include "Psycle.hpp"
-
+#include "PsycleConfig.hpp"
 #include "Song.hpp"
-
 
 namespace psycle {
 namespace host {
@@ -15,8 +14,10 @@ namespace host {
 		class XMSamplerUI;
 		class CWaveInMacDlg;
 
-		#define MAX_WIRE_DIALOGS 16
+		class SPatternHeaderCoords;
+		class SMachineCoords;
 
+		#define MAX_WIRE_DIALOGS 16
 		#define MAX_DRAW_MESSAGES 32
 
 		struct draw_modes
@@ -135,69 +136,6 @@ namespace host {
 			int drawLineEnd;
 		};
 
-		class SSkinSource
-		{
-		public:
-			int x;
-			int y;
-			int width;
-			int height;
-		};
-
-		class SSkinDest
-		{
-		public:
-			int x;
-			int y;
-		};
-
-		class SPatternHeaderCoords
-		{
-		public:
-			SSkinSource sBackground;
-			SSkinSource sNumber0;
-			SSkinSource sRecordOn;
-			SSkinSource sMuteOn;
-			SSkinSource sSoloOn;
-			SSkinDest dDigitX0;
-			SSkinDest dDigit0X;
-			SSkinDest dRecordOn;
-			SSkinDest dMuteOn;
-			SSkinDest dSoloOn;
-			BOOL bHasTransparency;
-			COLORREF cTransparency;
-		};
-
-		class SMachineCoords
-		{
-		public:
-			SSkinSource sMaster;
-			SSkinSource sGenerator;
-			SSkinSource sGeneratorVu0;
-			SSkinSource sGeneratorVuPeak;
-			SSkinSource sGeneratorPan;
-			SSkinSource sGeneratorMute;
-			SSkinSource sGeneratorSolo;
-			SSkinSource sEffect;
-			SSkinSource sEffectVu0;
-			SSkinSource sEffectVuPeak;
-			SSkinSource sEffectPan;
-			SSkinSource sEffectMute;
-			SSkinSource sEffectBypass;
-			SSkinSource dGeneratorVu;
-			SSkinSource dGeneratorPan;
-			SSkinDest dGeneratorMute;
-			SSkinDest dGeneratorSolo;
-			SSkinDest dGeneratorName;
-			SSkinSource dEffectVu;
-			SSkinSource dEffectPan;
-			SSkinDest dEffectMute;
-			SSkinDest dEffectBypass;
-			SSkinDest dEffectName;
-			BOOL bHasTransparency;
-			COLORREF cTransparency;
-		};
-
 		/// child view window
 		class CChildView : public CWnd
 		{
@@ -299,7 +237,7 @@ namespace host {
 			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(std::string fName);
 			void OnFileLoadsongNamed(std::string fName, int fType);
-			
+			void AppendToRecent(std::string& fName);
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;
@@ -352,15 +290,17 @@ namespace host {
 								// Its function is to prevent audio (and midi) operations while it is not
 								// initialized, or while song is being modified (New(),Load()..).
 								// 
-
-			SPatternHeaderCoords PatHeaderCoords;
-			SMachineCoords	MachineCoords;
+			// Easy access to settings. These pointers don't change during the live of the program
+			SPatternHeaderCoords* PatHeaderCoords;
+			SMachineCoords*	MachineCoords;
+			PsycleConfig::MachineView* macView;
+			PsycleConfig::PatternView* patView;
 
 			bool maxView;	//maximise pattern state
 			int textLeftEdge;
 
 		// Overrides
-			protected:
+		protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 
 		//////////////////////////////////////////////////////////////////////
@@ -369,7 +309,6 @@ namespace host {
 		private:
 
 			//Recent Files!!!!//
-			void AppendToRecent(std::string& fName);
 			void CallOpenRecent(int pos);
 			//Recent Files!!!!//
 
@@ -418,24 +357,8 @@ namespace host {
 
 		private:
 			// GDI Stuff
-			CBitmap patternheader;
-			CBitmap patternheadermask;
-			HBITMAP hbmPatHeader;
-			CBitmap machineskin;
-			CBitmap machineskinmask;
-			CBitmap machinebkg;
-			HBITMAP hbmMachineSkin;
-			HBITMAP hbmMachineBkg;
-
-			
-			HBITMAP hbmMachineDial;
-
 			CBitmap* bmpDC;
 			int FLATSIZES[256];
-
-			int bkgx;
-			int bkgy;
-
 			int triangle_size_tall;
 			int triangle_size_center;
 			int triangle_size_wide;
@@ -538,7 +461,6 @@ namespace host {
 			afx_msg void OnHelpPsycleenviromentinfo();
 			afx_msg void OnMidiMonitorDlg();
 			afx_msg void OnDestroy();
-			afx_msg void OnAppExit();
 			afx_msg void OnMachineview();
 			afx_msg void OnPatternView();
 			afx_msg void OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );

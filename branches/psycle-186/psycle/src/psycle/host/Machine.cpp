@@ -8,12 +8,10 @@
 #include "Song.hpp"
 
 #if !defined WINAMP_PLUGIN
-	// Included for the machine position on the machine view. This really should be
-	// done in a different way.
-	#include "MainFrm.hpp"
-	// These two are included to update the buffers that wiredlg uses for display. 
+	// Included for the machine position on the machine view.
+	#include "PsycleConfig.hpp"
+	// This one is included to update the buffers that wiredlg uses for display. 
 	// Find a way to manage these buffers without its inclusion
-	#include "Psycle.hpp"
 	#include "WireDlg.hpp"
 	// Included due to the plugin caching, which should be separated from the dialog.
 	#include "NewMachine.hpp"
@@ -47,6 +45,7 @@ namespace psycle
 #endif //!defined WINAMP_PLUGIN
 
 		char* Master::_psName = "Master";
+		bool Machine::autoStopMachine = false;
 
 		void Machine::crashed(std::exception const & e) throw()
 		{
@@ -752,7 +751,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			}
 			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
 
-			if ( Global::pConfig->autoStopMachines )
+			if ( autoStopMachine )
 			{
 				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.AccumRight < 0.00024*GetAudioRange()
 					&& rms.count >= numSamples)	{
@@ -964,34 +963,41 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				delete pMachine;
 				pMachine=p;
 			}
+			
+#if !defined WINAMP_PLUGIN
+			///TODO: Move this code to the ChildView, after loading.
+			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
+			CPoint viewSize = Global::_pSong->viewSize;
+#endif //!defined WINAMP_PLUGIN
+
 			if(index < MAX_BUSES)
 			{
 				pMachine->_mode = MACHMODE_GENERATOR;
 #if !defined WINAMP_PLUGIN
-				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width)
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.width;
-				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height)
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sGenerator.height;
+				if(pMachine->_x > viewSize.x-mcoords.sGenerator.width)
+					pMachine->_x = viewSize.x-mcoords.sGenerator.width;
+				if(pMachine->_y > viewSize.y-mcoords.sGenerator.height)
+					pMachine->_y = viewSize.y-mcoords.sGenerator.height;
 #endif //!defined WINAMP_PLUGIN
 			}
 			else if (index < MAX_BUSES*2)
 			{
 				pMachine->_mode = MACHMODE_FX;
 #if !defined WINAMP_PLUGIN
-				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width)
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.width;
-				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height)
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sEffect.height;
+				if(pMachine->_x > viewSize.x-mcoords.sEffect.width)
+					pMachine->_x = viewSize.x-mcoords.sEffect.width;
+				if(pMachine->_y > viewSize.y-mcoords.sEffect.height)
+					pMachine->_y = viewSize.y-mcoords.sEffect.height;
 #endif //!defined WINAMP_PLUGIN
 			}
 			else
 			{
 				pMachine->_mode = MACHMODE_MASTER;
 #if !defined WINAMP_PLUGIN
-				if(pMachine->_x > Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width)
-					pMachine->_x = Global::_pSong->viewSize.x-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.width;
-				if(pMachine->_y > Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height)
-					pMachine->_y = Global::_pSong->viewSize.y-((CMainFrame *)theApp.m_pMainWnd)->m_wndView.MachineCoords.sMaster.height;
+				if(pMachine->_x > viewSize.x-mcoords.sMaster.width)
+					pMachine->_x = viewSize.x-mcoords.sMaster.width;
+				if(pMachine->_y > viewSize.y-mcoords.sMaster.height)
+					pMachine->_y = viewSize.y-mcoords.sMaster.height;
 #endif //!defined WINAMP_PLUGIN
 			}
 			pMachine->SetPan(pMachine->_panning);
@@ -1086,12 +1092,10 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		void Master::Init(void)
 		{
 			Machine::Init();
-			//_LMAX = 1; // Min value should NOT be zero, because we use a log10() to calculate the vu-meter's value.
-			//_RMAX = 1;
 			currentpeak=0.0f;
 			peaktime=1;
-			_lMax = 1;
-			_rMax = 1;
+			_lMax = 0.f;
+			_rMax = 0.f;
 			vuupdated = false;
 			_clip = false;
 		}
@@ -1184,15 +1188,13 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			if(_lMax > 32767.0f)
 			{
 				_clip=true;
-				_lMax = 32767.0f;
 			}
-			else if (_lMax < 1.0f) { _lMax = 1.0f; }
+			else if (_lMax < 0.f) { _lMax = 0.f; }
 			if(_rMax > 32767.0f)
 			{
 				_clip=true;
-				_rMax = 32767.0f;
 			}
-			else if(_rMax < 1.0f) { _rMax = 1.0f; }
+			else if(_rMax < 0.f) { _rMax = 0.f; }
 			if( _lMax > currentpeak ) currentpeak = _lMax;
 			if( _rMax > currentpeak ) currentpeak = _rMax;
 

@@ -14,6 +14,26 @@ namespace psycle
 		#define MAX_ASIO_DRIVERS 32
 		#define MAX_ASIO_OUTPUTS 128
 
+		class ASIODriverSettings : public AudioDriverSettings
+		{
+		public:
+			ASIODriverSettings();
+			ASIODriverSettings(const ASIODriverSettings& othersettings);
+			ASIODriverSettings& operator=(const ASIODriverSettings& othersettings);
+			bool operator!=(ASIODriverSettings const &);
+			bool operator==(ASIODriverSettings const & other) { return !((*this) != other); }
+			virtual AudioDriver* NewDriver();
+			inline virtual AudioDriverInfo& GetInfo() { return info_; };
+
+			virtual void SetDefaultSettings();
+			virtual void Load(ConfigStorage &);
+			virtual void Save(ConfigStorage &);
+
+			unsigned int driverID;
+		private:
+			static AudioDriverInfo info_;
+		};
+
 		/// output device interface implemented by asio.
 		class ASIOInterface : public AudioDriver
 		{
@@ -97,49 +117,40 @@ namespace psycle
 			};
 
 		public:
-			ASIOInterface();
+			ASIOInterface(ASIODriverSettings* settings);
 			virtual ~ASIOInterface() throw();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context);
-			virtual void Configure();
+			inline virtual AudioDriverSettings& settings() { return *settings_; };
+
+			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
+			virtual bool Enable(bool e);
+			virtual void Reset();
 			inline virtual bool Initialized() { return _initialized; };
-			inline virtual bool Configured() { return _configured; };
 			virtual bool Enabled() { return _running; };
-			virtual int GetBufferSize();
+			virtual void Configure();
 			virtual void RefreshAvailablePorts();
 			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
 			virtual void GetCapturePorts(std::vector<std::string> &ports);
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-			inline virtual AudioDriverInfo* GetInfo() { return &_info; };
-			virtual void Reset();
-			virtual bool Enable(bool e);
 			virtual std::uint32_t GetWritePosInSamples();
 			virtual std::uint32_t GetPlayPosInSamples();
-			bool SupportsAsio();
+			inline virtual std::uint32_t GetInputLatencySamples() { return _inlatency; }
+			inline virtual std::uint32_t GetOutputLatencySamples() { return _outlatency; }
+
 			DriverEnum GetDriverFromidx(int driverID);
 			PortOut GetOutPortFromidx(int driverID);
 			int GetidxFromOutPort(PortOut&port);
 			void ControlPanel(int driverID);
-			virtual std::uint32_t GetInputLatencySamples() { return _inlatency; }
-			virtual std::uint32_t GetOutputLatencySamples() { return _outlatency; }
 
+			static bool SupportsAsio();
 			static void bufferSwitch(long index, ASIOBool processNow);
 			static ASIOTime *bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow);
 			static void sampleRateChanged(ASIOSampleRate sRate);
 			static long asioMessages(long selector, long value, void* message, double* opt);
 
-			std::vector<DriverEnum> _drivEnum;
-
-			static int _ASIObufferSamples;
-			static AsioStereoBuffer *ASIObuffers;
-			static bool _firstrun;
-			static bool _supportsOutputReady;
-
 		protected:
 			void Error(const char msg[]);
-			void ReadConfig();
-			void WriteConfig();
 			bool Start();
 			bool Stop();
 
@@ -148,38 +159,25 @@ namespace psycle
 
 			ASIOCallbacks asioCallbacks;
 
-
-
-//			int drivercount;
-//			char szFullName[MAX_ASIO_OUTPUTS][160];
-
-		// callback prototypes
-/*
-			int driverindex[MAX_ASIO_OUTPUTS];
-			int outputindex[MAX_ASIO_OUTPUTS];
-			long minSamples[MAX_ASIO_DRIVERS];
-			long maxSamples[MAX_ASIO_DRIVERS];
-			long prefSamples[MAX_ASIO_DRIVERS];
-			long Granularity[MAX_ASIO_DRIVERS];
-			int currentSamples[MAX_ASIO_DRIVERS];
-*/
 		private:
-			static AudioDriverInfo _info;
-			static ::CCriticalSection _lock;
-			static AsioDrivers asioDrivers;
 			bool _initialized;
-			bool _configured;
 			bool _running;
-//			int _driverID;
 			long _inlatency;
 			long _outlatency;
-			static std::uint32_t writePos;
-			static std::uint32_t m_wrapControl;
+			std::vector<DriverEnum> drivEnum_;
 
+			static ASIODriverSettings* settings_;
+			static AsioDrivers asioDrivers;
+
+			static ::CCriticalSection _lock;
 			static PortOut _selectedout;
 			static std::vector<PortCapt> _selectedins;
 			std::vector<int> _portMapping;
-
+			static AsioStereoBuffer *ASIObuffers;
+			static bool _firstrun;
+			static bool _supportsOutputReady;
+			static std::uint32_t writePos;
+			static std::uint32_t m_wrapControl;
 		};
 	}
 }

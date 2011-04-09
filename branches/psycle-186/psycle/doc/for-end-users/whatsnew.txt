@@ -4,7 +4,7 @@ Version | Date | Type of release             | Authors
 1.8.8   | 2011 | beta						 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.6	| 2009 | maintenance                 | [JAZ] & alk & bohan.
-1.8.5	| 2007 | RC                          | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
+1.8.5	| 2007 | RC, release                 | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
 1.8.3	| 2007 | beta                        | [JAZ]
 1.8.2	| 2006 | bugfix                      | [JAZ] & bohan & jme
 1.9     | 2005 | alpha                       | psycledelics combined effort
@@ -42,6 +42,15 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.8 beta4
+------------
+* Reimplemented most of the Settings system (This includes many things, from making all them accessible from a central point in the code, an user option to save them to other places than the windows registry, real-time change of audio driver, centralized the code to import/export the visual and keyboard settings, and more)
+* Toolbar improvements (now they are all detachable, improved visuals a bit)
+* Fonts use now default quality (which means allowing antialias if setting activated on Windows).
+* WireDlg, and machine parameter window can now be closed with ESC key (Only XMSampler window cannot be closed this way now).
+! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning )
+* Internal source code change: Implemented XMSamplerMixerPage sliders, WireDlg sliders and master volume slider on toolbar with OnHScroll/VScroll message handler (proper way of doing it). Also, separated the toolbar sourcecode into independent files.
+
 v1.8.8 beta3
 ------------
 + Added ability to send midi commands to native machines. Yannis Midi and fluidsynth now support it.

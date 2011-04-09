@@ -191,25 +191,6 @@ namespace psycle
 						universalis::cpu::fpu::exceptions::mask::type                fpu_exception_mask_;
 				#endif
 			///\}
-
-#if 0 // v1.9
-			///\name cpu cost measurement ... for the time spent in the machine's processing function
-			///\{
-				public:
-					void             inline work_cpu_cost(cpu::cycles_type const & value)       throw() { work_cpu_cost_ = value; }
-					cpu::cycles_type inline work_cpu_cost(                              ) const throw() { return work_cpu_cost_; }
-				private:
-					cpu::cycles_type        work_cpu_cost_;
-			///\}
-			///\name cpu cost measurement ... for the time spent routing audio
-			///\{
-				public:
-					void             inline wire_cpu_cost(cpu::cycles_type const & value)       throw() { wire_cpu_cost_ = value; }
-					cpu::cycles_type inline wire_cpu_cost(                              ) const throw() { return wire_cpu_cost_; }
-				private:
-					cpu::cycles_type        wire_cpu_cost_;
-			///\}
-#else
 	///\name cpu time usage measurement
 	///\{
 		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
@@ -227,7 +208,6 @@ namespace psycle
 		public:  uint64_t processing_count() const throw() { return processing_count_; }
 		protected: uint64_t processing_count_;
 	///\}
-#endif
 
 #if 0 // v1.9
 			///\name each machine has a type attribute so that we can make yummy switch statements
@@ -264,6 +244,7 @@ namespace psycle
 			///\}
 #else
 			public:///\todo private
+				static bool autoStopMachine;
 				int _macIndex;
 				MachineType _type;
 				MachineMode _mode;
@@ -370,6 +351,7 @@ namespace psycle
 				public:
 					virtual int GetNumCols() { return _nCols; }
 					virtual int GetNumParams() { return _numPars; }
+					virtual int GetParamType(int numparam) { return 0; }
 					virtual void GetParamName(int numparam, char * name) { name[0]='\0'; }
 					virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; }
 					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; }

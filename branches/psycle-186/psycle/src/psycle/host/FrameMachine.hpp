@@ -7,84 +7,54 @@ namespace psycle {
 namespace host {
 		class CChildView;
 		class Machine;
-
-		#define K_XSIZE     28
-		#define K_YSIZE     28
-		#define K_NUMFRAMES 63
-		#define W_ROWWIDTH  150
-
+		class CBaseParamView;
 
 		/// machine window.
 		class CFrameMachine : public CFrameWnd
 		{
-			DECLARE_DYNCREATE(CFrameMachine)
+			DECLARE_DYNAMIC(CFrameMachine)
+		public:
+			CFrameMachine(Machine* pMachine);
+			virtual ~CFrameMachine();
 		protected:
 			CFrameMachine(); // protected constructor used by dynamic creation
+
+		public:
+			virtual void ResizeWindow(CRect* pRect);
+			virtual void GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect = NULL);
+			virtual void PostOpenWnd();
+			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
+		protected:
+			virtual CBaseParamView* CreateView();
+
 		// Attributes
 		public:
-			CFrameMachine(int dum){MachineIndex = dum;};
-		protected:
-			Machine* _pMachine;
-			//CBitmap b_knob;
-			CFont	b_font;
-			CFont	b_font_bold;
-
-		// Enviroment
-			int numParameters;
-
-			bool istweak;
-			float visualtweakvalue;
-			bool finetweak;
-			bool ultrafinetweak;
-			int tweakpar;
-			int tweakbase;
-			int minval;
-			int maxval;
-			int sourcepoint;
-			int prevval;
-			
-			int ncol;
-			int parspercol;
-		// Operations
-		public:
-			virtual void SelectMachine(Machine* pMachine);
-			virtual void Generate();
-			virtual int ConvertXYtoParam(int x, int y);
+			inline Machine& machine(){ return *_machine; }
+			bool *_pActive; // It is used to help the program know if this window is open or not.
 			CChildView *wndView;
-			UINT MachineIndex;
-			bool* _pActive;	// It is used to help the program know if this window is open or not.
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CFrameMachine)
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
-			virtual ~CFrameMachine();
-			// Generated message map functions
-			//{{AFX_MSG(CFrameMachine)
-			afx_msg void OnPaint();
-			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-			afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
-			afx_msg void OnParametersRandomparameters();
-			afx_msg void OnParametersResetparameters();
-			afx_msg void OnParametersCommand();
-			afx_msg void OnMachineAboutthismachine();
+			Machine* _machine;
+			CBaseParamView* pView;
+
+		protected:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnDestroy();
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnSetFocus(CWnd* pOldWnd);
+			afx_msg void OnSizing(UINT fwSide, LPRECT pRect);
 			afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 			afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
-			afx_msg void OnParametersShowpreset();
-			afx_msg void OnSetFocus(CWnd* pOldWnd);
-			afx_msg void OnTimer(UINT_PTR nIDEvent);
-			//}}AFX_MSG
+			afx_msg void OnOperationsEnabled();
+			afx_msg void OnUpdateOperationsEnabled(CCmdUI *pCmdUI);
+			afx_msg void OnProgramsRandomizeprogram();
+			afx_msg void OnParametersResetparameters();
+			afx_msg void OnParametersCommand();
+			afx_msg void OnViewsBankmanager();
+			afx_msg void OnUpdateViewsBankmanager(CCmdUI *pCmdUI);
+			afx_msg void OnMachineAboutthismachine();
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 	}   // namespace
 }   // namespace

@@ -177,7 +177,7 @@ namespace psycle { namespace host {
 				srate.Format("%d", m_sampleRate);
 				bits = m_bitDepth;
 				dither=m_dither;
-				if(bits==32) {bits=24;}
+				if(bits==32) {bits=m_bitDepth=24;}
 			}
 			int i = m_sampleRateCombo.SelectString(-1, srate);
 			if (i == CB_ERR)

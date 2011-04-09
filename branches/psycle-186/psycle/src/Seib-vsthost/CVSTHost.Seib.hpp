@@ -713,8 +713,8 @@ namespace seib {
 		protected:
 			long lBlockSize;
 			static int quantization;
-			bool useJBridge;
-			bool usePsycleVstBridge;
+			static bool useJBridge;
+			static bool usePsycleVstBridge;
 			bool loadingEffect;
 			VstInt32 loadingShellId;
 			bool isShell;
@@ -723,10 +723,10 @@ namespace seib {
 			CEffect* LoadPlugin(const char * sName,VstInt32 shellIdx=0);
 			static VstIntPtr VSTCALLBACK AudioMasterCallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 
-			void UseJBridge(bool use) { useJBridge=use; }
-			bool UseJBridge() const { return useJBridge; }
-			void UsePsycleVstBridge(bool use) { usePsycleVstBridge=use; }
-			bool UsePsycleVstBridge() const { return usePsycleVstBridge; }
+			static void UseJBridge(bool use) { useJBridge=use; }
+			static bool UseJBridge() { return useJBridge; }
+			static void UsePsycleVstBridge(bool use) { usePsycleVstBridge=use; }
+			static bool UsePsycleVstBridge() { return usePsycleVstBridge; }
 
 			// overridable functions
 		protected:

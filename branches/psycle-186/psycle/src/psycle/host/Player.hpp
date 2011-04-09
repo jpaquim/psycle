@@ -106,8 +106,6 @@ namespace psycle
 			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
 			const int SamplesPerRow() { return m_SamplesPerRow; }
 
-			/// used by the plugins to indicate that they need redraw.
-			bool Tweaker;
 			///\name secondary output device, write to a file
 			///\{
 			/// starts the recording output device.

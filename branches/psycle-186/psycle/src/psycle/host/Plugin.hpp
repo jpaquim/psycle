@@ -151,7 +151,14 @@ namespace psycle
 				private: bool		needsAux_;
 
 				//\todo: Dynamic
-				virtual const char* AuxColumnName(int idx) { return MIDI_CHAN_NAMES[idx]; }
+				virtual const char* AuxColumnName(int idx) { 
+					/*if(needsAux_) {
+
+					}
+					else*/ {
+						return MIDI_CHAN_NAMES[idx];
+					}
+				}
 				virtual int NumAuxColumnIndexes() { return 16;}
 
 			///\}
@@ -196,6 +203,7 @@ namespace psycle
 				public:
 					virtual int  GetNumCols   () { return GetInfo()->numCols; }
 					virtual int  GetNumParams () { return GetInfo()->numParameters; }
+					virtual int GetParamType(int numparam) { return GetInfo()->Flags; }
 					virtual void GetParamName (int numparam, char * name);
 					virtual void GetParamRange(int numparam, int & minval,int & maxval);
 					virtual int  GetParamValue(int numparam);

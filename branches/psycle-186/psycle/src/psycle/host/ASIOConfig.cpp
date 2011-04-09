@@ -50,16 +50,12 @@ namespace psycle { namespace host {
 			CString str;
 			CDialog::OnInitDialog();
 			pASIO->RefreshAvailablePorts();
-			for (unsigned int i(0); i < pASIO->_drivEnum.size(); ++i)
+			std::vector<std::string> ports;
+			pASIO->GetPlaybackPorts(ports);
+			std::vector<std::string>::const_iterator it;
+			for (it = ports.begin(); it != ports.end(); ++it)
 			{
-				char szFullName[160];
-				for (unsigned int j(0); j < pASIO->_drivEnum[i]._portout.size(); ++j)
-				{
-					strcpy(szFullName,pASIO->_drivEnum[i]._name.c_str());
-					strcat(szFullName," ");
-					strcat(szFullName,pASIO->_drivEnum[i]._portout[j].GetName().c_str());
-					m_driverComboBox.AddString(szFullName);
-				}
+				m_driverComboBox.AddString(it->c_str());
 			}
 
 			if (m_driverIndex < 0)
@@ -153,7 +149,7 @@ namespace psycle { namespace host {
 			{
 				for (int i = driver.minSamples; i <= driver.maxSamples; i *= 2)
 				{
-					if (i < pASIO->_ASIObufferSamples)
+					if (i < m_bufferSize)
 					{
 						prefindex++;
 					}
@@ -170,7 +166,7 @@ namespace psycle { namespace host {
 
 				for (int i = driver.minSamples; i <= driver.maxSamples; i += g)
 				{
-					if (i < pASIO->_ASIObufferSamples)
+					if (i < m_bufferSize)
 					{
 						prefindex++;
 					}

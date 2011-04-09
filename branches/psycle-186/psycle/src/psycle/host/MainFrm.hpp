@@ -31,7 +31,7 @@ namespace psycle { namespace host {
 			virtual ~CMainFrame();
 		protected: 
 			DECLARE_DYNAMIC(CMainFrame)
-		// Operations
+
 		public:
 		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -39,7 +39,6 @@ namespace psycle { namespace host {
 		// Implementation
 		public:
 			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
-			void ClosePsycle();
 			void CheckForAutosave();
 			void CloseMacGui(int mac,bool closewiredialogs=true);
 			void CloseAllMacGuis();

@@ -72,27 +72,39 @@ namespace psycle { namespace host {
 			{
 				return -1;
 			}
+			if (!wavview.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
+				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
+			{
+				TRACE0("Failed to create view window\n");
+				return -1;
+			}
 
-		/*	toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP |
-				CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC);
-			toolbar.LoadToolBar(IDR_WAVEBAR); */
-			
-			statusbar.Create(this);
-			statusbar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+			if( !ToolBar.CreateEx(this, TBSTYLE_FLAT| TBSTYLE_TRANSPARENT) ||
+				!ToolBar.LoadToolBar(IDR_WAVEDFRAME))
+			{
+				TRACE0("Failed to create toolbar\n");
+				return -1;      // fail to create
+			}
+
+			// Status bar
+			if (!statusbar.Create(this) ||
+				!statusbar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT)))
+			{
+				TRACE0("Failed to create status bar\n");
+				return -1;      // fail to create
+			}
 			statusbar.SetPaneStyle(0, /*SBPS_NORMAL*/ SBPS_STRETCH);
 			statusbar.SetPaneInfo(1, ID_INDICATOR_SEL, SBPS_NORMAL, 180);
 			statusbar.SetPaneInfo(2, ID_INDICATOR_SIZE, SBPS_NORMAL, 180);
 			statusbar.SetPaneInfo(3, ID_INDICATOR_MODE, SBPS_NORMAL, 70);
 
-			if( !(ToolBar.Create(this, WS_CHILD|WS_VISIBLE|CBRS_TOP|CBRS_FLYBY)) || !ToolBar.LoadToolBar(IDR_WAVEDFRAME))
-				this->MessageBox("Error creating toolbar!", "whoops!", MB_OK);
-
 			
-			wavview.Create(NULL, "Psycle wave editor", AFX_WS_DEFAULT_VIEW,
-			CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
+			ToolBar.SetWindowText("Psycle Wave Editor tool bar");
+			ToolBar.EnableDocking(CBRS_ALIGN_ANY);
+			EnableDocking(CBRS_ALIGN_ANY);
+			DockControlBar(&ToolBar);
+			LoadBarState(_T("WaveEdToolbar"));
 
-			/*	toolbar.EnableDocking(CBRS_ALIGN_ANY);
-			EnableDocking(CBRS_ALIGN_ANY); */
 			bPlaying=false;
 			SetWindowText("Psycle wave editor");
 			return 0;
@@ -105,17 +117,19 @@ namespace psycle { namespace host {
 				return false;
 			}
 
-		//	cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-		//	cs.lpszClass = AfxRegisterWndClass(0,0,0, AfxGetApp()->LoadIcon(IDR_WAVEFRAME));
-			
+			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+			cs.lpszClass = AfxRegisterWndClass(0);
+
 			return true;	
 		}
 
 		void CWaveEdFrame::OnDestroy()
 		{
+			SaveBarState(_T("WaveEdToolbar"));
+			OnStop();
+
 			CFrameWnd::OnDestroy();
 
-			OnStop();
 		}
 
 
@@ -189,10 +203,15 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::OnShowWindow(BOOL bShow, UINT nStatus) 
 		{
 			CFrameWnd::OnShowWindow(bShow, nStatus);
-
-			Notify();
-		//	AdjustStatusBar(_pSong->instSelected, _pSong->waveSelected);
-			UpdateWindow();
+			if(bShow) {
+				Notify();
+				UpdateWindow();
+				wavview.StartTimer();
+			}
+			else 
+			{
+				wavview.StopTimer();
+			}
 		}
 
 		void CWaveEdFrame::Notify(void)

@@ -104,7 +104,7 @@ namespace psycle { namespace host {
 			lastlinetick=0;
 			saving=false;
 
-			std::string name = Global::pConfig->GetCurrentWaveRecDir().c_str();
+			std::string name = Global::psycleconf().GetCurrentWaveRecDir().c_str();
 			name+='\\';
 			name+=pSong->fileName;
 			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
@@ -288,7 +288,7 @@ namespace psycle { namespace host {
 				if (index != -1)
 				{
 					str.Truncate(index);
-					Global::pConfig->SetCurrentWaveRecDir(str.GetString());
+					Global::psycleconf().SetCurrentWaveRecDir(str.GetString());
 				}
 
 			}
@@ -346,10 +346,11 @@ namespace psycle { namespace host {
 			m_savewave.EnableWindow(false);
 			m_cancel.SetWindowText("Stop");
 			
-			autostop = Global::pConfig->autoStopMachines;
-			if ( Global::pConfig->autoStopMachines )
+			//If autoStopMachines enabled, disable while recording.
+			autostop = Global::configuration().UsesAutoStopMachines();
+			if ( autostop )
 			{
-				Global::pConfig->autoStopMachines = false;
+				Global::configuration().UseAutoStopMachines(false);
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
 					if (pSong->_pMachine[c])
@@ -573,7 +574,7 @@ namespace psycle { namespace host {
 			pPlayer->StopRecording();
 			Global::pConfig->_pOutputDriver->Enable(false);
 			///\todo: for zealan, this call is not closing the midi driver, and when doing the Open again, it crashes.
-			Global::pConfig->_pMidiInput->Close();
+			Global::midi().Close();
 
 			std::string::size_type pos = file.rfind('\\');
 			if (pos == std::string::npos)
@@ -732,15 +733,16 @@ namespace psycle { namespace host {
 		{
 			saving=false;
 			kill_thread=1;
+			//If autostop was enabled, restore the setting.
 			if ( autostop ) 
 			{
-				Global::pConfig->autoStopMachines=true;
+				Global::configuration().UseAutoStopMachines(true);
 			}
 			Global::pPlayer->_playBlock=playblock;
 			Global::pPlayer->_loopSong=loopsong;
 			memcpy(Global::_pSong->playOrderSel,sel,MAX_SONG_POSITIONS);
 			Global::pConfig->_pOutputDriver->Enable(true);
-			Global::pConfig->_pMidiInput->Open();
+			Global::midi().Open();
 
 			if (m_outputtype == 1)
 			{

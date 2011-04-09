@@ -4,9 +4,9 @@
 
 #include "DirectSound.hpp"
 #include "DSoundConfig.hpp"
-#include "Registry.hpp"
-#include "Configuration.hpp"
+#include "ConfigStorage.hpp"
 #include "MidiInput.hpp"
+
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/aligned_alloc.hpp>
@@ -21,7 +21,7 @@ namespace psycle
 {
 	namespace host
 	{
-		AudioDriverInfo DirectSound::_info = { "DirectSound Output" };
+		AudioDriverInfo DirectSoundSettings::info_ = { "DirectSound Output" };
 		AudioDriverEvent DirectSound::_event;
 
 		void DirectSound::Error(const TCHAR msg[])
@@ -29,17 +29,85 @@ namespace psycle
 			MessageBox(0, msg, _T("DirectSound Output driver"), MB_OK | MB_ICONERROR);
 		}
 
-		DirectSound::DirectSound()
-		:
-			device_guid(DSDEVID_DefaultPlayback),
-			_initialized(false),
-			_configured(false),
-			_running(false),
-			_playing(false),
-			_threadRun(false),
-			_pDs(0),
-			_pBuffer(0),
-			_pCallback(0)
+		DirectSoundSettings::DirectSoundSettings()
+		{
+			SetDefaultSettings();
+		}
+		DirectSoundSettings::DirectSoundSettings(const DirectSoundSettings& othersettings)
+			: AudioDriverSettings(othersettings)
+		{
+			SetDefaultSettings();
+		}
+		DirectSoundSettings& DirectSoundSettings::operator=(const DirectSoundSettings& othersettings)
+		{
+			AudioDriverSettings::operator=(othersettings);
+			return *this;
+		}
+		bool DirectSoundSettings::operator!=(DirectSoundSettings const &othersettings)
+		{
+			return
+				AudioDriverSettings::operator!=(othersettings) ||
+				device_guid_ != othersettings.device_guid_;
+		}
+
+		AudioDriver* DirectSoundSettings::NewDriver()
+		{
+			return new DirectSound(this);
+		}
+
+		void DirectSoundSettings::SetDefaultSettings()
+		{
+			AudioDriverSettings::SetDefaultSettings();
+			device_guid_ = DSDEVID_DefaultPlayback;
+			setBlockCount(4);
+			setBlockFrames(768);
+		}
+		void DirectSoundSettings::Load(ConfigStorage &store)
+		{
+			if(store.OpenGroup("\\devices\\direct-sound"))
+			{
+				///\todo:store.Read("DeviceGuid", device_guid_);
+				unsigned int tmp = samplesPerSec();
+				store.Read("SamplesPerSec", tmp);
+				setSamplesPerSec(tmp);
+				bool dodither = dither();
+				store.Read("Dither", dodither);
+				setDither(dodither);
+				tmp = validBitDepth();
+				store.Read("BitDepth", tmp);
+				setValidBitDepth(tmp);
+				tmp = blockCount();
+				store.Read("NumBuffers", tmp);
+				setBlockCount(tmp);
+				unsigned int bytes = blockBytes();
+				store.Read("BufferSize", bytes);
+				setBlockBytes(bytes);
+				store.CloseGroup();
+
+				if(device_guid_ == GUID()) {device_guid_ = DSDEVID_DefaultPlayback; }
+			}
+		}
+		void DirectSoundSettings::Save(ConfigStorage &store)
+		{
+			store.CreateGroup("\\devices\\direct-sound");
+			///\todo:store.Write("DeviceGuid", device_guid_);
+			store.Write("SamplesPerSec", samplesPerSec());
+			store.Write("Dither", dither());
+			store.Write("BitDepth", validBitDepth());
+			store.Write("NumBuffers", blockCount());
+			store.Write("BufferSize", blockBytes());
+			store.CloseGroup();
+		}
+
+		DirectSound::DirectSound(DirectSoundSettings* settings)
+			: settings_(settings)
+			, _initialized(false)
+			, _running(false)
+			, _playing(false)
+			, _threadRun(false)
+			, _pDs(0)
+			, _pBuffer(0)
+			, _pCallback(0)
 		{
 			_capEnums.resize(0);
 			_capPorts.resize(0);
@@ -50,13 +118,11 @@ namespace psycle
 			Reset();
 		}
 
-		void DirectSound::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void * context)
+		void DirectSound::Initialize(AUDIODRIVERWORKFN pCallback, void * context)
 		{
 			_callbackContext = context;
 			_pCallback = pCallback;
 			_running = false;
-			_hwnd = hwnd;
-			ReadConfig();
 			if( FAILED( ::CoInitialize(NULL) ) )
 			{
 				Error(_T("(DirectSound) Failed to initialize COM"));
@@ -82,11 +148,10 @@ namespace psycle
 
 		bool DirectSound::Start()
 		{
-//			CSingleLock lock(&_lock, TRUE);
 			if(_running) return true;
 			if(!_pCallback) return false;
 
-			if(FAILED(::DirectSoundCreate8(&device_guid, &_pDs, NULL)))
+			if(FAILED(::DirectSoundCreate8(&settings_->device_guid_, &_pDs, NULL)))
 			{
 				Error(_T("Failed to create DirectSound object"));
 				return false;
@@ -98,10 +163,10 @@ namespace psycle
 				return false;
 			}
 
-			_dsBufferSize = _blockSizeBytes*_numBlocks;
+			_dsBufferSize = settings_->totalBufferBytes();
 
 			WAVEFORMATPCMEX wf;
-			PrepareWaveFormat(wf, (_channelMode == stereo) ? 2 : 1, _samplesPerSec, _sampleBits, _sampleValidBits);
+			PrepareWaveFormat(wf, settings_->numChannels(), settings_->samplesPerSec(), settings_->bitDepth(), settings_->validBitDepth());
 
 			DSBUFFERDESC desc;
 			ZeroMemory( &desc, sizeof(DSBUFFERDESC) );
@@ -150,7 +215,6 @@ namespace psycle
 
 		bool DirectSound::Stop()
 		{
-//			CSingleLock lock(&_lock, TRUE);
 			if(!_running) return true;
 			_threadRun = false;
 			CSingleLock event(&_event, TRUE);
@@ -259,7 +323,7 @@ namespace psycle
 
 			// Create the capture buffer
 			WAVEFORMATPCMEX wf;
-			PrepareWaveFormat(wf, (_channelMode == stereo) ? 2 : 1, _samplesPerSec, _sampleBits, _sampleValidBits);
+			PrepareWaveFormat(wf, settings_->numChannels(), settings_->samplesPerSec(), settings_->bitDepth(), settings_->validBitDepth());
 
 			DSCBUFFERDESC dscbd;
 			ZeroMemory( &dscbd, sizeof(DSCBUFFERDESC) );
@@ -282,10 +346,10 @@ namespace psycle
 				return false;
 			}
 			// 2* is a safety measure (Haven't been able to dig out why it crashes if it is exactly the size)
-			universalis::os::aligned_memory_alloc(16, port.pleft, 2*_blockSizeBytes);
-			universalis::os::aligned_memory_alloc(16, port.pright, 2*_blockSizeBytes);
-			ZeroMemory(port.pleft, 2*_blockSizeBytes);
-			ZeroMemory(port.pright, 2*_blockSizeBytes);
+			universalis::os::aligned_memory_alloc(16, port.pleft, 2*settings_->blockBytes());
+			universalis::os::aligned_memory_alloc(16, port.pright, 2*settings_->blockBytes());
+			ZeroMemory(port.pleft, 2*settings_->blockBytes());
+			ZeroMemory(port.pright, 2*settings_->blockBytes());
 			return true;
 		}
 
@@ -401,9 +465,9 @@ namespace psycle
 			//Prefill buffer:
 			pThis->_lowMark = 0;
 			pThis->m_readPosWraps = 0;
-			pThis->_highMark = pThis->_blockSizeBytes;
+			pThis->_highMark = pThis->settings_->blockBytes();
 			pThis->_pBuffer->SetCurrentPosition(0);
-			for(int i=0; i< pThis->_numBlocks;i++)
+			for(int i=0; i< pThis->settings_->blockCount();i++)
 			{
 				//Directsound playback buffer is started here.
 				pThis->DoBlocks();
@@ -431,7 +495,7 @@ namespace psycle
 					}
 					// Next, proceeed with the generation of audio
 					pThis->DoBlocks();
-					if (++runs > pThis->_numBlocks)
+					if (++runs > pThis->settings_->blockCount())
 						break;
 				}
 				::Sleep(1);
@@ -461,10 +525,11 @@ namespace psycle
 
 			int* pBlock1 , *pBlock2;
 			unsigned long blockSize1, blockSize2;
-			HRESULT hr = port._pBuffer->Lock(port._lowMark, _blockSizeBytes, 
+			HRESULT hr = port._pBuffer->Lock(port._lowMark, settings_->blockBytes(), 
 				(void**)&pBlock1, &blockSize1, (void**)&pBlock2, &blockSize2, 0);
 			if (SUCCEEDED(hr))
 			{ 
+				unsigned int _sampleValidBits = settings_->validBitDepth();
 				// Put the audio in our float buffers.
 				int numSamples = blockSize1 / GetSampleSizeBytes();
 				if (_sampleValidBits == 32) {
@@ -501,7 +566,7 @@ namespace psycle
 		{
 			int* pBlock1 , *pBlock2;
 			unsigned long blockSize1, blockSize2;
-			HRESULT hr = _pBuffer->Lock(_lowMark, _blockSizeBytes, 
+			HRESULT hr = _pBuffer->Lock(_lowMark, settings_->blockBytes(), 
 				(void**)&pBlock1, &blockSize1, (void**)&pBlock2, &blockSize2, 0);
 			if (DSERR_BUFFERLOST == hr) 
 			{ 
@@ -511,12 +576,13 @@ namespace psycle
 				if (_highMark < _dsBufferSize) _pBuffer->SetCurrentPosition(_highMark);
 				else _pBuffer->SetCurrentPosition(0);
 
-				hr = _pBuffer->Lock(_lowMark, _blockSizeBytes, 
+				hr = _pBuffer->Lock(_lowMark, settings_->blockBytes(), 
 					(void**)&pBlock1, &blockSize1, (void**)&pBlock2, &blockSize2, 0);
 			}
 			if (SUCCEEDED(hr))
 			{
 				// Generate audio and put it into the buffer
+				unsigned int _sampleValidBits = settings_->validBitDepth();
 				int numSamples = blockSize1 / GetSampleSizeBytes();
 				float *pFloatBlock = _pCallback(_callbackContext, numSamples);
 				if(_sampleValidBits == 32) {
@@ -526,7 +592,7 @@ namespace psycle
 					Quantize24in32Bit(pFloatBlock, pBlock1, numSamples);
 				}
 				else if (_sampleValidBits == 16) {
-					if(_dither) Quantize16WithDither(pFloatBlock, pBlock1, numSamples);
+					if(settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock1, numSamples);
 					else Quantize16(pFloatBlock, pBlock1, numSamples);
 				}
 				_lowMark += blockSize1;
@@ -541,7 +607,7 @@ namespace psycle
 						Quantize24in32Bit(pFloatBlock, pBlock2, numSamples);
 					}
 					else if (_sampleValidBits == 16) {
-						if(_dither) Quantize16WithDither(pFloatBlock, pBlock2, numSamples);
+						if(settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock2, numSamples);
 						else Quantize16(pFloatBlock, pBlock2, numSamples);
 					}
 					_lowMark += blockSize2;
@@ -554,115 +620,33 @@ namespace psycle
 					if((std::uint64_t)m_readPosWraps * (std::uint64_t)_dsBufferSize >= 0x100000000LL)
 					{
 						m_readPosWraps = 0;
-						CMidiInput::Instance()->ReSync();	// MIDI IMPLEMENTATION
+						Global::midi().ReSync();	// MIDI IMPLEMENTATION
 					}
 				}
-				_highMark = _lowMark + _blockSizeBytes;
+				_highMark = _lowMark + settings_->blockBytes();
 				if (SUCCEEDED(hr) && !_playing)
 				{
 					_playing = true;
 					_pBuffer->SetCurrentPosition(_highMark);
 					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
-					CMidiInput::Instance()->ReSync(); // MIDI IMPLEMENTATION
+					Global::midi().ReSync(); // MIDI IMPLEMENTATION
 				}
 			}
-		}
-
-		void DirectSound::ReadConfig()
-		{
-			// default configuration
-			bool saveatend(false);
-			device_guid = DSDEVID_DefaultPlayback;
-			_dither = false;
-			_sampleBits = 32;
-			_sampleValidBits = 32;
-			_channelMode = stereo;
-			_samplesPerSec = 44100;
-			_blockSizeBytes = 4096;
-			_numBlocks = 4;
-			_configured = true;
-
-			// read from registry
-			Registry reg;
-			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS) // settings in version 1.8
-			{
-				reg.CloseRootKey();
-				reg.OpenRootKey(HKEY_CURRENT_USER,PSYCLE__PATH__REGISTRY__ROOT "--1.7"); // settings in version 1.7 alpha
-				if(reg.OpenKey("configuration\\devices\\direct-sound") != ERROR_SUCCESS)
-				{
-					reg.CloseRootKey();
-					reg.OpenRootKey(HKEY_CURRENT_USER,"Software\\AAS\\Psycle\\CurrentVersion");
-					if(reg.OpenKey("DirectSound") != ERROR_SUCCESS)
-					{
-						reg.CloseRootKey();
-						return;
-					}
-				}
-				saveatend=true;
-			}
-			bool configured(true);
-			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceGuid", device_guid);
-			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", _dither);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _sampleValidBits);
-			if (configured) { if(_sampleValidBits == 24) _sampleBits=32;
-				else _sampleBits=_sampleValidBits;
-			}
-			configured &= ERROR_SUCCESS == reg.QueryValue("NumBuffers", _numBlocks);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", _blockSizeBytes);
-			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
-			_configured = configured;
-			if(device_guid == GUID()) {device_guid = DSDEVID_DefaultPlayback; }
-			reg.CloseKey();
-			reg.CloseRootKey();
-			if(saveatend) WriteConfig();
-		}
-
-		void DirectSound::WriteConfig()
-		{
-			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
-			{
-				Error("Unable to write configuration to the registry");
-				return;
-			}
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS)
-			{
-				if(reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\direct-sound") != ERROR_SUCCESS)
-				{
-					Error("Unable to write configuration to the registry");
-					return;
-				}
-			}
-			reg.SetValue("DeviceGuid", device_guid);
-			reg.SetValue("Dither", _dither);
-			reg.SetValue("BitDepth", _sampleValidBits);
-			reg.SetValue("SamplesPerSec", _samplesPerSec);
-			reg.SetValue("BufferSize", _blockSizeBytes);
-			reg.SetValue("NumBuffers", _numBlocks);
-			reg.CloseKey();
-			reg.CloseRootKey();
 		}
 
 		void DirectSound::Configure()
 		{
-			// 1. reads the config from persistent storage
-			// 2. opens the gui to let the user edit the settings
-			// 3. writes the config to persistent storage
-
-			if(!_configured) ReadConfig();
-
 			CDSoundConfig dlg;
-			dlg.device_idx = GetIdxFromDevice(&device_guid);
-			dlg.dither = _dither;
-			dlg.bit_depth  = _sampleValidBits;
-			dlg.sample_rate = _samplesPerSec;
-			dlg.buffer_samples = GetBufferSamples();
-			dlg.buffer_count = _numBlocks;
+			dlg.device_idx = GetIdxFromDevice(&settings_->device_guid_);
+			dlg.dither = settings_->dither();
+			dlg.bit_depth  = settings_->validBitDepth();
+			dlg.sample_rate = settings_->samplesPerSec();
+			dlg.buffer_samples = settings_->blockFrames();
+			dlg.buffer_count = settings_->blockCount();
 			dlg.directsound = this;
 
 			if(dlg.DoModal() != IDOK) return;
-			
+			Enable(false);
 			WAVEFORMATPCMEX wf;
 			PrepareWaveFormat(wf, 2, dlg.sample_rate, (dlg.bit_depth==24)?32:dlg.bit_depth, dlg.bit_depth);
 			bool supported = _playEnums[dlg.device_idx].IsFormatSupported(wf,false);
@@ -671,17 +655,13 @@ namespace psycle
 				return;
 			}
 
-			this->device_guid = *_playEnums[dlg.device_idx].guid;
-			_samplesPerSec = dlg.sample_rate;
-			_sampleValidBits = dlg.bit_depth;
-			if(_sampleValidBits == 24) _sampleBits = 32;
-			else _sampleBits = _sampleValidBits;
-			_dither = dlg.dither;
-			_numBlocks = dlg.buffer_count;
-			_blockSizeBytes = dlg.buffer_samples*GetSampleSizeBytes();
-
-			_configured = true;
-			WriteConfig();
+			settings_->device_guid_ = *_playEnums[dlg.device_idx].guid;
+			settings_->setSamplesPerSec(dlg.sample_rate);
+			settings_->setValidBitDepth(dlg.bit_depth);
+			settings_->setDither(dlg.dither);
+			settings_->setBlockCount(dlg.buffer_count);
+			settings_->setBlockFrames(dlg.buffer_samples);
+			Enable(true);
 		}
 
 		std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) {
@@ -702,25 +682,16 @@ namespace psycle
 			//the cursor moves and always points to the next byte of data to be played.
 			//When the buffer is stopped, the cursor remains where it is.
 			if(!_threadRun) return 0;
-			DWORD playPos;
-			DWORD writePos;
+			DWORD playPos, writePos;
 			if(FAILED(_pBuffer->GetCurrentPosition(&playPos, &writePos)))
 			{
 				Error(_T("DirectSoundBuffer::GetCurrentPosition failed"));
 				return 0;
 			}
-			nanoseconds pcns = cpu_time_clock();
-			std::ostringstream asdf;
-			asdf << "PlayPos: "<< playPos << "\twritepos: " << writePos << "\tlowMark: " << _lowMark << "\tm_readPosWraps: " << m_readPosWraps;
-
 			if(playPos < writePos && _lowMark > writePos) {
-				asdf << " (" << (playPos + m_readPosWraps*_dsBufferSize)/GetSampleSizeBytes() << ") at " << ((pcns.get_count()/1000000)&0xFFFF) << ")\n";
-				TRACE(asdf.str().c_str());
 				return (playPos + m_readPosWraps*_dsBufferSize)/GetSampleSizeBytes();
 			}
 			else {
-				asdf << " (" << (playPos + (m_readPosWraps-1)*_dsBufferSize)/GetSampleSizeBytes() << ") at " << ((pcns.get_count()/1000000)&0xFFFF) << ")\n";
-				TRACE(asdf.str().c_str());
 				return (playPos + (m_readPosWraps-1)*_dsBufferSize)/GetSampleSizeBytes();
 			}
 		}
@@ -744,6 +715,7 @@ namespace psycle
 		//Reposition the write block before the play cursor.
 		void DirectSound::RepositionMark(int &low, int pos)
 		{
+			unsigned int _blockSizeBytes = settings_->blockCount();
 			if (pos < _blockSizeBytes) {
 				low = _dsBufferSize-_blockSizeBytes;
 			}

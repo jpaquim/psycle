@@ -31,6 +31,8 @@
 
 #include <cmath> // SwingFill
 
+int const ID_TIMER_VIEW_REFRESH =39;
+int const ID_TIMER_AUTOSAVE = 159;
 namespace psycle { namespace host {
 
 		CMainFrame		*pParentMain;
@@ -59,10 +61,6 @@ namespace psycle { namespace host {
 			,CH(200)
 			,maxView(false)
 			,textLeftEdge(2)
-			,hbmPatHeader(0)
-			,hbmMachineSkin(0)
-			,hbmMachineBkg(0)
-			,hbmMachineDial(0)
 			,bmpDC(NULL)
 			,playpos(-1)
 			,newplaypos(-1) 
@@ -110,6 +108,11 @@ namespace psycle { namespace host {
 			MBStart.x=0;
 			MBStart.y=0;
 
+			patView = &Global::psycleconf().patView();
+			macView = &Global::psycleconf().macView();
+			PatHeaderCoords = &patView->PatHeaderCoords;
+			MachineCoords = &macView->MachineCoords;
+
 			Global::pInputHandler->SetChildView(this);
 
 			// Creates a new song object. The application Song.
@@ -134,14 +137,6 @@ namespace psycle { namespace host {
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-			patternheader.DeleteObject();
-			DeleteObject(hbmPatHeader);
-			machineskin.DeleteObject();
-			DeleteObject(hbmMachineSkin);
-			patternheadermask.DeleteObject();
-			machineskinmask.DeleteObject();
-			machinebkg.DeleteObject();
-			DeleteObject(hbmMachineBkg);
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -155,7 +150,6 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_CPUPERFORMANCE, OnHelpPsycleenviromentinfo)
 			ON_COMMAND(ID_MIDI_MONITOR, OnMidiMonitorDlg)
 			ON_WM_DESTROY()
-			ON_COMMAND(ID_APP_EXIT, OnAppExit)
 			ON_COMMAND(ID_MACHINEVIEW, OnMachineview)
 			ON_COMMAND(ID_PATTERNVIEW, OnPatternView)	
 			ON_WM_KEYDOWN()
@@ -276,29 +270,28 @@ namespace psycle { namespace host {
 		}
 
 		/// This function gives to the pParentMain the pointer to a CMainFrm
-		/// object. Call this function from the CMainframe side object to
-		/// allow CCHildView call functions of the CMainFrm parent object
-		/// Call this function after creating both the CCHildView object and
-		/// the cmainfrm object
+		/// object. Call this function from the CMainFrm side object to
+		/// allow CChildView call functions of the CMainFrm parent object
+		/// Call this function after creating both the CChildView object and
+		/// the CMainFrm object
 		void CChildView::ValidateParent()
 		{
 			pParentMain=(CMainFrame *)pParentFrame;
-			pParentMain->_pSong=Global::_pSong;
 		}
 
 		/// Timer initialization
 		void CChildView::InitTimer()
 		{
-			KillTimer(31);
-			KillTimer(159);
-			if (!SetTimer(31,33,NULL)) // GUI update. 
+			KillTimer(ID_TIMER_VIEW_REFRESH);
+			KillTimer(ID_TIMER_AUTOSAVE);
+			if (!SetTimer(ID_TIMER_VIEW_REFRESH,33,NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
 
-			if ( Global::pConfig->autosaveSong )
+			if ( Global::psycleconf().autosaveSong )
 			{
-				if (!SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL)) // Autosave Song
+				if (!SetTimer(ID_TIMER_AUTOSAVE,Global::psycleconf().autosaveSongTime*60000,NULL)) // Autosave Song
 				{
 					AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 				}
@@ -308,7 +301,7 @@ namespace psycle { namespace host {
 		/// Timer handler
 		void CChildView::OnTimer( UINT_PTR nIDEvent )
 		{
-			if (nIDEvent == 31)
+			if (nIDEvent == ID_TIMER_VIEW_REFRESH)
 			{
 				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
 				if (!lock.Lock(50)) return;
@@ -319,9 +312,9 @@ namespace psycle { namespace host {
 						(
 							master->_lMax,
 							master->_rMax,
-							Global::pConfig->vu1,
-							Global::pConfig->vu2,
-							Global::pConfig->vu3,
+							macView->vu1,
+							macView->vu2,
+							macView->vu3,
 							master->_clip
 						);
 					pParentMain->UpdateMasterValue(master->_outDry);
@@ -330,7 +323,6 @@ namespace psycle { namespace host {
 				}
 				if (viewMode == view_modes::machine)
 				{
-					//\todo : Move the commented code to a "Tweak", so we can reuse the code below of "Global::pPlayer->Tweaker"
 /*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
 					{
 						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
@@ -347,21 +339,15 @@ namespace psycle { namespace host {
 				{
 					if (_pSong->_pMachine[c])
 					{
-						if ( _pSong->_pMachine[c]->_type == MACH_PLUGIN )
+						if ( _pSong->_pMachine[c]->_type == MACH_VST ||
+							_pSong->_pMachine[c]->_type == MACH_VSTFX )
 						{
-							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
-								pParentMain->m_pWndMac[c]->Invalidate(false);
-						}
-						else if ( _pSong->_pMachine[c]->_type == MACH_VST ||
-								_pSong->_pMachine[c]->_type == MACH_VSTFX )
-						{
+							//I don't know if this has to be done in a synchronized thread
+							//(like this one) neither if it can take a moderate amount of time.
 							((vst::plugin*)_pSong->_pMachine[c])->Idle();
-//							if (pParentMain->isguiopen[c] && Global::pPlayer->Tweaker)
-//								((CVstEditorDlg*)pParentMain->m_pWndMac[c])->Refresh(-1,0);
 						}
 					}
 				}
-				Global::pPlayer->Tweaker = false;
 
 				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
 				if (Global::pPlayer->_playing)
@@ -372,7 +358,7 @@ namespace psycle { namespace host {
 						pParentMain->SetAppSongBpm(0);
 						pParentMain->SetAppSongTpb(0);
 
-						if (Global::pConfig->_followSong)
+						if (Global::psycleconf()._followSong)
 						{
 							CListBox* pSeqList = (CListBox*)pParentMain->m_seqBar.GetDlgItem(IDC_SEQLIST);
 							editcur.line=Global::pPlayer->_lineCounter;
@@ -398,9 +384,9 @@ namespace psycle { namespace host {
 					}
 				}
 			}
-			if (nIDEvent == 159 && !Global::pPlayer->_recording)
+			if (nIDEvent == ID_TIMER_AUTOSAVE && !Global::pPlayer->_recording)
 			{
-				CString filepath = Global::pConfig->GetSongDir().c_str();
+				CString filepath = Global::psycleconf().GetSongDir().c_str();
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
@@ -419,18 +405,9 @@ namespace psycle { namespace host {
 		{
 			if (_outputActive)
 			{
-				AudioDriver* pOut = Global::pConfig->_pOutputDriver;
+				AudioDriver* pOut = Global::psycleconf()._pOutputDriver;
 
 				_outputActive = false;
-				if (!pOut->Initialized())
-				{
-					pOut->Initialize(m_hWnd, Global::pPlayer->Work, Global::pPlayer);
-				}
-				if (!pOut->Configured())
-				{
-					pOut->Configure();
-					_outputActive = true;
-				}
 				if (!pOut->Enabled())
 				{
 					_outputActive = pOut->Enable(true);
@@ -438,32 +415,24 @@ namespace psycle { namespace host {
 				else {
 					_outputActive = true;
 				}
-				// MIDI IMPLEMENTATION
-				Global::pConfig->_pMidiInput->Open();
-
-				// set midi input mode to real-time or step
-				if(viewMode == view_modes::machine && Global::pConfig->_midiMachineViewSeqMode)
-					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
-				else
-					CMidiInput::Instance()->m_midiMode = MODE_STEP;
 			}
+			// set midi input mode to real-time or step
+			if(viewMode == view_modes::machine && Global::psycleconf().midi()._midiMachineViewSeqMode)
+				Global::midi().m_midiMode = MODE_REALTIME;
+			else
+				Global::midi().m_midiMode = MODE_STEP;
 		}
 
 
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
-			if (Global::pConfig->_pOutputDriver->Initialized())
+			if (Global::psycleconf()._pOutputDriver->Initialized())
 			{
-				Global::pConfig->_pOutputDriver->Reset();
+				Global::psycleconf()._pOutputDriver->Reset();
 			}
-			KillTimer(31);
-			KillTimer(159);
-		}
-
-		void CChildView::OnAppExit() 
-		{
-			pParentMain->ClosePsycle();
+			KillTimer(ID_TIMER_VIEW_REFRESH);
+			KillTimer(ID_TIMER_AUTOSAVE);
 		}
 
 		void CChildView::OnPaint() 
@@ -471,7 +440,7 @@ namespace psycle { namespace host {
 			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 			CPaintDC dc(this);
 
-			if ( bmpDC == NULL && Global::pConfig->useDoubleBuffer ) // buffer creation
+			if ( bmpDC == NULL && Global::psycleconf().useDoubleBuffer ) // buffer creation
 			{
 				CRect rc;
 				GetClientRect(&rc);
@@ -481,7 +450,7 @@ namespace psycle { namespace host {
 				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%.8X\n",(int)bmpDC);
 				TRACE(buf);
 			}
-			else if ( bmpDC != NULL && !Global::pConfig->useDoubleBuffer ) // buffer deletion
+			else if ( bmpDC != NULL && !Global::psycleconf().useDoubleBuffer ) // buffer deletion
 			{
 				char buf[100];
 				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
@@ -489,7 +458,7 @@ namespace psycle { namespace host {
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
-			if ( Global::pConfig->useDoubleBuffer )
+			if ( Global::psycleconf().useDoubleBuffer )
 			{
 				CDC bufDC;
 				bufDC.CreateCompatibleDC(&dc);
@@ -606,7 +575,7 @@ namespace psycle { namespace host {
 			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
 			_pSong->viewSize.y=cy;
 			
-			if ( bmpDC != NULL && Global::pConfig->useDoubleBuffer ) // remove old buffer to force recreating it with new size
+			if ( bmpDC != NULL && Global::psycleconf().useDoubleBuffer ) // remove old buffer to force recreating it with new size
 			{
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
 				bmpDC->DeleteObject();
@@ -641,7 +610,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
@@ -658,7 +627,7 @@ namespace psycle { namespace host {
 
 				if (index != -1)
 				{
-					Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+					Global::psycleconf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 				}
 				
 				if (!file.Create(str.GetBuffer(1), true))
@@ -686,7 +655,7 @@ namespace psycle { namespace host {
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
 				{
-					std::string filepath = Global::pConfig->GetCurrentSongDir();
+					std::string filepath = Global::psycleconf().GetCurrentSongDir();
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					
@@ -765,7 +734,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
@@ -793,7 +762,7 @@ namespace psycle { namespace host {
 					CProgressDialog progress;
 					if (index != -1)
 					{
-						Global::pConfig->SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+						Global::psycleconf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 						Global::_pSong->fileName = str.Mid(index+1);
 					}
 					else
@@ -866,7 +835,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
@@ -956,9 +925,9 @@ namespace psycle { namespace host {
 		void CChildView::OnFileSaveaudio() 
 		{
 			OnBarstop();
-			KillTimer(31);
-			KillTimer(159);
-			OnTimer(159); // Autosave
+			KillTimer(ID_TIMER_VIEW_REFRESH);
+			KillTimer(ID_TIMER_AUTOSAVE);
+			OnTimer(ID_TIMER_AUTOSAVE); // Autosave
 			CSaveWavDlg dlg(this, &blockSel);
 			dlg.DoModal();
 			InitTimer();
@@ -989,9 +958,9 @@ namespace psycle { namespace host {
 			}
 			if (!bChecked)
 			{
-				if (Global::pConfig->bFileSaveReminders)
+				if (Global::psycleconf().bFileSaveReminders)
 				{
-					std::string filepath = Global::pConfig->GetCurrentSongDir();
+					std::string filepath = Global::psycleconf().GetCurrentSongDir();
 					filepath += '\\';
 					filepath += Global::_pSong->fileName;
 					OldPsyFile file;
@@ -1042,7 +1011,7 @@ namespace psycle { namespace host {
 				if (Global::_pSong->_saved)
 				{
 					std::ostringstream fullpath;
-					fullpath << Global::pConfig->GetCurrentSongDir().c_str()
+					fullpath << Global::psycleconf().GetCurrentSongDir().c_str()
 						<< '\\' << Global::_pSong->fileName.c_str();
 					FileLoadsongNamed(fullpath.str());
 				}
@@ -1059,10 +1028,10 @@ namespace psycle { namespace host {
 				ShowScrollBar(SB_BOTH,FALSE);
 
 				// set midi input mode to real-time or Step
-				if(Global::pConfig->_midiMachineViewSeqMode)
-					CMidiInput::Instance()->m_midiMode = MODE_REALTIME;
+				if(Global::psycleconf().midi()._midiMachineViewSeqMode)
+					Global::midi().m_midiMode = MODE_REALTIME;
 				else
-					CMidiInput::Instance()->m_midiMode = MODE_STEP;
+					Global::midi().m_midiMode = MODE_STEP;
 
 				Repaint();
 				pParentMain->StatusBarIdle();
@@ -1088,16 +1057,13 @@ namespace psycle { namespace host {
 				//ShowScrollBar(SB_BOTH,FALSE);
 				
 				// set midi input mode to step insert
-				CMidiInput::Instance()->m_midiMode = MODE_STEP;
+				Global::midi().m_midiMode = MODE_STEP;
 				
 				GetParent()->SetActiveWindow();
 
-				if
-					(
-						Global::pConfig->_followSong &&
-						editPosition  != Global::pPlayer->_playPosition &&
-						Global::pPlayer->_playing
-					)
+				if (Global::psycleconf()._followSong &&
+					editPosition  != Global::pPlayer->_playPosition &&
+					Global::pPlayer->_playing)
 				{
 					editPosition=Global::pPlayer->_playPosition;
 				}
@@ -1124,7 +1090,7 @@ namespace psycle { namespace host {
 				ShowScrollBar(SB_BOTH,FALSE);
 				
 				// set midi input mode to step insert
-				CMidiInput::Instance()->m_midiMode = MODE_STEP;
+				Global::midi().m_midiMode = MODE_STEP;
 				
 				GetParent()->SetActiveWindow();
 				Repaint();
@@ -1144,7 +1110,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnBarplay() 
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::psycleconf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -1155,7 +1121,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnBarplayFromStart() 
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::psycleconf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -1179,13 +1145,13 @@ namespace psycle { namespace host {
 
 		void CChildView::OnBarrec() 
 		{
-			if (Global::pConfig->_followSong && bEditMode)
+			if (Global::psycleconf()._followSong && bEditMode)
 			{
 				bEditMode = FALSE;
 			}
 			else
 			{
-				Global::pConfig->_followSong = TRUE;
+				Global::psycleconf()._followSong = TRUE;
 				bEditMode = TRUE;
 				CButton*cb=(CButton*)pParentMain->m_seqBar.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
@@ -1195,7 +1161,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
 		{
-			if (Global::pConfig->_followSong && bEditMode)
+			if (Global::psycleconf()._followSong && bEditMode)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1203,7 +1169,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnButtonplayseqblock() 
 		{
-			if (Global::pConfig->_followSong)
+			if (Global::psycleconf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -1237,7 +1203,7 @@ namespace psycle { namespace host {
 
 			if (pl)
 			{
-				if ( Global::pConfig->_followSong && blk)
+				if ( Global::psycleconf()._followSong && blk)
 				{
 					editPosition=prevEditPosition;
 					pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
@@ -1263,7 +1229,8 @@ namespace psycle { namespace host {
 				{
 					Global::pPlayer->StartRecording(dlg.GetPathName().GetBuffer(4));
 				}
-				if ( Global::pConfig->autoStopMachines ) 
+				//If autoStopMachine is activated, deactivate it while recording
+				if ( Global::psycleconf().UsesAutoStopMachines() ) 
 				{
 					OnAutostop();
 				}
@@ -1288,9 +1255,9 @@ namespace psycle { namespace host {
 
 		void CChildView::OnAutostop() 
 		{
-			if ( Global::pConfig->autoStopMachines )
+			if ( Global::psycleconf().UsesAutoStopMachines() )
 			{
-				Global::pConfig->autoStopMachines = false;
+				Global::psycleconf().UseAutoStopMachines(false);
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
 					if (Global::_pSong->_pMachine[c])
@@ -1299,12 +1266,12 @@ namespace psycle { namespace host {
 					}
 				}
 			}
-			else Global::pConfig->autoStopMachines = true;
+			else Global::psycleconf().UseAutoStopMachines(true);
 		}
 
 		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) 
 		{
-			if (Global::pConfig->autoStopMachines == true ) pCmdUI->SetCheck(TRUE);
+			if (Global::psycleconf().UsesAutoStopMachines() ) pCmdUI->SetCheck(TRUE);
 			else pCmdUI->SetCheck(FALSE);
 		}
 
@@ -1339,7 +1306,7 @@ namespace psycle { namespace host {
 
 			if (dlg.DoModal() == IDOK)
 			{
-
+				///\todo: Implement.
 			}
 		}
 
@@ -1408,14 +1375,14 @@ namespace psycle { namespace host {
 					if (dlg.selectedMode == modegen) 
 					{
 						fb = Global::_pSong->GetFreeBus();
-						xs = MachineCoords.sGenerator.width;
-						ys = MachineCoords.sGenerator.height;
+						xs = MachineCoords->sGenerator.width;
+						ys = MachineCoords->sGenerator.height;
 					}
 					else 
 					{
 						fb = Global::_pSong->GetFreeFxBus();
-						xs = MachineCoords.sEffect.width;
-						ys = MachineCoords.sEffect.height;
+						xs = MachineCoords->sEffect.width;
+						ys = MachineCoords->sEffect.height;
 					}
 				}
 				else
@@ -1424,8 +1391,8 @@ namespace psycle { namespace host {
 					{
 						AddMacViewUndo();
 						fb = mac;
-						xs = MachineCoords.sEffect.width;
-						ys = MachineCoords.sEffect.height;
+						xs = MachineCoords->sEffect.width;
+						ys = MachineCoords->sEffect.height;
 						// delete machine if it already exists
 						if (Global::_pSong->_pMachine[fb])
 						{
@@ -1438,8 +1405,8 @@ namespace psycle { namespace host {
 					{
 						AddMacViewUndo();
 						fb = mac;
-						xs = MachineCoords.sGenerator.width;
-						ys = MachineCoords.sGenerator.height;
+						xs = MachineCoords->sGenerator.width;
+						ys = MachineCoords->sGenerator.height;
 						// delete machine if it already exists
 						if (Global::_pSong->_pMachine[fb])
 						{
@@ -1539,26 +1506,20 @@ namespace psycle { namespace host {
 		void CChildView::OnConfigurationSettings() 
 		{
 			CConfigDlg dlg("Psycle Settings");
-			_outputActive = false;
-			dlg.Init(Global::pConfig);
 			if (dlg.DoModal() == IDOK)
 			{
-				KillTimer(159);
-				if ( Global::pConfig->autosaveSong )
-				{
-					SetTimer(159,Global::pConfig->autosaveSongTime*60000,NULL);
-				}
+				Global::psycleconf().RefreshSettings();
+				RecalculateColourGrid();
+				RecalcMetrics();
+				InitTimer();
 			}
-			_outputActive = true;
-			EnableSound();
-			//Repaint();
+			Repaint();
 		}
 
 		void CChildView::OnHelpSaludos() 
 		{
 			CGreetDialog dlg;
 			dlg.DoModal();
-			//Repaint();
 		}
 
 		///\todo extemely toxic pollution
@@ -1888,7 +1849,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::pConfig->GetCurrentSongDir();
+			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
@@ -1912,7 +1873,7 @@ namespace psycle { namespace host {
 						editPosition=0;
 						xmfile.Load(*_pSong);
 						xmfile.Close();
-						if (Global::pConfig->bShowSongInfoOnLoad)
+						if (Global::psycleconf().bShowSongInfoOnLoad)
 						{
 							CSongpDlg dlg(Global::_pSong);
 							dlg.SetReadOnly();
@@ -1932,7 +1893,7 @@ namespace psycle { namespace host {
 							return;
 						}
 						it.Close();
-						if (Global::pConfig->bShowSongInfoOnLoad)
+						if (Global::psycleconf().bShowSongInfoOnLoad)
 						{
 							CSongpDlg dlg(Global::_pSong);
 							dlg.SetReadOnly();
@@ -1952,7 +1913,7 @@ namespace psycle { namespace host {
 							return;
 						}
 						s3m.Close();
-						if (Global::pConfig->bShowSongInfoOnLoad)
+						if (Global::psycleconf().bShowSongInfoOnLoad)
 						{
 							CSongpDlg dlg(Global::_pSong);
 							dlg.SetReadOnly();
@@ -1966,7 +1927,7 @@ namespace psycle { namespace host {
 						editPosition=0;
 						modfile.Load(*_pSong);
 						modfile.Close();
-						if (Global::pConfig->bShowSongInfoOnLoad)
+						if (Global::psycleconf().bShowSongInfoOnLoad)
 						{
 							CSongpDlg dlg(Global::_pSong);
 							dlg.SetReadOnly();
@@ -1979,7 +1940,7 @@ namespace psycle { namespace host {
 				index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::pConfig->SetCurrentSongDir((LPCSTR)str.Left(index));
+					Global::psycleconf().SetCurrentSongDir((LPCSTR)str.Left(index));
 					Global::_pSong->fileName = str.Mid(index+1)+".psy";
 				}
 				else
@@ -2004,7 +1965,6 @@ namespace psycle { namespace host {
 			int iCount;
 			char* nameBuff;
 			UINT nameSize;
-			HMENU hFileMenu, hRootMenuBar;
 			UINT ids[] =
 				{
 					ID_FILE_RECENT_01,
@@ -2012,12 +1972,6 @@ namespace psycle { namespace host {
 					ID_FILE_RECENT_03,
 					ID_FILE_RECENT_04
 				};
-			MENUITEMINFO hNewItemInfo, hTempItemInfo;
-			hRootMenuBar = ::GetMenu(this->GetParent()->m_hWnd);
-			//pRootMenuBar = this->GetParent()->GetMenu();
-			//hRootMenuBar = HMENU (*pRootMenuBar);
-			hFileMenu = GetSubMenu(hRootMenuBar, 0);
-			hRecentMenu = GetSubMenu(hFileMenu, 11);
 			// Remove initial empty element, if present.
 			if(GetMenuItemID(hRecentMenu, 0) == ID_FILE_RECENT_NONE)
 			{
@@ -2040,6 +1994,7 @@ namespace psycle { namespace host {
 			{
 				DeleteMenu(hRecentMenu, 4-1, MF_BYPOSITION);
 			}
+			::MENUITEMINFO hNewItemInfo, hTempItemInfo;
 			hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
 			hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
 			hNewItemInfo.fType		= MFT_STRING;
@@ -2055,6 +2010,7 @@ namespace psycle { namespace host {
 				hTempItemInfo.wID		= ids[iCount];
 				SetMenuItemInfo(hRecentMenu, iCount, true, &hTempItemInfo);
 			}
+			Global::psycleconf().AddRecentFile(fName);
 		}
 
 		void CChildView::OnFileRecent_01()
@@ -2121,7 +2077,7 @@ namespace psycle { namespace host {
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
 			{
-				Global::pConfig->SetCurrentSongDir(fName.substr(0,index));
+				Global::psycleconf().SetCurrentSongDir(fName.substr(0,index));
 				Global::_pSong->fileName = fName.substr(index+1);
 			}
 			else
@@ -2142,7 +2098,7 @@ namespace psycle { namespace host {
 			KillUndo();
 			KillRedo();
 			SetTitleBarText();
-			if (Global::pConfig->bShowSongInfoOnLoad)
+			if (Global::psycleconf().bShowSongInfoOnLoad)
 			{
 				CSongpDlg dlg(Global::_pSong);
 				dlg.SetReadOnly();
@@ -2197,1118 +2153,35 @@ namespace psycle { namespace host {
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\keys.txt",Global::pConfig->appPath().c_str());
+			sprintf(path,"%sdocs\\keys.txt",Global::psycleconf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\readme.txt",Global::pConfig->appPath().c_str());
+			sprintf(path,"%sdocs\\readme.txt",Global::psycleconf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\tweaking.txt",Global::pConfig->appPath().c_str());
+			sprintf(path,"%sdocs\\tweaking.txt",Global::psycleconf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\whatsnew.txt",Global::pConfig->appPath().c_str());
+			sprintf(path,"%sdocs\\whatsnew.txt",Global::psycleconf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
-		}
-
-		void CChildView::LoadMachineSkin()
-		{
-			std::string szOld;
-			LoadMachineDial();
-			if (!Global::pConfig->machine_skin.empty())
-			{
-				szOld = Global::pConfig->machine_skin;
-				if (szOld != PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
-				{
-					BOOL result = FALSE;
-					FindMachineSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->machine_skin.c_str(), &result);
-					if(result)
-					{
-						return;
-					}
-				}
-				// load defaults
-				szOld = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
-				// and coords
-				#if defined PSYCLE__CONFIGURATION__SKIN__UGLY_DEFAULT
-					MachineCoords.sMaster.x = 0;
-					MachineCoords.sMaster.y = 0;
-					MachineCoords.sMaster.width = 148;
-					MachineCoords.sMaster.height = 48;
-
-					MachineCoords.sGenerator.x = 0;
-					MachineCoords.sGenerator.y = 48;
-					MachineCoords.sGenerator.width = 148;
-					MachineCoords.sGenerator.height = 48;
-					MachineCoords.sGeneratorVu0.x = 0;
-					MachineCoords.sGeneratorVu0.y = 144;
-					MachineCoords.sGeneratorVu0.width = 6;
-					MachineCoords.sGeneratorVu0.height = 5;
-					MachineCoords.sGeneratorVuPeak.x = 96;
-					MachineCoords.sGeneratorVuPeak.y = 144;
-					MachineCoords.sGeneratorVuPeak.width = 6;
-					MachineCoords.sGeneratorVuPeak.height = 5;
-					MachineCoords.sGeneratorPan.x = 21;
-					MachineCoords.sGeneratorPan.y = 149;
-					MachineCoords.sGeneratorPan.width = 24;
-					MachineCoords.sGeneratorPan.height = 9;
-					MachineCoords.sGeneratorMute.x = 7;
-					MachineCoords.sGeneratorMute.y = 149;
-					MachineCoords.sGeneratorMute.width = 7;
-					MachineCoords.sGeneratorMute.height = 7;
-					MachineCoords.sGeneratorSolo.x = 14;
-					MachineCoords.sGeneratorSolo.y = 149;
-					MachineCoords.sGeneratorSolo.width = 7;
-					MachineCoords.sGeneratorSolo.height = 7;
-
-					MachineCoords.sEffect.x = 0;
-					MachineCoords.sEffect.y = 96;
-					MachineCoords.sEffect.width = 148;
-					MachineCoords.sEffect.height = 48;
-					MachineCoords.sEffectVu0.x = 0;
-					MachineCoords.sEffectVu0.y = 144;
-					MachineCoords.sEffectVu0.width = 6;
-					MachineCoords.sEffectVu0.height = 5;
-					MachineCoords.sEffectVuPeak.x = 96;
-					MachineCoords.sEffectVuPeak.y = 144;
-					MachineCoords.sEffectVuPeak.width = 6;
-					MachineCoords.sEffectVuPeak.height = 5;
-					MachineCoords.sEffectPan.x = 21;
-					MachineCoords.sEffectPan.y = 149;
-					MachineCoords.sEffectPan.width = 24;
-					MachineCoords.sEffectPan.height = 9;
-					MachineCoords.sEffectMute.x = 7;
-					MachineCoords.sEffectMute.y = 149;
-					MachineCoords.sEffectMute.width = 7;
-					MachineCoords.sEffectMute.height = 7;
-					MachineCoords.sEffectBypass.x = 0;
-					MachineCoords.sEffectBypass.y = 149;
-					MachineCoords.sEffectBypass.width = 7;
-					MachineCoords.sEffectBypass.height = 12;
-
-					MachineCoords.dGeneratorVu.x = 8;
-					MachineCoords.dGeneratorVu.y = 3;
-					MachineCoords.dGeneratorVu.width = 96;
-					MachineCoords.dGeneratorVu.height = 0;
-					MachineCoords.dGeneratorPan.x = 3;
-					MachineCoords.dGeneratorPan.y = 35;
-					MachineCoords.dGeneratorPan.width = 117;
-					MachineCoords.dGeneratorPan.height = 0;
-					MachineCoords.dGeneratorMute.x = 137;
-					MachineCoords.dGeneratorMute.y = 4;
-					MachineCoords.dGeneratorSolo.x = 137;
-					MachineCoords.dGeneratorSolo.y = 17;
-					MachineCoords.dGeneratorName.x = 10;
-					MachineCoords.dGeneratorName.y = 12;
-
-					MachineCoords.dEffectVu.x = 8;
-					MachineCoords.dEffectVu.y = 3;
-					MachineCoords.dEffectVu.width = 96;
-					MachineCoords.dEffectVu.height = 0;
-					MachineCoords.dEffectPan.x = 3;
-					MachineCoords.dEffectPan.y = 35;
-					MachineCoords.dEffectPan.width = 117;
-					MachineCoords.dEffectPan.height = 0;
-					MachineCoords.dEffectMute.x = 137;
-					MachineCoords.dEffectMute.y = 4;
-					MachineCoords.dEffectBypass.x = 137;
-					MachineCoords.dEffectBypass.y = 15;
-					MachineCoords.dEffectName.x = 10;
-					MachineCoords.dEffectName.y = 12;
-					MachineCoords.bHasTransparency = FALSE;
-				#else
-					MachineCoords.sMaster.x = 0;
-					MachineCoords.sMaster.y = 0;
-					MachineCoords.sMaster.width = 148;
-					MachineCoords.sMaster.height = 47;//48;
-
-					MachineCoords.sGenerator.x = 0;
-					MachineCoords.sGenerator.y = 47;//48;
-					MachineCoords.sGenerator.width = 148;
-					MachineCoords.sGenerator.height = 47;//48;
-					MachineCoords.sGeneratorVu0.x = 0;
-					MachineCoords.sGeneratorVu0.y = 141;//144;
-					MachineCoords.sGeneratorVu0.width = 7;//6;
-					MachineCoords.sGeneratorVu0.height = 4;//5;
-					MachineCoords.sGeneratorVuPeak.x = 128;//96;
-					MachineCoords.sGeneratorVuPeak.y = 141;//144;
-					MachineCoords.sGeneratorVuPeak.width = 2;//6;
-					MachineCoords.sGeneratorVuPeak.height = 4;//5;
-					MachineCoords.sGeneratorPan.x = 45;//102;
-					MachineCoords.sGeneratorPan.y = 145;//144;
-					MachineCoords.sGeneratorPan.width = 16;//24;
-					MachineCoords.sGeneratorPan.height = 5;//9;
-					MachineCoords.sGeneratorMute.x = 0;//133;
-					MachineCoords.sGeneratorMute.y = 145;//144;
-					MachineCoords.sGeneratorMute.width = 15;//7;
-					MachineCoords.sGeneratorMute.height = 14;//7;
-					MachineCoords.sGeneratorSolo.x = 15;//140;
-					MachineCoords.sGeneratorSolo.y = 145;//144;
-					MachineCoords.sGeneratorSolo.width = 15;//7;
-					MachineCoords.sGeneratorSolo.height = 14;//7;
-
-					MachineCoords.sEffect.x = 0;
-					MachineCoords.sEffect.y = 94;//96;
-					MachineCoords.sEffect.width = 148;
-					MachineCoords.sEffect.height = 47;//48;
-					MachineCoords.sEffectVu0.x = 0;
-					MachineCoords.sEffectVu0.y = 141;//144;
-					MachineCoords.sEffectVu0.width = 7;//6;
-					MachineCoords.sEffectVu0.height = 4;//5;
-					MachineCoords.sEffectVuPeak.x = 128;//96;
-					MachineCoords.sEffectVuPeak.y = 141;//144;
-					MachineCoords.sEffectVuPeak.width = 2;//6;
-					MachineCoords.sEffectVuPeak.height = 4;//5;
-					MachineCoords.sEffectPan.x = 45;//102;
-					MachineCoords.sEffectPan.y = 145;//144;
-					MachineCoords.sEffectPan.width = 16;//24;
-					MachineCoords.sEffectPan.height = 5;//9;
-					MachineCoords.sEffectMute.x = 0;//133;
-					MachineCoords.sEffectMute.y = 145;//144;
-					MachineCoords.sEffectMute.width = 15;//7;
-					MachineCoords.sEffectMute.height = 14;//7;
-					MachineCoords.sEffectBypass.x = 30;//126;
-					MachineCoords.sEffectBypass.y = 145;//144;
-					MachineCoords.sEffectBypass.width = 15;//7;
-					MachineCoords.sEffectBypass.height = 14;//13;
-
-					MachineCoords.dGeneratorVu.x = 10;//8;
-					MachineCoords.dGeneratorVu.y = 35;//3;
-					MachineCoords.dGeneratorVu.width = 130;//96;
-					MachineCoords.dGeneratorVu.height = 0;
-					MachineCoords.dGeneratorPan.x = 39;//3;
-					MachineCoords.dGeneratorPan.y = 26;//35;
-					MachineCoords.dGeneratorPan.width = 91;//117;
-					MachineCoords.dGeneratorPan.height = 0;
-					MachineCoords.dGeneratorMute.x = 11;//137;
-					MachineCoords.dGeneratorMute.y = 5;//4;
-					MachineCoords.dGeneratorSolo.x = 26;//137;
-					MachineCoords.dGeneratorSolo.y = 5;//17;
-					MachineCoords.dGeneratorName.x = 49;//10;
-					MachineCoords.dGeneratorName.y = 7;//12;
-
-					MachineCoords.dEffectVu.x = 10;//8;
-					MachineCoords.dEffectVu.y = 35;//3;
-					MachineCoords.dEffectVu.width = 130;//96;
-					MachineCoords.dEffectVu.height = 0;
-					MachineCoords.dEffectPan.x = 39;//3;
-					MachineCoords.dEffectPan.y = 26;//35;
-					MachineCoords.dEffectPan.width = 91;//117;
-					MachineCoords.dEffectPan.height = 0;
-					MachineCoords.dEffectMute.x = 11;//137;
-					MachineCoords.dEffectMute.y = 5;//4;
-					MachineCoords.dEffectBypass.x = 26;//137;
-					MachineCoords.dEffectBypass.y = 5;//15;
-					MachineCoords.dEffectName.x = 49;//10;
-					MachineCoords.dEffectName.y = 7;//12;
-					MachineCoords.bHasTransparency = FALSE;
-				#endif
-				machineskin.DeleteObject();
-				DeleteObject(hbmMachineSkin);
-				machineskinmask.DeleteObject();
-				machineskin.LoadBitmap(IDB_MACHINE_SKIN);
-			}
-		}
-
-		void CChildView::FindMachineSkin(CString findDir, CString findName, BOOL *result)
-		{
-			CFileFind finder;
-			int loop = finder.FindFile(findDir + "\\*"); // check for subfolders.
-			while (loop) 
-			{								
-				loop = finder.FindNextFile();
-				if (finder.IsDirectory() && !finder.IsDots())
-				{
-					FindMachineSkin(finder.GetFilePath(),findName,result);
-					if ( *result == TRUE) return;
-				}
-			}
-			finder.Close();
-			loop = finder.FindFile(findDir + "\\" + findName + ".psm"); // check if the directory is empty
-			while (loop)
-			{
-				loop = finder.FindNextFile();
-				if (!finder.IsDirectory())
-				{
-					CString sName, tmpPath;
-					sName = finder.GetFileName();
-					// ok so we have a .psm, does it have a valid matching .bmp?
-					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
-					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
-					pExt[0]=0;
-					char szOpenName[MAX_PATH];
-					sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
-
-					machineskin.DeleteObject();
-					if( hbmMachineSkin) DeleteObject(hbmMachineSkin);
-					machineskinmask.DeleteObject();
-					hbmMachineSkin = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-					if (hbmMachineSkin)
-					{
-						if (machineskin.Attach(hbmMachineSkin))
-						{	
-							memset(&MachineCoords,0,sizeof(MachineCoords));
-							// load settings
-							FILE* hfile;
-							sprintf(szOpenName,"%s\\%s.psm",findDir,sName);
-							if(!(hfile=fopen(szOpenName,"rb")))
-							{
-								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
-								return;
-							}
-							char buf[512];
-							while (fgets(buf, 512, hfile))
-							{
-								if (strstr(buf,"\"master_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sMaster.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sMaster.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sMaster.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sMaster.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGenerator.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGenerator.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGenerator.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGenerator.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_vu0_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorVu0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorVu0.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorVu0.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorVu0.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_vu_peak_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorVuPeak.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorVuPeak.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorVuPeak.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorVuPeak.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_pan_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_mute_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorMute.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorMute.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorMute.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_solo_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sGeneratorSolo.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sGeneratorSolo.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sGeneratorSolo.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sGeneratorSolo.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffect.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffect.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffect.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffect.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_vu0_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectVu0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectVu0.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectVu0.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectVu0.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_vu_peak_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectVuPeak.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectVuPeak.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectVuPeak.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectVuPeak.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_pan_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_mute_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectMute.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectMute.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectMute.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_bypass_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.sEffectBypass.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.sEffectBypass.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.sEffectBypass.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.sEffectBypass.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_vu_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorVu.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorVu.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dGeneratorVu.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dGeneratorVu.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_pan_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dGeneratorPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dGeneratorPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_mute_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorMute.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_solo_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorSolo.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorSolo.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"generator_name_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dGeneratorName.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dGeneratorName.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_vu_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectVu.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectVu.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dEffectVu.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dEffectVu.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_pan_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectPan.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectPan.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												MachineCoords.dEffectPan.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													MachineCoords.dEffectPan.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_mute_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectMute.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectMute.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_bypass_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectBypass.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectBypass.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"effect_name_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										MachineCoords.dEffectName.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											MachineCoords.dEffectName.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"transparency\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										helpers::hexstring_to_integer(q+1, MachineCoords.cTransparency);
-										MachineCoords.bHasTransparency = TRUE;
-									}
-								}
-							}
-							if (MachineCoords.bHasTransparency)
-							{
-								PrepareMask(&machineskin,&machineskinmask,MachineCoords.cTransparency);
-							}
-							fclose(hfile);
-							*result = TRUE;
-							break;
-						}
-					}
-				}
-			}
-			finder.Close();
-		}
-
-		void CChildView::LoadPatternHeaderSkin()
-		{
-			std::string szOld;
-			if (!Global::pConfig->pattern_header_skin.empty())
-			{
-				szOld = Global::pConfig->pattern_header_skin;
-				// ok so...
-				if (szOld != std::string(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN))
-				{
-					BOOL result = FALSE;
-					FindPatternHeaderSkin(Global::pConfig->GetSkinDir().c_str(),Global::pConfig->pattern_header_skin.c_str(), &result);
-					if (result)
-					{
-						return;
-					}
-				}
-				// load defaults
-				szOld = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
-				// and coords
-				#if defined PSYCLE__PATH__CONFIGURATION__SKIN__UGLY_DEFAULT
-					PatHeaderCoords.sBackground.x=0;
-					PatHeaderCoords.sBackground.y=0;
-					PatHeaderCoords.sBackground.width=109;
-					PatHeaderCoords.sBackground.height=16;
-					PatHeaderCoords.sNumber0.x = 0;
-					PatHeaderCoords.sNumber0.y = 16;
-					PatHeaderCoords.sNumber0.width = 7;
-					PatHeaderCoords.sNumber0.height = 12;
-					PatHeaderCoords.sRecordOn.x = 70;
-					PatHeaderCoords.sRecordOn.y = 16;
-					PatHeaderCoords.sRecordOn.width = 7;
-					PatHeaderCoords.sRecordOn.height = 7;
-					PatHeaderCoords.sMuteOn.x = 77;
-					PatHeaderCoords.sMuteOn.y = 16;
-					PatHeaderCoords.sMuteOn.width = 7;
-					PatHeaderCoords.sMuteOn.height = 7;
-					PatHeaderCoords.sSoloOn.x = 84;
-					PatHeaderCoords.sSoloOn.y = 16;
-					PatHeaderCoords.sSoloOn.width = 7;
-					PatHeaderCoords.sSoloOn.height = 7;
-					PatHeaderCoords.dDigitX0.x = 23;
-					PatHeaderCoords.dDigitX0.y = 2;
-					PatHeaderCoords.dDigit0X.x = 30;
-					PatHeaderCoords.dDigit0X.y = 2;
-					PatHeaderCoords.dRecordOn.x = 52;
-					PatHeaderCoords.dRecordOn.y = 5;
-					PatHeaderCoords.dMuteOn.x = 75;
-					PatHeaderCoords.dMuteOn.y = 5;
-					PatHeaderCoords.dSoloOn.x = 96;
-					PatHeaderCoords.dSoloOn.y = 5;
-					PatHeaderCoords.bHasTransparency = FALSE;
-				#else
-					PatHeaderCoords.sBackground.x=0;
-					PatHeaderCoords.sBackground.y=0;
-					PatHeaderCoords.sBackground.width=109;
-					PatHeaderCoords.sBackground.height=18;//16
-					PatHeaderCoords.sNumber0.x = 0;
-					PatHeaderCoords.sNumber0.y = 18;//16
-					PatHeaderCoords.sNumber0.width = 7;
-					PatHeaderCoords.sNumber0.height = 12;
-					PatHeaderCoords.sRecordOn.x = 70;
-					PatHeaderCoords.sRecordOn.y = 18;//16
-					PatHeaderCoords.sRecordOn.width = 11;//7;
-					PatHeaderCoords.sRecordOn.height = 11;//7;
-					PatHeaderCoords.sMuteOn.x = 81;//77;
-					PatHeaderCoords.sMuteOn.y = 18;//16;
-					PatHeaderCoords.sMuteOn.width = 11;//7;
-					PatHeaderCoords.sMuteOn.height = 11;//7;
-					PatHeaderCoords.sSoloOn.x = 92;//84;
-					PatHeaderCoords.sSoloOn.y = 18;//16;
-					PatHeaderCoords.sSoloOn.width = 11;//7;
-					PatHeaderCoords.sSoloOn.height = 11;//7;
-					PatHeaderCoords.dDigitX0.x = 24;//22;
-					PatHeaderCoords.dDigitX0.y = 3;//2;
-					PatHeaderCoords.dDigit0X.x = 31;//29;
-					PatHeaderCoords.dDigit0X.y = 3;//2;
-					PatHeaderCoords.dRecordOn.x = 52;
-					PatHeaderCoords.dRecordOn.y = 3;//5;
-					PatHeaderCoords.dMuteOn.x = 75;
-					PatHeaderCoords.dMuteOn.y = 3;//5;
-					PatHeaderCoords.dSoloOn.x = 97;//96;
-					PatHeaderCoords.dSoloOn.y = 3;//5;
-					PatHeaderCoords.bHasTransparency = FALSE;
-				#endif
-				patternheader.DeleteObject();
-				DeleteObject(hbmPatHeader);
-				patternheadermask.DeleteObject();
-				patternheader.LoadBitmap(IDB_PATTERN_HEADER_SKIN);
-			}
-		}
-
-		void CChildView::FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result)
-		{
-			CFileFind finder;
-			int loop = finder.FindFile(findDir + "\\*");	// check for subfolders.
-			while (loop) 
-			{		
-				loop = finder.FindNextFile();
-				if (finder.IsDirectory() && !finder.IsDots())
-				{
-					FindPatternHeaderSkin(finder.GetFilePath(),findName,result);
-				}
-			}
-			finder.Close();
-			loop = finder.FindFile(findDir + "\\" + findName + ".psh"); // check if the directory is empty
-			while (loop)
-			{
-				loop = finder.FindNextFile();
-				if (!finder.IsDirectory())
-				{
-					CString sName, tmpPath;
-					sName = finder.GetFileName();
-					// ok so we have a .psh, does it have a valid matching .bmp?
-					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
-					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
-					pExt[0]=0;
-					char szOpenName[MAX_PATH];
-					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
-					patternheader.DeleteObject();
-					if (hbmPatHeader)DeleteObject(hbmPatHeader);
-					patternheadermask.DeleteObject();
-					hbmPatHeader = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-					if (hbmPatHeader)
-					{
-						if (patternheader.Attach(hbmPatHeader))
-						{	
-							memset(&PatHeaderCoords,0,sizeof(PatHeaderCoords));
-							// load settings
-							FILE* hfile;
-							sprintf(szOpenName,"%s\\%s.psh",findDir,sName);
-							if(!(hfile=fopen(szOpenName,"rb")))
-							{
-								MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
-								return;
-							}
-							char buf[512];
-							while (fgets(buf, 512, hfile))
-							{
-								if (strstr(buf,"\"background_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sBackground.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sBackground.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sBackground.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sBackground.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"number_0_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sNumber0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sNumber0.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sNumber0.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sNumber0.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"record_on_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sRecordOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sRecordOn.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sRecordOn.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sRecordOn.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"mute_on_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sMuteOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sMuteOn.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sMuteOn.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sMuteOn.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"solo_on_source\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.sSoloOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.sSoloOn.y = atoi(q+1);
-											q = strchr(q+1,44); // ,
-											if (q)
-											{
-												PatHeaderCoords.sSoloOn.width = atoi(q+1);
-												q = strchr(q+1,44); // ,
-												if (q)
-												{
-													PatHeaderCoords.sSoloOn.height = atoi(q+1);
-												}
-											}
-										}
-									}
-								}
-								else if (strstr(buf,"\"digit_x0_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dDigitX0.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dDigitX0.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"digit_0x_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dDigit0X.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dDigit0X.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"record_on_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dRecordOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dRecordOn.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"mute_on_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dMuteOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dMuteOn.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"solo_on_dest\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										PatHeaderCoords.dSoloOn.x = atoi(q+1);
-										q = strchr(q+1,44); // ,
-										if (q)
-										{
-											PatHeaderCoords.dSoloOn.y = atoi(q+1);
-										}
-									}
-								}
-								else if (strstr(buf,"\"transparency\"="))
-								{
-									char *q = strchr(buf,61); // =
-									if (q)
-									{
-										helpers::hexstring_to_integer(q+1, PatHeaderCoords.cTransparency);
-										PatHeaderCoords.bHasTransparency = TRUE;
-									}
-								}
-							}
-							if (PatHeaderCoords.bHasTransparency)
-							{
-								PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
-							}
-							fclose(hfile);
-							*result = TRUE;
-							break;
-						}
-					}
-				}
-			}
-			finder.Close();
 		}
 
 
 		void CChildView::RecalcMetrics()
 		{
-			if (Global::pConfig->pattern_draw_empty_data)
+			if (patView->draw_empty_data)
 			{
 				strcpy(szBlankParam,".");
 				strcpy(szBlankNote,"---");
@@ -3318,12 +2191,12 @@ namespace psycle { namespace host {
 				strcpy(szBlankParam," ");
 				strcpy(szBlankNote,"   ");
 			}
-			TEXTHEIGHT = Global::pConfig->pattern_font_y;
+			TEXTHEIGHT = patView->font_y;
 			ROWHEIGHT = TEXTHEIGHT+1;
-			TEXTWIDTH = Global::pConfig->pattern_font_x;
+			TEXTWIDTH = patView->font_x;
 			for (int c=0; c<256; c++)	
 			{ 
-				FLATSIZES[c]=Global::pConfig->pattern_font_x; 
+				FLATSIZES[c]=patView->font_x; 
 			}
 			COLX[0] = 0;
 			COLX[1] = (TEXTWIDTH*3)+2;
@@ -3336,8 +2209,8 @@ namespace psycle { namespace host {
 			COLX[8] = COLX[7]+TEXTWIDTH;
 			COLX[9] = COLX[8]+TEXTWIDTH+1;
 			ROWWIDTH = COLX[9];
-			HEADER_ROWWIDTH = PatHeaderCoords.sBackground.width+1;
-			HEADER_HEIGHT = PatHeaderCoords.sBackground.height+2;
+			HEADER_ROWWIDTH = PatHeaderCoords->sBackground.width+1;
+			HEADER_HEIGHT = PatHeaderCoords->sBackground.height+2;
 			if (ROWWIDTH < HEADER_ROWWIDTH)
 			{
 				int temp = (HEADER_ROWWIDTH-ROWWIDTH)/2;
@@ -3348,7 +2221,7 @@ namespace psycle { namespace host {
 				}
 			}
 			HEADER_INDENT = (ROWWIDTH - HEADER_ROWWIDTH)/2;
-			if (Global::pConfig->_linenumbers)
+			if (patView->_linenumbers)
 			{
 				XOFFSET = (4*TEXTWIDTH);
 				YOFFSET = TEXTHEIGHT+2;
@@ -3372,55 +2245,13 @@ namespace psycle { namespace host {
 			{ 
 				VISTRACKS = 1; 
 			}
-			triangle_size_tall = Global::pConfig->mv_triangle_size+((23*Global::pConfig->mv_wirewidth)/16);
+			triangle_size_tall = macView->triangle_size+((23*macView->wirewidth)/16);
 
 			triangle_size_center = triangle_size_tall/2;
 			triangle_size_wide = triangle_size_tall/2;
 			triangle_size_indent = triangle_size_tall/6;
 		}
 
-		void CChildView::PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans)
-		{
-			BITMAP bm;
-			// Get the dimensions of the source bitmap
-			pBmpSource->GetObject(sizeof(BITMAP), &bm);
-			// Create the mask bitmap
-			pBmpMask->DeleteObject();
-			pBmpMask->CreateBitmap( bm.bmWidth, bm.bmHeight, 1, 1, NULL);
-			// We will need two DCs to work with. One to hold the Image
-			// (the source), and one to hold the mask (destination).
-			// When blitting onto a monochrome bitmap from a color, pixels
-			// in the source color bitmap that are equal to the background
-			// color are blitted as white. All the remaining pixels are
-			// blitted as black.
-			CDC hdcSrc, hdcDst;
-			hdcSrc.CreateCompatibleDC(NULL);
-			hdcDst.CreateCompatibleDC(NULL);
-			// Load the bitmaps into memory DC
-			CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
-			CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
-			// Change the background to trans color
-			hdcSrc.SetBkColor(clrTrans);
-			// This call sets up the mask bitmap.
-			hdcDst.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcSrc,0,0,SRCCOPY);
-			// Now, we need to paint onto the original image, making
-			// sure that the "transparent" area is set to black. What
-			// we do is AND the monochrome image onto the color Image
-			// first. When blitting from mono to color, the monochrome
-			// pixel is first transformed as follows:
-			// if  1 (black) it is mapped to the color set by SetTextColor().
-			// if  0 (white) is is mapped to the color set by SetBkColor().
-			// Only then is the raster operation performed.
-			hdcSrc.SetTextColor(RGB(255,255,255));
-			hdcSrc.SetBkColor(RGB(0,0,0));
-			hdcSrc.BitBlt(0,0,bm.bmWidth, bm.bmHeight, &hdcDst,0,0,SRCAND);
-			// Clean up by deselecting any objects, and delete the
-			// DC's.
-			hdcSrc.SelectObject(hbmSrcT);
-			hdcDst.SelectObject(hbmDstT);
-			hdcSrc.DeleteDC();
-			hdcDst.DeleteDC();
-		}
 
 		void CChildView::TransparentBlt
 			(
@@ -3556,37 +2387,6 @@ namespace psycle { namespace host {
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);	
-		}
-		void CChildView::LoadMachineDial()
-		{
-			CNativeGui::uiSetting().LoadMachineDial();
-		}
-
-		void CChildView::LoadMachineBackground()
-		{
-			machinebkg.DeleteObject();
-			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
-			if (Global::pConfig->bBmpBkg)
-			{
-				Global::pConfig->bBmpBkg=FALSE;
-				hbmMachineBkg = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineBkg)
-				{
-					if (machinebkg.Attach(hbmMachineBkg))
-					{	
-						BITMAP bm;
-						GetObject(hbmMachineBkg,sizeof(BITMAP),&bm);
-
-						bkgx=bm.bmWidth;
-						bkgy=bm.bmHeight;
-
-						if ((bkgx > 0) && (bkgy > 0))
-						{
-							Global::pConfig->bBmpBkg=TRUE;
-						}
-					}
-				}
-			}
 		}
 
 }}

@@ -26,11 +26,16 @@ namespace psycle
 		/// this include patterns, pattern sequence, machines and their initial parameters and coordinates, wavetables, ...
 		class Song
 		{
+			static int defaultPatLines;
 		public:
 			/// constructor.
 			Song();
 			/// destructor.
 			virtual ~Song() throw();
+
+			static void SetDefaultPatLines(int lines);
+			static int GetDefaultPatLines() { return defaultPatLines; };
+
 			/// the name of the song.
 			std::string name;
 			/// the author of the song.
@@ -217,6 +222,7 @@ namespace psycle
 			unsigned char * CreateNewPattern(int ps);
 			/// removes a pattern from this song.
 			void RemovePattern(int ps);
+
 			
 			const int SongTracks(){return SONGTRACKS;}
 			void SongTracks(const int value){ SONGTRACKS = value;}

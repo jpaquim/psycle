@@ -428,7 +428,10 @@ namespace psycle { namespace host {
 					else
 					{	// convert integer to string.
 						std::ostringstream s;
-						s << _pPlugsInfo[i]->version << " or " << std::hex << atoi(_pPlugsInfo[i]->version.c_str());
+						std::istringstream s2(_pPlugsInfo[i]->version);
+						int iver = 0;
+						s2 >> iver;
+						s << _pPlugsInfo[i]->version << " or " << std::hex << iver;
 						m_versionLabel.SetWindowText(s.str().c_str());
 					}
 					{	// convert integer to string.
@@ -492,15 +495,16 @@ namespace psycle { namespace host {
 		{
 			DestroyPluginInfo();
 #if defined _WIN64
-			DeleteFile((universalis::os::fs::home_app_local("psycle") / "psycle64.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / "psycle64.plugin-scan.cache").native_file_string().c_str());
 #elif defined _WIN32
-			DeleteFile((universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / "psycle.plugin-scan.cache").native_file_string().c_str());
 #else
 #error unexpected platform
 #endif
 			LoadPluginInfo(this->GetParentFrame());
 			UpdateList();
 			m_browser.Invalidate();
+			m_browser.SetFocus();
 		}
 		void CNewMachine::OnScanNew()
 		{
@@ -508,6 +512,7 @@ namespace psycle { namespace host {
 			LoadPluginInfo(GetParent());
 			UpdateList();
 			m_browser.Invalidate();
+			m_browser.SetFocus();
 		}
 
 		void CNewMachine::OnBytype() 
@@ -545,7 +550,7 @@ namespace psycle { namespace host {
 
 				::AfxGetApp()->DoWaitCursor(1); 
 
-				DWORD dwThreadId;
+				//DWORD dwThreadId;
 				LoadPluginInfoParams params;
 				params.verify = verify;
 				//This almost works.. except for the fact that when closing the progress dialog, the focus is lost.
@@ -632,7 +637,7 @@ namespace psycle { namespace host {
 			}
 #elif defined _WIN32
 			populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
-			if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
+			if(Global::pConfig->UsesJBridge() || Global::pConfig->UsesPsycleVstBridge())
 			{
 				populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
 			}
@@ -648,7 +653,7 @@ namespace psycle { namespace host {
 			}
 			std::ofstream out;
 			{
-				boost::filesystem::path log_dir(universalis::os::fs::home_app_local("psycle"));
+				boost::filesystem::path log_dir(universalis::os::fs::home_app_local(PSYCLE__TAR_NAME));
 				// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
 				mkdir(log_dir.native_directory_string().c_str());
 #if defined _WIN64
@@ -1075,9 +1080,9 @@ namespace psycle { namespace host {
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
 #if defined _WIN64
-			std::string cache((universalis::os::fs::home_app_local("psycle") / "psycle64.plugin-scan.cache").native_file_string());
+			std::string cache((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / "psycle64.plugin-scan.cache").native_file_string());
 #elif defined _WIN32
-			std::string cache((universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache").native_file_string());
+			std::string cache((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / "psycle.plugin-scan.cache").native_file_string());
 #else
 #error unexpected platform
 #endif
@@ -1210,9 +1215,9 @@ namespace psycle { namespace host {
 		bool CNewMachine::SaveCacheFile()
 		{
 #if defined _WIN64
-			boost::filesystem::path cache(universalis::os::fs::home_app_local("psycle") / "psycle64.plugin-scan.cache");
+			boost::filesystem::path cache(universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / "psycle64.plugin-scan.cache");
 #elif defined _WIN32
-			boost::filesystem::path cache(universalis::os::fs::home_app_local("psycle") / "psycle.plugin-scan.cache");
+			boost::filesystem::path cache(universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / "psycle.plugin-scan.cache");
 #else
 	#error unexpected platform
 #endif

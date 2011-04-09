@@ -31,6 +31,8 @@ namespace psycle { namespace host {
 			unsigned long GetCursorPos();				//returns cursor's position
 			void SetCursorPos(unsigned long newpos);	//sets cursor's position
 			bool IsStereo();
+			void StartTimer();
+			void StopTimer();
 
 		// Overrides
 			// ClassWizard generated virtual function overrides

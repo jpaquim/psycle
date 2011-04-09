@@ -9,12 +9,10 @@
 // http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
 // http://msdn.microsoft.com/en-us/library/dd370876%28v=VS.85%29.aspx
 #include "WasapiDriver.hpp"
-#include "Constants.hpp"
 #include "WasapiConfig.hpp"
-#include "Registry.hpp"
-#include "Configuration.hpp"
-#include <psycle/helpers/dsp.hpp>
+#include "ConfigStorage.hpp"
 
+#include <psycle/helpers/dsp.hpp>
 
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/aligned_alloc.hpp>
@@ -35,7 +33,7 @@ namespace psycle
 {
 	namespace host
 	{
-		AudioDriverInfo WasapiDriver::_info = { "Windows WASAPI inteface" };
+		AudioDriverInfo WasapiSettings::info_ = { "Windows WASAPI inteface" };
 		AudioDriverEvent WasapiDriver::_event;
 
 		const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);
@@ -50,15 +48,113 @@ namespace psycle
 			MessageBox(0, msg, _T("DirectSound Output driver"), MB_OK | MB_ICONERROR);
 		}
 
-		WasapiDriver::WasapiDriver()
-			:_pCallback(0)
+		WasapiSettings::WasapiSettings()
+		{
+			SetDefaultSettings();
+		}
+		WasapiSettings::WasapiSettings(const WasapiSettings& othersettings)
+			: AudioDriverSettings(othersettings)
+		{
+			SetDefaultSettings();
+		}
+		WasapiSettings& WasapiSettings::operator=(const WasapiSettings& othersettings)
+		{
+			AudioDriverSettings::operator=(othersettings);
+			return *this;
+		}
+		bool WasapiSettings::operator!=(WasapiSettings const &other)
+		{
+			return AudioDriverSettings::operator!=(other) ||
+				shared != other.shared ||
+				wcscmp(szDeviceID,other.szDeviceID);
+		}
+		AudioDriver* WasapiSettings::NewDriver()
+		{
+			return new WasapiDriver(this);
+		}
+
+		void WasapiSettings::SetDefaultSettings()
+		{
+			AudioDriverSettings::SetDefaultSettings();
+			setValidBitDepth(24);
+			setBlockCount(2);
+			setBlockBytes(2048);
+			shared = true;
+			
+			wcscpy_s(szDeviceID, MAX_STR_LEN-1, L"");
+		}
+		void WasapiSettings::Load(ConfigStorage &store)
+		{
+			if(store.OpenGroup("\\devices\\wasapi"))
+			{
+				///\todo:store.Read("DeviceString", szDeviceID);
+				store.Read("Shared", shared);
+				unsigned int tmp = samplesPerSec();
+				store.Read("SamplesPerSec", tmp);
+				setSamplesPerSec(tmp);
+				bool dodither = dither();
+				store.Read("Dither", dodither);
+				setDither(dodither);
+				tmp = validBitDepth();
+				store.Read("BitDepth", tmp);
+				setValidBitDepth(tmp);
+				tmp = blockFrames();
+				store.Read("BufferSize", tmp);
+				setBlockFrames(tmp);
+				store.CloseGroup();
+			}
+		}
+		void WasapiSettings::Save(ConfigStorage &store)
+		{
+			store.CreateGroup("\\devices\\wasapi");
+			///\todo:store.Write("DeviceString", szDeviceID);
+			store.Write("Shared", shared);
+			store.Write("SamplesPerSec", samplesPerSec());
+			store.Write("Dither", dither());
+			store.Write("BitDepth", validBitDepth());
+			store.Write("BufferSize", blockFrames());
+			store.CloseGroup();
+		}
+		////////////////////////////////////////////////////
+
+		bool WasapiDriver::PortEnum::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode)
+		{
+			IMMDeviceEnumerator *pEnumerator = NULL;
+			IMMDevice			*device = NULL;
+			IAudioClient        *client = NULL;
+			bool issuccess=false;
+			HRESULT hr;
+			hr = CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+				IID_IMMDeviceEnumerator, (void**)&pEnumerator);
+			EXIT_ON_ERROR(hr)
+
+			hr = pEnumerator->GetDevice(szDeviceID, &device);
+			EXIT_ON_ERROR(hr)
+
+			hr = device->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&client);
+			EXIT_ON_ERROR(hr)
+
+			WAVEFORMATEX* bla = NULL;
+			hr = client->IsFormatSupported(sharemode, reinterpret_cast<WAVEFORMATEX*>(&pwfx),
+				(sharemode == AUDCLNT_SHAREMODE_SHARED)? &bla : NULL);
+			if(bla != NULL) { ::CoTaskMemFree(bla); }
+			if(hr==S_OK) issuccess = true;
+Exit:
+			SAFE_RELEASE(client)
+			SAFE_RELEASE(device)
+			SAFE_RELEASE(pEnumerator)
+			return issuccess;
+		}
+		////////////////////////////////////////////////////
+		WasapiDriver::WasapiDriver(WasapiSettings* settings)
+			:settings_(settings)
+			,_pCallback(0)
 			,running(false)
 			,_initialized(false)
 			,_configured(false)
 			,writeMark(0)
 			,_callbackContext(0)
 			,dwThreadId(0)
-			,dither(false)
 			,pAudioClock(0)
 		{
 			ZeroMemory(&out, sizeof(PaWasapiSubStream));
@@ -69,12 +165,11 @@ namespace psycle
 			Stop();
 		}
 
-		void WasapiDriver::Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context)
+		void WasapiDriver::Initialize(AUDIODRIVERWORKFN pCallback, void* context)
 		{
 			_callbackContext = context;
 			_pCallback = pCallback;
 			running = false;
-			ReadConfig();
 			HRESULT hr = S_OK;
 			IMMDeviceEnumerator *pEnumerator = NULL;
 
@@ -95,7 +190,9 @@ Exit:
 		bool WasapiDriver::Start(){
 			HRESULT hr;
 			IMMDeviceEnumerator *pEnumerator = NULL;
+			wcscpy_s(out.szDeviceID, MAX_STR_LEN-1, settings_->szDeviceID);
 			out.streamFlags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK;
+			out.shareMode = settings_->shared ? AUDCLNT_SHAREMODE_SHARED : AUDCLNT_SHAREMODE_EXCLUSIVE;
 			if(running) return true;
 			if(!_pCallback) return false;
 
@@ -124,7 +221,7 @@ Exit:
 				EXIT_ON_ERROR(hr)
 
 				framesPerLatency = portaudio::MakeFramesFromHns(out.period, out.wavex.Format.nSamplesPerSec);
-				_numBlocks = 2;
+				settings_->setBlockCount(2);
 			}
 			else {
 				framesPerLatency = GetBufferSamples();
@@ -134,7 +231,7 @@ Exit:
 					// Add latency frames
 					framesPerLatency = portaudio::MakeFramesFromHns(out.period, out.wavex.Format.nSamplesPerSec);
 				}
-				_numBlocks = 2;
+				settings_->setBlockCount(2);
 			}
 			// Align frames to HD Audio packet size of 128 bytes 
 			framesPerLatency = portaudio::AlignFramesPerBuffer(framesPerLatency,
@@ -142,7 +239,7 @@ Exit:
 
 			// Calculate period
 			out.period = portaudio::MakeHnsPeriod(framesPerLatency, out.wavex.Format.nSamplesPerSec);
-			_blockSizeBytes = framesPerLatency * GetSampleSizeBytes();
+			settings_->setBlockFrames(framesPerLatency);
 	
 			hr = out.client->Initialize(
 				out.shareMode,
@@ -155,7 +252,7 @@ Exit:
 
 			hr= out.client->GetBufferSize(&out.bufferFrameCount);
 			EXIT_ON_ERROR(hr)
-			_blockSizeBytes = out.bufferFrameCount * GetSampleSizeBytes();
+			settings_->setBlockFrames(out.bufferFrameCount);
 			
 
 			hr = out.client->GetService(IID_IAudioClock, (void**)&pAudioClock);
@@ -276,10 +373,10 @@ Exit:
 			port.flags = 0;
 			EXIT_ON_ERROR(hr)
 			// 2* is a safety measure (Haven't been able to dig out why it crashes if it is exactly the size)
-			universalis::os::aligned_memory_alloc(16, port.pleft, 2*_blockSizeBytes);
-			universalis::os::aligned_memory_alloc(16, port.pright, 2*_blockSizeBytes);
-			ZeroMemory(port.pleft, 2*_blockSizeBytes);
-			ZeroMemory(port.pright, 2*_blockSizeBytes);
+			universalis::os::aligned_memory_alloc(16, port.pleft, 2*settings_->blockBytes());
+			universalis::os::aligned_memory_alloc(16, port.pright, 2*settings_->blockBytes());
+			ZeroMemory(port.pleft, 2*settings_->blockBytes());
+			ZeroMemory(port.pright, 2*settings_->blockBytes());
 			return hr;
 Exit:
 			Error("Couldn't open the capture device. Possibly the format is not supported");
@@ -449,6 +546,7 @@ Exit:
 				EXIT_ON_ERROR(hr)
 				if (!(flags & AUDCLNT_BUFFERFLAGS_SILENT))
 				{
+					unsigned int _sampleValidBits = settings_->validBitDepth();
 					if (_sampleValidBits == 32) {
 						DeinterlaceFloat(reinterpret_cast<float*>(pData), port.pleft,port.pright, numf);
 					}
@@ -474,7 +572,7 @@ Exit:
 			// Grab the next empty buffer from the audio device.
 			HRESULT hr = pRenderClient->GetBuffer(numFramesAvailable, &pData);
 			EXIT_ON_ERROR(hr)
-
+			unsigned int _sampleValidBits = settings_->validBitDepth();
 			float *pFloatBlock = _pCallback(_callbackContext, numFramesAvailable);
 			if(_sampleValidBits == 32) {
 				dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pData), numFramesAvailable*2, 1.f/32768.f);
@@ -483,7 +581,7 @@ Exit:
 				Quantize24in32Bit(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
 			}
 			else if (_sampleValidBits == 16) {
-				if(dither) Quantize16WithDither(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
+				if(settings_->dither()) Quantize16WithDither(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
 				else Quantize16(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
 			}
 
@@ -531,111 +629,38 @@ Exit:
 			_capPorts[_portMapping[idx]]._machinepos+=numsamples;
 		}
 
-		void WasapiDriver::ReadConfig(){
-			// default configuration
-			_channelMode = stereo;
-			_samplesPerSec = 44100;
-			_sampleBits=32;
-			_sampleValidBits=24;
-			_blockSizeBytes = 2048;
-			_numBlocks = 2;
-			out.shareMode = AUDCLNT_SHAREMODE_SHARED;
-			dither = true;
-			_configured = true;
-
-			// read from registry
-			Registry reg;
-			reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT);
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\wasapi") != ERROR_SUCCESS) // settings in version 1.8
-			{
-				reg.CloseRootKey();
-				return;
-			}
-			bool configured(true);
-			bool shared;
-			int samples;
-			configured &= ERROR_SUCCESS == reg.QueryValue("DeviceString", out.szDeviceID);
-			configured &= ERROR_SUCCESS == reg.QueryValue("Shared", shared);
-			configured &= ERROR_SUCCESS == reg.QueryValue("Dither", dither);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BitDepth", _sampleValidBits);
-			configured &= ERROR_SUCCESS == reg.QueryValue("BufferSize", samples);
-			configured &= ERROR_SUCCESS == reg.QueryValue("SamplesPerSec", _samplesPerSec);
-			if (configured) {
-				if(_sampleValidBits == 24) _sampleBits=32;
-				else _sampleBits=_sampleValidBits;
-				out.shareMode = shared ? AUDCLNT_SHAREMODE_SHARED : AUDCLNT_SHAREMODE_EXCLUSIVE;
-				_blockSizeBytes = samples * GetSampleSizeBytes();
-			}
-			reg.CloseKey();
-			reg.CloseRootKey();
-			_configured = configured;
-		}
-
-		void WasapiDriver::WriteConfig(){
-			Registry reg;
-			if(reg.OpenRootKey(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT) != ERROR_SUCCESS)
-			{
-				Error("Unable to write configuration to the registry");
-				return;
-			}
-			if(reg.OpenKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\wasapi") != ERROR_SUCCESS)
-			{
-				if(reg.CreateKey(PSYCLE__PATH__REGISTRY__CONFIGKEY "\\devices\\wasapi") != ERROR_SUCCESS)
-				{
-					Error("Unable to write configuration to the registry");
-					return;
-				}
-			}
-			bool shared = (out.shareMode == AUDCLNT_SHAREMODE_SHARED) ? true : false;
-			int samples = GetBufferSamples();
-			reg.SetValue("DeviceString", out.szDeviceID);
-			reg.SetValue("Shared", shared);
-			reg.SetValue("Dither", dither);
-			reg.SetValue("BitDepth", _sampleValidBits);
-			reg.SetValue("SamplesPerSec", _samplesPerSec);
-			reg.SetValue("BufferSize", samples);
-			reg.CloseKey();
-			reg.CloseRootKey();
-		}
 		void WasapiDriver::Configure(void)
 		{
-			if(!_configured) ReadConfig();
-
 			WasapiConfig dlg;
 			dlg.m_driverIndex = GetIdxFromDevice(out.szDeviceID);
-			dlg.m_sampleRate = _samplesPerSec;
-			dlg.m_bitDepth = _sampleValidBits;
-			dlg.m_dither = dither;
-			dlg.m_shareMode = (out.shareMode == AUDCLNT_SHAREMODE_SHARED)? 1: 0;
-			dlg.m_bufferSize = GetBufferSamples();
+			dlg.m_sampleRate = settings_->samplesPerSec();
+			dlg.m_bitDepth = settings_->validBitDepth();
+			dlg.m_dither = settings_->dither();
+			dlg.m_shareMode = settings_->shared;
+			dlg.m_bufferSize = settings_->blockFrames();
 			dlg.wasapi = this;
 
 			if(dlg.DoModal() != IDOK) return;
-
+			Enable(false);
 			AUDCLNT_SHAREMODE sharemode = (dlg.m_shareMode == 0)? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED;
 			if(dlg.m_shareMode == 0) {
 				WAVEFORMATPCMEX wf;
 				PrepareWaveFormat(wf, 2, dlg.m_sampleRate, (dlg.m_bitDepth==24)?32:dlg.m_bitDepth, dlg.m_bitDepth);
-				bool supported = _playEnums[dlg.m_driverIndex].IsFormatSupported(wf,sharemode, false);
+				bool supported = _playEnums[dlg.m_driverIndex].IsFormatSupported(wf,sharemode);
 				if(!supported) {
 					Error("The Format selected is not supported. Keeping the previous configuration");
 					return;
 				}
 			}
 
-			wcscpy_s(out.szDeviceID, MAX_STR_LEN-1, _playEnums[dlg.m_driverIndex].szDeviceID);
-			_samplesPerSec = dlg.m_sampleRate;
-			_sampleValidBits = dlg.m_bitDepth;
-			if(_sampleValidBits == 24) _sampleBits = 32;
-			else _sampleBits = _sampleValidBits;
-			dither = dlg.m_dither;
-			_blockSizeBytes = dlg.m_bufferSize * GetSampleSizeBytes();
-			out.shareMode = sharemode;
-
-			_configured = true;
-			WriteConfig();
-		
-		};
+			wcscpy_s(settings_->szDeviceID, MAX_STR_LEN-1, _playEnums[dlg.m_driverIndex].szDeviceID);
+			settings_->setSamplesPerSec(dlg.m_sampleRate);
+			settings_->setValidBitDepth(dlg.m_bitDepth);
+			settings_->setDither(dlg.m_dither);
+			settings_->setBlockFrames(dlg.m_bufferSize);
+			settings_->shared = dlg.m_shareMode;
+			Enable(true);
+		}
 
 		void WasapiDriver::RefreshPorts(IMMDeviceEnumerator *pEnumerator){
 			HRESULT hr = S_OK;
@@ -773,14 +798,11 @@ Exit:
 				WAVEFORMATEX* pwft;
 				hr = stream.client->GetMixFormat(&pwft);
 				EXIT_ON_ERROR(hr)
-				_samplesPerSec = pwft->nSamplesPerSec;
-				_sampleBits = pwft->wBitsPerSample;
+				settings_->setSamplesPerSec(pwft->nSamplesPerSec);
+				settings_->setValidBitDepth(pwft->wBitsPerSample);
 				if(pwft->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
 					WAVEFORMATEXTENSIBLE* wfex = (WAVEFORMATEXTENSIBLE*)pwft;
-					_sampleValidBits = wfex->Samples.wValidBitsPerSample;
-				}
-				else {
-					_sampleValidBits = _sampleBits;
+					settings_->setValidBitDepth(wfex->Samples.wValidBitsPerSample);
 				}
 				memcpy(wfOut,pwft,std::min(sizeof(WAVEFORMATEX) + pwft->cbSize, sizeof(WAVEFORMATEXTENSIBLE)));
 				::CoTaskMemFree(pwft);
@@ -788,7 +810,7 @@ Exit:
 			else
 			{
 				WAVEFORMATPCMEX format;
-				PrepareWaveFormat(format, 2, _samplesPerSec, _sampleBits, _sampleValidBits);
+				PrepareWaveFormat(format, settings_->numChannels(), settings_->samplesPerSec(), settings_->bitDepth(), settings_->validBitDepth());
 				memcpy(wfOut,&format,sizeof(WAVEFORMATPCMEX));
 			}
 			WAVEFORMATEX* bla = NULL;
@@ -808,12 +830,12 @@ Exit:
 			if(running) {
 				HRESULT hr = pAudioClock->GetPosition(&pos,NULL);
 				EXIT_ON_ERROR(hr)
-				if(audioClockFreq == _samplesPerSec) {
+				if(audioClockFreq == settings_->samplesPerSec()) {
 					retVal = pos;
 				}
 				else {
 					//Thus, the stream-relative offset in seconds can always be calculated as p/f.
-					retVal = (pos*_samplesPerSec/audioClockFreq);
+					retVal = (pos*settings_->samplesPerSec()/audioClockFreq);
 				}
 			}
 Exit:
@@ -831,35 +853,6 @@ Exit:
 		std::uint32_t WasapiDriver::GetOutputLatencyMs(){
 			///\todo: The documentation suggests that the period has to be added to the latency. verify it.
 			return portaudio::nano100ToMillis(out.device_latency+out.period);
-		}
-
-		bool WasapiDriver::PortEnum::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode, bool isInput)
-		{
-			IMMDeviceEnumerator *pEnumerator = NULL;
-			IMMDevice			*device = NULL;
-			IAudioClient        *client = NULL;
-			bool issuccess=false;
-			HRESULT hr;
-			hr = CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-				IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-			EXIT_ON_ERROR(hr)
-
-			hr = pEnumerator->GetDevice(szDeviceID, &device);
-			EXIT_ON_ERROR(hr)
-
-			hr = device->Activate(IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&client);
-			EXIT_ON_ERROR(hr)
-
-			WAVEFORMATEX* bla = NULL;
-			hr = client->IsFormatSupported(sharemode, reinterpret_cast<WAVEFORMATEX*>(&pwfx),
-				(sharemode == AUDCLNT_SHAREMODE_SHARED)? &bla : NULL);
-			if(bla != NULL) { ::CoTaskMemFree(bla); }
-			if(hr==S_OK) issuccess = true;
-Exit:
-			SAFE_RELEASE(client)
-			SAFE_RELEASE(device)
-			SAFE_RELEASE(pEnumerator)
-			return issuccess;
 		}
 
 		std::uint32_t WasapiDriver::GetIdxFromDevice(WCHAR* szDeviceID) {

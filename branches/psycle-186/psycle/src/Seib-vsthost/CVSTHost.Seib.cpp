@@ -47,6 +47,8 @@ namespace seib {
 		/*****************************************************************************/
 		bool CFxBase::NeedsBSwap;
 		int CVSTHost::quantization = 0x40000000;
+		bool CVSTHost::useJBridge = false;
+		bool CVSTHost::usePsycleVstBridge = false;
 		VstTimeInfo CVSTHost::vstTimeInfo;
 
 		CVSTHost * CVSTHost::pHost = NULL;      /* pointer to the one and only host  */
@@ -1250,8 +1252,6 @@ namespace seib {
 			loadingEffect = false;
 			loadingShellId = 0;
 			isShell = false;
-			useJBridge = false;
-			usePsycleVstBridge = false;
 			pHost = this;                           /* install this instance as the one  */
 		}
 

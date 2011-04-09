@@ -11,6 +11,8 @@
 #include "Song.hpp"
 
 #include "cpu_time_clock.hpp"
+
+int const ID_TIMER_INFODLG = 1;
 namespace psycle { namespace host {
 
 		CInfoDlg::CInfoDlg(CWnd* pParent)
@@ -36,6 +38,8 @@ namespace psycle { namespace host {
 		BEGIN_MESSAGE_MAP(CInfoDlg, CDialog)
 		ON_WM_TIMER()
 		ON_BN_CLICKED(IDC_CPU_PERF, OnCpuPerf)
+		ON_WM_SHOWWINDOW()
+		ON_WM_CLOSE()
 		END_MESSAGE_MAP()
 
 		BOOL CInfoDlg::OnInitDialog() 
@@ -52,17 +56,32 @@ namespace psycle { namespace host {
 			InitTimer();
 			return TRUE;
 		}
-
+		void CInfoDlg::OnShowWindow(BOOL bShow, UINT nStatus) 
+		{
+			CDialog::OnShowWindow(bShow, nStatus);
+			if(bShow) {
+				InitTimer();
+			}
+			else 
+			{
+				KillTimer(ID_TIMER_INFODLG);
+			}
+		}
+		void CInfoDlg::OnClose() 
+		{
+			KillTimer(ID_TIMER_INFODLG);
+			CDialog::OnClose();
+		}
 		void CInfoDlg::InitTimer()
 		{
-			if(!SetTimer(1,500,NULL))
+			if(!SetTimer(ID_TIMER_INFODLG,500,NULL))
 				MessageBox("Error! Couldn't initialize timer","CPU Perfomance Dialog", MB_OK | MB_ICONERROR);
 		}
 
 		void CInfoDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
 			Song* _pSong = Global::_pSong;
-			if(nIDEvent==1)
+			if(nIDEvent==ID_TIMER_INFODLG)
 			{
 				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
 				if (!lock.Lock(50)) return;
@@ -169,6 +188,7 @@ namespace psycle { namespace host {
 				m_mem_virtual.SetWindowText(buffer);
 		#endif
 			}
+			CDialog::OnTimer(nIDEvent);
 		}
 
 		void CInfoDlg::UpdateInfo()

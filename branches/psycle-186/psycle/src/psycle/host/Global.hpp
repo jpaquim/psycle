@@ -28,10 +28,12 @@ namespace psycle
 	}
 	namespace host
 	{
-		class Song;
-		class Player;
 		class Configuration;
 		class InputHandler;
+		class PsycleConfig;
+		class Song;
+		class CMidiInput;
+		class Player;
 		namespace vst
 		{
 			class host;
@@ -46,21 +48,30 @@ namespace psycle
 				Global();
 				virtual ~Global() throw();
 
-				static Song * _pSong;
-				static Player * pPlayer;
 				static Configuration * pConfig;
-				static helpers::dsp::resampler * pResampler;
 #if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
 #endif //!defined WINAMP_PLUGIN
+				static Song * _pSong;
+				static helpers::dsp::resampler * pResampler;
+#if !defined WINAMP_PLUGIN
+				static CMidiInput * pMidiInput;
+#endif //!defined WINAMP_PLUGIN
+				static Player * pPlayer;
 				static vst::host* pVstHost;
 
 				static FAvSetMmThreadCharacteristics    pAvSetMmThreadCharacteristics;
 				static FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics;
 
 				static inline Song           & song() { return *_pSong; }
+#if !defined WINAMP_PLUGIN
+				static inline CMidiInput     & midi(){ return *pMidiInput; }
+#endif //!defined WINAMP_PLUGIN
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
+#if !defined WINAMP_PLUGIN
+				static inline PsycleConfig  & psycleconf(){ return *reinterpret_cast<PsycleConfig*>(pConfig); }
+#endif //!defined WINAMP_PLUGIN
 				static inline helpers::dsp::resampler & resampler(){ return *pResampler; }
 				static inline vst::host		 & vsthost(){ return *pVstHost; }
 		};

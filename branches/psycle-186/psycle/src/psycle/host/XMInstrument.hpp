@@ -135,7 +135,7 @@ namespace psycle { namespace host {
 			void Save(RiffFile& riffFile);
 
 			/// Wave Data Copy Operator
-			void operator= (const WaveData& source)
+			WaveData& operator= (const WaveData& source)
 			{
 				Init();
 				m_WaveName = source.m_WaveName;
@@ -161,6 +161,7 @@ namespace psycle { namespace host {
 				std::memcpy(m_pWaveDataL, source.m_pWaveDataL, source.m_WaveLength * sizeof *m_pWaveDataL);
 				if(source.m_WaveStereo)
 					std::memcpy(m_pWaveDataR, source.m_pWaveDataR, source.m_WaveLength * sizeof *m_pWaveDataR);
+				return *this;
 			}
 
 
@@ -437,7 +438,7 @@ namespace psycle { namespace host {
 		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile);
 
-		void operator= (const XMInstrument & other)
+		XMInstrument & operator= (const XMInstrument & other)
 		{
 			m_bEnabled = other.m_bEnabled;
 
@@ -477,6 +478,7 @@ namespace psycle { namespace host {
 			{
 				m_AssignNoteToSample[i]=other.m_AssignNoteToSample[i];
 			}
+			return *this;
 		}
 
 		// Properties

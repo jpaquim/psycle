@@ -59,6 +59,7 @@ public:
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
+	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
 	virtual void GetParamValue(int numparam,char *parVal);
@@ -86,6 +87,7 @@ public:
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
+	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
 	virtual void GetParamValue(int numparam,char *parVal);
@@ -334,6 +336,7 @@ public:
 	virtual int GetAudioOutputs() { return 1; }
 	virtual char* GetName(void) { return _psName; }
 	virtual int GetNumCols();
+	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
 	virtual void GetParamValue(int numparam,char *parVal);

@@ -28,8 +28,6 @@ namespace psycle
 {
 	namespace host
 	{
-		extern CPsycleApp theApp;
-
 		namespace vst
 		{
 			using namespace seib::vst;
@@ -574,7 +572,6 @@ namespace psycle
 				{
 					const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 					SetParameter(pData->_inst, value);
-					Global::pPlayer->Tweaker = true;
 				}
 				else if(note == notecommands::tweakslide)
 				{
@@ -600,7 +597,6 @@ namespace psycle
 						const float value(((pData->_cmd * 256) + pData->_parameter) / 65535.0f);
 						SetParameter(pData->_inst, value);
 					}
-					Global::pPlayer->Tweaker = true;
 				}
 				else if(pData->_note == notecommands::midicc) // Mcm (MIDI CC) Command
 				{

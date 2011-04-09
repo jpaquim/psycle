@@ -2,10 +2,7 @@
 ///\implementation psycle::host::CMidiInputDlg.
 
 #include "MidiInputDlg.hpp"
-
-#include "OutputDlg.hpp"
-#include "MidiInput.hpp"
-#include "Configuration.hpp"
+#include "PsycleConfig.hpp"
 
 namespace psycle { namespace host {
 
@@ -64,7 +61,7 @@ namespace psycle { namespace host {
 				s << std::hex << model;
 				gui.SetWindowText(s.str().c_str());
 			}
-			void write_to_gui(CMidiInputDlg::group & gui, Configuration::midi_type::group_type const & model)
+			void write_to_gui(CMidiInputDlg::group & gui, PsycleConfig::Midi::group_t const & model)
 			{
 				gui.record.SetCheck(model.record());
 				gui.type.SetCurSel(model.type());
@@ -77,23 +74,23 @@ namespace psycle { namespace host {
 		BOOL CMidiInputDlg::OnInitDialog() 
 		{
 			CPropertyPage::OnInitDialog();
-
-			raw.SetCheck(Global::pConfig->midi().raw());
-			gen_select_type.SetCurSel(Global::pConfig->midi().gen_select_type());
-			inst_select_type.SetCurSel(Global::pConfig->midi().inst_select_type());
+			PsycleConfig::Midi& midi = Global::psycleconf().midi();
+			raw.SetCheck(midi.raw());
+			gen_select_type.SetCurSel(midi.gen_select_with());
+			inst_select_type.SetCurSel(midi.inst_select_with());
 
 			velocity.type.AddString("cmd");
 			velocity.type.AddString("ins");
-			write_to_gui(velocity, Global::pConfig->midi().velocity());
+			write_to_gui(velocity, midi.velocity());
 
 			pitch.type.AddString("cmd");
 			pitch.type.AddString("twk");
 			pitch.type.AddString("tws");
 			pitch.type.AddString("ins");
 			pitch.type.AddString("mcm");
-			write_to_gui(pitch, Global::pConfig->midi().pitch());
+			write_to_gui(pitch, midi.pitch());
 
-			assert(groups.size() == Global::pConfig->midi().groups().size());
+			assert(groups.size() == midi.groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
 				groups[i]->type.AddString("cmd");
@@ -101,8 +98,8 @@ namespace psycle { namespace host {
 				groups[i]->type.AddString("tws");
 				groups[i]->type.AddString("ins");
 				groups[i]->type.AddString("mcm");
-				write_to_gui(*groups[i], Global::pConfig->midi().group(i));
-				write_to_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
+				write_to_gui(*groups[i], midi.group(i));
+				write_to_gui_text(groups[i]->message, midi.group(i).message());
 			}
 
 			return TRUE;
@@ -117,7 +114,7 @@ namespace psycle { namespace host {
 				gui.GetWindowText(mfc);
 				helpers::hexstring_to_integer(static_cast<char const * const>(mfc), model);
 			}
-			void read_from_gui(CMidiInputDlg::group const & gui, Configuration::midi_type::group_type & model)
+			void read_from_gui(CMidiInputDlg::group const & gui, PsycleConfig::Midi::group_t & model)
 			{
 				model.record() = gui.record.GetCheck();
 				model.type() = gui.type.GetCurSel();
@@ -130,16 +127,17 @@ namespace psycle { namespace host {
 
 		void CMidiInputDlg::OnOK() 
 		{
-			Global::pConfig->midi().gen_select_type() = (Configuration::midi_type::selector_t) gen_select_type.GetCurSel();
-			Global::pConfig->midi().inst_select_type() = (Configuration::midi_type::selector_t) inst_select_type.GetCurSel();
-			Global::pConfig->midi().raw() = raw.GetCheck();
-			read_from_gui(velocity, Global::pConfig->midi().velocity());
-			read_from_gui(pitch, Global::pConfig->midi().pitch());
-			assert(groups.size() == Global::pConfig->midi().groups().size());
+			PsycleConfig::Midi& midi = Global::psycleconf().midi();
+			midi.gen_select_with() = (PsycleConfig::Midi::selector_t) gen_select_type.GetCurSel();
+			midi.inst_select_with() = (PsycleConfig::Midi::selector_t) inst_select_type.GetCurSel();
+			midi.raw() = raw.GetCheck();
+			read_from_gui(velocity, midi.velocity());
+			read_from_gui(pitch, midi.pitch());
+			assert(groups.size() == midi.groups().size());
 			for(std::size_t i(0) ; i < groups.size() ; ++i)
 			{
-				read_from_gui(*groups[i], Global::pConfig->midi().group(i));
-				read_from_gui_text(groups[i]->message, Global::pConfig->midi().group(i).message());
+				read_from_gui(*groups[i], midi.group(i));
+				read_from_gui_text(groups[i]->message, midi.group(i).message());
 			}
 			CPropertyPage::OnOK();
 		}

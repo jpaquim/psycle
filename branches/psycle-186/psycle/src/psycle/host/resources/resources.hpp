@@ -170,6 +170,7 @@
 #define IDC_BROWSEWAVEREC               1035
 #define IDC_KEY0                        1036
 #define IDC_CMDLIST                     1037
+#define IDC_BROWSE_USERPRESET           1037
 #define IDC_ROWC                        1038
 #define IDC_FT2DEL2                     1038
 #define IDC_WINDOWSBLOCKS               1038
@@ -699,6 +700,7 @@
 #define IDC_MACHINEBOTTOM_CAN2          1482
 #define IDC_MACHINEFONTBOTTOM_CAN2      1483
 #define IDC_VOLSLIDER                   1484
+#define IDC_DEFAULTSKIN                 1484
 #define IDC_ASIO_DEVICE                 1485
 #define IDC_ASIO_SAMPLERATE_COMBO       1486
 #define IDC_ASIO_DITHER                 1487
@@ -1054,6 +1056,7 @@
 #define IDC_APPLYTOPATTERN              1791
 #define IDC_PSYCLEVSTBRIDGE             1791
 #define IDC_ACCESS_EXCLUSIVE            1791
+#define IDC_MIDI_KEYBOARD               1791
 #define IDC_LINESTART                   1792
 #define IDC_OUTPUTCLIPBOARD2            1793
 #define IDC_OUTPUTSAMPLE                1793
@@ -1072,6 +1075,7 @@
 #define IDC_CPU_PERF                    1808
 #define IDC_RADIO1                      1809
 #define IDC_ACCESS_SHARED               1809
+#define IDC_MIDI_SEQUENCED              1809
 #define IDC_WAVEOUT_BITDEPTH            1810
 #define IDC_SPLIT1                      1811
 #define IDC_WASAPI_DEVICE               1812
@@ -1083,6 +1087,10 @@
 #define IDC_SCAN_NEW                    1818
 #define IDC_HOLD                        1819
 #define IDC_CONTRIBUTORS                1820
+#define IDC_USERPRESETS_EDIT            1821
+#define IDC_TEXT_CLOCKDEVICE            1822
+#define IDC_TEXT_HEADROOM               1823
+#define IDC_SAVESETTINGS_ON             1824
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1232,7 +1240,7 @@
 #define ID_PROGRAMS_OPENPRESET          33077
 #define ID_PROGRAMS_SAVEPRESET          33078
 #define ID_PROGRAMS_SELECTBANK          33079
-#define ID_ABOUT_ABOUTVST               33080
+#define ID_ABOUT_ABOUTMAC               33080
 #define ID_COMBO_BANK                   33082
 #define ID_SELECTBANK_0                 33100
 #define ID_SELECTPROGRAM_0              33200
@@ -1252,9 +1260,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        282
+#define _APS_NEXT_RESOURCE_VALUE        283
 #define _APS_NEXT_COMMAND_VALUE         34212
-#define _APS_NEXT_CONTROL_VALUE         1821
+#define _APS_NEXT_CONTROL_VALUE         1825
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

@@ -22,6 +22,8 @@ namespace psycle { namespace host {
 
 			virtual BOOL OnInitDialog();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+			afx_msg void OnClose();
 			afx_msg void OnCpuPerf();
 
 			DECLARE_MESSAGE_MAP()

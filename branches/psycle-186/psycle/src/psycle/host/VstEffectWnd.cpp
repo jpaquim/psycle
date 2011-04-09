@@ -3,19 +3,15 @@
 
 #include "VstEffectWnd.hpp"
 
-#include "Configuration.hpp"
-#include "PresetsDlg.hpp"
-#include "VstParamList.hpp"
-#include "InputHandler.hpp"
-///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-#include "MainFrm.hpp"
-#include "ChildView.hpp"
-
 #include "VstHost24.hpp"
 
-namespace psycle { namespace host {
+#include "Configuration.hpp"
+#include "VstParamList.hpp"
+///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+#include "ChildView.hpp"
 
-		extern CPsycleApp theApp;
+
+namespace psycle { namespace host {
 
 		//////////////////////////////////////////////////////////////////////////
 	
@@ -44,31 +40,14 @@ namespace psycle { namespace host {
 		//////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
 
-		IMPLEMENT_DYNAMIC(CVstEffectWnd, CFrameWnd)
+		IMPLEMENT_DYNAMIC(CVstEffectWnd, CFrameMachine)
 
-		BEGIN_MESSAGE_MAP(CVstEffectWnd, CFrameWnd)
-			ON_WM_CREATE()
+		BEGIN_MESSAGE_MAP(CVstEffectWnd, CFrameMachine)
 			ON_WM_CLOSE()
-//			ON_WM_DESTROY()
-			ON_WM_TIMER()
-			ON_WM_SETFOCUS()
-			ON_WM_KEYDOWN()
-			ON_WM_KEYUP()
 			ON_WM_SIZING()
 			ON_WM_INITMENUPOPUP()
-//			ON_WM_LBUTTONDOWN()
-			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
-			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
 			ON_COMMAND(ID_PROGRAMS_OPENPRESET, OnProgramsOpenpreset)
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
-			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
-			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
-			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
-			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
-			ON_UPDATE_COMMAND_UI(ID_VIEWS_BANKMANAGER, OnUpdateViewsBankmanager)
-			ON_COMMAND(ID_VIEWS_MIDICHANNELS, OnViewsMidichannels)
-			ON_UPDATE_COMMAND_UI(ID_VIEWS_MIDICHANNELS, OnUpdateViewsMidichannels)
-			ON_COMMAND(ID_ABOUT_ABOUTVST, OnAboutAboutvst)
 //			ON_LBN_SELCHANGE(ID_COMBO_BANK, OnSelchangeBank)
 //			ON_CBN_CLOSEUP(ID_COMBO_BANK, OnCloseupProgram)
 //			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
@@ -79,22 +58,26 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_PROGRAMLESS, OnUpdateProgramLess)
 			ON_COMMAND(ID_PROGRAMMORE, OnProgramMore)
 			ON_UPDATE_COMMAND_UI(ID_PROGRAMMORE, OnUpdateProgramMore)
+			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
+			ON_COMMAND(ID_VIEWS_MIDICHANNELS, OnViewsMidichannels)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_MIDICHANNELS, OnUpdateViewsMidichannels)
 			ON_COMMAND(ID_VIEWS_SHOWTOOLBAR, OnViewsShowtoolbar)
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
 		END_MESSAGE_MAP()
 
 		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect):CEffectWnd(effect)
-		, pView(0) , _machine(effect) , pParamGui(0)
+		, CFrameMachine(effect), pParamGui(0)
 		{
 		}
-
-		int CVstEffectWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
+		int CVstEffectWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
-			if ( CFrameWnd::OnCreate(lpCreateStruct) == -1)
+			if (CFrameMachine::OnCreate(lpCreateStruct) == -1)
+			{
 				return -1;
+			}
 
-			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
-				|  CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, TBSTYLE_TRANSPARENT) ||
 				!toolBar.LoadToolBar(IDR_VSTFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
@@ -146,24 +129,24 @@ namespace psycle { namespace host {
 //			comboBank.SetCurSel(0);
 			FillProgramCombobox();
 
-
-			pView = CreateView();
+			toolBar.SetBarStyle(toolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_GRIPPER);
 			toolBar.SetWindowText("Vst Toolbar");
-			toolBar.EnableDocking(CBRS_ALIGN_ANY);
-			EnableDocking(CBRS_ALIGN_TOP);
+			toolBar.EnableDocking(CBRS_ALIGN_TOP);
+
+			EnableDocking(CBRS_ALIGN_ANY);
 			DockControlBar(&toolBar);
-			if (!Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,FALSE,FALSE);
-			machine().SetEditWnd(this);
-			*_pActive=true;
-			SetTimer(449, 25, 0);
+			LoadBarState(_T("VstParamToolbar"));
+
+			vstmachine().SetEditWnd(this);
 			return 0;
 		}
+
 		void CVstEffectWnd::OnClose()
 		{
-//			machine().EnterCritical();             /* make sure we're not processing    */
-			machine().EditClose();              /* tell effect edit window's closed  */
-//			machine().LeaveCritical();             /* re-enable processing              */
-			pView->DestroyWindow();
+//			vstmachine().EnterCritical();             /* make sure we're not processing    */
+			vstmachine().EditClose();              /* tell effect edit window's closed  */
+//			vstmachine().LeaveCritical();             /* re-enable processing              */
+			SaveBarState(_T("VstParamToolbar"));
 			if (pParamGui) pParamGui->DestroyWindow();
 			std::list<HWND>::iterator it = secwinlist.begin();
 			while ( it != secwinlist.end() )
@@ -171,76 +154,9 @@ namespace psycle { namespace host {
 				::SendMessage(*it, WM_CLOSE, 0, 0);
 				++it;
 			}
-			*_pActive=false;
 			CFrameWnd::OnClose();
 		}
 
-		void CVstEffectWnd::OnTimer(UINT_PTR nIDEvent)
-		{
-			if ( nIDEvent == 449 )
-			{
-				pView->WindowIdle();
-			}
-			CFrameWnd::OnTimer(nIDEvent);
-		}
-
-		void CVstEffectWnd::OnSetFocus(CWnd* pOldWnd) 
-		{
-			CFrameWnd::OnSetFocus(pOldWnd);
-		}
-
-		void CVstEffectWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
-			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(cmd.IsValid())
-			{
-				switch(cmd.GetType())
-				{
-				case CT_Note:
-					if (!bRepeat)
-					{
-						const int outnote = cmd.GetNote();
-						if ( machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-						{
-							Global::pInputHandler->PlayNote(outnote,255,127,true,&machine());
-						}
-						else Global::pInputHandler->PlayNote(outnote);
-					}
-					break;
-				case CT_Immediate:
-				case CT_Editor:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-					break;
-				}
-			}
-			else if(nChar == VK_ESCAPE) {
-				PostMessage(WM_CLOSE);
-			}
-			this->SetFocus();
-
-			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-		}
-
-		void CVstEffectWnd::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			const int outnote = cmd.GetNote();
-			if(outnote != -1) {
-				if(machine()._mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-					Global::pInputHandler->StopNote(outnote, 255,true, &machine());
-				else
-					Global::pInputHandler->StopNote(outnote);
-			}
-			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
-		}
-
-		/*		void CVstEffectWnd::OnLButtonDown(UINT nFlags, CPoint point) 
-		{
-		this->SetFocus();
-		CFrameWnd::OnLButtonDown(nFlags, point);
-		}
-		*/
 
 		/*****************************************************************************/
 		/* OnInitMenuPopup : called when a popup menu is initialized                 */
@@ -259,7 +175,7 @@ namespace psycle { namespace host {
 		}
 		void CVstEffectWnd::FillPopup(CMenu* pPopupMenu)
 		{
-			if (machine().numPrograms() > 1)
+			if (vstmachine().numPrograms() > 1)
 			{
 				CMenu* popPrg=0;
 				// Find the popup menu for programs.
@@ -289,15 +205,15 @@ namespace psycle { namespace host {
 				if (!popPrg)
 					return;
 
-				for (int i = 0; i < machine().numPrograms() && i < 980 ; i += 16)
+				for (int i = 0; i < vstmachine().numPrograms() && i < 980 ; i += 16)
 				{
 					CMenu popup;
 					popup.CreatePopupMenu();
-					for (int j = i; (j < i + 16) && (j < machine().numPrograms()); j++)
+					for (int j = i; (j < i + 16) && (j < vstmachine().numPrograms()); j++)
 					{
 						char szProg[kVstMaxProgNameLen+7] = "";
 						char szPgName[kVstMaxProgNameLen+1] = "";
-						machine().GetProgramNameIndexed(-1, j, szPgName);
+						vstmachine().GetProgramNameIndexed(-1, j, szPgName);
 						std::sprintf(szProg,"%d. %s",j,szPgName);
 						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, szProg);
 					}
@@ -307,7 +223,7 @@ namespace psycle { namespace host {
 						(UINT)popup.Detach(),
 						szSub);
 				}
-				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + machine().GetProgram(),
+				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + vstmachine().GetProgram(),
 					MF_CHECKED | MF_BYCOMMAND);
 			}
 		}
@@ -316,23 +232,23 @@ namespace psycle { namespace host {
 			comboProgram.ResetContent();
 
 			int nump;
-			nump = machine().numPrograms();
+			nump = vstmachine().numPrograms();
 			for(int i(0) ; i < nump; ++i)
 			{
 				char s1[kVstMaxProgNameLen+7];
 				char s2[kVstMaxProgNameLen+1];
-				machine().GetProgramNameIndexed(-1, i, s2);
+				vstmachine().GetProgramNameIndexed(-1, i, s2);
 				std::sprintf(s1,"%d: %s",i,s2);
 				comboProgram.AddString(s1);
 			}
-			int i = machine().GetProgram();
+			int i = vstmachine().GetProgram();
 			if ( i > nump || i < 0) {  i = 0; }
 			comboProgram.SetCurSel(i);
 		}
 		void CVstEffectWnd::OnSelchangeProgram() 
 		{
 			int const se=comboProgram.GetCurSel();
-			machine().SetProgram(se);
+			vstmachine().SetProgram(se);
 			if (pParamGui && pParamGui->IsWindowVisible()){
 				pParamGui->SelectProgram(se);
 			}
@@ -350,112 +266,48 @@ namespace psycle { namespace host {
 				pParamGui->SelectProgram(se);
 			}
 		}
-		CBaseGui* CVstEffectWnd::CreateView()
+		CBaseParamView* CVstEffectWnd::CreateView()
 		{
 			if ( pEffect->HasEditor())
 			{
-				CVstGui* gui = new CVstGui(&machine());
-				CRect rcClient(0,0,0,0);
-				// C_Tuner.dll crashes if asked before opening
-				//gui->GetViewSize(rcClient);
-				gui->Create(NULL, "vstgui", WS_CHILD | WS_VISIBLE,
-					rcClient, this, AFX_IDW_PANE_FIRST, NULL);
+				CVstGui* gui = new CVstGui(&vstmachine());
+				gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
+					CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
 				return gui;
 			}
 			else
 			{
-				CNativeGui* gui = new CNativeGui(&machine());
-				CRect rcClient;
-				gui->GetViewSize(rcClient);
-				gui->Create(NULL, "nativegui", WS_CHILD | WS_VISIBLE,
-					rcClient, this, AFX_IDW_PANE_FIRST, NULL);
-				return gui;
+				return CFrameMachine::CreateView();
+			}
+		}
+		void CVstEffectWnd::GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect)
+		{
+			CFrameMachine::GetWindowSize(rcFrame, rcClient, pRect);
+			if ( Global::psycleconf().macParam().toolbarOnMachineParams)
+			{
+				//SM_CYBORDER The height of a window border, in pixels. This is equivalent to the SM_CYEDGE value for windows with the 3-D look.
+				CRect tbRect;
+				toolBar.GetWindowRect(&tbRect);
+				int heiTool = tbRect.bottom - tbRect.top - (2 * ::GetSystemMetrics(SM_CYBORDER) );
+				rcClient.top+=heiTool;
+				rcFrame.bottom += heiTool;
 			}
 		}
 
-		void CVstEffectWnd::PostOpenWnd()
-		{
-			pView->Open();
-			ResizeWindow(0);
-		}
-		/**********************************************************/
-
-		void CVstEffectWnd::GetWindowSize(CRect &rcFrame, CRect &rcClient, ERect *pRect)
-		{
-			if ( !pRect )
-			{
-				if (!pView->GetViewSize(rcClient))
-				{
-					rcClient.top = 0; rcClient.left = 0;
-					rcClient.right = 400; rcClient.bottom = 300;
-				}
-				rcFrame = rcClient;
-			}
-			else 
-			{
-				rcFrame.left = pRect->left;
-				rcFrame.top = pRect->top;
-				rcFrame.right = pRect->right;
-				rcFrame.bottom = pRect->bottom;
-				rcClient.top = 0; rcClient.left = 0;
-				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
-			}
-			CRect tbRect;
-			toolBar.GetWindowRect(&tbRect);
-			rcClient.top+=tbRect.bottom - tbRect.top;
-			if ( Global::pConfig->_toolbarOnVsts)
-			{
-				rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
-					::GetSystemMetrics(SM_CYMENUSIZE) +
-					(tbRect.bottom-tbRect.top) +
-					6 * ::GetSystemMetrics(SM_CYBORDER) +
-					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
-			}
-			else
-			{
-				rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
-					::GetSystemMetrics(SM_CYMENUSIZE) +
-					6 * ::GetSystemMetrics(SM_CYBORDER) +
-					2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
-				rcClient.top=0;
-			}
-			rcFrame.right += 6 * ::GetSystemMetrics(SM_CXBORDER) +
-				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
-		}
 		void CVstEffectWnd::ResizeWindow(int w,int h)
 		{
 			CRect rcW;
 			GetWindowRect(&rcW);
 
-			ERect rc;
+			CRect rc;
 			rc.left = (short)rcW.left;	rc.top = (short)rcW.top;
 			rc.right = rc.left + w;	rc.bottom = rc.top + h;
 			ResizeWindow(&rc);
 			pView->WindowIdle();
 		}
-		void CVstEffectWnd::ResizeWindow(ERect *pRect)
+		void CVstEffectWnd::ResizeWindow(CRect* pRect)
 		{
-			CRect rcEffFrame,rcEffClient,rcTemp,tbRect;
-			GetWindowSize(rcEffFrame, rcEffClient, pRect);
-			SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
-			pView->SetWindowPos(NULL,0,rcEffClient.top,rcEffClient.right+1,rcEffClient.bottom+1,SWP_SHOWWINDOW);
-			GetClientRect(&rcTemp);
-			toolBar.GetWindowRect(&tbRect);
-			rcTemp.bottom-=tbRect.bottom - tbRect.top;
-			//Using the previous values, resize the window to the desired sizes.
-			MoveWindow
-				(
-				rcEffFrame.left,
-				rcEffFrame.top,
-				(rcEffFrame.right-rcEffFrame.left)+(rcEffClient.right-rcTemp.right),
-				(rcEffFrame.bottom-rcEffFrame.top)+(rcEffClient.bottom-rcTemp.bottom),
-				true
-				);
-			pView->WindowIdle();
-		}
-		void CVstEffectWnd::OnSizing(UINT fwSide, LPRECT pRect)
-		{
-			pView->WindowIdle();
+			CFrameMachine::ResizeWindow(pRect);
 		}
 
 
@@ -513,7 +365,7 @@ namespace psycle { namespace host {
 				if ( ptr->initialPath != 0) {
 					ofn.lpstrInitialDir = ptr->initialPath;
 				} else {
-					ofn.lpstrInitialDir =  (char*)machine().OnGetDirectory();
+					ofn.lpstrInitialDir =  (char*)vstmachine().OnGetDirectory();
 				}
 				if (ptr->command == kVstFileSave) {
 					ofn.Flags = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_EXPLORER | OFN_ENABLESIZING;
@@ -587,51 +439,23 @@ namespace psycle { namespace host {
 			}
 			else if (ptr->command == kVstDirectorySelect)
 			{
-				LPMALLOC pMalloc;
-				// Gets the Shell's default allocator
-				//
-				if (::SHGetMalloc(&pMalloc) == NOERROR)
+				std::string result;
+				if ( ptr->returnPath == 0)
 				{
-					char szInitPath[_MAX_PATH];
-					BROWSEINFO bi;
-					LPITEMIDLIST pidl;
-					if(ptr->initialPath)
-						strncpy(szInitPath, ptr->initialPath, _MAX_PATH - 1);
-					else
-						strcpy(szInitPath, "");
-					if ( ptr->returnPath == 0)
-					{
-						ptr->reserved = 1;
-						ptr->returnPath = new char[_MAX_PATH];
-						ptr->sizeReturnPath = _MAX_PATH -1;
-						ptr->nbReturnPath = 1;
-					}
-					// Get help on BROWSEINFO struct - it's got all the bit settings.
-					//
-					bi.hwndOwner = GetParent()->m_hWnd;
-
-					bi.pidlRoot = NULL;
-					bi.pszDisplayName = szInitPath;
-					bi.lpszTitle = ptr->title;
-					bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
-					bi.lpfn = NULL; //&CVstEffectWnd::BrowseCallbackProc;
-					bi.lParam = 0;
-					// This next call issues the dialog box.
-					//
-					if ((pidl = ::SHBrowseForFolder(&bi)) != NULL)
-					{
-						if (::SHGetPathFromIDList(pidl, ptr->returnPath))
-						{
-							ptr->nbReturnPath=1;
-						}
-						// Free the PIDL allocated by SHBrowseForFolder.
-						//
-						pMalloc->Free(pidl);
-					}
-					//if ( ptr->reserved ) { delete[] ptr->returnPath; ptr->reserved = 0; }
-					// Release the shell's allocator.
-					//
-					pMalloc->Release();
+					ptr->reserved = 1;
+					ptr->returnPath = new char[_MAX_PATH];
+					ptr->sizeReturnPath = _MAX_PATH -1;
+					ptr->nbReturnPath = 1;
+				}
+				if(ptr->initialPath)
+					result = ptr->initialPath;
+				else
+					result = "";
+				
+				if(CPsycleApp::BrowseForFolder(GetParent()->m_hWnd, ptr->title, result))
+				{
+					strncpy(ptr->returnPath, result.c_str(), _MAX_PATH-1);
+					ptr->nbReturnPath=1;
 				}
 			}
 			return ptr->returnPath>0;
@@ -703,14 +527,14 @@ namespace psycle { namespace host {
 		bool CVstEffectWnd::SetParameterAutomated(long index, float value)
 		{
 			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-			if(index>= 0 || index < machine().GetNumParams())
+			if(index>= 0 || index < vstmachine().GetNumParams())
 			{
-				if(Global::configuration()._RecordTweaks)
+				if(Global::psycleconf().inputHandler()._RecordTweaks)
 				{
-					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, index, helpers::math::lround<int,float>(value * vst::quantization));
+					if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
+						wndView->MousePatternTweakSlide(vstmachine()._macIndex, index, helpers::math::lround<int,float>(value * vst::quantization));
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, index, helpers::math::lround<int,float>(value * vst::quantization));
+						wndView->MousePatternTweak(vstmachine()._macIndex, index, helpers::math::lround<int,float>(value * vst::quantization));
 				}
 				if(pParamGui)
 					pParamGui->UpdateNew(index, value);
@@ -722,38 +546,13 @@ namespace psycle { namespace host {
 
 		/***********************************************************************/
 
-		void CVstEffectWnd::OnOperationsEnabled()
-		{
-			if (machine().IsSynth())
-			{
-				machine()._mute = !machine()._mute;
-			}
-			else
-			{
-				machine().Bypass(!machine().Bypass());
-				if (machine()._mute) machine()._mute = false;
-			}
-		}
-
-		void CVstEffectWnd::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
-		{
-			pCmdUI->SetText("Activated");
-			if (machine().IsSynth())
-			{
-				pCmdUI->SetCheck(!machine()._mute);
-			}
-			else
-			{
-				pCmdUI->SetCheck(!(machine()._mute || machine().Bypass()));
-			}
-		}
 
 		void CVstEffectWnd::OnProgramsOpenpreset()
 		{
 			char tmp[2048];
-			if (!machine().OnGetChunkFile(tmp))
+			if (!vstmachine().OnGetChunkFile(tmp))
 			{
-				std::strncpy(tmp,reinterpret_cast<char*>(machine().OnGetDirectory()),1024);
+				std::strncpy(tmp,reinterpret_cast<char*>(vstmachine().OnGetDirectory()),1024);
 				std::strcat(tmp,"\\fxb");
 			}
 			CFileDialog dlg(TRUE,
@@ -768,14 +567,14 @@ namespace psycle { namespace host {
 			if ( dlg.GetFileExt() == "fxb" )
 			{
 				CFxBank b(dlg.GetPathName());
-				if ( b.Initialized() ) machine().LoadBank(b);
+				if ( b.Initialized() ) vstmachine().LoadBank(b);
 				else
 					MessageBox("Error Loading file", NULL, MB_ICONERROR);
 			}
 			else if ( dlg.GetFileExt() == "fxp" )
 			{
 				CFxProgram p(dlg.GetPathName());
-				if ( p.Initialized() ) machine().LoadProgram(p);
+				if ( p.Initialized() ) vstmachine().LoadProgram(p);
 				else
 					MessageBox("Error Loading file", NULL, MB_ICONERROR);
 
@@ -786,9 +585,9 @@ namespace psycle { namespace host {
 		void CVstEffectWnd::OnProgramsSavepreset()
 		{
 			char tmp[2048];
-			if (!machine().OnGetChunkFile(tmp))
+			if (!vstmachine().OnGetChunkFile(tmp))
 			{
-				std::strncpy(tmp,reinterpret_cast<char*>(machine().OnGetDirectory()),1024);
+				std::strncpy(tmp,reinterpret_cast<char*>(vstmachine().OnGetDirectory()),1024);
 				std::strcat(tmp,"\\filename");
 			}
 			CFileDialog dlg(FALSE,
@@ -806,36 +605,10 @@ namespace psycle { namespace host {
 					SaveProgram((char *)(LPCSTR)dlg.GetPathName());
 			}
 		}
-		/*
-		void CVstEffectWnd::OnSavePreset() 
-		{
-		char tmp[2048];
-		machine().OnGetChunkFile(tmp);
-		std::string sFile = tmp;
-		if (sFile.empty())
-		OnSavePresetAs();
-		else
-		{
-		std::string ext = sFile.substr(sFile.size()-4,4);
-		if ( ext == ".fxb")
-		SaveBank(sFile);
-		else if ( ext == ".fxp")
-		SaveProgram(sFile);
-		}
-		}
-		*/
-		void CVstEffectWnd::OnProgramsRandomizeprogram()
-		{
-			int numParameters = machine().numParams();
-			for(int c(0); c < numParameters ; ++c)
-			{
-				machine().SetParameter(c, ((rand()/(float)RAND_MAX)*0.5f)+0.5f);
-			}
-			UpdateWindow();
-		}
+	
 		void CVstEffectWnd::OnSetProgram(UINT nID)
 		{
-			machine().SetProgram(nID - ID_SELECTPROGRAM_0);
+			vstmachine().SetProgram(nID - ID_SELECTPROGRAM_0);
 			comboProgram.SetCurSel(nID - ID_SELECTPROGRAM_0);
 			if (pParamGui && pParamGui->IsWindowVisible()){
 				pParamGui->SelectProgram(nID - ID_SELECTPROGRAM_0);
@@ -843,8 +616,8 @@ namespace psycle { namespace host {
 		}
 		void CVstEffectWnd::OnProgramLess()
 		{
-			int numProgram = machine().GetProgram()-1;
-			machine().SetProgram(numProgram);
+			int numProgram = vstmachine().GetProgram()-1;
+			vstmachine().SetProgram(numProgram);
 			comboProgram.SetCurSel(numProgram);
 			if (pParamGui && pParamGui->IsWindowVisible()){
 				pParamGui->SelectProgram(numProgram);
@@ -853,7 +626,7 @@ namespace psycle { namespace host {
 		}
 		void CVstEffectWnd::OnUpdateProgramLess(CCmdUI *pCmdUI)
 		{
-			if ( machine().GetProgram() == 0)
+			if ( vstmachine().GetProgram() == 0)
 			{
 				pCmdUI->Enable(false);
 			}
@@ -861,8 +634,8 @@ namespace psycle { namespace host {
 		}
 		void CVstEffectWnd::OnProgramMore()
 		{
-			int numProgram = machine().GetProgram()+1;
-			machine().SetProgram(numProgram);
+			int numProgram = vstmachine().GetProgram()+1;
+			vstmachine().SetProgram(numProgram);
 			comboProgram.SetCurSel(numProgram);
 			if (pParamGui && pParamGui->IsWindowVisible()){
 				pParamGui->SelectProgram(numProgram);
@@ -871,12 +644,14 @@ namespace psycle { namespace host {
 		}
 		void CVstEffectWnd::OnUpdateProgramMore(CCmdUI *pCmdUI)
 		{
-			if ( machine().GetProgram()+1 == machine().numPrograms())
+			if ( vstmachine().GetProgram()+1 == vstmachine().numPrograms())
 			{
 				pCmdUI->Enable(false);
 			}
 			else pCmdUI->Enable(true);
 		}
+
+
 
 		void CVstEffectWnd::OnViewsParameterlist()
 		{
@@ -884,7 +659,7 @@ namespace psycle { namespace host {
 			GetWindowRect(&rc);
 			if (!pParamGui)
 			{
-				pParamGui= new CVstParamList(&machine());
+				pParamGui= new CVstParamList(&vstmachine());
 				pParamGui->Create();
 			}
 			if (pParamGui->IsWindowVisible())
@@ -907,18 +682,6 @@ namespace psycle { namespace host {
 			else
 				pCmdUI->SetCheck(false);
 		}
-
-		void CVstEffectWnd::OnViewsBankmanager()
-		{
-			CPresetsDlg dlg;
-			dlg._pMachine=_machine;
-			dlg.DoModal();
-		}
-
-		void CVstEffectWnd::OnUpdateViewsBankmanager(CCmdUI *pCmdUI)
-		{
-		}
-
 		void CVstEffectWnd::OnViewsMidichannels()
 		{
 			// TODO: Agregue aquí su código de controlador de comandos
@@ -931,26 +694,17 @@ namespace psycle { namespace host {
 
 		void CVstEffectWnd::OnViewsShowtoolbar()
 		{
-			Global::pConfig->_toolbarOnVsts = !Global::pConfig->_toolbarOnVsts;
+			Global::psycleconf().macParam().toolbarOnMachineParams = !Global::psycleconf().macParam().toolbarOnMachineParams;
 
-			if (Global::pConfig->_toolbarOnVsts) ShowControlBar(&toolBar,TRUE,FALSE);
+			if (Global::psycleconf().macParam().toolbarOnMachineParams) ShowControlBar(&toolBar,TRUE,FALSE);
 			else ShowControlBar(&toolBar,FALSE,FALSE);
 			ResizeWindow(0);
 		}
 
 		void CVstEffectWnd::OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI)
 		{
-			pCmdUI->SetCheck(Global::pConfig->_toolbarOnVsts);
+			pCmdUI->SetCheck(Global::psycleconf().macParam().toolbarOnMachineParams);
 		}
-
-		void CVstEffectWnd::OnAboutAboutvst()
-		{
-			///\todo: made an informative dialog like in seib's vsthost.
-			std::string message;
-			(message = "Vst Plugin by " )+ machine().GetVendorName();
-			MessageBox(message.c_str(),"About");
-		}
-
 	}   // namespace
 }   // namespace
 

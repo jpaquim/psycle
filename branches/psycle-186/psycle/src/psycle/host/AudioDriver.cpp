@@ -11,7 +11,7 @@ namespace psycle
 		#define SHORT_MIN -32768
 		#define SHORT_MAX 32767
 
-		AudioDriverInfo SilentDriver::_info = { "Silent" };
+		AudioDriverInfo SilentSettings::info_ = { "Silent" };
 
 		// returns random value between 0 and 1
 		// i got the magic numbers from csound so they should be ok but 
@@ -22,14 +22,46 @@ namespace psycle
 			stat = (stat * 1103515245 + 12345) & 0x7fffffff;
 			return (double)stat * (1.0 / 0x7fffffff);
 		}
-		AudioDriver::AudioDriver()
-			: _samplesPerSec(44100)
-			, _sampleBits(16)
-			, _sampleValidBits(16)
-			, _channelMode(stereo)
-			, _numBlocks(0)
-			, _blockSizeBytes(0)
-		{}
+
+		AudioDriverSettings::AudioDriverSettings()
+		{
+		}
+		AudioDriverSettings::AudioDriverSettings(const AudioDriverSettings& othersettings)
+		{
+			operator=(othersettings);
+		}
+		AudioDriverSettings& AudioDriverSettings::operator=(const AudioDriverSettings& othersettings)
+		{
+			samplesPerSec_ = othersettings.samplesPerSec_;
+			channelMode_ = othersettings.channelMode_;
+			blockCount_ = othersettings.blockCount_;
+			validBitDepth_ = othersettings.validBitDepth_;
+			bitDepth_ = othersettings.bitDepth_;
+			frameBytes_ = othersettings.frameBytes_;
+			blockFrames_ = othersettings.blockFrames_;
+			return *this;
+		}
+
+		bool AudioDriverSettings::operator!=(AudioDriverSettings const & othersettings) {
+			return
+				samplesPerSec_ != othersettings.samplesPerSec_ ||
+				channelMode_ != othersettings.channelMode_ ||
+				blockCount_ != othersettings.blockCount_ ||
+				validBitDepth_ != othersettings.validBitDepth_ ||
+				bitDepth_ != othersettings.bitDepth_ ||
+				frameBytes_ != othersettings.frameBytes_ ||
+				blockFrames_ != othersettings.blockFrames_;
+		}
+		void AudioDriverSettings::SetDefaultSettings(bool include_others)
+		{
+			samplesPerSec_ = 44100;
+			channelMode_ = stereo;
+			blockCount_ = 0;
+			dither_ = true;
+			setValidBitDepth(16);
+			setBlockFrames(0);
+		};
+
 
 		void AudioDriver::PrepareWaveFormat(WAVEFORMATEXTENSIBLE& wf, int channels, int sampleRate, int bits, int validBits)
 		{
@@ -161,6 +193,10 @@ namespace psycle
 				*poutright++ = (*pin++)*32768.f;
 			}
 			while(--c);
+		}
+	
+		AudioDriver* SilentSettings::NewDriver() {
+			return new SilentDriver(this);
 		}
 	}
 }

@@ -16,6 +16,26 @@ namespace psycle
 {
 	namespace host
 	{
+		class WasapiSettings : public AudioDriverSettings
+		{
+		public:
+			WasapiSettings();
+			WasapiSettings(const WasapiSettings& othersettings);
+			WasapiSettings& operator=(const WasapiSettings& othersettings);
+			virtual bool operator!=(WasapiSettings const &);
+			virtual bool operator==(WasapiSettings const & other) { return !((*this) != other); }
+			virtual AudioDriver* NewDriver();
+			virtual AudioDriverInfo& GetInfo() { return info_; }
+
+			virtual void SetDefaultSettings();
+			virtual void Load(ConfigStorage &);
+			virtual void Save(ConfigStorage &);
+			bool shared;
+			WCHAR szDeviceID[MAX_STR_LEN];
+		private:
+			static AudioDriverInfo info_;
+		};
+
 		/// output device interface.
 		class WasapiDriver : public AudioDriver
 		{
@@ -23,7 +43,7 @@ namespace psycle
 			{
 			public:
 				PortEnum() {};
-				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode, bool isInput);
+				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode);
 				// from GetId
 				WCHAR szDeviceID[MAX_STR_LEN];
 				// from PropVariant
@@ -55,11 +75,15 @@ namespace psycle
 			}
 			PaWasapiSubStream;
 		public:
-			WasapiDriver();
+			WasapiDriver(WasapiSettings* settings);
 			virtual ~WasapiDriver();
-			virtual void Initialize(HWND hwnd, AUDIODRIVERWORKFN pCallback, void* context);
-			virtual void Reset(void);
+			virtual AudioDriverSettings& settings() { return *settings_;}
+
+			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
 			virtual bool Enable(bool e) { return e ? Start() : Stop(); }
+			virtual void Reset(void);
+			virtual void Configure(void);
+			virtual bool Initialized(void) {return _initialized; }
 			virtual bool Enabled() { return running; }
 			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
 			virtual void GetCapturePorts(std::vector<std::string> &ports);
@@ -71,18 +95,12 @@ namespace psycle
 			virtual std::uint32_t GetPlayPosInSamples();
 			virtual std::uint32_t GetInputLatencyMs();
 			virtual std::uint32_t GetOutputLatencyMs();
-			virtual void Configure(void);
-			virtual bool Configured(void) { return _configured; }
-			virtual bool Initialized(void) {return _initialized; }
-			virtual AudioDriverInfo* GetInfo() { return &_info; }
 		private:
 			static void Error(const TCHAR msg[]);
 			static const char* GetError(HRESULT hr);
 			void RefreshPorts(IMMDeviceEnumerator *pEnumerator);
 			void FillPortList(std::vector<PortEnum>& portList, IMMDeviceCollection *pCollection, LPWSTR defaultID);
 			std::uint32_t GetIdxFromDevice(WCHAR* szDeviceID);
-			void ReadConfig();
-			void WriteConfig();
 			bool Start();
 			bool Stop();
 			static DWORD WINAPI EventAudioThread(void* pWasapi);
@@ -91,7 +109,7 @@ namespace psycle
 			HRESULT DoBlock(IAudioRenderClient *pRenderClient, int numFramesAvailable);
 			HRESULT DoBlockRecording(PaWasapiSubStream& port, IAudioCaptureClient *pCaptureClient, int numFramesAvailable);
 
-			static AudioDriverInfo _info;
+			WasapiSettings* settings_;
 			static AudioDriverEvent _event;
 			void* _callbackContext;
 			AUDIODRIVERWORKFN _pCallback;
@@ -104,7 +122,6 @@ namespace psycle
 		private:
 			std::vector<PaWasapiSubStream> _capPorts;
 			std::vector<int> _portMapping;
-			bool dither;
 			// output
 			PaWasapiSubStream out;
 			IAudioClock* pAudioClock;
@@ -154,7 +171,7 @@ namespace portaudio{
 	// Aligns WASAPI buffer to 128 byte packet boundary. HD Audio will fail to play if buffer
 	// is misaligned. This problem was solved in Windows 7 were AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED
 	// is thrown although we must align for Vista anyway.
-	static UINT32 AlignFramesPerBuffer(UINT32 nFrames, UINT32 nSamplesPerSec, UINT32 nBlockAlign)
+	static inline UINT32 AlignFramesPerBuffer(UINT32 nFrames, UINT32 nSamplesPerSec, UINT32 nBlockAlign)
 	{
 #define HDA_PACKET_SIZE 128
 

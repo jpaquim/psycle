@@ -293,7 +293,7 @@ namespace host{
 		//For now, everything zeroed. Later on we can convert the ADSR curves to envelopes.
 		//SetEnvelopes(instIdx,_samph);
 		_samph.volfade=0x400;
-		size_t filepos = GetPos();
+		//size_t filepos = GetPos();
 		_samph.shsize = sizeof(XMSAMPLESTRUCT);
 		Write(&_samph,sizeof(_samph));
 

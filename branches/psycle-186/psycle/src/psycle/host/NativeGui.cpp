@@ -3,105 +3,228 @@
 
 #include "NativeGui.hpp"
 
-#include "ChildView.hpp"
-#include "Configuration.hpp"
-#include "InputHandler.hpp"
-#include "NewVal.hpp"
-///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-#include "MainFrm.hpp"
-
 #include "Machine.hpp"
+#include "Plugin.hpp" // For default parameter value.
+
+#include "ChildView.hpp"
+#include "NewVal.hpp"
+
+#define DEFAULT_ROWWIDTH  150
+
 
 namespace psycle { namespace host {
 
-		extern CPsycleApp theApp;
+	extern CPsycleApp theApp;
 
+	PsycleConfig::MachineParam* CNativeGui::uiSetting = NULL;
+
+	int CNativeGui::InfoLabel::xoffset(3);
+	int CNativeGui::GraphSlider::xoffset(6);
+
+	//////////////////////////////////////////////////////////////////////////
+	// Knob class
+	void CNativeGui::Knob::Draw(CDC& dc, CDC& knobDC, int x_knob,int y_knob,float value)
+	{
+		const int numFrames = CNativeGui::uiSetting->dialframes;
+		const int width = CNativeGui::uiSetting->dialwidth;
+		const int height = CNativeGui::uiSetting->dialheight;
+		const COLORREF titleColor = CNativeGui::uiSetting->titleColor;
+
+		int pixel = numFrames*value;
+		if (pixel >= numFrames) pixel=numFrames-1;
+		pixel*=width;
+		dc.BitBlt(x_knob, y_knob, width, height, &knobDC, pixel, 0, SRCCOPY);
+		dc.Draw3dRect(x_knob, y_knob+height-1, width, 1, titleColor, titleColor);
+	}
+	bool  CNativeGui::Knob::LButtonDown( UINT nFlags, int x,int y)
+	{
+		if ( x< CNativeGui::uiSetting->dialwidth
+			&& y < CNativeGui::uiSetting->dialheight) return true;
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// InfoLabel class
+	void CNativeGui::InfoLabel::Draw(CDC& dc, int x, int y, int width, const char *parName,const char *parValue)
+	{
+		const int height = CNativeGui::uiSetting->dialheight;
+		const COLORREF titleColor = CNativeGui::uiSetting->titleColor;
+
+		const int half = height/2;
+		dc.Draw3dRect(x,y-1,width,height+1,titleColor,titleColor);
+//		dc.FillSolidRect(x, y, width-1, half,topColor);
+//		dc.FillSolidRect(x, y+half, width-1, half-1,bottomColor);
+
+		dc.SetBkColor(CNativeGui::uiSetting->topColor);
+		dc.SetTextColor(CNativeGui::uiSetting->fontTopColor);
+		dc.ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName), 0);
+	
+		DrawValue(dc,x,y,width,parValue);
+	}
+	void CNativeGui::InfoLabel::DrawValue(CDC& dc, int x, int y, int width, const char *parValue)
+	{
+		const int height = CNativeGui::uiSetting->dialheight;
+		const int half = height/2;
+		dc.SetBkColor(CNativeGui::uiSetting->bottomColor);
+		dc.SetTextColor(CNativeGui::uiSetting->fontBottomColor);
+		dc.ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// HLightInfoLabel class
+	void CNativeGui::InfoLabel::DrawHLight(CDC& dc, int x, int y, int width, const char *parName,const char *parValue)
+	{
+		const int height = CNativeGui::uiSetting->dialheight;
+
+		const int half = height/2;
+		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
+//		dc.FillSolidRect(x, y, mywidth, half,titleColor);
+//		dc.FillSolidRect(x, y+half, mywidth, half,bottomColor);
+
+		dc.SetBkColor(CNativeGui::uiSetting->titleColor);
+		dc.SetTextColor(CNativeGui::uiSetting->fonttitleColor);
+		CFont *oldfont =dc.SelectObject(&CNativeGui::uiSetting->font_bold);
+		dc.ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
+		dc.SelectObject(oldfont);
+
+		DrawHLightValue(dc,x,y,width,parValue);
+		dc.Draw3dRect(x-1,y-1,width+ CNativeGui::uiSetting->dialwidth+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
+	}
+	void CNativeGui::InfoLabel::DrawHLightB(CDC& dc,int x, int y,int width,const char *parName,const char *parValue)
+	{
+		const int height = CNativeGui::uiSetting->dialheight;
+
+		const int half = height/2;
+		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
+		//		dc.FillSolidRect(x, y, mywidth, half,titleColor);
+		//		dc.FillSolidRect(x, y+half, mywidth, half,bottomColor);
+
+		dc.SetBkColor(CNativeGui::uiSetting->hTopColor);
+		dc.SetTextColor(CNativeGui::uiSetting->fonthBottomColor);
+		CFont *oldfont =dc.SelectObject(&CNativeGui::uiSetting->font_bold);
+		dc.ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
+		dc.SelectObject(oldfont);
+
+		DrawHLightValue(dc,x,y,width,parValue);
+		dc.Draw3dRect(x-1,y-1,width+ CNativeGui::uiSetting->dialwidth+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
+	}
+	void CNativeGui::InfoLabel::DrawHLightValue(CDC& dc, int x, int y, int width,const char *parValue)
+	{
+		const int height = CNativeGui::uiSetting->dialheight;
+		const int half = height/2;
+		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
+		dc.SetBkColor(CNativeGui::uiSetting->bottomColor);
+		dc.SetTextColor(CNativeGui::uiSetting->fontBottomColor);
+		dc.ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
+	}
+	void CNativeGui::InfoLabel::DrawHeader(CDC& dc, int x, int y, int width,const char *parName)
+	{
+		const int height = CNativeGui::uiSetting->dialheight;
+		const int half = height/2;
+		const int quarter = height/4;
+		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
+
+		dc.FillSolidRect(x, y, mywidth, half,CNativeGui::uiSetting->topColor);
+		dc.FillSolidRect(x, y+half, mywidth, half,CNativeGui::uiSetting->bottomColor);
+
+		dc.SetBkColor(CNativeGui::uiSetting->titleColor);
+		dc.SetTextColor(CNativeGui::uiSetting->fonttitleColor);
+
+		CFont *oldfont = dc.SelectObject(&CNativeGui::uiSetting->font_bold);
+		dc.ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
+		dc.SelectObject(&CNativeGui::uiSetting->font);
+		dc.Draw3dRect(x-1,y-1,width+CNativeGui::uiSetting->dialwidth+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
+		dc.SelectObject(oldfont);
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// GraphSlider class
+	void CNativeGui::GraphSlider::Draw(CDC& dc, CDC& backDC, CDC& knobDC, int x, int y,float value)
+	{
+		int width = CNativeGui::uiSetting->sliderwidth;
+		int height = CNativeGui::uiSetting->sliderheight;
+		dc.BitBlt(x,y,width,height,&backDC,0,0,SRCCOPY);
+//		dc.FillSolidRect(x+width, y, InfoLabel::width, height-InfoLabel::height,topColor);
+		dc.Draw3dRect(x-1,y-1,width+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
+		DrawKnob(dc,knobDC,x,y,value);
+	}
+	void CNativeGui::GraphSlider::DrawKnob(CDC& dc, CDC& knobDC, int x, int y, float value)
+	{
+		int height = CNativeGui::uiSetting->sliderheight;
+		int knobheight = CNativeGui::uiSetting->sliderknobheight;
+		int knobwidth = CNativeGui::uiSetting->sliderknobwidth;
+		int ypos(0);
+		if ( value < 0.375 ) ypos = (height-knobheight);
+		else if ( value < 0.999) ypos = (((value-0.375f)*1.6f)-1.0f)*-1.0f*(height-knobheight);
+		dc.BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
+	}
+	bool  CNativeGui::GraphSlider::LButtonDown( UINT nFlags,int x,int y)
+	{
+		if ( x< CNativeGui::uiSetting->sliderwidth
+			&& y < CNativeGui::uiSetting->sliderheight) return true;
+		return false;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+	// SwitchButton class
+	void CNativeGui::SwitchButton::Draw(CDC& dc, CDC& switchDC, int x, int y)
+	{
+		int height = CNativeGui::uiSetting->switchheight;
+		int width = CNativeGui::uiSetting->switchwidth;
+		dc.BitBlt(x,y,width,height,&switchDC,0,0,SRCCOPY);
+		dc.Draw3dRect(x-1,y-1,width+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
+	}
+
+	void CNativeGui::CheckedButton::Draw(CDC& dc, int x, int y,const char* text,bool checked)
+	{
+		int height = CNativeGui::uiSetting->switchheight;
+		int width = CNativeGui::uiSetting->switchwidth;
+		if ( checked )
+		{
+			dc.SetBkColor(CNativeGui::uiSetting->hBottomColor);
+			dc.SetTextColor(CNativeGui::uiSetting->fonthBottomColor);
+		}
+		else{
+			dc.SetBkColor(CNativeGui::uiSetting->topColor);
+			dc.SetTextColor(CNativeGui::uiSetting->fontTopColor);
+		}
+		CFont *oldfont =dc.SelectObject(&CNativeGui::uiSetting->font_bold);
+		dc.ExtTextOut(x+4, y+1, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+height-1), CString(text), 0);
+		dc.SelectObject(oldfont);
+		dc.Draw3dRect(x-1,y-1,width+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// Vumeter class
+	void CNativeGui::VuMeter::Draw(CDC& dc, CDC& vuOn,CDC& vuOff, int x, int y, float value)
+	{
+		int height = CNativeGui::uiSetting->switchheight;
+		int width = CNativeGui::uiSetting->switchwidth;
+		int ypos = (1-value)*height;
+		dc.BitBlt(x+7,y+35,width,ypos,&vuOff,0,0,SRCCOPY);
+		dc.BitBlt(x+7,y+35+ypos,width,height,&vuOn,0,ypos,SRCCOPY);
+	}
+
+	/////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////
 		BEGIN_MESSAGE_MAP(CNativeGui, CWnd)
 			ON_WM_CREATE()
-			ON_WM_DESTROY()
 			ON_WM_SETFOCUS()
-			ON_WM_TIMER()
 			ON_WM_PAINT()
 			ON_WM_LBUTTONDOWN()
 			ON_WM_LBUTTONDBLCLK()
 			ON_WM_MOUSEMOVE()
 			ON_WM_LBUTTONUP()
 			ON_WM_RBUTTONUP()
-			ON_WM_KEYDOWN()
-			ON_WM_KEYUP()
 		END_MESSAGE_MAP()
 
 
-		NativeGUISettings::NativeGUISettings()
-		{
-			topColor = Global::pConfig->machineGUITopColor;
-			bottomColor = Global::pConfig->machineGUIBottomColor;
-			hTopColor = Global::pConfig->machineGUIHTopColor;
-			hBottomColor = Global::pConfig->machineGUIHBottomColor;
-			titleColor = Global::pConfig->machineGUITitleColor;
-			fontTopColor = Global::pConfig->machineGUIFontTopColor;
-			fontBottomColor = Global::pConfig->machineGUIFontBottomColor;
-			fonthTopColor = Global::pConfig->machineGUIHFontTopColor;
-			fonthBottomColor = Global::pConfig->machineGUIHFontBottomColor;
-			fonttitleColor = Global::pConfig->machineGUITitleFontColor;
-
-			b_font.CreatePointFont(80,"Tahoma");
-			CString sFace("Tahoma");
-			LOGFONT lf = LOGFONT();
-			lf.lfWeight = FW_BOLD;
-			lf.lfHeight = 80;
-			lf.lfQuality = DEFAULT_QUALITY;
-			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
-			if(!b_font_bold.CreatePointFontIndirect(&lf))
-			{
-				b_font_bold.CreatePointFont(80,"Tahoma Bold");
-			}
-			LoadMachineDial();
-
-			///\todo: Get this information from the dial bitmap instead of having it hardcoded.
-			dialwidth = 28;
-			dialheight = 28;
-			dialframes = 63;
-		}
-		NativeGUISettings::~NativeGUISettings()
-		{
-			b_font.DeleteObject();
-			b_font_bold.DeleteObject();
-		}
-
-		void NativeGUISettings::LoadMachineDial()
-		{
-			dial.DeleteObject();
-			if ( hbmMachineDial) DeleteObject(hbmMachineDial);
-			if (Global::pConfig->bBmpDial)
-			{
-				Global::pConfig->bBmpDial=FALSE;
-				hbmMachineDial = (HBITMAP)LoadImage(NULL, Global::pConfig->szBmpDialFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineDial)
-				{
-					if (dial.Attach(hbmMachineDial))
-					{	
-						BITMAP bm;
-						GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
-
-						if ((bm.bmWidth == 1792) && (bm.bmHeight == 28))
-						{
-							Global::pConfig->bBmpDial=TRUE;
-						}
-						else
-							dial.LoadBitmap(IDB_KNOB);
-					}
-				}
-			}
-			else 
-				dial.LoadBitmap(IDB_KNOB);
-		}
-
-
-		CNativeGui::CNativeGui(Machine* effect)
+		CNativeGui::CNativeGui(Machine* effect, CChildView* view)
 		:ncol(0)
 		,numParameters(0)
 		,parspercol(0)
+		,colwidth(DEFAULT_ROWWIDTH)
 		,istweak(false)
 		,finetweak(false)
 		,ultrafinetweak(false)
@@ -112,30 +235,9 @@ namespace psycle { namespace host {
 		,maxval(0)
 		,sourcepoint(0)
 		,prevval(0)
+		,mainView(view)
 		{
 			SelectMachine(effect);
-		}
-
-		bool CNativeGui::GetViewSize(CRect& rect)
-		{
-			rect.left= rect.top = 0;
-			rect.right = ncol * W_ROWWIDTH;
-			rect.bottom = parspercol * uiSetting().dialheight;
-			return true;
-		}
-
-		void CNativeGui::SelectMachine(Machine* pMachine)
-		{
-			_pMachine = pMachine;
-			numParameters = _pMachine->GetNumParams();
-			ncol = _pMachine->GetNumCols();
-			if ( ncol == 0 )
-			{
-				ncol = 1;
-				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
-			}
-			parspercol = numParameters/ncol;
-			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
 		}
 
 		int CNativeGui::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -144,143 +246,95 @@ namespace psycle { namespace host {
 			{
 				return -1;
 			}
-			GetDesktopWindow()->GetWindowRect(&uiSetting().deskrect);
 			return 0;
 		}
 
-		void CNativeGui::OnDestroy() 
+		BOOL CNativeGui::PreCreateWindow(CREATESTRUCT& cs)
 		{
-			CWnd::OnDestroy();
-		}
-
-		void CNativeGui::OnTimer(UINT_PTR nIDEvent) 
-		{
-			if ( nIDEvent == 2104+machine()._macIndex )
-			{
-				Invalidate(false);
-			}
-			CWnd::OnTimer(nIDEvent);
+			if (!CWnd::PreCreateWindow(cs))
+				return FALSE;
+			
+			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+			cs.style &= ~WS_BORDER;
+			cs.lpszClass = AfxRegisterWndClass(0);
+			return TRUE;
 		}
 
 		void CNativeGui::OnSetFocus(CWnd* pOldWnd) 
 		{
-//			GetParent()->OnSetFocus(pOldWnd);
-			WindowIdle();
+			CWnd::OnSetFocus(pOldWnd);
+			GetParent()->SetFocus();
 		}
 
 
-		///////////////////////////////////////////////////////////////////////
-		// GUI PAINTING HERE
-		///////////////////////////////////////////////////////////////////////
-
 		void CNativeGui::OnPaint() 
 		{
-			int const K_XSIZE2=uiSetting().dialwidth+8;
-			int const K_YSIZE2=uiSetting().dialheight/2;
+			int const K_XSIZE2=uiSetting->dialwidth+8;
 
 			CRect rect;
 			GetClientRect(&rect);
 
 			CPaintDC dc(this);
-			CFont* oldfont=dc.SelectObject(&uiSetting().b_font);
+			CFont* oldfont=dc.SelectObject(&uiSetting->font);
 
-			CDC memDC;
-			CBitmap* oldbmp;
-			memDC.CreateCompatibleDC(&dc);
-			oldbmp=memDC.SelectObject(&uiSetting().dial);
+			CDC knobDC;
+			CBitmap* oldKnobbmp;
+			knobDC.CreateCompatibleDC(&dc);
+			oldKnobbmp=knobDC.SelectObject(&uiSetting->dial);
 
 			int y_knob, x_knob,knob_c;
-			y_knob = x_knob = knob_c = 0;
 			char parName[64];
+			y_knob = x_knob = knob_c = 0;
 			std::memset(parName,0,64);
 
 			for (int c=0; c<numParameters; c++)
 			{
-				char buffer[128];
-
-				BOOL bDrawKnob = TRUE;
-				int min_v, max_v, val_v;
-				min_v = max_v = val_v = 1;
-
 				_pMachine->GetParamName(c,parName);
-				_pMachine->GetParamRange(c,min_v,max_v);
-				val_v = _pMachine->GetParamValue(c);
-				_pMachine->GetParamValue(c,buffer);
-				bDrawKnob = (min_v==max_v)?false:true;
+				int type = _pMachine->GetParamType(c);
 
-				if(bDrawKnob && (max_v - min_v)>0)
+				if(type == 2) // STATUS
 				{
+					char buffer[128];
+					int min_v, max_v;
+					min_v = max_v = 0;
+
+					_pMachine->GetParamRange(c,min_v,max_v);
+					_pMachine->GetParamValue(c,buffer);
+
 					int const amp_v = max_v - min_v;
 					float rel_v;
-					if ( istweak && c == tweakpar) 
+					if ( istweak && c == tweakpar)
 					{
 						rel_v = visualtweakvalue - min_v;
 					} else {
-						rel_v = val_v - min_v;
+						rel_v = _pMachine->GetParamValue(c) - min_v;
 					}
-					int const frame = (uiSetting().dialframes*rel_v)/amp_v;
-					int const xn = frame*uiSetting().dialwidth;
-
-					dc.BitBlt(x_knob,y_knob,uiSetting().dialwidth,uiSetting().dialheight,&memDC,xn,0,SRCCOPY);
-				
-					if ((tweakpar == c) && (istweak))
+					Knob::Draw(dc,knobDC,x_knob,y_knob,rel_v/amp_v);
+					if ( istweak && c == tweakpar)
 					{
-						dc.SetBkColor(uiSetting().hTopColor);
-						dc.SetTextColor(uiSetting().fonthTopColor);
+						InfoLabel::DrawHLight(dc,K_XSIZE2+x_knob,y_knob,colwidth,parName,buffer);
 					}
 					else
 					{
-						dc.SetBkColor(uiSetting().topColor);
-						dc.SetTextColor(uiSetting().fontTopColor);
+						InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,colwidth,parName,buffer);
 					}
-					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(uiSetting().dialwidth+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
-					
-					if ((tweakpar == c) && (istweak))
-					{
-						dc.SetBkColor(uiSetting().hBottomColor);
-						dc.SetTextColor(uiSetting().fonthBottomColor);
-					}
-					else
-					{
-						dc.SetBkColor(uiSetting().bottomColor);
-						dc.SetTextColor(uiSetting().fontBottomColor);
-					}
-					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(uiSetting().dialwidth+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+uiSetting().dialheight), CString(buffer), 0);
+				}
+				else if(type == 1) // HEADER
+				{
+					InfoLabel::DrawHeader(dc,K_XSIZE2+x_knob,y_knob,colwidth,parName);
 				}
 				else
 				{
-					if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
-					{
-						dc.SetBkColor(uiSetting().topColor);
-						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
-						
-						dc.SetBkColor(uiSetting().bottomColor);
-						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+uiSetting().dialheight), "", 0);
-					}
-					else
-					{
-						dc.SetBkColor(uiSetting().topColor);
-						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + uiSetting().dialheight / 4), "", 0);
-					
-						dc.SetBkColor(uiSetting().titleColor);
-						dc.SetTextColor(uiSetting().fonttitleColor);
-
-						dc.SelectObject(&uiSetting().b_font_bold);
-						dc.ExtTextOut(x_knob + 8, y_knob + uiSetting().dialheight / 4, ETO_OPAQUE, CRect(x_knob, y_knob + uiSetting().dialheight / 4, W_ROWWIDTH + x_knob, y_knob + uiSetting().dialheight * 3 / 4), CString(parName), 0);
-						dc.SelectObject(&uiSetting().b_font);
-
-						dc.SetBkColor(uiSetting().bottomColor);
-						dc.ExtTextOut(x_knob, y_knob + uiSetting().dialheight * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + uiSetting().dialheight * 3 / 4, W_ROWWIDTH + x_knob, y_knob + uiSetting().dialheight), "", 0);
-					}
+					InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,colwidth,"","");
 				}
-				y_knob += uiSetting().dialheight;
+				y_knob += uiSetting->dialheight;
 
 				++knob_c;
 
 				if (knob_c >= parspercol)
 				{
 					knob_c = 0;
-					x_knob += W_ROWWIDTH;
+					x_knob += colwidth;
 					y_knob = 0;
 				}
 			}
@@ -290,26 +344,13 @@ namespace psycle { namespace host {
 			{
 				for (int c=numParameters; c<exess; c++)
 				{
-					dc.SetBkColor(uiSetting().topColor);
-					dc.SetTextColor(uiSetting().fontTopColor);
-					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
-
-					dc.SetBkColor(uiSetting().bottomColor);
-					dc.SetTextColor(uiSetting().fontBottomColor);
-					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+uiSetting().dialheight), "", 0);
-
-					y_knob += uiSetting().dialheight;
+					InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,colwidth,"","");
+					y_knob += uiSetting->dialheight;
 				}
 			}
-			memDC.SelectObject(oldbmp);
-			memDC.DeleteDC();
+			knobDC.SelectObject(oldKnobbmp);
+			knobDC.DeleteDC();
 			dc.SelectObject(oldfont);
-		}
-
-		int CNativeGui::ConvertXYtoParam(int x, int y)
-		{
-			if ((y/uiSetting().dialheight) >= parspercol ) return -1; //this if for VST's that use the native gui.
-			return (y/uiSetting().dialheight) + ((x/W_ROWWIDTH)*parspercol);
 		}
 
 		void CNativeGui::OnLButtonDown(UINT nFlags, CPoint point) 
@@ -323,7 +364,7 @@ namespace psycle { namespace host {
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
 				visualtweakvalue= tweakbase;
-//				wndView->AddMacViewUndo();
+				mainView->AddMacViewUndo();
 				SetCapture();
 			}
 			else
@@ -335,18 +376,16 @@ namespace psycle { namespace host {
 
 		void CNativeGui::OnLButtonDblClk(UINT nFlags, CPoint point)
 		{
-/*
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				int par = ConvertXYtoParam(point.x,point.y);
-				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
+				if(par>=0 && par <= _pMachine->GetNumParams() )
 				{
-					wndView->AddMacViewUndo();
+					mainView->AddMacViewUndo();
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
 				}
 			}
 			Invalidate(false);
-*/
 			CWnd::OnLButtonDblClk(nFlags, point);
 		}
 
@@ -377,7 +416,7 @@ namespace psycle { namespace host {
 				}
 
 				double freak;
-				int screenh = uiSetting().deskrect.bottom;
+				int screenh = uiSetting->deskrect.bottom;
 				if ( ultrafinetweak ) freak = 0.5f;
 				else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
 				else if (maxval-minval < screenh*2/3) freak = (maxval-minval)/float(screenh/3);
@@ -392,17 +431,22 @@ namespace psycle { namespace host {
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f));  // +0.5f to round correctly, not like "floor".
 				prevval=(int)(nv+0.5f);
 				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-//				wndView->AddMacViewUndo();
-				if(Global::configuration()._RecordTweaks)
+				mainView->AddMacViewUndo();
+				if(Global::psycleconf().inputHandler()._RecordTweaks)
 				{
-					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, tweakpar, prevval);
+					if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
+					{
+						mainView->MousePatternTweakSlide(machine()._macIndex, tweakpar, prevval);
+					}
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, tweakpar, prevval);
+					{
+						mainView->MousePatternTweak(machine()._macIndex, tweakpar, prevval);
+					}
 				}
-//				if(pParamGui)
-//					pParamGui->UpdateNew(index, value);
-
+/*
+				if(pParamGui)
+					pParamGui->UpdateNew(index, value);
+*/
 
 				Invalidate(false);
 			}
@@ -425,10 +469,11 @@ namespace psycle { namespace host {
 			{
 				if (nFlags & MK_CONTROL)
 				{
-/*					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
+					
+/*					Global::_pSong->seqBus = machine()._macIndex;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-					cb2->SetCurSel(AUX_PARAMS); // PARAMS
+					cb2->SetCurSel(AUX_PARAMS);
 					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 */
@@ -454,7 +499,7 @@ namespace psycle { namespace host {
 					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
-//						wndView->AddMacViewUndo();
+						mainView->AddMacViewUndo();
 						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
 					}
 					Invalidate(false);
@@ -463,54 +508,32 @@ namespace psycle { namespace host {
 			CWnd::OnRButtonUp(nFlags, point);
 		}
 
-		void CNativeGui::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+		int CNativeGui::ConvertXYtoParam(int x, int y)
 		{
-			// ignore repeats: nFlags&0x4000
-			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			if(cmd.IsValid())
-			{
-				switch(cmd.GetType())
-				{
-				case CT_Note:
-					if (!bRepeat){
-						const int outnote = cmd.GetNote();
-						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,255,127,true,_pMachine);
-						else
-							Global::pInputHandler->PlayNote(outnote);
-					}
-					break;
-
-				case CT_Immediate:
-				case CT_Editor:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
-					break;
-				}
-			}
-
-			this->SetFocus();
-
-			//wndView->KeyDown(nChar,nRepCnt,nFlags);
-			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
+			if ((y/uiSetting->dialheight) >= parspercol ) return -1; //this if for VST's that use the native gui.
+			return (y/uiSetting->dialheight) + ((x/colwidth)*colwidth);
 		}
 
-		void CNativeGui::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+		bool CNativeGui::GetViewSize(CRect& rect)
 		{
+			rect.left= rect.top = 0;
+			rect.right = ncol * colwidth;
+			rect.bottom = parspercol * uiSetting->dialheight;
+			return true;
+		}
 
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
-			const int outnote = cmd.GetNote();
-			if(outnote>=0)
+		void CNativeGui::SelectMachine(Machine* pMachine)
+		{
+			_pMachine = pMachine;
+			numParameters = _pMachine->GetNumParams();
+			ncol = _pMachine->GetNumCols();
+			if ( ncol == 0 )
 			{
-				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
-				{
-					Global::pInputHandler->StopNote(outnote,255,true,_pMachine);
-				}
-				else Global::pInputHandler->StopNote(outnote);
+				ncol = 1;
+				while ( (numParameters/ncol)*uiSetting->dialheight > ncol*colwidth ) ncol++;
 			}
-
-			//wndView->KeyUp(nChar, nRepCnt, nFlags);
-			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
+			parspercol = numParameters/ncol;
+			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
 		}
 
 	}   // namespace

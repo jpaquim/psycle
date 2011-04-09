@@ -26,15 +26,15 @@ namespace psycle { namespace host {
 
 		CPreset::~CPreset()
 		{
-			delete [] params;
-			delete [] data;
+			delete[] params;
+			delete[] data;
 		}
 
 		void CPreset::Clear()
 		{
-			delete [] params; params = 0;
+			delete[] params; params = 0;
 			numPars =-1;
-			delete [] data; data = 0;
+			delete[] data; data = 0;
 			dataSize = 0;
 			std::memset(name,0,32);
 		}
@@ -43,15 +43,15 @@ namespace psycle { namespace host {
 		{
 			if ( num > 0 )
 			{
-				delete [] params; params = new int[num];
+				delete[] params; params = new int[num];
 				numPars=num;
 			}
 			else
 			{
-				delete params; params = 0;
+				delete[] params; params = 0;
 				numPars =-1;
 			}
-			delete [] data; data = 0;
+			delete[] data; data = 0;
 			dataSize = 0;
 
 			std::memset(name,0, sizeof name * sizeof *name);
@@ -61,25 +61,25 @@ namespace psycle { namespace host {
 		{
 			if ( num > 0 )
 			{
-				delete [] params; params = new int[num];
+				delete[] params; params = new int[num];
 				numPars=num;
 				std::memcpy(params,parameters,numPars * sizeof *params);
 			}
 			else
 			{
-				delete [] params; params = 0;
+				delete[] params; params = 0;
 				numPars=-1;
 			}
 
 			if ( size > 0 )
 			{
-				delete [] data; data = new unsigned char[size];
+				delete[] data; data = new unsigned char[size];
 				std::memcpy(data,newdata,size);
 				dataSize = size;
 			}
 			else
 			{
-				delete [] data; data = 0;
+				delete[] data; data = 0;
 				dataSize=0;
 			}
 			std::strcpy(name,newname);
@@ -89,49 +89,50 @@ namespace psycle { namespace host {
 		{
 			if ( num > 0 )
 			{
-				delete [] params; params = new int[num];
+				delete[] params; params = new int[num];
 				numPars=num;
 				for(int x=0;x<num;x++) params[x]= helpers::math::lround<int,float>(parameters[x]*65535.0f);
 			}
 			else
 			{
-				delete [] params; params = 0;
+				delete[] params; params = 0;
 				numPars=-1;
 			}
 
-			delete [] data; data = 0;
+			delete[] data; data = 0;
 			dataSize = 0;
 
 			std::strcpy(name,newname);
 		}
 
-		void CPreset::operator=(CPreset& newpreset)
+		CPreset& CPreset::operator=(const CPreset& newpreset)
 		{
 			if ( newpreset.numPars > 0 )
 			{
 				numPars=newpreset.numPars;
-				delete [] params; params = new int[numPars];
+				delete[] params; params = new int[numPars];
 				std::memcpy(params,newpreset.params,numPars * sizeof *params);
 			}
 			else
 			{
-				delete [] params; params = 0;
+				delete[] params; params = 0;
 				numPars=-1;
 			}
 
 			if ( newpreset.dataSize > 0 )
 			{
 				dataSize = newpreset.dataSize;
-				delete [] data; data = new unsigned char[dataSize];
+				delete[] data; data = new unsigned char[dataSize];
 				std::memcpy(data,newpreset.data,dataSize);
 			}
 			else
 			{
-				delete [] data; data = 0;
+				delete[] data; data = 0;
 				dataSize = 0;
 			}
 
 			strcpy(name,newpreset.name);
+			return *this;
 		}
 
 		int CPreset::GetParam(const int n)
@@ -213,45 +214,22 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					
-					try
+					iniPreset.Init(numParameters);
+					for(int i=0; i < numParameters; ++i)
 					{
-						iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), 0,  0);
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // reinterpret_cast sucks
-					{
-						// o_O`
+						iniPreset.SetParam(i , _pMachine->GetParamValue(i));
 					}
 				}
-				buffer = _pMachine->GetDllName();
 			}
 			else if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
 			{ 
 				iniPreset.Init(numParameters);
-				int i(0);
-				while(i < numParameters)
+				for(int i=0; i < numParameters; ++i)
 				{
-					try
-					{
-						iniPreset.SetParam(i, helpers::math::lround<int,float>(reinterpret_cast<vst::plugin *>(_pMachine)->GetParameter(i) * vst::quantization));
-					}
-					catch(const std::exception &)
-					{
-						// o_O`
-					}
-					catch(...) // reinterpret_cast sucks
-					{
-						// o_O`
-					}
-					++i;
+					iniPreset.SetParam(i, _pMachine->GetParamValue(i));
 				}
-				buffer = _pMachine->GetDllName();
-
 			}
+			buffer = _pMachine->GetDllName();
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
 			fileName= buffer;

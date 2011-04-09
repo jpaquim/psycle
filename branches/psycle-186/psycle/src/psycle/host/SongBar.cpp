@@ -5,12 +5,12 @@
  */
 
 #include "SongBar.hpp"
+#include "PsycleConfig.hpp"
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "Player.hpp"
-#include "Configuration.hpp"
 
 namespace psycle{ namespace host{
 
@@ -259,7 +259,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	//l and r are the left and right vu meter values
 	void SongBar::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
 	{
-		if (Global::pConfig->draw_vus)
+		if (Global::psycleconf().macView().draw_vus)
 		{
 			if(l<1)l=1;
 			if(r<1)r=1;
@@ -277,8 +277,10 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 			int log_r=100*log10f(r);
 			log_l=log_l-225;
 			if ( log_l < 0 )log_l=0;
+			if ( log_l > 225 )log_l=225;
 			log_r=log_r-225;
 			if ( log_r < 0 )log_r=0;
+			if ( log_r > 225 )log_r=225;
 			
 			if (log_l || vuprevL)
 			{
@@ -323,15 +325,13 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 BOOL SongBar::OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult )
 {
 	TOOLTIPTEXT* pstTTT = (TOOLTIPTEXT * )pstNMHDR;
-	UINT nID = pstNMHDR->idFrom;
+	//UINT nID = pstNMHDR->idFrom;
 	if ((pstTTT->uFlags & TTF_IDISHWND))
 	{
 		// idFrom is actually the HWND of the tool
 		//nID = ::GetDlgCtrlID((HWND)nID);
 
-		char buf[256];
-		sprintf(buf, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos())));
-		pstTTT->lpszText = buf;
+		sprintf(pstTTT->szText, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos())));
 		pstTTT->hinst = AfxGetResourceHandle();
 		return(TRUE);
 	}

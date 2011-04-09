@@ -139,14 +139,17 @@ namespace psycle
 			CMidiInput();
 			virtual ~CMidiInput();
 
-			/// returns the current instance
-			static CMidiInput * Instance() { return s_Instance; }
+			/// returns the number of midi devices on the system
+			static int GetNumDevices( void );	
+			/// Return the description of a device by its index
+			static void GetDeviceDesc( int idx, std::string& result);	
+			/// convert a name identifier into a index identifier (or -1 if fail)
+			static int FindDevByName( CString nameString );	
 
 			/// set MIDI input device identifier
 			void SetDeviceId(unsigned int driver, int devId);
 			/// open the midi input devices
 			bool Open();
-		public:
 			/// resync the MIDI with the audio engine
 			void ReSync();
 			/// close the midi input device
@@ -159,16 +162,6 @@ namespace psycle
 			MIDI_STATS * GetStatsPtr() { return &m_stats; }		
 			/// for external access
 			MIDI_CONFIG * GetConfigPtr() { return &m_config; }
-
-			/// returns the number of midi devices on the system
-			int GetNumDevices( void );	
-			/// convert a name identifier into a index identifier (or -1 if fail)
-			int FindDevByName( CString nameString );	
-			/// fill a listbox with a list of the available input devices
-			std::uint32_t PopulateListbox( CComboBox * listbox , bool issync );	
-
-			/// return the current device handle
-			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
 
 			/// set a instrument map
 			void SetInstMap( int machine, int inst );	
@@ -202,14 +195,14 @@ namespace psycle
 			/// the real callbacks
 			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
+			/// return the current device handle
+			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
+
 			/// We've received a resync message
 			void InternalReSync( DWORD_PTR dwParam2 );
 			/// We've received a clock message
 			void InternalClock( DWORD_PTR dwParam2 );
 			int GetTrackToPlay(int note, int velocity, int instNo);
-
-			/// the current instance pointer
-			static CMidiInput * s_Instance;	
 
 			/// midi device identifiers
 			int m_devId[ MAX_DRIVERS ];		

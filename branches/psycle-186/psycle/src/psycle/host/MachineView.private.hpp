@@ -16,7 +16,7 @@ namespace psycle { namespace host {
 
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
-			if (Global::pConfig->draw_vus)
+			if (macView->draw_vus)
 			{
 				for (int c=0; c<MAX_MACHINES-1; c++)
 				{
@@ -38,7 +38,7 @@ namespace psycle { namespace host {
 
 		void CChildView::DrawMachineVumeters(int c, CDC *devc)
 		{
-			if (Global::pConfig->draw_vus)
+			if (macView->draw_vus)
 			{
 				Machine* pMac = _pSong->_pMachine[c];
 				if (pMac)
@@ -58,14 +58,16 @@ namespace psycle { namespace host {
 
 		void CChildView::DrawMachineEditor(CDC *devc)
 		{
-			CBrush fillbrush(Global::pConfig->mv_polycolour);
+			CBrush fillbrush(macView->polycolour);
 			CBrush *oldbrush = devc->SelectObject(&fillbrush);
-			if (Global::pConfig->bBmpBkg) // Draw Background image
+			if (macView->bBmpBkg) // Draw Background image
 			{
 				CDC memDC;
 				CBitmap* oldbmp;
 				memDC.CreateCompatibleDC(devc);
-				oldbmp=memDC.SelectObject(&machinebkg);
+				oldbmp=memDC.SelectObject(&macView->machinebkg);
+				int bkgx = macView->bkgx;
+				int bkgy = macView->bkgy;
 
 				if ((CW > bkgx) || (CH > bkgy)) 
 				{
@@ -90,21 +92,21 @@ namespace psycle { namespace host {
 			{
 				CRect rClient;
 				GetClientRect(&rClient);
-				devc->FillSolidRect(&rClient,Global::pConfig->mv_colour);
+				devc->FillSolidRect(&rClient,macView->colour);
 			}
 
-			if (Global::pConfig->mv_wireaa)
+			if (macView->wireaa)
 			{
 				
 				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
 				// polygon color stated in the config.
-				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
-				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
-				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
+				float deltaColR = ((macView->polycolour     & 0xFF) / 510.0) + .45;
+				float deltaColG = ((macView->polycolour>>8  & 0xFF) / 510.0) + .45;
+				float deltaColB = ((macView->polycolour>>16 & 0xFF) / 510.0) + .45;
 			
-				CPen linepen1( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa*2), Global::pConfig->mv_wireaacolour);
-				CPen linepen2( PS_SOLID, Global::pConfig->mv_wirewidth+(Global::pConfig->mv_wireaa), Global::pConfig->mv_wireaacolour2); 
-				CPen linepen3( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+				CPen linepen1( PS_SOLID, macView->wirewidth+(macView->wireaa*2), macView->wireaacolour);
+				CPen linepen2( PS_SOLID, macView->wirewidth+(macView->wireaa), macView->wireaacolour2); 
+				CPen linepen3( PS_SOLID, macView->wirewidth, macView->wirecolour); 
 	 			CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
 				CPen *oldpen = devc->SelectObject(&linepen1);
 				CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
@@ -120,17 +122,17 @@ namespace psycle { namespace host {
 						switch (tmac->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							oriX = tmac->_x+(MachineCoords.sGenerator.width/2);
-							oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
+							oriX = tmac->_x+(MachineCoords->sGenerator.width/2);
+							oriY = tmac->_y+(MachineCoords->sGenerator.height/2);
 							break;
 						case MACHMODE_FX:
-							oriX = tmac->_x+(MachineCoords.sEffect.width/2);
-							oriY = tmac->_y+(MachineCoords.sEffect.height/2);
+							oriX = tmac->_x+(MachineCoords->sEffect.width/2);
+							oriY = tmac->_y+(MachineCoords->sEffect.height/2);
 							break;
 
 						case MACHMODE_MASTER:
-							oriX = tmac->_x+(MachineCoords.sMaster.width/2);
-							oriY = tmac->_y+(MachineCoords.sMaster.height/2);
+							oriX = tmac->_x+(MachineCoords->sMaster.width/2);
+							oriY = tmac->_y+(MachineCoords->sMaster.height/2);
 							break;
 						}
 
@@ -146,17 +148,17 @@ namespace psycle { namespace host {
 									switch (pout->_mode)
 									{
 									case MACHMODE_GENERATOR:
-										desX = pout->_x+(MachineCoords.sGenerator.width/2);
-										desY = pout->_y+(MachineCoords.sGenerator.height/2);
+										desX = pout->_x+(MachineCoords->sGenerator.width/2);
+										desY = pout->_y+(MachineCoords->sGenerator.height/2);
 										break;
 									case MACHMODE_FX:
-										desX = pout->_x+(MachineCoords.sEffect.width/2);
-										desY = pout->_y+(MachineCoords.sEffect.height/2);
+										desX = pout->_x+(MachineCoords->sEffect.width/2);
+										desY = pout->_y+(MachineCoords->sEffect.height/2);
 										break;
 
 									case MACHMODE_MASTER:
-										desX = pout->_x+(MachineCoords.sMaster.width/2);
-										desY = pout->_y+(MachineCoords.sMaster.height/2);
+										desX = pout->_x+(MachineCoords->sMaster.width/2);
+										desY = pout->_y+(MachineCoords->sMaster.height/2);
 										break;
 									}
 								}
@@ -281,9 +283,9 @@ namespace psycle { namespace host {
 
 				// the shaded arrow colors will be multiplied by these values to convert them from grayscale to the
 				// polygon color stated in the config.
-				float deltaColR = ((Global::pConfig->mv_polycolour     & 0xFF) / 510.0) + .45;
-				float deltaColG = ((Global::pConfig->mv_polycolour>>8  & 0xFF) / 510.0) + .45;
-				float deltaColB = ((Global::pConfig->mv_polycolour>>16 & 0xFF) / 510.0) + .45;
+				float deltaColR = ((macView->polycolour     & 0xFF) / 510.0) + .45;
+				float deltaColG = ((macView->polycolour>>8  & 0xFF) / 510.0) + .45;
+				float deltaColB = ((macView->polycolour>>16 & 0xFF) / 510.0) + .45;
 				
 
 				// Draw wire [connections]
@@ -294,7 +296,7 @@ namespace psycle { namespace host {
 					if(tmac)
 					{
 
-						CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+						CPen linepen( PS_SOLID, macView->wirewidth, macView->wirecolour); 
 						CPen polyInnardsPen(PS_SOLID, 0, RGB(192 * deltaColR, 192 * deltaColG, 192 * deltaColB));
 						CPen *oldpen = devc->SelectObject(&linepen);				
 						CBrush *oldbrush = static_cast<CBrush*>(devc->SelectStockObject(NULL_BRUSH));
@@ -305,17 +307,17 @@ namespace psycle { namespace host {
 						switch (tmac->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							oriX = tmac->_x+(MachineCoords.sGenerator.width/2);
-							oriY = tmac->_y+(MachineCoords.sGenerator.height/2);
+							oriX = tmac->_x+(MachineCoords->sGenerator.width/2);
+							oriY = tmac->_y+(MachineCoords->sGenerator.height/2);
 							break;
 						case MACHMODE_FX:
-							oriX = tmac->_x+(MachineCoords.sEffect.width/2);
-							oriY = tmac->_y+(MachineCoords.sEffect.height/2);
+							oriX = tmac->_x+(MachineCoords->sEffect.width/2);
+							oriY = tmac->_y+(MachineCoords->sEffect.height/2);
 							break;
 
 						case MACHMODE_MASTER:
-							oriX = tmac->_x+(MachineCoords.sMaster.width/2);
-							oriY = tmac->_y+(MachineCoords.sMaster.height/2);
+							oriX = tmac->_x+(MachineCoords->sMaster.width/2);
+							oriY = tmac->_y+(MachineCoords->sMaster.height/2);
 							break;
 						}
 
@@ -331,17 +333,17 @@ namespace psycle { namespace host {
 									switch (pout->_mode)
 									{
 									case MACHMODE_GENERATOR:
-										desX = pout->_x+(MachineCoords.sGenerator.width/2);
-										desY = pout->_y+(MachineCoords.sGenerator.height/2);
+										desX = pout->_x+(MachineCoords->sGenerator.width/2);
+										desY = pout->_y+(MachineCoords->sGenerator.height/2);
 										break;
 									case MACHMODE_FX:
-										desX = pout->_x+(MachineCoords.sEffect.width/2);
-										desY = pout->_y+(MachineCoords.sEffect.height/2);
+										desX = pout->_x+(MachineCoords->sEffect.width/2);
+										desY = pout->_y+(MachineCoords->sEffect.height/2);
 										break;
 
 									case MACHMODE_MASTER:
-										desX = pout->_x+(MachineCoords.sMaster.width/2);
-										desY = pout->_y+(MachineCoords.sMaster.height/2);
+										desX = pout->_x+(MachineCoords->sMaster.width/2);
+										desY = pout->_y+(MachineCoords->sMaster.height/2);
 										break;
 									}
 								}
@@ -489,7 +491,7 @@ namespace psycle { namespace host {
 				CDC memDC;
 				CBitmap* oldbmp;
 				memDC.CreateCompatibleDC(devc);
-				oldbmp=memDC.SelectObject(&machineskin);
+				oldbmp=memDC.SelectObject(&macView->machineskin);
 
 				int vol = pMac->_volumeDisplay;
 				int max = pMac->_volumeMaxDisplay;
@@ -498,21 +500,21 @@ namespace psycle { namespace host {
 				{
 				case MACHMODE_GENERATOR:
 					// scale our volumes
-					vol *= MachineCoords.dGeneratorVu.width;
+					vol *= MachineCoords->dGeneratorVu.width;
 					vol /= 96;
 
-					max *= MachineCoords.dGeneratorVu.width;
+					max *= MachineCoords->dGeneratorVu.width;
 					max /= 96;
 
-					if (MachineCoords.bHasTransparency)
+					if (MachineCoords->bHasTransparency)
 					{
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (vol > 0)
 						{
-							if (MachineCoords.sGeneratorVu0.width)
+							if (MachineCoords->sGeneratorVu0.width)
 							{
-								vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
-								vol *= MachineCoords.sGeneratorVu0.width;
+								vol /= MachineCoords->sGeneratorVu0.width;// restrict to leds
+								vol *= MachineCoords->sGeneratorVu0.width;
 							}
 						}
 						else
@@ -521,51 +523,51 @@ namespace psycle { namespace host {
 						}
 
 						RECT r;
-						r.left = pMac->_x+vol+MachineCoords.dGeneratorVu.x;
-						r.top = pMac->_y+MachineCoords.dGeneratorVu.y;
-						r.right = r.left + MachineCoords.dGeneratorVu.width-vol;
-						r.bottom = r.top + MachineCoords.sGeneratorVu0.height;
-						devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+						r.left = pMac->_x+vol+MachineCoords->dGeneratorVu.x;
+						r.top = pMac->_y+MachineCoords->dGeneratorVu.y;
+						r.right = r.left + MachineCoords->dGeneratorVu.width-vol;
+						r.bottom = r.top + MachineCoords->sGeneratorVu0.height;
+						devc->FillSolidRect(&r,macView->colour);
 
 						TransparentBlt(devc,
 									r.left, 
 									r.top, 
-									MachineCoords.dGeneratorVu.width-vol, 
-									MachineCoords.sGeneratorVu0.height, 
+									MachineCoords->dGeneratorVu.width-vol, 
+									MachineCoords->sGeneratorVu0.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x+vol, 
-									MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y);
+									&macView->machineskinmask,
+									MachineCoords->sGenerator.x+MachineCoords->dGeneratorVu.x+vol, 
+									MachineCoords->sGenerator.y+MachineCoords->dGeneratorVu.y);
 
 						if (max > 0)
 						{
-							if (MachineCoords.sGeneratorVuPeak.width)
+							if (MachineCoords->sGeneratorVuPeak.width)
 							{
-								max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
-								max *= MachineCoords.sGeneratorVuPeak.width;
+								max /= MachineCoords->sGeneratorVuPeak.width;// restrict to leds
+								max *= MachineCoords->sGeneratorVuPeak.width;
 								TransparentBlt(devc,
-											pMac->_x+max+MachineCoords.dGeneratorVu.x, 
-											pMac->_y+MachineCoords.dGeneratorVu.y, 
-											MachineCoords.sGeneratorVuPeak.width, 
-											MachineCoords.sGeneratorVuPeak.height, 
+											pMac->_x+max+MachineCoords->dGeneratorVu.x, 
+											pMac->_y+MachineCoords->dGeneratorVu.y, 
+											MachineCoords->sGeneratorVuPeak.width, 
+											MachineCoords->sGeneratorVuPeak.height, 
 											&memDC, 
-											&machineskinmask,
-											MachineCoords.sGeneratorVuPeak.x, 
-											MachineCoords.sGeneratorVuPeak.y);
+											&macView->machineskinmask,
+											MachineCoords->sGeneratorVuPeak.x, 
+											MachineCoords->sGeneratorVuPeak.y);
 							}
 						}
 
 						if (vol > 0)
 						{
 							TransparentBlt(devc,
-										pMac->_x+MachineCoords.dGeneratorVu.x, 
-										pMac->_y+MachineCoords.dGeneratorVu.y, 
+										pMac->_x+MachineCoords->dGeneratorVu.x, 
+										pMac->_y+MachineCoords->dGeneratorVu.y, 
 										vol, 
-										MachineCoords.sGeneratorVu0.height, 
+										MachineCoords->sGeneratorVu0.height, 
 										&memDC, 
-										&machineskinmask,
-										MachineCoords.sGeneratorVu0.x, 
-										MachineCoords.sGeneratorVu0.y);
+										&macView->machineskinmask,
+										MachineCoords->sGeneratorVu0.x, 
+										MachineCoords->sGeneratorVu0.y);
 						}
 					}
 					else
@@ -573,10 +575,10 @@ namespace psycle { namespace host {
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (vol > 0)
 						{
-							if (MachineCoords.sGeneratorVu0.width)
+							if (MachineCoords->sGeneratorVu0.width)
 							{
-								vol /= MachineCoords.sGeneratorVu0.width;// restrict to leds
-								vol *= MachineCoords.sGeneratorVu0.width;
+								vol /= MachineCoords->sGeneratorVu0.width;// restrict to leds
+								vol *= MachineCoords->sGeneratorVu0.width;
 							}
 						}
 						else
@@ -584,41 +586,41 @@ namespace psycle { namespace host {
 							vol = 0;
 						}
 
-						devc->BitBlt(pMac->_x+vol+MachineCoords.dGeneratorVu.x, 
-										pMac->_y+MachineCoords.dGeneratorVu.y, 
-										MachineCoords.dGeneratorVu.width-vol, 
-										MachineCoords.sGeneratorVu0.height, 
+						devc->BitBlt(pMac->_x+vol+MachineCoords->dGeneratorVu.x, 
+										pMac->_y+MachineCoords->dGeneratorVu.y, 
+										MachineCoords->dGeneratorVu.width-vol, 
+										MachineCoords->sGeneratorVu0.height, 
 										&memDC, 
-										MachineCoords.sGenerator.x+MachineCoords.dGeneratorVu.x+vol, 
-										MachineCoords.sGenerator.y+MachineCoords.dGeneratorVu.y, 
+										MachineCoords->sGenerator.x+MachineCoords->dGeneratorVu.x+vol, 
+										MachineCoords->sGenerator.y+MachineCoords->dGeneratorVu.y, 
 										SRCCOPY); //background
 
 						if (max > 0)
 						{
-							if (MachineCoords.sGeneratorVuPeak.width)
+							if (MachineCoords->sGeneratorVuPeak.width)
 							{
-								max /= MachineCoords.sGeneratorVuPeak.width;// restrict to leds
-								max *= MachineCoords.sGeneratorVuPeak.width;
-								devc->BitBlt(pMac->_x+max+MachineCoords.dGeneratorVu.x, 
-											pMac->_y+MachineCoords.dGeneratorVu.y, 
-											MachineCoords.sGeneratorVuPeak.width, 
-											MachineCoords.sGeneratorVuPeak.height, 
+								max /= MachineCoords->sGeneratorVuPeak.width;// restrict to leds
+								max *= MachineCoords->sGeneratorVuPeak.width;
+								devc->BitBlt(pMac->_x+max+MachineCoords->dGeneratorVu.x, 
+											pMac->_y+MachineCoords->dGeneratorVu.y, 
+											MachineCoords->sGeneratorVuPeak.width, 
+											MachineCoords->sGeneratorVuPeak.height, 
 											&memDC, 
-											MachineCoords.sGeneratorVuPeak.x, 
-											MachineCoords.sGeneratorVuPeak.y, 
+											MachineCoords->sGeneratorVuPeak.x, 
+											MachineCoords->sGeneratorVuPeak.y, 
 											SRCCOPY); //peak
 							}
 						}
 
 						if (vol > 0)
 						{
-							devc->BitBlt(pMac->_x+MachineCoords.dGeneratorVu.x, 
-										pMac->_y+MachineCoords.dGeneratorVu.y, 
+							devc->BitBlt(pMac->_x+MachineCoords->dGeneratorVu.x, 
+										pMac->_y+MachineCoords->dGeneratorVu.y, 
 										vol, 
-										MachineCoords.sGeneratorVu0.height, 
+										MachineCoords->sGeneratorVu0.height, 
 										&memDC, 
-										MachineCoords.sGeneratorVu0.x, 
-										MachineCoords.sGeneratorVu0.y, 
+										MachineCoords->sGeneratorVu0.x, 
+										MachineCoords->sGeneratorVu0.y, 
 										SRCCOPY); // leds
 						}
 					}
@@ -626,21 +628,21 @@ namespace psycle { namespace host {
 					break;
 				case MACHMODE_FX:
 					// scale our volumes
-					vol *= MachineCoords.dEffectVu.width;
+					vol *= MachineCoords->dEffectVu.width;
 					vol /= 96;
 
-					max *= MachineCoords.dEffectVu.width;
+					max *= MachineCoords->dEffectVu.width;
 					max /= 96;
 
-					if (MachineCoords.bHasTransparency)
+					if (MachineCoords->bHasTransparency)
 					{
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (vol > 0)
 						{
-							if (MachineCoords.sEffectVu0.width)
+							if (MachineCoords->sEffectVu0.width)
 							{
-								vol /= MachineCoords.sEffectVu0.width;// restrict to leds
-								vol *= MachineCoords.sEffectVu0.width;
+								vol /= MachineCoords->sEffectVu0.width;// restrict to leds
+								vol *= MachineCoords->sEffectVu0.width;
 							}
 						}
 						else
@@ -649,51 +651,51 @@ namespace psycle { namespace host {
 						}
 
 						RECT r;
-						r.left = pMac->_x+vol+MachineCoords.dEffectVu.x;
-						r.top = pMac->_y+MachineCoords.dEffectVu.y;
-						r.right = r.left + MachineCoords.dEffectVu.width-vol;
-						r.bottom = r.top + MachineCoords.sEffectVu0.height;
-						devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+						r.left = pMac->_x+vol+MachineCoords->dEffectVu.x;
+						r.top = pMac->_y+MachineCoords->dEffectVu.y;
+						r.right = r.left + MachineCoords->dEffectVu.width-vol;
+						r.bottom = r.top + MachineCoords->sEffectVu0.height;
+						devc->FillSolidRect(&r,macView->colour);
 
 						TransparentBlt(devc,
 									r.left, 
 									r.top, 
-									MachineCoords.dEffectVu.width-vol, 
-									MachineCoords.sEffectVu0.height, 
+									MachineCoords->dEffectVu.width-vol, 
+									MachineCoords->sEffectVu0.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sEffect.x+MachineCoords.dEffectVu.x+vol, 
-									MachineCoords.sEffect.y+MachineCoords.dEffectVu.y);
+									&macView->machineskinmask,
+									MachineCoords->sEffect.x+MachineCoords->dEffectVu.x+vol, 
+									MachineCoords->sEffect.y+MachineCoords->dEffectVu.y);
 
 						if (max > 0)
 						{
-							if (MachineCoords.sEffectVuPeak.width)
+							if (MachineCoords->sEffectVuPeak.width)
 							{
-								max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
-								max *= MachineCoords.sEffectVuPeak.width;
+								max /= MachineCoords->sEffectVuPeak.width;// restrict to leds
+								max *= MachineCoords->sEffectVuPeak.width;
 								TransparentBlt(devc,
-											pMac->_x+max+MachineCoords.dEffectVu.x, 
-											pMac->_y+MachineCoords.dEffectVu.y, 
-											MachineCoords.sEffectVuPeak.width, 
-											MachineCoords.sEffectVuPeak.height, 
+											pMac->_x+max+MachineCoords->dEffectVu.x, 
+											pMac->_y+MachineCoords->dEffectVu.y, 
+											MachineCoords->sEffectVuPeak.width, 
+											MachineCoords->sEffectVuPeak.height, 
 											&memDC, 
-											&machineskinmask,
-											MachineCoords.sEffectVuPeak.x, 
-											MachineCoords.sEffectVuPeak.y);
+											&macView->machineskinmask,
+											MachineCoords->sEffectVuPeak.x, 
+											MachineCoords->sEffectVuPeak.y);
 							}
 						}
 
 						if (vol > 0)
 						{
 							TransparentBlt(devc,
-										pMac->_x+MachineCoords.dEffectVu.x, 
-										pMac->_y+MachineCoords.dEffectVu.y, 
+										pMac->_x+MachineCoords->dEffectVu.x, 
+										pMac->_y+MachineCoords->dEffectVu.y, 
 										vol, 
-										MachineCoords.sEffectVu0.height, 
+										MachineCoords->sEffectVu0.height, 
 										&memDC, 
-										&machineskinmask,
-										MachineCoords.sEffectVu0.x, 
-										MachineCoords.sEffectVu0.y);
+										&macView->machineskinmask,
+										MachineCoords->sEffectVu0.x, 
+										MachineCoords->sEffectVu0.y);
 						}
 					}
 					else
@@ -701,10 +703,10 @@ namespace psycle { namespace host {
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
 						if (vol > 0)
 						{
-							if (MachineCoords.sEffectVu0.width)
+							if (MachineCoords->sEffectVu0.width)
 							{
-								vol /= MachineCoords.sEffectVu0.width;// restrict to leds
-								vol *= MachineCoords.sEffectVu0.width;
+								vol /= MachineCoords->sEffectVu0.width;// restrict to leds
+								vol *= MachineCoords->sEffectVu0.width;
 							}
 						}
 						else
@@ -712,41 +714,41 @@ namespace psycle { namespace host {
 							vol = 0;
 						}
 
-						devc->BitBlt(pMac->_x+vol+MachineCoords.dEffectVu.x, 
-										pMac->_y+MachineCoords.dEffectVu.y, 
-										MachineCoords.dEffectVu.width-vol, 
-										MachineCoords.sEffectVu0.height, 
+						devc->BitBlt(pMac->_x+vol+MachineCoords->dEffectVu.x, 
+										pMac->_y+MachineCoords->dEffectVu.y, 
+										MachineCoords->dEffectVu.width-vol, 
+										MachineCoords->sEffectVu0.height, 
 										&memDC, 
-										MachineCoords.sEffect.x+MachineCoords.dEffectVu.x+vol, 
-										MachineCoords.sEffect.y+MachineCoords.dEffectVu.y, 
+										MachineCoords->sEffect.x+MachineCoords->dEffectVu.x+vol, 
+										MachineCoords->sEffect.y+MachineCoords->dEffectVu.y, 
 										SRCCOPY); //background
 
 						if (max > 0)
 						{
-							if (MachineCoords.sEffectVuPeak.width)
+							if (MachineCoords->sEffectVuPeak.width)
 							{
-								max /= MachineCoords.sEffectVuPeak.width;// restrict to leds
-								max *= MachineCoords.sEffectVuPeak.width;
-								devc->BitBlt(pMac->_x+max+MachineCoords.dEffectVu.x, 
-											pMac->_y+MachineCoords.dEffectVu.y, 
-											MachineCoords.sEffectVuPeak.width, 
-											MachineCoords.sEffectVuPeak.height, 
+								max /= MachineCoords->sEffectVuPeak.width;// restrict to leds
+								max *= MachineCoords->sEffectVuPeak.width;
+								devc->BitBlt(pMac->_x+max+MachineCoords->dEffectVu.x, 
+											pMac->_y+MachineCoords->dEffectVu.y, 
+											MachineCoords->sEffectVuPeak.width, 
+											MachineCoords->sEffectVuPeak.height, 
 											&memDC, 
-											MachineCoords.sEffectVuPeak.x, 
-											MachineCoords.sEffectVuPeak.y, 
+											MachineCoords->sEffectVuPeak.x, 
+											MachineCoords->sEffectVuPeak.y, 
 											SRCCOPY); //peak
 							}
 						}
 
 						if (vol > 0)
 						{
-							devc->BitBlt(pMac->_x+MachineCoords.dEffectVu.x, 
-										pMac->_y+MachineCoords.dEffectVu.y, 
+							devc->BitBlt(pMac->_x+MachineCoords->dEffectVu.x, 
+										pMac->_y+MachineCoords->dEffectVu.y, 
 										vol, 
-										MachineCoords.sEffectVu0.height, 
+										MachineCoords->sEffectVu0.height, 
 										&memDC, 
-										MachineCoords.sEffectVu0.x, 
-										MachineCoords.sEffectVu0.y, 
+										MachineCoords->sEffectVu0.x, 
+										MachineCoords->sEffectVu0.y, 
 										SRCCOPY); // leds
 						}
 					}
@@ -768,7 +770,7 @@ namespace psycle { namespace host {
 				return;
 			}
 
-			if (MachineCoords.bHasTransparency)
+			if (MachineCoords->bHasTransparency)
 			{
 				RECT r;
 				switch (mac->_mode)
@@ -776,16 +778,16 @@ namespace psycle { namespace host {
 				case MACHMODE_GENERATOR:
 					r.left = mac->_x;
 					r.top = mac->_y;
-					r.right = r.left + MachineCoords.sGenerator.width;
-					r.bottom = r.top + MachineCoords.sGenerator.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					r.right = r.left + MachineCoords->sGenerator.width;
+					r.bottom = r.top + MachineCoords->sGenerator.height;
+					devc->FillSolidRect(&r,macView->colour);
 					break;
 				case MACHMODE_FX:
 					r.left = mac->_x;
 					r.top = mac->_y;
-					r.right = r.left + MachineCoords.sEffect.width;
-					r.bottom = r.top + MachineCoords.sEffect.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					r.right = r.left + MachineCoords->sEffect.width;
+					r.bottom = r.top + MachineCoords->sEffect.height;
+					devc->FillSolidRect(&r,macView->colour);
 					break;
 				}
 			}
@@ -796,7 +798,7 @@ namespace psycle { namespace host {
 			//the code below draws the highlight around the selected machine (the corners)
 
 			CPoint pol[3];
-			CPen linepen( PS_SOLID, Global::pConfig->mv_wirewidth, Global::pConfig->mv_wirecolour); 
+			CPen linepen( PS_SOLID, macView->wirewidth, macView->wirecolour); 
 			CPen *oldpen = devc->SelectObject(&linepen);
 
 			int hlength = 9; //the length of the selected machine highlight
@@ -816,30 +818,30 @@ namespace psycle { namespace host {
 
 					devc->Polyline(&pol[0], 3);
 
-					pol[0].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
+					pol[0].x = x + MachineCoords->sGenerator.width + hdistance - hlength;
 					pol[0].y = y - hdistance;
-					pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
+					pol[1].x = x + MachineCoords->sGenerator.width + hdistance;
 					pol[1].y = y - hdistance;
-					pol[2].x = x + MachineCoords.sGenerator.width + hdistance;
+					pol[2].x = x + MachineCoords->sGenerator.width + hdistance;
 					pol[2].y = y - hdistance + hlength;
 
 					devc->Polyline(&pol[0], 3);
 
-					pol[0].x = x + MachineCoords.sGenerator.width + hdistance;
-					pol[0].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
-					pol[1].x = x + MachineCoords.sGenerator.width + hdistance;
-					pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
-					pol[2].x = x + MachineCoords.sGenerator.width + hdistance - hlength;
-					pol[2].y = y + MachineCoords.sGenerator.height + hdistance;
+					pol[0].x = x + MachineCoords->sGenerator.width + hdistance;
+					pol[0].y = y + MachineCoords->sGenerator.height + hdistance - hlength;
+					pol[1].x = x + MachineCoords->sGenerator.width + hdistance;
+					pol[1].y = y + MachineCoords->sGenerator.height + hdistance;
+					pol[2].x = x + MachineCoords->sGenerator.width + hdistance - hlength;
+					pol[2].y = y + MachineCoords->sGenerator.height + hdistance;
 
 					devc->Polyline(&pol[0], 3);
 
 					pol[0].x = x - hdistance + hlength;
-					pol[0].y = y + MachineCoords.sGenerator.height + hdistance;
+					pol[0].y = y + MachineCoords->sGenerator.height + hdistance;
 					pol[1].x = x - hdistance;
-					pol[1].y = y + MachineCoords.sGenerator.height + hdistance;
+					pol[1].y = y + MachineCoords->sGenerator.height + hdistance;
 					pol[2].x = x - hdistance;
-					pol[2].y = y + MachineCoords.sGenerator.height + hdistance - hlength;
+					pol[2].y = y + MachineCoords->sGenerator.height + hdistance - hlength;
 
 					devc->Polyline(&pol[0], 3);
 
@@ -857,30 +859,30 @@ namespace psycle { namespace host {
 
 					devc->Polyline(&pol[0], 3);
 
-					pol[0].x = x + MachineCoords.sEffect.width + hdistance - hlength;
+					pol[0].x = x + MachineCoords->sEffect.width + hdistance - hlength;
 					pol[0].y = y - hdistance;
-					pol[1].x = x + MachineCoords.sEffect.width + hdistance;
+					pol[1].x = x + MachineCoords->sEffect.width + hdistance;
 					pol[1].y = y - hdistance;
-					pol[2].x = x + MachineCoords.sEffect.width + hdistance;
+					pol[2].x = x + MachineCoords->sEffect.width + hdistance;
 					pol[2].y = y - hdistance + hlength;
 
 					devc->Polyline(&pol[0], 3);
 
-					pol[0].x = x + MachineCoords.sEffect.width + hdistance;
-					pol[0].y = y + MachineCoords.sEffect.height + hdistance - hlength;
-					pol[1].x = x + MachineCoords.sEffect.width + hdistance;
-					pol[1].y = y + MachineCoords.sEffect.height + hdistance;
-					pol[2].x = x + MachineCoords.sEffect.width + hdistance - hlength;
-					pol[2].y = y + MachineCoords.sEffect.height + hdistance;
+					pol[0].x = x + MachineCoords->sEffect.width + hdistance;
+					pol[0].y = y + MachineCoords->sEffect.height + hdistance - hlength;
+					pol[1].x = x + MachineCoords->sEffect.width + hdistance;
+					pol[1].y = y + MachineCoords->sEffect.height + hdistance;
+					pol[2].x = x + MachineCoords->sEffect.width + hdistance - hlength;
+					pol[2].y = y + MachineCoords->sEffect.height + hdistance;
 
 					devc->Polyline(&pol[0], 3);
 
 					pol[0].x = x - hdistance + hlength;
-					pol[0].y = y + MachineCoords.sEffect.height + hdistance;
+					pol[0].y = y + MachineCoords->sEffect.height + hdistance;
 					pol[1].x = x - hdistance;
-					pol[1].y = y + MachineCoords.sEffect.height + hdistance;
+					pol[1].y = y + MachineCoords->sEffect.height + hdistance;
 					pol[2].x = x - hdistance;
-					pol[2].y = y + MachineCoords.sEffect.height + hdistance - hlength;
+					pol[2].y = y + MachineCoords->sEffect.height + hdistance - hlength;
 
 					devc->Polyline(&pol[0], 3);
 				}
@@ -904,12 +906,12 @@ namespace psycle { namespace host {
 
 			CDC memDC;
 			memDC.CreateCompatibleDC(devc);
-			CBitmap* oldbmp = memDC.SelectObject(&machineskin);
+			CBitmap* oldbmp = memDC.SelectObject(&macView->machineskin);
 
 			DrawMachineHighlight(macnum, devc, mac, x, y);
 
 			// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-			if (MachineCoords.bHasTransparency)
+			if (MachineCoords->bHasTransparency)
 			{
 				switch (mac->_mode)
 				{
@@ -918,74 +920,74 @@ namespace psycle { namespace host {
 					RECT r;
 					r.left = x;
 					r.top = y;
-					r.right = r.left + MachineCoords.sGenerator.width;
-					r.bottom = r.top + MachineCoords.sGenerator.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					r.right = r.left + MachineCoords->sGenerator.width;
+					r.bottom = r.top + MachineCoords->sGenerator.height;
+					devc->FillSolidRect(&r,macView->colour);
 					*/
 
 					TransparentBlt(devc,
 								x, 
 								y, 
-								MachineCoords.sGenerator.width, 
-								MachineCoords.sGenerator.height, 
+								MachineCoords->sGenerator.width, 
+								MachineCoords->sGenerator.height, 
 								&memDC, 
-								&machineskinmask,
-								MachineCoords.sGenerator.x, 
-								MachineCoords.sGenerator.y);
+								&macView->machineskinmask,
+								MachineCoords->sGenerator.x, 
+								MachineCoords->sGenerator.y);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords.dGeneratorPan.width;
+						int panning = mac->_panning*MachineCoords->dGeneratorPan.width;
 						panning /= 128;
 						TransparentBlt(devc,
-									x+panning+MachineCoords.dGeneratorPan.x, 
-									y+MachineCoords.dGeneratorPan.y, 
-									MachineCoords.sGeneratorPan.width, 
-									MachineCoords.sGeneratorPan.height, 
+									x+panning+MachineCoords->dGeneratorPan.x, 
+									y+MachineCoords->dGeneratorPan.y, 
+									MachineCoords->sGeneratorPan.width, 
+									MachineCoords->sGeneratorPan.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sGeneratorPan.x, 
-									MachineCoords.sGeneratorPan.y);
+									&macView->machineskinmask,
+									MachineCoords->sGeneratorPan.x, 
+									MachineCoords->sGeneratorPan.y);
 					}
 					if (mac->_mute)
 					{
 						TransparentBlt(devc,
-									x+MachineCoords.dGeneratorMute.x, 
-									y+MachineCoords.dGeneratorMute.y, 
-									MachineCoords.sGeneratorMute.width, 
-									MachineCoords.sGeneratorMute.height, 
+									x+MachineCoords->dGeneratorMute.x, 
+									y+MachineCoords->dGeneratorMute.y, 
+									MachineCoords->sGeneratorMute.width, 
+									MachineCoords->sGeneratorMute.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sGeneratorMute.x, 
-									MachineCoords.sGeneratorMute.y);
+									&macView->machineskinmask,
+									MachineCoords->sGeneratorMute.x, 
+									MachineCoords->sGeneratorMute.y);
 					}
 					else if (_pSong->machineSoloed == macnum)
 					{
 						TransparentBlt(devc,
-									x+MachineCoords.dGeneratorSolo.x, 
-									y+MachineCoords.dGeneratorSolo.y, 
-									MachineCoords.sGeneratorSolo.width, 
-									MachineCoords.sGeneratorSolo.height, 
+									x+MachineCoords->dGeneratorSolo.x, 
+									y+MachineCoords->dGeneratorSolo.y, 
+									MachineCoords->sGeneratorSolo.width, 
+									MachineCoords->sGeneratorSolo.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sGeneratorSolo.x, 
-									MachineCoords.sGeneratorSolo.y);
+									&macView->machineskinmask,
+									MachineCoords->sGeneratorSolo.x, 
+									MachineCoords->sGeneratorSolo.y);
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->generatorFont);
+						CFont* oldFont= devc->SelectObject(&macView->generatorFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(macView->generator_fontcolour);
+						if (macView->draw_mac_index)
 						{
 							char name[sizeof(mac->_editName)+6+3];
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-//							devc->ExtTextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y,
+//							devc->ExtTextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y,
 //								ETO_OPAQUE, CRect(x,y,x+68,y+13), CString(macname[i]), 0);
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
+							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, name);
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, mac->_editName);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -996,72 +998,72 @@ namespace psycle { namespace host {
 					RECT r;
 					r.left = x;
 					r.top = y;
-					r.right = r.left + MachineCoords.sEffect.width;
-					r.bottom = r.top + MachineCoords.sEffect.height;
-					devc->FillSolidRect(&r,Global::pConfig->mv_colour);
+					r.right = r.left + MachineCoords->sEffect.width;
+					r.bottom = r.top + MachineCoords->sEffect.height;
+					devc->FillSolidRect(&r,macView->colour);
 					*/
 
 					TransparentBlt(devc,
 								x, 
 								y,
-								MachineCoords.sEffect.width, 
-								MachineCoords.sEffect.height, 
+								MachineCoords->sEffect.width, 
+								MachineCoords->sEffect.height, 
 								&memDC, 
-								&machineskinmask,
-								MachineCoords.sEffect.x, 
-								MachineCoords.sEffect.y);
+								&macView->machineskinmask,
+								MachineCoords->sEffect.x, 
+								MachineCoords->sEffect.y);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords.dEffectPan.width;
+						int panning = mac->_panning*MachineCoords->dEffectPan.width;
 						panning /= 128;
 						TransparentBlt(devc,
-									x+panning+MachineCoords.dEffectPan.x, 
-									y+MachineCoords.dEffectPan.y, 
-									MachineCoords.sEffectPan.width, 
-									MachineCoords.sEffectPan.height, 
+									x+panning+MachineCoords->dEffectPan.x, 
+									y+MachineCoords->dEffectPan.y, 
+									MachineCoords->sEffectPan.width, 
+									MachineCoords->sEffectPan.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sEffectPan.x, 
-									MachineCoords.sEffectPan.y);
+									&macView->machineskinmask,
+									MachineCoords->sEffectPan.x, 
+									MachineCoords->sEffectPan.y);
 					}
 					if (mac->_mute)
 					{
 						TransparentBlt(devc,
-									x+MachineCoords.dEffectMute.x, 
-									y+MachineCoords.dEffectMute.y, 
-									MachineCoords.sEffectMute.width, 
-									MachineCoords.sEffectMute.height, 
+									x+MachineCoords->dEffectMute.x, 
+									y+MachineCoords->dEffectMute.y, 
+									MachineCoords->sEffectMute.width, 
+									MachineCoords->sEffectMute.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sEffectMute.x, 
-									MachineCoords.sEffectMute.y);
+									&macView->machineskinmask,
+									MachineCoords->sEffectMute.x, 
+									MachineCoords->sEffectMute.y);
 					}
 					if (mac->Bypass())
 					{
 						TransparentBlt(devc,
-									x+MachineCoords.dEffectBypass.x, 
-									y+MachineCoords.dEffectBypass.y, 
-									MachineCoords.sEffectBypass.width, 
-									MachineCoords.sEffectBypass.height, 
+									x+MachineCoords->dEffectBypass.x, 
+									y+MachineCoords->dEffectBypass.y, 
+									MachineCoords->sEffectBypass.width, 
+									MachineCoords->sEffectBypass.height, 
 									&memDC, 
-									&machineskinmask,
-									MachineCoords.sEffectBypass.x, 
-									MachineCoords.sEffectBypass.y);
+									&macView->machineskinmask,
+									MachineCoords->sEffectBypass.x, 
+									MachineCoords->sEffectBypass.y);
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->effectFont);
+						CFont* oldFont= devc->SelectObject(&macView->effectFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(macView->effect_fontcolour);
+						if (macView->draw_mac_index)
 						{
 							char name[sizeof(mac->_editName)+6+3];
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
+							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, name);
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, mac->_editName);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1072,12 +1074,12 @@ namespace psycle { namespace host {
 					TransparentBlt(devc,
 								x, 
 								y,
-								MachineCoords.sMaster.width, 
-								MachineCoords.sMaster.height, 
+								MachineCoords->sMaster.width, 
+								MachineCoords->sMaster.height, 
 								&memDC, 
-								&machineskinmask,
-								MachineCoords.sMaster.x, 
-								MachineCoords.sMaster.y);
+								&macView->machineskinmask,
+								MachineCoords->sMaster.x, 
+								MachineCoords->sMaster.y);
 					break;
 				}
 			}
@@ -1088,61 +1090,61 @@ namespace psycle { namespace host {
 				case MACHMODE_GENERATOR:
 					devc->BitBlt(x, 
 								y, 
-								MachineCoords.sGenerator.width, 
-								MachineCoords.sGenerator.height, 
+								MachineCoords->sGenerator.width, 
+								MachineCoords->sGenerator.height, 
 								&memDC, 
-								MachineCoords.sGenerator.x, 
-								MachineCoords.sGenerator.y, 
+								MachineCoords->sGenerator.x, 
+								MachineCoords->sGenerator.y, 
 								SRCCOPY);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords.dGeneratorPan.width;
+						int panning = mac->_panning*MachineCoords->dGeneratorPan.width;
 						panning /= 128;
-						devc->BitBlt(x+panning+MachineCoords.dGeneratorPan.x, 
-									y+MachineCoords.dGeneratorPan.y, 
-									MachineCoords.sGeneratorPan.width, 
-									MachineCoords.sGeneratorPan.height, 
+						devc->BitBlt(x+panning+MachineCoords->dGeneratorPan.x, 
+									y+MachineCoords->dGeneratorPan.y, 
+									MachineCoords->sGeneratorPan.width, 
+									MachineCoords->sGeneratorPan.height, 
 									&memDC, 
-									MachineCoords.sGeneratorPan.x, 
-									MachineCoords.sGeneratorPan.y, 
+									MachineCoords->sGeneratorPan.x, 
+									MachineCoords->sGeneratorPan.y, 
 									SRCCOPY);
 					}
 					if (mac->_mute)
 					{
-						devc->BitBlt(x+MachineCoords.dGeneratorMute.x, 
-									y+MachineCoords.dGeneratorMute.y, 
-									MachineCoords.sGeneratorMute.width, 
-									MachineCoords.sGeneratorMute.height, 
+						devc->BitBlt(x+MachineCoords->dGeneratorMute.x, 
+									y+MachineCoords->dGeneratorMute.y, 
+									MachineCoords->sGeneratorMute.width, 
+									MachineCoords->sGeneratorMute.height, 
 									&memDC, 
-									MachineCoords.sGeneratorMute.x, 
-									MachineCoords.sGeneratorMute.y, 
+									MachineCoords->sGeneratorMute.x, 
+									MachineCoords->sGeneratorMute.y, 
 									SRCCOPY);
 					}
 					else if (_pSong->machineSoloed == macnum)
 					{
-						devc->BitBlt(x+MachineCoords.dGeneratorSolo.x, 
-									y+MachineCoords.dGeneratorSolo.y, 
-									MachineCoords.sGeneratorSolo.width, 
-									MachineCoords.sGeneratorSolo.height, 
+						devc->BitBlt(x+MachineCoords->dGeneratorSolo.x, 
+									y+MachineCoords->dGeneratorSolo.y, 
+									MachineCoords->sGeneratorSolo.width, 
+									MachineCoords->sGeneratorSolo.height, 
 									&memDC, 
-									MachineCoords.sGeneratorSolo.x, 
-									MachineCoords.sGeneratorSolo.y, 
+									MachineCoords->sGeneratorSolo.x, 
+									MachineCoords->sGeneratorSolo.y, 
 									SRCCOPY);
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->generatorFont);
+						CFont* oldFont= devc->SelectObject(&macView->generatorFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_generator_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(macView->generator_fontcolour);
+						if (macView->draw_mac_index)
 						{
 							char name[sizeof(mac->_editName)+6+3];
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, name);
+							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, name);
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dGeneratorName.x, y+MachineCoords.dGeneratorName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, mac->_editName);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1151,61 +1153,61 @@ namespace psycle { namespace host {
 				case MACHMODE_FX:
 					devc->BitBlt(x, 
 								y,
-								MachineCoords.sEffect.width, 
-								MachineCoords.sEffect.height, 
+								MachineCoords->sEffect.width, 
+								MachineCoords->sEffect.height, 
 								&memDC, 
-								MachineCoords.sEffect.x, 
-								MachineCoords.sEffect.y, 
+								MachineCoords->sEffect.x, 
+								MachineCoords->sEffect.y, 
 								SRCCOPY);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords.dEffectPan.width;
+						int panning = mac->_panning*MachineCoords->dEffectPan.width;
 						panning /= 128;
-						devc->BitBlt(x+panning+MachineCoords.dEffectPan.x, 
-									y+MachineCoords.dEffectPan.y, 
-									MachineCoords.sEffectPan.width, 
-									MachineCoords.sEffectPan.height, 
+						devc->BitBlt(x+panning+MachineCoords->dEffectPan.x, 
+									y+MachineCoords->dEffectPan.y, 
+									MachineCoords->sEffectPan.width, 
+									MachineCoords->sEffectPan.height, 
 									&memDC, 
-									MachineCoords.sEffectPan.x, 
-									MachineCoords.sEffectPan.y, 
+									MachineCoords->sEffectPan.x, 
+									MachineCoords->sEffectPan.y, 
 									SRCCOPY);
 					}
 					if (mac->_mute)
 					{
-						devc->BitBlt(x+MachineCoords.dEffectMute.x, 
-									y+MachineCoords.dEffectMute.y, 
-									MachineCoords.sEffectMute.width, 
-									MachineCoords.sEffectMute.height, 
+						devc->BitBlt(x+MachineCoords->dEffectMute.x, 
+									y+MachineCoords->dEffectMute.y, 
+									MachineCoords->sEffectMute.width, 
+									MachineCoords->sEffectMute.height, 
 									&memDC, 
-									MachineCoords.sEffectMute.x, 
-									MachineCoords.sEffectMute.y, 
+									MachineCoords->sEffectMute.x, 
+									MachineCoords->sEffectMute.y, 
 									SRCCOPY);
 					}
 					if (mac->Bypass())
 					{
-						devc->BitBlt(x+MachineCoords.dEffectBypass.x, 
-									y+MachineCoords.dEffectBypass.y, 
-									MachineCoords.sEffectBypass.width, 
-									MachineCoords.sEffectBypass.height, 
+						devc->BitBlt(x+MachineCoords->dEffectBypass.x, 
+									y+MachineCoords->dEffectBypass.y, 
+									MachineCoords->sEffectBypass.width, 
+									MachineCoords->sEffectBypass.height, 
 									&memDC, 
-									MachineCoords.sEffectBypass.x, 
-									MachineCoords.sEffectBypass.y, 
+									MachineCoords->sEffectBypass.x, 
+									MachineCoords->sEffectBypass.y, 
 									SRCCOPY);
 					}
 					// Draw text
 					{
-						CFont* oldFont= devc->SelectObject(&Global::pConfig->effectFont);
+						CFont* oldFont= devc->SelectObject(&macView->effectFont);
 						devc->SetBkMode(TRANSPARENT);
-						devc->SetTextColor(Global::pConfig->mv_effect_fontcolour);
-						if (Global::pConfig->draw_mac_index)
+						devc->SetTextColor(macView->effect_fontcolour);
+						if (macView->draw_mac_index)
 						{
 							char name[sizeof(mac->_editName)+6+3];
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, name);
+							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, name);
 						}
 						else
 						{
-							devc->TextOut(x+MachineCoords.dEffectName.x, y+MachineCoords.dEffectName.y, mac->_editName);
+							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, mac->_editName);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1215,11 +1217,11 @@ namespace psycle { namespace host {
 				case MACHMODE_MASTER:
 					devc->BitBlt(x, 
 								y,
-								MachineCoords.sMaster.width, 
-								MachineCoords.sMaster.height, 
+								MachineCoords->sMaster.width, 
+								MachineCoords->sMaster.height, 
 								&memDC, 
-								MachineCoords.sMaster.x, 
-								MachineCoords.sMaster.y, 
+								MachineCoords->sMaster.x, 
+								MachineCoords->sMaster.y, 
 								SRCCOPY);
 					break;
 				}
@@ -1260,17 +1262,17 @@ namespace psycle { namespace host {
 					switch (pMac->_mode)
 					{
 					case MACHMODE_GENERATOR:
-						x2 = pMac->_x+MachineCoords.sGenerator.width;
-						y2 = pMac->_y+MachineCoords.sGenerator.height;
+						x2 = pMac->_x+MachineCoords->sGenerator.width;
+						y2 = pMac->_y+MachineCoords->sGenerator.height;
 						break;
 					case MACHMODE_FX:
-						x2 = pMac->_x+MachineCoords.sEffect.width;
-						y2 = pMac->_y+MachineCoords.sEffect.height;
+						x2 = pMac->_x+MachineCoords->sEffect.width;
+						y2 = pMac->_y+MachineCoords->sEffect.height;
 						break;
 
 					case MACHMODE_MASTER:
-						x2 = pMac->_x+MachineCoords.sMaster.width;
-						y2 = pMac->_y+MachineCoords.sMaster.height;
+						x2 = pMac->_x+MachineCoords->sMaster.width;
+						y2 = pMac->_y+MachineCoords->sMaster.height;
 						break;
 					}
 					

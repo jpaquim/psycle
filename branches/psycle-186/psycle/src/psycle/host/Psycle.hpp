@@ -17,19 +17,19 @@ namespace psycle { namespace host {
 			CPsycleApp();
 			virtual ~CPsycleApp() throw();
 		public:
+			static bool BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath);
 			virtual BOOL InitInstance();
 			virtual int ExitInstance();
 			BOOL PreTranslateMessage(MSG* pMsg);
 			virtual BOOL IsIdleMessage( MSG* pMsg );
 			virtual BOOL OnIdle(LONG lCount);
+			void RestoreRecentFiles();
 		public:
-			Global _global;
+			Global global_;
 			afx_msg void OnAppAbout();
 		private:
-			void GetNaiveCPUFreq();
 			void ProcessCmdLine(LPSTR cmdline);
-			void LoadRecent(CMainFrame*);
-			void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;
+
 			UINT m_uUserMessage;
 		};
 
