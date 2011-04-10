@@ -68,7 +68,7 @@ class CMachineParameter {
 
 ///\name CMachineParameter flags
 ///\{
-	/// shows a line with background
+	/// shows a line with no text nor knob
 	int const MPF_NULL = 0;
 	/// shows a line with the text in a centered label
 	int const MPF_LABEL = 1;

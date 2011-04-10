@@ -66,7 +66,6 @@ namespace psycle
 		}
 		void Configuration::Save(ConfigStorage & store)
 		{
-			store.Write("VersionString", PSYCLE__VERSION);
 			#if defined _WIN64
 				store.Write("PluginDir64",plugin_dir_);
 			#elif defined _WIN32

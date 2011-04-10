@@ -22,7 +22,7 @@ namespace psycle {
 		class CVstGui : public CBaseParamView
 		{
 		public:
-			CVstGui(vst::plugin*effect);
+			CVstGui(CFrameMachine* frame,vst::plugin*effect);
 			void Open();
 			bool GetViewSize(CRect& rect);
 			void WindowIdle();

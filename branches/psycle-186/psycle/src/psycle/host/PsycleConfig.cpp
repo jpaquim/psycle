@@ -19,6 +19,7 @@
 #include "Player.hpp"
 #include "Song.hpp"
 #include "NativeGui.hpp"
+#include "NativeGraphics.hpp"
 
 #include <universalis/os/fs.hpp>
 #include <wingdi.h>
@@ -32,6 +33,12 @@ namespace psycle
 		PsycleConfig::MachineParam::MachineParam()
 		{
 			CNativeGui::uiSetting = this;
+			Knob::uiSetting = this;
+			InfoLabel::uiSetting = this;
+			GraphSlider::uiSetting = this;
+			SwitchButton::uiSetting = this;
+			CheckedButton::uiSetting = this;
+			VuMeter::uiSetting = this;
 			SetDefaultSettings();
 		}
 		PsycleConfig::MachineParam::~MachineParam()
@@ -48,6 +55,12 @@ namespace psycle
 			switchOn.DeleteObject();
 			switchOff.DeleteObject();
 			CNativeGui::uiSetting = NULL;
+			Knob::uiSetting = NULL;
+			InfoLabel::uiSetting = NULL;
+			GraphSlider::uiSetting = NULL;
+			SwitchButton::uiSetting = NULL;
+			CheckedButton::uiSetting = NULL;
+			VuMeter::uiSetting = NULL;
 		}
 		void PsycleConfig::MachineParam::SetDefaultSettings(bool include_others)
 		{
@@ -77,8 +90,7 @@ namespace psycle
 		}
 		void PsycleConfig::MachineParam::SetDefaultSkin()
 		{
-			bBmpControls = false;
-			szBmpControlsFilename = PSYCLE__PATH__DEFAULT_DIAL_SKIN;
+			szBmpControlsFilename = "";
 
 			dialwidth = 28;
 			dialheight = 28;
@@ -96,13 +108,13 @@ namespace psycle
 			switchwidth = 28;
 		}
 
-		void PsycleConfig::MachineParam::Load(ConfigStorage & store)
+		void PsycleConfig::MachineParam::Load(ConfigStorage & store,std::string mainSkinDir, std::string machine_skin)
 		{
+			// Do not open group if loading version 1.8.6
 			if(!store.GetVersion().empty()) {
-				store.CreateGroup("MacParamVisual");
+				store.OpenGroup("MacParamVisual");
 			}
 			store.Read("toolbarOnVsts", toolbarOnMachineParams);
-			store.Read("bBmpDial", bBmpControls);
 			store.Read("szBmpDialFilename", szBmpControlsFilename);
 			store.Read("machineGUIFontTopColor", fontTopColor);
 			store.Read("machineGUIFontBottomColor", fontBottomColor);
@@ -114,19 +126,27 @@ namespace psycle
 			store.Read("machineGUIHTopColor", hTopColor);
 			store.Read("machineGUIHBottomColor", hBottomColor);
 			store.Read("machineGUITitleColor", titleColor);
+			// Close group if loading version 1.8.8 and onwards
 			if(!store.GetVersion().empty()) {
 				store.CloseGroup();
 			}
-
-			if(!bBmpControls || szBmpControlsFilename == PSYCLE__PATH__DEFAULT_DIAL_SKIN) {
+			if(szBmpControlsFilename.empty() || szBmpControlsFilename == PSYCLE__PATH__DEFAULT_DIAL_SKIN) {
 				SetDefaultSkin();
+			}
+			else if(szBmpControlsFilename.rfind('\\') == -1) {
+				if(machine_skin.empty()) {
+					szBmpControlsFilename = mainSkinDir + "\\" + szBmpControlsFilename;
+				}
+				else {
+					std::string skin_dir = machine_skin.substr(0,machine_skin.rfind('\\'));
+					szBmpControlsFilename = skin_dir + "\\" + szBmpControlsFilename;
+				}
 			}
 		}
 		void PsycleConfig::MachineParam::Save(ConfigStorage & store)
 		{
 			store.CreateGroup("MacParamVisual");
 			store.Write("toolbarOnVsts", toolbarOnMachineParams);
-			store.Write("bBmpDial", bBmpControls);
 			store.Write("szBmpDialFilename", szBmpControlsFilename);
 			store.Write("machineGUIFontTopColor", fontTopColor);
 			store.Write("machineGUIFontBottomColor", fontBottomColor);
@@ -150,7 +170,7 @@ namespace psycle
 			::GetWindowRect(hwndDesk, &deskrect); 
 
 			RefreshSkin();
-			CNativeGui::GraphSlider::xoffset = (sliderwidth-sliderknobwidth)/2;
+			GraphSlider::xoffset = ((sliderwidth-sliderknobwidth)/2) +1;
 		}
 		void PsycleConfig::MachineParam::RefreshSkin()
 		{
@@ -164,9 +184,9 @@ namespace psycle
 			switchOn.DeleteObject();
 			switchOff.DeleteObject();
 
-			if (bBmpControls)
+			bool bBmpControls=false;
+			if (!szBmpControlsFilename.empty())
 			{
-				bBmpControls=false;
 				hbmMachineDial = (HBITMAP)LoadImage(NULL, szBmpControlsFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 				if (hbmMachineDial && dial.Attach(hbmMachineDial))
 				{	
@@ -177,14 +197,13 @@ namespace psycle
 					{
 						bBmpControls=true;
 					}
-					else {
-						dial.LoadBitmap(IDB_KNOB);
-					}
 				}
 			}
-			else {
+			if(!bBmpControls) {
+				szBmpControlsFilename="";
 				dial.LoadBitmap(IDB_KNOB);
 			}
+
 			///\todo: We do not support changing these yet.
 			sliderBack.LoadBitmap(IDB_SLIDERBACKV);
 			sliderKnob.LoadBitmap(IDB_SLIDERKNOBV);
@@ -247,7 +266,7 @@ namespace psycle
 		}
 		void PsycleConfig::MachineView::SetDefaultSkin()
 		{
-			machine_skin = PSYCLE__PATH__DEFAULT_MACHINE_SKIN;
+			machine_skin = "";
 
 			MachineCoords.sMaster.x = 0;
 			MachineCoords.sMaster.y = 0;
@@ -338,14 +357,15 @@ namespace psycle
 		void PsycleConfig::MachineView::SetDefaultBackground()
 		{
 			bBmpBkg = false;
-			szBmpBkgFilename = PSYCLE__PATH__DEFAULT_BACKGROUND_SKIN;
+			szBmpBkgFilename = "";
 			bkgx = 0;
 			bkgy = 0;
 		}
 		void PsycleConfig::MachineView::Load(ConfigStorage &store, std::string mainSkinDir)
 		{
+			// Do not open group if loading version 1.8.6
 			if(!store.GetVersion().empty()) {
-				store.CreateGroup("MachineVisual");
+				store.OpenGroup("MachineVisual");
 			}
 			store.Read("mv_colour", colour);
 			store.Read("mv_polycolour", polycolour);
@@ -359,7 +379,6 @@ namespace psycle
 			store.Read("vu3", vu3);
 			store.Read("draw_vus", draw_vus);
 
-			store.Read("bBmpBkg", bBmpBkg);
 			store.Read("szBmpBkgFilename", szBmpBkgFilename);
 			store.Read("machine_skin", machine_skin);
 			store.Read("draw_mac_index", draw_mac_index);
@@ -372,17 +391,32 @@ namespace psycle
 			store.Read("effect_fontface", effect_fontface);
 			store.Read("effect_font_point", effect_font_point);
 			store.Read("effect_font_flags", effect_font_flags);
+			// Close group if loading version 1.8.8 and onwards
 			if(!store.GetVersion().empty()) {
 				store.CloseGroup();
 			}
-			
-			if(machine_skin == PSYCLE__PATH__DEFAULT_MACHINE_SKIN) { SetDefaultSkin(); }
-			else {
-				SkinIO::LocateSkinDir(mainSkinDir.c_str(), machine_skin.c_str(), ".psm", skin_dir);
-				SkinIO::LoadMachineSkin((skin_dir + "\\" +  machine_skin + ".psm").c_str() ,MachineCoords);
+
+			std::string skin_dir = mainSkinDir;
+			if(machine_skin.empty() || machine_skin == PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
+			{
+				SetDefaultSkin();
 			}
-			if(!bBmpBkg || szBmpBkgFilename == PSYCLE__PATH__DEFAULT_BACKGROUND_SKIN) {
+			else {
+				if(machine_skin.rfind('\\') == -1) {
+					SkinIO::LocateSkinDir(mainSkinDir.c_str(), machine_skin.c_str(), ".psm", skin_dir);
+					machine_skin = skin_dir + "\\" + machine_skin;
+				}
+				else {
+					skin_dir = machine_skin.substr(0,machine_skin.rfind('\\'));
+				}
+				SkinIO::LoadMachineSkin((machine_skin + ".psm").c_str() ,MachineCoords);
+			}
+			if(szBmpBkgFilename.empty() || szBmpBkgFilename == PSYCLE__PATH__DEFAULT_BACKGROUND_SKIN)
+			{
 				SetDefaultBackground();
+			}
+			else if(szBmpBkgFilename.rfind('\\') == -1) {
+				szBmpBkgFilename = skin_dir + "\\" + szBmpBkgFilename;
 			}
 		}
 		void PsycleConfig::MachineView::Save(ConfigStorage &store)
@@ -400,7 +434,6 @@ namespace psycle
 			store.Write("vu3", vu3);
 			store.Write("draw_vus", draw_vus);
 
-			store.Write("bBmpBkg", bBmpBkg);
 			store.Write("szBmpBkgFilename", szBmpBkgFilename);
 			store.Write("machine_skin", machine_skin);
 			store.Write("draw_mac_index", draw_mac_index);
@@ -451,7 +484,7 @@ namespace psycle
 			DeleteObject(hbmMachineSkin);
 			hbmMachineSkin=NULL;
 			machineskinmask.DeleteObject();
-			if (machine_skin == PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
+			if (machine_skin.empty())
 			{
 				machineskin.LoadBitmap(IDB_MACHINE_SKIN);
 			}
@@ -469,10 +502,7 @@ namespace psycle
 		}
 		bool PsycleConfig::MachineView::RefreshBitmaps()
 		{
-			char szOpenName[MAX_PATH];
-			sprintf(szOpenName,"%s\\%s.bmp",skin_dir.c_str(),machine_skin.c_str());
-
-			hbmMachineSkin = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+			hbmMachineSkin = (HBITMAP)LoadImage(NULL, (machine_skin+ ".bmp").c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 			if (hbmMachineSkin && machineskin.Attach(hbmMachineSkin))
 			{	
 				return true;
@@ -484,9 +514,9 @@ namespace psycle
 			machinebkg.DeleteObject();
 			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
 			hbmMachineBkg=NULL;
-			if (bBmpBkg)
+			bBmpBkg=false;
+			if (!szBmpBkgFilename.empty())
 			{
-				bBmpBkg=false;
 				hbmMachineBkg = (HBITMAP)LoadImage(NULL, szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 				if (hbmMachineBkg)
 				{
@@ -504,6 +534,9 @@ namespace psycle
 						}
 					}
 				}
+			}
+			if(!bBmpBkg) {
+				szBmpBkgFilename="";
 			}
 		}
 
@@ -569,7 +602,7 @@ namespace psycle
 		}
 		void PsycleConfig::PatternView::SetDefaultSkin()
 		{
-			header_skin = PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN;
+			header_skin = "";
 			hbmPatHeader = NULL;
 
 			PatHeaderCoords.sBackground.x=0;
@@ -606,6 +639,7 @@ namespace psycle
 		}
 		void PsycleConfig::PatternView::Load(ConfigStorage &store, std::string mainSkinDir)
 		{
+			// Do not open group if loading version 1.8.6
 			if(!store.GetVersion().empty()) {
 				store.OpenGroup("PatternVisual");
 			}
@@ -649,14 +683,22 @@ namespace psycle
 			store.Read("DisplayLineNumbersHex", _linenumbersHex);
 			store.Read("DisplayLineNumbersCursor", _linenumbersCursor);
 
+			// Close group if loading version 1.8.8 and onwards
 			if(!store.GetVersion().empty()) {
 				store.CloseGroup();
 			}
 
-			if(header_skin == PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN) { SetDefaultSkin(); }
+			if(header_skin.empty() || header_skin == PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN)
+			{
+				SetDefaultSkin();
+			}
 			else {
-				SkinIO::LocateSkinDir(mainSkinDir.c_str(), header_skin.c_str(), ".psh", skin_dir);
-				SkinIO::LoadPatternSkin((skin_dir + "\\" +  header_skin + ".psh").c_str() ,PatHeaderCoords);
+				if(header_skin.rfind('\\') == -1 && header_skin.length() > 0) {
+					std::string skin_dir = mainSkinDir;
+					SkinIO::LocateSkinDir(mainSkinDir.c_str(), header_skin.c_str(), ".psh", skin_dir);
+					header_skin = skin_dir + "\\" +  header_skin;
+				}
+				SkinIO::LoadPatternSkin((header_skin + ".psh").c_str() ,PatHeaderCoords);
 			}
 		}
 		void PsycleConfig::PatternView::Save(ConfigStorage &store)
@@ -723,7 +765,7 @@ namespace psycle
 			hbmPatHeader=NULL;
 			patternheadermask.DeleteObject();
 
-			if (header_skin == PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN)
+			if (header_skin.empty())
 			{
 				patternheader.LoadBitmap(IDB_PATTERN_HEADER_SKIN);
 			}
@@ -740,10 +782,7 @@ namespace psycle
 		}
 		bool PsycleConfig::PatternView::RefreshBitmaps()
 		{
-			char szOpenName[MAX_PATH];
-			sprintf(szOpenName,"%s\\%s.bmp",skin_dir.c_str(),header_skin.c_str());
-
-			hbmPatHeader = (HBITMAP)LoadImage(NULL, szOpenName, IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+			hbmPatHeader = (HBITMAP)LoadImage(NULL, (header_skin+ ".bmp").c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
 			if (hbmPatHeader && patternheader.Attach(hbmPatHeader))
 			{	
 				return true;
@@ -954,6 +993,7 @@ namespace psycle
 
 		void PsycleConfig::InputHandler::Load(ConfigStorage &store)
 		{
+			// Load from private profile if loading version 1.8.6
 			if(store.GetVersion().empty())
 			{
 				KeyPresetIO::LoadOldPrivateProfile(*this);
@@ -979,7 +1019,7 @@ namespace psycle
 			store.Read("bMultiKey", bMultiKey);
 			store.Read("notesToEffects", _notesToEffects);
 
-
+			// Finish loading if version 1.8.8 and onwards
 			if(!store.GetVersion().empty()) {
 				char buffer[64];
 				std::map<CmdSet,std::pair<int,int>>::const_iterator it;
@@ -1050,7 +1090,10 @@ namespace psycle
 
 			if(!checkforduplicates)
 			{
-				keyMap[theKey]=cmd;
+				//Do not map a 0,0 key. Just add it to the set.
+				if(key != 0 || modifiers != 0) {
+					keyMap[theKey]=cmd;
+				}
 				setMap[cmd.GetID()]=theKey;
 				return false;
 			}
@@ -1069,7 +1112,8 @@ namespace psycle
 				}
 				itKey->second=cmd;
 			}
-			else
+			//Do not map a 0,0 key. Just add it to the set.
+			else if(key != 0 || modifiers != 0)
 			{
 				keyMap[theKey]=cmd;
 			}
@@ -1130,8 +1174,9 @@ namespace psycle
 		}
 		void PsycleConfig::Midi::Load(ConfigStorage &store)
 		{
+			// Do not open group if loading version 1.8.6
 			if(!store.GetVersion().empty()) {
-				store.CreateGroup("devices\\midi");
+				store.OpenGroup("devices\\midi");
 			}
 
 			store.Read("MidiMachineViewSeqMode", _midiMachineViewSeqMode);
@@ -1175,6 +1220,7 @@ namespace psycle
 			store.Read("MidiInstSelectorType", with);
 			inst_select_with_ = static_cast<Midi::selector_t>(with);
 
+			// Close group if loading version 1.8.8 and onwards
 			if(!store.GetVersion().empty()) {
 				store.CloseGroup();
 			}
@@ -1313,14 +1359,18 @@ namespace psycle
 
 			//Open Current user.
 			Registry reg(Registry::HKCU, "");
-			if(!reg.OpenLocation(PSYCLE__PATH__REGISTRY__ROOT))
+			if(!reg.OpenLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
 			{
 				return false;
 			}
-			if(!reg.OpenGroup(PSYCLE__PATH__REGISTRY__CONFIGKEY))
+			// Try opening version 1.8.8. Else, resort to 1.8.6. If neither, return.
+			if(!reg.OpenGroup(PSYCLE__SETTINGS__CONFIGKEY))
 			{
-				reg.CloseLocation();
-				return false;
+				if(!reg.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY))
+				{
+					reg.CloseLocation();
+					return false;
+				}
 			}
 			Load(reg);
 			reg.CloseLocation();
@@ -1328,21 +1378,30 @@ namespace psycle
 		}
 		bool PsycleConfig::SavePsycleSettings()
 		{
-			///\todo: Implement the different Stores
-
-			//Open Current user.
-			Registry reg(Registry::HKCU, PSYCLE__VERSION);
-			if(!reg.CreateLocation(PSYCLE__PATH__REGISTRY__ROOT))
+			ConfigStorage* store;
+			switch(store_place_)
+			{
+			case STORE_REGEDIT: store = new Registry(Registry::HKCU, PSYCLE__VERSION);
+				break;
+			case STORE_USER_DATA: return false;///\todo:
+				break;
+			case STORE_EXE_DIR: return false;///\todo:
+				break;
+			default:
+				return false;
+			}
+			if(!store->CreateLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
 			{
 				return false;
 			}
-			if(!reg.CreateGroup(PSYCLE__PATH__REGISTRY__CONFIGKEY))
+			if(!store->CreateGroup(PSYCLE__SETTINGS__CONFIGKEY))
 			{
-				reg.CloseLocation();
+				store->CloseLocation();
 				return false;
 			}
-			Save(reg);
-			reg.CloseLocation();
+			Save(*store);
+			store->CloseLocation();
+			delete store;
 			return true;
 		}
 
@@ -1388,10 +1447,12 @@ namespace psycle
 
 			store.Read("NewMacDlgpluginOrder", CNewMachine::pluginOrder);
 			store.Read("NewMacDlgpluginName", CNewMachine::pluginName);
-
+///
+// The other Load() calls can change the group, so do not add settings of PsycleConfig below here.
+///
 			patView_.Load(store, skin_dir_);
 			macView_.Load(store, skin_dir_);
-			macParam_.Load(store);
+			macParam_.Load(store,skin_dir_, macView_.machine_skin);
 			input_.Load(store);
 			midi_.Load(store);
 			for(int i=0; i < _numOutputDrivers; i++)
@@ -1414,6 +1475,9 @@ namespace psycle
 			store.Read("3",read);
 			recent_files_.push_back(read);
 			store.CloseGroup();
+///
+//Do not add settings here, see the comment above about groups
+///
 		}
 
 		void PsycleConfig::Save(ConfigStorage & store)
@@ -1458,7 +1522,7 @@ namespace psycle
 				audioSettings[i]->Save(store);
 			}
 
-			store.OpenGroup("recent-files");
+			store.CreateGroup("recent-files");
 			store.Write("0",recent_files_[0]);
 			store.Write("1",recent_files_[1]);
 			store.Write("2",recent_files_[2]);
@@ -1480,6 +1544,13 @@ namespace psycle
 			input_.RefreshSettings();
 			midi_.RefreshSettings();
 
+			RefreshAudio();
+
+			theApp.RestoreRecentFiles();
+		}
+		
+		void PsycleConfig::RefreshAudio()
+		{
 			bool refreshAudio = (!_pOutputDriver || !_pOutputDriver->Enabled());
 			bool refreshMidi = refreshAudio;
 			if(0 > _outputDriverIndex || _outputDriverIndex >= _numOutputDrivers) {
@@ -1506,8 +1577,6 @@ namespace psycle
 				Global::midi().SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
 				Global::midi().Open();
 			}
-
-			theApp.RestoreRecentFiles();
 		}
 		void PsycleConfig::OutputChanged(int newidx)
 		{

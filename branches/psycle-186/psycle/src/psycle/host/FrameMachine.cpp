@@ -268,10 +268,10 @@ namespace psycle { namespace host {
 		{
 			CNativeGui* gui;
 			if(machine()._type == MACH_MIXER) {
-				gui = new MixerFrameView(&machine(), wndView);
+				gui = new MixerFrameView(this,&machine(), wndView);
 			}
 			else {
-				gui = new CNativeGui(&machine(), wndView);
+				gui = new CNativeGui(this,&machine(), wndView);
 			}
 			gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);

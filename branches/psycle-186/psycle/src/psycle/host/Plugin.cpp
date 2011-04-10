@@ -734,6 +734,11 @@ namespace psycle
 			else return false;
 		}
 
+		int Plugin::GetParamType(int numparam)
+		{
+			if( numparam < _pInfo->numParameters ) return _pInfo->Parameters[numparam]->Flags;
+			else return 0;
+		}
 		void Plugin::GetParamName(int numparam, char * name)
 		{
 			if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);

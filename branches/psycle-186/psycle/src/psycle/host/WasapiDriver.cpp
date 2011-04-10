@@ -85,9 +85,10 @@ namespace psycle
 		}
 		void WasapiSettings::Load(ConfigStorage &store)
 		{
-			if(store.OpenGroup("\\devices\\wasapi"))
+			if(store.OpenGroup("devices\\wasapi") ||
+				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\wasapi"))
 			{
-				///\todo:store.Read("DeviceString", szDeviceID);
+				store.ReadRaw("DeviceString", &szDeviceID, sizeof(szDeviceID));
 				store.Read("Shared", shared);
 				unsigned int tmp = samplesPerSec();
 				store.Read("SamplesPerSec", tmp);
@@ -106,8 +107,8 @@ namespace psycle
 		}
 		void WasapiSettings::Save(ConfigStorage &store)
 		{
-			store.CreateGroup("\\devices\\wasapi");
-			///\todo:store.Write("DeviceString", szDeviceID);
+			store.CreateGroup("devices\\wasapi");
+			store.WriteRaw("DeviceString", &szDeviceID, sizeof(szDeviceID));
 			store.Write("Shared", shared);
 			store.Write("SamplesPerSec", samplesPerSec());
 			store.Write("Dither", dither());

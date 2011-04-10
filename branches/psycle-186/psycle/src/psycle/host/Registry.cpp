@@ -33,7 +33,9 @@ namespace psycle
 				{
 					///\todo.
 				}
-				SetValue("ConfigVersion",version_config_);
+				current_group = config_root;
+				Write("ConfigVersion",version_config_);
+				current_group = NULL;
 				return true;
 			}
 			else return false;
@@ -46,25 +48,31 @@ namespace psycle
 				result = ::RegCreateKeyEx(hk_root, location.c_str(), 0, 0, 0, KEY_ALL_ACCESS, 0, &config_root, 0);
 				::RegCloseKey(config_root);
 				config_root = NULL;
+				version_config_ = "";
 				result = ::RegOpenKeyEx(hk_root, location.c_str(), 0, KEY_READ, &config_root);
 				if(result == ERROR_SUCCESS)
 				{
-					QueryValue("ConfigVersion",version_config_);
 				}
+			}
+			if(result == ERROR_SUCCESS) 
+			{
+				current_group = config_root;
+				Read("ConfigVersion",version_config_);
+				current_group = NULL;
 			}
 			return (result == ERROR_SUCCESS);
 		}
 		void Registry::CloseLocation()
 		{
-			::RegCloseKey(config_root);
-			config_root = NULL;
 			::RegCloseKey(current_group);
 			current_group = NULL;
+			::RegCloseKey(config_root);
+			config_root = NULL;
 		}
 		bool Registry::CreateGroup(std::string const & group, bool overwrite)
 		{
 			::RegCloseKey(current_group);
-			config_root = NULL;
+			current_group = NULL;
 			result result = ::RegCreateKeyEx(config_root, group.c_str(), 0, 0, 0, KEY_ALL_ACCESS, 0, &current_group, 0);
 			if (result == ERROR_SUCCESS)
 			{
@@ -173,6 +181,17 @@ namespace psycle
 			return ::RegSetValueEx(current_group, key.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(s.c_str()), (DWORD)(s.length() + 1));
 		 }
 
+		bool Registry::ReadRaw(std::string const & key, void *data, std::size_t max_length)
+		{
+			type type_read = REG_BINARY;
+			result const error(::RegQueryValueEx(current_group, key.c_str(), 0, &type_read, reinterpret_cast<unsigned char *>(data), reinterpret_cast<unsigned long int*>(&max_length)));
+			return (error == ERROR_SUCCESS);
+		}
+		bool Registry::WriteRaw(std::string const & key, void *data, std::size_t max_length)
+		{
+			result const error(::RegSetValueEx(current_group, key.c_str(), 0, REG_BINARY , reinterpret_cast<unsigned char const *>(data), max_length));
+			return (error == ERROR_SUCCESS);
+		}
 
 		long int
 		Registry::QueryTypeAndSize(std::string const & name, type & type, std::size_t & size)

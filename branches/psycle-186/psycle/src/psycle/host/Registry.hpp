@@ -99,7 +99,11 @@ namespace psycle
 			/*override*/ bool Read(std::string const & key, char *, std::size_t max_length);
 			/*override*/ bool Write(std::string const & key, std::string const &);
 		///\}
-
+		///\raw data. Store decides how to save/load it.
+		///\{
+			virtual bool ReadRaw(std::string const & key, void *, std::size_t max_length);
+			virtual bool WriteRaw(std::string const & key, void *, std::size_t max_length);
+		///\}
 			result QueryTypeAndSize(std::string const &, type & type, std::size_t & size);
 
 			template<typename x>

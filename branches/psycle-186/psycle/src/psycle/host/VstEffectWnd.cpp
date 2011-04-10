@@ -15,8 +15,9 @@ namespace psycle { namespace host {
 
 		//////////////////////////////////////////////////////////////////////////
 	
-		CVstGui::CVstGui(vst::plugin* effect)
-		:pEffect(effect)
+		CVstGui::CVstGui(CFrameMachine* frame,vst::plugin* effect)
+		:CBaseParamView(frame)
+		,pEffect(effect)
 		{}
 
 		void CVstGui::Open()
@@ -43,6 +44,7 @@ namespace psycle { namespace host {
 		IMPLEMENT_DYNAMIC(CVstEffectWnd, CFrameMachine)
 
 		BEGIN_MESSAGE_MAP(CVstEffectWnd, CFrameMachine)
+			ON_WM_CREATE()
 			ON_WM_CLOSE()
 			ON_WM_SIZING()
 			ON_WM_INITMENUPOPUP()
@@ -270,7 +272,7 @@ namespace psycle { namespace host {
 		{
 			if ( pEffect->HasEditor())
 			{
-				CVstGui* gui = new CVstGui(&vstmachine());
+				CVstGui* gui = new CVstGui(this,&vstmachine());
 				gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 					CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
 				return gui;

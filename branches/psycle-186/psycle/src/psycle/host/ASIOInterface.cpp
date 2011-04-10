@@ -67,7 +67,8 @@ namespace psycle
 		void ASIODriverSettings::Load(ConfigStorage & store)
 		{
 			int driverID(0);
-			if(store.OpenGroup("\\devices\\asio"))
+			if(store.OpenGroup("devices\\asio") ||
+				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\asio"))
 			{
 				unsigned int block;
 				unsigned int samples;
@@ -81,7 +82,7 @@ namespace psycle
 		}
 		void ASIODriverSettings::Save(ConfigStorage & store)
 		{
-			store.CreateGroup("\\devices\\asio");
+			store.CreateGroup("devices\\asio");
 			store.Write("BufferSize", blockFrames());
 			store.Write("DriverID", driverID);
 			store.Write("SamplesPerSec", samplesPerSec());

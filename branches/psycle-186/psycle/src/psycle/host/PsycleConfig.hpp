@@ -9,8 +9,8 @@ namespace psycle
 {
 	namespace host
 	{
-		#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-		#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR)
+		#define PSYCLE__SETTINGS__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
+		#define PSYCLE__SETTINGS__CONFIGKEY "Configuration"
 		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 		#define PSYCLE__PATH__DEFAULT_DIAL_SKIN "No Dial Bitmap"
@@ -93,7 +93,7 @@ namespace psycle
 				void SetDefaultSettings(bool include_others=true);
 				void SetDefaultColours();
 				void SetDefaultSkin();
-				void Load(ConfigStorage &);
+				void Load(ConfigStorage &,std::string mainSkinDir, std::string machine_skin);
 				void Save(ConfigStorage &);
 				void RefreshSettings();
 				void RefreshSkin();
@@ -112,7 +112,6 @@ namespace psycle
 				CFont	font;
 				CFont	font_bold;
 				CRect	deskrect;
-				bool bBmpControls;
 				std::string szBmpControlsFilename;
 				CBitmap dial;
 				HBITMAP hbmMachineDial;
@@ -174,8 +173,6 @@ namespace psycle
 				bool bBmpBkg;
 				std::string szBmpBkgFilename;
 				std::string machine_skin;
-				//Directory of this skin.
-				std::string skin_dir;
 				SMachineCoords	MachineCoords;
 				CBitmap machineskin;
 				CBitmap machineskinmask;
@@ -238,8 +235,6 @@ namespace psycle
 				COLORREF cursor2;
 
 				std::string header_skin;
-				//Directory of this skin.
-				std::string skin_dir;
 				SPatternHeaderCoords PatHeaderCoords;
 				CBitmap patternheader;
 				CBitmap patternheadermask;
@@ -418,6 +413,7 @@ namespace psycle
 			virtual void Load(ConfigStorage &);
 			virtual void Save(ConfigStorage &);
 			virtual void RefreshSettings();
+			virtual void RefreshAudio();
 
 			virtual bool LoadPsycleSettings();
 			virtual bool SavePsycleSettings();

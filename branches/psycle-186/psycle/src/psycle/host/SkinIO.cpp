@@ -78,6 +78,7 @@ namespace psycle { namespace host {
 					FILE* file;
 					file = std::fopen(szOpenName, "rb");
 					if(file) {
+						std::sprintf(szOpenName,"%s\\%s",findDir,sName);
 						pattern_skins.push_back(szOpenName);
 						std::fclose(file);
 					}
@@ -101,12 +102,15 @@ namespace psycle { namespace host {
 					FILE* file;
 					file = std::fopen(szOpenName, "rb");
 					if(file) {
+						std::sprintf(szOpenName,"%s\\%s",findDir,sName);
 						machine_skins.push_back(szOpenName);
 						std::fclose(file);
 					}
 				}
 			}
 			finder.Close();
+			pattern_skins.sort();
+			machine_skins.sort();
 		}
 		void SkinIO::LoadTheme(const char* szFile, PsycleConfig::MachineView& macView,
 			PsycleConfig::MachineParam& macParam, PsycleConfig::PatternView& patView)
@@ -120,7 +124,10 @@ namespace psycle { namespace host {
 			}
 			std::map<std::string,std::string> props;
 			LoadProperties(hfile, props);
-			
+
+			std::string str1 = szFile;
+			std::string skin_dir = str1.substr(0, str1.rfind('\\')).c_str();
+
 			using helpers::hexstring_to_integer;
 			hexstring_to_integer(props["pvc_separator"], patView.separator);
 			hexstring_to_integer(props["pvc_separator2"], patView.separator2);
@@ -148,6 +155,15 @@ namespace psycle { namespace host {
 			hexstring_to_integer(props["pvc_cursor2"], patView.cursor2);
 
 			patView.header_skin = props["pattern_header_skin"];
+			if ( patView.header_skin.empty() || patView.header_skin == PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN)
+			{
+				patView.header_skin = "";
+			}
+			else if (patView.header_skin.rfind('\\') == -1)
+			{
+				patView.header_skin = skin_dir + '\\' + patView.header_skin;
+				LoadPatternSkin((patView.header_skin + ".psh").c_str(),patView.PatHeaderCoords);
+			}
 
 			patView.font_name = props["pattern_fontface"];
 			hexstring_to_integer(props["pattern_font_point"], patView.font_point);
@@ -168,13 +184,28 @@ namespace psycle { namespace host {
 			hexstring_to_integer(props["vu3"], macView.vu3);
 
 			macView.machine_skin = props["machine_skin"];
+			if (macView.machine_skin.empty() || macView.machine_skin == PSYCLE__PATH__DEFAULT_MACHINE_SKIN)
+			{
+				macView.machine_skin = "";
+			}
+			else if(macView.machine_skin.rfind('\\') == -1)
+			{
+				macView.machine_skin = skin_dir + '\\' + macView.machine_skin;
+				LoadMachineSkin((macView.machine_skin + ".psm").c_str(),macView.MachineCoords);
+			}
+			
 			std::map<std::string,std::string>::iterator it = props.find("machine_background");
-			if(it != props.end()) {
+			// This is set to true only when doing RefreshSettings
+			macView.bBmpBkg = false;
+			if(it != props.end() && !it->second.empty()) {
 				macView.szBmpBkgFilename = it->second;
-				macView.bBmpBkg = true;
+				if(macView.szBmpBkgFilename.rfind('\\') == -1)
+				{
+					macView.szBmpBkgFilename = skin_dir + '\\' + macView.szBmpBkgFilename;
+				}
 			}
 			else {
-				macView.bBmpBkg = false;
+				macView.szBmpBkgFilename = "";
 			}
 
 			macView.generator_fontface = props["generator_fontface"];
@@ -196,12 +227,15 @@ namespace psycle { namespace host {
 			hexstring_to_integer(props["machineGUITitleFontColor"], macParam.fonttitleColor);
 
 			it = props.find("machine_GUI_bitmap");
-			if(it != props.end()) {
+			if(it != props.end() && !it->second.empty()) {
 				macParam.szBmpControlsFilename = it->second;
-				macParam.bBmpControls = true;
+				if(macParam.szBmpControlsFilename.rfind('\\') == -1)
+				{
+					macParam.szBmpControlsFilename = skin_dir + '\\' + macParam.szBmpControlsFilename;
+				}
 			}
 			else {
-				macParam.bBmpControls = false;
+				macParam.szBmpControlsFilename = "";
 			}
 
 			//
@@ -248,7 +282,17 @@ namespace psycle { namespace host {
 			std::fprintf(hfile,"\"pattern_font_flags\"=dword:%.8X\n", patView.font_flags);
 			std::fprintf(hfile,"\"pattern_font_x\"=dword:%.8X\n", patView.font_x);
 			std::fprintf(hfile,"\"pattern_font_y\"=dword:%.8X\n", patView.font_y);
-			std::fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n", patView.header_skin.c_str());
+			if(patView.header_skin.empty())
+			{
+				std::fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n", PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
+			}
+			else
+			{
+				std::string str1 = patView.header_skin;
+				std::string str2 = str1.substr(str1.rfind('\\'));
+				str2 = str2.substr(0,str2.length()-4);
+				std::fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n", str2.c_str());
+			}
 			std::fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n", patView.separator);
 			std::fprintf(hfile,"\"pvc_separator2\"=dword:%.8X\n", patView.separator2);
 			std::fprintf(hfile,"\"pvc_background\"=dword:%.8X\n", patView.background);
@@ -282,7 +326,19 @@ namespace psycle { namespace host {
 			std::fprintf(hfile,"\"effect_fontface\"=\"%s\"\n", macView.effect_fontface.c_str());
 			std::fprintf(hfile,"\"effect_font_point\"=dword:%.8X\n", macView.effect_font_point);
 			std::fprintf(hfile,"\"effect_font_flags\"=dword:%.8X\n", macView.effect_font_flags);
-			std::fprintf(hfile,"\"machine_skin\"=\"%s\"\n", macView.machine_skin.c_str());
+
+			if(macView.machine_skin.empty())
+			{
+				std::fprintf(hfile,"\"machine_skin\"=\"%s\"\n", PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
+			}
+			else
+			{
+				std::string str1 = macView.machine_skin;
+				std::string str2 = str1.substr(str1.rfind('\\'));
+				str2 = str2.substr(0,str2.length()-4);
+				std::fprintf(hfile,"\"machine_skin\"=\"%s\"\n", str2.c_str());
+			}
+
 			std::fprintf(hfile,"\"mv_colour\"=dword:%.8X\n", macView.colour);
 			std::fprintf(hfile,"\"mv_wirecolour\"=dword:%.8X\n", macView.wirecolour);
 			std::fprintf(hfile,"\"mv_polycolour\"=dword:%.8X\n", macView.polycolour);
@@ -418,7 +474,7 @@ namespace psycle { namespace host {
 					int length = std::strlen(value);
 					if(value[0] == '"')
 					{
-						length--;
+						length-=2;
 						value++;
 						value[length-1]='\0';
 					}

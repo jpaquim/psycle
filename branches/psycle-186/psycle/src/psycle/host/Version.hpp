@@ -33,6 +33,9 @@
 #define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$" // $Date$
 #define PSYCLE__VERSION__SOURCE_URL "Subversion $URL$"
 
+//This is here because it is needed by audiodriver loaders.
+#define PSYCLE__PATH__REGISTRY__1_8_6KEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR)
+
 /// identifies what sources the build comes from.
 #define PSYCLE__VERSION \
 	PSYCLE__BRANCH " " \

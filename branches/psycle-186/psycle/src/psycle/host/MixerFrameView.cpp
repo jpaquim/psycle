@@ -2,9 +2,9 @@
 ///\brief implementation file for psycle::host::MixerFrameView.
 
 #include "MixerFrameView.hpp"
-
+#include "NativeGraphics.hpp"
 #include "internal_machines.hpp"
-
+#include "FrameMachine.hpp"
 #include "ChildView.hpp"
 
 namespace psycle { namespace host {
@@ -24,9 +24,9 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 
-		MixerFrameView::MixerFrameView(Machine* effect, CChildView* view)
-		:CNativeGui(effect, view)
-		,bmpDC(0)
+		MixerFrameView::MixerFrameView(CFrameMachine* frame,Machine* effect, CChildView* view)
+		:CNativeGui(frame,effect, view)
+		,backgroundBmp(0)
 		,numSends(0)
 		,numChans(0)
 		,updateBuffer(false)
@@ -40,27 +40,40 @@ namespace psycle { namespace host {
 		}
 		MixerFrameView::~MixerFrameView()
 		{
-			if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }
+			if ( backgroundBmp ) { backgroundBmp->DeleteObject(); delete backgroundBmp; }
 		}
 
 		void MixerFrameView::OnPaint() 
 		{
+			int infowidth(colwidth-uiSetting->dialwidth);
+			int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
+			int vuxoffset = (colwidth + uiSetting->sliderwidth - uiSetting->vuwidth)/2;
+			int vuyoffset = uiSetting->sliderheight - uiSetting->vuheight-uiSetting->dialheight;
+			int xoffset(realwidth), yoffset(0);
+			int checkedwidth(16);
+			char value[48];
+
 			if (!_pMachine) return;
 			CPaintDC dc(this); // device context for painting
 
 			CRect rect;
 			GetClientRect(&rect);
-			if (updateBuffer) 
+
+			if(UpdateSendsandChans()) 
 			{
-				if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }
-				bmpDC = new CBitmap;
-				bmpDC->CreateCompatibleBitmap(&dc,rect.right-rect.left,rect.bottom-rect.top);
+				GetViewSize(rect);
+				parentFrame->ResizeWindow(&rect);
+				updateBuffer = true;
 			}
 
 			CDC bufferDC;
+			CBitmap bufferBmp;
 			bufferDC.CreateCompatibleDC(&dc);
-			CBitmap *bufferbmp = bufferDC.SelectObject(bmpDC);
+			bufferBmp.CreateCompatibleBitmap(&dc,rect.right-rect.left,rect.bottom-rect.top);
+			CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);
 			CFont *oldfont=bufferDC.SelectObject(&uiSetting->font);
+
 
 			CDC knobDC;
 			CDC SliderKnobDC;
@@ -76,48 +89,66 @@ namespace psycle { namespace host {
 			SwitchOnDC.CreateCompatibleDC(&bufferDC);
 			VuOnDC.CreateCompatibleDC(&bufferDC);
 			VuOffDC.CreateCompatibleDC(&bufferDC);
-			CBitmap *oldbmp=knobDC.SelectObject(&CNativeGui::uiSetting->dial);
-			CBitmap *oldbmp2=SliderKnobDC.SelectObject(&CNativeGui::uiSetting->sliderKnob);
-			CBitmap *sliderbmp=SliderbackDC.SelectObject(&CNativeGui::uiSetting->sliderBack);
-			CBitmap *switchonbmp=SwitchOffDC.SelectObject(&CNativeGui::uiSetting->switchOff);
-			CBitmap *switchoffbmp=SwitchOnDC.SelectObject(&CNativeGui::uiSetting->switchOn);
-			CBitmap *oldbmp3=VuOnDC.SelectObject(&CNativeGui::uiSetting->vuOn);
-			CBitmap *vubmp=VuOffDC.SelectObject(&CNativeGui::uiSetting->vuOff);
+			CBitmap *knobbmp=knobDC.SelectObject(&uiSetting->dial);
+			CBitmap *slknobbmp=SliderKnobDC.SelectObject(&uiSetting->sliderKnob);
+			CBitmap *sliderbmp=SliderbackDC.SelectObject(&uiSetting->sliderBack);
+			CBitmap *switchonbmp=SwitchOffDC.SelectObject(&uiSetting->switchOff);
+			CBitmap *switchoffbmp=SwitchOnDC.SelectObject(&uiSetting->switchOn);
+			CBitmap *vubmp=VuOnDC.SelectObject(&uiSetting->vuOn);
+			CBitmap *vu2bmp=VuOffDC.SelectObject(&uiSetting->vuOff);
 
 			if (updateBuffer) 
 			{
-				bufferDC.FillSolidRect(0,0,rect.right,rect.bottom,uiSetting->bottomColor);
-				GenerateBackground(bufferDC, SliderbackDC, SliderKnobDC, VuOnDC, VuOffDC);
+				if ( backgroundBmp ) { backgroundBmp->DeleteObject(); delete backgroundBmp; }
+				CDC backgroundDC;
+				backgroundDC.CreateCompatibleDC(&bufferDC);
+				backgroundBmp = new CBitmap();
+				backgroundBmp->CreateCompatibleBitmap(&bufferDC,rect.right-rect.left,rect.bottom-rect.top);
+				CBitmap* oldbgnd = backgroundDC.SelectObject(backgroundBmp);
+				CFont *oldbgndfont=backgroundDC.SelectObject(&uiSetting->font);
+
+				backgroundDC.FillSolidRect(0,0,rect.right,rect.bottom,uiSetting->bottomColor);
+				GenerateBackground(backgroundDC, SliderbackDC, VuOffDC);
+
+				bufferDC.BitBlt(0,0,rect.right,rect.bottom,&backgroundDC,0,0,SRCCOPY);
+				backgroundDC.SelectObject(oldbgnd);
+				backgroundDC.SelectObject(oldbgndfont);
+				backgroundDC.DeleteDC();
+
 				updateBuffer=false;
 			}
-			// Column 1 Master volume
-			int xoffset(colwidth), yoffset(0);
-			int infowidth(colwidth-uiSetting->dialwidth);
-			int checkedwidth(16);
-			char value[48];
+			else {
+				CDC backgroundDC;
+				backgroundDC.CreateCompatibleDC(&bufferDC);
+				CBitmap* oldbgnd = backgroundDC.SelectObject(backgroundBmp);
+				bufferDC.BitBlt(0,0,rect.right,rect.bottom,&backgroundDC,0,0,SRCCOPY);
+				backgroundDC.SelectObject(oldbgnd);
+				backgroundDC.DeleteDC();
+			}
 
-			yoffset=(mixer().numsends()+1)*uiSetting->dialheight;
+
+			// Column 1 Master volume
+			yoffset=(mixer().numsends()+1)*realheight;
 			mixer().GetParamValue(13,value);
 			Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(13)/256.0f);
 			InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
-			bufferDC.Draw3dRect(xoffset-1,yoffset-1,colwidth+1,uiSetting->dialheight+1,uiSetting->titleColor,uiSetting->titleColor);
-			yoffset+=uiSetting->dialheight;
+			yoffset+=realheight;
 			mixer().GetParamValue(14,value);
 			Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(14)/1024.0f);
 			InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
-			yoffset+=uiSetting->dialheight;
+			yoffset+=realheight;
 			mixer().GetParamValue(15,value);
 			Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(15)/256.0f);
 			InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
 
 			mixer().GetParamValue(0,value);
 			InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,value);
-			VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,mixer()._volumeDisplay/97.0f);
-			yoffset+=uiSetting->dialheight;
-			GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(0)/4096.0f);
+			yoffset+=realheight;
+			GraphSlider::DrawKnob(bufferDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(0)/4096.0f);
+			VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset-vuyoffset,mixer()._volumeDisplay/97.0f);
 
 			// Columns 2 onwards, controls
-			xoffset+=colwidth;
+			xoffset+=realwidth;
 			Machine** machines = Global::song()._pMachine;
 			for (int i(0); i<mixer().numinputs(); i++)
 			{
@@ -128,39 +159,39 @@ namespace psycle { namespace host {
 					if (mixer().ChannelValid(i))
 					{
 						if ( _swapend == i+chan1)
-							InfoLabel::DrawHLightB(bufferDC,xoffset,yoffset,infowidth,chantxt.c_str(),machines[mixer()._inputMachines[i]]->_editName);
+							InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),machines[mixer()._inputMachines[i]]->_editName);
 						else 
-							InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,chantxt.c_str(),machines[mixer()._inputMachines[i]]->_editName);
+							InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),machines[mixer()._inputMachines[i]]->_editName);
 					}
 					else
 					{
 						if ( _swapend == i+chan1)
-							InfoLabel::DrawHLightB(bufferDC,xoffset,infowidth,yoffset,chantxt.c_str(),"");
+							InfoLabel::DrawHLight(bufferDC,xoffset,colwidth,yoffset,chantxt.c_str(),"");
 						else
-							InfoLabel::DrawHLightB(bufferDC,xoffset,infowidth,yoffset,chantxt.c_str(),"");
+							InfoLabel::DrawHeader2(bufferDC,xoffset,colwidth,yoffset,chantxt.c_str(),"");
 					}
 				}
 				if (mixer().ChannelValid(i))
 				{
-					yoffset=uiSetting->dialheight;
+					yoffset+=realheight;
 					for (int j=0; j<mixer().numsends(); j++)
 					{
 						int param =(i+1)*0x10+(j+1);
 						Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(param)/256.0f);
 						mixer().GetParamValue(param,value);
 						InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
-						yoffset+=uiSetting->dialheight;
+						yoffset+=realheight;
 					}
 					int param =(i+1)*0x10;
 					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(param)/256.0f);
 					mixer().GetParamValue(param,value);
 					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
-					yoffset+=uiSetting->dialheight;
+					yoffset+=realheight;
 					param+=14;
 					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(param)/1024.0f);
 					mixer().GetParamValue(param,value);
 					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
-					yoffset+=uiSetting->dialheight;
+					yoffset+=realheight;
 					param++;
 					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(param)/256.0f);
 					mixer().GetParamValue(param,value);
@@ -168,41 +199,19 @@ namespace psycle { namespace host {
 					param= i+1;
 					mixer().GetParamValue(param,value);
 					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,value);
-					VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,mixer().VuChan(i));
-					yoffset+=uiSetting->dialwidth;
-					GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(param)/4096.0f);
+					yoffset+=realheight;
+					GraphSlider::DrawKnob(bufferDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(param)/4096.0f);
+					VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer().VuChan(i));
 					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset,"S",mixer().GetSoloState(i));
 					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset,"M",mixer().Channel(i).Mute());
 					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->dialwidth,"D",mixer().Channel(i).DryOnly());
 					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset+uiSetting->dialwidth,"W",mixer().Channel(i).WetOnly());
-					xoffset+=colwidth;
 				}
-				else
-				{
-					yoffset=uiSetting->dialheight;
-					for (int j=0; j<mixer().numsends(); j++)
-					{
-						InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"");
-						yoffset+=uiSetting->dialheight;
-					}
-					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,0);
-					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"");
-					yoffset+=uiSetting->dialheight;
-					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,0);
-					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"");
-					yoffset+=uiSetting->dialheight;
-					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,0);
-					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"");
-					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,"");
-					VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,0);
-					yoffset+=uiSetting->dialwidth;
-					GraphSlider::Draw(bufferDC,SliderbackDC, SliderKnobDC,xoffset,yoffset,0);
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset,"S",false);
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset,"M",false);
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->dialwidth,"D",false);
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset+uiSetting->dialwidth,"W",false);
-					xoffset+=colwidth;
+				else {
+					std::string chantxt = mixer().GetAudioInputName(int(i+Mixer::chan1));
+					InfoLabel::DrawHLight(bufferDC,xoffset,0,colwidth,chantxt.c_str(),"");
 				}
+				xoffset+=realwidth;
 			}
 			for (int i(0); i<mixer().numreturns(); i++)
 			{
@@ -210,25 +219,20 @@ namespace psycle { namespace host {
 				if ( _swapend != -1  || refreshheaders)
 				{
 					std::string sendtxt = mixer().GetAudioInputName(int(i+Mixer::return1));
-					if (mixer().ReturnValid(i))
-					{
-						if ( _swapend == i+return1)
-							InfoLabel::DrawHLightB(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),sendNames[i].c_str());
-						else 
-							InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),sendNames[i].c_str());
-					}
-					else
-					{
-						if ( _swapend == i+return1)
-							InfoLabel::DrawHLightB(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),"");
-						else
-							InfoLabel::DrawHLightB(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),"");
+					if (mixer().ReturnValid(i)) {
+						if(_swapend != i+return1) {
+							InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,sendtxt.c_str(),sendNames[i].c_str());
+						} else {
+							InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,sendtxt.c_str(),sendNames[i].c_str());
+						}
+					} else {
+						InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,sendtxt.c_str(),"");
 					}
 				}
 
 				if (mixer().ReturnValid(i))
 				{
-					yoffset=(2+i)*uiSetting->dialheight;
+					yoffset=(2+i)*realheight;
 					for (int j=i+1; j<mixer().numsends(); j++)
 					{
 						if(GetRouteState(i,j)) {
@@ -237,7 +241,7 @@ namespace psycle { namespace host {
 						else {
 							SwitchButton::Draw(bufferDC,SwitchOffDC,xoffset,yoffset);
 						}
-						yoffset+=uiSetting->dialheight;
+						yoffset+=realheight;
 					}
 					if(GetRouteState(i,13)) {
 						SwitchButton::Draw(bufferDC,SwitchOnDC,xoffset,yoffset);
@@ -247,54 +251,36 @@ namespace psycle { namespace host {
 					}
 
 					int param =0xF1+i;
-					yoffset=(mixer().numsends()+3)*uiSetting->dialheight;
+					yoffset=(mixer().numsends()+3)*realheight;
 					mixer().GetParamValue(param,value);
 					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,mixer().GetParamValue(param)/256.0f);
 					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,value);
-					bufferDC.Draw3dRect(xoffset-1,yoffset-1,colwidth+1,uiSetting->dialheight+1,uiSetting->titleColor,uiSetting->titleColor);
 
 					param = 0xE1+i;
 					mixer().GetParamValue(param,value);
 					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,value);
-					VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,mixer().VuSend(i));
-					yoffset+=uiSetting->dialheight;
-					GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(param)/4096.0f);
+					yoffset+=realheight;
+					GraphSlider::DrawKnob(bufferDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(param)/4096.0f);
+					VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer().VuSend(i));
 					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset,"S",mixer().GetSoloState(i+Mixer::return1));
 					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset,"M",mixer().Return(i).Mute());
-					xoffset+=colwidth;
 				}
-				else
-				{
-					yoffset+=(1+i)*uiSetting->dialheight;
-					for (int j=i+1; j<mixer().numsends(); j++)
-					{
-						InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Route","");
-						yoffset+=uiSetting->dialheight;
-					}
-					InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Master","");
-
-					yoffset=(mixer().numsends()+3)*uiSetting->dialheight;
-					Knob::Draw(bufferDC,knobDC,xoffset,yoffset,0);
-					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"");
-					InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,"");
-					VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,0);
-					yoffset+=uiSetting->dialheight;
-					GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,0);
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset,"S",false);
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset,"M",false);
-					xoffset+=colwidth;
+				else {
+					std::string sendtxt = mixer().GetAudioInputName(int(i+Mixer::return1));
+					InfoLabel::DrawHLight(bufferDC,xoffset,0,colwidth,sendtxt.c_str(),"");
 				}
+				xoffset+=realwidth;
 			}
 
 			dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);
 
-			VuOnDC.SelectObject(oldbmp3);
+			VuOnDC.SelectObject(vubmp);
 			VuOnDC.DeleteDC();
-			SliderKnobDC.SelectObject(oldbmp2);
+			SliderKnobDC.SelectObject(slknobbmp);
 			SliderKnobDC.DeleteDC();
-			knobDC.SelectObject(oldbmp);
+			knobDC.SelectObject(knobbmp);
 			knobDC.DeleteDC();
-			VuOffDC.SelectObject(vubmp);
+			VuOffDC.SelectObject(vu2bmp);
 			VuOffDC.DeleteDC();
 			SwitchOffDC.SelectObject(switchoffbmp);
 			SwitchOffDC.DeleteDC();
@@ -303,8 +289,8 @@ namespace psycle { namespace host {
 			SliderbackDC.SelectObject(sliderbmp);
 			SliderbackDC.DeleteDC();
 
+			bufferDC.SelectObject(oldbmp);
 			bufferDC.SelectObject(oldfont);
-			bufferDC.SelectObject(bufferbmp);
 			bufferDC.DeleteDC();
 		}
 
@@ -516,6 +502,7 @@ namespace psycle { namespace host {
 			_swapstart = -1;
 			_swapend = -1;
 			isslider = false;
+			istweak=false;
 			Invalidate();
 			ReleaseCapture();
 			CWnd::OnLButtonUp(nFlags, point);
@@ -523,27 +510,27 @@ namespace psycle { namespace host {
 
 		int MixerFrameView::ConvertXYtoParam(int x, int y)
 		{
+			int realwidth = colwidth+1;
 			int xoffset(0),yoffset(0);
-			return GetParamFromPos(GetColumn(x,xoffset),GetRow(x%(colwidth),y,yoffset));
+			return GetParamFromPos(GetColumn(x,xoffset),GetRow(x%realwidth,y,yoffset));
 		}
 
 		bool MixerFrameView::GetViewSize(CRect& rect)
 		{
+			int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
 			rect.left= rect.top = 0;
-			rect.right = ncol * colwidth;
-			rect.bottom = parspercol * uiSetting->dialheight;
+			rect.right = ncol * realwidth;
+			rect.bottom = parspercol * realheight + (uiSetting->sliderheight+1);
 			return true;
 		}
 
 		void MixerFrameView::SelectMachine(Machine* pMachine)
 		{
 			_pMachine = pMachine;
+			//This forces a reload of the values.
+			numSends=-1;
 			UpdateSendsandChans();
-
-			// +2 -> labels column, plus master column.
-			ncol = mixer().numinputs()+mixer().numreturns()+2;
-			 // + 5 -> labels row, pan, gain, mix and slider
-			parspercol = mixer().numsends()+5;
 			updateBuffer=true;
 		}
 
@@ -568,88 +555,115 @@ namespace psycle { namespace host {
 			if ( numSends != mixer().numreturns()/*sends*/ || numChans != mixer().numinputs()/*cols*/)
 			{
 				//numSends= sends; numChans = cols;
-				numSends = mixer().numreturns(); numChans = mixer().numinputs();
+				numSends = mixer().numreturns();
+				numChans = mixer().numinputs();
+
+				// +2 -> labels column, plus master column.
+				ncol = mixer().numinputs()+mixer().numreturns()+2;
+				 // + 5 -> labels row, pan, gain, and mix. Slider is aside
+				parspercol = mixer().numsends()+4;
 				return true;
 			}
 			return false;
 		}
 
-		void MixerFrameView::GenerateBackground(CDC &bufferDC, CDC &SliderbackDC, CDC& SliderKnobDC, CDC &VuOnDC, CDC& VuOffDC)
+		void MixerFrameView::GenerateBackground(CDC &bufferDC, CDC &SliderbackDC, CDC& VuOffDC)
 		{
 			// Draw to buffer.
 			// Column 0, Labels.
 			int xoffset(0), yoffset(0);
+			const COLORREF titleColor = uiSetting->titleColor;
 			int infowidth(colwidth-uiSetting->dialwidth);
+			int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
+			int vuxoffset = (colwidth + uiSetting->sliderwidth - uiSetting->vuwidth)/2;
+			int vuyoffset = uiSetting->sliderheight - uiSetting->vuheight-uiSetting->dialheight;
 			for (int i=0; i <mixer().numsends();i++)
 			{
-				yoffset+=uiSetting->dialheight;
-				std::string sendtxt = "Send ";
-				if ( i < 9 )sendtxt += ('1'+i);
-				else { sendtxt += '1'; sendtxt += ('0'+i-9); }
+				yoffset+=realheight;
+				std::ostringstream sendtxt;
+				sendtxt << "Send " << i+1;
 				if ( mixer().SendValid(i))
 				{
-					InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),sendNames[i].c_str());
+					InfoLabel::DrawHeader2(bufferDC,0,yoffset,colwidth,sendtxt.str().c_str(),sendNames[i].c_str());
 				}
-				else InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),"");
+				else InfoLabel::DrawHeader2(bufferDC,0,yoffset,colwidth,sendtxt.str().c_str(),"");
+				bufferDC.Draw3dRect(-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
 			}
-			yoffset+=uiSetting->dialheight;
-			InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,"Mix","");
-			yoffset+=uiSetting->dialheight;
-			InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,"Gain","");
-			yoffset+=uiSetting->dialheight;
-			InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,"Pan","");
+			yoffset+=realheight;
+			InfoLabel::DrawHeader2(bufferDC,0,yoffset,colwidth,"Mix","");
+			bufferDC.Draw3dRect(-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+			yoffset+=realheight;
+			InfoLabel::DrawHeader2(bufferDC,0,yoffset,colwidth,"Gain","");
+			bufferDC.Draw3dRect(-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+			yoffset+=realheight;
+			InfoLabel::DrawHeader2(bufferDC,0,yoffset,colwidth,"Pan","");
+			bufferDC.Draw3dRect(-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
 
-			yoffset+=uiSetting->sliderheight;
-			InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,"Ch. Input","");
+			yoffset+=uiSetting->sliderheight+1;
+			InfoLabel::DrawHeader2(bufferDC,0,yoffset,colwidth,"Ch. Input","");
+			yoffset+=realheight;
+			bufferDC.Draw3dRect(-1,-1,realwidth+1,yoffset+1,titleColor,titleColor);
 
 			// Column 1 master Volume.
-			xoffset+=colwidth;
+			xoffset+=realwidth;
 			yoffset=0;
-			std::string mastertxt = "Master Out";
-			InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,mastertxt.c_str(),"");
+			InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,"Master Out","");
+			bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
 
-			yoffset+=(mixer().numsends()+1)*uiSetting->dialheight;
+			yoffset+=(mixer().numsends()+1)*realheight;
 			InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"D/W","");
-			yoffset+=uiSetting->dialheight;
+			bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+			yoffset+=realheight;
 			InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Gain","");
-			yoffset+=uiSetting->dialheight;
+			bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+			yoffset+=realheight;
 			InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Pan","");
+			bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
 
 			InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,"Level","");
-			VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,0);
-			yoffset+=uiSetting->dialheight;
-			GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,0);
-			bufferDC.Draw3dRect(xoffset-1,0-1,colwidth+1,yoffset+1,uiSetting->titleColor,uiSetting->titleColor);
+			yoffset+=realheight;
+			GraphSlider::Draw(bufferDC,SliderbackDC,xoffset,yoffset);
+			VuMeter::DrawBack(bufferDC,VuOffDC,xoffset+vuxoffset,yoffset+vuyoffset);
+			yoffset+=uiSetting->sliderheight+1;
+			bufferDC.Draw3dRect(xoffset-1,-1,realwidth+1,yoffset+1,titleColor,titleColor);
 
 
 			// Columns 2 onwards, controls
-			xoffset+=colwidth;
+			xoffset+=realwidth;
 			for (int i=0; i<mixer().numinputs(); i++)
 			{
 				yoffset=0;
 				std::string chantxt = mixer().GetAudioInputName(int(i+Mixer::chan1));
 				if (mixer().ChannelValid(i))
 				{
-					InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,chantxt.c_str(),Global::song()._pMachine[mixer()._inputMachines[i]]->_editName);
+					InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),Global::song()._pMachine[mixer()._inputMachines[i]]->_editName);
 				}
-				else InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,chantxt.c_str(),"");
-				yoffset+=uiSetting->dialheight;
+				else InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),"");
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+				yoffset+=realheight;
 				for (int j=0; j<mixer().numsends(); j++)
 				{
 					InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Send","");
-					yoffset+=uiSetting->dialheight;
+					bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+					yoffset+=realheight;
 				}
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Mix","");
-				yoffset+=uiSetting->dialheight;
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+				yoffset+=realheight;
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Gain","");
-				yoffset+=uiSetting->dialheight;
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+				yoffset+=realheight;
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Pan","");
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
 
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,"Level","");
-				VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,0);
-				yoffset+=uiSetting->dialwidth;
-				GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,0);
-				xoffset+=colwidth;
+				yoffset+=realheight;
+				GraphSlider::Draw(bufferDC,SliderbackDC,xoffset,yoffset);
+				VuMeter::DrawBack(bufferDC,VuOffDC,xoffset+vuxoffset,yoffset+vuyoffset);
+				yoffset+=uiSetting->sliderheight+1;
+				bufferDC.Draw3dRect(xoffset-1,-1,realwidth+1,yoffset+1,titleColor,titleColor);
+				xoffset+=realwidth;
 			}
 			for (int i=0; i<mixer().numreturns(); i++)
 			{
@@ -657,31 +671,39 @@ namespace psycle { namespace host {
 				std::string sendtxt = mixer().GetAudioInputName(int(i+Mixer::return1));
 				if (mixer().ReturnValid(i))
 				{
-					InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),sendNames[i].c_str());
+					InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,sendtxt.c_str(),sendNames[i].c_str());
 				}
-				else InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,infowidth,sendtxt.c_str(),"");
-				yoffset+=(2+i)*uiSetting->dialheight;
+				else InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,sendtxt.c_str(),"");
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+				yoffset+=(2+i)*realheight;
 				for (int j=i+1; j<mixer().numsends(); j++)
 				{
 					InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Route","");
-					yoffset+=uiSetting->dialheight;
+					bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+					yoffset+=realheight;
 				}
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Master","");
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
 
-				yoffset=(mixer().numsends()+3)*uiSetting->dialheight;
+				yoffset=(mixer().numsends()+3)*realheight;
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset,infowidth,"Pan","");
+				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
+
 				InfoLabel::Draw(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,"Level","");
-				VuMeter::Draw(bufferDC,VuOnDC,VuOffDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->sliderheight-uiSetting->dialheight-uiSetting->vuheight,0);
-				yoffset+=uiSetting->dialheight;
-				GraphSlider::Draw(bufferDC,SliderbackDC,SliderKnobDC,xoffset,yoffset,0);
-				bufferDC.Draw3dRect(xoffset-1,0-1,colwidth+1,yoffset+1,uiSetting->titleColor,uiSetting->titleColor);
-				xoffset+=colwidth;
+				yoffset+=realheight;
+				GraphSlider::Draw(bufferDC,SliderbackDC,xoffset,yoffset);
+				VuMeter::DrawBack(bufferDC,VuOffDC,xoffset+vuxoffset,yoffset+vuyoffset);
+				yoffset+=uiSetting->sliderheight+1;
+				bufferDC.Draw3dRect(xoffset-1,-1,realwidth+1,yoffset+1,titleColor,titleColor);
+				xoffset+=realwidth;
 			}
 		}
 		int MixerFrameView::GetColumn(int x, int &xoffset)
 		{
-			int col=x/(colwidth);
-			xoffset=x%(colwidth);
+			int realwidth = colwidth+1;
+
+			int col=x/(realwidth);
+			xoffset=x%(realwidth);
 			if ( col < chan1+mixer().numinputs()) return col;
 			else
 			{
@@ -691,9 +713,11 @@ namespace psycle { namespace host {
 		}
 		int MixerFrameView::GetRow(int x,int y,int &yoffset)
 		{
+			int realheight = uiSetting->dialheight+1;
+
 			int checkedwidth(16);
-			int row = y/uiSetting->dialheight;
-			yoffset=y%uiSetting->dialheight;
+			int row = y/realheight;
+			yoffset=y%realheight;
 			if (row < send1+mixer().numsends()) return row;
 			else
 			{
@@ -703,7 +727,7 @@ namespace psycle { namespace host {
 				else if (row == 2) return pan;
 				else if (x < uiSetting->sliderwidth)
 				{
-					yoffset = y - (uiSetting->dialheight*(mixer().numsends()+4 ));
+					yoffset = y - (realheight*(mixer().numsends()+4 ));
 					return slider;
 				}
 				else if ( row == 3 )

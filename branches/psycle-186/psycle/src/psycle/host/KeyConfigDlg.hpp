@@ -14,7 +14,8 @@ namespace psycle { namespace host {
 			enum { IDD = IDD_KEYCONFIG };
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
+			
+			void RefreshDialog();
 			void FillCmdList();
 			void SaveHotKey(long idx,WORD key,WORD mods);
 			void FindKey(long idx,WORD &key,WORD &mods);

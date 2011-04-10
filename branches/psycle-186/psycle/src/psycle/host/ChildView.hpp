@@ -223,10 +223,6 @@ namespace host {
 			void SetTitleBarText();
 			void RecalculateColourGrid();
 			void RecalcMetrics();
-			void LoadPatternHeaderSkin();
-			void LoadMachineSkin();
-			void LoadMachineBackground();
-			void LoadMachineDial();
 			void KillWireDialogs();
 			void patTrackMute();
 			void patTrackSolo();
@@ -237,7 +233,7 @@ namespace host {
 			void DoMacPropDialog(int propMac);
 			void FileLoadsongNamed(std::string fName);
 			void OnFileLoadsongNamed(std::string fName, int fType);
-			void AppendToRecent(std::string& fName);
+			void AppendToRecent(std::string const& fName);
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;

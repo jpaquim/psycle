@@ -103,8 +103,6 @@ namespace psycle
 		private:
 			bool _initialized;
 
-			HWND _hwnd;
-//			MMRESULT _timer;
 			//controls if the driver is supposed to be running or not
 			bool _running;
 			//informs the real state of the DSound buffer (see the control of buffer play in DoBlocks())

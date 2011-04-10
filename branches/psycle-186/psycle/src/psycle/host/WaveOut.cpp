@@ -62,7 +62,8 @@ namespace psycle
 		}
 		void WaveOutSettings::Load(ConfigStorage &store)
 		{
-			if(store.OpenGroup("\\devices\\mme"))
+			if(store.OpenGroup("devices\\mme") ||
+				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\mme"))
 			{
 				store.Read("DeviceID", deviceID_);
 				store.Read("PollSleep", pollSleep_);
@@ -86,7 +87,7 @@ namespace psycle
 		}
 		void WaveOutSettings::Save(ConfigStorage &store)
 		{
-			store.CreateGroup("\\devices\\mme");
+			store.CreateGroup("devices\\mme");
 			store.Write("DeviceID", deviceID_);
 			store.Write("PollSleep", pollSleep_);
 			store.Write("SamplesPerSec", samplesPerSec());

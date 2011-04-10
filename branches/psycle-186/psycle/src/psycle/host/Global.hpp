@@ -3,7 +3,7 @@
 #pragma once
 
 #include "namespaces.hpp"
-#include "Version.hpp"
+#include "version.hpp"
 
 #include "Constants.hpp"
 #include "SongStructs.hpp"

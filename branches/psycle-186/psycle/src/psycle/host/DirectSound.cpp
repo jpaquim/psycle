@@ -6,6 +6,7 @@
 #include "DSoundConfig.hpp"
 #include "ConfigStorage.hpp"
 #include "MidiInput.hpp"
+#include "Psycle.hpp"
 
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
@@ -21,6 +22,8 @@ namespace psycle
 {
 	namespace host
 	{
+		extern CPsycleApp theApp;
+
 		AudioDriverInfo DirectSoundSettings::info_ = { "DirectSound Output" };
 		AudioDriverEvent DirectSound::_event;
 
@@ -64,9 +67,11 @@ namespace psycle
 		}
 		void DirectSoundSettings::Load(ConfigStorage &store)
 		{
-			if(store.OpenGroup("\\devices\\direct-sound"))
+			if(store.OpenGroup("devices\\direct-sound") ||
+				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\direct-sound"))
 			{
-				///\todo:store.Read("DeviceGuid", device_guid_);
+				///\todo: fixme
+				store.ReadRaw("DeviceGuid", &device_guid_, sizeof(device_guid_));
 				unsigned int tmp = samplesPerSec();
 				store.Read("SamplesPerSec", tmp);
 				setSamplesPerSec(tmp);
@@ -89,8 +94,8 @@ namespace psycle
 		}
 		void DirectSoundSettings::Save(ConfigStorage &store)
 		{
-			store.CreateGroup("\\devices\\direct-sound");
-			///\todo:store.Write("DeviceGuid", device_guid_);
+			store.CreateGroup("devices\\direct-sound");
+			store.WriteRaw("DeviceGuid", &device_guid_, sizeof(device_guid_));
 			store.Write("SamplesPerSec", samplesPerSec());
 			store.Write("Dither", dither());
 			store.Write("BitDepth", validBitDepth());
@@ -149,6 +154,7 @@ namespace psycle
 		bool DirectSound::Start()
 		{
 			if(_running) return true;
+			if(theApp.m_pMainWnd->m_hWnd == NULL) return false;
 			if(!_pCallback) return false;
 
 			if(FAILED(::DirectSoundCreate8(&settings_->device_guid_, &_pDs, NULL)))
@@ -156,7 +162,7 @@ namespace psycle
 				Error(_T("Failed to create DirectSound object"));
 				return false;
 			}
-			if(FAILED(_pDs->SetCooperativeLevel(_hwnd, DSSCL_PRIORITY)))
+			if(FAILED(_pDs->SetCooperativeLevel(theApp.m_pMainWnd->m_hWnd, DSSCL_PRIORITY)))
 			{
 				Error(_T("Failed to set DirectSound cooperative level"));
 				SAFE_RELEASE(_pDs)
@@ -626,10 +632,13 @@ namespace psycle
 				_highMark = _lowMark + settings_->blockBytes();
 				if (SUCCEEDED(hr) && !_playing)
 				{
-					_playing = true;
 					_pBuffer->SetCurrentPosition(_highMark);
 					hr = _pBuffer->Play(0, 0, DSBPLAY_LOOPING);
-					Global::midi().ReSync(); // MIDI IMPLEMENTATION
+
+					if(SUCCEEDED(hr)) {
+						_playing = true;
+						Global::midi().ReSync(); // MIDI IMPLEMENTATION
+					}
 				}
 			}
 		}
@@ -667,7 +676,7 @@ namespace psycle
 		std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) {
 			for(int i = 0; i < _playEnums.size() ; ++i)
 			{
-				if(device == _playEnums[i].guid)
+				if(memcmp(device,_playEnums[i].guid,sizeof(GUID)) == 0)
 				{
 					return i;
 				}

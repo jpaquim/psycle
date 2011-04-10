@@ -113,10 +113,12 @@ namespace psycle { namespace host {
 
 			// The one and only window has been initialized, so show and update it.
 			pFrame->ShowWindow(SW_MAXIMIZE);
-
+			
+			RestoreRecentFiles();
+			global_.psycleconf().RefreshAudio();
 			// center master machine. Cannot be done until here because it's when we have the window size.
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords.sMaster.width)/2;
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
 
 			//Psycle maintains its own recent
 			//LoadRecent(pFrame); // Import recent files from registry.
@@ -202,14 +204,18 @@ namespace psycle { namespace host {
 		void CPsycleApp::RestoreRecentFiles()
 		{
 			HMENU hRecentMenu = reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.hRecentMenu;
-			for(int iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
+			//At startup, this is called before the window is opened
+			if(hRecentMenu)
 			{
-				::DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
-			}
-			std::vector<std::string> recent = global_.psycleconf().GetRecentFiles();
-			for(int iCount = 0; iCount< recent.size();iCount++)
-			{
-				reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.AppendToRecent(recent[iCount]);
+				for(int iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
+				{
+					::DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
+				}
+				std::vector<std::string> recent = global_.psycleconf().GetRecentFiles();
+				for(int iCount = recent.size()-1; iCount>= 0;iCount--)
+				{
+					reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.AppendToRecent(recent[iCount]);
+				}
 			}
 		}
 

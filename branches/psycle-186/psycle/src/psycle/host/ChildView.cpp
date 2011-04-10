@@ -39,6 +39,7 @@ namespace psycle { namespace host {
 
 		CChildView::CChildView()
 			:pParentFrame(0)
+			,hRecentMenu(0)
 			,MasterMachineDialog(NULL)
 			,SamplerMachineDialog(NULL)
 			,XMSamplerMachineDialog(NULL)
@@ -1960,7 +1961,7 @@ namespace psycle { namespace host {
 			SetTitleBarText();
 		}
 
-		void CChildView::AppendToRecent(std::string& fName)
+		void CChildView::AppendToRecent(std::string const& fName)
 		{
 			int iCount;
 			char* nameBuff;

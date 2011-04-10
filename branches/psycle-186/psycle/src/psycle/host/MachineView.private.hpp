@@ -62,6 +62,7 @@ namespace psycle { namespace host {
 			CBrush *oldbrush = devc->SelectObject(&fillbrush);
 			if (macView->bBmpBkg) // Draw Background image
 			{
+				///\todo: Background should be part of the buffered memDC.
 				CDC memDC;
 				CBitmap* oldbmp;
 				memDC.CreateCompatibleDC(devc);

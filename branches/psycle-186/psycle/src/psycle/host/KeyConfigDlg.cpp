@@ -60,13 +60,26 @@ namespace psycle { namespace host {
 		BOOL CKeyConfigDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			PsycleConfig& config = Global::psycleconf();
 			
 			// prevent ALT in hotkey	
 			WORD rules=HKCOMB_A|HKCOMB_CA|HKCOMB_SA|HKCOMB_SCA;
 			WORD subst=0;
 			m_hotkey0.SetRules(rules,subst);
 
+			m_spinlines.SetRange(1,MAX_LINES);
+
+			UDACCEL acc;
+			acc.nSec = 4;
+			acc.nInc = 16;
+			m_spinlines.SetAccel(1, &acc);
+
+			RefreshDialog();
+			return TRUE;  // return TRUE unless you set the focus to a control
+						// EXCEPTION: OCX Property Pages should return FALSE
+		}
+		void CKeyConfigDlg::RefreshDialog() 
+		{
+			PsycleConfig& config = Global::psycleconf();
 			m_cmdCtrlPlay.SetCheck(handler.bCtrlPlay?1:0);
 			m_cmdNewHomeBehaviour.SetCheck(handler.bFT2HomeBehaviour?1:0);
 			m_cmdFT2Del.SetCheck(handler.bFT2DelBehaviour?1:0);
@@ -87,25 +100,15 @@ namespace psycle { namespace host {
 
 			m_save_reminders.SetCheck(config.bFileSaveReminders?1:0);
 			m_show_info.SetCheck(config.bShowSongInfoOnLoad?1:0);
-			m_spinlines.SetRange(1,MAX_LINES);
 			m_allowinstances.SetCheck(config._allowMultipleInstances?1:0);
 			m_storeplaces.SetCurSel(config.store_place_);
 
 			itoa(Global::psycleconf().GetDefaultPatLines(),buffer,10);
 			m_numlines.SetWindowText(buffer);
-			UDACCEL acc;
-			acc.nSec = 4;
-			acc.nInc = 16;
-			m_spinlines.SetAccel(1, &acc);
-
 			bInit = TRUE;
 			OnUpdateNumLines();
 			FillCmdList();
-			
-			return TRUE;  // return TRUE unless you set the focus to a control
-						// EXCEPTION: OCX Property Pages should return FALSE
 		}
-
 		void CKeyConfigDlg::OnCancel() 
 		{
 			CDialog::OnCancel();
@@ -193,12 +196,10 @@ namespace psycle { namespace host {
 			
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
-				///\todo: Cannot cancel and need to refresh the UI.
+				///\todo: Cannot cancel.
 				KeyPresetIO::LoadPreset(szFile, handler);
-				keyMap.clear();
+				RefreshDialog();
 			}
-			// update display for new key
-			FillCmdList();
 		}
 
 
@@ -225,7 +226,7 @@ namespace psycle { namespace host {
 			if (GetSaveFileName(&ofn)==TRUE)
 			{
 				///\todo: Will not export settings changed since dialog opened.
-				KeyPresetIO::LoadPreset(szFile, handler);
+				KeyPresetIO::SavePreset(szFile, handler);
 			}
 		}
 

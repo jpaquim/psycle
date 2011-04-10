@@ -216,7 +216,6 @@ namespace psycle { namespace host {
 			m_wndInst.pParentMain=this;
 			m_wndInst.Create(IDD_INSTRUMENT,this);
 			m_wndInst.Validate();
-
 			// Wave Editor Window
 			m_pWndWed = new CWaveEdFrame(this->_pSong,this);
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW, this);
@@ -417,10 +416,6 @@ namespace psycle { namespace host {
 			{
 				CloseAllMacGuis();
 				m_wndView._outputActive = false;
-				Global::pPlayer->Stop();
-				Global::pConfig->_pOutputDriver->Enable(false);
-				// MIDI IMPLEMENTATION
-				Global::midi().Close();
 
 				//Psycle manages its own list for recent files
 				//((CPsycleApp*)AfxGetApp())->SaveRecent(this);

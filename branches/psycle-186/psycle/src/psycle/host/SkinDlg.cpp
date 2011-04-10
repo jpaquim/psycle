@@ -127,7 +127,56 @@ namespace psycle { namespace host {
 		BOOL CSkinDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
+			for(int i=4;i<=64;i++)
+			{
+				char s[4];
+				sprintf(s,"%2i",i);
+				m_pattern_font_x.AddString(s);
+				m_pattern_font_y.AddString(s);
+			}
+			for (int i = 50; i <= 320; i+=5)
+			{
+				char s[8];
+				if (i < 100)
+				{
+					sprintf(s," %.1f",float(i)/10.0f);
+				}
+				else
+				{
+					sprintf(s,"%.1f",float(i)/10.0f);
+				}
+				m_pattern_font_point.AddString(s);
+				m_generator_font_point.AddString(s);
+				m_effect_font_point.AddString(s);
+			}
 
+			char s[4];
+			m_wireaa.AddString("off");
+			for (int i = 1; i <= 16; i++)
+			{
+				sprintf(s,"%2i",i);
+				m_wirewidth.AddString(s);
+				m_wireaa.AddString(s);
+			}
+			for (int i = 8; i <= 64; i++)
+			{
+				sprintf(s,"%2i",i);
+				m_triangle_size.AddString(s);
+			}
+			// ok now browse our folder for skins
+			SkinIO::LocateSkins(Global::psycleconf().GetSkinDir().c_str(), pattern_skins, machine_skins);
+
+			m_pattern_header_skin.AddString(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
+			m_machine_skin.AddString(PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
+			std::list<std::string>::const_iterator it;
+			for(it = pattern_skins.begin(); it != pattern_skins.end(); ++it) {
+				std::string tmp = it->substr(it->rfind('\\')+1);
+				m_pattern_header_skin.AddString(tmp.c_str());
+			}
+			for(it = machine_skins.begin(); it != machine_skins.end(); ++it) {
+				std::string tmp = it->substr(it->rfind('\\')+1);
+				m_machine_skin.AddString(tmp.c_str());
+			}
 			RefreshAllValues();
 
 			SetTimer(ID_TIMER_SKINGDLG,100,0);
@@ -347,16 +396,42 @@ namespace psycle { namespace host {
 		}
 		void CSkinDlg::OnSelchangePatternHeaderSkin()
 		{
-			CString temp;
-			m_pattern_header_skin.GetLBText(m_pattern_header_skin.GetCurSel(),temp);
-			patConfig.header_skin=temp;
+			int pos = m_pattern_header_skin.GetCurSel();
+			if(pos == 0) {
+				patConfig.header_skin="";
+			}
+			else {
+				std::list<std::string>::const_iterator it;
+				int i;
+				for(i=1,it=pattern_skins.begin() ; it != pattern_skins.end() ; ++i,++it)
+				{
+					if(i == pos)
+					{
+						patConfig.header_skin=*it;
+						break;
+					}
+				}
+			}
 		}
 
 		void CSkinDlg::OnSelchangeMachineSkin()
 		{
-			CString temp;
-			m_machine_skin.GetLBText(m_machine_skin.GetCurSel(),temp);
-			macConfig.machine_skin = temp;
+			int pos = m_machine_skin.GetCurSel();
+			if(pos == 0) {
+				macConfig.machine_skin="";
+			}
+			else {
+				std::list<std::string>::const_iterator it;
+				int i;
+				for(i=1,it=machine_skins.begin() ; it != machine_skins.end() ; ++i,++it)
+				{
+					if(i == pos)
+					{
+						macConfig.machine_skin=*it;
+						break;
+					}
+				}
+			}
 		}
 		void CSkinDlg::OnSelchangeWireWidth()
 		{
@@ -394,33 +469,28 @@ namespace psycle { namespace host {
 
 		void CSkinDlg::OnBnClickedMachineguiBitmap()
 		{
-			ChangeBitmap(paramConfig.szBmpControlsFilename, 
-				paramConfig.bBmpControls);
-			if (paramConfig.bBmpControls)
+			ChangeBitmap(paramConfig.szBmpControlsFilename);
+			if (paramConfig.szBmpControlsFilename.empty())
 			{
-				CString str1(paramConfig.szBmpControlsFilename.c_str());
-				int i = str1.ReverseFind('\\')+1;
-				CString str2 = str1.Mid(i);
-				m_machine_GUI_bitmap.SetWindowText(str2);
+				m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
 			}
 			else
 			{
-				m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
+				std::string str1 = paramConfig.szBmpControlsFilename;
+				m_machine_GUI_bitmap.SetWindowText(str1.substr(str1.rfind('\\')+1).c_str());
 			}
 		}
 
 		void CSkinDlg::OnMachineBitmap() 
 		{
-			ChangeBitmap(macConfig.szBmpBkgFilename, macConfig.bBmpBkg);
-			if (macConfig.bBmpBkg) {
-				CString str1(macConfig.szBmpBkgFilename.c_str());
-				int i = str1.ReverseFind('\\')+1;
-				CString str2 = str1.Mid(i);
-				m_machine_background_bitmap.SetWindowText(str2);
+			ChangeBitmap(macConfig.szBmpBkgFilename);
+			if (macConfig.szBmpBkgFilename.empty()) {
+				m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 			}
 			else
 			{
-				m_machine_background_bitmap.SetWindowText("No Background Bitmap");
+				std::string str1 = macConfig.szBmpBkgFilename;
+				m_machine_background_bitmap.SetWindowText(str1.substr(str1.rfind('\\')+1).c_str());
 			}
 		}
 		void CSkinDlg::OnImportReg() 
@@ -483,100 +553,56 @@ namespace psycle { namespace host {
 			m_draw_mac_index.SetCheck(macConfig.draw_mac_index);
 			m_draw_vus.SetCheck(macConfig.draw_vus);
 
-			for(int i=4;i<=64;i++)
-			{
-				char s[4];
-				sprintf(s,"%2i",i);
-				m_pattern_font_x.AddString(s);
-				m_pattern_font_y.AddString(s);
-			}
 			m_pattern_font_x.SetCurSel(patConfig.font_x-4);
 			m_pattern_font_y.SetCurSel(patConfig.font_y-4);
 
-			for (int i = 50; i <= 320; i+=5)
-			{
-				char s[8];
-				if (i < 100)
-				{
-					sprintf(s," %.1f",float(i)/10.0f);
-				}
-				else
-				{
-					sprintf(s,"%.1f",float(i)/10.0f);
-				}
-				m_pattern_font_point.AddString(s);
-				m_generator_font_point.AddString(s);
-				m_effect_font_point.AddString(s);
-			}
-
 			SetFontNames();
 
-			char s[4];
-			m_wireaa.AddString("off");
-			for (int i = 1; i <= 16; i++)
-			{
-				sprintf(s,"%2i",i);
-				m_wirewidth.AddString(s);
-				m_wireaa.AddString(s);
-			}
 			m_wirewidth.SetCurSel(macConfig.wirewidth-1);
 			m_wireaa.SetCurSel(macConfig.wireaa);
 
-			for (int i = 8; i <= 64; i++)
-			{
-				sprintf(s,"%2i",i);
-				m_triangle_size.AddString(s);
-			}
 			m_triangle_size.SetCurSel(macConfig.triangle_size-8);
-
-			// ok now browse our folder for skins
-			SkinIO::LocateSkins(Global::psycleconf().GetSkinDir().c_str(), pattern_skins, machine_skins);
-
-			m_pattern_header_skin.AddString(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
-			m_machine_skin.AddString(PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
+			
+			bool found = false;
 			std::list<std::string>::const_iterator it;
-			for(it = pattern_skins.begin(); it != pattern_skins.end(); ++it) {
-				m_pattern_header_skin.AddString(it->c_str());
+			int i;
+			for(i=1, it = pattern_skins.begin(); it != pattern_skins.end(); ++i, ++it) {
+				if(*it == patConfig.header_skin) {
+					found = true;
+					break;
+				}
 			}
-			for(it = machine_skins.begin(); it != machine_skins.end(); ++it) {
-				m_machine_skin.AddString(it->c_str());
-			}
-			int sel = m_pattern_header_skin.FindStringExact(0,patConfig.header_skin.c_str());
-			if (sel==CB_ERR)
-			{
-				sel = m_pattern_header_skin.FindStringExact(0,PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
-			}
-			m_pattern_header_skin.SetCurSel(sel);
+			if(found) { m_pattern_header_skin.SetCurSel(i); }
+			else { m_pattern_header_skin.SetCurSel(0); }
 
-			sel = m_machine_skin.FindStringExact(0,macConfig.machine_skin.c_str());
-			if (sel==CB_ERR)
-			{
-				sel = m_machine_skin.FindStringExact(0,PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
+			found = false;
+			for(i=1, it = machine_skins.begin(); it != machine_skins.end(); ++i, ++it) {
+				if(*it == macConfig.machine_skin) {
+					found = true;
+					break;
+				}
 			}
-			m_machine_skin.SetCurSel(sel);
+			if(found) { m_machine_skin.SetCurSel(i); }
+			else { m_machine_skin.SetCurSel(0); }
 
-			if (macConfig.bBmpBkg)
-			{
-				CString str1(macConfig.szBmpBkgFilename.c_str());
-				int i = str1.ReverseFind('\\')+1;
-				CString str2 = str1.Mid(i);
-				m_machine_background_bitmap.SetWindowText(str2);
-			}
-			else
+			if (macConfig.szBmpBkgFilename.empty())
 			{
 				m_machine_background_bitmap.SetWindowText("No Background Bitmap");
 			}
-
-			if (paramConfig.bBmpControls)
+			else
 			{
-				CString str1(paramConfig.szBmpControlsFilename.c_str());
-				int i = str1.ReverseFind('\\')+1;
-				CString str2 = str1.Mid(i);
-				m_machine_GUI_bitmap.SetWindowText(str2);
+				std::string str1 = macConfig.szBmpBkgFilename;
+				m_machine_background_bitmap.SetWindowText(str1.substr(str1.rfind('\\')+1).c_str());
+			}
+
+			if (paramConfig.szBmpControlsFilename.empty())
+			{
+				m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
 			}
 			else
 			{
-				m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
+				std::string str1 = paramConfig.szBmpControlsFilename;
+				m_machine_GUI_bitmap.SetWindowText(str1.substr(str1.rfind('\\')+1).c_str());
 			}
 		}
 
@@ -703,19 +729,24 @@ namespace psycle { namespace host {
 			return fontDesc;
 		}
 
-		void CSkinDlg::ChangeBitmap(std::string& filename, bool& enabled)
+		void CSkinDlg::ChangeBitmap(std::string& filename)
 		{
 			OPENFILENAME ofn; // common dialog box structure
 			char szFile[_MAX_PATH]; // buffer for file name
 			char szPath[_MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
 			szPath[0]='\0';
-			CString str1(filename.c_str());
-			int i = str1.ReverseFind('\\')+1;
-			CString str2 = str1.Mid(i);
-			std::strcpy(szFile,str2);
-			std::strcpy(szPath,str1);
-			szPath[i]=0;
+			if(filename.empty()) {
+				std::strcpy(szPath,Global::psycleconf().GetSkinDir().c_str());
+			}
+			else{
+				CString str1(filename.c_str());
+				int i = str1.ReverseFind('\\')+1;
+				CString str2 = str1.Mid(i);
+				std::strcpy(szFile,str2);
+				std::strcpy(szPath,str1);
+				szPath[i]=0;
+			}
 			// Initialize OPENFILENAME
 			::ZeroMemory(&ofn, sizeof(OPENFILENAME));
 			ofn.lStructSize = sizeof(OPENFILENAME);
@@ -732,11 +763,10 @@ namespace psycle { namespace host {
 			if(GetOpenFileName(&ofn)==TRUE)
 			{
 				filename = szFile;
-				enabled = true;
 			}
 			else
 			{
-				macConfig.bBmpBkg = false;
+				filename = "";
 			}
 		}
 	}   // namespace

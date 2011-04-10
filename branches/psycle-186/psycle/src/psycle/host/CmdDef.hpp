@@ -317,7 +317,7 @@ namespace psycle
 				case cdefKeyF_2: return "Key (Oct.2) F";
 				case cdefKeyFS2: return "Key (Oct.2) F#";
 				case cdefKeyG_2: return "Key (Oct.2) G";
-				case cdefKeyGS2: return "Key (Oct.2)-G#";
+				case cdefKeyGS2: return "Key (Oct.2) G#";
 				case cdefKeyA_2: return "Key (Oct.2)-A";
 				case cdefKeyAS2: return "Key (Oct.2)-A#";
 				case cdefKeyB_2: return "Key (Oct.2)-B";
@@ -329,7 +329,7 @@ namespace psycle
 				case cdefKeyF_3: return "Key (Oct.3) F";
 				case cdefKeyFS3: return "Key (Oct.3) F#";
 				case cdefKeyG_3: return "Key (Oct.3) G";
-				case cdefKeyGS3: return "Key (Oct.3)-G#";
+				case cdefKeyGS3: return "Key (Oct.3) G#";
 				case cdefKeyA_3: return "Key (Oct.3)-A";
 				case cdefKeyAS3: return "Key (Oct.3)-A#";
 				case cdefKeyB_3: return "Key (Oct.3)-B";

@@ -203,7 +203,7 @@ namespace psycle
 				public:
 					virtual int  GetNumCols   () { return GetInfo()->numCols; }
 					virtual int  GetNumParams () { return GetInfo()->numParameters; }
-					virtual int GetParamType(int numparam) { return GetInfo()->Flags; }
+					virtual int GetParamType(int numparam);
 					virtual void GetParamName (int numparam, char * name);
 					virtual void GetParamRange(int numparam, int & minval,int & maxval);
 					virtual int  GetParamValue(int numparam);

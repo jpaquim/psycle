@@ -2,7 +2,7 @@
 ///\brief implementation file for psycle::host::CNativeGui.
 
 #include "NativeGui.hpp"
-
+#include "NativeGraphics.hpp"
 #include "Machine.hpp"
 #include "Plugin.hpp" // For default parameter value.
 
@@ -15,199 +15,9 @@
 namespace psycle { namespace host {
 
 	extern CPsycleApp theApp;
+		
+	PsycleConfig::MachineParam* CNativeGui::uiSetting;
 
-	PsycleConfig::MachineParam* CNativeGui::uiSetting = NULL;
-
-	int CNativeGui::InfoLabel::xoffset(3);
-	int CNativeGui::GraphSlider::xoffset(6);
-
-	//////////////////////////////////////////////////////////////////////////
-	// Knob class
-	void CNativeGui::Knob::Draw(CDC& dc, CDC& knobDC, int x_knob,int y_knob,float value)
-	{
-		const int numFrames = CNativeGui::uiSetting->dialframes;
-		const int width = CNativeGui::uiSetting->dialwidth;
-		const int height = CNativeGui::uiSetting->dialheight;
-		const COLORREF titleColor = CNativeGui::uiSetting->titleColor;
-
-		int pixel = numFrames*value;
-		if (pixel >= numFrames) pixel=numFrames-1;
-		pixel*=width;
-		dc.BitBlt(x_knob, y_knob, width, height, &knobDC, pixel, 0, SRCCOPY);
-		dc.Draw3dRect(x_knob, y_knob+height-1, width, 1, titleColor, titleColor);
-	}
-	bool  CNativeGui::Knob::LButtonDown( UINT nFlags, int x,int y)
-	{
-		if ( x< CNativeGui::uiSetting->dialwidth
-			&& y < CNativeGui::uiSetting->dialheight) return true;
-		return false;
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	// InfoLabel class
-	void CNativeGui::InfoLabel::Draw(CDC& dc, int x, int y, int width, const char *parName,const char *parValue)
-	{
-		const int height = CNativeGui::uiSetting->dialheight;
-		const COLORREF titleColor = CNativeGui::uiSetting->titleColor;
-
-		const int half = height/2;
-		dc.Draw3dRect(x,y-1,width,height+1,titleColor,titleColor);
-//		dc.FillSolidRect(x, y, width-1, half,topColor);
-//		dc.FillSolidRect(x, y+half, width-1, half-1,bottomColor);
-
-		dc.SetBkColor(CNativeGui::uiSetting->topColor);
-		dc.SetTextColor(CNativeGui::uiSetting->fontTopColor);
-		dc.ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName), 0);
-	
-		DrawValue(dc,x,y,width,parValue);
-	}
-	void CNativeGui::InfoLabel::DrawValue(CDC& dc, int x, int y, int width, const char *parValue)
-	{
-		const int height = CNativeGui::uiSetting->dialheight;
-		const int half = height/2;
-		dc.SetBkColor(CNativeGui::uiSetting->bottomColor);
-		dc.SetTextColor(CNativeGui::uiSetting->fontBottomColor);
-		dc.ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	// HLightInfoLabel class
-	void CNativeGui::InfoLabel::DrawHLight(CDC& dc, int x, int y, int width, const char *parName,const char *parValue)
-	{
-		const int height = CNativeGui::uiSetting->dialheight;
-
-		const int half = height/2;
-		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
-//		dc.FillSolidRect(x, y, mywidth, half,titleColor);
-//		dc.FillSolidRect(x, y+half, mywidth, half,bottomColor);
-
-		dc.SetBkColor(CNativeGui::uiSetting->titleColor);
-		dc.SetTextColor(CNativeGui::uiSetting->fonttitleColor);
-		CFont *oldfont =dc.SelectObject(&CNativeGui::uiSetting->font_bold);
-		dc.ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
-		dc.SelectObject(oldfont);
-
-		DrawHLightValue(dc,x,y,width,parValue);
-		dc.Draw3dRect(x-1,y-1,width+ CNativeGui::uiSetting->dialwidth+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
-	}
-	void CNativeGui::InfoLabel::DrawHLightB(CDC& dc,int x, int y,int width,const char *parName,const char *parValue)
-	{
-		const int height = CNativeGui::uiSetting->dialheight;
-
-		const int half = height/2;
-		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
-		//		dc.FillSolidRect(x, y, mywidth, half,titleColor);
-		//		dc.FillSolidRect(x, y+half, mywidth, half,bottomColor);
-
-		dc.SetBkColor(CNativeGui::uiSetting->hTopColor);
-		dc.SetTextColor(CNativeGui::uiSetting->fonthBottomColor);
-		CFont *oldfont =dc.SelectObject(&CNativeGui::uiSetting->font_bold);
-		dc.ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
-		dc.SelectObject(oldfont);
-
-		DrawHLightValue(dc,x,y,width,parValue);
-		dc.Draw3dRect(x-1,y-1,width+ CNativeGui::uiSetting->dialwidth+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
-	}
-	void CNativeGui::InfoLabel::DrawHLightValue(CDC& dc, int x, int y, int width,const char *parValue)
-	{
-		const int height = CNativeGui::uiSetting->dialheight;
-		const int half = height/2;
-		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
-		dc.SetBkColor(CNativeGui::uiSetting->bottomColor);
-		dc.SetTextColor(CNativeGui::uiSetting->fontBottomColor);
-		dc.ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
-	}
-	void CNativeGui::InfoLabel::DrawHeader(CDC& dc, int x, int y, int width,const char *parName)
-	{
-		const int height = CNativeGui::uiSetting->dialheight;
-		const int half = height/2;
-		const int quarter = height/4;
-		const int mywidth = width + CNativeGui::uiSetting->dialwidth;
-
-		dc.FillSolidRect(x, y, mywidth, half,CNativeGui::uiSetting->topColor);
-		dc.FillSolidRect(x, y+half, mywidth, half,CNativeGui::uiSetting->bottomColor);
-
-		dc.SetBkColor(CNativeGui::uiSetting->titleColor);
-		dc.SetTextColor(CNativeGui::uiSetting->fonttitleColor);
-
-		CFont *oldfont = dc.SelectObject(&CNativeGui::uiSetting->font_bold);
-		dc.ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
-		dc.SelectObject(&CNativeGui::uiSetting->font);
-		dc.Draw3dRect(x-1,y-1,width+CNativeGui::uiSetting->dialwidth+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
-		dc.SelectObject(oldfont);
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	// GraphSlider class
-	void CNativeGui::GraphSlider::Draw(CDC& dc, CDC& backDC, CDC& knobDC, int x, int y,float value)
-	{
-		int width = CNativeGui::uiSetting->sliderwidth;
-		int height = CNativeGui::uiSetting->sliderheight;
-		dc.BitBlt(x,y,width,height,&backDC,0,0,SRCCOPY);
-//		dc.FillSolidRect(x+width, y, InfoLabel::width, height-InfoLabel::height,topColor);
-		dc.Draw3dRect(x-1,y-1,width+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
-		DrawKnob(dc,knobDC,x,y,value);
-	}
-	void CNativeGui::GraphSlider::DrawKnob(CDC& dc, CDC& knobDC, int x, int y, float value)
-	{
-		int height = CNativeGui::uiSetting->sliderheight;
-		int knobheight = CNativeGui::uiSetting->sliderknobheight;
-		int knobwidth = CNativeGui::uiSetting->sliderknobwidth;
-		int ypos(0);
-		if ( value < 0.375 ) ypos = (height-knobheight);
-		else if ( value < 0.999) ypos = (((value-0.375f)*1.6f)-1.0f)*-1.0f*(height-knobheight);
-		dc.BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
-	}
-	bool  CNativeGui::GraphSlider::LButtonDown( UINT nFlags,int x,int y)
-	{
-		if ( x< CNativeGui::uiSetting->sliderwidth
-			&& y < CNativeGui::uiSetting->sliderheight) return true;
-		return false;
-	}
-
-	//////////////////////////////////////////////////////////////////////////
-	// SwitchButton class
-	void CNativeGui::SwitchButton::Draw(CDC& dc, CDC& switchDC, int x, int y)
-	{
-		int height = CNativeGui::uiSetting->switchheight;
-		int width = CNativeGui::uiSetting->switchwidth;
-		dc.BitBlt(x,y,width,height,&switchDC,0,0,SRCCOPY);
-		dc.Draw3dRect(x-1,y-1,width+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
-	}
-
-	void CNativeGui::CheckedButton::Draw(CDC& dc, int x, int y,const char* text,bool checked)
-	{
-		int height = CNativeGui::uiSetting->switchheight;
-		int width = CNativeGui::uiSetting->switchwidth;
-		if ( checked )
-		{
-			dc.SetBkColor(CNativeGui::uiSetting->hBottomColor);
-			dc.SetTextColor(CNativeGui::uiSetting->fonthBottomColor);
-		}
-		else{
-			dc.SetBkColor(CNativeGui::uiSetting->topColor);
-			dc.SetTextColor(CNativeGui::uiSetting->fontTopColor);
-		}
-		CFont *oldfont =dc.SelectObject(&CNativeGui::uiSetting->font_bold);
-		dc.ExtTextOut(x+4, y+1, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+height-1), CString(text), 0);
-		dc.SelectObject(oldfont);
-		dc.Draw3dRect(x-1,y-1,width+1,height+1,CNativeGui::uiSetting->titleColor,CNativeGui::uiSetting->titleColor);
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////
-	// Vumeter class
-	void CNativeGui::VuMeter::Draw(CDC& dc, CDC& vuOn,CDC& vuOff, int x, int y, float value)
-	{
-		int height = CNativeGui::uiSetting->switchheight;
-		int width = CNativeGui::uiSetting->switchwidth;
-		int ypos = (1-value)*height;
-		dc.BitBlt(x+7,y+35,width,ypos,&vuOff,0,0,SRCCOPY);
-		dc.BitBlt(x+7,y+35+ypos,width,height,&vuOn,0,ypos,SRCCOPY);
-	}
-
-	/////////////////////////////////////////////////////////
-	/////////////////////////////////////////////////////////
 		BEGIN_MESSAGE_MAP(CNativeGui, CWnd)
 			ON_WM_CREATE()
 			ON_WM_SETFOCUS()
@@ -220,8 +30,9 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 
-		CNativeGui::CNativeGui(Machine* effect, CChildView* view)
-		:ncol(0)
+		CNativeGui::CNativeGui(CFrameMachine* frame,Machine* effect, CChildView* view)
+		:CBaseParamView(frame)
+		,ncol(0)
 		,numParameters(0)
 		,parspercol(0)
 		,colwidth(DEFAULT_ROWWIDTH)
@@ -269,10 +80,11 @@ namespace psycle { namespace host {
 
 		void CNativeGui::OnPaint() 
 		{
-			int const K_XSIZE2=uiSetting->dialwidth+8;
-
-			CRect rect;
-			GetClientRect(&rect);
+			int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
+			int const K_XSIZE2=uiSetting->dialwidth;
+			int const infowidth=colwidth-uiSetting->dialwidth;
+			const COLORREF titleColor = uiSetting->titleColor;
 
 			CPaintDC dc(this);
 			CFont* oldfont=dc.SelectObject(&uiSetting->font);
@@ -291,8 +103,7 @@ namespace psycle { namespace host {
 			{
 				_pMachine->GetParamName(c,parName);
 				int type = _pMachine->GetParamType(c);
-
-				if(type == 2) // STATUS
+				if(type == 2) // STATE
 				{
 					char buffer[128];
 					int min_v, max_v;
@@ -312,29 +123,30 @@ namespace psycle { namespace host {
 					Knob::Draw(dc,knobDC,x_knob,y_knob,rel_v/amp_v);
 					if ( istweak && c == tweakpar)
 					{
-						InfoLabel::DrawHLight(dc,K_XSIZE2+x_knob,y_knob,colwidth,parName,buffer);
+						InfoLabel::DrawHLight(dc,K_XSIZE2+x_knob,y_knob,infowidth,parName,buffer);
 					}
 					else
 					{
-						InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,colwidth,parName,buffer);
+						InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,infowidth,parName,buffer);
 					}
 				}
 				else if(type == 1) // HEADER
 				{
-					InfoLabel::DrawHeader(dc,K_XSIZE2+x_knob,y_knob,colwidth,parName);
+					InfoLabel::DrawHeader(dc,x_knob,y_knob,colwidth,parName);
 				}
 				else
 				{
-					InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,colwidth,"","");
+					InfoLabel::Draw(dc,x_knob,y_knob,colwidth,"","");
 				}
-				y_knob += uiSetting->dialheight;
+				dc.Draw3dRect(x_knob-1,y_knob-1,colwidth+2,uiSetting->dialheight+2,titleColor,titleColor);
+				y_knob += realheight;
 
 				++knob_c;
 
 				if (knob_c >= parspercol)
 				{
 					knob_c = 0;
-					x_knob += colwidth;
+					x_knob += realwidth;
 					y_knob = 0;
 				}
 			}
@@ -344,8 +156,9 @@ namespace psycle { namespace host {
 			{
 				for (int c=numParameters; c<exess; c++)
 				{
-					InfoLabel::Draw(dc,K_XSIZE2+x_knob,y_knob,colwidth,"","");
-					y_knob += uiSetting->dialheight;
+					InfoLabel::Draw(dc,x_knob,y_knob,colwidth,"","");
+					dc.Draw3dRect(x_knob-1,y_knob-1,colwidth+2,uiSetting->dialheight+2,titleColor,titleColor);
+					y_knob += realheight;
 				}
 			}
 			knobDC.SelectObject(oldKnobbmp);
@@ -510,15 +323,19 @@ namespace psycle { namespace host {
 
 		int CNativeGui::ConvertXYtoParam(int x, int y)
 		{
-			if ((y/uiSetting->dialheight) >= parspercol ) return -1; //this if for VST's that use the native gui.
-			return (y/uiSetting->dialheight) + ((x/colwidth)*colwidth);
+			int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
+			if (y/realheight >= parspercol ) return -1; //this if for VST's that use the native gui.
+			return (y/realheight) + ((x/realwidth)*parspercol);
 		}
 
 		bool CNativeGui::GetViewSize(CRect& rect)
 		{
+			int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
 			rect.left= rect.top = 0;
-			rect.right = ncol * colwidth;
-			rect.bottom = parspercol * uiSetting->dialheight;
+			rect.right = ncol * realwidth;
+			rect.bottom = parspercol * realheight;
 			return true;
 		}
 

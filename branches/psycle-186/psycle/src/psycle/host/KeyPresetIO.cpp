@@ -27,12 +27,14 @@ namespace psycle { namespace host {
 				} 
 				if(buf[0] == '[')
 				{
-					if(strcmp(buf,"[Psycle setMap Presets v1.0]"))
+					const char* test = "[Psycle Keymap Presets v1.0]\n";
+					if(strcmp(buf,test))
 					{
-						::MessageBox(0, "This loader only supports Psycle setMap format 1.0",
+						::MessageBox(0, "This loader only supports Psycle Keymap format 1.0",
 							"File Open Error", MB_ICONERROR | MB_OK);
 						return;
 					}
+					continue;
 				}
 				//locate = sign
 				int length = std::strlen(buf);
@@ -45,7 +47,8 @@ namespace psycle { namespace host {
 
 					//Get the mod and key out of the first part
 					pos = std::strspn(buf,"Key[");
-					length = std::strlen(buf);
+					//minus 1 because of the \n
+					length = std::strlen(buf)-1;
 					if(pos + 6 < length)
 					{
 						int mod = buf[pos+4] - '0';
@@ -72,15 +75,15 @@ namespace psycle { namespace host {
 					"File Save Error", MB_ICONERROR | MB_OK);
 				return;
 			}
-			std::fprintf(hfile,"[Psycle setMap Presets v1.0]\n\n");
+			std::fprintf(hfile,"[Psycle Keymap Presets v1.0]\n\n");
 
 			std::map<std::pair<int,int>,CmdDef>::const_iterator it;
 			for(it = settings.keyMap.begin(); it != settings.keyMap.end(); it++)
 			{
 				if (it->second.IsValid()) {
 					std::fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",
-						it->first.second,
 						it->first.first,
+						it->first.second,
 						it->second.GetID(),
 						it->second.GetName());
 				}
@@ -121,12 +124,13 @@ namespace psycle { namespace host {
 			key = "bShiftArrowsDoSelect";
 			settings.bShiftArrowsDoSelect = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
 			
-			if (data != "N/A")  // 1.7.6 and older had N/A in this file. No longer supported.
+			if (data != "N/A")  // 1.7.6 and older had N/A in this field. No longer supported.
 			{
 				CString cmdDefn;
 				int cmddata;
 				// restore key data
 				sect = "Keys2"; // 1.8 onward
+				settings.keyMap.clear();
 				std::map<CmdSet,std::pair<int,int>>::const_iterator it;
 				for(it = settings.setMap.begin(); it != settings.setMap.end(); it++)
 				{
@@ -134,7 +138,7 @@ namespace psycle { namespace host {
 					if(cmd.IsValid())
 					{
 						key.Format("n%03d",it->first);
-						cmddata= GetPrivateProfileInt(sect,key,cdefNull,sDefaultCfgName);
+						cmddata= GetPrivateProfileInt(sect,key,0,sDefaultCfgName);
 						settings.SetCmd(cmd.GetID(),cmddata>>8,cmddata&0xFF);
 					}
 				}

@@ -37,7 +37,7 @@ namespace host {
 			returnmax=return1+MAX_CONNECTIONS
 		};
 		public:
-			MixerFrameView(Machine* effect, CChildView* view);
+			MixerFrameView(CFrameMachine* frame,Machine* effect, CChildView* view);
 			virtual ~MixerFrameView();
 		// Operations
 			virtual bool GetViewSize(CRect& rect);
@@ -48,7 +48,7 @@ namespace host {
 			inline Machine& machine(){ return *_pMachine; }
 			virtual int ConvertXYtoParam(int x, int y);
 			bool UpdateSendsandChans();
-			void GenerateBackground(CDC &bufferDC, CDC &SliderbackDC, CDC& SliderKnobDC, CDC &VuOnDC, CDC& VuOffDC);
+			void GenerateBackground(CDC &bufferDC, CDC &SliderbackDC, CDC& VuOffDC);
 			int GetColumn(int x,int &xoffset);
 			int GetRow(int x,int y,int &yoffset);
 			int GetParamFromPos(int col,int row);
@@ -63,7 +63,7 @@ namespace host {
 			// graphics
 			bool updateBuffer;
 
-			CBitmap *bmpDC;
+			CBitmap *backgroundBmp;
 
 			std::string sendNames[MAX_CONNECTIONS];
 			// used to know if they have changed since last paint.
