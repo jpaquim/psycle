@@ -13,7 +13,8 @@
 				audio.mozSetup(1, sampleRate);
 
 				var currentWritePosition = 0;
-				var prebufferSize = sampleRate / 2; // buffer 500ms
+				var prebufferSize = Math.ceil(0.5 * sampleRate);
+				var buffer = new Float32Array(prebufferSize);
 				var tail = null, tailPosition;
 
 				// The function called with regular interval to populate 
@@ -36,16 +37,15 @@
 
 						// Check if we need add some data to the audio output.
 						var currentPosition = audio.mozCurrentSampleOffset();
-						var available = currentPosition + prebufferSize - currentWritePosition;
+						var available = currentPosition - currentWritePosition + buffer.length;
 						if(available > 0) {
 							// Request some sound data from the callback function.
-							var soundData = new Float32Array(available);
-							readFn(soundData);
+							readFn(buffer);
 							// Writting the data.
-							written = audio.mozWriteAudio(soundData);
-							if(written < soundData.length) {
+							written = audio.mozWriteAudio(buffer);
+							if(written < buffer.length) {
 								// Not all the data was written, saving the tail.
-								tail = soundData;
+								tail = buffer;
 								tailPosition = written;
 							}
 							currentWritePosition += written;
@@ -57,38 +57,46 @@
 
 			// Control and generate the sound.
 
-			var frequency = 0, currentSoundSample;
+			var freq = 0, timeInSamples;
 			var sampleRate = 44100;
 
 			function requestSoundData(soundData) {
-				if(!frequency) { 
-					return; // no sound selected
+				if(!freq) { 
+					// no sound selected
+					for(var i = 0, size = soundData.length; i < size; ++i) {
+						soundData[i] = 0;
+					}
+					return;
 				}
 
-				var k = 2 * Math.PI * frequency / sampleRate;
+				var w = 2 * Math.PI * freq / sampleRate;
 				for(var i = 0, size = soundData.length; i < size; ++i) {
-					soundData[i] = Math.sin(k * currentSoundSample++);
+					soundData[i] = Math.sin(w * timeInSamples++);
 				}
 			}
 
 			var audioDestination = new AudioDataDestination(sampleRate, requestSoundData);
 
 			function start() {
-				currentSoundSample = 0;
-				frequency = parseFloat(document.getElementById("freq").value);
+				timeInSamples = 0;
+				freq = parseFloat(document.getElementById("freq").value);
 			}
 
 			function stop() {
-				frequency = 0;
+				freq = 0;
+			}
+			
+			function main(window) {
+				start();
 			}
 			
 			// ]]>
 		</script>
 	</head>
 	<body onload='main(this);'>
-		<input type='text' size='4' id='freq' value='440'><label for='hz'>Hz</label></input>
-		<button onclick='start();'>play</button>
-		<button onclick='stop();'>stop</button>
+		<input type='text' size='6' id='freq' value='220' onchange='start();'><label for='hz'>Hz</label></input>
+		<button onclick='start();'>Play</button>
+		<button onclick='stop();'>Stop</button>
 	</body>
 </html>
 
