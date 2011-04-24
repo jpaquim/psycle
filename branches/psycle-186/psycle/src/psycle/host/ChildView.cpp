@@ -75,6 +75,7 @@ namespace psycle { namespace host {
 			,wireSY(0)
 			,wireDX(0)
 			,wireDY(0)
+			,allowcontextmenu(false)
 			,maxt(1)
 			,maxl(1)
 			,tOff(0)
@@ -88,12 +89,6 @@ namespace psycle { namespace host {
 			,blockNLines(0)
 			,mcd_x(0)
 			,mcd_y(0)
-			,pUndoList(NULL)
-			,pRedoList(NULL)
-			,UndoCounter(0)
-			,UndoSaved(0)
-			,UndoMacCounter(0)
-			,UndoMacSaved(0)
 			,patBufferLines(0)
 			,patBufferCopy(false)
 		{
@@ -127,8 +122,6 @@ namespace psycle { namespace host {
 		CChildView::~CChildView()
 		{
 			Global::pInputHandler->SetChildView(NULL);
-			KillRedo();
-			KillUndo();
 
 			if ( bmpDC != NULL )
 			{
@@ -141,51 +134,90 @@ namespace psycle { namespace host {
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
+			ON_WM_TIMER()
 			ON_WM_PAINT()
-			ON_WM_LBUTTONDOWN()
-			ON_WM_RBUTTONDOWN()
-			ON_WM_RBUTTONUP()
-			ON_WM_LBUTTONUP()
-			ON_WM_MOUSEMOVE()
-			ON_WM_LBUTTONDBLCLK()
-			ON_COMMAND(ID_CPUPERFORMANCE, OnHelpPsycleenviromentinfo)
-			ON_COMMAND(ID_MIDI_MONITOR, OnMidiMonitorDlg)
 			ON_WM_DESTROY()
-			ON_COMMAND(ID_MACHINEVIEW, OnMachineview)
-			ON_COMMAND(ID_PATTERNVIEW, OnPatternView)	
+			ON_WM_SIZE()
+			ON_WM_CONTEXTMENU()
+			ON_WM_HSCROLL()
+			ON_WM_VSCROLL()
 			ON_WM_KEYDOWN()
 			ON_WM_KEYUP()
-			ON_COMMAND(ID_BARPLAY, OnBarplay)
-			ON_COMMAND(ID_BARPLAYFROMSTART, OnBarplayFromStart)
-			ON_COMMAND(ID_BARREC, OnBarrec)
-			ON_COMMAND(ID_BARSTOP, OnBarstop)
-			ON_COMMAND(ID_RECORDB, OnRecordWav)
-			ON_WM_TIMER()
-			ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
+			ON_WM_LBUTTONDOWN()
+			ON_WM_RBUTTONDOWN()
+			ON_WM_LBUTTONUP()
+			ON_WM_RBUTTONUP()
+			ON_WM_LBUTTONDBLCLK()
+			ON_WM_MBUTTONDOWN()
+			ON_WM_MOUSEMOVE()
+			ON_WM_MOUSEWHEEL()
+//Main menu and toolbar (A few entries are in MainFrm)
 			ON_COMMAND(ID_FILE_NEW, OnFileNew)
-			ON_COMMAND_EX(ID_EXPORT, OnExport)
+			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
+			ON_COMMAND(ID_FILE_IMPORT_XMFILE, OnFileImportModulefile)
 			ON_COMMAND_EX(ID_FILE_SAVE, OnFileSave)
 			ON_COMMAND_EX(ID_FILE_SAVE_AS, OnFileSaveAs)
-			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
-			ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
-			ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
-			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
-			ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
-			ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
-			ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
-			ON_UPDATE_COMMAND_UI(ID_BARPLAYFROMSTART, OnUpdateBarplayFromStart)
-			ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
+			ON_COMMAND_EX(ID_EXPORT, OnExport)
+			ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
 			ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
-			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
-			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
+			ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
+			ON_COMMAND(ID_FILE_RECENT_01, OnFileRecent_01)
+			ON_COMMAND(ID_FILE_RECENT_02, OnFileRecent_02)
+			ON_COMMAND(ID_FILE_RECENT_03, OnFileRecent_03)
+			ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
+			ON_COMMAND(ID_RECORDB, OnRecordWav)
+			ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
+			ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
+			ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
+			ON_COMMAND(ID_EDIT_CUT, patCut)
+			ON_COMMAND(ID_EDIT_COPY, patCopy)
+			ON_COMMAND(ID_EDIT_PASTE, patPaste)
+			ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
+			ON_COMMAND(ID_EDIT_DELETE, patDelete)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateUndo)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateRedo)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopy)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopy)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternPaste)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
+			ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
+			ON_COMMAND(ID_BARREC, OnBarrec)
+			ON_COMMAND(ID_BARPLAYFROMSTART, OnBarplayFromStart)
+			ON_COMMAND(ID_BARPLAY, OnBarplay)
 			ON_COMMAND(ID_BUTTONPLAYSEQBLOCK, OnButtonplayseqblock)
+			ON_COMMAND(ID_BARSTOP, OnBarstop)
+			ON_COMMAND(ID_AUTOSTOP, OnAutostop)
+			ON_COMMAND(ID_CONFIGURATION_LOOPPLAYBACK, OnConfigurationLoopplayback)
+			ON_UPDATE_COMMAND_UI(ID_BARREC, OnUpdateBarrec)
+			ON_UPDATE_COMMAND_UI(ID_BARPLAYFROMSTART, OnUpdateBarplayFromStart)
+			ON_UPDATE_COMMAND_UI(ID_BARPLAY, OnUpdateBarplay)
 			ON_UPDATE_COMMAND_UI(ID_BUTTONPLAYSEQBLOCK, OnUpdateButtonplayseqblock)
+			ON_UPDATE_COMMAND_UI(ID_AUTOSTOP, OnUpdateAutostop)
+			ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_LOOPPLAYBACK, OnUpdateConfigurationLoopplayback)
+			ON_COMMAND(ID_MACHINEVIEW, OnMachineview)
+			ON_COMMAND(ID_PATTERNVIEW, OnPatternView)	
+			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
+			//Show Gear Rack is the command IDC_GEAR_RACK of the machine bar (in mainfrm)
+			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
+			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
+			//Show Wave editor is the command IDC_WAVEBUT of the machine bar (in mainfrm)
+			ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
+			ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
+			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
+			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
+			ON_COMMAND(ID_CPUPERFORMANCE, OnHelpPsycleenviromentinfo)
+			ON_COMMAND(ID_MIDI_MONITOR, OnMidiMonitorDlg)
+			ON_COMMAND(ID_HELP_README, OnHelpReadme)
+			ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
+			ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
+			ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
+			ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
+//Pattern Popup
 			ON_COMMAND(ID_POP_CUT, OnPopCut)
-			ON_UPDATE_COMMAND_UI(ID_POP_CUT, OnUpdateCutCopy)
 			ON_COMMAND(ID_POP_COPY, OnPopCopy)
 			ON_COMMAND(ID_POP_PASTE, OnPopPaste)
-			ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePaste)
 			ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
+			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
 			ON_COMMAND(ID_POP_DELETE, OnPopDelete)
 			ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
 			ON_COMMAND(ID_POP_INTERPOLATE_CURVE, OnPopInterpolateCurve)
@@ -195,39 +227,15 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POP_TRANSPOSE12, OnPopTranspose12)
 			ON_COMMAND(ID_POP_TRANSPOSE_1, OnPopTranspose_1)
 			ON_COMMAND(ID_POP_TRANSPOSE_12, OnPopTranspose_12)
-			ON_COMMAND(ID_AUTOSTOP, OnAutostop)
-			ON_UPDATE_COMMAND_UI(ID_AUTOSTOP, OnUpdateAutostop)
-			ON_COMMAND(ID_POP_TRANSFORMPATTERN, OnPopTransformpattern)
-			ON_COMMAND(ID_POP_PATTENPROPERTIES, OnPopPattenproperties)
 			ON_COMMAND(ID_POP_BLOCK_SWINGFILL, OnPopBlockSwingfill)
 			ON_COMMAND(ID_POP_TRACK_SWINGFILL, OnPopTrackSwingfill)
-			ON_WM_SIZE()
-			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
-			ON_WM_CONTEXTMENU()
-			ON_WM_HSCROLL()
-			ON_WM_VSCROLL()
-			ON_COMMAND(ID_FILE_IMPORT_XMFILE, OnFileImportModulefile)
-			ON_COMMAND(ID_FILE_RECENT_01, OnFileRecent_01)
-			ON_COMMAND(ID_FILE_RECENT_02, OnFileRecent_02)
-			ON_COMMAND(ID_FILE_RECENT_03, OnFileRecent_03)
-			ON_COMMAND(ID_FILE_RECENT_04, OnFileRecent_04)
-			ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
-			ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
-			ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateUndo)
-			ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, OnUpdateRedo)
-			ON_WM_MOUSEWHEEL()
-			ON_WM_MBUTTONDOWN()
-			ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdatePatternCutCopy)
-			ON_UPDATE_COMMAND_UI(ID_EDIT_PASTE, OnUpdatePatternPaste)
-			ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
-			ON_COMMAND(ID_HELP_KEYBTXT, OnHelpKeybtxt)
-			ON_COMMAND(ID_HELP_README, OnHelpReadme)
-			ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
-			ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
-			ON_COMMAND(ID_CONFIGURATION_LOOPPLAYBACK, OnConfigurationLoopplayback)
-			ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_LOOPPLAYBACK, OnUpdateConfigurationLoopplayback)
+			ON_COMMAND(ID_POP_TRANSFORMPATTERN, OnPopTransformpattern)
+			ON_COMMAND(ID_POP_PATTENPROPERTIES, OnPopPattenproperties)
+			ON_UPDATE_COMMAND_UI(ID_POP_CUT, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
+			ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePaste)
+			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
 			ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE_CURVE, OnUpdateCutCopy)
@@ -238,19 +246,7 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_1, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_TRANSPOSE_12, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_BLOCK_SWINGFILL, OnUpdateCutCopy)
-			ON_COMMAND(ID_EDIT_CUT, patCut)
-			ON_COMMAND(ID_EDIT_COPY, patCopy)
-			ON_COMMAND(ID_EDIT_PASTE, patPaste)
-			ON_COMMAND(ID_EDIT_MIXPASTE, patMixPaste)
-			ON_UPDATE_COMMAND_UI(ID_EDIT_COPY, OnUpdatePatternCutCopy)
-			ON_UPDATE_COMMAND_UI(ID_EDIT_MIXPASTE, OnUpdatePatternPaste)
-			ON_COMMAND(ID_EDIT_DELETE, patDelete)
-			ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdatePatternCutCopy)
-			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
-			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
-			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
-			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
-			END_MESSAGE_MAP()
+		END_MESSAGE_MAP()
 
 		BOOL CChildView::PreCreateWindow(CREATESTRUCT& cs) 
 		{
@@ -264,8 +260,8 @@ namespace psycle { namespace host {
 					CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
 					//::LoadCursor(NULL, IDC_ARROW), HBRUSH(COLOR_WINDOW+1), NULL);
 					::LoadCursor(NULL, IDC_ARROW),
-					0,
-					0
+					(HBRUSH)GetStockObject( HOLLOW_BRUSH ),
+					NULL
 				);
 			return TRUE;
 		}
@@ -391,7 +387,7 @@ namespace psycle { namespace host {
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
 				if(!file.Create(filepath.GetBuffer(1), true)) return;
-				CProgressDialog progress;
+				CProgressDialog progress(NULL,false);
 				_pSong->Save(&file,progress, true);
 				if (!file.Close())
 				{
@@ -573,8 +569,6 @@ namespace psycle { namespace host {
 
 			CW = cx;
 			CH = cy;
-			_pSong->viewSize.x=cx; // Hack to move machines boxes inside of the visible area.
-			_pSong->viewSize.y=cy;
 			
 			if ( bmpDC != NULL && Global::psycleconf().useDoubleBuffer ) // remove old buffer to force recreating it with new size
 			{
@@ -667,7 +661,6 @@ namespace psycle { namespace host {
 						MessageBox("Error creating file!", "Error!", MB_OK);
 						return FALSE;
 					}
-					progress.Create();
 					progress.SetWindowText("Saving...");
 					progress.ShowWindow(SW_SHOW);
 					if (!_pSong->Save(&file, progress))
@@ -678,18 +671,9 @@ namespace psycle { namespace host {
 					else 
 					{
 						_pSong->_saved=true;
-						if (pUndoList)
-						{
-							UndoSaved = pUndoList->counter;
-						}
-						else
-						{
-							UndoSaved = 0;
-						}
-						UndoMacSaved = UndoMacCounter;
-						SetTitleBarText();
+						Global::pInputHandler->SafePoint();
 					}
-					progress.OnCancel();
+					progress.SendMessage(WM_CLOSE);
 					if (!file.Close())
 					{
 						std::ostringstream s;
@@ -777,7 +761,6 @@ namespace psycle { namespace host {
 						return FALSE;
 					}
 
-					progress.Create();
 					progress.SetWindowText("Saving...");
 					progress.ShowWindow(SW_SHOW);
 					if (!_pSong->Save(&file,progress))
@@ -791,18 +774,9 @@ namespace psycle { namespace host {
 						std::string recent = str.GetBuffer(1);
 						AppendToRecent(recent);
 						
-						if (pUndoList)
-						{
-							UndoSaved = pUndoList->counter;
-						}
-						else
-						{
-							UndoSaved = 0;
-						}
-						UndoMacSaved = UndoMacCounter;
-						SetTitleBarText();
+						Global::pInputHandler->SafePoint();
 					}
-					progress.OnCancel();
+					progress.SendMessage(WM_CLOSE);
 					if (!file.Close())
 					{
 						std::ostringstream s;
@@ -898,12 +872,14 @@ namespace psycle { namespace host {
 		{
 			if (CheckUnsavedSong("New Song"))
 			{
-				KillUndo();
-				KillRedo();
+				Global::pInputHandler->KillUndo();
+				Global::pInputHandler->KillRedo();
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
 
 				Global::_pSong->New();
+				Global::_pSong->_pMachine[MASTER_INDEX]->_x = (CW - Global::psycleconf().macView().MachineCoords.sMaster.width) / 2;
+				Global::_pSong->_pMachine[MASTER_INDEX]->_y = (CH - Global::psycleconf().macView().MachineCoords.sMaster.height) / 2;
 
 				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 				SetTitleBarText();
@@ -938,68 +914,46 @@ namespace psycle { namespace host {
 		//  <JosepMa> is this still the case? or what does "machine changes" mean?
 		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
-			BOOL bChecked = TRUE;
-			if (pUndoList)
+			if (Global::pInputHandler->IsModified()
+				&& Global::psycleconf().bFileSaveReminders)
 			{
-				if (UndoSaved != pUndoList->counter)
+				std::string filepath = Global::psycleconf().GetCurrentSongDir();
+				filepath += '\\';
+				filepath += Global::_pSong->fileName;
+				OldPsyFile file;
+				CProgressDialog progress;
+				std::ostringstream szText;
+				szText << "Save changes to \"" << Global::_pSong->fileName
+					<< "\"?";
+				int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
+				switch (result)
 				{
-					bChecked = FALSE;
-				}
-			}
-			else if (UndoMacSaved != UndoMacCounter)
-			{
-				bChecked = FALSE;
-			}
-			else
-			{
-				if (UndoSaved != 0)
-				{
-					bChecked = FALSE;
-				}
-			}
-			if (!bChecked)
-			{
-				if (Global::psycleconf().bFileSaveReminders)
-				{
-					std::string filepath = Global::psycleconf().GetCurrentSongDir();
-					filepath += '\\';
-					filepath += Global::_pSong->fileName;
-					OldPsyFile file;
-					CProgressDialog progress;
-					std::ostringstream szText;
-					szText << "Save changes to \"" << Global::_pSong->fileName
-						<< "\"?";
-					int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
-					switch (result)
+				case IDYES:
+					progress.SetWindowText("Saving...");
+					progress.ShowWindow(SW_SHOW);
+					if (!file.Create((char*)filepath.c_str(), true))
 					{
-					case IDYES:
-						progress.Create();
-						progress.SetWindowText("Saving...");
-						progress.ShowWindow(SW_SHOW);
-						if (!file.Create((char*)filepath.c_str(), true))
-						{
-							std::ostringstream szText;
-							szText << "Error writing to \"" << filepath << "\"!!!";
-							MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
-							return FALSE;
-						}
-						_pSong->Save(&file,progress);
-						progress.OnCancel();
-						if (!file.Close())
-						{
-							std::ostringstream s;
-							s << "Error writing to file '" << file.szName << "'" << std::endl;
-							MessageBox(s.str().c_str(),"File Error!!!",0);
-						}
-						return TRUE;
-						break;
-					case IDNO:
-						return TRUE;
-						break;
-					case IDCANCEL:
+						std::ostringstream szText;
+						szText << "Error writing to \"" << filepath << "\"!!!";
+						MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
 						return FALSE;
-						break;
 					}
+					_pSong->Save(&file,progress);
+					progress.SendMessage(WM_CLOSE);
+					if (!file.Close())
+					{
+						std::ostringstream s;
+						s << "Error writing to file '" << file.szName << "'" << std::endl;
+						MessageBox(s.str().c_str(),"File Error!!!",0);
+					}
+					return TRUE;
+					break;
+				case IDNO:
+					return TRUE;
+					break;
+				case IDCANCEL:
+					return FALSE;
+					break;
 				}
 			}
 			return TRUE;
@@ -1321,14 +1275,19 @@ namespace psycle { namespace host {
 
 			dlg.patLines= nlines;
 			strcpy(dlg.patName,name);
+			dlg.patIdx = patNum;
+			dlg.m_pSong = _pSong;
+			dlg.m_shownames = Global::psycleconf().patView().showTrackNames_?1:0;
+			dlg.m_independentnames = _pSong->shareTrackNames?0:1;
+
 			pParentMain->UpdateSequencer();
 			
 			if (dlg.DoModal() == IDOK)
 			{
 				if ( nlines != dlg.patLines )
 				{
-					AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 					_pSong->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
 					if ( strcmp(name,dlg.patName) != 0 )
 					{
@@ -1372,7 +1331,7 @@ namespace psycle { namespace host {
 				int fb,xs,ys;
 				if (mac < 0)
 				{
-					AddMacViewUndo();
+					Global::pInputHandler->AddMacViewUndo();
 					if (dlg.selectedMode == modegen) 
 					{
 						fb = Global::_pSong->GetFreeBus();
@@ -1390,31 +1349,17 @@ namespace psycle { namespace host {
 				{
 					if (mac >= MAX_BUSES && dlg.selectedMode != modegen)
 					{
-						AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords->sEffect.width;
 						ys = MachineCoords->sEffect.height;
-						// delete machine if it already exists
-						if (Global::_pSong->_pMachine[fb])
-						{
-							x = Global::_pSong->_pMachine[fb]->_x;
-							y = Global::_pSong->_pMachine[fb]->_y;
-							pParentMain->CloseMacGui(fb);
-						}
 					}
 					else if (mac < MAX_BUSES && dlg.selectedMode == modegen)
 					{
-						AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords->sGenerator.width;
 						ys = MachineCoords->sGenerator.height;
-						// delete machine if it already exists
-						if (Global::_pSong->_pMachine[fb])
-						{
-							x = Global::_pSong->_pMachine[fb]->_x;
-							y = Global::_pSong->_pMachine[fb]->_y;
-							pParentMain->CloseMacGui(fb);
-						}
 					}
 					else
 					{
@@ -1422,9 +1367,17 @@ namespace psycle { namespace host {
 						return;
 					}
 				}
-				// random position
-				if ((x < 0) || (y < 0))
+				// Get info of old machine and close any open gui.
+				if (Global::_pSong->_pMachine[fb])
 				{
+					x = Global::_pSong->_pMachine[fb]->_x;
+					y = Global::_pSong->_pMachine[fb]->_y;
+					CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+					pParentMain->CloseMacGui(fb);
+				}
+				else if ((x < 0) || (y < 0))
+				{
+					 // random position
 					bool bCovered = TRUE;
 					while (bCovered)
 					{
@@ -1592,7 +1545,7 @@ namespace psycle { namespace host {
 				unsigned char *base = _ppattern();
 				if (base)
 				{
-					AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
 					for (l=y;l<y+ny;l++)
 					{
 						int const displace=x*EVENT_SIZE+l*MULTIPLY;
@@ -1756,63 +1709,25 @@ namespace psycle { namespace host {
 
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
-			if(pUndoList) 
+			if(Global::pInputHandler->HasUndo(viewMode))
 			{
-				switch (pUndoList->type)
-				{
-				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
-					pCmdUI->SetText("Undo");
-					break;
-				default:
-					if(viewMode == view_modes::pattern)// && bEditMode)
-					{
-						pCmdUI->Enable(TRUE);
-						pCmdUI->SetText("Undo");
-					}
-					else
-					{
-						pCmdUI->Enable(FALSE);
-						pCmdUI->SetText("Undo in Pattern View");
-					}
-					break;
-				}
+				pCmdUI->Enable(TRUE);
 			}
 			else
 			{
-				pCmdUI->SetText("Undo");
 				pCmdUI->Enable(FALSE);
 			}
 		}
 
 		void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
-			if(pRedoList) 
+			if(Global::pInputHandler->HasRedo(viewMode))
 			{
-				switch (pRedoList->type)
-				{
-				case UNDO_SEQUENCE:
-					pCmdUI->Enable(TRUE);
-					pCmdUI->SetText("Redo");
-					break;
-				default:
-					if(viewMode == view_modes::pattern)// && bEditMode)
-					{
-						pCmdUI->Enable(TRUE);
-						pCmdUI->SetText("Redo");
-					}
-					else
-					{
-						pCmdUI->Enable(FALSE);
-						pCmdUI->SetText("Redo in Pattern View");
-					}
-					break;
-				}
+				pCmdUI->Enable(TRUE);
 			}
 			else
 			{
 				pCmdUI->Enable(FALSE);
-				pCmdUI->SetText("Redo");
 			}
 		}
 
@@ -1856,8 +1771,8 @@ namespace psycle { namespace host {
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
-				KillUndo();
-				KillRedo();
+				Global::pInputHandler->KillUndo();
+				Global::pInputHandler->KillRedo();
 				pParentMain->CloseAllMacGuis();
 				Global::pPlayer->Stop();
 
@@ -1948,7 +1863,8 @@ namespace psycle { namespace host {
 				{
 					Global::_pSong->fileName = str+".psy";
 				}
-
+				Global::_pSong->_pMachine[MASTER_INDEX]->_x = (CW - Global::psycleconf().macView().MachineCoords.sMaster.width) / 2;
+				Global::_pSong->_pMachine[MASTER_INDEX]->_y = (CH - Global::psycleconf().macView().MachineCoords.sMaster.height) / 2;
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
@@ -2064,7 +1980,6 @@ namespace psycle { namespace host {
 			}
 			editPosition = 0;
 			CProgressDialog progress;
-			progress.Create();
 			progress.ShowWindow(SW_SHOW);
 			if(!_pSong->Load(&file,progress) || !file.Close())
 			{
@@ -2072,7 +1987,7 @@ namespace psycle { namespace host {
 				s << "Error reading from file '" << file.szName << "'" << std::endl;
 				MessageBox(s.str().c_str(), "File Error!!!", 0);
 			}
-			progress.OnCancel();
+			progress.SendMessage(WM_CLOSE);
 			_pSong->_saved=true;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
@@ -2086,7 +2001,7 @@ namespace psycle { namespace host {
 				Global::_pSong->fileName = fName;
 			}
 			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
-
+			EnforceAllMachinesOnView();
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
 			pParentMain->m_wndInst.WaveUpdate();
@@ -2096,8 +2011,8 @@ namespace psycle { namespace host {
 			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
 			RecalculateColourGrid();
 			Repaint();
-			KillUndo();
-			KillRedo();
+			Global::pInputHandler->KillUndo();
+			Global::pInputHandler->KillRedo();
 			SetTitleBarText();
 			if (Global::psycleconf().bShowSongInfoOnLoad)
 			{
@@ -2121,30 +2036,9 @@ namespace psycle { namespace host {
 		{
 			std::string titlename = "[";
 			titlename+=Global::_pSong->fileName;
-			/*
-			if(!(Global::_pSong->_saved))
+			if(Global::pInputHandler->IsModified())
 			{
 				titlename+=" *";
-			}
-			else
-			*/ 
-			if(pUndoList)
-			{
-				if (UndoSaved != pUndoList->counter)
-				{
-					titlename+=" *";
-				}
-			}
-			else if (UndoMacSaved != UndoMacCounter)
-			{
-				titlename+=" *";
-			}
-			else
-			{
-				if (UndoSaved != 0)
-				{
-					titlename+=" *";
-				}
 			}
 			// don't know how to access to the IDR_MAINFRAME String Title.
 			titlename += "] Psycle Modular Music Creation Studio (" PSYCLE__VERSION ")";
@@ -2179,6 +2073,54 @@ namespace psycle { namespace host {
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
+		void CChildView::EnforceAllMachinesOnView()
+		{
+			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
+			for(int i(0);i<MAX_MACHINES;i++)
+			{
+				if(_pSong->_pMachine[i])
+				{
+					int x = _pSong->_pMachine[i]->_x;
+					int y = _pSong->_pMachine[i]->_y;
+					switch (_pSong->_pMachine[i]->_mode)
+					{
+					case MACHMODE_GENERATOR:
+						if ( x > CW-mcoords.sGenerator.width ) 
+						{
+							x = CW-mcoords.sGenerator.width;
+						}
+						if ( y > CH-mcoords.sGenerator.height ) 
+						{
+							y = CH-mcoords.sGenerator.height;
+						}
+						break;
+					case MACHMODE_FX:
+						if ( x > CW-mcoords.sEffect.width )
+						{
+							x = CW-mcoords.sEffect.width;
+						}
+						if ( y > CH-mcoords.sEffect.height ) 
+						{
+							y = CH-mcoords.sEffect.height;
+						}
+						break;
+
+					case MACHMODE_MASTER:
+						if ( x > CW-mcoords.sMaster.width ) 
+						{
+							x = CW-mcoords.sMaster.width;
+						}
+						if ( y > CH-mcoords.sMaster.height )
+						{
+							y = CH-mcoords.sMaster.height;
+						}
+						break;
+					}
+					_pSong->_pMachine[i]->_x = x;
+					_pSong->_pMachine[i]->_y = y;
+				}
+			}
+		}
 
 		void CChildView::RecalcMetrics()
 		{
@@ -2363,9 +2305,9 @@ namespace psycle { namespace host {
 			}
 			if(dlg.deleted)
 			{
-				pParentMain->CloseMacGui(propMac);
 				{
 					CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+					pParentMain->CloseMacGui(propMac);
 					Global::_pSong->DestroyMachine(propMac);
 				}
 				pParentMain->UpdateEnvInfo();

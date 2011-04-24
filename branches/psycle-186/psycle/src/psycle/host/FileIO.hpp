@@ -86,6 +86,7 @@ namespace psycle
 		public:
 			bool ReadString(std::string & string);
 			bool ReadString(char* pData, std::size_t maxBytes);
+			bool WriteString(std::string & string);
 
 			const double        ReadDouble() { double        t; Read(t); return t; }
 			const float         ReadFloat()  { float         t; Read(t); return t; }

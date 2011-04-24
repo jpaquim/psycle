@@ -4,6 +4,7 @@
 #include "MacProp.hpp"
 
 #include "MainFrm.hpp"
+#include "InputHandler.hpp"
 #include "Machine.hpp"
 
 namespace psycle { namespace host {
@@ -74,13 +75,10 @@ namespace psycle { namespace host {
 			// Delete MACHINE!
 			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 			{
-				if ( m_view != NULL )
-				{
-					m_view->AddMacViewUndo();
-				}
+				Global::pInputHandler->AddMacViewUndo();
 
 				deleted = true;
-				OnCancel();
+				PostMessage (WM_CLOSE);
 			}
 		}
 
@@ -91,7 +89,7 @@ namespace psycle { namespace host {
 			pMachine->_volumeDisplay = 0;
 			if ( m_view != NULL )
 			{
-				m_view->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 				m_view->updatePar=thisMac;
 				m_view->Repaint(draw_modes::machine);
 			}
@@ -101,7 +99,7 @@ namespace psycle { namespace host {
 			pMachine->Bypass(m_bypassCheck.GetCheck() == 1);
 			if ( m_view != NULL )
 			{
-				m_view->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 				m_view->updatePar=thisMac;
 				m_view->Repaint(draw_modes::machine);
 			}
@@ -109,7 +107,7 @@ namespace psycle { namespace host {
 
 		void CMacProp::OnSolo() 
 		{
-			m_view->AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 			if (m_soloCheck.GetCheck() == 1)
 			{
 				for ( int i=0;i<MAX_MACHINES;i++ )
@@ -174,7 +172,7 @@ namespace psycle { namespace host {
 					}
 				}
 			}
-			OnCancel();
+			PostMessage (WM_CLOSE);
 		}
 		void CMacProp::OnBnClickedReplacemac()
 		{
@@ -189,7 +187,7 @@ namespace psycle { namespace host {
 			{
 				m_view->Repaint();
 			}
-			OnCancel();
+			PostMessage (WM_CLOSE);
 		}
 
 	}   // namespace

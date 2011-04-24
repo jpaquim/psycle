@@ -3,15 +3,18 @@
 
 #include "WireDlg.hpp"
 
-#include "ChildView.hpp"
-#include "Configuration.hpp"
+#include "PsycleConfig.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
-#include "Zap.hpp"
 
 #include "Machine.hpp"
-#include "internal_machines.hpp"
 #include "Player.hpp"
+#include "Song.hpp"
+
+//Included for Dummy's "wasVST". Should be possible to do it in another way
+#include "internal_machines.hpp"
+
+#include "Zap.hpp"
 #include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 
@@ -20,11 +23,28 @@ int const ID_TIMER_WIRE = 2304;
 namespace psycle { namespace host {
 		int SCOPE_SPEC_SAMPLES = 1024;
 
-		CWireDlg::CWireDlg(CChildView* pParent) : CDialog(CWireDlg::IDD, pParent)
+		CWireDlg::CWireDlg(CWnd* mainView_, CWireDlg** windowVar_, int wireDlgIdx_,
+			Machine& srcMac_, int srcWireIdx_, Machine& dstMac_, int dstWireIdx_)
+			: CDialog(CWireDlg::IDD, AfxGetMainWnd())
+			, mainView(mainView_)
+			, windowVar(windowVar_)
+			, srcMachine(srcMac_)
+			, wireDlgIdx(wireDlgIdx_)
+			, dstMachine(dstMac_)
+			, dstWireIdx(dstWireIdx_)
 		{
-			m_pParent = pParent;
+			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
+			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
+			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
+			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
+			CDialog::Create(IDD, AfxGetMainWnd());
 		}
 
+		CWireDlg::~CWireDlg()
+		{
+			universalis::os::aligned_memory_dealloc(pSamplesL);
+			universalis::os::aligned_memory_dealloc(pSamplesR);
+		}
 		void CWireDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
@@ -37,6 +57,7 @@ namespace psycle { namespace host {
 		}
 
 		BEGIN_MESSAGE_MAP(CWireDlg, CDialog)
+			ON_WM_CLOSE()
 			ON_WM_TIMER()
 			ON_WM_HSCROLL()
 			ON_WM_VSCROLL()
@@ -51,11 +72,6 @@ namespace psycle { namespace host {
 		{
 			CDialog::OnInitDialog();
 
-			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
-			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
-			psycle::helpers::dsp::Clear(pSamplesL,SCOPE_BUF_SIZE);
-			psycle::helpers::dsp::Clear(pSamplesR,SCOPE_BUF_SIZE);
-			
 			scope_mode = 0;
 			m_sliderMode.ShowWindow(SW_HIDE);
 			scope_peak_rate = 20;
@@ -71,13 +87,12 @@ namespace psycle { namespace host {
 			m_volslider.SetTicFreq(16*4);
 
 			float val;
-			_dstWireIndex = _pDstMachine->FindInputWire(isrcMac);
-			_pDstMachine->GetWireVolume(_dstWireIndex,val);
+			dstMachine.GetWireVolume(dstWireIdx,val);
 			invol = val;
 			UpdateVolPerDb();
 			m_volslider.SetPos(helpers::dsp::AmountToSlider(val));
-			if ( _pSrcMachine->_type == MACH_VST || _pSrcMachine->_type == MACH_VSTFX 
-				|| (_pSrcMachine->_type == MACH_DUMMY && ((Dummy*)_pSrcMachine)->wasVST)) // native to VST, divide.
+			if ( srcMachine._type == MACH_VST || srcMachine._type == MACH_VSTFX 
+				|| (srcMachine._type == MACH_DUMMY && ((Dummy*)&srcMachine)->wasVST)) // native to VST, divide.
 			{
 				mult = 32768.0f;
 			}
@@ -87,7 +102,7 @@ namespace psycle { namespace host {
 			}	
 
 			char buf[128];
-			sprintf(buf,"[%d] %s -> %s Connection Volume", wireIndex, _pSrcMachine->_editName, _pDstMachine->_editName);
+			sprintf(buf,"[%d] %s -> %s Connection Volume", srcWireIdx, srcMachine._editName, dstMachine._editName);
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -111,19 +126,10 @@ namespace psycle { namespace host {
 			return TRUE;
 		}
 
-		BOOL CWireDlg::Create()
-		{
-			return CDialog::Create(IDD, m_pParent);
-		}
-
-		void CWireDlg::OnCancel()
+		void CWireDlg::OnClose()
 		{
 			KillTimer(ID_TIMER_WIRE);
-			_pSrcMachine->_pScopeBufferL = NULL;
-			_pSrcMachine->_pScopeBufferR = NULL;
-			_pSrcMachine->_scopeBufferIndex = 0;
-			m_pParent->WireDialog[this_index] = NULL;
-			DestroyWindow();
+			CDialog::OnClose();
 			font.DeleteObject();
 			bufBM->DeleteObject();
 			clearBM->DeleteObject();
@@ -133,8 +139,18 @@ namespace psycle { namespace host {
 			linepenbR.DeleteObject();
 			zapObject(bufBM);
 			zapObject(clearBM);
-			universalis::os::aligned_memory_dealloc(pSamplesL);
-			universalis::os::aligned_memory_dealloc(pSamplesR);
+			DestroyWindow();
+		}
+
+		void CWireDlg::PostNcDestroy()
+		{
+			//This part should be synchronized, but it is done explicitely
+			//when calling CloseMacGuis or CloseAllMacGuis to prevent deadlocks
+			srcMachine._pScopeBufferL = NULL;
+			srcMachine._pScopeBufferR = NULL;
+			srcMachine._scopeBufferIndex = 0;
+
+			if(windowVar!= NULL) *windowVar = NULL;
 			delete this;
 		}
 		BOOL CWireDlg::PreTranslateMessage(MSG* pMsg) 
@@ -147,22 +163,16 @@ namespace psycle { namespace host {
 					v = std::max(0,v-1);
 					m_volslider.SetPos(v);
 					return true;
-				}
-				else if (pMsg->wParam == VK_DOWN)
-				{
+				} else if (pMsg->wParam == VK_DOWN) {
 					int v = m_volslider.GetPos();
 					v=std::min(v+1,256*4);
 					m_volslider.SetPos(v);
 					return true;
-				}
-				else if (pMsg->wParam == VK_ESCAPE)
-				{
+				} else if (pMsg->wParam == VK_ESCAPE) {
 					PostMessage (WM_CLOSE);
 					return true;
-				}
-				else
-				{
-					m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+				} else {
+					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 					return true;
 				}
 			}
@@ -171,13 +181,12 @@ namespace psycle { namespace host {
 				if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN)
 				{
 					return true;
-				}
-				else if (pMsg->wParam == VK_ESCAPE)
-				{
+				} else if (pMsg->wParam == VK_ESCAPE) {
+					return true;
+				} else {
+					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 					return true;
 				}
-				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-				return true;
 			}
 			return CDialog::PreTranslateMessage(pMsg);
 		}
@@ -267,7 +276,7 @@ namespace psycle { namespace host {
 					{
 						// now draw our scope
 
-						int index = _pSrcMachine->_scopeBufferIndex;
+						int index = srcMachine._scopeBufferIndex;
 						float curpeakl,curpeakr;
 						curpeakl = curpeakr = 0;
 						float vucorrection= invol*mult*5329.0f/32768.0f;
@@ -275,8 +284,8 @@ namespace psycle { namespace host {
 						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float awl=fabsf(pSamplesL[index]*_pSrcMachine->_lVol);///32768; 
-							float awr=fabsf(pSamplesR[index]*_pSrcMachine->_rVol);///32768; 
+							float awl=fabsf(pSamplesL[index]*srcMachine._lVol);///32768; 
+							float awr=fabsf(pSamplesR[index]*srcMachine._rVol);///32768; 
 
 							if (awl>curpeakl)	{	curpeakl = awl;	}
 							if (awr>curpeakr)	{	curpeakr = awr;	}
@@ -410,22 +419,22 @@ namespace psycle { namespace host {
 
 						float add = (float(Global::player().SampleRate())/(float(freq)))/64.0f;
 
-						float n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
+						float n = float(srcMachine._scopeBufferIndex-pos);
+						bufDC.MoveTo(256,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*srcMachine._lVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_lVol));
+							bufDC.LineTo(x,GetY(pSamplesL[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*srcMachine._lVol));
 		//					bufDC.LineTo(x,GetY(32768/2));
 						}
 						bufDC.SelectObject(&linepenR);
 
-						n = float(_pSrcMachine->_scopeBufferIndex-pos);
-						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
+						n = float(srcMachine._scopeBufferIndex-pos);
+						bufDC.MoveTo(256,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*srcMachine._rVol));
 						for (int x = 256-2; x >= 0; x-=2)
 						{
 							n -= add;
-							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*_pSrcMachine->_rVol));
+							bufDC.LineTo(x,GetY(pSamplesR[((int)n)&(SCOPE_BUF_SIZE-1)]*invol*mult*srcMachine._rVol));
 						}
 
 						bufDC.SelectObject(oldpen);
@@ -454,11 +463,11 @@ namespace psycle { namespace host {
 						memset (bbr,0,sizeof(bbr));
 
 						int width = 128/scope_spec_bands;
-						const float multleft= invol*mult/32768.0f *_pSrcMachine->_lVol;
-						const float multright= invol*mult/32768.0f *_pSrcMachine->_rVol;
+						const float multleft= invol*mult/32768.0f *srcMachine._lVol;
+						const float multright= invol*mult/32768.0f *srcMachine._rVol;
 						const float invSamples = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
 						// calculate our bands using same buffer chasing technique
-						int index = _pSrcMachine->_scopeBufferIndex;
+						int index = srcMachine._scopeBufferIndex;
 						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
 						{ 
 							index--;
@@ -582,13 +591,13 @@ namespace psycle { namespace host {
 						float mvc, mvpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
 						mvc = mvpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
 
-						int index = _pSrcMachine->_scopeBufferIndex;
+						int index = srcMachine._scopeBufferIndex;
 						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
 						{ 
 							index--;
 							index&=(SCOPE_BUF_SIZE-1);
-							float wl=(pSamplesL[index]*invol*mult*_pSrcMachine->_lVol);///32768; 
-							float wr=(pSamplesR[index]*invol*mult*_pSrcMachine->_rVol);///32768; 
+							float wl=(pSamplesL[index]*invol*mult*srcMachine._lVol);///32768; 
+							float wr=(pSamplesR[index]*invol*mult*srcMachine._rVol);///32768; 
 							float awl=fabsf(wl);
 							float awr=fabsf(wr);
 							if ((wl < 0 && wr > 0) || (wl > 0 && wr < 0))
@@ -866,11 +875,11 @@ namespace psycle { namespace host {
 
 			UpdateVolPerDb();
 			float f;
-			_pDstMachine->GetWireVolume(_dstWireIndex, f);
+			dstMachine.GetWireVolume(dstWireIdx, f);
 			if (f != invol)
 			{
-				m_pParent->AddMacViewUndo();
-				_pDstMachine->SetWireVolume(_dstWireIndex, invol );
+				Global::pInputHandler->AddMacViewUndo();
+				dstMachine.SetWireVolume(dstWireIdx, invol );
 			}
 		}
 
@@ -903,11 +912,11 @@ namespace psycle { namespace host {
 		}
 		void CWireDlg::OnDelete() 
 		{
-			m_pParent->AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-			_pSrcMachine->DeleteOutputWireIndex(Global::_pSong,wireIndex);
-			_pDstMachine->DeleteInputWireIndex(Global::_pSong,_dstWireIndex);
-			OnCancel();
+			srcMachine.DeleteOutputWireIndex(Global::_pSong,srcWireIdx);
+			dstMachine.DeleteInputWireIndex(Global::_pSong,dstWireIdx);
+			PostMessage (WM_CLOSE);
 		}
 		void CWireDlg::OnMode()
 		{
@@ -940,13 +949,13 @@ namespace psycle { namespace host {
 			}
 			if (hold)
 			{
-				_pSrcMachine->_pScopeBufferL = NULL;
-				_pSrcMachine->_pScopeBufferR = NULL;
+				srcMachine._pScopeBufferL = NULL;
+				srcMachine._pScopeBufferR = NULL;
 			}
 			else
 			{
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				srcMachine._pScopeBufferL = pSamplesL;
+				srcMachine._pScopeBufferR = pSamplesR;
 			}
 		}
 
@@ -957,7 +966,7 @@ namespace psycle { namespace host {
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
-				m_pParent->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				// update from dialog
 				m_volslider.SetPos(helpers::dsp::AmountToSlider(dlg.volume));
@@ -972,7 +981,7 @@ namespace psycle { namespace host {
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{
-				m_pParent->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 				// update from dialog
 				m_volslider.SetPos(helpers::dsp::AmountToSlider(dlg.volume));
 				invol = dlg.volume;
@@ -1090,8 +1099,8 @@ namespace psycle { namespace host {
 				m_sliderRate.SetPos(scope_peak_rate);
 				sprintf(buf,"Scope Mode");
 				peakL = peakR = peak2L = peak2R = 128.0f;
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				srcMachine._pScopeBufferL = pSamplesL;
+				srcMachine._pScopeBufferR = pSamplesR;
 				linepenL.CreatePen(PS_SOLID, 2, 0xc08080);
 				linepenR.CreatePen(PS_SOLID, 2, 0x80c080);
 				SetTimer(ID_TIMER_WIRE,scope_peak_rate,0);
@@ -1134,8 +1143,8 @@ namespace psycle { namespace host {
 				m_sliderRate.SetRange(10,100);
 				m_sliderRate.SetPos(scope_osc_rate);
 				sprintf(buf,"Oscilloscope");
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				srcMachine._pScopeBufferL = pSamplesL;
+				srcMachine._pScopeBufferR = pSamplesR;
 				SetTimer(ID_TIMER_WIRE,scope_osc_rate,0);
 				break;
 			case 2:
@@ -1211,8 +1220,8 @@ namespace psycle { namespace host {
 				m_sliderRate.SetRange(10,100);
 				m_sliderRate.SetPos(scope_spec_rate);
 				sprintf(buf,"Spectrum Analyzer");
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				srcMachine._pScopeBufferL = pSamplesL;
+				srcMachine._pScopeBufferR = pSamplesR;
 				SetTimer(ID_TIMER_WIRE,scope_osc_rate,0);
 				break;
 			case 3:
@@ -1252,8 +1261,8 @@ namespace psycle { namespace host {
 				linepenL.CreatePen(PS_SOLID, 3, 0xc08080);
 				linepenR.CreatePen(PS_SOLID, 3, 0x80c080);
 
-				_pSrcMachine->_pScopeBufferL = pSamplesL;
-				_pSrcMachine->_pScopeBufferR = pSamplesR;
+				srcMachine._pScopeBufferL = pSamplesL;
+				srcMachine._pScopeBufferR = pSamplesR;
 				sprintf(buf,"Stereo Phase");
 				o_mvc = o_mvpc = o_mvl = o_mvdl = o_mvpl = o_mvdpl = o_mvr = o_mvdr = o_mvpr = o_mvdpr = 0.0f;
 				m_sliderMode.ShowWindow(SW_HIDE);

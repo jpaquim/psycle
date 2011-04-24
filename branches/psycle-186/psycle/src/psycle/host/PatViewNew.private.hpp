@@ -280,8 +280,8 @@ namespace psycle { namespace host {
 				InvalidateRect(rect,false);
 				if ( snt > VISTRACKS )
 				{	
-					ShowScrollBar(SB_HORZ,TRUE);
 					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
+					ShowScrollBar(SB_HORZ,TRUE);
 				}
 				else
 				{	
@@ -290,8 +290,8 @@ namespace psycle { namespace host {
 
 				if ( plines > VISLINES )
 				{	
-					ShowScrollBar(SB_VERT,TRUE);
 					SetScrollRange(SB_VERT,0,plines-VISLINES);
+					ShowScrollBar(SB_VERT,TRUE);
 				}
 				else
 				{	
@@ -300,16 +300,17 @@ namespace psycle { namespace host {
 				break;
 			case draw_modes::pattern: 
 				// all data
-				rect.top=YOFFSET;		
+				rect.top=0;		
 				rect.left=0;
 				rect.bottom=CH;
 				rect.right=CW;
-				updatePar |= DRAW_FULL_DATA;
+				//Drawing also the header, because it can have differen track names.
+				updatePar |= DRAW_TRHEADER | DRAW_FULL_DATA;
 				InvalidateRect(rect,false);
 				if ( snt > VISTRACKS )
 				{	
-					ShowScrollBar(SB_HORZ,TRUE);
 					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
+					ShowScrollBar(SB_HORZ,TRUE);
 				}
 				else
 				{	
@@ -318,8 +319,8 @@ namespace psycle { namespace host {
 
 				if ( plines > VISLINES )
 				{	
-					ShowScrollBar(SB_VERT,TRUE);
 					SetScrollRange(SB_VERT,0,plines-VISLINES);
+					ShowScrollBar(SB_VERT,TRUE);
 				}
 				else
 				{	
@@ -391,8 +392,8 @@ namespace psycle { namespace host {
 				InvalidateRect(rect,false);
 				if ( snt > VISTRACKS )
 				{	
-					ShowScrollBar(SB_HORZ,TRUE);
 					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
+					ShowScrollBar(SB_HORZ,TRUE);
 				}
 				else
 				{	
@@ -401,8 +402,8 @@ namespace psycle { namespace host {
 
 				if ( plines > VISLINES )
 				{	
-					ShowScrollBar(SB_VERT,TRUE);
 					SetScrollRange(SB_VERT,0,plines-VISLINES);
+					ShowScrollBar(SB_VERT,TRUE);
 				}
 				else
 				{	
@@ -940,7 +941,23 @@ namespace psycle { namespace host {
 				oldbmp = memDC.SelectObject(&patView->patternheader);
 				int xOffset = XOFFSET-1;
 
-				if (PatHeaderCoords->bHasTransparency)
+				if(patView->showTrackNames_)
+				{
+					char buffer[256];
+					for(int i=tOff;i<tOff+maxt;i++)
+					{
+						rect.left = xOffset;
+						rect.right = xOffset+1;
+						devc->FillSolidRect(&rect,pvc_separator[i+1]);
+						rect.left++;
+						rect.right+= ROWWIDTH-1;
+						devc->FillSolidRect(&rect,pvc_background[i+1]);
+						sprintf(buffer,"%.2d:%s",i,_pSong->_trackNames[_ps()][i].c_str());
+						TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
+						xOffset += ROWWIDTH;
+					}
+				}
+				else if (PatHeaderCoords->bHasTransparency)
 				{
 					for(int i=tOff;i<tOff+maxt;i++)
 					{
@@ -1820,7 +1837,25 @@ namespace psycle { namespace host {
 								oldbmp = memDC.SelectObject(&patView->patternheader);
 								xOffset = XOFFSET-1;
 
-								if (PatHeaderCoords->bHasTransparency)
+								if(patView->showTrackNames_)
+								{
+									char buffer[256];
+									rect.top = 0;
+									rect.bottom = YOFFSET;
+									for(int i=tOff;i<tOff+scrollT;i++)
+									{
+										rect.left = xOffset;
+										rect.right = xOffset+1;
+										devc->FillSolidRect(&rect,pvc_separator[i+1]);
+										rect.left++;
+										rect.right+= ROWWIDTH-1;
+										devc->FillSolidRect(&rect,pvc_background[i+1]);
+										sprintf(buffer,"%.2d:%s",i,_pSong->_trackNames[_ps()][i].c_str());
+										TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
+										xOffset += ROWWIDTH;
+									}
+								}
+								else if (PatHeaderCoords->bHasTransparency)
 								{
 									for(int i=tOff;i<tOff+scrollT;i++)
 									{
@@ -1993,7 +2028,25 @@ namespace psycle { namespace host {
 								oldbmp = memDC.SelectObject(&patView->patternheader);
 								xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
 
-								if (PatHeaderCoords->bHasTransparency)
+								if(patView->showTrackNames_)
+								{
+									char buffer[256];
+									rect.top = 0;
+									rect.bottom = YOFFSET;
+									for(int i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
+									{
+										rect.left = xOffset;
+										rect.right = xOffset+1;
+										devc->FillSolidRect(&rect,pvc_separator[i+1]);
+										rect.left++;
+										rect.right+= ROWWIDTH-1;
+										devc->FillSolidRect(&rect,pvc_background[i+1]);
+										sprintf(buffer,"%.2d:%s",i,_pSong->_trackNames[_ps()][i].c_str());
+										TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
+										xOffset += ROWWIDTH;
+									}
+								}
+								else if (PatHeaderCoords->bHasTransparency)
 								{
 									for(int i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
 									{

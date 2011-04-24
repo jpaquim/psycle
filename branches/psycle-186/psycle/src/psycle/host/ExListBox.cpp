@@ -12,16 +12,6 @@ namespace psycle { namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // CExListBox
-CThisEdit::CThisEdit()
-{
-}
-CThisEdit::~CThisEdit()
-{
-}
-BEGIN_MESSAGE_MAP(CThisEdit, CEdit)
-END_MESSAGE_MAP()
-
-
 CExListBox::CExListBox()
 {
 }
@@ -31,8 +21,7 @@ CExListBox::~CExListBox()
 }
 
 BEGIN_MESSAGE_MAP(CExListBox, CListBox)
-	ON_WM_RBUTTONDOWN()
-	ON_WM_KEYDOWN()
+	ON_WM_CONTEXTMENU()
 	ON_EN_CHANGE(IDC_SEQEDITBOX, OnChangePatternName)
 	ON_EN_KILLFOCUS(IDC_SEQEDITBOX,OnKillFocusPatternName)
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 0xFFFF, OnToolTipText)
@@ -47,14 +36,22 @@ void CExListBox::PreSubclassWindow()
 	EnableToolTips(TRUE);
 }
 
-void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
+void CExListBox::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
-	BOOL tmp = FALSE;
-	int row = ItemFromPoint2(point,tmp);
-	if ( row == -1)
-		return;
-	
-	SetSel(row);
+	CMenu menu;
+	VERIFY(menu.LoadMenu(IDR_SEQUENCE_MENU));
+	CMenu* pPopup = menu.GetSubMenu(0);
+	ASSERT(pPopup != NULL);
+	pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
+
+	menu.DestroyMenu();
+}
+
+void CExListBox::ShowEditBox(bool isName)
+{
+	this->isName = isName;
+	int row = GetCurSel();
+
 	HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
 	CFont font;
 	font.Attach( hFont );
@@ -63,12 +60,23 @@ void CExListBox::OnRButtonDown( UINT nFlags, CPoint point )
 	GetItemRect(row,&cellrect);
 
 	myedit.DestroyWindow();
-	myedit.Create(WS_CHILD|WS_BORDER,cellrect,this,IDC_SEQEDITBOX);
+	myedit.Create(WS_CHILD|WS_BORDER|ES_AUTOHSCROLL,cellrect,this,IDC_SEQEDITBOX);
 	myedit.SetFont(&font);
-	myedit.SetWindowText(Global::_pSong->patternName[Global::_pSong->playOrder[row]]);
+	if(isName) {
+		myedit.SetLimitText(30);
+		myedit.SetWindowText(Global::_pSong->patternName[Global::_pSong->playOrder[row]]);
+	}
+	else {
+		myedit.SetLimitText(3);
+		char bla[10];
+		sprintf(bla, "%.2X", Global::_pSong->playOrder[row]);
+		myedit.SetWindowText(bla);
+	}
+	myedit.SetSel(0,-1);
 	myedit.ShowWindow(SW_SHOWNORMAL);
 	myedit.SetFocus();
 }
+
 void CExListBox::OnKillFocusPatternName()
 {
 	((CMainFrame*)GetParentFrame())->UpdateSequencer();
@@ -79,17 +87,23 @@ void CExListBox::OnChangePatternName()
 {
 	CString string;
 	myedit.GetWindowText(string);
-	strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
+	if(isName) {
+		strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
+	}
+	else {
+		int val = hexstring_to_integer(string.GetBuffer());
+		if(val < MAX_PATTERNS) {
+			Global::_pSong->playOrder[GetCurSel()] = val;
+		}
+	}
 }
 INT_PTR CExListBox::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 {
 	int row;
 	RECT cellrect;   // cellrect		- to hold the bounding rect
-	BOOL tmp = FALSE;
-	row  = ItemFromPoint2(point,tmp);  //we call the ItemFromPoint function to determine the row,
-	//note that in NT this function may fail  use the ItemFromPointNT member function
-
-	if ( row == -1 ) 
+	BOOL outside = FALSE;
+	row  = ItemFromPoint(point,outside);  //we call the ItemFromPoint function to determine the row,
+	if ( outside ) 
 		return -1;
 
 	//set up the TOOLINFO structure. GetItemRect(row,&cellrect);
@@ -129,35 +143,6 @@ BOOL CExListBox::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
 	*pResult = 0;
 
 	return TRUE;    
-}
-
-// CListBox::ItemFromPoint does not work on NT.
-UINT CExListBox::ItemFromPoint2(CPoint pt, BOOL& bOutside) const
-{
-	int nFirstIndex, nLastIndex;
-	//GetFirstAndLastIndex(nFirstIndex, nLastIndex);
-	nFirstIndex = GetTopIndex();
-	nLastIndex = nFirstIndex  + GetCount(); 
-	
-	bOutside = TRUE;
-	
-	CRect Rect;
-	int nResult = -1;
-	
-	for (int i = nFirstIndex; nResult == -1 && i <= nLastIndex; i++)
-	{
-		if (GetItemRect(i, &Rect) != LB_ERR)
-		{
-			if (Rect.PtInRect(pt))
-			{
-				nResult  = i;
-				bOutside = FALSE;
-			}
-		}
-		
-	}
-	
-	return nResult;
 }
 
 }}

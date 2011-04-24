@@ -6,6 +6,7 @@
 #include "internal_machines.hpp"
 #include "FrameMachine.hpp"
 #include "ChildView.hpp"
+#include "InputHandler.hpp"
 
 namespace psycle { namespace host {
 
@@ -145,7 +146,7 @@ namespace psycle { namespace host {
 			InfoLabel::DrawValue(bufferDC,xoffset+uiSetting->dialwidth,yoffset+uiSetting->sliderheight,infowidth,value);
 			yoffset+=realheight;
 			GraphSlider::DrawKnob(bufferDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(0)/4096.0f);
-			VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset-vuyoffset,mixer()._volumeDisplay/97.0f);
+			VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer()._volumeDisplay/97.0f);
 
 			// Columns 2 onwards, controls
 			xoffset+=realwidth;
@@ -423,7 +424,7 @@ namespace psycle { namespace host {
 					}
 				}
 				prevval = tweakbase;
-				mainView->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 			}
 			CWnd::OnLButtonDown(nFlags, point);
 		}

@@ -100,26 +100,6 @@ namespace host {
 			CCursor end;	//
 		};
 
-		class SPatternUndo
-		{
-		public:
-			int type;
-			SPatternUndo* pPrev;
-			unsigned char* pData;
-			int pattern;
-			int x;
-			int y;
-			int	tracks;
-			int	lines;
-			// store positional data plz
-			int edittrack;
-			int editline;
-			int editcol;
-			int seqpos;
-			// counter for tracking, works like ID
-			int counter;
-		};
-
 		enum {
 			UNDO_PATTERN,
 			UNDO_LENGTH,
@@ -147,6 +127,7 @@ namespace host {
 			void ValidateParent();
 			void EnableSound();
 			void Repaint(draw_modes::draw_mode drawMode = draw_modes::all);
+			void EnforceAllMachinesOnView();
 
 			void ShowTransformPatternDlg(void);
 			void ShowPatternDlg(void);
@@ -206,19 +187,6 @@ namespace host {
 			void IncPosition(bool bRepeat=false);
 			void DecPosition();
 
-			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
-			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
-			void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
-
-			void AddMacViewUndo(); // place holder
-
-			void KillUndo();
-			void KillRedo();
 			void SelectNextTrack();  // for armed tracks recording
 			void SetTitleBarText();
 			void RecalculateColourGrid();
@@ -387,6 +355,7 @@ namespace host {
 			int wireSY;
 			int wireDX;
 			int wireDY;
+			bool allowcontextmenu;
 
 			int maxt;		// num of tracks shown
 			int maxl;		// num of lines shown
@@ -414,15 +383,6 @@ namespace host {
 			unsigned char patBufferData[EVENT_SIZE*MAX_LINES*MAX_TRACKS];
 			int patBufferLines;
 			bool patBufferCopy;
-
-			SPatternUndo * pUndoList;
-			SPatternUndo * pRedoList;
-
-			int UndoCounter;
-			int UndoSaved;
-
-			int UndoMacCounter;
-			int UndoMacSaved;
 
 			int mcd_x;
 			int mcd_y;

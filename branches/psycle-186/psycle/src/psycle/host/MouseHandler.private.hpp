@@ -15,49 +15,39 @@ namespace psycle { namespace host {
 				wiresource = -1; wiredest = -1;
 				wiremove = -1;
 				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
+				{
+					int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
+					if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
 					{
-/*					smac=GetMachine(point);
-					if ( smac == -1 )
+						wiredest = _pSong->_pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
+						wiremove = _pSong->_pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection index in destination machine
+
+						switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
 						{
-*/
-						int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
-						if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
-							{
-							wiredest = _pSong->_pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
-							wiremove = _pSong->_pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection point in destination machine
+						//case MACHMODE_GENERATOR: //A wire can't end in a generator								
+						case MACHMODE_FX:
+							wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
+							wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
+							wireSX = point.x;
+							wireSY = point.y;
+							break;
 
-							switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
-								{
-								/*							case MACHMODE_GENERATOR: //A wire can't end in a generator
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sGenerator.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sGenerator.height/2);
-								break;
-								*/								
-								case MACHMODE_FX:
-									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
-									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
-									wireSX = point.x;
-									wireSY = point.y;
-									break;
-
-								case MACHMODE_MASTER:
-									wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
-									wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
-									wireSX = point.x;
-									wireSY = point.y;
-									break;
-								}		
-							wiresource=-1;
-//							OnMouseMove(nFlags,point);
-							}
-//						}
+						case MACHMODE_MASTER:
+							wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
+							wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
+							wireSX = point.x;
+							wireSY = point.y;
+							break;
+						}		
+						wiresource=-1;
 					}
+				}
 				else if (nFlags == MK_RBUTTON) // Right click alone. Action: Create a new wire or move wire destination.
 				{
 					wiresource = GetMachine(point); //See if we have clicked over a machine.
 					if ( wiresource == -1 ) // not a machine. Let's see if it is a wire
 					{
-						wiremove = GetWire(point,wiresource); // wiresource = origin machine *index*. wiremove = wire connection point in origin machine
+						wiremove = GetWire(point,wiresource); // wiresource = origin machine *index*. wiremove = wire connection index in origin machine
 					}
 					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable wire creation/move
 					{
@@ -75,16 +65,11 @@ namespace psycle { namespace host {
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
-/*						case MACHMODE_MASTER: // A wire can't be sourced in master
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sMaster.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sMaster.height/2);
-							break;
-*/							
+						//case MACHMODE_MASTER: // A wire can't be sourced in master
 						default:
 							wiresource=-1;			//don't pretend we're drawing a wire if we're not..
 							break;
 						}
-//						OnMouseMove(nFlags,point);
 					}
 				} // End nFlags & MK_RBUTTON
 			}
@@ -94,6 +79,7 @@ namespace psycle { namespace host {
 		void CChildView::OnRButtonUp( UINT nFlags, CPoint point )
 		{
 			ReleaseCapture();
+			allowcontextmenu=true;
 
 			if (viewMode == view_modes::machine)
 			{
@@ -109,7 +95,7 @@ namespace psycle { namespace host {
 					{
 						Machine *tmac = _pSong->_pMachine[wiresource];
 						Machine *dmac = _pSong->_pMachine[propMac];
-						AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 						if (wiremove != -1) //were we moving a wire?
 						{
 							int w(-1);
@@ -127,6 +113,7 @@ namespace psycle { namespace host {
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
+							allowcontextmenu=false;
 						}
 						else
 						{
@@ -146,6 +133,7 @@ namespace psycle { namespace host {
 							{
 								MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 							}
+							allowcontextmenu=false;
 						}
 					}
 					else if ( wiremove != -1) //were we moving a wire then?
@@ -159,6 +147,7 @@ namespace psycle { namespace host {
 						{
 							MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 						}
+						allowcontextmenu=false;
 					}
 				}
 				else
@@ -166,6 +155,7 @@ namespace psycle { namespace host {
 					int w = GetWire(point,wiresource);
 					if ( w != -1 )	// Are we over a wire?
 					{
+						allowcontextmenu=false;
 						Machine *tmac = _pSong->_pMachine[wiresource];
 						Machine *dmac = _pSong->_pMachine[tmac->_outputMachines[w]];
 						int free=-1;
@@ -173,8 +163,8 @@ namespace psycle { namespace host {
 						{
 							if (WireDialog[i])
 							{
-								if ((WireDialog[i]->_pSrcMachine == tmac) &&
-								(WireDialog[i]->_pDstMachine == dmac))  // If this is true, the dialog is already open
+								if ((WireDialog[i]->srcMachine._macIndex == tmac->_macIndex) &&
+									(WireDialog[i]->dstMachine._macIndex == dmac->_macIndex))  // If this is true, the dialog is already open
 								{
 									wiresource = -1;
 									wiredest = -1;
@@ -189,13 +179,8 @@ namespace psycle { namespace host {
 						if (free != -1) //If there is any dialog slot free
 						{
 					   		CWireDlg* wdlg;
-							wdlg = WireDialog[free] = new CWireDlg(this);
-							wdlg->this_index = free;
-							wdlg->wireIndex = w;
-							wdlg->isrcMac = wiresource;
-							wdlg->_pSrcMachine = tmac;
-							wdlg->_pDstMachine = dmac;
-							wdlg->Create();
+							wdlg = WireDialog[free] = new CWireDlg(this, &WireDialog[free], 
+								free, *tmac, w,  *dmac, dmac->FindInputWire(wiresource));
 							pParentMain->CenterWindowOnPoint(wdlg, point);
 							wdlg->ShowWindow(SW_SHOW);
 						}
@@ -214,16 +199,42 @@ namespace psycle { namespace host {
 		}
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
 		{
-			if (viewMode == view_modes::pattern)
+			/* ///\todo: finish
+			if (viewMode == view_modes::machine && allowcontextmenu)
+			{
+				CMenu menu;
+				VERIFY(menu.LoadMenu(IDR_POPUP_MACHINE));
+				CMenu* pPopup = menu.GetSubMenu(0);
+				ASSERT(pPopup != NULL);
+				CPoint mypoint = point;
+				if(mypoint.x < 0 || mypoint.y < 0){ // Context menu button pressed
+					if(_pSong->_pMachine[_pSong->seqBus]) {
+						mypoint.x = _pSong->_pMachine[_pSong->seqBus]->_x;
+						mypoint.y = _pSong->_pMachine[_pSong->seqBus]->_y;
+						//\todo: needs to add the clientoffset too
+					}
+				}
+				else {  // Right click mouse button
+				}
+				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, AfxGetMainWnd());
+				menu.DestroyMenu();
+			}
+			else*/ if (viewMode == view_modes::pattern)
 			{
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
 				CMenu* pPopup = menu.GetSubMenu(0);
 				ASSERT(pPopup != NULL);
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, AfxGetMainWnd());
-				
+				CPoint mypoint = point;
+				if(mypoint.x < 0 || mypoint.y < 0){ // Context menu button pressed
+					mypoint.x = XOFFSET+editcur.track*ROWWIDTH;
+					mypoint.y = YOFFSET+editcur.line*ROWHEIGHT;
+					//\todo: needs to add the clientoffset too
+				}
+				else {  // Right click mouse button
+				}
+				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, AfxGetMainWnd());
 				menu.DestroyMenu();
-		//		Repaint(draw_modes::cursor);
 			}
 			CWnd::OnContextMenu(pWnd,point);
 		}
@@ -444,7 +455,11 @@ namespace psycle { namespace host {
 				if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
 				{	
 					int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
-
+					if (point.x < XOFFSET) // Mouse is in the "Line" column
+					{
+						Global::psycleconf().patView().showTrackNames_ = !Global::psycleconf().patView().showTrackNames_;
+						Repaint();
+					}
 					if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOn,PatHeaderCoords->sRecordOn))
 					{
 						_pSong->_trackArmed[ttm] = !_pSong->_trackArmed[ttm];
@@ -525,7 +540,7 @@ namespace psycle { namespace host {
 				{
 					if (wiremove >= 0) // are we moving a wire?
 					{
-						AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 						if (wiredest == -1)
 						{
 							Machine *tmac = _pSong->_pMachine[wiresource];
@@ -561,7 +576,7 @@ namespace psycle { namespace host {
 					}
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
-						AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 						Machine *tmac = _pSong->_pMachine[wiresource];
 						Machine *dmac = _pSong->_pMachine[propMac];
 						int dsttype=0;
@@ -583,7 +598,7 @@ namespace psycle { namespace host {
 					else if ( smacmode == smac_modes::move && smac != -1 ) // Are we moving a machine?
 					{
 						SSkinSource ssrc;
-						AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 
 						switch(_pSong->_pMachine[smac]->_mode)
 						{
@@ -711,7 +726,7 @@ namespace psycle { namespace host {
 
 							if (_pSong->_pMachine[smac]->_panning != newpan)
 							{
-								AddMacViewUndo();
+								Global::pInputHandler->AddMacViewUndo();
 
 								_pSong->_pMachine[smac]->SetPan(newpan);
 								newpan= _pSong->_pMachine[smac]->_panning;
@@ -1091,8 +1106,8 @@ namespace psycle { namespace host {
 							{
 								if (WireDialog[i])
 								{
-									if ((WireDialog[i]->_pSrcMachine == tmac) &&
-										(WireDialog[i]->_pDstMachine == dmac))  // If this is true, the dialog is already open
+									if ((WireDialog[i]->srcMachine._macIndex == tmac->_macIndex) &&
+										(WireDialog[i]->dstMachine._macIndex == dmac->_macIndex))  // If this is true, the dialog is already open
 									{
 										wiresource = -1;
 										return;
@@ -1103,13 +1118,8 @@ namespace psycle { namespace host {
 							if (free != -1) //If there is any dialog slot open
 							{
 								CWireDlg* wdlg;
-								wdlg = WireDialog[free] = new CWireDlg(this);
-								wdlg->this_index = free;
-								wdlg->wireIndex = w;
-								wdlg->isrcMac = wiresource;
-								wdlg->_pSrcMachine = tmac;
-								wdlg->_pDstMachine = dmac;
-								wdlg->Create();
+								wdlg = WireDialog[free] = new CWireDlg(this, &WireDialog[free], 
+										free, *tmac, w, *dmac, dmac->FindInputWire(wiresource));
 								pParentMain->CenterWindowOnPoint(wdlg, point);
 								wdlg->ShowWindow(SW_SHOW);
 								wiresource = -1;

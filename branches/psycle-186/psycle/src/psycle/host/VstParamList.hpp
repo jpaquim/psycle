@@ -13,9 +13,8 @@ namespace psycle {
 		class CVstParamList : public CDialog
 		{
 		public:
-			CVstParamList(vst::plugin* effect);   // standard constructor
+			CVstParamList(vst::plugin& effect, CVstParamList** windowVar);   // standard constructor
 			virtual ~CVstParamList();
-			virtual BOOL Create(CWnd *pParentWnd=NULL);
 
 			enum { IDD = IDD_VSTRACK };
 			CComboBox	m_program;
@@ -25,12 +24,12 @@ namespace psycle {
 		
 		// Attributes
 		public:
-			inline vst::plugin& machine(){ return *_pMachine; }
+			vst::plugin& machine;
 
 		protected:
-			vst::plugin * _pMachine;
 			int _quantizedvalue;
-			CWnd* _mainView;
+			CWnd* mainView;
+			CVstParamList** windowVar;
 
 		// Operations
 		public:
@@ -45,19 +44,20 @@ namespace psycle {
 		// Overrides
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
+			virtual BOOL OnInitDialog();
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
+			virtual void PostNcDestroy();
+			virtual void OnCancel();
 		protected:
 		#if !defined NDEBUG
 			virtual void AssertValid() const;
 			virtual void Dump(CDumpContext& dc) const;
 		#endif
 			// Generated message map functions
-			virtual BOOL OnInitDialog();
+			afx_msg void OnClose();
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnSelchangeList();
-			afx_msg void OnReleasedcaptureSlider(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnSelchangeProgram();
-			afx_msg void OnCloseupProgram();
 			afx_msg void OnDeltaposSpin(NMHDR* pNMHDR, LRESULT* pResult);
 			DECLARE_MESSAGE_MAP()
 		};

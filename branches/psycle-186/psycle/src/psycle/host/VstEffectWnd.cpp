@@ -80,7 +80,7 @@ namespace psycle { namespace host {
 			}
 
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT, TBSTYLE_TRANSPARENT) ||
-				!toolBar.LoadToolBar(IDR_VSTFRAME))
+				!toolBar.LoadToolBar(IDR_FRAMEMACHINE))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
@@ -149,14 +149,14 @@ namespace psycle { namespace host {
 			vstmachine().EditClose();              /* tell effect edit window's closed  */
 //			vstmachine().LeaveCritical();             /* re-enable processing              */
 			SaveBarState(_T("VstParamToolbar"));
-			if (pParamGui) pParamGui->DestroyWindow();
+			if (pParamGui) pParamGui->SendMessage(WM_CLOSE);
 			std::list<HWND>::iterator it = secwinlist.begin();
 			while ( it != secwinlist.end() )
 			{
 				::SendMessage(*it, WM_CLOSE, 0, 0);
 				++it;
 			}
-			CFrameWnd::OnClose();
+			CFrameMachine::OnClose();
 		}
 
 
@@ -251,7 +251,7 @@ namespace psycle { namespace host {
 		{
 			int const se=comboProgram.GetCurSel();
 			vstmachine().SetProgram(se);
-			if (pParamGui && pParamGui->IsWindowVisible()){
+			if (pParamGui){
 				pParamGui->SelectProgram(se);
 			}
 			SetFocus();
@@ -263,7 +263,7 @@ namespace psycle { namespace host {
 		void CVstEffectWnd::RefreshUI()
 		{
 			FillProgramCombobox();
-			if (pParamGui && pParamGui->IsWindowVisible()){
+			if (pParamGui){
 				int const se=comboProgram.GetCurSel();
 				pParamGui->SelectProgram(se);
 			}
@@ -555,7 +555,7 @@ namespace psycle { namespace host {
 			if (!vstmachine().OnGetChunkFile(tmp))
 			{
 				std::strncpy(tmp,reinterpret_cast<char*>(vstmachine().OnGetDirectory()),1024);
-				std::strcat(tmp,"\\fxb");
+				std::strcat(tmp,"\\");
 			}
 			CFileDialog dlg(TRUE,
 				"fxb",
@@ -590,7 +590,7 @@ namespace psycle { namespace host {
 			if (!vstmachine().OnGetChunkFile(tmp))
 			{
 				std::strncpy(tmp,reinterpret_cast<char*>(vstmachine().OnGetDirectory()),1024);
-				std::strcat(tmp,"\\filename");
+				std::strcat(tmp,"\\");
 			}
 			CFileDialog dlg(FALSE,
 				"fxb",
@@ -612,7 +612,7 @@ namespace psycle { namespace host {
 		{
 			vstmachine().SetProgram(nID - ID_SELECTPROGRAM_0);
 			comboProgram.SetCurSel(nID - ID_SELECTPROGRAM_0);
-			if (pParamGui && pParamGui->IsWindowVisible()){
+			if (pParamGui){
 				pParamGui->SelectProgram(nID - ID_SELECTPROGRAM_0);
 			}
 		}
@@ -621,7 +621,7 @@ namespace psycle { namespace host {
 			int numProgram = vstmachine().GetProgram()-1;
 			vstmachine().SetProgram(numProgram);
 			comboProgram.SetCurSel(numProgram);
-			if (pParamGui && pParamGui->IsWindowVisible()){
+			if (pParamGui){
 				pParamGui->SelectProgram(numProgram);
 			}
 			UpdateWindow();
@@ -639,7 +639,7 @@ namespace psycle { namespace host {
 			int numProgram = vstmachine().GetProgram()+1;
 			vstmachine().SetProgram(numProgram);
 			comboProgram.SetCurSel(numProgram);
-			if (pParamGui && pParamGui->IsWindowVisible()){
+			if (pParamGui){
 				pParamGui->SelectProgram(numProgram);
 			}
 			UpdateWindow();
@@ -661,17 +661,13 @@ namespace psycle { namespace host {
 			GetWindowRect(&rc);
 			if (!pParamGui)
 			{
-				pParamGui= new CVstParamList(&vstmachine());
-				pParamGui->Create();
-			}
-			if (pParamGui->IsWindowVisible())
-			{
-				pParamGui->ShowWindow(SW_HIDE); 
+				pParamGui= new CVstParamList(vstmachine(), &pParamGui);
+				pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
+				pParamGui->ShowWindow(SW_SHOWNORMAL); 
 			}
 			else
 			{
-				pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
-				pParamGui->ShowWindow(SW_SHOWNORMAL); 
+				pParamGui->SendMessage(WM_CLOSE);
 			}
 		}
 
@@ -679,7 +675,7 @@ namespace psycle { namespace host {
 		{
 			if ( pParamGui )
 			{
-				pCmdUI->SetCheck(pParamGui->IsWindowVisible());
+				pCmdUI->SetCheck(true);
 			}
 			else
 				pCmdUI->SetCheck(false);

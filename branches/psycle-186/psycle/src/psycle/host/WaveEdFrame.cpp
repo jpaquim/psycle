@@ -10,11 +10,10 @@
 #include "Song.hpp"
 
 namespace psycle { namespace host {
-
+		extern CPsycleApp theApp;
 		IMPLEMENT_DYNAMIC(CWaveEdFrame, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CWaveEdFrame, CFrameWnd)
-			//{{AFX_MSG_MAP(CWaveEdFrame)
 			ON_WM_CLOSE()
 			ON_UPDATE_COMMAND_UI ( ID_INDICATOR_SIZE, OnUpdateStatusBar )
 			ON_WM_CREATE()
@@ -33,7 +32,6 @@ namespace psycle { namespace host {
 			ON_COMMAND ( ID_WAVED_RELEASE, OnRelease)
 			ON_COMMAND ( ID_WAVED_FASTFORWARD, OnFastForward )
 			ON_COMMAND ( ID_WAVED_REWIND, OnRewind )
-			//}}AFX_MSG_MAP
 			ON_WM_DESTROY()
 		END_MESSAGE_MAP()
 
@@ -52,18 +50,34 @@ namespace psycle { namespace host {
 		{
 			this->_pSong=_sng;
 			wavview.SetSong(this->_pSong);
-			wavview.SetParent(pframe);
+			wavview.SetMainFrame(pframe);
 		}
 
 		CWaveEdFrame::~CWaveEdFrame() throw()
 		{
-
 		}
 
-		void CWaveEdFrame::OnClose() 
+		BOOL CWaveEdFrame::PreCreateWindow(CREATESTRUCT& cs) 
 		{
-			ShowWindow(SW_HIDE);
-			OnStop();
+			if( !CFrameWnd::PreCreateWindow(cs) )
+			{
+				return false;
+			}
+
+			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+			cs.lpszClass = AfxRegisterWndClass(0);
+
+			return true;	
+		}
+
+		BOOL CWaveEdFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
+		{
+			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
+			{
+				this->AdjustStatusBar(_pSong->instSelected);
+				return true;	
+			}
+			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
 		}
 
 		int CWaveEdFrame::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -104,53 +118,40 @@ namespace psycle { namespace host {
 			EnableDocking(CBRS_ALIGN_ANY);
 			DockControlBar(&ToolBar);
 			LoadBarState(_T("WaveEdToolbar"));
+			// Sets Icon
+			HICON tIcon;
+			tIcon=theApp.LoadIcon(IDR_WAVEFRAME);
+			SetIcon(tIcon, true);
+			SetIcon(tIcon, false);
 
 			bPlaying=false;
 			SetWindowText("Psycle wave editor");
 			return 0;
 		}
 
-		BOOL CWaveEdFrame::PreCreateWindow(CREATESTRUCT& cs) 
+		void CWaveEdFrame::OnClose() 
 		{
-			if( !CFrameWnd::PreCreateWindow(cs) )
-			{
-				return false;
-			}
-
-			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-			cs.lpszClass = AfxRegisterWndClass(0);
-
-			return true;	
+			AfxGetMainWnd()->SetFocus();
+			ShowWindow(SW_HIDE);
+			OnStop();
 		}
-
 		void CWaveEdFrame::OnDestroy()
 		{
 			SaveBarState(_T("WaveEdToolbar"));
 			OnStop();
-
+			HICON _icon = GetIcon(false);
+			DestroyIcon(_icon);
 			CFrameWnd::OnDestroy();
-
 		}
-
 
 		void CWaveEdFrame::GenerateView() 
 		{	
 			this->wavview.GenerateAndShow(); 
 		}
 
-		BOOL CWaveEdFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) 
-		{
-			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
-			{
-				this->AdjustStatusBar(_pSong->instSelected);
-				return true;	
-			}
-			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
-		}
-
 		void CWaveEdFrame::OnUpdateStatusBar(CCmdUI *pCmdUI)  
 		{     
-			pCmdUI->Enable ();  
+			pCmdUI->Enable();  
 		}
 
 		void CWaveEdFrame::OnUpdatePlayButtons(CCmdUI *pCmdUI)

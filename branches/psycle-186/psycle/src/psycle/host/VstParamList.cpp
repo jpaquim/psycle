@@ -3,75 +3,10 @@
 #include "VstParamList.hpp"
 
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-#include "Configuration.hpp"
-#include "MainFrm.hpp"
 #include "ChildView.hpp"
+#include "InputHandler.hpp"
 
 #include "VstHost24.hpp"
-
-
-namespace psycle { namespace host {
-
-	extern CPsycleApp theApp;
-
-/*****************************************************************************/
-/* Create : creates the dialog                                               */
-/*****************************************************************************/
-
-		CVstParamList::CVstParamList(vst::plugin* effect)
-		: _pMachine(effect)
-		, _mainView(0)
-		, _quantizedvalue(0)
-		{
-		}
-		CVstParamList::~CVstParamList()
-		{
-		}
-		void CVstParamList::DoDataExchange(CDataExchange* pDX)
-		{
-			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_CMBPROGRAM, m_program);
-			DDX_Control(pDX, IDC_SLIDERPARAM, m_slider);
-			DDX_Control(pDX, IDC_STATUSPARAM, m_text);
-			DDX_Control(pDX, IDC_LISTPARAM, m_parlist);
-		}
-
-		BEGIN_MESSAGE_MAP(CVstParamList, CDialog)
-			ON_WM_VSCROLL()
-			ON_LBN_SELCHANGE(IDC_LISTPARAM, OnSelchangeList)
-			ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDERPARAM, OnReleasedcaptureSlider)
-			ON_CBN_SELCHANGE(IDC_CMBPROGRAM, OnSelchangeProgram)
-			ON_CBN_CLOSEUP(IDC_CMBPROGRAM, OnCloseupProgram)
-			ON_NOTIFY(UDN_DELTAPOS, IDC_SPINPARAM, OnDeltaposSpin)
-			ON_WM_CREATE()
-		END_MESSAGE_MAP()
-
-		/////////////////////////////////////////////////////////////////////////////
-		// CVstParamList diagnostics
-
-		#if !defined  NDEBUG
-			void CVstParamList::AssertValid() const
-			{
-				CDialog::AssertValid();
-			}
-
-			void CVstParamList::Dump(CDumpContext& dc) const
-			{
-				CDialog::Dump(dc);
-			}
-		#endif //!NDEBUG
-
-		BOOL CVstParamList::Create(CWnd* pParentWnd) 
-		{
-			return CDialog::Create(IDD, pParentWnd);
-		}
-
-		BOOL CVstParamList::OnInitDialog() 
-		{
-			CDialog::OnInitDialog();
-			Init();
-			return TRUE;
-		}
 /*
 	MSDN:
  	When you implement a modeless dialog box, always override the OnCancel member
@@ -82,9 +17,93 @@ namespace psycle { namespace host {
 	usually allocated with new. Modal dialog boxes are usually constructed on the
 	frame and do not need PostNcDestroy cleanup.
 
-	I don't do that, because the default behaviour of hiding, and deleting when the
-	parent window is closed is ok for this task.
+	JosepMa:
+	I added also listening to the ON_WM_CLOSE message and doing the same in the OnClose()
  */
+
+namespace psycle { namespace host {
+
+	extern CPsycleApp theApp;
+
+/*****************************************************************************/
+/* Create : creates the dialog                                               */
+/*****************************************************************************/
+
+		CVstParamList::CVstParamList(vst::plugin& effect, CVstParamList** windowVar_)
+			: CDialog(CVstParamList::IDD, AfxGetMainWnd())
+			, machine(effect)
+			, mainView(0)
+			, windowVar(windowVar_)
+			, _quantizedvalue(0)
+		{
+			CDialog::Create(IDD, AfxGetMainWnd());
+		}
+		CVstParamList::~CVstParamList()
+		{
+		}
+
+		void CVstParamList::DoDataExchange(CDataExchange* pDX)
+		{
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_CMBPROGRAM, m_program);
+			DDX_Control(pDX, IDC_SLIDERPARAM, m_slider);
+			DDX_Control(pDX, IDC_STATUSPARAM, m_text);
+			DDX_Control(pDX, IDC_LISTPARAM, m_parlist);
+		}
+
+		BEGIN_MESSAGE_MAP(CVstParamList, CDialog)
+			ON_WM_CLOSE()
+			ON_WM_VSCROLL()
+			ON_LBN_SELCHANGE(IDC_LISTPARAM, OnSelchangeList)
+			ON_CBN_SELCHANGE(IDC_CMBPROGRAM, OnSelchangeProgram)
+			ON_NOTIFY(UDN_DELTAPOS, IDC_SPINPARAM, OnDeltaposSpin)
+			ON_WM_CREATE()
+		END_MESSAGE_MAP()
+
+		/////////////////////////////////////////////////////////////////////////////
+		// CVstParamList diagnostics
+
+	#if !defined  NDEBUG
+		void CVstParamList::AssertValid() const
+		{
+			CDialog::AssertValid();
+		}
+
+		void CVstParamList::Dump(CDumpContext& dc) const
+		{
+			CDialog::Dump(dc);
+		}
+	#endif //!NDEBUG
+
+		BOOL CVstParamList::PreTranslateMessage(MSG* pMsg) {
+			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
+				CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+				if(def.GetType() == CT_Note) {
+					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+					return true;
+				}
+			}
+			return CDialog::PreTranslateMessage(pMsg);
+		}
+		BOOL CVstParamList::OnInitDialog() 
+		{
+			CDialog::OnInitDialog();
+			Init();
+			return TRUE;
+		}
+		void CVstParamList::OnCancel() {
+			DestroyWindow();
+		}
+		void CVstParamList::OnClose()
+		{
+			CDialog::OnClose();
+			DestroyWindow();
+		}
+		void CVstParamList::PostNcDestroy()
+		{
+			if(windowVar!= NULL) *windowVar = NULL;
+			delete this;
+		}
 		void CVstParamList::Init() 
 		{
 			UpdateParList();
@@ -92,37 +111,37 @@ namespace psycle { namespace host {
 			m_slider.SetRange(0, vst::quantization);
 			UpdateOne();
 		}
-
+		
 		void CVstParamList::InitializePrograms()
 		{
 			m_program.ResetContent();
 
-			const int nump = machine().numPrograms();
+			const int nump = machine.numPrograms();
 			for(int i(0) ; i < nump; ++i)
 			{
 				char s1[kVstMaxProgNameLen+7];
 				char s2[kVstMaxProgNameLen+1];
-				machine().GetProgramNameIndexed(-1, i, s2);
+				machine.GetProgramNameIndexed(-1, i, s2);
 				std::sprintf(s1,"%d: %s",i,s2);
 				m_program.AddString(s1);
 			}
-			m_program.SetCurSel(machine().GetProgram());
+			m_program.SetCurSel(machine.GetProgram());
 		}
 		void CVstParamList::SelectProgram(long index) {
-			m_program.SetCurSel(machine().GetProgram());
+			m_program.SetCurSel(machine.GetProgram());
 		}
 		void CVstParamList::UpdateParList()
 		{
 			const int nPar= m_parlist.GetCurSel();
 			m_parlist.ResetContent();
 
-			const long int params = machine().numParams();
+			const long int params = machine.numParams();
 			for(int i(0) ; i < params; ++i)
 			{
 				char str[kVstMaxProgNameLen+9], buf[kVstMaxProgNameLen+1];
 				std::memset(str, 0, kVstMaxProgNameLen+9);
-				machine().GetParamName(i, buf);
-				bool b = machine().CanBeAutomated(i);
+				machine.GetParamName(i, buf);
+				bool b = machine.CanBeAutomated(i);
 				if(b) std::sprintf(str,"(A)%.3X: %s", i, buf);
 				else std::sprintf(str, "(_)%.3X: %s", i, buf);
 				m_parlist.AddString(str);
@@ -136,7 +155,7 @@ namespace psycle { namespace host {
 		void CVstParamList::UpdateText(int value)
 		{
 			char str[kVstMaxProgNameLen*3],str2[14];
-			machine().DescribeValue(m_parlist.GetCurSel(),str);
+			machine.DescribeValue(m_parlist.GetCurSel(),str);
 			std::sprintf(str2,"\t[Hex: %4X]",value);
 			std::strcat(str,str2);
 			m_text.SetWindowText(str);
@@ -144,7 +163,7 @@ namespace psycle { namespace host {
 
 		void CVstParamList::UpdateOne()
 		{
-			int value = machine().GetParamValue(m_parlist.GetCurSel());
+			int value = machine.GetParamValue(m_parlist.GetCurSel());
 			UpdateText(value);
 			_quantizedvalue = value;
 			m_slider.SetPos(vst::quantization - _quantizedvalue);
@@ -163,7 +182,6 @@ namespace psycle { namespace host {
 		void CVstParamList::OnSelchangeList() 
 		{
 			UpdateOne();
-			if (_mainView) _mainView->SetFocus();
 		}
 
 		void CVstParamList::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -173,48 +191,36 @@ namespace psycle { namespace host {
 
 			if(nVal != _quantizedvalue)
 			{
-				machine().SetParameter(m_parlist.GetCurSel(), nVal);
+				machine.SetParameter(m_parlist.GetCurSel(), nVal);
 				UpdateText(nVal);
 				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 				if(Global::psycleconf().inputHandler()._RecordTweaks)
 				{
 					if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, m_parlist.GetCurSel(), nVal);
+						((CChildView *) mainView)->MousePatternTweakSlide(machine._macIndex, m_parlist.GetCurSel(), nVal);
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, m_parlist.GetCurSel(), nVal);
+						((CChildView *) mainView)->MousePatternTweak(machine._macIndex, m_parlist.GetCurSel(), nVal);
 				}
 			}
 		}
 
-		void CVstParamList::OnReleasedcaptureSlider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			if (_mainView) _mainView->SetFocus();
-			*pResult = 0;
-		}
 
 		void CVstParamList::OnSelchangeProgram() 
 		{
 			int const se=m_program.GetCurSel();
-			_pMachine->SetProgram(se);
+			machine.SetProgram(se);
 			UpdateOne();
-			if (_mainView) _mainView->SetFocus();
-		}
-
-		void CVstParamList::OnCloseupProgram() 
-		{
-			if (_mainView) _mainView->SetFocus();
 		}
 
 		void CVstParamList::OnDeltaposSpin(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 			const int se(m_program.GetCurSel() + pNMUpDown->iDelta);
-			if(se >= 0 && se < machine().numPrograms())
+			if(se >= 0 && se < machine.numPrograms())
 			{
 				m_program.SetCurSel(se);
-				machine().SetProgram(se);
+				machine.SetProgram(se);
 			}
-			if (_mainView) _mainView->SetFocus();
 			*pResult = 0;
 		}
 

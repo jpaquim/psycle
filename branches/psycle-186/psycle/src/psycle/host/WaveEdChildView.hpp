@@ -20,8 +20,9 @@ namespace psycle { namespace host {
 		public:
 			CWaveEdChildView();
 			void SetSong(Song*);
-			void SetParent(CMainFrame*);
+			void SetMainFrame(CMainFrame*);
 			virtual ~CWaveEdChildView();
+			CMainFrame* GetMainFrame() {return mainFrame; };
 			void GenerateAndShow();
 			void SetViewData(int ins);
 			void SetSpecificZoom(int factor);
@@ -183,15 +184,9 @@ namespace psycle { namespace host {
 			std::deque<std::pair<short, short> > lHeadDisplay;
 			std::deque<std::pair<short, short> > rHeadDisplay;
 
-			//todo: unless we're saving settings between uses, these should all be allocated as needed
-			CWaveEdAmplifyDialog AmpDialog;
-			CWaveEdMixDialog MixDlg;
-			CWaveEdInsertSilenceDialog SilenceDlg;
-			CWaveEdCrossfadeDialog XFadeDlg;
-
 			CScrollableDlgBar zoombar;
 
-			CMainFrame* pParent;
+			CMainFrame* mainFrame;
 		};
 
 		//{{AFX_INSERT_LOCATION}}

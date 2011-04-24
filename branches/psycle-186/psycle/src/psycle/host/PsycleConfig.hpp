@@ -250,6 +250,7 @@ namespace psycle
 				bool _centerCursor;
 				bool draw_empty_data;
 				int timesig;
+				bool showTrackNames_;
 
 				bool _linenumbers;
 				bool _linenumbersHex;

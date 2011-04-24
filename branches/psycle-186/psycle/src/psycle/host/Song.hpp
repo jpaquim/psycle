@@ -85,6 +85,12 @@ namespace psycle
 			int _trackArmedCount;
 			/// Wether each of the tracks is armed (selected for recording data in)
 			bool _trackArmed[MAX_TRACKS];
+			/// The names of the trakcs
+			std::string _trackNames[MAX_PATTERNS][MAX_TRACKS];
+			void ChangeTrackName(int patIdx, int trackidx, std::string name);
+			void SetTrackNameShareMode(bool shared);
+			void CopyNamesFrom(int patorigin, int patdest);
+			bool shareTrackNames;
 			///\name machines
 			///\{
 			/// the array of machines.
@@ -247,8 +253,6 @@ namespace psycle
 			std::string fileName;
 			/// The index of the machine which plays in solo.
 			int machineSoloed;
-			/// ???
-			CPoint viewSize;
 			/// Is this song saved to a file?
 			bool _saved;
 			/// The index of the track which plays in solo.

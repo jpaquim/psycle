@@ -14,6 +14,7 @@
 
 namespace psycle{ namespace host{
 
+	extern CPsycleApp theApp;
 IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 
 	SongBar::SongBar()
@@ -59,17 +60,18 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		   TRACE0("Warning: UpdateData failed during dialog init.\n");
 		}
 
-		blessless.LoadMappedBitmap(IDB_LESSLESS,0);
-		bless.LoadMappedBitmap(IDB_LESS,0);
-		bmore.LoadMappedBitmap(IDB_MORE,0);
-		bmoremore.LoadMappedBitmap(IDB_MOREMORE,0);
-
-		((CButton*)GetDlgItem(IDC_BPM_DECTEN))->SetBitmap((HBITMAP)blessless);
-		((CButton*)GetDlgItem(IDC_BPM_DECONE))->SetBitmap((HBITMAP)bless);
-		((CButton*)GetDlgItem(IDC_BPM_ADDONE))->SetBitmap((HBITMAP)bmore);
-		((CButton*)GetDlgItem(IDC_BPM_ADDTEN))->SetBitmap((HBITMAP)bmoremore);
-		((CButton*)GetDlgItem(IDC_DEC_TPB))->SetBitmap((HBITMAP)bless);
-		((CButton*)GetDlgItem(IDC_INC_TPB))->SetBitmap((HBITMAP)bmore);
+		((CButton*)GetDlgItem(IDC_BPM_DECTEN))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESSLESS),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_BPM_DECONE))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_BPM_ADDONE))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_BPM_ADDTEN))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MOREMORE),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_DEC_TPB))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_INC_TPB))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
 
 		for(int i=4;i<=MAX_TRACKS;i++)
 		{
@@ -253,6 +255,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	void SongBar::OnClipbut() 
 	{
 		((Master*)(Global::song()._pMachine[MASTER_INDEX]))->_clip = false;
+		((CButton*)GetDlgItem(IDC_CLIPBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 

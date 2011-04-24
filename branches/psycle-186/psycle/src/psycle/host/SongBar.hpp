@@ -49,11 +49,6 @@ namespace psycle { namespace host {
 		CStatic			m_bpmlabel;
 		CStatic			m_tpblabel;
 
-		CBitmap blessless;
-		CBitmap bless;
-		CBitmap bmore;
-		CBitmap bmoremore;
-
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;
 		Song*		m_pSong;

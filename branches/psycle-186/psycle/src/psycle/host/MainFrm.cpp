@@ -29,8 +29,9 @@
 
 #include <HtmlHelp.h>
 
-
 namespace psycle { namespace host {
+
+	extern CPsycleApp theApp;
 
 		#define WM_SETMESSAGESTRING 0x0362
 
@@ -61,7 +62,6 @@ namespace psycle { namespace host {
 		CMainFrame::~CMainFrame()
 		{
 			Global::pInputHandler->SetMainFrame(NULL);
-			if(pGearRackDialog) pGearRackDialog->OnCancel();
 		}
 
 		BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
@@ -107,28 +107,31 @@ namespace psycle { namespace host {
 //seqbar start
 			ON_LBN_SELCHANGE(IDC_SEQLIST, OnSelchangeSeqlist)
 			ON_LBN_DBLCLK(IDC_SEQLIST, OnDblclkSeqlist)
-			ON_BN_CLICKED(IDC_INCSHORT, OnBnClickedIncshort)
-			ON_BN_CLICKED(IDC_DECSHORT, OnBnClickedDecshort)
-			ON_BN_CLICKED(IDC_INCLONG, OnBnClickedInclong)
-			ON_BN_CLICKED(IDC_DECLONG, OnBnClickedDeclong)
-			ON_BN_CLICKED(IDC_SEQNEW, OnBnClickedSeqnew)
-			ON_BN_CLICKED(IDC_SEQDUPLICATE, OnBnClickedSeqduplicate)
-			ON_BN_CLICKED(IDC_SEQINS, OnBnClickedSeqins)
-			ON_BN_CLICKED(IDC_SEQDELETE, OnBnClickedSeqdelete)
-			ON_BN_CLICKED(IDC_SEQCUT, OnBnClickedSeqcut)
-			ON_BN_CLICKED(IDC_SEQCOPY, OnBnClickedSeqcopy)
-			ON_BN_CLICKED(IDC_SEQPASTE, OnBnClickedSeqpaste)
-			ON_BN_CLICKED(IDC_SEQCLR, OnBnClickedSeqclr)
-			ON_BN_CLICKED(IDC_SEQSRT, OnBnClickedSeqsrt)
-			ON_BN_CLICKED(IDC_DECLEN, OnBnClickedDeclen)
-			ON_BN_CLICKED(IDC_INCLEN, OnBnClickedInclen)
-			ON_BN_CLICKED(IDC_FOLLOW, OnBnClickedFollow)
-			ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnBnClickedRecordNoteoff)
-			ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnBnClickedRecordTweaks)
-			ON_BN_CLICKED(IDC_SHOWPATTERNAME, OnBnClickedShowpattername)
-			ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnBnClickedMultichannelAudition)
-			ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnBnClickedNotestoeffects)
-			ON_BN_CLICKED(IDC_MOVECURSORPASTE, OnBnClickedMovecursorpaste)
+			ON_BN_CLICKED(IDC_INCSHORT, OnIncshort)
+			ON_BN_CLICKED(IDC_DECSHORT, OnDecshort)
+			ON_BN_CLICKED(IDC_SEQNEW, OnSeqnew)
+			ON_BN_CLICKED(IDC_SEQDUPLICATE, OnSeqduplicate)
+			ON_BN_CLICKED(IDC_SEQINS, OnSeqins)
+			ON_BN_CLICKED(IDC_SEQDELETE, OnSeqdelete)
+			//Popup menu of seqbar						
+			ON_COMMAND(ID__SEQRENAME, OnSeqrename)
+			ON_COMMAND(ID__SEQCHANGEPOS, OnSeqchange)
+			ON_COMMAND(IDC_SEQCUT, OnSeqcut)
+			ON_COMMAND(IDC_SEQCOPY, OnSeqcopy)
+			ON_COMMAND(IDC_SEQPASTE, OnSeqpaste)
+			ON_COMMAND(ID__SEQPASTEBELOW, OnSeqpasteBelow)
+			ON_COMMAND(ID__SEQSORT, OnSeqsort)
+			ON_COMMAND(ID__SEQCLEAR, OnSeqclear)
+			ON_UPDATE_COMMAND_UI(IDC_SEQPASTE, OnUpdatepaste)
+			ON_UPDATE_COMMAND_UI(ID__SEQPASTEBELOW, OnUpdatepasteBelow)
+			//Popup menu end
+			ON_BN_CLICKED(IDC_FOLLOW, OnFollow)
+			ON_BN_CLICKED(IDC_RECORD_NOTEOFF, OnRecordNoteoff)
+			ON_BN_CLICKED(IDC_RECORD_TWEAKS, OnRecordTweaks)
+			ON_BN_CLICKED(IDC_SHOWPATTERNAME, OnShowpattername)
+			ON_BN_CLICKED(IDC_MULTICHANNEL_AUDITION, OnMultichannelAudition)
+			ON_BN_CLICKED(IDC_NOTESTOEFFECTS, OnNotestoeffects)
+			ON_BN_CLICKED(IDC_MOVECURSORPASTE, OnMovecursorpaste)
 //seqbar end
 //statusbar start
 			ON_UPDATE_COMMAND_UI(ID_INDICATOR_SEQPOS, OnUpdateIndicatorSeqPos)
@@ -171,12 +174,15 @@ namespace psycle { namespace host {
 			}
 			m_wndView.ValidateParent();
 			// Create Toolbars.
-			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT| TBSTYLE_TRANSPARENT) ||
+			//m_rebar.Create(this);
+			//m_rebar.SetBarStyle(m_rebar.GetBarStyle() | CBRS_FLYBY);
+			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|TBSTYLE_LIST|TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
+			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
 			m_songBar.InitializeValues(this, &m_wndView, _pSong);
 			if (!m_songBar.Create(this, IDD_SONGBAR, CBRS_TOP|CBRS_FLYBY|CBRS_GRIPPER, IDD_SONGBAR))
 			{
@@ -226,8 +232,14 @@ namespace psycle { namespace host {
 			HMENU hFileMenu = GetSubMenu(::GetMenu(m_hWnd), 0);
 			m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 11);
 
-
-			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_GRIPPER);
+			/*
+			int buttons = m_wndToolBar.GetToolBarCtrl().GetButtonCount();
+			for(int i=0;i<buttons;i++) {
+				if(!(m_wndToolBar.GetButtonStyle(i)&BTNS_SEP)) {
+					m_wndToolBar.SetButtonStyle(i, m_wndToolBar.GetButtonStyle(i)|BTNS_AUTOSIZE|BTNS_SHOWTEXT);
+				}
+			}
+			*/
 
 			m_wndToolBar.SetWindowText("Psycle tool bar");
 			m_songBar.SetWindowText("Psycle song controls bar");
@@ -245,6 +257,13 @@ namespace psycle { namespace host {
 			DockControlBar(&m_machineBar);
 			DockControlBar(&m_seqBar);
 			LoadBarState(_T("General"));
+
+			// Sets Icon
+			HICON tIcon;
+			tIcon=theApp.LoadIcon(IDR_MAINFRAME);
+			SetIcon(tIcon, true);
+			SetIcon(tIcon, false);
+
 
 			// Finally initializing timer
 			// Show Machine view and init 
@@ -354,7 +373,7 @@ namespace psycle { namespace host {
 			m_songBar.DestroyWindow();
 			m_machineBar.DestroyWindow();
 			m_seqBar.DestroyWindow();
-			// m_pWndWed->DestroyWindow(); is called by the default CFrameWnd::OnClose() function, and the memory freed (no idea how...)
+			// m_pWndWed->DestroyWindow(); is called by the default CWnd::DestroyWindow() function, and the memory freed by subsequent CWnd::OnPostNCDestroy()
 			m_wndView.DestroyWindow();
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
@@ -415,6 +434,7 @@ namespace psycle { namespace host {
 			if (m_wndView.CheckUnsavedSong("Exit Psycle"))
 			{
 				CloseAllMacGuis();
+				if(pGearRackDialog) pGearRackDialog->SendMessage(WM_CLOSE);
 				m_wndView._outputActive = false;
 
 				//Psycle manages its own list for recent files
@@ -497,7 +517,7 @@ namespace psycle { namespace host {
 			_pSong->auxcolSelected=_pSong->instSelected;
 			UpdateComboIns();
 
-			m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 
 			m_wndInst.WaveUpdate();
 			m_wndInst.ShowWindow(SW_SHOWNORMAL);
@@ -529,14 +549,14 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					m_wndView.AddMacViewUndo();
+					Global::pInputHandler->AddMacViewUndo();
 
 					switch (ma->_type)
 					{
 					case MACH_MASTER:
 						if (!m_wndView.MasterMachineDialog)
 						{
-							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView, (Master*)ma);
+							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView, *(Master*)ma, &m_wndView.MasterMachineDialog);
 							for (int i=0;i<MAX_CONNECTIONS; i++)
 							{
 								if ( ma->_inputCon[i])
@@ -547,46 +567,36 @@ namespace psycle { namespace host {
 									}
 								}
 							}
-							CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
-							m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
 						}
+						CenterWindowOnPoint(m_wndView.MasterMachineDialog, point);
+						m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
 						break;
 					case MACH_SAMPLER:
 						if (m_wndView.SamplerMachineDialog)
 						{
-							if (m_wndView.SamplerMachineDialog->_pMachine != (Sampler*)ma)
+							if (((Machine&)m_wndView.SamplerMachineDialog->machine)._macIndex != ma->_macIndex)
 							{
-								m_wndView.SamplerMachineDialog->OnCancel();
-								m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
-								m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
-								m_wndView.SamplerMachineDialog->Create();
-								CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
-								m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
+								m_wndView.SamplerMachineDialog->SendMessage(WM_CLOSE);
 							}
+							else return;
 						}
-						else
-						{
-							m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView);
-							m_wndView.SamplerMachineDialog->_pMachine = (Sampler*)ma;
-							m_wndView.SamplerMachineDialog->Create();
-							CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
-							m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
-						}
+						m_wndView.SamplerMachineDialog = new CGearTracker(&m_wndView.SamplerMachineDialog,*(Sampler*)ma);
+						CenterWindowOnPoint(m_wndView.SamplerMachineDialog, point);
+						m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
 						break;
 					case MACH_XMSAMPLER:
 						{
 						if (m_wndView.XMSamplerMachineDialog)
 						{
-							if (m_wndView.XMSamplerMachineDialog->GetMachine() != (XMSampler*)ma)
+							if (m_wndView.XMSamplerMachineDialog->GetMachine()->_macIndex != ma->_macIndex)
 							{
-								m_wndView.XMSamplerMachineDialog->DestroyWindow();
+								m_wndView.XMSamplerMachineDialog->SendMessage(WM_CLOSE);
 							}
 							else return;
 						}
-						//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
-						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),&m_wndView);
-						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma);
-						m_wndView.XMSamplerMachineDialog->Create(&m_wndView);
+						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),AfxGetMainWnd());
+						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma, &m_wndView.XMSamplerMachineDialog);
+						m_wndView.XMSamplerMachineDialog->Create(this);
 						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
 						}
 						break;
@@ -594,16 +604,13 @@ namespace psycle { namespace host {
 						{
 							if (m_wndView.WaveInMachineDialog)
 							{
-								if (m_wndView.WaveInMachineDialog->pRecorder != (AudioRecorder*)ma)
+								if (((Machine&)m_wndView.WaveInMachineDialog->recorder)._macIndex != ma->_macIndex)
 								{
-									m_wndView.WaveInMachineDialog->DestroyWindow();
+									m_wndView.WaveInMachineDialog->SendMessage(WM_CLOSE);
 								}
 								else return;
 							}
-							//m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName().c_str(),&m_wndView);
-							m_wndView.WaveInMachineDialog = new CWaveInMacDlg(&m_wndView);
-							m_wndView.WaveInMachineDialog->pRecorder = (AudioRecorder*)ma;
-							m_wndView.WaveInMachineDialog->Create();
+							m_wndView.WaveInMachineDialog = new CWaveInMacDlg(&m_wndView, &m_wndView.WaveInMachineDialog,*(AudioRecorder*)ma);
 							CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
 						}
 						break;
@@ -616,12 +623,10 @@ namespace psycle { namespace host {
 							newwin->_pActive = &isguiopen[tmac];
 							newwin->wndView = &m_wndView;
 
-							newwin->LoadFrame(IDR_MACHINEFRAME, 
-								WS_POPUPWINDOW | WS_CAPTION,
-								this);
+							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;
-							winname << _pSong->FindBusFromIndex(ma->_macIndex) << " : " << ma->_editName;
+							winname << _pSong->FindBusFromIndex(tmac) << " : " << ma->_editName;
 							newwin->SetWindowText(winname.str().c_str());
 							newwin->ShowWindow(SW_SHOWNORMAL);
 							isguiopen[tmac] = true;
@@ -635,13 +640,10 @@ namespace psycle { namespace host {
 							CVstEffectWnd* newwin;
 							m_pWndMac[tmac] = newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
 							newwin->_pActive = &isguiopen[tmac];
-							newwin->LoadFrame(IDR_VSTFRAME, 
-								WS_POPUPWINDOW | WS_CAPTION,
-								this);
+							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
-							winname << std::hex << std::setw(2)
-								<< _pSong->FindBusFromIndex(tmac)
-								<< " : " << ma->_editName;
+							winname<<std::setfill('0') << std::setw(2) << std::hex;
+							winname << _pSong->FindBusFromIndex(tmac) << " : " << ma->_editName;
 							newwin->SetTitleText(winname.str().c_str());
 							// C_Tuner.dll crashes if asking size before opening.
 //							newwin->ResizeWindow(0);
@@ -716,11 +718,12 @@ namespace psycle { namespace host {
 
 		void CMainFrame::CloseAllMacGuis()
 		{
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 			for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 			{
 				if (m_wndView.WireDialog[i])
 				{
-					m_wndView.WireDialog[i]->OnCancel();
+					m_wndView.WireDialog[i]->SendMessage(WM_CLOSE);
 				}
 			}
 			for (int c=0; c<MAX_MACHINES; c++)
@@ -737,10 +740,10 @@ namespace psycle { namespace host {
 				{
 					if (m_wndView.WireDialog[i])
 					{
-						if ((m_wndView.WireDialog[i]->_pSrcMachine == _pSong->_pMachine[mac]) ||
-							(m_wndView.WireDialog[i]->_pDstMachine == _pSong->_pMachine[mac]))
+						if ((m_wndView.WireDialog[i]->srcMachine._macIndex == _pSong->_pMachine[mac]->_macIndex) ||
+							(m_wndView.WireDialog[i]->dstMachine._macIndex == _pSong->_pMachine[mac]->_macIndex))
 						{
-							m_wndView.WireDialog[i]->OnCancel();
+							m_wndView.WireDialog[i]->SendMessage(WM_CLOSE);
 						}
 					}
 				}
@@ -750,16 +753,16 @@ namespace psycle { namespace host {
 				switch (_pSong->_pMachine[mac]->_type)
 				{
 					case MACH_MASTER:
-						if (m_wndView.MasterMachineDialog) m_wndView.MasterMachineDialog->OnCancel();
+						if (m_wndView.MasterMachineDialog) m_wndView.MasterMachineDialog->SendMessage(WM_CLOSE);
 						break;
 					case MACH_SAMPLER:
-						if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->OnCancel();
+						if (m_wndView.SamplerMachineDialog) m_wndView.SamplerMachineDialog->SendMessage(WM_CLOSE);
 						break;
 					case MACH_XMSAMPLER:
-						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->DestroyWindow();
+						if (m_wndView.XMSamplerMachineDialog) m_wndView.XMSamplerMachineDialog->SendMessage(WM_CLOSE);
 						break;
 					case MACH_RECORDER:
-						if (m_wndView.WaveInMachineDialog) m_wndView.WaveInMachineDialog->DestroyWindow();
+						if (m_wndView.WaveInMachineDialog) m_wndView.WaveInMachineDialog->SendMessage(WM_CLOSE);
 						break;
 					case MACH_DUPLICATOR:
 //					case MACH_LFO:
@@ -770,8 +773,7 @@ namespace psycle { namespace host {
 					case MACH_VSTFX:
 						if (isguiopen[mac])
 						{
-							m_pWndMac[mac]->DestroyWindow();
-							isguiopen[mac] = false;
+							m_pWndMac[mac]->SendMessage(WM_CLOSE);
 						}
 						break;
 					default:break;
@@ -847,28 +849,29 @@ namespace psycle { namespace host {
 		//
 		void CMainFrame::OnSelchangeSeqlist() { m_seqBar.OnSelchangeSeqlist(); }
 		void CMainFrame::OnDblclkSeqlist() { m_seqBar.OnDblclkSeqlist(); }
-		void CMainFrame::OnBnClickedIncshort() { m_seqBar.OnBnClickedIncshort(); }
-		void CMainFrame::OnBnClickedDecshort() { m_seqBar.OnBnClickedDecshort(); }
-		void CMainFrame::OnBnClickedInclong() { m_seqBar.OnBnClickedInclong(); }
-		void CMainFrame::OnBnClickedDeclong() { m_seqBar.OnBnClickedDeclong(); }
-		void CMainFrame::OnBnClickedSeqnew() { m_seqBar.OnBnClickedSeqnew(); }
-		void CMainFrame::OnBnClickedSeqduplicate() { m_seqBar.OnBnClickedSeqduplicate(); }
-		void CMainFrame::OnBnClickedSeqins() { m_seqBar.OnBnClickedSeqins(); }
-		void CMainFrame::OnBnClickedSeqdelete() { m_seqBar.OnBnClickedSeqdelete(); }
-		void CMainFrame::OnBnClickedSeqcut() { m_seqBar.OnBnClickedSeqcut(); }
-		void CMainFrame::OnBnClickedSeqcopy() { m_seqBar.OnBnClickedSeqcopy(); }
-		void CMainFrame::OnBnClickedSeqpaste() { m_seqBar.OnBnClickedSeqpaste(); }
-		void CMainFrame::OnBnClickedSeqclr() { m_seqBar.OnBnClickedSeqclr(); }
-		void CMainFrame::OnBnClickedSeqsrt() { m_seqBar.OnBnClickedSeqsrt(); }
-		void CMainFrame::OnBnClickedDeclen() { m_seqBar.OnBnClickedDeclen(); }
-		void CMainFrame::OnBnClickedInclen() { m_seqBar.OnBnClickedInclen(); }
-		void CMainFrame::OnBnClickedFollow() { m_seqBar.OnBnClickedFollow(); }
-		void CMainFrame::OnBnClickedRecordNoteoff() { m_seqBar.OnBnClickedRecordNoteoff(); }
-		void CMainFrame::OnBnClickedRecordTweaks() { m_seqBar.OnBnClickedRecordTweaks(); }
-		void CMainFrame::OnBnClickedShowpattername() { m_seqBar.OnBnClickedShowpattername(); }
-		void CMainFrame::OnBnClickedMultichannelAudition() { m_seqBar.OnBnClickedMultichannelAudition(); }
-		void CMainFrame::OnBnClickedNotestoeffects() { m_seqBar.OnBnClickedNotestoeffects(); }
-		void CMainFrame::OnBnClickedMovecursorpaste() { m_seqBar.OnBnClickedMovecursorpaste(); }
+		void CMainFrame::OnIncshort() { m_seqBar.OnIncshort(); }
+		void CMainFrame::OnDecshort() { m_seqBar.OnDecshort(); }
+		void CMainFrame::OnSeqnew() { m_seqBar.OnSeqnew(); }
+		void CMainFrame::OnSeqduplicate() { m_seqBar.OnSeqduplicate(); }
+		void CMainFrame::OnSeqins() { m_seqBar.OnSeqins(); }
+		void CMainFrame::OnSeqdelete() { m_seqBar.OnSeqdelete(); }
+		void CMainFrame::OnSeqrename() { m_seqBar.OnSeqrename(); }
+		void CMainFrame::OnSeqchange() { m_seqBar.OnSeqchange(); }
+		void CMainFrame::OnSeqcut() { m_seqBar.OnSeqcut(); }
+		void CMainFrame::OnSeqcopy() { m_seqBar.OnSeqcopy(); }
+		void CMainFrame::OnSeqpaste() { m_seqBar.OnSeqpasteAbove(); }
+		void CMainFrame::OnSeqpasteBelow() { m_seqBar.OnSeqpasteBelow(); }
+		void CMainFrame::OnSeqsort() { m_seqBar.OnSeqsort(); }
+		void CMainFrame::OnSeqclear() { m_seqBar.OnSeqclear(); }
+		void CMainFrame::OnUpdatepaste(CCmdUI* pCmdUI) {m_seqBar.OnUpdatepaste(pCmdUI);}
+		void CMainFrame::OnUpdatepasteBelow(CCmdUI* pCmdUI) {m_seqBar.OnUpdatepasteBelow(pCmdUI);}
+		void CMainFrame::OnFollow() { m_seqBar.OnFollow(); }
+		void CMainFrame::OnRecordNoteoff() { m_seqBar.OnRecordNoteoff(); }
+		void CMainFrame::OnRecordTweaks() { m_seqBar.OnRecordTweaks(); }
+		void CMainFrame::OnShowpattername() { m_seqBar.OnShowpattername(); }
+		void CMainFrame::OnMultichannelAudition() { m_seqBar.OnMultichannelAudition(); }
+		void CMainFrame::OnNotestoeffects() { m_seqBar.OnNotestoeffects(); }
+		void CMainFrame::OnMovecursorpaste() { m_seqBar.OnMovecursorpaste(); }
 		bool CMainFrame::ToggleFollowSong()
 		{
 			bool check;
@@ -879,7 +882,7 @@ namespace psycle { namespace host {
 				m_seqBar.m_follow.SetCheck(0);
 				check=false;
 			}
-			m_seqBar.OnBnClickedFollow();
+			m_seqBar.OnFollow();
 			return check;
 		}
 		void CMainFrame::UpdatePlayOrder(bool mode) { m_seqBar.UpdatePlayOrder(mode); }

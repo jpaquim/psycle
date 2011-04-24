@@ -12,6 +12,27 @@ namespace psycle
 		class CMainFrm;
 		class Machine;
 
+		class SPatternUndo
+		{
+		public:
+			int type;
+			SPatternUndo* pPrev;
+			unsigned char* pData;
+			int pattern;
+			int x;
+			int y;
+			int	tracks;
+			int	lines;
+			// store positional data plz
+			int edittrack;
+			int editline;
+			int editcol;
+			int seqpos;
+			// counter for tracking, works like ID
+			int counter;
+		};
+
+
 		/// input handler, keyboard configuration.
 		class InputHandler  
 		{
@@ -52,6 +73,23 @@ namespace psycle
 			void Stop();
 			void PlaySong();
 			void PlayFromCur();
+
+			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
+			void AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter);
+			void AddMacViewUndo(); // place holder
+			void KillUndo();
+			void KillRedo();
+			bool IsModified();
+			bool HasUndo(int viewMode);
+			bool HasRedo(int viewMode);
+			void SafePoint();
+
 		private:
 			/// get key modifier index.
 			UINT GetModifierIdx(UINT nFlags)
@@ -72,6 +110,15 @@ namespace psycle
 			int mactrack[MAX_TRACKS];
 			/// last track output to	
 			int outtrack;
+
+			SPatternUndo * pUndoList;
+			SPatternUndo * pRedoList;
+
+			int UndoCounter;
+			int UndoSaved;
+
+			int UndoMacCounter;
+			int UndoMacSaved;
 		};
 	}
 }

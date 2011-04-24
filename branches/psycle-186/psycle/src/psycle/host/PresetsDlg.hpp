@@ -2,6 +2,7 @@
 ///\brief interface file for psycle::host::CPresetsDlg.
 #pragma once
 #include "Psycle.hpp"
+#include "Machine.hpp"
 #include <cstring>
 
 namespace psycle {
@@ -11,33 +12,6 @@ namespace host {
 
 		class CFrameMachine;
 		class Machine;
-
-		/// machine parameter preset \todo should we move it outside of gui classes?
-		class CPreset  
-		{
-			int numPars;
-			int* params;
-			long int dataSize;
-			unsigned char * data;
-			char name[32];
-		public:
-			void Clear();
-			void Init(int num);
-			void Init(int num,const char* newname,   int const * parameters,int size, void* newdata);
-			void Init(int num,const char* newname, float const * parameters); // for VST .fxb's
-			int GetNumPars() { return numPars; }
-			void GetParsArray(int* destarray) { if(numPars>0) std::memcpy(destarray, params, numPars * sizeof *params); }
-			void GetDataArray(void* destarray) {if(dataSize>0) std::memcpy(destarray, data, dataSize); }
-			void* GetData() {return data;}
-			long int GetDataSize() {return dataSize;}
-			void SetName(const char *setname) { std::strcpy(name,setname); }
-			void GetName(char *nname) { std::strcpy(nname,name); }
-			int GetParam(const int n);
-			void SetParam(const int n,int val);
-			CPreset();
-			virtual ~CPreset();
-			CPreset& operator=(const CPreset& newpreset);
-		};
 
 		/// machine parameter preset window.
 		class CPresetsDlg : public CDialog

@@ -44,12 +44,14 @@ Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
 v1.8.8 beta4
 ------------
++ Pattern tracks can be named now. Find the new settings on the pattern properties dialog.
 * Reimplemented most of the Settings system (This includes many things, from making all them accessible from a central point in the code, an user option to save them to other places than the windows registry, real-time change of audio driver, centralized the code to import/export the visual and keyboard settings, and more)
-* Toolbar improvements (now they are all detachable, improved visuals a bit)
+* Toolbar improvements (now they are all detachable, new graphics, some UI reordering, context menu on the sequence list). Also, separated the toolbar sourcecode into independent files.
 * Fonts use now default quality (which means allowing antialias if setting activated on Windows).
 * WireDlg, and machine parameter window can now be closed with ESC key (Only XMSampler window cannot be closed this way now).
+* Internal source code change: Implemented the sliders with OnHScroll/VScroll message handler (proper way of doing it) on XMSamplerMixerPage, WireDlg, Master Dialog, master slider on the toolbar and in Wave Recording machine dialog. Other improvements on the open/closing of those dialogs.
+* Changes on the Machine parameter windows, merged several sources. Now Native windows work the same way than VST ones.
 ! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning )
-* Internal source code change: Implemented XMSamplerMixerPage sliders, WireDlg sliders and master volume slider on toolbar with OnHScroll/VScroll message handler (proper way of doing it). Also, separated the toolbar sourcecode into independent files.
 
 v1.8.8 beta3
 ------------

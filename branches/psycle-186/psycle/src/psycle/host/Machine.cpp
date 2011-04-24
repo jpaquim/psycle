@@ -964,41 +964,17 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				pMachine=p;
 			}
 			
-#if !defined WINAMP_PLUGIN
-			///TODO: Move this code to the ChildView, after loading.
-			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
-			CPoint viewSize = Global::_pSong->viewSize;
-#endif //!defined WINAMP_PLUGIN
-
 			if(index < MAX_BUSES)
 			{
 				pMachine->_mode = MACHMODE_GENERATOR;
-#if !defined WINAMP_PLUGIN
-				if(pMachine->_x > viewSize.x-mcoords.sGenerator.width)
-					pMachine->_x = viewSize.x-mcoords.sGenerator.width;
-				if(pMachine->_y > viewSize.y-mcoords.sGenerator.height)
-					pMachine->_y = viewSize.y-mcoords.sGenerator.height;
-#endif //!defined WINAMP_PLUGIN
 			}
 			else if (index < MAX_BUSES*2)
 			{
 				pMachine->_mode = MACHMODE_FX;
-#if !defined WINAMP_PLUGIN
-				if(pMachine->_x > viewSize.x-mcoords.sEffect.width)
-					pMachine->_x = viewSize.x-mcoords.sEffect.width;
-				if(pMachine->_y > viewSize.y-mcoords.sEffect.height)
-					pMachine->_y = viewSize.y-mcoords.sEffect.height;
-#endif //!defined WINAMP_PLUGIN
 			}
 			else
 			{
 				pMachine->_mode = MACHMODE_MASTER;
-#if !defined WINAMP_PLUGIN
-				if(pMachine->_x > viewSize.x-mcoords.sMaster.width)
-					pMachine->_x = viewSize.x-mcoords.sMaster.width;
-				if(pMachine->_y > viewSize.y-mcoords.sMaster.height)
-					pMachine->_y = viewSize.y-mcoords.sMaster.height;
-#endif //!defined WINAMP_PLUGIN
 			}
 			pMachine->SetPan(pMachine->_panning);
 			if (pMachine->_bypass) pMachine->Bypass(true);

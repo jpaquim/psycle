@@ -15,31 +15,39 @@ IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)
 XMSamplerUI::XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 : CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 , init(false)
-	{
-	}
+, windowVar_(NULL)
+{
+}
 
 XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 :CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 , init(false)
-	{
-	}
-
-BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
-	//{{AFX_MSG_MAP(XMSamplerUI)
-	ON_WM_DESTROY()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-///void XMSamplerUI::OnClose()
-void XMSamplerUI::OnDestroy()
+, windowVar_(NULL)
 {
-	((CChildView*)m_pParentWnd)->XMSamplerMachineDialog = NULL;
-	CPropertySheet::OnDestroy();
+}
+XMSamplerUI::~XMSamplerUI()
+{
 }
 
+BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
+	ON_WM_CLOSE()
+END_MESSAGE_MAP()
 
-void XMSamplerUI::Init(XMSampler* pMachine) 
-	{
+
+void XMSamplerUI::PostNcDestroy()
+{
+	if(windowVar_!= NULL) *windowVar_ = NULL;
+	delete this;
+}
+void XMSamplerUI::OnClose()
+{
+	CPropertySheet::OnClose();
+	DestroyWindow();
+}
+
+void XMSamplerUI::Init(XMSampler* pMachine,XMSamplerUI** windowVar) 
+{
+	windowVar_ = windowVar;
 	_pMachine = pMachine;
 	m_General.pMachine(pMachine);
 	m_Instrument.pMachine(pMachine);

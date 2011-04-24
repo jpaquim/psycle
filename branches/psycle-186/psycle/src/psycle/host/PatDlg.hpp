@@ -11,37 +11,45 @@ namespace psycle {
 		{
 		public:
 			CPatDlg(CWnd* pParent = 0);
-			int patLines;
-			char patName[32];
-		// Dialog Data
-			//{{AFX_DATA(CPatDlg)
 			enum { IDD = IDD_PATDLG };
-			CButton	m_adaptsizeCheck;
-			CEdit	m_numlines;
 			CEdit	m_patname;
+			char patName[32];
+			CEdit	m_numlines;
+			int patLines;
 			CSpinButtonCtrl	m_spinlines;
-			BOOL	m_adaptsize;
 			CStatic m_text;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CPatDlg)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
+			CButton	m_adaptsizeCheck;
+			BOOL	m_adaptsize;
+			int		m_shownames;
+			int		m_independentnames;
+
+			CEdit   m_trackedit;
+			CListBox m_tracklist;
+			CButton m_copybutton;
+			CComboBox m_patternlist;
+
+			int patIdx;
+			Song* m_pSong;
+			int prevsel;
+			std::string tracknames[MAX_TRACKS];
 			BOOL bInit;
-			// Generated message map functions
-			//{{AFX_MSG(CPatDlg)
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+		protected:
+			void FillTrackList();
+			void FillPatternCombo();
+
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
-			afx_msg void OnCheck1();
-			afx_msg void OnUpdateNumLines();
-			//}}AFX_MSG
+			afx_msg void OnAdaptContent();
+			afx_msg void OnChangeNumLines();
+			afx_msg void OnChangeTrackEdit();
+			afx_msg void OnSelchangeTracklist();
+			afx_msg void OnHeaderHeader();
+			afx_msg void OnHeaderNames();
+			afx_msg void OnNotShareNames();
+			afx_msg void OnShareNames();
+			afx_msg void OnCopyNames();
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 }}

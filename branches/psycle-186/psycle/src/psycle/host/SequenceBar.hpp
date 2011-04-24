@@ -27,34 +27,34 @@ namespace psycle { namespace host {
 	public:
 		afx_msg void OnSelchangeSeqlist();
 		afx_msg void OnDblclkSeqlist();
-		afx_msg void OnBnClickedIncshort();
-		afx_msg void OnBnClickedDecshort();
-		afx_msg void OnBnClickedInclong();
-		afx_msg void OnBnClickedDeclong();
-		afx_msg void OnBnClickedSeqnew();
-		afx_msg void OnBnClickedSeqduplicate();
-		afx_msg void OnBnClickedSeqins();
-		afx_msg void OnBnClickedSeqdelete();
-		afx_msg void OnBnClickedSeqcut();
-		afx_msg void OnBnClickedSeqcopy();
-		afx_msg void OnBnClickedSeqpaste();
-		afx_msg void OnBnClickedSeqclr();
-		afx_msg void OnBnClickedSeqsrt();
-		afx_msg void OnBnClickedDeclen();
-		afx_msg void OnBnClickedInclen();
-		afx_msg void OnBnClickedFollow();
-		afx_msg void OnBnClickedRecordNoteoff();
-		afx_msg void OnBnClickedRecordTweaks();
-		afx_msg void OnBnClickedShowpattername();
-		afx_msg void OnBnClickedMultichannelAudition();
-		afx_msg void OnBnClickedNotestoeffects();
-		afx_msg void OnBnClickedMovecursorpaste();
+		afx_msg void OnIncshort();
+		afx_msg void OnDecshort();
+		afx_msg void OnSeqnew();
+		afx_msg void OnSeqduplicate();
+		afx_msg void OnSeqins();
+		afx_msg void OnSeqdelete();
+		afx_msg void OnSeqrename();
+		afx_msg void OnSeqchange();
+		afx_msg void OnSeqcut();
+		afx_msg void OnSeqcopy();
+		afx_msg void OnSeqpasteAbove();
+		afx_msg void OnSeqpasteBelow();
+		afx_msg void OnSeqclear();
+		afx_msg void OnSeqsort();
+		afx_msg void OnUpdatepaste(CCmdUI* pCmdUI);
+		afx_msg void OnUpdatepasteBelow(CCmdUI* pCmdUI);
+		afx_msg void OnFollow();
+		afx_msg void OnRecordNoteoff();
+		afx_msg void OnRecordTweaks();
+		afx_msg void OnShowpattername();
+		afx_msg void OnMultichannelAudition();
+		afx_msg void OnNotestoeffects();
+		afx_msg void OnMovecursorpaste();
 
 		void UpdatePlayOrder(bool mode);
 		void UpdateSequencer(int bottom = -1);
 	protected:
 		CStatic m_duration;
-		CStatic m_seqLen;
 		CExListBox m_sequence;
 	public:
 		CButton m_follow;
@@ -65,13 +65,6 @@ namespace psycle { namespace host {
 		CButton m_multiChannel;
 		CButton m_notesToEffects;
 		CButton m_moveWhenPaste;
-
-		CBitmap bplus;
-		CBitmap bminus;
-		CBitmap bplusplus;
-		CBitmap bminusminus;
-		CBitmap bless;
-		CBitmap bmore;
 
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;

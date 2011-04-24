@@ -5,9 +5,11 @@
 
 namespace psycle { namespace host {
 
-		CProgressDialog::CProgressDialog(CWnd* pParent) : CDialog(CProgressDialog::IDD, pParent)
+		CProgressDialog::CProgressDialog(CWnd* pParent, bool create) : CDialog(CProgressDialog::IDD, pParent)
 		{
-			m_pParent = pParent;
+			if(create) {
+				CDialog::Create(IDD, pParent);
+			}
 		}
 
 		void CProgressDialog::DoDataExchange(CDataExchange* pDX)
@@ -17,6 +19,7 @@ namespace psycle { namespace host {
 		}
 
 		BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
+			ON_WM_CLOSE()
 		END_MESSAGE_MAP()
 
 		BOOL CProgressDialog::OnInitDialog() 
@@ -28,15 +31,10 @@ namespace psycle { namespace host {
 			return true;
 		}
 
-		BOOL CProgressDialog::Create()
+		void CProgressDialog::OnClose()
 		{
-			return CDialog::Create(IDD, m_pParent);
-		}
-
-		void CProgressDialog::OnCancel()
-		{
-			DestroyWindow();
-			AfxGetApp()->DoWaitCursor(-1); 
+			CDialog::OnClose();
+			AfxGetApp()->DoWaitCursor(-1);
 		}
 
 	}   // namespace

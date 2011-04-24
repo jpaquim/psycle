@@ -7,6 +7,7 @@
 #include "Plugin.hpp" // For default parameter value.
 
 #include "ChildView.hpp"
+#include "InputHandler.hpp"
 #include "NewVal.hpp"
 
 #define DEFAULT_ROWWIDTH  150
@@ -177,7 +178,7 @@ namespace psycle { namespace host {
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
 				visualtweakvalue= tweakbase;
-				mainView->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 				SetCapture();
 			}
 			else
@@ -194,7 +195,7 @@ namespace psycle { namespace host {
 				int par = ConvertXYtoParam(point.x,point.y);
 				if(par>=0 && par <= _pMachine->GetNumParams() )
 				{
-					mainView->AddMacViewUndo();
+					Global::pInputHandler->AddMacViewUndo();
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
 				}
 			}
@@ -244,7 +245,7 @@ namespace psycle { namespace host {
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f));  // +0.5f to round correctly, not like "floor".
 				prevval=(int)(nv+0.5f);
 				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-				mainView->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 				if(Global::psycleconf().inputHandler()._RecordTweaks)
 				{
 					if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
@@ -312,7 +313,7 @@ namespace psycle { namespace host {
 					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
-						mainView->AddMacViewUndo();
+						Global::pInputHandler->AddMacViewUndo();
 						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
 					}
 					Invalidate(false);

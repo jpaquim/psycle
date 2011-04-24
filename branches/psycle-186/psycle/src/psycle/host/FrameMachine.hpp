@@ -23,7 +23,9 @@ namespace host {
 			virtual void ResizeWindow(CRect* pRect);
 			virtual void GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect = NULL);
 			virtual void PostOpenWnd();
+
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+			virtual void PostNcDestroy();
 
 		protected:
 			virtual CBaseParamView* CreateView();
@@ -39,6 +41,7 @@ namespace host {
 
 		protected:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+			afx_msg void OnClose();
 			afx_msg void OnDestroy();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
@@ -51,7 +54,7 @@ namespace host {
 			afx_msg void OnParametersResetparameters();
 			afx_msg void OnParametersCommand();
 			afx_msg void OnViewsBankmanager();
-			afx_msg void OnUpdateViewsBankmanager(CCmdUI *pCmdUI);
+			afx_msg void OnUpdateParametersCommand(CCmdUI *pCmdUI);
 			afx_msg void OnMachineAboutthismachine();
 			DECLARE_MESSAGE_MAP()
 		};

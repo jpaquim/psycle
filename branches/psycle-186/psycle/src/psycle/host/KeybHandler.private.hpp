@@ -198,7 +198,7 @@ namespace psycle { namespace host {
 						|| (pentry->_inst != entry._inst) 
 						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
 						pentry->_cmd = entry._cmd;
 						pentry->_parameter = entry._parameter;
@@ -279,7 +279,7 @@ namespace psycle { namespace host {
 						|| (pentry->_inst != entry._inst) 
 						|| ((pentry->_note != notecommands::tweak) && (pentry->_note != notecommands::tweakeffect) && (pentry->_note != notecommands::tweakslide)))
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
 						pentry->_cmd = entry._cmd;
 						pentry->_parameter = entry._parameter;
@@ -356,7 +356,7 @@ namespace psycle { namespace host {
 					|| (pentry->_cmd != entry._cmd) 
 					|| (pentry->_parameter != entry._parameter))
 				{
-					AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 					pentry->_mach = entry._mach;
 					pentry->_cmd = entry._cmd;
 					pentry->_parameter = entry._parameter;
@@ -431,7 +431,7 @@ namespace psycle { namespace host {
 						|| (pentry->_inst != entry._inst) 
 						|| (pentry->_note != notecommands::midicc))
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
 						pentry->_cmd = entry._cmd;
 						pentry->_parameter = entry._parameter;
@@ -504,7 +504,7 @@ namespace psycle { namespace host {
 				if ((pentry->_mach != entry._mach) 
 					|| (pentry->_inst != entry._inst))
 				{
-					AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 					pentry->_mach = entry._mach;
 					pentry->_inst = entry._inst;
 
@@ -559,7 +559,7 @@ namespace psycle { namespace host {
 				{
 					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
@@ -607,7 +607,7 @@ namespace psycle { namespace host {
 				{
 					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
-						AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
@@ -803,7 +803,7 @@ namespace psycle { namespace host {
 				}
 				note = notecommands::release;
 			}
-			AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
+			Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
 			entry->_note = note;
 			entry->_mach = _pSong->seqBus;
 
@@ -901,7 +901,7 @@ namespace psycle { namespace host {
 
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
-				AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 				entry->_note = notecommands::release;
 
 				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
@@ -937,7 +937,7 @@ namespace psycle { namespace host {
 
 			if (editcur.col < 5 && oldValue == 255)	{ oldValue = 0; }
 
-			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			switch ((editcur.col+1)%2)
 			{
@@ -992,7 +992,7 @@ namespace psycle { namespace host {
 			unsigned char * offset = _ptrack(ps);
 			unsigned char * toffset = _ptrackline(ps);
 
-			AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			// &&&&& hardcoded # of bytes per event
 			if ( editcur.col == 0 )
@@ -1027,7 +1027,7 @@ namespace psycle { namespace host {
 					editcur.line--;
 			}
 
-			AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
+			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int i;
 			for (i=editcur.line; i < patlines-1; i++)
@@ -1051,7 +1051,7 @@ namespace psycle { namespace host {
 			unsigned char * offset = _ptrack(ps);
 			int patlines = _pSong->patternLines[ps];
 
-			AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
+			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int i;
 			for (i=patlines-1; i > editcur.line; i--)
@@ -1282,7 +1282,7 @@ namespace psycle { namespace host {
 				PatternEntry blank;
 
 				patBufferLines = _pSong->patternLines[ps];
-				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int length = patBufferLines*EVENT_SIZE*MAX_TRACKS;
 				
@@ -1323,10 +1323,10 @@ namespace psycle { namespace host {
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
 				// **************** funky shit goin on here yo with the pattern resize or some shit
-				AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 				if ( patBufferLines != _pSong->patternLines[ps] )
 				{
-					AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 					_pSong->AllocNewPattern(ps,"",patBufferLines,false);
 				}
 				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
@@ -1344,10 +1344,10 @@ namespace psycle { namespace host {
 				unsigned char* offset_target = _ppattern(ps);
 				unsigned char* offset_source = patBufferData;
 				// **************** funky shit goin on here yo with the pattern resize or some shit
-				AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 				if ( patBufferLines != _pSong->patternLines[ps] )
 				{
-					AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
 					_pSong->AllocNewPattern(ps,"",patBufferLines,false);
 				}
 
@@ -1376,7 +1376,7 @@ namespace psycle { namespace host {
 				PatternEntry blank;
 
 				patBufferLines = _pSong->patternLines[ps];
-				AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int length = patBufferLines*EVENT_SIZE*MAX_TRACKS;
 				
@@ -1402,7 +1402,7 @@ namespace psycle { namespace host {
 				int pLines=_pSong->patternLines[ps];
 				int length=pLines*EVENT_SIZE*MAX_TRACKS;
 
-				AddUndo(ps,0,0,MAX_TRACKS,pLines,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,pLines,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for	(int c=editcur.line*EVENT_SIZE*MAX_TRACKS;c<length;c+=EVENT_SIZE)
 				{
@@ -1550,7 +1550,7 @@ namespace psycle { namespace host {
 
 				if (cutit)
 				{
-					AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				}
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1587,7 +1587,7 @@ namespace psycle { namespace host {
 				PatternEntry blank;
 
 				// UNDO CODE HERE CUT
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
 					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
@@ -1608,7 +1608,7 @@ namespace psycle { namespace host {
 				int nl = _pSong->patternLines[ps];
 
 				// UNDO CODE PASTE AND MIX PASTE
-				if (save) AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				if (save) Global::pInputHandler->AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int ls=0;
 				int ts=0;
@@ -1681,7 +1681,7 @@ namespace psycle { namespace host {
 				int stopL=destl+blockNLines;
 
 				// We backup the data of the whole block.
-				AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				// Do the blocks overlap? Then take care of moving the appropiate data.
 				if (abs(blockLastOrigin.start.track-destt) < blockNTracks	&& abs(blockLastOrigin.start.line-destl) < blockNLines )
@@ -1845,10 +1845,10 @@ namespace psycle { namespace host {
 
 				int ps = _ps();
 				int nlines = _pSong->patternLines[ps];
-				AddUndo(ps,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 				if (nlines != nl)
 				{
-					AddUndoLength(ps,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndoLength(ps,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 					_pSong->patternLines[ps] = nl;
 				}
 
@@ -1893,7 +1893,7 @@ namespace psycle { namespace host {
 				sl=blockSel.start.line;			
 				nl=((blockSel.end.line-sl)/2)+1;
 				el=blockSel.end.line;
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 			else 
 			{
@@ -1902,7 +1902,7 @@ namespace psycle { namespace host {
 				sl=0;
 				nl= _pSong->patternLines[ps]/2;	
 				el=_pSong->patternLines[ps]-1;
-				AddUndo(ps,0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 
 			for (int t=st;t<et;t++)
@@ -1936,7 +1936,7 @@ namespace psycle { namespace host {
 				sl=blockSel.start.line;		
 				nl=blockSel.end.line-sl+1;
 				el=nl/2;
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 			else 
 			{
@@ -1945,7 +1945,7 @@ namespace psycle { namespace host {
 				sl=0;
 				nl=_pSong->patternLines[ps];	
 				el=_pSong->patternLines[ps]/2;
-				AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 			
 			for (int t=st;t<et;t++)
@@ -1975,7 +1975,7 @@ namespace psycle { namespace host {
 			{
 				int ps = _ps();
 
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -2005,7 +2005,7 @@ namespace psycle { namespace host {
 			if ( blockSelected == true ) 
 			{
 				int ps = _ps();
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -2036,7 +2036,7 @@ namespace psycle { namespace host {
 			{
 				const int ps=_ps();
 
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -2068,7 +2068,7 @@ namespace psycle { namespace host {
 				///////////////////////////////////////////////////////// Add ROW
 				unsigned char *toffset=_ppattern(ps);
 				
-				AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 				
 				const int initvalue = 
 					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.start.line*MULTIPLY+3) * 0x100 +
@@ -2120,7 +2120,7 @@ namespace psycle { namespace host {
 		{
 			if(_pSong->playOrder[editPosition]<(MAX_PATTERNS-1))
 			{
-				AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				++_pSong->playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
@@ -2132,7 +2132,7 @@ namespace psycle { namespace host {
 		{
 			if(_pSong->playOrder[editPosition]>0)
 			{
-				AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
+				Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 				--_pSong->playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
@@ -2208,7 +2208,7 @@ namespace psycle { namespace host {
 				{
 					if ( _pSong->playLength+1 > MAX_SONG_POSITIONS) return;
 
-					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
+					Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
 					int patternum=_pSong->GetBlankPatternUnused();
 					if ( patternum>= MAX_PATTERNS )
 					{
@@ -2250,325 +2250,10 @@ namespace psycle { namespace host {
 
 		}
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// undo/redo code
-		////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		void CChildView::AddMacViewUndo()
-		{
-			// i have not written the undo code yet for machine and instruments
-			// however, for now it at least tracks changes for save/new/open/close warnings
-			UndoMacCounter++;
-			SetTitleBarText();
-		}
-
-		void CChildView::AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-
-			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
-			pNew->pData = pData;
-			pNew->pattern = pattern;
-			pNew->x = x;
-			pNew->y = y;
-			if (tracks+x > _pSong->SONGTRACKS)
-			{
-				tracks = _pSong->SONGTRACKS-x;
-			}
-			pNew->tracks = tracks;
-						
-			const int nl = _pSong->patternLines[pattern];
-			
-			if (lines+y > nl)
-			{
-				lines = nl-y;
-			}
-			pNew->lines = lines;
-			pNew->type = UNDO_PATTERN;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			for (int t=x;t<x+tracks;t++)
-			{
-				for (int l=y;l<y+lines;l++)
-				{
-					unsigned char *offset_source=_ptrackline(pattern,t,l);
-					
-					memcpy(pData,offset_source,EVENT_SIZE);
-					pData+=EVENT_SIZE;
-				}
-			}
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			SetTitleBarText();
-		}
-
-		void CChildView::AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
-			pNew->pData = pData;
-			pNew->pattern = pattern;
-			pNew->x = x;
-			pNew->y = y;
-			if (tracks+x > _pSong->SONGTRACKS)
-			{
-				tracks = _pSong->SONGTRACKS-x;
-			}
-			pNew->tracks = tracks;
-			const int nl = _pSong->patternLines[pattern];
-			if (lines+y > nl)
-			{
-				lines = nl-y;
-			}
-			pNew->tracks = tracks;
-			pNew->lines = lines;
-			pNew->type = UNDO_PATTERN;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-
-			for (int t=x;t<x+tracks;t++)
-			{
-				for (int l=y;l<y+lines;l++)
-				{
-					unsigned char *offset_source=_ptrackline(pattern,t,l);
-					
-					memcpy(pData,offset_source,EVENT_SIZE);
-					pData+=EVENT_SIZE;
-				}
-			}
-		}
-
-		void CChildView::AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			pNew->pData = NULL;
-			pNew->pattern = pattern;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_LENGTH;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			SetTitleBarText();
-		}
-
-		void CChildView::AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			pNew->pData = NULL;
-			pNew->pattern = pattern;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_LENGTH;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-		}
-
-		void CChildView::AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
-			memcpy(pNew->pData, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_SEQUENCE;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			SetTitleBarText();
-		}
-
-		void CChildView::AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			// count used patterns
-			unsigned short count = 0;
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (_pSong->ppPatternData[i])
-				{
-					count++;
-				}
-			}
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
-			unsigned char *pWrite=pNew->pData;
-			memcpy(pWrite, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
-
-			memcpy(pWrite, &count, sizeof(count));
-			pWrite+=sizeof(count);
-
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (_pSong->ppPatternData[i])
-				{
-					memcpy(pWrite, &i, sizeof(i));
-					pWrite+=sizeof(i);
-					memcpy(pWrite, _pSong->ppPatternData[i], MULTIPLY2);
-					pWrite+=MULTIPLY2;
-				}
-			}
-
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = _pSong->playLength;
-			pNew->type = UNDO_SONG;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-
-			if (bWipeRedo)
-			{
-				KillRedo();
-				UndoCounter++;
-				pNew->counter = UndoCounter;
-			}
-			else
-			{
-				pNew->counter = counter;
-			}
-			SetTitleBarText();
-		}
-
-		void CChildView::AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			// count used patterns
-			unsigned char count = 0;
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (_pSong->ppPatternData[i])
-				{
-					count++;
-				}
-			}
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
-			unsigned char *pWrite=pNew->pData;
-			memcpy(pWrite, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
-
-			memcpy(pWrite, &count, sizeof(count));
-			pWrite+=sizeof(count);
-
-			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
-			{
-				if (_pSong->ppPatternData[i])
-				{
-					memcpy(pWrite, &i, sizeof(i));
-					pWrite+=sizeof(i);
-					memcpy(pWrite, _pSong->ppPatternData[i], MULTIPLY2);
-					pWrite+=MULTIPLY2;
-				}
-			}
-
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = _pSong->playLength;
-			pNew->type = UNDO_SONG;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-		}
-
-		void CChildView::AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
-		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
-			memcpy(pNew->pData, _pSong->playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_SEQUENCE;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
-		}
 
 		void CChildView::OnEditUndo() 
 		{
+			SPatternUndo * pUndoList = Global::pInputHandler->pUndoList;
 			if (pUndoList)
 			{
 				switch (pUndoList->type)
@@ -2576,7 +2261,7 @@ namespace psycle { namespace host {
 				case UNDO_PATTERN:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
+						Global::pInputHandler->AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
 						// do undo
 						unsigned char* pData = pUndoList->pData;
 
@@ -2617,7 +2302,7 @@ namespace psycle { namespace host {
 				case UNDO_LENGTH:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						AddRedoLength(pUndoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
+						Global::pInputHandler->AddRedoLength(pUndoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
 						// do undo
 						_pSong->patternLines[pUndoList->pattern]=pUndoList->lines;
 						// set up cursor
@@ -2640,7 +2325,7 @@ namespace psycle { namespace host {
 						break;
 					}
 				case UNDO_SEQUENCE:
-					AddRedoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
+					Global::pInputHandler->AddRedoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
 					// do undo
 					memcpy(_pSong->playOrder, pUndoList->pData, MAX_SONG_POSITIONS*sizeof(char));
 					_pSong->playLength = pUndoList->lines;
@@ -2663,7 +2348,7 @@ namespace psycle { namespace host {
 					}
 					break;
 				case UNDO_SONG:
-					AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
+					Global::pInputHandler->AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
 					// do undo
 					unsigned char * pData = pUndoList->pData;
 					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
@@ -2707,6 +2392,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnEditRedo() 
 		{
+			SPatternUndo * pRedoList = Global::pInputHandler->pRedoList;
 			if (pRedoList)
 			{
 				switch (pRedoList->type)
@@ -2714,7 +2400,7 @@ namespace psycle { namespace host {
 				case UNDO_PATTERN:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
+						Global::pInputHandler->AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do redo
 						unsigned char* pData = pRedoList->pData;
 
@@ -2756,7 +2442,7 @@ namespace psycle { namespace host {
 				case UNDO_LENGTH:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						AddUndoLength(pRedoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
+						Global::pInputHandler->AddUndoLength(pRedoList->pattern,_pSong->patternLines[pRedoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
 						// do undo
 						_pSong->patternLines[pRedoList->pattern]=pRedoList->lines;
 						// set up cursor
@@ -2779,7 +2465,7 @@ namespace psycle { namespace host {
 						break;
 					}
 				case UNDO_SEQUENCE:
-					AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
+					Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
 					// do undo
 					memcpy(_pSong->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
 					_pSong->playLength = pRedoList->lines;
@@ -2802,7 +2488,7 @@ namespace psycle { namespace host {
 					}
 					break;
 				case UNDO_SONG:
-					AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
+					Global::pInputHandler->AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
 					// do undo
 					unsigned char * pData = pRedoList->pData;
 					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
@@ -2841,36 +2527,6 @@ namespace psycle { namespace host {
 				SetTitleBarText();
 			}
 		}
-
-		void CChildView::KillRedo()
-		{
-			while (pRedoList)
-			{
-				SPatternUndo* pTemp = pRedoList->pPrev;
-				delete (pRedoList->pData);
-				delete (pRedoList);
-				pRedoList = pTemp;
-			}
-		}
-
-		void CChildView::KillUndo()
-		{
-			while (pUndoList)
-			{
-				SPatternUndo* pTemp = pUndoList->pPrev;
-				delete (pUndoList->pData);
-				delete (pUndoList);
-				pUndoList = pTemp;
-			}
-			UndoCounter = 0;
-			UndoSaved = 0;
-
-			UndoMacCounter=0;
-			UndoMacSaved=0;
-
-		//	SetTitleBarText();
-		}
-
 
 		void CChildView::SelectNextTrack()
 		{

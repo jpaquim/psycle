@@ -1,8 +1,8 @@
 
 #include "WaveInMacDlg.hpp"
 
-#include "Configuration.hpp"
-#include "ChildView.hpp"
+#include "PsycleConfig.hpp"
+#include "InputHandler.hpp"
 
 #include "internal_machines.hpp"
 #include "AudioDriver.hpp"
@@ -10,10 +10,13 @@
 
 namespace psycle { namespace host {
 
-CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
-: CDialog(CWaveInMacDlg::IDD, pParent)
+CWaveInMacDlg::CWaveInMacDlg(CWnd* wndView, CWaveInMacDlg** windowVar, AudioRecorder& new_recorder)
+: CDialog(CWaveInMacDlg::IDD, AfxGetMainWnd())
+, mainView(wndView)
+, windowVar_(windowVar)
+, recorder(new_recorder)
 {
-	m_pParent = pParent;
+	CDialog::Create(IDD, AfxGetMainWnd());
 }
 
 void CWaveInMacDlg::DoDataExchange(CDataExchange* pDX)
@@ -25,14 +28,11 @@ void CWaveInMacDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CWaveInMacDlg, CDialog)
+	ON_WM_CLOSE()
+	ON_WM_HSCROLL()
 	ON_CBN_SELENDOK(IDC_COMBO1, OnCbnSelendokCombo1)
-	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER1, OnNMReleasedcaptureSlider1)
 END_MESSAGE_MAP()
 
-BOOL CWaveInMacDlg::Create()
-{
-	return CDialog::Create(IDD, m_pParent);
-}
 
 BOOL CWaveInMacDlg::OnInitDialog() 
 {
@@ -40,14 +40,56 @@ BOOL CWaveInMacDlg::OnInitDialog()
 	
 	FillCombobox();
 	m_volslider.SetRange(0,1024);
-	m_volslider.SetPos(pRecorder->_gainvol*256);
+	m_volslider.SetPos(recorder._gainvol*256);
 	char label[30];
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->_gainvol));
+	sprintf(label,"%.01fdB", helpers::dsp::dB(recorder._gainvol));
 	m_vollabel.SetWindowText(label);
 	return TRUE;
 	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
+
+void CWaveInMacDlg::OnClose()
+{
+	CDialog::OnClose();
+	DestroyWindow();
+}
+void CWaveInMacDlg::PostNcDestroy()
+{
+	if(windowVar_!=NULL) *windowVar_ = NULL;
+	delete this;
+}
+
+BOOL CWaveInMacDlg::PreTranslateMessage(MSG* pMsg) 
+{
+	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
+		CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+		if(def.GetType() == CT_Note) {
+			mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+			return true;
+		}
+	}
+	return CDialog::PreTranslateMessage(pMsg);
+}
+void CWaveInMacDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+	//CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+	switch(nSBCode){
+	case TB_BOTTOM: //fallthrough
+	case TB_LINEDOWN: //fallthrough
+	case TB_PAGEDOWN: //fallthrough
+	case TB_TOP: //fallthrough
+	case TB_LINEUP: //fallthrough
+	case TB_PAGEUP: //fallthrough
+		OnChangeSlider();
+		break;
+	case TB_THUMBPOSITION: //fallthrough
+	case TB_THUMBTRACK:
+		OnChangeSlider();
+		break;
+	}
+	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
 void CWaveInMacDlg::FillCombobox()
 {
 	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
@@ -59,37 +101,20 @@ void CWaveInMacDlg::FillCombobox()
 		m_listbox.AddString(ports[i].c_str());
 	}
 	if (ports.size()==0) m_listbox.AddString("No Inputs Available");
-	m_listbox.SetCurSel(pRecorder->_captureidx);
+	m_listbox.SetCurSel(recorder._captureidx);
 }
 
 void CWaveInMacDlg::OnCbnSelendokCombo1()
 {
-	pRecorder->ChangePort(m_listbox.GetCurSel());
+	recorder.ChangePort(m_listbox.GetCurSel());
 }
 
-void CWaveInMacDlg::OnCancel()
-{
-	m_pParent->WaveInMachineDialog = NULL;
-	DestroyWindow();
-	delete this;
-}
-
-BOOL CWaveInMacDlg::PreTranslateMessage(MSG* pMsg) 
-{
-	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
-	{
-		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-	}
-	return CDialog::PreTranslateMessage(pMsg);
-}
-
-void CWaveInMacDlg::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
+void CWaveInMacDlg::OnChangeSlider()
 {
 	char label[30];
-	pRecorder->_gainvol = m_volslider.GetPos()*0.00390625f;
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->_gainvol));
+	recorder._gainvol = m_volslider.GetPos()*0.00390625f;
+	sprintf(label,"%.01fdB", helpers::dsp::dB(recorder._gainvol));
 	m_vollabel.SetWindowText(label);
-	*pResult = 0;
 }
 
 }   // namespace

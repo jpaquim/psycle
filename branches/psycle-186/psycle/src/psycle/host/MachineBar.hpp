@@ -54,8 +54,6 @@ namespace psycle { namespace host {
 		CComboBox       m_auxcombo;
 		CComboBox       m_inscombo;
 	protected:
-		CBitmap blittleleft;
-		CBitmap blittleright;
 
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;

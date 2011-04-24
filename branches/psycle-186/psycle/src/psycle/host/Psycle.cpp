@@ -74,7 +74,7 @@ namespace psycle { namespace host {
 				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
 				if(*(m_lpCmdLine) != 0)
 				{
-					PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
+					::PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
 				}
 				return FALSE;
 			}
@@ -104,12 +104,6 @@ namespace psycle { namespace host {
 			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
 
 			instanceChecker.TrackFirstInstanceRunning();
-
-			// Sets Icon
-			HICON tIcon;
-			tIcon=LoadIcon(IDR_MAINFRAME);
-			pFrame->SetIcon(tIcon, true);
-			pFrame->SetIcon(tIcon, false);
 
 			// The one and only window has been initialized, so show and update it.
 			pFrame->ShowWindow(SW_MAXIMIZE);
@@ -144,6 +138,7 @@ namespace psycle { namespace host {
 			global_.midi().Close();
 			global_.psycleconf().SavePsycleSettings();
 			CNewMachine::DestroyPluginInfo();
+
 			return CWinApp::ExitInstance();
 		}
 
@@ -223,6 +218,7 @@ namespace psycle { namespace host {
 		{
 
 			///\todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
+			// SHCreateItemFromParsingName(
 			bool val=false;
 			
 			LPMALLOC pMalloc;
@@ -231,9 +227,9 @@ namespace psycle { namespace host {
 			if (::SHGetMalloc(&pMalloc) == NOERROR)
 			{
 				char pszBuffer[MAX_PATH];
+				pszBuffer[0]='\0';
 				BROWSEINFO bi;
 				LPITEMIDLIST pidl;
-				strncpy(pszBuffer, rpath.c_str(), MAX_PATH - 1);
 				// Get help on BROWSEINFO struct - it's got all the bit settings.
 				//
 				bi.hwndOwner = hWnd_;
@@ -264,6 +260,7 @@ namespace psycle { namespace host {
 			}
 			return val;
 		}
+
 		//////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////

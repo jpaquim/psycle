@@ -2,48 +2,29 @@
 ///\brief implementation file for psycle::host::CMasterDlg.
 
 #include "MasterDlg.hpp"
-#include "ChildView.hpp"
-
+#include "InputHandler.hpp"
 #include "Machine.hpp"
 
 #include <psycle/helpers/dsp.hpp>
 
 namespace psycle { namespace host {
 
-		BEGIN_MESSAGE_MAP(CVolumeCtrl, CSliderCtrl)
-			ON_WM_LBUTTONDOWN()
-			ON_WM_LBUTTONUP()
-		END_MESSAGE_MAP()
-
-		void CVolumeCtrl::OnLButtonDown(UINT nFlags, CPoint point) {
-			editing_ = true;
-			CSliderCtrl::OnLButtonDown(nFlags, point);
-		}
-
-		void CVolumeCtrl::OnLButtonUp(UINT nFlags, CPoint point) {
-			editing_ = false;
-			CSliderCtrl::OnLButtonUp(nFlags, point);
-		}
-
 		/// master dialog
-		CMasterDlg::CMasterDlg(CChildView* pParent, Master* new_master) 
-			: CDialog(CMasterDlg::IDD, pParent), m_pParent(pParent), 
-				_pMachine(new_master){
+		CMasterDlg::CMasterDlg(CWnd* wndView, Master& new_master, CMasterDlg** windowVar) 
+			: CDialog(CMasterDlg::IDD, AfxGetMainWnd()), windowVar_(windowVar)
+			, machine(new_master), m_slidermaster(-1)
+			, mainView(wndView)
+		{
 			memset(macname,0,sizeof(macname));
 			for (int i = 0; i < 12; ++i) {
 				CVolumeCtrl* slider = new CVolumeCtrl(i);
 				sliders_.push_back(slider);
 			}
-			CDialog::Create(IDD, m_pParent);
-			std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
-			for ( ; it != sliders_.end(); ++it ) {
-				CVolumeCtrl* slider = *it;
-				slider->SetRange(0, 832);
-				slider->SetPageSize(96);
-			}
+			CDialog::Create(CMasterDlg::IDD, AfxGetMainWnd());
 		}
 
-		CMasterDlg::~CMasterDlg() {		
+		CMasterDlg::~CMasterDlg() {
+			namesFont.DeleteObject();
 			m_back.DeleteObject();
 			m_numbers.DeleteObject();
 			m_sliderknob.DeleteObject();
@@ -52,7 +33,6 @@ namespace psycle { namespace host {
 				delete *it;
 			}
 		}
-
 		void CMasterDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
@@ -75,7 +55,9 @@ namespace psycle { namespace host {
 		}
 
 		BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
-			//{{AFX_MSG_MAP(CMasterDlg)
+			ON_WM_VSCROLL()
+			ON_WM_PAINT()
+			ON_WM_CLOSE()
 			ON_BN_CLICKED(IDC_AUTODEC, OnAutodec)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERMASTER, OnCustomdrawSlidermaster)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM1, OnCustomdrawSliderm)
@@ -90,10 +72,18 @@ namespace psycle { namespace host {
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM7, OnCustomdrawSliderm)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM8, OnCustomdrawSliderm)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM9, OnCustomdrawSliderm)
-			ON_WM_PAINT()
-			//}}AFX_MSG_MAP
-			ON_STN_CLICKED(IDC_MIXERVIEW, OnStnClickedMixerview)
 		END_MESSAGE_MAP()
+
+		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) {
+			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
+				CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+				if(def.GetType() == CT_Note) {
+					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+					return true;
+				}
+			}
+			return CDialog::PreTranslateMessage(pMsg);
+		}
 
 		BOOL CMasterDlg::OnInitDialog() 
 		{
@@ -107,18 +97,86 @@ namespace psycle { namespace host {
 			
 			m_slidermaster.SetRange(0, 832);
 			m_slidermaster.SetPageSize(96);
+			std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
+			for ( ; it != sliders_.end(); ++it ) {
+				CVolumeCtrl* slider = *it;
+				slider->SetRange(0, 832);
+				slider->SetPageSize(96);
+			}
 			SetSliderValues();
-			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
+			if (machine.decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
 			return TRUE;
+		}
+
+		void CMasterDlg::OnClose()
+		{
+			CDialog::OnClose();
+			DestroyWindow();
+		}
+		void CMasterDlg::PostNcDestroy()
+		{
+			if(windowVar_!=NULL) *windowVar_ = NULL;
+			delete this;
+		}
+
+
+		void CMasterDlg::OnAutodec() 
+		{
+			if (m_autodec.GetCheck())
+			{
+				machine.decreaseOnClip=true;
+			}
+			else machine.decreaseOnClip=false;
+		}
+
+
+
+		void CMasterDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+			CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+			switch(nSBCode){
+			case TB_BOTTOM: //fallthrough
+			case TB_LINEDOWN: //fallthrough
+			case TB_PAGEDOWN: //fallthrough
+			case TB_TOP: //fallthrough
+			case TB_LINEUP: //fallthrough
+			case TB_PAGEUP: //fallthrough
+				if(the_slider == &m_slidermaster) {
+					OnChangeSliderMaster(m_slidermaster.GetPos());
+				}
+				else {
+					std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
+					for ( ; it != sliders_.end(); ++it ) {
+						if( the_slider == *it) {
+							OnChangeSliderMacs(*it);
+						}
+					}
+				}
+				break;
+			case TB_THUMBPOSITION: //fallthrough
+			case TB_THUMBTRACK:
+				if(the_slider == &m_slidermaster) {
+					OnChangeSliderMaster(m_slidermaster.GetPos());
+				}
+				else {
+					std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
+					for ( ; it != sliders_.end(); ++it ) {
+						if( the_slider == *it) {
+							OnChangeSliderMacs(*it);
+						}
+					}
+				}
+				break;
+			}
+			CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 		}
 
 		void CMasterDlg::SetSliderValues()
 		{
 			float val;
 			float db;
-			if(_pMachine->_outDry>0) {
-				db = helpers::dsp::dB(_pMachine->_outDry/256.0f);
+			if(machine._outDry>0) {
+				db = helpers::dsp::dB(machine._outDry/256.0f);
 			}
 			else {
 				db = -99.f;
@@ -127,8 +185,8 @@ namespace psycle { namespace host {
 			std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
 			for ( int i = 0; it != sliders_.end(); ++it, ++i ) {
 				CVolumeCtrl* slider = *it;
-				if (_pMachine->_inputCon[i]) {		
-					_pMachine->GetWireVolume(i,val);
+				if (machine._inputCon[i]) {		
+					machine.GetWireVolume(i,val);
 					slider->SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 				} else {
 					slider->SetPos(832);
@@ -136,65 +194,83 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CMasterDlg::OnAutodec() 
-		{
-			if (m_autodec.GetCheck())
-			{
-				_pMachine->decreaseOnClip=true;
-			}
-			else _pMachine->decreaseOnClip=false;
-		}
-
 		void CMasterDlg::UpdateUI(void)
 		{
-			if (!--_pMachine->peaktime) 
+			if (!--machine.peaktime) 
 			{
 				char peak[10];
-				if ( _pMachine->currentpeak > 0)
+				if ( machine.currentpeak > 0)
 				{
-					sprintf(peak,"%.2fdB",helpers::dsp::dB(_pMachine->currentpeak*0.00003051f));
+					sprintf(peak,"%.2fdB",helpers::dsp::dB(machine.currentpeak*0.00003051f));
 				}
 				else strcpy(peak,"-inf dB");
 				m_masterpeak.SetWindowText(peak);
 				
 				SetSliderValues();
 
-				_pMachine->peaktime=25;
-				_pMachine->currentpeak=0.0f;
+				machine.peaktime=25;
+				machine.currentpeak=0.0f;
 			}
 		}
 
-		void CMasterDlg::OnCancel()
+		void CMasterDlg::OnChangeSliderMaster(int pos)
 		{
-			m_pParent->MasterMachineDialog = NULL;
-			CDialog::OnCancel();
+			float db = ((832-pos)/16.0f)-40.0f;
+			machine._outDry = int(helpers::dsp::dB2Amp(db)*256.0f);
 		}
 
-		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CMasterDlg::OnChangeSliderMacs(CVolumeCtrl* slider)
 		{
-			float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
-			if (m_slidermaster.editing())_pMachine->_outDry = int(helpers::dsp::dB2Amp(db)*256.0f);
+			float db = ((832-slider->GetPos())/16.0f)-40.0f;
+			machine.SetWireVolume(slider->index(),helpers::dsp::dB2Amp(db));
+		}
 
-			PaintNumbers(db,40,171);
+		void CMasterDlg::OnPaint() 
+		{
+			CPaintDC dc(this); // device context for painting
+			
+			if ( dc.m_ps.rcPaint.bottom >= 170 && dc.m_ps.rcPaint.top <= 185)
+			{
+				CDC *dcm = m_mixerview.GetDC();
+				CDC memDC;
+				PaintNumbersDC(dcm,((832-m_slidermaster.GetPos())/16.0f)-40.0f,40,171);
+				std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
+				for ( int i= 0; it != sliders_.end(); ++it, ++i) {
+					CVolumeCtrl* slider = *it;
+					PaintNumbersDC(dcm,((832-slider->GetPos())/16.0f)-40.0f,112 +i*24,171);
+				}
+			}
+			if ( dc.m_ps.rcPaint.bottom >=16 && dc.m_ps.rcPaint.top<=200 && dc.m_ps.rcPaint.right >=410)
+			{
+				CDC *dcm = m_mixerview.GetDC();
+				CFont* oldfont = dcm->SelectObject(&namesFont);
+				dcm->SetTextColor(0x00FFFFFF); // White
+				dcm->SetBkColor(0x00000000); // Black
 
-			*pResult = DrawSliderGraphics(pNMHDR);
+				int const xo(417);
+				int const yo(16);
+				int const dy(17);
+				int y(yo);
+				int i(0);
+				while(i < MAX_CONNECTIONS)
+				{
+					dcm->ExtTextOut(xo, y, ETO_CLIPPED, CRect(xo,y,xo+77,y+13), CString(macname[i]), 0);
+					i++;
+					y += dy;
+				}
+				dcm->SelectObject(oldfont);
+			}
+			// Do not call CDialog::OnPaint() for painting messages
 		}
 
 		void CMasterDlg::PaintNumbers(float val, int x, int y)
 		{
 			CDC *dc = m_mixerview.GetDC();
 			CDC memDC;
-//			CBitmap* oldbmp;
-//			memDC.CreateCompatibleDC(dc);
-//			oldbmp = memDC.SelectObject(&m_numbers);
-			
-			PaintNumbersDC(dc,&memDC,val,x,y);
-
-//			memDC.SelectObject(oldbmp);
-//			memDC.DeleteDC();
+			PaintNumbersDC(dc,val,x,y);
 		}
 
-		void CMasterDlg::PaintNumbersDC(CDC *dc, CDC *memDC, float val, int x, int y)
+		void CMasterDlg::PaintNumbersDC(CDC *dc, float val, int x, int y)
 		{
 			char valtxt[6];
 			CFont* oldfont = dc->SelectObject(&namesFont);
@@ -225,11 +301,17 @@ namespace psycle { namespace host {
 			dc->SelectObject(oldfont);
 		}
 
+		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
+			float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
+			PaintNumbers(db,40,171);
+			*pResult = DrawSliderGraphics(pNMHDR);
+		}
+
 		void CMasterDlg::OnCustomdrawSliderm(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
 			float db = ((832-slider->GetPos())/16.0f)-40.0f;
-			if (slider->editing())_pMachine->SetWireVolume(slider->index(),helpers::dsp::dB2Amp(db));
 			PaintNumbers(db,112 + slider->index() *24,171);
 			
 			if (slider->index() == 10) {
@@ -254,50 +336,6 @@ namespace psycle { namespace host {
 			*pResult = DrawSliderGraphics(pNMHDR);
 		}
 
-		void CMasterDlg::OnPaint() 
-		{
-			CPaintDC dc(this); // device context for painting
-			
-			if ( dc.m_ps.rcPaint.bottom >= 170 && dc.m_ps.rcPaint.top <= 185)
-			{
-				CDC *dcm = m_mixerview.GetDC();
-				CDC memDC;
-//				CBitmap* oldbmp;
-//				memDC.CreateCompatibleDC(dcm);
-//				oldbmp = memDC.SelectObject(&m_numbers);
-				
-				PaintNumbersDC(dcm,&memDC,((832-m_slidermaster.GetPos())/16.0f)-40.0f,40,171);
-				std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
-				for ( int i= 0; it != sliders_.end(); ++it, ++i) {
-					CVolumeCtrl* slider = *it;
-					PaintNumbersDC(dcm,&memDC,((832-slider->GetPos())/16.0f)-40.0f,112 +i*24,171);
-				}
-//				memDC.SelectObject(oldbmp);
-//				memDC.DeleteDC();
-			}
-			if ( dc.m_ps.rcPaint.bottom >=16 && dc.m_ps.rcPaint.top<=200 && dc.m_ps.rcPaint.right >=410)
-			{
-				CDC *dcm = m_mixerview.GetDC();
-				CFont* oldfont = dcm->SelectObject(&namesFont);
-				dcm->SetTextColor(0x00FFFFFF); // White
-				dcm->SetBkColor(0x00000000); // Black
-
-				int const xo(417);
-				int const yo(16);
-				int const dy(17);
-				int y(yo);
-				int i(0);
-				while(i < MAX_CONNECTIONS)
-				{
-					dcm->ExtTextOut(xo, y, ETO_CLIPPED, CRect(xo,y,xo+77,y+13), CString(macname[i]), 0);
-					i++;
-					y += dy;
-				}
-				dcm->SelectObject(oldfont);
-			}
-			// Do not call CDialog::OnPaint() for painting messages
-		}
-
 		LRESULT CMasterDlg::DrawSliderGraphics(NMHDR* pNMHDR)
 		{
 			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
@@ -307,9 +345,9 @@ namespace psycle { namespace host {
 				// return CDRF_NOTIFYITEMDRAW so that we will get subsequent 
 				// CDDS_ITEMPREPAINT notifications
 
-				CDC* pDC = CDC::FromHandle( nmcd.hdc );
 				CDC memDC;
 				CBitmap* oldbmp;
+				CDC* pDC = CDC::FromHandle( nmcd.hdc );
 				memDC.CreateCompatibleDC(pDC);
 				oldbmp=memDC.SelectObject(&m_back);
 				pDC->BitBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left,nmcd.rc.bottom-nmcd.rc.top,&memDC,0,0,SRCCOPY);
@@ -351,17 +389,5 @@ namespace psycle { namespace host {
 			else return 0;
 
 		}
-
-
-		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) {
-			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
-				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-			}
-			return CDialog::PreTranslateMessage(pMsg);
-		}
-
-		void CMasterDlg::OnStnClickedMixerview() {
-		}
-
 	}   // namespace
 }   // namespace

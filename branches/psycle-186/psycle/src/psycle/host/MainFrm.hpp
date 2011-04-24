@@ -78,6 +78,7 @@ namespace psycle { namespace host {
 			void UpdateSequencer(int bottom = -1);
 			
 			CChildView  m_wndView;
+			//CRebar      m_rebar;
 			CToolBar    m_wndToolBar;
 			SongBar		m_songBar;
 			MachineBar	m_machineBar;
@@ -145,28 +146,29 @@ namespace psycle { namespace host {
 //sequencebar start
 			afx_msg void OnSelchangeSeqlist();
 			afx_msg void OnDblclkSeqlist();
-			afx_msg void OnBnClickedIncshort();
-			afx_msg void OnBnClickedDecshort();
-			afx_msg void OnBnClickedInclong();
-			afx_msg void OnBnClickedDeclong();
-			afx_msg void OnBnClickedSeqnew();
-			afx_msg void OnBnClickedSeqduplicate();
-			afx_msg void OnBnClickedSeqins();
-			afx_msg void OnBnClickedSeqdelete();
-			afx_msg void OnBnClickedSeqcut();
-			afx_msg void OnBnClickedSeqcopy();
-			afx_msg void OnBnClickedSeqpaste();
-			afx_msg void OnBnClickedSeqclr();
-			afx_msg void OnBnClickedSeqsrt();
-			afx_msg void OnBnClickedDeclen();
-			afx_msg void OnBnClickedInclen();
-			afx_msg void OnBnClickedFollow();
-			afx_msg void OnBnClickedRecordNoteoff();
-			afx_msg void OnBnClickedRecordTweaks();
-			afx_msg void OnBnClickedShowpattername();
-			afx_msg void OnBnClickedMultichannelAudition();
-			afx_msg void OnBnClickedNotestoeffects();
-			afx_msg void OnBnClickedMovecursorpaste();
+			afx_msg void OnIncshort();
+			afx_msg void OnDecshort();
+			afx_msg void OnSeqnew();
+			afx_msg void OnSeqduplicate();
+			afx_msg void OnSeqins();
+			afx_msg void OnSeqdelete();
+			afx_msg void OnSeqrename();
+			afx_msg void OnSeqchange();
+			afx_msg void OnSeqcut();
+			afx_msg void OnSeqcopy();
+			afx_msg void OnSeqpaste();
+			afx_msg void OnSeqpasteBelow();
+			afx_msg void OnSeqsort();
+			afx_msg void OnSeqclear();
+			afx_msg void OnUpdatepaste(CCmdUI* pCmdUI);
+			afx_msg void OnUpdatepasteBelow(CCmdUI* pCmdUI);
+			afx_msg void OnFollow();
+			afx_msg void OnRecordNoteoff();
+			afx_msg void OnRecordTweaks();
+			afx_msg void OnShowpattername();
+			afx_msg void OnMultichannelAudition();
+			afx_msg void OnNotestoeffects();
+			afx_msg void OnMovecursorpaste();
 //sequencebar end
 //Statusbar start
 			afx_msg void OnUpdateIndicatorSeqPos(CCmdUI *pCmdUI);

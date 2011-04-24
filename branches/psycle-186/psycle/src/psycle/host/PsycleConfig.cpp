@@ -558,6 +558,7 @@ namespace psycle
 			_centerCursor = false;
 			draw_empty_data = false;
 			timesig = 4;
+			showTrackNames_ = false;
 
 			_linenumbers = true;
 			_linenumbersHex = false;
@@ -679,6 +680,7 @@ namespace psycle
 			store.Read("CenterCursor", _centerCursor);
 			store.Read("pattern_draw_empty_data", draw_empty_data);
 			store.Read("pv_timesig", timesig);
+			store.Read("showTrackNames", showTrackNames_);
 			store.Read("DisplayLineNumbers", _linenumbers);
 			store.Read("DisplayLineNumbersHex", _linenumbersHex);
 			store.Read("DisplayLineNumbersCursor", _linenumbersCursor);
@@ -740,6 +742,7 @@ namespace psycle
 			store.Write("CenterCursor", _centerCursor);
 			store.Write("pattern_draw_empty_data", draw_empty_data);
 			store.Write("pv_timesig", timesig);
+			store.Write("showTrackNames", showTrackNames_);
 			store.Write("DisplayLineNumbers", _linenumbers);
 			store.Write("DisplayLineNumbersHex", _linenumbersHex);
 			store.Write("DisplayLineNumbersCursor", _linenumbersCursor);

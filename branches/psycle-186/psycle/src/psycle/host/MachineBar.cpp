@@ -6,6 +6,7 @@
 
 #include "MachineBar.hpp"
 #include "ChildView.hpp"
+#include "InputHandler.hpp"
 #include "MainFrm.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -15,7 +16,7 @@
 #include "WaveEdFrame.hpp"
 
 namespace psycle{ namespace host{
-
+	extern CPsycleApp theApp;
 IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	MachineBar::MachineBar()
@@ -61,13 +62,14 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 		macComboInitialized = false;
 
-		blittleleft.LoadMappedBitmap(IDB_LLEFT,0);
-		blittleright.LoadMappedBitmap(IDB_LRIGHT,0);
-
-		((CButton*)GetDlgItem(IDC_B_DECGEN))->SetBitmap((HBITMAP)blittleleft);
-		((CButton*)GetDlgItem(IDC_B_INCGEN))->SetBitmap((HBITMAP)blittleright);
-		((CButton*)GetDlgItem(IDC_B_DECWAV))->SetBitmap((HBITMAP)blittleleft);
-		((CButton*)GetDlgItem(IDC_B_INCWAV))->SetBitmap((HBITMAP)blittleright);
+		((CButton*)GetDlgItem(IDC_B_DECGEN))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LOWER),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_B_INCGEN))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_GREATER),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_B_DECWAV))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LOWER),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_B_INCWAV))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_GREATER),IMAGE_ICON,16,16,0));
 
 	//	for(int i=0;i<=16;i++)
 	//	{
@@ -309,9 +311,11 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		if (m_pParentMain->pGearRackDialog == NULL)
 		{
-			m_pParentMain->pGearRackDialog = new CGearRackDlg(m_pWndView, m_pParentMain);
-			m_pParentMain->pGearRackDialog->Create();
+			m_pParentMain->pGearRackDialog = new CGearRackDlg(m_pParentMain,m_pWndView, &m_pParentMain->pGearRackDialog);
 			m_pParentMain->pGearRackDialog->ShowWindow(SW_SHOW);
+		}
+		else {
+			m_pParentMain->pGearRackDialog->SetActiveWindow();
 		}
 		((CButton*)GetDlgItem(IDC_GEAR_RACK))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 	}
@@ -494,7 +498,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		if (dlg.DoModal() == IDOK)
 		{
-			m_pWndView->AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 
 			int si = m_pSong->instSelected;
 			

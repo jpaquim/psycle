@@ -14,6 +14,8 @@
 
 namespace psycle{ namespace host{
 
+	extern CPsycleApp theApp;
+
 IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 	SequenceBar::SequenceBar()
@@ -29,7 +31,6 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	{
 		CDialogBar::DoDataExchange(pDX);
 		DDX_Control(pDX, IDC_LENGTH, m_duration);
-		DDX_Control(pDX, IDC_SEQ3, m_seqLen);
 		DDX_Control(pDX, IDC_SEQLIST, m_sequence);
 		DDX_Control(pDX, IDC_FOLLOW, m_follow);
 		DDX_Control(pDX, IDC_RECORD_NOTEOFF, m_noteoffs);
@@ -73,20 +74,11 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_notesToEffects.SetCheck(Global::psycleconf().inputHandler()._notesToEffects?1:0);
 		m_follow.SetCheck(Global::psycleconf()._followSong?1:0);
 
-		bplus.LoadMappedBitmap(IDB_PLUS,0);
-		bminus.LoadMappedBitmap(IDB_MINUS,0);
-		bplusplus.LoadMappedBitmap(IDB_PLUSPLUS,0);
-		bminusminus.LoadMappedBitmap(IDB_MINUSMINUS,0);
-		bless.LoadMappedBitmap(IDB_LESS,0);
-		bmore.LoadMappedBitmap(IDB_MORE,0);
+		((CButton*)GetDlgItem(IDC_INCSHORT))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_PLUS),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_DECSHORT))->SetIcon((HICON)
+				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MINUS),IMAGE_ICON,16,16,0));
 
-		((CButton*)GetDlgItem(IDC_INCSHORT))->SetBitmap((HBITMAP)bplus);
-		((CButton*)GetDlgItem(IDC_INCLONG))->SetBitmap((HBITMAP)bplusplus);
-		((CButton*)GetDlgItem(IDC_DECSHORT))->SetBitmap((HBITMAP)bminus);
-		((CButton*)GetDlgItem(IDC_DECLONG))->SetBitmap((HBITMAP)bminusminus);
-		((CButton*)GetDlgItem(IDC_DECLEN))->SetBitmap((HBITMAP)bless);
-		((CButton*)GetDlgItem(IDC_INCLEN))->SetBitmap((HBITMAP)bmore);
-		
 		UpdatePlayOrder(true);
 		UpdateSequencer();
 
@@ -146,10 +138,19 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->editPosition=ep;
 		m_pWndView->SetFocus();
 	}
-	void SequenceBar::OnBnClickedIncshort()
+	void SequenceBar::OnSeqrename()
+	{
+		m_sequence.ShowEditBox(true);
+	}
+	void SequenceBar::OnSeqchange()
+	{
+		m_sequence.ShowEditBox(false);
+	}
+
+	void SequenceBar::OnIncshort()
 	{
 		int indexes[MAX_SONG_POSITIONS];
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+		Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 
 		int const num= m_sequence.GetSelCount();
 		m_sequence.GetSelItems(MAX_SONG_POSITIONS,indexes);
@@ -168,10 +169,10 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedDecshort()
+	void SequenceBar::OnDecshort()
 	{
 		int indexes[MAX_SONG_POSITIONS];
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+		Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 
 		int const num= m_sequence.GetSelCount();
 		m_sequence.GetSelItems(MAX_SONG_POSITIONS,indexes);
@@ -190,63 +191,11 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedInclong()
-	{
-		int indexes[MAX_SONG_POSITIONS];
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
-
-		int const num= m_sequence.GetSelCount();
-		m_sequence.GetSelItems(MAX_SONG_POSITIONS,indexes);
-
-		for (int i = 0; i < num; i++)
-		{
-			if(m_pSong->playOrder[indexes[i]]<(MAX_PATTERNS-16))
-			{
-				m_pSong->playOrder[indexes[i]]+=16;			
-			}
-			else
-			{
-				m_pSong->playOrder[indexes[i]]=(MAX_PATTERNS-1);
-			}
-		}
-		UpdatePlayOrder(false);
-		UpdateSequencer();
-		((CButton*)GetDlgItem(IDC_INCLONG))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->Repaint(draw_modes::pattern);
-		m_pWndView->SetFocus();
-	}
-
-	void SequenceBar::OnBnClickedDeclong()
-	{
-		int indexes[MAX_SONG_POSITIONS];
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
-
-		int const num= m_sequence.GetSelCount();
-		m_sequence.GetSelItems(MAX_SONG_POSITIONS,indexes);
-
-		for (int i = 0; i < num; i++)
-		{
-			if(m_pSong->playOrder[indexes[i]]>=16)
-			{
-				m_pSong->playOrder[indexes[i]]-=16;			
-			}
-			else
-			{
-				m_pSong->playOrder[indexes[i]]=0;
-			}
-		}
-		UpdatePlayOrder(false);
-		UpdateSequencer();
-		((CButton*)GetDlgItem(IDC_DECLONG))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->Repaint(draw_modes::pattern);
-		m_pWndView->SetFocus();
-	}
-
-	void SequenceBar::OnBnClickedSeqnew()
+	void SequenceBar::OnSeqnew()
 	{
 		if(m_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
-			m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+			Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 			++m_pSong->playLength;
 
 			m_pWndView->editPosition++;
@@ -274,7 +223,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedSeqduplicate()
+	void SequenceBar::OnSeqduplicate()
 	{
 		int selcount = m_sequence.GetSelCount();
 		if (selcount == 0) return;
@@ -284,7 +233,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			m_pWndView->SetFocus();
 			return;
 		}
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+		Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 		// Moves all patterns after the selection, to make space.
 		int* litems = new int[selcount];
 		m_sequence.GetSelItems(selcount,litems);
@@ -313,6 +262,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 					int oldpat = m_pSong->playOrder[litems[i]];
 					m_pSong->AllocNewPattern(newpat,m_pSong->patternName[oldpat],m_pSong->patternLines[oldpat],FALSE);
 					memcpy(m_pSong->_ppattern(newpat),m_pSong->_ppattern(oldpat),MULTIPLY2);
+					m_pSong->CopyNamesFrom(oldpat, newpat);
 				}
 				else 
 				{
@@ -331,11 +281,11 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedSeqins()
+	void SequenceBar::OnSeqins()
 	{
 		if(m_pSong->playLength<(MAX_SONG_POSITIONS-1))
 		{
-			m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+			Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 			++m_pSong->playLength;
 
 			m_pWndView->editPosition++;
@@ -354,10 +304,10 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedSeqdelete()
+	void SequenceBar::OnSeqdelete()
 	{
 		int indexes[MAX_SONG_POSITIONS];
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+		Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 
 		int const num= m_sequence.GetSelCount();
 		m_sequence.GetSelItems(MAX_SONG_POSITIONS,indexes);
@@ -407,14 +357,13 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedSeqcut()
+	void SequenceBar::OnSeqcut()
 	{
-		OnBnClickedSeqcopy();
-		OnBnClickedSeqdelete();
-		((CButton*)GetDlgItem(IDC_SEQCUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
+		OnSeqcopy();
+		OnSeqdelete();
 	}
 
-	void SequenceBar::OnBnClickedSeqcopy()
+	void SequenceBar::OnSeqcopy()
 	{
 		seqcopybufferlength= m_sequence.GetSelCount();
 		m_sequence.GetSelItems(MAX_SONG_POSITIONS,seqcopybuffer);
@@ -434,17 +383,19 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			// convert to actual index
 			seqcopybuffer[i] = m_pSong->playOrder[seqcopybuffer[i]];
 		}
-		((CButton*)GetDlgItem(IDC_SEQCOPY))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedSeqpaste()
+	void SequenceBar::OnSeqpasteAbove()
+	{
+	}
+	void SequenceBar::OnSeqpasteBelow()
 	{
 		if (seqcopybufferlength > 0)
 		{
 			if(m_pSong->playLength<(MAX_SONG_POSITIONS-1))
 			{
-				m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+				Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 
 				// we will do this in a loop to easily handle an error if we run out of space
 
@@ -480,15 +431,13 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 				}
 			}
 		}
-		((CButton*)GetDlgItem(IDC_SEQPASTE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
-
-	void SequenceBar::OnBnClickedSeqclr()
+	void SequenceBar::OnSeqclear()
 	{
 		if (MessageBox("Do you really want to clear the sequence and pattern data?","Sequencer",MB_YESNO) == IDYES)
 		{
-			m_pWndView->AddUndoSong(m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+			Global::pInputHandler->AddUndoSong(m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 			{
 				CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 				// clear sequence
@@ -508,13 +457,12 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			UpdateSequencer();
 			m_pWndView->Repaint(draw_modes::pattern);
 		}
-		((CButton*)GetDlgItem(IDC_SEQCLR))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedSeqsrt()
+	void SequenceBar::OnSeqsort()
 	{
-		m_pWndView->AddUndoSong(m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+		Global::pInputHandler->AddUndoSong(m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
 		unsigned char oldtonew[MAX_PATTERNS];
 		unsigned char newtoold[MAX_PATTERNS];
 		memset(oldtonew,255,MAX_PATTERNS*sizeof(char));
@@ -598,39 +546,11 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 		seqcopybufferlength = 0;
 		UpdateSequencer();
-		((CButton*)GetDlgItem(IDC_SEQSRT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->Repaint(draw_modes::pattern);
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedDeclen()
-	{
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
-		if(m_pSong->playLength>1)
-		{
-			--m_pSong->playLength;
-			m_pSong->playOrder[m_pSong->playLength]=0;
-			UpdatePlayOrder(false);
-			UpdateSequencer();
-		}
-		((CButton*)GetDlgItem(IDC_DECLEN))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->SetFocus();
-	}
-
-	void SequenceBar::OnBnClickedInclen()
-	{
-		m_pWndView->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
-		if(m_pSong->playLength<(MAX_SONG_POSITIONS-1))
-		{
-			++m_pSong->playLength;
-			UpdatePlayOrder(false);
-			UpdateSequencer();
-		}
-		((CButton*)GetDlgItem(IDC_INCLEN))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->SetFocus();
-	}
-
-	void SequenceBar::OnBnClickedFollow()
+	void SequenceBar::OnFollow()
 	{
 		Global::psycleconf()._followSong = m_follow.GetCheck()?true:false;
 
@@ -669,20 +589,20 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedRecordNoteoff()
+	void SequenceBar::OnRecordNoteoff()
 	{
 		if ( m_noteoffs.GetCheck() ) Global::psycleconf().inputHandler()._RecordNoteoff=true;
 		else Global::psycleconf().inputHandler()._RecordNoteoff=false;
 		m_pWndView->SetFocus();}
 
-	void SequenceBar::OnBnClickedRecordTweaks()
+	void SequenceBar::OnRecordTweaks()
 	{
 		if ( m_tweaks.GetCheck() ) Global::psycleconf().inputHandler()._RecordTweaks=true;
 		else Global::psycleconf().inputHandler()._RecordTweaks=false;
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedShowpattername()
+	void SequenceBar::OnShowpattername()
 	{
 		Global::psycleconf()._bShowPatternNames=m_patNames.GetCheck();
 		
@@ -703,36 +623,52 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		}
 		*/
 
-		UpdateSequencer();
-		m_sequence.SetSel(Global::pPlayer->_playPosition,true);
-
-		int top = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:m_pWndView->editPosition) - 0xC;
-		if (top < 0) top = 0;
-		m_sequence.SetTopIndex(top);
+		int selpos = ((Global::pPlayer->_playing)?Global::pPlayer->_playPosition:m_pWndView->editPosition);
+		UpdateSequencer(selpos);
 		m_pWndView->SetFocus();
 	}
-	void SequenceBar::OnBnClickedMultichannelAudition()
+	void SequenceBar::OnMultichannelAudition()
 	{
 		Global::psycleconf().inputHandler().bMultiKey = !Global::psycleconf().inputHandler().bMultiKey;
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedNotestoeffects()
+	void SequenceBar::OnNotestoeffects()
 	{
 		if ( m_notesToEffects.GetCheck() ) Global::psycleconf().inputHandler()._notesToEffects=true;
 		else Global::psycleconf().inputHandler()._notesToEffects=false;
 		m_pWndView->SetFocus();
 	}
 
-	void SequenceBar::OnBnClickedMovecursorpaste()
+	void SequenceBar::OnMovecursorpaste()
 	{
 		Global::psycleconf().inputHandler().bMoveCursorPaste = !Global::psycleconf().inputHandler().bMoveCursorPaste;
 		m_pWndView->SetFocus();
 	}
+	void SequenceBar::OnUpdatepaste(CCmdUI* pCmdUI)
+	{
+		if (seqcopybufferlength > 0)
+		{
+			pCmdUI->Enable(true);
+		}
+		else {
+			pCmdUI->Enable(false);
+		}
+	}
+	void SequenceBar::OnUpdatepasteBelow(CCmdUI* pCmdUI) 
+	{
+		if (seqcopybufferlength > 0)
+		{
+			pCmdUI->Enable(true);
+		}
+		else {
+			pCmdUI->Enable(false);
+		}
+	}
 
 	void SequenceBar::UpdateSequencer(int selectedpos)
 	{
-		char buf[16];
+		char buf[38];
 
 		int top = m_sequence.GetTopIndex();
 		m_sequence.ResetContent();
@@ -741,7 +677,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		{
 			for(int n=0;n<m_pSong->playLength;n++)
 			{
-				sprintf(buf,"%.2X:%s",n,m_pSong->patternName[m_pSong->playOrder[n]]);
+				sprintf(buf,"%.2X: %s",n,m_pSong->patternName[m_pSong->playOrder[n]]);
 				m_sequence.AddString(buf);
 			}
 		}
@@ -754,16 +690,18 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			}
 		}
 		
-		m_sequence.SelItemRange(false,0,m_sequence.GetCount()-1);
-		for (int i=0; i<MAX_SONG_POSITIONS;i++)
-		{
-			if ( m_pSong->playOrderSel[i]) m_sequence.SetSel(i,true);
-		}
 		if (selectedpos >= 0)
 		{
 			m_sequence.SetSel(selectedpos);
 			top = selectedpos - 0xC;
 			if (top < 0) top = 0;
+		}
+		else {
+			m_sequence.SelItemRange(false,0,m_sequence.GetCount()-1);
+			for (int i=0; i<MAX_SONG_POSITIONS;i++)
+			{
+				if ( m_pSong->playOrderSel[i]) m_sequence.SetSel(i,true);
+			}
 		}
 		m_sequence.SetTopIndex(top);
 		m_pParentMain->StatusBarIdle();
@@ -777,15 +715,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 		int ll = m_pSong->playLength;
 
-		char buffer[16];
-
-	// Update Labels
-		
-		sprintf(buffer,"%.2X",ll);
-		m_seqLen.SetWindowText(buffer);
-
 		// take ff and fe commands into account
-
 		float songLength = 0;
 		int bpm = m_pSong->BeatsPerMin();
 		int tpb = m_pSong->LinesPerBeat();
@@ -820,6 +750,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			}
 		}
 		
+		char buffer[16];
 		sprintf(buffer, "%02d:%02d", ((int)songLength) / 60, ((int)songLength) % 60);
 		m_duration.SetWindowText(buffer);
 		

@@ -6,6 +6,7 @@
 #include "AudioDriver.hpp"
 
 #include "MainFrm.hpp"
+#include "InputHandler.hpp"
 #include "WaveEdFrame.hpp"
 #include "Zap.hpp"
 #include <mmreg.h>
@@ -308,7 +309,11 @@ namespace psycle { namespace host {
 			}
 			else
 			{
+				HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+				HGDIOBJ oldfont = pDC->SelectObject(hFont);
 				pDC->TextOut(4,4,"No Wave Data");
+				pDC->SelectObject(oldfont);
+
 			}
 			
 			// Do not call CWnd::OnPaint() for painting messages
@@ -518,23 +523,9 @@ namespace psycle { namespace host {
 			CMenu *popup;
 			popup=menu.GetSubMenu(0);
 			assert(popup);
+			popup->TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, point.x, point.y, GetOwner());
+			menu.DestroyMenu();
 
-			//i would very much like to know why this nonsense is necessary.. i've been told that OnUpdateCommandUI messages
-			//don't work for non-CFrameWnd-derived windows, but ChildView.cpp seems to do alright..  if another solution is
-			//not found, it might be best to just move the context menu to CWaveEdFrame.
-			popup->EnableMenuItem(ID_POPUP_COPY, (wdWave&&blSelection? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_CUT, (wdWave&&blSelection? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_PASTE, (IsClipboardFormatAvailable(CF_WAVE)? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_ZOOMOUT, (wdWave && diLength<wdLength? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_ZOOMIN, (wdWave && diLength>8? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_ZOOMSEL, (wdWave && blSelection? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_DELETE, (wdWave && blSelection? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_SETLOOPSTART, (wdWave? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_SETLOOPEND, (wdWave? MF_ENABLED: MF_GRAYED));
-			popup->EnableMenuItem(ID_POPUP_SELECTIONTOLOOP, (wdWave && blSelection? MF_ENABLED: MF_GRAYED));
-			popup->TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, point.x, point.y, this);
-
-			popup->DestroyMenu();	//i'm not sure this is necessary here..
 			CRect rect;
 			GetWindowRect(&rect);
 			rbX = point.x-rect.left;
@@ -819,7 +810,7 @@ namespace psycle { namespace host {
 
 				if ( nFlags & MK_CONTROL )
 				{
-					pParent->m_wndView.AddMacViewUndo();
+					Global::pInputHandler->AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					_pSong->StopInstrument(wsInstrument);
 
@@ -837,7 +828,7 @@ namespace psycle { namespace host {
 						wdLoop=true;
 						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
-					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+					mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
 
@@ -863,7 +854,7 @@ namespace psycle { namespace host {
 
 				if ( nFlags & MK_CONTROL )
 				{
-					pParent->m_wndView.AddMacViewUndo();
+					Global::pInputHandler->AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					_pSong->StopInstrument(wsInstrument);
 
@@ -883,7 +874,7 @@ namespace psycle { namespace host {
 						wdLoop=true;
 						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 					}
-					pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+					mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
 				}
@@ -1129,7 +1120,7 @@ namespace psycle { namespace host {
 			_pSong->StopInstrument(wsInstrument);
 			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
 			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-			pParent->m_wndInst.WaveUpdate();
+			mainFrame->m_wndInst.WaveUpdate();
 			bDragLoopEnd = bDragLoopStart = false;
 			CRect rect;
 			GetClientRect(&rect);
@@ -1151,7 +1142,7 @@ namespace psycle { namespace host {
 			if(wdWave)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				Fade(wdLeft+startPoint, length, 0, 1.0f);
 				if(wdStereo)
@@ -1170,7 +1161,7 @@ namespace psycle { namespace host {
 			if(wdWave)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				Fade(wdLeft+startPoint, length, 1.0f, 0);
 				if(wdStereo)
@@ -1191,7 +1182,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				for (c = startPoint ; c < startPoint+length ; c++)
@@ -1249,7 +1240,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				for (c=startPoint; c<startPoint+length; c++)
@@ -1312,8 +1303,8 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
-
+				Global::pInputHandler->AddMacViewUndo();
+				CWaveEdAmplifyDialog AmpDialog(GetOwner());
 				pos = AmpDialog.DoModal();
 				if (pos != AMP_DIALOG_CANCEL)
 				{
@@ -1339,7 +1330,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				//halved = (int) floor(length/2.0);	
@@ -1367,7 +1358,8 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnSelectionInsertSilence()
 		{
-			if(SilenceDlg.DoModal()!=IDCANCEL)
+			CWaveEdInsertSilenceDialog SilenceDlg(GetOwner());
+			if(SilenceDlg.DoModal()==IDOK)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				unsigned long timeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * SilenceDlg.timeInSecs;
@@ -1429,12 +1421,12 @@ namespace psycle { namespace host {
 							wdLoopE += timeInSamps;
 							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
 						}
-						pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+						mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					}
 				}
 
 
-				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				RefreshDisplayData(true);
 				Invalidate(true);
 
@@ -1445,7 +1437,7 @@ namespace psycle { namespace host {
 		{
 			if (wdWave && wdStereo)
 			{
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				//SetUndo(4, wdLeft, wdRight, wdLength); 
@@ -1605,7 +1597,7 @@ namespace psycle { namespace host {
 
 			if (wdWave && blSelection)
 			{
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				_pSong->StopInstrument(wsInstrument);
@@ -1673,7 +1665,7 @@ namespace psycle { namespace host {
 				ResetScrollBars();
 				RefreshDisplayData();
 
-				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1765,7 +1757,7 @@ namespace psycle { namespace host {
 		{
 			unsigned long c = 0;
 
-			pParent->m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 
 			char *pData;
 			std::uint32_t lFmt, lData;
@@ -1874,7 +1866,7 @@ namespace psycle { namespace host {
 			ResetScrollBars();
 			RefreshDisplayData(true);
 
-			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+			mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
 		}
 
@@ -1882,7 +1874,7 @@ namespace psycle { namespace host {
 		{
 			unsigned long startPoint;
 
-			pParent->m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 
 			char *pData;
 			std::uint32_t lFmt, lData;
@@ -1959,7 +1951,7 @@ namespace psycle { namespace host {
 			ResetScrollBars();
 			RefreshDisplayData(true);
 
-			pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+			mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 			Invalidate(true);
 
 		}
@@ -1968,11 +1960,11 @@ namespace psycle { namespace host {
 		{
 			unsigned long c = 0;
 			unsigned long startPoint;
-
+			CWaveEdMixDialog MixDlg(GetOwner());
 			if(MixDlg.DoModal() != IDCANCEL)
 			{
 
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				char *pData;
 				std::uint32_t lFmt, lData;
@@ -2091,7 +2083,7 @@ namespace psycle { namespace host {
 				ResetScrollBars();
 				RefreshDisplayData(true);
 
-				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				Invalidate(true);
 			}
 
@@ -2101,12 +2093,13 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnPasteCrossfade()
 		{
+			CWaveEdCrossfadeDialog XFadeDlg(GetOwner());
 			if(XFadeDlg.DoModal() != IDCANCEL)
 			{
 				unsigned long c = 0;
 				unsigned long startPoint, endPoint;
 
-				pParent->m_wndView.AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 
 				char *pData;
 				std::uint32_t lFmt, lData;
@@ -2192,7 +2185,7 @@ namespace psycle { namespace host {
 				ResetScrollBars();
 				RefreshDisplayData(true);
 
-				pParent->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				Invalidate(true);
 			}
 
@@ -2228,7 +2221,7 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnPopupSetLoopStart()
 		{
-			pParent->m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
@@ -2246,13 +2239,13 @@ namespace psycle { namespace host {
 				wdLoop=true;
 				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
-			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+			mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
 		void CWaveEdChildView::OnPopupSetLoopEnd()
 		{
-			pParent->m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
@@ -2270,7 +2263,7 @@ namespace psycle { namespace host {
 				wdLoop=true;
 				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
-			pParent->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+			mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
@@ -2291,7 +2284,7 @@ namespace psycle { namespace host {
 				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
 			}
 
-			pParent->m_wndInst.WaveUpdate();
+			mainFrame->m_wndInst.WaveUpdate();
 			CRect rect;
 			GetClientRect(&rect);
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2303,9 +2296,9 @@ namespace psycle { namespace host {
 		{
 			_pSong = _sng;
 		}
-		void CWaveEdChildView::SetParent(CMainFrame* parent)
+		void CWaveEdChildView::SetMainFrame(CMainFrame* parent)
 		{
-			pParent = parent;
+			mainFrame = parent;
 		}
 		unsigned long CWaveEdChildView::GetWaveLength()
 		{

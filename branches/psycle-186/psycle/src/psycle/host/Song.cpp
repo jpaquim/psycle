@@ -2,19 +2,18 @@
 ///\brief implementation file for psycle::host::Song.
 
 
-#include "Psycle.hpp"
+#include "Song.hpp"
 
 #if !defined WINAMP_PLUGIN
+	#include "PsycleConfig.hpp"
 	#include "NewMachine.hpp"
-	#include "MainFrm.hpp"
-	#include "ChildView.hpp"
 	#include "ProgressDialog.hpp"
+	#include "InputHandler.hpp"
 #else
+	#include "Configuration.hpp"
 	#include "player_plugins/winamp/fake_progressDialog.hpp"
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
-
-#include "Song.hpp"
 
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
@@ -477,6 +476,9 @@ namespace psycle
 				// All pattern reset
 				patternLines[i]=defaultPatLines;
 				std::sprintf(patternName[i], "Untitled"); 
+				for(int j(0) ;  j < MAX_TRACKS; j++) {
+					_trackNames[i][j] = "";
+				}
 			}
 			_trackArmedCount = 0;
 			for(int i(0) ; i < MAX_TRACKS; ++i)
@@ -502,6 +504,7 @@ namespace psycle
 		}
 		void Song::DoNew() {
 			seqBus=0;
+			shareTrackNames=true;
 			// Song reset
 			name = "Untitled";
 			author = "Unnamed";
@@ -528,28 +531,50 @@ namespace psycle
 			auxcolSelected = 0;
 			_saved=false;
 			fileName ="Untitled.psy";
-#if !defined WINAMP_PLUGIN
-			CreateMachine
-				(
-					MACH_MASTER, 
-					(viewSize.x - Global::psycleconf().macView().MachineCoords.sMaster.width) / 2, 
-					(viewSize.y - Global::psycleconf().macView().MachineCoords.sMaster.height) / 2, 
-					0,
-					MASTER_INDEX
-				);
-#else
 			CreateMachine(MACH_MASTER, 320, 200, 0, MASTER_INDEX);
-#endif //!defined WINAMP_PLUGIN
+		}
+
+		void Song::ChangeTrackName(int patIdx, int trackidx, std::string name)
+		{
+			if(shareTrackNames)
+			{
+				for(int i(0); i < MAX_PATTERNS; i++) {
+					_trackNames[i][trackidx] = name;
+				}
+			}
+			else 
+			{
+				_trackNames[patIdx][trackidx] = name;
+			}
+		}
+		void Song::SetTrackNameShareMode(bool shared)
+		{
+			if(shared) {
+				for(int i(1); i < MAX_PATTERNS; i++) {
+					for(int j(0); j < SONGTRACKS; j++) {
+						_trackNames[i][j] = _trackNames[i][j];
+					}
+				}
+			}
+		}
+		void Song::CopyNamesFrom(int patOrig,int patDest)
+		{
+			for(int i(0); i< SONGTRACKS; i++) {
+				_trackNames[patDest][i] = _trackNames[patOrig][i];
+			}
 		}
 
 		int Song::GetFreeMachine()
 		{
-			int tmac = 0;
-			for(;;)
+			int idx=-1;
+			for(int tmac = 0; tmac < MAX_MACHINES; tmac++)
 			{
-				if(!_pMachine[tmac]) return tmac;
-				if(tmac++ >= MAX_MACHINES) return -1;
+				if(!_pMachine[tmac]) {
+					idx=tmac;
+					break;
+				}
 			}
+			return idx;
 		}
 		bool Song::ValidateMixerSendCandidate(Machine* mac,bool rewiring)
 		{
@@ -1263,6 +1288,16 @@ namespace psycle
 							if(version == 0) {
 								size= (UINT)(pFile->GetPos() - begins);
 							}
+							if(version > 0) {
+								pFile->Read(shareTrackNames);
+								if( shareTrackNames) {
+									for(int t(0); t < SONGTRACKS; t++) {
+										std::string name;
+										pFile->ReadString(name);
+										ChangeTrackName(0,t,name);
+									}
+								}
+							}
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1399,6 +1434,15 @@ namespace psycle
 							}
 							//\ Fix for a bug existing in the Song Saver in the 1.7.x series
 							if((version == 0x0000) &&( pFile->GetPos() == begins+size+4)) size += 4;
+							if(version > 0) {
+								if( !shareTrackNames) {
+									for(int t(0); t < SONGTRACKS; t++) {
+										std::string name;
+										pFile->ReadString(name);
+										ChangeTrackName(index,t,name);
+									}
+								}
+							}
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1554,9 +1598,6 @@ namespace psycle
 				RestoreMixerSendFlags();
 				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 				// translate any data that is required
-#if !defined WINAMP_PLUGIN
-				static_cast<CMainFrame*>(theApp.m_pMainWnd)->UpdateComboGen();
-#endif //!defined WINAMP_PLUGIN
 				machineSoloed = solo;
 				// Safe measures for damaged files.
 				if (!_pMachine[MASTER_INDEX] )
@@ -1942,45 +1983,6 @@ namespace psycle
 							pMac[i]->Init();
 							pMac[i]->Load(pFile);
 						}
-
-#if !defined WINAMP_PLUGIN
-						///TODO: Move this code to the ChildView, after loading.
-						SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
-						switch (pMac[i]->_mode)
-						{
-						case MACHMODE_GENERATOR:
-							if ( x > viewSize.x-mcoords.sGenerator.width ) 
-							{
-								x = viewSize.x-mcoords.sGenerator.width;
-							}
-							if ( y > viewSize.y-mcoords.sGenerator.height ) 
-							{
-								y = viewSize.y-mcoords.sGenerator.height;
-							}
-							break;
-						case MACHMODE_FX:
-							if ( x > viewSize.x-mcoords.sEffect.width )
-							{
-								x = viewSize.x-mcoords.sEffect.width;
-							}
-							if ( y > viewSize.y-mcoords.sEffect.height ) 
-							{
-								y = viewSize.y-mcoords.sEffect.height;
-							}
-							break;
-
-						case MACHMODE_MASTER:
-							if ( x > viewSize.x-mcoords.sMaster.width ) 
-							{
-								x = viewSize.x-mcoords.sMaster.width;
-							}
-							if ( y > viewSize.y-mcoords.sMaster.height )
-							{
-								y = viewSize.y-mcoords.sMaster.height;
-							}
-							break;
-						}
-#endif //!defined WINAMP_PLUGIN
 
 						pMac[i]->_x = x;
 						pMac[i]->_y = y;
@@ -2417,7 +2419,13 @@ namespace psycle
 
 			pFile->Write("SNGI",4);
 			version = CURRENT_FILE_VERSION_SNGI;
-			size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])));
+			size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])))
+				+ sizeof(bool); 
+			if( shareTrackNames) {
+				for(int t(0); t < SONGTRACKS; t++) {
+					size+=_trackNames[0][t].length()+1; // +1 because of the \0 terminator.
+				}
+			}
 			pFile->Write(&version,sizeof(version));
 			pFile->Write(&size,sizeof(size));
 
@@ -2452,6 +2460,14 @@ namespace psycle
 				pFile->Write(&_trackMuted[i],sizeof(_trackMuted[i]));
 				pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
 			}
+
+			pFile->Write(shareTrackNames);
+			if( shareTrackNames) {
+				for(int t(0); t < SONGTRACKS; t++) {
+					pFile->WriteString(_trackNames[0][t]);
+				}
+			}
+
 
 			if ( !autosave ) 
 			{
@@ -2525,6 +2541,11 @@ namespace psycle
 
 					pFile->Write(&version,sizeof(version));
 					size = (UINT)(sizez77+(4*sizeof(int))+strlen(patternName[i])+1);
+					if( !shareTrackNames) {
+						for(int t(0); t < SONGTRACKS; t++) {
+							size+=_trackNames[index][t].length()+1; // +1 because of the \0 terminator.
+						}
+					}
 					pFile->Write(&size,sizeof(size));
 
 					index = i; // index
@@ -2539,7 +2560,12 @@ namespace psycle
 					pFile->Write(&sizez77,sizeof(sizez77));
 					pFile->Write(pCopy,sizez77);
 					zapArray(pCopy);
-
+					
+					if( !shareTrackNames) {
+						for(int t(0); t < SONGTRACKS; t++) {
+							pFile->WriteString(_trackNames[index][t]);
+						}
+					}
 					if ( !autosave ) 
 					{
 						progress.m_Progress.StepIt();
@@ -2724,7 +2750,7 @@ namespace psycle
 
 			// save our file
 #if !defined WINAMP_PLUGIN
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 #endif //!defined WINAMP_PLUGIN
 			///\todo: Wrong song dir causes "machine cloning failed"! 
 			///\todo: the process should be chagned and save the data in memory.
@@ -2808,7 +2834,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
 
-			int xs,ys,x,y;
+			int xs,ys;
 			if (src >= MAX_BUSES)
 			{
 				xs = mcoords.sEffect.width;
@@ -2819,33 +2845,9 @@ namespace psycle
 				xs = mcoords.sGenerator.width;
 				ys = mcoords.sGenerator.height;
 			}
-			x=_pMachine[dst]->_x+32;
-			y=_pMachine[dst]->_y+ys+8;
 
-			bool bCovered = TRUE;
-			while (bCovered)
-			{
-				bCovered = FALSE;
-				for (int i=0; i < MAX_MACHINES; i++)
-				{
-					if (i != dst)
-					{
-						if (_pMachine[i])
-						{
-							if ((abs(_pMachine[i]->_x - x) < 32) &&
-								(abs(_pMachine[i]->_y - y) < 32))
-							{
-								bCovered = TRUE;
-								i = MAX_MACHINES;
-								x = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CW-xs);
-								y = (rand())%(((CMainFrame *)theApp.m_pMainWnd)->m_wndView.CH-ys);
-							}
-						}
-					}
-				}
-			}
-			_pMachine[dst]->_x = x;
-			_pMachine[dst]->_y = y;
+			_pMachine[dst]->_x = _pMachine[dst]->_x+32;
+			_pMachine[dst]->_y = _pMachine[dst]->_y+ys+8;
 #endif //!defined WINAMP_PLUGIN
 
 			// delete all connections
@@ -2915,7 +2917,7 @@ namespace psycle
 			// ok now we get down to business
 #if !defined WINAMP_PLUGIN
 
-			((CMainFrame *)theApp.m_pMainWnd)->m_wndView.AddMacViewUndo();
+			Global::pInputHandler->AddMacViewUndo();
 #endif //!defined WINAMP_PLUGIN
 
 			// save our file

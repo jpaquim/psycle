@@ -6,33 +6,30 @@
 namespace psycle {
 	namespace host {
 
-		class CChildView;
 		class Machine;
-		class Song;
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
-		//const int SCOPE_SPEC_SAMPLES = 1024;
 		const int MAX_SCOPE_SPEC_SAMPLES = SCOPE_BUF_SIZE;
 
 		/// wire monitor window.
 		class CWireDlg : public CDialog
 		{
 		public:
-			CWireDlg(CChildView* pParent);
-		// Overrides
+			CWireDlg(CWnd* mainView, CWireDlg** windowVar, int wireDlgIdx,
+				Machine& srcMac, int srcWireIdx, Machine& dstMac, int dstWireIdx);
+			virtual ~CWireDlg();
+		
+		protected:
 			virtual BOOL PreTranslateMessage(MSG* pMsg);
-		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
-			// Generated message map functions
 			virtual BOOL OnInitDialog();
-		public:
-			BOOL Create();
-			afx_msg void OnCancel();
+			virtual void PostNcDestroy();
+
 		protected:
-			afx_msg void OnDelete();
+			afx_msg void OnClose();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnDelete();
 			afx_msg void OnMode();
 			afx_msg void OnHold();
 			afx_msg void OnVolumeDb();
@@ -50,13 +47,14 @@ namespace psycle {
 			inline int GetY(float f);
 
 		public:
-			UINT this_index;
-			int wireIndex;
-			int isrcMac;
-			Machine* _pSrcMachine;
-			Machine* _pDstMachine;
-			int _dstWireIndex;
+			Machine& srcMachine;
+			Machine& dstMachine;
 		protected:
+			CWireDlg** windowVar;
+			CWnd* mainView;
+			UINT wireDlgIdx;
+			int srcWireIdx;
+			int dstWireIdx;
 		// Dialog Data
 			enum { IDD = IDD_WIREDIALOG };
 			CSliderCtrl	m_volslider;
@@ -66,7 +64,6 @@ namespace psycle {
 			CStatic	m_volabel_db;
 			CButton m_mode;
 
-			CChildView* m_pParent;
 			CBitmap* bufBM;
 			CBitmap* clearBM;
 			CPen linepenL;

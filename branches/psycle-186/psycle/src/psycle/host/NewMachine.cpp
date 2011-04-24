@@ -624,7 +624,6 @@ namespace psycle { namespace host {
 			loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::pConfig->GetVst64Dir());
 			loggers::information()("Scanning plugins ... Listing ...");
 
-			progress.Create();
 			progress.SetWindowText("Scanning plugins ... Listing ...");
 			progress.ShowWindow(SW_SHOW);
 
@@ -711,7 +710,7 @@ namespace psycle { namespace host {
 			_numPlugins = plugsCount;
 			progress.m_Progress.SetPos(16384);
 			progress.SetWindowText("Saving scan cache file ...");
-			progress.OnCancel();
+			progress.SendMessage(WM_CLOSE);
 			param->theEvent.SetEvent();
 			return 0;
 		}

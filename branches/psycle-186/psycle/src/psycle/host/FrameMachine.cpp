@@ -3,11 +3,8 @@
 
 #include "FrameMachine.hpp"
 
-//#include "MainFrm.hpp"
 #include "InputHandler.hpp"
 #include "ChildView.hpp"
-//#include "Configuration.hpp"
-//#include "NewVal.hpp"
 #include "Machine.hpp"
 #include "NativeGui.hpp"
 #include "MixerFrameView.hpp"
@@ -17,12 +14,13 @@
 
 int const ID_TIMER_PARAM_REFRESH = 2104;
 namespace psycle { namespace host {
-
+		extern CPsycleApp theApp;
 		IMPLEMENT_DYNAMIC(CFrameMachine, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 			ON_WM_CREATE()
 			ON_WM_TIMER()
+			ON_WM_CLOSE()
 			ON_WM_DESTROY()
 			ON_WM_SETFOCUS()
 			ON_WM_KEYDOWN()
@@ -31,22 +29,22 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
 			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
-			ON_COMMAND(ID_PARAMETERS_RESETPARAMETERS, OnParametersResetparameters)
+			ON_COMMAND(ID_PROGRAMS_RESETDEFAULT, OnParametersResetparameters)
 			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
-			ON_UPDATE_COMMAND_UI(ID_VIEWS_BANKMANAGER, OnUpdateViewsBankmanager)
 			ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
+			ON_UPDATE_COMMAND_UI(ID_MACHINE_COMMAND, OnUpdateParametersCommand)
 			ON_COMMAND(ID_ABOUT_ABOUTMAC, OnMachineAboutthismachine)
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine(Machine* pMachine)
-		: pView(0) , _machine(pMachine)
+		: pView(NULL) , _machine(pMachine), _pActive(NULL)
 		{
-			//do not use! Use OnCreate Instead.
+			//Use OnCreate.
 		}
 
 		CFrameMachine::~CFrameMachine()
 		{
-			//do not use! Use OnDestroy Instead.
+			//Use OnDestroy
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -64,8 +62,15 @@ namespace psycle { namespace host {
 			}
 			if ( _machine->_type == MACH_PLUGIN )
 			{
-				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_machine)->GetInfo()->Command);
+				GetMenu()->GetSubMenu(1)->ModifyMenu(6, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
+					((Plugin*)_machine)->GetInfo()->Command);
 			}
+
+			// Sets Icon
+			HICON tIcon;
+			tIcon=theApp.LoadIcon(IDR_FRAMEMACHINE);
+			SetIcon(tIcon, true);
+			SetIcon(tIcon, false);
 
 			*_pActive=true;
 			SetTimer(ID_TIMER_PARAM_REFRESH,33,0);
@@ -82,12 +87,22 @@ namespace psycle { namespace host {
 			return TRUE;
 		}
 
-		void CFrameMachine::OnDestroy() 
+		void CFrameMachine::OnClose() 
 		{
 			KillTimer(ID_TIMER_PARAM_REFRESH);
-			pView->DestroyWindow();
-			if ( _pActive != NULL ) *_pActive=false;
-			CFrameWnd::OnDestroy();
+			CFrameWnd::OnClose();
+		}
+
+		void CFrameMachine::OnDestroy()
+		{
+			HICON _icon = GetIcon(false);
+			DestroyIcon(_icon);
+			if (pView != NULL) { pView->DestroyWindow(); delete pView; }
+		}
+		void CFrameMachine::PostNcDestroy() 
+		{
+			if (_pActive != NULL) *_pActive=false;
+			delete this;
 		}
 
 		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
@@ -172,7 +187,6 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
 		{
-			pCmdUI->SetText("Activated");
 			if (machine()._mode == MACHMODE_GENERATOR)
 			{
 				pCmdUI->SetCheck(!machine()._mute);
@@ -197,7 +211,7 @@ namespace psycle { namespace host {
 
 				float roffset = randsem*(float)dif;
 
-				wndView->AddMacViewUndo();
+				Global::pInputHandler->AddMacViewUndo();
 				machine().SetParameter(c,minran+int(roffset));
 			}
 			Invalidate(false);
@@ -211,7 +225,7 @@ namespace psycle { namespace host {
 				for (int c=0; c<numpars; c++)
 				{
 					int dv = ((Plugin*)_machine)->GetInfo()->Parameters[c]->DefValue;
-					wndView->AddMacViewUndo();
+					Global::pInputHandler->AddMacViewUndo();
 					_machine->SetParameter(c,dv);
 				}
 			}
@@ -231,6 +245,17 @@ namespace psycle { namespace host {
 				{
 					// o_O`
 				}
+			}
+		}
+
+		void CFrameMachine::OnUpdateParametersCommand(CCmdUI *pCmdUI)
+		{
+			if ( _machine->_type == MACH_PLUGIN)
+			{
+				pCmdUI->Enable(true);
+			}
+			else {
+				pCmdUI->Enable(false);
 			}
 		}
 
@@ -256,11 +281,6 @@ namespace psycle { namespace host {
 			dlg._pMachine=_machine;
 			dlg.DoModal();
 		}
-
-		void CFrameMachine::OnUpdateViewsBankmanager(CCmdUI *pCmdUI)
-		{
-		}
-
 
 		/**********************************************************/
 
