@@ -64,12 +64,14 @@ template<> struct compile_time_factorial<0u> { unsigned int const static value =
 
 template<typename Real> UNIVERSALIS__COMPILER__CONST
 Real inline deci_bell_to_linear(Real deci_bell) {
-	return std::pow(10u, deci_bell / 20);
+	///\todo merge with psycle::helpers::dsp::dB2Amp
+	return std::pow(10u, deci_bell / Real(20));
 }
 
 template<typename Real> UNIVERSALIS__COMPILER__CONST
 Real inline linear_to_deci_bell(Real linear) {
-	return 20 * std::log10(linear);
+	///\todo merge with psycle::helpers::dsp::dB
+	return Real(20) * std::log10(linear);
 }
 
 }}}
