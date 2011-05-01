@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::output
 #ifndef PSYCLE__PLUGINS__OUTPUT__INCLUDED
@@ -15,7 +15,7 @@
 	#include "outputs/alsa.hpp"
 #elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DIRECT_SOUND
 	#include "outputs/direct_sound.hpp"
-#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DUMMY
+#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DUMMY || defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#include "outputs/dummy.hpp"
 #else
 	#error no default output
@@ -41,7 +41,6 @@ namespace outputs {
 	class settings {
 		unsigned int buffer_frames;
 		unsigned int period_frames;
-
 		unsigned int channels;
 		unsigned int bits_per_channel_sample;
 		real samples_per_second;
@@ -65,13 +64,13 @@ typedef outputs::
 		alsa
 	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DIRECT_SOUND
 		direct_sound
-	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DUMMY
+	#elif defined PSYCLE__PLUGINS__OUTPUT__DEFAULT__DUMMY || defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 		dummy
 	#else
 		#error no default output
 	#endif
 	output_base;
-	
+
 /// default output.
 class PSYCLE__DECL output : public output_base {
 	public:
