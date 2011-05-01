@@ -160,7 +160,7 @@ Integer inline lrint(Real x) {
 				int32_t i = lrint<int32_t>(r);
 				int32_t si = static_cast<int32_t>(r);
 				BOOST_CHECK(i == si || i == si + (r > 0 ? +1 : -1));
-				r += 100.1;
+				r += Real(100.1);
 			}
 		}
 	}
