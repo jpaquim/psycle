@@ -84,7 +84,6 @@ Integer inline lrint(Real x) {
 #else
 
 	// int32_t
-///\todo: this one should be revised. Seemed not to work in x64 (sound was distorted, although audible).
 	template<> UNIVERSALIS__COMPILER__CONST
 	int32_t inline lrint<>(double d) {
 		BOOST_STATIC_ASSERT((sizeof d == 8));
@@ -141,39 +140,74 @@ Integer inline lrint(Real x) {
 
 #endif
 
-#if defined BOOST_AUTO_TEST_CASE && DIVERSALIS__STDLIB__MATH >= 199901 // some test of C1999's features
-	#include <fenv.h>
-	BOOST_AUTO_TEST_CASE(lrint_test) {
-		int const initial_feround(fegetround());
-		try {
-			fesetround(FE_TONEAREST);
-			BOOST_CHECK(lrint<long int>(+2.6) == +3);
-			BOOST_CHECK(lrint<long int>(+1.4) == +1);
-			BOOST_CHECK(lrint<long int>(-2.6) == -3);
-			BOOST_CHECK(lrint<long int>(-1.4) == -1);
-			fesetround(FE_TOWARDZERO);
-			BOOST_CHECK(lrint<long int>(+1.6) == +1);
-			BOOST_CHECK(lrint<long int>(+1.4) == +1);
-			BOOST_CHECK(lrint<long int>(-1.6) == -1);
-			BOOST_CHECK(lrint<long int>(-1.4) == -1);
-			fesetround(FE_DOWNWARD);
-			BOOST_CHECK(lrint<long int>(+1.6) == +1);
-			BOOST_CHECK(lrint<long int>(+1.4) == +1);
-			BOOST_CHECK(lrint<long int>(-1.6) == -2);
-			BOOST_CHECK(lrint<long int>(-1.4) == -2);
-			fesetround(FE_UPWARD);
-			BOOST_CHECK(lrint<long int>(+1.6) == +2);
-			BOOST_CHECK(lrint<long int>(+1.4) == +2);
-			BOOST_CHECK(lrint<long int>(-1.6) == -1);
-			BOOST_CHECK(lrint<long int>(-1.4) == -1);
-		} catch(...) {
-			fesetround(initial_feround);
-			throw;
-		}
-		fesetround(initial_feround);
-	}
-#endif
-
 }}}
+
+/***************************************************************************************************************/
+#if defined BOOST_AUTO_TEST_CASE
+
+	#if DIVERSALIS__STDLIB__MATH >= 199901 // some test of C1999's features
+		#include <fenv.h>
+	#endif
+
+	namespace psycle { namespace helpers { namespace math {
+
+	namespace lrint_test_namespace {
+		
+		template<typename Real>
+		void test() {
+			Real r(-1e6);
+			while(r < Real(1e6)) {
+				int32_t i = lrint<int32_t>(r);
+				int32_t si = static_cast<int32_t>(r);
+				BOOST_CHECK(i == si || i == si + (r > 0 ? +1 : -1));
+				r += 100.1;
+			}
+		}
+	}
+	
+	BOOST_AUTO_TEST_CASE(lrint_test) {
+		using namespace lrint_test_namespace;
+		test<float>();
+		test<double>();
+		#if DIVERSALIS__STDLIB__MATH >= 199901
+			test<long double>();
+		#endif
+	}
+	
+	#if DIVERSALIS__STDLIB__MATH >= 199901 // some test of C1999's features
+		BOOST_AUTO_TEST_CASE(lrint_c1999_test) {
+			int const initial_feround(fegetround());
+			try {
+				fesetround(FE_TONEAREST);
+				BOOST_CHECK(lrint<long int>(+2.6) == +3);
+				BOOST_CHECK(lrint<long int>(+1.4) == +1);
+				BOOST_CHECK(lrint<long int>(-2.6) == -3);
+				BOOST_CHECK(lrint<long int>(-1.4) == -1);
+				fesetround(FE_TOWARDZERO);
+				BOOST_CHECK(lrint<long int>(+1.6) == +1);
+				BOOST_CHECK(lrint<long int>(+1.4) == +1);
+				BOOST_CHECK(lrint<long int>(-1.6) == -1);
+				BOOST_CHECK(lrint<long int>(-1.4) == -1);
+				fesetround(FE_DOWNWARD);
+				BOOST_CHECK(lrint<long int>(+1.6) == +1);
+				BOOST_CHECK(lrint<long int>(+1.4) == +1);
+				BOOST_CHECK(lrint<long int>(-1.6) == -2);
+				BOOST_CHECK(lrint<long int>(-1.4) == -2);
+				fesetround(FE_UPWARD);
+				BOOST_CHECK(lrint<long int>(+1.6) == +2);
+				BOOST_CHECK(lrint<long int>(+1.4) == +2);
+				BOOST_CHECK(lrint<long int>(-1.6) == -1);
+				BOOST_CHECK(lrint<long int>(-1.4) == -1);
+			} catch(...) {
+				fesetround(initial_feround);
+				throw;
+			}
+			fesetround(initial_feround);
+		}
+	#endif
+
+	}}}
+
+#endif
 
 #endif
