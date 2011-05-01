@@ -50,6 +50,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 			const vec vol_vec = { vol, vol, vol, vol };
 			const vec* src = reinterpret_cast<const vec*>(pSrcSamples);
 			vec* dst = reinterpret_cast<vec*>(pDstSamples);
+			#pragma omp parallel for // with gcc, build with the -fopenmp flag
 			for(int i = 0; i < numSamples; ++i) dst[i] = src[i] * vol_vec;
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
