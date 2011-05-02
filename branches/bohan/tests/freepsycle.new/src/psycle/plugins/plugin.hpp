@@ -209,7 +209,7 @@ namespace math { using namespace engine::math; }
 					case channel::flags::discrete:
 						this->do_process_template<channel::flags::discrete, Evaluated_Flags...>();
 					default:
-						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS); \
+						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 				}
 			}
 
@@ -223,7 +223,7 @@ namespace math { using namespace engine::math; }
 					case channel::flags::discrete:
 						this->template_switch<channel::flags::discrete, Evaluated_Flags...>(flags_to_evaluate);
 					default:
-						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS); \
+						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 				}
 			}
 	};
