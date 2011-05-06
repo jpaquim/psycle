@@ -17,6 +17,10 @@
 
 	///\name processor endianess
 	///\{
+		/// indicates the compiler's target processor byte order (1234, 4321, etc)
+		#define DIVERSALIS__CPU__ENDIAN <number>
+		#undef DIVERSALIS__CPU__ENDIAN // was just defined to insert documentation.
+
 		/// indicates the compiler's target processor uses big endian byte order.
 		#define DIVERSALIS__CPU__ENDIAN__BIG
 		#undef DIVERSALIS__CPU__ENDIAN__BIG // was just defined to insert documentation.
@@ -139,9 +143,19 @@
 		/// 1 == sse1 (pentium3/athlon-4/athlon-xp/athlon-mp)
 		/// 2 == sse2 (intel pentium-4, amd k8/opteron/athlon64/athlon-fx)
 		/// 3 == sse3 (intel prescott)
+		/// 4 == sse4 (intel core2)
 		#define DIVERSALIS__CPU__X86__SSE <number>
 		#undef DIVERSALIS__CPU__X86__SSE // was just defined to insert documentation.
+
+		/// ssse
+		/// 3 == ssse3 (intel core2)
+		#define DIVERSALIS__CPU__X86__SSSE <number>
+		#undef DIVERSALIS__CPU__X86__SSSE // was just defined to insert documentation.
 		
+		/// math builtins through sse
+		#define DIVERSALIS__CPU__X86__SSE__MATH <number>
+		#undef DIVERSALIS__CPU__X86__SSE__MATH // was just defined to insert documentation.
+
 		/// indicates the compiler's target x86 processor supports the 3d-now instruction set.
 		/// Only amd chips have 3d-now support.
 		/// 1 == 3d-now (k6-2/3)
@@ -156,8 +170,6 @@
 		#undef DIVERSALIS__CPU__X86__MMX // was just defined to insert documentation.
 	///\}
 #endif
-
-
 
 /**********************************************************************************/
 // now the real work
@@ -196,12 +208,13 @@
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__IA 2
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
-	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel nocona/emt64 (sse3)
+	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel core2 (ssse3) nocona/emt64 (sse3)
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 9
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif \
 		defined __k8__     /* amd k8/opteron/athlon64/athlon-fx (sse2) */ || \
+		defined __core2__  /* intel core2 (ssse3) */ || \
 		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 8
@@ -226,20 +239,22 @@
 		#define DIVERSALIS__CPU__X86 3
 	#endif
 
-	#if defined __SSE4__
+	#if defined __SSSE3__
+		#define DIVERSALIS__CPU__X86__SSSE 3
+	#endif
+
+	#if defined __SSE4__ || defined __SSE4_1__
 		#define DIVERSALIS__CPU__X86__SSE 4
 	#elif defined __SSE3__
 		#define DIVERSALIS__CPU__X86__SSE 3
-		#if defined __SSE3_MATH__
-			#define DIVERSALIS__CPU__X86__SSE__MATH 3
-		#endif
 	#elif defined __SSE2__
 		#define DIVERSALIS__CPU__X86__SSE 2
-		#if defined __SSE2_MATH__
-			#define DIVERSALIS__CPU__X86__SSE__MATH 2
-		#endif
 	#elif defined __SSE__
 		#define DIVERSALIS__CPU__X86__SSE 1
+	#endif
+
+	#if defined __SSE_MATH__ || defined __SSE2_MATH__
+		#define DIVERSALIS__CPU__X86__SSE__MATH  DIVERSALIS__CPU__X86__SSE
 	#endif
 
 	#if defined __3dNOW_A__
@@ -261,7 +276,17 @@
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 4
 	#endif
 	
-	#if defined _M_IA64
+	#if defined _M_ALPHA
+		#define DIVERSALIS__CPU
+		#define DIVERSALIS__CPU__ALPHA_AXP _M_ALPHA
+	#elif defined _M_MRX000 // mips
+		#define DIVERSALIS__CPU
+		#define DIVERSALIS__CPU__MIPS
+		#define DIVERSALIS__CPU__MRX _M_MRX000
+	#elif defined _M_PPC // xbox 360?
+		#define DIVERSALIS__CPU
+		#define DIVERSALIS__CPU__POWER_PC _M_PPC
+	#elif defined _M_IA64
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__IA 2
 	#elif defined _M_X64 // 64-bit x86 amd or intel (but not necessarily _WIN64)
@@ -287,16 +312,6 @@
 		#if DIVERSALIS__CPU__X86 >= 6
 			#define DIVERSALIS__CPU__X86__MMX
 		#endif
-	#elif defined _M_ALPHA
-		#define DIVERSALIS__CPU
-		#define DIVERSALIS__CPU__ALPHA_AXP _M_ALPHA
-	#elif defined _M_MRX000 // mips
-		#define DIVERSALIS__CPU
-		#define DIVERSALIS__CPU__MIPS
-		#define DIVERSALIS__CPU__MRX _M_MRX000
-	#elif defined _M_PPC // xbox 360?
-		#define DIVERSALIS__CPU
-		#define DIVERSALIS__CPU__POWER_PC _M_PPC
 	#endif
 #endif
 
@@ -369,12 +384,8 @@
 	#endif
 #endif
 
-
-
 /**********************************************************************************/
 // consistency check
-
-
 
 #if !defined DIVERSALIS__CPU && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#error unkown cpu
