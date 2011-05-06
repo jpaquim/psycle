@@ -19,18 +19,17 @@
 #endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
-
 	#if defined _MT // defined when -MD or -MDd (multithreaded dll) or -MT or -MTd (multithreaded static) is specified.
 		#define DIVERSALIS__STDLIB__RUNTIME__MULTI_THREADED
 	#endif
-
 	#if defined _DLL // defined when -MD or -MDd (multithread dll) is specified.
 		#define DIVERSALIS__STDLIB__RUNTIME__DYN_LINK
 	#endif
-
 	#if defined _DEBUG // defined when compiling with -LDd, -MDd, or -MTd.
 		#define DIVERSALIS__STDLIB__RUNTIME__DEBUG
 	#endif
+#elif defined _REENTRANT
+		#define DIVERSALIS__STDLIB__RUNTIME__MULTI_THREADED
 #endif
 
 #endif // !defined DIVERSALIS__STDLIB__INCLUDED

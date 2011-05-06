@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::os::dyn_link::resolver
 
@@ -145,22 +145,19 @@ void resolver::resolve_symbol_error(std::string const & name, std::string const 
 boost::filesystem::path resolver::decorated_filename(boost::filesystem::path const & path, unsigned int const & version) throw() {
 	std::ostringstream version_string; version_string << version;
 	return
-		#if !defined UNIVERSALIS__QUAQUAVERSALIS && ( \
-				defined DIVERSALIS__OS__POSIX || \
-				defined DIVERSALIS__OS__MICROSOFT \
-		)
+		#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__BIN_FMT
 			#if defined DIVERSALIS__OS__CYGWIN
-			//"cyg" +
+				//"cyg" +
 			#else
-			//"lib" +
+				//"lib" +
 			#endif
 			path.branch_path() / (
 				path.leaf() +
-				#if defined DIVERSALIS__OS__LINUX
+				#if defined DIVERSALIS__OS__BIN_FMT__ELF
 					".so" // "." + version_string.str() // libfoo.so.0
-				#elif defined DIVERSALIS__OS__APPLE
+				#elif defined DIVERSALIS__OS__BIN_FMT__MAC_O
 					".dylib" // libfoo.dylib or libfoo.bundle
-				#elif defined DIVERSALIS__OS__MICROSOFT || defined DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
+				#elif defined DIVERSALIS__OS__BIN_FMT__PE
 					".dll" // "-" + version_string.str() + ".dll" // libfoo-0.dll or cygfoo-0.dll
 					// [bohan] we don't need to append the .dll suffix when the given name doesn't contain a dot,
 					// [bohan] otherwise, we have to explicitly add the .dll suffix.
