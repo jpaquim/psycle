@@ -199,29 +199,29 @@ namespace math { using namespace engine::math; }
 			template<channel::flags::type a, channel::flags::type b, channel::flags::type c>
 			void do_process_template() {}
 
-			template<channel::flags::type ... Evaluated_Flags>
-			void template_switch(channel::flags::type const & flag_to_evaluate) {
+			template<channel::flags::type... Evaluated_Flags>
+			void template_switch(channel::flags::type flag_to_evaluate) {
 				switch(flag_to_evaluate) {
 					case channel::flags::continuous:
-						this->do_process_template<channel::flags::continuous, Evaluated_Flags...>();
+						this->do_process_template<Evaluated_Flags..., channel::flags::continuous>();
 					case channel::flags::empty:
-						this->do_process_template<channel::flags::empty, Evaluated_Flags...>();
+						this->do_process_template<Evaluated_Flags..., channel::flags::empty>();
 					case channel::flags::discrete:
-						this->do_process_template<channel::flags::discrete, Evaluated_Flags...>();
+						this->do_process_template<Evaluated_Flags..., channel::flags::discrete>();
 					default:
 						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 				}
 			}
 
-			template<channel::flags::type ... Evaluated_Flags>
-			void template_switch(channel::flags::type const & flag_to_evaluate, channel::flags::type const & flags_to_evaluate...) {
+			template<channel::flags::type... Evaluated_Flags, typename... Flags_To_Evaluate>
+			void template_switch(channel::flags::type flag_to_evaluate, Flags_To_Evaluate... flags_to_evaluate) {
 				switch(flag_to_evaluate) {
 					case channel::flags::continuous:
-						this->template_switch<channel::flags::continuous, Evaluated_Flags...>(flags_to_evaluate);
+						this->template_switch<Evaluated_Flags..., channel::flags::continuous>(flags_to_evaluate...);
 					case channel::flags::empty:
-						this->template_switch<channel::flags::empty, Evaluated_Flags...>(flags_to_evaluate);
+						this->template_switch<Evaluated_Flags..., channel::flags::empty>(flags_to_evaluate...);
 					case channel::flags::discrete:
-						this->template_switch<channel::flags::discrete, Evaluated_Flags...>(flags_to_evaluate);
+						this->template_switch<Evaluated_Flags..., channel::flags::discrete>(flags_to_evaluate...);
 					default:
 						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
 				}
@@ -231,7 +231,7 @@ namespace math { using namespace engine::math; }
 	void inline test_call() {
 		test_class test_instance;
 		//template_switch<>(test_instance, channel::flags::continuous, channel::flags::empty, channel::flags::discrete);
-		test_instance.template_switch<>(channel::flags::continuous, channel::flags::empty, channel::flags::discrete);
+		test_instance.template_switch(channel::flags::continuous, channel::flags::empty, channel::flags::discrete);
 	}
 	#endif
 
