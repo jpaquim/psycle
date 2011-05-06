@@ -32,11 +32,14 @@ void sine::seconds_per_event_change_notification_from_port(port const & port) {
 
 void sine::do_process() {
 	if(!out_port_) return;
-	PSYCLE__PLUGINS__TEMPLATE_SWITCH(do_process_template,
-		(phase_port_ ? phase_chn().flag() : channel::flags::empty)
-		( freq_port_ ?  freq_chn().flag() : channel::flags::empty)
-		(  amp_port_ ?   amp_chn().flag() : channel::flags::empty)
-	);
+	channel::flags::type const phase_flag = phase_port_ ? phase_chn().flag() : channel::flags::empty;
+	channel::flags::type const  freq_flag =  freq_port_ ?  freq_chn().flag() : channel::flags::empty;
+	channel::flags::type const   amp_flag =   amp_port_ ?   amp_chn().flag() : channel::flags::empty;
+	#if defined DIVERSALIS__COMPILER__FEATURE__CXXOX
+		do_process_template_switch<sine>(phase_flag, freq_flag, amp_flag);
+	#else
+		PSYCLE__ENGINE__TEMPLATE_SWITCH(do_process_template, (phase_flag)(freq_flag)(amp_flag));
+	#endif
 }
 
 template<

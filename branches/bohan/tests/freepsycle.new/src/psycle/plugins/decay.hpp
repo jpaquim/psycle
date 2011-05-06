@@ -33,7 +33,7 @@ class PSYCLE__DECL decay : public node {
 			channel::flags::type decay_flag
 		>
 		void do_process_template();
-		
+
 		real current_;
 		real decay_, events_per_second_, seconds_per_event_;
 
