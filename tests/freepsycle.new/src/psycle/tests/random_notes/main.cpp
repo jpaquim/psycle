@@ -81,7 +81,7 @@ void play() {
 			scheduler.threads(threads);
 				
 			if(loggers::information()()) loggers::information()("generating input ...");
-			seconds const seconds(5);
+			seconds const seconds(60);
 			score.generate();
 			if(loggers::information()()) loggers::information()("generating input ... done");
 			if(loggers::information()()) {
