@@ -86,7 +86,7 @@ void score1::connect(engine::node & out) {
 
 void score1::generate() {
 	engine::real const beats_per_second(1);
-	unsigned int const notes(100000);
+	unsigned int const notes(10000);
 	engine::real beat(0);
 	engine::real duration(0.00001 / beats_per_second);
 	float slowdown(0.001);
@@ -109,7 +109,7 @@ void score1::generate() {
 		beat += duration;
 		duration += duration * slowdown;
 		if(
-			duration > 0.1  / beats_per_second ||
+			duration > 0.1 * size / beats_per_second ||
 			duration < 0.00001 / beats_per_second
 		) slowdown = -slowdown;
 	}
