@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::os::clocks
 #include <universalis/detail/project.private.hpp>
@@ -267,12 +267,16 @@ namespace detail {
 			nanoseconds performance_counter() throw(exception) {
 				::LARGE_INTEGER counter, frequency;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-				//QueryPerformanceFrequency should (and tends to be) constant, but it looks like there have been buggy chips/bioses.
+				// QueryPerformanceFrequency should (and tends to be) constant, but it looks like there have been buggy chips/bioses.
 				if(!::QueryPerformanceFrequency(&frequency)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-				// for systems where the frequency may change over time, we need to remember the last counter and time values
+				// For systems where the frequency may change over time, we need to remember the last counter and time values.
 				int64_t static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_counter(0);
 				nanoseconds::tick_type static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE last_time(0);
-				nanoseconds ns(double(counter.QuadPart - last_counter) / (frequency.QuadPart* 0.000000001) );
+				#if 1 ///\todo why are there floating point casts here? it should work fine with 64-bit integer operations, isn't it?
+					nanoseconds ns(double(counter.QuadPart - last_counter) / (frequency.QuadPart * 0.000000001));
+				#else
+					nanoseconds ns((counter.QuadPart - last_counter) * 1000 * 1000 * 1000 / frequency.QuadPart);
+				#endif
 				ns += nanoseconds(last_time);
 				last_time = ns.get_count();
 				last_counter = counter.QuadPart;
