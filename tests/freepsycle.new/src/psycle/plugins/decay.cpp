@@ -61,8 +61,13 @@ void decay::do_process_template() {
 				this->decay_per_second(decay_channel()[out_event].sample());
 			break;
 			case channel::flags::discrete:
-				if(decay_event < decay_channel().size() && decay_channel()[decay_event].index() == out_event)
-					this->decay_per_second(decay_channel()[decay_event++].sample());
+				#if 0 // more friendly way
+					auto decay = decay_channel()[out_event];
+					if(decay) this->decay_per_second(decay.sample());
+				#else
+					if(decay_event < decay_channel().size() && decay_channel()[decay_event].index() == out_event)
+						this->decay_per_second(decay_channel()[decay_event++].sample());
+				#endif
 			break;
 			case channel::flags::empty: default: /* nothing */ ;
 		}
