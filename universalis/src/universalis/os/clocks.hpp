@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief universalis::os::clocks
 
@@ -67,7 +67,7 @@ class UNIVERSALIS__DECL utc_since_epoch {
 /// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
 /// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
 /// The implementation for mswindows is unpsecified on SMP systems.
-class UNIVERSALIS__DECL monotonic {
+class UNIVERSALIS__DECL monotonic { // note: new name in c++0x is "steady"
 	public:
 		nanoseconds static current();
 };
@@ -218,7 +218,7 @@ namespace detail {
 					do {
 						t = clock();
 						++timeout;
-					} while(t == t0 && timeout < 1000 * 1000 * 10);
+					} while(t == t0 && timeout < 1000 * 1000 * 100);
 					if(t == t0) t = t0 + days(1); // reports the timeout as a bogus big value
 					t -= t0;
 					if(t < min) min = t;
