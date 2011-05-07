@@ -34,6 +34,7 @@ void bipolar_filter::do_process_first() {
 	buffer & in = in_port_.buffer();
 	buffer & out = out_port_.buffer();
 	assert(out.channels() == in.channels());
+	#pragma omp parallel for
 	for(std::size_t channel = 0; channel < in.channels(); ++channel)
 		for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events(); ++event) {
 			// not needed because in and out have the same buffer: out[channel][event].index(event);
