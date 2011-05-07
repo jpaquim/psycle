@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::sine
 #include <psycle/detail/project.private.hpp>
@@ -35,8 +35,8 @@ void sine::do_process() {
 	channel::flags::type const phase_flag = phase_port_ ? phase_chn().flag() : channel::flags::empty;
 	channel::flags::type const  freq_flag =  freq_port_ ?  freq_chn().flag() : channel::flags::empty;
 	channel::flags::type const   amp_flag =   amp_port_ ?   amp_chn().flag() : channel::flags::empty;
-	#if defined DIVERSALIS__COMPILER__FEATURE__CXXOX
-		do_process_template_switch<sine>(phase_flag, freq_flag, amp_flag);
+	#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+		do_process_template_switch(*this, phase_flag, freq_flag, amp_flag);
 	#else
 		PSYCLE__ENGINE__TEMPLATE_SWITCH(do_process_template, (phase_flag)(freq_flag)(amp_flag));
 	#endif

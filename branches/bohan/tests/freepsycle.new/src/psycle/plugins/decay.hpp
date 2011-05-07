@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2008-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::decay - a decaying pulse
 #ifndef PSYCLE__PLUGINS__DECAY__INCLUDED
@@ -32,7 +32,7 @@ class PSYCLE__DECL decay : public node {
 			channel::flags::type pulse_flag,
 			channel::flags::type decay_flag
 		>
-		void do_process_template();
+		void do_process_template(); friend class node;
 
 		real current_;
 		real decay_, events_per_second_, seconds_per_event_;
