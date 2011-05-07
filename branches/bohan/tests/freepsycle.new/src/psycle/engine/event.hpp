@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2002-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2002-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::engine::event
 #ifndef PSYCLE__ENGINE__EVENT__INCLUDED
@@ -17,11 +17,11 @@ class event {
 	///\{
 		public:
 			/// the immutable value of the sample.
-			///\return immutable the value of the sample
+			///\return immutable value of the sample
 			real sample() const { return sample_; }
 
 			/// the mutable value of the sample.
-			///\return mutable the value of the sample
+			///\return mutable value of the sample
 			real & sample() { return sample_; }
 
 			/// sets the value of the sample.
