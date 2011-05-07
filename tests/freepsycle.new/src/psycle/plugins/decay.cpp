@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2008-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\implementation psycle::plugins::decay
 #include <psycle/detail/project.private.hpp>
@@ -29,8 +29,8 @@ void decay::do_process() {
 	if(!have_out()) return;
 	channel::flags::type const pulse_flag = have_pulse() ? pulse_channel().flag() : channel::flags::empty;
 	channel::flags::type const decay_flag = have_decay() ? decay_channel().flag() : channel::flags::empty;
-	#if defined DIVERSALIS__COMPILER__FEATURE__CXXOX
-		do_process_template_switch<decay>(pulse_flag, decay_flag);
+	#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+		do_process_template_switch(*this, pulse_flag, decay_flag);
 	#else
 		PSYCLE__ENGINE__TEMPLATE_SWITCH(do_process_template, (pulse_flag)(decay_flag));
 	#endif

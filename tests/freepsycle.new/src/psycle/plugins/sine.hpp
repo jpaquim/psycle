@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 ///\interface psycle::plugins::sine - oscillator with a sinusoidal wave form
 #ifndef PSYCLE__PLUGINS__SINE__INCLUDED
@@ -32,7 +32,7 @@ class PSYCLE__DECL sine : public node {
 			channel::flags::type  freq_flag,
 			channel::flags::type   amp_flag
 		>
-		void do_process_template();
+		void do_process_template(); friend class node;
 	
 		real phase_, step_, freq_to_step_, amp_;
 		ports::output out_port_;

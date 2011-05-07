@@ -260,32 +260,26 @@ class PSYCLE__DECL node : public named {
 			/// re-implement this function in a derived class and put your own code in it.
 			virtual void do_process() = 0;
 
-			#if defined DIVERSALIS__COMPILER__FEATURE__CXXOX
-				template<channel::flags::type... Evaluated_Flags>
-				void do_process_template_switch(channel::flags::type flag_to_evaluate) {
-					switch(flag_to_evaluate) {
-						case channel::flags::empty:
-							this->do_process_template<Evaluated_Flags..., channel::flags::empty>();
-						case channel::flags::discrete:
-							this->do_process_template<Evaluated_Flags..., channel::flags::discrete>();
-						case channel::flags::continuous:
-							this->do_process_template<Evaluated_Flags..., channel::flags::continuous>();
-						default:
-							throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
-					}
+			#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+				template<channel::flags::type... Evaluated_Flags, typename Node>
+				static void do_process_template_switch(Node & node) {
+					node.template do_process_template<Evaluated_Flags...>();
 				}
 
-				template<channel::flags::type... Evaluated_Flags, typename... Flags_To_Evaluate>
-				void do_process_template_switch(channel::flags::type flag_to_evaluate, Flags_To_Evaluate... flags_to_evaluate) {
+				template<channel::flags::type... Evaluated_Flags, typename Node, typename... Flags_To_Evaluate>
+				static void do_process_template_switch(Node & node, channel::flags::type flag_to_evaluate, Flags_To_Evaluate... flags_to_evaluate) {
 					switch(flag_to_evaluate) {
 						case channel::flags::empty:
-							this->do_process_template_switch<Evaluated_Flags..., channel::flags::empty>(flags_to_evaluate...);
+							do_process_template_switch<Evaluated_Flags..., channel::flags::empty>(node, flags_to_evaluate...);
+						break;
 						case channel::flags::discrete:
-							this->do_process_template_switch<Evaluated_Flags..., channel::flags::discrete>(flags_to_evaluate...);
+							do_process_template_switch<Evaluated_Flags..., channel::flags::discrete>(node, flags_to_evaluate...);
+						break;
 						case channel::flags::continuous:
-							this->do_process_template_switch<Evaluated_Flags..., channel::flags::continuous>(flags_to_evaluate...);
+							do_process_template_switch<Evaluated_Flags..., channel::flags::continuous>(node, flags_to_evaluate...);
+						break;
 						default:
-							throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION); \
+							throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					}
 				}
 			#else
@@ -646,7 +640,7 @@ void node::reset() {
 /**********************************************************************************************************************/
 // PSYCLE__ENGINE__TEMPLATE_SWITCH
 
-#if !defined DIVERSALIS__COMPILER__FEATURE__CXXOX
+#if !defined DIVERSALIS__COMPILER__FEATURE__CXX0X
 	#include <boost/preprocessor/seq.hpp>
 
 	///\internal implementation for PSYCLE__ENGINE__TEMPLATE_SWITCH with 1 flag
@@ -774,6 +768,6 @@ void node::reset() {
 			default: \
 				throw psycle::engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS); \
 		}
-#endif // !defined DIVERSALIS__COMPILER__FEATURE__CXXOX
+#endif // !defined DIVERSALIS__COMPILER__FEATURE__CXX0X
 
 #endif
