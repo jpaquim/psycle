@@ -4,7 +4,7 @@
 ///\implementation psycle::front_ends::text::main
 #include <psycle/detail/project.private.hpp>
 #include "main.hpp"
-#include "score1.hpp"
+#include "score2.hpp"
 #include <psycle/engine.hpp>
 #include <psycle/host/plugin_resolver.hpp>
 #include <psycle/host/scheduler.hpp>
@@ -16,7 +16,7 @@
 #include <iostream>
 namespace psycle { namespace tests { namespace random_notes {
 
-typedef score1 score_type;
+typedef score2 score_type;
 using namespace universalis::stdlib;
 
 void play() {
