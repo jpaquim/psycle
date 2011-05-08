@@ -33,6 +33,18 @@ class PSYCLE__DECL sine : public node {
 			channel::flags::type   amp_flag
 		>
 		void do_process_template(); friend class node;
+		
+		template<
+			bool have_phase,
+			bool have_freq,
+			bool have_amp
+		>
+		void do_process_template(
+			std::size_t evt,
+			real phase,
+			real freq,
+			real amp
+		);
 	
 		real phase_, step_, freq_to_step_, amp_;
 		ports::output out_port_;
