@@ -34,18 +34,27 @@ class PSYCLE__DECL sine : public node {
 		>
 		void do_process_template(); friend class node;
 		
-		template<
-			bool have_phase,
-			bool have_freq,
-			bool have_amp
-		>
-		void do_process_template(
-			std::size_t evt,
-			real phase,
-			real freq,
-			real amp
-		);
-	
+		#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+			template<bool have_phase, bool have_freq, bool have_amp>
+			void do_process_template(std::size_t begin, std::size_t end);
+
+			template<int Ports>
+			void do_process_split(ports::inputs::single * ports[Ports]);
+
+			template<bool... Evaluated_Bools, typename Node>
+			static void do_process_template_switch_x(std::size_t begin, std::size_t end, Node & node) {
+				node.template do_process_template<Evaluated_Bools...>(begin, end);
+			}
+
+			template<bool... Evaluated_Bools, typename Node, typename... Bools_To_Evaluate>
+			static void do_process_template_switch_x(std::size_t begin, std::size_t end, Node & node, bool bool_to_evaluate, Bools_To_Evaluate... bools_to_evaluate) {
+				if(bool_to_evaluate)
+					do_process_template_switch_x<Evaluated_Bools..., true>(begin, end, node, bools_to_evaluate...);
+				else
+					do_process_template_switch_x<Evaluated_Bools..., false>(begin, end, node, bools_to_evaluate...);
+			}
+		#endif
+
 		real phase_, step_, freq_to_step_, amp_;
 		ports::output out_port_;
 		ports::inputs::single phase_port_, freq_port_, amp_port_;

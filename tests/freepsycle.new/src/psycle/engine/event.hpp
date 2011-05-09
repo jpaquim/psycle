@@ -19,10 +19,12 @@ class event {
 			/// the immutable value of the sample.
 			///\return immutable value of the sample
 			real sample() const { return sample_; }
+			operator real() const { return sample_; }
 
 			/// the mutable value of the sample.
 			///\return mutable value of the sample
 			real & sample() { return sample_; }
+			operator real&() { return sample_; }
 
 			/// sets the value of the sample.
 			///\param the value of the sample
