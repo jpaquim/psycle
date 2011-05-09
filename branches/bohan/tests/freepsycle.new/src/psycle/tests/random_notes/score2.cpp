@@ -37,7 +37,7 @@ void score2::generate() {
 	//sine_.freq(440);
 
 	real const beats_per_second = 1;
-	unsigned int const notes = 100000;
+	unsigned int const notes = 10000;
 	real beat = 0;
 	real duration = 0.00001 / beats_per_second;
 	float slowdown = 0.001;
