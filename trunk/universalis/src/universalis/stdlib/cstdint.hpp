@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief cstdint standard header
 
@@ -8,20 +8,14 @@
 #pragma once
 
 #include <universalis/detail/project.hpp>
-#if 0
-	// what we would like to include in an ideal world
+#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
 	#include <cstdint>
-
-	// C1999
-	#if __STDC_VERSION__ >= 199901
+#elif 0
+	#if __STDC_VERSION__ >= 199901 // C1999
 		#include <stdint.h>
-	#endif
-
-	// most unix systems had the equivalent inttypes.h for a long time
-	#if defined DIVERSALIS__OS__UNIX
+	#elif defined DIVERSALIS__OS__UNIX // most unix systems had the equivalent inttypes.h for a long time
 		#include <inttypes.h>
 	#endif
-
 #else
 	// see also http://www.azillionmonkeys.com/qed/pstdint.h
 
@@ -79,12 +73,14 @@
 	}}
 #endif
 
-/****************************************************************************/
-// injection in std namespace
-namespace std { using namespace universalis::stdlib::stdint; }
+#if !defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+	/****************************************************************************/
+	// injection in std namespace
+	namespace std { using namespace universalis::stdlib::stdint; }
 
-/****************************************************************************/
-// injection in root namespace
-using namespace universalis::stdlib::stdint;
+	/****************************************************************************/
+	// injection in root namespace
+	using namespace universalis::stdlib::stdint;
+#endif
 
 #endif
