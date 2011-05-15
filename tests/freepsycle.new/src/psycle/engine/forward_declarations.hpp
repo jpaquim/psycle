@@ -9,7 +9,6 @@
 #define PSYCLE__ENGINE__FORWARD_DECLARATIONS__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
-#include "sample.hpp"
 namespace psycle {
 	//namespace loggers = universalis::os::loggers;
 	namespace loggers { using namespace universalis::os::loggers; }

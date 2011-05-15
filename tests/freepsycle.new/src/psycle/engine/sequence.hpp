@@ -6,15 +6,13 @@
 #define PSYCLE__ENGINE__SEQUENCE__INCLUDED
 #pragma once
 #include "named.hpp"
-#include "sample.hpp"
+#include "buffer.hpp"
 #include "exception.hpp"
 #include <boost/signal.hpp>
 #include <map>
 #define PSYCLE__DECL  PSYCLE__ENGINE
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace engine {
-
-class buffer;
 
 /// a sequence of events
 class PSYCLE__DECL sequence : public named {
