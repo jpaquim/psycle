@@ -20,8 +20,8 @@
 #endif
 
 /// overridding of virtual member function
-#if 0 // new keyword in C++0x
-	#define UNIVERSALIS__COMPILER__OVERRIDE [[override]]
+#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+	#define UNIVERSALIS__COMPILER__OVERRIDE override
 #else
 	#define UNIVERSALIS__COMPILER__OVERRIDE
 #endif
