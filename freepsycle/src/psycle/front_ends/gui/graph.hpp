@@ -46,7 +46,7 @@ class PSYCLE__DECL canvas : public canvas_base {
 
 	private:
 		Gnome::Canvas::Group group_;
-		
+
 	public:
 		class graph & graph() { return graph_; }
 		operator class graph & () { return graph(); }
