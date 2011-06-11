@@ -159,7 +159,7 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				END:
 			}
 		#else
-			for(int i = 0; i < numSamples; ++i) pDstSamples[i] = SrcSamples[i] * multi;
+			for(int i = 0; i < numSamples; ++i) pDstSamples[i] = pSrcSamples[i] * multi;
 		#endif
 	}
 
