@@ -396,7 +396,7 @@ int zipreader_extract(zipreader_file *f, int outfd)
 		return _zm_readin(f, outfd, _zm_write, 0, 0);
 	case 8: /* DEFLATE */
 		{
-			auto struct deflate_memory dm;
+			struct deflate_memory dm;
 			memset(&dm, 0, sizeof(dm));
 			if (inflateInit2(&dm.str, -MAX_WBITS) != Z_OK) return 0;
 			r = _zm_readin(f, outfd, _zm_inflate, _zm_inflate_fin, &dm);

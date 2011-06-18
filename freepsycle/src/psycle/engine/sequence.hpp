@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2008-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::engine::sequence
-#ifndef PSYCLE__ENGINE__SEQUENCE__INCLUDED
-#define PSYCLE__ENGINE__SEQUENCE__INCLUDED
 #pragma once
 #include "named.hpp"
 #include "buffer.hpp"
@@ -106,4 +103,3 @@ class PSYCLE__DECL sequence_iterator {
 
 }}
 #include <psycle/detail/decl.hpp>
-#endif

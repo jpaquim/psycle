@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::sine - oscillator with a sinusoidal wave form
-#ifndef PSYCLE__PLUGINS__SINE__INCLUDED
-#define PSYCLE__PLUGINS__SINE__INCLUDED
 #pragma once
 #include "plugin.hpp"
 #define PSYCLE__DECL  PSYCLE__PLUGINS__SINE
@@ -67,4 +64,3 @@ class PSYCLE__DECL sine : public node {
 
 }}
 #include <psycle/detail/decl.hpp>
-#endif

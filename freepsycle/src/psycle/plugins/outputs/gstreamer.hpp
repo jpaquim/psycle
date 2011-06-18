@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::outputs::gstreamer
-#ifndef PSYCLE__PLUGINS__OUTPUTS__GSTREAMER__INCLUDED
-#define PSYCLE__PLUGINS__OUTPUTS__GSTREAMER__INCLUDED
 #pragma once
 #include "../resource.hpp"
 #include <universalis/stdlib/mutex.hpp>
@@ -64,4 +61,3 @@ class PSYCLE__DECL gstreamer : public resource {
 
 }}}
 #include <psycle/detail/decl.hpp>
-#endif

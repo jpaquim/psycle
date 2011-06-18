@@ -105,8 +105,11 @@ class PSYCLE__CORE__DECL RiffFile {
 			bool ReadBE(int16_t & x) { return ReadBE(reinterpret_cast<uint16_t&>(x)); }
 
 			bool Write(uint16_t x) {
-				uint8_t data[2] = { x & 0xFF, (x>>8) & 0xFF };
-				return WriteChunk(data,2);
+				uint8_t data[2] = {
+					static_cast<uint8_t>(x & 0xff),
+					static_cast<uint8_t>((x >> 8) & 0xff)
+				};
+				return WriteChunk(data, 2);
 			}
 			bool Write(int16_t x) { return Write(reinterpret_cast<uint16_t&>(x)); }
 		///\}
@@ -132,7 +135,12 @@ class PSYCLE__CORE__DECL RiffFile {
 			bool ReadBE(int32_t & x) { return ReadBE(reinterpret_cast<uint32_t&>(x)); }
 
 			bool Write(uint32_t x) {
-				uint8_t data[4] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF };
+				uint8_t data[4] = {
+					static_cast<uint8_t>(x & 0xff),
+					static_cast<uint8_t>((x >> 8) & 0xff),
+					static_cast<uint8_t>((x >> 16) & 0xff),
+					static_cast<uint8_t>((x >> 24) & 0xff)
+				};
 				return WriteChunk(data, 4);
 			}
 
@@ -160,7 +168,16 @@ class PSYCLE__CORE__DECL RiffFile {
 			bool ReadBE(int64_t & x) { return ReadBE(reinterpret_cast<uint64_t&>(x)); }
 
 			bool Write(uint64_t x) {
-				uint8_t data[8] = { x & 0xFF, (x>>8) & 0xFF, (x>>16) & 0xFF, (x>>24) & 0xFF, (x>>32) & 0xFF, (x>>40) & 0xFF, (x>>48) & 0xFF, (x>>56) & 0xFF };
+				uint8_t data[8] = {
+					static_cast<uint8_t>(x & 0xff),
+					static_cast<uint8_t>((x >> 8) & 0xff),
+					static_cast<uint8_t>((x >> 16) & 0xff),
+					static_cast<uint8_t>((x >> 24) & 0xff),
+					static_cast<uint8_t>((x >> 32) & 0xff),
+					static_cast<uint8_t>((x >> 40) & 0xff),
+					static_cast<uint8_t>((x >> 48) & 0xff),
+					static_cast<uint8_t>((x >> 56) & 0xff)
+				};
 				return WriteChunk(data, 8);
 			}
 

@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::stream::format::riff_wave
-#ifndef PSYCLE__STREAM__FORMATS__RIFF_WAVE__FORMAT__INCLUDED
-#define PSYCLE__STREAM__FORMATS__RIFF_WAVE__FORMAT__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 #include "../../format.hpp"
@@ -163,4 +160,3 @@ class PSYCLE__DECL format : public stream::format {
 
 }}}}
 #include <psycle/detail/decl.hpp>
-#endif

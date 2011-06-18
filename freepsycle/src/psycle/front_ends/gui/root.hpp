@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::front_ends::gui::root
-#ifndef PSYCLE__FRONT_ENDS__GUI__ROOT__INCLUDED
-#define PSYCLE__FRONT_ENDS__GUI__ROOT__INCLUDED
 #pragma once
 #include <psycle/engine/engine.hpp>
 #include "graph.hpp"
@@ -50,4 +47,3 @@ class root : public Gtk::Window {
 		Gtk::HBox h_box_;
 };
 }}}
-#endif

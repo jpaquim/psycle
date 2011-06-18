@@ -1,7 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\implementation psycle::host::graph
 #include <psycle/detail/project.private.hpp>
 #include "graph.hpp"
 namespace psycle { namespace host {

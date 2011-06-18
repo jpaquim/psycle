@@ -41,7 +41,7 @@ using namespace psycle::plugin_interface;
 #define LFO_SAWDOWN  4
 #define LFO_RANDOM   5
 
-#define GAIN_NORM 100.0
+#define GAIN_NORM 100
 
 #define LINK_OFF 0
 #define LINK_ON  1

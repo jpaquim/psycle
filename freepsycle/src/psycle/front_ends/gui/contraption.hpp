@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2000-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\\interface psycle::front_ends::gui::contraption
-#ifndef PSYCLE__FRONT_ENDS__GUI__CONTRAPTION__INCLUDED
-#define PSYCLE__FRONT_ENDS__GUI__CONTRAPTION__INCLUDED
 #pragma once
 #include "forward_declarations.hpp"
 #include "color.hpp"
@@ -76,4 +73,3 @@ class PSYCLE__DECL contraption : public Gnome::Canvas::Group {
 };
 }}}
 #include <psycle/detail/decl.hpp>
-#endif

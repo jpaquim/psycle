@@ -1,10 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::engine::reference_counter
-#ifndef PSYCLE__ENGINE__REFERENCE_COUNTER__INCLUDED
-#define PSYCLE__ENGINE__REFERENCE_COUNTER__INCLUDED
-#pragma once
 #include "named.hpp"
 #include <cassert>
 #define PSYCLE__DECL  PSYCLE__ENGINE
@@ -45,28 +41,5 @@ class plugin_library_reference : public reference_counter {
 		named const named_;
 };
 
-///\internal ... not used for now
-/// a reference to a shared object.
-template<typename X>
-class reference {
-	public:
-		reference(X & x) : x_(x), reference_counter_(++*new reference_counter) {}
-		reference(reference const & other) : x_(other.x_), reference_counter_(++other.reference_counter_) {}
-		void operator=(reference const & other) { check_if_last_reference(); x_ = other.x_; reference_counter_ = ++other.reference_counter_; }
-		~reference() throw() { check_if_last_reference(); }
-		operator X const & () const { return *x_; }
-		operator X & () { return *x_; }
-	private:
-		X * x_;
-		reference_counter & reference_counter_;
-		void check_if_last_reference() {
-			if(--reference_counter_ == 0) {
-				delete reference_counter_;
-				delete x_;
-			}
-		}
-};
-
 }}
 #include <psycle/detail/decl.hpp>
-#endif
