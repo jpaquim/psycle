@@ -1,7 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\implementation psycle::plugins::outputs::alsa
 #include <psycle/detail/project.private.hpp>
 #include "alsa.hpp"
 #include <universalis/os/thread_name.hpp>
@@ -94,7 +93,7 @@ void alsa::do_open() {
 					"could not get static info for opened device named: " << pcm_device_name <<
 					": " << ::snd_strerror(error);
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else if(loggers::information()) {
+			} else {
 				std::ostringstream s;
 				s <<
 					"alsa pcm device: info:\n"

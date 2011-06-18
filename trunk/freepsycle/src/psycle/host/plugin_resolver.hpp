@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::host::plugin_resolver
-#ifndef PSYCLE__HOST__PLUGIN_RESOLVER__INCLUDED
-#define PSYCLE__HOST__PLUGIN_RESOLVER__INCLUDED
 #pragma once
 #include <psycle/engine/engine.hpp>
 #include <universalis/os/dyn_link.hpp>
@@ -54,4 +51,3 @@ class PSYCLE__DECL plugin_resolver {
 
 }}
 #include <psycle/detail/decl.hpp>
-#endif

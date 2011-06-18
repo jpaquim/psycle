@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2007-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface psycle::host::scheduler
-#ifndef PSYCLE__HOST__SCHEDULER__INCLUDED
-#define PSYCLE__HOST__SCHEDULER__INCLUDED
 #pragma once
 #include <psycle/engine/graph.hpp>
 #include <universalis/stdlib/thread.hpp>
@@ -273,4 +270,3 @@ void inline node::on_engine_io_ready(engine::node &) { scheduler_.io_ready_signa
 
 }}
 #include <psycle/detail/decl.hpp>
-#endif

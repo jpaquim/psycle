@@ -1,7 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\implementation psycle::stream::format::riff_wave
 #include <psycle/detail/project.private.hpp>
 #include "format.hpp"
 #include <cstring>
@@ -206,4 +205,3 @@ void format::chunk_type::tag(uint16_t tag) {
 	}
 #endif
 }}}}
-

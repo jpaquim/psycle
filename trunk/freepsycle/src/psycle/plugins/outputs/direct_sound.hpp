@@ -1,14 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::devices::outputs::direct_sound
-#ifndef PSYCLE__PLUGINS__OUTPUTS__DIRECT_SOUND__INCLUDED
-#define PSYCLE__PLUGINS__OUTPUTS__DIRECT_SOUND__INCLUDED
 #pragma once
 #include "../resource.hpp"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
-	#error "this plugin is specific to microsoft's operating system"
+	#error This plugin is specific to microsoft's operating system.
 #endif
 
 #include <windows.h>
@@ -73,4 +70,3 @@ namespace psycle { namespace plugins { namespace outputs {
 	};
 }}}
 #include <psycle/detail/decl.hpp>
-#endif

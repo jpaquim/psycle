@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; erodix ; johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::outputs::jack
-#ifndef PSYCLE__PLUGINS__OUTPUTS__JACK__INCLUDED
-#define PSYCLE__PLUGINS__OUTPUTS__JACK__INCLUDED
 #pragma once
 #include "../resource.hpp"
 #include <psycle/helpers/ring_buffer.hpp>
@@ -63,4 +60,3 @@ class PSYCLE__DECL jack : public resource {
 
 }}}
 #include <psycle/detail/decl.hpp>
-#endif

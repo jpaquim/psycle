@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::engine::buffer
-#ifndef PSYCLE__ENGINE__BUFFER__INCLUDED
-#define PSYCLE__ENGINE__BUFFER__INCLUDED
 #pragma once
 #include "forward_declarations.hpp"
 #include <psycle/helpers/math.hpp>
@@ -15,8 +12,7 @@ namespace psycle { namespace engine {
 
 typedef double real;
 
-//namespace math = helpers::math;
-namespace math { using namespace helpers::math; }
+namespace math = helpers::math;
 
 /// a sample with an associated, logical, index.
 /// the index corresponds to a logical (i.e., not physical) position in a buffer.
@@ -217,4 +213,3 @@ void buffer::copy(buffer const & buffer, std::size_t channels) {
 }
 
 }}
-#endif

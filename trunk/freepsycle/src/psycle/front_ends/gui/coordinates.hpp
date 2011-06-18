@@ -1,17 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
 
 /********* UNUSED FILE **********/
 
-///\file
-///\interface
-///\n psycle::front_ends::gui::coordinates::cartesian.
-///\n psycle::front_ends::gui::dimensions
-///\n psycle::front_ends::gui::position
-///\n psycle::front_ends::gui::bounds
-#ifndef PSYCLE__FRONT_ENDS__GUI__COORDINATES__INCLUDED
-#define PSYCLE__FRONT_ENDS__GUI__COORDINATES__INCLUDED
+
 #pragma once
 #include "forward_declarations.hpp"
 namespace psycle { namespace front_ends { namespace gui {
@@ -366,4 +359,3 @@ class bounds : public position<Position_Coordinate>, public dimensions<Dimension
 		//\}
 };
 }}}
-#endif

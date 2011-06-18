@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2009 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2008-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::outputs::dummy
-#ifndef PSYCLE__PLUGINS__OUTPUTS__DUMMY__INCLUDED
-#define PSYCLE__PLUGINS__OUTPUTS__DUMMY__INCLUDED
 #pragma once
 #include "../resource.hpp"
 #include <universalis/stdlib/thread.hpp>
@@ -50,4 +47,3 @@ class PSYCLE__DECL dummy : public resource {
 
 }}}
 #include <psycle/detail/decl.hpp>
-#endif

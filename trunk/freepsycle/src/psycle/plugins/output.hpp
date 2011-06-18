@@ -1,9 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface psycle::plugins::output
-#ifndef PSYCLE__PLUGINS__OUTPUT__INCLUDED
-#define PSYCLE__PLUGINS__OUTPUT__INCLUDED
 #pragma once
 #include <psycle/detail/project.hpp>
 
@@ -82,4 +79,3 @@ class PSYCLE__DECL output : public output_base {
 
 }}
 #include <psycle/detail/decl.hpp>
-#endif

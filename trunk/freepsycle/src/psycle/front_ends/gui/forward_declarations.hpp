@@ -1,10 +1,6 @@
-///\file
-/// forward declarations for the namespace psycle::front_ends::gui.
-/// This file is used to avoid mutually recursive dependencies in declarations.
-/// It does not have any real declarations, just forward names.
-///\see file graph.hpp to #include the real declarations
-#ifndef PSYCLE__FRONT_ENDS__GUI__FORWARD_DECLARATIONS__INCLUDED
-#define PSYCLE__FRONT_ENDS__GUI__FORWARD_DECLARATIONS__INCLUDED
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+
 #pragma once
 #include <psycle/detail/project.hpp>
 #include <psycle/engine/forward_declarations.hpp>
@@ -29,4 +25,3 @@ class typenames : public generic::typenames<graph, node, port, ports::output, po
 typedef typenames::bases bases;
 
 }}}
-#endif
