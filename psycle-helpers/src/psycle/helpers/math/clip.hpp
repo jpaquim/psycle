@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef PSYCLE__HELPERS__MATH__CLIP__INCLUDED
 #define PSYCLE__HELPERS__MATH__CLIP__INCLUDED
@@ -41,7 +41,7 @@ SignedIntegralResult inline clipped_lrint(Real x) {
 
 /// combines float to signed integer conversion with clipping.
 // amount has to be a multiple of 8. and both in and out be 16byte aligned.
-inline void clip16_lrint(const float in[], std::int16_t out[], int amount) {
+inline void clip16_lrint(const float in[], int16_t out[], int amount) {
 	#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		__m128 *psrc = (__m128*)in;
 		__m128i *pdst = (__m128i*)out;
@@ -78,7 +78,7 @@ inline void clip16_lrint(const float in[], std::int16_t out[], int amount) {
 		int const max((1u << (16 - 1)) - 1); // The compiler is able to compute this statically.
 		int const min(-max - 1);
 		do {
-			*out++ = lrint<std::int16_t>(clipped(float(min), *in++, float(max)));
+			*out++ = lrint<int16_t>(clipped(float(min), *in++, float(max)));
 		} while(--amount);
 
 	#endif
@@ -87,31 +87,31 @@ inline void clip16_lrint(const float in[], std::int16_t out[], int amount) {
 	/// clipping.
 	inline int  UNIVERSALIS__COMPILER__CONST
 	f2iclip16(float f) { 
-		return clipped_lrint<int,16,float>(f);
+		return clipped_lrint<int, 16, float>(f);
 	}
 
 	/// clipping.
 	inline int  UNIVERSALIS__COMPILER__CONST
 	f2iclip18(float f) { 
-		return clipped_lrint<int,18,float>(f);
+		return clipped_lrint<int, 18, float>(f);
 	}
 
 	/// clipping.
 	inline int  UNIVERSALIS__COMPILER__CONST
 	f2iclip20(float f) { 
-		return clipped_lrint<int,20,float>(f);
+		return clipped_lrint<int, 20, float>(f);
 	}
 
 	/// clipping.
 	inline int  UNIVERSALIS__COMPILER__CONST
 	f2iclip24(float f) { 
-		return clipped_lrint<int,24,float>(f);
+		return clipped_lrint<int, 24, float>(f);
 	}
 
 	/// clipping.
 	inline int  UNIVERSALIS__COMPILER__CONST
 	f2iclip32(float f) { 
-		return clipped_lrint<int,32,float>(f);
+		return clipped_lrint<int, 32, float>(f);
 	}
 }}}
 

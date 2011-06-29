@@ -1,16 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface universalis::os::loggers
-
-#ifndef UNIVERSALIS__OS__LOGGERS__INCLUDED
-#define UNIVERSALIS__OS__LOGGERS__INCLUDED
 #pragma once
-
 #include "exception.hpp"
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/compiler/location.hpp>
-#include <boost/thread/mutex.hpp>
+#include <universalis/stdlib/mutex.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -26,19 +21,21 @@ namespace loggers {
 /// logger.
 class UNIVERSALIS__DECL logger {
 	public:
+		logger() {}
 		virtual ~logger() throw() {}
 
 		void operator()(int const level, std::string const & message) throw() { log(level, message); }
 		void operator()(int const level, std::string const & message, compiler::location const & location) throw() { log(level, message, location); }
 
-	protected: friend class loggers::multiplex_logger;
+	protected:
 		void            log(int const level, std::string const &, compiler::location const & location) throw();
 		void            log(int const level, std::string const &) throw();
 		virtual void do_log(int const level, std::string const & message, compiler::location const &) throw() = 0;
 		virtual void do_log(int const level, std::string const &) throw() = 0;
 
-	protected: boost::mutex & mutex() throw() { return mutex_; }
-	private:   boost::mutex   mutex_;
+	private: friend class loggers::multiplex_logger;
+		stdlib::mutex mutex_;
+		typedef universalis::stdlib::lock_guard<stdlib::mutex> lock_guard_type;
 };
 
 namespace loggers {
@@ -162,5 +159,3 @@ namespace loggers {
 }
 
 }}
-
-#endif

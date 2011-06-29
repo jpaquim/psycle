@@ -1,13 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2006-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2006-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\interface universalis::cpu::atomic::compare_and_swap
-
-#ifndef UNIVERSALIS__CPU__ATOMIC_COMPARE_AND_SWAP__INCLUDED
-#define UNIVERSALIS__CPU__ATOMIC_COMPARE_AND_SWAP__INCLUDED
 #pragma once
-
-#include <diversalis/compiler.hpp>
+#include <universalis/detail/project.hpp>
 #if defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40100 // 4.1.0
 	// gcc's __sync_* built-in functions documented at http://gcc.gnu.org/onlinedocs/gcc-4.1.0/gcc/Atomic-Builtins.html
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
@@ -19,7 +14,6 @@
 #else
 	#include <glib/gatomic.h>
 #endif
-
 namespace universalis { namespace cpu {
 
 // see c++ standard http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2047.html
@@ -80,14 +74,15 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 /******************************************************************************************/
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/stdlib/thread.hpp>
+	#include <universalis/stdlib/chrono.hpp>
 	#include <universalis/os/sched.hpp>
 	#include <universalis/os/clocks.hpp>
 	#include <vector>
 	#include <boost/bind.hpp>
 	#include <sstream>
 
-	namespace universalis { namespace cpu {
-		using namespace universalis::stdlib;
+	namespace universalis { namespace cpu { namespace test {
+		using namespace stdlib;
 		class atomic_compare_and_swap_test_class {
 			public:
 				void test() {
@@ -113,52 +108,41 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 
 		class atomic_compare_and_swap_speed_test_class {
 			private:
-				nanoseconds static cpu_time_clock() {
-					#if 0
-						return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
-					#elif 0
-						return universalis::os::clocks::thread_cpu_time::current();
-					#elif 0
-						return universalis::os::clocks::process_cpu_time::current();
-					#else
-						return universalis::os::clocks::monotonic::current();
-					#endif
-				}
+				typedef os::clocks::monotonic clock;
 
 				class tls {
 					public:
-						tls(int i) : t(), count(), i(i) {}
-						nanoseconds t;
+						tls(int i) : d(), count(), i(i) {}
+						clock::duration d;
 						unsigned int count;
 						int i;
 				};
 
 				void thread_function(tls * const tls_pointer) {
 					tls & tls(*tls_pointer);
-					--shared_start;
+					--shared_start; ///\todo doesn't look rihgt!
 					while(!atomic_compare_and_swap(shared_start, 0, 0));
 					while(tls.count < end) {
-						nanoseconds const t0(cpu_time_clock());
+						clock::time_point const t0(clock::now());
 						for(unsigned int i(0); i < inner_loop; ++i) {
 							if(atomic_compare_and_swap(shared, -1, -1)) return;
 							shared = tls.i;
 							while(atomic_compare_and_swap(shared, tls.i, tls.i));
 						}
-						nanoseconds const t1(cpu_time_clock());
-						if(++tls.count > start) tls.t += t1 - t0;
+						clock::time_point const t1(clock::now());
+						if(++tls.count > start) tls.d += t1 - t0;
 					}
 					shared = -1;
 				}
 
 				unsigned int inner_loop, start, end;
-
 				int shared, shared_start;
 
 			public:
 				void test(unsigned int threads) {
 					unsigned int const cpu_avail =
 						// note: std::thread::hardware_concurrency() is not impacted by the process' scheduler affinity mask.
-						universalis::os::sched::process().affinity_mask().active_count();
+						os::sched::process().affinity_mask().active_count();
 					if(cpu_avail == 1) {
 						// note: On single-cpu system, the lock-free test is very slow
 						//       because each thread completes its full quantum before the scheduler decides to switch (10 to 15 ms)
@@ -189,7 +173,7 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 						delete threads_[i];
 						{
 							std::ostringstream s;
-							s << threads << " threads: " << i << ": " << tls_[i]->t.get_count() * 1e-9 / (tls_[i]->count - start) / inner_loop << 's';
+							s << threads << " threads: " << i << ": " << chrono::nanoseconds(tls_[i]->d).count() * 1e-9 / (tls_[i]->count - start) / inner_loop << 's';
 							BOOST_MESSAGE(s.str());
 						}
 						delete tls_[i];
@@ -203,7 +187,5 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 			test.test(4);
 			test.test(8);
 		}
-	}}
-#endif
-
+	}}}
 #endif

@@ -200,7 +200,7 @@ void Player::clear_plan() {
 }
 
 void Player::process(int samples) {
-	nanoseconds const t0(cpu_time_clock());
+	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 	int remaining_samples = samples;
 	while(remaining_samples) {
 		int const amount(std::min(remaining_samples, MAX_BUFFER_LENGTH));
@@ -240,7 +240,7 @@ void Player::process(int samples) {
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
 		timeInfo_.setSamplePos(((Master*)song().machine(MASTER_INDEX))->sampleCount);
 	}
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	song().accumulate_processing_time(t1 - t0);
 }
 

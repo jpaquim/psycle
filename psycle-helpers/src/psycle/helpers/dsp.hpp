@@ -44,13 +44,13 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
 	inline void Add(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float vol)
 	{
-		#if defined DIVERSALIS__COMPILER__GNU
+		#if 0 ///\todo boggus defined DIVERSALIS__COMPILER__GNU
 			numSamples >>= 2;
 			typedef float vec __attribute__((vector_size(4 * sizeof(float))));
 			const vec vol_vec = { vol, vol, vol, vol };
 			const vec* src = reinterpret_cast<const vec*>(pSrcSamples);
 			vec* dst = reinterpret_cast<vec*>(pDstSamples);
-			#pragma omp parallel for // with gcc, build with the -fopenmp flag
+			//#pragma omp parallel for // with gcc, build with the -fopenmp flag
 			for(int i = 0; i < numSamples; ++i) dst[i] = src[i] * vol_vec;
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
@@ -614,22 +614,21 @@ namespace psycle { namespace helpers { /** various signal processing utility fun
 				v1.push_back(s);
 				v2.push_back(s);
 			}
-
-			using namespace universalis::stdlib;
 			typedef universalis::os::clocks::monotonic clock;
 			int const iterations = 10000;
 			float const vol = 0.5;
 
 			{ // add
 				std::size_t const count = v1.size();
-				nanoseconds const t1(clock::current());
+				clock::time_point const t1(clock::now());
 				for(int i(0); i < iterations; ++i) Add(&v1[0], &v2[0], count, vol);
-				nanoseconds const t2(clock::current());
+				clock::time_point const t2(clock::now());
 				for(int i(0); i < iterations; ++i) for(int j(0); j < count; ++j) v2[j] += v1[j] * vol;
-				nanoseconds const t3(clock::current());
+				clock::time_point const t3(clock::now());
 				{
 					std::ostringstream s;
-					s << "add: " << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
+					using namespace universalis::stdlib::chrono;
+					s << "add: " << nanoseconds(t2 - t1).count() * 1e-9 << "s < " << nanoseconds(t3 - t2).count() * 1e-9 << "s";
 					BOOST_MESSAGE(s.str());
 				}
 				BOOST_CHECK(t2 - t1 < t3 - t2);

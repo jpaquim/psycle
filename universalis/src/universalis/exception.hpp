@@ -1,12 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2008 psycle development team http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-///\interface universalis::exception
-
-#ifndef UNIVERSALIS__EXCEPTION__INCLUDED
-#define UNIVERSALIS__EXCEPTION__INCLUDED
 #pragma once
-
 #include "compiler/exception.hpp"
 #include "compiler/location.hpp"
 #include <stdexcept>
@@ -46,7 +41,7 @@ class UNIVERSALIS__DECL exception
 {
 	public:
 		exception(compiler::location const & location, void const * cause = 0) throw()
-		: exceptions::locatable(location), exceptions::nested(cause) {}
+			: exceptions::locatable(location), exceptions::nested(cause) {}
 		virtual ~exception() throw() {}
 };
 
@@ -71,7 +66,7 @@ namespace exceptions {
 		{
 			public:
 				bad_cast(std::type_info const & from, std::type_info const & to, compiler::location const & location, void const * cause = 0) throw()
-				: locatable(location), nested(cause), from_(from), to_(to) {}
+					: locatable(location), nested(cause), from_(from), to_(to) {}
 				virtual ~bad_cast() throw() {}
 
 			public:  std::type_info const & from() const throw() { return this->from_; }
@@ -90,7 +85,10 @@ namespace exceptions {
 	namespace detail {
 		class rethrow_functor {
 			public:
-				template<typename E> void operator_(compiler::location const & location, E const * const e = 0) const throw(runtime_error) { throw runtime_error(exceptions::string(*e), location, e); }
+				template<typename E>
+				void operator_(compiler::location const & location, E const * const e = 0) const throw(runtime_error) {
+					throw runtime_error(exceptions::string(*e), location, e);
+				}
 		};
 	}
 
@@ -128,5 +126,3 @@ namespace exceptions {
 		catch(               ...                ) { rethrow_functor.operator_<void*>(location    ); }
 	}
 }
-
-#endif

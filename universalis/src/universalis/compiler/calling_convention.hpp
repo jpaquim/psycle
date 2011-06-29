@@ -1,8 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
-
-///\file
-/// function calling conventions
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 // see http://www.programmersheaven.com/2/Calling-conventions (or http://www.angelcode.com/dev/callconv/callconv.html)
 
@@ -18,10 +15,6 @@
 // note: on microsoft's compiler, with cdecl, there's is no special decoration for extern "C" declarations, i.e., no '_' prepended.
 // member functions defaults to thiscall
 // non-member functions defaults to cdecl
-
-#ifndef UNIVERSALIS__COMPILER__CALLING_CONVENTION__INCLUDED
-#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__INCLUDED
-#pragma once
 
 #include "attribute.hpp"
 
@@ -69,6 +62,4 @@
 			#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__FAST ...
 		#endif
 	*/
-#endif
-
 #endif

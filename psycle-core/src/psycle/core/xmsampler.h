@@ -1150,7 +1150,7 @@ private:
 	///\name thread synchronisation
 	///\{
 		public:
-			typedef class scoped_lock<mutex> scoped_lock;
+			typedef class lock_guard<mutex> scoped_lock;
 			operator mutex & () const { return mutex_; }
 		private:
 			mutex mutable mutex_;

@@ -4,8 +4,6 @@
 ///\file \brief secure version of standard C functions
 ///\see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
 
-#ifndef UNIVERSALIS__STDLIB__STDC_SECURE_LIB__INCLUDED
-#define UNIVERSALIS__STDLIB__STDC_SECURE_LIB__INCLUDED
 #pragma once
 
 #include <universalis/detail/project.hpp>
@@ -77,10 +75,4 @@
 		using universalis::stdlib::vswprintf_s;
 	#endif
 	using universalis::stdlib::strcpy_s;
-#endif
-
-/****************************************************************************/
-// injection in std namespace
-namespace std { using namespace universalis::stdlib; }
-
 #endif

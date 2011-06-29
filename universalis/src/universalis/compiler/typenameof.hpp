@@ -17,6 +17,9 @@ namespace universalis { namespace compiler {
 template<typename X>
 std::string inline typenameof(X const & x) { return typenameof(typeid(x)); }
 
+/// gets the compiler symbol string of any type.
+template<typename X>
+std::string inline typenameof() { return typenameof(typeid(X)); }
 
 /********************************************************************************************/
 // implementation details
@@ -24,7 +27,7 @@ std::string inline typenameof(X const & x) { return typenameof(typeid(x)); }
 ///\internal
 namespace detail {
 	///\internal
-	/// demangling of compiler symbols strings.
+	/// demangling of compiler symbol strings.
 	std::string UNIVERSALIS__DECL demangle(std::string const & mangled_symbol);
 }
 

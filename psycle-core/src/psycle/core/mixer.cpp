@@ -76,11 +76,11 @@ void Mixer::recursive_process(unsigned int frames) {
 	// Step Two, prepare input signals for the Send Fx, and make them work
 	FxSend(frames, true);
 	{ // Step Three, Mix the returns of the Send Fx's with the leveled input signal
-		nanoseconds const t0(cpu_time_clock());
+		cpu_time_clock::time_point const t0(cpu_time_clock::now());
 		Mix(frames);
 		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 		Machine::UpdateVuAndStanbyFlag(frames);
-		nanoseconds const t1(cpu_time_clock());
+		cpu_time_clock::time_point const t1(cpu_time_clock::now());
 		accumulate_processing_time(t1 - t0);
 	}
 
@@ -260,7 +260,7 @@ void Mixer::sched_outputs(sched_deps & result) const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 bool Mixer::sched_process(unsigned int frames) {
-	nanoseconds const t0(cpu_time_clock());
+	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 
 	if(mixed && numsends()) {
 		mixed = false;
@@ -274,7 +274,7 @@ bool Mixer::sched_process(unsigned int frames) {
 		mixed = true;
 	}
 
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	accumulate_processing_time(t1 - t0);
 	if(mixed) ++processing_count_;
 	

@@ -1,14 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\file
-
-#ifndef UNIVERSALIS__INCLUDE_WINDOWS_WITHOUT_CRAP__INCLUDED
-#define UNIVERSALIS__INCLUDE_WINDOWS_WITHOUT_CRAP__INCLUDED
 #pragma once
-
 #include <diversalis.hpp>
-
 #if defined DIVERSALIS__OS__MICROSOFT
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(push) // don't let microsoft mess around with our warning settings
@@ -30,6 +24,7 @@
 	#ifndef _SECURE_ATL
 		#define _SECURE_ATL 1
 	#endif
+
 	#if !defined NOMINMAX
 		/// tells microsoft's headers not to pollute the global namespace with min and max macros (which break a lot of libraries, including the standard c++ library!)
 		#define NOMINMAX
@@ -80,7 +75,4 @@
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
 		#pragma warning(pop) // don't let microsoft mess around with our warning settings
 	#endif
-
-#endif
-
 #endif

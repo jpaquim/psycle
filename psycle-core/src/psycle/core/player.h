@@ -13,7 +13,7 @@
 #include <psycle/helpers/riff.hpp>
 
 #include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/thread.hpp>
 
@@ -246,10 +246,10 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 		private:
 			void thread_function(std::size_t thread_number);
 
-			typedef class scoped_lock<mutex> scoped_lock;
+			typedef unique_lock<mutex> scoped_lock;
 			mutex mutable mutex_;
-			condition<scoped_lock> mutable condition_;
-			condition<scoped_lock> mutable main_condition_;
+			condition_variable mutable condition_;
+			condition_variable mutable main_condition_;
 
 			bool stop_requested_;
 			bool suspend_requested_;

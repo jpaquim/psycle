@@ -1,13 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
 
-///\interface universalis::compiler::location
-#ifndef UNIVERSALIS__COMPILER__LOCATION__INCLUDED
-#define UNIVERSALIS__COMPILER__LOCATION__INCLUDED
 #pragma once
-
 #include "stringize.hpp"
-#if !defined DIVERSALIS__COMPILER__GNU
+#ifndef DIVERSALIS__COMPILER__GNU
 	// Only gcc is able to include the name of the current class implicitly with __PRETTY_FUNCTION__.
 	// We can use rtti support on other compilers.
 	#include "typenameof.hpp"
@@ -92,20 +88,20 @@ class location {
 		__LINE__ \
 	)
 
-///\internal
 #if defined DIVERSALIS__COMPILER__GNU
-	// Gcc is able to include the name of the current class implicitly, so we don't need to use rtti.
-	// The dummy "this" usage is just here to ensure the compiler will fail to compile
-	// if this macro was mistakenly used instead of the "NO_CLASS" variant.
+	///\internal
+	/// Gcc is able to include the name of the current class implicitly, so we don't need to use rtti.
+	/// The dummy "this" usage is just here to ensure the compiler will fail to compile
+	/// if this macro was mistakenly used instead of the "NO_CLASS" variant.
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
 		(std::string(this ? "" : "") + BOOST_CURRENT_FUNCTION)
 #else
-	// include the name of the current class explicitly using rtti on the "this" pointer
+	///\internal
+	/// include the name of the current class explicitly using rtti on the "this" pointer
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION \
 		(universalis::compiler::typenameof(*this) + " :: " UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS)
 #endif
 
+///\internal
 #define UNIVERSALIS__COMPILER__LOCATION__DETAIL__FUNCTION__NO_CLASS  \
 	BOOST_CURRENT_FUNCTION
-
-#endif
