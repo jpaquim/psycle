@@ -43,7 +43,7 @@ class WaveFileOut : public AudioDriver {
 		void thread_function();
 		void writeBuffer();
 		thread * thread_;
-		typedef class scoped_lock<mutex> scoped_lock;
+		typedef class unique_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
 		bool stop_requested_;
 

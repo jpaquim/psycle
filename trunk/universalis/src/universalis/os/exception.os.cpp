@@ -17,12 +17,12 @@ char const * exception::what() const throw() {
 }
 
 #if defined DIVERSALIS__OS__MICROSOFT
-	namespace exceptions { namespace detail {
-		char const * posix::what() const throw() {
+	namespace exceptions {
+		char const * iso_or_posix_std::what() const throw() {
 			if(!what_) what_ = new std::string(stdlib::exceptions::desc(code()));
 			return what_->c_str();
 		}
-	}}
+	}
 #endif
 
 namespace exceptions { namespace detail {

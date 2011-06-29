@@ -1,150 +1,57 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2007-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 ///\file \brief thread standard header
 /// This file implements the C++ standards proposal at http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2320.html
 
-#ifndef UNIVERSALIS__STDLIB__THREAD__INCLUDED
-#define UNIVERSALIS__STDLIB__THREAD__INCLUDED
+/// note: std::thread::hardware_concurrency() is not impacted by the process' scheduler affinity mask;
+/// you can use universalis::os::sched::process().affinity_mask().active_count() for that.
+
 #pragma once
-
 #include <universalis/detail/project.hpp>
-
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103500
-	#include <universalis/os/sched.hpp>
-#endif
-#if BOOST_VERSION >= 103500 && defined BOOST_DATE_TIME_HAS_NANOSECONDS
-	#include <boost/thread/thread_time.hpp> // boost::get_system_time()
-	#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && !defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+	#include <thread>
+	namespace universalis { namespace stdlib {
+		using std::thread;
+		namespace this_thread = std::this_thread;
+	}}
 #else
-	#include "detail/boost_xtime.hpp" // boost_xtime_get_and_add
-#endif
-
-#include <boost/thread/thread.hpp>
-#include <boost/thread/once.hpp>
-#if defined DIVERSALIS__OS__MICROSOFT
-	#include <universalis/os/include_windows_without_crap.hpp>
-#endif
-#if defined BOOST_AUTO_TEST_CASE
-	#include <sstream>
-#endif
-
-namespace universalis { namespace stdlib {
-
-class thread {
-	private:
-		typedef boost::thread impl_type;
-		impl_type impl_;
-
-	public:
-		#if BOOST_VERSION >= 103500
-			typedef impl_type::native_handle_type native_handle_type;
-			native_handle_type native_handle() { return impl_.native_handle(); }
-		#else
-			typedef void* native_handle_type;
-			native_handle_type native_handle() {
-				assert(false);
-				return 0;
+	#include "detail/chrono/duration_and_time_point.hpp"
+	#include <boost/thread/thread.hpp>
+	namespace universalis { namespace stdlib {
+		using boost::thread;
+		//namespace this_thread = boost::this_thread;
+		namespace this_thread {
+			using namespace boost::this_thread;
+			
+			template<typename Duration>
+			void inline sleep_for(Duration const & d) {
+				chrono::nanoseconds::rep const ns = chrono::nanoseconds(d).count();
+				boost::this_thread::sleep(
+					boost::posix_time::
+						#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+							nanoseconds(ns)
+						#else
+							microseconds(ns / 1000)
+						#endif
+				);
 			}
-		#endif
 
-		template<typename Callable>
-		explicit thread(Callable callable) : impl_(callable) {}
-		
-		void join() { impl_.join(); }
-		
-		template<typename Elapsed_Time>
-		bool timed_join(Elapsed_Time const & elapsed_time) {
-			#if BOOST_VERSION >= 103500
-				return impl_.timed_join(elapsed_time);
-			#else
-				impl_.join();
-				return true;
-			#endif
+			template<typename Clock, typename Duration>
+			void inline sleep_until(chrono::time_point<Clock, Duration> const & t) { sleep_for(t - Clock::now()); }
 		}
-
-		bool joinable() const {
-			#if BOOST_VERSION >= 103500
-				return impl_.joinable();
-			#else
-				return true;
-			#endif
-		}
-		
-		void detach() {
-			#if BOOST_VERSION >= 103500
-				impl_.detach();
-			#endif
-		}
-
-		/// note: std::thread::hardware_concurrency() is not impacted by the process' scheduler affinity mask.
-		static unsigned int hardware_concurrency() {
-			#if BOOST_VERSION >= 103500
-				return impl_type::hardware_concurrency();
-			#else
-				return os::sched::process().affinity_mask().active_count();
-			#endif
-		}
-};
-
-typedef boost::once_flag once_flag;
-
-/// The standard uses the new "constexpr" keyword to mark once_flag's constructor
-/// so that once_flag objects are initialised as compiled-time constants.
-/// Since we cannot yet use "constexpr",
-/// we have to require explicit initialisation with a constant:
-///\code
-/// std::once_flag flag = BOOST_ONCE_INIT;
-///\endcode
-/// instead of just:
-///\code
-/// std::once_flag flag;
-///\endcode
-#define STD_ONCE_INIT BOOST_ONCE_INIT
-
-template<typename Callable /*, typename Arguments...*/>
-void inline call_once(once_flag & flag, Callable callable /*, Arguments... arguments*/) {
-	#if BOOST_VERSION >= 103800
-		boost::call_once(flag, callable);
-	#else
-		// older boost versions want a function pointer and arguments in reversed order
-		boost::call_once(callable, flag);
-	#endif
-}
-
-namespace this_thread {
-
-	void inline yield() { boost::thread::yield(); }
-
-	/// see the standard header date_time for duration types implementing the Elapsed_Time concept
-	template<typename Elapsed_Time>
-	void inline sleep(Elapsed_Time const & elapsed_time) {
-		// boost::thread::sleep sleeps until the given absolute event date.
-		// So, we compute the event date by getting the current date and adding the delta to it.
-		// Note: boost::thread::sleep returns on interruptions (at least on posix)
-		boost::thread::sleep(
-			#if BOOST_VERSION >= 103500 && defined BOOST_DATE_TIME_HAS_NANOSECONDS
-				boost::get_system_time() +
-				boost::posix_time::seconds(elapsed_time.get_count())
-			#else
-				detail::boost_xtime_get_and_add(elapsed_time)
-			#endif
-		);
-	}
-}
-
-#if defined BOOST_AUTO_TEST_CASE
-	BOOST_AUTO_TEST_CASE(hardware_concurrency_test) {
-		std::ostringstream s; s << "hardware concurrency: " << thread::hardware_concurrency();
-		BOOST_MESSAGE(s.str());
-	}
+	}}
 #endif
 
-}}
-
-/****************************************************************************/
-// injection in std namespace
-namespace std { using namespace universalis::stdlib; }
-
+/******************************************************************************************/
+#ifdef BOOST_AUTO_TEST_CASE
+#include <sstream>
+	namespace universalis { namespace stdlib { namespace test {
+		BOOST_AUTO_TEST_CASE(thread_hardware_concurrency_test) {
+			unsigned int const count = thread::hardware_concurrency();
+			std::ostringstream s; s << "hardware concurrency: " << count;
+			BOOST_MESSAGE(s.str());
+			BOOST_CHECK(count >= 1);
+		}
+	}}}
 #endif

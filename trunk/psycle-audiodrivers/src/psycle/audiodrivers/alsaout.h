@@ -77,9 +77,9 @@ class AlsaOut : public AudioDriver {
 			bool stop_requested_;
 			/// a mutex to synchronise accesses to running_ and stop_requested_
 			mutex mutex_;
-			typedef class scoped_lock<mutex> scoped_lock;
+			typedef class unique_lock<mutex> scoped_lock;
 			/// a condition variable to wait until notified that the value of running_ has changed
-			condition<scoped_lock> condition_;
+			condition_variable condition_;
 		///\}
 };
 

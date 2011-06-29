@@ -142,10 +142,10 @@ namespace {
 namespace {
 	unsigned int global_client_count;
 	mutex global_client_count_mutex;
-	once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
+	UNIVERSALIS__STDLIB__ONCE_FLAG(global_client_count_init_once_flag);
 	void global_client_count_init() {
 		// note: we do not need to lock here, but this is a way to ensure it is initialised.
-		scoped_lock<mutex> lock(global_client_count_mutex);
+		lock_guard<mutex> lock(global_client_count_mutex);
 		global_client_count = 0;
 	}
 }
@@ -166,7 +166,7 @@ GStreamerOut::GStreamerOut()
 void GStreamerOut::do_open() throw(std::exception) {
 	{ // initialize gstreamer
 		universalis::stdlib::call_once(global_client_count_init_once_flag, global_client_count_init);
-		scoped_lock<mutex> lock(global_client_count_mutex);
+		lock_guard<mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
 			if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: init", UNIVERSALIS__COMPILER__LOCATION);
 			int * argument_count(0);
@@ -322,7 +322,7 @@ void GStreamerOut::do_close() throw(std::exception) {
 
 	{ // deinitialize gstreamer
 		universalis::stdlib::call_once(global_client_count_init_once_flag, global_client_count_init);
-		scoped_lock<mutex> lock(global_client_count_mutex);
+		lock_guard<mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) {
 			#if 0 // gst_deinit must not be called because gst_init won't work afterwards
 				if(loggers::trace()) loggers::trace()("psycle: audiodrivers: gstreamer: deinit", UNIVERSALIS__COMPILER__LOCATION);

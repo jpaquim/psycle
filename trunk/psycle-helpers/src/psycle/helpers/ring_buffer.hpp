@@ -229,7 +229,6 @@ class ring_with_compiler_volatile {
 	#include <utility>
 	#include <random>
 	#include <chrono>
-	#include <typeinfo>
 	#include <sstream>
 	
 	namespace psycle { namespace helpers {
@@ -299,7 +298,7 @@ class ring_with_compiler_volatile {
 					"ring buffer size: " << size << "\n"
 					"number of cpu avail: " << cpu_avail << "\n"
 					"elements to process: " << double(elements_to_process) << "\n"
-					"rand gen typename: " << universalis::compiler::typenameof(typeid(rand_gen_type)) << "\n"
+					"rand gen typename: " << universalis::compiler::typenameof<rand_gen_type>()) << "\n"
 					"rand gen dist range: " << rand_gen_dist_lower << ' ' << rand_gen_dist_upper << "\n"
 					"writer rand gen seed: " << writer_rand_gen_seed << "\n"
 					"reader rand gen seed: " << reader_rand_gen_seed;

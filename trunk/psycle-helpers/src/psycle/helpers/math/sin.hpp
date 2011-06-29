@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2009 members of the psycle project http://psycle.sourceforge.net and of the music-dsp mailing list http://www.music.columbia.edu/cmc/music-dsp
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net and of the music-dsp mailing list http://www.music.columbia.edu/cmc/music-dsp
 
 #ifndef PSYCLE__HELPERS__MATH__SIN__INCLUDED
 #define PSYCLE__HELPERS__MATH__SIN__INCLUDED
@@ -8,7 +8,7 @@
 #include "constants.hpp"
 #include <universalis.hpp>
 #include <cmath>
-#if defined BOOST_AUTO_TEST_CASE
+#ifdef BOOST_AUTO_TEST_CASE
 	#include <universalis/os/clocks.hpp>
 	#include <sstream>
 #endif
@@ -54,53 +54,57 @@ Real inline fast_sin(Real radians) {
 	return y;
 }
 
-#if defined BOOST_AUTO_TEST_CASE
-	#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
-		///\todo fail at runtime on old mingw
-	#else
-		template<unsigned int Polynomial_Degree, typename Real>
-		void fast_sin_test_template() {
-			using namespace universalis::stdlib;
-			typedef universalis::os::clocks::monotonic clock;
-			int const iterations(1000000);
-			nanoseconds const t1(clock::current());
-			Real const step(pi / 1000);
-			Real f1(1), ff1(0);
-			for(int i(0); i < iterations; ++i) {
-				//too slow: f1 = std::fmod(f1 + pi, 2 * pi) - pi;
-				f1 += fast_sin<2>(ff1);
-				ff1 += step;
-				if(ff1 > pi) ff1 -= 2 * pi;
+/******************************************************************************************/
+#ifdef BOOST_AUTO_TEST_CASE
+	namespace test {
+		#if defined DIVERSALIS__OS__MICROSOFT && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION__MAJOR < 4
+			///\todo fail at runtime on old mingw
+		#else
+			template<unsigned int Polynomial_Degree, typename Real>
+			void fast_sin_test_template() {
+				typedef universalis::os::clocks::hires_thread_or_fallback clock;
+				int const iterations(1000000);
+				clock::time_point const t1(clock::now());
+				Real const step(pi / 1000);
+				Real f1(1), ff1(0);
+				for(int i(0); i < iterations; ++i) {
+					//too slow: f1 = std::fmod(f1 + pi, 2 * pi) - pi;
+					f1 += fast_sin<2>(ff1);
+					ff1 += step;
+					if(ff1 > pi) ff1 -= 2 * pi;
+				}
+				clock::time_point const t2(clock::now());
+				Real f2(1), ff2(0);
+				for(int i(0); i < iterations; ++i) {
+					f2 += std::sin(ff2);
+					ff2 += step;
+				}
+				clock::time_point const t3(clock::now());
+				{
+					std::ostringstream s; s << "fast_sin<Polynomial_Degree = " << Polynomial_Degree << ", Real = " << universalis::compiler::typenameof(f1) << ">: " << f1;
+					BOOST_MESSAGE(s.str());
+				}
+				{
+					std::ostringstream s; s << "std::sin: " << f2;
+					BOOST_MESSAGE(s.str());
+				}
+				{
+					std::ostringstream s;
+					using universalis::stdlib::chrono::nanoseconds;
+					s << nanoseconds(t2 - t1).count() * 1e-9 << "s < " << nanoseconds(t3 - t2).count() * 1e-9 << "s";
+					BOOST_MESSAGE(s.str());
+				}
+				BOOST_CHECK(t2 - t1 < t3 - t2);
 			}
-			nanoseconds const t2(clock::current());
-			Real f2(1), ff2(0);
-			for(int i(0); i < iterations; ++i) {
-				f2 += std::sin(ff2);
-				ff2 += step;
+
+			BOOST_AUTO_TEST_CASE(fast_sin_test) {
+				fast_sin_test_template<2, float>();
+				fast_sin_test_template<4, float>();
+				fast_sin_test_template<2, double>();
+				fast_sin_test_template<4, double>();
 			}
-			nanoseconds const t3(clock::current());
-			{
-				std::ostringstream s; s << "fast_sin<Polynomial_Degree = " << Polynomial_Degree << ", Real = " << universalis::compiler::typenameof(f1) << ">: " << f1;
-				BOOST_MESSAGE(s.str());
-			}
-			{
-				std::ostringstream s; s << "std::sin: " << f2;
-				BOOST_MESSAGE(s.str());
-			}
-			{
-				std::ostringstream s;
-				s << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
-				BOOST_MESSAGE(s.str());
-			}
-			BOOST_CHECK(t2 - t1 < t3 - t2);
-		}
-		BOOST_AUTO_TEST_CASE(fast_sin_test) {
-			fast_sin_test_template<2, float>();
-			fast_sin_test_template<4, float>();
-			fast_sin_test_template<2, double>();
-			fast_sin_test_template<4, double>();
-		}
-	#endif
+		#endif
+	}
 #endif
 
 }}}

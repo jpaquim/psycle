@@ -818,7 +818,7 @@ void LFO::PreWork(int numSamples, bool clear)
 {
 	Machine::PreWork(numSamples, clear);
 
-	nanoseconds const t0(cpu_time_clock());
+	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 
 	int maxVal=0, minVal=0;
 	int curVal=0, newVal=0;
@@ -857,7 +857,7 @@ void LFO::PreWork(int numSamples, bool clear)
 	lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 	if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	accumulate_processing_time(t1 - t0);
 }
 

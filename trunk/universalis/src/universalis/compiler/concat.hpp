@@ -1,12 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
-
-///\file
-///\brief concatenation
-
-#ifndef UNIVERSALIS__COMPILER__CONCAT__INCLUDED
-#define UNIVERSALIS__COMPILER__CONCAT__INCLUDED
-#pragma once
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #include <universalis/detail/project.hpp>
 
@@ -25,5 +18,3 @@
 ///\relates UNIVERSALIS__COMPILER__CONCAT
 #define UNIVERSALIS__COMPILER__CONCAT__NO_EXPANSION(left_token, right_token) \
 	left_token##right_token
-
-#endif

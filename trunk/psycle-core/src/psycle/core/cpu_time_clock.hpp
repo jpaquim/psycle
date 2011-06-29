@@ -9,27 +9,20 @@
 
 #include <psycle/core/detail/project.hpp>
 #include <universalis/os/clocks.hpp>
-#include <universalis/stdlib/date_time.hpp>
 
 namespace psycle { namespace core {
-
-using namespace universalis::stdlib;
 
 /// This clock is meant to have the following characteristics:
 /// - high resolution: can measure very short durations,
 /// - monotonic: does not jump nor accelerate/deccelerate to adjust to official time,
 /// - virtual thread time: ideally, this counts the time spent by cpu(s) in the current thread, blocked time not counted.
-nanoseconds inline cpu_time_clock() {
-	return universalis::os::clocks::hires_thread_or_fallback::current();
-}
+typedef universalis::os::clocks::hires_thread_or_fallback cpu_time_clock;
 
 /// This clock is meant to have the following characteristics:
 /// - high resolution: can measure very short durations,
 /// - monotonic: does not jump nor accelerate/deccelerate to adjust to official time,
 /// - real, wall time: counts the real time elapsed, since some unspecified origin.
-nanoseconds inline wall_time_clock() {
-	return universalis::os::clocks::monotonic::current();
-}
+typedef universalis::os::clocks::monotonic wall_time_clock;
 
 }}
 #endif

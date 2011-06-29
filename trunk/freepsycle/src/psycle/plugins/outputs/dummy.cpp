@@ -83,7 +83,7 @@ void dummy::thread_loop() {
 		{ scoped_lock lock(mutex_);
 			if(stop_requested_) return;
 		}
-		if(!free_wheeling_) std::this_thread::sleep(sleep_);
+		if(!free_wheeling_) std::this_thread::sleep_for(sleep_);
 		if(loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
 		io_ready(true);
 		condition_.notify_one();

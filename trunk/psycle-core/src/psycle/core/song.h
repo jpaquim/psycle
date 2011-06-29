@@ -12,6 +12,7 @@
 #include "machine.h"
 #include "instrument.h"
 #include "xminstrument.h"
+#include "cpu_time_clock.hpp"
 #include <universalis/stdlib/mutex.hpp>
 
 namespace psycle { namespace core {
@@ -156,7 +157,7 @@ class PSYCLE__CORE__DECL CoreSong {
 			OutPort::id_type srctype);
 	
 		//thread synchronisation
-		typedef class scoped_lock<mutex> scoped_lock;
+		typedef class lock_guard<mutex> scoped_lock;
 		operator mutex& () const { return mutex_; }
 
 		// instrument actions
@@ -188,25 +189,25 @@ class PSYCLE__CORE__DECL CoreSong {
 		void reset_time_measurement() { accumulated_processing_time_ = accumulated_routing_time_ = 0; }
 
 		/// total processing cpu time usage measurement
-		nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		cpu_time_clock::duration accumulated_processing_time() const throw() { return accumulated_processing_time_; }
 		/// total processing cpu time usage measurement
-		void accumulate_processing_time(nanoseconds ns) throw() {
-			if(loggers::warning() && ns.get_count() < 0) {
+		void accumulate_processing_time(cpu_time_clock::duration d) throw() {
+			if(loggers::warning() && d.count() < 0) {
 				std::ostringstream s;
-				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+				s << "time went backward by: " << chrono::nanoseconds(d).count() * 1e-9 << 's';
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else accumulated_processing_time_ += ns;
+			} else accumulated_processing_time_ += d;
 		}
 
 		/// routing cpu time usage measurement
-		nanoseconds accumulated_routing_time() const throw() { return accumulated_routing_time_; }
+		cpu_time_clock::duration accumulated_routing_time() const throw() { return accumulated_routing_time_; }
 		/// routing cpu time usage measurement
-		void accumulate_routing_time(nanoseconds ns) throw() {
-			if(loggers::warning() && ns.get_count() < 0) {
+		void accumulate_routing_time(cpu_time_clock::duration d) throw() {
+			if(loggers::warning() && d.count() < 0) {
 				std::ostringstream s;
-				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+				s << "time went backward by: " << chrono::nanoseconds(d).count() * 1e-9 << 's';
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else accumulated_routing_time_ += ns;
+			} else accumulated_routing_time_ += d;
 		}
 
 	protected:
@@ -231,7 +232,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		Sequence sequence_;
 		Machine* machines_[MAX_MACHINES];
 		mutable mutex mutex_;
-		nanoseconds accumulated_processing_time_, accumulated_routing_time_;
+		cpu_time_clock::duration accumulated_processing_time_, accumulated_routing_time_;
 };
 
 /// Song extends CoreSong with UI-related stuff

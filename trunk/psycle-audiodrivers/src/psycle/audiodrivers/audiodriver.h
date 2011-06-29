@@ -336,7 +336,7 @@ class DummyDriver : public AudioDriver {
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
 			mutex mutex_;
-			typedef class scoped_lock<mutex> scoped_lock;
+			typedef class unique_lock<mutex> scoped_lock;
 	///\}
 };
 

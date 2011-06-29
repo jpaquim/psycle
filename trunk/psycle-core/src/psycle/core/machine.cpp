@@ -588,7 +588,7 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 }
 
 void Machine::PreWork(int numSamples, bool clear) {
-	nanoseconds const t0(cpu_time_clock());
+	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 	sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
 	if(_pScopeBufferL && _pScopeBufferR) {
 		float *pSamplesL = _pSamplesL;   
@@ -615,7 +615,7 @@ void Machine::PreWork(int numSamples, bool clear) {
 		dsp::Clear(_pSamplesL, numSamples);
 		dsp::Clear(_pSamplesR, numSamples);
 	}
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	callbacks->song().accumulate_routing_time(t1 - t0);
 }
 
@@ -624,11 +624,11 @@ void Machine::PreWork(int numSamples, bool clear) {
 void Machine::recursive_process(unsigned int frames) {
 	recursive_process_deps(frames);
 
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 
 	GenerateAudio(frames);
 
-	nanoseconds const t2(cpu_time_clock());
+	cpu_time_clock::time_point const t2(cpu_time_clock::now());
 	accumulate_processing_time(t2 - t1);
 }
 
@@ -642,10 +642,10 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix) {
 					pInMachine->recursive_process(frames);
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
-					nanoseconds const t0(cpu_time_clock());
+					cpu_time_clock::time_point const t0(cpu_time_clock::now());
 					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, frames, pInMachine->_lVol * _inputConVol[i]);
 					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, frames, pInMachine->_rVol * _inputConVol[i]);
-					nanoseconds const t1(cpu_time_clock());
+					cpu_time_clock::time_point const t1(cpu_time_clock::now());
 					callbacks->song().accumulate_routing_time(t1 - t0);
 				}
 			}
@@ -653,9 +653,9 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix) {
 	}
 	recursive_is_processing_ = false;
 	{ // undernormalise
-		nanoseconds const t0(cpu_time_clock());
+		cpu_time_clock::time_point const t0(cpu_time_clock::now());
 		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-		nanoseconds const t1(cpu_time_clock());
+		cpu_time_clock::time_point const t1(cpu_time_clock::now());
 		callbacks->song().accumulate_routing_time(t1 - t0);
 	}
 }
@@ -696,7 +696,7 @@ void Machine::sched_outputs(sched_deps & result) const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 bool Machine::sched_process(unsigned int frames) {
-	nanoseconds const t0(cpu_time_clock());
+	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 
 	if(_connectedInputs && !_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
@@ -709,12 +709,12 @@ bool Machine::sched_process(unsigned int frames) {
 	}
 	dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	callbacks->song().accumulate_routing_time(t1 - t0);
 
 	GenerateAudio(frames);
 
-	nanoseconds const t2(cpu_time_clock());
+	cpu_time_clock::time_point const t2(cpu_time_clock::now());
 	accumulate_processing_time(t2 - t1);
 
 	++processing_count_;
