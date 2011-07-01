@@ -4,7 +4,7 @@
 #pragma once
 #include "../resource.hpp"
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 #include <gst/gstelement.h>
 #define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__GSTREAMER
 #include <psycle/detail/decl.hpp>
@@ -36,9 +36,9 @@ class PSYCLE__DECL gstreamer : public resource {
 		void static handoff_static(::GstElement *, ::GstBuffer *, ::GstPad *, gstreamer *);
 		void        handoff(::GstBuffer &, ::GstPad &);
 
-		typedef outputs::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
-		condition<scoped_lock> mutable condition_;
+		typedef unique_lock<mutex> scoped_lock;
+		condition_variable mutable condition_;
 
 		bool wait_for_state_to_become_playing_;
 		bool handoff_called_;

@@ -5,8 +5,8 @@
 #include <psycle/engine/graph.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <set>
 #include <list>
 #define PSYCLE__DECL  PSYCLE__HOST
@@ -93,8 +93,8 @@ class node {
 	///\{
 		public:  void reset_time_measurement();
 
-		public:  nanoseconds accumulated_processing_time() const { return accumulated_processing_time_; }
-		private: nanoseconds accumulated_processing_time_;
+		public:  chrono::nanoseconds accumulated_processing_time() const { return accumulated_processing_time_; }
+		private: chrono::nanoseconds accumulated_processing_time_;
 
 		public:  uint64_t processing_count() const { return processing_count_; }
 		private: uint64_t processing_count_;
@@ -224,9 +224,9 @@ class PSYCLE__DECL scheduler : public std::set<node*> {
 		threads_type threads_;
 		void thread_function(std::size_t thread_number);
 
-		typedef class scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
-		condition<scoped_lock> mutable condition_;
+		typedef unique_lock<mutex> scoped_lock;
+		condition_variable mutable condition_;
 		
 		bool stop_requested_;
 		bool suspend_requested_;

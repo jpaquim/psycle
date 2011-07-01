@@ -32,7 +32,7 @@ bool dummy::opened() const {
 
 void dummy::do_start() {
 	resource::do_start();
-	sleep_ = static_cast<nanoseconds::tick_type>(1e9 * graph().events_per_buffer() / in_port().events_per_second());
+	sleep_ = static_cast<chrono::nanoseconds::rep>(1e9 * graph().events_per_buffer() / in_port().events_per_second());
 	io_ready(false);
 	stop_requested_ = false;
 	// start the thread
@@ -83,7 +83,7 @@ void dummy::thread_loop() {
 		{ scoped_lock lock(mutex_);
 			if(stop_requested_) return;
 		}
-		if(!free_wheeling_) std::this_thread::sleep_for(sleep_);
+		if(!free_wheeling_) this_thread::sleep_for(sleep_);
 		if(loggers::trace()()) loggers::trace()("io ready: true", UNIVERSALIS__COMPILER__LOCATION);
 		io_ready(true);
 		condition_.notify_one();

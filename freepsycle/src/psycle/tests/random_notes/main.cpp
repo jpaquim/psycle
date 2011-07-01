@@ -9,7 +9,7 @@
 #include <psycle/host/scheduler.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <universalis/stdlib/thread.hpp>
-#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -80,16 +80,16 @@ void play() {
 			scheduler.threads(threads);
 				
 			if(loggers::information()()) loggers::information()("generating input ...");
-			seconds const seconds(60);
+			chrono::seconds const seconds(60);
 			score.generate();
 			if(loggers::information()()) loggers::information()("generating input ... done");
 			if(loggers::information()()) {
 				std::ostringstream s;
-				s << "will end scheduler thread in " << seconds.get_count() << " seconds ...";
+				s << "will end scheduler thread in " << seconds.count() << " seconds ...";
 				loggers::information()(s.str());
 			}
 			scheduler.start();
-			this_thread::sleep(seconds);
+			this_thread::sleep_for(seconds);
 			scheduler.stop();
 		}
 		loggers::information()("############################################# clean up ######################################################");

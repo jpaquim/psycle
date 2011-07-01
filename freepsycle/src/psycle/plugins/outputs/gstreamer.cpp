@@ -173,10 +173,10 @@ namespace {
 namespace {
 	unsigned int global_client_count;
 	mutex global_client_count_mutex;
-	once_flag global_client_count_init_once_flag = STD_ONCE_INIT;
+	UNIVERSALIS__STDLIB__ONCE_FLAG(global_client_count_init_once_flag);
 	void global_client_count_init() {
-		// note: we do not need to lock here, but this is a way to ensure it is initialised.
-		scoped_lock<mutex> lock(global_client_count_mutex);
+		// note: we do not need to lock here, but this is a way to ensure it is initialised (read/write barrier).
+		unique_lock<mutex> lock(global_client_count_mutex);
 		global_client_count = 0;
 	}
 }
@@ -185,8 +185,8 @@ void gstreamer::do_open() {
 	resource::do_open();
 
 	{ // initialize gstreamer
-		std::call_once(global_client_count_init_once_flag, global_client_count_init);
-		std::scoped_lock<mutex> lock(global_client_count_mutex);
+		call_once(global_client_count_init_once_flag, global_client_count_init);
+		unique_lock<mutex> lock(global_client_count_mutex);
 		if(!global_client_count++) {
 			int * argument_count(0);
 			char *** arguments(0);
@@ -299,7 +299,7 @@ void gstreamer::do_open() {
 	);
 
 	{ // allocate the intermediate buffer
-		///\todo use gstreamer's lock-free ringbuffer
+		///\todo use psycle-helpers's lock-free ringbuffer
 		// note: period_frames may be different from graph().events_per_buffer()
 		std::size_t const bytes(static_cast<std::size_t>(graph().events_per_buffer() * format.bytes_per_sample()));
 		if(!(intermediate_buffer_ = new char[bytes])) {
@@ -454,8 +454,8 @@ void gstreamer::do_close() {
 	sink_ = caps_filter_ = source_ = 0; caps_ = 0;
 
 	{ // deinitialize gstreamer
-		std::call_once(global_client_count_init_once_flag, global_client_count_init);
-		std::scoped_lock<mutex> lock(global_client_count_mutex);
+		call_once(global_client_count_init_once_flag, global_client_count_init);
+		unique_lock<mutex> lock(global_client_count_mutex);
 		if(!--global_client_count) {
 			#if 0  // gst_deinit must not be called because gst_init won't work afterwards
 				::gst_deinit();

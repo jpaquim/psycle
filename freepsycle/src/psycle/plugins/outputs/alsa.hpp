@@ -6,7 +6,7 @@
 #include <alsa/asoundlib.h>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 #define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__ALSA
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
@@ -53,9 +53,9 @@ class PSYCLE__DECL alsa : public resource {
 		void thread_function();
 		void poll_loop();
 	
-		typedef outputs::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
-		condition<scoped_lock> mutable condition_;
+		typedef unique_lock<mutex> scoped_lock;
+		condition_variable mutable condition_;
 
 		bool stop_requested_;
 
