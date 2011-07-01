@@ -1,11 +1,13 @@
+#include "SynthTrack.hpp"
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
-#include "SynthTrack.hpp"
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstdlib>
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers;
 using namespace psycle::helpers::math;
+using namespace universalis::stdlib;
 
 int const WAVETABLES = 4;
 int const MAX_ENV_TIME = 250000;
@@ -119,13 +121,13 @@ class mi : public CMachineInterface {
 		void InitWaveTableOrig();
 		void InitWaveTableSR(bool delArray=false);
 		float *WaveTable[WAVETABLES];
-		std::uint32_t waveTableSize;
+		uint32_t waveTableSize;
 		float wavetableCorrection;
 		CSynthTrack track[MAX_TRACKS];
 	
 		SYNPAR globalpar;
 		bool reinitChannel[MAX_TRACKS];
-		std::uint32_t currentSR;
+		uint32_t currentSR;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
@@ -319,11 +321,11 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 0: //fallthrough
 	case 1:
 			switch(value) {
-				case 0:std::strcpy(txt,"Sine");return true;
-				case 1:std::strcpy(txt,"Sawtooth");return true;
-				case 2:std::strcpy(txt,"Square");return true;
-				case 3:std::strcpy(txt,"Triangle");return true;
-				case 4:std::strcpy(txt,"White noise");return true;
+				case 0: std::strcpy(txt, "Sine"); return true;
+				case 1: std::strcpy(txt, "Sawtooth"); return true;
+				case 2: std::strcpy(txt, "Square"); return true;
+				case 3: std::strcpy(txt, "Triangle"); return true;
+				case 4: std::strcpy(txt, "White noise"); return true;
 			}
 			break;
 	case 2:
@@ -596,21 +598,21 @@ void mi::InitWaveTableSR(bool delArray) {
 	const float increase2 = 65536.0f/(float)amount;
 
 	//Skipping noise wavetable. It is useless.
-	for (std::uint32_t i=0;i < WAVETABLES; i++) {
+	for (uint32_t i=0;i < WAVETABLES; i++) {
 		if (delArray) {
 			delete WaveTable[i];
 		}
 		//Two more shorts allocated for the interpolation routine.
 		WaveTable[i]=new float[amount+2];
 	}
-	for(std::uint32_t c=0;c<half;c++) {
+	for(uint32_t c=0;c<half;c++) {
 		double sval=(double)c*sinFraction;
 		WaveTable[0][c]=math::lrint<short int,double>(sin(sval)*16384.0);
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=-16384;
 		WaveTable[3][c]=(c*increase2)-16384;
 	}
-	for(std::uint32_t c=half;c<amount;c++) {
+	for(uint32_t c=half;c<amount;c++) {
 		double sval=(double)c*sinFraction;
 		WaveTable[0][c]=math::lrint<short int,double>(sin(sval)*16384.0);
 		WaveTable[1][c]=(c*increase)-16384;
@@ -619,7 +621,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	}
 	//Two more shorts allocated for the interpolation routine.
 	//Skipping noise wavetable. It is useless.
-	for (std::uint32_t i=0;i < WAVETABLES; i++) {
+	for (uint32_t i=0;i < WAVETABLES; i++) {
 		WaveTable[i][amount]=WaveTable[i][0];
 		WaveTable[i][amount+1]=WaveTable[i][1];
 	}

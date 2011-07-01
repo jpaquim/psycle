@@ -1163,7 +1163,7 @@ void Mixer::RecalcSend(int chan,int send)
 }
 bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 {
-	std::uint32_t filesize;
+	uint32_t filesize;
 	pFile->Read(filesize);
 
 	pFile->Read(solocolumn_);
@@ -1220,7 +1220,7 @@ bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 
 void Mixer::SaveSpecificChunk(RiffFile* pFile) const
 {
-	std::uint32_t size(sizeof(solocolumn_)+sizeof(master_)+2*sizeof(int));
+	uint32_t size(sizeof(solocolumn_)+sizeof(master_)+2*sizeof(int));
 	size+=(3*sizeof(float)+3*sizeof(bool)+numsends()*sizeof(float))*numinputs();
 	size+=(2*sizeof(float)+2*sizeof(bool)+numsends()*sizeof(bool)+2*sizeof(float)+sizeof(int))*numreturns();
 	size+=(2*sizeof(float)+sizeof(int))*numsends();

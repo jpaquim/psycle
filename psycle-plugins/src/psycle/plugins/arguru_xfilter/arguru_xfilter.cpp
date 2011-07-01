@@ -2,6 +2,7 @@
 ///\brief Arguru xfilter (crossdelay)
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/dsp.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 #include <cstdio>
 
@@ -72,10 +73,10 @@ class mi : public CMachineInterface {
 		}
 		float *dbl;
 		float *dbr;
-		std::int32_t dcl,dcr,ccl,ccr;
-		std::int32_t currentSR;
-		std::int32_t currentTL;
-		std::int32_t max_delay_samples;
+		int32_t dcl,dcr,ccl,ccr;
+		int32_t currentSR;
+		int32_t currentTL;
+		int32_t max_delay_samples;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)

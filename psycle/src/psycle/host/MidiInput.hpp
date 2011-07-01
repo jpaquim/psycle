@@ -79,7 +79,7 @@ namespace psycle { namespace host {
 			/// tracker pattern info struct
 			PatternEvent entry;
 			/// MIDI input device's timestamp
-			std::uint32_t timeStamp;
+			uint32_t timeStamp;
 			/// MIDI channel
 			int channel;
 		};
@@ -113,7 +113,7 @@ namespace psycle { namespace host {
 			/// strobe for the channel map list
 			bool channelMapUpdate;
 			/// 32 bits of boolean info (see FLAGS, CLEAR AFTER READ)
-			std::uint32_t flags;			
+			uint32_t flags;			
 		};
 
 		enum MODES
@@ -160,7 +160,7 @@ namespace psycle { namespace host {
 			/// convert a name identifier into a index identifier (or -1 if fail)
 			int FindDevByName( CString nameString );	
 			/// fill a listbox with a list of the available input devices
-			std::uint32_t PopulateListbox( CComboBox * listbox , bool issync );	
+			uint32_t PopulateListbox( CComboBox * listbox , bool issync );	
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
 			/// set a instrument map
@@ -184,12 +184,12 @@ namespace psycle { namespace host {
 
 		private:
 			/// the midi callback functions (just a static linker to the instance one)
-			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
 			/// interal engine resync process
 			void InternalReSync( DWORD_PTR dwParam2 );
@@ -205,9 +205,9 @@ namespace psycle { namespace host {
 			bool m_midiInHandlesTried;	
 
 			/// channel->instrument map
-			std::uint32_t m_channelInstMap[ MAX_MACHINES ];				
+			uint32_t m_channelInstMap[ MAX_MACHINES ];				
 			/// channel->generator map
-			std::uint32_t m_channelGeneratorMap[ MAX_MIDI_CHANNELS ];	
+			uint32_t m_channelGeneratorMap[ MAX_MIDI_CHANNELS ];	
 			/// channel, note off setting
 			bool m_channelNoteOff[ MAX_MIDI_CHANNELS ];			
 			/// channel->controller->parameter map
@@ -216,15 +216,15 @@ namespace psycle { namespace host {
 			///\name audio-engine timing vars
 			///\{
 				/// .
-				std::uint32_t m_timingCounter;
+				uint32_t m_timingCounter;
 				/// .
-				std::uint32_t m_timingAccumulator;
+				uint32_t m_timingAccumulator;
 				/// .
-				std::uint32_t m_prevTimingCounter;
+				uint32_t m_prevTimingCounter;
 				/// the base sync stamp
-				std::uint32_t m_baseStampTime;	
+				uint32_t m_baseStampTime;	
 				/// .
-				std::uint32_t m_tickBase;
+				uint32_t m_tickBase;
 			///\}
 
 			/// midi device identifiers
@@ -261,7 +261,7 @@ namespace psycle { namespace host {
 			///\name syncronization variables
 			///\{
 				/// .
-				std::uint32_t m_baseStampTimeFix;
+				uint32_t m_baseStampTimeFix;
 				/// .
 				int m_fixOffset;
 				/// .

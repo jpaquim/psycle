@@ -19,6 +19,7 @@
 #endif
 
 namespace psycle { namespace host {
+	using namespace universalis::stdlib;
 	
 	int16_t const MODSongLoader::BIGMODPERIODTABLE[37 * 8] = { // (12note * 3oct + 1note) * 8fine
 		907,900,894,887,881,875,868,862,856,850,844,838,832,826,820,814,
@@ -77,8 +78,8 @@ namespace psycle { namespace host {
 		memcpy(&_insheader,&_insheaderb+4,sizeof(XMSAMPLEFILEHEADER)-2);
 		SetEnvelopes(m_pSong->rInstrument(idx),_insheaderb);
 
-		std::uint32_t iSampleCount(0);
-		for (std::uint32_t i=0; i<96; i++)
+		uint32_t iSampleCount(0);
+		for (uint32_t i=0; i<96; i++)
 		{
 			if (_insheader.snum[i] > iSampleCount) iSampleCount = _insheader.snum[i];
 		}
@@ -202,8 +203,7 @@ namespace psycle { namespace host {
 		ReadHeader(m_Header);
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
-		//using std::max;
-		song.tracks(std::max(m_Header.channels, std::uint16_t(4)));
+		song.tracks(std::max(m_Header.channels, uint16_t(4)));
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));

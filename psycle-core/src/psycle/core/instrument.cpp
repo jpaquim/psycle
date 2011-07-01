@@ -152,7 +152,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 
 	// now we have to read waves
 
-	std::int32_t numwaves;
+	int32_t numwaves;
 	pFile->Read(numwaves);
 	for (int i = 0; i < numwaves; i++)
 	{
@@ -160,8 +160,8 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 
 		pFile->ReadArray(Header,4);
 		Header[4] = 0;
-		std::uint32_t version = 0;
-		std::uint32_t size = 0;
+		uint32_t version = 0;
+		uint32_t size = 0;
 
 		if (strcmp(Header,"WAVE")==0)
 		{
@@ -177,7 +177,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 			}
 			else
 			{
-				std::uint32_t index = 0;
+				uint32_t index = 0;
 				pFile->Read(index);
 
 				pFile->Read(waveLength);
@@ -193,14 +193,14 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 				pFile->ReadString(waveName, sizeof waveName);
 				
 				pFile->Read(size);
-				std::uint8_t* pData;
+				uint8_t* pData;
 				
 				if ( fullopen )
 				{
-					pData = new std::uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
+					pData = new uint8_t[size+4];// +4 to avoid any attempt at buffer overflow by the code <-- ?
 					pFile->ReadArray(pData,size);
 					///\todo SoundDesquash should be object-oriented and provide access to this via its interface
-					std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
+					uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
 					if(waveLength != pDataLength)
 					{
 						std::ostringstream s;
@@ -217,7 +217,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 				else
 				{
 					pFile->Skip(size);
-					waveDataL=new std::int16_t[2];
+					waveDataL=new int16_t[2];
 				}
 
 				if (waveStereo)
@@ -225,9 +225,9 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 					pFile->Read(size);
 					if ( fullopen )
 					{
-						pData = new std::uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
+						pData = new uint8_t[size+4]; // +4 to avoid any attempt at buffer overflow by the code <-- ?
 						pFile->ReadArray(pData,size);
-						std::uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
+						uint32_t pDataLength = (pData[4]<<24) | (pData[3]<<16) | (pData[2]<<8) | pData[1];
 						///\todo SoundDesquash should be object-oriented and provide access to this via its interface
 						if(waveLength != pDataLength)
 						{
@@ -245,7 +245,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 					else
 					{
 						pFile->Skip(size);
-						waveDataR = new std::int16_t[2];
+						waveDataR = new int16_t[2];
 					}
 				}
 			}
@@ -302,19 +302,19 @@ void Instrument::SaveFileChunk(RiffFile* pFile)
 	pFile->Write(numwaves);
 	if (waveLength > 0)
 	{
-		std::uint8_t * pData1(0);
-		std::uint8_t * pData2(0);
-		std::uint32_t size1=0,size2=0;
+		uint8_t * pData1(0);
+		uint8_t * pData2(0);
+		uint32_t size1=0,size2=0;
 		size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
 		if (waveStereo)
 		{
 			size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
 		}
 
-		std::uint32_t index = 0;
+		uint32_t index = 0;
 		pFile->WriteArray("WAVE",4);
-		std::uint32_t version = CURRENT_FILE_VERSION_WAVE;
-		std::uint32_t size =
+		uint32_t version = CURRENT_FILE_VERSION_WAVE;
+		uint32_t size =
 			sizeof index +
 			sizeof waveLength +
 			sizeof waveVolume +
@@ -400,9 +400,9 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 
 	if (waveLength > 0)
 	{
-		std::uint8_t * pData1(0);
-		std::uint8_t * pData2(0);
-		std::uint32_t size1=0,size2=0;
+		uint8_t * pData1(0);
+		uint8_t * pData2(0);
+		uint32_t size1=0,size2=0;
 
 		size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
 		if (waveStereo)
@@ -430,7 +430,7 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 		xml << toHex(size1) <<"'>";
 		
 		xml << "<hex v='";
-		for (std::uint32_t k = 0; k < size1; k++) {
+		for (uint32_t k = 0; k < size1; k++) {
 			xml << toHex(pData1[k],2);
 		}
 		xml << "'/>" << std::endl;
@@ -442,7 +442,7 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 			xml << toHex(size2) <<"'>";
 		
 			xml << "<hex v='";
-			for (std::uint32_t k = 0; k < size2; k++) {
+			for (uint32_t k = 0; k < size2; k++) {
 				xml << toHex(pData2[k], 2);
 			}
 			xml << "'/>" << std::endl;

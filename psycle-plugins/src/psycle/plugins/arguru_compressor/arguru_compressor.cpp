@@ -4,10 +4,12 @@
 
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstdio> // for std::sprintf
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers::math;
+using namespace universalis::stdlib;
 
 CMachineParameter const paraGain = {"Input Gain","Input Gain",0,128,MPF_STATE, 0};
 CMachineParameter const paraThreshold = {"Threshold","Threshold",0,128,MPF_STATE,64};
@@ -59,7 +61,7 @@ class mi : public CMachineInterface {
 		float currentGain;
 		//float targetGain;
 		//float gainStep;
-		std::int32_t currentSR;
+		int32_t currentSR;
 		//enum action { none, actAttack, actRelease} currentAction;
 	
 };

@@ -6,6 +6,8 @@
 #include <psycle/helpers/math.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 #include <universalis/os/thread_name.hpp>
+#include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <boost/bind.hpp>
 #include <stdexcept>
 
@@ -14,6 +16,7 @@ namespace psycle { namespace audiodrivers {
 namespace loggers = universalis::os::loggers;
 using universalis::exceptions::runtime_error;
 using universalis::os::exceptions::desc;
+using namespace universalis::stdlib;
 using namespace helpers::math;
 
 AudioDriverInfo MsDirectSound::info( ) const {
@@ -179,11 +182,11 @@ void MsDirectSound::thread_function() {
 			}
 			if(high_mark_ < low_mark_) {
 				if(pos >= low_mark_ || pos < high_mark_) {
-					this_thread::sleep(milliseconds(1)); //this_thread::yield();
+					this_thread::sleep_for(chrono::milliseconds(1)); //this_thread::yield();
 					continue;
 				}
 			} else if(pos >= low_mark_ && pos < high_mark_) {
-				this_thread::sleep(milliseconds(1)); //this_thread::yield();
+				this_thread::sleep_for(chrono::milliseconds(1)); //this_thread::yield();
 				continue;
 			}
 			break;
@@ -215,7 +218,7 @@ void MsDirectSound::thread_function() {
 				);
 				if(result == DSERR_BUFFERLOST) {
 					// application lost focus. retry periodically.
-					this_thread::sleep(milliseconds(500));
+					this_thread::sleep_for(chrono::milliseconds(500));
 					// check whether the thread has been asked to terminate
 					{
 						scoped_lock lock(mutex_);
@@ -489,7 +492,7 @@ void MsDirectSound::GetCapturePorts(std::vector<std::string> & ports) {
 	for(unsigned int i = 0;i < cap_enums_.size(); ++i) ports.push_back(cap_enums_[i].port_name_);
 }
 
-void MsDirectSound::AddCapturePort(std::uint32_t idx) {
+void MsDirectSound::AddCapturePort(uint32_t idx) {
 	if(idx >= cap_enums_.size()) return; // throw exception?
 	
 	for(unsigned int i = 0; i < cap_ports_.size(); ++i)
@@ -508,7 +511,7 @@ void MsDirectSound::AddCapturePort(std::uint32_t idx) {
 	set_started(was_started);
 }
 
-void MsDirectSound::RemoveCapturePort(std::uint32_t idx) {
+void MsDirectSound::RemoveCapturePort(uint32_t idx) {
 	if(idx >= cap_enums_.size()) return; // throw exception?
 	
 	bool was_started(started());

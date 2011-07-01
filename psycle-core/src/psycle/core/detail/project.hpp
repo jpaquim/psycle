@@ -10,6 +10,10 @@
 #include <psycle/core/detail/config.hpp>
 #include <universalis.hpp>
 
+namespace psycle { namespace core {
+
+using namespace universalis::stdlib;
+
 #ifndef DIVERSALIS__COMPILER__RESOURCE
 	#ifdef PSYCLE__CORE__SHARED
 		#ifdef PSYCLE__CORE__SOURCE
@@ -25,5 +29,7 @@
 		#pragma comment(lib, "psycle-core")
 	#endif
 #endif
+
+}}
 
 #endif

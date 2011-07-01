@@ -11,7 +11,7 @@
 	#include <cstring>
 	#include <unistd.h>
 #elif defined DIVERSALIS__OS__MICROSOFT
-	#include "include_windows_without_crap.hpp"
+	#include <universalis/os/include_windows_without_crap.hpp>
 	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#pragma comment(lib, "kernel32") // win64?
 	#endif

@@ -19,14 +19,16 @@
 
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
+#include <universalis/stdlib/cstdint.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers::math;
+using namespace universalis::stdlib;
 
-std::uint32_t const LFO_SKIP_SAMPLES = 30;
+uint32_t const LFO_SKIP_SAMPLES = 30;
 
 #ifndef M_PI
 	#define M_PI 3.14159265359f
@@ -227,7 +229,7 @@ inline void mi::RecalcFilter( const float depth_mul_1_minus_freqofs )
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples_in, int tracks)
 {
-	std::uint32_t numsamples = static_cast<std::uint32_t>(numsamples_in);
+	uint32_t numsamples = static_cast<uint32_t>(numsamples_in);
 	const float depth_mul_1_minus_freqofs = depth * (1.f - freqofs) * .5f;
 
 	if (skipcount == 0) {
@@ -236,7 +238,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples_in, int
 	do {
 		const float recip_l = a0_l / (a0_l * a0_r);
 		const float recip_r = a0_r / (a0_l * a0_r);
-		std::uint32_t cont = std::min(LFO_SKIP_SAMPLES - (skipcount % LFO_SKIP_SAMPLES), numsamples);
+		uint32_t cont = std::min(LFO_SKIP_SAMPLES - (skipcount % LFO_SKIP_SAMPLES), numsamples);
 		skipcount+=cont;
 		numsamples-=cont;
 		while (cont--) {

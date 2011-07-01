@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CInfoDlg.
 #pragma once
 #include "Psycle.hpp"
-#include <universalis/stdlib/date_time.hpp>
+#include <psycle/core/cpu_time_clock.hpp>
 
 namespace psycle { namespace host {
 
@@ -36,7 +36,7 @@ class CInfoDlg : public CDialog {
 		CListCtrl machlist_;
 
 		unsigned int item_count_;
-		nanoseconds last_update_time_;
+		core::wall_time_clock::time_point last_update_time_;
 		ProjectData* projects_;
 };
 

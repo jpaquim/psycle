@@ -51,13 +51,13 @@
 namespace psycle { namespace helpers { namespace dsp {
 
 /// the array for the state vector
-std::uint32_t MersenneTwister::mt[N];
+uint32_t MersenneTwister::mt[N];
 
 /// mti == N + 1 means mt[N] is not initialized
-std::int32_t MersenneTwister::mti = N + 1;
+int32_t MersenneTwister::mti = N + 1;
 
 /// initializes mt[N] with a seed
-void MersenneTwister::init_genrand(std::uint32_t s) {
+void MersenneTwister::init_genrand(uint32_t s) {
 	mt[0] = s & 0xffffffffU;
 	for(mti = 1; mti < N; ++mti) {
 		mt[mti] = 1812433253 * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti;
@@ -73,7 +73,7 @@ void MersenneTwister::init_genrand(std::uint32_t s) {
 /// initialize by an array with array-length.
 /// init_key is the array for initializing keys,
 /// key_length is its length
-void MersenneTwister::init_by_array(std::uint32_t init_key[], std::size_t key_length) {
+void MersenneTwister::init_by_array(uint32_t init_key[], std::size_t key_length) {
 	std::size_t i, j, k;
 	init_genrand(19650218);
 	i = 1; j = 0;
@@ -96,13 +96,13 @@ void MersenneTwister::init_by_array(std::uint32_t init_key[], std::size_t key_le
 }
 
 /// generates a random number on [0,0xffffffff]-interval
-std::uint32_t MersenneTwister::genrand_int32() {
-	std::uint32_t y;
-	static std::uint32_t mag01[2] = { 0, MATRIX_A };
+uint32_t MersenneTwister::genrand_int32() {
+	uint32_t y;
+	static uint32_t mag01[2] = { 0, MATRIX_A };
 	// mag01[x] = x * MATRIX_A  for x = 0, 1
 
 	if(mti >= N) { // generate N words at one time
-		std::int32_t kk;
+		int32_t kk;
 
 		if(mti == N + 1) // if init_genrand() has not been called,
 			init_genrand(5489); // a default initial seed is used
@@ -133,8 +133,8 @@ std::uint32_t MersenneTwister::genrand_int32() {
 }
 
 /// generates a random number on [0, 0x7fffffff] interval
-std::int32_t MersenneTwister::genrand_int31() {
-	return static_cast<std::int32_t>(genrand_int32() >> 1);
+int32_t MersenneTwister::genrand_int31() {
+	return static_cast<int32_t>(genrand_int32() >> 1);
 }
 
 /// generates a random number on [0, 1] real interval
@@ -157,7 +157,7 @@ double MersenneTwister::genrand_real3() {
 
 /// generates a random number on [0, 1) with 53-bit resolution
 double MersenneTwister::genrand_res53() { 
-	std::uint32_t a = genrand_int32() >> 5, b = genrand_int32() >> 6; 
+	uint32_t a = genrand_int32() >> 5, b = genrand_int32() >> 6; 
 	return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
 } 
 

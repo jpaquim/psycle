@@ -120,7 +120,7 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 
 				void thread_function(tls * const tls_pointer) {
 					tls & tls(*tls_pointer);
-					--shared_start; ///\todo doesn't look rihgt!
+					--shared_start; ///\todo doesn't look right!
 					while(!atomic_compare_and_swap(shared_start, 0, 0));
 					while(tls.count < end) {
 						clock::time_point const t0(clock::now());

@@ -11,7 +11,7 @@
 
 namespace psycle { namespace helpers { namespace dsp {
 
-#define TPI 6.28318530717958647692528676655901
+const double TPI = 6.28318530717958647692528676655901;
 
 enum FilterType {
 	F_LOWPASS12 = 0,

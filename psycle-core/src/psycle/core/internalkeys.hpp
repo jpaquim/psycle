@@ -28,7 +28,7 @@ namespace InternalMacs {
 	};
 }
 namespace InternalKeys {
-	static const MachineKey invalid(Hosts::INTERNAL,"<invalid>", std::uint32_t(-1));
+	static const MachineKey invalid(Hosts::INTERNAL,"<invalid>", uint32_t(-1));
 	static const MachineKey master(Hosts::INTERNAL,"<master>", InternalMacs::MASTER);
 	static const MachineKey dummy(Hosts::INTERNAL,"<dummy>", InternalMacs::DUMMY);
 	static const MachineKey sampler(Hosts::INTERNAL,"<sampler>", InternalMacs::SAMPLER );

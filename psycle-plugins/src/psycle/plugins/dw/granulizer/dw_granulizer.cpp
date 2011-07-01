@@ -613,7 +613,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 							return true;
 							
 		case PRM_OUTGAIN:				if(value!=0)
-								sprintf(txt, "%i%% (%.2f dB)", (int)value, 20 * std::log10(value / GAIN_NORM));
+								sprintf(txt, "%i%% (%.2f dB)", (int)value, 20 * std::log10(value / (float) GAIN_NORM));
 							else
 								sprintf(txt,"-inf.");
 							return true;

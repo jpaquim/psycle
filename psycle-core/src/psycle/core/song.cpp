@@ -293,13 +293,13 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 		int16_t * csamples;
 		uint32_t const Datalen(_pInstrument[instrument]->waveLength);
 		_pInstrument[instrument]->waveStereo = false;
-		_pInstrument[instrument]->waveDataL = new std::int16_t[Datalen];
+		_pInstrument[instrument]->waveDataL = new int16_t[Datalen];
 		csamples = _pInstrument[instrument]->waveDataL;
 		if(bits == 16) for(unsigned int smp(0) ; smp < Datalen; ++smp) {
 			file.ReadBE(*csamples);
 			++csamples;
 		} else for(unsigned int smp(0) ; smp < Datalen; ++smp) {
-			std::int8_t tmp;
+			int8_t tmp;
 			file.Read(tmp);
 			*csamples = tmp * 0x101;
 			++csamples;
@@ -312,9 +312,9 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 bool CoreSong::WavAlloc(Instrument::id_type iInstr, bool bStereo, int32_t iSamplesPerChan, const char * pathToWav) {
 	assert(iSamplesPerChan < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 	DeleteLayer(iInstr);
-	_pInstrument[iInstr]->waveDataL = new std::int16_t[iSamplesPerChan];
+	_pInstrument[iInstr]->waveDataL = new int16_t[iSamplesPerChan];
 	if(bStereo) {
-		_pInstrument[iInstr]->waveDataR = new std::int16_t[iSamplesPerChan];
+		_pInstrument[iInstr]->waveDataR = new int16_t[iSamplesPerChan];
 		_pInstrument[iInstr]->waveStereo = true;
 	} else _pInstrument[iInstr]->waveStereo = false;
 	_pInstrument[iInstr]->waveLength = iSamplesPerChan;
@@ -354,21 +354,21 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 	// sample type
 	int st_type(file.NumChannels());
 	int bits(file.BitsPerSample());
-	std::uint32_t Datalen(file.NumSamples());
+	uint32_t Datalen(file.NumSamples());
 
 	// Initializes the layer.
 	WavAlloc(instrument, st_type == 2, Datalen, pathToWav);
 	// Reading of Wave data.
 	// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 	// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-	std::int16_t * sampL(_pInstrument[instrument]->waveDataL);
+	int16_t * sampL(_pInstrument[instrument]->waveDataL);
 
 	///\todo use template code for all this semi-repetitive code.
 
-	std::uint32_t io; /// \todo why is this declared here?
+	uint32_t io; /// \todo why is this declared here?
 	// mono
 	if(st_type == 1) {
-		std::uint8_t smp8;
+		uint8_t smp8;
 		switch(bits) {
 			case 8:
 				for(io = 0 ; io < Datalen ; ++io) {
@@ -393,8 +393,8 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 	}
 	// stereo
 	else {
-		std::int16_t *sampR(_pInstrument[instrument]->waveDataR);
-		std::uint8_t smp8;
+		int16_t *sampR(_pInstrument[instrument]->waveDataR);
+		uint8_t smp8;
 		switch(bits) {
 			case 8:
 				for(io = 0 ; io < Datalen ; ++io) {
@@ -436,8 +436,8 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 			file.Read(pl);
 			if(pl == 1) {
 				file.Skip(15);
-				std::uint32_t ls; file.Read(ls);
-				std::uint32_t le; file.Read(le);
+				uint32_t ls; file.Read(ls);
+				uint32_t le; file.Read(le);
 				_pInstrument[instrument]->waveLoopStart = ls;
 				_pInstrument[instrument]->waveLoopEnd = le;
 				// only for my bad sample collection
@@ -481,13 +481,13 @@ bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/
 			return false;
 
 		file.WriteChunk("INSD",4);
-		std::uint32_t version = CURRENT_FILE_VERSION_INSD;
+		uint32_t version = CURRENT_FILE_VERSION_INSD;
 		file.Write(version);
 		std::fpos_t pos = file.GetPos();
-		std::uint32_t size = 0;
+		uint32_t size = 0;
 		file.Write(size);
 
-		std::uint32_t index = dst; // index
+		uint32_t index = dst; // index
 		file.Write(index);
 
 		_pInstrument[src]->SaveFileChunk(&file);

@@ -293,7 +293,7 @@ using namespace helpers;
 		
 		bool LADSPAMachine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size=0;
+			uint32_t size=0;
 			pFile->Read(size); // size of whole structure
 			if(size)
 			{
@@ -308,7 +308,7 @@ using namespace helpers;
 				}
 				else
 				{
-					std::uint32_t count=0;
+					uint32_t count=0;
 					pFile->Read(count);  // size of vars
 					for(unsigned int i(0) ; i < count ; ++i)
 					{
@@ -323,8 +323,8 @@ using namespace helpers;
 		
 		void LADSPAMachine::SaveSpecificChunk(RiffFile* pFile) const
 		{
-			std::uint32_t count = GetNumParams();
-			std::uint32_t size = sizeof count  + sizeof(std::uint32_t) * count;
+			uint32_t count = GetNumParams();
+			uint32_t size = sizeof count  + sizeof(uint32_t) * count;
 			pFile->Write(size);
 			pFile->Write(count);
 			for(unsigned int i(0) ; i < count ; ++i) {

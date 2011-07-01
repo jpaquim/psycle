@@ -18,31 +18,29 @@
 #include "datacompression.hpp"
 #include <cstring>
 
-namespace psycle
-{
-	namespace helpers
-	{
-		std::uint8_t const MIN_REDUNDANT_BYTES_2 = 3;
+namespace psycle { namespace helpers {
+
+		uint8_t const MIN_REDUNDANT_BYTES_2 = 3;
 		#define ReadLittleEndian32(ptr) ((ptr[3]<<24)|(ptr[2]<<16)|(ptr[1]<<8)|(ptr[0]))
 
-		std::ptrdiff_t DataCompression::BEERZ77Comp2(std::uint8_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size)
+		std::ptrdiff_t DataCompression::BEERZ77Comp2(uint8_t const * pSource, uint8_t ** pDestination, std::size_t const & size)
 		{
 			// remember to delete your destination when done
 			if (pSource)
 			{
-				std::uint8_t * pDestPos = *pDestination = new std::uint8_t[size * 9 / 8 + 5]; // worst case
+				uint8_t * pDestPos = *pDestination = new uint8_t[size * 9 / 8 + 5]; // worst case
 				std::memset(pDestPos, 0, size * 9 / 8 + 5);
-				*pDestPos++ = static_cast<std::uint8_t>(0x04); // file version
-				*pDestPos++ = static_cast<std::uint8_t>((size      ) & 0xff);
-				*pDestPos++ = static_cast<std::uint8_t>((size >>  8) & 0xff);
-				*pDestPos++ = static_cast<std::uint8_t>((size >> 16) & 0xff);
-				*pDestPos++ = static_cast<std::uint8_t>((size >> 24) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>(0x04); // file version
+				*pDestPos++ = static_cast<uint8_t>((size      ) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>((size >>  8) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>((size >> 16) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>((size >> 24) & 0xff);
 
 				// we will compress pSource into pDest
-				std::uint8_t const * pSlidingWindow = pSource;
-				std::uint8_t const * pCurrentPos = pSource;
-				std::uint8_t const * pTestPos;
-				std::uint8_t       * pUncompressedCounter(0);
+				uint8_t const * pSlidingWindow = pSource;
+				uint8_t const * pCurrentPos = pSource;
+				uint8_t const * pTestPos;
+				uint8_t       * pUncompressedCounter(0);
 
 				while (pCurrentPos < pSource+size)
 				{
@@ -55,7 +53,7 @@ namespace psycle
 					}
 
 					// check our current position against our sliding window
-					std::uint8_t const * pBestMatch = pCurrentPos;
+					uint8_t const * pBestMatch = pCurrentPos;
 					int BestMatchLength = 0;
 
 					// now to find the best match in our string
@@ -65,8 +63,8 @@ namespace psycle
 						if (*pTestPos == *pCurrentPos)
 						{
 							// set our pointers
-							std::uint8_t const * pMatchPosEnd = pCurrentPos;
-							std::uint8_t const * pMatchPosStart;
+							uint8_t const * pMatchPosEnd = pCurrentPos;
+							uint8_t const * pMatchPosStart;
 							for (pMatchPosStart = pTestPos; pMatchPosStart < pTestPos+255+MIN_REDUNDANT_BYTES_2; pMatchPosStart++)
 							{
 								// check for pointer overflow
@@ -112,7 +110,7 @@ namespace psycle
 						// first, our LENGTH
 						*pDestPos++ = (BestMatchLength - MIN_REDUNDANT_BYTES_2);
 						// second, our OFFSET
-						std::uint16_t Output = (pCurrentPos - pBestMatch);
+						uint16_t Output = (pCurrentPos - pBestMatch);
 						*pDestPos++ = Output&0xff;
 						// update the pointer
 						pCurrentPos += BestMatchLength;
@@ -154,7 +152,7 @@ namespace psycle
 			return -1;
 		}
 
-		bool DataCompression::BEERZ77Decomp2(std::uint8_t const * pSourcePos, std::uint8_t ** pDestination)
+		bool DataCompression::BEERZ77Decomp2(uint8_t const * pSourcePos, uint8_t ** pDestination)
 		{
 			// remember to delete your destination when done
 			if (pSourcePos) 
@@ -169,7 +167,7 @@ namespace psycle
 
 					//ok, now we can start decompressing
 					uint8_t* pWindowPos;
-					uint8_t* pDestPos = *pDestination = new std::uint8_t[FileSize];
+					uint8_t* pDestPos = *pDestination = new uint8_t[FileSize];
 
 					uint16_t Offset;
 					uint16_t Length;
@@ -206,23 +204,23 @@ namespace psycle
 		//
 		/////////////////////////////
 
-		std::ptrdiff_t DataCompression::SoundSquash(std::int16_t const * pSource, std::uint8_t ** pDestination, std::size_t const & size_)
+		std::ptrdiff_t DataCompression::SoundSquash(int16_t const * pSource, uint8_t ** pDestination, std::size_t const & size_)
 		{
 			std::size_t size(size_);
 			if (pSource)
 			{
-				std::uint8_t * pDestPos = *pDestination = new std::uint8_t[size * 12 / 4 + 5]; // worst case ; remember we use words of 2 bytes
+				uint8_t * pDestPos = *pDestination = new uint8_t[size * 12 / 4 + 5]; // worst case ; remember we use words of 2 bytes
 
 				std::memset(pDestPos, 0, size * 12 / 4 + 5);
-				*pDestPos++ = static_cast<std::uint8_t>(0x01); // file version
-				*pDestPos++ = static_cast<std::uint8_t>((size      ) & 0xff);
-				*pDestPos++ = static_cast<std::uint8_t>((size >>  8) & 0xff);
-				*pDestPos++ = static_cast<std::uint8_t>((size >> 16) & 0xff);
-				*pDestPos++ = static_cast<std::uint8_t>((size >> 24) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>(0x01); // file version
+				*pDestPos++ = static_cast<uint8_t>((size      ) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>((size >>  8) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>((size >> 16) & 0xff);
+				*pDestPos++ = static_cast<uint8_t>((size >> 24) & 0xff);
 
 				// init predictor
-				std::int16_t prevprev = 0;
-				std::int16_t prev = 0;
+				int16_t prevprev = 0;
+				int16_t prev = 0;
 				// init bitpos for encoder
 				int bitpos = 0;
 
@@ -230,8 +228,8 @@ namespace psycle
 				{
 					// predict that this sample should be last sample + (last sample - previous last sample)
 					// and calculate the deviation from that as our error value to store
-					std::int16_t t = *pSource++;
-					std::int16_t error = (t - (prev+(prev-prevprev))) & 0xFFFF;
+					int16_t t = *pSource++;
+					int16_t error = (t - (prev+(prev-prevprev))) & 0xFFFF;
 					// shuffle our previous values for next value
 					prevprev = prev;
 					prev = t;
@@ -458,14 +456,14 @@ namespace psycle
 			return -1;
 		}
 
-		bool DataCompression::SoundDesquash(std::uint8_t const * pSourcePos, std::int16_t ** pDestination)
+		bool DataCompression::SoundDesquash(uint8_t const * pSourcePos, int16_t ** pDestination)
 		{
 			// check validity of data
 			if (pSourcePos) 
 			{
 				if (*pSourcePos++ == 0x01) // version 1 is pretty simple
 				{
-					const std::int16_t mask[16] = {
+					const int16_t mask[16] = {
 						0x0000,
 						0x0001,
 						0x0003,
@@ -489,11 +487,11 @@ namespace psycle
 
 					pSourcePos+=4;
 					//ok, now we can start decompressing
-					std::int16_t* pDestPos = *pDestination = new std::int16_t[FileSize];
+					int16_t* pDestPos = *pDestination = new int16_t[FileSize];
 
 					// init our predictor
-					std::int16_t prevprev = 0;
-					std::int16_t prev = 0;
+					int16_t prevprev = 0;
+					int16_t prev = 0;
 					// bit counter for decoder
 					int bitpos = 0;
 
@@ -502,7 +500,7 @@ namespace psycle
 				// read a full uint32_t because that is 32 bits.  in our worst case we will need
 						// 7+5+15 bits, 27, which is easily contained in 32 bits.
 
-				std::uint32_t bits = (std::uint32_t)ReadLittleEndian32(pSourcePos);
+				uint32_t bits = (uint32_t)ReadLittleEndian32(pSourcePos);
 				// note, we do not increment pSourcePos.
 
 						// now shift for our bit position to get the next bit we require
@@ -511,25 +509,25 @@ namespace psycle
 						// low 4 bits are number of valid bits count
 						int numbits =bits & 0x0f;
 						// next bit is the sign flag
-						std::uint32_t sign = bits & 0x010;
+						uint32_t sign = bits & 0x010;
 						// the remaining bits are our value
 						bits>>=5;
 
 						// mask out only the bits that are relevant
-						std::int16_t error = static_cast<std::int16_t>(bits & mask[numbits]);
+						int16_t error = static_cast<int16_t>(bits & mask[numbits]);
 
 						// check for negative values
 						if (sign)
 						{
 							// we need to convert to negative
-							std::int16_t error2 = (0xffff << numbits) & 0xffff;
+							int16_t error2 = (0xffff << numbits) & 0xffff;
 							error = error | error2;
 						}
 
 						// and then apply our error value to the prediction
 						// sample = last + (last - prev last)
 
-						std::int16_t t = (prev+(prev-prevprev))+error & 0xffff;
+						int16_t t = (prev+(prev-prevprev))+error & 0xffff;
 						// store our sample
 						*pDestPos++ = t;
 						// shuffle our previous values for next value
@@ -553,5 +551,4 @@ namespace psycle
 			}
 			return false;
 		}
-	}
-}
+}}

@@ -51,16 +51,18 @@
 #include <cstddef>
 namespace psycle { namespace helpers { namespace dsp {
 
+using namespace universalis::stdlib;
+
 /// Period parameters
-std::int32_t const N = 624;
+int32_t const N = 624;
 /// Period parameters
-std::int32_t const M = 397;
+int32_t const M = 397;
 /// constant vector a
-std::uint32_t const MATRIX_A = 0x9908b0dfU;
+uint32_t const MATRIX_A = 0x9908b0dfU;
 /// most significant w-r bits
-std::uint32_t const UPPER_MASK = 0x80000000U;
+uint32_t const UPPER_MASK = 0x80000000U;
 /// least significant r bits
-std::uint32_t const LOWER_MASK = 0x7fffffffU;
+uint32_t const LOWER_MASK = 0x7fffffffU;
 
 /// mt19937 pseudo-random number generator
 class MersenneTwister {
@@ -69,16 +71,16 @@ public:
 	virtual ~MersenneTwister() {}
 
 	/// initializes mt[N] with a seed
-	void init_genrand(std::uint32_t s);
+	void init_genrand(uint32_t s);
 
 	/// initialize by an array with array-length
-	void init_by_array(std::uint32_t init_key[], std::size_t key_length);
+	void init_by_array(uint32_t init_key[], std::size_t key_length);
 
 	/// generates a random number on [0,0xffffffff]-interval
-	std::uint32_t genrand_int32();
+	uint32_t genrand_int32();
 
 	/// generates a random number on [0,0x7fffffff]-interval
-	std::int32_t genrand_int31();
+	int32_t genrand_int31();
 
 	/// generates a random number on [0,1]-real-interval
 	double genrand_real1();
@@ -97,8 +99,8 @@ public:
 
 private:
 	/// the array for the state vector
-	static std::uint32_t mt[N];
-	static std::int32_t mti;
+	static uint32_t mt[N];
+	static int32_t mti;
 };
 
 }}}

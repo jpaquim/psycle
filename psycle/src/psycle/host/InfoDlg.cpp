@@ -9,8 +9,8 @@
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/internalkeys.hpp>
-#include <psycle/core/cpu_time_clock.hpp>
 #include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/chrono.hpp>
 
 #if !defined NDEBUG
    #define new DEBUG_NEW
@@ -70,9 +70,11 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 
 	char buffer[128];
 	
-	nanoseconds total_machine_processing_time(0);
-	nanoseconds const now = core::wall_time_clock();
-	nanoseconds const real_time_duration = now - last_update_time_;
+	chrono::nanoseconds total_machine_processing_time = 0;
+	core::wall_time_clock::time_point const now = core::wall_time_clock::now();
+	std::size_t threads = Player::singleton().num_threads();
+	if(!threads) threads = 1; // Beware: when not using multithreading, Player::singleton().num_threads() is zero!
+	float const multicore_real_time_duration = chrono::nanoseconds(now - last_update_time_).count() * threads;
 
 	unsigned int i = 0;
 	for(unsigned int m(0); m < MAX_MACHINES; ++m) if(song.machine(m)) {
@@ -82,12 +84,12 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 		sprintf(buffer, "%d", machine._connectedInputs);
 		machlist_.SetItem(i, 3, LVIF_TEXT, buffer, 0, 0, 0, 0);
 
-		// OutPut numbers
+		// Output numbers
 		sprintf(buffer, "%d", machine._connectedOutputs);
 		machlist_.SetItem(i, 4, LVIF_TEXT, buffer, 0, 0, 0, 0);
 
 		{ // processing cpu percent
-			float const percent = 100.0f * machine.accumulated_processing_time().get_count() / (real_time_duration.get_count() *Player::singleton().num_threads());
+			float const percent = 100.0f * chrono::nanoseconds(machine.accumulated_processing_time()).count() / multicore_real_time_duration;
 			sprintf(buffer, "%.1f%%", percent);
 			machlist_.SetItem(i, 5, LVIF_TEXT, buffer, 0, 0, 0, 0);
 		}
@@ -103,19 +105,19 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 	if(item_count_ != i) UpdateInfo();
 	
 	{ // total cpu percent (counts everything, not just machine processing + routing)
-		float const percent = 100.0f * song.accumulated_processing_time().get_count() / (real_time_duration.get_count() *Player::singleton().num_threads());
+		float const percent = 100.0f * chrono::nanoseconds(song.accumulated_processing_time()).count() / multicore_real_time_duration;
 		sprintf(buffer, "%.1f%%", percent);
 		cpuidlelabel_.SetWindowText(buffer);
 	}
 	
 	{ // total machine processing cpu percent
-		float const percent = 100.0f * total_machine_processing_time.get_count() / (real_time_duration.get_count() *Player::singleton().num_threads());
+		float const percent = 100.0f * total_machine_processing_time.count() / multicore_real_time_duration;
 		sprintf(buffer, "%.1f%%", percent);
 		machscpu_.SetWindowText(buffer);
 	}
 
 	{ // routing cpu percent
-		float const percent = 100.0f * song.accumulated_routing_time().get_count() / (real_time_duration.get_count() *Player::singleton().num_threads());
+		float const percent = 100.0f * chrono::nanoseconds(song.accumulated_routing_time()).count() / multicore_real_time_duration;
 		sprintf(buffer, "%.1f%%", percent);
 		cpurout_.SetWindowText(buffer);
 	}
@@ -125,8 +127,8 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 		// the real frequency in some cases. This has to be worked out.
 		LARGE_INTEGER frequency;
 		if(!::QueryPerformanceFrequency(&frequency)) strcpy(buffer, "unsupported");
-		if(frequency.QuadPart / 1000000 < 10) sprintf(buffer, "%d threads", Player::singleton().num_threads());
-		else sprintf(buffer, "%dx%d MHz", Player::singleton().num_threads(), frequency.QuadPart / 1000000);
+		if(frequency.QuadPart / 1000000 < 10) sprintf(buffer, "%d threads", threads);
+		else sprintf(buffer, "%dx%d MHz", threads, frequency.QuadPart / 1000000);
 		processor_label_.SetWindowText(buffer);
 	}
 

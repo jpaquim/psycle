@@ -81,8 +81,8 @@ struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fal
 			#endif
 			measure_clock_resolution<utc_since_epoch>();
 			measure_clock_resolution<monotonic>();
-			measure_clock_resolution<process>();
-			measure_clock_resolution<thread>();
+			measure_clock_resolution<process>(10);
+			measure_clock_resolution<thread>(10);
 			measure_clock_resolution<hires_thread_or_fallback>();
 		}
 	}}}}

@@ -50,7 +50,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 				int numParameters;
 				riff.Read(numParameters);
 				if(plug.proxy()()) {
-					std::int32_t * Vals = new std::int32_t[numParameters];
+					int32_t * Vals = new int32_t[numParameters];
 					riff.ReadArray(Vals, numParameters);
 					try {
 						if(type == abass) {
@@ -113,7 +113,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 		riff.Skip(96); // ConnectionPoints, 12*8bytes
 		riff.Read(machine._connectedInputs);
 		riff.Read(machine._connectedOutputs);
-		std::int32_t panning;
+		int32_t panning;
 		riff.Read(panning);
 		machine.SetPan(panning);
 		riff.Skip(40); // skips shiatz
@@ -121,14 +121,14 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 			case delay:
 				{
 					const int nparams = 2;
-					std::int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
+					int32_t parameters [nparams]; riff.ReadArray(parameters,nparams);
 					retweak(machine, type, parameters, nparams, 5);
 				}
 				break;
 			case flanger:
 				{
 					const int nparams = 2;
-					std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+					int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
 					retweak(machine, type, parameters, nparams, 7);
 				}
 				break;
@@ -136,7 +136,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 				riff.Skip(4);
 				{
 					const int nparams = 1;
-					std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+					int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
 					/*if(type == gainer)*/ retweak(machine, type, parameters, nparams);
 				}
 				break;
@@ -147,7 +147,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 			case distortion:
 			{
 				const int nparams=4;
-				std::int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
+				int32_t parameters [nparams]; riff.ReadArray(parameters, nparams);
 				retweak(machine, type, parameters, nparams);
 				break;
 			}
@@ -158,7 +158,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 			case ring_modulator:
 				{
 					const int nparams=4;
-					std::uint8_t parameters [nparams];
+					uint8_t parameters [nparams];
 					riff.Read(parameters[0]);
 					riff.Read(parameters[1]);
 					riff.Skip(1);
@@ -172,7 +172,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 				riff.Skip(5);
 				{
 					const int nparams=4;
-					std::int32_t parameters [nparams];
+					int32_t parameters [nparams];
 					riff.Read(parameters[0]);
 					riff.Read(parameters[2]);
 					riff.Read(parameters[1]);
@@ -206,7 +206,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 				riff.Skip(21);
 				{
 					const int nparams=6;
-					std::int32_t parameters [nparams];
+					int32_t parameters [nparams];
 					riff.ReadArray(&parameters[1], nparams-1);
 					riff.Read(parameters[0]);
 					retweak(machine, type, parameters, nparams);

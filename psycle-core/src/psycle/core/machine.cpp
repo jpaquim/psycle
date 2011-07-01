@@ -778,7 +778,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 }
 
 bool Machine::LoadFileChunk(RiffFile* pFile,int version) {
-	std::uint32_t temp=0;
+	uint32_t temp=0;
 	pFile->Read(_bypass);
 	pFile->Read(_mute);
 	pFile->Read(_panning);
@@ -821,7 +821,7 @@ bool Machine::LoadSpecificChunk(RiffFile * pFile, int /*version*/) {
 		pFile->Read(temp);
 		SetParameter(i,temp);
 	}
-	pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
+	pFile->Skip(size - sizeof count - count * sizeof(uint32_t));
 	return true;
 }
 
@@ -848,12 +848,12 @@ void Machine::SaveFileChunk(RiffFile * pFile) const {
 }
 
 void Machine::SaveSpecificChunk(RiffFile * pFile) const {
-	std::uint32_t count = GetNumParams();
-	std::uint32_t const size(sizeof count  + count * sizeof(std::uint32_t));
+	uint32_t count = GetNumParams();
+	uint32_t const size(sizeof count  + count * sizeof(uint32_t));
 	pFile->Write(size);
 	pFile->Write(count);
 	for(unsigned int i(0); i < count; ++i) {
-		std::uint32_t temp = GetParamValue(i);
+		uint32_t temp = GetParamValue(i);
 		pFile->Write(temp);
 	}
 }

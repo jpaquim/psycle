@@ -1,13 +1,11 @@
 #include "riffwave.hpp"
 
-namespace psycle
-{
-	namespace helpers
-	{
-		RiffWave::RiffWave() {
-		}
-		RiffWave::~RiffWave() {
-		}
-	}
+namespace psycle { namespace helpers {
+
+RiffWave::RiffWave() {
 }
 
+RiffWave::~RiffWave() {
+}
+
+}}

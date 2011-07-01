@@ -13,6 +13,8 @@
 
 namespace psycle { namespace host {
 
+using namespace universalis::stdlib;
+
 void XMSongExport::exportsong(Song& song) {
 	lines_per_beat_ = ComputeLinesPerBeat(song);
 	writeSongHeader(song);
@@ -39,12 +41,12 @@ void XMSongExport::writeSongHeader(Song &song) {
 	WriteArray(XM_HEADER, 17);//ID text
 
 	std::ostringstream buf;
-	buf << "PE:" << std::setw(20) <<  std::left << song.name().substr(0,17);		
+	buf << "PE:" << std::setw(20) <<  std::left << song.name().substr(0, 17);		
 	WriteArray(buf.str().c_str(), 20);//Module name
-	std::uint8_t temp = 0x1A;
+	uint8_t temp = 0x1A;
 	Write(temp);							
 	WriteArray("FastTracker v2.00   ", 20);//Tracker name
-	std::uint16_t temp2 = 0x0104;
+	uint16_t temp2 = 0x0104;
 	Write(temp2);//Version number
 
 	std::memset(&m_Header, 0, sizeof m_Header);
@@ -248,7 +250,7 @@ void XMSongExport::SavePattern(Song& song, psycle::core::Pattern* pattern) {
 				if (bWriteParam) Write(param);
 			}
 		}
-		ptHeader.packedsize = static_cast<std::uint16_t>((GetPos() - currentpos) & 0xFFFF);
+		ptHeader.packedsize = static_cast<uint16_t>((GetPos() - currentpos) & 0xFFFF);
 		Seek(currentpos-sizeof(ptHeader));
 		WriteHeader(ptHeader);
 		Skip(ptHeader.packedsize);
@@ -402,7 +404,7 @@ void XMSongExport::SavePattern(Song & song, const int patIdx) {
 					
 				}
 			}
-			ptHeader.packedsize = static_cast<std::uint16_t>((GetPos() - currentpos) & 0xFFFF);
+			ptHeader.packedsize = static_cast<uint16_t>((GetPos() - currentpos) & 0xFFFF);
 			Seek(currentpos-sizeof(ptHeader));
 			Write(&ptHeader,sizeof(ptHeader));
 			Skip(ptHeader.packedsize);

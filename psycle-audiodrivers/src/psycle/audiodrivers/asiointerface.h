@@ -6,7 +6,7 @@
 #pragma once
 
 #include "audiodriver.h"
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 
 #include <universalis/os/include_windows_without_crap.hpp>
 
@@ -199,8 +199,8 @@ class ASIOInterface : public AudioDriver {
 		#endif
 
 		mutex mutex_;
-		typedef class scoped_lock<mutex> scoped_lock;
-		condition<scoped_lock> condition_;
+		typedef class unique_lock<mutex> scoped_lock;
+		condition_variable condition_;
 
 		bool _configured;
 		bool _running;

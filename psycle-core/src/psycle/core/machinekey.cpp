@@ -27,7 +27,7 @@ namespace psycle { namespace core {
 			index_(key.index())
 		{}
 
-		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, std::uint32_t index )
+		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, uint32_t index )
 		:
 			host_(host),
 			index_(index)
@@ -94,7 +94,7 @@ namespace psycle { namespace core {
 		const Hosts::type MachineKey::host() const { 
 			return host_;
 		}
-		std::uint32_t MachineKey::index() const {
+		uint32_t MachineKey::index() const {
 			return index_;
 		}
 }}

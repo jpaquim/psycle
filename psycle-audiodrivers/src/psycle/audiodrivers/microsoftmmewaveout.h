@@ -74,7 +74,7 @@ class MsWaveOut : public AudioDriver {
 		/*override*/ void WriteConfig();
 
 	private:
-		std::int16_t *buf;
+		int16_t *buf;
 		// mme variables
 		HWAVEOUT hWaveOut;   // device handle
 		static CRITICAL_SECTION waveCriticalSection;

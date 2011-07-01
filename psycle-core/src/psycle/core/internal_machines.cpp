@@ -53,7 +53,7 @@ int Dummy::GenerateAudio(int numSamples) {
 // its "LoadSpecificChunk" skips the data of the chunk so that the
 // song loader can continue the sequence.
 bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version) {
-	std::uint32_t size=0;
+	uint32_t size=0;
 	pFile->Read(size); // size of this part params to load
 	pFile->Skip(size);
 	return true;
@@ -143,7 +143,7 @@ void DuplicatorMac::Tick( int channel, const PatternEvent & data ) {
 					int note = pTemp.note()+noteOffset[i];
 					if ( note>=notetypes::release) note=notetypes::b9;
 					else if (note<0 ) note=0;
-					pTemp.setNote(static_cast<std::uint8_t>(note));
+					pTemp.setNote(static_cast<uint8_t>(note));
 				}
 				// this can happen if the parameter is the machine itself.
 				if (callbacks->song().machine(macOutput[i]) != this) 
@@ -291,7 +291,7 @@ int DuplicatorMac::GenerateAudio( int numSamples ) {
 }
 
 bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
-	std::uint32_t size;
+	uint32_t size;
 	pFile->Read(size);
 	pFile->ReadArray(macOutput,NUM_MACHINES);
 	pFile->ReadArray(noteOffset,NUM_MACHINES);
@@ -299,7 +299,7 @@ bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
 }
 
 void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile) const {
-	std::uint32_t const size(sizeof macOutput + sizeof noteOffset);
+	uint32_t const size(sizeof macOutput + sizeof noteOffset);
 	pFile->Write(size);
 	pFile->WriteArray(macOutput,NUM_MACHINES);
 	pFile->WriteArray(noteOffset,NUM_MACHINES);
@@ -447,7 +447,7 @@ int Master::GenerateAudio( int numSamples ) {
 }
 
 bool Master::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
-	std::uint32_t size;
+	uint32_t size;
 	pFile->Read(size);
 	pFile->Read(_outDry);
 	pFile->Read(decreaseOnClip);
@@ -455,7 +455,7 @@ bool Master::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
 }
 
 void Master::SaveSpecificChunk(RiffFile* pFile) const {
-	std::uint32_t const size(sizeof _outDry + sizeof decreaseOnClip);
+	uint32_t const size(sizeof _outDry + sizeof decreaseOnClip);
 	pFile->Write(size);
 	pFile->Write(_outDry);
 	pFile->Write(decreaseOnClip);
@@ -538,7 +538,7 @@ int AudioRecorder::GenerateAudio(int numSamples)
 
 bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 {
-	std::uint32_t size;
+	uint32_t size;
 	pFile->Read(size); // size of this part params to load
 	pFile->Read(_captureidx);
 	pFile->Read(_gainvol);
@@ -546,7 +546,7 @@ bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 }
 void AudioRecorder::SaveSpecificChunk(RiffFile * pFile) const
 {
-	std::uint32_t size = sizeof _captureidx+ sizeof _gainvol;
+	uint32_t size = sizeof _captureidx+ sizeof _gainvol;
 	pFile->Write(size); // size of this part params to save
 	pFile->Write(_captureidx);
 	pFile->Write(_gainvol);
@@ -869,7 +869,7 @@ int LFO::GenerateAudio( int numSamples )
 
 bool LFO::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 {
-	std::uint32_t size;
+	uint32_t size;
 	pFile->Read(size);
 	pFile->Read(waveform);
 	pFile->Read(lSpeed);
@@ -882,7 +882,7 @@ bool LFO::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 
 void LFO::SaveSpecificChunk(RiffFile* pFile) const
 {
-	std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
+	uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
 	pFile->Write(size);
 	pFile->Write(waveform);
 	pFile->Write(lSpeed);
