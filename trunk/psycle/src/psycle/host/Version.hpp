@@ -24,11 +24,11 @@
 #define PSYCLE__TAR_NAME "psycle"
 #define PSYCLE__NAME "Psycle Modular Music Creation Studio"
 #define PSYCLE__BRANCH "Psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright 2000-2010 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
+#define PSYCLE__COPYRIGHT "Copyright 2000-2011 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
 #define PSYCLE__LICENSE "Some parts GPL, others public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 9
+#define PSYCLE__VERSION__PATCH 10
 #define PSYCLE__VERSION__QUALITY "alpha"
 #define PSYCLE__VERSION__SOURCE_REVISION "Subversion $Revision$" // $Date$
 #define PSYCLE__VERSION__SOURCE_URL "Subversion $URL$"

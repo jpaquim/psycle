@@ -54,8 +54,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vst2.x/aeffectx.h>
 #include <vst2.x/vstfxstore.h>
 
-namespace seib {
-	namespace vst {
+namespace seib { namespace vst {
+
 		/*! hostCanDos strings Plug-in -> Host */
 		namespace HostCanDos
 		{
@@ -318,39 +318,37 @@ namespace seib {
 
 			bool loadLibrary (const char* fileName)
 			{
-			#if defined _WIN64 || defined _WIN32
-				module = LoadLibrary (fileName);
-				sFileName = new char[strlen(fileName) + 1];
-				if (sFileName)
-					strcpy((char*)sFileName, fileName);
-			#elif TARGET_API_MAC_CARBON
-				CFStringRef fileNameString = CFStringCreateWithCString (NULL, fileName, kCFStringEncodingUTF8);
-				if (fileNameString == 0)
-					return false;
-				CFURLRef url = CFURLCreateWithFileSystemPath (NULL, fileNameString, kCFURLPOSIXPathStyle, false);
-				CFRelease (fileNameString);
-				if (url == 0)
-					return false;
-				module = CFBundleCreate (NULL, url);
-				CFRelease (url);
-				if (module && CFBundleLoadExecutable ((CFBundleRef)module) == false)
-					return false;
-			#endif
+				#if defined DIVERSALIS__OS__MICROSOFT
+					module = LoadLibrary (fileName);
+					sFileName = new char[std::strlen(fileName) + 1];
+					if (sFileName) std::strcpy((char*)sFileName, fileName);
+				#elif defined DIVERSALIS__OS__APPLE
+					CFStringRef fileNameString = CFStringCreateWithCString (NULL, fileName, kCFStringEncodingUTF8);
+					if(fileNameString == 0) return false;
+					CFURLRef url = CFURLCreateWithFileSystemPath (NULL, fileNameString, kCFURLPOSIXPathStyle, false);
+					CFRelease(fileNameString);
+					if(url == 0) return false;
+					module = CFBundleCreate(0, url);
+					CFRelease(url);
+					if(module && !CFBundleLoadExecutable((CFBundleRef)module)) return false;
+				#else
+					#error Freedom is unimplemented in that land; attempt no landing there.
+				#endif
 				return module != 0;
 			}
 
 			PluginEntryProc getMainEntry ()
 			{
 				PluginEntryProc mainProc = 0;
-			#if defined _WIN64 || defined _WIN32
-				mainProc = reinterpret_cast<PluginEntryProc>(GetProcAddress ((HMODULE)module, "VSTPluginMain"));
-				if(!mainProc)
-					mainProc = reinterpret_cast<PluginEntryProc>(GetProcAddress ((HMODULE)module, "main"));
-			#elif TARGET_API_MAC_CARBON
-				mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("VSTPluginMain"));
-				if (!mainProc)
-					mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("main_macho"));
-			#endif
+				#if defined DIVERSALIS__OS__MICROSOFT
+					mainProc = reinterpret_cast<PluginEntryProc>(GetProcAddress ((HMODULE)module, "VSTPluginMain"));
+					if(!mainProc) mainProc = reinterpret_cast<PluginEntryProc>(GetProcAddress ((HMODULE)module, "main"));
+				#elif defined DIVERSALIS__OS__APPLE
+					mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("VSTPluginMain"));
+					if(!mainProc) mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("main_macho"));
+				#else
+					#error Freedom is unimplemented in that land; attempt no landing there.
+				#endif
 				return mainProc;
 			}
 			//-------------------------------------------------------------------------------------------------------
@@ -830,5 +828,4 @@ namespace seib {
 			// VST 2.3 Extensions
 			virtual VstSpeakerArrangement *DECLARE_VST_DEPRECATED(OnGetInputSpeakerArrangement)(CEffect &pEffect) const { return pEffect.OnHostInputSpeakerArrangement(); }
 		};
-	}
-}
+}}

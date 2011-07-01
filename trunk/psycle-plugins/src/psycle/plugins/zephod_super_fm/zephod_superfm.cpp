@@ -4,6 +4,7 @@
 #include <cmath>
 
 using namespace psycle::plugin_interface;
+using namespace universalis::stdlib;
 
 //////////////////////////////////////////////////////////////////////
 // Psycle
@@ -157,13 +158,13 @@ class mi : public CMachineInterface
 		virtual bool DescribeValue(char * /*txt*/, const int /*param*/, const int /*value*/);
 		virtual void Stop();
 
-		std::uint8_t wave,ModWave;
+		uint8_t wave,ModWave;
 		CTrack Tracks[MAX_TRACKS];
 		int medBreakNote[MAX_TRACKS];
-		std::uint8_t route;
+		uint8_t route;
 		int mod1_env,mod2_env,mod3_env;
 		int tickCounter;
-		std::int32_t currentSR;
+		int32_t currentSR;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)

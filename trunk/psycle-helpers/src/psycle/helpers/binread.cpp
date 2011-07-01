@@ -18,51 +18,51 @@ BinRead::BinRead( std::istream & in )
 BinRead::~BinRead() {
 }
 
-std::uint16_t BinRead::readUInt2LE() {
+uint16_t BinRead::readUInt2LE() {
 	unsigned char buf[2];
 	in_.read( reinterpret_cast<char*>(&buf), 2 );
 	return buf[0] | (buf[1] << 8);
 }
 
-std::uint16_t BinRead::readUInt2BE() {
+uint16_t BinRead::readUInt2BE() {
 	unsigned char buf[2];
 	in_.read( reinterpret_cast<char*>(&buf), 2 );
 	return buf[1] | (buf[0] << 8);
 }
 
-std::uint32_t BinRead::readUInt4BE() {
+uint32_t BinRead::readUInt4BE() {
 	unsigned char buf[4];
 	in_.read( reinterpret_cast<char*>(&buf), 4 );
 	return (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3] ;
 }
 		
-std::uint32_t BinRead::readUInt4LE() {
+uint32_t BinRead::readUInt4LE() {
 	unsigned char buf[4];
 	in_.read( reinterpret_cast<char*>(&buf), 4 );
 	return buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24) ; 
 }
 		
-std::int16_t BinRead::readInt2LE() {
-	return static_cast<std::int16_t>( readUInt2LE() );
+int16_t BinRead::readInt2LE() {
+	return static_cast<int16_t>( readUInt2LE() );
 }
 		
-std::int16_t BinRead::readInt2BE() {
-	return static_cast<std::int16_t>( readUInt2BE() );
+int16_t BinRead::readInt2BE() {
+	return static_cast<int16_t>( readUInt2BE() );
 }
 
-std::int32_t BinRead::readInt4LE() {
-	return static_cast<std::int32_t>( readUInt4LE() );
+int32_t BinRead::readInt4LE() {
+	return static_cast<int32_t>( readUInt4LE() );
 }
 
-std::int32_t BinRead::readInt4BE() {
-	return static_cast<std::int32_t>( readUInt4BE() );
+int32_t BinRead::readInt4BE() {
+	return static_cast<int32_t>( readUInt4BE() );
 }
 
-void BinRead::readUIntArray4LE( std::uint32_t data[], int count ) {
+void BinRead::readUIntArray4LE( uint32_t data[], int count ) {
 	for ( int i = 0; i < count; ++i ) data[i] = readUInt4LE();
 }
 
-void BinRead::readIntArray4LE( std::int32_t data[], int count ) {
+void BinRead::readIntArray4LE( int32_t data[], int count ) {
 	for ( int i = 0; i < count; ++i ) data[i] = readInt4LE();
 }
 

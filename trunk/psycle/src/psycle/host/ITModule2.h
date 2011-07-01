@@ -13,6 +13,8 @@ namespace psycle {
 	}
 	namespace host {
 
+		using namespace universalis::stdlib;
+
 		class ITModule2 : public RiffFile
 		{
 		private:
@@ -54,12 +56,12 @@ namespace psycle {
 		private:
 			double        ReadDouble() { double        t; Read(t); return t; }
 			float         ReadFloat()  { float         t; Read(t); return t; }
-			std:: int32_t ReadInt32()  { std:: int32_t t; Read(t); return t; }
-			std::uint32_t ReadUInt32() { std::uint32_t t; Read(t); return t; }
-			std:: int16_t ReadInt16()  { std:: int16_t t; Read(t); return t; }
-			std::uint16_t ReadUInt16() { std::uint16_t t; Read(t); return t; }
-			std::  int8_t ReadInt8()   { std::  int8_t t; Read(t); return t; }
-			std:: uint8_t ReadUInt8()  { std:: uint8_t t; Read(t); return t; }
+			int32_t  ReadInt32()  {  int32_t t; Read(t); return t; }
+			uint32_t ReadUInt32() { uint32_t t; Read(t); return t; }
+			int16_t  ReadInt16()  {  int16_t t; Read(t); return t; }
+			uint16_t ReadUInt16() { uint16_t t; Read(t); return t; }
+			int8_t   ReadInt8()   {   int8_t t; Read(t); return t; }
+			uint8_t  ReadUInt8()  {  uint8_t t; Read(t); return t; }
 			bool ReadHeader(itHeader& header);
 			bool ReadHeader(EmbeddedMIDIData& header);
 			bool ReadHeader(itInsHeader1x& header);

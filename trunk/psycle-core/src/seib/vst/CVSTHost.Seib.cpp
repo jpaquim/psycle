@@ -26,21 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include <psycle/core/detail/project.private.hpp>
-#include "CVSTHost.Seib.hpp" // private prototypes
-
+#include "CVSTHost.Seib.hpp"
 #include "EffectWnd.hpp"
+#include <universalis/stdlib/chrono.hpp>
 
-#if defined DIVERSALIS__OS__MICROSOFT
-	#pragma warning(push)
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#include <MMSystem.h>
-	#pragma warning(pop)
-#else
-	#error unimplemented
-#endif
+namespace seib { namespace vst {
 
-namespace seib {
-	namespace vst {
+using namespace universalis::stdlib;
 
 		/*****************************************************************************/
 		/* Static Data                                                               */
@@ -740,24 +732,23 @@ namespace seib {
 			aEffect=loadstruct.aEffect;
 			ploader=loadstruct.pluginloader;
 
-		#if defined _WIN64 || defined _WIN32
-			char const * name = (char*)(loadstruct.pluginloader->sFileName);
-			char const * const p = strrchr(name, '\\');
-			if (p)
-			{
-				sDir = new char[p - name + 1];
-				if (sDir)
-				{
-					memcpy(sDir, name, p - name);
-					((char*)sDir)[p - name] = '\0';
+			#if defined DIVERSALIS__OS__MICROSOFT
+				char const * name = (char*)(loadstruct.pluginloader->sFileName);
+				char const * const p = std::strrchr(name, '\\');
+				if(p) {
+					sDir = new char[p - name + 1];
+					if(sDir) {
+						std::memcpy(sDir, name, p - name);
+						((char*)sDir)[p - name] = '\0';
+					}
 				}
-			}
-			else { sDir = new char[1]; ((char*)sDir)[0]='\0'; }
-		#elif defined __APPLE__
-			#error yet to be done
-		#else
-			#error yet to be done
-		#endif
+				else {
+					sDir = new char[1];
+					((char*)sDir)[0]='\0';
+				}
+			#else
+				#error Freedom is unimplemented in that land; attempt no landing there.
+			#endif
 
 			// The trick, store the CEffect's class instance so that the host can talk to us.
 			// I am unsure what other hosts use for resvd1 and resvd2
@@ -817,16 +808,12 @@ namespace seib {
 			aEffect = NULL;                         /* and reset the pointer             */
 			delete ploader;
 
-		#if defined _WIN64 || defined _WIN32
-			if (sDir)                               /* reset directory            */
-			{
-				delete[] sDir; sDir = NULL;
-			}
-		#elif defined __APPLE__
-			#error yet to be done!
-		#else
-			#error yet to be done!
-		#endif
+			#if defined DIVERSALIS__OS__MICROSOFT
+				// reset directory
+				delete[] sDir; sDir = 0;
+			#else
+				#error Freedom is unimplemented in that land; attempt no landing there.
+			#endif
 		}
 
 		/*****************************************************************************/
@@ -1383,12 +1370,8 @@ namespace seib {
 			//nanoseconds (system time)
 			if(lMask & kVstNanosValid)
 			{
-			#if defined _WIN64 || defined _WIN32
-				vstTimeInfo.nanoSeconds = timeGetTime();
+				vstTimeInfo.nanoSeconds = chrono::nanoseconds(chrono::high_resolution_clock::now().time_since_epoch()).count();
 				vstTimeInfo.flags |= kVstNanosValid;
-			#else
-				#error add the appropiate code.
-			#endif
 			}
 		}
 
@@ -1834,11 +1817,9 @@ namespace seib {
 			#endif
 
 				}
-				// This is PSYCLE__HOST__CATCH_ALL() for static members.
-			}PSYCLE__HOST__CATCH_ALL__NO_CLASS(pEffect->crashclass);
+			// This is PSYCLE__HOST__CATCH_ALL() for static members.
+			} PSYCLE__HOST__CATCH_ALL__NO_CLASS(pEffect->crashclass);
 			if (fakeeffect )delete pEffect;
 			return 0L;
 		}
-
-	}
-}
+}}

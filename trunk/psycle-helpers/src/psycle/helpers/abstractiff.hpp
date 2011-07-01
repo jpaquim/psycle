@@ -8,11 +8,12 @@
 #include <string>
 #include <fstream>
 
-namespace psycle
-{
-	namespace helpers
-	{
-				/***** DATA TYPES *********/
+namespace psycle { namespace helpers {
+
+using namespace universalis::stdlib;
+
+		/***** DATA TYPES *********/
+
 		/// big-endian 32-bit integer.
 		class ULongBE
 		{
@@ -24,19 +25,19 @@ namespace psycle
 					unsigned char lohi;
 					unsigned char lolo;
 				}byte;
-				std::uint32_t originalValue;
+				uint32_t originalValue;
 			}d;
 			ULongBE();
-			ULongBE(std::uint32_t);
-			virtual std::uint32_t unsignedValue() const;
-			virtual std::int32_t signedValue() const;
+			ULongBE(uint32_t);
+			virtual uint32_t unsignedValue() const;
+			virtual int32_t signedValue() const;
 		};
 
 		class LongBE : public ULongBE
 		{
 		public:
 			LongBE();
-			LongBE(std::int32_t);
+			LongBE(int32_t);
 		};
 
 		/// big-endian 16-bit unsigned integer.
@@ -48,18 +49,18 @@ namespace psycle
 					unsigned char hi;
 					unsigned char lo;
 				}byte;
-				std::uint16_t originalValue;
+				uint16_t originalValue;
 			}d;
 			UShortBE();
-			UShortBE(std::uint16_t);
-			virtual std::uint16_t unsignedValue() const;
-			virtual std::int16_t signedValue() const;
+			UShortBE(uint16_t);
+			virtual uint16_t unsignedValue() const;
+			virtual int16_t signedValue() const;
 		};
 		class ShortBE : public UShortBE
 		{
 		public:
 			ShortBE();
-			ShortBE(std::int16_t);
+			ShortBE(int16_t);
 		};
 
 		// big-endian 32-bit fixed point value.
@@ -77,7 +78,7 @@ namespace psycle
 					unsigned char hi;
 					unsigned char lo;
 				}byte;
-				std::uint16_t value;
+				uint16_t value;
 			}decimal;
 			float value() const;
 		};
@@ -93,19 +94,19 @@ namespace psycle
 					unsigned char hilo;
 					unsigned char hihi;
 				}byte;
-				std::uint32_t originalValue;
+				uint32_t originalValue;
 			}d;
 			ULongLE();
-			ULongLE(std::uint32_t);
-			virtual std::uint32_t unsignedValue() const;
-			virtual std::int32_t signedValue() const;
+			ULongLE(uint32_t);
+			virtual uint32_t unsignedValue() const;
+			virtual int32_t signedValue() const;
 		};
 
 		class LongLE : public ULongLE
 		{
 		public:
 			LongLE();
-			LongLE(std::int32_t);
+			LongLE(int32_t);
 		};
 
 		/// little-endian 16-bit unsigned integer.
@@ -117,18 +118,18 @@ namespace psycle
 					unsigned char lo;
 					unsigned char hi;
 				}byte;
-				std::uint16_t originalValue;
+				uint16_t originalValue;
 			}d;
 			UShortLE();
-			UShortLE(std::uint16_t);
-			virtual std::uint16_t unsignedValue() const;
-			virtual std::int16_t signedValue() const;
+			UShortLE(uint16_t);
+			virtual uint16_t unsignedValue() const;
+			virtual int16_t signedValue() const;
 		};
 		class ShortLE : public UShortLE
 		{
 		public:
 			ShortLE();
-			ShortLE(std::int16_t);
+			ShortLE(int16_t);
 		};
 
 		/******* Data Structures *******/
@@ -140,7 +141,7 @@ namespace psycle
 			virtual ~BaseChunkHeader();
 			std::string idString() const;
 			bool matches(IffChunkId id2) const;
-			virtual std::uint32_t length() const = 0;
+			virtual uint32_t length() const = 0;
 		};
 
 		/******* Base Class for reader ******/
@@ -171,12 +172,12 @@ namespace psycle
 			template<typename T>
 				void ReadArray(T* array, int n);
 
-			virtual void Read(std::uint8_t & x);
-			virtual void Read(std::int8_t & x);
-			virtual void Read(std::uint16_t & x)=0;
-			virtual void Read(std::int16_t & x)=0;
-			virtual void Read(std::uint32_t & x)=0;
-			virtual void Read(std::int32_t & x)=0;
+			virtual void Read(uint8_t & x);
+			virtual void Read(int8_t & x);
+			virtual void Read(uint16_t & x)=0;
+			virtual void Read(int16_t & x)=0;
+			virtual void Read(uint32_t & x)=0;
+			virtual void Read(int32_t & x)=0;
 			virtual void Read(char & x);
 			virtual void Read(bool & x);
 
@@ -186,12 +187,12 @@ namespace psycle
 			template<typename T>
 				void WriteArray(T const* array, int n);
 
-			virtual void Write(const std::uint8_t & x);
-			virtual void Write(const std::int8_t & x);
-			virtual void Write(const std::uint16_t & x)=0;
-			virtual void Write(const std::int16_t & x)=0;
-			virtual void Write(const std::uint32_t & x)=0;
-			virtual void Write(const std::int32_t & x)=0;
+			virtual void Write(const uint8_t & x);
+			virtual void Write(const int8_t & x);
+			virtual void Write(const uint16_t & x)=0;
+			virtual void Write(const int16_t & x)=0;
+			virtual void Write(const uint32_t & x)=0;
+			virtual void Write(const int32_t & x)=0;
 			virtual void Write(const char & x);
 			virtual void Write(const bool & x);
 
@@ -200,23 +201,23 @@ namespace psycle
 			std::size_t Seek(std::ptrdiff_t const & bytes);
 			std::size_t Skip(std::ptrdiff_t const & bytes);
 
-			void ReadBE(std::uint32_t & x);
-			void ReadBE(std::int32_t & x);
-			void ReadBE(std::uint16_t & x);
-			void ReadBE(std::int16_t & x);
-			void ReadLE(std::uint32_t & x);
-			void ReadLE(std::int32_t & x);
-			void ReadLE(std::uint16_t & x);
-			void ReadLE(std::int16_t & x);
+			void ReadBE(uint32_t & x);
+			void ReadBE(int32_t & x);
+			void ReadBE(uint16_t & x);
+			void ReadBE(int16_t & x);
+			void ReadLE(uint32_t & x);
+			void ReadLE(int32_t & x);
+			void ReadLE(uint16_t & x);
+			void ReadLE(int16_t & x);
 
-			void WriteBE(const std::uint32_t & x);
-			void WriteBE(const std::int32_t & x);
-			void WriteBE(const std::uint16_t & x);
-			void WriteBE(const std::int16_t & x);
-			void WriteLE(const std::uint32_t & x);
-			void WriteLE(const std::int32_t & x);
-			void WriteLE(const std::uint16_t & x);
-			void WriteLE(const std::int16_t & x);
+			void WriteBE(const uint32_t & x);
+			void WriteBE(const int32_t & x);
+			void WriteBE(const uint16_t & x);
+			void WriteBE(const int16_t & x);
+			void WriteLE(const uint32_t & x);
+			void WriteLE(const int32_t & x);
+			void WriteLE(const uint16_t & x);
+			void WriteLE(const int16_t & x);
 
 			void Read(IffChunkId id);
 			void Read(ULongBE& ulong);
@@ -237,6 +238,4 @@ namespace psycle
 			std::string file_name_;
 			std::fstream _stream;
 		};
-	}
-}
-
+}}

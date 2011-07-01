@@ -13,28 +13,27 @@
 #pragma once
 #include <universalis.hpp>
 #include <cstddef>
-namespace psycle
-{
-	namespace helpers
-	{
+namespace psycle { namespace helpers {
+
+using namespace universalis::stdlib;
+
 		class DataCompression {
 			public:
 				DataCompression();
 				~DataCompression();
 		
 				/// compresses.
-				static std::ptrdiff_t BEERZ77Comp2(std::uint8_t const * pSource, std::uint8_t ** pDestination, std::size_t const &);
+				static std::ptrdiff_t BEERZ77Comp2(uint8_t const * pSource, uint8_t ** pDestination, std::size_t const &);
 		
 		
 		
 		
 				/// decompresses.
-				static bool           BEERZ77Decomp2(std::uint8_t const * pSourcePos, std::uint8_t ** pDestination);
+				static bool           BEERZ77Decomp2(uint8_t const * pSourcePos, uint8_t ** pDestination);
 		
 				/// squashes.
-				static std::ptrdiff_t SoundSquash(std::int16_t const * pSource, std::uint8_t ** pDestination, std::size_t const &);
+				static std::ptrdiff_t SoundSquash(int16_t const * pSource, uint8_t ** pDestination, std::size_t const &);
 				/// desquashes.
-				static bool           SoundDesquash(std::uint8_t const * pSourcePos, std::int16_t ** pDestination);
+				static bool           SoundDesquash(uint8_t const * pSourcePos, int16_t ** pDestination);
 		};
-	}
-}
+}}

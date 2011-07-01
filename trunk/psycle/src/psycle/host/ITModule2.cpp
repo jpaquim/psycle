@@ -17,6 +17,8 @@
 
 namespace psycle { namespace host {
 
+using namespace universalis::stdlib;
+
 		ITModule2::ITModule2(void)
 		{
 			embeddedData = NULL;
@@ -30,7 +32,7 @@ namespace psycle { namespace host {
 		bool ITModule2::BitsBlock::ReadBlock(RiffFile *pFile)
 		{
 			// block layout : uint16 size, <size> bytes data
-			std::uint16_t size;
+			uint16_t size;
 			pFile->Read(size);
 			pdata = new unsigned char[size];
 			if (!pdata) return false;
@@ -859,7 +861,7 @@ Special:  Bit 0: On = song message attached.
 			PatternEvent pent=pempty;
 
 			Skip(2); // packedSize
-			std::int16_t rowCount=ReadInt16();
+			int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			Pattern & pat = *new Pattern();
@@ -955,8 +957,8 @@ Special:  Bit 0: On = song message attached.
 					if(mask[channel]&8)
 					{
 						pent.setMachine(0);
-						std::uint8_t command=ReadUInt8();
-						std::uint8_t param=ReadUInt8();
+						uint8_t command=ReadUInt8();
+						uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent.setParameter(param);
 						ParseEffect(pent,linesPerBeat,command,param,channel);
 						lastcom[channel]=pent.command();
@@ -1551,8 +1553,8 @@ OFFSET              Count TYPE   Description
 					smpbuf = new char[iLen];
 					ReadArray(smpbuf,iLen);
 				}
-				std::int16_t wNew;
-				std::int16_t offset;
+				int16_t wNew;
+				int16_t offset;
 				if ( s3mFileH.trackerInf==1) offset=0; // 1=[VERY OLD] signed samples, 2=unsigned samples
 				else offset=-32768;
 
@@ -1564,14 +1566,14 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
 						ReadArray(smpbuf,iLen*2);
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + out) = wNew;
+							*(const_cast<int16_t*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
 					} else {
@@ -1641,7 +1643,7 @@ OFFSET              Count TYPE   Description
 					char channel=newEntry&31;
 					if(newEntry&32)
 					{
-						std::uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
+						uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
 						if (note==254) pent.setNote(notecommands::release);
 						else if (note==255) pent.setNote(255);
 						else pent.setNote(((note/16)*12+(note%16)+12));  // +12 since ST3 C-4 is Psycle's C-5
@@ -1650,7 +1652,7 @@ OFFSET              Count TYPE   Description
 					}
 					if(newEntry&64)
 					{
-						std::uint8_t tmp=ReadUInt8();
+						uint8_t tmp=ReadUInt8();
 
 						if ( tmp<=64)
 						{
@@ -1661,8 +1663,8 @@ OFFSET              Count TYPE   Description
 					if(newEntry&128)
 					{
 						pent.setMachine(0);
-						std::uint8_t command=ReadUInt8();
-						std::uint8_t param=ReadUInt8();
+						uint8_t command=ReadUInt8();
+						uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent.setParameter(param);
 						ParseEffect(pent,linesPerBeat,command,param,channel);
 						if ( pent.command() == PatternCmd::BREAK_TO_LINE )

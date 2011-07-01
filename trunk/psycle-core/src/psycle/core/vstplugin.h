@@ -126,8 +126,8 @@
 			if(GetVendorString(temp) && temp[0]) return temp;
 			else return "Unknown vendor";
 		}
-		virtual const std::uint32_t GetAPIVersion() const { return GetVstVersion(); }
-		virtual const std::uint32_t GetVersion() const { return GetVendorVersion(); }
+		virtual const uint32_t GetAPIVersion() const { return GetVstVersion(); }
+		virtual const uint32_t GetVersion() const { return GetVendorVersion(); }
 		virtual bool IsGenerator() const { try { return IsSynth(); }PSYCLE__HOST__CATCH_ALL(crashclass); return false; }
 		virtual bool IsShellMaster() const { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(crashclass); return 0; }
 		virtual int GetShellIdx() const { try { return ( IsShellPlugin()) ? uniqueId() : 0; }PSYCLE__HOST__CATCH_ALL(crashclass); return 0; }

@@ -14,6 +14,8 @@
 #endif
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
+using namespace universalis::stdlib;
+
 	/// linear -> deciBell
 	/// amplitude normalized to 1.0f.
 	float inline UNIVERSALIS__COMPILER__CONST

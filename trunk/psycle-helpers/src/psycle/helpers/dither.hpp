@@ -1,7 +1,6 @@
 ///\interface psycle::helpers::dsp::Dither
 
 #pragma once
-
 #include <psycle/helpers/mersennetwister.hpp>
 namespace psycle { namespace helpers { namespace dsp {
 

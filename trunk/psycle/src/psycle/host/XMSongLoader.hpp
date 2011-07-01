@@ -14,6 +14,8 @@ namespace psycle {
 	}
 	namespace host {
 
+	using namespace universalis::stdlib;
+
 	class XMSongLoader : public RiffFile
 	{
 	public:
@@ -115,17 +117,17 @@ namespace psycle {
 		// inlines
 
 		inline unsigned char ReadUInt1() {	
-			std::uint8_t i(0);
+			uint8_t i(0);
 			return Read(i)?i:0;
 		}
 
 		inline unsigned short ReadUInt2() {
-			std::uint16_t i(0);
+			uint16_t i(0);
 			return Read(i)?i:0;
 		}
 
 		inline unsigned int ReadUInt4() {
-			std::uint32_t i(0);
+			uint32_t i(0);
 			return Read(i)?i:0;
 		}
 		

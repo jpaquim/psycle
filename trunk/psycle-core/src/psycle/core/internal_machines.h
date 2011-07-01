@@ -56,8 +56,8 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 		static const int NUM_MACHINES=8;
 		void AllocateVoice(int channel, int machine);
 		void DeallocateVoice(int channel, int machine);
-		std::int16_t macOutput[NUM_MACHINES];
-		std::int16_t noteOffset[NUM_MACHINES];
+		int16_t macOutput[NUM_MACHINES];
+		int16_t noteOffset[NUM_MACHINES];
 		static std::string _psName;
 		bool bisTicking;
 		// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
@@ -188,12 +188,12 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 
 		// parameter settings
 	
-		std::int16_t waveform;
-		std::int32_t lSpeed;
-		std::int16_t macOutput[NUM_CHANS];
-		std::int16_t paramOutput[NUM_CHANS];
-		std::int32_t phase[NUM_CHANS];
-		std::int32_t level[NUM_CHANS];
+		int16_t waveform;
+		int32_t lSpeed;
+		int16_t macOutput[NUM_CHANS];
+		int16_t paramOutput[NUM_CHANS];
+		int32_t phase[NUM_CHANS];
+		int32_t level[NUM_CHANS];
 
 		// internal state vars
 	
@@ -202,9 +202,9 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 		/// our lfo
 		float waveTable[LFO_SIZE];
 		/// value of knob when last seen-- used to compensate for outside changes
-		std::int16_t prevVal[NUM_CHANS];
+		int16_t prevVal[NUM_CHANS];
 		/// where knob should be at lfo==0
-		std::int32_t centerVal[NUM_CHANS];
+		int32_t centerVal[NUM_CHANS];
 
 		static std::string _psName;
 		bool bisTicking;

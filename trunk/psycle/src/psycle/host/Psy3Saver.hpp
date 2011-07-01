@@ -9,6 +9,8 @@ namespace psycle {
 	}
 	namespace host {
 
+		using namespace universalis::stdlib;
+
 		class Psy3Saver {
 		public:
 			Psy3Saver(psycle::core::Song& song);
@@ -45,7 +47,7 @@ namespace psycle {
                                       const std::string& old_substr,
                                       const std::string& new_substr) const;
 			std::string ConvertName(const std::string& name) const;
-			std::uint32_t ConvertType(const psycle::core::MachineKey& key, bool isGenerator) const;
+			uint32_t ConvertType(const psycle::core::MachineKey& key, bool isGenerator) const;
 			void ConvertEvent(const psycle::core::PatternEvent& ev, unsigned char* data) const;
 			unsigned char* CreateNewPattern(int ps, int tracks, int lines);
 			int ComputeLinesPerBeat();

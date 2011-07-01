@@ -2,9 +2,11 @@
 #include "dither.hpp"
 namespace psycle { namespace helpers { namespace dsp {
 
+using namespace universalis::stdlib;
+
 Dither::Dither() : bitdepth(16), pdf(Pdf::triangular), noiseshape(NoiseShape::none) {
 	// copied verbatim from mt19937 demo
-	std::uint32_t init[4] = { 0x123, 0x234, 0x345, 0x456 };
+	uint32_t init[4] = { 0x123, 0x234, 0x345, 0x456 };
 	mt.init_by_array(init, sizeof init);
 }
 

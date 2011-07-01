@@ -32,7 +32,7 @@ MsWaveOut::~MsWaveOut() throw() {
 
 WAVEHDR* MsWaveOut::allocateBlocks( ) {
 	unsigned char* buffer;
-	std::uint32_t i;
+	uint32_t i;
 	WAVEHDR* blocks;
 	DWORD totalBufferSize = (playbackSettings().blockBytes() + sizeof(WAVEHDR)) * playbackSettings().blockCount();
 

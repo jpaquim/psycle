@@ -347,7 +347,7 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 			//
 			if ((pVoice->_wave._loop) && ((pVoice->_wave._pos>>32) >= pVoice->_wave._loopEnd))
 			{
-				pVoice->_wave._pos -= (std::int64_t)(pVoice->_wave._loopEnd - pVoice->_wave._loopStart) << 32;
+				pVoice->_wave._pos -= (int64_t)(pVoice->_wave._loopEnd - pVoice->_wave._loopStart) << 32;
 			}
 			if ((pVoice->_wave._pos>>32) >= pVoice->_wave._length)
 			{
@@ -477,7 +477,7 @@ void Sampler::Tick( int channel, const PatternEvent & event )
 
 bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 {
-	std::uint32_t size = 0;
+	uint32_t size = 0;
 	pFile->Read(size);
 	if (size) {
 		if (version > CURRENT_FILE_VERSION_MACD) {
@@ -486,7 +486,7 @@ bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 			return false;
 		}
 		else {
-			std::int32_t temp = 0;
+			int32_t temp = 0;
 			pFile->Read(temp); // numSubtracks
 			_numVoices=temp;
 			pFile->Read(temp); // quality
@@ -513,8 +513,8 @@ bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 
 void Sampler::SaveSpecificChunk(RiffFile* pFile) const
 {
-	std::int32_t temp;
-	std::uint32_t size = 2 * sizeof temp;
+	int32_t temp;
+	uint32_t size = 2 * sizeof temp;
 	pFile->Write(size);
 	temp = _numVoices;
 	pFile->Write(temp); // numSubtracks
@@ -542,7 +542,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 
 	Voice* pVoice = &_voices[voice];
 	int triggered = 0;
-	std::uint64_t w_offset = 0;
+	uint64_t w_offset = 0;
 
 	pVoice->_sampleCounter=0;
 	pVoice->effCmd= pEntry.command();
@@ -635,12 +635,12 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		if ( callbacks->song()._pInstrument[pVoice->_instrument]->_loop)
 		{
 			double const totalsamples = double(timeInfo.samplesPerTick()*callbacks->song()._pInstrument[pVoice->_instrument]->_lines);
-			pVoice->_wave._speed = (std::int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+			pVoice->_wave._speed = (int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 		}
 		else
 		{
 			float const finetune = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->waveFinetune);
-			pVoice->_wave._speed = (std::int64_t)(pow(2.0f, ((pEntry.note()+callbacks->song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
+			pVoice->_wave._speed = (int64_t)(pow(2.0f, ((pEntry.note()+callbacks->song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
 		}
 		
 
@@ -896,7 +896,7 @@ void Sampler::NoteOffFast( int voice )
 
 void Sampler::PerformFx( int voice )
 {
-std::int64_t shift;
+	int64_t shift;
 	switch(_voices[voice].effCmd)
 	{
 		// 0x01 : Pitch Up

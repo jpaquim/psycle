@@ -591,14 +591,14 @@
 				{
 					int nextevent;
 					if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-					for(std::uint32_t i(0) ; i < callbacks->song().tracks() ; ++i)
+					for(uint32_t i(0) ; i < callbacks->song().tracks() ; ++i)
 					{
 						if(TriggerDelay[i].command() && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 					}
 					if(nextevent > ns)
 					{
 						if(TWSActive) TWSSamples -= ns;
-						for(std::uint32_t i(0) ; i < callbacks->song().tracks(); ++i)
+						for(uint32_t i(0) ; i < callbacks->song().tracks(); ++i)
 						{
 							// come back to this
 							if(TriggerDelay[i].command()) TriggerDelayCounter[i] -= ns;
@@ -663,7 +663,7 @@
 								if(activecount == 0) TWSActive = false;
 							}
 						}
-						for(std::uint32_t i(0) ; i < callbacks->song().tracks(); ++i)
+						for(uint32_t i(0) ; i < callbacks->song().tracks(); ++i)
 						{
 							// come back to this
 							if(TriggerDelay[i].command() == commandtypes::NOTE_DELAY)
@@ -750,7 +750,7 @@
 
 	bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 	{
-		std::uint32_t size;
+		uint32_t size;
 		unsigned char _program;
 		pFile->Read(size);
 		if(size)
@@ -764,7 +764,7 @@
 				//MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
 			}
-			std::uint32_t count;
+			uint32_t count;
 			pFile->Read(_program);
 			pFile->Read(count);
 			size -= sizeof _program + sizeof count + sizeof(float) * count;
@@ -772,7 +772,7 @@
 			{
 				BeginSetProgram();
 				SetProgram(_program);
-				for(std::uint32_t i(0) ; i < count ; ++i)
+				for(uint32_t i(0) ; i < count ; ++i)
 				{
 					float temp;
 					pFile->Read(temp);

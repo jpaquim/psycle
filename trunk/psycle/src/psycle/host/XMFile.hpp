@@ -6,9 +6,11 @@
 #pragma once
 #include "Global.hpp"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
-namespace psycle { namespace host{
+namespace psycle { namespace host {
+
+using namespace universalis::stdlib;
 
 	static const char XM_HEADER [] = "Extended Module: ";
 
@@ -121,16 +123,16 @@ namespace psycle { namespace host{
 
 	struct XMFILEHEADER
 	{
-		std::uint32_t size;
-		std::uint16_t norder;
-		std::uint16_t restartpos;
-		std::uint16_t channels;
-		std::uint16_t patterns;
-		std::uint16_t instruments;
-		std::uint16_t flags;
-		std::uint16_t speed;
-		std::uint16_t tempo;
-		std::uint8_t order[256];
+		uint32_t size;
+		uint16_t norder;
+		uint16_t restartpos;
+		uint16_t channels;
+		uint16_t patterns;
+		uint16_t instruments;
+		uint16_t flags;
+		uint16_t speed;
+		uint16_t tempo;
+		uint8_t order[256];
 	};
 
 	struct XMINSTRUMENTFILEHEADER
@@ -138,62 +140,63 @@ namespace psycle { namespace host{
 		char extxi[21];		// Extended Instrument:
 		char name[23];		// Name, 1Ah
 		char trkname[20];	// FastTracker v2.00
-		std::uint16_t shsize;		// 0x0102
+		uint16_t shsize;		// 0x0102
 	};
 	struct XMPATTERNHEADER
 	{
-		std::uint32_t size;
-		std::uint8_t packingtype;
-		std::uint16_t rows;
-		std::uint16_t packedsize;
+		uint32_t size;
+		uint8_t packingtype;
+		uint16_t rows;
+		uint16_t packedsize;
 
 	};
 	struct XMINSTRUMENTHEADER
 	{
-		std::uint32_t size;
+		uint32_t size;
 		char name[22];
-		std::uint8_t type;
-		std::uint16_t samples;
+		uint8_t type;
+		uint16_t samples;
 	};
 	struct XMSAMPLEFILEHEADER
 	{
-		std::uint8_t snum[96];
-		std::uint16_t venv[24];
-		std::uint16_t penv[24];
-		std::uint8_t vnum, pnum;
-		std::uint8_t vsustain, vloops, vloope, psustain, ploops, ploope;
-		std::uint8_t vtype, ptype;
-		std::uint8_t vibtype, vibsweep, vibdepth, vibrate;
-		std::uint16_t volfade;
-		std::uint16_t reserved[11];
-		std::uint16_t reserved2;
+		uint8_t snum[96];
+		uint16_t venv[24];
+		uint16_t penv[24];
+		uint8_t vnum, pnum;
+		uint8_t vsustain, vloops, vloope, psustain, ploops, ploope;
+		uint8_t vtype, ptype;
+		uint8_t vibtype, vibsweep, vibdepth, vibrate;
+		uint16_t volfade;
+		uint16_t reserved[11];
+		uint16_t reserved2;
 	};
 	struct XMSAMPLEHEADER
 	{
-		std::uint32_t shsize;
-		std::uint8_t snum[96];
-		std::uint16_t venv[24];
-		std::uint16_t penv[24];
-		std::uint8_t vnum, pnum;
-		std::uint8_t vsustain, vloops, vloope, psustain, ploops, ploope;
-		std::uint8_t vtype, ptype;
-		std::uint8_t vibtype, vibsweep, vibdepth, vibrate;
-		std::uint16_t volfade;
-		std::uint16_t reserved[11];
+		uint32_t shsize;
+		uint8_t snum[96];
+		uint16_t venv[24];
+		uint16_t penv[24];
+		uint8_t vnum, pnum;
+		uint8_t vsustain, vloops, vloope, psustain, ploops, ploope;
+		uint8_t vtype, ptype;
+		uint8_t vibtype, vibsweep, vibdepth, vibrate;
+		uint16_t volfade;
+		uint16_t reserved[11];
 	};
 
 	struct XMSAMPLESTRUCT
 	{
-		std::uint32_t samplen;
-		std::uint32_t loopstart;
-		std::uint32_t looplen;
-		std::uint8_t vol;
-		std::int8_t finetune;
-		std::uint8_t type;
-		std::uint8_t pan;
-		std::int8_t relnote;
-		std::uint8_t res;
+		uint32_t samplen;
+		uint32_t loopstart;
+		uint32_t looplen;
+		uint8_t vol;
+		int8_t finetune;
+		uint8_t type;
+		uint8_t pan;
+		int8_t relnote;
+		uint8_t res;
 		char name[22];
 	};
 }}
-#pragma pack()
+
+#pragma pack(pop)

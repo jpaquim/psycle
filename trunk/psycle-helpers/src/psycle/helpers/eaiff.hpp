@@ -5,10 +5,9 @@
 */
 #pragma once
 #include "abstractiff.hpp"
-namespace psycle
-{
-	namespace helpers
-	{
+namespace psycle { namespace helpers {
+
+using namespace universalis::stdlib;
 
 		/******* Data Structures *******/
 		class IffChunkHeader : public BaseChunkHeader
@@ -19,7 +18,7 @@ namespace psycle
 		public:
 			IffChunkHeader();
 			virtual ~IffChunkHeader();
-			virtual std::uint32_t length() const;
+			virtual uint32_t length() const;
 		};
 
 		class FormChunkHeader
@@ -47,27 +46,27 @@ namespace psycle
 			virtual void addCatChunk(IffChunkId id, bool endprevious=true);
 			virtual void addListChunk(IffChunkId id, bool endprevious=true);
 			virtual void addListProperty(IffChunkId contentId, IffChunkId propId);
-			virtual void addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, std::uint32_t dataSize);
+			virtual void addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, uint32_t dataSize);
 
 			virtual const IffChunkHeader& readHeader();
 			virtual const IffChunkHeader& findChunk(IffChunkId id, bool allowWrap=false);
 			virtual void skipThisChunk();
 
-			inline void Read(std::uint8_t & x) { AbstractIff::Read(x); }
-			inline void Read(std::int8_t & x) { AbstractIff::Read(x); }
-			inline void Read(std::uint16_t & x) { ReadBE(x); }
-			inline void Read(std::int16_t & x) { ReadBE(x); }
-			inline void Read(std::uint32_t & x) { ReadBE(x); }
-			inline void Read(std::int32_t & x) { ReadBE(x); }
+			inline void Read(uint8_t & x) { AbstractIff::Read(x); }
+			inline void Read(int8_t & x) { AbstractIff::Read(x); }
+			inline void Read(uint16_t & x) { ReadBE(x); }
+			inline void Read(int16_t & x) { ReadBE(x); }
+			inline void Read(uint32_t & x) { ReadBE(x); }
+			inline void Read(int32_t & x) { ReadBE(x); }
 			inline void Read(char & x) { AbstractIff::Read(x); }
 			inline void Read(bool & x) { AbstractIff::Read(x); }
 
-			inline void Write(const std::uint8_t & x) { AbstractIff::Write(x); }
-			inline void Write(const std::int8_t & x) { AbstractIff::Write(x); }
-			inline void Write(const std::uint16_t& x) { WriteBE(x); }
-			inline void Write(const std::int16_t& x) { WriteBE(x); }
-			inline void Write(const std::uint32_t& x) { WriteBE(x); }
-			inline void Write(const std::int32_t& x) { WriteBE(x); }
+			inline void Write(const uint8_t & x) { AbstractIff::Write(x); }
+			inline void Write(const int8_t & x) { AbstractIff::Write(x); }
+			inline void Write(const uint16_t& x) { WriteBE(x); }
+			inline void Write(const int16_t& x) { WriteBE(x); }
+			inline void Write(const uint32_t& x) { WriteBE(x); }
+			inline void Write(const int32_t& x) { WriteBE(x); }
 			inline void Write(const char & x) { AbstractIff::Write(x); }
 			inline void Write(const bool & x) { AbstractIff::Write(x); }
 
@@ -83,8 +82,6 @@ namespace psycle
 			void Write(const ULongLE& ulong){ AbstractIff::Write(ulong); }
 
 			IffChunkHeader currentHeader;
-			std::uint32_t headerPosition;
+			uint32_t headerPosition;
 		};
-	}
-}
-
+}}

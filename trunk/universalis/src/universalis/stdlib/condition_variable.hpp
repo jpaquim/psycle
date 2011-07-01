@@ -104,7 +104,7 @@
 	#include <vector>
 	#include <sstream>
 	namespace universalis { namespace stdlib { namespace test {
-		class condition_test_class {
+		class condition_variable_test_class {
 			private:
 				void thread_function() {
 					{ lock_guard_type l(m);
@@ -144,7 +144,7 @@
 			public:
 				void test() {
 					i = 0;
-					thread t(boost::bind(&condition_test_class::thread_function, this));
+					thread t(boost::bind(&condition_variable_test_class::thread_function, this));
 					{ lock_guard_type l(m);
 						while(i != 1) c.wait(l);
 						i = 2;
@@ -155,12 +155,12 @@
 
 		};
 
-		BOOST_AUTO_TEST_CASE(condition_test) {
-			condition_test_class test;
+		BOOST_AUTO_TEST_CASE(condition_variable_test) {
+			condition_variable_test_class test;
 			test.test();
 		}
 
-		class condition_speed_test_class {
+		class condition_variable_speed_test_class {
 			private:
 				typedef os::clocks::monotonic clock;
 
@@ -219,7 +219,7 @@
 
 					std::vector<thread*> threads_(threads);
 					for(unsigned int i(0); i < threads; ++i)
-						threads_[i] = new thread(boost::bind(&condition_speed_test_class::thread_function, this, tls_[i]));
+						threads_[i] = new thread(boost::bind(&condition_variable_speed_test_class::thread_function, this, tls_[i]));
 
 					for(unsigned int i(0); i < threads; ++i) threads_[i]->join();
 
@@ -235,8 +235,8 @@
 				}
 		};
 		
-		BOOST_AUTO_TEST_CASE(condition_speed_test) {
-			condition_speed_test_class test;
+		BOOST_AUTO_TEST_CASE(condition_variable_speed_test) {
+			condition_variable_speed_test_class test;
 			test.test(2);
 			test.test(4);
 			test.test(8);

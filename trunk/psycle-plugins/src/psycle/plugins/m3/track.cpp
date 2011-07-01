@@ -1,4 +1,4 @@
-// CTrack Definition file (M3Track.cpp)
+// CTrack Definition file
 #include "track.hpp"
 #include <cassert>
 

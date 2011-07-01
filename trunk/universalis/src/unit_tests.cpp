@@ -12,7 +12,7 @@
 #include <universalis/stdlib/chrono.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 #include <universalis/os/clocks.hpp>
 #include <universalis/os/detail/clocks.hpp>
 #include <universalis/os/sched.hpp>

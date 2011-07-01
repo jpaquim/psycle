@@ -65,7 +65,7 @@ void Psy2Filter::prepareSequence( CoreSong & song) {
 }
 
 bool Psy2Filter::load(const std::string & fileName, CoreSong & song) {
-	std::int32_t num;
+	int32_t num;
 	RiffFile file;
 	file.Open(fileName);
 	//progress.emit(1,0,"");
@@ -109,7 +109,7 @@ bool Psy2Filter::LoadINFO(RiffFile * file, CoreSong & song) {
 }
 
 bool Psy2Filter::LoadSNGI(RiffFile * file, CoreSong & song) {
-	std::int32_t tmp;
+	int32_t tmp;
 	file->Read(tmp);
 	song.bpm(tmp);
 
@@ -129,7 +129,7 @@ bool Psy2Filter::LoadSNGI(RiffFile * file, CoreSong & song) {
 }
 
 bool Psy2Filter::LoadSEQD(RiffFile * file, CoreSong & song) {
-	std::int32_t length,tmp;
+	int32_t length,tmp;
 	unsigned char playOrder[128];
 	file->ReadArray(playOrder,128);
 	file->Read(length);
@@ -156,7 +156,7 @@ PatternEvent Psy2Filter::convertEntry(unsigned char * data ) const {
 }
 
 bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
-	std::int32_t numLines;
+	int32_t numLines;
 	char patternName[32];
 	file->Read(numLines);
 	file->ReadArray(patternName, sizeof(patternName)); patternName[31]=0;
@@ -218,7 +218,7 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 }
 
 bool Psy2Filter::LoadINSD(RiffFile * file, CoreSong & song) {
-	std::int32_t i;
+	int32_t i;
 	file->Read(instSelected);
 
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i)
@@ -261,17 +261,17 @@ bool Psy2Filter::LoadINSD(RiffFile * file, CoreSong & song) {
 }
 
 bool Psy2Filter::LoadWAVD(RiffFile * file, CoreSong & song) {
-	std::int32_t i;
+	int32_t i;
 	// Skip wave selected
 	file->Skip(4);
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i) {
 		for(int w = 0; w<PSY2_MAX_WAVES; ++w) {
-			std::uint32_t wltemp=0;
+			uint32_t wltemp=0;
 			file->Read(wltemp);
 			if(wltemp > 0) {
 				if(w == 0) {
 					Instrument& pIns = *(song._pInstrument[i]);
-					std::int16_t tmpFineTune;
+					int16_t tmpFineTune;
 					pIns.waveLength=wltemp;
 					file->ReadArray(pIns.waveName, 32); pIns.waveName[31]=0;
 					file->Read(pIns.waveVolume);
@@ -281,10 +281,10 @@ bool Psy2Filter::LoadWAVD(RiffFile * file, CoreSong & song) {
 					file->Read(pIns.waveLoopEnd);
 					file->Read(pIns.waveLoopType);
 					file->Read(pIns.waveStereo);
-					pIns.waveDataL = new std::int16_t[pIns.waveLength];
+					pIns.waveDataL = new int16_t[pIns.waveLength];
 					file->ReadArray(pIns.waveDataL, pIns.waveLength);
 					if(pIns.waveStereo) {
-						pIns.waveDataR = new std::int16_t[pIns.waveLength];
+						pIns.waveDataR = new int16_t[pIns.waveLength];
 						file->ReadArray(pIns.waveDataR, pIns.waveLength);
 					}
 				} else {
@@ -303,7 +303,7 @@ bool Psy2Filter::LoadWAVD(RiffFile * file, CoreSong & song) {
 }
 
 bool Psy2Filter::PreLoadVSTs(RiffFile * file, CoreSong & /*song*/) {
-	std::int32_t i;
+	int32_t i;
 	for(i = 0; i < PSY2_MAX_PLUGINS; ++i) {
 		file->Read(vstL[i].valid);
 		if(vstL[i].valid) {
@@ -323,12 +323,12 @@ bool Psy2Filter::PreLoadVSTs(RiffFile * file, CoreSong & /*song*/) {
 
 bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_machines::Converter & converter) {
 	MachineFactory & factory = MachineFactory::getInstance();
-	std::int32_t i;
+	int32_t i;
 	file->ReadArray(_machineActive,128);
 	std::memset(pMac,0,sizeof pMac);
 
 	for(i = 0; i < 128; ++i) {
-		std::int32_t x, y, type;
+		int32_t x, y, type;
 		if(_machineActive[i]) {
 			//progress.emit(4,8192+i*(4096/128),"");
 			file->Read(x);
@@ -562,7 +562,7 @@ bool Psy2Filter::TidyUp(RiffFile* /*file*/,CoreSong& song,convert_internal_machi
 	// machines that instanced them. vstL[] contains this pool.
 	// Since we have already created the machines, now we can remove this array
 	// which just maintains the parameters of the machine.
-	std::int32_t i;
+	int32_t i;
 	// Clean "pars" array.
 	for(i = 0; i < PSY2_MAX_PLUGINS; ++i) {
 		if(vstL[i].valid) {
@@ -861,7 +861,7 @@ bool Plugin::LoadPsy2FileFormat(RiffFile * pFile) {
 	int numParameters;
 	pFile->Read(numParameters);
 	if(proxy()()) {
-		std::int32_t * Vals = new std::int32_t[numParameters];
+		int32_t * Vals = new int32_t[numParameters];
 		pFile->ReadArray(Vals, numParameters);
 		try {
 			for(int i = 0; i < numParameters; ++i) proxy().ParameterTweak(i,Vals[i]);
@@ -1036,7 +1036,7 @@ namespace vst {
 		if(!b) return false;
 
 		// read chunk size
-		std::uint32_t chunk_size;
+		uint32_t chunk_size;
 		pFile->Read(chunk_size);
 
 		// read chunk data

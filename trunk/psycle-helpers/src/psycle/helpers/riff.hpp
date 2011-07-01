@@ -12,6 +12,8 @@
 #include <cstdio>
 namespace psycle { namespace helpers {
 
+using namespace universalis::stdlib;
+
 enum DDCRET {
 	DDC_SUCCESS,           ///< operation succeded
 	DDC_FAILURE,           ///< operation failed for unspecified reasons
@@ -22,7 +24,7 @@ enum DDCRET {
 	DDC_INVALID_FILE       ///< file format does not match
 };
 
-std::uint32_t FourCC(const char * ChunkName);
+uint32_t FourCC(const char * ChunkName);
 
 enum ExtRiffFileMode {
 	RFM_UNKNOWN, ///< undefined type (can use to mean "N/A" or "not open")
@@ -33,9 +35,9 @@ enum ExtRiffFileMode {
 class ExtRiffChunkHeader {
 	public:
 		/// Four-character chunk ID
-		std::uint32_t ckID;       
+		uint32_t ckID;       
 		/// Length of data in chunk
-		std::uint32_t ckSize;     
+		uint32_t ckSize;     
 };
 
 /// riff file format.
@@ -49,7 +51,7 @@ class ExtRiffFile {
 		ExtRiffFileMode      fmode;
 		/// I/O stream to use
 		FILE             *file;
-		DDCRET Seek(std::int32_t offset);
+		DDCRET Seek(int32_t offset);
 	public:
 		ExtRiffFile();
 		virtual ~ExtRiffFile();
@@ -57,35 +59,35 @@ class ExtRiffFile {
 		DDCRET Open(const char * Filename, ExtRiffFileMode NewMode);
 		DDCRET Close();
 
-		std::int32_t CurrentFilePosition() const;
+		int32_t CurrentFilePosition() const;
 
 		template<typename X>
 		DDCRET inline Read(X & x) { return Read(&x, sizeof x); }
 		template<typename X>
 		DDCRET inline Write(X const & x) { return Write(&x, sizeof x); }
 
-		DDCRET Read(void *, std::uint32_t bytes); // Remember to fix endian if needed when you call this
-		DDCRET Write(void const *, std::uint32_t bytes); // Remember to fix endian if needed when you call this
-		DDCRET Expect(void const *, std::uint32_t bytes); // Remember to fix endian if needed when you call this
+		DDCRET Read(void *, uint32_t bytes); // Remember to fix endian if needed when you call this
+		DDCRET Write(void const *, uint32_t bytes); // Remember to fix endian if needed when you call this
+		DDCRET Expect(void const *, uint32_t bytes); // Remember to fix endian if needed when you call this
 
 		/// Added by [JAZ]
-		DDCRET Skip(std::int32_t NumBytes);
+		DDCRET Skip(int32_t NumBytes);
 
-		DDCRET Backpatch(std::int32_t FileOffset, const void * Data, std::uint32_t NumBytes); // Remember to fix endian if needed when you call this
+		DDCRET Backpatch(int32_t FileOffset, const void * Data, uint32_t NumBytes); // Remember to fix endian if needed when you call this
 };
 
 class WaveFormat_ChunkData {
 	public:
 		/// Format category (PCM=1)
-		std::uint16_t wFormatTag;       
+		uint16_t wFormatTag;       
 		/// Number of channels (mono=1, stereo=2)
-		std::uint16_t nChannels;        
+		uint16_t nChannels;        
 		/// Sampling rate [Hz]
-		std::uint32_t nSamplesPerSec;   
-		std::uint32_t nAvgBytesPerSec;
-		std::uint16_t nBlockAlign;
-		std::uint16_t nBitsPerSample;
-		void Config(std::uint32_t NewSamplingRate = 44100, std::uint16_t NewBitsPerSample = 16, std::uint16_t NewNumChannels = 2, bool isFloat = false) {
+		uint32_t nSamplesPerSec;   
+		uint32_t nAvgBytesPerSec;
+		uint16_t nBlockAlign;
+		uint16_t nBitsPerSample;
+		void Config(uint32_t NewSamplingRate = 44100, uint16_t NewBitsPerSample = 16, uint16_t NewNumChannels = 2, bool isFloat = false) {
 			if (isFloat) {
 				wFormatTag = 3; // IEEE float
 			}
@@ -121,11 +123,11 @@ class WaveFormat_Chunk {
 		}
 };
 
-std::uint16_t const MAX_WAVE_CHANNELS = 2;
+uint16_t const MAX_WAVE_CHANNELS = 2;
 
 class WaveFileSample {
 	public:
-		std::int16_t chan[MAX_WAVE_CHANNELS];
+		int16_t chan[MAX_WAVE_CHANNELS];
 };
 
 
@@ -136,56 +138,56 @@ class WaveFile: public ExtRiffFile {
 	WaveFormat_Chunk wave_format;
 	ExtRiffChunkHeader pcm_data;
 	/// offset of 'pcm_data' in output file
-	std::uint32_t pcm_data_offset;
-	std::uint32_t num_samples;
+	uint32_t pcm_data_offset;
+	uint32_t num_samples;
 
 	public:
 	WaveFile();
 
 	DDCRET OpenForWrite(const char * Filename,
-		std::uint32_t SamplingRate = 44100,
-		std::uint16_t BitsPerSample = 16,
-		std::uint16_t NumChannels = 2,
+		uint32_t SamplingRate = 44100,
+		uint16_t BitsPerSample = 16,
+		uint16_t NumChannels = 2,
 		bool isFloat = false);
 
 	DDCRET OpenForRead(const char * Filename);
 
-	DDCRET ReadSample(std::int16_t Sample[MAX_WAVE_CHANNELS]);
-	DDCRET WriteSample(const std::int16_t Sample[MAX_WAVE_CHANNELS]);
-	DDCRET SeekToSample(std::uint32_t SampleIndex);
+	DDCRET ReadSample(int16_t Sample[MAX_WAVE_CHANNELS]);
+	DDCRET WriteSample(const int16_t Sample[MAX_WAVE_CHANNELS]);
+	DDCRET SeekToSample(uint32_t SampleIndex);
 
 	/// work only with 16-bit audio
-	DDCRET WriteData(const std::int16_t * data, std::uint32_t numData);
+	DDCRET WriteData(const int16_t * data, uint32_t numData);
 	/// work only with 16-bit audio
-	DDCRET ReadData(std::int16_t * data, std::uint32_t numData);
+	DDCRET ReadData(int16_t * data, uint32_t numData);
 
 	/// work only with unsigned 8-bit audio
-	DDCRET WriteData(const std::uint8_t * data, std::uint32_t numData);
+	DDCRET WriteData(const uint8_t * data, uint32_t numData);
 	/// work only with unsigned 8-bit audio
-	DDCRET ReadData(std::uint8_t * data, std::uint32_t numData);
+	DDCRET ReadData(uint8_t * data, uint32_t numData);
 
-	DDCRET ReadSamples(std::uint32_t num, WaveFileSample[]);
+	DDCRET ReadSamples(uint32_t num, WaveFileSample[]);
 
 	DDCRET WriteMonoSample(float ChannelData);
 	DDCRET WriteStereoSample(float LeftChannelData, float RightChannelData);
 
-	DDCRET ReadMonoSample(std::int16_t * ChannelData);
-	DDCRET ReadStereoSample(std::int16_t * LeftSampleData, std::int16_t * RightSampleData);
+	DDCRET ReadMonoSample(int16_t * ChannelData);
+	DDCRET ReadStereoSample(int16_t * LeftSampleData, int16_t * RightSampleData);
 
 	DDCRET Close();
 
 	/// [Hz]
-	std::uint32_t SamplingRate() const;
-	std::uint16_t BitsPerSample() const;
-	std::uint16_t NumChannels() const;
-	std::uint32_t NumSamples() const;
+	uint32_t SamplingRate() const;
+	uint16_t BitsPerSample() const;
+	uint16_t NumChannels() const;
+	uint32_t NumSamples() const;
 
 	/// Open for write using another wave file's parameters...
 	DDCRET OpenForWrite(const char * Filename, WaveFile & OtherWave) {
 		return OpenForWrite(Filename, OtherWave.SamplingRate(), OtherWave.BitsPerSample(), OtherWave.NumChannels());
 	}
 
-	std::int32_t CurrentFilePosition() const {
+	int32_t CurrentFilePosition() const {
 		return ExtRiffFile::CurrentFilePosition();
 	}
 };

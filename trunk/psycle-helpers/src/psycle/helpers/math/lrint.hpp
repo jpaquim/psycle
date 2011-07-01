@@ -10,6 +10,8 @@
 
 namespace psycle { namespace helpers { namespace math {
 
+using namespace universalis::stdlib;
+
 /// C1999 lrint - converts a floating point number to an integer by rounding in an unspecified way.
 /// This function has the same semantic as C1999's lrint series of functions,
 /// but with C++ overload support, we don't need different names for each type.

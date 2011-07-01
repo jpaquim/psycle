@@ -12,6 +12,7 @@
 #include "patternevent.h"
 #include "playertimeinfo.h"
 #include "machinekey.hpp"
+#include "cpu_time_clock.hpp"
 
 #include <universalis/os/loggers.hpp>
 #include <universalis/stdlib/cstdint.hpp>
@@ -407,17 +408,17 @@ class PSYCLE__CORE__DECL Machine {
 	///\{
 		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
 
-		public:  chrono::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-		private: chrono::nanoseconds accumulated_processing_time_;
-		protected: void accumulate_processing_time(chrono::nanoseconds ns) throw() {
-				if(loggers::warning() && ns.count() < 0) {
+		public:  cpu_time_clock::duration accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		private: cpu_time_clock::duration accumulated_processing_time_;
+		protected: void accumulate_processing_time(cpu_time_clock::duration d) throw() {
+				if(loggers::warning() && d.count() < 0) {
 					std::ostringstream s;
-					s << "time went backward by: " << ns.count() * 1e-9 << 's';
+					s << "time went backward by: " << chrono::nanoseconds(d).count() * 1e-9 << 's';
 					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				} else accumulated_processing_time_ += ns;
+				} else accumulated_processing_time_ += d;
 			}
 
-		public:  uint64_t processing_count() const throw() { return processing_count_; }
+		public:    uint64_t processing_count() const throw() { return processing_count_; }
 		protected: uint64_t processing_count_;
 	///\}
 

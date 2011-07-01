@@ -14,6 +14,15 @@
 
 namespace psycle { namespace helpers { namespace math {
 
+using universalis::stdlib::int64_t;
+using universalis::stdlib::uint64_t;
+using universalis::stdlib::int32_t;
+using universalis::stdlib::uint32_t;
+using universalis::stdlib::int16_t;
+using universalis::stdlib::uint16_t;
+using universalis::stdlib::int8_t;
+using universalis::stdlib::uint8_t;
+
 /// an approximate but fast computation of the base-2 logarithm.
 ///
 /// The approximation error is:
@@ -26,7 +35,7 @@ float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f) {
 		//assert(f > 0); 
 		union result_union {
 			float f;
-			std::uint32_t i;
+			uint32_t i;
 		} result;
 		result.f = f;
 		#if 0 // slower

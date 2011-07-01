@@ -44,7 +44,7 @@ int const MAX_BUFFER_LENGTH = 256;
 ///\}
 
 /// the pi constant.
-/// note: this is also defined in <psycle/helpers/math/pi.hpp> but we want no dependency here
+/// note: this is also defined in <psycle/helpers/math/constants.hpp> but we want no dependency here
 double const pi = 3.14159265358979323846;
 
 /*////////////////////////////////////////////////////////////////////////*/
@@ -91,14 +91,22 @@ class CMachineParameter {
 /// class defining the machine properties
 class CMachineInfo {
 	public:
-		CMachineInfo(short APIVersion, int flags, int numParameters, CMachineParameter const * const * parameters,
-			char const * name, char const * shortName, char const * author, char const * command, int numCols)
-		: APIVersion(APIVersion), PlugVersion(0), Flags(flags), numParameters(numParameters), Parameters(parameters),
-		Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
-		CMachineInfo(short APIVersion, short PlugVersion, int flags, int numParameters, CMachineParameter const * const * parameters,
-			char const * name, char const * shortName, char const * author, char const * command, int numCols)
-		: APIVersion(APIVersion), PlugVersion(PlugVersion), Flags(flags), numParameters(numParameters), Parameters(parameters),
-		Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols) {}
+		CMachineInfo(
+			short APIVersion, int flags, int numParameters, CMachineParameter const * const * parameters,
+			char const * name, char const * shortName, char const * author, char const * command, int numCols
+		) :
+			APIVersion(APIVersion), PlugVersion(0), Flags(flags), numParameters(numParameters), Parameters(parameters),
+			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols)
+		{}
+
+		CMachineInfo(
+			short APIVersion, short PlugVersion, int flags, int numParameters, CMachineParameter const * const * parameters,
+			char const * name, char const * shortName, char const * author, char const * command, int numCols
+		) :
+			APIVersion(APIVersion), PlugVersion(PlugVersion), Flags(flags), numParameters(numParameters), Parameters(parameters),
+			Name(name), ShortName(shortName), Author(author), Command(command), numCols(numCols)
+		{}
+
 		/// API version. Use MI_VERSION
 		short const APIVersion;
 		/// plug version. Your machine version. Shown in Hexadecimal.
@@ -268,4 +276,3 @@ class CMachineInterface {
 	
 }}
 #endif
-

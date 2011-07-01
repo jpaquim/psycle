@@ -12,6 +12,8 @@
 
 namespace psycle { namespace helpers {
 
+using namespace universalis::stdlib;
+
 class BinRead {
 	public:
 
@@ -20,20 +22,20 @@ class BinRead {
 		BinRead( std::istream & in );
 		~BinRead();
 
-		std::int16_t readInt2LE();
-		std::uint16_t readUInt2LE();
+		int16_t readInt2LE();
+		uint16_t readUInt2LE();
 	
-		std::int16_t readInt2BE();
-		std::uint16_t readUInt2BE();
+		int16_t readInt2BE();
+		uint16_t readUInt2BE();
 		
-		std::int32_t readInt4LE(); 
-		std::uint32_t readUInt4LE();
+		int32_t readInt4LE(); 
+		uint32_t readUInt4LE();
 
-		std::int32_t readInt4BE();
-		std::uint32_t readUInt4BE();
+		int32_t readInt4BE();
+		uint32_t readUInt4BE();
 			
-		void readUIntArray4LE( std::uint32_t data[], int count );
-		void readIntArray4LE( std::int32_t data[], int count );
+		void readUIntArray4LE( uint32_t data[], int count );
+		void readIntArray4LE( int32_t data[], int count );
 
 		void read( char * data, std::streamsize const & bytes );
 
@@ -49,9 +51,8 @@ class BinRead {
 		#if 0
 			BinPlatform platform_;
 			BinPlatform testPlatform();
-			std::uint32_t swap4( std::uint32_t value );
+			uint32_t swap4( uint32_t value );
 		#endif
 };
 
 }}
-

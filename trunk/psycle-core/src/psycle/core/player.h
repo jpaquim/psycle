@@ -12,7 +12,7 @@
 #include <psycle/helpers/dither.hpp>
 #include <psycle/helpers/riff.hpp>
 
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 #include <universalis/stdlib/chrono.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/thread.hpp>

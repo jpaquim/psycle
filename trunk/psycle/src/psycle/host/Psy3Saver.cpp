@@ -12,8 +12,9 @@
 #include <sstream>
 #include <iomanip>
 
-namespace psycle  {
-	namespace host {
+namespace psycle  { namespace host {
+
+using namespace universalis::stdlib;
 
 		Psy3Saver::Psy3Saver(psycle::core::Song& song)
 			: song_(&song) {
@@ -68,7 +69,7 @@ namespace psycle  {
 			return new_name;
 		}
 
-		std::uint32_t Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
+		uint32_t Psy3Saver::ConvertType(const psycle::core::MachineKey& key,bool isGenerator) const {
 			OldMachineType old_type = MACH_DUMMY; // default
 			if (key.host() == Hosts::INTERNAL ) {
 				if (key == InternalKeys::master ) {
@@ -99,7 +100,7 @@ namespace psycle  {
 				else
 					old_type = MACH_VSTFX;
 			}
-			return (std::uint32_t)old_type;
+			return static_cast<uint32_t>(old_type);
 		}
 
 		bool Psy3Saver::Save(psycle::core::RiffFile* pFile,bool autosave) {
@@ -383,7 +384,7 @@ namespace psycle  {
 					pFile->Write(size);
 					// chunk data
 					index = i; // index					
-					pFile->Write(std::uint32_t(index));
+					pFile->Write(uint32_t(index));
 
 					MachineKey key = song_->machine(i)->getMachineKey();
 					pFile->Write(ConvertType(key,song_->machine(i)->IsGenerator()));
@@ -397,7 +398,7 @@ namespace psycle  {
 						}
 					#elif (CURRENT_FILE_VERSION_MACD&0xFF00) == 0x0100
 						pFile->WriteString(ConvertName(key.dllName())+".dll"));
-						pFile->Write(std::uint32_t(key.index())); // is saved in the dllName
+						pFile->Write(uint32_t(key.index())); // is saved in the dllName
 					#endif
 					song_->machine(i)->SaveFileChunk(pFile);
 
@@ -549,5 +550,4 @@ namespace psycle  {
 		}
 
 
-	}	// namespace host
-}  // namespace psycle
+}}
