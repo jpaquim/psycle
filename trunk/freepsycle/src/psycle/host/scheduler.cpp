@@ -13,18 +13,7 @@ namespace psycle { namespace host {
 using engine::exceptions::runtime_error;
 
 namespace {
-	nanoseconds cpu_time_clock() {
-		#if 0
-			return hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch();
-		#elif 0
-			return universalis::os::clocks::thread_cpu_time::current();
-		#elif 0
-			return universalis::os::clocks::process_cpu_time::current();
-		#else
-			return universalis::os::clocks::monotonic::current();
-		#endif
-	}
-
+	typedef universalis::os::clocks::hires_thread_or_fallback cpu_time_clock;
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
 }
 
@@ -101,17 +90,17 @@ void node::reset() {
 }
 
 void node::process(bool first) {
-	nanoseconds const t0(cpu_time_clock());
+	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 	if(first) engine_.process_first(); else engine_.process();
-	nanoseconds const t1(cpu_time_clock());
+	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	if(t1 > t0) {
 		accumulated_processing_time_ += t1 - t0;
 		++processing_count_no_zeroes_;
 	} else if(loggers::warning() && t1 < t0) {
 		std::ostringstream s;
 		s << "time went backward: "
-			<< t0.get_count() * 1e-9 << "s, "
-			<< t1.get_count() * 1e-9 << 's';
+			<< chrono::nanoseconds(t0.time_since_epoch()).count() * 1e-9 << "s, "
+			<< chrono::nanoseconds(t1.time_since_epoch()).count() * 1e-9 << 's';
 		loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	++processing_count_;
@@ -231,7 +220,7 @@ void scheduler::start() {
 			loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
 		for(std::size_t i = 0; i < thread_count_; ++i)
-			threads_.push_back(new std::thread(boost::bind(&scheduler::thread_function, this, i)));
+			threads_.push_back(new thread(boost::bind(&scheduler::thread_function, this, i)));
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;
@@ -340,7 +329,7 @@ void scheduler::stop() {
 
 	// dump time measurements
 	std::cout << "time measurements: \n";
-	nanoseconds total;
+	chrono::nanoseconds total;
 	for(const_iterator i = begin(), e = end(); i != e; ++i) {
 		node & node = **i;
 		std::cout
@@ -351,16 +340,16 @@ void scheduler::stop() {
 		if(!node.processing_count()) std::cout << "not processed\n";
 		else {
 			std::cout
-				<< node.accumulated_processing_time().get_count() * 1e-9 << "s / "
+				<< chrono::nanoseconds(node.accumulated_processing_time()).count() * 1e-9 << "s / "
 				<< node.processing_count() << " = "
-				<< node.accumulated_processing_time().get_count() * 1e-9 / node.processing_count() << 's';
+				<< chrono::nanoseconds(node.accumulated_processing_time()).count() * 1e-9 / node.processing_count() << 's';
 			if(node.processing_count() > node.processing_count_no_zeroes())
 				std::cout << ", zeroes: " << node.processing_count() - node.processing_count_no_zeroes();
 			std::cout << '\n';
 		}
 		total += node.accumulated_processing_time();
 	}
-	std::cout << "total: " << 1e-9 * total.get_count() << "s\n";
+	std::cout << "total: " << 1e-9 * total.count() << "s\n";
 }
 
 void scheduler::thread_function(std::size_t thread_number) {

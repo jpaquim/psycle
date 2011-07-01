@@ -18,7 +18,7 @@
 		using std::lock_guard;
 		using std::once_flag;
 		using std::call_once;
-		#define UNIVERSALIS__STDLIB__ONCE_FLAG(flag) std::once_flag flag;
+		#define UNIVERSALIS__STDLIB__ONCE_FLAG(flag) std::once_flag flag
 	}}
 #else
 	#include "chrono.hpp"
@@ -84,6 +84,6 @@
 		using boost::lock_guard;
 		using boost::once_flag;
 		using boost::call_once;
-		#define UNIVERSALIS__STDLIB__ONCE_FLAG(flag) boost::once_flag flag = BOOST_ONCE_INIT;
+		#define UNIVERSALIS__STDLIB__ONCE_FLAG(flag) boost::once_flag flag = BOOST_ONCE_INIT
 	}}
 #endif

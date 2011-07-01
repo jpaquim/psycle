@@ -52,7 +52,7 @@ class PSYCLE__DECL graph : public std::set<node*>, public named {
 
 	///\name thread synchronisation
 		public:
-			typedef class scoped_lock<mutex> scoped_lock;
+			typedef unique_lock<mutex> scoped_lock;
 			operator mutex & () const { return mutex_; }
 		private:
 			mutex mutable mutex_;
@@ -231,7 +231,7 @@ class PSYCLE__DECL node : public named {
 			void io_ready(bool io_ready);
 		private:
 			bool io_ready_;
-			typedef class scoped_lock<mutex> scoped_lock;
+			typedef unique_lock<mutex> scoped_lock;
 			mutex mutable mutex_;
 
 		public:

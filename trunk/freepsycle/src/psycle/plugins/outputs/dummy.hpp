@@ -5,7 +5,7 @@
 #include "../resource.hpp"
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 #define PSYCLE__DECL  PSYCLE__PLUGINS__OUTPUTS__DUMMY
 #include <psycle/detail/decl.hpp>
 namespace psycle { namespace plugins { namespace outputs {
@@ -28,7 +28,7 @@ class PSYCLE__DECL dummy : public resource {
 		void do_close() /*override*/;
 	private:
 		bool free_wheeling_;
-		nanoseconds sleep_;
+		chrono::nanoseconds sleep_;
 
 		bool opened_;
 
@@ -36,9 +36,9 @@ class PSYCLE__DECL dummy : public resource {
 		void thread_function();
 		void thread_loop();
 
-		typedef std::scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
-		condition<scoped_lock> mutable condition_;
+		typedef unique_lock<mutex> scoped_lock;
+		condition_variable mutable condition_;
 
 		bool stop_requested_;
 

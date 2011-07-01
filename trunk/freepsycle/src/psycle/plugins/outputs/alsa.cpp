@@ -438,7 +438,7 @@ void alsa::do_start() {
 	
 	stop_requested_ = false;
 	// start the poller thread
-	thread_ = new std::thread(boost::bind(&alsa::thread_function, this));
+	thread_ = new thread(boost::bind(&alsa::thread_function, this));
 }
 
 bool alsa::started() const {
@@ -572,7 +572,7 @@ void alsa::poll_loop() {
 									loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 								}
 								// sleep a bit before retrying to resume
-								std::this_thread::sleep(std::seconds(1));
+								this_thread::sleep_for(chrono::seconds(1));
 								{ scoped_lock lock(mutex_);
 									if(stop_requested_) return;
 								}
