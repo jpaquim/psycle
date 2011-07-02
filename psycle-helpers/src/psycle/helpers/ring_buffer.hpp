@@ -9,7 +9,9 @@
 #include <cstddef>
 #include <cassert>
 #include <algorithm>
-#include <cstdatomic>
+#ifdef DIVERSALIS__COMPILER__FEATURE__CXX0X
+	#include <cstdatomic>
+#endif
 namespace psycle { namespace helpers { namespace ring_buffers {
 
 // see portaudio memory barrier http://portaudio.com/trac/browser/portaudio/trunk/src/common/pa_memorybarrier.h
