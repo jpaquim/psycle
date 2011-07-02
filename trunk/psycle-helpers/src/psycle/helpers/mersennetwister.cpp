@@ -1,5 +1,3 @@
-///\implementation psycle::helpers::dsp::MersenneTwister
-
 /* 
 	A C-program for MT19937, with initialization improved 2002/1/26.
 	Coded by Takuji Nishimura and Makoto Matsumoto.
@@ -45,28 +43,20 @@
 
 // (c++-ified for psycle by dw aley)
 // (64-bit compatibility by johan boule)
+// (made thread-safe by eliminating static data by johan boule)
 
 #include "mersennetwister.hpp"
 #include <cmath>
 namespace psycle { namespace helpers { namespace dsp {
 
-/// the array for the state vector
-uint32_t MersenneTwister::mt[N];
-
-/// mti == N + 1 means mt[N] is not initialized
-int32_t MersenneTwister::mti = N + 1;
-
 /// initializes mt[N] with a seed
 void MersenneTwister::init_genrand(uint32_t s) {
-	mt[0] = s & 0xffffffffU;
+	mt[0] = s;
 	for(mti = 1; mti < N; ++mti) {
 		mt[mti] = 1812433253 * (mt[mti - 1] ^ (mt[mti - 1] >> 30)) + mti;
 		/// See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
 		/// In the previous versions, MSBs of the seed affect
 		/// only MSBs of the array mt[].
-		// 2002/01/09 modified by Makoto Matsumoto
-		mt[mti] &= 0xffffffffU;
-		/// for >32 bit machines
 	}
 }
 
@@ -74,10 +64,8 @@ void MersenneTwister::init_genrand(uint32_t s) {
 /// init_key is the array for initializing keys,
 /// key_length is its length
 void MersenneTwister::init_by_array(uint32_t init_key[], std::size_t key_length) {
-	std::size_t i, j, k;
 	init_genrand(19650218);
-	i = 1; j = 0;
-	k = N > key_length ? N : key_length;
+	std::size_t i = 1, j = 0, k = N > key_length ? N : key_length;
 	for(; k; --k) {
 		mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1664525)) + init_key[j] + j; // non linear
 		mt[i] &= 0xffffffffU; // for WORDSIZE > 32 machines
@@ -97,31 +85,31 @@ void MersenneTwister::init_by_array(uint32_t init_key[], std::size_t key_length)
 
 /// generates a random number on [0,0xffffffff]-interval
 uint32_t MersenneTwister::genrand_int32() {
-	uint32_t y;
-	static uint32_t mag01[2] = { 0, MATRIX_A };
-	// mag01[x] = x * MATRIX_A  for x = 0, 1
-
 	if(mti >= N) { // generate N words at one time
-		int32_t kk;
-
 		if(mti == N + 1) // if init_genrand() has not been called,
 			init_genrand(5489); // a default initial seed is used
 
-		for(kk = 0; kk < N - M; ++kk) {
-			y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-			mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 1];
+		// mag01[x] = x * MATRIX_A  for x = 0, 1
+		uint32_t const static mag01[2] = { 0, MATRIX_A };
+		{
+			int32_t kk;
+			for(kk = 0; kk < N - M; ++kk) {
+				uint32_t y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+				mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 1];
+			}
+			for(; kk < N - 1; ++kk) {
+				uint32_t y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
+				mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ mag01[y & 1];
+			}
 		}
-		for(; kk < N - 1; ++kk) {
-			y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
-			mt[kk] = mt[kk + (M - N)] ^ (y >> 1) ^ mag01[y & 1];
+		{
+			uint32_t y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
+			mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 1];
 		}
-		y = (mt[N - 1] & UPPER_MASK) | (mt[0] & LOWER_MASK);
-		mt[N - 1] = mt[M - 1] ^ (y >> 1) ^ mag01[y & 1];
-
 		mti = 0;
 	}
 	
-	y = mt[mti++];
+	uint32_t y = mt[mti++];
 
 	// Tempering
 	y ^= (y >> 11);
@@ -136,6 +124,8 @@ uint32_t MersenneTwister::genrand_int32() {
 int32_t MersenneTwister::genrand_int31() {
 	return static_cast<int32_t>(genrand_int32() >> 1);
 }
+
+// These real versions are due to Isaku Wada, 2002/01/09 added
 
 /// generates a random number on [0, 1] real interval
 double MersenneTwister::genrand_real1() {
@@ -161,18 +151,16 @@ double MersenneTwister::genrand_res53() {
 	return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
 } 
 
-// These real versions are due to Isaku Wada, 2002/01/09 added
-
 /// gaussian-distribution variation, added by dw
 void MersenneTwister::genrand_gaussian(double & out1, double & out2) {
-	float x1;
-	float x2;
-	float w;
+	double x1;
+	double x2;
+	double w;
 	do {
-		x1 = this->genrand_real1() * 2 - 1;
-		x2 = this->genrand_real1() * 2 - 1;
+		x1 = genrand_real1() * 2 - 1;
+		x2 = genrand_real1() * 2 - 1;
 		w = x1 * x1 + x2 * x2;
-	} while(w >= 1.0);
+	} while(w >= 1.0f);
 	w = std::sqrt((-2.0f * log(w)) / w);
 	out1 = w * x1;
 	out2 = w * x2;
