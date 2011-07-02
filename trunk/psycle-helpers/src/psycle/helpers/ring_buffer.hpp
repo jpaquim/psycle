@@ -14,6 +14,7 @@
 #endif
 namespace psycle { namespace helpers { namespace ring_buffers {
 
+// see boost circular buffer    http://www.boost.org/doc/libs/1_46_1/libs/circular_buffer/doc/circular_buffer.html
 // see portaudio memory barrier http://portaudio.com/trac/browser/portaudio/trunk/src/common/pa_memorybarrier.h
 // see portaudio ring buffer    http://portaudio.com/trac/browser/portaudio/trunk/src/common/pa_ringbuffer.c
 

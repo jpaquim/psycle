@@ -37,24 +37,24 @@
 		template<typename Clock>
 		void measure_clock_resolution(unsigned int const count = 1000000) {
 			using namespace stdlib::chrono;
-			nanoseconds min(hours(1)), avg, max;
+			nanoseconds min(hours(1)), max, sum;
 			for(unsigned int i(0); i < count; ++i) {
-				unsigned long long int timeout(0);
+				uintmax_t timeout(0);
 				typename Clock::time_point t1;
 				typename Clock::time_point const t0(Clock::now());
 				do { t1 = Clock::now(); ++timeout; } while(t1 == t0 && timeout < 1000 * 1000 * 100);
+				if(Clock::is_monotonic) BOOST_CHECK(t1 >= t0);
 				if(t1 == t0) t1 = t0 + hours(1); // reports the timeout as a bogus big value
 				nanoseconds const d(t1 - t0);
 				if(d < min) min = d;
 				if(d > max) max = d;
-				avg += d;
+				sum += d;
 			}
-			avg /= count;
 			std::ostringstream s;
 			s
 				<< "clock: " << std::setw(60) << compiler::typenameof<Clock>()
 				<< ": min: " << std::setw(10) << min.count() * 1e-9 << 's'
-				<< ", avg: " << std::setw(10) << avg.count() * 1e-9 << 's'
+				<< ", avg: " << std::setw(10) << sum.count() * 1e-9 / count << 's'
 				<< ", max: " << std::setw(10) << max.count() * 1e-9 << 's';
 			BOOST_MESSAGE(s.str());
 		}
