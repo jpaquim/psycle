@@ -92,7 +92,7 @@ uint32_t MersenneTwister::genrand_int32() {
 		// mag01[x] = x * MATRIX_A  for x = 0, 1
 		uint32_t const static mag01[2] = { 0, MATRIX_A };
 		{
-			int32_t kk;
+			std::size_t kk;
 			for(kk = 0; kk < N - M; ++kk) {
 				uint32_t y = (mt[kk] & UPPER_MASK) | (mt[kk + 1] & LOWER_MASK);
 				mt[kk] = mt[kk + M] ^ (y >> 1) ^ mag01[y & 1];
