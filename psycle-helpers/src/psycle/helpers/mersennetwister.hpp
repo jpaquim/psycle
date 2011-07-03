@@ -57,9 +57,9 @@ using namespace universalis::stdlib;
 class MersenneTwister {
 	private:
 		/// Period parameters
-		int32_t const static N = 624;
+		std::size_t const static N = 624;
 		/// Period parameters
-		int32_t const static M = 397;
+		std::size_t const static M = 397;
 		/// constant vector a
 		uint32_t const static MATRIX_A = 0x9908b0dfU;
 		/// most significant w-r bits
@@ -69,7 +69,7 @@ class MersenneTwister {
 		
 		/// the array for the state vector
 		uint32_t mt[N];
-		int32_t mti;
+		std::size_t mti;
 	public:
 		MersenneTwister() : mti(N + 1) {} /// mti == N + 1 means mt[N] is not initialized
 		

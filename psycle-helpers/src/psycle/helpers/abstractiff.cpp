@@ -264,31 +264,21 @@ namespace psycle { namespace helpers {
 		}
 
 		void AbstractIff::WriteString(const char * const data) {
-			std::ptrdiff_t idx = 0;
-
-			while(data[idx] != '\0')
-			{
-				idx++;
-			}
-			WriteRaw(data,idx);
+			std::size_t idx = 0;
+			while(data[idx] != '\0') ++idx;
+			WriteRaw(data, idx);
 		}
 
 		void AbstractIff::WriteSizedString(const char * const data, std::size_t const & length) {
+			assert(length > 0);
 			if (length <= 0 ) {
 				throw std::runtime_error("erroneous max_length passed to WriteString");
 			}
-			std::ptrdiff_t idx = 0;
-
-			while(data[idx] != '\0' && idx < length)
-			{
-				idx++;
-			}
-			WriteRaw(data,idx);
-
+			std::size_t idx = 0;
+			while(data[idx] != '\0' && idx < length) ++idx;
+			WriteRaw(data, idx);
 			char c = '\0';
-			while(idx < length) {
-				Write(c);
-			}
+			while(idx < length) Write(c);
 		}
 
 		template<typename T>

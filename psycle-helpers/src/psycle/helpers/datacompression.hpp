@@ -13,27 +13,26 @@
 #pragma once
 #include <universalis.hpp>
 #include <cstddef>
-namespace psycle { namespace helpers {
+namespace psycle { namespace helpers { namespace DataCompression {
 
 using namespace universalis::stdlib;
 
-		class DataCompression {
-			public:
-				DataCompression();
-				~DataCompression();
-		
-				/// compresses.
-				static std::ptrdiff_t BEERZ77Comp2(uint8_t const * pSource, uint8_t ** pDestination, std::size_t const &);
-		
-		
-		
-		
-				/// decompresses.
-				static bool           BEERZ77Decomp2(uint8_t const * pSourcePos, uint8_t ** pDestination);
-		
-				/// squashes.
-				static std::ptrdiff_t SoundSquash(int16_t const * pSource, uint8_t ** pDestination, std::size_t const &);
-				/// desquashes.
-				static bool           SoundDesquash(uint8_t const * pSourcePos, int16_t ** pDestination);
-		};
-}}
+/// compresses.
+/// returns the destination size. remember to delete the destination when done!
+std::size_t BEERZ77Comp2(uint8_t const * source, uint8_t ** destination, std::size_t source_size);
+
+/// decompresses.
+/// \todo the destination size is NOT returned
+/// remember to delete your destination when done!
+bool BEERZ77Decomp2(uint8_t const * source, uint8_t ** destination);
+
+/// squashes sound.
+/// returns the destination size. remember to delete the destination when done!
+std::size_t SoundSquash(int16_t const * source, uint8_t ** destination, std::size_t source_size);
+
+/// desquashes sound.
+/// \todo the destination size is NOT returned
+/// remember to delete your destination when done!
+bool SoundDesquash(uint8_t const * source, int16_t ** destination);
+
+}}}

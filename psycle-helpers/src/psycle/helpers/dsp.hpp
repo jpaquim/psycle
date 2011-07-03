@@ -625,7 +625,7 @@ using namespace universalis::stdlib;
 				clock::time_point const t1(clock::now());
 				for(int i(0); i < iterations; ++i) Add(&v1[0], &v2[0], count, vol);
 				clock::time_point const t2(clock::now());
-				for(int i(0); i < iterations; ++i) for(int j(0); j < count; ++j) v2[j] += v1[j] * vol;
+				for(int i(0); i < iterations; ++i) for(std::size_t j(0); j < count; ++j) v2[j] += v1[j] * vol;
 				clock::time_point const t3(clock::now());
 				{
 					std::ostringstream s;
