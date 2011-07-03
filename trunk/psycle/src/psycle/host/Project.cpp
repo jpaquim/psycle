@@ -106,12 +106,8 @@ void Project::FileLoadsongNamed(const std::string& fName) {
 		mac_view_->child_view()->MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
 		progress_.ShowWindow(SW_HIDE);
 		mac_view()->UnlockVu();
-		delete song;
-		#pragma message(__FILE__ "(" UNIVERSALIS__COMPILER__STRINGIZE(__LINE__) "): warning: ***** BUG HERE *****")
-		// [bohan] some more details about the bug:
-		// We called "player.song(*song);" above, so current player song is now "*song", which we just deleted.
-		// If we call "player.song(*song_);" it will try to lock the deleted "*song" and crash.
 		player.song(*song_);
+		delete song;
 		return;			
 	}	
 	progress_.ShowWindow(SW_HIDE);
@@ -309,8 +305,8 @@ void Project::FileImportModulefile()
 				{			
 					mac_view()->child_view()->MessageBox("Load failed");
 					it.Close();
-					delete song;
 					player.song(*song_);
+					delete song;
 					return;
 				}
 				it.Close();
@@ -337,8 +333,8 @@ void Project::FileImportModulefile()
 				{			
 					mac_view()->child_view()->MessageBox("Load failed");
 					s3m.Close();
-					delete song;
 					player.song(*song_);
+					delete song;
 					return;
 				}
 				s3m.Close();
