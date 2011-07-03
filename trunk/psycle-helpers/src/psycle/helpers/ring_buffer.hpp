@@ -197,8 +197,9 @@ class ring_buffer_with_compiler_volatile {
 			std::size_t & UNIVERSALIS__COMPILER__RESTRICT_REF size2
 		) const {
 			std::size_t const read = read_;
+			std::size_t const write = write_;
 			begin = read & size_mask_;
-			std::size_t const avail = std::min(max, (write_ - read) & size_mask2_);
+			std::size_t const avail = std::min(max, (write - read) & size_mask2_);
 			if(begin + avail > size_) {
 				size1 = size_ - begin;
 				size2 = avail - size1;
