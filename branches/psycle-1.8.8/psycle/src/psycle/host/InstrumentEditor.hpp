@@ -21,8 +21,6 @@ namespace psycle { namespace host {
 			bool cando;
 			bool initializingDialog;
 			CMainFrame* pParentMain;
-		// Dialog Data
-			//{{AFX_DATA(CInstrumentEditor)
 			enum { IDD = IDD_INSTRUMENT };
 			CStatic	m_notelabel;
 			CStatic	m_panlabel;
@@ -45,18 +43,11 @@ namespace psycle { namespace host {
 			CStatic	m_loopend;
 			CStatic	m_looptype;
 			CStatic	m_instlabel;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CInstrumentEditor)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CInstrumentEditor)
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnLoopoff();
 			afx_msg void OnLoopforward();
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
@@ -79,8 +70,6 @@ namespace psycle { namespace host {
 			afx_msg void OnInsDecnote();
 			afx_msg void OnInsIncnote();
 			afx_msg void OnInsIncoctave();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

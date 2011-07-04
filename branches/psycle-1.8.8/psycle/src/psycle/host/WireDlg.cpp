@@ -18,9 +18,10 @@
 #include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 
-int const ID_TIMER_WIRE = 2304;
 
 namespace psycle { namespace host {
+		int const ID_TIMER_WIRE = 2304;
+
 		int SCOPE_SPEC_SAMPLES = 1024;
 
 		CWireDlg::CWireDlg(CWnd* mainView_, CWireDlg** windowVar_, int wireDlgIdx_,
@@ -28,8 +29,9 @@ namespace psycle { namespace host {
 			: CDialog(CWireDlg::IDD, AfxGetMainWnd())
 			, mainView(mainView_)
 			, windowVar(windowVar_)
-			, srcMachine(srcMac_)
 			, wireDlgIdx(wireDlgIdx_)
+			, srcMachine(srcMac_)
+			, srcWireIdx(srcWireIdx_)
 			, dstMachine(dstMac_)
 			, dstWireIdx(dstWireIdx_)
 		{
@@ -125,11 +127,16 @@ namespace psycle { namespace host {
 
 			return TRUE;
 		}
+		void CWireDlg::OnCancel()
+		{
+			OnClose();
+		}
 
 		void CWireDlg::OnClose()
 		{
 			KillTimer(ID_TIMER_WIRE);
 			CDialog::OnClose();
+
 			font.DeleteObject();
 			bufBM->DeleteObject();
 			clearBM->DeleteObject();
@@ -831,38 +838,38 @@ namespace psycle { namespace host {
 			switch (scope_mode)
 			{
 			case 0:
-				if (scope_peak_rate != m_sliderRate.GetPos())
+				if (scope_peak_rate != nPos)
 				{
-					scope_peak_rate = m_sliderRate.GetPos();
+					scope_peak_rate = nPos;
 					SetTimer(ID_TIMER_WIRE,scope_peak_rate,0);
 				}
 				break;
 			case 1:
 				if (hold)
 				{
-					pos = m_sliderRate.GetPos()&(SCOPE_BUF_SIZE-1);
+					pos = nPos&(SCOPE_BUF_SIZE-1);
 				}
 				else
 				{
 					pos = 1;
-					if (scope_osc_rate != m_sliderRate.GetPos())
+					if (scope_osc_rate != nPos)
 					{
-						scope_osc_rate = m_sliderRate.GetPos();
+						scope_osc_rate = nPos;
 						SetTimer(ID_TIMER_WIRE,scope_osc_rate,0);
 					}
 				}
 				break;
 			case 2:
-				if (scope_spec_rate != m_sliderRate.GetPos())
+				if (scope_spec_rate != nPos)
 				{
-					scope_spec_rate = m_sliderRate.GetPos();
+					scope_spec_rate = nPos;
 					SetTimer(ID_TIMER_WIRE,scope_spec_rate,0);
 				}
 				break;
 			case 3:
-				if (scope_phase_rate != m_sliderRate.GetPos())
+				if (scope_phase_rate != nPos)
 				{
-					scope_phase_rate = m_sliderRate.GetPos();
+					scope_phase_rate = nPos;
 					SetTimer(ID_TIMER_WIRE,scope_phase_rate,0);
 				}
 				break;
@@ -871,7 +878,7 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnChangeSliderVol(UINT nPos) 
 		{
-			invol = helpers::dsp::SliderToAmount(m_volslider.GetPos());
+			invol = helpers::dsp::SliderToAmount(nPos);
 
 			UpdateVolPerDb();
 			float f;
@@ -966,11 +973,9 @@ namespace psycle { namespace host {
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
-				Global::pInputHandler->AddMacViewUndo();
-
-				// update from dialog
-				m_volslider.SetPos(helpers::dsp::AmountToSlider(dlg.volume));
-				invol = dlg.volume;
+				int pos = helpers::dsp::AmountToSlider(dlg.volume);
+				m_volslider.SetPos(pos);
+				OnChangeSliderVol(pos);
 			}
 		}
 
@@ -981,10 +986,9 @@ namespace psycle { namespace host {
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{
-				Global::pInputHandler->AddMacViewUndo();
-				// update from dialog
-				m_volslider.SetPos(helpers::dsp::AmountToSlider(dlg.volume));
-				invol = dlg.volume;
+				int pos = helpers::dsp::AmountToSlider(dlg.volume);
+				m_volslider.SetPos(pos);
+				OnChangeSliderVol(pos);
 			}
 		}
 

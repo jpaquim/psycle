@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::CNativeGui.
 #pragma once
 #include "Psycle.hpp"
-#include "NativeGui.hpp"
+#include "NativeView.hpp"
 #include "PsycleConfig.hpp"
 namespace psycle {
 namespace host {
@@ -11,7 +11,7 @@ namespace host {
 		class Mixer;
 
 		/// Native Knob-based UI for psycle plugins and non-GUI VSTs
-		class MixerFrameView : public CNativeGui
+		class MixerFrameView : public CNativeView
 		{
 		enum
 		{
@@ -37,7 +37,7 @@ namespace host {
 			returnmax=return1+MAX_CONNECTIONS
 		};
 		public:
-			MixerFrameView(CFrameMachine* frame,Machine* effect, CChildView* view);
+			MixerFrameView(CFrameMachine* frame,Machine* effect);
 			virtual ~MixerFrameView();
 		// Operations
 			virtual bool GetViewSize(CRect& rect);
@@ -54,11 +54,11 @@ namespace host {
 			int GetParamFromPos(int col,int row);
 			bool GetRouteState(int ret,int send);
 			
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			DECLARE_MESSAGE_MAP()
 		
 			// graphics
 			bool updateBuffer;

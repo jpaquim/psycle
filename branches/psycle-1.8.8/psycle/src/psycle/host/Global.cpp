@@ -90,13 +90,14 @@ namespace psycle
 
 		Global::~Global()
 		{
+			delete _pSong; _pSong = 0;
+			//vst host has to be deleted after song.
 			delete pVstHost; pVstHost = 0;
 			delete pPlayer; pPlayer = 0;
 #if !defined WINAMP_PLUGIN
 			delete pMidiInput; pMidiInput = 0;
 #endif //!defined WINAMP_PLUGIN
 			delete pResampler; pResampler = 0;
-			delete _pSong; _pSong = 0;
 #if !defined WINAMP_PLUGIN
 			delete pInputHandler; pInputHandler = 0;
 #endif //!defined WINAMP_PLUGIN

@@ -28,8 +28,9 @@ namespace psycle { namespace host {
 			CEdit	m_macname;
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		protected:
 			virtual BOOL OnInitDialog();
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnChangeMacName();
 			afx_msg void OnDelete();
 			afx_msg void OnMute();
@@ -37,7 +38,6 @@ namespace psycle { namespace host {
 			afx_msg void OnSolo();
 			afx_msg void OnClone();
 			afx_msg void OnBnClickedReplacemac();
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace host

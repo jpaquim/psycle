@@ -34,17 +34,17 @@ namespace psycle { namespace host {
 
 
 		// Overrides
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
 		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
+		// Implementation
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnChangeBufnum();
 			afx_msg void OnChangeBufsize();
 			afx_msg void OnSelendokSamplerate();
 			afx_msg void OnSelendokBitDepth();
-			DECLARE_MESSAGE_MAP()
 		private:
 			void RecalcLatency();
 		};

@@ -117,38 +117,38 @@ namespace psycle
 		///\todo: finish
 		 std::list<std::string> Registry::GetGroups(){std::list<std::string> list; return list;}
 		 std::list<std::string> Registry::GetKeys(){std::list<std::string> list; return list;}
-		 bool Registry::Read(std::string const & key, bool & x){ return QueryValue(key, x, REG_BINARY); }
-		 bool Registry::Write(std::string const & key, bool x){return SetValue(key, x, REG_BINARY);}
+		 bool Registry::Read(std::string const & key, bool & x){ return ERROR_SUCCESS==QueryValue(key, x, REG_BINARY); }
+		 bool Registry::Write(std::string const & key, bool x){return ERROR_SUCCESS==SetValue(key, x, REG_BINARY);}
 
-		 bool Registry::Read(std::string const & key, uint8_t & x){uint32_t x2; bool result = QueryValue(key, x2, REG_DWORD); x = x2; return result; }
-		 bool Registry::Read(std::string const & key, int8_t & x){uint32_t x2;  bool result =  QueryValue(key, x2, REG_DWORD); x = x2; return result;  }
-		 bool Registry::Read(std::string const & key, char & x){uint32_t x2;  bool result =  QueryValue(key, x2, REG_DWORD); x = x2; return result;  } // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
-		 bool Registry::Write(std::string const & key, uint8_t x){uint32_t x2 = x; return SetValue(key, x2, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, int8_t x){uint32_t x2 = x; return SetValue(key, x2, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, char x){uint32_t x2 = x; return SetValue(key, x2, REG_DWORD);} // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
+		 bool Registry::Read(std::string const & key, uint8_t & x){uint32_t x2; bool result = ERROR_SUCCESS==QueryValue(key, x2, REG_DWORD); x = x2; return result; }
+		 bool Registry::Read(std::string const & key, int8_t & x){uint32_t x2;  bool result =  ERROR_SUCCESS==QueryValue(key, x2, REG_DWORD); x = x2; return result;  }
+		 bool Registry::Read(std::string const & key, char & x){uint32_t x2;  bool result =  ERROR_SUCCESS==QueryValue(key, x2, REG_DWORD); x = x2; return result;  } // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
+		 bool Registry::Write(std::string const & key, uint8_t x){uint32_t x2 = x; return ERROR_SUCCESS==SetValue(key, x2, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, int8_t x){uint32_t x2 = x; return ERROR_SUCCESS==SetValue(key, x2, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, char x){uint32_t x2 = x; return ERROR_SUCCESS==SetValue(key, x2, REG_DWORD);} // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
 
-		 bool Registry::Read(std::string const & key, uint16_t & x){ uint32_t x2;  bool result =  QueryValue(key, x2, REG_DWORD); x = x2; return result;  }
-		 bool Registry::Read(std::string const & key, int16_t & x){uint32_t x2;  bool result =  QueryValue(key, x2, REG_DWORD); x = x2; return result;  }
-		 bool Registry::Write(std::string const & key, uint16_t x){uint32_t x2 = x; return SetValue(key, x2, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, int16_t x){uint32_t x2 = x; return SetValue(key, x2, REG_DWORD);}
+		 bool Registry::Read(std::string const & key, uint16_t & x){ uint32_t x2;  bool result =  ERROR_SUCCESS==QueryValue(key, x2, REG_DWORD); x = x2; return result;  }
+		 bool Registry::Read(std::string const & key, int16_t & x){uint32_t x2;  bool result =  ERROR_SUCCESS==QueryValue(key, x2, REG_DWORD); x = x2; return result;  }
+		 bool Registry::Write(std::string const & key, uint16_t x){uint32_t x2 = x; return ERROR_SUCCESS==SetValue(key, x2, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, int16_t x){uint32_t x2 = x; return ERROR_SUCCESS==SetValue(key, x2, REG_DWORD);}
 
-		 bool Registry::Read(std::string const & key, uint32_t & x){return QueryValue(key, x, REG_DWORD);}
-		 bool Registry::Read(std::string const & key, int32_t & x){return QueryValue(key, x, REG_DWORD);}
-		 bool Registry::Read(std::string const & key, COLORREF & x){return QueryValue(key, x, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, uint32_t x){return SetValue(key, x, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, int32_t x){return SetValue(key, x, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, COLORREF x){return SetValue(key, x, REG_DWORD);}
+		 bool Registry::Read(std::string const & key, uint32_t & x){return ERROR_SUCCESS==QueryValue(key, x, REG_DWORD);}
+		 bool Registry::Read(std::string const & key, int32_t & x){return ERROR_SUCCESS==QueryValue(key, x, REG_DWORD);}
+		 bool Registry::Read(std::string const & key, COLORREF & x){return ERROR_SUCCESS==QueryValue(key, x, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, uint32_t x){return ERROR_SUCCESS==SetValue(key, x, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, int32_t x){return ERROR_SUCCESS==SetValue(key, x, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, COLORREF x){return ERROR_SUCCESS==SetValue(key, x, REG_DWORD);}
 
-		 bool Registry::Read(std::string const & key, uint64_t & x){return QueryValue(key, x, REG_QWORD);}
-		 bool Registry::Read(std::string const & key, int64_t & x){return QueryValue(key, x, REG_QWORD);}
-		 bool Registry::Write(std::string const & key, uint64_t x){return SetValue(key, x, REG_QWORD);}
-		 bool Registry::Write(std::string const & key, int64_t x){return SetValue(key, x, REG_QWORD);}
+		 bool Registry::Read(std::string const & key, uint64_t & x){return ERROR_SUCCESS==QueryValue(key, x, REG_QWORD);}
+		 bool Registry::Read(std::string const & key, int64_t & x){return ERROR_SUCCESS==QueryValue(key, x, REG_QWORD);}
+		 bool Registry::Write(std::string const & key, uint64_t x){return ERROR_SUCCESS==SetValue(key, x, REG_QWORD);}
+		 bool Registry::Write(std::string const & key, int64_t x){return ERROR_SUCCESS==SetValue(key, x, REG_QWORD);}
 
-		 bool Registry::Read(std::string const & key, float & x){return QueryValue(key, x, REG_DWORD);}
-		 bool Registry::Write(std::string const & key, float x){return SetValue(key, x, REG_DWORD);}
+		 bool Registry::Read(std::string const & key, float & x){return ERROR_SUCCESS==QueryValue(key, x, REG_DWORD);}
+		 bool Registry::Write(std::string const & key, float x){return ERROR_SUCCESS==SetValue(key, x, REG_DWORD);}
 
-		 bool Registry::Read(std::string const & key, double & x){return QueryValue(key, x, REG_QWORD);}
-		 bool Registry::Write(std::string const & key, double x){return SetValue(key, x, REG_QWORD);}
+		 bool Registry::Read(std::string const & key, double & x){return ERROR_SUCCESS==QueryValue(key, x, REG_QWORD);}
+		 bool Registry::Write(std::string const & key, double x){return ERROR_SUCCESS==SetValue(key, x, REG_QWORD);}
 		 bool Registry::Read(std::string const & key, std::string &s)
 		 {
 			std::size_t size;
@@ -177,9 +177,32 @@ namespace psycle
 			return (error == ERROR_SUCCESS);
 		 }
 		 bool Registry::Write(std::string const & key, std::string const &s)
-		 {
-			return ::RegSetValueEx(current_group, key.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(s.c_str()), (DWORD)(s.length() + 1));
+		 { 
+			 int error = ::RegSetValueEx(current_group, key.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(s.c_str()), (DWORD)(s.length() + 1));
+			 return (error == ERROR_SUCCESS);
 		 }
+
+		bool Registry::Read(std::string const & key, WCHAR *string, std::size_t max_length_bytes)
+		{
+			char result[8192];
+			bool done = Read(key,result,8191);
+			if(done) {
+				done = MultiByteToWideChar(CP_UTF8,NULL,result, -1, string, max_length_bytes);
+			}
+			 return done;
+		}
+		bool Registry::Write(std::string const & key, WCHAR *string)
+		{
+			int wlen = wcslen(string);
+			char* res = new char[wlen*2+1];
+			int bytes = WideCharToMultiByte(CP_UTF8,NULL,string, -1, res, wlen*2+1, NULL, NULL);
+			bool done = bytes>0;
+			if (done) {
+				done = ::RegSetValueEx(current_group, key.c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(res), bytes);
+			}
+			 delete[] res;
+			 return done;
+		}
 
 		bool Registry::ReadRaw(std::string const & key, void *data, std::size_t max_length)
 		{
@@ -187,9 +210,9 @@ namespace psycle
 			result const error(::RegQueryValueEx(current_group, key.c_str(), 0, &type_read, reinterpret_cast<unsigned char *>(data), reinterpret_cast<unsigned long int*>(&max_length)));
 			return (error == ERROR_SUCCESS);
 		}
-		bool Registry::WriteRaw(std::string const & key, void *data, std::size_t max_length)
+		bool Registry::WriteRaw(std::string const & key, void *data, std::size_t bytesize)
 		{
-			result const error(::RegSetValueEx(current_group, key.c_str(), 0, REG_BINARY , reinterpret_cast<unsigned char const *>(data), max_length));
+			result const error(::RegSetValueEx(current_group, key.c_str(), 0, REG_BINARY , reinterpret_cast<unsigned char const *>(data), bytesize));
 			return (error == ERROR_SUCCESS);
 		}
 

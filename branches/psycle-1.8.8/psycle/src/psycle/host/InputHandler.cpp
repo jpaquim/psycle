@@ -732,7 +732,7 @@ namespace psycle
 			case cdefInfoPattern:
 				if ( pChildView->viewMode == view_modes::pattern )
 				{
-					pChildView->OnPopPattenproperties();
+					pChildView->ShowPatternDlg();
 				}
 				break;
 

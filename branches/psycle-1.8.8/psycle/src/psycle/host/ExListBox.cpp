@@ -91,7 +91,7 @@ void CExListBox::OnChangePatternName()
 		strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
 	}
 	else {
-		int val = hexstring_to_integer(string.GetBuffer());
+		int val = hexstring_to_integer(static_cast<LPCTSTR>(string));
 		if(val < MAX_PATTERNS) {
 			Global::_pSong->playOrder[GetCurSel()] = val;
 		}

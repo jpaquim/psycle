@@ -56,7 +56,7 @@ namespace psycle { namespace host {
 			Global::pInputHandler->SetMainFrame(this);
 			_pSong = 0;
 			pGearRackDialog = 0;
-			for(int c=0;c<MAX_MACHINES;c++) isguiopen[c]=false;
+			for(int c=0;c<MAX_MACHINES;c++) m_pWndMac[c]=NULL;
 		}
 
 		CMainFrame::~CMainFrame()
@@ -176,13 +176,13 @@ namespace psycle { namespace host {
 			// Create Toolbars.
 			//m_rebar.Create(this);
 			//m_rebar.SetBarStyle(m_rebar.GetBarStyle() | CBRS_FLYBY);
-			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|TBSTYLE_LIST|TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
+			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
-			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
+			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER|CBRS_SIZE_DYNAMIC|CCS_ADJUSTABLE);
 			m_songBar.InitializeValues(this, &m_wndView, _pSong);
 			if (!m_songBar.Create(this, IDD_SONGBAR, CBRS_TOP|CBRS_FLYBY|CBRS_GRIPPER, IDD_SONGBAR))
 			{
@@ -388,12 +388,12 @@ namespace psycle { namespace host {
 			filepath += "\\autosave.psy";
 
 			OldPsyFile file;
-			if(file.Open(filepath.GetBuffer(1)))
+			if(file.Open(static_cast<LPCTSTR>(filepath)))
 			{
 				file.Close();
 				int val = MessageBox("An autosave.psy file has been found in the root song dir. Do you want to reload it? (Press \"No\" to delete it)","Song Recovery",MB_YESNOCANCEL);
 
-				if (val == IDYES ) m_wndView.FileLoadsongNamed(filepath.GetBuffer(1));
+				if (val == IDYES ) m_wndView.FileLoadsongNamed(static_cast<LPCTSTR>(filepath));
 				else if (val == IDNO ) DeleteFile(filepath);
 			}
 		}
@@ -543,7 +543,7 @@ namespace psycle { namespace host {
 
 			if (ma)
 			{
-				if (isguiopen[tmac])
+				if (m_pWndMac[tmac])
 				{
 					m_pWndMac[tmac]->SetActiveWindow();
 				}
@@ -619,9 +619,7 @@ namespace psycle { namespace host {
 					case MACH_MIXER:
 						{
 							CFrameMachine* newwin;
-							m_pWndMac[tmac] = newwin = new CFrameMachine(ma);
-							newwin->_pActive = &isguiopen[tmac];
-							newwin->wndView = &m_wndView;
+							m_pWndMac[tmac] = newwin = new CFrameMachine(ma, &m_wndView, &m_pWndMac[tmac]);
 
 							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
@@ -629,7 +627,6 @@ namespace psycle { namespace host {
 							winname << _pSong->FindBusFromIndex(tmac) << " : " << ma->_editName;
 							newwin->SetWindowText(winname.str().c_str());
 							newwin->ShowWindow(SW_SHOWNORMAL);
-							isguiopen[tmac] = true;
 							newwin->PostOpenWnd();
 							CenterWindowOnPoint(m_pWndMac[tmac], point);
 						}
@@ -638,8 +635,7 @@ namespace psycle { namespace host {
 					case MACH_VSTFX:
 						{
 							CVstEffectWnd* newwin;
-							m_pWndMac[tmac] = newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma));
-							newwin->_pActive = &isguiopen[tmac];
+							m_pWndMac[tmac] = newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma), &m_wndView, &m_pWndMac[tmac]);
 							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;
@@ -771,7 +767,7 @@ namespace psycle { namespace host {
 					case MACH_PLUGIN:
 					case MACH_VST:
 					case MACH_VSTFX:
-						if (isguiopen[mac])
+						if (m_pWndMac[mac])
 						{
 							m_pWndMac[mac]->SendMessage(WM_CLOSE);
 						}

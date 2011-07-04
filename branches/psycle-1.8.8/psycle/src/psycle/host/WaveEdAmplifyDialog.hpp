@@ -13,33 +13,19 @@ namespace psycle { namespace host {
 		// Construction
 		public:
 			CWaveEdAmplifyDialog(CWnd* pParent = 0);
-		// Dialog Data
-			//{{AFX_DATA(CWaveEdAmplifyDialog)
 			enum { IDD = IDD_WAVED_AMPLIFY };
 			CEdit	m_dbedit;
 			CEdit	m_edit;
 			CSliderCtrl	m_slider;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWaveEdAmplifyDialog)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CWaveEdAmplifyDialog)
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
-			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
 			virtual void OnOK();
 			virtual void OnCancel();
-			//}}AFX_MSG
+		protected:
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult);
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 	}   // namespace
 }   // namespace

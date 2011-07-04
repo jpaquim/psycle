@@ -4,11 +4,11 @@
 #include "SkinDlg.hpp"
 #include "SkinIO.hpp"
 
-int const ID_TIMER_SKINGDLG = 1;
+#define MAX_FONTS 256
 
 namespace psycle { namespace host {
 
-		#define MAX_FONTS 256
+		int const ID_TIMER_SKINGDLG = 1;
 
 		IMPLEMENT_DYNCREATE(CSkinDlg, CPropertyPage)
 
@@ -191,6 +191,7 @@ namespace psycle { namespace host {
 			patConfig._centerCursor = m_centercursor.GetCheck()?true:false;
 			patConfig.timesig = m_timesig.GetCurSel()+1;
 			Global::psycleconf().useDoubleBuffer = gfxbuffer_;
+			KillTimer(ID_TIMER_SKINGDLG);
 			CDialog::OnOK();
 		}
 
@@ -206,14 +207,8 @@ namespace psycle { namespace host {
 
 		void CSkinDlg::OnCancel() 
 		{
-			CDialog::OnCancel();
-		}
-
-		void CSkinDlg::OnClose() 
-		{
 			KillTimer(ID_TIMER_SKINGDLG);
-			
-			CPropertyPage::OnClose();
+			CDialog::OnCancel();
 		}
 
 		void CSkinDlg::OnButtonPattern() {
@@ -407,6 +402,7 @@ namespace psycle { namespace host {
 				{
 					if(i == pos)
 					{
+						SkinIO::LoadPatternSkin((*it + ".psh").c_str(),patConfig.PatHeaderCoords);
 						patConfig.header_skin=*it;
 						break;
 					}
@@ -427,6 +423,7 @@ namespace psycle { namespace host {
 				{
 					if(i == pos)
 					{
+						SkinIO::LoadMachineSkin((*it + ".psm").c_str(),macConfig.MachineCoords);
 						macConfig.machine_skin=*it;
 						break;
 					}

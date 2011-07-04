@@ -12,21 +12,23 @@ namespace psycle { namespace host {
 		/// root class.
 		class CPsycleApp : public CWinApp
 		{
-			DECLARE_MESSAGE_MAP()
 		public:
 			CPsycleApp();
 			virtual ~CPsycleApp() throw();
 		public:
 			static bool BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath);
+			void RestoreRecentFiles();
+		protected:
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
 			virtual BOOL InitInstance();
 			virtual int ExitInstance();
-			BOOL PreTranslateMessage(MSG* pMsg);
 			virtual BOOL IsIdleMessage( MSG* pMsg );
 			virtual BOOL OnIdle(LONG lCount);
-			void RestoreRecentFiles();
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnAppAbout();
 		public:
 			Global global_;
-			afx_msg void OnAppAbout();
 		private:
 			void ProcessCmdLine(LPSTR cmdline);
 
@@ -41,9 +43,6 @@ namespace psycle { namespace host {
 		{
 		public:
 			CAboutDlg();
-
-			// Dialog Data
-			//{{AFX_DATA(CAboutDlg)
 			enum { IDD = IDD_ABOUTBOX };
 			CStatic	m_asio;
 			CEdit	m_sourceforge;
@@ -54,22 +53,13 @@ namespace psycle { namespace host {
 			CStatic	m_aboutbmp;
 			CEdit	m_contrib;
 			CStatic m_versioninfo;
-			//}}AFX_DATA
-
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CAboutDlg)
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-
-			// Implementation
-		protected:
-			//{{AFX_MSG(CAboutDlg)
-			afx_msg void OnContributors();
 			virtual BOOL OnInitDialog();
-			afx_msg void OnShowatstartup();
-			//}}AFX_MSG
+		protected:
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnContributors();
+			afx_msg void OnShowatstartup();
 		};
 
 

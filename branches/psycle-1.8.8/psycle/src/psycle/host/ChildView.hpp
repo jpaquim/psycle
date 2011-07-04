@@ -254,7 +254,7 @@ namespace host {
 								// Its function is to prevent audio (and midi) operations while it is not
 								// initialized, or while song is being modified (New(),Load()..).
 								// 
-			// Easy access to settings. These pointers don't change during the live of the program
+			// Easy access to settings. These pointers don't change during the life of the program
 			SPatternHeaderCoords* PatHeaderCoords;
 			SMachineCoords*	MachineCoords;
 			PsycleConfig::MachineView* macView;
@@ -277,6 +277,7 @@ namespace host {
 			//Recent Files!!!!//
 
 			void PreparePatternRefresh(int drawMode);
+			void SetPatternScrollBars(int snt, int plines);
 			void DrawPatEditor(CDC *devc);
 			void DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
 		//	void DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
@@ -407,6 +408,7 @@ namespace host {
 			
 			void SelectMachineUnderCursor(void);
 			BOOL CheckUnsavedSong(std::string szTitle);
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 			afx_msg void OnRButtonDown( UINT nFlags, CPoint point );
@@ -417,15 +419,20 @@ namespace host {
 			afx_msg void OnHelpPsycleenviromentinfo();
 			afx_msg void OnMidiMonitorDlg();
 			afx_msg void OnDestroy();
+		public:
 			afx_msg void OnMachineview();
 			afx_msg void OnPatternView();
+		protected:
 			afx_msg void OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 			afx_msg void OnKeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
+		public:
 			afx_msg void OnBarplay();
 			afx_msg void OnBarplayFromStart();
+			afx_msg void OnButtonplayseqblock();
 			afx_msg void OnBarrec();
 			afx_msg void OnBarstop();
 			afx_msg void OnRecordWav();
+		protected:
 			afx_msg void OnTimer( UINT_PTR nIDEvent );
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 			afx_msg void OnFileNew();
@@ -440,11 +447,12 @@ namespace host {
 			afx_msg void OnUpdateBarplay(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateBarplayFromStart(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateBarrec(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateButtonplayseqblock(CCmdUI* pCmdUI);
 			afx_msg void OnFileSongproperties();
 			afx_msg void OnViewInstrumenteditor();
+		public:
 			afx_msg void OnNewmachine();
-			afx_msg void OnButtonplayseqblock();
-			afx_msg void OnUpdateButtonplayseqblock(CCmdUI* pCmdUI);
+		protected:
 			afx_msg void OnPopCut();
 			afx_msg void OnUpdateCutCopy(CCmdUI* pCmdUI);
 			afx_msg void OnPopCopy();
@@ -475,8 +483,10 @@ namespace host {
 			afx_msg void OnFileRecent_02();
 			afx_msg void OnFileRecent_03();
 			afx_msg void OnFileRecent_04();
+			public:
 			afx_msg void OnEditUndo();
 			afx_msg void OnEditRedo();
+			protected:
 			afx_msg void OnUpdateUndo(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateRedo(CCmdUI* pCmdUI);
 			afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -495,7 +505,6 @@ namespace host {
 			afx_msg void OnPopBlockswitch();
 			afx_msg void OnUpdatePopBlockswitch(CCmdUI *pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
-			DECLARE_MESSAGE_MAP()
 };
 
 

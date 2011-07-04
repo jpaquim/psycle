@@ -50,8 +50,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	END_MESSAGE_MAP()
 
 	// SongBar message handlers
-
-	LONG SongBar::OnInitDialog ( UINT wParam, LONG lParam)
+	LRESULT SongBar::OnInitDialog ( WPARAM wParam, LPARAM lParam)
 	{
 		BOOL bRet = HandleInitDialog(wParam, lParam);
 
@@ -82,6 +81,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		m_trackcombo.SetCurSel(m_pSong->SONGTRACKS-4);
 
 		m_masterslider.SetRange(0,1024);
+		m_masterslider.SetTipSide(TBTS_TOP);
 		float val = 1.0f;
 		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL) {
 			 val =((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry/256.f;

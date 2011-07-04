@@ -10,14 +10,14 @@ namespace psycle { namespace host {
 		class CMidiInputDlg : public CPropertyPage
 		{
 			DECLARE_DYNCREATE(CMidiInputDlg)
-			DECLARE_MESSAGE_MAP()
 		public:
 			CMidiInputDlg();
 			virtual ~CMidiInputDlg();
 			int const static IDD = IDD_MIDI_INPUT;
-			virtual void OnOK();
+
 		protected:
 			virtual BOOL OnInitDialog();
+			virtual void OnOK();
 			virtual void DoDataExchange(CDataExchange* pDX);
 
 		public:
@@ -44,6 +44,8 @@ namespace psycle { namespace host {
 			CButton raw;
 			CComboBox gen_select_type;
 			CComboBox inst_select_type;
+		protected:
+			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

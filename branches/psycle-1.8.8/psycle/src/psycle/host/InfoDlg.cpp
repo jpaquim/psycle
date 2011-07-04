@@ -12,8 +12,8 @@
 
 #include "cpu_time_clock.hpp"
 
-int const ID_TIMER_INFODLG = 1;
 namespace psycle { namespace host {
+		int const ID_TIMER_INFODLG = 1;
 
 		CInfoDlg::CInfoDlg(CWnd* pParent)
 		: CDialog(CInfoDlg::IDD, pParent)
@@ -66,6 +66,11 @@ namespace psycle { namespace host {
 			{
 				KillTimer(ID_TIMER_INFODLG);
 			}
+		}
+		void CInfoDlg::OnCancel() 
+		{
+			KillTimer(ID_TIMER_INFODLG);
+			CDialog::OnCancel();
 		}
 		void CInfoDlg::OnClose() 
 		{
@@ -174,8 +179,6 @@ namespace psycle { namespace host {
 				m_mem_reso.SetWindowText(buffer);
 				
 				sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPhys/(float)(1<<20), lpBuffer.ullTotalPhys/(float)(1<<20));
-				//wanna see a woooping bug? Uncomment this line:
-				//sprintf(buffer, "%dM %d (of %dM)", lpBuffer.ullAvailPhys>>20, lpBuffer.ullTotalPhys>>20);
 				m_mem_phy.SetWindowText(buffer);
 				
 				sprintf(buffer,"%.0fM (of %.0fM)", (lpBuffer.ullAvailPageFile/(float)(1<<20)) , (lpBuffer.ullTotalPageFile/(float)(1<<20)));

@@ -39,9 +39,8 @@ class XMSamplerUI : public CPropertySheet
 		XMSampler* GetMachine(){ return _pMachine; }
 
 	protected:
-		afx_msg void OnClose();
-
 		DECLARE_MESSAGE_MAP()
+		afx_msg void OnClose();
 };
 
 }   // namespace

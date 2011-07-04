@@ -25,15 +25,16 @@ namespace psycle { namespace host {
 			bool m_dither;
 			int	m_bufferSize;
 		// Overrides
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
+			virtual void OnOK();
 		// Implementation
 		protected:
 			void RecalcLatency();
 			void FillBufferBox();
 			void SetProperties();
-			virtual BOOL OnInitDialog();
-			virtual void OnOK();
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnSelendokDriver();
 			afx_msg void OnSelendokSamplerate();
 			afx_msg void OnSelendokBits();
@@ -41,7 +42,6 @@ namespace psycle { namespace host {
 			afx_msg void OnShared();
 			afx_msg void OnExclusive();
 			afx_msg void OnDestroy();
-			DECLARE_MESSAGE_MAP()
 		};
 
 }}

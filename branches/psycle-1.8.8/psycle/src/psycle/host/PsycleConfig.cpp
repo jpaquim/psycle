@@ -5,6 +5,7 @@
 #include "Psycle.hpp"
 
 #include "Registry.hpp"
+#include "WinIniFile.hpp"
 #include "SkinIO.hpp"
 #include "KeyPresetIO.hpp"
 
@@ -18,8 +19,8 @@
 #include "NewMachine.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
-#include "NativeGui.hpp"
 #include "NativeGraphics.hpp"
+#include "NativeView.hpp"
 
 #include <universalis/os/fs.hpp>
 #include <wingdi.h>
@@ -32,7 +33,7 @@ namespace psycle
 
 		PsycleConfig::MachineParam::MachineParam()
 		{
-			CNativeGui::uiSetting = this;
+			CNativeView::uiSetting = this;
 			Knob::uiSetting = this;
 			InfoLabel::uiSetting = this;
 			GraphSlider::uiSetting = this;
@@ -54,7 +55,7 @@ namespace psycle
 			vuOff.DeleteObject();
 			switchOn.DeleteObject();
 			switchOff.DeleteObject();
-			CNativeGui::uiSetting = NULL;
+			CNativeView::uiSetting = NULL;
 			Knob::uiSetting = NULL;
 			InfoLabel::uiSetting = NULL;
 			GraphSlider::uiSetting = NULL;
@@ -98,8 +99,8 @@ namespace psycle
 
 			sliderheight = 182;
 			sliderwidth = 28;
-			sliderknobheight = 21;
-			sliderknobwidth = 16;
+			sliderknobheight = 10;
+			sliderknobwidth = 22;
 
 			vuheight = 97;
 			vuwidth = 16;
@@ -170,7 +171,7 @@ namespace psycle
 			::GetWindowRect(hwndDesk, &deskrect); 
 
 			RefreshSkin();
-			GraphSlider::xoffset = ((sliderwidth-sliderknobwidth)/2) +1;
+			GraphSlider::xoffset = ((sliderwidth-sliderknobwidth)/2);
 		}
 		void PsycleConfig::MachineParam::RefreshSkin()
 		{
@@ -1358,25 +1359,37 @@ namespace psycle
 
 		bool PsycleConfig::LoadPsycleSettings()
 		{
-			///\todo: Implement the different Stores
-
-			//Open Current user.
-			Registry reg(Registry::HKCU, "");
-			if(!reg.OpenLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
+			//There is no "prefered setting". If the file exists, it is used.
+			ConfigStorage* store;
+			store = new WinIniFile(PSYCLE__VERSION);
+			if(!store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__TAR_NAME ".ini").native_file_string()))
 			{
-				return false;
-			}
-			// Try opening version 1.8.8. Else, resort to 1.8.6. If neither, return.
-			if(!reg.OpenGroup(PSYCLE__SETTINGS__CONFIGKEY))
-			{
-				if(!reg.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY))
+				delete store;
+				store = new WinIniFile(PSYCLE__VERSION);
+				if(!store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / PSYCLE__TAR_NAME ".ini").native_file_string()))
 				{
-					reg.CloseLocation();
+					delete store;
+					store = new Registry(Registry::HKCU, "");
+					if(!store->OpenLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
+					{
+						return false;
+					}
+				}
+			}
+
+
+			// Try opening version 1.8.8. Else, resort to 1.8.6. If neither, return.
+			if(!store->OpenGroup(PSYCLE__SETTINGS__CONFIGKEY))
+			{
+				if(!store->OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY))
+				{
+					store->CloseLocation();
 					return false;
 				}
 			}
-			Load(reg);
-			reg.CloseLocation();
+			Load(*store);
+			store->CloseLocation();
+			delete store;
 			return true;
 		}
 		bool PsycleConfig::SavePsycleSettings()
@@ -1384,17 +1397,28 @@ namespace psycle
 			ConfigStorage* store;
 			switch(store_place_)
 			{
-			case STORE_REGEDIT: store = new Registry(Registry::HKCU, PSYCLE__VERSION);
+			case STORE_REGEDIT: 
+				store = new Registry(Registry::HKCU, PSYCLE__VERSION);
+				if(!store->CreateLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
+				{
+					return false;
+				}
 				break;
-			case STORE_USER_DATA: return false;///\todo:
+			case STORE_USER_DATA: 
+				store = new WinIniFile(PSYCLE__VERSION);
+				if(!store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / PSYCLE__TAR_NAME ".ini").native_file_string()))
+				{
+					return false;
+				}
 				break;
-			case STORE_EXE_DIR: return false;///\todo:
+			case STORE_EXE_DIR: 
+				store = new WinIniFile(PSYCLE__VERSION);
+				if(!store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__TAR_NAME ".ini").native_file_string()))
+				{
+					return false;
+				}
 				break;
 			default:
-				return false;
-			}
-			if(!store->CreateLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
-			{
 				return false;
 			}
 			if(!store->CreateGroup(PSYCLE__SETTINGS__CONFIGKEY))

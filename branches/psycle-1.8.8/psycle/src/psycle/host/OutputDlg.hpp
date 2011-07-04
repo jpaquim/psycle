@@ -32,21 +32,22 @@ namespace psycle { namespace host {
 			int const static MIN_HEADROOM = 0;
 			int const static MAX_HEADROOM = 9999;
 		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);
 			void EnableClockOptions();
 			void DisableClockOptions();
 			void PopulateListbox( CComboBox * listbox, int numDevs, bool issync );
 		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
 			virtual void OnCancel();
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnConfig();
 			afx_msg void OnSelChangeOutput();
 			afx_msg void OnSelChangeMidi();
 			afx_msg void OnSelChangeSync();
 			afx_msg void OnEnableInmediate();
 			afx_msg void OnEnableSequenced();
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

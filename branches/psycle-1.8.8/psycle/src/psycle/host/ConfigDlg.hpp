@@ -35,7 +35,7 @@ namespace psycle { namespace host {
 			CKeyConfigDlg _keyDlg;
 
 			PsycleConfig* _pConfig;
-
+		protected:
 			DECLARE_MESSAGE_MAP()
 		};
 	}   // namespace

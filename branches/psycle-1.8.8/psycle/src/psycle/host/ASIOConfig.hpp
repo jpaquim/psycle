@@ -24,11 +24,12 @@ namespace psycle { namespace host {
 			ASIOInterface* pASIO;
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
+			virtual void OnOK();
 		protected:
 			void RecalcLatency();
 			void FillBufferBox();
-			virtual BOOL OnInitDialog();
-			virtual void OnOK();
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnSelendokSamplerate();
 			afx_msg void OnSelendokBuffersize();
 			afx_msg void OnDestroy();
@@ -36,6 +37,5 @@ namespace psycle { namespace host {
 			afx_msg void OnControlPanel();
 			afx_msg void OnSelchangeAsioDriver();
 			afx_msg void OnBnClickedOk();
-			DECLARE_MESSAGE_MAP()
 		};
 }}

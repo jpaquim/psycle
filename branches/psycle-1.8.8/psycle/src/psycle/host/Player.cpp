@@ -571,11 +571,6 @@ void Player::clear_plan() {
 			}
 			if( _playPosition >= pSong->playLength)
 			{	
-				// Don't loop the recording
-				if(_recording)
-				{
-					StopRecording();
-				}
 				if( _loopSong )
 				{
 					_playPosition = 0;
@@ -862,7 +857,7 @@ void Player::stop_threads() {
 					}
 					sampleCount += amount;
 
-					if((_playing) && (_recording))
+					if(_recording)
 					{
 						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);
 						float* pR(pSong->_pMachine[MASTER_INDEX]->_pSamplesR);
@@ -1050,24 +1045,36 @@ void Player::stop_threads() {
 #if !defined WINAMP_PLUGIN
 			if(!_recording)
 			{
+				Stop();
+
 				if(samplerate > 0) SampleRate(samplerate);
+
+				int the_depth;
+				if(bitdepth>0)	the_depth = bitdepth;
+				else {
+					the_depth = Global::pConfig->_pOutputDriver->GetSampleValidBits();
+					if(Global::pConfig->_pOutputDriver->GetSampleBits() == 32) isFloat = true;
+				}
+
 				_dodither=dodither;
 				if(dodither)
 				{
-					if(bitdepth>0)	dither.SetBitDepth(bitdepth);
-					else			dither.SetBitDepth(Global::pConfig->_pOutputDriver->GetSampleValidBits());
+					dither.SetBitDepth(the_depth);
 					dither.SetPdf((helpers::dsp::Dither::Pdf::type)ditherpdf);
 					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape::type)noiseshape);
 				}
-				int channels = 2;
-				if(channelmode != stereo) channels = 1;
-				Stop();
+
+				int channels;
+				if(channelmode != no_mode && channelmode != stereo) { channels = 1; }
+				else { channels = 2; }
+
 				if (!psFilename.empty())
 				{
-					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), samplerate, bitdepth, channels, isFloat) == DDC_SUCCESS)
+					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), m_SampleRate, the_depth, channels, isFloat) == DDC_SUCCESS)
 						_recording = true;
 					else
 					{
+						//recording to true so that StopRecording can reset the values.
 						_recording = true;
 						StopRecording(false);
 					}

@@ -35,17 +35,12 @@ namespace psycle { namespace host {
 			void StartTimer();
 			void StopTimer();
 
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWaveEdChildView)
-			protected:
+		protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
 			// Generated message map functions
 		protected:
-			//{{AFX_MSG(CWaveEdChildView)
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnPaint();
 			afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -114,9 +109,6 @@ namespace psycle { namespace host {
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnDestroy();
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 		private:
 			//refreshes position/thumb size of scroll bars and hsliders
 			void ResetScrollBars(bool bNewLength=false);
@@ -188,9 +180,5 @@ namespace psycle { namespace host {
 
 			CMainFrame* mainFrame;
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 	}   // namespace
 }   // namespace

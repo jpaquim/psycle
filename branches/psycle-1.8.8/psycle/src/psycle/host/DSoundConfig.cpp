@@ -107,7 +107,7 @@ namespace psycle { namespace host {
 			if(!m_deviceComboBox.GetCount())
 			{
 				// no DirectSound driver ...
-				::MessageBox(0, "no DirectSound driver", "Warning", MB_ICONWARNING);
+				MessageBox("no DirectSound driver", "Warning", MB_ICONWARNING);
 				// we cancel instead.
 				CDialog::OnCancel();
 				return;

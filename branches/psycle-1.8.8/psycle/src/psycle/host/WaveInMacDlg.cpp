@@ -48,7 +48,10 @@ BOOL CWaveInMacDlg::OnInitDialog()
 	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
-
+void CWaveInMacDlg::OnCancel()
+{
+	DestroyWindow();
+}
 void CWaveInMacDlg::OnClose()
 {
 	CDialog::OnClose();

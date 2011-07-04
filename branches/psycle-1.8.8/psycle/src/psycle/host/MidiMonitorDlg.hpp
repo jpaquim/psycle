@@ -17,8 +17,6 @@ namespace psycle { namespace host {
 			void InitTimer( void );	
 			/// updates the values in the dialog.
 			void UpdateInfo( void );
-		// Dialog Data
-			//{{AFX_DATA(CMidiMonitorDlg)
 			enum { IDD = IDD_MIDI_MONITOR };
 			CStatic	m_tickSync;
 			CStatic	m_midiSyncStart;
@@ -57,26 +55,18 @@ namespace psycle { namespace host {
 			CStatic m_ch14;
 			CStatic m_ch15;
 			CStatic m_ch16;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CMidiMonitorDlg)
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual void OnTimer(UINT_PTR nIDEvent);
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CMidiMonitorDlg)
 			virtual BOOL OnInitDialog();
 			virtual void fnClearEventsLost();
+			virtual void OnCancel();
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 			afx_msg void OnClose();
 
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 		private:
 			void SetStaticFlag( CStatic * pStatic, DWORD flags, DWORD flagMask );	// used for dot control
 			void CreateChannelMap( void );	// create the channel map table
@@ -85,9 +75,6 @@ namespace psycle { namespace host {
 			int m_clearCounter;		// use for the 'clear lost events' button
 			CFont m_symbolFont;		// custom graphic font
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 	}   // namespace
 }   // namespace

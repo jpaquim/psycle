@@ -45,7 +45,7 @@ namespace psycle
 
 		void WasapiDriver::Error(const TCHAR msg[])
 		{
-			MessageBox(0, msg, _T("DirectSound Output driver"), MB_OK | MB_ICONERROR);
+			MessageBox(0, msg, _T("Windows WASAPI driver"), MB_OK | MB_ICONERROR);
 		}
 
 		WasapiSettings::WasapiSettings()
@@ -88,7 +88,7 @@ namespace psycle
 			if(store.OpenGroup("devices\\wasapi") ||
 				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\wasapi"))
 			{
-				store.ReadRaw("DeviceString", &szDeviceID, sizeof(szDeviceID));
+				store.Read("DeviceString", szDeviceID, sizeof(szDeviceID));
 				store.Read("Shared", shared);
 				unsigned int tmp = samplesPerSec();
 				store.Read("SamplesPerSec", tmp);
@@ -108,7 +108,7 @@ namespace psycle
 		void WasapiSettings::Save(ConfigStorage &store)
 		{
 			store.CreateGroup("devices\\wasapi");
-			store.WriteRaw("DeviceString", &szDeviceID, sizeof(szDeviceID));
+			store.Write("DeviceString", szDeviceID);
 			store.Write("Shared", shared);
 			store.Write("SamplesPerSec", samplesPerSec());
 			store.Write("Dither", dither());

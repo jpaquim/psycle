@@ -103,8 +103,6 @@ namespace psycle { namespace host {
 			CStatic	m_dllnameLabel;
 			int		m_showdllName;
 			CStatic m_APIversionLabel;
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 		public:
 			CImageList imgList;
 			HTREEITEM tHand;
@@ -131,18 +129,25 @@ namespace psycle { namespace host {
 			HTREEITEM hInt[6];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 
-			afx_msg void OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult);
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
+			virtual void OnOK();
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnRefresh();
 			afx_msg void OnByclass();
 			afx_msg void OnBytype();
-			virtual void OnOK();
 			afx_msg void OnDblclkBrowser(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnDestroy();
 			afx_msg void OnShowdllname();
 			afx_msg void OnShoweffname();
 			afx_msg void OnCheckAllow();
-			DECLARE_MESSAGE_MAP()
+			afx_msg void OnEnChangeEdit1();
+			afx_msg void OnStnClickedNamelabel();
+			afx_msg void OnEnChangeRichedit21();
+			afx_msg void OnScanNew();
 		private:
 			static bool isopened;
 			static int _numPlugins;
@@ -152,11 +157,6 @@ namespace psycle { namespace host {
 			static bool LoadCacheFile(int & currentPlugsCount, int & currentBadPlugsCount, bool verify);
 			static bool SaveCacheFile();
 			void UpdateList(bool bInit = false);
-		public:
-			afx_msg void OnEnChangeEdit1();
-			afx_msg void OnStnClickedNamelabel();
-			afx_msg void OnEnChangeRichedit21();
-			afx_msg void OnScanNew();
 		};
 
 	}   // namespace

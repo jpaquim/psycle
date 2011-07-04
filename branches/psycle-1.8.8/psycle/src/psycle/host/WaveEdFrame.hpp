@@ -24,14 +24,10 @@ namespace psycle { namespace host {
 			void Notify(void);
 			Song *_pSong;
 			CMainFrame *_pFrame;
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWaveEdFrame)
-			public:
+		public:
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-			protected:
+		protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-			//}}AFX_VIRTUAL	
 		private:
 			void AdjustStatusBar(int ins);
 			void PlayFrom(unsigned long startpos);
@@ -42,10 +38,8 @@ namespace psycle { namespace host {
 
 			int wsInstrument;
 			bool bPlaying;
-		// Implementation
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CWaveEdFrame)
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnClose();
 			afx_msg void OnUpdateStatusBar(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateSelection(CCmdUI *pCmdUI);
@@ -63,12 +57,7 @@ namespace psycle { namespace host {
 			afx_msg void OnStop();
 			afx_msg void OnFastForward();
 			afx_msg void OnRewind();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 	}   // namespace
 }   // namespace

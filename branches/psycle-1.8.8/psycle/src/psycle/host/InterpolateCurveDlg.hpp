@@ -24,9 +24,10 @@ namespace psycle { namespace host {
 		// Overrides
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
 		// Implementation
 		protected:
-			virtual BOOL OnInitDialog();
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnOk();
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -39,7 +40,6 @@ namespace psycle { namespace host {
 			afx_msg void OnEnKillfocusMin();
 			afx_msg void OnEnKillfocusMax();
 			afx_msg void OnBnClickedChecktwk();
-			DECLARE_MESSAGE_MAP()
 		private:
 			void AdjustPointToView(CPoint&point);
 			void AdjustRectToView(RECT&rect);

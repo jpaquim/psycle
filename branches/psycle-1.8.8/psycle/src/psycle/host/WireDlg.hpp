@@ -24,9 +24,11 @@ namespace psycle {
 			virtual BOOL PreTranslateMessage(MSG* pMsg);
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
+			virtual	void OnCancel();
 			virtual void PostNcDestroy();
 
 		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnClose();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnDelete();
@@ -36,7 +38,6 @@ namespace psycle {
 			afx_msg void OnVolumePer();
 			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-			DECLARE_MESSAGE_MAP()
 
 			void InitSpectrum();
 			void SetMode();

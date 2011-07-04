@@ -161,35 +161,6 @@ namespace psycle
 			int maxValue;
 		};
 
-		class CPreset  
-		{
-		public:
-			CPreset();
-			CPreset(const CPreset& newpreset);
-			virtual ~CPreset();
-			CPreset& operator=(const CPreset& newpreset);
-
-			void Init(int num);
-			void Init(int num,const char* newname,   int const * parameters,int size, void* newdata);
-			void Init(int num,const char* newname, float const * parameters); // for VST .fxb's
-			void Clear();
-			int GetNumPars() { return numPars; }
-			void GetParsArray(int* destarray) { if(numPars>0) std::memcpy(destarray, params, numPars * sizeof *params); }
-			void GetDataArray(void* destarray) {if(dataSize>0) std::memcpy(destarray, data, dataSize); }
-			void* GetData() {return data;}
-			long int GetDataSize() {return dataSize;}
-			void SetName(const char *setname) { std::strcpy(name,setname); }
-			void GetName(char *nname) { std::strcpy(nname,name); }
-			int GetParam(const int n);
-			void SetParam(const int n,int val);
-		private:
-			int numPars;
-			int* params;
-			long int dataSize;
-			unsigned char * data;
-			char name[32];
-		};
-
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
@@ -386,6 +357,17 @@ namespace psycle
 					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; }
 					virtual int GetParamValue(int numparam) { return 0; }
 					virtual bool SetParameter(int numparam, int value) { return false; }
+					virtual void SetCurrentProgram(int idx) {};
+					virtual int GetCurrentProgram() {return 0;};
+					virtual void GetCurrentProgramName(char* val) {strcpy(val,"Program 0");};
+					virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){strcpy(val,"Program 0");};
+					virtual int GetNumPrograms(){ return 1;}; // total programs of the bank.
+					virtual int GetTotalPrograms(){ return 1;}; //total programs independently of the bank
+					virtual void SetCurrentBank(int idx) {};
+					virtual int GetCurrentBank() {return 0;};
+					virtual void GetCurrentBankName(char* val) {strcpy(val,"Internal");};
+					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};
+					virtual int GetNumBanks(){ return 1;};
 				public:///\todo private:
 					int _numPars;
 					int _nCols;

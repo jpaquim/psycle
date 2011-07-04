@@ -25,7 +25,6 @@ public:
 
 	protected:
 		DECLARE_MESSAGE_MAP()
-	public:
 		afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 		afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
 		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
@@ -98,7 +97,6 @@ public:
 
 	protected:
 		DECLARE_MESSAGE_MAP()
-	public:
 		afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 		afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
 		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
@@ -146,15 +144,15 @@ public:
 	/// Dialog ID
 	enum { IDD = IDD_XMSAMPLERUIINST };
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
-
-	DECLARE_MESSAGE_MAP()
-
-public:
 	void pMachine(XMSampler * const p){m_pMachine = p;};
 	XMSampler * const pMachine(){return m_pMachine;};
 
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
+
+
+protected:
+	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult);

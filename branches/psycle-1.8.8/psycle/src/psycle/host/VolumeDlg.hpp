@@ -11,33 +11,21 @@ namespace psycle { namespace host {
 			CVolumeDlg(CWnd* pParent = 0);
 			float volume;
 			int edit_type;
-		// Dialog Data
-			//{{AFX_DATA(CVolumeDlg)
 			enum { IDD = IDD_NEW_VOLUME };
 			CEdit		m_db;
 			CEdit		m_per;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CVolumeDlg)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
 			void DrawDb();
 			void DrawPer();
 			bool go;
-			// Generated message map functions
-			//{{AFX_MSG(CVolumeDlg)
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnChangeEditDb();
 			afx_msg void OnChangeEditPer();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 		};
 
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 	}   // namespace
 }   // namespace

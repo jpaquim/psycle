@@ -6,38 +6,82 @@
 #include "InputHandler.hpp"
 #include "ChildView.hpp"
 #include "Machine.hpp"
-#include "NativeGui.hpp"
+#include "NativeView.hpp"
 #include "MixerFrameView.hpp"
 #include "Plugin.hpp"
 #include "vsthost24.hpp"
 #include "PresetsDlg.hpp"
+#include "ParamList.hpp"
 
-int const ID_TIMER_PARAM_REFRESH = 2104;
 namespace psycle { namespace host {
+		int const ID_TIMER_PARAM_REFRESH = 2104;
 		extern CPsycleApp theApp;
+
+		//////////////////////////////////////////////////////////////////////////
+
+		void CMyToolBar::OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle)
+		{
+			// Call base class implementation.
+			CToolBar::OnBarStyleChange(dwOldStyle, dwNewStyle);
+
+			// Use exclusive-or to detect changes in style bits.
+			DWORD changed = dwOldStyle ^ dwNewStyle;
+
+			if (changed & CBRS_FLOATING) {
+				if (dwNewStyle & CBRS_FLOATING) {
+					((CFrameMachine*)GetOwner())->ResizeWindow(NULL);
+				}
+				else {
+					((CFrameMachine*)GetOwner())->ResizeWindow(NULL);
+				}
+			}
+#if 0
+			if (changed & CBRS_ORIENT_ANY) {
+				if (dwNewStyle & CBRS_ORIENT_HORZ) {
+					// ToolBar now horizontal
+				}
+				else if (dwNewStyle & CBRS_ORIENT_VERT) {
+					// ToolBar now vertical            
+				}
+			}
+#endif
+		}
+
 		IMPLEMENT_DYNAMIC(CFrameMachine, CFrameWnd)
 
 		BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
 			ON_WM_CREATE()
-			ON_WM_TIMER()
 			ON_WM_CLOSE()
 			ON_WM_DESTROY()
+			ON_WM_TIMER()
 			ON_WM_SETFOCUS()
 			ON_WM_KEYDOWN()
 			ON_WM_KEYUP()
 			ON_WM_SIZING()
-			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
-			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
+			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
+			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
 			ON_COMMAND(ID_PROGRAMS_RESETDEFAULT, OnParametersResetparameters)
+			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
+			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
+			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
 			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
+			ON_COMMAND(ID_VIEWS_SHOWTOOLBAR, OnViewsShowtoolbar)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
 			ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
 			ON_UPDATE_COMMAND_UI(ID_MACHINE_COMMAND, OnUpdateParametersCommand)
 			ON_COMMAND(ID_ABOUT_ABOUTMAC, OnMachineAboutthismachine)
+			ON_LBN_SELCHANGE(ID_COMBO_PRG, OnSelchangeProgram)
+			ON_CBN_CLOSEUP(ID_COMBO_PRG, OnCloseupProgram)
+			ON_COMMAND(ID_PROGRAMLESS, OnProgramLess)
+			ON_UPDATE_COMMAND_UI(ID_PROGRAMLESS, OnUpdateProgramLess)
+			ON_COMMAND(ID_PROGRAMMORE, OnProgramMore)
+			ON_UPDATE_COMMAND_UI(ID_PROGRAMMORE, OnUpdateProgramMore)
 		END_MESSAGE_MAP()
 
-		CFrameMachine::CFrameMachine(Machine* pMachine)
-		: pView(NULL) , _machine(pMachine), _pActive(NULL)
+		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0)
 		{
 			//Use OnCreate.
 		}
@@ -53,7 +97,6 @@ namespace psycle { namespace host {
 			{
 				return -1;
 			}
-
 			pView = CreateView();
 			if(!pView)
 			{
@@ -62,9 +105,49 @@ namespace psycle { namespace host {
 			}
 			if ( _machine->_type == MACH_PLUGIN )
 			{
-				GetMenu()->GetSubMenu(1)->ModifyMenu(6, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
+				GetMenu()->GetSubMenu(1)->ModifyMenu(5, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
 					((Plugin*)_machine)->GetInfo()->Command);
 			}
+			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
+				!toolBar.LoadToolBar(IDR_FRAMEMACHINE))
+			{
+				TRACE0("Failed to create toolbar\n");
+				return -1;      // fail to create
+			}
+#if 0
+			//nice, but will make the toolbar too big.
+			toolBar.SetButtonText(0,"blabla");
+			CRect temp;
+			toolBar.GetItemRect(0,&temp);
+			toolBar.GetToolBarCtrl().SetButtonSize(CSize(temp.Width(),
+				temp.Height()));
+#endif
+
+			CRect rect;
+			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_PRG);
+			toolBar.SetButtonInfo(nIndex, ID_COMBO_PRG, TBBS_SEPARATOR, 160);
+			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
+			rect.top = 1;
+			rect.bottom = rect.top + 400; //drop height
+			if(!comboProgram.Create( WS_CHILD |  CBS_DROPDOWNLIST | WS_VISIBLE | CBS_AUTOHSCROLL 
+				 | WS_VSCROLL, rect, &toolBar, ID_COMBO_PRG))
+			{
+				TRACE0("Failed to create combobox\n");
+				return -1;      // fail to create
+			}
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			CFont font;
+			font.Attach( hFont );
+			comboProgram.SetFont(&font);
+
+			FillProgramCombobox();
+			toolBar.SetBarStyle(toolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
+			toolBar.SetWindowText("Params Toolbar");
+			toolBar.EnableDocking(CBRS_ALIGN_TOP);
+
+			EnableDocking(CBRS_ALIGN_ANY);
+			DockControlBar(&toolBar);
+			LoadBarState(_T("VstParamToolbar"));
 
 			// Sets Icon
 			HICON tIcon;
@@ -72,8 +155,7 @@ namespace psycle { namespace host {
 			SetIcon(tIcon, true);
 			SetIcon(tIcon, false);
 
-			*_pActive=true;
-			SetTimer(ID_TIMER_PARAM_REFRESH,33,0);
+			SetTimer(ID_TIMER_PARAM_REFRESH,30,0);
 			return 0;
 		}
 
@@ -97,11 +179,14 @@ namespace psycle { namespace host {
 		{
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
+			comboProgram.DestroyWindow();
 			if (pView != NULL) { pView->DestroyWindow(); delete pView; }
+			if (pParamGui) pParamGui->SendMessage(WM_CLOSE);
+			SaveBarState(_T("VstParamToolbar"));
 		}
 		void CFrameMachine::PostNcDestroy() 
 		{
-			if (_pActive != NULL) *_pActive=false;
+			if(windowVar!= NULL) *windowVar = NULL;
 			delete this;
 		}
 
@@ -172,30 +257,45 @@ namespace psycle { namespace host {
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-		void CFrameMachine::OnOperationsEnabled()
+		void CFrameMachine::OnSizing(UINT fwSide, LPRECT pRect)
 		{
-			if (machine()._mode == MACHMODE_GENERATOR)
-			{
-				machine()._mute = !machine()._mute;
-			}
-			else
-			{
-				machine().Bypass(!machine().Bypass());
-				if (machine()._mute) machine()._mute = false;
-			}
+			pView->WindowIdle();
 		}
 
-		void CFrameMachine::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
+
+		//////////////////////////////////////////////////////////////////////////
+		// OnInitMenuPopup : called when a popup menu is initialized            //
+		//////////////////////////////////////////////////////////////////////////
+
+		void CFrameMachine::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
 		{
-			if (machine()._mode == MACHMODE_GENERATOR)
+			// if Effect Edit menu popping up
+			if ((pPopupMenu->GetMenuItemCount() > 0) &&
+				(pPopupMenu->GetMenuItemID(0) == ID_PROGRAMS_OPENPRESET))
 			{
-				pCmdUI->SetCheck(!machine()._mute);
+				FillBankPopup(pPopupMenu);
+				FillProgramPopup(pPopupMenu);
 			}
-			else
-			{
-				pCmdUI->SetCheck(!(machine()._mute || machine().Bypass()));
-			}
+
+			CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
 		}
+		void CFrameMachine::OnSetBank(UINT nID)
+		{
+			int bank = nID - ID_SELECTBANK_0;
+			if (bank < machine().GetNumBanks()) {
+				machine().SetCurrentBank(bank);
+			}
+			else {
+				///todo
+			}
+
+			FillProgramCombobox();
+		}
+		void CFrameMachine::OnSetProgram(UINT nID)
+		{
+			ChangeProgram(nID - ID_SELECTPROGRAM_0);
+		}
+
 
 		void CFrameMachine::OnProgramsRandomizeprogram()
 		{
@@ -230,6 +330,78 @@ namespace psycle { namespace host {
 				}
 			}
 			Invalidate(false);
+		}
+
+		void CFrameMachine::OnOperationsEnabled()
+		{
+			if (machine()._mode == MACHMODE_GENERATOR)
+			{
+				machine()._mute = !machine()._mute;
+			}
+			else
+			{
+				machine().Bypass(!machine().Bypass());
+				if (machine()._mute) machine()._mute = false;
+			}
+		}
+
+		void CFrameMachine::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
+		{
+			if (machine()._mode == MACHMODE_GENERATOR)
+			{
+				pCmdUI->SetCheck(!machine()._mute);
+			}
+			else
+			{
+				pCmdUI->SetCheck(!(machine()._mute || machine().Bypass()));
+			}
+		}
+
+		void CFrameMachine::OnViewsBankmanager()
+		{
+			CPresetsDlg dlg;
+			dlg._pMachine=_machine;
+			dlg.DoModal();
+		}
+
+		void CFrameMachine::OnViewsParameterlist()
+		{
+			CRect rc;
+			GetWindowRect(&rc);
+			if (!pParamGui)
+			{
+				pParamGui= new CParamList(machine(), this, &pParamGui);
+				pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
+				pParamGui->ShowWindow(SW_SHOWNORMAL); 
+			}
+			else
+			{
+				pParamGui->SendMessage(WM_CLOSE);
+			}
+		}
+
+		void CFrameMachine::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
+		{
+			if ( pParamGui )
+			{
+				pCmdUI->SetCheck(true);
+			}
+			else
+				pCmdUI->SetCheck(false);
+		}
+
+		void CFrameMachine::OnViewsShowtoolbar()
+		{
+			Global::psycleconf().macParam().toolbarOnMachineParams = !Global::psycleconf().macParam().toolbarOnMachineParams;
+
+			if (Global::psycleconf().macParam().toolbarOnMachineParams) ShowControlBar(&toolBar,TRUE,FALSE);
+			else ShowControlBar(&toolBar,FALSE,FALSE);
+			ResizeWindow(0);
+		}
+
+		void CFrameMachine::OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI)
+		{
+			pCmdUI->SetCheck(Global::psycleconf().macParam().toolbarOnMachineParams);
 		}
 
 		void CFrameMachine::OnParametersCommand() 
@@ -273,25 +445,53 @@ namespace psycle { namespace host {
 					CString("About") + CString(machine().GetName()));
 			}
 		}
-
-
-		void CFrameMachine::OnViewsBankmanager()
+		void CFrameMachine::OnSelchangeProgram() 
 		{
-			CPresetsDlg dlg;
-			dlg._pMachine=_machine;
-			dlg.DoModal();
+			ChangeProgram(comboProgram.GetCurSel());
+			SetFocus();
+		}
+		void CFrameMachine::OnCloseupProgram()
+		{
+			SetFocus();
 		}
 
-		/**********************************************************/
+		void CFrameMachine::OnProgramLess()
+		{
+			ChangeProgram(machine().GetCurrentProgram()-1);
+			UpdateWindow();
+		}
+		void CFrameMachine::OnUpdateProgramLess(CCmdUI *pCmdUI)
+		{
+			if ( machine().GetCurrentProgram() == 0)
+			{
+				pCmdUI->Enable(false);
+			}
+			else pCmdUI->Enable(true);
+		}
+		void CFrameMachine::OnProgramMore()
+		{
+			ChangeProgram(machine().GetCurrentProgram()+1);
+			UpdateWindow();
+		}
+		void CFrameMachine::OnUpdateProgramMore(CCmdUI *pCmdUI)
+		{
+			if ( machine().GetCurrentProgram()+1 == machine().GetNumPrograms() || machine().GetNumPrograms()==0)
+			{
+				pCmdUI->Enable(false);
+			}
+			else pCmdUI->Enable(true);
+		}
+
+		//////////////////////////////////////////////////////////////////////////
 
 		CBaseParamView* CFrameMachine::CreateView()
 		{
-			CNativeGui* gui;
+			CBaseParamView* gui;
 			if(machine()._type == MACH_MIXER) {
-				gui = new MixerFrameView(this,&machine(), wndView);
+				gui = new MixerFrameView(this,&machine());
 			}
 			else {
-				gui = new CNativeGui(this,&machine(), wndView);
+				gui = new CNativeView(this,&machine());
 			}
 			gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
 				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
@@ -335,6 +535,17 @@ namespace psycle { namespace host {
 				2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
 			rcFrame.right +=
 				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
+
+			if ( Global::psycleconf().macParam().toolbarOnMachineParams && !(toolBar.GetBarStyle() & CBRS_FLOATING))
+			{
+				//SM_CYBORDER The height of a window border, in pixels. This is equivalent to the SM_CYEDGE value for windows with the 3-D look.
+				CRect tbRect;
+				toolBar.GetWindowRect(&tbRect);
+				int heiTool = tbRect.bottom - tbRect.top - (2 * ::GetSystemMetrics(SM_CYBORDER) );
+				rcClient.top+=heiTool;
+				rcFrame.bottom += heiTool;
+			}
+
 		}
 		void CFrameMachine::ResizeWindow(CRect *pRect)
 		{
@@ -345,9 +556,146 @@ namespace psycle { namespace host {
 			pView->WindowIdle();
 		}
 
-		void CFrameMachine::OnSizing(UINT fwSide, LPRECT pRect)
+
+		//////////////////////////////////////////////////////////////////////////
+
+		void CFrameMachine::FillBankPopup(CMenu* pPopupMenu)
 		{
-			pView->WindowIdle();
+			if (machine().GetNumBanks() > 1)
+			{
+				CMenu* popBnk=0;
+				popBnk = pPopupMenu->GetSubMenu(3);
+				if (!popBnk)
+					return;
+
+				DeleteBankMenu(popBnk);
+				for (int i = 0; i < machine().GetNumBanks(); i++)
+				{
+					char s1[38];
+					char s2[32];
+					_machine->GetIndexBankName(i, s2);
+					std::sprintf(s1,"%d: %s",i,s2);
+					popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, s1);
+				}
+				popBnk->CheckMenuItem(ID_SELECTBANK_0 + machine().GetCurrentBank(),
+					MF_CHECKED | MF_BYCOMMAND);
+			}
+		}
+
+		bool CFrameMachine::DeleteBankMenu(CMenu* popBnk)
+		{
+			if (popBnk->GetMenuItemID(0) == ID_SELECTBANK_0)
+			{
+				while (popBnk->GetMenuItemCount() > 0)
+				{
+					popBnk->DeleteMenu(0,MF_BYPOSITION);
+				}
+				return true;
+			}
+			return false;
+		}
+		void CFrameMachine::FillProgramPopup(CMenu* pPopupMenu)
+		{
+			if (machine().GetTotalPrograms() > 1)
+			{
+				CMenu* popPrg=0;
+				popPrg = pPopupMenu->GetSubMenu(4);
+				if (!popPrg)
+					return;
+
+				DeleteProgramMenu(popPrg);
+
+				for (int i = 0; i < machine().GetNumPrograms() && i < 980 ; i += 16)
+				{
+					CMenu popup;
+					popup.CreatePopupMenu();
+					for (int j = i; (j < i + 16) && (j < machine().GetNumPrograms()); j++)
+					{
+						char s1[38];
+						char s2[32];
+						_machine->GetIndexProgramName(_machine->GetCurrentBank(), j, s2);
+						std::sprintf(s1,"%d: %s",j,s2);
+						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, s1);
+					}
+					char szSub[256] = "";;
+					std::sprintf(szSub,"Programs %d-%d",i,i+15);
+					popPrg->AppendMenu(MF_POPUP | MF_STRING,
+						(UINT)popup.Detach(),
+						szSub);
+				}
+				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + machine().GetCurrentProgram(),
+					MF_CHECKED | MF_BYCOMMAND);
+			}
+		}
+
+		bool CFrameMachine::DeleteProgramMenu(CMenu* popPrg)
+		{
+			CMenu* secMenu=0;
+			if (popPrg->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+			{
+				popPrg->DeleteMenu(0, MF_BYPOSITION);
+				return true;
+			}
+			else if ((secMenu=popPrg->GetSubMenu(0)))
+			{
+				if (secMenu->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+				{
+					while (popPrg->GetSubMenu(0))
+					{
+						popPrg->DeleteMenu(0,MF_BYPOSITION);
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+		void CFrameMachine::FillProgramCombobox()
+		{
+			comboProgram.ResetContent();
+
+			int nump;
+			nump = _machine->GetNumPrograms();
+			for(int i(0) ; i < nump; ++i)
+			{
+				char s1[38];
+				char s2[32];
+				_machine->GetIndexProgramName(-1, i, s2);
+				std::sprintf(s1,"%d: %s",i,s2);
+				comboProgram.AddString(s1);
+			}
+			int i = _machine->GetCurrentProgram();
+			if ( i > nump || i < 0) {  i = 0; }
+			comboProgram.SetCurSel(i);
+
+			if (pParamGui){
+				pParamGui->InitializePrograms();
+			}
+		}
+
+		void CFrameMachine::ChangeProgram(int numProgram)
+		{
+			_machine->SetCurrentProgram(numProgram);
+			comboProgram.SetCurSel(numProgram);
+			if (pParamGui){
+				pParamGui->SelectProgram(numProgram);
+			}
+		}
+		void CFrameMachine::Automate(int param, int value, bool undo)
+		{
+			if(undo) {
+				Global::pInputHandler->AddMacViewUndo();
+			}
+
+			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
+			if(Global::psycleconf().inputHandler()._RecordTweaks)
+			{
+				if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
+					wndView->MousePatternTweakSlide(machine()._macIndex, param, value);
+				else
+					wndView->MousePatternTweak(machine()._macIndex, param, value );
+			}
+			if(pParamGui)
+				pParamGui->UpdateNew(param, value);
 		}
 
 	}   // namespace

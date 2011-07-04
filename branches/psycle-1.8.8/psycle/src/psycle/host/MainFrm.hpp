@@ -15,6 +15,7 @@ namespace psycle { namespace host {
 		class Song;
 		class CWaveEdFrame;
 		class CGearRackDlg;
+		class CFrameMachine;
 
 		enum
 		{
@@ -36,6 +37,10 @@ namespace psycle { namespace host {
 		// Overrides
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+			#if !defined NDEBUG
+				virtual void AssertValid() const;
+				virtual void Dump(CDumpContext& dc) const;
+			#endif
 		// Implementation
 		public:
 			void CenterWindowOnPoint(CWnd* pWnd, POINT point);
@@ -56,10 +61,6 @@ namespace psycle { namespace host {
 
 		private:
 			void SaveRecent();
-			#if !defined NDEBUG
-				virtual void AssertValid() const;
-				virtual void Dump(CDumpContext& dc) const;
-			#endif
 		public:  // control bar embedded members
 			void SetAppSongBpm(int x);
 			void SetAppSongTpb(int x);
@@ -95,13 +96,13 @@ namespace psycle { namespace host {
 			// Attributes
 		public:
 			Song* _pSong;
-			bool isguiopen[MAX_MACHINES];
-			CFrameWnd	*m_pWndMac[MAX_MACHINES];
+			CFrameMachine	*m_pWndMac[MAX_MACHINES];
 
 
 
 		protected:
-			LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
+			DECLARE_MESSAGE_MAP()
+			afx_msg LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnClose();
@@ -190,7 +191,6 @@ namespace psycle { namespace host {
 			afx_msg void OnUpdateViewMachinebar(CCmdUI* pCmdUI);
 			afx_msg void OnPsyhelp();
 //Menu end
-			DECLARE_MESSAGE_MAP()
 };
 
 }}

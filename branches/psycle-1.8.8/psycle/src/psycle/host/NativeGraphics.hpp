@@ -211,7 +211,7 @@ namespace host {
 		CFont *oldfont =dc.SelectObject(&uiSetting->font_bold);
 		dc.ExtTextOut(x+2, y+1, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width, y+height), CString(text), 0);
 		dc.SelectObject(oldfont);
-		dc.Draw3dRect(x-1,y-1,width+2,height+2,titleColor,titleColor);
+		dc.Draw3dRect(x,y-1,width,height+2,titleColor,titleColor);
 	}
 
 

@@ -69,9 +69,7 @@
 #define IDD_SAVESONG                    183
 #define IDD_SWINGFILL                   187
 #define IDD_ASIO_CONFIG                 188
-#define IDB_MASTERBACK                  190
 #define IDB_MASTERNUMBERS               191
-#define IDB_MASTERSLIDER                192
 #define IDB_PATTERN_HEADER_SKIN         194
 #define IDB_MACHINE_SKIN                195
 #define IDD_GEAR_SCOPE                  196
@@ -121,6 +119,9 @@
 #define IDI_ICON1                       296
 #define IDI_GREATER                     296
 #define IDR_POPUP_MACHINE               297
+#define IDB_MASTER_VU                   298
+#define IDB_MASTER_BGND                 299
+#define IDB_MASTERKNOB                  300
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1102,6 +1103,7 @@
 #define IDC_TRACKEDIT                   1828
 #define IDC_COPY_BUTTON                 1829
 #define IDC_SHOW_MASTER                 1830
+#define IDC_MASTERDLG_VU                1831
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1310,6 +1312,13 @@
 #define ID_VIEWS_HELP                   34266
 #define ID_VIEW_WAVEEDITOR              34267
 #define ID_PROGRAMS_RESETDEFAULT        34268
+#define ID_EDIT_PATTERN                 34269
+#define ID_PATTERN_S                    34270
+#define ID_Menu34271                    34271
+#define ID_EDIT_BLOCK                   34272
+#define ID_BLOCK_S                      34273
+#define ID_EDIT_SEQUENCE                34274
+#define ID_SEQUENCE_Q                   34275
 #define IDT_NEW_MACHINES_BROWSER_TIMER  40000
 #define ID_TEXT                         65535
 
@@ -1318,9 +1327,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        298
-#define _APS_NEXT_COMMAND_VALUE         34269
-#define _APS_NEXT_CONTROL_VALUE         1831
+#define _APS_NEXT_RESOURCE_VALUE        301
+#define _APS_NEXT_COMMAND_VALUE         34276
+#define _APS_NEXT_CONTROL_VALUE         1832
 #define _APS_NEXT_SYMED_VALUE           61
 #endif
 #endif

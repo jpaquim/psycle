@@ -10,6 +10,7 @@ namespace psycle { namespace host {
 
 	class SequenceBar : public CDialogBar
 	{
+		friend class CMainFrame;
 		DECLARE_DYNAMIC(SequenceBar)
 
 	public:
@@ -17,14 +18,13 @@ namespace psycle { namespace host {
 		virtual ~SequenceBar();
 		
 		void InitializeValues(CMainFrame* frame, CChildView* view, Song* song);
-
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-	public:
+		void seqpaste(bool below);
+	protected:
 		DECLARE_MESSAGE_MAP()
-		afx_msg LONG OnInitDialog ( UINT, LONG );
-	public:
+		afx_msg LRESULT OnInitDialog ( WPARAM , LPARAM );
 		afx_msg void OnSelchangeSeqlist();
 		afx_msg void OnDblclkSeqlist();
 		afx_msg void OnIncshort();

@@ -17,25 +17,20 @@ public:
 	virtual ~CExListBox();
 	void ShowEditBox(bool isName);
 
-// Attributes
-public:
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnKillFocusPatternName();
-	afx_msg void OnChangePatternName();
-	INT_PTR OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
-	
-	BOOL OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult );
-	// Operations
 public:
 	CEdit myedit;
 	bool isName;
-// Overrides
 protected:
 	virtual void PreSubclassWindow();
+	virtual INT_PTR OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 
 	// Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnKillFocusPatternName();
+	afx_msg void OnChangePatternName();
+	afx_msg BOOL OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult );
 };
 
 }}

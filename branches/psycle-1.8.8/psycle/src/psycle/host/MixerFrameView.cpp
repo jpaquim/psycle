@@ -3,9 +3,9 @@
 
 #include "MixerFrameView.hpp"
 #include "NativeGraphics.hpp"
+#include "Song.hpp"
 #include "internal_machines.hpp"
 #include "FrameMachine.hpp"
-#include "ChildView.hpp"
 #include "InputHandler.hpp"
 
 namespace psycle { namespace host {
@@ -25,8 +25,8 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 
-		MixerFrameView::MixerFrameView(CFrameMachine* frame,Machine* effect, CChildView* view)
-		:CNativeGui(frame,effect, view)
+		MixerFrameView::MixerFrameView(CFrameMachine* frame,Machine* effect)
+		:CNativeView(frame,effect)
 		,backgroundBmp(0)
 		,numSends(0)
 		,numChans(0)
@@ -53,7 +53,7 @@ namespace psycle { namespace host {
 			int vuyoffset = uiSetting->sliderheight - uiSetting->vuheight-uiSetting->dialheight;
 			int xoffset(realwidth), yoffset(0);
 			int checkedwidth(16);
-			char value[48];
+			char value[64];
 
 			if (!_pMachine) return;
 			CPaintDC dc(this); // device context for painting
@@ -412,15 +412,7 @@ namespace psycle { namespace host {
 
 						tweakbase = nv+0.5f;
 						_pMachine->SetParameter(tweakpar,tweakbase);
-						///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-						//				wndView->AddMacViewUndo();
-						if(Global::psycleconf().inputHandler()._RecordTweaks)
-						{
-							if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
-								mainView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, tweakbase);
-							else
-								mainView->MousePatternTweak(_pMachine->_macIndex, tweakpar, tweakbase);
-						}
+						parentFrame->Automate(tweakpar,tweakbase,true);
 					}
 				}
 				prevval = tweakbase;
@@ -458,16 +450,7 @@ namespace psycle { namespace host {
 				if (nv > maxval) nv = maxval;
 				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
 				prevval=(int)(nv+0.5f);
-				///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-				//				wndView->AddMacViewUndo();
-				if(Global::psycleconf().inputHandler()._RecordTweaks)
-				{
-					if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
-						mainView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, prevval);
-					else
-						mainView->MousePatternTweak(_pMachine->_macIndex, tweakpar, prevval);
-				}
-
+				parentFrame->Automate(tweakpar,prevval,false);
 
 				Invalidate(false);
 				CWnd::OnMouseMove(nFlags,point);
@@ -481,7 +464,7 @@ namespace psycle { namespace host {
 				else _swapend = col;
 				CWnd::OnMouseMove(nFlags,point);
 			}
-			else CNativeGui::OnMouseMove(nFlags,point);
+			else CNativeView::OnMouseMove(nFlags,point);
 		}
 
 		void MixerFrameView::OnLButtonUp(UINT nFlags, CPoint point) 

@@ -34,13 +34,14 @@ namespace psycle {
 			std::string tracknames[MAX_TRACKS];
 			BOOL bInit;
 		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		protected:
 			void FillTrackList();
 			void FillPatternCombo();
-
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnAdaptContent();
 			afx_msg void OnChangeNumLines();
 			afx_msg void OnChangeTrackEdit();
@@ -50,6 +51,5 @@ namespace psycle {
 			afx_msg void OnNotShareNames();
 			afx_msg void OnShareNames();
 			afx_msg void OnCopyNames();
-			DECLARE_MESSAGE_MAP()
 		};
 }}

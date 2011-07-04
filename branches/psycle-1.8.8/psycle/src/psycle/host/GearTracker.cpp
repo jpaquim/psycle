@@ -75,14 +75,17 @@ namespace psycle { namespace host {
 			machine._resampler.quality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 		}
 
-		void CGearTracker::PostNcDestroy()
-		{
-			if(windowVar_ !=NULL) *windowVar_ = NULL;
-			delete this;
+		void CGearTracker::OnCancel() {
+			DestroyWindow();
 		}
 		void CGearTracker::OnClose()
 		{
 			CDialog::OnClose();
 			DestroyWindow();
+		}
+		void CGearTracker::PostNcDestroy()
+		{
+			if(windowVar_ !=NULL) *windowVar_ = NULL;
+			delete this;
 		}
 }}

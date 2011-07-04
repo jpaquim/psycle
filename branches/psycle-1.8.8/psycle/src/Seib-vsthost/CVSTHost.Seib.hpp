@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vst2.x/AEffectx.h>               /* VST header files                  */
 #include <vst2.x/vstfxstore.h>
 #include "JBridgeEnabler.hpp"
+#include "CVSTPreset.hpp"
 //////////////////////////////////////////////////////////////////////////
 // This is part of Psycle, to catch the exceptions that happen when interacting
 // with the plugins. To use your own, replace 
@@ -73,186 +74,11 @@ namespace seib {
 			extern const char* canDoBypass;
 		}
 
-		/*****************************************************************************/
-		/* CFxBase : base class for FX Bank / Program Files                          */
-		/*****************************************************************************/
-		class CFxBase
-		{
-		protected:
-			CFxBase();
-		public:
-			CFxBase(VstInt32 _version,VstInt32 _fxID, VstInt32 _fxVersion);
-			CFxBase(const char *pszFile);
-			CFxBase(FILE* pFileHandle);
-			CFxBase & operator=(CFxBase const &org) { return DoCopy(org); }
-			CFxBase & DoCopy(const CFxBase &org);
-
-			bool Save(const char *pszFile);
-			long GetMagic() { return version; }
-			long GetVersion() { return version; }
-			long GetFxID() {  return fxID; }
-			long GetFxVersion() { return fxVersion; }
-			bool Initialized() { return initialized; }
-			std::string GetPathName() { return pathName; }
-			// This function would normally be protected, but it is needed in the saving of Programs from a Bank.
-			virtual bool SaveData(FILE* pFileHandle) { pf = pFileHandle; return SaveData(); }
-		protected:
-			VstInt32 fxMagic;			///< "Magic" identifier of this chunk. Tells if it is a Bank/Program and if it is chunk based.
-			VstInt32 version;			///< format version
-			VstInt32 fxID;				///< fx unique ID
-			VstInt32 fxVersion;			///< fx version
-			std::string pathName;
-			bool initialized;
-			// pf would normally be private, but it is needed in the loading of Programs from a Bank.
-			FILE* pf;
-		protected:
-			bool Load(const char *pszFile);
-			virtual bool LoadData() { return ReadHeader(); }
-			virtual bool SaveData() { return WriteHeader(); }
-			template <class T>
-			bool Read(T &f,bool allowswap=true);
-			template <class T>
-			bool Write(T f,bool allowswap=true);
-			bool ReadArray(void *f,int size);	
-			bool WriteArray(void *f, int size);
-			void Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
-			void Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
-			bool ReadHeader();
-			bool WriteHeader();
-			virtual void CreateInitialized();
-		private:
-			static bool NeedsBSwap;
-		private:
-			void SwapBytes(VstInt32 &f);
-			void SwapBytes(float &f);
-		};
-
-		/*****************************************************************************/
-		/* CFxProgram : class for an .fxp (Program) file                             */
-		/*****************************************************************************/
-		class CFxProgram : public CFxBase
-		{
-		public:
-			CFxProgram(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
-			CFxProgram(FILE *pFileHandle);
-			// Create a CFxProgram from parameters.
-			// _fxID and _fxVersion are mandatory. 
-			// if isChunk == false, size is the number of parameters, and data, if not empty, contains 
-			// an array of floats that correspond to the parameter values.
-			// if isChunk == true, size is the size of the chunk, and data, if not empty, contains the chunk data.
-			CFxProgram(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 size, bool isChunk=false, void *data=0);
-			CFxProgram(CFxProgram const &org):CFxBase(){ Init(); DoCopy(org); }
-			virtual ~CFxProgram();
-			CFxProgram & operator=(CFxProgram const &org) { FreeMemory(); return DoCopy(org); }
-
-			// access functions
-			const char * GetProgramName() const	{ return prgName;	}
-			void SetProgramName(const char *name = "")
-			{
-				//leave last char for null.
-				std::strncpy(prgName, name, 27);
-			}
-			long GetNumParams() const{ return numParams; }
-			float GetParameter(VstInt32 nParm) const{  return (nParm < numParams) ? pParams[nParm] : 0; }
-			bool SetParameter(VstInt32 nParm, float val = 0.0);
-			long GetChunkSize() const{ return chunkSize; }
-			const void *GetChunk() const { return pChunk; }
-			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
-			bool IsChunk() const{ return fxMagic == chunkPresetMagic; }
-			void ManuallyInitialized() { initialized = true; }
-
-			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pFileHandle); }
-
-		protected:
-			char prgName[28];			///< program name (null-terminated ASCII string)
-
-			VstInt32 numParams;			///< number of parameters
-			float* pParams;				///< variable sized array with parameter values
-			int chunkSize;				///< Size of the opaque chunk.
-			unsigned char* pChunk;		///< variable sized array with opaque program data
-
-		protected:
-			void Init();
-			CFxProgram & DoCopy(CFxProgram const &org);
-			void FreeMemory();
-			virtual bool LoadData();
-			virtual bool SaveData();
-
-		private:
-			void ChunkMode() { FreeMemory(); fxMagic = chunkPresetMagic; }
-			void ParamMode() { FreeMemory(); fxMagic = fMagic; }
-			bool SetParameters(const float* pnewparams,int params);
-			bool SetChunk(const void *chunk, VstInt32 size);
-			bool SetNumParams(VstInt32 nPars,bool initializeData=true);
-			bool SetChunkSize(VstInt32 size,bool initializeData=true);
-		};
-
-
-		/*****************************************************************************/
-		/* CFxBank : class for an .fxb (Bank) file                                   */
-		/*****************************************************************************/
-
-		class CFxBank : public CFxBase
-		{
-		public:
-			CFxBank(const char *pszFile = 0):CFxBase(){ Init(); initialized=Load(pszFile); }
-			CFxBank(FILE* pFileHandle);
-			// Create a CFxBank from parameters.
-			// _fxID, _fxVersion and _numPrograms are mandatory.
-			// If isChunk == false, the Bank is created as a regular bank of numPrograms, _size is then the
-			// number of parameters of the program, and data can be zero, or an array of CFxPrograms to copy to the CFxBank.
-			// if isChunk == true ,create a chunk of size "_size", and copy the contents of "data".
-			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk=false, int _size=0, void *_data=0);
-			CFxBank(CFxBank const &org) { Init(); DoCopy(org); }
-			virtual ~CFxBank();
-			CFxBank & operator=(CFxBank const &org) { FreeMemory(); return DoCopy(org); }
-
-			// access functions
-			long GetNumPrograms() const { return numPrograms; }
-			
-			long GetChunkSize() const { return chunkSize; }
-			void * const GetChunk() const { return pChunk; }
-			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
-			bool IsChunk() const{ return fxMagic == chunkBankMagic; }
-
-			// if nProgNum is not specified (i.e, it is -1) , currentProgram is used as index.
-			CFxProgram& GetProgram(VstInt32 nProgNum=-1)
-			{
-				if ( nProgNum < 0 || nProgNum >= numPrograms) return programs[currentProgram];
-				else return programs[nProgNum];
-			}
-			void SetProgramIndex(VstInt32 nProgNum) { if (nProgNum < numPrograms ) currentProgram = nProgNum; }
-			VstInt32 GetProgramIndex() const { return currentProgram;	}
-			void ManuallyInitialized() { initialized = true; }
-			virtual bool SaveData(FILE* pFileHandle) { return CFxBase::SaveData(pf); }
-
-		protected:
-			VstInt32 numPrograms;
-			VstInt32 currentProgram;
-			int chunkSize;
-			unsigned char * pChunk;
-			std::vector<CFxProgram> programs;
-
-		protected:
-			void Init();
-			CFxBank & DoCopy(CFxBank const &org);
-			bool SetChunk(const void *chunk, VstInt32 size);
-			bool SetChunkSize(VstInt32 size, bool initializeData=true);
-			void FreeMemory();
-			virtual bool LoadData();
-			virtual bool SaveData();
-
-		private:
-			void ChunkMode() { FreeMemory(); fxMagic = chunkBankMagic; }
-			void ProgramMode() { FreeMemory(); fxMagic = bankMagic; }
-
-		};
-
 		class CPatchChunkInfo : public VstPatchChunkInfo
 		{
 		public:
-			CPatchChunkInfo(CFxProgram fxstore);
-			CPatchChunkInfo(CFxBank fxstore);
+			CPatchChunkInfo(const CFxProgram& fxstore);
+			CPatchChunkInfo(const CFxBank& fxstore);
 		};
 
 		//-------------------------------------------------------------------------------------------------------
@@ -318,9 +144,11 @@ namespace seib {
 			{
 			#if defined _WIN64 || defined _WIN32
 				char szProxyPath[MAX_PATH];
-				JBridge::getJBridgeLibrary(szProxyPath);
+				szProxyPath[0]=0 ;
+				JBridge::getJBridgeLibrary(szProxyPath, MAX_PATH);
 				if ( szProxyPath[0] != '\0' )
 				{
+					// Load proxy DLL
 					module = LoadLibrary(szProxyPath);
 					//we need the original name in sFilename.
 					sFileName = new char[strlen(fileName) + 1];
@@ -445,7 +273,7 @@ namespace seib {
 			virtual void * OnGetDirectory();
 			virtual bool OnGetChunkFile(char * nativePath);
 			virtual bool OnSizeEditorWindow(long width, long height);
-			///\todo: You might need to overload the OnUpdateDisplay in order to check other changes.
+			///\todo: You might need to override the OnUpdateDisplay in order to check other changes.
 			virtual bool OnUpdateDisplay();
 			virtual void * OnOpenWindow(VstWindow* window);
 			virtual bool OnCloseWindow(VstWindow* window);

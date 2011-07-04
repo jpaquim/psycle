@@ -10,11 +10,18 @@ namespace psycle { namespace host {
 
 	class SongBar : public CDialogBar
 	{
+		friend class CMainFrame;
 	DECLARE_DYNAMIC(SongBar)
 
 	public:
 		SongBar(void);
 		virtual ~SongBar(void);
+		CComboBox       m_trackcombo;
+		CComboBox       m_octavecombo;
+		CSliderCtrl		m_masterslider;
+		CStatic			m_bpmlabel;
+		CStatic			m_tpblabel;
+
 
 		void InitializeValues(CMainFrame* frame, CChildView* view, Song* song);
 		void SetAppSongBpm(int x);
@@ -25,9 +32,9 @@ namespace psycle { namespace host {
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+	protected:
 		DECLARE_MESSAGE_MAP()
-		afx_msg LONG OnInitDialog ( UINT, LONG );
-	public:
+		afx_msg LRESULT OnInitDialog ( WPARAM , LPARAM );
 		afx_msg void OnSelchangeTrackcombo();
 		afx_msg void OnCloseupTrackcombo();
 		afx_msg void OnBpmAddOne();
@@ -42,13 +49,7 @@ namespace psycle { namespace host {
 		afx_msg void OnClipbut();
 		afx_msg BOOL OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult );
 
-		CComboBox       m_trackcombo;
-		CComboBox       m_octavecombo;
-		CSliderCtrl		m_masterslider;
 	protected:
-		CStatic			m_bpmlabel;
-		CStatic			m_tpblabel;
-
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;
 		Song*		m_pSong;

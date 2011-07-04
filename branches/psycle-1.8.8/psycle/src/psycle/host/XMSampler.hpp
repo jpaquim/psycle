@@ -1124,17 +1124,6 @@ private:
 	int m_NextSampleTick;// The sample position of the next Tracker Tick
 	int _sampleCounter;	// Number of Samples since note start
 
-	///\name thread synchronisation
-	///\{
-		public:
-			typedef class scoped_lock<mutex> scoped_lock;
-			mutex & Mutex() const { return mutex_; }
-			operator mutex & () const { return mutex_; }
-		private:
-			mutex mutable mutex_;
-	///\}
-
-	//\todo : This should not be independant for each xmsampler, but shared.
 	static XMInstrument m_Instruments[MAX_INSTRUMENT+1];
 	static XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT+1];
 };

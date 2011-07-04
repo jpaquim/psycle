@@ -113,6 +113,9 @@ namespace psycle
 			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
 			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered. Force this we need to use __except instead of catch.
 		}
+
+
+
 		Machine::Machine(MachineType msubclass, MachineMode mode, int id)
 		{
 		//	Machine();
@@ -750,6 +753,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				_volumeDisplay = temp;
 			}
 			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
+			else {_volumeDisplay = 0;}
 
 			if ( autoStopMachine )
 			{
@@ -1161,6 +1165,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				}
 				while (--i);
 			}
+			UpdateVuAndStanbyFlag(numSamples);
 			if(_lMax > 32767.0f)
 			{
 				_clip=true;

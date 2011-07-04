@@ -22,8 +22,8 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
-	DECLARE_MESSAGE_MAP()
 public:
+	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

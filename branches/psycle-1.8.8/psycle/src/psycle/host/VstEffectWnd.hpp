@@ -11,13 +11,12 @@
 
 namespace psycle {
 	namespace host {
+		class CChildView;
+
 		namespace vst
 		{
 			class plugin;
 		}
-		using namespace seib::vst;
-
-		class CVstParamList;
 
 		class CVstGui : public CBaseParamView
 		{
@@ -31,18 +30,17 @@ namespace psycle {
 		};
 
 		/// vst editor window.
-		class CVstEffectWnd : public CFrameMachine, public CEffectWnd
+		class CVstEffectWnd : public CFrameMachine, public seib::vst::CEffectWnd
 		{
 			DECLARE_DYNAMIC(CVstEffectWnd)
 		public: 
-			CVstEffectWnd(vst::plugin* effect);
+			CVstEffectWnd(vst::plugin* effect, CChildView* wndView_, CFrameMachine** windowVar_);
 			virtual ~CVstEffectWnd(){};
 		protected:
 			CVstEffectWnd(){}; // protected constructor used by dynamic creation
 
 		public:
 			virtual void CloseEditorWnd() { OnClose(); }
-			virtual void GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect);
 			virtual void ResizeWindow(int width, int height);
 			virtual void ResizeWindow(CRect* pRect);
 			virtual void RefreshUI();
@@ -57,35 +55,15 @@ namespace psycle {
 			inline vst::plugin& vstmachine(){ return *reinterpret_cast<vst::plugin*>(_machine); }
 			virtual CBaseParamView* CreateView();
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); }
-			void FillProgramCombobox();
-			void FillPopup(CMenu* pPopupMenu);
-			CVstParamList* pParamGui;
-			CToolBar toolBar;
-			CComboBox comboBank;
-			CComboBox comboProgram;
 			std::list<HWND> secwinlist;
 
 		// Implementation
 		public:
+			DECLARE_MESSAGE_MAP()
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnClose();
 			afx_msg void OnProgramsOpenpreset();
 			afx_msg void OnProgramsSavepreset();
-			afx_msg void OnViewsParameterlist();
-			afx_msg void OnUpdateViewsParameterlist(CCmdUI *pCmdUI);
-			afx_msg void OnViewsMidichannels();
-			afx_msg void OnUpdateViewsMidichannels(CCmdUI *pCmdUI);
-			afx_msg void OnSelchangeProgram();
-			afx_msg void OnCloseupProgram();
-			afx_msg void OnSetProgram(UINT nID);
-			afx_msg void OnProgramLess();
-			afx_msg void OnUpdateProgramLess(CCmdUI *pCmdUI);
-			afx_msg void OnProgramMore();
-			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);
-			afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
-			afx_msg void OnViewsShowtoolbar();
-			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

@@ -9,7 +9,6 @@ namespace psycle { namespace host {
 		/// direct sound config window.
 		class CDSoundConfig : public CDialog
 		{
-				DECLARE_MESSAGE_MAP()
 			public:
 				CDSoundConfig(CWnd * pParent = 0);
 				int const static IDD = IDD_DSOUNDCONFIG;
@@ -35,16 +34,17 @@ namespace psycle { namespace host {
 
 			protected:
 				virtual void DoDataExchange(CDataExchange* pDX);
-			private:
 				virtual BOOL OnInitDialog();
 				virtual void OnOK();
+				void RecalcLatency();
+			private:
+				DECLARE_MESSAGE_MAP()
 				afx_msg void OnSelchangeDevice();
 				afx_msg void OnSelendokSamplerate();
 				afx_msg void OnSelendokBitDepth();
 				afx_msg void OnChangeBufnumEdit();
 				afx_msg void OnChangeBufsizeEdit();
 				afx_msg void OnDestroy();
-				void RecalcLatency();
 		};
 	}   // namespace
 }   // namespace

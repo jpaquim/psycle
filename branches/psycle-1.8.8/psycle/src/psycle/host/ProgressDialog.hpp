@@ -15,12 +15,10 @@ namespace psycle { namespace host {
 		// Overrides
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
-		protected:
-			// Generated message map functions
 			virtual BOOL OnInitDialog();
-			afx_msg void OnClose();
+		protected:
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnClose();
 		};
 
 	}   // namespace host

@@ -4,25 +4,49 @@
 // Name of the proxy DLL to load
 #define JBRIDGE_PROXY_REGKEY        TEXT("Software\\JBridge")
 
-#ifdef _WIN64
+#ifdef _M_X64
 #define JBRIDGE_PROXY_REGVAL        TEXT("Proxy64")  //use this for x64 builds
 #else
 #define JBRIDGE_PROXY_REGVAL        TEXT("Proxy32")  //use this for x86 builds
 #endif
 
-void JBridge::getJBridgeLibrary(char szProxyPath[]) {
-	// Get path to JBridge proxy
-	szProxyPath[0]='\0' ;
+
+//Check if it’s a plugin_name.xx.dll
+bool JBridge::IsBootStrapDll(const char * path)
+{
+	bool ret = false;
+
+	HMODULE hModule = LoadLibrary(path);
+	if( !hModule )
+	{
+		//some error…
+		return ret;
+	}
+
+	//Exported dummy function to identify this as a bootstrap dll.
+	if( GetProcAddress(hModule, "JBridgeBootstrap") )
+	{
+		//it’s a bootstrap dll
+		ret = true;
+	}
+
+	FreeLibrary( hModule );
+
+	return ret;
+}
+
+// Get path to JBridge proxy
+void JBridge::getJBridgeLibrary(char szProxyPath[], DWORD pathsize) {
 	HKEY hKey;
 	if ( RegOpenKeyEx(HKEY_LOCAL_MACHINE, JBRIDGE_PROXY_REGKEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS )
 	{
-		DWORD dw=sizeof(szProxyPath);
-		RegQueryValueEx(hKey, JBRIDGE_PROXY_REGVAL, NULL, NULL, (LPBYTE)szProxyPath, &dw);
+		RegQueryValueEx(hKey, JBRIDGE_PROXY_REGVAL, NULL, NULL, (LPBYTE)szProxyPath, &pathsize);
 		RegCloseKey(hKey);
 	}
 }
-
-PFNBRIDGEMAIN JBridge::getBridgeMainEntry(HMODULE hModuleProxy)
+// Get bridge's entry point
+PFNBRIDGEMAIN JBridge::getBridgeMainEntry(const HMODULE hModuleProxy)
 {
-	return (PFNBRIDGEMAIN)GetProcAddress(hModuleProxy, "BridgeMain");
+	return (PFNBRIDGEMAIN)GetProcAddress(const_cast<HMODULE>(hModuleProxy), "BridgeMain");
 }
+

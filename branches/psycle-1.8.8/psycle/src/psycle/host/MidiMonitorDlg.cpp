@@ -8,8 +8,8 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 
-int const ID_TIMER_MIDIMON = 1;
 namespace psycle { namespace host {
+		int const ID_TIMER_MIDIMON = 1;
 
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
@@ -132,6 +132,11 @@ namespace psycle { namespace host {
 			{
 				KillTimer(ID_TIMER_MIDIMON);
 			}
+		}
+		void CMidiMonitorDlg::OnCancel() 
+		{
+			KillTimer(ID_TIMER_MIDIMON);
+			CDialog::OnCancel();
 		}
 		void CMidiMonitorDlg::OnClose() 
 		{

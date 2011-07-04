@@ -23,11 +23,10 @@ namespace psycle { namespace host {
 		// Overrides
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
-		protected:
 			virtual BOOL OnInitDialog();
-			afx_msg void OnUpdateEdit1();
+		protected:
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnUpdateEdit1();
 		};
 
 	}   // namespace

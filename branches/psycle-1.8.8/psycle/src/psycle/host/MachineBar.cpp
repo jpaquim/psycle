@@ -50,8 +50,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 
 	// MachineBar message handlers
-
-	LONG MachineBar::OnInitDialog ( UINT wParam, LONG lParam)
+	LRESULT MachineBar::OnInitDialog ( WPARAM wParam, LPARAM lParam)
 	{
 		BOOL bRet = HandleInitDialog(wParam, lParam);
 
@@ -315,6 +314,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			m_pParentMain->pGearRackDialog->ShowWindow(SW_SHOW);
 		}
 		else {
+
 			m_pParentMain->pGearRackDialog->SetActiveWindow();
 		}
 		((CButton*)GetDlgItem(IDC_GEAR_RACK))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
@@ -616,7 +616,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		CString str;
 		cb->GetWindowText(str);
 		int result;
-		helpers::hexstring_to_integer(str.Left(2).GetBuffer(2), result);
+		helpers::hexstring_to_integer(static_cast<LPCTSTR>(str.Left(2)), result);
 		return result;
 	}
 }}

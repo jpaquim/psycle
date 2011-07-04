@@ -25,8 +25,6 @@ namespace psycle {
 			int kill_thread;
 			int threadopen;
 			CEvent _event;
-		// Dialog Data
-			//{{AFX_DATA(CSaveWavDlg)
 			enum { IDD = IDD_SAVEWAVDLG };
 			CButton	m_browse;
 			CButton	m_cancel;
@@ -51,14 +49,6 @@ namespace psycle {
 			CComboBox	m_channelmode;
 			CComboBox	m_pdf;
 			CComboBox	m_noiseshaping;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CSaveWavDlg)
-			protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
 			HANDLE thread_handle;
 
@@ -117,15 +107,16 @@ namespace psycle {
 
 			void SaveWav(std::string file, int bits, int rate, channel_mode channelmode, bool isFloat);
 			
-			// Generated message map functions
-			//{{AFX_MSG(CSaveWavDlg)
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
+			virtual void OnCancel();
+			DECLARE_MESSAGE_MAP()						
 			afx_msg void OnFilebrowse();
 			afx_msg void OnSelAllSong();
 			afx_msg void OnSelRange();
 			afx_msg void OnSelPattern();
 			afx_msg void OnSavewave();
-			virtual void OnCancel();
 			afx_msg void OnSelchangeComboBits();
 			afx_msg void OnSelchangeComboChannels();
 			afx_msg void OnSelchangeComboRate();
@@ -139,11 +130,6 @@ namespace psycle {
 			afx_msg void OnOutputfile();
 			afx_msg void OnOutputclipboard();
 			afx_msg void OnOutputsample();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()						
 };
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 }}

@@ -16,9 +16,10 @@ namespace psycle { namespace host {
 			enum { IDD = IDD_DIRECTORIES };
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		protected:
 			virtual BOOL OnInitDialog();
-			virtual void OnOk();
+			virtual void OnOK( );
+		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnBrowseSong();
 			afx_msg void OnChangeSongedit();
 			afx_msg void OnBnClickedBrowsewaverec();
@@ -38,7 +39,6 @@ namespace psycle { namespace host {
 			afx_msg void OnChangeSkinedit();
 			afx_msg void OnBrowsePresets();
 			afx_msg void OnChangePresetsedit();
-			DECLARE_MESSAGE_MAP()
 		protected:
 			void EnableSupportedBridges();
 			void DisableAllBridges();

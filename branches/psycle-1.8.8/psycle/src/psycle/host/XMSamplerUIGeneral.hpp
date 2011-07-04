@@ -18,42 +18,25 @@ public:
 	XMSampler * const pMachine() { return _pMachine;};
 	void pMachine(XMSampler * const p) { _pMachine = p;};
 
-	// Dialog Data
-	//{{AFX_DATA(XMSamplerUIGeneral)
 	enum { IDD = IDD_XM_GENERAL };
 	CComboBox	m_interpol;
 	CSliderCtrl	m_polyslider;
 	CStatic m_polylabel;
-	//}}AFX_DATA
-
-	// Overrides
-	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(XMSamplerUIGeneral)
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-private:
-	XMSampler* _pMachine;
-	bool m_bInitialize;
-//	CEdit m_GlobalVolume;
-public:
-	afx_msg void OnCbnSelchangeXminterpol();
-	afx_msg void OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult);
-
-protected:
-	// Generated message map functions
-	//{{AFX_MSG(XMSaplerUIGeneral)
-	virtual BOOL OnInitDialog();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-public:
 	CEdit m_ECommandInfo;
 	CButton m_bAmigaSlides;
 	CButton m_ckFilter;
 	CComboBox m_cbPanningMode;
-
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+private:
+	XMSampler* _pMachine;
+	bool m_bInitialize;
+//	CEdit m_GlobalVolume;
+protected:
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnCbnSelchangeXminterpol();
+	afx_msg void OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCheck1();
 	afx_msg void OnBnClickedCheck2();
 	afx_msg void OnBnClickedCheck3();

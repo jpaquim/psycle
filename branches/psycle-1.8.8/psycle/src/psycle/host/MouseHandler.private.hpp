@@ -216,7 +216,7 @@ namespace psycle { namespace host {
 				}
 				else {  // Right click mouse button
 				}
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, AfxGetMainWnd());
+				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
 				menu.DestroyMenu();
 			}
 			else*/ if (viewMode == view_modes::pattern)
@@ -233,7 +233,7 @@ namespace psycle { namespace host {
 				}
 				else {  // Right click mouse button
 				}
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, AfxGetMainWnd());
+				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
 				menu.DestroyMenu();
 			}
 			CWnd::OnContextMenu(pWnd,point);

@@ -10,6 +10,7 @@ namespace psycle { namespace host {
 
 	class MachineBar : public CDialogBar
 	{
+		friend class CMainFrame;
 	DECLARE_DYNAMIC(MachineBar)
 
 	public:
@@ -25,9 +26,9 @@ namespace psycle { namespace host {
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+	protected:
 		DECLARE_MESSAGE_MAP()
-		afx_msg LONG OnInitDialog ( UINT, LONG );
-	public:
+		afx_msg LRESULT OnInitDialog ( WPARAM , LPARAM );
 		afx_msg void OnSelchangeCombostep();
 		afx_msg void OnCloseupCombostep();
 		afx_msg void OnSelchangeBarCombogen();

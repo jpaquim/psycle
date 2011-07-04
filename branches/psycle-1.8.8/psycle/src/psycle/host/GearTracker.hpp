@@ -25,13 +25,14 @@ namespace host {
 			virtual BOOL OnInitDialog();
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual void PostNcDestroy();
+			virtual void OnCancel();
 		// Implementation
 		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnClose();
 			afx_msg void OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnSelchangeCombo1();
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

@@ -60,7 +60,9 @@ namespace psycle { namespace host {
 			// return TRUE unless you set the focus to a control
 			// EXCEPTION: OCX Property Pages should return FALSE
 		}
-
+		void CGearRackDlg::OnCancel() {
+			DestroyWindow();
+		}
 		void CGearRackDlg::OnClose()
 		{
 			AfxGetMainWnd()->SetFocus();
@@ -87,7 +89,7 @@ namespace psycle { namespace host {
 		void CGearRackDlg::RedrawList() 
 		{
 			char buffer[64];
-			
+			m_list.ShowWindow(SW_HIDE);
 			m_list.ResetContent();
 
 			int selected=0;
@@ -177,8 +179,9 @@ namespace psycle { namespace host {
 				}
 				break;
 			}
-
-			m_list.SetCurSel(selected);
+			m_list.ShowWindow(SW_SHOW);
+			m_list.SelItemRange(false,0,m_list.GetCount()-1);
+			m_list.SetSel(selected,true);
 		}
 
 		void CGearRackDlg::OnSelchangeGearlist() 

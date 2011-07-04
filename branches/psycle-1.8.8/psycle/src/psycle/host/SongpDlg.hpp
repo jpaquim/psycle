@@ -20,17 +20,14 @@ namespace psycle {
 			CEdit	m_songcredits;
 			CEdit	m_songtitle;
 			bool	readonlystate;
-		// Overrides
-		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		// Implementation
 		public:
 			void SetReadOnly();
 		protected:
-			// Generated message map functions
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
-			afx_msg void OnOk();
+		protected:
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnOk();
 		};
 
 }}

@@ -54,8 +54,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	}
 
 	// SequenceBar message handlers
-
-	LONG SequenceBar::OnInitDialog ( UINT wParam, LONG lParam)
+	LRESULT SequenceBar::OnInitDialog ( WPARAM wParam, LPARAM lParam)
 	{
 		BOOL bRet = HandleInitDialog(wParam, lParam);
 
@@ -388,48 +387,42 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 
 	void SequenceBar::OnSeqpasteAbove()
 	{
+		seqpaste(false);	
 	}
 	void SequenceBar::OnSeqpasteBelow()
 	{
+		seqpaste(true);
+	}
+	void SequenceBar::seqpaste(bool below)
+	{
 		if (seqcopybufferlength > 0)
 		{
-			if(m_pSong->playLength<(MAX_SONG_POSITIONS-1))
-			{
-				Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
-
-				// we will do this in a loop to easily handle an error if we run out of space
-
-				// our list can be in any order so we must be careful
-				int pastedcount = 0;
-				for (int i=0; i < seqcopybufferlength; i++)
-				{
-					if(m_pSong->playLength<(MAX_SONG_POSITIONS-1))
-					{
-						++m_pSong->playLength;
-
-						m_pWndView->editPosition++;
-						pastedcount++;
-						int c;
-						for(c = m_pSong->playLength - 1 ; c >= m_pWndView->editPosition ; --c)
-						{
-							m_pSong->playOrder[c]=m_pSong->playOrder[c-1];
-						}
-						m_pSong->playOrder[c+1] = seqcopybuffer[i];
-					}
-				}
-
-				if (pastedcount>0)
-				{
-					UpdatePlayOrder(true);
-					for(int i(m_pWndView->editPosition + 1 - pastedcount) ; i < m_pWndView->editPosition ; ++i)
-					{
-						m_pSong->playOrderSel[i] = true;
-					}
-					UpdateSequencer(m_pWndView->editPosition);
-					m_pWndView->Repaint(draw_modes::pattern);
-
-				}
+			Global::pInputHandler->AddUndoSequence(m_pSong->playLength,m_pWndView->editcur.track,m_pWndView->editcur.line,m_pWndView->editcur.col,m_pWndView->editPosition);
+			if(m_pSong->playLength+seqcopybufferlength>MAX_SONG_POSITIONS) {
+				seqcopybufferlength=MAX_SONG_POSITIONS-m_pSong->playLength;
 			}
+			if(below) m_pWndView->editPosition+=1;
+			int movepos = m_pSong->playLength-1;
+			
+			m_pSong->playLength+=seqcopybufferlength;
+			int c,i;
+			for(c=m_pSong->playLength-1, i=movepos; i >= m_pWndView->editPosition; --c,--i)
+			{
+				m_pSong->playOrder[c]=m_pSong->playOrder[i];
+			}
+			for(int i=seqcopybufferlength-1; c >= m_pWndView->editPosition; --c, --i)
+			{
+				m_pSong->playOrder[c]=seqcopybuffer[i];
+			}
+
+			UpdatePlayOrder(true);
+			for(int i=0; i <MAX_SONG_POSITIONS; ++i)
+			{
+				m_pSong->playOrderSel[i] = false;
+			}
+			m_pSong->playOrderSel[m_pWndView->editPosition] = true;
+			UpdateSequencer(m_pWndView->editPosition);
+			m_pWndView->Repaint(draw_modes::pattern);
 		}
 		m_pWndView->SetFocus();
 	}
@@ -722,7 +715,6 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		for (int i=0; i <ll; i++)
 		{
 			int pattern = m_pSong->playOrder[i];
-			// this should parse each line for ffxx commands if you want it to be truly accurate
 			unsigned char* const plineOffset = m_pSong->_ppattern(pattern);
 			for (int l = 0; l < m_pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
 			{
@@ -732,14 +724,14 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 					switch (pEntry->_cmd)
 					{
 					case 0xFF:
-						if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+						if ( pEntry->_parameter != 0 && (pEntry->_note < 121 || pEntry->_note == 255))
 						{
 							bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 						}
 						break;
 						
 					case 0xFE:
-						if ( pEntry->_parameter != 0 && pEntry->_note < 121 || pEntry->_note == 255)
+						if ( pEntry->_parameter != 0 && (pEntry->_note < 121 || pEntry->_note == 255))
 						{
 							tpb=pEntry->_parameter;
 						}

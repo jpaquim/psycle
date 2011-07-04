@@ -13,7 +13,6 @@
 #include "SaveWavDlg.hpp"
 #include "SongpDlg.hpp"
 #include "MasterDlg.hpp"
-#include "NativeGui.hpp"
 #include "XMSamplerUI.hpp"
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
@@ -31,9 +30,9 @@
 
 #include <cmath> // SwingFill
 
-int const ID_TIMER_VIEW_REFRESH =39;
-int const ID_TIMER_AUTOSAVE = 159;
 namespace psycle { namespace host {
+		int const ID_TIMER_VIEW_REFRESH =39;
+		int const ID_TIMER_AUTOSAVE = 159;
 
 		CMainFrame		*pParentMain;
 
@@ -281,7 +280,7 @@ namespace psycle { namespace host {
 		{
 			KillTimer(ID_TIMER_VIEW_REFRESH);
 			KillTimer(ID_TIMER_AUTOSAVE);
-			if (!SetTimer(ID_TIMER_VIEW_REFRESH,33,NULL)) // GUI update. 
+			if (!SetTimer(ID_TIMER_VIEW_REFRESH,30,NULL)) // GUI update. 
 			{
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
@@ -315,21 +314,27 @@ namespace psycle { namespace host {
 							master->_clip
 						);
 					pParentMain->UpdateMasterValue(master->_outDry);
-					if ( MasterMachineDialog ) MasterMachineDialog->UpdateUI();
+					if ( MasterMachineDialog ) {
+						MasterMachineDialog->UpdateUI();
+						for (int i=0;i<MAX_CONNECTIONS; i++)
+						{
+							if ( master->_inputCon[i])
+							{
+								if (_pSong->_pMachine[master->_inputMachines[i]])
+								{
+									strcpy(MasterMachineDialog->macname[i],_pSong->_pMachine[master->_inputMachines[i]]->_editName);
+								}
+							}
+							else {
+								strcpy(MasterMachineDialog->macname[i],"");
+							}
+						}
+					}
 					master->vuupdated = true;
 				}
 				if (viewMode == view_modes::machine)
 				{
-/*					if (Global::pPlayer->_playing && Global::pPlayer->_lineChanged)
-					{
-						// This is meant to repaint the whole machine in case the panning/mute/solo/bypass has changed. (not really implemented right now)
-						Repaint(draw_modes::all_machines);
-					}
-					else
-					{*/
-						CClientDC dc(this);
-						DrawAllMachineVumeters(&dc);
-//					}
+						Repaint(draw_modes::playback);
 				}
 
 				for(int c=0; c<MAX_MACHINES; c++)
@@ -386,7 +391,7 @@ namespace psycle { namespace host {
 				CString filepath = Global::psycleconf().GetSongDir().c_str();
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
-				if(!file.Create(filepath.GetBuffer(1), true)) return;
+				if(!file.Create(static_cast<LPCTSTR>(filepath), true)) return;
 				CProgressDialog progress(NULL,false);
 				_pSong->Save(&file,progress, true);
 				if (!file.Close())
@@ -474,6 +479,12 @@ namespace psycle { namespace host {
 						DrawMachineVumeters(updatePar, &bufDC);
 						updateMode=draw_modes::all;
 						break;
+					case draw_modes::playback:
+						///\todo need to refresh also mute/solo/bypass and panning.
+						//warning: doing DrawMachine can cause problems if transparent
+						//graphics or if machine text is drawn outside of the machine.
+						DrawAllMachineVumeters(&bufDC);
+						break;
 					case draw_modes::all_machines:
 						for (int i=0;i<MAX_MACHINES;i++)
 						{
@@ -516,6 +527,12 @@ namespace psycle { namespace host {
 						DrawMachineVumeters(updatePar, &dc);
 						updateMode=draw_modes::all;
 						break;
+					case draw_modes::playback:
+						///\todo need to refresh also mute/solo/bypass and panning.
+						//warning: doing DrawMachine can cause problems if transparent
+						//graphics or if machine text is drawn outside of the machine.
+						DrawAllMachineVumeters(&dc);
+						break;
 					case draw_modes::all_machines:
 						for (int i=0;i<MAX_MACHINES;i++)
 						{
@@ -545,6 +562,11 @@ namespace psycle { namespace host {
 			if ( viewMode == view_modes::machine )
 			{
 				if ( drawMode <= draw_modes::machine )
+				{
+					updateMode = drawMode;
+					Invalidate(false);
+				}
+				if ( drawMode <= draw_modes::playback )
 				{
 					updateMode = drawMode;
 					Invalidate(false);
@@ -625,7 +647,7 @@ namespace psycle { namespace host {
 					Global::psycleconf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 				}
 				
-				if (!file.Create(str.GetBuffer(1), true))
+				if (!file.Create(static_cast<LPCTSTR>(str), true))
 				{
 					MessageBox("Error creating file!", "Error!", MB_OK);
 					return FALSE;
@@ -755,7 +777,7 @@ namespace psycle { namespace host {
 						Global::_pSong->fileName = str;
 					}
 					
-					if (!file.Create(str.GetBuffer(1), true))
+					if (!file.Create(static_cast<LPCTSTR>(str), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
 						return FALSE;
@@ -771,7 +793,7 @@ namespace psycle { namespace host {
 					else 
 					{
 						_pSong->_saved=true;
-						std::string recent = str.GetBuffer(1);
+						std::string recent = static_cast<LPCTSTR>(str);
 						AppendToRecent(recent);
 						
 						Global::pInputHandler->SafePoint();
@@ -825,43 +847,43 @@ namespace psycle { namespace host {
 				switch(comDlgErr)
 				{
 				case CDERR_DIALOGFAILURE:
-					::MessageBox(0, "CDERR_DIALOGFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_DIALOGFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_FINDRESFAILURE:
-					::MessageBox(0, "CDERR_FINDRESFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_FINDRESFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_INITIALIZATION:
-					::MessageBox(0, "CDERR_INITIALIZATION", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_INITIALIZATION", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_LOADRESFAILURE:
-					::MessageBox(0, "CDERR_LOADRESFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_LOADRESFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_LOADSTRFAILURE:
-					::MessageBox(0, "CDERR_LOADSTRFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_LOADSTRFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_LOCKRESFAILURE:
-					::MessageBox(0, "CDERR_LOCKRESFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_LOCKRESFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_MEMALLOCFAILURE:
-					::MessageBox(0, "CDERR_MEMALLOCFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_MEMALLOCFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_MEMLOCKFAILURE:
-					::MessageBox(0, "CDERR_MEMLOCKFAILURE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_MEMLOCKFAILURE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_NOHINSTANCE:
-					::MessageBox(0, "CDERR_NOHINSTANCE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_NOHINSTANCE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_NOHOOK:
-					::MessageBox(0, "CDERR_NOHOOK", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_NOHOOK", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_NOTEMPLATE:
-					::MessageBox(0, "CDERR_NOTEMPLATE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_NOTEMPLATE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_REGISTERMSGFAIL:
-					::MessageBox(0, "CDERR_REGISTERMSGFAIL", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_REGISTERMSGFAIL", "exception", MB_OK | MB_ICONERROR);
 					break;
 				case CDERR_STRUCTSIZE:
-					::MessageBox(0, "CDERR_STRUCTSIZE", "exception", MB_OK | MB_ICONERROR);
+					MessageBox("CDERR_STRUCTSIZE", "exception", MB_OK | MB_ICONERROR);
 					break;
 				}
 			}
@@ -1182,7 +1204,7 @@ namespace psycle { namespace host {
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
-					Global::pPlayer->StartRecording(dlg.GetPathName().GetBuffer(4));
+					Global::pPlayer->StartRecording(static_cast<LPCTSTR>(dlg.GetPathName()));
 				}
 				//If autoStopMachine is activated, deactivate it while recording
 				if ( Global::psycleconf().UsesAutoStopMachines() ) 

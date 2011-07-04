@@ -2027,7 +2027,6 @@ namespace psycle
 
 		void XMSampler::Tick()
 		{
-			scoped_lock lock(*this);
 			SampleCounter(0);
 			m_TickCount=0;
 
@@ -2050,8 +2049,6 @@ namespace psycle
 
 		void XMSampler::Tick(int channelNum,PatternEntry* pData)
 		{
-			scoped_lock lock(*this);
-
 			 // don't process twk , twf of Mcm Commands, or empty commands
 			if ( pData->_note > notecommands::release && (pData->_note < notecommands::empty || pData->_cmd == 0) )
 			{
@@ -2263,8 +2260,6 @@ namespace psycle
 
 		int XMSampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 		{
-			scoped_lock lock(*this);
-
 			int i;
 
 			if (!_mute)

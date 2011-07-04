@@ -22,6 +22,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual void OnCancel();
 	virtual void PostNcDestroy();
 
 	enum { IDD = IDD_MACWAVEIN };
@@ -32,10 +33,10 @@ protected:
 	CWaveInMacDlg** windowVar_;
 
 protected:
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnClose();
 	afx_msg void OnCbnSelendokCombo1();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	DECLARE_MESSAGE_MAP()
 };
 
 }   // namespace

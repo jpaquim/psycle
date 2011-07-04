@@ -45,7 +45,6 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
-	DECLARE_MESSAGE_MAP()
 
 public:
 	void pMachine(XMSampler *const p){m_pMachine = p;};
@@ -54,6 +53,7 @@ public:
 	XMInstrument::WaveData& rWave(){return *m_pWave;};
 	void DrawScope(void);
 
+	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnLbnSelchangeSamplelist();
 	afx_msg void OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult);

@@ -55,6 +55,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_SPECIALKEYS, OnBnClickedSpecialKeys)
 			ON_BN_CLICKED(IDC_NONE, OnNone)
 			ON_EN_UPDATE(IDC_EDIT_DEFLINES, OnUpdateNumLines)
+			ON_CBN_SELCHANGE(IDC_SAVESETTINGS_ON, OnSelchangeStore)
 		END_MESSAGE_MAP()
 
 		BOOL CKeyConfigDlg::OnInitDialog() 
@@ -237,7 +238,12 @@ namespace psycle { namespace host {
 			keyMap.clear();
 			FillCmdList();
 		}
-
+		void CKeyConfigDlg::OnSelchangeStore()
+		{
+			MessageBox("This setting only affects where Psycle is going to save the settings.\n\n"
+				"Settings are always loaded checking first on Psycle's dir, then on User's dir and then on regedit",
+				"Configuration Store", MB_OK);
+		}
 		/// update key on show
 		void CKeyConfigDlg::OnSelchangeCmdlist() 
 		{	

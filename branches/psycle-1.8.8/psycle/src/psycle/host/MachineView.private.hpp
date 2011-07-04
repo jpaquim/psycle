@@ -759,7 +759,6 @@ namespace psycle { namespace host {
 				}
 
 				memDC.SelectObject(oldbmp);
-				memDC.DeleteDC();
 			}
 		}
 

@@ -2758,7 +2758,7 @@ namespace psycle
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;
-			if (!file.Create(filepath.GetBuffer(1), true))
+			if (!file.Create(static_cast<LPCTSTR>(filepath), true))
 			{
 				return false;
 			}
@@ -2783,7 +2783,7 @@ namespace psycle
 
 			// now load it
 
-			if (!file.Open(filepath.GetBuffer(1)))
+			if (!file.Open(static_cast<LPCTSTR>(filepath)))
 			{
 				DeleteFile(filepath);
 				return false;
@@ -2926,7 +2926,7 @@ namespace psycle
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;
-			if (!file.Create(filepath.GetBuffer(1), true))
+			if (!file.Create(static_cast<LPCTSTR>(filepath), true))
 			{
 				return false;
 			}
@@ -2952,7 +2952,7 @@ namespace psycle
 
 			// now load it
 
-			if (!file.Open(filepath.GetBuffer(1)))
+			if (!file.Open(static_cast<LPCTSTR>(filepath)))
 			{
 				DeleteFile(filepath);
 				return false;

@@ -178,10 +178,10 @@ namespace psycle { namespace host {
 			HTREEITEM intFxNode;
 			if(!pluginOrder)
 			{
-				hNodes[0] = m_browser.InsertItem("Built-in machines",0,0 , TVI_ROOT, TVI_LAST);
-				hNodes[1] = m_browser.InsertItem("Native plug-ins",2,2,TVI_ROOT,TVI_LAST);
-				hNodes[2] = m_browser.InsertItem("VST2 plug-ins",4,4,TVI_ROOT,TVI_LAST);
-				hNodes[3] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
+				hNodes[0] = m_browser.InsertItem("Internal machines",0,0 , TVI_ROOT, TVI_LAST);
+				hNodes[1] = m_browser.InsertItem("Psycle Host machines",2,2,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("VST 2.x Host machines",4,4,TVI_ROOT,TVI_LAST);
+				hNodes[3] = m_browser.InsertItem("Non-working or not a machine",6,6,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[0];
 				nodeindex = 3;
 				//The following is unfinished. It is for nested branches.
@@ -256,7 +256,7 @@ namespace psycle { namespace host {
 			{
 				hNodes[0] = m_browser.InsertItem("Sound generators (Instruments)",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Sound Effects (DSP)",1,1,TVI_ROOT,TVI_LAST);
-				hNodes[2] = m_browser.InsertItem("Crashed or invalid plugins",6,6,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("Non-working or not a machine",6,6,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[1];
 				nodeindex=2;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
@@ -630,7 +630,7 @@ namespace psycle { namespace host {
 			populate_plugin_list(nativePlugs,Global::pConfig->GetPluginDir());
 #if	defined _WIN64
 			populate_plugin_list(vstPlugs,Global::pConfig->GetVst64Dir());
-			if(Global::pConfig->UseJBridge() || Global::pConfig->UsePsycleVstBridge())
+			if(Global::pConfig->UsesJBridge() || Global::pConfig->UsesPsycleVstBridge())
 			{
 				populate_plugin_list(vstPlugs,Global::pConfig->GetVst32Dir());
 			}

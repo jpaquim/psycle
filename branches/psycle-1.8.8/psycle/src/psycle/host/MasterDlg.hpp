@@ -20,6 +20,22 @@ namespace host {
 			int index_;
 		};
 
+		class CMasterVu: public CProgressCtrl
+		{
+		public:
+			CMasterVu();
+			virtual ~CMasterVu();
+
+			void LoadBitmap(UINT IDControl);
+			CBitmap m_vu;
+			CBitmap* m_pback;
+
+			DECLARE_MESSAGE_MAP()
+			afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+			afx_msg void OnPaint();
+
+		};
+
 		/// master machine window.
 		class CMasterDlg : public CDialog
 		{
@@ -33,7 +49,6 @@ namespace host {
 			char macname[MAX_CONNECTIONS][32];
 
 protected:
-			void PaintNumbers(float val, int x, int y);
 			void PaintNumbersDC(CDC* dc,float val,int x,int y);
 			LRESULT DrawSliderGraphics(NMHDR* pNMHDR);
 			void PaintNames(char* name,int x,int y);
@@ -44,25 +59,29 @@ public:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
 			virtual BOOL PreTranslateMessage(MSG* pMsg);
+			virtual void OnCancel();
 			virtual void PostNcDestroy();
 protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnClose();
 			afx_msg void OnAutodec();
+			afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 			afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnPaint();
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-			DECLARE_MESSAGE_MAP()
 
 			enum { IDD = IDD_MASTERDLG };
 			CStatic	m_masterpeak;
 			CVolumeCtrl	m_slidermaster;
 			std::vector<CVolumeCtrl*> sliders_;
-			CStatic	m_mixerview;
+			CMasterVu m_vuCtrl;
 			CButton	m_autodec;
-			CBitmap m_numbers;
 			CBitmap m_sliderknob;
 			CBitmap m_back;
+			int m_nBmpWidth;
+			int m_nBmpHeight;
+
 			CFont namesFont;
 			Master& machine;
 			CMasterDlg** windowVar_;

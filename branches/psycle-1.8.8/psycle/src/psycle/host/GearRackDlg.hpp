@@ -32,8 +32,10 @@ namespace psycle { namespace host {
 			virtual BOOL OnInitDialog();
 			virtual BOOL PreTranslateMessage(MSG* pMsg);
 			virtual void PostNcDestroy();
+			virtual void OnCancel();
 		// Implementation
 		protected:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnCreate();
 			afx_msg void OnClose();
 			afx_msg void OnDelete();
@@ -48,7 +50,6 @@ namespace psycle { namespace host {
 			afx_msg void OnRadioIns();
 			afx_msg void OnExchange();
 			afx_msg void OnClonemachine();
-			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

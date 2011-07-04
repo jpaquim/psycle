@@ -43,10 +43,12 @@ namespace psycle { namespace host {
 
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		protected:
 			virtual void OnOK( );
 			virtual void OnCancel();
 			virtual BOOL OnInitDialog();
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnColourMachine();
 			afx_msg void OnColourWire();
 			afx_msg void OnColourPoly();
@@ -81,8 +83,6 @@ namespace psycle { namespace host {
 			afx_msg void OnLineNumbers();
 			afx_msg void OnLineNumbersHex();
 			afx_msg void OnLineNumbersCursor();
-			afx_msg void OnClose();
-			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnImportReg();
 			afx_msg void OnExportReg();
 			afx_msg void OnSelchangePatternFontPoint();
@@ -115,7 +115,6 @@ namespace psycle { namespace host {
 			afx_msg void OnBnClickedMachineguiTopfontc2();
 			afx_msg void OnBnClickedMachineguiBottomc2();
 			afx_msg void OnBnClickedMachineguiBottomfontc2();
-			DECLARE_MESSAGE_MAP()
 		private:
 			bool BrowseTo(char *rpath);
 			static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *lpelfe,  NEWTEXTMETRICEX *lpntme, DWORD FontType,  LPARAM lParam);

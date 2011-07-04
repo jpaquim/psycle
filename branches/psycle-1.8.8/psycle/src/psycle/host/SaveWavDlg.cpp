@@ -543,7 +543,7 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					SaveWav(name.GetBuffer(4),real_bits[bits],real_rate[rate],channelmode,isFloat);
+					SaveWav(static_cast<LPCTSTR>(name),real_bits[bits],real_rate[rate],channelmode,isFloat);
 				}
 			}
 			else if (m_outputtype == 1 || m_outputtype == 2)
@@ -613,13 +613,12 @@ namespace psycle { namespace host {
 				}
 				m_progress.SetRange(0,j);
 				
-				pPlayer->_playBlock=false;
 				lastpostick=0;
 				pPlayer->Start(0,0);
 				break;
 			case 1:
 				m_patnumber.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), pstart);
+				hexstring_to_integer(static_cast<LPCTSTR>(name), pstart);
 				m_progress.SetRange(0,pSong->patternLines[pstart]);
 				for (cont=0;cont<pSong->playLength;cont++)
 				{
@@ -633,13 +632,12 @@ namespace psycle { namespace host {
 				pSong->playOrderSel[cont]=true;
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;
 				break;
 			case 2:
 				m_rangestart.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), pstart);
+				hexstring_to_integer(static_cast<LPCTSTR>(name) , pstart);
 				m_rangeend.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), tmp);
+				hexstring_to_integer(static_cast<LPCTSTR>(name), tmp);
 				j=0;
 				for (cont=pstart;cont<=tmp;cont++)
 				{
@@ -651,15 +649,14 @@ namespace psycle { namespace host {
 				lastpostick=pstart;
 				pPlayer->Start(pstart,0);
 				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;
 				break;
 			case 3:
 				m_patnumber.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), pstart);
+				hexstring_to_integer(static_cast<LPCTSTR>(name), pstart);
 				m_linestart.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), blockSLine);
+				hexstring_to_integer(static_cast<LPCTSTR>(name), blockSLine);
 				m_lineend.GetWindowText(name);
-				hexstring_to_integer(name.GetBuffer(2), blockELine);
+				hexstring_to_integer(static_cast<LPCTSTR>(name), blockELine);
 
 				m_progress.SetRange(blockSLine,blockELine);
 				//find the position in the sequence where the pstart pattern is located.
@@ -675,7 +672,6 @@ namespace psycle { namespace host {
 				pSong->playOrderSel[cont]=true;
 				pPlayer->Start(pstart,blockSLine, blockELine);
 				pPlayer->_playBlock=true;
-				pPlayer->_loopSong=false;				
 				break;
 			default:
 				SaveEnd();
@@ -689,23 +685,13 @@ namespace psycle { namespace host {
 		{
 			((CSaveWavDlg*)b)->threadopen++;
 			Player* pPlayer = Global::pPlayer;
-			int stream_size = 8192; // Player has just a single buffer of 65535 samples to allocate both channels
-			//int stream_buffer[65535];
-			while(!((CSaveWavDlg*)b)->kill_thread)
+			pPlayer->_loopSong=false;
+			int stream_size = 16384; // Player has just a single buffer of 65535 samples to allocate both channels
+			while(!((CSaveWavDlg*)b)->kill_thread && pPlayer->_playing)  // the player automatically stops at end, if not looping.
 			{
-				if (!pPlayer->_recording) // the player automatically closes the wav recording when looping.
-				{
-					pPlayer->Stop();
-					((CSaveWavDlg*)b)->SaveEnd();
-					((CSaveWavDlg*)b)->threadopen--;
-					((CSaveWavDlg*)b)->_event.SetEvent();
-					ExitThread(0);
-					//return 0;
-				}
 				pPlayer->Work(pPlayer,stream_size);
 				((CSaveWavDlg*)b)->SaveTick();
 			}
-
 			pPlayer->Stop();
 			pPlayer->StopRecording();
 			((CSaveWavDlg*)b)->SaveEnd();

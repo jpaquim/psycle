@@ -50,7 +50,7 @@ v1.8.8 beta4
 * Fonts use now default quality (which means allowing antialias if setting activated on Windows).
 * WireDlg, and machine parameter window can now be closed with ESC key (Only XMSampler window cannot be closed this way now).
 * Internal source code change: Implemented the sliders with OnHScroll/VScroll message handler (proper way of doing it) on XMSamplerMixerPage, WireDlg, Master Dialog, master slider on the toolbar and in Wave Recording machine dialog. Other improvements on the open/closing of those dialogs.
-* Changes on the Machine parameter windows, merged several sources. Now Native windows work the same way than VST ones.
+* Changes on the Machine parameter windows, merged several sources. Now Native windows offer the same menu/toolbar features than VST ones.
 ! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning )
 
 v1.8.8 beta3

@@ -90,7 +90,7 @@ namespace psycle
 		bool Configuration::SupportsJBridge() const
 		{
 			char testjBridge[MAX_PATH];
-			JBridge::getJBridgeLibrary(testjBridge);
+			JBridge::getJBridgeLibrary(testjBridge, MAX_PATH);
 			return testjBridge[0]!='\0';
 		}
 		void Configuration::UseJBridge(bool use) 

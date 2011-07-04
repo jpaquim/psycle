@@ -9,6 +9,58 @@
 
 namespace psycle { namespace host {
 
+	int const numbersMasterX = 30;
+	int const numbersX = 118;
+	int const numbersY = 186;
+	int const numbersAddX = 24;
+	int const textX = 427;
+	int const textY = 32;
+	int const textYAdd = 15;
+	int const textW = 75;
+	int const textH = 12;
+
+	  
+  BEGIN_MESSAGE_MAP(CMasterVu, CProgressCtrl)
+	ON_WM_ERASEBKGND()
+	ON_WM_PAINT()
+  END_MESSAGE_MAP()
+
+	CMasterVu::CMasterVu():CProgressCtrl()
+	{
+	}
+	CMasterVu::~CMasterVu()
+	{
+		m_vu.DeleteObject();
+	}
+	void CMasterVu::LoadBitmap(UINT IDControl)
+	{
+		m_vu.LoadBitmap(IDControl);
+	}
+	BOOL CMasterVu::OnEraseBkgnd(CDC* pDC) 
+	{
+		return TRUE;
+	}
+	void CMasterVu::OnPaint() 
+	{
+		CPaintDC dc(this);
+		CRect crect, wrect;
+		GetClientRect(&crect);
+		GetParent()->ScreenToClient(crect);
+		GetWindowRect(&wrect);
+		GetParent()->ScreenToClient(wrect);
+
+		CBitmap* oldbmp;
+		CDC memDC;
+		memDC.CreateCompatibleDC(&dc);
+		oldbmp=memDC.SelectObject(&m_vu);
+		int vol = crect.Height() -  GetPos()*crect.Height()/100;
+		dc.BitBlt(0, vol, crect.Width(), crect.Height(), &memDC, 0, vol, SRCCOPY);
+		memDC.SelectObject(m_pback);
+		dc.BitBlt(0, 0, crect.Width(), vol, &memDC, wrect.left, wrect.top, SRCCOPY);
+		memDC.SelectObject(oldbmp);
+	}
+
+
 		/// master dialog
 		CMasterDlg::CMasterDlg(CWnd* wndView, Master& new_master, CMasterDlg** windowVar) 
 			: CDialog(CMasterDlg::IDD, AfxGetMainWnd()), windowVar_(windowVar)
@@ -26,7 +78,6 @@ namespace psycle { namespace host {
 		CMasterDlg::~CMasterDlg() {
 			namesFont.DeleteObject();
 			m_back.DeleteObject();
-			m_numbers.DeleteObject();
 			m_sliderknob.DeleteObject();
 			std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
 			for ( ; it != sliders_.end(); ++it ) {
@@ -50,28 +101,18 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_SLIDERM11, *sliders_[10]);
 			DDX_Control(pDX, IDC_SLIDERM10, *sliders_[9]);
 			DDX_Control(pDX, IDC_SLIDERM1, *sliders_[0]);
-			DDX_Control(pDX, IDC_MIXERVIEW, m_mixerview);
 			DDX_Control(pDX, IDC_AUTODEC, m_autodec);
+			DDX_Control(pDX, IDC_MASTERDLG_VU, m_vuCtrl);
 		}
 
 		BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
 			ON_WM_VSCROLL()
 			ON_WM_PAINT()
+	        ON_WM_ERASEBKGND()
 			ON_WM_CLOSE()
 			ON_BN_CLICKED(IDC_AUTODEC, OnAutodec)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERMASTER, OnCustomdrawSlidermaster)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM1, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM10, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM11, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM12, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM2, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM3, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM4, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM5, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM6, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM7, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM8, OnCustomdrawSliderm)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERM9, OnCustomdrawSliderm)
+			ON_NOTIFY_RANGE(NM_CUSTOMDRAW, IDC_SLIDERM1, IDC_SLIDERM12, OnCustomdrawSliderm)
 		END_MESSAGE_MAP()
 
 		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) {
@@ -89,11 +130,17 @@ namespace psycle { namespace host {
 		{
 			CDialog::OnInitDialog();
 
-			m_sliderknob.LoadBitmap(IDB_MASTERSLIDER);
-			m_back.LoadBitmap(IDB_MASTERBACK);
+			m_sliderknob.LoadBitmap(IDB_MASTERKNOB);
+			m_back.LoadBitmap(IDB_MASTER_BGND);
+			m_vuCtrl.LoadBitmap(IDB_MASTER_VU);
+			m_vuCtrl.m_pback=&m_back;
+			// Get dimension
+			BITMAP bm;
+			m_back.GetBitmap(&bm);
+			m_nBmpWidth = bm.bmWidth;
+			m_nBmpHeight = bm.bmHeight;
 
 			namesFont.CreatePointFont(80,"Tahoma");
-			m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
 			
 			m_slidermaster.SetRange(0, 832);
 			m_slidermaster.SetPageSize(96);
@@ -104,11 +151,15 @@ namespace psycle { namespace host {
 				slider->SetPageSize(96);
 			}
 			SetSliderValues();
+			m_vuCtrl.SetRange(0,100);
 			if (machine.decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
 			return TRUE;
 		}
-
+		void CMasterDlg::OnCancel()
+		{
+			DestroyWindow();
+		}
 		void CMasterDlg::OnClose()
 		{
 			CDialog::OnClose();
@@ -119,7 +170,6 @@ namespace psycle { namespace host {
 			if(windowVar_!=NULL) *windowVar_ = NULL;
 			delete this;
 		}
-
 
 		void CMasterDlg::OnAutodec() 
 		{
@@ -199,7 +249,7 @@ namespace psycle { namespace host {
 			if (!--machine.peaktime) 
 			{
 				char peak[10];
-				if ( machine.currentpeak > 0)
+				if ( machine.currentpeak > 0.001f) //26bits of precision in the display
 				{
 					sprintf(peak,"%.2fdB",helpers::dsp::dB(machine.currentpeak*0.00003051f));
 				}
@@ -210,7 +260,14 @@ namespace psycle { namespace host {
 
 				machine.peaktime=25;
 				machine.currentpeak=0.0f;
+				CRect r;
+				r.top=textY;
+				r.left=textX;
+				r.right=textX+textW;
+				r.bottom=textY+MAX_CONNECTIONS*textYAdd;
+				InvalidateRect(r);
 			}
+			m_vuCtrl.SetPos(machine._volumeDisplay);
 		}
 
 		void CMasterDlg::OnChangeSliderMaster(int pos)
@@ -228,55 +285,34 @@ namespace psycle { namespace host {
 		void CMasterDlg::OnPaint() 
 		{
 			CPaintDC dc(this); // device context for painting
-			
-			if ( dc.m_ps.rcPaint.bottom >= 170 && dc.m_ps.rcPaint.top <= 185)
+	
+			RECT& rect = dc.m_ps.rcPaint;
+			if ( rect.bottom >= numbersY && rect.top <= numbersY+12)
 			{
-				CDC *dcm = m_mixerview.GetDC();
-				CDC memDC;
-				PaintNumbersDC(dcm,((832-m_slidermaster.GetPos())/16.0f)-40.0f,40,171);
+				PaintNumbersDC(&dc,((832-m_slidermaster.GetPos())/16.0f)-40.0f,numbersMasterX,numbersY);
 				std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
 				for ( int i= 0; it != sliders_.end(); ++it, ++i) {
 					CVolumeCtrl* slider = *it;
-					PaintNumbersDC(dcm,((832-slider->GetPos())/16.0f)-40.0f,112 +i*24,171);
+					PaintNumbersDC(&dc,((832-slider->GetPos())/16.0f)-40.0f,numbersX +i*numbersAddX,numbersY);
 				}
 			}
-			if ( dc.m_ps.rcPaint.bottom >=16 && dc.m_ps.rcPaint.top<=200 && dc.m_ps.rcPaint.right >=410)
+			if (rect.right >=textX)
 			{
-				CDC *dcm = m_mixerview.GetDC();
-				CFont* oldfont = dcm->SelectObject(&namesFont);
-				dcm->SetTextColor(0x00FFFFFF); // White
-				dcm->SetBkColor(0x00000000); // Black
+				CFont* oldfont = dc.SelectObject(&namesFont);
+				dc.SetTextColor(0x00FFFFFF); // White
+				dc.SetBkColor(0x00000000); // Black
 
-				int const xo(417);
-				int const yo(16);
-				int const dy(17);
-				int y(yo);
-				int i(0);
-				while(i < MAX_CONNECTIONS)
+				for(int i=0, y=textY ; i < MAX_CONNECTIONS; i++, y += textYAdd)
 				{
-					dcm->ExtTextOut(xo, y, ETO_CLIPPED, CRect(xo,y,xo+77,y+13), CString(macname[i]), 0);
-					i++;
-					y += dy;
+					dc.ExtTextOut(textX, y-1, ETO_CLIPPED, CRect(textX,y,textX+textW,y+textH), CString(macname[i]), 0);
 				}
-				dcm->SelectObject(oldfont);
+				dc.SelectObject(oldfont);
 			}
 			// Do not call CDialog::OnPaint() for painting messages
 		}
-
-		void CMasterDlg::PaintNumbers(float val, int x, int y)
-		{
-			CDC *dc = m_mixerview.GetDC();
-			CDC memDC;
-			PaintNumbersDC(dc,val,x,y);
-		}
-
 		void CMasterDlg::PaintNumbersDC(CDC *dc, float val, int x, int y)
 		{
 			char valtxt[6];
-			CFont* oldfont = dc->SelectObject(&namesFont);
-			dc->SetTextColor(0x00FFFFFF); // White
-			dc->SetBkColor(0x00000000); // Black
-
 			if ( fabs(val) < 10.0f )
 			{
 				if ( val < 0 ) sprintf(valtxt,"%.01f",val);
@@ -286,77 +322,54 @@ namespace psycle { namespace host {
 				else if ( val < 0) sprintf(valtxt,"%.0f ",val);
 				else sprintf(valtxt," %.0f ",val);
 			}
-			
-			dc->TextOut(x,y-2,valtxt);
-			dc->SelectObject(oldfont);
-		}
-
-		void CMasterDlg::PaintNames(char *name, int x, int y)
-		{
-			CDC *dc = m_mixerview.GetDC();
-			CFont* oldfont = dc->SelectObject(&namesFont);
 			dc->SetTextColor(0x00FFFFFF); // White
 			dc->SetBkColor(0x00000000); // Black
-			dc->TextOut(x,y,name);
+			CFont* oldfont = dc->SelectObject(&namesFont);
+			dc->ExtTextOut(x, y-2, ETO_CLIPPED, CRect(x,y,x+22,y+textH), CString(valtxt), 0);
 			dc->SelectObject(oldfont);
 		}
 
 		void CMasterDlg::OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
-			PaintNumbers(db,40,171);
-			*pResult = DrawSliderGraphics(pNMHDR);
+			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+			if (nmcd.dwDrawStage == CDDS_POSTPAINT)
+			{
+				float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
+				CClientDC dc(this);
+				PaintNumbersDC(&dc,db,numbersMasterX,numbersY);
+				*pResult = CDRF_DODEFAULT;
+			}
+			else {
+				*pResult = DrawSliderGraphics(pNMHDR);
+			}
 		}
 
-		void CMasterDlg::OnCustomdrawSliderm(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CMasterDlg::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
-			float db = ((832-slider->GetPos())/16.0f)-40.0f;
-			PaintNumbers(db,112 + slider->index() *24,171);
-			
-			if (slider->index() == 10) {
-				// I know the following is Ugly, but it is the only solution I've found, because first,
-				// OnPaint is called, after the bitmap is drawn, and finally the sliders are redrawn.
-				CDC *dcm = m_mixerview.GetDC();
-				CFont* oldfont = dcm->SelectObject(&namesFont);
-				dcm->SetTextColor(0x00FFFFFF); // White
-				dcm->SetBkColor(0x00000000); // Black
-				int const xo(417);
-				int const yo(16);
-				int const dy(17);
-				int y(yo);
-				int i(0);
-				while(i < MAX_CONNECTIONS) {
-					dcm->ExtTextOut(xo, y, ETO_CLIPPED, CRect(xo,y,xo+77,y+13), CString(macname[i]), 0);
-					i++;
-					y += dy;
-				}
-				dcm->SelectObject(oldfont);
-			}	
-			*pResult = DrawSliderGraphics(pNMHDR);
+			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+			if (nmcd.dwDrawStage == CDDS_POSTPAINT)
+			{
+				CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
+				float db = ((832-slider->GetPos())/16.0f)-40.0f;
+				CClientDC dc(this);
+				PaintNumbersDC(&dc,db,numbersX + slider->index()*numbersAddX,numbersY);
+				*pResult = CDRF_DODEFAULT;
+			}
+			else {
+				*pResult = DrawSliderGraphics(pNMHDR);
+			}
 		}
 
 		LRESULT CMasterDlg::DrawSliderGraphics(NMHDR* pNMHDR)
 		{
 			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-
-			if ( nmcd.dwDrawStage == CDDS_PREPAINT )
+			switch(nmcd.dwDrawStage)
 			{
-				// return CDRF_NOTIFYITEMDRAW so that we will get subsequent 
-				// CDDS_ITEMPREPAINT notifications
-
-				CDC memDC;
-				CBitmap* oldbmp;
-				CDC* pDC = CDC::FromHandle( nmcd.hdc );
-				memDC.CreateCompatibleDC(pDC);
-				oldbmp=memDC.SelectObject(&m_back);
-				pDC->BitBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left,nmcd.rc.bottom-nmcd.rc.top,&memDC,0,0,SRCCOPY);
-				pDC->Detach();
-				memDC.SelectObject(oldbmp);
-
-				return CDRF_NOTIFYITEMDRAW ;
+			case CDDS_PREPAINT:
+			{
+				return CDRF_NOTIFYITEMDRAW|CDRF_NOTIFYPOSTPAINT;
 			}
-			else if ( nmcd.dwDrawStage == CDDS_ITEMPREPAINT )
+			case CDDS_ITEMPREPAINT:
 			{
 				if ( nmcd.dwItemSpec == TBCD_THUMB )
 				{
@@ -366,28 +379,49 @@ namespace psycle { namespace host {
 					memDC.CreateCompatibleDC(pDC);
 					oldbmp=memDC.SelectObject(&m_sliderknob);
 					pDC->BitBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left,nmcd.rc.bottom-nmcd.rc.top,&memDC,0,0,SRCCOPY);
-					pDC->Detach();
 					memDC.SelectObject(oldbmp);
 				}
 				else if(nmcd.dwItemSpec == TBCD_CHANNEL)
 				{
+					//Drawing the whole background, not only the channel.
 					CDC* pDC = CDC::FromHandle( nmcd.hdc );
-
 					CDC memDC;
 					CBitmap* oldbmp;
 					memDC.CreateCompatibleDC(pDC);
 					oldbmp=memDC.SelectObject(&m_back);
-					CRect r;
-					sliders_[0]->GetClientRect(r);
-					nmcd.rc = r;
-					pDC->BitBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left+1,nmcd.rc.bottom-nmcd.rc.top,&memDC,36,49,SRCCOPY);
-					pDC->Detach();
+					CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
+					CRect crect, wrect;
+					slider->GetClientRect(&crect);
+					ScreenToClient(crect);
+					slider->GetWindowRect(&wrect);
+					ScreenToClient(wrect);
+					pDC->BitBlt(0, 0, crect.Width(), crect.Height(), &memDC, wrect.left, wrect.top, SRCCOPY);
 					memDC.SelectObject(oldbmp);
+				}
+				else {
+					//Do not draw ticks.
 				}
 				return CDRF_SKIPDEFAULT;
 			}
-			else return 0;
-
+			default:
+				return CDRF_DODEFAULT;
+			}
+		}
+		
+		BOOL CMasterDlg::OnEraseBkgnd(CDC* pDC) 
+		{
+			if (m_back.m_hObject != NULL)
+			{
+				CDC memDC;
+				memDC.CreateCompatibleDC(pDC);
+				CBitmap* pOldBitmap = memDC.SelectObject(&m_back);
+				pDC->BitBlt(0, 0, m_nBmpWidth, m_nBmpHeight, &memDC, 0, 0, SRCCOPY);
+				memDC.SelectObject(pOldBitmap);
+				return TRUE;
+			}
+			else {
+				return CDialog::OnEraseBkgnd(pDC);
+			}
 		}
 	}   // namespace
 }   // namespace

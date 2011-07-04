@@ -14,6 +14,9 @@ namespace psycle { namespace host {
 			enum { IDD = IDD_KEYCONFIG };
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
+			virtual void OnCancel();
+			virtual void OnOK();
 			
 			void RefreshDialog();
 			void FillCmdList();
@@ -21,17 +24,15 @@ namespace psycle { namespace host {
 			void FindKey(long idx,WORD &key,WORD &mods);
 
 		protected:
-			virtual BOOL OnInitDialog();
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnSelchangeCmdlist();
-			virtual void OnCancel();
-			virtual void OnOK();
 			afx_msg void OnImportreg();
 			afx_msg void OnExportreg();
 			afx_msg void OnDefaults();
 			afx_msg void OnBnClickedSpecialKeys();
 			afx_msg void OnNone();
 			afx_msg void OnUpdateNumLines();
-			DECLARE_MESSAGE_MAP()
+			afx_msg void OnSelchangeStore();
 		protected:
 			CListBox	m_lstCmds;
 			CHotKeyCtrl	m_hotkey0;

@@ -12,6 +12,7 @@
 #include "ITModule2.h"
 
 #include "Player.hpp"
+#include "Song.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 
@@ -1365,7 +1366,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
 			_new_point = 0;
 		}
 
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+		CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 	//\todo : Verify that we aren't trying to add an existing point!!!
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
@@ -1376,7 +1377,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 		m_pEnvelope->SustainBegin(m_EditPoint);
 		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
 		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1387,7 +1388,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
 		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
 		m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1398,7 +1399,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 	{
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+		CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 		m_pEnvelope->LoopStart(m_EditPoint);
 		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
 		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1409,7 +1410,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
 		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
 		m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1430,7 +1431,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 
 	if(m_EditPoint != _points)
 		{
-			XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 		m_pEnvelope->Delete(m_EditPoint);
 		m_EditPoint = _points;
 			Invalidate();
@@ -1438,21 +1439,21 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain()
 { 
-	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+	CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
 	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
 	Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop()
 { 
-		XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+		CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
 		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
 		Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope()
 {
-	XMSampler::scoped_lock _lock(m_pXMSampler->Mutex());
+	CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 	m_pEnvelope->Clear();
 	Invalidate();
 }

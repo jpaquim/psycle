@@ -19,14 +19,15 @@ namespace psycle { namespace host {
 			void UpdateInfo();
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
 			virtual BOOL OnInitDialog();
+			virtual void OnCancel();
+
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 			afx_msg void OnClose();
 			afx_msg void OnCpuPerf();
 
-			DECLARE_MESSAGE_MAP()
 		private:
 			void InitTimer();
 

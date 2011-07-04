@@ -209,6 +209,17 @@ namespace psycle
 					virtual int  GetParamValue(int numparam);
 					virtual void GetParamValue(int numparam, char * parval);
 					virtual bool SetParameter (int numparam, int value);
+					virtual void SetCurrentProgram(int idx) {};
+					virtual int GetCurrentProgram() {return 0;};
+					virtual void GetCurrentProgramName(char* val) {strcpy(val,"Program 0");};
+					virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){strcpy(val,"Program 0");};
+					virtual int GetNumPrograms(){ return 1;};
+					virtual int GetTotalPrograms(){ return 1;};
+					virtual void SetCurrentBank(int idx) {};
+					virtual int GetCurrentBank() {return 0;};
+					virtual void GetCurrentBankName(char* val) {strcpy(val,"Internal");};
+					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};
+					virtual int GetNumBanks(){ return 1;};
 			///\}
 
 			///\name (de)serialization

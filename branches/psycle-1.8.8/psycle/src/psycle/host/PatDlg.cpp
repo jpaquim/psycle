@@ -97,7 +97,7 @@ namespace psycle { namespace host {
 
 			CString text;
 			m_trackedit.GetWindowText(text);
-			tracknames[prevsel] = text.GetBuffer();
+			tracknames[prevsel] = static_cast<LPCTSTR>(text);
 			m_pSong->shareTrackNames = (m_independentnames == 0);
 			for(int i(0); i< m_pSong->SONGTRACKS; i++) {
 				m_pSong->ChangeTrackName(patIdx,i,tracknames[i]);
@@ -178,7 +178,7 @@ namespace psycle { namespace host {
 		{
 			CString text;
 			m_trackedit.GetWindowText(text);
-			tracknames[prevsel] = text.GetBuffer();
+			tracknames[prevsel] = static_cast<LPCTSTR>(text);
 
 			prevsel = m_tracklist.GetCurSel();
 			bInit = false;

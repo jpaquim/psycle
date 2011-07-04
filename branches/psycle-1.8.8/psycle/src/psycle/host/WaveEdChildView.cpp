@@ -12,11 +12,10 @@
 #include <mmreg.h>
 #include <math.h>
 
-int const ID_TIMER_WAVED_REFRESH = 31415;
-
 namespace psycle { namespace host {
 
 		using namespace helpers;
+		int const ID_TIMER_WAVED_REFRESH = 31415;
 	
 		float const CWaveEdChildView::zoomBase = 1.06f;
 
@@ -489,7 +488,7 @@ namespace psycle { namespace host {
 		}
 		void CWaveEdChildView::StartTimer()
 		{
-			int refreshIdx;
+			int refreshIdx = 3;
 			if(SystemParametersInfo(SPI_GETKEYBOARDPREF, 0, &refreshIdx,0) > 0)
 			{
 				SetTimer(ID_TIMER_WAVED_REFRESH, refreshIdx*250, 0);

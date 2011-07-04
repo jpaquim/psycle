@@ -217,6 +217,25 @@ namespace psycle
 					}catch(...){}
 				}
 				virtual bool DescribeValue(int parameter, char * psTxt);
+				virtual void SetCurrentProgram(int idx) {SetProgram(idx);};
+				virtual int GetCurrentProgram() {
+					return GetProgram()%128;
+				};
+				virtual void GetCurrentProgramName(char* val) {GetProgramName(val);};
+				virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){
+					GetProgramNameIndexed(bnkidx, prgIdx, val);};
+				virtual int GetNumPrograms(){ return numPrograms()<128?numPrograms():128;};
+				virtual int GetTotalPrograms(){ return numPrograms();};
+				virtual void SetCurrentBank(int idx) { SetProgram(idx*128+GetCurrentProgram());};
+				virtual int GetCurrentBank() {return GetProgram()/128;};
+				virtual void GetCurrentBankName(char* val) {GetIndexBankName(GetCurrentBank(),val);};
+				virtual void GetIndexBankName(int bnkidx, char* val){
+					if(bnkidx < GetNumBanks())
+						sprintf(val,"Internal %d", bnkidx+1);
+					else
+						val[0]='\0';
+				};
+				virtual int GetNumBanks(){ return numPrograms()/128;};
 
 				virtual void InsertOutputWireIndex(Song* pSong,int wireIndex,int dstmac)
 				{

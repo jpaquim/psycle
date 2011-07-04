@@ -33,16 +33,15 @@ BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
-
-void XMSamplerUI::PostNcDestroy()
-{
-	if(windowVar_!= NULL) *windowVar_ = NULL;
-	delete this;
-}
 void XMSamplerUI::OnClose()
 {
 	CPropertySheet::OnClose();
 	DestroyWindow();
+}
+void XMSamplerUI::PostNcDestroy()
+{
+	if(windowVar_!= NULL) *windowVar_ = NULL;
+	delete this;
 }
 
 void XMSamplerUI::Init(XMSampler* pMachine,XMSamplerUI** windowVar) 

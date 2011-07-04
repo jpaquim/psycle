@@ -90,35 +90,20 @@ namespace psycle { namespace host {
 			m_instEdit.SetWindowText(_instPathBuf.c_str());
 			m_pluginEdit.SetWindowText(_pluginPathBuf.c_str());
 			m_vst32Edit.SetWindowText(_vstPath32Buf.c_str());
+			m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			m_presetEdit.SetWindowText(_presetPathBuf.c_str());
 
-			if(IsWin64()) {
-				m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
-				EnableSupportedBridges();
-				if(_isJbridged||_isPsycleBridged) {
-					m_bridgeSupport.SetCheck(TRUE);
-				}
-				else {
-					DisableAllBridges();
-				}
-				m_jBridge.SetCheck(_isJbridged);
-				m_PsycleVstBridge.SetCheck(_isPsycleBridged);
-			}
-			else {
-				DisableAllBridges();
-				m_bridgeSupport.EnableWindow(FALSE);
-				m_vst64Edit.EnableWindow(FALSE);
-				CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST64);
-				cb->EnableWindow(FALSE);
-			}
+			EnableSupportedBridges();
+			m_jBridge.SetCheck(_isJbridged);
+			m_PsycleVstBridge.SetCheck(_isPsycleBridged);
 			initializingDlg=false;
 			
 			return TRUE;  // return TRUE unless you set the focus to a control
 						// EXCEPTION: OCX Property Pages should return FALSE
 		}
 
-		void CDirectoryDlg::OnOk()
+		void CDirectoryDlg::OnOK()
 		{
 			PsycleConfig& config = Global::psycleconf();
 			if (_songPathChanged)    config.SetSongDir(_songPathBuf);
@@ -302,9 +287,28 @@ namespace psycle { namespace host {
 		}
 
 		void CDirectoryDlg::EnableSupportedBridges() {
+			bool bridging = false;
 			if (Global::psycleconf().SupportsJBridge())
 			{
 				m_jBridge.EnableWindow();
+				bridging = true;
+			}
+			else {
+				//Since jbridge is the only available bridge so far, disable bridging.
+				m_bridgeSupport.EnableWindow(FALSE);
+			}
+			//todo: not ready yet
+			//m_PsycleVstBridge.EnableWindow();
+			if(false) {
+			}
+			else {
+				m_PsycleVstBridge.EnableWindow(FALSE);
+			}
+
+			if(bridging){
+				if(_isJbridged||_isPsycleBridged) {
+					m_bridgeSupport.SetCheck(TRUE);
+				}
 				if(IsWow64()) {
 					m_vst64Edit.EnableWindow(TRUE);
 					CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST64);
@@ -316,12 +320,19 @@ namespace psycle { namespace host {
 				}
 			}
 			else {
-				//Since jbridge is the only available bridge so far, disable bridging.
+				//If there is no bridge available, disable bridging.
 				m_bridgeSupport.EnableWindow(FALSE);
 				DisableAllBridges();
+				if(IsWow64()) {
+					m_vst64Edit.EnableWindow(FALSE);
+					CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST64);
+					cb->EnableWindow(FALSE);
+				} else if(IsWin64()) {
+					m_vst32Edit.EnableWindow(FALSE);
+					CButton* cb=(CButton*)GetDlgItem(IDC_BROWSEVST32);
+					cb->EnableWindow(FALSE);
+				}
 			}
-			//todo: not ready yet
-			//m_PsycleVstBridge.EnableWindow();
 		}
 		void CDirectoryDlg::DisableAllBridges() {
 			m_jBridge.EnableWindow(FALSE);

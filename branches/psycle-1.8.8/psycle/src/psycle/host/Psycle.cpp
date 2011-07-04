@@ -79,12 +79,14 @@ namespace psycle { namespace host {
 				return FALSE;
 			}
 
+
 			// To create the main window, this code creates a new frame window
 			// object and then sets it as the application's main window object.
 			CMainFrame* pFrame = new CMainFrame();
 			if (!pFrame)
 				return FALSE;
 			m_pMainWnd = pFrame;
+
 
 			if(!loaded) // problem reading registry info. missing or damaged
 			{
@@ -134,10 +136,12 @@ namespace psycle { namespace host {
 
 		int CPsycleApp::ExitInstance() 
 		{
-			global_.psycleconf()._pOutputDriver->Enable(false);
-			global_.midi().Close();
-			global_.psycleconf().SavePsycleSettings();
-			CNewMachine::DestroyPluginInfo();
+			if(global_.psycleconf()._pOutputDriver != NULL) {
+				global_.psycleconf()._pOutputDriver->Enable(false);
+				global_.midi().Close();
+				global_.psycleconf().SavePsycleSettings();
+				CNewMachine::DestroyPluginInfo();
+			}
 
 			return CWinApp::ExitInstance();
 		}

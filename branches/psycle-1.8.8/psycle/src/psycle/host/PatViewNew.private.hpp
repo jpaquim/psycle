@@ -278,25 +278,7 @@ namespace psycle { namespace host {
 				rect.right=CW;
 				updatePar |= DRAW_TRHEADER | DRAW_FULL_DATA;
 				InvalidateRect(rect,false);
-				if ( snt > VISTRACKS )
-				{	
-					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
-					ShowScrollBar(SB_HORZ,TRUE);
-				}
-				else
-				{	
-					ShowScrollBar(SB_HORZ,FALSE); 
-				}
-
-				if ( plines > VISLINES )
-				{	
-					SetScrollRange(SB_VERT,0,plines-VISLINES);
-					ShowScrollBar(SB_VERT,TRUE);
-				}
-				else
-				{	
-					ShowScrollBar(SB_VERT,FALSE); 
-				}
+				SetPatternScrollBars(snt,plines);
 				break;
 			case draw_modes::pattern: 
 				// all data
@@ -307,25 +289,7 @@ namespace psycle { namespace host {
 				//Drawing also the header, because it can have differen track names.
 				updatePar |= DRAW_TRHEADER | DRAW_FULL_DATA;
 				InvalidateRect(rect,false);
-				if ( snt > VISTRACKS )
-				{	
-					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
-					ShowScrollBar(SB_HORZ,TRUE);
-				}
-				else
-				{	
-					ShowScrollBar(SB_HORZ,FALSE); 
-				}
-
-				if ( plines > VISLINES )
-				{	
-					SetScrollRange(SB_VERT,0,plines-VISLINES);
-					ShowScrollBar(SB_VERT,TRUE);
-				}
-				else
-				{	
-					ShowScrollBar(SB_VERT,FALSE); 
-				}
+				SetPatternScrollBars(snt,plines);
 				break;
 			case draw_modes::playback: 
 				{
@@ -390,25 +354,7 @@ namespace psycle { namespace host {
 				rect.right=CW;
 				updatePar |= DRAW_FULL_DATA;
 				InvalidateRect(rect,false);
-				if ( snt > VISTRACKS )
-				{	
-					SetScrollRange(SB_HORZ,0,snt-VISTRACKS);
-					ShowScrollBar(SB_HORZ,TRUE);
-				}
-				else
-				{	
-					ShowScrollBar(SB_HORZ,FALSE); 
-				}
-
-				if ( plines > VISLINES )
-				{	
-					SetScrollRange(SB_VERT,0,plines-VISLINES);
-					ShowScrollBar(SB_VERT,TRUE);
-				}
-				else
-				{	
-					ShowScrollBar(SB_VERT,FALSE); 
-				}
+				SetPatternScrollBars(snt,plines);
 				break;
 			case draw_modes::selection: 
 				// could optimize to only draw the changes
@@ -2758,5 +2704,38 @@ namespace psycle { namespace host {
 			RecalculateColour(pvc_selectionbeat, ColourDiffAdd(patView->row, patView->rowbeat, patView->selection), ColourDiffAdd(patView->row2, patView->rowbeat2, patView->selection2));
 			RecalculateColour(pvc_selection4beat, ColourDiffAdd(patView->row, patView->row4beat, patView->selection), ColourDiffAdd(patView->row2, patView->row4beat2, patView->selection2));
 		}
+		void CChildView::SetPatternScrollBars(int snt, int plines)
+		{
+			if ( snt > VISTRACKS )
+			{	
+				SCROLLINFO si;
+				si.cbSize = sizeof(SCROLLINFO);
+				si.fMask = SIF_PAGE | SIF_RANGE;
+				si.nMin = 0;
+				si.nMax = snt-VISTRACKS;
+				si.nPage = 1;
+				SetScrollInfo(SB_HORZ,&si);
+				ShowScrollBar(SB_HORZ,TRUE);
+			}
+			else
+			{	
+				ShowScrollBar(SB_HORZ,FALSE); 
+			}
 
+			if ( plines > VISLINES )
+			{	
+				SCROLLINFO si;
+				si.cbSize = sizeof(SCROLLINFO);
+				si.fMask = SIF_PAGE | SIF_RANGE;
+				si.nMin = 0;
+				si.nMax = plines-VISLINES;
+				si.nPage = 1;
+				SetScrollInfo(SB_VERT,&si);
+				ShowScrollBar(SB_VERT,TRUE);
+			}
+			else
+			{	
+				ShowScrollBar(SB_VERT,FALSE); 
+			}
+		}
 }}
