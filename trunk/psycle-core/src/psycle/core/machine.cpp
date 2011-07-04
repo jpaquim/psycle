@@ -140,58 +140,21 @@ void OutPort::CollectData(int /*numSamples*/) {
 // Right Channel Gain [dB] = 20*log (sin (Pi /2* max(0,CC#10 – 1)/126)
 
 void Machine::crashed(std::exception const & e) throw() {
-	bool minor_problem(false);
-	bool crash(false);
-	{
-		#if 0 ///\todo
-		if(function_error) {
-			universalis::cpu::exception const * const translated(dynamic_cast<universalis::cpu::exception const * const>(function_error->exception()));
-			if(translated) {
-				crash = true;
-				switch(translated->code()) {
-					// grows the fpu exception mask so that each type of exception is only reported once
-					case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
-					case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
-					case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
-					case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
-					case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
-					case STATUS_FLOAT_STACK_CHECK:                                                                       break;
-					case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
-				}
-			}
-		}
-		#endif
-	}
-	if(!minor_problem) {
-		///\todo do we need thread synchronization?
-		///\todo gui needs to update
-		crashed_ = true;
-		_bypass = true;
-		_mute = true;
-	}
+	///\todo do we need thread synchronization?
+	///\todo gui needs to update
+	crashed_ = true;
+	_bypass = true;
+	_mute = true;
 	std::ostringstream s;
-	s << "Machine: " << GetEditName() << ": " << GetDllName();
-	s << std::endl << e.what() << std::endl;
-	if(minor_problem) {
-		s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
-		//host::loggers::warning(s.str());
-		std::cerr << s.str() << std::endl;
-	} else {
-		s
-			<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash." << std::endl
-			<< "You should save your work to a new file, and restart the host.";
-		if(crash) {
-			//host::loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
-			//host::loggers::exception(s.str());
-			std::cerr << s.str() << std::endl;
-		} else {
-			//host::loggers::exception(s.str());
-			std::cerr << s.str() << std::endl;
-		}
-	}
-	//MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
-	//std::cerr << (crash) ? "Exception (Crash)" : "Exception (Software)" << std::endl;
-	///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered.
+	s
+		<< "Machine: " << GetEditName() << std::endl
+		<< "Library: " << GetDllName() << std::endl
+		<< e.what() << std::endl
+		<< "The machine has been set to bypassed/muted to prevent it from making the host crash." << std::endl
+		<< "You should save your work to a new file, and restart the host.";
+	//if(loggers::exception()) loggers::exception()(s.str());
+	std::cerr << s.str() << std::endl;
+	//MessageBox(0, s.str().c_str(), "Error", MB_OK | MB_ICONERROR);
 }
 
 Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
