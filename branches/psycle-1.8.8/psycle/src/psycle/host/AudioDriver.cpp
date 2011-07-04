@@ -4,6 +4,8 @@
 
 #include "AudioDriver.hpp"
 #include "Constants.hpp"
+#include <ks.h>
+#include <KsMedia.h>
 namespace psycle
 {
 	namespace host
