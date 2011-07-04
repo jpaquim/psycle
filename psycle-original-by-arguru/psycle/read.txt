@@ -1,0 +1,6 @@
+u can make anything with the program but please keep me updated
+with info and any improvement done in the program.
+
+You will need at least to compile the project microsoft visual c++ 6.0.
+
+No 3rd party additional stuff required.

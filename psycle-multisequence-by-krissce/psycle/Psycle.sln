@@ -1,0 +1,27 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Psycle", "Psycle.vcproj", "{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		P4 Release = P4 Release
+		Release = Release
+		Release Cyrix = Release Cyrix
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.Debug.ActiveCfg = Debug|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.Debug.Build.0 = Debug|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.P4 Release.ActiveCfg = P4 Release|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.P4 Release.Build.0 = P4 Release|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.Release.ActiveCfg = Release|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.Release.Build.0 = Release|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.Release Cyrix.ActiveCfg = Release Cyrix|Win32
+		{2014D1F1-0BE4-4739-AA2D-4950D88EDAD1}.Release Cyrix.Build.0 = Release Cyrix|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

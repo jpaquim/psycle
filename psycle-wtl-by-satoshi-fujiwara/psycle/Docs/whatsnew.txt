@@ -1,0 +1,21 @@
+---------------------------------------------------
+Legend :	+=addition		*=change	!=bug
+---------------------------------------------------
+
+2004/10/20
+
+!fix: resource bug
+
+2004/10/15
+
+!fix: .psy File Loading Failed.
+!fix: .xm File Loading Failed.
+!fix: Direct Graphics Object Error.
+
+2004/10/11
+
+*Build Unicode
++Multi Language Support
++English Resource
++volume column.
++XMSampler (this is unable to edit wave and instrument yet)

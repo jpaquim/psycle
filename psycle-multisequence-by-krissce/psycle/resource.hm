@@ -1,0 +1,4 @@
+// Microsoft Developer Studio generated Help ID include file.
+// Used by Psycle.rc
+//
+#define HIDC_SEQSLEN                    0x80ba04a3    // IDD_SEQUENCER [English (U.S.)]

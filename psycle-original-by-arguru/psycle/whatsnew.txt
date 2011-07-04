@@ -1,0 +1,96 @@
+V1.02
+-----
+
+*Added DirectX (DirectSound) output driver
+*Added output driver selection dialog
+*Audio drivers now use the registry to store configuration
+*Internal reorganizations
+
+v1.0
+-----
+Wav Recorder implemented.
+Finetune for samples.
+Sourcecode released.
+
+v0.95beta
+---------
+Plugin GUI improved. Knobs, multiple windows, etc...
+Bugfixes
+
+v0.92beta
+---------
+Now u listen "OnClick" wav files on waveload filebrowser, cooler to browse samples.
+Loop tempo-autofit [lines measured] for instruments.
+Bugfixes.
+
+v0.91beta
+---------
+Added built in wave editor [1st version]
+Fixed language resource bug [some tooltips never were displayed]
+Fix bug when loading/overwriting waves while they are beign played
+Fixed some GDI bugs
+Audio devices displayed fine on audio config
+Playing position indicated in status bar
+Added next/prev buttons both Instrument & Generator (toolbar)
+New help revision
+
+v0.70beta
+---------
+general:
+Graphic sequencer [ft2 style] included.
+Upgraded to 32 tracks
+New/Open/Save as buttons on toolbar/menu
+New logo
+
+machine view:
+New machine button on toolbar.
+New machine dialog style.
+Master volume control added on master machine [doubleclick master]
+
+pattern view:
+SHIFT+notes to enter chords [it2 style]
+Copy and paste now adapt number of lines [of source pattern]
+
+new plugs:
+xFreeverb [+width space parameter]
+Crossdelay
+Distortion
+
++ lots of stuff, bugfixes, etc....
+
+v0.50beta
+---------
+Loading/Saving songs bugs removed
+Some code cleaning
+Changes on plugin API
+Added X-Freeverb plugin
+
+v0.45beta
+---------
+First beta release
+
+
+V0.25 Alpha (2-Jun-2000)
+------------------------
+- Added Arguru remixed/recoded version of the Zephod SuperFMSynthesizer.
+- Fixed bugs and stuff on Arguru Synth.
+- General code cleanup.
+- Improved interface, better looking.
+- Improved generator plugin handler.
+- Machine dragging bugfix.
+- Lot of changes and bug fixes.
+
+V0.20 Alpha (1-Jun-2000)
+------------------------
+- Added Generator hadling for plug-ins (new substractive synthesis Arguru Synth plugin included)
+- Bug fixes
+
+V0.16 Alpha (18-May-2000)
+-------------------------
+- Added patttern step jump in pattern editor.
+- Added 3rd party plugin support [alpha API]
+- Bug fixes
+
+V0.15 Alpha (16-May-2000)
+-------------------------
+- Added flanger machine

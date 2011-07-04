@@ -1,0 +1,69 @@
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\prsht.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\mshtml.idl";
+import "c:\program files\microsoft visual studio .net 2003\vc7\platformsdk\include\dimm.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\mshtmhst.idl";
+import "c:\program files\microsoft visual studio .net 2003\vc7\platformsdk\include\docobj.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\exdisp.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\objsafe.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\shldisp.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\shobjidl.idl";
+import "c:\program files\microsoft visual studio .net 2003\vc7\platformsdk\include\prsht.idl";
+import "C:\My Documents\Visual Studio Projects\PsycleWTL\PsycleWTLScript\_PsycleWTLScript.idl";
+import "C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\include\activscp.idl";
+
+[
+	object,
+	uuid(2CA78C1E-D645-4B67-8979-68BD9DF2D7DA),
+	dual,
+	helpstring("IMainObject Interface"),
+	pointer_default(unique)
+] 
+#line 14 "c:\\my documents\\visual studio projects\\psyclewtl\\mainobject.h"
+interface IMainObject : IDispatch {
+#line 16 "c:\\my documents\\visual studio projects\\psyclewtl\\mainobject.h"
+	[id(1),helpstring("メソッドRun")] HRESULT  Run([in] ULONG hInstance, [in] BSTR lpstrCmdLine, [in] LONG nCmdShow);
+};
+
+[
+	object,
+	uuid(9AFFA8E7-B4C7-46f3-81EE-801B6D12ABFF),
+	dual,
+	helpstring("IMainController Interface"),
+	pointer_default(unique)
+] 
+#line 26 "c:\\my documents\\visual studio projects\\psyclewtl\\mainobject.h"
+interface IMain : IDispatch {
+};
+
+
+[ version(1.0), uuid(79CF997C-9828-4C28-AEE8-68AAA4442513), helpstring("Main 1.0 タイプ ライブラリ") ]
+library Main
+{
+	importlib("stdole2.tlb");
+	importlib("olepro32.dll");
+
+	[
+		uuid(57335A8D-317A-43B2-BC48-392170220B49),
+		helpstring("_IMainObjectEvents インターフェイス")
+	] 
+#line 38 "c:\\my documents\\visual studio projects\\psyclewtl\\mainobject.h"
+	dispinterface _IMainObjectEvents {
+	properties:
+
+	methods:
+	};
+
+	[
+		version(1.0),
+		uuid(194F2C2F-7394-44BD-8E83-03923F98189F),
+		helpstring("MainObject Class")
+	] 
+#line 55 "c:\\my documents\\visual studio projects\\psyclewtl\\mainobject.h"
+	coclass CMainObject {
+		interface IMainObject;
+		interface IMain;
+		[default, source]	interface _IMainObjectEvents;
+	};
+
+}
+

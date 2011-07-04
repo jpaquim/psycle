@@ -1,0 +1,3106 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "atlres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 日本語 resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+#ifdef _WIN32
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "..\\resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""atlres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "..\\res\\Psycle.ico"
+IDR_WAVEFRAME           ICON                    "..\\res\\icon1.ico"
+IDR_VSTFRAME            ICON                    "..\\res\\idr_vstf.ico"
+IDR_MACHINEFRAME        ICON                    "..\\res\\ico00001.ico"
+IDI_MAIN_ICON           ICON                    "..\\res\\ico00002.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_SPLASH              BITMAP                  "..\\res\\splash copia.bmp"
+IDB_SPEAKER             BITMAP                  "..\\res\\bmp00004.bmp"
+IDB_SAMPLER             BITMAP                  "..\\res\\bmp00003.bmp"
+IDB_PLUSPLUS            BITMAP                  "..\\res\\plus1.bmp"
+IDB_PLUS                BITMAP                  "..\\res\\plus.bmp"
+IDB_PATTERN_HEADER_SKIN BITMAP                  "..\\res\\pattern_header_skin.bmp"
+IDB_MOREMORE            BITMAP                  "..\\res\\moremore.bmp"
+IDB_MORE                BITMAP                  "..\\res\\more.bmp"
+IDB_MINUSMINUS          BITMAP                  "..\\res\\minus1.bmp"
+IDB_MINUS               BITMAP                  "..\\res\\minus.bmp"
+IDB_MASTERSLIDER        BITMAP                  "..\\res\\MasterMachine\\slider.bmp"
+IDB_MASTERNUMBERS       BITMAP                  "..\\res\\MasterMachine\\numbers.bmp"
+IDB_MASTERBACK          BITMAP                  "..\\res\\MasterMachine\\masterbk.bmp"
+IDB_MACHINETYPE         BITMAP                  "..\\res\\bmp00002.bmp"
+IDB_MACHINE_SKIN        BITMAP                  "..\\res\\machine_skin.bmp"
+IDB_LRIGHT              BITMAP                  "..\\res\\littleright.bmp"
+IDB_LLEFT               BITMAP                  "..\\res\\littleleft.bmp"
+IDB_LESSLESS            BITMAP                  "..\\res\\lessless.bmp"
+IDB_LESS                BITMAP                  "..\\res\\less.bmp"
+IDB_KNOB                BITMAP                  "..\\res\\TbMainKnob.bmp"
+IDB_DIRECTX             BITMAP                  "..\\res\\bmp00009.bmp"
+IDB_CPU                 BITMAP                  "..\\res\\bmp00005.bmp"
+IDB_ASIO                BITMAP                  "..\\res\\AsioLogo.bmp"
+IDR_MAINFRAME           BITMAP                  "..\\res\\toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_WAVEFRAME MENU 
+BEGIN
+    POPUP "処理"
+    BEGIN
+        MENUITEM "選択範囲をボリューム調整...\tCTRL+M", ID_SELECTION_AMPLIFY
+        MENUITEM "選択範囲をリバース\tCTRL+R",  ID_SELECTION_REVERSE
+        MENUITEM "選択範囲をフェイド イン\tCTRL+I", ID_SELECTION_FADEIN
+        MENUITEM "選択範囲をフェイド アウト\tCTRL+O", ID_SELECTION_FADEOUT
+        MENUITEM "ノーマライズ\tCTRL+N",        ID_SELECTION_NORMALIZE
+        MENUITEM "DC 成分の除去\tCTRL+D",       ID_SELECTION_REMOVEDC
+    END
+    POPUP "編集"
+    BEGIN
+        MENUITEM "すべて選択\tCTRL+A",          ID_EDIT_SELECT_ALL
+        MENUITEM SEPARATOR
+        MENUITEM "切り取り\tCTRL+X",            ID_EDIT_CUT
+        MENUITEM "コピー\tCTRL+C",              ID_EDIT_COPY
+        MENUITEM "貼り付け\tCTRL+V",            ID_EDIT_PASTE
+        MENUITEM "削除\tDel",                   ID_EDIT_DELETE
+    END
+    POPUP "表示"
+    BEGIN
+        MENUITEM "ズーム イン\t+ [Kpd]",        ID_SELECCION_ZOOM
+        MENUITEM "ズーム アウト\t- [Kpd]",      ID_SELECCION_ZOOMOUT
+        MENUITEM "すべて表示",                  ID_SELECTION_SHOWALL
+    END
+    POPUP "コンバート"
+    BEGIN
+        MENUITEM "モノラルへコンバート",        ID_CONVERT_MONO
+    END
+END
+
+IDR_VSTFRAME MENU 
+BEGIN
+    POPUP "パラメータ"
+    BEGIN
+        MENUITEM "パラメータをリセット",        ID_PARAMETERS_RESETPARAMETERS
+
+        MENUITEM "パラメータをランダムに設定",  ID_PARAMETERS_RANDOMPARAMETERS
+
+        MENUITEM SEPARATOR
+        MENUITEM "プリセットダイアログを開く\tCtrl+P", 
+                                                ID_PARAMETERS_SHOWPRESET
+    END
+END
+
+IDR_POPUPMENU MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "元に戻す(&U)",                ID_EDIT_UNDO
+        MENUITEM "やり直し(&R)",                ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Block 切り取り(&C)",          ID_POP_CUT
+        MENUITEM "Block コピー(&O)",            ID_POP_COPY
+        MENUITEM "Block 貼り付け(&P)",          ID_POP_PASTE
+        MENUITEM "Block ミックス貼り付け(&M)",  ID_POP_MIXPASTE
+        MENUITEM "Block 削除(&D)",              ID_POP_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Effect 値を補間(&I)",         ID_POP_INTERPOLATE
+        MENUITEM "Generator 変更(&G)",          ID_POP_CHANGEGENERATOR
+        MENUITEM "Instrument 変更(&T)",         ID_POP_CHANGEINSTRUMENT
+        MENUITEM SEPARATOR
+        MENUITEM "トランスポーズ ＋半音",       ID_POP_TRANSPOSE1
+        MENUITEM "トランスポーズ －半音",       ID_POP_TRANSPOSE_1
+        MENUITEM "トランスポーズ ＋1 Oct",      ID_POP_TRANSPOSE12
+        MENUITEM "トランスポーズ －1 Oct",      ID_POP_TRANSPOSE_12
+        MENUITEM SEPARATOR
+        MENUITEM "選択範囲のスウィング感を設定", ID_POP_BLOCK_SWINGFILL
+        MENUITEM "Track のスウィング感を設定",  ID_POP_TRACK_SWINGFILL
+        MENUITEM SEPARATOR
+        MENUITEM "Pattern プロパティ",          ID_POP_PATTENPROPERTIES
+    END
+END
+
+IDR_MACHINEFRAME MENU 
+BEGIN
+    POPUP "Machine"
+    BEGIN
+        MENUITEM "Command 1",                   ID_MACHINE_COMMAND
+        MENUITEM SEPARATOR
+        MENUITEM "この Machine について",       ID_MACHINE_ABOUTTHISMACHINE
+        MENUITEM "PSYGEAR v1.0 について",       ID_MACHINE_ABOUTPSYGEARV10
+    END
+    POPUP "パラメータ"
+    BEGIN
+        MENUITEM "パラメータ リセット",         ID_PARAMETERS_RESETPARAMETERS
+
+        MENUITEM "パラメータをランダムに設定",  ID_PARAMETERS_RANDOMPARAMETERS
+
+        MENUITEM SEPARATOR
+        MENUITEM "プリセット ダイアログを開く\tCtrl+P", 
+                                                ID_PARAMETERS_SHOWPRESET
+    END
+END
+
+IDR_MAINFRAME MENU 
+BEGIN
+    POPUP "ファイル(&F)"
+    BEGIN
+        MENUITEM "新規作成(&N)",                ID_FILE_NEW
+        MENUITEM "開く(&O)\tCTRL+O",            ID_FILE_LOADSONG
+        MENUITEM "上書き保存(&S)\tCTRL+S",      ID_FILE_SAVE
+        MENUITEM "名前を付けて保存(&A)...",     ID_FILE_SAVE_AS
+        MENUITEM "WAV ファイル書出し(&W)...",   ID_FILE_SAVEAUDIO
+        MENUITEM SEPARATOR
+        MENUITEM "Song プロパティ(&P)",         ID_FILE_SONGPROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "作業前の状態に戻す",          ID_FILE_REVERT
+        POPUP "最近使ったファイル(&R)"
+        BEGIN
+            MENUITEM "No recent file",              ID_FILE_RECENT_NONE
+            , GRAYED
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "終了(&X)",                    ID_APP_EXIT
+    END
+    POPUP "編集(&E)"
+    BEGIN
+        MENUITEM "元に戻す(&U)",                ID_EDIT_UNDO
+        MENUITEM "やり直し(&R)",                ID_EDIT_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "Pattern 切り取り(&T)\tCTRL+F3", ID_EDIT_CUT
+        MENUITEM "Pattern コピー(&C)\tCTRL+F4", ID_EDIT_COPY
+        MENUITEM "Pattern 貼り付け(&P)\tCTRL+F5", ID_EDIT_PASTE
+        MENUITEM "Pattern ミックス貼り付け(&M)", ID_EDIT_MIXPASTE
+        MENUITEM "Pattern 削除(&D)",            ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Block 切り取り",              ID_POP_CUT
+        MENUITEM "Block コピー",                ID_POP_COPY
+        MENUITEM "Block 貼り付け",              ID_POP_PASTE
+        MENUITEM "Block ミックス貼り付け",      ID_POP_MIXPASTE
+        MENUITEM "Block 削除",                  ID_POP_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "Sequence 切り取り",           IDC_SEQCUT
+        MENUITEM "Sequence コピー",             IDC_SEQCOPY
+        MENUITEM "Sequence 貼り付け",           IDC_SEQPASTE
+        MENUITEM "Sequence 削除",               IDC_SEQDELETE
+    END
+    POPUP "表示(&V)"
+    BEGIN
+        MENUITEM "ツールバー(&T)",              ID_VIEW_TOOLBAR
+        MENUITEM "Song バー",                   ID_VIEW_SONGBAR
+        MENUITEM "Machine バー",                ID_VIEW_MACHINEBAR
+        MENUITEM "Sequencer バー",              ID_VIEW_SEQUENCERBAR
+        MENUITEM "ステータス バー(&S)",         ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Machine ビュー\tF2",          ID_MACHINEVIEW
+        MENUITEM "Pattern エディター\tF3",      ID_PATTERNVIEW
+        MENUITEM "Pattern Sequencer\tF4",       ID_SHOWPSEQ
+        MENUITEM SEPARATOR
+        MENUITEM "Machine を追加\tF9",          ID_NEWMACHINE
+        MENUITEM "Instrument エディター\tF10",  ID_VIEW_INSTRUMENTEDITOR
+    END
+    POPUP "設定(&C)"
+    BEGIN
+        MENUITEM "オーディオの開放\tCtrl+F",    ID_CONFIGURATION_FREEAUDIO
+        MENUITEM "Machine の自動停止",          ID_AUTOSTOP
+        MENUITEM "ループ再生",                  ID_CONFIGURATION_LOOPPLAYBACK
+
+        MENUITEM SEPARATOR
+        MENUITEM "設定(&S)...",                 ID_CONFIGURATION_SETTINGS
+    END
+    POPUP "パフォーマンス(&P)"
+    BEGIN
+        MENUITEM "CPU モニター...(&C)",         ID_CPUPERFORMANCE
+        MENUITEM "MIDI モニター...(&M)",        ID_MIDI_MONITOR
+    END
+    POPUP "ヘルプ(&H)"
+    BEGIN
+        MENUITEM "ヘルプ(&H)\tF1",              ID_PSYHELP, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "&keys.txt",                   ID_HELP_KEYBTXT
+        MENUITEM "&ReadMe.txt",                 ID_HELP_README
+        MENUITEM "&Tweakings and Commands.txt", ID_HELP_TWEAKING
+        MENUITEM "&WhatsNew.txt",               ID_HELP_WHATSNEW
+        MENUITEM SEPARATOR
+        MENUITEM "PsycleWTL について...(&A)",   ID_ABOUTPSYCLE
+        MENUITEM "謝辞(&G)",                    ID_HELP_SALUDOS
+    END
+END
+
+IDR_MENU_ENV_EDIT MENU 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "Point追加",                   ID_ADD_POINT
+        MENUITEM "Point削除",                   ID_DEL_POINT
+        MENUITEM SEPARATOR
+        MENUITEM "Sustain 設定",                ID_SET_SUSTAIN
+        MENUITEM "Sustain　解除",               ID_REMOVE_SUSTAIN
+        MENUITEM SEPARATOR
+        MENUITEM "Loop開始位置　設定",          ID_SET_LOOPSTART
+        MENUITEM "Loop終了位置　設定",          ID_SET_LOOPEND
+        MENUITEM "Loop設定　解除",              ID_REMOVE_LOOP
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_WIREDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 212
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 181
+    END
+
+    IDD_WAVEOUTCONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 76
+    END
+
+    IDD_WAVED_AMPLIFY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 257
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+    END
+
+    IDD_VSTRACK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 16
+    END
+
+    IDD_SWINGFILL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 170
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
+    END
+
+    IDD_SONGPROP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 189
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 128
+    END
+
+    IDD_SKIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 295
+        BOTTOMMARGIN, 285
+    END
+
+    IDD_SEQUENCER, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 71
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 328
+    END
+
+    IDD_SAVEWAVDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 253
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 247
+    END
+
+    IDD_PSYBAR2, DIALOG
+    BEGIN
+        RIGHTMARGIN, 575
+    END
+
+    IDD_PSYBAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 529
+    END
+
+    IDD_PRESETS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 162
+        TOPMARGIN, 7
+    END
+
+    IDD_PATDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 47
+    END
+
+    IDD_OUTPUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 275
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 114
+    END
+
+    IDD_NEWVAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 4
+        RIGHTMARGIN, 260
+        TOPMARGIN, 7
+    END
+
+    IDD_NEWMACHINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 377
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 256
+    END
+
+    IDD_NEW_VOLUME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 110
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_MIDI_MONITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 331
+    END
+
+    IDD_MIDI_LEARN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 49
+    END
+
+    IDD_MIDI_INPUT, DIALOG
+    BEGIN
+        RIGHTMARGIN, 320
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 278
+    END
+
+    IDD_MASTERDLG, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 338
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 145
+    END
+
+    IDD_MACPROP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 53
+    END
+
+    IDD_KEYCONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 317
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 270
+    END
+
+    IDD_INSTRUMENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 210
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 236
+    END
+
+    IDD_INST_EDITOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_INFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 232
+    END
+
+    IDD_GREETS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 233
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 150
+    END
+
+    IDD_GEAR_TRACKER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 273
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 64
+    END
+
+    IDD_GEAR_RACK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 255
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 269
+    END
+
+    IDD_ENVDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 341
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 320
+    END
+
+    IDD_DSOUNDCONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 270
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 111
+    END
+
+    IDD_DIRECTORIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 303
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CONFIGURATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 391
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_ASIO_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 270
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 94
+    END
+
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 248
+    END
+
+    IDD_XM_SAMPLER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 328
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 120
+    END
+
+    IDD_XM_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 466
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 243
+    END
+
+    IDD_XMSAMPLERUIINST, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 518
+        TOPMARGIN, 8
+        BOTTOMMARGIN, 354
+    END
+
+    IDD_XMSAMPLERUISAMPLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 517
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 281
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_WAVEFRAME ACCELERATORS 
+BEGIN
+    "A",            ID_SELECTION_SHOWALL,   VIRTKEY, CONTROL, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_SELECTION_REMOVEDC,  VIRTKEY, CONTROL, NOINVERT
+    "I",            ID_SELECTION_FADEIN,    VIRTKEY, CONTROL, NOINVERT
+    "M",            ID_SELECTION_AMPLIFY,   VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_SELECTION_NORMALIZE, VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_SELECTION_FADEOUT,   VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_SELECTION_REVERSE,   VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_ADD,         ID_SELECCION_ZOOM,      VIRTKEY, NOINVERT
+    VK_DELETE,      ID_EDIT_DELETE,         VIRTKEY, NOINVERT
+    VK_SUBTRACT,    ID_SELECCION_ZOOMOUT,   VIRTKEY, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_VSTFRAME ACCELERATORS 
+BEGIN
+    "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, CONTROL, NOINVERT
+END
+
+IDR_MAINFRAME ACCELERATORS 
+BEGIN
+    "O",            ID_FILE_LOADSONG,       VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          ID_PSYHELP,             VIRTKEY, NOINVERT
+    VK_F10,         ID_VIEW_INSTRUMENTEDITOR, VIRTKEY, NOINVERT
+    VK_F4,          ID_SHOWPSEQ,            VIRTKEY, NOINVERT
+END
+
+IDR_MACHINEFRAME ACCELERATORS 
+BEGIN
+    "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_MAINFRAME TOOLBAR  17, 17
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_LOADSONG
+    BUTTON      ID_FILE_SAVE
+    BUTTON      ID_FILE_SAVEAUDIO
+    SEPARATOR
+    BUTTON      ID_RECORDB
+    SEPARATOR
+    BUTTON      ID_EDIT_UNDO
+    BUTTON      ID_EDIT_REDO
+    BUTTON      ID_BARREC
+    SEPARATOR
+    BUTTON      ID_BARPLAYFROMSTART
+    BUTTON      ID_BARPLAY
+    BUTTON      ID_BUTTONPLAYSEQBLOCK
+    BUTTON      ID_BARSTOP
+    BUTTON      ID_AUTOSTOP
+    SEPARATOR
+    BUTTON      ID_MACHINEVIEW
+    BUTTON      ID_PATTERNVIEW
+    SEPARATOR
+    BUTTON      ID_NEWMACHINE
+    BUTTON      ID_VIEW_INSTRUMENTEDITOR
+    SEPARATOR
+    BUTTON      ID_PSYHELP
+    BUTTON      ID_ABOUTPSYCLE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,7,4,0
+ PRODUCTVERSION 1,7,4,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041103a4"
+        BEGIN
+            VALUE "CompanyName", "Psycledelics"
+            VALUE "FileDescription", "PsycleWTL Digital Audio Studio"
+            VALUE "FileVersion", "1, 7, 4, 0"
+            VALUE "InternalName", "PsycleWTL"
+            VALUE "LegalCopyright", "Copyright (C) 2000-2002"
+            VALUE "OriginalFilename", "PsycleWTL.EXE"
+            VALUE "ProductName", "PsycleWTL Application"
+            VALUE "ProductVersion", "1, 7, 4, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 932
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_WIREDIALOG DIALOGEX 0, 0, 219, 188
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Mode",IDC_BUTTON,5,96,166,18,NOT WS_TABSTOP
+    CONTROL         "Slider1",IDC_SLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,1,119,138,12
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS,1,133,138,12
+    PUSHBUTTON      "保持",IDC_BUTTON2,141,120,30,24,NOT WS_TABSTOP
+    PUSHBUTTON      "接続を削除",IDC_BUTTON1,5,148,166,33,NOT WS_TABSTOP
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_VERT | TBS_BOTH | WS_TABSTOP,181,6,28,135
+    PUSHBUTTON      "db",IDC_VOLUME_DB,173,148,39,15,NOT WS_TABSTOP
+    PUSHBUTTON      "%",IDC_VOLUME_PER,173,166,39,15,NOT WS_TABSTOP
+END
+
+IDD_WAVEOUTCONFIG DIALOGEX 0, 0, 272, 79
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Psycle MME オーディオ ドライバー 設定"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "デバイス:",IDC_STATIC,11,7,26,13,SS_CENTERIMAGE
+    COMBOBOX        IDC_CONFIG_DEVICE,45,7,167,137,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "オーディオ 設定",IDC_STATIC,4,22,264,54
+    LTEXT           "サンプルレート:",IDC_STATIC,24,35,38,8
+    COMBOBOX        IDC_CONFIG_SAMPLERATE,64,33,65,140,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "バッファー:",IDC_STATIC,16,56,25,8
+    EDITTEXT        IDC_CONFIG_BUFNUM,48,55,31,12,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_CONFIG_BUFNUM_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,68,55,11,12
+    LTEXT           "×",IDC_STATIC,83,57,8,8
+    EDITTEXT        IDC_CONFIG_BUFSIZE,91,54,47,12,ES_AUTOHSCROLL
+    CONTROL         "Spin2",IDC_CONFIG_BUFSIZE_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,127,54,11,12
+    CONTROL         "ディザ処理(&D)",IDC_CONFIG_DITHER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,152,35,54,10
+    LTEXT           "レイテンシ: 12345ms",IDC_CONFIG_LATENCY,143,56,60,8
+    CONTROL         130,IDC_STATIC,"Static",SS_BITMAP,208,36,51,30
+    DEFPUSHBUTTON   "OK",IDOK,219,7,50,14
+END
+
+IDD_WAVED_AMPLIFY DIALOGEX 0, 0, 264, 57
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Amplify..."
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "OK",IDOK,155,40,50,14,0,WS_EX_STATICEDGE
+    PUSHBUTTON      "キャンセル",IDCANCEL,210,40,50,14,0,WS_EX_STATICEDGE
+    CTEXT           "Adjust volume:",IDC_STATIC,0,5,260,10,0,
+                    WS_EX_STATICEDGE
+    CONTROL         "Slider3",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,5,20,200,15
+    EDITTEXT        IDC_EDIT2,210,20,25,15,ES_AUTOHSCROLL
+    CTEXT           "db",IDC_STATIC,239,20,18,15,SS_CENTERIMAGE
+END
+
+IDD_VSTRACK DIALOGEX 0, 0, 142, 203
+STYLE DS_SETFONT | DS_CONTROL | WS_CHILD
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,6,3,11,
+                    16
+    COMBOBOX        IDC_COMBO1,23,4,116,136,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LIST1,23,22,115,163,LBS_USETABSTOPS | 
+                    LBS_WANTKEYBOARDINPUT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_TEXT1,7,188,131,12,SS_CENTERIMAGE | NOT WS_GROUP,
+                    WS_EX_STATICEDGE
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_VERT | 
+                    TBS_NOTICKS | WS_TABSTOP,6,25,16,157
+END
+
+IDD_SWINGFILL DIALOG  0, 0, 177, 86
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "スィング感を設定"
+FONT 9, "MS UI Gothic"
+BEGIN
+    RTEXT           "テンポ (BPM):",IDC_STATIC,0,5,68,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_CENTER_TEMPO,70,5,40,15,ES_AUTOHSCROLL
+    CONTROL         "実際の BPM",IDC_OFFSET,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,115,5,55,15
+    RTEXT           "分散 (%):",IDC_STATIC,0,25,68,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_VARIANCE,70,25,40,15,ES_AUTOHSCROLL
+    CTEXT           "未チェック = 中心の BPM",IDC_STATIC,115,20,60,20
+    RTEXT           "1サイクル (ライン数):",IDC_STATIC,0,45,68,15,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_WIDTH,70,45,40,15,ES_AUTOHSCROLL
+    RTEXT           "位相 (度):",IDC_STATIC,0,65,68,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_PHASE,70,65,40,15,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,115,45,55,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,115,65,55,14
+END
+
+IDD_SONGPROP DIALOGEX 0, 0, 196, 135
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Song プロパティ"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "Song タイトル",IDC_STATIC,4,4,49,8
+    EDITTEXT        IDC_EDIT1,4,16,188,12,ES_AUTOHSCROLL
+    LTEXT           "クレジット",IDC_STATIC,4,32,50,8
+    EDITTEXT        IDC_EDIT3,4,44,188,12,ES_AUTOHSCROLL
+    LTEXT           "コメント",IDC_STATIC,4,60,51,8
+    EDITTEXT        IDC_EDIT4,4,72,188,40,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    WS_VSCROLL
+    PUSHBUTTON      "Ok",IDC_BUTTON1,4,116,188,16
+END
+
+IDD_SKIN DIALOGEX 0, 0, 298, 287
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "表示"
+FONT 9, "MS UI Gothic", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Pattern エディター",IDC_STATIC,1,1,144,284
+    LTEXT           "フォント名",IDC_STATIC,7,11,45,10
+    COMBOBOX        IDC_PATTERN_FONT_POINT,7,40,32,104,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "サイズ",IDC_STATIC,42,40,20,15,SS_CENTERIMAGE
+    COMBOBOX        IDC_PATTERN_FONT_X,65,40,25,104,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "X",IDC_STATIC,92,40,8,15,SS_CENTERIMAGE
+    COMBOBOX        IDC_PATTERN_FONT_Y,105,40,25,104,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Y",IDC_STATIC,132,40,8,15,SS_CENTERIMAGE
+    CONTROL         "ライン番号",IDC_LINE_NUMBERS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,56,42,10
+    CONTROL         "カーソル",IDC_LINE_NUMBERS_CURSOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,56,56,33,10
+    CONTROL         "HEX値表示",IDC_LINE_NUMBERS_HEX,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,93,56,49,10
+    LTEXT           "スキン",IDC_STATIC,8,72,17,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_PATTERN_HEADER_SKIN,29,70,111,227,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "色",IDC_STATIC,6,85,134,197
+    PUSHBUTTON      "フォント",IDC_FONTC,9,94,44,12
+    CONTROL         "",IDC_FONT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,96,
+                    12,9
+    CONTROL         "",IDC_FONT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,96,
+                    12,9
+    PUSHBUTTON      "フォント",IDC_FONTC2,92,94,44,12
+    PUSHBUTTON      "再生時フォント",IDC_FONTPLAYC,9,110,44,12
+    CONTROL         "",IDC_FONTPLAY_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    112,12,9
+    CONTROL         "",IDC_FONTPLAY_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
+                    112,12,9
+    PUSHBUTTON      "再生時フォント",IDC_FONTPLAYC2,92,110,44,12
+    PUSHBUTTON      "選択時フォント",IDC_FONTSELC,9,126,44,12
+    CONTROL         "",IDC_FONTSEL_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    128,12,9
+    CONTROL         "",IDC_FONTSEL_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
+                    128,12,9
+    PUSHBUTTON      "選択時フォント",IDC_FONTSELC2,92,126,44,12
+    PUSHBUTTON      "カーソルフォント",IDC_FONTCURSORC,9,142,44,12
+    CONTROL         "",IDC_FONTCURSOR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,
+                    60,144,12,9
+    CONTROL         "",IDC_FONTCURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
+                    74,144,12,9
+    PUSHBUTTON      "カーソルフォント",IDC_FONTCURSORC2,92,142,44,12
+    PUSHBUTTON      "仕切り",IDC_PATSEPARATORC,9,158,44,12
+    CONTROL         "",IDC_PBG_SEPARATOR,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    160,12,9
+    CONTROL         "",IDC_PBG_SEPARATOR2,"Static",SS_GRAYRECT | SS_SUNKEN,
+                    74,160,12,9
+    PUSHBUTTON      "仕切り",IDC_PATSEPARATORC2,92,158,44,12
+    PUSHBUTTON      "背景",IDC_PATTERNBACKC,9,174,44,12
+    CONTROL         "",IDC_PBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,175,
+                    12,9
+    CONTROL         "",IDC_PBG_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,175,
+                    12,9
+    PUSHBUTTON      "背景",IDC_PATTERNBACKC2,92,174,44,12
+    PUSHBUTTON      "Row（行）",IDC_ROWC,9,189,44,12
+    CONTROL         "",IDC_ROW_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,191,
+                    12,9
+    CONTROL         "",IDC_ROW_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,191,
+                    12,9
+    PUSHBUTTON      "Row（行）",IDC_ROWC2,92,189,44,12
+    PUSHBUTTON      "ライン/ビート",IDC_BEATC,9,204,44,12
+    CONTROL         "",IDC_BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,206,
+                    12,9
+    CONTROL         "",IDC_BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,206,
+                    12,9
+    PUSHBUTTON      "ライン/ビート",IDC_BEATC2,92,204,44,12
+    PUSHBUTTON      "ライン/4ビート",IDC_4BEAT,9,219,44,12
+    CONTROL         "",IDC_4BEAT_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,221,
+                    12,9
+    CONTROL         "",IDC_4BEAT_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
+                    221,12,9
+    PUSHBUTTON      "ライン/4ビート",IDC_4BEAT2,92,219,44,12
+    PUSHBUTTON      "再生時バー",IDC_PLAYBARC,9,234,44,12
+    CONTROL         "",IDC_PLAYBAR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    236,11,9
+    CONTROL         "",IDC_PLAYBAR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
+                    236,12,9
+    PUSHBUTTON      "再生時バー",IDC_PLAYBARC2,92,234,44,12
+    PUSHBUTTON      "選択範囲",IDC_SELECTIONC,9,249,44,12
+    CONTROL         "",IDC_SELECTION_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    251,12,9
+    CONTROL         "",IDC_SELECTION_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,
+                    74,251,12,9
+    PUSHBUTTON      "選択範囲",IDC_SELECTIONC2,92,249,44,12
+    PUSHBUTTON      "カーソル",IDC_CURSORC,9,264,44,12
+    CONTROL         "",IDC_CURSOR_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,60,
+                    266,12,9
+    CONTROL         "",IDC_CURSOR_CAN2,"Static",SS_GRAYRECT | SS_SUNKEN,74,
+                    266,12,9
+    PUSHBUTTON      "カーソル",IDC_CURSORC2,92,264,44,12
+    GROUPBOX        "Machine ビュー",IDC_STATIC,150,1,145,176
+    LTEXT           "フォント名",IDC_STATIC,156,11,45,10
+    PUSHBUTTON      "Generators",IDC_MV_FONT_COLOUR,154,39,46,13
+    CONTROL         "",IDC_MBG_MV_FONT,"Static",SS_GRAYRECT | SS_SUNKEN,205,
+                    41,12,9
+    COMBOBOX        IDC_MACHINE_FONT_POINT,221,39,32,104,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "サイズ",IDC_STATIC,257,38,20,15,SS_CENTERIMAGE
+    PUSHBUTTON      "Effects",IDC_MV_FONT_COLOUR2,154,72,46,13
+    CONTROL         "",IDC_MBG_MV_FONT2,"Static",SS_GRAYRECT | SS_SUNKEN,205,
+                    74,12,9
+    COMBOBOX        IDC_MACHINE_FONT_POINT2,222,72,32,104,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "サイズ",IDC_STATIC,258,71,20,15,SS_CENTERIMAGE
+    PUSHBUTTON      "背景",IDC_BG_COLOUR,154,89,46,13
+    CONTROL         "",IDC_MBG_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,91,
+                    12,9
+    PUSHBUTTON      "ワイヤー",IDC_WIRE_COLOUR,154,106,46,12
+    CONTROL         "",IDC_MWIRE_COL,"Static",SS_GRAYRECT | SS_SUNKEN,205,
+                    107,12,9
+    COMBOBOX        IDC_WIRE_WIDTH,222,89,24,104,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "線の太さ",IDC_STATIC,248,88,42,13,SS_CENTERIMAGE
+    PUSHBUTTON      "三角形",IDC_POLY_COLOUR,154,123,46,12
+    CONTROL         "",IDC_MPOLY_COL,"Static",SS_GRAYRECT | SS_SUNKEN,205,
+                    125,12,9
+    COMBOBOX        IDC_WIREAA,222,106,24,104,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "後光処理",IDC_STATIC,249,108,28,8,SS_CENTERIMAGE
+    LTEXT           "スキン",IDC_STATIC,155,142,17,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_MACHINE_SKIN,176,140,113,227,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "VU メーター",IDC_STATIC,151,179,144,43
+    PUSHBUTTON      "背景",IDC_BUTTON24,154,188,46,13
+    CONTROL         "",IDC_VU2_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,191,
+                    12,9
+    PUSHBUTTON      "VU バー",IDC_BUTTON23,154,205,46,12
+    CONTROL         "",IDC_VU1_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,205,207,
+                    12,9
+    PUSHBUTTON      "クリップ時",IDC_BUTTON25,222,204,46,13
+    CONTROL         "",IDC_VU3_CAN,"Static",SS_GRAYRECT | SS_SUNKEN,273,206,
+                    12,9
+    GROUPBOX        "全体のオプション",IDC_STATIC,151,223,144,30
+    CONTROL         "ダブルバッファリングでグラフィック表示",
+                    IDC_DOUBLEBUFFER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    155,236,99,12
+    GROUPBOX        "テーマ オプション",IDC_STATIC,151,255,144,30
+    PUSHBUTTON      "ロード",IDC_IMPORTREG,156,267,55,12
+    PUSHBUTTON      "保存",IDC_EXPORTREG,216,267,55,12
+    CONTROL         "データが無い箇所に記入",IDC_DRAW_EMPTY_DATA,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,59,8,79,12
+    PUSHBUTTON      "pattern fontface",IDC_PATTERN_FONTFACE,5,20,135,15
+    PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE,154,20,135,15
+    PUSHBUTTON      "machine fontface",IDC_MACHINE_FONTFACE2,154,55,135,15
+    CONTROL         "Machine インデックスを表示",IDC_DRAW_MAC_INDEX,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,203,8,88,12
+    PUSHBUTTON      "Background Bitmap",IDC_MACHINE_BITMAP,154,158,135,13
+    COMBOBOX        IDC_TRIANGLESIZE,222,123,24,104,CBS_DROPDOWN | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "三角形サイズ",IDC_STATIC,248,122,44,13,SS_CENTERIMAGE
+    CONTROL         "VU メーター 表示",IDC_CHECK_VUS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,223,188,66,11
+END
+
+IDD_SEQUENCER DIALOGEX 0, 0, 75, 333
+STYLE DS_SETFONT | WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
+EXSTYLE WS_EX_TRANSPARENT
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LISTBOX         IDC_SEQLIST,5,5,38,209,LBS_SORT | LBS_EXTENDEDSEL | 
+                    LBS_DISABLENOSCROLL | WS_VSCROLL
+    PUSHBUTTON      "",IDC_INCSHORT,48,5,23,14,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "",IDC_DECSHORT,48,21,23,14,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "",IDC_INCLONG,48,37,23,14,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "",IDC_DECLONG,48,53,23,14,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "新規",IDC_SEQNEW,48,69,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "クローン",IDC_SEQDUPLICATE,48,85,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "挿入",IDC_SEQINS,48,101,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "切取",IDC_SEQCUT,48,117,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "コピー",IDC_SEQCOPY,48,132,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "貼付",IDC_SEQPASTE,48,148,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "削除",IDC_SEQDELETE,48,164,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "クリア",IDC_SEQCLR,48,179,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "並替",IDC_SEQSRT,48,195,23,14,NOT WS_TABSTOP
+    PUSHBUTTON      "",IDC_DECLEN,19,211,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    CTEXT           "000",IDC_SEQ3,36,211,16,12,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "",IDC_INCLEN,55,211,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    LTEXT           "時間長",IDC_STATIC,5,228,22,8
+    CTEXT           "00:00",IDC_LENGTH,37,226,34,12,SS_CENTERIMAGE | NOT 
+                    WS_GROUP,WS_EX_STATICEDGE
+    CONTROL         "Song をフォロー",IDC_FOLLOW,"Button",BS_AUTOCHECKBOX,4,
+                    241,62,8
+    CONTROL         "マルチチャンネル オーディション",
+                    IDC_MULTICHANNEL_AUDITION,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE,4,289,62,18
+    CONTROL         "NoteOff を記録",IDC_RECORD_NOTEOFF,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE,4,271,60,15
+    CONTROL         "Tweak を記録",IDC_RECORD_TWEAKS,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE,4,254,60,15
+    LTEXT           "長さ",IDC_STATIC,5,213,12,8
+    CONTROL         "Effect への Notes を許可",IDC_NOTESTOEFFECTS,"Button",
+                    BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,4,311,59,17
+END
+
+IDD_SAVEWAVDLG DIALOG  0, 0, 260, 254
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "WAV ファイルとして書出し"
+FONT 9, "MS UI Gothic"
+BEGIN
+    LTEXT           "出力先 パス",IDC_STATIC,7,9,39,10
+    EDITTEXT        IDC_FILENAME,51,7,157,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "参照",IDC_FILEBROWSE,213,7,40,13
+    CONTROL         "ミュートしていないマスターへの各入力を、分離したWavファイル(ファイル名は wire 番号 と付けられます)として保存します。",
+                    IDC_SAVEWIRESSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,13,25,231,21
+    GROUPBOX        "録音",IDC_STATIC,15,106,228,61
+    EDITTEXT        IDC_PATNUMBER,119,132,26,13,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(HEX値で入力)",IDC_STATIC,149,135,47,10
+    EDITTEXT        IDC_RANGESTART,119,147,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    EDITTEXT        IDC_RANGEEND,165,147,26,12,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "から",IDC_STATIC,150,149,11,8
+    LTEXT           "(HEX値で入力)",IDC_STATIC,195,149,47,10
+    CONTROL         "Progress1",IDC_PROGRESS,"msctls_progress32",WS_BORDER | 
+                    0x1,5,220,250,9
+    DEFPUSHBUTTON   "WAV 保存",IDC_SAVEWAVE,155,232,50,14
+    PUSHBUTTON      "閉じる",IDCANCEL,210,232,41,14
+    CONTROL         "Song全体を録音",IDC_RECSONG,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,23,119,112,10
+    CONTROL         "Pattern 番号を指定して録音",IDC_RECPATTERN,"Button",
+                    BS_AUTORADIOBUTTON,23,134,96,10
+    CONTROL         "Sequence 間を指定して録音",IDC_RECRANGE,"Button",
+                    BS_AUTORADIOBUTTON,23,149,93,10
+    RTEXT           "サンプリング周波数",IDC_STATIC,67,175,48,8,
+                    SS_CENTERIMAGE
+    RTEXT           "チャンネル",IDC_STATIC,87,205,28,8,SS_CENTERIMAGE
+    RTEXT           "量子化ビット数",IDC_STATIC,74,190,40,8,SS_CENTERIMAGE
+    CONTROL         "ミュートしていない各Trackを、分離したWavファイル(ファイル名は track 番号 と付けられます)として保存します。** 'delay bleed' に悩まされるとき - もし、これが問題なら ファイルの終わりに無音状態を挿入してください。",
+                    IDC_SAVETRACKSSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,13,47,230,24
+    COMBOBOX        IDC_COMBO_RATE,120,172,125,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_BITS,120,187,125,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO_CHANNELS,120,202,125,75,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "注意:\n多くのフィルターでは、\n低いサンプルレートで\n書き出すと\n失敗します。",
+                    IDC_STATIC,12,174,52,42,WS_DISABLED
+    LTEXT           "",IDC_TEXT,7,235,144,12
+    CONTROL         "ミュートしていない各Generatorを、分離したWavファイル(ファイル名は genarator 番号 と付けられます)として保存します。** 'delay bleed' に悩まされるとき - もし、これが問題なら ファイルの終わりに無音状態を挿入してください。",
+                    IDC_SAVEGENERATORSEPARATED,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE | WS_TABSTOP,13,76,230,24
+END
+
+IDD_PSYBAR2 DIALOGEX 0, 0, 581, 16
+STYLE DS_SETFONT | WS_CHILD
+EXSTYLE WS_EX_TRANSPARENT
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "Pattern ステップ",IDC_STATIC,5,4,43,8
+    COMBOBOX        IDC_SSCOMBO2,50,2,24,158,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,78,2,1,12,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "",IDC_B_DECGEN,167,2,10,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER
+    PUSHBUTTON      "",IDC_B_INCGEN,177,2,10,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER
+    COMBOBOX        IDC_BAR_COMBOGEN,83,2,82,12,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "",IDC_B_DECWAV,389,2,10,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER
+    PUSHBUTTON      "",IDC_B_INCWAV,399,2,10,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER
+    COMBOBOX        IDC_BAR_COMBOINS,292,2,95,158,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "ロード",IDC_LOADWAVE,412,1,24,14
+    PUSHBUTTON      "編集",IDC_EDITWAVE,464,1,24,14
+    PUSHBUTTON      "Wav編集",IDC_WAVEBUT,489,1,37,14
+    PUSHBUTTON      "保存",IDC_SAVEWAVE,438,1,24,14
+    COMBOBOX        IDC_AUXSELECT,244,2,45,46,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,238,2,1,12,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "Gear ラック",IDC_GEAR_RACK,190,2,43,13
+END
+
+IDD_PSYBAR DIALOGEX 0, 0, 533, 16
+STYLE DS_SETFONT | WS_CHILD
+EXSTYLE WS_EX_TRANSPARENT
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    RTEXT           "Tracks",IDC_STATIC,4,4,21,8
+    COMBOBOX        IDC_TRACKCOMBO,28,2,29,158,CBS_DROPDOWNLIST | WS_VSCROLL
+    CTEXT           "Tempo",IDC_STATIC,63,4,22,8,SS_CENTERIMAGE
+    PUSHBUTTON      "",IDC_BTN_DECTEN,87,2,16,12,BS_ICON | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "",IDC_BTN_DECONE,103,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    CTEXT           "",IDC_BPMLABEL,120,2,24,12,SS_CENTERIMAGE | SS_SUNKEN
+    PUSHBUTTON      "",IDC_BTN_INCONE,145,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    PUSHBUTTON      "",IDC_BTN_INCTEN,162,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    LTEXT           "Lines per beat",IDC_STATIC,183,4,45,8,SS_CENTERIMAGE | 
+                    NOT WS_GROUP
+    PUSHBUTTON      "",IDC_DEC_TPB,231,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    CTEXT           "",IDC_TPBLABEL,248,2,16,12,SS_CENTERIMAGE | SS_SUNKEN
+    PUSHBUTTON      "",IDC_INC_TPB,265,2,16,12,BS_BITMAP | BS_CENTER | 
+                    BS_VCENTER | NOT WS_TABSTOP
+    LTEXT           "VU",IDC_STATIC,345,4,10,8
+    CONTROL         "",IDC_LVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,3,130,
+                    4
+    CONTROL         "",IDC_RVUM,"Static",SS_BLACKRECT | SS_SUNKEN,358,10,130,
+                    4
+    CONTROL         "",IDC_FRAMECLIP,"Static",SS_BLACKRECT | SS_SUNKEN,491,3,
+                    7,11
+    PUSHBUTTON      "",IDC_CLIPBUT,500,3,8,11,NOT WS_TABSTOP
+    LTEXT           "Octave",IDC_STATIC,286,4,24,8
+    COMBOBOX        IDC_COMBOOCTAVE,311,2,28,132,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_PROGRESS_DIALOG DIALOGEX 0, 0, 252, 9
+STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_3DLOOK | DS_CENTER | 
+    WS_POPUP | WS_CAPTION
+CAPTION "動作中..."
+FONT 9, "MS UI Gothic", 0, 0, 0x0
+BEGIN
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",0x1,1,1,
+                    250,8
+END
+
+IDD_PRESETS DIALOGEX 0, 0, 167, 137
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Machine プリセット"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "Machine プリセット",IDC_STATIC,7,7,54,8
+    COMBOBOX        IDC_PRESETSLIST,7,18,100,112,CBS_SIMPLE | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "保存(&S)",IDC_SAVE,110,17,50,14
+    PUSHBUTTON      "削除(&D)",IDC_DELETE,110,33,50,14
+    PUSHBUTTON      "インポート(&M)",IDC_IMPORT,110,49,50,14
+    PUSHBUTTON      "エクスポート(&E)",IDC_EXPORT,110,65,50,14
+    CONTROL         "プレビュー(&P)",IDC_PREVIEW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,111,84,49,11
+    DEFPUSHBUTTON   "使用(&U)",IDOK,110,98,50,16
+    PUSHBUTTON      "閉じる(&C)",IDCANCEL,110,115,50,15
+END
+
+IDD_PATDLG DIALOGEX 0, 0, 186, 50
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Pattern プロパティ"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "名称",IDC_STATIC,7,5,20,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT1,28,5,96,12,ES_AUTOHSCROLL
+    LTEXT           "ライン",IDC_STATIC,7,22,20,12,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT2,28,22,40,12,ES_AUTOHSCROLL | ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,68,22,11,12
+    CTEXT           "",IDC_TEXT,82,22,42,12,SS_CENTERIMAGE | SS_SUNKEN
+    CONTROL         "Pattern 内容を変更のサイズに適応させる",IDC_CHECK1,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,28,39,127,10
+    PUSHBUTTON      "OK",IDOK,129,4,50,15
+    PUSHBUTTON      "キャンセル",IDCANCEL,129,22,50,15
+END
+
+IDD_OUTPUT DIALOG  0, 0, 282, 121
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "入力/出力"
+FONT 9, "MS UI Gothic"
+BEGIN
+    GROUPBOX        "オーディオ",IDC_STATIC,5,5,275,45
+    RTEXT           "サウンド 出力",IDC_STATIC,10,15,50,9
+    COMBOBOX        IDC_DRIVER,65,15,212,114,CBS_DROPDOWNLIST | WS_TABSTOP
+    PUSHBUTTON      "詳細設定",IDC_CONFIG,225,30,50,14
+    GROUPBOX        "MIDI",IDC_STATIC,5,50,275,70
+    RTEXT           "入力 デバイス:",IDC_STATIC,15,60,46,11
+    COMBOBOX        IDC_MIDI_DRIVER,65,60,212,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "ヘッドルーム (ms):",IDC_STATIC,170,75,60,10,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_HEADROOM,236,75,29,12,ES_AUTOHSCROLL
+    CONTROL         "Spin2",IDC_MIDI_HEADROOM_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,266,75,11,12
+    RTEXT           "同期 デバイス:",IDC_STATIC,15,90,46,11
+    COMBOBOX        IDC_SYNC_DRIVER,65,90,212,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "有効 : MIDIコマンドで シーケンス時。無効 : MIDIキーボード を使用時。",
+                    IDC_MIDI_MACHINE_VIEW_SEQ_MODE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,106,260,10
+END
+
+IDD_NEWVAL DIALOGEX 0, 0, 264, 38
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "New Value"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT1,4,4,128,12,NOT WS_BORDER,WS_EX_CLIENTEDGE | 
+                    WS_EX_RIGHT
+    DEFPUSHBUTTON   "OK",IDOK,136,4,60,12
+    PUSHBUTTON      "Cancel",IDCANCEL,200,4,60,12
+    CTEXT           "Static",IDC_TEXT,4,20,256,14,SS_CENTERIMAGE | SS_SUNKEN
+END
+
+IDD_NEWMACHINE DIALOGEX 0, 0, 384, 263
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Machine を新たに配置"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "Gear 参照",IDC_STATIC,7,2,88,9
+    CONTROL         "Tree1",IDC_BROWSER,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
+                    TVS_TRACKSELECT | WS_BORDER | WS_TABSTOP | 0x400,7,13,
+                    187,223
+    GROUPBOX        "Machine プロパティ",IDC_STATIC,201,7,176,111
+    LTEXT           "名称",IDC_STATIC,223,19,20,8
+    LTEXT           "",IDC_NAMELABEL,246,18,125,12,SS_SUNKEN
+    LTEXT           "特徴",IDC_STATIC,223,34,15,8
+    LTEXT           "",IDC_DESCLABEL,246,30,125,19,SS_SUNKEN
+    LTEXT           "DLL 名",IDC_STATIC,216,54,22,8
+    LTEXT           "",IDC_DLLNAMELABEL,246,49,125,21,SS_SUNKEN
+    LTEXT           "バージョン",IDC_STATIC,213,71,24,8
+    LTEXT           "",IDC_VERSIONLABEL,246,70,125,12,SS_SUNKEN
+    GROUPBOX        "Machine を リスティング する条件",IDC_STATIC,201,136,
+                    176,47
+    CONTROL         "ライブラリ名 (DLL名)",IDC_SHOWDLLNAME,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,216,150,88,12
+    CONTROL         "プラグイン名",IDC_SHOWEFFNAME,"Button",
+                    BS_AUTORADIOBUTTON,216,166,88,10
+    GROUPBOX        "Machines を ソート する条件",IDC_STATIC,201,188,176,48
+    CONTROL         "プラグイン の タイプ によって",IDC_BYTYPE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,216,202,85,10
+    CONTROL         "Machine の 種類 によって",IDC_BYCLASS,"Button",
+                    BS_AUTORADIOBUTTON,216,217,86,10
+    PUSHBUTTON      "すべてのプラグインを再スキャンし、すべての警告をリセットする",
+                    IDC_REFRESH,7,240,188,16
+    DEFPUSHBUTTON   "OK",IDOK,202,240,82,16
+    PUSHBUTTON      "キャンセル",IDCANCEL,291,240,86,16
+    CONTROL         "このプラグインをロードする場合はポップアップ警告を表示",
+                    IDC_CHECK_ALLOW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    212,95,159,10
+END
+
+IDD_NEW_VOLUME DIALOG  0, 0, 117, 62
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "New Volume"
+FONT 9, "MS UI Gothic"
+BEGIN
+    EDITTEXT        IDC_EDIT_DB,30,5,45,15,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "db",IDC_STATIC,80,5,15,15,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_PER,30,25,45,15,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "%",IDC_STATIC,80,25,15,15,SS_CENTERIMAGE
+    DEFPUSHBUTTON   "OK",IDOK,5,45,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,60,45,50,14
+END
+
+IDD_MIDI_MONITOR DIALOGEX 0, 0, 309, 338
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "PsycleWTL MIDI モニター"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "MIDI 入力",IDC_STATIC,1,1,306,333,BS_FLAT
+    GROUPBOX        "Core ステータス",IDC_STATIC,7,12,294,68
+    RTEXT           "バッファ 使用 (イベント)",IDC_STATIC,15,23,81,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_BUFFER_USED,99,23,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "バッファ 容量 (イベント)",IDC_STATIC,15,36,81,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_BUFFER_CAPACITY,99,36,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "同期オフセット (ms)",IDC_STATIC,156,62,84,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_SYNC_OFFSET,244,62,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "同期調整 (samples)",IDC_STATIC,167,49,73,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_SYNC_ADJUST,244,49,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "インターナル MIDI バージョン",IDC_STATIC,156,23,84,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_MIDI_VERSION,244,23,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "MIDI ヘッドルーム (ms)",IDC_STATIC,12,62,84,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_MIDI_HEADROOM,99,62,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "イベント同期 レイテンシ (ms)",IDC_STATIC,156,36,84,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_SYNC_LATENCY,244,36,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "イベント 損失",IDC_STATIC,15,49,81,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_EVENTS_LOST,99,49,50,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    GROUPBOX        "フラグ",IDC_STATIC,7,82,294,78
+    RTEXT           "PsycleWTL の MIDI  はアクティブ?",IDC_STATIC,12,93,81,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_PSYCLE_MIDI_ACTIVE,96,92,14,11,SS_SUNKEN
+    RTEXT           "MIDI データ受信中?",IDC_STATIC,12,106,81,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_RECEIVING_MIDI_DATA,96,105,14,11,SS_SUNKEN
+    RTEXT           "同期中",IDC_STATIC,12,119,81,8,SS_CENTERIMAGE
+    CTEXT           "",IDF_SYNCRONISING,96,118,14,11,SS_SUNKEN
+    RTEXT           "再同期のトリガーは?",IDC_STATIC,12,132,81,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_RESYNC_TRIGGERED,96,131,14,11,SS_SUNKEN
+    LTEXT           "MIDI 同期: スタート",IDC_STATIC,120,95,59,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_MIDI_SYNC_START,183,92,14,11,SS_SUNKEN
+    LTEXT           "MIDI 同期: クロック",IDC_STATIC,120,107,59,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_MIDI_SYNC_CLOCK,183,105,14,11,SS_SUNKEN
+    LTEXT           "MIDI 同期: ストップ",IDC_STATIC,120,119,59,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_MIDI_SYNC_STOP,183,118,14,11,SS_SUNKEN
+    LTEXT           "同期をエミュレート: スタート",IDC_STATIC,203,95,74,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_EMULATED_SYNC_START,280,92,14,11,SS_SUNKEN
+    LTEXT           "同期をエミュレート: クロック",IDC_STATIC,203,107,74,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_EMULATED_SYNC_CLOCK,280,105,14,11,SS_SUNKEN
+    LTEXT           "同期をエミュレート: ストップ",IDC_STATIC,203,119,74,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDF_EMULATED_SYNC_STOP,280,118,14,11,SS_SUNKEN
+    RTEXT           "Trackerの""Tick""をエミュレート?",IDC_STATIC,12,145,81,
+                    8,SS_CENTERIMAGE
+    CTEXT           "",IDF_SYNC_TICK,96,144,14,11,SS_SUNKEN
+    CTEXT           "C",IDC_CLEAR_EVENTS_LOST,150,49,11,10,SS_NOTIFY | 
+                    SS_CENTERIMAGE,WS_EX_DLGMODALFRAME
+    GROUPBOX        "チャンネル マッピング",IDC_STATIC,7,161,294,168
+    CONTROL         "List2",IDC_CHANNEL_MAP,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,14,172,281,152
+    CTEXT           "1",IDC_STATIC,133,133,9,8,SS_CENTERIMAGE
+    CTEXT           "2",IDC_STATIC,143,133,9,8,SS_CENTERIMAGE
+    CTEXT           "3",IDC_STATIC,153,133,9,8,SS_CENTERIMAGE
+    CTEXT           "4",IDC_STATIC,163,133,9,8,SS_CENTERIMAGE
+    CTEXT           "5",IDC_STATIC,173,133,9,8,SS_CENTERIMAGE
+    CTEXT           "6",IDC_STATIC,183,133,9,8,SS_CENTERIMAGE
+    CTEXT           "7",IDC_STATIC,193,133,9,8,SS_CENTERIMAGE
+    CTEXT           "8",IDC_STATIC,203,133,9,8,SS_CENTERIMAGE
+    CTEXT           "9",IDC_STATIC,213,133,9,8,SS_CENTERIMAGE
+    CTEXT           "10",IDC_STATIC,223,133,9,8,SS_CENTERIMAGE
+    CTEXT           "11",IDC_STATIC,233,133,9,8,SS_CENTERIMAGE
+    CTEXT           "12",IDC_STATIC,243,133,9,8,SS_CENTERIMAGE
+    CTEXT           "13",IDC_STATIC,253,133,9,8,SS_CENTERIMAGE
+    CTEXT           "14",IDC_STATIC,263,133,9,8,SS_CENTERIMAGE
+    CTEXT           "15",IDC_STATIC,273,133,9,8,SS_CENTERIMAGE
+    CTEXT           "16",IDC_STATIC,283,133,9,8,SS_CENTERIMAGE
+    LTEXT           "Ch:",IDC_STATIC,120,132,12,8
+    CTEXT           "",IDC_CH1,133,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH2,143,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH3,153,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH4,163,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH5,173,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH6,183,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH7,193,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH8,203,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH9,213,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH10,223,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH11,233,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH12,243,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH13,253,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH14,263,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH15,273,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+    CTEXT           "",IDC_CH16,283,143,9,8,SS_CENTERIMAGE,WS_EX_STATICEDGE
+END
+
+IDD_MIDI_LEARN DIALOG  0, 0, 186, 54
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "MIDI コントローラー を認識"
+FONT 9, "MS UI Gothic"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,74,35,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,129,35,50,14
+    LTEXT           "MIDI コントローラー の メッセージ を待機中",IDC_TEXT,7,
+                    7,172,26
+END
+
+IDD_MIDI_INPUT DIALOG  0, 0, 327, 282
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
+CAPTION "MIDI コントローラー"
+FONT 9, "MS UI Gothic"
+BEGIN
+    GROUPBOX        "MIDI 動作 (HEX値で入力)",IDC_STATIC,0,0,326,282
+    CONTROL         "Map ベロシティー",IDC_MIDI_RECORD_VEL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,10,94,15
+    CTEXT           "⇒",IDC_STATIC,97,13,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_VEL,111,10,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_VEL,156,10,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,12,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_VEL,212,10,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,12,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_VEL,256,10,29,12,ES_AUTOHSCROLL
+    CONTROL         "Map ピッチ ホイール",IDC_MIDI_RECORD_PIT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,25,94,15
+    CTEXT           "⇒",IDC_STATIC,97,28,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_PIT,111,25,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_PIT,156,25,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,27,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_PIT,212,25,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,25,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_PIT,256,25,29,12,ES_AUTOHSCROLL
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,42,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_0,62,40,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,43,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_0,111,40,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_0,156,40,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,42,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_0,212,40,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,40,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_0,256,40,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_0,289,40,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,57,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_1,62,55,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,58,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_1,111,55,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_1,156,55,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,57,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_1,212,55,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,55,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_1,256,55,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_1,289,55,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,72,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_2,62,70,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,73,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_2,111,70,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_2,156,70,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,72,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_2,212,70,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,70,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_2,256,70,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_2,289,70,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,87,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_3,62,85,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,88,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_3,111,85,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_3,156,85,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,87,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_3,212,85,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,85,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_3,256,85,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_3,289,85,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,102,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_4,62,100,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,103,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_4,111,100,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_4,156,100,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,102,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_4,212,100,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,100,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_4,256,100,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_4,289,100,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_5,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,117,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_5,62,115,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,118,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_5,111,115,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_5,156,115,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,117,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_5,212,115,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,115,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_5,256,115,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_5,289,115,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_6,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,132,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_6,62,130,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,133,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_6,111,130,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_6,156,130,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,132,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_6,212,130,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,130,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_6,256,130,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_6,289,130,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_7,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,147,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_7,62,145,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,148,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_7,111,145,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_7,156,145,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,147,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_7,212,145,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,145,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_7,256,145,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_7,289,145,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_8,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,162,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_8,62,160,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,163,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_8,111,160,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_8,156,160,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,162,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_8,212,160,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,160,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_8,256,160,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_8,289,160,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_9,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,177,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_9,62,175,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,178,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_9,111,175,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_9,156,175,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,177,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_9,212,175,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,175,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_9,256,175,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_9,289,175,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_10,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,192,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_10,62,190,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,193,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_10,111,190,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_10,156,190,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,192,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_10,212,190,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,190,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_10,256,190,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_10,289,190,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_11,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,207,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_11,62,205,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,208,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_11,111,205,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_11,156,205,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,207,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_11,212,205,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,205,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_11,256,205,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_11,289,205,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_12,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,222,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_12,62,220,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,223,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_12,111,220,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_12,156,220,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,222,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_12,212,220,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,220,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_12,256,220,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_12,289,220,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_13,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,237,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_13,62,235,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,238,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_13,111,235,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_13,156,235,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,237,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_13,212,235,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,235,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_13,256,235,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_13,289,235,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_14,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,252,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_14,62,250,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,253,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_14,111,250,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_14,156,250,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,252,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_14,212,250,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,250,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_14,256,250,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_14,289,250,32,13,WS_DISABLED
+    CONTROL         "Map コントローラー",IDC_MIDI_RECORD_15,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,3,267,58,10
+    EDITTEXT        IDC_MIDI_MESSAGE_15,62,265,29,12,ES_AUTOHSCROLL
+    CTEXT           "⇒",IDC_STATIC,97,268,8,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_MIDI_TYPE_15,111,265,40,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_MIDI_COMMAND_15,156,265,29,12,ES_AUTOHSCROLL
+    CTEXT           "範囲",IDC_STATIC,193,267,15,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_FROM_15,212,265,29,12,ES_AUTOHSCROLL
+    CTEXT           "～",IDC_STATIC,244,265,8,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_MIDI_TO_15,256,265,29,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Learn",IDC_LEARN_15,289,265,32,13,WS_DISABLED
+END
+
+IDD_MASTERDLG DIALOGEX 0, 0, 339, 146
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "PsycleWTL マスターボリューム と ミニミキサー"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         "クリップする場合、マスター ボリュームを自動的に減少させる",
+                    IDC_AUTODEC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,1,129,
+                    184,14
+    CONTROL         "Slider1",IDC_SLIDERMASTER,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,23,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM1,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,63,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM2,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,76,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM3,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,89,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM4,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM5,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,116,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM6,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,129,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM7,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,142,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM8,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,156,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM9,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,169,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM10,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,183,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM11,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,196,34,13,70,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider1",IDC_SLIDERM12,"msctls_trackbar32",TBS_VERT | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,209,34,13,70,
+                    WS_EX_TRANSPARENT
+    LTEXT           "現在のピーク:",IDC_STATIC,263,133,35,8
+    RTEXT           "-90.0dB",IDC_MASTERPEAK,301,131,31,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CONTROL         190,IDC_MIXERVIEW,"Static",SS_BITMAP | WS_BORDER,1,1,335,
+                    125
+END
+
+IDD_MACPROP DIALOGEX 0, 0, 187, 60
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CTEXT           "名称",IDC_STATIC,7,8,19,8,SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT1,30,7,88,12,ES_AUTOHSCROLL
+    CONTROL         "ミュート",IDC_MUTE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,30,30,10
+    CONTROL         "バイパス",IDC_BYPASS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,49,30,37,10
+    CONTROL         "ソロ",IDC_SOLO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,96,
+                    30,24,10
+    DEFPUSHBUTTON   "OK",IDOK,124,7,56,15
+    PUSHBUTTON      "Machine を削除",IDC_BUTTON1,124,22,56,15
+    PUSHBUTTON      "クローン を作成",IDC_CLONE,124,38,56,15
+END
+
+IDD_KEYCONFIG DIALOGEX 0, 0, 323, 277
+STYLE DS_SETFONT | WS_CHILD | WS_CAPTION
+CAPTION "キーボード と その他"
+FONT 9, "MS UI Gothic", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "キーマップ",IDC_STATIC,3,3,125,272
+    LISTBOX         IDC_CMDLIST,8,13,115,222,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "キー:",IDC_STATIC,8,243,18,8
+    CONTROL         "HotKey1",IDC_KEY0,"msctls_hotkey32",WS_BORDER | 
+                    WS_TABSTOP,29,239,95,15
+    PUSHBUTTON      "なし",IDC_NONE,8,258,55,12
+    PUSHBUTTON      "Lookup",IDC_DEFAULTS3,68,258,55,12,WS_DISABLED
+    GROUPBOX        "動作",IDC_STATIC,134,3,183,169
+    CONTROL         "右Ctrl = 再生 . Space = 再生Stop ( 編集のOn/Off )",
+                    IDC_PLAY_R_CTRL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    138,13,172,10
+    CONTROL         "FT2 スタイルの Home/End キー操作",IDC_FT2_HOME_END,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,24,172,10
+    CONTROL         "FT2 スタイルの 削除動作",IDC_FT2DEL,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,138,35,172,10
+    CONTROL         "範囲設定に Shift + 矢印キー を使う",IDC_SHIFTARROWS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,45,172,13
+    CONTROL         "Pattern エディター内のカーソルの周回移動",IDC_WRAP,
+                    "Button",BS_AUTOCHECKBOX,138,58,172,11
+    CONTROL         "カーソルをPatternエディターの中心へ位置させる",
+                    IDC_CENTERCURSOR,"Button",BS_AUTOCHECKBOX,138,70,172,10
+    CONTROL         "カーソルを常に下へ（Pattern Rowの値の指定位置でも）",
+                    IDC_CURSORDOWN,"Button",BS_AUTOCHECKBOX | BS_MULTILINE,
+                    138,82,172,10
+    GROUPBOX        "その他のオプション",IDC_STATIC,134,178,183,64
+    CONTROL         "編集中の Song の保存を促す（分）",
+                    IDC_AUTOSAVE_CURRENT_SONG,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,138,191,126,10
+    EDITTEXT        IDC_AUTOSAVE_MINS,267,190,36,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Spin1",IDC_AUTOSAVE_MINS_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,302,190,10,12
+    CONTROL         "新規作成あるいは終了時にファイルを保存するか確認",
+                    IDC_FILE_SAVE_REMINDERS,"Button",BS_AUTOCHECKBOX | 
+                    BS_MULTILINE,138,203,172,10
+    CONTROL         "Song をロード時、Song 情報を表示",IDC_SHOW_INFO_ON_LOAD,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE,138,215,172,10
+    RTEXT           "新規 Pattern のライン既定数:",IDC_STATIC,134,226,89,12,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_EDIT_DEFLINES,226,226,41,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "Spin1",IDC_SPIN_DEFLINES,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,255,226,11,12
+    CTEXT           "",IDC_TEXT_DEFLINES,270,226,42,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    GROUPBOX        "キーマップ プリセット",IDC_STATIC,133,247,184,28
+    PUSHBUTTON      "既定値に戻す",IDC_DEFAULTS,138,258,55,12
+    PUSHBUTTON      "ロード",IDC_IMPORTREG,197,258,55,12
+    PUSHBUTTON      "保存",IDC_EXPORTREG,257,258,55,12
+    CONTROL         "tws(Smooth Tweaks)コマンドとしてマウスのツマミ調整を記録",
+                    IDC_TWEAK_SMOOTH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    138,93,166,10
+    CONTROL         """R""ボタンが OFF の Track での記録を不許可",
+                    IDC_RECORD_UNARMED,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    138,104,172,10
+END
+
+IDD_INSTRUMENT DIALOGEX 0, 0, 217, 243
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Instrument エディター"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    RTEXT           "Instrument",IDC_STATIC,6,10,37,12,SS_CENTERIMAGE
+    CTEXT           "000",IDC_INSTNUMBER,46,10,20,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    PUSHBUTTON      "<",IDC_BUTTON12,70,10,8,12
+    PUSHBUTTON      ">",IDC_BUTTON13,78,10,8,12
+    EDITTEXT        IDC_INSTNAME,89,10,84,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "削除...",IDC_BUTTON7,176,10,32,12
+    GROUPBOX        "Instrument プロパティ",IDC_STATIC,4,24,208,215
+    LTEXT           "次の Note の動作",IDC_STATIC,29,38,56,9,SS_CENTERIMAGE
+    COMBOBOX        IDC_NNA_COMBO,89,35,84,52,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "パンニング",IDC_STATIC,24,52,26,8
+    CONTROL         "Slider3",IDC_PANSLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,50,51,121,12
+    CTEXT           "100%",IDC_PANLABEL,178,50,24,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CONTROL         "ランダム パンニング",IDC_RPAN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,15,66,79,8
+    CONTROL         "ランダム VCF カットオフ",IDC_RCUT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,79,80,8
+    CONTROL         "ランダム VCF レゾナンス/Bw.",IDC_RRES,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,105,79,92,8
+    GROUPBOX        "テンポ ルーピング ツール",IDC_STATIC,8,91,200,30
+    CONTROL         "Sample 再生を適合させる",IDC_CHECK4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,15,104,89,10
+    EDITTEXT        IDC_LOOPEDIT,111,103,22,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Pattern rows",IDC_STATIC,138,105,42,8
+    GROUPBOX        "Instrument Wave レイヤー",IDC_STATIC,8,122,200,114,
+                    BS_CENTER
+    RTEXT           "ボリューム",IDC_STATIC,18,135,25,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,134,128,12
+    CTEXT           "100%",IDC_VOLABEL,180,134,24,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "ファインチューン",IDC_STATIC,10,150,34,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,148,128,12
+    CTEXT           "100%",IDC_VOLABEL2,180,148,24,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "チューン",IDC_STATIC,26,165,18,8,SS_CENTERIMAGE
+    PUSHBUTTON      "Oct -",IDC_INS_DECOCTAVE,48,162,31,12
+    PUSHBUTTON      "Note -",IDC_INS_DECNOTE,80,162,31,12
+    PUSHBUTTON      "Note +",IDC_INS_INCNOTE,112,162,31,12
+    PUSHBUTTON      "Oct. +",IDC_INS_INCOCTAVE,144,162,31,12
+    CTEXT           "C#5",IDC_NOTETUNE,180,162,24,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "ループ",IDC_STATIC,28,183,16,8,SS_CENTERIMAGE
+    PUSHBUTTON      "オフ",IDC_LOOPOFF,48,180,52,12
+    PUSHBUTTON      "フォワード",IDC_LOOPFORWARD,100,180,56,12
+    CTEXT           "フォワード",IDC_LOOPTYPE,160,180,44,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CTEXT           "既 ループ設定",IDC_STATIC,16,199,38,8,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPSTART,56,197,36,12,SS_CENTERIMAGE | 
+                    WS_BORDER
+    CTEXT           "～",IDC_STATIC,97,200,8,8,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPEND,109,197,36,12,SS_CENTERIMAGE | 
+                    WS_BORDER
+    LTEXT           "長さ",IDC_STATIC,151,199,14,8,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_WAVELENGTH,168,196,36,12,SS_CENTERIMAGE | 
+                    WS_BORDER
+    PUSHBUTTON      "振幅/フィルター エンベロープ",IDC_BUTTON8,11,214,194,17
+END
+
+IDD_INST_EDITOR DIALOG  0, 0, 261, 234
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Instruments エディター"
+FONT 9, "MS UI Gothic"
+BEGIN
+    DEFPUSHBUTTON   "適用(&A)",IDOK,137,213,65,14
+    PUSHBUTTON      "閉じる(&C)",IDCANCEL,204,213,50,14
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",TCS_HOTTRACK,7,25,247,
+                    134
+    LTEXT           "Instrument:",IDC_STATIC,8,9,36,8
+    LTEXT           "",IDC_INST_NUM,57,8,19,12,SS_SUNKEN
+    PUSHBUTTON      "Button1",IDC_INST_MORE,45,7,10,14,BS_BITMAP
+    PUSHBUTTON      "Button1",IDC_INST_LESS,78,7,10,14,BS_BITMAP
+    EDITTEXT        IDC_INST_NAME,90,8,124,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "削除",IDC_REMOVE,217,7,37,14
+END
+
+IDD_INFO DIALOGEX 0, 0, 316, 239
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "PsycleWTL CPU/DSP パフォーマンス モニター"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "コア情報",IDC_STATIC,7,7,303,81
+    GROUPBOX        "Gear情報 と CPU パフォーマンス",IDC_STATIC,7,89,303,143
+    CONTROL         "List2",IDC_MACHINELIST,"SysListView32",LVS_REPORT | 
+                    LVS_ALIGNLEFT | LVS_NOSORTHEADER | WS_BORDER | 
+                    WS_TABSTOP,12,101,293,125
+    GROUPBOX        "CPU パフォーマンス モニター",IDC_STATIC,185,16,120,68
+    CTEXT           "合計",IDC_STATIC,189,44,34,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_CPUIDLE_LABEL,232,44,40,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CTEXT           "Machines",IDC_STATIC,188,56,36,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MCPULABEL,232,56,40,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "プロセッサ",IDC_STATIC,188,31,34,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_CPUL,232,28,40,12,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "Routing",IDC_STATIC,189,68,38,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MCPULABEL2,232,68,40,10,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CONTROL         137,IDC_STATIC,"Static",SS_BITMAP,276,28,24,18
+    GROUPBOX        "利用可能なリソース",IDC_STATIC,13,16,168,68
+    CTEXT           "Windows リソース",IDC_STATIC,16,29,64,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESOf,86,28,90,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "物理メモリ (RAM)",IDC_STATIC,18,42,62,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO2,86,42,90,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "ページ ファイル (スワップ)",IDC_STATIC,15,55,66,8,
+                    SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO3,86,55,90,10,SS_CENTERIMAGE | SS_SUNKEN
+    CTEXT           "仮想メモリ",IDC_STATIC,54,69,28,8,SS_CENTERIMAGE
+    CTEXT           "",IDC_MEM_RESO4,86,68,90,10,SS_CENTERIMAGE | SS_SUNKEN
+END
+
+IDD_GREETS DIALOG  0, 0, 240, 157
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "謝辞とインフォメーション"
+FONT 9, "MS UI Gothic"
+BEGIN
+    CTEXT           "Psycledelics, Psycleコミュニティーは, Psycleの開発における\n次の人々の貢献に感謝したい。",
+                    IDC_STATIC,4,4,232,17
+    GROUPBOX        "ありがとう!",IDC_STATIC,4,23,232,104
+    LISTBOX         IDC_LIST1,8,33,224,88,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,7,135,226,15
+END
+
+IDD_GEAR_TRACKER DIALOGEX 0, 0, 280, 71
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "プロパティ",IDC_STATIC,4,0,208,68
+    CTEXT           "同時発音数",IDC_STATIC,8,18,38,17,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_TRACKSLIDER2,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,45,14,135,26
+    CTEXT           "4",IDC_TRACKLABEL2,181,21,28,12,SS_CENTERIMAGE | 
+                    WS_BORDER
+    LTEXT           "サンプル補間方法",IDC_STATIC,50,47,51,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO1,104,46,104,60,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CTEXT           "PsycleWTL Sampler",IDC_STATIC,216,4,60,8,SS_CENTERIMAGE
+    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,216,16,61,16
+    CTEXT           "- プロッフェショナル -",IDC_STATIC,216,39,60,8,
+                    SS_CENTERIMAGE
+END
+
+IDD_GEAR_RACK DIALOG  0, 0, 262, 276
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Gear ラック"
+FONT 9, "MS UI Gothic"
+BEGIN
+    GROUPBOX        "Machines",ID_TEXT,5,0,252,272
+    LISTBOX         IDC_GEARLIST,11,10,179,240,LBS_NOINTEGRALHEIGHT | 
+                    LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "作成/置換",IDC_CREATE,195,10,55,15
+    PUSHBUTTON      "削除",IDC_DELETE,195,30,55,15
+    PUSHBUTTON      "パタメーター",IDC_PARAMETERS,195,50,55,15
+    PUSHBUTTON      "プロパティ",IDC_PROPERTIES,195,70,55,15
+    PUSHBUTTON      "クローン作成",IDC_CLONEMACHINE,195,111,55,15
+    PUSHBUTTON      "場所の交替",IDC_EXCHANGE,195,91,55,15
+    CONTROL         "Generators",IDC_RADIO_GEN,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | WS_GROUP,12,254,76,15
+    CONTROL         "Effects",IDC_RADIO_EFX,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | WS_GROUP,93,254,76,15
+    CONTROL         "Instruments",IDC_RADIO_INS,"Button",BS_AUTORADIOBUTTON | 
+                    BS_PUSHLIKE | WS_GROUP,175,254,76,15
+END
+
+IDD_ENVDIALOG DIALOGEX 0, 0, 348, 351
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "エンベロープ エディター"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "振幅",IDC_STATIC,4,0,340,144
+    CONTROL         "",IDC_AMPFRAME,"Static",SS_WHITERECT | WS_BORDER,10,12,
+                    284,69
+    RTEXT           "アタック",IDC_STATIC,30,93,15,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,47,92,232,12
+    LTEXT           "Static",IDC_A_A_LABEL,283,92,44,12,SS_CENTERIMAGE
+    RTEXT           "ディケイ",IDC_STATIC,27,105,18,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,47,105,232,12
+    LTEXT           "Static",IDC_A_D_LABEL,283,104,44,12,SS_CENTERIMAGE
+    RTEXT           "サスティン レベル",IDC_STATIC,8,117,38,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,47,116,232,12
+    LTEXT           "Static",IDC_A_S_LABEL,283,116,44,12,SS_CENTERIMAGE
+    RTEXT           "リリース",IDC_STATIC,28,129,17,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,47,129,232,12
+    LTEXT           "Static",IDC_A_R_LABEL,283,128,44,12,SS_CENTERIMAGE
+    GROUPBOX        "フィルター",IDC_STATIC,4,148,340,144
+    CONTROL         "",IDC_AMPFRAME2,"Static",SS_WHITERECT | WS_BORDER,8,160,
+                    284,69
+    RTEXT           "アタック",IDC_STATIC,30,241,15,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_F_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,240,232,12
+    LTEXT           "Static",IDC_F_A_LABEL,284,240,44,12,SS_CENTERIMAGE
+    RTEXT           "ディケイ",IDC_STATIC,27,254,18,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_F_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,253,232,12
+    LTEXT           "Static",IDC_F_D_LABEL,284,252,44,12,SS_CENTERIMAGE
+    RTEXT           "サスティン レベル",IDC_STATIC,8,266,38,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_F_SLIDER3,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,264,232,12
+    LTEXT           "Static",IDC_F_S_LABEL,284,264,44,12,SS_CENTERIMAGE
+    RTEXT           "リリース",IDC_STATIC,28,277,17,8,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_F_SLIDER4,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,277,232,12
+    LTEXT           "Static",IDC_F_R_LABEL,284,276,44,12,SS_CENTERIMAGE
+    GROUPBOX        "フィルター パラメーター",IDC_STATIC,4,296,288,52
+    RTEXT           "カット オフ",IDC_STATIC,8,308,32,12,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER9,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,308,196,12
+    LTEXT           "Static",IDC_CUTOFF_LBL,244,308,44,12,SS_CENTERIMAGE
+    RTEXT           "Q",IDC_STATIC,8,320,32,12,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_SLIDER10,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,320,196,12
+    LTEXT           "Static",IDC_LABELQ,244,320,44,12,SS_CENTERIMAGE
+    RTEXT           "エンベロープ",IDC_STATIC,8,332,32,12,SS_CENTERIMAGE
+    CONTROL         "Slider1",IDC_ENVELOPE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,48,332,196,12
+    LTEXT           "Static",IDC_A_A_LABEL7,244,332,44,12,SS_CENTERIMAGE
+    CTEXT           "フィルター モード",IDC_STATIC,296,296,48,12,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO1,296,308,48,72,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,296,324,50,24
+END
+
+IDD_DSOUNDCONFIG DIALOGEX 0, 0, 277, 118
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "PsycleWTL DirectX オーディオ ドライバー 設定"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "デバイス:",IDC_STATIC,13,7,26,13,SS_CENTERIMAGE
+    COMBOBOX        IDC_DSOUND_DEVICE,45,7,167,161,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         132,IDC_STATIC,"Static",SS_BITMAP,191,23,21,20
+    GROUPBOX        "オーディオ プロパティ",IDC_STATIC,7,44,263,67
+    RTEXT           "サンプルレート:",IDC_STATIC,16,60,45,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_DSOUND_SAMPLERATE_COMBO,63,58,65,77,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "バッファ:",IDC_STATIC,33,90,28,10,SS_CENTERIMAGE
+    EDITTEXT        IDC_DSOUND_BUFNUM_EDIT,63,89,33,12,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_DSOUND_BUFNUM_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,85,89,11,12
+    LTEXT           "×",IDC_STATIC,99,91,8,8
+    EDITTEXT        IDC_DSOUND_BUFSIZE_EDIT,108,89,48,12,ES_AUTOHSCROLL
+    CONTROL         "Spin2",IDC_DSOUND_BUFSIZE_SPIN,"msctls_updown32",
+                    UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | 
+                    UDS_ARROWKEYS | UDS_NOTHOUSANDS,144,89,11,12
+    CONTROL         "ディザ処理",IDC_DSOUND_DITHER,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,64,76,47,10
+    CONTROL         "排他処理",IDC_EXCLUSIVE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,120,76,60,10
+    LTEXT           "レイテンシ: 12345 ms",IDC_DSOUND_LATENCY,166,91,64,8,
+                    SS_CENTERIMAGE
+    DEFPUSHBUTTON   "OK",IDOK,220,7,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,220,24,50,14
+END
+
+IDD_DIRECTORIES DIALOGEX 0, 0, 310, 182
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION
+CAPTION "ディレクトリ"
+FONT 9, "MS UI Gothic", 0, 0, 0x0
+BEGIN
+    EDITTEXT        IDC_SONGEDIT,13,17,269,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "..",IDC_BROWSESONG,285,17,12,13
+    EDITTEXT        IDC_INSTEDIT,13,51,269,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "..",IDC_BROWSEINST,285,51,12,13
+    EDITTEXT        IDC_PLUGINEDIT,13,88,269,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "..",IDC_BROWSEPLUGIN,285,88,12,13
+    EDITTEXT        IDC_VSTEDIT,13,126,269,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "..",IDC_BROWSEVST,285,126,12,13
+    GROUPBOX        "Song ディレクトリ",IDC_STATIC,7,7,296,28
+    GROUPBOX        "Instrument ディレクトリ",IDC_STATIC,7,42,296,28
+    GROUPBOX        "プラグイン ディレクトリ",IDC_STATIC,7,79,296,28
+    GROUPBOX        "VST プラグイン ディレクトリ",IDC_STATIC,7,115,296,28
+    EDITTEXT        IDC_SKINEDIT,13,162,269,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "..",IDC_BROWSESKIN,285,162,12,13
+    GROUPBOX        "スキン ディレクトリ",IDC_STATIC,7,151,296,28
+END
+
+IDD_CONFIGURATION DIALOG  0, 0, 398, 156
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "設定"
+FONT 9, "MS UI Gothic"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,341,7,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,341,24,50,14
+END
+
+IDD_ASIO_CONFIG DIALOGEX 0, 0, 277, 100
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "PsycleWTL ASIO ドライバー 設定"
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    CONTROL         198,IDC_STATIC,"Static",SS_BITMAP,210,25,60,29
+    LTEXT           "サンプルレート:",IDC_STATIC,11,61,54,8,SS_CENTERIMAGE
+    COMBOBOX        IDC_ASIO_SAMPLERATE_COMBO,71,57,65,77,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "バッファ サイズ:",IDC_STATIC,11,79,54,10,SS_CENTERIMAGE
+    LTEXT           "レイテンシ: 12345 ms",IDC_ASIO_LATENCY,142,79,64,8,
+                    SS_CENTERIMAGE
+    DEFPUSHBUTTON   "OK",IDOK,220,60,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,220,80,50,14
+    LTEXT           "デバイス:",IDC_STATIC,10,7,26,13,SS_CENTERIMAGE
+    COMBOBOX        IDC_ASIO_DRIVER,40,7,230,161,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "コントロール パネル",IDC_CONTROL_PANEL,41,30,87,15
+    COMBOBOX        IDC_ASIO_BUFFERSIZE_COMBO,71,75,65,77,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "<- 問題があるようなら、バッファ サイズをチェック.",
+                    IDC_STATIC,136,28,69,24,WS_DISABLED
+END
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 288, 255
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP
+EXSTYLE WS_EX_STATICEDGE
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+    LTEXT           "\t名前\t\t\t\t\t協力内容",IDC_HEADER,18,27,251,12,
+                    SS_SUNKEN | NOT WS_VISIBLE | WS_BORDER
+    GROUPBOX        "協力者 リスト",IDC_STATIC,7,16,272,133
+    EDITTEXT        IDC_EDIT1,18,40,251,102,ES_MULTILINE | ES_NOHIDESEL | 
+                    ES_READONLY | ES_WANTRETURN | NOT WS_VISIBLE | 
+                    WS_VSCROLL
+    LTEXT           "Psycledelics Site:",IDC_STATIC,13,155,55,8
+    EDITTEXT        IDC_EDIT2,73,155,236,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "Source Forge:",IDC_STATIC,13,167,46,8
+    EDITTEXT        IDC_EDIT5,73,167,236,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "ASIO Steinberg Audio Stream I/O API (C)1996 Steinberg",
+                    IDC_ASIO,103,181,182,8,NOT WS_VISIBLE
+    LTEXT           "VST Virtual Studio Technology v2.3 (C)2003 Steinberg",
+                    IDC_STEINBERGCOPY,103,192,182,8,NOT WS_VISIBLE
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,5,208,277,1,
+                    WS_EX_STATICEDGE
+    CONTROL         "起動時に About ダイアログを表示",IDC_SHOWATSTARTUP,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,211,117,11
+    RTEXT           "バージョン  [Date]",IDC_VERSION_INFO,120,211,161,11,
+                    SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKRECT,5,224,277,1,
+                    WS_EX_STATICEDGE
+    PUSHBUTTON      "協力 && クレジット",IDC_BUTTON1,4,231,84,17
+    DEFPUSHBUTTON   "PsycleWTL を起動",IDOK,90,231,193,17,WS_GROUP
+    CONTROL         "",IDC_HEADERDLG,"Static",SS_BLACKRECT | NOT WS_VISIBLE | 
+                    WS_BORDER,0,0,309,13
+    CONTROL         142,IDC_ABOUTBMP,"Static",SS_BITMAP | SS_REALSIZEIMAGE | 
+                    WS_BORDER,0,0,309,201
+END
+
+IDD_XM_SAMPLER DIALOGEX 0, 0, 335, 127
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 9, "MS UI Gothic", 0, 0, 0x1
+BEGIN
+END
+
+IDD_XM_GENERAL DIALOGEX 0, 0, 473, 250
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "全般"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "プロパティ",IDC_STATIC,7,7,229,53
+    CTEXT           "同時発音数",IDC_STATIC,18,16,45,16,SS_CENTERIMAGE
+    CONTROL         "",IDC_TRACKSLIDER2,"msctls_trackbar32",TBS_AUTOTICKS | 
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,74,17,115,13
+    CTEXT           "4",IDC_TRACKLABEL2,190,17,20,11,SS_CENTERIMAGE | 
+                    WS_BORDER
+    LTEXT           "サンプル補間方法",IDC_STATIC,13,32,59,11,SS_CENTERIMAGE
+    COMBOBOX        IDC_COMBO1,74,31,137,60,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CTEXT           "PsycleWTL XMSampler 0.5A",IDC_STATIC,239,14,161,18,
+                    SS_CENTERIMAGE
+    CONTROL         "Linear Period",IDC_LINEAR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,73,46,57,10
+    LTEXT           "Tempo (bpm)",IDC_STATIC,14,71,46,8
+    LTEXT           "Speed",IDC_STATIC,65,71,24,8
+    GROUPBOX        "Initial Settings",IDC_STATIC,7,63,229,38
+    EDITTEXT        IDC_EDIT_TEMPO,14,83,40,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_TEMPO,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,48,80,
+                    11,12
+    EDITTEXT        IDC_EDIT_SPEED,65,82,40,12,ES_NUMBER
+    CONTROL         "",IDC_SPIN_SPEED,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS,101,80,
+                    11,12
+END
+
+IDD_XMSAMPLERUIINST DIALOGEX 0, 0, 525, 361
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Instrument"
+FONT 8, "ＭＳ Ｐゴシック", 400, 0, 0x80
+BEGIN
+    EDITTEXT        IDC_INST_NO,43,8,40,12,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    CONTROL         "",IDC_SPIN_INST,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,75,8,10,
+                    14
+    EDITTEXT        IDC_INST_NAME,128,8,158,12,ES_AUTOHSCROLL
+    LTEXT           "Inst. No.",IDC_S_INST_NO,14,8,28,12
+    LTEXT           "Inst. Name",IDC_S_INST_NO2,89,8,38,12
+    LTEXT           "NNA",IDC_STATIC,14,32,27,9,SS_CENTERIMAGE
+    COMBOBOX        IDC_XM_NNA_COMBO,42,28,44,52,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_PANSLIDER,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,304,57,32,32
+    CTEXT           "100%",IDC_PAN_LBL,304,92,32,12,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CONTROL         "パン",IDC_RPAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,
+                    60,50,8
+    CONTROL         "VCF カットオフ",IDC_RCUT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,74,60,50,8
+    CONTROL         "VCF レゾナンス",IDC_RRES,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,133,60,50,8
+    CTEXT           "Cutoff",IDC_STATIC_CUTOFF,399,42,32,13,SS_CENTERIMAGE
+    CONTROL         "",IDC_CUTOFF,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
+                    WS_TABSTOP,401,57,32,32
+    CTEXT           "Static",IDC_CUTOFF_LBL,399,92,32,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Q",IDC_STATIC_Q,435,42,32,13,SS_CENTERIMAGE
+    CONTROL         "",IDC_Q,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | 
+                    WS_TABSTOP,437,57,32,32
+    CTEXT           "Static",IDC_Q_LBL,435,92,32,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    CTEXT           "Env.",IDC_STATIC_ENV,471,42,32,13,SS_CENTERIMAGE
+    CONTROL         "",IDC_ENVELOPE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,473,57,32,32
+    CTEXT           "Static",IDC_ENV_LBL,471,92,32,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    GROUPBOX        "Filter",IDC_STATIC_FILTER,348,24,162,94,0,
+                    WS_EX_TRANSPARENT
+    GROUPBOX        "Random Variation",IDC_STATIC,11,46,180,32
+    GROUPBOX        "Envelope Edit",IDC_STATIC,11,78,180,40
+    CONTROL         "Amp.",IDC_RADIO_AMP,"Button",BS_AUTORADIOBUTTON,18,90,
+                    42,18
+    CONTROL         "Filter",IDC_RADIO_FILTER,"Button",BS_AUTORADIOBUTTON,60,
+                    90,42,18
+    CONTROL         "Pan",IDC_RADIO_PAN,"Button",BS_AUTORADIOBUTTON,102,90,
+                    42,18
+    CONTROL         "Pitch",IDC_RADIO_PITCH,"Button",BS_AUTORADIOBUTTON,144,
+                    90,42,18
+    CTEXT           "Mode",IDC_STATIC_MODE,363,42,32,13,SS_CENTERIMAGE
+    CONTROL         "",IDC_SLIDER_MODE,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,363,57,32,32
+    CTEXT           "Static",IDC_MODE_LBL,363,92,32,13,SS_CENTERIMAGE,
+                    WS_EX_STATICEDGE
+    GROUPBOX        "Pan",IDC_STATIC,297,24,48,94,0,WS_EX_TRANSPARENT
+    CONTROL         "Envelope Editor",IDC_XM_EDIT_ENVELOPE,"EnvelopeEditor",
+                    WS_TABSTOP,13,128,496,108
+    CONTROL         "SampleAssignEditor",IDC_SAMPLE_ASSIGN_EDITOR,
+                    "SampleAssignEditor",WS_TABSTOP,13,247,496,98
+END
+
+IDD_XMSAMPLERUISAMPLE DIALOGEX 0, 0, 524, 288
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Sample"
+FONT 8, "ＭＳ Ｐゴシック", 400, 0, 0x80
+BEGIN
+    GROUPBOX        "Instrument Wave レイヤー",IDC_STATIC,7,7,261,56,
+                    BS_CENTER
+    RTEXT           "ボリューム",IDC_STATIC,9,19,22,8,SS_CENTERIMAGE
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,35,17,73,11
+    CTEXT           "100%",IDC_VOLABEL,109,17,21,11,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "ファインチューン",IDC_STATIC,134,19,29,8,SS_CENTERIMAGE
+    CONTROL         "",IDC_SLIDER2,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,163,17,73,11
+    CTEXT           "100%",IDC_VOLABEL2,237,16,21,11,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "チューン",IDC_STATIC,121,31,15,8,SS_CENTERIMAGE
+    PUSHBUTTON      "Oct -",IDC_INS_DECOCTAVE,139,29,24,11
+    PUSHBUTTON      "Note -",IDC_INS_DECNOTE,163,29,23,11
+    PUSHBUTTON      "Note +",IDC_INS_INCNOTE,186,29,23,11
+    PUSHBUTTON      "Oct. +",IDC_INS_INCOCTAVE,209,29,23,11
+    CTEXT           "C#5",IDC_NOTETUNE,237,29,21,11,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    RTEXT           "ループ",IDC_STATIC,14,31,14,8,SS_CENTERIMAGE
+    PUSHBUTTON      "オフ",IDC_LOOPOFF,35,31,22,11
+    PUSHBUTTON      "フォワード",IDC_LOOPFORWARD,60,31,22,11
+    CTEXT           "フォワード",IDC_LOOPTYPE,87,31,22,11,SS_CENTERIMAGE | 
+                    SS_SUNKEN
+    CTEXT           "既 ループ設定",IDC_STATIC,10,51,33,8,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPSTART,45,49,31,11,SS_CENTERIMAGE | 
+                    WS_BORDER
+    CTEXT           "～",IDC_STATIC,79,51,8,8,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_LOOPEND,90,49,31,11,SS_CENTERIMAGE | 
+                    WS_BORDER
+    LTEXT           "長さ",IDC_STATIC,126,51,12,8,SS_CENTERIMAGE
+    CTEXT           "1234567",IDC_WAVELENGTH,141,48,31,11,SS_CENTERIMAGE | 
+                    WS_BORDER
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME,7,87,510,155
+    GROUPBOX        "テンポ ルーピング ツール",IDC_STATIC,269,14,171,27
+    CONTROL         "Sample 再生を適合させる",IDC_CHECK4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,271,26,77,9
+    EDITTEXT        IDC_LOOPEDIT,353,25,19,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Pattern rows",IDC_STATIC,377,27,36,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_WAVEOUTCONFIG DLGINIT
+BEGIN
+    IDC_CONFIG_SAMPLERATE, 0x403, 6, 0
+0x3639, 0x3030, 0x0030, 
+    IDC_CONFIG_SAMPLERATE, 0x403, 6, 0
+0x3834, 0x3030, 0x0030, 
+    IDC_CONFIG_SAMPLERATE, 0x403, 6, 0
+0x3434, 0x3031, 0x0030, 
+    IDC_CONFIG_SAMPLERATE, 0x403, 6, 0
+0x3232, 0x3530, 0x0030, 
+    0
+END
+
+IDD_PSYBAR2 DLGINIT
+BEGIN
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0030, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0031, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0032, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0033, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0034, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0035, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0036, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0037, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0038, 
+    IDC_SSCOMBO2, 0x403, 2, 0
+0x0039, 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3131, "\000" 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3231, "\000" 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3331, "\000" 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3431, "\000" 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3531, "\000" 
+    IDC_SSCOMBO2, 0x403, 3, 0
+0x3631, "\000" 
+    IDC_AUXSELECT, 0x403, 5, 0
+0x494d, 0x4944, "\000" 
+    IDC_AUXSELECT, 0x403, 7, 0
+0x6150, 0x6172, 0x736d, "\000" 
+    IDC_AUXSELECT, 0x403, 8, 0
+0x6153, 0x706d, 0x656c, 0x0073, 
+    0
+END
+
+IDD_PSYBAR DLGINIT
+BEGIN
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0030, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0031, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0032, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0033, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0034, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0035, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0036, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0037, 
+    IDC_COMBOOCTAVE, 0x403, 2, 0
+0x0038, 
+    0
+END
+
+IDD_ASIO_CONFIG DLGINIT
+BEGIN
+    IDC_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3639, 0x3030, 0x0030, 
+    IDC_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3834, 0x3030, 0x0030, 
+    IDC_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3434, 0x3031, 0x0030, 
+    IDC_ASIO_SAMPLERATE_COMBO, 0x403, 6, 0
+0x3232, 0x3530, 0x0030, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDR_MAINFRAME           "PsycleWTL"
+    IDS_UNKNOWN_ERROR       "不明なエラーです。"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_PAGE_SETUP      "Change the printing options\nPage Setup"
+    ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
+    ID_FILE_PRINT           "Print the active document\nPrint"
+    ID_FILE_PRINT_PREVIEW   "Display full pages\nPrint Preview"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
+    ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
+    ID_WINDOW_CASCADE       "Arrange windows so they overlap\nCascade Windows"
+    ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_SCSIZE          "Change the window size"
+    ATL_IDS_SCMOVE          "Change the window position"
+    ATL_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    ATL_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    ATL_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    ATL_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    ATL_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_SCRESTORE       "Restore the window to normal size"
+    ATL_IDS_SCTASKLIST      "Activate Task List"
+    ATL_IDS_MDICHILD        "Activate this window"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE 
+BEGIN
+    ATL_IDS_MRU_FILE        "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_INDICATOR_SEQPOS     "Pos:00"
+    ID_INDICATOR_PATTERN    "Pat:00"
+    ID_INDICATOR_LINE       "ライン:000"
+    ID_INDICATOR_TIME       "00:00:00.00"
+    ID_INDICATOR_EDIT       "編集"
+    ID_INDICATOR_FOLLOW     "フォロー"
+    ID_INDICATOR_NOTEOFF    "NoteOff"
+    ID_INDICATOR_TWEAKS     "Tweak"
+    ID_INDICATOR_OCTAVE     "Oct:0"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_POP_CUT              "選択範囲の内容を切り取り（選択元は削除）バッファーに保存\n選択範囲を切り取り"
+    ID_POP_COPY             "選択範囲の内容をコピーしバッファーに保存\n選択範囲をコピー"
+    ID_POP_PASTE            "バッファーの内容を貼り付け(上書き)\n選択内容の貼り付け"
+    ID_POP_INTERPOLATE      "選択範囲をスムースな値で補間\n値の補間"
+    ID_POP_CHANGEGENERATOR  "現在選択中の Generator へ変更\nGenerator 変更"
+    ID_POP_CHANGEINSTRUMENT "現在選択中の Instrument へ変更\nInstrument 変更"
+    ID_POP_TRANSPOSE1       "トランスポーズ(半音上げる)\nトランスポーズ +1"
+    ID_POP_TRANSPOSE12      "トランスポーズ(1オクターブ上げる)\nトランスポーズ +12"
+    ID_POP_TRANSPOSE_12     "トランスポーズ(1オクターブ下げる)\nトランスポーズ -12"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_ABOUTPSYCLE          "インフォメーションとロゴ\nロゴ"
+    ID_HELP_SALUDOS         "協力してくれた方々\n謝辞"
+    ID_RECORDB              "HDD に WAV ファイルで保存\nWAV ファイルに保存"
+    ID_BARPLAY              "Song 再生\n再生"
+    ID_BUTTONPLAYSEQBLOCK   "Sequence ループ中の選択した Pattern を再生\n選択した Pattern を再生"
+    ID_BARSTOP              "Song 停止\n停止"
+    ID_AUTOSTOP             "使用されていない Machine (出力を生成しないもの) を自動停止\nMachine の自動停止"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_SEQUENCER       "Sequencer バー 表示/非表示"
+    ID_CONFIGURATION_LOOPPLAYBACK 
+                            "Song をループするか、一旦終了したら停止するか、を切り替えます"
+    ID_BARPLAYFROMSTART     "Sequence の先頭から再生開始\nスタートから再生"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_HELP_README          "Readme.txt ファイルを開く\nReadme を開く"
+    ID_HELP_TWEAKING        "Tweakings and Commands.txt を開く\ntweakings and Commandsを開く"
+    ID_HELP_KEYBTXT         "(デフォルトのキーボード配置が記述された)keys.txtを開く\nkeys を開く"
+    ID_BARREC               "Sequence を記録\nSequence を記録"
+    ID_CONFIGURATION_OPENONLYVISUALCONFIG "THIS IS A TESTING ONLY OPTION"
+    ID_CONFIGURATION_OPENONLYKEYBOARDCONFIG "THIS IS A TESTING ONLY OPTION"
+    ID_CONFIGURATION_OPENONLYDIRECTORIESCONFIG "THIS IS A TESTING ONLY OPTION"
+    ID_CONFIGURATION_OPENONLYINPUTOUTPUTCONFIG "THIS IS A TESTING ONLY OPTION"
+    ID_CONFIGURATION_OPENONLYMIDIINPUTCONFIG "THIS IS A TESTING ONLY OPTION"
+    ID_VIEW_SONGBAR         "Song バー 表示/非表示 (Tempo, tbp, VUメーター)"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_LOADSONG        "Song を開く\n開く"
+    ID_FILE_IMPORT_XMFILE   "Pointを追加します."
+    ID_FILE_IMPORT_ITFILE   "Pointを削除します。"
+    ID_FILE_SONGPROPERTIES  "Song プロパティダイアログを表示します\nSong プロパティを表示"
+    ID__SUSTAIN32780        "Sustain設定を解除します。"
+    ID__LOOP32781           "Loop開始位置を設定します。"
+    ID__LOOP32782           "Loop終了位置を設定します。"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_SET_SUSTAIN          "Sustainをこの位置にセットします。"
+    ID_REMOVE_SUSTAIN       "Sustain設定を解除します。"
+    ID_MACHINEVIEW          "Loop開始位置を設定します。"
+    ID_PATTERNVIEW          "Loop終了位置を設定します。"
+    ID_SHOWPSEQ             "Loop設定を解除します。"
+    ID_NEWMACHINE           "新しい Machine を挿入\n新規 Machine"
+    ID_VIEW_INSTRUMENTEDITOR 
+                            "Instruments/Samples エディターを開く\nInstruments エディターを開く"
+    ID_CONFIGURATION_FREEAUDIO "オーディオ出力を無効化\nオーディオ無効化"
+    ID_CONFIGURATION_SETTINGS "設定全般のダイアログを開く\n設定を開く"
+    ID_CPUPERFORMANCE       "CPU パフォーマンス モニターを表示\nCPU モニター表示"
+    ID_MIDI_MONITOR         "MIDI モニター表示\nMidi モニター表示"
+    ID_PSYHELP              "オンラインヘルプを開く\nヘルプ"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_POP_PATTENPROPERTIES "Pattern プロパティダイアログを表示\nPattern プロパティを表示"
+    ID_POP_MIXPASTE         "この貼り付けは、Pattern とバッファーの内容を混ぜ合わせます\nミックス貼り付け"
+    ID_POP_TRANSPOSE_1      "トランスポーズ(半音下げる)\nトランスポーズ +1"
+    ID_SELECTION_AMPLIFY    "ボリューム調整..."
+    ID_SELECTION_REVERSE    "Sample の方向をリバース"
+    ID_SELECTION_FADEIN     "リニアにフェイド イン"
+    ID_SELECTION_FADEOUT    "リニアにフェイド アウト"
+    ID_SELECTION_NORMALIZE  "サンプルのピーク値を最大にします"
+    ID_SELECTION_REMOVEDC   "DC 成分の除去"
+    ID_SELECCION_ZOOM       "ズームイン表示"
+    ID_SELECCION_ZOOMOUT    "ズームアウト表示"
+    ID_SELECTION_SHOWALL    "波形全体を表示"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COULDNT_INITIALIZE_TIMER "タイマーのイニシャライズ不可"
+    IDS_SONG_SAVED          "Song Saved"
+    IDS_ARE_YOU_SURE        "ほんとうにいいですか？"
+    ID_POP_BLOCK_SWINGFILL  "スウィング感を作るため、選択範囲の Effect Column を、Song全体の BPM を変更するコマンド（FFxx）でいっぱいにする"
+    ID_POP_TRACK_SWINGFILL  "スウィング感を作るため、カーソルのある Track の Effect Column を、Song全体の BPM を変更するコマンド（FFxx）でいっぱいにする"
+    ID_EDIT_MIXPASTE        "クリップボードからの Pattern をミックスして貼り付け\nPattern ミックス"
+    ID_FILE_SAVEAUDIO       "WAV、あるいは圧縮フォーマットのファイルに保存します\nWAV ファイル書出し"
+    ID_HELP_WHATSNEW        "WhatsNew.txt ファイルを開く\nwhatsnew.txt を開く"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_DELETE          "選択内容を削除"
+    ID_CONVERT_MONO         "チャンネルをミックスし、モノラルへコンバート"
+    ID_CONVERT_STEREO       "チャンネルに分離し、ステレオにコンバート"
+    ID_INDICATOR_SIZE       "サイズ:"
+    ID_INDICATOR_MODE       "モード:"
+    IDS_NOTMAC              "Machine 無し"
+    IDS_MIDICH_FMT          "%.2X: MIDI チャンネル %.2i"
+    IDS_FILTER_WAVE         "WAV ファイル (*.wav)|*.wav|すべてのファイル (*.*)|*.*||"
+    IDS_LOAD_WAVE           "新規 WAV ロート"
+    IDS_SAVE_NOTFOUND       "保存するものがありません\nまず、Wavのエントリーが空でないところを選択してください"
+    IDS_ERROR               "エラー"
+    IDS_NOT_MAKEHELP        "Sorry\nまだ誰もヘルプファイルを作っていません"
+    IDS_CLEAR_CONFIRM       "Sequence と Pattern のデータを本当にクリアしたいのですか？"
+    IDS_EXTENTION           ".psy"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NEWVAL_1            "有効範囲より下です。 この HEX 値を使用 : twk %.2X %.2X %.4X"
+    IDS_NEWVAL_2            "有効範囲より上です。 この HEX 値を使用 : twk %.2X %.2X %.4X"
+    IDS_NEWVAL_3            "この HEX 値を使用 : twk %.2X %.2X %.4X"
+    IDS_UNDO                "元に戻す"
+    IDS_UNDO1               "Pattern エディタで元に戻す"
+    IDS_REDO                "やり直し"
+    IDS_REDO1               "Pattern エディタでやり直し"
+    IDS_FILTER_WAV          "WAV ファイル (*.wav)|*.wav|すべてのファイル (*.*)|*.*||"
+    IDS_FMT_HELPKEYB        "%sDocs\\keys.txt"
+    IDS_HELPOPEN            "open"
+    IDS_FMT_HELPREADME      "%sDocs\\readme.txt"
+    IDS_FMT_HELPTWEAK       "%sDocs\\tweaking.txt"
+    IDS_FMT_HELPWHATSNEW    "%sDocs\\whatsnew.txt"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_REG_DO_NOT_WRITE    "レジストリに設定を書き込むことが出来ません"
+    IDS_FONT_DO_NOT_FOUND   "このフォントを見つけることができませんでした!"
+    IDS_ERR_READ_FILE       "ファイル読み込み中にエラーが発生しました。%s %d"
+    IDS_ERR_WRITE_FILE      "ファイル書き込み中にエラーが発生しました。%s %d"
+    IDS_ERR_GETPROCADDRESS  "GetProcAddress で例外が発生しました: %s"
+    IDS_ERR_CALL_MAIN       "mainを呼ぶ際、例外が発生しました: %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0001         "SetSampleRate で例外が発生しました: %s"
+    IDS_ERR_MSG0002         "SetBlockSize で例外が発生しました: %s"
+    IDS_ERR_MSG0003         "effOpen で例外が発生しました: %s"
+    IDS_ERR_MSG0004         "SetSpeakerArrangement で例外が発生しました: %s"
+    IDS_ERR_MSG0005         "SetSampleRate(2) で例外が発生しました: %s"
+    IDS_ERR_MSG0006         "SetBlockSize(2) で例外が発生しました: %s"
+    IDS_ERR_MSG0007         "SetSpeakerArrangement(2) で例外が発生しました: %s"
+    IDS_ERR_MSG0008         "SetSamplerate(3) で例外が発生しました: %s"
+    IDS_ERR_MSG0009         "SetBlockSize(3) で例外が発生しました: %s"
+    IDS_ERR_MSG0010         "GetProgram で例外が発生しました: %s"
+    IDS_ERR_MSG0011         "GetVstVersion で例外が発生しました: %s"
+    IDS_ERR_MSG0012         "SetProgram で例外が発生しました: %s"
+    IDS_ERR_MSG0013         "MainsChanged で例外が発生しました: %s"
+    IDS_ERR_MSG0014         "GetVendorString で例外が発生しました: %s"
+    IDS_ERR_MSG0015         "VST プラグイン \\'%s\\' が見当たらないか、壊れています - ダミーと入れ替え。"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0016         "ロードエラー"
+    IDS_ERR_MSG0017         "Machine はそのチャンクを保存中に例外処理をしました。\nそれはクラッシュしており、そのため恐らくPsycleを落とすでしょう。"
+    IDS_ERR_MSG0018         "Machine は effMainsChanged で例外処理をしました"
+    IDS_ERR_MSG0019         "Machine は effGetParamDisplay で例外処理をしました"
+    IDS_ERR_MSG0020         "Machine は effGetParamLabel で例外処理をしました"
+    IDS_ERR_MSG0021         "Machine は effGetProgram で例外処理をしました"
+    IDS_ERR_MSG0022         "Machine は effSetProgram で例外処理をしました"
+    IDS_ERR_MSG0023         "Machine は effProcessEvents で例外処理をしました"
+    IDS_ERR_MSG0024         "Machine は effEditIdle で例外処理をしました"
+    IDS_ERR_MSG0025         "不明のVST"
+    IDS_ERR_MSG0026         "Machine は effEditIdle で例外処理をしました"
+    IDS_ERR_MSG0027         "Machine は effClose で例外処理をしました"
+    IDS_ERR_MSG0028         "DirectSound オブジェクトの作成に失敗しました"
+    IDS_ERR_MSG0029         "DirectSound においてアプリケーション協調レベルの設定に失敗しました"
+    IDS_ERR_MSG0030         "DirectSound においてサウンドバッファの作成に失敗しました"
+    IDS_ERR_MSG0031         "DirectSound においてバッファのフォーマット設定に失敗しました"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0032         "DirectSound においてバッファ能力の取得に失敗しました"
+    IDS_ERR_MSG0033         "DirectSoundBuffer::GetCurrentPosition 失敗"
+    IDS_ERR_MSG0034         "サウンドバッファのオーディオデータに対する有効な書き込みポインタの取得に失敗しました"
+    IDS_ERR_MSG0035         "レジストリに設定を書き込むことが出来ません"
+    IDS_ERR_MSG0036         "ERROR: Could not open the "
+    IDS_ERR_MSG0037         "MIDI input device"
+    IDS_ERR_MSG0038         "MIDI sync device"
+    IDS_ERR_MSG0039         "and MIDI sync device"
+    IDS_ERR_MSG0040         "None"
+    IDS_ERR_MSG0041         "失敗しました"
+    IDS_ERR_MSG0042         "WAV ファイル録音に失敗しました"
+    IDS_ERR_MSG0043         "エラー"
+    IDS_ERR_MSG0044         "internal machine replacement plugin not declared"
+    IDS_ERR_MSG0045         "%d と %d は二重にポインタを持っています"
+    IDS_ERR_MSG0046         "二重の Machine"
+    IDS_ERR_MSG0047         "未知の Machine タイプ: %1%"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0048         "旧 Song をローディングしています"
+    IDS_ERR_MSG0049         "このファイルは、使用中の Psycle よりも新しい Psycle で作成されています。新しいバージョンの Psycle をゲットしましょう!"
+    IDS_ERR_MSG0050         "'%1%' からの読み込みエラー!!!"
+    IDS_ERR_MSG0051         "'%1%'への書き込みエラー"
+    IDS_ERR_MSG0052         "waveOutOpen() : Wave デバイスのオープンに失敗しました"
+    IDS_ERR_MSG0053         "waveOutReset() : 再生停止に失敗しました"
+    IDS_ERR_MSG0054         "waveOutUnprepareHeader() : バッファ用メモリの開放に失敗しました"
+    IDS_ERR_MSG0055         "waveOutClose() : Wave デバイスのクローズに失敗しました"
+    IDS_ERR_MSG0056         "waveOutWrite() : Wave デバイスにデータを転送するのに失敗しました"
+    IDS_ERR_MSG0057         "waveOutGetPosition() : Wave デバイスが与える現在の再生位置の検索に失敗しました"
+    IDS_ERR_MSG0058         "TIME_SAMPLES をサポートしていないので、waveOutGetPosition() が実行出来ません"
+    IDS_ERR_MSG0059         "ファイルを開くことができません。"
+    IDS_ERR_MSG0060         "XMファイルではありません。"
+    IDS_ERR_MSG0061         "Machine の接続に失敗しました!"
+    IDS_ERR_MSG0062         "ファイル作成エラー!"
+    IDS_ERR_MSG0063         "ファイルを開くことが出来ませんでした。場所が正しいかチェックして下さい。"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0064         "ロードエラー"
+    IDS_ERR_MSG0065         "ロードに失敗しました。この拡張子は認識できません。 %1%"
+    IDS_ERR_MSG0066         "ロードに失敗しました。%1%"
+    IDS_ERR_MSG0067         "Song をロードしました"
+    IDS_ERR_MSG0068         "Machine の種類が違います!"
+    IDS_ERR_MSG0069         "Machine の作成に失敗しました"
+    IDS_ERR_MSG0070         "読み出しモードでファイルを開くことが出来ませんでした。操作は異常終了しました。"
+    IDS_ERR_MSG0071         "ファイルオープンエラー"
+    IDS_ERR_MSG0072         "エラー! タイマーを初期化することができませんでした"
+    IDS_ERR_MSG0073         "CPU パフォーマンス ダイアログ"
+    IDS_ERR_MSG0074         "書き込みモードでファイルを開くことが出来ませんでした。操作は異常終了しました。"
+    IDS_ERR_MSG0075         "ファイル保存エラー"
+    IDS_ERR_MSG0076         "ファイルから読み込めません。操作を異常終了として処理しました。"
+    IDS_ERR_MSG0077         "そのプリセットファイルはこのプラグインにおいて最新ではありません。"
+    IDS_ERR_MSG0078         "プリセットファイルエラー"
+    IDS_ERR_MSG0079         "そのプリセットファイルはこのプラグインにおいて最新ではありません。"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0080         "そのプリセットファイルはあなたが現在使用中のPsycleよりも新しいバージョンのPsycleのものです。"
+    IDS_ERR_MSG0081         "まだ、チャンクバンクをサポートしていません"
+    IDS_ERR_MSG0082         "プリセットファイルエラー"
+    IDS_ERR_MSG0083         "パラメータの数がファイルのものと一致しません!"
+    IDS_ERR_MSG0084         "fxb ファイル ロードエラー"
+    IDS_ERR_MSG0085         "ファイルに書くことができませんでした。操作を異常終了として処理しました。"
+    IDS_ERR_MSG0086         "プリセット数が最大に達しました。操作は処理されていません。"
+    IDS_ERR_MSG0087         "プリセットファイルがいっぱいです"
+    IDS_ERR_MSG0088         "名称を指定していません。操作を異常終了として処理しました。"
+    IDS_ERR_MSG0089         "プリセットファイル保存エラー"
+    IDS_ERR_MSG0090         "ファイルを開くことができませんでした。操作を異常終了として処理しました。"
+    IDS_ERR_MSG0091         "ファイルが一致しません!― このファイルは古いフォーマットです。この Machine には新しいフォーマットのファイルが必要です。"
+    IDS_ERR_MSG0092         "ファイルインポートエラー"
+    IDS_ERR_MSG0093         "ファイルが一致しません!"
+    IDS_ERR_MSG0094         "まず、プリセットを選択してください。"
+    IDS_ERR_MSG0095         "背景用ビットマップがありません"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0096         "ファイル書き込み中にエラーが発生しました。%s %s %d"
+    IDS_ERR_MSG0097         "このバージョンのＯＳでは動作しません。"
+    IDS_ERR_MSG0098         "サポート外ＯＳ"
+    IDS_ERR_MSG0099         "ネイティブのプラグイン ""%s"" をダミーと入れ替えます。"
+    IDS_ERR_MSG0100         "VST Generator プラグイン ""%s"" とダミーを入れ替えます。"
+    IDS_ERR_MSG0101         "VST Effect プラグイン ""%s"" とダミーを入れ替えます。"
+    IDS_ERR_MSG0102         "Machine の特定のチャンク ""%s"" が見当たらないか、壊れています。 - ダミーと入れ替え。"
+    IDS_ERR_MSG0103         "ネイティブのプラグイン ""%s"" が見つからないか、壊れています - ダミーと入れ替え。"
+    IDS_ERR_MSG0104         "Machine はそのチャンクをロード中に例外処理をしました。\nそれはクラッシュしており、ダミーと入れ替えられました。"
+    IDS_ERR_MSG0105         "Machine はそのチャンクをロード中に例外処理をしました。\nそれはクラッシュしており、削除されるでしょう。"
+    IDS_ERR_MSG0106         "ファイルを開くことが出来ませんでした。"
+    IDS_ERR_MSG0107         "ファイルフォーマットが正しくありません"
+    IDS_ERR_MSG0108         "このオプションは2つのエントリーを選択しなければなりません。"
+    IDS_ERR_MSG0109         "Gear ラック ダイアログ"
+    IDS_ERR_MSG0110         "Gear があるスロットを1つ選択してください(オプションで置きたい空のスロットも指定可)"
+    IDS_ERR_MSG0111         "ダイアログのアップデートタイマーをスタートすることができない？"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_TRACE_MSG0000       "VST プラグイン : インスタンスの問い合わせが 0x%.8X によって拒絶されました\n"
+    IDS_TRACE_MSG0001       "VST プラグイン : Instanced at (Effect*): %.8X\n"
+    IDS_TRACE_MSG0002       "VST プラグイン dll ファイル名 : %s\n"
+    IDS_TRACE_MSG0003       "VST プラグイン : 入力 = %d, 出力 = %d\n"
+    IDS_TRACE_MSG0004       "VST プラグインがホストディスパッチャーへ呼び出し: Eff: 0x%.8X, Opcode = %d, Index = %d, Value = %d, PTR = %.8X, OPT = %.3f\n"
+    IDS_TRACE_MSG0005       "VST プラグイン : 解放の問い合わせ 0x%.8X\n"
+    IDS_TRACE_MSG0006       "VST マスター ディスパッチャー: Set Time\n"
+    IDS_TRACE_MSG0007       "(0x%x) ms difference = %d playPos = %u (samples)\n"
+    IDS_TRACE_MSG0008       "(0x%x) MIDI latency error %d (samples) samplebase = %u\n"
+    IDS_TRACE_MSG0009       "CPsycleWTLView::~CPsycleWTLView(). bmpDC (0x%.8X) を削除\n"
+    IDS_TRACE_MSG0010       "PreparePatternRefresh において editcur.track が範囲を超えました"
+    IDS_TRACE_MSG0011       "PreparePatternRefresh において editcur.line が範囲を超えました"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0000             "無効の NumParams 値"
+    IDS_MSG0001             "ロードしませんでした"
+    IDS_MSG0002             "Out of Range"
+    IDS_MSG0003             "Vst2 Instr."
+    IDS_MSG0004             "Sample 無し"
+    IDS_MSG0005             "ASIO DirectX ドライバー"
+    IDS_MSG0006             "ASIO DirectX Full Duplex ドライバー"
+    IDS_MSG0007             "ASIO Multimedia ドライバー"
+    IDS_MSG0008             "ASIO ドライバー"
+    IDS_MSG0009             "Windows WaveOut MME"
+    IDS_MSG0010             "読み込み中..."
+    IDS_MSG0011             "保存中..."
+    IDS_MSG0012             "WAVE 出力ドライバー"
+    IDS_MSG0013             "Fast Tracker II モジュールからインポートしました。"
+    IDS_MSG0014             "%s パン: %.0f%% 左 / %.0f%% 右"
+    IDS_MSG0015             "%s パン: 中心"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0016             "上書き保存して構いませんか?"
+    IDS_MSG0017             "Song 保存"
+    IDS_MSG0018             "'%1%' への変更を保存しますか?"
+    IDS_MSG0019             "警告! Song を最後に保存して以降の変更のすべてを失います! 続けていいですか?"
+    IDS_MSG0020             "作業前の状態に戻す"
+    IDS_MSG0021             "Songs (*.psf)\000*.psf\000Psycle Pattern (*.psb)\000*.psb\000All (*.*)\000*.*"
+    IDS_MSG0022             "Extend Songs (*.psf)\000*.psf\000Songs (*.psy)\000*.psy\000Psycle Pattern (*.psb)\000*.psb\000XM File (*.xm)\000*.xm\000All (*.*)\000*.*"
+    IDS_MSG0023             "新規 Song"
+    IDS_MSG0024             "PsycleWTL Configuration"
+    IDS_MSG0025             "Song ロード"
+    IDS_MSG0026             "] PsycleWTL Modular Music Creation Studio"
+    IDS_MSG0027             "パラメータ : ' %.2x:%s ' (範囲 %d ～ %d)"
+    IDS_MSG0028             "Machines: Generators"
+    IDS_MSG0029             "プロパティ"
+    IDS_MSG0030             "%.2X: %s"
+    IDS_MSG0031             "%.2X: Machine無し"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0032             "Machines: Effects"
+    IDS_MSG0033             "Sample Instruments"
+    IDS_MSG0034             "Wave エディター"
+    IDS_MSG0035             "無し   [低品質]"
+    IDS_MSG0036             "リニア    [中品質]"
+    IDS_MSG0037             "スプライン [高品質]"
+    IDS_MSG0038             "名称"
+    IDS_MSG0039             "Machine"
+    IDS_MSG0040             "タイプ"
+    IDS_MSG0041             "入力数"
+    IDS_MSG0042             "出力数"
+    IDS_MSG0043             "CPU"
+    IDS_MSG0044             "%d MHz"
+    IDS_MSG0045             "(%.1fM のうち) %.1fM"
+    IDS_MSG0046             "Note カット"
+    IDS_MSG0047             "Note リリース"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0048             "無し"
+    IDS_MSG0049             "フォワード"
+    IDS_MSG0050             "オフ"
+    IDS_MSG0051             "%.2X : %s プロパティ"
+    IDS_MSG0052             "本当にいいですか？"
+    IDS_MSG0053             "Machine 削除"
+    IDS_MSG0054             "クローン作成エラー"
+    IDS_MSG0055             "モノラル (ミックス)"
+    IDS_MSG0056             "モノラル (左)"
+    IDS_MSG0057             "モノラル (右)"
+    IDS_MSG0058             "ステレオ"
+    IDS_MSG0059             "停止"
+    IDS_MSG0060             "[%d] %s -> %s 接続 ボリューム"
+    IDS_MSG0061             "スコープ モード"
+    IDS_MSG0062             "オシロスコープ"
+    IDS_MSG0063             "スペクトラム アナライザー"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0064             "ステレオ 位相"
+    IDS_MSG0065             "スコープ モード"
+    IDS_MSG0066             "リフレッシュ %.2fHz"
+    IDS_MSG0067             "周波数 %dhz リフレッシュ %.2fhz"
+    IDS_MSG0068             "%d バンド リフレッシュ %.2fhz"
+    IDS_MSG0069             "レイテンシ: %dms"
+    IDS_MSG0070             "背景用ビットマップがありません"
+    IDS_MSG0071             "レイテンシ: %dms"
+    IDS_MSG0072             "古いフォーマットの Song(PSY2SONG) をローディング中..."
+    IDS_MSG0073             "ローパス"
+    IDS_MSG0074             "ハイパス"
+    IDS_MSG0075             "バンドパス"
+    IDS_MSG0076             "ノッチバンド"
+    IDS_MSG0077             "無し"
+    IDS_MSG0078             "チャンネル"
+    IDS_MSG0079             "Note オフ"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_MSG0112         "警告! プラグイン"
+    IDS_ERR_MSG0113         "ファイルが一致しません!"
+    IDS_ERR_MSG0114         "ファイルインポートエラー"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0080             "Generator/Effect"
+    IDS_MSG0081             "Instrument"
+    IDS_MSG0082             "インターナル プラグイン"
+    IDS_MSG0083             "ネイティブ プラグイン"
+    IDS_MSG0084             "VST2   プラグイン"
+    IDS_MSG0085             "ダミー プラグ"
+    IDS_MSG0086             "プラグインをスキャン中..."
+    IDS_MSG0087             "ステレオ サンプラー ユニット. 新規 Sampler を挿入."
+    IDS_MSG0088             "インターナル Machine"
+    IDS_MSG0089             "XM互換 ステレオ サンプラー ユニット. 新規 Sampler を挿入."
+    IDS_MSG0090             "ダミー"
+    IDS_MSG0091             "不正なプラグインと交換"
+    IDS_MSG0092             "閉じる"
+    IDS_MSG0093             "PsycleWTL Wave Editor"
+    IDS_MSG0094             "ディレクトリを選択してください"
+    IDS_MSG0095             "サイズ: %u"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MSG0096             "モード: ステレオ"
+    IDS_MSG0097             "モード: モノラル"
+    IDS_MSG0098             "モード: 空"
+    IDS_MSG0099             "XM互換 ステレオ サンプラー ユニット. 新規 Sampler を挿入."
+END
+
+#endif    // 日本語 resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// 英語 (米国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "Config &display...\tF2",      IDM_CHANGEDEVICE
+        MENUITEM "Configure &input...\tF3",     IDM_CONFIGINPUT
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tESC",                  IDM_EXIT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_SELECTDEVICE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 259
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 143
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAIN_ACCEL ACCELERATORS 
+BEGIN
+    VK_ESCAPE,      IDM_EXIT,               VIRTKEY, NOINVERT
+    VK_RETURN,      IDM_TOGGLEFULLSCREEN,   VIRTKEY, ALT, NOINVERT
+    "X",            IDM_EXIT,               VIRTKEY, ALT, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SELECTDEVICE DIALOG  0, 0, 289, 302
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Direct3D Settings"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    GROUPBOX        "Adapter and device",IDC_STATIC,5,5,276,47
+    LTEXT           "Display &Adapter:",IDC_STATIC,16,17,98,10,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_ADAPTER_COMBO,124,15,149,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Render &Device:",IDC_STATIC,16,34,98,10,SS_CENTERIMAGE
+    COMBOBOX        IDC_DEVICE_COMBO,124,32,149,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Display mode settings",IDC_STATIC,5,56,276,98
+    CONTROL         "&Windowed",IDC_WINDOW,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,16,68,98,15
+    CONTROL         "&Fullscreen",IDC_FULLSCREEN,"Button",BS_AUTORADIOBUTTON,
+                    16,83,98,15
+    LTEXT           "Adapter F&ormat:",IDC_STATIC,16,103,98,8
+    COMBOBOX        IDC_ADAPTERFORMAT_COMBO,124,101,149,204,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "&Resolution:",IDC_STATIC,16,120,98,8
+    COMBOBOX        IDC_RESOLUTION_COMBO,124,118,149,204,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    LTEXT           "R&efresh Rate:",IDC_STATIC,16,137,98,8
+    COMBOBOX        IDC_REFRESHRATE_COMBO,124,135,149,204,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    GROUPBOX        "Device settings",IDC_STATIC,7,158,274,118
+    LTEXT           "&Back Buffer Format:",IDC_STATIC,16,173,98,8
+    COMBOBOX        IDC_BACKBUFFERFORMAT_COMBO,124,170,149,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "De&pth/Stencil Buffer Format:",IDC_STATIC,16,190,98,8
+    COMBOBOX        IDC_DEPTHSTENCILBUFFERFORMAT_COMBO,124,187,149,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Multisample Type:",IDC_STATIC,16,207,98,10,
+                    SS_CENTERIMAGE
+    COMBOBOX        IDC_MULTISAMPLE_COMBO,124,204,149,100,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Multisample &Quality:",IDC_STATIC,16,224,98,8
+    COMBOBOX        IDC_MULTISAMPLE_QUALITY_COMBO,124,221,149,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Vertex Processing:",IDC_STATIC,16,241,98,8
+    COMBOBOX        IDC_VERTEXPROCESSING_COMBO,124,238,149,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Present &Interval:",IDC_STATIC,16,258,98,8
+    COMBOBOX        IDC_PRESENTINTERVAL_COMBO,124,255,149,100,
+                    CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,86,286,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,152,286,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "..\\res\\PsycleWTL.exe.manifest"
+#endif    // 英語 (米国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

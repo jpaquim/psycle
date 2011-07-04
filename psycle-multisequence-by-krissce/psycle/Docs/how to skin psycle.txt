@@ -1,0 +1,115 @@
+A quick doc on skinning psycle
+------------------------------
+
+1) Preface, What's skinnable?
+
+	There are two things skinnable right now, the Machine boxes, and the Pattern headers.
+	At a later time we will probably allow skinning of knobs (native machines' parameters)
+
+	These parts support different sizes and also transparency.
+
+2) What do I need in order to skin?
+
+	You need to make four files, two for graphics, and two for image information.
+	These files are the folowing:
+
+		your_machine_graphics_name.bmp
+		your_header_graphics_name.bmp
+		your_machine_graphics_info_.psm
+		your_header_graphics_info.psh
+
+	You can put them in subdirectories if you like, but they have NOT to contain dots "."
+	(this limitation might be removed at a later time).
+
+	Also, note that the .psm and the .psh files need to be on the same directory than the 
+	.bmp's. If you put them separated, they won't be loaded.
+
+3) How do I make the files?
+
+	The best way to start is getting one skin and modifying it. Once you understand
+	how everything works, you might be confident on starting from your own work.
+
+	Notes for graphics:
+
+		You can make them the way you want, with the bitdepth appropiated. Support for other
+		fileformats than .bmp are not planned (they would require specific loaders).
+
+	Notes for info files:
+
+	mach.psm (machines info)
+	------------------------
+
+	The following values tell psycle how your bitmap file is formatted (this is, where are the 
+	graphics and which size do they have.
+	Coords are top, left, width height
+
+
+	"master_source"=0,153,189,22         <---- GraphicBox for master.
+	"generator_source"=0,6,195,112       <---- GraphicBox for the Generator machines
+	"generator_vu0_source"=0,0,4,6       <---- the highlighted vu graphic, the Width also tells the VU's block size.
+	"generator_vu_peak_source"=157,0,4,6 <---- the "peak" vu graphic (which is left when the vu goes down)
+	"generator_pan_source"=196,39,8,9    <---- the pan handle graphic 
+	"generator_mute_source"=233,0,28,27  <---- the mute highlighted graphic 
+	"generator_solo_source"=195,0,37,38  <---- the solo highlighted graphic 
+
+	"effect_source"=0,118,227,32        <----- GraphicBox for Effect machines
+	"effect_vu0_source"=0,150,2,3       <----- the highlighted vu graphic, the Width also tells the VU's block size.
+	"effect_vu_peak_source"=41,150,2,3  <----- the chunk of the vu that is left when the vu goes down
+	"effect_pan_source"=196,39,8,9      <----- the pan handle graphic
+	"effect_mute_source"=197,51,19,11   <----- the mute highlighted graphic
+	"effect_bypass_source"=221,51,21,10 <----- the bypass highlighted graphic
+
+	If you do not want a vu on either machine you may set the height of the vu0_source to 0.
+
+
+	The following values tell psycle how has it to draw the different objects.
+	Here, the coords are relative to the top left corner of the source graphic.
+ 	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)
+
+
+	"generator_vu_dest"=19,44,156 <---- top, left, width coords of the whole vumeter.
+	"generator_pan_dest"=90,67,76 <---- top, left, width coords of the pan. subtract the width of the pan graphic from the total width.
+	"generator_mute_dest"=51,68 <---- top, left coords of the mute button
+	"generator_solo_dest"=11,62 <----top,left coords of the solo button
+	"generator_name_dest"=16,20 <---- top,left cords of the machine text
+
+	"effect_vu_dest"=18,9,40    <---- top, left and width coords of the whole vumeter
+	"effect_pan_dest"=117,20,71 <---- top, left and width coords of the pan. subtract the width of the pan graphic from the total width.
+	"effect_mute_dest"=173,5    <---- top, left coords of the mute button
+	"effect_bypass_dest"=197,5  <----top,left coords of the bypass button
+	"effect_name_dest"=62,4     <---- top,left cords of the machine text
+
+	"transparency"=0000ff00  <---- RGB value of the colour that is to be used as transparency.
+					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
+
+
+	head.psh (headers info)
+	-----------------------
+
+	The following values tell psycle how your bitmap file is formatted (this is, where are the 
+	graphics and which size do they have.
+	Coords are top, left, width height
+
+	"background_source"=0,0,106,16 <---- Background graphic for the header.
+	"number_0_source"=0,16,7,12    <---- graphic for the number 0. The others have to follow as "123456789" and have the same size.
+	"record_on_source"=70,16,9,9   <---- hihlighted record on button
+	"mute_on_source"=79,16,9,9     <---- highlighted mute
+	"solo_on_source"=88,16,9,9     <---- highlighted solo
+
+	If you do not want any track numbers then make the height of the numbers 0.
+
+	The following values tell psycle how has to draw the different objects.
+	Here, the coords are relative to the top left corner of the source graphic.
+ 	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of head.bmp)
+
+
+	"digit_x0_dest"=10,2		<---- Position for the left digit
+	"digit_0x_dest"=17,2		<---- position for the right digit
+	"record_on_dest"=40,4		<---- position for the record button
+	"mute_on_dest"=63,4		<---- position for the mute button
+	"solo_on_dest"=85,4		<---- position for the solo button
+
+	"transparency"=0000ff00  <---- 00BBGGRR . Colour that is to be used as transparency.
+	                                Note: It is important that you put the number next to the equal sign!
+					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
+
