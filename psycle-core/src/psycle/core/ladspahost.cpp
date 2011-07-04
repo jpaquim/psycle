@@ -1,24 +1,36 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright (C) 2007-2008 Psycledelics                                  *
+*   http://psycle.sourceforge.net                                         *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/detail/project.private.hpp>
 #include "ladspahost.hpp"
-
 #include "pluginfinder.h"
 #include "ladspamachine.h"
 #include "playertimeinfo.h"
-#include <boost/filesystem.hpp>
 #include <iostream>
 
-#if defined DIVERSALIS__OS__POSIX
+#if defined __unix__ || defined __APPLE__
 	#include <dlfcn.h>
-#elif defined DIVERSALIS__OS__MICROSOFT
-	#include <universalis/os/include_windows_without_crap.hpp>
 #else
-	#error unsupported platform
+	#include <windows.h>
 #endif
 
-namespace psycle { namespace core {
+namespace psy { namespace core {
 
 LadspaHost::LadspaHost(MachineCallbacks*calls)
 :MachineHost(calls) {}
@@ -30,7 +42,7 @@ LadspaHost& LadspaHost::getInstance(MachineCallbacks* callb) {
 	return instance;
 }
 
-Machine* LadspaHost::CreateMachine(PluginFinder& finder, const MachineKey& key,Machine::id_type id) {
+Machine* LadspaHost::CreateMachine(PluginFinder& finder, MachineKey key,Machine::id_type id) {
 	///\todo This is a good place where to use exceptions. (task for a later date)
 	std::string fullPath = finder.lookupDllName(key);
 	if (fullPath.empty()) return 0;
@@ -74,11 +86,8 @@ void LadspaHost::FillPluginInfo(const std::string& fullName, const std::string& 
 			pinfo.setName( psDescriptor->Name );
 			pinfo.setRole( MachineRole::EFFECT );
 			pinfo.setLibName( fullName );
-			pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
-			//pinfo.setApiVersion( version );
 			//pinfo.setVersion( version );
 			pinfo.setAuthor( psDescriptor->Maker );
-			pinfo.setAllow( true );
 			MachineKey key( hostCode() , fileName, index );
 			finder.AddInfo(key, pinfo);
 			psDescriptor = pfDescriptorFunction(++index);

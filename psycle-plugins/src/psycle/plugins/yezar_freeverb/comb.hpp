@@ -1,5 +1,5 @@
 #pragma once
-#include <psycle/helpers/math/erase_denormals.hpp>
+#include "denormals.hpp"
 
 // Comb filter class declaration
 //
@@ -11,40 +11,36 @@ class comb
 {
 public:
 					comb();
-	virtual			~comb();
-			void	setbuffer(int samples);
-	inline  float	process(float inp);
-			void	mute();
-			void	setdamp(float val);
-			float	getdamp();
-			void	setfeedback(float val);
-			float	getfeedback();
+			void				setbuffer(float *buf, int size);
+	inline  float				process(float inp);
+			void				mute();
+			void				setdamp(float val);
+			float				getdamp();
+			void				setfeedback(float val);
+			float				getfeedback();
 private:
-	void deletebuffer();
-
-	float			*buffer;
-	float			feedback;
-	float			filterstore;
-	float			damp1;
-	float			damp2;
-	int				bufsize;
-	int				bufidx;
+	float				feedback;
+	float				filterstore;
+	float				damp1;
+	float				damp2;
+	float				*buffer;
+	int								bufsize;
+	int								bufidx;
 };
 
 // Big to inline - but crucial for speed
 
 inline float comb::process(float input)
 {
-	float bufin;
-	float output = buffer[bufidx];
+	float output;
+
+	output = buffer[bufidx];
+	undenormalise(output);
 
 	filterstore = (output*damp2) + (filterstore*damp1);
-	psycle::helpers::math::fast_erase_denormals_inplace(filterstore);
+	undenormalise(filterstore);
 
-	bufin = input + (filterstore*feedback);
-
-	psycle::helpers::math::fast_erase_denormals_inplace(bufin);
-	buffer[bufidx] = bufin;
+	buffer[bufidx] = input + (filterstore*feedback);
 
 	if(++bufidx>=bufsize) bufidx = 0;
 

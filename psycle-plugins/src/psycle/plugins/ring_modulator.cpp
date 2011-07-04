@@ -5,15 +5,16 @@
 /// \file
 /// \brief ring modulator with frequency modulation of the amplitude modulation
 #include "plugin.hpp"
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/pi.hpp>
+#include <psycle/helpers/math/remainder.hpp>
 namespace psycle { namespace plugin {
 
-using namespace helpers::math;
+namespace math = helpers::math;
 
 class Ring_Modulator : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "ring modulator with frequency modulation of the amplitude modulation" << std::endl;
 		out << "compatible with original psycle 1 arguru's psych-osc" << std::endl;
@@ -30,33 +31,28 @@ public:
 	
 	static const Information & information() throw()
 	{
-		static bool initialized = false;
-		static Information *info = NULL;
-		if (!initialized) {
-			static const Information::Parameter parameters [] =
-			{
-				Information::Parameter::exponential("am frequency", 0.0001 * pi * 2, 0, 22050 * pi * 2),
-				Information::Parameter::exponential("am frequency glide", 0.0001 * pi * 2, 0, 15 * 22050 * pi * 2),
-				Information::Parameter::exponential("fm frequency", 0.0001 * pi * 2, 0, 100 * pi * 2),
-				Information::Parameter::exponential("fm bandwidth", 0.0001 * pi * 2, 0, 22050 * pi * 2)
-			};
-			static Information information(0x0110, Information::Types::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
-			info = &information;
-		}
-		return *info;
+		static const Information::Parameter parameters [] =
+		{
+			Information::Parameter::exponential("am frequency", 0.0001 * math::pi * 2, 0, 22050 * math::pi * 2),
+			Information::Parameter::exponential("am frequency glide", 0.0001 * math::pi * 2, 0, 15 * 22050 * math::pi * 2),
+			Information::Parameter::exponential("fm frequency", 0.0001 * math::pi * 2, 0, 100 * math::pi * 2),
+			Information::Parameter::exponential("fm bandwidth", 0.0001 * math::pi * 2, 0, 22050 * math::pi * 2)
+		};
+		static const Information information(Information::Types::effect, "ayeternal PsychOsc AM", "PsychOsc AM", "bohan and the psycledelics community", 2, parameters, sizeof parameters / sizeof *parameters);
+		return information;
 	}
 
-	/*override*/ void describe(std::ostream & out, const int & parameter) const
+	virtual void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
 		case am_radians_per_second:
 		case fm_radians_per_second:
 		case fm_bandwidth:
-			out << (*this)(parameter) / pi / 2 << " hertz";
+			out << (*this)(parameter) / math::pi / 2 << " hertz";
 			break;
 		case am_glide:
-			out << (*this)(am_glide) / pi / 2 << " hertz/second";
+			out << (*this)(am_glide) / math::pi / 2 << " hertz/second";
 			break;
 		default:
 			Plugin::describe(out, parameter);
@@ -69,35 +65,35 @@ public:
 			phases_[oscillator] = 0;
 	}
 
-	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
-	/*override*/ void parameter(const int &);
+	virtual void process(Sample l[], Sample r[], int samples, int);
+	virtual void parameter(const int &);
 protected:
-	/*override*/ void SeqTick(int, int, int, int command, int value);
-	/*override*/ void samples_per_second_changed()
+	virtual void sequencer_note_event(const int, const int, const int, const int command, const int value);
+	virtual void samples_per_second_changed()
 	{
 		parameter(am_radians_per_second);
 		parameter(fm_radians_per_second);
 		parameter(fm_bandwidth);
 		parameter(am_glide);
 	}
-	inline const Real Work(const Real & sample, const Real & modulation) const;
+	inline const Real process(const Real & sample, const Real & modulation) const;
 	enum Oscillators { am, fm, oscillators };
 	Real
 		phases_[oscillators], radians_per_sample_[oscillators],
 		am_glide_, glided_am_radians_per_samples_, fm_bandwidth_;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Ring_Modulator)
+PSYCLE__PLUGIN__INSTANCIATOR(Ring_Modulator)
 
-void Ring_Modulator::SeqTick(int, int, int, int command, int value)
+void Ring_Modulator::sequencer_note_event(const int, const int, const int, const int command, const int value)
 {
 	switch(command)
 	{
 	case 1:
-		phases_[am] = pi * 2 * value / 0x100;
+		phases_[am] = math::pi * 2 * value / 0x100;
 		break;
 	case 2:
-		phases_[fm] = pi * 2 * value / 0x100;
+		phases_[fm] = math::pi * 2 * value / 0x100;
 		break;
 	}
 }
@@ -119,13 +115,13 @@ void Ring_Modulator::parameter(const int & parameter)
 	}
 }
 
-void Ring_Modulator::Work(Sample l[], Sample r[], int samples, int)
+void Ring_Modulator::process(Sample l[], Sample r[], int samples, int)
 {
 	for(int sample(0) ; sample < samples ; ++sample)
 	{
 		const Real modulation(static_cast<Real>(::sin(phases_[am]))); // * glided_am_radians_per_samples_);
-		l[sample] = static_cast<Sample>(Work(l[sample], modulation));
-		r[sample] = static_cast<Sample>(Work(r[sample], modulation));;
+		l[sample] = static_cast<Sample>(process(l[sample], modulation));
+		r[sample] = static_cast<Sample>(process(r[sample], modulation));;
 		phases_[am] += static_cast<Real>(glided_am_radians_per_samples_ + ::sin(phases_[fm]) * fm_bandwidth_);
 		phases_[fm] += radians_per_sample_[fm];
 		if(radians_per_sample_[am] > glided_am_radians_per_samples_)
@@ -142,10 +138,10 @@ void Ring_Modulator::Work(Sample l[], Sample r[], int samples, int)
 		}
 	}
 	for(int oscillator(0) ; oscillator < oscillators ; ++oscillator)
-		phases_[oscillator] = std::fmod(phases_[oscillator], pi * 2);
+		phases_[oscillator] = math::remainder(phases_[oscillator], math::pi * 2);
 }
 
-inline const Ring_Modulator::Real Ring_Modulator::Work(const Real & sample, const Real & modulation) const
+inline const Ring_Modulator::Real Ring_Modulator::process(const Real & sample, const Real & modulation) const
 {
 	return sample * modulation;
 }

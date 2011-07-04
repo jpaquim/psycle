@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net
+// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef PSYCLE__HELPERS__MATH__MATH__INCLUDED
 #define PSYCLE__HELPERS__MATH__MATH__INCLUDED
@@ -64,14 +64,12 @@ template<> struct compile_time_factorial<0u> { unsigned int const static value =
 
 template<typename Real> UNIVERSALIS__COMPILER__CONST
 Real inline deci_bell_to_linear(Real deci_bell) {
-	///\todo merge with psycle::helpers::dsp::dB2Amp
-	return std::pow(10u, deci_bell / Real(20));
+	return std::pow(10u, deci_bell / 20);
 }
 
 template<typename Real> UNIVERSALIS__COMPILER__CONST
 Real inline linear_to_deci_bell(Real linear) {
-	///\todo merge with psycle::helpers::dsp::dB
-	return Real(20) * std::log10(linear);
+	return 20 * std::log10(linear);
 }
 
 }}}

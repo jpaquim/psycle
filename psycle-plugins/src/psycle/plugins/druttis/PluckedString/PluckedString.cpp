@@ -8,41 +8,88 @@
 #include "CVoice.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
 #define MAC_NAME				"Plucked String"
-#define MAC_VERSION				"1.2"
-int const IMAC_VERSION		=	0x0120;
+#define MAC_VERSION				"1.1"
 #define MAC_AUTHOR				"Druttis"
-#define	MAX_VOICES				2
+#define				MAX_TRACKS				64
+#define				MAX_VOICES				2
 #define NUM_TICKS				32
 //============================================================================
 //				Parameters
 //============================================================================
+
 #define PARAM_PLUCK_POS 0
-CMachineParameter const paramPluckPos = {"Pluck Position", "Pluck Position", 0, 255, MPF_STATE, 32};
+CMachineParameter const paramPluckPos = {
+	"Pluck Position",
+	"Pluck Position",
+	0,
+	255,
+	MPF_STATE,
+	32
+};
 
 #define PARAM_DAMPING 1
-CMachineParameter const paramDamping = {"Damping", "Damping", 0, 255, MPF_STATE, 0};
+CMachineParameter const paramDamping = {
+	"Damping",
+	"Damping",
+	0,
+	255,
+	MPF_STATE,
+	0
+};
 
 #define PARAM_VOLUME 2
-CMachineParameter const paramVolume = {"Volume", "Volume", 0, 255, MPF_STATE, 128};
+CMachineParameter const paramVolume = {
+	"Volume",
+	"Volume",
+	0,
+	255,
+	MPF_STATE,
+	128
+};
 
 #define PARAM_VIB_SPEED 3
-CMachineParameter const paramVibSpeed = {"Vibrato Speed", "Vibrato Speed", 0, 255, MPF_STATE, 0};
+CMachineParameter const paramVibSpeed = {
+	"Vibrato Speed",
+	"Vibrato Speed",
+	0,
+	255,
+	MPF_STATE,
+	0
+};
 
 #define PARAM_VIB_AMOUNT 4
-CMachineParameter const paramVibAmount = {"Vibrato Amount","Vibrato Amount", 0, 255, MPF_STATE, 0};
+CMachineParameter const paramVibAmount = {
+	"Vibrato Amount",
+	"Vibrato Amount",
+	0,
+	255,
+	MPF_STATE,
+	0
+};
 
 #define PARAM_VIB_DELAY 5
-CMachineParameter const paramVibDelay = {"Vibrato Delay", "Vibrato Delay", 0, 255, MPF_STATE, 0};
+CMachineParameter const paramVibDelay = {
+	"Vibrato Delay",
+	"Vibrato Delay",
+	0,
+	255,
+	MPF_STATE,
+	0
+};
 
 #define PARAM_SCHOOLNESS 6
-CMachineParameter const paramSchoolness = {"Schoolness (Deviation)", "Max deviation from  note", 0, 255, MPF_STATE, 0};
+CMachineParameter const paramSchoolness = {
+	"Schoolness",
+	"Schoolness",
+	0,
+	255,
+	MPF_STATE,
+	0
+};
 //============================================================================
 //				Parameter list
 //============================================================================
@@ -56,14 +103,14 @@ CMachineParameter const *pParams[] = {
 	&paramSchoolness
 };
 
+#define NUM_PARAMS 7
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
-	IMAC_VERSION,
 	GENERATOR,
-	sizeof pParams / sizeof *pParams,
+	NUM_PARAMS,
 	pParams,
 #ifdef _DEBUG
 	MAC_NAME " " MAC_VERSION " (Debug)",
@@ -93,21 +140,21 @@ public:
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks);
 public:
 	GLOBALS globals;
-	CVoice	voices[MAX_TRACKS][MAX_VOICES];
-	int		ticks_remaining;
-	bool	initialized;
-	bool	working;
+	CVoice				voices[MAX_TRACKS][MAX_VOICES];
+	int								ticks_remaining;
+	bool				initialized;
+	bool				working;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //============================================================================
 //				Constructor
 //============================================================================
 mi::mi()
 {
-	Vals = new int[MacInfo.numParameters];
 	working = false;
 	initialized = false;
+	Vals = new int[NUM_PARAMS];
 	ticks_remaining = NUM_TICKS;
 }
 //============================================================================
@@ -117,7 +164,7 @@ mi::~mi()
 {
 	initialized = false;
 	while (working);
-	delete[] Vals;
+	delete Vals;
 }
 //============================================================================
 //				Init
@@ -153,7 +200,6 @@ void mi::Command()
 		"0Cxx : Volume / Velocity\n"
 		"0Dxx : Glide\n"
 		"0Exx : Note delay\n"
-		"\nWarning! This plugin doesn't sound the same at different sampling rates"
 		,
 		MAC_AUTHOR " " MAC_NAME " v." MAC_VERSION,
 		0
@@ -174,17 +220,16 @@ void mi::ParameterTweak(int par, int val)
 			globals.damping = 0.97f + (1.0f - (float) val / 255.0f) * 0.03f;
 			break;
 		case PARAM_VOLUME:
-			// This gives a range of +-16320 at output.
 			globals.volume = (float) val * 64.0f;
 			break;
 		case PARAM_VIB_SPEED:
-			globals.vib_speed = (float) val * NUM_TICKS / (25.5f * globals.srate);
+			globals.vib_speed = (float) val / 255.0f * NUM_TICKS * 10.0f / globals.srate;
 			break;
 		case PARAM_VIB_AMOUNT:
-			globals.vib_amount = (float) val / 3060.0f; // 255*12semis
+			globals.vib_amount = (float) val / 3060.0f;
 			break;
 		case PARAM_VIB_DELAY:
-			globals.vib_delay = (float) val * globals.srate / (127.5f * NUM_TICKS);
+			globals.vib_delay = (float) val / 255.0f * globals.srate / NUM_TICKS * 2.0f;
 			break;
 		case PARAM_SCHOOLNESS:
 			globals.schoolness = (float) val / 510.0f;
@@ -195,46 +240,16 @@ void mi::ParameterTweak(int par, int val)
 //				DescribeValue
 //============================================================================
 bool mi::DescribeValue(char* txt,int const param, int const value) {
-	switch(param) {
-		case PARAM_VOLUME:
-			if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 510.0f));
-			else sprintf(txt, "-inf dB");
-			break;
-		case PARAM_VIB_SPEED:
-			sprintf(txt, "%.2f Hz", value / 25.5f);
-			break;
-		case PARAM_VIB_AMOUNT:
-			sprintf(txt, "%.0f cents", value / 2.55f);
-			break;
-		case PARAM_VIB_DELAY:
-			sprintf(txt, "%.0f ms", value / 0.1275f);
-			break;
-		case PARAM_SCHOOLNESS:
-			sprintf(txt, "%.2f cents", value / 5.1f);
-			break;
-		default:
-			return false;
-	}
-	return true;
+	return false;
 }
 //============================================================================
 //				SequencerTick
 //============================================================================
 void mi::SequencerTick()
 {
-	if (pCB->GetSamplingRate() != globals.srate) {
-		//
-		//				Update some stuf
-		globals.srate = pCB->GetSamplingRate();
-		globals.vib_speed = (float) Vals[PARAM_VIB_SPEED] * NUM_TICKS / (25.5f * globals.srate);
-		globals.vib_delay = (float) Vals[PARAM_VIB_DELAY] * globals.srate / (127.5f * NUM_TICKS);
-
-		for (int ti = 0; ti < MAX_TRACKS; ti++) {
-			for (int vi = 0; vi < MAX_VOICES; vi++) {
-				voices[ti][vi].UpdateSampleRate();
-			}
-		}
-	}
+	//
+	//				Update some stuf
+	globals.srate = pCB->GetSamplingRate();
 }
 //============================================================================
 //				SequencerTick
@@ -254,11 +269,15 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 	//
 	//				Route
-	if (note==NOTE_NOTEOFF) {
+	if (note == 120) {
 		voices[channel][0].NoteOff();
-	} else if (note<=NOTE_MAX) {
+	} else if (note < 120) {
 		if ((cmd != 0x0d) || (voices[channel][0].currentFreq == -1)) {
 			voices[channel][0].NoteOff();
+//												int size = sizeof(CVoice) * (MAX_VOICES - 1);
+//												if (size > 0) {
+//																memcpy(&voices[channel][1], &voices[channel][0], size);
+//												}
 		}
 		voices[channel][0].NoteOn(note, vol, cmd, val);
 		voices[channel][0].ticks_remaining = 0;
@@ -302,6 +321,7 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int num
 			//				Render all voices now
 			for (ti = 0; ti < numtracks; ti++) {
 				for (vi = 0; vi < MAX_VOICES; vi++) {
+	//												for (vi = MAX_VOICES - 1; vi >= 0; vi--) {
 					if (voices[ti][vi].IsActive()) {
 						pleft = psamplesleft;
 						pright = psamplesright;

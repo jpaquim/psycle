@@ -11,7 +11,7 @@ class Gainer : public Plugin
 {
 	public:
 
-		/*override*/ void help(std::ostream & out) throw()
+		virtual void help(std::ostream & out) const throw()
 		{
 			out << "just a multiplier" << std::endl;
 		}
@@ -20,21 +20,15 @@ class Gainer : public Plugin
 
 		static const Information & information() throw()
 		{
-			static bool initialized = false;
-			static Information *info = NULL;
-			if (!initialized) {
-				static const Information::Parameter parameters [] =
-				{
-					Information::Parameter::exponential("gain", std::exp(-4.), 1, std::exp(+4.))
-				};
-				static Information information(0x0110, Information::Types::effect, "ayeternal Gainer", "Gainer", "bohan", 1, parameters, sizeof parameters / sizeof *parameters);
-				info = &information;
-				initialized = true;
-			}
-			return *info;
+			static const Information::Parameter parameters [] =
+			{
+				Information::Parameter::exponential("gain", std::exp(-4.), 1, std::exp(+4.))
+			};
+			static const Information information(Information::Types::effect, "ayeternal Gainer", "Gainer", "bohan", 1, parameters, sizeof parameters / sizeof *parameters);
+			return information;
 		}
 
-		/*override*/ void describe(std::ostream & out, const int & parameter) const
+		virtual void describe(std::ostream & out, const int & parameter) const
 		{
 			switch(parameter)
 			{
@@ -49,7 +43,7 @@ class Gainer : public Plugin
 
 		Gainer() : Plugin(information()) {}
 
-		/*override*/ void parameter(const int & parameter)
+		virtual void parameter(const int & parameter)
 		{
 			switch(parameter)
 			{
@@ -59,18 +53,18 @@ class Gainer : public Plugin
 			}
 		}
 
-		/*override*/ void Work(Sample l[], Sample r[], int sample, int)
+		virtual void process(Sample l[], Sample r[], int sample, int)
 		{
 			while(sample--)
 			{
-				Work(l[sample]);
-				Work(r[sample]);
+				process(l[sample]);
+				process(r[sample]);
 			}
 		}
 
 	protected:
 
-		inline void Work(Sample & sample)
+		inline void process(Sample & sample)
 		{
 			sample *= gain_;
 		}
@@ -78,6 +72,6 @@ class Gainer : public Plugin
 		Real gain_;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Gainer)
+PSYCLE__PLUGIN__INSTANCIATOR(Gainer)
 
 }}

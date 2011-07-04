@@ -273,15 +273,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="src\psycle\player\main.cpp"
-			>
-		</File>
-		<File
 			RelativePath="src\psycle\player\configuration.cpp"
 			>
 		</File>
 		<File
-			RelativePath="src\psycle\player\configuration.hpp"
+			RelativePath="src\psycle\player\main.cpp"
 			>
 		</File>
 	</Files>

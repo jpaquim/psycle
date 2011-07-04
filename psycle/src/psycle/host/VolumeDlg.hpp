@@ -4,7 +4,6 @@
 #include "Psycle.hpp"
 
 namespace psycle { namespace host {
-
 		/// volume window.
 		class CVolumeDlg : public CDialog
 		{

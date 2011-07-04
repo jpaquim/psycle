@@ -7,7 +7,7 @@
 
 #if defined PSYCLE__ALSA_AVAILABLE
 #include "audiodriver.h"
-#include <universalis/stdlib/condition_variable.hpp>
+#include <universalis/stdlib/condition.hpp>
 #include <alsa/asoundlib.h>
 
 namespace psycle { namespace audiodrivers {
@@ -77,9 +77,9 @@ class AlsaOut : public AudioDriver {
 			bool stop_requested_;
 			/// a mutex to synchronise accesses to running_ and stop_requested_
 			mutex mutex_;
-			typedef class unique_lock<mutex> scoped_lock;
+			typedef class scoped_lock<mutex> scoped_lock;
 			/// a condition variable to wait until notified that the value of running_ has changed
-			condition_variable condition_;
+			condition<scoped_lock> condition_;
 		///\}
 };
 

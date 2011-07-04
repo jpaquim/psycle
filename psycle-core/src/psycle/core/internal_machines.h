@@ -1,18 +1,20 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef PSYCLE__CORE__INTERNAL_MACHINES__INCLUDED
-#define PSYCLE__CORE__INTERNAL_MACHINES__INCLUDED
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #pragma once
-
 #include "machine.h"
-#include "internalkeys.hpp"
 
-namespace psycle { namespace core {
+namespace psy { namespace core {
 
 /****************************************************************************************************/
 /// dummy machine.
-class PSYCLE__CORE__DECL Dummy : public Machine {
+class Dummy : public Machine {
 	protected:
 		Dummy(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -21,18 +23,15 @@ class PSYCLE__CORE__DECL Dummy : public Machine {
 		void CopyFrom(Machine* mac);
 		virtual bool LoadSpecificChunk(RiffFile*,int version);
 		virtual int GenerateAudio(int numSamples);
-		virtual  const MachineKey& getMachineKey() const { return InternalKeys::dummy; }
+		virtual MachineKey getMachineKey() const { return MachineKey::dummy(); }
 		virtual std::string GetName() const { return _psName; }
-		virtual bool isGenerator() const { return generator; }
-		void setGenerator(bool gen) { generator = gen; }
 	protected:
 		static std::string _psName;
-		bool generator;
 };
 
 /****************************************************************************************************/
 /// note duplicator machine.
-class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
+class DuplicatorMac : public Machine {
 	protected:
 		DuplicatorMac(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -40,9 +39,9 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 		virtual void Init(void);
 		virtual void Tick( int channel, const PatternEvent & pData );
 		virtual void Stop();
-		virtual void PreWork(int numSamples, bool clear = true);
+		virtual void PreWork(int numSamples);
 		virtual int GenerateAudio( int numSamples );
-		virtual  const MachineKey& getMachineKey() const { return InternalKeys::duplicator; }
+		virtual MachineKey getMachineKey() const { return MachineKey::duplicator(); }
 		virtual std::string GetName() const { return _psName; }
 		virtual void GetParamName(int numparam,char *name) const;
 		virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
@@ -56,8 +55,8 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 		static const int NUM_MACHINES=8;
 		void AllocateVoice(int channel, int machine);
 		void DeallocateVoice(int channel, int machine);
-		int16_t macOutput[NUM_MACHINES];
-		int16_t noteOffset[NUM_MACHINES];
+		std::int16_t macOutput[NUM_MACHINES];
+		std::int16_t noteOffset[NUM_MACHINES];
 		static std::string _psName;
 		bool bisTicking;
 		// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
@@ -68,7 +67,7 @@ class PSYCLE__CORE__DECL DuplicatorMac : public Machine {
 
 /****************************************************************************************************/
 /// master machine.
-class PSYCLE__CORE__DECL Master : public Machine {
+class Master : public Machine {
 	protected:
 		Master(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
@@ -77,7 +76,7 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		virtual void Stop();
 		virtual void Tick(int channel, const PatternEvent & data );
 		virtual int GenerateAudio( int numSamples );
-		virtual const MachineKey& getMachineKey() const { return InternalKeys::master; }
+		virtual MachineKey getMachineKey() const { return MachineKey::master(); }
 		virtual std::string GetName() const { return _psName; }
 		/// Loader for psycle fileformat version 2.
 		virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -88,7 +87,7 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		double sampleCount;
 		bool _clip;
 		bool decreaseOnClip;
-		float* _pMasterSamples;
+		static float* _pMasterSamples;
 		int peaktime;
 		float currentpeak;
 		float _lMax;
@@ -99,47 +98,18 @@ class PSYCLE__CORE__DECL Master : public Machine {
 		static std::string _psName;
 };
 
-class PSYCLE__CORE__DECL AudioRecorder : public Machine
-{
-	protected:
-		AudioRecorder(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
-	public:
-		virtual ~AudioRecorder() throw();
-		virtual void Init(void);
-		virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
-		virtual void SaveSpecificChunk(RiffFile * pFile) const;
-		virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
-		virtual int GenerateAudio(int numSamples);
-		virtual const MachineKey& getMachineKey() const { return InternalKeys::audioinput; }
-		virtual std::string GetName() const { return _psName; }
-
-		virtual void ChangePort(int newport);
-		virtual void setGainVol(float gainvol) { _gainvol = gainvol; }
-		virtual float GainVol() const { return _gainvol; }
-		virtual int CaptureIdx() const { return _captureidx; }
-	
-	private:
-		static std::string _psName;
-
-		int _captureidx;
-		bool _initialized;
-		float _gainvol;
-		float* pleftorig;
-		float* prightorig;
-};
-
 /****************************************************************************************************/
 /// LFO machine
-class PSYCLE__CORE__DECL LFO : public Machine {
+class LFO : public Machine {
 	protected:
 		LFO(MachineCallbacks* callbacks, Machine::id_type index); friend class InternalHost;
 	public:
 		virtual ~LFO() throw();
 		virtual void Init(void);
 		virtual void Tick( int channel, const PatternEvent & pData );
-		virtual void PreWork(int numSamples, bool clear = true);
+		virtual void PreWork(int numSamples);
 		virtual int GenerateAudio( int numSamples );
-		virtual const MachineKey& getMachineKey() const { return InternalKeys::lfo; }
+		virtual MachineKey getMachineKey() const { return MachineKey::lfo(); }
 		virtual std::string GetName() const { return _psName; }
 		virtual void GetParamName(int numparam,char *name) const;
 		virtual void GetParamRange(int numparam,int &minval,int &maxval) const;
@@ -188,12 +158,12 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 
 		// parameter settings
 	
-		int16_t waveform;
-		int32_t lSpeed;
-		int16_t macOutput[NUM_CHANS];
-		int16_t paramOutput[NUM_CHANS];
-		int32_t phase[NUM_CHANS];
-		int32_t level[NUM_CHANS];
+		std::int16_t waveform;
+		std::int32_t lSpeed;
+		std::int16_t macOutput[NUM_CHANS];
+		std::int16_t paramOutput[NUM_CHANS];
+		std::int32_t phase[NUM_CHANS];
+		std::int32_t level[NUM_CHANS];
 
 		// internal state vars
 	
@@ -202,13 +172,12 @@ class PSYCLE__CORE__DECL LFO : public Machine {
 		/// our lfo
 		float waveTable[LFO_SIZE];
 		/// value of knob when last seen-- used to compensate for outside changes
-		int16_t prevVal[NUM_CHANS];
+		std::int16_t prevVal[NUM_CHANS];
 		/// where knob should be at lfo==0
-		int32_t centerVal[NUM_CHANS];
+		std::int32_t centerVal[NUM_CHANS];
 
 		static std::string _psName;
 		bool bisTicking;
 };
 
 }}
-#endif

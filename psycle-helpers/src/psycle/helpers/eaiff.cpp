@@ -6,11 +6,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-namespace psycle { namespace helpers {
-
+namespace psycle
+{
+	namespace helpers
+	{
 		const IffChunkId EaIff::grabbag = {' ',' ',' ',' '};
 
-		uint32_t IffChunkHeader::length() const {
+		std::uint32_t IffChunkHeader::length() const {
 			return ulength.unsignedValue();
 		}
 
@@ -33,7 +35,7 @@ namespace psycle { namespace helpers {
 		}
 		void EaIff::addListProperty(IffChunkId contentId, IffChunkId propId) {
 		}
-		void EaIff::addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, uint32_t dataSize) {
+		void EaIff::addListProperty(IffChunkId contentId, IffChunkId propId, void const *data, std::uint32_t dataSize) {
 		}
 
 		const IffChunkHeader& EaIff::readHeader() {
@@ -59,4 +61,6 @@ namespace psycle { namespace helpers {
 		}
 
 
-}}
+	}
+}
+

@@ -22,39 +22,38 @@ class Voice
 	//
 	//////////////////////////////////////////////////////////////////
 public:
-	Globals				*m_globals;
-	SharedBuffers		*m_buffers;
+	Globals								*m_globals;
 private:
-	float				m_velocity;
+	float								m_velocity;
 	//				OSC 1
-	Formant				m_osc1_formant;
-	float				m_osc1_phase;
-	Inertia				m_osc1_incr;
+	Formant								m_osc1_formant;
+	float								m_osc1_phase;
+	Inertia								m_osc1_incr;
 	//				OSC 2
-	Formant				m_osc2_formant;
-	float				m_osc2_phase;
-	Inertia				m_osc2_incr;
+	Formant								m_osc2_formant;
+	float								m_osc2_phase;
+	Inertia								m_osc2_incr;
 	//				NOISE
-	Inertia				m_noise_decay;
+	Inertia								m_noise_decay;
 	//				MOD
-	Envelope			m_mod;
+	Envelope				m_mod;
 	//				LFO 1
-	float				m_lfo1_phase;
+	float								m_lfo1_phase;
 	//				LFO 2
-	Inertia				m_lfo2_delay;
-	float				m_lfo2_phase;
+	Inertia								m_lfo2_delay;
+	float								m_lfo2_phase;
 	//				VCF
-	Envelope			m_vcf;
+	Envelope				m_vcf;
 	//				VCA
-	Envelope			m_vca;
+	Envelope				m_vca;
 	//				NOISE FLT
-	float				b0;
-	float				b1;
-	float				b2;
+	float b0;
+	float b1;
+	float b2;
 	//				FLT 1
-	Filter				m_flt1;
+	Filter								m_flt1;
 	//				FLT 2
-	Filter				m_flt2;
+	Filter								m_flt2;
 	//
 	//////////////////////////////////////////////////////////////////
 	//
@@ -306,8 +305,8 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				Setup
 		//////////////////////////////////////////////////////////////
-		float *posc1_fm = m_buffers->m_osc1_fm_out - 1;
-		float *posc2_fm = m_buffers->m_osc2_fm_out - 1;
+		float *posc1_fm = m_osc1_fm_out - 1;
+		float *posc2_fm = m_osc2_fm_out - 1;
 		float *posc1_pm_amount = m_globals->m_posc1_pm_amount_out - 1;
 		float *posc2_pm_amount = m_globals->m_posc2_pm_amount_out - 1;
 		float *posc_fm = m_globals->m_posc_fm_out - 1;
@@ -321,78 +320,77 @@ public:
 		float *pflt2_freq = m_globals->m_pflt2_freq_out - 1;
 		float *pflt2_q = m_globals->m_pflt2_q_out - 1;
 		float *pamp_level = m_globals->m_pamp_level_out - 1;
-		float *pout1 = m_buffers->m_out1 - 1;
-		float *pout2 = m_buffers->m_out2 - 1;
-		float *ppmtable = GetPMTable();
+		float *pout1 = m_out1 - 1;
+		float *pout2 = m_out2 - 1;
 		//////////////////////////////////////////////////////////////
 		//				Generate MOD
 		//////////////////////////////////////////////////////////////
 		switch (m_globals->m_mod_dest)
 		{
 		case MOD_LFO2 :
-			AddEnv(m_buffers->m_mod_out, plfo2_incr + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			plfo2_incr = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, plfo2_incr + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			plfo2_incr = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case MOD_LFO1 :
-			AddEnv(m_buffers->m_mod_out, plfo1_incr + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			plfo1_incr = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, plfo1_incr + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			plfo1_incr = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_FLT2_FREQ :
-			AddEnv(m_buffers->m_mod_out, pflt2_freq + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			pflt2_freq = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, pflt2_freq + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			pflt2_freq = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_FLT1_FREQ :
-			AddEnv(m_buffers->m_mod_out, pflt1_freq + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			pflt1_freq = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, pflt1_freq + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			pflt1_freq = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_PHASE :
-			AddEnv2(m_buffers->m_osc1_phase_out, posc1_pm_amount + 1, m_buffers->m_osc2_phase_out, posc2_pm_amount + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			posc1_pm_amount = m_buffers->m_osc1_phase_out - 1;
-			posc2_pm_amount = m_buffers->m_osc2_phase_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv2(m_osc1_phase_out, posc1_pm_amount + 1, m_osc2_phase_out, posc2_pm_amount + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			posc1_pm_amount = m_osc1_phase_out - 1;
+			posc2_pm_amount = m_osc2_phase_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_PM :
-			AddEnv(m_buffers->m_mod_out, posc_pm + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			posc_pm = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, posc_pm + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			posc_pm = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_FM :
-			AddEnv(m_buffers->m_mod_out, posc_fm + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			posc_fm = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, posc_fm + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			posc_fm = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_MIX :
-			AddEnv(m_buffers->m_mod_out, posc_mix + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			posc_mix = m_buffers->m_mod_out - 1;
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			AddEnv(m_mod_out, posc_mix + 1, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			posc_mix = m_mod_out - 1;
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_OSC12 :
-			FillEnv2(m_buffers->m_osc1_fm_out, m_buffers->m_osc2_fm_out, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			FillEnv2(m_osc1_fm_out, m_osc2_fm_out, &m_mod, m_globals->m_pmod_amount_out, numsamples);
 			break;
 		case DST_OSC2 :
-			FillEnv(m_buffers->m_osc2_fm_out, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
+			FillEnv(m_osc2_fm_out, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
 			break;
 		case DST_OSC1 :
-			FillEnv(m_buffers->m_osc1_fm_out, &m_mod, m_globals->m_pmod_amount_out, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			FillEnv(m_osc1_fm_out, &m_mod, m_globals->m_pmod_amount_out, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 			break;
 		case DST_OFF :
 		default :
-			Fill(m_buffers->m_osc1_fm_out, 0.0f, numsamples);
-			Fill(m_buffers->m_osc2_fm_out, 0.0f, numsamples);
+			Fill(m_osc1_fm_out, 0.0f, numsamples);
+			Fill(m_osc2_fm_out, 0.0f, numsamples);
 		}
 		//////////////////////////////////////////////////////////////
 		//				LFO 1
@@ -400,38 +398,38 @@ public:
 		switch (m_globals->m_lfo1_dest)
 		{
 		case DST_FLT2_FREQ :
-			m_lfo1_phase = AddLFO(m_buffers->m_lfo1_out, pflt2_freq + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
-			pflt2_freq = m_buffers->m_lfo1_out - 1;
+			m_lfo1_phase = AddLFO(m_lfo1_out, pflt2_freq + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			pflt2_freq = m_lfo1_out - 1;
 			break;
 		case DST_FLT1_FREQ :
-			m_lfo1_phase = AddLFO(m_buffers->m_lfo1_out, pflt1_freq + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
-			pflt1_freq = m_buffers->m_lfo1_out - 1;
+			m_lfo1_phase = AddLFO(m_lfo1_out, pflt1_freq + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			pflt1_freq = m_lfo1_out - 1;
 			break;
 		case DST_PHASE :
-			m_lfo1_phase = AddLFO2(m_buffers->m_osc1_phase_out, posc1_pm_amount + 1, m_buffers->m_osc2_phase_out, posc2_pm_amount + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
-			posc1_pm_amount = m_buffers->m_osc1_phase_out - 1;
-			posc2_pm_amount = m_buffers->m_osc2_phase_out - 1;
+			m_lfo1_phase = AddLFO2(m_osc1_phase_out, posc1_pm_amount + 1, m_osc2_phase_out, posc2_pm_amount + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			posc1_pm_amount = m_osc1_phase_out - 1;
+			posc2_pm_amount = m_osc2_phase_out - 1;
 			break;
 		case DST_PM :
-			m_lfo1_phase = AddLFO(m_buffers->m_lfo1_out, posc_pm + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
-			posc_pm = m_buffers->m_lfo1_out - 1;
+			m_lfo1_phase = AddLFO(m_lfo1_out, posc_pm + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			posc_pm = m_lfo1_out - 1;
 			break;
 		case DST_FM :
-			m_lfo1_phase = AddLFO(m_buffers->m_lfo1_out, posc_fm + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
-			posc_fm = m_buffers->m_lfo1_out - 1;
+			m_lfo1_phase = AddLFO(m_lfo1_out, posc_fm + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			posc_fm = m_lfo1_out - 1;
 			break;
 		case DST_MIX :
-			m_lfo1_phase = AddLFO(m_buffers->m_lfo1_out, posc_mix + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
-			posc_mix = m_buffers->m_lfo1_out - 1;
+			m_lfo1_phase = AddLFO(m_lfo1_out, posc_mix + 1, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			posc_mix = m_lfo1_out - 1;
 			break;
 		case DST_OSC12 :
-			m_lfo1_phase = AddLFO2(m_buffers->m_osc1_fm_out, m_buffers->m_osc1_fm_out, m_buffers->m_osc2_fm_out, m_buffers->m_osc2_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			m_lfo1_phase = AddLFO2(m_osc1_fm_out, m_osc1_fm_out, m_osc2_fm_out, m_osc2_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
 			break;
 		case DST_OSC2 :
-			m_lfo1_phase = AddLFO(m_buffers->m_osc2_fm_out, m_buffers->m_osc2_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			m_lfo1_phase = AddLFO(m_osc2_fm_out, m_osc2_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
 			break;
 		case DST_OSC1 :
-			m_lfo1_phase = AddLFO(m_buffers->m_osc1_fm_out, m_buffers->m_osc1_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
+			m_lfo1_phase = AddLFO(m_osc1_fm_out, m_osc1_fm_out, &m_globals->m_lfo1_wave, m_lfo1_phase, plfo1_incr + 1, m_globals->m_plfo1_amount_out, numsamples);
 			break;
 		case DST_OFF :
 		default: ;
@@ -442,42 +440,42 @@ public:
 		switch (m_globals->m_lfo2_dest)
 		{
 		case LFO2_AMP :
-			m_lfo2_phase = AddLFO3(m_buffers->m_lfo2_out, pamp_level + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			pamp_level = m_buffers->m_lfo2_out - 1;
+			m_lfo2_phase = AddLFO3(m_lfo2_out, pamp_level + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			pamp_level = m_lfo2_out - 1;
 			break;
 		case DST_FLT2_FREQ :
-			m_lfo2_phase = AddLFO3(m_buffers->m_lfo2_out, pflt2_freq + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			pflt2_freq = m_buffers->m_lfo2_out - 1;
+			m_lfo2_phase = AddLFO3(m_lfo2_out, pflt2_freq + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			pflt2_freq = m_lfo2_out - 1;
 			break;
 		case DST_FLT1_FREQ :
-			m_lfo2_phase = AddLFO3(m_buffers->m_lfo2_out, pflt1_freq + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			pflt1_freq = m_buffers->m_lfo2_out - 1;
+			m_lfo2_phase = AddLFO3(m_lfo2_out, pflt1_freq + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			pflt1_freq = m_lfo2_out - 1;
 			break;
 		case DST_PHASE :
-			m_lfo2_phase = AddLFO4(m_buffers->m_osc1_phase_out, posc1_pm_amount + 1, m_buffers->m_osc2_phase_out, posc2_pm_amount + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			posc1_pm_amount = m_buffers->m_osc1_phase_out - 1;
-			posc2_pm_amount = m_buffers->m_osc2_phase_out - 1;
+			m_lfo2_phase = AddLFO4(m_osc1_phase_out, posc1_pm_amount + 1, m_osc2_phase_out, posc2_pm_amount + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			posc1_pm_amount = m_osc1_phase_out - 1;
+			posc2_pm_amount = m_osc2_phase_out - 1;
 			break;
 		case DST_PM :
-			m_lfo2_phase = AddLFO3(m_buffers->m_lfo2_out, posc_pm + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			posc_pm = m_buffers->m_lfo2_out - 1;
+			m_lfo2_phase = AddLFO3(m_lfo2_out, posc_pm + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			posc_pm = m_lfo2_out - 1;
 			break;
 		case DST_FM :
-			m_lfo2_phase = AddLFO3(m_buffers->m_lfo2_out, posc_fm + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			posc_fm = m_buffers->m_lfo1_out - 1;
+			m_lfo2_phase = AddLFO3(m_lfo2_out, posc_fm + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			posc_fm = m_lfo1_out - 1;
 			break;
 		case DST_MIX :
-			m_lfo2_phase = AddLFO3(m_buffers->m_lfo2_out, posc_mix + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
-			posc_mix = m_buffers->m_lfo1_out - 1;
+			m_lfo2_phase = AddLFO3(m_lfo2_out, posc_mix + 1, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			posc_mix = m_lfo1_out - 1;
 			break;
 		case DST_OSC12 :
-			m_lfo2_phase = AddLFO4(m_buffers->m_osc1_fm_out, m_buffers->m_osc1_fm_out, m_buffers->m_osc2_fm_out, m_buffers->m_osc2_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			m_lfo2_phase = AddLFO4(m_osc1_fm_out, m_osc1_fm_out, m_osc2_fm_out, m_osc2_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
 			break;
 		case DST_OSC2 :
-			m_lfo2_phase = AddLFO3(m_buffers->m_osc2_fm_out, m_buffers->m_osc2_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			m_lfo2_phase = AddLFO3(m_osc2_fm_out, m_osc2_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
 			break;
 		case DST_OSC1 :
-			m_lfo2_phase = AddLFO3(m_buffers->m_osc1_fm_out, m_buffers->m_osc1_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
+			m_lfo2_phase = AddLFO3(m_osc1_fm_out, m_osc1_fm_out, &m_globals->m_lfo2_wave, &m_lfo2_delay, m_lfo2_phase, plfo2_incr + 1, m_globals->m_plfo2_amount_out, numsamples);
 			break;
 		case DST_OFF :
 		default: ;
@@ -487,13 +485,13 @@ public:
 		//////////////////////////////////////////////////////////////
 		if ((m_globals->m_noise_level.GetTarget() == 0.0f && m_globals->m_noise_level.IsIdle()) || m_noise_decay.IsIdle())
 		{
-			Fill(m_buffers->m_out2, 0.0f, numsamples);
+			Fill(m_out2, 0.0f, numsamples);
 		}
 		else
 		{
 			float *pnoisecolor = m_globals->m_pnoise_color_out - 1;
 			float *pnoiselevel = m_globals->m_pnoise_level_out - 1;
-			pout2 = m_buffers->m_out2 - 1;
+			pout2 = m_out2 - 1;
 			nsamples = numsamples;
 			do
 			{
@@ -501,7 +499,7 @@ public:
 				nsamples -= amt;
 				if ( m_noise_decay.IsIdle())
 				{
-					Fill(m_buffers->m_out2,0.0f, numsamples);
+					Fill(m_out2,0.0f, numsamples);
 				}
 				else do
 				{
@@ -521,7 +519,7 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				OSC 2
 		//////////////////////////////////////////////////////////////
-		pout2 = m_buffers->m_out2 - 1;
+		pout2 = m_out2 - 1;
 		nsamples = numsamples;
 		idx = (m_globals->m_osc2_wave.Get()->index == WF_BLANK ? -1 : m_globals->m_osc2_pm_type);
 		switch (idx)
@@ -534,8 +532,9 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, incr)
-							* (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, incr));
+					idx = f2i(incr * incr2freq) & 0xffff;
+					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx)
+							* (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, idx));
 					m_osc2_phase += incr;
 				}
 				while (--amt);
@@ -550,8 +549,9 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, incr)
-							+ (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, incr));
+					idx = f2i(incr * incr2freq) & 0xffff;
+					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx)
+							+ (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, idx));
 					m_osc2_phase += incr;
 				}
 				while (--amt);
@@ -566,8 +566,9 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, incr)
-							- (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, incr));
+					idx = f2i(incr * incr2freq) & 0xffff;
+					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx)
+							- (m_globals->m_osc2_wave.GetSample(m_osc2_phase + *++posc2_pm_amount, idx));
 					m_osc2_phase += incr;
 				}
 				while (--amt);
@@ -582,7 +583,8 @@ public:
 				do
 				{
 					incr = m_osc2_incr.Next() * FM(*++posc2_fm);
-					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, incr);
+					idx = f2i(incr * incr2freq) & 0xffff;
+					*++pout2 += m_globals->m_osc2_wave.GetSample(m_osc2_phase, idx);
 					m_osc2_phase += incr;
 				}
 				while (--amt);
@@ -594,7 +596,7 @@ public:
 		idx = m_globals->m_osc2_vowelnum;
 		if (idx > -1)
 		{
-			pout2 = m_buffers->m_out2 - 1;
+			pout2 = m_out2 - 1;
 			nsamples = numsamples;
 			do
 			{
@@ -606,7 +608,7 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				OSC 1
 		//////////////////////////////////////////////////////////////
-		pout2 = m_buffers->m_out2 - 1;
+		pout2 = m_out2 - 1;
 		nsamples = numsamples;
 		switch (m_globals->m_osc1_pm_type)
 		{
@@ -618,7 +620,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx)
 							* (m_globals->m_osc1_wave.GetSample(tmp + *++posc1_pm_amount, idx));
@@ -636,7 +638,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx)
 							+ (m_globals->m_osc1_wave.GetSample(tmp + *++posc1_pm_amount, idx));
@@ -654,7 +656,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx)
 							- (m_globals->m_osc1_wave.GetSample(tmp + *++posc1_pm_amount, idx));
@@ -673,7 +675,7 @@ public:
 				do
 				{
 					incr = m_osc1_incr.Next() * FM(*++posc1_fm + *++pout2 * *++posc_fm);
-					idx = lrint<int>(incr * incr2freq) & 0xffff;
+					idx = f2i(incr * incr2freq) & 0xffff;
 					tmp = m_osc1_phase + *pout2 * *++posc_pm * ppmtable[idx];
 					*++pout1 = m_globals->m_osc1_wave.GetSample(tmp, idx);
 					m_osc1_phase += incr;
@@ -685,7 +687,7 @@ public:
 		idx = m_globals->m_osc1_vowelnum;
 		if (idx > -1)
 		{
-			pout1 = m_buffers->m_out1 - 1;
+			pout1 = m_out1 - 1;
 			nsamples = numsamples;
 			do
 			{
@@ -697,8 +699,8 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				Mix
 		//////////////////////////////////////////////////////////////
-		pout1 = m_buffers->m_out1 - 1;
-		pout2 = m_buffers->m_out2 - 1;
+		pout1 = m_out1 - 1;
+		pout2 = m_out2 - 1;
 		nsamples = numsamples;
 		if (m_globals->m_osc_ring_mod)
 		{
@@ -721,7 +723,7 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				Filter Animation
 		//////////////////////////////////////////////////////////////
-		pout2 = m_buffers->m_out2 - 1;
+		pout2 = m_out2 - 1;
 		nsamples = numsamples;
 		do
 		{
@@ -737,7 +739,7 @@ public:
 		if (m_globals->m_flt1_kbd_track != 0.0f)
 		{
 			tmp = m_osc1_incr.GetValue() * incr2freq * m_globals->m_flt1_kbd_track / m_globals->m_samplingrate;
-			pout2 = m_buffers->m_out2 - 1;
+			pout2 = m_out2 - 1;
 			nsamples = numsamples;
 			do
 			{
@@ -748,8 +750,8 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				Filter 1
 		//////////////////////////////////////////////////////////////
-		pout1 = m_buffers->m_out1 - 1;
-		pout2 = m_buffers->m_out2 - 1;
+		pout1 = m_out1 - 1;
+		pout2 = m_out2 - 1;
 		nsamples = numsamples;
 		switch (m_globals->m_flt1_type)
 		{
@@ -830,8 +832,8 @@ public:
 		//////////////////////////////////////////////////////////////
 		//				Filter 2
 		//////////////////////////////////////////////////////////////
-		pout1 = m_buffers->m_out1 - 1;
-		pout2 = m_buffers->m_out2 - 1;
+		pout1 = m_out1 - 1;
+		pout2 = m_out2 - 1;
 		nsamples = numsamples;
 		switch (m_globals->m_flt2_mode)
 		{
@@ -859,7 +861,7 @@ public:
 		//				Out
 		//////////////////////////////////////////////////////////////
 		--pout;
-		pout1 = m_buffers->m_out1 - 1;
+		pout1 = m_out1 - 1;
 		do
 		{
 			amt = m_vca.Clip(numsamples);

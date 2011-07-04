@@ -2,86 +2,52 @@
 ///\brief interface file for psycle::host::CWaveOutDialog.
 #pragma once
 #include "Psycle.hpp"
-#include <psycle/audiodrivers/microsoftmmewaveout.h>
 
 namespace psycle { namespace host {
 
+	class WaveOut;
 		/// mme config window.
 		class CWaveOutDialog : public CDialog
 		{
 		public:
 			CWaveOutDialog(CWnd * pParent = 0);
-		// Dialog Data
-			//{{AFX_DATA(CWaveOutDialog)
 			enum { IDD = IDD_WAVEOUTCONFIG };
-			CStatic	m_Latency;
-			CSpinButtonCtrl	m_BufSizeSpin;
-			CSpinButtonCtrl	m_BufNumSpin;
-			CEdit	m_BufSizeEdit;
-			CEdit	m_BufNumEdit;
-			CButton	m_DitherCheck;
-			CComboBox	m_DeviceList;
-			CComboBox	m_SampleRateBox;
-			int		m_BufNum;
-			int		m_BufSize;
-			int		m_Device;
-			BOOL	m_Dither;
-			//}}AFX_DATA
-			int m_SampleRate;
+			CComboBox	m_deviceList;
+			CComboBox	m_sampleRateBox;
+			CComboBox	m_bitDepthBox;
+			CEdit	m_bufNumEdit;
+			CSpinButtonCtrl	m_bufNumSpin;
+			CEdit	m_bufSamplesEdit;
+			CSpinButtonCtrl	m_bufSamplesSpin;
+			CStatic	m_latency;
+			WaveOut* waveout;
+			int		m_device;
+			int		m_sampleRate;
+			int		m_bitDepth;
+			bool	m_dither;
+			int		m_bufNum;
+			int		m_bufSamples;
+			int static const numbuf_min = 3;
+			int static const numbuf_max = 8;
+			int static const numsamples_min = 128;
+			int static const numsamples_max = 8193;
+
+
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWaveOutDialog)
 			protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
 		// Implementation
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CWaveOutDialog)
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
-			afx_msg void OnChangeConfigBufnum();
-			afx_msg void OnChangeConfigBufsize();
-			afx_msg void OnSelendokConfigSamplerate();
-			//}}AFX_MSG
+			afx_msg void OnChangeBufnum();
+			afx_msg void OnChangeBufsize();
+			afx_msg void OnSelendokSamplerate();
+			afx_msg void OnSelendokBitDepth();
 			DECLARE_MESSAGE_MAP()
 		private:
 			void RecalcLatency();
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Developer Studio will insert additional declarations immediately before the previous line.
-		class MMEUi : public audiodrivers::MMEUiInterface
-		{
-		public:
-			MMEUi() {}
-			~MMEUi() {}
-
-			/*override*/ int DoModal() {
-				return dlg_.DoModal();
-			}
-
-			/*override*/ void SetValues(
-				int device_idx, bool dither,
-				int sample_rate, int buffer_size, int buffer_count);
-
-			/*override*/ void GetValues(
-				int & device_idx, bool & dither,
-				int & sample_rate, int & buffer_size, int & buffer_count);
-				
-			/*override*/ void WriteConfig(
-				int device_idx, bool dither,
-				int sample_rate, int buffer_size, int buffer_count);
-
-			/*override*/ void ReadConfig(
-				int & device_idx, bool & dither,
-				int & sample_rate, int & buffer_size, int & buffer_count);
-
-			/*override*/ void Error(std::string const & msg);
-		protected:
-			CWaveOutDialog dlg_;
-		};
-
 
 	}   // namespace
 }   // namespace

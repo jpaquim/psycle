@@ -1,74 +1,111 @@
-// CTrack Definition file
 #include "track.hpp"
 #include <cassert>
 
-using namespace psycle::plugin_interface;
+// CTrack Definition file (M3Track.cpp)
+
+/* Since This doesn't work, the values in the "Init()" are hardcoded
+extern CMachineParameter const paraWave1;
+extern CMachineParameter const paraPulseWidth1;
+extern CMachineParameter const paraWave2;
+extern CMachineParameter const paraPulseWidth2;
+extern CMachineParameter const paraDetuneSemi;
+extern CMachineParameter const paraDetuneFine;
+extern CMachineParameter const paraSync;
+extern CMachineParameter const paraMixType;
+extern CMachineParameter const paraMix;
+extern CMachineParameter const paraSubOscWave;
+extern CMachineParameter const paraSubOscVol;
+extern CMachineParameter const paraPEGAttackTime;
+extern CMachineParameter const paraPEGDecayTime;
+extern CMachineParameter const paraPEnvMod;
+extern CMachineParameter const paraGlide;
+
+extern CMachineParameter const paraVolume;
+extern CMachineParameter const paraAEGAttackTime;
+extern CMachineParameter const paraAEGSustainTime;
+extern CMachineParameter const paraAEGReleaseTime;
+
+extern CMachineParameter const paraFilterType;
+extern CMachineParameter const paraCutoff;
+extern CMachineParameter const paraResonance;
+extern CMachineParameter const paraFEGAttackTime;
+extern CMachineParameter const paraFEGSustainTime;
+extern CMachineParameter const paraFEGReleaseTime;
+extern CMachineParameter const paraFEnvMod;
+
+		// LFO 1
+extern CMachineParameter const paraLFO1Dest;
+extern CMachineParameter const paraLFO1Wave;
+extern CMachineParameter const paraLFO1Freq;
+extern CMachineParameter const paraLFO1Amount;
+		// LFO 2
+extern CMachineParameter const paraLFO2Dest;
+extern CMachineParameter const paraLFO2Wave;
+extern CMachineParameter const paraLFO2Freq;
+extern CMachineParameter const paraLFO2Amount;
+
+*/
 
 void CTrack::Stop()
 {
-	AEGState = EGS_NONE;
+		AEGState = EGS_NONE;
 }
 
 void CTrack::Init()
 {
-	_channel = -1;
+		_channel = -1;
 
-	noise1 = noise2 = Sync = false;
-	RandomMixType = false;
-	RandomWave1 = false;
-	RandomWave2 = false;
-	RandomWaveSub = false;
-	LFO1Noise = LFO2Noise = false;
-	LFO1Synced = LFO2Synced = false;
-	AEGState = EGS_NONE;
-	FEGState = EGS_NONE;
-	PEGState = EGS_NONE;
-	Frequency = FrequencyFrom = 0.0;
-	r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
-	noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
-	x1 = x2 = y1 = y2 = 0;
-	pnoise = WaveTable[4];
-	OldOut = 0;
-	pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
-	
-	coefsTabOffs = coefsTab; // lp
-	Cutoff = 127;
-	Resonance = 32;
-	FEGAttackTime = MSToSamples( pmi->EnvTime( 0));
-	FEGSustainTime = MSToSamples( pmi->EnvTime( 0));
-	FEGReleaseTime = MSToSamples( pmi->EnvTime( 0));
-	AEGAttackTime = MSToSamples( pmi->EnvTime( 10));
-	AEGSustainTime = MSToSamples( pmi->EnvTime( 50));
-	AEGReleaseTime = MSToSamples( pmi->EnvTime( 30));
-	FEnvMod = 0;
-	PEGAttackTime = MSToSamples( pmi->EnvTime( 0));
-	PEGDecayTime = MSToSamples( pmi->EnvTime( 0));
-	PEnvMod = 0;
-	Bal1 = 63;;
-	Bal2 = 64;;
-	Glide =  GlideActive = false;
-	RandomWave1 = RandomWave2 = RandomWaveSub = false;
-	SubOscVol = 64;;
-	Center1 = 64/127;
-	Center2 = 64/127;
-	DetuneSemi = DetuneFine = 1;
-	Volume = (float)(64/245.0);
-	LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;				
-	LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
-	PhaseAddLFO1 = PhaseAddLFO2 = 0;
-	MixType = 0;
-	PhScale2A=1.0;
-	PhScale2B=1.0;
-	Ph1=1.0;
-	Ph2=1.0;
+		noise1 = noise2 = Sync = false;
+		RandomMixType = false;
+		RandomWave1 = false;
+		RandomWave2 = false;
+		RandomWaveSub = false;
+		LFO1Noise = LFO2Noise = false;
+		LFO1Synced = LFO2Synced = false;
+		AEGState = EGS_NONE;
+		FEGState = EGS_NONE;
+		PEGState = EGS_NONE;
+		r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
+		noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
+		x1 = x2 = y1 = y2 = 0;
+		pnoise = WaveTable[4];
+		OldOut = 0;
+		pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
+		
+		coefsTabOffs = coefsTab; // lp
+		Cutoff = 127; //paraCutoff.DefValue;
+		Resonance = 32; //paraResonance.DefValue;
+		FEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraFEGAttackTime.DefValue*/));
+		FEGSustainTime = MSToSamples( pmi->EnvTime( 0/*paraFEGSustainTime.DefValue*/));
+		FEGReleaseTime = MSToSamples( pmi->EnvTime( 0/*paraFEGReleaseTime.DefValue*/));
+		AEGAttackTime = MSToSamples( pmi->EnvTime( 10/*paraAEGAttackTime.DefValue*/));
+		AEGSustainTime = MSToSamples( pmi->EnvTime( 50/*paraAEGSustainTime.DefValue*/));
+		AEGReleaseTime = MSToSamples( pmi->EnvTime( 30/*paraAEGReleaseTime.DefValue*/));
+		FEnvMod = 0;
+		PEGAttackTime = MSToSamples( pmi->EnvTime( 0/*paraPEGAttackTime.DefValue*/));
+		PEGDecayTime = MSToSamples( pmi->EnvTime( 0/*paraPEGDecayTime.DefValue*/));
+		PEnvMod = 0;
+		Bal1 = 63;/*127-paraMix.DefValue*/;
+		Bal2 = 64;/*paraMix.DefValue*/;
+		Glide =  GlideActive = false;
+		RandomWave1 = RandomWave2 = RandomWaveSub = false;
+		SubOscVol = 64;/*paraSubOscVol.DefValue*/;
+		Center1 = 64/127;/*paraPulseWidth1.DefValue/127.0;*/
+		Center2 = 64/127;/*paraPulseWidth2.DefValue/127.0;*/
+		DetuneSemi = DetuneFine = 1;
+		Volume = (float)(64/245.0);/*paraVolume.DefValue/245.0);*/
+		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;				
+		LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
+		PhaseAddLFO1 = PhaseAddLFO2 = 0;
+		MixType = 0;
 }
 
 void CTrack::Tick( tvals const &tv)
 {
+
 	// Filter
 	if( tv.FilterType != 0xff)
 	{
-		assert(tv.FilterType<4);
 		coefsTabOffs = coefsTab + (int)tv.FilterType*128*128*8;
 	}
 	if( tv.Cutoff != 0xff)
@@ -197,14 +234,11 @@ void CTrack::Tick( tvals const &tv)
 		RandomWave1 = noise1 = false;
 
 		if( tv.Wave1 == 4) // noise
-		{
-			pwavetab1 = NULL;
+		{				pwavetab1 = NULL;
 			noise1 = true;
 		}
 		else if( tv.Wave1 == 5) // random
-		{
-			RandomWave1 = true;
-		}
+		{				RandomWave1 = true;				}
 		else 
 		{
 			assert(tv.Wave1 < 4 );
@@ -218,14 +252,11 @@ void CTrack::Tick( tvals const &tv)
 		RandomWave2 = noise2 = false;
 
 		if( tv.Wave2 == 4) // noise
-		{
-			noise2 = true;
+		{				noise2 = true;
 			pwavetab2 = NULL;
 		}
 		else if( tv.Wave2 == 5) // random
-		{
-			RandomWave2 = true;
-		}
+		{				RandomWave2 = true;				}
 		else 
 		{				
 			assert(tv.Wave2 < 4 );
@@ -252,10 +283,10 @@ void CTrack::Tick( tvals const &tv)
 	}
 
 
-	if( tv.Note != NOTE_NONE) // neuer wert
+	if( tv.Note != NOTE_OFF) // neuer wert
 	{
 		Note = tv.Note;
-		if(Note <= NOTE_MAX) // neue note gesetzt
+		if(Note <= 119) // neue note gesetzt
 		{
 			FrequencyFrom = Frequency;
 			Frequency = freqTab[Note];
@@ -322,7 +353,7 @@ void CTrack::Tick( tvals const &tv)
 			NewPhases();
 
 		}
-		else if( tv.Note == NOTE_NOTEOFF)
+		else if( tv.Note == NOTE_NO)
 		{
 			AEGState = EGS_SUSTAIN; // Prepare Amp Osci to enter in Release mode.
 			AEGCount = 0;
@@ -337,33 +368,33 @@ void CTrack::Tick( tvals const &tv)
 		LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;
 		switch( tv.LFO1Dest)
 		{
-//		case 0: ...none
-		case 1: LFO_Osc1 = true;	break;
-		case 2: LFO_PW1 = true;		break;
-		case 3: LFO_Amp = true;		break;
-		case 4: LFO_Cut = true;		break;
+//								case 0: ...none
+		case 1: LFO_Osc1 = true;				break;
+		case 2: LFO_PW1 = true;								break;
+		case 3: LFO_Amp = true;								break;
+		case 4: LFO_Cut = true;								break;
 
 		case 5: // 12
-			LFO_Osc1 = true;	LFO_PW1 = true;		break;
+			LFO_Osc1 = true;				LFO_PW1 = true;				break;
 		case 6: // 13
-			LFO_Osc1 = true;	LFO_Amp = true;		break;
+			LFO_Osc1 = true;				LFO_Amp = true;				break;
 		case 7: // 14
-			LFO_Osc1 = true;	LFO_Cut = true;		break;
+			LFO_Osc1 = true;				LFO_Cut = true;				break;
 		case 8: // 23
-			LFO_PW1 = true;		LFO_Amp = true;		break;
+			LFO_PW1 = true;								LFO_Amp = true;				break;
 		case 9: // 24
-			LFO_PW1 = true;		LFO_Cut = true;		break;
+			LFO_PW1 = true;								LFO_Cut = true;				break;
 		case 10: // 34
-			LFO_Amp = true;		LFO_Cut = true;		break;
+			LFO_Amp = true;								LFO_Cut = true;				break;
 
 		case 11: // 123
-			LFO_Osc1 = true;	LFO_PW1 = true;		LFO_Amp = true;	break;
+			LFO_Osc1 = true;				LFO_PW1 = true;				LFO_Amp = true;				break;
 		case 12: // 124
-			LFO_Osc1 = true;	LFO_PW1 = true;		LFO_Cut = true; break;
+			LFO_Osc1 = true;				LFO_PW1 = true; LFO_Cut = true; break;
 		case 13: // 134
-			LFO_Osc1 = true;	LFO_Amp = true;		LFO_Cut = true; break;
+			LFO_Osc1 = true;				LFO_Amp = true; LFO_Cut = true; break;
 		case 14: // 234
-			LFO_PW1 = true;		LFO_Amp = true;		LFO_Cut = true;	break;
+			LFO_PW1 = true;								LFO_Amp = true;				LFO_Cut = true;				break;
 		case 15: // 1234
 			LFO_Osc1 = true;
 			LFO_PW1 = true;
@@ -423,33 +454,33 @@ void CTrack::Tick( tvals const &tv)
 		LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
 		switch( tv.LFO2Dest)
 		{
-//		case 0: ...none
-		case 1:	LFO_Osc2 = true;	break;
-		case 2: LFO_PW2 = true;		break;
-		case 3:	LFO_Mix = true;		break;
-		case 4:	LFO_Reso = true;	break;
+//								case 0: ...none
+		case 1:				LFO_Osc2 = true;				break;
+		case 2: LFO_PW2 = true;								break;
+		case 3:				LFO_Mix = true;								break;
+		case 4:				LFO_Reso = true;				break;
 
 		case 5: // 12
-			LFO_Osc2 = true;	LFO_PW2 = true;		break;
+			LFO_Osc2 = true;				LFO_PW2 = true;				break;
 		case 6: // 13
-			LFO_Osc2 = true;	LFO_Mix = true;		break;
+			LFO_Osc2 = true;				LFO_Mix = true;				break;
 		case 7: // 14
-			LFO_Osc2 = true;	LFO_Reso = true;	break;
+			LFO_Osc2 = true;				LFO_Reso = true;break;
 		case 8: // 23
-			LFO_PW2 = true;		LFO_Mix = true;		break;
+			LFO_PW2 = true;				LFO_Mix = true;								break;
 		case 9: // 24
-			LFO_PW2 = true;		LFO_Reso = true;	break;
+			LFO_PW2 = true;				LFO_Reso = true;				break;
 		case 10: // 34
-			LFO_Mix = true;		LFO_Reso = true;	break;
+			LFO_Mix = true;				LFO_Reso = true;				break;
 
 		case 11: // 123
-			LFO_Osc2 = true;	LFO_PW2 = true;		LFO_Mix = true;		break;
+			LFO_Osc2 = true;				LFO_PW2 = true;				LFO_Mix = true;				break;
 		case 12: // 124
-			LFO_Osc2 = true;	LFO_PW2 = true;		LFO_Reso = true;	break;
+			LFO_Osc2 = true;				LFO_PW2 = true;				LFO_Reso = true;break;
 		case 13: // 134
-			LFO_Osc2 = true;	LFO_Mix = true;		LFO_Reso = true;	break;
+			LFO_Osc2 = true;				LFO_Mix = true;				LFO_Reso = true;break;
 		case 14: // 234
-			LFO_PW2 = true;		LFO_Mix = true;		LFO_Reso = true;	break;
+			LFO_PW2 = true;				LFO_Mix = true;				LFO_Reso = true;				break;
 
 		case 15: // 1234
 			LFO_Osc2 = true;
@@ -528,7 +559,7 @@ void CTrack::Work( float *psamples, int numsamples)
 		if( AEGState)
 		{
 			float o = Osc()*VCA();
-			*(psamples++) += Filter( OldOut + o); // anti knack
+			*psamples++ += Filter( OldOut + o); // anti knack
 			OldOut = o;
 		}
 		NewPhases();

@@ -3,26 +3,17 @@
 
 #include "Configuration.hpp"
 #include "ChildView.hpp"
-#include "RecorderGui.hpp"
 
-#include <psycle/core/internal_machines.h>
-#include <psycle/audiodrivers/audiodriver.h>
+#include "internal_machines.hpp"
+#include "AudioDriver.hpp"
 #include <psycle/helpers/dsp.hpp>
 
 namespace psycle { namespace host {
 
 CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
-	: CDialog(CWaveInMacDlg::IDD, pParent),
-	  gui_(0)
+: CDialog(CWaveInMacDlg::IDD, pParent)
 {
 	m_pParent = pParent;
-}
-
-CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent, MachineGui* gui)
-	: CDialog(CWaveInMacDlg::IDD, pParent),
-	  m_pParent(pParent),
-	  gui_(gui)
-{
 }
 
 void CWaveInMacDlg::DoDataExchange(CDataExchange* pDX)
@@ -49,9 +40,9 @@ BOOL CWaveInMacDlg::OnInitDialog()
 	
 	FillCombobox();
 	m_volslider.SetRange(0,1024);
-	m_volslider.SetPos(pRecorder->GainVol()*256);
+	m_volslider.SetPos(pRecorder->_gainvol*256);
 	char label[30];
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->GainVol()));
+	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->_gainvol));
 	m_vollabel.SetWindowText(label);
 	return TRUE;
 	// return TRUE unless you set the focus to a control
@@ -61,23 +52,14 @@ void CWaveInMacDlg::FillCombobox()
 {
 	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 	std::vector<std::string> ports;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE	
-	// todo use real port names in the driver
-	unsigned int n = mydriver.captureSettings().numChannels();
-	for ( unsigned int i = 0; i < n; ++i ) {
-		std::ostringstream buffer;
-		buffer << "Input" << i;
-		ports.push_back(buffer.str());
-	}
-#else
+	mydriver.RefreshAvailablePorts();
 	mydriver.GetCapturePorts(ports);
-#endif
 	for (unsigned int i =0; i < ports.size(); ++i)
 	{
 		m_listbox.AddString(ports[i].c_str());
 	}
 	if (ports.size()==0) m_listbox.AddString("No Inputs Available");
-	m_listbox.SetCurSel(pRecorder->CaptureIdx());
+	m_listbox.SetCurSel(pRecorder->_captureidx);
 }
 
 void CWaveInMacDlg::OnCbnSelendokCombo1()
@@ -87,9 +69,7 @@ void CWaveInMacDlg::OnCbnSelendokCombo1()
 
 void CWaveInMacDlg::OnCancel()
 {
-	if (gui_)
-		gui_->BeforeDeleteDlg();
-
+	m_pParent->WaveInMachineDialog = NULL;
 	DestroyWindow();
 	delete this;
 }
@@ -106,33 +86,12 @@ BOOL CWaveInMacDlg::PreTranslateMessage(MSG* pMsg)
 void CWaveInMacDlg::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	char label[30];
-	pRecorder->setGainVol(m_volslider.GetPos()*0.00390625f);
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->GainVol()));
+	pRecorder->_gainvol = m_volslider.GetPos()*0.00390625f;
+	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->_gainvol));
 	m_vollabel.SetWindowText(label);
 	*pResult = 0;
 }
 
-void CWaveInMacDlg::Show(int x, int y)
-{	
-	centerWindowOnPoint(x, y);
-}
-
-void CWaveInMacDlg::centerWindowOnPoint(int x, int y) {
-	CRect r;
-	GetWindowRect(&r);
-
-	x -= ((r.right-r.left)/2);
-	y -= ((r.bottom-r.top)/2);
-
-	if (x < 0) {
-		x = 0;
-	}
-	if (y < 0) {
-		y = 0;
-	}
-	SetWindowPos( 0, x,	y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-}
-
-
 }   // namespace
 }   // namespace
+

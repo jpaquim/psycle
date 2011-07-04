@@ -3,7 +3,7 @@
 
 #if defined PSYCLE__MICROSOFT_MME_AVAILABLE
 #include "microsoftmmewaveout.h"
-#include <universalis/os/aligned_alloc.hpp>
+#include <universalis/os/aligned_memory_alloc.hpp>
 
 namespace psycle { namespace audiodrivers {
 
@@ -32,7 +32,7 @@ MsWaveOut::~MsWaveOut() throw() {
 
 WAVEHDR* MsWaveOut::allocateBlocks( ) {
 	unsigned char* buffer;
-	uint32_t i;
+	std::uint32_t i;
 	WAVEHDR* blocks;
 	DWORD totalBufferSize = (playbackSettings().blockBytes() + sizeof(WAVEHDR)) * playbackSettings().blockCount();
 

@@ -4,22 +4,16 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-	namespace core {
-		class Sampler;
-	}
-	namespace host {
+namespace host {
 
 		class CChildView;
+		class Sampler;
 
 		/// gear tracker window.
 		class CGearTracker : public CDialog
 		{
 		public:
 			CGearTracker(CChildView* pParent = 0);
-			CGearTracker(class MachineGui* gui);
-		private:
-			MachineGui* gui_;
-		public:
 			Sampler* _pMachine;
 			BOOL Create();
 			afx_msg void OnCancel();

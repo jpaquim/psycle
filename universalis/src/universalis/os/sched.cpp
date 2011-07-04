@@ -26,7 +26,7 @@ process::process()
 )
 {}
 
-affinity_mask process::affinity_mask() const {
+affinity_mask process::affinity_mask() const throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
 		#if defined DIVERSALIS__OS__CYGWIN
@@ -55,7 +55,7 @@ affinity_mask process::affinity_mask() const {
 	/// The doc says:
 	/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
 #else
-	void process::affinity_mask(class affinity_mask const & affinity_mask) {
+	void process::affinity_mask(class affinity_mask const & affinity_mask) throw(exception) {
 		#if defined DIVERSALIS__OS__POSIX
 			#if defined DIVERSALIS__OS__CYGWIN
 				///\todo sysconf
@@ -72,7 +72,7 @@ affinity_mask process::affinity_mask() const {
 	}
 #endif
 
-process::priority_type process::priority() {
+process::priority_type process::priority() throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		errno = 0;
 		priority_type result(getpriority(PRIO_PROCESS, native_handle_));
@@ -87,7 +87,7 @@ process::priority_type process::priority() {
 	#endif
 }
 
-void process::priority(process::priority_type priority) {
+void process::priority(process::priority_type priority) throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		if(setpriority(PRIO_PROCESS, native_handle_, priority))
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
@@ -112,7 +112,7 @@ thread::thread() : native_handle_(
 	#endif
 ) {}
 
-affinity_mask thread::affinity_mask() const {
+affinity_mask thread::affinity_mask() const throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		#if defined DIVERSALIS__OS__CYGWIN
 			///\todo sysconf
@@ -137,7 +137,7 @@ affinity_mask thread::affinity_mask() const {
 	#endif
 }
 
-void thread::affinity_mask(class affinity_mask const & affinity_mask) {
+void thread::affinity_mask(class affinity_mask const & affinity_mask) throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		#if defined DIVERSALIS__OS__CYGWIN
 			///\todo sysconf
@@ -165,7 +165,7 @@ namespace {
 }
 #endif
 
-thread::priority_type thread::priority() {
+thread::priority_type thread::priority() throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		int policy;
 		sched_param param;
@@ -198,7 +198,7 @@ thread::priority_type thread::priority() {
 	#endif
 }
 
-void thread::priority(thread::priority_type priority) {
+void thread::priority(thread::priority_type priority) throw(exception) {
 	#if defined DIVERSALIS__OS__POSIX
 		int const policy =
 			priority > priorities::normal ? SCHED_RR :

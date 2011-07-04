@@ -11,4 +11,5 @@
 
 #include <psycle/helpers/math/math.hpp>
 #include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/ring_buffer.hpp>
+//requires c++0x: #include <psycle/helpers/ring_buffer.hpp>
+

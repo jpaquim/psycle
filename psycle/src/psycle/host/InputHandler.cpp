@@ -4,24 +4,15 @@
 
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
-#include "PatternView.hpp"
 #include "Configuration.hpp"
-#include "ChildView.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-#include <psycle/core/internalkeys.hpp>
+#include "Machine.hpp"
+#include "Player.hpp"
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
-
-namespace psycle { namespace host {
-	using namespace core;
-
+namespace psycle
+{
+	namespace host
+	{
 		const char * sDefaultCfgName = "PsycleKeys.INI";
 
 		InputHandler::InputHandler()
@@ -38,8 +29,10 @@ namespace psycle { namespace host {
 			bDoingSelection = false;
 
 			// set up multi-channel playback
-			for(UINT i=0;i<MAX_TRACKS;i++)
-				notetrack[i]=120;
+			for(UINT i=0;i<MAX_TRACKS;i++) {
+				notetrack[i]=notecommands::release;
+				instrtrack[i]=255;
+			}
 			outtrack=0;
 
 			TRACE("Building default keys");
@@ -57,7 +50,7 @@ namespace psycle { namespace host {
 		// in: command def, key, modifiers
 		// out: true if we had to remove another definition
 		///\todo more warnings if we are changing existing defs
-		bool InputHandler::SetCmd(CmdDef &cmd, int key, UINT modifiers,bool checkforduplicates)
+		bool InputHandler::SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates)
 		{	
 			// clear note?
 			if(!cmd.IsValid())
@@ -122,7 +115,7 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->playing()&&Global::pConfig->_followSong))
+				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->_playing&&Global::pConfig->_followSong))
 				{
 					switch (nChar)
 					{
@@ -454,6 +447,494 @@ namespace psycle { namespace host {
 		{
 			switch(cmd.GetID())
 			{
+			case cdefNull:
+				break;
+
+			case cdefPatternCut:
+				pChildView->patCut();
+				break;
+
+			case cdefPatternCopy:
+				pChildView->patCopy();
+				break;
+
+			case cdefPatternPaste:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->patPaste();
+				break;
+
+			case cdefPatternMixPaste:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->patPaste();
+				break;
+
+			case cdefPatternDelete:
+				pChildView->patDelete();
+				break;
+
+			case cdefPatternTrackMute:
+				pChildView->patTrackMute();
+				break;
+
+			case cdefPatternTrackSolo:
+				pChildView->patTrackSolo();
+				break;
+
+			case cdefPatternTrackRecord:
+				pChildView->patTrackRecord();
+				break;
+
+			case cdefFollowSong:	
+
+				//used by song follow toggle
+				//CButton*cb=(CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW);
+
+				if (((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->GetCheck() == 0) 
+				{
+					((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->SetCheck(1);
+				} 
+				else
+				{
+					((CButton*)pMainFrame->m_wndSeq.GetDlgItem(IDC_FOLLOW))->SetCheck(0);
+				}
+				pMainFrame->OnFollowSong();
+				break;
+
+			case cdefKeyStopAny:
+				pChildView->EnterNoteoffAny();
+				break;
+
+			case cdefColumnNext:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
+				break;
+
+			case cdefColumnPrev:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->PrevTrack(1,Global::pConfig->_wrapAround);
+				break;
+
+			case cdefNavLeft:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( !bDoingSelection )
+				{
+					pChildView->PrevCol(Global::pConfig->_wrapAround);
+					if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+				}
+				else
+				{
+					if ( !pChildView->blockSelected )
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					pChildView->PrevTrack(1,Global::pConfig->_wrapAround);
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+
+				bDoingSelection = false;
+				break;
+			case cdefNavRight:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( !bDoingSelection )
+				{
+					pChildView->NextCol(Global::pConfig->_wrapAround);
+					if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+				}
+				else
+				{
+					if ( !pChildView->blockSelected)
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					pChildView->AdvanceTrack(1,Global::pConfig->_wrapAround);
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+
+				bDoingSelection = false;
+				break;
+			case cdefNavUp:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if (pChildView->patStep == 0)
+					pChildView->PrevLine(1,Global::pConfig->_wrapAround);
+				else
+					//if added by sampler. New option.
+					if (!Global::pConfig->_NavigationIgnoresStep)
+						pChildView->PrevLine(pChildView->patStep,Global::pConfig->_wrapAround);//before
+					else
+						pChildView->PrevLine(1,Global::pConfig->_wrapAround);//new option
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+				bDoingSelection = false;
+				break;
+			case cdefNavDn:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if (pChildView->patStep == 0)
+					pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
+				else
+					//if added by sampler. New option.
+					if (!Global::pConfig->_NavigationIgnoresStep)
+						pChildView->AdvanceLine(pChildView->patStep,Global::pConfig->_wrapAround); //before
+					else
+						pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);//new option
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+				bDoingSelection = false;
+				break;
+			case cdefNavPageUp:
+				{
+					int stepsize(0);
+					if ( Global::pConfig->_pageUpSteps == 0) stepsize = Global::_pSong->LinesPerBeat();
+					else if ( Global::pConfig->_pageUpSteps == 1)stepsize = Global::_pSong->LinesPerBeat()*Global::pConfig->pv_timesig;
+					else stepsize = Global::pConfig->_pageUpSteps;
+
+					//if added by sampler to move backward 16 lines when playing
+					if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+					{
+						if (Global::pPlayer->_playBlock )
+						{
+							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
+							else
+							{
+								Global::pPlayer->_lineCounter = 0;
+								Global::pPlayer->ExecuteLine();
+							}
+						}
+						else
+						{
+							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
+							else
+							{
+								if (Global::pPlayer->_playPosition > 0)
+								{
+									Global::pPlayer->_playPosition -= 1;
+									Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - stepsize;												
+								}
+								else
+								{
+									Global::pPlayer->_lineCounter = 0;
+									Global::pPlayer->ExecuteLine();
+								}
+							}
+						}
+					}
+					//end of if added by sampler
+					else
+					{
+						pChildView->bScrollDetatch=false;
+						pChildView->ChordModeOffs = 0;
+
+						if ( bDoingSelection && !pChildView->blockSelected)
+						{
+							pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						pChildView->PrevLine(stepsize,false);
+						if ( bDoingSelection )
+						{
+							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+					}
+				}
+				break;
+
+			case cdefNavPageDn:
+				{
+					int stepsize(0);
+					if ( Global::pConfig->_pageUpSteps == 0) stepsize = Global::_pSong->LinesPerBeat();
+					else if ( Global::pConfig->_pageUpSteps == 1)stepsize = Global::_pSong->LinesPerBeat()*Global::pConfig->pv_timesig;
+					else stepsize = Global::pConfig->_pageUpSteps;
+
+					//if added by sampler
+					if (Global::pPlayer->_playing && Global::pConfig->_followSong)
+					{
+						Global::pPlayer->_lineCounter += stepsize;
+					}
+					//end of if added by sampler
+					else
+					{
+						pChildView->bScrollDetatch=false;
+						pChildView->ChordModeOffs = 0;
+						if ( bDoingSelection && !pChildView->blockSelected)
+						{
+							pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						pChildView->AdvanceLine(stepsize,false);
+						if ( bDoingSelection )
+						{
+							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+					}
+				}
+				break;
+			
+			case cdefNavTop:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if(bFT2HomeBehaviour)
+				{
+					pChildView->editcur.line=0;
+				}
+				else
+				{
+					if (pChildView->editcur.col != 0) 
+						pChildView->editcur.col = 0;
+					else 
+						if ( pChildView->editcur.track != 0 ) 
+							pChildView->editcur.track = 0;
+						else 
+							pChildView->editcur.line = 0;
+				}
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+
+				pChildView->Repaint(draw_modes::cursor);
+				break;
+			
+			case cdefNavBottom:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if(bFT2HomeBehaviour)
+				{
+					pChildView->editcur.line=Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
+				}
+				else
+				{		
+					if (pChildView->editcur.col != 8) 
+						pChildView->editcur.col = 8;
+					else if ( pChildView->editcur.track != Global::_pSong->SONGTRACKS-1 ) 
+						pChildView->editcur.track = Global::_pSong->SONGTRACKS-1;
+					else 
+						pChildView->editcur.line = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
+				}
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( bShiftArrowsDoSelect && Global::pConfig->_windowsBlocks) pChildView->BlockUnmark();
+
+
+				pChildView->Repaint(draw_modes::cursor);
+				break;
+			
+			case cdefRowInsert:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->InsertCurr();
+				break;
+
+			case cdefRowDelete:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if (pChildView->blockSelected && Global::pConfig->_windowsBlocks)
+				{
+					pChildView->DeleteBlock();
+				}
+				else
+				{
+					pChildView->DeleteCurr();
+				}
+				break;
+
+			case cdefRowClear:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if (pChildView->blockSelected && Global::pConfig->_windowsBlocks)
+				{
+					pChildView->DeleteBlock();
+				}
+				else
+				{
+					pChildView->ClearCurr();		
+				}
+				break;
+
+			case cdefBlockStart:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				break;
+
+			case cdefBlockEnd:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->EndBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				break;
+
+			case cdefSelectAll:
+				{
+					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
+					pChildView->StartBlock(0,0,0);
+					pChildView->EndBlock(Global::_pSong->SONGTRACKS-1,nl-1,8);
+				}
+				break;
+				
+			case cdefSelectCol:
+				{
+					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
+					pChildView->StartBlock(pChildView->editcur.track,0,0);
+					pChildView->EndBlock(pChildView->editcur.track,nl-1,8);
+				}
+				break;
+
+			case cdefSelectBar:
+			//selects 4*tpb lines, 8*tpb lines 16*tpb lines, etc. up to number of lines in pattern
+				{
+					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];			
+								
+					pChildView->bScrollDetatch=false;
+					pChildView->ChordModeOffs = 0;
+					
+					if (pChildView->blockSelectBarState == 1) 
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+
+					int blockLength = (4 * pChildView->blockSelectBarState * Global::_pSong->LinesPerBeat())-1;
+
+					if ((pChildView->editcur.line + blockLength) >= nl-1)
+					{
+						pChildView->EndBlock(pChildView->editcur.track,nl-1,8);	
+						pChildView->blockSelectBarState = 1;
+					}
+					else
+					{
+						pChildView->EndBlock(pChildView->editcur.track,pChildView->editcur.line + blockLength,8);
+						pChildView->blockSelectBarState *= 2;
+					}	
+					
+				}
+				break;
+
+			case cdefEditQuantizeDec:
+				pMainFrame->EditQuantizeChange(-1);
+				break;
+
+			case cdefEditQuantizeInc:
+				pMainFrame->EditQuantizeChange(1);
+				break;
+
+			case cdefTransposeChannelInc:
+				pChildView->patTranspose(1);
+				break;
+			case cdefTransposeChannelDec:
+				pChildView->patTranspose(-1);
+				break;
+			case cdefTransposeChannelInc12:
+				pChildView->patTranspose(12);
+				break;
+			case cdefTransposeChannelDec12:
+				pChildView->patTranspose(-12);
+				break;
+
+			case cdefTransposeBlockInc:
+				pChildView->BlockTranspose(1);
+				break;
+			case cdefTransposeBlockDec:
+				pChildView->BlockTranspose(-1);
+				break;
+			case cdefTransposeBlockInc12:
+				pChildView->BlockTranspose(12);
+				break;
+			case cdefTransposeBlockDec12:
+				pChildView->BlockTranspose(-12);
+				break;
+
+
+			case cdefBlockUnMark:
+				pChildView->BlockUnmark();
+				break;
+
+			case cdefBlockDouble:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->DoubleLength();
+				break;
+
+			case cdefBlockHalve:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->HalveLength();
+				break;
+
+			case cdefBlockCut:
+				pChildView->CopyBlock(true);
+				break;
+
+			case cdefBlockCopy:
+				pChildView->CopyBlock(false);
+				break;
+
+			case cdefBlockPaste:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,false);
+				break;
+
+			case cdefBlockMix:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,true);
+				break;
+
+			case cdefBlockDelete:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->DeleteBlock();
+				break;
+
+			case cdefBlockInterpolate:
+				pChildView->BlockParamInterpolate();
+				break;
+
+			case cdefBlockSetMachine:
+				pChildView->BlockGenChange(Global::_pSong->seqBus);
+				break;
+
+			case cdefBlockSetInstr:
+				pChildView->BlockInsChange(Global::_pSong->auxcolSelected);
+				break;
+
+			case cdefOctaveUp:
+				pMainFrame->ShiftOctave(1);
+				break;
+
+			case cdefOctaveDn:
+				pMainFrame->ShiftOctave(-1);
+				break;
 
 			case cdefPlaySong:
 				PlaySong();
@@ -468,23 +949,35 @@ namespace psycle { namespace host {
 				break;
 
 			case cdefPlayRowTrack:
-				pChildView->pattern_view()->PlayCurrentNote();
-				pChildView->pattern_view()->AdvanceLine(1,Global::pConfig->_wrapAround);
+				pChildView->PlayCurrentNote();
+				pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
 				break;
 
 			case cdefPlayRowPattern:
-				pChildView->pattern_view()->PlayCurrentRow();
-				pChildView->pattern_view()->AdvanceLine(1,Global::pConfig->_wrapAround);
+				pChildView->PlayCurrentRow();
+				pChildView->AdvanceLine(1,Global::pConfig->_wrapAround);
 				break;
 
 			case cdefPlayBlock:
 				pChildView->OnButtonplayseqblock();
 				break;
 
+			case cdefEditToggle:
+				pChildView->bEditMode = !pChildView->bEditMode;
+				pChildView->ChordModeOffs = 0;
+				
+				if(bCtrlPlay) Stop();
+				
+		//		pChildView->Repaint(draw_modes::patternHeader);
+				break;
+
 			case cdefPlayStop:
-				pChildView->pattern_view()->Stop();
+				Stop();
 				break;
 			
+			case cdefSelectMachine:
+				pChildView->SelectMachineUnderCursor();
+				break;
 			case cdefMachineInc:
 				pMainFrame->OnBIncgen();
 				break;
@@ -501,13 +994,34 @@ namespace psycle { namespace host {
 				pMainFrame->OnBDecwav();
 				break;
 
+			case cdefInfoPattern:
+				if ( pChildView->viewMode == view_modes::pattern )
+				{
+					pChildView->OnPopPattenproperties();
+				}
+				break;
+
+			case cdefInfoMachine:
+
+				if (Global::_pSong->seqBus < MAX_MACHINES)
+				{
+					if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
+					{
+						CPoint point;
+						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
+						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
+						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);//, Global::_pSong->seqBus);
+					}
+				}
+				break;
+
 			case cdefEditMachine:
 				pChildView->OnMachineview();
 				break;
 
 			case cdefEditPattern:
 				pChildView->OnPatternView();
-				pChildView->pattern_view()->ChordModeOffs = 0;
+				pChildView->ChordModeOffs = 0;
 				break;
 
 			case cdefEditInstr:
@@ -519,16 +1033,16 @@ namespace psycle { namespace host {
 				break;
 
 			case cdefMaxPattern:		
-				if (pChildView->pattern_view()->maxView == true) 
+				if (pChildView->maxView == true) 
 				{
-					pChildView->pattern_view()->maxView = false;
+					pChildView->maxView = false;
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,TRUE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,TRUE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
 				} 
 				else
 				{			
-					pChildView->pattern_view()->maxView = true;
+					pChildView->maxView = true;
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,FALSE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,FALSE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
@@ -536,27 +1050,38 @@ namespace psycle { namespace host {
 				break;
 
 			case cdefPatternInc:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.IncCurPattern();
+				pChildView->ChordModeOffs = 0;
+				pChildView->IncCurPattern();
 				break;
 
 			case cdefPatternDec:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.DecCurPattern();
+				pChildView->ChordModeOffs = 0;
+				pChildView->DecCurPattern();
 				break;
 
 			case cdefSongPosInc:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.IncPosition(brepeat?true:false);
+				pChildView->ChordModeOffs = 0;
+				pChildView->IncPosition(brepeat?true:false);
 				pMainFrame->StatusBarIdle(); 
 				break;
 
 			case cdefSongPosDec:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.DecPosition();
+				pChildView->ChordModeOffs = 0;
+				pChildView->DecPosition();
 				pMainFrame->StatusBarIdle(); 
 				break;
-			default:;
+
+			case cdefUndo:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->OnEditUndo();
+				break;
+
+			case cdefRedo:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->OnEditRedo();
+				break;
 			}
 		}
 
@@ -572,74 +1097,99 @@ namespace psycle { namespace host {
 
 		void InputHandler::PlayFromCur() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///todo: add proper start play code
-			Global::pPlayer->start(0);
-#else
-			Global::pPlayer->Start(pChildView->pattern_view()->editPosition,pChildView->pattern_view()->editcur.line);
-#endif
+			Global::pPlayer->Start(pChildView->editPosition,pChildView->editcur.line);
 			pMainFrame->StatusBarIdle();
 		}
 
 
-
-		void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
+		bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		{
-			Song* song = &pMainFrame->projects()->active_project()->song();
-			assert(note>=0 && note < 128);
+			if ( pChildView->editcur.col == 0 )
+			{
+				// get command
+				CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
 
+		//		BOOL bRepeat = nFlags&0x4000;
+				if ( cmd.GetType() == CT_Note )
+				{
+		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
+		//			{
+						pChildView->EnterNote(cmd.GetNote());
+						return true;
+		//			}
+				}
+				return false;
+			}
+			else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
+			{
+				return pChildView->MSBPut(nChar);
+			}
+			return false;
+		}
+
+		void InputHandler::StopNote(int note, int instr, bool bTranspose,Machine*pMachine)
+		{
+			assert(note>=0 && note < 128);
 			if(note<0)
 				return;
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = Global::_pSong->auxcolSelected;
 
 			// octave offset 
 			if(note<120)
 			{
 				if(bTranspose)
-					note+=song->currentOctave*12;
+					note+=Global::_pSong->currentOctave*12;
 
 				if (note > 119) 
 					note = 119;
 			}
 
-			if(!pMachine)
+			if(pMachine==NULL)
 			{
-				int mgn = song->seqBus;
+				int mgn = Global::_pSong->seqBus;
 
 				if (mgn < MAX_MACHINES)
 				{
-					pMachine = song->machine(mgn);
-				}
-				if (!pMachine)
-				{
-					return;
+					pMachine = Global::_pSong->_pMachine[mgn];
 				}
 			}
 
-			for(int i=0;i<song->tracks();i++)
+			for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
 			{
-				if(notetrack[i]==note)
+				if(notetrack[i]==note && instrtrack[i]==instNo)
 				{
-					notetrack[i]=120;
+					notetrack[i]=notecommands::release;
+					instrtrack[i]=255;
 					// build entry
-					PatternEvent entry;
-					entry.setNote(notecommands::release);
-					entry.setInstrument(song->auxcolSelected);
-					entry.setMachine(song->seqBus);
-					entry.setCommand(0);
-					entry.setParameter(0);	
+					PatternEntry entry;
+					entry._note = 120;
+					entry._inst = instNo;
+					entry._mach = Global::_pSong->seqBus;
+					entry._cmd = 0;
+					entry._parameter = 0;	
 
 					// play it
-					pMachine->Tick(i,entry);
+
+					if (pMachine)
+					{
+						pMachine->Tick(i,&entry);
+					}
 				}
 			}
 		}
 
 		// velocity range 0 -> 127
-		void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine)
+		void InputHandler::PlayNote(int note,int instr, int velocity,bool bTranspose,Machine*pMachine)
 		{
-			Song* song = &pMainFrame->projects()->active_project()->song();
-			// stop any notes with the same value
-			StopNote(note,bTranspose,pMachine);
+			// stop any (stuck) notes with the same value
+			StopNote(note,instr,bTranspose,pMachine);
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = Global::_pSong->auxcolSelected;
 
 			if(note<0)
 				return;
@@ -648,17 +1198,17 @@ namespace psycle { namespace host {
 			if(note<120)
 			{
 				if(bTranspose)
-					note+=song->currentOctave*12;
+					note+=Global::_pSong->currentOctave*12;
 
 				if (note > 119) 
 					note = 119;
 			}
 
 			// build entry
-			PatternEvent entry;
-			entry.setNote(note);
-			entry.setInstrument(song->auxcolSelected);
-			entry.setMachine(song->seqBus);
+			PatternEntry entry;
+			entry._note = note;
+			entry._inst = instNo;
+			entry._mach = Global::_pSong->seqBus;
 
 			if(velocity != 127 && Global::pConfig->midi().velocity().record())
 			{
@@ -667,42 +1217,41 @@ namespace psycle { namespace host {
 				switch(Global::pConfig->midi().velocity().type())
 				{
 					case 0:
-						entry.setCommand(Global::pConfig->midi().velocity().command());
-						entry.setParameter(par);
+						entry._cmd = Global::pConfig->midi().velocity().command();
+						entry._parameter = par;
 						break;
 					case 3:
-						entry.setInstrument(par);
+						entry._inst = par;
 						break;
 				}
 			}
 			else
 			{
-				entry.setCommand(0);
-				entry.setParameter(0);
+				entry._cmd=0;
+				entry._parameter=0;
 			}
 
 			// play it
 			if(pMachine==NULL)
 			{
-				if (entry.machine() < MAX_MACHINES)
+				if (entry._mach < MAX_MACHINES)
 				{
-					pMachine = song->machine(entry.machine());
+					pMachine = Global::_pSong->_pMachine[entry._mach];
 				}
 			}	
 
 			if (pMachine)
 			{
-				// implement lock sample to machine here.
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
-				if (pMachine->getMachineKey() == InternalKeys::sampler)
+				if (pMachine->_type == MACH_SAMPLER)
 				{
-					if ((song->_pInstrument[song->auxcolSelected]->_locked_machine_index != -1)
-						&& (song->_pInstrument[song->auxcolSelected]->_locked_to_machine == true))
+					if ((Global::_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
+						&& (Global::_pSong->_pInstrument[instNo]->_LOCKINST == true))
 					{
-						entry.setMachine(song->_pInstrument[song->auxcolSelected]->_locked_machine_index);
-						pMachine = song->machine(entry.machine());
+						entry._mach = Global::_pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
+						pMachine = Global::_pSong->_pMachine[entry._mach];
 						if ( !pMachine) return;
 					}
 				}
@@ -710,18 +1259,18 @@ namespace psycle { namespace host {
 				if(bMultiKey)
 				{
 					int i;
-					for (i = outtrack+1; i < song->tracks(); i++)
+					for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
 					{
-						if (notetrack[i] == 120)
+						if (notetrack[i] == notecommands::release)
 						{
 							break;
 						}
 					}
-					if (i >= song->tracks())
+					if (i >= Global::_pSong->SONGTRACKS)
 					{
 						for (i = 0; i <= outtrack; i++)
 						{
-							if (notetrack[i] == 120)
+							if (notetrack[i] == notecommands::release)
 							{
 								break;
 							}
@@ -734,14 +1283,15 @@ namespace psycle { namespace host {
 					outtrack=0;
 				}
 				// this should check to see if a note is playing on that track
-				if (notetrack[outtrack] < 120)
+				if (notetrack[outtrack] < notecommands::release)
 				{
-					StopNote(notetrack[outtrack], bTranspose, pMachine);
+					StopNote(notetrack[outtrack], instrtrack[outtrack], bTranspose, pMachine);
 				}
 
 				// play
 				notetrack[outtrack]=note;
-				pMachine->Tick(outtrack,entry);
+				instrtrack[outtrack]=instNo;
+				pMachine->Tick(outtrack,&entry);
 			}
 		}
 

@@ -1,42 +1,65 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/***************************************************************************
+	*   Copyright (C) 2007 Psycledelics     *
+	*   psycle.sf.net   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
+#ifndef TIMESIGNATURE_H
+#define TIMESIGNATURE_H
 
-#ifndef PSYCLE__CORE__TIME_SIGNATURE__INCLUDED
-#define PSYCLE__CORE__TIME_SIGNATURE__INCLUDED
-#pragma once
+/**
+@author  Psycledelics  
+*/
 
-#include <psycle/core/detail/project.hpp>
+namespace psy
+{
+	namespace core
+	{
 
-namespace psycle { namespace core {
 
-class PSYCLE__CORE__DECL TimeSignature {
-	public:
+class TimeSignature{
+public:
 		TimeSignature();
 		TimeSignature(int numerator, int denominator);
 		TimeSignature(float ownerDefinedBeats);
 
-		int numerator() const { return ownerDefined_ ? 4 : numerator_; }
-		void setNumerator(int value) { numerator_ = value; }
+		~TimeSignature();
 
-		int denominator() const { return ownerDefined_ ? 4 : denominator_; }
-		void setDenominator(int value) { if(value != 0) denominator_ = value; }
+		void setNumerator(int value);
+		int numerator() const;
 
-		int count() const { return count_; }
-		void incCount() { ++count_; }
-		void setCount(int count) { count_ = count; }
+		int denominator() const;
+		void setDenominator(int value);
 
-		bool ownerDefined() const { return ownerDefined_; }
+		void setCount(int count);
+		void incCount();
+		int count() const;
 
-		float beats() const { return ownerDefined_ ? ownerDefinedBeats_ : static_cast<float>(numerator_ * count_); }
-		void set_beats(float beats) { ownerDefined_ = true; ownerDefinedBeats_ = beats; }
+		float beats() const;
+		bool ownerDefined() const;
 
-	private:
+private:
+
 		int numerator_;
 		int denominator_;
 		int count_;
 
 		bool ownerDefined_;
 		float ownerDefinedBeats_;
+
 };
 
 }}

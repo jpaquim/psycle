@@ -5,13 +5,10 @@
 
 #include <sstream>
 
-#include <psycle/core/pattern.h>
-
 namespace psycle { namespace host {
 
-		CPatDlg::CPatDlg(CWnd* pParent, Pattern* pattern)
-			:  CDialog(CPatDlg::IDD, pParent),
-			   pattern_(pattern) {
+		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
+		{
 			//{{AFX_DATA_INIT(CPatDlg)
 			m_adaptsize = FALSE;
 			//}}AFX_DATA_INIT
@@ -38,29 +35,18 @@ namespace psycle { namespace host {
 			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
-		template< typename T >
-		static std::string asString( const T& value ) 
-		{
-			std::ostringstream o;
-			if (!(o << value) )
-				assert( 0 );
-			return o.str();
-		}
-
 		BOOL CPatDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
 			m_spinlines.SetRange(1,MAX_LINES);
 			m_patname.SetWindowText(patName);
 			m_patname.SetLimitText(30);
-			m_numlines.SetWindowText(asString(pattern_->timeSignatures().front().beats()).c_str());
-			CStatic* cc =(CStatic*)GetDlgItem(IDC_STATIC1);
-			cc->SetWindowText("Beats");
-			GetDlgItem(IDC_CHECK1)->ShowWindow(SW_HIDE);			
-			GetDlgItem(IDC_TEXT)->ShowWindow(SW_HIDE);			
+			char buffer[16];
+			itoa(patLines,buffer,10);
+			m_numlines.SetWindowText(buffer);
 			UDACCEL acc;
-			acc.nSec = 1;
-			acc.nInc = 4;
+			acc.nSec = 4;
+			acc.nInc = 16;
 			m_spinlines.SetAccel(1, &acc);
 			// Pass the focus to the texbox
 			m_patname.SetFocus();
@@ -97,25 +83,24 @@ namespace psycle { namespace host {
 			m_adaptsize = m_adaptsizeCheck.GetCheck();
 		}
 
-		template< typename T > 
-		static T asValue( const std::string& strValue, bool isHex = 0 )
-		{    
-			T result;
-			if ( strValue == "" )
-				return 0;
-			std::stringstream stream(strValue);
-			stream >> result;
-			return result;
-		}
-
 		void CPatDlg::OnUpdateNumLines() 
 		{
+			char buffer[256];
 			if (bInit)
 			{
-				char buffer[256];
 				m_numlines.GetWindowText(buffer,16);
-				double result = asValue<double>(std::string(buffer));
-				pattern_->timeSignatures().front().set_beats(result);
+				int val=atoi(buffer);
+
+				if (val < 0)
+				{
+					val = 0;
+				}
+				else if(val > MAX_LINES)
+				{
+					val = MAX_LINES-1;
+				}
+				sprintf(buffer,"HEX: %x",val);
+				m_text.SetWindowText(buffer);
 			}
 		}
 	}   // namespace

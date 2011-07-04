@@ -2,25 +2,26 @@
 
 envelope::envelope()
 {
-	envcoef=0;
-	suscounter=0;
+envcoef=0;
+suscounter=0;
 }
 
 envelope::~envelope()
 {
+
 }
 
 void envelope::reset()
 {
 	if(envstate==ENV_NONE)
 	{
-		envstate=ENV_ATT;
-		envcoef=1.0f/(float)a;
+	envstate=ENV_ATT;
+	envcoef=1.0f/(float)a;
 	}
 	else
 	{
-		envstate=ENV_ANTICLICK;
-		envcoef=envvol/32.0f;
+	envstate=ENV_CLICK;
+	envcoef=envvol/32.0f;
 	}
 }
 
@@ -54,7 +55,7 @@ void envelope::noteoff()
 {
 	if (envstate!=ENV_NONE)
 	{
-		envstate=ENV_REL;
-		envcoef=envvol/(float)r;
+				envstate=ENV_REL;
+				envcoef=envvol/(float)r;
 	}
 }

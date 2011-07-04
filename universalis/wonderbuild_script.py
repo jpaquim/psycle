@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2009-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+# copyright 2009-2009 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 if __name__ == '__main__':
 	import sys, os
@@ -36,31 +36,39 @@ class Wonderbuild(ScriptTask):
 		diversalis = diversalis.script_task
 		self._common = common = diversalis.common
 		diversalis = diversalis.mod_dep_phases
-		pch = common.pch
 		cfg = common.cfg.clone()
 
-		from wonderbuild.cxx_tool_chain import PkgConfigCheckTask, ModTask
-		from wonderbuild.std_checks.std_math import StdMathCheckTask
-		from wonderbuild.std_checks.std_cxx0x import StdCxx0xCheckTask
-		from wonderbuild.std_checks.boost import BoostCheckTask
-		from wonderbuild.std_checks.multithreading_support import MultithreadingSupportCheckTask
-		from wonderbuild.std_checks.openmp import OpenMPCheckTask
-		from wonderbuild.std_checks.dynamic_loading_support import DynamicLoadingSupportCheckTask
-		from wonderbuild.std_checks.winmm import WinMMCheckTask
-
-		check_cfg = cfg.clone()
-		std_math = StdMathCheckTask.shared(check_cfg)
-		std_cxx0x = StdCxx0xCheckTask.shared(check_cfg)
-		boost = BoostCheckTask.shared(check_cfg, (1, 40, 0), ('signals', 'thread', 'filesystem', 'date_time'))
-		boost_test = BoostCheckTask.shared(check_cfg, (1, 40, 0), ('unit_test_framework',))
-		mt = MultithreadingSupportCheckTask.shared(check_cfg)
-		openmp = OpenMPCheckTask.shared(check_cfg)
-		dl = DynamicLoadingSupportCheckTask.shared(check_cfg)
-		glibmm = PkgConfigCheckTask.shared(check_cfg, ['glibmm-2.4', 'gmodule-2.0', 'gthread-2.0'])
-		winmm = WinMMCheckTask.shared(check_cfg)
-		
 		from wonderbuild import UserReadableException
+		from wonderbuild.cxx_tool_chain import PkgConfigCheckTask, ModTask
+		from wonderbuild.std_checks.dlfcn import DlfcnCheckTask
+		from wonderbuild.std_checks.pthread import PThreadCheckTask
+		from wonderbuild.std_checks.boost import BoostCheckTask
+		from wonderbuild.std_checks.winmm import WinMMCheckTask
 		from wonderbuild.install import InstallTask
+		
+		check_cfg = cfg.clone()
+		glibmm = PkgConfigCheckTask.shared(check_cfg, ['glibmm-2.4', 'gmodule-2.0', 'gthread-2.0'])
+		dlfcn = DlfcnCheckTask.shared(check_cfg)
+		pthread = PThreadCheckTask.shared(check_cfg)
+		boost = BoostCheckTask.shared(check_cfg, (1, 34, 1), ('signals', 'thread', 'filesystem', 'date_time'))
+		boost_test = BoostCheckTask.shared(check_cfg, (1, 34, 1), ('unit_test_framework',))
+		winmm = WinMMCheckTask.shared(check_cfg)
+
+		CommonPch = common.Pch
+		class Pch(CommonPch):
+			def __call__(self, sched_ctx):
+				for x in CommonPch.__call__(self, sched_ctx): yield x
+				req = [diversalis]
+				opt = []
+				for x in sched_ctx.parallel_wait(universalis.cxx_phase, *(req + opt)): yield x
+				self.result = self.result and min(bool(r) for r in req)
+				self.public_deps += req + [x for x in opt if x]
+			
+			def do_cxx_phase(self):
+				if universalis.cxx_phase.dest_dir not in self.cfg.include_paths: self.cfg.include_paths.append(universalis.cxx_phase.dest_dir)
+				CommonPch.do_cxx_phase(self)
+		common.__class__.Pch = Pch # overrides the common pch
+		pch = common.pch
 
 		class UniversalisMod(ModTask):
 			def __init__(self):
@@ -69,11 +77,11 @@ class Wonderbuild(ScriptTask):
 				self.cxx_phase = UniversalisMod.InstallHeaders(self.project, self.name + '-headers')
 				
 			def __call__(self, sched_ctx):
-				self.private_deps = []
-				self.public_deps = [diversalis, std_math, boost, mt, dl]
+				self.private_deps = [pch.lib_task]
+				self.public_deps = [diversalis, boost]
 				if self.cfg.dest_platform.os == 'win': self.public_deps.append(winmm)
 				req = self.public_deps + self.private_deps
-				opt = [std_cxx0x, openmp, glibmm]
+				opt = [dlfcn, pthread, glibmm]
 				for x in sched_ctx.parallel_wait(*(req + opt)): yield x
 				self.result = min(bool(r) for r in req)
 				self.public_deps += [x for x in opt if x]
@@ -89,7 +97,7 @@ class Wonderbuild(ScriptTask):
 				if self.cfg.shared: self.cfg.defines['UNIVERSALIS__SHARED'] = None
 				self.cfg.defines['UNIVERSALIS__META__MODULE__NAME'] = '"' + self.name +'"'
 				self.cfg.defines['UNIVERSALIS__META__MODULE__VERSION'] = 0
-				self.cfg.include_paths.appendleft(src_dir)
+				self.cfg.include_paths.append(src_dir)
 				for s in (src_dir / 'universalis').find_iter(in_pats = ('*.cpp',), prune_pats = ('todo',)): self.sources.append(s)
 			
 			def apply_cxx_to(self, cfg):
@@ -113,7 +121,6 @@ class Wonderbuild(ScriptTask):
 								in_pats = ('*.hpp',), ex_pats = ('*.private.hpp',), prune_pats = ('todo',)))
 						return self._sources
 		self._mod_dep_phases = mod_dep_phases = universalis = UniversalisMod()
-		common.pch.public_deps.append(mod_dep_phases)
 		self.default_tasks.append(mod_dep_phases.mod_phase)
 
 		class UnitTestMod(ModTask):

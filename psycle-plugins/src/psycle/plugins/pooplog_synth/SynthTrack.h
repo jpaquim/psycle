@@ -4,9 +4,6 @@
 
 #pragma once
 #include "filter.h"
-#include <psycle/helpers/math.hpp>
-
-using namespace psycle::helpers::math;
 
 #define OVERDRIVEDIVISOR 512.0f
 
@@ -40,6 +37,7 @@ using namespace psycle::helpers::math;
 #define MAX_ENV_TIME				16384
 #define MIN_ENV_TIME				1
 #define MAX_RATE								4096
+#define MAX_TRACKS				64 // for upcoming expansion
 #define NUMCOLUMNS 5
 #define MAXVCFMODE 21
 #define MAXLFOWAVE 15
@@ -93,7 +91,7 @@ using namespace psycle::helpers::math;
 #define SOLVE_A(x)  float(std::pow(2.0f,((7.0f-std::log((float)x)/std::log(2.0f)))))
 #define SOLVE_A_LOW(x)  float(SOLVE_A(x)*(SAMPLE_LENGTH/2048))
 #define SOLVE_A_HIGH(x) float(1.0/(2.0-(1.0/SOLVE_A(x)))*(SAMPLE_LENGTH/2048))
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 
 		
 
@@ -322,7 +320,7 @@ const signed char ArpNote[MAXARP][16] = {
 struct VCFPAR
 {
 	float *pvcflfowave;
-	int vcflfowave;
+	int				vcflfowave;
 	int vcfenvdelay;
 	int vcfenvattack;
 	int vcfenvdecay;
@@ -339,7 +337,7 @@ struct VCFPAR
 
 struct VCFVALS
 {
-	int VcfEnvStage;
+	int				VcfEnvStage;
 	float VcfCutoff;
 	float vcflfophase;
 	float VcfEnvValue;
@@ -724,6 +722,24 @@ private:
 
 };
 
+///\todo #include <psycle/helpers/xxxxx>, or just static_cast directly
+inline int f2i(float flt)
+{ 
+	#if 1
+		return static_cast<int>(flt - 0.5);
+	#else // x87 fpu blergh...
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#endif
+}
+
 inline void CSynthTrack::FilterTick()
 {
 	unsigned int i;
@@ -753,7 +769,7 @@ inline void CSynthTrack::FilterTick()
 	{
 		vibrato_phase += ((VibratoSpeed)*(VibratoSpeed))*0.000030517f*freq_mul;
 		WRAP_AROUND(vibrato_phase);
-		Vib_basenote+=((syntp->vibrato_amplitude*0.00390625f)+(float(syntp->pvibrato_wave[lrint<int>(vibrato_phase)])
+		Vib_basenote+=((syntp->vibrato_amplitude*0.00390625f)+(float(syntp->pvibrato_wave[f2i(vibrato_phase)])
 						*0.015625f
 						*float(VibratoAmplitude)));
 	}
@@ -780,7 +796,7 @@ inline void CSynthTrack::FilterTick()
 				vibrato_phase += ((syntp->vibrato_speed-MAXSYNCMODES)*(syntp->vibrato_speed-MAXSYNCMODES))*0.000030517f;
 			}
 			WRAP_AROUND(vibrato_phase);
-			Vib_basenote+=((syntp->vibrato_amplitude*0.00390625f)+(float(syntp->pvibrato_wave[lrint<int>(vibrato_phase)])
+			Vib_basenote+=((syntp->vibrato_amplitude*0.00390625f)+(float(syntp->pvibrato_wave[f2i(vibrato_phase)])
 							*0.015625f
 							*float(syntp->vibrato_amplitude)));
 			break;
@@ -921,12 +937,12 @@ inline void CSynthTrack::FilterTick()
 				WRAP_AROUND(lVcfv[i].vcflfophase);
 				if (syntp->gVcfp[i].vcfenvtype == 1)
 				{
-					outcutoff+= (float(syntp->gVcfp[i].pvcflfowave[lrint<int>(lVcfv[i].vcflfophase)])
+					outcutoff+= (float(syntp->gVcfp[i].pvcflfowave[f2i(lVcfv[i].vcflfophase)])
 									*(float(syntp->gVcfp[i].vcflfoamplitude)+(lVcfv[i].VcfEnvValue*syntp->gVcfp[i].vcfenvmod)));
 				}
 				else
 				{
-					outcutoff+= (float(syntp->gVcfp[i].pvcflfowave[lrint<int>(lVcfv[i].vcflfophase)])
+					outcutoff+= (float(syntp->gVcfp[i].pvcflfowave[f2i(lVcfv[i].vcflfophase)])
 									*float(syntp->gVcfp[i].vcflfoamplitude));
 				}
 			}
@@ -1069,16 +1085,16 @@ inline void CSynthTrack::FilterTick()
 
 					if (syntp->gOscp[i].oscpenvtype == 1)
 					{
-						temp += ((float(syntp->gOscp[i].poscplfowave[lrint<int>(lOscv[i].oscplfophase)])
+						temp += ((float(syntp->gOscp[i].poscplfowave[f2i(lOscv[i].oscplfophase)])
 									*(float(syntp->gOscp[i].oscplfoamplitude))+(lOscv[i].OscpEnvValue*syntp->gOscp[i].oscpenvmod)));
 					}
 					else
 					{
-						temp += ((float(syntp->gOscp[i].poscplfowave[lrint<int>(lOscv[i].oscplfophase)])
+						temp += ((float(syntp->gOscp[i].poscplfowave[f2i(lOscv[i].oscplfophase)])
 									*float(syntp->gOscp[i].oscplfoamplitude)));
 					}
 				}
-				lOscv[i].oscphase = (syntp->gOscp[i].oscphase+lrint<int>(temp))&((SAMPLE_LENGTH*2)-1);
+				lOscv[i].oscphase = (syntp->gOscp[i].oscphase+f2i(temp))&((SAMPLE_LENGTH*2)-1);
 			}
 
 			// osc1w adsr
@@ -1185,12 +1201,12 @@ inline void CSynthTrack::FilterTick()
 
 				if (syntp->gOscp[i].oscwenvtype == 1)
 				{
-					temp += ((float(syntp->gOscp[i].poscwlfowave[lrint<int>(lOscv[i].oscwlfophase)])
+					temp += ((float(syntp->gOscp[i].poscwlfowave[f2i(lOscv[i].oscwlfophase)])
 								*(float(syntp->gOscp[i].oscwlfoamplitude))+(lOscv[i].OscwEnvValue*syntp->gOscp[i].oscwenvmod*0.0625f)));
 				}
 				else
 				{
-					temp += ((float(syntp->gOscp[i].poscwlfowave[lrint<int>(lOscv[i].oscwlfophase)])
+					temp += ((float(syntp->gOscp[i].poscwlfowave[f2i(lOscv[i].oscwlfophase)])
 									*float(syntp->gOscp[i].oscwlfoamplitude)));
 				}
 			}
@@ -1316,18 +1332,18 @@ inline void CSynthTrack::FilterTick()
 
 				if (syntp->gOscp[i].oscfenvtype == 1)
 				{
-					note+=(float(syntp->gOscp[i].poscflfowave[lrint<int>(lOscv[i].oscflfophase)])
+					note+=(float(syntp->gOscp[i].poscflfowave[f2i(lOscv[i].oscflfophase)])
 								*0.015625f
 								*(float(syntp->gOscp[i].oscflfoamplitude)+(lOscv[i].OscfEnvValue*syntp->gOscp[i].oscfenvmod)));
 				}
 				else
 				{
-					note+=(float(syntp->gOscp[i].poscflfowave[lrint<int>(lOscv[i].oscflfophase)])
+					note+=(float(syntp->gOscp[i].poscflfowave[f2i(lOscv[i].oscflfophase)])
 								*0.015625f
 								*float(syntp->gOscp[i].oscflfoamplitude));
 				}
 			}
-			lOscv[i].oscwidth=lrint<int>(temp);
+			lOscv[i].oscwidth=f2i(temp);
 			lOscv[i].OSCSpeed[0]=(float)pow(2.0, (note)/12.0)*WidthMultiplierB[lOscv[i].oscwidth]*freq_mul;
 			lOscv[i].OSCSpeed[1]=(float)pow(2.0, (note)/12.0)*WidthMultiplierA[lOscv[i].oscwidth]*freq_mul;
 			if(lOscv[i].OSCSpeed[0]<0) lOscv[i].OSCSpeed[0]=0;
@@ -1467,7 +1483,7 @@ inline void CSynthTrack::FilterTick()
 			{
 				if (syntp->gain_envmod > 0)
 				{
-					OutGain+= (float(syntp->pgain_lfo_wave[lrint<int>(gain_lfo_phase)])
+					OutGain+= (float(syntp->pgain_lfo_wave[f2i(gain_lfo_phase)])
 									/OVERDRIVEDIVISOR
 									*syntp->gain_lfo_amplitude
 									*syntp->gain_lfo_amplitude
@@ -1475,7 +1491,7 @@ inline void CSynthTrack::FilterTick()
 				}
 				else
 				{
-					OutGain-= (float(syntp->pgain_lfo_wave[lrint<int>(gain_lfo_phase)])
+					OutGain-= (float(syntp->pgain_lfo_wave[f2i(gain_lfo_phase)])
 									/OVERDRIVEDIVISOR
 									*syntp->gain_lfo_amplitude
 									*syntp->gain_lfo_amplitude
@@ -1485,7 +1501,7 @@ inline void CSynthTrack::FilterTick()
 			}
 			else
 			{
-				OutGain+= (float(syntp->pgain_lfo_wave[lrint<int>(gain_lfo_phase)])
+				OutGain+= (float(syntp->pgain_lfo_wave[f2i(gain_lfo_phase)])
 								/OVERDRIVEDIVISOR
 								*syntp->gain_lfo_amplitude
 								*syntp->gain_lfo_amplitude);
@@ -1522,7 +1538,7 @@ inline void CSynthTrack::FilterTick()
 			}
 			WRAP_AROUND(tremolo_phase);
 
-			TremoloVol=1.0f-((float(syntp->ptremolo_wave[lrint<int>(tremolo_phase)]+1.0f)
+			TremoloVol=1.0f-((float(syntp->ptremolo_wave[f2i(tremolo_phase)]+1.0f)
 							*0.00390625f
 							*0.533333f
 							*float(syntp->tremolo_amplitude)));
@@ -1547,7 +1563,7 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, unsigned in
 {
 	while (Pos>=SAMPLE_LENGTH)
 	{
-//								Pos = (Pos-lrint<int>(Pos))+(lrint<int>(Pos)&(SAMPLE_LENGTH-1));
+//								Pos = (Pos-f2i(Pos))+(f2i(Pos)&(SAMPLE_LENGTH-1));
 		Pos -= SAMPLE_LENGTH;
 		dir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1601,11 +1617,11 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, unsigned in
 
 			for (unsigned int i = 0; i < syntp->interpolate; i++)
 			{
-				total+=antialias(syntp->gOscp[osc].pWave[dir][lrint<int>(Pos)]);
+				total+=antialias(syntp->gOscp[osc].pWave[dir][f2i(Pos)]);
 				Pos += add[dir];
 				while (Pos>=SAMPLE_LENGTH)
 				{
-//																				Pos = (Pos-lrint<int>(Pos))+(lrint<int>(Pos)&(SAMPLE_LENGTH-1));
+//																				Pos = (Pos-f2i(Pos))+(f2i(Pos)&(SAMPLE_LENGTH-1));
 					Pos -= SAMPLE_LENGTH;
 					dir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1633,7 +1649,7 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, unsigned in
 		}
 		else
 		{
-			return syntp->gOscp[osc].pWave[dir][lrint<int>(Pos)];
+			return syntp->gOscp[osc].pWave[dir][f2i(Pos)];
 		}
 	}
 }
@@ -1644,7 +1660,7 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, float Pos)
 	/* unecessary
 	if (Pos>=SAMPLE_LENGTH*2)
 	{
-		Pos = lrint<int>(Pos)&(SAMPLE_LENGTH*2-1);
+		Pos = f2i(Pos)&(SAMPLE_LENGTH*2-1);
 	}
 	*/
 
@@ -1678,18 +1694,18 @@ inline float CSynthTrack::GetInterpolatedSampleOSC(unsigned int osc, float Pos)
 
 			for (unsigned int i = 0; i < syntp->interpolate; i++)
 			{
-				total+=antialias(syntp->gOscp[osc].pWave[lrint<int>(Pos)]);
+				total+=antialias(syntp->gOscp[osc].pWave[f2i(Pos)]);
 				Pos += add;
 				if (Pos>=SAMPLE_LENGTH)
 				{
-					Pos = (Pos-lrint<int>(Pos))+(lrint<int>(Pos)&((SAMPLE_LENGTH*2)-1));
+					Pos = (Pos-f2i(Pos))+(f2i(Pos)&((SAMPLE_LENGTH*2)-1));
 				}
 			}
 			return (total/syntp->interpolate);
 		}
 		else
 		{
-			return syntp->gOscp[osc].pWave[lrint<int>(Pos)];
+			return syntp->gOscp[osc].pWave[f2i(Pos)];
 		}
 	}
 }
@@ -1775,7 +1791,7 @@ inline float CSynthTrack::GetPhaseSampleMix()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed[lOscv[i].oscdir];
 			while (lOscv[i].OSCPosition>=SAMPLE_LENGTH)
 			{
-//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-lrint<int>(lOscv[i].OSCPosition))+(lrint<int>(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
+//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
 				lOscv[i].OSCPosition -= SAMPLE_LENGTH;
 				lOscv[i].oscdir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1812,7 +1828,7 @@ inline float CSynthTrack::GetPhaseSampleMix()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed;
 			if (lOscv[i].OSCPosition>=SAMPLE_LENGTH*2)
 			{
-				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-lrint<int>(lOscv[i].OSCPosition))+(lrint<int>(lOscv[i].OSCPosition)&(SAMPLE_LENGTH*2-1));
+				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH*2-1));
 				if ((syntp->gOscp[i].oscsync) && (syntp->gOscp[i].oscsync != i+1))
 				{
 					lOscv[syntp->gOscp[i].oscsync-1].OSCPosition = 0;
@@ -1883,7 +1899,7 @@ inline float CSynthTrack::GetPhaseSampleOSCOdd()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed[lOscv[i].oscdir];
 			while (lOscv[i].OSCPosition>=SAMPLE_LENGTH)
 			{
-//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-lrint<int>(lOscv[i].OSCPosition))+(lrint<int>(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
+//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
 				lOscv[i].OSCPosition -= SAMPLE_LENGTH;
 				lOscv[i].oscdir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -1920,7 +1936,7 @@ inline float CSynthTrack::GetPhaseSampleOSCOdd()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed;
 			if (lOscv[i].OSCPosition>=SAMPLE_LENGTH*2)
 			{
-				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-lrint<int>(lOscv[i].OSCPosition))+(lrint<int>(lOscv[i].OSCPosition)&(SAMPLE_LENGTH*2-1));
+				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH*2-1));
 				if ((syntp->gOscp[i].oscsync) && (syntp->gOscp[i].oscsync != i+1))
 				{
 					lOscv[syntp->gOscp[i].oscsync-1].OSCPosition = 0;
@@ -1994,7 +2010,7 @@ inline float CSynthTrack::GetPhaseSampleOSCEven()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed[lOscv[i].oscdir];
 			while (lOscv[i].OSCPosition>=SAMPLE_LENGTH)
 			{
-//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-lrint<int>(lOscv[i].OSCPosition))+(lrint<int>(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
+//																				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH-1));
 				lOscv[i].OSCPosition -= SAMPLE_LENGTH;
 				lOscv[i].oscdir ^= 1;
 #ifndef SYNTH_LIGHT
@@ -2031,7 +2047,7 @@ inline float CSynthTrack::GetPhaseSampleOSCEven()
 			lOscv[i].OSCPosition+=lOscv[i].OSCSpeed;
 			if (lOscv[i].OSCPosition>=SAMPLE_LENGTH*2)
 			{
-				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-lrint<int>(lOscv[i].OSCPosition))+(lrint<int>(lOscv[i].OSCPosition)&(SAMPLE_LENGTH*2-1));
+				lOscv[i].OSCPosition = (lOscv[i].OSCPosition-f2i(lOscv[i].OSCPosition))+(f2i(lOscv[i].OSCPosition)&(SAMPLE_LENGTH*2-1));
 				if ((syntp->gOscp[i].oscsync) && (syntp->gOscp[i].oscsync != i+1))
 				{
 					lOscv[syntp->gOscp[i].oscsync-1].OSCPosition = 0;
@@ -2143,16 +2159,16 @@ inline float CSynthTrack::HandleOverdrive(float input)
 		case 5+BASEOVERDRIVE:
 			// bounce off limits
 			input *= OutGain;
-			if (input < -1.0f)								return input-(lrint<int>(input)+1)*(input+1.0f);
-			else if (input > 1.0f)				return input-(lrint<int>(input)+1)*(input-1.0f);
+			if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+			else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 			return input;
 			break;
 		case 6: // hard clip 3
 		case 6+BASEOVERDRIVE:
 			// invert, this one is harsh
 			input *= OutGain;
-			if (input < -1.0f)								return input + (lrint<int>(input/(2.0f)))*(2.0f);
-			else if (input > 1.0f)				return input - (lrint<int>(input/(2.0f)))*(2.0f);
+			if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+			else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 			return input;
 			break;
 		case 7: // parabolic distortion
@@ -2170,7 +2186,7 @@ inline float CSynthTrack::HandleOverdrive(float input)
 			break;
 		case 9: // sin remapper
 		case 9+BASEOVERDRIVE:
-			return SourceWaveTable[0][lrint<int>(input*OutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
+			return SourceWaveTable[0][f2i(input*OutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
 			break;
 			/*
 		case 9: // soft clip 5

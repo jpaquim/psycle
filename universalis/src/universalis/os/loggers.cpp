@@ -1,26 +1,29 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2008 psycledelics http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
+///\implementation universalis::os::loggers
 #include <universalis/detail/project.private.hpp>
 #include "loggers.hpp"
 #include "thread_name.hpp"
-#include <universalis/stdlib/chrono.hpp>
+#include <universalis/stdlib/date_time.hpp>
 #include <cstdlib>
 #include <algorithm> // for std::min
 #include <iomanip>
 
 namespace universalis { namespace os {
 
+using namespace stdlib;
+
 /**********************************************************************************************************/
 // logger
 
 void logger::log(int const level, std::string const & message, compiler::location const & location) throw() {
-	lock_guard_type g(mutex_);
+	boost::mutex::scoped_lock lock(mutex());
 	do_log(level, message, location);
 }
 
 void logger::log(int const level, std::string const & string) throw() {
-	lock_guard_type g(mutex_);
+	boost::mutex::scoped_lock lock(mutex());
 	do_log(level, string);
 }
 
@@ -32,7 +35,7 @@ namespace loggers {
 multiplex_logger multiplex_logger::singleton_;
 
 bool multiplex_logger::add(logger & logger) {
-	lock_guard_type g(mutex_);
+	boost::mutex::scoped_lock lock(mutex());
 	iterator i(std::find(begin(), end(), &logger));
 	if(i != end()) return false;
 	push_back(&logger);
@@ -40,7 +43,7 @@ bool multiplex_logger::add(logger & logger) {
 }
 
 bool multiplex_logger::remove(logger const & logger) {
-	lock_guard_type g(mutex_);
+	boost::mutex::scoped_lock lock(mutex());
 	iterator i(std::find(begin(), end(), &logger));
 	if(i == end()) return false;
 	erase(i);
@@ -88,13 +91,13 @@ void stream_logger::do_log(int const level, std::string const & string) throw() 
 	int const static colors [] = {0, 2, 5, 1, 6, 3, 4, 7};
 	char const level_char(levels[std::min(static_cast<std::size_t>(level), sizeof levels)]);
 	try {
-		using namespace stdlib::chrono;
-		typedef high_resolution_clock clock;
-		clock::time_point const static time0 = clock::now();
-		nanoseconds const time_ns = clock::now() - time0;
+		nanoseconds::tick_type const static time0_ns =
+			hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count();
+		nanoseconds::tick_type const time_ns =
+			hiresolution_clock<utc_time>::universal_time().nanoseconds_since_epoch().get_count() - time0_ns;
 		if(ansi_terminal) ostream() << "\033[1;3" << colors[level % sizeof colors] << 'm';
 		ostream() << "log: "
-				<< std::setw(7) << time_ns.count() / 1000 << "us: "
+				<< std::setw(7) << time_ns / 1000 << "us: "
 				<< level_char << ": "
 				<< thread_name::get() << ": ";
 		if(ansi_terminal) {
@@ -112,6 +115,7 @@ void stream_logger::do_log(int const level, std::string const & string) throw() 
 		std::cerr << "logger crashed!";
 		if(ansi_terminal) std::cerr << "\033[0m";
 		std::cerr << std::endl;
+		
 		// ... and fallback to std::clog
 		std::clog << "log: " << level_char << ": " << string << '\n';
 	}

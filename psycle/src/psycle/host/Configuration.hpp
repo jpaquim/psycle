@@ -3,25 +3,23 @@
 #pragma once
 #include "Global.hpp"
 #include <cstddef>
-#include <psycle/audiodrivers/audiodriver.h>
 
-namespace psycle {
-	namespace audiodrivers { 
-		class MMEUiInterface;
-		class DSoundUiInterface; 
-		class AsioUiInterface; 
-	}
-	namespace host {
+#include "AudioDriver.hpp"
 
-	#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-	#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR)
-	#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
-	#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
+namespace psycle
+{
+	namespace host
+	{
+		#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
+		#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR)
+		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
+		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 
-	class CMidiInput; // MIDI IMPLEMENTATION 
+		class CMidiInput; // MIDI IMPLEMENTATION 
 
-	/// configuration.
-	class Configuration {
+		/// configuration.
+		class Configuration
+		{
 		public:
 			Configuration();
 			virtual ~Configuration() throw();
@@ -134,19 +132,20 @@ namespace psycle {
 			CFont effectFont;
 
 		public:
-			class midi_type {
+			class midi_type
+			{
 				public:
-					midi_type() : groups_(16), velocity_(0x0c), pitch_(1), raw_() {
-						for(std::size_t i(0) ; i < groups().size() ; ++i)
-							group(i).message() = group(i).command() = static_cast<int>(i + 1);
+					midi_type() : groups_(16), velocity_(0x0c), pitch_(1), raw_()
+					{
+						for(std::size_t i(0) ; i < groups().size() ; ++i) group(i).message() = group(i).command() = static_cast<int>(i + 1);
 					}
 
 				public:
 					class group_with_message;
-					class group_type {
+					class group_type
+					{
 						public:
-							group_type(int const & command = 0)
-								: record_(), type_(), command_(command), from_(), to_(0xff) {}
+							group_type(int const & command = 0) : record_(), type_(), command_(command), from_(), to_(0xff) {}
 
 						public:
 							bool const inline & record() const throw() { return record_; }
@@ -181,8 +180,8 @@ namespace psycle {
 						public:
 							typedef group_with_message with_message;
 					};
-
-					class group_with_message : public group_type {
+					class group_with_message : public group_type
+					{
 						public:
 							group_with_message() : message_() {}
 
@@ -219,6 +218,23 @@ namespace psycle {
 					bool       inline & raw()       throw() { return raw_; }
 				private:
 					bool                raw_;
+			public:
+				typedef enum {
+					MS_USE_SELECTED = 0,
+					MS_BANK,
+					MS_PROGRAM,
+					MS_MIDI_CHAN
+				} selector_t;
+				public:
+					selector_t const inline & gen_select_type() const throw() { return gen_select_type_; }
+					selector_t       inline & gen_select_type()       throw() { return gen_select_type_; }
+				private:
+					selector_t                gen_select_type_;
+				public:
+					selector_t const inline & inst_select_type() const throw() { return inst_select_type_; }
+					selector_t       inline & inst_select_type()       throw() { return inst_select_type_; }
+				private:
+					selector_t                inst_select_type_;
 			};
 
 		public:
@@ -233,7 +249,7 @@ namespace psycle {
 			bool _linenumbersCursor;
 			bool _followSong;
 
-			audiodrivers::AudioDriver** _ppOutputDrivers;
+			AudioDriver** _ppOutputDrivers;
 			int _numOutputDrivers;
 			int _outputDriverIndex;
 
@@ -254,38 +270,13 @@ namespace psycle {
 			int defaultPatLines;
 			bool autoStopMachines;
 
-			audiodrivers::AudioDriver* _pOutputDriver;
-		private:
-			audiodrivers::MMEUiInterface* mme_ui_;
-			audiodrivers::DSoundUiInterface* dsound_ui_;
-			audiodrivers::AsioUiInterface* asio_ui_;
-		public:
+			AudioDriver* _pOutputDriver;
 
 			bool Initialized() { return _initialized; }
 			bool Read();
 			void Write();
 			bool ReadVersion17();
 			void SetSkinDefaults();
-
-			inline int GetBitDepth() const throw()
-			{
-				return _pOutputDriver->playbackSettings().bitDepth();
-			}
-
-			inline int GetSamplesPerSec() const throw()
-			{
-				return _pOutputDriver->playbackSettings().samplesPerSec();
-			}
-#if 0
-			//Method commented because this is set via the audiodriver configuration.
-			inline void SetSamplesPerSec(int samplerate) const throw()
-			{
-				psycle::audiodrivers::AudioDriverSettings settings = _pOutputDriver->playbackSettings();
-				settings.setSamplesPerSec(samplerate);
-				_pOutputDriver->setPlaybackSettings(settings); 				
-			}
-#endif
-
 			bool _initialized;
 
 
@@ -325,10 +316,18 @@ namespace psycle {
 			std::string plugin_dir_;
 
 		public:
-			std::string const & GetVstDir              () const throw() { return vst_dir_; }
-			               void SetVstDir              (std::string const &);
+			std::string const & GetVst32Dir              () const throw() { return vst32_dir_; }
+			               void SetVst32Dir              (std::string const &);
+			std::string const & GetVst64Dir              () const throw() { return vst64_dir_; }
+			               void SetVst64Dir              (std::string const &);
 		private:
-			std::string vst_dir_;
+			std::string vst32_dir_;
+			std::string vst64_dir_;
+		public:
+			void UseJBridge(bool use);
+			bool UseJBridge() const;
+			void UsePsycleVstBridge(bool use);
+			bool UsePsycleVstBridge() const;
 
 		public:
 			std::string const & GetWaveRecDir              () const throw() { return wave_rec_dir_; }

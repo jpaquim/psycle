@@ -1,4 +1,6 @@
-#include "../../SongStructs.hpp"
+#pragma once
+
+#include "../../Global.hpp"
 #include <universalis/stdlib/cstdint.hpp>
 #include <iostream>
 #include <typeinfo>

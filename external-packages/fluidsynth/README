@@ -1,11 +1,3 @@
-Psycle's fluidsynth
-===================
-Attention. This is a stripped down version of the fluidsynth software.
-Concretely, all audio and midi driver classes, the shell and other bindings
-have been removed. Also, there's a fake implementation of glib which is intended
-only for single threaded operation.
-
-
 Introduction
 ============
 

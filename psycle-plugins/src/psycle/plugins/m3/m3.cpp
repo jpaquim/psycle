@@ -1,11 +1,8 @@
 // Here It goes the "mi" declaration. It has been moved to track.hpp due to some compiling requirements.
 #include "track.hpp"
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/sine_cosine.hpp>
 #include <cstring>
 #include <cmath>
-
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
 
 // M3 Buzz plugin by MAKK makk@gmx.de
 // released on 04-21-99
@@ -24,15 +21,19 @@ using namespace psycle::helpers::math;
 // Original Author sources are under:
 // http://www.fortunecity.com/skyscraper/rsi/76/plugins.htm
 
-float CTrack::freqTab[12*10];
-float CTrack::coefsTab[4 * 128 * 128 * 8];
-float CTrack::LFOOscTab[0x10000];
-signed short CTrack::WaveTable[5][2100];
+float freqTab[120];
+float coefsTab[4 * 128 * 128 * 8];
+float LFOOscTab[0x10000];
+signed short WaveTable[5][2100];
 
 /// This value defines the MAX_TRACKS of PSYCLE, not of the Plugin.
 /// Leave it like it is. Your Plugin NEEDS TO support it.
 /// (Or dynamically allocate them. Check JMDrum's Source for an example)
 unsigned int const MAX_PSYCLE_TRACKS = MAX_TRACKS;
+
+/// Change this number to the number of parameters of your machine
+/// Remember that Psycle ONLY have GLOBAL parameters.
+unsigned int const NUMPARAMETERS = 34;
 
 CMachineParameter const paraWave1 = {
 	"Osc1Wav", "Oscillator 1 Waveform", 0, 5, MPF_STATE, 0
@@ -114,6 +115,7 @@ CMachineParameter const paraFEnvMod = {
 };
 
 // LFOs
+
 CMachineParameter const paraLFO1Dest = {
 	"LFO1 Dest", "LFO1 Destination", 0, 15, MPF_STATE, 0
 };
@@ -128,6 +130,7 @@ CMachineParameter const paraLFO1Amount = {
 };
 
 // lfo2
+
 CMachineParameter const paraLFO2Dest = {
 	"LFO2 Dest", "LFO2 Destination", 0, 15, MPF_STATE, 0
 };
@@ -183,31 +186,30 @@ CMachineParameter const *pParameters[] = {
 	&paraLFO2Amount,
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0120,
-	GENERATOR,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	"M3 by Makk"
-	#ifndef NDEBUG
-		 " (debug build)"
-	#endif
-	,
-	"M3",
-	"Makk",
-	"About",
-	5
+CMachineInfo const MacInfo(
+		MI_VERSION,
+		GENERATOR,
+		NUMPARAMETERS,
+		pParameters,
+		"M3 by Makk"
+		#ifndef NDEBUG
+			 " (debug build)"
+		#endif
+		,
+		"M3",
+		"Makk",
+		"About",
+		5
 );
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi() {
-	Vals =new int[MacInfo.numParameters];
+	Vals =new int[NUMPARAMETERS];
 }
 
 mi::~mi() {
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init() {
@@ -221,34 +223,34 @@ void mi::Init() {
 	// Generate Oscillator tables
 	for(int c = 0; c < 2100; ++c) {
 		double sval = (double) c * 0.00306796157577128245943617517898389;
-		CTrack::WaveTable[0][c] = int(std::sin(sval) * 16384.0f);
+		WaveTable[0][c] = int(std::sin(sval) * 16384.0f);
 
-		if(c < 2048) CTrack::WaveTable[1][c] = (c * 16) - 16384;
-		else CTrack::WaveTable[1][c] = ((c - 2048) * 16) - 16384;
+		if(c < 2048) WaveTable[1][c] = (c * 16) - 16384;
+		else WaveTable[1][c] = ((c - 2048) * 16) - 16384;
 
-		if(c < 1024) CTrack::WaveTable[2][c] = -16384;
-		else CTrack::WaveTable[2][c] = 16384;
+		if(c < 1024) WaveTable[2][c] = -16384;
+		else WaveTable[2][c] = 16384;
 
-		if(c < 1024) CTrack::WaveTable[3][c] = (c * 32) - 16384;
-		else CTrack::WaveTable[3][c] = 16384 - ((c - 1024) * 32);
+		if(c < 1024) WaveTable[3][c] = (c * 32) - 16384;
+		else WaveTable[3][c] = 16384 - ((c - 1024) * 32);
 
-		CTrack::WaveTable[4][c] = std::rand();
+		WaveTable[4][c] = std::rand();
 	}
 
 	// generate frequencyTab
 	double freq = 16.35; // c0 to b9
 	for(int j = 0; j < 10; ++j)
 		for(int i = 0; i < 12; ++i) {
-			CTrack::freqTab[j * 12 + i] = float(freq);
+			freqTab[j * 12 + i] = float(freq);
 			freq *= 1.05946309435929526; // * 2 ^ (1 / 12)
 		}
 	// generate coefsTab
 	for(int t = 0; t < 4; ++t)
 		for(int f = 0; f < 128; ++f)
 			for(int r = 0; r < 128; ++r)
-				ComputeCoefs(CTrack::coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
+				ComputeCoefs(coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
 	// generate LFOOscTab
-	for(int p = 0; p < 0x10000; ++p) CTrack::LFOOscTab[p] = std::pow(1.00004230724139582, p - 0x8000);
+	for(int p = 0; p < 0x10000; ++p) LFOOscTab[p] = std::pow(1.00004230724139582, p - 0x8000);
 }
 
 void mi::Stop() {
@@ -306,7 +308,6 @@ void mi::ParameterTweak(int par, int val) {
 
 // Called each tick (i.e.when playing). Note: it goes after ParameterTweak and before SeqTick
 void mi::SequencerTick() {
-
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -324,7 +325,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 
 	SetNoValue(tmp);
 
-	if(note<=NOTE_MAX) { // New Note entering.
+	if(note<120) { // New Note entering.
 		for(int voice = 0; voice < MAX_SIMUL_TRACKS; ++voice) { // Find a voice to apply the new note
 			switch(Tracks[voice].AEGState) {
 				case EGS_NONE:
@@ -340,7 +341,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 			}
 			if(Tracks[voice]._channel == channel) { // Does exist a Previous note?
 				if(!Tracks[voice].Glide) { // If no Glide , Note Off
-					tmp.Note = NOTE_NOTEOFF;
+					tmp.Note = 120;
 					Tracks[voice].Tick(tmp);
 					Tracks[voice]._channel = -1;
 					if(useVoice == -1) useVoice = voice;
@@ -353,7 +354,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 		Tracks[useVoice]._channel = channel;
 		Tracks[useVoice].Tick(tmp);
 	}
-	else if(note == NOTE_NOTEOFF) {
+	else if(note == 120) {
 		for(int voice = 0; voice < MAX_SIMUL_TRACKS; ++voice) { // Find the...
 			if(
 				Tracks[voice]._channel == channel && // ...playing voice on current channel.
@@ -559,12 +560,14 @@ void mi::SetNoValue(tvals &tv) {
 	tv.LFO2Amount = 0xff;
 }
 
+
+
 void mi::ComputeCoefs( float *coefs, int freq, int r, int t) {
 
 	float omega = 2 * psycle::plugin_interface::pi * Cutoff(freq) / pCB->GetSamplingRate();
 
 	float sn, cs;
-	sincos(omega, sn, cs);
+	psycle::helpers::math::sin_cos(omega, sn, cs);
 	//float sn = std::sin(omega);
 	//float cs = std::cos(omega);
 	

@@ -1,27 +1,65 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-///\implementation psycle::core::Machine.
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/detail/project.private.hpp>
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
+///\implementation psy::core::Machine
+
 #include "machine.h"
 #include "song.h"
+#include "dsp.h"
 #include "fileio.h"
-#include "cpu_time_clock.hpp"
-#include "internalkeys.hpp"
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/dsp.hpp>
-#include <universalis/os/aligned_alloc.hpp>
-#include <universalis/os/loggers.hpp>
+#include <psycle/helpers/math/round.hpp>
 #include <cstddef>
+#include <cstdlib> // for posix_memalign
 #include <iostream> // only for debug output
 #include <sstream>
 
-namespace psycle { namespace core {
+namespace psy { namespace core {
 
-using namespace helpers;
-using namespace helpers::math;
-namespace loggers = universalis::os::loggers;
+///\todo general purpose => move this to universalis/operating_system/aligned_malloc.hpp or something
+template<typename X>
+void aligned_malloc(std::size_t alignment, X *& x, std::size_t count) {
+	std::size_t const size(count * sizeof(X));
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+			void * address;
+			posix_memalign(&address, alignment, size);
+			x = static_cast<X*>(address);
+			// note: free with std::free
+	#elif 0///\todo defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+			x = static_cast<X*>(__mingw_aligned_malloc(size, alignment));
+			// note: free with _mingw_aligned_free
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+			x = static_cast<X*>(_aligned_malloc(size, alignment));
+			// note: free with _aligned_free
+	#else
+		// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
+		// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
+		// note that memalign is declared obsolete and does not specify how to free the allocated memory.
+		
+		size; // unused
+		x = new X[count];
+		// note: free with delete[]
+	#endif
+}
+
+///\todo general purpose => move this to universalis/operating_system/aligned_dealloc.hpp or something
+template<typename X>
+void aligned_dealloc(X *& address) {
+	#if defined DIVERSALIS__OPERATING_SYSTEM__POSIX
+		free(address); address=0;
+	#elif 0///\todo: defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__GNU
+		_aligned_free(address); address=0;
+	#elif defined DIVERSALIS__OPERATING_SYSTEM__MICROSOFT && defined DIVERSALIS__COMPILER__MICROSOFT
+		_aligned_free(address); address=0;
+	#else
+		delete[] address; address=0;
+	#endif
+}
 
 /********************************************************************************************/
 // AudioBuffer
@@ -29,11 +67,11 @@ namespace loggers = universalis::os::loggers;
 AudioBuffer::AudioBuffer(int numChannels, int numSamples)
 : numchannels_(numChannels),numsamples_(numSamples)
 {
-	universalis::os::aligned_memory_alloc(16, buffer_, numChannels * numSamples);
+	aligned_malloc(16, buffer_, numChannels * numSamples);
 }
 
 AudioBuffer::~AudioBuffer() {
-	universalis::os::aligned_memory_dealloc(buffer_);
+	aligned_dealloc(buffer_);
 }
 
 void AudioBuffer::Clear() {
@@ -145,7 +183,7 @@ void Machine::crashed(std::exception const & e) throw() {
 	{
 		#if 0 ///\todo
 		if(function_error) {
-			universalis::cpu::exception const * const translated(dynamic_cast<universalis::cpu::exception const * const>(function_error->exception()));
+			universalis::processor::exception const * const translated(dynamic_cast<universalis::processor::exception const * const>(function_error->exception()));
 			if(translated) {
 				crash = true;
 				switch(translated->code()) {
@@ -196,16 +234,16 @@ void Machine::crashed(std::exception const & e) throw() {
 
 Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 :
+	crashed_(),
+	//fpu_exception_mask_(),
 	id_(id),
 	callbacks(callbacks),
 	playColIndex(0),
 	_bypass(false),
 	_standby(false),
 	_mute(false),
-	recursive_is_processing_(),
-	recursive_processed_(),
-	processing_count_(),
-	crashed_(),
+	_waitingForSound(false),
+	_worked(false),
 	audio_range_(1.0f),
 	numInPorts(0),
 	numOutPorts(0),
@@ -232,8 +270,9 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 	TWSActive(false),
 	TWSSamples(0)
 {
-	universalis::os::aligned_memory_alloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
-	universalis::os::aligned_memory_alloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
+
+	aligned_malloc(16, _pSamplesL, MAX_BUFFER_LENGTH);
+	aligned_malloc(16, _pSamplesR, MAX_BUFFER_LENGTH);
 
 	// Clear machine buffer samples
 	dsp::Clear(_pSamplesL,MAX_BUFFER_LENGTH);
@@ -267,8 +306,8 @@ Machine::Machine(MachineCallbacks* callbacks, Machine::id_type id)
 }
 
 Machine::~Machine() {
-	universalis::os::aligned_memory_dealloc(_pSamplesL);
-	universalis::os::aligned_memory_dealloc(_pSamplesR);
+	aligned_dealloc(_pSamplesL);
+	aligned_dealloc(_pSamplesR);
 }
 
 void Machine::CloneFrom(Machine & src) {
@@ -315,24 +354,23 @@ void Machine::CloneFrom(Machine & src) {
 
 	SetEditName(src.GetEditName());
 
-	#if 0 ///\todo FIXME: Implement MemoryFile.
+	///\todo FIXME: Implement MemoryFile.
 	MemoryFile file;
 	file.OpenMem(1000);
 	///\todo FIXME: Version anyone?! 
 	src.SaveSpecificChunk(&file);
 	LoadSpecificChunk(&file, 0);
 	file.CloseMem();
-	#endif
 }
 
 void Machine::Init() {
 	// Standard gear initalization
-	processing_count_ = 0;
-	accumulated_processing_time_ = 0;
+	//work_cpu_cost(0);
+	//wire_cpu_cost(0);
 	_mute = false;
 	Standby(false);
 	_bypass = false;
-	recursive_is_processing_ = false;
+	_waitingForSound = false;
 	// Centering volume and panning
 	SetPan(64);
 	// Clearing connections
@@ -420,14 +458,14 @@ bool Machine::Disconnect(Machine & dstMac) {
 	return true; 
 }
 
-void Machine::DeleteWires(CoreSong& song) {
+void Machine::DeleteWires() {
 	Machine * iMac;
 	// Deleting the connections to/from other machines
 	for(Wire::id_type w = 0; w < MAX_CONNECTIONS; ++w) {
 		// Checking In-Wires
 		if(_inputCon[w]) {
 			if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES)) {
-				iMac = song.machine(_inputMachines[w]);
+				iMac = callbacks->song().machine(_inputMachines[w]);
 				if(iMac) {
 					Wire::id_type wix = iMac->FindOutputWire(id());
 					if(wix >= 0) iMac->DeleteOutputWire(wix,0);
@@ -438,7 +476,7 @@ void Machine::DeleteWires(CoreSong& song) {
 		// Checking Out-Wires
 		if(_connection[w]) {
 			if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES)) {
-				iMac = song.machine(_outputMachines[w]);
+				iMac = callbacks->song().machine(_outputMachines[w]);
 				if(iMac) {
 					Wire::id_type wix = iMac->FindInputWire(id());
 					if(wix >= 0) iMac->DeleteInputWire(wix,0);
@@ -588,8 +626,10 @@ bool Machine::GetDestWireVolume(Machine::id_type srcIndex, Wire::id_type WireInd
 }
 
 void Machine::PreWork(int numSamples, bool clear) {
-	cpu_time_clock::time_point const t0(cpu_time_clock::now());
-	sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
+	processed_by_multithreaded_scheduler_ = false;
+	_worked = false;
+	_waitingForSound = false;
+	//PSYCLE__CPU_COST__INIT(cost);
 	if(_pScopeBufferL && _pScopeBufferR) {
 		float *pSamplesL = _pSamplesL;   
 		float *pSamplesR = _pSamplesR;   
@@ -615,111 +655,49 @@ void Machine::PreWork(int numSamples, bool clear) {
 		dsp::Clear(_pSamplesL, numSamples);
 		dsp::Clear(_pSamplesR, numSamples);
 	}
-	cpu_time_clock::time_point const t1(cpu_time_clock::now());
-	callbacks->song().accumulate_routing_time(t1 - t0);
+	//PSYCLE__CPU_COST__CALCULATE(cost, numSamples);
+	//wire_cpu_cost(wire_cpu_cost() + cost);
 }
 
-// Low level process function of machines. Takes care of audio generation and routing.
+// Low level Work function of machines. Takes care of audio generation and routing.
 // Each machine is expected to produce its output in its own _pSamplesX buffers.
-void Machine::recursive_process(unsigned int frames) {
-	recursive_process_deps(frames);
-
-	cpu_time_clock::time_point const t1(cpu_time_clock::now());
-
-	GenerateAudio(frames);
-
-	cpu_time_clock::time_point const t2(cpu_time_clock::now());
-	accumulate_processing_time(t2 - t1);
+void Machine::Work(int numSamples) {
+	WorkWires(numSamples);
+	GenerateAudio(numSamples);
 }
 
-void Machine::recursive_process_deps(unsigned int frames, bool mix) {
-	recursive_is_processing_ = true;
+void Machine::WorkWires(int numSamples, bool mix) {
+	// Variable to avoid feedback loops.
+	_waitingForSound = true;
 	for(int i(0); i < MAX_CONNECTIONS; ++i) {
 		if(_inputCon[i]) {
 			Machine * pInMachine = callbacks->song().machine(_inputMachines[i]);
 			if(pInMachine) {
-				if(!pInMachine->recursive_processed_ && !pInMachine->recursive_is_processing_)
-					pInMachine->recursive_process(frames);
+				if(!pInMachine->_worked && !pInMachine->_waitingForSound) { 
+					{
+						#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+							universalis::processor::exceptions::fpu::mask fpu_exception_mask(pInMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+						#endif
+						pInMachine->Work(numSamples);
+					}
+				}
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
-					cpu_time_clock::time_point const t0(cpu_time_clock::now());
-					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, frames, pInMachine->_lVol * _inputConVol[i]);
-					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, frames, pInMachine->_rVol * _inputConVol[i]);
-					cpu_time_clock::time_point const t1(cpu_time_clock::now());
-					callbacks->song().accumulate_routing_time(t1 - t0);
+					//PSYCLE__CPU_COST__INIT(wcost);
+					dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol * _inputConVol[i]);
+					dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol * _inputConVol[i]);
+					//PSYCLE__CPU_COST__CALCULATE(wcost, numSamples);
+					//wire_cpu_cost(wire_cpu_cost() + wcost);
 				}
 			}
 		}
 	}
-	recursive_is_processing_ = false;
-	{ // undernormalise
-		cpu_time_clock::time_point const t0(cpu_time_clock::now());
-		dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-		cpu_time_clock::time_point const t1(cpu_time_clock::now());
-		callbacks->song().accumulate_routing_time(t1 - t0);
-	}
-}
-
-/// tells the scheduler which machines to process before this one
-void Machine::sched_inputs(sched_deps & result) const {
-	if(_connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(_inputCon[c]) {
-		Machine & input(*callbacks->song().machine(_inputMachines[c]));
-		result.push_back(&input);
-	}
-	if (_isMixerSend && result.empty()) {
-		//Work down the connection wires until finding the mixer.
-		const Machine* nmac = this;
-		while(true) {
-			for(int i(0); i < MAX_CONNECTIONS; ++i) if(nmac->_connection[i]) {
-				nmac = callbacks->song().machine(nmac->_outputMachines[i]);
-				break;
-			}
-			if (nmac->getMachineKey() == InternalKeys::mixer) {
-				break;
-			}
-			if (nmac->_connectedOutputs == 0) {
-				// we are on the wrong machine, better return
-				return;
-			}
-		}
-		result.push_back(nmac);
-	}
-}
-
-/// tells the scheduler which machines may be processed after this one
-void Machine::sched_outputs(sched_deps & result) const {
-	if(_connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(_connection[c]) {
-		Machine & output(*callbacks->song().machine(_outputMachines[c]));
-		result.push_back(&output);
-	}
-}
-
-/// called by the scheduler to ask for the actual processing of the machine
-bool Machine::sched_process(unsigned int frames) {
-	cpu_time_clock::time_point const t0(cpu_time_clock::now());
-
-	if(_connectedInputs && !_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
-		Machine & input_node(*callbacks->song().machine(_inputMachines[i]));
-		if(!input_node.Standby()) Standby(false);
-		// Mixer already prepares the buffers onto the sends.
-		if(!Standby() && (input_node.getMachineKey() != InternalKeys::mixer || !_isMixerSend)) {
-			dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node.lVol() * _inputConVol[i]);
-			dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node.rVol() * _inputConVol[i]);
-		}
-	}
-	dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-
-	cpu_time_clock::time_point const t1(cpu_time_clock::now());
-	callbacks->song().accumulate_routing_time(t1 - t0);
-
-	GenerateAudio(frames);
-
-	cpu_time_clock::time_point const t2(cpu_time_clock::now());
-	accumulate_processing_time(t2 - t1);
-
-	++processing_count_;
-
-	return true;
+	_waitingForSound = false;
+	
+	//PSYCLE__CPU_COST__INIT(wcost);
+	dsp::Undenormalize(_pSamplesL, _pSamplesR, numSamples);
+	//PSYCLE__CPU_COST__CALCULATE(wcost,numSamples);
+	//wire_cpu_cost(wire_cpu_cost() + wcost);
 }
 
 void Machine::defineInputAsStereo(int numports) {
@@ -742,7 +720,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#if defined PSYCLE__CONFIGURATION__RMS_VUS
 		_volumeCounter = dsp::GetRMSVol(rms, _pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
 		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
-		int temp(lround<int>(50.0f * std::log10(_volumeCounter) + 100.0f));
+		int temp(psycle::helpers::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
 		if(temp > 0) _volumeDisplay = temp;
@@ -762,7 +740,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 	#else
 		_volumeCounter = core::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples) * (1.f / GetAudioRange());
 		// transpose scale from [-40, 0] dB to [0, 97] pixels (actually 100 pixels)
-		int temp(lround<int>(50.0f * std::log10(_volumeCounter) + 100.0f));
+		int temp(psycle::helpers::math::rounded(50.0f * log10f(_volumeCounter) + 100.0f));
 		// clip values
 		if(temp > 97) temp = 97;
 		if(temp > _volumeDisplay) _volumeDisplay = temp;
@@ -778,7 +756,7 @@ void Machine::UpdateVuAndStanbyFlag(int numSamples) {
 }
 
 bool Machine::LoadFileChunk(RiffFile* pFile,int version) {
-	uint32_t temp=0;
+	std::uint32_t temp=0;
 	pFile->Read(_bypass);
 	pFile->Read(_mute);
 	pFile->Read(_panning);
@@ -812,16 +790,16 @@ bool Machine::LoadFileChunk(RiffFile* pFile,int version) {
 }
 
 bool Machine::LoadSpecificChunk(RiffFile * pFile, int /*version*/) {
-	uint32_t size(0);
+	std::uint32_t size;
 	pFile->Read(size);
-	uint32_t count(0);
+	std::uint32_t count;
 	pFile->Read(count);
-	for(uint32_t i(0); i < count; ++i) {
-		uint32_t temp(0);
+	for(std::uint32_t i(0); i < count; ++i) {
+		std::uint32_t temp;
 		pFile->Read(temp);
 		SetParameter(i,temp);
 	}
-	pFile->Skip(size - sizeof count - count * sizeof(uint32_t));
+	pFile->Skip(size - sizeof count - count * sizeof(std::uint32_t));
 	return true;
 }
 
@@ -848,12 +826,12 @@ void Machine::SaveFileChunk(RiffFile * pFile) const {
 }
 
 void Machine::SaveSpecificChunk(RiffFile * pFile) const {
-	uint32_t count = GetNumParams();
-	uint32_t const size(sizeof count  + count * sizeof(uint32_t));
+	std::uint32_t count = GetNumParams();
+	std::uint32_t const size(sizeof count  + count * sizeof(std::uint32_t));
 	pFile->Write(size);
 	pFile->Write(count);
 	for(unsigned int i(0); i < count; ++i) {
-		uint32_t temp = GetParamValue(i);
+		std::uint32_t temp = GetParamValue(i);
 		pFile->Write(temp);
 	}
 }
@@ -951,10 +929,5 @@ void Machine::reallocateRemainingEvents(double beatOffset) {
 		++it;
 	}
 }
-
-	bool Machine::IsGenerator() const
-	{
-		return !acceptsConnections();
-	}
 
 }}

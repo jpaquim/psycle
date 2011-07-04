@@ -6,11 +6,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-namespace psycle { namespace helpers {
-
+namespace psycle
+{
+	namespace helpers
+	{
 		//const RiffChunkId MsRiff::grabbag = {' ',' ',' ',' '};
 
-		uint32_t RiffChunkHeader::length() const {
+		std::uint32_t RiffChunkHeader::length() const {
 			return ulength.unsignedValue();
 		}
 
@@ -58,4 +60,6 @@ namespace psycle { namespace helpers {
 			Seek(headerPosition + 8 + currentHeader.length());
 			if (GetPos() % 2 > 0) Skip(1);
 		}
-}}
+	}
+}
+

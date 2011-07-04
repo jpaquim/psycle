@@ -23,18 +23,16 @@
 #include "../vdabout.hpp"
 #include "combfilter.hpp"
 
-enum {
-	LDELAY=0,
-	LDRY,
-	LWET,
-	RDELAY,
-	RDRY,
-	RWET,
-	LOCKDELAY,
-	LOCKDRY,
-	LOCKWET
-};
-
+#define LDELAY    0
+#define LDRY      1
+#define LWET      2
+#define RDELAY    3
+#define RDRY      4
+#define RWET      5
+#define LOCKDELAY 6
+#define LOCKDRY   7
+#define LOCKWET   8
+#define PARNUM    9
 
 #define PARCOLS 3
 
@@ -42,10 +40,9 @@ enum {
 #define VDSHORTNAME  "Echo"
 #define VDAUTHOR     "V. Demasi (Built on "__DATE__")"
 #define VDCOMMAND    "License"
-int const VDVERSION = 0x110;
 
 #define MIN_DELAY  0
-#define MAX_DELAY  22050
+#define MAX_DELAY  COMB_FILTER_MAX_DELAY
 #define MIN_GAIN   0
 #define MAX_GAIN   100
 #define GAIN_NORM  100.0f
@@ -58,9 +55,6 @@ int const VDVERSION = 0x110;
 #define MIN_LOCK     0
 #define MAX_LOCK     1
 #define SET_LOCK 1
-
-using psycle::plugin_interface::CMachineParameter;
-using psycle::plugin_interface::MPF_STATE;
 
 CMachineParameter const parLeftDelay =
 {
@@ -120,38 +114,37 @@ CMachineParameter const *pParameters[] =
 	&parLockWet
 };
 
-psycle::plugin_interface::CMachineInfo const MacInfo (
-	psycle::plugin_interface::MI_VERSION,
-	VDVERSION,
-	psycle::plugin_interface::EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
+CMachineInfo const MacInfo(
+	MI_VERSION,
+	EFFECT,																																				// flags
+	PARNUM,																																				// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	VDPLUGINNAME " (Debug Build)",
+	VDPLUGINNAME " (Debug Build)",												// name
 #else
-	VDPLUGINNAME,
+	VDPLUGINNAME,																												// name
 #endif
-	VDSHORTNAME,
-	VDAUTHOR,
-	VDCOMMAND,
+	VDSHORTNAME,																												// short name
+	VDAUTHOR,																																// author
+	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
 	PARCOLS
 );
 
-class mi : public psycle::plugin_interface::CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
+class mi : public CMachineInterface
+{
+public:
+	mi();
+	virtual ~mi();
 
-		virtual void Init();
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
-		virtual void SequencerTick();
-		virtual bool DescribeValue(char *txt,int const param, int const value);
-		virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
-	private:
-		CombFilter leftFilter;
-		CombFilter rightFilter;
-		float lDryGain, lWetGain, rDryGain, rWetGain;
-		int lastDelayModified, lastDryModified, lastWetModified;
-		int currentSR;
-	};
+	virtual void Init();
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
+	virtual void SequencerTick();
+	virtual bool DescribeValue(char *txt,int const param, int const value);
+	virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
+private:
+	CombFilter leftFilter;
+	CombFilter rightFilter;
+	float lDryGain, lWetGain, rDryGain, rWetGain;
+	int lastDelayModified, lastDryModified, lastWetModified;
+};

@@ -9,38 +9,292 @@
 #include <cstring>
 #include <vector>
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math/clip.hpp>
 
-using namespace psycle::plugin_interface;
+#define NUMPARAMETERS 28
 
-CMachineParameter const paraCoarse = {"Coarse", "Coarse", -24, 24, MPF_STATE, 0};
-CMachineParameter const paraFine = {"Fine", "Fine", -100, 100, MPF_STATE, 0};
-CMachineParameter const paraPB = {"Pitch bend", "Pitch bend", 0, 0x4000, MPF_STATE, 0x2000};
-CMachineParameter const paraPD = {"Pitch bend depth", "Pitch bend depth", 0, 12, MPF_STATE, 12};
-CMachineParameter const paraExpression = {"Main Volume", "Main Volume", 0, 127, MPF_STATE, 127};
-CMachineParameter const paraDist = {"Distortion", "Distortion", 0, 100, MPF_STATE, 0};
-CMachineParameter const paraFilter = {"Envelope&Filter", "Envelope&Filter", 0, 1, MPF_STATE||MPF_LABEL, 0};
-CMachineParameter const paraCutOff = {"Cutoff", "Cutoff", 0, 0xFFFF, MPF_STATE, 0x7FFF};
-CMachineParameter const paraCutSweep = {"Cutoff sweep", "Cutoff sweep", -127, 127, MPF_STATE, 0};
-CMachineParameter const paraCutLFOSpeed = {"Cutoff LFO speed", "Cutoff", 0, 0xFF, MPF_STATE, 0};
-CMachineParameter const paraCutLFODepth = {"Cutoff LFO depth","Cutoff LFO depth", 0, 0x2000, MPF_STATE, 0};
-CMachineParameter const paraResonance = {"Resonance", "Resonance", 0, 0xFFFF, MPF_STATE, 0};
-CMachineParameter const paraMod = {"Modulation", "Modulation", 0, 0xFFFF, MPF_STATE, 0};
-CMachineParameter const paraDecay = {"Decay", "Modulation", 0, 0xFFFF, MPF_STATE, 0};
-CMachineParameter const paraLFO = {"Vibrato&Sweep", "Vibrato&Sweep", 0, 1, MPF_STATE||MPF_LABEL, 0};
-CMachineParameter const paraSpeed = {"Vibrato Speed", "Vibrato Speed", 0, 0xFF, MPF_STATE, 0};
-CMachineParameter const paraDepth = {"Vibrato Depth", "Vibrato Depth", 0, 0xFF, MPF_STATE, 0};
-CMachineParameter const paraType = {"LFO Type", "LFO Type", 0, 2, MPF_STATE, 0};
-CMachineParameter const paraDelay = {"Vibrato attack", "Vibrato attack", 0, 0xFF, MPF_STATE, 0};
-CMachineParameter const paraSweepDelay = {"sweep delay", "sweep delay", 0, 0xFF, MPF_STATE, 0};
-CMachineParameter const paraSweepValue = {"sweep amount", "sweep amount",	-127, 127, MPF_STATE, 0};
-CMachineParameter const paraChorus = {"Chorus", "Chorus", 0, 1, MPF_STATE||MPF_LABEL, 0};
-CMachineParameter const paraChorusOnOff = {"On/Off", "On/Off", 0, 1, MPF_STATE, 0};
-CMachineParameter const paraChorusDelay = {"Delay", "Delay", 0, 127, MPF_STATE, 3};
-CMachineParameter const paraChorusLFOSpeed = {"LFO Speed", "LFO Speed", 0, 127, MPF_STATE, 16};
-CMachineParameter const paraChorusLFODepth = {"LFO Depth", "LFO Depth", 0, 127, MPF_STATE, 3};
-CMachineParameter const paraChorusFB = {"Amount", "Amoun t", 1, 100, MPF_STATE, 64};
-CMachineParameter const paraChorusWidth = {"Stereo Width", "Stereo Width", -127, 127, MPF_STATE, -10};
+CMachineParameter const paraCoarse = 
+{
+	"Coarse",
+	"Coarse",																																				// description
+	-24,																																												// MinValue				
+	24,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFine = 
+{
+	"Fine",
+	"Fine",																																				// description
+	-65535,																																												// MinValue				
+	65535,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraPB = 
+{
+	"Pitch bend",
+	"Pitch bend",																																				// description
+	0,																																												// MinValue				
+	0x2000*2,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0x2000
+};
+
+CMachineParameter const paraPD = 
+{
+	"Pitch depth",
+	"Pitch depth",																																				// description
+	0,																																												// MinValue				
+	12,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	12
+};
+
+CMachineParameter const paraExpression = 
+{
+	"Expression",
+	"Expression",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	127
+};
+
+CMachineParameter const paraDist = 
+{
+	"Distortion",
+	"Distortion",																																				// description
+	0,																																												// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFilter = 
+{
+	"Envelope&Filter",
+	"Envelope&Filter",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE||MPF_LABEL,																								// Flags
+	0
+};
+
+
+CMachineParameter const paraCutOff = 
+{
+	"Cutoff",
+	"Cutoff",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0x7FFF
+};
+
+CMachineParameter const paraCutSweep = 
+{
+	"Cutoff sweep",
+	"Cutoff sweep",																																				// description
+	-127,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraCutLFOSpeed = 
+{
+	"Cutoff LFO speed",
+	"Cutoff",																																				// description
+	0,																																												// MinValue				
+	0xFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraCutLFODepth = 
+{
+	"Cutoff LFO depth",
+	"Cutoff LFO depth",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraResonance = 
+{
+	"Resonance",
+	"Resonance",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+CMachineParameter const paraMod = 
+{
+	"Modulation",
+	"Modulation",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDecay = 
+{
+	"Decay",
+	"Modulation",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraLFO = 
+{
+	"LFO&Sweep",
+	"LFO&Sweep",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE||MPF_LABEL,																								// Flags
+	0
+};
+
+CMachineParameter const paraSpeed = 
+{
+	"Speed",
+	"Speed",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDepth = 
+{
+	"Depth",
+	"Depth",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraType = 
+{
+	"Type",
+	"Type",																																				// description
+	0,																																												// MinValue				
+	2,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDelay = 
+{
+	"Delay",
+	"Delay",																																				// description
+	0,																																												// MinValue				
+	0xFFFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraSweepDelay = 
+{
+	"Sweep delay",
+	"Sweep delay",																																				// description
+	0,																																												// MinValue				
+	1/*xFFFF*/,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraSweepValue = 
+{
+	"Sweep value",
+	"Sweep value",																																				// description
+	//-127,																																												// MinValue				
+	//127,																																												// MaxValue
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+CMachineParameter const paraChorus = 
+{
+	"Chorus",
+	"Chorus",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE||MPF_LABEL,																																								// Flags
+	0
+};
+
+CMachineParameter const paraChorusOnOff = 
+{
+	"On/Off",
+	"On/Off",																																				// description
+	0,																																												// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+CMachineParameter const paraChorusDelay = 
+{
+	"Delay",
+	"Delay",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	3
+};
+
+CMachineParameter const paraChorusLFOSpeed = 
+{
+	"LFO Speed",
+	"LFO Speed",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	2
+};
+
+CMachineParameter const paraChorusLFODepth = 
+{
+	"LFO Depth",
+	"LFO Depth",																																				// description
+	0,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	1
+};
+
+
+CMachineParameter const paraChorusFB = 
+{
+	"Feedback",
+	"Feedback",																																				// description
+	1,																																												// MinValue				
+	100,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	64
+};
+
+CMachineParameter const paraChorusWidth = 
+{
+	"Width",
+	"Width",																																				// description
+	-127,																																												// MinValue				
+	127,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	-10
+};
+
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -72,23 +326,23 @@ CMachineParameter const *pParameters[] =
 	&paraChorusLFODepth,
 	&paraChorusFB,
 	&paraChorusWidth
+
 };
 
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0020,
-	GENERATOR,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	GENERATOR,																																// flags
+	NUMPARAMETERS,																												// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	"LegaSynth TB303 (Debug build)",
+	"LegaSynth TB303 (Debug build)",								// name
 #else
-	"LegaSynth TB303",
+	"LegaSynth TB303",																								// name
 #endif
-	"TB303",
-	"Juan Linietsky, ported by Sartorius",
-	"Help",
+	"TB303",																												// short name
+	"Juan Linietsky, ported by Sartorius",																												// author
+	"Help",																																				// A command, that could be use for open an editor, etc...
 	2
 );
 
@@ -110,51 +364,65 @@ public:
 private:
 
 	TB303_Voice track[MAX_TRACKS];
+	Voice::Default_Data track_def_data;
 	TB303_Voice::Data track_data;
 	Chorus				chorus;
 	int samplerate;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals=new int[MacInfo.numParameters];
+	Vals=new int[NUMPARAMETERS];
 }
 
 mi::~mi()
 {
 	// Destroy dinamically allocated objects/memory here
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init()
 {
-	// Initialize your stuff here
+// Initialize your stuff here
 	samplerate = pCB->GetSamplingRate();
-	track_data.LFO_speed=0;
-	track_data.LFO_depth=0;
-	track_data.LFO_type=0; // 0 - sine / 1 - saw / 2- pulse
-	track_data.LFO_delay=0; 
+	track_def_data.relative_pan=0;
+	track_def_data.LFO_speed=0;
+	track_def_data.LFO_depth=0;
+	track_def_data.LFO_type=0; // 0 - sine / 1 - saw / 2- pulse
+	track_def_data.LFO_delay=0; 
 	
-	track_data.sweep_delay=0;
-	track_data.sweep_value=0;
+	track_def_data.sweep_delay=0;
+	track_def_data.sweep_value=0;
 	
+		/* Channel Default Stuff */
+	
+	//track_def_data.vibrato_depth=0;
+	//track_def_data.vibrato_speed=30;
+	//track_def_data.channel_pan=0;
+	//track_def_data.main_volume=127;
+	//track_def_data.default_chorus=0;
+	//track_def_data.portamento_time_coarse=0;
+	//track_def_data.portamento_time_fine=0;
+	//track_def_data.do_portamento=false;
+
 	track_data.coarse = 0;
-	track_data.fine=0; //coarse -100 to 100
+	track_data.fine=0; //coarse -127 to 127
 	track_data.envelope_cutoff=0x7FFF; //"Cut", "Filter envelope cutoff 0 - 0xFFFF"
 	track_data.resonance=0; //"Res", "Filter resonance - 0 - 0xFFFF 
 	track_data.envelope_mod=0; //"Env", "Filter envelope modulation"
 	track_data.envelope_decay=0; // "Filter envelope decay" - 0 - 0xFFFF
 
-	track_data.cutoff_sweep=0;
-	track_data.cutoff_lfo_speed=0;
-	track_data.cutoff_lfo_depth=0;
+	track_data.cutoff_sweep=0; // -127 to 127
+	track_data.cutoff_lfo_speed=0; // 0 - 0xFF
+	track_data.cutoff_lfo_depth=0; // 0 - 0xFF
 
 
 	for(int i=0;i<MAX_TRACKS;i++)
 	{
-		track[i].set_data(track_data);
+		track[i].set_default_data(&track_def_data);
+		track[i].set_data(&track_data);
 
 		track[i].set_mix_frequency(samplerate);
 		track[i].set_note_off(0);
@@ -173,7 +441,7 @@ void mi::Stop()
 
 void mi::SequencerTick()
 {
-	// Called on each tick while sequencer is playing
+// Called on each tick while sequencer is playing
 	if(samplerate!=pCB->GetSamplingRate())
 	{
 		samplerate=pCB->GetSamplingRate();
@@ -196,7 +464,7 @@ void mi::ParameterTweak(int par, int val)
 		case 1:track_data.fine = val; break;
 		case 2:pb = val; break;
 		case 3:pd = val; break;
-		case 4:expr = val; break;
+		case 4:expr = (val&0xFF); break;
 		case 5: break;
 		case 6: break;
 		case 7:track_data.envelope_cutoff = val; break;
@@ -207,163 +475,127 @@ void mi::ParameterTweak(int par, int val)
 		case 12:track_data.envelope_mod = val; break;
 		case 13:track_data.envelope_decay = val;break;
 		case 14:break;
-		case 15:track_data.LFO_speed = val;break;
-		case 16:track_data.LFO_depth = val;break;
-		case 17:track_data.LFO_type = val;break;
-		case 18:track_data.LFO_delay = val;break;
-		case 19:track_data.sweep_delay = val;break;
-		case 20:track_data.sweep_value = val;break;
+		case 15:track_def_data.LFO_speed = val;break;
+		case 16:track_def_data.LFO_depth = val;break;
+		case 17:track_def_data.LFO_type = val;break;
+		case 18:track_def_data.LFO_delay = val;break;
+		case 19:track_def_data.sweep_delay = 0;break; // Not yet available
+		case 20:track_def_data.sweep_value = 0;break; // Not yet available
 		case 21:break;
 		case 22:break;
 		case 23:chorus.set_delay(val);break;
-		case 24:chorus.set_lfo_speed(val*0.125f);break;
-		case 25:chorus.set_lfo_depth(val*0.1f);break;
+		case 24:chorus.set_lfo_speed(val);break;
+		case 25:chorus.set_lfo_depth(val);break;
 		case 26:chorus.set_feedback(val);break;
-		case 27:chorus.set_width(val/1.27f);break;
+		case 27:chorus.set_width(val);break;
 	}
-	if (par>1 && par<5){
-		for(int c=0;c<MAX_TRACKS;c++) {
-			track[c].set_pitch_bend(pb);
-			track[c].set_pitch_depth(pd);
-			track[c].set_main_volume(expr);
-		}
-	} else if (par>14 && par<21) {
-		for(int c=0;c<MAX_TRACKS;c++) {
-			track[c].set_data(track_data);
-		}
+	if (par<14){
+		for(int c=0;c<MAX_TRACKS;c++)
+			{
+				track[c].set_data(&track_data);
+				track[c].set_pitch_bend(pb);
+				track[c].set_pitch_depth(pd);
+				track[c].set_expression(expr);
+			}
+	} else if (par>14&&par<21) {
+		for(int c=0;c<MAX_TRACKS;c++)
+			{
+				track[c].set_default_data(&track_def_data);
+			}
+
 	}
 }
 
 void mi::Command()
 {
-	// Called when user presses editor button
-	// Probably you want to show your custom window here
-	// or an about button
-	char buffer[2048];
+// Called when user presses editor button
+// Probably you want to show your custom window here
+// or an about button
+char buffer[2048];
 
-	sprintf(
-			buffer,"%s",
-			"LegaSynth TB303\n"
-			);
+sprintf(
+		buffer,"%s",
+		"LegaSynth TB303\n"
+		);
 
-	pCB->MessBox(buffer,"LegaSynth TB303",0);
+pCB->MessBox(buffer,"LegaSynth TB303",0);
 
 }
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks)
 {
-	double const range=0.0000152587890625; // change range from 32bits to 16bits.
-	float const dist=(float)Vals[5]*0.005f;
+	bool const use_chorus=(Vals[22]==1);
+	float const dist=(float)Vals[5]*.01*.0000015;
+	//std::vector<float> s_l(numsamples), s_r(numsamples);
+	std::vector<int> s_l(numsamples), s_r(numsamples);
+
 	for(int c=0;c<tracks;c++)
 	{
+		s_l.assign(numsamples,0);
+		s_r.assign(numsamples,0);
+
 		TB303_Voice *ptrack=&track[c];
-		Voice::Status status = ptrack->get_status();
-		if (status != Voice::DEAD) {
-			ptrack->mix(numsamples,psamplesleft,psamplesright);
-		}
-	}
-	if(Vals[5]>0) {
+		
+		ptrack->mix(numsamples,&s_l.front(),&s_r.front());
+
 		float *xpsamplesleft=psamplesleft;
 		float *xpsamplesright=psamplesright;
 		--xpsamplesleft;
 		--xpsamplesright;
+
 		for(int k=0;k<numsamples;k++)
 		{
-			const float fl = *++xpsamplesleft;
-			const double il = fl*dist;
-			*xpsamplesleft=psycle::helpers::math::f2iclip16(fl-range*(il*il-il*il*il));
-			const float fr = *++xpsamplesright;
-			const double ir = fr*dist;
-			*xpsamplesright=psycle::helpers::math::f2iclip16(fr-range*(ir*ir-ir*ir*ir));
+			/*float*/ int &sl = s_l.at(k);
+			/*float*/ int &sr = s_r.at(k);
+			*++xpsamplesleft+=(dist>0?(float)(sl-dist*(sl*sl+sl*sl*sl)):(float)sl);
+			*++xpsamplesright+=(dist>0?(float)(sr-dist*(sr*sr+sr*sr*sr)):(float)sr);
 		}
 	}
-
-	if (Vals[22]==1){
-		chorus.process(psamplesleft,psamplesright,numsamples);
+	if (use_chorus){
+			//--psamplesleft;
+			//--psamplesright;
+			chorus.process(psamplesleft,psamplesright,numsamples);
 	}
 }
 
 // Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
-	switch (param)
+	if(param==1)
 	{
-	case 0://fallthrough
-	case 3:
-		sprintf(txt,"%d notes",value);
+		sprintf(txt,"%.6f",(float)value/65535.f);
 		return true;
-	case 1:
-		sprintf(txt,"%.0f cents",(float)value/655.35f);
-		return true;
-	case 2:
-		sprintf(txt,"%.02f%% (%.02f)",(float)(value-8192.f)/81.92f, Vals[3]*(float)(value-8192.f)/8192.f);
-		return true;
-	case 5:
+	}
+
+	if(param==5)
+	{
 		sprintf(txt,"%i %%",value);
 		return true;
-	case 8:
-		sprintf(txt,"%.02f%%/s",value*16*Voice::UPDATES_PER_SECOND/655.35f);
-		return true;
-	case 9:
-		sprintf(txt,"%.02fHz",(value+1)*Voice::UPDATES_PER_SECOND*(0.1f/256.f));
-		return true;
-	case 10:
-		sprintf(txt,"%.02f%%", value*(1.0f/81.92f));
-		return true;
-	case 13:
-		sprintf(txt,"%.02fms",50 + (2450*value*0.000015259021896696421759365224689097f)); /*/65535.0;*/
-		return true;
-	case 15:
-		sprintf(txt,"%.02fHz",value*(Voice::UPDATES_PER_SECOND/819.2f));
-		return true;
-	case 16:
-		sprintf(txt,"%.02f notes",value*0.1f);
-		return true;
-	case 17:
+	}
+	if(param==17)
+	{
 		switch(value)
 		{
 		case 0:sprintf(txt,"Sine");return true;break;
 		case 1:sprintf(txt,"Sawtooth");return true;break;
 		case 2:sprintf(txt,"Square");return true;break;
 		}
-	case 18: //fallthrough
-	case 19:
-		sprintf(txt,"%.02fms",value*(1000.f/Voice::UPDATES_PER_SECOND));
+	}
+	
+	if (param==19 || param==20)
+	{
+		sprintf(txt,"N/A");
 		return true;
-	case 20:
-		sprintf(txt,"%.02f notes/s", (std::pow(std::abs(value),1.6)*0.0025*Voice::UPDATES_PER_SECOND)*((value<0)?-1.0:1.0));
-		return true;
-	case 22:
+	}
+
+
+	if (param==22)
+	{
 		sprintf(txt,value?"On":"Off");
 		return true;
-	case 23:
-		sprintf(txt,"%d ms",value);
-		return true;
-	case 24:
-		sprintf(txt,"L%.02f Hz, R%.02f Hz",value*0.125f, value*0.15625f);
-		return true;
-	case 25:
-		sprintf(txt,"%.01f ms",value*0.1f);
-		return true;
-	case 26:
-		sprintf(txt,"%d %%",value);
-		return true;
-	case 27:
-		if(value<0) {
-			sprintf(txt,"%.0f%% - %.0f%%", 100.f-(value/1.27f), value/1.27f);
-		}
-		else if(value == 0) { sprintf(txt,"Left - Right"); }
-		else if(value == 64) { sprintf(txt,"Center"); }
-		else if(value== 127) { sprintf(txt,"Right - Left"); }
-		else { sprintf(txt,"%.0f%% - %.0f%%", 100.f-(value/1.27f), value/1.27f); }
-		
-		return true;
-	default:
-		break;
-	};
-	return false;
-}
+	}
+	return false;}
 
 //////////////////////////////////////////////////////////////////////
 // The SeqTick function where your notes and pattern command handlers
@@ -376,17 +608,17 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
+	if( (note < 121 || note == 255 ) && (cmd == 0x0C)) track[channel].set_preamp(val * .003921568627450980392156862745098f); // 1/255
+	
 	// Note off
-	if(note==NOTE_NOTEOFF)
+	if(note==120)
 	{
 		track[channel].set_note_off(0);
 	}
-	else if (note<=NOTE_MAX)
+	else if (note< 120)
 	// Note on
 	{
+		//track[channel].set_note_off(127);
 		track[channel].set_note(note,Vals[4]);
 	}
-
-	if( (note < 121 || note == 255 ) && (cmd == 0x0C)) track[channel].set_velocity(val /2);
-	
 }

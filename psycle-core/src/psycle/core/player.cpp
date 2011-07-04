@@ -1,40 +1,40 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/detail/project.private.hpp>
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
+///\file
+///\brief implementation file for psy::core::Player
+
 #include "player.h"
-
 #include "internal_machines.h"
 #include "machine.h"
 #include "sampler.h"
 #include "song.h"
-#include "cpu_time_clock.hpp"
-#if defined DIVERSALIS__OS__MICROSOFT
-	#include "vsthost.h"
-	#include "machinefactory.h"
-#endif
-
-
 #include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/helpers/value_mapper.hpp>
-#include <universalis/compiler/typenameof.hpp>
-#include <universalis/os/loggers.hpp>
-#include <universalis/os/thread_name.hpp>
-#include <universalis/os/sched.hpp>
-#include <universalis/cpu/exception.hpp>
-#include <universalis/os/aligned_alloc.hpp>
+
+///\todo needs link against libuniversalis
+//#include <universalis/operating_system/cpu_affinity.hpp>
+
 #include <boost/bind.hpp>
+#include <iostream> // only for debug output
 
-namespace psycle { namespace core {
-
-using namespace helpers;
-using namespace audiodrivers;
-
-namespace loggers = universalis::os::loggers;
+namespace psy { namespace core {
 
 namespace {
 	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
-	bool const ultra_trace(false);
+}
+
+Player & Player::singleton() {
+	// note: keep sure a player instance is created from the gui
+	// before starting audiothread
+	// or use single threaded only
+	static Player player;
+	return player; 
 }
 
 Player::Player()
@@ -46,25 +46,20 @@ Player::Player()
 	recording_(),
 	recording_with_dither_(),
 	playing_(),
-	autoStopMachines_(),
-	autostop_(true) {
-	driver_ = default_driver_ = new DummyDriver();
-	universalis::os::aligned_memory_alloc(16, buffer_, MAX_SAMPLES_WORKFN);
+	loopSequenceEntry_(),
+	autoStopMachines_()
+{
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
+
+	///\todo starting the threads needs to be done elsewhere?
 	start_threads();
 }
 
-Player::~Player() {
-	stop_threads();
-	delete default_driver_;
-	universalis::os::aligned_memory_dealloc(buffer_);
-}
-
-
 void Player::start_threads() {
-	if(loggers::trace()) loggers::trace()("psycle: core: player: starting scheduler threads", UNIVERSALIS__COMPILER__LOCATION);
-	if(!threads_.empty()) {
-		if(loggers::trace()) loggers::trace()("psycle: core: player: scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
+	std::cout << "psycle: core: player: starting scheduler threads\n";
+	//if(loggers::information()()) loggers::information()("starting scheduler threads on graph " + graph().underlying().name() + " ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(threads_.size()) {
+		//if(loggers::information()()) loggers::information()("scheduler threads are already running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
 
@@ -76,28 +71,32 @@ void Player::start_threads() {
 	stop_requested_ = suspend_requested_ = false;
 	processed_node_count_ = suspended_ = 0;
 
-	unsigned int thread_count = thread::hardware_concurrency();
+	///\todo needs link against libuniversalis
+	//thread_count_ = universalis::operating_system::cpu_affinity::cpu_count();
+	thread_count_ = 0;
 	{ // thread count env var
 		char const * const env(std::getenv("PSYCLE_THREADS"));
 		if(env) {
 			std::stringstream s;
 			s << env;
-			s >> thread_count;
+			s >> thread_count_;
 		}
 	}
 	
-	if(loggers::information()) {
-		std::ostringstream s;
-		s << "psycle: core: player: using " << thread_count << " threads";
-		loggers::information()(s.str());
-	}
-
-	if(thread_count < 2) return; // don't create any thread, will use a single-threaded, recursive processing
+	if(!thread_count_) return; // don't create any thread, will use a single-threaded, recursive processing
 
 	try {
 		// start the scheduling threads
-		for(std::size_t i(0); i < thread_count; ++i)
-			threads_.push_back(new thread(boost::bind(&Player::thread_function, this, i)));
+		std::cout << "psycle: core: player: using " << thread_count_ << " threads\n";
+		#if 0
+		if(loggers::information()()) {
+			std::ostringstream s;
+			s << "using " << thread_count_ << " threads";
+			loggers::information()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		}
+		#endif
+		for(std::size_t i(0); i < thread_count_; ++i)
+			threads_.push_back(new std::thread(boost::bind(&Player::thread_function, this, i)));
 	} catch(...) {
 		{ scoped_lock lock(mutex_);
 			stop_requested_ = true;
@@ -115,37 +114,27 @@ void Player::start_threads() {
 
 void Player::start(double pos) {
 	stop(); // This causes all machines to reset, and samplesperRow to init.
-	if(loggers::information()) loggers::information()("psycle: core: player: starting");
+
+	std::cout << "psycle: core: player: starting\n";
 	if(!song_) {
-		if(loggers::warning()) loggers::warning()("psycle: core: player: no song to play");
+		std::cerr << "psycle: core: player: no song to play\n";
 		return;
 	}
-	{
-		scoped_lock lock(song());
-		if(autoRecord_) startRecording();
-
-		Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
-		master._clip = false;
-		master.sampleCount = 0;
-
-		for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
-		playing_ = true;
-		timeInfo_.setPlayBeatPos(pos);
-		timeInfo_.setTicksSpeed(song().tick_speed(), song().is_ticks());
+	if(!driver_) {
+		std::cerr << "psycle: core: player: no audio driver to output the song to\n";
+		return;
 	}
-}
 
-void Player::skip(double beats) {
-	skipTo(timeInfo_.playBeatPos() + beats);
-}
-void Player::skipTo(double beatpos) {
-	if (!playing_) return;
+	if(autoRecord_) startRecording();
 
-	timeInfo_.setPlayBeatPos(beatpos);
-
-	scoped_lock lock(song());
 	Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
-	master.sampleCount = 60 * beatpos / bpm();
+	master._clip = false;
+	master.sampleCount = 0;
+	
+	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;
+	playing_ = true;
+	timeInfo_.setPlayBeatPos(pos);
+	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
 }
 
 void Player::suspend_and_compute_plan() {
@@ -161,7 +150,7 @@ void Player::suspend_and_compute_plan() {
 	condition_.notify_all();  // notify all threads they must suspend
 	{ scoped_lock lock(mutex_);
 		// wait until all threads are suspended
-		while(suspended_ != threads_.size()) main_condition_.wait(lock);
+		while(suspended_ != threads_.size()) condition_.wait(lock);
 		compute_plan();
 		suspend_requested_ = false;
 	}
@@ -175,19 +164,9 @@ void Player::compute_plan() {
 	// iterate over all the nodes
 	for(int m(0); m < MAX_MACHINES; ++m) if(song().machine(m)) {
 		++graph_size_;
-		Machine & n(*song().machine(m));
+		node & n(*song().machine(m));
 		// find the terminal nodes in the graph (nodes with no connected input ports)
-		input_nodes_.clear(); n.sched_inputs(input_nodes_);
-		if(input_nodes_.empty()) terminal_nodes_.push_back(&n);
-	}
-	if(ultra_trace && loggers::trace()) {
-		std::ostringstream s;
-		s << "psycle: core: player: terminal nodes:";
-		for(nodes_queue_type::const_iterator i(terminal_nodes_.begin()), e(terminal_nodes_.end()); i != e; ++i) {
-			Machine & node(**i);
-			s << "\n\t" << node.GetEditName();
-		}
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+		if(!n._connectedInputs) terminal_nodes_.push_back(&n);
 	}
 
 	// copy the initial processing queue
@@ -200,23 +179,14 @@ void Player::clear_plan() {
 }
 
 void Player::process(int samples) {
-	cpu_time_clock::time_point const t0(cpu_time_clock::now());
 	int remaining_samples = samples;
 	while(remaining_samples) {
-		int const amount(std::min(remaining_samples, MAX_BUFFER_LENGTH));
-		{ // reset all machine buffers
-			#if 0 // currently, routing time is already counted in each machine's PreWork function.. not sure it's a good thing.
-				nanoseconds const t0(cpu_time_clock());
-			#endif
-			for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
-			#if 0 // currently, routing time is already counted in each machine's PreWork function.. not sure it's a good thing.
-				nanoseconds const t1(cpu_time_clock());
-				song().accumulate_routing_time(t1 - t0);
-			#endif
-		}
+		int const amount(std::min(remaining_samples, STREAM_SIZE));
+		// reset all machine buffers
+		for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
 		Sampler::DoPreviews(amount, song().machine(MASTER_INDEX)->_pSamplesL, song().machine(MASTER_INDEX)->_pSamplesR);
-		if(threads_.empty()) // single-threaded, recursive processing
-			song().machine(MASTER_INDEX)->recursive_process(amount);
+		if(!threads_.size()) // single-threaded, recursive processing
+			song().machine(MASTER_INDEX)->Work(amount);
 		else { // multi-threaded scheduling
 			// we push all the terminal nodes to the processing queue
 			{ scoped_lock lock(mutex_);
@@ -227,107 +197,73 @@ void Player::process(int samples) {
 			condition_.notify_all(); // notify all threads that we added nodes to the queue
 			// wait until all nodes have been processed
 			{ scoped_lock lock(mutex_);
-				while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
+				while(processed_node_count_ != graph_size_) condition_.wait(lock);
 			}
 		}
 		// write samples to file
-		///\josepma: I don't understand this check. autoRecord doesn't play a role here
 		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
 		// move the pointer forward for the next Master::Work() iteration.
-		((Master*)song().machine(MASTER_INDEX))->_pMasterSamples += amount * 2;
+		Master::_pMasterSamples += amount * 2;
 		remaining_samples -= amount;
 		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
-		timeInfo_.setSamplePos(((Master*)song().machine(MASTER_INDEX))->sampleCount);
 	}
-	cpu_time_clock::time_point const t1(cpu_time_clock::now());
-	song().accumulate_processing_time(t1 - t0);
 }
 
 void Player::thread_function(std::size_t thread_number) {
-	if(loggers::trace()) {
-		scoped_lock lock(mutex_);
-		std::ostringstream s;
-		s << "psycle: core: player: scheduler thread #" << thread_number << " started";
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	{ scoped_lock lock(mutex_);
+		std::cout << "psycle: core: player: scheduler thread #" << thread_number << " started\n";
 	}
 
-	// set thread name
-	universalis::os::thread_name thread_name;
-	{
+	#if 0
+	if(loggers::information()()) loggers::information()("scheduler thread started on graph " + graph().underlying().name(), UNIVERSALIS__COMPILER__LOCATION);
+	
+	universalis::operating_system::thread_name thread_name;
+	{ // set thread name
 		std::ostringstream s;
-		s << universalis::compiler::typenameof(*this) << '#' << thread_number;
+		s << universalis::compiler::typenameof(*this) << '#' << graph().underlying().name() << '#' << thread_number;
 		thread_name.set(s.str());
 	}
 
 	// install cpu/os exception handler/translator
-	universalis::cpu::exceptions::install_handler_in_thread();
-
-	{ // set thread priority and cpu affinity
-		using universalis::os::exceptions::operation_not_permitted;
-		using universalis::os::sched::thread;
-		thread t;
-
-		// set thread priority
-		try {
-			t.priority(thread::priorities::highest);
-		} catch(operation_not_permitted e) {
-			if(loggers::warning()) {
-				std::ostringstream s; s << "no permission to set thread priority: " << e.what();
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-		}
-
-		// set thread cpu affinity
-		try {
-			thread::affinity_mask_type const af(t.affinity_mask());
-			if(af.active_count()) {
-				unsigned int rotated = 0, cpu_index = 0;
-				while(!af(cpu_index) || rotated++ != thread_number) cpu_index = (cpu_index + 1) % af.size();
-				thread::affinity_mask_type new_af; new_af(cpu_index, true); t.affinity_mask(new_af);
-			}
-		} catch(operation_not_permitted e) {
-			if(loggers::warning()) {
-				std::ostringstream s; s << "no permission to set thread cpu affinity: " << e.what();
-				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			}
-		}
-	}
+	universalis::processor::exception::install_handler_in_thread();
+	#endif
 
 	try {
 		try {
 			process_loop();
 		} catch(...) {
-			loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
+			//loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
 			throw;
 		}
 	} catch(std::exception const & e) {
-		if(loggers::exception()) {
+		#if 0
+		if(loggers::exception()()) {
 			std::ostringstream s;
 			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		#endif
 		throw;
 	} catch(...) {
-		if(loggers::exception()) {
+		#if 0
+		if(loggers::exception()()) {
 			std::ostringstream s;
-			s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
+			s << "exception: " << universalis::compiler::exceptions::ellipsis();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
+		#endif
 		throw;
 	}
-
-	if(loggers::trace()) {
-		scoped_lock lock(mutex_);
-		std::ostringstream s;
-		s << "psycle: core: player: scheduler thread #" << thread_number << " terminated";
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	//loggers::information()("scheduler thread on graph " + graph().underlying().name() + " terminated", UNIVERSALIS__COMPILER__LOCATION);
+	{ scoped_lock lock(mutex_);
+		std::cout << "psycle: core: player: scheduler thread #" << thread_number << " terminated\n";
 	}
 }
 
 void Player::process_loop() throw(std::exception) {
 	while(true) {
-		Machine * node_;
+		Player::node * node_;
 		{ scoped_lock lock(mutex_);
 			while(
 				!nodes_queue_.size() &&
@@ -341,7 +277,7 @@ void Player::process_loop() throw(std::exception) {
 				if(!this_thread_suspended_) {
 					this_thread_suspended_ = true;
 					++suspended_;
-					main_condition_.notify_one();
+					condition_.notify_all();
 				}
 				continue;
 			}
@@ -349,67 +285,31 @@ void Player::process_loop() throw(std::exception) {
 				this_thread_suspended_ = false;
 				--suspended_;
 			}
-
 			// There are nodes waiting in the queue. We pop the first one.
 			node_ = nodes_queue_.front();
 			nodes_queue_.pop_front();
 		}
-		Machine & node(*node_);
+		Player::node & node(*node_);
 
-		if(ultra_trace && loggers::trace()) {
-			scoped_lock lock(mutex_);
-			std::ostringstream s;
-			s << "psycle: core: player: processing node: " << node.GetEditName();
-			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-
-		bool const done(node.sched_process(samples_to_process_));
+		process(node);
 	
-		if(ultra_trace && loggers::trace()) {
-			scoped_lock lock(mutex_);
-			std::ostringstream s;
-			s << "psycle: core: player: processed node: " << node.GetEditName() << ", done: " << done;
-			loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-		}
-
-		int notify(0);
+		unsigned int notify(0);
 		{ scoped_lock lock(mutex_);
-			node.sched_processed_ = done;
-			//If not done, it means it needs to be reprocessed somewhere.
-			if (!done) ++graph_size_;
-
+			node.processed_by_multithreaded_scheduler_ = true;
 			// check whether all nodes have been processed
-			if(++processed_node_count_ == graph_size_) notify = -1; // wake up the main processing loop
-			else {
-				// check whether successors of the node we processed are now ready.
+			if(++processed_node_count_ == graph_size_) notify = 2; // wake up the main processing loop
+			else // check whether successors of the node we processed are now ready.
 				// iterate over all the outputs of the node we processed
-				output_nodes_.clear(); node.sched_outputs(output_nodes_);
-				for(Machine::sched_deps::const_iterator i(output_nodes_.begin()), e(output_nodes_.end()); i != e; ++i) {
-					Machine & output_node(*const_cast<Machine*>(*i));
+				if(node._connectedOutputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(node._connection[c]) {
+					Player::node & output_node(*song().machine(node._outputMachines[c]));
 					bool output_node_ready(true);
 					// iterate over all the inputs connected to our output
-					input_nodes_.clear(); output_node.sched_inputs(input_nodes_);
-					for(Machine::sched_deps::const_iterator i(input_nodes_.begin()), e(input_nodes_.end()); i != e; ++i) {
-						const Machine & input_node(**i);
-						if(&input_node == &node) continue;
-						if(ultra_trace && loggers::trace()) {
-							std::ostringstream s;
-							s << "psycle: core: player: node: " << node.GetEditName()
-								<< ", output: " << output_node.GetEditName()
-								<< ", input: " << input_node.GetEditName()
-								<< ", ready: " << input_node.sched_processed_;
-							loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						}
-						if(!input_node.sched_processed_) {
+					if(output_node._connectedInputs) for(int c(0); c < MAX_CONNECTIONS; ++c) if(output_node._inputCon[c]) {
+						Player::node & input_node(*song().machine(output_node._inputMachines[c]));
+						if(!input_node.processed_by_multithreaded_scheduler_) {
 							output_node_ready = false;
 							break;
 						}
-					}
-					if(ultra_trace && loggers::trace()) {
-						std::ostringstream s;
-						s << "psycle: core: player: node: " << node.GetEditName()
-							<< ", output: " << output_node.GetEditName() << ", ready: " << output_node_ready;
-						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					if(output_node_ready) {
 						// All the dependencies of the node have been processed.
@@ -418,42 +318,68 @@ void Player::process_loop() throw(std::exception) {
 						++notify;
 					}
 				}
-			}
 		}
 		switch(notify) {
-			case -1: main_condition_.notify_one(); break; // wake up the main processing loop
-			case 0: break; // no successor ready
-			case 1: break; // If there's only one successor ready, we don't notify since it can be processed in the same thread.
-			case 2: condition_.notify_one(); break; // notify one thread that we added nodes to the queue
-			default: condition_.notify_all(); // notify all threads that we added nodes to the queue
+			case 0:
+				// no successor ready
+			break;
+			case 1:
+				// If there's only one successor ready, we don't notify since it can be processed in the same thread.
+			break;
+			case 2:
+				condition_.notify_one(); // notify one thread that we added nodes to the queue
+			break;
+			default:
+				condition_.notify_all(); // notify all threads that we added nodes to the queue
 		}
 	}
 }
 
-void Player::stop() {
-	if(!song_) return;
+void Player::process(Player::node & node) throw(std::exception) {
+	#if 0
+	{ scoped_lock lock(mutex_);
+		std::cout << "psycle: core: player: processing node: " << node.GetEditName() << '\n';
+	}
+	#endif
 
-	if(loggers::information()) loggers::information()("psycle: core: player: stopping");
-	
-	scoped_lock lock(song());
+	///\todo the mixer machine needs this to be set to false
+	bool const mix(true);
+
+	if(node._connectedInputs) for(int i(0); i < MAX_CONNECTIONS; ++i) if(node._inputCon[i]) {
+		Player::node & input_node(*song().machine(node._inputMachines[i]));
+		if(!input_node.Standby()) node.Standby(false);
+		if(!node._mute && !node.Standby() && mix) {
+			dsp::Add(input_node._pSamplesL, node._pSamplesL, samples_to_process_, input_node.lVol() * node._inputConVol[i]);
+			dsp::Add(input_node._pSamplesR, node._pSamplesR, samples_to_process_, input_node.rVol() * node._inputConVol[i]);
+		}
+	}
+	dsp::Undenormalize(node._pSamplesL, node._pSamplesR, samples_to_process_);
+	node.GenerateAudio(samples_to_process_);
+}
+
+void Player::stop() {
+	std::cout << "psycle: core: player: stopping\n";
+	if(!song_ || !driver_) return;
 	playing_ = false;
 	for(int i(0); i < MAX_MACHINES; ++i) if(song().machine(i)) {
 		song().machine(i)->Stop();
 		for(int c(0); c < MAX_TRACKS; ++c) song().machine(i)->TriggerDelay[c].setCommand(0);
 	}
 	setBpm(song().bpm());
-	timeInfo_.setTicksSpeed(song().tick_speed(), song().is_ticks());
-	samples_per_second(driver_->playbackSettings().samplesPerSec());
-	// Disabled, because in psyclemfc, autorecording is used sometimes to record live, and pressing stop
-	// is a way to make autorecording ignore the song length and keep recording until intentionally stopping
-	// the recording (not the playback)
-	//if(autoRecord_) stopRecording();
+	timeInfo_.setTicksSpeed(song().ticksSpeed(), song().isTicks());
+	samples_per_second(driver_->settings().samplesPerSec());
+	if(autoRecord_) stopRecording();
+}
+
+Player::~Player() {
+	///\todo stopping the threads needs to be done elsewhere?
+	stop_threads();
 }
 
 void Player::stop_threads() {
-	if(loggers::trace()) loggers::trace()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
-	if(threads_.empty()) {
-		if(loggers::trace()) loggers::trace()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
+	//if(loggers::information()()) loggers::information()("terminating and joining scheduler threads ...", UNIVERSALIS__COMPILER__LOCATION);
+	if(!threads_.size()) {
+		//if(loggers::information()()) loggers::information()("scheduler threads were not running", UNIVERSALIS__COMPILER__LOCATION);
 		return;
 	}
 	{ scoped_lock lock(mutex_);
@@ -464,158 +390,388 @@ void Player::stop_threads() {
 		(**i).join();
 		delete *i;
 	}
-	if(loggers::trace()) loggers::trace()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
+	//if(loggers::information()()) loggers::information()("scheduler threads joined", UNIVERSALIS__COMPILER__LOCATION);
 	threads_.clear();
 	clear_plan();
 }
 
 void Player::samples_per_second(int samples_per_second) {
 	timeInfo_.setSampleRate(samples_per_second);
-	#if defined DIVERSALIS__OS__MICROSOFT
-		// update the vstTimeInfo. The plugins themselves are still informed via the setSampleRate call
-		static_cast<vst::host&>(*MachineFactory::getInstance().getHosts()[Hosts::VST]).ChangeSampleRate(samples_per_second);
-	#endif
 	if(!song_) return;
 	///\todo update the source code of the plugins...
-	for(unsigned int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
+	for(int i(0) ; i < MAX_MACHINES; ++i) if(song().machine(i)) song().machine(i)->SetSampleRate(samples_per_second);
 }
 
-float * Player::Work(int numSamples) {
-	assert(numSamples < MAX_SAMPLES_WORKFN);
-
-	if(!song_) return buffer_;
-
-	bool autostop = false;
-
-	{ scoped_lock lock(song());
-
-		if (!song().is_ready()) {
-			dsp::Clear(buffer_, numSamples);
-			return buffer_;
-		}
-
-		// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
-		///\todo: The buffer has to be served by the audiodriver, since the audiodriver knows the size it needs to have.
-		((Master*)song().machine(MASTER_INDEX))->_pMasterSamples = buffer_;
-		
-		if(autoRecord_ && timeInfo_.playBeatPos() >= song().sequence().tickLength())
-			stopRecording();
-
-		if(!playing_) {
-			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-			process(numSamples);
-			//playPos += beatLength;
-			//if(playPos > "signumerator") playPos -= signumerator;
-		} else {
-			if(loopEnabled()) {
-				// Maintain the cursor inside the loop sequence
-				if(
-					timeInfo_.playBeatPos() >= timeInfo_.cycleEndPos() ||
-					timeInfo_.playBeatPos() < timeInfo_.cycleStartPos()
-				) setPlayPos(timeInfo_.cycleStartPos());
+void Player::process_global_event(GlobalEvent const & event) {
+	Machine::id_type mIndex;
+	switch(event.type()) {
+		case GlobalEvent::BPM_CHANGE:
+			setBpm(event.parameter());
+			std::cout << "psycle: core: player: bpm change event found. position: " << timeInfo_.playBeatPos() << ", new bpm: " << event.parameter() << '\n';
+			break;
+		case GlobalEvent::JUMP_TO:
+			timeInfo_.setPlayBeatPos(event.parameter());
+			break;
+		case GlobalEvent::SET_BYPASS:
+			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) //i.e. Effect
+				song().machine(mIndex)->_bypass = true;
+			break;
+		case GlobalEvent::UNSET_BYPASS:
+			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex) && song().machine(mIndex)->acceptsConnections()) // i.e. Effect
+				song().machine(mIndex)->_bypass = false;
+			break;
+		case GlobalEvent::SET_MUTE:
+			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex))
+				song().machine(mIndex)->_mute = true;
+			break;
+		case GlobalEvent::UNSET_MUTE:
+			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex))
+				song().machine(mIndex)->_mute = false;
+			break;
+		case GlobalEvent::SET_VOLUME:
+			if(event.target() == 255) {
+				Master & master(static_cast<Master&>(*song().machine(MASTER_INDEX)));
+				master._outDry = static_cast<int>(event.parameter());
 			} else {
-				// autostop
-				if (timeInfo_.playBeatPos() >= song().sequence().max_beats()) {
-					autostop = true;
+				mIndex = event.target();
+				if(mIndex < MAX_MACHINES && song().machine(mIndex)) {
+					Wire::id_type wire(event.target2());
+					song().machine(mIndex)->SetDestWireVolume(mIndex, wire,
+						CValueMapper::Map_255_1(static_cast<int>(event.parameter()))
+					);
 				}
 			}
-			sequencer_.set_player(*this); // for a callback to process()
-			sequencer_.set_time_info(timeInfo_);
-			sequencer_.Work(numSamples);
+		case GlobalEvent::SET_PANNING:
+			mIndex = event.target();
+			if(mIndex < MAX_MACHINES && song().machine(mIndex))
+				song().machine(mIndex)->SetPan(static_cast<int>( event.parameter()));
+			break;
+		default: ;
+	}
+}
+
+/// Final Loop. Read new line for notes to send to the Machines
+void Player::execute_notes(double beat_offset, PatternLine & line) {
+	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)
+
+	// step 1: process all tweaks.
+	for(
+		std::map<int, PatternEvent>::iterator trackItr = line.tweaks().begin();
+		trackItr != line.tweaks().end(); ++trackItr
+	) {
+		int track = trackItr->first;
+		PatternEvent & entry(trackItr->second);
+		int mac = entry.machine();
+
+		// not a valid machine id?
+		if(mac >= MAX_MACHINES || !song().machine(mac)) continue;
+			
+		Machine & machine = *song().machine(mac);
+		
+		switch(entry.note()) {
+			case notetypes::tweak_slide: {
+				int const delay(64);
+				int delaysamples(0), origin(machine.GetParamValue(entry.instrument()));
+				float increment(origin);
+				int previous(0);
+				float rate = (((entry.command() << 16 ) | entry.parameter()) - origin) / (timeInfo().samplesPerTick() / 64.0f);
+					entry.setNote(notetypes::tweak);
+					entry.setCommand(origin >> 8);
+					entry.setParameter(origin & 0xff);
+					machine.AddEvent(
+						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+						line.sequenceTrack() * 1024 + track, entry
+					);
+					previous = origin;
+					delaysamples += delay;
+					while(delaysamples < timeInfo().samplesPerTick()) {
+						increment += rate;
+						if(static_cast<int>(increment) != previous) {
+							origin = static_cast<int>(increment);
+							entry.setCommand(origin >> 8);
+							entry.setParameter(origin & 0xff);
+							machine.AddEvent(
+								beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+								line.sequenceTrack() * 1024 + track, entry
+							);
+							previous = origin;
+						}
+						delaysamples += delay;
+					}
+			} break;
+			default: machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
 		}
 	}
 
-	// the song's mutex isn't a recursive mutex, so we need to call stop() outside of the scoped_lock
-	if(autostop) stop();
+	// step 2: process all notes.
+	for(
+		std::map<int, PatternEvent>::iterator trackItr = line.notes().begin();
+		trackItr != line.notes().end(); ++trackItr
+	) {
+		int track = trackItr->first;
+		
+		// track muted?
+		if(song().patternSequence().trackMuted(track)) continue;
+			
+		PatternEvent entry = trackItr->second;
 
+		// not a note ?
+		if(entry.note() >= notetypes::tweak && entry.note() != 255) continue;
+
+		int mac = entry.machine();
+		if(mac != 255) prev_machines_[track] = mac;
+		else mac = prev_machines_[track];
+
+		// not a valid machine id?
+		if(mac == 255 || mac >= MAX_MACHINES) continue;
+			
+		// no machine with this id?
+		if(!song().machine(mac)) continue;
+		
+		Machine & machine = *song().machine(mac);
+
+		// machine muted?
+		if(machine._mute) continue;
+
+		switch(entry.command()) {
+			case commandtypes::NOTE_DELAY: {
+				double delayoffset(entry.parameter() / 256.0);
+				// At least Plucked String works erroneously if the command is not ommited.
+				entry.setCommand(0); entry.setParameter(0);
+				machine.AddEvent(beat_offset + delayoffset, line.sequenceTrack() * 1024 + track, entry);
+				
+			} break;
+			case commandtypes::RETRIGGER: {
+				///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
+				int delaysamples(0);
+				int rate = entry.parameter() + 1;
+				int delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+				entry.setCommand(0); entry.setParameter(0);
+				machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+				delaysamples += delay;
+				while(delaysamples < timeInfo().samplesPerTick()) {
+					machine.AddEvent(
+						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+						line.sequenceTrack() * 1024 + track, entry
+					);
+					delaysamples += delay;
+				}
+			} break;
+			case commandtypes::RETR_CONT: {
+				///\todo: delaysamples and rate should be memorized, do not reinit delaysamples.
+				///\todo: verify that using ints for rate and variation is enough, or has to be float.
+				int delaysamples(0), rate(0), delay(0), variation(0);
+				int parameter = entry.parameter() & 0x0f;
+				variation = (parameter < 9) ? (4 * parameter) : (-2 * (16 - parameter));
+				if(entry.parameter() & 0xf0) rate = entry.parameter() & 0xf0;
+				delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+				entry.setCommand(0); entry.setParameter(0);
+				machine.AddEvent(
+					beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+					line.sequenceTrack() * 1024 + track, entry
+				);
+				delaysamples += delay;
+				while(delaysamples < timeInfo().samplesPerTick()) {
+					machine.AddEvent(
+						beat_offset + static_cast<double>(delaysamples) / timeInfo().samplesPerBeat(),
+						line.sequenceTrack() * 1024 + track, entry
+					);
+
+					rate += variation;
+					if(rate < 16) rate = 16;
+					delay = (rate * static_cast<int>(timeInfo().samplesPerTick())) >> 8;
+					delaysamples += delay;
+				}
+			} break;
+			case commandtypes::ARPEGGIO: {
+				///\todo : Add Memory.
+				///\todo : This won't work... What about sampler's NNA's?
+				#if 0
+					if(entry.parameter()) {
+						machine.TriggerDelay[track] = entry;
+						machine.ArpeggioCount[track] = 1;
+					}
+					machine.RetriggerRate[track] = static_cast<int>(timeInfo_.samplesPerTick() * timeInfo_.linesPerBeat() / 24);
+				#endif
+			} break;
+			default:
+				machine.TriggerDelay[track].setCommand(0);
+				machine.AddEvent(beat_offset, line.sequenceTrack() * 1024 + track, entry);
+				machine.TriggerDelayCounter[track] = 0;
+				machine.ArpeggioCount[track] = 0;
+		}
+	}
+}
+
+float * Player::Work(int numSamples) {
+	if(!song_) return buffer_;
+
+	scoped_lock lock(work_mutex());
+
+	// Prepare the buffer that the Master Machine writes to. It is done here because process() can be called several times.
+	Master::_pMasterSamples = buffer_;
+	double beatsToWork = numSamples / static_cast<double>(timeInfo_.samplesPerBeat());
+	
+	///\todo CSingleLock crit(&song().door, true);
+
+	if(autoRecord_ && timeInfo_.playBeatPos() >= song().patternSequence().tickLength()) stopRecording();
+
+	if(!playing_) {
+		///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
+		process(numSamples);
+		//playPos += beatLength;
+		//if(playPos > "signumerator") playPos -= signumerator;
+	} else {
+		if(loopSequenceEntry()) {
+			// Maintain the cursor inside the loop sequence
+			if(
+				timeInfo_.playBeatPos() >= loopSequenceEntry()->tickEndPosition() ||
+				timeInfo_.playBeatPos() <= loopSequenceEntry()->tickPosition()
+			) setPlayPos(loopSequenceEntry()->tickPosition());
+		} else if(loopSong() && timeInfo_.playBeatPos() >= song().patternSequence().tickLength())
+			setPlayPos(0);
+
+		std::multimap<double, PatternLine> events;
+		std::vector<GlobalEvent*> globals;
+
+		// processing of each buffer is subdivided into chunks, determined by the placement of any global events.
+		
+		// end beat position of the current chunk-- i.e., the next global event's position.
+		double chunkBeatEnd;
+		// number of beats in the chunk.
+		double chunkBeatSize;
+		// number of samples needed to process for this chunk.
+		int chunkSampleSize;
+		// this is used to counter rounding errors of sample/beat conversions
+		int processedSamples(0);
+		// whether this is the first time through the loop.  this is passed to GetNextGlobalEvents()
+		// to specify that we're including events at exactly playPos -only- on the first iteration--
+		// otherwise we'll get the first event over and over again.
+		bool bFirst(true);
+		do {
+			// get the next round of global events.  we need to repopulate the list of globals and patternlines
+			// each time through the loop because global events can potentially move the song's beatposition elsewhere.
+			globals.clear();
+			chunkBeatEnd = song().patternSequence().GetNextGlobalEvents(timeInfo_.playBeatPos(), beatsToWork, globals, bFirst);
+			if(loopSequenceEntry()) {
+				// Don't go further than the sequenceEnd.
+				if(chunkBeatEnd >= loopSequenceEntry()->tickEndPosition())
+					chunkBeatEnd = loopSequenceEntry()->tickEndPosition();
+			} else if(loopSong() && chunkBeatEnd >= song().patternSequence().tickLength())
+				chunkBeatEnd = song().patternSequence().tickLength();
+
+			// determine chunk length in beats and samples.
+			chunkBeatSize = chunkBeatEnd - timeInfo_.playBeatPos();
+			if(globals.empty())
+				chunkSampleSize = numSamples - processedSamples;
+			else
+				chunkSampleSize = static_cast<int>(chunkBeatSize * timeInfo_.samplesPerBeat());
+
+			// get all patternlines occuring before the next global event, execute them, and process
+			events.clear();
+			
+			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
+			song().patternSequence().GetLinesInRange(timeInfo_.playBeatPos(), chunkBeatSize, events);
+			
+			for(
+				std::multimap<double, PatternLine>::iterator lineIt = events.begin();
+				lineIt!= events.end();
+				++lineIt
+			) execute_notes(lineIt->first - timeInfo_.playBeatPos(), lineIt->second);
+
+			if(chunkSampleSize > 0) {
+				process(chunkSampleSize);
+				processedSamples += chunkSampleSize;
+			}
+			
+			beatsToWork -= chunkBeatSize;
+
+			// execute this batch of global events
+			for(
+				std::vector<GlobalEvent*>::iterator globIt = globals.begin();
+				globIt!=globals.end();
+				++globIt
+			) process_global_event(**globIt);
+
+			bFirst = false;
+		} while(!globals.empty()); // if globals is empty, then we've processed through to the end of the buffer.
+	}
 	return buffer_;
 }
 
 void Player::setDriver(AudioDriver & driver) {
-	if(loggers::trace()) {
-		std::ostringstream s;
-		s << "psycle: core: player: setting audio driver to: " << driver.info().name();
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	std::cout << "psycle: core: player: setting audio driver to: " << driver.info().name() << '\n';
+
+	if(driver_) driver_->Enable(false);
+
+	if(!driver.Initialized()) {
+		driver.Initialize(Work, this);
+		std::cout << "psycle: core: player: audio driver initialized\n";
 	}
-
-	bool was_opened = driver_->opened();
-	bool was_started = driver_->started();
-
-	if(&driver == driver_) {
-		// same driver instance
-		driver.set_started(false);
-	} else {
-		// different driver instance
-		driver_->set_opened(false);
-		driver_ = &driver;
-	}
-
-	driver.set_callback(Work, this);
 	
-	if(was_started && loggers::trace()) {
-		std::ostringstream s;
-		s << "psycle: core: player: starting audio driver: " << driver.info().name();
-		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+	if(!driver.Configured()) {
+		std::cout << "psycle: core: player: asking audio driver to configure itself\n";
+		driver.Configure();
 	}
-	driver.set_opened(was_opened);
-	driver.set_started(was_started);
-
-	samples_per_second(driver.playbackSettings().samplesPerSec());
+	std::cout << "psycle: core: player: audio driver configured\n";
+	
+	if(driver.Enable(true)) {
+		std::cout << "psycle: core: player: audio driver enabled: " << driver.info().name() << '\n';
+		samples_per_second(driver.settings().samplesPerSec());
+		driver_ = &driver;
+	} else {
+		std::cerr << "psycle: core: player: audio driver failed to enable. setting back previous driver\n";
+		if(driver_) driver_->Enable(true);
+	}
 }
 
 /*****************************************************************************/
 // buffer to riff wav file methods
 
 void Player::writeSamplesToFile(int amount) {
-	if(!song_) return;
-
+	if(!song_ || !driver_) return;
 	float * pL(song().machine(MASTER_INDEX)->_pSamplesL);
 	float * pR(song().machine(MASTER_INDEX)->_pSamplesR);
 	if(recording_with_dither_) {
-		dither_.Process(pL, amount);
-		dither_.Process(pR, amount);
+		dither.Process(pL, amount);
+		dither.Process(pR, amount);
 	}
-	switch(driver_->playbackSettings().channelMode()) {
+	switch(driver_->settings().channelMode()) {
 		case 0: // mono mix
 			for(int i(0); i < amount; ++i)
 				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-				if(outputWaveFile_.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteMonoSample((*pL++ + *pR++) / 2) != DDC_SUCCESS) stopRecording();
 			break;
 		case 1: // mono L
 			for(int i(0); i < amount; ++i)
-				if(outputWaveFile_.WriteMonoSample(*pL++) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteMonoSample(*pL++) != DDC_SUCCESS) stopRecording();
 			break;
 		case 2: // mono R
 			for(int i(0); i < amount; ++i)
-				if(outputWaveFile_.WriteMonoSample(*pR++) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteMonoSample(*pR++) != DDC_SUCCESS) stopRecording();
 			break;
 		default: // stereo
 			for(int i(0); i < amount; ++i)
-				if(outputWaveFile_.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) stopRecording();
+				if(_outputWaveFile.WriteStereoSample(*pL++, *pR++) != DDC_SUCCESS) stopRecording();
 			break;
 	}
 }
 
-void Player::startRecording(bool do_dither, dsp::Dither::Pdf::type ditherpdf, dsp::Dither::NoiseShape::type noiseshaping) {
+void Player::startRecording() {
 	if(recording_) return;
-	if(!song_) return;
-
-	scoped_lock lock(song());
-	int channels(driver_->playbackSettings().numChannels());
-	recording_ = DDC_SUCCESS == outputWaveFile_.OpenForWrite(fileName().c_str(), driver_->playbackSettings().samplesPerSec(), driver_->playbackSettings().bitDepth(), channels);
-	recording_with_dither_ = do_dither;
-	if(do_dither) {
-		dither_.SetBitDepth(driver_->playbackSettings().bitDepth());
-		dither_.SetPdf(ditherpdf);
-		dither_.SetNoiseShaping(noiseshaping);
-	}
+	if(!song_ && !driver_) return;
+	int channels(2);
+	if(driver_->settings().channelMode() != 3) channels = 1;
+	recording_ = DDC_SUCCESS == _outputWaveFile.OpenForWrite(fileName().c_str(), driver_->settings().samplesPerSec(), driver_->settings().bitDepth(), channels);
 }
 
 void Player::stopRecording() {
 	if(!recording_) return;
-
-	scoped_lock lock(song());
-	outputWaveFile_.Close();
+	_outputWaveFile.Close();
 	recording_ = false;
 }
 

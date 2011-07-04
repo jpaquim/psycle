@@ -1,20 +1,33 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/detail/project.private.hpp>
 #include "plugininfo.h"
 
-namespace psycle { namespace core {
-
+namespace psy { namespace core {
 PluginInfo::PluginInfo(){}
-PluginInfo::PluginInfo(MachineRole::type role, std::string name, std::string author, std::string desc, std::string api_version, std::string plug_version, std::string libname, std::string categ)
+PluginInfo::PluginInfo(MachineRole::type role, std::string name, std::string author, std::string desc, std::string version, std::string libname, std::string categ)
 :
 	role_(role),
 	name_(name),
 	author_(author),
 	desc_(desc),
-	api_version_(api_version),
-	plug_version_(plug_version),
+	version_(version),
 	libName_(libname),
 	fileTime_( 0 ),
 	allow_( true ),
@@ -57,20 +70,12 @@ const std::string & PluginInfo::desc() const {
 	return desc_;
 }
 
-void PluginInfo::setApiVersion( const std::string & api_version ) {
-	api_version_ = api_version;
+void PluginInfo::setVersion( const std::string & version ) {
+	version_ = version;
 }
 
-const std::string & PluginInfo::apiVersion() const {
-	return api_version_;
-}
-
-void PluginInfo::setPlugVersion( const std::string & plug_version ) {
-	plug_version_ = plug_version;
-}
-
-const std::string & PluginInfo::plugVersion() const {
-	return plug_version_;
+const std::string & PluginInfo::version() const {
+	return version_;
 }
 
 void PluginInfo::setLibName( const std::string & libName ) {
@@ -114,3 +119,4 @@ const std::string & PluginInfo::category() const {
 }
 
 }}
+

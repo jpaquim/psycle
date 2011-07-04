@@ -1,30 +1,154 @@
 #include <psycle/plugin_interface.hpp>
 #include "drum.hpp"
 #include <cstdlib>
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
 
 #define DRUM_VERSION "2.2"
-int const IDRUM_VERSION =0x0220;
 #define MAX_SIMUL_TRACKS 16
+#define NUMPARAMETERS 16
 
-CMachineParameter const prStartFreq = {"Start Freq", "Start Frequency (Hz)", 80, 600, MPF_STATE, 200};
-CMachineParameter const prEndFreq = {"End Freq", "End Frequency (Hz)", 20, 400, MPF_STATE, 44};
-CMachineParameter const prFreqDecay = {"Freq Decay", "Frequency Down Speed (in mscs)", 10, 300, MPF_STATE, 65};
-CMachineParameter const prStartAmp = {"Start Amp (1)", "Starting Amplitude", 0, 32767, MPF_STATE, 32767};
-CMachineParameter const prEndAmp = {"End Amp (1)", "Ending Amplitude", 0, 32767, MPF_STATE, 21844};
-CMachineParameter const prLength = {"Length", "Duration of the note (ms)", 10, 500, MPF_STATE, 180};
-CMachineParameter const prOutVol = {"Volume", "Volume (0-32767)", 0, 32767, MPF_STATE, 32767};
-CMachineParameter const prDecMode = {"Dec Mode", "Decrement Mode", 0, 3, MPF_STATE, 2};
-CMachineParameter const prComp = {"Compatible(1/2)", "Compatible With version", 0, 1, MPF_STATE, 1};
-CMachineParameter const prNNA = {"NNA Command", "NNA Command when New Note", 0, 1, MPF_STATE, 0};
-CMachineParameter const prAttack = {"Attack up to (2)", "Attack from 0/100 to x/100", 0, 99, MPF_STATE, 2};
-CMachineParameter const prDecay = {"Decay up to (2)", "Decay from Attack to x/100", 1, 100, MPF_STATE, 63};
-CMachineParameter const prSustain = {"Sustain Volume (2)", "Sustain Volume at Decay-End Pos", 0, 100, MPF_STATE, 77};
-CMachineParameter const prMix = {"Drum&Thump Mix", "Mix of Drum and Thump Signals", -100, 100, MPF_STATE, -53};
-CMachineParameter const prThumpLen = {"Thump Length", "Thump Length", 1, 60, MPF_STATE, 6};
-CMachineParameter const prThumpFreq = {"Thump Freq", "Thump Frequency", 220, 6000, MPF_STATE, 1500};
+
+CMachineParameter const prStartFreq = {
+	"Start Freq",
+	"Start Frequency (Hz)",
+	80,
+	600,
+	MPF_STATE,
+	200
+};
+
+CMachineParameter const prEndFreq = {
+	"End Freq",
+	"End Frequency (Hz)",
+	20,
+	400,
+	MPF_STATE,
+	44
+};
+CMachineParameter const prFreqDecay = {
+	"Freq Decay",
+	"Frequency Down Speed (in mscs)",
+	10,
+	300,
+	MPF_STATE,
+	65
+};
+CMachineParameter const prStartAmp = {
+	"Start Amp (1)",
+	"Starting Amplitude",
+	0,
+	32767,
+	MPF_STATE,
+	32767
+};
+CMachineParameter const prEndAmp = {
+	"End Amp (1)",
+	"Ending Amplitude",
+	0,
+	32767,
+	MPF_STATE,
+	21844
+};
+
+CMachineParameter const prLength = {
+	"Length",
+	"Duration of the note (ms)",
+	10,
+	500,
+	MPF_STATE,
+	180
+};
+CMachineParameter const prOutVol = {
+	"Volume",
+	"Volume (0-32767)",
+	0,
+	32767,
+	MPF_STATE,
+	32767
+};
+CMachineParameter const prDecMode = {
+	"Dec Mode",
+	"Decrement Mode",
+	0,
+	3,
+	MPF_STATE,
+//				2
+	0
+};
+CMachineParameter const prComp = {
+	"Compatible(1/2)",
+	"Compatible With version",
+	0,
+	1,
+	MPF_STATE,
+//				1
+	0
+};
+CMachineParameter const prNNA = {
+	"NNA Command",
+	"NNA Command when New Note",
+	0,
+	1,
+	MPF_STATE,
+	0
+};
+
+CMachineParameter const prAttack = {
+	"Attack up to (2)",
+	"Attack from 0/100 to x/100",
+	0,
+	99,
+	MPF_STATE,
+	2
+};
+CMachineParameter const prDecay = {
+	"Decay up to (2)",
+	"Decay from Attack to x/100",
+	1,
+	100,
+	MPF_STATE,
+	63
+};
+CMachineParameter const prSustain = {
+	"Sustain Volume (2)",
+	"Sustain Volume at Decay-End Pos",
+	0,
+	100,
+	MPF_STATE,
+	55
+};
+CMachineParameter const prMix = {
+	"Drum&Thump Mix",
+	"Mix of Drum and Thump Signals",
+	-100,
+	100,
+	MPF_STATE,
+//				-37
+	-100
+};
+CMachineParameter const prThumpLen = {
+	"Thump Length",
+	"Thump Length",
+	1,
+	60,
+	MPF_STATE,
+	10
+};
+CMachineParameter const prThumpFreq = {
+	"Thump Freq",
+	"Thump Frequency",
+	220,
+	6000,
+	MPF_STATE,
+	5000
+};
+CMachineParameter const prNothing = {
+	"-",
+	"Nothing",
+	0,
+	1,
+	MPF_STATE,
+	0
+};
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -46,17 +170,16 @@ CMachineParameter const *pParameters[] =
 	&prThumpFreq,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
-	IDRUM_VERSION,
 	GENERATOR,
-	sizeof pParameters / sizeof *pParameters,
+	NUMPARAMETERS,
 	pParameters,
-	"Drum Synth v." DRUM_VERSION
-		#ifndef NDEBUG
-			" (Debug)"
-		#endif
-		,
+#ifdef _DEBUG
+	"Drum Synth v." DRUM_VERSION " (Debug)",
+#else
+	"Drum Synth v." DRUM_VERSION,
+#endif
 	"Drum" DRUM_VERSION,
 	"[JAZ] on " __DATE__,
 	"Command Help",
@@ -88,15 +211,15 @@ private:
 	int numtracks;
 
 	DrumPars globalpar;
-	int currentSR;
+		
 };
 
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals=new int[MacInfo.numParameters];
+	Vals=new int[NUMPARAMETERS];
 
 	numtracks=0;
 	for (int i=0;i<MAX_TRACKS;i++) allocatedvoice[i]=-1;
@@ -105,42 +228,16 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
+
+// Destroy dinamically allocated objects/memory here
 }
+
 void mi::Init()
 {
-	currentSR=pCB->GetSamplingRate();
+// Initialize your stuff here
+
 }
-void mi::SequencerTick()
-{
-	if(currentSR != pCB->GetSamplingRate())
-	{
-		Stop();
-		currentSR=pCB->GetSamplingRate();
-
-		globalpar.StartSpeed=Vals[0] * (float)(MAX_ENVPOS)/pCB->GetSamplingRate();
-		globalpar.DecLength=Vals[2] * pCB->GetSamplingRate() / 1000.0;
-		globalpar.IncSpeed= (Vals[1] - Vals[0]) * (float)(MAX_ENVPOS)/ (globalpar.DecLength*pCB->GetSamplingRate());
-
-		globalpar.SLength=(Vals[5]* pCB->GetSamplingRate())/1000;
-		if ( Vals[8] == 0 ) {
-			globalpar.DecayDec=((Vals[3]-Vals[4])*globalpar.sinmix)/(globalpar.SLength*100.0);
-		}
-		else {
-			if ( Vals[10] != 0 ) { // If it's 0, they don't change.
-				globalpar.AttackPos=globalpar.SLength*Vals[10]/100;
-				globalpar.AttackInc=(327.67*globalpar.sinmix)/globalpar.AttackPos;
-			}
-			if ( Vals[10] > Vals[11] ) globalpar.DecayPos=globalpar.AttackPos+1;
-			else globalpar.DecayPos=globalpar.SLength*Vals[11]/100;
-			globalpar.DecayDec=((327.67-(3.2767*Vals[12]))*globalpar.sinmix)/(globalpar.DecayPos-globalpar.AttackPos);
-			globalpar.SustainDec=(3.2767*Vals[12]*globalpar.sinmix)/(globalpar.SLength-globalpar.DecayPos);
-		}
-		globalpar.ThumpLength=(Vals[14]* pCB->GetSamplingRate())/10000;
-		globalpar.ThumpDec=globalpar.ThumpVol/globalpar.ThumpLength;
-	}
-}
-
 void mi::Stop()
 {
 	for(int c=0;c<numtracks;c++)
@@ -148,8 +245,14 @@ void mi::Stop()
 	for (int i=0;i<MAX_TRACKS;i++) allocatedvoice[i]=-1;
 }
 
+void mi::SequencerTick()
+{
+// Called on each tick while sequencer is playing
+}
+
 void mi::ParameterTweak(int par, int val)
 {
+	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
 	switch (par) {
 		case 0: 
@@ -281,20 +384,23 @@ void mi::ParameterTweak(int par, int val)
 }
 void mi::Command()
 {
-	char buffer[256];
+// Called when user presses editor button
+// Probably you want to show your custom window here
+// or an about button
+char buffer[256];
 
-	sprintf(
+sprintf(
 
-			buffer,"%s%s%s%s",
-			"Pattern commands\n\n",
-			"0Cxx : Set Volume\n\n",
-			"  Compatible 1.x : $00->0 $FF->32767\n",
-			"  Compatible 2.x : $00->0 $FF->OutVol\n\0"
-			);
+		buffer,"%s%s%s%s",
+		"Pattern commands\n\n",
+		"0Cxx : Set Volume\n\n",
+		"  Compatible 1.x : $00->0 $FF->32767\n",
+		"  Compatible 2.x : $00->0 $FF->OutVol\n\0"
+		);
 
-	pCB->MessBox(buffer,"·-=<[JAZ]> JMDrum Synth v." DRUM_VERSION "=-·",0);
+pCB->MessBox(buffer,"·-=<[JAZ]> JMDrum Synth v." DRUM_VERSION "=-·",0);
+
 }
-
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	float sl=0;
@@ -370,7 +476,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	int vidx = GetVoice(channel);
-	if(note<NOTE_NOTEOFF) // Note on
+	if(note<120) // Note on
 	{
 		if (vidx != -1 )
 		{
@@ -402,11 +508,11 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			DTrack[vidx].NoteOn(note,&globalpar);
 		}
 
-		globalpar.OutVol=tmp; // restore outvol
+		globalpar.OutVol=tmp;				//restore outvol
 	}
 	else if (vidx != -1)
 	{
-		if (note==NOTE_NOTEOFF)
+		if (note==120)
 		{
 			DTrack[vidx].NoteOff(); // Note off
 		}
@@ -441,7 +547,6 @@ int mi::GetVoice(int channel,bool getnew)
 	DTrack[j].Chan = channel;
 	return j;
 }
-
 void mi::DeallocateVoice(int voice)
 {
 	if ( DTrack[voice].Chan == -1)
@@ -453,3 +558,4 @@ void mi::DeallocateVoice(int voice)
 	}
 	DTrack[voice].Chan = -1;
 }
+

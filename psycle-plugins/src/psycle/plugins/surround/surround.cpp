@@ -1,41 +1,55 @@
 #include <psycle/plugin_interface.hpp>
 #include "biquad.hpp"
-#include <cstring>
-#include <cstdlib>
+#include <string.h>
+#include <stdlib.h>
 #include <cassert>
-#include <cmath>
-#include <cstdio>
+#include <math.h>
 
 //////////////////////////////////////////////////////////////////////
 // KarLKoX "Surround" plugin for PSYCLE
 
-using namespace psycle::plugin_interface;
+#define VERNUM "v1.2"
 
-const short VERNUM=0x120;
+CMachineParameter const paraLength = 
+{ 
+	"Cutoff Frequency",
+	"Cutoff for HighPass Filter",																				// description
+	0,																																																// MinValue				
+	1000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	400,
+};
+CMachineParameter const paraMode = 
+{ 
+	"Work Mode",
+	"Working model for the surround",																// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0,
+};
 
-CMachineParameter const paraLength = {"Cutoff Frequency", "Cutoff for HighPass Filter", 0, 1000, MPF_STATE, 400};
-CMachineParameter const paraMode = {"Work Mode", "Working model for the surround", 0, 1, MPF_STATE, 0};
-CMachineParameter const *pParameters[] =
-{	// global
+CMachineParameter const *pParameters[] = 
+{ 
+	// global
 	&paraLength,
 	&paraMode
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	VERNUM,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	"KarLKoX Surround "
-		#ifndef NDEBUG
-			" (Debug build)"
-		#endif
-		,
-	"Surround",
-	"Saïd Bougribate",
-	"About",
-	2
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	EFFECT,																																				// flags
+	2,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+#ifdef _DEBUG
+	"KarLKoX Surround (Debug build)" VERNUM,								// name
+#else
+	"KarLKoX Surround" VERNUM,																								// name
+#endif
+	"Surround",																																// short name
+	"Saïd Bougribate",																								// author
+	"About",																																// A command, that could be use for open an editor, etc...
+	2																																								// must be 2 else we can't see the knob (??)
 );
 
 class mi : public CMachineInterface
@@ -59,17 +73,19 @@ private:
 
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[MacInfo.numParameters];
+	// The constructor zone
+	Vals = new int[2];
 	initialized=false;
 }
 
 mi::~mi()
 {
 	delete [] Vals;
+// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init()
@@ -87,15 +103,14 @@ void mi::Setup()
 		initialized=true;
 		break;
 	case 1:
-		#if 0
-			BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,!initialized);
-			BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,!initialized);
-			initialized = true;
-		#endif
+/*
+		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqleft,!initialized);
+		BiQuad_new(HPF, 0.0f, (float)Vals[0], (float)smprate, 1, &bqright,!initialized);
+		initialized=true;
+*/
 		break;
 	}
 }
-
 void mi::SequencerTick()
 {
 	if (pCB->GetSamplingRate() != smprate ) Setup();
@@ -103,7 +118,10 @@ void mi::SequencerTick()
 
 void mi::Command()
 {
-	pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!\n\n Some modifications made by [JAZ] on Dec 2002","-=KarLKoX=- [Surround]",0);
+// Called when user presses editor button
+// Probably you to show your custom window here
+// or an about button
+	pCB->MessBox("Made 14/12/2001 by Saïd Bougribate for Psycl3!\n\n Some modifications made by [JAZ] on Dec 2002\n Version" VERNUM,"-=KarLKoX=- [Surround]",0);
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -112,9 +130,11 @@ void mi::ParameterTweak(int par, int val)
 	Setup();
 }
 
+// Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
-	if(!initialized) Setup();
+	//float xlb, xrb, xlt, xrt;
+	if (!initialized) Setup();
 	--psamplesleft;
 	--psamplesright;
 	// over all samples 
@@ -130,25 +150,25 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		} while(--numsamples);
 		break;
 	case 1:
-		#if 0
-			// This code was meant to make surround just out of the stereo part of a signal
-			// concretely it means that it doesn't affect the mono components of the signal.
-			do
-			{
-				float xl = *++psamplesleft;
-				float xr = *++psamplesright;
-				
-				float xtl = (float)BiQuad(xl, &bqleft); // BQ is a HighPass
-				float xtr = (float)BiQuad(xr, &bqright); // BQ is a HighPass
+/*								This code was meant to make surround just out of the stereo part of a signal
+		concretely it means that it doesn't affect the mono components of the signal.
+		do
+		{
+			float xl = *++psamplesleft;
+			float xr = *++psamplesright;
+			
+			float xtl = (float)BiQuad(xl, &bqleft); // BQ is a HighPass
+			float xtr = (float)BiQuad(xr, &bqright); // BQ is a HighPass
 
-				*psamplesleft  = xl+xtl*0.5-xtr*0.5;
-				*psamplesright  = xr-xtl*0.5+xtr*0.5;
-			} while(--numsamples);
-		#endif
+			*psamplesleft  = xl+xtl*0.5-xtr*0.5;
+			*psamplesright  = xr-xtl*0.5+xtr*0.5;
+		} while(--numsamples);
+*/
 		break;
 	}
 }
 
+// Function that describes value on client's displaying
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch (param)
@@ -170,3 +190,4 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	}
 	return false;
 }
+

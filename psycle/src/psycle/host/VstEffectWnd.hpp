@@ -4,17 +4,15 @@
 #include "Psycle.hpp"
 #include "NativeGui.hpp"
 
-#include <seib/vst/EffectWnd.hpp>
-
+#include <Seib-Vsthost/EffectWnd.hpp>
 #include <list>
 
 namespace psycle {
-	namespace core {
-		namespace vst {
+	namespace host {
+		namespace vst
+		{
 			class plugin;
 		}
-	}
-	namespace host {
 		using namespace seib::vst;
 
 		class CVstParamList;
@@ -36,12 +34,7 @@ namespace psycle {
 			DECLARE_DYNAMIC(CVstEffectWnd)
 		public: 
 			CVstEffectWnd(vst::plugin* effect);
-			CVstEffectWnd(vst::plugin* effect, class MachineGui* gui);
 			virtual ~CVstEffectWnd(){};
-
-		private:
-			MachineGui* gui_;
-
 		protected:
 			CVstEffectWnd(){}; // protected constructor used by dynamic creation
 
@@ -68,8 +61,6 @@ namespace psycle {
 			virtual bool CloseFileSelector (VstFileSelect *ptr);
 			virtual void* OpenSecondaryWnd(VstWindow& window);
 			virtual bool CloseSecondaryWnd(VstWindow& window);
-			void CenterWindowOnPoint(int x, int y);
-
 		protected:
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); }
 			virtual CBaseGui* CreateView();
@@ -86,7 +77,7 @@ namespace psycle {
 		public:
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnClose();
-			afx_msg void OnDestroy();
+//			afx_msg void OnDestroy();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
 			afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

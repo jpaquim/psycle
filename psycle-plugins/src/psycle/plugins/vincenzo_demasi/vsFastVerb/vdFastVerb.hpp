@@ -23,14 +23,13 @@
 #include "../vdabout.hpp"
 #include "fastverbfilter.hpp"
 
-enum {
-	LDELAY=0,
-	LFEEDBACK,
-	RDELAY,
-	RFEEDBACK,
-	LOCKDELAY,
-	LOCKFEEDBACK
-};
+#define LDELAY       0
+#define LFEEDBACK    1
+#define RDELAY       2
+#define RFEEDBACK    3
+#define LOCKDELAY    4
+#define LOCKFEEDBACK 5
+#define PARNUM       6
 
 #define PARCOLS   3
 
@@ -38,10 +37,9 @@ enum {
 #define VDSHORTNAME  "FastVerb"
 #define VDAUTHOR     "V. Demasi (Built on "__DATE__")"
 #define VDCOMMAND    "License"
-int const VDVERSION = 0x110;
 
 #define MIN_DELAY  1
-#define MAX_DELAY  22050
+#define MAX_DELAY  FASTVERB_FILTER_MAX_DELAY
 #define MIN_FEEDBACK   0
 #define MAX_FEEDBACK   100
 #define SET_LDELAY (MAX_DELAY / 2)
@@ -52,9 +50,6 @@ int const VDVERSION = 0x110;
 #define MIN_LOCK 0
 #define MAX_LOCK 1
 #define SET_LOCK 1
-
-using psycle::plugin_interface::CMachineParameter;
-using psycle::plugin_interface::MPF_STATE;
 
 CMachineParameter const parLeftDelay =
 {
@@ -96,38 +91,37 @@ CMachineParameter const *pParameters[] =
 	&parLockFeedback
 };
 
-psycle::plugin_interface::CMachineInfo const MacInfo (
-	psycle::plugin_interface::MI_VERSION,
-	VDVERSION,
-	psycle::plugin_interface::EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
+CMachineInfo const MacInfo(
+	MI_VERSION,
+	EFFECT,																																				// flags
+	PARNUM,																																				// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	VDPLUGINNAME " (Debug Build)",
+	VDPLUGINNAME " (Debug Build)",												// name
 #else
-	VDPLUGINNAME,
+	VDPLUGINNAME,																												// name
 #endif
-	VDSHORTNAME,
-	VDAUTHOR,
-	VDCOMMAND,
+	VDSHORTNAME,																												// short name
+	VDAUTHOR,																																// author
+	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
 	PARCOLS
 );
 
-class mi : public psycle::plugin_interface::CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
+class mi : public CMachineInterface
+{
+public:
+	mi();
+	virtual ~mi();
 
-		virtual void Init();
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
-		virtual void SequencerTick();
-		virtual bool DescribeValue(char *txt,int const param, int const value);
-		virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
-	private:
-		FastverbFilter leftFilter;
-		FastverbFilter rightFilter;
-		int lastDelayModified, lastFeedbackModified;
-		float lFeedback, rFeedback;
-		int currentSR;
+	virtual void Init();
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
+	virtual void SequencerTick();
+	virtual bool DescribeValue(char *txt,int const param, int const value);
+	virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
+private:
+	FastverbFilter leftFilter;
+	FastverbFilter rightFilter;
+	int lastDelayModified, lastFeedbackModified;
+	float lFeedback, rFeedback;
 };

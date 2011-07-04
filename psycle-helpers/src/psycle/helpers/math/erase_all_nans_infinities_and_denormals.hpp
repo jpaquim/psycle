@@ -12,9 +12,6 @@
 
 namespace psycle { namespace helpers { namespace math {
 
-using universalis::stdlib::uint32_t;
-using universalis::stdlib::uint64_t;
-
 /// Cure for malicious samples
 /// Type : Filters Denormals, NaNs, Infinities
 /// References : Posted by urs[AT]u-he[DOT]com
@@ -24,18 +21,18 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 	#else
 		union {
 			float sample;
-			uint32_t bits;
+			std::uint32_t bits;
 		} u;
 		u.sample = sample;
 
-		uint32_t const exponent_mask(0x7f800000);
-		uint32_t const exponent(u.bits & exponent_mask);
+		std::uint32_t const exponent_mask(0x7f800000);
+		std::uint32_t const exponent(u.bits & exponent_mask);
 
 		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
-		uint32_t const not_nan_nor_infinity(exponent < exponent_mask);
+		std::uint32_t const not_nan_nor_infinity(exponent < exponent_mask);
 
 		// exponent > 0 is 0 if denormalized, otherwise 1
-		uint32_t const not_denormal(exponent > 0);
+		std::uint32_t const not_denormal(exponent > 0);
 
 		u.bits *= not_nan_nor_infinity & not_denormal;
 		sample = u.sample;
@@ -49,18 +46,18 @@ void inline erase_all_nans_infinities_and_denormals(double & sample) {
 	#else
 		union {
 			double sample;
-			uint64_t bits;
+			std::uint64_t bits;
 		} u;
 		u.sample = sample;
 
-		uint64_t const exponent_mask(0x7f80000000000000ULL);
-		uint64_t const exponent(u.bits & exponent_mask);
+		std::uint64_t const exponent_mask(0x7f80000000000000ULL);
+		std::uint64_t const exponent(u.bits & exponent_mask);
 
 		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
-		uint64_t const not_nan_nor_infinity(exponent < exponent_mask);
+		std::uint64_t const not_nan_nor_infinity(exponent < exponent_mask);
 
 		// exponent > 0 is 0 if denormalized, otherwise 1
-		uint64_t const not_denormal(exponent > 0);
+		std::uint64_t const not_denormal(exponent > 0);
 
 		u.bits *= not_nan_nor_infinity & not_denormal;
 		sample = u.sample;

@@ -329,6 +329,30 @@
 				Name="compiler"
 				>
 				<File
+					RelativePath="src\universalis\compiler\exception.compiler.cpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\compiler\exception.hpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\compiler\location.hpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\compiler\numeric.hpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\compiler\typenameof.cpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\compiler\typenameof.hpp"
+					>
+				</File>
+				<File
 					RelativePath="src\universalis\compiler\align.hpp"
 					>
 				</File>
@@ -365,22 +389,6 @@
 					>
 				</File>
 				<File
-					RelativePath="src\universalis\compiler\exception.compiler.cpp"
-					>
-				</File>
-				<File
-					RelativePath="src\universalis\compiler\exception.hpp"
-					>
-				</File>
-				<File
-					RelativePath="src\universalis\compiler\location.hpp"
-					>
-				</File>
-				<File
-					RelativePath="src\universalis\compiler\numeric.hpp"
-					>
-				</File>
-				<File
 					RelativePath="src\universalis\compiler\pack.hpp"
 					>
 				</File>
@@ -390,10 +398,6 @@
 				</File>
 				<File
 					RelativePath="src\universalis\compiler\restrict.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\universalis\compiler\setup_feature_test_macros.hpp"
 					>
 				</File>
 				<File
@@ -417,14 +421,6 @@
 					>
 				</File>
 				<File
-					RelativePath="src\universalis\compiler\typenameof.cpp"
-					>
-				</File>
-				<File
-					RelativePath="src\universalis\compiler\typenameof.hpp"
-					>
-				</File>
-				<File
 					RelativePath="src\universalis\compiler\virtual.hpp"
 					>
 				</File>
@@ -436,10 +432,6 @@
 			<Filter
 				Name="os"
 				>
-				<File
-					RelativePath="src\universalis\os\aligned_alloc.hpp"
-					>
-				</File>
 				<File
 					RelativePath="src\universalis\os\check_version.cpp"
 					>
@@ -485,10 +477,6 @@
 					>
 				</File>
 				<File
-					RelativePath="src\universalis\os\include_windows_without_crap.hpp"
-					>
-				</File>
-				<File
 					RelativePath="src\universalis\os\loggers.cpp"
 					>
 				</File>
@@ -520,28 +508,28 @@
 					RelativePath="src\universalis\os\thread_name.hpp"
 					>
 				</File>
-				<Filter
-					Name="detail"
+				<File
+					RelativePath="src\universalis\os\aligned_alloc.hpp"
 					>
-					<File
-						RelativePath=".\src\universalis\os\detail\clocks.hpp"
-						>
-					</File>
-				</Filter>
+				</File>
+				<File
+					RelativePath="src\universalis\os\include_windows_without_crap.hpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="cpu"
 				>
-				<File
-					RelativePath="src\universalis\cpu\atomic_compare_and_swap.hpp"
-					>
-				</File>
 				<File
 					RelativePath="src\universalis\cpu\exception.cpu.cpp"
 					>
 				</File>
 				<File
 					RelativePath="src\universalis\cpu\exception.hpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\cpu\atomic_compare_and_swap.hpp"
 					>
 				</File>
 				<File
@@ -553,15 +541,15 @@
 				Name="stdlib"
 				>
 				<File
-					RelativePath=".\src\universalis\stdlib\chrono.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\universalis\stdlib\condition_variable.hpp"
+					RelativePath="src\universalis\stdlib\condition.hpp"
 					>
 				</File>
 				<File
 					RelativePath="src\universalis\stdlib\cstdint.hpp"
+					>
+				</File>
+				<File
+					RelativePath="src\universalis\stdlib\date_time.hpp"
 					>
 				</File>
 				<File
@@ -577,10 +565,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\universalis\stdlib\ratio.hpp"
-					>
-				</File>
-				<File
 					RelativePath="src\universalis\stdlib\stdc_secure_lib.hpp"
 					>
 				</File>
@@ -591,18 +575,22 @@
 				<Filter
 					Name="detail"
 					>
-					<Filter
-						Name="chrono"
+					<File
+						RelativePath="src\universalis\stdlib\detail\boost_xtime.hpp"
 						>
-						<File
-							RelativePath=".\src\universalis\stdlib\detail\chrono\duration_and_time_point.hpp"
-							>
-						</File>
-						<File
-							RelativePath=".\src\universalis\stdlib\detail\chrono\measure_clock.hpp"
-							>
-						</File>
-					</Filter>
+					</File>
+					<File
+						RelativePath="src\universalis\stdlib\detail\duration.hpp"
+						>
+					</File>
+					<File
+						RelativePath="src\universalis\stdlib\detail\hiresolution_clock.hpp"
+						>
+					</File>
+					<File
+						RelativePath="src\universalis\stdlib\detail\utc_time.hpp"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>

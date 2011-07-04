@@ -1,10 +1,27 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/***************************************************************************
+*   Copyright (C) 2007 Psycledelics     *
+*   psycle.sf.net   *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/detail/project.private.hpp>
+
 #include "ladspamachine.h"
 
-#include <psycle/helpers/dsp.hpp>
+#include "dsp.h"
 #include "player.h"
 #include "fileio.h"
 
@@ -17,9 +34,8 @@
 	#include <windows.h>
 #endif
 
-namespace psycle { namespace core {
-
-using namespace helpers;
+namespace psy {
+	namespace core {
 	
 		///\todo: Improve the case where no min/max limit is given by the plugin (Example: the amp.so doesn't have a max value).
 		LadspaParam::LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname)
@@ -156,8 +172,8 @@ using namespace helpers;
 		{
 			SetEditName(GetName());
 			SetAudioRange(1.0f);
-			//pOutSamplesL= new LADSPA_Data[MAX_BUFFER_LENGTH];
-			//pOutSamplesR= new LADSPA_Data[MAX_BUFFER_LENGTH];
+			//pOutSamplesL= new LADSPA_Data[STREAM_SIZE];
+			//pOutSamplesR= new LADSPA_Data[STREAM_SIZE];
 			// Step five: Prepare the structures to use the plugin with the program.
 			std::cout << "step five" << std::endl;
 			prepareStructures();
@@ -240,6 +256,13 @@ using namespace helpers;
 			}
 		}
 		
+		void LADSPAMachine::PreWork(int numSamples)
+		{
+			//std::swap(_pSamplesL,pOutSamplesL);
+			//std::swap(_pSamplesR,pOutSamplesR);
+			Machine::PreWork(numSamples);
+		}
+		
 		int LADSPAMachine::GenerateAudio(int numSamples )
 		{
 			if(!_mute && !_bypass && !_standby)
@@ -293,7 +316,7 @@ using namespace helpers;
 		
 		bool LADSPAMachine::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			uint32_t size=0;
+			std::uint32_t size=0;
 			pFile->Read(size); // size of whole structure
 			if(size)
 			{
@@ -308,7 +331,7 @@ using namespace helpers;
 				}
 				else
 				{
-					uint32_t count=0;
+					std::uint32_t count=0;
 					pFile->Read(count);  // size of vars
 					for(unsigned int i(0) ; i < count ; ++i)
 					{
@@ -323,8 +346,8 @@ using namespace helpers;
 		
 		void LADSPAMachine::SaveSpecificChunk(RiffFile* pFile) const
 		{
-			uint32_t count = GetNumParams();
-			uint32_t size = sizeof count  + sizeof(uint32_t) * count;
+			std::uint32_t count = GetNumParams();
+			std::uint32_t size = sizeof count  + sizeof(std::uint32_t) * count;
 			pFile->Write(size);
 			pFile->Write(count);
 			for(unsigned int i(0) ; i < count ; ++i) {

@@ -19,43 +19,34 @@
 
 #pragma once
 
+// 500 millis. at 44100 Hz
+#define ALLPASS_FILTER_BUFFER_SIZE 22051
+#define ALLPASS_FILTER_MAX_DELAY   (ALLPASS_FILTER_BUFFER_SIZE - 1)
+
 class AllPassFilter
 {
 private:
-	float* buffer;
-	int size;
+	float buffer[ALLPASS_FILTER_BUFFER_SIZE];
 	unsigned int writein, readout;
 	float gain;
 public:
 
-	AllPassFilter():buffer(0), size(0), writein(0), readout(0), gain(1.0f)
+	AllPassFilter()
 	{
+		readout = writein = 0;
+		gain = 1.0f;
+		for(register int i = 0; i < ALLPASS_FILTER_BUFFER_SIZE; ++i)
+			buffer[i] = 0.0f;
 	}
 
 	~AllPassFilter()
 	{
-		if(buffer) delete[] buffer;
-	}
-
-	//Resizing the buffer to half of new samplerate (half a second)
-	inline void changeSamplerate(int newSR) {
-		int const newSize=newSR/2 + 1;
-		if (buffer) delete[] buffer;
-		buffer = new float[newSize];
-		for(int i=0; i<newSize; i++ ) {
-			buffer[i]=0.0f;
-		}
-		size=newSize;
-		if(readout>= size) {
-			readout = 0;
-			writein = 0;
-		}
 	}
 
 	inline void setDelay(unsigned int samples)
 	{
-		if((writein = readout + samples) >= size)
-			writein -= size;
+		if((writein = readout + samples) >= ALLPASS_FILTER_BUFFER_SIZE)
+			writein -= ALLPASS_FILTER_BUFFER_SIZE;
 	}
 
 	inline void setGain(float value)
@@ -69,8 +60,8 @@ public:
 			(ignored for efficiency) */
 		float output = -gain * sample + buffer[readout];
 		buffer[writein] = sample + output * gain;
-		if(++writein == size) writein = 0;
-		if(++readout == size) readout = 0;
+		if(++writein == ALLPASS_FILTER_BUFFER_SIZE) writein = 0;
+		if(++readout == ALLPASS_FILTER_BUFFER_SIZE) readout = 0;
 		return output;
 	}
 };

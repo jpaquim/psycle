@@ -5,16 +5,15 @@
 /// \file
 /// \brief delay
 #include "plugin.hpp"
-#include <psycle/helpers/math/erase_all_nans_infinities_and_denormals.hpp>
 #include <cassert>
 #include <vector>
 namespace psycle { namespace plugin {
-	using namespace psycle::helpers::math;
+
 
 class Delay : public Plugin
 {
 public:
-	/*override*/ void help(std::ostream & out) throw()
+	virtual void help(std::ostream & out) const throw()
 	{
 		out << "Delay." << std::endl;
 		out << "Compatible with original psycle 1 arguru's dala delay." << std::endl;
@@ -31,29 +30,23 @@ public:
 
 	static const Information & information() throw()
 	{
-		static bool initialized = false;
-		static Information *info = NULL;
-		if (!initialized) {
-			const int factors(2 * 3 * 4 * 5 * 7);
-			const Real delay_maximum(Information::Parameter::input_maximum_value / factors);
-			static const Information::Parameter parameters [] =
-			{
-				Information::Parameter::linear("dry", -1, 1, 1),
-				Information::Parameter::linear("wet", -1, 0, 1),
-				Information::Parameter::linear("delay left", 0, 0, delay_maximum),
-				Information::Parameter::linear("feedback left", -1, 0, 1),
-				Information::Parameter::linear("delay right", 0, 0, delay_maximum),
-				Information::Parameter::linear("feedback right", -1, 0, 1),
-				Information::Parameter::discrete("snap to", 3, factors - 1)
-			};
-			static Information information(0x0110, Information::Types::effect, "ayeternal Dalay Delay", "Dalay Delay", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
-			info = &information;
-			initialized = true;
-		}
-		return *info;
+		const int factors(2 * 3 * 4 * 5 * 7);
+		const Real delay_maximum(Information::Parameter::input_maximum_value / factors);
+		static const Information::Parameter parameters [] =
+		{
+			Information::Parameter::linear("dry", -1, 1, 1),
+			Information::Parameter::linear("wet", -1, 0, 1),
+			Information::Parameter::linear("delay left", 0, 0, delay_maximum),
+			Information::Parameter::linear("feedback left", -1, 0, 1),
+			Information::Parameter::linear("delay right", 0, 0, delay_maximum),
+			Information::Parameter::linear("feedback right", -1, 0, 1),
+			Information::Parameter::discrete("snap to", 3, factors - 1)
+		};
+		static const Information information(Information::Types::effect, "ayeternal Dalay Delay", "Dalay Delay", "bohan", 4, parameters, sizeof parameters / sizeof *parameters);
+		return information;
 	}
 
-	/*override*/ void describe(std::ostream & out, const int & parameter) const
+	virtual void describe(std::ostream & out, const int & parameter) const
 	{
 		switch(parameter)
 		{
@@ -62,7 +55,7 @@ public:
 			out << (*this)(parameter) << " ticks (lines)";
 			break;
 		case snap:
-			if((*this)[parameter] == information().parameter(parameter).MaxValue) out << "off ";
+			if((*this)[parameter] == information().parameter(parameter).maximum_value) out << "off ";
 			out << "1 / " << 1 + (*this)[parameter] << " ticks (lines)";
 			break;
 		case left_feedback:
@@ -80,16 +73,17 @@ public:
 	}
 
 	Delay() : Plugin(information()) {}
-	/*override*/ void init();
-	/*override*/ void Work(Sample l [], Sample r [], int samples, int);
-	/*override*/ void parameter(const int &);
+	virtual inline ~Delay() throw() {}
+	virtual void init();
+	virtual void process(Sample l [], Sample r [], int samples, int);
+	virtual void parameter(const int &);
 protected:
-	/*override*/ void samples_per_second_changed()
+	virtual void samples_per_second_changed()
 	{
 		parameter(left_delay);
 		parameter(right_delay);
 	}
-	/*override*/ void sequencer_ticks_per_second_changed()
+	virtual void sequencer_ticks_per_second_changed()
 	{
 		parameter(left_delay);
 		parameter(right_delay);
@@ -97,12 +91,12 @@ protected:
 	enum Channels { left, right, channels };
 	std::vector<Real> buffers_ [channels];
 	std::vector<Real>::iterator buffer_iterators_ [channels];
-	inline void Work(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback);
+	inline void process(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback);
 	inline void resize(const int & channel, const int & parameter);
 	inline void resize(const int & channel, const Real & delay);
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(Delay)
+PSYCLE__PLUGIN__INSTANCIATOR(Delay)
 
 void Delay::init()
 {
@@ -127,8 +121,8 @@ inline void Delay::resize(const int & channel, const int & parameter)
 {
 	const int snap1((*this)[snap] + 1);
 	const Real snap_delay(static_cast<int>((*this)(parameter) * snap1) / static_cast<Real>(snap1));
-	(*this)(parameter) = snap_delay;
-	(*this)[parameter] = information().parameter(parameter).scale.apply_inverse(snap_delay) + 1; // Round up.
+	this->scaled_parameters_[parameter] = snap_delay;
+	this->parameters_[parameter] = information().parameter(parameter).scale.apply_inverse(snap_delay)+1; // Round up.
 	resize(channel, snap_delay);
 }
 
@@ -139,21 +133,19 @@ inline void Delay::resize(const int & channel, const Real & delay)
 	buffer_iterators_[channel] = buffers_[channel].begin();
 }
 
-void Delay::Work(Sample l [], Sample r [], int samples, int)
+void Delay::process(Sample l [], Sample r [], int samples, int)
 {
 	for(int sample(0) ; sample < samples ; ++sample)
 	{
-		Work(buffers_[left] , buffer_iterators_[left] , l[sample], (*this)(left_feedback));
-		Work(buffers_[right], buffer_iterators_[right], r[sample], (*this)(right_feedback));
+		process(buffers_[left] , buffer_iterators_[left] , l[sample], (*this)(left_feedback));
+		process(buffers_[right], buffer_iterators_[right], r[sample], (*this)(right_feedback));
 	}
 }
 
-inline void Delay::Work(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback)
+inline void Delay::process(std::vector<Real> & buffer, std::vector<Real>::iterator & buffer_iterator, Sample & input, const Sample & feedback)
 {
 	const Real read(*buffer_iterator);
-	Real newval = input + feedback * read;
-	erase_all_nans_infinities_and_denormals(newval);
-	*buffer_iterator = newval;
+	*buffer_iterator = input + feedback * read;
 	if(++buffer_iterator == buffer.end()) buffer_iterator = buffer.begin();
 	input = static_cast<Sample>((*this)(dry) * input + (*this)(wet) * read);
 }

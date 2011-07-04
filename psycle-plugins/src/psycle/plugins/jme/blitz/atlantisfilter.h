@@ -16,7 +16,6 @@
 */
 
 #define PIf	3.1415926535897932384626433832795f;
-#define ANTIDENORMAL 1e-15f // could be 1e-18f, but this is still way below audible noise threshold
 
 #pragma once
 enum eAlgorithm {
@@ -35,8 +34,8 @@ public:
 
 	void setAlgorithm(eAlgorithm a_algo);
 	void reset();
+	void process(float& sample);
 	void recalculateCoeffs(const float a_fFrequency, const float a_fFeedback);
-	inline void process(float& sample);
 private:
 
 	eAlgorithm m_Algorithm;
@@ -48,59 +47,3 @@ private:
 	float m_low, m_high, m_band;
 };
 
-inline void CSIDFilter::process(float& sample)
-{
-	const float f = m_f;
-	const float fb = m_fb;
-	float low = m_low;
-	float band = m_band;
-	float high = m_high;
-
-	low -= (f*band);
-	band -= (f*high);
-	high = (band*fb) - low - sample + ANTIDENORMAL;
-
-	switch (m_Algorithm)
-	{
-		case FILTER_ALGO_SID_LPF:
-		{
-			sample = low;
-			break;
-		}
-		case FILTER_ALGO_SID_HPF:
-		{
-			sample = high;
-			break;
-		}
-		case FILTER_ALGO_SID_BPF:
-		{
-			sample = band;
-			break;
-		}
-		case FILTER_ALGO_SID_LPF_HPF:
-		{
-			sample = low + high;
-			break;
-		}
-		case FILTER_ALGO_SID_LPF_BPF:
-		{
-			sample = low + band;
-			break;
-		}
-		case FILTER_ALGO_SID_LPF_HPF_BPF:
-		{
-			sample = low + band + high;
-			break;
-		}
-		case FILTER_ALGO_SID_HPF_BPF:
-		{
-			sample = band + high;
-			break;
-		}
-		default:
-			break;
-	}
-	m_low = low;
-	m_band = band;
-	m_high = high;
-}

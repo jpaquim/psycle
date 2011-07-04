@@ -1,11 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
 
+
 #include "ConfigDlg.hpp"
+
 #include "MainFrm.hpp"
-#include "PatternView.hpp"
-#include "MachineView.hpp"
-#include <psycle/core/machinefactory.h>
 
 namespace psycle { namespace host {
 
@@ -16,21 +15,32 @@ namespace psycle { namespace host {
 		CConfigDlg::CConfigDlg(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 			: CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 		{
+			AddControlPages();
 		}
 
 		CConfigDlg::CConfigDlg(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 			:CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 		{
+			AddControlPages();
 		}
 
 		CConfigDlg::~CConfigDlg()
 		{
 		}
 
+		void CConfigDlg::AddControlPages() {
+			m_psh.dwFlags |= PSH_NOAPPLYNOW; // Eliminate the Apply button
+
+			AddPage(&_skinDlg);
+			AddPage(&_keyDlg);
+			AddPage(&_dirDlg);
+			AddPage(&_outputDlg);
+			AddPage(&_midiDlg);
+		}
 		BEGIN_MESSAGE_MAP(CConfigDlg, CPropertySheet)
 		END_MESSAGE_MAP()
 
-		void CConfigDlg::Init(Configuration* pConfig,int dlgnum) 
+		void CConfigDlg::Init(Configuration* pConfig) 
 		{
 			_pConfig = pConfig;
 			_skinDlg._patternSeparatorColor = pConfig->pvc_separator;
@@ -123,7 +133,10 @@ namespace psycle { namespace host {
 			if(!pConfig->GetInstrumentDir().empty()) _dirDlg._instPathBuf   = pConfig->GetInstrumentDir();
 			if(!pConfig->GetSongDir()      .empty()) _dirDlg._songPathBuf   = pConfig->GetSongDir();
 			if(!pConfig->GetPluginDir()    .empty()) _dirDlg._pluginPathBuf = pConfig->GetPluginDir();
-			if(!pConfig->GetVstDir()       .empty()) _dirDlg._vstPathBuf    = pConfig->GetVstDir();
+			if(!pConfig->GetVst32Dir()     .empty()) _dirDlg._vstPath32Buf  = pConfig->GetVst32Dir();
+			if(!pConfig->GetVst64Dir()     .empty()) _dirDlg._vstPath64Buf  = pConfig->GetVst64Dir();
+			_dirDlg._isJbridged = pConfig->UseJBridge();
+			_dirDlg._isPsycleBridged = pConfig->UsePsycleVstBridge();
 			if(!pConfig->GetWaveRecDir()   .empty()) _dirDlg._waveRecPathBuf= pConfig->GetWaveRecDir();
 			if(!pConfig->GetSkinDir()      .empty())
 			{
@@ -137,11 +150,6 @@ namespace psycle { namespace host {
 				_skinDlg._skinPathBuf.clear();
 				_keyDlg ._skinPathBuf.clear();
 			}
-			if(dlgnum == 1 || dlgnum == 0) AddPage(&_skinDlg);
-			if(dlgnum == 2 || dlgnum == 0) AddPage(&_keyDlg);
-			if(dlgnum == 3 || dlgnum == 0) AddPage(&_dirDlg);
-			if(dlgnum == 4 || dlgnum == 0) AddPage(&_outputDlg);
-			if(dlgnum == 5 || dlgnum == 0) AddPage(&_midiDlg);
 		}
 
 		INT_PTR CConfigDlg::DoModal() 
@@ -224,7 +232,7 @@ namespace psycle { namespace host {
 				if (_pConfig->pattern_header_skin != _skinDlg._pattern_header_skin)
 				{
 					_pConfig->pattern_header_skin = _skinDlg._pattern_header_skin;
-					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->LoadPatternHeaderSkin();
+					if (_pConfig->Initialized() ) ((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadPatternHeaderSkin();
 				}
 
 				_pConfig->pattern_font_point = _skinDlg._pattern_font_point;
@@ -246,7 +254,7 @@ namespace psycle { namespace host {
 					_pConfig->machine_skin = _skinDlg._machine_skin;
 					if (_pConfig->Initialized() ) 
 					{
-//						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin(); maybe a todo
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineSkin();
 					}
 				}
 
@@ -256,8 +264,7 @@ namespace psycle { namespace host {
 					_pConfig->szBmpBkgFilename = _skinDlg.szBmpBkgFilename;
 					if (_pConfig->Initialized() ) 
 					{
-//						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();
-						//maybe a todo
+						((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineBackground();
 					}
 				}
 
@@ -268,8 +275,8 @@ namespace psycle { namespace host {
 				}
 				if (_pConfig->Initialized() ) 
 				{
-//					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial(); maybe a todo
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalcMetrics();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.LoadMachineDial();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalcMetrics();
 				}
 
 				_pConfig->_outputDriverIndex = _outputDlg.m_driverIndex;
@@ -280,28 +287,21 @@ namespace psycle { namespace host {
 
 				if (_dirDlg._instPathChanged) _pConfig->SetInstrumentDir(_dirDlg._instPathBuf);
 				if (_dirDlg._songPathChanged) _pConfig->SetSongDir(_dirDlg._songPathBuf);
-				if (_dirDlg._pluginPathChanged) {
-					MachineFactory & factory(MachineFactory::getInstance());
-					factory.setPsyclePath(_dirDlg._pluginPathBuf);
-					_pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
+				if (_dirDlg._pluginPathChanged) _pConfig->SetPluginDir(_dirDlg._pluginPathBuf);
+				if (_dirDlg._vstPath32Changed) _pConfig->SetVst32Dir(_dirDlg._vstPath32Buf);
+				if (_dirDlg._vstPath64Changed) _pConfig->SetVst64Dir(_dirDlg._vstPath64Buf);
+				_pConfig->UseJBridge(_dirDlg._isJbridged);
+				_pConfig->UsePsycleVstBridge(_dirDlg._isPsycleBridged);
 
-				}
-				if (_dirDlg._vstPathChanged) {
-					MachineFactory & factory(MachineFactory::getInstance());
-					factory.setVstPath(_dirDlg._vstPathBuf);
-					_pConfig->SetVstDir(_dirDlg._vstPathBuf);
-				}
 				if (_dirDlg._skinPathChanged) _pConfig->SetSkinDir(_dirDlg._skinPathBuf);
 				if (_dirDlg._waveRecPathChanged) _pConfig->SetWaveRecDir(_dirDlg._waveRecPathBuf);
 
 				if (_pConfig->Initialized() ) 
 				{
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->RecalculateColourGrid();
-					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.pattern_view()->Repaint(PatternView::draw_modes::all);
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.RecalculateColourGrid();
+					((CMainFrame *)theApp.m_pMainWnd)->m_wndView.Repaint();
 				}
 				_pConfig->Write();
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->InitSkin();
-				((CMainFrame *)theApp.m_pMainWnd)->m_wndView.machine_view()->Rebuild();
 			}
 			return retVal;
 		}

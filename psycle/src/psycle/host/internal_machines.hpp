@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Global.hpp"
 #include "Machine.hpp"
 namespace psycle
 {
@@ -12,7 +12,7 @@ class Dummy : public Machine
 public:
 	Dummy(int index);
 	Dummy(Machine *mac);
-	virtual void Work(int numSamples);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
@@ -31,14 +31,14 @@ public:
 	MultiMachine(int index);
 	virtual ~MultiMachine();
 	virtual void Init();
-	virtual void Tick( int channel,PatternEvent* pData);
+	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 
 protected:
 	static const int NUMMACHINES=8;
 	void AllocateVoice(int channel, int machine);
 	void DeallocateVoice(int channel, int machine);
-		virtual void CustomTick(int channel,int i, PatternEvent& pData) = 0;
+		virtual void CustomTick(int channel,int i, PatternEntry& pData) = 0;
 	short macOutput[NUMMACHINES];
 	short noteOffset[NUMMACHINES];
 	bool bisTicking;
@@ -55,8 +55,8 @@ public:
 	DuplicatorMac(int index);
 	virtual void Init(void);
 	virtual void Tick();
-	virtual void CustomTick(int channel,int i, PatternEvent& pData);
-	virtual void Work(int numSamples);
+	virtual void CustomTick(int channel,int i, PatternEntry& pData);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual void GetParamName(int numparam,char *name);
@@ -81,7 +81,7 @@ public:
 	DrumsMatrix(int index);
 	virtual void Init(void);
 	virtual void Tick();
-	virtual void Tick( int channel,PatternEvent* pData);
+	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange(){ return 32768.0f; }
@@ -106,21 +106,19 @@ public:
 	AudioRecorder();
 	AudioRecorder(int index);
 	virtual ~AudioRecorder();
-	virtual void PreWork(int numSamples,bool clear) { Machine::PreWork(numSamples,false); }
+	virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage) { Machine::PreWork(numSamples,false,measure_cpu_usage); }
 	virtual void Init(void);
-	virtual void Work(int numSamples);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange(){ return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
 	virtual void ChangePort(int newport);
-	virtual void setGainVol(float gainvol) { _gainvol = gainvol; }
-	virtual float GainVol() const { return _gainvol; }
-	virtual int CaptureIdx() const { return _captureidx; }
 
 	static char* _psName;
 
+	char drivername[32];
 	int _captureidx;
 	bool _initialized;
 	float _gainvol;
@@ -168,11 +166,17 @@ public:
 		inline float &Send(int i) { return sends_[i]; }
 		inline const float &Send(int i) const { return sends_[i]; }
 		inline float &Volume() { return volume_; }
+		inline const float &Volume() const { return volume_; }
 		inline float &Panning() { return panning_; }
+		inline const float &Panning() const { return panning_; }
 		inline float &DryMix() { return drymix_; }
+		inline const float &DryMix() const { return drymix_; }
 		inline bool &Mute() { return mute_; }
+		inline const bool &Mute() const { return mute_; }
 		inline bool &DryOnly() { return dryonly_; }
+		inline const bool &DryOnly() const { return dryonly_; }
 		inline bool &WetOnly() { return wetonly_; }
+		inline const bool &WetOnly() const { return wetonly_; }
 
 		void AddSend() { sends_.push_back(0); }
 		void ResizeTo(int sends) { sends_.resize(sends); }
@@ -198,7 +202,7 @@ public:
 	public:
 		MixerWire():machine_(-1),volume_(1.0f),normalize_(1.0f) {}
 		MixerWire(int mac,float norm):machine_(mac),volume_(1.0f),normalize_(norm){}
-		bool IsValid(){ return (machine_!=-1); }
+		bool IsValid() const { return (machine_!=-1); }
 
 		int machine_;
 		float volume_;
@@ -236,12 +240,17 @@ public:
 		inline void Send(int i,bool value) { sends_[i]= value; }
 		inline const bool Send(int i) const { return sends_[i]; }
 		inline bool &MasterSend() { return mastersend_; }
+		inline const bool &MasterSend() const{ return mastersend_; }
 		inline float &Volume() { return volume_; }
+		inline const float &Volume() const { return volume_; }
 		inline float &Panning() { return panning_; }
+		inline const float &Panning() const { return panning_; }
 		inline bool &Mute() { return mute_; }
+		inline const bool &Mute() const { return mute_; }
 		inline MixerWire &Wire() { return wire_; }
+		inline const MixerWire &Wire() const { return wire_; }
 		
-		bool IsValid() { return wire_.IsValid(); }
+		bool IsValid() const { return wire_.IsValid(); }
 
 		void AddSend() { sends_.push_back(false); }
 		void ResizeTo(int sends) { sends_.resize(sends); }
@@ -292,10 +301,21 @@ public:
 	Mixer(int index);
 	virtual ~Mixer() throw();
 	virtual void Init(void);
-	virtual void Tick( int channel,PatternEvent* pData);
-	virtual void Work(int numSamples);
-	void FxSend(int numSamples);
+	virtual void Tick( int channel,PatternEntry* pData);
+	virtual void recursive_process(unsigned int frames, bool measure_cpu_usage);
+	///\name used by the multi-threaded scheduler
+	///\{
+		protected:
+			/// tells the scheduler which machines to process before this one
+			/*override*/ void sched_inputs(sched_deps&) const;
+			/// tells the scheduler which machines may be processed after this one
+			/*override*/ void sched_outputs(sched_deps&) const;
+			/// called by the scheduler to ask for the actual processing of the machine
+			/*override*/ bool sched_process(unsigned int frames, bool measure_cpu_usage);
+	///\}
+	void FxSend(int numSamples, bool recurse, bool measure_cpu_usage);
 	void Mix(int numSamples);
+public:
 	virtual void GetWireVolume(int wireIndex, float &value){ value = GetWireVolume(wireIndex); }
 	virtual float GetWireVolume(int wireIndex);
 	virtual void SetWireVolume(int wireIndex,float value);
@@ -371,6 +391,10 @@ public:
 
 protected:
 	static char* _psName;
+	/// helper variable for scheduled processing: returns can be routed to other returns
+	int sched_returns_processed_curr;
+	int sched_returns_processed_prev;
+	bool mixed;
 
 	int solocolumn_;
 	std::vector<InputChannel> inputs_;

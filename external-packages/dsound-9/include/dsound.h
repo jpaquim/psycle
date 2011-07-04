@@ -111,6 +111,7 @@ struct IDirectSoundCaptureBuffer;
 struct IDirectSoundNotify;
 #endif // __cplusplus
 
+
 //
 // DirectSound 8.0 interfaces.
 //
@@ -165,6 +166,7 @@ typedef struct IDirectSound3DBuffer         *LPDIRECTSOUND3DBUFFER;
 typedef struct IDirectSoundCapture          *LPDIRECTSOUNDCAPTURE;
 typedef struct IDirectSoundCaptureBuffer    *LPDIRECTSOUNDCAPTUREBUFFER;
 typedef struct IDirectSoundNotify           *LPDIRECTSOUNDNOTIFY;
+
 
 #if DIRECTSOUND_VERSION >= 0x0800
 
@@ -1095,6 +1097,7 @@ DECLARE_INTERFACE_(IDirectSoundCaptureBuffer, IUnknown)
 #define IDirectSoundCaptureBuffer_Stop(p)                       (p)->Stop()
 #define IDirectSoundCaptureBuffer_Unlock(p,a,b,c,d)             (p)->Unlock(a,b,c,d)
 #endif // !defined(__cplusplus) || defined(CINTERFACE)
+
 
 #if DIRECTSOUND_VERSION >= 0x0800
 
@@ -2170,9 +2173,11 @@ DECLARE_INTERFACE_(IDirectSoundFullDuplex, IUnknown)
 // IDirectSoundCaptureBuffer attributes
 
 #define DSCBCAPS_WAVEMAPPED         0x80000000
+
 #if DIRECTSOUND_VERSION >= 0x0800
 #define DSCBCAPS_CTRLFX             0x00000200
 #endif
+
 
 #define DSCBLOCK_ENTIREBUFFER       0x00000001
 
@@ -2185,6 +2190,7 @@ DECLARE_INTERFACE_(IDirectSoundFullDuplex, IUnknown)
 
 #define DS_CERTIFIED                0x00000000
 #define DS_UNCERTIFIED              0x00000001
+
 
 //
 // Flags for the I3DL2 effects
@@ -2382,4 +2388,5 @@ DEFINE_GUID(GUID_DSCFX_SYSTEM_NS, 0x5ab0882e, 0x7274, 0x4516, 0x87, 0x7d, 0x4e, 
 #ifdef __cplusplus
 };
 #endif // __cplusplus
+
 

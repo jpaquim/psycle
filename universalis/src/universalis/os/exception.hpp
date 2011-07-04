@@ -53,23 +53,26 @@ namespace exceptions {
 
 	using universalis::exceptions::runtime_error;
 
-	#if defined DIVERSALIS__OS__MICROSOFT
-		/// exceptions for which code() is a standard iso or posix errno one and not a winapi GetLastError() one.
-		/// The what() function then uses the iso standard lib strerror() function instead of windows ntdll FormatMessage().
-		class UNIVERSALIS__DECL iso_or_posix_std : public exception {
-			public:
-				iso_or_posix_std(compiler::location const & location) throw() : exception(errno, location) {}
-				iso_or_posix_std(int code, compiler::location const & location) throw() : exception(code, location) {}
-				char const * what() const throw() /*override*/;
-		};
-	#else
-		// posix systems conform to the iso standard, so there is no nothing special to do.
-		typedef exception iso_or_posix_std;
-	#endif
+	///\internal
+	namespace detail {
+		#if defined DIVERSALIS__OS__MICROSOFT
+			/// exceptions for which code() is a standard posix errno one and not a winapi GetLastError() one.
+			/// The what() function then uses the standard lib strerror() function instead of windows ntdll FormatMessage().
+			class UNIVERSALIS__DECL posix : public exception {
+				public:
+					posix(compiler::location const & location) throw() : exception(errno, location) {}
+					posix(int code, compiler::location const & location) throw() : exception(code, location) {}
+					char const * what() const throw() /*override*/;
+			};
+		#else
+			// nothing special to do on posix systems
+			typedef exception posix;
+		#endif
+	}
 
-	class UNIVERSALIS__DECL operation_not_permitted : public iso_or_posix_std {
+	class UNIVERSALIS__DECL operation_not_permitted : public detail::posix {
 		public:
-			operation_not_permitted(compiler::location const & location) throw() : iso_or_posix_std(EPERM, location) {}
+			operation_not_permitted(compiler::location const & location) throw() : detail::posix(EPERM, location) {}
 	};
 
 	///\internal

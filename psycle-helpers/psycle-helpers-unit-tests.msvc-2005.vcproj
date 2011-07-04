@@ -4,7 +4,6 @@
 	Version="8.00"
 	Name="psycle-helpers-unit-tests"
 	ProjectGUID="{C6292BF4-9E87-4176-9101-A3D29D163B35}"
-	TargetFrameworkVersion="0"
 	>
 	<Platforms>
 		<Platform
@@ -76,7 +75,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="$(TargetPath) $(BoostUnitTestProgramCommandArguments)"
+				CommandLine="$(TargetPath) --log_level=test_suite --report_level=detailed"
 			/>
 		</Configuration>
 		<Configuration
@@ -138,7 +137,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="$(TargetPath) $(BoostUnitTestProgramCommandArguments)"
+				CommandLine="$(TargetPath) --log_level=test_suite --report_level=detailed"
 			/>
 		</Configuration>
 		<Configuration
@@ -200,7 +199,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="$(TargetPath) $(BoostUnitTestProgramCommandArguments)"
+				CommandLine="$(TargetPath) --log_level=test_suite --report_level=detailed"
 			/>
 		</Configuration>
 		<Configuration
@@ -262,14 +261,14 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="$(TargetPath) $(BoostUnitTestProgramCommandArguments)"
+				CommandLine="$(TargetPath) --log_level=test_suite --report_level=detailed"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{16F2DEB9-8F35-45C9-B460-732615F0C8D5}"
-			RelativePathToProject="..\..\psycle-helpers\psycle-helpers.msvc-2005.vcproj"
+			RelativePathToProject=".\psycle-helpers.msvc-2005.vcproj"
 		/>
 	</References>
 	<Files>

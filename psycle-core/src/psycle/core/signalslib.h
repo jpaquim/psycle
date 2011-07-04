@@ -1,20 +1,21 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
-// For the raison d'être of this file,
+// For the raison d'etre of this file,
 // see the boost signals faq question number 3.
 // http://www.boost.org/doc/html/signals/s04.html
-
-#ifndef PSYCLE__CORE__SIGNALSLIB__INCLUDED
-#define PSYCLE__CORE__SIGNALSLIB__INCLUDED
-#pragma once
+#ifndef boost_signalslib
+#define boost_signalslib
 
 #ifdef signals
-	#error "<psycle/core/signalslib.hpp> must be included before any qt header"
+#error "signalslib.hpp must be included before any qt header"
+#endif
+
+#ifdef _MSC_VER
+#pragma warning (disable:4251) // class 'X' needs to have dll-interface to be used by clients of class 'Y'
+#pragma warning (disable:4275) // non dll-interface class 'X' used as base for dll-interface class 'Y'
 #endif
 
 #include <boost/signal.hpp>
-namespace boost {
+namespace boost
+{
 	namespace signalslib = signals;
 }
 

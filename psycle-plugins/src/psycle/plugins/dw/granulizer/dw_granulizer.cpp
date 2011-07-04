@@ -6,156 +6,154 @@
 //////////////////////////////////////////////////////////////////////
 // dw granulizer plugin
 
-using namespace psycle::plugin_interface;
+#define TWOPI				6.28318530718
+#define NUM_RANDS				4
 
-#define TWOPI 6.28318530718
-#define NUM_RANDS 4
+#define MIN_LENGTH				10
+#define MIN_FREQ				1
+#define MIN_ATTACK				0
+#define MIN_DECAY				0
+#define MIN_PITCH				0
+#define MIN_LSPEED				10
+#define MIN_LAYERS				1
 
-#define MIN_LENGTH 10
-#define MIN_FREQ   1
-#define MIN_ATTACK 0
-#define MIN_DECAY  0
-#define MIN_PITCH  0
-#define MIN_LSPEED 10
-#define MIN_LAYERS 1
+#define MAX_LAYERS				10
+#define MAX_LENGTH				16538
+#define MAX_FREQ				16538
+#define MAX_ATTACK  1800
+#define MAX_DECAY				1800
+#define MAX_PITCH				1000
+#define MAX_THRESH				32768
+#define MAX_GAIN				1000
+#define MAX_LSPEED				32768
 
-#define MAX_LAYERS 10
-#define MAX_LENGTH 16538
-#define MAX_FREQ   16538
-#define MAX_ATTACK 1800
-#define MAX_DECAY  1800
-#define MAX_PITCH  1000
-#define MAX_THRESH 32768
-#define MAX_GAIN   1000
-#define MAX_LSPEED 32768
+#define LSPEED_MULTIPLYER				30
+#define LSPEED_SUBTRACTER				MAX_LSPEED + MIN_LSPEED
 
-#define LSPEED_MULTIPLYER 30
-#define LSPEED_SUBTRACTER MAX_LSPEED + MIN_LSPEED
+#define LFO1								0
+#define LFO2								1
+#define LFO_SINE								0
+#define LFO_TRIANGLE				1
+#define LFO_SQUARE								2
+#define LFO_SAWUP								3
+#define LFO_SAWDOWN								4
+#define LFO_RANDOM								5
 
-#define LFO1         0
-#define LFO2         1
-#define LFO_SINE     0
-#define LFO_TRIANGLE 1
-#define LFO_SQUARE   2
-#define LFO_SAWUP    3
-#define LFO_SAWDOWN  4
-#define LFO_RANDOM   5
+#define GAIN_NORM				100.0
 
-#define GAIN_NORM 100
+#define LINK_OFF				0
+#define LINK_ON								1
 
-#define LINK_OFF 0
-#define LINK_ON  1
+#define SYNC_L1								-1
+#define SYNC_L2								1
+#define SYNC_NONE				0
+#define SYNC_BOTH1				-2
+#define SYNC_BOTH2				2
 
-#define SYNC_L1    -1
-#define SYNC_L2     1
-#define SYNC_NONE   0
-#define SYNC_BOTH1 -2
-#define SYNC_BOTH2  2
+#define SYNC_GRAIN								1
 
-#define SYNC_GRAIN  1
+#define LCHAN								0
+#define RCHAN								1
 
-#define LCHAN 0
-#define RCHAN 1
+#define LIM_AMT_SCALER				1024
 
-#define LIM_AMT_SCALER 1024
+#define PRM_SIZE								1
+#define PRM_FREQ								2
+#define PRM_ATTACK								3
+#define PRM_DECAY								4
+#define PRM_PSTART								5
+#define PRM_PEND								6
+#define PRM_PLINK								7
+#define PRM_MAXGRAINS				8
+#define PRM_RANDSIZE				11
+#define PRM_RANDFREQ				12
+#define PRM_RANDATTACK				13
+#define PRM_RANDDECAY				14
+#define PRM_RANDPSTART				15
+#define PRM_RANDPEND				16
+#define PRM_LFO1SHAPE				18
+#define PRM_LFO2SHAPE				19
+#define PRM_L1TOSIZE				21
+#define PRM_L1TOFREQ				22
+#define PRM_L1TOATTACK				23
+#define PRM_L1TODECAY				24
+#define PRM_L1TOPSTART				25
+#define PRM_L1TOPEND				26
+#define PRM_LFO1SPEED				28
+#define PRM_LFO2SPEED				29
+#define PRM_L2TOSIZE				31
+#define PRM_L2TOFREQ				32
+#define PRM_L2TOATTACK				33
+#define PRM_L2TODECAY				34
+#define PRM_L2TOPSTART				35
+#define PRM_L2TOPEND				36
+#define PRM_LFO1PHASE				38
+#define PRM_LFO2PHASE				39
+#define PRM_THRESH								41
+#define PRM_OUTGAIN								42
 
-#define PRM_SIZE        1
-#define PRM_FREQ        2
-#define PRM_ATTACK      3
-#define PRM_DECAY       4
-#define PRM_PSTART      5
-#define PRM_PEND        6
-#define PRM_PLINK       7
-#define PRM_MAXGRAINS   8
-#define PRM_RANDSIZE   11
-#define PRM_RANDFREQ   12
-#define PRM_RANDATTACK 13
-#define PRM_RANDDECAY  14
-#define PRM_RANDPSTART 15
-#define PRM_RANDPEND   16
-#define PRM_LFO1SHAPE  18
-#define PRM_LFO2SHAPE  19
-#define PRM_L1TOSIZE   21
-#define PRM_L1TOFREQ   22
-#define PRM_L1TOATTACK 23
-#define PRM_L1TODECAY  24
-#define PRM_L1TOPSTART 25
-#define PRM_L1TOPEND   26
-#define PRM_LFO1SPEED  28
-#define PRM_LFO2SPEED  29
-#define PRM_L2TOSIZE   31
-#define PRM_L2TOFREQ   32
-#define PRM_L2TOATTACK 33
-#define PRM_L2TODECAY  34
-#define PRM_L2TOPSTART 35
-#define PRM_L2TOPEND   36
-#define PRM_LFO1PHASE  38
-#define PRM_LFO2PHASE  39
-#define PRM_THRESH     41
-#define PRM_OUTGAIN    42
+#define PRM_GRAINSYNC				44
+#define PRM_LFOSYNC								45
 
-#define PRM_GRAINSYNC  44
-#define PRM_LFOSYNC    45
+#define PRM_LIMITAMT				47
+#define PRM_DENSITY								48
 
-#define PRM_LIMITAMT   47
-#define PRM_DENSITY    48
-
-#define DISPLAY_REFRESH 882 // ~50/sec
+#define DISPLAY_REFRESH				882								// ~50/sec
 
 #define CUBIC_RESOLUTION 2048 // stolen..
 
 
-// shortname longname min max flags initval
+//																																																shortname												longname																min												max												flags								initval
 
-CMachineParameter const paramNull            = {" "," ",0,0,MPF_LABEL,0};
-CMachineParameter const paramGrainSize       = { "Size","grain size",MIN_LENGTH,MAX_LENGTH,MPF_STATE,1140};
-CMachineParameter const paramGrainFreq       = {"Freq","grain frequency",MIN_FREQ,MAX_FREQ,MPF_STATE,957};
-CMachineParameter const paramAttack          = {"Attack","attack time",MIN_ATTACK,MAX_ATTACK,MPF_STATE,200};
-CMachineParameter const paramDecay           = {"Decay","decay time",MIN_DECAY,MAX_DECAY,MPF_STATE,200};
-CMachineParameter const paramPitchStart      = {"Pitch Start","Start pitch",MIN_PITCH,MAX_PITCH,MPF_STATE,MAX_PITCH};
-CMachineParameter const paramPitchEnd        = {"Pitch End","End pitch",MIN_PITCH,MAX_PITCH,MPF_STATE,MAX_PITCH};
-CMachineParameter const paramPitchLink       = {"Pitch Link","Link start/end pitch",LINK_OFF,LINK_ON,MPF_STATE,LINK_OFF};
-CMachineParameter const paramMaxGrains       = {"Max Grain Layers","Maximum grain layers",MIN_LAYERS,MAX_LAYERS,MPF_STATE,MAX_LAYERS};
-CMachineParameter const paramRandSize        = {"Rand% Size","Random size %",0,100,MPF_STATE,0};
-CMachineParameter const paramRandFreq        = {"Rand% Freq","Random frequency %",0,100,MPF_STATE,0};
-CMachineParameter const paramRandAttack      = {"Rand% Attack","Random attack %",0,100,MPF_STATE,0};
-CMachineParameter const paramRandDecay       = {"Rand% Decay","Random decay %",0,100,MPF_STATE,0};
-CMachineParameter const paramRandPStart      = {"Rand% PStart","Random start pitch %",0,100,MPF_STATE,0};
-CMachineParameter const paramRandPEnd        = {"Rand% PEnd","Random end pitch %",0,100,MPF_STATE,0};
-CMachineParameter const paramL1Size          = {"LFO1->Size","LFO1 to grain size",0,200,MPF_STATE,100};
-CMachineParameter const paramL1Freq          = {"LFO1->Freq","LFO1 to grain freq",0,200,MPF_STATE,100};
-CMachineParameter const paramL1Attack        = {"LFO1->Attack","LFO1 to attack",0,200,MPF_STATE,100};
-CMachineParameter const paramL1Decay         = {"LFO1->Decay","LFO1 to decay",0,200,MPF_STATE,100};
-CMachineParameter const paramL1PStart        = {"LFO1->PStart","LFO1 to pitch start",0,200,MPF_STATE,100};
-CMachineParameter const paramL1PEnd          = {"LFO1->PEnd","LFO1 to pitch end",0,200,MPF_STATE,100};
-CMachineParameter const paramL2Size          = {"LFO2->Size","LFO2 to grain size",0,200,MPF_STATE,100};
-CMachineParameter const paramL2Freq          = {"LFO2->Freq","LFO2 to grain freq",0,200,MPF_STATE,100};
-CMachineParameter const paramL2Attack        = {"LFO2->Attack","LFO2 to attack",0,200,MPF_STATE,100};
-CMachineParameter const paramL2Decay         = {"LFO2->Decay","LFO2 to decay",0,200,MPF_STATE,100};
-CMachineParameter const paramL2PStart        = {"LFO2->PStart","LFO2 to pitch start",0,200,MPF_STATE,100};
-CMachineParameter const paramL2PEnd          = {"LFO2->PEnd","LFO2 to pitch end",0,200,MPF_STATE,100};
-CMachineParameter const paramLFO1Shape       = {"LFO1 Shape","LFO1 Shape",0,5,MPF_STATE,0};
-CMachineParameter const paramLFO2Shape       = {"LFO2 Shape","LFO2 Shape",0,5,MPF_STATE,0};
-CMachineParameter const paramLFO1Speed       = {"LFO1 Frequency","LFO1 Speed",MIN_LSPEED,MAX_LSPEED,MPF_STATE,MAX_LSPEED/2};
-CMachineParameter const paramLFO2Speed       = {"LFO2 Frequency","LFO2 Speed",MIN_LSPEED,MAX_LSPEED,MPF_STATE,MAX_LSPEED/2};
-CMachineParameter const paramLFO1Phase       = {"LFO1 Phase","LFO1 Phase",0,360,MPF_STATE,0};
-CMachineParameter const paramLFO2Phase       = {"LFO2 Phase","LFO2 Phase",0,360,MPF_STATE,0};
-CMachineParameter const paramLimitThresh     = {"Limit Threshold","Limiter Threshold",0,MAX_THRESH,MPF_STATE,MAX_THRESH/2};
-CMachineParameter const paramLimitAmt        = {"Limit amount","amount limited",0,32768,MPF_STATE,0};
-CMachineParameter const paramDensity         = {"Density","grain density",0,10000,MPF_STATE,0};
-CMachineParameter const paramOutGain         = {"Out Gain","output gain",0,MAX_GAIN,MPF_STATE,GAIN_NORM};
-CMachineParameter const paramLFOSync         = {"LFO Syncer","Synchronize LFOs",-2,2,MPF_STATE,0};
-CMachineParameter const paramGrainSync       = {"Grain Syncer","Synchronize Grains",0,1,MPF_STATE,0};
+CMachineParameter const paramNull =												{				" ",																" ",																				0,												0,												MPF_LABEL,				0};
+CMachineParameter const paramGrainSize =				{ 				"Size",																"grain size",												MIN_LENGTH,				MAX_LENGTH,				MPF_STATE,				1140};
+CMachineParameter const paramGrainFreq =				{				"Freq",																"grain frequency",								MIN_FREQ,				MAX_FREQ,				MPF_STATE,				957};
+CMachineParameter const paramAttack =								{				"Attack",												"attack time",												MIN_ATTACK,				MAX_ATTACK,				MPF_STATE,				200};
+CMachineParameter const paramDecay =								{				"Decay",												"decay time",												MIN_DECAY,				MAX_DECAY,				MPF_STATE,				200};
+CMachineParameter const paramPitchStart =				{				"Pitch Start",								"Start pitch",												MIN_PITCH,				MAX_PITCH,				MPF_STATE,				MAX_PITCH};
+CMachineParameter const paramPitchEnd =								{				"Pitch End",								"End pitch",												MIN_PITCH,				MAX_PITCH,				MPF_STATE,				MAX_PITCH};
+CMachineParameter const paramPitchLink =				{				"Pitch Link",								"Link start/end pitch",				LINK_OFF,				LINK_ON,				MPF_STATE,				LINK_OFF};
+CMachineParameter const paramMaxGrains =				{				"Max Grain Layers",				"Maximum grain layers", MIN_LAYERS, MAX_LAYERS, MPF_STATE,  MAX_LAYERS};
+CMachineParameter const paramRandSize =								{				"Rand% Size",								"Random size %",								0,												100,								MPF_STATE,				0};
+CMachineParameter const paramRandFreq =								{				"Rand% Freq",								"Random frequency %",				0,												100,								MPF_STATE,				0};
+CMachineParameter const paramRandAttack =				{				"Rand% Attack",								"Random attack %",								0,												100,								MPF_STATE,				0};
+CMachineParameter const paramRandDecay =				{				"Rand% Decay",								"Random decay %",								0,												100,								MPF_STATE,				0};
+CMachineParameter const paramRandPStart =				{				"Rand% PStart",								"Random start pitch %",				0,												100,								MPF_STATE,				0};
+CMachineParameter const paramRandPEnd =								{				"Rand% PEnd",								"Random end pitch %",				0,												100,								MPF_STATE,				0};
+CMachineParameter const paramL1Size =								{				"LFO1->Size",								"LFO1 to grain size",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL1Freq =								{				"LFO1->Freq",								"LFO1 to grain freq",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL1Attack =								{				"LFO1->Attack",								"LFO1 to attack",								0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL1Decay =								{				"LFO1->Decay",								"LFO1 to decay",								0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL1PStart =								{				"LFO1->PStart",								"LFO1 to pitch start",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL1PEnd =								{				"LFO1->PEnd",								"LFO1 to pitch end",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL2Size =								{				"LFO2->Size",								"LFO2 to grain size",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL2Freq =								{				"LFO2->Freq",								"LFO2 to grain freq",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL2Attack =								{				"LFO2->Attack",								"LFO2 to attack",								0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL2Decay =								{				"LFO2->Decay",								"LFO2 to decay",								0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL2PStart =								{				"LFO2->PStart",								"LFO2 to pitch start",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramL2PEnd =								{				"LFO2->PEnd",								"LFO2 to pitch end",				0,												200,								MPF_STATE,				100};
+CMachineParameter const paramLFO1Shape =				{				"LFO1 Shape",								"LFO1 Shape",												0,												5,												MPF_STATE,				0};
+CMachineParameter const paramLFO2Shape =				{				"LFO2 Shape",								"LFO2 Shape",												0,												5,												MPF_STATE,				0};
+CMachineParameter const paramLFO1Speed =				{				"LFO1 Frequency",				"LFO1 Speed",												MIN_LSPEED,				MAX_LSPEED,				MPF_STATE,				MAX_LSPEED/2};
+CMachineParameter const paramLFO2Speed =				{				"LFO2 Frequency",				"LFO2 Speed",												MIN_LSPEED,				MAX_LSPEED,				MPF_STATE,				MAX_LSPEED/2};
+CMachineParameter const paramLFO1Phase =				{				"LFO1 Phase",								"LFO1 Phase",												0,												360,								MPF_STATE,				0};
+CMachineParameter const paramLFO2Phase =				{				"LFO2 Phase",								"LFO2 Phase",												0,												360,								MPF_STATE,				0};
+CMachineParameter const paramLimitThresh =				{				"Limit Threshold",				"Limiter Threshold",				0,												MAX_THRESH,				MPF_STATE,				MAX_THRESH/2};
+CMachineParameter const paramLimitAmt =								{				"Limit amount",								"amount limited",								0,												32768,								MPF_STATE,				0};
+CMachineParameter const paramDensity =								{				"Density",												"grain density",								0,												10000,								MPF_STATE,				0};
+CMachineParameter const paramOutGain =								{				"Out Gain",												"output gain",												0,												MAX_GAIN,				MPF_STATE,				GAIN_NORM};
+CMachineParameter const paramLFOSync =								{				"LFO Syncer",								"Synchronize LFOs",								-2,												2,												MPF_STATE,				0};
+CMachineParameter const paramGrainSync =				{				"Grain Syncer",								"Synchronize Grains",				0,												1,												MPF_STATE,				0};
 
-CMachineParameter const paramLabelSync       = {"        -Sync Tools-" , "Synchronization tools", 0,  1, MPF_STATE || MPF_LABEL, 0};
-CMachineParameter const paramLabelDisplay    = {"         -Display-"   , "Display"              , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelGrainShape = {"        -Grain Shape-", "Grain Shape Controls" , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelRandMod    = {"        -Random Mod-" , "Random Modulation"    , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelLFO1Mod    = {"         -LFO1 Mod-"  , "LFO1 Modulation"      , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelLFO2Mod    = {"         -LFO2 Mod-"  , "LFO2 Modulation"      , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelAmpSection = {"        -Amp Section-", "Amp controls"         , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelLFOs       = {"            -LFOs-"   , "LFO Controls"         , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelBlank      = {"              -=-"    , ""                     , 0, -1, MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelSync =				{				"        -Sync Tools-",								"Synchronization tools",0,												1,												MPF_STATE || MPF_LABEL,				0};
+CMachineParameter const paramLabelDisplay=				{				"         -Display-",												"Display",																0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelGrainShape={				"        -Grain Shape-",								"Grain Shape Controls",				0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelRandMod=				{				"        -Random Mod-",								"Random Modulation",				0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelLFO1Mod=				{				"         -LFO1 Mod-",												"LFO1 Modulation",								0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelLFO2Mod=				{				"         -LFO2 Mod-",												"LFO2 Modulation",								0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelAmpSection={				"        -Amp Section-",								"Amp controls",												0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelLFOs=								{				"            -LFOs-",																"LFO Controls",												0,												1,												MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelBlank=				{				"              -=-",												"				",																								0,												-1,												MPF_STATE || MPF_LABEL, 1};
 
 
 CMachineParameter const *pParameters[] = 
@@ -225,90 +223,98 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
-	0x0100,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	"dw granulizer"
-		#ifndef NDEBUG
-			" (Debug build)"
-		#endif
-		,
-	"granulizer",
-	"dw",
-	"About",
-	5
+	0,																												// flags
+	50,																												// numParameters
+	pParameters,																								// Pointer to parameters
+#ifndef NDEBUG
+	"dw granulizer (Debug build)",																// name
+#else
+	"dw granulizer",																								// name
+#endif
+	"granulizer",																								// short name
+	"dw",																												// author
+	"About",																								// A command, that could be use for open an editor, etc...
+	5																																//number of columns
 );
 
-class GrainLayer {
-	public:
-		GrainLayer();
-		~GrainLayer();
-		float process(float samp, int channel);
+class GrainLayer
+{
+public:
 
-		int size;
-		int position;
-		float relPos;
-		bool in_use;
+	GrainLayer();
+	~GrainLayer();
+	float process(float samp, int channel);
 
-		int attack;
-		int decay;
+	int size;
+	int position;
+	float relPos;
+	bool in_use;
 
-		float pitchCurrent;
-		float pitchEnd;
-		float pitchStep;
+	int attack;
+	int decay;
+//				float attackStep;
+//				float decayStep;
 
-		std::vector<float> dataL;
-		std::vector<float> dataR;
+	float pitchCurrent;
+	float pitchEnd;
+	float pitchStep;
 
-		std::vector<float> attackBuf;
-		std::vector<float> decayBuf;
+	std::vector<float> dataL;
+	std::vector<float> dataR;
+
+	std::vector<float> attackBuf;
+	std::vector<float> decayBuf;
+
 };
 
-class mi : public CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
-		virtual void Init();
-		virtual void SequencerTick();
-		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
-		virtual bool DescribeValue(char* txt,int const param, int const value);
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
+class mi : public CMachineInterface
+{
+public:
+	mi();
+	virtual ~mi();
+	virtual void Init();
+	virtual void SequencerTick();
+	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
 
-		//stolen
-		static float SplineInterpolate(float zero, float minusone, float minustwo, unsigned int res);
+	//stolen
+	static float SplineInterpolate(float zero, float minusone, float minustwo, unsigned int res);
 
-		int _resolution;
-		static float aTable[CUBIC_RESOLUTION];
-		static float bTable[CUBIC_RESOLUTION];
-		static float cTable[CUBIC_RESOLUTION];
-		//stolen
+	int _resolution;
+	static float aTable[CUBIC_RESOLUTION];
+	static float bTable[CUBIC_RESOLUTION];
+	static float cTable[CUBIC_RESOLUTION];
+//  static float _dTable[CUBIC_RESOLUTION];
+	//stolen
 
-	private:
-		void StartLayer();
-		void EndLayer(GrainLayer* layertoend);
-		double GetLFO(int lfonum); // function wrapper
-		double LFOSine(int lfonum);
-		double LFOTriangle(int lfonum);
-		double LFOSquare(int lfonum);
-		double LFOSawUp(int lfonum);
-		double LFOSawDown(int lfonum);
-		double LFORandom(int lfonum);
 
-		float gain;
+private:
 
-		std::vector<GrainLayer*> layers;
-		int counter, dispCounter;
-		float lfo1counter, lfo2counter;
-		float randvals1[NUM_RANDS];
-		float randvals2[NUM_RANDS];
+	void StartLayer();
+	void EndLayer(GrainLayer* layertoend);
+	double GetLFO(int lfonum);																//function wrapper
+	double LFOSine(int lfonum);
+	double LFOTriangle(int lfonum);
+	double LFOSquare(int lfonum);
+	double LFOSawUp(int lfonum);
+	double LFOSawDown(int lfonum);
+	double LFORandom(int lfonum);
+
+	float gain;
+
+	std::vector<GrainLayer*> layers;
+	int counter, dispCounter;
+	float lfo1counter, lfo2counter;
+	float randvals1[NUM_RANDS];
+	float randvals2[NUM_RANDS];
 };
 
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 
 float mi::aTable[CUBIC_RESOLUTION];												// this feels soooo wrong
@@ -318,11 +324,11 @@ float mi::cTable[CUBIC_RESOLUTION];
 
 mi::mi()
 {
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[sizeof pParameters];
 	layers.resize(MAX_LAYERS);
 	for(int i = 0; i < MAX_LAYERS; ++i)
 	{
-		layers[i]=new GrainLayer();
+		layers[i]=new GrainLayer;
 		layers[i]->in_use=false;
 	}
 	counter=0;
@@ -352,7 +358,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 	for(int i = 0; i < MAX_LAYERS; ++i)
 		delete layers[i];
 
@@ -613,7 +619,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 							return true;
 							
 		case PRM_OUTGAIN:				if(value!=0)
-								sprintf(txt, "%i%% (%.2f dB)", (int)value, 20 * std::log10(value / (float) GAIN_NORM));
+								sprintf(txt, "%i%% (%.2f dB)", (int)value, 20 * std::log10(value / GAIN_NORM));
 							else
 								sprintf(txt,"-inf.");
 							return true;
@@ -774,21 +780,19 @@ void mi::StartLayer()
 		layers[next]->decay												= (int)(decay);
 
 		//				generate splines for attack/release envelopes (this function is completely arbitrary, but it sounds much better than linear..)
-		layers[next]->attackBuf.clear();
 		for(i=0;i<(int)(attack);++i)				
 		{
 			splineX = (float)i / attack;																																																// 0 <= x <= 1
-			if(splineX < 0.4)				layers[next]->attackBuf.push_back(splineX * splineX);																								// x < .4:								x^2
-			else if(splineX>0.6)layers[next]->attackBuf.push_back(1 - ((splineX - 1) * (splineX - 1)));				// x > .6:								1 - (x - 1)^2
-			else	layers[next]->attackBuf.push_back(3.4 * splineX - 1.2);																				// .4<=x<=.6:				3.4x - 1.2
+			if(splineX < 0.4)				layers[next]->attackBuf[i] = splineX * splineX;																								// x < .4:								x^2
+			else if(splineX>0.6)layers[next]->attackBuf[i] = 1 - ((splineX - 1) * (splineX - 1));				// x > .6:								1 - (x - 1)^2
+			else																layers[next]->attackBuf[i] = 3.4 * splineX - 1.2;																				// .4<=x<=.6:				3.4x - 1.2
 		}
-		layers[next]->decayBuf.clear();
 		for(i=0;i<(int)(decay);++i)
 		{
 			splineX = (float)i / decay;																																																				// 0 <= x <= 1
-			if(splineX < 0.4)				layers[next]->decayBuf.push_back(1 - ((splineX) * (splineX)));				// x < .4:								1-(-x)^2 = 1-x^2
-			else if(splineX>0.6)layers[next]->decayBuf.push_back((1-splineX) * (1-splineX));								// x > .6:								(1-x)^2
-			else	layers[next]->decayBuf.push_back(3.4 * (1-splineX) - 1.2);								// .4<=x<=.6:				3.4(1-x) - 1.2
+			if(splineX < 0.4)				layers[next]->decayBuf[i] = 1 - ((splineX) * (splineX));				// x < .4:								1-(-x)^2 = 1-x^2
+			else if(splineX>0.6)layers[next]->decayBuf[i] = (1-splineX) * (1-splineX);								// x > .6:								(1-x)^2
+			else																layers[next]->decayBuf[i] = 3.4 * (1-splineX) - 1.2;								// .4<=x<=.6:				3.4(1-x) - 1.2
 		}
 
 		layers[next]->pitchCurrent				= (pstart / (float)MAX_PITCH);

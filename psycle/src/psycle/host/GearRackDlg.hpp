@@ -9,11 +9,8 @@ namespace psycle { namespace host {
 		/// gear rack window.
 		class CGearRackDlg : public CDialog
 		{
-		public:			
-			CGearRackDlg(class MachineView* mac_view);
-		private:
-			MachineView* view_;
 		public:
+			CGearRackDlg(CChildView* pParent, CMainFrame* pMain);
 			CChildView* m_pParent;
 			CMainFrame* pParentMain;
 			void RedrawList();

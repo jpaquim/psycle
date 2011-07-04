@@ -20,12 +20,12 @@
 #include "vdAllPass.hpp"
 #include <stdio.h>
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[PARNUM];
 }
 
 mi::~mi()
@@ -40,9 +40,6 @@ void mi::Init()
 	lastDelayModified = LDELAY;
 	lastGainModified = LGAIN;
 	lGain = rGain = 0.0f;
-	currentSR = pCB->GetSamplingRate();
-	leftFilter.changeSamplerate(currentSR);
-	rightFilter.changeSamplerate(currentSR);
 }
 
 void mi::Command()
@@ -56,24 +53,23 @@ void mi::Command()
 void mi::ParameterTweak(int par, int val)
 {
 	Vals[par] = val;
-	const float srMult = currentSR/44100.0f;
 	switch(par)
 	{
 	case LDELAY:
-		leftFilter.setDelay(val*srMult);
+		leftFilter.setDelay(val);
 		if(Vals[LOCKDELAY])
 		{
 			Vals[RDELAY] = val;
-			rightFilter.setDelay(val*srMult);
+			rightFilter.setDelay(val);
 		}
 		lastDelayModified = LDELAY;
 		break;
 	case RDELAY:
-		rightFilter.setDelay(val*srMult);
+		rightFilter.setDelay(val);
 		if(Vals[LOCKDELAY])
 		{
 			Vals[LDELAY] = val;
-			leftFilter.setDelay(val*srMult);
+			leftFilter.setDelay(val);
 		}
 		lastDelayModified = RDELAY;
 		break;
@@ -124,16 +120,9 @@ void mi::ParameterTweak(int par, int val)
 	}
 }
 
-// Called on each tick while sequencer is playing
 void mi::SequencerTick()
 {
-	if (currentSR != pCB->GetSamplingRate()) {
-		currentSR = pCB->GetSamplingRate();
-		leftFilter.changeSamplerate(currentSR);
-		leftFilter.setDelay(Vals[LDELAY]*currentSR/44100.0f );
-		rightFilter.changeSamplerate(currentSR);
-		rightFilter.setDelay(Vals[RDELAY]*currentSR/44100.0f);
-	}
+	// Called on each tick while sequencer is playing
 }
 
 // Function that describes value on client's displaying
@@ -142,9 +131,9 @@ bool mi::DescribeValue(char *txt,int const param, int const value)
 	switch (param)
 	{
 	case LDELAY:
-	case RDELAY: sprintf(txt, "%.1f ms",  (float)value / 44.100f); return true;
-	case LGAIN: sprintf(txt, "%d", value); return true;
-	case RGAIN: sprintf(txt, "%d", value); return true;
+	case RDELAY: sprintf(txt, "%d (%.1f ms)", value, value / 44.100f); return true;
+	case LGAIN: sprintf(txt, "%.2f", lGain); return true;
+	case RGAIN: sprintf(txt, "%.2f", rGain); return true;
 	case LOCKDELAY:
 	case LOCKGAIN: sprintf(txt, "%s", value ? "on" : "off"); return true;
 	}

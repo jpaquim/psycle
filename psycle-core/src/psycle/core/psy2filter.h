@@ -1,15 +1,30 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 #ifndef PSYCLE__CORE__PSY2FILTER__INCLUDED
 #define PSYCLE__CORE__PSY2FILTER__INCLUDED
 #pragma once
 
 #include "psyfilterbase.h"
-
+#include "cstdint.h"
 #include <vector>
 
-namespace psycle { namespace core {
+namespace psy { namespace core {
 
 class RiffFile;
 class PatternCategory;
@@ -17,14 +32,20 @@ class SequenceLine;
 class Machine;
 class PatternEvent;
 
-namespace convert_internal_machines {
+namespace convert_internal_machines
+{
 	class Converter;
 }
 
-class PSYCLE__CORE__DECL Psy2Filter : public PsyFilterBase {
+/**
+@author  Psycledelics  
+*/
+class Psy2Filter : public PsyFilterBase
+{
 	protected:
 		//Note: convert_internal_machines uses its own enum.
-		enum machineclass_t {
+		typedef enum MachineClass
+		{
 			MACH_MASTER = 0,
 			MACH_SINE = 1, 
 			MACH_DIST = 2,
@@ -38,43 +59,44 @@ class PSYCLE__CORE__DECL Psy2Filter : public PsyFilterBase {
 			MACH_VSTFX = 10,
 			MACH_SCOPE = 11,
 			MACH_DUMMY = 255
-		};
+		} machineclass_t;
 
-		class VSTLoader {
+		class VSTLoader
+		{
 			public:
 				bool valid;
 				char dllName[128];
 				int numpars;
 				float * pars;
 		};
+		class PatternEntry
+		{
+		public:
+			inline PatternEntry()
+				:
+				_note(255),
+				_inst(255),
+				_mach(255),
+				_cmd(0),
+				_parameter(0)
+			{}
 
-		class PatternEntry {
-			public:
-				inline PatternEntry()
-					:
-					_note(255),
-					_inst(255),
-					_mach(255),
-					_cmd(0),
-					_parameter(0)
-				{}
-
-				uint8_t _note;
-				uint8_t _inst;
-				uint8_t _mach;
-				uint8_t _cmd;
-				uint8_t _parameter;
+			std::uint8_t _note;
+			std::uint8_t _inst;
+			std::uint8_t _mach;
+			std::uint8_t _cmd;
+			std::uint8_t _parameter;
 		};
 
 	///\name Singleton Pattern
 	///\{
-		protected:
-			Psy2Filter();
-		private:
-			Psy2Filter( Psy2Filter const & );
-			Psy2Filter& operator=(Psy2Filter const &);
-		public:
-			static Psy2Filter* getInstance();
+	protected:
+		Psy2Filter();
+	private:
+		Psy2Filter( Psy2Filter const & );
+		Psy2Filter& operator=(Psy2Filter const &);
+	public:
+		static Psy2Filter* getInstance();
 	///\}
 
 	public:
@@ -122,7 +144,7 @@ class PSYCLE__CORE__DECL Psy2Filter : public PsyFilterBase {
 		unsigned char octave;
 		int instSelected; //-> map to auxcolselected
 
-		void prepareSequence(CoreSong& song);
+		void preparePatternSequence(CoreSong& song);
 		PatternEvent convertEntry( unsigned char * data ) const;
 };
 

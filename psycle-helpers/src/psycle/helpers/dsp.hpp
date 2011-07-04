@@ -14,14 +14,11 @@
 #endif
 namespace psycle { namespace helpers { /** various signal processing utility functions. */ namespace dsp {
 
-using namespace universalis::stdlib;
-
 	/// linear -> deciBell
 	/// amplitude normalized to 1.0f.
 	float inline UNIVERSALIS__COMPILER__CONST
 	dB(float amplitude)
 	{
-		///\todo merge with psycle::helpers::math::linear_to_deci_bell
 		return 20.0f * std::log10(amplitude);
 	}
 
@@ -29,7 +26,6 @@ using namespace universalis::stdlib;
 	float inline UNIVERSALIS__COMPILER__CONST
 	dB2Amp(float db)
 	{
-		///\todo merge with psycle::helpers::math::deci_bell_to_linear
 		return std::pow(10.0f, db / 20.0f);
 	}
 
@@ -44,22 +40,20 @@ using namespace universalis::stdlib;
 	/****************************************************************************/
 
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
-	inline void Add(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float vol)
+	inline void Add(float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float vol)
 	{
-		#if 0 ///\todo boggus defined DIVERSALIS__COMPILER__GNU
-			numSamples >>= 2;
-			typedef float vec __attribute__((vector_size(4 * sizeof(float))));
-			const vec vol_vec = { vol, vol, vol, vol };
-			const vec* src = reinterpret_cast<const vec*>(pSrcSamples);
-			vec* dst = reinterpret_cast<vec*>(pDstSamples);
-			//#pragma omp parallel for // with gcc, build with the -fopenmp flag
-			for(int i = 0; i < numSamples; ++i) dst[i] = src[i] * vol_vec;
-		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
-			const __m128* psrc = (const __m128*)pSrcSamples;
-			__m128* pdst = (__m128*)pDstSamples;
-			numSamples >>= 2;
-			for(int i = 0; i < numSamples; ++i) pdst[i] = _mm_add_ps(pdst[i], _mm_mul_ps(psrc[i], volps));
+			__m128 *psrc = (__m128*)pSrcSamples;
+			__m128 *pdst = (__m128*)pDstSamples;
+			while(numSamples>0)
+			{
+				__m128 tmpps = _mm_mul_ps(*psrc, volps);
+				*pdst = _mm_add_ps(*pdst, tmpps);
+				++psrc;
+				++pdst;
+				numSamples -= 4;
+			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 			__asm
 			{
@@ -83,7 +77,8 @@ using namespace universalis::stdlib;
 				END:
 			}
 		#else
-			for(int i = 0; i < numSamples; ++i) pDstSamples[i] += pSrcSamples[i] * vol;
+			--pSrcSamples; --pDstSamples;
+			do { *++pDstSamples += *++pSrcSamples * vol; } while(--numSamples);
 		#endif
 	}
 
@@ -120,7 +115,8 @@ using namespace universalis::stdlib;
 				END:
 			}
 		#else
-			for(int i = 0; i < numSamples; ++i) pDstSamples[i] *= multi;
+			--pDstSamples;
+			do { *++pDstSamples *= multi; } while (--numSamples);
 		#endif
 	}
 
@@ -161,7 +157,8 @@ using namespace universalis::stdlib;
 				END:
 			}
 		#else
-			for(int i = 0; i < numSamples; ++i) pDstSamples[i] = pSrcSamples[i] * multi;
+			--pSrcSamples; --pDstSamples;
+			do { *++pDstSamples = *++pSrcSamples*multi; } while (--numSamples);
 		#endif
 	}
 
@@ -616,21 +613,26 @@ using namespace universalis::stdlib;
 				v1.push_back(s);
 				v2.push_back(s);
 			}
+
+			using namespace universalis::stdlib;
 			typedef universalis::os::clocks::monotonic clock;
 			int const iterations = 10000;
 			float const vol = 0.5;
 
 			{ // add
-				std::size_t const count = v1.size();
-				clock::time_point const t1(clock::now());
-				for(int i(0); i < iterations; ++i) Add(&v1[0], &v2[0], count, vol);
-				clock::time_point const t2(clock::now());
-				for(int i(0); i < iterations; ++i) for(std::size_t j(0); j < count; ++j) v2[j] += v1[j] * vol;
-				clock::time_point const t3(clock::now());
+				nanoseconds const t1(clock::current());
+				for(int i(0); i < iterations; ++i) Add(&v1[0], &v2[0], v1.size(), vol);
+				nanoseconds const t2(clock::current());
+				for(int i(0); i < iterations; ++i) {
+					float const * in = &v1[0]; --in;
+					float * out = &v2[0]; --out;
+					std::size_t count = v1.size();
+					do { *++out += *++in * vol; } while(--count);
+				}
+				nanoseconds const t3(clock::current());
 				{
 					std::ostringstream s;
-					using namespace universalis::stdlib::chrono;
-					s << "add: " << nanoseconds(t2 - t1).count() * 1e-9 << "s < " << nanoseconds(t3 - t2).count() * 1e-9 << "s";
+					s << "add: " << (t2 - t1).get_count() * 1e-9 << "s < " << (t3 - t2).get_count() * 1e-9 << "s";
 					BOOST_MESSAGE(s.str());
 				}
 				BOOST_CHECK(t2 - t1 < t3 - t2);

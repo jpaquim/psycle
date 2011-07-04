@@ -2,18 +2,15 @@
 ///\brief interface file for psycle::host::CPresetsDlg.
 #pragma once
 #include "Psycle.hpp"
-
 #include <cstring>
 
 namespace psycle {
-namespace core {
-	class Machine;
-}
 namespace host {
 
 		#define MAX_PRESETS 256
 
 		class CFrameMachine;
+		class Machine;
 
 		/// machine parameter preset \todo should we move it outside of gui classes?
 		class CPreset  

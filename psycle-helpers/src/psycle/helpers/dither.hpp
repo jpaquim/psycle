@@ -1,6 +1,7 @@
 ///\interface psycle::helpers::dsp::Dither
 
 #pragma once
+
 #include <psycle/helpers/mersennetwister.hpp>
 namespace psycle { namespace helpers { namespace dsp {
 
@@ -13,17 +14,17 @@ class Dither {
 
 		struct Pdf {
 			enum type {
-				triangular = 0,
-				rectangular,
-				gaussian
-			};
+			triangular = 0,
+			rectangular,
+			gaussian
+		};
 		};
 		
 		struct NoiseShape {
 			enum type {
-				none = 0,
-				highpass
-			};
+			none = 0,
+			highpass
+		};
 		};
 
 		void SetBitDepth(unsigned int newdepth) { bitdepth = newdepth; }

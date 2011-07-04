@@ -21,12 +21,12 @@
 #include <math.h>
 #include "vdNoiseGate.hpp"
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[PARNUM];
 }
 
 mi::~mi()
@@ -37,7 +37,7 @@ mi::~mi()
 
 void mi::Init()
 {
-	currentSR = pCB->GetSamplingRate();
+	// Initialize your stuff here
 }
 
 void mi::Command()
@@ -51,7 +51,6 @@ void mi::Command()
 void mi::ParameterTweak(int par, int val)
 {
 	Vals[par] = val;
-	float const srMult = currentSR/44100.0f;
 	switch(par)
 	{
 	case LTHRESHOLD:
@@ -86,12 +85,12 @@ void mi::ParameterTweak(int par, int val)
 			}
 		break;
 	case CUTOFF:
-		leftFilter.setCutOff(val / (srMult*GAIN_NORM));
-		rightFilter.setCutOff(val / (srMult*GAIN_NORM));
+		leftFilter.setCutOff(val / GAIN_NORM);
+		rightFilter.setCutOff(val / GAIN_NORM);
 		break;
 	case RESONANCE:
-		leftFilter.setResonance(val / (srMult*GAIN_NORM));
-		rightFilter.setResonance(val / (srMult*GAIN_NORM));
+		leftFilter.setResonance(val / GAIN_NORM);
+		rightFilter.setResonance(val / GAIN_NORM);
 		break;
 	case LOWPASS:
 		lowPassOn = val;
@@ -103,17 +102,9 @@ void mi::ParameterTweak(int par, int val)
 	}
 }
 
-// Called on each tick while sequencer is playing
 void mi::SequencerTick()
 {
-	if (currentSR != pCB->GetSamplingRate()) {
-		currentSR = pCB->GetSamplingRate();
-		float const srMult = currentSR/44100.0f;
-		leftFilter.setCutOff(Vals[CUTOFF]/ (srMult*GAIN_NORM));
-		leftFilter.setResonance(Vals[CUTOFF] / (srMult*GAIN_NORM));
-		rightFilter.setCutOff(Vals[RESONANCE] / (srMult*GAIN_NORM));
-		rightFilter.setResonance(Vals[RESONANCE] / (srMult*GAIN_NORM));
-	}
+	// Called on each tick while sequencer is playing
 }
 
 // Function that describes value on client's displaying
@@ -128,7 +119,6 @@ bool mi::DescribeValue(char *txt,int const param, int const value)
 	case LOWPASS:
 		sprintf(txt, "%s", value ? "on" : "off"); return true;
 	case CUTOFF:
-		sprintf(txt, "%f", value*currentSR*0.01); return true;
 	case RESONANCE:
 		sprintf(txt, "0.%d", value); return true;
 	case PREGAIN:

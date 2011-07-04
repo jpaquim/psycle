@@ -13,23 +13,102 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 */
 
 #include <psycle/plugin_interface.hpp>
-#include "gverb.h"
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include "gverb.h"
 
-using namespace psycle::plugin_interface;
+#define NUMPARAMETERS 8
 
-CMachineParameter const paraRoomSize = { "Room size", "Room size", 1, 300, MPF_STATE, 144 };
-CMachineParameter const paraRevTime = { "Reverb time", "Reverb time", 10, 3000, MPF_STATE, 1800 };
-CMachineParameter const paraDamping = { "Damping", "Damping", 0, 1000, MPF_STATE, 1000 };
-CMachineParameter const paraBandwidth = { "Input bandwidth", "Input bandwidth", 0, 1000, MPF_STATE, 0 };
-CMachineParameter const paraDry = { "Dry signal level", "Dry", -70000, 0, MPF_STATE, -70000 };
-CMachineParameter const paraEarly = { "Early reflection level", "Early", -70000, 0, MPF_STATE, 0 };
-CMachineParameter const paraTail = { "Tail level", "Tail level", -70000, 0, MPF_STATE, -17500 };
-CMachineParameter const paraMonoStereo = { "Input", "Input", 0, 1, MPF_STATE, 0 };
 
-CMachineParameter const *pParameters[] = {
+#define DB_CO(g) ((g) > -90.0f ? powf(10.0f, (g) * 0.05f) : 0.0f)
+#define CO_DB(v) (20.0f * log10f(v))
+
+CMachineParameter const paraRoomSize = 
+{ 
+	"Room size",
+	"Room size",																								// description
+	1,																																																// MinValue				
+	300,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	144,
+};
+
+CMachineParameter const paraRevTime = 
+{ 
+	"Reverb time",
+	"Reverb time",																								// description
+	10,																																																// MinValue				
+	3000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	1800,
+};
+
+CMachineParameter const paraDamping = 
+{ 
+	"Damping",
+	"Damping",																								// description
+	0,																																																// MinValue				
+	1000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	1000,
+};
+
+CMachineParameter const paraBandwidth = 
+{ 
+	"Input bandwidth",
+	"Input bandwidth",																																												// description
+	0,																																																// MinValue				
+	1000,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0,
+};
+
+CMachineParameter const paraDry = 
+{ 
+	"Dry signal level",
+	"Dry",																								// description
+	-70000,																																																// MinValue				
+	0,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	-70000,
+};
+
+CMachineParameter const paraEarly = 
+{ 
+	"Early reflection level",
+	"Early",																								// description
+	-70000,																																																// MinValue				
+	0,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0,
+};
+
+
+CMachineParameter const paraTail = 
+{ 
+	"Tail level",
+	"Tail level",																																												// description
+	-70000,																																																// MinValue				
+	0,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	-17500,
+};
+
+CMachineParameter const paraMonoStereo = 
+{ 
+	"Input",
+	"Input",																																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0,
+};
+
+
+CMachineParameter const *pParameters[] = 
+{ 
+	// global
 	&paraRoomSize,
 	&paraRevTime,
 	&paraDamping,
@@ -40,163 +119,152 @@ CMachineParameter const *pParameters[] = {
 	&paraMonoStereo
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0110,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	#ifndef NDEBUG
-		"LADSPA GVerb (Debug build)",
-	#else
-		"LADSPA GVerb",
-	#endif
-	"GVerb",
-	"Juhana Sadeharju/Steve Harris/Sartorius",
-	"About",
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	EFFECT,																																								// flags
+	NUMPARAMETERS,																																// numParameters
+	pParameters,																																// Pointer to parameters
+#ifdef _DEBUG
+	"LADSPA GVerb (Debug build)",								// name
+#else
+	"LADSPA GVerb",																								// name
+#endif
+	"GVerb",																												// short name
+	"Juhana Sadeharju/Steve Harris/Sartorius",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	1
 );
 
-class mi : public CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
 
-		virtual void Init();
-		virtual void SequencerTick();
-		virtual void Work(float *psamplesleft, float *psamplesright, int numsamples, int tracks);
-		virtual bool DescribeValue(char* txt, int const param, int const value);
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
-	private:
-		gverb *gv_l, *gv_r;
-		int samplerate;
+class mi : public CMachineInterface
+{
+public:
+
+	mi();
+	virtual ~mi();
+
+	virtual void Init();
+	virtual void SequencerTick();
+	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
+	virtual bool DescribeValue(char* txt,int const param, int const value);
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
+
+private:
+
+	ty_gverb *gv_l,*gv_r;
+	int samplerate;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
-template<typename Real> inline Real DB_CO(Real g) {
-	return g > Real(-90) ? std::pow(Real(10), g * Real(0.05)) : Real(0);
+mi::mi()
+{
+	// The constructor zone
+	Vals = new int[NUMPARAMETERS];
 }
 
-template<typename Real> inline Real CO_DB(Real v) {
-	return Real(20) * std::log10(v);
+mi::~mi()
+{
+	delete Vals;
+	gverb_free(gv_l);
+	gverb_free(gv_r);
 }
 
-mi::mi() {
-	Vals = new int[MacInfo.numParameters];
-}
-
-mi::~mi() {
-	delete[] Vals;
-	delete gv_l;
-	delete gv_r;
-}
-
-void mi::Init() {
+void mi::Init()
+{
+// Initialize your stuff here
 	samplerate = pCB->GetSamplingRate();
-	gv_l = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
-	gv_r = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+
+	gv_l = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+
+	gv_r = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+
 }
 
-void mi::SequencerTick() {
-	if(samplerate != pCB->GetSamplingRate()) {
+void mi::SequencerTick()
+{
+// Called on each tick while sequencer is playing
+	if(samplerate != pCB->GetSamplingRate())
+	{
 		samplerate = pCB->GetSamplingRate();
 
-		delete gv_l;
-		delete gv_r;
+		gverb_free(gv_l);
+		gverb_free(gv_r);
 		
-		gv_l = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
-		gv_r = new gverb(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+		gv_l = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
+		gv_r = gverb_new(samplerate, 300.0f, 50.0f, 7.0f, 0.5f, 15.0f, 0.5f, 0.5f, 0.5f);
 
-		gv_l->set_roomsize(Vals[0]);
-		gv_r->set_roomsize(Vals[0]);
+		gverb_set_roomsize(gv_l,(float)Vals[0]); gverb_set_roomsize(gv_r,(float)Vals[0]);
+		gverb_set_revtime(gv_l,(float)Vals[1]*.01f); gverb_set_revtime(gv_r,(float)Vals[1]*.01f);
+		gverb_set_damping(gv_l,(float)Vals[2] * .001f); gverb_set_damping(gv_r,(float)Vals[2] * .001f);
+		gverb_set_inputbandwidth(gv_l,(float)Vals[3] * .001f); gverb_set_inputbandwidth(gv_r,(float)Vals[3] * .001f);
+		gverb_set_earlylevel(gv_l,DB_CO((float)Vals[5]*.001f)); gverb_set_earlylevel(gv_r,DB_CO((float)Vals[5]*.001f));
+		gverb_set_taillevel(gv_l,DB_CO((float)Vals[6]*.001f)); gverb_set_taillevel(gv_r,DB_CO((float)Vals[6]*.001f));
 
-		gv_l->set_revtime(Vals[1] * .01f);
-		gv_r->set_revtime(Vals[1] * .01f);
-
-		gv_l->set_damping(Vals[2] * .001f);
-		gv_r->set_damping(Vals[2] * .001f);
-
-		gv_l->set_inputbandwidth(Vals[3] * .001f);
-		gv_r->set_inputbandwidth(Vals[3] * .001f);
-
-		gv_l->set_earlylevel(DB_CO(Vals[5] * .001f));
-		gv_r->set_earlylevel(DB_CO(Vals[5] * .001f));
-
-		gv_l->set_taillevel(DB_CO(Vals[6] * .001f));
-		gv_r->set_taillevel(DB_CO(Vals[6] * .001f));
 	}
 }
 
-void mi::Command() {
-	pCB->MessBox("LADSPA GVerb","GVerb",0);
+void mi::Command()
+{
+// Called when user presses editor button
+// Probably you want to show your custom window here
+// or an about button
+pCB->MessBox("LADSPA GVerb","GVerb",0);
 }
 
-void mi::ParameterTweak(int par, int val) {
-	Vals[par] = val;
-	switch(par) {
-		case 0:
-			gv_l->set_roomsize(val);
-			gv_r->set_roomsize(val);
-			break;
-		case 1:
-			gv_l->set_revtime(val * .01f);
-			gv_r->set_revtime(val * .01f);
-			break;
-		case 2:
-			gv_l->set_damping(val * .001f);
-			gv_r->set_damping(val * .001f);
-			break;
-		case 3:
-			gv_l->set_inputbandwidth(val * .001f);
-			gv_r->set_inputbandwidth(val * .001f);
-			break;
+void mi::ParameterTweak(int par, int val)
+{
+	Vals[par]=val;
+	switch(par)
+	{
+		case 0: gverb_set_roomsize(gv_l,(float)val); gverb_set_roomsize(gv_r,(float)val); break;
+		case 1: gverb_set_revtime(gv_l,(float)val*.01f); gverb_set_revtime(gv_r,(float)val*.01f); break;
+		case 2: gverb_set_damping(gv_l,(float)val * .001f); gverb_set_damping(gv_r,(float)val * .001f); break;
+		case 3: gverb_set_inputbandwidth(gv_l,(float)val * .001f); gverb_set_inputbandwidth(gv_r,(float)val * .001f); break;
 		case 4: break;
-		case 5:
-			gv_l->set_earlylevel(DB_CO(val * .001f));
-			gv_r->set_earlylevel(DB_CO(val * .001f));
-			break;
-		case 6:
-			gv_l->set_taillevel(DB_CO(val * .001f));
-			gv_r->set_taillevel(DB_CO(val * .001f));
-			break;
-		case 7:
-			gv_l->flush();
-			gv_r->flush();
-			break;
+		case 5: gverb_set_earlylevel(gv_l,DB_CO((float)val*.001f)); gverb_set_earlylevel(gv_r,DB_CO((float)val*.001f)); break;
+		case 6: gverb_set_taillevel(gv_l,DB_CO((float)val*.001f)); gverb_set_taillevel(gv_r,DB_CO((float)val*.001f)); break;
+		case 7: gverb_flush(gv_l); gverb_flush(gv_r); break;
 		default:
-			break;
+				break;
 	}
 }
 
-void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
-	float const dry = DB_CO(Vals[4] * .001f);
+// Work... where all is cooked 
+void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
+{
+	float const dry = DB_CO((float)Vals[4]*.001f);
 	
-	float outl = 0;
-	float outr = 0;
+	float sl = 0;
+	float sr = 0;
 
-	if(Vals[7]) {
-		do {
-			float inl = *psamplesleft; // * 0.000030517578125f;
-			float inr = *psamplesright; // * 0.000030517578125f;
-			gv_l->process(inl, &outl, &outr);
-			*psamplesleft = inl * dry + outl; //*32767.f;
-			*psamplesright = inr*dry + outr; //*32767.f;
-			gv_r->process(inr, &outl, &outr);
-			*psamplesleft += outl; //*32767.f;
-			*psamplesright += outr; //*32767.f;
+	if (Vals[7])
+	{
+		do
+		{
+			float _sl = *psamplesleft;// * 0.000030517578125f;
+			float _sr = *psamplesright;// * 0.000030517578125f;
+			gverb_do(gv_l,_sl,&sl,&sr);
+			*psamplesleft = _sl*dry + sl;//*32767.f;
+			*psamplesright = _sr*dry + sr;//*32767.f;
+			gverb_do(gv_r,_sr,&sl,&sr);
+			*psamplesleft += sl;//*32767.f;
+			*psamplesright += sr;//*32767.f;
 
 			++psamplesleft;
 			++psamplesright;
 		} while(--numsamples);
-	} else {
-		do {
-			float sm = (*psamplesleft + *psamplesright) * 0.5f; // * 0.000030517578125f;
-			gv_l->process(sm, &outl, &outr);
+	}
+	else
+	{
+		do
+		{
+			float sm = (*psamplesleft + *psamplesright) / 2;// * 0.000030517578125f;
+			gverb_do(gv_l,sm,&sl,&sr);
 
-			*psamplesleft = *psamplesleft * dry + outl; //*32767.f;
-			*psamplesright = *psamplesright * dry + outr; //*32767.f;
+			*psamplesleft = *psamplesleft * dry + sl;//*32767.f;
+			*psamplesright = *psamplesright * dry + sr;//*32767.f;
 
 			++psamplesleft;
 			++psamplesright;
@@ -205,24 +273,29 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 }
 
 // Function that describes value on client's displaying
-bool mi::DescribeValue(char* txt,int const param, int const value) {
-	switch(param) {
+bool mi::DescribeValue(char* txt,int const param, int const value)
+{
+
+	switch(param)
+	{
 		case 0:
-			std::sprintf(txt, "%i m", value);
+			std::sprintf(txt,"%i m",value);
 			return true;
 		case 1:
-			std::sprintf(txt, "%.2f s", value * .01f);
+			std::sprintf(txt,"%.2f s",(float)value*.01f);
 			return true;
 		case 2: case 3:
-			std::sprintf(txt, "%.01f", value * .001f);
+			std::sprintf(txt,"%.01f",(float)value*.001f);
 			return true;
 		case 4: case 5: case 6:
-			std::sprintf(txt, "%i dB", value / 1000);
+			std::sprintf(txt,"%i dB",value/1000);
 			return true;
 		case 7:
-			std::sprintf(txt, value ? "stereo" : "mono");
+			std::sprintf(txt,value?"stereo":"mono");
 			return true;
+
 		default:
+
 			return false;
 	}
 }

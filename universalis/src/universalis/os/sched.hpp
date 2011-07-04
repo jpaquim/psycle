@@ -84,7 +84,7 @@ class UNIVERSALIS__DECL process {
 			/// affinity mask type
 			typedef class affinity_mask affinity_mask_type;
 			/// gets the affinity mask against the set of cpu available to the process.
-			affinity_mask_type affinity_mask() const;
+			affinity_mask_type affinity_mask() const throw(exception);
 			/// sets the affinity mask against the set of cpu available to the process.
 				#if defined DIVERSALIS__OS__MICROSOFT
 					/// special case for windows, this must be done inline!
@@ -92,7 +92,7 @@ class UNIVERSALIS__DECL process {
 					/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
 					inline
 				#endif
-			void affinity_mask(affinity_mask_type const &);
+			void affinity_mask(affinity_mask_type const &) throw(exception);
 		///\}
 
 		///\name priority
@@ -109,9 +109,9 @@ class UNIVERSALIS__DECL process {
 				priority_type;
 
 			/// gets the process priority level
-			priority_type priority();
+			priority_type priority() throw(exception);
 			/// sets the process priority level
-			void priority(priority_type priority);
+			void priority(priority_type priority) throw(exception);
 
 			/// process priority values
 			struct priorities {
@@ -167,9 +167,9 @@ class UNIVERSALIS__DECL thread {
 			/// affinity mask type
 			typedef class affinity_mask affinity_mask_type;
 			/// gets the affinity mask against the set of cpu available to the process.
-			class affinity_mask affinity_mask() const;
+			class affinity_mask affinity_mask() const throw(exception);
 			/// sets the affinity mask against the set of cpu available to the process.
-			void affinity_mask(class affinity_mask const &);
+			void affinity_mask(class affinity_mask const &) throw(exception);
 		///\}
 
 		///\name priority
@@ -178,9 +178,9 @@ class UNIVERSALIS__DECL thread {
 			typedef int priority_type;
 
 			/// gets the thread priority level
-			priority_type priority();
+			priority_type priority() throw(exception);
 			/// sets the thread priority level
-			void priority(priority_type priority);
+			void priority(priority_type priority) throw(exception);
 
 			/// thread priority values
 			struct priorities {
@@ -222,7 +222,7 @@ class UNIVERSALIS__DECL thread {
 	// special case for windows, this must be done inline!
 	// The doc says:
 	// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
-	void inline process::affinity_mask(class affinity_mask const & affinity_mask) {
+	void inline process::affinity_mask(class affinity_mask const & affinity_mask) throw(exception) {
 		if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_))
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	}

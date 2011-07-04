@@ -2,39 +2,37 @@
 ///\brief implementation file for psycle::host::CGearTracker.
 #include "GearTracker.hpp"
 
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/core/sampler.h>
-
 #include "ChildView.hpp"
-#include "MachineGui.hpp"
-#include "MachineView.hpp"
+
+#include "Sampler.hpp"
 
 namespace psycle { namespace host {
 
-		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)
-			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
-		END_MESSAGE_MAP()
-
 		CGearTracker::CGearTracker(CChildView* pParent)
-			: CDialog(CGearTracker::IDD, pParent),
-			  m_pParent(pParent) {
+			: CDialog(CGearTracker::IDD, pParent)
+		{
+			m_pParent = pParent;
+			//{{AFX_DATA_INIT(CGearTracker)
+				// NOTE: the ClassWizard will add member initialization here
+			//}}AFX_DATA_INIT
 		}
 
-		CGearTracker::CGearTracker(MachineGui* gui)
-			: CDialog(CGearTracker::IDD, gui->view()->child_view()),
-			  gui_(gui),
-			  m_pParent(gui->view()->child_view()),
-				_pMachine((Sampler*)gui->mac()) {
-
-		}
-
-		void CGearTracker::DoDataExchange(CDataExchange* pDX) {
+		void CGearTracker::DoDataExchange(CDataExchange* pDX)
+		{
 			CDialog::DoDataExchange(pDX);
+			//{{AFX_DATA_MAP(CGearTracker)
 			DDX_Control(pDX, IDC_COMBO1, m_interpol);
 			DDX_Control(pDX, IDC_TRACKSLIDER2, m_polyslider);
 			DDX_Control(pDX, IDC_TRACKLABEL2, m_polylabel);
+			//}}AFX_DATA_MAP
 		}
+
+		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
+			//{{AFX_MSG_MAP(CGearTracker)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)
+			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
+			//}}AFX_MSG_MAP
+		END_MESSAGE_MAP()
 
 		BOOL CGearTracker::OnInitDialog() 
 		{
@@ -45,9 +43,9 @@ namespace psycle { namespace host {
 			m_interpol.AddString("Spline [Medium Quality]");
 			m_interpol.AddString("512p Sinc [Highest Quality]");
 
-			m_interpol.SetCurSel(_pMachine->resampler_.quality());
+			m_interpol.SetCurSel(_pMachine->_resampler.quality());
 
-			SetWindowText(_pMachine->GetEditName().c_str());
+			SetWindowText(_pMachine->_editName);
 
 			m_polyslider.SetRange(2, SAMPLER_MAX_POLYPHONY, true);
 			m_polyslider.SetPos(_pMachine->_numVoices);
@@ -80,7 +78,7 @@ namespace psycle { namespace host {
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			_pMachine->resampler_.quality((psycle::helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
+			_pMachine->_resampler.quality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 		}
 
 		BOOL CGearTracker::Create()
@@ -90,11 +88,9 @@ namespace psycle { namespace host {
 
 		void CGearTracker::OnCancel()
 		{
-			if (gui_)
-			  gui_->BeforeDeleteDlg();
+			m_pParent->SamplerMachineDialog = NULL;
 			DestroyWindow();
 			delete this;
 		}
 
-	}   // namespace host
-}   // namespace psycle
+}}

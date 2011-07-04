@@ -4,15 +4,9 @@
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/internalkeys.hpp>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "Song.hpp"
+#include "Machine.hpp"
+#include "Configuration.hpp"
 
 namespace psycle { namespace host {
 
@@ -167,32 +161,44 @@ namespace psycle { namespace host {
 
 		void CMidiMonitorDlg::UpdateInfo( void )
 		{
-			char tmp[ 64 ];
-
 			// fill in the numeric stats
 			MIDI_STATS * pStats = CMidiInput::Instance()->GetStatsPtr();
-
-			sprintf( tmp, "%d\0", pStats->bufferCount );
-			m_bufferUsed.SetWindowText( tmp );
-			sprintf( tmp, "%d\0", pStats->bufferSize );
-			m_bufferCapacity.SetWindowText( tmp );
-			sprintf( tmp, "%d\0", pStats->eventsLost );
-			m_eventsLost.SetWindowText( tmp );
-			sprintf( tmp, "%d\0", pStats->syncEventLatency );
-			m_syncLatency.SetWindowText( tmp );
-			sprintf( tmp, "%d\0", pStats->syncAdjuster );
-			m_syncAdjust.SetWindowText( tmp );
-			sprintf( tmp, "%d\0", pStats->syncOffset );
-			m_syncOffset.SetWindowText( tmp );
-
-			// add the config
 			MIDI_CONFIG * pConfig = CMidiInput::Instance()->GetConfigPtr();
-
 			m_midiVersion.SetWindowText( pConfig->versionStr );
-			sprintf( tmp, "%d\0", pConfig->midiHeadroom );
-			m_midiHeadroom.SetWindowText( tmp );
+
+			if(CMidiInput::Instance()->m_midiMode == MODE_REALTIME) {
+				char tmp[ 64 ];
+				sprintf( tmp, "%d\0", pStats->bufferCount );
+				m_bufferUsed.SetWindowText( tmp );
+				sprintf( tmp, "%d\0", pStats->bufferSize );
+				m_bufferCapacity.SetWindowText( tmp );
+				sprintf( tmp, "%d\0", pStats->eventsLost );
+				m_eventsLost.SetWindowText( tmp );
+				sprintf( tmp, "%d\0", pStats->clockDeviation );
+				m_syncLatency.SetWindowText( tmp );
+				sprintf( tmp, "%d\0", pStats->syncAdjuster );
+				m_syncAdjust.SetWindowText( tmp );
+				sprintf( tmp, "%d\0", pStats->syncOffset );
+				m_syncOffset.SetWindowText( tmp );
+				sprintf( tmp, "%d\0", pConfig->midiHeadroom );
+				m_midiHeadroom.SetWindowText( tmp );
+			}
+			else {
+				m_bufferUsed.SetWindowText( "" );
+				m_bufferCapacity.SetWindowText( "" );
+				m_eventsLost.SetWindowText( "" );
+				m_syncLatency.SetWindowText( "" );
+				m_syncAdjust.SetWindowText( "" );
+				m_syncOffset.SetWindowText( "" );
+				m_midiHeadroom.SetWindowText( "" );
+			}
 
 			// fill in the flags
+			if( !CMidiInput::Instance()->Active()) { 
+				pStats->flags &= ~FSTAT_ACTIVE;
+			} else {
+				pStats->flags |= FSTAT_ACTIVE;
+			}
 			SetStaticFlag( &m_psycleMidiActive, pStats->flags, FSTAT_ACTIVE );
 			SetStaticFlag( &m_receivingMidiData, pStats->flags, FSTAT_MIDI_INPUT );
 
@@ -350,61 +356,69 @@ namespace psycle { namespace host {
 			}
 
 			char txtBuffer[ 128 ];
-
 			// for all MIDI channels
 			for( int ch = 0; ch<MAX_MIDI_CHANNELS; ch++ )
 			{
-				// get generator/fx for this channel
-				int genFxIdx = pMidiInput->GetGenMap( ch );
+				Machine * pMachine = NULL;
+				int selIdx=-1;
 
-				// machine mapped & active?
-				if( genFxIdx >= 0 && genFxIdx < MAX_MACHINES )
+				//Generator/effect selector
+				switch(Global::configuration().midi().gen_select_type())
 				{
-					if( Global::song().machine( genFxIdx ) )
+				case Configuration::midi_type::MS_USE_SELECTED:
+					selIdx = Global::_pSong->seqBus;
+					pMachine = Global::_pSong->_pMachine[ selIdx ];
+					break;
+				case Configuration::midi_type::MS_BANK:
+				case Configuration::midi_type::MS_PROGRAM:
+					 selIdx = pMidiInput->GetGenMap( ch );
+					if( selIdx >= 0 && selIdx < MAX_MACHINES)
 					{
-						// machine
-						Machine * pMachine = Global::song().machine( genFxIdx );
-						sprintf( txtBuffer, "%02d: %s\0", genFxIdx, pMachine->GetEditName().c_str() );
-						m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-
-						// instrument
-						int instrument = pMidiInput->GetInstMap( ch );
-						if (pMachine->getMachineKey() == InternalKeys::sampler) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song()._pInstrument[instrument]->_sName );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-						}
-						else if ( pMachine->getMachineKey() == InternalKeys::sampulse) {
-							sprintf( txtBuffer, "%03d: %s\0", instrument, Global::song().rInstrument(instrument).Name() );
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
-						}
-						else
-						{
-							// n/a
-							m_channelMap.SetItem( ch, 2, LVIF_TEXT, "n/a", 0, 0, 0, NULL );
-						}
-
-						// note on/off status
-						if( pMidiInput->GetNoteOffStatus( ch ) )
-						{
-							// recognised
-							m_channelMap.SetItem( ch, 3, LVIF_TEXT, "Yes", 0, 0, 0, NULL );
-						}
-						else
-						{
-							// ignoored
-							m_channelMap.SetItem( ch, 3, LVIF_TEXT, "No", 0, 0, 0, NULL );
-						}
+						pMachine = Global::_pSong->_pMachine[ selIdx ];
 					}
+					break;
+				case Configuration::midi_type::MS_MIDI_CHAN:
+					selIdx = ch;
+					pMachine = Global::_pSong->_pMachine[ selIdx ];
+					break;
+				}
+				if (pMachine == NULL) strcpy( txtBuffer, "-");
+				else sprintf( txtBuffer, "%02d: %s", selIdx, pMachine->_editName );
+				m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+
+				//instrument selection
+				switch(Global::configuration().midi().inst_select_type())
+				{
+				case Configuration::midi_type::MS_USE_SELECTED:
+					selIdx = Global::_pSong->auxcolSelected;
+					break;
+				case Configuration::midi_type::MS_BANK:
+				case Configuration::midi_type::MS_PROGRAM:
+					selIdx = pMidiInput->GetInstMap( ch );
+					break;
+				case Configuration::midi_type::MS_MIDI_CHAN:
+					selIdx = ch;
+					break;
+				}
+				if( pMachine && pMachine->NeedsAuxColumn() && selIdx >= 0 && selIdx < pMachine->NumAuxColumnIndexes())
+				{
+					sprintf( txtBuffer, "%02X: %s", selIdx, pMachine->AuxColumnName(selIdx));
+				}
+				else { sprintf( txtBuffer, "-"); }
+				m_channelMap.SetItem( ch, 2, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
+
+				// note on/off status
+				if(pMidiInput->m_midiMode == MODE_REALTIME)
+				{
+					m_channelMap.SetItem( ch, 3, LVIF_TEXT, 
+						pMidiInput->GetNoteOffStatus( ch )?"Yes":"No"
+						, 0, 0, 0, NULL );
 				}
 				else
 				{
-					// channel not mapped at all
-					m_channelMap.SetItem( ch, 1, LVIF_TEXT, "-", 0, 0, 0, NULL );
-					m_channelMap.SetItem( ch, 2, LVIF_TEXT, "-", 0, 0, 0, NULL );
-					m_channelMap.SetItem( ch, 3, LVIF_TEXT, "-", 0, 0, 0, NULL );
+					m_channelMap.SetItem( ch, 3, LVIF_TEXT, "Yes", 0, 0, 0, NULL );
 				}
 			}
-
 			// clear update strobe
 			pMidiInput->GetStatsPtr()->channelMapUpdate = false;
 		}
@@ -423,7 +437,7 @@ namespace psycle { namespace host {
 			// for all MIDI channels
 			for( int ch = 0; ch<MAX_MIDI_CHANNELS; ch++ )
 			{
-				sprintf( txtBuffer, "Ch %d\0", (ch+1) );
+				sprintf( txtBuffer, "Ch %d", (ch+1) );
 				m_channelMap.InsertItem( ch, txtBuffer, NULL );
 			}
 		}

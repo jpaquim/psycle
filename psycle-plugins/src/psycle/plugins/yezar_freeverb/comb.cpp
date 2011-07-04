@@ -1,40 +1,31 @@
 #include "comb.hpp"
-#include <universalis/os/aligned_alloc.hpp>
-#include <psycle/helpers/dsp.hpp>
 
 // Comb filter implementation
 //
-// Originally Written by Jezar at Dreampoint, June 2000
+// Written by Jezar at Dreampoint, June 2000
 // http://www.dreampoint.co.uk
 // This code is public domain
 
 comb::comb()
-: buffer(0), feedback(0), filterstore(0), damp1(0), damp2(0),
-	bufsize(0), bufidx(0)
-{}
-comb::~comb()
 {
-	deletebuffer();
+	filterstore = 0;
+	bufidx = 0;
 }
 
-void comb::setbuffer(int samples)
+void comb::setbuffer(float *buf, int size) 
 {
-	if (bufsize) {
-		deletebuffer();
-	}
-	bufsize = samples;
-	universalis::os::aligned_memory_alloc(16, buffer, (bufsize+3)&0xFFFFFFFC);
-	if(bufidx>=bufsize) bufidx = 0;
+	buffer = buf; 
+	bufsize = size;
 }
 
 void comb::mute()
 {
-	psycle::helpers::dsp::Clear(buffer, bufsize);
+	for (int i=0; i<bufsize; i++)
+		buffer[i]=0;
 }
 
 void comb::setdamp(float val) 
 {
-	//todo: this will need some work for multiple sampling rates.
 	damp1 = val; 
 	damp2 = 1-val;
 }
@@ -52,9 +43,4 @@ void comb::setfeedback(float val)
 float comb::getfeedback() 
 {
 	return feedback;
-}
-void comb::deletebuffer() {
-	if (bufsize) {
-		universalis::os::aligned_memory_dealloc(buffer);
-	}
 }

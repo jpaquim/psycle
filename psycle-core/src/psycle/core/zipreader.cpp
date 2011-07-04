@@ -18,43 +18,36 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/detail/project.private.hpp>
 #include "zipreader.h"
-
-#if defined DIVERSALIS__OS__MICROSOFT
-	#include <universalis/os/include_windows_without_crap.hpp>
-	#include <io.h>
-#else
+#include <zlib.h>
+#if defined __unix__ || defined __APPLE__
 	#include <unistd.h>
 	#include <sys/types.h>
+#elif defined _WIN64 || defined _WIN32
+	#include <io.h>
 #endif
-
-#include <zlib.h> // include after windows header
-
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 // case-insensitive string comparison function
-// TODO BAD: strcasecmp is not part of the iso std lib (hence the __STRICT_ANSI__ check below)
-#if defined DIVERSALIS__COMPILER__MICROSOFT
+// todo: strcasecmp is not part of the iso std lib
+#if defined _MSC_VER
 	#define strcasecmp stricmp 
-#elif defined DIVERSALIS__COMPILER__GNU
-	#if defined DIVERSALIS__OS__CYGWIN__ && defined __STRICT_ANSI__
+#elif defined __GNUC__
+	#if defined __CYGWIN__ && defined __STRICT_ANSI__
 		// copied from cygwin's <string.h> header
 		_BEGIN_STD_C
 		int _EXFUN(strcasecmp,(const char *, const char *));
 		_END_STD_C
+	#else
+		// todo check the implementation on other systems
 	#endif
 #endif
-
-namespace psycle { namespace core {
 
 static int _load(int fd, char *buf, size_t bufsize)
 {
@@ -78,7 +71,7 @@ static void _zr_fix_name(char **fn)
 		else break;
 	}
 }
-static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
+static zipreader *_zr_step2(int fd, unsigned int a, unsigned int b, unsigned int y)
 {
 	unsigned int i;
 	unsigned char head1[30];
@@ -87,11 +80,7 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 	unsigned int n, m, lh;
 	unsigned int names;
 	unsigned int tail;
-	union u {
-		char * raw;
-		zipreader * z;
-	} zu;
-	zu.z = 0;
+	zipreader *z = 0;
 
 	ldset = (off_t*)malloc(y * sizeof(off_t));
 	if (!ldset) return 0;
@@ -117,7 +106,7 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 
 		n = (head2[28] | (((unsigned int)head2[29]) << 8));/* file name length */
 		m = (head2[30] | (((unsigned int)head2[31]) << 8)) /* extra field length */
-			+ (head2[31] | (((unsigned int)head2[32]) << 8)); /* file comment length */
+		+ (head2[31] | (((unsigned int)head2[32]) << 8)); /* file comment length */
 
 		/* local header offset */
 		lh = head2[42]
@@ -127,14 +116,15 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 		ldset[i] = lh;
 
 		/* next central directory header */
-		b += 46 + n + m;
-		names += n + 1;
+		b += (46 + (n + m));
+		names += (n+1);
 	}
-	zu.raw = (char*)malloc(sizeof(zipreader) + (sizeof(zipreader_file) * y) + names);
-	if (!zu.raw) goto FAIL;
-	zu.z->fd = fd;
-	zu.z->headers = ldset;
-	zu.z->_fnp = zu.z->files = y;
+	z = (zipreader *)malloc(sizeof(zipreader) + (sizeof(zipreader_file) * y)
+			+ names);
+	if (!z) goto FAIL;
+	z->fd = fd;
+	z->headers = ldset;
+	z->_fnp = z->files = y;
 	tail = names;
 	names = sizeof(zipreader) + (sizeof(zipreader_file) * y);
 	tail += names;
@@ -144,34 +134,34 @@ static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
 		if (memcmp(head1, "PK\3\4", 4) != 0) goto FAIL;
 		n = (head1[26] | (((unsigned int)head1[27]) << 8));/* file name length */
 		m = (head1[28] | (((unsigned int)head1[29]) << 8));/* extra field length */
-		zu.z->file[i].gpbits = head1[6] | (((unsigned int)head1[7]) << 8);
-		zu.z->file[i].method = head1[8] | (((unsigned int)head1[9]) << 8);
-		zu.z->file[i].crc32 = head1[14] | (((unsigned int)head1[15]) << 8)
+		z->file[i].gpbits = head1[6] | (((unsigned int)head1[7]) << 8);
+		z->file[i].method = head1[8] | (((unsigned int)head1[9]) << 8);
+		z->file[i].crc32 = head1[14] | (((unsigned int)head1[15]) << 8)
 			| (((unsigned int)head1[16]) << 16)
 			| (((unsigned int)head1[17]) << 24);
-		zu.z->file[i].csize = head1[18] | (((unsigned int)head1[19]) << 8)
+		z->file[i].csize = head1[18] | (((unsigned int)head1[19]) << 8)
 			| (((unsigned int)head1[20]) << 16)
 			| (((unsigned int)head1[21]) << 24);
-		zu.z->file[i].esize = head1[22] | (((unsigned int)head1[23]) << 8)
+		z->file[i].esize = head1[22] | (((unsigned int)head1[23]) << 8)
 			| (((unsigned int)head1[24]) << 16)
 			| (((unsigned int)head1[25]) << 24);
-		zu.z->file[i].filename_ptr = zu.raw + names;
+		z->file[i].filename_ptr = ((unsigned char *)z) + names;
 
-		_zr_fix_name(&zu.z->file[i].filename_ptr);
+		_zr_fix_name((char**)&z->file[i].filename_ptr);
 
-		names += n + 1;
+		names += n+1;
 		if (names > tail) goto FAIL;
-		if (!_load(fd, zu.z->file[i].filename_ptr, n)) goto FAIL;
-		zu.z->file[i].filename_ptr[n] = 0; /* null terminate */
-		zu.z->file[i].pos = (ldset[i] + n + m) + 30;
-		zu.z->file[i].top = zu.z;
+		if (!_load(fd, (char*)z->file[i].filename_ptr, n)) goto FAIL;
+		z->file[i].filename_ptr[n] = 0; /* null terminate */
+		z->file[i].pos = (ldset[i] + n + m)+30;
+		z->file[i].top = z;
 	}
 
 	/* are we still here?!? i think we're done... */
-	return zu.z;
+	return z;
 
 FAIL:
-	free(zu.raw);
+	free(z);
 	free(ldset);
 	return 0;
 }
@@ -396,7 +386,7 @@ int zipreader_extract(zipreader_file *f, int outfd)
 		return _zm_readin(f, outfd, _zm_write, 0, 0);
 	case 8: /* DEFLATE */
 		{
-			struct deflate_memory dm;
+			auto struct deflate_memory dm;
 			memset(&dm, 0, sizeof(dm));
 			if (inflateInit2(&dm.str, -MAX_WBITS) != Z_OK) return 0;
 			r = _zm_readin(f, outfd, _zm_inflate, _zm_inflate_fin, &dm);
@@ -406,5 +396,3 @@ int zipreader_extract(zipreader_file *f, int outfd)
 	};
 	return 0;
 }
-
-}}

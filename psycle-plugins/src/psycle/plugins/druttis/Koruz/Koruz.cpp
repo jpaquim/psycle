@@ -6,20 +6,17 @@
 //
 //============================================================================
 #include <psycle/plugin_interface.hpp>
-#include "../dsp/CDsp.h"
-#include "../dsp/Chorus.h"
-#include "../dsp/Phaser.h"
+#include "../CDsp.h"
+#include "../DspLib/Chorus.h"
+#include "../DspLib/Delay.h"
+#include "../DspLib/Phaser.h"
 #include <cstring>
 #include <cmath>
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
-
 //============================================================================
 //				Defines
 //============================================================================
 #define MAC_NAME				"Koruz"
-int const MAC_VERSION  = 0x0110;
+#define MAC_VERSION				"1.0"
 #define MAC_AUTHOR				"Druttis"
 //============================================================================
 //				Wavetable
@@ -28,6 +25,8 @@ int const MAC_VERSION  = 0x0110;
 #define WAVESIZE 4096
 #define WAVEMASK 4095
 float				wavetable[WAVESIZE];
+//				Truncation for f2i
+unsigned short cwTrunc = 0x1f72;
 //============================================================================
 //				Parameters
 //============================================================================
@@ -61,6 +60,7 @@ CMachineParameter const paramChorusPhase = { "Chorus Phase", "Chorus Phase", 0, 
 #define PARAM_CHORUS_SWIRL 13
 CMachineParameter const paramChorusSwirl = { "Chorus Swirl", "Chorus Swirl", 0, 256, MPF_STATE, 192 };
 
+#define NUM_PARAMS 14
 //============================================================================
 //				Parameter list
 //============================================================================
@@ -86,16 +86,15 @@ CMachineParameter const *pParams[] =
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
-	MAC_VERSION,
 	EFFECT,
-	sizeof pParams / sizeof *pParams,
+	NUM_PARAMS,
 	pParams,
 #ifdef _DEBUG
-	MAC_NAME " (Debug)",
+	MAC_NAME " " MAC_VERSION " (Debug)",
 #else
-	MAC_NAME,
+	MAC_NAME " " MAC_VERSION,
 #endif
 	MAC_NAME,
 	MAC_AUTHOR " on " __DATE__,
@@ -119,8 +118,15 @@ public:
 	virtual void SequencerTick();
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Work(float *psamplesleft, float* psamplesright, int numsamples, int numtracks);
+	inline int GetSamplingRate()
+	{
+		return pCB->GetSamplingRate();
+	}
+	inline int GetTickLength()
+	{
+		return pCB->GetTickLength();
+	}
 public:
-	int currentSR;
 
 	//				Phaser
 	float				phaser_min;
@@ -143,7 +149,7 @@ public:
 	float				chorus_swirl;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -153,7 +159,9 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[NUM_PARAMS];
+	//
+	Stop();
 	//
 	int i;
 	float t;
@@ -172,7 +180,8 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	Stop();
+	delete Vals;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -195,7 +204,6 @@ void mi::Init()
 	chorus_right.Init(2047);
 	chorus_left_phase = 0.0f;
 	chorus_right_phase = 0.0f;
-	currentSR = pCB->GetSamplingRate();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -221,7 +229,7 @@ void mi::Command()
 		"Greetz to all psycle doods!\n\n"
 		"---------------------------\n"
 		"druttis@darkface.pp.se\n",
-		MAC_AUTHOR " " MAC_NAME,
+		MAC_AUTHOR " " MAC_NAME " v." MAC_VERSION,
 		0
 	);
 }
@@ -241,13 +249,13 @@ void mi::ParameterTweak(int par, int val)
 	switch (par)
 	{
 		case PARAM_PHASER_MIN:
-			phaser_min = (float) val * 128.0f / (float)currentSR;
+			phaser_min = (float) val * 128.0f / (float) pCB->GetSamplingRate();
 			break;
 		case PARAM_PHASER_MAX:
-			phaser_max = (float) val * 128.0f / (float)currentSR;
+			phaser_max = (float) val * 128.0f / (float) pCB->GetSamplingRate();
 			break;
 		case PARAM_PHASER_RATE:
-			phaser_increment = (float) (val * WAVESIZE) / 51.2f / (float)currentSR;
+			phaser_increment = (float) (val * WAVESIZE) / 51.2f / (float) pCB->GetSamplingRate();
 			break;
 		case PARAM_PHASER_FB:
 			tmp = (float) val / 256.0f;
@@ -266,13 +274,13 @@ void mi::ParameterTweak(int par, int val)
 			phaser_swirl = (float) pow(2.0f, (float) val / 128.0f - 1.0f);
 			break;
 		case PARAM_CHORUS_DELAY:
-			chorus_delay = (float) val * 0.0128f * (float)currentSR;
+			chorus_delay = (float) val * 0.0128f * (float) pCB->GetSamplingRate();
 			break;
 		case PARAM_CHORUS_DEPTH:
 			chorus_depth = (float) val * 4.0f;
 			break;
 		case PARAM_CHORUS_RATE:
-			chorus_increment = (float) (val * WAVESIZE) / 51.2f / (float)currentSR;
+			chorus_increment = (float) (val * WAVESIZE) / 51.2f / (float) pCB->GetSamplingRate();
 			break;
 		case PARAM_CHORUS_FB:
 			tmp = (float) val / 256.0f;
@@ -357,15 +365,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 
 void mi::SequencerTick()
 {
-	if(currentSR != pCB->GetSamplingRate())
-	{
-		currentSR = pCB->GetSamplingRate();
-		phaser_min = (float) Vals[PARAM_PHASER_MIN] * 128.0f / (float)currentSR;
-		phaser_max = (float) Vals[PARAM_PHASER_MAX] * 128.0f / (float)currentSR;
-		phaser_increment = (float) (Vals[PARAM_PHASER_RATE] * WAVESIZE) / 51.2f / (float)currentSR;
-		chorus_delay = (float) Vals[PARAM_CHORUS_DELAY] * 0.0128f * (float)currentSR;
-		chorus_increment = (float) (Vals[PARAM_CHORUS_RATE] * WAVESIZE) / 51.2f / (float)currentSR;
-	}
+	//				Insert code here for effects.
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1,32 +1,57 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/***************************************************************************
+	*   Copyright (C) 2007 Psycledelics   *
+	*   psycle.sf.net   *
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	*   This program is distributed in the hope that it will be useful,       *
+	*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+	*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+	*   GNU General Public License for more details.                          *
+	*                                                                         *
+	*   You should have received a copy of the GNU General Public License     *
+	*   along with this program; if not, write to the                         *
+	*   Free Software Foundation, Inc.,                                       *
+	*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+	***************************************************************************/
+//
+//
+#ifndef PSYCLE_HOSTEVENTDRIVER_H
+#define PSYCLE_HOSTEVENTDRIVER_H
 
-#ifndef PSYCLE__CORE__EVENT_DRIVER__INCLUDED
-#define PSYCLE__CORE__EVENT_DRIVER__INCLUDED
-#pragma once
+//namespace psy {
+//namespace core {
 
-#include <psycle/core/detail/project.hpp>
+/**
+Base class for an event driver, such as a MIDI input driver.
 
-namespace psycle { namespace core {
+@author Josep Ma Antolin,,,
+*/
+class EventDriver{
+public:
+	EventDriver();
 
-/// base class for an event driver, such as a MIDI input driver.
-///\author Josep Ma Antolin
-class PSYCLE__CORE__DECL EventDriver {
-	public:
-		EventDriver();
-		~EventDriver();
+	~EventDriver();
 
-		/// 
-		virtual bool Open();
-		/// 
-		virtual bool Sync(int sampleoffset, int buffersize);
-		/// 
-		virtual void ReSync();
-		/// 
-		virtual bool Close( );
-		/// 
-		virtual bool Active();
+
+	/// 
+	virtual bool Open();
+	/// 
+	virtual bool Sync(int sampleoffset, int buffersize);
+	/// 
+	virtual void ReSync();
+	/// 
+	virtual bool Close( );
+	/// 
+	virtual bool Active();
+
+
 };
 
-}}
+//}
+//}
+
 #endif

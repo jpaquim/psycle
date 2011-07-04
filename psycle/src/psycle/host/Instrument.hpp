@@ -11,9 +11,6 @@ namespace psycle
 		class Instrument
 		{
 		public:
-			//PSYCLE__STRONG_TYPEDEF(int, id_type);
-			typedef int id_type;
-
 			Instrument();
 			virtual ~Instrument();
 			void Delete();
@@ -37,8 +34,8 @@ namespace psycle
 			///\endverbatim
 			unsigned char _NNA;
 			
-			int _locked_machine_index; //-1 means not locked
-			bool _locked_to_machine;
+			int _lock_instrument_to_machine; //-1 means not locked
+			bool _LOCKINST;
 
 
 			///\name Amplitude Envelope overview:

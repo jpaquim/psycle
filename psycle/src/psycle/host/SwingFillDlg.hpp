@@ -4,7 +4,6 @@
 #include "Psycle.hpp"
 
 namespace psycle { namespace host {
-
 		/// swing fill dialog window.
 		class CSwingFillDlg : public CDialog
 		{

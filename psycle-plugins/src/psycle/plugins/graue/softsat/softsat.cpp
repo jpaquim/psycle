@@ -35,36 +35,50 @@
 // version 0.2 - threshold now defaults to 32768 rather than to 512
 
 #include <psycle/plugin_interface.hpp>
-#include <cstring>
-#include <cstdlib>
-#include <cassert>
-#include <cmath>
-#include <cstdio>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
 
-using namespace psycle::plugin_interface;
+CMachineParameter const paraThreshold =
+{
+	"Threshold",
+	"Threshold level", // description
+	16,                // MinValue				
+	32768,             // MaxValue
+	MPF_STATE,         // Flags
+	32768,             // default value
+};
 
-CMachineParameter const paraThreshold = {"Threshold", "Threshold level", 16, 32768, MPF_STATE, 32768};
-CMachineParameter const paraHardness = {"Hardness", "Hardness", 1, 2048, MPF_STATE, 1024};
+CMachineParameter const paraHardness =
+{
+	"Hardness",
+	"Hardness",        // description
+	1,                 // MinValue				
+	2048,              // MaxValue
+	MPF_STATE,         // Flags
+	1024,              // default value
+};
 
-CMachineParameter const *pParameters[] = { 
+CMachineParameter const *pParameters[] = 
+{ 
 	&paraThreshold,
 	&paraHardness
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
-	0x0100,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
+	0,                                     // flags
+	2,                                     // numParameters
+	pParameters,                           // Pointer to parameters
 #ifndef NDEBUG
-	"ThunderPalace SoftSat (Debug build)",
+	"ThunderPalace SoftSat (Debug build)", // name
 #else
-	"ThunderPalace SoftSat",
+	"ThunderPalace SoftSat",               // name
 #endif
-	"SoftSat",
-	"Catatonic Porpoise",
-	"About",
+	"SoftSat",                             // short name
+	"Catatonic Porpoise",                  // author
+	"About",                 // A command that is used to display an about box
 	3
 );
 
@@ -75,66 +89,110 @@ public:
 	mi();
 	virtual ~mi();
 
+	virtual void Init();
+	virtual void SequencerTick();
 	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
 	virtual bool DescribeValue(char* txt,int const param, int const value);
 	virtual void Command();
 	virtual void ParameterTweak(int par, int val);
 
 private:
-	inline void ProcessChannel(float& sample);
-	float gradation;
-	float range;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[MacInfo.numParameters];
+	// The constructor zone
+	Vals = new int[2];
 }
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
+// Destroy dynamically allocated objects/memory here
+}
+
+void mi::Init()
+{
+// Initialize your stuff here
+}
+
+void mi::SequencerTick()
+{
+// Called on each tick while sequencer is playing
 }
 
 void mi::Command()
 {
+// Called when user presses editor button
+// Show the about box
 	pCB->MessBox("Made September 9, 2005 by Catatonic Porpoise","About SoftSat",0);
 }
 
 void mi::ParameterTweak(int par, int val)
 {
 	Vals[par] = val;
-	switch(par) {
-	case 0: range = ((float) val) / ((gradation+1)/2);
-		break;
-	case 1: gradation = ((float) val) / 2049.0f;
-		break;
-	}
 }
 
+// Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int tracks)
 {
-	do {
+	const float gradation = ((float) Vals[1]) / 2049.0f;       // paraHardness
+	const float range = ((float) Vals[0]) / ((gradation+1)/2); // paraThreshold
+
+	do
+	{
 		float sl = *psamplesleft / range;
 		float sr = *psamplesright / range;
 
-		if (sl > 0) {
-			ProcessChannel(sl);
+		if (sl > 0)
+		{
+			if (sl > gradation)
+			{
+				sl = gradation + (sl-gradation)
+					/ (1+((sl-gradation)/(1-gradation))
+						* ((sl-gradation)/(1-gradation)));
+			}
+			if (sl > 1.0f)
+				sl = (gradation + 1.0f) / 2.0f;
 		}
-		else {
+		else
+		{
 			sl = -sl;
-			ProcessChannel(sl);
+			if (sl > gradation)
+			{
+				sl = gradation + (sl-gradation)
+					/ (1+((sl-gradation)/(1-gradation))
+						* ((sl-gradation)/(1-gradation)));
+			}
+			if (sl > 1.0f)
+				sl = (gradation + 1.0f) / 2.0f;
 			sl = -sl;
 		}
 
-		if (sr > 0) {
-			ProcessChannel(sr);
+		if (sr > 0)
+		{
+			if (sr > gradation)
+			{
+				sr = gradation + (sr-gradation)
+					/ (1+((sr-gradation)/(1-gradation))
+						* ((sr-gradation)/(1-gradation)));
+			}
+			if (sr > 1.0f)
+				sr = (gradation + 1.0f) / 2.0f;
 		}
-		else {
+		else
+		{
 			sr = -sr;
-			ProcessChannel(sr);
+			if (sr > gradation)
+			{
+				sr = gradation + (sr-gradation)
+					/ (1+((sr-gradation)/(1-gradation))
+						* ((sr-gradation)/(1-gradation)));
+			}
+			if (sr > 1.0f)
+				sr = (gradation + 1.0f) / 2.0f;
 			sr = -sr;
 		}
 
@@ -147,6 +205,7 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int tra
 	} while(--numsamples);
 }
 
+// Function that describes value on client's display
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	if (param == 1) // hardness
@@ -156,17 +215,4 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	}
 
 	return false; // use default (integer) display mechanism?
-}
-
-
-inline void mi::ProcessChannel(float& sample)
-{
-	if (sample > gradation)
-	{
-		sample = gradation + (sample-gradation)
-			/ (1+((sample-gradation)/(1-gradation))
-				* ((sample-gradation)/(1-gradation)));
-	}
-	if (sample > 1.0f)
-		sample = (gradation + 1.0f) / 2.0f;
 }

@@ -1,15 +1,11 @@
 #pragma once
 
-enum {
-	ENV_ATT=1,
-	ENV_DEC,
-	ENV_FINITE_SUS,
-	ENV_NOTEOFF_SUS,
-	ENV_REL,
-	ENV_ANTICLICK,
-
-	ENV_NONE=99
-};
+#define ENV_ATT 1
+#define ENV_DEC 2
+#define ENV_SUS 3
+#define ENV_REL 4
+#define ENV_NONE 99
+#define ENV_CLICK 5
 
 class envelope  
 {
@@ -64,14 +60,13 @@ float envelope::res(void)
 			if(envvol<susvol)
 			{
 				envvol=susvol;
-				if(s == 0) envstate=ENV_NOTEOFF_SUS;
-				else envstate=ENV_FINITE_SUS;
+				envstate=ENV_SUS;
 				suscounter=0;
 			}
 		}
 
 		// Sustain
-		if(envstate==ENV_FINITE_SUS)
+		if(envstate==ENV_SUS)
 		{
 			suscounter++;
 			
@@ -94,7 +89,8 @@ float envelope::res(void)
 			}
 		}
 
-		if(envstate==ENV_ANTICLICK)
+
+		if(envstate==ENV_CLICK)
 		{
 			envvol-=envcoef;
 
@@ -106,9 +102,9 @@ float envelope::res(void)
 			}
 		}
 
-		return envvol;
+	return envvol;
 	}
 	else 
-		return 0;
+	return 0;
 
 }

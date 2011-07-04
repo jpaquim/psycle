@@ -36,12 +36,11 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
+//#include <cassert>
+//#include <cmath>
 
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
 
 #define PLUGIN_NAME "Pooplog Scratch Master 0.06b"
 
@@ -51,6 +50,22 @@ using namespace psycle::helpers::math;
 #define SPEED_ONE 1024.0f
 #define MAX_BUF 1024*1024*4
 
+inline int f2i(float flt)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
+}
 
 #define NUM_BUFF 89
 const static float buffindex[NUM_BUFF]={
@@ -144,14 +159,85 @@ const static float buffindex[NUM_BUFF]={
 	248.0f,
 	256.0f};
 
-CMachineParameter const paraLength = {"Buffer Length", "Buffer Length", 0, NUM_BUFF-1, MPF_STATE, 25};
-CMachineParameter const paraSpeed = {"Scratch Speed", "Scratch Speed", int(-SPEED_ONE*2), SPEED_MAX, MPF_STATE, int(SPEED_ONE)};
-CMachineParameter const paraDragL = {"Left Drag Delay", "Left Drag Delay", 0, DRAG_MAX, MPF_STATE, DRAG_MAX/2};
-CMachineParameter const paraDragR = {"Right Drag Delay", "Right Drag Delay", 0, DRAG_MAX, MPF_STATE, DRAG_MAX/2};
-CMachineParameter const paraUnbalance = {"Speed Unbalance", "Speed Unbalance", 0, 512, MPF_STATE, 256};
-CMachineParameter const paraFeedback = {"Feedback", "Feedback", 0, 512, MPF_STATE, 256};
-CMachineParameter const paraMix = {"Mix", "Mix", 0, 256, MPF_STATE, 256};
-CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
+CMachineParameter const paraLength = 
+{ 
+	"Buffer Length",																
+	"Buffer Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	25,
+};
+
+CMachineParameter const paraSpeed = 
+{ 
+	"Scratch Speed",
+	"Scratch Speed",																																// description
+	int(-SPEED_ONE*2),																																																// MinValue				
+	SPEED_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	int(SPEED_ONE),
+};
+
+CMachineParameter const paraDragL = 
+{ 
+	"Left Drag Delay",																
+	"Left Drag Delay",																																				// description
+	0,																																																// MinValue				
+	DRAG_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	DRAG_MAX/2,
+};
+
+CMachineParameter const paraDragR = 
+{ 
+	"Right Drag Delay",																
+	"Right Drag Delay",																																				// description
+	0,																																																// MinValue				
+	DRAG_MAX,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	DRAG_MAX/2,
+};
+
+CMachineParameter const paraUnbalance = 
+{ 
+	"Speed Unbalance",																
+	"Speed Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256,
+};
+
+CMachineParameter const paraFeedback = 
+{ 
+	"Feedback",																
+	"Feedback",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256,
+};
+
+CMachineParameter const paraMix = 
+{ 
+	"Mix",																
+	"Mix",																																				// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256,
+};
+
+CMachineParameter const paraInputGain = 
+{ 
+	"Input Gain",
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256
+};
 
 enum
 { 
@@ -163,7 +249,8 @@ enum
 	e_paraUnbalance,
 	e_paraFeedback,
 	e_paraInputGain,
-	e_paraMix
+	e_paraMix,
+	num_param
 };
 
 CMachineParameter const *pParameters[] = 
@@ -180,16 +267,15 @@ CMachineParameter const *pParameters[] =
 };
 
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0006,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	PLUGIN_NAME,
-	"Pooplog Scratch",
-	"Jeremy Evers",
-	"About",
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	0,																																								// flags
+	num_param,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+	PLUGIN_NAME,																				// name
+	"Pooplog Scratch",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	4
 );
 
@@ -232,27 +318,27 @@ private:
 	int song_freq;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //DLL_EXPORTS
 
 mi::mi()
 {
 	denormal = (float)1.0E-18;
 	// The constructor zone
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[num_param];
 	Vals[e_paraLength] = 17;
 }
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 	if (pBufferL)
 	{
-		delete[] pBufferL;
+		delete pBufferL;
 	}
 	if (pBufferR)
 	{
-		delete[] pBufferR;
+		delete pBufferR;
 	}
 // Destroy dinamically allocated objects/memory here
 }
@@ -405,7 +491,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 		if (pBufferL)
 		{
-			int i = lrint<int>(rlindex);
+			int i = f2i(rlindex);
 			if (i < (bufsize-1))
 			{
 				sol = (pBufferL[i]*(1.0f-(rlindex-i)))+(pBufferL[i+1]*(rlindex-i))+denormal;
@@ -418,7 +504,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (pBufferR)
 		{
-			int i = lrint<int>(rrindex);
+			int i = f2i(rrindex);
 			if (i < (bufsize-1))
 			{
 				sor = (pBufferR[i]*(1.0f-(rrindex-i)))+(pBufferR[i+1]*(rrindex-i))+denormal;

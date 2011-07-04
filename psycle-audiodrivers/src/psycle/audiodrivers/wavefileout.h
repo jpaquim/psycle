@@ -6,8 +6,7 @@
 #pragma once
 
 #include "audiodriver.h"
-#include <universalis/stdlib/thread.hpp>
-#include <universalis/stdlib/mutex.hpp>
+#include <universalis/stdlib/condition.hpp>
 #include <psycle/helpers/dither.hpp>
 #include <psycle/helpers/riff.hpp>
 
@@ -43,7 +42,7 @@ class WaveFileOut : public AudioDriver {
 		void thread_function();
 		void writeBuffer();
 		thread * thread_;
-		typedef class unique_lock<mutex> scoped_lock;
+		typedef class scoped_lock<mutex> scoped_lock;
 		mutex mutable mutex_;
 		bool stop_requested_;
 

@@ -2,12 +2,12 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-namespace core {
-	class XMSampler;
-}
 namespace host {
 
 // Cuadro de diálogo de XMSamplerMixerPage
+
+class XMSampler;
+
 class XMSamplerMixerPage : public CPropertyPage
 {
 	DECLARE_DYNAMIC(XMSamplerMixerPage)

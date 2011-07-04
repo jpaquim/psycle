@@ -1,14 +1,12 @@
 #include "FrameMixerMachine.hpp"
 
 #include "Configuration.hpp"
-#include "MachineGui.hpp"
-#include "MachineView.hpp"
 #include "NativeGui.hpp"
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "ChildView.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/mixer.h>
+#include "Song.hpp"
+#include "internal_machines.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -65,7 +63,7 @@ namespace psycle { namespace host {
 
 	//////////////////////////////////////////////////////////////////////////
 	// InfoLabel class
-	void CFrameMixerMachine::InfoLabel::Draw(CDC* dc, int x, int y, std::string parName, std::string parValue)
+	void CFrameMixerMachine::InfoLabel::Draw(CDC* dc, int x, int y,const char *parName,const char *parValue)
 	{
 		const int half = height/2;
 		dc->Draw3dRect(x,y-1,width,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
@@ -74,21 +72,21 @@ namespace psycle { namespace host {
 
 		dc->SetBkColor(Global::configuration().machineGUITopColor);
 		dc->SetTextColor(Global::configuration().machineGUIFontTopColor);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName.c_str()), 0);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width-1, y+half), CString(parName), 0);
 	
 		DrawValue(dc,x,y,parValue);
 	}
-	void CFrameMixerMachine::InfoLabel::DrawValue(CDC* dc, int x, int y, std::string parValue)
+	void CFrameMixerMachine::InfoLabel::DrawValue(CDC* dc, int x, int y,const char *parValue)
 	{
 		const int half = height/2;
 		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
 		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
-		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue.c_str()), 0);
+		dc->ExtTextOut(x+xoffset, y+half, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y+half, x+width-1, y+height-1), CString(parValue), 0);
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// HLightInfoLabel class
-	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, CFont* b_font_bold,int x, int y, std::string parName, std::string parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLight(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
@@ -98,13 +96,13 @@ namespace psycle { namespace host {
 		dc->SetBkColor(Global::configuration().machineGUITitleColor);
 		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
 		CFont *oldfont =dc->SelectObject(b_font_bold);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName.c_str()), 0);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
 		dc->SelectObject(oldfont);
 
 		DrawHLightValue(dc,x,y,parValue);
 		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
-	void CFrameMixerMachine::InfoLabel::DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,std::string parName, std::string parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLightB(CDC* dc, CFont* b_font_bold,int x, int y,const char *parName,const char *parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
@@ -114,24 +112,24 @@ namespace psycle { namespace host {
 		dc->SetBkColor(Global::configuration().machineGUIHTopColor);
 		dc->SetTextColor(Global::configuration().machineGUIHFontBottomColor);
 		CFont *oldfont =dc->SelectObject(b_font_bold);
-		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName.c_str()), 0);
+		dc->ExtTextOut(x+xoffset, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+mywidth-1, y+half), CString(parName), 0);
 		dc->SelectObject(oldfont);
 
 		DrawHLightValue(dc,x,y,parValue);
 		dc->Draw3dRect(x-1,y-1,width+ Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 	}
-	void CFrameMixerMachine::InfoLabel::DrawHLightValue(CDC* dc, int x, int y, std::string parValue)
+	void CFrameMixerMachine::InfoLabel::DrawHLightValue(CDC* dc, int x, int y,const char *parValue)
 	{
 		const int half = height/2;
 		const int mywidth = width + Knob::width;
 		dc->SetBkColor(Global::configuration().machineGUIBottomColor);
 		dc->SetTextColor(Global::configuration().machineGUIFontBottomColor);
-		dc->ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue.c_str()), 0);
+		dc->ExtTextOut(x+xoffset, y+half,ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y+half, x+mywidth-1, y+height), CString(parValue), 0);
 	}
 	
 	//////////////////////////////////////////////////////////////////////////
 	// HeaderInfoLabel class
-/*	void CFrameMixerMachine::InfoLabel::DrawHeader(CDC* dc, int x, int y,std::string parName, std::string parValue, bool checked)
+/*	void CFrameMixerMachine::InfoLabel::DrawHeader(CDC* dc, int x, int y,const char *parName, const char *parValue, bool checked)
 	{
 		const int half = height/2;
 		const int quarter = height/4;
@@ -144,7 +142,7 @@ namespace psycle { namespace host {
 		dc->SetTextColor(Global::configuration().machineGUITitleFontColor);
 
 		dc->SelectObject(&b_font_bold);
-		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName.c_str()), 0);
+		dc->ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x+1, y + quarter, x+mywidth-1, y+half+quarter), CString(parName), 0);
 		dc->SelectObject(&b_font);
 		dc->Draw3dRect(x-1,y-1,width+Knob::width+1,height+1,Global::configuration().machineGUITitleColor,Global::configuration().machineGUITitleColor);
 
@@ -216,6 +214,7 @@ namespace psycle { namespace host {
 		ON_WM_MOUSEMOVE()
 		ON_WM_LBUTTONUP()
 		ON_WM_RBUTTONUP()
+		ON_WM_TIMER()
 		ON_WM_CREATE()
 		ON_WM_DESTROY()
 		ON_WM_SETFOCUS()
@@ -226,11 +225,11 @@ namespace psycle { namespace host {
 	CFrameMixerMachine::CFrameMixerMachine()
 	{
 		//do not use. use CFrameMixerMachine(int dum)
-	}	
-
-	CFrameMixerMachine::CFrameMixerMachine(MachineGui* gui)		
-		: CFrameMachine(gui)
-		,_pMixer(0)
+	}
+	CFrameMixerMachine::CFrameMixerMachine(int dum)
+		///\todo: this line doesn't work. why?
+//		:CFrameMachine::CFrameMachine(dum)
+		:_pMixer(0)
 		,bmpDC(0)
 		,numSends(0)
 		,numChans(0)
@@ -240,9 +239,8 @@ namespace psycle { namespace host {
 		,isslider(false)
 		,refreshheaders(false)
 	{
-		MachineIndex = gui->mac()->id();		
+		MachineIndex = dum;
 	}
-
 	CFrameMixerMachine::~CFrameMixerMachine()
 	{
 		if ( bmpDC ) { bmpDC->DeleteObject(); delete bmpDC; }
@@ -250,7 +248,6 @@ namespace psycle { namespace host {
 
 	int CFrameMixerMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 	{
-
 		int retVal = CFrameMachine::OnCreate(lpCreateStruct);
 		if ( retVal >= 0 )
 		{
@@ -275,7 +272,7 @@ namespace psycle { namespace host {
 		for (int i=0; i<_pMixer->numreturns(); i++)
 		{
 			if (_pMixer->Return(i).IsValid()) {
-				sendNames[i]=gen_gui_->view()->song()->machine(_pMixer->Return(i).Wire().machine_)->GetEditName();
+				sendNames[i]=Global::song()._pMachine[_pMixer->Return(i).Wire().machine_]->GetEditName();
 				//sends++;
 			}
 			else sendNames[i]="";
@@ -298,8 +295,6 @@ namespace psycle { namespace host {
 		_pMixer=(Mixer*)(_pMachine = pMachine);
 		numParameters = _pMixer->GetNumParams();
 		UpdateSendsandChans();
-	}
-	void CFrameMixerMachine::Generate(double x, double y) {
 
 		int winh = InfoLabel::height + ((_pMixer->numsends()+3) * Knob::height) + GraphSlider::height; // + 3 -> pan, gain, mix
 		int winw = (_pMixer->numinputs()+_pMixer->numreturns()+2) * (Knob::width+InfoLabel::width); // +2 -> labels column, plus master column.
@@ -314,12 +309,6 @@ namespace psycle { namespace host {
 			false
 			);
 		updateBuffer=true;
-
-		std::ostringstream winname;
-		winname<<std::setfill('0') << std::setw(2) << std::hex;
-		winname << MachineIndex << " : " << _pMixer->GetEditName();
-		SetWindowText(winname.str().c_str());
-
 		ShowWindow(SW_SHOW);
 	}
 
@@ -336,9 +325,9 @@ namespace psycle { namespace host {
 			else { sendtxt += '1'; sendtxt += ('0'+i-9); }
 			if ( _pMixer->SendValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i]);
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 			}
-			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
+			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
 		}
 		yoffset+=InfoLabel::height;
 		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,"Mix","");
@@ -354,7 +343,7 @@ namespace psycle { namespace host {
 		xoffset+=InfoLabel::width+Knob::width;
 		yoffset=0;
 		std::string mastertxt = "Master Out";
-		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,mastertxt,"");
+		InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,mastertxt.c_str(),"");
 
 		yoffset+=(_pMixer->numsends()+1)*InfoLabel::height;
 		InfoLabel::Draw(&bufferDC,xoffset+Knob::width,yoffset,"D/W","");
@@ -378,10 +367,9 @@ namespace psycle { namespace host {
 			std::string chantxt = _pMixer->GetAudioInputName(int(i+Mixer::chan1));
 			if (_pMixer->ChannelValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,
-					gen_gui_->view()->song()->machine(_pMixer->_inputMachines[i])->GetEditName());
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
 			}
-			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
+			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
 			yoffset+=InfoLabel::height;
 			for (int j=0; j<_pMixer->numsends(); j++)
 			{
@@ -406,9 +394,9 @@ namespace psycle { namespace host {
 			std::string sendtxt = _pMixer->GetAudioInputName(int(i+Mixer::return1));
 			if (_pMixer->ReturnValid(i))
 			{
-				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i].c_str());
+				InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 			}
-			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
+			else InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
 			yoffset+=(2+i)*InfoLabel::height;
 			for (int j=i+1; j<_pMixer->numsends(); j++)
 			{
@@ -428,8 +416,10 @@ namespace psycle { namespace host {
 		}
 	}
 
-	void CFrameMixerMachine::UpdateUI()
+	void CFrameMixerMachine::OnTimer(UINT_PTR nIDEvent) 
 	{
+		if ( nIDEvent == 2104+MachineIndex )
+		{
 			if (UpdateSendsandChans())
 			{
 				updateBuffer=true;
@@ -449,6 +439,8 @@ namespace psycle { namespace host {
 					);
 			}
 			else Invalidate(false);
+		}
+		CFrameWnd::OnTimer(nIDEvent);
 	}
 	void CFrameMixerMachine::OnPaint() 
 	{
@@ -525,16 +517,16 @@ namespace psycle { namespace host {
 				if (_pMixer->ChannelValid(i))
 				{
 					if ( _swapend == i+chan1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,gen_gui_->view()->song()->machine(_pMixer->_inputMachines[i])->GetEditName());
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
 					else 
-						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,gen_gui_->view()->song()->machine(_pMixer->_inputMachines[i])->GetEditName());
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),Global::song()._pMachine[_pMixer->_inputMachines[i]]->_editName);
 				}
 				else
 				{
 					if ( _swapend == i+chan1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
 					else
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt,"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,chantxt.c_str(),"");
 				}
 			}
 			if (_pMixer->ChannelValid(i))
@@ -610,16 +602,16 @@ namespace psycle { namespace host {
 				if (_pMixer->ReturnValid(i))
 				{
 					if ( _swapend == i+return1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i]);
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 					else 
-						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,sendNames[i]);
+						InfoLabel::DrawHLight(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),sendNames[i].c_str());
 				}
 				else
 				{
 					if ( _swapend == i+return1)
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
 					else
-						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt,"");
+						InfoLabel::DrawHLightB(&bufferDC,&b_font_bold,xoffset,yoffset,sendtxt.c_str(),"");
 				}
 			}
 
@@ -913,13 +905,14 @@ namespace psycle { namespace host {
 					if(Global::configuration()._RecordTweaks)
 					{
 						if(Global::configuration()._RecordMouseTweaksSmooth)
-							wndView->MousePatternTweakSlide(_pMachine->id(), tweakpar, tweakbase);
+							wndView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, tweakbase);
 						else
-							wndView->MousePatternTweak(_pMachine->id(), tweakpar, tweakbase);
+							wndView->MousePatternTweak(_pMachine->_macIndex, tweakpar, tweakbase);
 					}
 				}
 			}
 			prevval = tweakbase;
+			wndView->AddMacViewUndo();
 		}
 		CFrameWnd::OnLButtonDown(nFlags, point);
 	}
@@ -957,9 +950,9 @@ namespace psycle { namespace host {
 			if(Global::configuration()._RecordTweaks)
 			{
 				if(Global::configuration()._RecordMouseTweaksSmooth)
-					wndView->MousePatternTweakSlide(_pMachine->id(), tweakpar, prevval);
+					wndView->MousePatternTweakSlide(_pMachine->_macIndex, tweakpar, prevval);
 				else
-					wndView->MousePatternTweak(_pMachine->id(), tweakpar, prevval);
+					wndView->MousePatternTweak(_pMachine->_macIndex, tweakpar, prevval);
 			}
 
 

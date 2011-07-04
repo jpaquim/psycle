@@ -1,25 +1,23 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
-#include <psycle/core/detail/project.private.hpp>
+/**********************************************************************************************
+	Copyright 2007-2008 members of the psycle project http://psycle.sourceforge.net
+
+	This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+**********************************************************************************************/
+
 #include "internal_machines.h"
 
+///\todo: These two includes need to be replaced by a "host" callback which gives such information.
+#include "commands.h"
 #include "player.h"
+
 #include "song.h"
+#include "dsp.h"
 #include "fileio.h"
-#include "cpu_time_clock.hpp"
 
-#include <psycle/audiodrivers/audiodriver.h>
-#include <psycle/helpers/math.hpp>
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/value_mapper.hpp>
-#include <universalis/stdlib/cstdint.hpp>
-
-namespace psycle { namespace core {
-
-using namespace helpers;
-using namespace helpers::math;
-using namespace audiodrivers;
+namespace psy { namespace core {
 
 /****************************************************************************************************/
 // Dummy
@@ -27,8 +25,8 @@ using namespace audiodrivers;
 std::string Dummy::_psName = "Dummy";
 
 Dummy::Dummy(MachineCallbacks* callbacks, Machine::id_type id)
-	: Machine(callbacks, id)
-	, generator(false)
+:
+	Machine(callbacks, id)
 {
 	defineInputAsStereo();
 	defineOutputAsStereo();
@@ -44,8 +42,11 @@ Dummy::~Dummy() throw() {
 }
 
 int Dummy::GenerateAudio(int numSamples) {
+	//cpu::cycles_type cost(cpu::cycles());
 	Machine::UpdateVuAndStanbyFlag(numSamples);
-	recursive_processed_ = true;
+	//cost = cpu::cycles() - cost;
+	//work_cpu_cost(work_cpu_cost() + cost);
+	_worked = true;
 	return numSamples;
 }
 
@@ -53,7 +54,7 @@ int Dummy::GenerateAudio(int numSamples) {
 // its "LoadSpecificChunk" skips the data of the chunk so that the
 // song loader can continue the sequence.
 bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version) {
-	uint32_t size=0;
+	std::uint32_t size=0;
 	pFile->Read(size); // size of this part params to load
 	pFile->Skip(size);
 	return true;
@@ -125,50 +126,12 @@ void DuplicatorMac::Stop() {
 	}
 }
 
-void DuplicatorMac::Tick( int channel, const PatternEvent & data ) {
+void DuplicatorMac::Tick( int /*channel*/, const PatternEvent & /*pData*/ ) {
 	//const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
-
-
-	if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
-	{
-		bisTicking=true;
-		for (int i=0;i<NUM_MACHINES;i++)
-		{
-			if (macOutput[i] != -1 && callbacks->song().machine(macOutput[i]) != NULL )
-			{
-				AllocateVoice(channel,i);
-				PatternEvent pTemp = data;
-				if ( pTemp.note() < notetypes::release )
-				{
-					int note = pTemp.note()+noteOffset[i];
-					if ( note>=notetypes::release) note=notetypes::b9;
-					else if (note<0 ) note=0;
-					pTemp.setNote(static_cast<uint8_t>(note));
-				}
-				// this can happen if the parameter is the machine itself.
-				if (callbacks->song().machine(macOutput[i]) != this) 
-				{
-					callbacks->song().machine(macOutput[i])->Tick(allocatedchans[channel][i],pTemp);
-					if (pTemp.note() >= notetypes::release )
-					{
-						DeallocateVoice(channel,i);
-					}
-				}
-				else
-				{
-					DeallocateVoice(channel,i);
-				}
-			}
-		}
-	}
-	bisTicking=false;
 }
 
-void DuplicatorMac::PreWork(int numSamples, bool clear) {
-	Machine::PreWork(numSamples, clear);
-	#if 0 // should do we count this in the processing time?
-		nanoseconds const t0(cpu_time_clock());
-	#endif
+void DuplicatorMac::PreWork(int numSamples) {
+	Machine::PreWork(numSamples);
 	for(; !workEvents.empty(); workEvents.pop_front()) {
 		WorkEvent & workEvent = workEvents.front();
 		if(!_mute && !bisTicking) {
@@ -199,8 +162,7 @@ void DuplicatorMac::PreWork(int numSamples, bool clear) {
 								DeallocateVoice(workEvent.track(), i);
 						#else
 							callbacks->song().machine(macOutput[i])->AddEvent(workEvent.beatOffset(), workEvent.track(), thenote);
-							///\todo some songs have workEvent.track() >= MAX_TRACKS ... added check to avoid crash
-							if(thenote.note() >= notetypes::release && workEvent.track() < MAX_TRACKS)
+							if(thenote.note() >= notetypes::release)
 								DeallocateVoice(workEvent.track(), i);
 						#endif
 					}
@@ -209,10 +171,6 @@ void DuplicatorMac::PreWork(int numSamples, bool clear) {
 		}
 		bisTicking = false;
 	}
-	#if 0 // should do we count this in the processing time?
-		nanoseconds const t1(cpu_time_clock());
-		accumulate_processing_time(t1 - t0);
-	#endif
 }
 
 void DuplicatorMac::AllocateVoice(int channel,int machine) {
@@ -285,13 +243,13 @@ bool DuplicatorMac::SetParameter(int numparam, int value) {
 }
 
 int DuplicatorMac::GenerateAudio( int numSamples ) {
-	recursive_processed_ = true;
+	_worked = true;
 	Standby(true);
 	return numSamples;
 }
 
 bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
-	uint32_t size;
+	std::uint32_t size;
 	pFile->Read(size);
 	pFile->ReadArray(macOutput,NUM_MACHINES);
 	pFile->ReadArray(noteOffset,NUM_MACHINES);
@@ -299,7 +257,7 @@ bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
 }
 
 void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile) const {
-	uint32_t const size(sizeof macOutput + sizeof noteOffset);
+	std::uint32_t const size(sizeof macOutput + sizeof noteOffset);
 	pFile->Write(size);
 	pFile->WriteArray(macOutput,NUM_MACHINES);
 	pFile->WriteArray(noteOffset,NUM_MACHINES);
@@ -311,12 +269,13 @@ void DuplicatorMac::SaveSpecificChunk(RiffFile* pFile) const {
 
 std::string Master::_psName = "Master";
 
+float * Master::_pMasterSamples = 0;
+
 Master::Master(MachineCallbacks* callbacks, Machine::id_type id)
 :
 	Machine(callbacks, id),
 	sampleCount(0),
 	decreaseOnClip(false),
-	_pMasterSamples(0),
 	_lMax(0),
 	_rMax(0),
 	_outDry(256)
@@ -360,9 +319,15 @@ void Master::Tick(int /*channel*/, const PatternEvent & data ) {
 }
 
 int Master::GenerateAudio( int numSamples ) {
+	#if PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
+		universalis::processor::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
+	#endif
+
+	//cpu::cycles_type cost(cpu::cycles());
+	
 	//if(!_mute) {
 	
-	float mv = value_mapper::map_256_1(_outDry);
+	float mv = CValueMapper::Map_255_1(_outDry);
 	float *pSamples = _pMasterSamples;
 	float *pSamplesL = _pSamplesL;
 	float *pSamplesR = _pSamplesR;
@@ -383,12 +348,12 @@ int Master::GenerateAudio( int numSamples ) {
 			if(std::fabs(*pSamples = *pSamplesL = *pSamplesL * mv) > _lMax)
 				_lMax = fabsf(*pSamplesL);
 			if(*pSamples > 32767.0f) {
-				_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
-				mv = value_mapper::map_256_1(_outDry);
+				_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesL = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
-				_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
-				mv = value_mapper::map_256_1(_outDry);
+				_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesL = -32767.0f; 
 			}
 			++pSamples;
@@ -397,12 +362,12 @@ int Master::GenerateAudio( int numSamples ) {
 			if(std::fabs(*pSamples = *pSamplesR = *pSamplesR * mv) > _rMax)
 				_rMax = fabsf(*pSamplesR);
 			if(*pSamples > 32767.0f) {
-					_outDry = lround<int>(_outDry * 32767.0f / (*pSamples));
-				mv = value_mapper::map_256_1(_outDry);
+				_outDry = f2i((float)_outDry * 32767.0f / (*pSamples));
+				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesR = 32767.0f; 
 			} else if (*pSamples < -32767.0f) {
-				_outDry = lround<int>(_outDry * -32767.0f / (*pSamples));
-				mv = value_mapper::map_256_1(_outDry);
+				_outDry = f2i((float)_outDry * -32767.0f / (*pSamples));
+				mv = CValueMapper::Map_255_1(_outDry);
 				*pSamples = *pSamplesR = -32767.0f; 
 			}
 			++pSamples;
@@ -442,12 +407,15 @@ int Master::GenerateAudio( int numSamples ) {
 	
 	sampleCount += numSamples;
 	
-	recursive_processed_ = true;
+	//cost = cpu::cycles() - cost;
+	//work_cpu_cost(work_cpu_cost() + cost);
+	
+	_worked = true;
 	return numSamples;
 }
 
 bool Master::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
-	uint32_t size;
+	std::uint32_t size;
 	pFile->Read(size);
 	pFile->Read(_outDry);
 	pFile->Read(decreaseOnClip);
@@ -455,101 +423,10 @@ bool Master::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
 }
 
 void Master::SaveSpecificChunk(RiffFile* pFile) const {
-	uint32_t const size(sizeof _outDry + sizeof decreaseOnClip);
+	std::uint32_t const size(sizeof _outDry + sizeof decreaseOnClip);
 	pFile->Write(size);
 	pFile->Write(_outDry);
 	pFile->Write(decreaseOnClip);
-}
-
-
-/****************************************************************************************************/
-// AudioRecorder
-
-std::string AudioRecorder::_psName = "AudioRecorder";
-
-AudioRecorder::AudioRecorder(MachineCallbacks* callbacks, Machine::id_type id)
-	: Machine(callbacks, id)
-	, _captureidx(0)
-	, _initialized(false)
-	, _gainvol(1.0f)
-	, pleftorig(_pSamplesL)
-	, prightorig(_pSamplesR)
-
-{
-	defineInputAsStereo();
-	defineOutputAsStereo();
-	SetEditName(_psName);
-	//DefineStereoInput(1);
-	//DefineStereoOutput(1);
-	SetAudioRange(32768.0f);
-}
-
-AudioRecorder::~AudioRecorder() throw() {
-	AudioDriver &mydriver = Player::singleton().driver();
-	if (_initialized) mydriver.RemoveCapturePort(_captureidx);
-	_pSamplesL=pleftorig;
-	_pSamplesR=prightorig;
-
-	//DestroyInputs();
-	//DestroyOutputs();
-}
-
-void AudioRecorder::Init(void) {
-	Machine::Init();
-	if(!_initialized) {
-		AudioDriver &mydriver = Player::singleton().driver();
-		mydriver.AddCapturePort(_captureidx);
-		_initialized = true;
-	}
-}
-
-void AudioRecorder::ChangePort(int newport)
-{
-	AudioDriver &mydriver = Player::singleton().driver();
-	if(_initialized) {
-		mydriver.set_opened(false);
-		mydriver.RemoveCapturePort(_captureidx);
-		_initialized=false;
-		_pSamplesL=pleftorig;
-		_pSamplesR=prightorig;
-	}
-	mydriver.AddCapturePort(newport);
-	_captureidx = newport;
-	mydriver.set_started(true);
-	_initialized = true;
-}
-int AudioRecorder::GenerateAudio(int numSamples)
-{
-	if (!_mute &&_initialized)
-	{
-		AudioDriver &mydriver = Player::singleton().driver();
-		mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
-		// prevent crashing if the audio driver is not working.
-		if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
-		helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
-		helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
-		helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-		UpdateVuAndStanbyFlag(numSamples);
-	}
-	else Standby(true);
-	recursive_processed_ = true;
-	return numSamples;
-}
-
-bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
-{
-	uint32_t size;
-	pFile->Read(size); // size of this part params to load
-	pFile->Read(_captureidx);
-	pFile->Read(_gainvol);
-	return true;
-}
-void AudioRecorder::SaveSpecificChunk(RiffFile * pFile) const
-{
-	uint32_t size = sizeof _captureidx+ sizeof _gainvol;
-	pFile->Write(size); // size of this part params to save
-	pFile->Write(_captureidx);
-	pFile->Write(_gainvol);
 }
 
 
@@ -814,11 +691,10 @@ bool LFO::SetParameter(int numparam, int value)
 	else return false;
 }
 
-void LFO::PreWork(int numSamples, bool clear)
+void LFO::PreWork(int numSamples)
 {
-	Machine::PreWork(numSamples, clear);
-
-	cpu_time_clock::time_point const t0(cpu_time_clock::now());
+	Machine::PreWork(numSamples);
+	//cpu::cycles_type cost(cpu::cycles());
 
 	int maxVal=0, minVal=0;
 	int curVal=0, newVal=0;
@@ -857,19 +733,19 @@ void LFO::PreWork(int numSamples, bool clear)
 	lfoPos += (lSpeed/ float(MAX_SPEED)) * (LFO_SIZE/float(minms/float(numSamples)));
 	if(lfoPos>LFO_SIZE) lfoPos-=LFO_SIZE;
 
-	cpu_time_clock::time_point const t1(cpu_time_clock::now());
-	accumulate_processing_time(t1 - t0);
+	//cost = cpu::cycles() - cost;
+	//work_cpu_cost(work_cpu_cost() + cost);
 }
 
 int LFO::GenerateAudio( int numSamples )
 {
-	recursive_processed_ = true;
+	_worked=true;
 	return numSamples;
 }
 
 bool LFO::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 {
-	uint32_t size;
+	std::uint32_t size;
 	pFile->Read(size);
 	pFile->Read(waveform);
 	pFile->Read(lSpeed);
@@ -882,7 +758,7 @@ bool LFO::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 
 void LFO::SaveSpecificChunk(RiffFile* pFile) const
 {
-	uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
+	std::uint32_t const size(sizeof waveform + sizeof lSpeed + sizeof macOutput + sizeof paramOutput + sizeof level + sizeof phase);
 	pFile->Write(size);
 	pFile->Write(waveform);
 	pFile->Write(lSpeed);

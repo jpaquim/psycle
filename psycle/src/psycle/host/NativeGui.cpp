@@ -10,7 +10,7 @@
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 #include "MainFrm.hpp"
 
-#include <psycle/core/machine.h>
+#include "Machine.hpp"
 
 namespace psycle { namespace host {
 
@@ -124,6 +124,20 @@ namespace psycle { namespace host {
 			return true;
 		}
 
+		void CNativeGui::SelectMachine(Machine* pMachine)
+		{
+			_pMachine = pMachine;
+			numParameters = _pMachine->GetNumParams();
+			ncol = _pMachine->GetNumCols();
+			if ( ncol == 0 )
+			{
+				ncol = 1;
+				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
+			}
+			parspercol = numParameters/ncol;
+			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
+		}
+
 		int CNativeGui::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
@@ -141,7 +155,7 @@ namespace psycle { namespace host {
 
 		void CNativeGui::OnTimer(UINT_PTR nIDEvent) 
 		{
-			if ( nIDEvent == 2104+machine().id() )
+			if ( nIDEvent == 2104+machine()._macIndex )
 			{
 				Invalidate(false);
 			}
@@ -153,21 +167,6 @@ namespace psycle { namespace host {
 //			GetParent()->OnSetFocus(pOldWnd);
 			WindowIdle();
 		}
-
-		void CNativeGui::SelectMachine(Machine* pMachine)
-		{
-			_pMachine = pMachine;
-			numParameters = _pMachine->GetNumParams();
-			ncol = _pMachine->GetNumCols();
-			if ( ncol == 0 )
-			{
-				ncol = 1;
-				while ( (numParameters/ncol)*uiSetting().dialheight > ncol*W_ROWWIDTH ) ncol++;
-			}
-			parspercol = numParameters/ncol;
-			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
-		}
-
 
 
 		///////////////////////////////////////////////////////////////////////
@@ -397,9 +396,9 @@ namespace psycle { namespace host {
 				if(Global::configuration()._RecordTweaks)
 				{
 					if(Global::configuration()._RecordMouseTweaksSmooth)
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine().id(), tweakpar, prevval);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweakSlide(machine()._macIndex, tweakpar, prevval);
 					else
-						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine().id(), tweakpar, prevval);
+						((CMainFrame *) theApp.m_pMainWnd)->m_wndView.MousePatternTweak(machine()._macIndex, tweakpar, prevval);
 				}
 //				if(pParamGui)
 //					pParamGui->UpdateNew(index, value);
@@ -426,11 +425,11 @@ namespace psycle { namespace host {
 			{
 				if (nFlags & MK_CONTROL)
 				{
-/*					Global::song().seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
+/*					Global::_pSong->seqBus = MachineIndex;//Global::_pSong->FindBusFromIndex(MachineIndex);
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					Global::song().auxcolSelected=tweakpar;
+					Global::_pSong->auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 */
 				}
@@ -452,7 +451,7 @@ namespace psycle { namespace host {
 						max_v
 						);
 
-					CNewVal dlg(machine().id(),tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
+					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
 //						wndView->AddMacViewUndo();
@@ -476,10 +475,10 @@ namespace psycle { namespace host {
 				case CT_Note:
 					if (!bRepeat){
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+						if ( _pMachine->_mode == MACHMODE_GENERATOR || Global::pConfig->_notesToEffects)
+							Global::pInputHandler->PlayNote(outnote,255,127,true,_pMachine);
 						else
-							Global::pInputHandler->PlayNote(outnote,127,true, 0);
+							Global::pInputHandler->PlayNote(outnote);
 					}
 					break;
 
@@ -503,11 +502,11 @@ namespace psycle { namespace host {
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
+				if ( _pMachine->_mode == MACHMODE_GENERATOR ||Global::pConfig->_notesToEffects)
 				{
-					Global::pInputHandler->StopNote(outnote,true,_pMachine);
+					Global::pInputHandler->StopNote(outnote,255,true,_pMachine);
 				}
-				else Global::pInputHandler->StopNote(outnote,true,NULL);
+				else Global::pInputHandler->StopNote(outnote);
 			}
 
 			//wndView->KeyUp(nChar, nRepCnt, nFlags);

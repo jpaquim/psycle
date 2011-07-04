@@ -4,14 +4,9 @@
 #include "MasterDlg.hpp"
 #include "ChildView.hpp"
 
-#include <psycle/core/internal_machines.h>
-#include <psycle/helpers/dsp.hpp>
+#include "Machine.hpp"
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include <psycle/helpers/dsp.hpp>
 
 namespace psycle { namespace host {
 
@@ -31,10 +26,9 @@ namespace psycle { namespace host {
 		}
 
 		/// master dialog
-		CMasterDlg::CMasterDlg(Master* master, CChildView* pParent) 
-			: CDialog(CMasterDlg::IDD, pParent),
-			  _pMachine(master),
-			  m_pParent(pParent) {
+		CMasterDlg::CMasterDlg(CChildView* pParent, Master* new_master) 
+			: CDialog(CMasterDlg::IDD, pParent), m_pParent(pParent), 
+				_pMachine(new_master){
 			memset(macname,0,sizeof(macname));
 			for (int i = 0; i < 12; ++i) {
 				CVolumeCtrl* slider = new CVolumeCtrl(i);
@@ -46,7 +40,7 @@ namespace psycle { namespace host {
 				CVolumeCtrl* slider = *it;
 				slider->SetRange(0, 832);
 				slider->SetPageSize(96);
-			}		
+			}
 		}
 
 		CMasterDlg::~CMasterDlg() {		
@@ -111,46 +105,12 @@ namespace psycle { namespace host {
 			namesFont.CreatePointFont(80,"Tahoma");
 			m_numbers.LoadBitmap(IDB_MASTERNUMBERS);
 			
-			m_slidermaster.SetRange(0, 832);		
+			m_slidermaster.SetRange(0, 832);
 			m_slidermaster.SetPageSize(96);
 			SetSliderValues();
 			if (((Master*)_pMachine)->decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
-
-/*
-			CWnd *dsk = GetDesktopWindow();
-			CRect rClient, rect, rect2;
-			dsk->GetClientRect(&rClient);
-
-			GetClientRect(&rect);
-			GetWindowRect(&rect2);
-			//Using the previous values, resize the window to the desired sizes.
-			MoveWindow
-				(
-				rClient.Width() / 2 - (rect2.right-rect2.left) / 2,
-				rClient.Height() / 2 - (rect2.bottom-rect2.top) / 2,
-				(rect2.right-rect2.left),
-				(rect2.bottom-rect2.top),
-				true
-				);
-*/
 			return TRUE;
-		}
-
-		void CMasterDlg::CenterWindowOnPoint(int x, int y) {
-			CRect r;
-			GetWindowRect(&r);
-
-			x -= ((r.right-r.left)/2);
-			y -= ((r.bottom-r.top)/2);
-
-			if (x < 0) {
-				x = 0;
-			}
-			if (y < 0) {
-				y = 0;
-			}
-			SetWindowPos( 0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE );
 		}
 
 		void CMasterDlg::SetSliderValues()
@@ -172,7 +132,7 @@ namespace psycle { namespace host {
 
 		void CMasterDlg::OnAutodec() 
 		{
-			if (m_autodec.GetState() &0x0003)
+			if (m_autodec.GetCheck())
 			{
 				_pMachine->decreaseOnClip=true;
 			}
@@ -200,6 +160,7 @@ namespace psycle { namespace host {
 
 		void CMasterDlg::OnCancel()
 		{
+			m_pParent->MasterMachineDialog = NULL;
 			CDialog::OnCancel();
 		}
 
@@ -389,7 +350,7 @@ namespace psycle { namespace host {
 		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) {
 			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
 				m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-			}			
+			}
 			return CDialog::PreTranslateMessage(pMsg);
 		}
 

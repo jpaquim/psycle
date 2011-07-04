@@ -1,65 +1,64 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
-
-///\interface psycle::core::Sampler.
-
-#ifndef PSYCLE__CORE__SAMPLER__INCLUDED
-#define PSYCLE__CORE__SAMPLER__INCLUDED
+///\file
+///\brief interface file for psy::core::Sampler. based on psyclemfc revision 5903
 #pragma once
 
+#include "cstdint.h"
+#include "dsp.h"
+#include "filter.h"
 #include "instrument.h"
 #include "instpreview.h"
 #include "machine.h"
-#include "internalkeys.hpp"
 
-#include <psycle/helpers/dsp.hpp>
-#include <psycle/helpers/filter.hpp>
+namespace psy {
+	namespace core {
 
-namespace psycle { namespace core {
+		#define SAMPLER_MAX_POLYPHONY          16
+		#define SAMPLER_DEFAULT_POLYPHONY      8
 
-	#define SAMPLER_MAX_POLYPHONY          16
-	#define SAMPLER_DEFAULT_POLYPHONY      8
+		#define SAMPLER_CMD_NONE               0x00
+		#define SAMPLER_CMD_PORTAUP            0x01
+		#define SAMPLER_CMD_PORTADOWN          0x02
+		#define SAMPLER_CMD_PORTA2NOTE         0x03
+		#define SAMPLER_CMD_PANNING            0x08
+		#define SAMPLER_CMD_OFFSET             0x09
+		#define SAMPLER_CMD_VOLUME             0x0c
+		#define SAMPLER_CMD_RETRIG             0x15
+		#define SAMPLER_CMD_EXTENDED           0x0e
+		#define SAMPLER_CMD_EXT_NOTEOFF        0xc0
+		#define SAMPLER_CMD_EXT_NOTEDELAY      0xd0
 
-	#define SAMPLER_CMD_NONE               0x00
-	#define SAMPLER_CMD_PORTAUP            0x01
-	#define SAMPLER_CMD_PORTADOWN          0x02
-	#define SAMPLER_CMD_PORTA2NOTE         0x03
-	#define SAMPLER_CMD_PANNING            0x08
-	#define SAMPLER_CMD_OFFSET             0x09
-	#define SAMPLER_CMD_VOLUME             0x0c
-	#define SAMPLER_CMD_RETRIG             0x15
-	#define SAMPLER_CMD_EXTENDED           0x0e
-	#define SAMPLER_CMD_EXT_NOTEOFF        0xc0
-	#define SAMPLER_CMD_EXT_NOTEDELAY      0xd0
+		typedef enum
+		{
+			ENV_OFF = 0,
+			ENV_ATTACK = 1,
+			ENV_DECAY = 2,
+			ENV_SUSTAIN = 3,
+			ENV_RELEASE = 4,
+			ENV_FASTRELEASE = 5
+		}
+		EnvelopeStage;
 
-	enum EnvelopeStage {
-		ENV_OFF = 0,
-		ENV_ATTACK = 1,
-		ENV_DECAY = 2,
-		ENV_SUSTAIN = 3,
-		ENV_RELEASE = 4,
-		ENV_FASTRELEASE = 5
-	};
-
-	class WaveData {
+		class WaveData
+		{
 		public:
 			short* _pL;
 			short* _pR;
 			bool _stereo;
-			int64_t _pos;
-			int64_t _speed;
+			std::int64_t _pos;
+			std::int64_t _speed;
 			bool _loop;
-			uint32_t _loopStart;
-			uint32_t _loopEnd;
-			uint32_t _length;
+			std::uint32_t _loopStart;
+			std::uint32_t _loopEnd;
+			std::uint32_t _length;
 			float _vol;
 			float _lVolDest;
 			float _rVolDest;
 			float _lVolCurr;
 			float _rVolCurr;
-	};
+		};
 
-	class Envelope {
+		class Envelope
+		{
 		public:
 			EnvelopeStage _stage;
 			float _value;
@@ -68,9 +67,10 @@ namespace psycle { namespace core {
 			float _decay;
 			float _sustain;
 			float _release;
-	};
+		};
 
-	class Voice {
+		class Voice
+		{
 		public:
 			Envelope _filterEnv;
 			Envelope _envelope;
@@ -79,7 +79,7 @@ namespace psycle { namespace core {
 			int _triggerNoteDelay;
 			int _instrument;
 			WaveData _wave;
-			psycle::helpers::dsp::Filter _filter;
+			dsp::Filter _filter;
 			int _cutoff;
 			float _coModify;
 			int _channel;
@@ -90,13 +90,13 @@ namespace psycle { namespace core {
 			int effretTicks;
 			float effretVol;
 			int effOld;
-	};
+		};
 
-	/// sampler.
-	class PSYCLE__CORE__DECL Sampler : public Machine {
+		/// sampler.
+		class Sampler : public Machine
+		{
 		protected:
 			Sampler(MachineCallbacks* callbacks, Machine::id_type id); friend class InternalHost;
-
 		public:
 			void Tick( );
 
@@ -105,7 +105,7 @@ namespace psycle { namespace core {
 			virtual void SetSampleRate(int sr);
 			virtual void Stop();
 			virtual void Tick(int channel, const PatternEvent & data );
-			virtual const MachineKey& getMachineKey() const { return InternalKeys::sampler; }
+			virtual MachineKey getMachineKey() const { return MachineKey::sampler(); }
 			virtual std::string GetName() const { return _psName; }
 			/// Loader for psycle fileformat version 2.
 			virtual bool LoadPsy2FileFormat(RiffFile* pFile);
@@ -113,26 +113,25 @@ namespace psycle { namespace core {
 			virtual void SaveSpecificChunk(RiffFile* pFile) const;
 			void Update();
 
-		///\name wave file previewing
-		///\{
-			public:
-				//todo these ought to be dynamically allocated
-				/// Wave preview.
-				static InstPreview wavprev;
-				/// Wave editor playback.
-				///\todo: two previews???
-				static InstPreview waved;
-				/// runs the wave previewing.
-				static void DoPreviews(int amount, float* pLeft, float* pRight);
-		///\}
+			///\name wave file previewing
+			///\{
+		public:
+			//todo these ought to be dynamically allocated
+			/// Wave preview.
+			static InstPreview wavprev;
+			/// Wave editor playback.
+			///\todo: two previews???
+			static InstPreview waved;
+			/// runs the wave previewing.
+			static void DoPreviews(int amount, float* pLeft, float* pRight);
+			///\}
 
 		protected:
-			static std::string _psName;
 
-		public:
+			static std::string _psName;
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			psycle::helpers::dsp::cubic_resampler resampler_;
+			dsp::Cubic _resampler;
 
 			void PerformFx(int voice);
 			void VoiceWork( int startSample, int numsamples, int voice );
@@ -142,7 +141,6 @@ namespace psycle { namespace core {
 			inline void TickEnvelope( int voice );
 			inline void TickFilterEnvelope( int voice );
 			Instrument::id_type lastInstrument[MAX_TRACKS];
-	};
-
-}}
-#endif
+		};
+	}
+}

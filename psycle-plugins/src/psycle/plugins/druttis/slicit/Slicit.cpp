@@ -8,16 +8,13 @@
 #include <psycle/plugin_interface.hpp>
 #include <cstring>
 #include <cmath>
-#include <cstdio>
 #include "../dsp/Inertia.h"
-
-using namespace psycle::plugin_interface;
 
 //============================================================================
 //				Defines
 //============================================================================
 #define MAC_NAME				"Slicit"
-int const MAC_VERSION = 0x0100;
+#define MAC_VERSION				"1.0"
 #define MAC_AUTHOR				"Druttis"
 
 //============================================================================
@@ -30,7 +27,7 @@ int const MAC_VERSION = 0x0100;
 #define FTYPE_1P_LP 1
 #define FTYPE_1P_HP 2
 
-char const *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
+char *FTYPE_STRING[3] = { "off", "1-Pole LP", "1-Pole HP" };
 
 int SPEED_FACTORS[4] = { 1, 2, 4, 8 };
 
@@ -360,16 +357,15 @@ struct PROG
 //============================================================================
 //				Machine info
 //============================================================================
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,
-	0x0100,
 	EFFECT,
-	sizeof pParams / sizeof *pParams,
+	NUM_PARAMS,
 	pParams,
 #ifdef _DEBUG
-	MAC_NAME " (Debug)",
+	MAC_NAME " " MAC_VERSION " (Debug)",
 #else
-	MAC_NAME,
+	MAC_NAME " " MAC_VERSION,
 #endif
 	MAC_NAME,
 	MAC_AUTHOR " on " __DATE__,
@@ -478,7 +474,7 @@ public:
 	float				m_out[2][2];
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -488,7 +484,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[NUM_PARAMS];
 	m_programs = new PROG[NUM_PROGRAMS];
 	Init();
 }
@@ -502,8 +498,8 @@ mi::mi()
 mi::~mi()
 {
 	Stop();
-	delete[] m_programs;
-	delete[] Vals;
+	delete m_programs;
+	delete Vals;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -632,7 +628,7 @@ void mi::Command()
 		"Greetz to all psycle doods!\n\n"
 		"---------------------------\n"
 		"druttis@darkface.pp.se\n",
-		MAC_AUTHOR " " MAC_NAME,
+		MAC_AUTHOR " " MAC_NAME " v." MAC_VERSION,
 		0
 	);
 }

@@ -2,15 +2,10 @@
 ///\brief interface file for psycle::host::InputHandler.
 #pragma once
 #include "Psycle.hpp"
-
-namespace psycle {
-	namespace core {
-		class Machine;
-	}
-
-	namespace host {
-		using namespace core;
-
+namespace psycle
+{
+	namespace host
+	{
 		///\name key modifiers
 		///\{
 		/// shift
@@ -26,11 +21,13 @@ namespace psycle {
 		/// ???
 		const int max_cmds = 1024;
 
+		class Machine;
 		class CChildView;
 		class CMainFrame;
 
 		/// command types
-		enum CmdType {
+		enum CmdType
+		{
 			CT_Null,
 			CT_Note,
 			CT_Editor,
@@ -454,18 +451,10 @@ namespace psycle {
 		/// input handler, keyboard configuration.
 		class InputHandler  
 		{
-		private:
+		public:
 			/// constructor.
 			InputHandler();
 			virtual ~InputHandler();
-
-		public:
-			static InputHandler& instance() {	
-				static InputHandler handler;
-				return handler; 
-			}
-
-
 			void BuildCmdLUT();
 		private:
 			/// get key modifier index.
@@ -507,9 +496,9 @@ namespace psycle {
 			/// .
 			bool EnterData(UINT nChar,UINT nFlags);
 			/// .
-			void PlayNote(int note,int velocity=127,bool bTranspose=true,Machine*pMachine=NULL);
+			void PlayNote(int note,int instr=255, int velocity=127,bool bTranspose=true,Machine*pMachine=NULL);
 			/// .
-			void StopNote(int note,bool bTranspose=true,Machine*pMachine=NULL);
+			void StopNote(int note,int instr=255, bool bTranspose=true,Machine*pMachine=NULL);
 			///\}
 
 			void Stop();
@@ -519,12 +508,12 @@ namespace psycle {
 			///\name store/load
 			///\{
 			/// .
-			inline bool SetCmd(CmdSet cset, int key, UINT modifiers,bool checkforduplicates=true)
+			inline bool SetCmd(CmdSet cset, UINT key, UINT modifiers,bool checkforduplicates=true)
 			{
 				CmdDef cmd(cset);
 				return SetCmd(cmd,key,modifiers,checkforduplicates);
 			}
-			bool SetCmd(CmdDef &cmd, int key, UINT modifiers,bool checkforduplicates=true);
+			bool SetCmd(CmdDef &cmd, UINT key, UINT modifiers,bool checkforduplicates=true);
 			/// .
 			bool ConfigSave();
 			/// .
@@ -552,12 +541,12 @@ namespace psycle {
 
 			/// multi-key playback state stuff
 			int notetrack[MAX_TRACKS]; 
+			int instrtrack[MAX_TRACKS]; 
 			/// last track output to	
 			int outtrack;
 
 			/// LUT for command data
 			CmdDef cmdLUT[MOD_MAX][256];		
 		};
-
-	}	// namespace host
-}	// namespace psycle
+	}
+}

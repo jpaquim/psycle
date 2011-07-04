@@ -1,10 +1,3 @@
-[:Team:]
-Current development team
-
-Josh Green
-Pedro Lopez-Cabanillas
-David Henningsson
-
 
 [:Idea:]
 
@@ -13,34 +6,35 @@ David Henningsson
 
 [:Development:]
 
-Many people contributed to FluidSynth, sent suggestions or bug
+Many people contributed to FluidSynth, send suggestions or bug
 fixes. The project was started by Peter Hanappe who is the main
 author. Josh Green is the current maintainer. Below you'll find a
-summary of contributions.
+summery of contributions.
 
 
-* Peter Hanappe. Initiated the project. files: stuck his nose in all
+* Peter Hanappe. Initiated the project. files: sticked his nose in all
   files.
 
 * Josh Green is the current maintainer and contributed a lot of code
   directly or indirectly through the Swami and Smurf code base.
   The SoundFont loader is completely based on his code. He also wrote
   the alsa sequencer driver. He made many changes and bug fixes,
-  but above all, he's one of the driving forces behind the synthesizer.
+  but above all, he's one of the driver forces behind the synthesizer.
   He also created the current FluidSynth graphic logo with Blender
   (the blue waves with FluidSynth letters partially submerged).
-
-* Markus Nentwig (re-)designed the resonant filter, the chorus, the
-  LADSPA subsystem, the MIDI router, optimized for SSE, made many
-  changes and bug fixes and got the synthesizer to actually work. Most
-  importantly, he used it on stage to make music.
-
-* S. Christian Collins did much testing of FluidSynth in regards to
-  EMU10K1 compatibility and provided many synthesis fixes in that regard.
+  files: iiwu_defsfont.{c,h}, iiwu_alsa{c,h} and others.
 
 * Stephane Letz from Grame wrote most of the MidiShare driver, all of
   the PortAudio driver, ported iiwusynth to MacOS X, and sent in many
   fixes. files: iiwu_midishare.c, iiwu_portaudio.c
+
+* Markus Nentwig (re-)designed the resonant filter, the chorus, the
+  LADSPA subsystem, the MIDI router, optimized for SSE, made many
+  changes and bug fixes and got the synthesizer to actually work. Most
+  importantly, he used it on stage to make music.  files:
+  iiwu_ladspa.{c,h}, iiwu_cmd.{c,h}, iiwu_voice.{c,h}, iiwu_synth.c,
+  iiwu_sse.h, iiwu_dsp_core.h, iiwu_rev.{c,h}, and basically all the
+  other files.
 
 * Antoine Schmitt added the sequencer support, support for sample
   loading (RAM Sfont), developed the
@@ -72,11 +66,9 @@ summary of contributions.
   to make iiwusynth independent from any library for maximum
   portability.
 
-* David Henningsson added code for fast rendering of MIDI files, 
-  rewrote the thread safety for 1.1.2, and fixed many bugs.
-
 * The midi device uses code from jMax's alsarawmidi.c file and from
-  Smurf's midi_alsaraw.c by Josh Green.  file: iiwu_alsa.c
+  Smurf's midi_alsaraw.c by Josh Green. Josh also added support for
+  the alsa sequencer interface. file: iiwu_alsa.c
 
 * The reverb algorithm was written by Jezar
   (http://www.dreampoint.co.uk). His code is public domain. The code
@@ -90,8 +82,8 @@ summary of contributions.
 * Ebrahim Mayat made big efforts for compiling and running FluidSynth
   on MacOS X. He also wrote the README-OSX file.
 
-* Martin UddÃ©n's midi package was used. His files are integrated into
-  the iiwu_midi file. Martin UddÃ©n <nanook@lysator.liu.se> file:
+* Martin Uddén's midi package was used. His files are integrated into
+  the iiwu_midi file. Martin Uddén <nanook@lysator.liu.se> file:
   iiwu_midi.c
 
 * Ken Ellinwood send in a patch to add bank offsets to SoundFonts. An
@@ -107,13 +99,7 @@ summary of contributions.
   signed integer type). Mozilla NSPR library, www.mozilla.org.  file:
   iiwu_phase.h
 
-* KO Myung-Hun for OS/2 support with Dart audio driver.
-
-* Pedro Lopez-Cabanillas wrote the CoreMIDI driver for MacOSX, the CMake based 
-  build system, revised the doxygen documentation, sequencer examples, fixes.
-
-* Growing list of individuals who contributed bug fixes, corrections and minor features:
-Nicolas Boulicault for ALSA sequencer midi.portname setting.
+* Growing list of individuals who contributed bug fixes and corrections:
 Werner Schweer
 Dave Philips
 Anthony Green
@@ -127,11 +113,5 @@ Takashi Iwai
 Bob Ham
 Gerald Pye
 Rui Nuno Capela
-Frieder BÃ¼rzele
+Frieder Bürzele
 Henri Manson
-Mihail Zenkov
-Paul Millar
-Nick Daly
-David Hilvert
-Bernat Arlandis i MaÃ±Ã³
-Sven Meier

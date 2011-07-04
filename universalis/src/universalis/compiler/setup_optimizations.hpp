@@ -1,5 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+
+///\file
 
 #ifndef UNIVERSALIS__COMPILER__SETUP_OPTIMIZATIONS__INCLUDED
 #define UNIVERSALIS__COMPILER__SETUP_OPTIMIZATIONS__INCLUDED
@@ -7,8 +9,8 @@
 
 #include <diversalis.hpp>
 
-#ifdef DIVERSALIS__COMPILER__MICROSOFT
-	#ifdef NDEBUG // if no dedug
+#if defined DIVERSALIS__COMPILER__MICROSOFT
+	#if defined NDEBUG // if no dedug
 		#if defined UNIVERSALIS__COMPILER__VERBOSE
 			#pragma message("universalis::compiler:: setting optimizations on ; (" __FILE__ ")")
 		#endif

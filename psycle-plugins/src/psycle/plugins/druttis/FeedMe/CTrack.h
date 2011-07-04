@@ -6,9 +6,10 @@
 //
 //============================================================================
 #pragma once
-#include "../dsp/CDsp.h"
-#include "../dsp/CEnvelope.h"
-#include "../dsp/wtfmlib.h"
+#include "../CDsp.h"
+#include "../DspMath.h"
+#include "../CEnvelope.h"
+#include "../wtfmlib.h"
 //============================================================================
 //				Defines
 //============================================================================
@@ -20,60 +21,33 @@
 //============================================================================
 struct TRACKDATA
 {
-	// current sampling rate.
-	int					samplingrate;
-	//	Index of the waveform table
-	int					waveform;
-	// unary fraction of feedback
+	//				Just some info
+	int								samplingrate;
+	//				The actual track info
+	int								waveform;
 	afloat				feedback;
-	// Index of overtone table
-	int					overtype;
-	// phase offset for the left channel. It is automated directly in the CTrack's work funcion!
-	// scale 0 to WAVESIZE-1
+	int								overtype;
 	afloat				phase;
-	//todo: afloat?
 	float				chorus;
-	// Index of the waveform table
-	int					distform;
-	// unary fraction of distortion amount.
+	int								distform;
 	afloat				distortion;
-	// amplitude attack time in samples
-	int					attack;
-	// amplitude release time in samples
-	int					release;
-	//todo: afloat?
-	// unary fraction of amplitude of the waveform
+	float				attack;
+	float				release;
 	float				amplitude;
-	// speed (amount of samples to increase per sample to increase vibrato_pos)  multiplied by GLOBAL_TICKS
 	float				vibrato_rate;
-	//todo: afloat?
-	// unary fraction of amplitude of the vibrato.
 	float				vibrato_amount;
-	// Vibrato attack time in samples divided by GLOBAL_TICKS
-	int					vibrato_delay;
-	// filter attack time in samples  divided by GLOBAL_TICKS
-	int					vcf_attack;
-	// filter decay time in samples  divided by GLOBAL_TICKS
-	int					vcf_decay;
-	// unary fraction of filter amplitude at sustain point.
+	float				vibrato_delay;
+	float				vcf_attack;
+	float				vcf_decay;
 	float				vcf_sustain;
-	// filter release time in samples  divided by GLOBAL_TICKS
-	int					vcf_release;
-	//todo: not afloat?
-	// unary fraction of filter envelope amount.
+	float				vcf_release;
 	afloat				vcf_amount;
-	// index of filter type
-	int					filter_type;
-	// unary fraction of filter frequency, at current samplerate
+	int								filter_type;
 	afloat				filter_freq;
-	// unary fraction of filter ressonance.
 	afloat				filter_res;
-	// samples of param change inertia, divided by GLOBAL_TICKS
-	int					inertia;
-	// note cut delay time in samples divided by GLOBAL_TICKS
-	int					note_cut;
-	// sync_mode bitwise operator.
-	int					sync_mode;
+	float				inertia;
+	int								note_cut;
+	int								sync_mode;
 };
 //============================================================================
 //				CTrack class
@@ -91,50 +65,42 @@ private:
 	//------------------------------------------------------------------------
 	//				Globals
 public:
-	TRACKDATA*					globals;
+	TRACKDATA								*globals;
 	//				Osc 1
-	// floating point position of the left channel, in samples.
-	float						osc1_pos;
-	// speed (amount of samples per sample to increase osc1_pos)
-	float						osc1_speed;
-	// target speed (used in conjunction with slide)
-	float						osc1_target_speed;
-	// overtones output buffers
-	float						osc1_out[MAX_OVERTONES + 1];
+	float												osc1_time;
+	float												osc1_speed;
+	float												osc1_target_speed;
+	float												osc1_out[MAX_OVERTONES + 1];
 	//				Osc 2
-	// floating point position of the right channel, in samples.
-	float						osc2_pos;
-	// speed (amount of samples per sample to increase osc2_pos)
-	float						osc2_speed;
-	// target speed (used in conjunction with slide)
-	float						osc2_target_speed;
-	// overtones output buffers
-	float						osc2_out[MAX_OVERTONES + 1];
-	// unary fraction of how much to increase oscx_speed to reach osc2_target. (each GLOBAL_TICKS samples)
-	float						slide_speed;
+	float												osc2_time;
+	float												osc2_speed;
+	float												osc2_target_speed;
+	float												osc2_out[MAX_OVERTONES + 1];
+	//
+	float												slide_speed;
 	//				Vibrato
-	// floating point position of the vibrato osci, in samples.
-	float						vibrato_pos;
-	// speed of the vibrato for osc1 (to add to osc1_speed)
-	float						vibrato_osc1_speed;
-	// speed of the vibrato for osc2 (to add to osc2_speed)
-	float						vibrato_osc2_speed;
-	//	amount of vibrato (used by the vibrato attack time).
-	float						vibrato_dtime;
+	float												vibrato_time;
+	float												vibrato_osc1_speed;
+	float												vibrato_osc2_speed;
+	float												vibrato_dtime;
+	//				Velocity
+	float												velocity;
 	//				VCA
-	// amplitude envelope
-	CEnvelope					vca_env;
+	CEnvelope								vca_env;
 	//				VCF & filter
-	// filter envelope
-	CEnvelope					vcf_env;
-	FILTER						vcf_data1;
-	FILTER						vcf_data2;
-	//	scaled amplitude multiplier, prepared for direct output
-	float						amplitude;
-	// amount of samples before note cut divided by GLOBAL_TICKS.
-	int							note_cut;
-	//	amount of samples before the next recalculation of variables.
-	int							ticks_remaining;
+	CEnvelope								vcf_env;
+	FILTER												vcf_data1;
+	FILTER												vcf_data2;
+	//				Phase
+	float												phase_time;
+	//				Amplitude (scaled for output)
+	float												amplitude;
+	//
+	int																note_cut;
+	//				Work variables
+	float												vibrato_out;
+	float												vcf_out;
+	int																ticks_remaining;
 	//------------------------------------------------------------------------
 	//				Methods
 	//------------------------------------------------------------------------
@@ -145,22 +111,8 @@ public:
 	static void Destroy();
 	void Stop();
 	void NoteOff();
-	void NoteOn(int note, int volume, bool slide=false);
-	//------------------------------------------------------------------------
-	//				Setup slide
-	//------------------------------------------------------------------------
-	void SetFreq(int note)
-	{
-		osc1_target_speed = CDsp::GetIncrement((float) (note - globals->chorus), WAVESIZE, globals->samplingrate);
-		osc2_target_speed = CDsp::GetIncrement((float) (note + globals->chorus), WAVESIZE, globals->samplingrate);
-	}
-	//------------------------------------------------------------------------
-	//				IsFinished
-	//------------------------------------------------------------------------
-	inline bool IsFinished()
-	{
-		return vca_env.IsFinished();
-	}
+	void NoteOn(int note, int volume);
+//				void Work(float *psamplesleft, float *psamplesright, int numsamples);
 	//------------------------------------------------------------------------
 	//				GetSampleExp with overtones and feedback
 	//------------------------------------------------------------------------
@@ -215,7 +167,21 @@ public:
 		}
 		return out * overtonemults[type];
 	}
-
+	//------------------------------------------------------------------------
+	//				Setup slide
+	//------------------------------------------------------------------------
+	void SetFreq(int note)
+	{
+		osc1_target_speed = CDsp::GetFreq((float) (note - globals->chorus), WAVESIZE, globals->samplingrate);
+		osc2_target_speed = CDsp::GetFreq((float) (note + globals->chorus), WAVESIZE, globals->samplingrate);
+	}
+	//------------------------------------------------------------------------
+	//				IsFinished
+	//------------------------------------------------------------------------
+	inline bool IsFinished()
+	{
+		return vca_env.IsFinished();
+	}
 	//============================================================================
 	//				Work
 	//============================================================================
@@ -223,35 +189,38 @@ public:
 	{
 		//
 		//
-		float vca_out;
-		// current speed, with vibrato
-		float osc1_spd;
-		// current speed, with vibrato
-		float osc2_spd;
-		// current position of osc2, with the offset.
-		float osc2_tme;
-		// Amount of vibrato currently being applied.
-		float vibrato_out;
-		int amount;
+		static float vca_out;
+		static float osc1_spd;
+		static float osc2_spd;
+		static float osc2_tme;
+		static int amount;
 		register int nsamples;
-		float dist;
-		float dist2;
-		float ndis;
+		static float dist;
+		static float dist2;
+		static float ndis;
 		register float *pleft;
 		register float *pright;
-		float out1[256];
-		float out2[256];
-
+		static float out1[256]; //GLOBAL_TICKS];
+		static float out2[256]; //GLOBAL_TICKS];
+		//
+		//				Waveform
 		float *pwaveform = wavetable[globals->waveform];
+		if (!pwaveform)
+			return;
+		//
+		//				Distform
 		float *pdistform = wavetable[globals->distform];
-
+		if (!pdistform)
+			return;
+		//
+		//				Loop
 		do {
 			//
-			//	Tick handling
+			//				Tick handling
 			if (!ticks_remaining) {
 				ticks_remaining = GLOBAL_TICKS;
 				//
-				//	Handle note cut
+				//				Handle note cut
 				if (note_cut > 0) {
 					note_cut--;
 					if (!note_cut) {
@@ -259,7 +228,7 @@ public:
 					}
 				}
 				//
-				//	Vibrato
+				//				Vibrato
 				if (globals->vibrato_delay == 0.0f) {
 					vibrato_out = 1.0f;
 				} else {
@@ -270,21 +239,21 @@ public:
 							vibrato_dtime = 1.0f;
 					}
 				}
-				vibrato_out *= globals->vibrato_amount * GetWTSample(wavetable[0], vibrato_pos);
-				vibrato_pos += globals->vibrato_rate;
-				while (vibrato_pos >= WAVESIZE)
-					vibrato_pos -= WAVESIZE;
+				vibrato_out *= globals->vibrato_amount * GetWTSample(wavetable[0], vibrato_time);
+				vibrato_time += globals->vibrato_rate;
+				while (vibrato_time >= WAVESIZE)
+					vibrato_time -= WAVESIZE;
 				//
-				//	Vibrato -> Freq
+				//				Vibrato -> Freq
 				vibrato_osc1_speed = vibrato_out * osc1_speed * 0.125f;
 				vibrato_osc2_speed = vibrato_out * osc2_speed * 0.125f;
 				//
-				//	Filter
-				float vcf_out = vcf_env.Next() * globals->vcf_amount.current;
+				//				Filter
+				vcf_out = vcf_env.Next() * globals->vcf_amount.current;
 				CDsp::InitFilter(&vcf_data1, globals->filter_freq.current + vcf_out, globals->filter_res.current);
 				CDsp::InitFilter(&vcf_data2, globals->filter_freq.current + vcf_out, globals->filter_res.current);
 				//
-				//	Slide
+				//				Slide
 				if (osc1_speed != osc1_target_speed) {
 					float dest = (osc1_target_speed - osc1_speed) * slide_speed;
 					osc1_speed += dest;
@@ -293,34 +262,34 @@ public:
 				}
 			}
 			//
-			//	Compute samples to render this iteration
+			//				Compute samples to render this iteration
 			amount = numsamples;
 			if (amount > ticks_remaining)
 				amount = ticks_remaining;
 			numsamples -= amount;
 			ticks_remaining -= amount;
 			//
-			//	Oscilators
+			//				Oscilators
 			osc1_spd = osc1_speed + vibrato_osc1_speed;
 			osc2_spd = osc2_speed + vibrato_osc2_speed;
-			osc2_tme = osc2_pos + globals->phase.current;
+			//				Phase
+			osc2_tme = osc2_time + globals->phase.current;
 			//
 			pleft = out1 - 1;
 			pright = out2 - 1;
 			nsamples = amount;
 			do
 			{
-				*++pleft = GetSample(pwaveform, globals->overtype, osc1_out, globals->feedback.current, osc1_pos);
+				*++pleft = GetSample(pwaveform, globals->overtype, osc1_out, globals->feedback.current, osc1_time);
 				*++pright = GetSample(pwaveform, globals->overtype, osc2_out, globals->feedback.current, osc2_tme);
-
-				osc1_pos += osc1_spd;
+				osc1_time += osc1_spd;
 				osc2_tme += osc2_spd;
 			}
 			while (--nsamples);
 			//
-			osc2_pos = osc2_tme - globals->phase.current;
+			osc2_time = osc2_tme - globals->phase.current;
 			//
-			//	Distort
+			//				Distort
 			dist = globals->distortion.current;
 			dist2 = dist * WAVESIZE;
 			ndis = 1.0f - dist;
@@ -335,7 +304,7 @@ public:
 				*pright = *pright * ndis + GetWTSample(pdistform, *pright * dist2) * dist;
 			} while (--nsamples);
 			//
-			//	Filter
+			//				Filter
 			switch (globals->filter_type)
 			{
 				case 0:
@@ -360,7 +329,7 @@ public:
 					break;
 			}
 			//
-			//	Amplify & Output
+			//				Amplify & Output
 			pleft = out1 - 1;
 			pright = out2 - 1;
 			nsamples = amount;
@@ -374,10 +343,10 @@ public:
 		}
 		while (numsamples);
 		//
-		//	Limit OSC times
-		while (osc1_pos >= WAVESIZE)
-			osc1_pos -= WAVESIZE;
-		while (osc2_pos >= WAVESIZE)
-			osc2_pos -= WAVESIZE;
+		//				Limit OSC times
+		while (osc1_time >= WAVESIZE)
+			osc1_time -= WAVESIZE;
+		while (osc2_time >= WAVESIZE)
+			osc2_time -= WAVESIZE;
 	}
 };

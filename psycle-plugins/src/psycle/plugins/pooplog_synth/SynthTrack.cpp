@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////
 #include <cmath>
 #include "SynthTrack.h"
-#include <psycle/plugin_interface.hpp>
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -495,7 +494,7 @@ void CSynthTrack::PerformFx()
 		note_delay_counter++;
 		if (note_delay_counter >=note_delay)
 		{
-			if (note<=psycle::plugin_interface::NOTE_MAX)
+			if (note<120)
 			{
 				NoteOn(note,0,0);
 			}
@@ -510,7 +509,7 @@ void CSynthTrack::PerformFx()
 		note_delay_counter++;
 		if (note_delay_counter >=note_delay)
 		{
-			if (note<=psycle::plugin_interface::NOTE_MAX)
+			if (note<120)
 			{
 				NoteOn(note,0,0);
 			}

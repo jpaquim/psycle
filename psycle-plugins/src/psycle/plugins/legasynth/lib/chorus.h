@@ -2,70 +2,68 @@
 // Dmitry "Sartorius" Kulikov LegaSynth plugins for PSYCLE
 
 /***************************************************************************
-                          chorus.h  -  description
-                             -------------------
-    begin                : Wed Jul 17 2002
-    copyright            : (C) 2002 by red
-    email                : red@server
- ***************************************************************************/
+							chorus.h  -  description
+								-------------------
+	begin                : Wed Jul 17 2002
+	copyright            : (C) 2002 by red
+	email                : red@server
+	***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version.                                   *
+	*                                                                         *
+	***************************************************************************/
 
 #ifndef CHORUS_H
 #define CHORUS_H
 
 #include <vector>
-#define INITIAL_BUFFER_SIZE 8192
-
-#ifndef M_PI
-	#define M_PI 3.14159265359
-#endif
-
+#define BUFFER_SIZE 30000
+#define M_PI 3.14159265359f
 /**
-  *@author red
-  */
+	*@author red
+	*/
+
 class Chorus {
 
-public:
-	// Instance process: Create one with new or variable declaration, and call set_mixfreq before any other call.
-	Chorus();
-	~Chorus();
+		float delay;
+		float lfo_speed;
+	float lfo_depth;
+	float feedback;
+		float width;
+	
+		int index; //osc index
+	int ring_buffer_index;
 
-	void set_mixfreq(int i_mixfreq_hz);
+	//std::vector<float> ringbuffer_l;
+	//std::vector<float> ringbuffer_r;
+	std::vector<int> ringbuffer_l;
+	std::vector<int> ringbuffer_r;
+
+	int mixfreq;
+	
+public:
+
+	void set_mixfreq(int p_mixfreq);
 
 	void process(float *p_lest,float *p_right,int p_amount);
+	//void process(int *p_lest,int *p_right,int p_amount);
 
-	void set_delay(float idelay_ms);
-	void set_lfo_speed(float ilfo_speed_hz);
-	void set_lfo_depth(float ilfo_depth_ms);
-	void set_feedback(float ifeedback_100);
-	void set_width(float iwidth_100);
-private:
-	void recalc_delay();
-	float mixfreq_hz;
+	//void set_chorus_params(float p_delay, float p_lfo_speed, float p_lfo_depth, float p_feedback, float p_width);
+	void set_delay(float p_delay);
+	void set_lfo_speed(float p_lfo_speed);
+	void set_lfo_depth(float p_lfo_depth);
+	void set_feedback(float p_feedback);
+	void set_width(float p_width);
+
+	//void get_chorus_params(float &p_delay, float &p_lfo_speed, float &p_lfo_depth, float &p_feedback, float &p_width);
 		
-	float delay_ms;
-	float lfo_speed_hz;
-	float lfo_depth_ms;
-	float feedback_1;
-	float width_1;
-
-	float delay_samples;
-	float depth_samples;
-  
-	int lfo_index; //lfo osc index
-	int write_index; //write index.
-
-	std::vector<float> ringbuffer_l;
-	std::vector<float> ringbuffer_r;
-
+	Chorus();
+	~Chorus();
 };
 
 #endif

@@ -46,8 +46,11 @@ int Inertia::GetLength()
 //////////////////////////////////////////////////////////////////////
 void Inertia::SetLength(int length)
 {
-	m_length = length;
-	Update();
+//	if (length != m_length)
+//	{
+		m_length = length;
+		Update();
+//	}
 }
 //////////////////////////////////////////////////////////////////////
 //
@@ -65,8 +68,11 @@ float Inertia::GetTarget()
 //////////////////////////////////////////////////////////////////////
 void Inertia::SetTarget(float target)
 {
-	m_target = target;
-	Update();
+//	if (target != m_target)
+//	{
+		m_target = target;
+		Update();
+//	}
 }
 //////////////////////////////////////////////////////////////////////
 //
@@ -152,10 +158,11 @@ void Inertia::Fill(float *pbuf, float mul, int nsamples)
 			}
 			while (amt > 2);
 		}
-		while (amt--)
+		do
 		{
 			*++pbuf = Next() * mul;
 		}
+		while (--amt);
 	}
 	while (nsamples);
 }

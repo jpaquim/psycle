@@ -3,7 +3,6 @@
 
 #include "InterpolateCurveDlg.hpp"
 
-#include <psycle/helpers/hexstring_to_integer.hpp>
 
 namespace psycle { namespace host {
 
@@ -14,6 +13,7 @@ namespace psycle { namespace host {
 			, linesperbeat(_linesperbeat)
 			, selectedGPoint(0)
 			, bDragging(false)
+			, y_range(65535)
 		{
 			kf = new keyframesstruct[numLines];
 			kfresult = new int[numLines];
@@ -42,6 +42,8 @@ namespace psycle { namespace host {
 			CDialog::DoDataExchange(pDX);
 			DDX_Control(pDX, IDC_POS, m_Pos);
 			DDX_Control(pDX, IDC_VAL, m_Value);
+			DDX_Control(pDX, IDC_INTER_MIN, m_Min);
+			DDX_Control(pDX, IDC_INTER_MAX, m_Max);
 			DDX_Control(pDX, IDC_CURVE_TYPE, m_CurveType);
 			DDX_Control(pDX, IDC_COMBOTWK, m_combotwk);
 			DDX_Control(pDX, IDC_CHECKTWK, m_checktwk);
@@ -57,6 +59,8 @@ namespace psycle { namespace host {
 			ON_CBN_SELENDOK(IDC_CURVE_TYPE, OnSelendokCurveType)
 			ON_EN_KILLFOCUS(IDC_POS, OnEnKillfocusPos)
 			ON_EN_KILLFOCUS(IDC_VAL, OnEnKillfocusVal)
+			ON_EN_KILLFOCUS(IDC_INTER_MIN, OnEnKillfocusMin)
+			ON_EN_KILLFOCUS(IDC_INTER_MAX, OnEnKillfocusMax)
 			ON_BN_CLICKED(IDC_CHECKTWK, OnBnClickedChecktwk)
 		END_MESSAGE_MAP()
 		
@@ -70,17 +74,18 @@ namespace psycle { namespace host {
 			m_CurveType.AddString ("All to Linear");
 			m_CurveType.AddString ("All to Hermite");
 			m_CurveType.SetCurSel (1);
-
 			//determine scaling factor
 			GetClientRect(&grapharea);
 			AdjustRectToView(grapharea);
 			xscale = (grapharea.right - grapharea.left) / float(numLines-1);
 			xoffset = (float(grapharea.right - grapharea.left) - (xscale*(numLines-1)))/2.0f;
-			yscale = (grapharea.bottom - grapharea.top) / float(65535); ///total height divided by max param value.
+			yscale = (grapharea.bottom - grapharea.top) / float(y_range); ///total height divided by max param value.
 			grapharea.left+=xoffset;grapharea.right-=xoffset;
 
 			SetPosText(0);
 			SetValText(kf[0].value);
+			SetMinText(min_val);
+			SetMaxText(max_val);
 			if (kftwk != -1)
 			{
 				m_checktwk.SetCheck(1);
@@ -100,16 +105,22 @@ namespace psycle { namespace host {
 		}
 
 		// Assign array of values to the curve dialog.
-		void CInterpolateCurve::AssignInitialValues(int* values,int commandtype)
+		void CInterpolateCurve::AssignInitialValues(int* values,int commandtype, int minval, int maxval)
 		{
+			kftwk = commandtype;
+			min_val = minval;
+			max_val = maxval;
+			y_range = maxval-minval;
 			for (int i(0); i< numLines; ++i)
 			{
 				if (values[i] != -1)
 				{
 					kf[i].value=values[i];
 				}
+				//This ensures the default values are within range
+				if (kf[i].value != -1 && kf[i].value < minval) kf[i].value=minval;
+				else if(kf[i].value>maxval)kf[i].value=maxval;
 			}
-			kftwk = commandtype;
 		}
 
 		void CInterpolateCurve::OnOk()
@@ -152,7 +163,7 @@ namespace psycle { namespace host {
 		{
 			RECT pointrect;
 			int x = grapharea.left + int(xscale * i);
-			int y = grapharea.top + int(yscale * (65535 - kf[i].value));
+			int y = grapharea.top + int(yscale * (max_val - kf[i].value));
 			pointrect.left = x - 3; pointrect.right = x + 3;
 			pointrect.top = y - 3;  pointrect.bottom = y + 3;
 			return pointrect;
@@ -193,6 +204,18 @@ namespace psycle { namespace host {
 			sprintf (val, "%04X", i);
 			m_Value.SetWindowText (val);
 		}
+		void CInterpolateCurve::SetMinText(int i)
+		{
+			char val[5];
+			sprintf (val, "%04X", i);
+			m_Min.SetWindowText (val);
+		}
+		void CInterpolateCurve::SetMaxText(int i)
+		{
+			char val[5];
+			sprintf (val, "%04X", i);
+			m_Max.SetWindowText (val);
+		}
 		void CInterpolateCurve::OnPaint()
 		{
 			CPaintDC dc(this); // device context for painting
@@ -208,9 +231,11 @@ namespace psycle { namespace host {
 
 			//draw gridlines
 			//horizontal
+			///\todo: adapt to range.
+			float range_16 = yscale * y_range /16.f;
 			for (int j = 0; j < 17; j++)  //line every 0x1000
 			{
-				dc.FillSolidRect (grapharea.left, grapharea.top + int(j * yscale * 4096), grapharea.right - grapharea.left, 1, 0x00DDDDDD);
+				dc.FillSolidRect (grapharea.left, grapharea.top + int(j *range_16), grapharea.right - grapharea.left, 1, 0x00DDDDDD);
 			}
 			//vertical
 			for (int h = 0; h < numLines;h++)
@@ -232,7 +257,7 @@ namespace psycle { namespace host {
 			if ( pos1 >= numLines ) return;
 
 			int x = grapharea.left + int(xscale * pos1);
-			int y = grapharea.top + int(yscale * (65535 - kf[pos1].value));
+			int y = grapharea.top + int(yscale * (max_val - kf[pos1].value));
 
 			dc.MoveTo (x, y);
 			RECT pointrect = GetGPointRect(pos1);
@@ -251,7 +276,7 @@ namespace psycle { namespace host {
 					{
 					case 0:
 						x = grapharea.left + int(xscale * pos2);
-						y = grapharea.top + int(yscale * (65535 - kf[pos2].value));
+						y = grapharea.top + int(yscale * (max_val - kf[pos2].value));
 						dc.LineTo(x,y);
 						break;
 					case 1:
@@ -259,7 +284,7 @@ namespace psycle { namespace host {
 						for (int i=1; i < distance; i++)
 						{
 							int curveval=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,distance, 0, true);
-							dc.LineTo(x+i,grapharea.top + int(yscale * (65535 - curveval)));
+							dc.LineTo(x+i,grapharea.top + int(yscale * (max_val - curveval)));
 						}
 						x = grapharea.left + int(xscale * pos2);
 						break;
@@ -278,7 +303,7 @@ namespace psycle { namespace host {
 				{
 				case 0:
 					x = grapharea.left + int(xscale * pos2);
-					y = grapharea.top + int(yscale * (65535 - kf[pos2].value));
+					y = grapharea.top + int(yscale * (max_val - kf[pos2].value));
 					dc.LineTo(x,y);
 					break;
 				case 1:
@@ -286,7 +311,7 @@ namespace psycle { namespace host {
 					for (int i=1; i < distance; i++)
 					{
 						int curveval=HermiteCurveInterpolate(kf[pos0].value,kf[pos1].value,kf[pos2].value,kf[pos3].value,i,distance, 0, true);
-						dc.LineTo(x+i,grapharea.top + int(yscale * (65535 - curveval)));
+						dc.LineTo(x+i,grapharea.top + int(yscale * (max_val - curveval)));
 					}
 					break;
 				}
@@ -311,7 +336,7 @@ namespace psycle { namespace host {
 				int pos = GetPointFromX(point.x);
 				if (pos >= 0)
 				{	
-                    kf[pos].value = 65535 - int((point.y)/yscale);
+                    kf[pos].value = max_val - int((point.y)/yscale);
 					selectedGPoint = pos;
 					
 					SetPosText(pos);
@@ -360,7 +385,7 @@ namespace psycle { namespace host {
 							kf[pos].curvetype = kf[selectedGPoint].curvetype;
 							kf[selectedGPoint].value = -1;
 						}
-						kf[pos].value = 65535 - int((point.y)/yscale);
+						kf[pos].value = max_val - int((point.y)/yscale);
 						selectedGPoint = pos;
 
 						SetPosText(pos);
@@ -442,10 +467,8 @@ namespace psycle { namespace host {
 			{
 				if ( kf[pos].value == -1)
 				{
-					CString text2;
-					m_Value.GetWindowText(text2);
-					int value=atoi(text2);
-					if ( value >0 && value < 65536)
+					int value=GetValValue();
+					if ( value >= GetMinValue() && value <= GetMaxValue())
 					{
 						kf[pos].value = value;
 					}
@@ -476,12 +499,8 @@ namespace psycle { namespace host {
 		{
 			if (selectedGPoint >=0)
 			{
-				CString text;
-				m_Value.GetWindowText(text);
-				std::string text2 = text;
-				int value=0;
-				hexstring_to_integer(text2,value);
-				if ( value >=0 && value < 65536)
+				int value=GetValValue();
+				if ( value >= GetMinValue() && value <= GetMaxValue())
 				{
 					kf[selectedGPoint].value = value;
 					RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
@@ -496,6 +515,32 @@ namespace psycle { namespace host {
 		}
 
 
+		void CInterpolateCurve::OnEnKillfocusMin()
+		{
+			int min = GetMinValue();
+			int max = GetMaxValue();
+			if (min < 0 || min > max) min=0;
+			y_range = max-min;
+			min_val = min;
+			//todo: guarantee not out of range values in kf
+			yscale = (grapharea.bottom - grapharea.top) / float(y_range); ///total height divided by max param value.
+			RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+			temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+			InvalidateRect(&temp, 0);
+		}
+		void CInterpolateCurve::OnEnKillfocusMax()
+		{
+			int min = GetMinValue();
+			int max = GetMaxValue();
+			if (max < min || max > 0xFFFF) max=0xFFFF;
+			y_range = max-min;
+			max_val = max;
+			yscale = (grapharea.bottom - grapharea.top) / float(y_range); ///total height divided by max param value.
+			//todo: guarantee not out of range values in kf
+			RECT temp;  temp.left = grapharea.left - 4; temp.right = grapharea.right + 4; 
+			temp.bottom = grapharea.bottom + 4; temp.top = grapharea.top - 4;
+			InvalidateRect(&temp, 0);
+		}
 
 		void CInterpolateCurve::GetNextkfvalue(int &startpos)
 		{
@@ -562,6 +607,41 @@ namespace psycle { namespace host {
 				}
 				break;
 			}
+		}
+		int CInterpolateCurve::GetPosValue()
+		{
+			CString text;
+			m_Pos.GetWindowText(text);
+			int pos=atoi(text)-startIndex;
+			return pos;
+		}
+		int CInterpolateCurve::GetValValue()
+		{
+			CString text;
+			m_Value.GetWindowText(text);
+			std::string text2 = text;
+			int value=0;
+			helpers::hexstring_to_integer(text2,value);
+			return value;
+		}
+
+		int CInterpolateCurve::GetMinValue()
+		{
+			CString text;
+			m_Min.GetWindowText(text);
+			std::string text2 = text;
+			int value=0;
+			helpers::hexstring_to_integer(text2,value);
+			return value;
+		}
+		int CInterpolateCurve::GetMaxValue()
+		{
+			CString text;
+			m_Max.GetWindowText(text);
+			std::string text2 = text;
+			int value=0;
+			helpers::hexstring_to_integer(text2,value);
+			return value;
 		}
 
 }   // namespace

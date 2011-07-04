@@ -23,11 +23,9 @@
 #include <cstdlib>
 #include <cassert>
 #include <cmath>
-#include <cstdio>
-
-using namespace psycle::plugin_interface;
 
 #define MAX_ENV_TIME 65536
+
 
 CMachineParameter const paraVol1 = 
 { 
@@ -1441,7 +1439,7 @@ CMachineParameter const *pParameters[] =
 	&paraFinetune,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
 	GENERATOR,
 	128,
@@ -1449,7 +1447,7 @@ CMachineInfo const MacInfo (
 	#ifndef NDEBUG
 		"GameFX (Debug build)",
 	#else
-		"GameFX 1.5",
+		"GameFX 1.4",
 	#endif
 	"GameFX",
 	"jme",
@@ -1475,7 +1473,7 @@ private:
 	PERFORMANCE globals;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
@@ -1485,7 +1483,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 }
 
 void mi::Init()
@@ -1497,7 +1495,7 @@ void mi::Init()
 void mi::Stop()
 {
 	for(int c=0;c<MAX_TRACKS;c++)
-		track[c].NoteOff();
+	track[c].NoteOff();
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -1933,14 +1931,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Note Off == 120
 	// Empty Note Row == 255
 	// Less than note off value??? == NoteON!
-	if(note<=NOTE_MAX) 
+	if(note<120) 
 	{
 		if ( cmd == 0x0C ) track[channel].NoteOn(note-24,&globals,val);
 		else track[channel].NoteOn(note-24,&globals,60);
 	}
 
 	// Note off
-	if(note==NOTE_NOTEOFF) track[channel].NoteOff();
+	if(note==120) track[channel].NoteOff();
 }
 }
 

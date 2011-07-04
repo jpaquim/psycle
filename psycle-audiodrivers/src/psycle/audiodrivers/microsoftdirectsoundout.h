@@ -8,27 +8,9 @@
 #if defined PSYCLE__MICROSOFT_DIRECT_SOUND_AVAILABLE
 
 #include "audiodriver.h"
-#include <universalis/stdlib/condition_variable.hpp>
+#include <universalis/stdlib/condition.hpp>
 
 #include <universalis/os/include_windows_without_crap.hpp>
-
-#if 1
-	// MICROSOFT BUG : Weirdly, <dsound.h> needs WAVEFORMATEX and co, which it doesn't define, not it include any other header to bring its definition!
-	// So, we include the mme system header to get WAVEFORMATEX and co.
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(push)
-		#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-	#endif
-
-		#include <MMSystem.h>
-		#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-			#pragma comment(lib, "winmm")
-		#endif
-
-	#if defined DIVERSALIS__COMPILER__MICROSOFT
-		#pragma warning(pop)
-	#endif
-#endif
 
 #include <dsound.h>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
@@ -144,7 +126,7 @@ class MsDirectSound : public AudioDriver {
 			/// whether the thread is asked to terminate
 			bool stop_requested_;
 			mutex mutex_;
-			typedef class unique_lock<mutex> scoped_lock;
+			typedef class scoped_lock<mutex> scoped_lock;
 	///\}
 };
 

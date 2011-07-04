@@ -8,47 +8,49 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace psycle { namespace helpers {
-
+namespace psycle
+{
+	namespace helpers
+	{
 		ULongBE::ULongBE() {
 			d.originalValue = 0;
 		}
-		ULongBE::ULongBE(uint32_t val) {
+		ULongBE::ULongBE(std::uint32_t val) {
 			d.byte.hihi = (val >> 24)&0xFF;
 			d.byte.hilo = (val >> 16)&0xFF;
 			d.byte.lohi = (val >> 8)&0xFF;
 			d.byte.lolo = val&0xFF;
 		}
 
-		uint32_t ULongBE::unsignedValue() const {
+		std::uint32_t ULongBE::unsignedValue() const {
 			return (d.byte.hihi << 24) + (d.byte.hilo << 16) + (d.byte.lohi << 8) + d.byte.lolo;
 		}
-		int32_t ULongBE::signedValue() const {
-			return static_cast<int32_t>(unsignedValue());
+		std::int32_t ULongBE::signedValue() const {
+			return static_cast<std::int32_t>(unsignedValue());
 		}
 
 		UShortBE::UShortBE() {
 			d.originalValue = 0;
 		}
-		UShortBE::UShortBE(uint16_t val) {
+		UShortBE::UShortBE(std::uint16_t val) {
 			d.byte.hi = (val >> 8)&0xFF;
 			d.byte.lo = val&0xFF;
 		}
-		uint16_t UShortBE::unsignedValue() const {
+		std::uint16_t UShortBE::unsignedValue() const {
 			return (d.byte.hi << 8) + d.byte.lo;
 		}
-		int16_t UShortBE::signedValue() const {
-			return static_cast<int16_t>(unsignedValue());
+		std::int16_t UShortBE::signedValue() const {
+			return static_cast<std::int16_t>(unsignedValue());
 		}
 		LongBE::LongBE() {
 			d.originalValue = 0;
 		}
-		LongBE::LongBE(int32_t val):ULongBE(static_cast<uint32_t>(val)){
+		LongBE::LongBE(std::int32_t val):ULongBE(static_cast<std::uint32_t>(val)){
 		}
 		ShortBE::ShortBE() {
 			d.originalValue = 0;
 		}
-		ShortBE::ShortBE(int16_t val):UShortBE(static_cast<uint16_t>(val)){
+		ShortBE::ShortBE(std::int16_t val):UShortBE(static_cast<std::uint16_t>(val)){
 		}
 
 		float FixedPointBE::value() const {
@@ -58,41 +60,41 @@ namespace psycle { namespace helpers {
 		ULongLE::ULongLE() {
 			d.originalValue = 0;
 		}
-		ULongLE::ULongLE(uint32_t val) {
+		ULongLE::ULongLE(std::uint32_t val) {
 			d.byte.hihi = (val >> 24)&0xFF;
 			d.byte.hilo = (val >> 16)&0xFF;
 			d.byte.lohi = (val >> 8)&0xFF;
 			d.byte.lolo = val&0xFF;
 		}
-		uint32_t ULongLE::unsignedValue() const {
+		std::uint32_t ULongLE::unsignedValue() const {
 			return (d.byte.hihi << 24) + (d.byte.hilo << 16) + (d.byte.lohi << 8) + d.byte.lolo;
 		}
-		int32_t ULongLE::signedValue() const {
-			return static_cast<int32_t>(unsignedValue());
+		std::int32_t ULongLE::signedValue() const {
+			return static_cast<std::int32_t>(unsignedValue());
 		}
 
 		UShortLE::UShortLE() {
 			d.originalValue = 0;
 		}
-		UShortLE::UShortLE(uint16_t val) {
+		UShortLE::UShortLE(std::uint16_t val) {
 			d.byte.hi = (val >> 8)&0xFF;
 			d.byte.lo = val&0xFF;
 		}
-		uint16_t UShortLE::unsignedValue() const {
+		std::uint16_t UShortLE::unsignedValue() const {
 			return (d.byte.hi << 8) + d.byte.lo;
 		}
-		int16_t UShortLE::signedValue() const {
-			return static_cast<int16_t>(unsignedValue());
+		std::int16_t UShortLE::signedValue() const {
+			return static_cast<std::int16_t>(unsignedValue());
 		}
 		LongLE::LongLE() {
 			d.originalValue = 0;
 		}
-		LongLE::LongLE(int32_t val):ULongLE(static_cast<uint32_t>(val)){
+		LongLE::LongLE(std::int32_t val):ULongLE(static_cast<std::uint32_t>(val)){
 		}
 		ShortLE::ShortLE() {
 			d.originalValue = 0;
 		}
-		ShortLE::ShortLE(int16_t val):UShortLE(static_cast<uint16_t>(val)){
+		ShortLE::ShortLE(std::int16_t val):UShortLE(static_cast<std::uint16_t>(val)){
 		}
 
 
@@ -193,10 +195,10 @@ namespace psycle { namespace helpers {
 		void AbstractIff::ReadArray(T* array, int n) {
 			for(int i=0;i<n;i++) Read(array[i]);
 		}
-		void AbstractIff::Read(uint8_t & x) {
+		void AbstractIff::Read(std::uint8_t & x) {
 			ReadRaw(&x,1);
 		}
-		void AbstractIff::Read(int8_t & x) {
+		void AbstractIff::Read(std::int8_t & x) {
 			ReadRaw(&x,1);
 		}
 		void AbstractIff::Read(char & x) {
@@ -204,46 +206,46 @@ namespace psycle { namespace helpers {
 		}
 
 		void AbstractIff::Read(bool & x) {
-			uint8_t c;
+			std::uint8_t c;
 			Read(c);
 			x = c;
 		}
-		void AbstractIff::ReadBE(uint32_t & x) {
+		void AbstractIff::ReadBE(std::uint32_t & x) {
 			ULongBE x1;
 			ReadRaw(&x1.d.byte,4);
 			x = x1.unsignedValue();
 		}
-		void AbstractIff::ReadBE(int32_t & x) {
+		void AbstractIff::ReadBE(std::int32_t & x) {
 			LongBE x1;
 			ReadRaw(&x1.d.byte,4);
 			x = x1.signedValue();
 		}
-		void AbstractIff::ReadBE(uint16_t & x) {
+		void AbstractIff::ReadBE(std::uint16_t & x) {
 			UShortBE x1;
 			ReadRaw(&x1.d.byte,2);
 			x = x1.unsignedValue();
 		}
-		void AbstractIff::ReadBE(int16_t & x) {
+		void AbstractIff::ReadBE(std::int16_t & x) {
 			ShortBE x1;
 			ReadRaw(&x1.d.byte,2);
 			x = x1.signedValue();
 		}
-		void AbstractIff::ReadLE(uint32_t & x) {
+		void AbstractIff::ReadLE(std::uint32_t & x) {
 			ULongLE x1;
 			ReadRaw(&x1.d.byte,4);
 			x = x1.unsignedValue();
 		}
-		void AbstractIff::ReadLE(int32_t & x) {
+		void AbstractIff::ReadLE(std::int32_t & x) {
 			LongLE x1;
 			ReadRaw(&x1.d.byte,4);
 			x = x1.signedValue();
 		}
-		void AbstractIff::ReadLE(uint16_t & x) {
+		void AbstractIff::ReadLE(std::uint16_t & x) {
 			UShortLE x1;
 			ReadRaw(&x1.d.byte,2);
 			x = x1.unsignedValue();
 		}
-		void AbstractIff::ReadLE(int16_t & x) {
+		void AbstractIff::ReadLE(std::int16_t & x) {
 			ShortLE x1;
 			ReadRaw(&x1.d.byte,2);
 			x = x1.signedValue();
@@ -264,21 +266,31 @@ namespace psycle { namespace helpers {
 		}
 
 		void AbstractIff::WriteString(const char * const data) {
-			std::size_t idx = 0;
-			while(data[idx] != '\0') ++idx;
-			WriteRaw(data, idx);
+			std::ptrdiff_t idx = 0;
+
+			while(data[idx] != '\0')
+			{
+				idx++;
+			}
+			WriteRaw(data,idx);
 		}
 
 		void AbstractIff::WriteSizedString(const char * const data, std::size_t const & length) {
-			assert(length > 0);
 			if (length <= 0 ) {
 				throw std::runtime_error("erroneous max_length passed to WriteString");
 			}
-			std::size_t idx = 0;
-			while(data[idx] != '\0' && idx < length) ++idx;
-			WriteRaw(data, idx);
+			std::ptrdiff_t idx = 0;
+
+			while(data[idx] != '\0' && idx < length)
+			{
+				idx++;
+			}
+			WriteRaw(data,idx);
+
 			char c = '\0';
-			while(idx < length) Write(c);
+			while(idx < length) {
+				Write(c);
+			}
 		}
 
 		template<typename T>
@@ -286,11 +298,11 @@ namespace psycle { namespace helpers {
 			for(int i=0;i<n;i++) Write(thearray[i]);
 		}
 
-		void AbstractIff::Write(const uint8_t & x) {
+		void AbstractIff::Write(const std::uint8_t & x) {
 			WriteRaw(&x,1);
 		}
 
-		void AbstractIff::Write(const int8_t & x) {
+		void AbstractIff::Write(const std::int8_t & x) {
 			WriteRaw(&x,1);
 		}
 
@@ -299,37 +311,37 @@ namespace psycle { namespace helpers {
 		} 
 
 		void AbstractIff::Write(const bool & x) {
-			uint8_t c = x; Write(c);
+			std::uint8_t c = x; Write(c);
 		}
-		void AbstractIff::WriteBE(const uint32_t & x) {
+		void AbstractIff::WriteBE(const std::uint32_t & x) {
 			ULongBE x2(x);
 			Write(x2.unsignedValue());
 		}
-		void AbstractIff::WriteBE(const int32_t & x) {
+		void AbstractIff::WriteBE(const std::int32_t & x) {
 			LongBE x2(x);
 			Write(x2.signedValue());
 		}
-		void AbstractIff::WriteBE(const uint16_t & x) {
+		void AbstractIff::WriteBE(const std::uint16_t & x) {
 			UShortBE x2(x);
 			Write(x2.unsignedValue());
 		}
-		void AbstractIff::WriteBE(const int16_t & x) {
+		void AbstractIff::WriteBE(const std::int16_t & x) {
 			ShortBE x2(x);
 			Write(x2.signedValue());
 		}
-		void AbstractIff::WriteLE(const uint32_t & x) {
+		void AbstractIff::WriteLE(const std::uint32_t & x) {
 			ULongLE x2(x);
 			Write(x2.unsignedValue());
 		}
-		void AbstractIff::WriteLE(const int32_t & x) {
+		void AbstractIff::WriteLE(const std::int32_t & x) {
 			LongLE x2(x);
 			Write(x2.signedValue());
 		}
-		void AbstractIff::WriteLE(const uint16_t & x) {
+		void AbstractIff::WriteLE(const std::uint16_t & x) {
 			UShortLE x2(x);
 			Write(x2.unsignedValue());
 		}
-		void AbstractIff::WriteLE(const int16_t & x) {
+		void AbstractIff::WriteLE(const std::int16_t & x) {
 			ShortLE x2(x);
 			Write(x2.signedValue());
 		}
@@ -405,4 +417,6 @@ namespace psycle { namespace helpers {
 			WriteRaw(data,numBytes);
 			Seek(currentPos);
 		}
-}}
+	}
+}
+

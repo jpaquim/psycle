@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2009 members of the psycle project http://psycle.sourceforge.net
 
 #ifndef PSYCLE__HELPERS__MATH__LROUND__INCLUDED
 #define PSYCLE__HELPERS__MATH__LROUND__INCLUDED
@@ -87,19 +87,16 @@ Integer inline lround(Real x) {
 
 #endif
 
-/******************************************************************************************/
-#ifdef BOOST_AUTO_TEST_CASE
-	namespace test {
-		BOOST_AUTO_TEST_CASE(lround_test) {
-			BOOST_CHECK(lround<long int>(+2.6) == +3);
-			BOOST_CHECK(lround<long int>(+1.4) == +1);
-			BOOST_CHECK(lround<long int>(-2.6) == -3);
-			BOOST_CHECK(lround<long int>(-1.4) == -1);
-			BOOST_CHECK(lround<long int>(+2.6f) == +3);
-			BOOST_CHECK(lround<long int>(+1.4f) == +1);
-			BOOST_CHECK(lround<long int>(-2.6f) == -3);
-			BOOST_CHECK(lround<long int>(-1.4f) == -1);
-		}
+#if defined BOOST_AUTO_TEST_CASE
+	BOOST_AUTO_TEST_CASE(lround_test) {
+		BOOST_CHECK(lround<long int>(+2.6) == +3);
+		BOOST_CHECK(lround<long int>(+1.4) == +1);
+		BOOST_CHECK(lround<long int>(-2.6) == -3);
+		BOOST_CHECK(lround<long int>(-1.4) == -1);
+		BOOST_CHECK(lround<long int>(+2.6f) == +3);
+		BOOST_CHECK(lround<long int>(+1.4f) == +1);
+		BOOST_CHECK(lround<long int>(-2.6f) == -3);
+		BOOST_CHECK(lround<long int>(-1.4f) == -1);
 	}
 #endif
 

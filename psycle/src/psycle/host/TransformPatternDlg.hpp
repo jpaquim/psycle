@@ -2,22 +2,19 @@
 #include "Psycle.hpp"
 #include "ChildView.hpp"
 
-#include <psycle/core/song.h>
+#include "Song.hpp"
 
+// CTransformPatternDlg dialog
 namespace psycle { namespace host {
-
-		/// CTransformPatternDlg dialog
 		class CTransformPatternDlg : public CDialog
 		{
 			DECLARE_DYNAMIC(CTransformPatternDlg)
 
 		private:
 			CChildView* _pChildView;
-			PatternView* pattern_view_;
 
 		public:
 			CTransformPatternDlg(CChildView* pChildView, CWnd* pParent = NULL);   // standard constructor
-			CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent = NULL);
 			virtual ~CTransformPatternDlg();
 
 		// Dialog Data

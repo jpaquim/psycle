@@ -27,27 +27,19 @@ namespace psycle { namespace host {
 			CKeyConfigDlg _keyDlg;
 		// Operations
 		public:
-			void Init(Configuration* pConfig,int dlgnum=0);
+			void Init(Configuration* pConfig);
+			void AddControlPages();
 		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CConfigDlg)
 			public:
 			virtual INT_PTR DoModal();
-			//}}AFX_VIRTUAL
 		// Implementation
 		public:
 			virtual ~CConfigDlg();
 			// Generated message map functions
 		protected:
 			Configuration* _pConfig;
-			//{{AFX_MSG(CConfigDlg)
- 				// NOTE - the ClassWizard will add and remove member functions here.
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 	}   // namespace
 }   // namespace

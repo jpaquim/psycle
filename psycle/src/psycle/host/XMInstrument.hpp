@@ -1,7 +1,7 @@
 #pragma once
 #include "Global.hpp"
 #include "FileIO.hpp"
-#include "Filter.hpp"
+#include <psycle/helpers/filter.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <cstring>
 namespace psycle { namespace host {
@@ -265,7 +265,7 @@ namespace psycle { namespace host {
 		class Envelope {
 		public:
 			/// Invalid point. Used to indicate that sustain/normal loop is disabled.
-			static const int INVALID = -1;
+			static const unsigned int INVALID = 0xFFFFFFFF;
 			
 			/// ValueType is a float value from  0 to 1.0  (or -1.0 1.0, or whatever else) which can be used as a multiplier.
 			typedef float ValueType;
@@ -297,7 +297,7 @@ namespace psycle { namespace host {
 				m_SustainEnd = INVALID;
 				m_LoopStart = INVALID;
 				m_LoopEnd = INVALID;
-				m_Points.clear();
+				if (!m_Points.empty()) { m_Points.clear(); }
 			}
 
 			// Object Functions.
@@ -368,7 +368,7 @@ namespace psycle { namespace host {
 			/// value has to be an existing point!
 			void LoopEnd(const unsigned int value){m_LoopEnd = value;}
 
-			const unsigned int NumOfPoints(){ return m_Points.size();}
+			const unsigned int NumOfPoints(){ return (unsigned int)m_Points.size();}
 
 			void Load(RiffFile& riffFile,const std::uint32_t version);
 			void Save(RiffFile& riffFile,const std::uint32_t version);

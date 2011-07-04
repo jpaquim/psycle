@@ -26,19 +26,33 @@ v0.02b
 
 v0.01b
 - initial beta release
-*/
-/////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////
+	*/
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
-
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
+#include <cmath>
 
 #define PLUGIN_NAME "Pooplog Autopan 0.06b"
+
+inline int f2i(float flt)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
+}
 
 #define FILEVERSION 2
 #define MAXSYNCMODES 16
@@ -50,22 +64,113 @@ using namespace psycle::helpers::math;
 #define MAXENVTYPE 2
 #define MAX_RATE								8192
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 
-CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
-CMachineParameter const paraVCFlfospeed = {"LFO Rate", "LFO Rate", 0, MAX_RATE, MPF_STATE, 6};
-CMachineParameter const paraPanlfoamplitude = {"Pan LFO Depth", "Pan LFO Depth", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraSmoothing = {"Delta Smoothing", "Delta Smoothing", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraVCFlfowave = {"LFO Wave", "LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
-CMachineParameter const paraVCFlfophase = {"LFO Phase", "LFO Phase", 0, 0xffff, MPF_STATE, 0};
-CMachineParameter const paraOUTmix = {"Mix", "Mix", 0, 256, MPF_STATE, 256};
-CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
-CMachineParameter const paraInertia = {"Tweak Inertia", "Tweak Inertia", 0,	1024, MPF_STATE, 0};
-CMachineParameter const paraPan = {"Panning", "Panning", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraNULL = 
+{ 
+	" ",
+	" ",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_LABEL,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraVCFlfospeed = 
+{ 
+	"LFO Rate",
+	"LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	6
+};
+
+
+CMachineParameter const paraPanlfoamplitude = 
+{ 
+	"Pan LFO Depth",
+	"Pan LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraSmoothing = 
+{ 
+	"Delta Smoothing",
+	"Delta Smoothing",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraVCFlfowave = 
+{ 
+	"LFO Wave",
+	"LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraVCFlfophase = 
+{ 
+	"LFO Phase",
+	"LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraOUTmix = 
+{ 
+	"Mix",
+	"Mix",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256
+};
+
+CMachineParameter const paraInputGain = 
+{ 
+	"Input Gain",
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256
+};
+
+CMachineParameter const paraInertia = 
+{
+	"Tweak Inertia",
+	"Tweak Inertia",																																				// description
+	0,																																																// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraPan = 
+{ 
+	"Panning",																
+	"Panning",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256,
+};
 
 enum {
 	e_paraPan,
@@ -76,7 +181,8 @@ enum {
 	e_paraVCFlfophase,
 	e_paraInertia,
 	e_paraInputGain,
-	e_paraOUTmix
+	e_paraOUTmix,
+	e_numVALS
 };
 
 CMachineParameter const *pParameters[] = 
@@ -93,16 +199,15 @@ CMachineParameter const *pParameters[] =
 	&paraOUTmix,
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0006,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-	PLUGIN_NAME,
-	"Pooplog Autopan",
-	"Jeremy Evers",
-	"About",
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	0,																																								// flags
+	e_numVALS,																																								// numParameters
+	pParameters,																												// Pointer to parameters
+	PLUGIN_NAME,																				// name
+	"Pooplog Autopan",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	3
 );
 
@@ -162,13 +267,13 @@ private:
 	int oldpan;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //DLL_EXPORTS
 
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[e_numVALS];
 	InitWaveTable();
 	pvcflfowave=SourceWaveTable[0];
 	pLastInertia = pInertia = NULL;
@@ -176,7 +281,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 // Destroy dinamically allocated objects/memory here
 	INERTIA* pI = pInertia;
 	while (pI)
@@ -228,17 +333,17 @@ inline void mi::FilterTick()
 	}
 	else
 	{
-		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100.f/song_freq;
+		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100/song_freq;
 	}
 	WRAP_AROUND(vcflfophase);
-	Vals[e_paraVCFlfophase] = lrint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraVCFlfophase] = f2i(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	int newpan = pan;
 
 	if (panlfoamplitude)
 	{
 		oldpan = pan;
-		newpan += lrint<int>((pvcflfowave[lrint<int>(vcflfophase)])*(panlfoamplitude));
+		newpan += f2i((pvcflfowave[f2i(vcflfophase)])*(panlfoamplitude));
 
 		if (newpan < 0)
 		{
@@ -389,7 +494,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = lrint<int>(pI->current);
+				*pI->source = f2i(pI->current);
 				pI = pI->next;
 			}
 		}
@@ -759,7 +864,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 16: sprintf(txt,"Sync 1/64 note"); return true; break;
 		}
 		// filter lfo rates
-		fv=44100.f*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+		fv=(float)44100*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 		sprintf(txt,"%.4f hz",fv);
 		return true;
 		break;

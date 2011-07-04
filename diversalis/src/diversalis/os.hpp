@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief compiler-independant meta-information about the operating system.
 
@@ -14,53 +14,50 @@
 	/**********************************************************************************/
 	// documentation about what is defined in this file
 
-	///\name operating system kind
-	///\{
-		/// unix, autodetected via __unix__.
-		#define DIVERSALIS__OS__UNIX
-		#undef DIVERSALIS__OS__UNIX // was just defined to insert documentation.
+	/// unix, autodetected via __unix__.
+	#define DIVERSALIS__OS__UNIX
+	#undef DIVERSALIS__OS__UNIX // was just defined to insert documentation.
 
-		/// the posix standard, autodetected.
-		#define DIVERSALIS__OS__POSIX
-		#undef DIVERSALIS__OS__POSIX // was just defined to insert documentation.
+	/// the posix standard, autodetected.
+	#define DIVERSALIS__OS__POSIX
+	#undef DIVERSALIS__OS__POSIX // was just defined to insert documentation.
 
-		/// linux kernel, autodetected via __linux__.
-		#define DIVERSALIS__OS__LINUX
-		#undef DIVERSALIS__OS__LINUX // was just defined to insert documentation.
+	/// gnu operating system, autodetected.
+	#define DIVERSALIS__OS__GNU
+	#undef DIVERSALIS__OS__GNU // was just defined to insert documentation.
 
-		/// bsd kernel, autodetected for apple's darwin/macos mach/bsd kernel via __STRICT_BSD__, \see DIVERSALIS__OS__DARWIN.
-		#define DIVERSALIS__OS__BSD
-		#undef DIVERSALIS__OS__BSD // was just defined to insert documentation.
+	/// mach kernel.
+	#define DIVERSALIS__OS__MACH
+	#undef DIVERSALIS__OS__MACH // was just defined to insert documentation.
 
-		/// hurd kernel, \see DIVERSALIS__OS__MACH.
-		#define DIVERSALIS__OS__HURD
-		#undef DIVERSALIS__OS__HURD // was just defined to insert documentation.
+	/// hurd kernel, \see DIVERSALIS__OS__MACH.
+	#define DIVERSALIS__OS__HURD
+	#undef DIVERSALIS__OS__HURD // was just defined to insert documentation.
 
-		/// mach kernel.
-		#define DIVERSALIS__OS__MACH
-		#undef DIVERSALIS__OS__MACH // was just defined to insert documentation.
+	/// linux kernel, autodetected via __linux__.
+	#define DIVERSALIS__OS__LINUX
+	#undef DIVERSALIS__OS__LINUX // was just defined to insert documentation.
 
-		/// darwin/mach kernel, \see DIVERSALIS__OS__MACH and \see DIVERSALIS__OS__BSD, and for apple's darwin/macos \see DIVERSALIS__OS__APPLE.
-		#define DIVERSALIS__OS__DARWIN
-		#undef DIVERSALIS__OS__DARWIN // was just defined to insert documentation.
+	/// bsd kernel, autodetected for apple's darwin/macos mach/bsd kernel via __STRICT_BSD__, \see DIVERSALIS__OS__DARWIN.
+	#define DIVERSALIS__OS__BSD
+	#undef DIVERSALIS__OS__BSD // was just defined to insert documentation.
 
-		/// apple's macosx darwin mach/bsd kernel. \see DIVERSALIS__OS__DARWIN.
-		#define DIVERSALIS__OS__APPLE
-		#undef DIVERSALIS__OS__APPLE // was just defined to insert documentation.
+	/// darwin/mach kernel, \see DIVERSALIS__OS__MACH and \see DIVERSALIS__OS__BSD, and for apple's darwin/macos \see DIVERSALIS__OS__APPLE.
+	#define DIVERSALIS__OS__DARWIN
+	#undef DIVERSALIS__OS__DARWIN // was just defined to insert documentation.
 
-		/// cygwin, autodetected via __CYGWIN__.
-		#define DIVERSALIS__OS__CYGWIN
-		#undef DIVERSALIS__OS__CYGWIN // was just defined to insert documentation.
+	/// apple's macosx darwin mach/bsd kernel. \see DIVERSALIS__OS__DARWIN.
+	#define DIVERSALIS__OS__APPLE
+	#undef DIVERSALIS__OS__APPLE // was just defined to insert documentation.
 
-		/// gnu operating system, autodetected.
-		#define DIVERSALIS__OS__GNU
-		#undef DIVERSALIS__OS__GNU // was just defined to insert documentation.
+	/// cygwin, autodetected via __CYGWIN__.
+	#define DIVERSALIS__OS__CYGWIN
+	#undef DIVERSALIS__OS__CYGWIN // was just defined to insert documentation.
 
-		/// microsoft's windows.
-		/// note: on cygwin, DIVERSALIS__OS__MICROSOFT is not defined, as it's considered to be in the unix family.
-		#define DIVERSALIS__OS__MICROSOFT
-		#undef DIVERSALIS__OS__MICROSOFT // was just defined to insert documentation.
-	///\}
+	/// microsoft's windows.
+	/// note: on cygwin, DIVERSALIS__OS__MICROSOFT is not defined, as it's considered to be in the unix family.
+	#define DIVERSALIS__OS__MICROSOFT
+	#undef DIVERSALIS__OS__MICROSOFT // was just defined to insert documentation.
 
 	///\name operating system version
 	///\{
@@ -79,25 +76,21 @@
 		#undef DIVERSALIS__OS__VERSION__PATCH // was just defined to insert documentation.
 	///\}
 
-	///\name operating system binary format
-	///\{
-		/// ELF binary format
-		#define DIVERSALIS__OS__BIN_FMT__ELF
-		#undef DIVERSALIS__OS__BIN_FMT__ELF // was just defined to insert documentation.
-
-		/// mac-o binary format
-		#define DIVERSALIS__OS__BIN_FMT__MAC_O
-		#undef DIVERSALIS__OS__BIN_FMT__MAC_O // was just defined to insert documentation.
-
-		/// PE binary format
-		#define DIVERSALIS__OS__BIN_FMT__PE
-		#undef DIVERSALIS__OS__BIN_FMT__PE // was just defined to insert documentation.
-	///\}
-
 #endif
+
+
 
 /**********************************************************************************/
 // now the real work
+
+
+////////
+// unix
+
+#if defined __unix__
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIX
+#endif
 
 /////////
 // linux
@@ -212,7 +205,7 @@
 #elif defined _WIN32 // || defined _WIN64
 	#define DIVERSALIS__OS
 	#define DIVERSALIS__OS__MICROSOFT
-	#define DIVERSALIS__OS__VERSION WINVER
+	#define DIVERSALIS__OS__MICROSOFT__VERSION WINVER
 
 	//////////////////
 	// WINVER
@@ -252,39 +245,29 @@
 		#endif
 	#endif
 
-////////////////
-// generic unix
 
-#elif defined __unix__ || defined unix
-	#define DIVERSALIS__OS
-	#define DIVERSALIS__OS__UNIX
-#endif
 
 /**********************************************************************************/
 // consistency check
 
-#if !defined DIVERSALIS__OS && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#error unkown os
+
+
+#else
+	/// We don't know the exact operating system, but we'll try to compile anyway, using crossplatform libraries.
+	#define DIVERSALIS__OS
+	#define DIVERSALIS__OS__UNIVERSALIS
 #endif
+
+#if !defined DIVERSALIS__OS
+	#error Unkown operating system.
+#endif
+
+
 
 /**********************************************************************************/
 // inferences
 
-// operating system binary format
-#if defined __ELF__
-	#define DIVERSALIS__OS__BIN_FMT
-	#define DIVERSALIS__OS__BIN_FMT__ELF
-#elif defined DIVERSALIS__OS__DARWIN
-	#define DIVERSALIS__OS__BIN_FMT
-	#define DIVERSALIS__OS__BIN_FMT__MAC_O
-#elif \
-	defined DIVERSALIS__OS__MICROSOFT || \
-	defined DIVERSALIS__OS__CYGWIN || \
-	defined DIVERSALIS__OS__MSYS || \
-	defined DIVERSALIS__OS__UWIN
-	#define DIVERSALIS__OS__BIN_FMT
-	#define DIVERSALIS__OS__BIN_FMT__PE
-#endif
+
 
 // operating system kernels for gnu operating system applications
 #if \
@@ -300,6 +283,21 @@
 	defined DIVERSALIS__OS__BSD || \
 	defined DIVERSALIS__OS__MACH
 	#define DIVERSALIS__OS__POSIX
+#endif
+
+// operating systems that emulate posix on windows
+#if \
+	defined DIVERSALIS__OS__CYGWIN || \
+	defined DIVERSALIS__OS__MSYS || \
+	defined DIVERSALIS__OS__UWIN
+	#define DIVERSALIS__OS__MICROSOFT__POSIX_EMULATION
+#endif
+
+// operating systems known to have an X Window System "by default"
+#if \
+	!defined DIVERSALIS__OS__MICROSOFT && \
+	!defined DIVERSALIS__OS__APPLE
+	#define DIVERSALIS__OS__X_WINDOW
 #endif
 
 #endif // !defined DIVERSALIS__OS__INCLUDED

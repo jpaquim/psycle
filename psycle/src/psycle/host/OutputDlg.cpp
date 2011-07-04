@@ -6,14 +6,9 @@
 #include "MidiInput.hpp"
 #include "Configuration.hpp"
 
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "AudioDriver.hpp"
+#include "Player.hpp"
+#include "Song.hpp"
 
 namespace psycle { namespace host {
 
@@ -55,8 +50,8 @@ namespace psycle { namespace host {
 
 			for (int i=0; i < _numDrivers; i++)
 			{
-				std::string name = m_ppDrivers[i]->info().header();
-				m_driverComboBox.AddString(name.c_str());
+				const char* psDesc = m_ppDrivers[i]->GetInfo()->_psName;
+				m_driverComboBox.AddString(psDesc);
 			}
 
 			if (m_driverIndex >= _numDrivers)
@@ -105,7 +100,8 @@ namespace psycle { namespace host {
 			m_driverIndex = m_driverComboBox.GetCurSel();
 			if (m_driverIndex != m_oldDriverIndex)
 			{
-				m_ppDrivers[m_oldDriverIndex]->set_started(false);
+				m_ppDrivers[m_oldDriverIndex]->Enable(false);
+				CMidiInput::Instance()->Close();
 			}
 			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
 			if( m_oldMidiDriverIndex != m_midiDriverIndex )
@@ -120,7 +116,6 @@ namespace psycle { namespace host {
 				CMidiInput::Instance()->SetDeviceId( DRIVER_SYNC, m_syncDriverIndex-1 );
 			}
 			CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = m_midiHeadroom;
-
 			Global::pConfig->_midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
 			CDialog::OnOK();
 		}
@@ -135,18 +130,10 @@ namespace psycle { namespace host {
 
 		void COutputDlg::OnConfig() 
 		{
-
-			int index = m_driverComboBox.GetCurSel();
-			Player &player = Player::singleton();
-			if (player.driver().info().name() != m_ppDrivers[index]->info().name()) {
-				player.driver().set_opened(false);
-				m_ppDrivers[index]->Configure();
-				player.setDriver(*m_ppDrivers[index]);
-			}
-			else {
-				m_ppDrivers[index]->Configure();
-			}
-			player.samples_per_second(m_ppDrivers[index]->playbackSettings().samplesPerSec());
+			m_driverIndex = m_driverComboBox.GetCurSel();
+			m_ppDrivers[m_oldDriverIndex]->Enable(false);
+			m_ppDrivers[m_driverIndex]->Configure();
+			Global::pPlayer->SetSampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
 		}
 
 	}   // namespace

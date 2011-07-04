@@ -20,15 +20,12 @@ v0.01b
 /////////////////////////////////////////////////////////////////////
 	*/
 #include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math.hpp>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
+#include <cmath>
 
 #include "filter.h"
-
-using namespace psycle::plugin_interface;
-using namespace psycle::helpers::math;
 
 #ifndef LIGHT
 #define MAX_BUF 1024*1024*4
@@ -38,6 +35,22 @@ using namespace psycle::helpers::math;
 #define PLUGIN_NAME "Pooplog Delay Light 0.04b"
 #endif
 
+inline int f2i(float flt)
+{ 
+	#if defined _MSC_VER && defined _M_IX86
+		int i; 
+		static const double half = 0.5f; 
+		_asm 
+		{ 
+			fld flt 
+			fsub half 
+			fistp i 
+		} 
+		return i;
+	#else
+		return static_cast<int>(flt - 0.5f);
+	#endif
+}
 
 #define SYNTH_REMAP_0 24
 #define FILEVERSION 2
@@ -57,7 +70,7 @@ using namespace psycle::helpers::math;
 #define MAXFILTER 26
 #define MAX_RATE								4096
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-f2i(x))+(f2i(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
@@ -156,52 +169,442 @@ const static float buffindex[NUM_BUFF]={
 	256.0f};
 
 
-CMachineParameter const paraLengthL = {"Left Delay Length", "Left Delay Length", 0, NUM_BUFF-1, MPF_STATE, 21};
-CMachineParameter const paraDelayPanL = {"Left Delay Pan", "Left Delay Pan", 0, 512, MPF_STATE, 0};
-CMachineParameter const paraFeedbackL = {"Left Feedback", "Left Feedback", 0, 256, MPF_STATE, 64};
-CMachineParameter const paraFeedbackPanL = {"Left Feedback Pan", "Left Feedback Pan", 0, 512, MPF_STATE, 0};
-CMachineParameter const paraLengthR = {"Right Delay Length", "Right Delay Length", 0, NUM_BUFF-1, MPF_STATE, 21};
-CMachineParameter const paraDelayPanR = {"Right Delay Pan", "Right Delay Pan", 0, 512, MPF_STATE, 512};
-CMachineParameter const paraFeedbackR = {"Right Feedback", "Right Feedback", 0, 256, MPF_STATE, 64};
-CMachineParameter const paraFeedbackPanR = {"Right Feedback Pan", "Right Feedback Pan", 0, 512, MPF_STATE, 512};
-CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
-CMachineParameter const paraDLVCFcutoff = {"Delay Cutoff", "Delay Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
-CMachineParameter const paraDLVCFresonance = {"Delay Resonance", "Delay Resonance", 1, 240, MPF_STATE, 1};
-CMachineParameter const paraDLVCFtype = {"Delay Filter Type", "Delay Filter Type", 0, MAXVCFTYPE, MPF_STATE, 0};
-CMachineParameter const paraDLVCFlfospeed = {"Delay LFO Rate", "Delay LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
-CMachineParameter const paraDLVCFlfoamplitude = {"Cutoff LFO Depth", "Cutoff LFO Depth", 0, MAX_VCF_CUTOFF, MPF_STATE, 0};
-CMachineParameter const paraDLUnbalancelfoamplitude = {"Unbalance LFO Depth", "Unbalance LFO Depth", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraDLGainlfoamplitude = {"Gain LFO Depth", "Gain LFO Depth", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraDLVCFlfowave = {"Delay LFO Wave", "Delay LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
-CMachineParameter const paraDLVCFlfophase = {"Delay LFO Phase", "Delay LFO Phase", 0, 0xffff, MPF_STATE, 0};
-CMachineParameter const paraDLOUToverdrive = {"Delay Shaper", "Delay Shaper", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
-CMachineParameter const paraDLOUToverdrivegain = {"Shaper Gain/Param", "Shaper Gain/Param", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraDLUnbalance = {"Cutoff Unbalance", "Cutoff Unbalance", 0, 512, MPF_STATE, 256};
-CMachineParameter const paraDLRoute = {"Delay Routing", "Delay Routing", 0, 1, MPF_STATE, 0};
+
+
+
+
+
+CMachineParameter const paraLengthL = 
+{ 
+	"Left Delay Length",																
+	"Left Delay Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	21,
+};
+
+CMachineParameter const paraDelayPanL = 
+{ 
+	"Left Delay Pan",																
+	"Left Delay Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0,
+};
+
+CMachineParameter const paraFeedbackL = 
+{ 
+	"Left Feedback",																
+	"Left Feedback",																																// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	64,
+};
+
+CMachineParameter const paraFeedbackPanL = 
+{ 
+	"Left Feedback Pan",																
+	"Left Feedback Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0,
+};
+
+
+
+CMachineParameter const paraLengthR = 
+{ 
+	"Right Delay Length",																
+	"Right Delay Length",																																// description
+	0,																																																// MinValue				
+	NUM_BUFF-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	21,
+};
+
+CMachineParameter const paraDelayPanR = 
+{ 
+	"Right Delay Pan",																
+	"Right Delay Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	512,
+};
+
+CMachineParameter const paraFeedbackR = 
+{ 
+	"Right Feedback",																
+	"Right Feedback",																																// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	64,
+};
+
+CMachineParameter const paraFeedbackPanR = 
+{ 
+	"Right Feedback Pan",																
+	"Right Feedback Pan",																																// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	512,
+};
+
+
+
+
+
+
+
+
+CMachineParameter const paraNULL = 
+{ 
+	" ",
+	" ",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_LABEL,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLVCFcutoff = 
+{ 
+	"Delay Cutoff",
+	"Delay Cutoff",																																				// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	MAX_VCF_CUTOFF/2
+};
+
+CMachineParameter const paraDLVCFresonance = 
+{ 
+	"Delay Resonance",
+	"Delay Resonance",																																// description
+	1,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	1
+};
+
+CMachineParameter const paraDLVCFtype = 
+{ 
+	"Delay Filter Type",
+	"Delay Filter Type",																																								// description
+	0,																																																// MinValue				
+	MAXVCFTYPE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraDLVCFlfospeed = 
+{ 
+	"Delay LFO Rate",
+	"Delay LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraDLVCFlfoamplitude = 
+{ 
+	"Cutoff LFO Depth",
+	"Cutoff LFO Depth",																												// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLUnbalancelfoamplitude = 
+{ 
+	"Unbalance LFO Depth",
+	"Unbalance LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLGainlfoamplitude = 
+{ 
+	"Gain LFO Depth",
+	"Gain LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLVCFlfowave = 
+{ 
+	"Delay LFO Wave",
+	"Delay LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLVCFlfophase = 
+{ 
+	"Delay LFO Phase",
+	"Delay LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLOUToverdrive = 
+{ 
+	"Delay Shaper",
+	"Delay Shaper",																																				// description
+	0,																																												// MinValue				
+	MAXOVERDRIVEMETHOD,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLOUToverdrivegain = 
+{ 
+	"Shaper Gain/Param",
+	"Shaper Gain/Param",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraDLUnbalance = 
+{ 
+	"Cutoff Unbalance",																
+	"Cutoff Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256,
+};
+
+CMachineParameter const paraDLRoute = 
+{ 
+	"Delay Routing",
+	"Delay Routing",																																// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
 
 
 #ifndef LIGHT
-CMachineParameter const paraFBVCFcutoff = {"Feedback Cutoff", "Feedback Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
-CMachineParameter const paraFBVCFresonance = {"Feedback Resonance", "Feedback Resonance", 1, 240, MPF_STATE, 1};
-CMachineParameter const paraFBVCFtype = {"Feedback Filter Type", "Feedback Filter Type", 0, MAXVCFTYPE, MPF_STATE, 0};
-CMachineParameter const paraFBVCFlfospeed = {"Feedback LFO Rate", "Feedback LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
-CMachineParameter const paraFBVCFlfoamplitude = {"Cutoff LFO Depth", "Cutoff LFO Depth", 0, MAX_VCF_CUTOFF, MPF_STATE, 0};
-CMachineParameter const paraFBUnbalancelfoamplitude = {"Unbalance LFO Depth", "Unbalance LFO Depth", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraFBGainlfoamplitude = {"Gain LFO Depth", "Gain LFO Depth", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraFBVCFlfowave = {"Feedback LFO Wave", "Feedback LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
-CMachineParameter const paraFBVCFlfophase = {"Feedback LFO Phase", "Feedback LFO Phase", 0, 0xffff, MPF_STATE, 0};
-CMachineParameter const paraFBOUToverdrive = {"Feedback Shaper", "Feedback Shaper", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
-CMachineParameter const paraFBRoute = {"Feedback Routing", "Feedback Routing", 0, 1, MPF_STATE, 0};
-CMachineParameter const paraFBOUToverdrivegain = {"Shaper Gain/Param", "Shaper Gain/Param", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraFBUnbalance = {"Cutoff Unbalance", "Cutoff Unbalance", 0, 512, MPF_STATE, 256};
-CMachineParameter const paraOUToverdrivegain = {"Final Gain/Param", "Final Gain/Param", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraOUToverdrive = {"Final Shaper", "Final Shaper", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
+
+CMachineParameter const paraFBVCFcutoff = 
+{ 
+	"Feedback Cutoff",
+	"Feedback Cutoff",																																				// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	MAX_VCF_CUTOFF/2
+};
+
+CMachineParameter const paraFBVCFresonance = 
+{ 
+	"Feedback Resonance",
+	"Feedback Resonance",																																// description
+	1,																																																// MinValue				
+	240,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	1
+};
+
+CMachineParameter const paraFBVCFtype = 
+{ 
+	"Feedback Filter Type",
+	"Feedback Filter Type",																																								// description
+	0,																																																// MinValue				
+	MAXVCFTYPE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraFBVCFlfospeed = 
+{ 
+	"Feedback LFO Rate",
+	"Feedback LFO Rate",																																// description
+	0,																																																// MinValue				
+	MAX_RATE,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+
+CMachineParameter const paraFBVCFlfoamplitude = 
+{ 
+	"Cutoff LFO Depth",
+	"Cutoff LFO Depth",																												// description
+	0,																																																// MinValue				
+	MAX_VCF_CUTOFF,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBUnbalancelfoamplitude = 
+{ 
+	"Unbalance LFO Depth",
+	"Unbalance LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBGainlfoamplitude = 
+{ 
+	"Gain LFO Depth",
+	"Gain LFO Depth",																												// description
+	0,																																																// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBVCFlfowave = 
+{ 
+	"Feedback LFO Wave",
+	"Feedback LFO Wave",																												// description
+	0,																																																// MinValue				
+	MAXLFOWAVE-1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBVCFlfophase = 
+{ 
+	"Feedback LFO Phase",
+	"Feedback LFO Phase",																																				// description
+	0,																																																// MinValue				
+	0xffff,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBOUToverdrive = 
+{ 
+	"Feedback Shaper",
+	"Feedback Shaper",																																				// description
+	0,																																												// MinValue				
+	MAXOVERDRIVEMETHOD,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBRoute = 
+{ 
+	"Feedback Routing",
+	"Feedback Routing",																																// description
+	0,																																																// MinValue				
+	1,																																																// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBOUToverdrivegain = 
+{ 
+	"Shaper Gain/Param",
+	"Shaper Gain/Param",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraFBUnbalance = 
+{ 
+	"Cutoff Unbalance",																
+	"Cutoff Unbalance",																																				// description
+	0,																																																// MinValue				
+	512,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256,
+};
+
+
+CMachineParameter const paraOUToverdrivegain = 
+{ 
+	"Final Gain/Param",
+	"Final Gain/Param",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraOUToverdrive = 
+{ 
+	"Final Shaper",
+	"Final Shaper",																																				// description
+	0,																																												// MinValue				
+	MAXOVERDRIVEMETHOD,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
 #endif
 
-CMachineParameter const paraInputGain = {"Input Gain", "Input Gain", 0, 1024, MPF_STATE, 256};
-CMachineParameter const paraOUTmix = {"Mix", "Mix", 0, 256, MPF_STATE, 128};
-CMachineParameter const paraInertia = {"Tweak Inertia", "Tweak Inertia", 0, 1024, MPF_STATE, 0};
-CMachineParameter const paraTRACKTempo = {"Follow Tempo", "Follow Tempo", 0, 1, MPF_STATE, 1};
+
+CMachineParameter const paraInputGain = 
+{ 
+	"Input Gain",
+	"Input Gain",																																				// description
+	0,																																												// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	256
+};
+
+CMachineParameter const paraOUTmix = 
+{ 
+	"Mix",
+	"Mix",																																				// description
+	0,																																												// MinValue				
+	256,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	128
+};
+
+CMachineParameter const paraInertia = 
+{
+	"Tweak Inertia",
+	"Tweak Inertia",																																				// description
+	0,																																																// MinValue				
+	1024,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	0
+};
+
+CMachineParameter const paraTRACKTempo = 
+{ 
+	"Follow Tempo",
+	"Follow Tempo",																												// description
+	0,																																																// MinValue				
+	1,																																												// MaxValue
+	MPF_STATE,																																								// Flags
+	1
+};
 
 
 #ifndef LIGHT
@@ -248,7 +651,8 @@ enum {
 	e_paraOUTmix,
 	e_paraInertia,
 	e_paraNULL02,
-	e_paraTRACKTempo
+	e_paraTRACKTempo,
+	e_numVALS
 };
 
 CMachineParameter const *pParameters[] = 
@@ -299,16 +703,15 @@ CMachineParameter const *pParameters[] =
 	&paraTRACKTempo
 };
 
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0004,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
+CMachineInfo const MacInfo(
+	MI_VERSION,				
+	0,																																								// flags
+	e_numVALS,																																								// numParameters
+	pParameters,																												// Pointer to parameters
 	PLUGIN_NAME,
-	"Pooplog Delay",
-	"Jeremy Evers",
-	"About",
+	"Pooplog Delay",																												// short name
+	"Jeremy Evers",																												// author
+	"About",																																// A command, that could be use for open an editor, etc...
 	5
 );
 
@@ -342,7 +745,8 @@ enum {
 	e_paraTRACKTempo,
 	e_paraInputGain,
 	e_paraOUTmix,
-	e_paraInertia
+	e_paraInertia,
+	e_numVALS
 };
 
 CMachineParameter const *pParameters[] = 
@@ -378,11 +782,10 @@ CMachineParameter const *pParameters[] =
 	&paraInertia,
 };
 
-CMachineInfo const MacInfo (
+CMachineInfo const MacInfo(
 	MI_VERSION,				
-	0x0004,
-	EFFECT,
-	sizeof pParameters / sizeof *pParameters,																																							// numParameters
+	0,																																								// flags
+	e_numVALS,																																								// numParameters
 	pParameters,																												// Pointer to parameters
 	PLUGIN_NAME,
 	"Pooplog Delay L",																												// short name
@@ -557,13 +960,13 @@ private:
 	bool trackBPM;
 };
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 //DLL_EXPORTS
 
 mi::mi()
 {
 	// The constructor zone
-	Vals = new int[MacInfo.numParameters];
+	Vals = new int[e_numVALS];
 	InitWaveTable();
 	pDLvcflfowave=SourceWaveTable[0];
 #ifndef LIGHT
@@ -576,7 +979,7 @@ mi::mi()
 
 mi::~mi()
 {
-	delete[] Vals;
+	delete Vals;
 // Destroy dynamically allocated objects/memory here
 	INERTIA* pI = pInertia;
 	while (pI)
@@ -588,11 +991,11 @@ mi::~mi()
 	pLastInertia = pInertia = NULL;
 	if (pBufferL)
 	{
-		delete[] pBufferL;
+		delete pBufferL;
 	}
 	if (pBufferR)
 	{
-		delete[] pBufferR;
+		delete pBufferR;
 	}
 }
 
@@ -741,7 +1144,7 @@ inline void mi::FilterTick()
 		DLvcflfophase += ((DLvcflfospeed-MAXSYNCMODES)*(DLvcflfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(DLvcflfophase);
-	Vals[e_paraDLVCFlfophase] = lrint<int>(DLvcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraDLVCFlfophase] = f2i(DLvcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	if (DLvcftype)
 	{
@@ -751,7 +1154,7 @@ inline void mi::FilterTick()
 
 		if (DLunbalancelfoamplitude)
 		{
-			int val = lrint<int>((pDLvcflfowave[lrint<int>(DLvcflfophase)])*(DLunbalancelfoamplitude))+256;
+			int val = f2i((pDLvcflfowave[f2i(DLvcflfophase)])*(DLunbalancelfoamplitude))+256;
 			// unbalance
 			if (val <= 256)
 			{
@@ -774,7 +1177,7 @@ inline void mi::FilterTick()
 		}
 		if (DLvcflfoamplitude)
 		{
-			outcutoff+= (float(pDLvcflfowave[lrint<int>(DLvcflfophase)])
+			outcutoff+= (float(pDLvcflfowave[f2i(DLvcflfophase)])
 							*float(DLvcflfoamplitude));
 		}
 		if (outcutoff<0) outcutoff = 0;
@@ -806,7 +1209,7 @@ inline void mi::FilterTick()
 	{
 		if (DLgainlfoamplitude)
 		{
-			float p = DLoverdrivegain+(float(pDLvcflfowave[lrint<int>(DLvcflfophase)])
+			float p = DLoverdrivegain+(float(pDLvcflfowave[f2i(DLvcflfophase)])
 							*float(DLgainlfoamplitude));
 			if (p < 0) 
 			{
@@ -837,7 +1240,7 @@ inline void mi::FilterTick()
 		FBvcflfophase += ((FBvcflfospeed-MAXSYNCMODES)*(FBvcflfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(FBvcflfophase);
-	Vals[e_paraFBVCFlfophase] = lrint<int>(FBvcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraFBVCFlfophase] = f2i(FBvcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	if (FBvcftype)
 	{
@@ -847,7 +1250,7 @@ inline void mi::FilterTick()
 
 		if (FBunbalancelfoamplitude)
 		{
-			int val = lrint<int>((pFBvcflfowave[lrint<int>(FBvcflfophase)])*(FBunbalancelfoamplitude))+256;
+			int val = f2i((pFBvcflfowave[f2i(FBvcflfophase)])*(FBunbalancelfoamplitude))+256;
 			// unbalance
 			if (val <= 256)
 			{
@@ -870,7 +1273,7 @@ inline void mi::FilterTick()
 		}
 		if (FBvcflfoamplitude)
 		{
-			outcutoff+= (float(pFBvcflfowave[lrint<int>(FBvcflfophase)])
+			outcutoff+= (float(pFBvcflfowave[f2i(FBvcflfophase)])
 							*float(FBvcflfoamplitude));
 		}
 		if (outcutoff<0) outcutoff = 0;
@@ -902,7 +1305,7 @@ inline void mi::FilterTick()
 	{
 		if (FBgainlfoamplitude)
 		{
-			float p = FBoverdrivegain+(float(pFBvcflfowave[lrint<int>(FBvcflfophase)])
+			float p = FBoverdrivegain+(float(pFBvcflfowave[f2i(FBvcflfophase)])
 							*float(FBgainlfoamplitude));
 			if (p < 0) 
 			{
@@ -1285,7 +1688,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = lrint<int>(pI->current);
+				*pI->source = f2i(pI->current);
 				if (pI->bCutoff == 1)
 				{
 					DLVcfCutoff=pI->current;
@@ -1390,7 +1793,7 @@ void mi::ParameterTweak(int par, int val)
 				float outcutoff = DLVcfCutoff;
 				if (DLvcflfoamplitude)
 				{
-					outcutoff+= (float(pDLvcflfowave[lrint<int>(DLvcflfophase)])
+					outcutoff+= (float(pDLvcflfowave[f2i(DLvcflfophase)])
 									*float(DLvcflfoamplitude));
 				}
 				if (outcutoff<0) outcutoff = 0;
@@ -1465,7 +1868,7 @@ void mi::ParameterTweak(int par, int val)
 				float outcutoff = FBVcfCutoff;
 				if (FBvcflfoamplitude)
 				{
-					outcutoff+= (float(pFBvcflfowave[lrint<int>(FBvcflfophase)])
+					outcutoff+= (float(pFBvcflfowave[f2i(FBvcflfophase)])
 									*float(FBvcflfoamplitude));
 				}
 				if (outcutoff<0) outcutoff = 0;
@@ -1682,15 +2085,15 @@ inline float mi::HandleFNOverdrive(float input)
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= FNOutGain;
-		if (input < -1.0f)								return input-(lrint<int>(input)+1)*(input+1.0f);
-		else if (input > 1.0f)				return input-(lrint<int>(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= FNOutGain;
-		if (input < -1.0f)								return input + (lrint<int>(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)				return input - (lrint<int>(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
@@ -1704,7 +2107,7 @@ inline float mi::HandleFNOverdrive(float input)
 		return input;
 		break;
 	case 9: // sin remapper
-		return SourceWaveTable[0][lrint<int>(input*FNOutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
+		return SourceWaveTable[0][f2i(input*FNOutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
 		break;
 	case 10: //
 		// good negative partial rectifier
@@ -1989,93 +2392,93 @@ inline float mi::HandleFNOverdrive(float input)
 		}
 		if (FNplayPos >= SAMPLE_LENGTH)
 		{
-			int i = lrint<int>(FNplayPos/SAMPLE_LENGTH);
+			int i = f2i(FNplayPos/SAMPLE_LENGTH);
 			if (i & 1)
 			{
 				FNplayDir = -FNplayDir;
 			}
-			FNplayPos = (FNplayPos-lrint<int>(FNplayPos))+(lrint<int>(FNplayPos)&((SAMPLE_LENGTH)-1));
+			FNplayPos = (FNplayPos-f2i(FNplayPos))+(f2i(FNplayPos)&((SAMPLE_LENGTH)-1));
 		}
 		switch (FNoverdrive)
 		{
 		case SYNTH_REMAP_0: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[0][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[0][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[0][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[0][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+1: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[1][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[1][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[1][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+2: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[10][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[10][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[10][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+3: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[4][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[4][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[4][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+4: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[0][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[0][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[10][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+5: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[1][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[10][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+6: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[1][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[4][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+7: 
 			if (FNplayDir<0)
 			{
-				return SourceWaveTable[10][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
+				return SourceWaveTable[10][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
+				return SourceWaveTable[4][f2i(FNplayPos)+SAMPLE_LENGTH]*FNthisMax*2;
 			}
 			break;
 		}
@@ -2113,15 +2516,15 @@ inline float mi::HandleDLOverdrive(float input)
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= DLOutGain;
-		if (input < -1.0f)								return input-(lrint<int>(input)+1)*(input+1.0f);
-		else if (input > 1.0f)				return input-(lrint<int>(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= DLOutGain;
-		if (input < -1.0f)								return input + (lrint<int>(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)				return input - (lrint<int>(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
@@ -2135,7 +2538,7 @@ inline float mi::HandleDLOverdrive(float input)
 		return input;
 		break;
 	case 9: // sin remapper
-		return SourceWaveTable[0][lrint<int>(input*DLOutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
+		return SourceWaveTable[0][f2i(input*DLOutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
 		break;
 	case 10: //
 		// good negative partial rectifier
@@ -2420,93 +2823,93 @@ inline float mi::HandleDLOverdrive(float input)
 		}
 		if (DLplayPos >= SAMPLE_LENGTH)
 		{
-			int i = lrint<int>(DLplayPos/SAMPLE_LENGTH);
+			int i = f2i(DLplayPos/SAMPLE_LENGTH);
 			if (i & 1)
 			{
 				DLplayDir = -DLplayDir;
 			}
-			DLplayPos = (DLplayPos-lrint<int>(DLplayPos))+(lrint<int>(DLplayPos)&((SAMPLE_LENGTH)-1));
+			DLplayPos = (DLplayPos-f2i(DLplayPos))+(f2i(DLplayPos)&((SAMPLE_LENGTH)-1));
 		}
 		switch (DLoverdrive)
 		{
 		case SYNTH_REMAP_0: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[0][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[0][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[0][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[0][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+1: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[1][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[1][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[1][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+2: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[10][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[10][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[10][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+3: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[4][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[4][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[4][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+4: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[0][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[0][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[10][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+5: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[1][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[10][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+6: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[1][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[4][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+7: 
 			if (DLplayDir<0)
 			{
-				return SourceWaveTable[10][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
+				return SourceWaveTable[10][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
+				return SourceWaveTable[4][f2i(DLplayPos)+SAMPLE_LENGTH]*DLthisMax*2;
 			}
 			break;
 		}
@@ -2544,15 +2947,15 @@ inline float mi::HandleFBOverdrive(float input)
 	case 5: // hard clip 2
 		// bounce off limits
 		input *= FBOutGain;
-		if (input < -1.0f)								return input-(lrint<int>(input)+1)*(input+1.0f);
-		else if (input > 1.0f)				return input-(lrint<int>(input)+1)*(input-1.0f);
+		if (input < -1.0f)								return input-(f2i(input)+1)*(input+1.0f);
+		else if (input > 1.0f)				return input-(f2i(input)+1)*(input-1.0f);
 		return input;
 		break;
 	case 6: // hard clip 3
 		// invert, this one is harsh
 		input *= FBOutGain;
-		if (input < -1.0f)								return input + (lrint<int>(input/(2.0f)))*(2.0f);
-		else if (input > 1.0f)				return input - (lrint<int>(input/(2.0f)))*(2.0f);
+		if (input < -1.0f)								return input + (f2i(input/(2.0f)))*(2.0f);
+		else if (input > 1.0f)				return input - (f2i(input/(2.0f)))*(2.0f);
 		return input;
 		break;
 	case 7: // parabolic distortion
@@ -2566,7 +2969,7 @@ inline float mi::HandleFBOverdrive(float input)
 		return input;
 		break;
 	case 9: // sin remapper
-		return SourceWaveTable[0][lrint<int>(input*FBOutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
+		return SourceWaveTable[0][f2i(input*FBOutGain*SAMPLE_LENGTH*2)&((SAMPLE_LENGTH*2)-1)];
 		break;
 	case 10: //
 		// good negative partial rectifier
@@ -2851,93 +3254,93 @@ inline float mi::HandleFBOverdrive(float input)
 		}
 		if (FBplayPos >= SAMPLE_LENGTH)
 		{
-			int i = lrint<int>(FBplayPos/SAMPLE_LENGTH);
+			int i = f2i(FBplayPos/SAMPLE_LENGTH);
 			if (i & 1)
 			{
 				FBplayDir = -FBplayDir;
 			}
-			FBplayPos = (FBplayPos-lrint<int>(FBplayPos))+(lrint<int>(FBplayPos)&((SAMPLE_LENGTH)-1));
+			FBplayPos = (FBplayPos-f2i(FBplayPos))+(f2i(FBplayPos)&((SAMPLE_LENGTH)-1));
 		}
 		switch (FBoverdrive)
 		{
 		case SYNTH_REMAP_0: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[0][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[0][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[0][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[0][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+1: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[1][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[1][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[1][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+2: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[10][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[10][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[10][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+3: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[4][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[4][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[4][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+4: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[0][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[0][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[10][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+5: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[1][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[10][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[10][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+6: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[1][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[1][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[4][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		case SYNTH_REMAP_0+7: 
 			if (FBplayDir<0)
 			{
-				return SourceWaveTable[10][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
+				return SourceWaveTable[10][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMin*2;
 			}
 			else
 			{
-				return SourceWaveTable[4][lrint<int>(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
+				return SourceWaveTable[4][f2i(FBplayPos)+SAMPLE_LENGTH]*FBthisMax*2;
 			}
 			break;
 		}
@@ -3519,7 +3922,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			case 16: sprintf(txt,"Sync 1/64 note"); return true; break;
 		}
 		// filter lfo rates
-		fv=44100.f*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
+		fv=(float)44100*((value-MAXSYNCMODES)*(value-MAXSYNCMODES)*0.000030517f)/(SAMPLE_LENGTH*2*FILTER_CALC_TIME);
 		sprintf(txt,"%.4f hz",fv);
 		return true;
 		break;

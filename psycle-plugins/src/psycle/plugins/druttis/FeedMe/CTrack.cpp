@@ -17,11 +17,11 @@ float CTrack::overtonemults[MAX_OVERTONES];
 //				Constructor
 //============================================================================
 CTrack::CTrack()
-:vibrato_pos(0.0f)
-,vibrato_dtime(0.0f)
-,osc1_speed(-1)
-,osc2_speed(-1)
 {
+	vibrato_time = 0.0f;
+	vibrato_dtime = 0.0f;
+	osc1_speed = -1;
+	osc2_speed = -1;
 }
 
 //============================================================================
@@ -35,8 +35,13 @@ CTrack::~CTrack()
 //============================================================================
 void CTrack::Init()
 {
-	for (int i = 0; i < WAVESIZE; i++) {
-		float t = (float) i / (float) WAVESIZE;
+	//
+	//
+	int i;
+	float t;
+	//				Render
+	for (i = 0; i < WAVESIZE; i++) {
+		t = (float) i / (float) WAVESIZE;
 		//				Sine
 		wavetable[0][i] = (float) sin(t * PI2);
 		//				Triangle
@@ -57,7 +62,8 @@ void CTrack::Init()
 		wavetable[5][i] = (float) (t * t - 0.5f) * 2.0f;
 	}
 	//
-	//Create overtone multipliers (value to normalize amplitude of the output)
+	//				Create overtone multipliers (actually value to normalize amplitude of
+	//				the output)
 	overtonemults[0] = 1.0f / 1.0f;
 	overtonemults[1] = 1.0f / 2.5f;
 	overtonemults[2] = 1.0f / 4.0f;
@@ -78,6 +84,7 @@ void CTrack::Stop()
 {
 	vca_env.Kill();
 	vcf_env.Kill();
+	vibrato_time = 0.0f;
 	vibrato_dtime = 0.0f;
 	osc1_speed = -1;
 	osc2_speed = -1;
@@ -93,30 +100,40 @@ void CTrack::NoteOff()
 //============================================================================
 //				NoteOn
 //============================================================================
-void CTrack::NoteOn(int note, int volume, bool slide)
+void CTrack::NoteOn(int note, int volume)
 {
+	//
+	//
+	bool slide = (note < 0);
+	if (slide)
+		note = -note;
+	//
+	//
 	SetFreq(note);
-
-	//	Osc 1
-	if (!slide || osc1_speed == -1)
+	//
+	//				Osc 1
+	if (!slide || (osc1_speed == -1))
 		osc1_speed = osc1_target_speed;
-	memset(osc1_out, 0, sizeof(osc1_out));
-	osc1_pos = 0.0f;
-	//	Osc 2
-	if (!slide || osc2_speed == -1)
+	memset(osc1_out, 0, sizeof(float) * 4);
+	osc1_time = 0.0f;
+	//				Osc 2
+	if (!slide || (osc2_speed == -1))
 		osc2_speed = osc2_target_speed;
-	memset(osc2_out, 0, sizeof(osc2_out));
-	osc2_pos = 0.0f;
-
-	//	Reset ticks
+	memset(osc2_out, 0, sizeof(float) * 4);
+	osc2_time = 0.0f;
+	//
+	//				Reset ticks
 	ticks_remaining = 0;
+	//
+	//
 	if ((globals->sync_mode & 1) != 0) {
-		//	Reset vibrato
-		vibrato_pos = 0.0f;
+		//
+		//				Reset vibrato
+		vibrato_time = 0.0f;
 		vibrato_dtime = 0.0f;
 	}
-
-	//	Setup & start VCF
+	//
+	//				Setup & start VCF
 	vcf_env.SetAttack(globals->vcf_attack);
 	vcf_env.SetDecay(globals->vcf_decay);
 	vcf_env.SetSustain(globals->vcf_sustain);
@@ -126,13 +143,12 @@ void CTrack::NoteOn(int note, int volume, bool slide)
 	if ((globals->sync_mode & 2) != 0) {
 		vcf_env.Begin();
 	}
-
-	//	Compute velocity & amplitude
-	float velocity = (float) volume / 255.0f;
-
+	//
+	//				Computer velocity & amplitude
+	velocity = (float) volume / 255.0f;
 	amplitude = velocity * 16384.0f * globals->amplitude;
-
-	//	Setup & start VCA
+	//
+	//				Setup & start VCA
 	vca_env.SetAttack(globals->attack);
 	vca_env.SetRelease(globals->release);
 	vca_env.Begin();

@@ -1,169 +1,141 @@
-// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
+/**************************************************************************
+*   Copyright 2007 Psycledelics http://psycle.sourceforge.net             *
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+*   This program is distributed in the hope that it will be useful,       *
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+*   GNU General Public License for more details.                          *
+*                                                                         *
+*   You should have received a copy of the GNU General Public License     *
+*   along with this program; if not, write to the                         *
+*   Free Software Foundation, Inc.,                                       *
+*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+***************************************************************************/
 
-#include <psycle/core/detail/project.private.hpp>
 #include "plugincatcher.h"
+#include "file.h"
 #include "fileio.h"
-#include <universalis/os/fs.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <iostream> // only for debug output
 #include <sstream>
-#include <cstring>
 
-namespace psycle { namespace core {
+namespace psy { namespace core {
 
-namespace {
-	boost::filesystem::path const & cache_path() {
-		boost::filesystem::path const static once(
-			universalis::os::fs::home_app_local("psycle") / "plugin-scan-v2.cache"
-		);
-		return once;
-	}
+
+PluginFinderCache::PluginFinderCache()
+:_numPlugins(0)
+{
+	loadCache();
 }
 
-PluginFinderCache::PluginFinderCache(bool delayedScan)
-: PluginFinder(delayedScan)
-{}
-
-void PluginFinderCache::Initialize(bool clear) {
-	if(clear) deleteCache();
-	else loadCache();
-}
-
-void PluginFinderCache::EnablePlugin(const MachineKey & key, bool enable) {
-	PluginFinder::EnablePlugin(key, enable);
-	saveCache();
+PluginFinderCache::~PluginFinderCache()
+{
 }
 
 bool PluginFinderCache::loadCache(){
-	///\todo: Implement this with a better structure (My plan was to use
-	// the new riff classes on the helpers project, but they are unfinished)
-	char temp[9];
-	uint32_t version(0);
-	uint32_t fileNumPlugs(0);
+#if 0
+	//FIXME:std::string cache((universalis::operating_system::paths::package::home() / "psycle.plugin-scan.cache").native_file_string());
+	std::string cache(File::home() + "/psycle.plugin-scan.cache");
+
 	RiffFile file;
 
-	if(!file.Open(cache_path().file_string().c_str())) {
+	if (!file.Open(cache.c_str()))
 		return false;
-	}
-
-	file.ReadArray(temp, 8);
-	temp[8] = 0;
-	if(std::strcmp(temp, "PSYCACHE") != 0) {
+	
+	char Temp[1024];
+	file.ReadArray(Temp,8);
+	Temp[8]=0;
+	if (strcmp(Temp,"PSYCACHE")!=0)
+	{
 		file.Close();
 		deleteCache();
 		return false;
 	}
-
+	
+	std::uint32_t version;
 	file.Read(version);
-	if(version != CURRENT_CACHE_MAP_VERSION) {
+	if (version != CURRENT_CACHE_MAP_VERSION)
+	{
 		file.Close();
 		deleteCache();
 		return false;
 	}
-
+	
+	std::uint32_t fileNumPlugs;
 	file.Read(fileNumPlugs);
-	for (uint32_t i = 0; i < fileNumPlugs; ++i) {
+	for (std::uint32_t i = 0; i < fileNumPlugs; i++)
+	{
 		PluginInfo p;
-
-		std::string fullPath;
-		file.ReadString(fullPath); p.setLibName(fullPath);
-		
-		{ uint64_t filetime(0); file.Read(filetime); p.setFileTime((time_t )filetime); }
-		{ std::string error_msg; file.ReadString(error_msg); p.setError(error_msg); }
-
-		Hosts::type host;
-		{ uint8_t host_int; file.Read(host_int); host = Hosts::type(host_int); }
-
-		uint32_t index(0);
-		file.Read(index);
-		
-		{ uint8_t allow; file.Read(allow); p.setAllow((bool)allow); }
-		{ uint32_t role_int(0); file.Read(role_int); p.setRole(MachineRole::type(role_int)); }
-
-		{ std::string s_temp;
-			file.ReadString(s_temp); p.setName(s_temp);
-			file.ReadString(s_temp); p.setAuthor(s_temp);
-			file.ReadString(s_temp); p.setDesc(s_temp);
-			file.ReadString(s_temp); p.setApiVersion(s_temp);
-			file.ReadString(s_temp); p.setPlugVersion(s_temp);
-		}
-
-		// Temp here contains the full path to the .dll
+		file.ReadString(Temp,sizeof(Temp));
 		{
-			boost::filesystem::path const path(fullPath);
-			if(boost::filesystem::exists(path)) {
-				std::time_t t_time = boost::filesystem::last_write_time(path);
-				if(t_time != (std::time_t)(-1)) {
-					// Only add the information to the cache if the dll hasn't been modified (say, a new version)
-					// Else, we want to get the new information, and that will happen in the plugins scan.
-					if(p.fileTime() == t_time) {
-						MachineKey key(host, path.leaf(), index);
-						if(!hasHost(host)) addHost(host);
-						AddInfo(key, p);
-					}
-				}
-				MachineKey key(host, path.leaf(), index);
-				if(!hasHost(host)) addHost(host);
-				AddInfo(key, p);
+			//FIXME: types
+			time_t filetime;
+			//file.ReadArray(&filetime,sizeof(filetime));p.setFileTime(filetime);
+			std::uint32_t size;
+			file.Read(size);
+			if(size)
+			{
+				char *chars(new char[size + 1]);
+				file.ReadArray(chars, size);
+				chars[size] = '\0';
+				p.setError((const char*)chars);
+				delete [] chars;
 			}
 		}
-	}
-
-	file.Close();
-	return true;
-}
-
-bool PluginFinderCache::saveCache(){
-	deleteCache();
-
-	RiffFile file;
-	if(!file.Create(cache_path().file_string().c_str(), true)) {
-		boost::filesystem::create_directory(cache_path().branch_path());
-		if(!file.Create(cache_path().file_string().c_str(), true)) return false;
-	}
-	file.WriteArray("PSYCACHE", 8);
-	uint32_t version = CURRENT_CACHE_MAP_VERSION;
-	file.Write(version);
-	
-	uint32_t fileNumPlugs = 0;
-	
-	// We skip the internal host. It doesn't need to be cached, since it is autogenerated each time.
-	for(uint32_t numHost = 1; hasHost(Hosts::type(numHost)); ++numHost) {
-		fileNumPlugs += size(Hosts::type(numHost));
-	}
-	file.Write(fileNumPlugs);
-
-	// We skip the internal host. It doesn't need to be cached, since it is autogenerated each time.
-	for(uint32_t numHost = 1; hasHost(Hosts::type(numHost)); ++numHost) {
-		PluginFinder::const_iterator iter = begin(Hosts::type(numHost));
-		while(iter != end(Hosts::type(numHost))) {
-			PluginInfo info =iter->second;
-			file.WriteString(info.libName());
-			file.Write((uint64_t)info.fileTime());
-			file.WriteString(info.error());
-			file.Write((uint8_t)iter->first.host());
-			file.Write(iter->first.index());
-			file.Write((uint8_t)info.allow());
-			file.Write((uint32_t)info.role());
-			file.WriteString(info.name());
-			file.WriteString(info.author());
-			file.WriteString(info.desc());
-			file.WriteString(info.apiVersion());
-			file.WriteString(info.plugVersion());
-			++iter;
+		{
+			std::string s_temp;
+			bool b_temp;
+			std::int32_t identifier;
+			MachineType mtype;
+			MachineMode mmode;
+			//FIXME: types
+			file.Read(b_temp); p.setAllow(b_temp);
+			//file.ReadArray(&mmode,sizeof(mmode)); p.setMode(mmode);
+			//file.ReadArray(&mtype,sizeof(mtype)); p.setType(mtype);
+			file.ReadString(s_temp); p.setName(s_temp);
+			file.Read(identifier);
+			file.ReadString(s_temp); p.setAuthor(s_temp);
+			file.ReadString(s_temp); p.setDesc(s_temp);
+			file.ReadString(s_temp); p.setVersion(s_temp);
 		}
+
+//FIXME:Unfinished
+		// Temp here contains the full path to the .dll
+		/*if(finder.FindFile(Temp))
+		{
+			time_t t_time;
+			finder.FindNextFile();
+			if (finder.GetLastWriteTime(&time))
+			{
+				// Only add the information to the cache if the dll hasn't been modified (say, a new version)
+				// Else, we want to get the new information, and that will happen in the plugins scan.
+				if ( p.fileTime() == t_time )
+				{
+					p.setLibName( Temp );
+					PluginFinderKey key(fileName, ladspa_path + File::slash() + fileName, identifier);
+					map_[key] = info;
+					_numPlugins++;
+
+				}
+			}
+		}
+*/
 	}
+	
 	file.Close();
+#endif
 	return true;
 }
-
+bool PluginFinderCache::saveCache(){
+	return false;
+}
 void PluginFinderCache::deleteCache(){
-	boost::filesystem::remove(cache_path());
 }
 
-void PluginFinderCache::PostInitialization() {
-	saveCache();
-}
 
 }}
+

@@ -154,6 +154,7 @@ namespace psycle { namespace host {
 		/// update key on show
 		void CKeyConfigDlg::OnSelchangeCmdlist() 
 		{	
+			if(m_lstCmds.GetCurSel() == -1) return;
 			WORD key = 0;
 			WORD mods = 0;	
 			

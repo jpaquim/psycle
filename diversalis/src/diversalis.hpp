@@ -8,7 +8,7 @@
 #pragma once
 
 	#include "diversalis/compiler.hpp"
-	#ifndef DIVERSALIS__COMPILER__RESOURCE
+	#if !defined DIVERSALIS__COMPILER__RESOURCE
 		#include "diversalis/os.hpp"
 		#include "diversalis/cpu.hpp"
 		#include "diversalis/stdlib.hpp"

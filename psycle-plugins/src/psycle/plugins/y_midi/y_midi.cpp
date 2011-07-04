@@ -1,8 +1,8 @@
 #include "y_midi.hpp"
 #include "gmnames.h"
 
-int mi::midiopencount[MAX_MIDI_DEVICES+1]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-HMIDIOUT mi::handles[MAX_MIDI_DEVICES+1]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int mi::midiopencount(0);
+HMIDIOUT mi::handle(0);
 
 //////////////////////////////////////////////////////////////////////////
 // midichannel class
@@ -60,19 +60,23 @@ void midichannel::StopMidi()
 //////////////////////////////////////////////////////////////////////////
 //  mi machine class.
 
-PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
+PSYCLE__PLUGIN__INSTANCIATOR(mi, MacInfo)
 
 mi::mi()
 {
 	int i;
-	Vals=new int[MacInfo.numParameters];
+	Vals=new int[NUMPARAMETERS];
 
-	for(i=0;i<psycle::plugin_interface::MAX_TRACKS; i++)
+	InitMidi();
+	for(i=0;i<MIDI_TRACKS; i++)
+	{
+		numChannel[i].Init(handle,i);
+	}
+	for(i=0;i<MAX_TRACKS; i++)
 	{
 		numC[i]=0;
 		notes[i]=-1;
 	}
-	pars.portidx = 0;
 }
 
 mi::~mi()
@@ -83,37 +87,29 @@ mi::~mi()
 
 void mi::Init()
 {
-	// Initialize your stuff here
-	InitMidi();
+// Initialize your stuff here
 }
 
-bool mi::HostEvent(int const eventNr, int const val1, float const val2) {
-	if (eventNr == psycle::plugin_interface::HE_NEEDS_AUX_COLUMN) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
 
 void mi::Command()
 {
-	// Called when user presses editor button
-	// Probably you want to show your custom window here
-	// or an about button
-	char buffer[256];
+// Called when user presses editor button
+// Probably you want to show your custom window here
+// or an about button
+char buffer[256];
 
-	sprintf(
+sprintf(
 
-			buffer,"%s%s%s%s",
-			"Commands:\n",
-			"C1xx - Set Program to xx\n",
-			"C2xx or aux column - Set Midi Channel for this track\n\n",
-			"CCxx or 0Cxx - Set Volume\n\n",
-			"Use the Aux column to force a midi channel for this note\n"
-			);
+		buffer,"%s%s%s%s",
+		"Commands:\n",
+		"C1xx - Set Program to xx\n",
+		"C2xx - Set Midi Channel for this track\n\n",
+		"CCxx - Set Volume\n\n",
+		"Use the Aux column to force a midi channel for this note\n"
+		);
 
-	pCB->MessBox(buffer,"·-=<YanniS> YMidi Midi Output v." YMIDI_VERSION "=-·",0);
+pCB->MessBox(buffer,"·-=<YanniS> YMidi Midi Output v." YMIDI_VERSION "=-·",0);
+
 }
 
 void mi::SequencerTick()
@@ -131,12 +127,10 @@ void mi::ParameterTweak(int par, int val)
 	switch(par)
 	{
 	case 0:
-		if(pars.portidx != val){
-			FreeMidi();
+		{
+			///\todo: finish this.
 			pars.portidx = val;
-			InitMidi();
 		}
-		break;
 	case 1: numChannel[0].SetPatch(val); pars.patch1=val; break;
 	case 2: numChannel[1].SetPatch(val); pars.patch2=val; break;
 	case 3: numChannel[2].SetPatch(val); pars.patch3=val; break;
@@ -159,52 +153,34 @@ void mi::ParameterTweak(int par, int val)
 
 void mi::Stop()
 {
-	midiOutReset(handles[pars.portidx]);
+	for (int i=0;i<MIDI_TRACKS;i++)
+	{
+		numChannel[i].StopMidi();
+	}
 }
 
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch(param)
 	{
-	case 0: {
-		std::ostringstream out;
-		
-		if(value==0) out << "Default output (" << midiopencount[value] <<")";
-		else if(value <= MAX_MIDI_DEVICES) out << outputNames[value-1] <<"(" << midiopencount[value] <<")";
-		else out << "wrong index";
-		strcpy(txt,out.str().c_str());
-		return true;
-		}
-	case 1: strcpy(txt,GmNames[value]); return true;
-	case 2: strcpy(txt,GmNames[value]); return true;
-	case 3: strcpy(txt,GmNames[value]); return true;
-	case 4: strcpy(txt,GmNames[value]); return true;
-	case 5: strcpy(txt,GmNames[value]); return true;
-	case 6: strcpy(txt,GmNames[value]); return true;
-	case 7: strcpy(txt,GmNames[value]); return true;
-	case 8: strcpy(txt,GmNames[value]); return true;
-	case 9: strcpy(txt,GmNames[value]); return true;
-	case 10: {
-		switch(value) {
-		case 0:strcpy(txt,GmDrumSets[0]);break;
-		case 8:strcpy(txt,GmDrumSets[1]);break;
-		case 16:strcpy(txt,GmDrumSets[2]);break;
-		case 24:strcpy(txt,GmDrumSets[3]);break;
-		case 25:strcpy(txt,GmDrumSets[4]);break;
-		case 32:strcpy(txt,GmDrumSets[5]);break;
-		case 40:strcpy(txt,GmDrumSets[6]);break;
-		case 48:strcpy(txt,GmDrumSets[7]);break;
-		case 56:strcpy(txt,GmDrumSets[8]);break;
-		default:strcpy(txt,"-");break;
-		}
-		return true;
-	 }
-	case 11: strcpy(txt,GmNames[value]); return true;
-	case 12: strcpy(txt,GmNames[value]); return true;
-	case 13: strcpy(txt,GmNames[value]); return true;
-	case 14: strcpy(txt,GmNames[value]); return true;
-	case 15: strcpy(txt,GmNames[value]); return true;
-	case 16: strcpy(txt,GmNames[value]); return true;
+		///\todo: finish this.
+	case 0: strcpy(txt,"unimplemented"); return false;break;
+	case 1: strcpy(txt,GmNames[pars.patch1]); return true;break;
+	case 2: strcpy(txt,GmNames[pars.patch2]); return true;break;
+	case 3: strcpy(txt,GmNames[pars.patch3]); return true;break;
+	case 4: strcpy(txt,GmNames[pars.patch4]); return true;break;
+	case 5: strcpy(txt,GmNames[pars.patch5]); return true;break;
+	case 6: strcpy(txt,GmNames[pars.patch6]); return true;break;
+	case 7: strcpy(txt,GmNames[pars.patch7]); return true;break;
+	case 8: strcpy(txt,GmNames[pars.patch8]); return true;break;
+	case 9: strcpy(txt,GmNames[pars.patch9]); return true;break;
+	case 10: strcpy(txt,GmNames[pars.patch10]); return true;break;
+	case 11: strcpy(txt,GmNames[pars.patch11]); return true;break;
+	case 12: strcpy(txt,GmNames[pars.patch12]); return true;break;
+	case 13: strcpy(txt,GmNames[pars.patch13]); return true;break;
+	case 14: strcpy(txt,GmNames[pars.patch14]); return true;break;
+	case 15: strcpy(txt,GmNames[pars.patch15]); return true;break;
+	case 16: strcpy(txt,GmNames[pars.patch16]); return true;break;
 	default : return false;
 	}
 }
@@ -216,86 +192,50 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	else if (cmd == 0xC1)
 	{
 		Channel(channel).SetPatch(val&0x7F);
-		UpdatePatch(numC[channel],val&0x7F);
+		UpdatePatch(channel,val&0x7F);
 	}
 
-	if(note<=psycle::plugin_interface::NOTE_MAX) // Note on
+	if(note<120) // Note on
 	{
 		if ( ins != 255 ) assignChannel(channel,ins&0x0F);
 		if (notes[channel]!= -1) Channel(channel).Stop(notes[channel]);
-		Channel(channel).Play(note, (cmd == 0xCC || cmd == 0x0C)?val>>1:0x64);
+		Channel(channel).Play(note, (cmd == 0xCC || cmd == 0x0C)?val*0.5f:0x64);
 		notes[channel]=note;
 	}
-	else if (note==psycle::plugin_interface::NOTE_NOTEOFF && notes[channel]!= -1) // Note off
+	else if (note==120 && notes[channel]!= -1) // Note off
 	{
 		if ( ins != 255 ) assignChannel(channel,ins&0x0F);
 		Channel(channel).Stop(notes[channel]);
 		notes[channel]=-1;
 	}
-}
-void mi::MidiEvent(int channel, int midievent, int value) {
-	switch(midievent) {
-		case MIDI_NOTEOFF: MidiChannel(channel).Stop(value>>8);break;
-		case MIDI_NOTEON: MidiChannel(channel).Play(value>>8, value&0xFF);break;
-		case MIDI_PATCHCHANGE: {
-					MidiChannel(channel).SetPatch((value>>8)&0x7F);
-					UpdatePatch(channel,(value>>8)&0x7F);
-				  }
-				  break;
-		default:
-			MidiChannel(channel).SendMidi(MidiChannel(channel).BuildEvent(midievent, value >> 8, value&0x7F));
-		break;
-	}
-}
-void mi::InitMidi()
-{
-	GetMidiNames();
-	if(midiopencount[pars.portidx] < 0) midiopencount[pars.portidx]=0;
-	if(midiopencount[pars.portidx] == 0) {
-		if (!midiOutOpen(&handles[pars.portidx], (UINT)pars.portidx-1, 0, 0, CALLBACK_NULL) )
-		{
-			midiopencount[pars.portidx]++;
-		}
-	}
-	for(int i=0;i<MIDI_TRACKS; i++)
+	else if ( note == 123 )
 	{
-		numChannel[i].Init(handles[pars.portidx],i);
+		channel = ins&0x0F;
+		int command = ins&0xF0;
+
+		if (command == MIDI_PATCHCHANGE)
+		{
+			Channel(channel).SetPatch(cmd&0x7F);
+			UpdatePatch(channel,cmd&0x7F);
+		}
+		else Channel(channel).SendMidi(Channel(channel).BuildEvent(ins,cmd,val));
 	}
 }
 
-void mi::GetMidiNames()
+void mi::InitMidi()
 {
-	// get the number of MIDI input devices
-	int numDevs = midiOutGetNumDevs();
-	if(numDevs > MAX_MIDI_DEVICES) numDevs = MAX_MIDI_DEVICES;
-	
-	int idx = 0;
-	for(; idx < numDevs; idx++ )
+	if (!midiOutOpen(&handle, (UINT)-1, 0, 0, CALLBACK_NULL) )
 	{
-		std::ostringstream out;
-		MIDIOUTCAPS moc;
-		midiOutGetDevCaps( idx, &moc, sizeof( moc ) );
-		if(moc.wTechnology == MOD_MIDIPORT) out << "[POR] ";
-		else if(moc.wTechnology == MOD_SYNTH) out << "[SYN] ";
-		else if(moc.wTechnology == MOD_SQSYNTH) out << "[SQU] ";
-		else if(moc.wTechnology == MOD_FMSYNTH) out << "[FM] ";
-		else if(moc.wTechnology == MOD_MAPPER) out << "[MAP] ";
-		else if(moc.wTechnology == MOD_WAVETABLE) out << "[WAV] ";
-		else if(moc.wTechnology == MOD_SWSYNTH) out << "[SOF] ";
-		out << moc.szPname;
-		outputNames[idx] = out.str();
-	}
-	for(; idx < MAX_MIDI_DEVICES; idx++) {
-		outputNames[idx] = "";
+		midiopencount++;
 	}
 }
 
 void mi::FreeMidi()
 {
-	midiopencount[pars.portidx]--;
-	if (midiopencount[pars.portidx]==0) 
+	midiopencount--;
+	if (!midiopencount) 
 	{
-		midiOutClose(handles[pars.portidx]);
+		midiOutClose(handle);
 	}
 }
 void mi::UpdatePatch(int channel,int patch)

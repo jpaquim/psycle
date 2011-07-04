@@ -19,50 +19,42 @@
 
 #pragma once
 
+// 500 millis. at 44100 Hz
+#define COMB_FILTER_BUFFER_SIZE 22051
+#define COMB_FILTER_MAX_DELAY   (COMB_FILTER_BUFFER_SIZE - 1)
+
 class CombFilter
 {
 
 private:
-	float* buffer;
-	int size;
+	float buffer[COMB_FILTER_BUFFER_SIZE];
 	unsigned int writein, readout;
 
 public:
 
-	CombFilter():buffer(0),size(0),readout(0),writein(0)
+	CombFilter()
 	{
+		readout = writein = 0;
+		for(register int i = 0; i < COMB_FILTER_BUFFER_SIZE; ++i)
+			buffer[i] = 0.0f;
 	}
 
 	~CombFilter()
 	{
-		if(buffer) delete[] buffer;
 	}
-	inline void changeSamplerate(int newSR)
-	{
-		int const newSize=newSR/2 + 1;
-		if (buffer) delete[] buffer;
-		buffer = new float[newSize];
-		for(int i=0; i<newSize; i++ ) {
-			buffer[i]=0.0f;
-		}
-		size=newSize;
-		if(readout>= size) {
-			readout = 0;
-			writein = 0;
-		}
-	}
+
 	inline void setDelay(unsigned int samples)
 	{
-		if((writein = readout + samples) >= size)
-			writein -= size;
+		if((writein = readout + samples) >= COMB_FILTER_BUFFER_SIZE)
+			writein -= COMB_FILTER_BUFFER_SIZE;
 	}
 
 	inline float process(float sample)
 	{
 		buffer[writein] = sample;
 		sample = buffer[readout];
-		if(++writein == size) writein = 0;
-		if(++readout == size) readout = 0;
+		if(++writein == COMB_FILTER_BUFFER_SIZE) writein = 0;
+		if(++readout == COMB_FILTER_BUFFER_SIZE) readout = 0;
 		return sample;
 	};
 };

@@ -22,16 +22,16 @@
 #include <psycle/plugin_interface.hpp>
 #include "../vdabout.hpp"
 #include "lowpassfilter.hpp"
-enum {
-	LTHRESHOLD=0,
-	RTHRESHOLD,
-	LOCKTHRESHOLD,
-	PREGAIN,
-	CUTOFF,
-	RESONANCE,
-	LOWPASS,
-	GAIN
-};
+
+#define LTHRESHOLD    0
+#define RTHRESHOLD    1
+#define LOCKTHRESHOLD 2
+#define PREGAIN       3
+#define CUTOFF        4
+#define RESONANCE     5
+#define LOWPASS       6
+#define GAIN          7
+#define PARNUM        8
 
 #define PARCOLS 2
 
@@ -63,9 +63,6 @@ enum {
 #define MIN_LOCK           0
 #define MAX_LOCK           1
 #define SET_LOCK           1
-
-using psycle::plugin_interface::CMachineParameter;
-using psycle::plugin_interface::MPF_STATE;
 
 CMachineParameter const parLeftThreshold =
 {
@@ -119,38 +116,38 @@ CMachineParameter const *pParameters[] =
 	&parGain
 };
 
-psycle::plugin_interface::CMachineInfo const MacInfo (
-	psycle::plugin_interface::MI_VERSION,
-	psycle::plugin_interface::EFFECT,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
+CMachineInfo const MacInfo(
+	MI_VERSION,
+	EFFECT,																																				// flags
+	PARNUM,																																				// numParameters
+	pParameters,																												// Pointer to parameters
 #ifdef _DEBUG
-	VDPLUGINNAME " (Debug Build)",
+	VDPLUGINNAME " (Debug Build)",												// name
 #else
-	VDPLUGINNAME,
+	VDPLUGINNAME,																												// name
 #endif
-	VDSHORTNAME,
-	VDAUTHOR,
-	VDCOMMAND,
+	VDSHORTNAME,																												// short name
+	VDAUTHOR,																																// author
+	VDCOMMAND,																																// A command, that could be use for open an editor, etc...
 	PARCOLS
 );
 
-class mi : public psycle::plugin_interface::CMachineInterface {
-	public:
-		mi();
-		virtual ~mi();
+class mi : public CMachineInterface
+{
+public:
+	mi();
+	virtual ~mi();
 
-		virtual void Init();
-		virtual void Command();
-		virtual void ParameterTweak(int par, int val);
-		virtual void SequencerTick();
-		virtual bool DescribeValue(char *txt,int const param, int const value);
-		virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
-	private:
-		float lThreshold, rThreshold;
-		LowPassFilter leftFilter, rightFilter;
-		float pregain, gain;
-		int lastThresholdModified;
-		int lowPassOn;
-		int currentSR;
+	virtual void Init();
+	virtual void Command();
+	virtual void ParameterTweak(int par, int val);
+	virtual void SequencerTick();
+	virtual bool DescribeValue(char *txt,int const param, int const value);
+	virtual void Work(float *pleftsamples, float *prightsamples, int samplesnum, int tracks);
+private:
+	float lThreshold, rThreshold;
+	LowPassFilter leftFilter, rightFilter;
+	float pregain, gain;
+	int lastThresholdModified;
+	int lowPassOn;
 };

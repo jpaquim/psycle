@@ -1,65 +1,72 @@
-// CTrack Declaration file
-
 #pragma once
 #include <psycle/plugin_interface.hpp>
-#include <universalis/stdlib/cstdint.hpp>
+// Here It goes the "mi" declaration. It has been moved to M3Track.h due to some compiling requirements.
 #include <cstdlib>
 #include <cmath>
+#include <cstdint>
 
-using namespace universalis::stdlib;
+// CTrack Declaration file (M3Track.h)
 
-unsigned int const MAX_SIMUL_TRACKS = 8;
+extern float freqTab[120];
+extern float coefsTab[4*128*128*8];
+extern float LFOOscTab[0x10000];
+extern signed short WaveTable[5][2100];
 
-class mi;
+#define MAX_SIMUL_TRACKS 8
 
-enum {
-	EGS_NONE=0,
-	EGS_ATTACK,
-	EGS_SUSTAIN,
-	EGS_RELEASE
-};
+
+#define EGS_NONE 0
+#define EGS_ATTACK 1
+#define EGS_SUSTAIN 2
+#define EGS_RELEASE 3
+
+
 
 class tvals {
-public:
-	uint8_t Note;
-	uint8_t Wave1;
-	uint8_t PulseWidth1;
-	uint8_t Wave2;
-	uint8_t PulseWidth2;
-	uint8_t DetuneSemi;
-	uint8_t DetuneFine;
-	uint8_t Sync;
-	uint8_t MixType;
-	uint8_t Mix;
-	uint8_t SubOscWave;
-	uint8_t SubOscVol;
-	uint8_t PEGAttackTime;
-	uint8_t PEGDecayTime;
-	uint8_t PEnvMod;
-	uint8_t Glide;
+	public:
+		std::uint8_t Note;
+		std::uint8_t Wave1;
+		std::uint8_t PulseWidth1;
+		std::uint8_t Wave2;
+		std::uint8_t PulseWidth2;
+		std::uint8_t DetuneSemi;
+		std::uint8_t DetuneFine;
+		std::uint8_t Sync;
+		std::uint8_t MixType;
+		std::uint8_t Mix;
+		std::uint8_t SubOscWave;
+		std::uint8_t SubOscVol;
+		std::uint8_t PEGAttackTime;
+		std::uint8_t PEGDecayTime;
+		std::uint8_t PEnvMod;
+		std::uint8_t Glide;
 
-	uint8_t Volume;
-	uint8_t AEGAttackTime;
-	uint8_t AEGSustainTime;
-	uint8_t AEGReleaseTime;
+		std::uint8_t Volume;
+		std::uint8_t AEGAttackTime;
+		std::uint8_t AEGSustainTime;
+		std::uint8_t AEGReleaseTime;
 
-	uint8_t FilterType;
-	uint8_t Cutoff;
-	uint8_t Resonance;
-	uint8_t FEGAttackTime;
-	uint8_t FEGSustainTime;
-	uint8_t FEGReleaseTime;
-	uint8_t FEnvMod;
+		std::uint8_t FilterType;
+		std::uint8_t Cutoff;
+		std::uint8_t Resonance;
+		std::uint8_t FEGAttackTime;
+		std::uint8_t FEGSustainTime;
+		std::uint8_t FEGReleaseTime;
+		std::uint8_t FEnvMod;
 
-	uint8_t LFO1Dest;
-	uint8_t LFO1Wave;
-	uint8_t LFO1Freq;
-	uint8_t LFO1Amount;
-	uint8_t LFO2Dest;
-	uint8_t LFO2Wave;
-	uint8_t LFO2Freq;
-	uint8_t LFO2Amount;
+		std::uint8_t LFO1Dest;
+		std::uint8_t LFO1Wave;
+		std::uint8_t LFO1Freq;
+		std::uint8_t LFO1Amount;
+		std::uint8_t LFO2Dest;
+		std::uint8_t LFO2Wave;
+		std::uint8_t LFO2Freq;
+		std::uint8_t LFO2Amount;
 };
+
+
+
+class mi;
 
 class CTrack {
 	public:
@@ -74,15 +81,10 @@ class CTrack {
 		int MSToSamples(double const ms);
 
 	public:
-		static float freqTab[120];
-		static float coefsTab[4*128*128*8];
-		static float LFOOscTab[0x10000];
-		static signed short WaveTable[5][2100];
-
 		int _channel;
 
 		// ......Osc......
-		uint8_t Note;
+		std::uint8_t Note;
 		const short *pwavetab1, *pwavetab2, *pwavetabsub;
 		int SubOscVol;
 		bool noise1, noise2;
@@ -174,7 +176,7 @@ class CTrack {
 
 };
 
-class mi : public psycle::plugin_interface::CMachineInterface {
+class mi : public CMachineInterface {
 	public:
 		mi();
 		virtual ~mi();
@@ -190,14 +192,13 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 
 		void ComputeCoefs( float *coefs, int f, int r, int t);
 		// skalefuncs
-		inline float Cutoff(int v);
-		inline float Resonance(float v);
-		inline float Bandwidth(int v);
 		inline float LFOFreq( int v);
 		inline float EnvTime( int v);
+		inline float Cutoff( int v);
+		inline float Resonance( float v);
+		inline float Bandwidth( int v);
 
 		float TabSizeDivSampleFreq;
-		
 
 	private:
 
@@ -208,24 +209,26 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 // scale functions
 
 inline float mi::Cutoff(int v) {
-	return std::pow((v + 5.0) / (127.0 + 5.0), 1.7) * 13000.0 + 30.0;
+	return std::pow((v + 5) / (127.0 + 5), 1.7) * 13000 + 30;
 }
 
 inline float mi::Resonance(float v) {
-	return std::pow(v / 127.0, 4.0) * 150.0 + 0.1;
+	return std::pow(v / 127.0, 4) * 150 + 0.1;
 }
 
 inline float mi::Bandwidth(int v) {
-	return std::pow(v / 127.0, 4.0) * 4.0 + 0.1;
+	return std::pow(v / 127.0, 4) * 4 + 0.1;
 }
 
 inline float mi::LFOFreq(int v) {
-	return (std::pow((v + 8.0) / (116.0 + 8.0), 4.0) - 0.000017324998565270) * 40.00072;
+	return (std::pow((v + 8) / (116.0 + 8), 4) - 0.000017324998565270) * 40.00072;
 }
 
 inline float mi::EnvTime(int v) {
-	return std::pow((v + 2.0) / (127.0 + 2.0), 3.0) * 10000;
+	return std::pow((v + 2) / (127.0 + 2), 3) * 10000;
 }
+
+
 ////////////////////////////////
 ////////////////////////////////
 ////////////////////////////////
@@ -366,10 +369,10 @@ inline float CTrack::Filter( float x) {
 	if(LFO_Reso) {
 		r = Resonance +
 		((pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount) >> (7 + 8));
+		if(r < 0) r = 0;
+		else if(r > 127) r = 127;
 	} else r = Resonance;
 
-	if(r < 0) r = 0;
-	else if(r > 127) r = 127;
 
 	int ofs = ((c << 7) + r) << 3;
 	y =
@@ -381,9 +384,7 @@ inline float CTrack::Filter( float x) {
 
 	y2 = y1; y1 = y;
 	x2 = x1; x1 = x;
-	///\fixme
 	return y;
-	//return x;
 }
 
 inline void CTrack::NewPhases() {
@@ -467,8 +468,8 @@ inline void CTrack::NewPhases() {
 		// PW1
 		if(LFO_PW1) { // LFO_PW_Mod
 			currentcenter1 = Center1 + (float)pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount / (127.0 * 0x8000);
-			if(currentcenter1 <= 0) currentcenter1 = 0.00001f;
-			else if(currentcenter1 >= 1) currentcenter1 = 0.99999f;
+			if(currentcenter1 < 0) currentcenter1 = 0;
+			else if(currentcenter1 > 1) currentcenter1 = 1;
 		} else // No LFO
 			currentcenter1 = Center1;
 			PhScale1A = 0.5 / currentcenter1;
@@ -477,8 +478,8 @@ inline void CTrack::NewPhases() {
 			// PW2
 			if(LFO_PW2) { //LFO_PW_Mod
 				currentcenter2 = Center2 + (float)pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount / (127.0 * 0x8000);
-				if(currentcenter2 <= 0) currentcenter2 = 0.00001f;
-				else if(currentcenter2 >= 1) currentcenter2 = 0.99999f;
+				if(currentcenter2 < 0) currentcenter2 = 0;
+				else if(currentcenter2 > 1) currentcenter2 = 1;
 			} else // No LFO
 				currentcenter2 = Center2;
 				

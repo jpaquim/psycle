@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief compiler-independant meta-information about the compiler
 
@@ -18,49 +18,29 @@
 	///\{
 		/// compiler name
 		#define DIVERSALIS__COMPILER__NAME <string>
-		#undef DIVERSALIS__COMPILER__NAME // was just defined to insert documentation.
 
 		/// compiler name and version, as a string.
 		#define DIVERSALIS__COMPILER__VERSION__STRING <string>
-		#undef DIVERSALIS__COMPILER__VERSION__STRING // was just defined to insert documentation.
 
 		/// compiler version, as an integral number.
 		/// This combines the major, minor and patch numbers into a single integral number.
 		#define DIVERSALIS__COMPILER__VERSION <number>
-		#undef DIVERSALIS__COMPILER__VERSION // was just defined to insert documentation.
 
 		/// compiler version, major number.
 		#define DIVERSALIS__COMPILER__VERSION__MAJOR <number>
-		#undef DIVERSALIS__COMPILER__VERSION__MAJOR // was just defined to insert documentation.
 
 		/// compiler version, minor number.
 		#define DIVERSALIS__COMPILER__VERSION__MINOR <number>
-		#undef DIVERSALIS__COMPILER__VERSION__MINOR // was just defined to insert documentation.
 
 		/// compiler version, patch number.
 		#define DIVERSALIS__COMPILER__VERSION__PATCH <number>
-		#undef DIVERSALIS__COMPILER__VERSION__PATCH // was just defined to insert documentation.
 
 		/// compiler version, application binary interface number.
 		#define DIVERSALIS__COMPILER__VERSION__ABI <number>
-		#undef DIVERSALIS__COMPILER__VERSION__ABI // was just defined to insert documentation.
 	///\}
 
 	///\name meta-information about the compiler's features
 	///\{
-		/// indicates the compiler does not generate code for a processor.
-		/// e.g.: netbeans-cnd or eclipse-cdt c++ indexers, the doxygen documentation compiler, resource compilers, etc.
-		#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-		#undef DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // was just defined to insert documentation.
-
-		/// indicates the compiler supports run-time type information. i.e.: typeid, dynamic_cast<>
-		#define DIVERSALIS__COMPILER__FEATURE__RTTI
-		#undef DIVERSALIS__COMPILER__FEATURE__RTTI // was just defined to insert documentation.
-
-		/// indicates the compiler supports exception handling. i.e.: try, catch, throw
-		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
-		#undef DIVERSALIS__COMPILER__FEATURE__EXCEPTION // was just defined to insert documentation.
-
 		/// indicates the compiler supports pre-compilation.
 		#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
 		#undef DIVERSALIS__COMPILER__FEATURE__PRE_COMPILTION // was just defined to insert documentation.
@@ -73,14 +53,23 @@
 		#define DIVERSALIS__COMPILER__FEATURE__WARNING
 		#undef DIVERSALIS__COMPILER__FEATURE__WARNING // was just defined to insert documentation.
 
+		/// indicates the compiler does not generate code for a processor.
+		/// e.g.: the eclipse cdt c++ indexer, the doxygen documentation compiler, resource compilers, etc.
+		#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+		#undef DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE // was just defined to insert documentation.
+
 		///\todo doc
 		#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		#undef DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS // was just defined to insert documentation.
 
+		/// indicates the compiler supports run-time type information. i.e.: typeid, dynamic_cast<>
+		#define DIVERSALIS__COMPILER__FEATURE__RTTI
+
+		/// indicates the compiler supports exception handling. i.e.: try, catch, throw
+		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
+
 		/// indicates the compiler supports open-mp.
-		/// returns an integer representing the date of the OpenMP specification implemented.
 		#define DIVERSALIS__COMPILER__FEATURE__OPEN_MP _OPENMP
-		#undef DIVERSALIS__COMPILER__FEATURE__OPEN_MP // was just defined to insert documentation.
 
 		/// indicates the compiler supports some assembler language.
 		#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
@@ -107,16 +96,8 @@
 
 		/// llvm clang, autodetected via __clang__.
 		/// To see the predefined macros, run: clang++ -xc++ -std=c++98 -dM -E /dev/null
-		/// Note that clang disguises itself as gcc, so you will also have
-		/// DIVERSALIS__COMPILER__GNU defined.
 		#define DIVERSALIS__COMPILER__CLANG
 		#undef DIVERSALIS__COMPILER__CLANG // was just defined to insert documentation.
-
-		/// intel icc, autodetected via __INTEL_COMPILER.
-		/// Note that icc disguises itself as gcc or msvc, so you will also have
-		/// DIVERSALIS__COMPILER__GNU or DIVERSALIS__COMPILER__MICROSOFT defined.
-		#define DIVERSALIS__COMPILER__INTEL
-		#undef DIVERSALIS__COMPILER__INTEL // was just defined to insert documentation.
 
 		/// bcc, autodetected via __BORLAND__.
 		#define DIVERSALIS__COMPILER__BORLAND
@@ -130,11 +111,11 @@
 		/// doxygen documentation compiler. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__DOXYGEN
 
-		/// netbeans-cnd c++ indexer. This is not autodetected and has to be manually defined.
+		/// netbeans c++ indexer. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__NETBEANS
 		#undef DIVERSALIS__COMPILER__NETBEANS // was just defined to insert documentation.
 
-		/// eclipse-cdt c++ indexer. This is not autodetected and has to be manually defined.
+		/// eclipse cdt c++ indexer. This is not autodetected and has to be manually defined.
 		#define DIVERSALIS__COMPILER__ECLIPSE
 		#undef DIVERSALIS__COMPILER__ECLIPSE // was just defined to insert documentation.
 
@@ -143,6 +124,8 @@
 		#undef DIVERSALIS__COMPILER__RESOURCE // was just defined to insert documentation.
 	///\}
 #endif
+
+
 
 /**********************************************************************************/
 // now the real work
@@ -158,8 +141,8 @@
 		#define __cplusplus
 	#endif
 
-////////////////////////////
-// netbeans-cnd c++ indexer
+////////////////////////
+// netbeans c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__NETBEANS
 	#define DIVERSALIS__COMPILER
@@ -167,7 +150,7 @@
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 
 ///////////////////////////
-// eclipse-cdt c++ indexer
+// eclipse cdt c++ indexer
 
 #elif defined DIVERSALIS__COMPILER__ECLIPSE
 	#define DIVERSALIS__COMPILER
@@ -182,7 +165,7 @@
 	#define DIVERSALIS__COMPILER__GNU
 	#if defined __clang__
 		#define DIVERSALIS__COMPILER__CLANG
-		#if 0 ///\todo  use gnu version for now
+		#if 0 // use gnu version for now
 			#define DIVERSALIS__COMPILER__VERSION__MAJOR __clang__major__
 			#define DIVERSALIS__COMPILER__VERSION__MINOR __clang__minor__
 			#define DIVERSALIS__COMPILER__VERSION__PATCH __clang__patchlevel__
@@ -190,7 +173,7 @@
 		#define DIVERSALIS__COMPILER__NAME "clang"
 	#elif defined __INTEL_COMPILER
 		#define DIVERSALIS__COMPILER__INTEL
-		#define DIVERSALIS__COMPILER__NAME "icc-gcc"
+		#define DIVERSALIS__COMPILER__NAME "icc"
 	#else
 		#define DIVERSALIS__COMPILER__NAME "gcc"
 	#endif
@@ -211,17 +194,9 @@
 	#define DIVERSALIS__COMPILER__FEATURE__WARNING
 
 	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
-	#define DIVERSALIS__COMPILER__ASSEMBLER__ATT ///\todo needs autodetection since gcc also supports intel asm
+	#define DIVERSALIS__COMPILER__ASSEMBLER__ATT
 
 	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-
-	#if defined __GXX_RTTI
-		#define DIVERSALIS__COMPILER__FEATURE__RTTI
-	#endif
-
-	#if defined __GXX_EXPERIMENTAL_CXX0X__
-		#define DIVERSALIS__COMPILER__FEATURE__CXX0X
-	#endif
 
 	// check if version supports pre-compilation. gcc < 3.4 does not support pre-compilation.
 	#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
@@ -290,6 +265,10 @@
 	#endif
 	#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	
+	#if defined _OPENMP // defined when compiling with -openmp, returns an integer representing the date of the OpenMP specification implemented
+		#define DIVERSALIS__COMPILER__FEATURE__OPEN_MP _OPENMP
+	#endif
+
 	#if defined _CPPRTTI // defined for code compiled with -GR (Enable Run-Time Type Information).
 		#define DIVERSALIS__COMPILER__FEATURE__RTTI
 	#else
@@ -319,29 +298,16 @@
 	#endif
 #endif
 
-/////////
-// C++0x
 
-#if __cplusplus > 199711
-	#define DIVERSALIS__COMPILER__FEATURE__CXX0X
-#endif
 
-///////////////////
-// openmp standard
-
-// defined when compiling with:
-// -fopenmp on gcc or alike,
-// -openmp on msvc.
-// returns an integer representing the date of the OpenMP specification implemented.
-#if defined _OPENMP
-	#define DIVERSALIS__COMPILER__FEATURE__OPEN_MP _OPENMP
-#endif
 
 /**********************************************************************************/
 // consistency check
 
+
+
 #if !defined DIVERSALIS__COMPILER
-	#error unkown compiler
+	#error Unkown compiler.
 #endif
 	
 #if !defined __cplusplus && !defined DIVERSALIS__COMPILER__RESOURCE

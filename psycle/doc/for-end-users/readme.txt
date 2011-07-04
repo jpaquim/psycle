@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.8.6.1  ---------
+				------------------------------- 1.8.8 beta 3 ---
 --------------------------------------------------------------------------------
 
 contents:
@@ -41,7 +41,8 @@ Here some features of Psycle:
   sampling rate, 8/16 and 24bits, mono or stereo.
 - 70+ Native Plugins (generators & effects), most of them open-source and with 
   an easy to use API to create new ones.
-- Support for VST1 and VST2 plugin standard.
+- Multithreaded audio engine.
+- Support for VST1 and VST2 plugin standard, including support for JBridge.
 - Importing of .xm's/.s3m's/.it's/.mod's.
 - Exporting to wav, as well as recording realtime to .wav
 - Configurable Keyboard Layout
@@ -57,7 +58,6 @@ at the bottom of this document)
 
 
 Note:
-Plans for supporting DXi are there, but it's not a primary work.
 LADSPA is supported in a forthcoming linux version, and DSSI support is planned
 
 --------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ There is no SDK ready, so the best way to start a new one is getting the sources
 of an existing one. Arguru synth is an usual template.
 
 
-Psycle 1.8.6.1 includes a freeware VST pack containing software from the following vendors:
+Psycle 1.8.5 and above includes a freeware VST pack containing software from the following vendors:
 
 Digital Fish Phones	( http://www.digitalfishphones.com/ )
 DiscoDSP		( http://www.discodsp.com/ )
@@ -137,23 +137,19 @@ Oatmeal by Fuzzpilz  	( http://bicycle-for-slugs.org/ )
 * Psycle (windows/MFC)
 
 	1.8: Current stable version. Development will follow with bugfixes and
-	     new additions which don't imply big changes to the underlying
-	     code.
+	    new additions which don't imply big changes to the underlying
+	    code.
 
-	1.9/2.0: The existing source code of 1.9 will be discarded and 1.8.5
-	     will serve as the next 1.9 codebase. It is expected to add
-	     multichannel audio input/output, audio recording (live input),
-	     separation of sources to different libs and multipattern sequence
-	     ability, without losing the tracker feeling. Don't expect a Cubase,
-	     instead, a tracker that would allow to make a pattern with pieces.
+	1.9/2.0: Right now future development is not firmly defined. Ideas include
+		taking current 1.8.8 sources, modify them (but not redo them) to
+		be more like the current trunk, and add features in order of precedence.
 
 * qpsycle (linux/QT windows/QT)
 
-	alpha: A native linux version is being developed with some code that
-	       will be used for Psycle 1.9. It already contains a multipattern
-	       sequencer, the posibility to have more effect columns, support
-	       for LADSPA plugins and a new fileformat to contain all these
-	       new additions.
+	alpha: The native linux version hasn't received any new revision lately.
+		Qpsycle's idea has always been multiplatform and be more like a sequencer
+		instead of a classic-type tracker. Nothing is written in stone related this
+		version.
 
 For up to date information, don't forget to visit the Developement forums on
 Psycledelics site.
