@@ -1,0 +1,109 @@
+psycle-core, brief description.
+-------------------------------
+
+Psycle-core is designed around event based data, as opposed to sheets (patterns) of data.
+This is a fundamental change that affects most parts of psycle ( the player, the way machines
+receive data and generate audio, and obviously, the way song stores this data).
+
+Data:
+-----
+* Event:
+Defined in patternevent.h as class PatternEvent
+It is a superset of the psyclemfc PatternEntry (defined in songstructs.h). It encapsulates in a class an entry (note, aux, mac, cmd,par), and extends it allowing more than one command
+Note: Its current design might need a small change (removing legacy columns and adding them as extendables)
+
+* Pattern:
+Defined in singlepattern.h as class SinglePattern
+It is no longer a 2D array of events. Instead, it is a vector of PatternLines, which are placed with a timestamp.
+Timestamp is defined as beats ( 1.0 -> beat 1 , 2.65 , beat 2, and 65ths). A SinglePattern always starts at beat 0.
+PatternLine (defined in patternline.h) is needed when two events happen at the same time, so patternline is again a vector of events, which are placed in a track.
+Example:
+(1 beat = 4 lines)
+
+L|T0  | T1  |
+0|C-4 | C-5 |
+1|--- | off |
+2|E-4 | --- |
+3|--- | --- |
+
+Is converted to:
+
+SinglePattern
+(
+0.0,PatternLine( (0,PatternEvent(C-4)) , (1,PatternEvent(C-5)))
+,
+0.25,PatternLine( (1,PatternEvent(off)) )
+,
+0.5,PatternLine( (0,PatternEvent(E-4)) )
+)
+
+So the player gets the pattern, sets to a beat position, and if there's something there, reads it, else does nothing.
+
+Note: Its current design might need a medium size change. While the concept works, it might be overcomplicated for its function. Desired goals were: fast way for the player to reproduce it (list of ordered events), while not being too hard for the graphics to generate the visual representation of it.
+
+*Sequence:
+Defined in patternsequence.h as PatternSequence
+It is no longer single-pattern, but multi-pattern (more than one pattern at a time).
+It is a vector of sequenceLines.
+Beware! SquenceLine is the *timeline* for a group of patterns, not a line as in a pattern. This means that the Sequence has as many lines as the width of the sequence, not the length.
+SequenceLines are a vector of SequenceEntries, with a timestamp (timestamp in beats, since the start of the sequence).
+Explanation:  When a user adds the pattern to the sequence, it is giving us this information: Which pattern, at which timestap and at which line of the sequence. So the application chooses the line of the sequence, and adds a SequenceEntry for that pattern in it.
+So.. what's a SequenceEntry?
+A pattern contains a number of events, and would always play them. In a sequence, we could wish that the pattern is not played completely, but just half of it. The SequenceEntry adds this extra information the sequence, indicating at which place of the pattern the beat starts and at which it ends, instead of playing it from the start to the end.
+
+
+There's also a special line in the sequence, which contains "GlobalEvents". In other words, things like tempo, "pattern" loops and such will now be placed separated to the pattern. The list of globalpatterns is not closed yet, since some might be more global than others ( muting a machine might be something more sensitive to do in a pattern than in a global line)
+
+
+
+Machines:
+---------
+Due to the above change, Machines have changed partially the way they generate sound.
+As such, the functions "Tick(), Tick(channel,event) and Work()" are removed/replaced by others, as such:
+
+*Tick() 
+This is maintained for backwards compatibility. A machine should be able to generate it by itself it it needs so, in which case it could decide the granularity that it desires. See Machines::GenerateAudio for how to do it.
+
+*Tick(channel,event)
+This is maintained for backwards compatibility. A machine right now as a vector of ordered events that happen during the GenerateAudio() timeframe. It can easily generate a loop (while(events){processevent();popevent();}). (ok, the loop is a bit more complicated, but not that much).
+
+*Work()
+It has been renamed to GenerateAudioInTicks() and is maintained for backwards compatibility only. An important note is that it is no longer needed to call Machine::Work().
+
+*GenerateAudio()
+This function has been added to replace all the three above. It is no longer tied to ticks, which means that numSamples should be near constant (depending on audiodriver buffers). Each call, the machine should check the event vector (workEvents), and generate audio according to those events.
+
+*the way they are generated was changed slightly in psycle-core respect of psyclemfc. Especially, it doesn't use the cache (should be coded), and several parameters were added to the constructors.
+
+Example:
+pMachine = new Dummy(callbacks, index, pSong);
+
+First parameter is a callback for Player. It is similar to CFxCallback for natives or "AudioMaster" for VST plugins. Its addition was in order to remove the Global::xxx dependencies.
+Second parameter is the machine index in the song ( old _macIndex, new id() )
+Third parameter is a pointer to the song they belong to. This is only used in a couple of machines for their close relation to the song data ( duplicator mac, and mixer need to know other machines ). Probably could be worked out and have a reduced set of the information ready from the callbacks.
+
+
+
+Wires: 
+------
+It is an incomplete work from 1.9alpha. I believe they aren't used at all right now, instead, using the classical (psyclemfc) way.
+There are some changes, though. Functions to create wires, delete wires and such were added.
+
+
+Player:
+-------
+Due to the above changes, The way the Player works has changed. Specially the part that determines which notes should be played.
+Basically, there's a function that checks which sequenceEntries are active at the current timestamp, read the events inside of the SinglePatterns, and adds them as events to the corresponding machine before calling GenerateAudio().
+
+Player is still singlethreaded, which is something that should be changed. Multi-io is not implemented either (thats for what the Wires in 1.9 started to be developped). 
+
+
+
+psyxfilter
+----------
+Psycle loaders/savers were divided in separated files, instead of keeping them inside the song class.
+for such, there is psy2filter, psy3filter and psy4filter. psyfilter is a factory to load the correct psyx filter.
+
+
+
+That's about it. Obviously, there are many more changes due to the port, but that's not what this document explains.
