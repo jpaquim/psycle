@@ -1,0 +1,126 @@
+
+-- Psycle 1.67 (If it Comes. If not, many of these will come with Psycle 2) --
+------------------------------------------------------------------------------
+
+* Sampler Machine/Wave Ed:
+--------------------------
+	bug: 	 portamento to note slides too much. (can anyone test this for me?)
+	feature: just have an checkbox to enable or disable the Amplitude, or the whole synthesis (phongshade)
+	feature: Instruments Support ( *.xi , *.iti. Maybe more)
+		 * samples mapped by key
+		 * maybe: samples mapped by velocity?
+	feature: Improve Filter support.
+		 * twk Control
+		 * maybe: allow filter cutoff/res mapping to velocity
+	feature: volume slides/arpeggio
+	feature: ability to set loop points. (+ ping-pong loops)
+	feature: Easier way to load Samples.
+	feature: Toolbar for the Wave Editor.
+	feature: Note playback in WaveEd (Problem: Needs a sampler Machine. The wave preview is not adecuated)
+
+* GUI (pattern):
+----------------
+	bug:	 Select with mouse when playing gives problems
+	feature: FT2 Jumps to the top of a pattern when you move from one to another (Kris)
+	feature: Another option would be turning off mouse move cursor, I liked being able to select something
+		 and instantly copy it to where i have the cursor (Kris)
+	feature: maybe: MultiPattern View (The code is not made in the best way)
+	feature: Easier way to select patterns (having +-10 steps) 
+	feature: Better key navigation in patterns. When editing a new pattern, create it and put it on the sequence.
+	feature: MORE Keyboard shortcuts 
+
+* GUI (machines):
+-----------------
+	feature: Saving all the missing settings to registry (like follow song, class of plugin..)
+	feature: Clone Machine Button
+	feature: Replace Machine by another.
+	feature: Prevent duplicate names when creating Machines ( FeedMe , FeedMe 2...)
+	feature: Directories in "Add new machine" (Sorting with directories)
+		 Remember previous used and add "class/type" selection to registry
+	feature: Internal Fx Gui to Native Gui Conversion (including wiredialog)
+		 Create a new "universal" MachineFrame class, for all plugins
+		 (Needs a few more changes in the class definitions)
+	feature: Center Parameters window 
+	feature: VST/Native machine Windows : ESC = close (Problem: can't close within the CWnd!!!)
+	feature: VST: support for plugin resize. (Problem: Needs to know the View Class!)
+	feature: VST param highlight when modifying.
+		 When changing a param with the Graphic VST GUI, select the corresponding param in
+		 the list (and update the bar as well). When,which, and to which value can be
+		 known using the audioMasterCallback (Problem: Needs to know the View Class!)
+	bug:	 VST: Changing a parameter, changing to another window, and returning to Psycle causes
+		 that parameter to get the old value again (Scrollbar problem. Solution: Update the scrollbar)
+	bug: 	 VST: Param value+1 when selecting (Scrollbar precision)
+	feature: Option to hide Parameters in VST GUI.
+	feature: Add Presets in a "tab" under Parameters (easy switching/testing)!
+	bug:     Crash bug when loading a big .fxb file, problem with deleting, etc...  (Rep. by Vibra)
+		 Fix:Basically, make ONLY .fxb for VST's.
+	feature: Really good looking new Master Machine.(Graphics under res\MasterMachine)
+	bug:	 JMDrum is buggy (Crashes sometimes)
+
+
+* Player Engine:
+----------------
+	bug: 	 In some rare cases, when opening a song, psycle produces noise.
+		 (See spiritualized.psy. Open, play, reopen -> bug. Not always!) Weird bug. Can't say more.
+	bug:	 "MidiInput.cpp(359): warning #68: integer conversion resulted in a change of sign"
+	bug:	 plugins which make use of the "SaveData" (native) or "SaveChunk" (VST’) can cause a crash if they are
+		 missing when you load a song. Won’t get fixed by now. Needs a fileformat change.
+	bug:	 New Note in Quadrasid does not reinitialize the Envelope. (Bug? This doesn't happen on freebase)
+	bug:	 DirectSound Output is a bit buggy.Crashes and bad sound reported. 
+		 ->Won’t Fix. Waiting for new code for Psycle 2<-
+	feature: Maybe: New command "twc" which will send a machine command (like note delay, to say a silly one)
+		 to the machine indicated by gen, and ___>to_the_channel_indicated_by_"inst"<____!
+		 (asked by Pikari)
+	feature: pattern repeat (loop) and song repeat (asked by Vir|us)
+	feature: Note Delay to VST's
+
+
+* Importing:
+------------
+
+	bug: It doesn't add the machines necessary to play all notes.
+	bug: if you import an XM file and save, the finetune of the samples is not saved (Fileformat limitation)
+	feature: Add option for the user to create samplers for instruments
+	feature: IT importing
+
+
+
+
+
+-- Possible Features For Psycle 2 --
+------------------------------------
+
+* Editing Capabilities:
+-----------------------
+	* Multi pattern Sequencing
+	* Multiple Editors (Not only tracker view)
+	* Parameter Automation  ( Envelopes for Parameters )
+	* Live Parameter change Recording.
+	* tws (Tweak Slide) Command to slide the tweak. (asked by _sue_)
+	* Velocity/Panning/other_weird column to pattern data
+	* Appregiator: One "template" note, notes "produced" by the appregiator in a different colour.
+	* "zip"-able columns.
+	* Tracker track? (for bpm, global volume...)
+	? Notes of current selected machine marked with a different colour
+	? Maybe notes/etc, of muted machines shown in grey
+	? Time signatures
+
+* Machines :
+------------
+
+	* the morphing fft-filter machine!!!! http://psycle.pastnotecut.org/thread.php?threadid=39&boardid=1&styleid=1
+	* Multiple Inputs/Outputs
+	* MIDI generator - instead of generating audio, generates MIDI out - sync could be an issue.
+	* Sequencers: Posibility to control more than one machine at the same time
+	* Compressor/limiter
+	* Flanger/Chorus
+
+* Audio/Control:
+----------------
+
+	* ASIO driver I/O
+	* audio record support (Like, from microphone)
+	* "MIDI Controlling <-> Machine <-> Machine" Interface = MIDI mapping
+	  (allow to map midi commands to change different parameters)
+
+	* Ogg/Winamp Plugin export?
