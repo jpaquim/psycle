@@ -37,8 +37,8 @@
 #undef NDEBUG
 #include <cassert>
 
-float inline uint8_t_to_float(uint8_t x) {
-	union { float f; uint32_t i; } u; u.f = 32768.0f; u.i |= x;
+float inline uint8_t_to_float(std::uint8_t x) {
+	union { float f; std::uint32_t i; } u; u.f = 32768.0f; u.i |= x;
 	return (u.f - 32768.0f) * 256.0f ;
 }
 
