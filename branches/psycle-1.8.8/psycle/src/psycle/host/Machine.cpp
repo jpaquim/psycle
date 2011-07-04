@@ -31,11 +31,6 @@
 #include <universalis/os/aligned_alloc.hpp>
 #include "cpu_time_clock.hpp"
 
-#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#include <universalis.hpp>
-#endif
 namespace psycle
 {
 	namespace host
@@ -47,71 +42,21 @@ namespace psycle
 		char* Master::_psName = "Master";
 		bool Machine::autoStopMachine = false;
 
-		void Machine::crashed(std::exception const & e) throw()
-		{
-			bool minor_problem(false);
-			bool crash(false);
-			{
-				exceptions::function_error const * const function_error(dynamic_cast<exceptions::function_error const * const>(&e));
-				if(function_error)
-				{
-					#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-						#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-					#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-						universalis::cpu::exception const * const translated(dynamic_cast<universalis::cpu::exception const * const>(function_error->exception()));
-						if(translated)
-						{
-							crash = true;
-							switch(translated->code())
-							{
-								// grows the fpu exception mask so that each type of exception is only reported once
-								case STATUS_FLOAT_INEXACT_RESULT:    fpu_exception_mask().inexact(true)     ; minor_problem = true ; break;
-								case STATUS_FLOAT_DENORMAL_OPERAND:  fpu_exception_mask().denormal(true)    ; minor_problem = true ; break;
-								case STATUS_FLOAT_DIVIDE_BY_ZERO:    fpu_exception_mask().divide_by_0(true) ;                        break;
-								case STATUS_FLOAT_OVERFLOW:          fpu_exception_mask().overflow(true)    ;                        break;
-								case STATUS_FLOAT_UNDERFLOW:         fpu_exception_mask().underflow(true)   ; minor_problem = true ; break;
-								case STATUS_FLOAT_STACK_CHECK:                                                                       break;
-								case STATUS_FLOAT_INVALID_OPERATION: fpu_exception_mask().invalid(true)     ;                        break;
-							}
-						}
-					#endif
-				}
-			}
-			if(!minor_problem)
-			{
-				///\todo do we need thread synchronization?
-				///\todo gui needs to update
-				crashed_ = true;
-				_bypass = true;
-				_mute = true;
-			}
+		void Machine::crashed(std::exception const & e) throw() {
+			///\todo do we need thread synchronization?
+			///\todo gui needs to update
+			crashed_ = true;
+			_bypass = true;
+			_mute = true;
 			std::ostringstream s;
-			s << "Machine: " << _editName;
-			if(GetDllName()) s << ": " << GetDllName();
-			s << std::endl << e.what() << std::endl;
-			if(minor_problem)
-			{
-				s << "This is a minor problem: the machine won't be disabled and further occurences of the problem won't be reported anymore.";
-				if(loggers::warning()) loggers::warning()(s.str());
-			}
-			else
-			{
-				s
-					<< "This is a serious error: the machine has been set to bypassed/muted to prevent it from making the host crash."
-					<< std::endl
-					<< "You should save your work to a new file, and restart the host.";
-				if(crash)
-				{
-					//loggers::crash(s.str()); // already colorized and reported as crash by the exception constructor
-					if(loggers::exception()) loggers::exception()(s.str());
-				}
-				else
-				{
-					if(loggers::exception()) loggers::exception()(s.str());
-				}
-			}
-			MessageBox(0, s.str().c_str(), crash ? "Exception (Crash)" : "Exception (Software)", MB_OK | (minor_problem ? MB_ICONWARNING : MB_ICONERROR));
-			///\todo in the case of a minor_problem, we would rather continue the execution at the point the cpu/os exception was triggered. Force this we need to use __except instead of catch.
+			s
+				<< "Machine: " << _editName << std::endl
+				<< "DLL: "<< GetDllName() << std::endl
+				<< e.what() << std::endl
+				<< "The machine has been set to bypassed/muted to prevent it from making the host crash." << std::endl
+				<< "You should save your work to a new file, and restart the host.";
+			if(loggers::exception()) loggers::exception()(s.str());
+			MessageBox(0, s.str().c_str(), "Error", MB_OK | MB_ICONERROR);
 		}
 
 
@@ -126,11 +71,6 @@ namespace psycle
 
 		Machine::Machine()
 			: crashed_()
-			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-			#elif	PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-				, fpu_exception_mask_()
-			#endif
 			, _macIndex(0)
 			, _type(MACH_UNDEFINED)
 			, _mode(MACHMODE_UNDEFINED)
@@ -208,11 +148,6 @@ namespace psycle
 		}
 		Machine::Machine(Machine* mac)
 			: crashed_()
-#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-#elif	PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-			, fpu_exception_mask_()
-#endif
 			, _macIndex(mac->_macIndex)
 			, _type(mac->_type)
 			, _mode(mac->_mode)
@@ -1082,12 +1017,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 		int Master::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
-			#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-				#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-			#elif PSYCLE__CONFIGURATION__OPTION__ENABLE__FPU_EXCEPTIONS
-				universalis::cpu::exceptions::fpu::mask fpu_exception_mask(this->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-			#endif
-
 			float mv = helpers::value_mapper::map_256_1(_outDry);
 				
 			float *pSamples = _pMasterSamples;

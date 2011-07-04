@@ -528,11 +528,6 @@ namespace psycle
 								nanoseconds const t1(cpu_time_clock());
 								accumulate_processing_time(t1 - t0);
 							}
-							#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-							#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-								universalis::cpu::exceptions::fpu::mask fpu_exception_mask(pSendMachine->fpu_exception_mask()); // (un)masks fpu exceptions in the current scope
-							#endif
 							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 							pRetMachine->recursive_process(numSamples, measure_cpu_usage);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.

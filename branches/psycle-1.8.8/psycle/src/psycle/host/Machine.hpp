@@ -8,12 +8,6 @@
 #include <universalis/compiler/location.hpp>
 #include <universalis/stdlib/date_time.hpp>
 #include <universalis/os/loggers.hpp>
-
-#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-	#include <universalis/cpuexceptions/fpu.hpp>
-#endif
 #include <stdexcept>
 namespace psycle
 {
@@ -179,35 +173,24 @@ namespace psycle
 				private:
 					bool                crashed_;
 			///\}
-			///\name crash handling ... fpu exception mask
+
+			///\name cpu time usage measurement
 			///\{
-				#if !defined PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-					#error PSYCLE__CONFIGURATION__FPU_EXCEPTIONS isn't defined! Check the code where this error is triggered.
-				#elif PSYCLE__CONFIGURATION__FPU_EXCEPTIONS
-					public:
-						universalis::cpu::exceptions::fpu::mask::type const inline & fpu_exception_mask() const throw() { return fpu_exception_mask_; }
-						universalis::cpu::exceptions::fpu::mask::type       inline & fpu_exception_mask()       throw() { return fpu_exception_mask_; }
-					private:
-						universalis::cpu::fpu::exceptions::mask::type                fpu_exception_mask_;
-				#endif
+				public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
+
+				public:  universalis::stdlib::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+				private: universalis::stdlib::nanoseconds accumulated_processing_time_;
+				protected: void accumulate_processing_time(universalis::stdlib::nanoseconds ns) throw() {
+						if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+							std::ostringstream s;
+							s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
+							universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						} else accumulated_processing_time_ += ns;
+					}
+
+				public:  uint64_t processing_count() const throw() { return processing_count_; }
+				protected: uint64_t processing_count_;
 			///\}
-	///\name cpu time usage measurement
-	///\{
-		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
-
-		public:  universalis::stdlib::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-		private: universalis::stdlib::nanoseconds accumulated_processing_time_;
-		protected: void accumulate_processing_time(universalis::stdlib::nanoseconds ns) throw() {
-				if(universalis::os::loggers::warning() && ns.get_count() < 0) {
-					std::ostringstream s;
-					s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
-					universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				} else accumulated_processing_time_ += ns;
-			}
-
-		public:  uint64_t processing_count() const throw() { return processing_count_; }
-		protected: uint64_t processing_count_;
-	///\}
 
 #if 0 // v1.9
 			///\name each machine has a type attribute so that we can make yummy switch statements
