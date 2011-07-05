@@ -1,4 +1,5 @@
 
+#include <psycle/host/detail/project.private.hpp>
 #include "SpecialKeys.hpp"
 
 namespace psycle { namespace host {

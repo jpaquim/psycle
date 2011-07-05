@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "Psy3Saver.hpp"
 #include "ProgressDialog.hpp"
 #include "Zap.hpp"

@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CKeyConfigDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include <afxwin.h>
 

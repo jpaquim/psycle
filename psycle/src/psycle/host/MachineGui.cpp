@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "MachineGui.hpp"
 
 #include "MainFrm.hpp"

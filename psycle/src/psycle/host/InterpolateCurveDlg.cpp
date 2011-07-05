@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CInterpolateCurve.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "InterpolateCurveDlg.hpp"
 
 #include <psycle/helpers/hexstring_to_integer.hpp>

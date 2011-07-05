@@ -1,10 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
+
 #pragma once
-
-#include "namespaces.hpp"
+#include <psycle/host/detail/project.hpp>
 #include "Version.hpp"
-
 #include <psycle/core/constants.h>
 #include <psycle/core/commands.h>
 #include <psycle/helpers/math.hpp>

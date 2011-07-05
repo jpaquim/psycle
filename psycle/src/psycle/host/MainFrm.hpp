@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CMainFrame.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "ChildView.hpp"
 #include "ExListBox.h"
 #include "InfoDlg.hpp"

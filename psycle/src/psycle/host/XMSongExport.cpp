@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSongExport.hpp"
 #include <psycle/core/song.h>
 #include <psycle/core/machine.h>

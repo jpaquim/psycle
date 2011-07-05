@@ -1,5 +1,5 @@
 ///\file
-///\brief configuration of the build.
+///\brief public build config settings, exposed to clients.
 #pragma once
 
 /// Define to 1 to use plugins in the build dir, 0 otherwise.
@@ -22,19 +22,3 @@
 
 ///\todo always 1 now. need to clean up all references
 #define PSYCLE__CONFIGURATION__USE_PSYCORE 1
-
-/**************************************************************************************************/
-/// string describing the configuration of the build.
-#define PSYCLE__CONFIGURATION(EOL) \
-	"compiler build tool chain = " DIVERSALIS__COMPILER__VERSION__STRING EOL \
-	"rms vu = " UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__CONFIGURATION__RMS_VUS) EOL \
-	"debugging = " PSYCLE__CONFIGURATION__DEBUG
-
-	/// value to show in the string describing the configuration of the build.
-	#if defined NDEBUG
-		#define PSYCLE__CONFIGURATION__DEBUG "off"
-	#else
-		#define PSYCLE__CONFIGURATION__DEBUG "on"
-	#endif
-
-#include <universalis/compiler/stringize.hpp> // for UNIVERSALIS__COMPILER__STRINGIZE

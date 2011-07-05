@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "PatDeleteCommand.hpp"
 #include "PatternView.hpp"
 

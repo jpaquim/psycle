@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewMachine.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "NewMachine.hpp"
 
 #include "Configuration.hpp"

@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CNativeGui.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "NativeGui.hpp"
 
 #include "ChildView.hpp"

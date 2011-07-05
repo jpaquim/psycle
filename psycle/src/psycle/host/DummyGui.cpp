@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "DummyGui.hpp"
 
 namespace psycle { namespace host {

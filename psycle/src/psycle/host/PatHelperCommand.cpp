@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "PatHelperCommand.hpp"
 #include "PatternView.hpp"
 #include "Project.hpp"

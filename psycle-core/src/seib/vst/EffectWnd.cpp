@@ -29,6 +29,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace seib { namespace vst {
 
+/********************************************************************************/
+// CEffectGui
+
+bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect) {
+	if(!pRect) pEffect->EditGetRect(&pRect);
+	if(!pRect) return false;
+	rcClient.left = rcClient.top = 0;
+	rcClient.right = pRect->right - pRect->left;
+	rcClient.bottom = pRect->bottom - pRect->top;
+	return true;
+}
+
+
+/********************************************************************************/
+// CEffectWnd
+
 VkeysT CEffectWnd::VKeys[] = {
 	{ VK_BACK,      VKEY_BACK      },
 	{ VK_TAB,       VKEY_TAB       },
@@ -37,7 +53,9 @@ VkeysT CEffectWnd::VKeys[] = {
 	{ VK_PAUSE,     VKEY_PAUSE     },
 	{ VK_ESCAPE,    VKEY_ESCAPE    },
 	{ VK_SPACE,     VKEY_SPACE     },
-	//  { VK_NEXT,      VKEY_NEXT      },
+	#if 0
+	{ VK_NEXT,      VKEY_NEXT      },
+	#endif
 	{ VK_END,       VKEY_END       },
 	{ VK_HOME,      VKEY_HOME      },
 	{ VK_LEFT,      VKEY_LEFT      },
@@ -86,95 +104,48 @@ VkeysT CEffectWnd::VKeys[] = {
 	{ VK_SHIFT,     VKEY_SHIFT     },
 	{ VK_CONTROL,   VKEY_CONTROL   },
 	{ VK_MENU,      VKEY_ALT       },
-	//  { VK_EQUALS,    VKEY_EQUALS    },
+	#if 0
+	{ VK_EQUALS,    VKEY_EQUALS    },
+	#endif
 };
 
-
-/*****************************************************************************/
-/* GetWindowSize : calculates the effect window's size                       */
-/*****************************************************************************/
-
-bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect)
-{
-	if (!pRect)
-		pEffect->EditGetRect(&pRect);
-	if (!pRect)
-		return false;
-
-	rcClient.left = rcClient.top = 0;
-	rcClient.right = pRect->right - pRect->left;
-	rcClient.bottom = pRect->bottom - pRect->top;
-	return true;
-}
-
-/*===========================================================================*/
-/* CEffectWnd class members                                                  */
-/*===========================================================================*/
-
-CEffectWnd::CEffectWnd(CEffect* effect)
-: pEffect(effect)
-{
-}
-CEffectWnd::~CEffectWnd()
-{
-	///?
-}
-
-
-/*****************************************************************************/
-/* MakeVstKeyCode : converts from Windows to VST                             */
-/*****************************************************************************/
-
-void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode &keyCode)
-{
-	if ((nChar >= 'A') && (nChar <= 'Z'))
+void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode & keyCode) {
+	if(nChar >= 'A' && nChar <= 'Z')
 		keyCode.character = nChar + ('a' - 'A');
 	else
 		keyCode.character = nChar;
 	keyCode.virt = 0;
-	for (int i = 0; i < (sizeof(VKeys)/sizeof(VKeys[0])); i++)
-	{
-		if (nChar == VKeys[i].vkWin)
-		{
+	for(int i = 0; i < sizeof VKeys / sizeof *VKeys; ++i) {
+		if(nChar == VKeys[i].vkWin) {
 			keyCode.virt = VKeys[i].vstVirt;
 			break;
 		}
 		keyCode.modifier = 0;
-		if (GetKeyState(VK_SHIFT) & 0x8000)
+		if(GetKeyState(VK_SHIFT) & 0x8000)
 			keyCode.modifier |= MODIFIER_SHIFT;
-		if (GetKeyState(VK_CONTROL) & 0x8000)
+		if(GetKeyState(VK_CONTROL) & 0x8000)
 			keyCode.modifier |= MODIFIER_CONTROL;
-		if (GetKeyState(VK_MENU) & 0x8000)
+		if(GetKeyState(VK_MENU) & 0x8000)
 			keyCode.modifier |= MODIFIER_ALTERNATE;
 	}
 }
 
-/*****************************************************************************/
-/* SaveBank saves bank to file                                               */
-/*****************************************************************************/
-
-bool CEffectWnd::SaveBank(std::string sName)
-{
+bool CEffectWnd::SaveBank(std::string const & sName) {
 	pEffect->SetChunkFile(sName.c_str());
 	CFxBank b = pEffect->SaveBank();
-
-	if (b.Initialized())
-	{
+	if(b.Initialized())
 		return b.Save(sName.c_str());
-	}
-	else return false;
+	else
+		return false;
 }
 
-bool CEffectWnd::SaveProgram(std::string sName)
-{
+bool CEffectWnd::SaveProgram(std::string const & sName) {
 	pEffect->SetChunkFile(sName.c_str());
 	CFxProgram p = pEffect->SaveProgram();
-
-	if (p.Initialized())
-	{
+	if(p.Initialized())
 		return p.Save(sName.c_str());
-	}
-	else return false;
+	else
+		return false;
 }
 
 }}

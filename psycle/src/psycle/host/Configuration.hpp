@@ -1,6 +1,7 @@
 ///\file
 ///\interface psycle::host::Configuration.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include <cstddef>
 #include <psycle/audiodrivers/audiodriver.h>
@@ -13,7 +14,7 @@ namespace psycle {
 	}
 	namespace host {
 
-	#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
+	#define PSYCLE__PATH__REGISTRY__ROOT "Software\\" PSYCLE__NAME "\\" PSYCLE__BRANCH
 	#define PSYCLE__PATH__REGISTRY__CONFIGKEY "Configuration--" UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MAJOR) "." UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__MINOR)
 	#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 	#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"

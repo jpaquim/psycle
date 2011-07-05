@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CVstParamList.
+#include <psycle/host/detail/project.private.hpp>
 #include "VstParamList.hpp"
 
 ///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?

@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
+#include <psycle/host/detail/project.private.hpp>
 #include "GearTracker.hpp"
 
 #include <psycle/helpers/dsp.hpp>

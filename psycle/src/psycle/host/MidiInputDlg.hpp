@@ -1,6 +1,7 @@
 ///\file
 ///\interface psycle::host::CMidiInputDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include <vector>
 

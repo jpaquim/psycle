@@ -1,6 +1,7 @@
 // TransformPatternDlg.cpp : implementation file
 //
 
+#include <psycle/host/detail/project.private.hpp>
 #include "TransformPatternDlg.hpp"
 
 #include "PatternView.hpp"

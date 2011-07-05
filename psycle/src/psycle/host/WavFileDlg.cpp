@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWavFileDlg.
+#include <psycle/host/detail/project.private.hpp>
 #include "WavFileDlg.hpp"
 
 #include <psycle/core/song.h>

@@ -1,8 +1,8 @@
 ///\file
 ///\interface file for psycle::host::COutputDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include "configuration_options.hpp"
 #include <psycle/audiodrivers/audiodriver.h>
 
 namespace psycle { namespace host {

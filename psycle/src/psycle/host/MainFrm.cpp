@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CMainFrame.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "MainFrm.hpp"
 
 #include "Project.hpp"

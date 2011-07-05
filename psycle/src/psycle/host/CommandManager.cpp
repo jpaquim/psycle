@@ -2,6 +2,7 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 
+#include <psycle/host/detail/project.private.hpp>
 #include "CommandManager.hpp"
 
 namespace psycle { namespace host {

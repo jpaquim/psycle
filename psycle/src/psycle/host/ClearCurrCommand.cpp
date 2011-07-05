@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "ClearCurrCommand.hpp"
 #include "PatternView.hpp"
 
