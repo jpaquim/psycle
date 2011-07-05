@@ -25,7 +25,7 @@ VS_VERSION_INFO VERSIONINFO
 		{
 			BLOCK "040904b0" // 0x0409 == lang-id for en_US, 0x04b0 == 1200 == unicode charset
 			{
-				VALUE "CompanyName", PSYCLE__BRANCH "\r\n" PSYCLE__SOURCE_URL
+				VALUE "CompanyName", PSYCLE__BRANCH
 				VALUE "LegalCopyright", PSYCLE__COPYRIGHT
 				VALUE "License", PSYCLE__LICENSE
 
