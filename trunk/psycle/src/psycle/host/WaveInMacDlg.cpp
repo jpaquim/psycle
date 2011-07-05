@@ -1,4 +1,4 @@
-
+#include <psycle/host/detail/project.private.hpp>
 #include "WaveInMacDlg.hpp"
 
 #include "Configuration.hpp"

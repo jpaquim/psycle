@@ -1,6 +1,5 @@
 #pragma once
-#include "namespaces.hpp"
-#include "configuration_options.hpp"
+#include <psycle/host/detail/project.hpp>
 
 namespace psycle { namespace host {
 

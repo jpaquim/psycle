@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 
 #include <psycle/core/patternevent.h>

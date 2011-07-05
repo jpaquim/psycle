@@ -3,6 +3,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CChildView.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "ChildView.hpp"
 
 #include <cderr.h>

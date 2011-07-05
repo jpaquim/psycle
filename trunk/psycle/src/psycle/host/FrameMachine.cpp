@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "FrameMachine.hpp"
 
 #include "MainFrm.hpp"

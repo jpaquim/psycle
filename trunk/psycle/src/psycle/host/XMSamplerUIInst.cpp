@@ -5,6 +5,7 @@
  *  $Revision$
  */
 
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUIInst.hpp"
 
 #include "XMSongLoader.hpp"

@@ -1,6 +1,7 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 namespace psycle { namespace host{
 
@@ -426,4 +427,5 @@ struct s3madlibheader
 };
 
 }}
-#pragma pack()
+
+#pragma pack(pop)

@@ -3,6 +3,8 @@
 
 ///\todo The use of song class could be removed. It only needs to have the current selected sample
 // and in psycore, the InstPreview has been moved to the Sampler class.
+
+#include <psycle/host/detail/project.private.hpp>
 #include "WaveEdFrame.hpp"
 
 #include "ProjectData.hpp"

@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CGreetDialog.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "GreetDialog.hpp"
 
 namespace psycle { namespace host {

@@ -17,14 +17,12 @@
 *           plugin one wraps the CEffect into a Machine class
 */
 
-#ifndef PSYCLE__CORE__VSTHOST__INCLUDED
-#define PSYCLE__CORE__VSTHOST__INCLUDED
-
+#pragma once
 #include <psycle/core/detail/project.hpp>
 
 #ifndef DIVERSALIS__OS__MICROSOFT
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning ################# UNIMPLEMENTED #################
+		#warning ################# VST HOST UNIMPLEMENTED ON NON-WINDOWS SYSTEMS #################
 	#endif
 	namespace psycle { namespace core { namespace vst {
 		class host;
@@ -35,10 +33,9 @@
 	#include "internalkeys.hpp"
 	#include <seib/vst/CVSTHost.Seib.hpp>
 	#include <map>
+	namespace psycle { namespace core{ namespace vst {
 
 	using namespace seib::vst;
-
-	namespace psycle { namespace core{ namespace vst {
 
 	// Dialog max ticks for parameters.
 	const int quantize = 65535;
@@ -111,6 +108,6 @@
 			MachineKey currentKey;
 			Machine::id_type currentId;
 	};
+
 	}}}
-#endif
 #endif

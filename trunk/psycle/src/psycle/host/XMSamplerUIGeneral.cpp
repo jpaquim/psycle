@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUIGeneral.hpp"
 
 #include <psycle/core/xminstrument.h>

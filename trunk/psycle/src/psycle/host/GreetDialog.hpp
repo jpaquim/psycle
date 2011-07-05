@@ -1,6 +1,7 @@
-#pragma once
 ///\file
 ///\brief interface file for psycle::host::CGreetDialog.
+#pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 namespace psycle { namespace host {

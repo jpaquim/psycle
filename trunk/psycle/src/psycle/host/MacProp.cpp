@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CMacProp.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "MacProp.hpp"
 
 #include "MachineGui.hpp"

@@ -25,16 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ******************************************************************************/
 
 #pragma once
-
 #include <psycle/core/detail/project.hpp>
-
-//////////////////////////////////////////////////////////////////////////
-// This is part of Psycle, to catch the exceptions that happen when interacting
-// with the plugins. To use your own, replace 
-// PSYCLE__HOST__CATCH_ALL(*this) by whatever you find appropiate, like
-// catch(...) {} 
-#include <psycle/core/exceptions.h> // for throw.
-//////////////////////////////////////////////////////////////////////////
 
 // steinberg's headers are unable to correctly detect the platform,
 // so we need to detect the platform ourselves,
@@ -50,9 +41,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /// Tell the SDK that we want to support all the VST specs, not only VST2.4
 #define VST_FORCE_DEPRECATED 0
 
-//VST header files
+// VST header files
 #include <vst2.x/aeffectx.h>
 #include <vst2.x/vstfxstore.h>
+
+//////////////////////////////////////////////////////////////////////////
+// This is part of Psycle, to catch the exceptions that happen when interacting
+// with the plugins. To use your own, replace 
+// PSYCLE__HOST__CATCH_ALL(*this) by whatever you find appropiate, like
+// catch(...) {} 
+#include <psycle/core/exceptions.h> // for throw.
+//////////////////////////////////////////////////////////////////////////
 
 namespace seib { namespace vst {
 

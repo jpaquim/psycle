@@ -1,4 +1,5 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Command.hpp"
 #include <psycle/core/pattern.h>
 

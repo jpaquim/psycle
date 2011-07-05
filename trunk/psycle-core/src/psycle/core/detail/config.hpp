@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2009-2010 members of the psycle project http://psycle.sourceforge.net
+// copyright 2009-2011 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef PSYCLE__CORE__DETAIL__CONFIG__INCLUDED
-#define PSYCLE__CORE__DETAIL__CONFIG__INCLUDED
+///\file
+///\brief public build config settings, exposed to clients.
 #pragma once
 
-#ifndef PSYCLE__CORE__SHARED // always a shared lib for now
+/// define this when building/built as a dll
 #define PSYCLE__CORE__SHARED
-#endif
-
-#endif

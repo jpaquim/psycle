@@ -1,4 +1,5 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "SeqHelperCommand.hpp"
 
 namespace psycle { namespace host {

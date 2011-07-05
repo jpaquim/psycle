@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdInsertSilenceDialog.
+#include <psycle/host/detail/project.private.hpp>
 #include "WaveEdInsertSilenceDialog.hpp"
 
 namespace psycle { namespace host {

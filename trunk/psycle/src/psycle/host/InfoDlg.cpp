@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "InfoDlg.hpp"
 #include "Configuration.hpp"
 #include "projectdata.hpp"

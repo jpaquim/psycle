@@ -1,13 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::CSongpDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 namespace psycle {
-namespace core {
-	class Song;
-}
-namespace host {
+	namespace core {
+		class Song;
+	}
+	namespace host {
 
 /// song dialog window.
 class CSongpDlg : public CDialog {

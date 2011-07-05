@@ -2,6 +2,7 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 namespace psycle {

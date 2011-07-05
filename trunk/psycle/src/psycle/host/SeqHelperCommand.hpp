@@ -2,6 +2,7 @@
 // copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
 
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Command.hpp"
 
 // This class offers help to prepare undo/redo storage for SeqView commands

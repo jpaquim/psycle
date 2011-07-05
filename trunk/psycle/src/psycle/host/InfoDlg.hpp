@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CInfoDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include <psycle/core/cpu_time_clock.hpp>
 

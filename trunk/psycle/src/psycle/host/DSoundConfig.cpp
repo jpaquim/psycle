@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "DSoundConfig.hpp"
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT

@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "Configuration.hpp"
 #include "Registry.hpp"
 

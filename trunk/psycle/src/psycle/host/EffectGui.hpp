@@ -1,4 +1,5 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "MachineGui.hpp"
 #include "Psycle.hpp"
 

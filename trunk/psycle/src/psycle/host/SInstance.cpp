@@ -19,6 +19,7 @@ All rights reserved.
 
 /////////////////////////////////  Includes  //////////////////////////////////
 
+#include <psycle/host/detail/project.private.hpp>
 #include "SInstance.h"
 
 
