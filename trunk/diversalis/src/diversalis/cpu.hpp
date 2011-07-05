@@ -123,16 +123,16 @@
 		#undef DIVERSALIS__CPU__IA // was just defined to insert documentation.
 
 		/// x86 instruction set.\n
-		/// 9 == 64-bit amd k8/opteron/athlon64/athlon-fx (sse2), 64-bit intel nocona/emt64.\n
-		/// 8 == 32-bit intel prescott (sse3).\n
-		/// 7 == 32-bit intel pentium-4 (sse2).\n
-		/// 6 == 32-bit i80686 pentium-m (sse2), pentium3/athlon-4/athlon-xp/athlon-mp (sse1), althon/athlon-thunderbird (sse1 prefetch, enhanced 3d-now), k6-2/3 (3d-now), k6 (mmx), pentium2 (mmx), pentium-pro (no mmx).\n
-		/// 5 == 32-bit i80586 pentium1, pentium-mmx.\n
-		/// 4 == 32-bit i80486+487.\n
-		/// 3 == 32-bit i80386dx+387 (excluding the bridled i386sx).\n
-		/// 2 == 16-bit i80286.\n
-		/// 1 == 16-bit i8086 (excluding the bridled i8088).\n
-		/// 0 == 08-bit i8080/i8085.\n
+		/// 64 == 64-bit amd k8/opteron/athlon64/athlon-fx (sse2), 64-bit intel core2/nocona/emt64.\n
+		///  8 == 32-bit intel prescott (sse3).\n
+		///  7 == 32-bit intel pentium-4 (sse2).\n
+		///  6 == 32-bit i80686 pentium-m (sse2), pentium3/athlon-4/athlon-xp/athlon-mp (sse1), althon/athlon-thunderbird (sse1 prefetch, enhanced 3d-now), k6-2/3 (3d-now), k6 (mmx), pentium2 (mmx), pentium-pro (no mmx).\n
+		///  5 == 32-bit i80586 pentium1, pentium-mmx.\n
+		///  4 == 32-bit i80486+487.\n
+		///  3 == 32-bit i80386dx+387 (excluding the bridled i386sx).\n
+		///  2 == 16-bit i80286.\n
+		///  1 == 16-bit i8086 (excluding the bridled i8088).\n
+		///  0 == 08-bit i8080/i8085.\n
 		#define DIVERSALIS__CPU__X86 <number>
 		#undef DIVERSALIS__CPU__X86 // was just defined to insert documentation.
 	///\}
@@ -179,11 +179,15 @@
 
 #if defined DIVERSALIS__COMPILER__GNU
 	// There are so many processors supported ...
-	// gcc -E -dM -x c++ -std=c++98 -march=<xxx> -ffast-math -msse2 /dev/null
-	// where <xxx> in -march=<xxx> may be native, k8, nocona, ...
+	// gcc -E -dM -march=<xxx> -xc++ /dev/null
+	// where <xxx> in -march=<xxx> may be native, k8, core2, ...
 
-	#if defined __LP64__
+	#if defined __LP64__ // longs and pointers are 64 bits
 		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
+	#elif defined __LLP64__ // longs longs and pointers are 64 bits
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
+	#else
+		#define DIVERSALIS__CPU__SIZEOF_POINTER 4
 	#endif
 	
 	#if defined __powerpc__
@@ -207,17 +211,23 @@
 	#elif defined __ia64__
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__IA 2
-		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
 	#elif defined __x86_64__ // amd k8/opteron/athlon64/athlon-fx (sse2), intel core2 (ssse3) nocona/emt64 (sse3)
 		#define DIVERSALIS__CPU
-		#define DIVERSALIS__CPU__X86 9
-		#define DIVERSALIS__CPU__SIZEOF_POINTER 8
+		#define DIVERSALIS__CPU__X86 64
 	#elif \
 		defined __k8__     /* amd k8/opteron/athlon64/athlon-fx (sse2) */ || \
 		defined __core2__  /* intel core2 (ssse3) */ || \
-		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
 		#define DIVERSALIS__CPU
-		#define DIVERSALIS__CPU__X86 8
+		#define DIVERSALIS__CPU__X86 64
+	#elif \
+		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
+		// Beware:
+		// __x86_64__ is not defined, so the compiler targets 32-bit systems,
+		// and in this case "-march=prescott" is assimilated to nocona.
+		// In other words, __prescott__ is never defined, and instead it's reported as __nocona__,
+		// although it actually doesn't have 64-bit instructions like the nocona does!
+		#define DIVERSALIS__CPU
+		#define DIVERSALIS__CPU__X86 8 // not 64! (see above)
 	#elif defined __pentium4__ // <= intel pentium-4 (sse2)
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 7
@@ -291,7 +301,7 @@
 		#define DIVERSALIS__CPU__IA 2
 	#elif defined _M_X64 // 64-bit x86 amd or intel (but not necessarily _WIN64)
 		#define DIVERSALIS__CPU
-		#define DIVERSALIS__CPU__X86 9
+		#define DIVERSALIS__CPU__X86 64
 		#define DIVERSALIS__CPU__X86__SSE 2 ///\todo detect SSE3
 		///\todo detect 3d-now
 		#define DIVERSALIS__CPU__X86__MMX

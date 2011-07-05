@@ -45,3 +45,15 @@
 	/// __DATE__ and __TIME__ don't seem to work with msvc's resource compiler. It works with mingw's.
 	#define PSYCLE__BUILD__DATE "a sunny day"
 #endif
+
+//#ifdef UNICODE
+#if defined DIVERSALIS__CPU__X86 && DIVERSALIS__CPU__X86 >= 64
+	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined DIVERSALIS__CPU__X86
+	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined DIVERSALIS__CPU__IA
+	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+	#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
+//#endif
