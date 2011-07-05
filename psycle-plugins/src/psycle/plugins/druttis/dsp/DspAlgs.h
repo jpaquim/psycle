@@ -40,6 +40,8 @@ inline int v2m(int v)
 //
 //////////////////////////////////////////////////////////////////////
 
+#warning "portability: someone come back and centralise this"
+#pragma message("warning: portability: someone come back and centralise this")
 inline int f2i(float x)
 { 
 	#if defined _MSC_VER && defined _M_IX86

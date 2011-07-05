@@ -13,6 +13,8 @@ using namespace psycle::helpers::math;
 
 //////////////////////////////////////////////////////////////////////
 // floor2int : fast floor thing
+#warning "portability: someone come back and centralise this"
+#pragma message("warning: portability: someone come back and centralise this")
 inline int floor2i(float x) {
 	#if defined _MSC_VER && defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
 	__asm
