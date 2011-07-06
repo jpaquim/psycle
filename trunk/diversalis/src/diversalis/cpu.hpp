@@ -216,11 +216,10 @@
 		#define DIVERSALIS__CPU__X86 64
 	#elif \
 		defined __k8__     /* amd k8/opteron/athlon64/athlon-fx (sse2) */ || \
-		defined __core2__  /* intel core2 (ssse3) */ || \
+		defined __core2__  /* intel core2 (ssse3) */
 		#define DIVERSALIS__CPU
 		#define DIVERSALIS__CPU__X86 64
-	#elif \
-		defined __nocona__ /* intel prescott/nocona/emt64 (sse3) */
+	#elif 	defined __nocona__ // intel prescott/nocona/emt64 (sse3)
 		// Beware:
 		// __x86_64__ is not defined, so the compiler targets 32-bit systems,
 		// and in this case "-march=prescott" is assimilated to nocona.
