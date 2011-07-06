@@ -313,6 +313,8 @@
 	#define DIVERSALIS__COMPILER__RESOURCE
 	#define DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#if !defined DIVERSALIS__COMPILER
+		// Microsoft uses a separate (bogus) preprocessor for ressource compilation,
+		// called "rc", which as nothing to do with msvc's "cl".
 		#define DIVERSALIS__COMPILER
 		#define DIVERSALIS__COMPILER__NAME "rc"
 		#define DIVERSALIS__COMPILER__VERSION__STRING DIVERSALIS__COMPILER__NAME
@@ -321,6 +323,9 @@
 
 /////////
 // C++0x
+
+// table that lists C++0x features and their support in popular compilers
+// http://wiki.apache.org/stdcxx/C++0xCompilerSupport
 
 #if __cplusplus > 199711
 	#define DIVERSALIS__COMPILER__FEATURE__CXX0X

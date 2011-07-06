@@ -266,10 +266,10 @@ namespace detail {
 				// http://msdn.microsoft.com/en-us/library/ee417693.aspx
 				// http://stackoverflow.com/questions/644510/cpu-clock-frequency-and-thus-queryperformancecounter-wrong
 
-				static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE nanoseconds::rep last_time = 0;
-				static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE nanoseconds::rep last_frequency_time = 0;
-				static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE ::LONGLONG last_frequency(0);
-				static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE ::LONGLONG last_counter(0);
+				static thread_local nanoseconds::rep last_time = 0;
+				static thread_local nanoseconds::rep last_frequency_time = 0;
+				static thread_local ::LONGLONG last_frequency(0);
+				static thread_local ::LONGLONG last_counter(0);
 
 				if(!last_frequency_time || nanoseconds(last_time - last_frequency_time) > seconds(1)) {
 					last_frequency_time = last_time;

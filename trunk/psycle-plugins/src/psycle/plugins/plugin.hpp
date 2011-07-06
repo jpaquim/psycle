@@ -89,9 +89,9 @@ class Plugin : protected plugin_interface::CMachineInterface {
 								DefValue = 0;
 							}
 						public:
-							/// minimum lower bound authorized by the binary interface. (unsigned 16-bit integer)
+							/// minimum lower bound authorized by the GUI interface. (unsigned 16-bit integer)
 							int const static input_minimum_value = 0;
-							/// maximum upper bound authorized by the binary interface. (unsigned 16-bit integer)
+							/// maximum upper bound authorized by the GUI interface. (unsigned 16-bit integer)
 							int const static input_maximum_value = 0xffff;
 						private:
 							/// creates a scaled parameter ; you don't use this directly, but rather the public static creation functions.
@@ -309,17 +309,17 @@ class Plugin : protected plugin_interface::CMachineInterface {
 /// call this from your plugin's source file to export the necessary function from the dynamically linked library.
 #define PSYCLE__PLUGIN__INSTANTIATOR(typename) \
 	extern "C" { \
-		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		psycle::plugin::Plugin::Information const & \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
 		GetInfo() { return typename::information(); } \
 		\
-		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		psycle::plugin::Plugin & \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
 		CreateMachine() { return * new typename; } \
 		\
-		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		void \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
 		DeleteMachine(psycle::plugin::Plugin & plugin) { delete &plugin; } \

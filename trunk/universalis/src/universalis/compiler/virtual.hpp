@@ -4,10 +4,8 @@
 ///\file
 /// stuff related with virtual member functions
 
-#ifndef UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__VIRTUAL__INCLUDED
-#define UNIVERSALIS__COMPILER__DETAIL__PRAGMATIC__VIRTUAL__INCLUDED
 #pragma once
-
+#include <universalis/detail/project.hpp>
 #include "attribute.hpp"
 
 /// pure virtual classes
@@ -19,11 +17,12 @@
 	#define UNIVERSALIS__COMPILER__PURE_VIRTUAL
 #endif
 
-/// overridding of virtual member function
-#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
-	#define UNIVERSALIS__COMPILER__OVERRIDE override
+/// override keyword - overridding of virtual member function
+#if \
+	defined DIVERSALIS__COMPILER__FEATURE__CXX0X && \
+	/* gcc since version 4.7 http://gcc.gnu.org/gcc-4.7/changes.html */ \
+	defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION > 407000
+	// override is a keyword
 #else
-	#define UNIVERSALIS__COMPILER__OVERRIDE
-#endif
-
+	#define override
 #endif
