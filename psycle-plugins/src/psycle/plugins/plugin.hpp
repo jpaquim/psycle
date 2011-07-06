@@ -73,7 +73,7 @@ class Plugin : protected plugin_interface::CMachineInterface {
 					/// information describing a parameter
 					class Parameter : public plugin_interface::CMachineParameter {
 						public:
-							struct Types { enum Type { null = plugin_interface::MPF_NULL, state = plugin_interface::MPF_STATE }; };
+							struct Types { enum Type { null = plugin_interface::MPF_NULL, label = plugin_interface::MPF_LABEL, state = plugin_interface::MPF_STATE }; };
 							helpers::Scale const & scale;
 						public:
 							/// creates a separator with an optional label.
@@ -85,7 +85,12 @@ class Plugin : protected plugin_interface::CMachineInterface {
 								Description = name;
 								MinValue = 0;
 								MaxValue = 0;
-								Flags = Types::null;
+								if (name[0] == '\0') {
+									Flags = Types::null;
+								}
+								else {
+									Flags = Types::label;
+								}
 								DefValue = 0;
 							}
 						public:
