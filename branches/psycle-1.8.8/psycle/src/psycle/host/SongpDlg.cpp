@@ -1,10 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CSongpDlg.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "SongpDlg.hpp"
-
 #include "Song.hpp"
-
 namespace psycle { namespace host {
 
 		CSongpDlg::CSongpDlg(Song *song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)

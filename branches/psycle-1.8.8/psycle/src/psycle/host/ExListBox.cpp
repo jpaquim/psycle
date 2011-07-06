@@ -1,8 +1,8 @@
 // ExListBox.cpp : implementation file
 // Code originally from ran wainstein:
 // http://www.codeproject.com/combobox/cexlistboc.asp
-//
 
+#include <psycle/host/detail/project.private.hpp>
 #include "ExListBox.h"
 #include "MainFrm.hpp"
 

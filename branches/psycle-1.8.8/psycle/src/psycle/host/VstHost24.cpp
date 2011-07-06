@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "VstHost24.hpp"
 #include "Global.hpp"
 #include "Psycle.hpp"
@@ -524,8 +524,8 @@ namespace psycle
 			void plugin::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 			{
 				Machine::PreWork(numSamples,clear, measure_cpu_usage);
-				nanoseconds t0;
-				if(measure_cpu_usage) { t0 = cpu_time_clock(); }
+				cpu_time_clock::time_point t0;
+				if(measure_cpu_usage) t0 = cpu_time_clock::now();
 				if(!WillProcessReplace())
 				{
 					helpers::dsp::Clear(_pOutSamplesL, numSamples);
@@ -557,7 +557,7 @@ namespace psycle
 					}
 				}
 				if(measure_cpu_usage) {
-					nanoseconds const t1(cpu_time_clock());
+					cpu_time_clock::time_point const t1(cpu_time_clock::now());
 					Global::song().accumulate_routing_time(t1 - t0);
 				}
 			}

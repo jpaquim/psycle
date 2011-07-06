@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::WasapiConfig.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "WasapiConfig.hpp"
 #include "WasapiDriver.hpp"
 

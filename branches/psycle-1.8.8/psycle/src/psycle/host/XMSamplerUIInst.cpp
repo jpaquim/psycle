@@ -4,8 +4,9 @@
  *  $Date$
  *  $Revision$
  */
-
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUIInst.hpp"
+
 #include "PsycleConfig.hpp"
 
 #include "XMSongLoader.hpp"
@@ -1776,6 +1777,4 @@ void XMSamplerUIInst::CSampleAssignEditor::OnHScroll(UINT nSBCode, UINT nPos, CS
 
 	};
 
-}   // namespace
-}   // namespace
-
+}}

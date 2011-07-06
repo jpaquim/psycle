@@ -1,8 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::CSkinDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-
 #include "PsycleConfig.hpp"
 namespace psycle { namespace host {
 

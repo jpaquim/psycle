@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CProgressDialog.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "ProgressDialog.hpp"
 
 namespace psycle { namespace host {

@@ -1,7 +1,7 @@
 ///\file
 ///\implementation psycle::host::Registry.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "WinIniFile.hpp"
 #include <psycle/helpers/hexstring_to_binary.hpp>
 namespace psycle

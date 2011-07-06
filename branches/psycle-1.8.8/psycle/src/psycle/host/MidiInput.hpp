@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
@@ -227,24 +228,30 @@ namespace psycle
 			/// have we been synced with the audio engine yet?
 			bool m_synced;			
 			/// are we in the process of syncing?
-			bool m_syncing;			
+			bool m_syncing;
+
 			///\name audio-engine timing vars
 			///\{
 				/// Time (in millis) at which the MIDI port was started (can be used for own clock. Currently unused)
+				///\todo use std::chrono
 				std::uint32_t m_pc_clock_base;
 				/// Time (in millis) at last resync (used to calculate the MIDI IN Clock deviation)
+				///\todo use std::chrono
 				std::uint32_t m_resyncClockBase;
 				/// MIDI In clock (in millis) at the time of Resync. Used to verify clock deviation between MIDI IN clock calls
+				///\todo use std::chrono
 				std::uint32_t m_resyncMidiStampTime;
 				/// play position (Sample being played), at the time of Resync. Used to verify clock deviation between MIDI IN clock calls
 				int m_resyncPlayPos;	
 				/// difference in samples between the clock position that we should be and the one we are
 				int m_fixOffset;
 				/// Adjusted MIDI In clock (in millis) at the time of Resync for the next event to be written into the audio buffer
+				///\todo use std::chrono
 				std::uint32_t m_resyncAdjStampTime;
 				/// Accumulator (in samples) since last resync.
 				std::uint32_t m_timingAccumulator;
 				/// Accumulator (in millis) since last resync. (Used to know which events to process for this injectMIDI call).
+				///\todo use std::chrono
 				std::uint32_t m_timingCounter;
 			///\}
 

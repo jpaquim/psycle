@@ -1,10 +1,9 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-
 #include "XMInstrument.hpp"
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
 
 class XMSampler;
 
@@ -243,5 +242,4 @@ protected:
 
 };
 
-}   // namespace
-}   // namespace
+}}

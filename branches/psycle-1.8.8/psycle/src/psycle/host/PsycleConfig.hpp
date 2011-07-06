@@ -1,6 +1,7 @@
 ///\file
 ///\interface psycle::host::Configuration.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "Configuration.hpp"
 #include "CmdDef.hpp"
@@ -9,8 +10,6 @@ namespace psycle
 {
 	namespace host
 	{
-		#define PSYCLE__SETTINGS__REGISTRY__ROOT "Software\\" PSYCLE__TAR_NAME "\\" PSYCLE__BRANCH
-		#define PSYCLE__SETTINGS__CONFIGKEY "Configuration"
 		#define PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN "Psycle Default (internal)"
 		#define PSYCLE__PATH__DEFAULT_MACHINE_SKIN "Psycle Default (internal)"
 		#define PSYCLE__PATH__DEFAULT_DIAL_SKIN "No Dial Bitmap"

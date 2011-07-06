@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::MixerFrameView.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "MixerFrameView.hpp"
 #include "NativeGraphics.hpp"
 #include "Song.hpp"

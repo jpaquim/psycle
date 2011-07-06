@@ -1,7 +1,7 @@
 //\file
 //\brief implementation file for psycle::host::InstPreview.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "InstPreview.hpp"
 #include "Instrument.hpp"
 namespace psycle {

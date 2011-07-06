@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Song.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "Song.hpp"
 
 #if !defined WINAMP_PLUGIN
@@ -22,7 +22,7 @@
 #include "VstHost24.hpp"
 
 #include <psycle/helpers/datacompression.hpp>
-#include "convert_internal_machines.hpp"
+#include "convert_internal_machines.private.hpp"
 namespace loggers = universalis::os::loggers;
 #if !defined WINAMP_PLUGIN
 	#include <psycle/helpers/riff.hpp> // for Wave file loading.

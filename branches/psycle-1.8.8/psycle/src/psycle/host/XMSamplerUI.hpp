@@ -1,12 +1,12 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "XMSamplerUIGeneral.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
@@ -43,5 +43,4 @@ class XMSamplerUI : public CPropertySheet
 		afx_msg void OnClose();
 };
 
-}   // namespace
-}   // namespace
+}}

@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CEnvDialog.
+#include <psycle/host/detail/project.private.hpp>
 #include "EnvDialog.hpp"
-
 #include "Song.hpp"
 
 namespace psycle { namespace host {

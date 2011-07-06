@@ -1,6 +1,7 @@
 ///\file
 ///\interface psycle::host::Configuration.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 namespace psycle
 {

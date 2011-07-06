@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CSwingFillDlg.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "SwingFillDlg.hpp"
 
 namespace psycle { namespace host {

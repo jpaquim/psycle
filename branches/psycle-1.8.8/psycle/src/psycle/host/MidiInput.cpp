@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CMidiInput.
 /// original code 21st April by Mark McCormack (mark_jj_mccormak@yahoo.co.uk) for Psycle - v2.2b -virtually complete-
 
+#include <psycle/host/detail/project.private.hpp>
 #include "MidiInput.hpp"
 
 #include "InputHandler.hpp"
@@ -118,7 +119,7 @@ namespace psycle
 
 				if( m_devId[ DRIVER_MIDI ] == m_devId[ DRIVER_SYNC ] || m_devId[ DRIVER_SYNC ] == -1)
 				{
-					m_pc_clock_base = cpu_time_clock().get_count()*0.000001;
+					m_pc_clock_base = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
 				}
 				else
 				{
@@ -129,7 +130,7 @@ namespace psycle
 					result = midiInStart( m_midiInHandle[ DRIVER_SYNC ] );
 					BREAK_ON_ERROR(result, 0x08)
 
-					m_pc_clock_base = cpu_time_clock().get_count()*0.000001;
+					m_pc_clock_base = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
 				}
 			}
 Exit:
@@ -1192,7 +1193,7 @@ Exit:
 
 		void CMidiInput::InternalClock( DWORD_PTR dwParam2 )
 		{
-			int pcClock = cpu_time_clock().get_count()*0.000001 - m_resyncClockBase;
+			int pcClock = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den) - m_resyncClockBase;
 			int midiClock = dwParam2 - m_resyncMidiStampTime;
 			// calc the deviation of the MIDI clock.
 			int clockDeviation = pcClock - midiClock;
@@ -1219,7 +1220,7 @@ Exit:
 
 		void CMidiInput::InternalReSync( DWORD_PTR dwParam2 )
 		{
- 			m_resyncClockBase = cpu_time_clock().get_count()*0.000001;
+ 			m_resyncClockBase = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
  			m_resyncPlayPos = Global::pConfig->_pOutputDriver->GetPlayPosInSamples();
 
 			// save vars

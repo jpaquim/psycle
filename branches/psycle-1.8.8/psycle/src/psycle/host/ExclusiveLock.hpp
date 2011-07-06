@@ -1,7 +1,5 @@
-#ifndef PSYCLE__HOST__EXCLUSIVELOCK__INCLUDED
-#define PSYCLE__HOST__EXCLUSIVELOCK__INCLUDED
 #pragma once
-
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 class CExclusiveLock
@@ -19,5 +17,3 @@ protected:
 	int		num_places;
 	bool	locked;
 };
-
-#endif // PSYCLE__HOST__EXCLUSIVELOCK_INCLUDED

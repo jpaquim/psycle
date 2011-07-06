@@ -1,4 +1,4 @@
-#pragma once
+#include <psycle/host/detail/project.private.hpp>
 #include "JBridgeEnabler.hpp"
 
 // Name of the proxy DLL to load

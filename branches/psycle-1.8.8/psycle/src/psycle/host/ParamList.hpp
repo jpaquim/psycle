@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CVstParamList.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 namespace psycle {

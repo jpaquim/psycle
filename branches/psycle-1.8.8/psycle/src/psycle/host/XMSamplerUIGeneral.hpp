@@ -1,8 +1,8 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
-namespace psycle {
-namespace host {
+namespace psycle { namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUIGeneral dialog
@@ -43,5 +43,4 @@ protected:
 	afx_msg void OnCbnSelendokXmpanningmode();
 };
 
-}   // namespace
-}   // namespace
+}}

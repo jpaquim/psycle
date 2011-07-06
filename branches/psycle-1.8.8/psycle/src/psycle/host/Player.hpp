@@ -1,10 +1,11 @@
 ///\file
 ///\brief interface file for psycle::host::Player.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 
-#include <universalis/stdlib/condition.hpp>
-#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include "Machine.hpp"
@@ -148,23 +149,22 @@ namespace psycle
 
 
 
-				///\name multithreaded scheduler
-	///\{
+		///\name multithreaded scheduler
+		///\{
 		private:
 			void start_threads();
 			void stop_threads();
 
-			typedef std::list<universalis::stdlib::thread*> threads_type;
+			typedef std::list<std::thread*> threads_type;
 			threads_type threads_;
 		public:
 			unsigned long num_threads() { if(threads_.empty()){return 1;} return (unsigned long)threads_.size(); }
 		private:
 			void thread_function(std::size_t thread_number);
 
-			typedef class universalis::stdlib::scoped_lock<universalis::stdlib::mutex> scoped_lock;
-			universalis::stdlib::mutex mutable mutex_;
-			universalis::stdlib::condition<scoped_lock> mutable condition_;
-			universalis::stdlib::condition<scoped_lock> mutable main_condition_;
+			typedef class std::unique_lock<std::mutex> scoped_lock;
+			std::mutex mutable mutex_;
+			std::condition_variable mutable condition_, main_condition_;
 
 			bool stop_requested_;
 			bool suspend_requested_;
@@ -185,7 +185,7 @@ namespace psycle
 			void clear_plan();
 			void process_loop(std::size_t thread_number) throw(std::exception);
 			int samples_to_process_;
-	///\}
+		///\}
 		};
 	}
 }

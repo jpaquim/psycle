@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::ScrollableDlgBar.
+#include <psycle/host/detail/project.private.hpp>
 #include "ScrollableDlgBar.hpp"
 
 namespace psycle { namespace host {

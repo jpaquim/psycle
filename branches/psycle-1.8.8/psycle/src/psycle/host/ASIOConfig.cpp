@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CASIOConfig.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "ASIOConfig.hpp"
 #include "ASIOInterface.hpp"
 

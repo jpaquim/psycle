@@ -1,7 +1,6 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUI.hpp"
-
 #include "ChildView.hpp"
-
 #include "XMSampler.hpp"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -64,5 +63,4 @@ void XMSamplerUI::UpdateUI(void)
 	if (GetActivePage() == &m_Mixer ) m_Mixer.UpdateAllChannels();
 }
 
-}   // namespace
-}   // namespace
+}}

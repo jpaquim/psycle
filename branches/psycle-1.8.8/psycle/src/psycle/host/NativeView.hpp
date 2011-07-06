@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CNativeGui.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "BaseParamView.hpp"
 #include "PsycleConfig.hpp"

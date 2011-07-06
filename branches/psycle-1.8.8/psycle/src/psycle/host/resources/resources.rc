@@ -1,5 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
+#include <psycle/host/detail/project.private.hpp>
 #include "resources.hpp"
 
 #define APSTUDIO_READONLY_SYMBOLS

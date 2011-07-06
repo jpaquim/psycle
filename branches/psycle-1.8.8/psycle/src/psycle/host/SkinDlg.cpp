@@ -1,10 +1,9 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "SkinDlg.hpp"
 #include "SkinIO.hpp"
-
-#define MAX_FONTS 256
 
 namespace psycle { namespace host {
 

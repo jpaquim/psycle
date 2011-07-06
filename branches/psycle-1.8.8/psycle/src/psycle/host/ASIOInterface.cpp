@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::ASIOInterface.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "ASIOInterface.hpp"
 #include "ASIOConfig.hpp"
 #include "ConfigStorage.hpp"
@@ -67,9 +68,12 @@ namespace psycle
 		void ASIODriverSettings::Load(ConfigStorage & store)
 		{
 			int driverID(0);
-			if(store.OpenGroup("devices\\asio") ||
-				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\asio"))
-			{
+			if(
+				// First, try current path since version 1.8.8
+				store.OpenGroup("devices\\asio") ||
+				// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
+				store.OpenGroup("configuration--1.8\\devices\\asio")
+			) {
 				unsigned int block;
 				unsigned int samples;
 				store.Read("BufferSize", block);

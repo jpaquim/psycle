@@ -1,11 +1,9 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
-
 #include "FileIO.hpp"
 
-
-namespace psycle {
-	namespace host {
+namespace psycle { namespace host {
 		class Song;
 		class XMSampler;
 
@@ -490,5 +488,4 @@ namespace psycle {
 		private:
 			s3mHeader  s3mFileH;
 		};
-	}
-}
+}}

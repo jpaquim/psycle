@@ -1,16 +1,17 @@
 ///\file
 ///\brief interface file for psycle::host::Song
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
 #include "SongStructs.hpp"
 #include "Instrument.hpp"
 #include "ExclusiveLock.hpp"
-
+#include "cpu_time_clock.hpp"
 #if !defined WINAMP_PLUGIN
 	#include "InstPreview.hpp"
-#endif // WINAMP_PLUGIN
-#include <universalis/stdlib/date_time.hpp>
+#endif
+#include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/loggers.hpp>
 
 class CCriticalSection;
@@ -264,31 +265,31 @@ namespace psycle
 			//For an exclusive lock (i.e. the rest of the cases) use the CExclusiveLock.
 			CSemaphore mutable semaphore;
 
-			universalis::stdlib::nanoseconds accumulated_processing_time_, accumulated_routing_time_;
+			cpu_time_clock::duration accumulated_processing_time_, accumulated_routing_time_;
 
 		/// cpu time usage measurement
 		void reset_time_measurement() { accumulated_processing_time_ = accumulated_routing_time_ = 0; }
 
 		/// total processing cpu time usage measurement
-		universalis::stdlib::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+		cpu_time_clock::duration accumulated_processing_time() const throw() { return accumulated_processing_time_; }
 		/// total processing cpu time usage measurement
-		void accumulate_processing_time(universalis::stdlib::nanoseconds ns) throw() {
-			if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+		void accumulate_processing_time(cpu_time_clock::duration d) throw() {
+			if(loggers::warning() && d.count() < 0) {
 				std::ostringstream s;
-				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
-				universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else accumulated_processing_time_ += ns;
+				s << "time went backward by: " << std::chrono::nanoseconds(d).count() * 1e-9 << 's';
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			} else accumulated_processing_time_ += d;
 		}
 
 		/// routing cpu time usage measurement
-		universalis::stdlib::nanoseconds accumulated_routing_time() const throw() { return accumulated_routing_time_; }
+		cpu_time_clock::duration accumulated_routing_time() const throw() { return accumulated_routing_time_; }
 		/// routing cpu time usage measurement
-		void accumulate_routing_time(universalis::stdlib::nanoseconds ns) throw() {
-			if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+		void accumulate_routing_time(cpu_time_clock::duration d) throw() {
+			if(loggers::warning() && d.count() < 0) {
 				std::ostringstream s;
-				s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
-				universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else accumulated_routing_time_ += ns;
+				s << "time went backward by: " << std::chrono::nanoseconds(d).count() * 1e-9 << 's';
+				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+			} else accumulated_routing_time_ += d;
 		}
 		};
 	}

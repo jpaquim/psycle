@@ -4,8 +4,7 @@
  *  $Revision$
  */
 
-
-
+#include <psycle/host/detail/project.private.hpp>
 #include "XMInstrument.hpp"
 #include <psycle/helpers/filter.hpp>
 #include <psycle/helpers/datacompression.hpp>

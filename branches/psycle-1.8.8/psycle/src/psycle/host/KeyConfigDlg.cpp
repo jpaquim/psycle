@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "KeyConfigDlg.hpp"
 #include "KeyPresetIO.hpp"
 #include "SpecialKeys.hpp"

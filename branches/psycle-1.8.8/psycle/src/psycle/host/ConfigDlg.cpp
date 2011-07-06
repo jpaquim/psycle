@@ -1,9 +1,8 @@
 ///\file
 ///\brief implementation file for psycle::host::CConfigDlg.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "ConfigDlg.hpp"
-
 
 namespace psycle { namespace host {
 

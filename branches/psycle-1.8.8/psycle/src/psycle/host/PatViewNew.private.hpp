@@ -1,5 +1,7 @@
 ///\file
 ///\brief pattern view graphic operations for psycle::host::CChildView, private header
+#pragma once
+#include <psycle/host/detail/project.hpp>
 namespace psycle { namespace host {
 
 		#define DRAW_DATA		1

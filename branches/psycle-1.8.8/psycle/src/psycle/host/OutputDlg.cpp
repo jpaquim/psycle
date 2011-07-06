@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::COutputDlg.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "OutputDlg.hpp"
 #include "PsycleConfig.hpp"
 

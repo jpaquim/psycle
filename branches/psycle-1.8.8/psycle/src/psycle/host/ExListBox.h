@@ -1,8 +1,9 @@
-#pragma once
 // ExListBox.h : header file
 // Code originally from ran wainstein:
 // http://www.codeproject.com/combobox/cexlistboc.asp
-//
+
+#pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 namespace psycle { namespace host {

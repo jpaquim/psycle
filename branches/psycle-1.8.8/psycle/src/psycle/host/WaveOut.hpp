@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::WaveOut.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "AudioDriver.hpp"
 #if defined DIVERSALIS__COMPILER__MICROSOFT

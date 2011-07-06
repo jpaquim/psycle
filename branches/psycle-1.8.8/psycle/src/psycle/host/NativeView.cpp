@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CNativeView.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "NativeView.hpp"
 #include "NativeGraphics.hpp"
 #include "FrameMachine.hpp"

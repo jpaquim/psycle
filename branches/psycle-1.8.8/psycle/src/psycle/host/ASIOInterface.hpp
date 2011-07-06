@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::ASIOInterface.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "AudioDriver.hpp"
 #include <asiodrivers.h>

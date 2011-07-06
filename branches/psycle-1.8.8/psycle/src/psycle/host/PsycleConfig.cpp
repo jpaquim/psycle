@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "PsycleConfig.hpp"
 #include "Psycle.hpp"
 
@@ -25,10 +26,13 @@
 #include <universalis/os/fs.hpp>
 #include <wingdi.h>
 
-namespace psycle
-{
-	namespace host
-	{
+namespace psycle { namespace host {
+
+	namespace {
+		static const char registry_root_path[] = "software\\" PSYCLE__NAME "\\" PSYCLE__BRANCH;
+		static const char registry_config_subkey[] = "configuration";
+	}
+
 		extern CPsycleApp theApp;
 
 		PsycleConfig::MachineParam::MachineParam()
@@ -1362,27 +1366,104 @@ namespace psycle
 			//There is no "prefered setting". If the file exists, it is used.
 			ConfigStorage* store;
 			store = new WinIniFile(PSYCLE__VERSION);
-			if(!store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__TAR_NAME ".ini").native_file_string()))
+			if(!store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string()))
 			{
 				delete store;
 				store = new WinIniFile(PSYCLE__VERSION);
-				if(!store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / PSYCLE__TAR_NAME ".ini").native_file_string()))
+				if(!store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string()))
 				{
 					delete store;
 					store = new Registry(Registry::HKCU, "");
-					if(!store->OpenLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
+					if(!store->OpenLocation(registry_root_path))
 					{
 						return false;
 					}
 				}
 			}
 
-
-			// Try opening version 1.8.8. Else, resort to 1.8.6. If neither, return.
-			if(!store->OpenGroup(PSYCLE__SETTINGS__CONFIGKEY))
-			{
-				if(!store->OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY))
-				{
+			//////////////////////
+			//
+			// History of the registry config path:
+			//
+			//////////////////////
+			//
+			// In early psycle versions, registry config used to be stored in:
+			// \HKCU\Software\AAS\Psycle\1.0\
+			//
+			// "AAS" stood for Arguru Audio Software, Arguru being Juan Antonio Argüelles Rius's handle, late original author of psycle.
+			//
+			//////////////////////
+			//
+			// Later, it was stored in:
+			// \HKCU\Software\AAS\Psycle\CurrentVersion\
+			//
+			// The "CurrentVersion" was hardcoded in the source code as a string instead of specifying an actual version,
+			// which made it, hmm, interesting. It was probably edited by hand just before releasing a version, but we don't know for sure.
+			//
+			//////////////////////
+			//
+			// In version 1.7.56, the path changed to:
+			// \HKCU\Software\psycle\Psycledelics--1.7\configuration\ (which was expanded from macros \HKCU\Software\<PSYCLE__NAME>\<PSYCLE__BRANCH>--<PSYCLE__VERSION__MAJOR>.<PSYCLE__VERSION__MINOR>\configuration\)
+			//
+			// Around that time, there had been two known forks of psycle circulating, one from Krissce, and one from Satoshi Fujiwara.
+			// Putting "Psycledelics" in the path prevented any clash in config settings between the branches/forks.
+			// Also probably unconsciously influenced by this open source nature of psycle,
+			// the path became a bit unsusal since it's in the form <App>\<Branch> and not <Company>\<App>.
+			//
+			// Audio driver settings were stored in the sub path:
+			// \HKCU\Software\psycle\Psycledelics--1.7\configuration\devices\
+			//
+			// The recent file list was stored outside of the configuration path, in:
+			// \HKCU\Software\psycle\Psycledelics-1.7\recent-files\
+			//
+			//////////////////////
+			//
+			// In version 1.8.0, the path changed to:
+			// \HKCU\Software\psycle\Psycledelics\Configuration--1.8\ (which was expanded from macros \HKCU\Software\<PSYCLE__NAME>\<PSYCLE__BRANCH>\Configuration--<PSYCLE__VERSION__MAJOR>.<PSYCLE__VERSION__MINOR>\)
+			//
+			// Audio driver settings were stored in the sub path:
+			// \HKCU\Software\psycle\Psycledelics\Configuration--1.8\devices\
+			//
+			// The recent file list was stored outside of the configuration path, in:
+			// \HKCU\Software\psycle\Psycledelics\recent-files\
+			//
+			//////////////////////
+			//
+			// Since 1.8.8, registry config is stored in:
+			// \HKCU\Software\psycle\Psycledelics\ (which is expanded from macros \HKCU\Software\<PSYCLE__NAME>\<PSYCLE__BRANCH>\)
+			//
+			// General settings are stored in the sub path:
+			// \HKCU\Software\psycle\Psycledelics\Configuration\
+			//
+			// Audio driver settings are stored in the sub path:
+			// \HKCU\Software\psycle\Psycledelics\devices\
+			//
+			// The recent file list is stored in the sub path:
+			// \HKCU\Software\psycle\Psycledelics\recent-files\
+			//
+			// The keyboard config file %SystemRoot%\PsycleKeys.ini is gone, it's now all stored in the sub path:
+			// \HKCU\Software\psycle\Psycledelics\InputHandling\
+			//
+			// Some other settings are also now stored by categories in sub paths:
+			// \HKCU\Software\psycle\Psycledelics\MachineVisual\
+			// \HKCU\Software\psycle\Psycledelics\MacParamVisual\
+			// \HKCU\Software\psycle\Psycledelics\PatternVisual\
+			//
+			// The toolbar settings, however are stored in:
+			// \HKCU\Software\psycle\Psycle\ (because of MFC limitations?)
+			//
+			//////////////////////
+			//
+			// Thankfully, each psycle version migrated the config flawlessly by importing the config from older paths.
+			//
+			//////////////////////
+			//
+			// So here we go,
+			// First, try current path since version 1.8.8
+			if(!store->OpenGroup(registry_config_subkey)) {
+				// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
+				if(!store->OpenGroup("configuration--1.8")) {
+					// If neither, return.
 					store->CloseLocation();
 					return false;
 				}
@@ -1392,44 +1473,48 @@ namespace psycle
 			delete store;
 			return true;
 		}
-		bool PsycleConfig::SavePsycleSettings()
-		{
-			ConfigStorage* store;
-			switch(store_place_)
-			{
-			case STORE_REGEDIT: 
-				store = new Registry(Registry::HKCU, PSYCLE__VERSION);
-				if(!store->CreateLocation(PSYCLE__SETTINGS__REGISTRY__ROOT))
-				{
+
+		bool PsycleConfig::SavePsycleSettings() {
+			ConfigStorage* store = 0;
+			try {
+				switch(store_place_) {
+					case STORE_REGEDIT: 
+						store = new Registry(Registry::HKCU, PSYCLE__VERSION);
+						if(!store->CreateLocation(registry_root_path)) {
+							delete store;
+							return false;
+						}
+						break;
+					case STORE_USER_DATA: 
+						store = new WinIniFile(PSYCLE__VERSION);
+						if(!store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string())) {
+							delete store;
+							return false;
+						}
+						break;
+					case STORE_EXE_DIR: 
+						store = new WinIniFile(PSYCLE__VERSION);
+						if(!store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string())) {
+							delete store;
+							return false;
+						}
+						break;
+					default:
+						return false;
+				}
+				if(!store->CreateGroup(registry_config_subkey)) {
+					store->CloseLocation();
+					delete store;
 					return false;
 				}
-				break;
-			case STORE_USER_DATA: 
-				store = new WinIniFile(PSYCLE__VERSION);
-				if(!store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__TAR_NAME) / PSYCLE__TAR_NAME ".ini").native_file_string()))
-				{
-					return false;
-				}
-				break;
-			case STORE_EXE_DIR: 
-				store = new WinIniFile(PSYCLE__VERSION);
-				if(!store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__TAR_NAME ".ini").native_file_string()))
-				{
-					return false;
-				}
-				break;
-			default:
-				return false;
-			}
-			if(!store->CreateGroup(PSYCLE__SETTINGS__CONFIGKEY))
-			{
+				Save(*store);
 				store->CloseLocation();
-				return false;
+				delete store;
+				return true;
+			} catch(...) {
+				delete store;
+				throw;
 			}
-			Save(*store);
-			store->CloseLocation();
-			delete store;
-			return true;
 		}
 
 		void PsycleConfig::Load(ConfigStorage & store)

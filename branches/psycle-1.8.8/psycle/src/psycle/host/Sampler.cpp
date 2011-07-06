@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Sampler.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "Sampler.hpp"
 #include "Song.hpp"
 #include "Player.hpp"

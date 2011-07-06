@@ -4,6 +4,7 @@
  *  $Revision$
  */
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 
 #pragma pack(1)

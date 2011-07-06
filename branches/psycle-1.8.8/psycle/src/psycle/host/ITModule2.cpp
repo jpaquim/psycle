@@ -1,3 +1,4 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "ITModule2.h"
 #include "Configuration.hpp"
 

@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CWaveEdChildView.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "WaveEdAmplifyDialog.hpp"
 #include <psycle/host/WaveEdMixDialog.hpp>

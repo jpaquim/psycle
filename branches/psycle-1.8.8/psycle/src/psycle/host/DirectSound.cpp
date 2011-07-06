@@ -1,7 +1,7 @@
 ///\file
 ///\implementation psycle::host::DirectSound.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "DirectSound.hpp"
 #include "DSoundConfig.hpp"
 #include "ConfigStorage.hpp"
@@ -67,9 +67,12 @@ namespace psycle
 		}
 		void DirectSoundSettings::Load(ConfigStorage &store)
 		{
-			if(store.OpenGroup("devices\\direct-sound") ||
-				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\direct-sound"))
-			{
+			if(
+				// First, try current path since version 1.8.8
+				store.OpenGroup("devices\\direct-sound") ||
+				// else, resort try the old path used from versions 1.8.0 to 1.8.6 included
+				store.OpenGroup("configuration--1.8\\devices\\direct-sound")
+			) {
 				///\todo: fixme
 				store.ReadRaw("DeviceGuid", &device_guid_, sizeof(device_guid_));
 				unsigned int tmp = samplesPerSec();

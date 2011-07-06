@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CPsycleApp.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "resources/resources.hpp" // main symbols
 #include "Global.hpp"
 #include <psycle/helpers/hexstring_to_integer.hpp>

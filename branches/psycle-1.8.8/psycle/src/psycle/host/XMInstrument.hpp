@@ -1,4 +1,5 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
 #include <psycle/helpers/filter.hpp>

@@ -1,5 +1,5 @@
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "internal_machines.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
@@ -433,13 +433,13 @@ namespace psycle
 			sched_returns_processed_curr=0;
 			FxSend(frames, true, measure_cpu_usage);
 			{ // Step Three, Mix the returns of the Send Fx's with the leveled input signal
-				nanoseconds t0;
-				if(measure_cpu_usage){ t0 = cpu_time_clock();}
+				cpu_time_clock::time_point t0;
+				if(measure_cpu_usage) t0 = cpu_time_clock::now();
 				Mix(frames);
 				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 				Machine::UpdateVuAndStanbyFlag(frames);
-				if(measure_cpu_usage){
-					nanoseconds const t1(cpu_time_clock());
+				if(measure_cpu_usage) {
+					cpu_time_clock::time_point const t1(cpu_time_clock::now());
 					accumulate_processing_time(t1 - t0);
 				}
 			}
@@ -461,8 +461,8 @@ namespace psycle
 					assert(pSendMachine);
 					if (!pSendMachine->recursive_processed_ && !pSendMachine->recursive_is_processing_)
 					{ 
-						nanoseconds t0;
-						if(measure_cpu_usage){ t0  =cpu_time_clock();}
+						cpu_time_clock::time_point t0;
+						if(measure_cpu_usage) t0 = cpu_time_clock::now();
 						bool soundready=false;
 						// Mix all the inputs and route them to the send fx.
 						{
@@ -524,8 +524,8 @@ namespace psycle
 						// tell the FX to work, now that the input is ready.
 						if(recurse){
 							//Time is only accumulated in recurse mode, because in shed mode the sched_process method already does it.
-							if(measure_cpu_usage){ 
-								nanoseconds const t1(cpu_time_clock());
+							if(measure_cpu_usage) {
+								cpu_time_clock::time_point const t1(cpu_time_clock::now());
 								accumulate_processing_time(t1 - t0);
 							}
 							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
@@ -635,8 +635,8 @@ namespace psycle
 
 		/// called by the scheduler to ask for the actual processing of the machine
 		bool Mixer::sched_process(unsigned int frames, bool measure_cpu_usage) {
-			nanoseconds t0;
-			if(measure_cpu_usage){ t0 = cpu_time_clock(); }
+			cpu_time_clock::time_point t0;
+			if(measure_cpu_usage) t0 = cpu_time_clock::now();
 
 			if( sched_returns_processed_curr < numreturns()) {
 				mixed = false;
@@ -651,7 +651,7 @@ namespace psycle
 				sched_returns_processed_curr=0;
 			}
 			if(measure_cpu_usage){ 
-				nanoseconds const t1(cpu_time_clock());
+				cpu_time_clock::time_point const t1(cpu_time_clock::now());
 				accumulate_processing_time(t1 - t0);
 			}
 			if(mixed) ++processing_count_;

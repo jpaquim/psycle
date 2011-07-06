@@ -1,6 +1,7 @@
 ///\file
 ///\brief pointer handler for psycle::host::CChildView, private header
-
+#pragma once
+#include <psycle/host/detail/project.hpp>
 namespace psycle { namespace host {
 
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )

@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CMidiMonitorDlg.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "MidiMonitorDlg.hpp"
 #include "MidiInput.hpp"
 #include "PsycleConfig.hpp"

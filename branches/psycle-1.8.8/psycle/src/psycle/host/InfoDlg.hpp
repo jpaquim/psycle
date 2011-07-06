@@ -1,9 +1,9 @@
 ///\file
 ///\brief interface file for psycle::host::CInfoDlg.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include <universalis/stdlib/date_time.hpp>
-
+#include "cpu_time_clock.hpp"
 namespace psycle { namespace host {
 
 		/// info window.
@@ -43,7 +43,7 @@ namespace psycle { namespace host {
 			CButton m_cpu_perf;
 
 			unsigned int item_count_;
-			universalis::stdlib::nanoseconds last_update_time_;
+			wall_time_clock::time_point last_update_time_;
 
 		};
 }}

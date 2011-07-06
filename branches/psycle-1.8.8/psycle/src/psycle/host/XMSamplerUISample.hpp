@@ -1,11 +1,9 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-
 #include "XMInstrument.hpp"
 
-namespace psycle {
-namespace host {
-
+namespace psycle { namespace host {
 
 class XMSampler;
 class CWaveScopeCtrl : public CStatic
@@ -90,6 +88,5 @@ protected:
 	CListBox m_SampleList;
 	CWaveScopeCtrl m_WaveScope;
 };
-
 
 }}

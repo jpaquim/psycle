@@ -3,7 +3,7 @@
  *  $Date: 2010-08-15 18:18:35 +0200 (dg., 15 ag 2010) $
  *  $Revision: 9831 $
  */
-
+#include <psycle/host/detail/project.private.hpp>
 #include "SongBar.hpp"
 #include "PsycleConfig.hpp"
 #include "MainFrm.hpp"

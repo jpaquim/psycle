@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Player.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "Player.hpp"
 #include "Song.hpp"
 #include "Machine.hpp"
@@ -24,7 +24,7 @@ namespace psycle
 	{
 		using namespace seib::vst;
 		namespace {
-			static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
+			static thread_local bool this_thread_suspended_ = false;
 		}
 		Player::Player()
 		{
@@ -795,7 +795,7 @@ void Player::stop_threads() {
 			int amount;
 			Song* pSong = Global::_pSong;
 			Master::_pMasterSamples = _pBuffer;
-			nanoseconds const t0(cpu_time_clock());
+			cpu_time_clock::time_point const t0(cpu_time_clock::now());
 			sampleOffset = 0;
 			do
 			{
@@ -951,7 +951,7 @@ void Player::stop_threads() {
 				 sampleOffset += amount;
 				 CVSTHost::vstTimeInfo.flags &= ~kVstTransportChanged;
 			} while(numSamples>0);
-			nanoseconds const t1(cpu_time_clock());
+			cpu_time_clock::time_point const t1(cpu_time_clock::now());
 			pSong->accumulate_processing_time(t1 - t0);
 			return _pBuffer;
 		}

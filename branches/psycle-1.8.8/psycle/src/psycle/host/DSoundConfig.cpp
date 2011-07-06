@@ -1,6 +1,7 @@
 ///\file
 ///\implementation psycle::host::CDSoundConfig.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "DSoundConfig.hpp"
 #include "DirectSound.hpp"
 namespace psycle { namespace host {

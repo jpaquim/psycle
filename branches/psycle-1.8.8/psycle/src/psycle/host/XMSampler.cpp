@@ -1,5 +1,5 @@
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"

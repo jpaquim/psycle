@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::Machine
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "Machine.hpp"
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
@@ -513,8 +513,8 @@ namespace psycle
 		void Machine::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 		{
 			sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;
-			nanoseconds t0;
-			if (measure_cpu_usage){ t0 = cpu_time_clock(); }
+			cpu_time_clock::time_point t0;
+			if(measure_cpu_usage) t0 = cpu_time_clock::now();
 #if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
@@ -544,7 +544,7 @@ namespace psycle
 				helpers::dsp::Clear(_pSamplesR, numSamples);
 			}
 			if(measure_cpu_usage) {
-				nanoseconds const t1(cpu_time_clock());
+				cpu_time_clock::time_point const t1(cpu_time_clock::now());
 				Global::song().accumulate_routing_time(t1 - t0);
 			}
 		}
@@ -555,12 +555,12 @@ namespace psycle
 void Machine::recursive_process(unsigned int frames, bool measure_cpu_usage) {
 	recursive_process_deps(frames, true, measure_cpu_usage);
 
-	nanoseconds t1;
-	if(measure_cpu_usage) { t1 = cpu_time_clock(); }
+	cpu_time_clock::time_point t1;
+	if(measure_cpu_usage) t1 = cpu_time_clock::now();
 
 	GenerateAudio(frames, measure_cpu_usage);
 	if(measure_cpu_usage) {
-		nanoseconds const t2(cpu_time_clock());
+		cpu_time_clock::time_point const t2(cpu_time_clock::now());
 		accumulate_processing_time(t2 - t1);
 	}
 }
@@ -575,12 +575,12 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix, bool measure
 					pInMachine->recursive_process(frames,measure_cpu_usage);
 				if(!pInMachine->Standby()) Standby(false);
 				if(!_mute && !Standby() && mix) {
-					nanoseconds t0;
-					if(measure_cpu_usage) { t0 = cpu_time_clock(); }
+					cpu_time_clock::time_point t0;
+					if(measure_cpu_usage) t0 = cpu_time_clock::now();
 					helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, frames, pInMachine->_lVol * _inputConVol[i]);
 					helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, frames, pInMachine->_rVol * _inputConVol[i]);
 					if(measure_cpu_usage) { 
-						nanoseconds const t1(cpu_time_clock());
+						cpu_time_clock::time_point const t1(cpu_time_clock::now());
 						Global::song().accumulate_routing_time(t1 - t0);
 					}
 				}
@@ -588,11 +588,11 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix, bool measure
 		}
 	}
 
-	nanoseconds t0;
-	if(measure_cpu_usage) { t0 = cpu_time_clock(); }
+	cpu_time_clock::time_point t0;
+	if(measure_cpu_usage) t0 = cpu_time_clock::now();
 	helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 	if(measure_cpu_usage) {
-		nanoseconds const t1(cpu_time_clock());
+		cpu_time_clock::time_point const t1(cpu_time_clock::now());
 		Global::song().accumulate_routing_time(t1 - t0);
 	}
 	recursive_is_processing_ = false;
@@ -638,8 +638,8 @@ void Machine::sched_outputs(sched_deps & result) const {
 
 /// called by the scheduler to ask for the actual processing of the machine
 bool Machine::sched_process(unsigned int frames, bool measure_cpu_usage) {
-	nanoseconds t0;
-	if(measure_cpu_usage){ t0 =cpu_time_clock(); }
+	cpu_time_clock::time_point t0;
+	if(measure_cpu_usage) t0 = cpu_time_clock::now();
 
 	if(!_mute) for(int i(0); i < MAX_CONNECTIONS; ++i) if(_inputCon[i]) {
 		Machine & input_node(*Global::song()._pMachine[_inputMachines[i]]);
@@ -652,15 +652,15 @@ bool Machine::sched_process(unsigned int frames, bool measure_cpu_usage) {
 	}
 	helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 
-	nanoseconds t1;
+	cpu_time_clock::time_point t1;
 	if(measure_cpu_usage) {
-		t1 =cpu_time_clock();
+		t1 = cpu_time_clock::now();
 		Global::song().accumulate_routing_time(t1 - t0);
 	}
 
 	GenerateAudio(frames,measure_cpu_usage);
 	if(measure_cpu_usage) {
-		nanoseconds const t2(cpu_time_clock());
+		cpu_time_clock::time_point const t2(cpu_time_clock::now());
 		accumulate_processing_time(t2 - t1);
 	}
 
@@ -712,7 +712,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
 			if (_volumeDisplay>0 )--_volumeDisplay;
-			if ( Global::pConfig->autoStopMachines )
+			if ( Global::pConfig->UsesAutoStopMachines() )
 			{
 				if (_volumeCounter < 8.0f)	{
 					_volumeCounter = 0.0f;

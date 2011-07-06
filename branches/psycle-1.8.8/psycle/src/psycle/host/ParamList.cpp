@@ -1,5 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CParamList.
+#include <psycle/host/detail/project.private.hpp>
 #include "ParamList.hpp"
 
 #include "FrameMachine.hpp"

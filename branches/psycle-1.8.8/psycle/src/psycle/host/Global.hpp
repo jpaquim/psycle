@@ -1,16 +1,12 @@
 ///\file
 ///\brief interface file for psycle::host::Global.
 #pragma once
-
-#include "namespaces.hpp"
+#include <psycle/host/detail/project.hpp>
 #include "version.hpp"
-
 #include "Constants.hpp"
 #include "SongStructs.hpp"
-
 #include <psycle/helpers/math.hpp>
 #include <psycle/helpers/value_mapper.hpp>
-
 #include <Shlwapi.h>
 
 // AVRT is the new "multimedia schedulling stuff"

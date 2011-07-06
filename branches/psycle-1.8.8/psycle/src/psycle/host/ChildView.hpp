@@ -1,7 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::CChildView.
 #pragma once
-
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "Song.hpp"

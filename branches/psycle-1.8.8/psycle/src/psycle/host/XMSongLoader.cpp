@@ -4,7 +4,7 @@
  *  $Revision$
  */
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSongLoader.hpp"
 #include "ProgressDialog.hpp"
 #include "Song.hpp"

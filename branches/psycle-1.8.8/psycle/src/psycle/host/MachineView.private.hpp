@@ -1,5 +1,7 @@
 ///\file
 ///\brief machine view graphic operations for psycle::host::CChildView, private header
+#pragma once
+#include <psycle/host/detail/project.hpp>
 #include <algorithm>
 namespace psycle { namespace host {
 

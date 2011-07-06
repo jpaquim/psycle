@@ -1,12 +1,9 @@
 //\file
 ///\brief implementation file for psycle::host::CVstEditorDlg.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "VstEffectWnd.hpp"
-
 #include "VstHost24.hpp"
 #include "Configuration.hpp"
-
-
 namespace psycle { namespace host {
 
 	using namespace seib::vst;

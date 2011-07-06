@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CSkinDlg.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "KeyPresetIO.hpp"
 
 namespace psycle { namespace host {

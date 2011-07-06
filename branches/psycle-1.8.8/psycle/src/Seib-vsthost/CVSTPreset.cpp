@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 
+#include <psycle/host/detail/project.private.hpp>
 #include "CVSTPreset.hpp"                   /* private prototypes                */
 
 namespace seib {

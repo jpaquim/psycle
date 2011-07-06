@@ -1,6 +1,7 @@
 ///\file
 ///\interface psycle::host::Configuration.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include <string>
 
@@ -25,7 +26,10 @@ namespace psycle
 			virtual void RefreshSettings() {}
 
 			//Members
+
+			///\todo can also be done with universalis::os::fs::process_executable_file_path().parent_path()
 			std::string const & appPath              () const { return program_executable_dir_; }
+
 			std::string const & GetPluginDir         () const { return plugin_dir_; }
 			               void SetPluginDir         (std::string const &d) { plugin_dir_ = d; }
 			std::string const & GetVst32Dir          () const { return vst32_dir_; }

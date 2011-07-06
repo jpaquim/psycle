@@ -1,18 +1,17 @@
 ///\file
 ///\implementation psycle::host::Configuration.
 
+#include <psycle/host/detail/project.private.hpp>
 #include "Configuration.hpp"
 #include "ConfigStorage.hpp"
-
 #include "Song.hpp"
 #include "VstHost24.hpp"
-namespace psycle
-{
-	namespace host
-	{
+namespace psycle { namespace host {
+
 		/////////////////////////////////////////////
 		Configuration::Configuration() : _pOutputDriver(0)
 		{
+			///\todo can also be done with universalis::os::fs::process_executable_file_path().parent_path()
 			char c[MAX_PATH];
 			c[0]='\0';
 			::GetModuleFileName(0, c, sizeof c);

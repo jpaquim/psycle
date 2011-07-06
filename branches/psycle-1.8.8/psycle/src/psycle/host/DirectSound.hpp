@@ -1,6 +1,7 @@
 ///\file
 ///\interface psycle::host::DirectSound.
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "AudioDriver.hpp"
 

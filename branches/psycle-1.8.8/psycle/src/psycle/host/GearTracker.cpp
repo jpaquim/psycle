@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CGearTracker.
+#include <psycle/host/detail/project.private.hpp>
 #include "GearTracker.hpp"
-
 #include "Sampler.hpp"
 
 namespace psycle { namespace host {

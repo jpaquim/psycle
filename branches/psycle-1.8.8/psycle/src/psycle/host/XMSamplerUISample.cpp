@@ -1,5 +1,5 @@
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUISample.hpp"
-
 #include "XMSampler.hpp"
 
 namespace psycle { namespace host {
@@ -759,6 +759,4 @@ void XMSamplerUISample::DrawScope()
 	m_WaveScope.Invalidate();
 }
 
-}   // namespace
-}   // namespace
-
+}}

@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::WaveOut.
 
-
+#include <psycle/host/detail/project.private.hpp>
 #include "WaveOut.hpp"
 #include "WaveOutDialog.hpp"
 #include "MidiInput.hpp"
@@ -62,9 +62,12 @@ namespace psycle
 		}
 		void WaveOutSettings::Load(ConfigStorage &store)
 		{
-			if(store.OpenGroup("devices\\mme") ||
-				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\mme"))
-			{
+			if(
+				// First, try current path since version 1.8.8
+				store.OpenGroup("devices\\mme") ||
+				// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
+				store.OpenGroup("configuration--1.8\\devices\\mme")
+			) {
 				store.Read("DeviceID", deviceID_);
 				store.Read("PollSleep", pollSleep_);
 				unsigned int tmp = samplesPerSec();

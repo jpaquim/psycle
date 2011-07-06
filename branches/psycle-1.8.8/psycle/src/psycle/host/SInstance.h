@@ -11,10 +11,8 @@ Copyright (c) 1998 - 2000 by PJ Naughter.
 All rights reserved.
 */
 
-#ifndef PSYCLE__HOST__SINSTANCE__INCLUDED
-#define PSYCLE__HOST__SINSTANCE__INCLUDED
 #pragma once
-
+#include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
 class CInstanceChecker : public CObject
@@ -34,5 +32,3 @@ protected:
 	CMutex m_instanceDataMutex;
 	HANDLE m_hPrevInstance;
 };
-
-#endif // PSYCLE__HOST__SINSTANCE

@@ -8,6 +8,8 @@
 // http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 // http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
 // http://msdn.microsoft.com/en-us/library/dd370876%28v=VS.85%29.aspx
+
+#include <psycle/host/detail/project.private.hpp>
 #include "WasapiDriver.hpp"
 #include "WasapiConfig.hpp"
 #include "ConfigStorage.hpp"
@@ -85,9 +87,12 @@ namespace psycle
 		}
 		void WasapiSettings::Load(ConfigStorage &store)
 		{
-			if(store.OpenGroup("devices\\wasapi") ||
-				store.OpenGroup(PSYCLE__PATH__REGISTRY__1_8_6KEY "\\devices\\wasapi"))
-			{
+			if(
+				// First, try current path since version 1.8.8
+				store.OpenGroup("devices\\wasapi") ||
+				// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
+				store.OpenGroup("configuration--1.8\\devices\\wasapi")
+			) {
 				store.Read("DeviceString", szDeviceID, sizeof(szDeviceID));
 				store.Read("Shared", shared);
 				unsigned int tmp = samplesPerSec();

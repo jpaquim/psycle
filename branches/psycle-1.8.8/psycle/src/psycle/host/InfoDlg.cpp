@@ -1,7 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
-
-
+#include <psycle/host/detail/project.private.hpp>
 #include "InfoDlg.hpp"
 
 #include "Configuration.hpp"
@@ -94,9 +93,10 @@ namespace psycle { namespace host {
 				unsigned long num_threads_running = Global::pPlayer->num_threads();
 				char buffer[128];
 				
-				nanoseconds total_machine_processing_time(0);
-				nanoseconds const now = wall_time_clock();
-				nanoseconds const real_time_duration = now - last_update_time_;
+				cpu_time_clock::duration total_machine_processing_time(0);
+				wall_time_clock::time_point const now = wall_time_clock::now();
+				float const real_time_duration = std::chrono::nanoseconds(now - last_update_time_).count();
+				float const multicore_real_time_duration = real_time_duration * num_threads_running;
 				bool cpu_usage = Global::pPlayer->measure_cpu_usage_;
 				int n=0;
 				for (int c=0; c<MAX_MACHINES; c++)
@@ -114,7 +114,7 @@ namespace psycle { namespace host {
 
 						{ // processing cpu percent
 							if(cpu_usage) {
-								float const percent = 100.0f * tmac->accumulated_processing_time().get_count() / (real_time_duration.get_count() *num_threads_running);
+								float const percent = 100.0f * std::chrono::nanoseconds(tmac->accumulated_processing_time()).count() / multicore_real_time_duration;
 								sprintf(buffer,"%.1f%%",percent);
 							}
 							else {
@@ -134,14 +134,14 @@ namespace psycle { namespace host {
 
 				{ // total cpu percent (counts everything, not just machine processing + routing)
 					//Accumulated processing time does not count "num_threads_running since it is acummulated in the Player thread (single threaded)
-					float const percent = 100.0f * _pSong->accumulated_processing_time().get_count() / real_time_duration.get_count();
+					float const percent = 100.0f * std::chrono::nanoseconds(_pSong->accumulated_processing_time()).count() / real_time_duration;
 					sprintf(buffer, "%.1f%%", percent);
 					m_cpuidlelabel.SetWindowText(buffer);
 				}
 				
 				{ // total machine processing cpu percent
 					if(cpu_usage) {
-						float const percent = 100.0f * total_machine_processing_time.get_count() / (real_time_duration.get_count() *num_threads_running);
+						float const percent = 100.0f * total_machine_processing_time.count() / multicore_real_time_duration;
 						sprintf(buffer, "%.1f%%", percent);
 					}
 					else {
@@ -152,7 +152,7 @@ namespace psycle { namespace host {
 
 				{ // routing cpu percent
 					if(cpu_usage) {
-						float const percent = 100.0f * _pSong->accumulated_routing_time().get_count() / (real_time_duration.get_count() *num_threads_running);
+						float const percent = 100.0f * chrono::nanoseconds(_pSong->accumulated_routing_time()).count() / multicore_real_time_duration;
 						sprintf(buffer, "%.1f%%", percent);
 					}
 					else {

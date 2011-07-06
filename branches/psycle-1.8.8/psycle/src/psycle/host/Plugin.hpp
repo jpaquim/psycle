@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::Plugin
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "Machine.hpp"
 #include <psycle/plugin_interface.hpp>

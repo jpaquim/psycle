@@ -1,6 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdFrame.
-
+#include <psycle/host/detail/project.private.hpp>
 #include "WaveEdFrame.hpp"
 
 #include "Configuration.hpp"

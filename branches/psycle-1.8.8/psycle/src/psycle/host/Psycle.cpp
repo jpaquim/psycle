@@ -1,8 +1,6 @@
 ///\file
 ///\brief implementation file for psycle::host::CPsycleApp.
-
-#define _WIN32_DCOM
-
+#include <psycle/host/detail/project.private.hpp>
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
 #include "SInstance.h"
@@ -18,7 +16,10 @@
 #include <diversalis/compiler.hpp>
 
 #include <sstream>
+
+#define _WIN32_DCOM
 #include <comdef.h>
+
 #include <wbemidl.h>
 #if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 	# pragma comment(lib, "wbemuuid")
@@ -59,12 +60,13 @@ namespace psycle { namespace host {
 			CInstanceChecker instanceChecker;
 
 			//For the Bar states. Everything else is maintained in PsycleConf
-			SetRegistryKey(_T(PSYCLE__TAR_NAME)); // Change the registry key under which our settings are stored.
+			///\todo is it this line that causes the \HKCU\Software\psycle\Psycle\ path? (note the doubled "psycle" in the path)
+			SetRegistryKey(_T(PSYCLE__NAME)); // Change the registry key under which our settings are stored.
 
 			//Psycle maintains its own recent
 			//LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
-			loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
+			loggers::information()("Build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
 
 			bool loaded = global_.psycleconf().LoadPsycleSettings();
 			if (loaded &&

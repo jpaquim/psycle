@@ -1,12 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::Machine
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include <psycle/helpers/dsp.hpp>
 #include "FileIO.hpp"
+#include "cpu_time_clock.hpp"
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
-#include <universalis/stdlib/date_time.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/loggers.hpp>
 #include <stdexcept>
 namespace psycle
@@ -178,18 +180,18 @@ namespace psycle
 			///\{
 				public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
 
-				public:  universalis::stdlib::nanoseconds accumulated_processing_time() const throw() { return accumulated_processing_time_; }
-				private: universalis::stdlib::nanoseconds accumulated_processing_time_;
-				protected: void accumulate_processing_time(universalis::stdlib::nanoseconds ns) throw() {
-						if(universalis::os::loggers::warning() && ns.get_count() < 0) {
+				public:  cpu_time_clock::duration accumulated_processing_time() const throw() { return accumulated_processing_time_; }
+				private: cpu_time_clock::duration accumulated_processing_time_;
+				protected: void accumulate_processing_time(std::chrono::nanoseconds d) throw() {
+						if(loggers::warning() && d.count() < 0) {
 							std::ostringstream s;
-							s << "time went backward by: " << ns.get_count() * 1e-9 << 's';
-							universalis::os::loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-						} else accumulated_processing_time_ += ns;
+							s << "time went backward by: " << std::chrono::nanoseconds(d).count() * 1e-9 << 's';
+							loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+						} else accumulated_processing_time_ += d;
 					}
 
-				public:  uint64_t processing_count() const throw() { return processing_count_; }
-				protected: uint64_t processing_count_;
+				public:    std::uint64_t processing_count() const throw() { return processing_count_; }
+				protected: std::uint64_t processing_count_;
 			///\}
 
 #if 0 // v1.9

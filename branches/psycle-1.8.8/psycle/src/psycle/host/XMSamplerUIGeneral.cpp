@@ -1,7 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CDirectoryDlg.
+#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUIGeneral.hpp"
-
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 
@@ -171,5 +171,4 @@ Ex: Pitch slide down");
 		_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
 	}
 
-}   // namespace
-}   // namespace
+}}

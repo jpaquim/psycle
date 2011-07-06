@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::vsthost
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>

@@ -1,6 +1,7 @@
 ///\file
 ///\brief keyboard handler for psycle::host::CChildView, private header
-
+#pragma once
+#include <psycle/host/detail/project.hpp>
 namespace psycle { namespace host {		
 		
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
