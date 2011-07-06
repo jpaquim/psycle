@@ -28,6 +28,10 @@ namespace psycle { namespace host {
 		void Configuration::SetDefaultSettings(bool include_others)
 		{
 			SetPluginDir(appPath()+"PsyclePlugins");
+			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+				if(std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
+					SetPluginDir(appPath() + "psycle-plugins");
+			#endif
 			SetVst32Dir(appPath()+"VstPlugins");
 			SetVst64Dir(appPath()+"VstPlugins64");
 			UseJBridge(false);
@@ -37,11 +41,14 @@ namespace psycle { namespace host {
 		}
 		void Configuration::Load(ConfigStorage & store)
 		{
-			#if defined _WIN64
-				store.Read("PluginDir64",plugin_dir_);
-			#elif defined _WIN32
-				store.Read("PluginDir",plugin_dir_);
+			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
 			#endif
+				#if defined _WIN64
+					store.Read("PluginDir64",plugin_dir_);
+				#elif defined _WIN32
+					store.Read("PluginDir",plugin_dir_);
+				#endif
 			store.Read("VstDir",vst32_dir_);
 			store.Read("VstDir64",vst64_dir_);
 			bool use=false;
@@ -65,11 +72,14 @@ namespace psycle { namespace host {
 		}
 		void Configuration::Save(ConfigStorage & store)
 		{
-			#if defined _WIN64
-				store.Write("PluginDir64",plugin_dir_);
-			#elif defined _WIN32
-				store.Write("PluginDir",plugin_dir_);
+			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
 			#endif
+				#if defined _WIN64
+					store.Write("PluginDir64",plugin_dir_);
+				#elif defined _WIN32
+					store.Write("PluginDir",plugin_dir_);
+				#endif
 			store.Write("VstDir",vst32_dir_);
 			store.Write("VstDir64",vst64_dir_);
 
