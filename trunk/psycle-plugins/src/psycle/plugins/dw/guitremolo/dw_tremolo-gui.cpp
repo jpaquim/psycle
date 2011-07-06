@@ -46,7 +46,7 @@ CMachineParameter const paramGravity = { "Gravity", "Gravity", 0, MAX_GRAVITY, M
 CMachineParameter const paramGravMode = { "Gravity Mode", "Gravity Mode", 0, 1, MPF_STATE, 0 };
 CMachineParameter const paramStereoPhase={ "Stereo Phase", "Stereo Phase", 0, MAX_PHASE, MPF_STATE, MAX_PHASE * 3 / 4 };
 CMachineParameter const paramSync = { "Restart LFO", "Restart LFO", 0, 1, MPF_STATE, 0 };
-CMachineParameter const paramNull = { "", "", 0, 0, MPF_LABEL, 0 };
+CMachineParameter const paramNull = { "", "", 0, 0, MPF_NULL, 0 };
 
 enum
 {

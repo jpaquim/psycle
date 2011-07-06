@@ -107,7 +107,7 @@ using namespace psycle::plugin_interface;
 
 // shortname longname min max flags initval
 
-CMachineParameter const paramNull            = {" "," ",0,0,MPF_LABEL,0};
+CMachineParameter const paramNull            = {" "," ",0,0,MPF_NULL,0};
 CMachineParameter const paramGrainSize       = { "Size","grain size",MIN_LENGTH,MAX_LENGTH,MPF_STATE,1140};
 CMachineParameter const paramGrainFreq       = {"Freq","grain frequency",MIN_FREQ,MAX_FREQ,MPF_STATE,957};
 CMachineParameter const paramAttack          = {"Attack","attack time",MIN_ATTACK,MAX_ATTACK,MPF_STATE,200};
@@ -147,15 +147,15 @@ CMachineParameter const paramOutGain         = {"Out Gain","output gain",0,MAX_G
 CMachineParameter const paramLFOSync         = {"LFO Syncer","Synchronize LFOs",-2,2,MPF_STATE,0};
 CMachineParameter const paramGrainSync       = {"Grain Syncer","Synchronize Grains",0,1,MPF_STATE,0};
 
-CMachineParameter const paramLabelSync       = {"        -Sync Tools-" , "Synchronization tools", 0,  1, MPF_STATE || MPF_LABEL, 0};
-CMachineParameter const paramLabelDisplay    = {"         -Display-"   , "Display"              , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelGrainShape = {"        -Grain Shape-", "Grain Shape Controls" , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelRandMod    = {"        -Random Mod-" , "Random Modulation"    , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelLFO1Mod    = {"         -LFO1 Mod-"  , "LFO1 Modulation"      , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelLFO2Mod    = {"         -LFO2 Mod-"  , "LFO2 Modulation"      , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelAmpSection = {"        -Amp Section-", "Amp controls"         , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelLFOs       = {"            -LFOs-"   , "LFO Controls"         , 0,  1, MPF_STATE || MPF_LABEL, 1};
-CMachineParameter const paramLabelBlank      = {"              -=-"    , ""                     , 0, -1, MPF_STATE || MPF_LABEL, 1};
+CMachineParameter const paramLabelSync       = {"        -Sync Tools-" , "Synchronization tools", 0,  0, MPF_LABEL, 0};
+CMachineParameter const paramLabelDisplay    = {"         -Display-"   , "Display"              , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelGrainShape = {"        -Grain Shape-", "Grain Shape Controls" , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelRandMod    = {"        -Random Mod-" , "Random Modulation"    , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelLFO1Mod    = {"         -LFO1 Mod-"  , "LFO1 Modulation"      , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelLFO2Mod    = {"         -LFO2 Mod-"  , "LFO2 Modulation"      , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelAmpSection = {"        -Amp Section-", "Amp controls"         , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelLFOs       = {"            -LFOs-"   , "LFO Controls"         , 0,  0, MPF_LABEL, 1};
+CMachineParameter const paramLabelBlank      = {"              -=-"    , ""                     , 0, -0, MPF_LABEL, 1};
 
 
 CMachineParameter const *pParameters[] = 

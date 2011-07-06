@@ -176,7 +176,7 @@ CMachineParameter const paraMIXlfoamplitude = {"Mix LFO Depth", "Mix LFO Depth",
 CMachineParameter const paraSmoothing = {"Delta Smoothing", "Delta Smoothing", 0, 255, MPF_STATE, 0};
 CMachineParameter const paraSPEEDlfophase = {"Speed LFO Phase", "Speed LFO Phase", 0, 0xffff, MPF_STATE, 0};
 CMachineParameter const paraMIXlfophase = {"Mix LFO Phase", "Mix LFO Phase", 0, 0xffff, MPF_STATE, 0};
-CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
+CMachineParameter const paraNULL = {" ", " ", 0, 0, MPF_NULL, 0};
 
 enum
 { 

@@ -185,986 +185,127 @@ using namespace psycle::plugin_interface;
 //#define PREVIEW
 #define FILEVERSION 4
 
+#define FMLAB_VERSION "0.68b"
+int const IFMLAB_VERSION = 0x0068;
+
 #define THREESEL(sel,a,b,c) ((sel)<120)?((a)+((b)-(a))*(sel)/120):((b)+((c)-(b))*((sel)-120)/120)
 
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 float SyncAdd[MAXSYNCMODES+1];
-int vibrato_delay;
 int song_freq;
 float max_vcf_cutoff;
 float freq_mul;
 
+///\fixme these two should not be static! this way they affect other instances!
+int vibrato_delay;
 #ifndef SYNTH_LIGHT
 int tremolo_delay;
 #endif
 
-CMachineParameter const paraNULL = 
-{ 
-	" ",
-	" ",																												// description
-	0,																																																// MinValue				
-	1,																																												// MaxValue
-	MPF_LABEL,																																								// Flags
-	0
-};
+CMachineParameter const paraNULL = {" ", " ", 0, 0, MPF_NULL, 0};
+CMachineParameter const paraOSCnum = {"OSC Select", "OSC Select", 0, MAXOSC-1, MPF_STATE, 0};
+CMachineParameter const paraVCFnum = {"VCF Select", "VCF Select", 0, MAXVCF-1, MPF_STATE, 0};
+CMachineParameter const paraVCFenvtype = {"VCF Env Type", "VCF Env Type", 0, MAXENVTYPE, MPF_STATE, 0};
+CMachineParameter const paraOSCdetune = {"OSC Tune", "OSC Tune", -36, 36, MPF_STATE, 0};
+CMachineParameter const paraOSCfinetune = {"OSC Finetune", "OSC Finetune",-256, 256, MPF_STATE, 0};
+CMachineParameter const paraOSCsync = {"OSC Sync", "OSC Sync", 0, MAXOSC, MPF_STATE, 0};
 
-CMachineParameter const paraOSCnum = 
-{ 
-	"OSC Select",
-	"OSC Select",																																				// description
-	0,																																												// MinValue				
-	MAXOSC-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
+CMachineParameter const paraVCAattack = {"VCA Attack", "VCA Attack", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraVCAdecay = {"VCA Decay", "VCA Decay", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraVCAsustain = {"VCA Sustain", "VCA Sustain level", 0, 256, MPF_STATE, 192};
+CMachineParameter const paraVCArelease = {"VCA Release", "VCA Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 1024};
+CMachineParameter const paraVCFmixmode = {"VCF Mix Mode", "VCF Mix Mode", 0, MAXVCFMODE, MPF_STATE, 0};
+CMachineParameter const paraVCFattack = {"VCF Attack", "VCF Attack", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraVCFdecay = {"VCF Decay", "VCF Decay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraVCFdelay = {"VCF Delay", "VCF Delay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraVCFsustain = {"VCF Sustain", "VCF Sustain level", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraVCFrelease = {"VCF Release", "VCF Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 1024};
+CMachineParameter const paraVCFcutoff = {"VCF Cutoff", "VCF Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
+CMachineParameter const paraVCFresonance = {"VCF Resonance", "VCF Resonance", 1, 240, MPF_STATE, 1};
+CMachineParameter const paraVCFtype = {"VCF Type", "VCF Type", 0, MAXVCFTYPE, MPF_STATE, 0};
+CMachineParameter const paraVCFenvmod = {"VCF Env Mod", "VCF Env Mod", -MAX_VCF_CUTOFF, MAX_VCF_CUTOFF, MPF_STATE, 0};
 
-CMachineParameter const paraVCFnum = 
-{ 
-	"VCF Select",
-	"VCF Select",																																				// description
-	0,																																												// MinValue				
-	MAXVCF-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFenvtype = 
-{ 
-	"VCF Env Type",
-	"VCF Env Type",																																				// description
-	0,																																												// MinValue				
-	MAXENVTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCdetune = 
-{ 
-	"OSC Tune",
-	"OSC Tune",																																				// description
-	-36,																																												// MinValue				
-	36,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCfinetune = 
-{ 
-	"OSC Finetune",
-	"OSC Finetune",																																// description
-	-256,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCsync = 
-{ 
-	"OSC Sync",
-	"OSC Sync",																																				// description
-	0,																																																// MinValue				
-	MAXOSC,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCAattack = 
-{ 
-	"VCA Attack",
-	"VCA Attack",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-
-CMachineParameter const paraVCAdecay = 
-{ 
-	"VCA Decay",
-	"VCA Decay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-CMachineParameter const paraVCAsustain = 
-{ 
-	"VCA Sustain",
-	"VCA Sustain level",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	192
-};
-
-
-CMachineParameter const paraVCArelease = 
-{ 
-	"VCA Release",
-	"VCA Release",																																				// description
-	MIN_ENV_TIME,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1024
-};
-
-CMachineParameter const paraVCFmixmode = 
-{ 
-	"VCF Mix Mode",
-	"VCF Mix Mode",																																				// description
-	0,																																																// MinValue				
-	MAXVCFMODE,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFattack = 
-{ 
-	"VCF Attack",
-	"VCF Attack",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-
-CMachineParameter const paraVCFdecay = 
-{ 
-	"VCF Decay",
-	"VCF Decay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFdelay = 
-{ 
-	"VCF Delay",
-	"VCF Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-
-CMachineParameter const paraVCFsustain = 
-{ 
-	"VCF Sustain",
-	"VCF Sustain level",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraVCFrelease = 
-{ 
-	"VCF Release",
-	"VCF Release",																																				// description
-	MIN_ENV_TIME,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1024
-};
-
-CMachineParameter const paraVCFcutoff = 
-{ 
-	"VCF Cutoff",
-	"VCF Cutoff",																																				// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	MAX_VCF_CUTOFF/2
-};
-
-CMachineParameter const paraVCFresonance = 
-{ 
-	"VCF Resonance",
-	"VCF Resonance",																																// description
-	1,																																																// MinValue				
-	240,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
-
-CMachineParameter const paraVCFtype = 
-{ 
-	"VCF Type",
-	"VCF Type",																																								// description
-	0,																																																// MinValue				
-	MAXVCFTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraVCFenvmod = 
-{ 
-	"VCF Env Mod",
-	"VCF Env Mod",																																				// description
-	-MAX_VCF_CUTOFF,																																												// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-
-CMachineParameter const paraVCFlfospeed = 
-{ 
-	"VCF LFO Rate",
-	"VCF LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraVCFlfoamplitude = 
-{ 
-	"VCF LFO Depth",
-	"VCF LFO Depth",																												// description
-	0,																																																// MinValue				
-	MAX_VCF_CUTOFF,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVCFlfowave = 
-{ 
-	"VCF LFO Wave",
-	"VCF LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-
-CMachineParameter const paraVibratospeed = 
-{ 
-	"Vibrato Rate",
-	"Vibrato Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraVibratoamplitude = 
-{ 
-	"Vibrato",
-	"Vibrato",																												// description
-	0,																																																// MinValue				
-	2304,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVibratowave = 
-{ 
-	"Vibrato Wave",
-	"Vibrato Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraVibratodelay = 
-{ 
-	"Vibrato Delay",
-	"Vibrato Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCmixtype = 
-{ 
-	"OSC Mix Method",
-	"OSC Mix Method",																																				// description
-	0,																																																// MinValue				
-	3,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOUTvol = 
-{ 
-	"Volume",
-	"Volume",																																				// description
-	0,																																												// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-CMachineParameter const paraOUToverdrive = 
-{ 
-	"Overdrive Method",
-	"Overdrive Method",																																				// description
-	0,																																												// MinValue				
-	MAXOVERDRIVEMETHOD,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOUToverdrivegain = 
-{ 
-	"Overdrive Gain",
-	"Overdrive Gain",																																				// description
-	0,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-
-CMachineParameter const paraGlobalDetune = 
-{
-	"Global Tune",
-	"Global Tune",																																				// description
-	-36,																																												// MinValue				
-	36,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraGlobalFinetune = 
-{
-	"Global Finetune",
-	"Global Finetune",																																				// description
-	-256,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraPorta = 
-{
-	"Portamento",
-	"Portamento",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME/2,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraInertia = 
-{
-	"Tweak Inertia",
-	"Tweak Inertia",																																				// description
-	0,																																																// MinValue				
-	1024,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraInterpolation = 
-{
-	"Antialias",
-	"Antialias",																																				// description
-	1,																																																// MinValue				
-	MAXANTIALIAS,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
+CMachineParameter const paraVCFlfospeed = {"VCF LFO Rate", "VCF LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraVCFlfoamplitude = {"VCF LFO Depth", "VCF LFO Depth", 0, MAX_VCF_CUTOFF, MPF_STATE, 0};
+CMachineParameter const paraVCFlfowave = {"VCF LFO Wave", "VCF LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraVibratospeed = {"Vibrato Rate", "Vibrato Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraVibratoamplitude = {"Vibrato", "Vibrato", 0, 2304, MPF_STATE, 0};
+CMachineParameter const paraVibratowave = {"Vibrato Wave", "Vibrato Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraVibratodelay = {"Vibrato Delay", "Vibrato Delay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraOSCmixtype = {"OSC Mix Method", "OSC Mix Method", 0, 3, MPF_STATE, 0};
+CMachineParameter const paraOUTvol = {"Volume", "Volume", 0, 512, MPF_STATE, 128};
+CMachineParameter const paraOUToverdrive = {"Overdrive Method", "Overdrive Method", 0, MAXOVERDRIVEMETHOD, MPF_STATE, 0};
+CMachineParameter const paraOUToverdrivegain = {"Overdrive Gain", "Overdrive Gain", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraGlobalDetune = {"Global Tune", "Global Tune", -36, 36, MPF_STATE, 0};
+CMachineParameter const paraGlobalFinetune = {"Global Finetune", "Global Finetune", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraPorta = {"Portamento", "Portamento", 0, MAX_ENV_TIME/2, MPF_STATE, 0};
+CMachineParameter const paraInertia = {"Tweak Inertia", "Tweak Inertia", 0, 1024, MPF_STATE, 0};
+CMachineParameter const paraInterpolation = {"Antialias", "Antialias", 1, MAXANTIALIAS, MPF_STATE, 1};
 
 #ifdef SYNTH_ULTRALIGHT
-CMachineParameter const paraOSCvol = 
-{ 
-	"OSC Volume",
-	"OSC Volume",																																				// description
-	0,																																												// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOSCwave = 
-{ 
-	"OSC Wave",
-	"OSC Wave",																																				// description
-	0,																																																// MinValue				
-	MAXWAVE,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
+CMachineParameter const paraOSCvol = {"OSC Volume", "OSC Volume", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraOSCwave = {"OSC Wave", "OSC Wave", 0, MAXWAVE, MPF_STATE, 0};
 #else
-CMachineParameter const paraOSCvolA = 
-{ 
-	"OSC Volume A",
-	"OSC Volume A",																																				// description
-	0,																																												// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOSCvolB = 
-{ 
-	"OSC Volume B",
-	"OSC Volume B",																																				// description
-	0,																																												// MinValue				
-	512,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCAwave = 
-{ 
-	"OSC Wave A",
-	"OSC Wave A",																																				// description
-	0,																																																// MinValue				
-	MAXWAVE,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCBwave = 
-{ 
-	"OSC Wave B",
-	"OSC Wave B",																																				// description
-	0,																																																// MinValue				
-	MAXWAVE,																																																// MaxValue
-	MPF_STATE,																																								// Flags
-	1
-};
-
-CMachineParameter const paraOSCwidth = 
-{ 
-	"OSC Width A:B",
-	"OSC Width",																																				// description
-	1,																																																// MinValue				
-	255,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-CMachineParameter const paraGAINenvtype = 
-{ 
-	"Gain Env Type",
-	"Gain Env Type",																																				// description
-	0,																																												// MinValue				
-	MAXENVTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraGAINenvmod = 
-{ 
-	"Gain Env Mod",
-	"Gain Env Mod",																																				// description
-	-256,																																												// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraGAINattack = 
-{ 
-	"Gain Attack",
-	"Gain Attack",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-
-CMachineParameter const paraGAINdecay = 
-{ 
-	"Gain Decay",
-	"Gain Decay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraGAINdelay = 
-{ 
-	"Gain Delay",
-	"Gain Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-
-CMachineParameter const paraGAINsustain = 
-{ 
-	"Gain Sustain",
-	"Gain Sustain level",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraGAINrelease = 
-{ 
-	"Gain Release",
-	"Gain Release",																																				// description
-	MIN_ENV_TIME,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1024
-};
-
-
-CMachineParameter const paraGAINlfospeed = 
-{ 
-	"Gain LFO Rate",
-	"Gain LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraGAINlfoamplitude = 
-{ 
-	"Gain LFO Depth",
-	"Gain LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraGAINlfowave = 
-{ 
-	"Gain LFO Wave",
-	"Gain LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
+CMachineParameter const paraOSCvolA = {"OSC Volume A", "OSC Volume A", 0, 512, MPF_STATE, 256};
+CMachineParameter const paraOSCvolB = {"OSC Volume B", "OSC Volume B", 0, 512, MPF_STATE, 0};
+CMachineParameter const paraOSCAwave = {"OSC Wave A", "OSC Wave A", 0, MAXWAVE, MPF_STATE, 0};
+CMachineParameter const paraOSCBwave = {"OSC Wave B", "OSC Wave B", 0, MAXWAVE, MPF_STATE, 1};
+CMachineParameter const paraOSCwidth = {"OSC Width A:B", "OSC Width", 1, 255, MPF_STATE, 128};
+CMachineParameter const paraGAINenvtype = {"Gain Env Type", "Gain Env Type", 0, MAXENVTYPE, MPF_STATE, 0};
+CMachineParameter const paraGAINenvmod = {"Gain Env Mod", "Gain Env Mod", -256, 256, MPF_STATE, 0};
+CMachineParameter const paraGAINattack = {"Gain Attack", "Gain Attack", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraGAINdecay = {"Gain Decay", "Gain Decay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraGAINdelay = {"Gain Delay", "Gain Delay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraGAINsustain = {"Gain Sustain", "Gain Sustain level", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraGAINrelease = {"Gain Release", "Gain Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 1024};
+CMachineParameter const paraGAINlfospeed = {"Gain LFO Rate", "Gain LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraGAINlfoamplitude = {"Gain LFO Depth", "Gain LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraGAINlfowave = {"Gain LFO Wave", "Gain LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
 #endif
+
 #ifndef SYNTH_LIGHT
+CMachineParameter const paraOSCphasemix = {"OSC Phase Mix", "OSC Phase Mix", 0, MAXPHASEMIX, MPF_STATE, 0};
+CMachineParameter const paraOSCphaseamount = {"OSC Phase", "OSC Phase", -SAMPLE_LENGTH*2, SAMPLE_LENGTH*2, MPF_STATE, SAMPLE_LENGTH/4};
+CMachineParameter const paraOSCpenvmod = {"OSC PH Env Mod", "OSC PH Env Mod", -SAMPLE_LENGTH*2, SAMPLE_LENGTH*2, MPF_STATE, 0};
+CMachineParameter const paraOSCpattack = {"OSC PH Attack", "OSC PH Attack", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraOSCpdecay = {"OSC PH Decay", "OSC PH Decay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraOSCpdelay = {"OSC PH Delay", "OSC PH Delay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraOSCpsustain = {"OSC PH Sustain", "OSC PH Sustain level", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraOSCprelease = {"OSC PH Release", "OSC PH Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 1024};
+CMachineParameter const paraOSCplfospeed = {"OSC PH LFO Rate", "OSC PH LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraOSCplfoamplitude = {"OSC PH LFO Depth", "OSC PH LFO Depth", 0, SAMPLE_LENGTH*4, MPF_STATE, 0};
+CMachineParameter const paraOSCplfowave = {"OSC PH LFO Wave", "OSC PH LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraOSCwenvmod = {"OSC W Env Mod", "OSC W Env Mod", -4096, 4096, MPF_STATE, 0};
 
-CMachineParameter const paraOSCphasemix = 
-{ 
-	"OSC Phase Mix",
-	"OSC Phase Mix",																																				// description
-	0,																																																// MinValue				
-	MAXPHASEMIX,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
+CMachineParameter const paraOSCwattack = {"OSC W Attack", "OSC W Attack", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraOSCwdecay = {"OSC W Decay", "OSC W Decay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraOSCwdelay = {"OSC W Delay", "OSC W Delay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraOSCwsustain = {"OSC W Sustain", "OSC W Sustain level", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraOSCwrelease = {"OSC W Release", "OSC W Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 1024};
+CMachineParameter const paraOSCwlfospeed = {"OSC W LFO Rate", "OSC W LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraOSCwlfoamplitude = {"OSC W LFO Depth", "OSC W LFO Depth", 0, 256, MPF_STATE, 0};
+CMachineParameter const paraOSCwlfowave = {"OSC W LFO Wave", "OSC W LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraOSCfenvtype = {"OSC Frq Env Type", "OSC Frq Env Type", 0, MAXENVTYPE, MPF_STATE, 0};
+CMachineParameter const paraOSCwenvtype = {"OSC W Env Type", "OSC W Env Type", 0, MAXENVTYPE, MPF_STATE, 0};
+CMachineParameter const paraOSCpenvtype = {"OSC PH Env Type", "OSC PH Env Type", 0, MAXENVTYPE, MPF_STATE, 0};
 
-CMachineParameter const paraOSCphaseamount = 
-{ 
-	"OSC Phase",
-	"OSC Phase",																																				// description
-	-SAMPLE_LENGTH*2,																																																// MinValue				
-	SAMPLE_LENGTH*2,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	SAMPLE_LENGTH/4
-};
+CMachineParameter const paraOSCfenvmod = {"OSC Frq Env Mod", "OSC Frq Env Mod", -2304, 2304, MPF_STATE, 0};
+CMachineParameter const paraOSCfdelay = {"OSC Frq Delay", "OSC Frq Delay", 0, MAX_ENV_TIME, MPF_STATE,0};
+CMachineParameter const paraOSCfattack = {"OSC Frq Attack", "OSC Frq Attack", 0, MAX_ENV_TIME, MPF_STATE, 128};
+CMachineParameter const paraOSCfdecay = {"OSC Frq Decay", "OSC Frq Decay", 0, MAX_ENV_TIME, MPF_STATE, 0};
+CMachineParameter const paraOSCfsustain = {"OSC Frq Sustain", "OSC Frq Sustain level", 0, 256, MPF_STATE, 256};
+CMachineParameter const paraOSCfrelease = {"OSC Frq Release", "OSC Frq Release", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 1024};
+CMachineParameter const paraOSCflfospeed = {"OSC Frq LFO Rate", "OSC Frq LFO Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraOSCflfoamplitude = {"OSC Frq LFO Depth", "OSC Frq LFO Depth", 0, 2304, MPF_STATE, 0};
+CMachineParameter const paraOSCflfowave = {"OSC Frq LFO Wave", "OSC Frq LFO Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraTremolospeed = {"Tremolo Rate", "Tremolo Rate", 0, MAX_RATE, MPF_STATE, 0};
+CMachineParameter const paraTremoloamplitude = {"Tremolo", "Tremolo", 0, 240, MPF_STATE, 0};
+CMachineParameter const paraTremolowave = {"Tremolo Wave", "Tremolo Wave", 0, MAXLFOWAVE-1, MPF_STATE, 0};
+CMachineParameter const paraTremolodelay = {"Tremolo Delay", "Tremolo Delay", 0, MAX_ENV_TIME, MPF_STATE, 0};
 
-CMachineParameter const paraOSCpenvmod = 
-{ 
-	"OSC PH Env Mod",
-	"OSC PH Env Mod",																																				// description
-	-SAMPLE_LENGTH*2,																																												// MinValue				
-	SAMPLE_LENGTH*2,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCpattack = 
-{ 
-	"OSC PH Attack",
-	"OSC PH Attack",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-
-CMachineParameter const paraOSCpdecay = 
-{ 
-	"OSC PH Decay",
-	"OSC PH Decay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCpdelay = 
-{ 
-	"OSC PH Delay",
-	"OSC PH Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCpsustain = 
-{ 
-	"OSC PH Sustain",
-	"OSC PH Sustain level",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOSCprelease = 
-{ 
-	"OSC PH Release",
-	"OSC PH Release",																																				// description
-	MIN_ENV_TIME,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1024
-};
-
-CMachineParameter const paraOSCplfospeed = 
-{ 
-	"OSC PH LFO Rate",
-	"OSC PH LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraOSCplfoamplitude = 
-{ 
-	"OSC PH LFO Depth",
-	"OSC PH LFO Depth",																												// description
-	0,																																																// MinValue				
-	SAMPLE_LENGTH*4,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCplfowave = 
-{ 
-	"OSC PH LFO Wave",
-	"OSC PH LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCwenvmod = 
-{ 
-	"OSC W Env Mod",
-	"OSC W Env Mod",																																				// description
-	-4096,																																												// MinValue				
-	4096,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCwattack = 
-{ 
-	"OSC W Attack",
-	"OSC W Attack",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-
-CMachineParameter const paraOSCwdecay = 
-{ 
-	"OSC W Decay",
-	"OSC W Decay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCwdelay = 
-{ 
-	"OSC W Delay",
-	"OSC W Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraOSCwsustain = 
-{ 
-	"OSC W Sustain",
-	"OSC W Sustain level",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOSCwrelease = 
-{ 
-	"OSC W Release",
-	"OSC W Release",																																				// description
-	MIN_ENV_TIME,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1024
-};
-
-
-CMachineParameter const paraOSCwlfospeed = 
-{ 
-	"OSC W LFO Rate",
-	"OSC W LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraOSCwlfoamplitude = 
-{ 
-	"OSC W LFO Depth",
-	"OSC W LFO Depth",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCwlfowave = 
-{ 
-	"OSC W LFO Wave",
-	"OSC W LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCfenvtype = 
-{ 
-	"OSC Frq Env Type",
-	"OSC Frq Env Type",																																				// description
-	0,																																												// MinValue				
-	MAXENVTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCwenvtype = 
-{ 
-	"OSC W Env Type",
-	"OSC W Env Type",																																				// description
-	0,																																												// MinValue				
-	MAXENVTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCpenvtype = 
-{ 
-	"OSC PH Env Type",
-	"OSC PH Env Type",																																				// description
-	0,																																												// MinValue				
-	MAXENVTYPE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCfenvmod = 
-{ 
-	"OSC Frq Env Mod",
-	"OSC Frq Env Mod",																																				// description
-	-2304,																																												// MinValue				
-	2304,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCfdelay = 
-{ 
-	"OSC Frq Delay",
-	"OSC Frq Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCfattack = 
-{ 
-	"OSC Frq Attack",
-	"OSC Frq Attack",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	128
-};
-
-
-CMachineParameter const paraOSCfdecay = 
-{ 
-	"OSC Frq Decay",
-	"OSC Frq Decay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCfsustain = 
-{ 
-	"OSC Frq Sustain",
-	"OSC Frq Sustain level",																												// description
-	0,																																																// MinValue				
-	256,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	256
-};
-
-CMachineParameter const paraOSCfrelease = 
-{ 
-	"OSC Frq Release",
-	"OSC Frq Release",																																				// description
-	MIN_ENV_TIME,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	1024
-};
-
-
-CMachineParameter const paraOSCflfospeed = 
-{ 
-	"OSC Frq LFO Rate",
-	"OSC Frq LFO Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraOSCflfoamplitude = 
-{ 
-	"OSC Frq LFO Depth",
-	"OSC Frq LFO Depth",																												// description
-	0,																																																// MinValue				
-	2304,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraOSCflfowave = 
-{ 
-	"OSC Frq LFO Wave",
-	"OSC Frq LFO Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraTremolospeed = 
-{ 
-	"Tremolo Rate",
-	"Tremolo Rate",																																// description
-	0,																																																// MinValue				
-	MAX_RATE,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-
-CMachineParameter const paraTremoloamplitude = 
-{ 
-	"Tremolo",
-	"Tremolo",																												// description
-	0,																																																// MinValue				
-	240,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraTremolowave = 
-{ 
-	"Tremolo Wave",
-	"Tremolo Wave",																												// description
-	0,																																																// MinValue				
-	MAXLFOWAVE-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraTremolodelay = 
-{ 
-	"Tremolo Delay",
-	"Tremolo Delay",																																				// description
-	0,																																																// MinValue				
-	MAX_ENV_TIME,																																				// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraARPmode = 
-{
-	"Arpeggio Type",
-	"Arpeggio Type",																																// description
-	0,																																												// MinValue				
-	MAXARP-1,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	0
-};
-
-CMachineParameter const paraARPbpm = 
-{
-	"Arpeggio BPM",
-	"Arpeggio BPM",																																				// description
-	0,																																												// MinValue				
-	2048,																																								// MaxValue
-	MPF_STATE,																																				// Flags
-	0
-};
-
-
-CMachineParameter const paraARPcount = 
-{
-	"Arpeggio Steps",
-	"Arpeggio Steps",																																				// description
-	0,																																												// MinValue				
-	16,																																												// MaxValue
-	MPF_STATE,																																								// Flags
-	4
-};
-
-
+CMachineParameter const paraARPmode = {"Arpeggio Type", "Arpeggio Type", 0, MAXARP-1, MPF_STATE, 0};
+CMachineParameter const paraARPbpm = {"Arpeggio BPM", "Arpeggio BPM", 0, 2048, MPF_STATE, 0};
+CMachineParameter const paraARPcount = {"Arpeggio Steps", "Arpeggio Steps", 0, 16, MPF_STATE, 4};
 #endif
 
 #ifdef SYNTH_ULTRALIGHT
@@ -1215,8 +356,7 @@ enum {
 	e_paraInertia,
 	e_paraInterpolation,
 	e_paraNULL8,
-	e_paraOUTvol,
-	NUMPARAMETERS
+	e_paraOUTvol
 };
 
 CMachineParameter const *pParameters[] = 
@@ -1270,18 +410,22 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	GENERATOR,																																// flags
-	NUMPARAMETERS,																												// numParameters
-	pParameters,																												// Pointer to parameters
-	"Pooplog FM UltraLight 0.68b",																								// name
-	"Pooplog UltraL",																												// short name
-	"Jeremy Evers",																												// author
-	"Pattern Commands",																																				// A command, that could be use for open an editor, etc...
+	MI_VERSION,
+	IFMLAB_VERSION,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"Pooplog FM UltraLight" FMLAB_VERSION
+#ifdef _DEBUG
+	 (Debug build)"
+#endif
+	,
+	"Pooplog UltraL",
+	"Jeremy Evers",
+	"Pattern Commands",
 	NUMCOLUMNS
 );
-#else
-#ifdef SYNTH_LIGHT
+#elif defined SYNTH_LIGHT
 // light synth
 enum {
 	e_paraOSCnum,
@@ -1340,8 +484,7 @@ enum {
 	e_paraInertia,
 	e_paraInterpolation,
 	e_paraNULL7,
-	e_paraOUTvol,
-	NUMPARAMETERS
+	e_paraOUTvol
 };
 
 CMachineParameter const *pParameters[] = 
@@ -1407,18 +550,19 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	GENERATOR,																																// flags
-	NUMPARAMETERS,																												// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	IFMLAB_VERSION,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"Pooplog FM Light" FMLAB_VERSION
 #ifdef _DEBUG
-	"Pooplog FM Light 0.68b(Debug build)",								// name
-#else
-	"Pooplog FM Light 0.68b",																								// name
+	 (Debug build)"
 #endif
-	"Pooplog Light",																												// short name
-	"Jeremy Evers",																												// author
-	"Pattern Commands",																																				// A command, that could be use for open an editor, etc...
+	,
+	"Pooplog Light",
+	"Jeremy Evers",
+	"Pattern Commands",
 	NUMCOLUMNS
 );
 #else
@@ -1524,8 +668,7 @@ enum {
 	e_paraInertia,
 	e_paraInterpolation,
 	e_paraNULL13,
-	e_paraOUTvol,
-	NUMPARAMETERS
+	e_paraOUTvol
 };
 
 CMachineParameter const *pParameters[] = 
@@ -1635,21 +778,21 @@ CMachineParameter const *pParameters[] =
 
 
 CMachineInfo const MacInfo (
-	MI_VERSION,				
-	GENERATOR,																																// flags
-	NUMPARAMETERS,																												// numParameters
-	pParameters,																												// Pointer to parameters
+	MI_VERSION,
+	IFMLAB_VERSION,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+	"Pooplog FM Laboratory" FMLAB_VERSION
 #ifdef _DEBUG
-	"Pooplog FM Laboratory 0.68b(Debug build)",								// name
-#else
-	"Pooplog FM Laboratory 0.68b",																								// name
+	 (Debug build)"
 #endif
-	"Pooplog",																												// short name
-	"Jeremy Evers",																												// author
-	"Pattern Commands",																																				// A command, that could be use for open an editor, etc...
+	 ,
+	"Pooplog",
+	"Jeremy Evers",
+	"Pattern Commands",
 	NUMCOLUMNS
 );
-#endif
 #endif
 
 struct INERTIA
@@ -1704,7 +847,7 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 
 mi::mi()
 {
-	Vals = new int[NUMPARAMETERS];
+	Vals = new int[MacInfo.numParameters];
 	InitWaveTable();
 	pLastInertia = pInertia = NULL;
 }
@@ -3940,11 +3083,17 @@ void mi::InitWaveTable()
 		case 19:sprintf(txt,"Soft R Saw -");return true;break;
 		case 20:sprintf(txt,"Soft Square +");return true;break;
 		case 21:sprintf(txt,"Soft Square -");return true;break;
-		case 22:sprintf(txt,"White Noise 1");return true;break;
-		case 23:sprintf(txt,"White Noise 2");return true;break;
-		case 24:sprintf(txt,"Brown Noise 1");return true;break;
-		case 25:sprintf(txt,"Brown Noise 2");return true;break;
-		case 26:sprintf(txt,"Silence");return true;break;
+		case 22:sprintf(txt,"Super MW +");return true;break;
+		case 23:sprintf(txt,"Super MW -");return true;break;
+		case 24:sprintf(txt,"Racer +");return true;break;
+		case 25:sprintf(txt,"Racer -");return true;break;
+		case 26:sprintf(txt,"White Noise");return true;break;
+		case 27:sprintf(txt,"White Noise Loop 1");return true;break;
+		case 28:sprintf(txt,"White Noise Loop 2");return true;break; // WHITENOISEGEN
+		case 29:sprintf(txt,"Brown Noise");return true;break;
+		case 30:sprintf(txt,"Brown Noise Loop 1");return true;break;
+		case 31:sprintf(txt,"Brown Noise Loop 2");return true;break; // BROWNNOISEGEN
+		case 32:sprintf(txt,"Silence");return true;break;
 	*/
 #ifndef SYNTH_ULTRALIGHT
 	WaveTable[0] = &SourceWaveTable[0][0];

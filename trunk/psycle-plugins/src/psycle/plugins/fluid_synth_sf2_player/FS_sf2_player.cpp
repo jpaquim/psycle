@@ -56,7 +56,7 @@ struct SYNPAR {
 };
 
 CMachineParameter const paraInstr = {
-	"Channel / Instrument", "Channel", 0, 1, MPF_STATE||MPF_LABEL, 0
+	"Channel / Instrument", "Channel", 0, 0, MPF_LABEL, 0
 };
 
 CMachineParameter const paraChannel = {
@@ -80,7 +80,7 @@ CMachineParameter const paraWheelSens = {
 };
 
 CMachineParameter const paraReverb = {
-	"Reverb", "Reverb", 0, 0, MPF_STATE||MPF_LABEL, 0
+	"Reverb", "Reverb", 0, 0, MPF_LABEL, 0
 };
 
 CMachineParameter const paraReverbOn = {
@@ -104,7 +104,7 @@ CMachineParameter const paraReverbLevel = {
 };
 
 CMachineParameter const paraChorus = {
-	"Chorus", "Chorus", 0, 0, MPF_STATE||MPF_LABEL, 0
+	"Chorus", "Chorus", 0, 0, MPF_LABEL, 0
 };
 
 CMachineParameter const paraChorusOn = {
@@ -144,7 +144,7 @@ CMachineParameter const paraGain = {
 };
 
 CMachineParameter const paraNull = {
-	"", "", 0, 0, MPF_STATE, 0
+	"", "", 0, 0, MPF_NULL, 0
 };
 
 CMachineParameter const *pParameters[] = { 
