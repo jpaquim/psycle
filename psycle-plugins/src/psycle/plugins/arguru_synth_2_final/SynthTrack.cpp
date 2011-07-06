@@ -77,14 +77,14 @@ void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float srCorr
 void CSynthTrack::setGlobalPar(SYNPAR* globalPar) {
 	syntp=globalPar;
 }
-void CSynthTrack::NoteOn(int note,int spd)
+void CSynthTrack::NoteOn(int note)
 {
 	bool forceNew=false;
 
 	InitLfo(syntp->vcf_lfo_speed,syntp->vcf_lfo_amplitude);
 
 	float nnote=(float)note+
-		(float)syntp->globalfinetune*0.0038962f+
+		(float)syntp->globalfinetune*0.00389625f+
 		(float)syntp->globaldetune;
 	OSC1Speed=(float)pow(2.0, (float)nnote*wavetableCorrection/12.0);
 
@@ -112,17 +112,15 @@ void CSynthTrack::NoteOn(int note,int spd)
 	}
 	else if ( AmpEnvStage == 0 || AmpEnvStage > 3) forceNew = true;
 
-	OSC2Vol=(float)syntp->osc_mix*0.0039062f;
-	OSC1Vol=1.0f-OSC2Vol;
+	if(sp_cmd != 0x0C) {
+		OSC2Vol=(float)syntp->osc_mix*0.00390625f;
+		OSC1Vol=1.0f-OSC2Vol;
 
-	float spdcoef;
-	
-	if(spd<65) spdcoef=(float)spd*0.015625f;
-	else       spdcoef=1.0f;
+		float volMulti = (float)syntp->out_vol*0.00390625f;
 
-	OSC1Vol*=(float)syntp->out_vol*0.0039062f*spdcoef;
-	OSC2Vol*=(float)syntp->out_vol*0.0039062f*spdcoef;
-
+		OSC1Vol*=volMulti;
+		OSC2Vol*=volMulti;
+	}
 	if (sp_cmd != 0x0E) {
 		NoteCutTime = 0;
 	}
@@ -146,8 +144,8 @@ void CSynthTrack::InitEnvelopes(bool forceNew)
 	VcfResonance=(float)syntp->vcf_resonance/256.0f;
 
 	// Init Amplitude Envelope
-	AmpEnvSustainLevel=(float)syntp->amp_env_sustain*0.0039062f;
-	VcfEnvSustainLevel=(float)syntp->vcf_env_sustain*0.0039062f;
+	AmpEnvSustainLevel=(float)syntp->amp_env_sustain*0.00390625f;
+	VcfEnvSustainLevel=(float)syntp->vcf_env_sustain*0.00390625f;
 
 	if(AmpEnvStage == 0)
 	{
@@ -168,7 +166,8 @@ void CSynthTrack::InitEnvelopes(bool forceNew)
 
 void CSynthTrack::NoteOff(bool fast)
 {
-	float const unde = 0.00001f;
+	//control that it isn't too long
+	float const unde = 1.0f/(220500.f*srCorrection);
 
 	if(AmpEnvStage)
 	{
@@ -293,14 +292,26 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	sp_val=val;
 
 	// Init glide
-	///\fixme: Samplerate aware
 	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f*srCorrection; }
 	else 
 	{
 		const float synthglide = 256-syntp->synthglide;
 		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f*srCorrection;
 		else oscglide= 0.0f;
+
+		if(cmd==0x0C) 
+		{
+			OSC2Vol=(float)syntp->osc_mix*0.00390625f;
+			OSC1Vol=1.0f-OSC2Vol;
+
+			float volMulti = (float)syntp->out_vol*0.00390625f
+				* (float)val*0.00390625f;
+
+			OSC1Vol*=volMulti;
+			OSC2Vol*=volMulti;
+		}
 	}
+
 
 	// Init vibrato
 	if (cmd==4) ActiveVibrato(val>>4,val&0xf);

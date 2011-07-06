@@ -40,7 +40,7 @@ CMachineInfo const MacInfo (
 	"Freeverb",
 	"Jezar",
 	"About",
-	5
+	2
 );
 
 class mi : public CMachineInterface {

@@ -54,7 +54,7 @@ public:
 	void setSampleRate(int currentSR_, int wavetableSize_, float srCorrection_);
 	void setGlobalPar(SYNPAR* globalPar);
 	void InitEffect(int cmd,int val);
-	void NoteOn(int note, int spd);
+	void NoteOn(int note);
 	void NoteOff(bool stop=false);
 	void PerformFx();
 	inline float GetSample();
@@ -429,6 +429,8 @@ inline void CSynthTrack::GetEnvVcf()
 		{
 			VcfEnvValue=VcfEnvSustainLevel;
 			VcfEnvStage=3;
+			
+			if(!syntp->vcf_env_sustain) VcfEnvStage=0;
 		}
 	break;
 
