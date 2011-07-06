@@ -416,9 +416,9 @@ CMachineInfo const MacInfo (
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"Pooplog FM UltraLight" FMLAB_VERSION
-#ifdef _DEBUG
-	 (Debug build)"
-#endif
+	#ifndef NDEBUG
+		"(Debug build)"
+	#endif
 	,
 	"Pooplog UltraL",
 	"Jeremy Evers",
@@ -556,9 +556,9 @@ CMachineInfo const MacInfo (
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"Pooplog FM Light" FMLAB_VERSION
-#ifdef _DEBUG
-	 (Debug build)"
-#endif
+	#ifndef NDEBUG
+		"(Debug build)"
+	#endif
 	,
 	"Pooplog Light",
 	"Jeremy Evers",
@@ -784,10 +784,10 @@ CMachineInfo const MacInfo (
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
 	"Pooplog FM Laboratory" FMLAB_VERSION
-#ifdef _DEBUG
-	 (Debug build)"
-#endif
-	 ,
+	#ifndef NDEBUG
+		"(Debug build)"
+	#endif
+	,
 	"Pooplog",
 	"Jeremy Evers",
 	"Pattern Commands",
