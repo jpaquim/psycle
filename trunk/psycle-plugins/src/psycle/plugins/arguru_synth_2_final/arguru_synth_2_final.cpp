@@ -10,7 +10,7 @@ using namespace psycle::helpers::math;
 using namespace universalis::stdlib;
 
 int const WAVETABLES = 4;
-int const MAX_ENV_TIME = 250000;
+int const MAX_ENV_TIME = 220500;
 
 CMachineParameter const paraOSC1wave = {"OSC1 Wave", "OSC1 Wave", 0, 4, MPF_STATE, 1};
 CMachineParameter const paraOSC2wave = {"OSC2 Wave", "OSC2 Wave", 0, 4, MPF_STATE, 1};
@@ -118,7 +118,6 @@ class mi : public CMachineInterface {
 		virtual void Stop();
 
 	private:
-		void InitWaveTableOrig();
 		void InitWaveTableSR(bool delArray=false);
 		float *WaveTable[WAVETABLES];
 		uint32_t waveTableSize;
@@ -568,16 +567,16 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 	break;
 	
 	case 8: // Change cutoff
-		globalpar.vcf_cutoff=val*0.5f;
+		globalpar.vcf_cutoff=val>>1;
 	break;
 	
 	case 9: // Change reso
-		globalpar.vcf_resonance=val*0.5f;
+		globalpar.vcf_resonance=val>>1;
 	break;
 	}
 
 	if(note<=NOTE_MAX)
-		track[channel].NoteOn(note-18,(cmd == 0x0C)?(val>>2)&0x3F:64);
+		track[channel].NoteOn(note-18);
 	else if(note==NOTE_NOTEOFF)
 		track[channel].NoteOff();
 }
@@ -590,7 +589,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 //the OSC speed.
 void mi::InitWaveTableSR(bool delArray) {
 	//Ensure the value is even, we need to divide it by two.
-	const uint32_t amount = lround<uint32_t>(currentSR / 22.0f) & 0xFFFFFFF8;
+	const uint32_t amount = lround<uint32_t>(currentSR / 22.0f) & 0xFFFFFFFE;
 	const uint32_t half = amount >> 1;
 
 	const double sinFraction = 2.0*math::pi/(double)amount;
@@ -620,7 +619,6 @@ void mi::InitWaveTableSR(bool delArray) {
 		WaveTable[3][c]=16384-((c-half)*increase2);
 	}
 	//Two more shorts allocated for the interpolation routine.
-	//Skipping noise wavetable. It is useless.
 	for (uint32_t i=0;i < WAVETABLES; i++) {
 		WaveTable[i][amount]=WaveTable[i][0];
 		WaveTable[i][amount+1]=WaveTable[i][1];
