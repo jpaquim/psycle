@@ -417,7 +417,7 @@ CMachineInfo const MacInfo (
 	pParameters,
 	"Pooplog FM UltraLight" FMLAB_VERSION
 	#ifndef NDEBUG
-		"(Debug build)"
+		" (Debug build)"
 	#endif
 	,
 	"Pooplog UltraL",
@@ -557,7 +557,7 @@ CMachineInfo const MacInfo (
 	pParameters,
 	"Pooplog FM Light" FMLAB_VERSION
 	#ifndef NDEBUG
-		"(Debug build)"
+		" (Debug build)"
 	#endif
 	,
 	"Pooplog Light",
@@ -785,7 +785,7 @@ CMachineInfo const MacInfo (
 	pParameters,
 	"Pooplog FM Laboratory" FMLAB_VERSION
 	#ifndef NDEBUG
-		"(Debug build)"
+		" (Debug build)"
 	#endif
 	,
 	"Pooplog",
