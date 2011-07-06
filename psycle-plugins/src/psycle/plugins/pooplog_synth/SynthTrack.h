@@ -108,9 +108,6 @@ extern int tremolo_delay;
 
 extern float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 extern float SyncAdd[MAXSYNCMODES+1];
-#ifndef SYNTH_LIGHT
-extern int tremolo_delay;
-#endif
 
 #ifndef SYNTH_ULTRALIGHT
 const float WidthMultiplierA[257] = 
