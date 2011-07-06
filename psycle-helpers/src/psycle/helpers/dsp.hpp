@@ -33,6 +33,17 @@ using namespace universalis::stdlib;
 		return std::pow(10.0f, db / 20.0f);
 	}
 
+	float inline UNIVERSALIS__COMPILER__CONST
+	SliderToAmount(int nPos) {
+		return ((1024-nPos)*(1024-nPos))/(16384.f*4.f*4.f);
+	}
+
+	int inline UNIVERSALIS__COMPILER__CONST
+	AmountToSlider(float amount) {
+		int t = (int)std::sqrt(amount*16384.f*4.f*4.f);
+		return 1024-t;
+	}
+
 	/// undenormalize (renormalize) samples in a signal buffer.
 	///\todo make a template version that accept both float and doubles
 	inline void Undenormalize(float * UNIVERSALIS__COMPILER__RESTRICT pSamplesL,float * UNIVERSALIS__COMPILER__RESTRICT pSamplesR, int numsamples)
