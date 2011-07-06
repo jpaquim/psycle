@@ -13,6 +13,7 @@ using namespace psycle::helpers::math;
 
 //////////////////////////////////////////////////////////////////////
 // floor2int : fast floor thing
+UNIVERSALIS__COMPILER__DEPRECATED("portability: someone come back and centralise this")
 inline int floor2i(float x) {
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning "portability: someone come back and centralise this"

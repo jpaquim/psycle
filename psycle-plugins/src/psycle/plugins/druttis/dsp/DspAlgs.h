@@ -39,7 +39,8 @@ inline int v2m(int v)
 //
 //////////////////////////////////////////////////////////////////////
 
-#include <diversalis/compiler.hpp>
+#include <universalis.hpp>
+UNIVERSALIS__COMPILER__DEPRECATED("portability: someone come back and centralise this")
 inline int f2i(float x) { 
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
 		#warning "portability: someone come back and centralise this"
