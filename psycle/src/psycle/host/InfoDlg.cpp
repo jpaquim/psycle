@@ -73,9 +73,10 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 	
 	chrono::nanoseconds total_machine_processing_time = 0;
 	core::wall_time_clock::time_point const now = core::wall_time_clock::now();
+	float const real_time_duration = chrono::nanoseconds(now - last_update_time_).count();
 	std::size_t threads = Player::singleton().num_threads();
 	if(!threads) threads = 1; // Beware: when not using multithreading, Player::singleton().num_threads() is zero!
-	float const multicore_real_time_duration = chrono::nanoseconds(now - last_update_time_).count() * threads;
+	float const multicore_real_time_duration = real_time_duration * threads;
 
 	unsigned int i = 0;
 	for(unsigned int m(0); m < MAX_MACHINES; ++m) if(song.machine(m)) {
@@ -106,7 +107,8 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 	if(item_count_ != i) UpdateInfo();
 	
 	{ // total cpu percent (counts everything, not just machine processing + routing)
-		float const percent = 100.0f * chrono::nanoseconds(song.accumulated_processing_time()).count() / multicore_real_time_duration;
+		//Accumulated processing time does not count "num_threads_running since it is acummulated in the Player thread (single threaded)
+		float const percent = 100.0f * chrono::nanoseconds(song.accumulated_processing_time()).count() / real_time_duration;
 		sprintf(buffer, "%.1f%%", percent);
 		cpuidlelabel_.SetWindowText(buffer);
 	}
@@ -136,20 +138,25 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 	song.reset_time_measurement();
 
 	{ // memory status
-		MEMORYSTATUS lpBuffer;
-		GlobalMemoryStatus(&lpBuffer);
+		MEMORYSTATUSEX lpBuffer;
+		lpBuffer.dwLength = sizeof lpBuffer;
+		GlobalMemoryStatusEx(&lpBuffer);
 
-		sprintf(buffer, "%d%%", 100 - lpBuffer.dwMemoryLoad);
+		std::sprintf(buffer, "%d%%", 100 - lpBuffer.dwMemoryLoad);
 		mem_reso_.SetWindowText(buffer);
 		
-		sprintf(buffer, "%.1fM (of %.1fM)", lpBuffer.dwAvailPhys / 1048576.0f, lpBuffer.dwTotalPhys / 1048576.0f);
+		std::sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPhys / float(1<<20), lpBuffer.ullTotalPhys / float(1<<20));
 		mem_phy_.SetWindowText(buffer);
 		
-		sprintf(buffer, "%.1fM (of %.1fM)", lpBuffer.dwAvailPageFile / 1048576.0f, lpBuffer.dwTotalPageFile / 1048576.0f);
+		std::sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPageFile / float(1<<20), lpBuffer.ullTotalPageFile / float(1<<20));
 		mem_pagefile_.SetWindowText(buffer);
 		
-		sprintf(buffer, "%.1fM (of %.1fM)", lpBuffer.dwAvailVirtual / 1048576.0f, lpBuffer.dwTotalVirtual / 1048576.0f);
-		mem_virtual_.SetWindowText(buffer);
+		#ifdef _WIN64
+			std::sprintf(buffer,"%.0fG (of %.0fG)", lpBuffer.ullAvailVirtual / float(1<<30), lpBuffer.ullTotalVirtual / float(1<<30));
+		#else
+			std::sprintf(buffer,"%.0fM (of %.0fM)", lpBuffer.ullAvailVirtual / float(1<<20), lpBuffer.ullTotalVirtual / float(1<<20));
+		#endif
+		m_mem_virtual.SetWindowText(buffer);
 	}
 }
 
