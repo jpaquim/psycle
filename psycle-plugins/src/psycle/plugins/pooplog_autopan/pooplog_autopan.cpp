@@ -56,7 +56,7 @@ using namespace psycle::helpers::math;
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 
-CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
+CMachineParameter const paraNULL = {" ", " ", 0, 0, MPF_NULL, 0};
 CMachineParameter const paraVCFlfospeed = {"LFO Rate", "LFO Rate", 0, MAX_RATE, MPF_STATE, 6};
 CMachineParameter const paraPanlfoamplitude = {"Pan LFO Depth", "Pan LFO Depth", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraSmoothing = {"Delta Smoothing", "Delta Smoothing", 0, 256, MPF_STATE, 0};

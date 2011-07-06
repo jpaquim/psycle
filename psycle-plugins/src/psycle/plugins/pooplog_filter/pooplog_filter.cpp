@@ -77,7 +77,7 @@ using namespace psycle::helpers::math;
 float SyncAdd[MAXSYNCMODES+1];
 float SourceWaveTable[MAXLFOWAVE+1][(SAMPLE_LENGTH*2)+256];
 
-CMachineParameter const paraNULL = {" ", " ", 0, 1, MPF_LABEL, 0};
+CMachineParameter const paraNULL = {" ", " ", 0, 0, MPF_NULL, 0};
 CMachineParameter const paraVCFcutoff = {"Filter Cutoff", "Filter Cutoff", 0, MAX_VCF_CUTOFF, MPF_STATE, MAX_VCF_CUTOFF/2};
 CMachineParameter const paraVCFresonance = {"Filter Resonance", "Filter Resonance", 1, 240, MPF_STATE, 1};
 CMachineParameter const paraVCFtype = {"Filter Type", "Filter Type", 0, MAXVCFTYPE, MPF_STATE, 0};
