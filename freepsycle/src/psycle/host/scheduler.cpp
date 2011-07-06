@@ -14,7 +14,7 @@ using engine::exceptions::runtime_error;
 
 namespace {
 	typedef universalis::os::clocks::hires_thread_or_fallback cpu_time_clock;
-	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
+	static thread_local bool this_thread_suspended_ = false;
 }
 
 /**********************************************************************************************************************/
