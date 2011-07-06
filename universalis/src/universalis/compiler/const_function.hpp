@@ -4,7 +4,7 @@
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU
-	#define UNIVERSALIS__COMPILER__CONST UNIVERSALIS__COMPILER__ATTRIBUTE(const)
+	#define UNIVERSALIS__COMPILER__CONST UNIVERSALIS__COMPILER__ATTRIBUTE(__const__)
 #elif defined DIVERSALIS__COMPILER__INTEL
 	///\todo supported.. check the doc
 	#define UNIVERSALIS__COMPILER__CONST

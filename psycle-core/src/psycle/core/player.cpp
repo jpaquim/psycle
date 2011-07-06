@@ -33,7 +33,7 @@ using namespace audiodrivers;
 namespace loggers = universalis::os::loggers;
 
 namespace {
-	static UNIVERSALIS__COMPILER__THREAD_LOCAL_STORAGE bool this_thread_suspended_ = false;
+	static thread_local bool this_thread_suspended_ = false;
 	bool const ultra_trace(false);
 }
 

@@ -13,24 +13,26 @@ using namespace psycle::helpers::math;
 
 //////////////////////////////////////////////////////////////////////
 // floor2int : fast floor thing
-#warning "portability: someone come back and centralise this"
-#pragma message("warning: portability: someone come back and centralise this")
 inline int floor2i(float x) {
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning "portability: someone come back and centralise this"
+	#else
+		#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZE(__LINE__) ") : warning: portability: someone come back and centralise this")
+	#endif
 	#if defined _MSC_VER && defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
-	__asm
-	{
-		FLD								DWORD PTR [x]
-		FIST				DWORD PTR [ESP-8]
-		SUB								ESP, 8
-		FISUB				DWORD PTR [ESP]
-		NOP
-		FSTP				DWORD PTR [ESP+4]
-		POP								EAX
-		POP								EDX
-		ADD								EDX, 7FFFFFFFH
-		SBB								EAX, 0
-	}
-	///\todo [bohan] does the compiler understand that, since there no return statement? ... this code might be what's making druttis plugins behave weirdly when built with msvc 8
+		__asm
+		{
+			FLD								DWORD PTR [x]
+			FIST				DWORD PTR [ESP-8]
+			SUB								ESP, 8
+			FISUB				DWORD PTR [ESP]
+			NOP
+			FSTP				DWORD PTR [ESP+4]
+			POP								EAX
+			POP								EDX
+			ADD								EDX, 7FFFFFFFH
+			SBB								EAX, 0
+		}
 	#else
 		return static_cast<int>(std::floor(x));
 	#endif

@@ -7,7 +7,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
-
 #include <cmath>
 
 //////////////////////////////////////////////////////////////////////
@@ -40,24 +39,26 @@ inline int v2m(int v)
 //
 //////////////////////////////////////////////////////////////////////
 
-#warning "portability: someone come back and centralise this"
-#pragma message("warning: portability: someone come back and centralise this")
-inline int f2i(float x)
-{ 
+#include <diversalis/compiler.hpp>
+inline int f2i(float x) { 
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning "portability: someone come back and centralise this"
+	#else
+		#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZE(__LINE__) ") : warning: portability: someone come back and centralise this")
+	#endif
 	#if defined _MSC_VER && defined _M_IX86
-	__asm
-	{
-		FLD								DWORD PTR [x]
-		FIST				DWORD PTR [ESP-8]
-		SUB								ESP, 8
-		FISUB				DWORD PTR [ESP]
-		NOP
-		FSTP				DWORD PTR [ESP+4]
-		POP								EAX
-		POP								EDX
-		ADD								EDX, 7FFFFFFFH
-		SBB								EAX, 0
-	}
+		__asm {
+			FLD								DWORD PTR [x]
+			FIST				DWORD PTR [ESP-8]
+			SUB								ESP, 8
+			FISUB				DWORD PTR [ESP]
+			NOP
+			FSTP				DWORD PTR [ESP+4]
+			POP								EAX
+			POP								EDX
+			ADD								EDX, 7FFFFFFFH
+			SBB								EAX, 0
+		}
 	#else
 		return std::floor(x);
 	#endif

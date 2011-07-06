@@ -1,7 +1,5 @@
-///\interface psycle native plugin interface api
-
-#ifndef PSYCLE__PLUGIN_INTERFACE__INCLUDED
-#define PSYCLE__PLUGIN_INTERFACE__INCLUDED
+///\file
+///\brief psycle native plugin interface
 #pragma once
 
 // *** Note ***
@@ -9,19 +7,17 @@
 // we should not introduce any dependency by including
 // anything that is not part of the c++ standard library.
 
-/** Define for 64 Bit Platform. */
-#ifndef IS_64BIT_PLATFORM
-	#if defined _WIN64 || defined __LP64__
-	#define IS_64BIT_PLATFORM
-	#endif
-#endif
-
 namespace psycle { namespace plugin_interface {
 
-/// machine interface version. If highest bit is set, then it is a 64bit compile.
-/// Note: Psycle 1.8.6 and older will not detect the 64bit difference, since it uses int and checks
-/// for higher or equal version.
-#if defined IS_64BIT_PLATFORM
+/// defined for 64 Bit platforms
+#if defined __LP64__ || defined __LLP64__ || defined _WIN64
+	#define PSYCLE__PLUGIN__64BIT_PLATFORM
+#endif
+
+/// machine interface version.
+/// If highest bit is set, then it is a 64bit compile.
+/// Note: Psycle 1.8.6 and older will not detect the 64bit difference, since it uses int and checks for higher or equal version.
+#ifdef PSYCLE__PLUGIN__64BIT_PLATFORM
 	unsigned short const MI_VERSION = 0x8012;
 #else
 	unsigned short const MI_VERSION = 0x0012;
@@ -56,11 +52,11 @@ class CMachineParameter {
 		char const *Name;
 		/// Longer description: "Cutoff Frequency (0-7f)"
 		char const *Description;
-		/// >= 0
+		/// recommended >= 0. If negative, minValue is represented as 0 in the pattern
 		int MinValue;
-		/// <= 65535
+		/// recommended <= 65535. Basically so that it can be represented in the pattern
 		int MaxValue;
-		/// flags.
+		/// flags. (see below)
 		int Flags;
 		/// default value for params that have MPF_STATE flag set
 		int DefValue;
@@ -68,7 +64,7 @@ class CMachineParameter {
 
 ///\name CMachineParameter flags
 ///\{
-	/// shows a line with background
+	/// shows a line with no text nor knob
 	int const MPF_NULL = 0;
 	/// shows a line with the text in a centered label
 	int const MPF_LABEL = 1;
@@ -150,10 +146,12 @@ class CFxCallback {
 		virtual void MessBox(char const * /*message*/, char const * /*caption*/, unsigned int /*type*/) const = 0;
 		///\todo: doc
 		virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/) = 0;
-		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual float * unused0(int, int) = 0;
-		/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual float * unused1(int, int) = 0;
+
 		virtual int GetTickLength() const = 0;
 		virtual int GetSamplingRate() const = 0;
 		virtual int GetBPM() const = 0;
@@ -192,29 +190,32 @@ class CMachineInterface {
 
 		///\name Export / Import
 		///\{
-			/// Called by the host when loading a song or preset. The pointer contains the data saved
-		/// by the plugin with GetData()
+			/// Called by the host when loading a song or preset.
+			/// The pointer contains the data saved by the plugin with GetData().
 			/// It is called after all parameters have been set with ParameterTweak.
-			virtual void PutData(void * /*pData*/) {}
-			/// Called by the host when saving a song or preset. Use it to to save extra data that you need
+			virtual void PutData(void * /*data*/) {}
+			/// Called by the host when saving a song or preset. Use it to to save extra data that you need.
 			/// The values of the parameters will be automatically restored via calls to parameterTweak().
-			virtual void GetData(void * /*pData*/) {}
-			/// Called by the host before calling GetData to know the size to allocate for pData before calling
-			/// GetData()
+			virtual void GetData(void * /*data*/) {}
+			/// Called by the host before calling GetData to know the size to allocate for pData before calling GetData()
 			virtual int GetDataSize() { return 0; }
 		///\}
 
 		/// Called by the host when the user selects the command menu option. Commonly used to show a help box,
 		/// but can be used to show a specific editor,a configuration or other similar things.
 		virtual void Command() {}
-		//
+
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual void unused0(int /*track*/) {}
-		//
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual bool unused1(int /*track*/) const { return false; }
+
 		///\todo: called by the host to send a midi event (mcm) to the plugin.
 		virtual void MidiEvent(int /*channel*/, int /*midievent*/, int /*value*/) {}
-		//
+
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual void unused2(unsigned int const /*data*/) {}
+
 		/// Called by the host when it requires to show a description of the value of a parameter.
 		/// return false to tell the host to show the numerical value. Return true and fill txt with
 		/// some text to show that text to the user.
@@ -224,7 +225,8 @@ class CMachineInterface {
 		/// Called by the host when there is some data to play. Only notes and pattern commands will be informed
 		/// this way. Tweaks call ParameterTweak
 		virtual void SeqTick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/) {}
-		//
+
+		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual void unused3() {}
 
 	public:
@@ -237,24 +239,24 @@ class CMachineInterface {
 		CFxCallback mutable * pCB;
 };
 
-/*////////////////////////////////////////////////////////////////////////*/
+////////////////////////////////////////////////////////////////////////////
 /// From the text below, you just need to know that once you've defined the MachineInteface class
-/// and the MachineInfo instance, USE PSYCLE__PLUGIN__INSTANTIATOR() to export it.
+/// and the MachineInfo instance, use PSYCLE__PLUGIN__INSTANTIATOR() to export it.
 
 #define PSYCLE__PLUGIN__INSTANTIATOR(typename, info) \
 	extern "C" \
 	{ \
-		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		psycle::plugin_interface::CMachineInfo const * const \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
 		GetInfo() { return &info; } \
 		\
-		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		psycle::plugin_interface::CMachineInterface * \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
 		CreateMachine() { return new typename; } \
 		\
-		PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT \
+		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		void \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
 		DeleteMachine(psycle::plugin_interface::CMachineInterface & plugin) { delete &plugin; } \
@@ -262,17 +264,16 @@ class CMachineInterface {
 
 /// we don't use universalis/diversalis here because we want no dependency
 #if !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
-	#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT
+	#define PSYCLE__PLUGIN__DYN_LINK__EXPORT
 	#define PSYCLE__PLUGIN__CALLING_CONVENTION
 #elif defined __GNUG__
-	#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT __attribute__((dllexport))
+	#define PSYCLE__PLUGIN__DYN_LINK__EXPORT __attribute__((__dllexport__))
 	#define PSYCLE__PLUGIN__CALLING_CONVENTION __attribute__((__cdecl__))
 #elif defined _MSC_VER
-	#define PSYCLE__PLUGIN__DYNAMIC_LINK__EXPORT __declspec(dllexport)
+	#define PSYCLE__PLUGIN__DYN_LINK__EXPORT __declspec(dllexport)
 	#define PSYCLE__PLUGIN__CALLING_CONVENTION __cdecl
 #else
 	#error please add definition for your compiler
 #endif
 	
 }}
-#endif
