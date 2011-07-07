@@ -1,16 +1,29 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-#ifndef UNIVERSALIS__COMPILER__SETUP_OPTIMIZATIONS__INCLUDED
-#define UNIVERSALIS__COMPILER__SETUP_OPTIMIZATIONS__INCLUDED
 #pragma once
-
 #include <diversalis.hpp>
 
-#ifdef DIVERSALIS__COMPILER__MICROSOFT
-	#ifdef NDEBUG // if no dedug
+// consistency check
+#if defined NDEBUG && defined DIVERSALIS__STDLIB__RUNTIME__DEBUG
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning assertions are off and we are using a debug runtime. Is this intended?
+	#else
+		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are off and we are using a debug runtime. Is this intended?")
+	#endif
+#elif !defined NDEBUG && !defined DIVERSALIS__STDLIB__RUNTIME__DEBUG && \
+	/* debug runtime is currently only detected on msvc */ defined DIVERSALIS__COMPILER__MICROSOFT
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning assertions are on and we are not using a debug runtime. Is this intended?
+	#else
+		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are on and we are not using a debug runtime. Is this intended?")
+	#endif
+#endif
+
+#ifdef NDEBUG // if no dedug
+	#ifdef DIVERSALIS__COMPILER__MICROSOFT
 		#if defined UNIVERSALIS__COMPILER__VERBOSE
-			#pragma message("universalis::compiler:: setting optimizations on ; (" __FILE__ ")")
+			#pragma message(__FILE__ "(" __LINE__ ") : universalis::compiler:: setting optimizations on")
 		#endif
 
 		#pragma runtime_checks("c", off) // reports when a value is assigned to a smaller data type that results in a data loss
@@ -44,6 +57,4 @@
 		#define _SECURE_SCL 0 // disable checked iterators. see http://msdn.microsoft.com/en-us/library/aa985896.aspx
 		#define _HAS_ITERATOR_DEBUGGING 0 // see http://msdn.microsoft.com/en-us/library/aa985939.aspx
 	#endif
-#endif
-
 #endif

@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\file \brief compiler-independant meta-information about the compiler's target processor.
-
-#ifndef DIVERSALIS__CPU__INCLUDED
-#define DIVERSALIS__CPU__INCLUDED
+///\file
+///\brief compiler-independant meta-information about the compiler's target processor.
 #pragma once
-
 #include "compiler.hpp"
 #include "os.hpp"
 
@@ -407,5 +404,3 @@
 #if !defined DIVERSALIS__CPU__FLOAT_ENDIAN && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#error unkown float byte sex
 #endif
-
-#endif // !defined DIVERSALIS__CPU__INCLUDED
