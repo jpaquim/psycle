@@ -57,7 +57,8 @@ using namespace universalis::stdlib;
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
 	inline void Add(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float vol)
 	{
-		#if 0 ///\todo boggus defined DIVERSALIS__COMPILER__GNU
+		#if defined DIVERSALIS__COMPILER__GNU
+			numSamples += 3;
 			numSamples >>= 2;
 			typedef float vec __attribute__((vector_size(4 * sizeof(float))));
 			const vec vol_vec = { vol, vol, vol, vol };
@@ -69,6 +70,7 @@ using namespace universalis::stdlib;
 			__m128 volps = _mm_set_ps1(vol);
 			const __m128* psrc = (const __m128*)pSrcSamples;
 			__m128* pdst = (__m128*)pDstSamples;
+			numSamples += 3;
 			numSamples >>= 2;
 			for(int i = 0; i < numSamples; ++i) pdst[i] = _mm_add_ps(pdst[i], _mm_mul_ps(psrc[i], volps));
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
