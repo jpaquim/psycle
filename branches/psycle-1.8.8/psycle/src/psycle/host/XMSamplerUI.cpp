@@ -39,6 +39,7 @@ void XMSamplerUI::OnClose()
 }
 void XMSamplerUI::PostNcDestroy()
 {
+	CPropertySheet::PostNcDestroy();
 	if(windowVar_!= NULL) *windowVar_ = NULL;
 	delete this;
 }

@@ -70,13 +70,13 @@ namespace psycle
 			
 			if (m_WaveStereo)
 			{
-				delete pData;
+				delete[] pData;
 				riffFile.Read(size2);
 				pData = new unsigned char[size2];
 				riffFile.Read(pData,size2);
 				DataCompression::SoundDesquash(pData, &m_pWaveDataR);
 			}
-			delete pData;
+			delete[] pData;
 			return size;
 		}
 
@@ -133,13 +133,13 @@ namespace psycle
 
 			riffFile.Write(size1);
 			riffFile.Write((void*)pData1,size1);
-			delete pData1;
+			delete[] pData1;
 			
 			if (m_WaveStereo)
 			{
 				riffFile.Write(size2);
 				riffFile.Write((void*)pData2,size2);
-				delete pData2;
+				delete[] pData2;
 			}
 		}
 

@@ -151,6 +151,7 @@ namespace psycle { namespace host {
 
 		void CWireDlg::PostNcDestroy()
 		{
+			CDialog::PostNcDestroy();
 			//This part should be synchronized, but it is done explicitely
 			//when calling CloseMacGuis or CloseAllMacGuis to prevent deadlocks
 			srcMachine._pScopeBufferL = NULL;

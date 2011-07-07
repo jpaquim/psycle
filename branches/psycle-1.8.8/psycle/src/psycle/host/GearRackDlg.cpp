@@ -71,6 +71,7 @@ namespace psycle { namespace host {
 		}
 		void CGearRackDlg::PostNcDestroy()
 		{
+			CDialog::PostNcDestroy();
 			if(windowVar != NULL) *windowVar = NULL;
 			delete this;
 		}

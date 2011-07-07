@@ -89,7 +89,7 @@ namespace psycle { namespace host {
 				m_preslist.GetWindowText(str,32);
 				if ( str[0] == '\0' )
 				{
-					MessageBox("You have not specified any name. Operation Aborted.","Preset Save Error",MB_OK);
+					MessageBox("You have not specified any name. Operation Aborted.","Preset save error",MB_OK);
 					return;
 				}
 				iniPreset.SetName(str);
@@ -135,7 +135,11 @@ namespace psycle { namespace host {
 
 		void CPresetsDlg::OnImport() 
 		{
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) 
+			{
+				MessageBox("Use the Open preset menu option with VST machines.","File import error",MB_OK);
+				return;
+			}
 
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
@@ -169,11 +173,15 @@ namespace psycle { namespace host {
 
 		void CPresetsDlg::OnExport() 
 		{
-			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX) return;
+			if( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX)
+			{
+				MessageBox("Use the Save preset menu option with VST machines.","File save error",MB_OK);
+				return;
+			}
 
 			if ( m_preslist.GetCurSel() == CB_ERR )
 			{
-				MessageBox("You have to select the preset(s) to export.","File Save Error",MB_OK);
+				MessageBox("You have to select the preset(s) to export.","File save error",MB_OK);
 			}
 			char szFile[MAX_PATH];       // buffer for file name
 			szFile[0]='\0';

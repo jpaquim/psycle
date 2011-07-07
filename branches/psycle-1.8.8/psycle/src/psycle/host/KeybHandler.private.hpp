@@ -2295,8 +2295,8 @@ namespace psycle { namespace host {
 						}
 						// delete undo from list
 						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
+						delete pUndoList->pData;
+						delete pUndoList;
 						pUndoList = pTemp;
 					}
 					break;
@@ -2320,8 +2320,8 @@ namespace psycle { namespace host {
 						
 						// delete undo from list
 						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
+						delete pUndoList->pData;
+						delete pUndoList;
 						pUndoList = pTemp;
 						break;
 					}
@@ -2343,8 +2343,8 @@ namespace psycle { namespace host {
 					// delete undo from list
 					{
 						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
+						delete pUndoList->pData;
+						delete pUndoList;
 						pUndoList = pTemp;
 					}
 					break;
@@ -2379,8 +2379,8 @@ namespace psycle { namespace host {
 					// delete undo from list
 					{
 						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete (pUndoList->pData);
-						delete (pUndoList);
+						delete pUndoList->pData;
+						delete pUndoList;
 						pUndoList = pTemp;
 					}
 					break;
@@ -2435,8 +2435,8 @@ namespace psycle { namespace host {
 						}
 						// delete redo from list
 						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
+						delete pRedoList->pData;
+						delete pRedoList;
 						pRedoList = pTemp;
 					}
 					break;
@@ -2460,8 +2460,8 @@ namespace psycle { namespace host {
 						
 						// delete redo from list
 						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
+						delete pRedoList->pData;
+						delete pRedoList;
 						pRedoList = pTemp;
 						break;
 					}
@@ -2483,8 +2483,8 @@ namespace psycle { namespace host {
 					{
 						// delete redo from list
 						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
+						delete pRedoList->pData;
+						delete pRedoList;
 						pRedoList = pTemp;
 					}
 					break;
@@ -2519,8 +2519,8 @@ namespace psycle { namespace host {
 					{
 						// delete redo from list
 						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete (pRedoList->pData);
-						delete (pRedoList);
+						delete pRedoList->pData;
+						delete pRedoList;
 						pRedoList = pTemp;
 					}
 					break;

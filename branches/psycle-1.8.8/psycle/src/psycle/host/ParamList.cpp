@@ -102,6 +102,7 @@ namespace psycle { namespace host {
 		}
 		void CParamList::PostNcDestroy()
 		{
+			CDialog::PostNcDestroy();
 			if(windowVar!= NULL) *windowVar = NULL;
 			delete this;
 		}
@@ -197,7 +198,6 @@ namespace psycle { namespace host {
 			int min_v, max_v;
 			min_v = max_v = 0;
 			machine.GetParamRange(m_parlist.GetCurSel(),min_v,max_v);
-			int const amp_v = max_v - min_v;
 			const int nVal = max_v - m_slider.GetPos();
 
 			if(nVal != _quantizedvalue)

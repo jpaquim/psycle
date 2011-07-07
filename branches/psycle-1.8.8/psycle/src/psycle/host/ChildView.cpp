@@ -1633,7 +1633,7 @@ namespace psycle { namespace host {
 		{
 			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
 			
-			int *valuearray = new int[blockSel.end.line-blockSel.start.line+1];
+			int* valuearray = new int[blockSel.end.line-blockSel.start.line+1];
 			int ps=_pSong->playOrder[editPosition];
 			unsigned char notecommand = notecommands::empty;
 			unsigned char targetmac = 255;
@@ -1691,7 +1691,7 @@ namespace psycle { namespace host {
 				else if ( dlg.kftwk == 2 ) twktype = notecommands::midicc;
 				BlockParamInterpolate(dlg.kfresult,twktype);
 			}
-			delete valuearray;
+			delete[] valuearray;
 		}
 
 
@@ -2051,7 +2051,7 @@ namespace psycle { namespace host {
 			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
 			OnFileLoadsongNamed(nameBuff, 1);
-			delete [] nameBuff; nameBuff = 0;
+			delete[] nameBuff; nameBuff = 0;
 		}
 
 		void CChildView::SetTitleBarText()

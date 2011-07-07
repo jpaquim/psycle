@@ -32,8 +32,8 @@ namespace psycle { namespace host {
 
 		CInterpolateCurve::~CInterpolateCurve()
 		{
-			delete kf;
-			delete kfresult;
+			delete[] kf;
+			delete[] kfresult;
 		}
 
 		void CInterpolateCurve::DoDataExchange(CDataExchange* pDX)

@@ -1790,7 +1790,7 @@ namespace psycle
 								bool stereo;
 								char *junk =new char[42+sizeof(bool)];
 								pFile->Read(junk,sizeof(junk));
-								delete junk;
+								delete[] junk;
 								pFile->Read(&stereo,sizeof(bool));
 								short *junk2 = new signed short[wltemp];
 								pFile->Read(junk2, sizeof(junk2));
@@ -1798,7 +1798,7 @@ namespace psycle
 								{
 									pFile->Read(junk2, sizeof(junk2));
 								}
-								delete junk2;
+								delete[] junk2;
 							}
 						}
 					}

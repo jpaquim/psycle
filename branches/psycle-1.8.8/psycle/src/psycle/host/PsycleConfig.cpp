@@ -1307,7 +1307,7 @@ namespace psycle { namespace host {
 					delete audioSettings[i];
 				}
 			}
-			delete(_pOutputDriver);
+			delete _pOutputDriver;
 		}
 
 		void PsycleConfig::SetDefaultSettings(bool include_others)
@@ -1696,7 +1696,7 @@ namespace psycle { namespace host {
 				_outputDriverIndex = 0;
 			}
 			else { _outputDriverIndex = newidx; }
-			delete(_pOutputDriver);
+			delete _pOutputDriver;
 			_pOutputDriver = audioSettings[_outputDriverIndex]->NewDriver();
 			_pOutputDriver->Initialize(Global::pPlayer->Work, Global::pPlayer);
 			Global::pPlayer->SetSampleRate(audioSettings[_outputDriverIndex]->samplesPerSec());

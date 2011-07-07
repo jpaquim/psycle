@@ -1359,8 +1359,8 @@ namespace psycle
 			while (pRedoList)
 			{
 				SPatternUndo* pTemp = pRedoList->pPrev;
-				delete (pRedoList->pData);
-				delete (pRedoList);
+				delete pRedoList->pData;
+				delete pRedoList;
 				pRedoList = pTemp;
 			}
 		}
@@ -1370,8 +1370,8 @@ namespace psycle
 			while (pUndoList)
 			{
 				SPatternUndo* pTemp = pUndoList->pPrev;
-				delete (pUndoList->pData);
-				delete (pUndoList);
+				delete pUndoList->pData;
+				delete pUndoList;
 				pUndoList = pTemp;
 			}
 			UndoCounter = 0;

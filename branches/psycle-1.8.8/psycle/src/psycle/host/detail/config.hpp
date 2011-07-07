@@ -22,5 +22,5 @@
 #define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
 /// Define to 1 to use RMS Vu's, 0 otherwise
-#define PSYCLE__CONFIGURATION__RMS_VUS 0
+#define PSYCLE__CONFIGURATION__RMS_VUS 1
 

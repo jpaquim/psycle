@@ -385,11 +385,11 @@ namespace psycle
 #ifndef NDEBUG 
 					throw;
 #else
-							delete pData;
+							delete[] pData;
 							return false;
 #endif
 						}
-						delete pData;
+						delete[] pData;
 						return true;
 					}
 				}

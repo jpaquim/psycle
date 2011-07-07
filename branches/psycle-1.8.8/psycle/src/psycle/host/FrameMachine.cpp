@@ -187,7 +187,7 @@ namespace psycle { namespace host {
 		void CFrameMachine::PostNcDestroy() 
 		{
 			if(windowVar!= NULL) *windowVar = NULL;
-			delete this;
+			CFrameWnd::PostNcDestroy();
 		}
 
 		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
