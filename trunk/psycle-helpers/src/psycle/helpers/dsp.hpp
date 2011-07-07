@@ -64,8 +64,8 @@ using namespace universalis::stdlib;
 			const vec vol_vec = { vol, vol, vol, vol };
 			const vec* src = reinterpret_cast<const vec*>(pSrcSamples);
 			vec* dst = reinterpret_cast<vec*>(pDstSamples);
-			//#pragma omp parallel for // with gcc, build with the -fopenmp flag
-			for(int i = 0; i < numSamples; ++i) dst[i] = src[i] * vol_vec;
+			#pragma omp parallel for // with gcc, build with the -fopenmp flag
+			for(int i = 0; i < numSamples; ++i) dst[i] += src[i] * vol_vec;
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			__m128 volps = _mm_set_ps1(vol);
 			const __m128* psrc = (const __m128*)pSrcSamples;
@@ -634,7 +634,7 @@ using namespace universalis::stdlib;
 			float const vol = 0.5;
 
 			{ // add
-				std::size_t const count = v1.size();
+				std::size_t const count = v1.size() >> 2 << 2; // stop at multiple of four
 				clock::time_point const t1(clock::now());
 				for(int i(0); i < iterations; ++i) Add(&v1[0], &v2[0], count, vol);
 				clock::time_point const t2(clock::now());
