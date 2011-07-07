@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\file \brief compiler-independant meta-information about the compiler
-
-#ifndef DIVERSALIS__COMPILER__INCLUDED
-#define DIVERSALIS__COMPILER__INCLUDED
+///\file
+///\brief compiler-independant meta-information about the compiler
 #pragma once
-
 #include "detail/project.hpp"
 
 #if defined DIVERSALIS__COMPILER__DOXYGEN
@@ -352,5 +349,3 @@
 #if !defined __cplusplus && !defined DIVERSALIS__COMPILER__RESOURCE
 	#error Not a c++ compiler. For the gnu compiler, please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver).
 #endif
-
-#endif // !defined DIVERSALIS__COMPILER__INCLUDED

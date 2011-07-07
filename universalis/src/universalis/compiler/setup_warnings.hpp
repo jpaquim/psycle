@@ -1,10 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
-#ifndef UNIVERSALIS__COMPILER__SETUP_WARNINGS__INCLUDED
-#define UNIVERSALIS__COMPILER__SETUP_WARNINGS__INCLUDED
 #pragma once
-
 #include <diversalis.hpp>
 
 #if defined DIVERSALIS__COMPILER__GNU
@@ -102,6 +99,4 @@
 	#define _CRT_NONSTDC_NO_WARNINGS // posix is okay
 	//#define _ATL_SECURE_NO_WARNINGS
 	//#define _AFX_SECURE_NO_WARNINGS
-#endif
-
 #endif

@@ -10,6 +10,5 @@
 #define UNIVERSALIS__META__MODULE__NAME "universalis" // used in universalis::compiler::location
 //#define UNIVERSALIS__META__MODULE__VERSION 0 // optionally used in universalis::compiler::location
 
-#include <universalis/compiler/setup_feature_test_macros.hpp>
-#include <universalis/compiler/setup_warnings.hpp>
-#include <universalis/compiler/setup_optimizations.hpp>
+#include <universalis/detail/project.hpp>
+
