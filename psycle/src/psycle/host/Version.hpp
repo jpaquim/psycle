@@ -35,7 +35,7 @@
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
 	"Version: " PSYCLE__VERSION EOL \
-	"Build config options:" EOL "\t- " PSYCLE__BUILD__CONFIG(EOL "\t-") EOL \
+	"Build config options:" EOL "\t- " PSYCLE__BUILD__CONFIG(EOL "\t- ") EOL \
 	"Built on: " PSYCLE__BUILD__DATE EOL \
 	"From sources: " PSYCLE__SOURCE_URL
 
