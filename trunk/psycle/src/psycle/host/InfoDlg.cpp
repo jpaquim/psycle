@@ -156,7 +156,7 @@ void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
 		#else
 			std::sprintf(buffer,"%.0fM (of %.0fM)", lpBuffer.ullAvailVirtual / float(1<<20), lpBuffer.ullTotalVirtual / float(1<<20));
 		#endif
-		m_mem_virtual.SetWindowText(buffer);
+		mem_virtual_.SetWindowText(buffer);
 	}
 }
 
