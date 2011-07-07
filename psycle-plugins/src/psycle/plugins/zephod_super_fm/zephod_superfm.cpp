@@ -96,6 +96,25 @@ CMachineParameter const *pParameters[] =
 	&paraTune
 };
 
+
+CMachineInfo const MacInfo (
+	MI_VERSION,
+	0x0110,
+	GENERATOR,
+	sizeof pParameters / sizeof *pParameters,
+	pParameters,
+#ifdef _DEBUG
+	"Zephod SuperFM (Debug build)",
+#else
+	"Zephod SuperFM (Arguru Remix)",
+#endif
+	"SuperFM",
+	"Zephod / Arguru",
+	"Help",
+	2
+);
+
+
 class mi;
 
 class CTrack
@@ -127,23 +146,6 @@ class CTrack
 
 		float Mot1dv,Mot2dv,Mot3dv;
 };
-
-CMachineInfo const MacInfo (
-	MI_VERSION,
-	0x0110,
-	GENERATOR,
-	sizeof pParameters / sizeof *pParameters,
-	pParameters,
-#ifdef _DEBUG
-	"Zephod SuperFM (Debug build)",
-#else
-	"Zephod SuperFM (Arguru Remix)",
-#endif
-	"SuperFM",
-	"Zephod / Arguru",
-	"Help",
-	2
-);
 
 class mi : public CMachineInterface
 {
