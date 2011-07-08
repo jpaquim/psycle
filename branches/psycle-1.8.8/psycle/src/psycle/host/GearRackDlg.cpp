@@ -264,9 +264,9 @@ namespace psycle { namespace host {
 				{
 					if (Global::_pSong->_pMachine[tmac])
 					{
+						mainFrame->CloseMacGui(tmac);
 						{
 							CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-							mainFrame->CloseMacGui(tmac);
 							Global::_pSong->DestroyMachine(tmac);
 						}
 						mainFrame->UpdateEnvInfo();

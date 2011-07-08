@@ -714,7 +714,6 @@ namespace psycle { namespace host {
 
 		void CMainFrame::CloseAllMacGuis()
 		{
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 			for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 			{
 				if (m_wndView.WireDialog[i])

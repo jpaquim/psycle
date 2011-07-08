@@ -49,7 +49,7 @@ namespace psycle { namespace host {
 			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
 			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
 			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
-			m_machlist.InsertColumn(5,"CPU",LVCFMT_RIGHT,48,1);
+			m_machlist.InsertColumn(5,"1 CPU",LVCFMT_RIGHT,48,1);
 			m_cpu_perf.SetCheck(Global::pPlayer->measure_cpu_usage_? 1:0);
 			UpdateInfo();
 			InitTimer();
@@ -114,7 +114,8 @@ namespace psycle { namespace host {
 
 						{ // processing cpu percent
 							if(cpu_usage) {
-								float const percent = 100.0f * std::chrono::nanoseconds(tmac->accumulated_processing_time()).count() / multicore_real_time_duration;
+								//Showing the cpu usage of the thread, so then it is possible to know how much of a thread, a machine uses.
+								float const percent = 100.0f * std::chrono::nanoseconds(tmac->accumulated_processing_time()).count() / real_time_duration;
 								sprintf(buffer,"%.1f%%",percent);
 							}
 							else {
@@ -133,7 +134,7 @@ namespace psycle { namespace host {
 				if(item_count_ != n) UpdateInfo();
 
 				{ // total cpu percent (counts everything, not just machine processing + routing)
-					//Accumulated processing time does not count "num_threads_running since it is acummulated in the Player thread (single threaded)
+					//Accumulated processing time does not divide by "num_threads_running" since it is acummulated in the Player thread (single threaded)
 					float const percent = 100.0f * std::chrono::nanoseconds(_pSong->accumulated_processing_time()).count() / real_time_duration;
 					sprintf(buffer, "%.1f%%", percent);
 					m_cpuidlelabel.SetWindowText(buffer);

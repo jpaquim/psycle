@@ -22,8 +22,6 @@
 namespace psycle { namespace host {
 		int const ID_TIMER_WIRE = 2304;
 
-		int SCOPE_SPEC_SAMPLES = 1024;
-
 		CWireDlg::CWireDlg(CWnd* mainView_, CWireDlg** windowVar_, int wireDlgIdx_,
 			Machine& srcMac_, int srcWireIdx_, Machine& dstMac_, int dstWireIdx_)
 			: CDialog(CWireDlg::IDD, AfxGetMainWnd())
@@ -82,6 +80,7 @@ namespace psycle { namespace host {
 			scope_spec_bands = 128;
 			scope_spec_rate = 20;
 			scope_spec_mode = 2;
+			SCOPE_SPEC_SAMPLES = 1024;
 			scope_phase_rate = 20;
 			InitSpectrum();
 
@@ -152,8 +151,7 @@ namespace psycle { namespace host {
 		void CWireDlg::PostNcDestroy()
 		{
 			CDialog::PostNcDestroy();
-			//This part should be synchronized, but it is done explicitely
-			//when calling CloseMacGuis or CloseAllMacGuis to prevent deadlocks
+			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 			srcMachine._pScopeBufferL = NULL;
 			srcMachine._pScopeBufferR = NULL;
 			srcMachine._scopeBufferIndex = 0;

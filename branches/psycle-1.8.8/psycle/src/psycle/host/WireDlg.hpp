@@ -84,6 +84,7 @@ namespace psycle {
 			int scope_mode;
 			int scope_peak_rate;
 			int scope_osc_freq;
+			int SCOPE_SPEC_SAMPLES;
 			int scope_osc_rate;
 			int scope_spec_bands;
 			int scope_spec_rate;

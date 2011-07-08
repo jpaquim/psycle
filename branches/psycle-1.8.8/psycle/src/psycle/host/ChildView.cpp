@@ -559,29 +559,35 @@ namespace psycle { namespace host {
 
 		void CChildView::Repaint(draw_modes::draw_mode drawMode)
 		{
-			if ( viewMode == view_modes::machine )
+			switch(viewMode)
 			{
-				if ( drawMode <= draw_modes::machine )
+			case view_modes::machine:
 				{
-					updateMode = drawMode;
+					if ( drawMode <= draw_modes::machine )
+					{
+						updateMode = drawMode;
+						Invalidate(false);
+					}
+					else if ( drawMode == draw_modes::playback )
+					{
+						updateMode = drawMode;
+						Invalidate(false);
+					}
+				}
+				break;
+			case view_modes::pattern:
+				{
+					if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all )	
+					{
+						PreparePatternRefresh(drawMode);
+					}
+				}
+				break;
+			case view_modes::sequence:
+				{
 					Invalidate(false);
 				}
-				if ( drawMode <= draw_modes::playback )
-				{
-					updateMode = drawMode;
-					Invalidate(false);
-				}
-			}
-			else if ( viewMode == view_modes::pattern )
-			{
-				if (drawMode >= draw_modes::pattern || drawMode == draw_modes::all )	
-				{
-					PreparePatternRefresh(drawMode);
-				}
-			}
-			if ( viewMode == view_modes::sequence )
-			{
-				Invalidate(false);
+				break;
 			}
 		}
 
@@ -1394,7 +1400,6 @@ namespace psycle { namespace host {
 				{
 					x = Global::_pSong->_pMachine[fb]->_x;
 					y = Global::_pSong->_pMachine[fb]->_y;
-					CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 					pParentMain->CloseMacGui(fb);
 				}
 				else if ((x < 0) || (y < 0))
@@ -2327,9 +2332,9 @@ namespace psycle { namespace host {
 			}
 			if(dlg.deleted)
 			{
+				pParentMain->CloseMacGui(propMac);
 				{
 					CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-					pParentMain->CloseMacGui(propMac);
 					Global::_pSong->DestroyMachine(propMac);
 				}
 				pParentMain->UpdateEnvInfo();
