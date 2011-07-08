@@ -1,7 +1,7 @@
 ///\implementation psycle::helpers.
-#include <vector>
 #include <cctype>
 #include <string>
+#include <sstream>
 
 namespace psycle { namespace helpers {
 
