@@ -226,7 +226,6 @@ void Player::start_threads() {
 			CVSTHost::vstTimeInfo.tempo = bpm;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 			CVSTHost::vstTimeInfo.flags |= kVstTempoValid;
-			//\todo : Find out if we should notify the plugins of this change.
 		}
 
 void Player::suspend_and_compute_plan() {
@@ -548,7 +547,7 @@ void Player::clear_plan() {
 		{
 			Song* pSong = Global::_pSong;
 			if ( _patternjump!=-1 ) _playPosition= _patternjump;
-			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = true; }
+			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = false; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
 			else _lineCounter++;
 			_playTime += 60 / float (bpm * tpb);
