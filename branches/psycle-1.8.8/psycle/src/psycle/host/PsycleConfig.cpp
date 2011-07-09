@@ -358,6 +358,7 @@ namespace psycle { namespace host {
 			MachineCoords.dEffectName.x = 19;
 			MachineCoords.dEffectName.y = 47;
 			MachineCoords.bHasTransparency = true;
+			MachineCoords.cTransparency = 0x0000FF00;
 		}
 		void PsycleConfig::MachineView::SetDefaultBackground()
 		{
@@ -642,6 +643,7 @@ namespace psycle { namespace host {
 			PatHeaderCoords.dSoloOn.x = 77;
 			PatHeaderCoords.dSoloOn.y = 2;
 			PatHeaderCoords.bHasTransparency = false;
+			PatHeaderCoords.cTransparency = 0x0000FF00;	
 		}
 		void PsycleConfig::PatternView::Load(ConfigStorage &store, std::string mainSkinDir)
 		{
