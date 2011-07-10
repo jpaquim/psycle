@@ -89,7 +89,6 @@ void mi::ParameterTweak(int par, int val) {
 }
 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
-
 	if (m_Timer < timerSamples && m_Timer+numsamples >= timerSamples) {
 		int diff = timerSamples - m_Timer;
 		m_Timer+= diff;
@@ -100,7 +99,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				psamplesleft++; psamplesright++;
 				m_CurrentVolume+=slopeAmount;
 			}
-			diff++;
 		}
 		psamplesleft+=diff;
 		psamplesright+=diff;
@@ -118,9 +116,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			psamplesleft++; psamplesright++;
 			m_CurrentVolume-=slopeAmount;
 		}
-		numsamples++;
-		while(numsamples--) *psamplesleft++ = *psamplesright++ = 0;
 		if (m_CurrentVolume<=0.01f) {
+			while(numsamples--) *psamplesleft++ = *psamplesright++ = 0;
 			changing=false;
 		}
 	} else {
