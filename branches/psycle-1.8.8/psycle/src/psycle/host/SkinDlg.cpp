@@ -90,6 +90,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 			ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
 			ON_BN_CLICKED(IDC_LINE_NUMBERS_CURSOR, OnLineNumbersCursor)
+			ON_BN_CLICKED(IDC_DEFAULTSKIN, OnDefaults)
 			ON_BN_CLICKED(IDC_IMPORTREG, OnImportReg)
 			ON_BN_CLICKED(IDC_EXPORTREG, OnExportReg)
 			ON_CBN_SELCHANGE(IDC_PATTERN_FONT_POINT, OnSelchangePatternFontPoint)
@@ -488,6 +489,16 @@ namespace psycle { namespace host {
 				std::string str1 = macConfig.szBmpBkgFilename;
 				m_machine_background_bitmap.SetWindowText(str1.substr(str1.rfind('\\')+1).c_str());
 			}
+		}
+
+		void CSkinDlg::OnDefaults()
+		{
+			patConfig.SetDefaultSettings();
+			macConfig.SetDefaultSettings();
+			paramConfig.SetDefaultSettings();
+			patConfig.RefreshSettings();
+			macConfig.RefreshSettings();
+			paramConfig.RefreshSettings();
 		}
 		void CSkinDlg::OnImportReg() 
 		{

@@ -84,6 +84,7 @@ namespace psycle { namespace host {
 			afx_msg void OnLineNumbers();
 			afx_msg void OnLineNumbersHex();
 			afx_msg void OnLineNumbersCursor();
+			afx_msg void OnDefaults();
 			afx_msg void OnImportReg();
 			afx_msg void OnExportReg();
 			afx_msg void OnSelchangePatternFontPoint();
