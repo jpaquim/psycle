@@ -16,6 +16,7 @@ using namespace universalis::stdlib;
 /// This function has the same semantic as C1999's lrint series of functions,
 /// but with C++ overload support, we don't need different names for each type.
 /// On C1999, the rounding mode may be set with fesetround, but msvc does not support it, so the mode is unspecified.
+///\todo rename to just 'rint'. The 'l' prefix in 'lrint' means the function returns a long int. But since here the return type is a template parameter, that makes to sense.
 template<typename Integer, typename Real> UNIVERSALIS__COMPILER__CONST
 Integer inline lrint(Real x) {
 	return x;
