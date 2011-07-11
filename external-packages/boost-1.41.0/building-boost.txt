@@ -2,6 +2,8 @@ rem Index
 rem ======
 rem - Build with MinGW
 rem - Build with Visual C++
+rem
+rem Worth reading: http://stackoverflow.com/questions/2629421/how-to-use-boost-in-visual-studio-2010
 
 pushd .
 
@@ -16,7 +18,7 @@ rem The 'bootstrap' script builds bjam.exe in the source dir.
 call bootstrap
 
 set bjam=%cd%\bjam -j%NUMBER_OF_PROCESSORS% --debug-configuration ^
-	link=shared runtime-link=shared threading=multi variant=release,debug ^
+	link=shared runtime-link=shared threading=multi variant=release,debug
 
 rem -----------------------------
 rem Call the label you want here.
