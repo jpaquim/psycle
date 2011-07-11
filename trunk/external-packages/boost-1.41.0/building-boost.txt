@@ -15,14 +15,16 @@ set src=%cd%\boost_1_41_0
 cd %src%
 
 rem The 'bootstrap' script builds bjam.exe in the source dir.
-call bootstrap
+if not exist bjam.exe call bootstrap
 
-set bjam=%cd%\bjam -j%NUMBER_OF_PROCESSORS% --debug-configuration link=shared runtime-link=shared threading=multi variant=release,debug
+set bjam=%cd%\bjam -j%NUMBER_OF_PROCESSORS% --debug-configuration ^
+ --build-dir=%src%.build --prefix=%src%.install ^
+ link=shared runtime-link=shared threading=multi variant=release,debug
 
 rem -----------------------------
 rem Call the label you want here.
 rem -----------------------------
-call :mingw
+call :msvc32
 
 popd
 goto :eof
@@ -33,19 +35,7 @@ rem The following commands can be used to build boost using the MinGW compiler.
 rem The target platform, architecture and address model depends entirely on the variant of mingw.
 rem -----------------------------------------------------------------------------------------------------------------
 
-%bjam% toolset=gcc --build-dir=%src%.build --prefix=%src%.install install
-
-popd
-goto :eof
-
-:msvc
-rem -----------------------------------------------------------------------------------------------------------------
-rem The following commands can be used to build boost in two variants,
-rem one for the 32-bit Windows platform, and another for the 64-bit Windows platform,
-rem using the Visual C++ compiler.
-rem -----------------------------------------------------------------------------------------------------------------
-
-%bjam% toolset=msvc define=_SECURE_SCL=0 define=_HAS_ITERATOR_DEBUGGING=0 address-model=32,64 --build-dir=%src%.build --prefix=%src%.install install
+%bjam% toolset=gcc install
 
 popd
 goto :eof
@@ -55,7 +45,8 @@ rem ----------------------------------------------------------------------------
 rem The following commands can be used to build boost for the 64-bit Windows platform, using the Visual C++ compiler.
 rem -----------------------------------------------------------------------------------------------------------------
 
-%bjam% toolset=msvc define=_SECURE_SCL=0 define=_HAS_ITERATOR_DEBUGGING=0 address-model=64 --stagedir=%src%.stage64 stage
+%bjam% toolset=msvc define=_SECURE_SCL=0 define=_HAS_ITERATOR_DEBUGGING=0 ^
+ address-model=64 --stagedir=%src%.stage64 stage
 
 popd
 goto :eof
@@ -65,7 +56,8 @@ rem ----------------------------------------------------------------------------
 rem The following commands can be used to build boost for the 32-bit Windows platform, using the Visual C++ compiler.
 rem -----------------------------------------------------------------------------------------------------------------
 
-%bjam% toolset=msvc define=_SECURE_SCL=0 define=_HAS_ITERATOR_DEBUGGING=0 address-model=32 --stagedir=%src%.stage32 stage
+%bjam% toolset=msvc define=_SECURE_SCL=0 define=_HAS_ITERATOR_DEBUGGING=0 ^
+ address-model=32 --stagedir=%src%.stage32 stage
 
 popd
 goto :eof
