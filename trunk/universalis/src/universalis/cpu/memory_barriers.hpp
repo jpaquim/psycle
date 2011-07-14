@@ -65,7 +65,6 @@
 			//         which is a cache-coherent, write-through one, except for SSE instructions!
 			namespace universalis { namespace cpu { namespace memory_barriers {
 				void inline  full() {
-					///\todo it seems mfence needs SSE2/3(?).
 					#if DIVERSALIS__CPU__X86__SSE >= 3
 						asm volatile("mfence" ::: "memory");
 					#else
@@ -73,7 +72,6 @@
 						asm volatile ("lock; addl $0, 0(%%esp)" ::: "memory");
 					#endif
 				}
-				///\todo [bohan] needs SSE1, SSE2?
 				void inline  read() { asm volatile("lfence" ::: "memory"); }
 				void inline write() { asm volatile("sfence" ::: "memory"); }
 			}}}
@@ -99,8 +97,7 @@
 		//         Hence, we also add _mm_*fence() to emit the needed CPU instructions.
 		//         What has not been checked is whether we would end up with doubled hardware fences on non-x86 targets.
 		void inline  full() {
-			///\todo it seems mfence needs SSE2/3(?).
-			#if DIVERSALIS__CPU__X86__SSE >= 3
+			#if DIVERSALIS__CPU__X86__SSE >= 3 || DIVERSALIS__CPU__X86 >= 64
 				_mm_mfence();
 			#elif defined DIVERSALIS__CPU__X86
 				// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
