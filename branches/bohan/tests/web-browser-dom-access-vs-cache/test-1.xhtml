@@ -1,0 +1,51 @@
+<?xml version='1.0' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml2.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml'>
+	<head>
+		<meta http-equiv='content-type' content='application/xhtml+xml' />
+		<title>bohan dom access vs cache test</title>
+		<script type='text/javascript'>
+			// <![CDATA[
+
+			window.bohan  = {
+				_cache: {},
+				
+				get: function(id) {
+					if(false) {
+						return document.getElementById(id);
+					} else {
+						return bohan._cache[id] || (bohan._cache[id] = document.getElementById(id));
+					}
+				}
+			};
+			
+			function main(window) {
+				var form = document.createElement('form');
+				var size = 1000;
+				for(var i = 0; i < size; ++i) {
+					var s = i.toString();
+					var e = document.createElement('input');
+					e.setAttribute('id', s);
+					e.setAttribute('type', 'text');
+					e.setAttribute('value', s);
+					form.appendChild(e);
+				}
+				document.body.appendChild(form);
+				var t0 = new Date();
+				var r = 0;
+				for(var i = 0; i < 1000000; ++i) {
+					s = (i % size).toString();
+					r += Number(bohan.get(s).value);
+				}
+				var t1 = new Date();
+				document.body.insertBefore(document.createTextNode(((t1.getTime() - t0.getTime()) * 1e-3).toString() + 's'), form);
+				document.body.insertBefore(document.createElement('br'), form);
+				document.body.insertBefore(document.createTextNode(r), form);
+			}
+			
+			// ]]>
+		</script>
+	</head>
+	<body onload='main(this);'/>
+</html>
+

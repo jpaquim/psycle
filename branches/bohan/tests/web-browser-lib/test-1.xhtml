@@ -1,0 +1,47 @@
+<?xml version='1.0' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml2.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml'>
+	<head>
+		<meta http-equiv='content-type' content='application/xhtml+xml' />
+		<title>bohan lib test</title>
+		<script type='text/javascript'>
+			// <![CDATA[
+
+			window.bohan  = {
+				log: function(/*arguments*/) { console.log(arguments); },
+				
+				deprecationEnabled: true,
+				
+				deprecated: function(f, replacement) {
+					if(!bohan.deprecationEnabled) return f;
+					return function(/*arguments*/) {
+						var msg = 'warning: deprecated function \'' + f.toString().split('{')[0].replace(/ $/, '') + '\' called.';
+						if(replacement) msg += ' Please use \'' + replacement + '\' instead.';
+						bohan.log(msg);
+						f.apply(this, arguments);
+					};
+				}
+			};
+			
+			function fucked(formId, inputId, value) {
+				var form = document.createElement('form');
+				form.id = formId;
+				var input = document.createElement('input');
+				input.id = inputId;
+				input.value = value;
+				form.appendChild(input);
+				document.body.appendChild(form);
+			}
+			
+			fucked = bohan.deprecated(fucked, 'no replacement for now');
+			
+			function main(window) {
+				fucked('form', 'bouzingue', '123');
+			}
+			
+			// ]]>
+		</script>
+	</head>
+	<body onload='main(this);'/>
+</html>
+
