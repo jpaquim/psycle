@@ -4,25 +4,10 @@
 	<head>
 		<meta http-equiv='content-type' content='application/xhtml+xml' />
 		<title>bohan lib test</title>
+		<script type='text/javascript' src='deprecated.js' />
 		<script type='text/javascript'>
 			// <![CDATA[
 
-			window.bohan  = {
-				log: function(/*arguments*/) { console.log(arguments); },
-				
-				deprecationEnabled: true,
-				
-				deprecated: function(f, replacement) {
-					if(!bohan.deprecationEnabled) return f;
-					return function(/*arguments*/) {
-						var msg = 'warning: deprecated function \'' + f.toString().split('{')[0].replace(/ $/, '') + '\' called.';
-						if(replacement) msg += ' Please use \'' + replacement + '\' instead.';
-						bohan.log(msg);
-						f.apply(this, arguments);
-					};
-				}
-			};
-			
 			function fucked(formId, inputId, value) {
 				var form = document.createElement('form');
 				form.id = formId;
