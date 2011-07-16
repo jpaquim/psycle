@@ -18,10 +18,15 @@
 				document.body.appendChild(form);
 			}
 			
-			fucked = bohan.deprecated(fucked, 'no replacement for now');
+			groink = function(/*arguments*/) {
+				return fucked.apply(this, arguments);
+			}
+			
+			//fucked = bohan.deprecated(fucked, 'no replacement for now');
+			groink = bohan.deprecated(groink, 'no replacement for now');
 			
 			function main(window) {
-				fucked('form', 'bouzingue', '123');
+				groink('form', 'bouzingue', '123');
 			}
 			
 			// ]]>
