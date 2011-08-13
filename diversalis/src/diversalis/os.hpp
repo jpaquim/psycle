@@ -57,6 +57,10 @@
 		/// note: on cygwin, DIVERSALIS__OS__MICROSOFT is not defined, as it's considered to be in the unix family.
 		#define DIVERSALIS__OS__MICROSOFT
 		#undef DIVERSALIS__OS__MICROSOFT // was just defined to insert documentation.
+
+		/// google's native-client (NaCl aka Pepper)
+		#define DIVERSALIS__OS__NACL
+		#undef DIVERSALIS__OS__NACL // was just defined to insert documentation.
 	///\}
 
 	///\name operating system version
@@ -248,6 +252,13 @@
 			#error "_WIN32_WINNT is zero."
 		#endif
 	#endif
+
+/////////////////////////////////////////////
+/// google's native-client (NaCl aka Pepper)
+
+#elif defined __native_client__
+	#define DIVERSALIS__OS__NACL
+#endif
 
 ////////////////
 // generic unix
