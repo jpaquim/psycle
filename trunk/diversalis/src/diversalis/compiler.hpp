@@ -98,12 +98,12 @@
 	///\name meta-information about the compiler's brand
 	///\{
 		/// gnu g++/gcc, g++, autodetected via __GNUG__ (equivalent to __GNUC__ && __cplusplus).
-		/// To see the predefined macros, run: g++ -xc++ -std=c++98 -dM -E /dev/null
+		/// To see the predefined macros, run: g++ -xc++ -std=c++0x -dM -E /dev/null
 		#define DIVERSALIS__COMPILER__GNU
 		#undef DIVERSALIS__COMPILER__GNU // was just defined to insert documentation.
 
 		/// llvm clang, autodetected via __clang__.
-		/// To see the predefined macros, run: clang++ -xc++ -std=c++98 -dM -E /dev/null
+		/// To see the predefined macros, run: clang++ -xc++ -std=c++0x -dM -E /dev/null
 		/// Note that clang disguises itself as gcc, so you will also have
 		/// DIVERSALIS__COMPILER__GNU defined.
 		#define DIVERSALIS__COMPILER__CLANG
