@@ -128,7 +128,7 @@ class scene0 : public scene {
 };
 
 void animate(scene0 & scene, view & view, render & render) {
-	std::this_thread::sleep(std::milliseconds(250)); // TODO calling start() and stop() right after may not work
+	std::this_thread::sleep_for(std::chrono::milliseconds(250)); // TODO calling start() and stop() right after may not work
 	real z(0), t(0);
 	while(true) {
 		view.from(0, 0, z);
@@ -138,7 +138,7 @@ void animate(scene0 & scene, view & view, render & render) {
 		//std::cout << render.view().from.z << '\n';
 
 		render.process();
-		std::this_thread::sleep(std::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10)); // TODO hardcoded sleep
 		render.wait();
 		
 		scene.s2.pos.x = (1 + t / 100) * std::cos(t);

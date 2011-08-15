@@ -1,15 +1,16 @@
 /*
-  Simple Demo for GLSL 2.0
-  www.lighthouse3d.com
+	Simple Demo for GLSL 2.0
+	www.lighthouse3d.com
 */
+
+#define GL_GLEXT_PROTOTYPES
+//#include <GL/glew.h>
+#include <GL/glut.h>
 
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <cstdlib> // for std::exit
-
-//#include <GL/glew.h>
-#include <GL/glut.h>
 
 void change_size(int w, int h) {
 	// Prevent a divide by zero, when window is too short
@@ -21,7 +22,7 @@ void change_size(int w, int h) {
 	glLoadIdentity();
 	
 	// Set the viewport to be the entire window
-    glViewport(0, 0, w, h);
+	glViewport(0, 0, w, h);
 
 	// Set the correct perspective.
 	gluPerspective(45, float(w) / h, 1, 1000);
