@@ -10,7 +10,7 @@
 #include <boost/signal.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
-#include <universalis/stdlib/condition.hpp>
+#include <universalis/stdlib/condition_variable.hpp>
 #include <list>
 
 namespace raytrace {
@@ -50,9 +50,9 @@ class render {
 		boost::signal<void ()> update_signal_;
 
 	private:
-		typedef std::scoped_lock<std::mutex> scoped_lock;
+		typedef std::unique_lock<std::mutex> scoped_lock;
 		std::mutex mutable mutex_, update_signal_mutex_, done_mutex_;
-		std::condition<scoped_lock> mutable condition_, condition_done_;
+		std::condition_variable mutable condition_, condition_done_;
 		bool process_requested_, done_, stop_requested_;
 		unsigned int count_, update_signal_count_;
 		std::size_t thread_count_, thread_done_count_, thread_done_count2_;
