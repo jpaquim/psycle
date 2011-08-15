@@ -210,7 +210,7 @@
 ///////////////////////
 // microsoft's windows
 
-#elif defined _WIN32 // || defined _WIN64
+#elif defined _WIN32
 	#define DIVERSALIS__OS
 	#define DIVERSALIS__OS__MICROSOFT
 	#define DIVERSALIS__OS__VERSION WINVER
@@ -258,7 +258,6 @@
 
 #elif defined __native_client__
 	#define DIVERSALIS__OS__NACL
-#endif
 
 ////////////////
 // generic unix
