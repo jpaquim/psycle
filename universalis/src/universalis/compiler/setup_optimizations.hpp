@@ -18,9 +18,22 @@
 	#else
 		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are on and we are not using a debug runtime. Is this intended?")
 	#endif
+#elif defined NDEBUG && !defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE && \
+	/* optimisation is currently only detected on gcc */ defined DIVERSALIS__COMPILER__GNU
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning assertions are off and optimisations are on. Is this intended?
+	#else
+		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are off and optimisations are on. Is this intended?")
+	#endif
+#elif !defined NDEBUG && defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning both assertions and optimisations are on. Is this intended?
+	#else
+		#pragma message(__FILE__ "(" __LINE__ ") : warning: both assertions and optimisations are on. Is this intended?")
+	#endif
 #endif
 
-#ifdef NDEBUG // if no dedug
+#if defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE || defined NDEBUG
 	#ifdef DIVERSALIS__COMPILER__MICROSOFT
 		#if defined UNIVERSALIS__COMPILER__VERBOSE
 			#pragma message(__FILE__ "(" __LINE__ ") : universalis::compiler:: setting optimizations on")
