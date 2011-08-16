@@ -70,6 +70,10 @@
 		#define DIVERSALIS__COMPILER__FEATURE__WARNING
 		#undef DIVERSALIS__COMPILER__FEATURE__WARNING // was just defined to insert documentation.
 
+		/// indicates the compiler has optimisations enabled.
+		#define DIVERSALIS__COMPILER__FEATURE__OPTIMIZE
+		#undef DIVERSALIS__COMPILER__FEATURE__OPTIMIZE // was just defined to insert documentation.
+
 		///\todo doc
 		#define DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		#undef DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS // was just defined to insert documentation.
@@ -205,6 +209,10 @@
 	#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL__
 	#define DIVERSALIS__COMPILER__VERSION__ABI __GXX_ABI_VERSION
 
+	#ifdef __OPTIMIZE__ // when -O flag different than -O0
+		#define DIVERSALIS__COMPILER__FEATURE__OPTIMIZE
+	#endif
+	
 	#define DIVERSALIS__COMPILER__FEATURE__WARNING
 
 	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
