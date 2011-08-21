@@ -509,7 +509,34 @@ namespace psycle
 				
 			_isMixerSend=false;
 		}
-
+		void Machine::GetCurrentPreset(CPreset & preset)
+		{
+			int numParameters = GetNumParams();
+			preset.Init(numParameters);
+			for(int i=0; i < numParameters; ++i)
+			{
+				preset.SetParam(i , GetParamValue(i));
+			}
+		}
+		void Machine::Tweak(CPreset const & preset)
+		{
+			int num=preset.GetNumPars();
+			for(int i(0) ; i < num ; ++i)
+			{
+				try
+				{
+					SetParameter(i, preset.GetParam(i));
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
+				}
+			}
+		}
 		void Machine::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 		{
 			sched_processed_ = recursive_processed_ = recursive_is_processing_ = false;

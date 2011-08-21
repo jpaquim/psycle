@@ -88,7 +88,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	{
 		int maxitems=m_sequence.GetCount();
 		int const ep=m_sequence.GetCurSel();
-		if(m_pWndView->editPosition<0) m_pWndView->editPosition = 0; // DAN FIXME
+		if(m_pWndView->editPosition<0) m_pWndView->editPosition = 0;
 		int const cpid=m_pSong->playOrder[m_pWndView->editPosition];
 
 		memset(m_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));

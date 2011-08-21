@@ -14,15 +14,12 @@ namespace psycle { namespace host {
 		CMidiMonitorDlg::CMidiMonitorDlg(CWnd* pParent)
 			: CDialog(CMidiMonitorDlg::IDD, pParent)
 			, m_clearCounter( 0 )
-	{
-			//{{AFX_DATA_INIT(CMidiMonitorDlg)
-			//}}AFX_DATA_INIT
+		{
 		}
 
 		void CMidiMonitorDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CMidiMonitorDlg)
 			DDX_Control(pDX, IDF_SYNC_TICK, m_tickSync);
 			DDX_Control(pDX, IDF_EMULATED_SYNC_START, m_emulatedSyncStart);
 			DDX_Control(pDX, IDF_EMULATED_SYNC_STOP, m_emulatedSyncStop);
@@ -60,15 +57,13 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_CH14, m_ch14 );
 			DDX_Control(pDX, IDC_CH15, m_ch15 );
 			DDX_Control(pDX, IDC_CH16, m_ch16);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CMidiMonitorDlg, CDialog)
-			//{{AFX_MSG_MAP(CMidiMonitorDlg)
 			ON_WM_TIMER()
 			ON_WM_CTLCOLOR()
+			ON_WM_SHOWWINDOW()
 			ON_COMMAND( IDC_CLEAR_EVENTS_LOST, fnClearEventsLost )
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CMidiMonitorDlg::OnInitDialog() 

@@ -81,13 +81,11 @@ namespace psycle { namespace host {
 			inst_select_type.SetCurSel(midi.inst_select_with());
 
 			velocity.type.AddString("cmd");
-			velocity.type.AddString("ins");
 			write_to_gui(velocity, midi.velocity());
 
 			pitch.type.AddString("cmd");
 			pitch.type.AddString("twk");
 			pitch.type.AddString("tws");
-			pitch.type.AddString("ins");
 			pitch.type.AddString("mcm");
 			write_to_gui(pitch, midi.pitch());
 
@@ -97,7 +95,6 @@ namespace psycle { namespace host {
 				groups[i]->type.AddString("cmd");
 				groups[i]->type.AddString("twk");
 				groups[i]->type.AddString("tws");
-				groups[i]->type.AddString("ins");
 				groups[i]->type.AddString("mcm");
 				write_to_gui(*groups[i], midi.group(i));
 				write_to_gui_text(groups[i]->message, midi.group(i).message());

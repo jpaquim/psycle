@@ -156,7 +156,6 @@ namespace psycle { namespace host {
 //menu end
 		END_MESSAGE_MAP()
 
-
 		int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		{
 			if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
@@ -176,13 +175,14 @@ namespace psycle { namespace host {
 			// Create Toolbars.
 			//m_rebar.Create(this);
 			//m_rebar.SetBarStyle(m_rebar.GetBarStyle() | CBRS_FLYBY);
-			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
+			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
 			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER|CBRS_SIZE_DYNAMIC|CCS_ADJUSTABLE);
+
 			m_songBar.InitializeValues(this, &m_wndView, _pSong);
 			if (!m_songBar.Create(this, IDD_SONGBAR, CBRS_TOP|CBRS_FLYBY|CBRS_GRIPPER, IDD_SONGBAR))
 			{
@@ -195,6 +195,7 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create machinebar\n");
 				return -1;		// fail to create
 			}
+
 			// Status bar
 			if (!m_wndStatusBar.Create(this) ||
 				!m_wndStatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT)))
@@ -210,7 +211,7 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create sequencebar\n");
 				return -1;		// fail to create
 			}
-			
+
 			// CPU info Window
 			m_wndInfo.Create(IDD_INFO,this);
 
@@ -278,7 +279,6 @@ namespace psycle { namespace host {
 			
 			return 0;
 		}
-
 		BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 		{
 			if( !CFrameWnd::PreCreateWindow(cs) )

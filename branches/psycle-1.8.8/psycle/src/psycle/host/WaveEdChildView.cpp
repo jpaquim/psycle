@@ -112,7 +112,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_ZOOMOUT, OnSelectionZoomOut)
 			ON_WM_TIMER()
 			ON_WM_CONTEXTMENU()
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_VOLSLIDE, OnCustomdrawVolSlider)
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_VOLSLIDER, OnCustomdrawVolSlider)
 
 		END_MESSAGE_MAP()
 
@@ -391,7 +391,7 @@ namespace psycle { namespace host {
 
 			CScrollBar* hScroll = (CScrollBar*) zoombar.GetDlgItem(IDC_HSCROLL);
 			CSliderCtrl* zoomSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_ZOOMSLIDE);
-			CSliderCtrl* volSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_VOLSLIDE);
+			CSliderCtrl* volSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_VOLSLIDER);
 			
 			if(pScrollBar == hScroll)
 			{
@@ -478,7 +478,7 @@ namespace psycle { namespace host {
 			cs = (CSliderCtrl*)zoombar.GetDlgItem(IDC_ZOOMSLIDE);
 			cs->SetWindowPos(NULL, cx-100, 0, 80, cyZoombar, SWP_NOZORDER);
 
-			cs = (CSliderCtrl*)zoombar.GetDlgItem(IDC_VOLSLIDE);
+			cs = (CSliderCtrl*)zoombar.GetDlgItem(IDC_VOLSLIDER);
 			cs->SetWindowPos(NULL, 0, 0, 75, cyZoombar, SWP_NOZORDER);
 
 			CScrollBar *csb;
@@ -2344,7 +2344,7 @@ namespace psycle { namespace host {
 		{
 			CScrollBar* hScroll = (CScrollBar*) zoombar.GetDlgItem(IDC_HSCROLL);
 			CSliderCtrl* zoomSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_ZOOMSLIDE);
-			CSliderCtrl* volSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_VOLSLIDE);
+			CSliderCtrl* volSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_VOLSLIDER);
 
 			if(wdWave)
 			{

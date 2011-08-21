@@ -8,10 +8,10 @@ namespace psycle { namespace host {
 
 		IMPLEMENT_DYNAMIC(CTransformPatternDlg, CDialog)
 
-		CTransformPatternDlg::CTransformPatternDlg(CChildView* pChildView, CWnd* pParent /*=NULL*/)
+		CTransformPatternDlg::CTransformPatternDlg(Song* _pSong, CWnd* pParent /*=NULL*/)
 			: CDialog(CTransformPatternDlg::IDD, pParent)
 		{
-			_pChildView = pChildView;
+			pSong = _pSong;
 			m_applyto = 0;
 		}
 
@@ -119,8 +119,6 @@ namespace psycle { namespace host {
 				int currentPattern;
 				int currentColumn;
 				int currentLine;
-
-				Song* pSong = _pChildView->_pSong;
 
 				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;

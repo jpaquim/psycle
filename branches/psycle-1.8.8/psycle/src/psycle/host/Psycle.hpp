@@ -11,14 +11,13 @@ namespace psycle { namespace host {
 		class CMainFrame; // forward declaration
 
 		/// root class.
-		class CPsycleApp : public CWinApp
+		class CPsycleApp : public CWinAppEx
 		{
 		public:
 			CPsycleApp();
 			virtual ~CPsycleApp() throw();
 		public:
 			static bool BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath);
-			void RestoreRecentFiles();
 		protected:
 			virtual BOOL PreTranslateMessage(MSG* pMsg);
 			virtual BOOL InitInstance();

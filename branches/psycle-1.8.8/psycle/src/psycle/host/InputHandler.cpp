@@ -547,7 +547,7 @@ namespace psycle
 				break;
 
 			case cdefSelectBar:
-			//selects 4*tpb lines, 8*tpb lines 16*tpb lines, etc. up to number of lines in pattern
+			//selects 1 bar, 2 bars, 4 bars... up to number of lines in pattern
 				{
 					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];			
 								
@@ -559,7 +559,7 @@ namespace psycle
 						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
 					}
 
-					int blockLength = (4 * pChildView->blockSelectBarState * Global::_pSong->LinesPerBeat())-1;
+					int blockLength = (patSettings.timesig * pChildView->blockSelectBarState * Global::_pSong->LinesPerBeat())-1;
 
 					if ((pChildView->editcur.line + blockLength) >= nl-1)
 					{
@@ -836,50 +836,22 @@ namespace psycle
 			pMainFrame->StatusBarIdle();
 		}
 
-
-		bool InputHandler::EnterData(UINT nChar,UINT nFlags)
-		{
-			if ( pChildView->editcur.col == 0 )
-			{
-				// get command
-				CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
-
-		//		BOOL bRepeat = nFlags&0x4000;
-				if ( cmd.GetType() == CT_Note )
-				{
-		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
-		//			{
-						pChildView->EnterNote(cmd.GetNote());
-						return true;
-		//			}
-				}
-				return false;
-			}
-			else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
-			{
-				return pChildView->MSBPut(nChar);
-			}
-			return false;
-		}
-
 		void InputHandler::StopNote(int note, int instr, bool bTranspose,Machine*pMachine)
 		{
 			assert(note>=0 && note < 128);
-			if(note<0)
-				return;
 
 			int instNo;
 			if (instr < 255) instNo = instr;
 			else instNo = Global::_pSong->auxcolSelected;
 
 			// octave offset 
-			if(note<120)
+			if(note<notecommands::release)
 			{
 				if(bTranspose)
 					note+=Global::_pSong->currentOctave*12;
 
-				if (note > 119) 
-					note = 119;
+				if (note > notecommands::b9) 
+					note = notecommands::b9;
 			}
 
 			if(pMachine==NULL)
@@ -890,7 +862,15 @@ namespace psycle
 				{
 					pMachine = Global::_pSong->_pMachine[mgn];
 				}
+				if(!pMachine) return;
 			}
+
+			// build entry
+			PatternEntry entry;
+			entry._note = 120;
+			entry._mach = pMachine->_macIndex;
+			entry._cmd = 0;
+			entry._parameter = 0;	
 
 			for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
 			{
@@ -898,20 +878,10 @@ namespace psycle
 				{
 					notetrack[i]=notecommands::release;
 					instrtrack[i]=255;
-					// build entry
-					PatternEntry entry;
-					entry._note = 120;
 					entry._inst = instNo;
-					entry._mach = Global::_pSong->seqBus;
-					entry._cmd = 0;
-					entry._parameter = 0;	
 
 					// play it
-
-					if (pMachine)
-					{
-						pMachine->Tick(i,&entry);
-					}
+					pMachine->Tick(i,&entry);
 				}
 			}
 		}
@@ -937,8 +907,8 @@ namespace psycle
 				if(bTranspose)
 					note+=Global::_pSong->currentOctave*12;
 
-				if (note > 119) 
-					note = 119;
+				if (note > notecommands::b9) 
+					note = notecommands::b9;
 			}
 
 			// build entry
@@ -951,16 +921,8 @@ namespace psycle
 			{
 				int par = config.midi().velocity().from() + (config.midi().velocity().to() - config.midi().velocity().from()) * velocity / 127;
 				if (par > 255) par = 255; else if (par < 0) par = 0;
-				switch(config.midi().velocity().type())
-				{
-					case 0:
-						entry._cmd = config.midi().velocity().command();
-						entry._parameter = par;
-						break;
-					case 3:
-						entry._inst = par;
-						break;
-				}
+				entry._cmd = config.midi().velocity().command();
+				entry._parameter = par;
 			}
 			else
 			{
@@ -1032,6 +994,120 @@ namespace psycle
 			}
 		}
 
+
+
+		bool InputHandler::EnterData(UINT nChar,UINT nFlags)
+		{
+			if ( pChildView->editcur.col == 0 )
+			{
+				// get command
+				CmdDef cmd = KeyToCmd(nChar,nFlags);
+
+		//		BOOL bRepeat = nFlags&0x4000;
+				if ( cmd.GetType() == CT_Note )
+				{
+		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
+		//			{
+						pChildView->EnterNote(cmd.GetNote());
+						return true;
+		//			}
+				}
+				return false;
+			}
+			else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
+			{
+				return pChildView->MSBPut(nChar);
+			}
+			return false;
+		}
+
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////
+		// MidiPatternNote
+		//
+		// DESCRIPTION	  : Called by the MIDI input interface to insert pattern notes
+		// PARAMETERS     : int outnote - note to insert/stop . int velocity - velocity of the note, or zero if noteoff
+		// RETURNS		  : <void>
+		// 
+		void InputHandler::MidiPatternNote(int outnote , int macidx, int channel, int velocity)
+		{
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+			PsycleConfig& config = Global::psycleconf();
+			Machine* mac = NULL;
+			if(macidx >=0 && macidx <MAX_BUSES)
+			{
+				mac = Global::_pSong->_pMachine[macidx];
+			}
+			// undo code not required, enter note handles it
+			if(pChildView->viewMode == view_modes::pattern && pChildView->bEditMode)
+			{ 
+				// add note
+				if(velocity > 0 || 
+					(settings._RecordNoteoff && Global::pPlayer->_playing && config._followSong))
+				{
+					pChildView->EnterNote(outnote, channel,velocity,false, mac);
+				}
+				else
+				{
+					StopNote(outnote,channel,false, mac);	// note end
+				}			
+			}
+			else 
+			{
+				// play note
+				if(velocity>0)
+					PlayNote(outnote,channel,velocity,false,mac);
+				else
+					StopNote(outnote,channel,false,mac);
+			}
+
+		}
+
+		void InputHandler::MidiPatternTweak(int busMachine, int command, int value, bool slide) {
+			pChildView->MousePatternTweak(busMachine, command, value, slide);
+
+			Song& song = Global::song();
+			// play it
+			Machine* pMachine = song._pMachine[busMachine];
+			if (pMachine)
+			{
+				// build entry
+				PatternEntry entry;
+				entry._mach = busMachine;
+				entry._cmd = (value>>8)&255;
+				entry._parameter = value&255;
+				entry._inst = command;
+				entry._note = (slide)?notecommands::tweakslide : notecommands::tweak;
+				// play
+				pMachine->Tick(pChildView->editcur.track,&entry);
+			}
+		}
+
+		//These are just redirections right now.
+		void InputHandler::MidiPatternCommand(int busMachine, int command, int value){
+			pChildView->MidiPatternCommand(busMachine, command, value);
+		}
+
+		void InputHandler::MidiPatternMidiCommand(int busMachine, int command, int value){
+			pChildView->MidiPatternMidiCommand(busMachine, command, value);
+		}
+
+		void InputHandler::Automate(int macIdx, int param, int value, bool undo)
+		{
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+
+			if(undo) {
+				AddMacViewUndo();
+			}
+
+			if(settings._RecordTweaks)
+			{
+				if(settings._RecordMouseTweaksSmooth)
+					pChildView->MousePatternTweak(macIdx, param, value,true);
+				else
+					pChildView->MousePatternTweak(macIdx, param, value );
+			}
+		}
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// undo/redo code
 		////////////////////////////////////////////////////////////////////////////////////////////////////////

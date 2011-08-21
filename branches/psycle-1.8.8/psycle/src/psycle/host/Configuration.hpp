@@ -27,7 +27,6 @@ namespace psycle
 
 			//Members
 
-			///\todo can also be done with universalis::os::fs::process_executable_file_path().parent_path()
 			std::string const & appPath              () const { return program_executable_dir_; }
 
 			std::string const & GetPluginDir         () const { return plugin_dir_; }

@@ -62,6 +62,7 @@ namespace psycle
 				static inline Song           & song() { return *_pSong; }
 #if !defined WINAMP_PLUGIN
 				static inline CMidiInput     & midi(){ return *pMidiInput; }
+				static inline InputHandler   & inputHandler() { return * pInputHandler; }
 #endif //!defined WINAMP_PLUGIN
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }

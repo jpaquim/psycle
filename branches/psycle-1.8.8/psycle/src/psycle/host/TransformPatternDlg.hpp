@@ -1,21 +1,21 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include "ChildView.hpp"
 
 #include "Song.hpp"
 
 // CTransformPatternDlg dialog
 namespace psycle { namespace host {
+		class Song;
+
 		class CTransformPatternDlg : public CDialog
 		{
 			DECLARE_DYNAMIC(CTransformPatternDlg)
 
 		private:
-			CChildView* _pChildView;
-
+			Song* pSong;
 		public:
-			CTransformPatternDlg(CChildView* pChildView, CWnd* pParent = NULL);   // standard constructor
+			CTransformPatternDlg(Song* _pSong, CWnd* pParent = NULL);   // standard constructor
 			virtual ~CTransformPatternDlg();
 
 			enum { IDD = IDD_TRANSFORMPATTERN };			

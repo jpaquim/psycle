@@ -11,7 +11,6 @@ namespace psycle { namespace host {
 		/////////////////////////////////////////////
 		Configuration::Configuration() : _pOutputDriver(0)
 		{
-			///\todo can also be done with universalis::os::fs::process_executable_file_path().parent_path()
 			char c[MAX_PATH];
 			c[0]='\0';
 			::GetModuleFileName(0, c, sizeof c);

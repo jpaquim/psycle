@@ -21,7 +21,7 @@
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 8
 #define PSYCLE__VERSION__PATCH 8
-#define PSYCLE__VERSION__QUALITY "between beta3 and beta4"
+#define PSYCLE__VERSION__QUALITY "RC1"
 #define PSYCLE__SOURCE_URL "Subversion $URL$"
 
 /// identifies what source version the build comes from.

@@ -551,7 +551,7 @@ namespace psycle
 							}
 							AddMIDI(0xE0 | midiChannel,LSB(NSCurrent[midiChannel]),MSB(NSCurrent[midiChannel]),NSSamples[midiChannel]);
 							 
-							NSSamples[midiChannel]+=min(TWEAK_SLIDE_SAMPLES,ns);
+							NSSamples[midiChannel]+=std::min(TWEAK_SLIDE_SAMPLES,ns);
 							ns-=TWEAK_SLIDE_SAMPLES;
 						}
 					}

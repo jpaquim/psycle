@@ -7,8 +7,6 @@
 
 #include "InputHandler.hpp"
 #include "PsycleConfig.hpp"
-#include "ChildView.hpp"
-#include "MainFrm.hpp"
 
 #include "Song.hpp"
 #include "Player.hpp"
@@ -835,35 +833,29 @@ Exit:
 												int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
 												switch(Global::psycleconf().midi().group(i).type())
 												{
-													case 0:
+												case PsycleConfig::Midi::group_t::t_command:
 														note = notecommands::empty;
 														inst = 255;
 														cmd = Global::psycleconf().midi().group(i).command();
 														parameter = value;
 														break;
-													case 1:
+												case PsycleConfig::Midi::group_t::t_tweak:
 														note = notecommands::tweak;
 														inst = Global::psycleconf().midi().group(i).command();
 														cmd = (value>>8)&255;
 														parameter = value&255;
 														break;
-													case 2:
+												case PsycleConfig::Midi::group_t::t_tweakslide:
 														note = notecommands::tweakslide;
 														inst = Global::psycleconf().midi().group(i).command();
 														cmd = (value>>8)&255;
 														parameter = value&255;
 														break;
-													case 3:
+												case PsycleConfig::Midi::group_t::t_mcm:
 														note = notecommands::midicc;
 														inst = Global::psycleconf().midi().group(i).command() | (inst&0x0F);
 														cmd = data1;
 														parameter = data2;
-														break;
-													case 4:
-														note = notecommands::empty;
-														inst = data2;
-														cmd = 0;
-														parameter = 0;
 														break;
 												}
 												break;
@@ -1001,7 +993,6 @@ Exit:
 //					int cmd = 0; cmd; // not used
 //					int parameter = 0; parameter; // not used
 					
-					CMainFrame & frame(*static_cast<CMainFrame*>(theApp.m_pMainWnd));
 					m_stats.channelMap |= (1 << channel);
 
 					// branch on status code
@@ -1015,8 +1006,7 @@ Exit:
     						// limit to playable range (above this is special codes)
     						if(note>119) 
     							note=119;
-							// TODO: watch this, it should be OK as long as we don't change things too much
-							frame.m_wndView.MidiPatternNote(note, busMachine, inst, velocity);
+							Global::inputHandler().MidiPatternNote(note, busMachine, inst, velocity);
 							return;
 						// controller
 						case 0x0B:
@@ -1085,7 +1075,7 @@ Exit:
 					{
 						if (Global::psycleconf().midi().raw() && status != 0xFE )
 						{
-							frame.m_wndView.MidiPatternMidiCommand(status,(data1 << 8) | data2);
+							Global::inputHandler().MidiPatternMidiCommand(status,busMachine,(data1 << 8) | data2);
 						}
 						// branch on status code
 						else switch(statusHN)
@@ -1100,20 +1090,18 @@ Exit:
 										int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
 										switch(Global::psycleconf().midi().group(i).type())
 										{
-											case 0:
-												frame.m_wndView.MidiPatternCommand(Global::psycleconf().midi().group(i).command(), value);
+											case PsycleConfig::Midi::group_t::t_command:
+												Global::inputHandler().MidiPatternCommand(busMachine,Global::psycleconf().midi().group(i).command(), value);
 												break;
-											case 1:
-												frame.m_wndView.MidiPatternTweak(Global::psycleconf().midi().group(i).command(), value);
+											case PsycleConfig::Midi::group_t::t_tweak:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().group(i).command(), value);
 												break;
-											case 2:
-												frame.m_wndView.MidiPatternTweakSlide(Global::psycleconf().midi().group(i).command(), value);
+											case PsycleConfig::Midi::group_t::t_tweakslide:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().group(i).command(), value, true);
 												break;
-											case 3:
-												frame.m_wndView.MidiPatternMidiCommand(status, (data1 << 8) | data2);
+											case PsycleConfig::Midi::group_t::t_mcm:
+												Global::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
 												break;
-											case 4:
-												frame.m_wndView.MidiPatternInstrument(value);
 										}
 									}
 								}
@@ -1128,21 +1116,18 @@ Exit:
 										int const value(Global::psycleconf().midi().pitch().from() + (Global::psycleconf().midi().pitch().to() - Global::psycleconf().midi().pitch().from()) * data / 0x3fff);
 										switch (Global::psycleconf().midi().pitch().type())
 										{
-										case 0:
-											frame.m_wndView.MidiPatternCommand(Global::psycleconf().midi().pitch().command(), value);
-											break;
-										case 1:
-											frame.m_wndView.MidiPatternTweak(Global::psycleconf().midi().pitch().command(), value);
-											break;
-										case 2:
-											frame.m_wndView.MidiPatternTweakSlide(Global::psycleconf().midi().pitch().command(), value);
-											break;
-										case 3:
-											frame.m_wndView.MidiPatternMidiCommand(status | (inst&0x0F), (data1 << 8) | data2);
-											break;
-										case 4:
-											frame.m_wndView.MidiPatternInstrument(value);
-											break;
+											case PsycleConfig::Midi::group_t::t_command:
+												Global::inputHandler().MidiPatternCommand(busMachine,Global::psycleconf().midi().pitch().command(), value);
+												break;
+											case PsycleConfig::Midi::group_t::t_tweak:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().pitch().command(), value);
+												break;
+											case PsycleConfig::Midi::group_t::t_tweakslide:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().pitch().command(), value, true);
+												break;
+											case PsycleConfig::Midi::group_t::t_mcm:
+												Global::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
+												break;
 										}
 									}
 								}

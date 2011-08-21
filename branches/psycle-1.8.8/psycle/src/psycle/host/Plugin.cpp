@@ -8,7 +8,6 @@
 
 #if !defined WINAMP_PLUGIN
 	#include "InputHandler.hpp"
-	//#include "psycle.hpp"
 	#include "NewMachine.hpp"
 #else
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
@@ -770,7 +769,7 @@ namespace psycle
 			{
 				try
 				{
-					return proxy().Vals()[numparam];
+					return proxy().Val(numparam);
 				}
 				catch(const std::exception &)
 				{
@@ -790,8 +789,8 @@ namespace psycle
 			{
 				try
 				{
-					if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
-						std::sprintf(parval, "%i", proxy().Vals()[numparam]);
+					if(!proxy().DescribeValue(parval, numparam, proxy().Val(numparam)))
+						std::sprintf(parval, "%i", proxy().Val(numparam));
 				}
 				catch(const std::exception &)
 				{
@@ -916,7 +915,7 @@ namespace psycle
 						TWSInst[i] = pData->_inst;
 						try
 						{
-							TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
+							TWSCurrent[i] = float(proxy().Val(TWSInst[i]));
 						}
 						catch(const std::exception &)
 						{
@@ -985,7 +984,50 @@ namespace psycle
 				}
 			}
 		}
-
+		void Plugin::GetCurrentPreset(CPreset & preset)
+		{
+			void* pData = NULL;
+			int numParameters = GetNumParams();
+			try
+			{
+				int dataSizeStruct = proxy().GetDataSize();
+				if(dataSizeStruct > 0) //Can only happen for native plugins.
+				{
+					pData = new char[dataSizeStruct];
+					proxy().GetData(pData); // Internal Save
+					preset.Init(numParameters , "", proxy().Vals(), dataSizeStruct, pData);
+					delete[] pData;
+				}
+				else
+				{
+					Machine::GetCurrentPreset(preset);
+				}
+			}
+			catch(const std::exception &)
+			{
+				delete[] pData;
+				preset.Init(numParameters);
+			}
+		}
+		void Plugin::Tweak(CPreset const & preset)
+		{
+			Machine::Tweak(preset);
+			if(preset.GetData())
+			{
+				try
+				{
+					proxy().PutData(preset.GetData()); // Internal save
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
+				}
+			}
+		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

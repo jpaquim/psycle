@@ -204,12 +204,12 @@ namespace psycle { namespace host {
 		void PresetIO::SavePresets(const char* szFile,  std::list<CPreset>& presets)
 		{
 			std::FILE* hfile;
-			if(!(hfile=std::fopen(szFile,"wb")))
-			{
-				::MessageBox(0,"The File couldn't be opened for Writing. Operation Aborted","File Save Error",MB_OK);
-				return;
-			}
 			if(presets.size() > 0) {
+				if(!(hfile=std::fopen(szFile,"wb")))
+				{
+					::MessageBox(0,"The File couldn't be opened for Writing. Operation Aborted","File Save Error",MB_OK);
+					return;
+				}
 				if (false)
 				{
 					SaveVersion0(hfile, presets);
@@ -218,8 +218,12 @@ namespace psycle { namespace host {
 				{
 					SaveVersion1(hfile, presets);
 				}
+				std::fclose(hfile);
 			}
-			std::fclose(hfile);
+			else {
+				boost::filesystem::path thepath(szFile);
+				boost::filesystem::remove(thepath);
+			}
 		}
 
 

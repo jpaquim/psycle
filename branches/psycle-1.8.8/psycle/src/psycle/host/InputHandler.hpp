@@ -75,6 +75,12 @@ namespace psycle
 			void PlaySong();
 			void PlayFromCur();
 
+			void MidiPatternNote(int outnote , int macidx, int channel, int velocity);	// called by the MIDI input to insert pattern notes
+			void MidiPatternCommand(int busMachine, int command, int value); // called by midi to insert pattern commands
+			void MidiPatternTweak(int busMachine, int command, int value, bool slide=false); // called by midi to insert pattern commands
+			void MidiPatternMidiCommand(int busMachine, int command, int value); // called by midi to insert midi pattern commands
+			void Automate(int macIdx, int param, int value, bool undo);
+
 			void AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);
 			void AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter);
 			void AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo=true, int counter=0);

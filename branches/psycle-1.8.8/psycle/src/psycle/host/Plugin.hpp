@@ -15,8 +15,6 @@ namespace psycle
 	namespace host
 	{
 		using namespace psycle::plugin_interface;
-		/// \todo CPresetsDlg code sux big time concerning interface separation :-(
-		class CPresetDlg;
 		extern const char* MIDI_CHAN_NAMES[16];
 
 		/// calls that the plugin side can make to the host side
@@ -93,9 +91,7 @@ namespace psycle
 					void inline unused3 ()                                                                     throw(exceptions::function_error);
 					int  inline Val(int parameter)                                                             throw(exceptions::function_error);
 
-					///\todo CPresetsDlg code sux big time concerning interface separation :-(
-					///\todo deprecated: use int Val(int) instead
-					friend class CPresetDlg; int const /* at least it's const! */ * Vals() { return plugin().Vals; }
+					int const /* at least it's const! */ * Vals() { return plugin().Vals; }
 			///\}
 		};
 
@@ -221,6 +217,8 @@ namespace psycle
 					virtual void GetCurrentBankName(char* val) {strcpy(val,"Internal");};
 					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};
 					virtual int GetNumBanks(){ return 1;};
+					virtual void Tweak(CPreset const & preset);
+					virtual void GetCurrentPreset(CPreset & preset);
 			///\}
 
 			///\name (de)serialization

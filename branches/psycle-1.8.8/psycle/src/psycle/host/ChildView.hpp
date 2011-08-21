@@ -135,15 +135,10 @@ namespace host {
 			void BlockGenChange(int x);
 			void ShowSwingFillDlg(bool bTrackMode);
 
-			void MidiPatternNote(int outnote , int macidx, int channel, int velocity);	// called by the MIDI input to insert pattern notes
-			void MidiPatternCommand(int command, int value); // called by midi to insert pattern commands
-			void MidiPatternTweak(int command, int value); // called by midi to insert pattern commands
-			void MidiPatternTweakSlide(int command, int value); // called by midi to insert pattern commands
-			void MidiPatternMidiCommand(int command, int value); // called by midi to insert midi pattern commands
-			void MidiPatternInstrument(int value); // called by midi to insert pattern commands
-			void MousePatternTweak(int machine, int command, int value);
-			void MousePatternTweakSlide(int machine, int command, int value);
-			void EnterNote(int note, int instr=255, int velocity=127, bool bTranspose=true);
+			void MidiPatternCommand(int busMachine, int command, int value); // called by midi to insert pattern commands
+			void MidiPatternMidiCommand(int busMachine, int command, int value); // called by midi to insert midi pattern commands
+			void MousePatternTweak(int machine, int command, int value, bool slide=false);
+			void EnterNote(int note, int instr=255, int velocity=127, bool bTranspose=true, Machine* mac=NULL);
 			void EnterNoteoffAny();
 			bool MSBPut(int nChar);
 			void PrevTrack(int x,bool wrap,bool updateDisplay=true);
@@ -202,11 +197,10 @@ namespace host {
 			void FileLoadsongNamed(std::string fName);
 			void OnFileLoadsongNamed(std::string fName, int fType);
 			void AppendToRecent(std::string const& fName);
+			void RestoreRecent();
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;
-
-//			CBitmap machinedial; //the machine dial bitmap
 
 			CFrameWnd* pParentFrame;
 			Song* _pSong;
@@ -475,6 +469,8 @@ namespace host {
 			afx_msg void OnPopTrackSwingfill();
 			afx_msg void OnSize(UINT nType, int cx, int cy);
 			afx_msg void OnConfigurationSettings();
+			afx_msg void OnEnableAudio();
+			afx_msg void OnUpdateEnableAudio(CCmdUI* pCmdUI);
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

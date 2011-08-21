@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::CFrameMachine.
 #include <psycle/host/detail/project.private.hpp>
 #include "FrameMachine.hpp"
-
 #include "InputHandler.hpp"
 #include "ChildView.hpp"
 #include "Machine.hpp"
@@ -58,6 +57,7 @@ namespace psycle { namespace host {
 			ON_WM_KEYDOWN()
 			ON_WM_KEYUP()
 			ON_WM_SIZING()
+			ON_WM_INITMENUPOPUP()
 			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
 			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
@@ -140,6 +140,7 @@ namespace psycle { namespace host {
 			font.Attach( hFont );
 			comboProgram.SetFont(&font);
 
+			LocatePresets();
 			FillProgramCombobox();
 			toolBar.SetBarStyle(toolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
 			toolBar.SetWindowText("Params Toolbar");
@@ -284,9 +285,20 @@ namespace psycle { namespace host {
 			int bank = nID - ID_SELECTBANK_0;
 			if (bank < machine().GetNumBanks()) {
 				machine().SetCurrentBank(bank);
+				isInternal=false;
+				isUser=false;
 			}
-			else {
-				///todo
+			else 
+			{
+				bank -= machine().GetNumBanks();
+				if(internalPresets.size() > 0) {
+					bank--;
+					if (bank == -1) isInternal=true;
+				}
+				if(userPresets.size() > 0) {
+					bank--;
+					if (bank == -1) isUser=true;
+				}
 			}
 
 			FillProgramCombobox();
@@ -338,11 +350,15 @@ namespace psycle { namespace host {
 			{
 				machine()._mute = !machine()._mute;
 			}
-			else
+			else if (machine()._mute) 
 			{
-				machine().Bypass(!machine().Bypass());
-				if (machine()._mute) machine()._mute = false;
+				machine()._mute = false;
+				machine().Bypass(false);
 			}
+			else {
+				machine().Bypass(!machine().Bypass());
+			}
+			wndView->Repaint();
 		}
 
 		void CFrameMachine::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
@@ -457,12 +473,30 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnProgramLess()
 		{
-			ChangeProgram(machine().GetCurrentProgram()-1);
+			int i = 0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+			ChangeProgram(i-1);
 			UpdateWindow();
 		}
 		void CFrameMachine::OnUpdateProgramLess(CCmdUI *pCmdUI)
 		{
-			if ( machine().GetCurrentProgram() == 0)
+			int i = 0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+			if ( i == 0)
 			{
 				pCmdUI->Enable(false);
 			}
@@ -470,12 +504,35 @@ namespace psycle { namespace host {
 		}
 		void CFrameMachine::OnProgramMore()
 		{
-			ChangeProgram(machine().GetCurrentProgram()+1);
+			int i = 0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+			ChangeProgram(i+1);
 			UpdateWindow();
 		}
 		void CFrameMachine::OnUpdateProgramMore(CCmdUI *pCmdUI)
 		{
-			if ( machine().GetCurrentProgram()+1 == machine().GetNumPrograms() || machine().GetNumPrograms()==0)
+			int i = 0;
+			int nump = 0;
+			if (isInternal) {
+				i = userSelected;
+				nump = internalPresets.size();
+			} else if(isUser){
+				i = userSelected;
+				nump = userPresets.size();
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+				nump =  _machine->GetNumPrograms();
+			}
+
+			if ( i+1 == nump || nump==0)
 			{
 				pCmdUI->Enable(false);
 			}
@@ -559,52 +616,128 @@ namespace psycle { namespace host {
 
 		//////////////////////////////////////////////////////////////////////////
 
+		void CFrameMachine::LocatePresets()
+		{
+			int dataSizeStruct = 0;
+			if( machine()._type == MACH_PLUGIN)
+			{
+				dataSizeStruct = ((Plugin *)_machine)->proxy().GetDataSize();
+			}
+			CString buffer;
+			buffer = machine().GetDllName();
+			buffer = buffer.Left(buffer.GetLength()-4);
+			buffer += ".prs";
+			boost::filesystem::path inpath(buffer);
+			if(boost::filesystem::exists(inpath))
+			{
+				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,internalPresets,false);
+			}
+
+			buffer = Global::psycleconf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
+			boost::filesystem::path inpath2(buffer);
+			if(boost::filesystem::exists(inpath2))
+			{
+				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,userPresets,false);
+			}
+
+			userSelected=0;
+			if(internalPresets.size() > 0) {
+				isInternal = true; isUser = false;
+			}
+			else if(userPresets.size() > 0) {
+				isInternal = false; isUser = true;
+			}
+			else {
+				isInternal = isUser = false;
+			}
+		}
+
 		void CFrameMachine::FillBankPopup(CMenu* pPopupMenu)
 		{
-			if (machine().GetNumBanks() > 1)
-			{
-				CMenu* popBnk=0;
-				popBnk = pPopupMenu->GetSubMenu(3);
-				if (!popBnk)
-					return;
+			CMenu* popBnk=0;
+			popBnk = pPopupMenu->GetSubMenu(3);
+			if (!popBnk)
+				return;
 
-				DeleteBankMenu(popBnk);
-				for (int i = 0; i < machine().GetNumBanks(); i++)
+			DeleteBankMenu(popBnk);
+			int i = 0;
+			for (i = 0; i < machine().GetNumBanks() && i < 980 ; i += 16)
+			{
+				CMenu popup;
+				popup.CreatePopupMenu();
+				for (int j = i; (j < i + 16) && (j < machine().GetNumBanks()); j++)
 				{
 					char s1[38];
 					char s2[32];
-					_machine->GetIndexBankName(i, s2);
-					std::sprintf(s1,"%d: %s",i,s2);
-					popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, s1);
+					_machine->GetIndexBankName(j, s2);
+					std::sprintf(s1,"%d: %s",j,s2);
+					popup.AppendMenu(MF_STRING, ID_SELECTBANK_0 + j, s1);
 				}
-				popBnk->CheckMenuItem(ID_SELECTBANK_0 + machine().GetCurrentBank(),
-					MF_CHECKED | MF_BYCOMMAND);
+				char szSub[256] = "";;
+				std::sprintf(szSub,"Programs %d-%d",i,i+15);
+				popBnk->AppendMenu(MF_POPUP | MF_STRING,
+					(UINT)popup.Detach(),
+					szSub);
 			}
+
+			if(internalPresets.size() > 0|| 
+				( userPresets.size() == 0 && i == 0)) {
+				popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, "Provided Presets");
+				i++;
+			}
+			if(userPresets.size() > 0)
+			{
+				popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, "User Presets");
+				i++;
+			}
+			int selected;
+			if(isInternal || 
+				(internalPresets.size() == 0 && isUser)) {
+				selected = machine().GetNumBanks();
+			}
+			else if (isUser) {
+				selected = machine().GetNumBanks()+1;
+			}
+			else {
+				selected = machine().GetCurrentBank();
+			}
+			popBnk->CheckMenuItem(ID_SELECTBANK_0 + selected, MF_CHECKED | MF_BYCOMMAND);
 		}
 
 		bool CFrameMachine::DeleteBankMenu(CMenu* popBnk)
 		{
-			if (popBnk->GetMenuItemID(0) == ID_SELECTBANK_0)
+			CMenu* secMenu=0;
+			while (popBnk->GetMenuItemCount() > 0)
 			{
-				while (popBnk->GetMenuItemCount() > 0)
+				if ((secMenu=popBnk->GetSubMenu(0)))
 				{
-					popBnk->DeleteMenu(0,MF_BYPOSITION);
+					while (secMenu->GetMenuItemCount() > 0) 
+					{
+						secMenu->DeleteMenu(0,MF_BYPOSITION);
+					}
 				}
-				return true;
+				popBnk->DeleteMenu(0,MF_BYPOSITION);
 			}
-			return false;
+			return true;
 		}
 		void CFrameMachine::FillProgramPopup(CMenu* pPopupMenu)
 		{
-			if (machine().GetTotalPrograms() > 1)
+			CMenu* popPrg=0;
+			popPrg = pPopupMenu->GetSubMenu(4);
+			if (!popPrg)
+				return;
+
+			DeleteProgramMenu(popPrg);
+			if(isInternal) 
 			{
-				CMenu* popPrg=0;
-				popPrg = pPopupMenu->GetSubMenu(4);
-				if (!popPrg)
-					return;
-
-				DeleteProgramMenu(popPrg);
-
+				FillPopupFromPresets(popPrg, internalPresets);
+			}
+			else if(isUser)
+			{
+				FillPopupFromPresets(popPrg, userPresets);
+			}
+			else if (machine().GetTotalPrograms() > 0)
+			{
 				for (int i = 0; i < machine().GetNumPrograms() && i < 980 ; i += 16)
 				{
 					CMenu popup;
@@ -613,7 +746,7 @@ namespace psycle { namespace host {
 					{
 						char s1[38];
 						char s2[32];
-						_machine->GetIndexProgramName(_machine->GetCurrentBank(), j, s2);
+						_machine->GetIndexProgramName(machine().GetCurrentBank(), j, s2);
 						std::sprintf(s1,"%d: %s",j,s2);
 						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, s1);
 					}
@@ -623,58 +756,137 @@ namespace psycle { namespace host {
 						(UINT)popup.Detach(),
 						szSub);
 				}
-				popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + machine().GetCurrentProgram(),
-					MF_CHECKED | MF_BYCOMMAND);
+			}
+			int selected;
+			if(isInternal) {
+				selected = userSelected;
+			}
+			else if (isUser) {
+				selected = userSelected;
+			}
+			else {
+				selected = machine().GetCurrentProgram();
+			}
+			popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + selected, MF_CHECKED | MF_BYCOMMAND);
+		}
+
+		void CFrameMachine::FillPopupFromPresets(CMenu* popPrg, std::list<CPreset> const & presets )
+		{
+			for (int i = 0; i <presets.size() && i < 980 ; i += 16)
+			{
+				CMenu popup;
+				popup.CreatePopupMenu();
+				std::list<CPreset>::const_iterator preset = presets.begin();
+				for(int j = i; (j < i + 16) && (preset != presets.end()); j++, preset++)
+				{
+					char s1[38];
+					char s2[32];
+					preset->GetName(s2);
+					std::sprintf(s1,"%d: %s",j,s2);
+					popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, s1);
+				}
+				char szSub[256] = "";;
+				std::sprintf(szSub,"Programs %d-%d",i,i+15);
+				popPrg->AppendMenu(MF_POPUP | MF_STRING,
+					(UINT)popup.Detach(),
+					szSub);
 			}
 		}
 
 		bool CFrameMachine::DeleteProgramMenu(CMenu* popPrg)
 		{
 			CMenu* secMenu=0;
-			if (popPrg->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+			while (popPrg->GetMenuItemCount() > 0)
 			{
-				popPrg->DeleteMenu(0, MF_BYPOSITION);
-				return true;
-			}
-			else if ((secMenu=popPrg->GetSubMenu(0)))
-			{
-				if (secMenu->GetMenuItemID(0) == ID_SELECTPROGRAM_0)
+				if ((secMenu=popPrg->GetSubMenu(0)))
 				{
-					while (popPrg->GetSubMenu(0))
+					while (secMenu->GetMenuItemCount() > 0)
 					{
-						popPrg->DeleteMenu(0,MF_BYPOSITION);
+						secMenu->DeleteMenu(0,MF_BYPOSITION);
 					}
 				}
-				return true;
+				popPrg->DeleteMenu(0,MF_BYPOSITION);
 			}
-			return false;
+			return true;
 		}
 		void CFrameMachine::FillProgramCombobox()
 		{
 			comboProgram.ResetContent();
-
-			int nump;
-			nump = _machine->GetNumPrograms();
-			for(int i(0) ; i < nump; ++i)
-			{
-				char s1[38];
-				char s2[32];
-				_machine->GetIndexProgramName(-1, i, s2);
-				std::sprintf(s1,"%d: %s",i,s2);
-				comboProgram.AddString(s1);
+			int nump = 0;
+			if(isInternal)  {
+				FillComboboxFromPresets(&comboProgram, internalPresets);
+				nump = internalPresets.size();
+			} else if (isUser) {
+				FillComboboxFromPresets(&comboProgram, userPresets);
+				nump = userPresets.size();
+			} else if (_machine->GetNumPrograms() > 0) {
+				nump =  _machine->GetNumPrograms();
+				for(int i(0) ; i < nump; ++i)
+				{
+					char s1[38];
+					char s2[32];
+					_machine->GetIndexProgramName(-1, i, s2);
+					std::sprintf(s1,"%d: %s",i,s2);
+					comboProgram.AddString(s1);
+				}
 			}
-			int i = _machine->GetCurrentProgram();
+			int i=0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+
 			if ( i > nump || i < 0) {  i = 0; }
 			comboProgram.SetCurSel(i);
-
 			if (pParamGui){
 				pParamGui->InitializePrograms();
 			}
 		}
 
+		void CFrameMachine::FillComboboxFromPresets(CComboBox* combo, std::list<CPreset> const & presets )
+		{
+			std::list<CPreset>::const_iterator preset = presets.begin();
+			for(int i = 0; preset != presets.end(); i++, preset++)
+			{
+				char s1[38];
+				char s2[32];
+				preset->GetName(s2);
+				std::sprintf(s1,"%d: %s",i,s2);
+				combo->AddString(s1);
+			}
+		}
+
 		void CFrameMachine::ChangeProgram(int numProgram)
 		{
-			_machine->SetCurrentProgram(numProgram);
+			if(isInternal){
+				userSelected=numProgram;
+				std::list<CPreset>::iterator preset = internalPresets.begin();
+				for(int i=0; preset != internalPresets.end(); i++, preset++)
+				{
+					if(i == userSelected) {
+						_machine->Tweak(*preset);
+						break;
+					}
+				}
+			}
+			else if (isUser) {
+				userSelected=numProgram;
+				std::list<CPreset>::iterator preset = userPresets.begin();
+				for(int i=0; preset != userPresets.end(); i++, preset++)
+				{
+					if(i == userSelected) {
+						_machine->Tweak(*preset);
+						break;
+					}
+				}
+			}
+			else {
+				_machine->SetCurrentProgram(numProgram);
+			}
 			comboProgram.SetCurSel(numProgram);
 			if (pParamGui){
 				pParamGui->SelectProgram(numProgram);
@@ -682,18 +894,7 @@ namespace psycle { namespace host {
 		}
 		void CFrameMachine::Automate(int param, int value, bool undo)
 		{
-			if(undo) {
-				Global::pInputHandler->AddMacViewUndo();
-			}
-
-			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-			if(Global::psycleconf().inputHandler()._RecordTweaks)
-			{
-				if(Global::psycleconf().inputHandler()._RecordMouseTweaksSmooth)
-					wndView->MousePatternTweakSlide(machine()._macIndex, param, value);
-				else
-					wndView->MousePatternTweak(machine()._macIndex, param, value );
-			}
+			Global::inputHandler().Automate(machine()._macIndex, param, value, undo);
 			if(pParamGui)
 				pParamGui->UpdateNew(param, value);
 		}

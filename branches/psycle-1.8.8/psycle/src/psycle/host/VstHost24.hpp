@@ -224,7 +224,8 @@ namespace psycle
 				};
 				virtual void GetCurrentProgramName(char* val) {GetProgramName(val);};
 				virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){
-					GetProgramNameIndexed(bnkidx, prgIdx, val);};
+
+					GetProgramNameIndexed(-1, bnkidx*128 + prgIdx, val);};
 				virtual int GetNumPrograms(){ return numPrograms()<128?numPrograms():128;};
 				virtual int GetTotalPrograms(){ return numPrograms();};
 				virtual void SetCurrentBank(int idx) { SetProgram(idx*128+GetCurrentProgram());};

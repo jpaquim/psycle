@@ -511,7 +511,7 @@ namespace psycle
 
 				// PanningMode::Linear is already on rvol, so we omit the case.
 				if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
-					rvol = min(1.0f, rvol*2.0f);
+					rvol = std::min(1.0f, rvol*2.0f);
 				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
 					//rvol = powf(rvol, 0.5f);// This is the commonly used one
 					rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.

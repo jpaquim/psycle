@@ -39,8 +39,6 @@ namespace psycle { namespace host {
 		BEGIN_MESSAGE_MAP(CVstEffectWnd, CFrameMachine)
 			ON_WM_CREATE()
 			ON_WM_CLOSE()
-			ON_WM_SIZING()
-			ON_WM_INITMENUPOPUP()
 			ON_COMMAND(ID_PROGRAMS_OPENPRESET, OnProgramsOpenpreset)
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 		END_MESSAGE_MAP()

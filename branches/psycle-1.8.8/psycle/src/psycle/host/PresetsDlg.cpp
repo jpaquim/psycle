@@ -2,8 +2,9 @@
 ///\brief implementation file for psycle::host::CPresetsDlg.
 #include <psycle/host/detail/project.private.hpp>
 #include "PresetsDlg.hpp"
+#include "Machine.hpp"
 #include "Configuration.hpp"
-#include "Plugin.hpp"
+#include <universalis/os/fs.hpp>
 
 #include <cstring>
 
@@ -38,38 +39,14 @@ namespace psycle { namespace host {
 			m_preslist.LimitText(32);
 			presetChanged = false;
 
-			numParameters = _pMachine->GetNumParams();
-			dataSizeStruct = 0;
-			void* pData = NULL;
-			try
-			{
-				if( _pMachine->_type == MACH_PLUGIN)
-				{
-					dataSizeStruct = ((Plugin *)_pMachine)->proxy().GetDataSize();
-				}
-				if(dataSizeStruct > 0) //Can only happen for native plugins.
-				{
-					pData = new char[dataSizeStruct];
-					reinterpret_cast<Plugin *>(_pMachine)->proxy().GetData(pData); // Internal Save
-					iniPreset.Init(numParameters , "", reinterpret_cast<Plugin *>(_pMachine)->proxy().Vals(), dataSizeStruct, pData);
-					delete[] pData;
-				}
-				else
-				{
-					iniPreset.Init(numParameters);
-					for(int i=0; i < numParameters; ++i)
-					{
-						iniPreset.SetParam(i , _pMachine->GetParamValue(i));
-					}
-				}
-			}
-			catch(const std::exception &)
-			{
-				dataSizeStruct = 0;
-				delete[] pData;
-				iniPreset.Init(numParameters);
-			}
+			_pMachine->GetCurrentPreset(iniPreset);
+			numParameters = iniPreset.GetNumPars();
+			dataSizeStruct = iniPreset.GetDataSize();
 
+			boost::filesystem::path thepath(Global::psycleconf().GetPresetsDir());
+			if(!boost::filesystem::exists(thepath)) {
+				boost::filesystem::create_directory(thepath);
+			}
 			CString buffer;
 			buffer = _pMachine->GetDllName();
 			buffer = Global::psycleconf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
@@ -224,7 +201,7 @@ namespace psycle { namespace host {
 				for(int i=0; preset != presets.end(); i++, preset++)
 				{
 					if(i == sel) {
-						TweakMachine(*preset);
+						_pMachine->Tweak(*preset);
 						break;
 					}
 				}
@@ -243,7 +220,8 @@ namespace psycle { namespace host {
 			for(int i=0; preset != presets.end(); i++, preset++)
 			{
 				if(i == sel) {
-					TweakMachine(*preset);
+					_pMachine->Tweak(*preset);
+					presetChanged = true;
 					break;
 				}
 			}
@@ -255,7 +233,7 @@ namespace psycle { namespace host {
 		{
 			if (presetChanged ) // Restore old preset if changed.
 			{
-				TweakMachine(iniPreset);
+				_pMachine->Tweak(iniPreset);
 			}
 			
 			CDialog::OnCancel();
@@ -286,41 +264,6 @@ namespace psycle { namespace host {
 			PresetIO::SavePresets(presetFile, presets);
 		}
 
-		void CPresetsDlg::TweakMachine(const CPreset &preset)
-		{
-			int num=preset.GetNumPars();
-			for(int i(0) ; i < num ; ++i)
-			{
-				try
-				{
-					_pMachine->SetParameter(i, preset.GetParam(i));
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-				catch(...) // reinterpret_cast sucks
-				{
-					// o_O`
-				}
-			}
-			if(preset.GetData() && _pMachine->_type == MACH_PLUGIN)
-			{
-				try
-				{
-					reinterpret_cast<Plugin *>(_pMachine)->proxy().PutData(preset.GetData()); // Internal save
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-				catch(...) // reinterpret_cast sucks
-				{
-					// o_O`
-				}
-			}
-			presetChanged = true;
-		}
 
 	}   // namespace
 }   // namespace

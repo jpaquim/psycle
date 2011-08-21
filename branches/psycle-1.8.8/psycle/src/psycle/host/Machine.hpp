@@ -5,6 +5,7 @@
 #include "Global.hpp"
 #include <psycle/helpers/dsp.hpp>
 #include "FileIO.hpp"
+#include "PresetIO.hpp"
 #include "cpu_time_clock.hpp"
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
@@ -353,6 +354,8 @@ namespace psycle
 					virtual void GetCurrentBankName(char* val) {strcpy(val,"Internal");};
 					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};
 					virtual int GetNumBanks(){ return 1;};
+					virtual void Tweak(CPreset const & preset);
+					virtual void GetCurrentPreset(CPreset & preset);
 				public:///\todo private:
 					int _numPars;
 					int _nCols;

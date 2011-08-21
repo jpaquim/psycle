@@ -204,6 +204,8 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
 			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
+			ON_COMMAND(ID_CONFIGURATION_ENABLEAUDIO, OnEnableAudio)
+			ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_ENABLEAUDIO, OnUpdateEnableAudio)
 			ON_COMMAND(ID_CPUPERFORMANCE, OnHelpPsycleenviromentinfo)
 			ON_COMMAND(ID_MIDI_MONITOR, OnMidiMonitorDlg)
 			ON_COMMAND(ID_HELP_README, OnHelpReadme)
@@ -403,6 +405,22 @@ namespace psycle { namespace host {
 			}
 		}
 
+		void CChildView::OnEnableAudio()
+		{
+			AudioDriver* pOut = Global::psycleconf()._pOutputDriver;
+			if (pOut->Enabled()) {
+				pOut->Enable(false);
+				_outputActive = false;
+			}
+			else {
+				_outputActive = pOut->Enable(true);
+			}
+		}
+		void CChildView::OnUpdateEnableAudio(CCmdUI* pCmdUI) 
+		{
+			AudioDriver* pOut = Global::psycleconf()._pOutputDriver;
+			pCmdUI->SetCheck(pOut->Enabled());
+		}
 		void CChildView::EnableSound()
 		{
 			if (_outputActive)
@@ -1285,7 +1303,7 @@ namespace psycle { namespace host {
 
 		void CChildView::ShowTransformPatternDlg(void)
 		{
-			CTransformPatternDlg dlg(this);
+			CTransformPatternDlg dlg(_pSong);
 
 			if (dlg.DoModal() == IDOK)
 			{
@@ -1922,7 +1940,7 @@ namespace psycle { namespace host {
 				DeleteMenu(hRecentMenu, 0, MF_BYPOSITION);
 			}
 			// Check for duplicates and eventually remove.
-			for(iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
+			for(iCount = GetMenuItemCount(hRecentMenu)-1; iCount >=0; iCount--)
 			{
 				nameSize = GetMenuString(hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
 				nameBuff = new char[nameSize];
@@ -1955,6 +1973,32 @@ namespace psycle { namespace host {
 				SetMenuItemInfo(hRecentMenu, iCount, true, &hTempItemInfo);
 			}
 			Global::psycleconf().AddRecentFile(fName);
+		}
+		void CChildView::RestoreRecent()
+		{
+			const std::vector<std::string> recent = Global::psycleconf().GetRecentFiles();
+			UINT ids[] =
+				{
+					ID_FILE_RECENT_01,
+					ID_FILE_RECENT_02,
+					ID_FILE_RECENT_03,
+					ID_FILE_RECENT_04
+				};
+			for(int iCount = GetMenuItemCount(hRecentMenu)-1; iCount>=0;iCount--)
+			{
+				DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
+			}
+			for(int iCount = recent.size()-1; iCount>= 0;iCount--)
+			{
+				::MENUITEMINFO hNewItemInfo;
+				hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);
+				hNewItemInfo.fMask		= MIIM_ID | MIIM_TYPE;
+				hNewItemInfo.fType		= MFT_STRING;
+				hNewItemInfo.wID		= ids[iCount];
+				hNewItemInfo.cch		= (UINT)recent[iCount].length();
+				hNewItemInfo.dwTypeData = (LPSTR)recent[iCount].c_str();
+				InsertMenuItem(hRecentMenu, 0, TRUE, &hNewItemInfo);
+			}
 		}
 
 		void CChildView::OnFileRecent_01()

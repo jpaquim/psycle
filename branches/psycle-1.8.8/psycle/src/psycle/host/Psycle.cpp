@@ -27,7 +27,7 @@
 
 namespace psycle { namespace host {
 
-		BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
+		BEGIN_MESSAGE_MAP(CPsycleApp, CWinAppEx)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 		END_MESSAGE_MAP()
 
@@ -53,7 +53,7 @@ namespace psycle { namespace host {
 			InitCtrls.dwICC = ICC_WIN95_CLASSES;
 			InitCommonControlsEx(&InitCtrls);
 
-			CWinApp::InitInstance();
+			CWinAppEx::InitInstance();
 
 			// Allow only one instance of the program
 			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
@@ -112,7 +112,7 @@ namespace psycle { namespace host {
 			// The one and only window has been initialized, so show and update it.
 			pFrame->ShowWindow(SW_MAXIMIZE);
 			
-			RestoreRecentFiles();
+			pFrame->m_wndView.RestoreRecent();
 			global_.psycleconf().RefreshAudio();
 			// center master machine. Cannot be done until here because it's when we have the window size.
 			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
@@ -145,7 +145,7 @@ namespace psycle { namespace host {
 				CNewMachine::DestroyPluginInfo();
 			}
 
-			return CWinApp::ExitInstance();
+			return CWinAppEx::ExitInstance();
 		}
 
 		BOOL CPsycleApp::PreTranslateMessage(MSG* pMsg)
@@ -154,7 +154,7 @@ namespace psycle { namespace host {
 			{
 				ProcessCmdLine(reinterpret_cast<LPSTR>(pMsg->wParam));
 			}
-			return CWinApp::PreTranslateMessage(pMsg);
+			return CWinAppEx::PreTranslateMessage(pMsg);
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ namespace psycle { namespace host {
 		// Returning false on WM_TIMER prevents the statusbar from being updated. So it's disabled for now.
 		BOOL CPsycleApp::IsIdleMessage( MSG* pMsg )
 		{
-			if (!CWinApp::IsIdleMessage( pMsg ) || 
+			if (!CWinAppEx::IsIdleMessage( pMsg ) || 
 				pMsg->message == WM_TIMER) 
 			{
 //				return FALSE;
@@ -175,7 +175,7 @@ namespace psycle { namespace host {
 
 		BOOL CPsycleApp::OnIdle(LONG lCount)
 		{
-			BOOL bMore = CWinApp::OnIdle(lCount);
+			BOOL bMore = CWinAppEx::OnIdle(lCount);
 
 			///\todo: 
 			return bMore;
@@ -199,25 +199,6 @@ namespace psycle { namespace host {
 		{
 			CAboutDlg dlg;
 			dlg.DoModal();
-		}
-
-		
-		void CPsycleApp::RestoreRecentFiles()
-		{
-			HMENU hRecentMenu = reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.hRecentMenu;
-			//At startup, this is called before the window is opened
-			if(hRecentMenu)
-			{
-				for(int iCount = 0; iCount<GetMenuItemCount(hRecentMenu);iCount++)
-				{
-					::DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
-				}
-				std::vector<std::string> recent = global_.psycleconf().GetRecentFiles();
-				for(int iCount = recent.size()-1; iCount>= 0;iCount--)
-				{
-					reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.AppendToRecent(recent[iCount]);
-				}
-			}
 		}
 
 		bool CPsycleApp::BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath)

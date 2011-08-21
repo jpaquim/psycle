@@ -22,7 +22,6 @@ namespace host {
 			CComboBox	m_preslist;
 			Machine* _pMachine;
 		protected:
-			void TweakMachine(const CPreset &preset);
 			void SavePresets();
 			void ReadPresets();
 			void UpdateList();

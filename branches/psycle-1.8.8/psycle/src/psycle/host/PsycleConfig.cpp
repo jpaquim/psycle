@@ -3,7 +3,6 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "PsycleConfig.hpp"
-#include "Psycle.hpp"
 
 #include "Registry.hpp"
 #include "WinIniFile.hpp"
@@ -1659,8 +1658,6 @@ namespace psycle { namespace host {
 			midi_.RefreshSettings();
 
 			RefreshAudio();
-
-			theApp.RestoreRecentFiles();
 		}
 		
 		void PsycleConfig::RefreshAudio()
@@ -1727,6 +1724,16 @@ namespace psycle { namespace host {
 
         void PsycleConfig::AddRecentFile(std::string const &f)
 		{
+			for(int i = recent_files_.size()-1; i >= 0; --i) 
+			{
+				if( f == recent_files_[i]) {
+					for(int j = recent_files_.size()-1; j > i; --j) 
+					{
+						recent_files_[j-1]=recent_files_[j];
+					}
+					recent_files_[recent_files_.size()-1]="";
+				}
+			}
 			for(int i = recent_files_.size()-1; i > 0; --i) 
 			{
 				recent_files_[i]=recent_files_[i-1];

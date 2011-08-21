@@ -73,7 +73,6 @@ namespace psycle
 				// else, resort try the old path used from versions 1.8.0 to 1.8.6 included
 				store.OpenGroup("configuration--1.8\\devices\\direct-sound")
 			) {
-				///\todo: fixme
 				store.ReadRaw("DeviceGuid", &device_guid_, sizeof(device_guid_));
 				unsigned int tmp = samplesPerSec();
 				store.Read("SamplesPerSec", tmp);

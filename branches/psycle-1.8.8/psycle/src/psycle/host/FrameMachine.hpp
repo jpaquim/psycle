@@ -3,6 +3,7 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include "PresetIO.hpp"
 
 namespace psycle {
 namespace host {
@@ -44,12 +45,14 @@ namespace host {
 		protected:
 			void Automate(int param, int value, bool undo);
 			void ChangeProgram(int program);
+			void LocatePresets();
 			void FillBankPopup(CMenu* pPopupMenu);
 			bool DeleteBankMenu(CMenu* popPrg);
 			void FillProgramPopup(CMenu* pPopupMenu);
 			bool DeleteProgramMenu(CMenu* popPrg);
+			void FillPopupFromPresets(CMenu* popPrg, std::list<CPreset> const & presets );
 			void FillProgramCombobox();
-
+			void FillComboboxFromPresets(CComboBox* combo, std::list<CPreset> const & presets );
 			Machine* _machine;
 			CChildView *wndView;
 			CFrameMachine** windowVar;
@@ -58,6 +61,12 @@ namespace host {
 			CComboBox comboProgram;
 			CBaseParamView* pView;
 			CParamList* pParamGui;
+			
+			std::list<CPreset> internalPresets;
+			std::list<CPreset> userPresets;
+			bool isInternal;
+			bool isUser;
+			int userSelected;
 
 		protected:
 			DECLARE_MESSAGE_MAP()

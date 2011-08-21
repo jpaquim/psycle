@@ -321,6 +321,13 @@ namespace psycle
 				class group_t
 				{
 				public:
+					enum {
+						t_command=0,
+						t_tweak,
+						t_tweakslide,
+						t_mcm,
+						num_types
+					};
 					group_t(int const & command = 0) : record_(), type_(), command_(command), from_(), to_(0xff) {}
 				public:
 					bool const inline & record()  const throw() { return record_; }
