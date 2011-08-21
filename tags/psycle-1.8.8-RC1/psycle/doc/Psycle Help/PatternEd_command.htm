@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+  <link rel="StyleSheet" href="psycle.css" type="text/css" media="screen">
+
+</head>
+
+
+
+<body>
+
+<table width="100%">
+
+  <col width="50%">
+  <tbody>
+
+    <tr>
+
+      <td><a href="PatternEd_Tweak.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+
+      <td align="right"><a href="PatternEd_Global.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+<p class="head2">Mcm Command</p>
+
+<p class="head3">For Vst's</p>
+
+The Mcm command works in a similar way
+than the Twk Command:<br>
+
+<br>
+
+If the following is a pattern Row,<br>
+
+<pre>Description: (1) (2)(3) (4)<br>Pattern Row : ---- .. .. ....<br></pre>
+
+then, on (1) , you insert the Mcm
+command.<br>
+
+To do so, you should press Mcm key.
+Check and/or change its value in the Keyboard&nbsp;Configuration
+dialog
+(Configuration-settings).<br>
+
+<br>
+
+On (2) , you define the Midi command
+number that you want to send.<br>
+
+You might need to check some MIDI
+documents and/or the Plugin's help to know what to write in here.<br>
+
+<br>
+
+On (3) , you specify the number of the
+Machine, just like you do with tweaks.<br>
+
+This
+number is the one shown in the combobox, or in the machine's dialog.<br>
+
+<br>
+
+Finally, on (4), you specify the Value
+to send for this midi command.<br>
+
+&nbsp;&nbsp; &nbsp;<br>
+
+(4) is divided in two groups of two
+values AABB. You might only need to speficy AA.<br>
+
+<br>
+
+Usually, you'll use it to send midi
+CC's. CC Command is "B0".<br>
+
+Example, this sets the machine volume to
+half of it:<br>
+
+<pre>Mcm B0 01 0740<br></pre>
+
+B0 Send a
+midi CC (Control Change) command<br>
+
+01 to the
+Generator number 1<br>
+
+07 In
+order to change it's (Channel) volume<br>
+
+40 to 40
+(in a scale of 0 to 7F, HEX)<br>
+
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <br>
+
+<p class="head3"> For Natives</p>
+
+The Mcm command can also be used for
+another purpose with Native plugins.<br>
+
+It allows to send a command to another
+channel. This way, you can workaround the limitation where you can only
+put
+one of them per channel.<br>
+
+<br>
+
+Syntax is as follows:<br>
+
+<br>
+
+If the following is a pattern Row,<br>
+
+<pre>Description: (1) (2)(3) (4)<br><br>Pattern Row : ---- .. .. ....<br><br></pre>
+
+on (1) , you insert the Mcm command.<br>
+
+on (2), insert the channel (track)
+number where the command will be sent to.<br>
+
+on (3), insert the machine number<br>
+
+on (4), insert the command that you want
+to send.<br>
+
+&nbsp;&nbsp; &nbsp;<br>
+
+Example: Send command 0C50 to channel 02
+of machine 06:<br>
+
+<br>
+<pre> mcm 02 06 0C50</pre>
+
+<span style="font-family: monospace;"></span>
+<p>
+<table width="100%">
+
+  <col width="50%">
+  <tbody>
+
+    <tr>
+
+      <td><a href="PatternEd_Tweak.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+
+      <td align="right"><a href="PatternEd_Global.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+</p>
+
+</body>
+</html>

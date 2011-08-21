@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_Main.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_Tweak.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+<p class=head2>Entering Notes</P>
+Notes can be entered via the computer keyboard or a <a href="Config_MIDI.htm">MIDI keyboard</a>.  The lower octave is respresented by Z-M (which correspond to C-B), and the higher octave is represented by Q-P (C' to E'').  The actual octave that is entered into the pattern editor is set in the <a href="Bars_Songbar.htm">Song Bar</a>, and can be increased or decreased by pressing "*" or "/" (numeric keypad) respectively.  <P>Notes in psycle look like this:
+<P>
+<center><code>C-4 01 00 0C3F<br></code>
+1 &nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; 4</center>
+<P>
+<table border="0">
+<col width="25">
+<tr valign="top"><td><b>1. </b></td><td> Note name, which can range from <code>C-0</code> to <code>B-9</code>.  The number represents the octave - <code>C-4</code> is usually the same as middle C on the piano (this can sometimes depend on the sampler/synthesiser settings).</td>
+<tr valign="top"><td><b>2.</b></td><td> Auxiliary column - This column has two uses, depending on the type of machine you use. For the Sampler Machine, it indicates which instrument is going to play.<br>
+With VST's, it can be used (it is not required) to specify the MIDI channel number (from 0 to F).
+<tr valign="top"><td><b>3.</b></td><td> Machine number (in hexadecimal).</td>
+<tr valign="top"><td><b>4.</b></td><td> Note parameters - these will depend on your machine.  For VSTs, the <code>0Cxx</code> command sets the volume at note on, where <code>xx</code> is the volume (from 00 to FF). For native machines and the internal sampler, refer to their documentation.</td>
+</table>
+<P>
+When entering notes, make sure the cursor is in the left-hand side of the track.  To edit other parts of the note entry (channel, machine number, parameter) move using the arrow keys or the mouse.
+<P>
+To enter chords, hold shift and press each note.  They will be placed on the same line, to the right of the cursor.
+<P>
+Unlike other notation systems, note durations will depend on the volume envelope settings in the machine, and on note-off commands.  Note-off commands send a "note off" signal to the machine, which often triggers the "release" part of the volume envelope (this depends on the machine itself). You can enter them using the key "1" over the "Q" key ( on a QWERTY keyboard). It should look like this:  <P>
+<center><code> off .. XX .... </code></center> <P>
+where <code>XX</code> is the machine number.<P> Omitting the machine number will send a noteoff command to the machine that was previously playing in this track. Hitting Ctrl+1 will enter one of such off commands. <P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="PatternEd_Main.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_Tweak.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>

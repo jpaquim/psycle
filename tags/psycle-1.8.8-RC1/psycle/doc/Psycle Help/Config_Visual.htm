@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="Config_Keyboard.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+<p class=head2>Visual</font></p>
+<p class=under>(Configuration > Settings... >>Visual)</p>
+<p class=head3>Pattern View</P>
+<table>
+<tr valign="top"><td>
+
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5">
+<Col width=130>
+<tr valign="top"><td><b><i>Draw Empty Data:</i></b></td><td> Whether placeholders
+ are shown where there are no numbers e.g. <code>C-5 03 06 ....</code></td>
+<tr valign="top"><td><b><i>Font Face:</i></b></td><td>Click on the button below the text to select the Font used in the Pattern Editor.</td>
+<tr valign="top"><td><b><i>Point, X, Y:</i></b></td><td>These are the size of text, and width and height of the text spaces used in the Pattern Editor.</td>
+<tr valign="top"><td><b><i>Line Numbers:</i></b></td><td>Whether line numbers are displayed at the left-hand side of the Pattern Editor.</td>
+<tr valign="top"><td><b><i>Cursor:</i></b></td><td>Whether the cursor position is highlighted on the line numbers.</td>
+<tr valign="top"><td><b><i>In Hex:</i></b></td><td>Whether the line numbers are displayed in hexadecimal notation (like the rest of Psycle).</td>
+<tr valign="top"><td><b><i>Skin:</i></b></td><td>Allows you to select the skin to be used for the "header" above each track in the Pattern Editor. </td>
+<tr valign="top"><td><b><i>Colours:</i></b></td><td>Select the colours for different parts of the Pattern Editor, which can be a gradient.  The left colour is the leftmost colour, which is interpolated left-to-right across the screen to give the colour on the right.  The parts correspond as shown below.
+</td>
+</table>
+</td>
+<td>
+<img src="config_visual_patternview.png" width="216" height="462" border="0">
+</td>
+</table>
+<P>
+<table>
+<col width="0">
+<tr valign="top"><td><b>Part:</b></td> <td><b>Colour For:</b></td>
+<tr valign="top"><td><i>Font</i></td><td>Normal Font colour</td>
+<tr valign="top"><td><i>Font Play</i></td><td>The note highlighted when playing.</td>
+<tr valign="top"><td><i>Font Sel</i></td><td>The font of a block selection.</td>
+<tr valign="top"><td><i>Font Cur</i></td><td>The font of the character under the cursor.</td>
+<tr valign="top"><td><i>Separator</i></td><td>The gap between Tracks.</td>
+<tr valign="top"><td><i>BackGnd</i></td><td>Background Fill.</td>
+<tr valign="top"><td><i>Row</i></td><td>Lines separating rows.</td>
+<tr valign="top"><td><i>Beat</i></td><td>Every x beats (x = lines per beat).</td>
+<tr valign="top"><td><i>4 Beats</i></td><td>Every 4 beats.</td>
+<tr valign="top"><td><i>Playbar</i></td><td>Highlighted bar that moves when playing.</td>
+<tr valign="top"><td><i>Selection</i></td><td>Block Selection fill</td>
+<tr valign="top"><td><i>Cursor</i></td><td>Cursor fill </td>
+</table>
+<P>
+<p class=head3>Machine View</p>
+<P>
+<table>
+<tr valign="top"><td>
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5">
+<Col width=130>
+<tr valign="top"><td><b><i>Draw Machine Indexes:</i></b></td><td>Show the machine numbers in the Machine View.</td>
+<tr valign="top"><td><b><i>Generator/Effect Font and Colour:</i></b></td><td>The Generator/Effect font (blue and green boxes respectively) can be set by clicking the button (set to "Tahoma" in the diagram), set the font size in the drop-dwon box and click on the "Generators"/"Effects" button to set the text colour.</td>
+<tr valign="top"><td><b><i>Background:</i></b></td><td>Select the background colour.</td>
+<tr valign="top"><td><b><i>Wire Width:</i></b></td><td>Set the width of the wires that connect machines.</td>
+<tr valign="top"><td><b><i>Wires:</i></b></td><td>Wire colour.</td>
+<tr valign="top"><td><b><i>Antialias Halo:</i></b></td><td>Set the thickness of the colour smoothing that surrounds the wires.</td>
+<tr valign="top"><td><b><i>Polygons:</i></b></td><td>Colour of the triangles that are in the middle of the wires.</td>
+<tr valign="top"><td><b><i>Polygon size:</i></b></td><td>Size of these triangles.</td>
+<tr valign="top"><td><b><i>Skin:</i></b></td><td>Select the machine's <a href="Config_Skins.htm">skin</a>.</td>
+<tr valign="top"><td><b><i>Background Bitmap:</i></b></td><td>Set the background image for the Machine View</td>
+</table>
+</td>
+<td>
+<img src="config_visual_machineview_color.png" width="218" height="286" border="0">
+</td>
+</table>
+<P>
+<p class=head3>VU Colors</p>
+<P>
+<img src="config_visual_VU.png" width="218" height="70" border="0">
+<P>
+Set the Background, VU bar and the OnClip (when the level gets about 0 dB) colours.  The checkbox determines whether the VU meters are drawn - if you want to save CPU usage, untick this box.
+<P>
+<p class=head3>Global Options</p>
+<P>
+<img src="config_visual_global.png" width="216" height="49" border="0">
+<P>
+Enable Graphics double buffering to have a cleaner view.  This will make more difference with a slower CPU, however it will also use CPU power.
+<P>
+<p class=head3>Theme Options</p>
+<P>
+<img src="config_visual_theme.png" width="216" height="49" border="0">
+<P>
+Load and save themes using the buttons.
+<P>
+<p class=head3>Native Gui</p>
+<P>
+<img src="config_visual_natives.png" width="440" height="96" border="0">
+<P>
+You can change the following settings for the text color, and for the background color:
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5"><Col width=130>
+<tr valign="top"><td><b><i>Title:</i></b></td><td>Colours used in the Group title.</td>
+<tr valign="top"><td><b><i>Param:</i></b></td><td>Colours used in the Parameter name line</td>
+<tr valign="top"><td><b><i>Value:</i></b></td><td>Colours used in the Value line</td>
+<tr valign="top"><td><b><i>SelParam:</i></b></td><td>Colours used for the Parameter line, when selected</td>
+<tr valign="top"><td><b><i>SelValue:</i></b></td><td>Colours used for the Parameter value, when selected.</td>
+<tr valign="top"><td><b><i>Dial Bitmap:</i></b></td><td>Bitmap for the dial - see <a href="Config_Skins.htm#knobs">Skinning</a></td>
+</table>
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="Config_Keyboard.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+</body>
+</html>

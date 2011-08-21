@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+  <link rel="StyleSheet" href="psycle.css" type="text/css" media="screen">
+</head>
+
+
+
+<body>
+
+<table width="100%">
+
+  <col width="50%">
+  <tbody>
+    <tr>
+      <td><a href="Tutorial_Sampler.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+      <td align="right"><a href="Tutorial_Tweaking.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
+
+    </tr>
+  </tbody>
+</table>
+
+
+<p class="head2">Psycle Concept No. 2</p>
+
+
+Now that you've got your sounds working, it's time to enter some notes to make a proper song.
+To open the pattern window, press F3 <b><i>OR</i></b> go to the menu <i>View &gt; Pattern Editor</i>.  A Psycle song consists of patterns which are then sequenced.  A pattern is made up of rows and tracks.
+<p>
+<img src="patterneditor.jpg" border="0" height="109" width="434">
+</p>
+<p>Each row corresponds to a time interval. With the default
+Line-per-beat setting of 4, that means that every row corresponds to a
+dem-semi-quaver, or 16th-note. However, this does not mean that a note
+is restricted to a 16th-note duration - that depends on the settings of
+the generator and Note-Off commands. It is analogous to having a piano
+score with every note and rest written out as tied 16th notes (or
+whatever time interval applies).
+</p>
+<p>
+Each track is like channels on a mixer - it allows notes from different generators to be played simultaneously.
+</p>
+<p class="head2">Entering Notes</p>
+Now you're in the pattern window, it's time to enter some notes.
+Firstly, some explanation of the format of the notes is needed. Each
+entry for a note looks like this:
+
+<p></p>
+<center>
+<code> --- .. .. .... <br>
+
+C-4 01 00 0D7F <br>
+
+A-3 .. 00 ....
+</code></center>
+
+
+<p>For now, all you really need to know about is the note name (e.g.
+C-4) and the generator number (3rd column) which are pretty much self
+explanatory once you know where they are. Now, to enter some notes, go
+to a track and click on the part of a note entry position where the
+note-name goes. Now, press Q, down arrow, W, down arrow, E, down arrow.
+You should see several notes there. Notice that the machine number is automatically entered by Psycle. It uses the generator selected in the machine combobox (in the toolbar).</p>
+<p>If you're using samples, the only difference in playing notes is
+that the sample number (which is the other combobox in the toolbar) is shown in the second column e.g.</p>
+<p></p>
+<center>
+<code> C-4 02 01 .... <br>
+
+</code></center>
+
+
+<p>
+where the sample number is 02 and the generator number is 01.</p>
+<br>
+A special key to be aware of is the "Note Off" key, which sends a
+"noteoff" message to the specified generator, allowing you to decide
+when to stop a playing note. Press the key "1" above the QWERTY keys.
+You would see a like like this:<br>
+
+<center>
+<code>
+off .. 00 .... </code></center>
+<p>Note: You might need to change the Envelope values ( amp envelope,
+VCA envelope...)&nbsp;of the machine to get the duration that you
+search for.</p>
+<p class=head2>The sequence: How to play more patterns</P>
+<p>
+
+</p>
+<p>
+<table width="100%">
+
+  <col width="50%">
+  <tbody>
+    <tr>
+      <td><a href="Tutorial_Sampler.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+      <td align="right"><a href="Tutorial_Tweaking.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
+
+    </tr>
+  </tbody>
+</table>
+
+
+</p>
+</body>
+</html>
