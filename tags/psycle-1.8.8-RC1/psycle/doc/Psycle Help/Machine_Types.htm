@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="Machine_Add.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+<p class=head2>Machine Types</p>
+Machines are divided into two types: <b><i>Generators</i></b> (coloured blue in Psycle's default skin) and <b><i>Effects</i></b> (green).  Generators produce sounds, and Effects modify those sounds. To create audible sound, your generator must be <a href="Machine_Wires.htm">connected</a> to the <a href="Machine_Master.htm">Master Machine</a>, either directly or through some Effects.<P>
+<center><img src="machine.png"border="0">
+</center><p>
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5">
+<Col width=120>
+<tr><td valign="top">
+<i><b>Mute:</b></i></td><td> Stops all sound output from the machine.</td>
+<tr><td valign="top"><i><b>Solo:</b></i></td><td> Allows sound output only from the particular Generator.</td>
+<tr><td valign="top"><i><b>Generator no.:</b></i></td><td> The number of the generator that is used for tweaking, notes etc.  Generator numbers start at 00 and can go up to 3F (in other words you can have a maximum of 64 generators).</td>
+<tr><td valign="top"><i><b>Machine name:</b></i></td><td> The name of the machine - this by default is the name of the plugin e.g. Auguru Synth 2f, but it can be changed by right-clicking the machine and entering a new name.</td>
+<tr><td valign="top"><i><b>Panning:</b></i></td><td> Modifies the left or right bias of the machine.</td>
+<tr><td valign="top"><i><b>VU Meter:</b></i></td><td> Shows the volume of the machine during playback (and rendering).</td>
+<tr><td valign="top"><i><b>Bypass:</b></i></td><td> Bypasses (skips) the particular machine during playback (and rendering).</td>
+<tr><td valign="top"><i><b>Effect no.:</b></i></td><td> The number of the effect - used for tweaking.  Effect numbers start at 40 and can go up to 7F (maximum of 64 Effects).</td>
+</table>
+<P>
+If Psycle cannot find the correct plugin when loading a song, a <a href="Internal_Dummy.htm">dummy plugin</a> is inserted in its place, which is denoted by an X in front of the original plugin's name.
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td></td><td align="right"><a href="Machine_Add.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+</table>
+
+</font>
+</body>
+</html>

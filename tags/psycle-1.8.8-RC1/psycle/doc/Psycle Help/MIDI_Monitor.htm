@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+</head>
+<body>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_OtherFeat.htm">Previous</a></td><td align="right"><a href="MIDI_Tips.htm">Next</a></td>
+</table>
+
+<p class=head2>The Midi Monitor</b></P>
+
+MIDI implementations of v2.2b or better provide a MIDI Monitor Dialog to allow you to see the current state of Psycle's MIDI interface. The dialog is shown below with a short explanation of all the values shown: <P>
+
+<table border="0" bordercolor="0" cellspacing="0" cellpadding="5">
+<Col width=120>
+<tr valign="top"><td><b><i>Buffer Used:</i></b></td><td>The amount of MIDI events currently waiting in the internal MIDI buffer.</td>
+
+<tr valign="top"><td><b><i>Buffer Capacity:</i></b></td><td>The maximum number of MIDI events the internal MIDI buffer can hold (currently fixed at 1024).</td>
+
+<tr valign="top"><td><b><i>Events Lost:</i></b></td><td>The number of MIDI events purged (not played) from the internal MIDI buffer. This usually happens when there is a "drop-out" in the audio pipe-line and the MIDI interface decides that the events should be disguarded rather than played (because they probably have been delayed too much).</td>
+
+<tr valign="top"><td><b><i>MIDI Headroom:</i></b></td><td>How much "MIDI slack" is being allowed to account for delayed MIDI messages getting to Psycle (set in the configuration dialog).</td>
+
+<tr valign="top"><td><b><i>Internal MIDI Version:</i></b></td><td>The descriptor of the currently running Psycle MIDI interface code.</td>
+
+<tr valign="top"><td><i><b>Sync Event Latency:</b></i></td><td>The amount of milliseconds the MIDI Sync Start message was delayed.</td>
+
+<tr valign="top"><td><b><i>Sync Adjust:</i></b></td><td>The amount of samples Psycle has accounted for to bring its audio engine in line with the incomming MIDI data. A negative value here means that some notes may have been purged from the MIDI buffer to regain sync (not too good). A positive value here means that Psycle had time to wait until it needed to start playing the received MIDI data (good).</td>
+
+<tr valign="top"><td><b><i>Sync Offset:</i></b></td><td>The current amount of milliseconds that the Psycle audio engine has "lagged" behind the incomming MIDI. This typically should start around 0 and then being greater (negative) if the audio engine "drops-out" at any point. This value is used internally to keep the audio engine in sync with an external MIDI sequencer.</td>
+
+<tr valign="top"><td><b><i>Psycle MIDI active?</i></b></td><td>Is Psycle using the MIDI input?</td>
+
+<tr valign="top"><td><b><i>Receiving MIDI data?</i></b></td><td>Is Psycle receiving any MIDI data, either on the main device or the sync device?</td>
+
+<tr valign="top"><td><b><i>Syncronising:</i></b></td><td>Is Psycle currently syncronising the audio engine with the incomming MIDI?</td>
+
+<tr valign="top"><td><b><i>Resync Triggered?</i></b></td><td>Has a resync been triggered because the audio engine has been restarted? (e.g. when a new plug-in is created)</td>
+
+<tr valign="top"><td><b><i>Emulated Track Tick?</i></b></td><td>Has Psycle received a tracker tick? (CC 123, DATA 1-127 - simulates a tracker line change)</td>
+
+<tr valign="top"><td><b><i>MIDI Sync Start/Clock/Stop:</i></b></td><td>Has Psycle received one of these MIDI sync messages?</td>
+
+<tr valign="top"><td><b><i>Emualted Sync Start/Clock/Stop:</i></b></td><td>Has Psycle received one of the emulated sync messages? (CC 121, 122 & 124)</td>
+
+<tr valign="top"><td><b><i>Ch 1-16:</i></b></td><td>Shows the data received for each MIDI channel (included ALL types of data).</td>
+
+</table>
+<P>
+(The channel-mapping table is self-explanatory)
+<P>
+<table width="100%">
+<col width="50%">
+<tr><td><a href="MIDI_OtherFeat.htm">Previous</a></td><td align="right"><a href="MIDI_Tips.htm">Next</a></td>
+</table>
+
+</body>
+</html>
