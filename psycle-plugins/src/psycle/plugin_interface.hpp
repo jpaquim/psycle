@@ -210,7 +210,7 @@ class CMachineInterface {
 		/// unused vtable slot kept for binary compatibility with old closed-source plugins
 		virtual bool unused1(int /*track*/) const { return false; }
 
-		///\todo: called by the host to send a midi event (mcm) to the plugin.
+		///called by the host to send a midi event (mcm) to the plugin.
 		virtual void MidiEvent(int /*channel*/, int /*midievent*/, int /*value*/) {}
 
 		/// unused vtable slot kept for binary compatibility with old closed-source plugins
@@ -220,7 +220,7 @@ class CMachineInterface {
 		/// return false to tell the host to show the numerical value. Return true and fill txt with
 		/// some text to show that text to the user.
 		virtual bool DescribeValue(char * /*txt*/, int const /*param*/, int const /*value*/) { return false; }
-		///\todo: called by the host to send a control event or ask for information. See HostEvent codes.
+		///called by the host to send a control event or ask for information. See HostEvent codes.
 		virtual bool HostEvent(int const /*eventNr*/, int const /*val1*/, float const /*val2*/) { return false; }
 		/// Called by the host when there is some data to play. Only notes and pattern commands will be informed
 		/// this way. Tweaks call ParameterTweak
