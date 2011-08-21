@@ -11,8 +11,6 @@ namespace psycle { namespace host {
 		// Construction
 		public:
 			CWaveEdMixDialog(CWnd* pParent = 0);
-		// Dialog Data
-			//{{AFX_DATA(CWaveEdMixDialog)
 			enum { IDD = IDD_WAVED_MIX };
 			CSliderCtrl		m_srcVol;
 			CSliderCtrl		m_destVol;
@@ -22,14 +20,8 @@ namespace psycle { namespace host {
 			CEdit			m_fadeOutTime;
 			CStatic			m_destVolText;
 			CStatic			m_srcVolText;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWaveEdMixDialog)
-			protected:
+		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
 		public:
 			float srcVol;
 			float destVol;
@@ -38,22 +30,16 @@ namespace psycle { namespace host {
 			float fadeInTime;
 			float fadeOutTime;
 		protected:
-			// Generated message map functions
-			//{{AFX_MSG(CWaveEdMixDialog)
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
 			virtual void OnCancel();
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
 		public:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnCustomDrawDestSlider(NMHDR *pNMHDR, LRESULT *pResult);
 			afx_msg void OnCustomDrawSrcSlider(NMHDR *pNMHDR, LRESULT *pResult);
 			afx_msg void OnBnClickedFadeoutcheck();
 			afx_msg void OnBnClickedFadeincheck();
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
 }   // namespace
 }   // namespace

@@ -1,17 +1,11 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include "XMInstrument.hpp"
 
-#include <psycle/core/xminstrument.h>
+namespace psycle { namespace host {
 
-#include <afxwin.h>
-#include <afxcmn.h>
-
-namespace psycle {
-namespace core {
-	class XMSampler;
-}
-namespace host {
+class XMSampler;
 
 class XMSamplerUIInst : public CPropertyPage
 {
@@ -30,7 +24,6 @@ public:
 
 	protected:
 		DECLARE_MESSAGE_MAP()
-	public:
 		afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 		afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
 		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
@@ -50,7 +43,7 @@ public:
 		/**  */
 		const int GetEnvelopePointIndexAtPoint(const int x,const int y)
 		{
-			int const _points = m_pEnvelope->NumOfPoints();
+			std::size_t const _points = m_pEnvelope->NumOfPoints();
 			for(unsigned int i = 0;i < _points ;i++)
 			{
 				CPoint _pt_env;
@@ -64,7 +57,7 @@ public:
 				}
 			}
 
-			return _points; // return == _points -> Point not found.
+			return (int)_points; // return == _points -> Point not found.
 		}
 
 		XMInstrument::Envelope* m_pEnvelope;
@@ -103,7 +96,6 @@ public:
 
 	protected:
 		DECLARE_MESSAGE_MAP()
-	public:
 		afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 		afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
 		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
@@ -151,15 +143,15 @@ public:
 	/// Dialog ID
 	enum { IDD = IDD_XMSAMPLERUIINST };
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
-
-	DECLARE_MESSAGE_MAP()
-
-public:
 	void pMachine(XMSampler * const p){m_pMachine = p;};
 	XMSampler * const pMachine(){return m_pMachine;};
 
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
+
+
+protected:
+	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnNMCustomdrawVolCutoffPan(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomdrawSwing1Glide(NMHDR *pNMHDR, LRESULT *pResult);
@@ -250,5 +242,4 @@ protected:
 
 };
 
-}   // namespace
-}   // namespace
+}}

@@ -3,70 +3,46 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "DSoundConfig.hpp"
-
-#if defined DIVERSALIS__COMPILER__MICROSOFT
-	#pragma warning(push)
-	#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-#endif
-
-	#include <mmsystem.h>
-	#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-		#pragma comment(lib, "winmm")
-	#endif
-
-#if defined DIVERSALIS__COMPILER__MICROSOFT
-	#pragma warning(pop)
-#endif
-
-#include <dsound.h>
-#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-	#pragma comment(lib, "dsound")
-#endif
-
-#include <iomanip>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
-
+#include "DirectSound.hpp"
 namespace psycle { namespace host {
 
 		CDSoundConfig::CDSoundConfig(CWnd* pParent)
 		:
 			CDialog(CDSoundConfig::IDD, pParent),
-			device_guid(), // DSDEVID_DefaultPlayback <-- unresolved external symbol
-			exclusive(),
-			dither(),
+			device_idx(0),
 			sample_rate(44100),
 			buffer_count(4),
-			buffer_size(4096)
+			buffer_samples(512),
+			bit_depth(16),
+			dither(false)
 		{
 		}
 
 		void CDSoundConfig::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_EXCLUSIVE, m_exclusiveCheck);
-			DDX_Control(pDX, IDC_DSOUND_LATENCY, m_latency);
-			DDX_Control(pDX, IDC_DSOUND_BUFNUM_SPIN, m_numBuffersSpin);
-			DDX_Control(pDX, IDC_DSOUND_BUFSIZE_SPIN, m_bufferSizeSpin);
-			DDX_Control(pDX, IDC_DSOUND_DITHER, m_ditherCheck);
-			DDX_Control(pDX, IDC_DSOUND_BUFSIZE_EDIT, m_bufferSizeEdit);
-			DDX_Control(pDX, IDC_DSOUND_BUFNUM_EDIT, m_numBuffersEdit);
-			DDX_Control(pDX, IDC_DSOUND_SAMPLERATE_COMBO, m_sampleRateCombo);
 			DDX_Control(pDX, IDC_DSOUND_DEVICE, m_deviceComboBox);
+			DDX_CBIndex(pDX, IDC_DSOUND_DEVICE, device_idx);
+			DDX_Control(pDX, IDC_DSOUND_SAMPLERATE_COMBO, m_sampleRateCombo);
+			DDX_Control(pDX, IDC_DSOUND_BITDEPTH, m_bitDepthCombo);
+			DDX_Control(pDX, IDC_DSOUND_BUFNUM_EDIT, m_numBuffersEdit);
+			DDX_Control(pDX, IDC_DSOUND_BUFNUM_SPIN, m_numBuffersSpin);
+			DDX_Text(pDX, IDC_DSOUND_BUFNUM_EDIT, buffer_count);
+			DDV_MinMaxInt(pDX, buffer_count, buffer_count_min, buffer_count_max);
+			DDX_Control(pDX, IDC_DSOUND_BUFSIZE_EDIT, m_bufferSizeEdit);
+			DDX_Control(pDX, IDC_DSOUND_BUFSIZE_SPIN, m_bufferSizeSpin);
+			DDX_Text(pDX, IDC_DSOUND_BUFSIZE_EDIT, buffer_samples);
+			DDV_MinMaxInt(pDX, buffer_samples, buffer_size_min, buffer_size_max);
+			DDX_Control(pDX, IDC_DSOUND_LATENCY, m_latency);
 		}
 
 		BEGIN_MESSAGE_MAP(CDSoundConfig, CDialog)
+			ON_CBN_SELCHANGE(IDC_DSOUND_DEVICE, OnSelchangeDevice)
 			ON_CBN_SELENDOK(IDC_DSOUND_SAMPLERATE_COMBO, OnSelendokSamplerate)
+			ON_CBN_SELENDOK(IDC_DSOUND_BITDEPTH, OnSelendokBitDepth)
 			ON_EN_CHANGE(IDC_DSOUND_BUFNUM_EDIT, OnChangeBufnumEdit)
 			ON_EN_CHANGE(IDC_DSOUND_BUFSIZE_EDIT, OnChangeBufsizeEdit)
-			ON_CBN_SELCHANGE(IDC_DSOUND_DEVICE, OnSelchangeDevice)
 			ON_WM_DESTROY()
-			ON_BN_CLICKED(IDC_EXCLUSIVE, OnExclusive)
-			ON_BN_CLICKED(IDC_DSOUND_DITHER, OnDither)
 		END_MESSAGE_MAP()
 
 		BOOL CDSoundConfig::OnInitDialog() 
@@ -74,40 +50,24 @@ namespace psycle { namespace host {
 			CDialog::OnInitDialog();
 			// displays the DirectSound device in the combo box
 			{
-				class callback
+				std::vector<std::string> ports;
+				directsound->RefreshAvailablePorts();
+				directsound->GetPlaybackPorts(ports);
+				for(int i=0 ; i < ports.size() ; ++i)
 				{
-					public:
-						BOOL static CALLBACK DirectSoundEnumerateCallback(GUID * device_guid, char const * description, char const * name, void * context)
-						{
-							CDSoundConfig & enclosing(*reinterpret_cast<CDSoundConfig*>(context));
-							// add the entry to the combo box, making a copy of the guid and the description
-							name; // unused
-							enclosing.m_deviceComboBox.AddString(description);
-							enclosing.m_deviceComboBox.SetItemData
-								(
-									enclosing.m_deviceComboBox.FindString(0, description),
-									reinterpret_cast<DWORD_PTR>(device_guid ? new GUID(*device_guid) : new GUID(GUID())) // DSDEVID_DefaultPlayback <-- unresolved external symbol
-								);
-							return TRUE;
-						}
-				};
-				/*directsound*/::DirectSoundEnumerate(callback::DirectSoundEnumerateCallback, this);
-				m_deviceComboBox.SetCurSel(0);
-				for(int i(m_deviceComboBox.GetCount() - 1) ; i >= 0 ; --i)
-				{
-					if(this->device_guid == *reinterpret_cast<GUID const * const>(m_deviceComboBox.GetItemData(i)))
-					{
-						m_deviceComboBox.SetCurSel(i);
-						#if defined NDEBUG
-							break;
-						#endif
-					}
+					m_deviceComboBox.AddString(ports[i].c_str());
 				}
+				m_deviceComboBox.SetCurSel(device_idx);
 			}
-			// displays the driver options (boolean values) in the check boxes
+			// bit depth
 			{
-				m_ditherCheck.SetCheck(dither);
-				m_exclusiveCheck.SetCheck(exclusive);
+				switch(bit_depth) {
+				case 16: if (dither) m_bitDepthCombo.SetCurSel(1);
+						 else  m_bitDepthCombo.SetCurSel(0);
+						 break;
+				case 24: m_bitDepthCombo.SetCurSel(2); break;
+				case 32: m_bitDepthCombo.SetCurSel(3); break;
+				}
 			}
 			// displays the sample rate
 			{
@@ -126,21 +86,17 @@ namespace psycle { namespace host {
 			// displays the buffer size
 			{
 				CString str;
-				str.Format("%d", buffer_size);
+				str.Format("%d", buffer_samples);
 				m_bufferSizeEdit.SetWindowText(str);
 				m_bufferSizeSpin.SetRange32(buffer_size_min, buffer_size_max);
 				// sets the spin button increments
 				{
 					UDACCEL accel;
 					accel.nSec = 0;
-					accel.nInc = 512;
+					accel.nInc = 128;
 					m_bufferSizeSpin.SetAccel(1, &accel);
 				}
 			}
-			m_numBuffersEdit.SetReadOnly(exclusive);
-			m_numBuffersSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
-			m_bufferSizeEdit.SetReadOnly(exclusive);
-			m_bufferSizeSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
 
 			return TRUE;
 			// return TRUE unless you set the focus to a control
@@ -152,7 +108,7 @@ namespace psycle { namespace host {
 			if(!m_deviceComboBox.GetCount())
 			{
 				// no DirectSound driver ...
-				::MessageBox(0, "no DirectSound driver", "Warning", MB_ICONWARNING);
+				MessageBox("no DirectSound driver", "Warning", MB_ICONWARNING);
 				// we cancel instead.
 				CDialog::OnCancel();
 				return;
@@ -164,11 +120,7 @@ namespace psycle { namespace host {
 		{
 			// computes the latency
 			float latency_time_seconds;
-			{
-				int const latency_bytes(buffer_size * buffer_count);
-				int const latency_samples(latency_bytes / 4); ///\todo hardcoded to stereo 16-bit
-				latency_time_seconds = float(latency_samples) / sample_rate;
-			}
+			latency_time_seconds = float(buffer_samples * buffer_count) / sample_rate;
 			// displays the latency in the gui
 			{
 				std::ostringstream s;
@@ -181,21 +133,7 @@ namespace psycle { namespace host {
 
 		void CDSoundConfig::OnSelchangeDevice() 
 		{
-			// read the selected device guid from the gui
-			device_guid = *reinterpret_cast<GUID const *>(m_deviceComboBox.GetItemData(m_deviceComboBox.GetCurSel()));
-		}
-		void CDSoundConfig::OnExclusive()
-		{
-			exclusive = m_exclusiveCheck.GetState() & 1;
-			m_numBuffersEdit.SetReadOnly(exclusive);
-			m_numBuffersSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
-			m_bufferSizeEdit.SetReadOnly(exclusive);
-			m_bufferSizeSpin.ShowWindow(exclusive?SW_HIDE:SW_SHOW);
-		}
-
-		void CDSoundConfig::OnDither()
-		{
-			dither = m_ditherCheck.GetState() & 1;
+			device_idx = m_deviceComboBox.GetCurSel();
 		}
 
 		void CDSoundConfig::OnChangeBufsizeEdit() 
@@ -204,7 +142,7 @@ namespace psycle { namespace host {
 			// read the buffer size from the gui
 			CString s;
 			m_bufferSizeEdit.GetWindowText(s);
-			buffer_size = std::atoi(s);
+			buffer_samples = std::atoi(s);
 			RecalcLatency();
 		}
 
@@ -227,10 +165,22 @@ namespace psycle { namespace host {
 			sample_rate = std::atoi(s);
 			RecalcLatency();
 		}
+		void CDSoundConfig::OnSelendokBitDepth()
+		{
+			if(!IsWindow(m_bitDepthCombo.GetSafeHwnd())) return;
+
+			int pos = m_bitDepthCombo.GetCurSel();
+			switch(pos) {
+			case 0: bit_depth = 16; dither=false; break;
+			case 1: bit_depth = 16; dither=true; break;
+			case 2: bit_depth = 24; dither=false; break;
+			case 3:  bit_depth = 32; dither=false; break;
+			}
+		}
+
 
 		void CDSoundConfig::OnDestroy() 
 		{
-			for(int i(m_deviceComboBox.GetCount()) ; i > 0 ; delete reinterpret_cast<void*>(m_deviceComboBox.GetItemData(--i))); // must hard cast due to mfc's design
 			CDialog::OnDestroy();
 		}
 

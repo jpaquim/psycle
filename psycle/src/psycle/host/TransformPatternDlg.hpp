@@ -1,28 +1,23 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include "ChildView.hpp"
 
-#include <psycle/core/song.h>
+#include "Song.hpp"
 
+// CTransformPatternDlg dialog
 namespace psycle { namespace host {
+		class Song;
 
-		/// CTransformPatternDlg dialog
 		class CTransformPatternDlg : public CDialog
 		{
 			DECLARE_DYNAMIC(CTransformPatternDlg)
 
 		private:
-			CChildView* _pChildView;
-			PatternView* pattern_view_;
-
+			Song* pSong;
 		public:
-			CTransformPatternDlg(CChildView* pChildView, CWnd* pParent = NULL);   // standard constructor
-			CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent = NULL);
+			CTransformPatternDlg(Song* _pSong, CWnd* pParent = NULL);   // standard constructor
 			virtual ~CTransformPatternDlg();
 
-		// Dialog Data
-			//{{AFX_DATA(CTransformPatternDlg)
 			enum { IDD = IDD_TRANSFORMPATTERN };			
 			CEdit	m_filternote;
 			CEdit	m_filterins;
@@ -36,27 +31,15 @@ namespace psycle { namespace host {
 			CButton	m_applytosong;
 			CButton	m_applytopattern;
 			CButton	m_applytoblock;
-			//}}AFX_DATA
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CTransformPatternDlg)
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-			//}}AFX_VIRTUAL
-		// Implementation
-		protected:
-		// Generated message map functions
-		//{{AFX_MSG(CTransformPatternDlg)
 			virtual BOOL OnInitDialog();
-		//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
+		protected:
 		public:
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnBnClickedApply();
 
 		};
 
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-	}   // namespace
+}   // namespace
 }   // namespace

@@ -3,152 +3,186 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "OutputDlg.hpp"
+#include "PsycleConfig.hpp"
 
 #include "MidiInput.hpp"
-#include "Configuration.hpp"
-
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "AudioDriver.hpp"
+#include "Player.hpp"
 
 namespace psycle { namespace host {
 
 		IMPLEMENT_DYNCREATE(COutputDlg, CPropertyPage)
 
-		COutputDlg::COutputDlg()
-		:
-			CPropertyPage(IDD),
-			_numDrivers(0),
-			m_driverIndex(0),
-			_numMidiDrivers(0),
-			m_midiDriverIndex(0),
-			m_syncDriverIndex(0),
-			m_midiHeadroom(0),
-			m_ppDrivers(0)
+		COutputDlg::COutputDlg() :CPropertyPage(IDD)
+			, m_driverIndex(0)
+			, m_midiDriverIndex(0)
+			, m_syncDriverIndex(0)
+			, m_oldDriverIndex(0)
+			, m_oldMidiDriverIndex(0)
+			, m_oldSyncDriverIndex(0)
+			, m_midiHeadroom(0)
 		{
 		}
 
 		void COutputDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_MIDI_DRIVER, m_midiDriverComboBox);
 			DDX_Control(pDX, IDC_DRIVER, m_driverComboBox);
+			DDX_Control(pDX, IDC_MIDI_DRIVER, m_midiDriverComboBox);
+			DDX_Control(pDX, IDC_MIDI_KEYBOARD, m_inmediate);
+			DDX_Control(pDX, IDC_MIDI_SEQUENCED, m_sequenced);
 			DDX_Control(pDX, IDC_SYNC_DRIVER, m_midiSyncComboBox);
 			DDX_Control(pDX, IDC_MIDI_HEADROOM, m_midiHeadroomEdit);
 			DDX_Control(pDX, IDC_MIDI_HEADROOM_SPIN, m_midiHeadroomSpin);
-			DDX_Control(pDX, IDC_MIDI_MACHINE_VIEW_SEQ_MODE, m_midiMachineViewSeqMode);
 			DDX_Text(pDX, IDC_MIDI_HEADROOM, m_midiHeadroom);
 			DDV_MinMaxInt(pDX, m_midiHeadroom, MIN_HEADROOM, MAX_HEADROOM);
 		}
 
 		BEGIN_MESSAGE_MAP(COutputDlg, CDialog)
 			ON_BN_CLICKED(IDC_CONFIG, OnConfig)
+			ON_BN_CLICKED(IDC_MIDI_KEYBOARD, OnEnableInmediate)
+			ON_BN_CLICKED(IDC_MIDI_SEQUENCED, OnEnableSequenced)
+			ON_CBN_SELCHANGE(IDC_DRIVER, OnSelChangeOutput)
+			ON_CBN_SELCHANGE(IDC_DRIVER, OnSelChangeMidi)
+			ON_CBN_SELCHANGE(IDC_DRIVER, OnSelChangeSync)
 		END_MESSAGE_MAP()
 
 		BOOL COutputDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
+			PsycleConfig& conf = Global::psycleconf();
+			m_driverIndex = conf.outputDriverIndex();
+			m_midiDriverIndex = conf.midiDriverIndex();
+			m_syncDriverIndex = conf.syncDriverIndex();
 
-			for (int i=0; i < _numDrivers; i++)
+			for (int i=0; i < conf.numOutputDrivers(); i++)
 			{
-				std::string name = m_ppDrivers[i]->info().header();
-				m_driverComboBox.AddString(name.c_str());
-			}
-
-			if (m_driverIndex >= _numDrivers)
-			{
-				m_driverIndex = 0;
+				const char* psDesc = conf.audioSettings[i]->GetInfo()._psName;
+				m_driverComboBox.AddString(psDesc);
 			}
 			m_driverComboBox.SetCurSel(m_driverIndex);
 			m_oldDriverIndex = m_driverIndex;
 
-			_numMidiDrivers = CMidiInput::Instance()->PopulateListbox( &m_midiDriverComboBox, false );
-			if (m_midiDriverIndex > _numMidiDrivers)
-			{
-				m_midiDriverIndex = 0;
-			}
-
+			int _numMidiDrivers = CMidiInput::GetNumDevices();
+			PopulateListbox( &m_midiDriverComboBox, _numMidiDrivers, false );
 			m_midiDriverComboBox.SetCurSel(m_midiDriverIndex);
 			m_oldMidiDriverIndex = m_midiDriverIndex;
 
-			_numMidiDrivers = CMidiInput::Instance()->PopulateListbox( &m_midiSyncComboBox , true );
-			if (m_syncDriverIndex > _numMidiDrivers)
-			{
-				m_syncDriverIndex = 0;
-			}
-
+			PopulateListbox( &m_midiSyncComboBox, _numMidiDrivers, true );
 			m_midiSyncComboBox.SetCurSel(m_syncDriverIndex);
 			m_oldSyncDriverIndex = m_syncDriverIndex;
+
 
 			// setup spinner
 			CString str;
 			str.Format("%d", m_midiHeadroom);
 			m_midiHeadroomEdit.SetWindowText(str);
 			m_midiHeadroomSpin.SetRange32(MIN_HEADROOM, MAX_HEADROOM);
-
 			UDACCEL acc;
 			acc.nSec = 0;
 			acc.nInc = 50;
 			m_midiHeadroomSpin.SetAccel(1, &acc);
 
-			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
+			if(Global::psycleconf().midi()._midiMachineViewSeqMode) {
+				m_sequenced.SetCheck(TRUE);
+				EnableClockOptions();
+			}
+			else {
+				m_inmediate.SetCheck(TRUE);
+				DisableClockOptions();
+			}
 
 			return TRUE;
 		}
 
-		void COutputDlg::OnOK() 
+		void COutputDlg::OnSelChangeOutput()
 		{
 			m_driverIndex = m_driverComboBox.GetCurSel();
-			if (m_driverIndex != m_oldDriverIndex)
-			{
-				m_ppDrivers[m_oldDriverIndex]->set_started(false);
-			}
-			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
-			if( m_oldMidiDriverIndex != m_midiDriverIndex )
-			{
-				CMidiInput::Instance()->Close();
-				CMidiInput::Instance()->SetDeviceId( DRIVER_MIDI, m_midiDriverIndex-1 );
-			}
-			m_syncDriverIndex = m_midiSyncComboBox.GetCurSel();
-			if( m_oldSyncDriverIndex != m_syncDriverIndex )
-			{
-				CMidiInput::Instance()->Close();
-				CMidiInput::Instance()->SetDeviceId( DRIVER_SYNC, m_syncDriverIndex-1 );
-			}
-			CMidiInput::Instance()->GetConfigPtr()->midiHeadroom = m_midiHeadroom;
+			Global::psycleconf().OutputChanged(m_driverIndex);
+		}
 
-			Global::pConfig->_midiMachineViewSeqMode = m_midiMachineViewSeqMode.GetCheck();
+		void COutputDlg::OnSelChangeMidi()
+		{
+			m_midiDriverIndex = m_driverComboBox.GetCurSel();
+			Global::psycleconf().MidiChanged(m_midiDriverIndex);
+		}
+
+		void COutputDlg::OnSelChangeSync()
+		{
+			m_syncDriverIndex = m_driverComboBox.GetCurSel();
+			Global::psycleconf().SyncChanged(m_syncDriverIndex);
+		}
+
+		void COutputDlg::OnOK() 
+		{
+			PsycleConfig::Midi& config = Global::psycleconf().midi();
+			config._midiHeadroom = m_midiHeadroom;
+			config._midiMachineViewSeqMode = m_sequenced.GetCheck();
 			CDialog::OnOK();
 		}
 
 		void COutputDlg::OnCancel() 
 		{
-			m_driverIndex = m_oldDriverIndex;
-			m_midiDriverIndex = m_oldMidiDriverIndex;
-			m_midiMachineViewSeqMode.SetCheck(Global::pConfig->_midiMachineViewSeqMode);
-			CDialog::OnCancel();
+			PsycleConfig& config = Global::psycleconf();
+			if( m_oldDriverIndex != m_driverIndex )
+			{
+				config.OutputChanged(m_oldDriverIndex);
+			}
+			if( m_oldMidiDriverIndex != m_midiDriverIndex )
+			{
+				config.MidiChanged(m_oldMidiDriverIndex);
+			}
+			if( m_oldSyncDriverIndex != m_syncDriverIndex )
+			{
+				config.SyncChanged(m_oldSyncDriverIndex);
+			}
 		}
 
 		void COutputDlg::OnConfig() 
 		{
-
-			int index = m_driverComboBox.GetCurSel();
-			Player &player = Player::singleton();
-			if (player.driver().info().name() != m_ppDrivers[index]->info().name()) {
-				player.driver().set_opened(false);
-				m_ppDrivers[index]->Configure();
-				player.setDriver(*m_ppDrivers[index]);
-			}
-			else {
-				m_ppDrivers[index]->Configure();
-			}
-			player.samples_per_second(m_ppDrivers[index]->playbackSettings().samplesPerSec());
+			Global::psycleconf()._pOutputDriver->Configure();
+			Global::pPlayer->SetSampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
+		}
+		void COutputDlg::OnEnableInmediate()
+		{
+			DisableClockOptions();
+		}
+		void COutputDlg::OnEnableSequenced()
+		{
+			EnableClockOptions();
+		}
+		void COutputDlg::EnableClockOptions()
+		{
+			((CButton*)GetDlgItem(IDC_TEXT_CLOCKDEVICE))->EnableWindow(TRUE);
+			((CButton*)GetDlgItem(IDC_TEXT_HEADROOM))->EnableWindow(TRUE);
+			m_midiSyncComboBox.EnableWindow(TRUE);
+			m_midiHeadroomEdit.EnableWindow(TRUE);
+			m_midiHeadroomSpin.EnableWindow(TRUE);
+		}
+		void COutputDlg::DisableClockOptions()
+		{
+			((CButton*)GetDlgItem(IDC_TEXT_CLOCKDEVICE))->EnableWindow(FALSE);
+			((CButton*)GetDlgItem(IDC_TEXT_HEADROOM))->EnableWindow(FALSE);
+			m_midiSyncComboBox.EnableWindow(FALSE);
+			m_midiHeadroomEdit.EnableWindow(FALSE);
+			m_midiHeadroomSpin.EnableWindow(FALSE);
 		}
 
+		void COutputDlg::PopulateListbox( CComboBox * listbox, int numDevs, bool issync )
+		{
+			// clear listbox
+			listbox->ResetContent();
+
+			// always add the null dev
+			listbox->AddString( issync?"Same as MIDI Input Device":"None" );
+
+			// add each to the listbox
+			for( int idx = 0; idx < numDevs; idx++ )
+			{
+				std::string desc;
+				CMidiInput::GetDeviceDesc(idx, desc );
+				listbox->AddString( desc.c_str() );
+			}
+		}
 	}   // namespace
 }   // namespace

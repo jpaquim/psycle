@@ -6,6 +6,8 @@
 
 namespace psycle { namespace host {
 
+		class Song;
+
 		/// wave file dialog window.
 		class CWavFileDlg : public CFileDialog
 		{
@@ -23,13 +25,7 @@ namespace psycle { namespace host {
 
 			virtual void OnFileNameChange();
 		protected:
-			//{{AFX_MSG(CWavFileDlg)
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 	}   // namespace
 }   // namespace

@@ -17,8 +17,10 @@
 ///         even if there no value after the equal, otherwise the var is *not* set!
 #define PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS 1
 
-/// Define to 1 to use RMS Vu's, 0 otherwise
-#define PSYCLE__CONFIGURATION__RMS_VUS 0
+/// JAZ: Define to 1 to enable the volume column for XMSampler, 0 otherwise.
+/// It will also make the machine column in the pattern to show the values of the volume column instead.
+#define PSYCLE__CONFIGURATION__VOLUME_COLUMN 0
 
-///\todo always 1 now. need to clean up all references
-#define PSYCLE__CONFIGURATION__USE_PSYCORE 1
+/// Define to 1 to use RMS Vu's, 0 otherwise
+#define PSYCLE__CONFIGURATION__RMS_VUS 1
+

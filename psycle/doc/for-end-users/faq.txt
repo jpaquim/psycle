@@ -37,8 +37,7 @@ A)	Dummy internal machine? It is mainly used to replace missing plugin machines 
 
 Q)	I have problems playing a song in Winamp!
 
-A)	The winamp plugin hasn't been updated for long, and it lacks several changes that have
-	been since then. We no longer recommend using it, until we release an up-to-date version.
+A)	The winamp plugin hasn't been updated yet to 1.8.8. The latest version is up to 1.8.6.
 	
 
 - Samples and the Sampler Machine -
@@ -134,7 +133,8 @@ A)	put the cursor in a channel's first column, the row you want it to stop and p
 ----------------
 
 Q)	How can I develop a Psycle Machine?
-A)	The recommended way is to get the source directly of one of 
+A)	There is no SDK yet, and format will change in Psycle 2.
+	The recommended way right now is to get the source directly of one of 
 	the open source plugins ( arguru synth is a good start ), and use it as a template
 	for your own.
 	You can download them from Psycle's SVN repository at Source Forge Site:
@@ -151,46 +151,10 @@ A)	Psycle evolves continuously, and sometimes it is thanks small contributions f
 	You can contact the developers (See first Question of this FAQ) and ask what could
 	you do. Or either tell us what you'd like to do, DSP, plugins, help files, graphics,
 	tracker features... There are lots of places that can be improved in one way or another.
+	
 
 Q)	When will Psycle 2 be out?/ In which stage is Psycle 2 developement? What do you
 	plan for Psycle 2?
-A)	For those interested in a bit of history, here's the story :
+A)	See the History and roadmap.txt file
 
-	"History" Part One:
-
-		Psycle 2 has been in a few stages since it was first talked about. On December 2000
-		Mats (the one that made the 1.1 versions ) started developing what was called Psycle 2.
-		When he had to left, Psycle 2 stopped, and Psycle 1.5 was done by [JAZ].
-		After some months, it was clear that Psycle needed a change to be improved further more
-		so it was time to think with Psycle 2 again, but instead of continuing Mats's work,
-		[JAZ] started to think on a newer design.
-		This design has been codenamed PsyClean, but has never really started to be
-		developed.
-
-		Then, There was a version that was temporarily called 1.9. This was started by Dan,
-		but left it because of work.
-		This version had some Data structure changes which aimed to give more tracks, volume
-		column (panning too?) , more lines per pattern, new song fileformat, and so on.
-
-	"History" Part Two:
-
-		One guy called Dilvie contacted with the Psycle team, interested in developing a
-		tracker with similar aims to what Psycle had, and expand on his own ideas.
-
-		To make this a reality, Psycle was branched in Psycle 1 and PsycleII
-
-		Psycle 1 continued to be maintained by [JAZ] and pooplog. The aims where to continue
-		offering a version which was simple enough, stable and still powerfull, and to
-		fill the gap until PsycleII came out.
-
-		PsycleII wanted to be an audio studio (audio and video mixing, mastering...)
-		It was initially coded by Majick_ / MJK. He had most of the core ready, but left
-		for work too. Dilvie, on the other hand, started working on the GUI,
-		trying Mozilla XUL language as a start. Unfortunately, he was busy with work too
-		(yep... one more).
-		The latest news, unluckily, are that this branch is vapourware.
-
-	"Nowadays"
-	
-		See the roadmap-and-history.txt file
 

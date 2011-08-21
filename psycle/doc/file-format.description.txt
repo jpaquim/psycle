@@ -1,8 +1,8 @@
 Fileformat Documentation of .psy Files
 
 Psycle Version : 1.7+
-Document Version: 1.4
-Date:12-May-2007
+Document Version: 1.5
+Date:17-April-2011
 
 This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle >= 1.7
 It is Riff-like, with independant versioning for each chunk, and a "total" version number for
@@ -30,6 +30,8 @@ size = 4;		// Size of extra information data of the File Header. Note: It is use
 DATA:
 int chunkcount;		// Number of chunks in the file, not counting the File Header.
 
+DESCRIPTION:
+Data in the "PSY3SONG" Chunk describes the file. (Currently only the number of chunks, but could include other format-related information).
 
 ===================
 SONG INFO TEXT
@@ -44,20 +46,21 @@ char name[]; // null terminated string, so read until you find NULL.
 char author[]; // null terminated string, so read until you find NULL
 char comment[]; // null terminated string, so read until you find NULL
 
-===================
-SONG INFO TEXT
-===================
+
 HEADER:
 id = "INFO"; 
 version = 1;
-size = strlen(name)+strlen(author)+strlen(comment)+3 +sizeof(int) + bitmapsize;   //( +3 because of the NULL's )
+size = strlen(name)+strlen(author)+strlen(comment)+3 +sizeof(int) + bitmapsize;   //( +3 because of the NULL terminator )
 
 DATA:
-char name[]; // null terminated string, so read until you find NULL.
-char author[]; // null terminated string, so read until you find NULL
-char comment[]; // null terminated string, so read until you find NULL
+Version 1 has the same fields than version 0, and adds the following fields at the end:
 int bitmapsize;
 char *bitmaparray[bitmapsize];
+
+This version is defined but it is not implemented in any existing implementation.
+
+DESCRIPTION:
+Data in the INFO chunk can be considered song metadata. I.e. Information related to the song (not the file) which the user wanted to add.
 
 ===================
 SONG PROPERTIES 
@@ -80,8 +83,28 @@ int auxcolSelected; // index of the selected aux data for editing
 int instSelected;  // index of the sampler instrument selected for editig. It is stored separately from auxcol for switching.
 int sequenceWidth; // number of sequence columns for multipattern. currently 1.
 
+for each of the numTracks (trackMuted,TrackArmed,TrackMuted,TrackArmed....):
 bool trackMuted[numTracks] // Array with the value which sets the "mute" state of the tracks.
 bool trackArmed[numTracks] // Array with the value which sets the "Record" state of the tracks.
+
+
+HEADER:
+id = "SNGI"; 
+version = 1;
+size = (11*sizeof(int))+(numTracks*(sizeof(bool)+sizeof(bool))) + sizeof(bool)
+if shareTrackNames then 
+	size = size + (strlen(tracknames[track])+1) for each of the numTracks  // The +1 is for the NULL terminator.
+
+DATA:
+Version 1 has the same fields than version 0, and adds the following fields at the end:
+bool shareTrackNames // Indicates if this song uses a common list of track names, or individual for each pattern.
+
+if shareTrackNames is true then also:
+for each of the numTracks:
+char trackName[numTracks][] // null terminated string, so read until you find NULL.
+
+DESCRIPTION:
+Data in the SNGI chunk contains information needed by the program to play or edit the song. There should be two sections (one for playback and another for edition, but when the format was defined it was put together).
 
 ===================
 SEQUENCE DATA
@@ -97,6 +120,10 @@ int length; // length of the sequence. (1-256 ) // Psycle versions previous to 1
 char sequenceColumnName[]; // null terminated string, should be less than 32 chars long, It will be trucated on load.
 int playorder[sequenceLength]; // Desc : Contains the values of the array of the song sequence. playOrder[3] = 5 means that in 
 	// position 3, it plays the pattern 5th. (zero based)
+
+	
+DESCRIPTION:
+Each SEQD chunk describes a song sequence, which is the order in which patterns should be played. Psycle uses right now only one sequence, but newer version could implement multitrack sequencing.
 
 ===================
 PATTERN DATA
@@ -129,6 +156,9 @@ typedef struct PatternEntry
 }
 PatternEntry;
 
+DESCRIPTION:
+Each PATD chunk contains the description of one pattern. A pattern contains the notes,tweaks and effect commands to play.
+Only the patterns that are used (are in the sequence) get saved.
 
 ===================
 MACHINES DATA
@@ -196,6 +226,8 @@ uint datasize; // size of following data, although it could be easily calculated
 byte MachineSpecificData[datasize]; // data depends on type member. See below:
 
 
+DESCRIPTION:
+Each MACD chunk contains information of a machine. A machine is the audio element unit of Psycle, the one that makes or changes the sound. There needs to be one Master (and currently only one)
 
 ===================
 MACHINE SPECIFIC DATA(MACH_MASTER)
@@ -348,3 +380,18 @@ byte data2;					// compressed data
 
 *the compression used for waves is a form of delta packing. check the sources for details.
 The unpacked data is an array of type short, with values ranging from -32768 to 32767.
+
+
+HEADER:
+id = "INSD"; 
+version = 1;
+size = variable, depends on the samples.
+
+DATA:
+Version 1 has the same fields than version 0, and adds the following fields at the end:
+int lock_instrument;     // If use_lock is enabled, this is the index of the sampler machine to use to play this sample
+bool use_lock;           // indicates if instrument locking is enabled or not.
+
+
+DESCRIPTION:
+Each INSD chunk contains a sampled waveform and its parameters. To play this waveform, a Sampler machine is needed.

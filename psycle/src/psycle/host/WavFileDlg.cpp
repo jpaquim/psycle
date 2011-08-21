@@ -2,10 +2,7 @@
 ///\brief implementation file for psycle::host::CWavFileDlg.
 #include <psycle/host/detail/project.private.hpp>
 #include "WavFileDlg.hpp"
-
-#include <psycle/core/song.h>
-#include <psycle/core/sampler.h>
-
+#include "Song.hpp"
 namespace psycle { namespace host {
 
 IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
@@ -24,8 +21,6 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 
 		BEGIN_MESSAGE_MAP(CWavFileDlg, CFileDialog)
-			//{{AFX_MSG_MAP(CWavFileDlg)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 
@@ -34,26 +29,27 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			CString CurrExt=GetFileExt();
 			
 			CurrExt.MakeLower();
-			Sampler::wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
+			_pSong->wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
 			
-			Sampler::wavprev.Stop();
-			if (CurrExt=="wav" && _lastFile != GetFileName())
+			_pSong->wavprev.Stop();
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			if (CurrExt=="wav" && _lastFile != GetPathName())
 			{
-				_lastFile=GetFileName();
+				_lastFile=GetPathName();
 				
 				if (_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
-					Sampler::wavprev.Play();
+					_pSong->wavprev.Play();
 					
 				}
 			}
-			else if (CurrExt=="iff" && _lastFile != GetFileName())
+			else if (CurrExt=="iff" && _lastFile != GetPathName())
 			{
-				_lastFile=GetFileName();
+				_lastFile=GetPathName();
 				
 				if (_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
-					Sampler::wavprev.Play();
+					_pSong->wavprev.Play();
 				}
 			}
 

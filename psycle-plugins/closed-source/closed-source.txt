@@ -1,3 +1,0 @@
-The plugins in this directory are grouped by authors.
-We don't have the sources of them, and don't know whether their authors would still maintain their software, or don't care anymore or have lost the sources.
-We cannot guarantee that they work best, or even work at all.

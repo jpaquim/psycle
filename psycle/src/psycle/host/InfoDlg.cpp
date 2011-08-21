@@ -1,202 +1,244 @@
 ///\file
 ///\brief implementation file for psycle::host::CInfoDlg.
-
 #include <psycle/host/detail/project.private.hpp>
 #include "InfoDlg.hpp"
+
 #include "Configuration.hpp"
-#include "projectdata.hpp"
 
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-#include <psycle/core/machine.h>
-#include <psycle/core/internalkeys.hpp>
-#include <universalis/stdlib/thread.hpp>
-#include <universalis/stdlib/chrono.hpp>
+#include "Machine.hpp"
+#include "Player.hpp"
+#include "Song.hpp"
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "cpu_time_clock.hpp"
 
 namespace psycle { namespace host {
+		int const ID_TIMER_INFODLG = 1;
 
-CInfoDlg::CInfoDlg(ProjectData* projects, CWnd* pParent)
-: CDialog(CInfoDlg::IDD, pParent), projects_(projects) {}
-
-void CInfoDlg::DoDataExchange(CDataExchange* pDX) {
-	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_MEM_RESO4, mem_virtual_);
-	DDX_Control(pDX, IDC_MEM_RESO3, mem_pagefile_);
-	DDX_Control(pDX, IDC_MEM_RESO2, mem_phy_);
-	DDX_Control(pDX, IDC_MEM_RESO, mem_reso_);
-	DDX_Control(pDX, IDC_MCPULABEL2, cpurout_);
-	DDX_Control(pDX, IDC_MCPULABEL, machscpu_);
-	DDX_Control(pDX, IDC_CPUL, processor_label_);
-	DDX_Control(pDX, IDC_CPUIDLE_LABEL, cpuidlelabel_);
-	DDX_Control(pDX, IDC_MACHINELIST, machlist_);
-}
-
-BEGIN_MESSAGE_MAP(CInfoDlg, CDialog)
-	ON_WM_TIMER()
-END_MESSAGE_MAP()
-
-BOOL CInfoDlg::OnInitDialog() {
-	CDialog::OnInitDialog();			
-	machlist_.InsertColumn(0, "Name"     , LVCFMT_LEFT , 118, 0);
-	machlist_.InsertColumn(1, "Type"     , LVCFMT_LEFT ,  78, 1);
-	machlist_.InsertColumn(2, "Kind"     , LVCFMT_LEFT ,  62, 1);
-	machlist_.InsertColumn(3, "In wires" , LVCFMT_RIGHT,  52, 1);
-	machlist_.InsertColumn(4, "Out wires", LVCFMT_RIGHT,  58, 1);
-	machlist_.InsertColumn(5, "CPU"      , LVCFMT_RIGHT,  48, 1);
-
-	UpdateInfo();		
-	InitTimer();			
-	return true;
-}
-
-void CInfoDlg::InitTimer() {
-	if(!SetTimer(1, 1000, 0))
-		MessageBox("Error! Could not initialize timer", "CPU Performance Dialog", MB_OK | MB_ICONERROR);
-}
-
-void CInfoDlg::OnTimer(UINT_PTR nIDEvent) {
-	if(nIDEvent != 1) return;
-
-	Song & song = projects_->active_project()->song();
-
-	if(!song.is_ready()) return;
-
-	Song::scoped_lock lock(song);
-
-	char buffer[128];
-	
-	chrono::nanoseconds total_machine_processing_time = 0;
-	core::wall_time_clock::time_point const now = core::wall_time_clock::now();
-	float const real_time_duration = chrono::nanoseconds(now - last_update_time_).count();
-	std::size_t threads = Player::singleton().num_threads();
-	if(!threads) threads = 1; // Beware: when not using multithreading, Player::singleton().num_threads() is zero!
-	float const multicore_real_time_duration = real_time_duration * threads;
-
-	unsigned int i = 0;
-	for(unsigned int m(0); m < MAX_MACHINES; ++m) if(song.machine(m)) {
-		Machine & machine(*song.machine(m));
-
-		// Input numbers
-		sprintf(buffer, "%d", machine._connectedInputs);
-		machlist_.SetItem(i, 3, LVIF_TEXT, buffer, 0, 0, 0, 0);
-
-		// Output numbers
-		sprintf(buffer, "%d", machine._connectedOutputs);
-		machlist_.SetItem(i, 4, LVIF_TEXT, buffer, 0, 0, 0, 0);
-
-		{ // processing cpu percent
-			float const percent = 100.0f * chrono::nanoseconds(machine.accumulated_processing_time()).count() / multicore_real_time_duration;
-			sprintf(buffer, "%.1f%%", percent);
-			machlist_.SetItem(i, 5, LVIF_TEXT, buffer, 0, 0, 0, 0);
+		CInfoDlg::CInfoDlg(CWnd* pParent)
+		: CDialog(CInfoDlg::IDD, pParent)
+		{
 		}
 
-		total_machine_processing_time += machine.accumulated_processing_time();
-		machine.reset_time_measurement();
+		void CInfoDlg::DoDataExchange(CDataExchange* pDX)
+		{
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_MEM_RESO4, m_mem_virtual);
+			DDX_Control(pDX, IDC_MEM_RESO3, m_mem_pagefile);
+			DDX_Control(pDX, IDC_MEM_RESO2, m_mem_phy);
+			DDX_Control(pDX, IDC_MEM_RESO, m_mem_reso);
+			DDX_Control(pDX, IDC_MCPULABEL2, m_cpurout);
+			DDX_Control(pDX, IDC_MCPULABEL, m_machscpu);
+			DDX_Control(pDX, IDC_CPUL, m_processor_label);
+			DDX_Control(pDX, IDC_CPUIDLE_LABEL, m_cpuidlelabel);
+			DDX_Control(pDX, IDC_MACHINELIST, m_machlist);
+			DDX_Control(pDX, IDC_CPU_PERF, m_cpu_perf);
+		}
 
-		++i;
-	}
+		BEGIN_MESSAGE_MAP(CInfoDlg, CDialog)
+		ON_WM_TIMER()
+		ON_BN_CLICKED(IDC_CPU_PERF, OnCpuPerf)
+		ON_WM_SHOWWINDOW()
+		ON_WM_CLOSE()
+		END_MESSAGE_MAP()
 
-	last_update_time_ = now;
+		BOOL CInfoDlg::OnInitDialog() 
+		{
+			CDialog::OnInitDialog();
+			m_machlist.InsertColumn(0,"Name",LVCFMT_LEFT,120,0);
+			m_machlist.InsertColumn(1,"Machine",LVCFMT_LEFT,90,1);
+			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
+			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
+			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
+			m_machlist.InsertColumn(5,"1 CPU",LVCFMT_RIGHT,48,1);
+			m_cpu_perf.SetCheck(Global::pPlayer->measure_cpu_usage_? 1:0);
+			UpdateInfo();
+			InitTimer();
+			return TRUE;
+		}
+		void CInfoDlg::OnShowWindow(BOOL bShow, UINT nStatus) 
+		{
+			CDialog::OnShowWindow(bShow, nStatus);
+			if(bShow) {
+				InitTimer();
+			}
+			else 
+			{
+				KillTimer(ID_TIMER_INFODLG);
+			}
+		}
+		void CInfoDlg::OnCancel() 
+		{
+			KillTimer(ID_TIMER_INFODLG);
+			CDialog::OnCancel();
+		}
+		void CInfoDlg::OnClose() 
+		{
+			KillTimer(ID_TIMER_INFODLG);
+			CDialog::OnClose();
+		}
+		void CInfoDlg::InitTimer()
+		{
+			if(!SetTimer(ID_TIMER_INFODLG,500,NULL))
+				MessageBox("Error! Couldn't initialize timer","CPU Perfomance Dialog", MB_OK | MB_ICONERROR);
+		}
 
-	if(item_count_ != i) UpdateInfo();
-	
-	{ // total cpu percent (counts everything, not just machine processing + routing)
-		//Accumulated processing time does not count "num_threads_running since it is acummulated in the Player thread (single threaded)
-		float const percent = 100.0f * chrono::nanoseconds(song.accumulated_processing_time()).count() / real_time_duration;
-		sprintf(buffer, "%.1f%%", percent);
-		cpuidlelabel_.SetWindowText(buffer);
-	}
-	
-	{ // total machine processing cpu percent
-		float const percent = 100.0f * total_machine_processing_time.count() / multicore_real_time_duration;
-		sprintf(buffer, "%.1f%%", percent);
-		machscpu_.SetWindowText(buffer);
-	}
+		void CInfoDlg::OnTimer(UINT_PTR nIDEvent) 
+		{
+			Song* _pSong = Global::_pSong;
+			if(nIDEvent==ID_TIMER_INFODLG)
+			{
+				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
+				if (!lock.Lock(50)) return;
 
-	{ // routing cpu percent
-		float const percent = 100.0f * chrono::nanoseconds(song.accumulated_routing_time()).count() / multicore_real_time_duration;
-		sprintf(buffer, "%.1f%%", percent);
-		cpurout_.SetWindowText(buffer);
-	}
-	
-	{ // cpu frequency
-		///\todo:  Using the Windows API to get clicks/CPU frequency doesn't give
-		// the real frequency in some cases. This has to be worked out.
-		LARGE_INTEGER frequency;
-		if(!::QueryPerformanceFrequency(&frequency)) strcpy(buffer, "unsupported");
-		if(frequency.QuadPart / 1000000 < 10) sprintf(buffer, "%d threads", threads);
-		else sprintf(buffer, "%dx%d MHz", threads, frequency.QuadPart / 1000000);
-		processor_label_.SetWindowText(buffer);
-	}
+				unsigned long num_threads_running = Global::pPlayer->num_threads();
+				char buffer[128];
+				
+				cpu_time_clock::duration total_machine_processing_time(0);
+				wall_time_clock::time_point const now = wall_time_clock::now();
+				float const real_time_duration = std::chrono::nanoseconds(now - last_update_time_).count();
+				float const multicore_real_time_duration = real_time_duration * num_threads_running;
+				bool cpu_usage = Global::pPlayer->measure_cpu_usage_;
+				int n=0;
+				for (int c=0; c<MAX_MACHINES; c++)
+				{
+					Machine *tmac = _pSong->_pMachine[c];
+					if(tmac)
+					{
+						// Input numbers
+						sprintf(buffer,"%d",tmac->_numInputs);
+						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 
-	song.reset_time_measurement();
+						// OutPut numbers
+						sprintf(buffer,"%d",tmac->_numOutputs);
+						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 
-	{ // memory status
-		MEMORYSTATUSEX lpBuffer;
-		lpBuffer.dwLength = sizeof lpBuffer;
-		GlobalMemoryStatusEx(&lpBuffer);
+						{ // processing cpu percent
+							if(cpu_usage) {
+								//Showing the cpu usage of the thread, so then it is possible to know how much of a thread, a machine uses.
+								float const percent = 100.0f * std::chrono::nanoseconds(tmac->accumulated_processing_time()).count() / real_time_duration;
+								sprintf(buffer,"%.1f%%",percent);
+							}
+							else {
+								sprintf(buffer,"N/A");
+							}
+							m_machlist.SetItem(n,5,LVIF_TEXT,buffer,0,0,0,NULL);
+						}
+						total_machine_processing_time += tmac->accumulated_processing_time();
+						tmac->reset_time_measurement();
+						n++;
+					}
+				}
 
-		std::sprintf(buffer, "%d%%", 100 - lpBuffer.dwMemoryLoad);
-		mem_reso_.SetWindowText(buffer);
-		
-		std::sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPhys / float(1<<20), lpBuffer.ullTotalPhys / float(1<<20));
-		mem_phy_.SetWindowText(buffer);
-		
-		std::sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPageFile / float(1<<20), lpBuffer.ullTotalPageFile / float(1<<20));
-		mem_pagefile_.SetWindowText(buffer);
-		
-		#ifdef _WIN64
-			std::sprintf(buffer,"%.0fG (of %.0fG)", lpBuffer.ullAvailVirtual / float(1<<30), lpBuffer.ullTotalVirtual / float(1<<30));
-		#else
-			std::sprintf(buffer,"%.0fM (of %.0fM)", lpBuffer.ullAvailVirtual / float(1<<20), lpBuffer.ullTotalVirtual / float(1<<20));
+				last_update_time_ = now;
+
+				if(item_count_ != n) UpdateInfo();
+
+				{ // total cpu percent (counts everything, not just machine processing + routing)
+					//Accumulated processing time does not divide by "num_threads_running" since it is acummulated in the Player thread (single threaded)
+					float const percent = 100.0f * std::chrono::nanoseconds(_pSong->accumulated_processing_time()).count() / real_time_duration;
+					sprintf(buffer, "%.1f%%", percent);
+					m_cpuidlelabel.SetWindowText(buffer);
+				}
+				
+				{ // total machine processing cpu percent
+					if(cpu_usage) {
+						float const percent = 100.0f * total_machine_processing_time.count() / multicore_real_time_duration;
+						sprintf(buffer, "%.1f%%", percent);
+					}
+					else {
+						sprintf(buffer, "N/A");
+					}
+					m_machscpu.SetWindowText(buffer);
+				}
+
+				{ // routing cpu percent
+					if(cpu_usage) {
+						float const percent = 100.0f * chrono::nanoseconds(_pSong->accumulated_routing_time()).count() / multicore_real_time_duration;
+						sprintf(buffer, "%.1f%%", percent);
+					}
+					else {
+						sprintf(buffer, "N/A");
+					}
+
+					m_cpurout.SetWindowText(buffer);
+				}
+
+
+				{ // threads
+					 sprintf(buffer, "%d", num_threads_running);
+					m_processor_label.SetWindowText(buffer);
+				}
+
+				_pSong->reset_time_measurement();	
+				// Memory status -------------------------------------------------
+				
+				MEMORYSTATUSEX lpBuffer;
+				lpBuffer.dwLength = sizeof(MEMORYSTATUSEX);
+				GlobalMemoryStatusEx(&lpBuffer);
+				
+				sprintf(buffer,"%d%%",100-lpBuffer.dwMemoryLoad);
+				m_mem_reso.SetWindowText(buffer);
+				
+				sprintf(buffer, "%.0fM (of %.0fM)", lpBuffer.ullAvailPhys/(float)(1<<20), lpBuffer.ullTotalPhys/(float)(1<<20));
+				m_mem_phy.SetWindowText(buffer);
+				
+				sprintf(buffer,"%.0fM (of %.0fM)", (lpBuffer.ullAvailPageFile/(float)(1<<20)) , (lpBuffer.ullTotalPageFile/(float)(1<<20)));
+				m_mem_pagefile.SetWindowText(buffer);
+		#if defined _WIN64
+				sprintf(buffer,"%.0fG (of %.0fG)",(lpBuffer.ullAvailVirtual/(float)(1<<30)), (lpBuffer.ullTotalVirtual/(float)(1<<30)));
+				m_mem_virtual.SetWindowText(buffer);
+		#elif defined _WIN32
+				sprintf(buffer,"%.0fM (of %.0fM)",(lpBuffer.ullAvailVirtual/(float)(1<<20)), (lpBuffer.ullTotalVirtual/(float)(1<<20)));
+				m_mem_virtual.SetWindowText(buffer);
 		#endif
-		mem_virtual_.SetWindowText(buffer);
-	}
-}
+			}
+			CDialog::OnTimer(nIDEvent);
+		}
 
-void CInfoDlg::UpdateInfo() {
-	machlist_.DeleteAllItems();
-	
-	Song & song = projects_->active_project()->song();
-
-	unsigned int i = 0;
-	for(unsigned int m(0); m < MAX_MACHINES; ++m) if(song.machine(m)) {
-		Machine & machine(*song.machine(m));
-
-		char buffer[128];
+		void CInfoDlg::UpdateInfo()
+		{
+			m_machlist.DeleteAllItems();
 			
-		// Name [Machine view editor custom name]
-		sprintf(buffer, "%.3d: %s", i + 1, machine.GetEditName().c_str());
-		machlist_.InsertItem(i, buffer);
-			
-		// Gear [Gear type]
-		strcpy(buffer, machine.GetName().c_str());
-		machlist_.SetItem(i, 1, LVIF_TEXT, buffer, 0, 0, 0, 0);
-			
-		// Type [Set is generator/effect/master]
-		if(machine.getMachineKey() == InternalKeys::master) strcpy(buffer, "Master");
-		else if(machine.IsGenerator()) strcpy(buffer, "Generator");
-		else strcpy(buffer, "Effect");
-
-		machlist_.SetItem(i, 2, LVIF_TEXT, buffer, 0, 0, 0, 0);
-
-		// Input numbers
-		sprintf(buffer, "%d", machine._connectedInputs);
-		machlist_.SetItem(i, 3, LVIF_TEXT, buffer, 0, 0, 0, 0);
-			
-		// OutPut numbers
-		sprintf(buffer, "%d", machine._connectedOutputs);
-		machlist_.SetItem(i, 4, LVIF_TEXT, buffer, 0, 0, 0, 0);
-
-		++i;
-	}
-	item_count_ = i;
-}
-
+			int n=0;
+			Song* _pSong = Global::_pSong;
+			for(int c=0; c<MAX_MACHINES; c++)
+			{
+				Machine *tmac = _pSong->_pMachine[c];
+				if(tmac)
+				{
+					char buffer[128];
+					
+					// Name [Machine view editor custom name]
+					sprintf(buffer,"%.3d: %s",n+1,tmac->_editName);
+					m_machlist.InsertItem(n,buffer);
+					
+					// Gear [Gear type]
+					strcpy(buffer, tmac->GetName());
+					m_machlist.SetItem(n,1,LVIF_TEXT,buffer,0,0,0,NULL);
+					
+					// Type [Set is generator/effect/master]
+					switch(tmac->_mode)
+					{
+					case MACHMODE_GENERATOR: strcpy(buffer,"Generator");break;
+					case MACHMODE_FX: strcpy(buffer,"Effect");break;
+					case MACHMODE_MASTER: strcpy(buffer,"Master");break;
+					}
+					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
+					
+					// Input numbers
+					sprintf(buffer,"%d",tmac->_numInputs);
+					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
+					
+					// OutPut numbers
+					sprintf(buffer,"%d",tmac->_numOutputs);
+					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
+					n++;
+				}
+			}
+			item_count_ = n;
+		}
+		void CInfoDlg::OnCpuPerf() {
+			Global::pPlayer->measure_cpu_usage_ = m_cpu_perf.GetCheck() != 0;
+		}
 }}
+

@@ -5,72 +5,87 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-namespace core {
-	class Master;
-}
 namespace host {
 
-		class CChildView;
+		class Master;
 
 		class CVolumeCtrl: public CSliderCtrl
 		{
 		public:
-			CVolumeCtrl() : editing_(false), index_(-1) {}
-			CVolumeCtrl(int index) : editing_(false), index_(index) {}
+			CVolumeCtrl(int index) : index_(index) {}
 
-			bool editing() const { return editing_; }
 			int index() const { return index_; }
 
 		private:
-			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-			bool editing_;
 			int index_;
+		};
+
+		class CMasterVu: public CProgressCtrl
+		{
+		public:
+			CMasterVu();
+			virtual ~CMasterVu();
+
+			void LoadBitmap(UINT IDControl);
+			CBitmap m_vu;
+			CBitmap* m_pback;
+
 			DECLARE_MESSAGE_MAP()
+			afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+			afx_msg void OnPaint();
+
 		};
 
 		/// master machine window.
 		class CMasterDlg : public CDialog
 		{
 		public:
-			CMasterDlg(Master* master, CChildView * pParent);
-			~CMasterDlg();
+			CMasterDlg(CWnd* m_wndView, Master& new_master, CMasterDlg** windowVar);
+			virtual ~CMasterDlg();
 
 			void UpdateUI(void);
-			void CenterWindowOnPoint(int x, int y);
 
 			///\todo should be private
 			char macname[MAX_CONNECTIONS][32];
 
-		private:
-			void PaintNumbers(float val, int x, int y);
-			void PaintNumbersDC(CDC* dc,CDC* memDC,float val,int x,int y);
+protected:
+			void PaintNumbersDC(CDC* dc,float val,int x,int y);
 			LRESULT DrawSliderGraphics(NMHDR* pNMHDR);
 			void PaintNames(char* name,int x,int y);
-			void SetSliderValues();			
-			virtual BOOL PreTranslateMessage(MSG* pMsg);
+			void SetSliderValues();
+			void OnChangeSliderMaster(int pos);
+			void OnChangeSliderMacs(CVolumeCtrl* slider);
+public:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
-			afx_msg void OnAutodec();
-			afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawSliderm(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnPaint();
-			afx_msg void OnCancel();
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
+			virtual void OnCancel();
+			virtual void PostNcDestroy();
+protected:
 			DECLARE_MESSAGE_MAP()
-			afx_msg void OnStnClickedMixerview();
+			afx_msg void OnClose();
+			afx_msg void OnAutodec();
+			afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+			afx_msg void OnCustomdrawSlidermaster(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnPaint();
+			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 			enum { IDD = IDD_MASTERDLG };
 			CStatic	m_masterpeak;
-			CVolumeCtrl m_slidermaster;
+			CVolumeCtrl	m_slidermaster;
 			std::vector<CVolumeCtrl*> sliders_;
-			CStatic	m_mixerview;
+			CMasterVu m_vuCtrl;
 			CButton	m_autodec;
-			CBitmap m_numbers;
 			CBitmap m_sliderknob;
 			CBitmap m_back;
+			int m_nBmpWidth;
+			int m_nBmpHeight;
+
 			CFont namesFont;
-			Master* _pMachine;
-			CChildView* m_pParent;			
+			Master& machine;
+			CMasterDlg** windowVar_;
+			CWnd* mainView;
 		};
 
 	}   // namespace host

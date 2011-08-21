@@ -6,35 +6,19 @@
 
 namespace psycle { namespace host {
 
-		#define	DARK_GREEN	RGB(0, 128, 0)
-		#define	DARK_RED	RGB(128, 0, 0)	
+		#define	DARK_GREEN	RGB( 0, 128, 0 )
+		#define	DARK_RED	RGB( 128, 0, 0 )	
 
 		/// midi monitor window.
 		class CMidiMonitorDlg : public CDialog
 		{
 		public:
 			CMidiMonitorDlg(CWnd* pParent = 0);
-			void UpdateInfo();
-
-		protected:
-			virtual BOOL OnInitDialog();
-			virtual void fnClearEventsLost();
-			virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
-			virtual void OnTimer(UINT_PTR nIDEvent);
-			afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-
-			DECLARE_MESSAGE_MAP()
-
-		private:
-			void SetStaticFlag(CStatic * pStatic, DWORD flags, DWORD flagMask);	// used for dot control
-			void CreateChannelMap(); // create the channel map table
-			void FillChannelMap(bool overridden = false); // update the channel map table
-			void InitTimer();
-
-			int m_clearCounter; // use for the 'clear lost events' button
-			CFont m_symbolFont;	// custom graphic font			
-			// Dialog Data			
-			enum {IDD = IDD_MIDI_MONITOR};
+			/// starts the timer.
+			void InitTimer( void );	
+			/// updates the values in the dialog.
+			void UpdateInfo( void );
+			enum { IDD = IDD_MIDI_MONITOR };
 			CStatic	m_tickSync;
 			CStatic	m_midiSyncStart;
 			CStatic	m_midiSyncStop;
@@ -54,8 +38,8 @@ namespace psycle { namespace host {
 			CStatic	m_syncAdjust;
 			CStatic	m_eventsLost;
 			CStatic	m_bufferUsed;
-			CStatic m_clearEventsLost;
-			CListCtrl m_channelMap;
+			CButton m_clearEventsLost;
+			CListCtrl	m_channelMap;
 			CStatic m_ch1;
 			CStatic m_ch2;
 			CStatic m_ch3;
@@ -72,6 +56,25 @@ namespace psycle { namespace host {
 			CStatic m_ch14;
 			CStatic m_ch15;
 			CStatic m_ch16;
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual void OnTimer(UINT_PTR nIDEvent);
+			virtual BOOL OnInitDialog();
+			virtual void fnClearEventsLost();
+			virtual void OnCancel();
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+			afx_msg void OnClose();
+
+		private:
+			void SetStaticFlag( CStatic * pStatic, DWORD flags, DWORD flagMask );	// used for dot control
+			void CreateChannelMap( void );	// create the channel map table
+			void FillChannelMap( bool overridden = false );	// update the channel map table
+
+			int m_clearCounter;		// use for the 'clear lost events' button
+			CFont m_symbolFont;		// custom graphic font
 		};
 
 	}   // namespace

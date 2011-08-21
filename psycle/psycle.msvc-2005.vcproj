@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="psycle"
 	ProjectGUID="{C6292BF4-9E87-4176-9101-A3D29D074B35}"
 	RootNamespace="psycle"
-	TargetFrameworkVersion="0"
 	>
 	<Platforms>
 		<Platform
@@ -78,6 +77,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -140,6 +142,9 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -205,6 +210,9 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -268,11 +276,18 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{21F6FB1D-B7DB-4EDB-A2B0-DA1B2F04AF01}"
+			RelativePathToProject="..\..\psycle-audiodrivers\asio.msvc-2005.vcproj"
+		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{28C015FB-3BDA-4B32-8D85-C652E9892216}"
 			RelativePathToProject=".\projects\pre-compiled-headers\pre-compiled-headers-with-mfc.msvc-2005.vcproj"
@@ -552,6 +567,10 @@
 				</File>
 				<File
 					RelativePath="src\psycle\host\Configuration.hpp"
+					>
+				</File>
+				<File
+					RelativePath="src\psycle\host\configuration_options.hpp"
 					>
 				</File>
 				<File
@@ -1458,26 +1477,6 @@
 						</File>
 					</Filter>
 				</Filter>
-			</Filter>
-			<Filter
-				Name="detail"
-				>
-				<File
-					RelativePath=".\src\psycle\host\detail\config.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\psycle\host\detail\config.private.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\psycle\host\detail\project.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\src\psycle\host\detail\project.private.hpp"
-					>
-				</File>
 			</Filter>
 		</Filter>
 	</Files>

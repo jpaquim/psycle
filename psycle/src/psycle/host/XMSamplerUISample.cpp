@@ -1,8 +1,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUISample.hpp"
-
-#include <psycle/core/xmsampler.h>
-#include <psycle/core/song.h>
+#include "XMSampler.hpp"
 
 namespace psycle { namespace host {
 
@@ -119,7 +117,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					ULARGE_INTEGER posin;
 					posin.QuadPart = c * OffsetStep* 4294967296.0f;
 					yHi=0;
-					yLow = resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+					yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
 
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
@@ -171,7 +169,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 						ULARGE_INTEGER posin;
 						posin.QuadPart = c * OffsetStep* 4294967296.0f;
 						yHi=0;
-						yLow = resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+						yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
 
 						int const ryLow = (wrHeight * yLow)/32768;
 						int const ryHi = (wrHeight * yHi)/32768;
@@ -305,7 +303,7 @@ BOOL XMSamplerUISample::OnSetActive()
 		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 		{
 			char line[48];
-			XMInstrument::WaveData& wave = Global::song().SampleData(i);
+			XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
 			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
 			m_SampleList.AddString(line);
@@ -325,7 +323,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	m_Init=false;
 	char tmp[40];
 	int i= m_SampleList.GetCurSel();
-	XMInstrument::WaveData& wave = Global::song().SampleData(i);
+	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
 	pWave(&wave);
 
 	strcpy(tmp,wave.WaveName().c_str());
@@ -401,7 +399,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 	{
 		m_wndView.AddMacViewUndo();
 
-		int si = _pSong->instSelected();
+		int si = _pSong->instSelected;
 
 		//added by sampler
 		if ( _pSong->_pInstrument[si]->waveLength != 0)
@@ -415,7 +413,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 
 		if ( CurrExt == "wav" )
 		{
-			if (_pSong->WavAlloc(si,dlg.GetFileName()))
+			if (_pSong->WavAlloc(si,dlg.GetPathName()))
 			{
 				UpdateComboIns();
 				m_wndStatusBar.SetWindowText("New wave loaded");
@@ -425,7 +423,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 		}
 		else if ( CurrExt == "iff" )
 		{
-			if (_pSong->IffAlloc(si,dlg.GetFileName()))
+			if (_pSong->IffAlloc(si,dlg.GetPathName()))
 			{
 				UpdateComboIns();
 				m_wndStatusBar.SetWindowText("New wave loaded");
@@ -447,13 +445,10 @@ void XMSamplerUISample::OnBnClickedLoad()
 		if(_pSong->PW_Stage)
 		{
 			_pSong->PW_Stage=0;
-			_pSong->IsInvalided(true);
-			Sleep(LOCK_LATENCY);
 		}
 
 		//Delete it.
 		_pSong->DeleteLayer(PREV_WAV_INS);
-		_pSong->IsInvalided(false);
 	}
 */
 }
@@ -467,9 +462,9 @@ void XMSamplerUISample::OnBnClickedDupe()
 {
 	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
 	{
-		if ( Global::song().SampleData(j).WaveLength() == 0 ) 
+		if ( m_pMachine->SampleData(j).WaveLength() == 0 ) 
 		{
-			XMInstrument::WaveData& wavenew = Global::song().SampleData(j);
+			XMInstrument::WaveData& wavenew = m_pMachine->SampleData(j);
 			wavenew = rWave();
 			return;
 		}
@@ -619,8 +614,8 @@ void XMSamplerUISample::OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 	if (rWave().WaveLength() > 0) {
-		sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
-		sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
+	sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
+	sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
 	}
 	else {
 		sprintf(tmp2,"%s%d",notes[0],5);
@@ -764,6 +759,4 @@ void XMSamplerUISample::DrawScope()
 	m_WaveScope.Invalidate();
 }
 
-}   // namespace
-}   // namespace
-
+}}

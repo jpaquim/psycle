@@ -31,15 +31,7 @@
 		namespace helpers {
 			namespace math {}
 		}
-		namespace core {
-			namespace notetypes {}
-			namespace commandtypes {}
-		}
 		namespace host {
-			namespace notecommands = core::notetypes;
-			namespace PatternCmd = core::commandtypes;
-			namespace loggers = universalis::os::loggers;
-			using namespace core;
 			namespace loggers = universalis::os::loggers;
 			using namespace helpers;
 			using namespace helpers::math;

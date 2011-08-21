@@ -5,99 +5,37 @@
 
 #include "MainFrm.hpp"
 #include "ChildView.hpp"
-#include "PatternView.hpp"
-#include "Configuration.hpp"
-#include "ChildView.hpp"
 
-#include <psycle/core/machine.h>
-#include <psycle/core/player.h>
-#include <psycle/core/song.h>
-#include <psycle/core/internalkeys.hpp>
+#include "Machine.hpp"
+#include "Player.hpp"
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
-
-namespace psycle { namespace host {
-	using namespace core;
-
-		const char * sDefaultCfgName = "PsycleKeys.INI";
-
+namespace psycle
+{
+	namespace host
+	{
 		InputHandler::InputHandler()
+			:UndoCounter(0)
+			,UndoSaved(0)
+			,UndoMacCounter(0)
+			,UndoMacSaved(0)
+			,pUndoList(NULL)
+			,pRedoList(NULL)
 		{
-			TRACE("Initializing InputHandler()\n");
-			
-			// init bools
-			bCtrlPlay = true;
-			bMultiKey = true;
-			bMoveCursorPaste = true;
-			bFT2HomeBehaviour = true;
-			bFT2DelBehaviour = true;
-			bShiftArrowsDoSelect = false;
 			bDoingSelection = false;
 
 			// set up multi-channel playback
-			for(UINT i=0;i<MAX_TRACKS;i++)
-				notetrack[i]=120;
+			for(UINT i=0;i<MAX_TRACKS;i++) {
+				notetrack[i]=notecommands::release;
+				instrtrack[i]=255;
+				mactrack[i]=255;
+			}
 			outtrack=0;
-
-			TRACE("Building default keys");
-			// It is important to build the default keys, in order for the commands to exist.
-			BuildCmdLUT();
-			ConfigRestore();
 		}
 
 		InputHandler::~InputHandler()
 		{
-			ConfigSave();
-		}
-
-		// SetCmd
-		// in: command def, key, modifiers
-		// out: true if we had to remove another definition
-		///\todo more warnings if we are changing existing defs
-		bool InputHandler::SetCmd(CmdDef &cmd, int key, UINT modifiers,bool checkforduplicates)
-		{	
-			// clear note?
-			if(!cmd.IsValid())
-			{
-				cmdLUT[modifiers][key].SetNull();
-				return false;
-			}
-
-			// normal
-		/*	TRACE("Imm. Command: '%s' (%d) has been set to key %d, modifiers = %d%d%d\n",
-				cmd.GetName(),
-				int(cmd.ID),
-				key,
-				modifiers&MOD_S,
-				modifiers&MOD_C,
-				modifiers&MOD_E);
-		*/
-			// remove last key def, if it exists
-			bool bCmdReplaced=false;
-			if ( checkforduplicates)
-			{
-				UINT i,j;
-				for(j=0;j<MOD_MAX;j++)
-				{
-					for(i=0;i<256;i++)
-					{
-						if(cmdLUT[j][i]==cmd && ((j!=modifiers)|| (i!=key)))
-						{
-							TRACE("--> removing from [%d][%d]\n",j,i);
-							cmdLUT[j][i].SetNull();
-							bCmdReplaced=true;
-						}
-					}
-				}
-			}
-
-			// add new
-			cmdLUT[modifiers][key] = cmd;
-			return bCmdReplaced;
+			KillRedo();
+			KillUndo();
 		}
 
 
@@ -106,6 +44,8 @@ namespace psycle { namespace host {
 		// OUT: command mapped to key
 		CmdDef InputHandler::KeyToCmd(UINT nChar, UINT nFlags)
 		{
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+			PsycleConfig& config = Global::psycleconf();
 			bDoingSelection=false;
 			// invalid?	
 			if(nChar>255)
@@ -116,14 +56,15 @@ namespace psycle { namespace host {
 			TRACE("Key nChar : %u pressed. Flags %u\n",nChar,nFlags);
 
 			// special: right control mapped to PLAY
-			if(bCtrlPlay && GetKeyState(VK_RCONTROL)<0)
+			if(settings.bCtrlPlay && GetKeyState(VK_RCONTROL)<0)
 			{
 				CmdDef cmdPlay(cdefPlaySong);
 				return cmdPlay;
 			}
 			else
 			{
-				if (bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 && !(Global::pPlayer->playing()&&Global::pConfig->_followSong))
+				if (settings.bShiftArrowsDoSelect && GetKeyState(VK_SHIFT)<0 
+					&& !(Global::pPlayer->_playing && config._followSong))
 				{
 					switch (nChar)
 					{
@@ -185,19 +126,20 @@ namespace psycle { namespace host {
 						break;
 					}
 				}
-
 				nFlags= nFlags & ~MK_LBUTTON;
 				// This comparison is to allow the "Shift+Note" (chord mode) to work.
+				std::pair<int, int> pair(GetModifierIdx(nFlags), nChar);
+				CmdDef& thisCmd = settings.keyMap[pair];
 
-				CmdDef thisCmd = cmdLUT[GetModifierIdx(nFlags)][nChar];
-				if ( thisCmd.GetType() == CT_Note )
+				if ( thisCmd.GetType() == CT_Note ) {
 					return thisCmd;
-
-				thisCmd = cmdLUT[(GetModifierIdx(nFlags) & ~MOD_S)][nChar];
-				if ( thisCmd.GetType() == CT_Note )
+				} else if ( thisCmd.GetID() == cdefNull) {
+					std::pair<int, int> pair2(GetModifierIdx(nFlags) & ~MOD_S, nChar);
+					thisCmd = settings.keyMap[pair2];
 					return thisCmd;
-				else
-					return cmdLUT[GetModifierIdx(nFlags)][nChar];
+				} else {
+					return thisCmd;
+				}
 			}
 		}	
 
@@ -206,15 +148,13 @@ namespace psycle { namespace host {
 		// OUT: command
 		CmdDef InputHandler::StringToCmd(LPCTSTR str)
 		{
-			int i;
-			for(i=0;i<max_cmds;i++)
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+			std::map<CmdSet,std::pair<int,int>>::const_iterator it;
+			for(it = settings.setMap.begin(); it != settings.setMap.end(); it++)
 			{
-				CmdDef ret = CmdSet(i);
-				if(ret.IsValid())
-				{
-					if(!strcmp(ret.GetName(),str))
-						return ret;
-				}
+				CmdDef ret(it->first);
+				if(!strcmp(ret.GetName(),str))
+					return ret;
 			}
 			CmdDef ret(cdefNull);
 			return ret;
@@ -223,228 +163,25 @@ namespace psycle { namespace host {
 		// CmdToKey
 		// IN: command def
 		// OUT: key/mod command is defined for, 0/0 if not defined
-		void InputHandler::CmdToKey(CmdDef &cmd,WORD & key,WORD &mods)
+		void InputHandler::CmdToKey(CmdSet cmd,WORD & key,WORD &mods)
 		{
 			key = 0;
 			mods = 0;
-			
-			// hunt for key with cmd
-			UINT i,j;
-			for(j=0;j<MOD_MAX;j++)
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+			std::map<CmdSet,std::pair<int,int>>::const_iterator it;
+			it = settings.setMap.find(cmd);
+			if (it != settings.setMap.end())
 			{
-				for(i=0;i<256;i++)
-				{
-					if(cmdLUT[j][i]==cmd)
-					{
-						// found
-						
-						if(j&MOD_S)
-							mods|=HOTKEYF_SHIFT;
-						if(j&MOD_C)
-							mods|=HOTKEYF_CONTROL;				
-						if(j&MOD_E)
-							mods|=HOTKEYF_EXT;
+				key = it->second.second;
 
-						key = i;
-						return;
-					}
-				}
-			}
-
-			// not found
-		}
-
-		//ConfigSave
-		// save key config data
-		// returns true on success, false on fail
-		bool InputHandler::ConfigSave()
-		{
-
-			CString sect;
-			CString key;
-			CString data;
-
-			// File version
-			sect = "Info";
-			key = "AppVersion";
-			data = PSYCLE__VERSION;
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-			key = "Description";
-			data = "Psycle";
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);	
-
-			// option data
-			sect = "Options";
-			key = "bNewHomeBehaviour"; // Variable renamed to bFT2HomeBehaviour.
-			data.Format("%d",bFT2HomeBehaviour);
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-
-			key = "bCtrlPlay";
-			data.Format("%d",bCtrlPlay);
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-
-			key = "bMultiKey";
-			data.Format("%d",bMultiKey);
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-
-			key = "bMoveCursorPaste";
-			data.Format("%d",bMoveCursorPaste);
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-
-			key = "bFt2DelBehaviour";
-			data.Format("%d",bFT2DelBehaviour);
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-
-			key = "bShiftArrowsDoSelect";
-			data.Format("%d",bShiftArrowsDoSelect);
-			WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-
-
-			UINT i,j;
-			
-			// note keys
-			sect = "Keys2";
-			WritePrivateProfileString(sect,NULL,NULL,sDefaultCfgName); 	// clear
-
-			for(j=0;j<MOD_MAX;j++)
-			{
-				for(i=0;i<256;i++)
-				{
-					if(cmdLUT[j][i].IsValid())
-					{
-						key.Format("n%03d",int(cmdLUT[j][i].GetID()));
-						data.Format("%04d   ; cmd = '%s'",(j*256)+i,cmdLUT[j][i].GetName());
-						WritePrivateProfileString(sect,key,data,sDefaultCfgName);
-					}
-				}
-			}
-
-
-
-			return true;
-		}
-
-		// ConfigRestore
-		// restore key config data
-		// returns true on success, false on fail 
-		bool InputHandler::ConfigRestore()
-		{
-			CString sect;
-			CString key;
-			CString data;
-
-			// check file
-			sect = "Info";
-			key = "AppVersion";
-			data = "";	
-			GetPrivateProfileString(sect,key,"",data.GetBufferSetLength(64),64,sDefaultCfgName);
-			if(data=="")
-			{
-				return false;
-			}
-			// option data
-			sect = "Options";
-			key = "bNewHomeBehaviour"; // Variable renamed to bFT2HomeBehaviour.
-			bFT2HomeBehaviour = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
-
-			key = "bCtrlPlay";
-			bCtrlPlay = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
-
-			key = "bMultiKey";
-			bMultiKey = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
-
-			key = "bMoveCursorPaste";
-			bMoveCursorPaste = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
-
-			key = "bFT2DelBehaviour";
-			bFT2DelBehaviour = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
-
-			key = "bShiftArrowsDoSelect";
-			bShiftArrowsDoSelect = GetPrivateProfileInt(sect,key,1,sDefaultCfgName)?true:false;
-			
-			if (data== "N/A")
-			{
-				return ParseOldFileformat(); // 1.7.6 and older
-			}
-			else
-			{
-				CString cmdDefn;
-				int cmddata, i,modi;
-				bool saveconfig(false);
-				// restore key data
-				sect = "Keys2"; // 1.8 onward
-				key.Format("n%03d",0);
-/*				if ( GetPrivateProfileInt(sect,key,-1,sDefaultCfgName) == -1 ) // trying to get key for command 0 (C-0)
-				{
-					sect = "Keys";  // 1.7 Alpha release.
-					saveconfig=true;
-				}
-*/
-				for(i=0;i<max_cmds;i++)
-				{
-					CmdDef cmd = CmdSet(i);
-//					cmdDefn = cmd.GetName();
-//					if(cmdDefn!="Invalid")
-					if (cmd.IsValid())
-					{
-						key.Format("n%03d",i);
-						cmddata= GetPrivateProfileInt(sect,key,cdefNull,sDefaultCfgName);
-						///\todo: this is commented in order to allow users to have keys mapped to "none".
-						/// It causes new keys (so unexistant in the configuration) to be set as null, instead of
-						/// keeping the default value. Maybe this is a desired feature in fact.
-						//if (cmddata != cdefNull)
-						//{
-							modi=cmddata/256;
-							SetCmd(cmd.GetID(),cmddata%256,modi,true);
-						//}
-					}
-				}
-				if (saveconfig) ConfigSave();
-				return true;
+				if(it->second.first & MOD_S)
+					mods|=HOTKEYF_SHIFT;
+				if(it->second.first & MOD_C)
+					mods|=HOTKEYF_CONTROL;				
+				if(it->second.first & MOD_E)
+					mods|=HOTKEYF_EXT;
 			}
 		}
-		bool InputHandler::ParseOldFileformat()
-		{
-			// save key data
-			UINT i,j;
-			CString sect;
-			CString key;
-			
-			CmdSet ID;
-			int cmddata;
-			sect = "Keys";
-			for(j=0;j<MOD_MAX;j++)
-			{
-				for(i=0;i<256;i++)
-				{
-					key.Format("Key[%d]%03d",j,i);
-					cmddata = GetPrivateProfileInt(sect,key,-1,sDefaultCfgName);			
-					ID = CmdSet(cmddata);
-					if ( ID == cdefTweakE) ID = cdefMIDICC;// Old twf Command
-					SetCmd(ID,i,j);
-				}
-			}
-			WORD tmpkey, tmpmods;
-			CmdToKey(cdefSelectMachine,tmpkey,tmpmods);
-			if ( !tmpkey ) SetCmd(cdefSelectMachine,VK_RETURN,0);
-			ConfigSave();
-			return true;
-		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 		// operations
@@ -453,8 +190,487 @@ namespace psycle { namespace host {
 		///\todo move to a callback system... this is disgustingly messy
 		void InputHandler::PerformCmd(CmdDef &cmd, BOOL brepeat)
 		{
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+			PsycleConfig::PatternView& patSettings = Global::psycleconf().patView();
+			PsycleConfig& config = Global::psycleconf();
 			switch(cmd.GetID())
 			{
+			case cdefNull:
+				break;
+
+			case cdefPatternCut:
+				pChildView->patCut();
+				break;
+
+			case cdefPatternCopy:
+				pChildView->patCopy();
+				break;
+
+			case cdefPatternPaste:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->patPaste();
+				break;
+
+			case cdefPatternMixPaste:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->patMixPaste();
+				break;
+
+			case cdefPatternDelete:
+				pChildView->patDelete();
+				break;
+
+			case cdefPatternTrackMute:
+				pChildView->patTrackMute();
+				break;
+
+			case cdefPatternTrackSolo:
+				pChildView->patTrackSolo();
+				break;
+
+			case cdefPatternTrackRecord:
+				pChildView->patTrackRecord();
+				break;
+
+			case cdefFollowSong:	
+				pMainFrame->ToggleFollowSong();
+				break;
+
+			case cdefKeyStopAny:
+				pChildView->EnterNoteoffAny();
+				break;
+
+			case cdefColumnNext:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->AdvanceTrack(1,settings._wrapAround);
+				break;
+
+			case cdefColumnPrev:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->PrevTrack(1,settings._wrapAround);
+				break;
+
+			case cdefNavLeft:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( !bDoingSelection )
+				{
+					pChildView->PrevCol(settings._wrapAround);
+					if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+				}
+				else
+				{
+					if ( !pChildView->blockSelected )
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					pChildView->PrevTrack(1,settings._wrapAround);
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+
+				bDoingSelection = false;
+				break;
+			case cdefNavRight:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( !bDoingSelection )
+				{
+					pChildView->NextCol(settings._wrapAround);
+					if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+				}
+				else
+				{
+					if ( !pChildView->blockSelected)
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+					pChildView->AdvanceTrack(1,settings._wrapAround);
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+
+				bDoingSelection = false;
+				break;
+			case cdefNavUp:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if (pChildView->patStep == 0)
+					pChildView->PrevLine(1,settings._wrapAround);
+				else
+					//if added by sampler. New option.
+					if (!settings._NavigationIgnoresStep)
+						pChildView->PrevLine(pChildView->patStep,settings._wrapAround);//before
+					else
+						pChildView->PrevLine(1,settings._wrapAround);//new option
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+				bDoingSelection = false;
+				break;
+			case cdefNavDn:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if (pChildView->patStep == 0)
+					pChildView->AdvanceLine(1,settings._wrapAround);
+				else
+					//if added by sampler. New option.
+					if (!settings._NavigationIgnoresStep)
+						pChildView->AdvanceLine(pChildView->patStep,settings._wrapAround); //before
+					else
+						pChildView->AdvanceLine(1,settings._wrapAround);//new option
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+				bDoingSelection = false;
+				break;
+			case cdefNavPageUp:
+				{
+					int stepsize(0);
+					if ( settings._pageUpSteps == 0) stepsize = Global::_pSong->LinesPerBeat();
+					else if ( settings._pageUpSteps == 1)stepsize = Global::_pSong->LinesPerBeat()*patSettings.timesig;
+					else stepsize = settings._pageUpSteps;
+
+					//if added by sampler to move backward 16 lines when playing
+					if (Global::pPlayer->_playing && config._followSong)
+					{
+						if (Global::pPlayer->_playBlock )
+						{
+							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
+							else
+							{
+								Global::pPlayer->_lineCounter = 0;
+								Global::pPlayer->ExecuteLine();
+							}
+						}
+						else
+						{
+							if (Global::pPlayer->_lineCounter >= stepsize) Global::pPlayer->_lineCounter -= stepsize;
+							else
+							{
+								if (Global::pPlayer->_playPosition > 0)
+								{
+									Global::pPlayer->_playPosition -= 1;
+									Global::pPlayer->_lineCounter = Global::_pSong->patternLines[Global::pPlayer->_playPosition] - stepsize;												
+								}
+								else
+								{
+									Global::pPlayer->_lineCounter = 0;
+									Global::pPlayer->ExecuteLine();
+								}
+							}
+						}
+					}
+					//end of if added by sampler
+					else
+					{
+						pChildView->bScrollDetatch=false;
+						pChildView->ChordModeOffs = 0;
+
+						if ( bDoingSelection && !pChildView->blockSelected)
+						{
+							pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						pChildView->PrevLine(stepsize,false);
+						if ( bDoingSelection )
+						{
+							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						else if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+					}
+				}
+				break;
+
+			case cdefNavPageDn:
+				{
+					int stepsize(0);
+					if ( settings._pageUpSteps == 0) stepsize = Global::_pSong->LinesPerBeat();
+					else if ( settings._pageUpSteps == 1)stepsize = Global::_pSong->LinesPerBeat()*patSettings.timesig;
+					else stepsize = settings._pageUpSteps;
+
+					//if added by sampler
+					if (Global::pPlayer->_playing && config._followSong)
+					{
+						Global::pPlayer->_lineCounter += stepsize;
+					}
+					//end of if added by sampler
+					else
+					{
+						pChildView->bScrollDetatch=false;
+						pChildView->ChordModeOffs = 0;
+						if ( bDoingSelection && !pChildView->blockSelected)
+						{
+							pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						pChildView->AdvanceLine(stepsize,false);
+						if ( bDoingSelection )
+						{
+							pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+						}
+						else if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+					}
+				}
+				break;
+			
+			case cdefNavTop:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if(settings.bFT2HomeBehaviour)
+				{
+					pChildView->editcur.line=0;
+				}
+				else
+				{
+					if (pChildView->editcur.col != 0) 
+						pChildView->editcur.col = 0;
+					else 
+						if ( pChildView->editcur.track != 0 ) 
+							pChildView->editcur.track = 0;
+						else 
+							pChildView->editcur.line = 0;
+				}
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+
+				pChildView->Repaint(draw_modes::cursor);
+				break;
+			
+			case cdefNavBottom:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if ( bDoingSelection && !pChildView->blockSelected)
+				{
+					pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				if(settings.bFT2HomeBehaviour)
+				{
+					pChildView->editcur.line=Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
+				}
+				else
+				{		
+					if (pChildView->editcur.col != 8) 
+						pChildView->editcur.col = 8;
+					else if ( pChildView->editcur.track != Global::_pSong->SONGTRACKS-1 ) 
+						pChildView->editcur.track = Global::_pSong->SONGTRACKS-1;
+					else 
+						pChildView->editcur.line = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]]-1;
+				}
+				if ( bDoingSelection )
+				{
+					pChildView->ChangeBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				}
+				else if ( settings.bShiftArrowsDoSelect && settings._windowsBlocks) pChildView->BlockUnmark();
+
+
+				pChildView->Repaint(draw_modes::cursor);
+				break;
+			
+			case cdefRowInsert:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->InsertCurr();
+				break;
+
+			case cdefRowDelete:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if (pChildView->blockSelected && settings._windowsBlocks)
+				{
+					pChildView->DeleteBlock();
+				}
+				else
+				{
+					pChildView->DeleteCurr();
+				}
+				break;
+
+			case cdefRowClear:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				if (pChildView->blockSelected && settings._windowsBlocks)
+				{
+					pChildView->DeleteBlock();
+				}
+				else
+				{
+					pChildView->ClearCurr();		
+				}
+				break;
+
+			case cdefBlockStart:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				break;
+
+			case cdefBlockEnd:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->EndBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+				break;
+
+			case cdefSelectAll:
+				{
+					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
+					pChildView->StartBlock(0,0,0);
+					pChildView->EndBlock(Global::_pSong->SONGTRACKS-1,nl-1,8);
+				}
+				break;
+				
+			case cdefSelectCol:
+				{
+					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];
+					pChildView->StartBlock(pChildView->editcur.track,0,0);
+					pChildView->EndBlock(pChildView->editcur.track,nl-1,8);
+				}
+				break;
+
+			case cdefSelectBar:
+			//selects 1 bar, 2 bars, 4 bars... up to number of lines in pattern
+				{
+					const int nl = Global::_pSong->patternLines[Global::_pSong->playOrder[pChildView->editPosition]];			
+								
+					pChildView->bScrollDetatch=false;
+					pChildView->ChordModeOffs = 0;
+					
+					if (pChildView->blockSelectBarState == 1) 
+					{
+						pChildView->StartBlock(pChildView->editcur.track,pChildView->editcur.line,pChildView->editcur.col);
+					}
+
+					int blockLength = (patSettings.timesig * pChildView->blockSelectBarState * Global::_pSong->LinesPerBeat())-1;
+
+					if ((pChildView->editcur.line + blockLength) >= nl-1)
+					{
+						pChildView->EndBlock(pChildView->editcur.track,nl-1,8);	
+						pChildView->blockSelectBarState = 1;
+					}
+					else
+					{
+						pChildView->EndBlock(pChildView->editcur.track,pChildView->editcur.line + blockLength,8);
+						pChildView->blockSelectBarState *= 2;
+					}	
+					
+				}
+				break;
+
+			case cdefEditQuantizeDec:
+				pMainFrame->EditQuantizeChange(-1);
+				break;
+
+			case cdefEditQuantizeInc:
+				pMainFrame->EditQuantizeChange(1);
+				break;
+
+			case cdefTransposeChannelInc:
+				pChildView->patTranspose(1);
+				break;
+			case cdefTransposeChannelDec:
+				pChildView->patTranspose(-1);
+				break;
+			case cdefTransposeChannelInc12:
+				pChildView->patTranspose(12);
+				break;
+			case cdefTransposeChannelDec12:
+				pChildView->patTranspose(-12);
+				break;
+
+			case cdefTransposeBlockInc:
+				pChildView->BlockTranspose(1);
+				break;
+			case cdefTransposeBlockDec:
+				pChildView->BlockTranspose(-1);
+				break;
+			case cdefTransposeBlockInc12:
+				pChildView->BlockTranspose(12);
+				break;
+			case cdefTransposeBlockDec12:
+				pChildView->BlockTranspose(-12);
+				break;
+
+
+			case cdefBlockUnMark:
+				pChildView->BlockUnmark();
+				break;
+
+			case cdefBlockDouble:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->DoubleLength();
+				break;
+
+			case cdefBlockHalve:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->HalveLength();
+				break;
+
+			case cdefBlockCut:
+				pChildView->CopyBlock(true);
+				break;
+
+			case cdefBlockCopy:
+				pChildView->CopyBlock(false);
+				break;
+
+			case cdefBlockPaste:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,false);
+				break;
+
+			case cdefBlockMix:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->PasteBlock(pChildView->editcur.track,pChildView->editcur.line,true);
+				break;
+
+			case cdefBlockDelete:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->DeleteBlock();
+				break;
+
+			case cdefBlockInterpolate:
+				pChildView->BlockParamInterpolate();
+				break;
+
+			case cdefBlockSetMachine:
+				pChildView->BlockGenChange(Global::_pSong->seqBus);
+				break;
+
+			case cdefBlockSetInstr:
+				pChildView->BlockInsChange(Global::_pSong->auxcolSelected);
+				break;
+
+			case cdefOctaveUp:
+				pMainFrame->ShiftOctave(1);
+				break;
+
+			case cdefOctaveDn:
+				pMainFrame->ShiftOctave(-1);
+				break;
 
 			case cdefPlaySong:
 				PlaySong();
@@ -469,23 +685,35 @@ namespace psycle { namespace host {
 				break;
 
 			case cdefPlayRowTrack:
-				pChildView->pattern_view()->PlayCurrentNote();
-				pChildView->pattern_view()->AdvanceLine(1,Global::pConfig->_wrapAround);
+				pChildView->PlayCurrentNote();
+				pChildView->AdvanceLine(1,settings._wrapAround);
 				break;
 
 			case cdefPlayRowPattern:
-				pChildView->pattern_view()->PlayCurrentRow();
-				pChildView->pattern_view()->AdvanceLine(1,Global::pConfig->_wrapAround);
+				pChildView->PlayCurrentRow();
+				pChildView->AdvanceLine(1,settings._wrapAround);
 				break;
 
 			case cdefPlayBlock:
 				pChildView->OnButtonplayseqblock();
 				break;
 
+			case cdefEditToggle:
+				pChildView->bEditMode = !pChildView->bEditMode;
+				pChildView->ChordModeOffs = 0;
+				
+				if(settings.bCtrlPlay) Stop();
+				
+		//		pChildView->Repaint(draw_modes::patternHeader);
+				break;
+
 			case cdefPlayStop:
-				pChildView->pattern_view()->Stop();
+				Stop();
 				break;
 			
+			case cdefSelectMachine:
+				pChildView->SelectMachineUnderCursor();
+				break;
 			case cdefMachineInc:
 				pMainFrame->OnBIncgen();
 				break;
@@ -502,13 +730,33 @@ namespace psycle { namespace host {
 				pMainFrame->OnBDecwav();
 				break;
 
+			case cdefInfoPattern:
+				if ( pChildView->viewMode == view_modes::pattern )
+				{
+					pChildView->ShowPatternDlg();
+				}
+				break;
+
+			case cdefInfoMachine:
+				if (Global::_pSong->seqBus < MAX_MACHINES)
+				{
+					if (Global::_pSong->_pMachine[Global::_pSong->seqBus])
+					{
+						CPoint point;
+						point.x = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_x;
+						point.y = Global::_pSong->_pMachine[Global::_pSong->seqBus]->_y;
+						pMainFrame->ShowMachineGui(Global::_pSong->seqBus, point);//, Global::_pSong->seqBus);
+					}
+				}
+				break;
+
 			case cdefEditMachine:
 				pChildView->OnMachineview();
 				break;
 
 			case cdefEditPattern:
 				pChildView->OnPatternView();
-				pChildView->pattern_view()->ChordModeOffs = 0;
+				pChildView->ChordModeOffs = 0;
 				break;
 
 			case cdefEditInstr:
@@ -520,44 +768,55 @@ namespace psycle { namespace host {
 				break;
 
 			case cdefMaxPattern:		
-				if (pChildView->pattern_view()->maxView == true) 
+				if (pChildView->maxView == true) 
 				{
-					pChildView->pattern_view()->maxView = false;
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,TRUE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,TRUE,FALSE);
+					pChildView->maxView = false;
+					pMainFrame->ShowControlBar(&pMainFrame->m_seqBar,TRUE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_songBar,TRUE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
 				} 
 				else
 				{			
-					pChildView->pattern_view()->maxView = true;
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndSeq,FALSE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndControl,FALSE,FALSE);
+					pChildView->maxView = true;
+					pMainFrame->ShowControlBar(&pMainFrame->m_seqBar,FALSE,FALSE);
+					pMainFrame->ShowControlBar(&pMainFrame->m_songBar,FALSE,FALSE);
 					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
 				}
 				break;
 
 			case cdefPatternInc:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.IncCurPattern();
+				pChildView->ChordModeOffs = 0;
+				pChildView->IncCurPattern();
 				break;
 
 			case cdefPatternDec:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.DecCurPattern();
+				pChildView->ChordModeOffs = 0;
+				pChildView->DecCurPattern();
 				break;
 
 			case cdefSongPosInc:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.IncPosition(brepeat?true:false);
+				pChildView->ChordModeOffs = 0;
+				pChildView->IncPosition(brepeat?true:false);
 				pMainFrame->StatusBarIdle(); 
 				break;
 
 			case cdefSongPosDec:
-				pChildView->pattern_view()->ChordModeOffs = 0;
-				pMainFrame->m_wndSeq.DecPosition();
+				pChildView->ChordModeOffs = 0;
+				pChildView->DecPosition();
 				pMainFrame->StatusBarIdle(); 
 				break;
-			default:;
+
+			case cdefUndo:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->OnEditUndo();
+				break;
+
+			case cdefRedo:
+				pChildView->bScrollDetatch=false;
+				pChildView->ChordModeOffs = 0;
+				pChildView->OnEditRedo();
+				break;
 			}
 		}
 
@@ -573,74 +832,71 @@ namespace psycle { namespace host {
 
 		void InputHandler::PlayFromCur() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			///todo: add proper start play code
-			Global::pPlayer->start(0);
-#else
-			Global::pPlayer->Start(pChildView->pattern_view()->editPosition,pChildView->pattern_view()->editcur.line);
-#endif
+			Global::pPlayer->Start(pChildView->editPosition,pChildView->editcur.line);
 			pMainFrame->StatusBarIdle();
 		}
 
-
-
-		void InputHandler::StopNote(int note, bool bTranspose,Machine*pMachine)
+		void InputHandler::StopNote(int note, int instr, bool bTranspose,Machine*pMachine)
 		{
-			Song* song = &pMainFrame->projects()->active_project()->song();
 			assert(note>=0 && note < 128);
 
-			if(note<0)
-				return;
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = Global::_pSong->auxcolSelected;
 
 			// octave offset 
-			if(note<120)
+			if(note<notecommands::release)
 			{
 				if(bTranspose)
-					note+=song->currentOctave*12;
+					note+=Global::_pSong->currentOctave*12;
 
-				if (note > 119) 
-					note = 119;
+				if (note > notecommands::b9) 
+					note = notecommands::b9;
 			}
 
-			if(!pMachine)
+			if(pMachine==NULL)
 			{
-				int mgn = song->seqBus;
+				int mgn = Global::_pSong->seqBus;
 
 				if (mgn < MAX_MACHINES)
 				{
-					pMachine = song->machine(mgn);
+					pMachine = Global::_pSong->_pMachine[mgn];
 				}
-				if (!pMachine)
-				{
-					return;
-				}
+				if(!pMachine) return;
 			}
 
-			for(int i=0;i<song->tracks();i++)
+			// build entry
+			PatternEntry entry;
+			entry._note = 120;
+			entry._mach = pMachine->_macIndex;
+			entry._cmd = 0;
+			entry._parameter = 0;	
+
+			for(int i=0;i<Global::_pSong->SONGTRACKS;i++)
 			{
-				if(notetrack[i]==note)
+				if(notetrack[i]==note && instrtrack[i]==instNo)
 				{
-					notetrack[i]=120;
-					// build entry
-					PatternEvent entry;
-					entry.setNote(notecommands::release);
-					entry.setInstrument(song->auxcolSelected);
-					entry.setMachine(song->seqBus);
-					entry.setCommand(0);
-					entry.setParameter(0);	
+					notetrack[i]=notecommands::release;
+					instrtrack[i]=255;
+					entry._inst = instNo;
 
 					// play it
-					pMachine->Tick(i,entry);
+					pMachine->Tick(i,&entry);
 				}
 			}
 		}
 
 		// velocity range 0 -> 127
-		void InputHandler::PlayNote(int note,int velocity,bool bTranspose,Machine*pMachine)
+		void InputHandler::PlayNote(int note,int instr, int velocity,bool bTranspose,Machine*pMachine)
 		{
-			Song* song = &pMainFrame->projects()->active_project()->song();
-			// stop any notes with the same value
-			StopNote(note,bTranspose,pMachine);
+			PsycleConfig& config = Global::psycleconf();
+
+			// stop any (stuck) notes with the same value
+			StopNote(note,instr,bTranspose,pMachine);
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = Global::_pSong->auxcolSelected;
 
 			if(note<0)
 				return;
@@ -649,80 +905,71 @@ namespace psycle { namespace host {
 			if(note<120)
 			{
 				if(bTranspose)
-					note+=song->currentOctave*12;
+					note+=Global::_pSong->currentOctave*12;
 
-				if (note > 119) 
-					note = 119;
+				if (note > notecommands::b9) 
+					note = notecommands::b9;
 			}
 
 			// build entry
-			PatternEvent entry;
-			entry.setNote(note);
-			entry.setInstrument(song->auxcolSelected);
-			entry.setMachine(song->seqBus);
+			PatternEntry entry;
+			entry._note = note;
+			entry._inst = instNo;
+			entry._mach = Global::_pSong->seqBus;
 
-			if(velocity != 127 && Global::pConfig->midi().velocity().record())
+			if(velocity != 127 && config.midi().velocity().record())
 			{
-				int par = Global::pConfig->midi().velocity().from() + (Global::pConfig->midi().velocity().to() - Global::pConfig->midi().velocity().from()) * velocity / 127;
+				int par = config.midi().velocity().from() + (config.midi().velocity().to() - config.midi().velocity().from()) * velocity / 127;
 				if (par > 255) par = 255; else if (par < 0) par = 0;
-				switch(Global::pConfig->midi().velocity().type())
-				{
-					case 0:
-						entry.setCommand(Global::pConfig->midi().velocity().command());
-						entry.setParameter(par);
-						break;
-					case 3:
-						entry.setInstrument(par);
-						break;
-				}
+				entry._cmd = config.midi().velocity().command();
+				entry._parameter = par;
 			}
 			else
 			{
-				entry.setCommand(0);
-				entry.setParameter(0);
+				entry._cmd=0;
+				entry._parameter=0;
 			}
 
 			// play it
 			if(pMachine==NULL)
 			{
-				if (entry.machine() < MAX_MACHINES)
+				if (entry._mach < MAX_MACHINES)
 				{
-					pMachine = song->machine(entry.machine());
+					pMachine = Global::_pSong->_pMachine[entry._mach];
 				}
 			}	
 
 			if (pMachine)
 			{
-				// implement lock sample to machine here.
 				// if the current machine is a sampler, check 
 				// if current sample is locked to a machine.
 				// if so, switch entry._mach to that machine number
-				if (pMachine->getMachineKey() == InternalKeys::sampler)
+				if (pMachine->_type == MACH_SAMPLER)
 				{
-					if ((song->_pInstrument[song->auxcolSelected]->_locked_machine_index != -1)
-						&& (song->_pInstrument[song->auxcolSelected]->_locked_to_machine == true))
+					if ((Global::_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
+						&& (Global::_pSong->_pInstrument[instNo]->_LOCKINST == true))
 					{
-						entry.setMachine(song->_pInstrument[song->auxcolSelected]->_locked_machine_index);
-						pMachine = song->machine(entry.machine());
+						entry._mach = Global::_pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
+						pMachine = Global::_pSong->_pMachine[entry._mach];
 						if ( !pMachine) return;
 					}
 				}
 				// pick a track to play it on	
-				if(bMultiKey)
+				if(config.inputHandler().bMultiKey)
 				{
 					int i;
-					for (i = outtrack+1; i < song->tracks(); i++)
+					for (i = outtrack+1; i < Global::_pSong->SONGTRACKS; i++)
 					{
-						if (notetrack[i] == 120)
+						if (notetrack[i] == notecommands::release)
 						{
 							break;
 						}
 					}
-					if (i >= song->tracks())
+					if (i >= Global::_pSong->SONGTRACKS)
 					{
 						for (i = 0; i <= outtrack; i++)
 						{
-							if (notetrack[i] == 120)
+							if (notetrack[i] == notecommands::release)
 							{
 								break;
 							}
@@ -735,184 +982,565 @@ namespace psycle { namespace host {
 					outtrack=0;
 				}
 				// this should check to see if a note is playing on that track
-				if (notetrack[outtrack] < 120)
+				if (notetrack[outtrack] < notecommands::release)
 				{
-					StopNote(notetrack[outtrack], bTranspose, pMachine);
+					StopNote(notetrack[outtrack], instrtrack[outtrack], bTranspose, pMachine);
 				}
 
 				// play
 				notetrack[outtrack]=note;
-				pMachine->Tick(outtrack,entry);
+				instrtrack[outtrack]=instNo;
+				pMachine->Tick(outtrack,&entry);
 			}
 		}
 
-		// configure default keys
-		// messy, but not really any way around it
-// This is also called in ConfigRestore().
-// Remove it from there when/if making a new system.
-		void InputHandler::BuildCmdLUT()
+
+
+		bool InputHandler::EnterData(UINT nChar,UINT nFlags)
 		{
-			for(int i=0;i<MOD_MAX;i++)		
-				for(int j=0;j<256;j++)
-					cmdLUT[i][j].SetNull();
+			if ( pChildView->editcur.col == 0 )
+			{
+				// get command
+				CmdDef cmd = KeyToCmd(nChar,nFlags);
 
-			// immediate commands
-			SetCmd(cdefEditMachine,VK_F2,0,false);
-			SetCmd(cdefEditPattern,VK_F3,0,false);
+		//		BOOL bRepeat = nFlags&0x4000;
+				if ( cmd.GetType() == CT_Note )
+				{
+		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
+		//			{
+						pChildView->EnterNote(cmd.GetNote());
+						return true;
+		//			}
+				}
+				return false;
+			}
+			else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
+			{
+				return pChildView->MSBPut(nChar);
+			}
+			return false;
+		}
 
-			SetCmd(cdefInfoMachine,VK_RETURN,MOD_S,false);
-			SetCmd(cdefInfoPattern,VK_RETURN,MOD_C,false);
-			SetCmd(cdefSelectMachine,VK_RETURN,0,false);		
-			SetCmd(cdefAddMachine,VK_F9,0,false);
-			SetCmd(cdefEditInstr,VK_F10,0,false);
-			SetCmd(cdefMaxPattern,VK_TAB,MOD_C,false);
 
-			SetCmd(cdefOctaveUp,VK_MULTIPLY,0,false);
-			SetCmd(cdefOctaveDn,VK_DIVIDE,MOD_E,false);
+		///////////////////////////////////////////////////////////////////////////////////////////////////
+		// MidiPatternNote
+		//
+		// DESCRIPTION	  : Called by the MIDI input interface to insert pattern notes
+		// PARAMETERS     : int outnote - note to insert/stop . int velocity - velocity of the note, or zero if noteoff
+		// RETURNS		  : <void>
+		// 
+		void InputHandler::MidiPatternNote(int outnote , int macidx, int channel, int velocity)
+		{
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+			PsycleConfig& config = Global::psycleconf();
+			Machine* mac = NULL;
+			if(macidx >=0 && macidx <MAX_BUSES)
+			{
+				mac = Global::_pSong->_pMachine[macidx];
+			}
+			// undo code not required, enter note handles it
+			if(pChildView->viewMode == view_modes::pattern && pChildView->bEditMode)
+			{ 
+				// add note
+				if(velocity > 0 || 
+					(settings._RecordNoteoff && Global::pPlayer->_playing && config._followSong))
+				{
+					pChildView->EnterNote(outnote, channel,velocity,false, mac);
+				}
+				else
+				{
+					StopNote(outnote,channel,false, mac);	// note end
+				}			
+			}
+			else 
+			{
+				// play note
+				if(velocity>0)
+					PlayNote(outnote,channel,velocity,false,mac);
+				else
+					StopNote(outnote,channel,false,mac);
+			}
 
-			SetCmd(cdefMachineDec,VK_LEFT,MOD_C|MOD_E,false);
-			SetCmd(cdefMachineInc,VK_RIGHT,MOD_C|MOD_E,false);
+		}
 
-			SetCmd(cdefInstrDec,VK_DOWN,MOD_C|MOD_E,false);
-			SetCmd(cdefInstrInc,VK_UP,MOD_C|MOD_E,false);
+		void InputHandler::MidiPatternTweak(int busMachine, int command, int value, bool slide) {
+			pChildView->MousePatternTweak(busMachine, command, value, slide);
 
-			SetCmd(cdefPlayRowTrack,'4',0,false);
-			SetCmd(cdefPlayRowPattern,'8',0,false);
+			Song& song = Global::song();
+			// play it
+			Machine* pMachine = song._pMachine[busMachine];
+			if (pMachine)
+			{
+				// build entry
+				PatternEntry entry;
+				entry._mach = busMachine;
+				entry._cmd = (value>>8)&255;
+				entry._parameter = value&255;
+				entry._inst = command;
+				entry._note = (slide)?notecommands::tweakslide : notecommands::tweak;
+				// play
+				pMachine->Tick(pChildView->editcur.track,&entry);
+			}
+		}
+
+		//These are just redirections right now.
+		void InputHandler::MidiPatternCommand(int busMachine, int command, int value){
+			pChildView->MidiPatternCommand(busMachine, command, value);
+		}
+
+		void InputHandler::MidiPatternMidiCommand(int busMachine, int command, int value){
+			pChildView->MidiPatternMidiCommand(busMachine, command, value);
+		}
+
+		void InputHandler::Automate(int macIdx, int param, int value, bool undo)
+		{
+			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
+
+			if(undo) {
+				AddMacViewUndo();
+			}
+
+			if(settings._RecordTweaks)
+			{
+				if(settings._RecordMouseTweaksSmooth)
+					pChildView->MousePatternTweak(macIdx, param, value,true);
+				else
+					pChildView->MousePatternTweak(macIdx, param, value );
+			}
+		}
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// undo/redo code
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		void InputHandler::AddMacViewUndo()
+		{
+			// i have not written the undo code yet for machine and instruments
+			// however, for now it at least tracks changes for save/new/open/close warnings
+			UndoMacCounter++;
+			pChildView->SetTitleBarText();
+		}
+
+		void InputHandler::AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
+		{
+			Song& song = Global::song();
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pUndoList;
+			pUndoList = pNew;
+
+			// fill data
+			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
+			pNew->pData = pData;
+			pNew->pattern = pattern;
+			pNew->x = x;
+			pNew->y = y;
+			if (tracks+x > song.SONGTRACKS)
+			{
+				tracks = song.SONGTRACKS-x;
+			}
+			pNew->tracks = tracks;
+						
+			const int nl = song.patternLines[pattern];
 			
-			SetCmd(cdefPlayStart,VK_F5,MOD_S,false);
-			SetCmd(cdefPlaySong,VK_F5,0,false);
-			SetCmd(cdefPlayBlock,VK_F6,0,false);
-			SetCmd(cdefPlayFromPos,VK_F7,0,false);
-			SetCmd(cdefPlayStop,VK_F8,0,false);
+			if (lines+y > nl)
+			{
+				lines = nl-y;
+			}
+			pNew->lines = lines;
+			pNew->type = UNDO_PATTERN;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
 
-			SetCmd(cdefPatternInc,VK_UP,MOD_S|MOD_E,false);
-			SetCmd(cdefPatternDec,VK_DOWN,MOD_S|MOD_E,false);
-			SetCmd(cdefSongPosInc,VK_RIGHT,MOD_S|MOD_E,false);
-			SetCmd(cdefSongPosDec,VK_LEFT,MOD_S|MOD_E,false);
+			for (int t=x;t<x+tracks;t++)
+			{
+				for (int l=y;l<y+lines;l++)
+				{
+					unsigned char *offset_source=song._ptrackline(pattern,t,l);
+					
+					memcpy(pData,offset_source,EVENT_SIZE);
+					pData+=EVENT_SIZE;
+				}
+			}
+			if (bWipeRedo)
+			{
+				KillRedo();
+				UndoCounter++;
+				pNew->counter = UndoCounter;
+			}
+			else
+			{
+				pNew->counter = counter;
+			}
+			pChildView->SetTitleBarText();
+		}
 
-			SetCmd(cdefEditToggle,' ',0,false);
+		void InputHandler::AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
+		{
+			Song& song = Global::song();
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pRedoList;
+			pRedoList = pNew;
+			// fill data
+			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
+			pNew->pData = pData;
+			pNew->pattern = pattern;
+			pNew->x = x;
+			pNew->y = y;
+			if (tracks+x > song.SONGTRACKS)
+			{
+				tracks = song.SONGTRACKS-x;
+			}
+			pNew->tracks = tracks;
+			const int nl = song.patternLines[pattern];
+			if (lines+y > nl)
+			{
+				lines = nl-y;
+			}
+			pNew->tracks = tracks;
+			pNew->lines = lines;
+			pNew->type = UNDO_PATTERN;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
+			pNew->counter = counter;
 
-			// editor commands
-			SetCmd(cdefColumnNext,VK_TAB,0,false);
-			SetCmd(cdefColumnPrev,VK_TAB,MOD_S,false);
+			for (int t=x;t<x+tracks;t++)
+			{
+				for (int l=y;l<y+lines;l++)
+				{
+					unsigned char *offset_source=song._ptrackline(pattern,t,l);
+					
+					memcpy(pData,offset_source,EVENT_SIZE);
+					pData+=EVENT_SIZE;
+				}
+			}
+		}
 
-			SetCmd(cdefNavUp,VK_UP,MOD_E,false);
-			SetCmd(cdefNavDn,VK_DOWN,MOD_E,false);
-			SetCmd(cdefNavLeft,VK_LEFT,MOD_E,false);
-			SetCmd(cdefNavRight,VK_RIGHT,MOD_E,false);
+		void InputHandler::AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
+		{
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pUndoList;
+			pUndoList = pNew;
+			// fill data
+			pNew->pData = NULL;
+			pNew->pattern = pattern;
+			pNew->x = 0;
+			pNew->y = 0;
+			pNew->tracks = 0;
+			pNew->lines = lines;
+			pNew->type = UNDO_LENGTH;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
 
-			SetCmd(cdefNavPageUp,VK_PRIOR,MOD_E,false);
-			SetCmd(cdefNavPageDn,VK_NEXT,MOD_E,false);
-			SetCmd(cdefNavTop,VK_HOME,MOD_E,false);
-			SetCmd(cdefNavBottom,VK_END,MOD_E,false);
+			if (bWipeRedo)
+			{
+				KillRedo();
+				UndoCounter++;
+				pNew->counter = UndoCounter;
+			}
+			else
+			{
+				pNew->counter = counter;
+			}
+			pChildView->SetTitleBarText();
+		}
 
-			SetCmd(cdefTransposeChannelDec,VK_F1,MOD_C,false);	
-			SetCmd(cdefTransposeChannelInc,VK_F2,MOD_C,false);	
-			SetCmd(cdefTransposeChannelDec12,VK_F1,MOD_C|MOD_S,false);
-			SetCmd(cdefTransposeChannelInc12,VK_F2,MOD_C|MOD_S,false);
+		void InputHandler::AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
+		{
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pRedoList;
+			pRedoList = pNew;
+			// fill data
+			pNew->pData = NULL;
+			pNew->pattern = pattern;
+			pNew->x = 0;
+			pNew->y = 0;
+			pNew->tracks = 0;
+			pNew->lines = lines;
+			pNew->type = UNDO_LENGTH;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
+			pNew->counter = counter;
+		}
 
-			SetCmd(cdefTransposeBlockDec,VK_F11,MOD_C,false);
-			SetCmd(cdefTransposeBlockInc,VK_F12,MOD_C,false);
-			SetCmd(cdefTransposeBlockDec12,VK_F11,MOD_C|MOD_S,false);
-			SetCmd(cdefTransposeBlockInc12,VK_F12,MOD_C|MOD_S,false);	
+		void InputHandler::AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
+		{
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pUndoList;
+			pUndoList = pNew;
+			// fill data
+			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
+			memcpy(pNew->pData, Global::song().playOrder, MAX_SONG_POSITIONS*sizeof(char));
+			pNew->pattern = 0;
+			pNew->x = 0;
+			pNew->y = 0;
+			pNew->tracks = 0;
+			pNew->lines = lines;
+			pNew->type = UNDO_SEQUENCE;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
 
-			SetCmd(cdefPatternCut,VK_F3,MOD_C,false);
-			SetCmd(cdefPatternCopy,VK_F4,MOD_C,false);
-			SetCmd(cdefPatternPaste,VK_F5,MOD_C,false);
-			SetCmd(cdefPatternMixPaste,VK_F5,MOD_C|MOD_S,false);
-			SetCmd(cdefPatternTrackMute,VK_F9,MOD_C,false);
-			SetCmd(cdefPatternTrackSolo,VK_F8,MOD_C,false);
-			SetCmd(cdefPatternTrackRecord,VK_F7,MOD_C,false);
-			SetCmd(cdefFollowSong,'F',MOD_C,false);
-			SetCmd(cdefPatternDelete,VK_F3,MOD_C|MOD_S,false);
+			if (bWipeRedo)
+			{
+				KillRedo();
+				UndoCounter++;
+				pNew->counter = UndoCounter;
+			}
+			else
+			{
+				pNew->counter = counter;
+			}
+			pChildView->SetTitleBarText();
+		}
 
-			SetCmd(cdefRowInsert,VK_INSERT,MOD_E,false);
-			SetCmd(cdefRowDelete,VK_BACK,0,false);
-			SetCmd(cdefRowClear,VK_DELETE,MOD_E,false);
+		void InputHandler::AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
+		{
+			Song& song = Global::song();
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pUndoList;
+			pUndoList = pNew;
+			// fill data
+			// count used patterns
+			unsigned short count = 0;
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
+			{
+				if (song.ppPatternData[i])
+				{
+					count++;
+				}
+			}
+			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
+			unsigned char *pWrite=pNew->pData;
+			memcpy(pWrite, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
+			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
 
-			SetCmd(cdefBlockStart,'B',MOD_C,false);
-			SetCmd(cdefBlockEnd,'E',MOD_C,false);
-			SetCmd(cdefBlockUnMark,'U',MOD_C,false);
-			SetCmd(cdefBlockDouble,'D',MOD_C,false);
-			SetCmd(cdefBlockHalve,'H',MOD_C,false);
-			SetCmd(cdefBlockCut,'X',MOD_C,false);
-			SetCmd(cdefBlockCopy,'C',MOD_C,false);
-			SetCmd(cdefBlockPaste,'V',MOD_C,false);
-			SetCmd(cdefBlockMix,'M',MOD_C,false);
-			SetCmd(cdefBlockInterpolate,'I',MOD_C,false);
-			SetCmd(cdefBlockSetMachine,'G',MOD_C,false);
-			SetCmd(cdefBlockSetInstr,'T',MOD_C,false);
-			SetCmd(cdefBlockDelete,'X',MOD_C|MOD_S,false);
+			memcpy(pWrite, &count, sizeof(count));
+			pWrite+=sizeof(count);
 
-			SetCmd(cdefSelectAll,'A',MOD_C,false);
-			SetCmd(cdefSelectCol,'R',MOD_C,false);
-			SetCmd(cdefSelectBar,'K',MOD_C,false);
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
+			{
+				if (song.ppPatternData[i])
+				{
+					memcpy(pWrite, &i, sizeof(i));
+					pWrite+=sizeof(i);
+					memcpy(pWrite, song.ppPatternData[i], MULTIPLY2);
+					pWrite+=MULTIPLY2;
+				}
+			}
 
-			SetCmd(cdefEditQuantizeInc,221,0,false);    // lineskip + 1
-			SetCmd(cdefEditQuantizeDec,219,0,false);    // lineskip - 1
+			pNew->pattern = 0;
+			pNew->x = 0;
+			pNew->y = 0;
+			pNew->tracks = 0;
+			pNew->lines = song.playLength;
+			pNew->type = UNDO_SONG;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
 
-			// note keys
+			if (bWipeRedo)
+			{
+				KillRedo();
+				UndoCounter++;
+				pNew->counter = UndoCounter;
+			}
+			else
+			{
+				pNew->counter = counter;
+			}
+			pChildView->SetTitleBarText();
+		}
 
-			// octave 0
-			SetCmd(cdefKeyC_0,'Z',0,false);
-			SetCmd(cdefKeyCS0,'S',0,false);
-			SetCmd(cdefKeyD_0,'X',0,false);
-			SetCmd(cdefKeyDS0,'D',0,false);
-			SetCmd(cdefKeyE_0,'C',0,false);
-			SetCmd(cdefKeyF_0,'V',0,false);
-			SetCmd(cdefKeyFS0,'G',0,false);
-			SetCmd(cdefKeyG_0,'B',0,false);
-			SetCmd(cdefKeyGS0,'H',0,false);
-			SetCmd(cdefKeyA_0,'N',0,false);
-			SetCmd(cdefKeyAS0,'J',0,false);
-			SetCmd(cdefKeyB_0,'M',0,false);
+		void InputHandler::AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter)
+		{
+			Song& song = Global::song();
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pRedoList;
+			pRedoList = pNew;
+			// fill data
+			// count used patterns
+			unsigned char count = 0;
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
+			{
+				if (song.ppPatternData[i])
+				{
+					count++;
+				}
+			}
+			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
+			unsigned char *pWrite=pNew->pData;
+			memcpy(pWrite, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
+			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
 
-			// octave 1
-			SetCmd(cdefKeyC_1,'Q',0,false);
-			SetCmd(cdefKeyCS1,'2',0,false);
-			SetCmd(cdefKeyD_1,'W',0,false);
-			SetCmd(cdefKeyDS1,'3',0,false);
-			SetCmd(cdefKeyE_1,'E',0,false);
-			SetCmd(cdefKeyF_1,'R',0,false);
-			SetCmd(cdefKeyFS1,'5',0,false);
-			SetCmd(cdefKeyG_1,'T',0,false);
-			SetCmd(cdefKeyGS1,'6',0,false);
-			SetCmd(cdefKeyA_1,'Y',0,false);
-			SetCmd(cdefKeyAS1,'7',0,false);
-			SetCmd(cdefKeyB_1,'U',0,false);
+			memcpy(pWrite, &count, sizeof(count));
+			pWrite+=sizeof(count);
 
-			// octave 2
-			SetCmd(cdefKeyC_2,'I',0,false);
-			SetCmd(cdefKeyCS2,'9',0,false);
-			SetCmd(cdefKeyD_2,'O',0,false);
-			SetCmd(cdefKeyDS2,'0',0,false);
-			SetCmd(cdefKeyE_2,'P',0,false);
+			for (unsigned short i = 0; i < MAX_PATTERNS; i++)
+			{
+				if (song.ppPatternData[i])
+				{
+					memcpy(pWrite, &i, sizeof(i));
+					pWrite+=sizeof(i);
+					memcpy(pWrite, song.ppPatternData[i], MULTIPLY2);
+					pWrite+=MULTIPLY2;
+				}
+			}
 
-			// special
-			SetCmd(cdefKeyStop,'1',0,false);
-			SetCmd(cdefKeyStopAny,'1',MOD_C,false);
-			SetCmd(cdefTweakM,192,0,false);        // tweak machine (`)
-			SetCmd(cdefTweakS,192,MOD_C,false);        // tweak machine (`)
-			SetCmd(cdefMIDICC,192,MOD_S,false);    // Previously Tweak Effect. Now Mcm Command (~)
+			pNew->pattern = 0;
+			pNew->x = 0;
+			pNew->y = 0;
+			pNew->tracks = 0;
+			pNew->lines = song.playLength;
+			pNew->type = UNDO_SONG;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
+			pNew->counter = counter;
+		}
 
-			/*
-			outnoteLUT[188]	= 12;	// , = C 
-			outnoteLUT['L']	= 13;	// C#
-			outnoteLUT[190]	= 14;	// . = D
-			outnoteLUT[186]	= 15;	// / = D#
-			outnoteLUT[191]	= 16;	// E
+		void InputHandler::AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
+		{
+			Song &song = Global::song();
+			SPatternUndo* pNew = new SPatternUndo;
+			pNew->pPrev = pRedoList;
+			pRedoList = pNew;
+			// fill data
+			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
+			memcpy(pNew->pData, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
+			pNew->pattern = 0;
+			pNew->x = 0;
+			pNew->y = 0;
+			pNew->tracks = 0;
+			pNew->lines = lines;
+			pNew->type = UNDO_SEQUENCE;
+			pNew->edittrack = edittrack;
+			pNew->editline = editline;
+			pNew->editcol = editcol;
+			pNew->seqpos = seqpos;
+			pNew->counter = counter;
+		}
 
+		void InputHandler::KillRedo()
+		{
+			while (pRedoList)
+			{
+				SPatternUndo* pTemp = pRedoList->pPrev;
+				delete pRedoList->pData;
+				delete pRedoList;
+				pRedoList = pTemp;
+			}
+		}
 
-			outnoteLUT['I']	= 24;	// C
-			outnoteLUT['9']	= 25;	// C#
-			outnoteLUT['O']	= 26;	// D
-			outnoteLUT['0']	= 27;	// D#
-			outnoteLUT['P']	= 28;	// E
-			*/
+		void InputHandler::KillUndo()
+		{
+			while (pUndoList)
+			{
+				SPatternUndo* pTemp = pUndoList->pPrev;
+				delete pUndoList->pData;
+				delete pUndoList;
+				pUndoList = pTemp;
+			}
+			UndoCounter = 0;
+			UndoSaved = 0;
 
-			// undo/redo
-			SetCmd(cdefUndo,'Z',MOD_C,false);
-			SetCmd(cdefRedo,'Z',MOD_C|MOD_S,false);
+			UndoMacCounter=0;
+			UndoMacSaved=0;
+
+		//	SetTitleBarText();
+		}
+		bool InputHandler::IsModified()
+		{
+			if(pUndoList)
+			{
+				if (UndoSaved != pUndoList->counter)
+				{
+					return true;
+				}
+			}
+			if (UndoMacSaved != UndoMacCounter)
+			{
+				return true;
+			}
+			else if (UndoSaved != 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		void InputHandler::SafePoint()
+		{
+			if (pUndoList)
+			{
+				UndoSaved = pUndoList->counter;
+			}
+			else
+			{
+				UndoSaved = 0;
+			}
+			UndoMacSaved = UndoMacCounter;
+			pChildView->SetTitleBarText();
+		}
+		bool InputHandler::HasRedo(int viewMode)
+		{
+			if(pRedoList) 
+			{
+				switch (pRedoList->type)
+				{
+				case UNDO_SEQUENCE:
+					return true;
+					break;
+				default:
+					if(viewMode == view_modes::pattern)// && bEditMode)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+					break;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		bool InputHandler::HasUndo(int viewMode)
+		{
+			if(pUndoList) 
+			{
+				switch (pUndoList->type)
+				{
+				case UNDO_SEQUENCE:
+					return true;
+					break;
+				default:
+					if(viewMode == view_modes::pattern)// && bEditMode)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+					break;
+				}
+			}
+			else
+			{
+				return false;
+			}
 		}
 	}
 }

@@ -1,31 +1,18 @@
 // TransformPatternDlg.cpp : implementation file
-//
-
 #include <psycle/host/detail/project.private.hpp>
 #include "TransformPatternDlg.hpp"
-
-#include "PatternView.hpp"
-
-#include <psycle/helpers/hexstring_to_integer.hpp>
-
+#include "Song.hpp"
 namespace psycle { namespace host {
 
 		// CTransformPatternDlg dialog
 
 		IMPLEMENT_DYNAMIC(CTransformPatternDlg, CDialog)
 
-		CTransformPatternDlg::CTransformPatternDlg(CChildView* pChildView, CWnd* pParent /*=NULL*/)
+		CTransformPatternDlg::CTransformPatternDlg(Song* _pSong, CWnd* pParent /*=NULL*/)
 			: CDialog(CTransformPatternDlg::IDD, pParent)
 		{
-			_pChildView = pChildView;
+			pSong = _pSong;
 			m_applyto = 0;
-		}
-
-		CTransformPatternDlg::CTransformPatternDlg(PatternView* pattern_view, CWnd* pParent /*=NULL*/)
-			: CDialog(CTransformPatternDlg::IDD, pParent),
-			  pattern_view_(pattern_view),
-			  m_applyto(0)
-		{			
 		}
 
 		CTransformPatternDlg::~CTransformPatternDlg()
@@ -101,6 +88,8 @@ namespace psycle { namespace host {
 			int replaceins = -1;
 			int replacemac = -1;
 
+			using helpers::hexstring_to_integer;
+
 			if (afilterins[0] !=	'\0')
 				filterins = hexstring_to_integer(afilterins);
 
@@ -127,61 +116,61 @@ namespace psycle { namespace host {
 				if (filtermac != -1)
 					matchTarget++;
 
-				Song & song = *pattern_view_->song();
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
-				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
-				int columnCount = MAX_TRACKS;
-				int lineCount;
 				int currentPattern;
 				int currentColumn;
 				int currentLine;
-#endif
+
+				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
+				int columnCount = MAX_TRACKS;
+				int lineCount;
+
 				int currentins;
 				int currentmac;
 
 				int matchCount;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
+				PatternEntry* patternEntry;
 
-				Sequence::patterns_type::iterator patite = song.sequence().patterns_begin();
-				for ( ; patite != song.sequence().patterns_end(); ++patite) {
-					Pattern::iterator eventite = (**patite).begin();
-					PatternEvent pat_event = eventite->second;
-
-#else
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
-					if (!song.isPatternEmpty(currentPattern))
+					if (!pSong->IsPatternEmpty(currentPattern))
 					{				
-						PatternEvent* patternEntry = (PatternEvent*) song._ppattern(currentPattern);
+						patternEntry = (PatternEntry*) pSong->_ppattern(currentPattern);
 						lineCount = pSong->patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{
 							for (currentColumn = 0; currentColumn < columnCount; currentColumn++)
 							{
-								PatternEvent pat_event = patternEntry[(currentLine*columnCount)+currentColumn];
-#endif
-								currentins = pat_event.instrument();
-								currentmac = pat_event.machine();																																							
+								currentins = patternEntry[(currentLine*columnCount)+currentColumn]._inst;
+								currentmac = patternEntry[(currentLine*columnCount)+currentColumn]._mach;																																							
 
 								matchCount = 0;
 
-								if(currentins == filterins) ++matchCount;
-								if(currentmac == filtermac) ++matchCount;
-								if(matchCount == matchTarget) {
-									if(filterins != -1)
-										pat_event.setInstrument(replaceins);
-									if(filtermac != -1)
-										pat_event.setMachine(replacemac);
+								if (currentins == filterins)
+								{
+									matchCount++;
 								}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-							}
-#else
+
+								if (currentmac == filtermac)
+								{
+									matchCount++;
+								}
+
+								if (matchCount == matchTarget)
+								{
+									if (filterins != -1)
+									{
+										patternEntry[(currentLine*columnCount)+currentColumn]._inst = replaceins;
+									}
+									if (filtermac != -1)
+									{
+										patternEntry[(currentLine*columnCount)+currentColumn]._mach = replacemac;
+									}
+								}
 							}
 						}
 					}
 				}
-#endif
 			}
 		}
 	}   // namespace

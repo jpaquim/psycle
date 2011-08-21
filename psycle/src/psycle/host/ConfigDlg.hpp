@@ -7,10 +7,11 @@
 #include "SkinDlg.hpp"
 #include "OutputDlg.hpp"
 #include "MidiInputDlg.hpp"
-#include "Configuration.hpp"
 #include "KeyConfigDlg.hpp"
 
 namespace psycle { namespace host {
+
+		class PsycleConfig;
 
 		/// config window.
 		class CConfigDlg : public CPropertySheet
@@ -19,36 +20,24 @@ namespace psycle { namespace host {
 		public:
 			CConfigDlg(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 			CConfigDlg(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-		// Attributes
+			virtual ~CConfigDlg();
+		// Operations
 		public:
+			void AddControlPages();
+		// Overrides
+		public:
+			virtual INT_PTR DoModal();
+		// Implementation
+		protected:
 			CDirectoryDlg _dirDlg;
 			CSkinDlg _skinDlg;
 			COutputDlg _outputDlg;
 			CMidiInputDlg _midiDlg;
 			CKeyConfigDlg _keyDlg;
-		// Operations
-		public:
-			void Init(Configuration* pConfig,int dlgnum=0);
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CConfigDlg)
-			public:
-			virtual INT_PTR DoModal();
-			//}}AFX_VIRTUAL
-		// Implementation
-		public:
-			virtual ~CConfigDlg();
-			// Generated message map functions
+
+			PsycleConfig* _pConfig;
 		protected:
-			Configuration* _pConfig;
-			//{{AFX_MSG(CConfigDlg)
- 				// NOTE - the ClassWizard will add and remove member functions here.
-			//}}AFX_MSG
 			DECLARE_MESSAGE_MAP()
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 	}   // namespace
 }   // namespace

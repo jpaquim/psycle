@@ -1,12 +1,12 @@
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#include <psycle/host/detail/project.private.hpp>
 #include "internal_machines.hpp"
 #include "Configuration.hpp"
 #include "Song.hpp"
 #include "Player.hpp"
 #include "AudioDriver.hpp"
-#include "Global.hpp"
-#include <universalis/stdlib/cstdint.hpp>
+#include "cpu_time_clock.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -36,13 +36,11 @@ namespace psycle
 			else
 				wasVST = false;
 		}
-		void Dummy::Work(int numSamples)
+		int Dummy::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
-			Machine::Work(numSamples);
-			cpu::cycles_type cost = cpu::cycles();
 			UpdateVuAndStanbyFlag(numSamples);
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}
 
 		// Since Dummy is used by the loader to load broken/missing plugins, 
@@ -118,22 +116,22 @@ namespace psycle
 		}
 
 
-		void MultiMachine::Tick( int channel,PatternEvent* pData)
+		void MultiMachine::Tick( int channel,PatternEntry* pData)
 		{
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && Global::song().machine(macOutput[i]) != NULL )
+					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
 					{
 						AllocateVoice(channel,i);
-						PatternEvent pTemp = *pData;
+						PatternEntry pTemp = *pData;
 						CustomTick(channel,i, pTemp);
 						// this can happen if the parameter is the machine itself.
-						if (Global::song().machine(macOutput[i]) != this) 
+						if (Global::_pSong->_pMachine[macOutput[i]] != this) 
 						{
-							Global::song().machine(macOutput[i])->Tick(allocatedchans[channel][i],&pTemp);
+							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
 							if (pTemp._note >= notecommands::release )
 							{
 								DeallocateVoice(channel,i);
@@ -207,7 +205,7 @@ namespace psycle
 
 		}
 
-		void DuplicatorMac::CustomTick(int channel,int i, PatternEvent& pData)
+		void DuplicatorMac::CustomTick(int channel,int i, PatternEntry& pData)
 		{
 			if ( pData._note < notecommands::release )
 			{
@@ -247,9 +245,9 @@ namespace psycle
 		{
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::song().machine(macOutput[numparam]) != NULL))
+				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song().machine(macOutput[numparam])->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
@@ -272,10 +270,11 @@ namespace psycle
 			else return false;
 		}
 
-		void DuplicatorMac::Work(int numSamples)
+		int DuplicatorMac::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
-			_worked = true;
+			recursive_processed_ = true;
 			Standby(true);
+			return numSamples;
 		}
 		bool DuplicatorMac::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
@@ -305,16 +304,12 @@ namespace psycle
 			sprintf(_editName, _psName);
 			_initialized=false;
 			_captureidx=0;
-			pleftorig=_pSamplesL;
-			prightorig=_pSamplesR;
 			_gainvol=1.0f;
 		}
 		AudioRecorder::~AudioRecorder()
 		{
 			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 			if (_initialized) mydriver.RemoveCapturePort(_captureidx);
-			_pSamplesL=pleftorig;
-			_pSamplesR=prightorig;
 		}
 		void AudioRecorder::Init(void)
 		{
@@ -323,6 +318,7 @@ namespace psycle
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
 				_initialized = mydriver.AddCapturePort(_captureidx);
+				strncpy(drivername,mydriver.settings().GetInfo()._psName,32);
 			}
 		}
 		void AudioRecorder::ChangePort(int newport)
@@ -333,29 +329,36 @@ namespace psycle
 				mydriver.Enable(false);
 				mydriver.RemoveCapturePort(_captureidx);
 				_initialized=false;
-				_pSamplesL=pleftorig;
-				_pSamplesR=prightorig;
 			}
 			_initialized = mydriver.AddCapturePort(newport);
 			_captureidx = newport;
+			strncpy(drivername,mydriver.settings().GetInfo()._psName,32);
 			mydriver.Enable(true);
 		}
-		void AudioRecorder::Work(int numSamples)
+		int AudioRecorder::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
 			if (!_mute &&_initialized)
 			{
 				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-				mydriver.GetReadBuffers(_captureidx,&_pSamplesL,&_pSamplesR,numSamples);
-				// prevent crashing if the audio driver is not working.
-				if ( _pSamplesL == 0 ) { _pSamplesL=pleftorig; _pSamplesR=prightorig; }
-				helpers::dsp::Mul(_pSamplesL,numSamples,_gainvol);
-				helpers::dsp::Mul(_pSamplesR,numSamples,_gainvol);
-				helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
+				AudioDriverInfo &myinfo = mydriver.settings().GetInfo();
+				if(strcmp(myinfo._psName, drivername)) {
+					_initialized = false;
+					return numSamples;
+				}
+				mydriver.GetReadBuffers(_captureidx,&pleftorig,&prightorig,numSamples);
+				if(pleftorig == NULL) {
+					helpers::dsp::Clear(_pSamplesL,numSamples);
+					helpers::dsp::Clear(_pSamplesR,numSamples);
+				}
+				else {
+					helpers::dsp::MovMul(pleftorig,_pSamplesL,numSamples,_gainvol);
+					helpers::dsp::MovMul(prightorig,_pSamplesR,numSamples,_gainvol);
+				}
 				UpdateVuAndStanbyFlag(numSamples);
 			}
 			else Standby(true);
-			_cpuCost = 1;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}
 		bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 		{
@@ -383,6 +386,9 @@ namespace psycle
 			_type = MACH_MIXER;
 			_mode = MACHMODE_FX;
 			sprintf(_editName, _psName);
+			mixed=true;
+			sched_returns_processed_curr=0;
+			sched_returns_processed_prev=0;
 		}
 
 		Mixer::~Mixer() throw()
@@ -400,66 +406,72 @@ namespace psycle
 			solocolumn_=-1;
 		}
 
-		void Mixer::Tick( int channel,PatternEvent* pData)
+		void Mixer::Tick( int channel,PatternEntry* pData)
 		{
-			if(pData->note() == notecommands::tweak)
+			if(pData->_note == notecommands::tweak)
 			{
-				int nv = (pData->command()<<8)+pData->parameter();
-				SetParameter(pData->instrument(),nv);
-				Global::player().Tweaker = true;
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				SetParameter(pData->_inst,nv);
 			}
-			else if(pData->note() == notecommands::tweakslide)
+			else if(pData->_note == notecommands::tweakslide)
 			{
 				//\todo: Tweaks and tweak slides should not be a per-machine thing, but rather be player centric.
 				// doing simply "tweak" for now..
-				int nv = (pData->command()<<8)+pData->parameter();
-				SetParameter(pData->instrument(),nv);
-				Global::player().Tweaker = true;
+				int nv = (pData->_cmd<<8)+pData->_parameter;
+				SetParameter(pData->_inst,nv);
 			}
 		}
-
-		void Mixer::Work(int numSamples)
-		{
-			if ( _mute || Bypass())
-			{
-				Machine::Work(numSamples);
+		void Mixer::recursive_process(unsigned int frames, bool measure_cpu_usage) {
+			if(_mute || Bypass()) {
+				recursive_process_deps(frames, true, measure_cpu_usage);
 				return;
 			}
 
 			// Step One, do the usual work, except mixing all the inputs to a single stream.
-			Machine::WorkNoMix(numSamples);
+			recursive_process_deps(frames, false, measure_cpu_usage);
 			// Step Two, prepare input signals for the Send Fx, and make them work
-			FxSend(numSamples);
-			// Step Three, Mix the returns of the Send Fx's with the leveled input signal
-			cpu::cycles_type cost = cpu::cycles();
-			Mix(numSamples);
-			helpers::dsp::Undenormalize(_pSamplesL,_pSamplesR,numSamples);
-			UpdateVuAndStanbyFlag(numSamples);
-			_cpuCost += cpu::cycles() - cost;
+			sched_returns_processed_curr=0;
+			FxSend(frames, true, measure_cpu_usage);
+			{ // Step Three, Mix the returns of the Send Fx's with the leveled input signal
+				cpu_time_clock::time_point t0;
+				if(measure_cpu_usage) t0 = cpu_time_clock::now();
+				Mix(frames);
+				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+				Machine::UpdateVuAndStanbyFlag(frames);
+				if(measure_cpu_usage) {
+					cpu_time_clock::time_point const t1(cpu_time_clock::now());
+					accumulate_processing_time(t1 - t0);
+				}
+			}
 
-			_worked = true;
+			recursive_processed_ = true;
 		}
 
-		void Mixer::FxSend(int numSamples)
+		void Mixer::FxSend(int numSamples, bool recurse, bool measure_cpu_usage)
 		{
-			for (int i=0; i<numsends(); i++)
+			// Note: Since mixer allows to route returns to other sends, this needs
+			// to stop in non-recurse mode when the first of such routes is found
+			sched_returns_processed_prev=sched_returns_processed_curr;
+			int i;
+			for (i=sched_returns_processed_curr; i<numsends(); i++)
 			{
 				if (sends_[i].IsValid())
 				{
-					Machine* pSendMachine = Global::song().machine(sends_[i].machine_);
+					Machine* pSendMachine = Global::song()._pMachine[sends_[i].machine_];
 					assert(pSendMachine);
-					if (!pSendMachine->_worked && !pSendMachine->_waitingForSound)
+					if (!pSendMachine->recursive_processed_ && !pSendMachine->recursive_is_processing_)
 					{ 
+						cpu_time_clock::time_point t0;
+						if(measure_cpu_usage) t0 = cpu_time_clock::now();
 						bool soundready=false;
 						// Mix all the inputs and route them to the send fx.
 						{
-							cpu::cycles_type cost = cpu::cycles();
 							if ( solocolumn_ >=0 && solocolumn_ < MAX_CONNECTIONS)
 							{
 								int j = solocolumn_;
 								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = Global::song().machine(_inputMachines[j]);
+									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
@@ -473,7 +485,7 @@ namespace psycle
 							{
 								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = Global::song().machine(_inputMachines[j]);
+									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
 									assert(pInMachine);
 									if(!pInMachine->_mute && !pInMachine->Standby())
 									{
@@ -487,8 +499,17 @@ namespace psycle
 							{
 								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j][i] != 0.0f || mixvolretpr[j][i] != 0.0f ))
 								{
-									Machine* pRetMachine = Global::song().machine(Return(j).Wire().machine_);
+									Machine* pRetMachine = Global::song()._pMachine[Return(j).Wire().machine_];
 									assert(pRetMachine);
+									// Note: Since mixer allows to route returns to other sends, this needs
+									// to stop when the first of such routes is found.
+									if(!recurse) 
+									{
+										if(!pRetMachine->sched_processed_) {
+											sched_returns_processed_curr=i;
+											return;
+										}
+									}
 									if(!pRetMachine->_mute && !pRetMachine->Standby())
 									{
 										helpers::dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[j][i]);
@@ -498,28 +519,24 @@ namespace psycle
 								}
 							}
 							if (soundready) pSendMachine->Standby(false);
-							_cpuCost += cpu::cycles() - cost ;
 						}
 
 						// tell the FX to work, now that the input is ready.
-						{
-							Machine* pRetMachine = Global::song().machine(Return(i).Wire().machine_);
-							pRetMachine->Work(numSamples);
+						if(recurse){
+							//Time is only accumulated in recurse mode, because in shed mode the sched_process method already does it.
+							if(measure_cpu_usage) {
+								cpu_time_clock::time_point const t1(cpu_time_clock::now());
+								accumulate_processing_time(t1 - t0);
+							}
+							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
+							pRetMachine->recursive_process(numSamples, measure_cpu_usage);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
-							if(!pRetMachine->Standby()) Standby(false);
+							if(!pRetMachine->Standby())Standby(false);
 						}
-						///todo: why was this here? It is already done in PreWork()
-/*						{
-							cpu::cycles_type cost = cpu::cycles();
-							pSendMachine->_waitingForSound = false;
-							helpers::dsp::Clear(_pSamplesL, numSamples);
-							helpers::dsp::Clear(_pSamplesR, numSamples);
-							_cpuCost += cpu::cycles() - cost;
-						}
-*/
 					}
 				}
 			}
+			sched_returns_processed_curr=i;
 		}
 
 		void Mixer::Mix(int numSamples)
@@ -531,7 +548,7 @@ namespace psycle
 					int i= solocolumn_-MAX_CONNECTIONS;
 					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
-						Machine* pRetMachine = Global::song().machine(Return(i).Wire().machine_);
+						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
@@ -544,7 +561,7 @@ namespace psycle
 				{
 					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
-						Machine* pRetMachine = Global::song().machine(Return(i).Wire().machine_);
+						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
 						assert(pRetMachine);
 						if(!pRetMachine->_mute && !pRetMachine->Standby())
 						{
@@ -561,7 +578,7 @@ namespace psycle
 					int i = solocolumn_;
 					if (ChannelValid(i) && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = Global::song().machine(_inputMachines[i]);
+						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
@@ -574,7 +591,7 @@ namespace psycle
 				{
 					if (_inputCon[i] && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = Global::song().machine(_inputMachines[i]);
+						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
 						assert(pInMachine);
 						if(!pInMachine->_mute && !pInMachine->Standby())
 						{
@@ -585,6 +602,63 @@ namespace psycle
 				}
 			}
 		}
+
+		/// tells the scheduler which machines to process before this one
+		void Mixer::sched_inputs(sched_deps & result) const {
+			if(mixed) {
+				// step 1: receive all standard inputs
+				Machine::sched_inputs(result);
+			} else {
+				// step 2: get the output from return fx that have been processed
+				for(unsigned int i = sched_returns_processed_prev; i < sched_returns_processed_curr; ++i) {
+					if(Return(i).IsValid()) {
+						Machine & returned(*Global::_pSong->_pMachine[Return(i).Wire().machine_]);
+						result.push_back(&returned);
+					}
+				}
+			}
+		}
+
+		/// tells the scheduler which machines may be processed after this one
+		void Mixer::sched_outputs(sched_deps & result) const {
+			if(!mixed) {
+				// step 1: signal sent to sends. Identify them.
+				for (unsigned int i=sched_returns_processed_prev; i<sched_returns_processed_curr; i++) if (Send(i).IsValid()) {
+					Machine & input(*Global::_pSong->_pMachine[Send(i).machine_]);
+					result.push_back(&input);
+				}
+			} else {
+				// step 2: everything done, our outputs will be the next connections
+				Machine::sched_outputs(result);
+			}
+		}
+
+		/// called by the scheduler to ask for the actual processing of the machine
+		bool Mixer::sched_process(unsigned int frames, bool measure_cpu_usage) {
+			cpu_time_clock::time_point t0;
+			if(measure_cpu_usage) t0 = cpu_time_clock::now();
+
+			if( sched_returns_processed_curr < numreturns()) {
+				mixed = false;
+				// step 1: send signal to fx
+				FxSend(frames, false, measure_cpu_usage);
+			} else {
+				// step 2: mix with return fx
+				Mix(frames);
+				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
+				Machine::UpdateVuAndStanbyFlag(frames);
+				mixed = true;
+				sched_returns_processed_curr=0;
+			}
+			if(measure_cpu_usage){ 
+				cpu_time_clock::time_point const t1(cpu_time_clock::now());
+				accumulate_processing_time(t1 - t0);
+			}
+			if(mixed) ++processing_count_;
+			
+			return mixed;
+		}
+
 		float Mixer::GetWireVolume(int wireIndex)
 		{
 			if (wireIndex< MAX_CONNECTIONS)
@@ -631,7 +705,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				SetMixerSendFlag(pSong,pSong->machine(srcmac));
+				SetMixerSendFlag(pSong,pSong->_pMachine[srcmac]);
 				MixerWire wire(srcmac,0);
 				// If we're replacing an existing connection
 				if ( ReturnValid(wireIndex))
@@ -697,7 +771,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				DeleteMixerSendFlag(pSong,pSong->machine(Return(wireIndex).Wire().machine_));
+				DeleteMixerSendFlag(pSong,pSong->_pMachine[Return(wireIndex).Wire().machine_]);
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
@@ -707,7 +781,7 @@ namespace psycle
 		void Mixer::NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac)
 		{
 			// Mixer reached, set flags upwards.
-			SetMixerSendFlag(pSong,pSong->machine(callerMac));
+			SetMixerSendFlag(pSong,pSong->_pMachine[callerMac]);
 			for (int i(0); i < MAX_CONNECTIONS; i++)
 			{
 				if ( ReturnValid(i))
@@ -715,7 +789,7 @@ namespace psycle
 					if (Return(i).Wire().machine_ == callerMac)
 					{
 						sends_[i].machine_ = senderMac;
-						sends_[i].normalize_ = GetAudioRange()/pSong->machine(senderMac)->GetAudioRange();
+						sends_[i].normalize_ = GetAudioRange()/pSong->_pMachine[senderMac]->GetAudioRange();
 						for (int ch(0);ch<numinputs();ch++)
 						{
 							RecalcSend(ch,i);
@@ -728,7 +802,7 @@ namespace psycle
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong->machine(mac->_inputMachines[i]));
+				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=true;
 		}
@@ -736,7 +810,7 @@ namespace psycle
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong->machine(mac->_inputMachines[i]));
+				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=false;
 		}
@@ -750,7 +824,7 @@ namespace psycle
 				// Checking send/return Wires
 				if(Return(w).IsValid())
 				{
-					iMac = pSong->machine(Return(w).Wire().machine_);
+					iMac = pSong->_pMachine[Return(w).Wire().machine_];
 					if (iMac)
 					{
 						int wix = iMac->FindOutputWire(_macIndex);
@@ -797,15 +871,22 @@ namespace psycle
 			if ( channel == 0)
 			{
 				if (param == 0){ minval=0; maxval=0x1000; }
-				else if (param <= 12)  { minval=0; maxval=0x1000; }
+				else if (param <= 12)  {
+					if (!ChannelValid(param-1)) { minval=0; maxval=0; }
+					else { minval=0; maxval=0x1000; }
+				}
 				else if (param == 13) { minval=0; maxval=0x100; }
 				else if (param == 14) { minval=0; maxval=0x400; }
 				else  { minval=0; maxval=0x100; }
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0) { minval=0; maxval=0x100; }
-				else if (param <= 12) { minval=0; maxval=0x100; }
+				if (!ChannelValid(channel-1)) { minval=0; maxval=0; }
+				else if (param == 0) { minval=0; maxval=0x100; }
+				else if (param <= 12) {
+					if(!ReturnValid(param-1)) { minval=0; maxval=0; }
+					else { minval=0; maxval=0x100; }
+				}
 				else if (param == 13) { minval=0; maxval=3; }
 				else if (param == 14) { minval=0; maxval=0x400; }
 				else  { minval=0; maxval=0x100; }
@@ -814,16 +895,19 @@ namespace psycle
 			{
 				if ( param > 12) { minval=0; maxval=0; }
 				else if ( param == 0 ) { minval=0; maxval=24; }
+				else if (!ReturnValid(param-1)) { minval=0; maxval=0; }
 				else { minval=0; maxval=(1<<14)-1; }
 			}
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) { minval=0; maxval=0; }
+				else if (!ReturnValid(param-1)) { minval=0; maxval=0; }
 				else { minval=0; maxval=0x1000; }
 			}
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) { minval=0; maxval=0; }
+				else if (!ReturnValid(param-1)) { minval=0; maxval=0; }
 				else { minval=0; maxval=0x100; }
 			}
 			else { minval=0; maxval=0; }
@@ -880,8 +964,11 @@ namespace psycle
 				}
 				else if (param <= 12)
 				{
-					float dbs = helpers::dsp::dB(Channel(param-1).Volume());
-					return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+					if (!ChannelValid(param-1)) return 0;
+					else {
+						float dbs = helpers::dsp::dB(Channel(param-1).Volume());
+						return (dbs+96.0f)*42.67; // *(0x1000 / 96.0f)
+					}
 				}
 				else if (param == 13) return master_.DryWetMix()*0x100;
 				else if (param == 14) return master_.Gain()*0x100;
@@ -889,8 +976,13 @@ namespace psycle
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0) return Channel(channel-1).DryMix()*0x100;
-				else if (param <= 12) return Channel(channel-1).Send(param-1)*0x100;
+				if (!ChannelValid(channel-1)) return 0;
+				else if (param == 0) return Channel(channel-1).DryMix()*0x100;
+				else if (param <= 12)
+				{
+					if ( !ReturnValid(param-1)) return 0;
+					else return Channel(channel-1).Send(param-1)*0x100;
+				}
 				else if (param == 13)
 				{
 					if (Channel(channel-1).Mute()) return 3;
@@ -905,6 +997,7 @@ namespace psycle
 			{
 				if ( param > 12) return 0;
 				else if (param == 0 ) return solocolumn_+1;
+				else if ( !ReturnValid(param-1)) return 0;
 				else 
 				{
 					int val(0);
@@ -920,6 +1013,7 @@ namespace psycle
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return 0;
+				else if ( !ReturnValid(param-1)) return 0;
 				else
 				{
 					float dbs = helpers::dsp::dB(Return(param-1).Volume());
@@ -929,6 +1023,7 @@ namespace psycle
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return 0;
+				else if ( !ReturnValid(param-1)) return 0;
 				else return Return(param-1).Panning()*0x100;
 			}
 			else return 0;
@@ -952,7 +1047,8 @@ namespace psycle
 				}
 				else if (param <= 12)
 				{ 
-					if (Channel(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
+					if (!ChannelValid(param-1)) return;
+					else if (Channel(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
 					else
 					{
 						float dbs = helpers::dsp::dB(Channel(param-1).Volume());
@@ -981,14 +1077,16 @@ namespace psycle
 			}
 			else if (channel <= 12 )
 			{
-				if (param == 0)
+				if (!ChannelValid(channel-1)) return;
+				else if (param == 0)
 				{
 					if (Channel(channel-1).DryMix() == 0.0f) strcpy(parVal,"Off");
 					else sprintf(parVal,"%.0f%%",Channel(channel-1).DryMix()*100.0f);
 				}
 				else if (param <= 12)
 				{
-					if (Channel(channel-1).Send(param-1) == 0.0f) strcpy(parVal,"Off");
+					if ( !ReturnValid(param-1)) return;
+					else if (Channel(channel-1).Send(param-1) == 0.0f) strcpy(parVal,"Off");
 					else sprintf(parVal,"%.0f%%",Channel(channel-1).Send(param-1)*100.0f);
 				}
 				else if (param == 13)
@@ -1017,6 +1115,7 @@ namespace psycle
 			{
 				if ( param > 12) return;
 				else if (param == 0 ){ sprintf(parVal,"%d",solocolumn_+1); }
+				else if ( !ReturnValid(param-1))  return;
 				else 
 				{
 					parVal[0]= (Return(param-1).Mute())?'M':' ';
@@ -1039,19 +1138,18 @@ namespace psycle
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return;
+				else if ( !ReturnValid(param-1)) return;
+				else if (Return(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
 				else
 				{ 
-					if (Return(param-1).Volume() < 0.00002f ) strcpy(parVal,"-inf");
-					else
-					{
-						float dbs = helpers::dsp::dB(Return(param-1).Volume());
-						sprintf(parVal,"%.01fdB",dbs);
-					}
+					float dbs = helpers::dsp::dB(Return(param-1).Volume());
+					sprintf(parVal,"%.01fdB",dbs);
 				}
 			}
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return;
+				else if ( !ReturnValid(param-1)) return;
 				else
 				{
 					if (Return(param-1).Panning()== 0.0f) strcpy(parVal,"left");
@@ -1081,7 +1179,8 @@ namespace psycle
 				}
 				else if (param <= 12)
 				{
-					if ( value >= 0x1000) Channel(param-1).Volume()=1.0f;
+					if (!ChannelValid(param-1)) return false;
+					else if ( value >= 0x1000) Channel(param-1).Volume()=1.0f;
 					else if ( value == 0) Channel(param-1).Volume()=0.0f;
 					else
 					{
@@ -1097,6 +1196,7 @@ namespace psycle
 			}
 			else if (channel <= 12 )
 			{
+				if (!ChannelValid(channel-1)) return false;
 				if (param == 0) { Channel(channel-1).DryMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
 				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1); } 
 				else if (param == 13)
@@ -1113,6 +1213,7 @@ namespace psycle
 			{
 				if ( param > 12) return false;
 				else if (param == 0) solocolumn_ = (value<24)?value-1:23;
+				else if (!ReturnValid(param-1)) return false;
 				else 
 				{
 					Return(param-1).Mute() = (value&1)?true:false;
@@ -1128,6 +1229,7 @@ namespace psycle
 			else if ( channel == 14)
 			{
 				if ( param == 0 || param > 12) return false;
+				else if (!ReturnValid(param-1)) return false;
 				else
 				{
 					if ( value >= 0x1000) Return(param-1).Volume()=1.0f;
@@ -1144,6 +1246,7 @@ namespace psycle
 			else if ( channel == 15)
 			{
 				if ( param == 0 || param > 12) return false;
+				else if (!ReturnValid(param-1)) return false;
 				else { Return(param-1).Panning() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcReturn(param-1); }
 				return true;
 			}
@@ -1154,11 +1257,13 @@ namespace psycle
 		{
 			if ( _inputCon[idx] ) 
 			{
+				//Note that since volumeDisplay is integer, when using positive gain,
+				//the result can visually differ from the calculated one
 				float vol;
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
-				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (Global::song().machine(_inputMachines[idx])->_volumeDisplay/97.0f)*vol;
+				int temp(lround<int>(50.0f * std::log10(vol)));
+				return (Global::song()._pMachine[_inputMachines[idx]]->_volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
 		}
@@ -1167,11 +1272,13 @@ namespace psycle
 		{
 			if ( SendValid(idx) )
 			{
+				//Note that since volumeDisplay is integer, when using positive gain,
+				// the result can visually differ from the calculated one
 				float vol;
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
-				///\todo: DANG! _volumeDisplay is not proportional to the volume, so this doesn't work as expected
-				return (Global::song().machine(Return(idx).Wire().machine_)->_volumeDisplay/97.0f)*vol;
+				int temp(lround<int>(50.0f * std::log10(vol)));
+				return (Global::song()._pMachine[Return(idx).Wire().machine_]->_volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
 		}
@@ -1510,4 +1617,3 @@ namespace psycle
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

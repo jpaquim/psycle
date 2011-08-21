@@ -1,55 +1,51 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUI.hpp"
-
-#include "ChildView.hpp"
-#include "MachineGui.hpp"
-
-#include <psycle/core/xmsampler.h>
+#include "XMSampler.hpp"
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
 
 namespace psycle { namespace host {
 
-extern CPsycleApp theApp;
 
 IMPLEMENT_DYNAMIC(XMSamplerUI, CPropertySheet)
 
 XMSamplerUI::XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
 : CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 , init(false)
-	{
-	}
+, windowVar_(NULL)
+{
+}
 
 XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
 :CPropertySheet(pszCaption, pParentWnd, iSelectPage)
 , init(false)
-	{
-	}
-
-XMSamplerUI::XMSamplerUI(LPCTSTR pszCaption, MachineGui* gui, CWnd* pParentWnd, UINT iSelectPage)
-:CPropertySheet(pszCaption, pParentWnd, iSelectPage),
-gui_(gui)
-, init(false)
-	{
-	}
-
-BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
-	//{{AFX_MSG_MAP(XMSamplerUI)
-	ON_WM_DESTROY()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-///void XMSamplerUI::OnClose()
-void XMSamplerUI::OnDestroy()
+, windowVar_(NULL)
 {
-	gui_->BeforeDeleteDlg();
-	CPropertySheet::OnDestroy();
+}
+XMSamplerUI::~XMSamplerUI()
+{
 }
 
+BEGIN_MESSAGE_MAP(XMSamplerUI, CPropertySheet)
+	ON_WM_CLOSE()
+END_MESSAGE_MAP()
 
-void XMSamplerUI::Init(XMSampler* pMachine) 
-	{
+void XMSamplerUI::OnClose()
+{
+	CPropertySheet::OnClose();
+	DestroyWindow();
+}
+void XMSamplerUI::PostNcDestroy()
+{
+	CPropertySheet::PostNcDestroy();
+	if(windowVar_!= NULL) *windowVar_ = NULL;
+	delete this;
+}
+
+void XMSamplerUI::Init(XMSampler* pMachine,XMSamplerUI** windowVar) 
+{
+	windowVar_ = windowVar;
 	_pMachine = pMachine;
 	m_General.pMachine(pMachine);
 	m_Instrument.pMachine(pMachine);
@@ -67,5 +63,4 @@ void XMSamplerUI::UpdateUI(void)
 	if (GetActivePage() == &m_Mixer ) m_Mixer.UpdateAllChannels();
 }
 
-}   // namespace
-}   // namespace
+}}

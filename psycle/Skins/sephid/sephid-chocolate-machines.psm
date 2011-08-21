@@ -1,0 +1,40 @@
+// source coords in bitmap
+// x, y, width, height
+
+// numbers must be fixed height and width - ie
+// each number has the same dimensions - and they are
+// laid out in the order 0123456789
+
+// on indicators also designate clickable area
+
+"master_source"=0,102,151,51
+
+"generator_source"=0,0,151,51
+"generator_vu0_source"=51,153,6,5
+"generator_vu_peak_source"=0,0,0,0
+"generator_pan_source"=51,158,15,7
+"generator_mute_source"=0,153,17,17
+"generator_solo_source"=17,153,17,17
+
+"effect_source"=0,51,151,51
+"effect_vu0_source"=51,170,6,5
+"effect_vu_peak_source"=0,0,0,0
+"effect_pan_source"=51,175,15,7
+"effect_mute_source"=0,170,17,17
+"effect_bypass_source"=17,170,17,17
+
+// destination coords to be rendered to
+// destinations use 0,0 as top left of background
+// x,y,width
+
+"generator_vu_dest"=12,30,84
+"generator_pan_dest"=12,20,69
+"generator_mute_dest"=100,19
+"generator_solo_dest"=119,19
+"generator_name_dest"=12,8
+
+"effect_vu_dest"=12,30,84
+"effect_pan_dest"=12,20,69
+"effect_mute_dest"=100,19
+"effect_bypass_dest"=119,19
+"effect_name_dest"=12,8

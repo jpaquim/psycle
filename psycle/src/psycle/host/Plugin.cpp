@@ -1,24 +1,21 @@
 ///\file
 ///\brief implementation file for psycle::host::Plugin
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
 
+#include <psycle/host/detail/project.private.hpp>
 #include "Plugin.hpp"
 #include "FileIO.hpp"
 #include "Song.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "InputHandler.hpp"
-	//#include "psycle.hpp"
 	#include "NewMachine.hpp"
 #else
 	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
 
-#include "Loggers.hpp"
 #include "Zap.hpp"
 #include <diversalis/os.hpp>
-#include <universalis/os/exceptions/code_description.hpp>
+#include <universalis.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <cstdlib> // for environment variables functions
@@ -30,10 +27,26 @@ namespace psycle
 {
 	namespace host
 	{
+		namespace loggers = universalis::os::loggers;
 		typedef CMachineInfo * (* GETINFO) ();
 		typedef CMachineInterface * (* CREATEMACHINE) ();
+		const char* MIDI_CHAN_NAMES[16] = {
+			"MIDI Channel 01", "MIDI Channel 02","MIDI Channel 03","MIDI Channel 04",
+			"MIDI Channel 05","MIDI Channel 06","MIDI Channel 07","MIDI Channel 08",
+			"MIDI Channel 09","MIDI Channel 10","MIDI Channel 11","MIDI Channel 12",
+			"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
+		};
 
 		PluginFxCallback Plugin::_callback;
+
+		int PluginFxCallback::CallbackFunc(int cbkID, int /*par1*/, int /*par2*/, void* par3) {
+			if (cbkID == CBID_GET_WINDOW) {
+				void** outWnd = (void**)par3;
+				*outWnd = hWnd;
+				return true;
+			}
+			return false;
+		}
 
 		#pragma warning(push)
 			#pragma warning(disable:4355) // 'this' : used in base member initializer list
@@ -56,9 +69,7 @@ namespace psycle
 			Free();
 		}
 
-		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ || \
-			defined DIVERSALIS__OS__MICROSOFT && \
-			defined DIVERSALIS__OS__MICROSOFT__BRANCH__MSDOS
+		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ 
 			
 			// dos/win9x needs a work around for boost::filesystem::equivalent
 			// Or could that actually simply be due to FAT filesystems?
@@ -122,7 +133,7 @@ namespace psycle
 					{
 						// go to the parent dir (in the first iteration of the loop, it removes the file leaf)
 						path = path.branch_path();
-						loggers::trace("path: " + path.string());
+						loggers::trace()("path: " + path.string());
 						// the following test is necessary in case the user has changed the configured root dir but not rescanned the plugins.
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
@@ -146,7 +157,7 @@ namespace psycle
 						throw ...
 					}
 				#endif
-				loggers::trace(path_env_var_name + (" env var: " + new_path.str()));
+				loggers::trace()(path_env_var_name + (" env var: " + new_path.str()));
 				// load the library passing just the base file name and relying on the search path env var
 				_dll = ::LoadLibrary(base_name.c_str());
 				// set the path env var back to its original value
@@ -167,7 +178,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not load library: " << file_name << std::endl
-					<< universalis::os::exceptions::code_description();
+					<< universalis::os::exceptions::desc();
 				throw exceptions::library_errors::loading_error(s.str());
 			}
 			GETINFO GetInfo = (GETINFO) GetProcAddress(_dll, "GetInfo");
@@ -176,7 +187,7 @@ namespace psycle
 				std::ostringstream s; s
 					<< "library is not a psycle native plugin:" << std::endl
 					<< "could not resolve symbol 'GetInfo' in library: " << file_name << std::endl
-					<< universalis::os::exceptions::code_description();
+					<< universalis::os::exceptions::desc();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -184,7 +195,17 @@ namespace psycle
 				_pInfo = GetInfo();
 			}
 			PSYCLE__HOST__CATCH_ALL(*this)
-			if(_pInfo->Version < MI_VERSION) throw std::runtime_error("plugin format is too old");
+
+			// version 10 and 11 didn't use HEX representation.
+			// Also, verify for 32 or 64bits.
+			if(!(_pInfo->APIVersion == 11 && (MI_VERSION&0xFFF0) == 0x0010)
+				&& !((_pInfo->APIVersion&0xFFF0) == (MI_VERSION&0xFFF0))) {
+
+				std::ostringstream s;
+				s << "plugin version not supported" << _pInfo->APIVersion;
+				throw std::runtime_error(s.str());
+			}
+
 			_isSynth = _pInfo->Flags == 3;
 			if(_isSynth) _mode = MACHMODE_GENERATOR;
 			strncpy(_psShortName,_pInfo->ShortName,15);
@@ -199,7 +220,7 @@ namespace psycle
 			{
 				std::ostringstream s; s
 					<< "could not resolve symbol 'CreateMachine' in library: " << file_name << std::endl
-					<< universalis::os::exceptions::code_description();
+					<< universalis::os::exceptions::desc();
 				throw exceptions::library_errors::symbol_resolving_error(s.str());
 			}
 			try
@@ -217,10 +238,14 @@ namespace psycle
 				try
 				{
 					proxy().Init();
+					needsAux_ = proxy().HostEvent(plugin_interface::HE_NEEDS_AUX_COLUMN,0,0.0f);
+
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
 					throw;
+#endif
 				}
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
 				{
@@ -230,7 +255,9 @@ namespace psycle
 					}
 					catch(const std::exception &)
 					{
+#ifndef NDEBUG 
 						throw;
+#endif
 					}
 				}
 			}
@@ -260,6 +287,10 @@ namespace psycle
 			}
 			catch(const std::exception & e)
 			{
+#ifndef NDEBUG 
+					throw e;
+#else
+
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath << std::endl
 					<< "Replacing with dummy." << std::endl
@@ -267,15 +298,20 @@ namespace psycle
 					<< e.what();
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
+#endif
 			}
 			catch(...)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath2 << std::endl
 					<< "Replacing with dummy." << std::endl
 					<< "Unkown type of exception";
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
 				return false;
+#endif
 			}
 			return true;
 		}
@@ -289,7 +325,11 @@ namespace psycle
 			}
 			catch(const std::exception & e)
 			{
+#ifndef NDEBUG 
+					throw e;
+#else
 				if(!exception) exception = &e;
+#endif
 			}
 			if(_dll)
 			{
@@ -341,10 +381,14 @@ namespace psycle
 						}
 						catch(const std::exception &)
 						{
-							delete pData;
+#ifndef NDEBUG 
+					throw;
+#else
+							delete[] pData;
 							return false;
+#endif
 						}
-						delete pData;
+						delete[] pData;
 						return true;
 					}
 				}
@@ -362,6 +406,9 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw;
+#endif
 				// data won't be saved
 			}
 			UINT size = size2 + sizeof(count) + sizeof(int)*count;
@@ -384,20 +431,21 @@ namespace psycle
 				{
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
+#ifndef NDEBUG 
+					throw;
+#endif
+
 				}
 				pFile->Write(pData, size2); // Number of parameters
 				zapArray(pData);
 			}
 		}
 
-		void Plugin::Work(int numSamples)
+		int Plugin::GenerateAudioInTicks( int /*startSample*/, int numSamples )
 		{
-			if(_mode != MACHMODE_GENERATOR) Machine::Work(numSamples);
-			else
-			{
+			if(_mode == MACHMODE_GENERATOR) {
 				Standby(false);
 			}
-			cpu::cycles_type cost = cpu::cycles();
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!Bypass() && !Standby()))
@@ -407,7 +455,7 @@ namespace psycle
 					while (ns)
 					{
 						int nextevent = (TWSActive)?TWSSamples:ns+1;
-						for (int i=0; i < Global::song().tracks(); i++)
+						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 						{
 							if (TriggerDelay[i]._cmd)
 							{
@@ -423,7 +471,7 @@ namespace psycle
 							{
 								TWSSamples -= ns;
 							}
-							for (int i=0; i < Global::song().tracks(); i++)
+							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd)
@@ -433,10 +481,15 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::song().tracks());
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
 							}
 							catch(const std::exception &)
 							{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 							}
 							ns = 0;
 						}
@@ -447,10 +500,15 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::song().tracks());
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
 								}
 								catch(const std::exception &)
 								{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 								}
 								us += nextevent;
 							}
@@ -482,13 +540,18 @@ namespace psycle
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 										}
 									}
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for (int i=0; i < Global::song().tracks(); i++)
+							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -502,6 +565,11 @@ namespace psycle
 										}
 										catch(const std::exception &)
 										{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 										}
 										TriggerDelay[i]._cmd = 0;
 									}
@@ -521,6 +589,11 @@ namespace psycle
 										}
 										catch(const std::exception &)
 										{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 									}
@@ -540,6 +613,11 @@ namespace psycle
 										}
 										catch(const std::exception &)
 										{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
@@ -565,7 +643,7 @@ namespace psycle
 								{
 									if (TriggerDelayCounter[i] == nextevent)
 									{
-										PatternEvent entry =TriggerDelay[i];
+										PatternEntry entry =TriggerDelay[i];
 										switch(ArpeggioCount[i])
 										{
 										case 0: 
@@ -575,17 +653,27 @@ namespace psycle
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 											ArpeggioCount[i]++;
 											break;
 										case 1:
-											entry._note+=((TriggerDelay[i].parameter()&0xF0)>>4);
+											entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
 											try
 											{
-												proxy().SeqTick(i ,entry.note(), entry._inst, 0, 0);
+												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 											ArpeggioCount[i]++;
 											break;
@@ -593,15 +681,20 @@ namespace psycle
 											entry._note+=(TriggerDelay[i]._parameter&0x0F);
 											try
 											{
-												proxy().SeqTick(i ,entry.note(), entry.instrument(), 0, 0);
+												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
 											}
 											catch(const std::exception &)
 											{
+#ifndef NDEBUG 
+					throw;
+#else
+					return 0;
+#endif
 											}
 											ArpeggioCount[i]=0;
 											break;
 										}
-										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb()/24;
+										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
 									}
 									else
 									{
@@ -615,8 +708,8 @@ namespace psycle
 				}
 			}
 			else Standby(true);
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}
 
 		bool Plugin::SetParameter(int numparam,int value)
@@ -629,13 +722,22 @@ namespace psycle
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return false;
+#endif
 				}
 				return true;
 			}
 			else return false;
 		}
 
+		int Plugin::GetParamType(int numparam)
+		{
+			if( numparam < _pInfo->numParameters ) return _pInfo->Parameters[numparam]->Flags;
+			else return 0;
+		}
 		void Plugin::GetParamName(int numparam, char * name)
 		{
 			if( numparam < _pInfo->numParameters ) std::strcpy(name,_pInfo->Parameters[numparam]->Name);
@@ -667,11 +769,15 @@ namespace psycle
 			{
 				try
 				{
-					return proxy().Vals()[numparam];
+					return proxy().Val(numparam);
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return -1; // hmm
+#endif
 				}
 			}
 			else return -1; // hmm
@@ -683,11 +789,16 @@ namespace psycle
 			{
 				try
 				{
-					if(!proxy().DescribeValue(parval, numparam, proxy().Vals()[numparam]))
-						std::sprintf(parval, "%i", proxy().Vals()[numparam]);
+					if(!proxy().DescribeValue(parval, numparam, proxy().Val(numparam)))
+						std::sprintf(parval, "%i", proxy().Val(numparam));
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 				}
 			}
 			else std::strcpy(parval,"Out of Range");
@@ -701,7 +812,17 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 			}
+		}
+		void Plugin::SetSampleRate(int sr)
+		{
+			Machine::SetSampleRate(sr);
+			Tick();
 		}
 
 		void Plugin::Tick()
@@ -712,33 +833,42 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 			}
 		}
 
-		void Plugin::Tick(int channel, PatternEvent * pData)
+		void Plugin::Tick(int channel, PatternEntry * pData)
 		{
-			if(pData->note() == notecommands::tweak || pData->note() == notecommands::tweakeffect)
+			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
 			{
-				if(pData->instrument() < _pInfo->numParameters)
+				if(pData->_inst < _pInfo->numParameters)
 				{
-					int nv = (pData->command()<<8)+pData->parameter();
-					int const min = _pInfo->Parameters[pData->instrument()]->MinValue;
-					int const max = _pInfo->Parameters[pData->instrument()]->MaxValue;
+					int nv = (pData->_cmd<<8)+pData->_parameter;
+					int const min = _pInfo->Parameters[pData->_inst]->MinValue;
+					int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
 					nv += min;
 					if(nv > max) nv = max;
 					try
 					{
-						proxy().ParameterTweak(pData->instrument(), nv);
+						proxy().ParameterTweak(pData->_inst, nv);
 					}
 					catch(const std::exception &)
 					{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 					}
-					Global::pPlayer->Tweaker = true;
 				}
 			}
-			else if(pData->note() == notecommands::tweakslide)
+			else if(pData->_note == notecommands::tweakslide)
 			{
-				if(pData->instrument() < _pInfo->numParameters)
+				if(pData->_inst < _pInfo->numParameters)
 				{
 					int i;
 					if(TWSActive)
@@ -746,7 +876,7 @@ namespace psycle
 						// see if a tweak slide for this parameter is already happening
 						for(i = 0; i < MAX_TWS; i++)
 						{
-							if((TWSInst[i] == pData->instrument()) && (TWSDelta[i] != 0))
+							if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
 							{
 								// yes
 								break;
@@ -774,21 +904,26 @@ namespace psycle
 					}
 					if (i < MAX_TWS)
 					{
-						TWSDestination[i] = float(pData->command()<<8)+pData->parameter();
-						float min = float(_pInfo->Parameters[pData->instrument()]->MinValue);
-						float max = float(_pInfo->Parameters[pData->instrument()]->MaxValue);
+						TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
+						float min = float(_pInfo->Parameters[pData->_inst]->MinValue);
+						float max = float(_pInfo->Parameters[pData->_inst]->MaxValue);
 						TWSDestination[i] += min;
 						if (TWSDestination[i] > max)
 						{
 							TWSDestination[i] = max;
 						}
-						TWSInst[i] = pData->instrument();
+						TWSInst[i] = pData->_inst;
 						try
 						{
-							TWSCurrent[i] = float(proxy().Vals()[TWSInst[i]]);
+							TWSCurrent[i] = float(proxy().Val(TWSInst[i]));
 						}
 						catch(const std::exception &)
 						{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 						}
 						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer->SamplesPerRow();
 						TWSSamples = 0;
@@ -797,34 +932,102 @@ namespace psycle
 					else
 					{
 						// we have used all our slots, just send a twk
-						int nv = (pData->command()<<8)+pData->parameter();
-						int const min = _pInfo->Parameters[pData->instrument()]->MinValue;
-						int const max = _pInfo->Parameters[pData->instrument()]->MaxValue;
+						int nv = (pData->_cmd<<8)+pData->_parameter;
+						int const min = _pInfo->Parameters[pData->_inst]->MinValue;
+						int const max = _pInfo->Parameters[pData->_inst]->MaxValue;
 						nv += min;
 						if (nv > max) nv = max;
 						try
 						{
-							proxy().ParameterTweak(pData->instrument(), nv);
+							proxy().ParameterTweak(pData->_inst, nv);
 						}
 						catch(const std::exception &)
 						{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
 						}
 					}
 				}
-				Global::pPlayer->Tweaker = true;
+			}
+			else if (pData->_note == notecommands::midicc) {
+				try
+				{
+					proxy().MidiEvent(pData->_inst&0x0F, pData->_inst&0xF0, (pData->_cmd<<8) + pData->_parameter);
+				}
+				catch(const std::exception &)
+				{
+#ifndef NDEBUG 
+					throw;
+#else
+					return;
+#endif
+				}
 			}
 			else {
 				try
 				{
-					proxy().SeqTick(channel, pData->note(), pData->instrument(), pData->command(), pData->parameter());
+					if(channel == -1) {
+						//channel = GetFreePlayTrack(pData->_note, pData->_inst);
+					}
+					proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
 				}
 				catch(const std::exception &)
 				{
+#ifndef NDEBUG 
+					throw;
+#else
 					return;
+#endif
 				}
 			}
 		}
-
+		void Plugin::GetCurrentPreset(CPreset & preset)
+		{
+			void* pData = NULL;
+			int numParameters = GetNumParams();
+			try
+			{
+				int dataSizeStruct = proxy().GetDataSize();
+				if(dataSizeStruct > 0) //Can only happen for native plugins.
+				{
+					pData = new char[dataSizeStruct];
+					proxy().GetData(pData); // Internal Save
+					preset.Init(numParameters , "", proxy().Vals(), dataSizeStruct, pData);
+					delete[] pData;
+				}
+				else
+				{
+					Machine::GetCurrentPreset(preset);
+				}
+			}
+			catch(const std::exception &)
+			{
+				delete[] pData;
+				preset.Init(numParameters);
+			}
+		}
+		void Plugin::Tweak(CPreset const & preset)
+		{
+			Machine::Tweak(preset);
+			if(preset.GetData())
+			{
+				try
+				{
+					proxy().PutData(preset.GetData()); // Internal save
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+				catch(...) // reinterpret_cast sucks
+				{
+					// o_O`
+				}
+			}
+		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1046,4 +1249,3 @@ namespace psycle
 		}
 	}
 }
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

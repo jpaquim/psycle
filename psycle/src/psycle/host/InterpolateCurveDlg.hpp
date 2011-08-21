@@ -1,10 +1,8 @@
 ///\file
-///\brief interface file for psycle::host::CNewMachine.
+///\brief interface file for psycle::host::InterpolateCurveDlg.
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include <afxwin.h>
-
 namespace psycle { namespace host {
 
 	class CInterpolateCurve : public CDialog
@@ -13,7 +11,7 @@ namespace psycle { namespace host {
 			CInterpolateCurve(int startsel, int endsel, int _linesperbeat, CWnd* pParent = 0);
 			~CInterpolateCurve();
 			
-			void AssignInitialValues(int* values,int commandtype);
+			void AssignInitialValues(int* values,int commandtype, int minval, int maxval);
 			
 		// Dialog Data
 			enum { IDD = IDD_INTERPOLATE_CURVE };
@@ -21,13 +19,16 @@ namespace psycle { namespace host {
 			CComboBox m_combotwk;
 			CEdit m_Pos;
 			CEdit m_Value;
+			CEdit m_Min;
+			CEdit m_Max;
 			CComboBox m_CurveType;
 		// Overrides
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
 		// Implementation
 		protected:
-			virtual BOOL OnInitDialog();
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnOk();
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -37,8 +38,9 @@ namespace psycle { namespace host {
 			afx_msg void OnSelendokCurveType();
 			afx_msg void OnEnKillfocusPos();
 			afx_msg void OnEnKillfocusVal();
+			afx_msg void OnEnKillfocusMin();
+			afx_msg void OnEnKillfocusMax();
 			afx_msg void OnBnClickedChecktwk();
-			DECLARE_MESSAGE_MAP()
 		private:
 			void AdjustPointToView(CPoint&point);
 			void AdjustRectToView(RECT&rect);
@@ -48,11 +50,20 @@ namespace psycle { namespace host {
 			void FillReturnValues();
 			void SetPosText(int i);
 			void SetValText(int i);
+			void SetMinText(int i);
+			void SetMaxText(int i);
+			int GetPosValue();
+			int GetValValue();
+			int GetMinValue();
+			int GetMaxValue();
 			float HermiteCurveInterpolate(int kf0, int kf1, int kf2, int kf3, int curposition, int maxposition, float tangmult, bool interpolation);
 
 			int startIndex;
 			int numLines;
 			int linesperbeat;
+			int min_val;
+			int max_val;
+			int y_range;
 			RECT grapharea;
 			int	xoffset;
 			float xscale;

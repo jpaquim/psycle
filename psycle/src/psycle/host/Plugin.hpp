@@ -1,6 +1,8 @@
 ///\file
 ///\brief interface file for psycle::host::Plugin
 #pragma once
+#include <psycle/host/detail/project.hpp>
+#include "Global.hpp"
 #include "Machine.hpp"
 #include <psycle/plugin_interface.hpp>
 #include "Configuration.hpp"
@@ -13,24 +15,24 @@ namespace psycle
 	namespace host
 	{
 		using namespace psycle::plugin_interface;
-		/// \todo CPresetsDlg code sux big time concerning interface separation :-(
-		class CPresetDlg;
+		extern const char* MIDI_CHAN_NAMES[16];
 
 		/// calls that the plugin side can make to the host side
-		///\todo PLEASE EXTEND THIS!!!
 		class PluginFxCallback : public CFxCallback
 		{
 			public:
-				/* implement */ int GetTickLength() const { return Global::pPlayer->SamplesPerRow(); }
-				/* implement */ int GetSamplingRate() const { return Global::pConfig->GetSamplesPerSec(); }
-				/* implement */ int GetBPM() const { return Global::pPlayer->bpm(); }
-				/* implement */ int GetTPB() const { return Global::pPlayer->tpb(); }
+				inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) const { MessageBox(hWnd,ptxt,caption,type); }
+				inline virtual int GetTickLength() const { return Global::pPlayer->SamplesPerRow(); }
+				inline virtual int GetSamplingRate() const { return Global::player().SampleRate(); }
+				inline virtual int GetBPM() const { return Global::pPlayer->bpm; }
+				inline virtual int GetTPB() const { return Global::pPlayer->tpb; }
+				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/);
+				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+				inline virtual float * unused0(int, int) { return NULL;};
+				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
+				inline virtual float * unused1(int, int) { return NULL;};
 
-			public:
-				///\todo mswindows! humpf! mswindows!
-				/* implement */ void MessBox(char const* ptxt,char const* caption,unsigned int type) const { MessageBox(hWnd,ptxt,caption,type); }
 			public: ///\todo private:
-				///\todo mswindows! humpf! mswindows!
 				HWND hWnd;
 		};
 
@@ -79,19 +81,17 @@ namespace psycle
 					void inline GetData(void * pData)                                                          throw(exceptions::function_error);
 					int  inline GetDataSize()                                                                  throw(exceptions::function_error);
 					void inline Command()                                                                      throw(exceptions::function_error);
-					void inline MuteTrack(const int i)                                                         throw(exceptions::function_error);
-					bool inline IsTrackMuted(const int i)                                                      throw(exceptions::function_error);
-					void inline MidiNote(const int channel, const int value, const int velocity)               throw(exceptions::function_error);
-					void inline Event(std::uint32_t const data)                                                throw(exceptions::function_error);
+					void inline unused0(const int i)                                                           throw(exceptions::function_error);
+					bool inline unused1(const int i)                                                           throw(exceptions::function_error);
+					void inline MidiEvent(const int channel, const int value, const int velocity)               throw(exceptions::function_error);
+					void inline unused2(std::uint32_t const data)                                              throw(exceptions::function_error);
 					bool inline DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error);
-					bool inline PlayWave(const int wave, const int note, const float volume)                   throw(exceptions::function_error);
+					bool inline HostEvent(const int wave, const int note, const float volume)                  throw(exceptions::function_error);
 					void inline SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error);
-					void inline StopWave()                                                                     throw(exceptions::function_error);
+					void inline unused3 ()                                                                     throw(exceptions::function_error);
 					int  inline Val(int parameter)                                                             throw(exceptions::function_error);
 
-					///\todo CPresetsDlg code sux big time concerning interface separation :-(
-					///\todo deprecated: use int Val(int) instead
-					friend class CPresetDlg; int const /* at least it's const! */ * Vals() { return plugin().Vals; }
+					int const /* at least it's const! */ * Vals() { return plugin().Vals; }
 			///\}
 		};
 
@@ -144,7 +144,20 @@ namespace psycle
 				public:  bool const & IsSynth() const throw() { return _isSynth; }
 				private: bool        _isSynth;
 
-				///\todo there was also std::uint32_t GetVersion() in v1.9
+				public: virtual bool NeedsAuxColumn() { return needsAux_; }
+				private: bool		needsAux_;
+
+				//\todo: Dynamic
+				virtual const char* AuxColumnName(int idx) { 
+					/*if(needsAux_) {
+
+					}
+					else*/ {
+						return MIDI_CHAN_NAMES[idx];
+					}
+				}
+				virtual int NumAuxColumnIndexes() { return 16;}
+
 			///\}
 
 			///\name parameter info
@@ -174,10 +187,11 @@ namespace psycle
 			///\name signal/event processing
 			///\{
 				public:
-					virtual void Work(int numSamples);
+					virtual int GenerateAudioInTicks( int startSample, int numSamples );
 					virtual float GetAudioRange(){ return 32768.0f; }
+					virtual void SetSampleRate(int sr);
 					virtual void Tick();
-					virtual void Tick(int channel, PatternEvent * pEntry);
+					virtual void Tick(int channel, PatternEntry * pEntry);
 					virtual void Stop();
 			///\}
 
@@ -186,11 +200,25 @@ namespace psycle
 				public:
 					virtual int  GetNumCols   () { return GetInfo()->numCols; }
 					virtual int  GetNumParams () { return GetInfo()->numParameters; }
+					virtual int GetParamType(int numparam);
 					virtual void GetParamName (int numparam, char * name);
 					virtual void GetParamRange(int numparam, int & minval,int & maxval);
 					virtual int  GetParamValue(int numparam);
 					virtual void GetParamValue(int numparam, char * parval);
 					virtual bool SetParameter (int numparam, int value);
+					virtual void SetCurrentProgram(int idx) {};
+					virtual int GetCurrentProgram() {return 0;};
+					virtual void GetCurrentProgramName(char* val) {strcpy(val,"Program 0");};
+					virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){strcpy(val,"Program 0");};
+					virtual int GetNumPrograms(){ return 1;};
+					virtual int GetTotalPrograms(){ return 1;};
+					virtual void SetCurrentBank(int idx) {};
+					virtual int GetCurrentBank() {return 0;};
+					virtual void GetCurrentBankName(char* val) {strcpy(val,"Internal");};
+					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};
+					virtual int GetNumBanks(){ return 1;};
+					virtual void Tweak(CPreset const & preset);
+					virtual void GetCurrentPreset(CPreset & preset);
 			///\}
 
 			///\name (de)serialization
@@ -236,15 +264,15 @@ namespace psycle
 		void inline proxy:: GetData(void * pData)                                                          throw(exceptions::function_error) { try { plugin().GetData(pData);                                                } PSYCLE__HOST__CATCH_ALL(host()) }
 		int  inline proxy:: GetDataSize()                                                                  throw(exceptions::function_error) { try { return plugin().GetDataSize();                                          } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
 		void inline proxy:: Command()                                                                      throw(exceptions::function_error) { try { plugin().Command();                                                     } PSYCLE__HOST__CATCH_ALL(host()) }
-		void inline proxy:: MuteTrack(const int i)                                                         throw(exceptions::function_error) { try { plugin().MuteTrack(i);                                                  } PSYCLE__HOST__CATCH_ALL(host()) }
-		bool inline proxy:: IsTrackMuted(const int i)                                                      throw(exceptions::function_error) { try { return const_cast<const CMachineInterface &>(plugin()).IsTrackMuted(i); } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-		void inline proxy:: MidiNote(const int channel, const int value, const int velocity)               throw(exceptions::function_error) { try { plugin().MidiNote(channel, value, velocity);                            } PSYCLE__HOST__CATCH_ALL(host()) }
-		void inline proxy:: Event(std::uint32_t const data)                                                throw(exceptions::function_error) { try { plugin().Event(data);                                                   } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: unused0(const int i)                                                           throw(exceptions::function_error) { try { plugin().unused0(i);                                                    } PSYCLE__HOST__CATCH_ALL(host()) }
+		bool inline proxy:: unused1(const int i)                                                           throw(exceptions::function_error) { try { return const_cast<const CMachineInterface &>(plugin()).unused1(i);      } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		void inline proxy:: MidiEvent(const int channel, const int value, const int velocity)              throw(exceptions::function_error) { try { plugin().MidiEvent(channel, value, velocity);                           } PSYCLE__HOST__CATCH_ALL(host()) }
+		void inline proxy:: unused2(std::uint32_t const data)                                              throw(exceptions::function_error) { try { plugin().unused2(data);                                                 } PSYCLE__HOST__CATCH_ALL(host()) }
 		bool inline proxy:: DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error) { try { return plugin().DescribeValue(txt, param, value);                       } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
-		bool inline proxy:: PlayWave(const int wave, const int note, const float volume)                   throw(exceptions::function_error) { try { plugin().PlayWave(wave, note, volume);                                  } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
+		bool inline proxy:: HostEvent(const int eventNr, const int val1, const float val2)                 throw(exceptions::function_error) { try { return plugin().HostEvent(eventNr, val1, val2);                         } PSYCLE__HOST__CATCH_ALL(host()) return false; /* dummy return to avoid warning */ }
 		void inline proxy:: SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error) { try { plugin().SeqTick(channel, note, ins, cmd, val);                         } PSYCLE__HOST__CATCH_ALL(host()) }
-		void inline proxy:: StopWave()                                                                     throw(exceptions::function_error) { try { plugin().StopWave();                                                    } PSYCLE__HOST__CATCH_ALL(host()) }
-		int  inline proxy::Val(int parameter)                                                              throw(exceptions::function_error) { try { return plugin().Vals[parameter];                                        } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
+		void inline proxy:: unused3()                                                                      throw(exceptions::function_error) { try { plugin().unused3();                                                     } PSYCLE__HOST__CATCH_ALL(host()) }
+		int  inline proxy:: Val(int parameter)                                                             throw(exceptions::function_error) { try { return plugin().Vals[parameter];                                        } PSYCLE__HOST__CATCH_ALL(host()) return 0; /* dummy return to avoid warning */ }
 		void inline proxy:: callback()                                                                     throw(exceptions::function_error) { try { plugin().pCB = host().GetCallback();                                    } PSYCLE__HOST__CATCH_ALL(host()) }
 
 		#if defined DIVERSALIS__COMPILER__MICROSOFT

@@ -1,15 +1,17 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include <universalis/stdlib/cstdint.hpp>
+
 namespace psycle
 {
 	namespace host
 	{
 		#pragma pack(push, 1)
 
-		class PatternEvent
+		class PatternEntry
 		{
 			public:
-				inline PatternEvent()
+				inline PatternEntry()
 				:
 					_note(255),
 					_inst(255),
@@ -30,9 +32,9 @@ namespace psycle
 #error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 #if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				inline PatternEvent(std::uint8_t note, std::uint8_t inst, std::uint8_t volume, std::uint8_t cmd, std::uint8_t param, std::uint8_t machine)
+				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t volume, std::uint8_t cmd, std::uint8_t param, std::uint8_t machine)
 #else
-				inline PatternEvent(std::uint8_t note, std::uint8_t inst, std::uint8_t machine, std::uint8_t cmd, std::uint8_t param)
+				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t machine, std::uint8_t cmd, std::uint8_t param)
 #endif
 #endif
 				:
@@ -50,30 +52,6 @@ namespace psycle
 					_parameter(param)
 				{
 				}
-
-				void setNote(std::uint8_t value) { _note = value; }
-				std::uint8_t note() const { return _note; }
-
-				void setInstrument(std::uint8_t instrument) { _inst = instrument; }
-				std::uint8_t instrument() const { return _inst; }
-
-				void setMachine(std::uint8_t machine) { _mach = machine; }
-				std::uint8_t machine() const { return _mach; }
-
-				void setCommand(std::uint8_t command) { _cmd = command; }
-				std::uint8_t command() const { return _cmd; }
-
-				void setParameter(std::uint8_t parameter) { _parameter = parameter; }
-				std::uint8_t parameter() const { return _parameter; }
-
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				void setVolume(std::uint8_t volume) { _volume = volume; }
-				std::uint8_t volume() const { return _volume; }
-	#endif
-#endif		private:
 				std::uint8_t _note;
 				std::uint8_t _inst;
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
@@ -90,18 +68,17 @@ namespace psycle
 				std::uint8_t _parameter;
 	#endif
 #endif
-
 		};
 
 		// Patterns are organized in rows.
-		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEvent) bytes
+		// i.e. pattern[rows][tracks], being a row = NUMTRACKS*sizeof(PatternEntry) bytes
 		// belong to the first line.
 		#pragma warning(push)
 		#pragma warning(disable:4200) // nonstandard extension used : zero-sized array in struct/union; Cannot generate copy-ctor or copy-assignment operator when UDT contains a zero-sized array
 		class Pattern
 		{
 			public:
-				PatternEvent _data[];
+				PatternEntry _data[];
 		};
 		#pragma warning(pop)
 
@@ -170,8 +147,9 @@ namespace psycle
 				tweakeffect, //old. for compatibility only.
 				midicc,
 				tweakslide,
-				//maintain these two as the last ones
+				//Place whatever it can be written in the pattern above invalid, and anything else below it
 				invalid,
+				midi_sync = 254,
 				empty = 255
 			};
 		}

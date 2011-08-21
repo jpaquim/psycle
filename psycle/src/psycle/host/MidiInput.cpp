@@ -6,57 +6,48 @@
 #include "MidiInput.hpp"
 
 #include "InputHandler.hpp"
-#include "Configuration.hpp"
-#include "ChildView.hpp"
-#include "MainFrm.hpp"
+#include "PsycleConfig.hpp"
 
-#include <psycle/core/song.h>
-#include <psycle/core/player.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/vstplugin.h>
-#include <psycle/helpers/math.hpp>
+#include "Song.hpp"
+#include "Player.hpp"
+#include "Plugin.hpp"
+#include "VstHost24.hpp"
 
-#if !defined NDEBUG
-   #define new DEBUG_NEW
-   #undef THIS_FILE
-   static char THIS_FILE[] = __FILE__;
-#endif
+#include "cpu_time_clock.hpp"
 
-namespace psycle { namespace host {
+#define BREAK_ON_ERROR(result, code) \
+	if(result != MMSYSERR_NOERROR) { problem |= code; goto Exit; }
 
-	using namespace universalis::stdlib;
-
+namespace psycle
+{
+	namespace host
+	{
 		extern CPsycleApp theApp;
 
-		CMidiInput * CMidiInput::s_Instance(0);	// the current instance
-
 		CMidiInput::CMidiInput() : 
-			m_midiInHandlesTried(0),
-			m_patIn(0),
-			m_patOut(0),
-			m_patCount(0),
-			m_timingCounter(0),
-			m_timingAccumulator(0),
-			m_baseStampTime(0),
-			m_reSync(false),
-			m_synced(false),
-			m_syncing(false)
+			m_midiInHandlesTried( false ),
+			m_bufWriteIdx( 0 ),
+			m_bufReadIdx( 0 ),
+			m_bufCount( 0 ),
+			m_timingCounter( 0 ),
+			m_timingAccumulator( 0 ),
+			m_resyncAdjStampTime( 0 ),
+			m_reSync( false ),
+			m_synced( false ),
+			m_syncing( false )
 		{
-			assert(!Instance());
-
-			// assign instance
-			s_Instance = this;
-
 			// clear down buffers
-			// Can't clear this. it's not a basic type!
-			//std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
+			std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
 			std::memset( m_channelSetting, -1, sizeof( int ) * MAX_MIDI_CHANNELS );
-			std::memset( m_channelInstMap, 0, sizeof( uint32_t ) * MAX_MACHINES );
-			std::memset( m_channelGeneratorMap, -1, sizeof( uint32_t ) * MAX_MIDI_CHANNELS );
-			std::memset( m_channelNoteOff, 0, sizeof( bool ) * MAX_MIDI_CHANNELS );	
+			std::memset( m_channelInstMap, 0, sizeof( std::uint32_t ) * MAX_MACHINES );
+			std::memset( m_channelGeneratorMap, -1, sizeof( std::uint32_t ) * MAX_MIDI_CHANNELS );
+			std::memset( m_channelNoteOff, true, sizeof( bool ) * MAX_MIDI_CHANNELS );	
 			std::memset( m_channelController, -1, sizeof( int ) * MAX_MIDI_CHANNELS * MAX_CONTROLLERS );	
-			std::memset( m_devId, -1, sizeof( int ) * MAX_DRIVERS );
+			std::memset( m_devId, -1, sizeof( std::uint32_t ) * MAX_DRIVERS );
 			std::memset( m_midiInHandle, 0, sizeof( HMIDIIN ) * MAX_DRIVERS );
+			std::memset( notetrack, notecommands::release, sizeof( unsigned char ) * MAX_TRACKS );
+			std::memset( instrtrack, -1, sizeof( unsigned char ) * MAX_TRACKS );
+			currenttrack=0;
 
 			// setup config defaults (override some by registry settings)
 			m_config.midiHeadroom = MIDI_PREDELAY_MS;
@@ -64,7 +55,7 @@ namespace psycle { namespace host {
 			
 			// clear down stats
 			m_stats.flags = 0;
-			m_stats.syncEventLatency = 0;
+			m_stats.clockDeviation = 0;
 			m_stats.syncAdjuster = 0;
 			m_stats.bufferCount = 0;
 			m_stats.eventsLost = 0;
@@ -84,9 +75,6 @@ namespace psycle { namespace host {
 			{
 				Close();
 			}
-
-			// clear instance
-			s_Instance = NULL;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +82,7 @@ namespace psycle { namespace host {
 		//
 		// DESCRIPTION	  : Set the MIDI device identifier without opening it
 		// PARAMETERS     : int driver - driver identifier
-		//                : uint32_t devId - device identifier
+		//                : std::uint32_t devId - device identifier
 		// RETURNS		  : <void>
 
 		void CMidiInput::SetDeviceId( unsigned int driver, int devId )
@@ -115,136 +103,70 @@ namespace psycle { namespace host {
 			MMRESULT result;
 
 			int problem = 0;
-			int opened = 0;
+			bool opened = false;
 
 			// open the main input driver
 			if( !m_midiInHandle[ DRIVER_MIDI ] && m_devId[ DRIVER_MIDI ] != -1 )
 			{
-
 				result = midiInOpen( &m_midiInHandle[ DRIVER_MIDI ], m_devId[ DRIVER_MIDI ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
-				if( result != MMSYSERR_NOERROR )
+				BREAK_ON_ERROR(result, 0x01)
+
+				opened = true;
+				result = midiInStart( m_midiInHandle[ DRIVER_MIDI ] );
+				BREAK_ON_ERROR(result, 0x02)
+
+				if( m_devId[ DRIVER_MIDI ] == m_devId[ DRIVER_SYNC ] || m_devId[ DRIVER_SYNC ] == -1)
 				{
-					problem |= 0x01;
+					m_pc_clock_base = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
 				}
 				else
 				{
-					opened |= 0x01;
+					// open
+					result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
+					BREAK_ON_ERROR(result, 0x04)
+
+					result = midiInStart( m_midiInHandle[ DRIVER_SYNC ] );
+					BREAK_ON_ERROR(result, 0x08)
+
+					m_pc_clock_base = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
 				}
 			}
-
-			// open the sync input driver (only if not the same as the main MIDI one)
-			if( m_devId[ DRIVER_MIDI ] != m_devId[ DRIVER_SYNC ] &&
-				!m_midiInHandle[ DRIVER_SYNC ] && m_devId[ DRIVER_SYNC ] != -1 )
-			{
-				// open
-				result = midiInOpen( &m_midiInHandle[ DRIVER_SYNC ], m_devId[ DRIVER_SYNC ], (DWORD_PTR)fnMidiCallbackStatic, 0, CALLBACK_FUNCTION );
-				if( result != MMSYSERR_NOERROR )
-				{
-					problem |= 0x02;
-				}
-				else
-				{
-					opened |= 0x01;
-				}
-			}
-
+Exit:
 			// any problems?
 			if( !m_midiInHandlesTried && problem )
 			{
 				CString messageText;
-				int errorCount = 0;
 
-				// create text error message
-				messageText = "ERROR: Could not open the ";
+				if(problem & 0x05) {
+					messageText = "ERROR: Could not open the ";
+				}
+				else if(problem & 0x0A) {
+					messageText = "ERROR: Could not start the ";
+				}
 				if( problem & 0x01 )
 				{
 					messageText += "MIDI input device";
-					errorCount++;
 				}
-				if( problem & 0x02 )
+				if( problem & 0x04 )
 				{
-					if( errorCount == 0 )
-					{
-						messageText += "MIDI sync device";
-					}
-					else
-					{
-						messageText += "and MIDI sync device";
-					}
+					messageText += "MIDI sync device";
 				}
-				messageText += "?";
+				messageText += "!";
 
 				m_midiInHandlesTried = true;
 
 				// messagebox to the user
-				AfxMessageBox( messageText, MB_ICONEXCLAMATION+MB_OK );
+				AfxMessageBox( messageText, MB_ICONEXCLAMATION | MB_OK );
 			}
-
-			// make sure we have good enough resolution from the system timer
-			// (Win95/98 default to 1ms accuracy, but Win2000/NT can default to 5ms.  This makes sure we
-			//  have an accurate enough timer!)
-			timeBeginPeriod( 1 );
-
-			// start midi input? (& zero timestamps)
-			if( !opened )
-				return problem != 0;
-			else
-				return Sync();
-
-		}
-
-		///////////////////////////////////////////////////////////////////////////////////////////////////
-		// Sync
-		//
-		// DESCRIPTION	  : Starts the midi input devices (resets the timestamps)
-		// PARAMETERS     : <void>
-		// RETURNS		  : bool - Worked true/Failed false
-
-		bool CMidiInput::Sync()
-		{
-			MMRESULT result;
-			
-			bool syncSet = false;
-			int problem = 0;
-
-			// main midi device open?
-			if( m_midiInHandle[ DRIVER_MIDI ] )
-			{
-				result = midiInStart( m_midiInHandle[ DRIVER_MIDI ] );
-				if (result != MMSYSERR_NOERROR)
-				{
-					problem |= 0x01;
-				}
-
-
-				// start (resets the dwParam2 timestamps)?
-				if( m_devId[ DRIVER_MIDI ] == m_devId[ DRIVER_SYNC ] )
-				{
-					m_tickBase = timeGetTime();
-					syncSet = true;
-				}
-			}
-
-			// sync midi device open?
-			if( !syncSet && m_midiInHandle[ DRIVER_SYNC ] )
-			{
-				result = midiInStart( m_midiInHandle[ DRIVER_SYNC ] );
-				if (result != MMSYSERR_NOERROR)
-				{
-					problem |= 0x02;
-				}
-				
-				// start (resets the dwParam2 timestamps)
-				m_tickBase = timeGetTime();
-			}
-
-			// Bug: In an ideal world we would like our counter (timeGetTime) and the internal MIDI counter (from
-			// the MIDI driver) to be exactly spot on and started at the same time.  However, sometimes these clocks
-			// are not dead on an we this can give slight inaccuracy (up to 4ms) when running the clocks off against
-			// each other to work out the latency of a MIDI message.
-
+			m_stats.channelMapUpdate = true;
 			m_synced = false;
-			return problem != 0;
+			//Allow MIDI to work even if we don't receive a clock.
+			m_timingAccumulator = 0;
+			m_bufCount = 0;
+			m_bufReadIdx = 0;
+			m_bufWriteIdx = 0;
+
+			return problem == 0;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -280,43 +202,29 @@ namespace psycle { namespace host {
 		bool CMidiInput::Close()
 		{
 			MMRESULT result;
-
 			int problem = 0;
 
 			// close drivers
 			if( m_midiInHandle[ DRIVER_MIDI ] )
 			{
 				result = midiInClose( m_midiInHandle[ DRIVER_MIDI ] );
-				if( result != MMSYSERR_NOERROR )
-				{
-					problem |= 0x01;
-				}
-				else
-				{
-					m_midiInHandle[ DRIVER_MIDI ] = NULL;
-				}
+				BREAK_ON_ERROR(result, 0x01)
+
+				m_midiInHandle[ DRIVER_MIDI ] = NULL;
 			}
 
 			if( m_midiInHandle[ DRIVER_SYNC ] )
 			{
 				result = midiInClose( m_midiInHandle[ DRIVER_SYNC ] );
-				if( result != MMSYSERR_NOERROR )
-				{
-					problem |= 0x02;
-				}
-				else
-				{
-					m_midiInHandle[ DRIVER_SYNC ] = NULL;
-				}
-			}
+				BREAK_ON_ERROR(result, 0x02)
 
+				m_midiInHandle[ DRIVER_SYNC ] = NULL;
+			}
+Exit:
 			// allow messagebox errors again
 			m_midiInHandlesTried = false;
 
-			// we have finished with the resolution set in open
-			timeEndPeriod( 1 );
-
-			return problem != 0;
+			return problem == 0;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,13 +237,13 @@ namespace psycle { namespace host {
 		int CMidiInput::FindDevByName( CString nameString )
 		{
 			MIDIINCAPS mic;
-			uint32_t numDevs;
+			std::uint32_t numDevs;
 
 			// get the number of MIDI input devices
 			numDevs = midiInGetNumDevs();
 
 			// scan for text-id match
-			for( uint32_t idx = 0; idx < numDevs; idx++ )
+			for( std::uint32_t idx = 0; idx < numDevs; idx++ )
 			{
 				// get info about the next device
 				if( !midiInGetDevCaps( idx, &mic, sizeof(MIDIINCAPS) ) )
@@ -368,32 +276,15 @@ namespace psycle { namespace host {
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// PopulateListbox
 		//
-		// DESCRIPTION	  : Fill a listbox with a list of the available input devices
-		// PARAMETERS     : CComboBox * listbox - pointer to the listbox to fill
-		// RETURNS		  : uint32_t - amount of devices found
-
-		uint32_t CMidiInput::PopulateListbox( CComboBox * listbox, bool issync )
+		// DESCRIPTION	  : return the name of a device, via its index
+		// PARAMETERS     : idx - the position to get its description
+		// RETURNS		  : std::string - name of the device
+		void CMidiInput::GetDeviceDesc( int idx, std::string& result)
 		{
 			MIDIINCAPS mic;
-			uint32_t numDevs;
-
-			// clear listbox
-			listbox->ResetContent();
-
-			// always add the null dev
-			listbox->AddString( issync?"Same as MIDI Input Device":"None" );
-
-			// get the number of MIDI input devices
-			numDevs = midiInGetNumDevs();
-
-			// add each to the listbox
-			for( uint32_t idx = 0; idx < numDevs; idx++ )
-			{
-				midiInGetDevCaps( idx, &mic, sizeof( mic ) );
-				listbox->AddString( mic.szPname );
-			}
-
-			return numDevs; 
+			assert(idx < GetNumDevices());
+			midiInGetDevCaps( idx, &mic, sizeof( mic ) );
+			result = mic.szPname;
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -421,8 +312,10 @@ namespace psycle { namespace host {
 		{
 			assert( channel < MAX_MIDI_CHANNELS );
 			assert( inst < MAX_INSTRUMENTS );
-			m_channelInstMap[ channel ] = inst;
-			m_stats.channelMapUpdate = true;
+			if(inst != m_channelInstMap[ channel ]) {
+				m_channelInstMap[ channel ] = inst;
+				m_stats.channelMapUpdate = true;
+			}
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -450,8 +343,11 @@ namespace psycle { namespace host {
 		{
 			assert( channel < MAX_MIDI_CHANNELS );
 			assert( generator < MAX_MACHINES );
-			m_channelGeneratorMap[ channel ] = generator;
-			m_stats.channelMapUpdate = true;
+			if(generator != m_channelGeneratorMap[ channel ])
+			{
+				m_channelGeneratorMap[ channel ] = generator;
+				m_stats.channelMapUpdate = true;
+			}
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,34 +400,34 @@ namespace psycle { namespace host {
 		//
 		// DESCRIPTION	  : The MIDI input callback function for our opened device <linker>
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
-		//                : uint32_t uMsg - message identifier
+		//                : std::uint32_t uMsg - message identifier
 		//                : DWORD_PTR dwInstance - user instance data (not used)
 		//                : DWORD_PTR dwParam1 - various midi message info
 		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
-			CMidiInput * pMidiInput = CMidiInput::Instance();
+			CMidiInput& midiInput = Global::midi();
 
 			// do nothing if there is no reference object or the object is not active
-			if( !pMidiInput || (!pMidiInput->GetHandle( DRIVER_MIDI ) && !pMidiInput->GetHandle( DRIVER_SYNC )))
+			if((!midiInput.GetHandle( DRIVER_MIDI ) && !midiInput.GetHandle( DRIVER_SYNC )))
 			{
 				return;
 			}
 
 			// strobe the master input
-			pMidiInput->GetStatsPtr()->flags |= FSTAT_MIDI_INPUT;
+			midiInput.GetStatsPtr()->flags |= FSTAT_MIDI_INPUT;
 
 			// link to reference object
-			switch( pMidiInput->m_midiMode )
+			switch( midiInput.m_midiMode )
 			{
 			case MODE_REALTIME:
-				pMidiInput->fnMidiCallback_Inject( handle, uMsg, dwInstance, dwParam1, dwParam2 );
+				midiInput.fnMidiCallback_Inject( handle, uMsg, dwInstance, dwParam1, dwParam2 );
 				break;
 
 			case MODE_STEP:
-				pMidiInput->fnMidiCallback_Step( handle, uMsg, dwInstance, dwParam1, dwParam2 );
+				midiInput.fnMidiCallback_Step( handle, uMsg, dwInstance, dwParam1, dwParam2 );
 				break;
 
 			default:
@@ -545,13 +441,13 @@ namespace psycle { namespace host {
 		//
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
-		//                : uint32_t uMsg - message identifier
+		//                : std::uint32_t uMsg - message identifier
 		//                : DWORD_PTR dwInstance - user instance data (not used)
 		//                : DWORD_PTR dwParam1 - various midi message info
 		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// branch on type of midi message
 			switch( uMsg )
@@ -574,14 +470,35 @@ namespace psycle { namespace host {
 					int data2 = p1HiWordLB;
 					int cmd = 0;
 					int parameter = 0;
+					int track = 0;
 
 					// and a bit more...
 					int statusHN = (status & 0xF0) >> 4;
 					int statusLN = (status & 0x0F);
 					int channel = statusLN;
 
+					switch(Global::psycleconf().midi().gen_select_with())
+					{
+					case PsycleConfig::Midi::MS_USE_SELECTED:
+						SetGenMap( channel, Global::song().seqBus );
+						break;
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
+						SetGenMap( channel, channel );
+						break;
+					}
+					switch(Global::psycleconf().midi().inst_select_with())
+					{
+					case PsycleConfig::Midi::MS_USE_SELECTED:
+						SetInstMap( channel, Global::song().auxcolSelected );
+						break;
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
+						SetInstMap( channel, channel );
+						break;
+					}
+
 					// map channel -> generator
 					int busMachine = GetGenMap( channel );
+					int inst = GetInstMap( channel );
 
 					// branch on status code
 					switch( statusHN )
@@ -594,12 +511,17 @@ namespace psycle { namespace host {
 							{
 								// limit to playable range (above this is special codes)
 								if( note > 119 ) note = 119;
+								track = GetTrackToPlay(note, noteOn, inst);
+								cmd = 0x0C;
+								parameter = p1HiWordLB;
+
 							}
 							else
 							{
 								// note off
 								if( m_channelNoteOff[ channel ] )
 								{
+									track = GetTrackToPlay(note, 0, inst);
 									note = 120;
 								}
 								else
@@ -616,6 +538,7 @@ namespace psycle { namespace host {
 							// note off
 							if( m_channelNoteOff[ channel ] )
 							{
+								track = GetTrackToPlay(note, 0, inst);
 								note = 120;
 							}
 							else
@@ -629,11 +552,10 @@ namespace psycle { namespace host {
 						case 0x0C:
 						{
 							// program change -> map generator/effect to channel
-
-							// machine active?
-							if( program < MAX_MACHINES )
-							{  
-								if (Player::singleton().song().machine(program) )
+							if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							{
+								// machine active?
+								if( program < MAX_MACHINES && Global::_pSong->_pMachine[ program ] )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -643,23 +565,23 @@ namespace psycle { namespace host {
 									// machine not active, can't map!
 									SetGenMap( channel, -1 );
 								}
+								return;
 							}
-							else
+							else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
-								// machine not active, can't map!
-								SetGenMap( channel, -1 );
+								SetInstMap( channel, program );
+								return;
 							}
-							return;
+							else {
+								note = notecommands::midicc;
+								inst = (status&0xF0) | (inst&0x0F);
+								cmd = program;
+							}
 						}
 						break;
 
 						/*
-						case 11:
-							// mods
-							// data 2 contains the info
-							break;
-
-						case 14:
+						case 0x0E:
 							// pitch wheel
 							// data 2 contains the info
 							break;
@@ -711,7 +633,7 @@ namespace psycle { namespace host {
 									m_stats.flags |= FSTAT_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->stop();
+									Global::pPlayer->Stop();
 									return;
 								}
 								break;
@@ -733,9 +655,35 @@ namespace psycle { namespace host {
 								// BANK SELECT (controller 0)
 								case 0:
 								{
+									// banks select -> map generator to channel
+									if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
+									{
+										// machine active?
+										if( program < MAX_MACHINES && Global::_pSong->_pMachine[ data2 ] )
+										{
+											// ok, map
+											SetGenMap( channel, data2 );
+										}
+										else
+										{
+											// machine not active, can't map!
+											SetGenMap( channel, -1 );
+										}
+										return;
+									}
 									// banks select -> map instrument to channel
-									SetInstMap( channel, data2 );
-									return;
+									else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
+									{
+										SetInstMap( channel, data2 );
+										return;
+									}
+									else
+									{
+										note = notecommands::midicc;
+										inst = (status&0xF0) | (inst&0x0F);
+										cmd = data1;
+										parameter = data2;
+									}
 								}
 								break;
 
@@ -799,7 +747,7 @@ namespace psycle { namespace host {
 									m_stats.flags |= FSTAT_EMULATED_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->stop();
+									Global::pPlayer->Stop();
 									return;
 								}
 								break;
@@ -855,13 +803,68 @@ namespace psycle { namespace host {
 									if( gParameter >= 0 )
 									{
 										note = notecommands::tweak;
-										cmd = gParameter;
+										inst  = gParameter;
+										if(Global::_pSong->_pMachine[busMachine] && inst < Global::_pSong->_pMachine[busMachine]->GetNumParams())
+										{	
+											int minval, maxval;
+											Global::_pSong->_pMachine[busMachine]->GetParamRange(inst, minval, maxval);
+											int value = minval + helpers::math::lround<int, float>( data2 * (maxval-minval) / 127.f);
+											cmd = value / 256;
+											parameter = value % 256;
+										}
+										else
+											parameter = data2;
+									}
+									else if (Global::psycleconf().midi().raw())
+									{
+										note = notecommands::midicc;
+										inst  = (status&0xF0) | (inst&0x0F);
+										cmd = data1;
 										parameter = data2;
 									}
 									else
 									{
+										// search if there's a remap
+										int i;
+										for(i =0 ; i < 16 ; ++i)
+										{
+											if(Global::psycleconf().midi().group(i).record() && (Global::psycleconf().midi().group(i).message() == data1 ))
+											{
+												int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
+												switch(Global::psycleconf().midi().group(i).type())
+												{
+												case PsycleConfig::Midi::group_t::t_command:
+														note = notecommands::empty;
+														inst = 255;
+														cmd = Global::psycleconf().midi().group(i).command();
+														parameter = value;
+														break;
+												case PsycleConfig::Midi::group_t::t_tweak:
+														note = notecommands::tweak;
+														inst = Global::psycleconf().midi().group(i).command();
+														cmd = (value>>8)&255;
+														parameter = value&255;
+														break;
+												case PsycleConfig::Midi::group_t::t_tweakslide:
+														note = notecommands::tweakslide;
+														inst = Global::psycleconf().midi().group(i).command();
+														cmd = (value>>8)&255;
+														parameter = value&255;
+														break;
+												case PsycleConfig::Midi::group_t::t_mcm:
+														note = notecommands::midicc;
+														inst = Global::psycleconf().midi().group(i).command() | (inst&0x0F);
+														cmd = data1;
+														parameter = data2;
+														break;
+												}
+												break;
+											}
+										}
+
 										// controller not setup, we can't do anything
-										return;
+										if (i==16)
+											return;
 									}
 								}
 								break;
@@ -878,39 +881,41 @@ namespace psycle { namespace host {
 					}
 
 					// buffer overflow?
-					if( m_patCount >= MIDI_BUFFER_SIZE )
+					if( m_bufCount >= MIDI_BUFFER_SIZE )
 					{
 						m_stats.flags |= FSTAT_BUFFER_OVERFLOW;
 						return;
 					}
 
 					// invalid machine/channel?
-					if( !Player::singleton().song().machine( busMachine ) && note != 254 )
+					if( !Global::_pSong->_pMachine[ busMachine ] && note != 254 )
 					{
 						return;
 					}
 
 					// create a patten entry struct in the midi buffer
-					int patIn = m_patIn;
-					PatternEvent* pEntry = &m_midiBuffer[ patIn ].entry;
-					pEntry->setNote(note);
-					pEntry->setMachine(busMachine);
-					pEntry->setInstrument(GetInstMap(channel));
-					pEntry->setCommand(cmd);
-					pEntry->setParameter(parameter);
+					int patIn = m_bufWriteIdx;
+					PatternEntry * pEntry = &m_midiBuffer[ patIn ].entry;
+
+					pEntry->_note = note;
+					pEntry->_mach = busMachine;
+					pEntry->_inst = inst;
+					pEntry->_cmd = cmd;
+					pEntry->_parameter = parameter;
 
 					// add the other necessary info
 					m_midiBuffer[ patIn ].timeStamp = dwParam2;
 					m_midiBuffer[ patIn ].channel = channel;
+					m_midiBuffer[ patIn ].track = track;
 					m_stats.channelMap |= (1 << channel);
 
 					// advance IN pointer
-					m_patCount++;
-					m_patIn++;
-					if( m_patIn >= MIDI_BUFFER_SIZE ) m_patIn = 0;
+					m_bufCount++;
+					m_bufWriteIdx++;
+					if( m_bufWriteIdx >= MIDI_BUFFER_SIZE ) m_bufWriteIdx = 0;
 					m_stats.flags |= FSTAT_IN_BUFFER;
 
-					// this the 1st message, we are NOT synced already, sync to audio engine now!
+					// this the 1st message, we are NOT synced yet, sync to audio engine now!
 					if( !m_synced )
 					{
 						// force sync
@@ -926,13 +931,13 @@ namespace psycle { namespace host {
 		//
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
-		//                : uint32_t uMsg - message identifier
+		//                : std::uint32_t uMsg - message identifier
 		//                : DWORD_PTR dwInstance - user instance data (not used)
 		//                : DWORD_PTR dwParam1 - various midi message info
 		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// pipe MIDI note on messages into the pattern entry window
 
@@ -957,18 +962,38 @@ namespace psycle { namespace host {
 					int data1 = p1LowWordHB;
 					int data2 = p1HiWordLB;
 					int data = ((data2&0x7f)<<7)|(data1&0x7f);
-
-//					int cmd = 0; cmd; // not used
-//					int parameter = 0; parameter; // not used
-					
 					// and a bit more...
 					int statusHN = (status & 0xF0) >> 4;
 					int statusLN = (status & 0x0F);
 					int channel = statusLN;
 
-					CMainFrame & frame(*static_cast<CMainFrame*>(theApp.m_pMainWnd));
-					///\todo: Disabled because it makes the aux column be setup without user control. Needs improvement.
-					//frame.ChangeIns(channel);
+					switch(Global::psycleconf().midi().gen_select_with())
+					{
+					case PsycleConfig::Midi::MS_USE_SELECTED:
+						SetGenMap( channel, Global::song().seqBus );
+						break;
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
+						SetGenMap( channel, channel );
+						break;
+					}
+					switch(Global::psycleconf().midi().inst_select_with())
+					{
+					case PsycleConfig::Midi::MS_USE_SELECTED:
+						SetInstMap( channel, Global::song().auxcolSelected );
+						break;
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
+						SetInstMap( channel, channel );
+						break;
+					}
+
+					// map channel -> generator
+					int busMachine = GetGenMap( channel );
+					int inst = GetInstMap( channel );
+
+//					int cmd = 0; cmd; // not used
+//					int parameter = 0; parameter; // not used
+					
+					m_stats.channelMap |= (1 << channel);
 
 					// branch on status code
 					switch( statusHN )
@@ -976,23 +1001,81 @@ namespace psycle { namespace host {
 						// (also) note off
 						case 0x08:		
 							velocity=0;
-						// note on/off
+						//fallthrough
 						case 0x09:
     						// limit to playable range (above this is special codes)
     						if(note>119) 
     							note=119;
-							// TODO: watch this, it should be OK as long as we don't change things too much
-							frame.m_wndView.MidiPatternNote(note,velocity);
+							Global::inputHandler().MidiPatternNote(note, busMachine, inst, velocity);
 							return;
+						// controller
+						case 0x0B:
+						{
+							// switch on controller ID
+							switch( data1 )
+							{
+								// BANK SELECT (controller 0)
+								case 0:
+								{
+									// banks select -> map generator to channel
+									if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
+									{
+										// machine active?
+										if( data2 < MAX_MACHINES && Global::_pSong->_pMachine[ data2 ] )
+										{
+											// ok, map
+											SetGenMap( channel, data2 );
+										}
+										else
+										{
+											// machine not active, can't map!
+											SetGenMap( channel, -1 );
+										}
+										return;
+									}
+									// banks select -> map instrument to channel
+									else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
+									{
+										SetInstMap( channel, data2 );
+										return;
+									}
+								}
+								default:break;
+							}
+						}
+						// program change
+						case 0x0C:
+						{
+							// program change -> map generator/effect to channel
+							if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							{
+								// machine active?
+								if( data1 < MAX_MACHINES && Global::_pSong->_pMachine[ data1 ] )
+								{
+									// ok, map
+									SetGenMap( channel, data1 );
+								}
+								else
+								{
+									// machine not active, can't map!
+									SetGenMap( channel, -1 );
+								}
+								return;
+							}
+							else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							{
+								SetInstMap( channel, data1 );
+								return;
+							}
+						}
 						default:break;
 					}
 
-					if (Global::pConfig->_RecordTweaks)
+					if (Global::psycleconf().inputHandler()._RecordTweaks)
 					{
-						if (Global::pConfig->midi().raw() && status != 0xFE )
+						if (Global::psycleconf().midi().raw() && status != 0xFE )
 						{
-							frame.m_wndView.MidiPatternMidiCommand(status,(data1 << 8) | data2);
-							return;
+							Global::inputHandler().MidiPatternMidiCommand(status,busMachine,(data1 << 8) | data2);
 						}
 						// branch on status code
 						else switch(statusHN)
@@ -1002,25 +1085,23 @@ namespace psycle { namespace host {
 								// data 2 contains the info
 								for(int i(0) ; i < 16 ; ++i)
 								{
-									if(Global::pConfig->midi().group(i).record() && (Global::pConfig->midi().group(i).message() == data1 ))
+									if(Global::psycleconf().midi().group(i).record() && (Global::psycleconf().midi().group(i).message() == data1 ))
 									{
-										int const value(Global::pConfig->midi().group(i).from() + (Global::pConfig->midi().group(i).to() - Global::pConfig->midi().group(i).from()) * data2 / 127);
-										switch(Global::pConfig->midi().group(i).type())
+										int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
+										switch(Global::psycleconf().midi().group(i).type())
 										{
-											case 0:
-												frame.m_wndView.MidiPatternCommand(Global::pConfig->midi().group(i).command(), value);
+											case PsycleConfig::Midi::group_t::t_command:
+												Global::inputHandler().MidiPatternCommand(busMachine,Global::psycleconf().midi().group(i).command(), value);
 												break;
-											case 1:
-												frame.m_wndView.MidiPatternTweak(Global::pConfig->midi().group(i).command(), value);
+											case PsycleConfig::Midi::group_t::t_tweak:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().group(i).command(), value);
 												break;
-											case 2:
-												frame.m_wndView.MidiPatternTweakSlide(Global::pConfig->midi().group(i).command(), value);
+											case PsycleConfig::Midi::group_t::t_tweakslide:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().group(i).command(), value, true);
 												break;
-											case 3:
-												frame.m_wndView.MidiPatternMidiCommand(status, (data1 << 8) | data2);
+											case PsycleConfig::Midi::group_t::t_mcm:
+												Global::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
 												break;
-											case 4:
-												frame.m_wndView.MidiPatternInstrument(value);
 										}
 									}
 								}
@@ -1028,28 +1109,25 @@ namespace psycle { namespace host {
 							case 0x0E:
 								// pitch wheel
 								// data 2 contains the info
-								if (Global::pConfig->_RecordTweaks)
+								if (Global::psycleconf().inputHandler()._RecordTweaks)
 								{
-									if (Global::pConfig->midi().pitch().record())
+									if (Global::psycleconf().midi().pitch().record())
 									{
-										int const value(Global::pConfig->midi().pitch().from() + (Global::pConfig->midi().pitch().to() - Global::pConfig->midi().pitch().from()) * data / 0x3fff);
-										switch (Global::pConfig->midi().pitch().type())
+										int const value(Global::psycleconf().midi().pitch().from() + (Global::psycleconf().midi().pitch().to() - Global::psycleconf().midi().pitch().from()) * data / 0x3fff);
+										switch (Global::psycleconf().midi().pitch().type())
 										{
-										case 0:
-											frame.m_wndView.MidiPatternCommand(Global::pConfig->midi().pitch().command(), value);
-											break;
-										case 1:
-											frame.m_wndView.MidiPatternTweak(Global::pConfig->midi().pitch().command(), value);
-											break;
-										case 2:
-											frame.m_wndView.MidiPatternTweakSlide(Global::pConfig->midi().pitch().command(), value);
-											break;
-										case 3:
-											frame.m_wndView.MidiPatternMidiCommand(status, (data1 << 8) | data2);
-											break;
-										case 4:
-											frame.m_wndView.MidiPatternInstrument(value);
-											break;
+											case PsycleConfig::Midi::group_t::t_command:
+												Global::inputHandler().MidiPatternCommand(busMachine,Global::psycleconf().midi().pitch().command(), value);
+												break;
+											case PsycleConfig::Midi::group_t::t_tweak:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().pitch().command(), value);
+												break;
+											case PsycleConfig::Midi::group_t::t_tweakslide:
+												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().pitch().command(), value, true);
+												break;
+											case PsycleConfig::Midi::group_t::t_mcm:
+												Global::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
+												break;
 										}
 									}
 								}
@@ -1057,21 +1135,29 @@ namespace psycle { namespace host {
 					}
 					else
 					{
-						// midi controllers pass-through
-						int mgn = Player::singleton().song().seqBus;
-
-						if (mgn < MAX_MACHINES)
+						if (busMachine >= 0 && busMachine < MAX_MACHINES)
 						{
-							Machine* pMachine = Player::singleton().song().machine(mgn);
+							Machine* pMachine = Global::_pSong->_pMachine[busMachine];
 							if (pMachine)
 							{
-								PatternEvent pevent;
-								pevent.setNote(notetypes::midi_cc);
-								pevent.setMachine(pMachine->id());
-								pevent.setInstrument(status);
-								pevent.setCommand(data1);
-								pevent.setParameter(data2);
-								pMachine->AddEvent(0,0, pevent);
+								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
+								{
+									((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
+									return;
+								}
+								else
+								{
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+									PatternEntry pentry(notecommands::midicc,status,255,data1,data2,busMachine);
+#else
+									PatternEntry pentry(notecommands::midicc,status,busMachine,data1,data2);
+#endif
+#endif
+									pMachine->Tick(0,&pentry);
+								}
 							}
 						}
 					}
@@ -1092,70 +1178,22 @@ namespace psycle { namespace host {
 
 		void CMidiInput::InternalClock( DWORD_PTR dwParam2 )
 		{
-			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
-
-			// WARNING! GetPlayPos() has max of 0x7FFFFF
+			int pcClock = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den) - m_resyncClockBase;
+			int midiClock = dwParam2 - m_resyncMidiStampTime;
+			// calc the deviation of the MIDI clock.
+			int clockDeviation = pcClock - midiClock;
+			m_stats.clockDeviation = clockDeviation;
 
 			// get the current play sample position
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			// todo
- 			int playPos = 0;
-#else
-			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
-#endif
-			// calc the latency of the clock midi message
-			int midiLatencyMs = ( timeGetTime() - m_tickBase ) - dwParam2;
-
-			// adjust the sample position (fix latency)
-			int adjPlayPos = playPos - lround<int>((midiLatencyMs/1000.f) * samplesPerSecond );
-			
-			// never let the adjusted play pos become negative (this really breaks things - usually
-			// when trying to resync just after the audio engine has restared)
-			if( adjPlayPos < 0 )
-			{
-				adjPlayPos = 0;
-			}
-
-			// sample counter wrap around?
-			// (detects a wrap around using the transistion from the MSB of the 23 bit sample counter
-			//  from a 1 to a 0.  could possible get confused if we are adjusting the play position
-			//  "backwards" in the sample counter (to fix lag), but I have not seen this)
-			if( (m_lastPlayPos & 0x400000) && !(adjPlayPos & 0x400000) )
-			{
-				m_wraps++;
-			}
-
-			// create real big sample counter
-			// (if anyone is bothered to keep one song going long enough for this counter to wrap-around, then
-			//  good luck to them!  They must be mad...)
-			LARGE_INTEGER bigSampleCounter;
-			bigSampleCounter.QuadPart = (m_wraps * 0x800000) + adjPlayPos;
+ 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPosInSamples();
+			int samplesPerSecond = Global::player().SampleRate();
 
 			// convert this back to a ms counter
-			DWORD playMs = (DWORD)(((bigSampleCounter.QuadPart - m_adjustedPlayPos)/(float)samplesPerSecond) * 1000.0f);
-
-			// how many milliseconds should we have taken
-			DWORD shouldTakenMs = dwParam2 - m_baseStampTimeFix;
+			DWORD playMs = (DWORD)(((playPos - m_resyncPlayPos)/(float)samplesPerSecond) * 1000.0f);
 
 			// create offset (ms)
-			m_fixOffset = playMs - shouldTakenMs;
+			m_fixOffset = playMs - midiClock;
 			m_stats.syncOffset = m_fixOffset;
-
-			// move on
-			m_lastPlayPos = adjPlayPos;
-
-		#ifdef _DEBUGGING
-		// (DEBUGGING)
-		int static tstrobe = 0;
-		if( tstrobe == 0 )
-		{
-			char tmp[ 128 ];
-			sprintf( tmp, "(0x%x) ms difference = %d playPos = %u (samples)\n\0", dwParam2, m_fixOffset, playPos );
-			TRACE( tmp );
-		}
-		tstrobe++;
-		if( tstrobe > 40 ) tstrobe = 0;
-		#endif
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1167,42 +1205,19 @@ namespace psycle { namespace host {
 
 		void CMidiInput::InternalReSync( DWORD_PTR dwParam2 )
 		{
-			// get the current play sample position
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			// todo
- 			int playPos = 0;
-#else
-			int playPos = Global::pConfig->_pOutputDriver->GetPlayPos();
-#endif
-			
-			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
-
-			// calculate the latency of the MIDI message in samples (delay in getting to us)
-			// using our own timer, started at the same time (hopefully!) as the MIDI
-			// input timer.
- 			int midiLatency = ( timeGetTime() - m_tickBase ) - dwParam2;
-			int midiLatencySamples = lround<int>( (midiLatency/1000.f) * samplesPerSecond );
-			m_stats.syncEventLatency = midiLatencySamples;
-
-			// work out the real play position
-			m_adjustedPlayPos = playPos - midiLatencySamples;
+ 			m_resyncClockBase = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
+ 			m_resyncPlayPos = Global::pConfig->_pOutputDriver->GetPlayPosInSamples();
 
 			// save vars
-			m_baseStampTime = dwParam2;
-			m_baseStampTimeFix = dwParam2;
+			m_resyncMidiStampTime = dwParam2;
+			m_resyncAdjStampTime = dwParam2;
 
 			// set vars
 			m_synced = true;
 			m_syncing = true;
-			m_wraps = 0;
+			m_stats.clockDeviation = 0;
+			m_stats.syncOffset = 0;
 			m_fixOffset = 0;
-
-		#ifdef _DEBUGGING
-		// (DEBUGGING)
-		char tmp[128];
-		sprintf( tmp, "(0x%x) MIDI latency error %d (samples) samplebase = %u\n\0", dwParam2, midiLatencySamples, m_adjustedPlayPos );
-		TRACE( tmp );
-		#endif
 		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1212,120 +1227,81 @@ namespace psycle { namespace host {
 		// PARAMETERS     : int amount - amount of block samples
 		// RETURNS		  : bool - true if we did some processing, false if nothing was done
 
-		bool CMidiInput::InjectMIDI( int amount )
+		void CMidiInput::InjectMIDI( int amount )
 		{
-			// NOTE: The DirectSound driver is currently in no fit state to be used with
-			// the midi input.  The get write/play functions are not compatible with our
-			// method here in that they differ in the way the MME functions have been
-			// implemented!?  Oh, and the DSound functions are also not working correctly!
-
-			// midi injection NOT enabled?
-			if( !m_midiInHandle[ DRIVER_MIDI ] || 
-				strcmp( Global::pConfig->_pOutputDriver->info().name().c_str(), "mmewaveout" ) != 0 )	// TODO: need to remove this string compare? (speed)
+			if(m_midiMode != MODE_REALTIME)
 			{
-				m_stats.flags &= ~FSTAT_ACTIVE;
-				return false;
+				return;
 			}
 
-			m_stats.flags |= FSTAT_ACTIVE;
+			int samplesPerSecond = Global::player().SampleRate();
+			m_stats.bufferCount = m_bufCount;
 
-			int samplesPerSecond = Global::pConfig->GetSamplesPerSec();
-			m_stats.bufferCount = m_patCount;
-
-			// (waiting until we are sure we will have enough midi data in the buffer
-			//  to correctly inject the data when we are next called to write samples)
 			if( m_syncing )
 			{
 				m_stats.flags |= FSTAT_SYNC;
-
-				// get the write position now and adjust for samples done since the
-				// resync interrupt
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-				// todo
-				int writePos = 0;
-				int blockSamples = Global::pConfig->_pOutputDriver->playbackSettings().blockFrames();
-				int blocks = Global::pConfig->_pOutputDriver->playbackSettings().blockCount();
-#else
-				int writePos = Global::pConfig->_pOutputDriver->GetWritePos();				
-				int blockSamples = Global::pConfig->_pOutputDriver->GetBufferSize() / Global::pConfig->_pOutputDriver->GetSampleSize();
-				int blocks = Global::pConfig->_pOutputDriver->GetNumBuffers();
-#endif
+				// get the write position
+				int writePos = Global::pConfig->_pOutputDriver->GetWritePosInSamples() + Global::player().sampleOffset;
+				
 				// calculate our final adjuster
-				int syncAdjuster = m_adjustedPlayPos - ( writePos - (blockSamples*blocks) );
+				int syncAdjuster = writePos - m_resyncPlayPos;
 				m_stats.syncAdjuster = syncAdjuster;
 
-		#ifdef _DEBUGGING
-		// (DEBUGGING)
-		char tmp[128];
-		sprintf( tmp, "writePos %d (samples) syncAdjuster %d (samples) buffer %d (events)\n\0", writePos, syncAdjuster, m_stats.bufferCount );
-		TRACE( tmp );
-		#endif
-
 				// adjust the time base
-				// (if m_syncLimit < 0 we will probably loose a couple
-				// of the initial MIDI events, BUT we should keep the sync!)
-				m_baseStampTime -= (DWORD)(( syncAdjuster /(float)samplesPerSecond) * 1000.0f);
+				m_resyncAdjStampTime += (syncAdjuster * 1000/samplesPerSecond) - m_config.midiHeadroom;
 
 				// initial accumulator val
 				m_timingAccumulator = 0;
 				m_syncing = false;
 			}
 
-			// create our working stamp (account for timing fix and MIDI buffer headroom)
-			DWORD tbaseStampTime = m_baseStampTime - m_fixOffset - m_config.midiHeadroom;
+			// create our working stamp (account for timing fix)
+			DWORD tbaseStampTime = m_resyncAdjStampTime - m_fixOffset;
 
 			// accumulate sample count
 			m_timingAccumulator += amount;
 
 			// convert accumulator to milliseconds
-			m_timingCounter = (DWORD)(((float)(m_timingAccumulator)/samplesPerSecond) * 1000.0f);
+			m_timingCounter = (DWORD)((m_timingAccumulator * 1000.0f)/samplesPerSecond);
 
 			// remove any midi data that happend over before the base stamp
-			while( m_patCount && m_midiBuffer[ m_patOut ].timeStamp < tbaseStampTime )
+			while( m_bufCount && m_midiBuffer[ m_bufReadIdx ].timeStamp < tbaseStampTime )
 			{
 				// advance OUT pointer
-				m_patCount--;
-				m_patOut++;
-				if( m_patOut >= MIDI_BUFFER_SIZE ) m_patOut = 0;
+				m_bufCount--;
+				m_bufReadIdx++;
+				if( m_bufReadIdx >= MIDI_BUFFER_SIZE ) m_bufReadIdx = 0;
 
-		#ifdef _DEBUGGING
-		// (DEBUGGING)
-		TRACE( "*Lost Event*\n" );
-		#endif
 				m_stats.eventsLost++;
 				m_stats.flags |= FSTAT_CLEAR_BUFFER;
 			}
 
 			// NO midi data that need to be injected during this amount block?
-			if( !m_patCount || m_timingCounter < (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime ) )
+			if( !m_bufCount || m_timingCounter < (m_midiBuffer[ m_bufReadIdx ].timeStamp - tbaseStampTime ) )
 			{
-				return false;
+				return;
 			}
 
 			// NOTE: because we are inserting all the machine ticks before working the master
 			// we will always have the notes being slightly advanced of the song.  How much will
 			// be a factor of the current sample-rate and amount of samples.  For example, at
 			// 44100hz with a 256 sample block the vary will be up to 5.8ms, at a lower sample
-			// rate, say 22050hz, but sample block size it increases up to 11.6ms.
+			// rate, say 22050hz, but same block size it increases up to 11.6ms.
 
-			// I have tried to combat this by interleaving the ->Tick(..) functions with several
-			// ->Work(..) functions, but this has always produced audio pops & clicks, so I have
-			// left it with the very minimal (and I don't think noticable) 5.8ms vary at 44100hz
-			// (which is the sample rate most people use anyway).
-
-			// if you can fix this, or implement better, then please do! [MJJM]
+			// VSTs support sending timestamp with the event, and that should be the solution if 
+			// it is ever tried.
 
 			m_stats.flags |= FSTAT_OUT_BUFFER;
 
 			// OK, if we get here then there is at least one MIDI message that needs injecting
 			do
 			{
-				int note = m_midiBuffer[ m_patOut ].entry.note();
-				int machine = m_midiBuffer[ m_patOut ].entry.machine();
-				int data1 = m_midiBuffer[ m_patOut ].entry.command();
-				int data2 = m_midiBuffer[ m_patOut ].entry.parameter();
+				int note = m_midiBuffer[ m_bufReadIdx ].entry._note;
+				int machine = m_midiBuffer[ m_bufReadIdx ].entry._mach;
+				int track = m_midiBuffer[ m_bufReadIdx ].track;
+
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Player::singleton().song().machine( machine );
+				Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
 				// make sure machine is still valid
 				if( pMachine || note == 254 )
 				{
@@ -1333,61 +1309,89 @@ namespace psycle { namespace host {
 					switch( note )
 					{
 						// TWEAK
-						case notetypes::tweak_slide:
-							// *********
-							// midi doesn't get a tweak slide yet
-						case notetypes::tweak:
-
+						case notecommands::tweakslide:
+						case notecommands::tweak:
 						{
-							int min, max;
-							if (data1 > pMachine->GetNumParams()-1)
-							{
-								break;
-							}
-							pMachine->GetParamRange(data1,min,max);
-
-							// create actual value
-							int value = min + lround<int>( (max-min) * (data2/127.f) );
-
-							// assign
-							m_midiBuffer[ m_patOut ].entry.setInstrument(data1);
-							m_midiBuffer[ m_patOut ].entry.setCommand(value / 256);
-							m_midiBuffer[ m_patOut ].entry.setParameter(value % 256);
-							pMachine->AddEvent(0, m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
+							pMachine->Tick(track , &m_midiBuffer[ m_bufReadIdx ].entry );
 						}
 						break;
 
 						// SYNC TICK
-						case 254:
+						case notecommands::midi_sync:
 						{
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Player::singleton().song().machine(tc))
+								if( Global::_pSong->_pMachine[tc])
 								{
-									Player::singleton().song().machine(tc)->Tick();
+									Global::_pSong->_pMachine[tc]->Tick();
 								}
 							}
-
 							m_stats.flags |= FSTAT_SYNC_TICK;
 						}
 						break;
 						
 						// NORMAL NOTE
-						default: pMachine->Tick(m_midiBuffer[ m_patOut ].channel, m_midiBuffer[ m_patOut ].entry);
-					} // end of note switch
-				} // end of if 'is machine still active?'
+						default:
+						{
+							// normal note tick
+							pMachine->Tick( track, &m_midiBuffer[ m_bufReadIdx ].entry );
+						}
+						break;
+
+					}	// end of note switch
+				}	// end of if 'is machine still active?'
 
 				// advance OUT pointer
-				m_patCount--;
-				m_patOut++;
-				if( m_patOut >= MIDI_BUFFER_SIZE ) m_patOut = 0;
-			} while( m_patCount && m_timingCounter >= (m_midiBuffer[ m_patOut ].timeStamp - tbaseStampTime) );
+				m_bufCount--;
+				m_bufReadIdx++;
+				if( m_bufReadIdx >= MIDI_BUFFER_SIZE ) m_bufReadIdx = 0;
 
-			// Master machine initiates work
-			//
-			Player::singleton().song().machine(MASTER_INDEX)->recursive_process(amount);
-			return true;
+			} while( m_bufCount && m_timingCounter >= (m_midiBuffer[ m_bufReadIdx ].timeStamp - tbaseStampTime) );
+		}
+
+		int CMidiInput::GetTrackToPlay(int note, int velocity, int instNo)
+		{
+			if (velocity == 0)
+			{
+				int i;
+				for (i = 0; i < Global::_pSong->SONGTRACKS; i++)
+				{
+					if (notetrack[i] == note && instrtrack[i] == instNo)
+					{
+						break;
+					}
+				}
+				if(i >= Global::_pSong->SONGTRACKS) i=0;
+				currenttrack = i;
+				notetrack[currenttrack] = notecommands::release;
+				instrtrack[currenttrack] = instNo;
+			}
+			else
+			{
+				int i;
+				for (i = currenttrack+1; i < Global::_pSong->SONGTRACKS; i++)
+				{
+					if (notetrack[i] == notecommands::release)
+					{
+						break;
+					}
+				}
+				if (i >= Global::_pSong->SONGTRACKS)
+				{
+					for (i = 0; i <= currenttrack; i++)
+					{
+						if (notetrack[i] == notecommands::release)
+						{
+							break;
+						}
+					}
+				}
+				currenttrack = i;
+				notetrack[currenttrack] = note;
+				instrtrack[currenttrack] = instNo;
+			}
+			return currenttrack;
 		}
 	}
 }

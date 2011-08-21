@@ -1,6 +1,8 @@
 //\file
 //\brief interface file for psycle::host::InstPreview
-#include "mfc_namespace.hpp"
+#pragma once
+#include <psycle/host/detail/project.hpp>
+#include "Psycle.hpp"
 namespace psycle {
 	namespace host {
 

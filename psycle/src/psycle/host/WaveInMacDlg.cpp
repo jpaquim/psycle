@@ -1,28 +1,22 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "WaveInMacDlg.hpp"
 
-#include "Configuration.hpp"
-#include "ChildView.hpp"
-#include "RecorderGui.hpp"
+#include "PsycleConfig.hpp"
+#include "InputHandler.hpp"
 
-#include <psycle/core/internal_machines.h>
-#include <psycle/audiodrivers/audiodriver.h>
+#include "internal_machines.hpp"
+#include "AudioDriver.hpp"
 #include <psycle/helpers/dsp.hpp>
 
 namespace psycle { namespace host {
 
-CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent)
-	: CDialog(CWaveInMacDlg::IDD, pParent),
-	  gui_(0)
+CWaveInMacDlg::CWaveInMacDlg(CWnd* wndView, CWaveInMacDlg** windowVar, AudioRecorder& new_recorder)
+: CDialog(CWaveInMacDlg::IDD, AfxGetMainWnd())
+, mainView(wndView)
+, windowVar_(windowVar)
+, recorder(new_recorder)
 {
-	m_pParent = pParent;
-}
-
-CWaveInMacDlg::CWaveInMacDlg(CChildView* pParent, MachineGui* gui)
-	: CDialog(CWaveInMacDlg::IDD, pParent),
-	  m_pParent(pParent),
-	  gui_(gui)
-{
+	CDialog::Create(IDD, AfxGetMainWnd());
 }
 
 void CWaveInMacDlg::DoDataExchange(CDataExchange* pDX)
@@ -34,14 +28,11 @@ void CWaveInMacDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CWaveInMacDlg, CDialog)
+	ON_WM_CLOSE()
+	ON_WM_HSCROLL()
 	ON_CBN_SELENDOK(IDC_COMBO1, OnCbnSelendokCombo1)
-	ON_NOTIFY(NM_RELEASEDCAPTURE, IDC_SLIDER1, OnNMReleasedcaptureSlider1)
 END_MESSAGE_MAP()
 
-BOOL CWaveInMacDlg::Create()
-{
-	return CDialog::Create(IDD, m_pParent);
-}
 
 BOOL CWaveInMacDlg::OnInitDialog() 
 {
@@ -49,90 +40,87 @@ BOOL CWaveInMacDlg::OnInitDialog()
 	
 	FillCombobox();
 	m_volslider.SetRange(0,1024);
-	m_volslider.SetPos(pRecorder->GainVol()*256);
+	m_volslider.SetPos(recorder._gainvol*256);
 	char label[30];
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->GainVol()));
+	sprintf(label,"%.01fdB", helpers::dsp::dB(recorder._gainvol));
 	m_vollabel.SetWindowText(label);
 	return TRUE;
 	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
-void CWaveInMacDlg::FillCombobox()
-{
-	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-	std::vector<std::string> ports;
-#if PSYCLE__CONFIGURATION__USE_PSYCORE	
-	// todo use real port names in the driver
-	unsigned int n = mydriver.captureSettings().numChannels();
-	for ( unsigned int i = 0; i < n; ++i ) {
-		std::ostringstream buffer;
-		buffer << "Input" << i;
-		ports.push_back(buffer.str());
-	}
-#else
-	mydriver.GetCapturePorts(ports);
-#endif
-	for (unsigned int i =0; i < ports.size(); ++i)
-	{
-		m_listbox.AddString(ports[i].c_str());
-	}
-	if (ports.size()==0) m_listbox.AddString("No Inputs Available");
-	m_listbox.SetCurSel(pRecorder->CaptureIdx());
-}
-
-void CWaveInMacDlg::OnCbnSelendokCombo1()
-{
-	pRecorder->ChangePort(m_listbox.GetCurSel());
-}
-
 void CWaveInMacDlg::OnCancel()
 {
-	if (gui_)
-		gui_->BeforeDeleteDlg();
-
 	DestroyWindow();
+}
+void CWaveInMacDlg::OnClose()
+{
+	CDialog::OnClose();
+	DestroyWindow();
+}
+void CWaveInMacDlg::PostNcDestroy()
+{
+	CDialog::PostNcDestroy();
+	if(windowVar_!=NULL) *windowVar_ = NULL;
 	delete this;
 }
 
 BOOL CWaveInMacDlg::PreTranslateMessage(MSG* pMsg) 
 {
-	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP))
-	{
-		m_pParent->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
+		CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+		if(def.GetType() == CT_Note) {
+			mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+			return true;
+		}
 	}
 	return CDialog::PreTranslateMessage(pMsg);
 }
+void CWaveInMacDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+	//CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+	switch(nSBCode){
+	case TB_BOTTOM: //fallthrough
+	case TB_LINEDOWN: //fallthrough
+	case TB_PAGEDOWN: //fallthrough
+	case TB_TOP: //fallthrough
+	case TB_LINEUP: //fallthrough
+	case TB_PAGEUP: //fallthrough
+		OnChangeSlider();
+		break;
+	case TB_THUMBPOSITION: //fallthrough
+	case TB_THUMBTRACK:
+		OnChangeSlider();
+		break;
+	}
+	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+}
 
-void CWaveInMacDlg::OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult)
+void CWaveInMacDlg::FillCombobox()
+{
+	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+	std::vector<std::string> ports;
+	mydriver.RefreshAvailablePorts();
+	mydriver.GetCapturePorts(ports);
+	for (unsigned int i =0; i < ports.size(); ++i)
+	{
+		m_listbox.AddString(ports[i].c_str());
+	}
+	if (ports.size()==0) m_listbox.AddString("No Inputs Available");
+	m_listbox.SetCurSel(recorder._captureidx);
+}
+
+void CWaveInMacDlg::OnCbnSelendokCombo1()
+{
+	recorder.ChangePort(m_listbox.GetCurSel());
+}
+
+void CWaveInMacDlg::OnChangeSlider()
 {
 	char label[30];
-	pRecorder->setGainVol(m_volslider.GetPos()*0.00390625f);
-	sprintf(label,"%.01fdB", helpers::dsp::dB(pRecorder->GainVol()));
+	recorder._gainvol = m_volslider.GetPos()*0.00390625f;
+	sprintf(label,"%.01fdB", helpers::dsp::dB(recorder._gainvol));
 	m_vollabel.SetWindowText(label);
-	*pResult = 0;
 }
-
-void CWaveInMacDlg::Show(int x, int y)
-{	
-	centerWindowOnPoint(x, y);
-}
-
-void CWaveInMacDlg::centerWindowOnPoint(int x, int y) {
-	CRect r;
-	GetWindowRect(&r);
-
-	x -= ((r.right-r.left)/2);
-	y -= ((r.bottom-r.top)/2);
-
-	if (x < 0) {
-		x = 0;
-	}
-	if (y < 0) {
-		y = 0;
-	}
-	SetWindowPos( 0, x,	y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-}
-
 
 }   // namespace
 }   // namespace
+

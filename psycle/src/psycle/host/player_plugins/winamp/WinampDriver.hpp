@@ -1,6 +1,7 @@
 ///\file
 ///\brief interface file for psycle::host::WinampDriver.
 #pragma once
+#include "../../Global.hpp"
 #include "../../AudioDriver.hpp"
 namespace psycle
 {

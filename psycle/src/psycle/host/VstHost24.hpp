@@ -1,12 +1,14 @@
 ///\file
 ///\brief interface file for psycle::host::vsthost
 #pragma once
+#include <psycle/host/detail/project.hpp>
+#include "Global.hpp"
 #include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
-#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/math/lround.hpp>
 #include <cstring>
 /*
-*<@JosepMa> the so-called seib host (which is mine, but based on his), is composed of two classes:
+*<@JosepMa> Psycle's seib-VstHost is a reimplementation of HermannSeib's vsthost composed of two classes:
 *<@JosepMa> CVstHost and CEffect.
 *<@JosepMa> the former maps all the AudioMaster calls, provides a way to create CEffects, and helps
 *           in getting time/position information.
@@ -15,15 +17,17 @@
 *<@JosepMa> as such it maps all the dispatch calls to functions with parameter validation, and helps
 *           in the construction and destruction processes. Tries to help on other simpler tasks, and
 *           in the handling of parameter windows (VstEffectWnd.cpp/.hpp)
-*<@JosepMa> vst::AudioMaster and vst::plugin are subclasses of the aforementioned classes, which both: extend
+*<@JosepMa> vst::host and vst::plugin are subclasses of the aforementioned classes, which both: extend
 *           the functionality of the base classes, and adapts them to its usage inside psycle
 *<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
 *           plugin one wraps the CEffect into a Machine class
 */
-namespace psycle { namespace host { namespace vst {
-
-using namespace helpers::math;
-
+namespace psycle
+{
+	namespace host
+	{
+		namespace vst
+		{
 			// Maximum number of Audio Input/outputs
 			// \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
 			const int max_io = 16;
@@ -38,11 +42,11 @@ using namespace helpers::math;
 				VstIntPtr reserved;		///< zero (Reserved for future use)
 				VstEvent* events[MAX_VST_EVENTS];	///< event pointer array, variable size
 			} VstEventsDynamic;
-
+			extern const char* MIDI_CHAN_NAMES[16];
 			using namespace seib::vst;
 
 
-			class AudioMaster;
+			class host;
 			class CVstEffectWnd;
 
 			class plugin : public Machine, public CEffect
@@ -81,7 +85,7 @@ using namespace helpers::math;
 				float * _pOutSamplesR;
 				// Junk is a safe buffer for vst plugins that would want more buffers than
 				// supplied.
-				static float junk[STREAM_SIZE];
+				float* junk;
 				std::string _sDllName;
 				std::string _sProductName;
 				std::string _sVendorName;
@@ -102,6 +106,7 @@ using namespace helpers::math;
 					_nCols=0;
 					_pOutSamplesL = 0;
 					_pOutSamplesR = 0;
+					junk = 0;
 					_type=MACH_VST;
 				}
 				virtual ~plugin();
@@ -110,19 +115,22 @@ using namespace helpers::math;
 				//////////////////////////////////////////////////////////////////////////
 				// Actions
 				virtual void Init(){ Machine::Init();}
-				virtual void PreWork(int numSamples,bool clear=true);
-				virtual void Work(int numSamples);
+				virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage);
+				virtual int GenerateAudioInTicks(int startSample,  int numSamples);
 				virtual void Tick() { Machine::Tick(); }
-				virtual void Tick(int track, PatternEvent * pData);
+				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
+				virtual bool NeedsAuxColumn() { return _type == MACH_VST; }
+				virtual const char* AuxColumnName(int idx) { return MIDI_CHAN_NAMES[idx]; }
+				virtual int NumAuxColumnIndexes() { return 16;}
 				// old fileformat {
 				virtual bool PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance);
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
-				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(*this); return 0; }
-				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(*this); return 0; }
-				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); return 0; }
+				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(*this); }
+				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(*this); }
+				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual bool Bypass(void) { return Machine::Bypass(); }
@@ -178,6 +186,7 @@ using namespace helpers::math;
 				//
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; }
 				virtual int GetNumParams() { return numParams(); }
+				virtual int GetParamType(int numparam) { return 2; }
 				virtual void GetParamName(int numparam, char * parval) { if (numparam<numParams()) CEffect::GetParamName(numparam,parval); }
 				virtual void GetParamValue(int numparam, char * parval);
 				virtual int GetParamValue(int numparam)
@@ -185,7 +194,7 @@ using namespace helpers::math;
 					try
 					{
 						if(numparam < numParams())
-							return lround<int>(GetParameter(numparam) * quantization);
+							return helpers::math::lround<int, float>(GetParameter(numparam) * quantization);
 					}catch(...){}
 					return 0;
 				}
@@ -209,6 +218,26 @@ using namespace helpers::math;
 					}catch(...){}
 				}
 				virtual bool DescribeValue(int parameter, char * psTxt);
+				virtual void SetCurrentProgram(int idx) {SetProgram(idx);};
+				virtual int GetCurrentProgram() {
+					return GetProgram()%128;
+				};
+				virtual void GetCurrentProgramName(char* val) {GetProgramName(val);};
+				virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){
+
+					GetProgramNameIndexed(-1, bnkidx*128 + prgIdx, val);};
+				virtual int GetNumPrograms(){ return numPrograms()<128?numPrograms():128;};
+				virtual int GetTotalPrograms(){ return numPrograms();};
+				virtual void SetCurrentBank(int idx) { SetProgram(idx*128+GetCurrentProgram());};
+				virtual int GetCurrentBank() {return GetProgram()/128;};
+				virtual void GetCurrentBankName(char* val) {GetIndexBankName(GetCurrentBank(),val);};
+				virtual void GetIndexBankName(int bnkidx, char* val){
+					if(bnkidx < GetNumBanks())
+						sprintf(val,"Internal %d", bnkidx+1);
+					else
+						val[0]='\0';
+				};
+				virtual int GetNumBanks(){ return numPrograms()/128;};
 
 				virtual void InsertOutputWireIndex(Song* pSong,int wireIndex,int dstmac)
 				{
@@ -266,11 +295,11 @@ using namespace helpers::math;
 */
 			};
 
-			class AudioMaster : public CVSTHost
+			class host : public CVSTHost
 			{
 			public:
-				AudioMaster(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
-				virtual ~AudioMaster(){;}
+				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
+				virtual ~host(){;}
 
 				///< Helper class for Machine Creation.
 				//static Machine* CreateFromType(int _id, std::string _dllname);

@@ -3,40 +3,32 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-
 namespace psycle {
-	namespace core {
-		class Song;
-	}
 	namespace host {
 
-/// song dialog window.
-class CSongpDlg : public CDialog {
-	public:
-		/// mfc compliant constructor.
-		CSongpDlg(Song *song, CWnd* pParent = 0);
-		Song* _pSong;
+		class Song; // forward declaration
 
+		/// song dialog window.
+		class CSongpDlg : public CDialog
+		{
+		public:
+			/// mfc compliant constructor.
+			CSongpDlg(Song *song, CWnd* pParent = 0);
+			Song* _pSong;
 		// Dialog Data
-		enum { IDD = IDD_SONGPROP };
-		CEdit	m_songcomments;
-		CEdit	m_songcredits;
-		CEdit	m_songtitle;
-		bool	readonlystate;
-
-	// Overrides
-	protected:
-		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	// Implementation
-	public:
-		void SetReadOnly();
-
-	protected:
-		// Generated message map functions
-		virtual BOOL OnInitDialog();
-		afx_msg void OnOk();
-		DECLARE_MESSAGE_MAP()
-};
+			enum { IDD = IDD_SONGPROP };
+			CEdit	m_songcomments;
+			CEdit	m_songcredits;
+			CEdit	m_songtitle;
+			bool	readonlystate;
+		public:
+			void SetReadOnly();
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnOk();
+		};
 
 }}

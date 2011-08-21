@@ -15,10 +15,6 @@ All rights reserved.
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
-#ifndef __AFXMT_H__
-	#include <afxmt.h>
-#endif
-
 class CInstanceChecker : public CObject
 {
 public:

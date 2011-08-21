@@ -8,21 +8,22 @@
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
 #include <psycle/host/WaveEdCrossfadeDialog.hpp>
 #include <psycle/host/ScrollableDlgBar.hpp>
-#include <psycle/core/instrument.h>
 #include <deque>
 #include <utility>
-
 namespace psycle { namespace host {
 
 		class CMainFrame;
+		class Song;
 
 		/// wave editor window.
 		class CWaveEdChildView : public CWnd
 		{
 		public:
-			CWaveEdChildView(class CWaveEdFrame* frame, CMainFrame* parent);			
+			CWaveEdChildView();
+			void SetSong(Song*);
+			void SetMainFrame(CMainFrame*);
 			virtual ~CWaveEdChildView();
-
+			CMainFrame* GetMainFrame() {return mainFrame; };
 			void GenerateAndShow();
 			void SetViewData(int ins);
 			void SetSpecificZoom(int factor);
@@ -32,18 +33,15 @@ namespace psycle { namespace host {
 			unsigned long GetCursorPos();				//returns cursor's position
 			void SetCursorPos(unsigned long newpos);	//sets cursor's position
 			bool IsStereo();
+			void StartTimer();
+			void StopTimer();
 
-		// Overrides
-			// ClassWizard generated virtual function overrides
-			//{{AFX_VIRTUAL(CWaveEdChildView)
-			protected:
+		protected:
 			virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-			//}}AFX_VIRTUAL
-		// Implementation
 		protected:
 			// Generated message map functions
 		protected:
-			//{{AFX_MSG(CWaveEdChildView)
+			DECLARE_MESSAGE_MAP()
 			afx_msg void OnPaint();
 			afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
@@ -109,8 +107,9 @@ namespace psycle { namespace host {
 			afx_msg void OnSize(UINT nType, int cx, int cy);
 			afx_msg void OnCustomdrawVolSlider(NMHDR* pNMHDR, LRESULT* pResult);
 
-			//}}AFX_MSG
-			DECLARE_MESSAGE_MAP()
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnDestroy();
+			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 		private:
 			//refreshes position/thumb size of scroll bars and hsliders
 			void ResetScrollBars(bool bNewLength=false);
@@ -123,6 +122,7 @@ namespace psycle { namespace host {
 			void Mix(short* lhs, short *rhs, int lhsSize, int rhsSize, float lhsVol=1.0f, float rhsVol=1.0f);
 			void Fade(short* data, int length, float startVol, float endVol);
 			void Amplify(short* data, int length, float vol);
+			Song *_pSong;
 			
 			// Painting pens
 			CPen cpen_lo;
@@ -157,11 +157,8 @@ namespace psycle { namespace host {
 			bool blSelection;			//whether data is selected currently
 			bool wdWave;				//whether we have a wave to display
 			bool cursorBlink;			//switched on timer messages.. cursor is visible when true
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			Instrument::id_type wsInstrument;
-#else
+
 			int wsInstrument;
-#endif
 			bool drawwave;
 			bool bSnapToZero;
 			bool bDragLoopStart, bDragLoopEnd;	//indicates that the user is dragging the loop start/end
@@ -180,28 +177,9 @@ namespace psycle { namespace host {
 			std::deque<std::pair<short, short> > lHeadDisplay;
 			std::deque<std::pair<short, short> > rHeadDisplay;
 
-			//todo: unless we're saving settings between uses, these should all be allocated as needed
-			CWaveEdAmplifyDialog AmpDialog;
-			CWaveEdMixDialog MixDlg;
-			CWaveEdInsertSilenceDialog SilenceDlg;
-			CWaveEdCrossfadeDialog XFadeDlg;
-
 			CScrollableDlgBar zoombar;
 
-			
-		public:
-			afx_msg void OnTimer(UINT_PTR nIDEvent);
-			afx_msg void OnDestroy();
-			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-
-			CWaveEdFrame* frame_;
-			CMainFrame* pParent;
-
-			inline Song* song();
+			CMainFrame* mainFrame;
 		};
-
-		//{{AFX_INSERT_LOCATION}}
-		// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
 	}   // namespace
 }   // namespace

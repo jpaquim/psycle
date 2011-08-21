@@ -1,6 +1,5 @@
 ///\file
 ///\brief implementation file for psycle::host::CNewVal.
-
 #include <psycle/host/detail/project.private.hpp>
 #include "NewVal.hpp"
 

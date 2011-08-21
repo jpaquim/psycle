@@ -1,31 +1,40 @@
 ///\file
 ///\brief implementation file for psycle::host::CProgressDialog.
-
 #include <psycle/host/detail/project.private.hpp>
 #include "ProgressDialog.hpp"
 
 namespace psycle { namespace host {
 
+		CProgressDialog::CProgressDialog(CWnd* pParent, bool create) : CDialog(CProgressDialog::IDD, pParent)
+		{
+			if(create) {
+				CDialog::Create(IDD, pParent);
+			}
+		}
+
+		void CProgressDialog::DoDataExchange(CDataExchange* pDX)
+		{
+			CDialog::DoDataExchange(pDX);
+			DDX_Control(pDX, IDC_PROGRESS1, m_Progress);
+		}
+
 		BEGIN_MESSAGE_MAP(CProgressDialog, CDialog)
-			 ON_WM_SHOWWINDOW()
+			ON_WM_CLOSE()
 		END_MESSAGE_MAP()
 
-		CProgressDialog::CProgressDialog(CWnd* pParent) 
-			: CDialog(IDD_PROGRESS_DIALOG, pParent) {
-			CDialog::Create(IDD_PROGRESS_DIALOG, pParent);
-			progress_ctrl_.SetPos(0);
-			progress_ctrl_.SetRange(0,16384);
+		BOOL CProgressDialog::OnInitDialog() 
+		{
+			CDialog::OnInitDialog();
+			m_Progress.SetPos(0);
+			m_Progress.SetRange(0,16384);
+			AfxGetApp()->DoWaitCursor(1);
+			return true;
 		}
 
-		void CProgressDialog::DoDataExchange(CDataExchange* pDX) {
-			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_PROGRESS1, progress_ctrl_);
-		}
-
-		void CProgressDialog::OnShowWindow(BOOL bShow, UINT nStatus) {
-			CDialog::OnShowWindow(bShow, nStatus);
-			AfxGetApp()->DoWaitCursor(bShow ? 1 : -1);
-			::Sleep(1);
+		void CProgressDialog::OnClose()
+		{
+			CDialog::OnClose();
+			AfxGetApp()->DoWaitCursor(-1);
 		}
 
 	}   // namespace

@@ -11,17 +11,17 @@ namespace psycle { namespace host {
 		class CMidiInputDlg : public CPropertyPage
 		{
 			DECLARE_DYNCREATE(CMidiInputDlg)
-			DECLARE_MESSAGE_MAP()
-		public:
-			virtual void OnOK();
-		protected:
-			virtual BOOL OnInitDialog();
-		protected:
-			virtual void DoDataExchange(CDataExchange* pDX);
 		public:
 			CMidiInputDlg();
 			virtual ~CMidiInputDlg();
 			int const static IDD = IDD_MIDI_INPUT;
+
+		protected:
+			virtual BOOL OnInitDialog();
+			virtual void OnOK();
+			virtual void DoDataExchange(CDataExchange* pDX);
+
+		public:
 			class group_with_message;
 			class group
 			{
@@ -43,6 +43,10 @@ namespace psycle { namespace host {
 			typedef std::vector<group::with_message*> groups_type;
 			groups_type groups;
 			CButton raw;
+			CComboBox gen_select_type;
+			CComboBox inst_select_type;
+		protected:
+			DECLARE_MESSAGE_MAP()
 		};
 
 	}   // namespace

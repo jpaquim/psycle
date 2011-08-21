@@ -1,87 +1,281 @@
-<HTML>
- <HEAD>
- <!-- $MVD$:app("MicroVision WebExpress") -->
- <TITLE>Psycle MIDI</TITLE></HEAD>
- <BODY BGCOLOR=#FFFFFF VLINK=#0000FF ALINK=#00FFFF>
- <P ALIGN=CENTER>
- <CENTER><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=6>Psycle MIDI</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>(controlling
-  Psycle using MIDI input)</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>by
-  Mark McCormack</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><I>(mark_jj_mccormak@yahoo.co.uk
-  / ICQ #115046014)</I></FONT></FONT></CENTER><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><!-- $MVD$:spaceretainer() -->&nbsp;</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><I>Internal
-  MIDI Implementation v2.2 beta (Psycle Release 1.5xx)</I></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><I><!-- $MVD$:spaceretainer() -->&nbsp;</I></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Contents:</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>A.
-  Features</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>-
-  - - - - - - - - - - -</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>1.
-  How do I control Psycle from my MIDI sequencer ?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>2.
-  Can I use a sequencer instead of the internal Psycle tracker?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>3.
-  Can I mix using Psycle MIDI sounds and other synth/MIDI modules all controlled by my sequencer?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>4.
-  Can I mix using a sequencer with the internal tracker?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>5.
-  How do I see what is going on with Psycle's MIDI interface?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>6.
-  Can I record MIDI triggered Psycle audio using the internal Psycle WAV recording facility?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>7.
-  Why does the real-time MIDI not work with the DirectSound audio driver?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>8.
-  What can I do if my MIDI sequencer does not support a MIDI sync clock?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>9.
-  Tips &amp; Tricks</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>10.
-  Known Bugs</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>-
-  - - - - - - - - - - -</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>B.
-  Limitations</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>C.
-  MIDI Implementation Chart</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>A.
-  Features</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>You
-  can now control the excellent Psycle next-generation tracker via MIDI, rather than using the built-in classic tracker interface (treat it like a MIDI softsynth). MIDI note on/off messages can be mapped to any generator and instrument across all 16 MIDI channels. You can also select any instrument for that channel, when using a Sampler generator. Psycle Plug-in and VST parameters (both generator AND effect) can be controlled by using MIDI continous controller messages. If you still wish to use the internal 'tracker sequencer', then you can use still use MIDI input to insert notes into patterns from an external MIDI keyboard.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>1.
-  How do I control Psycle from my MIDI sequencer ?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>This
-  is fairly easy once you understand the basic concept. You will need to setup what is known as a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Virtual MIDI port</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>. This is a software emulated MIDI input/output port (yes, a port which does both!). You will need software such as </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Hubi's Loopback or MIDI Yoke</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> to create this virtual port. Personally, I prefer MIDI Yoke as it has been in my experience more stable - however - many people swear by Hubi. If you are using Win2000/NT then MIDI Yoke is what you need - as at time of writting Hubi's does not work under these NT derived platforms.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Once
-  you have setup this virtual MIDI port you simply select this port as the OUTPUT from your MIDI sequencer and also select this port as the INPUT into Psycle (find this in Configuration-&gt;Output tab). To create a pipe of MIDI data from the sequencer to Psycle thus:</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><FONT COLOR=#007F00><B>[MIDI
-  Sequencer Out]</B></FONT></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B> -----&gt; </B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><FONT COLOR=#FF0000><B>[Virtual MIDI Port (e.g. MIDI Yoke)]</B></FONT></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B> -----&gt; </B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><FONT COLOR=#007F00><B>[Psycle MIDI In]</B></FONT></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>And
-  you should now be able to control the generators of Psycle with your MIDI sequencer! For futher explanation see the configuration dialog of Psycle below:</FONT></FONT><P ALIGN=CENTER><CENTER><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><IMG SRC="midiconfiguration.jpg" ALT="Psycle Configuration Dialog" ALIGN=BOTTOM WIDTH=500 HEIGHT=339 BORDER=0 VSPACE=0 HSPACE=0></FONT></FONT></CENTER></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Select
-  the main input device from one of those available in the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Input Device</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> listbox. This should match the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Output MIDI Device</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> of your MIDI sequencer. If you wish to alter the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>midi headroom</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> available for midi input (see later for details) then you can do so by entering a value directly or by using the spin buttons to quickly increment/decrement the current value. If you are using a separate device for </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>MIDI Sync</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> (see later for details) then you can select this from the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Sync Device</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> listbox, although if you plan to send a MIDI Sync clock through the same device as the main input device then you can leave this unselected (None).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B></B></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>2.
-  Can I use a sequencer instead of the internal Psycle tracker?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Yes.
-  During a lot of testing this proved very stable and you should get good results.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>3.
-  Can I mix using Psycle MIDI sounds and other synth/MIDI modules all controlled by my sequencer?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Yes.
-  Since the previous Alpha implementation, one of the main improvements to Psycle's MIDI support has been the addition of some rather complex syncronisation code. This allows fairly stable and usable syncronisation between Psycle generated audio and that generated by other synth/MIDI modules. You will probably need to offset your non-Psycle MIDI/Audio tracks (in your sequencer) to align with the Psycle generator audio, but as long as you utilise sending some MIDI sync codes (or emulated sync) to Psycle you should keep the sync between the sequencer and Psycle. This is usually referred to as </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Transmit MIDI Start/Continue/Stop/Clock</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> or similar.</FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B><I>To
-  enable MIDI sync in CakeWalk: </I></B></FONT></FONT></P><P ALIGN=CENTER><CENTER><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><IMG SRC="midiout.jpg" ALT="CakeWalk Sync Dialog" ALIGN=BOTTOM WIDTH=391 HEIGHT=204 BORDER=0 VSPACE=0 HSPACE=0></FONT></FONT></CENTER></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Some
-  sequencers (CakeWalk included) allow you to send a MIDI Sync Start code when playback is start from any point in the song (not just the very beginning). This is usually referred to as </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Use Start, Never Continue</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> or similar. If your sequencer has this facility it is recommed that you enable this in order to force Psycle to resync with the audio engine every time sequencer playback is initiated.</FONT></FONT></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>4.
-  Can I mix using a sequencer with the internal tracker?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Not
-  really. The MIDI implementation has not been designed in any way to be used in </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><I>conjunction</I></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> with the internal tracker. When the pattern view is active in Psycle then all MIDI note-on messages are entered into the pattern (like when using the PC keyboard). It is possible to (for instance) play generators with the tracker interface and control the generator parameters with external MIDI controllers (e.g. using Phatboy hardware device). Remember the controller-&gt;generator parameter must firstly be set (using CC 126/127).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>5.
-  How do I see what is going on with Psycle's MIDI interface?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>MIDI
-  implementations of v2.2b or better provide a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>MIDI Monitor Dialog</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> to allow you to see the current state of Psycle's MIDI interface. The dialog is shown below with a short explanation of all the values shown:</FONT></FONT><P ALIGN=CENTER><CENTER><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><IMG SRC="midimonitor.jpg" ALT="Psycle MIDI Monitor Dialog" ALIGN=BOTTOM WIDTH=470 HEIGHT=571 BORDER=0 VSPACE=0 HSPACE=0></FONT></FONT></CENTER></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Buffer
-  Used</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - The amount of MIDI events currently waiting in the internal MIDI buffer.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Buffer
-  Capacity</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - The maximum number of MIDI events the internal MIDI buffer can hold (currently fixed at 1024).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Events
-  Lost </B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>- The number of MIDI events purged (not played) from the internal MIDI buffer. This usually happens when there is a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>&quot;drop-out&quot;</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> in the audio pipe-line and the MIDI interface decides that the events should be disguarded rather than played (because they probably have been delayed too much).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>MIDI
-  Headroon</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - How much </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>&quot;MIDI slack&quot;</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> is being allowed to account for delayed MIDI messages getting to Psycle (set in the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>configuration</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> dialog).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Internal
-  MIDI Version</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - The descriptor of the currently running Psycle MIDI interface code.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Sync
-  Event Latency</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - The amount of milliseconds the</FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B> MIDI Sync Start</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> message was delayed.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Sync
-  Adjust</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - The amount of samples Psycle has accounted for to bring its audio engine in line with the incomming MIDI data. A </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>negative</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> value here means that some notes may have been purged from the MIDI buffer to regain sync (not too good). A </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>positive</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> value here means that Psycle had time to wait until it needed to start playing the received MIDI data (good).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Sync
-  Offset</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - The current amount of milliseconds that the Psycle audio engine has &quot;lagged&quot; behind the incomming MIDI. This typically should start around 0 and then being greater (negative) if the audio engine &quot;drops-out&quot; at any point. This value is used internally to keep the audio engine in sync with an external MIDI sequencer.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Psycle
-  MIDI active?</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Is Psycle using the MIDI input?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Receiving
-  MIDI data?</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Is Psycle receiving any MIDI data, either on the main device or the sync device?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Syncronising
-  - </B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Is Psycle currently syncronising the audio engine with the incomming MIDI?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Resync
-  Triggered?</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Has a resync been triggered because the audio engine has been restarted? (e.g. when a new plug-in is created)</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Emulated
-  Track Tick?</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Has Psycle received a tracker tick? (</FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC 123, DATA 1-127</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - simulates a tracker line change)</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>MIDI
-  Sync Start/Clock/Stop</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Has Psycle received one of these MIDI sync messages?</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Emualted
-  Sync Start/Clock/Stop</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Has Psycle received one of the emulated sync messages? (</FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC 121, 122 &amp; 124</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>)</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Ch
-  1-16</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> - Shows the data received for each MIDI channel (included ALL types of data).</FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><I>(The
-  channel-mapping table is self-explanatory)</I></FONT></FONT></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>6.
-  Can I record MIDI triggered Psycle audio using the internal Psycle WAV recording facility?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>In
-  a word - No. However, virtually all sound cards these days support the ability to record what is being played. There would be no advantage to being able to record MIDI triggered audio using Psycle, as we would still be reliant on receiving MIDI externally!</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>7.
-  Why does real-time MIDI not appear to work with the DirectSound audio driver?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B></B></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>The
-  current implementation of the DirectSound interface support in Psycle does not provide the necessary information to the MIDI interface in order to enable decent syncronisation between the MIDI and the audio engine. Therefore, until the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>DirectSound</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> code is updated the MIDI interface </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>will NOT work</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> (in real-time) with DirectX audio. Sorry!</FONT></FONT></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>8.
-  What can I do if my MIDI sequencer does not support a MIDI sync clock?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B></B></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>If
-  your sequencer does not support outputing a MIDI clock, then you can use three controllers to simulate a clock using a standard MIDI track. Place a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC 121</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> as the first event in the song (preferably leaving a bar gap between it and the next midi event). Then every regular interval (say 1/16th of a bar) place a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC 122</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>. You can send these events through any channel and setting a generator/instrument map is not required. Finally, to stop all sound, place a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC 124</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> right at the end of your song.</FONT></FONT></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>9.
-  Tips &amp; Tricks?</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><P><UL><LI><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Set
-    the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>midi headroom</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> and </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>number of audio buffers/size</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> to the lowest bearable value when working on a particular song (to make things easier to work with). If you experience the occasional glitch then this is not a problem - you are only working on the tune - sync should still be regained within a few milliseconds. Once you are ready to mix down your song then set the midi headroom and audio settings to larger values (adjust midi sequencer time offsets to take account of this with regards to the other non-Psycle tracks) for this final mix - in order to reduce the probability of rogue system MIDI latency or Psycle audio &quot;drop-outs&quot; during this mix down.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><LI><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>If
-    you are not going to use a lot of sequencer audio in your song, or if you are just going to replace Psycle's internal tracker sequencer with input from a MIDI sequencer, then I would recommend you take a look at </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CakeWalk Pro v2.0</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>. This is (in my opinion) the best MIDI-ONLY sequencer for any platform, and has a unique 'bar=block' track view which is ideal for use with Psycle. It may be a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Win3.1 based program</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>, but works very well under </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Win98</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> and has a amazingly small memory footprint and has excellent support for MIDI sync and continous controllers (CC) .</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><LI><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>If
-    you </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>mute</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> a Psycle-controlling track in your sequencer and the current generator does not accept note-off messages, then you can (sometimes) press the </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>main Psycle STOP </B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>button in to stop all notes and then let the MIDI restart all the others (appart from the track you wanted to mute of course).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><LI><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>For
-    more interesting ways of setting controllers, get a program called </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC-Mouse</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>. This little application lets you control two parameters at a time using the mouse. Feed the output of this program into a virtual MIDI port and then through into your sequencer. You can then make smooth sweeps (of say a cut-off) using the mouse and record them in your sequencer!</FONT></FONT></UL><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><!-- $MVD$:spaceretainer() -->&nbsp;</FONT></FONT></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>10.
-  Known Bugs</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>The
-  MIDI interface to Psycle, although heavily developed and tested, is still Beta. Something as complex as syncronising two applications down to millisecond timing is always going to be difficult. There is currently still a random bug that occasionally occurs when creating a new generator/effect. This bug means the MIDI interface fails to resync with the audio engine and the MIDI buffer fills up, without any notes being played. Until this bug is fixed, should this occur, the work around is simply to send a MIDI Sync Start code to Psycle (e.g. restart playback from the start of the song on your MIDI sequencer).</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>B.
-  Limitations</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Currently
-  the main limitations of the MIDI input offered by Psycle are relating to the delay in the MIDI getting into Psycle (through Microsoft Windows) and, in a way, any audio engine drop-outs. Audio engine drop-outs are nothing to do with the MIDI interface, and can usually be rectified (or made much better) by increasing the number of audio buffers and/or the size of these buffers. To account for delays in MIDI messages getting to Psycle the amount of </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>midi headroom</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> (in milliseconds) is user-configurable. If you are experiencing a lot of lost messages and/or poor syncronisation then try increasing this value. The default is 100 milliseconds, but on slower systems or systems that are running a lot of heavy-duty applications concurrently with Psycle, it may be wise to increase this value. This will increase the audio latency, but the MIDI will be more stable and predictable.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B></B></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>C.
-  MIDI Implementation Chart</B></FONT></FONT><BR><BR><A HREF="PsycleMIDIChart.TXT"><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>PsycleMIDIChart.TXT</FONT></FONT></A><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> 
- (raw text)</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B><U></U></B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B><U>Notes</U></B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Controllers
-  126 &amp; 127</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> are used as a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><I>compound controller</I></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>. They are used together to set up a link between </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>any free controller (CC 1-120)</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> and a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>generator parameter</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> on the channel. For example, to map CC 32 to the channels generator parameter 15 use:</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC
-  126, DATA 32 </B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>(followed by)</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>CC
-  127, DATA 15</B></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>The
-  parameters of Psycle Plug-ins &amp; VST machines (both Generators AND effects) can be mapped. It is usually not wise to map recognised MIDI controllers (e.g. Volume is CC 7) to generator parameters, although mapping CC 7 to a generator's Master Volume parameter does make perfect sense!</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Note
-  that the values of Psycle generators are displayed in Hexidecimal (e.g. 0f in hex is 15 is decimal/sequencer).</FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>'Note
-  Off'</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> messages are by default ignored, enable them using </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Controller 125, DATA 127</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>To
-  use effects such as the GoaSlicer you will need to have a track sending tick-sync controllers to give the sync usually provided by the tracker. This is very easy, simply send (any channel, any patch, ...) a </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>Controller 123, DATA 127</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> on </FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2><B>every 1/16th</B></FONT></FONT><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2> note to simulate the typical required sync. In sequencers such as CakeWalk, you can simply create one bar of this sync pattern and then set the Loop parameter to some high value to ensure this pattern is sent every bar.</FONT></FONT><BR><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2></FONT></FONT><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=2>Make
-  sure the internal tempo of Psycle matches that of your MIDI sequencer.</FONT></FONT></P><P><!-- $MVD$:face("Verdana") --><FONT FACE="Verdana,Arial,Times New I2"><FONT SIZE=1><I>(21st
-  April 2001)</I></FONT></FONT></BODY></HTML>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<title>Psycle MIDI</title>
+<style type="text/css">
+body {
+	font-family:sans-serif,Arial;
+}
+h1 {
+	text-align: center;
+	font-weight: normal;
+	margin-bottom: 0px;
+}
+.subh1 {
+	text-align: center;
+	margin-bottom: 1.5em;
+}
+h2 {
+	font-size: medium;
+}
+</style>
+</head>
+<body>
+<h1>Psycle MIDI</h1>
+<div class="subh1">Controlling Psycle using MIDI input<br/>
+written by Mark McComack and updated by Josep Maria Antolín<br/>
+(mark_jj_mccormak@yahoo.co.uk / ICQ #115046014)</div>
+
+Internal MIDI Implementation v2.3 (Psycle Release 1.8.8)
+<br/>
+<h2>Contents</h2>
+<ol>
+<li>Introduction</li>
+<li>How do I control Psycle from my MIDI keyboard/controller?</li>
+<li>How do I control Psycle from my MIDI sequencer?</li>
+<li>Can I use a sequencer instead of the internal Psycle tracker?</li>
+<li>Can I mix using Psycle MIDI sounds and other synth/MIDI modules all controlled by my sequencer?</li>
+<li>Can I mix using a sequencer with the internal tracker?</li>
+<li>How do I see what is going on with Psycle's MIDI interface?</li>
+<li>Can I record MIDI triggered Psycle audio using the internal Psycle WAV recording facility?</li>
+<li>What can I do if my MIDI sequencer does not support a MIDI sync clock?</li>
+<li>Tips &amp; Tricks</li>
+<li>Known Bugs</li>
+<li>Limitations</li>
+<li>Instructions on using special MIDI events</li>
+</ol>
+<h2>Introduction</h2>
+<p>Psycle has support for MIDI input events, which provides two features: enter data into the patterns and control Psycle in realtime.
+MIDI messages can come from other software using a virtual MIDI device or from a MIDI keyboard or controller.<br/> MIDI note on/off messages
+can be mapped to any generator and instrument across all 16 MIDI channels. Selecting the instrument allows to use it with the Sampler or other machines that use the auxiliary column. <br/>
+The parameters of Psycle Plug-ins and VST instruments and effects can be controlled by using MIDI continous controller (CC) messages.
+</p>
+
+<h2>How do I control Psycle from my MIDI keyboard/controller?</h2>
+<p>
+This is the basic configuration. Select your midi device as the input into Psycle (find this in Psycle settings -&gt; Input/Output tab). Sometimes there will be more than one port for your hardware, such as a MIDI through port and/or a data port.<br/>
+Also, set the input method as Immediate, so that you don't need to worry about clocks and configuration.
+<br/>Finally, set the options to select the generator and instrument to the way that better fits your usage. (find this in Psycle settings -&gt; MIDI Controllers tab). 
+<br/>Note: Psycle does not autorefresh the list, so when you connect an USB MIDI device, you will need to reopen Psycle.
+</p>
+<div align="center"><img src="midicontrollers.png" alt="Psycle output configuration dialog" title="Psycle output configuration dialog" /><br/></div>
+<h2>How do I control Psycle from my MIDI sequencer?</h2>
+<p>
+This is fairly easy once you understand the concept behind. You will need to setup what is known as a
+<strong>Virtual MIDI port</strong>. This is a software emulated MIDI input/output port (yes, a port which does both!).
+<br/>You will need software such as <strong>LoopBe</strong> or <strong>MIDI Yoke</strong> to create this virtual port.
+If using Vista or Windows 7, I recommend using LoopBe, since it is more up-to-date. MIDI Yoke should work fine in Windows XP and offers more ports for free.
+</p>
+
+Once you have setup this virtual MIDI port you simply select this port as the output of your MIDI sequencer and also select
+this port as the input into Psycle (find this in Psycle Settings -&gt; Input/Output tab).
+Depending on the software you use, it can have several ports. It is important to use the same index for input and output.
+<br />Note: Psycle does not autorefresh the list, so when you connect an USB MIDI device, you will need to reopen Psycle.
+<pre>
+[MIDI Sequencer Out] -&gt; [Virtual MIDI Output Port]
+ and
+[Virtual MIDI Input Port] -&gt; [Psycle MIDI In]
+</pre>
+<div align="center"><img src="midiconfiguration.png" alt="Psycle output configuration dialog" title="Psycle output configuration dialog" /><br/></div>
+<p>
+Select the main input device from one of those available in the <strong>Input device</strong> listbox. It should match the <strong>
+output MIDI device</strong> of your MIDI sequencer.<br/>
+Then, select the input method <strong>Synchronized with MIDI clock</strong>.<br/>
+If you are using a separate device for MIDI Sync (see later for details) then you can select this from the <strong>Sync Device</strong> listbox,
+although if you plan to send a MIDI sync clock through the same device as the main input device then you can leave this as <strong>Same as Input device</strong>.<br/>
+If you wish to alter the MIDI headroom available for MIDI input (see later for details) then you can do so by entering a value
+directly or by using the spin buttons to quickly increment/decrement the current value.<br/>
+</p>
+<p>
+Finally, don't forget to setup the way to select the generator and instrument (find this in Psycle settings -&gt; MIDI controllers tab) 
+</p>
+<h2>Can I use a sequencer instead of the internal Psycle tracker?</h2>
+<p>Yes, in sequenced mode, the MIDI input can replace the pattern in sending the data. This data is buffered and played relative to the timestamp that it belongs to. 
+</p>
+<h2>Can I mix using Psycle MIDI sounds and other synth/MIDI modules all controlled by my sequencer?</h2>
+<p>
+Yes. Psycle's MIDI support includes time syncronisation code. This allows fairly stable and usable
+syncronisation between Psycle generated audio and that generated by
+other synth/MIDI modules. You will need to set the latencies properly, or offset your
+non-Psycle MIDI/Audio tracks (in your sequencer) to align with the
+Psycle generator audio, but as long as you send some MIDI
+sync codes (or emulated sync) to Psycle you should keep the sync between
+the sequencer and Psycle. This is usually referred to as <strong>Transmit MIDI Start/Continue/Stop clock</strong>
+</p>
+<p>
+Some
+sequencers (CakeWalk included) allow you to send a MIDI Sync Start code
+when playback is start from any point in the song (not just the very
+beginning). This is usually referred to as <strong>Use Start, never Continue</strong> or
+similar. If your sequencer has this facility it is recommed that you
+enable this in order to force Psycle to resync with the audio engine
+every time sequencer playback is initiated.</p>
+<h2>Can I mix using a sequencer with the internal tracker?</h2>
+<p>
+For the most part, the answer is No.<br/>
+When the pattern view is active, MIDI input is always inmediate instead of synchronized.
+Also, there is no synchronization between the midi clock and the tracker position (nor does it listen to the BPM, if present)<br/>
+Said that, MIDI does work while Psycle is playing, so it can be used for live playback to play notes and control parameters with a MIDI keyboard and or controller.
+</p>
+<h2>How do I see what is going on with Psycle's MIDI interface?</h2>
+<p>A MIDI monitor is provided which allows to see the current state of Psycle's MIDI interface. The dialog is shown below with a short explanation of all values:
+</p>
+<div align="center"><img src="midimonitor.png" alt="Psycle MIDI Monitor Dialog" title="Psycle MIDI Monitor Dialog"/></div>
+<dl>
+  <dt>Buffer Used</dt>
+  	<dd>- The amount of MIDI events currently waiting in the internal MIDI buffer</dd>
+  <dt>Buffer Capacity</dt>
+    <dd>- The maximum number of MIDI events the internal MIDI buffer can hold
+(currently fixed at 1024)</dd>
+  <dt>Events Lost</dt>
+    <dd>- The number of MIDI events purged (not played) from the internal MIDI buffer. <br/>
+    This usually happens when there is a <strong>&quot;drop-out&quot;</strong> in the audio pipe-line and the MIDI interface decides that the events should be
+discarded rather than played (because they probably have been delayed too much)</dd>
+  <dt>MIDI Headroon</dt>
+    <dd>- How much <strong>&quot;MIDI slack&quot;</strong> is being allowed to account for delayed MIDI messages getting to Psycle (set in the <strong>configuration</strong> dialog).</dd>
+  <dt>Internal MIDI Version</dt>
+    <dd>- The descriptor of the currently running Psycle MIDI interface code.</dd>
+  <dt>Sync Event Latency</dt>
+    <dd>- The amount of milliseconds the <strong>MIDI Sync Start</strong> message was delayed.</dd>
+  <dt>Sync Adjust</dt>
+    <dd>	 - The amount of samples Psycle has accounted for to bring its audio engine in line with the incomming MIDI data. <br/>A 
+	<strong>negative</strong> value here means that some notes may have been purged from the MIDI buffer to regain sync (not too good). <br/> A 
+	<strong>positive</strong> value here means that Psycle had time to wait until it needed to start playing the received MIDI data (good).
+    </dd>
+  <dt>Sync Offset</dt>
+    <dd>- The current amount of milliseconds that the Psycle audio engine has
+&quot;lagged&quot; behind the incomming MIDI. This typically should
+start around 0 and then being greater (negative) if the audio engine
+&quot;drops-out&quot; at any point. This value is used internally to
+keep the audio engine in sync with an external MIDI sequencer.</dd>
+  <dt>Psycle MIDI active?</dt>
+    <dd>- Is Psycle using the MIDI input?</dd>
+  <dt>Receiving MIDI data?</dt>
+    <dd>- Is Psycle receiving any MIDI data, either on the main device or the sync
+device?</dd>
+  <dt>Syncronising</dt>
+    <dd>- Is Psycle currently syncronising the audio engine with the incomming MIDI?</dd>
+  <dt>Resync Triggered?</dt>
+    <dd>- Has a resync been triggered because the audio engine has been restarted?</dd>
+  <dt>Emulated Track Tick?</dt>
+    <dd>- Has Psycle received a tracker tick? (CC 123, DATA 1-127). simulates a tracker line change</dd>
+  <dt>MIDI Sync Start/Clock/Stop</dt>
+    <dd>- Has Psycle received one of these MIDI sync messages?</dd>
+  <dt>Emulated Sync Start/Clock/Stop</dt>
+    <dd>- Has Psycle received one of the emulated sync messages? (CC 121, 122 &amp; 124)</dd>
+  <dt>Ch 1-16</dt>
+    <dd>- Shows that data has been received for that MIDI channel (included ALL types of data)</dd>
+</dl>
+(The channel-mapping table is self-explanatory)
+
+<h2>Can I record MIDI triggered Psycle audio using the internal Psycle WAV
+recording facility?</h2>
+<p>Yes, it is possible using the record in realtime button in the toolbar. This button will start recording when pressed,
+ and will stop when pressed again. It records all the audio that Psycle itself outputs.<br/>
+ Alternatively, there is also the possibility to use a virtual soundcard or use the feature to record <strong>what is playing</strong> if the soundcard supports it. 
+</p>
+<h2>What can I do if my MIDI sequencer does not support a MIDI sync clock?</h2>
+<p>
+If your
+sequencer does not support outputing a MIDI clock, then you can use
+three controllers to simulate a clock using a standard MIDI track. Place
+a <strong>CC 121</strong> as the first event in the song (preferably leaving a bar gap between it and the
+next midi event). Then every regular interval (say 1/16th of a bar)
+place a <strong>CC 122</strong>. You can send these events through any channel and
+setting a generator/instrument map is not required. Finally, to stop all
+sound, place a <strong>CC 124</strong> right at the end of your song.
+</p>
+<h2>Tips &amp; Tricks</h2>
+<p>
+Do not forget to send a midi clock start if using the Synchronized mode. No message will be played until this is done.
+</p>
+<p>
+The different audiodrivers have different implementations to get MIDI synchronization. Wasapi is sample accurate, Waveout and Directsound depend on drivers and ASIO is block accurate.<br/>
+Directsound and Waveout accuracy depend on the Operating System and soundcard drivers, and ASIO accuracy is not better because the position is only updated when producing audio.
+</p>
+<p>
+Set the <strong>midi headroom</strong> and <strong>number of audio buffers/size	</strong> to the
+	lowest bearable value when working on a particular song (to make things
+	easier to work with). If you experience the occasional glitch then this
+	is not a problem - you are only working on the tune - sync should still
+	be regained within a few milliseconds.<br/>
+	Once you are ready to mix down
+	your song then set the midi headroom and audio settings to larger
+	values (adjust midi sequencer time offsets to take account of this with
+	regards to the other non-Psycle tracks) for this final mix - in order
+	to reduce the probability of rogue system MIDI latency or Psycle audio
+	&quot;drop-outs&quot; during this mix down.
+</p>
+<p>
+If you <strong>mute</strong> a Psycle-controlling track in your sequencer and the current generator
+	does not accept note-off messages, then you can (sometimes) press the <strong>main
+	Psycle STOP </strong>button in
+	to stop all notes and then let the MIDI restart all the others (appart
+	from the track you wanted to mute of course).
+	</p>
+<p>
+For more
+	interesting ways of setting controllers, get a program called <strong>CC-Mouse</strong>. This
+	little application lets you control two parameters at a time using the
+	mouse. Feed the output of this program into a virtual MIDI port and
+	then through into your sequencer. You can then make smooth sweeps (of
+	say a cut-off) using the mouse and record them in your sequencer!
+	</p>
+<h2>Limitations</h2>
+<p>Currently the main limitations of the MIDI input offered
+by Psycle are relating to the delay in the MIDI getting into Psycle
+(through Microsoft Windows) and, in a way, any audio engine drop-outs.
+Audio engine drop-outs are nothing to do with the MIDI interface, and
+can usually be rectified (or made much better) by increasing the number
+of audio buffers and/or the size of these buffers.<br/> To account for delays
+in MIDI messages getting to Psycle the amount of <strong>midi
+headroom</strong> (in milliseconds) is user-configurable. If you are experiencing a lot of
+lost messages and/or poor syncronisation then try increasing this value.
+The default is 0 milliseconds, but on slower systems or systems that
+are running a lot of heavy-duty applications concurrently with Psycle,
+it may be wise to increase this value. This will increase the audio
+latency, but  MIDI will be more stable and predictable.
+</p>
+<h2>Instructions on using special MIDI events</h2>
+<p>
+<a href="PsycleMIDIChart.TXT">PsycleMIDIChart.TXT</a>(raw text)
+</p>
+<p>
+The parameters of Psycle Plug-ins &amp; VST machines
+(both Generators and effects) can be mapped via MIDI using the <strong>Controllers 126 &amp; 127</strong>.
+They are used together as a &quot;compound controller&quot; to set up a link between <strong>any
+free controller (CC 1-120)</strong> and a <strong>generator
+parameter</strong> on the channel. For example, to map CC 32 to the channel's generator parameter
+15 use:<br/>
+<strong>CC 126, DATA 32</strong> (followed by)<br/>
+<strong>CC 127, DATA 15</strong>
+</p>
+<p>
+It is usually not wise to map recognised MIDI controllers (e.g. Volume is CC 7) to generator
+parameters, although mapping CC 7 to a generator's Master Volume
+parameter does make perfect sense!<br/>
+Note 1: The values of Psycle generators are displayed
+in Hexadecimal (e.g. 0F in hex is 15 in decimal/sequencer).<br/>
+Note 2: This only works in synchronized mode.<br/>
+Note 3: These mappings take precedence to the ones setup in the MIDI Controllers tab in Psycle settings.
+</p>
+<p>
+'Note Off' messages in synchronized mode can be disabled per MIDI channel using <strong>Controller 125</strong>, (a value different than zero enables it).
+</p>
+<p>
+ To use effects such as the GoaSlicer you will need to
+have a track sending tick-sync controllers to give the sync usually
+provided by the tracker. This is very easy, simply send (any channel,
+any patch, ...) a <strong>Controller 123, DATA 127</strong> on every 1/16th note to
+simulate the typical required sync. In sequencers such as CakeWalk, you
+can simply create one bar of this sync pattern and then set the Loop
+parameter to some high value to ensure this pattern is sent every bar.
+</p>
+<p>Make sure the internal tempo of Psycle matches that of your MIDI sequencer.
+</p>
+<hr/>
+<small>Last updated: 21 august 2011</small>
+</body>
+</html>

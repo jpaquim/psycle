@@ -1,7 +1,8 @@
 #pragma once
+#include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
-#include "Filter.hpp"
+#include <psycle/helpers/filter.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <cstring>
 namespace psycle { namespace host {
@@ -135,7 +136,7 @@ namespace psycle { namespace host {
 			void Save(RiffFile& riffFile);
 
 			/// Wave Data Copy Operator
-			void operator= (const WaveData& source)
+			WaveData& operator= (const WaveData& source)
 			{
 				Init();
 				m_WaveName = source.m_WaveName;
@@ -161,6 +162,7 @@ namespace psycle { namespace host {
 				std::memcpy(m_pWaveDataL, source.m_pWaveDataL, source.m_WaveLength * sizeof *m_pWaveDataL);
 				if(source.m_WaveStereo)
 					std::memcpy(m_pWaveDataR, source.m_pWaveDataR, source.m_WaveLength * sizeof *m_pWaveDataR);
+				return *this;
 			}
 
 
@@ -265,7 +267,7 @@ namespace psycle { namespace host {
 		class Envelope {
 		public:
 			/// Invalid point. Used to indicate that sustain/normal loop is disabled.
-			static const int INVALID = -1;
+			static const unsigned int INVALID = 0xFFFFFFFF;
 			
 			/// ValueType is a float value from  0 to 1.0  (or -1.0 1.0, or whatever else) which can be used as a multiplier.
 			typedef float ValueType;
@@ -297,7 +299,7 @@ namespace psycle { namespace host {
 				m_SustainEnd = INVALID;
 				m_LoopStart = INVALID;
 				m_LoopEnd = INVALID;
-				m_Points.clear();
+				if (!m_Points.empty()) { m_Points.clear(); }
 			}
 
 			// Object Functions.
@@ -368,7 +370,7 @@ namespace psycle { namespace host {
 			/// value has to be an existing point!
 			void LoopEnd(const unsigned int value){m_LoopEnd = value;}
 
-			const unsigned int NumOfPoints(){ return m_Points.size();}
+			const unsigned int NumOfPoints(){ return (unsigned int)m_Points.size();}
 
 			void Load(RiffFile& riffFile,const std::uint32_t version);
 			void Save(RiffFile& riffFile,const std::uint32_t version);
@@ -437,7 +439,7 @@ namespace psycle { namespace host {
 		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile);
 
-		void operator= (const XMInstrument & other)
+		XMInstrument & operator= (const XMInstrument & other)
 		{
 			m_bEnabled = other.m_bEnabled;
 
@@ -477,6 +479,7 @@ namespace psycle { namespace host {
 			{
 				m_AssignNoteToSample[i]=other.m_AssignNoteToSample[i];
 			}
+			return *this;
 		}
 
 		// Properties

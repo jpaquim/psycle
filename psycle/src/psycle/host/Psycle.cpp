@@ -2,20 +2,19 @@
 ///\brief implementation file for psycle::host::CPsycleApp.
 #include <psycle/host/detail/project.private.hpp>
 #include "Psycle.hpp"
+#include "PsycleConfig.hpp"
+#include "SInstance.h"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-#include "ChildView.hpp"
-#include "MachineView.hpp"
-#include "PatternView.hpp"
+
+#include "AudioDriver.hpp"
 #include "MidiInput.hpp"
 #include "NewMachine.hpp"
-#include "SInstance.h"
-#include <psycle/core/plugincatcher.h>
-#include <psycle/core/machinefactory.h>
-#include <psycle/core/player.h>
+
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/loggers.hpp>
 #include <diversalis/compiler.hpp>
+
 #include <sstream>
 
 #define _WIN32_DCOM
@@ -28,324 +27,291 @@
 
 namespace psycle { namespace host {
 
-BEGIN_MESSAGE_MAP(CPsycleApp, CWinApp)
-	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-END_MESSAGE_MAP()
+		BEGIN_MESSAGE_MAP(CPsycleApp, CWinAppEx)
+			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
+		END_MESSAGE_MAP()
 
-CPsycleApp theApp; /// The one and only CPsycleApp object
+		CPsycleApp theApp; /// The one and only CPsycleApp object
 
-CPsycleApp::CPsycleApp() : m_uUserMessage(0) {
-	universalis::cpu::exceptions::install_handler_in_thread();
-}
-
-BOOL CPsycleApp::InitInstance() {		
-	MachineFactory & factory(MachineFactory::getInstance());
-	//TODO: Use the pluginCatcher when it's ready.
-	factory.Initialize(&Player::singleton(), new PluginFinderCache(true));
-
-	// Allow only one instance of the program
-	m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
-	CInstanceChecker instanceChecker;
-
-	SetRegistryKey(_T("psycle")); // Change the registry key under which our settings are stored.
-	
-	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
-	
-	// To create the main window, this code creates a new frame window
-	// object and then sets it as the application's main window object.
-	CMainFrame* pFrame = new CMainFrame();
-	m_pMainWnd = pFrame;
-
-	loggers::information()("build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
-
-	if(!Global::pConfig->Read()) { // problem reading registry info. missing or damaged
-		Global::pConfig->_initialized = false;
-		CConfigDlg dlg("Psycle Settings");
-		dlg.Init(Global::pConfig);
-		if(dlg.DoModal() == IDOK) {
-			pFrame->m_wndView._outputActive = true;
-			Global::pConfig->_initialized = true;
+		CPsycleApp::CPsycleApp() :m_uUserMessage(0)
+		{
 		}
-	} else {
-		pFrame->m_wndView._outputActive = true;
-	}
-	if(instanceChecker.PreviousInstanceRunning() && !Global::pConfig->_allowMultipleInstances) {
-		//AfxMessageBox(_T("Previous version detected, will now restore it"), MB_OK);
-		HWND prevWnd = instanceChecker.ActivatePreviousInstance();
-		if(*(m_lpCmdLine) != 0) {
-			PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
+
+		CPsycleApp::~CPsycleApp()
+		{
 		}
-		_global.pConfig->_pOutputDriver->set_started(false);
-		_global.pConfig->_pMidiInput->Close();
-		return FALSE;
-	}
 
-	// create and load the frame with its resources
-	pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
+		BOOL CPsycleApp::InitInstance()
+		{
+			// InitCommonControlsEx() is required on Windows XP if an application
+			// manifest specifies use of ComCtl32.dll version 6 or later to enable
+			// visual styles.  Otherwise, any window creation will fail.
+			INITCOMMONCONTROLSEX InitCtrls;
+			InitCtrls.dwSize = sizeof(InitCtrls);
+			// Set this to include all the common control classes you want to use
+			// in your application.
+			InitCtrls.dwICC = ICC_WIN95_CLASSES;
+			InitCommonControlsEx(&InitCtrls);
 
-	// Sets Icon
-	instanceChecker.TrackFirstInstanceRunning();
-	HICON tIcon;
-	tIcon=LoadIcon(IDR_MAINFRAME);
-	pFrame->SetIcon(tIcon, true);
-	pFrame->SetIcon(tIcon, false);
+			CWinAppEx::InitInstance();
 
-	pFrame->m_wndView.machine_view()->InitSkin();
-	pFrame->m_wndView.machine_view()->Rebuild();
-	pFrame->m_wndView.pattern_view()->LoadPatternHeaderSkin();
-	pFrame->m_wndView.pattern_view()->RecalcMetrics();
-	pFrame->m_wndView.pattern_view()->RecalculateColourGrid();	
+			// Allow only one instance of the program
+			m_uUserMessage=RegisterWindowMessage("Psycle.exe_CommandLine");
+			CInstanceChecker instanceChecker;
 
-	// The one and only window has been initialized, so show and update it.
+			//For the Bar states. Everything else is maintained in PsycleConf
+			///\todo is it this line that causes the \HKCU\Software\psycle\Psycle\ path? (note the doubled "psycle" in the path)
+			SetRegistryKey(_T(PSYCLE__NAME)); // Change the registry key under which our settings are stored.
 
-	pFrame->ShowWindow(SW_MAXIMIZE);
-				
-	// center master machine
-	pFrame->m_wndView.machine_view()->CenterMaster();
-	pFrame->UpdateWindow();
-	
-	factory.setPsyclePath(Global::pConfig->GetPluginDir());
-	factory.setVstPath(Global::pConfig->GetVstDir());
-	factory.setLadspaPath("");
-	factory.getFinder().PostInitialization();
+			//Psycle maintains its own recent
+			//LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
-	LoadRecent(pFrame); // Import recent files from registry.
-	if(*m_lpCmdLine)
-		ProcessCmdLine(m_lpCmdLine); // Process Command Line
-	else {
-		// Show splash screen
-		if(Global::pConfig->_showAboutAtStart) {
-			OnAppAbout();
-		}
-		pFrame->CheckForAutosave();
-	}
-	return TRUE;
-}
+			loggers::information()("Build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
 
-BOOL CPsycleApp::PreTranslateMessage(MSG* pMsg) {
-	if( pMsg->message == m_uUserMessage ) {
-		ProcessCmdLine(reinterpret_cast<LPSTR>(pMsg->wParam));
-	}
-	return CWinApp::PreTranslateMessage(pMsg);
-}
-
-// Returning false on WM_TIMER prevents the statusbar from being updated. So it's disabled for now.
-BOOL CPsycleApp::IsIdleMessage(MSG* pMsg) {
-	if(!CWinApp::IsIdleMessage(pMsg) || pMsg->message == WM_TIMER) {
-		//return FALSE;
-	}
-	//else {
-		return TRUE;
-	//}
-}
-
-BOOL CPsycleApp::OnIdle(LONG lCount) {
-	BOOL bMore = CWinApp::OnIdle(lCount);
-	///\todo: 
-	return bMore;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-// CPsycleApp message handlers
-
-int CPsycleApp::ExitInstance() {
-	_global.pConfig->Write();
-	_global.pConfig->_pOutputDriver->set_started(false);
-	_global.pConfig->_pMidiInput->Close();
-	MachineFactory & factory(MachineFactory::getInstance());
-	factory.Finalize();
-	return CWinApp::ExitInstance();
-}
-
-void CPsycleApp::ProcessCmdLine(LPSTR cmdline) {
-	if(*cmdline != 0) {
-		char tmpName [257];
-		std::strncpy(tmpName, m_lpCmdLine+1, 256 );
-		tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
-		reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.projects_->active_project()->OnFileLoadsongNamed(tmpName, 1);
-	}
-}
-
-void CPsycleApp::LoadRecent(CMainFrame* pFrame) {
-	//This one should be into Configuration class. It isn't, coz I'm not much
-	//into Psycle internal configuration loading routines.
-	//If YOU are, go and put it where it sould be put.
-	//
-	//I know there's a class "Registry" in psycle, but... I don't like using it.
-	//I think it's a little bit nonsense to use class that does not nuch more
-	//than API itself. The only one for plus is variable encapsulation.
-	//
-	//Fideloop.
-	//
-	::HMENU hRootMenuBar, hFileMenu;
-	hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-	hFileMenu = ::GetSubMenu(hRootMenuBar, 0);
-	pFrame->m_wndView.hRecentMenu = ::GetSubMenu(hFileMenu, 11);
-
-	std::string key(PSYCLE__PATH__REGISTRY__ROOT);
-	key += "\\recent-files";
-	HKEY RegKey;
-	if(::RegOpenKeyEx(HKEY_CURRENT_USER , key.c_str(), 0, KEY_READ, &RegKey) == ERROR_SUCCESS) {
-		DWORD nValues = 0;
-		::RegQueryInfoKey(RegKey, 0, 0, 0, 0, 0, 0, &nValues, 0, 0, 0, 0);
-		if(nValues) {
-			::MENUITEMINFO hNewItemInfo;
-			int iCount = 0;
-			char cntBuff[3];
-			DWORD cntSize = sizeof cntBuff;
-			char nameBuff[1 << 10];
-			DWORD nameSize = sizeof nameBuff;
-			::DeleteMenu(pFrame->m_wndView.hRecentMenu, 0, MF_BYPOSITION);
-			while
-				(
-				::RegEnumValue
-				(
-				RegKey,
-				iCount,
-				cntBuff,
-				&cntSize,
-				0,
-				0,
-				reinterpret_cast<unsigned char*>(nameBuff),
-				&nameSize
-				) == ERROR_SUCCESS
-				)
+			bool loaded = global_.psycleconf().LoadPsycleSettings();
+			if (loaded &&
+				instanceChecker.PreviousInstanceRunning() &&
+				!global_.psycleconf()._allowMultipleInstances)
 			{
-				::UINT ids[] =
+				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
+				if(*(m_lpCmdLine) != 0)
 				{
-					ID_FILE_RECENT_01,
-						ID_FILE_RECENT_02,
-						ID_FILE_RECENT_03,
-						ID_FILE_RECENT_04
-				};
-				hNewItemInfo.cbSize = sizeof hNewItemInfo;
-				hNewItemInfo.fMask = MIIM_ID | MIIM_TYPE;
-				hNewItemInfo.fType = MFT_STRING;
-				hNewItemInfo.wID = ids[iCount];
-				hNewItemInfo.cch = std::strlen(nameBuff);
-				hNewItemInfo.dwTypeData = nameBuff;
-				::InsertMenuItem(pFrame->m_wndView.hRecentMenu, iCount, TRUE, &hNewItemInfo);
-				cntSize = sizeof cntBuff;
-				nameSize = sizeof nameBuff;
-				++iCount;
+					::PostMessage(prevWnd,m_uUserMessage,reinterpret_cast<WPARAM>(m_lpCmdLine),0);
+				}
+				return FALSE;
 			}
-			::RegCloseKey(RegKey);
+
+
+			// To create the main window, this code creates a new frame window
+			// object and then sets it as the application's main window object.
+			CMainFrame* pFrame = new CMainFrame();
+			if (!pFrame)
+				return FALSE;
+			m_pMainWnd = pFrame;
+
+
+			if(!loaded) // problem reading registry info. missing or damaged
+			{
+				CConfigDlg dlg("Psycle Settings");
+				if (dlg.DoModal() == IDOK)
+				{
+					pFrame->m_wndView._outputActive = true;
+				}
+			}
+			else
+			{
+				pFrame->m_wndView._outputActive = true;
+			}
+			global_.psycleconf().RefreshSettings();
+
+			// create and load the frame with its resources
+			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
+
+			instanceChecker.TrackFirstInstanceRunning();
+
+			// The one and only window has been initialized, so show and update it.
+			pFrame->ShowWindow(SW_MAXIMIZE);
+			
+			pFrame->m_wndView.RestoreRecent();
+			global_.psycleconf().RefreshAudio();
+			// center master machine. Cannot be done until here because it's when we have the window size.
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
+			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
+
+			//Psycle maintains its own recent
+			//LoadRecent(pFrame); // Import recent files from registry.
+
+			if (*m_lpCmdLine)
+				ProcessCmdLine(m_lpCmdLine); // Process Command Line
+			else
+			{
+				CNewMachine::LoadPluginInfo(false);
+				// Show splash screen
+				if (global_.psycleconf()._showAboutAtStart)
+				{
+					OnAppAbout();
+				}
+				pFrame->CheckForAutosave();
+			}
+			return TRUE;
 		}
-	}
-}
 
-void CPsycleApp::SaveRecent(CMainFrame* pFrame) {
-	HMENU hRootMenuBar, hFileMenu;
-	hRootMenuBar = ::GetMenu(pFrame->m_hWnd);
-	hFileMenu = GetSubMenu(hRootMenuBar, 0);
-	pFrame->m_wndView.hRecentMenu = GetSubMenu(hFileMenu, 11);
+		int CPsycleApp::ExitInstance() 
+		{
+			if(global_.psycleconf()._pOutputDriver != NULL) {
+				global_.psycleconf()._pOutputDriver->Enable(false);
+				global_.midi().Close();
+				global_.psycleconf().SavePsycleSettings();
+				CNewMachine::DestroyPluginInfo();
+			}
 
-	{
-		HKEY RegKey;
-		if(::RegOpenKeyEx(HKEY_CURRENT_USER, PSYCLE__PATH__REGISTRY__ROOT, 0, KEY_WRITE, &RegKey) == ERROR_SUCCESS) {
-			::RegDeleteKey(RegKey, "recent-files");
-		}
-		::RegCloseKey(RegKey);
-	}
-
-	std::string key(PSYCLE__PATH__REGISTRY__ROOT);
-	key += "\\recent-files";
-	HKEY RegKey;
-	DWORD Effect;
-	if(
-		::RegCreateKeyEx(
-			HKEY_CURRENT_USER,
-			key.c_str(),
-			0,
-			0,
-			REG_OPTION_NON_VOLATILE,
-			KEY_ALL_ACCESS,
-			0,
-			&RegKey,
-			&Effect
-		) == ERROR_SUCCESS
-	) {
-		if(GetMenuItemID(pFrame->m_wndView.hRecentMenu, 0) == ID_FILE_RECENT_NONE) {
-			::RegCloseKey(RegKey);
-			return;
+			return CWinAppEx::ExitInstance();
 		}
 
-		for(int iCount(0) ; iCount < ::GetMenuItemCount(pFrame->m_wndView.hRecentMenu) ; ++iCount) {
-			UINT nameSize = ::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, 0, 0, MF_BYPOSITION) + 1;
-			char nameBuff[1 << 10];
-			::GetMenuString(pFrame->m_wndView.hRecentMenu, iCount, nameBuff, nameSize, MF_BYPOSITION);
-			std::ostringstream s;
-			s << iCount;
-			::RegSetValueEx(RegKey, s.str().c_str(), 0, REG_SZ, reinterpret_cast<unsigned char const *>(nameBuff), nameSize);
+		BOOL CPsycleApp::PreTranslateMessage(MSG* pMsg)
+		{
+			if( pMsg->message == m_uUserMessage )
+			{
+				ProcessCmdLine(reinterpret_cast<LPSTR>(pMsg->wParam));
+			}
+			return CWinAppEx::PreTranslateMessage(pMsg);
 		}
-		::RegCloseKey(RegKey);
-	}
-}
 
-void CPsycleApp::OnAppAbout() {
-	CAboutDlg dlg;
-	dlg.DoModal();
-}
+		/////////////////////////////////////////////////////////////////////////////
+		// CPsycleApp message handlers
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
 
-CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD) {
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
-}
+		// Returning false on WM_TIMER prevents the statusbar from being updated. So it's disabled for now.
+		BOOL CPsycleApp::IsIdleMessage( MSG* pMsg )
+		{
+			if (!CWinAppEx::IsIdleMessage( pMsg ) || 
+				pMsg->message == WM_TIMER) 
+			{
+//				return FALSE;
+			}
+//			else
+				return TRUE;
+		}
 
-void CAboutDlg::DoDataExchange(CDataExchange* pDX) {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	DDX_Control(pDX, IDC_ASIO, m_asio);
-	DDX_Control(pDX, IDC_EDIT5, m_sourceforge);
-	DDX_Control(pDX, IDC_EDIT2, m_psycledelics);
-	DDX_Control(pDX, IDC_STEINBERGCOPY, m_steincopyright);
-	DDX_Control(pDX, IDC_HEADERDLG, m_headerdlg);
-	DDX_Control(pDX, IDC_SHOWATSTARTUP, m_showabout);
-	DDX_Control(pDX, IDC_HEADER, m_headercontrib);
-	DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
-	DDX_Control(pDX, IDC_EDIT1, m_contrib);
-	DDX_Control(pDX, IDC_VERSION_INFO_MULTI_LINE, m_versioninfo);
-	//}}AFX_DATA_MAP
-}
+		BOOL CPsycleApp::OnIdle(LONG lCount)
+		{
+			BOOL bMore = CWinAppEx::OnIdle(lCount);
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-	ON_BN_CLICKED(IDC_BUTTON1, OnContributors)
-	ON_BN_CLICKED(IDC_SHOWATSTARTUP, OnShowatstartup)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
+			///\todo: 
+			return bMore;
+		}
 
-void CAboutDlg::OnContributors() {
-	if(m_aboutbmp.IsWindowVisible()) {
-		m_aboutbmp.ShowWindow(SW_HIDE);
-		m_contrib.ShowWindow(SW_SHOW);
-		m_headercontrib.ShowWindow(SW_SHOW);
-		m_headerdlg.ShowWindow(SW_SHOW);
-		m_psycledelics.ShowWindow(SW_SHOW);
-		m_sourceforge.ShowWindow(SW_SHOW);
-		m_asio.ShowWindow(SW_SHOW);
-		m_steincopyright.ShowWindow(SW_SHOW);
-	} else {
-		m_aboutbmp.ShowWindow(SW_SHOW);
-		m_contrib.ShowWindow(SW_HIDE);
-		m_headercontrib.ShowWindow(SW_HIDE);
-		m_headerdlg.ShowWindow(SW_HIDE);
-		m_psycledelics.ShowWindow(SW_HIDE);
-		m_sourceforge.ShowWindow(SW_HIDE);
-		m_asio.ShowWindow(SW_HIDE);
-		m_steincopyright.ShowWindow(SW_HIDE);
-	}
-}
+		void CPsycleApp::ProcessCmdLine(LPSTR cmdline)
+		{
+			if (*(cmdline) != 0)
+			{
+				if(strcmp(cmdline,"/skipscan") != 0) {
+					CNewMachine::LoadPluginInfo(false);
+					char tmpName [MAX_PATH];
+					std::strncpy(tmpName, m_lpCmdLine+1, MAX_PATH-1 );
+					tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
+					reinterpret_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
+				}
+			}
+		}
 
-BOOL CAboutDlg::OnInitDialog() {
-	CDialog::OnInitDialog();
+		void CPsycleApp::OnAppAbout()
+		{
+			CAboutDlg dlg;
+			dlg.DoModal();
+		}
 
-	m_contrib.SetWindowText
+		bool CPsycleApp::BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath)
+		{
+
+			///\todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
+			// SHCreateItemFromParsingName(
+			bool val=false;
+			
+			LPMALLOC pMalloc;
+			// Gets the Shell's default allocator
+			//
+			if (::SHGetMalloc(&pMalloc) == NOERROR)
+			{
+				char pszBuffer[MAX_PATH];
+				pszBuffer[0]='\0';
+				BROWSEINFO bi;
+				LPITEMIDLIST pidl;
+				// Get help on BROWSEINFO struct - it's got all the bit settings.
+				//
+				bi.hwndOwner = hWnd_;
+				bi.pidlRoot = NULL;
+				bi.pszDisplayName = pszBuffer;
+				bi.lpszTitle = title_;
+				bi.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+				bi.lpfn = NULL;
+				bi.lParam = 0;
+				// This next call issues the dialog box.
+				//
+				if ((pidl = ::SHBrowseForFolder(&bi)) != NULL)
+				{
+					if (::SHGetPathFromIDList(pidl, pszBuffer))
+					{
+						// At this point pszBuffer contains the selected path
+						//
+						val = true;
+						rpath =pszBuffer;
+					}
+					// Free the PIDL allocated by SHBrowseForFolder.
+					//
+					pMalloc->Free(pidl);
+				}
+				// Release the shell's allocator.
+				//
+				pMalloc->Release();
+			}
+			return val;
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////
+		
+		CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
+		{
+			//{{AFX_DATA_INIT(CAboutDlg)
+			//}}AFX_DATA_INIT
+		}
+
+		void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+		{
+			CDialog::DoDataExchange(pDX);
+			//{{AFX_DATA_MAP(CAboutDlg)
+			DDX_Control(pDX, IDC_ASIO, m_asio);
+			DDX_Control(pDX, IDC_EDIT5, m_sourceforge);
+			DDX_Control(pDX, IDC_EDIT2, m_psycledelics);
+			DDX_Control(pDX, IDC_STEINBERGCOPY, m_steincopyright);
+			DDX_Control(pDX, IDC_SHOWATSTARTUP, m_showabout);
+			DDX_Control(pDX, IDC_HEADER, m_headercontrib);
+			DDX_Control(pDX, IDC_ABOUTBMP, m_aboutbmp);
+			DDX_Control(pDX, IDC_EDIT1, m_contrib);
+			DDX_Control(pDX, IDC_VERSION_INFO_MULTI_LINE, m_versioninfo);
+			//}}AFX_DATA_MAP
+		}
+
+		BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+			//{{AFX_MSG_MAP(CAboutDlg)
+			ON_BN_CLICKED(IDC_CONTRIBUTORS, OnContributors)
+			ON_BN_CLICKED(IDC_SHOWATSTARTUP, OnShowatstartup)
+			//}}AFX_MSG_MAP
+		END_MESSAGE_MAP()
+
+
+
+		void CAboutDlg::OnContributors() 
+		{
+			if ( m_aboutbmp.IsWindowVisible() )
+			{
+				m_aboutbmp.ShowWindow(SW_HIDE);
+				m_contrib.ShowWindow(SW_SHOW);
+				m_headercontrib.ShowWindow(SW_SHOW);
+				m_psycledelics.ShowWindow(SW_SHOW);
+				m_sourceforge.ShowWindow(SW_SHOW);
+				m_asio.ShowWindow(SW_SHOW);
+				m_steincopyright.ShowWindow(SW_SHOW);
+			}
+			else 
+			{
+				m_aboutbmp.ShowWindow(SW_SHOW);
+				m_contrib.ShowWindow(SW_HIDE);
+				m_headercontrib.ShowWindow(SW_HIDE);
+				m_psycledelics.ShowWindow(SW_HIDE);
+				m_sourceforge.ShowWindow(SW_HIDE);
+				m_asio.ShowWindow(SW_HIDE);
+				m_steincopyright.ShowWindow(SW_HIDE);
+			}
+		}
+
+		BOOL CAboutDlg::OnInitDialog() 
+		{
+			CDialog::OnInitDialog();
+
+			m_contrib.SetWindowText
 			(
 				"Josep Mª Antolín. [JAZ]\t\tDeveloper since release 1.5" "\r\n"
 				"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
@@ -379,20 +345,21 @@ BOOL CAboutDlg::OnInitDialog() {
 				"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 				"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 			);
-	m_showabout.SetCheck(Global::pConfig->_showAboutAtStart);
+			m_showabout.SetCheck(Global::psycleconf()._showAboutAtStart);
 
-	m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
-	m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
-	m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER("\r\n"));
+			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
+			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
+			m_versioninfo.SetWindowText(PSYCLE__BUILD__IDENTIFIER("\r\n"));
 
-	// return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
-	return TRUE;
-}
+			// return TRUE unless you set the focus to a control
+			// EXCEPTION: OCX Property Pages should return FALSE
+			return TRUE;
+		}
 
-void CAboutDlg::OnShowatstartup()  {
-	if ( m_showabout.GetCheck() )  Global::pConfig->_showAboutAtStart = true;
-	else Global::pConfig->_showAboutAtStart=false;
-}
+		void CAboutDlg::OnShowatstartup() 
+		{
+			if ( m_showabout.GetCheck() )  Global::psycleconf()._showAboutAtStart = true;
+			else Global::psycleconf()._showAboutAtStart=false;
+		}
 
 }}

@@ -1,17 +1,11 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include "XMInstrument.hpp"
 
-#include <psycle/core/xminstrument.h>
+namespace psycle { namespace host {
 
-#include <afxwin.h>
-
-namespace psycle {
-namespace core {
-	class XMSampler;
-}
-namespace host {
-
+class XMSampler;
 class CWaveScopeCtrl : public CStatic
 {
 public:
@@ -49,7 +43,6 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
-	DECLARE_MESSAGE_MAP()
 
 public:
 	void pMachine(XMSampler *const p){m_pMachine = p;};
@@ -58,6 +51,7 @@ public:
 	XMInstrument::WaveData& rWave(){return *m_pWave;};
 	void DrawScope(void);
 
+	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnLbnSelchangeSamplelist();
 	afx_msg void OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult);
@@ -95,6 +89,4 @@ protected:
 	CWaveScopeCtrl m_WaveScope;
 };
 
-
-}   // namespace
-}   // namespace
+}}

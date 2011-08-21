@@ -6,48 +6,41 @@
 #include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
 
-namespace psycle {
-namespace core {
-	class XMSampler;
-}
-namespace host {
+namespace psycle { namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
+class XMSampler;
 
 class XMSamplerUI : public CPropertySheet
-	{
+{
 	DECLARE_DYNAMIC(XMSamplerUI)
 
 	public:
 		XMSamplerUI(UINT nIDCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
-		XMSamplerUI(LPCTSTR pszCaption, class MachineGui* gui, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
+		virtual ~XMSamplerUI();
 
 		enum { IDD = IDD_XM_SAMPLER };
 
 	private:
 		XMSampler* _pMachine;
+		XMSamplerUI** windowVar_;
 		XMSamplerUIGeneral m_General;
 		XMSamplerUIInst m_Instrument;
 		XMSamplerUISample m_Sample;
 		XMSamplerMixerPage m_Mixer;
 		bool init;
-		MachineGui* gui_;
 
 	public:
-		void Init(XMSampler* pMachine);
+		virtual void PostNcDestroy();
+		void Init(XMSampler* pMachine,XMSamplerUI** windowVar);
 		void UpdateUI(void);
 		XMSampler* GetMachine(){ return _pMachine; }
 
 	protected:
-		afx_msg void OnDestroy();
-
 		DECLARE_MESSAGE_MAP()
-	};
+		afx_msg void OnClose();
+};
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-}   // namespace
-}   // namespace
+}}

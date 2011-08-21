@@ -3,43 +3,41 @@
 #include "Psycle.hpp"
 
 namespace psycle {
-namespace core {
-	class AudioRecorder;
-}
 namespace host {
 
-class CChildView;
+/// gear rack window.
+
+class AudioRecorder;
 
 class CWaveInMacDlg : public CDialog
 {
 public:
-	CWaveInMacDlg(CChildView* pParent);
-	CWaveInMacDlg(CChildView* pParent, class MachineGui* gui);
-
-	CChildView* m_pParent;
-	void RedrawList();
-	BOOL Create();
-	void Show(int x, int y);
-	afx_msg void OnCancel();
-
-	CComboBox m_listbox;
-	AudioRecorder *pRecorder;
-	enum { IDD = IDD_MACWAVEIN };
+	CWaveInMacDlg(CWnd* wndView,CWaveInMacDlg** windowVar, AudioRecorder& new_recorder);
+public:
+	AudioRecorder& recorder;
 protected:
+	void RedrawList();
+	void FillCombobox();
+	void OnChangeSlider();
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	void FillCombobox();
+	virtual void OnCancel();
+	virtual void PostNcDestroy();
+
+	enum { IDD = IDD_MACWAVEIN };
+	CStatic m_vollabel;
+	CSliderCtrl m_volslider;
+	CComboBox m_listbox;
+	CWnd* mainView;
+	CWaveInMacDlg** windowVar_;
+
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
+	afx_msg void OnClose();
 	afx_msg void OnCbnSelendokCombo1();
-	CStatic m_vollabel;
-	afx_msg void OnNMReleasedcaptureSlider1(NMHDR *pNMHDR, LRESULT *pResult);
-	CSliderCtrl m_volslider;
-private:
-	MachineGui* gui_;
-	void centerWindowOnPoint(int x, int y);
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 };
 
 }   // namespace

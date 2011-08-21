@@ -3,42 +3,47 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include <psycle/core/cpu_time_clock.hpp>
-
+#include "cpu_time_clock.hpp"
 namespace psycle { namespace host {
 
-/// info window.
-class CInfoDlg : public CDialog {
-	public:
-		CInfoDlg(class ProjectData* projects, CWnd* pParent = 0);
-		~CInfoDlg() {}
+		/// info window.
+		class CInfoDlg : public CDialog
+		{
+		public:
+			CInfoDlg(CWnd* pParent = 0);
+			virtual ~CInfoDlg() {}
 
-		void UpdateInfo();
+		// Dialog Data
+			enum { IDD = IDD_INFO };
 
-	protected:
-		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		virtual BOOL OnInitDialog();
-		afx_msg void OnTimer(UINT_PTR nIDEvent);		
-		DECLARE_MESSAGE_MAP()
+			void UpdateInfo();
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
+			virtual void OnCancel();
 
-	private:
-		void InitTimer();			
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnTimer(UINT_PTR nIDEvent);
+			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+			afx_msg void OnClose();
+			afx_msg void OnCpuPerf();
 
-		enum { IDD = IDD_INFO };
+		private:
+			void InitTimer();
 
-		CStatic	mem_virtual_;
-		CStatic	mem_pagefile_;
-		CStatic	mem_phy_;
-		CStatic	mem_reso_;
-		CStatic	cpurout_;
-		CStatic	machscpu_;
-		CStatic	processor_label_;
-		CStatic	cpuidlelabel_;
-		CListCtrl machlist_;
+			CStatic	m_mem_virtual;
+			CStatic	m_mem_pagefile;
+			CStatic	m_mem_phy;
+			CStatic	m_mem_reso;
+			CStatic	m_cpurout;
+			CStatic	m_machscpu;
+			CStatic	m_processor_label;
+			CStatic	m_cpuidlelabel;
+			CListCtrl	m_machlist;
+			CButton m_cpu_perf;
 
-		unsigned int item_count_;
-		core::wall_time_clock::time_point last_update_time_;
-		ProjectData* projects_;
-};
+			unsigned int item_count_;
+			wall_time_clock::time_point last_update_time_;
 
+		};
 }}

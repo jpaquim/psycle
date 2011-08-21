@@ -1,12 +1,10 @@
 ///\file
 ///\brief implementation file for psycle::host::CVolumeDlg.
-
 #include <psycle/host/detail/project.private.hpp>
 #include "VolumeDlg.hpp"
 #include <cmath>
 
 namespace psycle { namespace host {
-
 		CVolumeDlg::CVolumeDlg(CWnd* pParent) : CDialog(CVolumeDlg::IDD, pParent)
 		{
 			//{{AFX_DATA_INIT(CVolumeDlg)

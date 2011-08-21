@@ -4,72 +4,64 @@
 #include <psycle/host/detail/project.hpp>
 #include "resources/resources.hpp" // main symbols
 #include "Global.hpp"
-#include "Loggers.hpp"
+#include <psycle/helpers/hexstring_to_integer.hpp>
 
 namespace psycle { namespace host {
 
-class CMainFrame; // forward declaration
+		class CMainFrame; // forward declaration
 
-/// root class.
-class CPsycleApp : public CWinApp {
-	DECLARE_MESSAGE_MAP()
+		/// root class.
+		class CPsycleApp : public CWinAppEx
+		{
+		public:
+			CPsycleApp();
+			virtual ~CPsycleApp() throw();
+		public:
+			static bool BrowseForFolder(HWND hWnd_, char* title_, std::string& rpath);
+		protected:
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
+			virtual BOOL InitInstance();
+			virtual int ExitInstance();
+			virtual BOOL IsIdleMessage( MSG* pMsg );
+			virtual BOOL OnIdle(LONG lCount);
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnAppAbout();
+		public:
+			Global global_;
+		private:
+			void ProcessCmdLine(LPSTR cmdline);
 
-	public:
-		CPsycleApp();
-		virtual ~CPsycleApp() throw() {}
-	public:
-		virtual BOOL InitInstance();
-		virtual int ExitInstance();
-		BOOL PreTranslateMessage(MSG* pMsg);
-		virtual BOOL IsIdleMessage( MSG* pMsg );
-		virtual BOOL OnIdle(LONG lCount);
-	public:
-		Global _global;
-		afx_msg void OnAppAbout();
-	private:
-		void GetNaiveCPUFreq();
-		void ProcessCmdLine(LPSTR cmdline);
-		void LoadRecent(CMainFrame*);
-		void SaveRecent(CMainFrame*); friend /*void*/ class CMainFrame/*::OnClose()*/;
-		UINT m_uUserMessage;
-};
+			UINT m_uUserMessage;
+		};
 
-/////////////////////////////////////////////////////////////////////////////
-// CAboutDlg dialog used for App About
 
-class CAboutDlg : public CDialog {
-	public:
-		CAboutDlg();
+		/////////////////////////////////////////////////////////////////////////////
+		// CAboutDlg dialog used for App About
 
-		// Dialog Data
-		//{{AFX_DATA(CAboutDlg)
-		enum { IDD = IDD_ABOUTBOX };
-		CStatic	m_asio;
-		CEdit	m_sourceforge;
-		CEdit	m_psycledelics;
-		CStatic	m_steincopyright;
-		CStatic	m_headerdlg;
-		CButton	m_showabout;
-		CStatic	m_headercontrib;
-		CStatic	m_aboutbmp;
-		CEdit	m_contrib;
-		CStatic m_versioninfo;
-		//}}AFX_DATA
+		class CAboutDlg : public CDialog
+		{
+		public:
+			CAboutDlg();
+			enum { IDD = IDD_ABOUTBOX };
+			CStatic	m_asio;
+			CEdit	m_sourceforge;
+			CEdit	m_psycledelics;
+			CStatic	m_steincopyright;
+			CButton	m_showabout;
+			CStatic	m_headercontrib;
+			CStatic	m_aboutbmp;
+			CEdit	m_contrib;
+			CStatic m_versioninfo;
+		protected:
+			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+			virtual BOOL OnInitDialog();
+		protected:
+			DECLARE_MESSAGE_MAP()
+			afx_msg void OnContributors();
+			afx_msg void OnShowatstartup();
+		};
 
-		// ClassWizard generated virtual function overrides
-		//{{AFX_VIRTUAL(CAboutDlg)
-	protected:
-		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-		//}}AFX_VIRTUAL
 
-		// Implementation
-	protected:
-		//{{AFX_MSG(CAboutDlg)
-		afx_msg void OnContributors();
-		virtual BOOL OnInitDialog();
-		afx_msg void OnShowatstartup();
-		//}}AFX_MSG
-		DECLARE_MESSAGE_MAP()
-};
 
 }}

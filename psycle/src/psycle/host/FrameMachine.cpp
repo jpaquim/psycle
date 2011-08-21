@@ -1,87 +1,94 @@
 ///\file
 ///\brief implementation file for psycle::host::CFrameMachine.
-
 #include <psycle/host/detail/project.private.hpp>
 #include "FrameMachine.hpp"
-
-#include "MainFrm.hpp"
-#include "ChildView.hpp"
-#include "MachineView.hpp"
 #include "InputHandler.hpp"
-#include "Configuration.hpp"
-
-#include "MachineGui.hpp"
-#include "NativeGui.hpp" ///\todo Replace the drawing code with NativeGui
-#include "NewVal.hpp"
+#include "ChildView.hpp"
+#include "Machine.hpp"
+#include "NativeView.hpp"
+#include "MixerFrameView.hpp"
+#include "Plugin.hpp"
+#include "vsthost24.hpp"
 #include "PresetsDlg.hpp"
-
-#include <psycle/core/machine.h>
-#include <psycle/core/plugin.h>
-#include <psycle/core/song.h>
-
-#include <sstream>
-#include <iomanip>
+#include "ParamList.hpp"
 
 namespace psycle { namespace host {
-
+		int const ID_TIMER_PARAM_REFRESH = 2104;
 		extern CPsycleApp theApp;
 
-		IMPLEMENT_DYNCREATE(CFrameMachine, CFrameWnd)
+		//////////////////////////////////////////////////////////////////////////
 
-		BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
-			//{{AFX_MSG_MAP(CFrameMachine)
-			ON_WM_PAINT()
-			ON_WM_LBUTTONDOWN()
-			ON_WM_LBUTTONDBLCLK()
-			ON_WM_MOUSEMOVE()
-			ON_WM_LBUTTONUP()
-			ON_WM_RBUTTONUP()
-			ON_WM_TIMER()
-			ON_COMMAND(ID_PARAMETERS_RANDOMPARAMETERS, OnParametersRandomparameters)
-			ON_COMMAND(ID_PARAMETERS_RESETPARAMETERS, OnParametersResetparameters)
-			ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
-			ON_COMMAND(ID_MACHINE_ABOUTTHISMACHINE, OnMachineAboutthismachine)
-			ON_WM_CREATE()
-			ON_WM_DESTROY()
-			ON_WM_KEYDOWN()
-			ON_WM_KEYUP()
-			ON_COMMAND(ID_PARAMETERS_SHOWPRESET, OnParametersShowpreset)
-			ON_WM_SETFOCUS()
-			//}}AFX_MSG_MAP
-		END_MESSAGE_MAP()
-
-		CFrameMachine::CFrameMachine()
-			: gen_gui_(0)
+		void CMyToolBar::OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle)
 		{
-			//do not use! Use OnCreate Instead.
+			// Call base class implementation.
+			CToolBar::OnBarStyleChange(dwOldStyle, dwNewStyle);
+
+			// Use exclusive-or to detect changes in style bits.
+			DWORD changed = dwOldStyle ^ dwNewStyle;
+
+			if (changed & CBRS_FLOATING) {
+				if (dwNewStyle & CBRS_FLOATING) {
+					((CFrameMachine*)GetOwner())->ResizeWindow(NULL);
+				}
+				else {
+					((CFrameMachine*)GetOwner())->ResizeWindow(NULL);
+				}
+			}
+#if 0
+			if (changed & CBRS_ORIENT_ANY) {
+				if (dwNewStyle & CBRS_ORIENT_HORZ) {
+					// ToolBar now horizontal
+				}
+				else if (dwNewStyle & CBRS_ORIENT_VERT) {
+					// ToolBar now vertical            
+				}
+			}
+#endif
 		}
 
-		CFrameMachine::CFrameMachine(MachineGui* gen_gui)
-			:	gen_gui_(gen_gui) {
-			assert(gen_gui);
-			wndView = gen_gui->view()->child_view();
-			MachineIndex = gen_gui->view()->song()->FindBusFromIndex(gen_gui->mac()->id());			
+		IMPLEMENT_DYNAMIC(CFrameMachine, CFrameWnd)
+
+		BEGIN_MESSAGE_MAP(CFrameMachine, CFrameWnd)
+			ON_WM_CREATE()
+			ON_WM_CLOSE()
+			ON_WM_DESTROY()
+			ON_WM_TIMER()
+			ON_WM_SETFOCUS()
+			ON_WM_KEYDOWN()
+			ON_WM_KEYUP()
+			ON_WM_SIZING()
+			ON_WM_INITMENUPOPUP()
+			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
+			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
+			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
+			ON_COMMAND(ID_PROGRAMS_RESETDEFAULT, OnParametersResetparameters)
+			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
+			ON_UPDATE_COMMAND_UI(ID_OPERATIONS_ENABLED, OnUpdateOperationsEnabled)
+			ON_COMMAND(ID_VIEWS_PARAMETERLIST, OnViewsParameterlist)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_PARAMETERLIST, OnUpdateViewsParameterlist)
+			ON_COMMAND(ID_VIEWS_BANKMANAGER, OnViewsBankmanager)
+			ON_COMMAND(ID_VIEWS_SHOWTOOLBAR, OnViewsShowtoolbar)
+			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
+			ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
+			ON_UPDATE_COMMAND_UI(ID_MACHINE_COMMAND, OnUpdateParametersCommand)
+			ON_COMMAND(ID_ABOUT_ABOUTMAC, OnMachineAboutthismachine)
+			ON_LBN_SELCHANGE(ID_COMBO_PRG, OnSelchangeProgram)
+			ON_CBN_CLOSEUP(ID_COMBO_PRG, OnCloseupProgram)
+			ON_COMMAND(ID_PROGRAMLESS, OnProgramLess)
+			ON_UPDATE_COMMAND_UI(ID_PROGRAMLESS, OnUpdateProgramLess)
+			ON_COMMAND(ID_PROGRAMMORE, OnProgramMore)
+			ON_UPDATE_COMMAND_UI(ID_PROGRAMMORE, OnUpdateProgramMore)
+		END_MESSAGE_MAP()
+
+		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0)
+		{
+			//Use OnCreate.
 		}
 
 		CFrameMachine::~CFrameMachine()
 		{
-			//do not use! Use OnDestroy Instead.
-		}
-
-		void CFrameMachine::Init(int x, int y)
-		{
-			LoadFrame(
-				IDR_MACHINEFRAME, 
-				WS_POPUPWINDOW | WS_CAPTION,
-				gen_gui_->view()->child_view());
-			SelectMachine(gen_gui_->mac());
-			CRect rc;
-			gen_gui_->view()->parent()->GetWindowRect(rc);
-			Generate(x, y);			
-			std::ostringstream winname;
-			winname<<std::setfill('0') << std::setw(2) << std::hex;
-			winname << MachineIndex << " : " << _pMachine->GetEditName();
-			SetWindowText(winname.str().c_str());
+			//Use OnDestroy
 		}
 
 		int CFrameMachine::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -90,51 +97,104 @@ namespace psycle { namespace host {
 			{
 				return -1;
 			}
-			istweak=false;
-			tweakpar=0;
-			tweakbase=0;
-			minval=0;
-			maxval=0;
-			prevval=0;
-			finetweak=false;
-			ultrafinetweak=false;
-			numParameters=0;
-			ncol=0;
-			parspercol=0;
-			visualtweakvalue=0.0f;
-
-			b_font.CreatePointFont(80,"Tahoma");
-//			b_font_bold.CreatePointFont(80,"Tahoma Bold");
-			CString sFace("Tahoma");
-			LOGFONT lf = LOGFONT();
-			lf.lfWeight = FW_BOLD;
-			lf.lfHeight = 80;
-			lf.lfQuality = NONANTIALIASED_QUALITY;
-			std::strncpy(lf.lfFaceName,(LPCTSTR)sFace,32);
-			if(!b_font_bold.CreatePointFontIndirect(&lf))
+			pView = CreateView();
+			if(!pView)
 			{
-				b_font_bold.CreatePointFont(80,"Tahoma Bold");
+				TRACE0("Failed to create view window\n");
+				return -1;
 			}
+			if ( _machine->_type == MACH_PLUGIN )
+			{
+				GetMenu()->GetSubMenu(1)->ModifyMenu(5, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
+					((Plugin*)_machine)->GetInfo()->Command);
+			}
+			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
+				!toolBar.LoadToolBar(IDR_FRAMEMACHINE))
+			{
+				TRACE0("Failed to create toolbar\n");
+				return -1;      // fail to create
+			}
+#if 0
+			//nice, but will make the toolbar too big.
+			toolBar.SetButtonText(0,"blabla");
+			CRect temp;
+			toolBar.GetItemRect(0,&temp);
+			toolBar.GetToolBarCtrl().SetButtonSize(CSize(temp.Width(),
+				temp.Height()));
+#endif
 
-			SetTimer(2104+MachineIndex,100,0);
+			toolBar.SetBarStyle(toolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
+			toolBar.SetWindowText("Params Toolbar");
+			toolBar.EnableDocking(CBRS_ALIGN_TOP);
+			CRect rect;
+			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_PRG);
+			toolBar.SetButtonInfo(nIndex, ID_COMBO_PRG, TBBS_SEPARATOR, 160);
+			toolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
+			rect.top = 1;
+			rect.bottom = rect.top + 400; //drop height
+			if(!comboProgram.Create( WS_CHILD |  CBS_DROPDOWNLIST | WS_VISIBLE | CBS_AUTOHSCROLL 
+				 | WS_VSCROLL, rect, &toolBar, ID_COMBO_PRG))
+			{
+				TRACE0("Failed to create combobox\n");
+				return -1;      // fail to create
+			}
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			CFont font;
+			font.Attach( hFont );
+			comboProgram.SetFont(&font);
+
+			LocatePresets();
+			FillProgramCombobox();
+
+			EnableDocking(CBRS_ALIGN_ANY);
+			DockControlBar(&toolBar);
+			LoadBarState(_T("VstParamToolbar"));
+
+			// Sets Icon
+			HICON tIcon;
+			tIcon=theApp.LoadIcon(IDR_FRAMEMACHINE);
+			SetIcon(tIcon, true);
+			SetIcon(tIcon, false);
+
+			SetTimer(ID_TIMER_PARAM_REFRESH,30,0);
 			return 0;
 		}
 
-		void CFrameMachine::OnDestroy() 
+		BOOL CFrameMachine::PreCreateWindow(CREATESTRUCT& cs)
 		{
-			assert(gen_gui_);
-			gen_gui_->BeforeDeleteDlg();
-			b_font.DeleteObject();
-			b_font_bold.DeleteObject();
-			KillTimer(2104+MachineIndex);
-			CFrameWnd::OnDestroy();
+			if( !CFrameWnd::PreCreateWindow(cs) )
+				return FALSE;
+			
+			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
+			return TRUE;
+		}
+
+		void CFrameMachine::OnClose() 
+		{
+			KillTimer(ID_TIMER_PARAM_REFRESH);
+			CFrameWnd::OnClose();
+		}
+
+		void CFrameMachine::OnDestroy()
+		{
+			HICON _icon = GetIcon(false);
+			DestroyIcon(_icon);
+			comboProgram.DestroyWindow();
+			if (pView != NULL) { pView->DestroyWindow(); delete pView; }
+			if (pParamGui) pParamGui->SendMessage(WM_CLOSE);
+			SaveBarState(_T("VstParamToolbar"));
+		}
+		void CFrameMachine::PostNcDestroy() 
+		{
+			if(windowVar!= NULL) *windowVar = NULL;
+			CFrameWnd::PostNcDestroy();
 		}
 
 		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
 		{
-			if ( nIDEvent == 2104+MachineIndex )
+			if ( nIDEvent == ID_TIMER_PARAM_REFRESH )
 			{
-				Invalidate(false);
+				pView->WindowIdle();
 			}
 			CFrameWnd::OnTimer(nIDEvent);
 		}
@@ -142,428 +202,7 @@ namespace psycle { namespace host {
 		void CFrameMachine::OnSetFocus(CWnd* pOldWnd) 
 		{
 			CFrameWnd::OnSetFocus(pOldWnd);
-			//((CMainFrame*)wndView->pParentFrame)->ChangeGen(_pMachine->id());
-			Invalidate(false);
-		}
-		void CFrameMachine::Generate(double x, double y)
-		{
-/*			if (Global::pConfig->bBmpDial)
-				wndView->LoadMachineDial();
-			else
-				wndView->machinedial.LoadBitmap(IDB_KNOB);
-*/
-			UpdateWindow();
-
-			int const winh = parspercol*K_YSIZE;
-
-
-			CRect rect,rect2;
-			//Show the window in the usual way, without worrying about the exact sizes.
-			SetWindowPos
-				(0, 
-				x,
-				y,
-				W_ROWWIDTH * ncol,
-				winh + GetSystemMetrics(SM_CYCAPTION) +  GetSystemMetrics(SM_CYMENU) + GetSystemMetrics(SM_CYEDGE),
-				SWP_NOZORDER | SWP_SHOWWINDOW
-			);
-			//Get the coordinates (sizes) of the client area, and the frame.
-			GetClientRect(&rect);
-			GetWindowRect(&rect2);
-			//Using the previous values, resize the window to the desired sizes.
-			MoveWindow
-				(x,
-				y,
-				(rect2.right-rect2.left)+((W_ROWWIDTH*ncol)-rect.right),
-				(rect2.bottom-rect2.top)+(winh-rect.bottom),
-				true
-			);
-			centerWindowOnPoint(x, y);
-		}
-		void CFrameMachine::centerWindowOnPoint(int x, int y) {
-			CRect r;
-			GetWindowRect(&r);
-
-			x -= ((r.right-r.left)/2);
-			y -= ((r.bottom-r.top)/2);
-
-			if (x < 0) {
-				x = 0;
-			}
-			if (y < 0) {
-				y = 0;
-			}
-			SetWindowPos(0, x,	y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-		}
-
-		void CFrameMachine::SelectMachine(Machine* pMachine)
-		{
-			_pMachine = pMachine;
-
-			// Get NumParameters
-
-			numParameters = _pMachine->GetNumParams();
-			ncol = _pMachine->GetNumCols();
-			parspercol = numParameters/ncol;
-
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-			{
-				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo().Command);
-			}
-			else if ( _pMachine->getMachineKey().host() == Hosts::VST )
-			{
-#else
-			if ( _pMachine->_type == MACH_PLUGIN )
-			{
-				GetMenu()->GetSubMenu(0)->ModifyMenu(0, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, ((Plugin*)_pMachine)->GetInfo()->Command);
-			}
-			else if ( _pMachine->_type == MACH_VST || _pMachine->_type == MACH_VSTFX )
-			{
-#endif
-				while ( (numParameters/ncol)*K_YSIZE > ncol*W_ROWWIDTH ) ncol++;
-				parspercol = numParameters/ncol;
-				if (parspercol>24)	// check for "too big" windows
-				{
-					parspercol=24;
-					ncol=numParameters/24;
-					if (ncol*24 != numParameters)
-					{
-						ncol++;
-					}
-				}
-			}
-			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
-			
-		}
-
-
-		///////////////////////////////////////////////////////////////////////
-		// PAINT GUI HERE
-		///////////////////////////////////////////////////////////////////////
-
-		void CFrameMachine::OnPaint() 
-		{
-			CPaintDC dc(this); // device context for painting
-
-			CFont* oldfont=dc.SelectObject(&b_font);
-
-			CRect rect;
-			GetClientRect(&rect);
-			int const K_XSIZE2=K_XSIZE+8;
-			int const K_YSIZE2=K_YSIZE/2;
-		//	int hsp=0;
-
-			CDC memDC;
-			CBitmap* oldbmp;
-
-			memDC.CreateCompatibleDC(&dc);
-			oldbmp=memDC.SelectObject(&CNativeGui::uiSetting().dial);
-
-			int y_knob = 0;
-			int x_knob = 0;
-			int knob_c = 0;
-			char parName[64];
-			std::memset(parName,0,64);
-
-			for (int c=0; c<numParameters; c++)
-			{
-				char buffer[128];
-
-				BOOL bDrawKnob = TRUE;
-				int min_v=1;
-				int max_v=1;
-				int val_v=1;
-
-				_pMachine->GetParamName(c,parName);
-				_pMachine->GetParamRange(c,min_v,max_v);
-				val_v = _pMachine->GetParamValue(c);
-				_pMachine->GetParamValue(c,buffer);
-				bDrawKnob = (min_v==max_v)?false:true;
-
-				if(bDrawKnob && (max_v - min_v)>0)
-				{
-					int const amp_v = max_v - min_v;
-					float rel_v;
-					if ( istweak && c == tweakpar) 
-					{
-						rel_v = visualtweakvalue - min_v;
-					} else {
-						rel_v = val_v - min_v;
-					}
-					int const frame = (K_NUMFRAMES*rel_v)/amp_v;
-					int const xn = frame*K_XSIZE;
-					dc.BitBlt(x_knob,y_knob,K_XSIZE,K_YSIZE,&memDC,xn,0,SRCCOPY);
-
-					//the old code which did the parameter highlight
-					/*int nc;
-					
-					if ((tweakpar == c) && (istweak))
-					{
-						nc = 0x00221100;
-					}
-					else
-					{
-						nc = 0;
-					}*/
-					
-					//commented out by Alk when enabling custom colours
-					//and all throughout this function
-					//dc.SetBkColor(0x00788D93 + nc*2);
-					//dc.SetTextColor(0x00CCDDEE + nc);
-					if ((tweakpar == c) && (istweak))
-					{
-						dc.SetBkColor(Global::pConfig->machineGUIHTopColor);
-						dc.SetTextColor(Global::pConfig->machineGUIHFontTopColor);
-					}
-					else
-					{
-						dc.SetBkColor(Global::pConfig->machineGUITopColor);
-						dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
-					}
-					dc.ExtTextOut(K_XSIZE2+x_knob, y_knob, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), CString(parName), 0);
-					
-					//dc.SetBkColor(0x00687D83 + nc*2);
-					//dc.SetTextColor(0x0044EEFF + nc);
-					if ((tweakpar == c) && (istweak))
-					{
-						dc.SetBkColor(Global::pConfig->machineGUIHBottomColor);
-						dc.SetTextColor(Global::pConfig->machineGUIHFontBottomColor);
-					}
-					else
-					{
-						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
-						dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
-					}
-					dc.ExtTextOut(K_XSIZE2 + x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(K_XSIZE+x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), CString(buffer), 0);
-				}
-				else
-				{
-					if(!std::strlen(parName) /* <bohan> don't know what pooplog's plugins use for separators... */ || std::strlen(parName) == 1)
-					{
-						//dc.SetBkColor(0x00788D93);
-						dc.SetBkColor(Global::pConfig->machineGUITopColor);
-						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
-						
-
-						//dc.SetBkColor(0x00687D83);
-						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
-						dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
-					}
-					else
-					{
-						//dc.SetBkColor(0x00788D93);
-						dc.SetBkColor(Global::pConfig->machineGUITopColor);
-						dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH + x_knob, y_knob + K_YSIZE / 4), "", 0);
-					
-						//dc.SetBkColor(0x0088a8b4);
-						//dc.SetTextColor(0x00FFFFFF);
-						dc.SetBkColor(Global::pConfig->machineGUITitleColor);
-						dc.SetTextColor(Global::pConfig->machineGUITitleFontColor);
-
-						dc.SelectObject(&b_font_bold);
-						dc.ExtTextOut(x_knob + 8, y_knob + K_YSIZE / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE * 3 / 4), CString(parName), 0);
-						dc.SelectObject(&b_font);
-
-						//dc.SetBkColor(0x00687D83);
-						dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
-						dc.ExtTextOut(x_knob, y_knob + K_YSIZE * 3 / 4, ETO_OPAQUE, CRect(x_knob, y_knob + K_YSIZE * 3 / 4, W_ROWWIDTH + x_knob, y_knob + K_YSIZE), "", 0);
-					}
-				}
-				y_knob += K_YSIZE;
-
-				++knob_c;
-
-				if (knob_c >= parspercol)
-				{
-					knob_c = 0;
-					x_knob += W_ROWWIDTH;
-					y_knob = 0;
-				}
-			}
-
-			int exess= parspercol*ncol;
-			if ( exess > numParameters )
-			{
-				for (int c=numParameters; c<exess; c++)
-				{
-					//dc.SetBkColor(0x00788D93);
-					//dc.SetTextColor(0x00CCDDEE);
-					dc.SetBkColor(Global::pConfig->machineGUITopColor);
-					dc.SetTextColor(Global::pConfig->machineGUIFontTopColor);
-					dc.ExtTextOut(x_knob, y_knob, ETO_OPAQUE, CRect(x_knob, y_knob, W_ROWWIDTH+x_knob, y_knob+K_YSIZE2), "", 0);
-
-					//dc.SetBkColor(0x00687D83);
-					//dc.SetTextColor(0x0044EEFF);
-					dc.SetBkColor(Global::pConfig->machineGUIBottomColor);
-					dc.SetTextColor(Global::pConfig->machineGUIFontBottomColor);
-					dc.ExtTextOut(x_knob, y_knob+K_YSIZE2, ETO_OPAQUE, CRect(x_knob, y_knob+K_YSIZE2, W_ROWWIDTH+x_knob, y_knob+K_YSIZE), "", 0);
-
-					y_knob += K_YSIZE;
-				}
-			}
-			memDC.SelectObject(oldbmp);
-			memDC.DeleteDC();
-			dc.SelectObject(oldfont);
-		}
-
-		int CFrameMachine::ConvertXYtoParam(int x, int y)
-		{
-			if ((y/K_YSIZE) >= parspercol ) return -1; //this if for VST's that use the native gui.
-			return (y/K_YSIZE) + ((x/W_ROWWIDTH)*parspercol);
-		}
-		void CFrameMachine::OnLButtonDown(UINT nFlags, CPoint point) 
-		{
-			tweakpar = ConvertXYtoParam(point.x,point.y);
-			if ((tweakpar > -1) && (tweakpar < numParameters))
-			{
-				sourcepoint = point.y;
-				tweakbase = _pMachine->GetParamValue(tweakpar);
-				prevval = tweakbase;
-				_pMachine->GetParamRange(tweakpar,minval,maxval);
-				istweak = true;
-				visualtweakvalue = tweakbase;
-				SetCapture();
-			}
-			else
-			{
-				istweak = false;
-			}
-			CFrameWnd::OnLButtonDown(nFlags, point);
-		}
-
-
-	void CFrameMachine::OnLButtonDblClk(UINT nFlags, CPoint point)
-		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-#endif
-			{
-				int par = ConvertXYtoParam(point.x,point.y);
-				if(par>=0 && par <= ((Plugin*)_pMachine)->GetNumParams() )
-				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo().Parameters[par]->DefValue);
-#else
-					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
-#endif
-				}
-			}
-			Invalidate(false);
-
-			CFrameWnd::OnLButtonDblClk(nFlags, point);
-		}
-
-
-		void CFrameMachine::OnMouseMove(UINT nFlags, CPoint point) 
-		{
-			if (istweak)
-			{
-				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
-				///       It should be interesting to know what is "somewhere else".
-/*				int curval = _pMachine->GetParamValue(tweakpar);
-				tweakbase -= prevval-curval;					//adjust base for tweaks from somewhere else
-				if(tweakbase<minval) tweakbase=minval;
-				if(tweakbase>maxval) tweakbase=maxval;
-*/
-				if (( ultrafinetweak && !(nFlags & MK_SHIFT )) || //shift-key has been left.
-					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
-				{
-					tweakbase = _pMachine->GetParamValue(tweakpar);
-					sourcepoint=point.y;
-					ultrafinetweak=!ultrafinetweak;
-				}
-				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
-					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
-				{
-					tweakbase = _pMachine->GetParamValue(tweakpar);
-					sourcepoint=point.y;
-					finetweak=!finetweak;
-				}
-
-				double freak;
-				int screenh = wndView->CH;
-				if ( ultrafinetweak ) freak = 0.5f;
-				else if (maxval-minval < screenh/4) freak = (maxval-minval)/float(screenh/4);
-				else if (maxval-minval < screenh*2/3) freak = (maxval-minval)/float(screenh/3);
-				else freak = (maxval-minval)/float(screenh*3/5);
-				if (finetweak) freak/=5;
-
-				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
-
-				if (nv < minval) nv = minval;
-				if (nv > maxval) nv = maxval;
-
-				visualtweakvalue = nv;
-				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
-				prevval=(int)(nv+0.5f);
-				if (Global::pConfig->_RecordTweaks)
-				{
-					if (Global::pConfig->_RecordMouseTweaksSmooth)
-					{
-						wndView->MousePatternTweakSlide(MachineIndex, tweakpar, ((int)nv)-minval);
-					}
-					else
-					{
-						wndView->MousePatternTweak(MachineIndex, tweakpar, ((int)nv)-minval);
-					}
-				}
-				Invalidate(false);
-			}
-			CFrameWnd::OnMouseMove(nFlags, point);
-		}
-
-		void CFrameMachine::OnLButtonUp(UINT nFlags, CPoint point) 
-		{
-			istweak = false;
-			Invalidate(false);	
-			ReleaseCapture();
-			CFrameWnd::OnLButtonUp(nFlags, point);
-		}
-
-		void CFrameMachine::OnRButtonUp(UINT nFlags, CPoint point) 
-		{
-			tweakpar = ConvertXYtoParam(point.x,point.y);
-
-			if ((tweakpar > -1) && (tweakpar < numParameters))
-			{
-				if (nFlags & MK_CONTROL)
-				{					
-					gen_gui_->view()->song()->seqBus = MachineIndex;//Global::song().FindBusFromIndex(MachineIndex);
-					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
-					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_wndControl2.GetDlgItem(IDC_AUXSELECT);
-					cb2->SetCurSel(AUX_PARAMS); // PARAMS
-					gen_gui_->view()->song()->auxcolSelected=tweakpar;
-					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
-				}
-				else 
-				{		
-					int min_v=1;
-					int max_v=1;
-					char name[64], title[128];
-					memset(name,0,64);
-
-					_pMachine->GetParamName(tweakpar,name);
-					_pMachine->GetParamRange(tweakpar,min_v,max_v);
-					std::sprintf
-						(
-							title, "Param:'%.2x:%s' (Range from %d to %d)\0",
-							tweakpar,
-							name,
-							min_v,
-							max_v
-						);
-					CNewVal dlg(MachineIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
-					if ( dlg.DoModal() == IDOK)
-					{
-						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
-					}
-					Invalidate(false);
-				}
-			}
-			CFrameWnd::OnRButtonUp(nFlags, point);
+			pView->WindowIdle();
 		}
 
 		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -580,10 +219,10 @@ namespace psycle { namespace host {
 					{
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
-						if ( _pMachine->IsGenerator() || Global::pConfig->_notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,127,true,_pMachine);
+						if ( _machine->_mode == MACHMODE_GENERATOR || Global::psycleconf().inputHandler()._notesToEffects)
+							Global::pInputHandler->PlayNote(outnote,255,127,true,_machine);
 						else
-							Global::pInputHandler->PlayNote(outnote,127,true, 0);
+							Global::pInputHandler->PlayNote(outnote);
 					}
 					break;
 
@@ -593,11 +232,12 @@ namespace psycle { namespace host {
 					break;
 				}
 			}
+			else if(nChar == VK_ESCAPE) {
+				PostMessage(WM_CLOSE);
+			}
 			this->SetFocus();
 
-			//wndView->KeyDown(nChar,nRepCnt,nFlags);
 			CFrameWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
-			//wndView->OnKeyDown(nChar,nRepCnt,nFlags);
 		}
 
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -607,77 +247,186 @@ namespace psycle { namespace host {
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _pMachine->IsGenerator() ||Global::pConfig->_notesToEffects)
+				if ( _machine->_mode == MACHMODE_GENERATOR ||Global::psycleconf().inputHandler()._notesToEffects)
 				{
-					Global::pInputHandler->StopNote(outnote,true,_pMachine);
+					Global::pInputHandler->StopNote(outnote,255,true,_machine);
 				}
-				else Global::pInputHandler->StopNote(outnote,true,NULL);
+				else Global::pInputHandler->StopNote(outnote);
 			}
 
-			//wndView->KeyUp(nChar, nRepCnt, nFlags);
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
-			//wndView->OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
-		void CFrameMachine::OnParametersRandomparameters() 
+		void CFrameMachine::OnSizing(UINT fwSide, LPRECT pRect)
 		{
-			int numpars = _pMachine->GetNumParams();
-			for (int c=0; c<numpars; c++)
+			pView->WindowIdle();
+		}
+
+
+		//////////////////////////////////////////////////////////////////////////
+		// OnInitMenuPopup : called when a popup menu is initialized            //
+		//////////////////////////////////////////////////////////////////////////
+
+		void CFrameMachine::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu) 
+		{
+			// if Effect Edit menu popping up
+			if ((pPopupMenu->GetMenuItemCount() > 0) &&
+				(pPopupMenu->GetMenuItemID(0) == ID_PROGRAMS_OPENPRESET))
+			{
+				FillBankPopup(pPopupMenu);
+				FillProgramPopup(pPopupMenu);
+			}
+
+			CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+		}
+		void CFrameMachine::OnSetBank(UINT nID)
+		{
+			int bank = nID - ID_SELECTBANK_0;
+			if (bank < machine().GetNumBanks()) {
+				machine().SetCurrentBank(bank);
+				isInternal=false;
+				isUser=false;
+			}
+			else 
+			{
+				bank -= machine().GetNumBanks();
+				if(internalPresets.size() > 0) {
+					bank--;
+					if (bank == -1) isInternal=true;
+				}
+				if(userPresets.size() > 0) {
+					bank--;
+					if (bank == -1) isUser=true;
+				}
+			}
+
+			FillProgramCombobox();
+		}
+		void CFrameMachine::OnSetProgram(UINT nID)
+		{
+			ChangeProgram(nID - ID_SELECTPROGRAM_0);
+		}
+
+
+		void CFrameMachine::OnProgramsRandomizeprogram()
+		{
+			int numParameters = machine().GetNumParams();
+			for(int c(0); c < numParameters ; ++c)
 			{
 				int minran,maxran;
-				_pMachine->GetParamRange(c,minran,maxran);
+				_machine->GetParamRange(c,minran,maxran);
 
-					int dif = (maxran-minran);
+				int dif = (maxran-minran);
 
-					float randsem = (float)rand()*0.000030517578125f;
+				float randsem = (float)rand()*0.000030517578125f;
 
-					float roffset = randsem*(float)dif;
+				float roffset = randsem*(float)dif;
 
-				_pMachine->SetParameter(c,minran+int(roffset));
+				Global::pInputHandler->AddMacViewUndo();
+				machine().SetParameter(c,minran+int(roffset));
 			}
 			Invalidate(false);
 		}
 
 		void CFrameMachine::OnParametersResetparameters() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-#endif
+			if ( _machine->_type == MACH_PLUGIN)
 			{
-				int numpars = _pMachine->GetNumParams();
+				int numpars = _machine->GetNumParams();
 				for (int c=0; c<numpars; c++)
 				{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-					int dv = ((Plugin*)_pMachine)->GetInfo().Parameters[c]->DefValue;
-#else
-					int dv = ((Plugin*)_pMachine)->GetInfo()->Parameters[c]->DefValue;
-#endif
-					_pMachine->SetParameter(c,dv);
+					int dv = ((Plugin*)_machine)->GetInfo()->Parameters[c]->DefValue;
+					Global::pInputHandler->AddMacViewUndo();
+					_machine->SetParameter(c,dv);
 				}
-			}
-			if (istweak)
-			{
-				istweak = false;
 			}
 			Invalidate(false);
 		}
 
+		void CFrameMachine::OnOperationsEnabled()
+		{
+			if (machine()._mode == MACHMODE_GENERATOR)
+			{
+				machine()._mute = !machine()._mute;
+			}
+			else if (machine()._mute) 
+			{
+				machine()._mute = false;
+				machine().Bypass(false);
+			}
+			else {
+				machine().Bypass(!machine().Bypass());
+			}
+			wndView->Repaint();
+		}
+
+		void CFrameMachine::OnUpdateOperationsEnabled(CCmdUI *pCmdUI)
+		{
+			if (machine()._mode == MACHMODE_GENERATOR)
+			{
+				pCmdUI->SetCheck(!machine()._mute);
+			}
+			else
+			{
+				pCmdUI->SetCheck(!(machine()._mute || machine().Bypass()));
+			}
+		}
+
+		void CFrameMachine::OnViewsBankmanager()
+		{
+			CPresetsDlg dlg;
+			dlg._pMachine=_machine;
+			dlg.DoModal();
+		}
+
+		void CFrameMachine::OnViewsParameterlist()
+		{
+			CRect rc;
+			GetWindowRect(&rc);
+			if (!pParamGui)
+			{
+				pParamGui= new CParamList(machine(), this, &pParamGui);
+				pParamGui->SetWindowPos(0,rc.right+1,rc.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
+				pParamGui->ShowWindow(SW_SHOWNORMAL); 
+			}
+			else
+			{
+				pParamGui->SendMessage(WM_CLOSE);
+			}
+		}
+
+		void CFrameMachine::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
+		{
+			if ( pParamGui )
+			{
+				pCmdUI->SetCheck(true);
+			}
+			else
+				pCmdUI->SetCheck(false);
+		}
+
+		void CFrameMachine::OnViewsShowtoolbar()
+		{
+			Global::psycleconf().macParam().toolbarOnMachineParams = !Global::psycleconf().macParam().toolbarOnMachineParams;
+
+			if (Global::psycleconf().macParam().toolbarOnMachineParams) ShowControlBar(&toolBar,TRUE,FALSE);
+			else ShowControlBar(&toolBar,FALSE,FALSE);
+			ResizeWindow(0);
+		}
+
+		void CFrameMachine::OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI)
+		{
+			pCmdUI->SetCheck(Global::psycleconf().macParam().toolbarOnMachineParams);
+		}
+
 		void CFrameMachine::OnParametersCommand() 
 		{
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
+			if ( _machine->_type == MACH_PLUGIN)
 			{
-				//todo
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-			{
-				((Plugin*)_pMachine)->GetCallback()->hWnd = m_hWnd;
-#endif
+				((Plugin*)_machine)->GetCallback()->hWnd = m_hWnd;
 				try
 				{
-					((Plugin*)_pMachine)->proxy().Command();
+					((Plugin*)_machine)->proxy().Command();
 				}
 				catch(const std::exception &)
 				{
@@ -686,37 +435,467 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CFrameMachine::OnMachineAboutthismachine() 
+		void CFrameMachine::OnUpdateParametersCommand(CCmdUI *pCmdUI)
 		{
-			if (istweak)
+			if ( _machine->_type == MACH_PLUGIN)
 			{
-				istweak = false;
+				pCmdUI->Enable(true);
 			}
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-			if ( _pMachine->getMachineKey().host() == Hosts::NATIVE )
-#else
-			if( _pMachine->_type == MACH_PLUGIN)
-#endif
-			{
-				MessageBox
-					(
-#if PSYCLE__CONFIGURATION__USE_PSYCORE
-						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo().Author),
-						"About " + CString(((Plugin*)_pMachine)->GetInfo().Name)
-#else
-						"Authors: " + CString(((Plugin*)_pMachine)->GetInfo()->Author),
-						"About " + CString(((Plugin*)_pMachine)->GetInfo()->Name)
-#endif
-					);
+			else {
+				pCmdUI->Enable(false);
 			}
 		}
 
-
-		void CFrameMachine::OnParametersShowpreset() 
+		void CFrameMachine::OnMachineAboutthismachine() 
 		{
-			CPresetsDlg dlg;
-			dlg._pMachine=_pMachine;
-			dlg.DoModal();
+			if ( _machine->_type == MACH_PLUGIN)
+			{
+				MessageBox(CString("Authors: ") + CString(((Plugin*)_machine)->GetInfo()->Author),
+						CString("About ") + CString(machine().GetName()));
+			}
+			else if ( _machine->_type == MACH_VST || _machine->_type == MACH_VSTFX)
+			{
+				///\todo: made an informative dialog like in seib's vsthost.
+				MessageBox(CString("Vst Plugin by " )+ CString(((vst::plugin*)_machine)->GetVendorName()),
+					CString("About") + CString(machine().GetName()));
+			}
+		}
+		void CFrameMachine::OnSelchangeProgram() 
+		{
+			ChangeProgram(comboProgram.GetCurSel());
+			SetFocus();
+		}
+		void CFrameMachine::OnCloseupProgram()
+		{
+			SetFocus();
+		}
+
+		void CFrameMachine::OnProgramLess()
+		{
+			int i = 0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+			ChangeProgram(i-1);
+			UpdateWindow();
+		}
+		void CFrameMachine::OnUpdateProgramLess(CCmdUI *pCmdUI)
+		{
+			int i = 0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+			if ( i == 0)
+			{
+				pCmdUI->Enable(false);
+			}
+			else pCmdUI->Enable(true);
+		}
+		void CFrameMachine::OnProgramMore()
+		{
+			int i = 0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+			ChangeProgram(i+1);
+			UpdateWindow();
+		}
+		void CFrameMachine::OnUpdateProgramMore(CCmdUI *pCmdUI)
+		{
+			int i = 0;
+			int nump = 0;
+			if (isInternal) {
+				i = userSelected;
+				nump = internalPresets.size();
+			} else if(isUser){
+				i = userSelected;
+				nump = userPresets.size();
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+				nump =  _machine->GetNumPrograms();
+			}
+
+			if ( i+1 == nump || nump==0)
+			{
+				pCmdUI->Enable(false);
+			}
+			else pCmdUI->Enable(true);
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+
+		CBaseParamView* CFrameMachine::CreateView()
+		{
+			CBaseParamView* gui;
+			if(machine()._type == MACH_MIXER) {
+				gui = new MixerFrameView(this,&machine());
+			}
+			else {
+				gui = new CNativeView(this,&machine());
+			}
+			gui->Create(NULL, NULL, AFX_WS_DEFAULT_VIEW,
+				CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL);
+			return gui;
+		}
+
+		void CFrameMachine::PostOpenWnd()
+		{
+			pView->Open();
+			ResizeWindow(0);
+		}
+
+		void CFrameMachine::GetWindowSize(CRect &rcFrame, CRect &rcClient, CRect *pRect)
+		{
+			if ( !pRect )
+			{
+				if (!pView->GetViewSize(rcClient))
+				{
+					rcClient.top = 0; rcClient.left = 0;
+					rcClient.right = 400; rcClient.bottom = 300;
+				}
+				rcFrame = rcClient;
+			}
+			else 
+			{
+				rcFrame.left = pRect->left;
+				rcFrame.top = pRect->top;
+				rcFrame.right = pRect->right;
+				rcFrame.bottom = pRect->bottom;
+				rcClient.top = 0; rcClient.left = 0;
+				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
+			}
+			//(non rezisable) SM_CXFIXEDFRAME is the height of the horizontal border, and SM_CYFIXEDFRAME is the width of the vertical border.
+			//This value is the same as SM_CXDLGFRAME/SM_CYDLGFRAME.
+			//(resizable) SM_CXSIZEFRAME is the width of the horizontal border, and SM_CYSIZEFRAME is the height of the vertical border.
+			//This value is the same as SM_CXFRAME/SM_CYFRAME.
+			//SM_CYMENU The height of a single-line menu bar, in pixels.
+			//SM_CYCAPTION The height of a caption area, in pixels.
+			rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
+				::GetSystemMetrics(SM_CYMENU) +
+				2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
+			rcFrame.right +=
+				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
+
+			if ( Global::psycleconf().macParam().toolbarOnMachineParams && !(toolBar.GetBarStyle() & CBRS_FLOATING))
+			{
+				//SM_CYBORDER The height of a window border, in pixels. This is equivalent to the SM_CYEDGE value for windows with the 3-D look.
+				CRect tbRect;
+				toolBar.GetWindowRect(&tbRect);
+				int heiTool = tbRect.bottom - tbRect.top - (2 * ::GetSystemMetrics(SM_CYBORDER) );
+				rcClient.top+=heiTool;
+				rcFrame.bottom += heiTool;
+			}
+
+		}
+		void CFrameMachine::ResizeWindow(CRect *pRect)
+		{
+			CRect rcEffFrame,rcEffClient,rcTemp,tbRect;
+			GetWindowSize(rcEffFrame, rcEffClient, pRect);
+			SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
+			pView->SetWindowPos(NULL,rcEffClient.left, rcEffClient.top, rcEffClient.right,rcEffClient.bottom,SWP_NOZORDER);
+			pView->WindowIdle();
+		}
+
+
+		//////////////////////////////////////////////////////////////////////////
+
+		void CFrameMachine::LocatePresets()
+		{
+			int dataSizeStruct = 0;
+			if( machine()._type == MACH_PLUGIN)
+			{
+				dataSizeStruct = ((Plugin *)_machine)->proxy().GetDataSize();
+			}
+			CString buffer;
+			buffer = machine().GetDllName();
+			buffer = buffer.Left(buffer.GetLength()-4);
+			buffer += ".prs";
+			boost::filesystem::path inpath(buffer);
+			if(boost::filesystem::exists(inpath))
+			{
+				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,internalPresets,false);
+			}
+
+			buffer = Global::psycleconf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
+			boost::filesystem::path inpath2(buffer);
+			if(boost::filesystem::exists(inpath2))
+			{
+				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,userPresets,false);
+			}
+
+			userSelected=0;
+			if(internalPresets.size() > 0) {
+				isInternal = true; isUser = false;
+			}
+			else if(userPresets.size() > 0) {
+				isInternal = false; isUser = true;
+			}
+			else {
+				isInternal = isUser = false;
+			}
+		}
+
+		void CFrameMachine::FillBankPopup(CMenu* pPopupMenu)
+		{
+			CMenu* popBnk=0;
+			popBnk = pPopupMenu->GetSubMenu(3);
+			if (!popBnk)
+				return;
+
+			DeleteBankMenu(popBnk);
+			int i = 0;
+			for (i = 0; i < machine().GetNumBanks() && i < 980 ; i += 16)
+			{
+				CMenu popup;
+				popup.CreatePopupMenu();
+				for (int j = i; (j < i + 16) && (j < machine().GetNumBanks()); j++)
+				{
+					char s1[38];
+					char s2[32];
+					_machine->GetIndexBankName(j, s2);
+					std::sprintf(s1,"%d: %s",j,s2);
+					popup.AppendMenu(MF_STRING, ID_SELECTBANK_0 + j, s1);
+				}
+				char szSub[256] = "";;
+				std::sprintf(szSub,"Programs %d-%d",i,i+15);
+				popBnk->AppendMenu(MF_POPUP | MF_STRING,
+					(UINT)popup.Detach(),
+					szSub);
+			}
+
+			if(internalPresets.size() > 0|| 
+				( userPresets.size() == 0 && i == 0)) {
+				popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, "Provided Presets");
+				i++;
+			}
+			if(userPresets.size() > 0)
+			{
+				popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, "User Presets");
+				i++;
+			}
+			int selected;
+			if(isInternal || 
+				(internalPresets.size() == 0 && isUser)) {
+				selected = machine().GetNumBanks();
+			}
+			else if (isUser) {
+				selected = machine().GetNumBanks()+1;
+			}
+			else {
+				selected = machine().GetCurrentBank();
+			}
+			popBnk->CheckMenuItem(ID_SELECTBANK_0 + selected, MF_CHECKED | MF_BYCOMMAND);
+		}
+
+		bool CFrameMachine::DeleteBankMenu(CMenu* popBnk)
+		{
+			CMenu* secMenu=0;
+			while (popBnk->GetMenuItemCount() > 0)
+			{
+				if ((secMenu=popBnk->GetSubMenu(0)))
+				{
+					while (secMenu->GetMenuItemCount() > 0) 
+					{
+						secMenu->DeleteMenu(0,MF_BYPOSITION);
+					}
+				}
+				popBnk->DeleteMenu(0,MF_BYPOSITION);
+			}
+			return true;
+		}
+		void CFrameMachine::FillProgramPopup(CMenu* pPopupMenu)
+		{
+			CMenu* popPrg=0;
+			popPrg = pPopupMenu->GetSubMenu(4);
+			if (!popPrg)
+				return;
+
+			DeleteProgramMenu(popPrg);
+			if(isInternal) 
+			{
+				FillPopupFromPresets(popPrg, internalPresets);
+			}
+			else if(isUser)
+			{
+				FillPopupFromPresets(popPrg, userPresets);
+			}
+			else if (machine().GetTotalPrograms() > 0)
+			{
+				for (int i = 0; i < machine().GetNumPrograms() && i < 980 ; i += 16)
+				{
+					CMenu popup;
+					popup.CreatePopupMenu();
+					for (int j = i; (j < i + 16) && (j < machine().GetNumPrograms()); j++)
+					{
+						char s1[38];
+						char s2[32];
+						_machine->GetIndexProgramName(machine().GetCurrentBank(), j, s2);
+						std::sprintf(s1,"%d: %s",j,s2);
+						popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, s1);
+					}
+					char szSub[256] = "";;
+					std::sprintf(szSub,"Programs %d-%d",i,i+15);
+					popPrg->AppendMenu(MF_POPUP | MF_STRING,
+						(UINT)popup.Detach(),
+						szSub);
+				}
+			}
+			int selected;
+			if(isInternal) {
+				selected = userSelected;
+			}
+			else if (isUser) {
+				selected = userSelected;
+			}
+			else {
+				selected = machine().GetCurrentProgram();
+			}
+			popPrg->CheckMenuItem(ID_SELECTPROGRAM_0 + selected, MF_CHECKED | MF_BYCOMMAND);
+		}
+
+		void CFrameMachine::FillPopupFromPresets(CMenu* popPrg, std::list<CPreset> const & presets )
+		{
+			for (int i = 0; i <presets.size() && i < 980 ; i += 16)
+			{
+				CMenu popup;
+				popup.CreatePopupMenu();
+				std::list<CPreset>::const_iterator preset = presets.begin();
+				for(int j = i; (j < i + 16) && (preset != presets.end()); j++, preset++)
+				{
+					char s1[38];
+					char s2[32];
+					preset->GetName(s2);
+					std::sprintf(s1,"%d: %s",j,s2);
+					popup.AppendMenu(MF_STRING, ID_SELECTPROGRAM_0 + j, s1);
+				}
+				char szSub[256] = "";;
+				std::sprintf(szSub,"Programs %d-%d",i,i+15);
+				popPrg->AppendMenu(MF_POPUP | MF_STRING,
+					(UINT)popup.Detach(),
+					szSub);
+			}
+		}
+
+		bool CFrameMachine::DeleteProgramMenu(CMenu* popPrg)
+		{
+			CMenu* secMenu=0;
+			while (popPrg->GetMenuItemCount() > 0)
+			{
+				if ((secMenu=popPrg->GetSubMenu(0)))
+				{
+					while (secMenu->GetMenuItemCount() > 0)
+					{
+						secMenu->DeleteMenu(0,MF_BYPOSITION);
+					}
+				}
+				popPrg->DeleteMenu(0,MF_BYPOSITION);
+			}
+			return true;
+		}
+		void CFrameMachine::FillProgramCombobox()
+		{
+			comboProgram.ResetContent();
+			int nump = 0;
+			if(isInternal)  {
+				FillComboboxFromPresets(&comboProgram, internalPresets);
+				nump = internalPresets.size();
+			} else if (isUser) {
+				FillComboboxFromPresets(&comboProgram, userPresets);
+				nump = userPresets.size();
+			} else if (_machine->GetNumPrograms() > 0) {
+				nump =  _machine->GetNumPrograms();
+				for(int i(0) ; i < nump; ++i)
+				{
+					char s1[38];
+					char s2[32];
+					_machine->GetIndexProgramName(0, i, s2);
+					std::sprintf(s1,"%d: %s",i,s2);
+					comboProgram.AddString(s1);
+				}
+			}
+			int i=0;
+			if (isInternal) {
+				i = userSelected;
+			} else if(isUser){
+				i = userSelected;
+			}
+			else {
+				i = _machine->GetCurrentProgram();
+			}
+
+			if ( i > nump || i < 0) {  i = 0; }
+			comboProgram.SetCurSel(i);
+			if (pParamGui){
+				pParamGui->InitializePrograms();
+			}
+		}
+
+		void CFrameMachine::FillComboboxFromPresets(CComboBox* combo, std::list<CPreset> const & presets )
+		{
+			std::list<CPreset>::const_iterator preset = presets.begin();
+			for(int i = 0; preset != presets.end(); i++, preset++)
+			{
+				char s1[38];
+				char s2[32];
+				preset->GetName(s2);
+				std::sprintf(s1,"%d: %s",i,s2);
+				combo->AddString(s1);
+			}
+		}
+
+		void CFrameMachine::ChangeProgram(int numProgram)
+		{
+			if(isInternal){
+				userSelected=numProgram;
+				std::list<CPreset>::iterator preset = internalPresets.begin();
+				for(int i=0; preset != internalPresets.end(); i++, preset++)
+				{
+					if(i == userSelected) {
+						_machine->Tweak(*preset);
+						break;
+					}
+				}
+			}
+			else if (isUser) {
+				userSelected=numProgram;
+				std::list<CPreset>::iterator preset = userPresets.begin();
+				for(int i=0; preset != userPresets.end(); i++, preset++)
+				{
+					if(i == userSelected) {
+						_machine->Tweak(*preset);
+						break;
+					}
+				}
+			}
+			else {
+				_machine->SetCurrentProgram(numProgram);
+			}
+			comboProgram.SetCurSel(numProgram);
+			if (pParamGui){
+				pParamGui->SelectProgram(numProgram);
+			}
+		}
+		void CFrameMachine::Automate(int param, int value, bool undo)
+		{
+			Global::inputHandler().Automate(machine()._macIndex, param, value, undo);
+			if(pParamGui)
+				pParamGui->UpdateNew(param, value);
 		}
 
 	}   // namespace

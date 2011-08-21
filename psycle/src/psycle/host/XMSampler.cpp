@@ -1,5 +1,5 @@
-#include "configuration_options.hpp"
-#if !PSYCLE__CONFIGURATION__USE_PSYCORE
+
+#include <psycle/host/detail/project.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
@@ -8,19 +8,16 @@
 #include "Configuration.hpp"
 #include "Global.hpp"
 #include <universalis/stdlib/cstdint.hpp>
-#include <psycle/helpers/math.hpp>
+
 #include <algorithm>
-namespace psycle { namespace host {
-
-using namespace helpers::math;
-
-/*		__declspec(align(32)) static float xdspFloatBuffer[20960];
-		static CXPreparedResamplerFilter *pFilter = NULL;
-		static CXResampler *pResampler = NULL;
-*/
-
+namespace psycle
+{
+	namespace host
+	{
 		TCHAR* XMSampler::_psName = _T("Sampulse");
 		const float XMSampler::SURROUND_THRESHOLD = 2.0f;
+		XMInstrument XMSampler::m_Instruments[MAX_INSTRUMENT+1];
+		XMInstrument::WaveData XMSampler::m_rWaveLayer[MAX_INSTRUMENT+1];
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -104,7 +101,7 @@ using namespace helpers::math;
 		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
 		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
 		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
-// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
+		// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
 		// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 		// The original table takes the lower octave values and multiplies them by two. 
 		// This doesn't take care of the roundings of the values.
@@ -122,9 +119,8 @@ using namespace helpers::math;
 			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		57 
 
 		};
-#if 0
 		// Original table
-const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
+/*		const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			54784,	51712,	48768,	46080,	43392,	40960,	38656,	36480,	34432,	32512,	30720,	29008,
 			27392,	25856,	24384,	23040,	21696,	20480,	19328,	18240,	17216,	16256,	15360,	14504,
 			13696,	12928,	12192,	11520,	10848,	10240,	9664,	9120,	8608,	8128,	7680,	7252,
@@ -136,7 +132,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			214,	202,	190,	180,	170,	160,	151,	143,	135,	127,	120,	113,
 			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		56 
 		};
-#endif
+*/
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
@@ -144,7 +140,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		{
 			m_Layer = layer;
 			m_pWave = wave;
-	m_Position=0;
+			m_Position.QuadPart=0;
 			m_Speed=0;
 			m_Playing=false;
 
@@ -178,60 +174,6 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			}
 		}
 
-/*
-		// Code  for the KaiserSinc Resampler from the XDSP library. It doesn't really work, and it is too slow
-		void XMSampler::XDSPWaveController::Init(XMInstrument::WaveData* wave, const int layer)
-		{
-			WaveDataController::Init(wave,layer);
-			pResampler=NULL;
-			pFilter=NULL;
-		}
-
-		void XMSampler::XDSPWaveController::Speed(const double value){
-			WaveDataController::Speed(value); m_Speed1x=value*Global::pPlayer->SampleRate(); RecreateResampler();
-		}
-
-		void __fastcall ResamplerCB(float *pout, dword const n, void *context)
-		{
-			XMSampler::XDSPWaveController* wc = (XMSampler::XDSPWaveController*)context;
-			unsigned long i=0,j=0;;
-
-			while (i<n && wc->Position() < wc->Length()-1)
-			{
-				pout[j++]=float(*(wc->pLeft()+wc->Position()));
-				if ( wc->IsStereo()) pout[j++]=float(*(wc->pRight()+wc->Position()));
-				wc->Position(wc->Position()+1);
-				i++;
-			}
-			if (wc->Position() == wc->Length()-1 ) 
-			{
-				while ( i<n) pout[i++]=0;
-				wc->Playing(false);
-			}
-			context = wc;
-		}
-		void XMSampler::XDSPWaveController::Workxdsp(int numSamples)
-		{
-			xdsp.ResamplerRun(pResampler,xdspFloatBuffer,numSamples);
-		}
-		void XMSampler::XDSPWaveController::RecreateResampler(void)
-		{
-			delete pResampler;
-			delete pFilter;
-
-			CXResamplerFilter *prf = xdsp.CreateKaiserSincFilter(m_Speed1x,Global::pPlayer->SampleRate(), 32, 0.5f, 1.0f);
-
-			pFilter = xdsp.PrepareResamplerFilter(prf, m_pWave->IsWaveStereo()?2:1);
-			delete prf;	// original filter is no longer needed
-
-			pResampler = xdsp.ResamplerCreate(pFilter, ResamplerCB, this, 10480);
-		}
-		XMSampler::XDSPWaveController::~XDSPWaveController()
-		{
-			zapObject(pResampler);
-			zapObject(pFilter);
-		}
-*/
 //////////////////////////////////////////////////////////////////////////
 //      XMSampler::EnvelopeController Implementation
 		void XMSampler::EnvelopeController::Init(XMInstrument::Envelope *pEnvelope)
@@ -313,7 +255,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		{
 //			if ( m_Mode == EnvelopeMode::TICK )
 //			{
-			m_sRateDeviation = (Global::pPlayer->SampleRate() *60) / (24 * Global::pPlayer->bpm());
+			m_sRateDeviation = (Global::pPlayer->SampleRate() *60) / (24 * Global::pPlayer->bpm);
 //			} else if ( m_Mode == EnvelopeMode::MILIS ) {
 //				m_sRateDeviation = (Global::pPlayer->SampleRate() / 1000.0f;
 //			}
@@ -441,7 +383,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			m_ChannelNum = channelNum;
 			pChannel(&pSampler()->rChannel(channelNum));
 			InstrumentNum(instrumentNum);
-			XMInstrument & _inst = Global::song().rInstrument(instrumentNum);
+			XMInstrument & _inst = pSampler()->rInstrument(instrumentNum);
 			m_pInstrument = &_inst;
 
 			// Envelopes
@@ -455,14 +397,11 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			m_Filter.SampleRate(Global::pPlayer->SampleRate());
 
 			//\todo: add the missing  Random options
-			#if 0
-			if (_inst.RandomCutoff())
-					{
-						CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
-					}
-			else
-			#endif
-			if (_inst.FilterCutoff() < 127)
+/*			if (_inst.RandomCutoff())
+			{
+				CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
+			}
+			else*/ if (_inst.FilterCutoff() < 127)
 			{
 				CutOff(_inst.FilterCutoff());
 //				Ressonance(_inst.FilterResonance());
@@ -478,14 +417,12 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 				CutOff(127);
 			}
 
-			#if 0
-			if (_inst.RandomResonance())
-					{
-						m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
-					}
-			else
-			#endif
-			if (_inst.FilterResonance() > 0)
+			
+/*			if (_inst.RandomResonance())
+			{
+				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
+			}
+			else */ if (_inst.FilterResonance() > 0)
 			{
 //				CutOff(_inst.FilterCutoff());
 				Ressonance(_inst.FilterResonance());
@@ -506,30 +443,24 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			
 		}// XMSampler::Voice::VoiceInit) 
 
-		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, helpers::dsp::Cubic& _resampler)
+		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, dsp::resampler& resampler)
 		{
-			helpers::dsp::PRESAMPLERFN pResamplerWork;
-			pResamplerWork = _resampler._pWorkFn;
+			dsp::resampler::work_func_type resampler_work = resampler.work;
 
 			float left_output = 0.0f;
 			float right_output = 0.0f;
 
-			if (Global::song().IsInvalided())
+			if (!m_pSampler->m_Instruments[this->InstrumentNum()].IsEnabled())
 			{
 				IsPlaying(false);
 				return;
 			}
-//			m_WaveDataController.Workxdsp(numSamples);
-//			int tmpcount=0;
 			while (numSamples)
 			{
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.
 
-				m_WaveDataController.Work(&left_output,&right_output,pResamplerWork);
-/*				left_output=xdspFloatBuffer[tmpcount++];
-				if ( m_WaveDataController.IsStereo()) right_output=xdspFloatBuffer[tmpcount++];
-*/				
+				m_WaveDataController.Work(&left_output,&right_output,resampler_work);
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 2 : Process the Envelopes.
@@ -580,7 +511,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 				// PanningMode::Linear is already on rvol, so we omit the case.
 				if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
-					rvol = min(1.0f, rvol*2.0f);
+					rvol = std::min(1.0f, rvol*2.0f);
 				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
 					//rvol = powf(rvol, 0.5f);// This is the commonly used one
 					rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
@@ -665,7 +596,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
 		{
 			int wavelayer = rInstrument().NoteToSample(note).second;
-			XMInstrument::WaveData& wave = Global::song().SampleData(wavelayer);
+			XMInstrument::WaveData& wave = pSampler()->SampleData(wavelayer);
 			if ( wave.WaveLength() == 0 ) return;
 
 			m_WaveDataController.Init(&wave,wavelayer);
@@ -1165,14 +1096,13 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 		void XMSampler::Channel::EffectInit()
 		{
-	#if 0
-		m_VibratoPos = 0;
+/*			m_VibratoPos = 0;
 			m_TremoloPos = 0;
 			m_TremoloDepth = 0;
 			m_VibratoAmount = 0;
 			m_AutoVibratoAmount = 0;
 			m_PanbrelloPos = 0;
-	#endif
+*/
 		}
 		void XMSampler::Channel::Restore()
 		{
@@ -1378,7 +1308,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					else if ( (volcmd&0x0F) == 1)  slidval=1;
 					else if ( (volcmd&0x0F) < 9) slidval=powf(2.0f,volcmd&0x0F);
 					else slidval=255;
-					PitchSlide(voice->Period()>voice->NoteToPeriod(note()),slidval,note());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),slidval,Note());
 					break;
 				case CMD_VOL::VOL_PITCH_SLIDE_DOWN:
 					// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
@@ -1468,14 +1398,14 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					PitchSlide(false,parameter);
 					break;
 				case CMD::PORTA2NOTE:
-					PitchSlide(voice->Period()>voice->NoteToPeriod(note()),parameter,note());
+					PitchSlide(voice->Period()>voice->NoteToPeriod(Note()),parameter,Note());
 					break;
 				case CMD::VOLUMESLIDE:
 					VolumeSlide(parameter);
 					break;
 				case CMD::TONEPORTAVOL:
 					VolumeSlide(parameter);
-					PitchSlide(voice->PeriodToNote(voice->Period())<note(),0,note());
+					PitchSlide(voice->PeriodToNote(voice->Period())<Note(),0,Note());
 					break;
 				case CMD::VIBRATOVOL:
 					VolumeSlide(parameter);
@@ -1510,22 +1440,22 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 				switch(parameter&0x0F)
 				{
 				case CMD_EE::EE_VOLENVOFF:
-					Global::song().rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
+					m_pSampler->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_VOLENVON:
-					Global::song().rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
+					m_pSampler->rInstrument(InstrumentNo()).AmpEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PANENVOFF:
-					Global::song().rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
+					m_pSampler->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PANENVON:
-					Global::song().rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
+					m_pSampler->rInstrument(InstrumentNo()).PanEnvelope()->IsEnabled(true);
 					break;
 				case CMD_EE::EE_PITCHENVON:
-					Global::song().rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
+					m_pSampler->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(false);
 					break;
 				case CMD_EE::EE_PITCHENVOFF:
-					Global::song().rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
+					m_pSampler->rInstrument(InstrumentNo()).PitchEnvelope()->IsEnabled(true);
 					break;
 				}
 			}
@@ -1885,8 +1815,8 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			else param = m_ArpeggioMem;
 			if ( ForegroundVoice())
 			{
-				m_ArpeggioPeriod[0] = ForegroundVoice()->NoteToPeriod(note() + ((param & 0xf0) >> 4));
-				m_ArpeggioPeriod[1] = ForegroundVoice()->NoteToPeriod(note() + (param & 0xf));
+				m_ArpeggioPeriod[0] = ForegroundVoice()->NoteToPeriod(Note() + ((param & 0xf0) >> 4));
+				m_ArpeggioPeriod[1] = ForegroundVoice()->NoteToPeriod(Note() + (param & 0xf));
 			}
 			m_EffectFlags |= EffectFlag::ARPEGGIO;
 		}
@@ -1944,7 +1874,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			}
 			m_EffectFlags |= EffectFlag::NOTECUT;
 		}
-		void XMSampler::Channel::DelayedNote(PatternEvent data)
+		void XMSampler::Channel::DelayedNote(PatternEntry data)
 		{
 			m_NoteCutTick=data._parameter&0x0f;
 			data._cmd=XMSampler::CMD::NONE;
@@ -2036,7 +1966,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			_mode = MACHMODE_GENERATOR;
 
 			_numVoices=0;
-			_resampler.SetQuality(helpers::dsp::R_LINEAR);
+			_resampler.quality(helpers::dsp::resampler::quality::linear);
 
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
@@ -2097,12 +2027,11 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 		void XMSampler::Tick()
 		{
-			scoped_lock lock(*this);
 			SampleCounter(0);
 			m_TickCount=0;
 
 			m_DeltaTick = Global::pPlayer->SampleRate() * 60
-				/ (Global::pPlayer->bpm() * 24/*ticksPerBeat*/);
+				/ (Global::pPlayer->bpm * 24/*ticksPerBeat*/);
 
 			NextSampleTick(m_DeltaTick+1);// +1 is to avoid one Tick too much at the end, because m_DeltaTick is rounded down.
 
@@ -2118,39 +2047,27 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		}
 
 
-		void XMSampler::Tick(int channelNum,PatternEvent* pData)
+		void XMSampler::Tick(int channelNum,PatternEntry* pData)
 		{
-			scoped_lock lock(*this);
-
-			if (Global::song().IsInvalided()) { return; }
-
-			// don't process twk , twf, Mcm Commands, or empty lines.
-			if ( pData->note() > notecommands::release )
+			 // don't process twk , twf of Mcm Commands, or empty commands
+			if ( pData->_note > notecommands::release && (pData->_note < notecommands::empty || pData->_cmd == 0) )
 			{
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				if ((pData->command() == 0 && pData->_volume == 255 && pData->instrument() == 255) || pData->note() != notecommands::empty )return; // Return in everything but commands!
-	#else
-				if ((pData->command() == 0 && pData->instrument() == 255 ) || pData->note() != notecommands::empty )return; // Return in everything but commands!
-	#endif
-#endif
+				return;
 			}
 
 			// define some variables to ease the case checking.
-			bool bInstrumentSet = (pData->instrument() < 255);
+			bool bInstrumentSet = (pData->_inst < 255);
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			bool bPortaEffect = ((pData->command() == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
+			bool bPortaEffect = ((pData->_cmd == CMD::PORTA2NOTE) || ((pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO));
 	#else
-			bool bPortaEffect = (pData->command() == CMD::PORTA2NOTE);
+			bool bPortaEffect = (pData->_cmd == CMD::PORTA2NOTE);
 	#endif
 #endif
-			bool bPorta2Note = (pData->note() <= notecommands::b9) && bPortaEffect;
-			bool bNoteOn = (pData->note() <= notecommands::b9) && !bPorta2Note;
+			bool bPorta2Note = (pData->_note <= notecommands::b9) && bPortaEffect;
+			bool bNoteOn = (pData->_note <= notecommands::b9) && !bPorta2Note;
 
 
 			Voice* currentVoice = NULL;
@@ -2158,11 +2075,11 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
 			if(bInstrumentSet)
 			{
-				if ( pData->instrument() != thisChannel.InstrumentNo() && thisChannel.note() !=0)
+				if ( pData->_inst != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
 				{
 					bNoteOn=true;
 				}
-				thisChannel.InstrumentNo(pData->instrument()); // Instrument is always set, even if no new note comes.
+				thisChannel.InstrumentNo(pData->_inst); // Instrument is always set, even if no new note comes.
 			}
 
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
@@ -2175,20 +2092,20 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					switch (currentVoice->rInstrument().DCT())
 					{
 					case XMInstrument::DCType::DCT_INSTRUMENT:
-						if ( pData->instrument() == thisChannel.InstrumentNo())
+						if ( pData->_inst == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
 					case XMInstrument::DCType::DCT_SAMPLE:
 						//\todo: Implement DCType Sample.
-						if ( pData->instrument() == thisChannel.InstrumentNo())
+						if ( pData->_inst == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
 						break;
 					case XMInstrument::DCType::DCT_NOTE:
-						if ( pData->note() == thisChannel.note() && pData->instrument() == thisChannel.InstrumentNo())
+						if ( pData->_note == thisChannel.Note() && pData->_inst == thisChannel.InstrumentNo())
 						{
 							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 						}
@@ -2212,7 +2129,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 						currentVoice->IsBackground(true);
 						break;
 					}
-				} else if(pData->note() == notecommands::release ){
+				} else if(pData->_note == notecommands::release ){
 					currentVoice->NoteOff();
 				}
 				else 
@@ -2225,7 +2142,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 					{
 						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
 						//		  and the position reset to 0.
-						thisChannel.Note(pData->note());
+						thisChannel.Note(pData->_note);
 					}
 				}
 			}
@@ -2238,13 +2155,13 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			// STEP B: Get a Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
-				if (( pData->command() == CMD::EXTENDED) && ((pData->parameter() & 0xf0) == CMD_E::E_NOTE_DELAY))
+				if (( pData->_cmd == CMD::EXTENDED) && ((pData->_parameter & 0xf0) == CMD_E::E_NOTE_DELAY))
 				{
 					thisChannel.DelayedNote(*pData);
 				}
 				else
 				{
-					if ( pData->note() != notecommands::empty ) thisChannel.Note(pData->note()); // If instrument set and no note, we don't want to reset the note.
+					if ( pData->_note != notecommands::empty ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
 					newVoice = GetFreeVoice();
 					if ( newVoice )
 					{
@@ -2254,9 +2171,9 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 							return;
 						}
 
-						XMInstrument & _inst = Global::song().rInstrument(thisChannel.InstrumentNo());
-						int _layer = _inst.NoteToSample(pData->note()).second;
-						int twlength = Global::song().SampleData(_layer).WaveLength();
+						XMInstrument & _inst = m_Instruments[thisChannel.InstrumentNo()];
+						int _layer = _inst.NoteToSample(pData->_note).second;
+						int twlength = m_rWaveLayer[_layer].WaveLength();
 						if(twlength > 0)
 						{
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
@@ -2288,19 +2205,19 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.note(),pData->_volume<<1,bInstrumentSet);
-							else newVoice->NoteOn(thisChannel.note(),-1,bInstrumentSet);
+							if ( pData->_volume<0x40) newVoice->NoteOn(thisChannel.Note(),pData->_volume<<1,bInstrumentSet);
+							else newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#else
-							newVoice->NoteOn(thisChannel.note(),-1,bInstrumentSet);
+							newVoice->NoteOn(thisChannel.Note(),-1,bInstrumentSet);
 	#endif
 #endif
-							thisChannel.Note(thisChannel.note()); //this forces a recalc of the m_Period.
+							thisChannel.Note(thisChannel.Note()); //this forces a recalc of the m_Period.
 
 							// Add Here any command that is limited to the scope of the new note.
 							// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
-							if ((pData->command()&0xF0) == CMD::OFFSET)
+							if ((pData->_cmd&0xF0) == CMD::OFFSET)
 							{
-								int offset = ((pData->command()&0x0F) << 16) +pData->parameter()<<8;
+								int offset = ((pData->_cmd&0x0F) << 16) +pData->_parameter<<8;
 								if ( offset != 0 )
 								{
 									thisChannel.OffsetMem(offset);
@@ -2317,14 +2234,14 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 						{
 							bNoteOn=false;
 							newVoice = NULL;
-							if ( pData->command() == 0 ) return;
+							if ( pData->_cmd == 0 ) return;
 						}
 					}
 					else
 					{
 						// This is a noteon command, but we are out of voices. We will try to process the effect.
 						bNoteOn=false;
-						if ( pData->command() == 0 ) return;
+						if ( pData->_cmd == 0 ) return;
 					}
 				}
 				}
@@ -2334,24 +2251,21 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			thisChannel.SetEffect(newVoice,pData->_volume,pData->command(),pData->parameter());
+			thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
 	#else
-			thisChannel.SetEffect(newVoice,255,pData->command(),pData->parameter());
+			thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);
 	#endif
 #endif
 		}
 
-		void XMSampler::Work(int numSamples)
+		int XMSampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 		{
-			scoped_lock lock(*this);
-
-			cpu::cycles_type cost = cpu::cycles();
 			int i;
 
 			if (!_mute)
 			{
 				Standby(false);
-				int _songtracks = Global::song().tracks();
+				int _songtracks = Global::_pSong->SongTracks();
 				int ns = numSamples;
 				int nextevent;
 
@@ -2451,7 +2365,7 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 							{
 								if (TriggerDelayCounter[i] == nextevent)
 								{
-									PatternEvent entry =TriggerDelay[i];
+									PatternEntry entry =TriggerDelay[i];
 									switch(ArpeggioCount[i])
 									{
 									case 0: 
@@ -2459,17 +2373,17 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 										ArpeggioCount[i]++;
 										break;
 									case 1:
-										entry._note+=((TriggerDelay[i].parameter()&0xF0)>>4);
+										entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
 										Tick(i,&entry);
 										ArpeggioCount[i]++;
 										break;
 									case 2:
-										entry._note+=(TriggerDelay[i].parameter()&0x0F);
+										entry._note+=(TriggerDelay[i]._parameter&0x0F);
 										Tick(i,&entry);
 										ArpeggioCount[i]=0;
 										break;
 									}
-									TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb()/24;
+									TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
 								}
 								else
 								{
@@ -2484,8 +2398,8 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			}
 
 			else Standby(true);
-			_cpuCost += cpu::cycles() - cost;
-			_worked = true;
+			recursive_processed_ = true;
+			return numSamples;
 		}// XMSampler::Work()
 
 		void XMSampler::WorkVoices(int numsamples)
@@ -2566,20 +2480,20 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			int tmp = 24 / ((TicksPerRow() == 0)?6:TicksPerRow());
 			if (tmp*TicksPerRow() == 24)
 			{
-				Global::song().LinesPerBeat(tmp);
-				Global::song().BeatsPerMin(BPM());
+				Global::_pSong->LinesPerBeat(tmp);
+				Global::_pSong->BeatsPerMin(BPM());
 			}
 			else
 			{
-				Global::song().LinesPerBeat(4);
-				Global::song().BeatsPerMin(6 * BPM() / TicksPerRow() );
+				Global::_pSong->LinesPerBeat(4);
+				Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow() );
 			}
 
-			int t= Global::pConfig->_pOutputDriver->_samplesPerSec * 60;
-			int v=Global::song().BeatsPerMin();
-			int z=Global::song().LinesPerBeat();
+			int t= Global::player().SampleRate() * 60;
+			int v=Global::_pSong->BeatsPerMin();
+			int z=Global::_pSong->LinesPerBeat();
 			Global::pPlayer->SamplesPerRow(	t / (v * z) );
-			m_DeltaTick = t / (Global::song().BeatsPerMin() * 24);
+			m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
 		}
 */
 		bool XMSampler::Load(RiffFile* riffFile)
@@ -2596,17 +2510,17 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			int temp;
 			// we cannot calculate the size previous to save, so we write a placeholder
 			// and seek back to write the correct value.
-			unsigned int size = 0;
-			unsigned int filepos = riffFile->GetPos();
+			unsigned long size = 0;
+			size_t filepos = riffFile->GetPos();
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices); // numSubtracks
-			switch (_resampler.GetQuality())
+			switch (_resampler.quality())
 			{
-				case helpers::dsp::R_NONE: temp = 0; break;
-				case helpers::dsp::R_SPLINE: temp = 2; break;
-				case helpers::dsp::R_BANDLIM: temp = 3; break;
-				case helpers::dsp::R_LINEAR:
+				case helpers::dsp::resampler::quality::none: temp = 0; break;
+				case helpers::dsp::resampler::quality::spline: temp = 2; break;
+				case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
+				case helpers::dsp::resampler::quality::linear: //fallthrough
 				default: temp = 1;
 			}
 			riffFile->Write(temp); // quality
@@ -2657,9 +2571,9 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 				}
 			#endif
 			
-			unsigned int endpos = riffFile->GetPos();
+			size_t endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
-			size = endpos - filepos -sizeof(size);
+			size = (unsigned long) (endpos - filepos -sizeof(size));
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Seek(endpos);
 
@@ -2669,27 +2583,27 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		{
 			int temp;
 			bool wrongState=false;
-			std::uint32_t filevers = 0;
-			unsigned long filepos;
-			int size=0;
+			std::uint32_t filevers;
+			size_t filepos;
+			long size=0;
 			riffFile->Read(&size,sizeof(size));
 			filepos=riffFile->GetPos();
 			riffFile->Read(filevers);
 			
 			// Check higher bits of version (AAAABBBB). 
 			// different A, incompatible, different B, compatible
-			if ( (filevers&0xFFFF0000) == VERSION_ONE )
+ 			if ( (filevers&0x11110000) == (VERSION&0x11110000) )
 			{
 				riffFile->Read(_numVoices); // numSubtracks
 				riffFile->Read(temp); // quality
 
 				switch (temp)
 				{
-					case 2:	_resampler.SetQuality(helpers::dsp::R_SPLINE); break;
-					case 3:	_resampler.SetQuality(helpers::dsp::R_BANDLIM); break;
-					case 0:	_resampler.SetQuality(helpers::dsp::R_NONE); break;
+					case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+					case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+					case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
 					case 1:
-					default: _resampler.SetQuality(helpers::dsp::R_LINEAR);
+					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
 
 				for (int i=0; i < 128; i++) riffFile->Read(&zxxMap[i],sizeof(ZxxMacro));
@@ -2701,7 +2615,6 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 
 				for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
 			#if 0
-			//This has been moved to the PSY3 loader
 				// Instrument Data Load
 				int numInstruments;
 				riffFile->Read(numInstruments);
@@ -2736,5 +2649,3 @@ const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 		}
 	}
 }
-
-#endif //#if !PSYCLE__CONFIGURATION__USE_PSYCORE

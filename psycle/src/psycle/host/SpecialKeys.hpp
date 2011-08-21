@@ -3,25 +3,25 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include <afxwin.h>
 
 namespace psycle { namespace host {
 
 /// key config window.
-class CSpecialKeys : public CDialog {
-	public:
-		CSpecialKeys(CWnd* pParent = 0); // standard constructor
-		enum { IDD = IDD_SPECIALKEYS };
+class CSpecialKeys : public CDialog
+{
+public:
+	CSpecialKeys(CWnd* pParent = NULL);   // standard constructor
+	enum { IDD = IDD_SPECIALKEYS };
 
-	protected:
-		virtual void DoDataExchange(CDataExchange* pDX); // DDX/DDV support
-		virtual BOOL OnInitDialog();
-		DECLARE_MESSAGE_MAP()
+	int key;
+	int mod;
 
-	public:
-		afx_msg void OnBnClickedOk();
-		int key;
-		int mod;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnBnClickedOk();
 };
 
 }}
