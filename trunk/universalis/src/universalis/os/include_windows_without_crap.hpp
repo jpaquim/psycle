@@ -63,12 +63,21 @@
 			//#include <atlbase.h> // for MIDL_INTERFACE used by <gdiplus.h>
 			// gdi+ needs min and max in the root namespace :-(
 			#include <algorithm>
-			using std::min;
-			using std::max;
-			#include <gdiplus.h>
-			#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-				#pragma comment(lib, "gdiplus")
+			#define NOMINMAX
+			#ifndef max
+			#define max(a,b)            (((a) > (b)) ? (a) : (b))
 			#endif
+			 
+			#ifndef min
+			#define min(a,b)            (((a) < (b)) ? (a) : (b))
+			#endif
+						#include <gdiplus.h>
+						#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+							#pragma comment(lib, "gdiplus")
+						#endif
+						#include <afxcontrolbars.h>
+			#undef max
+			#undef min
 		#endif
 	#endif
 
