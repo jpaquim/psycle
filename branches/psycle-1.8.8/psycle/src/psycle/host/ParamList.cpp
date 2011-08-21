@@ -121,7 +121,7 @@ namespace psycle { namespace host {
 			{
 				char s1[38];
 				char s2[32];
-				machine.GetIndexProgramName(-1, i, s2);
+				machine.GetIndexProgramName(0, i, s2);
 				std::sprintf(s1,"%d: %s",i,s2);
 				m_program.AddString(s1);
 			}

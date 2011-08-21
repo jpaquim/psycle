@@ -51,6 +51,7 @@ namespace psycle
 		private:
 			std::string program_executable_dir_;
 			std::string plugin_dir_;
+			std::string plugin_dir_other;
 			std::string vst32_dir_;
 			std::string vst64_dir_;
 		};

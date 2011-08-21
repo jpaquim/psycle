@@ -123,6 +123,9 @@ namespace psycle { namespace host {
 				temp.Height()));
 #endif
 
+			toolBar.SetBarStyle(toolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
+			toolBar.SetWindowText("Params Toolbar");
+			toolBar.EnableDocking(CBRS_ALIGN_TOP);
 			CRect rect;
 			int nIndex = toolBar.GetToolBarCtrl().CommandToIndex(ID_COMBO_PRG);
 			toolBar.SetButtonInfo(nIndex, ID_COMBO_PRG, TBBS_SEPARATOR, 160);
@@ -142,9 +145,6 @@ namespace psycle { namespace host {
 
 			LocatePresets();
 			FillProgramCombobox();
-			toolBar.SetBarStyle(toolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER);
-			toolBar.SetWindowText("Params Toolbar");
-			toolBar.EnableDocking(CBRS_ALIGN_TOP);
 
 			EnableDocking(CBRS_ALIGN_ANY);
 			DockControlBar(&toolBar);
@@ -166,7 +166,6 @@ namespace psycle { namespace host {
 				return FALSE;
 			
 			cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
-			cs.lpszClass = AfxRegisterWndClass(0);
 			return TRUE;
 		}
 
@@ -825,7 +824,7 @@ namespace psycle { namespace host {
 				{
 					char s1[38];
 					char s2[32];
-					_machine->GetIndexProgramName(-1, i, s2);
+					_machine->GetIndexProgramName(0, i, s2);
 					std::sprintf(s1,"%d: %s",i,s2);
 					comboProgram.AddString(s1);
 				}
