@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-1.8.8   | 2011 | beta						 | [JAZ] & bohan.
+1.8.8   | 2011 | beta, RC					 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.6	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.5	| 2007 | RC, release                 | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
@@ -42,16 +42,18 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.8.8 beta4
+v1.8.8 RC1
 ------------
 + Pattern tracks can be named now. Find the new settings on the pattern properties dialog.
++ New Machine and pattern skin and default colours thanks to Angelus.
 * Reimplemented most of the Settings system (This includes many things, from making all them accessible from a central point in the code, an user option to save them to other places than the windows registry, real-time change of audio driver, centralized the code to import/export the visual and keyboard settings, and more)
 * Toolbar improvements (now they are all detachable, new graphics, some UI reordering, context menu on the sequence list). Also, separated the toolbar sourcecode into independent files.
 * Fonts use now default quality (which means allowing antialias if setting activated on Windows).
 * WireDlg, and machine parameter window can now be closed with ESC key (Only XMSampler window cannot be closed this way now).
 * Internal source code change: Implemented the sliders with OnHScroll/VScroll message handler (proper way of doing it) on XMSamplerMixerPage, WireDlg, Master Dialog, master slider on the toolbar and in Wave Recording machine dialog. Other improvements on the open/closing of those dialogs.
 * Changes on the Machine parameter windows, merged several sources. Now Native windows offer the same menu/toolbar features than VST ones.
-! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning )
+* There are two presets files now, one in the same directory as the plugin, and a new one on the presets dialogs. This second one is called "User presets" in the banks menu and is editable from the presets dialog.
+! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning, jbridge integration now works )
 
 v1.8.8 beta3
 ------------

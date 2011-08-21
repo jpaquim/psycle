@@ -37,8 +37,7 @@ A)	Dummy internal machine? It is mainly used to replace missing plugin machines 
 
 Q)	I have problems playing a song in Winamp!
 
-A)	The winamp plugin hasn't been updated for long, and it lacks several changes that have
-	been since then. We no longer recommend using it, until we release an up-to-date version.
+A)	The winamp plugin hasn't been updated yet to 1.8.8. The latest version is up to 1.8.6.
 	
 
 - Samples and the Sampler Machine -

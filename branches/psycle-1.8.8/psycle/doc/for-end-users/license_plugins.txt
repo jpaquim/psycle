@@ -4,7 +4,6 @@ included with the software.
 
 Closed source, freeware plugins
 ---------------------------
-Arguru Compressor (sources lost before making backup)
 Cyanphase Vibrasynth (a ported buzz machine)
 Ninereeds Fractal 7900s port (a ported buzz machine)
 sond plugins (s filter, s phaser, s reverb, s vld, sond synth)
@@ -25,7 +24,7 @@ negative.
 Open source, Public Domain
 --------------------------------
 Alk Muter
-Arguru plugins (CrossDelay, Distortion, Goaslicer, Reverb, Synth, Zephod SuperFM)
+Arguru plugins (Compressor, CrossDelay, Distortion, Goaslicer, Reverb, Synth, Zephod SuperFM)
 Jezar Freeverb (Yezar Freeverb)
 drum synth
 YMidi - Midi Out
