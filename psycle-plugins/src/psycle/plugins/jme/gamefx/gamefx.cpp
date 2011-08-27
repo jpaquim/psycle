@@ -537,7 +537,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 	{
 		if (value==0)sprintf(txt,"(keep)");
 		else if(value==1) sprintf(txt, "-inf dB");
-		else sprintf(txt, "%.02f dB", 20.0f * std::log10f((float) (value-1) / 256.0f));
+		else sprintf(txt, "%.02f dB", 20.0f * std::log10((float) (value-1) / 256.0f));
 		return true;
 	}
 
