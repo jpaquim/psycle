@@ -18,11 +18,16 @@
 */
 
 #pragma once
-#include "filter.h"
+#include "atlantisfilter.h"
 #include "aaf.h"
+
+#define WAVETABLES 8
+static float const FAST_RELEASE = 128.0f;
+static float const RC_VOL_CUTOFF=0.25f;
 
 struct PERFORMANCE
 {
+//Parameters
 	int Volume[16];
 	int Waveform[16];
 	int Transpose[16];
@@ -30,110 +35,146 @@ struct PERFORMANCE
 	int Command[16];
 	int Parameter[16];
 	int Speed[16];
+	// which of the 16 positions is the first when note starts
 	int StartPos;
+	// which of the 16 positions is the loop start point
 	int LoopStart;
+	// which of the 16 positions is the loop end point
 	int LoopEnd;
+	// Speed (in samples) at which the updates to OSCSpeed and perf_count happen
 	int ReplaySpeed;
+	// Amplitude envelope attack, decay sustain and release. ADR in samples, S in 0..256
 	int AEGAttack;
 	int AEGDecay;
 	int AEGSustain;
 	int AEGRelease;
+	// Filter cutoff in 0..255
 	int Cutoff;
+	// Filter ressonance in 1..240
 	int Resonance;
-	int EnvMod;
+	// Filter envelope attack, decay sustain and release. ADR in samples, S in 0..256
 	int FEGAttack;
 	int FEGDecay;
 	int FEGSustain;
 	int FEGRelease;
+	// Filter envelope amount 0..255
+	int EnvMod;
+	// Note finetune 1/256th of a note.
 	int Finetune;
-	signed short Wavetable[8][4096];
+//Wavetables and noise generator
+	signed short* Wavetable[WAVETABLES];
+	//Value of the noise sample in this round (short) (used directly as low noise osci).
 	signed short shortnoise;
-	long noise;
-	long reg;
-	long bit22;
-	long bit17;
-	int  noiseindex;
+	// Switch used to indicate if the noise wavetable needs updating by the main Work call.
 	bool noiseused;
 };
 
 class CSynthTrack  
 {
 public:
-	void InitEffect(int cmd,int val);
-	void PerformFx();
-	void DoGlide();
-	float Filter(float x);
-	void NoteOff();
-	float GetEnvAmp();
-	void GetEnvVcf();
-	float oscglide;
-	float GetSample();
-	void NoteOn(int note, PERFORMANCE *perf, int spd);
-	void RealNoteOn();
-	
 	CSynthTrack();
 	virtual ~CSynthTrack();
+
+	void InitEffect(int cmd,int val);
+	void PerformFx();
+	void NoteOff();
+	float GetSample();
+	void NoteOn(int note);
+	void setGlobalPar(PERFORMANCE*perf);
+	void setSampleRate(int currentSR_, int wavetableSize_, float wavetableCorrection_);
+	//Stage of the amplitude envelope (used to detect note active)
 	int AmpEnvStage;
-	
+private:
+	void Retrig();
+	void DoGlide();
+	float Filter(float x);
+	float GetEnvAmp();
+	void GetEnvVcf();
+	void RealNoteOn();
+
 	CSIDFilter filter;
 	AAF16 aaf1;
+	PERFORMANCE *vpar;
+	int sampleRate;
+	float srCorrection;
+	//in float since it is compared with OSCPosition
+	float waveTableSize;
+	float wavetableCorrection;
 
-private:
-	int fltMode;
+	// Note
 	int nextNote;
-	int nextSpd;
-	short timetocompute;
-	void Retrig();
-
-	float VcfResonance;
-	int sp_cmd;
-	int sp_val;
-
+	float nextvoicevol;
+	// base note (note received)
+	int cur_basenote;
+	// real note,after applying effects (note used to calculate OSCSpeed)
+	int cur_realnote;
+	// Index inside the waveforms.
 	float OSCPosition;
+	// (target) OSC speed (samples to advance inside wavetables)
 	float OSCSpeed;
+	// (running) OSC speed (samples to advance inside wavetables)
 	float ROSCSpeed;
-	float OOSCSpeed;
+	// Amount of glide, if any (amount of samples to increase ROSCSpeed with).
+	float oscglide;
 
 	// Envelope [Amplitude]
 	float AmpEnvValue;
 	float AmpEnvCoef;
 	float AmpEnvSustainLevel;
+	// Osc volume in 0..1 range (converted from PERFORMANCE.Volume)
 	float OSCVol;
+	// Volume for this voice  in 0..1 range(contains the 0Cxx command)
+	float voicevol;
 
-	// Envelope [Amplitude]
+	// Filter
+	int fltMode;
+	float VcfCutoff;
+	float VcfResonance;
+
+	// Envelope [Filter]
 	float VcfEnvValue;
 	float VcfEnvCoef;
 	float VcfEnvSustainLevel;
+	// Stage of the filter envelope
 	int VcfEnvStage;
+	// filter envelope amount in 0..1 range.
 	float VcfEnvMod;
-	float VcfCutoff;
-	
-	PERFORMANCE *vpar;
+
+	// Command
+	int sp_cmd;
+	int sp_val;
+
+	// counter (in samples) until next OSCSpeed and perf_count updates.
 	int replaycount;
-	int				perf_count;
+	// Counter (in samples) until jumping to next state (Note: total amount is perf_count * replaycount)
+	int perf_count;
+	// Index of which of the 16 states is playing
 	int perf_index;
 
-	float minFade;
-	float fastRelease;
-	int cur_basenote;
-	int cur_realnote;
-	int				cur_volume;
-	float voicevol;
-	float volmulti;
-	float nextvoicevol;
+	// (Innecessary?) Controls that RealNoteOn is not called multiple times
+	//(this would happen on retrig, if note has stopped or also in fastrelease)
 	bool trigger;
-	bool keyrelease;
-	bool stopsend;
-	int				cur_waveform;
-	int				cur_transpose;
+	// Controls if retrig option (if selected) should be executed
+	bool allowRetrig;
+	// Controls if the stop command (gate off) has been executed
+	bool stopsent;
+
+	// The index of the waveform table that is in use right now.
+	int	cur_waveform;
+	// The transpose value in use right now
+	int	cur_transpose;
+	// The option in use right now
+	int	cur_option;
+	// The command in use right now
+	int	cur_command;
+	// The paramter in use right now
+	int	cur_parameter;
+	// Pitch variation (Inc/dec pitch command)
 	float add_to_pitch;
-	int				cur_option;
-	int				cur_command;
-	int				cur_parameter;
-	int				cur_speed;
+	// The speed in use right now
+	int	cur_speed;
+	// The current pulse width in use right now
 	int cur_pw;
-	float speed;
-	float spdcoef;
+	// final volume, used for anticlick.
 	float rcVol;
-	float rcVolCutoff;
 };
