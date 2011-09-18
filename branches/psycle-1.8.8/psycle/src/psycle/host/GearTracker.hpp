@@ -19,6 +19,7 @@ namespace host {
 			CComboBox	m_interpol;
 			CSliderCtrl	m_polyslider;
 			CStatic	m_polylabel;
+			CButton m_defaultC4;
 			Sampler& machine;
 			CGearTracker** windowVar_;
 		// Overrides
@@ -34,6 +35,7 @@ namespace host {
 			afx_msg void OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnSelchangeCombo1();
+			afx_msg void OnDefaultC4();
 		};
 
 	}   // namespace

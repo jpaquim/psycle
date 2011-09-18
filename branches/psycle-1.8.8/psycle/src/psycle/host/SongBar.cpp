@@ -264,63 +264,56 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	{
 		if (Global::psycleconf().macView().draw_vus)
 		{
-			if(l<1)l=1;
-			if(r<1)r=1;
-			
 			CStatic *stclip=(CStatic *)GetDlgItem(IDC_FRAMECLIP);
 			CClientDC clcanvas(stclip);
+			CRect rect;
+			stclip->GetClientRect(&rect);
 			
-			if (clip) clcanvas.FillSolidRect(0,0,9,20,vu3);
-			else  clcanvas.FillSolidRect(0,0,9,20,vu2);
+			if (clip) clcanvas.FillSolidRect(rect,vu3);
+			else  clcanvas.FillSolidRect(rect,vu2);
 			
 			CStatic *lv=(CStatic *)GetDlgItem(IDC_LVUM);
 			CClientDC canvasl(lv);
-
-			int log_l=100*log10f(l);
-			int log_r=100*log10f(r);
-			log_l=log_l-225;
-			if ( log_l < 0 )log_l=0;
-			if ( log_l > 225 )log_l=225;
-			log_r=log_r-225;
-			if ( log_r < 0 )log_r=0;
-			if ( log_r > 225 )log_r=225;
-			
+			lv->GetClientRect(rect);
+			int half = rect.Height()/2;
+			int log_l=l*rect.Width()/100;
+			int log_r=r*rect.Width()/100;
 			if (log_l || vuprevL)
 			{
-				canvasl.FillSolidRect(0,0,log_l,4,vu1);
+				canvasl.FillSolidRect(0,0,log_l,half,vu1);
 				if (vuprevL > log_l )
 				{
-					canvasl.FillSolidRect(log_l,0,vuprevL-log_l,4,vu3);
-					canvasl.FillSolidRect(vuprevL,0,225-vuprevL,4,vu2);
+					canvasl.FillSolidRect(log_l,0,vuprevL-log_l,half,vu3);
+					canvasl.FillSolidRect(vuprevL,0,rect.Width()-vuprevL,half,vu2);
 					vuprevL-=2;
 				}
 				else 
 				{
-					canvasl.FillSolidRect(log_l,0,225-log_l,4,vu2);
+					canvasl.FillSolidRect(log_l,0,rect.Width()-log_l,half,vu2);
 					vuprevL = log_l;
 				}
 			}
 			else
-				canvasl.FillSolidRect(0,0,225,4,vu2);
+				canvasl.FillSolidRect(0,0,rect.Width(),half,vu2);
 
 			if (log_r || vuprevR)
 			{
-				canvasl.FillSolidRect(0,5,log_r,4,vu1);
+				canvasl.FillSolidRect(0,half+1,log_r,half,vu1);
 				
 				if (vuprevR > log_r )
 				{
-					canvasl.FillSolidRect(log_r,5,vuprevR-log_r,4,vu3);
-					canvasl.FillSolidRect(vuprevR,5,225-vuprevR,4,vu2);
+					canvasl.FillSolidRect(log_r,half+1,vuprevR-log_r,half,vu3);
+					canvasl.FillSolidRect(vuprevR,half+1,rect.Width()-vuprevR,half,vu2);
 					vuprevR-=2;
 				}
 				else 
 				{
-					canvasl.FillSolidRect(log_r,5,225-log_r,4,vu2);
+					canvasl.FillSolidRect(log_r,half+1,rect.Width()-log_r,half,vu2);
 					vuprevR = log_r;
 				}
 			}
 			else
-				canvasl.FillSolidRect(0,5,225,4,vu2);
+				canvasl.FillSolidRect(0,half+1,rect.Width(),half,vu2);
 		}
 	}
 

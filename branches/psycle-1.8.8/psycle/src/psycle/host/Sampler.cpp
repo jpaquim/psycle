@@ -21,7 +21,7 @@ namespace psycle
 			_type = MACH_SAMPLER;
 			_mode = MACHMODE_GENERATOR;
 			sprintf(_editName, "Sampler");
-
+			baseC = 60;
 			_resampler.quality(helpers::dsp::resampler::quality::linear);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 			{
@@ -201,74 +201,6 @@ namespace psycle
 				}
 			}
 		}
-		bool Sampler::Load(RiffFile* pFile)
-		{
-			int i;
-			char junk[256];
-			memset(&junk, 0, sizeof(junk));
-
-			pFile->Read(&_editName,16);
-			_editName[15] = 0;
-
-			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
-			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
-			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
-			pFile->Read(&_connection[0], sizeof(_connection));
-			pFile->Read(&_inputCon[0], sizeof(_inputCon));
-			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			pFile->Read(&_numInputs, sizeof(_numInputs));
-			pFile->Read(&_numOutputs, sizeof(_numOutputs));
-
-			pFile->Read(&_panning, sizeof(_panning));
-			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-			pFile->Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
-
-			if (_numVoices < 4)
-			{
-				// Psycle versions < 1.1b2 had polyphony per channel,not per machine.
-				_numVoices = 8;
-			}
-
-			pFile->Read(&i, sizeof(int)); // interpol
-			switch (i)
-			{
-				case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
-				case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
-				case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
-				case 1:
-				default: _resampler.quality(helpers::dsp::resampler::quality::linear);
-			}
-
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-			pFile->Read(&junk[0], sizeof(int)); // outdry
-
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
-
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
-
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
-
-			return true;
-		}
-
 
 		void Sampler::VoiceWork(int numsamples, int voice)
 		{
@@ -630,7 +562,7 @@ namespace psycle
 				else
 				{
 					float const finetune = helpers::value_mapper::map_256_1(Global::_pSong->_pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
+					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::_pSong->_pInstrument[pVoice->_instrument]->waveTune)-baseC +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::pPlayer->SampleRate()));
 				}
 				
 
@@ -901,6 +833,79 @@ namespace psycle
 				default:
 				break;
 			}
+		}
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/// old file format vomit. don't look at it.
+
+		bool Sampler::Load(RiffFile* pFile)
+		{
+			int i;
+			char junk[256];
+			memset(&junk, 0, sizeof(junk));
+
+			pFile->Read(&_editName,16);
+			_editName[15] = 0;
+
+			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
+			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
+			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
+			pFile->Read(&_connection[0], sizeof(_connection));
+			pFile->Read(&_inputCon[0], sizeof(_inputCon));
+			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+			pFile->Read(&_numInputs, sizeof(_numInputs));
+			pFile->Read(&_numOutputs, sizeof(_numOutputs));
+
+			pFile->Read(&_panning, sizeof(_panning));
+			Machine::SetPan(_panning);
+			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
+			pFile->Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
+
+			if (_numVoices < 4)
+			{
+				// Psycle versions < 1.1b2 had polyphony per channel,not per machine.
+				_numVoices = 8;
+			}
+
+			pFile->Read(&i, sizeof(int)); // interpol
+			switch (i)
+			{
+				case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+				case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+				case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+				case 1:
+				default: _resampler.quality(helpers::dsp::resampler::quality::linear);
+			}
+
+			pFile->Read(&junk[0], sizeof(int)); // outwet
+			pFile->Read(&junk[0], sizeof(int)); // outdry
+
+			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
+			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
+			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
+			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
+
+			pFile->Read(&junk[0], sizeof(char)); // sinespeed
+			pFile->Read(&junk[0], sizeof(char)); // sineglide
+			pFile->Read(&junk[0], sizeof(char)); // sinevolume
+			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
+			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
+
+			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
+			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
+			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
+			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
+
+			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
+			pFile->Read(&junk[0], sizeof(int)); // filterResonance
+			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
+			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
+			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
+			pFile->Read(&junk[0], sizeof(int)); // filterMode
+
+			return true;
 		}
 	}
 }

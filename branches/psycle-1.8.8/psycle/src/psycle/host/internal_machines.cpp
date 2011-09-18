@@ -639,23 +639,39 @@ namespace psycle
 			if(measure_cpu_usage) t0 = cpu_time_clock::now();
 
 			if( sched_returns_processed_curr < numreturns()) {
+				// Step 1: send audio to the effects
 				mixed = false;
-				// step 1: send signal to fx
-				FxSend(frames, false, measure_cpu_usage);
+				if(!_mute && !Bypass()) {
+					FxSend(frames, false, measure_cpu_usage);
+				}
+				else {
+					sched_returns_processed_prev = sched_returns_processed_curr;
+					sched_returns_processed_curr = numreturns();
+				}
 			} else {
-				// step 2: mix with return fx
-				Mix(frames);
+				// step 2: mix input with return fx to generate output
+				if(Bypass()) {
+					for (int i=0; i<numinputs(); i++) if (_inputCon[i])	{
+						Machine & input_node(*Global::song()._pMachine[_inputMachines[i]]);
+						if(!input_node._mute && !input_node.Standby()) {
+							helpers::dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node._lVol);
+							helpers::dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node._rVol);
+						}
+					}
+				}
+				else if(!_mute) {
+					Mix(frames);
+				}
 				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
 				Machine::UpdateVuAndStanbyFlag(frames);
 				mixed = true;
 				sched_returns_processed_curr=0;
+				++processing_count_;
 			}
 			if(measure_cpu_usage){ 
 				cpu_time_clock::time_point const t1(cpu_time_clock::now());
 				accumulate_processing_time(t1 - t0);
 			}
-			if(mixed) ++processing_count_;
-			
 			return mixed;
 		}
 
@@ -782,19 +798,41 @@ namespace psycle
 		{
 			// Mixer reached, set flags upwards.
 			SetMixerSendFlag(pSong,pSong->_pMachine[callerMac]);
-			for (int i(0); i < MAX_CONNECTIONS; i++)
+			bool found=false;
+			int i=0;
+			for (;i < MAX_CONNECTIONS; i++)
 			{
 				if ( ReturnValid(i))
 				{
-					if (Return(i).Wire().machine_ == callerMac)
+					//If the caller is any of the ends of the chain, found.
+					if( Send(i).machine_ == callerMac || Return(i).Wire().machine_ == callerMac) {
+						found=true;
+						break;
+					}
+					//Else, try to find it inside this chain.
+					Machine* pMac = pSong->_pMachine[Return(i).Wire().machine_];
+					for(int c=0; c<MAX_CONNECTIONS; c++)
 					{
-						sends_[i].machine_ = senderMac;
-						sends_[i].normalize_ = GetAudioRange()/pSong->_pMachine[senderMac]->GetAudioRange();
-						for (int ch(0);ch<numinputs();ch++)
-						{
-							RecalcSend(ch,i);
+						if(pMac->_inputCon[c])	{
+							pMac = pSong->_pMachine[pMac->_inputMachines[c]];
+							if ( callerMac == pMac->_macIndex) {
+								found = true;
+								goto endfor;
+							}
+							c=0;
+							continue;
 						}
 					}
+				}
+			}
+endfor:
+			if (found)
+			{
+				sends_[i].machine_ = senderMac;
+				sends_[i].normalize_ = GetAudioRange()/pSong->_pMachine[senderMac]->GetAudioRange();
+				for (int ch(0);ch<numinputs();ch++)
+				{
+					RecalcSend(ch,i);
 				}
 			}
 		}

@@ -14,15 +14,21 @@
 //Included for Dummy's "wasVST". Should be possible to do it in another way
 #include "internal_machines.hpp"
 
+//Included for AddNewEffectHere
+#include "MainFrm.hpp"
+
 #include "Zap.hpp"
 #include <psycle/helpers/math/constants.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 
+//todo: OUCH!!! This will be difficult to make DPI aware.
 
 namespace psycle { namespace host {
 		int const ID_TIMER_WIRE = 2304;
 
-		CWireDlg::CWireDlg(CWnd* mainView_, CWireDlg** windowVar_, int wireDlgIdx_,
+		extern CPsycleApp theApp;
+
+		CWireDlg::CWireDlg(CChildView* mainView_, CWireDlg** windowVar_, int wireDlgIdx_,
 			Machine& srcMac_, int srcWireIdx_, Machine& dstMac_, int dstWireIdx_)
 			: CDialog(CWireDlg::IDD, AfxGetMainWnd())
 			, mainView(mainView_)
@@ -66,6 +72,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_HOLD, OnHold)
 			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
 			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
+			ON_BN_CLICKED(IDC_ADDEFFECTHERE, OnAddEffectHere)
 		END_MESSAGE_MAP()
 
 		BOOL CWireDlg::OnInitDialog() 
@@ -923,6 +930,28 @@ namespace psycle { namespace host {
 			srcMachine.DeleteOutputWireIndex(Global::_pSong,srcWireIdx);
 			dstMachine.DeleteInputWireIndex(Global::_pSong,dstWireIdx);
 			PostMessage (WM_CLOSE);
+		}
+		void CWireDlg::OnAddEffectHere()
+		{
+			int newMacidx = Global::_pSong->GetFreeFxBus();
+			mainView->NewMachine((srcMachine._x+dstMachine._x)/2,(srcMachine._y+dstMachine._y)/2,newMacidx);
+
+			Machine* newMac = Global::song()._pMachine[newMacidx];
+			if(newMac) {
+				Global::song().ChangeWireSourceMacBlocking(newMac,&dstMachine,newMac->GetFreeOutputWire(0),dstWireIdx);
+				{
+					CExclusiveLock lock(&Global::song().semaphore, 2, true);
+					Global::song().InsertConnectionNonBlocking(&srcMachine, newMac);
+				}
+				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (mainView->viewMode==view_modes::machine)
+				{
+					mainView->Repaint();
+				}
+				PostMessage (WM_CLOSE);
+			}
 		}
 		void CWireDlg::OnMode()
 		{

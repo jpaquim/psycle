@@ -104,7 +104,7 @@ namespace psycle
 		// Clock is multiplied by two to convert it from clock ticks to hertz (1 Hz -> two samples -> two ticks).
 		// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
 		// The original table takes the lower octave values and multiplies them by two. 
-		// This doesn't take care of the roundings of the values.
+		// That didn't take care of the roundings of the values.
 
 		const float XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			54787,	51712,	48809,	46070,	43484,	41044,	38740,	36566,	34514,	32576,	30748,	29022,
@@ -957,10 +957,10 @@ namespace psycle
 				return ( 14318181  / period ) / (double)Global::player().SampleRate() * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0);
 			} else {
 				// Linear Frequency
-				// 8363*2^((5*12*64 - Period) / (12*64))
+				// 8363*2^((7*12*64 - Period) / (12*64))
 				// 8363=Hz for Middle-C note
 				// 12*64 = 12 notes * 64 finetune steps.
-				// 7 = 12-middle_C ( if C-4 is middle_C, then, 8*12*64, if C-3, then 9*12*64, etc..) (12 "12-middle_C" is number of octaves)
+				// 7 = 12-middle_C ( if C-4 is middle_C, then 8*12*64, if C-3, then 9*12*64, etc..)
 				return	pow(2.0,
 							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
 							 /768.0)

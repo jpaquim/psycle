@@ -286,15 +286,6 @@ namespace psycle
 				pFile->Read(&size, sizeof size );
 				if(size)
 				{
-					if(version > CURRENT_FILE_VERSION_MACD)
-					{
-						pFile->Skip(size);
-						std::ostringstream s; s
-							<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
-							<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-						MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-						return false;
-					}
 					UINT count;
 					pFile->Read(&_program, sizeof _program);
 					pFile->Read(&count, sizeof count);

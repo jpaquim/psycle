@@ -110,7 +110,7 @@ namespace psycle { namespace host {
 								else { w = dmac->GetFreeInputWire(0); }
 							}
 							else { w = dmac->GetFreeInputWire(0); }
-							if (!_pSong->ChangeWireDestMac(tmac,dmac,wiremove,w))
+							if (!_pSong->ChangeWireDestMacBlocking(tmac,dmac,wiremove,w))
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
@@ -118,7 +118,6 @@ namespace psycle { namespace host {
 						}
 						else
 						{
-							CExclusiveLock lock(&_pSong->semaphore, 2, true);
 							int dsttype=0;
 							///\todo: for multi-io.
 							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
@@ -130,7 +129,7 @@ namespace psycle { namespace host {
 									dsttype=1;
 								}
 							}
-							if (_pSong->InsertConnection(tmac, dmac,0,dsttype)== -1)
+							if (_pSong->InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 							{
 								MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 							}
@@ -144,7 +143,7 @@ namespace psycle { namespace host {
 						int srctype=0;
 						///\todo: for multi-io.
 						//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-						if (!_pSong->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
+						if (!_pSong->ChangeWireSourceMacBlocking(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
 						{
 							MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 						}
@@ -557,7 +556,7 @@ namespace psycle { namespace host {
 								else { w = dmac->GetFreeInputWire(0); }
 							}
 							else { w = dmac->GetFreeInputWire(0); }
-							if (!_pSong->ChangeWireDestMac(tmac,dmac,wiremove,w))
+							if (!_pSong->ChangeWireDestMacBlocking(tmac,dmac,wiremove,w))
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
@@ -569,7 +568,7 @@ namespace psycle { namespace host {
 							int srctype=0;
 							///\todo: for multi-io.
 							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-							if (!_pSong->ChangeWireSourceMac(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
+							if (!_pSong->ChangeWireSourceMacBlocking(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
@@ -591,7 +590,7 @@ namespace psycle { namespace host {
 								dsttype=1;
 							}
 						}
-						if (_pSong->InsertConnection(tmac, dmac,0,dsttype)== -1)
+						if (_pSong->InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 						{
 							MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 						}
@@ -766,9 +765,11 @@ namespace psycle { namespace host {
 			{
 				if ((nFlags & MK_LBUTTON) && oldm.track != -1)
 				{
-					ntOff = tOff;
-					nlOff = lOff;
 					draw_modes::draw_mode paintmode = draw_modes::all;
+					if(scrollDelay <=0) {
+						ntOff = tOff;
+						nlOff = lOff;
+					}
 
 					int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
 					if ( point.x < XOFFSET ) ttm--; // 1/2 = 0 , -1/2 = 0 too!
@@ -778,8 +779,11 @@ namespace psycle { namespace host {
 						ccm=0;
 						if ( ttm < 0 ) { ttm = 0; } // Out of Range
 						// and Scroll
-						ntOff = ttm;
-						if (ntOff != tOff) paintmode=draw_modes::horizontal_scroll;
+						if(scrollDelay <=0)
+						{
+							ntOff = ttm;
+							if (ntOff != tOff) paintmode=draw_modes::horizontal_scroll;
+						}
 					}
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
@@ -793,7 +797,7 @@ namespace psycle { namespace host {
 								paintmode=draw_modes::horizontal_scroll; 
 							}
 						}
-						else	//scroll
+						else if(scrollDelay <=0)	//scroll
 						{	
 							ntOff = ttm-VISTRACKS+1;
 							if ( ntOff != tOff ) 
@@ -811,6 +815,7 @@ namespace psycle { namespace host {
 
 					if ( llm < lOff ) // Exceeded from top
 					{
+						
 						if ( llm < 0 ) // Out of range
 						{	
 							llm = 0;
@@ -820,7 +825,7 @@ namespace psycle { namespace host {
 								paintmode=draw_modes::vertical_scroll; 
 							}
 						}
-						else	//scroll
+						else if(scrollDelay <=0) //scroll
 						{	
 							nlOff = llm;
 							if ( nlOff != lOff ) 
@@ -838,7 +843,7 @@ namespace psycle { namespace host {
 								paintmode=draw_modes::vertical_scroll; 
 							}
 						}
-						else	//scroll
+						else if(scrollDelay <=0) //scroll
 						{	
 							nlOff = llm-VISLINES+1;
 							if ( nlOff != lOff ) 
@@ -881,10 +886,14 @@ namespace psycle { namespace host {
 						paintmode=draw_modes::selection;
 					}
 
-					bScrollDetatch=true;
-					detatchpoint.track = ttm;
-					detatchpoint.line = llm;
-					detatchpoint.col = ccm;
+					if(scrollDelay <=0) {
+						bScrollDetatch=true;
+						detatchpoint.track = ttm;
+						detatchpoint.line = llm;
+						detatchpoint.col = ccm;
+						scrollDelay=6;
+					}
+					scrollDelay--;
 					if (nFlags & MK_SHIFT)
 					{
 						editcur = detatchpoint;

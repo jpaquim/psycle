@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CInterpolateCurve.
 #include <psycle/host/detail/project.private.hpp>
 #include "InterpolateCurveDlg.hpp"
+#include "DPI.hpp"
 
 namespace psycle { namespace host {
 
@@ -132,13 +133,18 @@ namespace psycle { namespace host {
 			OnOK();		
 		}
 
+		//These two methods wouldn't be needed if this graphic was implemented with a custom control.
+		//(See sampulse UI)
 		void CInterpolateCurve::AdjustPointToView(CPoint&point)
 		{
-			point.y-=20; point.x-=10+xoffset;
+			CDPI& g_metrics = Global::dpiSetting();
+
+			point.y-=g_metrics.ScaleY(20); point.x-=g_metrics.ScaleX(10)+xoffset;
 		}
 		void CInterpolateCurve::AdjustRectToView(RECT&rect)
 		{
-			rect.top += 20; rect.left += 10; rect.right -= 10; rect.bottom -= 100;
+			CDPI& g_metrics = Global::dpiSetting();
+			rect.top += g_metrics.ScaleY(20); rect.left += g_metrics.ScaleX(10); rect.right -= g_metrics.ScaleX(10); rect.bottom -= g_metrics.ScaleY(100);
 		}
 		int CInterpolateCurve::GetPointFromX(LONG x)
 		{
@@ -218,6 +224,7 @@ namespace psycle { namespace host {
 		void CInterpolateCurve::OnPaint()
 		{
 			CPaintDC dc(this); // device context for painting
+			CDPI& g_metrics = Global::dpiSetting();
 
 			RECT tmprect = grapharea;
 			//set an extra border.
@@ -237,12 +244,13 @@ namespace psycle { namespace host {
 				dc.FillSolidRect (grapharea.left, grapharea.top + int(j *range_16), grapharea.right - grapharea.left, 1, 0x00DDDDDD);
 			}
 			//vertical
+			int fontheight = g_metrics.ScaleY(12);
 			for (int h = 0; h < numLines;h++)
 			{
 				if ( (startIndex+h) % linesperbeat == 0)
 				{
 					CString bla; bla.Format("%d",startIndex+h);
-					dc.TextOut (int(h * xscale) + grapharea.left,grapharea.bottom-12, bla);
+					dc.TextOut (int(h * xscale) + grapharea.left,grapharea.bottom-fontheight, bla);
 					dc.FillSolidRect (int(h * xscale) + grapharea.left,grapharea.top, 1,grapharea.bottom - grapharea.top, 0x00DD0000);
 				}
 				else

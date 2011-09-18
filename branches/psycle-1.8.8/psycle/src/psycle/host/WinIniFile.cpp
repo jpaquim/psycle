@@ -92,23 +92,23 @@ lpKeyName [in]
 If this parameter is NULL, all key names in the section specified by the lpAppName parameter are copied to the buffer specified by the lpReturnedString parameter.
 
 */
-		 bool WinIniFile::Read(std::string const & key, bool & x){ UINT y = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); x = (y==1); return true; }
+		 bool WinIniFile::Read(std::string const & key, bool & x){ UINT y = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); x = (y==1); return y!=0x87654321; }
 		 bool WinIniFile::Write(std::string const & key, bool x){ uint32_t y = x?1:0; return Write(key, y); }
 
-		 bool WinIniFile::Read(std::string const & key, uint8_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; }
-		 bool WinIniFile::Read(std::string const & key, int8_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; }
-		 bool WinIniFile::Read(std::string const & key, char & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; } // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
+		 bool WinIniFile::Read(std::string const & key, uint8_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; }
+		 bool WinIniFile::Read(std::string const & key, int8_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; }
+		 bool WinIniFile::Read(std::string const & key, char & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; } // 'char' is equivalent to either 'signed char' or 'unsigned char', but considered as a different type
 		 bool WinIniFile::Write(std::string const & key, uint8_t x){ uint32_t y = x; return Write(key, y); }
 		 bool WinIniFile::Write(std::string const & key, int8_t x){ int32_t y = x; return Write(key, y); }
 		 bool WinIniFile::Write(std::string const & key, char x){ int32_t y = x; return Write(key, y); }
 
-		 bool WinIniFile::Read(std::string const & key, uint16_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; }
-		 bool WinIniFile::Read(std::string const & key, int16_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; }
+		 bool WinIniFile::Read(std::string const & key, uint16_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; }
+		 bool WinIniFile::Read(std::string const & key, int16_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; }
 		 bool WinIniFile::Write(std::string const & key, uint16_t x){ uint32_t y = x; return Write(key, y); }
 		 bool WinIniFile::Write(std::string const & key, int16_t x){ int32_t y = x; return Write(key, y); }
 
-		 bool WinIniFile::Read(std::string const & key, uint32_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; }
-		 bool WinIniFile::Read(std::string const & key, int32_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0, filename.c_str()); return true; }
+		 bool WinIniFile::Read(std::string const & key, uint32_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; } // The default number is a valid number in this case, but expected to be unusual enough.
+		 bool WinIniFile::Read(std::string const & key, int32_t & x){ x = GetPrivateProfileInt(current_group.c_str(), key.c_str(), 0x87654321, filename.c_str()); return x!=0x87654321; }  // The default number is a valid number in this case, but expected to be unusual enough.
 		 bool WinIniFile::Read(std::string const & key, COLORREF & x){
 			char result[32];
 			bool done = GetPrivateProfileString(current_group.c_str(), key.c_str(), NULL, result, 32, filename.c_str());

@@ -2331,6 +2331,14 @@ namespace psycle { namespace host {
 
 			COLORREF* pBkg;
 			int linesPerBar = (_pSong->LinesPerBeat()*patView->timesig);
+			char* linecountformat;
+
+			if (patView->_linenumbersHex) {
+				linecountformat="%.2X";
+			} else {
+				linecountformat="%3i";
+			}
+
 			for (int i=lstart;i<lend;i++) // Lines
 			{
 				// break this up into several more general loops for speed
@@ -2363,16 +2371,8 @@ namespace psycle { namespace host {
 						devc->SetBkColor(pBkg[0]);
 						devc->SetTextColor(pvc_font[0]);
 					}
-					if (patView->_linenumbersHex)
-					{
-						sprintf(tBuf," %.2X",linecount);
-						TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
-					}
-					else
-					{
-						sprintf(tBuf,"%3i",linecount);
-						TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
-					}
+					sprintf(tBuf,linecountformat,linecount);
+					TXTFLAT(devc,tBuf,1,yOffset,XOFFSET-2,ROWHEIGHT-1);	// Print Line Number.
 				}
 
 				unsigned char *patOffset = _ppattern() +
@@ -2413,142 +2413,58 @@ namespace psycle { namespace host {
 						devc->SetBkColor(pBkg[trackcount]);
 						devc->SetTextColor(pvc_font[trackcount]);
 					}
-					OutNote(devc,xOffset+COLX[0],yOffset,*patOffset);
-					if (*(++patOffset) == 255 )
-					{
-						OutData(devc,xOffset+COLX[1],yOffset,0,true);
-					}
-					else
-					{
-						OutData(devc,xOffset+COLX[1],yOffset,*patOffset,false);
-					}
+					OutNote(devc,xOffset+COLX[0],yOffset,*patOffset++);
+					OutData(devc,xOffset+COLX[1],yOffset,*patOffset++,*(patOffset) == 255);
+					OutData(devc,xOffset+COLX[3],yOffset,*patOffset++,*(patOffset) == 255);
+					bool trflag = *(patOffset) == 0 && *(patOffset+1) == 0 && 
+						(*(patOffset-3) <= notecommands::release || *(patOffset-3) == 255 );
+					OutData(devc,xOffset+COLX[5],yOffset,*patOffset++,trflag);
+					OutData(devc,xOffset+COLX[7],yOffset,*patOffset++,trflag);
 
-					if (*(++patOffset) == 255 )
-					{
-						OutData(devc,xOffset+COLX[3],yOffset,0,true);
-					}
-					else 
-					{
-						OutData(devc,xOffset+COLX[3],yOffset,*patOffset,false);
-					}
-
-					if (*(++patOffset) == 0 && *(patOffset+1) == 0 && 
-						(*(patOffset-3) <= notecommands::release || *(patOffset-3) == 255 ))
-					{
-						OutData(devc,xOffset+COLX[5],yOffset,0,true);
-						patOffset++;
-						OutData(devc,xOffset+COLX[7],yOffset,0,true);
-					}
-					else
-					{
-						OutData(devc,xOffset+COLX[5],yOffset,*patOffset,false);
-						patOffset++;
-						OutData(devc,xOffset+COLX[7],yOffset,*patOffset,false);
-					}
 					// could optimize this check some, make separate loops
 					if ((linecount == editcur.line) && (trackcount == editcur.track))
 					{
+						patOffset-=5;
 						devc->SetBkColor(pvc_cursor[trackcount]);
 						devc->SetTextColor(pvc_fontCur[trackcount]);
 						switch (editcur.col)
 						{
 						case 0:
-							OutNote(devc,xOffset+COLX[0],yOffset,*(patOffset-4));
+							OutNote(devc,xOffset+COLX[0],yOffset,*(patOffset));
 							break;
 						case 1:
-							if (*(patOffset-3) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[1],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[1],yOffset,(*(patOffset-3))>>4,false);
-							}
+							OutData4(devc,xOffset+COLX[1],yOffset,(*(patOffset+1))>>4,*(patOffset+1) == 255);
 							break;
 						case 2:
-							if (*(patOffset-3) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[2],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[2],yOffset,*(patOffset-3),false);
-							}
+							OutData4(devc,xOffset+COLX[2],yOffset,*(patOffset+1),*(patOffset+1) == 255);
 							break;
 						case 3:
-							if (*(patOffset-2) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[3],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[3],yOffset,(*(patOffset-2))>>4,false);
-							}
+							OutData4(devc,xOffset+COLX[3],yOffset,(*(patOffset+2))>>4,*(patOffset+2) == 255);
 							break;
 						case 4:
-							if (*(patOffset-2) == 255 )
-							{
-								OutData4(devc,xOffset+COLX[4],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[4],yOffset,*(patOffset-2),false);
-							}
+							OutData4(devc,xOffset+COLX[4],yOffset,*(patOffset+2),*(patOffset+2) == 255);
 							break;
 						case 5:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
-							{
-								OutData4(devc,xOffset+COLX[5],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[5],yOffset,(*(patOffset-1))>>4,false);
-							}
+							OutData4(devc,xOffset+COLX[5],yOffset,(*(patOffset+3))>>4,trflag);
 							break;
 						case 6:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
-							{
-								OutData4(devc,xOffset+COLX[6],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset-1)),false);
-							}
+							OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset+3)),trflag);
 							break;
 						case 7:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
-							{
-								OutData4(devc,xOffset+COLX[7],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[7],yOffset,(*(patOffset))>>4,false);
-							}
+							OutData4(devc,xOffset+COLX[7],yOffset,(*(patOffset+4))>>4,trflag);
 							break;
 						case 8:
-							if (*(patOffset-1) == 0 && *(patOffset) == 0 && 
-								(*(patOffset-4) <= notecommands::release || *(patOffset-4) == 255 ))
-							{
-								OutData4(devc,xOffset+COLX[8],yOffset,0,true);
-							}
-							else
-							{
-								OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset)),false);
-							}
+							OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset+4)),trflag);
 							break;
 						}
+						patOffset+=5;
 					}
 					trackcount++;
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					patOffset+=2;
-	#else
-					patOffset++;
+					patOffset+++;
 	#endif
 #endif
 					xOffset+=ROWWIDTH;

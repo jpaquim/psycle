@@ -110,6 +110,9 @@ namespace psycle { namespace host {
 
 			switchheight = 28;
 			switchwidth = 28;
+
+			checkedheight = 14;
+			checkedwidth = 16;
 		}
 
 		void PsycleConfig::MachineParam::Load(ConfigStorage & store,std::string mainSkinDir, std::string machine_skin)
@@ -215,6 +218,8 @@ namespace psycle { namespace host {
 			vuOff.LoadBitmap(IDB_VUMETEROFF);
 			switchOn.LoadBitmap(IDB_SWITCHON);
 			switchOff.LoadBitmap(IDB_SWITCHOFF);
+			checkedOn.LoadBitmap(IDB_SWITCHMINI_ON);
+			checkedOff.LoadBitmap(IDB_SWITCHMINI_OFF);
 		}
 		////////////////////////////////////
 		PsycleConfig::MachineView::MachineView()
@@ -248,10 +253,13 @@ namespace psycle { namespace host {
 		}
 		void PsycleConfig::MachineView::SetDefaultColours()
 		{
+			//colour =	0x009D7B71;
+			//polycolour =	0x00D1D1D1;
+			//wirecolour =	0x00C0C0C0;
 			colour =	0x009D7B71;
-			polycolour =	0x00D1D1D1;
-			wirecolour =	0x00C0C0C0;
-			triangle_size = 10;
+			polycolour =	0x00B1978D;
+			wirecolour =	0x005F4741;
+			triangle_size = 12;
 			wirewidth = 1;
 			wireaa = 1;
 
@@ -259,11 +267,11 @@ namespace psycle { namespace host {
 			vu2 = 0x009D7B71;
 			vu3 = 0x000000FF;
 
-			generator_fontcolour = 0x00000000;
+			generator_fontcolour = 0x00EBEBEB;
 			generator_fontface = "Arial";
 			generator_font_point = 80;
 			generator_font_flags = 0;
-			effect_fontcolour = 0x00000000;
+			effect_fontcolour = 0x00EBEBEB;
 			effect_fontface = "Arial";
 			effect_font_point = 80;
 			effect_font_flags = 0;
@@ -564,6 +572,7 @@ namespace psycle { namespace host {
 			draw_empty_data = false;
 			timesig = 4;
 			showTrackNames_ = false;
+			showA440 = true;
 
 			_linenumbers = true;
 			_linenumbersHex = false;
@@ -687,6 +696,10 @@ namespace psycle { namespace host {
 			store.Read("pattern_draw_empty_data", draw_empty_data);
 			store.Read("pv_timesig", timesig);
 			store.Read("showTrackNames", showTrackNames_);
+			bool tmp;
+			if(store.Read("showA440", tmp)) {
+				showA440 = tmp;
+			}
 			store.Read("DisplayLineNumbers", _linenumbers);
 			store.Read("DisplayLineNumbersHex", _linenumbersHex);
 			store.Read("DisplayLineNumbersCursor", _linenumbersCursor);
@@ -749,6 +762,7 @@ namespace psycle { namespace host {
 			store.Write("pattern_draw_empty_data", draw_empty_data);
 			store.Write("pv_timesig", timesig);
 			store.Write("showTrackNames", showTrackNames_);
+			store.Write("showA440", showA440);
 			store.Write("DisplayLineNumbers", _linenumbers);
 			store.Write("DisplayLineNumbersHex", _linenumbersHex);
 			store.Write("DisplayLineNumbersCursor", _linenumbersCursor);
@@ -1342,7 +1356,6 @@ namespace psycle { namespace host {
 			autosaveSong = true;
 			autosaveSongTime = 10;
 
-			useDoubleBuffer = true;
 			_bShowPatternNames = false;
 			_followSong = false;
 
@@ -1549,7 +1562,6 @@ namespace psycle { namespace host {
 			}
 
 
-			store.Read("useDoubleBuffer", useDoubleBuffer);
 			store.Read("ShowPatternNames", _bShowPatternNames);
 			store.Read("FollowSong", _followSong);
 
@@ -1615,7 +1627,6 @@ namespace psycle { namespace host {
 			store.Write("autosaveSong", autosaveSong);
 			store.Write("autosaveSongTime", autosaveSongTime);
 			store.Write("storePlace",static_cast<int>(store_place_));
-			store.Write("useDoubleBuffer", useDoubleBuffer);
 			store.Write("FollowSong", _followSong);
 			store.Write("ShowPatternNames", _bShowPatternNames);
 

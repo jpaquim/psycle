@@ -138,19 +138,34 @@ namespace psycle
 			int GetNumPatterns();
 
 			/// creates a new connection between two machines. returns index in the dest machine, or -1 if error.
-			int InsertConnection(Machine* srcMac,Machine* dstMac,int srctype=0, int dsttype=0,float value = 1.0f);
-			int InsertConnection(int srcMac,int dstMac,int srctype=0, int dsttype=0,float value = 1.0f)
+			int InsertConnectionBlocking(Machine* srcMac,Machine* dstMac,int srctype=0, int dsttype=0,float value = 1.0f)
+			{
+				CExclusiveLock lock(&semaphore, 2, true);
+				return InsertConnectionNonBlocking(srcMac, dstMac, srctype, dsttype, value);
+			}
+			int InsertConnectionNonBlocking(Machine* srcMac,Machine* dstMac,int srctype=0, int dsttype=0,float value = 1.0f);
+			int InsertConnectionNonBlocking(int srcMac,int dstMac,int srctype=0, int dsttype=0,float value = 1.0f)
 			{
 				if ( srcMac >= MAX_MACHINES || dstMac >= MAX_MACHINES) return -1;
 				if ( !_pMachine[srcMac] || !_pMachine[dstMac] ) return -1;
-				return InsertConnection(_pMachine[srcMac],_pMachine[dstMac],srctype,dsttype,value);
+				return InsertConnectionNonBlocking(_pMachine[srcMac],_pMachine[dstMac],srctype,dsttype,value);
 			}
-			/// Changes the destination of a wire connection. wireindex= index of the wire in wiresource to change.
-			/// returns index, or -1 if error. 
-			bool ChangeWireDestMac(Machine* srcMac, Machine* dstMac, int wiresrc, int wiredest);
-			/// Changes the destination of a wire connection. wireindex= index of the wire in wiredest to change.
-			/// returns index, or -1 if error. 
-			bool ChangeWireSourceMac(Machine* srcMac, Machine* dstMac, int wiresrc, int wiredest);
+			/// Changes the destination of a wire. srcMac is its origin, newdstMac is its new destionation. 
+			/// outputwiresrc is the output wire index in srcMac. newinputwiredest is the input wire index in newdstMac
+			/// returns true if succeeded. 
+			bool ChangeWireDestMacBlocking(Machine* srcMac, Machine* newdstMac, int outputwiresrc, int newinputwiredest) {
+				CExclusiveLock lock(&semaphore, 2, true);
+				return ChangeWireDestMacNonBlocking(srcMac, newdstMac, outputwiresrc, newinputwiredest);
+			}
+			bool ChangeWireDestMacNonBlocking(Machine* srcMac, Machine* newdstMac, int outputwiresrc, int newinputwiredest);
+			/// Changes the source of a wire. newsrcMac is the new source. dstMac is its destination. 
+			/// newoutputwiresrc is the output wire index in newsrcMac. inputwiredest is the input wire index in dstMac
+			/// returns true if succeeded. 
+			bool ChangeWireSourceMacBlocking(Machine* newsrcMac, Machine* dstMac, int newoutputwiresrc, int inputwiredest) {
+				CExclusiveLock lock(&semaphore, 2, true);
+				return ChangeWireSourceMacNonBlocking(newsrcMac, dstMac, newoutputwiresrc, inputwiredest);
+			}
+			bool ChangeWireSourceMacNonBlocking(Machine* newsrcMac, Machine* dstMac, int newoutputwiresrc, int inputwiredest);
 			/// Verifies that the new connection doesn't conflict with the mixer machine.
 			bool Song::ValidateMixerSendCandidate(Machine* mac,bool rewiring=false);
 			void RestoreMixerSendFlags();
@@ -164,6 +179,8 @@ namespace psycle
 			int GetBlankPatternUnused(int rval = 0);
 			/// creates a new pattern.
 			bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
+			/// Adds an empty track at the index indicated. If pattern is -1, it does it for all patterns.
+			void AddNewTrack(int pattern, int trackIdx);
 			/// clones a machine.
 			bool CloneMac(int src,int dst);
 			/// clones an instrument.

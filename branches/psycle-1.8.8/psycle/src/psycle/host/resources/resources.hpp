@@ -102,9 +102,15 @@
 #define IDI_LOWER                       294
 #define IDI_GREATER                     296
 #define IDR_POPUP_MACHINE               297
-#define IDB_MASTER_VU                   298
 #define IDB_MASTER_BGND                 299
 #define IDB_MASTERKNOB                  300
+#define IDB_MASTER_VUOFF_LEFT           307
+#define IDB_MASTER_VUOFF_RIGHT          308
+#define IDB_MASTER_VUON_LEFT            309
+#define IDB_MASTER_VUON_RIGHT           311
+#define IDB_SWITCHMINI_OFF              312
+#define IDB_BITMAP1                     313
+#define IDB_SWITCHMINI_ON               313
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -314,6 +320,7 @@
 #define IDC_RECORD_NOTEOFF              1230
 #define IDC_CENTERCURSOR                1231
 #define IDC_CURSORDOWN                  1232
+#define IDC_SHOWA440                    1232
 #define IDC_MUTE                        1233
 #define IDC_SHOW_INFO_ON_LOAD           1233
 #define IDC_BYPASS                      1234
@@ -322,6 +329,7 @@
 #define IDC_SAVE                        1237
 #define IDC_DELETE                      1238
 #define IDC_IMPORT                      1239
+#define IDC_ADDEFFECTHERE               1239
 #define IDC_PREVIEW                     1240
 #define IDC_EXPORT                      1241
 #define IDC_PRESETSLIST                 1242
@@ -857,7 +865,9 @@
 #define IDC_SPINPARAM                   1785
 #define IDC_SHOWPATTERNAME              1786
 #define IDC_REPLACEMAC                  1787
+#define IDC_NEWMACBEFORE                1788
 #define IDC_VOLLABEL                    1789
+#define IDC_NEWMACAFTER                 1789
 #define IDC_OUTPUTFILE                  1790
 #define IDC_OUTPUTCLIPBOARD             1791
 #define IDC_APPLYTOPATTERN              1791
@@ -903,6 +913,9 @@
 #define IDC_COPY_BUTTON                 1829
 #define IDC_SHOW_MASTER                 1830
 #define IDC_MASTERDLG_VU                1831
+#define IDC_MASTERDLG_VULEFT            1831
+#define IDC_MASTERDLG_VURIGHT           1832
+#define IDC_DEFAULTC4                   1833
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1054,7 +1067,9 @@
 #define ID_CONTEXTMENU_BLOCKCOPY        34259
 #define ID_PROGRAMS_RESETDEFAULT        34268
 #define ID_CONFIGURATION_ENABLEAUDIO    34276
-#define ID_ACCELERATOR34277             34277
+#define ID_CONTEXTMENU_ADDNEWTRACKONCURSOR 34279
+#define ID_CONTEXTMENU_NOTETRANSPOSITION 34280
+#define ID_POP_ADDNEWTRACK              34281
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1062,9 +1077,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        306
-#define _APS_NEXT_COMMAND_VALUE         34279
-#define _APS_NEXT_CONTROL_VALUE         1832
+#define _APS_NEXT_RESOURCE_VALUE        314
+#define _APS_NEXT_COMMAND_VALUE         34282
+#define _APS_NEXT_CONTROL_VALUE         1835
 #define _APS_NEXT_SYMED_VALUE           62
 #endif
 #endif

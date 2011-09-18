@@ -306,7 +306,7 @@ namespace psycle
 				for(int c=0; c<MAX_CONNECTIONS; c++)
 				{
 					if(pMac->_inputCon[c])	{
-						pMac = pSong->_pMachine[pMac->_inputCon[c]];
+						pMac = pSong->_pMachine[pMac->_inputMachines[c]];
 						c=0;
 						continue;
 					}
@@ -1139,6 +1139,73 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			return numSamples;
 		}
 
+		void Master::UpdateVuAndStanbyFlag(int numSamples)
+		{
+#if PSYCLE__CONFIGURATION__RMS_VUS
+			helpers::dsp::GetRMSVol(rms,_pSamplesL,_pSamplesR,numSamples);
+			float volumeLeft = rms.previousLeft*(1.f/GetAudioRange());
+			float volumeRight = rms.previousRight*(1.f/GetAudioRange());
+			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+			int temp(helpers::math::lround<int,float>((50.0f * log10f(volumeLeft)+100.0f)));
+			// clip values
+			if(temp > 97) temp = 97;
+			if(temp > 0)
+			{
+				volumeDisplayLeft = temp;
+			}
+			else if (volumeDisplayLeft>1 ) volumeDisplayLeft -=2;
+			else {volumeDisplayLeft = 0;}
+			temp = helpers::math::lround<int,float>((50.0f * log10f(volumeRight)+100.0f));
+			// clip values
+			if(temp > 97) temp = 97;
+			if(temp > 0)
+			{
+				volumeDisplayRight = temp;
+			}
+			else if (volumeDisplayRight>1 ) volumeDisplayRight -=2;
+			else {volumeDisplayRight = 0;}
+			_volumeDisplay = std::max(volumeDisplayLeft,volumeDisplayRight);
+
+			if ( autoStopMachine )
+			{
+				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.AccumRight < 0.00024*GetAudioRange()
+					&& rms.count >= numSamples)	{
+					rms.count=0;
+					rms.AccumLeft=0.;
+					rms.AccumRight=0.;
+					rms.previousLeft=0.;
+					rms.previousRight=0.;
+					_volumeCounter = 0.0f;
+					volumeDisplayLeft = 0;
+					volumeDisplayRight = 0;
+					_volumeDisplay = 0;
+					Standby(true);
+				}
+			}
+#else
+			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
+			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
+			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
+			// clip values
+			if(temp > 97) temp = 97;
+			if(temp > _volumeDisplay) _volumeDisplay = temp;
+			if (_volumeDisplay>0 )--_volumeDisplay;
+			//Cannot calculate the volume display with GetMaxVol method.
+			volumeDisplayLeft = _volumeDisplay;
+			volumeDisplayRight = _volumeDisplay;
+
+			if ( Global::pConfig->UsesAutoStopMachines() )
+			{
+				if (_volumeCounter < 8.0f)	{
+					_volumeCounter = 0.0f;
+					volumeDisplayLeft = 0;
+					volumeDisplayRight = 0;
+					_volumeDisplay = 0;
+					Standby(true);
+				}
+			}
+#endif
+		}
 		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			UINT size;

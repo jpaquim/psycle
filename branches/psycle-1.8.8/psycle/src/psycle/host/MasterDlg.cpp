@@ -4,21 +4,26 @@
 #include "MasterDlg.hpp"
 #include "InputHandler.hpp"
 #include "Machine.hpp"
-
+#include "DPI.hpp"
 #include <psycle/helpers/dsp.hpp>
 
 namespace psycle { namespace host {
 
-	int const numbersMasterX = 30;
-	int const numbersX = 118;
-	int const numbersY = 186;
-	int const numbersAddX = 24;
-	int const textX = 427;
-	int const textY = 32;
-	int const textYAdd = 15;
-	int const textW = 75;
-	int const textH = 12;
-
+	int CMasterDlg::numbersMasterX = 22;
+	int CMasterDlg::numbersX = 118;
+	int CMasterDlg::numbersY = 186;
+	int CMasterDlg::numbersAddX = 24;
+	int CMasterDlg::textX = 427;
+	int CMasterDlg::textY = 32;
+	int CMasterDlg::textYAdd = 15;
+	int CMasterDlg::textW = 75;
+	int CMasterDlg::textH = 12;
+//	int CMasterVu::vuImgH = 162;
+//	int CMasterVu::vuImgW = 31;
+//	int CMasterVu::vuImgX = 62;
+//	int CMasterVu::vuImgY = 37;
+	int CMasterVu::vuImgH = 159;
+	int CMasterVu::vuImgW = 18;
 	  
   BEGIN_MESSAGE_MAP(CMasterVu, CProgressCtrl)
 	ON_WM_ERASEBKGND()
@@ -30,11 +35,13 @@ namespace psycle { namespace host {
 	}
 	CMasterVu::~CMasterVu()
 	{
-		m_vu.DeleteObject();
+		m_vuOn.DeleteObject();
+		m_vuOff.DeleteObject();
 	}
-	void CMasterVu::LoadBitmap(UINT IDControl)
+	void CMasterVu::LoadBitmap(UINT IDControlOn, UINT IDControlOff)
 	{
-		m_vu.LoadBitmap(IDControl);
+		m_vuOn.LoadBitmap(IDControlOn);
+		m_vuOff.LoadBitmap(IDControlOff);
 	}
 	BOOL CMasterVu::OnEraseBkgnd(CDC* pDC) 
 	{
@@ -43,20 +50,20 @@ namespace psycle { namespace host {
 	void CMasterVu::OnPaint() 
 	{
 		CPaintDC dc(this);
+		dc.SetStretchBltMode(HALFTONE);
 		CRect crect, wrect;
 		GetClientRect(&crect);
-		GetParent()->ScreenToClient(crect);
-		GetWindowRect(&wrect);
-		GetParent()->ScreenToClient(wrect);
-
 		CBitmap* oldbmp;
 		CDC memDC;
 		memDC.CreateCompatibleDC(&dc);
-		oldbmp=memDC.SelectObject(&m_vu);
-		int vol = crect.Height() -  GetPos()*crect.Height()/100;
-		dc.BitBlt(0, vol, crect.Width(), crect.Height(), &memDC, 0, vol, SRCCOPY);
-		memDC.SelectObject(m_pback);
-		dc.BitBlt(0, 0, crect.Width(), vol, &memDC, wrect.left, wrect.top, SRCCOPY);
+		oldbmp=memDC.SelectObject(&m_vuOn);
+		int vol = vuImgH - GetPos()*vuImgH/100;
+		int volRel = crect.Height() - GetPos()*crect.Height()/100;
+		dc.StretchBlt(0,volRel,crect.Width(),crect.Height(),&memDC,0,vol,vuImgW,vuImgH,SRCCOPY);
+		//dc.BitBlt(0, vol, crect.Width(), crect.Height(), &memDC, 0, vol, SRCCOPY);
+		memDC.SelectObject(&m_vuOff);
+		dc.StretchBlt(0,0,crect.Width(),volRel,&memDC,0,0,vuImgW,vol,SRCCOPY);
+		//dc.BitBlt(0, 0, crect.Width(), vol, &memDC, vuImgX, vuImgY, SRCCOPY);
 		memDC.SelectObject(oldbmp);
 	}
 
@@ -72,6 +79,18 @@ namespace psycle { namespace host {
 				CVolumeCtrl* slider = new CVolumeCtrl(i);
 				sliders_.push_back(slider);
 			}
+			// Using CDPI example class
+			CDPI& g_metrics = Global::dpiSetting();
+
+			numbersMasterX = g_metrics.ScaleX(numbersMasterX);
+			numbersX = g_metrics.ScaleX(numbersX);
+			numbersY = g_metrics.ScaleY(numbersY);
+			numbersAddX = g_metrics.ScaleX(numbersAddX);
+			textX = g_metrics.ScaleX(textX);
+			textY = g_metrics.ScaleY(textY);
+			textYAdd = g_metrics.ScaleY(textYAdd);
+			textW = g_metrics.ScaleX(textW);
+			textH = g_metrics.ScaleY(textH);
 			CDialog::Create(CMasterDlg::IDD, AfxGetMainWnd());
 		}
 
@@ -102,7 +121,8 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_SLIDERM10, *sliders_[9]);
 			DDX_Control(pDX, IDC_SLIDERM1, *sliders_[0]);
 			DDX_Control(pDX, IDC_AUTODEC, m_autodec);
-			DDX_Control(pDX, IDC_MASTERDLG_VU, m_vuCtrl);
+			DDX_Control(pDX, IDC_MASTERDLG_VULEFT, m_vuLeft);
+			DDX_Control(pDX, IDC_MASTERDLG_VURIGHT, m_vuRight);
 		}
 
 		BEGIN_MESSAGE_MAP(CMasterDlg, CDialog)
@@ -132,8 +152,8 @@ namespace psycle { namespace host {
 
 			m_sliderknob.LoadBitmap(IDB_MASTERKNOB);
 			m_back.LoadBitmap(IDB_MASTER_BGND);
-			m_vuCtrl.LoadBitmap(IDB_MASTER_VU);
-			m_vuCtrl.m_pback=&m_back;
+			m_vuLeft.LoadBitmap(IDB_MASTER_VUON_LEFT,IDB_MASTER_VUOFF_LEFT);
+			m_vuRight.LoadBitmap(IDB_MASTER_VUON_RIGHT, IDB_MASTER_VUOFF_RIGHT);
 			// Get dimension
 			BITMAP bm;
 			m_back.GetBitmap(&bm);
@@ -151,7 +171,8 @@ namespace psycle { namespace host {
 				slider->SetPageSize(96);
 			}
 			SetSliderValues();
-			m_vuCtrl.SetRange(0,100);
+			m_vuLeft.SetRange(0,100);
+			m_vuRight.SetRange(0,100);
 			if (machine.decreaseOnClip) m_autodec.SetCheck(1);
 			else m_autodec.SetCheck(0);
 			return TRUE;
@@ -268,7 +289,8 @@ namespace psycle { namespace host {
 				r.bottom=textY+MAX_CONNECTIONS*textYAdd;
 				InvalidateRect(r);
 			}
-			m_vuCtrl.SetPos(machine._volumeDisplay);
+			m_vuLeft.SetPos(machine.volumeDisplayLeft);
+			m_vuRight.SetPos(machine.volumeDisplayRight);
 		}
 
 		void CMasterDlg::OnChangeSliderMaster(int pos)
@@ -288,7 +310,7 @@ namespace psycle { namespace host {
 			CPaintDC dc(this); // device context for painting
 	
 			RECT& rect = dc.m_ps.rcPaint;
-			if ( rect.bottom >= numbersY && rect.top <= numbersY+12)
+			if ( rect.bottom >= numbersY && rect.top <= numbersY+textH)
 			{
 				PaintNumbersDC(&dc,((832-m_slidermaster.GetPos())/16.0f)-40.0f,numbersMasterX,numbersY);
 				std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
@@ -326,7 +348,7 @@ namespace psycle { namespace host {
 			dc->SetTextColor(0x00FFFFFF); // White
 			dc->SetBkColor(0x00000000); // Black
 			CFont* oldfont = dc->SelectObject(&namesFont);
-			dc->ExtTextOut(x, y-2, ETO_CLIPPED, CRect(x,y,x+22,y+textH), CString(valtxt), 0);
+			dc->ExtTextOut(x, y-2, ETO_CLIPPED, CRect(x,y,x+numbersAddX-2,y+textH), CString(valtxt), 0);
 			dc->SelectObject(oldfont);
 		}
 
@@ -379,7 +401,8 @@ namespace psycle { namespace host {
 					CBitmap* oldbmp;
 					memDC.CreateCompatibleDC(pDC);
 					oldbmp=memDC.SelectObject(&m_sliderknob);
-					pDC->BitBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left,nmcd.rc.bottom-nmcd.rc.top,&memDC,0,0,SRCCOPY);
+					pDC->StretchBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left,nmcd.rc.bottom-nmcd.rc.top,&memDC,0,0,22,10,SRCCOPY);
+					//pDC->BitBlt(nmcd.rc.left,nmcd.rc.top,nmcd.rc.right-nmcd.rc.left,nmcd.rc.bottom-nmcd.rc.top,&memDC,0,0,SRCCOPY);
 					memDC.SelectObject(oldbmp);
 				}
 				else if(nmcd.dwItemSpec == TBCD_CHANNEL)
@@ -388,15 +411,17 @@ namespace psycle { namespace host {
 					CDC* pDC = CDC::FromHandle( nmcd.hdc );
 					CDC memDC;
 					CBitmap* oldbmp;
+					CDPI& g_metrics = Global::dpiSetting();
+					pDC->SetStretchBltMode(HALFTONE);
 					memDC.CreateCompatibleDC(pDC);
 					oldbmp=memDC.SelectObject(&m_back);
 					CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
 					CRect crect, wrect;
 					slider->GetClientRect(&crect);
-					ScreenToClient(crect);
 					slider->GetWindowRect(&wrect);
 					ScreenToClient(wrect);
-					pDC->BitBlt(0, 0, crect.Width(), crect.Height(), &memDC, wrect.left, wrect.top, SRCCOPY);
+					pDC->StretchBlt(0, 0, crect.Width(), crect.Height(), &memDC, g_metrics.UnscaleX(wrect.left), g_metrics.UnscaleY(wrect.top), g_metrics.UnscaleX(crect.Width()), g_metrics.UnscaleY(crect.Height()), SRCCOPY);
+					//pDC->BitBlt(0, 0, crect.Width(), crect.Height(), &memDC, wrect.left, wrect.top, SRCCOPY);
 					memDC.SelectObject(oldbmp);
 				}
 				else {
@@ -411,18 +436,21 @@ namespace psycle { namespace host {
 		
 		BOOL CMasterDlg::OnEraseBkgnd(CDC* pDC) 
 		{
+			BOOL res = CDialog::OnEraseBkgnd(pDC);
 			if (m_back.m_hObject != NULL)
 			{
+				// Using CDPI example class
+				CDPI& g_metrics = Global::dpiSetting();
+				pDC->SetStretchBltMode(HALFTONE);
 				CDC memDC;
 				memDC.CreateCompatibleDC(pDC);
 				CBitmap* pOldBitmap = memDC.SelectObject(&m_back);
-				pDC->BitBlt(0, 0, m_nBmpWidth, m_nBmpHeight, &memDC, 0, 0, SRCCOPY);
+				pDC->StretchBlt(0,0,g_metrics.ScaleX(m_nBmpWidth),g_metrics.ScaleY(m_nBmpHeight),&memDC,0,0,m_nBmpWidth,m_nBmpHeight,SRCCOPY);
+				//pDC->BitBlt(0, 0, m_nBmpWidth, m_nBmpHeight, &memDC, 0, 0, SRCCOPY);
 				memDC.SelectObject(pOldBitmap);
-				return TRUE;
+				res = TRUE;
 			}
-			else {
-				return CDialog::OnEraseBkgnd(pDC);
-			}
+			return res;
 		}
 	}   // namespace
 }   // namespace

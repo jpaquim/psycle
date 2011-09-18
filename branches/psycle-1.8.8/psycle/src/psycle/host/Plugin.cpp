@@ -196,8 +196,8 @@ namespace psycle
 			}
 			PSYCLE__HOST__CATCH_ALL(*this)
 
-			// version 10 and 11 didn't use HEX representation.
-			// Also, verify for 32 or 64bits.
+			// checks that version is 11 (0x0B) while MI_VERSION is still 0x1N
+			// or version is 0xNM being compatible with the current MI_VERSION.
 			if(!(_pInfo->APIVersion == 11 && (MI_VERSION&0xFFF0) == 0x0010)
 				&& !((_pInfo->APIVersion&0xFFF0) == (MI_VERSION&0xFFF0))) {
 
@@ -345,52 +345,40 @@ namespace psycle
 			pFile->Read(&size,sizeof(size)); // size of whole structure
 			if(size)
 			{
-				if(version > CURRENT_FILE_VERSION_MACD)
+				UINT count;
+				pFile->Read(&count,sizeof(count));  // size of vars
+				/*
+				if (count)
 				{
-					pFile->Skip(size);
-					std::ostringstream s; s
-						<< version << " > " << CURRENT_FILE_VERSION_MACD << std::endl
-						<< "Data is from a newer format of psycle, it might be unsafe to load." << std::endl;
-					MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-					return false;
+					pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
 				}
-				else
+				*/
+				for (UINT i = 0; i < count; i++)
 				{
-					UINT count;
-					pFile->Read(&count,sizeof(count));  // size of vars
-					/*
-					if (count)
+					int temp;
+					pFile->Read(&temp,sizeof(temp));
+					SetParameter(i,temp);
+				}
+				size -= sizeof(count) + sizeof(int)*count;
+				if(size)
+				{
+					byte* pData = new byte[size];
+					pFile->Read(pData, size); // Number of parameters
+					try
 					{
-						pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
+						proxy().PutData(pData); // Internal load
 					}
-					*/
-					for (UINT i = 0; i < count; i++)
+					catch(const std::exception &)
 					{
-						int temp;
-						pFile->Read(&temp,sizeof(temp));
-						SetParameter(i,temp);
-					}
-					size -= sizeof(count) + sizeof(int)*count;
-					if(size)
-					{
-						byte* pData = new byte[size];
-						pFile->Read(pData, size); // Number of parameters
-						try
-						{
-							proxy().PutData(pData); // Internal load
-						}
-						catch(const std::exception &)
-						{
 #ifndef NDEBUG 
-					throw;
+				throw;
 #else
-							delete[] pData;
-							return false;
-#endif
-						}
 						delete[] pData;
-						return true;
+						return false;
+#endif
 					}
+					delete[] pData;
+					return true;
 				}
 			}
 			return true;
@@ -483,7 +471,7 @@ namespace psycle
 							{
 								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
 							}
-							catch(const std::exception &)
+							catch(const std::exception & e)
 							{
 #ifndef NDEBUG 
 					throw;

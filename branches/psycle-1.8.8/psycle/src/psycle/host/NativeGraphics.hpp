@@ -55,7 +55,7 @@ namespace host {
 	class CheckedButton
 	{
 	public:
-		inline static void Draw(CDC& dc,int x, int y,const char*text,bool checked);
+		inline static void Draw(CDC& dc,CDC& switchDC, int x, int y,const char* text);
 		static PsycleConfig::MachineParam* uiSetting;
 	};
 
@@ -195,24 +195,15 @@ namespace host {
 		dc.BitBlt(x,y,width,height,&switchDC,0,0,SRCCOPY);
 	}
 
-	void CheckedButton::Draw(CDC& dc, int x, int y,const char* text,bool checked)
+	void CheckedButton::Draw(CDC& dc, CDC& switchDC, int x, int y,const char* text)
 	{
-		const int height = 16;
-		const int width = 16;
-		const COLORREF titleColor = uiSetting->titleColor;
-		if ( checked )
-		{
-			dc.SetBkColor(uiSetting->hBottomColor);
-			dc.SetTextColor(uiSetting->fonthBottomColor);
-		}
-		else{
-			dc.SetBkColor(uiSetting->topColor);
-			dc.SetTextColor(uiSetting->fontTopColor);
-		}
+		const int height = uiSetting->checkedheight;
+		const int width = uiSetting->checkedwidth;
+
+		dc.BitBlt(x,y+1,width,height,&switchDC,0,0,SRCCOPY);
 		CFont *oldfont =dc.SelectObject(&uiSetting->font_bold);
-		dc.ExtTextOut(x+2, y+1, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y, x+width, y+height), CString(text), 0);
+		dc.ExtTextOut(x+width+1, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x+width, y, x+width+width-1, y+height), CString(text), 0);
 		dc.SelectObject(oldfont);
-		dc.Draw3dRect(x,y-1,width,height+2,titleColor,titleColor);
 	}
 
 

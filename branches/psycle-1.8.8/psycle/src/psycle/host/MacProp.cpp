@@ -24,6 +24,7 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_BYPASS, m_bypassCheck);
 			DDX_Control(pDX, IDC_MUTE, m_muteCheck);
 			DDX_Control(pDX, IDC_MAC_NAME, m_macname);
+			DDX_Control(pDX, IDC_NEWMACBEFORE, m_macbefore);
 		}
 
 		BEGIN_MESSAGE_MAP(CMacProp, CDialog)
@@ -33,6 +34,8 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_BYPASS, OnBypass)
 			ON_BN_CLICKED(IDC_SOLO, OnSolo)
 			ON_BN_CLICKED(IDC_CLONE, OnClone)
+			ON_BN_CLICKED(IDC_NEWMACBEFORE, OnAddNewBefore)
+			ON_BN_CLICKED(IDC_NEWMACAFTER, OnAddNewAfter)
 			ON_BN_CLICKED(IDC_REPLACEMAC, OnBnClickedReplacemac)
 		END_MESSAGE_MAP()
 
@@ -55,8 +58,14 @@ namespace psycle { namespace host {
 			if (pMachine->_mode == MACHMODE_GENERATOR ) 
 			{
 				m_bypassCheck.ShowWindow(SW_HIDE);
+				m_macbefore.EnableWindow(FALSE);
 			}
-			else 
+			else if(pMachine->_type == MACH_MIXER)
+			{
+				m_soloCheck.ShowWindow(SW_HIDE);
+				m_macbefore.EnableWindow(FALSE);
+			}
+			else
 			{
 				m_soloCheck.ShowWindow(SW_HIDE);
 			}
@@ -174,20 +183,75 @@ namespace psycle { namespace host {
 			}
 			PostMessage (WM_CLOSE);
 		}
+		void CMacProp::OnAddNewBefore()
+		{
+			int newMacidx = Global::_pSong->GetFreeFxBus();
+			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
+
+			Machine* newMac = Global::song()._pMachine[newMacidx];
+			if(newMac) {
+				CExclusiveLock lock(&Global::song().semaphore, 2, true);
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					if(pMachine->_inputCon[i]) {
+						Machine* srcMac = Global::song()._pMachine[pMachine->_inputMachines[i]];
+						int wiresrc = srcMac->FindOutputWire(pMachine->_macIndex);
+						Global::song().ChangeWireDestMacNonBlocking(srcMac,newMac,wiresrc,newMac->GetFreeInputWire(0));
+					}
+				}
+				Global::song().InsertConnectionNonBlocking(newMac, pMachine);
+				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (m_view->viewMode==view_modes::machine)
+				{
+					m_view->Repaint();
+				}
+				PostMessage (WM_CLOSE);
+			}
+		}
+		void CMacProp::OnAddNewAfter()
+		{
+			int newMacidx = Global::_pSong->GetFreeFxBus();
+			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
+
+			Machine* newMac = Global::song()._pMachine[newMacidx];
+			if(newMac) {
+				CExclusiveLock lock(&Global::song().semaphore, 2, true);
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					if(pMachine->_connection[i]) {
+						Machine* dstMac = Global::song()._pMachine[pMachine->_outputMachines[i]];
+						int wiredst = dstMac->FindInputWire(pMachine->_macIndex);
+						Global::song().ChangeWireSourceMacNonBlocking(newMac,dstMac,newMac->GetFreeOutputWire(0),wiredst);
+					}
+				}
+				Global::song().InsertConnectionNonBlocking(pMachine, newMac);
+				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (m_view->viewMode==view_modes::machine)
+				{
+					m_view->Repaint();
+				}
+				PostMessage (WM_CLOSE);
+			}
+		}
+
 		void CMacProp::OnBnClickedReplacemac()
 		{
 			int index = pMachine->_macIndex;
 			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
-			strcpy(txt,Global::_pSong->_pMachine[index]->_editName);
 
-			CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
-			pParentMain->UpdateEnvInfo();
-			pParentMain->UpdateComboGen();
-			if (m_view->viewMode==view_modes::machine)
-			{
-				m_view->Repaint();
+			Machine* newMac = Global::song()._pMachine[index];
+			if(newMac) {
+				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (m_view->viewMode==view_modes::machine)
+				{
+					m_view->Repaint();
+				}
+				PostMessage (WM_CLOSE);
 			}
-			PostMessage (WM_CLOSE);
 		}
 
 	}   // namespace

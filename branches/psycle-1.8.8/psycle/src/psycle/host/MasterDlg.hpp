@@ -26,9 +26,11 @@ namespace host {
 			CMasterVu();
 			virtual ~CMasterVu();
 
-			void LoadBitmap(UINT IDControl);
-			CBitmap m_vu;
-			CBitmap* m_pback;
+			void LoadBitmap(UINT IDControlOn, UINT IDControlOff);
+			CBitmap m_vuOn;
+			CBitmap m_vuOff;
+			static int vuImgH;
+			static int vuImgW;
 
 			DECLARE_MESSAGE_MAP()
 			afx_msg BOOL OnEraseBkgnd(CDC* pDC);
@@ -75,13 +77,24 @@ protected:
 			CStatic	m_masterpeak;
 			CVolumeCtrl	m_slidermaster;
 			std::vector<CVolumeCtrl*> sliders_;
-			CMasterVu m_vuCtrl;
+			CMasterVu m_vuLeft;
+			CMasterVu m_vuRight;
 			CButton	m_autodec;
 			CBitmap m_sliderknob;
 			CBitmap m_back;
 			int m_nBmpWidth;
 			int m_nBmpHeight;
 
+			static int numbersMasterX;
+			static int numbersX;
+			static int numbersY;
+			static int numbersAddX;
+			static int textX;
+			static int textY;
+			static int textYAdd;
+			static int textW;
+			static int textH;
+	
 			CFont namesFont;
 			Master& machine;
 			CMasterDlg** windowVar_;

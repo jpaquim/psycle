@@ -137,6 +137,12 @@ namespace psycle
 				//HBITMAP hbmswitchOff;
 				int switchwidth;
 				int switchheight;
+				CBitmap checkedOn;
+				CBitmap checkedOff;
+				//HBITMAP hbmcheckedOn;
+				//HBITMAP hbmcheckedOff;
+				int checkedwidth;
+				int checkedheight;
 			};
 
 			class MachineView
@@ -250,6 +256,7 @@ namespace psycle
 				bool draw_empty_data;
 				int timesig;
 				bool showTrackNames_;
+				bool showA440;
 
 				bool _linenumbers;
 				bool _linenumbersHex;
@@ -471,8 +478,6 @@ namespace psycle
 			bool autosaveSong;
 			int autosaveSongTime;
 			store_t store_place_;
-			//On SkinDlg
-			bool useDoubleBuffer;
 			//On SequencerBar
 			bool _bShowPatternNames;
 			bool _followSong;

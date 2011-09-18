@@ -6,6 +6,7 @@
 #include "Configuration.hpp"
 #if !defined WINAMP_PLUGIN
 	#include "InputHandler.hpp"
+	#include "DPI.hpp"
 	#include "PsycleConfig.hpp"
 	#include "MidiInput.hpp"
 #endif //!defined WINAMP_PLUGIN
@@ -56,6 +57,7 @@ namespace psycle
 		Configuration * Global::pConfig(0);
 #if !defined WINAMP_PLUGIN
 		InputHandler * Global::pInputHandler(0);
+		CDPI Global::dpi;
 #endif //!defined WINAMP_PLUGIN
 		Song * Global::_pSong(0);
 		helpers::dsp::resampler * Global::pResampler(0);

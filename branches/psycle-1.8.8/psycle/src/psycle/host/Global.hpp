@@ -13,6 +13,8 @@
 typedef HANDLE (WINAPI *FAvSetMmThreadCharacteristics)   (LPCTSTR,LPDWORD);
 typedef BOOL   (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
 
+class CDPI;
+
 namespace psycle
 {
 	namespace helpers
@@ -47,6 +49,7 @@ namespace psycle
 				static Configuration * pConfig;
 #if !defined WINAMP_PLUGIN
 				static InputHandler* pInputHandler;
+				static CDPI dpi;
 #endif //!defined WINAMP_PLUGIN
 				static Song * _pSong;
 				static helpers::dsp::resampler * pResampler;
@@ -63,6 +66,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 				static inline CMidiInput     & midi(){ return *pMidiInput; }
 				static inline InputHandler   & inputHandler() { return * pInputHandler; }
+				static inline CDPI			 & dpiSetting() { return dpi; }
 #endif //!defined WINAMP_PLUGIN
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }

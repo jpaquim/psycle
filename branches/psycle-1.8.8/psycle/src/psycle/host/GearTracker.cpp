@@ -20,12 +20,14 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_COMBO1, m_interpol);
 			DDX_Control(pDX, IDC_TRACKSLIDER2, m_polyslider);
 			DDX_Control(pDX, IDC_TRACKLABEL2, m_polylabel);
+			DDX_Control(pDX, IDC_DEFAULTC4, m_defaultC4);
 		}
 
 		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
 			ON_WM_CLOSE()
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)
 			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
+			ON_BN_CLICKED(IDC_DEFAULTC4, OnDefaultC4)
 		END_MESSAGE_MAP()
 
 		BOOL CGearTracker::OnInitDialog() 
@@ -38,6 +40,13 @@ namespace psycle { namespace host {
 			m_interpol.AddString("512p Sinc [Highest Quality]");
 
 			m_interpol.SetCurSel(machine._resampler.quality());
+			m_defaultC4.SetCheck(machine.isDefaultC4());
+			if(Global::psycleconf().patView().showA440) {
+				m_defaultC4.SetWindowTextA("C4 plays the default speed (Otherwise, C3 does it)");
+			}
+			else {
+				m_defaultC4.SetWindowTextA("C5 plays the default speed (Otherwise, C4 does it)");
+			}
 
 			SetWindowText(machine._editName);
 
@@ -74,7 +83,10 @@ namespace psycle { namespace host {
 		{
 			machine._resampler.quality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 		}
-
+		void CGearTracker::OnDefaultC4() 
+		{
+			machine.DefaultC4(m_defaultC4.GetCheck());
+		}
 		void CGearTracker::OnCancel() {
 			DestroyWindow();
 		}

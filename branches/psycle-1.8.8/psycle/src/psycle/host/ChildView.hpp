@@ -199,6 +199,9 @@ namespace host {
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
 		public:
+			static char* notes_tab_a440[256];
+			static char* notes_tab_a220[256];
+			static char* hex_tab[16];
 			//RECENT!!!//
 			HMENU hRecentMenu;
 
@@ -244,6 +247,8 @@ namespace host {
 			int VISTRACKS;
 			int VISLINES;
 			int COLX[10];
+			char szBlankParam[2];
+			char** note_tab_selected;
 			bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 								// Its function is to prevent audio (and midi) operations while it is not
 								// initialized, or while song is being modified (New(),Load()..).
@@ -280,8 +285,6 @@ namespace host {
 			inline void OutData4(CDC *devc,int x,int y,unsigned char data,bool trflag);
 			inline void TXT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
-			inline void BOX(CDC *devc,int x,int y, int w, int h);
-			inline void BOX(CDC *devc,CRect rect);
 			void DrawMachineVol(int c, CDC *devc);
 			void DrawMachineVumeters(int c, CDC *devc);	
 			void DrawAllMachineVumeters(CDC *devc);	
@@ -358,11 +361,9 @@ namespace host {
 			int lOff;		// Line Offset (first line shown)
 			int ntOff;		// These two variables are used for the DMScroll functino
 			int nlOff;
+			int scrollDelay; //Used to slow down the scroll.
 			int rntOff;
 			int rnlOff;
-
-			char szBlankParam[2];
-			char szBlankNote[4];
 
 			CCursor iniSelec;
 			CSelection blockSel;
@@ -454,6 +455,7 @@ namespace host {
 			afx_msg void OnUpdatePaste(CCmdUI* pCmdUI);
 			afx_msg void OnPopMixpaste();
 			afx_msg void OnPopDelete();
+			afx_msg void OnPopAddNewTrack();
 			afx_msg void OnPopInterpolate();
 			afx_msg void OnPopChangegenerator();
 			afx_msg void OnPopChangeinstrument();
@@ -514,136 +516,7 @@ namespace host {
 			int const srx=(TEXTWIDTH*3)+1;
 			int const sry=TEXTHEIGHT;
 			
-			switch(note)
-			{
-			case notecommands::empty: TXTFLAT(devc,szBlankNote,x,y,srx,sry);break;
-		//	case 255: TXTFLAT(devc,"   ",x,y,srx,sry);break;
-			case 0:   TXTFLAT(devc,"C-0",x,y,srx,sry);break;
-			case 1:   TXTFLAT(devc,"C#0",x,y,srx,sry);break;
-			case 2:   TXTFLAT(devc,"D-0",x,y,srx,sry);break;
-			case 3:   TXTFLAT(devc,"D#0",x,y,srx,sry);break;
-			case 4:   TXTFLAT(devc,"E-0",x,y,srx,sry);break;
-			case 5:   TXTFLAT(devc,"F-0",x,y,srx,sry);break;
-			case 6:   TXTFLAT(devc,"F#0",x,y,srx,sry);break;
-			case 7:   TXTFLAT(devc,"G-0",x,y,srx,sry);break;
-			case 8:   TXTFLAT(devc,"G#0",x,y,srx,sry);break;
-			case 9:   TXTFLAT(devc,"A-0",x,y,srx,sry);break;
-			case 10:  TXTFLAT(devc,"A#0",x,y,srx,sry);break;
-			case 11:  TXTFLAT(devc,"B-0",x,y,srx,sry);break;
-			case 12:  TXTFLAT(devc,"C-1",x,y,srx,sry);break;
-			case 13:  TXTFLAT(devc,"C#1",x,y,srx,sry);break;
-			case 14:  TXTFLAT(devc,"D-1",x,y,srx,sry);break;
-			case 15:  TXTFLAT(devc,"D#1",x,y,srx,sry);break;
-			case 16:  TXTFLAT(devc,"E-1",x,y,srx,sry);break;
-			case 17:  TXTFLAT(devc,"F-1",x,y,srx,sry);break;
-			case 18:  TXTFLAT(devc,"F#1",x,y,srx,sry);break;
-			case 19:  TXTFLAT(devc,"G-1",x,y,srx,sry);break;
-			case 20:  TXTFLAT(devc,"G#1",x,y,srx,sry);break;
-			case 21:  TXTFLAT(devc,"A-1",x,y,srx,sry);break;
-			case 22:  TXTFLAT(devc,"A#1",x,y,srx,sry);break;
-			case 23:  TXTFLAT(devc,"B-1",x,y,srx,sry);break;
-			case 24:  TXTFLAT(devc,"C-2",x,y,srx,sry);break;
-			case 25:  TXTFLAT(devc,"C#2",x,y,srx,sry);break;
-			case 26:  TXTFLAT(devc,"D-2",x,y,srx,sry);break;
-			case 27:  TXTFLAT(devc,"D#2",x,y,srx,sry);break;
-			case 28:  TXTFLAT(devc,"E-2",x,y,srx,sry);break;
-			case 29:  TXTFLAT(devc,"F-2",x,y,srx,sry);break;
-			case 30:  TXTFLAT(devc,"F#2",x,y,srx,sry);break;
-			case 31:  TXTFLAT(devc,"G-2",x,y,srx,sry);break;
-			case 32:  TXTFLAT(devc,"G#2",x,y,srx,sry);break;
-			case 33:  TXTFLAT(devc,"A-2",x,y,srx,sry);break;
-			case 34:  TXTFLAT(devc,"A#2",x,y,srx,sry);break;
-			case 35:  TXTFLAT(devc,"B-2",x,y,srx,sry);break;
-			case 36:  TXTFLAT(devc,"C-3",x,y,srx,sry);break;
-			case 37:  TXTFLAT(devc,"C#3",x,y,srx,sry);break;
-			case 38:  TXTFLAT(devc,"D-3",x,y,srx,sry);break;
-			case 39:  TXTFLAT(devc,"D#3",x,y,srx,sry);break;
-			case 40:  TXTFLAT(devc,"E-3",x,y,srx,sry);break;
-			case 41:  TXTFLAT(devc,"F-3",x,y,srx,sry);break;
-			case 42:  TXTFLAT(devc,"F#3",x,y,srx,sry);break;
-			case 43:  TXTFLAT(devc,"G-3",x,y,srx,sry);break;
-			case 44:  TXTFLAT(devc,"G#3",x,y,srx,sry);break;
-			case 45:  TXTFLAT(devc,"A-3",x,y,srx,sry);break;
-			case 46:  TXTFLAT(devc,"A#3",x,y,srx,sry);break;
-			case 47:  TXTFLAT(devc,"B-3",x,y,srx,sry);break;
-			case 48:  TXTFLAT(devc,"C-4",x,y,srx,sry);break;
-			case 49:  TXTFLAT(devc,"C#4",x,y,srx,sry);break;
-			case 50:  TXTFLAT(devc,"D-4",x,y,srx,sry);break;
-			case 51:  TXTFLAT(devc,"D#4",x,y,srx,sry);break;
-			case 52:  TXTFLAT(devc,"E-4",x,y,srx,sry);break;
-			case 53:  TXTFLAT(devc,"F-4",x,y,srx,sry);break;
-			case 54:  TXTFLAT(devc,"F#4",x,y,srx,sry);break;
-			case 55:  TXTFLAT(devc,"G-4",x,y,srx,sry);break;
-			case 56:  TXTFLAT(devc,"G#4",x,y,srx,sry);break;
-			case 57:  TXTFLAT(devc,"A-4",x,y,srx,sry);break;
-			case 58:  TXTFLAT(devc,"A#4",x,y,srx,sry);break;
-			case 59:  TXTFLAT(devc,"B-4",x,y,srx,sry);break;
-			case 60:  TXTFLAT(devc,"C-5",x,y,srx,sry);break;
-			case 61:  TXTFLAT(devc,"C#5",x,y,srx,sry);break;
-			case 62:  TXTFLAT(devc,"D-5",x,y,srx,sry);break;
-			case 63:  TXTFLAT(devc,"D#5",x,y,srx,sry);break;
-			case 64:  TXTFLAT(devc,"E-5",x,y,srx,sry);break;
-			case 65:  TXTFLAT(devc,"F-5",x,y,srx,sry);break;
-			case 66:  TXTFLAT(devc,"F#5",x,y,srx,sry);break;
-			case 67:  TXTFLAT(devc,"G-5",x,y,srx,sry);break;
-			case 68:  TXTFLAT(devc,"G#5",x,y,srx,sry);break;
-			case 69:  TXTFLAT(devc,"A-5",x,y,srx,sry);break;
-			case 70:  TXTFLAT(devc,"A#5",x,y,srx,sry);break;
-			case 71:  TXTFLAT(devc,"B-5",x,y,srx,sry);break;
-			case 72:  TXTFLAT(devc,"C-6",x,y,srx,sry);break;
-			case 73:  TXTFLAT(devc,"C#6",x,y,srx,sry);break;
-			case 74:  TXTFLAT(devc,"D-6",x,y,srx,sry);break;
-			case 75:  TXTFLAT(devc,"D#6",x,y,srx,sry);break;
-			case 76:  TXTFLAT(devc,"E-6",x,y,srx,sry);break;
-			case 77:  TXTFLAT(devc,"F-6",x,y,srx,sry);break;
-			case 78:  TXTFLAT(devc,"F#6",x,y,srx,sry);break;
-			case 79:  TXTFLAT(devc,"G-6",x,y,srx,sry);break;
-			case 80:  TXTFLAT(devc,"G#6",x,y,srx,sry);break;
-			case 81:  TXTFLAT(devc,"A-6",x,y,srx,sry);break;
-			case 82:  TXTFLAT(devc,"A#6",x,y,srx,sry);break;
-			case 83:  TXTFLAT(devc,"B-6",x,y,srx,sry);break;
-			case 84:  TXTFLAT(devc,"C-7",x,y,srx,sry);break;
-			case 85:  TXTFLAT(devc,"C#7",x,y,srx,sry);break;
-			case 86:  TXTFLAT(devc,"D-7",x,y,srx,sry);break;
-			case 87:  TXTFLAT(devc,"D#7",x,y,srx,sry);break;
-			case 88:  TXTFLAT(devc,"E-7",x,y,srx,sry);break;
-			case 89:  TXTFLAT(devc,"F-7",x,y,srx,sry);break;
-			case 90:  TXTFLAT(devc,"F#7",x,y,srx,sry);break;
-			case 91:  TXTFLAT(devc,"G-7",x,y,srx,sry);break;
-			case 92:  TXTFLAT(devc,"G#7",x,y,srx,sry);break;
-			case 93:  TXTFLAT(devc,"A-7",x,y,srx,sry);break;
-			case 94:  TXTFLAT(devc,"A#7",x,y,srx,sry);break;
-			case 95:  TXTFLAT(devc,"B-7",x,y,srx,sry);break;
-			case 96:  TXTFLAT(devc,"C-8",x,y,srx,sry);break;
-			case 97:  TXTFLAT(devc,"C#8",x,y,srx,sry);break;
-			case 98:  TXTFLAT(devc,"D-8",x,y,srx,sry);break;
-			case 99:  TXTFLAT(devc,"D#8",x,y,srx,sry);break;
-			case 100: TXTFLAT(devc,"E-8",x,y,srx,sry);break;
-			case 101: TXTFLAT(devc,"F-8",x,y,srx,sry);break;
-			case 102: TXTFLAT(devc,"F#8",x,y,srx,sry);break;
-			case 103: TXTFLAT(devc,"G-8",x,y,srx,sry);break;
-			case 104: TXTFLAT(devc,"G#8",x,y,srx,sry);break;
-			case 105: TXTFLAT(devc,"A-8",x,y,srx,sry);break;
-			case 106: TXTFLAT(devc,"A#8",x,y,srx,sry);break;
-			case 107: TXTFLAT(devc,"B-8",x,y,srx,sry);break;
-			case 108: TXTFLAT(devc,"C-9",x,y,srx,sry);break;
-			case 109: TXTFLAT(devc,"C#9",x,y,srx,sry);break;
-			case 110: TXTFLAT(devc,"D-9",x,y,srx,sry);break;
-			case 111: TXTFLAT(devc,"D#9",x,y,srx,sry);break;
-			case 112: TXTFLAT(devc,"E-9",x,y,srx,sry);break;
-			case 113: TXTFLAT(devc,"F-9",x,y,srx,sry);break;
-			case 114: TXTFLAT(devc,"F#9",x,y,srx,sry);break;
-			case 115: TXTFLAT(devc,"G-9",x,y,srx,sry);break;
-			case 116: TXTFLAT(devc,"G#9",x,y,srx,sry);break;
-			case 117: TXTFLAT(devc,"A-9",x,y,srx,sry);break;
-			case 118: TXTFLAT(devc,"A#9",x,y,srx,sry);break;
-			case 119: TXTFLAT(devc,"B-9",x,y,srx,sry);break;
-			case notecommands::release: TXTFLAT(devc,"off",x,y,srx,sry);break;
-			case notecommands::tweak: TXTFLAT(devc,"twk",x,y,srx,sry);break;
-			case notecommands::tweakeffect: TXTFLAT(devc,"twf",x,y,srx,sry);break;
-			case notecommands::midicc: TXTFLAT(devc,"mcm" /* aka "mcc" or "cmd"? */,x,y,srx,sry);break;
-			case notecommands::tweakslide: TXTFLAT(devc,"tws",x,y,srx,sry);break;
-			}
+			TXTFLAT(devc,note_tab_selected[note],x,y,srx,sry);
 		}
 
 		inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool trflag)
@@ -653,61 +526,18 @@ namespace host {
 			Rect.top=y;
 			Rect.right=x+TEXTWIDTH;
 			Rect.bottom=y+TEXTHEIGHT;
-			
-			if (trflag)
-			{
-				devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
-				Rect.left+=TEXTWIDTH; 
-				Rect.right+=TEXTWIDTH;
-				devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
-
-		//		Rect.right+=10;
-		//		devc->ExtTextOut(x+2,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"  ",FLATSIZES);
-				return;
+			char* first;
+			char* second;
+			if (trflag) {
+				first = second = szBlankParam;
+			} else {			
+				first = hex_tab[data>>4];
+				second = hex_tab[data&0xf];
 			}
-			
-			switch(data>>4)
-			{
-			case 0x0: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
-			case 0x1: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
-			case 0x2: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
-			case 0x3: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
-			case 0x4: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
-			case 0x5: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
-			case 0x6: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
-			case 0x7: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
-			case 0x8: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
-			case 0x9: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
-			case 0xA: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
-			case 0xB: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
-			case 0xC: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
-			case 0xD: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
-			case 0xE: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
-			case 0xF: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
-			}
-			
-			Rect.left+=TEXTWIDTH;
+			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,first,FLATSIZES);
+			Rect.left+=TEXTWIDTH; 
 			Rect.right+=TEXTWIDTH;
-			
-			switch(data&0xf)
-			{
-			case 0x0: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
-			case 0x1: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
-			case 0x2: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
-			case 0x3: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
-			case 0x4: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
-			case 0x5: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
-			case 0x6: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
-			case 0x7: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
-			case 0x8: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
-			case 0x9: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
-			case 0xA: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
-			case 0xB: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
-			case 0xC: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
-			case 0xD: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
-			case 0xE: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
-			case 0xF: devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
-			}
+			devc->ExtTextOut(x+TEXTWIDTH+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,second,FLATSIZES);
 		}
 
 		inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool trflag)
@@ -717,49 +547,15 @@ namespace host {
 			Rect.top=y;
 			Rect.right=x+TEXTWIDTH;
 			Rect.bottom=y+TEXTHEIGHT;
-			
-			if (trflag)
-			{
-				devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,szBlankParam,FLATSIZES);
-				return;
+			char* first;
+			char* second;
+			if (trflag) {
+				first = second = szBlankParam;
+			} else {			
+				first = hex_tab[data>>4];
+				second = hex_tab[data&0xf];
 			}
-			
-			switch(data&0xf)
-			{
-			case 0x0: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"0",FLATSIZES);break;
-			case 0x1: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"1",FLATSIZES);break;
-			case 0x2: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"2",FLATSIZES);break;
-			case 0x3: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"3",FLATSIZES);break;
-			case 0x4: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"4",FLATSIZES);break;
-			case 0x5: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"5",FLATSIZES);break;
-			case 0x6: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"6",FLATSIZES);break;
-			case 0x7: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"7",FLATSIZES);break;
-			case 0x8: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"8",FLATSIZES);break;
-			case 0x9: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"9",FLATSIZES);break;
-			case 0xA: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"A",FLATSIZES);break;
-			case 0xB: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"B",FLATSIZES);break;
-			case 0xC: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"C",FLATSIZES);break;
-			case 0xD: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"D",FLATSIZES);break;
-			case 0xE: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"E",FLATSIZES);break;
-			case 0xF: devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,"F",FLATSIZES);break;
-			}
-		}
-
-
-		inline void CChildView::BOX(CDC *devc,CRect rect)
-		{
-			devc->Rectangle(rect);
-		}
-
-		inline void CChildView::BOX(CDC *devc,int x,int y, int w, int h)
-		{
-			CRect rect;
-			rect.left=x;
-			rect.top=y;
-			rect.right=x+w;
-			rect.bottom=y+h;
-			
-			devc->Rectangle(rect);
+			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,first,FLATSIZES);
 		}
 
 		inline void CChildView::TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h)

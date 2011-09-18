@@ -272,18 +272,22 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::DrawADSR(int AX,int BX,int CX,int DX)
 		{
-			AX/=420;
-			BX/=420;
-			DX/=420;
-
-			int CH=100;
-		//	int CW=512;
-
 			CClientDC dc(&m_ampframe);
+			CRect rect;
+			m_ampframe.GetClientRect(&rect);
 			CPoint pol[5];
+			int CH=rect.Height();
+			int CW=rect.Width();
+
+			int samplesperpixel = 65536*3/rect.Width();
+			AX/=samplesperpixel;
+			BX/=samplesperpixel;
+			CX*=CH;
+			CX/=100;
+			DX/=samplesperpixel;
 
 			//dc.FillSolidRect(0,0,494,CH+1,0xCC7788);
-			dc.FillSolidRect(0,0,494,CH+1,RGB(50, 50, 50));
+			dc.FillSolidRect(0,0,CW,CH,RGB(50, 50, 50));
 			pol[0].x=0;
 			pol[0].y=CH;
 
@@ -310,20 +314,23 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::DrawADSRFil(int AX,int BX,int CX,int DX)
 		{
-			AX/=420;
-			BX/=420;
-			CX*=100;
-			CX/=128;
-			DX/=420;
-
-			int CH=100;
-		//	int CW=512;
-
 			CClientDC dc(&m_filframe);
+			CRect rect;
+			m_filframe.GetClientRect(&rect);
 			CPoint pol[5];
+			int CH=rect.Height()-1;
+			int CW=rect.Width();
+
+			int samplesperpixel = 65536*3/rect.Width();
+			AX/=samplesperpixel;
+			BX/=samplesperpixel;
+			CX*=CH;
+			CX/=128;
+			DX/=samplesperpixel;
+
 
 			//dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
-			dc.FillSolidRect(0,0,494,CH+1,RGB(50, 50, 50));
+			dc.FillSolidRect(0,0,CW,CH+1,RGB(50, 50, 50));
 			pol[0].x=0;
 			pol[0].y=CH;
 

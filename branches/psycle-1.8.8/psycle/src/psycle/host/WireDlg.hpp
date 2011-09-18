@@ -8,6 +8,7 @@ namespace psycle {
 	namespace host {
 
 		class Machine;
+		class CChildView;
 
 		const int MAX_SCOPE_BANDS = 128;
 		const int SCOPE_BUF_SIZE = 4096;
@@ -17,7 +18,7 @@ namespace psycle {
 		class CWireDlg : public CDialog
 		{
 		public:
-			CWireDlg(CWnd* mainView, CWireDlg** windowVar, int wireDlgIdx,
+			CWireDlg(CChildView* mainView, CWireDlg** windowVar, int wireDlgIdx,
 				Machine& srcMac, int srcWireIdx, Machine& dstMac, int dstWireIdx);
 			virtual ~CWireDlg();
 		
@@ -37,6 +38,7 @@ namespace psycle {
 			afx_msg void OnHold();
 			afx_msg void OnVolumeDb();
 			afx_msg void OnVolumePer();
+			afx_msg void OnAddEffectHere();
 			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
@@ -53,7 +55,7 @@ namespace psycle {
 			Machine& dstMachine;
 		protected:
 			CWireDlg** windowVar;
-			CWnd* mainView;
+			CChildView* mainView;
 			UINT wireDlgIdx;
 			int srcWireIdx;
 			int dstWireIdx;

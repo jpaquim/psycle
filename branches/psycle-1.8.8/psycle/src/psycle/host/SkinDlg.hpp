@@ -28,7 +28,7 @@ namespace psycle { namespace host {
 			// number of beats to show a full row in the pattern editor.
 			CComboBox m_timesig;
 			CComboBox	m_pattern_header_skin;
-			CButton	m_gfxbuffer;
+			CButton	m_showA440;
 			CButton	m_draw_mac_index;
 			CButton	m_generator_fontface;
 			CComboBox	m_generator_font_point;
@@ -80,7 +80,7 @@ namespace psycle { namespace host {
 			afx_msg void OnSelection2();
 			afx_msg void OnCursor();
 			afx_msg void OnCursor2();
-			afx_msg void OnDoublebuffer();
+			afx_msg void OnShowA440();
 			afx_msg void OnLineNumbers();
 			afx_msg void OnLineNumbersHex();
 			afx_msg void OnLineNumbersCursor();
@@ -134,7 +134,6 @@ namespace psycle { namespace host {
 			PsycleConfig::PatternView& patConfig;
 			PsycleConfig::MachineView& macConfig;
 			PsycleConfig::MachineParam& paramConfig;
-			bool gfxbuffer_;
 			std::list<std::string> pattern_skins;
 			std::list<std::string> machine_skins;
 		};

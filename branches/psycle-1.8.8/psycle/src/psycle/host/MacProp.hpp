@@ -26,6 +26,7 @@ namespace psycle { namespace host {
 			CButton	m_soloCheck;
 			CButton	m_bypassCheck;
 			CButton	m_muteCheck;
+			CButton	m_macbefore;
 			CEdit	m_macname;
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -38,6 +39,8 @@ namespace psycle { namespace host {
 			afx_msg void OnBypass();
 			afx_msg void OnSolo();
 			afx_msg void OnClone();
+			afx_msg void OnAddNewBefore();
+			afx_msg void OnAddNewAfter();
 			afx_msg void OnBnClickedReplacemac();
 		};
 

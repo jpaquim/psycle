@@ -114,7 +114,7 @@ namespace psycle
 			s->comments.append(szName);
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			s->InsertConnection(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
+			s->InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 
@@ -1141,7 +1141,7 @@ Special:  Bit 0: On = song message attached.
 			s->comments.append(szName);
 
 			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			s->InsertConnection(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
+			s->InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			s->seqBus=0;
 			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
 

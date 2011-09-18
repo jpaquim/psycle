@@ -52,7 +52,6 @@ namespace psycle { namespace host {
 			int vuxoffset = (colwidth + uiSetting->sliderwidth - uiSetting->vuwidth)/2;
 			int vuyoffset = uiSetting->sliderheight - uiSetting->vuheight-uiSetting->dialheight;
 			int xoffset(realwidth), yoffset(0);
-			int checkedwidth(16);
 			char value[64];
 
 			if (!_pMachine) return;
@@ -83,6 +82,8 @@ namespace psycle { namespace host {
 			CDC SwitchOnDC;
 			CDC VuOnDC;
 			CDC VuOffDC;
+			CDC checkedOnDC;
+			CDC checkedOffDC;
 			knobDC.CreateCompatibleDC(&bufferDC);
 			SliderKnobDC.CreateCompatibleDC(&bufferDC);
 			SliderbackDC.CreateCompatibleDC(&bufferDC);
@@ -90,6 +91,8 @@ namespace psycle { namespace host {
 			SwitchOnDC.CreateCompatibleDC(&bufferDC);
 			VuOnDC.CreateCompatibleDC(&bufferDC);
 			VuOffDC.CreateCompatibleDC(&bufferDC);
+			checkedOnDC.CreateCompatibleDC(&bufferDC);
+			checkedOffDC.CreateCompatibleDC(&bufferDC);
 			CBitmap *knobbmp=knobDC.SelectObject(&uiSetting->dial);
 			CBitmap *slknobbmp=SliderKnobDC.SelectObject(&uiSetting->sliderKnob);
 			CBitmap *sliderbmp=SliderbackDC.SelectObject(&uiSetting->sliderBack);
@@ -97,6 +100,8 @@ namespace psycle { namespace host {
 			CBitmap *switchoffbmp=SwitchOnDC.SelectObject(&uiSetting->switchOn);
 			CBitmap *vubmp=VuOnDC.SelectObject(&uiSetting->vuOn);
 			CBitmap *vu2bmp=VuOffDC.SelectObject(&uiSetting->vuOff);
+			CBitmap *checkedonbmp=checkedOffDC.SelectObject(&uiSetting->checkedOff);
+			CBitmap *checkedoffbmp=checkedOnDC.SelectObject(&uiSetting->checkedOn);
 
 			if (updateBuffer) 
 			{
@@ -203,10 +208,13 @@ namespace psycle { namespace host {
 					yoffset+=realheight;
 					GraphSlider::DrawKnob(bufferDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(param)/4096.0f);
 					VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer().VuChan(i));
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset,"S",mixer().GetSoloState(i));
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset,"M",mixer().Channel(i).Mute());
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset+uiSetting->dialwidth,"D",mixer().Channel(i).DryOnly());
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset+uiSetting->dialwidth,"W",mixer().Channel(i).WetOnly());
+					CheckedButton::Draw(bufferDC,mixer().GetSoloState(i)?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"S");
+					yoffset+=uiSetting->checkedheight;
+					CheckedButton::Draw(bufferDC,mixer().Channel(i).Mute()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"M");
+					yoffset+=uiSetting->checkedheight;
+					CheckedButton::Draw(bufferDC,mixer().Channel(i).DryOnly()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"D");
+					yoffset+=uiSetting->checkedheight;
+					CheckedButton::Draw(bufferDC,mixer().Channel(i).WetOnly()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"W");
 				}
 				else {
 					std::string chantxt = mixer().GetAudioInputName(int(i+Mixer::chan1));
@@ -263,8 +271,9 @@ namespace psycle { namespace host {
 					yoffset+=realheight;
 					GraphSlider::DrawKnob(bufferDC,SliderKnobDC,xoffset,yoffset,mixer().GetParamValue(param)/4096.0f);
 					VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer().VuSend(i));
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth,yoffset,"S",mixer().GetSoloState(i+Mixer::return1));
-					CheckedButton::Draw(bufferDC,xoffset+uiSetting->sliderwidth+checkedwidth,yoffset,"M",mixer().Return(i).Mute());
+					CheckedButton::Draw(bufferDC,mixer().GetSoloState(i+Mixer::return1)?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"S");
+					yoffset+=uiSetting->checkedheight;
+					CheckedButton::Draw(bufferDC,mixer().Return(i).Mute()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"M");
 				}
 				else {
 					std::string sendtxt = mixer().GetAudioInputName(int(i+Mixer::return1));
@@ -287,6 +296,10 @@ namespace psycle { namespace host {
 			SwitchOffDC.DeleteDC();
 			SwitchOnDC.SelectObject(switchonbmp);
 			SwitchOnDC.DeleteDC();
+			checkedOnDC.SelectObject(checkedonbmp);
+			checkedOnDC.DeleteDC();
+			checkedOffDC.SelectObject(checkedoffbmp);
+			checkedOffDC.DeleteDC();
 			SliderbackDC.SelectObject(sliderbmp);
 			SliderbackDC.DeleteDC();
 
@@ -699,7 +712,6 @@ namespace psycle { namespace host {
 		{
 			int realheight = uiSetting->dialheight+1;
 
-			int checkedwidth(16);
 			int row = y/realheight;
 			yoffset=y%realheight;
 			if (row < send1+mixer().numsends()) return row;
@@ -714,21 +726,14 @@ namespace psycle { namespace host {
 					yoffset = y - (realheight*(mixer().numsends()+4 ));
 					return slider;
 				}
-				else if ( row == 3 )
+				else
 				{
-					if ( x < uiSetting->sliderwidth+checkedwidth)
-					{
-						return solo;
-					}
-					else return mute;
-				}
-				else if (row == 4)
-				{
-					if ( x < uiSetting->sliderwidth+checkedwidth)
-					{
-						return dryonly;
-					}
-					else return wetonly;
+					int zeroy = (3+send1+mixer().numsends())*realheight;
+					row = (y-zeroy)/uiSetting->checkedheight;
+					if ( row == 0 ) return solo;
+					else if(row == 1) return mute;
+					else if(row == 2) return dryonly;
+					else if(row == 3) return wetonly;
 				}
 			}
 			return -1;

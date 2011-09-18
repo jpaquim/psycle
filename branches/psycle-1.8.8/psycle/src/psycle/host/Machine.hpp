@@ -364,9 +364,9 @@ namespace psycle
 			///\name gui stuff
 			///\{
 				public:
-					virtual int  GetPosX() { return _x; }
+					virtual int  GetPosX() const { return _x; }
 					virtual void SetPosX(int x) {_x = x;}
-					virtual int  GetPosY() { return _y; }
+					virtual int  GetPosY() const { return _y; }
 					virtual void SetPosY(int y) {_y = y;}
 				public:///\todo private:
 					int _x;
@@ -376,19 +376,19 @@ namespace psycle
 			///\name states
 			///\{
 				public:
-					virtual bool Bypass() { return _bypass; }
+					virtual bool Bypass() const { return _bypass; }
 					virtual void Bypass(bool e) { _bypass = e; }
 				public:///\todo private:
 					bool _bypass;
 
 				public:
-					virtual bool Standby() { return _standby; }
+					virtual bool Standby() const { return _standby; }
 					virtual void Standby(bool e) { _standby = e; }
 				public:///\todo private:
 					bool _standby;
 
 				public:
-					bool Mute() { return _mute; }
+					bool Mute() const { return _mute; }
 					void Mute(bool e) { _mute = e; }
 				public:///\todo private:
 					bool _mute;
@@ -551,6 +551,7 @@ namespace psycle
 			Master(int index);
 			virtual void Init(void);
 			virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
+			virtual void UpdateVuAndStanbyFlag(int numSamples);
 			virtual float GetAudioRange(){ return 32768.0f; }
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile * pFile);
@@ -565,6 +566,8 @@ namespace psycle
 			float currentpeak;
 			float _lMax;
 			float _rMax;
+			int volumeDisplayLeft;
+			int volumeDisplayRight;
 			static float* _pMasterSamples;
 		protected:
 			static char* _psName;

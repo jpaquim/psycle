@@ -125,30 +125,33 @@ namespace psycle
 			virtual bool Load(RiffFile* pFile);
 			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
 			{
+				DefaultC4(false);
 				UINT size;
 				pFile->Read(&size,sizeof(size));
 				if (size)
 				{
-					if (version > CURRENT_FILE_VERSION_MACD)
-					{
-						// data is from a newer format of psycle, it might be unsafe to load.
-						pFile->Skip(size);
-						return FALSE;
-					}
-					else
-					{
-						int temp;
-						pFile->Read(&temp, sizeof(temp)); // numSubtracks
-						_numVoices=temp;
-						pFile->Read(&temp, sizeof(temp)); // quality
+					/// Version 0
+					int temp;
+					pFile->Read(&temp, sizeof(temp)); // numSubtracks
+					_numVoices=temp;
+					pFile->Read(&temp, sizeof(temp)); // quality
 
-						switch (temp)
-						{
-							case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
-							case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
-							case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
-							case 1:
-							default: _resampler.quality(helpers::dsp::resampler::quality::linear);
+					switch (temp)
+					{
+						case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+						case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+						case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+						case 1:
+						default: _resampler.quality(helpers::dsp::resampler::quality::linear);
+					}
+					if(size > 3*sizeof(UINT))
+					{
+						UINT internalversion;
+						pFile->Read(&internalversion, sizeof(UINT));
+						if (internalversion == 1) {
+							bool defaultC4;
+							pFile->Read(&defaultC4, sizeof(bool)); // correct A4 frequency.
+							DefaultC4(defaultC4);
 						}
 					}
 				}
@@ -158,7 +161,7 @@ namespace psycle
 			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
 			{
 				UINT temp;
-				UINT size = 2*sizeof(temp);
+				UINT size = 3*sizeof(temp) + 1*sizeof(bool);
 				pFile->Write(&size,sizeof(size));
 				temp = _numVoices;
 				pFile->Write(&temp, sizeof(temp)); // numSubtracks
@@ -171,9 +174,20 @@ namespace psycle
 					default: temp = 1;
 				}
 				pFile->Write(&temp, sizeof(temp)); // quality
+
+				UINT internalversion = 1;
+				pFile->Write(&internalversion, sizeof(UINT));
+				bool defaultC4 = isDefaultC4();
+				pFile->Write(&defaultC4, sizeof(bool)); // correct A4
 			}
 
 			void Update(void);
+			void DefaultC4(bool correct) {
+				baseC = correct? 60 : 48;
+			}
+			bool isDefaultC4() {
+				return baseC == 60;
+			}
 
 		protected:
 			friend CGearTracker;
@@ -182,6 +196,7 @@ namespace psycle
 			int _numVoices;
 			Voice _voices[SAMPLER_MAX_POLYPHONY];
 			psycle::helpers::dsp::cubic_resampler _resampler;
+			int baseC;
 
 			void PerformFx(int voice);
 			void VoiceWork(int numsamples, int voice);

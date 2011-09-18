@@ -234,12 +234,12 @@ namespace psycle
 					// restore input connections
 					if (inputCon[i])
 					{
-						InsertConnection(_pMachine[inputMachines[i]], _pMachine[songIdx],0,0, inputConVol[i]);
+						InsertConnectionNonBlocking(_pMachine[inputMachines[i]], _pMachine[songIdx],0,0, inputConVol[i]);
 					}
 					// restore output connections
 					if (connection[i])
 					{
-						InsertConnection(_pMachine[songIdx], _pMachine[outputMachines[i]], 0,0, outputConVol[i]);
+						InsertConnectionNonBlocking(_pMachine[songIdx], _pMachine[outputMachines[i]], 0,0, outputConVol[i]);
 					}
 				}
 			}
@@ -249,10 +249,18 @@ namespace psycle
 		bool Song::ExchangeMachines(int one, int two)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
-			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			Machine *mac1 = _pMachine[one];
 			Machine *mac2 = _pMachine[two];
 
+			///\todo: This has been added as a safety measure. This method with the mixer (and multi-io) does not work.
+			if( (mac1  && (mac1->_isMixerSend || mac1->_type == MACH_MIXER))
+				|| (mac2 && (mac2->_isMixerSend || mac2->_type == MACH_MIXER)))
+			{
+				char buf[128];
+				std::sprintf(buf,"Cannot exchange the mixer with any other machine, or any send effect of the mixer");
+				MessageBox(0, buf, "Exchange Machine", 0);
+				return false;
+			}
 			// if they are both valid
 			if (mac1 && mac2)
 			{
@@ -585,7 +593,7 @@ namespace psycle
 			{
 				if (mac->_inputCon[i])
 				{
-					if (!ValidateMixerSendCandidate(_pMachine[mac->_inputMachines[i]],false))
+					if (!ValidateMixerSendCandidate(_pMachine[mac->_inputMachines[i]],true)) //true because obviously it has one output
 					{
 						return false;
 					}
@@ -612,7 +620,7 @@ namespace psycle
 			}
 		}
 
-		int Song::InsertConnection(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
+		int Song::InsertConnectionNonBlocking(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
 		{
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
@@ -622,7 +630,7 @@ namespace psycle
 			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return -1;
 			// disallow mixer as a sender of another mixer
 			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && dsttype != 0) return -1;
-			// If source is in a mixer chain, dissallow the new connection.
+			// If source is in a mixer chain, dissallow the new connection (there can only be one output and at much one input).
 			if ( srcMac->_isMixerSend ) return -1;
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
 			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && dsttype == 1))
@@ -640,25 +648,24 @@ namespace psycle
 			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
 			return dfreebus;
 		}
-		bool Song::ChangeWireDestMac(Machine* srcMac,Machine* dstMac, int wiresrc,int wiredest)
+		bool Song::ChangeWireDestMacNonBlocking(Machine* srcMac,Machine* newdstMac, int wiresrc,int newwiredest)
 		{
-			CExclusiveLock lock(&semaphore, 2, true);
 			// Assert that we have two machines
-			assert(srcMac); assert(dstMac);
+			assert(srcMac); assert(newdstMac);
 			// Verify that the destination is not a generator
-			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
+			if(newdstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
-			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >=MAX_CONNECTIONS) return false;
+			if (srcMac->FindOutputWire(newdstMac->_macIndex) > -1 || newdstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
 			// If source is in a mixer chain, dissallow the new connection.
+			if ( srcMac->_type == MACH_MIXER && newdstMac->_type == MACH_MIXER && newwiredest >=MAX_CONNECTIONS) return false;
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
-			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS))
+			if ( newdstMac->_isMixerSend || (newdstMac->_type == MACH_MIXER && newwiredest >= MAX_CONNECTIONS))
 			{
-				///\todo: validate for the case whre srcMac->_isMixerSend
+				///\todo: validate for the case where srcMac->_isMixerSend
 				if (!ValidateMixerSendCandidate(srcMac,true)) return false;
 			}
 
-			if (wiresrc == -1 || wiredest == -1 || srcMac->_outputMachines[wiresrc] == -1)
+			if (wiresrc == -1 || newwiredest == -1 || srcMac->_outputMachines[wiresrc] == -1)
 				return false;
 
 			int w;
@@ -672,32 +679,31 @@ namespace psycle
 
 				oldmac->GetWireVolume(w,volume);
 				oldmac->DeleteInputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
-				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				srcMac->InsertOutputWireIndex(this,wiresrc,newdstMac->_macIndex);
+				newdstMac->InsertInputWireIndex(this,newwiredest,srcMac->_macIndex,srcMac->GetAudioRange()/newdstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
 		}
-		bool Song::ChangeWireSourceMac(Machine* srcMac,Machine* dstMac, int wiresrc, int wiredest)
+		bool Song::ChangeWireSourceMacNonBlocking(Machine* newsrcMac,Machine* dstMac, int newwiresrc, int wiredest)
 		{
-			CExclusiveLock lock(&semaphore, 2, true);
 			// Assert that we have two machines
-			assert(srcMac); assert(dstMac);
+			assert(newsrcMac); assert(dstMac);
 			// Verify that the destination is not a generator
 			if(dstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
-			if (srcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
+			if (newsrcMac->FindOutputWire(dstMac->_macIndex) > -1 || dstMac->FindOutputWire(newsrcMac->_macIndex) > -1) return false;
 			// disallow mixer as a sender of another mixer
-			if ( srcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS) return false;
+			if ( newsrcMac->_type == MACH_MIXER && dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS) return false;
 			// If source is in a mixer chain, dissallow the new connection.
-			if ( srcMac->_isMixerSend ) return false;
+			if ( newsrcMac->_isMixerSend ) return false;
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
 			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS))
 			{
-				if (!ValidateMixerSendCandidate(srcMac,false)) return false;
+				if (!ValidateMixerSendCandidate(newsrcMac,false)) return false;
 			}
 
-			if (wiresrc == -1 || wiredest == -1)
+			if (newwiresrc == -1 || wiredest == -1)
 				return false;
 
 			Machine *oldmac(0);
@@ -721,9 +727,9 @@ namespace psycle
 					return false;
 
 				oldmac->DeleteOutputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,dstMac->_macIndex);
+				newsrcMac->InsertOutputWireIndex(this,newwiresrc,dstMac->_macIndex);
 				dstMac->GetWireVolume(wiredest,volume);
-				dstMac->InsertInputWireIndex(this,wiredest,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				dstMac->InsertInputWireIndex(this,wiredest,newsrcMac->_macIndex,newsrcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -830,12 +836,41 @@ namespace psycle
 					}
 					++l;
 				}
-				patternLines[pattern] = lines;
+				patternLines[pattern] = lines; ///< This represents the allocation of the new pattern
 			}
 			std::sprintf(patternName[pattern], name);
 			return true;
 		}
 
+		void Song::AddNewTrack(int pattern, int trackIdx) 
+		{
+			int first, last;
+			PatternEntry blank;
+			if(pattern == -1)  {
+				first=0;
+				last=0;
+				for(int i=0;i<MAX_PATTERNS;i++) {
+					if(IsPatternUsed(i)) {
+						last=i;
+					}
+				}
+			}
+			else {
+				first=pattern;
+				last=pattern;
+			}
+			if(SONGTRACKS < MAX_TRACKS) {
+				SONGTRACKS++;
+			}
+			for(int pat=first; pat <=last; pat++) {
+				for(int line=0;line<patternLines[pat]; line++) {
+					unsigned char *offset_source= ppPatternData[pat] + (line*MULTIPLY) + (trackIdx*EVENT_SIZE);
+
+					memmove(offset_source+EVENT_SIZE,offset_source,(SONGTRACKS-1-trackIdx)*EVENT_SIZE);
+					memcpy(offset_source,&blank,EVENT_SIZE);
+				}
+			}
+		}
 		int Song::GetHighestInstrumentIndex()
 		{
 			int i;
@@ -1288,16 +1323,6 @@ namespace psycle
 							if(version == 0) {
 								size= (UINT)(pFile->GetPos() - begins);
 							}
-							if(version > 0) {
-								pFile->Read(shareTrackNames);
-								if( shareTrackNames) {
-									for(int t(0); t < SONGTRACKS; t++) {
-										std::string name;
-										pFile->ReadString(name);
-										ChangeTrackName(0,t,name);
-									}
-								}
-							}
 						}
 						pFile->Seek(begins + size);
 					}
@@ -1355,6 +1380,20 @@ namespace psycle
 								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
+							// fix for a bug existing in the song saver in the 1.7.x series
+							if(version == 0) {
+								size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
+							}
+							else if(version > 0) {
+								pFile->Read(shareTrackNames);
+								if( shareTrackNames) {
+									for(int t(0); t < SONGTRACKS; t++) {
+										std::string name;
+										pFile->ReadString(name);
+										ChangeTrackName(0,t,name);
+									}
+								}
+							}
 							if (fullopen)
 							{
 								///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
@@ -1362,11 +1401,6 @@ namespace psycle
 								/// is bad for the Winamp plugin (or any other multi-document situation).
 								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
 							}
-							// fix for a bug existing in the song saver in the 1.7.x series
-							if(version == 0) {
-								size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
-							}
-
 						}
 						pFile->Seek(begins + size);
 					}

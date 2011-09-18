@@ -36,7 +36,7 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_CENTERCURSOR, m_centercursor);
 			DDX_Control(pDX, IDC_COMBO1, m_timesig);
 			DDX_Control(pDX, IDC_PATTERN_HEADER_SKIN, m_pattern_header_skin);
-			DDX_Control(pDX, IDC_DOUBLEBUFFER, m_gfxbuffer);
+			DDX_Control(pDX, IDC_SHOWA440, m_showA440);
 
 			DDX_Control(pDX, IDC_MACHINE_FONTFACE, m_generator_fontface);
 			DDX_Control(pDX, IDC_MACHINE_FONT_POINT, m_generator_font_point);
@@ -85,7 +85,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_SELECTIONC2, OnSelection2)
 			ON_BN_CLICKED(IDC_CURSORC, OnCursor)
 			ON_BN_CLICKED(IDC_CURSORC2, OnCursor2)
-			ON_BN_CLICKED(IDC_DOUBLEBUFFER, OnDoublebuffer)
+			ON_BN_CLICKED(IDC_SHOWA440, OnShowA440)
 			ON_BN_CLICKED(IDC_CHECK_VUS, OnCheckVus)
 			ON_BN_CLICKED(IDC_LINE_NUMBERS, OnLineNumbers)
 			ON_BN_CLICKED(IDC_LINE_NUMBERS_HEX, OnLineNumbersHex)
@@ -190,7 +190,6 @@ namespace psycle { namespace host {
 			///\todo: Set all settings.
 			patConfig._centerCursor = m_centercursor.GetCheck()?true:false;
 			patConfig.timesig = m_timesig.GetCurSel()+1;
-			Global::psycleconf().useDoubleBuffer = gfxbuffer_;
 			KillTimer(ID_TIMER_SKINGDLG);
 			CDialog::OnOK();
 		}
@@ -356,9 +355,9 @@ namespace psycle { namespace host {
 		{
 			patConfig._linenumbersHex = m_linenumbersHex.GetCheck() >0?true:false;
 		}
-		void CSkinDlg::OnDoublebuffer() 
+		void CSkinDlg::OnShowA440() 
 		{
-			gfxbuffer_ = m_gfxbuffer.GetCheck() >0?true:false;
+			patConfig.showA440 = m_showA440.GetCheck() >0?true:false;
 		}
 
 		void CSkinDlg::OnDrawMacIndex()
@@ -555,7 +554,7 @@ namespace psycle { namespace host {
 			m_centercursor.SetCheck(patConfig._centerCursor?1:0);
 			m_timesig.SetCurSel(patConfig.timesig-1);
 
-			m_gfxbuffer.SetCheck(gfxbuffer_);
+			m_showA440.SetCheck(patConfig.showA440);
 			
 			m_draw_mac_index.SetCheck(macConfig.draw_mac_index);
 			m_draw_vus.SetCheck(macConfig.draw_vus);
@@ -672,7 +671,9 @@ namespace psycle { namespace host {
 		{
 			CStatic *obj=(CStatic *)GetDlgItem(id);
 			CClientDC can(obj);
-			can.FillSolidRect(0,0,16,13,col);
+			CRect rect;
+			obj->GetClientRect(rect);
+			can.FillSolidRect(rect,col);
 		}
 
 		void CSkinDlg::ChangeFont(std::string& face, int& point, UINT& flags)

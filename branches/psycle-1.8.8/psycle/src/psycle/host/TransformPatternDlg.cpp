@@ -22,7 +22,6 @@ namespace psycle { namespace host {
 		void CTransformPatternDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CTransformPatternDlg)
 			DDX_Control(pDX, IDC_FILTERNOTE, m_filternote);
 			DDX_Control(pDX, IDC_FILTERINS, m_filterins);
 			DDX_Control(pDX, IDC_FILTERMAC, m_filtermac);
@@ -35,15 +34,11 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_APPLYTOSONG, m_applytosong);
 			DDX_Control(pDX, IDC_APPLYTOPATTERN, m_applytopattern);
 			DDX_Control(pDX, IDC_APPLYTOBLOCK, m_applytoblock);
-			//}}AFX_DATA_MAP
 		}
 
 
 		BEGIN_MESSAGE_MAP(CTransformPatternDlg, CDialog)
-		//{{AFX_MSG_MAP(CTransformPatternDlg)
 			ON_BN_CLICKED(IDAPPLY, &CTransformPatternDlg::OnBnClickedApply)
-		//}}AFX_MSG_MAP
-
 		END_MESSAGE_MAP()
 
 		BOOL CTransformPatternDlg::OnInitDialog() 

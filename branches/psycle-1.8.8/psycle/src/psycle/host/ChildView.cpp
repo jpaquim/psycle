@@ -35,6 +35,51 @@ namespace psycle { namespace host {
 		int const ID_TIMER_AUTOSAVE = 159;
 
 		CMainFrame		*pParentMain;
+		char* CChildView::notes_tab_a440[256] = {
+			"C-m","C#m","D-m","D#m","E-m","F-m","F#m","G-m","G#m","A-m","A#m","B-m", //0
+			"C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","B-0", //1
+			"C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","B-1", //2
+			"C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","B-2", //3
+			"C-3","C#3","D-3","D#3","E-3","F-3","F#3","G-3","G#3","A-3","A#3","B-3", //4
+			"C-4","C#4","D-4","D#4","E-4","F-4","F#4","G-4","G#4","A-4","A#4","B-4", //5
+			"C-5","C#5","D-5","D#5","E-5","F-5","F#5","G-5","G#5","A-5","A#5","B-5", //6
+			"C-6","C#6","D-6","D#6","E-6","F-6","F#6","G-6","G#6","A-6","A#6","B-6", //7
+			"C-7","C#7","D-7","D#7","E-7","F-7","F#7","G-7","G#7","A-7","A#7","B-7", //8
+			"C-8","C#8","D-8","D#8","E-8","F-8","F#8","G-8","G#8","A-8","A#8","B-8", //9
+			"off","twk","twf","mcm","tws","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+		};
+		char* CChildView::notes_tab_a220[256] = {
+			"C-0","C#0","D-0","D#0","E-0","F-0","F#0","G-0","G#0","A-0","A#0","B-0", //0
+			"C-1","C#1","D-1","D#1","E-1","F-1","F#1","G-1","G#1","A-1","A#1","B-1", //1
+			"C-2","C#2","D-2","D#2","E-2","F-2","F#2","G-2","G#2","A-2","A#2","B-2", //2
+			"C-3","C#3","D-3","D#3","E-3","F-3","F#3","G-3","G#3","A-3","A#3","B-3", //3
+			"C-4","C#4","D-4","D#4","E-4","F-4","F#4","G-4","G#4","A-4","A#4","B-4", //4
+			"C-5","C#5","D-5","D#5","E-5","F-5","F#5","G-5","G#5","A-5","A#5","B-5", //5
+			"C-6","C#6","D-6","D#6","E-6","F-6","F#6","G-6","G#6","A-6","A#6","B-6", //6
+			"C-7","C#7","D-7","D#7","E-7","F-7","F#7","G-7","G#7","A-7","A#7","B-7", //7
+			"C-8","C#8","D-8","D#8","E-8","F-8","F#8","G-8","G#8","A-8","A#8","B-8", //8
+			"C-9","C#9","D-9","D#9","E-9","F-9","F#9","G-9","G#9","A-9","A#9","B-9", //9
+			"off","twk","twf","mcm","tws","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+		};
+		char* CChildView::hex_tab[16] = {
+			"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"
+		};
 
 		CChildView::CChildView()
 			:pParentFrame(0)
@@ -81,6 +126,7 @@ namespace psycle { namespace host {
 			,lOff(0)
 			,ntOff(0)
 			,nlOff(0)
+			,scrollDelay(0)
 			,rntOff(0)
 			,rnlOff(0)
 			,isBlockCopied(false)
@@ -99,7 +145,7 @@ namespace psycle { namespace host {
 			selpos.bottom=0;
 			newselpos.bottom=0;
 			szBlankParam[0]='\0';
-			szBlankNote[0]='\0';
+			note_tab_selected=NULL;
 			MBStart.x=0;
 			MBStart.y=0;
 
@@ -220,6 +266,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
 			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
 			ON_COMMAND(ID_POP_DELETE, OnPopDelete)
+			ON_COMMAND(ID_POP_ADDNEWTRACK, OnPopAddNewTrack)
 			ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
 			ON_COMMAND(ID_POP_INTERPOLATE_CURVE, OnPopInterpolateCurve)
 			ON_COMMAND(ID_POP_CHANGEGENERATOR, OnPopChangegenerator)
@@ -308,8 +355,8 @@ namespace psycle { namespace host {
 				{
 					pParentMain->UpdateVumeters
 						(
-							master->_lMax,
-							master->_rMax,
+							master->volumeDisplayLeft,
+							master->volumeDisplayRight,
 							macView->vu1,
 							macView->vu2,
 							macView->vu3,
@@ -460,7 +507,7 @@ namespace psycle { namespace host {
 			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 			CPaintDC dc(this);
 
-			if ( bmpDC == NULL && Global::psycleconf().useDoubleBuffer ) // buffer creation
+			if ( bmpDC == NULL ) // buffer creation
 			{
 				CRect rc;
 				GetClientRect(&rc);
@@ -470,109 +517,55 @@ namespace psycle { namespace host {
 				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%.8X\n",(int)bmpDC);
 				TRACE(buf);
 			}
-			else if ( bmpDC != NULL && !Global::psycleconf().useDoubleBuffer ) // buffer deletion
+			CDC bufDC;
+			bufDC.CreateCompatibleDC(&dc);
+			CBitmap* oldbmp;
+			oldbmp = bufDC.SelectObject(bmpDC);
+			if (viewMode==view_modes::machine)	// Machine view paint handler
 			{
-				char buf[100];
-				sprintf(buf,"CChildView::OnPaint(). Deleted bmpDC (was 0x%.8X)\n",(int)bmpDC);
-				TRACE(buf);
-				bmpDC->DeleteObject();
-				delete bmpDC; bmpDC = 0;
-			}
-			if ( Global::psycleconf().useDoubleBuffer )
-			{
-				CDC bufDC;
-				bufDC.CreateCompatibleDC(&dc);
-				CBitmap* oldbmp;
-				oldbmp = bufDC.SelectObject(bmpDC);
-				if (viewMode==view_modes::machine)	// Machine view paint handler
+				switch (updateMode)
 				{
-					switch (updateMode)
+				case draw_modes::all:
+					DrawMachineEditor(&bufDC);
+					break;
+				case draw_modes::machine:
+					//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
+					DrawMachine(updatePar, &bufDC);
+					DrawMachineVumeters(updatePar, &bufDC);
+					updateMode=draw_modes::all;
+					break;
+				case draw_modes::playback:
+					///\todo need to refresh also mute/solo/bypass and panning.
+					//warning: doing DrawMachine can cause problems if transparent
+					//graphics or if machine text is drawn outside of the machine.
+					DrawAllMachineVumeters(&bufDC);
+					break;
+				case draw_modes::all_machines:
+					for (int i=0;i<MAX_MACHINES;i++)
 					{
-					case draw_modes::all:
-						DrawMachineEditor(&bufDC);
-						break;
-					case draw_modes::machine:
-						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
-						DrawMachine(updatePar, &bufDC);
-						DrawMachineVumeters(updatePar, &bufDC);
-						updateMode=draw_modes::all;
-						break;
-					case draw_modes::playback:
-						///\todo need to refresh also mute/solo/bypass and panning.
-						//warning: doing DrawMachine can cause problems if transparent
-						//graphics or if machine text is drawn outside of the machine.
-						DrawAllMachineVumeters(&bufDC);
-						break;
-					case draw_modes::all_machines:
-						for (int i=0;i<MAX_MACHINES;i++)
+						if (_pSong->_pMachine[i])
 						{
-							if (_pSong->_pMachine[i])
-							{
-								DrawMachine(i, &bufDC);
-							}
+							DrawMachine(i, &bufDC);
 						}
-						DrawAllMachineVumeters(&bufDC);
-						break;
 					}
+					DrawAllMachineVumeters(&bufDC);
+					break;
 				}
-				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
-				{
-					DrawPatEditor(&bufDC);
-				}
-				else if ( viewMode == view_modes::sequence)
-				{
-					DrawSeqEditor(&bufDC);
-				}
+			}
+			else if (viewMode == view_modes::pattern)	// Pattern view paint handler
+			{
+				DrawPatEditor(&bufDC);
+			}
+			else if ( viewMode == view_modes::sequence)
+			{
+				DrawSeqEditor(&bufDC);
+			}
 
-				CRect rc;
-				GetClientRect(&rc);
-				dc.BitBlt(0,0,rc.right-rc.left,rc.bottom-rc.top,&bufDC,0,0,SRCCOPY);
-				bufDC.SelectObject(oldbmp);
-				bufDC.DeleteDC();
-			}
-			else
-			{
-				if (viewMode==view_modes::machine) // Machine view paint handler
-				{
-					switch (updateMode)
-					{
-					case draw_modes::all:
-						DrawMachineEditor(&dc);
-						break;
-					case draw_modes::machine:
-						//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &dc);
-						DrawMachine(updatePar, &dc);
-						DrawMachineVumeters(updatePar, &dc);
-						updateMode=draw_modes::all;
-						break;
-					case draw_modes::playback:
-						///\todo need to refresh also mute/solo/bypass and panning.
-						//warning: doing DrawMachine can cause problems if transparent
-						//graphics or if machine text is drawn outside of the machine.
-						DrawAllMachineVumeters(&dc);
-						break;
-					case draw_modes::all_machines:
-						for (int i=0;i<MAX_MACHINES;i++)
-						{
-							if (_pSong->_pMachine[i]) 
-							{
-								DrawMachine(i, &dc);
-							}
-						}
-						DrawAllMachineVumeters(&dc);
-						updateMode=draw_modes::all;
-						break;
-					}
-				}
-				else if (viewMode == view_modes::pattern)	// Pattern view paint handler
-				{
-					DrawPatEditor(&dc);
-				}
-				else if ( viewMode == view_modes::sequence)
-				{
-					DrawSeqEditor(&dc);
-				}
-			}
+			CRect rc;
+			GetClientRect(&rc);
+			dc.BitBlt(0,0,rc.right-rc.left,rc.bottom-rc.top,&bufDC,0,0,SRCCOPY);
+			bufDC.SelectObject(oldbmp);
+			bufDC.DeleteDC();
 		}
 
 		void CChildView::Repaint(draw_modes::draw_mode drawMode)
@@ -616,7 +609,7 @@ namespace psycle { namespace host {
 			CW = cx;
 			CH = cy;
 			
-			if ( bmpDC != NULL && Global::psycleconf().useDoubleBuffer ) // remove old buffer to force recreating it with new size
+			if ( bmpDC != NULL ) // remove old buffer to force recreating it with new size
 			{
 				TRACE("CChildView::OnResize(). Deleted bmpDC");
 				bmpDC->DeleteObject();
@@ -1649,6 +1642,21 @@ namespace psycle { namespace host {
 		}
 
 		void CChildView::OnPopDelete() { DeleteBlock(); }
+		
+		void CChildView::OnPopAddNewTrack() 
+		{
+			int pattern = _pSong->playOrder[editPosition];
+			if (MessageBox("Do you want to add the track to all patterns?","Add pattern track",MB_YESNO) == IDYES )
+			{
+				pattern = -1;
+			}
+
+			_pSong->AddNewTrack(pattern, editcur.track);
+			pParentMain->PsybarsUpdate();
+			RecalculateColourGrid();
+			Repaint();
+		}
+
 
 		void CChildView::OnPopInterpolate() { BlockParamInterpolate(); }
 
@@ -2198,13 +2206,17 @@ namespace psycle { namespace host {
 			if (patView->draw_empty_data)
 			{
 				strcpy(szBlankParam,".");
-				strcpy(szBlankNote,"---");
+				notes_tab_a220[notecommands::empty]="---";
+				notes_tab_a440[notecommands::empty]="---";
 			}
 			else
 			{
 				strcpy(szBlankParam," ");
-				strcpy(szBlankNote,"   ");
+				notes_tab_a220[notecommands::empty]="   ";
+				notes_tab_a440[notecommands::empty]="   ";
 			}
+			note_tab_selected = patView->showA440 ? notes_tab_a440 : notes_tab_a220;
+
 			TEXTHEIGHT = patView->font_y;
 			ROWHEIGHT = TEXTHEIGHT+1;
 			TEXTWIDTH = patView->font_x;
@@ -2377,10 +2389,35 @@ namespace psycle { namespace host {
 			if(dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
-				{
-					CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-					Global::_pSong->DestroyMachine(propMac);
+				CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+				Machine* pMac = Global::song()._pMachine[propMac];
+				// move wires before deleting. Don't do inside DeleteMachine since that is used in song internally
+				if( pMac->_numInputs > 0 && pMac->_numOutputs > 0) {
+					//For each input connection
+					for(int i = 0; i < MAX_CONNECTIONS; i++) if(pMac->_inputCon[i]) {
+						Machine* srcMac = Global::song()._pMachine[pMac->_inputMachines[i]];
+						int wiresrc = srcMac->FindOutputWire(pMac->_macIndex);
+						bool first = true;
+						//Connect it to each output connection
+						for(int i = 0; i < MAX_CONNECTIONS; i++) if(pMac->_connection[i]) {
+							Machine* dstMac = Global::song()._pMachine[pMac->_outputMachines[i]];
+							//Except if already connected
+							if( dstMac->FindInputWire(srcMac->_macIndex) == -1) {
+								int wiredst = dstMac->FindInputWire(pMac->_macIndex);
+								//If first wire change, it can be moved. Else it needs a new connection.
+								if(first) {
+									Global::song().ChangeWireDestMacNonBlocking(srcMac,dstMac,wiresrc,wiredst);
+									first = false;
+								}
+								else {
+									Global::song().InsertConnectionNonBlocking(srcMac, dstMac);
+								}
+							}
+						}
+					}
 				}
+				Global::_pSong->DestroyMachine(propMac);
+
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
 				if (pParentMain->pGearRackDialog)

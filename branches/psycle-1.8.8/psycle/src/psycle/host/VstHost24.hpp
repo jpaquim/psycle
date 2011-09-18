@@ -133,7 +133,7 @@ namespace psycle
 				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
-				virtual bool Bypass(void) { return Machine::Bypass(); }
+				virtual bool Bypass(void) const { return Machine::Bypass(); }
 				virtual void Bypass(bool e)
 				{
 					Machine::Bypass(e);
@@ -146,7 +146,7 @@ namespace psycle
 						}catch(...){}
 					}
 				}
-				virtual bool Standby() { return Machine::Standby(); }
+				virtual bool Standby() const { return Machine::Standby(); }
 				virtual void Standby(bool e)
 				{
 					Machine::Standby(e);
