@@ -50,7 +50,7 @@ CMachineParameter const paraGlobalDetune = {"Glb. Detune", "Global Detune", -36,
 // So to correctly compensate, 1 seminote and fine of 60 is added (0.2344 * 256 ~ 60.01)
 //
 // With the new implementation where the wavetable is generated depending
-// on the sampling rate, this correction is maintained for compatibility.
+// on the sampling rate, this correction is maintained for compatibility, and substracted in parameterTweak.
 CMachineParameter const paraGlobalFinetune = {"Gbl. Finetune", "Global Finetune", -256, 256, MPF_STATE, 60};
 CMachineParameter const paraGlide = {"Glide Depth", "Glide Depth", 0, 255, MPF_STATE, 0};
 CMachineParameter const paraInterpolation = {"Resampling", "Resampling method", 0, 1, MPF_STATE, 0};
@@ -127,6 +127,7 @@ class mi : public CMachineInterface {
 		SYNPAR globalpar;
 		bool reinitChannel[MAX_TRACKS];
 		uint32_t currentSR;
+		int fxsamples;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
@@ -143,6 +144,7 @@ mi::mi() {
 	for(int i=0; i < MacInfo.numParameters; i++) {
 		Vals[i]=0;
 	}
+	fxsamples=256;
 }
 
 mi::~mi() {
@@ -160,6 +162,7 @@ void mi::Init() {
 	for (int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 	}
+	fxsamples=256*currentSR/44100.0f;
 }
 
 void mi::Stop() {
@@ -177,6 +180,7 @@ void mi::SequencerTick() {
 		for (int i = 0; i < MAX_TRACKS; ++i) {
 			track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 		}
+		fxsamples=256*currentSR/44100.0f;
 	}
 	for (int i = 0; i < MAX_TRACKS; ++i) reinitChannel[i] = true;
 }
@@ -228,7 +232,8 @@ void mi::ParameterTweak(int par, int val) {
 	globalpar.arp_mod=Vals[21];
 	globalpar.arp_bpm=Vals[22];
 	globalpar.arp_cnt=Vals[23];
-	globalpar.globaldetune=Vals[24];
+	//With the new wavetable, we remove the compensation
+	globalpar.globaldetune=Vals[24]-1;
 	//With the new wavetable, we remove the compensation
 	globalpar.globalfinetune=Vals[25]-60;
 	if (par == 26 && val > paraGlide.MaxValue) {
@@ -264,50 +269,58 @@ void mi::Command() {
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks) {
+	int fxsamplescnt = fxsamples;
 	for(int c=0;c<tracks;c++) {
+		fxsamplescnt=fxsamples;
 		if(track[c].AmpEnvStage) {
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
 			--xpsamplesleft;
 			--xpsamplesright;
 			
-			int xnumsamples=numsamples;
-		
 			CSynthTrack *ptrack=&track[c];
 			if(reinitChannel[c]) {
 				ptrack->InitEffect(0,0);
 				reinitChannel[c]=false;
 			}
 
-			if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
-		
-			///\todo: this could be considered a bug, calling performFx here doesn't ensure
-			// a constant number of samples between calls.
-			ptrack->PerformFx();
-
-			if(globalpar.osc_mix == 0) {
-				do {
-					const float sl=ptrack->GetSampleOsc1();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-			else if(globalpar.osc_mix == 256) {
-				do {
-					const float sl=ptrack->GetSampleOsc2();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-			else {
-				do {
-					const float sl=ptrack->GetSample();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
+			int xnumsamples = numsamples;
+			do
+			{
+				int minimum = std::min(xnumsamples,fxsamplescnt);
+				xnumsamples-=minimum;
+				fxsamplescnt-=minimum;
+				if(globalpar.osc_mix == 0) {
+					do {
+						const float sl=ptrack->GetSampleOsc1();
+						*++xpsamplesleft+=sl;
+						*++xpsamplesright+=sl;
+					} while(--minimum);
+				}
+				else if(globalpar.osc_mix == 256) {
+					do {
+						const float sl=ptrack->GetSampleOsc2();
+						*++xpsamplesleft+=sl;
+						*++xpsamplesright+=sl;
+					} while(--minimum);
+				}
+				else {
+					do {
+						const float sl=ptrack->GetSample();
+						*++xpsamplesleft+=sl;
+						*++xpsamplesright+=sl;
+					} while(--minimum);
+				}
+				if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
+			
+				if(fxsamplescnt<=0) {
+					ptrack->PerformFx();
+					fxsamplescnt=256*currentSR/44100.0f;
+				}
+			}while(xnumsamples>0);
 		}
 	}
+	fxsamples=fxsamplescnt;
 }
 
 // Function that describes value on client's displaying
@@ -576,23 +589,25 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 	}
 
 	if(note<=NOTE_MAX)
-		track[channel].NoteOn(note-18);
+		//Note zero is A-1 (Which is note 9 in Psycle)
+		track[channel].NoteOn(note-21);
 	else if(note==NOTE_NOTEOFF)
 		track[channel].NoteOff();
 }
 
 //New method to generate the wavetables:
 //
-//Generate a signal of aproximately 22Hz for the current sampling rate.
-//since it will not be an integer amount of samples, store the difference
+//Generate a signal of aproximately 13.75Hz for the current sampling rate.
+//This frequency is exactly A-1 using the standard tuning of A4=440
+//Since it will not be an integer amount of samples, store the difference
 //as a factor in wavetableCorrection, so that it can be applied when calculating
 //the OSC speed.
 void mi::InitWaveTableSR(bool delArray) {
 	//Ensure the value is even, we need to divide it by two.
-	const uint32_t amount = lround<uint32_t>(currentSR / 22.0f) & 0xFFFFFFFE;
+	const uint32_t amount = lround<uint32_t>(currentSR / 13.75f) & 0xFFFFFFFE;
 	const uint32_t half = amount >> 1;
 
-	const double sinFraction = 2.0*math::pi/(double)amount;
+	const double sinFraction = 2.0*psycle::plugin_interface::pi/(double)amount;
 	const float increase = 32768.0f/(float)amount;
 	const float increase2 = 65536.0f/(float)amount;
 
@@ -625,6 +640,6 @@ void mi::InitWaveTableSR(bool delArray) {
 	}
 
 	waveTableSize = amount;
-	wavetableCorrection = (float)amount*22.0f / (float)currentSR;
+	wavetableCorrection = (float)amount*13.75f / (float)currentSR;
 
 }

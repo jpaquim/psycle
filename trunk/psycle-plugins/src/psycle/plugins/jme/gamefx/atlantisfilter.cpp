@@ -40,7 +40,7 @@ void CSIDFilter::setAlgorithm(eAlgorithm a_algo)
 void CSIDFilter::recalculateCoeffs(const float a_fFrequency, const float a_fFeedback, const float sampleRate)
 {
 	//m_f = (200.0+(17800.0*6.0*a_fFrequency))*44100.0/sampleRate*piX2/985248.0;
-	float newfreq = (a_fFrequency < sampleRate*0.5f)? a_fFrequency : sampleRate -1.0f;
+	float newfreq = (a_fFrequency < sampleRate*0.5f)? a_fFrequency : sampleRate *0.5f;
 	m_f =(1.0f+(534.0f*newfreq))*44100.f/sampleRate*0.00127545253726566f; 
 	float f2 = 2.0f*(a_fFeedback-(a_fFrequency*a_fFrequency)); 
 	if (f2 < 0.0f) f2 = 0.0f;

@@ -62,12 +62,12 @@ CSynthTrack::~CSynthTrack()
 {
 
 }
-void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float srCorrection_) {
+void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float wavetableCorrection_) {
 	m_filter.init(currentSR_);
 	sampleRate = currentSR_;
 	srCorrection = 44100.0f / (float)sampleRate;
 	waveTableSize = wavetableSize_;
-	wavetableCorrection = srCorrection_;
+	wavetableCorrection = wavetableCorrection_;
 	if (AmpEnvStage) {
 		AmpEnvStage = 0;
 	}
@@ -86,12 +86,12 @@ void CSynthTrack::NoteOn(int note)
 	float nnote=(float)note+
 		(float)syntp->globalfinetune*0.00389625f+
 		(float)syntp->globaldetune;
-	OSC1Speed=(float)pow(2.0, (float)nnote*wavetableCorrection/12.0);
+	OSC1Speed=(float)pow(2.0, nnote/12.0)*wavetableCorrection;
 
 	float note2=nnote+
 		syntp->osc2finetune+
 		syntp->osc2detune;
-	OSC2Speed=(float)pow(2.0, (float)note2*wavetableCorrection/12.0);
+	OSC2Speed=(float)pow(2.0, note2/12.0)*wavetableCorrection;
 
 	//if (oscglide == 0.0f)
 	if (sp_cmd != 0x03)
@@ -292,11 +292,11 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	sp_val=val;
 
 	// Init glide
-	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f*srCorrection; }
+	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f; }
 	else 
 	{
 		const float synthglide = 256-syntp->synthglide;
-		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f*srCorrection;
+		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f;
 		else oscglide= 0.0f;
 
 		if(cmd==0x0C) 

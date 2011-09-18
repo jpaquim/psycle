@@ -116,14 +116,13 @@ bool dwfilter::SetFreq(double _freq)
 
 bool dwfilter::SetGain(double _gain)
 {
-	if(_gain>=FILT_MIN_GAIN && _gain<=FILT_MAX_GAIN)
+	if(_gain<FILT_MIN_GAIN) _gain = FILT_MIN_GAIN;
+	if(_gain>FILT_MAX_GAIN) _gain = FILT_MAX_GAIN;
+	if(gain!=_gain)
 	{
-		if(gain!=_gain)
-		{
-			gain = _gain;
-			CoefUpdate();
-			return true;
-		}
+		gain = _gain;
+		CoefUpdate();
+		return true;
 	}
 	return false; 
 }

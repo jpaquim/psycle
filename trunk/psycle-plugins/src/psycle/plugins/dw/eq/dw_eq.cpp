@@ -102,11 +102,6 @@ public:
 
 	dw_eq() : Plugin(information())
 	{
-		band1.SetSampleRate(samprate);
-		band2.SetSampleRate(samprate);
-		band3.SetSampleRate(samprate);
-		band4.SetSampleRate(samprate);
-
 		band1.SetMode(dwfilter::eq_loshelf);
 		band2.SetMode(dwfilter::eq_parametric);
 		band3.SetMode(dwfilter::eq_parametric);
@@ -115,6 +110,9 @@ public:
 
 	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
 	/*override*/ void parameter(const int &);
+	/*override*/ void init() {
+		samples_per_second_changed();
+	}
 
 protected:
 	/*override*/ void samples_per_second_changed() {
@@ -125,7 +123,6 @@ protected:
 	}
 
 	dwfilter band1, band2, band3, band4; //this is silly, i should use an array
-	int samprate;
 	bool active[4];				//used to bypass eq channels with gain==0
 };
 

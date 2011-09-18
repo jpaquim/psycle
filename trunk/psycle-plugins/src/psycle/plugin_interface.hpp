@@ -15,13 +15,7 @@ namespace psycle { namespace plugin_interface {
 #endif
 
 /// machine interface version.
-/// If highest bit is set, then it is a 64bit compile.
-/// Note: Psycle 1.8.6 and older will not detect the 64bit difference, since it uses int and checks for higher or equal version.
-#ifdef PSYCLE__PLUGIN__64BIT_PLATFORM
-	unsigned short const MI_VERSION = 0x8012;
-#else
-	unsigned short const MI_VERSION = 0x0012;
-#endif
+unsigned short const MI_VERSION = 0x0012;
 
 /// max number of pattern tracks
 int const MAX_TRACKS = 64;
@@ -31,9 +25,10 @@ int const MAX_BUFFER_LENGTH = 256;
 
 ///\name note values
 ///\{
-	/// value of B-9. NOTE: C-0 is note number 0!
+	/// value of B-8. NOTE: C minus 1 is note 0 and C-0 is note 12!
 	int const NOTE_MAX = 119;
-	/// value of the "off" note
+	int const NOTE_A4 = 69; // Note tuned at 440Hz.
+	/// value of the "off" (release) note.
 	int const NOTE_NOTEOFF = 120;
 	/// empty value
 	int const NOTE_NONE = 255;
