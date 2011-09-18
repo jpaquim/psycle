@@ -343,6 +343,7 @@ private:
 	long reg;
 	// Index position of the noise wavetable feeder (WAVETABLE 7).
 	int  noiseindex;
+	int fxsamples;
 };
 
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
@@ -361,6 +362,7 @@ mi::mi()
 		Vals[i]=0;
 	}
 	noiseindex=0;
+	fxsamples=256;
 }
 
 mi::~mi()
@@ -377,11 +379,13 @@ void mi::Init()
 	reg = 0x7ffff8; // init noise register
 	noiseindex = 0;
 	currentSR=pCB->GetSamplingRate();
+	globals.oversamplesAmt = (384000 / currentSR) & 0xFFFFFFFE;
 	// Initialize your stuff here (you can use pCB here without worries)
 	InitWaveTableSR();
 	for (int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 	}
+	fxsamples=256*currentSR/44100.0f;
 }
 
 void mi::Stop()
@@ -394,12 +398,14 @@ void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
 		Stop();
 		currentSR = pCB->GetSamplingRate();
+		globals.oversamplesAmt = (384000 / currentSR) & 0xFFFFFFFE;
 		InitWaveTableSR(true);
-		//force an update of Amplitude and filter envelopes.
-		ParameterTweak(116,Vals[116]);
+		//forces an update of Amplitude and filter envelopes.
+		ParameterTweak(115,Vals[115]);
 		for (int i = 0; i < MAX_TRACKS; ++i) {
 			track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 		}
+		fxsamples=256*currentSR/44100.0f;
 	}
 }
 
@@ -469,32 +475,47 @@ void mi::Command()
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	globals.noiseused=false;
+	int fxsamplescur = fxsamples;
 	for(int c=0;c<tracks;c++)
 	{
+		fxsamplescur=fxsamples;
 		if(track[c].AmpEnvStage)
 		{
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
-			int xnumsamples=numsamples;
 
 			--xpsamplesleft;
 			--xpsamplesright;
 
-			track[c].PerformFx();
-			do
-			{
-				const float sl=track[c].GetSample();
+			int xnumsamples = numsamples;
+			do {
+				int minimum = std::min(xnumsamples,fxsamplescur);
+				xnumsamples-=minimum;
+				fxsamplescur-=minimum;
 
-				*++xpsamplesleft+=sl;
-				*++xpsamplesright+=sl;
-			
-			} while(--xnumsamples);
+				do
+				{
+					const float sl=track[c].GetSample();
+
+					*++xpsamplesleft+=sl;
+					*++xpsamplesright+=sl;
+				
+				} while(--minimum);
+
+				if(fxsamplescur<=0) {
+					track[c].PerformFx();
+					fxsamplescur=256.f*currentSR/44100.0f;
+				}
+			}while(xnumsamples>0);
 		}
 	}
+	fxsamples = fxsamplescur;
 	if (globals.noiseused)
 	{
+		int big = waveTableSize/8;
+		int small = waveTableSize/64;
 		signed short noisework=0;
-		for (int i = 0; i < 256; i++){
+		for (int i = 0; i < big; i++){
 			long noise=(((reg & (1<<22))? 1:0) << 7) |
 			(((reg & (1<<20))? 1:0) << 6) |
 			(((reg & (1<<16))? 1:0) << 5) |
@@ -507,21 +528,27 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			const long bit22= (reg & (1<<22))? 1:0;
 			const long bit17= (reg & (1<<17))? 1:0;
 			/* Shift 1 bit left */
-			reg= reg << 1;
+			reg<<= 1;
 			/* Feed bit 0 */
-			reg= reg | (bit22 ^ bit17);
+			reg |= (bit22 ^ bit17);
 			noisework=(signed short)noise<<8;
 			int remaining = waveTableSize-noiseindex;
-			if(remaining > 32) remaining = 32;
-			int k=0;
-			for(;k<remaining;k++){
-				globals.Wavetable[7][noiseindex++]=noisework;
-			}
-			if(noiseindex >= waveTableSize) {
+			if(remaining >= small) {
+				for(int k=0;k<small;k++){
+					globals.Wavetable[7][noiseindex++]=noisework;
+				}
+				if(noiseindex >= waveTableSize) {
+					noiseindex -= waveTableSize;
+				}
+			} else {
+				int more = small-remaining;
+				for(int k=0;k<remaining;k++){
+					globals.Wavetable[7][noiseindex++]=noisework;
+				}
 				noiseindex -= waveTableSize;
-			}
-			for(;k<32;k++){
-				globals.Wavetable[7][noiseindex++]=noisework;
+				for(int k=0;k<more;k++){
+					globals.Wavetable[7][noiseindex++]=noisework;
+				}
 			}
 		}
 		globals.shortnoise=noisework;
@@ -741,7 +768,8 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	}
 
 	if(note<=NOTE_MAX)
-		track[channel].NoteOn(note-18);
+		//Note zero is A0 (Which is note 21 in Psycle)
+		track[channel].NoteOn(note-21);
 	else if(note==NOTE_NOTEOFF)
 		track[channel].NoteOff();
 	}
@@ -749,52 +777,52 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 //New method to generate the wavetables:
 //
-//Generate a signal of aproximately 22Hz for the current sampling rate.
-//since it will not be an integer amount of samples, store the difference
+//Generate a signal of aproximately 27.5Hz for the current sampling rate.
+//This frequency is exactly A0 using the standard tuning of A4=440
+//Since it will not be an integer amount of samples, store the difference
 //as a factor in wavetableCorrection, so that it can be applied when calculating
 //the OSC speed.
-//ATTENTION: Sampling side of GameFX works at 16x Samplerate
+//ATTENTION: Sampling side of GameFX oversamples at globals.oversamplesAmt
 void mi::InitWaveTableSR(bool delArray) {
-	//Ensure the value is even, we need to divide it by two.
-	const unsigned int oversample = currentSR*16;
-	const unsigned int amount = (int(oversample / 22.0f)+1) & 0xFFFFFFFE;
+	const unsigned int oversamplerate = currentSR*globals.oversamplesAmt;
+	//Ensure the value is divisible by four.
+	const unsigned int amount = int(oversamplerate / 27.5f) & 0xFFFFFFFC;
 	const unsigned int half = amount >> 1;
 	const unsigned int quarter = amount >> 2;
 
-	const double sinFraction = 6.283185307179586476925286766559/(double)amount;
+	const double sinFraction = 2.0*psycle::plugin_interface::pi/(double)amount;
 	const float increase = 32768.0f/(float)amount;
 	const float increase2 = 65536.0f/(float)amount;
 
 	//Noise wavetable (7) is maintained in the Work() method.
-	//Pulse wavetable (5) is made from the square wavetable.
 	for (unsigned int i=0;i < WAVETABLES; i++) {
 		if (delArray) {
 			delete globals.Wavetable[i];
 		}
 		//Two more shorts allocated for the interpolation routine.
-		if(i != 5) {
-			globals.Wavetable[i]=new short[amount+2];
-		}
-		else {
+		if(i == 5) {
 			//Pulse table is double its size, to allow changing width
 			globals.Wavetable[i]=new short[amount*2+2];
+		}
+		else {
+			globals.Wavetable[i]=new short[amount+2];
 		}
 	}
 	for(unsigned int c=0;c<half;c++) {
 		double sval=(double)c*sinFraction;
 		globals.Wavetable[0][c]=int(sin(sval)*16384.0);
-		globals.Wavetable[6][c]=(c*increase)-16384;
+		globals.Wavetable[1][c]=(c*increase2)-16384;
 		globals.Wavetable[4][c]=-16384;
 		globals.Wavetable[5][c]=-16384;
-		globals.Wavetable[1][c]=(c*increase2)-16384;
+		globals.Wavetable[6][c]=(c*increase)-16384;
 	}
 	for(unsigned int c=half;c<amount;c++) {
 		double sval=(double)c*sinFraction;
 		globals.Wavetable[0][c]=int(sin(sval)*16384.0);
-		globals.Wavetable[6][c]=(c*increase)-16384;
+		globals.Wavetable[1][c]=16384-((c-half)*increase2);
 		globals.Wavetable[4][c]=16384;
 		globals.Wavetable[5][c]=-16384;
-		globals.Wavetable[1][c]=16384-((c-half)*increase2);
+		globals.Wavetable[6][c]=(c*increase)-16384;
 	}
 	for(unsigned int c=amount;c<amount*2;c++) {
 		globals.Wavetable[5][c]=16384;
@@ -809,16 +837,16 @@ void mi::InitWaveTableSR(bool delArray) {
 
 	//Two more shorts allocated for the interpolation routine.
 	for (unsigned int i=0;i < WAVETABLES; i++) {
-		if(i != 5) {
-			globals.Wavetable[i][amount]=globals.Wavetable[i][0];
-			globals.Wavetable[i][amount+1]=globals.Wavetable[i][1];
-		}
-		else {
+		if(i == 5) {
 			globals.Wavetable[i][amount*2]=globals.Wavetable[i][0];
 			globals.Wavetable[i][amount*2+1]=globals.Wavetable[i][1];
+		}
+		else {
+			globals.Wavetable[i][amount]=globals.Wavetable[i][0];
+			globals.Wavetable[i][amount+1]=globals.Wavetable[i][1];
 		}
 	}
 
 	waveTableSize = amount;
-	wavetableCorrection = (float)amount*22.0f / (float)oversample;
+	wavetableCorrection = (float)amount*27.5f / (float)oversamplerate;
 }

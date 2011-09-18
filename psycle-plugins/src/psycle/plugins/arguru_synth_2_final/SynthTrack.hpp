@@ -51,7 +51,7 @@ public:
 	CSynthTrack();
 	virtual ~CSynthTrack();
 
-	void setSampleRate(int currentSR_, int wavetableSize_, float srCorrection_);
+	void setSampleRate(int currentSR_, int wavetableSize_, float wavetableCorrection_);
 	void setGlobalPar(SYNPAR* globalPar);
 	void InitEffect(int cmd,int val);
 	void NoteOn(int note);

@@ -80,9 +80,12 @@ void CSynthTrack::setGlobalPar(PERFORMANCE* perf)
 }
 
 void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float wavetableCorrection_) {
-	filter.recalculateCoeffs((float)vpar->Cutoff/256.0f, (float)vpar->Resonance/256.0f, currentSR_);
-	//the sampling side works at 16x oversampling
-	aaf1.Setup(16000, AAF16::lowpass, -3.0f, currentSR_*16);
+	if (fltMode != 0){
+		filter.setAlgorithm((eAlgorithm)(fltMode - 1));
+		filter.recalculateCoeffs((float)vpar->Cutoff/256.0f, (float)vpar->Resonance/256.0f, currentSR_);
+	}
+	//the sampling side works oversaples at oversamplesAmt
+	aaf1.Setup(16000, AAF16::lowpass, -3.0f, currentSR_*vpar->oversamplesAmt);
 
 	sampleRate = currentSR_;
 	srCorrection = 44100.0f / (float)sampleRate;
@@ -238,20 +241,20 @@ float CSynthTrack::GetSample()
 		//Limit C-1 to B-7 (8 octaves because sid also has 8)
 		if (tmpNote < 12) tmpNote= 0;
 		else if(tmpNote > 95) tmpNote = 95;
-		OSCSpeed=(float)pow(2.0, tmpNote*wavetableCorrection/12.0);
-		if (cur_waveform > 6) OSCSpeed*=0.25;
+		OSCSpeed=(float)pow(2.0, tmpNote/12.0)*wavetableCorrection;
+		if (cur_waveform == 7) OSCSpeed*=0.25;
 	}
 
 	int pos;
 	float sample;
 	float output=0.0f;
 
-
+	int const oversampleAmt = vpar->oversamplesAmt;
 	switch(cur_waveform)
 	{
 		case 5:	{	// pulse
 					//16x oversample
-					for (int i = 0; i<16; i++){
+					for (int i = 0; i<oversampleAmt; i++){
 						OSCPosition+=ROSCSpeed;
 						if(OSCPosition>=waveTableSize) OSCPosition-=waveTableSize;
 						pos = math::lrint<int32_t>(OSCPosition-0.5f);
@@ -262,12 +265,12 @@ float CSynthTrack::GetSample()
 				}
 		case 8: {	// low noise
 					//16x oversample
-					for (int i = 0; i<16; i++) output+=vpar->shortnoise;
+					for (int i = 0; i<oversampleAmt; i++) output+=vpar->shortnoise;
 					break;
 				}
 		default: {  // static waves
 					//16x oversample
-					for (int i = 0; i<16; i++){
+					for (int i = 0; i<oversampleAmt; i++){
 						OSCPosition+=ROSCSpeed;
 						if(OSCPosition>=waveTableSize) OSCPosition-=waveTableSize;
 						pos = math::lrint<int32_t>(OSCPosition-0.5f);
@@ -448,8 +451,7 @@ void CSynthTrack::InitEffect(int cmd, int val)
 
 	// Init glide
 	if(cmd==0x03)
-		// divided by 16 because sampling is oversampled to 16x
-		oscglide=(float)(val*val)*0.0000625f*srCorrection/16;
+		oscglide=(float)(val*val)*0.0000625f;
 	else
 		oscglide=99999.0f;
 	//Vol

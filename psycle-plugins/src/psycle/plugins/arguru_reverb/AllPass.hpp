@@ -12,7 +12,7 @@ public:
 	void SetDelay(int time, int stph);
 	inline void Work(float l_input,float r_input,float g);
 	inline float left_output() const { return left_output_; }
-	inline float right_output() const { return left_output_; }
+	inline float right_output() const { return right_output_; }
 
 private:
 	void DeleteBuffer();

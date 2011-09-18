@@ -294,7 +294,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		sprintf(txt,"%d notes",value);
 		return true;
 	case 1:
-		sprintf(txt,"%.0f cents",(float)value/655.35f);
+		sprintf(txt,"%d cents",value);
 		return true;
 	case 2:
 		sprintf(txt,"%.02f%% (%.02f)",(float)(value-8192.f)/81.92f, Vals[3]*(float)(value-8192.f)/8192.f);

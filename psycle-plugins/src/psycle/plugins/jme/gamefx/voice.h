@@ -42,21 +42,21 @@ struct PERFORMANCE
 	// which of the 16 positions is the loop end point
 	int LoopEnd;
 	// Speed (in samples) at which the updates to OSCSpeed and perf_count happen
-	int ReplaySpeed;
+	float ReplaySpeed;
 	// Amplitude envelope attack, decay sustain and release. ADR in samples, S in 0..256
-	int AEGAttack;
-	int AEGDecay;
+	float AEGAttack;
+	float AEGDecay;
 	int AEGSustain;
-	int AEGRelease;
+	float AEGRelease;
 	// Filter cutoff in 0..255
 	int Cutoff;
 	// Filter ressonance in 1..240
 	int Resonance;
 	// Filter envelope attack, decay sustain and release. ADR in samples, S in 0..256
-	int FEGAttack;
-	int FEGDecay;
+	float FEGAttack;
+	float FEGDecay;
 	int FEGSustain;
-	int FEGRelease;
+	float FEGRelease;
 	// Filter envelope amount 0..255
 	int EnvMod;
 	// Note finetune 1/256th of a note.
@@ -67,6 +67,7 @@ struct PERFORMANCE
 	signed short shortnoise;
 	// Switch used to indicate if the noise wavetable needs updating by the main Work call.
 	bool noiseused;
+	int oversamplesAmt;
 };
 
 class CSynthTrack  
