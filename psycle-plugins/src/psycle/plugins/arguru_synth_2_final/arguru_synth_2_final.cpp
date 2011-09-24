@@ -590,7 +590,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 
 	if(note<=NOTE_MAX)
 		//Note zero is A-1 (Which is note 9 in Psycle)
-		track[channel].NoteOn(note-21);
+		track[channel].NoteOn(note-9);
 	else if(note==NOTE_NOTEOFF)
 		track[channel].NoteOff();
 }
