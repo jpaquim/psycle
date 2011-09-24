@@ -229,6 +229,7 @@ void CTrack::Tick(int note, int volume, int SamplesPerSec)
 {
 	if( note <=NOTE_MAX)
 	{
+		//It should be "note - 69" but it is detuned by one note, and corrected in the default parameter for Detune.
 		Note = note - 70;
 		float Detune = (float)pmi->Vals[19]*0.0078125f;
 		freq = (float) (440.0f*pow(2.0f, ((float)Note+Detune)/12.0f))/float(SamplesPerSec);
