@@ -24,6 +24,8 @@
 
 #include <universalis/os/fs.hpp>
 #include <wingdi.h>
+#include <string>
+#include <sstream>
 
 namespace psycle { namespace host {
 
@@ -190,6 +192,8 @@ namespace psycle { namespace host {
 			vuOff.DeleteObject();
 			switchOn.DeleteObject();
 			switchOff.DeleteObject();
+			checkedOn.DeleteObject();
+			checkedOff.DeleteObject();
 
 			bool bBmpControls=false;
 			if (!szBmpControlsFilename.empty())
@@ -1588,17 +1592,21 @@ namespace psycle { namespace host {
 			recent_files_.clear();
 			store.OpenGroup("recent-files");
 			std::string read;
-			store.Read("0",read);
-			recent_files_.push_back(read);
+			if(store.Read("0",read)) {
+				recent_files_.push_back(read);
+			}
 			read="";
-			store.Read("1",read);
-			recent_files_.push_back(read);
+			if(store.Read("1",read)) {
+				recent_files_.push_back(read);
+			}
 			read="";
-			store.Read("2",read);
-			recent_files_.push_back(read);
+			if(store.Read("2",read)) {
+				recent_files_.push_back(read);
+			}
 			read="";
-			store.Read("3",read);
-			recent_files_.push_back(read);
+			if(store.Read("3",read)) {
+				recent_files_.push_back(read);
+			}
 			store.CloseGroup();
 ///
 //Do not add settings here, see the comment above about groups
@@ -1647,10 +1655,11 @@ namespace psycle { namespace host {
 			}
 
 			store.CreateGroup("recent-files");
-			store.Write("0",recent_files_[0]);
-			store.Write("1",recent_files_[1]);
-			store.Write("2",recent_files_[2]);
-			store.Write("3",recent_files_[3]);
+			for(int i=0; i < recent_files_.size(); i++) {
+				std::ostringstream str;
+				str << i;
+				store.Write(str.str().c_str(),recent_files_[i]);
+			}
 			store.CloseGroup();
 		}
 
@@ -1735,17 +1744,21 @@ namespace psycle { namespace host {
 
         void PsycleConfig::AddRecentFile(std::string const &f)
 		{
-			for(int i = recent_files_.size()-1; i >= 0; --i) 
+			bool found = false;
+			int initial = recent_files_.size()-1;
+			for(int i = 0; i < recent_files_.size(); ++i) 
 			{
 				if( f == recent_files_[i]) {
-					for(int j = recent_files_.size()-1; j > i; --j) 
-					{
-						recent_files_[j-1]=recent_files_[j];
-					}
-					recent_files_[recent_files_.size()-1]="";
+					found = true;
+					initial = i;
+					break;
 				}
 			}
-			for(int i = recent_files_.size()-1; i > 0; --i) 
+			if(recent_files_.size() < 4 && !found) {
+				recent_files_.push_back("");
+				initial++;
+			}
+			for(int i = initial; i > 0; --i) 
 			{
 				recent_files_[i]=recent_files_[i-1];
 			}

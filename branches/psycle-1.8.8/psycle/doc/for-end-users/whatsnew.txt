@@ -42,6 +42,21 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.8.8
+--------
++ New default option to show note A4 in patterns as standard A4 (440Hz). Unchecking it keeps the old A5 = 440Hz.
++ add a new track on cursor position for the current pattern or all patterns.
++ add a machine before or after another machine. Also option to add a machine in the middle of an existing wire.
++ deleting an effect with connected wires can keep neighbours connected now.
+* Application is a bit more DPI aware now. (Just behaving a bit better at 125% increase. It probably will never be fully DPI aware).
+* Scrolling in pattern view made slower.
+* Vumeter in main view made RMS. Stereo vu in Master window.
+* Dropped option of graphics double buffering. Now always enabled.
+! Mixer can be muted and bypassed again.
+! Rewiring of mixer sends/returns would not work sometimes.
+! Feature of saving pattern track names was not reading them back.
+! RC1 bugfixes (recent menu was not keeping the correct entries. Prevent crash on savewav dialog if path does not exist).
+
 v1.8.8 RC1
 ------------
 + Pattern tracks can be named now. Find the new settings on the pattern properties dialog.

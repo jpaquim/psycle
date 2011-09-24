@@ -348,20 +348,12 @@ namespace psycle { namespace host {
 		{
 			if (nIDEvent == ID_TIMER_VIEW_REFRESH)
 			{
-				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
+				CSingleLock lock(&_pSong->semaphore, FALSE);
 				if (!lock.Lock(50)) return;
-				Master* master = ((Master*)Global::_pSong->_pMachine[MASTER_INDEX]);
+				Master* master = ((Master*)_pSong->_pMachine[MASTER_INDEX]);
 				if (master)
 				{
-					pParentMain->UpdateVumeters
-						(
-							master->volumeDisplayLeft,
-							master->volumeDisplayRight,
-							macView->vu1,
-							macView->vu2,
-							macView->vu3,
-							master->_clip
-						);
+					pParentMain->UpdateVumeters();
 					pParentMain->UpdateMasterValue(master->_outDry);
 					if ( MasterMachineDialog ) {
 						MasterMachineDialog->UpdateUI();
@@ -379,7 +371,6 @@ namespace psycle { namespace host {
 							}
 						}
 					}
-					master->vuupdated = true;
 				}
 				if (viewMode == view_modes::machine)
 				{

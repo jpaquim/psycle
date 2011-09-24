@@ -803,10 +803,7 @@ namespace psycle { namespace host {
 		void CMainFrame::SetAppSongTpb(int x) { m_songBar.SetAppSongTpb(x); }
 		void CMainFrame::ShiftOctave(int x) { m_songBar.ShiftOctave(x); }
 		void CMainFrame::UpdateMasterValue(int newvalue) { m_songBar.UpdateMasterValue(newvalue); }
-		void CMainFrame:: UpdateVumeters(float l, float r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip) 
-		{
-			m_songBar.UpdateVumeters(l,r,vu1,vu2,vu3,clip);
-		}
+		void CMainFrame:: UpdateVumeters() { m_songBar.UpdateVumeters(); }
 		//
 		//MachineBar
 		//

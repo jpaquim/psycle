@@ -489,10 +489,10 @@ namespace psycle { namespace host {
 		}
 		void CWaveEdChildView::StartTimer()
 		{
-			int refreshIdx = 3;
-			if(SystemParametersInfo(SPI_GETKEYBOARDPREF, 0, &refreshIdx,0) > 0)
+			UINT refreshTime = GetCaretBlinkTime();
+			if(refreshTime> 0 && refreshTime != INFINITE)
 			{
-				SetTimer(ID_TIMER_WAVED_REFRESH, refreshIdx*250, 0);
+				SetTimer(ID_TIMER_WAVED_REFRESH, refreshTime, 0);
 			}
 			else {	
 				SetTimer(ID_TIMER_WAVED_REFRESH, 750, 0);

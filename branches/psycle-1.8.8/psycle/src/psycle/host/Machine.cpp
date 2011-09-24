@@ -1029,6 +1029,8 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			_type = MACH_MASTER;
 			_mode = MACHMODE_MASTER;
 			sprintf(_editName, _psName);
+			volumeDisplayLeft=0;
+			volumeDisplayRight=0;
 		}
 
 		void Master::Init(void)
@@ -1052,9 +1054,9 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			
 			if(vuupdated)
 			{ 
-					// Auto decrease effect for the Master vu-meters
-				_lMax *= 0.5; 
-				_rMax *= 0.5; 
+				// Auto decrease effect for the Master peak vu-meters (rms one is always showing the current value)
+				_lMax *= 0.707f; 
+				_rMax *= 0.707f; 
 			}
 			int i = numSamples;
 			if(decreaseOnClip)

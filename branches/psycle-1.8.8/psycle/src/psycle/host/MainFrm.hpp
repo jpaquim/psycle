@@ -67,7 +67,7 @@ namespace psycle { namespace host {
 			void SetAppSongTpb(int x);
 			void ShiftOctave(int x);
 			void UpdateMasterValue(int newvalue);
-			void UpdateVumeters(float l, float r, COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip);
+			void UpdateVumeters();
 
 			void ChangeIns(int i);
 			void ChangeGen(int i);

@@ -260,61 +260,67 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	}
 
 	//l and r are the left and right vu meter values
-	void SongBar::UpdateVumeters(float l, float r,COLORREF vu1,COLORREF vu2,COLORREF vu3,bool clip)
+	void SongBar::UpdateVumeters()
 	{
-		if (Global::psycleconf().macView().draw_vus)
+		PsycleConfig::MachineView& macView = Global::psycleconf().macView();
+		Master* master = ((Master*)m_pSong->_pMachine[MASTER_INDEX]);
+		if (macView.draw_vus)
 		{
+
 			CStatic *stclip=(CStatic *)GetDlgItem(IDC_FRAMECLIP);
 			CClientDC clcanvas(stclip);
 			CRect rect;
 			stclip->GetClientRect(&rect);
 			
-			if (clip) clcanvas.FillSolidRect(rect,vu3);
-			else  clcanvas.FillSolidRect(rect,vu2);
+			if (master->_clip) clcanvas.FillSolidRect(rect,macView.vu3);
+			else  clcanvas.FillSolidRect(rect,macView.vu2);
 			
 			CStatic *lv=(CStatic *)GetDlgItem(IDC_LVUM);
 			CClientDC canvasl(lv);
 			lv->GetClientRect(rect);
 			int half = rect.Height()/2;
-			int log_l=l*rect.Width()/100;
-			int log_r=r*rect.Width()/100;
+			int log_l=master->volumeDisplayLeft*rect.Width()/100;
+			int log_r=master->volumeDisplayRight*rect.Width()/100;
+			//Transpose scale from -40dbs...0dbs to 0 to rect.width()
+			vuprevL = (40.0f+helpers::dsp::dB((1.0f+master->_lMax)*(1.f/master->GetAudioRange())))*rect.Width()/40.f;
+			vuprevR = (40.0f+helpers::dsp::dB((1.0f+master->_rMax)*(1.f/master->GetAudioRange())))*rect.Width()/40.f;
+			if(vuprevL > rect.Width()) vuprevL = rect.Width();
+			if(vuprevR > rect.Width()) vuprevR = rect.Width();
+
 			if (log_l || vuprevL)
 			{
-				canvasl.FillSolidRect(0,0,log_l,half,vu1);
+				canvasl.FillSolidRect(0,0,log_l,half,macView.vu1);
 				if (vuprevL > log_l )
 				{
-					canvasl.FillSolidRect(log_l,0,vuprevL-log_l,half,vu3);
-					canvasl.FillSolidRect(vuprevL,0,rect.Width()-vuprevL,half,vu2);
-					vuprevL-=2;
+					canvasl.FillSolidRect(log_l,0,vuprevL-log_l,half,macView.vu3);
+					canvasl.FillSolidRect(vuprevL,0,rect.Width()-vuprevL,half,macView.vu2);
 				}
 				else 
 				{
-					canvasl.FillSolidRect(log_l,0,rect.Width()-log_l,half,vu2);
-					vuprevL = log_l;
+					canvasl.FillSolidRect(log_l,0,rect.Width()-log_l,half,macView.vu2);
 				}
 			}
 			else
-				canvasl.FillSolidRect(0,0,rect.Width(),half,vu2);
+				canvasl.FillSolidRect(0,0,rect.Width(),half,macView.vu2);
 
 			if (log_r || vuprevR)
 			{
-				canvasl.FillSolidRect(0,half+1,log_r,half,vu1);
+				canvasl.FillSolidRect(0,half+1,log_r,half,macView.vu1);
 				
 				if (vuprevR > log_r )
 				{
-					canvasl.FillSolidRect(log_r,half+1,vuprevR-log_r,half,vu3);
-					canvasl.FillSolidRect(vuprevR,half+1,rect.Width()-vuprevR,half,vu2);
-					vuprevR-=2;
+					canvasl.FillSolidRect(log_r,half+1,vuprevR-log_r,half,macView.vu3);
+					canvasl.FillSolidRect(vuprevR,half+1,rect.Width()-vuprevR,half,macView.vu2);
 				}
 				else 
 				{
-					canvasl.FillSolidRect(log_r,half+1,rect.Width()-log_r,half,vu2);
-					vuprevR = log_r;
+					canvasl.FillSolidRect(log_r,half+1,rect.Width()-log_r,half,macView.vu2);
 				}
 			}
 			else
-				canvasl.FillSolidRect(0,half+1,rect.Width(),half,vu2);
+				canvasl.FillSolidRect(0,half+1,rect.Width(),half,macView.vu2);
 		}
+		master->vuupdated = true;
 	}
 
 

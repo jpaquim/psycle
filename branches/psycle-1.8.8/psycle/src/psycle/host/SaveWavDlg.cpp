@@ -340,40 +340,24 @@ namespace psycle { namespace host {
 
 		void CSaveWavDlg::OnSavewave() 
 		{
+			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
+			const int real_bits[]={8,16,24,32,32};
+			bool isFloat = (bits == 4);
 			Song *pSong = Global::_pSong;
 			Player *pPlayer = Global::pPlayer;
 
-			m_savewave.EnableWindow(false);
-			m_cancel.SetWindowText("Stop");
-			
-			//If autoStopMachines enabled, disable while recording.
-			autostop = Global::configuration().UsesAutoStopMachines();
-			if ( autostop )
-			{
-				Global::configuration().UseAutoStopMachines(false);
-				for (int c=0; c<MAX_MACHINES; c++)
-				{
-					if (pSong->_pMachine[c])
-					{
-						pSong->_pMachine[c]->Standby(false);
-					}
-				}
-			}
-			playblock = pPlayer->_playBlock;
-			loopsong = pPlayer->_loopSong;
-			memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
-			memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
-			
 			CString name;
 			m_filename.GetWindowText(name);
-
 			rootname=name;
 			rootname=rootname.substr(0,
 				std::max(std::string::size_type(0),rootname.length()-4));
 
-			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-			const int real_bits[]={8,16,24,32,32};
-			bool isFloat = (bits == 4);
+			boost::filesystem::path mypath(name);
+
+			if (!boost::filesystem::exists(mypath.parent_path())) {
+				MessageBox("The folder where to store the file does not exists. Please, create it first","Save Wav dialog");
+				return;
+			}
 
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
@@ -394,6 +378,29 @@ namespace psycle { namespace host {
 			m_rangeend.EnableWindow(false);
 			m_rangestart.EnableWindow(false);
 			m_patnumber.EnableWindow(false);
+
+			m_savewave.EnableWindow(false);
+			m_cancel.SetWindowText("Stop");
+
+
+			//If autoStopMachines enabled, disable while recording.
+			autostop = Global::configuration().UsesAutoStopMachines();
+			if ( autostop )
+			{
+				Global::configuration().UseAutoStopMachines(false);
+				for (int c=0; c<MAX_MACHINES; c++)
+				{
+					if (pSong->_pMachine[c])
+					{
+						pSong->_pMachine[c]->Standby(false);
+					}
+				}
+			}
+			playblock = pPlayer->_playBlock;
+			loopsong = pPlayer->_loopSong;
+			memcpy(sel,pSong->playOrderSel,MAX_SONG_POSITIONS);
+			memset(pSong->playOrderSel,0,MAX_SONG_POSITIONS);
+
 
 			if (m_outputtype == 0)
 			{	//record to file
