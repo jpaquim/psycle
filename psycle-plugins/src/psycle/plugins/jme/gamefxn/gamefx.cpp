@@ -1,5 +1,5 @@
 /*
-	GameFX (C)2005 by jme
+	GameFX (C)2005-2009 by jme
 	Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
 	This plugin is free software; you can redistribute it and/or modify
@@ -750,28 +750,28 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
 	if (channel < MAX_TRACKS){
 
-	track[channel].InitEffect(cmd,val);
-	
-	// Global scope synth pattern commands
-	switch(cmd)
-	{
-	case 7: // Change envmod
-		globals.EnvMod=val;
+		track[channel].InitEffect(cmd,val);
+		
+		// Global scope synth pattern commands
+		switch(cmd)
+		{
+		case 7: // Change envmod
+			globals.EnvMod=val;
+			break;
+		case 8: // Change cutoff
+			globals.Cutoff=val>>1;
 		break;
-	case 8: // Change cutoff
-		globals.Cutoff=val>>1;
-	break;
+		
+		case 9: // Change reso
+			globals.Resonance=val>>1;
+		break;
+		}
 	
-	case 9: // Change reso
-		globals.Resonance=val>>1;
-	break;
-	}
-
-	if(note<=NOTE_MAX)
-		//Note zero is A0 (Which is note 21 in Psycle)
-		track[channel].NoteOn(note-21);
-	else if(note==NOTE_NOTEOFF)
-		track[channel].NoteOff();
+		if(note<=NOTE_MAX)
+			//Note zero is A0 (Which is note 21 in Psycle)
+			track[channel].NoteOn(note-21);
+		else if(note==NOTE_NOTEOFF)
+			track[channel].NoteOff();
 	}
 }
 

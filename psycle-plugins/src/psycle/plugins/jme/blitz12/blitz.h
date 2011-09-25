@@ -1,4 +1,4 @@
-/*								Blitz (C)2005 by jme
+/*								Blitz (C)2005-2009 by jme
 		Programm is based on Arguru Bass. Filter seems to be Public Domain.
 
 		This plugin is free software; you can redistribute it and/or modify
@@ -31,8 +31,7 @@
 #define MAX_ENV_TIME				65536
 #define MAX_TRACKS				64
 
-class mi : public CMachineInterface
-{
+class mi : public psycle::plugin_interface::CMachineInterface {
 public:
 	void InitWaveTable();
 	void updateOsc(int osc);
