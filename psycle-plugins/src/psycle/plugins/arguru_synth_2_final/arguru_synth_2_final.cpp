@@ -119,6 +119,7 @@ class mi : public CMachineInterface {
 
 	private:
 		void InitWaveTableSR(bool delArray=false);
+		float GetAsFrequency(int top);
 		float *WaveTable[WAVETABLES];
 		uint32_t waveTableSize;
 		float wavetableCorrection;
@@ -362,8 +363,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		else sprintf(txt, "-inf dB");
 		return true;
 	case 11:
-	case 20:
-			std::sprintf(txt,"%.1f%%",(float)value*0.390625f);
+		{
+			int top = Vals[15]+(Vals[18]*value*0.00390625f);
+			if(top > 240) top = 240;
+			if(top < 0) top = 0;
+			float result =GetAsFrequency(top);
+			std::sprintf(txt,"%.0f Hz", result);
+		}
 			return true;
 	case 13:
 			std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(44100.0f/64.0f));
@@ -401,30 +407,33 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			return true;
 		}
 	case 15:
+		{
+		float result = GetAsFrequency(value);
 			if (Vals[17] < 6) {
-				std::sprintf(txt,"%.0f Hz",264*pow(32.,value/240.));
+				std::sprintf(txt,"%.0f Hz",result);
 			}
 			else if(Vals[17] < 8){
-				std::sprintf(txt,"%.0f Hz",THREESEL((float)value,270.0f,400.0f,800.0f));
+				std::sprintf(txt,"%.0f Hz",result);
 			}
 			else if(Vals[17] < 10){
-				std::sprintf(txt,"%.0f Hz",THREESEL((float)value,270.0f,400.0f,650.0f));
+				std::sprintf(txt,"%.0f Hz",result);
 			}
 			else if (Vals[17] < 12) {
-				std::sprintf(txt,"%.0f Hz x2",264*pow(32.,value/240.)*0.7f);
+				std::sprintf(txt,"%.0f Hz x2",result);
 			}
 			else if (Vals[17] <14) {
-				std::sprintf(txt,"%.0f Hz - %.0f Hz", float(value/(1+Vals[16]/240.0)), 264*pow(32.,value/240.));
+				std::sprintf(txt,"%.0f Hz - %.0f Hz",result, 264*pow(32.,value/240.));
 			}
 			else if (Vals[17] <16) {
-				std::sprintf(txt,"%.03f Hz - %.0f Hz", float(value/(3.5-2*Vals[16]/240.0)), 264*pow(32.,value/240.));
+				std::sprintf(txt,"%.03f Hz - %.0f Hz",result, 264*pow(32.,value/240.));
 			}
 			else if(Vals[17] < 18){
-				std::sprintf(txt,"%.0f Hz + %.0f Hz",THREESEL((float)value,270.0f,400.0f,800.0f), THREESEL((float)value,2140.0f,800.0f,1150.0f));
+				std::sprintf(txt,"%.0f Hz + %.0f Hz",result, THREESEL((float)value,2140.0f,800.0f,1150.0f));
 			}
 			else {
-				std::sprintf(txt,"%.0f Hz + %.0f Hz",THREESEL((float)value,270.0f,400.0f,650.0f), THREESEL((float)value,2140.0f,1700.0f,1080.0f));
+				std::sprintf(txt,"%.0f Hz + %.0f Hz",result, THREESEL((float)value,2140.0f,1700.0f,1080.0f));
 			}
+		}
 			return true;
 	case 16:
 			if (Vals[17] < 2) {
@@ -487,42 +496,23 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			int top = Vals[15]+value;
 			if(top > 240) top = 240;
 			if(top < 0) top = 0;
-			float result;
-			if (Vals[17] < 6) {
-				result = 264*pow(32.,top/240.);
-			}
-			else if(Vals[17] < 8){
-				result = THREESEL((float)top,270.0f,400.0f,800.0f);
-			}
-			else if(Vals[17] < 10){
-				result = THREESEL((float)top,270.0f,400.0f,650.0f);
-			}
-			else if (Vals[17] < 12) {
-				result = 264*pow(32.,top/240.)*0.7f;
-			}
-			else if (Vals[17] <14) {
-				result = float(top/(1+Vals[16]/240.0));
-			}
-			else if (Vals[17] <16) {
-				result = float(top/(3.5-2*Vals[16]/240.0));
-			}
-			else if(Vals[17] < 18){
-				result = THREESEL((float)top,270.0f,400.0f,800.0f);
-			}
-			else {
-				result = THREESEL((float)top,270.0f,400.0f,650.0f);
-			}
+			float result =GetAsFrequency(top);
+
 			std::sprintf(txt,"%.0f Hz", result);
 			return true;
 		}
 	case 19:
 			{
-				float fv=(float)value*0.390625f;
-
 				if ( value == 0 ) std::strcpy(txt,"Osc1");
 				else if ( value == 256 ) std::strcpy(txt,"Osc2");
-				else std::sprintf(txt,"%.1f%% : %.1f%%",100-fv,fv);
+				else std::sprintf(txt,"%.02f dB: %.02f dB",
+					20.0f * std::log10((float)(256-value) *0.00390625f),
+					20.0f * std::log10((float)value *0.00390625f));
 			}
+			return true;
+	case 20:
+			if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value *0.00390625f));
+			else sprintf(txt, "-inf dB");
 			return true;
 	case 21:
 			switch(value) {
@@ -642,4 +632,34 @@ void mi::InitWaveTableSR(bool delArray) {
 	waveTableSize = amount;
 	wavetableCorrection = (float)amount*13.75f / (float)currentSR;
 
+}
+
+
+float mi::GetAsFrequency(int top) {
+	float result;
+	if (Vals[17] < 6) {
+		result = 264*pow(32.,top/240.);
+	}
+	else if(Vals[17] < 8){
+		result = THREESEL((float)top,270.0f,400.0f,800.0f);
+	}
+	else if(Vals[17] < 10){
+		result = THREESEL((float)top,270.0f,400.0f,650.0f);
+	}
+	else if (Vals[17] < 12) {
+		result = 264*pow(32.,top/240.)*0.7f;
+	}
+	else if (Vals[17] <14) {
+		result = float(top/(1+Vals[16]/240.0));
+	}
+	else if (Vals[17] <16) {
+		result = float(top/(3.5-2*Vals[16]/240.0));
+	}
+	else if(Vals[17] < 18){
+		result = THREESEL((float)top,270.0f,400.0f,800.0f);
+	}
+	else {
+		result = THREESEL((float)top,270.0f,400.0f,650.0f);
+	}
+	return result;
 }

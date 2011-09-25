@@ -197,10 +197,10 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 		inline float EnvTime( int v);
 
 		float TabSizeDivSampleFreq;
+		int currentSR;
 		
 
 	private:
-
 		void SetNoValue(tvals &tv);
 		CTrack Tracks[MAX_SIMUL_TRACKS];
 };
@@ -231,7 +231,7 @@ inline float mi::EnvTime(int v) {
 ////////////////////////////////
 
 inline int CTrack::MSToSamples(double const ms) {
-	return (int)(pmi->pCB->GetSamplingRate() * ms * (1.0 / 1000.0)) + 1; // +1 wg. div durch 0
+	return (int)(pmi->currentSR * ms * (1.0 / 1000.0)) + 1; // +1 wg. div durch 0
 }
 
 

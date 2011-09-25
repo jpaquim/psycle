@@ -26,6 +26,7 @@ typedef struct {
 	int ThumpFreq;
 
 	float OutVol;					// Out Volume
+	int compatibleMode;
 	int Mix;
 	int sinmix;
 	int samplerate;
@@ -40,8 +41,10 @@ class Drum
 	Coscillator Thump;
 
 	double IncSpeed;			// It should be DecSpeed, but we need a negative value.
+	double ThumpIncSpeed;
 	int DecMode;
 	float DecConstant;
+	float ThumpDecConstant;
 
 	int Spos;					// Current position.
 	int Slength;				// Length in Samples.
@@ -75,16 +78,22 @@ public:
 
 		if (Spos<ThumpLength){
 			output=((sin(Drummy.GetPos()) * SinVol) + (sin(Thump.GetPos()) * ThumpVol)) * OutVol;
-			ThumpVol-=ThumpDec;
+			ThumpVol+=ThumpDec;
 		}
 		else output=(sin(Drummy.GetPos()) * SinVol) * OutVol;
 	
 		if (Spos<DecLength)
 		{
 			switch(DecMode){
-			case 0: Drummy.IncSpeedin(IncSpeed);break;
-			case 1: Drummy.IncSpeedin(IncSpeed*(2.25 - DecConstant*(1 + Spos)));break;
-			case 2: Drummy.IncSpeedin(IncSpeed*((DecConstant - Spos)/DecLength)); break;
+			case 0: Drummy.IncSpeedin(IncSpeed); 
+				Thump.IncSpeedin(ThumpIncSpeed);
+				break;
+			case 1: Drummy.IncSpeedin(IncSpeed*(2.25 - DecConstant*(1 + Spos)));
+				Thump.IncSpeedin(ThumpIncSpeed*(2.25 - DecConstant*(1 + Spos*ThumpLength/DecLength)));
+				break;
+			case 2: Drummy.IncSpeedin(IncSpeed*((DecConstant - Spos)/DecLength)); 
+				 Thump.IncSpeedin(ThumpIncSpeed*((ThumpDecConstant - Spos)/ThumpLength)); 
+				break;
 			default:break; // case 3
 			}
 		}

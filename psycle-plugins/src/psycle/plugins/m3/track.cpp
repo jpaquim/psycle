@@ -136,7 +136,7 @@ void CTrack::Tick( tvals const &tv)
 		else
 		{
 			Glide = true;
-			GlideTime = tv.Glide*10000000/pmi->pCB->GetSamplingRate();
+			GlideTime = tv.Glide*10000000/pmi->currentSR;
 		}
 	}
 
@@ -412,7 +412,7 @@ void CTrack::Tick( tvals const &tv)
 	else
 	{
 		if( LFO1Noise) // sample & hold
-		{				PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)/pmi->pCB->GetSamplingRate()*0x200000); }
+		{				PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)/pmi->currentSR*0x200000); }
 		else
 		{				PhaseAddLFO1 = (int)(pmi->LFOFreq( LFO1Freq)*pmi->TabSizeDivSampleFreq*0x200000); }
 	}
@@ -500,7 +500,7 @@ void CTrack::Tick( tvals const &tv)
 	else
 	{
 		if( LFO2Noise) // sample & hold
-		{				PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)/pmi->pCB->GetSamplingRate()*0x200000); }
+		{				PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)/pmi->currentSR*0x200000); }
 		else
 		{				PhaseAddLFO2 = (int)(pmi->LFOFreq( LFO2Freq)*pmi->TabSizeDivSampleFreq*0x200000); }
 	}

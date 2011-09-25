@@ -5,26 +5,26 @@
 
 using namespace psycle::plugin_interface;
 
-#define DRUM_VERSION "2.2"
-int const IDRUM_VERSION =0x0220;
+#define DRUM_VERSION "2.5"
+int const IDRUM_VERSION =0x0250;
 #define MAX_SIMUL_TRACKS 16
 
-CMachineParameter const prStartFreq = {"Start Freq", "Start Frequency (Hz)", 80, 600, MPF_STATE, 200};
-CMachineParameter const prEndFreq = {"End Freq", "End Frequency (Hz)", 20, 400, MPF_STATE, 44};
-CMachineParameter const prFreqDecay = {"Freq Decay", "Frequency Down Speed (in mscs)", 10, 300, MPF_STATE, 65};
-CMachineParameter const prStartAmp = {"Start Amp (1)", "Starting Amplitude", 0, 32767, MPF_STATE, 32767};
-CMachineParameter const prEndAmp = {"End Amp (1)", "Ending Amplitude", 0, 32767, MPF_STATE, 21844};
-CMachineParameter const prLength = {"Length", "Duration of the note (ms)", 10, 500, MPF_STATE, 180};
+CMachineParameter const prStartFreq = {"Start Freq", "Start Frequency (Hz)", 80, 1200, MPF_STATE, 225};
+CMachineParameter const prEndFreq = {"End Freq", "End Frequency (Hz)", 20, 400, MPF_STATE, 40};
+CMachineParameter const prFreqDecay = {"Freq Decay", "Frequency Down Speed (in mscs)", 10, 300, MPF_STATE, 49};
+CMachineParameter const prStartAmp = {"Start Amp", "Starting Amplitude", 0, 32767, MPF_STATE, 32767};
+CMachineParameter const prEndAmp = {"End Amp", "Ending Amplitude", 0, 32767, MPF_STATE, 21844};
+CMachineParameter const prLength = {"Length", "Duration of the note (ms)", 10, 500, MPF_STATE, 220};
 CMachineParameter const prOutVol = {"Volume", "Volume (0-32767)", 0, 32767, MPF_STATE, 32767};
 CMachineParameter const prDecMode = {"Dec Mode", "Decrement Mode", 0, 3, MPF_STATE, 2};
-CMachineParameter const prComp = {"Compatible(1/2)", "Compatible With version", 0, 1, MPF_STATE, 1};
+CMachineParameter const prComp = {"Compatibility", "Compatible With version", 0, 2, MPF_STATE, 2};
 CMachineParameter const prNNA = {"NNA Command", "NNA Command when New Note", 0, 1, MPF_STATE, 0};
-CMachineParameter const prAttack = {"Attack up to (2)", "Attack from 0/100 to x/100", 0, 99, MPF_STATE, 2};
-CMachineParameter const prDecay = {"Decay up to (2)", "Decay from Attack to x/100", 1, 100, MPF_STATE, 63};
-CMachineParameter const prSustain = {"Sustain Volume (2)", "Sustain Volume at Decay-End Pos", 0, 100, MPF_STATE, 77};
+CMachineParameter const prAttack = {"Attack up to", "Attack from 0/100 to x/100", 0, 99, MPF_STATE, 2};
+CMachineParameter const prDecay = {"Decay up to", "Decay from Attack to x/100", 1, 100, MPF_STATE, 51};
+CMachineParameter const prSustain = {"Sustain Volume", "Sustain Volume at Decay-End Pos", 0, 100, MPF_STATE, 77};
 CMachineParameter const prMix = {"Drum&Thump Mix", "Mix of Drum and Thump Signals", -100, 100, MPF_STATE, -53};
-CMachineParameter const prThumpLen = {"Thump Length", "Thump Length", 1, 60, MPF_STATE, 6};
-CMachineParameter const prThumpFreq = {"Thump Freq", "Thump Frequency", 220, 6000, MPF_STATE, 1500};
+CMachineParameter const prThumpLen = {"Thump Length", "Thump Length", 1, 120, MPF_STATE, 100};
+CMachineParameter const prThumpFreq = {"Thump Freq", "Thump Frequency", 220, 6000, MPF_STATE, 2000};
 
 CMachineParameter const *pParameters[] = 
 { 
@@ -221,10 +221,11 @@ void mi::ParameterTweak(int par, int val)
 				globalpar.DecayDec=((327.67-(3.2767*Vals[12]))*globalpar.sinmix)/(globalpar.DecayPos-globalpar.AttackPos);
 				globalpar.SustainDec=(3.2767*Vals[12]*globalpar.sinmix)/(globalpar.SLength-globalpar.DecayPos);
 			}
+			globalpar.compatibleMode = val;
 			break;
 		case 9: break;
 		case 10:
-			if ( Vals[8] == 1 ) {
+			if ( Vals[8] > 0 ) {
 				if ( val != 0 ) { 
 					globalpar.AttackPos=globalpar.SLength*val/100;
 					globalpar.AttackInc=(327.67*globalpar.sinmix)/globalpar.AttackPos;
@@ -237,7 +238,7 @@ void mi::ParameterTweak(int par, int val)
 			}
 			break;
 		case 11:
-			if ( Vals[8] == 1 ) {
+			if ( Vals[8] > 0 ) {
 				if ( Vals[10] > val ) globalpar.DecayPos=globalpar.AttackPos+1;
 				else globalpar.DecayPos=globalpar.SLength*val/100;
 				globalpar.DecayDec=((327.67-(3.2767*Vals[12]))*globalpar.sinmix)/(globalpar.DecayPos-globalpar.AttackPos);
@@ -245,7 +246,7 @@ void mi::ParameterTweak(int par, int val)
 			}
 			break;
 		case 12:
-			if ( Vals[8] == 1 ) {
+			if ( Vals[8] > 0 ) {
 				globalpar.DecayDec=((327.67-(3.2767*val))*globalpar.sinmix)/(globalpar.DecayPos-globalpar.AttackPos);
 				globalpar.SustainDec=(3.2767*val*globalpar.sinmix)/(globalpar.SLength-globalpar.DecayPos);
 			}
@@ -333,13 +334,29 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
 	switch(param) {
-		case 0:
-		case 1:
-		case 15:
-			sprintf(txt,"%1dHz",value); return true;
-		case 2:
+		case 0://fallthrough
+		case 1://fallthrough
+		case 15://fallthrough
+			sprintf(txt,"%1dHz",value);
+			return true;
+		case 2://fallthrough
 		case 5:
-			sprintf(txt,"%1dms",value); return true;
+			sprintf(txt,"%1dms",value);
+			return true;
+		case 3://fallthrough
+		case 4:
+			if(Vals[8]==0) {
+				if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 32767.0f));
+				else sprintf(txt, "-inf dB");
+			}
+			else {
+				strcpy(txt,"---");
+			}
+			return true;
+		case 6:
+			if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 32767.0f));
+			else sprintf(txt, "-inf dB");
+			return true;
 		case 7:
 			switch(value) {
 				case 0: sprintf(txt,"Linear");break;
@@ -349,20 +366,48 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			}
 			return true;
 		case 8:
-			sprintf(txt,"%s",value==0?"Version 1.x(1)":"Version 2.x(2)");
+			if (value==0) {
+				sprintf(txt,"%s","Version 1.x");
+			}
+			else if(value==1) {
+				sprintf(txt,"%s","Version 2.2");
+			}
+			else {
+				sprintf(txt,"%s","Version 2.5");
+			}
 			return true;
 		case 9:
-			sprintf(txt,"%s",value==0?"NoteOff":"NoteContinue");return true;
-		case 10:
+			sprintf(txt,"%s",value==0?"NoteOff":"NoteContinue");
+			return true;
+		case 10://fallthrough
 		case 11:
+			if(Vals[8]==0) {
+				strcpy(txt,"---");
+			}
+			else {
+				sprintf(txt,"%1dms (%d%%)", Vals[5]*value/100,value);
+			}
+			return true;
 		case 12:
-			sprintf(txt,"%d%%",value); return true;
+			if(Vals[8]==0) {
+				strcpy(txt,"---");
+			}
+			else {
+				if (value > 0) sprintf(txt, "%.02f dB (%d%%)", 20.0f * std::log10((float) value / 100.0f), value);
+				else sprintf(txt, "-inf dB");
+			}
+			 return true;
 		case 13:
-			if ( value< 0 ) sprintf(txt,"100%%:%d%%",(value+100));
-			else sprintf(txt,"%d%%:100%%",(value-100)*(-1));
+			if ( value == -100 ) std::strcpy(txt,"Drum");
+			else if ( value == 100 ) std::strcpy(txt,"Thump");
+			else if ( value < 0 ) std::sprintf(txt,"0.00 dB: %.02f dB",
+				20.0f * std::log10((100+value)*0.01f));
+			else std::sprintf(txt,"%.02f dB: 0.00 dB",
+				20.0f * std::log10((100-value)*0.01f));
 			return true;
 		case 14:
-			sprintf(txt,"%0.1fms",value/10.0f); return true;
+			sprintf(txt,"%0.1fms",value/10.0f);
+			return true;
 		default: return false;
 	}
 }

@@ -211,7 +211,8 @@ mi::~mi() {
 }
 
 void mi::Init() {
-	TabSizeDivSampleFreq = (float)(2048.0/pCB->GetSamplingRate());
+	currentSR = pCB->GetSamplingRate();
+	TabSizeDivSampleFreq = (float)(2048.0/currentSR);
 
 	for(int i = 0; i < MAX_SIMUL_TRACKS; ++i) {
 		Tracks[i].pmi = this;
@@ -306,7 +307,27 @@ void mi::ParameterTweak(int par, int val) {
 
 // Called each tick (i.e.when playing). Note: it goes after ParameterTweak and before SeqTick
 void mi::SequencerTick() {
+	if(currentSR != pCB->GetSamplingRate()) {
+		currentSR = pCB->GetSamplingRate();
+		// generate coefsTab
+		for(int t = 0; t < 4; ++t)
+			for(int f = 0; f < 128; ++f)
+				for(int r = 0; r < 128; ++r)
+					ComputeCoefs(CTrack::coefsTab + (t * 128 * 128 + f * 128 + r) * 8, f, r, t);
 
+		tvals tmp;
+		SetNoValue(tmp);
+		tmp.PEGAttackTime = Vals[11];
+		tmp.PEGDecayTime = Vals[12]; 
+		tmp.AEGAttackTime = Vals[16]; 
+		tmp.AEGSustainTime = Vals[17];
+		tmp.AEGReleaseTime = Vals[18];
+		tmp.FEGAttackTime = Vals[22]; 
+		tmp.FEGSustainTime = Vals[23]; 
+		tmp.FEGReleaseTime = Vals[24]; 
+		for(int i = 0; i < MAX_SIMUL_TRACKS; ++i)
+			Tracks[i].Tick(tmp);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -318,6 +339,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 	// Note Off == 120
 	// Empty Note Row == 255
 	// Less than note off == NoteON
+	// A4 = note 69
 
 	int useVoice = -1;
 	tvals tmp;
@@ -561,7 +583,7 @@ void mi::SetNoValue(tvals &tv) {
 
 void mi::ComputeCoefs( float *coefs, int freq, int r, int t) {
 
-	float omega = 2 * psycle::plugin_interface::pi * Cutoff(freq) / pCB->GetSamplingRate();
+	float omega = 2 * psycle::plugin_interface::pi * Cutoff(freq) / currentSR;
 
 	float sn, cs;
 	sincos(omega, sn, cs);
