@@ -70,7 +70,7 @@ static void expand(std::complex<double> pz[], int npz, std::complex<double> coef
 	for (int i=0; i < npz+1; i++)
 	{ if (fabs(coeffs[i].imag()) > EPS)
 		{ fprintf(stderr, "mkfilter: coeff of z^%d is not real; poles/zeros are not std::complex conjugates\n", i);
-			exit(1);
+			throw((int)1);
 		}
 	}
 #undef EPS
@@ -121,14 +121,14 @@ void AAF16::compute_s(int order, mode_t mode, float chebrip )
 	// modify for Chebyshev (p. 136 DeFatta et al.)
 	if (chebrip >= 0.0)
 	{ fprintf(stderr, "mkfilter: Chebyshev ripple is %g dB; must be .lt. 0.0\n", chebrip);
-		exit(1);
+		throw((int)1);
 	}
 	double rip = pow(10.0, -chebrip / 10.0);
 	double eps = sqrt(rip - 1.0);
 	double y = asinh(1.0 / eps) / (double) order;
 	if (y <= 0.0)
 	{ fprintf(stderr, "mkfilter: bug: Chebyshev y=%g; must be .gt. 0.0\n", y);
-		exit(1);
+		throw((int)1);
 	}
 	for (int i = 0; i < splane.numpoles; i++)
 	{ splane.poles[i] = std::complex<double>(splane.poles[i].real() * sinh(y),
