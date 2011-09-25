@@ -52,10 +52,9 @@ v1.8.8
 * Scrolling in pattern view made slower.
 * Vumeter in main view made RMS. Stereo vu in Master window.
 * Dropped option of graphics double buffering. Now always enabled.
-! Mixer can be muted and bypassed again.
 ! Rewiring of mixer sends/returns would not work sometimes.
-! Feature of saving pattern track names was not reading them back.
-! RC1 bugfixes (recent menu was not keeping the correct entries. Prevent crash on savewav dialog if path does not exist).
+! Prevent crash on savewav dialog if path does not exist
+! RC1 bugfixes (recent menu was not keeping the correct entries. Feature of saving pattern track names was not reading them back, Mixer can be muted and bypassed again).
 
 v1.8.8 RC1
 ------------
@@ -67,7 +66,7 @@ v1.8.8 RC1
 * WireDlg, and machine parameter window can now be closed with ESC key (Only XMSampler window cannot be closed this way now).
 * Internal source code change: Implemented the sliders with OnHScroll/VScroll message handler (proper way of doing it) on XMSamplerMixerPage, WireDlg, Master Dialog, master slider on the toolbar and in Wave Recording machine dialog. Other improvements on the open/closing of those dialogs.
 * Changes on the Machine parameter windows, merged several sources. Now Native windows offer the same menu/toolbar features than VST ones.
-* There are two presets files now, one in the same directory as the plugin, and a new one on the presets dialogs. This second one is called "User presets" in the banks menu and is editable from the presets dialog.
+* There are two presets files now, one in the same directory as the plugin, and a new one on the presets directory. This second one is called "User presets" in the banks menu and is editable from the presets dialog.
 ! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning, jbridge integration now works )
 
 v1.8.8 beta3

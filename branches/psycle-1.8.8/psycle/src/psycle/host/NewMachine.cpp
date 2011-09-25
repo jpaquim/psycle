@@ -438,9 +438,6 @@ namespace psycle { namespace host {
 						std::ostringstream s;
 						if(_pPlugsInfo[i]->type == MACH_PLUGIN  && _pPlugsInfo[i]->APIversion > 0x10) {
 							s << std::hex << (_pPlugsInfo[i]->APIversion&0x7FFF);
-							if(_pPlugsInfo[i]->APIversion&0x8000) {
-								s << " (64 bits)";
-							} else { s << " (32 bits)"; }
 						}
 						else {
 							 s << _pPlugsInfo[i]->APIversion;
