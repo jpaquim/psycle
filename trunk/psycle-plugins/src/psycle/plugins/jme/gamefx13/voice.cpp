@@ -17,10 +17,12 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <packageneric/pre-compiled.private.hpp>
-#include <cmath>
-
 #include "voice.h"
+#include <psycle/helpers/math.hpp>
+#include <universalis/stdlib/cstdint.hpp>
+
+using namespace psycle::helpers;
+using namespace universalis::stdlib;
 
 #define FILTER_CALC_TIME 64
 #define TWOPI 6.28318530717958647692528676655901f
