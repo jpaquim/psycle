@@ -22,6 +22,7 @@
 	#endif
 
 	#ifndef _SECURE_ATL
+		/// ???
 		#define _SECURE_ATL 1
 	#endif
 
@@ -50,35 +51,30 @@
 		#include <windows.h>
 	#endif
 
-	#if !defined NOMINMAX
-		// The following two mswindows macros break a lot of libraries, including the standard c++ library!
-		#undef min
-		#undef max
-	#endif
-
 	// gdi+, must be included after <windows.h> or <afxwin.h>
 	///\todo is gdi+ available with other compilers than microsoft's? by default, it's safer to assume it's not, as usual.
 	#if defined DIVERSALIS__COMPILER__MICROSOFT ///\todo is gdi+ available with other compilers than microsoft's? by default, it's safer to assume it's not, as usual.
 		#if defined _AFXDLL // when mfc is used, also include <gdiplus.h>
 			//#include <atlbase.h> // for MIDL_INTERFACE used by <gdiplus.h>
 			// gdi+ needs min and max in the root namespace :-(
-			#include <algorithm>
-			#define NOMINMAX
 			#ifndef max
 			#define max(a,b)            (((a) > (b)) ? (a) : (b))
 			#endif
-			 
 			#ifndef min
 			#define min(a,b)            (((a) < (b)) ? (a) : (b))
 			#endif
-						#include <gdiplus.h>
-						#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
-							#pragma comment(lib, "gdiplus")
-						#endif
-						#include <afxcontrolbars.h>
+			#include <gdiplus.h>
+			#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
+				#pragma comment(lib, "gdiplus")
+			#endif
+			#include <afxcontrolbars.h>
 			#undef max
 			#undef min
 		#endif
+	#endif
+
+	#if defined min || defined max
+		#error min and/or max macros managed to creep up!
 	#endif
 
 	#if defined DIVERSALIS__COMPILER__MICROSOFT
