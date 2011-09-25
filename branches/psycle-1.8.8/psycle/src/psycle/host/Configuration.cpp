@@ -37,6 +37,7 @@ namespace psycle { namespace host {
 			UsePsycleVstBridge(false);
 			SetDefaultPatLines(64);
 			UseAutoStopMachines(false);
+			LoadNewBlitz(false);
 		}
 		void Configuration::Load(ConfigStorage & store)
 		{
@@ -70,6 +71,11 @@ namespace psycle { namespace host {
 			{
 				UseAutoStopMachines(use);
 			}
+			use=false;
+			if(store.Read("prefferNewBlitz", use))
+			{
+				LoadNewBlitz(use);
+			}
 		}
 		void Configuration::Save(ConfigStorage & store)
 		{
@@ -97,6 +103,9 @@ namespace psycle { namespace host {
 
 			use=UsesAutoStopMachines();
 			store.Write("autoStopMachines", use);
+
+			use=LoadsNewBlitz();
+			store.Write("prefferNewBlitz", use);
 		}
 
 		bool Configuration::SupportsJBridge() const
@@ -137,6 +146,14 @@ namespace psycle { namespace host {
        bool Configuration::UsesAutoStopMachines() const
 	   {
 		   return Machine::autoStopMachine;
+	   }
+       void Configuration::LoadNewBlitz(bool use)
+	   {
+		   prefferNewBlitz = use;
+	   }
+       bool Configuration::LoadsNewBlitz() const
+	   {
+		   return prefferNewBlitz;
 	   }
 	}
 }

@@ -43,8 +43,8 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_MIDI_KEYBOARD, OnEnableInmediate)
 			ON_BN_CLICKED(IDC_MIDI_SEQUENCED, OnEnableSequenced)
 			ON_CBN_SELCHANGE(IDC_DRIVER, OnSelChangeOutput)
-			ON_CBN_SELCHANGE(IDC_DRIVER, OnSelChangeMidi)
-			ON_CBN_SELCHANGE(IDC_DRIVER, OnSelChangeSync)
+			ON_CBN_SELCHANGE(IDC_MIDI_DRIVER, OnSelChangeMidi)
+			ON_CBN_SELCHANGE(IDC_SYNC_DRIVER, OnSelChangeSync)
 		END_MESSAGE_MAP()
 
 		BOOL COutputDlg::OnInitDialog() 
@@ -103,13 +103,13 @@ namespace psycle { namespace host {
 
 		void COutputDlg::OnSelChangeMidi()
 		{
-			m_midiDriverIndex = m_driverComboBox.GetCurSel();
+			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
 			Global::psycleconf().MidiChanged(m_midiDriverIndex);
 		}
 
 		void COutputDlg::OnSelChangeSync()
 		{
-			m_syncDriverIndex = m_driverComboBox.GetCurSel();
+			m_syncDriverIndex = m_midiSyncComboBox.GetCurSel();
 			Global::psycleconf().SyncChanged(m_syncDriverIndex);
 		}
 

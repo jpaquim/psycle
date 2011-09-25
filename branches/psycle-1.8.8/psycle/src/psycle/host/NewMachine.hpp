@@ -95,6 +95,7 @@ namespace psycle { namespace host {
 
 			enum { IDD = IDD_NEWMACHINE };
 			CButton	m_Allow;
+			CButton	m_LoadNewBlitz;
 			CStatic	m_nameLabel;
 			CTreeCtrl	m_browser;
 			CStatic	m_versionLabel;
@@ -143,6 +144,7 @@ namespace psycle { namespace host {
 			afx_msg void OnDestroy();
 			afx_msg void OnShowdllname();
 			afx_msg void OnShoweffname();
+			afx_msg void OnLoadNewBlitz();
 			afx_msg void OnCheckAllow();
 			afx_msg void OnEnChangeEdit1();
 			afx_msg void OnStnClickedNamelabel();

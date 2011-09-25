@@ -109,7 +109,6 @@
 #define IDB_MASTER_VUON_LEFT            309
 #define IDB_MASTER_VUON_RIGHT           311
 #define IDB_SWITCHMINI_OFF              312
-#define IDB_BITMAP1                     313
 #define IDB_SWITCHMINI_ON               313
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
@@ -916,6 +915,7 @@
 #define IDC_MASTERDLG_VULEFT            1831
 #define IDC_MASTERDLG_VURIGHT           1832
 #define IDC_DEFAULTC4                   1833
+#define IDC_LOAD_NEW_BLITZ              1837
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1079,7 +1079,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        314
 #define _APS_NEXT_COMMAND_VALUE         34282
-#define _APS_NEXT_CONTROL_VALUE         1835
+#define _APS_NEXT_CONTROL_VALUE         1838
 #define _APS_NEXT_SYMED_VALUE           62
 #endif
 #endif

@@ -45,10 +45,13 @@ namespace psycle
 			               int  GetDefaultPatLines   () const;
 			               void UseAutoStopMachines  (bool use);
 			               bool UsesAutoStopMachines () const;
+			               void LoadNewBlitz         (bool use);
+			               bool LoadsNewBlitz        () const;
 
 		public:
 			AudioDriver* _pOutputDriver;
 		private:
+			bool prefferNewBlitz;
 			std::string program_executable_dir_;
 			std::string plugin_dir_;
 			std::string plugin_dir_other;

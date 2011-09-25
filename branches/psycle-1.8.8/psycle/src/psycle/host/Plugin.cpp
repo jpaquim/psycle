@@ -269,12 +269,33 @@ namespace psycle
 			std::string sPath2;
 			std::string sPath;
 			int shellIdx=0;
+
 			if(!CNewMachine::lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
 				//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
-				sPath = psFileName;
+				if (psFileName == "blitz.dll")
+				{
+					if(Global::configuration().LoadsNewBlitz()) {
+						psFileName = "blitzn.dll";
+					}
+					else {
+						psFileName = "blitz12.dll";
+					}
+				}
+				else if (psFileName == "gamefx.dll" )
+				{
+					if(Global::configuration().LoadsNewBlitz()) {
+						psFileName = "gamefxn.dll";
+					}
+					else {
+						psFileName = "gamefx13.dll";
+					}
+				}
+				if(!CNewMachine::lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) {
+					sPath = psFileName;
+				}
 			}
 
 			if(!CNewMachine::TestFilename(sPath,shellIdx) ) 
@@ -702,7 +723,8 @@ namespace psycle
 
 		bool Plugin::SetParameter(int numparam,int value)
 		{
-			if(numparam < _pInfo->numParameters)
+			if(numparam < _pInfo->numParameters && value >= _pInfo->Parameters[numparam]->MinValue
+				&& value <= _pInfo->Parameters[numparam]->MaxValue)
 			{
 				try
 				{
@@ -1063,6 +1085,7 @@ namespace psycle
 				strcpy(sDllName,"arguru synth 2f.dll");
 				wasAS2=true;
 			}
+
 			std::string sPath2;
 			CString sPath;
 			if ( !CNewMachine::lookupDllName(sDllName,sPath2,MACH_PLUGIN,shellIdx) ) 

@@ -130,7 +130,7 @@ CMachineParameter const paraAmpVelocity = {"Velocity", "Velocity", 0, 256, MPF_S
 CMachineParameter const paraAmpTrack = {"Soften High Notes", "Soften High Notes", 0, 256, MPF_STATE, 64};
 
 CMachineParameter const paraFlt = {"Filter", "Filter", 0, 1, MPF_LABEL, 0};
-CMachineParameter const paraFltType = {"Type", "Type", 0, 17, MPF_STATE, 0};
+CMachineParameter const paraFltType = {"Type", "Type", 0, 10, MPF_STATE, 0};
 CMachineParameter const paraFltCutoff = {"Cutoff", "Cutoff", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraFltResonance = {"Resonance", "Resonance", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraFltTrack = {"Track", "Track", -64, 64, MPF_STATE, 5};

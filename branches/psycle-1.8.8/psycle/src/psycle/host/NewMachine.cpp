@@ -137,6 +137,7 @@ namespace psycle { namespace host {
 			DDX_Radio(pDX, IDC_BYTYPE, m_orderby);
 			DDX_Control(pDX, IDC_DLLNAMELABEL, m_dllnameLabel);
 			DDX_Radio(pDX, IDC_SHOWDLLNAME, m_showdllName);
+			DDX_Control(pDX, IDC_LOAD_NEW_BLITZ, m_LoadNewBlitz);
 			DDX_Control(pDX, IDC_APIVERSIONLABEL, m_APIversionLabel);
 		}
 
@@ -148,6 +149,7 @@ namespace psycle { namespace host {
 			ON_NOTIFY(NM_DBLCLK, IDC_BROWSER, OnDblclkBrowser)
 			ON_WM_DESTROY()
 			ON_BN_CLICKED(IDC_SHOWDLLNAME, OnShowdllname)
+			ON_BN_CLICKED(IDC_LOAD_NEW_BLITZ, OnLoadNewBlitz)
 			ON_BN_CLICKED(IDC_SHOWEFFNAME, OnShoweffname)
 			ON_BN_CLICKED(IDC_CHECK_ALLOW, OnCheckAllow)
 			ON_BN_CLICKED(IDC_SCAN_NEW, OnScanNew)
@@ -162,6 +164,7 @@ namespace psycle { namespace host {
 			bAllowChanged = false;
 			LoadPluginInfo();
 			UpdateList();
+			m_LoadNewBlitz.SetCheck(Global::configuration().LoadsNewBlitz());
 			return TRUE;
 		}
 
@@ -537,6 +540,10 @@ namespace psycle { namespace host {
 			pluginName = true;
 			UpdateList();
 			m_browser.Invalidate();
+		}
+		void CNewMachine::OnLoadNewBlitz()
+		{
+			Global::configuration().LoadNewBlitz(m_LoadNewBlitz.GetCheck());
 		}
 
 		void CNewMachine::LoadPluginInfo(bool verify)
