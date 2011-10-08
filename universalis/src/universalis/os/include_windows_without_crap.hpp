@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net
 
 #pragma once
 #include <diversalis.hpp>
@@ -58,10 +58,10 @@
 			//#include <atlbase.h> // for MIDL_INTERFACE used by <gdiplus.h>
 			// gdi+ needs min and max in the root namespace :-(
 			#ifndef max
-			#define max(a,b)            (((a) > (b)) ? (a) : (b))
+			#define max(a, b) (((a) > (b)) ? (a) : (b))
 			#endif
 			#ifndef min
-			#define min(a,b)            (((a) < (b)) ? (a) : (b))
+			#define min(a, b) (((a) < (b)) ? (a) : (b))
 			#endif
 			#include <gdiplus.h>
 			#if defined DIVERSALIS__COMPILER__FEATURE__AUTO_LINK

@@ -1,12 +1,12 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief secure version of standard C functions
 ///\see http://www.opengroup.org/platform/single_unix_specification/uploads/40/6355/n1093.pdf
 
 #pragma once
-
 #include <universalis/detail/project.hpp>
+
 #if defined __STDC_SECURE_LIB__
 	#if defined DIVERSALIS__COMPILER__MICROSOFT && DIVERSALIS__COMPILER__VERSION >= 1400
 		#include <cstdio>

@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net
 
 ///\interface universalis::os::fs
 
-#ifndef UNIVERSALIS__OS__FS__INCLUDED
-#define UNIVERSALIS__OS__FS__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
@@ -35,5 +32,3 @@ namespace universalis { namespace os { namespace fs {
 		#define UNIVERSALIS__OS__MICROSOFT__MAX_PATH (MAX_PATH < (1 << 12) ? (1 << 12) : MAX_PATH)
 	#endif
 }}}
-
-#endif

@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2009 members of the psycle project http://psycle.sourceforge.net
+// copyright 2008-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::os::sched
 
-#ifndef UNIVERSALIS__OS__SCHED__INCLUDED
-#define UNIVERSALIS__OS__SCHED__INCLUDED
 #pragma once
-
 #include "exception.hpp"
 #if defined DIVERSALIS__OS__POSIX
 	#include <pthread.h>
@@ -87,9 +84,13 @@ class UNIVERSALIS__DECL process {
 			affinity_mask_type affinity_mask() const;
 			/// sets the affinity mask against the set of cpu available to the process.
 				#if defined DIVERSALIS__OS__MICROSOFT
-					/// special case for windows, this must be done inline!
-					/// The doc says:
-					/// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
+					// Special case for Windows: we use an inline implementation in the header.
+					// Why? Fear of doing something horribly wrong with the blackbox that Windows is.
+					// The doc says:
+					// "Do not call SetProcessAffinityMask in a DLL that may be called by processes other than your own."
+					// Of course it might just be their way to say a DLL must be a good citizen and not do weird things that clients don't expect,
+					// but, due to lack of specification from microsoft, we are doomed to do stupid and probably useless things like this.
+					// Thank you Microsoft, once again.
 					inline
 				#endif
 			void affinity_mask(affinity_mask_type const &);
@@ -288,5 +289,3 @@ class UNIVERSALIS__DECL thread {
 #endif
 
 }}}
-
-#endif

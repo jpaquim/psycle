@@ -3,8 +3,6 @@
 
 ///\file \brief meta header that includes universalis' essential features
 
-#ifndef UNIVERSALIS__INCLUDED
-#define UNIVERSALIS__INCLUDED
 #pragma once
 
 #include "universalis/compiler/stringize.hpp"
@@ -48,7 +46,5 @@
 	#include <boost/static_assert.hpp>
 	#include <cassert>
 	#include <ciso646>
-
-#endif
 
 #endif

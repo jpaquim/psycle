@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2008 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::os::thread_name
 
-#ifndef UNIVERSALIS__OS__THREAD_NAME__INCLUDED
-#define UNIVERSALIS__OS__THREAD_NAME__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 #include <string>
 
@@ -39,5 +36,3 @@ class UNIVERSALIS__DECL thread_name {
 };
 
 }}
-
-#endif
