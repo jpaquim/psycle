@@ -21,14 +21,16 @@
 #include <stdexcept>
 
 namespace psycle {
-	namespace audiodrivers {
-		class AudioDriver;
-		class DummyDriver;
-	}
+
+namespace audiodrivers {
+	class AudioDriver;
+	class DummyDriver;
+}
 
 namespace core {
 
 using helpers::dsp::Dither;
+using namespace universalis::stdlib;
 
 /// schedules the processing of machines, sends signal buffers and sequence events to them, ...
 class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncopyable {

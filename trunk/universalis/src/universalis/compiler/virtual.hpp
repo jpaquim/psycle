@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
-/// stuff related with virtual member functions
+///\brief stuff related with virtual member functions
 
 #pragma once
 #include <universalis/detail/project.hpp>

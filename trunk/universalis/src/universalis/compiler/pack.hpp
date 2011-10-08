@@ -1,12 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
-///\file
-
-#ifndef UNIVERSALIS__COMPILER__PACK__INCLUDED
-#define UNIVERSALIS__COMPILER__PACK__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 
 #if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__COMPILER__MICROSOFT
@@ -17,6 +12,4 @@
 	#define UNIVERSALIS__COMPILER__PACK__PUSH(x)
 	#define UNIVERSALIS__COMPILER__PACK(x)
 	#define UNIVERSALIS__COMPILER__PACK__POP()
-#endif
-
 #endif

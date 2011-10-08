@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2010 members of the psycle project http://psycle.sourceforge.net
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::os::dyn_link::resolver
 
-#ifndef UNIVERSALIS__OS__DYN_LINK__INCLUDED
-#define UNIVERSALIS__OS__DYN_LINK__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 #include <boost/filesystem/path.hpp>
 #include <list>
@@ -109,5 +106,3 @@ class resolver {
 };
 
 }}}
-
-#endif

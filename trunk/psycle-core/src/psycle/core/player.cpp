@@ -206,11 +206,11 @@ void Player::process(int samples) {
 		int const amount(std::min(remaining_samples, MAX_BUFFER_LENGTH));
 		{ // reset all machine buffers
 			#if 0 // currently, routing time is already counted in each machine's PreWork function.. not sure it's a good thing.
-				nanoseconds const t0(cpu_time_clock());
+				cpu_time_clock::time_point const t0(cpu_time_clock::now());
 			#endif
 			for(int c(0); c < MAX_MACHINES; ++c) if(song().machine(c)) song().machine(c)->PreWork(amount);
 			#if 0 // currently, routing time is already counted in each machine's PreWork function.. not sure it's a good thing.
-				nanoseconds const t1(cpu_time_clock());
+				cpu_time_clock::time_point const t1(cpu_time_clock::now());
 				song().accumulate_routing_time(t1 - t0);
 			#endif
 		}
@@ -231,14 +231,15 @@ void Player::process(int samples) {
 			}
 		}
 		// write samples to file
-		///\josepma: I don't understand this check. autoRecord doesn't play a role here
+		///\todo josepma: I don't understand this check. autoRecord doesn't play a role here
 		if(recording_ && (playing_ || !autoRecord_)) writeSamplesToFile(amount); 
 		// move the pointer forward for the next Master::Work() iteration.
-		((Master*)song().machine(MASTER_INDEX))->_pMasterSamples += amount * 2;
+		Master & master = static_cast<Master&>(*song().machine(MASTER_INDEX));
+		master._pMasterSamples += amount * 2;
 		remaining_samples -= amount;
 		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
 		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
-		timeInfo_.setSamplePos(((Master*)song().machine(MASTER_INDEX))->sampleCount);
+		timeInfo_.setSamplePos(master.sampleCount);
 	}
 	cpu_time_clock::time_point const t1(cpu_time_clock::now());
 	song().accumulate_processing_time(t1 - t0);
@@ -246,7 +247,6 @@ void Player::process(int samples) {
 
 void Player::thread_function(std::size_t thread_number) {
 	if(loggers::trace()) {
-		scoped_lock lock(mutex_);
 		std::ostringstream s;
 		s << "psycle: core: player: scheduler thread #" << thread_number << " started";
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);

@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.pastnotecut.org : johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\interface universalis::compiler::typenameof
 
-#ifndef UNIVERSALIS__COMPILER__TYPENAMEOF__INCLUDED
-#define UNIVERSALIS__COMPILER__TYPENAMEOF__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 #include <typeinfo>
 #include <string>
@@ -37,5 +34,3 @@ std::string inline typenameof<std::type_info>(std::type_info const & type_info) 
 }
 
 }}
-
-#endif

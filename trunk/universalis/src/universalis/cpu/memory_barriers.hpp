@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2000 Ross Bencina and Phil Burk
 // copyright ????-???? Bjorn Roche, XO Audio, LLC
-// copyright 2008-2008 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2008-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 //
 // This source code is partially base on Apache Harmony.
 // see apache harmony barrier http://svn.apache.org/viewvc/harmony/enhanced/drlvm/trunk/vm/port/include/port_barriers.h
@@ -25,10 +25,7 @@
 /// universalis::cpu::memory_barriers::read()
 /// universalis::cpu::memory_barriers::write()
 
-#ifndef UNIVERSALIS__CPU__MEMORY_BARRIERS__INCLUDED
-#define UNIVERSALIS__CPU__MEMORY_BARRIERS__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 
 #if defined DIVERSALIS__OS__APPLE
@@ -160,5 +157,3 @@
 	}}}
 #endif
 #undef universalis__cpu__memory_barriers__defined
-
-#endif

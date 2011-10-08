@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2007 johan boule <bohan@jabber.org>
-// copyright 2004-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\implementation universalis::os::loggers
+
 #include <universalis/detail/project.private.hpp>
 #include "terminal.hpp"
 #include "loggers.hpp"
@@ -28,7 +28,7 @@
 
 namespace universalis { namespace os {
 
-terminal::terminal() throw(exception)
+terminal::terminal()
 #if !defined DIVERSALIS__OS__MICROSOFT
 {} // we do nothing when the operating system is not microsoft's
 #else
@@ -36,8 +36,7 @@ terminal::terminal() throw(exception)
 {
 	// ok, the following code looks completly weird,
 	// but that's actually the "simplest" way one can allocate a "console" in a gui application the microsoft way.
-	try
-	{
+	try {
 		////////////////////////////////////////////////////////////////////
 		// allocates a new console window if we don't have one attached yet
 
@@ -188,8 +187,7 @@ terminal::terminal() throw(exception)
 		if(::HANDLE console = os_output) { // ::GetStdHandle(STD_OUTPUT_HANDLE)
 			::CONSOLE_SCREEN_BUFFER_INFO buffer;
 			::GetConsoleScreenBufferInfo(console, &buffer);
-			// colors
-			{
+			{ // colors
 				unsigned short const attributes(BACKGROUND_BLUE | FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 				::SetConsoleTextAttribute(console, attributes);
 				{
@@ -199,8 +197,7 @@ terminal::terminal() throw(exception)
 					::FillConsoleOutputAttribute(console, attributes, width * height, coord, &length);
 				}
 			}
-			// buffer size
-			{
+			{ // buffer size
 				int const width(256), height(1024);
 				if(buffer.dwSize.X < width) buffer.dwSize.X = width;
 				if(buffer.dwSize.Y < height) buffer.dwSize.Y = height;
@@ -215,8 +212,7 @@ terminal::terminal() throw(exception)
 					}
 				}
 			}
-			// cursor
-			{
+			{ // cursor
 				::CONSOLE_CURSOR_INFO cursor;
 				::GetConsoleCursorInfo(console, &cursor); 
 				cursor.dwSize = 100;
@@ -224,8 +220,7 @@ terminal::terminal() throw(exception)
 				::SetConsoleCursorInfo(console, &cursor);
 			}
 		}
-	}
-	catch(std::exception const & e) {
+	} catch(std::exception const & e) {
 		#if defined DIVERSALIS__COMPILER__MICROSOFT
 			std::freopen("conout$", "w", stdout);
 		#else
@@ -262,7 +257,7 @@ terminal::~terminal() throw() {
 }
 
 void terminal::output(const int & logger_level, const std::string & string) {
-	boost::mutex::scoped_lock lock(mutex_);
+	scoped_lock lock(mutex_);
 	#if !defined DIVERSALIS__OS__MICROSOFT
 		std::cout << "\e[1m" << "logger: " << logger_level << string;
 		// ansi terminal

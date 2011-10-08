@@ -65,7 +65,7 @@ struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fal
 	}}}
 #endif
 
-/******************************************************************************************/
+/*****************************************************************************/
 #ifdef BOOST_AUTO_TEST_CASE
 	#include <universalis/stdlib/detail/chrono/measure_clock.hpp>
 	namespace universalis { namespace os { namespace clocks { namespace test {

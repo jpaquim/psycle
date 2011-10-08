@@ -35,15 +35,12 @@ const int MAX_SCOPE_BANDS = 128;
 const int SCOPE_BUF_SIZE  = 4096;
 const int SCOPE_SPEC_SAMPLES = 256;
 
-//cpu::cycles_type cost(cpu::cycles());
-//cost = cpu::cycles() - cost;
-
 class Machine; // forward declaration
 class CoreSong; // forward declaration
 
 class PSYCLE__CORE__DECL AudioBuffer {
 	public: 
-		AudioBuffer(int numChannels,int numSamples);
+		AudioBuffer(int numChannels, int numSamples);
 		~AudioBuffer();
 		void Clear();
 		float* getBuffer() { return buffer_; }

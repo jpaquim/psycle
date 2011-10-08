@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 /// the restrict keyword has been introduced in the iso 1999 standard.
@@ -9,10 +9,7 @@
 	/// void f(int & restrict r1, int & restrict r2, int * restrict p1, int restrict p2[]);
 	/// here the compiler is told that &r1 != &r2 != p1 != p2
 
-#ifndef UNIVERSALIS__COMPILER__RESTRICT__INCLUDED
-#define UNIVERSALIS__COMPILER__RESTRICT__INCLUDED
 #pragma once
-
 #include <universalis/detail/project.hpp>
 
 ///\todo test __STDC_VERSION
@@ -29,6 +26,4 @@
 #else
 	#define UNIVERSALIS__COMPILER__RESTRICT
 	#define UNIVERSALIS__COMPILER__RESTRICT_REF
-#endif
-
 #endif
