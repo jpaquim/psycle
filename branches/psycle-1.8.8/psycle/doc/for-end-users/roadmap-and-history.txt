@@ -46,13 +46,30 @@ At January 2007, xpsycle's developer moved onto his own program, and xpsycle sta
 Also, [JAZ]/JosepMa, took again the task of leading the main Psycle and released Psycle 1.8.5 in September 2007.
 This new version is based on the 1.8 branch (not on the 1.9), but several of the features have been added back and extended/finished ( a new wave editor, the new VSThost, a new Mixer machine, improvements on Sampulse), as well as the all time going task of fixing the errors (bugfixs)
 
+After this release, Psycle 1.8.5 sources became the development branch and work was focused on this. psycle-core (the engine of Psycle in the form of a library made for xpsycle/qpsycle) got a partial reimplementation, 1.8.5 features were ported back,and Qpsycle continued its development, making an alpha version which played Psycle songs and in which a simple song could be made. There was also a commandline Psycle player.
+These all could be built for linux and for windows using MinGW. psycle-core even got compiled and used in a PowerPC Mac.
+
+In 2009, an effort to put psycle-core into Psycle started. This implied changes to the UI code (all pattern code assumed structures that don't exist in psycle-core), machine view and the interaction between the plugin cache and settings. Also, fixes and improvements for 64bit compilation were added.
+Work advanced until summer, but Psycle was becoming unresponsive and errors/incompatibilities were popping up.
+
+In august of 2009, JAZ/JosepMa wrote a dimission post at psycle.pastnotecut.org. Two years had passed since last release and there was not even a beta version ready. Psycle was falling under its own weight and was in need of a stronger leader. There was also less and less activity at psycledelics and alternatives to Psycle seemed to be on the rise.
+
+JosepMa didn't leave immediately, and in autumn of 2009, Psycle 1.8.6 (and 1.8.6.1) was made backporting some features from the development branch back into Psycle 1.8.5 branch. They were mostly bugfixes with some small additions.
+
+Most of the 2010 passed without development, as JosepMa had progressively left, and there was no other developer. But at the end of summer, due to requests on the boards and feelings about Psycle, JosepMa decided to put back on the hat of developer and started working on Psycle 1.8.8 beta1.
+
+The original goal was only to add a couple more features to the 1.8.5/1.8.6 branch from the development branch (like multithreaded audio engine) but soon it evolved into a full upgrade to a more up-to-date software (x86 and x64 compatibility, better Vista/7 integration, reimplementation of several parts of the code, like the whole settings system, better audio and MIDI integration, new skins and graphics and an upgrade of most of the plugins with better parameter window information and samplerate awareness). For this reason, 1.8.8 was released as 1.10.0.
 
 Roadmap
 =======
-There are several works in progress around the Psycle project. This is a brief of what can be expected:
+There is no plan for the future. There is still no strong leader behind Psycle.
+Said that, these are the things that could be done:
 
-* QPsycle: This project is in alpha state, but it will become in the future as the linux reference for Psycle (aside of psycle in wine, that has worked quite well so far). It will not be like Psycle, but will try to maintain the spirit of it. Also, the source code of QPsycle and Psycle will share many common parts so that the developers can work cooperatively.
+    QPsycle: QPsycle was made uncompilable during the integration of psycle-core into Psyclemfc during 2009. No real effort has been done to fix that.
+    
+	psycle-core: The psycle-core engine needs a rethinking on what should it be. There are two ways to go from here on, take psycle-mfc engine and convert it into a library like psycle-core using parts of psycle-core where possible, or take psycle-core, remove the parts that are more problematic, and base that on current psycle-mfc or new designs.
+    
+	Psycle 1.10: This release most probably will see bugfixes.
+    
+	Psycle 1.11/2.0: The evolution of Psycle implies necessarily to componentize it. Also, new user interfaces are possible nowadays that weren't possible some years ago, as such, Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIs being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
 
-* Psycle 1.8: One more Psycle 1.8 could be expected (1.8.6) that would contain bugfixes and finish some incomplete features (most notably, Sampulse).
-
-* Psycle 1.9/2.0: Psycle 1.8.5 has become the new 1.9 branch, from which the development will continue. The first task will be to incorporate QPsycle's psycle-core engine, and improve upon it. Some new features are to be expected, like multi-io audio, new plugin formats ( LADSPA, others?), new Fileformat (PSY4) based on .xml and binary compressed data, and the ability to have a separated library to make again a psycle player.

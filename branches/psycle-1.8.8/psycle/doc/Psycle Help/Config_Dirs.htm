@@ -1,32 +1,69 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<html>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
 </head>
 
 <body>
 <table width="100%">
-<col width="50%">
-<tr><td><a href="Config_Keyboard.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Config_IO.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+	<col width="50%" />
+	<tr>
+		<td><a href="Config_Keyboard.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Config_IO.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
 </table>
-<p class=head2>Directories</p>
-<p class=under>(Configuration > Settings... >>Directories)</p>
+<p class="head2">Directories</p>
+<p class="under">(Configuration &gt; Settings... &gt;Directories)</p>
 
-<table cellspacing=0>
-<col width=160>
-<tr valign="top"><td><b>Song directory:</b></td><td>Default directory for opening/saving of .psy files.</td> 
-<tr valign="top"><td><b>Instrument directory:</b></td><td>Default directory for samples (.wav and .iff).</td> 
-<tr valign="top"><td><b>Plug-In directory:</b></td><td>Directory that contains your native plugins.</td> 
-<tr valign="top"><td><b>VST Plug-In directory:</b></td><td>Directory that contains your VST plugins.</td> 
-<tr valign="top"><td><b>Skin directory:</b></td><td>Directory containing your Psycle skins.</td> 
+<p><img src="config_directories.png"/></p>
+<table cellspacing="0">
+	<col width="160" />
+	<tr valign="top">
+		<td><b>Song directory:</b></td>
+		<td>Default directory for opening/saving of .psy files.</td>
+	</tr>
+	<tr valign="top">
+		<td><b>Instrument directory:</b></td>
+		<td>Default directory for samples (.wav and .iff).</td>
+	</tr>
+	<tr valign="top">
+		<td><b>Plug-In directory:</b></td>
+		<td>Directory that contains your native plugins.
+		 This directory is different between the x86 and x64 releases</td>
+	</tr>
+	<tr valign="top">
+		<td><b>VST Plug-In directory:</b></td>
+		<td>Directory that contains your VST plugins. If you have a bit bridging application,
+		you can specify both, the 32bit Vst plugin directory and the 64bit one. Else you will
+		be able to set only the directory of the same bits than the Psycle executable.<br/>
+		Right now, Psycle supports jBridge natively. Other bit bridges might work without integration.</td>
+	</tr>
+	<tr valign="top">
+		<td><b>Skin directory:</b></td>
+		<td>Directory containing your Psycle skins.</td>
+	</tr>
+	<tr valign="top">
+		<td><b>User presets directory:</b></td>
+		<td>Directory containing the presets for the machines. Originally Psycle saved the presets
+		next to the dll files, but this is a bad practice in Windows Vista and 7.</td>
+	</tr>
 </table>
-<P>
-A word of advice:  keep your native plugin directory separate from your VST directory - you can run into problems since both types of plugin are .dll files.
-<P>
+<p>A word of advice: keep your native plugin directory separate from
+your VST directory - you can run into problems since both types of
+plugin are .dll files.</p>
+<p />
 <table width="100%">
-<col width="50%">
-<tr><td><a href="Config_Keyboard.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="Config_IO.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+	<col width="50%" />
+	<tr>
+		<td><a href="Config_Keyboard.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Config_IO.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
 </table>
 </body>
 </html>

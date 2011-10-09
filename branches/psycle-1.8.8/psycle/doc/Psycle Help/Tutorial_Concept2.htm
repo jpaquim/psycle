@@ -1,108 +1,155 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-
-  <link rel="StyleSheet" href="psycle.css" type="text/css" media="screen">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
 </head>
-
-
-
 <body>
-
 <table width="100%">
 
-  <col width="50%">
-  <tbody>
-    <tr>
-      <td><a href="Tutorial_Sampler.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
-      <td align="right"><a href="Tutorial_Tweaking.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
+	<col width="50%" />
+	<tbody>
+		<tr>
+			<td><a href="Tutorial_Sampler.htm"><img
+				src="arrow_side_invert_L.gif" alt="Previous" border="0" /></a></td>
+			<td align="right"><a href="Tutorial_Tweaking.htm"><img
+				src="arrow_side_invert_R.gif" alt="Next" border="0" /></a></td>
 
-    </tr>
-  </tbody>
+		</tr>
+	</tbody>
 </table>
-
 
 <p class="head2">Psycle Concept No. 2</p>
 
-
-Now that you've got your sounds working, it's time to enter some notes to make a proper song.
-To open the pattern window, press F3 <b><i>OR</i></b> go to the menu <i>View &gt; Pattern Editor</i>.  A Psycle song consists of patterns which are then sequenced.  A pattern is made up of rows and tracks.
-<p>
-<img src="patterneditor.jpg" border="0" height="109" width="434">
-</p>
+Now that you've got your sounds working, it's time to enter some notes
+to make a proper song. To open the pattern window, press F3,
+<b><i>OR</i></b>
+the pattern editor button in the toolbar
+<b><i>OR</i></b>
+go to the menu
+<i>View &gt; Pattern Editor</i>
+. A Psycle song consists of patterns which are then sequenced. A pattern
+is made up of rows and tracks.
+<p><img src="patterneditor.jpg" border="0" alt="" /></p>
 <p>Each row corresponds to a time interval. With the default
 Line-per-beat setting of 4, that means that every row corresponds to a
 dem-semi-quaver, or 16th-note. However, this does not mean that a note
 is restricted to a 16th-note duration - that depends on the settings of
 the generator and Note-Off commands. It is analogous to having a piano
 score with every note and rest written out as tied 16th notes (or
-whatever time interval applies).
-</p>
-<p>
-Each track is like channels on a mixer - it allows notes from different generators to be played simultaneously.
-</p>
+whatever time interval applies).</p>
+<p>Each track is like channels on a mixer - it allows notes from
+different generators to be played simultaneously.</p>
 <p class="head2">Entering Notes</p>
 Now you're in the pattern window, it's time to enter some notes.
 Firstly, some explanation of the format of the notes is needed. Each
 entry for a note looks like this:
 
-<p></p>
-<center>
-<code> --- .. .. .... <br>
+<p />
+<center><code> --- .. .. .... <br />
 
-C-4 01 00 0D7F <br>
+C-4 01 00 0D7F <br />
 
-A-3 .. 00 ....
-</code></center>
+A-3 .. 00 .... </code></center>
 
-
+<p>Psycle uses the English notation for the note names (See <a
+	href="http://en.wikipedia.org/wiki/Note">Wikipedia</a> to see the
+correspondence with other notations). This notation uses the first 7
+letters of the alphabet as notes.</p>
 <p>For now, all you really need to know about is the note name (e.g.
 C-4) and the generator number (3rd column) which are pretty much self
 explanatory once you know where they are. Now, to enter some notes, go
 to a track and click on the part of a note entry position where the
 note-name goes. Now, press Q, down arrow, W, down arrow, E, down arrow.
-You should see several notes there. Notice that the machine number is automatically entered by Psycle. It uses the generator selected in the machine combobox (in the toolbar).</p>
+You should see several notes there. Notice that the machine number is
+automatically entered by Psycle. It uses the generator selected in the
+machine combobox (in the toolbar).</p>
+<p>The default mapping puts two octaves in a computer keyboard like
+what is shown in this image<br />
+<img src="640px-Psycle_keyboard.jpg" /></p>
+<p>You can check and modify which keyboard keys correspond to each
+musical key in the <a href="Config_Keyboard.htm">keyboard section</a> of
+the configuration</p>
 <p>If you're using samples, the only difference in playing notes is
-that the sample number (which is the other combobox in the toolbar) is shown in the second column e.g.</p>
-<p></p>
-<center>
-<code> C-4 02 01 .... <br>
+that the sample number (which is the other combobox in the toolbar) is
+shown in the second column e.g.</p>
+<p />
+<center><code> C-4 02 01 .... <br />
 
 </code></center>
 
 
-<p>
-where the sample number is 02 and the generator number is 01.</p>
-<br>
+<p>where the sample number is 02 and the generator number is 01.</p>
+<br />
 A special key to be aware of is the "Note Off" key, which sends a
 "noteoff" message to the specified generator, allowing you to decide
 when to stop a playing note. Press the key "1" above the QWERTY keys.
-You would see a like like this:<br>
+You would see a text like like this:
+<br />
 
-<center>
-<code>
-off .. 00 .... </code></center>
-<p>Note: You might need to change the Envelope values ( amp envelope,
-VCA envelope...)&nbsp;of the machine to get the duration that you
-search for.</p>
-<p class=head2>The sequence: How to play more patterns</P>
-<p>
-
+<center><code> off .. 00 .... </code></center>
+<p>Note: You might need to change the Envelope values ( amp
+envelope, VCA envelope...)&nbsp;of the machine to get the duration that
+you search for.</p>
+<p class="head2">The sequence: How to play more patterns</p>
+<p>A pattern can have many lines and tracks, but a single pattern is
+not meant to hold an entire song. For that, there is the sequence.<br />
 </p>
-<p>
-<table width="100%">
-
-  <col width="50%">
-  <tbody>
-    <tr>
-      <td><a href="Tutorial_Sampler.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
-      <td align="right"><a href="Tutorial_Tweaking.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
-
-    </tr>
-  </tbody>
+<table>
+	<tr>
+		<td><img src="sequence-numbers.png" /></td>
+		<td valign="top">
+		<p>The sequence, as the name implies is where you can indicate
+		which patterns will play, and in which order. Psycle supports up to
+		256 patterns and up to 256 positions in the sequence.<br />
+		On the left, there is a sequence showing pattern numbers. This is seen
+		as 00:00. The pair before the semicolon ":" indicates the position of
+		the sequence. The pair after the semicolon indicates the number of the
+		pattern.<br />
+		</p>
+		<p>In Psycle, the pattern you are editing is always the pattern
+		that is selected in the sequence. To add a new one, press the New
+		button. You will see that the sequence increments in one position, and
+		that the pattern is empty. Fill in some more notes.<br />
+		There are two more ways to increment the sequence length. If you press
+		the Ins button, the sequence will increase, but it will add the same
+		pattern number than the one you are editing. In this way, you can
+		repeat a pattern without needing to write it again (See positions 09,
+		0A and 0B).<br />
+		Finally, the other way to increase the sequence length is the Clone
+		button. If you press the button, the sequence increases, adds a new
+		pattern and fills it with a copy of what the current pattern has. This
+		is interesting when you want to do a variation of the current pattern
+		like adding or removing tracks and/or notes.<br />
+		</p>
+		<p>The other two buttons, the plus and minus, will change the
+		pattern index adding or removing one to its value. The sequence popup
+		menu allows other changes</p>
+		<p>Finally, on the right side, there is the sequence with named
+		patterns. The checkbox named "Show pattern names" on the bottom side
+		is responsible for switching this. You can name patterns
+		right-clicking on the pattern position in the sequence, or using
+		control+enter in the pattern, or selecting the pattern properties
+		option in the pattern popup menu.</p>
+		</td>
+		<td><img src="sequence-names.png" /></td>
+	</tr>
 </table>
 
+<table width="100%">
 
-</p>
+	<col width="50%" />
+	<tbody>
+		<tr>
+			<td><a href="Tutorial_Sampler.htm"><img
+				src="arrow_side_invert_L.gif" alt="Previous" border="0" /></a></td>
+			<td align="right"><a href="Tutorial_Tweaking.htm"><img
+				src="arrow_side_invert_R.gif" alt="Next" border="0" /></a></td>
+
+		</tr>
+	</tbody>
+</table>
+
 </body>
 </html>

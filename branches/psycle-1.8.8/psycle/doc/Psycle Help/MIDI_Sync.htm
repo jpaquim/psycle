@@ -1,32 +1,52 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<html>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
 </head>
 <body>
 <table width="100%">
-<col width="50%">
-<tr><td><a href="MIDI_Setup.htm">Previous</a></td><td align="right"><a href="MIDI_OtherFeat.htm">Next</a></td>
+	<col width="50%" />
+	<tr>
+		<td align="left"><a href="MIDI_Setup.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="MIDI_OtherFeat.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
 </table>
+<p class="head2">Clock synchronized setup</p>
+<p>
+To control Psycle from a MIDI sequencer is fairly easy once you understand the concept behind.<br/>
+You will need to setup what is known as a Virtual MIDI port. This is a software emulated MIDI input/output port (yes, a port which does both!).<br/>
+You will need software such as LoopBe or MIDI Yoke to create this virtual port. If using Vista or Windows 7, I recommend using LoopBe, since it is more up-to-date. MIDI Yoke should work fine in Windows XP and offers more ports for free.<br/>
+Once you have setup this virtual MIDI port you simply select this port as the output of your MIDI sequencer and also select this port as the input into Psycle (find this in the <a href="Config_IO.htm">Input/output tab</a>). Depending on the software you use, it can have several ports. It is important to use the same index for input and output.<br/>
+Note: Psycle does not autorefresh the list, so when you connect an USB MIDI device, you will need to reopen the configuration Dialog and select it again to start it.
+</p>
+<p><code>
+[MIDI Sequencer Out] -&gt; [Virtual MIDI Output Port]</code><br/>
+ and<br/>
+<code>
+[Virtual MIDI Input Port] -&gt; [Psycle MIDI In]
+</code></p>
 
-<p class=head2>Using Psycle alongside other synth/MIDI modules</P>
+Select the main input device from one of those available in the Input device listbox. It should match the output MIDI device of your MIDI sequencer.
+Then, select the input method Synchronized with MIDI clock.<br/>
+If you are using a separate device for MIDI Sync then you can select this from the Sync Device listbox, although if you plan to send a MIDI sync clock through the same device as the main input device then you can leave this as Same as Input device.<br/>
+If you wish to alter the MIDI headroom available for MIDI input (see later for details) then you can do so by entering a value directly or by using the spin buttons to quickly increment/decrement the current value.
+<p>
+Finally, don't forget to setup the way to select the generator and instrument (find this in the <a href="Config_MIDI.htm">
+controller's tab</a>) 
+</p>
 
-This will work, as long as a few precautions are taken.  You will probably need to offset your non-Psycle MIDI/Audio tracks (in your sequencer) to align with Psycle's audio, due to the playback delay.  It is also a good idea to send some MIDI sync codes (emulated sync) to Psycle, which is usually referred to as Transmit MIDI Start/Continue/Stop/Clock or similar.<P>
-
-To enable MIDI sync in CakeWalk: <P>
-
-<img src="midiout.jpg" width="391" height="204" border="0">
-
-<P>
-
-Some sequencers (CakeWalk included) allow you to send a MIDI Sync Start code when playback is start from any point in the song (not just the very beginning). This is usually referred to as Use Start, Never Continue or similar. If your sequencer has this facility, it should be enabled to force Psycle to resync with the audio engine every time sequencer playback is initiated.<P>
-
-If your sequencer does not support outputting a MIDI clock, then you can use three controllers to simulate a clock using a standard MIDI track. Place a CC 121 as the first event in the song (preferably leaving a bar gap between it and the next midi event). Then every regular interval (say 1/16th of a bar) place a CC 122. You can send these events through any channel and setting a generator/instrument map is not required. Finally, to stop all sound, place a CC 124 right at the end of your song.
-<P>
 <table width="100%">
-<col width="50%">
-<tr><td><a href="MIDI_Setup.htm">Previous</a></td><td align="right"><a href="MIDI_OtherFeat.htm">Next</a></td>
+	<col width="50%" />
+	<tr>
+		<td align="left"><a href="MIDI_Setup.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="MIDI_OtherFeat.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
 </table>
 </body>
 </html>

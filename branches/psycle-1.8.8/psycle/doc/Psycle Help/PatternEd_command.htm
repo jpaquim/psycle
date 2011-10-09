@@ -1,160 +1,158 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-
-  <link rel="StyleSheet" href="psycle.css" type="text/css" media="screen">
-
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
 </head>
 
-
-
 <body>
-
 <table width="100%">
+	<col width="50%" />
+	<tbody>
+		<tr>
+			<td><a href="PatternEd_Tweak.htm"><img
+				src="arrow_side_invert_L.gif" alt="Previous" border="0" /></a></td>
 
-  <col width="50%">
-  <tbody>
-
-    <tr>
-
-      <td><a href="PatternEd_Tweak.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
-
-      <td align="right"><a href="PatternEd_Global.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
-
-    </tr>
-
-  </tbody>
+			<td align="right"><a href="PatternEd_Global.htm"><img
+				src="arrow_side_invert_R.gif" alt="Next" border="0" /></a></td>
+		</tr>
+	</tbody>
 </table>
 
 <p class="head2">Mcm Command</p>
+<p>The Mcm command has evolved to have two different functionalities:</p>
+<p class="head3">As MIDI command</p>
+<p>
+The Mcm command works in a similar way than the Twk Command:
+</p>
 
-<p class="head3">For Vst's</p>
+If the following is a pattern Row,
+<br />
+<pre>Description: (1) (2)(3) (4)<br />Pattern Row : ---- .. .. ....<br /></pre>
 
-The Mcm command works in a similar way
-than the Twk Command:<br>
+then, on (1) , you insert the Mcm command.
+<br />
 
-<br>
+To do so, you should press Mcm key. Check and/or change its value in the 
+<a href="Config_Keyboard.htm">keyboard configuration dialog</a>).
+<br />
+<br />
 
-If the following is a pattern Row,<br>
+On (2) , you define the Midi command number that you want to send.
+<br />
 
-<pre>Description: (1) (2)(3) (4)<br>Pattern Row : ---- .. .. ....<br></pre>
+You might need to check some MIDI documents and/or the Plugin's help to
+know what to write in here. These values are always from 80 to FF.
+<br />
 
-then, on (1) , you insert the Mcm
-command.<br>
+<br />
 
-To do so, you should press Mcm key.
-Check and/or change its value in the Keyboard&nbsp;Configuration
-dialog
-(Configuration-settings).<br>
+On (3) , you specify the number of the Machine, just like you do with
+tweaks.
+<br />
 
-<br>
+This number is the one shown in the combobox, or in the machine's
+dialog.
+<br />
 
-On (2) , you define the Midi command
-number that you want to send.<br>
+<br />
 
-You might need to check some MIDI
-documents and/or the Plugin's help to know what to write in here.<br>
+Finally, on (4), you specify the Value to send for this midi command.
+<br />
 
-<br>
+<br />
 
-On (3) , you specify the number of the
-Machine, just like you do with tweaks.<br>
+(4) is divided in two groups of two values AABB. You might only need to
+speficy AA.
+<br />
 
-This
-number is the one shown in the combobox, or in the machine's dialog.<br>
+<br />
 
-<br>
+Usually, you'll use it to send MIDI CC's. CC Command is "B0".
+<br />
 
-Finally, on (4), you specify the Value
-to send for this midi command.<br>
+Example, this sets the machine volume to half of it:
+<br />
 
-&nbsp;&nbsp; &nbsp;<br>
+<pre>Mcm B0 01 0740<br /></pre>
 
-(4) is divided in two groups of two
-values AABB. You might only need to speficy AA.<br>
+B0 Send a MIDI CC (Control Change) command to the MIDI channel 0
+<br />
 
-<br>
+01 of the Generator number 1
+<br />
 
-Usually, you'll use it to send midi
-CC's. CC Command is "B0".<br>
+07 In order to change it's (Channel) volume
+<br />
 
-Example, this sets the machine volume to
-half of it:<br>
+40 to 40 (in a scale of 0 to 7F, HEX)
+<br />
 
-<pre>Mcm B0 01 0740<br></pre>
+<br />
 
-B0 Send a
-midi CC (Control Change) command<br>
+<p class="head3">As command redirector</p>
 
-01 to the
-Generator number 1<br>
+The Mcm command can also be used for another purpose. 
+It allows to send a command to another track. This way, you can
+workaround the limitation where you can only put one of them per
+track.
+<br />
 
-07 In
-order to change it's (Channel) volume<br>
+<br />
 
-40 to 40
-(in a scale of 0 to 7F, HEX)<br>
+Syntax is as follows:
+<br />
 
-&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <br>
+<br />
 
-<p class="head3"> For Natives</p>
+If the following is a pattern Row,
+<br />
 
-The Mcm command can also be used for
-another purpose with Native plugins.<br>
+<pre>Description: (1) (2)(3) (4)<br /><br />Pattern Row : ---- .. .. ....<br /><br /></pre>
 
-It allows to send a command to another
-channel. This way, you can workaround the limitation where you can only
-put
-one of them per channel.<br>
+on (1) , you insert the Mcm command.
+<br />
 
-<br>
+on (2), insert the (pattern) track number where the command will be sent
+to (This number will be at much 3F).
+<br />
 
-Syntax is as follows:<br>
+on (3), insert the machine number
+<br />
 
-<br>
+on (4), insert the command that you want to send.
+<br />
 
-If the following is a pattern Row,<br>
+<br />
 
-<pre>Description: (1) (2)(3) (4)<br><br>Pattern Row : ---- .. .. ....<br><br></pre>
+Example: Send command 0C50 to track 02 of machine 06:
+<br />
 
-on (1) , you insert the Mcm command.<br>
-
-on (2), insert the channel (track)
-number where the command will be sent to.<br>
-
-on (3), insert the machine number<br>
-
-on (4), insert the command that you want
-to send.<br>
-
-&nbsp;&nbsp; &nbsp;<br>
-
-Example: Send command 0C50 to channel 02
-of machine 06:<br>
-
-<br>
+<br />
 <pre> mcm 02 06 0C50</pre>
 
-<span style="font-family: monospace;"></span>
-<p>
+<span style="font-family: monospace;" />
+<p />
 <table width="100%">
 
-  <col width="50%">
-  <tbody>
+	<col width="50%" />
+	<tbody>
 
-    <tr>
+		<tr>
 
-      <td><a href="PatternEd_Tweak.htm"><img src="arrow_side_invert_L.gif" alt="Previous" border="0"></a></td>
+			<td><a href="PatternEd_Tweak.htm"><img
+				src="arrow_side_invert_L.gif" alt="Previous" border="0" /></a></td>
 
-      <td align="right"><a href="PatternEd_Global.htm"><img src="arrow_side_invert_R.gif" alt="Next" border="0"></a></td>
+			<td align="right"><a href="PatternEd_Global.htm"><img
+				src="arrow_side_invert_R.gif" alt="Next" border="0" /></a></td>
 
-    </tr>
+		</tr>
 
-  </tbody>
+	</tbody>
 </table>
 
-</p>
+<p />
 
 </body>
 </html>

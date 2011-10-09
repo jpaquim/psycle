@@ -96,9 +96,6 @@ kSh
 
 ?+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
 	[50MB to clipboard? ehem...]
-?+ 'Free wave' button that sets driver to silent
-?+ release audio when psycle looses focus option
-	[And we will get lots of people again of why does psycle do that]
 
 
 ##################################################################################
@@ -112,7 +109,6 @@ tested and categorized and sorted
 Machines
 ========
 
-*	cyanphase vibrasynth has an access violation bug [ Source code is no available. Fix is not possible]
 **	JAL7OH- JMdrum.dll crashes psycle (or gets muted) when using FBxx and/or FAxx.
 **	JMDrum is buggy (Crashes after changing settings sometimes)
 **                <lobyaway> ah, it bugs if i hold down a note while editing (to fill the pattern with notes)
@@ -195,7 +191,6 @@ GUI (machines)
 !!	machine param enter dialog should be modeless.
 		[[JAZ] Why? What do you want to do meanwhile?]
 		[<pooplog> play notes to test parameter]
-!	VST/Native machine Windows : ESC = close [Problem: can't close within the CWnd!!!]
 +	<_sue_> native mahcines gui should have sliders...it would change a lot....
 		<pooplog> sliders, switches, and owner draw controls i say?
 +	Directories in "Add new machine" (Sorting with directories)
@@ -228,6 +223,7 @@ Player Engine
 ====
 Vsts
 ====
+Note: Many of these are previous to switching to the Seib-based VSThost in 1.8.5.
 
 ***	songs saved with quadrasid sometimes freak out after loading...
 **  	Waldorf PPG WAVE 2.V VSTI : psycle misses/skips notes ramdomly - to check this fill in all 64 
@@ -288,12 +284,9 @@ Vsts
 MIDI related
 ============
 
-***	MIDI in only works with Waveout (and ASIO).
 ++	MIDI out
 ++	midi control commands learn
 ++	midi control commands handling 14 bit messages
-++	<lastfutur> if psycle recieves a program change i suggest it interprets it as the user wanting to change
-	the active machine to machine number [program number] ...this enables psycle for live use without screen
 +	<lastfutur> future feature requests for the controllers tab: midi routing presets;
 	checkbox: binding which machine is active to incoming program changes;
 	binding midi routing presets to machines; (possibly: save the presets in the psy)
@@ -316,7 +309,6 @@ Interface (contains pattern stuff too)
 	in the "note" column.
 	[Is it useful to enter numbers while playing and follow song? what about just adding notes
 	 wherever the position of the cursor is?]
-!!!	Psycle default colours should be improved (cursor, selection, etc.)
 !!	Should make it so clicking on colour boxes pops up menu
 !!	<pooplog> i mean follow song, multi aud, noteoffs, tweaks, etc. could be buttons perhaps
 !	JAL7OH- the cycle length in the swing fill dialog set to lines per beat/2 by default
@@ -329,27 +321,18 @@ Interface (contains pattern stuff too)
 		types of sorting, show the complete keys assigned (larger textbox)  , allow printing it....
 +	James says: i have an idea for that actually... seeing as there are so many configurable
 		keys... could perhaps have a textbox, where if you clicked in there, typed a key, it would highlight
-		what was assigned to it+	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
+		what was assigned to it
++	<Alk> to be able to drop a play markers (start and end) to loop through to make editing easier
 +	<Alk> +alt to make the transposing only effect current machine/sample
 		i.e. ctrl+alt+f11 = transpose current gen/sample down 1 note
 		ctrl+alt+shift+f12 = transpose current gen/sample up 1 octave
-+	<dp|away> you could setup some standard buffers you know are solid and do like setting low -> high
-		and shield the user from the nastiness
 +	<alk_> the 'Apply' button is not implemented in the config dialog
 +	<alk> make it so that you can click anywhere on the wire to get wire vol? (in case triangle is hidden)
-*	<_sue_> centering the open file menus....
-		and saving theyre size.......i allways have to make them larger so i can browse my samples dir....its
-		convenient for when you have folders with many files as you usually do with samples
 +	<sue> <pooplog> so please explain to me exactly what sequence mix paste button would do- it would mix-paste data
 		into the currently selected blocks? <sue> yes it would work as pattern mix paste for more than one pattern.
 +	<wayfinder> alk, oh oh and another one :D it would be cool if you could, for example with alt-0 through
 		9, change the row skip
-+	<wayfinder> like navigating in the sequence list with the cursor
-		[No. It is not needed, and causes alot of harm. if you want to navigate you have hotkeys]
 +	<wayfinder> numeric entering of pattern number
-+	<wayfinder> oh, i forgot one function of the IT pattern editor. when the cursor isnt following the
-		pattern, or when the song isnt playing, hitting the G key on a number takes you to that pattern
-		[ dear wayfinder, please remember that this is not IT damnit ]
 +?	<wayfinder> it would be so much cooler if there were like macros
 		say, i have a chorus part that's pattern 4, 6, 4, 5 and i have that three times in the song or so
 		i'd love to define pattern macro A as "4, 6, 4, 5" and be able to enter macro A in the
@@ -359,14 +342,6 @@ Interface (contains pattern stuff too)
 		[ We've added some more actually]
 		[ and most the needed ones are listed up there ^^ ]
 
-=============
-Driver Issues
-=============
-
-*	Output gets weird after a bit and start playing all crackly and doubletime
-		[<[JAZ]> I've seen this bug only when playing a song, going to configure the output and accepting
-		in the "waveout" or "Directsound" box. When accepting in the config dialog, all is back to normal.]
-* 	asio float MSB order unsupported
 
 =========
 Importing

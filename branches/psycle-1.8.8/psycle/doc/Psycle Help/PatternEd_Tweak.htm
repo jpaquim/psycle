@@ -1,46 +1,86 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<html>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<LINK REL=StyleSheet HREF="psycle.css" TYPE="text/css" MEDIA="screen">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
 </head>
 <body>
 <table width="100%">
-<col width="50%">
-<tr><td><a href="PatternEd_Notes.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_command.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+	<col width="50%" />
+	<tr>
+		<td><a href="PatternEd_Notes.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="PatternEd_command.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
 </table>
-<p class=head2>Tweaking Machines</P>
+<p class="head2">Tweaking Machines</p>
 
-The <code>twk</code> (tweak) and <code>tws</code> (smooth tweak) commands allow the parameters of machines to be automated.  The <code>twk</code> commmand causes the parameter change to happen instantaneously, while <code>tws</code> interpolates the change from the current value to the new value, over the time of one line.<P>
+The
+<code>twk</code>
+(tweak) and
+<code>tws</code>
+(smooth tweak) commands allow the parameters of machines to be
+automated. The
+<code>twk</code>
+commmand causes the parameter change to happen instantaneously, while
+<code>tws</code>
+interpolates the change from the current value to the new value, over
+the time of one line.
+<p>To insert a twk command, make sure the cursor is in the left-hand
+side of the track, and press " ` " (the key to the left of the "1" key).<br />
+To insert a tws command, do the same but hold the Shift key.<br />
+(Please. Note that you can change these keys from the <a
+	href="Config_Keyboard.htm">keyboard configuration dialog</a>)</p>
+<p />
 
-To insert a twk command, make sure the cursor is in the left-hand side of the track, and press " ` " (the key to the left of the "1" key).<BR>  To insert a tws command, do the same but hold the Shift key.<br>
-(Please. Note that you can change these keys from the <a href="Config_Keyboard.htm">keyboard configuration dialog</a>)<P>
+<center><code>twk 0A 00 A9B3<br />
+</code> 1 &nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; 4</center>
 
-<center><code>twk 01 00 A9B3<br></code>
-1 &nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; 4</center>
-
-<P>
+<p />
 
 <table border="0">
-<col width="25">
-<tr valign="top"><td><b>1.</b></td><td>Can be <code>twk</code> or <code>tws</code>.</td>
-<tr valign="top"><td><b>2.</b></td><td>Parameter number.</td>
-<tr valign="top"><td><b>3.</b></td><td>Machine number.</td>
-<tr valign="top"><td><b>4.</b></td><td>Parameter value.</td>
+	<col width="25" />
+	<tr valign="top">
+		<td><b>1.</b></td>
+		<td>Can be <code>twk</code> or <code>tws</code>.</td>
+	</tr>
+	<tr valign="top">
+		<td><b>2.</b></td>
+		<td>Parameter number.</td>
+	</tr>
+	<tr valign="top">
+		<td><b>3.</b></td>
+		<td>Machine number.</td>
+	</tr>
+	<tr valign="top">
+		<td><b>4.</b></td>
+		<td>Parameter value.</td>
+	</tr>
 </table>
-<P>
-The above example tweaks generator 0 (00), altering parameter 1 (01) to a value of A9B3 (43443 in decimal).
-<P><a name="param">
-To find the Parameter number and value for machine you can select "Params" in the third list box from the left in the Machine Bar, and then a list of parameters will display in the fourth listbox.<P>
-<center><img src="machinebar_params.png"border="0" align="absmiddle"></center>
-<P>
-Alternatively, for a native machine, right click the knob in the parameter window.  For a VST, use the listbox that appears via the "View-Parameter List" option.
+<p>The above example tweaks generator 0 (00), altering parameter 10
+(0A) to a value of A9B3 (43443 in decimal).</p>
+<p><a name="param"> To find the Parameter</a> number and value for
+machine you can select "Params" in the third list box from the left in
+the Machine Bar, and then a list of parameters will display in the
+fourth listbox.</p>
 
-For recording tweaks in real-time, see the <a href="PatternEd_Record.htm">Recording</a> section.
-<P>
+<center><img src="machinebar_params.png" border="0"
+	align="middle" alt="" /></center>
+<p>Alternatively, for a native machine, right click the knob in the
+parameter window. For a VST, use the listbox that appears via the
+"View-Parameter List" option. For recording tweaks in real-time, see the
+<a href="PatternEd_Record.htm">Recording</a> section.</p>
+<p />
 <table width="100%">
-<col width="50%">
-<tr><td><a href="PatternEd_Notes.htm"><img src="arrow_side_invert_L.gif" border=0 alt="Previous"></a></td><td align="right"><a href="PatternEd_command.htm"><img src="arrow_side_invert_R.gif" border=0 alt="Next"></a></td>
+	<col width="50%" />
+	<tr>
+		<td><a href="PatternEd_Notes.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="PatternEd_command.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
 </table>
 </body>
 </html>

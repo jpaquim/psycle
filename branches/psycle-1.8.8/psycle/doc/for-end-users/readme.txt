@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.8.8 RC1 ---
+				------------------------------- 1.10.0 ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -133,23 +133,17 @@ Oatmeal by Fuzzpilz  	( http://bicycle-for-slugs.org/ )
 
 3. Development:
 ---------------
+Psycle:
+	Psycle 1.10: This release most probably will see bugfixes.
+    
+	Psycle 1.11/2.0: The evolution of Psycle implies necessarily to componentize it. Also, new user interfaces are possible nowadays that weren't possible some years ago, as such, Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIS being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
 
-* Psycle (windows/MFC)
 
-	1.8: Current stable version. Development will follow with bugfixes and
-	    new additions which don't imply big changes to the underlying
-	    code.
+QPsycle:
+	QPsycle was made uncompilable during the integration of psycle-core into Psyclemfc during 2009. No real effort has been done to fix that.
+    
+	psycle-core: The psycle-core engine needs a rethinking on what should it be. There are two ways to go from here on, take psycle-mfc engine and convert it into a library like psycle-core using part of psycle-core where possible, or take psycle-core, remove the parts that are more problematic, and base that on current psycle-mfc or new designs.
 
-	1.9/2.0: Right now future development is not firmly defined. Ideas include
-		taking current 1.8.8 sources, modify them (but not redo them) to
-		be more like the current trunk, and add features in order of precedence.
-
-* qpsycle (linux/QT windows/QT)
-
-	alpha: The native linux version hasn't received any new revision lately.
-		Qpsycle's idea has always been multiplatform and be more like a sequencer
-		instead of a classic-type tracker. Nothing is written in stone related this
-		version.
 
 For up to date information, don't forget to visit the Developement forums on
 Psycledelics site.
@@ -175,6 +169,7 @@ checking. There are several tutorials, news, and some how-to's. Take a visit any
 day for information.
 
 		http://psycle.sourceforge.net/wiki
+		http://psycle.wikia.com/
 
 * Psycle's site at sourceforge:
 
@@ -186,12 +181,3 @@ files. You can also get the source code from the SVN repository:
 	development webpage : http://psycle.sourceforge.net/
 	SVN repository : https://psycle.svn.sourceforge.net/svnroot/psycle/trunk
 
-
-
-Also, chat with other Psycle users and developers in our IRC - Channel:
-join #psycle on EFNet network (server list: http://www.efnet.org/servers.html)
-If you don't have an irc client, you can use:
-	http://psycle.sourceforge.net/irc.html
-or
-	http://psycle.free.fr/irc
-with any "web" browser.

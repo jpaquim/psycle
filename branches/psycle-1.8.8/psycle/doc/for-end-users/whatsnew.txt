@@ -1,7 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-1.8.8   | 2011 | beta, RC					 | [JAZ] & bohan.
+1.10.0  | 2011 | release					 | [JAZ] & bohan.
+1.8.8   | 2010 | beta, RC					 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.6	| 2009 | maintenance                 | [JAZ] & alk & bohan.
 1.8.5	| 2007 | RC, release                 | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
@@ -28,7 +29,7 @@ Version | Date | Type of release             | Authors
 0.x     |      | alpha, beta                 | arguru
 ----------------------------------------------------------------------------------------------------
 
-Versions are composed this way since 1.7.24:
+Versions are composed this way since 1.7.24, except 1.8.5, which was a release:
 M.m.p , where:
 	- M = major version number.
 	- m = minor version number:
@@ -42,19 +43,20 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.8.8
+v1.10.0 (1.8.8 was renamed 1.10 before release)
 --------
 + New default option to show note A4 in patterns as standard A4 (440Hz). Unchecking it keeps the old A5 = 440Hz.
 + add a new track on cursor position for the current pattern or all patterns.
 + add a machine before or after another machine. Also option to add a machine in the middle of an existing wire.
 + deleting an effect with connected wires can keep neighbours connected now.
++ Playback cursor position in wave editor.
 * Application is a bit more DPI aware now. (Just behaving a bit better at 125% increase. It probably will never be fully DPI aware).
 * Scrolling in pattern view made slower.
 * Vumeter in main view made RMS. Stereo vu in Master window.
 * Dropped option of graphics double buffering. Now always enabled.
 ! Rewiring of mixer sends/returns would not work sometimes.
 ! Prevent crash on savewav dialog if path does not exist
-! RC1 bugfixes (recent menu was not keeping the correct entries. Feature of saving pattern track names was not reading them back, Mixer can be muted and bypassed again).
+! RC1 bugfixes (recent menu was not keeping the correct entries. Feature of saving pattern track names was not reading them back, Mixer can be muted and bypassed again, Render wav adding looped audio at the end, undo in pattern crashing Psycle, MIDI driver not getting selected, problem loading skins and more).
 
 v1.8.8 RC1
 ------------

@@ -28,7 +28,7 @@ h2 {
 written by Mark McComack and updated by Josep Maria Antolín<br/>
 (mark_jj_mccormak@yahoo.co.uk / ICQ #115046014)</div>
 
-Internal MIDI Implementation v2.3 (Psycle Release 1.8.8)
+Internal MIDI Implementation v2.3 (Psycle Release 1.10.0)
 <br/>
 <h2>Contents</h2>
 <ol>
@@ -58,7 +58,7 @@ The parameters of Psycle Plug-ins and VST instruments and effects can be control
 This is the basic configuration. Select your midi device as the input into Psycle (find this in Psycle settings -&gt; Input/Output tab). Sometimes there will be more than one port for your hardware, such as a MIDI through port and/or a data port.<br/>
 Also, set the input method as Immediate, so that you don't need to worry about clocks and configuration.
 <br/>Finally, set the options to select the generator and instrument to the way that better fits your usage. (find this in Psycle settings -&gt; MIDI Controllers tab). 
-<br/>Note: Psycle does not autorefresh the list, so when you connect an USB MIDI device, you will need to reopen Psycle.
+<br/>Note: Psycle does not autorefresh the list, so when you connect an USB MIDI device, you will need to reopen the configuration Dialog and select it again to start it.
 </p>
 <div align="center"><img src="midicontrollers.png" alt="Psycle output configuration dialog" title="Psycle output configuration dialog" /><br/></div>
 <h2>How do I control Psycle from my MIDI sequencer?</h2>
@@ -168,7 +168,9 @@ device?</dd>
   <dt>Ch 1-16</dt>
     <dd>- Shows that data has been received for that MIDI channel (included ALL types of data)</dd>
 </dl>
-(The channel-mapping table is self-explanatory)
+<p>The channel-mapping table is self-explanatory. The Noteoff column indicates if noteoff commands will get accepted
+by Psycle (yes), or will get discarded (no). This can be switched with the CC 126 and CC 127 MIDI messages</p>
+
 
 <h2>Can I record MIDI triggered Psycle audio using the internal Psycle WAV
 recording facility?</h2>
