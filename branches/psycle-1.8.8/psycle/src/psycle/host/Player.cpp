@@ -126,8 +126,11 @@ void Player::start_threads() {
 			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
 			if (initialize)
 			{
-				DoStop(); // This causes all machines to reset, and samplesperRow to init.				
+				DoStop(); // This causes all machines to reset, and samplesperRow to init.
+				bool recording = _recording;
+				_recording = false;
 				Work(256);
+				_recording = recording;
 				((Master*)(Global::_pSong->_pMachine[MASTER_INDEX]))->_clip = false;
 			}
 			_lineChanged = true;
@@ -570,9 +573,9 @@ void Player::clear_plan() {
 			}
 			if( _playPosition >= pSong->playLength)
 			{	
+				_playPosition = 0;
 				if( _loopSong )
 				{
-					_playPosition = 0;
 					if(( _playBlock) && (pSong->playOrderSel[_playPosition] == false))
 					{
 						while((!pSong->playOrderSel[_playPosition]) && ( _playPosition< pSong->playLength)) _playPosition++;
@@ -581,7 +584,8 @@ void Player::clear_plan() {
 				else 
 				{
 					_playing = false;
-					_playBlock =false;
+					_playBlock = false;
+					StopRecording();
 				}
 			}
 			// this is outside the if, so that _patternjump works
@@ -804,10 +808,14 @@ void Player::stop_threads() {
 				// Song play
 				if((_samplesRemaining <=0))
 				{
-					if (_playing)
+					//this double if is meant to prevent new line to play if song looping is disabled.
+					if(_playing) 
 					{
 						// Advance position in the sequencer
 						AdvancePosition();
+					}
+					if (_playing)
+					{
 						// Global commands are executed first so that the values for BPM and alike
 						// are up-to-date when "NotifyNewLine()" is called.
 						ExecuteGlobalCommands();

@@ -2071,6 +2071,7 @@ namespace psycle { namespace host {
 					break;
 
 				}
+				Global::pInputHandler->pUndoList  = pUndoList;
 				SetTitleBarText();
 			}
 		}
@@ -2210,6 +2211,7 @@ namespace psycle { namespace host {
 					}
 					break;
 				}
+				Global::pInputHandler->pRedoList = pRedoList;
 				SetTitleBarText();
 			}
 		}

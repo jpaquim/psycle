@@ -270,24 +270,35 @@ namespace psycle { namespace host {
 		{
 			if (!--machine.peaktime) 
 			{
-				char peak[10];
+				std::string peak;
+				
+				char tmp[10];
 				if ( machine.currentpeak > 0.001f) //26bits of precision in the display
 				{
-					sprintf(peak,"%.2fdB",helpers::dsp::dB(machine.currentpeak*0.00003051f));
+					sprintf(tmp,"%.2fdB",helpers::dsp::dB(machine.currentpeak*(1.f/machine.GetAudioRange())));
+					peak = tmp;
 				}
-				else strcpy(peak,"-inf dB");
-				m_masterpeak.SetWindowText(peak);
+				else peak = "-inf dB";
+				if ( machine.currentrms > 0.001f) //26bits of precision in the display
+				{
+					sprintf(tmp,"%.2fdB",helpers::dsp::dB(machine.currentrms*(1.f/machine.GetAudioRange())));
+					peak = peak + "/" + tmp;
+				}
+				else peak = peak + "/-inf dB";
+
+				m_masterpeak.SetWindowText(peak.c_str());
 				
 				SetSliderValues();
 
 				machine.peaktime=25;
 				machine.currentpeak=0.0f;
+				machine.currentrms=0.0f;
 				CRect r;
 				r.top=textY;
 				r.left=textX;
 				r.right=textX+textW;
 				r.bottom=textY+MAX_CONNECTIONS*textYAdd;
-				InvalidateRect(r);
+				InvalidateRect(r,FALSE);
 			}
 			m_vuLeft.SetPos(machine.volumeDisplayLeft);
 			m_vuRight.SetPos(machine.volumeDisplayRight);
@@ -327,7 +338,7 @@ namespace psycle { namespace host {
 
 				for(int i=0, y=textY ; i < MAX_CONNECTIONS; i++, y += textYAdd)
 				{
-					dc.ExtTextOut(textX, y-1, ETO_CLIPPED, CRect(textX,y,textX+textW,y+textH), CString(macname[i]), 0);
+					dc.ExtTextOut(textX, y-1, ETO_OPAQUE|ETO_CLIPPED, CRect(textX,y,textX+textW,y+textH), CString(macname[i]), 0);
 				}
 				dc.SelectObject(oldfont);
 			}

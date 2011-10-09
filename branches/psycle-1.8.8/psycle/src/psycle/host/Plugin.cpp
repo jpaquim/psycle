@@ -241,10 +241,10 @@ namespace psycle
 					needsAux_ = proxy().HostEvent(plugin_interface::HE_NEEDS_AUX_COLUMN,0,0.0f);
 
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 #ifndef NDEBUG 
-					throw;
+					throw e;
 #endif
 				}
 				for(int gbp(0) ; gbp < GetInfo()->numParameters ; ++gbp)
@@ -253,10 +253,10 @@ namespace psycle
 					{
 						proxy().ParameterTweak(gbp, _pInfo->Parameters[gbp]->DefValue);
 					}
-					catch(const std::exception &)
+					catch(const std::exception &e)
 					{
 #ifndef NDEBUG 
-						throw;
+						throw e;
 #endif
 					}
 				}
@@ -310,6 +310,7 @@ namespace psycle
 			{
 #ifndef NDEBUG 
 					throw e;
+					return false;
 #else
 
 				std::ostringstream s; s
@@ -325,6 +326,7 @@ namespace psycle
 			{
 #ifndef NDEBUG 
 					throw;
+					return false;
 #else
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath2 << std::endl
@@ -347,6 +349,7 @@ namespace psycle
 			catch(const std::exception & e)
 			{
 #ifndef NDEBUG 
+					if(!exception) exception = &e;
 					throw e;
 #else
 				if(!exception) exception = &e;
@@ -389,10 +392,12 @@ namespace psycle
 					{
 						proxy().PutData(pData); // Internal load
 					}
-					catch(const std::exception &)
+					catch(const std::exception &e)
 					{
 #ifndef NDEBUG 
-				throw;
+						delete[] pData;
+						throw e;
+						return false;
 #else
 						delete[] pData;
 						return false;
@@ -413,10 +418,10 @@ namespace psycle
 			{
 				size2 = proxy().GetDataSize();
 			}
-			catch(const std::exception &)
+			catch(const std::exception &e)
 			{
 #ifndef NDEBUG 
-					throw;
+					throw e;
 #endif
 				// data won't be saved
 			}
@@ -436,12 +441,12 @@ namespace psycle
 				{
 					proxy().GetData(pData); // Internal save
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
 #ifndef NDEBUG 
-					throw;
+					throw e;
 #endif
 
 				}
@@ -495,7 +500,8 @@ namespace psycle
 							catch(const std::exception & e)
 							{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -511,10 +517,11 @@ namespace psycle
 								{
 									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
 								}
-								catch(const std::exception &)
+								catch(const std::exception &e)
 								{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -547,10 +554,11 @@ namespace psycle
 											{
 												proxy().ParameterTweak(TWSInst[i], int(TWSCurrent[i]));
 											}
-											catch(const std::exception &)
+											catch(const std::exception &e)
 											{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -572,10 +580,11 @@ namespace psycle
 										{
 											proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
 										}
-										catch(const std::exception &)
+										catch(const std::exception &e)
 										{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -596,10 +605,11 @@ namespace psycle
 										{
 											proxy().SeqTick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
 										}
-										catch(const std::exception &)
+										catch(const std::exception &e)
 										{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -620,10 +630,11 @@ namespace psycle
 										{
 											proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
 										}
-										catch(const std::exception &)
+										catch(const std::exception &e)
 										{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -660,10 +671,11 @@ namespace psycle
 											{
 												proxy().SeqTick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
 											}
-											catch(const std::exception &)
+											catch(const std::exception &e)
 											{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -676,10 +688,11 @@ namespace psycle
 											{
 												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
 											}
-											catch(const std::exception &)
+											catch(const std::exception &e)
 											{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -692,10 +705,11 @@ namespace psycle
 											{
 												proxy().SeqTick(i ,entry._note, entry._inst, 0, 0);
 											}
-											catch(const std::exception &)
+											catch(const std::exception &e)
 											{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return 0;
 #else
 					return 0;
 #endif
@@ -730,10 +744,11 @@ namespace psycle
 				{
 					proxy().ParameterTweak(numparam,value);
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return false;
 #else
 					return false;
 #endif
@@ -781,10 +796,11 @@ namespace psycle
 				{
 					return proxy().Val(numparam);
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return -1;
 #else
 					return -1; // hmm
 #endif
@@ -802,10 +818,11 @@ namespace psycle
 					if(!proxy().DescribeValue(parval, numparam, proxy().Val(numparam)))
 						std::sprintf(parval, "%i", proxy().Val(numparam));
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -820,10 +837,11 @@ namespace psycle
 			{
 				proxy().Stop();
 			}
-			catch(const std::exception &)
+			catch(const std::exception &e)
 			{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -841,10 +859,11 @@ namespace psycle
 			{
 				proxy().SequencerTick();
 			}
-			catch(const std::exception &)
+			catch(const std::exception &e)
 			{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -866,10 +885,11 @@ namespace psycle
 					{
 						proxy().ParameterTweak(pData->_inst, nv);
 					}
-					catch(const std::exception &)
+					catch(const std::exception &e)
 					{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -927,10 +947,11 @@ namespace psycle
 						{
 							TWSCurrent[i] = float(proxy().Val(TWSInst[i]));
 						}
-						catch(const std::exception &)
+						catch(const std::exception &e)
 						{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -951,10 +972,11 @@ namespace psycle
 						{
 							proxy().ParameterTweak(pData->_inst, nv);
 						}
-						catch(const std::exception &)
+						catch(const std::exception &e)
 						{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -967,10 +989,11 @@ namespace psycle
 				{
 					proxy().MidiEvent(pData->_inst&0x0F, pData->_inst&0xF0, (pData->_cmd<<8) + pData->_parameter);
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -984,10 +1007,11 @@ namespace psycle
 					}
 					proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
 #ifndef NDEBUG 
-					throw;
+					throw e;
+					return;
 #else
 					return;
 #endif
@@ -1015,8 +1039,14 @@ namespace psycle
 			}
 			catch(const std::exception &)
 			{
+#ifndef NDEBUG 
+					throw e;
 				delete[] pData;
 				preset.Init(numParameters);
+#else
+				delete[] pData;
+				preset.Init(numParameters);
+#endif
 			}
 		}
 		void Plugin::Tweak(CPreset const & preset)
@@ -1028,12 +1058,18 @@ namespace psycle
 				{
 					proxy().PutData(preset.GetData()); // Internal save
 				}
-				catch(const std::exception &)
+				catch(const std::exception &e)
 				{
+#ifndef NDEBUG 
+					throw e;
+#endif
 					// o_O`
 				}
 				catch(...) // reinterpret_cast sucks
 				{
+#ifndef NDEBUG 
+					throw;
+#endif
 					// o_O`
 				}
 			}

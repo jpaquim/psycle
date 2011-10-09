@@ -109,7 +109,7 @@ namespace psycle { namespace host {
 		}
 		bool CPreset::operator <(const CPreset& b) const
 		{
-			return name < b.name;
+			return stricmp(name,b.name) < 0;
 		}
 		CPreset& CPreset::operator=(const CPreset& newpreset)
 		{
@@ -178,6 +178,7 @@ namespace psycle { namespace host {
 					else {
 						presets.clear();
 						LoadVersion0(hfile, numpresets, numParameters, presets);
+						presets.sort();
 					}
 				}
 				else
@@ -188,6 +189,7 @@ namespace psycle { namespace host {
 					{
 						presets.clear();
 						LoadVersion1(hfile, numParameters, dataSizeStruct, presets);
+						presets.sort();
 					}
 					else
 					{

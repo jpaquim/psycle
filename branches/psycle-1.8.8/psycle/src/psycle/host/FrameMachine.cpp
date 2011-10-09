@@ -377,6 +377,14 @@ namespace psycle { namespace host {
 			CPresetsDlg dlg;
 			dlg._pMachine=_machine;
 			dlg.DoModal();
+			int tempSelected=userSelected;
+			bool tmpInternal=isInternal;
+			bool tmpUser=isUser;
+			LocatePresets();
+			userSelected=tempSelected;
+			isInternal = tmpInternal;
+			isUser = tmpUser;
+			FillProgramCombobox();
 		}
 
 		void CFrameMachine::OnViewsParameterlist()
@@ -678,7 +686,7 @@ namespace psycle { namespace host {
 					(UINT)popup.Detach(),
 					szSub);
 			}
-
+			i = machine().GetNumBanks();
 			if(internalPresets.size() > 0|| 
 				( userPresets.size() == 0 && i == 0)) {
 				popBnk->AppendMenu(MF_STRING, ID_SELECTBANK_0 + i, "Provided Presets");

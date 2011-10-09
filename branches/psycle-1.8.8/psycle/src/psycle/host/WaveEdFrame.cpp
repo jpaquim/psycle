@@ -242,6 +242,7 @@ namespace psycle { namespace host {
 
 			_pSong->waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
 			_pSong->waved.Play(startPos);
+			wavview.SetTimer(ID_TIMER_WAVED_PLAYING, 33, 0);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
 		{

@@ -162,7 +162,9 @@ namespace psycle { namespace host {
 			}
 			else if (patView.header_skin.rfind('\\') == -1)
 			{
-				patView.header_skin = skin_dir + '\\' + patView.header_skin;
+				std::string current_skin_dir = skin_dir;
+				SkinIO::LocateSkinDir(current_skin_dir.c_str(), patView.header_skin.c_str(), ".psh", current_skin_dir);
+				patView.header_skin = current_skin_dir + '\\' + patView.header_skin;
 				LoadPatternSkin((patView.header_skin + ".psh").c_str(),patView.PatHeaderCoords);
 			}
 
@@ -191,7 +193,9 @@ namespace psycle { namespace host {
 			}
 			else if(macView.machine_skin.rfind('\\') == -1)
 			{
-				macView.machine_skin = skin_dir + '\\' + macView.machine_skin;
+				std::string current_skin_dir = skin_dir;
+				SkinIO::LocateSkinDir(current_skin_dir.c_str(), macView.machine_skin.c_str(), ".psm", current_skin_dir);
+				macView.machine_skin = current_skin_dir + "\\" +  macView.machine_skin;
 				LoadMachineSkin((macView.machine_skin + ".psm").c_str(),macView.MachineCoords);
 			}
 			

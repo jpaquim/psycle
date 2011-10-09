@@ -540,18 +540,7 @@ namespace psycle
 				unsigned int _sampleValidBits = settings_->validBitDepth();
 				// Put the audio in our float buffers.
 				int numSamples = blockSize1 / GetSampleSizeBytes();
-				if (_sampleValidBits == 32) {
-					DeinterlaceFloat(reinterpret_cast<float*>(pBlock1), port.pleft,port.pright, numSamples);
-				}
-				else if (_sampleValidBits == 24) {
-					DeQuantize32AndDeinterlace(pBlock1, port.pleft,port.pright, numSamples);
-				}
-				else {
-					DeQuantize16AndDeinterlace(reinterpret_cast<short int*>(pBlock1), port.pleft,port.pright, numSamples);
-				}
-				port._lowMark += blockSize1;
-				if (blockSize2 > 0)
-				{
+				if(numSamples > 0) {
 					if (_sampleValidBits == 32) {
 						DeinterlaceFloat(reinterpret_cast<float*>(pBlock1), port.pleft,port.pright, numSamples);
 					}
@@ -559,7 +548,21 @@ namespace psycle
 						DeQuantize32AndDeinterlace(pBlock1, port.pleft,port.pright, numSamples);
 					}
 					else {
-						DeQuantize16AndDeinterlace(reinterpret_cast<short int*>(pBlock2),  port.pleft+numSamples,port.pright+numSamples, blockSize2 / GetSampleSizeBytes());
+						DeQuantize16AndDeinterlace(reinterpret_cast<short int*>(pBlock1), port.pleft,port.pright, numSamples);
+					}
+				}
+				port._lowMark += blockSize1;
+				if (blockSize2 > 0)
+				{
+					numSamples = blockSize2 / GetSampleSizeBytes();
+					if (_sampleValidBits == 32) {
+						DeinterlaceFloat(reinterpret_cast<float*>(pBlock2), port.pleft+numSamples,port.pright+numSamples, numSamples);
+					}
+					else if (_sampleValidBits == 24) {
+						DeQuantize32AndDeinterlace(pBlock2, port.pleft+numSamples,port.pright+numSamples, numSamples);
+					}
+					else {
+						DeQuantize16AndDeinterlace(reinterpret_cast<short int*>(pBlock2),  port.pleft+numSamples,port.pright+numSamples, numSamples);
 					}
 					port._lowMark += blockSize2;
 				}

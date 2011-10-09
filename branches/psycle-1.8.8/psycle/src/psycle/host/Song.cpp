@@ -2787,7 +2787,7 @@ namespace psycle
 			Global::pInputHandler->AddMacViewUndo();
 #endif //!defined WINAMP_PLUGIN
 			///\todo: Wrong song dir causes "machine cloning failed"! 
-			///\todo: the process should be chagned and save the data in memory.
+			///\todo: the process should be changed and save the data in memory.
 			CString filepath = Global::psycleconf().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);

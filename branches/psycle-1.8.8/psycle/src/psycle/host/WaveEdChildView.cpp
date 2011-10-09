@@ -232,6 +232,8 @@ namespace psycle { namespace host {
 				//draw loop points
 				if ( wdLoop )
 				{
+					HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+					HGDIOBJ oldfont = memDC.SelectObject(hFont);
 					memDC.SelectObject(&cpen_lo);
 					if ( wdLoopS >= diStart && wdLoopS < diStart+diLength)
 					{
@@ -259,6 +261,7 @@ namespace psycle { namespace host {
 
 					memDC.MoveTo(le, 0);
 					memDC.LineTo(le, nHeadHeight);
+					memDC.SelectObject(oldfont);
 				}
 
 				//draw screen size on header
@@ -278,6 +281,11 @@ namespace psycle { namespace host {
 				if(cursorBlink	&&	cursorPos >= diStart	&&	cursorPos <= diStart+diLength)
 				{
 					int cursorX = helpers::math::lround<int,float>((cursorPos-diStart)*dispRatio);
+					memDC.MoveTo(cursorX, nHeadHeight);
+					memDC.LineTo(cursorX, nHeadHeight+nHeight);
+				}
+				if(_pSong->waved.IsEnabled()) {
+					int cursorX = helpers::math::lround<int,float>((_pSong->waved.GetPosition()-diStart)*dispRatio);
 					memDC.MoveTo(cursorX, nHeadHeight);
 					memDC.LineTo(cursorX, nHeadHeight+nHeight);
 				}
@@ -501,6 +509,7 @@ namespace psycle { namespace host {
 		void CWaveEdChildView::StopTimer()
 		{
 			KillTimer(ID_TIMER_WAVED_REFRESH);
+			KillTimer(ID_TIMER_WAVED_PLAYING);
 		}
 
 		void CWaveEdChildView::OnTimer(UINT_PTR nIDEvent)
@@ -512,6 +521,16 @@ namespace psycle { namespace host {
 				GetClientRect(&rect);
 				rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 				InvalidateRect(&rect, false);
+			}
+			if(nIDEvent==ID_TIMER_WAVED_PLAYING)
+			{
+				CRect rect;
+				GetClientRect(&rect);
+				rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
+				InvalidateRect(&rect, false);
+				if (!_pSong->waved.IsEnabled()) {
+					KillTimer(ID_TIMER_WAVED_PLAYING);
+				}
 			}
 			CWnd::OnTimer(nIDEvent);
 		}

@@ -264,7 +264,6 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POP_COPY, OnPopCopy)
 			ON_COMMAND(ID_POP_PASTE, OnPopPaste)
 			ON_COMMAND(ID_POP_MIXPASTE, OnPopMixpaste)
-			ON_COMMAND(ID_POP_BLOCKSWITCH, OnPopBlockswitch)
 			ON_COMMAND(ID_POP_DELETE, OnPopDelete)
 			ON_COMMAND(ID_POP_ADDNEWTRACK, OnPopAddNewTrack)
 			ON_COMMAND(ID_POP_INTERPOLATE, OnPopInterpolate)
@@ -283,7 +282,6 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_POP_COPY, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_MIXPASTE, OnUpdatePaste)
 			ON_UPDATE_COMMAND_UI(ID_POP_PASTE, OnUpdatePaste)
-			ON_UPDATE_COMMAND_UI(ID_POP_BLOCKSWITCH, OnUpdatePopBlockswitch)
 			ON_UPDATE_COMMAND_UI(ID_POP_DELETE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE, OnUpdateCutCopy)
 			ON_UPDATE_COMMAND_UI(ID_POP_INTERPOLATE_CURVE, OnUpdateCutCopy)
@@ -1620,17 +1618,6 @@ namespace psycle { namespace host {
 		}
 
 		void CChildView::OnPopMixpaste() { PasteBlock(editcur.track,editcur.line,true); }
-
-		void CChildView::OnPopBlockswitch()
-		{
-			SwitchBlock(editcur.track,editcur.line);
-		}
-
-		void CChildView::OnUpdatePopBlockswitch(CCmdUI *pCmdUI)
-		{
-			if (isBlockCopied && (viewMode == view_modes::pattern)) pCmdUI->Enable(true);
-			else  pCmdUI->Enable(false);
-		}
 
 		void CChildView::OnPopDelete() { DeleteBlock(); }
 		

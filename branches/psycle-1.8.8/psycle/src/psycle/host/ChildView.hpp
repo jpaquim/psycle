@@ -500,8 +500,6 @@ namespace host {
 			afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
-			afx_msg void OnPopBlockswitch();
-			afx_msg void OnUpdatePopBlockswitch(CCmdUI *pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
 };
 

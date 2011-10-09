@@ -1037,6 +1037,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		{
 			Machine::Init();
 			currentpeak=0.0f;
+			currentrms=0.0f;
 			peaktime=1;
 			_lMax = 0.f;
 			_rMax = 0.f;
@@ -1136,6 +1137,9 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			else if(_rMax < 0.f) { _rMax = 0.f; }
 			if( _lMax > currentpeak ) currentpeak = _lMax;
 			if( _rMax > currentpeak ) currentpeak = _rMax;
+			
+			float maxrms = std::max(rms.previousLeft, rms.previousRight);
+			if(maxrms > currentrms) currentrms = maxrms;
 
 			recursive_processed_ = true;
 			return numSamples;

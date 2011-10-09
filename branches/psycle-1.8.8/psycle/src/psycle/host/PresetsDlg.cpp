@@ -243,7 +243,6 @@ namespace psycle { namespace host {
 		{
 			char cbuf[32];
 			m_preslist.ResetContent();
-			presets.sort();
 
 			std::list<CPreset>::iterator preset = presets.begin();
 			for(;preset != presets.end(); preset++) 

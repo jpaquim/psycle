@@ -564,6 +564,7 @@ namespace psycle
 			bool decreaseOnClip;
 			int peaktime;
 			float currentpeak;
+			float currentrms;
 			float _lMax;
 			float _rMax;
 			int volumeDisplayLeft;

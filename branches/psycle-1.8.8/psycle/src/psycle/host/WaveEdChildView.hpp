@@ -14,6 +14,7 @@ namespace psycle { namespace host {
 
 		class CMainFrame;
 		class Song;
+		int const ID_TIMER_WAVED_PLAYING = 31411;
 
 		/// wave editor window.
 		class CWaveEdChildView : public CWnd
