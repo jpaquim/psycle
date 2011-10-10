@@ -96,45 +96,11 @@ class UNIVERSALIS__DECL process {
 			void affinity_mask(affinity_mask_type const &);
 		///\}
 
-		///\name priority
+		///\name scheduling policy and priority
 		///\{
-			/// process priority type
-			typedef
-				#if defined DIVERSALIS__OS__POSIX
-					int
-				#elif defined DIVERSALIS__OS__MICROSOFT
-					DWORD
-				#else
-					#error unsupported operating system
-				#endif
-				priority_type;
-
-			/// gets the process priority level
-			priority_type priority();
-			/// sets the process priority level
-			void priority(priority_type priority);
-
-			/// process priority values
-			struct priorities {
-				#if defined DIVERSALIS__OS__MICROSOFT
-					static priority_type const idle     = IDLE_PRIORITY_CLASS;
-					static priority_type const lowest   = IDLE_PRIORITY_CLASS;
-					static priority_type const low      = BELOW_NORMAL_PRIORITY_CLASS;
-					static priority_type const normal   = NORMAL_PRIORITY_CLASS;
-					static priority_type const high     = ABOVE_NORMAL_PRIORITY_CLASS;
-					static priority_type const highest  = HIGH_PRIORITY_CLASS;
-					static priority_type const realtime = REALTIME_PRIORITY_CLASS;
-				#else
-					// Note: These are nice values. Some systems may accept +20.
-					static priority_type const idle     = -20;
-					static priority_type const lowest   = -10;
-					static priority_type const low      = -5;
-					static priority_type const normal   =  0;
-					static priority_type const high     = +5;
-					static priority_type const highest  = +10;
-					static priority_type const realtime = +19;
-				#endif
-			};
+			/// boosts the policy and priority so the thread becomes (something close to) "realtime".
+			/// http://gitorious.org/sched_deadline/pages/Home
+			void become_realtime(/* realtime constraints: deadline, period, bugdet, runtime ... */);
 		///\}
 };
 
@@ -173,51 +139,11 @@ class UNIVERSALIS__DECL thread {
 			void affinity_mask(class affinity_mask const &);
 		///\}
 
-		///\name priority
+		///\name scheduling policy and priority
 		///\{
-			/// thread priority type
-			typedef int priority_type;
-
-			/// gets the thread priority level
-			priority_type priority();
-			/// sets the thread priority level
-			void priority(priority_type priority);
-
-			/// thread priority values
-			struct priorities {
-				/***********************************/
-				///\todo the interface for process/thread priority is so different between posix and windows
-				///\todo that it seems not worth trying to unify the two.
-				///\todo Before abandonning the idea, we should perhaps check how cygwin manages to handle that.
-				/**********************************/
-				#if defined DIVERSALIS__OS__MICROSOFT
-					static priority_type const idle     = THREAD_PRIORITY_IDLE;
-					static priority_type const lowest   = THREAD_PRIORITY_LOWEST;
-					static priority_type const low      = THREAD_PRIORITY_BELOW_NORMAL;
-					static priority_type const normal   = THREAD_PRIORITY_NORMAL;
-					static priority_type const high     = THREAD_PRIORITY_ABOVE_NORMAL;
-					static priority_type const highest  = THREAD_PRIORITY_HIGHEST;
-					static priority_type const realtime = THREAD_PRIORITY_TIME_CRITICAL;
-					// Note: If the thread (actually, the process) has the REALTIME_PRIORITY_CLASS base class,
-					//       then this can also be -7, -6, -5, -4, -3, 3, 4, 5, or 6.
-				#else
-					// Note: These are not the actual native values but an arbitrary scale.
-					//       The native values depends on the scheduling policy,
-					//       and the sched_get_priority_min(policy) and sched_get_priority_max(policy) functions
-					//       are used to rescale to native values.
-					//       The policy is chosen this way:
-					//           - value >  normal: if min == max, the policy is set to SCHED_RR,
-					//           - value == normal: SCHED_OTHER (the default policy of the os),
-					//           - value <  normal: SCHED_BATCH if defined, otherwise SCHED_OTHER.
-					static priority_type const idle     = -300; // min
-					static priority_type const lowest   = -200; // (max + min) * 1 / 6
-					static priority_type const low      = -100; // (max + min) * 2 / 6
-					static priority_type const normal   =    0; // (max + min) / 2
-					static priority_type const high     = +100; // (max + min) * 4 / 6
-					static priority_type const highest  = +200; // (max + min) * 5 / 6
-					static priority_type const realtime = +300; // max
-				#endif
-			};
+			/// boosts the policy and priority so the thread becomes (something close to) "realtime".
+			/// http://gitorious.org/sched_deadline/pages/Home
+			void become_realtime(/* realtime constraints: deadline, period, bugdet, runtime ... */);
 		///\}
 };
 
@@ -254,38 +180,20 @@ class UNIVERSALIS__DECL thread {
 			BOOST_MESSAGE(s.str());
 		}
 	}
-	
-	void thread_priority_test_one(int p) {
-		thread t;
-		int p0 = t.priority(); // save previous
-		{ std::ostringstream s; s << "setting thread priority to: " << p;
-			BOOST_MESSAGE(s.str());
-		}
-		t.priority(p);
-		p = t.priority();
-		{ std::ostringstream s; s << "thread priority is: " << p;
-			BOOST_MESSAGE(s.str());
-		}
-		t.priority(p0); // reset to previous
-	}
-	
-	BOOST_AUTO_TEST_CASE(thread_priority_test) {
+
+	#if 0 // need a way not to leave the thread with realtime scheduling, e.g. save and restore settings.
+		// otherwise other test cases which use multiple threads will just starve and never complete because one thread eats everything.
+	BOOST_AUTO_TEST_CASE(thread_realtime_test) {
 		try {
-			typedef thread::priorities priorities;
-			thread_priority_test_one(priorities::idle);
-			thread_priority_test_one(priorities::lowest);
-			thread_priority_test_one(priorities::low);
-			thread_priority_test_one(priorities::normal);
-			///\todo boosting the priority fails with an abort signal in the buildbot, while it should simply be caught as en EPERM errno.
-			//thread_priority_test_one(priorities::high);
-			//thread_priority_test_one(priorities::highest);
-			//thread_priority_test_one(priorities::realtime);
+			thread t;
+			t.become_realtime();
 		} catch(exceptions::operation_not_permitted e) {
 			std::ostringstream s;
-			s << "could not set thread priority: " << e.what();
+			s << "could not set thread scheduling policy and priority to realtime: " << e.what();
 			BOOST_MESSAGE(s.str());
 		}
 	}
+	#endif
 #endif
 
 }}}
