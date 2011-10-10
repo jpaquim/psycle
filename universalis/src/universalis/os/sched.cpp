@@ -11,9 +11,22 @@
 	#include <sys/resource.h>
 	#include <cerrno>
 #endif
+
 #include <cassert>
 
 namespace universalis { namespace os { namespace sched {
+
+#if defined DIVERSALIS__OS__POSIX
+	namespace {
+		// returns the min and max priorities for a policy
+		void priority_min_max(int policy, int & min, int & max) {
+			if((min = sched_get_priority_min(policy)) == -1)
+				throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+			if((max = sched_get_priority_max(policy)) == -1)
+				throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		}
+	}
+#endif
 
 /**********************************************************************/
 // process
@@ -26,6 +39,7 @@ process::process()
 )
 {}
 
+
 affinity_mask process::affinity_mask() const {
 	#if defined DIVERSALIS__OS__POSIX
 		///\todo also try using os.sysconf('SC_NPROCESSORS_ONLN') // SC_NPROCESSORS_CONF
@@ -34,7 +48,7 @@ affinity_mask process::affinity_mask() const {
 			class affinity_mask result;
 			result(0, true);
 			return result;
-		#else
+		#else // actually, linux-specific
 			class affinity_mask result;
 			if(sched_getaffinity(native_handle_, sizeof result.native_mask_, &result.native_mask_) == -1)
 				throw exception(UNIVERSALIS__COMPILER__LOCATION);
@@ -63,7 +77,7 @@ affinity_mask process::affinity_mask() const {
 		#if defined DIVERSALIS__OS__POSIX
 			#if defined DIVERSALIS__OS__CYGWIN
 				///\todo sysconf
-			#else
+			#else // actually, linux-specific
 				if(sched_setaffinity(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_) == -1)
 					throw exception(UNIVERSALIS__COMPILER__LOCATION);
 			#endif
@@ -76,27 +90,44 @@ affinity_mask process::affinity_mask() const {
 	}
 #endif
 
-process::priority_type process::priority() {
+void process::become_realtime(/* realtime constraints: deadline, period, bugdet, runtime ... */) {
 	#if defined DIVERSALIS__OS__POSIX
-		errno = 0;
-		priority_type result(getpriority(PRIO_PROCESS, native_handle_));
-		if(result == -1 && errno) throw exception(UNIVERSALIS__COMPILER__LOCATION);
-		return result;
-	#elif defined DIVERSALIS__OS__MICROSOFT
-		priority_type result(GetPriorityClass(native_handle_));
-		if(!result) throw exception(UNIVERSALIS__COMPILER__LOCATION);
-		return result;
-	#else
-		#error unsupported operating system
-	#endif
-}
+		// Notes for Linux:
+		// When a POSIX scheduler looks for a process to run, it first looks at processes with the highest priority,
+		// and only then it uses the policy to break ties amongst the list of processes with the same priority.
+		// The SCHED_FIFO policy is the most agressive.
+		// That said, Linux actually splits the processes in two categories due to the following constraints it imposes:
+		// All processes that are given a priority of 0 must use either SCHED_OTHER, SCHED_BATCH or SCHED_IDLE policy.
+		// All processes that use the SCHED_OTHER, SCHED_BATCH or SCHED_IDLE policy must be assigned a priority of 0.
+		// All processes that are given a priority > 0 must use either the SCHED_FIFO or SCHED_RR policy.
+		// All processes that use the SCHED_FIFO or SCHED_RR policy must be assigned a priority > 0.
+		// So, "non-realtime" processes are at priority 0, with a SCHED_OTHER, SCHED_BATCH or SCHED_IDLE policy,
+		// and "realtime" processes are at priority > 0, with either a SCHED_FIFO or SCHED_RR policy.
+		// The priority we set here is the static priority.
+		// For the SCHED_OTHER policy, there is also a dynamic priority (nice value),
+		// which is set to an absolute value with the setpriority() function or incremented/decremented with the nice() function.
+		// The dynamic priority (nice value) is not used by the SCHED_FIFO and SCHED_RR policies.
+	
+		int fifo_min, fifo_max;
+		priority_min_max(SCHED_FIFO, fifo_min, fifo_max);
+		
+		int other_min, other_max;
+		priority_min_max(SCHED_OTHER, other_min, other_max);
 
-void process::priority(process::priority_type priority) {
-	#if defined DIVERSALIS__OS__POSIX
-		if(setpriority(PRIO_PROCESS, native_handle_, priority))
-			throw exception(UNIVERSALIS__COMPILER__LOCATION);
+		sched_param param = sched_param();
+		
+		// set priority just above other_max, contrained to the [fifo_min, fifo_max] range
+		param.sched_priority = std::min(std::max(fifo_min, other_max + 1), fifo_max);
+		
+		if(-1 == sched_setscheduler(native_handle_, SCHED_FIFO, &param)) {
+			int const error = errno;
+			switch(error) {
+				case EPERM: throw exceptions::operation_not_permitted(UNIVERSALIS__COMPILER__LOCATION);
+				default: throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
+			}
+		}
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		if(!SetPriorityClass(native_handle_, priority))
+		if(!SetPriorityClass(native_handle_, REALTIME_PRIORITY_CLASS))
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#else
 		#error unsupported operating system
@@ -123,7 +154,7 @@ affinity_mask thread::affinity_mask() const {
 			class affinity_mask result;
 			result[0] = true;
 			return result;
-		#else
+			#else // beware, in pthread_getaffinity_np, np stands for non-portable
 			class affinity_mask result;
 			if(int error = pthread_getaffinity_np(native_handle_, sizeof result.native_mask_, &result.native_mask_))
 				throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
@@ -145,7 +176,7 @@ void thread::affinity_mask(class affinity_mask const & affinity_mask) {
 	#if defined DIVERSALIS__OS__POSIX
 		#if defined DIVERSALIS__OS__CYGWIN
 			///\todo sysconf
-		#else
+		#else // beware, in pthread_getaffinity_np, np stands for non-portable
 			if(int error = pthread_setaffinity_np(native_handle_, sizeof affinity_mask.native_mask_, &affinity_mask.native_mask_))
 				throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
 		#endif
@@ -157,89 +188,30 @@ void thread::affinity_mask(class affinity_mask const & affinity_mask) {
 	#endif
 }
 
-#if defined DIVERSALIS__OS__POSIX
-namespace {
-	// returns the min and max priorities for a policy
-	void priority_min_max(int policy, int & min, int & max) {
-		if((min = sched_get_priority_min(policy)) == -1)
-			throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-		if((max = sched_get_priority_max(policy)) == -1)
-			throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-	}
-}
-#endif
-
-thread::priority_type thread::priority() {
+void thread::become_realtime(/* realtime constraints: deadline, period, bugdet, runtime ... */) {
 	#if defined DIVERSALIS__OS__POSIX
-		int policy;
-		sched_param param;
-		if(int error = pthread_getschedparam(native_handle_, &policy, &param))
-			throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
-		int min_native_priority, max_native_priority;
-		priority_min_max(policy, min_native_priority, max_native_priority);
-		if(min_native_priority == max_native_priority) {
-			switch(policy) {
-				#if defined SCHED_BATCH
-					case SCHED_BATCH: return priorities::low;
-				#endif
-				case SCHED_RR: return priorities::high;
-				case SCHED_OTHER:
-				default: return priorities::normal;
-			}
-		} else return
-			#if 0 ///\todo boggus formula
-				idle + (realtime - idle) * (param.sched_priority - min_native_priority) / (max_native_priority - min_native_priority);
-			#else
-				param.sched_priority;
-			#endif
-	#elif defined DIVERSALIS__OS__MICROSOFT
-		int priority;
-		if((priority = ::GetThreadPriority(native_handle_)) == THREAD_PRIORITY_ERROR_RETURN)
-			throw exception(UNIVERSALIS__COMPILER__LOCATION);
-		return priority;
-	#else
-		return priorities::normal;
-	#endif
-}
+		// For details, see process::become_realtime
+	
+		int fifo_min, fifo_max;
+		priority_min_max(SCHED_FIFO, fifo_min, fifo_max);
+		
+		int other_min, other_max;
+		priority_min_max(SCHED_OTHER, other_min, other_max);
 
-void thread::priority(thread::priority_type priority) {
-	#if defined DIVERSALIS__OS__POSIX
-		int const policy =
-			priority > priorities::normal ? SCHED_RR :
-			#if defined SCHED_BATCH
-				priority < priorities::normal ? SCHED_BATCH :
-			#endif
-			SCHED_OTHER;
-		int min_native_priority, max_native_priority;
-		priority_min_max(policy, min_native_priority, max_native_priority);
-		sched_param param;
-		#if 0 ///\todo boggus formula
-			param.sched_priority = min_native_priority + (max_native_priority - min_native_priority) * priority / (realtime - idle);
-		#else
-			param.sched_priority =
-				priority <  priorities::lowest  ? min_native_priority :
-				priority <  priorities::low     ? std::max(0, min_native_priority) :
-				priority <  priorities::normal  ? std::max(0, min_native_priority) :
-				priority == priorities::normal  ? 0 :
-				priority <= priorities::high    ? std::min(1, max_native_priority) :
-				priority <= priorities::highest ? std::min(2, max_native_priority) : max_native_priority;
-		#endif
-		if(int error = pthread_setschedparam(native_handle_, policy, &param))
+		sched_param param = sched_param();
+		
+		// set priority just above other_max, contrained to the [fifo_min, fifo_max] range
+		param.sched_priority = std::min(std::max(fifo_min, other_max + 1), fifo_max);
+		
+		if(int error = pthread_setschedparam(native_handle_, SCHED_FIFO, &param))
 			switch(error) {
 				case EPERM: throw exceptions::operation_not_permitted(UNIVERSALIS__COMPILER__LOCATION);
 				default: throw exception(error, UNIVERSALIS__COMPILER__LOCATION);
 			}
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		// We can't choose values between the predefined constants,
-		// so we have to "snap" the value to one of those constants.
-		int const native_priority =
-			priority <  priorities::lowest  ? priorities::idle    :
-			priority <  priorities::low     ? priorities::lowest  :
-			priority <  priorities::normal  ? priorities::low     :
-			priority == priorities::normal  ? priorities::normal  :
-			priority <= priorities::high    ? priorities::high    :
-			priority <= priorities::highest ? priorities::highest : priorities::realtime;
-		if(!::SetThreadPriority(native_handle_, native_priority))
+		// Note: If the thread (actually, the process) has the REALTIME_PRIORITY_CLASS base class,
+		//       then this can also be -7, -6, -5, -4, -3, 3, 4, 5, or 6.
+		if(!::SetThreadPriority(native_handle_, THREAD_PRIORITY_TIME_CRITICAL))
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#endif
 }
@@ -252,7 +224,7 @@ affinity_mask::affinity_mask()
 		: native_mask_()
 	#endif
 {
-	#if defined DIVERSALIS__OS__POSIX
+	#if defined DIVERSALIS__OS__POSIX // actually, linux-specific
 		CPU_ZERO(&native_mask_);
 	#endif
 }
@@ -265,7 +237,7 @@ unsigned int affinity_mask::active_count() const {
 
 unsigned int affinity_mask::size() const {
 	return
-		#if defined DIVERSALIS__OS__POSIX
+		#if defined DIVERSALIS__OS__POSIX // actually, linux-specific
 			CPU_SETSIZE;
 		#elif defined DIVERSALIS__OS__MICROSOFT
 			sizeof native_mask_ << 3;
@@ -277,7 +249,7 @@ unsigned int affinity_mask::size() const {
 bool affinity_mask::operator()(unsigned int cpu_index) const {
 	assert(cpu_index < size());
 	return
-		#if defined DIVERSALIS__OS__POSIX
+		#if defined DIVERSALIS__OS__POSIX // actually, linux-specific
 			CPU_ISSET(cpu_index, &native_mask_);
 		#elif defined DIVERSALIS__OS__MICROSOFT
 			native_mask_ & native_mask_type(1) << cpu_index;
@@ -288,7 +260,7 @@ bool affinity_mask::operator()(unsigned int cpu_index) const {
 
 void affinity_mask::operator()(unsigned int cpu_index, bool active) {
 	assert(cpu_index < size());
-	#if defined DIVERSALIS__OS__POSIX
+	#if defined DIVERSALIS__OS__POSIX // actually, linux-specific
 		if(active)
 			CPU_SET(cpu_index, &native_mask_);
 		else

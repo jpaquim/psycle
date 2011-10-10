@@ -268,12 +268,12 @@ void Player::thread_function(std::size_t thread_number) {
 		using universalis::os::sched::thread;
 		thread t;
 
-		// set thread priority
+		// set thread scheduling policy and priority to realtime
 		try {
-			t.priority(thread::priorities::highest);
+			t.become_realtime();
 		} catch(operation_not_permitted e) {
 			if(loggers::warning()) {
-				std::ostringstream s; s << "no permission to set thread priority: " << e.what();
+				std::ostringstream s; s << "no permission to set thread scheduling policy and priority to realtime: " << e.what();
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
