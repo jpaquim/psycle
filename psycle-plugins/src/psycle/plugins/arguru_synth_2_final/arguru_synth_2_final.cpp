@@ -46,7 +46,7 @@ CMachineParameter const paraGlobalDetune = {"Glb. Detune", "Global Detune", -36,
 // log2 of this value is ~ 4.3528.
 // Multiply this amount by 12 (notes/octave) to get 52.2344, which stands
 // for note 52 and finetune 0.2344.
-// There is a compensation in the SeqTick() call which does note-18 ( 69-18 = 51 )
+// There was a compensation in the SeqTick() call which did note-18 ( 69-18 = 51 )
 // So to correctly compensate, 1 seminote and fine of 60 is added (0.2344 * 256 ~ 60.01)
 //
 // With the new implementation where the wavetable is generated depending
@@ -207,7 +207,7 @@ void mi::ParameterTweak(int par, int val) {
 	}
 	
 	globalpar.osc2detune=(float)Vals[2];
-	globalpar.osc2finetune=(float)Vals[3]*0.0038962f;
+	globalpar.osc2finetune=(float)Vals[3]*0.00389625f;
 	globalpar.osc2sync=(Vals[4]>0);
 	
 	//All parameters that are sample rate dependant are corrected here.
@@ -220,12 +220,27 @@ void mi::ParameterTweak(int par, int val) {
 	globalpar.vcf_env_decay=Vals[10]*multiplier;
 	globalpar.vcf_env_sustain=Vals[11];
 	globalpar.vcf_env_release=Vals[12]*multiplier;
-	globalpar.vcf_lfo_speed=Vals[13]*multiplier;
+	//in case of lfo_speed it is a division.
+	globalpar.vcf_lfo_speed=Vals[13]/multiplier;
 	globalpar.vcf_lfo_amplitude=Vals[14];
-	
-	///\todo: the change of cutoff only affects new notes. needs to be fixed
+	if(par == 13 || par == 14 ) {
+		for(int channel=0; channel<MAX_TRACKS;channel++) {
+			if(track[channel].AmpEnvStage != 0) {
+				track[channel].InitLfo(globalpar.vcf_lfo_speed,globalpar.vcf_lfo_amplitude);
+			}
+		}
+
+	}
+
 	globalpar.vcf_cutoff=Vals[15];
 	globalpar.vcf_resonance=Vals[16];
+	if(par == 15 || par == 16) {
+		for(int channel=0; channel<MAX_TRACKS;channel++) {
+			if(track[channel].AmpEnvStage != 0) {
+				track[channel].InitEnvelopes(false);
+			}
+		}
+	}
 	globalpar.vcf_type=Vals[17];
 	globalpar.vcf_envmod=Vals[18];
 	globalpar.osc_mix=Vals[19];
@@ -296,27 +311,27 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 						const float sl=ptrack->GetSampleOsc1();
 						*++xpsamplesleft+=sl;
 						*++xpsamplesright+=sl;
-					} while(--minimum);
+						} while(--minimum);
 				}
 				else if(globalpar.osc_mix == 256) {
 					do {
 						const float sl=ptrack->GetSampleOsc2();
 						*++xpsamplesleft+=sl;
 						*++xpsamplesright+=sl;
-					} while(--minimum);
+						} while(--minimum);
 				}
 				else {
 					do {
 						const float sl=ptrack->GetSample();
 						*++xpsamplesleft+=sl;
 						*++xpsamplesright+=sl;
-					} while(--minimum);
-				}
-				if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
-			
-				if(fxsamplescnt<=0) {
-					ptrack->PerformFx();
-					fxsamplescnt=256*currentSR/44100.0f;
+						} while(--minimum);
+					}
+					if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
+	
+					if(fxsamplescnt<=0) {
+						ptrack->PerformFx();
+						fxsamplescnt=256*currentSR/44100.0f;
 				}
 			}while(xnumsamples>0);
 		}
@@ -334,11 +349,11 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 	case 0: //fallthrough
 	case 1:
 			switch(value) {
-				case 0: std::strcpy(txt, "Sine"); return true;
-				case 1: std::strcpy(txt, "Sawtooth"); return true;
-				case 2: std::strcpy(txt, "Square"); return true;
-				case 3: std::strcpy(txt, "Triangle"); return true;
-				case 4: std::strcpy(txt, "White noise"); return true;
+				case 0:std::strcpy(txt,"Sine");return true;
+				case 1:std::strcpy(txt,"Sawtooth");return true;
+				case 2:std::strcpy(txt,"Square");return true;
+				case 3:std::strcpy(txt,"Triangle");return true;
+				case 4:std::strcpy(txt,"White noise");return true;
 			}
 			break;
 	case 2:
@@ -372,7 +387,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		}
 			return true;
 	case 13:
-			std::sprintf(txt,"%.03f Hz",(value*0.000005f)/(2.0f*math::pi_f)*(44100.0f/64.0f));
+			std::sprintf(txt,"%.03f Hz",(value*0.000005f)*(44100.0f/64.0f)/(2.0f*math::pi_f));
 			return true;
 	case 14:
 		{
@@ -433,7 +448,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			else {
 				std::sprintf(txt,"%.0f Hz + %.0f Hz",result, THREESEL((float)value,2140.0f,1700.0f,1080.0f));
 			}
-		}
+			}
 			return true;
 	case 16:
 			if (Vals[17] < 2) {
@@ -567,14 +582,23 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 	{
 	case 7: // Change envmod
 		globalpar.vcf_envmod=val-128;
+		if(track[channel].AmpEnvStage != 0) {
+			track[channel].InitEnvelopes(false);
+		}
 	break;
 	
 	case 8: // Change cutoff
 		globalpar.vcf_cutoff=val>>1;
+		if(track[channel].AmpEnvStage != 0) {
+			track[channel].InitEnvelopes(false);
+		}
 	break;
 	
 	case 9: // Change reso
 		globalpar.vcf_resonance=val>>1;
+		if(track[channel].AmpEnvStage != 0) {
+			track[channel].InitEnvelopes(false);
+		}
 	break;
 	}
 
@@ -631,9 +655,7 @@ void mi::InitWaveTableSR(bool delArray) {
 
 	waveTableSize = amount;
 	wavetableCorrection = (float)amount*13.75f / (float)currentSR;
-
 }
-
 
 float mi::GetAsFrequency(int top) {
 	float result;

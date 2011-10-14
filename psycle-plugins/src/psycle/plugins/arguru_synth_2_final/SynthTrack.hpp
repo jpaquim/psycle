@@ -28,7 +28,7 @@ struct SYNPAR
 	float vcf_env_decay;
 	int vcf_env_sustain;
 	float vcf_env_release;
-	int vcf_lfo_speed;
+	float vcf_lfo_speed;
 	int vcf_lfo_amplitude;
 	int vcf_cutoff;
 	int vcf_resonance;
@@ -48,6 +48,9 @@ struct SYNPAR
 class CSynthTrack  
 {
 public:
+	//wtNewACorrection is how much to speedup the wavetable reading due to the change from old 21.5Hz to new 13.75Hz.
+	static const float wtNewACorrection;
+
 	CSynthTrack();
 	virtual ~CSynthTrack();
 
@@ -57,6 +60,12 @@ public:
 	void NoteOn(int note);
 	void NoteOff(bool stop=false);
 	void PerformFx();
+	//lfo_freq is the amount to add to the lfo_phase [-2PI..2PI] each 64samples.
+	//freq_speed just uses a randomly choosen scale to say the same.
+	//It can be converted to Hz with:
+	//(freq_speed*0.000005f)*(samplerate/64.0f)/(2.0f*math::pi_f)
+	void InitLfo(float freq_speed,int amp);
+	void InitEnvelopes(bool force=false);
 	inline float GetSample();
 	inline float GetSampleOsc1();
 	inline float GetSampleOsc2();
@@ -65,9 +74,7 @@ public:
 	int NoteCutTime;
 
 private:
-	void InitLfo(int freq,int amp);
-	void InitEnvelopes(bool force=false);
-	void ActiveVibrato(int depth,int speed);
+	void ActiveVibrato(int depth,float speed);
 	void DisableVibrato();
 	void DoGlide();
 	void Vibrate();
@@ -79,10 +86,15 @@ private:
 	static const signed char ArpNote[9][16];
 	filter m_filter;
 	SYNPAR *syntp;
+	//Ok, the explanation of all these:
+	//Samplerate, self evident.
+	//srCorrection ratio between 44100 and the samplerate.
+	//iwavetableSize and fwavetablesize are the amount of samples (in int and float) of one period of the wavetable.
+	//wavetableCorrection is just a small correction to fix the period so that its size is integer and even.
 	int sampleRate;
 	float srCorrection;
-	//in float since it is compared with OSCPosition
-	float waveTableSize;
+	int iwaveTableSize;
+	float fwaveTableSize;
 	float wavetableCorrection;
 	dsp::cubic_resampler resampler;
 
@@ -147,12 +159,12 @@ inline void CSynthTrack::ArpTick()
 	Arp_tickcounter=0;
 
 	float note=Arp_basenote+(float)ArpNote[ArpMode-1][ArpCounter];
-	OSC1Speed=(float)pow(2.0, note*wavetableCorrection/12.0);
+	OSC1Speed=(float)pow(2.0, note/12.0)*wavetableCorrection;
 
 	float note2=note+
 	syntp->osc2finetune+
 	syntp->osc2detune;
-	OSC2Speed=(float)pow(2.0, note2*wavetableCorrection/12.0);
+	OSC2Speed=(float)pow(2.0, note2/12.0)*wavetableCorrection;
 
 	if(++ArpCounter>=syntp->arp_cnt)  ArpCounter=0;
 
@@ -192,14 +204,14 @@ inline float CSynthTrack::GetSample()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output = resampler.work_float(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
+				output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize)*OSC1Vol;
 			}
 			if ( syntp->wave2noise) {
 				//This assumes MAX_RAND is 0x7fff
 				output += (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output += resampler.work_float(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
+				output += resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize)*OSC2Vol;
 			}
 		}
 		else
@@ -230,15 +242,15 @@ inline float CSynthTrack::GetSample()
 			OSC2Position+=ROSC2Speed;
 		}
 		
-		if(OSC1Position>=waveTableSize)
+		if(OSC1Position>=fwaveTableSize)
 		{
-			OSC1Position-=waveTableSize;
+			OSC1Position-=fwaveTableSize;
 		
 			if(syntp->osc2sync)
 				OSC2Position=OSC1Position;
 		}
 
-		if(OSC2Position>=waveTableSize) OSC2Position-=waveTableSize;
+		if(OSC2Position>=fwaveTableSize) OSC2Position-=fwaveTableSize;
 
 		GetEnvVcf();
 
@@ -264,7 +276,7 @@ inline float CSynthTrack::GetSampleOsc1()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output = resampler.work_float(syntp->pWave, OSC1Position, math::lrint<int,float>(waveTableSize))*OSC1Vol;
+				output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize)*OSC1Vol;
 			}
 		}
 		else
@@ -280,7 +292,7 @@ inline float CSynthTrack::GetSampleOsc1()
 		if(vibrato) OSC1Position+=ROSC1Speed+OSCvib;
 		else        OSC1Position+=ROSC1Speed;
 		
-		if(OSC1Position>=waveTableSize)  OSC1Position-=waveTableSize;
+		if(OSC1Position>=fwaveTableSize)  OSC1Position-=fwaveTableSize;
 		
 		GetEnvVcf();
 
@@ -306,7 +318,7 @@ inline float CSynthTrack::GetSampleOsc2()
 				output = (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output = resampler.work_float(syntp->pWave2, OSC2Position, math::lrint<int,float>(waveTableSize))*OSC2Vol;
+				output = resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize)*OSC2Vol;
 			}
 		}
 		else
@@ -323,7 +335,7 @@ inline float CSynthTrack::GetSampleOsc2()
 		if(vibrato) OSC2Position+=ROSC2Speed+OSCvib;
 		else        OSC2Position+=ROSC2Speed;
 		
-		if(OSC2Position>=waveTableSize) OSC2Position-=waveTableSize;
+		if(OSC2Position>=fwaveTableSize) OSC2Position-=fwaveTableSize;
 		
 		GetEnvVcf();
 

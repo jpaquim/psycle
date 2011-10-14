@@ -16,6 +16,10 @@ const signed char CSynthTrack::ArpNote[9][16] = {
 	{0,  4,  7, 12, 16, 19, 24, 28, 31, 28, 24, 19, 16, 12,  7,  4},
 };
 
+// Amount to compensate non-Hz based values that work with the wavetable, like the glide parameter.
+// 1.56605 = (44100samplespersec/2048samples of old wavetable)/13.75Hz freq of current wavetable
+const float CSynthTrack::wtNewACorrection = (44100.f/2048.f)/13.75f;
+
 
 CSynthTrack::CSynthTrack()
 {
@@ -62,12 +66,15 @@ CSynthTrack::~CSynthTrack()
 {
 
 }
-void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float wavetableCorrection_) {
+void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float wavetableCorrection_)
+{
 	m_filter.init(currentSR_);
 	sampleRate = currentSR_;
 	srCorrection = 44100.0f / (float)sampleRate;
-	waveTableSize = wavetableSize_;
+	iwaveTableSize = wavetableSize_;
+	fwaveTableSize = wavetableSize_;
 	wavetableCorrection = wavetableCorrection_;
+	Arp_samplespertick=(currentSR_ * 60)/(syntp->arp_bpm*4);
 	if (AmpEnvStage) {
 		AmpEnvStage = 0;
 	}
@@ -104,7 +111,7 @@ void CSynthTrack::NoteOn(int note)
 			else
 			{
 				OSC2Position-= OSC1Position;
-				if (OSC2Position<0) OSC2Position+=waveTableSize;
+				if (OSC2Position<0) OSC2Position+=fwaveTableSize;
 			}
 			OSC1Position = 0;
 		}
@@ -194,11 +201,17 @@ void CSynthTrack::Vibrate()
 	}
 }
 
-void CSynthTrack::ActiveVibrato(int depth,int speed)
+void CSynthTrack::ActiveVibrato(int depth,float speed)
 {
+	//VibratoSpeed is the amount to add to the VibratoGr [-2PI..2PI] each sample.
+	//speed is a sixteenth of that.
+	//It can be converted to Hz with:
+	//(speed*0.0625)*samplerate/(2.0f*math::pi_f)
+	//Both, the depth and the speed need to be corrected,
+	//because the depth is dependant on the wavetable.
 	if (depth != 0 ) {
-		VibratoSpeed=(float)speed*0.0625*srCorrection;// /16.0f;
-		VibratoDepth=(float)depth*0.0625;// /16.0f;
+		VibratoSpeed=(float)speed*0.0625f*srCorrection;
+		VibratoDepth=(float)depth*0.0625f*wtNewACorrection*wavetableCorrection;
 	}
 	if (VibratoDepth > 0.0f ) {
 		vibrato=true;
@@ -214,26 +227,26 @@ void CSynthTrack::DoGlide()
 	// Glide Handler
 	if(ROSC1Speed<OSC1Speed)
 	{
-		ROSC1Speed+=oscglide*wavetableCorrection;
+		ROSC1Speed+=oscglide;
 
 		if(ROSC1Speed>OSC1Speed) ROSC1Speed=OSC1Speed;
 	}
 	else if (ROSC1Speed>OSC1Speed)
 	{
-		ROSC1Speed-=oscglide*wavetableCorrection;
+		ROSC1Speed-=oscglide;
 
 		if(ROSC1Speed<OSC1Speed) ROSC1Speed=OSC1Speed;
 	}
 
 	if(ROSC2Speed<OSC2Speed)
 	{
-		ROSC2Speed+=oscglide*wavetableCorrection;
+		ROSC2Speed+=oscglide;
 
 		if(ROSC2Speed>OSC2Speed) ROSC2Speed=OSC2Speed;
 	}
 	else if(ROSC2Speed>OSC2Speed)
 	{
-		ROSC2Speed-=oscglide*wavetableCorrection;
+		ROSC2Speed-=oscglide;
 
 		if(ROSC2Speed<OSC2Speed) ROSC2Speed=OSC2Speed;
 	}
@@ -256,14 +269,14 @@ void CSynthTrack::PerformFx()
 	{
 		/* 0x01 : Pitch Up */
 		case 0x01:
-			shift=(float)sp_val*0.001f*wavetableCorrection;
+			shift=(float)sp_val*0.001f*wtNewACorrection*wavetableCorrection;
 			ROSC1Speed+=shift;
 			ROSC2Speed+=shift;
 			break;
 
 		/* 0x02 : Pitch Down */
 		case 0x02:
-			shift=(float)sp_val*0.001f*wavetableCorrection;
+			shift=(float)sp_val*0.001f*wtNewACorrection*wavetableCorrection;
 			ROSC1Speed-=shift;
 			ROSC2Speed-=shift;
 			if(ROSC1Speed<0.0f)ROSC1Speed=0.0f;
@@ -272,13 +285,13 @@ void CSynthTrack::PerformFx()
 
 		/* 0x11 : CutOff Up */
 		case 0x11:
-			VcfCutoff+=sp_val;
+			VcfCutoff+=sp_val*srCorrection;
 			if(VcfCutoff>127)VcfCutoff=127;
 			break;
 
 		/* 0x12 : CutOff Down */
 		case 0x12:
-			VcfCutoff-=sp_val;
+			VcfCutoff-=sp_val*srCorrection;
 			if(VcfCutoff<0)VcfCutoff=0;
 			break;
 	}
@@ -292,11 +305,11 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	sp_val=val;
 
 	// Init glide
-	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f; }
+	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f*wtNewACorrection*wavetableCorrection; }
 	else 
 	{
 		const float synthglide = 256-syntp->synthglide;
-		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f;
+		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f*wtNewACorrection*wavetableCorrection;
 		else oscglide= 0.0f;
 
 		if(cmd==0x0C) 
@@ -314,8 +327,12 @@ void CSynthTrack::InitEffect(int cmd, int val)
 
 
 	// Init vibrato
-	if (cmd==4) ActiveVibrato(val>>4,val&0xf);
-	else        DisableVibrato();
+	if (cmd==4) {
+		ActiveVibrato(val>>4,val&0xf);
+	}
+	else {
+		DisableVibrato();
+	}
 
 	// Note CUT
 	if (cmd==0x0E && val>0)
@@ -325,7 +342,11 @@ void CSynthTrack::InitEffect(int cmd, int val)
 
 }
 
-void CSynthTrack::InitLfo(int freq,int amp)
+void CSynthTrack::InitLfo(float freq_speed,int amp)
 {
-	lfo_freq=(float)freq*0.000005f*wavetableCorrection;
+	//lfo_freq is the amount to add to the lfo_phase [-2PI..2PI] each 64samples.
+	//freq_speed just uses a randomly choosen scale to say the same.
+	//It can be converted to Hz with:
+	//(freq_speed*0.000005f)*(samplerate/64.0f)/(2.0f*math::pi_f)
+	lfo_freq=(float)freq_speed*0.000005f;
 }
