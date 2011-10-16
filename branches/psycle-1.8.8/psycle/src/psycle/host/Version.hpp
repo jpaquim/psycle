@@ -19,9 +19,9 @@
 #define PSYCLE__COPYRIGHT "Copyright 2000-2011 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
 #define PSYCLE__LICENSE "Some parts GPL, others public domain"
 #define PSYCLE__VERSION__MAJOR 1
-#define PSYCLE__VERSION__MINOR 8
-#define PSYCLE__VERSION__PATCH 8
-#define PSYCLE__VERSION__QUALITY "RC1"
+#define PSYCLE__VERSION__MINOR 10
+#define PSYCLE__VERSION__PATCH 0
+#define PSYCLE__VERSION__QUALITY "release"
 #define PSYCLE__SOURCE_URL "Subversion $URL$"
 
 /// identifies what source version the build comes from.

@@ -31,6 +31,7 @@ namespace psycle { namespace host {
 				if(std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
 					SetPluginDir(appPath() + "psycle-plugins");
 			#endif
+			SetCacheDir(universalis::os::fs::home_app_local(PSYCLE__NAME));
 			SetVst32Dir(appPath()+"VstPlugins");
 			SetVst64Dir(appPath()+"VstPlugins64");
 			UseJBridge(false);

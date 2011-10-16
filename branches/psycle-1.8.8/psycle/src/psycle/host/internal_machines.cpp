@@ -173,6 +173,11 @@ namespace psycle
 			availablechans[macOutput[machine]][allocatedchans[channel][machine]]= true;
 			allocatedchans[channel][machine]=-1;
 		}
+		bool MultiMachine::playsTrack(const int track) const
+		{
+			return Machine::playsTrack(track);
+		}
+
 		//////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 		DuplicatorMac::DuplicatorMac(int index):
@@ -214,6 +219,21 @@ namespace psycle
 				else if (note<0 ) note=0;
 				pData._note = static_cast<std::uint8_t>(note);
 			}
+		}
+		bool DuplicatorMac::playsTrack(const int track) const
+		{
+			for (int i=0;i<NUMMACHINES;i++)
+			{
+				if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
+				{
+					if(allocatedchans[track][i] != -1 &&
+						Global::_pSong->_pMachine[macOutput[i]]->playsTrack(allocatedchans[track][i]))
+					{
+							return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		void DuplicatorMac::GetParamName(int numparam,char *name)

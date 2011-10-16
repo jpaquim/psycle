@@ -45,15 +45,11 @@ namespace psycle
 				lastInstrument[i]=255;
 			}
 		}
-		const char* Sampler::AuxColumnName(int idx) {
-			return Global::_pSong->_pInstrument[ idx]->_sName;
-		}
 		void Sampler::Init(void)
 		{
 			Machine::Init();
 
 			_numVoices = SAMPLER_DEFAULT_POLYPHONY;
-
 			for (int i=0; i<_numVoices; i++)
 			{
 				_voices[i]._envelope._stage = ENV_OFF;
@@ -64,123 +60,6 @@ namespace psycle
 				_voices[i]._triggerNoteOff = 0;
 				_voices[i]._triggerNoteDelay = 0;
 			}
-		}
-
-		int Sampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
-		{
-			if (!_mute)
-			{
-				Standby(false);
-				for (int voice=0; voice<_numVoices; voice++)
-				{
-					// A correct implementation needs to take numsamples into account.
-					// This will not be fixed to leave sampler compatible with old songs.
-					PerformFx(voice);
-				}
-				int ns = numSamples;
-				while (ns)
-				{
-					int nextevent = ns+1;
-					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
-					{
-						if (TriggerDelay[i]._cmd)
-						{
-							if (TriggerDelayCounter[i] < nextevent)
-							{
-								nextevent = TriggerDelayCounter[i];
-							}
-						}
-					}
-					if (nextevent > ns)
-					{
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
-						{
-							// come back to this
-							if (TriggerDelay[i]._cmd)
-							{
-								TriggerDelayCounter[i] -= ns;
-							}
-						}
-						for (int voice=0; voice<_numVoices; voice++)
-						{
-							VoiceWork(ns, voice);
-						}
-						ns = 0;
-					}
-					else
-					{
-						if (nextevent)
-						{
-							ns -= nextevent;
-							for (int voice=0; voice<_numVoices; voice++)
-							{
-								VoiceWork(nextevent, voice);
-							}
-						}
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
-						{
-							// come back to this
-							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
-								{
-									// do event
-									Tick(i,&TriggerDelay[i]);
-									TriggerDelay[i]._cmd = 0;
-								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
-								{
-									// do event
-									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
-								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
-								{
-									// do event
-									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
-									int parameter = TriggerDelay[i]._parameter&0x0f;
-									if (parameter < 9)
-									{
-										RetriggerRate[i]+= 4*parameter;
-									}
-									else
-									{
-										RetriggerRate[i]-= 2*(16-parameter);
-										if (RetriggerRate[i] < 16)
-										{
-											RetriggerRate[i] = 16;
-										}
-									}
-								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-						}
-					}
-				}
-				UpdateVuAndStanbyFlag(numSamples);
-			}
-
-			else Standby(true);
-			recursive_processed_ = true;
-			return numSamples;
 		}
 
 		void Sampler::Stop(void)
@@ -201,154 +80,36 @@ namespace psycle
 				}
 			}
 		}
+		const char* Sampler::AuxColumnName(int idx) {
+			return Global::_pSong->_pInstrument[ idx]->_sName;
+		}
 
-		void Sampler::VoiceWork(int numsamples, int voice)
+		void Sampler::SetSampleRate(int sr)
 		{
-			helpers::dsp::resampler::work_func_type pResamplerWork;
-			Voice* pVoice = &_voices[voice];
-			float* pSamplesL = _pSamplesL;
-			float* pSamplesR = _pSamplesR;
-			float left_output;
-			float right_output;
-
-			pVoice->_sampleCounter += numsamples;
-
-			 if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
+			Machine::SetSampleRate(sr);
+			for (int i=0; i<_numVoices; i++)
 			{
-				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
-				{
-					pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
-					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer->SampleRate());
-					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer->SampleRate());
-					pVoice->effretTicks--;
-					pVoice->_wave._pos.QuadPart = 0;
-					if ( pVoice->effretMode == 1 )
-					{
-						pVoice->_wave._lVolDest += pVoice->effretVol;
-						pVoice->_wave._rVolDest += pVoice->effretVol;
-					}
-					else if (pVoice->effretMode == 2 )
-					{
-						pVoice->_wave._lVolDest *= pVoice->effretVol;
-						pVoice->_wave._rVolDest *= pVoice->effretVol;
-					}
-				}
-				else 
-				{
-					pVoice->_triggerNoteDelay=0;
-				}
-				pVoice->_envelope._stage = ENV_ATTACK;
-			}
-			else if (pVoice->_envelope._stage == ENV_OFF)
-			{
-				pVoice->_wave._lVolCurr = 0;
-				pVoice->_wave._rVolCurr = 0;
-				return;
-			}
-			else if ((pVoice->_triggerNoteOff) && (pVoice->_sampleCounter >= pVoice->_triggerNoteOff))
-			{
-				pVoice->_triggerNoteOff = 0;
-				NoteOff(voice);
-			}
-
-			// If the sample has been deleted while playing...
-			if (Global::_pSong->_pInstrument[pVoice->_instrument]->Empty())
-			{
-				pVoice->_envelope._stage = ENV_OFF;
-				pVoice->_wave._lVolCurr = 0;
-				pVoice->_wave._rVolCurr = 0;
-				return;
-			}
-
-			pResamplerWork = _resampler.work;
-			while (numsamples)
-			{
-				left_output=0;
-				right_output=0;
-
-				if (pVoice->_envelope._stage != ENV_OFF)
-				{
-					left_output = pResamplerWork(
-						pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
-						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
-					if (pVoice->_wave._stereo)
-					{
-						right_output = pResamplerWork(
-							pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
-							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
-					}
-
-					// Filter section
-					//
-					if (pVoice->_filter._type < dsp::F_NONE)
-					{
-						TickFilterEnvelope(voice);
-						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::lround<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
-						if (pVoice->_filter._cutoff < 0)
-						{
-							pVoice->_filter._cutoff = 0;
-						}
-						if (pVoice->_filter._cutoff > 127)
-						{
-							pVoice->_filter._cutoff = 127;
-						}
-
-						pVoice->_filter.Update();
-						if (pVoice->_wave._stereo)
-						{
-							pVoice->_filter.WorkStereo(left_output, right_output);
-						}
-						else
-						{
-							left_output = pVoice->_filter.Work(left_output);
-						}
-					}
-
-					TickEnvelope(voice);
-
-					// calculate volume
-					
-					if(pVoice->_wave._lVolCurr<0)
-						pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
-					if(pVoice->_wave._rVolCurr<0)
-						pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
-
-					if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
-						pVoice->_wave._lVolCurr-=0.005f;
-					if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
-						pVoice->_wave._lVolCurr+=0.005f;
-					if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
-						pVoice->_wave._rVolCurr-=0.005f;
-					if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
-						pVoice->_wave._rVolCurr+=0.005f;
-
-					if(!pVoice->_wave._stereo)
-						right_output=left_output;
-					right_output *= pVoice->_wave._rVolCurr*pVoice->_envelope._value;
-					left_output *= pVoice->_wave._lVolCurr*pVoice->_envelope._value;
-
-
-
-					pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
-
-					// Loop handler
-					//
-					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
-					{
-						pVoice->_wave._pos.HighPart -= (pVoice->_wave._loopEnd - pVoice->_wave._loopStart);
-					}
-					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
-					{
-						pVoice->_envelope._stage = ENV_OFF;
-					}
-				}
-					
-				*pSamplesL++ = *pSamplesL+left_output;
-				*pSamplesR++ = *pSamplesR+right_output;
-				numsamples--;
+				_voices[i]._envelope._stage = ENV_OFF;
+				_voices[i]._envelope._sustain = 0;
+				_voices[i]._filterEnv._stage = ENV_OFF;
+				_voices[i]._filterEnv._sustain = 0;
+				_voices[i]._filter.Init(sr);
+				_voices[i]._triggerNoteOff = 0;
+				_voices[i]._triggerNoteDelay = 0;
 			}
 		}
 
+		bool Sampler::playsTrack(const int track) const
+		{
+			for ( int voice=0; voice<_numVoices; voice++)
+			{
+				if ( _voices[voice]._channel == track && _voices[voice]._envelope._stage != ENV_OFF)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 		void Sampler::Tick()
 		{
 			for (int voice=0;voice<_numVoices;voice++)
@@ -712,6 +473,271 @@ namespace psycle
 
 		}
 
+		int Sampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
+		{
+			if (!_mute)
+			{
+				Standby(false);
+				for (int voice=0; voice<_numVoices; voice++)
+				{
+					// A correct implementation needs to take numsamples into account.
+					// This will not be fixed to leave sampler compatible with old songs.
+					PerformFx(voice);
+				}
+				int ns = numSamples;
+				while (ns)
+				{
+					int nextevent = ns+1;
+					for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+					{
+						if (TriggerDelay[i]._cmd)
+						{
+							if (TriggerDelayCounter[i] < nextevent)
+							{
+								nextevent = TriggerDelayCounter[i];
+							}
+						}
+					}
+					if (nextevent > ns)
+					{
+						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						{
+							// come back to this
+							if (TriggerDelay[i]._cmd)
+							{
+								TriggerDelayCounter[i] -= ns;
+							}
+						}
+						for (int voice=0; voice<_numVoices; voice++)
+						{
+							VoiceWork(ns, voice);
+						}
+						ns = 0;
+					}
+					else
+					{
+						if (nextevent)
+						{
+							ns -= nextevent;
+							for (int voice=0; voice<_numVoices; voice++)
+							{
+								VoiceWork(nextevent, voice);
+							}
+						}
+						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						{
+							// come back to this
+							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+							{
+								if (TriggerDelayCounter[i] == nextevent)
+								{
+									// do event
+									Tick(i,&TriggerDelay[i]);
+									TriggerDelay[i]._cmd = 0;
+								}
+								else
+								{
+									TriggerDelayCounter[i] -= nextevent;
+								}
+							}
+							else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
+							{
+								if (TriggerDelayCounter[i] == nextevent)
+								{
+									// do event
+									Tick(i,&TriggerDelay[i]);
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+								}
+								else
+								{
+									TriggerDelayCounter[i] -= nextevent;
+								}
+							}
+							else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
+							{
+								if (TriggerDelayCounter[i] == nextevent)
+								{
+									// do event
+									Tick(i,&TriggerDelay[i]);
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+									int parameter = TriggerDelay[i]._parameter&0x0f;
+									if (parameter < 9)
+									{
+										RetriggerRate[i]+= 4*parameter;
+									}
+									else
+									{
+										RetriggerRate[i]-= 2*(16-parameter);
+										if (RetriggerRate[i] < 16)
+										{
+											RetriggerRate[i] = 16;
+										}
+									}
+								}
+								else
+								{
+									TriggerDelayCounter[i] -= nextevent;
+								}
+							}
+						}
+					}
+				}
+				UpdateVuAndStanbyFlag(numSamples);
+			}
+
+			else Standby(true);
+			recursive_processed_ = true;
+			return numSamples;
+		}
+
+		void Sampler::VoiceWork(int numsamples, int voice)
+		{
+			helpers::dsp::resampler::work_func_type pResamplerWork;
+			Voice* pVoice = &_voices[voice];
+			float* pSamplesL = _pSamplesL;
+			float* pSamplesR = _pSamplesR;
+			float left_output;
+			float right_output;
+
+			pVoice->_sampleCounter += numsamples;
+
+			 if ((pVoice->_triggerNoteDelay) && (pVoice->_sampleCounter >= pVoice->_triggerNoteDelay))
+			{
+				if ( pVoice->effCmd == SAMPLER_CMD_RETRIG && pVoice->effretTicks)
+				{
+					pVoice->_triggerNoteDelay = pVoice->_sampleCounter+ pVoice->effVal;
+					pVoice->_envelope._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::pPlayer->SampleRate());
+					pVoice->_filterEnv._step = (1.0f/Global::_pSong->_pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::pPlayer->SampleRate());
+					pVoice->effretTicks--;
+					pVoice->_wave._pos.QuadPart = 0;
+					if ( pVoice->effretMode == 1 )
+					{
+						pVoice->_wave._lVolDest += pVoice->effretVol;
+						pVoice->_wave._rVolDest += pVoice->effretVol;
+					}
+					else if (pVoice->effretMode == 2 )
+					{
+						pVoice->_wave._lVolDest *= pVoice->effretVol;
+						pVoice->_wave._rVolDest *= pVoice->effretVol;
+					}
+				}
+				else 
+				{
+					pVoice->_triggerNoteDelay=0;
+				}
+				pVoice->_envelope._stage = ENV_ATTACK;
+			}
+			else if (pVoice->_envelope._stage == ENV_OFF)
+			{
+				pVoice->_wave._lVolCurr = 0;
+				pVoice->_wave._rVolCurr = 0;
+				return;
+			}
+			else if ((pVoice->_triggerNoteOff) && (pVoice->_sampleCounter >= pVoice->_triggerNoteOff))
+			{
+				pVoice->_triggerNoteOff = 0;
+				NoteOff(voice);
+			}
+
+			// If the sample has been deleted while playing...
+			if (Global::_pSong->_pInstrument[pVoice->_instrument]->Empty())
+			{
+				pVoice->_envelope._stage = ENV_OFF;
+				pVoice->_wave._lVolCurr = 0;
+				pVoice->_wave._rVolCurr = 0;
+				return;
+			}
+
+			pResamplerWork = _resampler.work;
+			while (numsamples)
+			{
+				left_output=0;
+				right_output=0;
+
+				if (pVoice->_envelope._stage != ENV_OFF)
+				{
+					left_output = pResamplerWork(
+						pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
+						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+					if (pVoice->_wave._stereo)
+					{
+						right_output = pResamplerWork(
+							pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
+							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+					}
+
+					// Filter section
+					//
+					if (pVoice->_filter._type < dsp::F_NONE)
+					{
+						TickFilterEnvelope(voice);
+						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::lround<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
+						if (pVoice->_filter._cutoff < 0)
+						{
+							pVoice->_filter._cutoff = 0;
+						}
+						if (pVoice->_filter._cutoff > 127)
+						{
+							pVoice->_filter._cutoff = 127;
+						}
+
+						pVoice->_filter.Update();
+						if (pVoice->_wave._stereo)
+						{
+							pVoice->_filter.WorkStereo(left_output, right_output);
+						}
+						else
+						{
+							left_output = pVoice->_filter.Work(left_output);
+						}
+					}
+
+					TickEnvelope(voice);
+
+					// calculate volume
+					
+					if(pVoice->_wave._lVolCurr<0)
+						pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
+					if(pVoice->_wave._rVolCurr<0)
+						pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
+
+					if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
+						pVoice->_wave._lVolCurr-=0.005f;
+					if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
+						pVoice->_wave._lVolCurr+=0.005f;
+					if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
+						pVoice->_wave._rVolCurr-=0.005f;
+					if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
+						pVoice->_wave._rVolCurr+=0.005f;
+
+					if(!pVoice->_wave._stereo)
+						right_output=left_output;
+					right_output *= pVoice->_wave._rVolCurr*pVoice->_envelope._value;
+					left_output *= pVoice->_wave._lVolCurr*pVoice->_envelope._value;
+
+
+
+					pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
+
+					// Loop handler
+					//
+					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
+					{
+						pVoice->_wave._pos.HighPart -= (pVoice->_wave._loopEnd - pVoice->_wave._loopStart);
+					}
+					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
+					{
+						pVoice->_envelope._stage = ENV_OFF;
+					}
+				}
+					
+				*pSamplesL++ = *pSamplesL+left_output;
+				*pSamplesR++ = *pSamplesR+right_output;
+				numsamples--;
+			}
+		}
+
+
 		void Sampler::TickFilterEnvelope(
 			int voice)
 		{
@@ -814,18 +840,20 @@ namespace psycle
 
 		void Sampler::PerformFx(int voice)
 		{
+			// 189408044700 stands for (2^30/250)*44100, meaning that
+			//value 250 = (inc)decreases the speed in in 1/4th of the original (wave) speed each PerformFx call.
 			__int64 shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up
 				case 0x01:
-					shift=_voices[voice].effVal*4294967;
+					shift=_voices[voice].effVal*189408044700/Global::player().SampleRate();
 					_voices[voice]._wave._speed+=shift;
 				break;
 
 				// 0x02 : Pitch Down
 				case 0x02:
-					shift=_voices[voice].effVal*4294967;
+					shift=_voices[voice].effVal*189408044700/Global::player().SampleRate();
 					_voices[voice]._wave._speed-=shift;
 					if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
 				break;
@@ -835,6 +863,63 @@ namespace psycle
 			}
 		}
 
+		bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			DefaultC4(false);
+			UINT size;
+			pFile->Read(&size,sizeof(size));
+			if (size)
+			{
+				/// Version 0
+				int temp;
+				pFile->Read(&temp, sizeof(temp)); // numSubtracks
+				_numVoices=temp;
+				pFile->Read(&temp, sizeof(temp)); // quality
+
+				switch (temp)
+				{
+					case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+					case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
+					case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+					case 1:
+					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
+				}
+				if(size > 3*sizeof(UINT))
+				{
+					UINT internalversion;
+					pFile->Read(&internalversion, sizeof(UINT));
+					if (internalversion == 1) {
+						bool defaultC4;
+						pFile->Read(&defaultC4, sizeof(bool)); // correct A4 frequency.
+						DefaultC4(defaultC4);
+					}
+				}
+			}
+			return TRUE;
+		}
+
+		void Sampler::SaveSpecificChunk(RiffFile* pFile) 
+		{
+			UINT temp;
+			UINT size = 3*sizeof(temp) + 1*sizeof(bool);
+			pFile->Write(&size,sizeof(size));
+			temp = _numVoices;
+			pFile->Write(&temp, sizeof(temp)); // numSubtracks
+			switch (_resampler.quality())
+			{
+				case helpers::dsp::resampler::quality::none: temp = 0; break;
+				case helpers::dsp::resampler::quality::spline: temp = 2; break;
+				case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
+				case helpers::dsp::resampler::quality::linear: //fallthrough
+				default: temp = 1;
+			}
+			pFile->Write(&temp, sizeof(temp)); // quality
+
+			UINT internalversion = 1;
+			pFile->Write(&internalversion, sizeof(UINT));
+			bool defaultC4 = isDefaultC4();
+			pFile->Write(&defaultC4, sizeof(bool)); // correct A4
+		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

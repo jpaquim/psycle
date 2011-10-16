@@ -702,6 +702,24 @@ int Machine::GenerateAudio(int numsamples, bool measure_cpu_usage) {
 int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 	return 0;
 }
+		bool Machine::playsTrack(const int track) const {
+			if (Standby()) {
+				return false;
+			}
+#if PSYCLE__CONFIGURATION__RMS_VUS
+			double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
+			if( bla < 0.00024 )
+			{
+				return false;
+			}
+#else
+			if (_volumeCounter < 8.0f)	{
+				return false;
+			}
+#endif
+			return true;
+		}
+
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
 #if PSYCLE__CONFIGURATION__RMS_VUS
@@ -717,18 +735,21 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			else if (_volumeDisplay>1 ) _volumeDisplay -=2;
 			else {_volumeDisplay = 0;}
 
-			if ( autoStopMachine )
+			if ( autoStopMachine && !Standby())
 			{
-				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.AccumRight < 0.00024*GetAudioRange()
-					&& rms.count >= numSamples)	{
-					rms.count=0;
-					rms.AccumLeft=0.;
-					rms.AccumRight=0.;
-					rms.previousLeft=0.;
-					rms.previousRight=0.;
-					_volumeCounter = 0.0f;
-					_volumeDisplay = 0;
-					Standby(true);
+				if(rms.count >= numSamples) {
+					double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
+					if( bla < 0.00024 )
+					{
+						rms.count=0;
+						rms.AccumLeft=0.;
+						rms.AccumRight=0.;
+						rms.previousLeft=0.;
+						rms.previousRight=0.;
+						_volumeCounter = 0.0f;
+						_volumeDisplay = 0;
+						Standby(true);
+					}
 				}
 			}
 #else
@@ -1171,23 +1192,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			else if (volumeDisplayRight>1 ) volumeDisplayRight -=2;
 			else {volumeDisplayRight = 0;}
 			_volumeDisplay = std::max(volumeDisplayLeft,volumeDisplayRight);
-
-			if ( autoStopMachine )
-			{
-				if (rms.AccumLeft < 0.00024*GetAudioRange() && rms.AccumRight < 0.00024*GetAudioRange()
-					&& rms.count >= numSamples)	{
-					rms.count=0;
-					rms.AccumLeft=0.;
-					rms.AccumRight=0.;
-					rms.previousLeft=0.;
-					rms.previousRight=0.;
-					_volumeCounter = 0.0f;
-					volumeDisplayLeft = 0;
-					volumeDisplayRight = 0;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-			}
 #else
 			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
@@ -1199,17 +1203,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			//Cannot calculate the volume display with GetMaxVol method.
 			volumeDisplayLeft = _volumeDisplay;
 			volumeDisplayRight = _volumeDisplay;
-
-			if ( Global::pConfig->UsesAutoStopMachines() )
-			{
-				if (_volumeCounter < 8.0f)	{
-					_volumeCounter = 0.0f;
-					volumeDisplayLeft = 0;
-					volumeDisplayRight = 0;
-					_volumeDisplay = 0;
-					Standby(true);
-				}
-			}
 #endif
 		}
 		bool Master::LoadSpecificChunk(RiffFile* pFile, int version)

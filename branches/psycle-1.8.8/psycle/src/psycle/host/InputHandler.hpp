@@ -16,9 +16,16 @@ namespace psycle
 		class SPatternUndo
 		{
 		public:
+			SPatternUndo();
+			SPatternUndo(const SPatternUndo& other);
+			virtual ~SPatternUndo();
+			SPatternUndo& operator=(const SPatternUndo &other);
+		private:
+			void Copy(const SPatternUndo &other);
+		public:
 			int type;
-			SPatternUndo* pPrev;
 			unsigned char* pData;
+			int dataSize;
 			int pattern;
 			int x;
 			int y;
@@ -118,8 +125,8 @@ namespace psycle
 			/// last track output to	
 			int outtrack;
 
-			SPatternUndo * pUndoList;
-			SPatternUndo * pRedoList;
+			std::list<SPatternUndo> pUndoList;
+			std::list<SPatternUndo> pRedoList;
 
 			int UndoCounter;
 			int UndoSaved;

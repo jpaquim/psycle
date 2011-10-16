@@ -975,38 +975,42 @@ namespace psycle { namespace host {
 				oss << _pSong->name
 					<< " - " << _pSong->patternName[_pSong->playOrder[m_wndView.editPosition]];
 
-				if ((m_wndView.viewMode==view_modes::pattern)	&& (!Global::pPlayer->_playing))
+				if (m_wndView.viewMode==view_modes::pattern && !Global::pPlayer->_playing)
 				{
 					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 					int machine = toffset[2];
-					if (machine<MAX_MACHINES)
+					if (machine<MAX_MACHINES && _pSong->_pMachine[machine])
 					{
-						if (_pSong->_pMachine[machine])
+						Machine* mac = _pSong->_pMachine[machine];
+						oss << " - " << mac->_editName;
+						if(mac->NeedsAuxColumn() && 
+							toffset[0] <= notecommands::b9 && toffset[1] != notecommands::empty)
 						{
-							oss << " - " << _pSong->_pMachine[machine]->_editName;
-							if (_pSong->_pMachine[machine]->_type == MACH_SAMPLER)
-							{
-								if (_pSong->_pInstrument[toffset[1]]->_sName[0])
-									oss <<  " - " << _pSong->_pInstrument[toffset[1]]->_sName;
+							oss <<  " - " << mac->AuxColumnName(toffset[1]);
+						}
+						else if (toffset[0] == notecommands::tweak ||toffset[0] == notecommands::tweakslide)
+						{
+							char buf[64];
+							buf[0]=0;
+							mac->GetParamName(toffset[1],buf);
+							if(buf[0])
+								oss <<  " - " << buf;
+						}
+						else if (toffset[0] == notecommands::midicc) {
+							if (toffset[1] < 0x40) {
+								oss << " - Send command to track " << toffset[1];
 							}
-							else if (_pSong->_pMachine[machine]->_type == MACH_XMSAMPLER)
-							{
-								if (XMSampler::rInstrument(toffset[1]).IsEnabled())
-									oss <<  " - " << XMSampler::rInstrument(toffset[1]).Name();
+							else if((toffset[1]&0xF0) == 0xB0) {
+								oss << " - Send MIDI CC";
 							}
-							else
-							{
-								char buf[64];
-								buf[0]=0;
-								_pSong->_pMachine[machine]->GetParamName(toffset[1],buf);
-								if(buf[0])
-									oss <<  " - " << buf;
+							else {
+								oss << " - Send MIDI";
 							}
 						}
-						else
-						{
-							oss << " - Machine Out of Range";
-						}
+					}
+					else if (machine != notecommands::empty)
+					{
+						oss << " - Machine Out of Range";
 					}
 				}
 

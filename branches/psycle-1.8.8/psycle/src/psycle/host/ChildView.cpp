@@ -1181,6 +1181,7 @@ namespace psycle { namespace host {
 			bool pl = Global::pPlayer->_playing;
 			bool blk = Global::pPlayer->_playBlock;
 			Global::pPlayer->Stop();
+			Repaint(draw_modes::playback);
 			pParentMain->SetAppSongBpm(0);
 			pParentMain->SetAppSongTpb(0);
 

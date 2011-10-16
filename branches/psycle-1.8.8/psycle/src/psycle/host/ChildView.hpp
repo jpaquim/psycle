@@ -519,11 +519,7 @@ namespace host {
 
 		inline void CChildView::OutData(CDC *devc,int x,int y,unsigned char data, bool trflag)
 		{
-			CRect Rect;
-			Rect.left=x;
-			Rect.top=y;
-			Rect.right=x+TEXTWIDTH;
-			Rect.bottom=y+TEXTHEIGHT;
+			CRect Rect(x,y,x+TEXTWIDTH,y+TEXTHEIGHT);
 			char* first;
 			char* second;
 			if (trflag) {
@@ -540,20 +536,9 @@ namespace host {
 
 		inline void CChildView::OutData4(CDC *devc,int x,int y,unsigned char data, bool trflag)
 		{
-			CRect Rect;
-			Rect.left=x;
-			Rect.top=y;
-			Rect.right=x+TEXTWIDTH;
-			Rect.bottom=y+TEXTHEIGHT;
-			char* first;
-			char* second;
-			if (trflag) {
-				first = second = szBlankParam;
-			} else {			
-				first = hex_tab[data>>4];
-				second = hex_tab[data&0xf];
-			}
-			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,first,FLATSIZES);
+			CRect Rect(x,y,x+TEXTWIDTH,y+TEXTHEIGHT);
+			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,
+				(trflag)?szBlankParam:hex_tab[data] ,FLATSIZES);
 		}
 
 		inline void CChildView::TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h)

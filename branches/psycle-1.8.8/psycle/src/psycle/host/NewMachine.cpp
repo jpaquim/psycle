@@ -7,7 +7,6 @@
 
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
-#include <universalis/os/fs.hpp>
 
 #include <string>
 #include <sstream>
@@ -494,10 +493,11 @@ namespace psycle { namespace host {
 		void CNewMachine::OnRefresh() 
 		{
 			DestroyPluginInfo();
+
 #if defined _WIN64
-			DeleteFile((universalis::os::fs::home_app_local(PSYCLE__NAME) / "psycle64.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((Global::configuration().cacheDir() / "psycle64.plugin-scan.cache").native_file_string().c_str());
 #elif defined _WIN32
-			DeleteFile((universalis::os::fs::home_app_local(PSYCLE__NAME) / "psycle.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((Global::configuration().cacheDir() / "psycle.plugin-scan.cache").native_file_string().c_str());
 #else
 #error unexpected platform
 #endif
@@ -656,7 +656,7 @@ namespace psycle { namespace host {
 			}
 			std::ofstream out;
 			{
-				boost::filesystem::path log_dir(universalis::os::fs::home_app_local(PSYCLE__NAME));
+				boost::filesystem::path log_dir(Global::configuration().cacheDir());
 				// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
 				mkdir(log_dir.native_directory_string().c_str());
 #if defined _WIN64
@@ -1083,9 +1083,9 @@ namespace psycle { namespace host {
 		bool CNewMachine::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
 #if defined _WIN64
-			std::string cache((universalis::os::fs::home_app_local(PSYCLE__NAME) / "psycle64.plugin-scan.cache").native_file_string());
+			std::string cache((Global::configuration().cacheDir() / "psycle64.plugin-scan.cache").native_file_string());
 #elif defined _WIN32
-			std::string cache((universalis::os::fs::home_app_local(PSYCLE__NAME) / "psycle.plugin-scan.cache").native_file_string());
+			std::string cache((Global::configuration().cacheDir() / "psycle.plugin-scan.cache").native_file_string());
 #else
 #error unexpected platform
 #endif
@@ -1094,23 +1094,13 @@ namespace psycle { namespace host {
 
 			if (!file.Open(cache.c_str()))
 			{
+#if defined _WIN32
 				/// try old location
-				/// same as universalis::os::fs::bin() / "psycle.plugin-scan.cache"
-				char modulefilename[_MAX_PATH];
-				GetModuleFileName(NULL,modulefilename,_MAX_PATH);
-				std::string path=modulefilename;
-				std::string::size_type pos=path.rfind('\\');
-				if(pos != std::string::npos)
-					path=path.substr(0,pos);
-#if defined _WIN64
-				std::string cache=path + "\\psycle64.plugin-scan.cache";
-#elif defined _WIN32
-				std::string cache=path + "\\psycle.plugin-scan.cache";
+				std::string cache2((boost::filesystem::path(Global::configuration().appPath()) / "psycle.plugin-scan.cache").native_file_string());
+				if (!file.Open(cache2.c_str())) return false;
 #else
-#error unexpected platform
+				return false;
 #endif
-
-				if (!file.Open(cache.c_str())) return false;
 			}
 
 			char Temp[MAX_PATH];
@@ -1218,9 +1208,9 @@ namespace psycle { namespace host {
 		bool CNewMachine::SaveCacheFile()
 		{
 #if defined _WIN64
-			boost::filesystem::path cache(universalis::os::fs::home_app_local(PSYCLE__NAME) / "psycle64.plugin-scan.cache");
+			boost::filesystem::path cache(Global::configuration().cacheDir() / "psycle64.plugin-scan.cache");
 #elif defined _WIN32
-			boost::filesystem::path cache(universalis::os::fs::home_app_local(PSYCLE__NAME) / "psycle.plugin-scan.cache");
+			boost::filesystem::path cache(Global::configuration().cacheDir() / "psycle.plugin-scan.cache");
 #else
 	#error unexpected platform
 #endif

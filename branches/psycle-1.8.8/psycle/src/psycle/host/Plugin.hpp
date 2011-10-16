@@ -188,7 +188,7 @@ namespace psycle
 			///\{
 				public:
 					virtual int GenerateAudioInTicks( int startSample, int numSamples );
-					virtual float GetAudioRange(){ return 32768.0f; }
+					virtual float GetAudioRange() const { return 32768.0f; }
 					virtual void SetSampleRate(int sr);
 					virtual void Tick();
 					virtual void Tick(int channel, PatternEntry * pEntry);

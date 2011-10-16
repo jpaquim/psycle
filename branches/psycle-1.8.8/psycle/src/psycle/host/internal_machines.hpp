@@ -14,7 +14,7 @@ public:
 	Dummy(int index);
 	Dummy(Machine *mac);
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
-	virtual float GetAudioRange(){ return 32768.0f; }
+	virtual float GetAudioRange() const { return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 
@@ -39,7 +39,8 @@ protected:
 	static const int NUMMACHINES=8;
 	void AllocateVoice(int channel, int machine);
 	void DeallocateVoice(int channel, int machine);
-		virtual void CustomTick(int channel,int i, PatternEntry& pData) = 0;
+	virtual void CustomTick(int channel,int i, PatternEntry& pData) = 0;
+	virtual bool playsTrack(const int track) const;
 	short macOutput[NUMMACHINES];
 	short noteOffset[NUMMACHINES];
 	bool bisTicking;
@@ -58,7 +59,8 @@ public:
 	virtual void Tick();
 	virtual void CustomTick(int channel,int i, PatternEntry& pData);
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
-	virtual float GetAudioRange(){ return 32768.0f; }
+	virtual bool playsTrack(const int track) const;
+	virtual float GetAudioRange() const { return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
@@ -86,7 +88,7 @@ public:
 	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 	virtual void Work(int numSamples);
-	virtual float GetAudioRange(){ return 32768.0f; }
+	virtual float GetAudioRange() const { return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
@@ -112,7 +114,7 @@ public:
 	virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage) { Machine::PreWork(numSamples,false,measure_cpu_usage); }
 	virtual void Init(void);
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
-	virtual float GetAudioRange(){ return 32768.0f; }
+	virtual float GetAudioRange() const { return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
@@ -331,7 +333,7 @@ public:
 	virtual void DeleteMixerSendFlag(Song* pSong,Machine* mac);
 	virtual void SetMixerSendFlag(Song* pSong,Machine* mac);
 	virtual void DeleteWires(Song* pSong);
-	virtual float GetAudioRange(){ return 32768.0f; }
+	virtual float GetAudioRange() const { return 32768.0f; }
 	std::string GetAudioInputName(int port);
 	virtual int GetAudioInputs() { return 24; }
 	virtual int GetAudioOutputs() { return 1; }

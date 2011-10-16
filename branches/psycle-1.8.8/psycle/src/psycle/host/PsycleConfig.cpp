@@ -644,6 +644,10 @@ namespace psycle { namespace host {
 			PatHeaderCoords.sSoloOn.y = 24;
 			PatHeaderCoords.sSoloOn.width = 18;
 			PatHeaderCoords.sSoloOn.height = 18;
+			PatHeaderCoords.sPlayOn.x = 4;
+			PatHeaderCoords.sPlayOn.y = 24;
+			PatHeaderCoords.sPlayOn.width = 18;
+			PatHeaderCoords.sPlayOn.height = 18;
 			PatHeaderCoords.dDigitX0.x = 31;
 			PatHeaderCoords.dDigitX0.y = 5;
 			PatHeaderCoords.dDigit0X.x = 40;
@@ -654,7 +658,10 @@ namespace psycle { namespace host {
 			PatHeaderCoords.dMuteOn.y = 2;
 			PatHeaderCoords.dSoloOn.x = 77;
 			PatHeaderCoords.dSoloOn.y = 2;
+			PatHeaderCoords.dPlayOn.x = 4;
+			PatHeaderCoords.dPlayOn.y = 2;
 			PatHeaderCoords.bHasTransparency = false;
+			PatHeaderCoords.bHasPlaying = true;
 			PatHeaderCoords.cTransparency = 0x0000FF00;	
 		}
 		void PsycleConfig::PatternView::Load(ConfigStorage &store, std::string mainSkinDir)
@@ -1127,7 +1134,7 @@ namespace psycle { namespace host {
 			// Update the keyMap entry if this key was already being used.
 			// Also, change the setMap entry if the keymap used a different CmdDef.
 			itKey = keyMap.find(theKey);
-			if(itKey != keyMap.end())
+			if(itKey != keyMap.end() && itKey->second.GetID() != cdefNull)
 			{
 				if(itKey->second.GetID() != cmd.GetID())
 				{
@@ -1387,6 +1394,7 @@ namespace psycle { namespace host {
 			if(!store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string()))
 			{
 				delete store;
+				SetCacheDir(universalis::os::fs::home_app_local(PSYCLE__NAME));
 				store = new WinIniFile(PSYCLE__VERSION);
 				if(!store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string()))
 				{
@@ -1396,7 +1404,17 @@ namespace psycle { namespace host {
 					{
 						return false;
 					}
+					else {
+						store_place_ = STORE_REGEDIT;
+					}
 				}
+				else {
+					store_place_ = STORE_USER_DATA;
+				}
+			}
+			else {
+				SetCacheDir(boost::filesystem::path(appPath()));
+				store_place_ = STORE_EXE_DIR;
 			}
 
 			//////////////////////

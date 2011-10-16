@@ -969,9 +969,9 @@ namespace psycle
 			}
 		}
 
-		const double XMSampler::Voice::NoteToPeriod(const int note)
+		double XMSampler::Voice::NoteToPeriod(const int note) const
 		{
-	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
+			const XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides())
 			{
@@ -986,9 +986,9 @@ namespace psycle
 			}
 		}
 
-		const int XMSampler::Voice::PeriodToNote(const double period)
+		int XMSampler::Voice::PeriodToNote(const double period) const
 		{
-	XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
+			const XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides()){
 				// f1
@@ -2025,6 +2025,11 @@ namespace psycle
 			//
 		}
 
+		
+		bool XMSampler::playsTrack(const int track) const
+		{
+			return GetCurrentVoice(track) != NULL;
+		}
 		void XMSampler::Tick()
 		{
 			SampleCounter(0);

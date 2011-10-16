@@ -267,7 +267,7 @@ namespace psycle
 						MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(pSong,wireIndex);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual float GetAudioRange(){ return 1.0f; }
+				virtual float GetAudioRange() const { return 1.0f; }
 
 
 

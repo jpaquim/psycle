@@ -153,7 +153,7 @@ namespace psycle
 		* @param value		: Desired point Value.
 		* @return			: New point index.
 		*/
-		const int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
+		int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 		{
 			assert(pointIndex < m_Points.size());
 			if(pointIndex < m_Points.size())
@@ -269,7 +269,7 @@ namespace psycle
 		* @param value		: Point Value.
 		* @return			: New point index.
 		*/
-		const unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
+		unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
 		{
 			unsigned int _new_index;
 			for(_new_index = 0;_new_index < (int)m_Points.size();_new_index++)

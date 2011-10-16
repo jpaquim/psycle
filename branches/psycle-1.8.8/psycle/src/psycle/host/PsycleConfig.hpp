@@ -41,12 +41,15 @@ namespace psycle
 			SSkinSource sRecordOn;
 			SSkinSource sMuteOn;
 			SSkinSource sSoloOn;
+			SSkinSource sPlayOn;
 			SSkinDest dDigitX0;
 			SSkinDest dDigit0X;
 			SSkinDest dRecordOn;
 			SSkinDest dMuteOn;
 			SSkinDest dSoloOn;
+			SSkinDest dPlayOn;
 			bool bHasTransparency;
+			bool bHasPlaying;
 			COLORREF cTransparency;
 		};
 

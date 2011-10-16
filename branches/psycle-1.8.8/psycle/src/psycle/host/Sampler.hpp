@@ -94,94 +94,26 @@ namespace psycle
 		/// sampler.
 		class Sampler : public Machine
 		{
+			friend CGearTracker;
 		public:
-			void Tick();
 			Sampler(int index);
 			virtual void Init(void);
+			virtual void Tick();
+			virtual void Tick(int channel, PatternEntry* pData);
+			virtual void Stop(void);
 			virtual int GenerateAudioInTicks(int startSample,  int numSamples);
-			virtual float GetAudioRange(){ return 32768.0f; }
-			virtual void SetSampleRate(int sr)
-			{
-				Machine::SetSampleRate(sr);
-				for (int i=0; i<_numVoices; i++)
-				{
-					_voices[i]._envelope._stage = ENV_OFF;
-					_voices[i]._envelope._sustain = 0;
-					_voices[i]._filterEnv._stage = ENV_OFF;
-					_voices[i]._filterEnv._sustain = 0;
-					_voices[i]._filter.Init(sr);
-					_voices[i]._triggerNoteOff = 0;
-					_voices[i]._triggerNoteDelay = 0;
-				}
-			}
+			virtual bool Load(RiffFile* pFile);
+			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+			virtual void SaveSpecificChunk(RiffFile* pFile);
+			virtual char* GetName(void) { return _psName; }
+			virtual float GetAudioRange() const { return 32768.0f; }
+			virtual void SetSampleRate(int sr);
 			virtual bool NeedsAuxColumn() { return true; }
 			virtual const char* AuxColumnName(int idx);
 			virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENTS-1; } // last instrument is the preview instrument
-				
-			virtual void Stop(void);
+			virtual bool playsTrack(const int track) const;
+
 			void StopInstrument(int insIdx);
-			virtual void Tick(int channel, PatternEntry* pData);
-			virtual char* GetName(void) { return _psName; }
-			virtual bool Load(RiffFile* pFile);
-			inline virtual bool LoadSpecificChunk(RiffFile* pFile, int version)
-			{
-				DefaultC4(false);
-				UINT size;
-				pFile->Read(&size,sizeof(size));
-				if (size)
-				{
-					/// Version 0
-					int temp;
-					pFile->Read(&temp, sizeof(temp)); // numSubtracks
-					_numVoices=temp;
-					pFile->Read(&temp, sizeof(temp)); // quality
-
-					switch (temp)
-					{
-						case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
-						case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
-						case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
-						case 1:
-						default: _resampler.quality(helpers::dsp::resampler::quality::linear);
-					}
-					if(size > 3*sizeof(UINT))
-					{
-						UINT internalversion;
-						pFile->Read(&internalversion, sizeof(UINT));
-						if (internalversion == 1) {
-							bool defaultC4;
-							pFile->Read(&defaultC4, sizeof(bool)); // correct A4 frequency.
-							DefaultC4(defaultC4);
-						}
-					}
-				}
-				return TRUE;
-			}
-
-			inline virtual void SaveSpecificChunk(RiffFile* pFile) 
-			{
-				UINT temp;
-				UINT size = 3*sizeof(temp) + 1*sizeof(bool);
-				pFile->Write(&size,sizeof(size));
-				temp = _numVoices;
-				pFile->Write(&temp, sizeof(temp)); // numSubtracks
-				switch (_resampler.quality())
-				{
-					case helpers::dsp::resampler::quality::none: temp = 0; break;
-					case helpers::dsp::resampler::quality::spline: temp = 2; break;
-					case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
-					case helpers::dsp::resampler::quality::linear: //fallthrough
-					default: temp = 1;
-				}
-				pFile->Write(&temp, sizeof(temp)); // quality
-
-				UINT internalversion = 1;
-				pFile->Write(&internalversion, sizeof(UINT));
-				bool defaultC4 = isDefaultC4();
-				pFile->Write(&defaultC4, sizeof(bool)); // correct A4
-			}
-
-			void Update(void);
 			void DefaultC4(bool correct) {
 				baseC = correct? 60 : 48;
 			}
@@ -190,14 +122,10 @@ namespace psycle
 			}
 
 		protected:
-			friend CGearTracker;
-
-			static char* _psName;
-			int _numVoices;
-			Voice _voices[SAMPLER_MAX_POLYPHONY];
-			psycle::helpers::dsp::cubic_resampler _resampler;
-			int baseC;
-
+			static inline int alteRand(int x)
+			{
+				return (x*rand())/32768;
+			}
 			void PerformFx(int voice);
 			void VoiceWork(int numsamples, int voice);
 			void NoteOff(int voice);
@@ -205,11 +133,13 @@ namespace psycle
 			int VoiceTick(int channel, PatternEntry* pData);
 			inline void TickEnvelope(int voice);
 			inline void TickFilterEnvelope(int voice);
+
+			static char* _psName;
 			unsigned char lastInstrument[MAX_TRACKS];
-			static inline int alteRand(int x)
-			{
-				return (x*rand())/32768;
-			}
+			int _numVoices;
+			Voice _voices[SAMPLER_MAX_POLYPHONY];
+			psycle::helpers::dsp::cubic_resampler _resampler;
+			int baseC;
 		};
 	}
 }

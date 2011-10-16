@@ -83,6 +83,7 @@ namespace psycle
 			bool _isWorking;
 			/// stops playing (thread safe).
 			void Stop();
+			bool trackPlaying(int track);
 			bool measure_cpu_usage_;
 		private:
 			// stops playing (non thread safe)
@@ -127,6 +128,7 @@ namespace psycle
 		protected:
 			/// Stores which machine played last in each track. this allows you to not specify the machine number everytime in the pattern.
 			int prevMachines[MAX_TRACKS];
+			bool playTrack[MAX_TRACKS];
 			/// Stores which instrument/aux value last used in each track.
 			int prevInstrument[MAX_TRACKS];
 			/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.

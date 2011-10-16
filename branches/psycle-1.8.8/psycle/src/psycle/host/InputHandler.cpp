@@ -13,13 +13,54 @@ namespace psycle
 {
 	namespace host
 	{
+		SPatternUndo::SPatternUndo()
+			:pData(NULL)
+			,dataSize(0)
+		{}
+
+		SPatternUndo::SPatternUndo(const SPatternUndo& other)
+		{
+			Copy(other);
+		}
+		SPatternUndo& SPatternUndo::operator=(const SPatternUndo &other)
+		{
+			if(pData != NULL) delete pData;
+			Copy(other);
+			return *this;
+		}
+		void SPatternUndo::Copy(const SPatternUndo &other)
+		{
+			if(other.dataSize > 0) {
+				pData = new unsigned char[other.dataSize];
+				memmove(pData,other.pData,other.dataSize);
+				dataSize = other.dataSize;
+			}
+			else {
+				pData = NULL;
+				dataSize = 0;
+			}
+			type = other.type;
+			pattern = other.pattern;
+			x = other.x;
+			y = other.y;
+			tracks = other.tracks;
+			lines = other.lines;
+			edittrack = other.edittrack;
+			editline = other.editline;
+			editcol = other.editcol;
+			seqpos = other.seqpos;
+			counter = other.counter;
+		}
+		SPatternUndo::~SPatternUndo()
+		{
+			if(pData) delete pData;
+		}
+
 		InputHandler::InputHandler()
 			:UndoCounter(0)
 			,UndoSaved(0)
 			,UndoMacCounter(0)
 			,UndoMacSaved(0)
-			,pUndoList(NULL)
-			,pRedoList(NULL)
 		{
 			bDoingSelection = false;
 
@@ -1123,21 +1164,20 @@ namespace psycle
 		void InputHandler::AddUndo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
 		{
 			Song& song = Global::song();
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
+			SPatternUndo pNew;
 
 			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
-			pNew->pData = pData;
-			pNew->pattern = pattern;
-			pNew->x = x;
-			pNew->y = y;
+			pNew.dataSize = tracks*lines*EVENT_SIZE;
+			unsigned char* pData = new unsigned char[pNew.dataSize];
+			pNew.pData = pData;
+			pNew.pattern = pattern;
+			pNew.x = x;
+			pNew.y = y;
 			if (tracks+x > song.SONGTRACKS)
 			{
 				tracks = song.SONGTRACKS-x;
 			}
-			pNew->tracks = tracks;
+			pNew.tracks = tracks;
 						
 			const int nl = song.patternLines[pattern];
 			
@@ -1145,12 +1185,12 @@ namespace psycle
 			{
 				lines = nl-y;
 			}
-			pNew->lines = lines;
-			pNew->type = UNDO_PATTERN;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
+			pNew.lines = lines;
+			pNew.type = UNDO_PATTERN;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
 
 			for (int t=x;t<x+tracks;t++)
 			{
@@ -1166,11 +1206,15 @@ namespace psycle
 			{
 				KillRedo();
 				UndoCounter++;
-				pNew->counter = UndoCounter;
+				pNew.counter = UndoCounter;
 			}
 			else
 			{
-				pNew->counter = counter;
+				pNew.counter = counter;
+			}
+			pUndoList.push_back(pNew);
+			if(pUndoList.size() > 100) {
+				pUndoList.pop_front();
 			}
 			pChildView->SetTitleBarText();
 		}
@@ -1178,33 +1222,31 @@ namespace psycle
 		void InputHandler::AddRedo(int pattern, int x, int y, int tracks, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
 		{
 			Song& song = Global::song();
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			unsigned char* pData = new unsigned char[tracks*lines*EVENT_SIZE];
-			pNew->pData = pData;
-			pNew->pattern = pattern;
-			pNew->x = x;
-			pNew->y = y;
+			SPatternUndo pNew;
+			pNew.dataSize = tracks*lines*EVENT_SIZE;
+			unsigned char* pData = new unsigned char[pNew.dataSize];
+			pNew.pData = pData;
+			pNew.pattern = pattern;
+			pNew.x = x;
+			pNew.y = y;
 			if (tracks+x > song.SONGTRACKS)
 			{
 				tracks = song.SONGTRACKS-x;
 			}
-			pNew->tracks = tracks;
+			pNew.tracks = tracks;
 			const int nl = song.patternLines[pattern];
 			if (lines+y > nl)
 			{
 				lines = nl-y;
 			}
-			pNew->tracks = tracks;
-			pNew->lines = lines;
-			pNew->type = UNDO_PATTERN;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
+			pNew.tracks = tracks;
+			pNew.lines = lines;
+			pNew.type = UNDO_PATTERN;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
+			pNew.counter = counter;
 
 			for (int t=x;t<x+tracks;t++)
 			{
@@ -1216,97 +1258,103 @@ namespace psycle
 					pData+=EVENT_SIZE;
 				}
 			}
+			pRedoList.push_back(pNew);
+			if(pRedoList.size() > 100) {
+				pRedoList.pop_front();
+			}
 		}
 
 		void InputHandler::AddUndoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
 		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			pNew->pData = NULL;
-			pNew->pattern = pattern;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_LENGTH;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
+			SPatternUndo pNew;
+			pNew.pattern = pattern;
+			pNew.x = 0;
+			pNew.y = 0;
+			pNew.tracks = 0;
+			pNew.lines = lines;
+			pNew.type = UNDO_LENGTH;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
 
 			if (bWipeRedo)
 			{
 				KillRedo();
 				UndoCounter++;
-				pNew->counter = UndoCounter;
+				pNew.counter = UndoCounter;
 			}
 			else
 			{
-				pNew->counter = counter;
+				pNew.counter = counter;
 			}
+			pUndoList.push_back(pNew);
+			if(pUndoList.size() > 100) {
+				pUndoList.pop_front();
+			}
+
 			pChildView->SetTitleBarText();
 		}
 
 		void InputHandler::AddRedoLength(int pattern, int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
 		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
-			// fill data
-			pNew->pData = NULL;
-			pNew->pattern = pattern;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_LENGTH;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
+			SPatternUndo pNew;
+			pNew.pattern = pattern;
+			pNew.x = 0;
+			pNew.y = 0;
+			pNew.tracks = 0;
+			pNew.lines = lines;
+			pNew.type = UNDO_LENGTH;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
+			pNew.counter = counter;
+			pRedoList.push_back(pNew);
+			if(pRedoList.size() > 100) {
+				pRedoList.pop_front();
+			}
 		}
 
 		void InputHandler::AddUndoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
 		{
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
-			// fill data
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
-			memcpy(pNew->pData, Global::song().playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_SEQUENCE;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
+			SPatternUndo pNew;
+			pNew.dataSize = MAX_SONG_POSITIONS;
+			pNew.pData = new unsigned char[pNew.dataSize];
+			memcpy(pNew.pData, Global::song().playOrder, MAX_SONG_POSITIONS*sizeof(char));
+			pNew.pattern = 0;
+			pNew.x = 0;
+			pNew.y = 0;
+			pNew.tracks = 0;
+			pNew.lines = lines;
+			pNew.type = UNDO_SEQUENCE;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
 
 			if (bWipeRedo)
 			{
 				KillRedo();
 				UndoCounter++;
-				pNew->counter = UndoCounter;
+				pNew.counter = UndoCounter;
 			}
 			else
 			{
-				pNew->counter = counter;
+				pNew.counter = counter;
 			}
+			pUndoList.push_back(pNew);
+			if(pUndoList.size() > 100) {
+				pUndoList.pop_front();
+			}
+
 			pChildView->SetTitleBarText();
 		}
 
 		void InputHandler::AddUndoSong(int edittrack, int editline, int editcol, int seqpos, BOOL bWipeRedo, int counter)
 		{
 			Song& song = Global::song();
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pUndoList;
-			pUndoList = pNew;
+			SPatternUndo pNew;
 			// fill data
 			// count used patterns
 			unsigned short count = 0;
@@ -1317,8 +1365,9 @@ namespace psycle
 					count++;
 				}
 			}
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
-			unsigned char *pWrite=pNew->pData;
+			pNew.dataSize = MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2;
+			pNew.pData = new unsigned char[pNew.dataSize];
+			unsigned char *pWrite=pNew.pData;
 			memcpy(pWrite, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
 			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
 
@@ -1336,26 +1385,30 @@ namespace psycle
 				}
 			}
 
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = song.playLength;
-			pNew->type = UNDO_SONG;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
+			pNew.pattern = 0;
+			pNew.x = 0;
+			pNew.y = 0;
+			pNew.tracks = 0;
+			pNew.lines = song.playLength;
+			pNew.type = UNDO_SONG;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
 
 			if (bWipeRedo)
 			{
 				KillRedo();
 				UndoCounter++;
-				pNew->counter = UndoCounter;
+				pNew.counter = UndoCounter;
 			}
 			else
 			{
-				pNew->counter = counter;
+				pNew.counter = counter;
+			}
+			pUndoList.push_back(pNew);
+			if(pUndoList.size() > 100) {
+				pUndoList.pop_front();
 			}
 			pChildView->SetTitleBarText();
 		}
@@ -1363,9 +1416,7 @@ namespace psycle
 		void InputHandler::AddRedoSong(int edittrack, int editline, int editcol, int seqpos, int counter)
 		{
 			Song& song = Global::song();
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
+			SPatternUndo pNew;
 			// fill data
 			// count used patterns
 			unsigned char count = 0;
@@ -1376,8 +1427,9 @@ namespace psycle
 					count++;
 				}
 			}
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2];
-			unsigned char *pWrite=pNew->pData;
+			pNew.dataSize = MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2;
+			pNew.pData = new unsigned char[pNew.dataSize];
+			unsigned char *pWrite=pNew.pData;
 			memcpy(pWrite, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
 			pWrite+=MAX_SONG_POSITIONS*sizeof(char);
 
@@ -1395,83 +1447,74 @@ namespace psycle
 				}
 			}
 
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = song.playLength;
-			pNew->type = UNDO_SONG;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
+			pNew.pattern = 0;
+			pNew.x = 0;
+			pNew.y = 0;
+			pNew.tracks = 0;
+			pNew.lines = song.playLength;
+			pNew.type = UNDO_SONG;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
+			pNew.counter = counter;
+			pRedoList.push_back(pNew);
+			if(pRedoList.size() > 100) {
+				pRedoList.pop_front();
+			}
 		}
 
 		void InputHandler::AddRedoSequence(int lines, int edittrack, int editline, int editcol, int seqpos, int counter)
 		{
 			Song &song = Global::song();
-			SPatternUndo* pNew = new SPatternUndo;
-			pNew->pPrev = pRedoList;
-			pRedoList = pNew;
+			SPatternUndo pNew;
 			// fill data
-			pNew->pData = new unsigned char[MAX_SONG_POSITIONS];
-			memcpy(pNew->pData, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
-			pNew->pattern = 0;
-			pNew->x = 0;
-			pNew->y = 0;
-			pNew->tracks = 0;
-			pNew->lines = lines;
-			pNew->type = UNDO_SEQUENCE;
-			pNew->edittrack = edittrack;
-			pNew->editline = editline;
-			pNew->editcol = editcol;
-			pNew->seqpos = seqpos;
-			pNew->counter = counter;
+			pNew.dataSize = MAX_SONG_POSITIONS;
+			pNew.pData = new unsigned char[pNew.dataSize];
+			memcpy(pNew.pData, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
+			pNew.pattern = 0;
+			pNew.x = 0;
+			pNew.y = 0;
+			pNew.tracks = 0;
+			pNew.lines = lines;
+			pNew.type = UNDO_SEQUENCE;
+			pNew.edittrack = edittrack;
+			pNew.editline = editline;
+			pNew.editcol = editcol;
+			pNew.seqpos = seqpos;
+			pNew.counter = counter;
+			pRedoList.push_back(pNew);
+			if(pRedoList.size() > 100) {
+				pRedoList.pop_front();
+			}
 		}
 
 		void InputHandler::KillRedo()
 		{
-			while (pRedoList)
-			{
-				SPatternUndo* pTemp = pRedoList->pPrev;
-				delete pRedoList->pData;
-				delete pRedoList;
-				pRedoList = pTemp;
-			}
+			pRedoList.clear();
 		}
 
 		void InputHandler::KillUndo()
 		{
-			while (pUndoList)
-			{
-				SPatternUndo* pTemp = pUndoList->pPrev;
-				delete pUndoList->pData;
-				delete pUndoList;
-				pUndoList = pTemp;
-			}
+			pUndoList.clear();
 			UndoCounter = 0;
 			UndoSaved = 0;
 
 			UndoMacCounter=0;
 			UndoMacSaved=0;
-
-		//	SetTitleBarText();
 		}
+
 		bool InputHandler::IsModified()
 		{
-			if(pUndoList)
-			{
-				if (UndoSaved != pUndoList->counter)
-				{
-					return true;
-				}
-			}
-			if (UndoMacSaved != UndoMacCounter)
+			if(pUndoList.empty() && UndoSaved != 0)
 			{
 				return true;
 			}
-			else if (UndoSaved != 0)
+			if(!pUndoList.empty() && pUndoList.back().counter != UndoSaved)
+			{
+				return true;
+			}
+			if (UndoMacSaved != UndoMacCounter)
 			{
 				return true;
 			}
@@ -1479,9 +1522,9 @@ namespace psycle
 		}
 		void InputHandler::SafePoint()
 		{
-			if (pUndoList)
+			if(!pUndoList.empty())
 			{
-				UndoSaved = pUndoList->counter;
+				UndoSaved = pUndoList.back().counter;
 			}
 			else
 			{
@@ -1492,9 +1535,12 @@ namespace psycle
 		}
 		bool InputHandler::HasRedo(int viewMode)
 		{
-			if(pRedoList) 
-			{
-				switch (pRedoList->type)
+			if(pRedoList.empty()) {
+				return false;
+			}
+			else {
+				SPatternUndo& redo = pRedoList.back();
+				switch (redo.type)
 				{
 				case UNDO_SEQUENCE:
 					return true;
@@ -1510,17 +1556,16 @@ namespace psycle
 					}
 					break;
 				}
-			}
-			else
-			{
-				return false;
 			}
 		}
 		bool InputHandler::HasUndo(int viewMode)
 		{
-			if(pUndoList) 
-			{
-				switch (pUndoList->type)
+			if(pUndoList.empty()) {
+				return false;
+			}
+			else {
+				SPatternUndo& undo = pUndoList.back();
+				switch (undo.type)
 				{
 				case UNDO_SEQUENCE:
 					return true;
@@ -1536,10 +1581,6 @@ namespace psycle
 					}
 					break;
 				}
-			}
-			else
-			{
-				return false;
 			}
 		}
 	}

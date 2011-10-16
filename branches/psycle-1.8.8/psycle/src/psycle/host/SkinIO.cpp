@@ -412,6 +412,9 @@ namespace psycle { namespace host {
 				coords.cTransparency = val;
 				coords.bHasTransparency = true;
 			}
+			else {
+				coords.bHasTransparency = false;
+			}
 			std::fclose(hfile);
 		}
 
@@ -446,6 +449,18 @@ namespace psycle { namespace host {
 				helpers::hexstring_to_integer(it->second, val);
 				coords.cTransparency = val;
 				coords.bHasTransparency = true;
+			}
+			else {
+				coords.bHasTransparency = false;
+			}
+			std::map<std::string,std::string>::iterator it2 = props.find("playing_on_source");
+			if (it2 != props.end()) {
+				SetSkinSource(it2->second, coords.sPlayOn);
+				SetSkinDest(props["playing_on_dest"], coords.dPlayOn);
+				coords.bHasPlaying = true;
+			}
+			else {
+				coords.bHasPlaying = false;
 			}
 			std::fclose(hfile);
 		}

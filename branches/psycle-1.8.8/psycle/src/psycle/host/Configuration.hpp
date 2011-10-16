@@ -2,6 +2,7 @@
 ///\interface psycle::host::Configuration.
 #pragma once
 #include <psycle/host/detail/project.hpp>
+#include <universalis/os/fs.hpp>
 #include "Global.hpp"
 #include <string>
 
@@ -28,6 +29,7 @@ namespace psycle
 			//Members
 
 			std::string const & appPath              () const { return program_executable_dir_; }
+			boost::filesystem::path const & cacheDir () const { return cache_dir_; }
 
 			std::string const & GetPluginDir         () const { return plugin_dir_; }
 			               void SetPluginDir         (std::string const &d) { plugin_dir_ = d; }
@@ -50,11 +52,14 @@ namespace psycle
 
 		public:
 			AudioDriver* _pOutputDriver;
+		protected:
+			void SetCacheDir          (boost::filesystem::path const &cachedir) { cache_dir_ = cachedir; }
 		private:
 			bool prefferNewBlitz;
 			std::string program_executable_dir_;
 			std::string plugin_dir_;
 			std::string plugin_dir_other;
+			boost::filesystem::path cache_dir_;
 			std::string vst32_dir_;
 			std::string vst64_dir_;
 		};

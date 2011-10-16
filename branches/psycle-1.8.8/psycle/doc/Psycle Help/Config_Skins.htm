@@ -172,6 +172,9 @@ source graphic i.e. the top left of the generator/effect graphic becomes
 		<td>(top, left)Position of the generator's name text.</td>
 	</tr>
 	<tr>
+		<td colspan="2">optional entry</td>
+	</tr>
+	<tr>
 		<td><code>"transparency"=0000ff00</code></td>
 		<td>BGR value of the colour to be made transparent, in the format
 		<code>00BBGGRR</code>. Leave this value out if not required - it will
@@ -213,6 +216,13 @@ different.
 		<td><code>"solo_on_source"=114,21,20,11</code></td>
 		<td>Highlighted solo button.</td>
 	</tr>
+	<tr>
+		<td colspan="2">optional entry</td>
+	</tr>
+	<tr>
+		<td><code>"playing_on_source"=0,0,0,0</code></td>
+		<td>Highlighted playing button.</td>
+	</tr>
 </table>
 
 
@@ -245,10 +255,18 @@ background image)</p>
 		<td>Position of the solo button.</td>
 	</tr>
 	<tr>
-		<td><code>"solo_on_dest"=64,5</code></td>
-		<td><code>00BBGGRR</code> values for the transparency. Omit if
-		not required.</td>
+		<td colspan="2">optional entries</td>
 	</tr>
+	<tr>
+		<td><code>"transparency"=0000FF00</code></td>
+		<td><code>00BBGGRR</code> values for the transparency. Beware that only basic colours
+		can be used, like the one in this example.</td>
+	</tr>
+	<tr>
+		<td><code>"playing_on_dest"=0,0</code></td>
+		<td>Highlighted playing button.</td>
+	</tr>
+
 </table>
 <p><b>Note:</b> It is important that the numbers are placed <i><b>next
 to the equals sign!</b></i></p>

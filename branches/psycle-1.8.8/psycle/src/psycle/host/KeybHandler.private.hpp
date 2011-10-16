@@ -1939,104 +1939,93 @@ namespace psycle { namespace host {
 
 		void CChildView::OnEditUndo() 
 		{
-			SPatternUndo * pUndoList = Global::pInputHandler->pUndoList;
-			if (pUndoList)
+			if (!Global::pInputHandler->pUndoList.empty())
 			{
-				switch (pUndoList->type)
+				SPatternUndo& pUndo = Global::pInputHandler->pUndoList.back();
+				switch (pUndo.type)
 				{
 				case UNDO_PATTERN:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddRedo(pUndoList->pattern,pUndoList->x,pUndoList->y,pUndoList->tracks,pUndoList->lines,editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
+						Global::pInputHandler->AddRedo(pUndo.pattern,pUndo.x,pUndo.y,pUndo.tracks,pUndo.lines,editcur.track,editcur.line,editcur.col,pUndo.seqpos,pUndo.counter);
 						// do undo
-						unsigned char* pData = pUndoList->pData;
+						unsigned char* pData = pUndo.pData;
 
-						for (int t=pUndoList->x;t<pUndoList->x+pUndoList->tracks;t++)
+						for (int t=pUndo.x;t<pUndo.x+pUndo.tracks;t++)
 						{
-							for (int l=pUndoList->y;l<pUndoList->y+pUndoList->lines;l++)
+							for (int l=pUndo.y;l<pUndo.y+pUndo.lines;l++)
 							{
-								unsigned char *offset_source=_ptrackline(pUndoList->pattern,t,l);
+								unsigned char *offset_source=_ptrackline(pUndo.pattern,t,l);
 								
 								memcpy(offset_source,pData,EVENT_SIZE);
 								pData+=EVENT_SIZE;
 							}
 						}
 						// set up cursor
-						editcur.track = pUndoList->edittrack;
-						editcur.line = pUndoList->editline;
-						editcur.col = pUndoList->editcol;
-						if (pUndoList->seqpos == editPosition)
+						editcur.track = pUndo.edittrack;
+						editcur.line = pUndo.editline;
+						editcur.col = pUndo.editcol;
+						if (pUndo.seqpos == editPosition)
 						{
 							// display changes
-							NewPatternDraw(pUndoList->x,pUndoList->x+pUndoList->tracks,pUndoList->y,pUndoList->y+pUndoList->lines);
+							NewPatternDraw(pUndo.x,pUndo.x+pUndo.tracks,pUndo.y,pUndo.y+pUndo.lines);
 							Repaint(draw_modes::data);
 						}
 						else
 						{
-							editPosition = pUndoList->seqpos;
+							editPosition = pUndo.seqpos;
 							pParentMain->UpdatePlayOrder(true);
 							Repaint(draw_modes::pattern);
 							
 						}
 						// delete undo from list
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete pUndoList->pData;
-						delete pUndoList;
-						pUndoList = pTemp;
+						Global::pInputHandler->pUndoList.pop_back();
 					}
 					break;
 				case UNDO_LENGTH:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddRedoLength(pUndoList->pattern,_pSong->patternLines[pUndoList->pattern],editcur.track,editcur.line,editcur.col,pUndoList->seqpos,pUndoList->counter);
+						Global::pInputHandler->AddRedoLength(pUndo.pattern,_pSong->patternLines[pUndo.pattern],editcur.track,editcur.line,editcur.col,pUndo.seqpos,pUndo.counter);
 						// do undo
-						_pSong->patternLines[pUndoList->pattern]=pUndoList->lines;
+						_pSong->patternLines[pUndo.pattern]=pUndo.lines;
 						// set up cursor
-						editcur.track = pUndoList->edittrack;
-						editcur.line = pUndoList->editline;
-						editcur.col = pUndoList->editcol;
-						if (pUndoList->seqpos != editPosition)
+						editcur.track = pUndo.edittrack;
+						editcur.line = pUndo.editline;
+						editcur.col = pUndo.editcol;
+						if (pUndo.seqpos != editPosition)
 						{
-							editPosition = pUndoList->seqpos;
+							editPosition = pUndo.seqpos;
 							pParentMain->UpdatePlayOrder(true);
 						}
 						// display changes
 						Repaint(draw_modes::pattern);
 						
 						// delete undo from list
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete pUndoList->pData;
-						delete pUndoList;
-						pUndoList = pTemp;
+						Global::pInputHandler->pUndoList.pop_back();
 						break;
 					}
 				case UNDO_SEQUENCE:
-					Global::pInputHandler->AddRedoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
+					Global::pInputHandler->AddRedoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndo.counter);
 					// do undo
-					memcpy(_pSong->playOrder, pUndoList->pData, MAX_SONG_POSITIONS*sizeof(char));
-					_pSong->playLength = pUndoList->lines;
+					memcpy(_pSong->playOrder, pUndo.pData, MAX_SONG_POSITIONS*sizeof(char));
+					_pSong->playLength = pUndo.lines;
 					// set up cursor
-					editcur.track = pUndoList->edittrack;
-					editcur.line = pUndoList->editline;
-					editcur.col = pUndoList->editcol;
-					editPosition = pUndoList->seqpos;
+					editcur.track = pUndo.edittrack;
+					editcur.line = pUndo.editline;
+					editcur.col = pUndo.editcol;
+					editPosition = pUndo.seqpos;
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
 					// delete undo from list
-					{
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete pUndoList->pData;
-						delete pUndoList;
-						pUndoList = pTemp;
-					}
+					Global::pInputHandler->pUndoList.pop_back();
 					break;
 				case UNDO_SONG:
-					Global::pInputHandler->AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndoList->counter);
+					Global::pInputHandler->AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndo.counter);
 					// do undo
-					unsigned char * pData = pUndoList->pData;
+					unsigned char * pData = pUndo.pData;
 					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
 					pData += MAX_SONG_POSITIONS;
 					unsigned char count = *pData;
@@ -2050,28 +2039,22 @@ namespace psycle { namespace host {
 						memcpy(pWrite,pData,MULTIPLY2);
 						pData+= MULTIPLY2;
 					}
-					_pSong->playLength = pUndoList->lines;
+					_pSong->playLength = pUndo.lines;
 					// set up cursor
-					editcur.track = pUndoList->edittrack;
-					editcur.line = pUndoList->editline;
-					editcur.col = pUndoList->editcol;
-					editPosition = pUndoList->seqpos;
+					editcur.track = pUndo.edittrack;
+					editcur.line = pUndo.editline;
+					editcur.col = pUndo.editcol;
+					editPosition = pUndo.seqpos;
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
 					// delete undo from list
-					{
-						SPatternUndo* pTemp = pUndoList->pPrev;
-						delete pUndoList->pData;
-						delete pUndoList;
-						pUndoList = pTemp;
-					}
+					Global::pInputHandler->pUndoList.pop_back();
 					break;
 
 				}
-				Global::pInputHandler->pUndoList  = pUndoList;
 				SetTitleBarText();
 			}
 		}
@@ -2079,23 +2062,23 @@ namespace psycle { namespace host {
 
 		void CChildView::OnEditRedo() 
 		{
-			SPatternUndo * pRedoList = Global::pInputHandler->pRedoList;
-			if (pRedoList)
+			if (!Global::pInputHandler->pRedoList.empty())
 			{
-				switch (pRedoList->type)
+				SPatternUndo& pRedo = Global::pInputHandler->pRedoList.back();
+				switch (pRedo.type)
 				{
 				case UNDO_PATTERN:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddUndo(pRedoList->pattern,pRedoList->x,pRedoList->y,pRedoList->tracks,pRedoList->lines,editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
+						Global::pInputHandler->AddUndo(pRedo.pattern,pRedo.x,pRedo.y,pRedo.tracks,pRedo.lines,editcur.track,editcur.line,editcur.col,pRedo.seqpos,false,pRedo.counter);
 						// do redo
-						unsigned char* pData = pRedoList->pData;
+						unsigned char* pData = pRedo.pData;
 
-						for (int t=pRedoList->x;t<pRedoList->x+pRedoList->tracks;t++)
+						for (int t=pRedo.x;t<pRedo.x+pRedo.tracks;t++)
 						{
-							for (int l=pRedoList->y;l<pRedoList->y+pRedoList->lines;l++)
+							for (int l=pRedo.y;l<pRedo.y+pRedo.lines;l++)
 							{
-								unsigned char *offset_source=_ptrackline(pRedoList->pattern,t,l);
+								unsigned char *offset_source=_ptrackline(pRedo.pattern,t,l);
 
 								
 								memcpy(offset_source,pData,EVENT_SIZE);
@@ -2103,81 +2086,69 @@ namespace psycle { namespace host {
 							}
 						}
 						// set up cursor
-						editcur.track = pRedoList->edittrack;
-						editcur.line = pRedoList->editline;
-						editcur.col = pRedoList->editcol;
-						if (pRedoList->seqpos == editPosition)
+						editcur.track = pRedo.edittrack;
+						editcur.line = pRedo.editline;
+						editcur.col = pRedo.editcol;
+						if (pRedo.seqpos == editPosition)
 						{
 							// display changes
-							NewPatternDraw(pRedoList->x,pRedoList->x+pRedoList->tracks,pRedoList->y,pRedoList->y+pRedoList->lines);
+							NewPatternDraw(pRedo.x,pRedo.x+pRedo.tracks,pRedo.y,pRedo.y+pRedo.lines);
 							Repaint(draw_modes::data);
 						}
 						else
 						{
-							editPosition = pRedoList->seqpos;
+							editPosition = pRedo.seqpos;
 							pParentMain->UpdatePlayOrder(true);
 							Repaint(draw_modes::pattern);
 							
 						}
 						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete pRedoList->pData;
-						delete pRedoList;
-						pRedoList = pTemp;
+						Global::pInputHandler->pRedoList.pop_back();
 					}
 					break;
 				case UNDO_LENGTH:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddUndoLength(pRedoList->pattern,_pSong->patternLines[pRedoList->pattern],editcur.track,editcur.line,editcur.col,pRedoList->seqpos,false,pRedoList->counter);
+						Global::pInputHandler->AddUndoLength(pRedo.pattern,_pSong->patternLines[pRedo.pattern],editcur.track,editcur.line,editcur.col,pRedo.seqpos,false,pRedo.counter);
 						// do undo
-						_pSong->patternLines[pRedoList->pattern]=pRedoList->lines;
+						_pSong->patternLines[pRedo.pattern]=pRedo.lines;
 						// set up cursor
-						editcur.track = pRedoList->edittrack;
-						editcur.line = pRedoList->editline;
-						editcur.col = pRedoList->editcol;
-						if (pRedoList->seqpos != editPosition)
+						editcur.track = pRedo.edittrack;
+						editcur.line = pRedo.editline;
+						editcur.col = pRedo.editcol;
+						if (pRedo.seqpos != editPosition)
 						{
-							editPosition = pRedoList->seqpos;
+							editPosition = pRedo.seqpos;
 							pParentMain->UpdatePlayOrder(true);
 						}
 						// display changes
 						Repaint(draw_modes::pattern);
 						
 						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete pRedoList->pData;
-						delete pRedoList;
-						pRedoList = pTemp;
+						Global::pInputHandler->pRedoList.pop_back();
 						break;
 					}
 				case UNDO_SEQUENCE:
-					Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
+					Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedo.counter);
 					// do undo
-					memcpy(_pSong->playOrder, pRedoList->pData, MAX_SONG_POSITIONS*sizeof(char));
-					_pSong->playLength = pRedoList->lines;
+					memcpy(_pSong->playOrder, pRedo.pData, MAX_SONG_POSITIONS*sizeof(char));
+					_pSong->playLength = pRedo.lines;
 					// set up cursor
-					editcur.track = pRedoList->edittrack;
-					editcur.line = pRedoList->editline;
-					editcur.col = pRedoList->editcol;
-					editPosition = pRedoList->seqpos;
+					editcur.track = pRedo.edittrack;
+					editcur.line = pRedo.editline;
+					editcur.col = pRedo.editcol;
+					editPosition = pRedo.seqpos;
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
-					{
-						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete pRedoList->pData;
-						delete pRedoList;
-						pRedoList = pTemp;
-					}
+					Global::pInputHandler->pRedoList.pop_back();
 					break;
 				case UNDO_SONG:
-					Global::pInputHandler->AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedoList->counter);
+					Global::pInputHandler->AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedo.counter);
 					// do undo
-					unsigned char * pData = pRedoList->pData;
+					unsigned char * pData = pRedo.pData;
 					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
 					pData += MAX_SONG_POSITIONS;
 					unsigned char count = *pData;
@@ -2193,25 +2164,18 @@ namespace psycle { namespace host {
 					}
 
 					// set up cursor
-					editcur.track = pRedoList->edittrack;
-					editcur.line = pRedoList->editline;
-					editcur.col = pRedoList->editcol;
-					editPosition = pRedoList->seqpos;
+					editcur.track = pRedo.edittrack;
+					editcur.line = pRedo.editline;
+					editcur.col = pRedo.editcol;
+					editPosition = pRedo.seqpos;
 					pParentMain->UpdatePlayOrder(true);
 					pParentMain->UpdateSequencer();
 					// display changes
 					Repaint(draw_modes::pattern);
 					
-					{
-						// delete redo from list
-						SPatternUndo* pTemp = pRedoList->pPrev;
-						delete pRedoList->pData;
-						delete pRedoList;
-						pRedoList = pTemp;
-					}
+					Global::pInputHandler->pRedoList.pop_back();
 					break;
 				}
-				Global::pInputHandler->pRedoList = pRedoList;
 				SetTitleBarText();
 			}
 		}

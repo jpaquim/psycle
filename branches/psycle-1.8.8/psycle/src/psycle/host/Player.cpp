@@ -48,6 +48,7 @@ namespace psycle
 			for(int i=0;i<MAX_TRACKS;i++) {
 				prevMachines[i]=255;
 				prevInstrument[i]=255;
+				playTrack[i]=false;
 			}
 			universalis::os::aligned_memory_alloc(16, _pBuffer, MAX_SAMPLES_WORKFN);
 			start_threads();
@@ -195,6 +196,9 @@ void Player::start_threads() {
 					Global::_pSong->_pMachine[i]->Stop();
 					for(int c = 0; c < MAX_TRACKS; c++) Global::_pSong->_pMachine[i]->TriggerDelay[c]._cmd = 0;
 				}
+			}
+			for(int i=0;i<MAX_TRACKS;i++) {
+				playTrack[i]=false;
 			}
 			SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
 			SampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
@@ -483,7 +487,7 @@ void Player::clear_plan() {
 				if(( !pSong->_trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == 255)) // Is it not muted and is a note or command?
 				{
 					int mac = pEntry->_mach;
-					if(mac != 255) prevMachines[track] = mac;
+					if(mac < MAX_MACHINES) prevMachines[track] = mac;
 					else mac = prevMachines[track];
 					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
 					{
@@ -491,15 +495,21 @@ void Player::clear_plan() {
 						if(pEntry->_inst != 255) prevInstrument[track] = pEntry->_inst;
 						else ins = prevInstrument[track];
 
-						if(mac < MAX_MACHINES) //looks like a valid machine index?
+						if(mac < MAX_MACHINES && pSong->_pMachine[mac] != NULL) //looks like a valid machine index?
 						{
-							// make a copy of the pattern entry, because we're going to modify it.
-							PatternEntry entry(*pEntry);
-							entry._inst = ins;
-
 							Machine *pMachine = pSong->_pMachine[mac];
-							if(pMachine && !(pMachine->_mute)) // Does this machine really exist and is not muted?
+							if(pEntry->_note == notecommands::release
+								 && pMachine->_type != MACH_SAMPLER && pMachine->_type != MACH_XMSAMPLER) {
+								playTrack[track]=false;
+							}
+							else {
+								playTrack[track]=true;
+							}
+							if(!pMachine->_mute) // Does this machine really exist and is not muted?
 							{
+								// make a copy of the pattern entry, because we're going to modify it.
+								PatternEntry entry(*pEntry);
+								entry._inst = ins;
 								if(entry._cmd == PatternCmd::NOTE_DELAY)
 								{
 									// delay
@@ -620,7 +630,7 @@ void Player::thread_function(std::size_t thread_number) {
 
 		// set thread priority
 		try {
-			t.priority(thread::priorities::highest);
+			t.become_realtime();
 			// Ask MMCSS to temporarily boost the thread priority
 			// to reduce glitches while the low-latency stream plays.
 			if(Is_Vista_or_Later()) 
@@ -630,7 +640,7 @@ void Player::thread_function(std::size_t thread_number) {
 			}
 		} catch(operation_not_permitted e) {
 			if(loggers::warning()) {
-				std::ostringstream s; s << "no permission to set thread priority: " << e.what();
+				std::ostringstream s; s << "no permission to set thread scheduling policy and priority to realtime: " << e.what();
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 			}
 		}
@@ -779,6 +789,10 @@ void Player::stop_threads() {
 	threads_.clear();
 	clear_plan();
 }
+		bool Player::trackPlaying(int track)
+		{
+			return playTrack[track];
+		}
 
 		float * Player::Work(void* context, int numSamples)
 		{
@@ -864,6 +878,17 @@ void Player::stop_threads() {
 					}
 					sampleCount += amount;
 
+					for(int track=0; track < pSong->SONGTRACKS; track++) {
+						if (playTrack[track] && amount > 128) {
+							if(prevMachines[track] < MAX_MACHINES && pSong->_pMachine[prevMachines[track]]) {
+								Machine& mac = *pSong->_pMachine[prevMachines[track]];
+								playTrack[track] = mac.playsTrack(track);
+							}
+							else {
+								playTrack[track] = false;
+							}
+						}
+					}
 					if(_recording)
 					{
 						float* pL(pSong->_pMachine[MASTER_INDEX]->_pSamplesL);

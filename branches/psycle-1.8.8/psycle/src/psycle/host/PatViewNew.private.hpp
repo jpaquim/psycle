@@ -338,6 +338,15 @@ namespace psycle { namespace host {
 							InvalidateRect(rect,false);
 						}
 					}
+					// header
+					if (patView->PatHeaderCoords.bHasPlaying) {
+						rect.top=0; 
+						rect.left=XOFFSET;
+						rect.bottom=YOFFSET-1;	
+						rect.right=XOFFSET+maxt*ROWWIDTH;
+						updatePar |= DRAW_TRHEADER;
+						InvalidateRect(rect,false);
+					}
 				}
 				break;
 			case draw_modes::playback_change: 
@@ -980,6 +989,17 @@ namespace psycle { namespace host {
 								&patView->patternheadermask,
 								PatHeaderCoords->sSoloOn.x, 
 								PatHeaderCoords->sSoloOn.y);
+						if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
+							TransparentBlt(devc,
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
+								1+PatHeaderCoords->dPlayOn.y, 
+								PatHeaderCoords->sPlayOn.width, 
+								PatHeaderCoords->sPlayOn.height, 
+								&memDC, 
+								&patView->patternheadermask,
+								PatHeaderCoords->sPlayOn.x, 
+								PatHeaderCoords->sPlayOn.y);
+
 						xOffset += ROWWIDTH;
 					}
 				}
@@ -1059,6 +1079,18 @@ namespace psycle { namespace host {
 								PatHeaderCoords->sSoloOn.x, 
 								PatHeaderCoords->sSoloOn.y, 
 								SRCCOPY);
+
+						if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
+							devc->BitBlt(
+								xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
+								1+PatHeaderCoords->dPlayOn.y, 
+								PatHeaderCoords->sPlayOn.width, 
+								PatHeaderCoords->sPlayOn.height, 
+								&memDC, 
+								PatHeaderCoords->sPlayOn.x, 
+								PatHeaderCoords->sPlayOn.y, 
+								SRCCOPY);
+				
 						xOffset += ROWWIDTH;
 					}
 				}
@@ -1145,558 +1177,6 @@ namespace psycle { namespace host {
 			{
 				if (scrollT && scrollL)
 				{
-					/*
-					// there is a flaw in this that makes background rect not draw quite right
-					// so for now x+y does a redraw all - i don't think anyone will complain
-					// as x+y scrolling only happens when you have that stupid center cursor on
-					// or when selecting
-					// scroll x AND y
-					CRgn rgn;
-					if (XOFFSET!=1)
-					{
-						const RECT linR = {0, YOFFSET, XOFFSET, CH};
-						devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect);
-					}
-					const RECT patR = {XOFFSET,YOFFSET , CW, CH};
-					devc->ScrollDC(scrollT*ROWWIDTH,scrollL*ROWHEIGHT,&patR,&patR,&rgn,&rect);
-					if (updatePar & DRAW_TRHEADER)
-					{
-						if (scrollT > 0)
-						{	
-							rect.top = YOFFSET;
-							rect.bottom = CH;
-							int xOffset = XOFFSET-1;
-							for (int i = 0; i < scrollT; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							xOffset = XOFFSET-1+((VISTRACKS-scrollT)*ROWWIDTH);
-							for (i = VISTRACKS-scrollT; i < VISTRACKS+1; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							DrawPatternData(devc,0, scrollT, 0, VISLINES+1);
-							DrawPatternData(devc, VISTRACKS-scrollT-1, VISTRACKS+1, 0,VISLINES+1);
-							if (scrollL > 0)
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL++\n");
-		#endif
-								DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1, 0,scrollL);
-							}
-							else 
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL+-\n");
-		#endif
-								DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1,VISLINES+scrollL,VISLINES+1);
-							}
-						}
-						else 
-						{	
-							rect.top = YOFFSET;
-							rect.bottom = CH;
-							int xOffset = XOFFSET-1;
-							for (int i = 0; i < 1-scrollT; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
-							for (i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
-							DrawPatternData(devc,0, 1-scrollT, 0, VISLINES+1);
-							if (scrollL > 0)
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL-+\n");
-		#endif
-								DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT, 0,scrollL);
-							}
-							else
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL--\n");
-		#endif
-								DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
-							}
-						}
-					}
-					else
-					{
-						// scroll header too
-						const RECT trkR = {XOFFSET, 0, CW, YOFFSET-1};
-						devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect);
-						if (scrollT > 0)
-						{	
-							rect.top = 0;
-							rect.bottom = CH;
-							int xOffset = XOFFSET-1;
-							for (int i = 0; i < scrollT; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							rect.top = YOFFSET;
-							xOffset = XOFFSET-1+((VISTRACKS-scrollT)*ROWWIDTH);
-							for (i = VISTRACKS-scrollT; i < VISTRACKS+1; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							DrawPatternData(devc,0, scrollT, 0, VISLINES+1);
-							DrawPatternData(devc, VISTRACKS-scrollT-1, VISTRACKS+1, 0,VISLINES+1);
-							if (scrollL > 0)
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL++H\n");
-		#endif
-								DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1, 0,scrollL);
-							}
-							else 
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL+-H\n");
-		#endif
-								DrawPatternData(devc, scrollT, VISTRACKS-scrollT-1,VISLINES+scrollL,VISLINES+1);
-							}
-
-							CDC memDC;
-							CBitmap *oldbmp;
-							memDC.CreateCompatibleDC(devc);
-							oldbmp = memDC.SelectObject(&patternheader);
-							xOffset = XOFFSET-1;
-
-							if (PatHeaderCoords->bHasTransparency)
-							{
-								for(int i=tOff;i<tOff+scrollT;i++)
-								{
-									const int trackx0 = i/10;
-									const int track0x = i%10;
-
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT,
-										1,
-										PatHeaderCoords->sBackground.width, 
-										PatHeaderCoords->sBackground.height,
-										&memDC, 
-										&patternheadermask,
-										PatHeaderCoords->sBackground.x,
-										PatHeaderCoords->sBackground.y);
-									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-										1+PatHeaderCoords->dDigitX0.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										&patternheadermask,
-										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y);
-									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-										1+PatHeaderCoords->dDigit0X.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										&patternheadermask,
-										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y);
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-											1+PatHeaderCoords->dMuteOn.y, 
-											PatHeaderCoords->sMuteOn.width, 
-											PatHeaderCoords->sMuteOn.height, 
-											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords->sMuteOn.x, 
-											PatHeaderCoords->sMuteOn.y);
-
-									if (Global::_pSong->_trackArmed[i])
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-											1+PatHeaderCoords->dRecordOn.y, 
-											PatHeaderCoords->sRecordOn.width, 
-											PatHeaderCoords->sRecordOn.height, 
-											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords->sRecordOn.x, 
-											PatHeaderCoords->sRecordOn.y);
-
-									if (Global::_pSong->_trackSoloed == i )
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-											1+PatHeaderCoords->dSoloOn.y, 
-											PatHeaderCoords->sSoloOn.width, 
-											PatHeaderCoords->sSoloOn.height, 
-											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords->sSoloOn.x, 
-											PatHeaderCoords->sSoloOn.y);
-									xOffset += ROWWIDTH;
-								}
-							}
-							else
-							{
-								for(int i=tOff;i<tOff+scrollT;i++)
-								{
-									const int trackx0 = i/10;
-									const int track0x = i%10;
-
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									devc->BitBlt(
-										xOffset+1+HEADER_INDENT,
-										1,
-										PatHeaderCoords->sBackground.width, 
-										PatHeaderCoords->sBackground.height,
-										&memDC, 
-										PatHeaderCoords->sBackground.x,
-										PatHeaderCoords->sBackground.y, 
-										SRCCOPY);
-									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-										1+PatHeaderCoords->dDigitX0.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y, 
-										SRCCOPY);
-									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-										1+PatHeaderCoords->dDigit0X.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y, 
-										SRCCOPY);
-
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-											1+PatHeaderCoords->dMuteOn.y, 
-											PatHeaderCoords->sMuteOn.width, 
-											PatHeaderCoords->sMuteOn.height, 
-											&memDC, 
-											PatHeaderCoords->sMuteOn.x, 
-											PatHeaderCoords->sMuteOn.y, 
-											SRCCOPY);
-
-									if (Global::_pSong->_trackArmed[i])
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-											1+PatHeaderCoords->dRecordOn.y, 
-											PatHeaderCoords->sRecordOn.width, 
-											PatHeaderCoords->sRecordOn.height, 
-											&memDC, 
-											PatHeaderCoords->sRecordOn.x, 
-											PatHeaderCoords->sRecordOn.y, 
-											SRCCOPY);
-
-									if (Global::_pSong->_trackSoloed == i )
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-											1+PatHeaderCoords->dSoloOn.y, 
-											PatHeaderCoords->sSoloOn.width, 
-											PatHeaderCoords->sSoloOn.height, 
-											&memDC, 
-											PatHeaderCoords->sSoloOn.x, 
-											PatHeaderCoords->sSoloOn.y, 
-											SRCCOPY);
-									xOffset += ROWWIDTH;
-								}
-							}
-							memDC.SelectObject(oldbmp);
-							memDC.DeleteDC();
-						}
-						else
-						{	
-							rect.top = YOFFSET;
-							rect.bottom = CH;
-							int xOffset = XOFFSET-1;
-							for (int i = 0; i < 1-scrollT; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							rect.top = 0;
-							xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
-							for (i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
-							{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-								devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-								rect.left++;
-								rect.right+= ROWWIDTH-1;
-								devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-								xOffset += ROWWIDTH;
-							}
-							DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
-							DrawPatternData(devc,0, 1-scrollT, 0, VISLINES+1);
-							if (scrollL > 0)
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL-+H\n");
-		#endif
-								DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT, 0,scrollL);
-							}
-							else
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HVSCROLL--H\n");
-		#endif
-								DrawPatternData(devc, 1-scrollT, VISTRACKS+scrollT,VISLINES+scrollL,VISLINES+1);
-							}
-
-							CDC memDC;
-							CBitmap *oldbmp;
-							memDC.CreateCompatibleDC(devc);
-							oldbmp = memDC.SelectObject(&patternheader);
-							xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
-
-							if (PatHeaderCoords->bHasTransparency)
-							{
-								for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
-								{
-									const int trackx0 = i/10;
-									const int track0x = i%10;
-
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT,
-										1,
-										PatHeaderCoords->sBackground.width, 
-										PatHeaderCoords->sBackground.height,
-										&memDC, 
-										&patternheadermask,
-										PatHeaderCoords->sBackground.x,
-										PatHeaderCoords->sBackground.y);
-									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-										1+PatHeaderCoords->dDigitX0.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										&patternheadermask,
-										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y);
-									TransparentBlt(devc,
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-										1+PatHeaderCoords->dDigit0X.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										&patternheadermask,
-										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y);
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-											1+PatHeaderCoords->dMuteOn.y, 
-											PatHeaderCoords->sMuteOn.width, 
-											PatHeaderCoords->sMuteOn.height, 
-											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords->sMuteOn.x, 
-											PatHeaderCoords->sMuteOn.y);
-
-									if (Global::_pSong->_trackArmed[i])
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-											1+PatHeaderCoords->dRecordOn.y, 
-											PatHeaderCoords->sRecordOn.width, 
-											PatHeaderCoords->sRecordOn.height, 
-											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords->sRecordOn.x, 
-											PatHeaderCoords->sRecordOn.y);
-
-									if (Global::_pSong->_trackSoloed == i )
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-											1+PatHeaderCoords->dSoloOn.y, 
-											PatHeaderCoords->sSoloOn.width, 
-											PatHeaderCoords->sSoloOn.height, 
-											&memDC, 
-											&patternheadermask,
-											PatHeaderCoords->sSoloOn.x, 
-											PatHeaderCoords->sSoloOn.y);
-									xOffset += ROWWIDTH;
-								}
-							}
-							else
-							{
-								for(i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
-								{
-									const int trackx0 = i/10;
-									const int track0x = i%10;
-
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									devc->BitBlt(
-										xOffset+1+HEADER_INDENT,
-										1,
-										PatHeaderCoords->sBackground.width, 
-										PatHeaderCoords->sBackground.height,
-										&memDC, 
-										PatHeaderCoords->sBackground.x,
-										PatHeaderCoords->sBackground.y, 
-										SRCCOPY);
-									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-										1+PatHeaderCoords->dDigitX0.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y, 
-										SRCCOPY);
-									devc->BitBlt(
-										xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-										1+PatHeaderCoords->dDigit0X.y, 
-										PatHeaderCoords->sNumber0.width,	 
-										PatHeaderCoords->sNumber0.height, 
-										&memDC, 
-										PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-										PatHeaderCoords->sNumber0.y, 
-										SRCCOPY);
-
-									// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-									if (Global::_pSong->_trackMuted[i])
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-											1+PatHeaderCoords->dMuteOn.y, 
-											PatHeaderCoords->sMuteOn.width, 
-											PatHeaderCoords->sMuteOn.height, 
-											&memDC, 
-											PatHeaderCoords->sMuteOn.x, 
-											PatHeaderCoords->sMuteOn.y, 
-											SRCCOPY);
-
-									if (Global::_pSong->_trackArmed[i])
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-											1+PatHeaderCoords->dRecordOn.y, 
-											PatHeaderCoords->sRecordOn.width, 
-											PatHeaderCoords->sRecordOn.height, 
-											&memDC, 
-											PatHeaderCoords->sRecordOn.x, 
-											PatHeaderCoords->sRecordOn.y, 
-											SRCCOPY);
-
-									if (Global::_pSong->_trackSoloed == i )
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-											1+PatHeaderCoords->dSoloOn.y, 
-											PatHeaderCoords->sSoloOn.width, 
-											PatHeaderCoords->sSoloOn.height, 
-											&memDC, 
-											PatHeaderCoords->sSoloOn.x, 
-											PatHeaderCoords->sSoloOn.y, 
-											SRCCOPY);
-									xOffset += ROWWIDTH;
-								}
-							}
-							memDC.SelectObject(oldbmp);
-							memDC.DeleteDC();
-						}
-					}
-					// Fill Bottom Space with Background colour if needed
-					if (maxl < VISLINES+1)
-					{
-		#ifdef _DEBUG_PATVIEW
-						TRACE("DRAW_BOTTOM\n");
-		#endif
-						if (XOFFSET!=1)
-						{
-							CRect rect;
-							rect.left=0; 
-							rect.right=XOFFSET; 
-							rect.top=YOFFSET+(maxl*ROWHEIGHT); 
-							rect.bottom=CH;
-							devc->FillSolidRect(&rect, pvc_separator[0]);
-						}
-
-						int xOffset = XOFFSET;
-
-						CRect rect;
-						rect.top=YOFFSET+(maxl*ROWHEIGHT); 
-						rect.bottom=CH;
-						for(int i=tOff;i<tOff+maxt;i++)
-						{
-							rect.left=xOffset; 
-							rect.right=xOffset+ROWWIDTH; 
-							devc->FillSolidRect(&rect, pvc_separator[i+1]);
-							xOffset += ROWWIDTH;
-						}
-					}
-					// Fill Right Space with Background colour if needed
-					if (maxt < VISTRACKS+1)
-					{
-		#ifdef _DEBUG_PATVIEW
-						TRACE("DRAW_RIGHT\n");
-		#endif
-						CRect rect;
-						rect.top=0; 
-						rect.bottom=CH;  
-						rect.right=CW;
-						rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-						devc->FillSolidRect(&rect,patView->separator2);
-					}
-					*/
 				}
 				else // not scrollT + scrollL
 				{
@@ -1871,6 +1351,18 @@ namespace psycle { namespace host {
 												&patView->patternheadermask,
 												PatHeaderCoords->sSoloOn.x, 
 												PatHeaderCoords->sSoloOn.y);
+
+										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
+											TransparentBlt(devc,
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
+												1+PatHeaderCoords->dPlayOn.y, 
+												PatHeaderCoords->sPlayOn.width, 
+												PatHeaderCoords->sPlayOn.height, 
+												&memDC, 
+												&patView->patternheadermask,
+												PatHeaderCoords->sPlayOn.x, 
+												PatHeaderCoords->sPlayOn.y);
+
 										xOffset += ROWWIDTH;
 									}
 								}
@@ -1943,6 +1435,18 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sSoloOn.x, 
 												PatHeaderCoords->sSoloOn.y, 
 												SRCCOPY);
+
+										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
+											devc->BitBlt(
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
+												1+PatHeaderCoords->dPlayOn.y, 
+												PatHeaderCoords->sPlayOn.width, 
+												PatHeaderCoords->sPlayOn.height, 
+												&memDC, 
+												PatHeaderCoords->sPlayOn.x, 
+												PatHeaderCoords->sPlayOn.y, 
+												SRCCOPY);
+
 										xOffset += ROWWIDTH;
 									}
 								}
@@ -2062,6 +1566,18 @@ namespace psycle { namespace host {
 												&patView->patternheadermask,
 												PatHeaderCoords->sSoloOn.x, 
 												PatHeaderCoords->sSoloOn.y);
+
+										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
+											TransparentBlt(devc,
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
+												1+PatHeaderCoords->dPlayOn.y, 
+												PatHeaderCoords->sPlayOn.width, 
+												PatHeaderCoords->sPlayOn.height, 
+												&memDC, 
+												&patView->patternheadermask,
+												PatHeaderCoords->sPlayOn.x, 
+												PatHeaderCoords->sPlayOn.y);
+
 										xOffset += ROWWIDTH;
 									}
 								}
@@ -2134,6 +1650,18 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sSoloOn.x, 
 												PatHeaderCoords->sSoloOn.y, 
 												SRCCOPY);
+
+										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
+											devc->BitBlt(
+												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
+												1+PatHeaderCoords->dPlayOn.y, 
+												PatHeaderCoords->sPlayOn.width, 
+												PatHeaderCoords->sPlayOn.height, 
+												&memDC, 
+												PatHeaderCoords->sPlayOn.x, 
+												PatHeaderCoords->sPlayOn.y, 
+												SRCCOPY);
+
 										xOffset += ROWWIDTH;
 									}
 								}
@@ -2436,25 +1964,25 @@ namespace psycle { namespace host {
 							OutData4(devc,xOffset+COLX[1],yOffset,(*(patOffset+1))>>4,*(patOffset+1) == 255);
 							break;
 						case 2:
-							OutData4(devc,xOffset+COLX[2],yOffset,*(patOffset+1),*(patOffset+1) == 255);
+							OutData4(devc,xOffset+COLX[2],yOffset,(*(patOffset+1))&0x0F,*(patOffset+1) == 255);
 							break;
 						case 3:
 							OutData4(devc,xOffset+COLX[3],yOffset,(*(patOffset+2))>>4,*(patOffset+2) == 255);
 							break;
 						case 4:
-							OutData4(devc,xOffset+COLX[4],yOffset,*(patOffset+2),*(patOffset+2) == 255);
+							OutData4(devc,xOffset+COLX[4],yOffset,(*(patOffset+2))&0x0F,*(patOffset+2) == 255);
 							break;
 						case 5:
 							OutData4(devc,xOffset+COLX[5],yOffset,(*(patOffset+3))>>4,trflag);
 							break;
 						case 6:
-							OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset+3)),trflag);
+							OutData4(devc,xOffset+COLX[6],yOffset,(*(patOffset+3))&0x0F,trflag);
 							break;
 						case 7:
 							OutData4(devc,xOffset+COLX[7],yOffset,(*(patOffset+4))>>4,trflag);
 							break;
 						case 8:
-							OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset+4)),trflag);
+							OutData4(devc,xOffset+COLX[8],yOffset,(*(patOffset+4))&0x0F,trflag);
 							break;
 						}
 						patOffset+=5;

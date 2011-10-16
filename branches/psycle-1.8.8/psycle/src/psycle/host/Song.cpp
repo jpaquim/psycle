@@ -1901,6 +1901,7 @@ namespace psycle
 							pMac[i] = pSampler = new Sampler(i);
 							pMac[i]->Init();
 							pMac[i]->Load(pFile);
+							pSampler->DefaultC4(false);
 							break;
 						case MACH_XMSAMPLER:
 							pMac[i] = pXMSampler = new XMSampler(i);

@@ -1218,26 +1218,26 @@ namespace psycle { namespace host {
 
 					rect.top=0;
 					rect.bottom=256;
-					if (scope_spec_mode == 1) rect.left=6;
-					else if (scope_spec_mode == 2) rect.left=38;
-					else if (scope_spec_mode == 3) rect.left=99;
+					if (scope_spec_mode == 1) rect.left=6*44100/Global::player().SampleRate();
+					else if (scope_spec_mode == 2) rect.left=38*44100/Global::player().SampleRate();
+					else if (scope_spec_mode == 3) rect.left=81*44100/Global::player().SampleRate();
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"440");
 					bufDC.TextOut(rect.left, 0, buf);
 					bufDC.TextOut(rect.left, 128-12, buf);
 
-					if (scope_spec_mode == 1) rect.left=82;
-					else if (scope_spec_mode == 2) rect.left=146;
-					else if (scope_spec_mode == 3) rect.left=256-42;
+					if (scope_spec_mode == 1) rect.left=82*44100/Global::player().SampleRate();
+					else if (scope_spec_mode == 2) rect.left=146*44100/Global::player().SampleRate();
+					else if (scope_spec_mode == 3) rect.left=(256-54)*44100/Global::player().SampleRate();
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"7K");
 					bufDC.TextOut(rect.left, 0, buf);
 					bufDC.TextOut(rect.left, 128-12, buf);
-					if (scope_spec_mode == 1) rect.left=256-70;
-					else if (scope_spec_mode == 2) rect.left=256-37;
-					else if (scope_spec_mode == 3) rect.left=256-7;
+					if (scope_spec_mode == 1) rect.left=(256-70)*44100/Global::player().SampleRate();
+					else if (scope_spec_mode == 2) rect.left=(256-37)*44100/Global::player().SampleRate();
+					else if (scope_spec_mode == 3) rect.left=(256-18)*44100/Global::player().SampleRate();
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"16K");

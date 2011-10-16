@@ -297,7 +297,7 @@ namespace psycle
 					virtual int GetFreeOutputWire(int slottype=0);
 					virtual int GetInputSlotTypes() { return 1; }
 					virtual int GetOutputSlotTypes() { return 1; }
-					virtual float GetAudioRange() { return 1.0f; }
+					virtual float GetAudioRange() const { return 1.0f; }
 
 			///\}
 
@@ -434,6 +434,7 @@ namespace psycle
 
 		public://\todo private:
 
+			virtual bool playsTrack(const int track) const;
 			///\name gui stuff
 			///\{
 				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
@@ -552,7 +553,7 @@ namespace psycle
 			virtual void Init(void);
 			virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
 			virtual void UpdateVuAndStanbyFlag(int numSamples);
-			virtual float GetAudioRange(){ return 32768.0f; }
+			virtual float GetAudioRange() const { return 32768.0f; }
 			virtual char* GetName(void) { return _psName; }
 			virtual bool Load(RiffFile * pFile);
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
