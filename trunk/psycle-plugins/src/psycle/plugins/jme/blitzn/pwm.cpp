@@ -32,8 +32,12 @@ pwm::pwm()
 	once(false),
 	twice(false),
 	sym(0),
-	frange(0),
+	range(0),
+	frange(0.f),
 	speed(0),
+	srcorrection(1.f),
+	skipstep(1),
+	topvalue(2047),
 	pos(0),
 	realpos(0),
 	last(0),
@@ -43,6 +47,20 @@ pwm::pwm()
 
 int pwm::getPosition() { return realpos; }
 int pwm::getLast(){ return last; }
-void pwm::setRange(int val) { frange = val * 0.000488519785f; }
-void pwm::setSpeed(int val) { speed=val+val; }
+void pwm::setRange(int val) { range= val; frange = val * 1.f/(float)topvalue; }
+void pwm::setSpeed(int val) { assert(val>=0); speed=2*val; }
+void pwm::setSampleRate(int val) {
+ 	assert(val>0); 
+	srcorrection=(float)val/44100.f;
+	topvalue=2047.f*srcorrection*skipstep;
+	if(pos>topvalue) pos=topvalue;
+	setRange(range);
+}
+void pwm::setSkipStep(int val) {
+ 	assert(val>0); 
+	skipstep=val;
+	topvalue=2047.f*srcorrection*skipstep;
+	if(pos>topvalue) pos=topvalue;
+	setRange(range);
+}
 void pwm::reset(){ last=9999; pos=0; direction=0;}

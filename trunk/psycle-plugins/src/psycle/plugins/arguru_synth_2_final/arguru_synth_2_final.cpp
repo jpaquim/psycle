@@ -137,6 +137,7 @@ mi::mi() {
 	Vals = new int[MacInfo.numParameters];
 	//Initialize here only those things that don't depend on
 	//external values (like sampling rate)
+	memset(&globalpar,0,sizeof(SYNPAR));
 	for(int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setGlobalPar(&globalpar);
 		reinitChannel[i] = false;

@@ -73,6 +73,9 @@ struct PERFORMANCE
 class CSynthTrack  
 {
 public:
+	//wtNewACorrection is how much to speedup the wavetable reading due to the change from old 21.5Hz to new 13.75Hz.
+	static const float wtNewACorrection;
+
 	CSynthTrack();
 	virtual ~CSynthTrack();
 

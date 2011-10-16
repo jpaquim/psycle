@@ -4,9 +4,7 @@
 
 #pragma once
 #include <cmath>
-#include <psycle/plugin_interface.hpp>
 typedef float SIG;
-double const two_pi = 2 * psycle::plugin_interface::pi;
 
 class CBiquad
 {
@@ -44,7 +42,7 @@ class filter
 public:
 	filter();
 	virtual ~filter();
-	void init(int s);
+	void Init(int s);
 	void reset();
 	void SetFilter_4PoleLP(int CurCutoff, int Resonance);
 	void SetFilter_4PoleEQ1(int CurCutoff, int Resonance); 

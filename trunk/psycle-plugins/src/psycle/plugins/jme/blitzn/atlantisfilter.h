@@ -1,3 +1,4 @@
+#pragma once
 /*		CSIDFilter (C)2008 Jeremy Evers, http:://jeremyevers.com
 
 		This program is free software; you can redistribute it and/or modify
@@ -18,7 +19,6 @@
 #define PIf	3.1415926535897932384626433832795f;
 #define ANTIDENORMAL 1e-15f // could be 1e-18f, but this is still way below audible noise threshold
 
-#pragma once
 enum eAlgorithm {
 	FILTER_ALGO_SID_LPF = 0,
 	FILTER_ALGO_SID_HPF,
@@ -35,7 +35,7 @@ public:
 
 	void setAlgorithm(eAlgorithm a_algo);
 	void reset();
-	void recalculateCoeffs(const float a_fFrequency, const float a_fFeedback);
+	void recalculateCoeffs(const float a_fFrequency, const float a_fFeedback, const float sampleRate);
 	inline void process(float& sample);
 private:
 

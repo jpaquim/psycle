@@ -3,6 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "filter.h"
+#include <psycle/plugin_interface.hpp>
+double const two_pi = 2 * psycle::plugin_interface::pi;
 #define INTERPOLATE(pos,start,end) ((start)+(pos)*((end)-(start)))
 
 float CBiquad::PreWarp(float dCutoff, float dSampleRate)
@@ -147,7 +149,7 @@ filter::filter()
 filter::~filter()
 {
 }
-void filter::init(int s) 
+void filter::Init(int s) 
 {
 	sr=s;
 	invert=false;

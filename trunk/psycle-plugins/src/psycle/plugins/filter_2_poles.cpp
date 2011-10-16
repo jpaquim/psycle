@@ -77,6 +77,10 @@ public:
 		case modulation_sequencer_ticks:
 			out << pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
 			break;
+		case modulation_amplitude:
+			//information.parameter(cutoff_frequency).scale.output_maximum()  <-- The Exponential scale mangles min and max
+			out << "(+/-)" << 7276  * (*this)(modulation_amplitude) << " hertz";
+			break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
 			else if((*this)(modulation_stereo_dephase) == Sample(pi)) out << "pi";

@@ -63,8 +63,9 @@
 #define WAVE_OSC2WORKBUFFER			35
 #define WAVE_OSC3WORKBUFFER			36
 #define WAVE_OSC4WORKBUFFER			37
-#define OVERSAMPLING				16
-#define FREQDIV						1.0f/(float)OVERSAMPLING
+#define WAVETABLES					38
+//#define OVERSAMPLING				16
+#define FREQDIV						1.0f/(float)vpar->oversamplesAmt
 #define BufferTemp					8
 
 
@@ -77,8 +78,7 @@ struct VOICEPAR
 	int globalStereo;
 
 	int arpPattern;
-	int arpSpeed;
-	int arpShuffle;
+	int arpSpeed[2];
 	int arpRetrig;
 
 	int lfoDelay;
@@ -94,7 +94,6 @@ struct VOICEPAR
 	int oscOptions[4];
 	int oscFuncType[4];
 	int oscFuncSym[4];
-	int oscSymDrift[4];
 	int oscSymDriftRange[4];
 	int oscSymDriftSpeed[4];
 	int oscSymLfoRange[4];
@@ -131,6 +130,7 @@ struct VOICEPAR
 	float fltVelocity;
 	float fltEnvAmount;
 
+	//todo: check if all the wavetable size is needed. Take in mind the work buffer wavetables.
 	signed short WaveTable[38][4100];
 
 	int initposition[4];
@@ -139,6 +139,12 @@ struct VOICEPAR
 	int restartfx;
 	float stereoLR[2];
 	int stereoPos;
+
+	unsigned int waveTableSize;
+	float wavetableCorrection;
+	unsigned int sampleRate;
+	float srCorrection;
+	int oversamplesAmt;
 };
 
 class CSynthTrack  
@@ -147,6 +153,7 @@ public:
 	CSynthTrack();
 	virtual ~CSynthTrack();
 	void InitVoice(VOICEPAR *voicePar);
+	void OnSampleRateChange();
 	void ResetSym();
 	void NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity);
 	void InitEffect(int cmd,int val);
@@ -155,17 +162,13 @@ public:
 
 	void calcOneWave(int osc);
 	void calcWaves(int mask);
-	float freqlimit(float freq) {
-		if (freq > 96) freq = 96;
-		return freq;
-	}
 	void PerformFx();
 	void DoGlide();
 	void RealNoteOn(bool arpClear);
 	void Retrig();
 	void NoteTie(int note);
-	void changeLfoDepth(int val);
-	void changeLfoSpeed(int val);
+	void OnChangeLfoDepth();
+	void OnChangeLfoSpeed();
 	float Filter(float x);
 	inline void GetSample(float* slr);
 	inline void GetEnvMod();
@@ -186,6 +189,10 @@ public:
 	int ampEnvStage;
 
 private:
+	void updateTuning();
+	inline float freqChange(float freq);
+	inline float getPitch(int oscCoarse, int oscFine, int arpTranspose, int p_vibadd,float modEnv, int options);
+
 	float satClip;
 	float cmCtl[4];
 	float fbCtl[4];
@@ -219,7 +226,6 @@ private:
 	int arpNotes;
 	float arpList[22];
 	int arpLen;
-	int arpSpeed[2];
 	int arpShuffle;
 	int arpCount;
 	int arpIndex;
@@ -232,7 +238,6 @@ private:
 	int currentStereoPos;
 	bool firstGlide;
 
-	int lfocount;
 	lfo lfoViber;
 	float lfoViberSample;
 	float lfoViberLast;
@@ -245,7 +250,6 @@ private:
 
 	int updateCount;
 	short timetocompute;
-	void updateTuning();
 
 	float fltResonance;
 	int sp_cmd;
@@ -306,355 +310,337 @@ private:
 	float speedup2;
 	
 	int oscWorkBufferDifferent[4];
-
-	inline int f2i(double d)
-	{
-			return ((int)d) & 2047;
-	};
-
-	inline float freqChange(float freq)
-	{
-		freq *= FREQDIV;
-		if (freq >= 2048.0f) freq = 2047.0f;
-		return freq;
-	};
 };
 
+inline float CSynthTrack::freqChange(float freq)
+{
+		freq *= FREQDIV * vpar->wavetableCorrection;
+		if (freq >= vpar->waveTableSize/2.f) freq = vpar->waveTableSize/2.f;
+		return freq;
+}
+
+inline float CSynthTrack::getPitch(int oscCoarse, int oscFine, int arpTranspose, int p_vibadd,float modEnv, int options)
+{
+	if (options != 7 && options != 8 ) 
+		return (float)pow(2.0, (bend+rbasenote+rsemitone+arpTranspose
+								+vpar->globalCoarse+oscCoarse+(vpar->globalFine+oscFine+modEnv+p_vibadd)*0.00390625)/12.0);
+	else
+		return (float)pow(2.0, (dbasenote
+								+vpar->globalCoarse+oscCoarse+(vpar->globalFine+oscFine+modEnv+p_vibadd)*0.00390625)/12.0);
+}
 
 inline void CSynthTrack::GetSample(float* slr)
 {
-	updateCount--;
-	if (updateCount < 1){
-		updateCount = 128;
-		masterVolume=(float)vpar->globalVolume*volMulti*0.005f;
-		osc1Vol=vpar->oscVolume[0]*masterVolume;
-		osc2Vol=vpar->oscVolume[1]*masterVolume;
-		osc3Vol=vpar->oscVolume[2]*masterVolume;
-		osc4Vol=vpar->oscVolume[3]*masterVolume;
-		rm1Vol=vpar->rm1*masterVolume*0.0001f;
-		rm2Vol=vpar->rm2*masterVolume*0.0001f;
-		arpSpeed[0]=vpar->arpSpeed;
-		if (vpar->arpShuffle) arpSpeed[1]=vpar->arpShuffle; else arpSpeed[1]=arpSpeed[0];
+	if(!ampEnvStage) {
+		return;
 	}
 
+	//todo: Think about substituting pwmcount for a call to PerformFx
+	pwmcount--;
+	if (pwmcount < 0){
+		pwmcount = 500;
+		calcWaves(15);
+	}
 
-	if(ampEnvStage)				{
-		pwmcount--;
-		if (pwmcount < 0){
-			pwmcount = 500;
-			calcWaves(15);
-		}
+	if (vpar->lfoDelay && lfoViber.next()) {
+		lfoViberLast=lfoViberSample;
+		lfoViberSample=(float)lfoViber.getPosition();
+		if (lfoViberSample != lfoViberLast) tuningChange=true;
+	} 
 
-		if (vpar->lfoDelay){
-			lfocount--;
-			if (lfocount < 0){
-				lfocount = 200;
-				lfoViber.next();
-				lfoViberLast=lfoViberSample;
-				lfoViberSample=(float)lfoViber.getPosition();
-				if (lfoViberSample != lfoViberLast) tuningChange=true;
-			}
-		} else {
-			if (lfoViberLast!=vpar->syncvibe){
-				lfoViberLast=vpar->syncvibe;
-				tuningChange=true;
-			}
-		}
-		//Arpeggio
-		fxcount--;
-		if (fxcount < 0){
-			fxcount = 50;
-			GetEnvMod();
-			if (modEnvValue != modEnvLast) tuningChange=true;
+	//Arpeggio
+	fxcount--;
+	if (fxcount < 0){
+		fxcount = 50;
+		GetEnvMod();
+		if (modEnvValue != modEnvLast) tuningChange=true;
 
-			arpCount--;
-			if (arpCount < 0){
-				arpCount = arpSpeed[arpShuffle];
-				if ((arpLen>1)&(stopRetrig == false)&((vpar->arpRetrig == 1)||((vpar->arpRetrig == 2)&(arpShuffle == 0)))) Retrig();
-				arpShuffle=1-arpShuffle;
-				arpIndex++;
-				if (arpIndex >= arpLen) arpIndex = 0;
-				curArp=arpList[arpIndex];
-				tuningChange=true;
-			}
-		}
+	}
+	arpCount--;
+	if (arpCount < 0){
+		arpCount = vpar->arpSpeed[arpShuffle];
+		if ((arpLen>1)&(stopRetrig == false)&((vpar->arpRetrig == 1)||((vpar->arpRetrig == 2)&(arpShuffle == 0)))) Retrig();
+		arpShuffle=1-arpShuffle;
+		arpIndex++;
+		if (arpIndex >= arpLen) arpIndex = 0;
+		curArp=arpList[arpIndex];
+		tuningChange=true;
+	}
 
-		oldBuf[0]=curBuf[0]>>2;
-		oldBuf[1]=curBuf[1]>>2;
-		oldBuf[2]=curBuf[2]>>2;
-		oldBuf[3]=curBuf[3]>>2;
+	oldBuf[0]=curBuf[0]>>2;
+	oldBuf[1]=curBuf[1]>>2;
+	oldBuf[2]=curBuf[2]>>2;
+	oldBuf[3]=curBuf[3]>>2;
 
-		float output=0.0f;
-		float output1=0.0f;
-		float output2=0.0f;
-		float output3=0.0f;
-		float output4=0.0f;
-		float decOutput1 = 0.0f;
-		float decOutput2 = 0.0f;
-		float decOutput3 = 0.0f;
-		float decOutput4 = 0.0f;
+	float output=0.0f;
+	float output1=0.0f;
+	float output2=0.0f;
+	float output3=0.0f;
+	float output4=0.0f;
+	float decOutput1 = 0.0f;
+	float decOutput2 = 0.0f;
+	float decOutput3 = 0.0f;
+	float decOutput4 = 0.0f;
 
-		float sample = 0.0f;
-		float phase = 0.0f;
-		int pos = 0;
-
-		if (tuningChange) updateTuning();
-		int c = 0;
+	float sample = 0.0f;
+	float phase = 0.0f;
+	int pos = 0;
+	if (tuningChange) updateTuning();
+	int c = 0;
 
 
-		bool dco1Enable = vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49);
-		bool dco2Enable = vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49);
-		bool dco3Enable = vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47) || (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49);
-		bool dco4Enable = vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49);
+	bool dco1Enable = vpar->oscVolume[0] || vpar->rm1 || vpar->oscOptions[1]==1 || vpar->oscOptions[1]==2 || vpar->oscOptions[1]==8 || (vpar->oscFuncType[0]>=44) & (vpar->oscFuncType[0]!=47) || (vpar->oscFuncType[0]>=46) & (vpar->oscFuncType[0]!=49);
+	bool dco2Enable = vpar->oscVolume[1] || vpar->rm1 || vpar->oscOptions[2]==1 || vpar->oscOptions[2]==2 || vpar->oscOptions[2]==8 || (vpar->oscFuncType[1]>=44) & (vpar->oscFuncType[1]!=47) || (vpar->oscFuncType[1]>=46) & (vpar->oscFuncType[1]!=49);
+	bool dco3Enable = vpar->oscVolume[2] || vpar->rm2 || vpar->oscOptions[3]==1 || vpar->oscOptions[3]==2 || vpar->oscOptions[3]==8 || (vpar->oscFuncType[2]>=44) & (vpar->oscFuncType[2]!=47) || (vpar->oscFuncType[2]>=46) & (vpar->oscFuncType[2]!=49);
+	bool dco4Enable = vpar->oscVolume[3] || vpar->rm2 || vpar->oscOptions[0]==1 || vpar->oscOptions[0]==2 || vpar->oscOptions[0]==8 || (vpar->oscFuncType[3]>=44) & (vpar->oscFuncType[3]!=47) || (vpar->oscFuncType[3]>=46) & (vpar->oscFuncType[3]!=49);
 
-		for (c=0; c<OVERSAMPLING; c++){
-			if (dco1Enable){
-				phase = dco1Position+dco1Last+fmData4;
-				while (phase >= 2048.0f) phase -= 2048.0f;
-				while (phase < 0.0f) phase += 2048.0f;
-				pos = (int)phase;
-				sample = WaveBuffer[curBuf[0]][pos];
-				output1 = aaf1.process((WaveBuffer[curBuf[0]][pos+1] - sample) * (phase - (float)pos) + sample);
-				if (vpar->oscFeedback[0] > 0.0f) dco1Last=(float)(HUGEANTIDENORMAL+output1)*(HUGEANTIDENORMAL+vpar->oscFeedback[0])*(HUGEANTIDENORMAL+fbCtl[0]);
-				else dco1Last=0.0f;
-				dco1Position+=rdco1Pitch;
-				if(dco1Position>=2048.0f){
-					dco1Position-=2048.0f;
-					if (nextBuf[0]){
-						curBuf[0]^=4;
-						nextBuf[0]=0;
-					}
-					if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-						dco2Position=dco1Position;
-						if (nextBuf[1]){
-							curBuf[1]^=4;
-							nextBuf[1]=0;
-						}
-						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-							dco3Position=dco1Position;
-							if (nextBuf[2]){
-								curBuf[2]^=4;
-								nextBuf[2]=0;
-							}
-							if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-								dco4Position=dco1Position;
-								if (nextBuf[3]){
-									curBuf[3]^=4;
-									nextBuf[3]=0;
-								}
-							}
-						}
-					}												
+	for (c=0; c<vpar->oversamplesAmt; c++){
+		if (dco1Enable){
+			phase = dco1Position+dco1Last+fmData4;
+			while (phase >= 2048.0f) phase -= 2048.0f;
+			while (phase < 0.0f) phase += 2048.0f;
+			pos = (int)phase;
+			sample = WaveBuffer[curBuf[0]][pos];
+			output1 = aaf1.process((WaveBuffer[curBuf[0]][pos+1] - sample) * (phase - (float)pos) + sample);
+			if (vpar->oscFeedback[0] > 0.0f) dco1Last=(float)(HUGEANTIDENORMAL+output1)*(HUGEANTIDENORMAL+vpar->oscFeedback[0])*(HUGEANTIDENORMAL+fbCtl[0]);
+			else dco1Last=0.0f;
+			dco1Position+=rdco1Pitch;
+			if(dco1Position>=2048.0f){
+				dco1Position-=2048.0f;
+				if (nextBuf[0]){
+					curBuf[0]^=4;
+					nextBuf[0]=0;
 				}
-			}
-
-			if (dco2Enable){
-				phase = dco2Position+dco2Last+fmData1;
-				while (phase >= 2048.0f) phase -= 2048.0f;
-				while (phase < 0.0f) phase += 2048.0f;
-				pos = (int)phase;
-				sample = WaveBuffer[1+curBuf[1]][pos];
-				output2 = aaf2.process((WaveBuffer[1+curBuf[1]][pos+1] - sample) * (phase - (float)pos) + sample);
-				if (vpar->oscFeedback[1] > 0.0f) dco2Last=(float)(HUGEANTIDENORMAL+output2)*(HUGEANTIDENORMAL+vpar->oscFeedback[1])*(HUGEANTIDENORMAL+fbCtl[1]);
-				else dco2Last = 0.0f;
-				dco2Position+=rdco2Pitch;
-				if(dco2Position>=2048.0f){
-					dco2Position-=2048.0f;
+				if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
+					dco2Position=dco1Position;
 					if (nextBuf[1]){
 						curBuf[1]^=4;
 						nextBuf[1]=0;
 					}
 					if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-						dco3Position=dco2Position;
+						dco3Position=dco1Position;
 						if (nextBuf[2]){
 							curBuf[2]^=4;
 							nextBuf[2]=0;
 						}
 						if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-							dco4Position=dco2Position;
+							dco4Position=dco1Position;
 							if (nextBuf[3]){
 								curBuf[3]^=4;
 								nextBuf[3]=0;
 							}
-							if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-								dco1Position=dco2Position;
-								if (nextBuf[0]){
-									curBuf[0]^=4;
-									nextBuf[0]=0;
-								}
-							}
 						}
 					}
-				}
+				}												
 			}
+		}
 
-			if (dco3Enable){
-				phase = dco3Position+dco3Last+fmData2;
-				while (phase >= 2048.0f) phase -= 2048.0f;
-				while (phase < 0.0f) phase += 2048.0f;
-				pos = (int)phase;
-				sample = WaveBuffer[2+curBuf[2]][pos];
-				output3 = aaf3.process((WaveBuffer[2+curBuf[2]][pos+1] - sample) * (phase - (float)pos) + sample);
-				if (vpar->oscFeedback[2] > 0.0f) dco3Last=(float)(HUGEANTIDENORMAL+output3)*(HUGEANTIDENORMAL+vpar->oscFeedback[2])*(HUGEANTIDENORMAL+fbCtl[2]);
-				else dco3Last = 0.0f;
-				dco3Position+=rdco3Pitch;
-				if(dco3Position>=2048.0f){
-					dco3Position-=2048.0f;
+		if (dco2Enable){
+			phase = dco2Position+dco2Last+fmData1;
+			while (phase >= 2048.0f) phase -= 2048.0f;
+			while (phase < 0.0f) phase += 2048.0f;
+			pos = (int)phase;
+			sample = WaveBuffer[1+curBuf[1]][pos];
+			output2 = aaf2.process((WaveBuffer[1+curBuf[1]][pos+1] - sample) * (phase - (float)pos) + sample);
+			if (vpar->oscFeedback[1] > 0.0f) dco2Last=(float)(HUGEANTIDENORMAL+output2)*(HUGEANTIDENORMAL+vpar->oscFeedback[1])*(HUGEANTIDENORMAL+fbCtl[1]);
+			else dco2Last = 0.0f;
+			dco2Position+=rdco2Pitch;
+			if(dco2Position>=2048.0f){
+				dco2Position-=2048.0f;
+				if (nextBuf[1]){
+					curBuf[1]^=4;
+					nextBuf[1]=0;
+				}
+				if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
+					dco3Position=dco2Position;
 					if (nextBuf[2]){
 						curBuf[2]^=4;
 						nextBuf[2]=0;
 					}
 					if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
-						dco4Position=dco3Position;
+						dco4Position=dco2Position;
 						if (nextBuf[3]){
 							curBuf[3]^=4;
 							nextBuf[3]=0;
 						}
 						if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-							dco1Position=dco3Position;
+							dco1Position=dco2Position;
 							if (nextBuf[0]){
 								curBuf[0]^=4;
 								nextBuf[0]=0;
-							}
-							if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-								dco2Position=dco3Position;
-								if (nextBuf[1]){
-									curBuf[1]^=4;
-									nextBuf[1]=0;
-								}
 							}
 						}
 					}
 				}
 			}
+		}
 
-			if (dco4Enable){
-				phase = dco4Position+dco4Last+fmData3;
-				while (phase >= 2048.0f) phase -= 2048.0f;
-				while (phase < 0.0f) phase += 2048.0f;
-				pos = (int)phase;
-				sample = WaveBuffer[3+curBuf[3]][pos];
-				output4 = aaf4.process((WaveBuffer[3+curBuf[3]][pos+1] - sample) * (phase - (float)pos) + sample);
-				if (vpar->oscFeedback[3] > 0.0f) dco4Last=(float)(HUGEANTIDENORMAL+output4)*(HUGEANTIDENORMAL+vpar->oscFeedback[3])*(HUGEANTIDENORMAL+fbCtl[3]);
-				else dco4Last=0.0f;
-				dco4Position+=rdco4Pitch;
-				if(dco4Position>=2048.0f){
-					dco4Position-=2048.0f;
+		if (dco3Enable){
+			phase = dco3Position+dco3Last+fmData2;
+			while (phase >= 2048.0f) phase -= 2048.0f;
+			while (phase < 0.0f) phase += 2048.0f;
+			pos = (int)phase;
+			sample = WaveBuffer[2+curBuf[2]][pos];
+			output3 = aaf3.process((WaveBuffer[2+curBuf[2]][pos+1] - sample) * (phase - (float)pos) + sample);
+			if (vpar->oscFeedback[2] > 0.0f) dco3Last=(float)(HUGEANTIDENORMAL+output3)*(HUGEANTIDENORMAL+vpar->oscFeedback[2])*(HUGEANTIDENORMAL+fbCtl[2]);
+			else dco3Last = 0.0f;
+			dco3Position+=rdco3Pitch;
+			if(dco3Position>=2048.0f){
+				dco3Position-=2048.0f;
+				if (nextBuf[2]){
+					curBuf[2]^=4;
+					nextBuf[2]=0;
+				}
+				if ((vpar->oscOptions[3] == 1) || (vpar->oscOptions[3] == 2)|| (vpar->oscOptions[3] == 8)){
+					dco4Position=dco3Position;
 					if (nextBuf[3]){
 						curBuf[3]^=4;
 						nextBuf[3]=0;
 					}
 					if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
-						dco1Position=dco4Position;
+						dco1Position=dco3Position;
 						if (nextBuf[0]){
 							curBuf[0]^=4;
 							nextBuf[0]=0;
 						}
 						if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
-							dco2Position=dco4Position;
+							dco2Position=dco3Position;
 							if (nextBuf[1]){
 								curBuf[1]^=4;
 								nextBuf[1]=0;
-							}
-							if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
-								dco3Position=dco4Position;
-								if (nextBuf[2]){
-									curBuf[2]^=4;
-									nextBuf[2]=0;
-								}
 							}
 						}
 					}
 				}
 			}
-
-			
-			fmData1 = 0.0f;
-			fmData2 = 0.0f;
-			fmData3 = 0.0f;
-			fmData4 = 0.0f;
-
-			if (dco1Enable){
-				fmData1 += (ANTIDENORMAL+fmCtl[oldBuf[0]][0])*(ANTIDENORMAL+output1);
-				fmData3 += (ANTIDENORMAL+fmCtl2[oldBuf[0]][0])*(ANTIDENORMAL+output1);
-			}
-
-			if (dco2Enable){
-				fmData2 += (ANTIDENORMAL+fmCtl[oldBuf[1]][1])*(ANTIDENORMAL+output2);
-				fmData4 += (ANTIDENORMAL+fmCtl2[oldBuf[1]][1])*(ANTIDENORMAL+output2);
-			}
-
-			if (dco3Enable){
-				fmData1 += (ANTIDENORMAL+fmCtl2[oldBuf[2]][2])*(ANTIDENORMAL+output3);
-				fmData3 += (ANTIDENORMAL+fmCtl[oldBuf[2]][2])*(ANTIDENORMAL+output3);
-			}
-
-			if (dco4Enable){
-				fmData2 += (ANTIDENORMAL+fmCtl2[oldBuf[3]][3])*(ANTIDENORMAL+output4);
-				fmData4 += (ANTIDENORMAL+fmCtl[oldBuf[3]][3])*(ANTIDENORMAL+output4);
-			}
-
-
-			decOutput1 += output1;
-			decOutput2 += output2;
-			decOutput3 += output3;
-			decOutput4 += output4;
 		}
 
-		output1 = decOutput1 * FREQDIV;
-		output2 = decOutput2 * FREQDIV;
-		output3 = decOutput3 * FREQDIV;
-		output4 = decOutput4 * FREQDIV;
-
-		output=((ANTIDENORMAL+output1)*(ANTIDENORMAL+osc1Vol))+((ANTIDENORMAL+output2)*(ANTIDENORMAL+osc2Vol))+((ANTIDENORMAL+output3)*(ANTIDENORMAL+osc3Vol))+((ANTIDENORMAL+output4)*(ANTIDENORMAL+osc4Vol))+((ANTIDENORMAL+output1)*(ANTIDENORMAL+output2)*(ANTIDENORMAL+rm1Vol))+((ANTIDENORMAL+output3)*(ANTIDENORMAL+output4)*(ANTIDENORMAL+rm2Vol));				
-
-		//master sat
-		if ((vpar->oscFuncType[0]==47)||(vpar->oscFuncType[1]==47)||(vpar->oscFuncType[2]==47)||(vpar->oscFuncType[3]==47)){
-			long long1 = (ANTIDENORMAL+output)*(ANTIDENORMAL+satClip);
-			if (long1 > 16384) long1=16384;
-			if (long1 < -16384) long1=-16384;
-			output=long1;
+		if (dco4Enable){
+			phase = dco4Position+dco4Last+fmData3;
+			while (phase >= 2048.0f) phase -= 2048.0f;
+			while (phase < 0.0f) phase += 2048.0f;
+			pos = (int)phase;
+			sample = WaveBuffer[3+curBuf[3]][pos];
+			output4 = aaf4.process((WaveBuffer[3+curBuf[3]][pos+1] - sample) * (phase - (float)pos) + sample);
+			if (vpar->oscFeedback[3] > 0.0f) dco4Last=(float)(HUGEANTIDENORMAL+output4)*(HUGEANTIDENORMAL+vpar->oscFeedback[3])*(HUGEANTIDENORMAL+fbCtl[3]);
+			else dco4Last=0.0f;
+			dco4Position+=rdco4Pitch;
+			if(dco4Position>=2048.0f){
+				dco4Position-=2048.0f;
+				if (nextBuf[3]){
+					curBuf[3]^=4;
+					nextBuf[3]=0;
+				}
+				if ((vpar->oscOptions[0] == 1) || (vpar->oscOptions[0] == 2)|| (vpar->oscOptions[0] == 8)){
+					dco1Position=dco4Position;
+					if (nextBuf[0]){
+						curBuf[0]^=4;
+						nextBuf[0]=0;
+					}
+					if ((vpar->oscOptions[1] == 1) || (vpar->oscOptions[1] == 2)|| (vpar->oscOptions[1] == 8)){
+						dco2Position=dco4Position;
+						if (nextBuf[1]){
+							curBuf[1]^=4;
+							nextBuf[1]=0;
+						}
+						if ((vpar->oscOptions[2] == 1) || (vpar->oscOptions[2] == 2)|| (vpar->oscOptions[2] == 8)){
+							dco3Position=dco4Position;
+							if (nextBuf[2]){
+								curBuf[2]^=4;
+								nextBuf[2]=0;
+							}
+						}
+					}
+				}
+			}
 		}
 
-		//cutoff mod
-		float cutmod = 0.0f;
-		if (vpar->oscFuncType[0]==46) cutmod+=((output1+16384)*(ANTIDENORMAL+cmCtl[0]));
-		if (vpar->oscFuncType[1]==46) cutmod+=((output2+16384)*(ANTIDENORMAL+cmCtl[1]));
-		if (vpar->oscFuncType[2]==46) cutmod+=((output3+16384)*(ANTIDENORMAL+cmCtl[2]));
-		if (vpar->oscFuncType[3]==46) cutmod+=((output4+16384)*(ANTIDENORMAL+cmCtl[3]));
+		
+		fmData1 = 0.0f;
+		fmData2 = 0.0f;
+		fmData3 = 0.0f;
+		fmData4 = 0.0f;
 
-		GetEnvFlt();
-		if (vpar->fltType){
-			if(!timetocompute--) {
-				int realcutoff=int(vpar->fltCutoff+(vpar->filtvibe*0.005)+(rbasenote*0.1*vpar->fltTrack)+(fltEnvValue*vpar->fltEnvAmount*((1-vpar->fltVelocity)+(voiceVol*vpar->fltVelocity))));
-				if(realcutoff<1)realcutoff=1;
-				if(realcutoff>250)realcutoff=250;
-				rcCut+=(realcutoff-50-rcCut)*rcCutCutoff;
-				int cf = rcCut+cutmod;
-				
-				// old filter
-				if (vpar->fltType <= 10) m_filter.setfilter(vpar->fltType, cf, vpar->fltResonance);
-				timetocompute=FILTER_CALC_TIME;
-
-				// atlantis sid filter
-				if (cf > 256.0f) cf = 256.0f;
-				if (cf < 0.0f) cf = 0.0f;
-
-				a_filter.recalculateCoeffs(((float)cf)/256.0f, (float)vpar->fltResonance/256.0f);
-			}
-			if (vpar->fltType <= 10) output = m_filter.res(output); // old filter
-			else {
-				a_filter.setAlgorithm((eAlgorithm)(vpar->fltType - 11));
-				a_filter.process(output); // atlantis sid filter
-			}
-			
+		if (dco1Enable){
+			fmData1 += (ANTIDENORMAL+fmCtl[oldBuf[0]][0])*(ANTIDENORMAL+output1);
+			fmData3 += (ANTIDENORMAL+fmCtl2[oldBuf[0]][0])*(ANTIDENORMAL+output1);
 		}
 
-		rcVol+=(((GetEnvAmp()*((1-vpar->ampVelocity)+(voiceVol*vpar->ampVelocity))*softenHighNotes)-rcVol)*rcVolCutoff);
-		output*=rcVol;
-		slr[0]=output*vpar->stereoLR[currentStereoPos];
-		slr[1]=output*vpar->stereoLR[1-currentStereoPos];
+		if (dco2Enable){
+			fmData2 += (ANTIDENORMAL+fmCtl[oldBuf[1]][1])*(ANTIDENORMAL+output2);
+			fmData4 += (ANTIDENORMAL+fmCtl2[oldBuf[1]][1])*(ANTIDENORMAL+output2);
+		}
+
+		if (dco3Enable){
+			fmData1 += (ANTIDENORMAL+fmCtl2[oldBuf[2]][2])*(ANTIDENORMAL+output3);
+			fmData3 += (ANTIDENORMAL+fmCtl[oldBuf[2]][2])*(ANTIDENORMAL+output3);
+		}
+
+		if (dco4Enable){
+			fmData2 += (ANTIDENORMAL+fmCtl2[oldBuf[3]][3])*(ANTIDENORMAL+output4);
+			fmData4 += (ANTIDENORMAL+fmCtl[oldBuf[3]][3])*(ANTIDENORMAL+output4);
+		}
+
+
+		decOutput1 += output1;
+		decOutput2 += output2;
+		decOutput3 += output3;
+		decOutput4 += output4;
 	}
+
+	output1 = decOutput1 * FREQDIV;
+	output2 = decOutput2 * FREQDIV;
+	output3 = decOutput3 * FREQDIV;
+	output4 = decOutput4 * FREQDIV;
+
+	output=((ANTIDENORMAL+output1)*(ANTIDENORMAL+osc1Vol))+((ANTIDENORMAL+output2)*(ANTIDENORMAL+osc2Vol))+((ANTIDENORMAL+output3)*(ANTIDENORMAL+osc3Vol))+((ANTIDENORMAL+output4)*(ANTIDENORMAL+osc4Vol))+((ANTIDENORMAL+output1)*(ANTIDENORMAL+output2)*(ANTIDENORMAL+rm1Vol))+((ANTIDENORMAL+output3)*(ANTIDENORMAL+output4)*(ANTIDENORMAL+rm2Vol));				
+
+	//master sat
+	if ((vpar->oscFuncType[0]==47)||(vpar->oscFuncType[1]==47)||(vpar->oscFuncType[2]==47)||(vpar->oscFuncType[3]==47)){
+		long long1 = (ANTIDENORMAL+output)*(ANTIDENORMAL+satClip);
+		if (long1 > 16384) long1=16384;
+		if (long1 < -16384) long1=-16384;
+		output=long1;
+	}
+
+	//cutoff mod
+	float cutmod = 0.0f;
+	if (vpar->oscFuncType[0]==46) cutmod+=((output1+16384)*(ANTIDENORMAL+cmCtl[0]));
+	if (vpar->oscFuncType[1]==46) cutmod+=((output2+16384)*(ANTIDENORMAL+cmCtl[1]));
+	if (vpar->oscFuncType[2]==46) cutmod+=((output3+16384)*(ANTIDENORMAL+cmCtl[2]));
+	if (vpar->oscFuncType[3]==46) cutmod+=((output4+16384)*(ANTIDENORMAL+cmCtl[3]));
+
+	GetEnvFlt();
+	if (vpar->fltType){
+		if(!timetocompute--) {
+			timetocompute=FILTER_CALC_TIME;
+			int realcutoff=int(vpar->fltCutoff+(vpar->filtvibe*0.005)+(rbasenote*0.1*vpar->fltTrack)+(fltEnvValue*vpar->fltEnvAmount*((1-vpar->fltVelocity)+(voiceVol*vpar->fltVelocity))));
+			if(realcutoff<1)realcutoff=1;
+			if(realcutoff>250)realcutoff=250;
+			rcCut+=(realcutoff-50-rcCut)*rcCutCutoff;
+			int cf = rcCut+cutmod;
+			
+			// old filter
+			if (vpar->fltType <= 10) m_filter.setfilter(vpar->fltType, cf, vpar->fltResonance);
+
+			// atlantis sid filter
+			if (cf > 256.0f) cf = 256.0f;
+			if (cf < 0.0f) cf = 0.0f;
+
+			a_filter.recalculateCoeffs(((float)cf)/256.0f, (float)vpar->fltResonance/256.0f, vpar->sampleRate);
+		}
+		if (vpar->fltType <= 10) output = m_filter.res(output); // old filter
+		else {
+			a_filter.setAlgorithm((eAlgorithm)(vpar->fltType - 11));
+			a_filter.process(output); // atlantis sid filter
+		}
+		
+	}
+
+	rcVol+=(((GetEnvAmp()*((1-vpar->ampVelocity)+(voiceVol*vpar->ampVelocity))*softenHighNotes)-rcVol)*rcVolCutoff);
+	output*=rcVol;
+	slr[0]=output*vpar->stereoLR[currentStereoPos];
+	slr[1]=output*vpar->stereoLR[1-currentStereoPos];
 }
 inline void CSynthTrack::GetEnvMod(){
 	switch (modEnvStage){
@@ -692,7 +678,7 @@ inline float CSynthTrack::GetEnvAmp(){
 	break;
 
 	case 2: // Decay
-		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f);
+		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f)*vpar->srCorrection;
 
 		if((ampEnvValue<ampEnvSustainLevel) || (ampEnvValue<0.001f))
 		{
@@ -710,7 +696,7 @@ inline float CSynthTrack::GetEnvAmp(){
 
 	case 3:
 		// Decay 2
-		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f);
+		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f)*vpar->srCorrection;
 		
 		if(ampEnvValue<=0.001f){
 			ampEnvValue=0.0f;
@@ -720,7 +706,7 @@ inline float CSynthTrack::GetEnvAmp(){
 	break;
 
 	case 4: // Release
-		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f);
+		ampEnvValue = ampEnvValue - (ampEnvValue * ampEnvCoef * 5.0f)*vpar->srCorrection;
 
 		if(ampEnvValue<0.001f){
 			ampEnvValue=0.0f;

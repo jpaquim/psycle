@@ -28,16 +28,24 @@ class pwm {
 		virtual ~pwm() {}
 		int getPosition();
 		int getLast();
+		/*Sets the range used by getPosition()/GetLast()*/
 		void setRange(int val);
 		void setSpeed(int val);
+		void setSampleRate(int srate);
+		void setSkipStep(int step);
 		void reset();
+		//Sample tick.
 		inline void next();
 		bool once;
 		bool twice;
 	private:
 		int sym;
+		int range;
 		float frange;
 		int speed;
+		float srcorrection;
+		int skipstep;
+		int topvalue;
 		int pos;
 		int realpos;
 		int last;
@@ -46,9 +54,9 @@ class pwm {
 };
 
 inline void pwm::next() {
-	if (frange != 0) move = speed; else speed = 0;
+	if (range != 0) move = speed; else speed = 0;
 	last=realpos;
-	realpos=(int)((float)pos*frange)&2047;
+	realpos=(int)((float)pos*frange);
 	if (direction==1){
 		pos-=move;
 		if (pos<=0){
@@ -60,8 +68,8 @@ inline void pwm::next() {
 	else if (direction==0)
 	{
 		pos+=move;
-		if (pos>=2047){
-			pos=2047;
+		if (pos>=topvalue){
+			pos=topvalue;
 			if (once) direction+=2;
 			else direction=1;
 		}

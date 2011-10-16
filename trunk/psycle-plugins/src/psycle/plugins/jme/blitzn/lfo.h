@@ -28,16 +28,19 @@ class lfo {
 		virtual ~lfo() {}
 		int getPosition();
 		int getLast();
+		int getWhenNext();
 		void setDelay(int val);
 		void setLevel(int val);
 		void setSpeed(int val);
+		void setSkipStep(int val);
 		void reset();
-		inline void next();
+		inline bool next();
 	private:
 		int delay;
 		int level;
 		int speed;
 
+		int skipstep;
 		int pause;
 		int phaseHi;
 		int phaseLo;
@@ -48,8 +51,11 @@ class lfo {
 		int last;
 };
 
-inline void lfo::next() {
-	if (pause) pause--;
+inline bool lfo::next() {
+	if (pause) {
+		pause--;
+		return false;
+	}
 	else {
 		phaseLo++;
 		if (count < 0){
@@ -63,8 +69,11 @@ inline void lfo::next() {
 				case 3: offset=0-speed*level;break;
 				default: offset=0; break;
 			}
-		} count--;
+		}
+		count--;
 		last=current;
 		current=phaseLo*coeff+offset;
+		if(skipstep) pause=skipstep;
+		return true;
 	}
 }

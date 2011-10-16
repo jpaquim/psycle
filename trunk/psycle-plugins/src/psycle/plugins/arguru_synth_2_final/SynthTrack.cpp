@@ -74,7 +74,9 @@ void CSynthTrack::setSampleRate(int currentSR_, int wavetableSize_, float waveta
 	iwaveTableSize = wavetableSize_;
 	fwaveTableSize = wavetableSize_;
 	wavetableCorrection = wavetableCorrection_;
-	Arp_samplespertick=(currentSR_ * 60)/(syntp->arp_bpm*4);
+	if(syntp->arp_bpm != 0) {
+		Arp_samplespertick=(currentSR_ * 60)/(syntp->arp_bpm*4);
+	}
 	if (AmpEnvStage) {
 		AmpEnvStage = 0;
 	}

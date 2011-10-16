@@ -197,9 +197,9 @@ float CSynthTrack::GetSample()
 	for (int i = 0; i<16; i++){
 		switch(cur_waveform)
 		{
-			case 5:								output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)+cur_pw]; break;
+			case 5:								output+=vpar->Wavetable[cur_waveform][int(OSCPosition)+cur_pw]; break;
 			case 8:								output+=vpar->shortnoise; break;
-			default:				output+=vpar->Wavetable[cur_waveform][f2i(OSCPosition)]; break;
+			default:				output+=vpar->Wavetable[cur_waveform][int(OSCPosition)]; break;
 		}
 		OSCPosition+=OOSCSpeed;
 		if(OSCPosition>=2048.0f) OSCPosition-=2048.0f;

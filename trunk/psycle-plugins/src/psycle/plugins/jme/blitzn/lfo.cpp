@@ -30,6 +30,7 @@
 lfo::lfo()
 :
 	delay(0),
+	skipstep(0),
 	pause(0),
 	phaseHi(0),
 	phaseLo(0),
@@ -41,7 +42,16 @@ lfo::lfo()
 
 int lfo::getPosition() { return current; }
 int lfo::getLast() { return 0; }
-void lfo::setDelay(int val) { delay = val; }
+int lfo::getWhenNext() { return pause; }
+void lfo::setDelay(int val) { assert(val>=0); delay = val; }
 void lfo::setLevel(int val) { level = val; if (val==0) coeff=0; }
-void lfo::setSpeed(int val) { speed = val; }
-void lfo::reset() { count=-1; phaseHi=3; pause=delay; current=0; }
+void lfo::setSpeed(int val) { assert(val>=0);  speed = val; }
+void lfo::setSkipStep(int val) { assert(val>0); skipstep= val-1; }
+void lfo::reset()
+{
+	count=-1; phaseHi=3; current=0;
+	if(delay && skipstep) pause=delay*skipstep;
+	else if (delay) pause=delay;
+	else if (skipstep) pause=skipstep;
+	else pause=0;
+}

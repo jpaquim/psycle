@@ -319,7 +319,6 @@ CMachineInfo const MacInfo (
 class mi : public CMachineInterface
 {
 public:
-	void InitWaveTable();
 	mi();
 	virtual ~mi();
 	virtual void Init();
@@ -376,11 +375,11 @@ mi::~mi()
 
 void mi::Init()
 {
+	// Initialize your stuff here (you can use pCB here without worries)
 	reg = 0x7ffff8; // init noise register
 	noiseindex = 0;
 	currentSR=pCB->GetSamplingRate();
 	globals.oversamplesAmt = (384000 / currentSR) & 0xFFFFFFFE;
-	// Initialize your stuff here (you can use pCB here without worries)
 	InitWaveTableSR();
 	for (int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
@@ -442,9 +441,10 @@ void mi::ParameterTweak(int par, int val)
 		globals.LoopEnd=Vals[114]-1;
 		globals.ReplaySpeed=Vals[115]*multiplier;
 		globals.AEGAttack=Vals[116]*multiplier;
-		globals.AEGDecay=Vals[117]*multiplier;
+		//decay and release are "special" and are corrected in the envelope
+		globals.AEGDecay=Vals[117];
 		globals.AEGSustain=Vals[118];
-		globals.AEGRelease=Vals[119]*multiplier;
+		globals.AEGRelease=Vals[119];
 		globals.Cutoff=Vals[120];
 		globals.Resonance=Vals[121];
 		globals.EnvMod=Vals[122];
@@ -464,9 +464,6 @@ void mi::Command()
 			buffer,"%s%s%s",
 			"Pattern commands\n",
 			"\n03xx : Glide",
-			"\n07xx : Change vcf env modulation [0700=0, 07FF=+256]",
-			"\n08xx : Change vcf cutoff frequency (half range)",
-			"\n09xx : Change vcf resonance amount (half range)",
 			"\n0Cxx : Volume"
 		);
 	pCB->MessBox(buffer,"GameFX",0);
@@ -475,10 +472,9 @@ void mi::Command()
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	globals.noiseused=false;
-	int fxsamplescur = fxsamples;
 	for(int c=0;c<tracks;c++)
 	{
-		fxsamplescur=fxsamples;
+		int fxsamplescur=fxsamples;
 		if(track[c].AmpEnvStage)
 		{
 			float *xpsamplesleft=psamplesleft;
@@ -509,7 +505,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 			}while(xnumsamples>0);
 		}
 	}
-	fxsamples = fxsamplescur;
+	fxsamples-=numsamples;
+	if(fxsamples<=0) {
+		fxsamples=256.f*currentSR/44100.0f;
+	}
+
 	if (globals.noiseused)
 	{
 		int big = waveTableSize/8;
@@ -752,21 +752,6 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 
 		track[channel].InitEffect(cmd,val);
 		
-		// Global scope synth pattern commands
-		switch(cmd)
-		{
-		case 7: // Change envmod
-			globals.EnvMod=val;
-			break;
-		case 8: // Change cutoff
-			globals.Cutoff=val>>1;
-		break;
-		
-		case 9: // Change reso
-			globals.Resonance=val>>1;
-		break;
-		}
-	
 		if(note<=NOTE_MAX)
 			//Note zero is A0 (Which is note 21 in Psycle)
 			track[channel].NoteOn(note-21);
@@ -782,7 +767,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 //Since it will not be an integer amount of samples, store the difference
 //as a factor in wavetableCorrection, so that it can be applied when calculating
 //the OSC speed.
-//ATTENTION: Sampling side of GameFX oversamples at globals.oversamplesAmt
+//ATTENTION: Sampling side of GameFX/Blitz oversamples at globals.oversamplesAmt
 void mi::InitWaveTableSR(bool delArray) {
 	const unsigned int oversamplerate = currentSR*globals.oversamplesAmt;
 	//Ensure the value is divisible by four.
@@ -792,12 +777,12 @@ void mi::InitWaveTableSR(bool delArray) {
 
 	const double sinFraction = 2.0*psycle::plugin_interface::pi/(double)amount;
 	const float increase = 32768.0f/(float)amount;
-	const float increase2 = 65536.0f/(float)amount;
+	const float increase2 = 32768.0f/(float)half;
 
 	//Noise wavetable (7) is maintained in the Work() method.
 	for (unsigned int i=0;i < WAVETABLES; i++) {
 		if (delArray) {
-			delete globals.Wavetable[i];
+			delete[] globals.Wavetable[i];
 		}
 		//Two more shorts allocated for the interpolation routine.
 		if(i == 5) {

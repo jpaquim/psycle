@@ -114,7 +114,7 @@ CMachineParameter const paraCommand12 = {"Command 12", "Command 12", 0, 15, MPF_
 CMachineParameter const paraCommand13 = {"Command 13", "Command 13", 0, 15, MPF_STATE, 0};
 CMachineParameter const paraCommand14 = {"Command 14", "Command 14", 0, 15, MPF_STATE, 0};
 CMachineParameter const paraCommand15 = {"Command 15", "Command 15", 0, 15, MPF_STATE, 0};
-CMachineParameter const paraCommand16 = {"Command 16", "Command 16", 0, 5, MPF_STATE, 0};
+CMachineParameter const paraCommand16 = {"Command 16", "Command 16", 0, 15, MPF_STATE, 0};
 
 CMachineParameter const paraParameter1 = {"Parameter 1", "Parameter 1", 0, 255, MPF_STATE, 0};
 CMachineParameter const paraParameter2 = {"Parameter 2", "Parameter 2", 0, 255, MPF_STATE, 0};
@@ -319,7 +319,6 @@ CMachineInfo const MacInfo (
 class mi : public CMachineInterface
 {
 public:
-	void InitWaveTable();
 	mi();
 	virtual ~mi();
 	virtual void Init();
@@ -330,6 +329,8 @@ public:
 	virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 	virtual void Stop();
 private:
+	void InitWaveTable();
+
 	CSynthTrack track[MAX_TRACKS];
 	PERFORMANCE globals;
 };
@@ -339,6 +340,14 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 mi::mi()
 {
 	Vals=new int[MacInfo.numParameters];
+
+	//Initialize here only those things that don't depend on
+	//external values (like sampling rate)
+	memset(&globals,0,sizeof(PERFORMANCE));
+	//this prevents a warning in valgrind when calling parameterTweak
+	for(int i=0; i < MacInfo.numParameters; i++) {
+		Vals[i]=0;
+	}
 
 	InitWaveTable();
 }
@@ -357,7 +366,7 @@ void mi::Init()
 void mi::Stop()
 {
 	for(int c=0;c<MAX_TRACKS;c++)
-	track[c].NoteOff();
+		track[c].NoteOff();
 }
 
 void mi::ParameterTweak(int par, int val)
@@ -396,7 +405,6 @@ void mi::ParameterTweak(int par, int val)
 		globals.Cutoff=Vals[120];
 		globals.Resonance=Vals[121];
 		globals.EnvMod=Vals[122];
-	
 		globals.FEGAttack=Vals[123];
 		globals.FEGDecay=Vals[124];
 		globals.FEGSustain=Vals[125];
@@ -427,7 +435,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		{
 			float *xpsamplesleft=psamplesleft;
 			float *xpsamplesright=psamplesright;
-			int xnumsamples=numsamples;
+			int xnumsamples = numsamples;
 
 			--xpsamplesleft;
 			--xpsamplesright;
@@ -439,7 +447,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 				*++xpsamplesleft+=sl;
 				*++xpsamplesright+=sl;
-			
+
 			} while(--xnumsamples);
 		}
 	}
@@ -696,16 +704,16 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		// Global scope synth pattern commands
 		switch(cmd)
 		{
-			case 7: // Change envmod
-				globals.EnvMod=val;
-				break;
-			case 8: // Change cutoff
+		case 7: // Change envmod
+			globals.EnvMod=val;
+			break;
+		case 8: // Change cutoff
 			globals.Cutoff=val>>1;
-				break;
+		break;
 		
-			case 9: // Change reso
+		case 9: // Change reso
 			globals.Resonance=val>>1;
-				break;
+		break;
 		}
 	
 		if(note<=NOTE_MAX)
@@ -713,7 +721,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 			if ( cmd == 0x0C ) track[channel].NoteOn(note-24,&globals,val);
 			else track[channel].NoteOn(note-24,&globals,60);
 		}
-	
+
 		else if(note==NOTE_NOTEOFF)
 			track[channel].NoteOff();
 	}
