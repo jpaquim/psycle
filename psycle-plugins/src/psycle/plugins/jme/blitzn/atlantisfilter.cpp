@@ -17,7 +17,7 @@
 
 
 #include "atlantisfilter.h"
-#define piX2		 6.283185307179586476925286766559f
+#define piX2		 6.283185307179586476925286766559
 
 
 CSIDFilter::CSIDFilter()
@@ -37,10 +37,11 @@ void CSIDFilter::setAlgorithm(eAlgorithm a_algo)
 	m_Algorithm = a_algo;
 }
 
-void CSIDFilter::recalculateCoeffs(const float a_fFrequency, const float a_fFeedback)
+void CSIDFilter::recalculateCoeffs(const float a_fFrequency, const float a_fFeedback, const float sampleRate)
 {
-	//m_f = (200.0f+(17800.0f*6*a_fFrequency))*44100.f/sampleRate*2*PIf/985248.0f;
-	m_f =(1.0f+(534.0f*a_fFrequency))*0.00127545253726566f; 
+	//m_f = (200.0+(17800.0*6.0*a_fFrequency))*44100.0/sampleRate*piX2/985248.0;
+	float newfreq = (a_fFrequency < sampleRate*0.5f)? a_fFrequency : sampleRate *0.5f;
+	m_f =(1.0f+(534.0f*newfreq))*44100.f/sampleRate*0.00127545253726566f; 
 	float f2 = 2.0f*(a_fFeedback-(a_fFrequency*a_fFrequency)); 
 	if (f2 < 0.0f) f2 = 0.0f;
 	m_fb = 1.0f/(0.707f+f2);

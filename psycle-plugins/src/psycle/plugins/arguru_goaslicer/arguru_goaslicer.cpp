@@ -68,8 +68,11 @@ mi::~mi() {
 void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
 		currentSR = pCB->GetSamplingRate();
-		timerSamples = Vals[0]*44100.f/currentSR;
-		slopeAmount = Vals[1]*5.38330078125f/currentSR;
+		//All parameters that are sample rate dependant are corrected here.
+		float multiplier = currentSR/44100.0f;
+
+		timerSamples = Vals[0]*multiplier;
+		slopeAmount = Vals[1]*multiplier/8192.f;
 	}
 	m_Timer = 0;
 	if (muted) {
@@ -84,8 +87,10 @@ void mi::Command() {
 
 void mi::ParameterTweak(int par, int val) {
 	Vals[par] = val;
-	timerSamples = Vals[0]*44100.f/currentSR;
-	slopeAmount = Vals[1]*5.38330078125f/currentSR;
+	//All parameters that are sample rate dependant are corrected here.
+	float multiplier = currentSR/44100.0f;
+	timerSamples = Vals[0]*multiplier;
+	slopeAmount = Vals[1]*44100.f/(8192.f*currentSR);
 }
 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks) {
@@ -134,9 +139,10 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 }
 
 bool mi::DescribeValue(char* txt,int const param, int const value) {
+	float multiplier = currentSR/44100.0f;
 	switch(param) {
 		case 0: {
-			int samp = value*44100.f/currentSR;
+			int samp = value*multiplier;
 			if (samp < pCB->GetTickLength()) {
 				std::sprintf(txt, "%.02f ticks (%dms)", (float)samp/pCB->GetTickLength(), 1000*samp/currentSR);
 			} else {
@@ -145,7 +151,7 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 			return true;
 		}
 		case 1: {
-			int slopms = 1000000/(value*5.38330078125);
+			int slopms = 8192000000/(value*currentSR);
 			std::sprintf(txt, "%d mcs", slopms);
 			return true;
 		}

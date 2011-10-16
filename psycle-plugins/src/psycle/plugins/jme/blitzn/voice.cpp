@@ -64,7 +64,6 @@ CSynthTrack::CSynthTrack() :
 	,curArp(0)
 	,volMulti(0.0f)
 	,currentStereoPos(0)
-	,lfocount(0)
 	,updateCount(1)
 	,timetocompute(FILTER_CALC_TIME)
 	,fltResonance(0.0f)
@@ -121,8 +120,10 @@ CSynthTrack::CSynthTrack() :
 		fmCtl2[1][i]=1.0f;
 	}
 
+	lfoViber.setSkipStep(200);
+
 	arpInput[0]=0;
-	m_filter.init(44100);
+	m_filter.Init(44100);
 	firstGlide = true;
 }
 
@@ -132,7 +133,29 @@ CSynthTrack::~CSynthTrack(){
 void CSynthTrack::InitVoice(VOICEPAR *voicePar){
 	vpar=voicePar;
 }
-
+void CSynthTrack::OnSampleRateChange() {
+	///\todo: use wavetablesize and wtCorrection
+	m_filter.Init(vpar->sampleRate);
+	if (vpar->fltType <= 10) 
+	{
+		m_filter.setfilter(vpar->fltType, vpar->fltCutoff, vpar->fltResonance);
+	}
+	else {
+		a_filter.recalculateCoeffs(((float)vpar->fltCutoff)/256.0f, (float)vpar->fltResonance/256.0f, vpar->sampleRate);
+	}
+	aaf1.Setup(16000, AAF16::lowpass, -3.0f, vpar->sampleRate*vpar->oversamplesAmt);
+	aaf2.Setup(16000, AAF16::lowpass, -3.0f, vpar->sampleRate*vpar->oversamplesAmt);
+	aaf3.Setup(16000, AAF16::lowpass, -3.0f, vpar->sampleRate*vpar->oversamplesAmt);
+	aaf4.Setup(16000, AAF16::lowpass, -3.0f, vpar->sampleRate*vpar->oversamplesAmt);
+	synfx[0].setSampleRate(vpar->sampleRate);
+	synfx[1].setSampleRate(vpar->sampleRate);
+	synfx[2].setSampleRate(vpar->sampleRate);
+	synfx[3].setSampleRate(vpar->sampleRate);
+	lfoViber.setSkipStep(200.f*vpar->sampleRate/44100.f);
+	if (ampEnvStage) {
+		ampEnvStage = 0;
+	}
+}
 void CSynthTrack::ResetSym(){
 	for (int i=0; i<4; i++){
 		if (vpar->oscOptions[i]==10){
@@ -166,8 +189,8 @@ void CSynthTrack::ResetSym(){
 }
 
 void CSynthTrack::NoteTie(int note){
-	note+=6;
-	basenote=note+1.235f;
+	//Compensation for the difference between wavetable size and base note.
+	basenote=note+0.2344f;
 	rsemitone=0.0f;
 	semiglide=0.0f;
 	bend=0;
@@ -210,11 +233,11 @@ void CSynthTrack::NoteOn(int note, VOICEPAR *voicePar, int spd, float velocity){
 	}
 }
 
-void CSynthTrack::changeLfoDepth(int val){
+void CSynthTrack::OnChangeLfoDepth(){
 	lfoViber.setLevel(vpar->lfoDepth);
 }
 
-void CSynthTrack::changeLfoSpeed(int val){
+void CSynthTrack::OnChangeLfoSpeed(){
 	lfoViber.setSpeed(vpar->lfoSpeed);
 }
 
@@ -261,7 +284,7 @@ void CSynthTrack::RealNoteOn(bool arpClear){
 	lfoViber.setDelay(vpar->lfoDelay);
 	lfoViber.reset();
 
-	softenHighNotes=1.0f-((float)pow(2.0,note/12.0)*vpar->ampTrack*0.015625);
+	softenHighNotes=1.0f-((float)pow(2.0,(note-7)/12.0)*vpar->ampTrack*0.015625);
 	if (softenHighNotes < 0.0f) softenHighNotes = 0.0f;
 
 	fxcount=0;
@@ -273,7 +296,8 @@ void CSynthTrack::RealNoteOn(bool arpClear){
 		else DefGlide=float((vpar->globalGlide*vpar->globalGlide)*0.0000625f);
 		DCOglide = DefGlide;
 	}
-	basenote=note+7.235f;
+	//Compensation for the difference between wavetable size and base note.
+	basenote=note+0.2344f;
 	rsemitone=0.0f;
 	semiglide=0.0f;
 	bend=0;
@@ -340,149 +364,54 @@ void CSynthTrack::updateTuning() {
 		}
 	}
 	switch (vpar->lfoDestination) {
-	case 0:				//all osc
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7 ) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+	case 0:
+		//all osc
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], vibadd, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], vibadd, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], vibadd, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], vibadd, modEnv, vpar->oscOptions[3]);
 		break;
 	case 1: // osc 2+3+4
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], vibadd, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], vibadd, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], vibadd, modEnv, vpar->oscOptions[3]);
 		break;
 	case 2: // osc 2+3
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 9)
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], vibadd, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], vibadd, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], 0, modEnv, vpar->oscOptions[3]);
 		break;
 	case 3: // osc 2+4
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], vibadd, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], 0, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], vibadd, modEnv, vpar->oscOptions[3]);
 		break;
 	case 4: // osc 3+4
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], 0, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], vibadd, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], vibadd, modEnv, vpar->oscOptions[3]);
 		break;
 	case 5: // osc 2
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], vibadd, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], 0, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], 0, modEnv, vpar->oscOptions[3]);
 		break;
 	case 6: // osc 3
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(rbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], 0, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], vibadd, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], 0, modEnv, vpar->oscOptions[3]);
 		break;
 	case 7: // osc 4
-		if (vpar->oscOptions[0] != 8 && vpar->oscOptions[0] != 7) 
-		dco1Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[0]+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		else
-		dco1Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[0]+(((modEnv+vpar->globalFine+vpar->oscFine[0])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[1] != 8 && vpar->oscOptions[1] != 7) 
-		dco2Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[1]+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco2Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[1]+(((modEnv+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[2] != 8 && vpar->oscOptions[2] != 7) 
-		dco3Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[2]+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		else
-		dco3Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[2]+(((modEnv+vpar->globalFine+vpar->oscFine[2])*0.0039062f)))/12.0);
-		if (vpar->oscOptions[3] != 8 && vpar->oscOptions[3] != 7) 
-		dco4Pitch=(float)pow(2.0,(bend+rbasenote+rsemitone+oscArpTranspose[3]+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[1])*0.0039062f)))/12.0);
-		else
-		dco4Pitch=(float)pow(2.0,(dbasenote+vpar->globalCoarse+vpar->oscCoarse[3]+(((modEnv+vibadd+vpar->globalFine+vpar->oscFine[3])*0.0039062f)))/12.0);
+		dco1Pitch= getPitch(vpar->oscCoarse[0], vpar->oscFine[0], oscArpTranspose[0], 0, modEnv, vpar->oscOptions[0]);
+		dco2Pitch= getPitch(vpar->oscCoarse[1], vpar->oscFine[1], oscArpTranspose[1], 0, modEnv, vpar->oscOptions[1]);
+		dco3Pitch= getPitch(vpar->oscCoarse[2], vpar->oscFine[2], oscArpTranspose[2], 0, modEnv, vpar->oscOptions[2]);
+		dco4Pitch= getPitch(vpar->oscCoarse[3], vpar->oscFine[3], oscArpTranspose[3], vibadd, modEnv, vpar->oscOptions[3]);
 		break;
 	}
 	rdco1Pitch=freqChange(dco1Pitch);
@@ -1004,12 +933,12 @@ void CSynthTrack::calcWaves(int mask){
 void CSynthTrack::NoteOff()
 {
 	stopRetrig=true;
-	if((ampEnvStage!=4)&(ampEnvStage!=0)){
+	if((ampEnvStage!=4)&&(ampEnvStage!=0)){
 		ampEnvStage=4;
 		ampEnvCoef=(ampEnvValue/(float)vpar->ampR)*speedup;
 		if (ampEnvCoef>minFade) ampEnvCoef=minFade;
 	}
-	if((fltEnvStage!=4)&(fltEnvStage!=0)){
+	if((fltEnvStage!=4)&&(fltEnvStage!=0)){
 		fltEnvStage=4;
 		fltEnvCoef=(fltEnvValue/(float)vpar->fltR)*speedup2;
 		if (fltEnvCoef>minFade) fltEnvCoef=minFade;
@@ -1066,323 +995,329 @@ void CSynthTrack::PerformFx()
 {
 	float shift;
 
+	masterVolume=(float)vpar->globalVolume*volMulti*0.005f;
+	osc1Vol=vpar->oscVolume[0]*masterVolume;
+	osc2Vol=vpar->oscVolume[1]*masterVolume;
+	osc3Vol=vpar->oscVolume[2]*masterVolume;
+	osc4Vol=vpar->oscVolume[3]*masterVolume;
+	rm1Vol=vpar->rm1*masterVolume*0.0001f;
+	rm2Vol=vpar->rm2*masterVolume*0.0001f;
+
 	// Perform tone glide
 	DoGlide();
 
 	if ( ((sp_cmd & 0xF0) == 0xD0) || ((sp_cmd & 0xF0) == 0xE0)) semiglide=sp_gl;
 
-	if ( ((sp_cmd & 0xF0) < 0xC0) & (sp_cmd != 0x0C)) {
-		if (sp_cmd != 0) {
-			arpInput[1] = sp_cmd>>4;
-			arpInput[2] = sp_cmd&0x0f;
-			arpInput[3] = sp_val;
-			switch (vpar->arpPattern) {
-			case 0: // 1oct Up
-				arpList[0]=(float)arpInput[0];
-				arpList[1]=(float)arpInput[1];
-				arpList[2]=(float)arpInput[2];
-				if ((float)arpInput[3] == 0) {
-					arpLen=3;
-				} else {
-					arpLen=4;
-					arpList[3]=(float)arpInput[3];
-				}
-				break;
-			case 1: // 2oct Up
-				arpList[0]=(float)arpInput[0];
-				arpList[1]=(float)arpInput[1];
-				arpList[2]=(float)arpInput[2];
-				if ((float)arpInput[3] == 0) {
-					arpLen=6;
-					arpList[3]=(float)arpInput[0]+12.0f;
-					arpList[4]=(float)arpInput[1]+12.0f;
-					arpList[5]=(float)arpInput[2]+12.0f;
-				} else {
-					arpLen=8;
-					arpList[3]=(float)arpInput[3];
-					arpList[4]=(float)arpInput[0]+12.0f;
-					arpList[5]=(float)arpInput[1]+12.0f;
-					arpList[6]=(float)arpInput[2]+12.0f;
-					arpList[7]=(float)arpInput[3]+12.0f;
-				}
-				break;
-			case 2: // 3oct Up
-				arpList[0]=(float)arpInput[0];
-				arpList[1]=(float)arpInput[1];
-				arpList[2]=(float)arpInput[2];
-				if ((float)arpInput[3] == 0) {
-					arpLen=9;
-					arpList[3]=(float)arpInput[0]+12.0f;
-					arpList[4]=(float)arpInput[1]+12.0f;
-					arpList[5]=(float)arpInput[2]+12.0f;
-					arpList[6]=(float)arpInput[0]+24.0f;
-					arpList[7]=(float)arpInput[1]+24.0f;
-					arpList[8]=(float)arpInput[2]+24.0f;
-				} else {
-					arpLen=12;
-					arpList[3]=(float)arpInput[3];
-					arpList[4]=(float)arpInput[0]+12.0f;
-					arpList[5]=(float)arpInput[1]+12.0f;
-					arpList[6]=(float)arpInput[2]+12.0f;
-					arpList[7]=(float)arpInput[3]+12.0f;
-					arpList[8]=(float)arpInput[0]+24.0f;
-					arpList[9]=(float)arpInput[1]+24.0f;
-					arpList[10]=(float)arpInput[2]+24.0f;
-					arpList[11]=(float)arpInput[3]+24.0f;
-				}
-				break;
-			case 3: // 1oct Down
-				if ((float)arpInput[3] == 0) {
-					arpLen=3;
-					arpList[0]=(float)arpInput[2];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[0];
-				} else {
-					arpLen=4;
-					arpList[0]=(float)arpInput[3];
-					arpList[1]=(float)arpInput[2];
-					arpList[2]=(float)arpInput[1];
-					arpList[3]=(float)arpInput[0];
-				}												
-				break;
-			case 4: // 2oct Down
-				if ((float)arpInput[3] == 0) {
-					arpLen=6;
-					arpList[0]=(float)arpInput[2]+12.0f;
-					arpList[1]=(float)arpInput[1]+12.0f;
-					arpList[2]=(float)arpInput[0]+12.0f;
-					arpList[3]=(float)arpInput[2];
-					arpList[4]=(float)arpInput[1];
-					arpList[5]=(float)arpInput[0];
-				} else {
-					arpLen=8;
-					arpList[0]=(float)arpInput[3]+12.0f;
-					arpList[1]=(float)arpInput[2]+12.0f;
-					arpList[2]=(float)arpInput[1]+12.0f;
-					arpList[3]=(float)arpInput[0]+12.0f;
-					arpList[4]=(float)arpInput[3];
-					arpList[5]=(float)arpInput[2];
-					arpList[6]=(float)arpInput[1];
-					arpList[7]=(float)arpInput[0];
-				}												
-				break;
-			case 5: // 3oct Down
-				if ((float)arpInput[3] == 0) {
-					arpLen=9;
-					arpList[0]=(float)arpInput[2]+24.0f;
-					arpList[1]=(float)arpInput[1]+24.0f;
-					arpList[2]=(float)arpInput[0]+24.0f;
-					arpList[3]=(float)arpInput[2]+12.0f;
-					arpList[4]=(float)arpInput[1]+12.0f;
-					arpList[5]=(float)arpInput[0]+12.0f;
-					arpList[6]=(float)arpInput[2];
-					arpList[7]=(float)arpInput[1];
-					arpList[8]=(float)arpInput[0];
-				} else {
-					arpLen=12;
-					arpList[0]=(float)arpInput[3]+24.0f;
-					arpList[1]=(float)arpInput[2]+24.0f;
-					arpList[2]=(float)arpInput[1]+24.0f;
-					arpList[3]=(float)arpInput[0]+24.0f;
-					arpList[4]=(float)arpInput[3]+12.0f;
-					arpList[5]=(float)arpInput[2]+12.0f;
-					arpList[6]=(float)arpInput[1]+12.0f;
-					arpList[7]=(float)arpInput[0]+12.0f;
-					arpList[8]=(float)arpInput[3];
-					arpList[9]=(float)arpInput[2];
-					arpList[10]=(float)arpInput[1];
-					arpList[11]=(float)arpInput[0];
-				}												
-				break;
-			case 6: // 1oct Up/Down
-				if ((float)arpInput[3] == 0) {
-					arpLen=4;
-					arpList[0]=(float)arpInput[0];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[2];
-					arpList[3]=(float)arpInput[1];
-				} else {
-					arpLen=6;
-					arpList[0]=(float)arpInput[0];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[2];
-					arpList[3]=(float)arpInput[3];
-					arpList[4]=(float)arpInput[2];
-					arpList[5]=(float)arpInput[1];
-				}												
-				break;
-			case 7: // 2oct Up/Down
-				if ((float)arpInput[3] == 0) {
-					arpLen=10;
-					arpList[0]=(float)arpInput[0];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[2];
-					arpList[3]=(float)arpInput[0]+12.0f;
-					arpList[4]=(float)arpInput[1]+12.0f;
-					arpList[5]=(float)arpInput[2]+12.0f;
-					arpList[6]=(float)arpInput[1]+12.0f;
-					arpList[7]=(float)arpInput[0]+12.0f;
-					arpList[8]=(float)arpInput[2];
-					arpList[9]=(float)arpInput[1];
-				} else {
-					arpLen=14;
-					arpList[0]=(float)arpInput[0];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[2];
-					arpList[3]=(float)arpInput[3];
-					arpList[4]=(float)arpInput[0]+12.0f;
-					arpList[5]=(float)arpInput[1]+12.0f;
-					arpList[6]=(float)arpInput[2]+12.0f;
-					arpList[7]=(float)arpInput[3]+12.0f;
-					arpList[8]=(float)arpInput[2]+12.0f;
-					arpList[9]=(float)arpInput[1]+12.0f;
-					arpList[10]=(float)arpInput[0]+12.0f;
-					arpList[11]=(float)arpInput[3];
-					arpList[12]=(float)arpInput[2];
-					arpList[13]=(float)arpInput[1];
-				}												
-				break;
-			case 8: // 3oct Up/Down
-				if ((float)arpInput[3] == 0) {
-					arpLen=16;
-					arpList[0]=(float)arpInput[0];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[2];
-					arpList[3]=(float)arpInput[0]+12.0f;
-					arpList[4]=(float)arpInput[1]+12.0f;
-					arpList[5]=(float)arpInput[2]+12.0f;
-					arpList[6]=(float)arpInput[0]+24.0f;
-					arpList[7]=(float)arpInput[1]+24.0f;
-					arpList[8]=(float)arpInput[2]+24.0f;
-					arpList[9]=(float)arpInput[1]+24.0f;
-					arpList[10]=(float)arpInput[0]+24.0f;
-					arpList[11]=(float)arpInput[2]+12.0f;
-					arpList[12]=(float)arpInput[1]+12.0f;
-					arpList[13]=(float)arpInput[0]+12.0f;
-					arpList[14]=(float)arpInput[2];
-					arpList[15]=(float)arpInput[1];
-				} else {
-					arpLen=22;
-					arpList[0]=(float)arpInput[0];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[2];
-					arpList[3]=(float)arpInput[3];
-					arpList[4]=(float)arpInput[0]+12.0f;
-					arpList[5]=(float)arpInput[1]+12.0f;
-					arpList[6]=(float)arpInput[2]+12.0f;
-					arpList[7]=(float)arpInput[3]+12.0f;
-					arpList[8]=(float)arpInput[0]+24.0f;
-					arpList[9]=(float)arpInput[1]+24.0f;
-					arpList[10]=(float)arpInput[2]+24.0f;
-					arpList[11]=(float)arpInput[3]+24.0f;
-					arpList[12]=(float)arpInput[2]+24.0f;
-					arpList[13]=(float)arpInput[1]+24.0f;
-					arpList[14]=(float)arpInput[0]+24.0f;
-					arpList[15]=(float)arpInput[3]+12.0f;
-					arpList[16]=(float)arpInput[2]+12.0f;
-					arpList[17]=(float)arpInput[1]+12.0f;
-					arpList[18]=(float)arpInput[0]+12.0f;
-					arpList[19]=(float)arpInput[3];
-					arpList[20]=(float)arpInput[2];
-					arpList[21]=(float)arpInput[1];
-				}												
-				break;
-			case 9: //1oct Down/Up
-				if ((float)arpInput[3] == 0) {
-					arpLen=4;
-					arpList[0]=(float)arpInput[2];
-					arpList[1]=(float)arpInput[1];
-					arpList[2]=(float)arpInput[0];
-					arpList[3]=(float)arpInput[1];
-				} else {
-					arpLen=6;
-					arpList[0]=(float)arpInput[3];
-					arpList[1]=(float)arpInput[2];
-					arpList[2]=(float)arpInput[1];
-					arpList[3]=(float)arpInput[0];
-					arpList[4]=(float)arpInput[1];
-					arpList[5]=(float)arpInput[2];
-				}												
-				break;
-			case 10: //2oct Down/Up
-				if ((float)arpInput[3] == 0) {
-					arpLen=10;
-					arpList[0]=(float)arpInput[2]+12.0f;
-					arpList[1]=(float)arpInput[1]+12.0f;
-					arpList[2]=(float)arpInput[0]+12.0f;
-					arpList[3]=(float)arpInput[2];
-					arpList[4]=(float)arpInput[1];
-					arpList[5]=(float)arpInput[0];
-					arpList[6]=(float)arpInput[1];
-					arpList[7]=(float)arpInput[2];
-					arpList[8]=(float)arpInput[0]+12.0f;
-					arpList[9]=(float)arpInput[1]+12.0f;
-				} else {
-					arpLen=14;
-					arpList[0]=(float)arpInput[3]+12.0f;
-					arpList[1]=(float)arpInput[2]+12.0f;
-					arpList[2]=(float)arpInput[1]+12.0f;
-					arpList[3]=(float)arpInput[0]+12.0f;
-					arpList[4]=(float)arpInput[3];
-					arpList[5]=(float)arpInput[2];
-					arpList[6]=(float)arpInput[1];
-					arpList[7]=(float)arpInput[0];
-					arpList[8]=(float)arpInput[1];
-					arpList[9]=(float)arpInput[2];
-					arpList[10]=(float)arpInput[3];
-					arpList[11]=(float)arpInput[0]+12.0f;
-					arpList[12]=(float)arpInput[1]+12.0f;
-					arpList[13]=(float)arpInput[2]+12.0f;
-				}												
-				break;
-			case 11: //3oct Down/Up
-				if ((float)arpInput[3] == 0) {
-					arpLen=16;
-					arpList[0]=(float)arpInput[2]+24.0f;
-					arpList[1]=(float)arpInput[1]+24.0f;
-					arpList[2]=(float)arpInput[0]+24.0f;
-					arpList[3]=(float)arpInput[2]+12.0f;
-					arpList[4]=(float)arpInput[1]+12.0f;
-					arpList[5]=(float)arpInput[0]+12.0f;
-					arpList[6]=(float)arpInput[2];
-					arpList[7]=(float)arpInput[1];
-					arpList[8]=(float)arpInput[0];
-					arpList[9]=(float)arpInput[1];
-					arpList[10]=(float)arpInput[2];
-					arpList[11]=(float)arpInput[0]+12.0f;
-					arpList[12]=(float)arpInput[1]+12.0f;
-					arpList[13]=(float)arpInput[2]+12.0f;
-					arpList[14]=(float)arpInput[0]+24.0f;
-					arpList[15]=(float)arpInput[1]+24.0f;
-				} else {
-					arpLen=6;
-					arpList[0]=(float)arpInput[3]+24.0f;
-					arpList[1]=(float)arpInput[2]+24.0f;
-					arpList[2]=(float)arpInput[1]+24.0f;
-					arpList[3]=(float)arpInput[0]+24.0f;
-					arpList[4]=(float)arpInput[3]+12.0f;
-					arpList[5]=(float)arpInput[2]+12.0f;
-					arpList[6]=(float)arpInput[1]+12.0f;
-					arpList[7]=(float)arpInput[0]+12.0f;
-					arpList[8]=(float)arpInput[3];
-					arpList[9]=(float)arpInput[2];
-					arpList[10]=(float)arpInput[1];
-					arpList[11]=(float)arpInput[0];
-					arpList[12]=(float)arpInput[1];
-					arpList[13]=(float)arpInput[2];
-					arpList[14]=(float)arpInput[3];
-					arpList[15]=(float)arpInput[0]+12.0f;
-					arpList[16]=(float)arpInput[1]+12.0f;
-					arpList[17]=(float)arpInput[2]+12.0f;
-					arpList[18]=(float)arpInput[3]+12.0f;
-					arpList[19]=(float)arpInput[0]+24.0f;
-					arpList[20]=(float)arpInput[1]+24.0f;
-					arpList[21]=(float)arpInput[2]+24.0f;
-				}												
-				break;
+	if ( ((sp_cmd & 0xF0) < 0xC0) && (sp_cmd != 0x0C) && (sp_cmd != 0)) {
+		arpInput[1] = sp_cmd>>4;
+		arpInput[2] = sp_cmd&0x0f;
+		arpInput[3] = sp_val;
+		switch (vpar->arpPattern) {
+		case 0: // 1oct Up
+			arpList[0]=(float)arpInput[0];
+			arpList[1]=(float)arpInput[1];
+			arpList[2]=(float)arpInput[2];
+			if ((float)arpInput[3] == 0) {
+				arpLen=3;
+			} else {
+				arpLen=4;
+				arpList[3]=(float)arpInput[3];
 			}
-			updateTuning(); // not very good here but still ok
+			break;
+		case 1: // 2oct Up
+			arpList[0]=(float)arpInput[0];
+			arpList[1]=(float)arpInput[1];
+			arpList[2]=(float)arpInput[2];
+			if ((float)arpInput[3] == 0) {
+				arpLen=6;
+				arpList[3]=(float)arpInput[0]+12.0f;
+				arpList[4]=(float)arpInput[1]+12.0f;
+				arpList[5]=(float)arpInput[2]+12.0f;
+			} else {
+				arpLen=8;
+				arpList[3]=(float)arpInput[3];
+				arpList[4]=(float)arpInput[0]+12.0f;
+				arpList[5]=(float)arpInput[1]+12.0f;
+				arpList[6]=(float)arpInput[2]+12.0f;
+				arpList[7]=(float)arpInput[3]+12.0f;
+			}
+			break;
+		case 2: // 3oct Up
+			arpList[0]=(float)arpInput[0];
+			arpList[1]=(float)arpInput[1];
+			arpList[2]=(float)arpInput[2];
+			if ((float)arpInput[3] == 0) {
+				arpLen=9;
+				arpList[3]=(float)arpInput[0]+12.0f;
+				arpList[4]=(float)arpInput[1]+12.0f;
+				arpList[5]=(float)arpInput[2]+12.0f;
+				arpList[6]=(float)arpInput[0]+24.0f;
+				arpList[7]=(float)arpInput[1]+24.0f;
+				arpList[8]=(float)arpInput[2]+24.0f;
+			} else {
+				arpLen=12;
+				arpList[3]=(float)arpInput[3];
+				arpList[4]=(float)arpInput[0]+12.0f;
+				arpList[5]=(float)arpInput[1]+12.0f;
+				arpList[6]=(float)arpInput[2]+12.0f;
+				arpList[7]=(float)arpInput[3]+12.0f;
+				arpList[8]=(float)arpInput[0]+24.0f;
+				arpList[9]=(float)arpInput[1]+24.0f;
+				arpList[10]=(float)arpInput[2]+24.0f;
+				arpList[11]=(float)arpInput[3]+24.0f;
+			}
+			break;
+		case 3: // 1oct Down
+			if ((float)arpInput[3] == 0) {
+				arpLen=3;
+				arpList[0]=(float)arpInput[2];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[0];
+			} else {
+				arpLen=4;
+				arpList[0]=(float)arpInput[3];
+				arpList[1]=(float)arpInput[2];
+				arpList[2]=(float)arpInput[1];
+				arpList[3]=(float)arpInput[0];
+			}												
+			break;
+		case 4: // 2oct Down
+			if ((float)arpInput[3] == 0) {
+				arpLen=6;
+				arpList[0]=(float)arpInput[2]+12.0f;
+				arpList[1]=(float)arpInput[1]+12.0f;
+				arpList[2]=(float)arpInput[0]+12.0f;
+				arpList[3]=(float)arpInput[2];
+				arpList[4]=(float)arpInput[1];
+				arpList[5]=(float)arpInput[0];
+			} else {
+				arpLen=8;
+				arpList[0]=(float)arpInput[3]+12.0f;
+				arpList[1]=(float)arpInput[2]+12.0f;
+				arpList[2]=(float)arpInput[1]+12.0f;
+				arpList[3]=(float)arpInput[0]+12.0f;
+				arpList[4]=(float)arpInput[3];
+				arpList[5]=(float)arpInput[2];
+				arpList[6]=(float)arpInput[1];
+				arpList[7]=(float)arpInput[0];
+			}												
+			break;
+		case 5: // 3oct Down
+			if ((float)arpInput[3] == 0) {
+				arpLen=9;
+				arpList[0]=(float)arpInput[2]+24.0f;
+				arpList[1]=(float)arpInput[1]+24.0f;
+				arpList[2]=(float)arpInput[0]+24.0f;
+				arpList[3]=(float)arpInput[2]+12.0f;
+				arpList[4]=(float)arpInput[1]+12.0f;
+				arpList[5]=(float)arpInput[0]+12.0f;
+				arpList[6]=(float)arpInput[2];
+				arpList[7]=(float)arpInput[1];
+				arpList[8]=(float)arpInput[0];
+			} else {
+				arpLen=12;
+				arpList[0]=(float)arpInput[3]+24.0f;
+				arpList[1]=(float)arpInput[2]+24.0f;
+				arpList[2]=(float)arpInput[1]+24.0f;
+				arpList[3]=(float)arpInput[0]+24.0f;
+				arpList[4]=(float)arpInput[3]+12.0f;
+				arpList[5]=(float)arpInput[2]+12.0f;
+				arpList[6]=(float)arpInput[1]+12.0f;
+				arpList[7]=(float)arpInput[0]+12.0f;
+				arpList[8]=(float)arpInput[3];
+				arpList[9]=(float)arpInput[2];
+				arpList[10]=(float)arpInput[1];
+				arpList[11]=(float)arpInput[0];
+			}												
+			break;
+		case 6: // 1oct Up/Down
+			if ((float)arpInput[3] == 0) {
+				arpLen=4;
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				arpList[3]=(float)arpInput[1];
+			} else {
+				arpLen=6;
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				arpList[3]=(float)arpInput[3];
+				arpList[4]=(float)arpInput[2];
+				arpList[5]=(float)arpInput[1];
+			}												
+			break;
+		case 7: // 2oct Up/Down
+			if ((float)arpInput[3] == 0) {
+				arpLen=10;
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				arpList[3]=(float)arpInput[0]+12.0f;
+				arpList[4]=(float)arpInput[1]+12.0f;
+				arpList[5]=(float)arpInput[2]+12.0f;
+				arpList[6]=(float)arpInput[1]+12.0f;
+				arpList[7]=(float)arpInput[0]+12.0f;
+				arpList[8]=(float)arpInput[2];
+				arpList[9]=(float)arpInput[1];
+			} else {
+				arpLen=14;
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				arpList[3]=(float)arpInput[3];
+				arpList[4]=(float)arpInput[0]+12.0f;
+				arpList[5]=(float)arpInput[1]+12.0f;
+				arpList[6]=(float)arpInput[2]+12.0f;
+				arpList[7]=(float)arpInput[3]+12.0f;
+				arpList[8]=(float)arpInput[2]+12.0f;
+				arpList[9]=(float)arpInput[1]+12.0f;
+				arpList[10]=(float)arpInput[0]+12.0f;
+				arpList[11]=(float)arpInput[3];
+				arpList[12]=(float)arpInput[2];
+				arpList[13]=(float)arpInput[1];
+			}												
+			break;
+		case 8: // 3oct Up/Down
+			if ((float)arpInput[3] == 0) {
+				arpLen=16;
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				arpList[3]=(float)arpInput[0]+12.0f;
+				arpList[4]=(float)arpInput[1]+12.0f;
+				arpList[5]=(float)arpInput[2]+12.0f;
+				arpList[6]=(float)arpInput[0]+24.0f;
+				arpList[7]=(float)arpInput[1]+24.0f;
+				arpList[8]=(float)arpInput[2]+24.0f;
+				arpList[9]=(float)arpInput[1]+24.0f;
+				arpList[10]=(float)arpInput[0]+24.0f;
+				arpList[11]=(float)arpInput[2]+12.0f;
+				arpList[12]=(float)arpInput[1]+12.0f;
+				arpList[13]=(float)arpInput[0]+12.0f;
+				arpList[14]=(float)arpInput[2];
+				arpList[15]=(float)arpInput[1];
+			} else {
+				arpLen=22;
+				arpList[0]=(float)arpInput[0];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[2];
+				arpList[3]=(float)arpInput[3];
+				arpList[4]=(float)arpInput[0]+12.0f;
+				arpList[5]=(float)arpInput[1]+12.0f;
+				arpList[6]=(float)arpInput[2]+12.0f;
+				arpList[7]=(float)arpInput[3]+12.0f;
+				arpList[8]=(float)arpInput[0]+24.0f;
+				arpList[9]=(float)arpInput[1]+24.0f;
+				arpList[10]=(float)arpInput[2]+24.0f;
+				arpList[11]=(float)arpInput[3]+24.0f;
+				arpList[12]=(float)arpInput[2]+24.0f;
+				arpList[13]=(float)arpInput[1]+24.0f;
+				arpList[14]=(float)arpInput[0]+24.0f;
+				arpList[15]=(float)arpInput[3]+12.0f;
+				arpList[16]=(float)arpInput[2]+12.0f;
+				arpList[17]=(float)arpInput[1]+12.0f;
+				arpList[18]=(float)arpInput[0]+12.0f;
+				arpList[19]=(float)arpInput[3];
+				arpList[20]=(float)arpInput[2];
+				arpList[21]=(float)arpInput[1];
+			}												
+			break;
+		case 9: //1oct Down/Up
+			if ((float)arpInput[3] == 0) {
+				arpLen=4;
+				arpList[0]=(float)arpInput[2];
+				arpList[1]=(float)arpInput[1];
+				arpList[2]=(float)arpInput[0];
+				arpList[3]=(float)arpInput[1];
+			} else {
+				arpLen=6;
+				arpList[0]=(float)arpInput[3];
+				arpList[1]=(float)arpInput[2];
+				arpList[2]=(float)arpInput[1];
+				arpList[3]=(float)arpInput[0];
+				arpList[4]=(float)arpInput[1];
+				arpList[5]=(float)arpInput[2];
+			}												
+			break;
+		case 10: //2oct Down/Up
+			if ((float)arpInput[3] == 0) {
+				arpLen=10;
+				arpList[0]=(float)arpInput[2]+12.0f;
+				arpList[1]=(float)arpInput[1]+12.0f;
+				arpList[2]=(float)arpInput[0]+12.0f;
+				arpList[3]=(float)arpInput[2];
+				arpList[4]=(float)arpInput[1];
+				arpList[5]=(float)arpInput[0];
+				arpList[6]=(float)arpInput[1];
+				arpList[7]=(float)arpInput[2];
+				arpList[8]=(float)arpInput[0]+12.0f;
+				arpList[9]=(float)arpInput[1]+12.0f;
+			} else {
+				arpLen=14;
+				arpList[0]=(float)arpInput[3]+12.0f;
+				arpList[1]=(float)arpInput[2]+12.0f;
+				arpList[2]=(float)arpInput[1]+12.0f;
+				arpList[3]=(float)arpInput[0]+12.0f;
+				arpList[4]=(float)arpInput[3];
+				arpList[5]=(float)arpInput[2];
+				arpList[6]=(float)arpInput[1];
+				arpList[7]=(float)arpInput[0];
+				arpList[8]=(float)arpInput[1];
+				arpList[9]=(float)arpInput[2];
+				arpList[10]=(float)arpInput[3];
+				arpList[11]=(float)arpInput[0]+12.0f;
+				arpList[12]=(float)arpInput[1]+12.0f;
+				arpList[13]=(float)arpInput[2]+12.0f;
+			}												
+			break;
+		case 11: //3oct Down/Up
+			if ((float)arpInput[3] == 0) {
+				arpLen=16;
+				arpList[0]=(float)arpInput[2]+24.0f;
+				arpList[1]=(float)arpInput[1]+24.0f;
+				arpList[2]=(float)arpInput[0]+24.0f;
+				arpList[3]=(float)arpInput[2]+12.0f;
+				arpList[4]=(float)arpInput[1]+12.0f;
+				arpList[5]=(float)arpInput[0]+12.0f;
+				arpList[6]=(float)arpInput[2];
+				arpList[7]=(float)arpInput[1];
+				arpList[8]=(float)arpInput[0];
+				arpList[9]=(float)arpInput[1];
+				arpList[10]=(float)arpInput[2];
+				arpList[11]=(float)arpInput[0]+12.0f;
+				arpList[12]=(float)arpInput[1]+12.0f;
+				arpList[13]=(float)arpInput[2]+12.0f;
+				arpList[14]=(float)arpInput[0]+24.0f;
+				arpList[15]=(float)arpInput[1]+24.0f;
+			} else {
+				arpLen=22;
+				arpList[0]=(float)arpInput[3]+24.0f;
+				arpList[1]=(float)arpInput[2]+24.0f;
+				arpList[2]=(float)arpInput[1]+24.0f;
+				arpList[3]=(float)arpInput[0]+24.0f;
+				arpList[4]=(float)arpInput[3]+12.0f;
+				arpList[5]=(float)arpInput[2]+12.0f;
+				arpList[6]=(float)arpInput[1]+12.0f;
+				arpList[7]=(float)arpInput[0]+12.0f;
+				arpList[8]=(float)arpInput[3];
+				arpList[9]=(float)arpInput[2];
+				arpList[10]=(float)arpInput[1];
+				arpList[11]=(float)arpInput[0];
+				arpList[12]=(float)arpInput[1];
+				arpList[13]=(float)arpInput[2];
+				arpList[14]=(float)arpInput[3];
+				arpList[15]=(float)arpInput[0]+12.0f;
+				arpList[16]=(float)arpInput[1]+12.0f;
+				arpList[17]=(float)arpInput[2]+12.0f;
+				arpList[18]=(float)arpInput[3]+12.0f;
+				arpList[19]=(float)arpInput[0]+24.0f;
+				arpList[20]=(float)arpInput[1]+24.0f;
+				arpList[21]=(float)arpInput[2]+24.0f;
+			}												
+			break;
 		}
+		updateTuning(); // not very good here but still ok
 	} else {
 		switch (sp_cmd) {
 			/* 0xC1 : Pitch Up */
@@ -1436,6 +1371,12 @@ void CSynthTrack::PerformFx()
 			break;
 		}
 	}
+
+	if (!vpar->lfoDelay && vpar->syncvibe!=lfoViberLast){
+		lfoViberLast=vpar->syncvibe;
+		updateTuning();
+	}
+
 }
 
 void CSynthTrack::InitEffect(int cmd, int val)

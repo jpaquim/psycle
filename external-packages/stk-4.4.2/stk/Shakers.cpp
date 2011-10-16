@@ -359,8 +359,8 @@ void Shakers :: setFinalZs( StkFloat z0, StkFloat z1, StkFloat z2 )
 
 void Shakers :: setDecays( StkFloat sndDecay, StkFloat sysDecay )
 {
-  soundDecay_ = sndDecay;
-  systemDecay_ = sysDecay;
+	soundDecay_ = std::pow(sndDecay,44100.f/Stk::sampleRate());;
+	systemDecay_ = std::pow(sysDecay,44100.f/Stk::sampleRate());
 }
 
 int Shakers :: setFreqAndReson( int which, StkFloat freq, StkFloat reson )
@@ -920,6 +920,7 @@ void Shakers :: controlChange( int number, StkFloat value )
       systemDecay_ = defDecays_[instType_] + ((value - 64.0) *
                                            decayScale_[instType_] *
                                            (1.0 - defDecays_[instType_]) / 64.0 );
+	  systemDecay_ = std::pow(systemDecay_ ,44100.f/Stk::sampleRate());
       gains_[0] = log(nObjects_) * baseGain_ / (StkFloat) nObjects_;
       for (i=1;i<nFreqs_;i++) gains_[i] = gains_[0];
       if (instType_ == 6) { // tambourine

@@ -51,7 +51,9 @@ v0.01b
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers::math;
 
-#define PLUGIN_NAME "Pooplog Filter 0.06b"
+#define PLUGIN_NAME "Pooplog Filter "
+#define PLUGIN_VERSION "0.06b"
+int const IPLUGIN_VERSION =0x0006;
 
 #define SYNTH_REMAP_0 24
 #define FILEVERSION 2
@@ -137,11 +139,11 @@ CMachineParameter const *pParameters[] =
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
-	0x0006,
+	IPLUGIN_VERSION,
 	EFFECT,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	PLUGIN_NAME,
+	PLUGIN_NAME PLUGIN_VERSION,
 	"Pooplog Filter",
 	"Jeremy Evers",
 	"About",
@@ -309,12 +311,12 @@ void mi::Init()
 	thisMin = 0;
 	nextMax = 0;
 	thisMax = 0;
-	/// Changed from 0 to 1 to avoid a "division by zero" problem.
+	/// Changed from 0 to 1 to avoid a "division by zero" problem
 	/// in HandleOverdrive w1 = SAMPLE_LENGTH/(thisMinCount+thisMaxCount-w2);
 	/// I don't know what the real solution would be
 	nextMinCount = 1;
 	thisMinCount = 1;
-	/// Changed from 0 to 1 to avoid a "division by zero" problem.
+	/// Changed from 0 to 1 to avoid a "division by zero" problem
 	/// in HandleOverdrive() { w1 = SAMPLE_LENGTH/(thisMinCount+thisMaxCount-w2); }
 	/// I don't know what the real solution would be
 	nextMaxCount = 1;

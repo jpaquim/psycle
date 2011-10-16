@@ -17,106 +17,112 @@
 */
 
 #include "blitz.h"
+#include <psycle/helpers/math.hpp>
 #include <cstdio>
 
 using namespace psycle::plugin_interface;
+using namespace psycle::helpers::math;
 
-CMachineParameter const paraGlobal = {"Global", "Global", 0, 1, MPF_STATE||MPF_LABEL, 0};
+#define BLITZ_VERSION "1.6"
+int const IBLITZ_VERSION =0x0160;
+
+
+CMachineParameter const paraGlobal = {"Global", "Global", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraGlobalVolume = {"Volume", "Volume", 0, 256, MPF_STATE, 128};
 CMachineParameter const paraGlobalCoarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
 CMachineParameter const paraGlobalFine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
 CMachineParameter const paraGlobalGlide = {"Glide", "Glide", 0, 255, MPF_STATE, 0};
 CMachineParameter const paraGlobalStereo = {"Stereo Switching", "Stereo Switching", 0, 256, MPF_STATE, 0};
 
-CMachineParameter const paraArpeggiator = {"Arpeggiator", "Arpeggiator", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraArpeggiator = {"Arpeggiator", "Arpeggiator", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraArpPattern = {"Pattern", "Pattern", 0, 11, MPF_STATE, 0};
 CMachineParameter const paraArpSpeed = {"Speed", "Speed", 1, 256, MPF_STATE, 24};
 CMachineParameter const paraArpShuffle = {"Shuffle", "Shuffle", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraArpRetrig = { "Retrig", "Retrig", 0, 2, MPF_STATE, 0};
 
-CMachineParameter const paraLfo = {"LFO", "LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraLfo = {"LFO", "LFO", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraLfoDelay = {"Delay", "Delay", 0, 999, MPF_STATE, 0};
 CMachineParameter const paraLfoDepth = {"Depth", "Depth", -999, 999, MPF_STATE, 0};
 CMachineParameter const paraLfoSpeed = {"Speed", "Speed", 0, 999, MPF_STATE, 0};
 CMachineParameter const paraLfoDestination = {"Destination Oscillators", "Destination Oscillators", 0, 7, MPF_STATE, 0};
 
-CMachineParameter const paraOsc1 = {"Oscillator 1", "Oscillator 1", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1 = {"Oscillator 1", "Oscillator 1", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc1Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 128};
 CMachineParameter const paraOsc1Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
 CMachineParameter const paraOsc1Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc1Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
 CMachineParameter const paraOsc1Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc1Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
-CMachineParameter const paraOsc1Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1Func = {"Function", "Function", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc1FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
 CMachineParameter const paraOsc1FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
-CMachineParameter const paraOsc1SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc1SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc1SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraOsc1SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc1SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc1SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc1SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
 
-CMachineParameter const paraOsc2 = {"Oscillator 2", "Oscillator 2", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2 = {"Oscillator 2", "Oscillator 2", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc2Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc2Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
 CMachineParameter const paraOsc2Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc2Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
 CMachineParameter const paraOsc2Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc2Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
-CMachineParameter const paraOsc2Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2Func = {"Function", "Function", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc2FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
 CMachineParameter const paraOsc2FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
-CMachineParameter const paraOsc2SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc2SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc2SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraOsc2SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc2SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc2SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc2SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
 
-CMachineParameter const paraOsc3 = {"Oscillator 3", "Oscillator 3", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3 = {"Oscillator 3", "Oscillator 3", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc3Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc3Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
 CMachineParameter const paraOsc3Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc3Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
 CMachineParameter const paraOsc3Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc3Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
-CMachineParameter const paraOsc3Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3Func = {"Function", "Function", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc3FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
 CMachineParameter const paraOsc3FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
-CMachineParameter const paraOsc3SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc3SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc3SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraOsc3SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc3SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc3SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc3SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
 
-CMachineParameter const paraOsc4 = {"Oscillator 4", "Oscillator 4", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4 = {"Oscillator 4", "Oscillator 4", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc4Volume = {"Volume", "Volume", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc4Coarse = {"Coarse", "Coarse", -60, 60, MPF_STATE, 0};
 CMachineParameter const paraOsc4Fine = {"Fine", "Fine", -256, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc4Waveform = {"Waveform", "Waveform", 0, 37, MPF_STATE, 0};
 CMachineParameter const paraOsc4Feedback = {"Feedback", "Feedback", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraOsc4Options = {"Options", "Options", 0, 13, MPF_STATE, 0};
-CMachineParameter const paraOsc4Func = {"Function", "Function", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4Func = {"Function", "Function", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc4FuncType = {"Type", "Type", 0, 54, MPF_STATE, 0};
 CMachineParameter const paraOsc4FuncSym = {"Symmetry", "Symmetry", 0, 2047, MPF_STATE, 1024};
-CMachineParameter const paraOsc4SymDrift = {"Symmetry Drift", "Symmetry Drift", -2047, 2047, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4SymDrift = {"Symmetry Drift", "Symmetry Drift", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc4SymDriftRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc4SymDriftSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraOsc4SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraOsc4SymLfo = {"Symmetry LFO", "Symmetry LFO", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraOsc4SymLfoRange = {"Range", "Range", -2047, 2047, MPF_STATE, 0};
 CMachineParameter const paraOsc4SymLfoSpeed = {"Speed", "Speed", 0, 256, MPF_STATE, 0};
 
-CMachineParameter const paraRM = {"Ring Modulators", "Ring Modulators", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraRM = {"Ring Modulators", "Ring Modulators", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraRM1 = {"RM 1/2 Volume", "RM 1/2 Volume", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraRM2 = {"RM 3/4 Volume", "RM 3/4 Volume", 0, 256, MPF_STATE, 0};
-CMachineParameter const paraPitch = {"Pitch Mod", "Pitch Mod", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraPitch = {"Pitch Mod", "Pitch Mod", 0, 0, MPF_LABEL, 0};
 
 CMachineParameter const paraModA = {"Envelope Attack", "Envelope Attack", 1, MAX_ENV_TIME>>3, MPF_STATE, 1};
 CMachineParameter const paraModD = {"Envelope Decay", "Envelope Decay", 1, MAX_ENV_TIME>>3, MPF_STATE, 1};
 CMachineParameter const paraModEnvAmount = {"Envelope Amount", "Envelope Amount", -256, 256, MPF_STATE, 0};
-CMachineParameter const paraAmp = {"Amplifier Envelope", "Amplifier Envelope", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraAmp = {"Amplifier Envelope", "Amplifier Envelope", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraAmpA = {"Attack", "Attack", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, MIN_ENV_TIME};
 CMachineParameter const paraAmpD = {"Decay", "Decay", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 4096};
 CMachineParameter const paraAmpS = {"Sustain", "Sustain", 0, 255, MPF_STATE, 224};
@@ -126,14 +132,14 @@ CMachineParameter const paraAmpScaling = {"Key Scaling", "Key Scaling", 0, 256, 
 CMachineParameter const paraAmpVelocity = {"Velocity", "Velocity", 0, 256, MPF_STATE, 256};
 CMachineParameter const paraAmpTrack = {"Soften High Notes", "Soften High Notes", 0, 256, MPF_STATE, 64};
 
-CMachineParameter const paraFlt = {"Filter", "Filter", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraFlt = {"Filter", "Filter", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraFltType = {"Type", "Type", 0, 17, MPF_STATE, 0};
 CMachineParameter const paraFltCutoff = {"Cutoff", "Cutoff", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraFltResonance = {"Resonance", "Resonance", 0, 256, MPF_STATE, 0};
 CMachineParameter const paraFltTrack = {"Track", "Track", -64, 64, MPF_STATE, 5};
 CMachineParameter const paraFltSweep = {"Sweep", "Sweep", -999, 999, MPF_STATE, 0};
 CMachineParameter const paraFltSpeed = {"Speed", "Speed", 0, 999, MPF_STATE, 0};
-CMachineParameter const paraFltEnv = {"Filter Envelope", "Filter Envelope", 0, 1, MPF_STATE||MPF_LABEL, 0};
+CMachineParameter const paraFltEnv = {"Filter Envelope", "Filter Envelope", 0, 0, MPF_LABEL, 0};
 CMachineParameter const paraFltA = {"Attack", "Attack", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, MIN_ENV_TIME};
 CMachineParameter const paraFltD = {"Decay", "Decay", MIN_ENV_TIME, MAX_ENV_TIME, MPF_STATE, 4096};
 CMachineParameter const paraFltS = {"Sustain", "Sustain", 0, 255, MPF_STATE, 0};
@@ -289,11 +295,11 @@ CMachineParameter const *pParameters[] = {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
-	0x0150,
+	IBLITZ_VERSION,
 	GENERATOR,								
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
-	"Blitz"
+	"Blitz " BLITZ_VERSION
 	#ifndef NDEBUG
 		" (Debug build)"
 	#endif
@@ -309,37 +315,74 @@ PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo) // To export DLL functions to host
 mi::mi()
 {
 	Vals=new int[MacInfo.numParameters];
+	memset(&globals,0,sizeof(VOICEPAR));
+	for (int c=0;c<MAX_TRACKS;c++) {
+		track[c].InitVoice(&globals);
+	}
+	//this prevents a warning in valgrind when calling parameterTweak
+	for(int i=0; i < MacInfo.numParameters; i++) {
+		Vals[i]=0;
+	}
 	InitWaveTable();
+	fxsamples=256;
 }
 
 mi::~mi()
 {
 	delete[] Vals;
+	// Destroy dinamically allocated objects/memory here
 }
 
 void mi::Init()
 {
-	for(int i(0);i<4;++i) globals.oscSymDrift[i]=0;
+	// Initialize your stuff here (you can use pCB here without worries)
+	globals.sampleRate = pCB->GetSamplingRate();
+	globals.srCorrection = 44100.0f / (float)globals.sampleRate;
+	globals.wavetableCorrection=44100.f/globals.sampleRate;
+
 	globals.restartfx=0;
 	globals.stereoPos=0;
-	slomo=0;
-	InitLoop[0].setRange(globals.oscSymDriftRange[0]);
-	InitLoop[0].setSpeed(globals.oscSymDriftSpeed[0]);
 	InitLoop[0].reset();
-	InitLoop[1].setRange(globals.oscSymDriftRange[1]);
-	InitLoop[1].setSpeed(globals.oscSymDriftSpeed[1]);
 	InitLoop[1].reset();
-	InitLoop[2].setRange(globals.oscSymDriftRange[2]);
-	InitLoop[2].setSpeed(globals.oscSymDriftSpeed[2]);
 	InitLoop[2].reset();
-	InitLoop[3].setRange(globals.oscSymDriftRange[3]);
-	InitLoop[3].setSpeed(globals.oscSymDriftSpeed[3]);
 	InitLoop[3].reset();
-	InitPos[0]=InitLoop[0].getPosition();
-	InitPos[1]=InitLoop[1].getPosition();
-	InitPos[2]=InitLoop[2].getPosition();
-	InitPos[3]=InitLoop[3].getPosition();
-	for (int c=0;c<MAX_TRACKS;c++) track[c].InitVoice(&globals);
+	InitLoop[0].setSkipStep(10);
+	InitLoop[1].setSkipStep(10);
+	InitLoop[2].setSkipStep(10);
+	InitLoop[3].setSkipStep(10);
+	for (int c=0;c<MAX_TRACKS;c++) {
+		track[c].OnSampleRateChange();
+	}
+}
+
+void mi::SequencerTick(){
+	if (globals.sampleRate != pCB->GetSamplingRate()) {
+		Stop();
+		globals.sampleRate = pCB->GetSamplingRate();
+		globals.srCorrection = 44100.0f / (float)globals.sampleRate;
+		globals.wavetableCorrection=44100.f/globals.sampleRate;
+
+		//Update samplerate dependant parameters.
+		{
+			float multiplier = globals.sampleRate/44100.0f;
+
+			globals.arpSpeed[0]=Vals[8]*50*multiplier;
+			if (Vals[9]) globals.arpSpeed[1]=Vals[9]*50*multiplier;
+			else globals.arpSpeed[1]=globals.arpSpeed[0];
+
+			globals.modA=Vals[84]*multiplier;
+			globals.modD=Vals[85]*multiplier;
+			globals.ampA=(Vals[88]<<7)*multiplier;
+			globals.fltA=(Vals[104]<<7)*multiplier;
+			globals.fltD=(Vals[105]<<7)*multiplier;
+			if (Vals[107]==65536) globals.fltD2=(Vals[107]<<11)*multiplier;
+			else globals.fltD2=(Vals[107]<<7)*multiplier;
+			globals.fltR=(Vals[108]<<7)*multiplier;
+		}
+		for (int i = 0; i < MAX_TRACKS; ++i) {
+			track[i].OnSampleRateChange();
+		}
+	}
 }
 
 void mi::Stop(){
@@ -355,6 +398,8 @@ void mi::updateOsc(int osc){
 void mi::ParameterTweak(int par, int val){
 	// Called when a parameter is changed by the host app / user gui
 	Vals[par]=val;
+	//All parameters that are sample rate dependant are corrected here.
+	float multiplier = globals.sampleRate/44100.0f;
 
 	switch (par){
 		case 1: globals.globalVolume=val; break;
@@ -363,15 +408,22 @@ void mi::ParameterTweak(int par, int val){
 		case 4: globals.globalGlide=val; break;
 		case 5: globals.globalStereo=val; if (globals.globalStereo) globals.stereoLR[0]=1.0f-(globals.globalStereo*0.00390625f); else globals.stereoLR[0]=1.0f; globals.stereoLR[1]=1.0f; break;
 		case 7: globals.arpPattern=val; break;
-		case 8: globals.arpSpeed=val; break;
-		case 9: globals.arpShuffle=val; break;
+		case 8: globals.arpSpeed[0]=val*50*multiplier;
+				if (Vals[9] == 0) globals.arpSpeed[1]=globals.arpSpeed[0];
+			break;
+		case 9: if(val) globals.arpSpeed[1]=val*50*multiplier;
+				else globals.arpSpeed[1]=globals.arpSpeed[0];
+			break;
 		case 10: globals.arpRetrig=val; break;
+		//lfoViber is corrected using the setSkipStep on channel's OnSampleRateChange()
 		case 12: globals.lfoDelay=val<<3; break;
 		case 13: globals.lfoDepth=val; SyncViber.setLevel(val);
-			for(int c=0;c<MAX_TRACKS;c++) track[c].changeLfoDepth(val);
+			for(int c=0;c<MAX_TRACKS;c++) track[c].OnChangeLfoDepth();
 			break;
+		//SyncViber and FiltViber ar not samplerate-corrected, because fxsamples is.
+		//lfoViber is corrected using the setSkipStep on channel's OnSampleRateChange()
 		case 14: globals.lfoSpeed=val; SyncViber.setSpeed(val);
-			for(int c=0;c<MAX_TRACKS;c++) track[c].changeLfoSpeed(val);
+			for(int c=0;c<MAX_TRACKS;c++) track[c].OnChangeLfoSpeed();
 			break;
 		case 15: globals.lfoDestination=val; break;
 		case 17: globals.oscVolume[0]=val; break;
@@ -382,9 +434,11 @@ void mi::ParameterTweak(int par, int val){
 		case 22: globals.oscOptions[0]=val; break;
 		case 24: globals.oscFuncType[0]=val; updateOsc(0); break;
 		case 25: globals.oscFuncSym[0]=val; break;
-		case 27: globals.oscSymDriftRange[0]=val; InitLoop[0].setRange(globals.oscSymDriftRange[0]); break;
-		case 28: globals.oscSymDriftSpeed[0]=val; InitLoop[0].setSpeed(globals.oscSymDriftSpeed[0]); break;
+		case 27: InitLoop[0].setRange(val); break;
+			//InitLoop is not samplerate-corrected, because fxsamples is.
+		case 28: InitLoop[0].setSpeed(val); break;
 		case 30: globals.oscSymLfoRange[0]=val; break;
+			//Speed corrected by samplerate on pwm
 		case 31: globals.oscSymLfoSpeed[0]=val; break;
 		case 33: globals.oscVolume[1]=val; break;
 		case 34: globals.oscCoarse[1]=val; break;
@@ -394,9 +448,11 @@ void mi::ParameterTweak(int par, int val){
 		case 38: globals.oscOptions[1]=val; break;
 		case 40: globals.oscFuncType[1]=val; updateOsc(1); break;
 		case 41: globals.oscFuncSym[1]=val;				break;
-		case 43: globals.oscSymDriftRange[1]=val; InitLoop[1].setRange(globals.oscSymDriftRange[1]); break;
-		case 44: globals.oscSymDriftSpeed[1]=val; InitLoop[1].setSpeed(globals.oscSymDriftSpeed[1]); break;
+		case 43: InitLoop[1].setRange(val); break;
+			//InitLoop is not samplerate-corrected, because fxsamples is.
+		case 44: InitLoop[1].setSpeed(val); break;
 		case 46: globals.oscSymLfoRange[1]=val; break;
+			//Speed corrected by samplerate on pwm
 		case 47: globals.oscSymLfoSpeed[1]=val; break;
 		case 49: globals.oscVolume[2]=val; break;
 		case 50: globals.oscCoarse[2]=val; break;
@@ -406,9 +462,11 @@ void mi::ParameterTweak(int par, int val){
 		case 54: globals.oscOptions[2]=val; break;
 		case 56: globals.oscFuncType[2]=val; updateOsc(2); break;
 		case 57: globals.oscFuncSym[2]=val;				break;
-		case 59: globals.oscSymDriftRange[2]=val; InitLoop[2].setRange(globals.oscSymDriftRange[2]); break;
-		case 60: globals.oscSymDriftSpeed[2]=val; InitLoop[2].setSpeed(globals.oscSymDriftSpeed[2]); break;
+		case 59: InitLoop[2].setRange(val); break;
+			//InitLoop is not samplerate-corrected, because fxsamples is.
+		case 60: InitLoop[2].setSpeed(val); break;
 		case 62: globals.oscSymLfoRange[2]=val; break;
+			//Speed corrected by samplerate on pwm
 		case 63: globals.oscSymLfoSpeed[2]=val; break;
 		case 65: globals.oscVolume[3]=val; break;
 		case 66: globals.oscCoarse[3]=val; break;
@@ -418,20 +476,25 @@ void mi::ParameterTweak(int par, int val){
 		case 70: globals.oscOptions[3]=val; break;
 		case 72: globals.oscFuncType[3]=val; updateOsc(3); break;
 		case 73: globals.oscFuncSym[3]=val; break;
-		case 75: globals.oscSymDriftRange[3]=val; InitLoop[3].setRange(globals.oscSymDriftRange[3]); break;
-		case 76: globals.oscSymDriftSpeed[3]=val; InitLoop[3].setSpeed(globals.oscSymDriftSpeed[3]); break;
+		case 75: InitLoop[3].setRange(val); break;
+			//InitLoop is not samplerate-corrected, because fxsamples is.
+		case 76: InitLoop[3].setSpeed(val); break;
 		case 78: globals.oscSymLfoRange[3]=val; break;
+			//Speed corrected by samplerate on pwm
 		case 79: globals.oscSymLfoSpeed[3]=val; break;
 		case 81: globals.rm1=val; break;
 		case 82: globals.rm2=val; break;
-		case 84: globals.modA=val; break;
-		case 85: globals.modD=val; break;
+		case 84: globals.modA=val*multiplier; break;
+		case 85: globals.modD=val*multiplier; break;
 		case 86: globals.modEnvAmount=(float)(val<<5); break;
-		case 88: globals.ampA=val<<7; break;
-		case 89: globals.ampD=val<<7; break;
+			//amp envelope is a bit "special" and is corrected in envelope
+		case 88: globals.ampA=(val<<7)*multiplier; break;
+		case 89: globals.ampD=(val<<7); break;
 		case 90: globals.ampS=val; break;
-		case 91: if (val==65536) globals.ampD2=val*2048; else globals.ampD2=val<<7; break;
-		case 92: globals.ampR=val<<7; break;
+		case 91: if (val==65536) globals.ampD2=(val<<11);
+				 else globals.ampD2=(val<<7);
+				 break;
+		case 92: globals.ampR=(val<<7); break;
 		case 93: globals.ampScaling=val; break;
 		case 94: globals.ampVelocity=(float)val*0.00390625f; break;
 		case 95: globals.ampTrack=(float)val*0.00390625f; break;
@@ -440,12 +503,15 @@ void mi::ParameterTweak(int par, int val){
 		case 99: globals.fltResonance=val; break;
 		case 100: globals.fltTrack=val; break;
 		case 101: globals.fltSweep=val; FiltViber.setLevel(val); break;
+		//SyncViber and FiltViber ar not samplerate-corrected, because fxsamples is.
 		case 102: globals.fltSpeed=val; FiltViber.setSpeed(val); break;
-		case 104: globals.fltA=val<<7; break;
-		case 105: globals.fltD=val<<7; break;
+		case 104: globals.fltA=(val<<7)*multiplier; break;
+		case 105: globals.fltD=(val<<7)*multiplier; break;
 		case 106: globals.fltS=val; break;
-		case 107: if (val==65536) globals.fltD2=val*2048; else globals.fltD2=val<<7; break;
-		case 108: globals.fltR=val<<7; break;
+		case 107: if (val==65536) globals.fltD2=(val<<11)*multiplier;
+				  else globals.fltD2=(val<<7)*multiplier;
+				  break;
+		case 108: globals.fltR=(val<<7)*multiplier; break;
 		case 109: globals.fltScaling=val; break;
 		case 110: globals.fltVelocity=(float)val*0.00390625f; break;
 		case 111: globals.fltEnvAmount=(float)val; break;
@@ -483,45 +549,70 @@ void mi::Command(){
 
 // Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks){
-	//float sl=0;
-	//float sr=0;
-	float slr[2];
-	for(int c=0;c<tracks;c++){
-		if(track[c].ampEnvStage){
-			float *xpsamplesleft=psamplesleft;
-			float *xpsamplesright=psamplesright;
-			int xnumsamples=numsamples;
-			--xpsamplesleft;
-			--xpsamplesright;
-			track[c].PerformFx();
-			assert(xnumsamples);
-			do{
-				track[c].GetSample(slr);
-				*++xpsamplesleft+=slr[0];
-				*++xpsamplesright+=slr[1];
-			}while(--xnumsamples);
+	float slr[2]={0.0f,0.0f};
+	int minimum = std::min(numsamples,fxsamples);
+	if (minimum>0) {
+		for(int c=0;c<tracks;c++){
+			if(track[c].ampEnvStage){
+				float *xpsamplesleft=psamplesleft;
+				float *xpsamplesright=psamplesright;
+				--xpsamplesleft;
+				--xpsamplesright;
+
+				int xnumsamples = minimum;
+				do {
+					track[c].GetSample(slr);
+					*++xpsamplesleft+=slr[0];
+					*++xpsamplesright+=slr[1];
+				} while(--xnumsamples);
+			}
 		}
+		fxsamples-=minimum;
+		numsamples-=minimum;
 	}
-	slomo++;
-	if (slomo > 10){
-		slomo=0;
-		InitPos[0]=InitLoop[0].getPosition();
-		InitPos[1]=InitLoop[1].getPosition();
-		InitPos[2]=InitLoop[2].getPosition();
-		InitPos[3]=InitLoop[3].getPosition();
+	if(fxsamples == 0) {
+		//SyncViber and FiltViber ar not samplerate-corrected, because fxsamples is.
+		SyncViber.next();
+		globals.syncvibe=(float)SyncViber.getPosition();
+		FiltViber.next();
+		globals.filtvibe=(float)FiltViber.getPosition();
+		//InitLoop is not samplerate-corrected, because fxsamples is.
 		InitLoop[0].next();
 		InitLoop[1].next();
 		InitLoop[2].next();
 		InitLoop[3].next();
-		globals.initposition[0]=InitPos[0];
-		globals.initposition[1]=InitPos[1];
-		globals.initposition[2]=InitPos[2];
-		globals.initposition[3]=InitPos[3];								
+		globals.initposition[0]=InitLoop[0].getPosition();
+		globals.initposition[1]=InitLoop[1].getPosition();
+		globals.initposition[2]=InitLoop[2].getPosition();
+		globals.initposition[3]=InitLoop[3].getPosition();
+
+		for(int c=0;c<tracks;c++){
+			if(track[c].ampEnvStage){
+				track[c].PerformFx();
+			}
+		}
+		fxsamples=256.f*globals.sampleRate/44100.0f;
 	}
-	SyncViber.next();
-	globals.syncvibe=(float)SyncViber.getPosition();
-	FiltViber.next();
-	globals.filtvibe=(float)FiltViber.getPosition();
+	if (numsamples > 0 ) {
+		float *psamplesleft2=psamplesleft+minimum;
+		float *psamplesright2=psamplesright+minimum;
+		minimum=numsamples;
+		for(int c=0;c<tracks;c++){
+			if(track[c].ampEnvStage){
+				float *xpsamplesleft=psamplesleft2;
+				float *xpsamplesright=psamplesright2;
+				--xpsamplesleft;
+				--xpsamplesright;
+
+				int xnumsamples = minimum;
+				do {
+					track[c].GetSample(slr);
+					*++xpsamplesleft+=slr[0];
+					*++xpsamplesright+=slr[1];
+				} while(--xnumsamples);
+			}
+		}
+	}
 }
 
 
@@ -583,7 +674,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value){
 
 	// Volume
 	if(param==1||param==0x11||param==0x21||param==0x31||param==0x41||param==0x51||param==0x52){
-		sprintf(txt, "%3.2f%%", (float)value*200/256);
+		if (value > 0) sprintf(txt, "%.02f dB", 20.0f * std::log10((float) value / 128.0f));
+		else sprintf(txt, "-inf dB");
 		return true;
 	}
 
@@ -804,14 +896,10 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 			InitLoop[1].next();
 			InitLoop[2].next();
 			InitLoop[3].next();
-			InitPos[0]=InitLoop[0].getPosition();
-			InitPos[1]=InitLoop[1].getPosition();
-			InitPos[2]=InitLoop[2].getPosition();
-			InitPos[3]=InitLoop[3].getPosition();
-			globals.initposition[0]=InitPos[0];
-			globals.initposition[1]=InitPos[1];
-			globals.initposition[2]=InitPos[2];
-			globals.initposition[3]=InitPos[3];
+			globals.initposition[0]=InitLoop[0].getPosition();
+			globals.initposition[1]=InitLoop[1].getPosition();
+			globals.initposition[2]=InitLoop[2].getPosition();
+			globals.initposition[3]=InitLoop[3].getPosition();
 			for (int c=0; c<MAX_TRACKS; c++) track[channel].ResetSym();
 		}
 		if (val&2){
@@ -836,11 +924,14 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 		// Note Off												== 120
 		// Empty Note Row				== 255
 		// Less than note off value??? == NoteON!
-		if(note<=NOTE_MAX){ 
-			if (cmd != 0xC3) track[channel].NoteOn(note-24,&globals,60,nextVol);
+		if(note<=NOTE_MAX){
+			//Note zero is ~21.5Hz which is approximately note F0 (Which is note 17 in Psycle).
+			//The exact tuning is corrected inside the NoteTie and RealNoteOn methods.
+			if (cmd == 0xC3 && track[channel].ampEnvStage) {
+				track[channel].NoteTie(note-17);
+			}
 			else {
-				if (track[channel].ampEnvStage) track[channel].NoteTie(note-24);
-				else track[channel].NoteOn(note-24,&globals,60,nextVol); // retrigger because volume envelope finished
+				track[channel].NoteOn(note-17,&globals,60,nextVol);
 			}
 		}
 		// Note off
@@ -848,11 +939,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val){
 	}
 }
 
-void mi::SequencerTick(){
-	// Called on each tick while sequencer is playing
-}
-
-
+/* I've decided not to made it samplerate dependant. calcWaves is too weird...*/
 void mi::InitWaveTable(){
 	int co = 0;
 	int cp = 0;
@@ -1040,4 +1127,7 @@ void mi::InitWaveTable(){
 		globals.WaveTable[WAVE_RANDOM4][c]=globals.WaveTable[WAVE_RANDOM][c>>5];
 		globals.WaveTable[WAVE_RANDOM5][c]=globals.WaveTable[WAVE_RANDOM][c>>6];
 	}
+	globals.waveTableSize=2048;
+	globals.wavetableCorrection=44100.f/globals.sampleRate;
+	globals.oversamplesAmt = 16;
 }

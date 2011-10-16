@@ -27,6 +27,11 @@ using namespace universalis::stdlib;
 #define FILTER_CALC_TIME 64
 #define TWOPI 6.28318530717958647692528676655901f
 
+// Amount to compensate non-Hz based values that work with the wavetable, like the glide parameter.
+// 1.56605 = (44100samplespersec/2048samples of old wavetable)/27.5Hz freq of current wavetable
+const float CSynthTrack::wtNewACorrection = (44100.f/2048.f)/27.5f;
+
+
 CSynthTrack::CSynthTrack()
 {
 	replaycount=1;
@@ -196,16 +201,16 @@ float CSynthTrack::GetSample()
 			switch(cur_command){
 				case 3: cur_realnote=(cur_realnote+cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
 				case 4: cur_realnote=(cur_realnote-cur_parameter)&127; if (cur_realnote>95) cur_realnote-=32; break;
-				case 5: cur_pw=cur_parameter*waveTableSize*0.00389625f; break;
+				case 5: cur_pw=cur_parameter*0.00389625f*waveTableSize; break;
 				case 6: 
 					{
-						cur_pw+=cur_parameter*waveTableSize*0.00389625f;
+						cur_pw+=cur_parameter*0.00389625f*waveTableSize;
 						if (cur_pw>waveTableSize) cur_pw-=waveTableSize;
 						break;
 					}
 				case 7: 
 					{
-						cur_pw-=cur_parameter*waveTableSize*0.00389625f;
+						cur_pw-=cur_parameter*0.00389625f*waveTableSize;
 						if(cur_pw<0) cur_pw+=waveTableSize;
 						break;
 					}
@@ -259,7 +264,7 @@ float CSynthTrack::GetSample()
 						if(OSCPosition>=waveTableSize) OSCPosition-=waveTableSize;
 						pos = math::lrint<int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos+cur_pw];
-						output+=aaf1.process((vpar->Wavetable[cur_waveform][pos+1+cur_pw] - sample) * (OSCPosition - (float)pos) + sample);
+						output+=aaf1.process((vpar->Wavetable[cur_waveform][pos+cur_pw+1] - sample) * (OSCPosition - (float)pos) + sample);
 					}
 					break;
 				}
@@ -312,7 +317,7 @@ float CSynthTrack::GetEnvAmp()
 	break;
 
 	case 2: // Decay
-		AmpEnvValue -= (AmpEnvValue * AmpEnvCoef * 5.0f);
+		AmpEnvValue -= (AmpEnvValue * AmpEnvCoef * 5.0f)*srCorrection;
 		
 		//This means -60dB.
 		if((AmpEnvValue<AmpEnvSustainLevel) || (AmpEnvValue<0.001f))
@@ -329,7 +334,7 @@ float CSynthTrack::GetEnvAmp()
 	break;
 
 	case 4: // Release
-		AmpEnvValue -= (AmpEnvValue * AmpEnvCoef * 5.0f);
+		AmpEnvValue -= (AmpEnvValue * AmpEnvCoef * 5.0f)*srCorrection;
 		//This means -60dB.
 		if(AmpEnvValue<0.001f)
 		{
@@ -424,14 +429,14 @@ void CSynthTrack::DoGlide()
 	// Glide Handler
 	if(ROSCSpeed<OSCSpeed)
 	{
-		ROSCSpeed+=oscglide*wavetableCorrection;
+		ROSCSpeed+=oscglide;
 
 		if(ROSCSpeed>OSCSpeed)
 			ROSCSpeed=OSCSpeed;
 	}
 	else
 	{
-		ROSCSpeed-=oscglide*wavetableCorrection;
+		ROSCSpeed-=oscglide;
 
 		if(ROSCSpeed<OSCSpeed)
 			ROSCSpeed=OSCSpeed;
@@ -451,7 +456,7 @@ void CSynthTrack::InitEffect(int cmd, int val)
 
 	// Init glide
 	if(cmd==0x03)
-		oscglide=(float)(val*val)*0.0000625f;
+		oscglide=(float)(val*val)*0.0000625f*wtNewACorrection*wavetableCorrection;
 	else
 		oscglide=99999.0f;
 	//Vol
