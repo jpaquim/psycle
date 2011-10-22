@@ -1137,7 +1137,7 @@ namespace psycle
 		{
 			PsycleConfig::InputHandler& settings = Global::psycleconf().inputHandler();
 
-			if(undo) {
+			if(undo || true) {
 				AddMacViewUndo();
 			}
 

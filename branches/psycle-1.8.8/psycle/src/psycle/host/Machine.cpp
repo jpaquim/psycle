@@ -707,10 +707,13 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				return false;
 			}
 #if PSYCLE__CONFIGURATION__RMS_VUS
-			double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
-			if( bla < 0.00024 )
-			{
-				return false;
+			//This is made to prevent calculating it when the count has been reseted.
+			if ( rms.count > 512) {
+				double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
+				if( bla < 0.00024 )
+				{
+					return false;
+				}
 			}
 #else
 			if (_volumeCounter < 8.0f)	{
@@ -737,7 +740,8 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 			if ( autoStopMachine && !Standby())
 			{
-				if(rms.count >= numSamples) {
+				//This is made to prevent calculating it when the count has been reseted.
+				if(rms.count >= 512) {
 					double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
 					if( bla < 0.00024 )
 					{

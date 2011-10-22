@@ -576,7 +576,7 @@ namespace psycle { namespace host {
 							}
 						}
 						char buf[64];
-						sprintf(buf,"%d Bands Refresh %.2fhz",scope_spec_bands,1000.0f/scope_spec_rate);
+						sprintf(buf,"%d Samples Refresh %.2fhz",SCOPE_SPEC_SAMPLES,1000.0f/scope_spec_rate);
 						CFont* oldFont= bufDC.SelectObject(&font);
 						bufDC.SetBkMode(TRANSPARENT);
 						bufDC.SetTextColor(0x505050);
@@ -1028,7 +1028,7 @@ namespace psycle { namespace host {
 				//Linear -pi to pi.
 				const float constant = 2.0f * helpers::math::pi_f * (-0.5f + ((float)i/(SCOPE_SPEC_SAMPLES-1)));
 				//Hann window 
-				const float window = 0.50 - 0.50 * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
+				const float window = 0.50f - 0.50f * cosf(2.0f * helpers::math::pi * i / (SCOPE_SPEC_SAMPLES - 1));
 				float j=0.0f;
 				for(int h=0;h<scope_spec_bands;h++)
 				{ 
@@ -1039,11 +1039,11 @@ namespace psycle { namespace host {
 					}
 					else if (scope_spec_mode == 2 ) {
 						//this makes it somewhat exponential.
-						th=(j*h*0.0078125/*1/128*/)*constant; 
+						th=(j*h*0.0078125f/*1/128*/)*constant; 
 					}
 					else {
 						//This simulates a constant note scale.
-						th = (powf(2.0f,h/16.f)-1)*0.525f*barsize*constant;
+						th = (powf(2.0f,h/16.f)-1.f)*0.525f*barsize*constant;
 					}
 					cth[i][h] = cosf(th) * window;
 					sth[i][h] = sinf(th) * window;
@@ -1218,26 +1218,30 @@ namespace psycle { namespace host {
 
 					rect.top=0;
 					rect.bottom=256;
-					if (scope_spec_mode == 1) rect.left=6*44100/Global::player().SampleRate();
-					else if (scope_spec_mode == 2) rect.left=38*44100/Global::player().SampleRate();
-					else if (scope_spec_mode == 3) rect.left=81*44100/Global::player().SampleRate();
+					float thebar = 440.f*2.f*256.f/Global::player().SampleRate();
+					if (scope_spec_mode == 1) rect.left=thebar;
+					else if (scope_spec_mode == 2) rect.left=16*sqrt(thebar);
+					else if (scope_spec_mode == 3) rect.left=32*log(1+thebar)/log(2.0f);
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"440");
 					bufDC.TextOut(rect.left, 0, buf);
 					bufDC.TextOut(rect.left, 128-12, buf);
 
-					if (scope_spec_mode == 1) rect.left=82*44100/Global::player().SampleRate();
-					else if (scope_spec_mode == 2) rect.left=146*44100/Global::player().SampleRate();
-					else if (scope_spec_mode == 3) rect.left=(256-54)*44100/Global::player().SampleRate();
+					thebar = 7000*2.f*256.f/Global::player().SampleRate();
+					if (scope_spec_mode == 1) rect.left=thebar;
+					else if (scope_spec_mode == 2) rect.left=16*sqrt(thebar);
+					else if (scope_spec_mode == 3) rect.left=32*log(1+thebar)/log(2.0f);
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"7K");
 					bufDC.TextOut(rect.left, 0, buf);
 					bufDC.TextOut(rect.left, 128-12, buf);
-					if (scope_spec_mode == 1) rect.left=(256-70)*44100/Global::player().SampleRate();
-					else if (scope_spec_mode == 2) rect.left=(256-37)*44100/Global::player().SampleRate();
-					else if (scope_spec_mode == 3) rect.left=(256-18)*44100/Global::player().SampleRate();
+
+					thebar = 16000*2.f*256.f/Global::player().SampleRate();
+					if (scope_spec_mode == 1) rect.left=thebar;
+					else if (scope_spec_mode == 2) rect.left=16*sqrt(thebar);
+					else if (scope_spec_mode == 3) rect.left=32*log(1+thebar)/log(2.0f);
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"16K");

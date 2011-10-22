@@ -549,11 +549,10 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					Global::pInputHandler->AddMacViewUndo();
-
 					switch (ma->_type)
 					{
 					case MACH_MASTER:
+						Global::pInputHandler->AddMacViewUndo();
 						if (!m_wndView.MasterMachineDialog)
 						{
 							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView, *(Master*)ma, &m_wndView.MasterMachineDialog);
@@ -572,6 +571,7 @@ namespace psycle { namespace host {
 						m_wndView.MasterMachineDialog->ShowWindow(SW_SHOW);
 						break;
 					case MACH_SAMPLER:
+						Global::pInputHandler->AddMacViewUndo();
 						if (m_wndView.SamplerMachineDialog)
 						{
 							if (((Machine&)m_wndView.SamplerMachineDialog->machine)._macIndex != ma->_macIndex)
@@ -585,6 +585,7 @@ namespace psycle { namespace host {
 						m_wndView.SamplerMachineDialog->ShowWindow(SW_SHOW);
 						break;
 					case MACH_XMSAMPLER:
+						Global::pInputHandler->AddMacViewUndo();
 						{
 						if (m_wndView.XMSamplerMachineDialog)
 						{
@@ -601,6 +602,7 @@ namespace psycle { namespace host {
 						}
 						break;
 					case MACH_RECORDER:
+						Global::pInputHandler->AddMacViewUndo();
 						{
 							if (m_wndView.WaveInMachineDialog)
 							{
@@ -665,17 +667,14 @@ namespace psycle { namespace host {
 				point.x = r.right/2;
 				point.y = r.bottom/2;
 			}
-			/*
 			WINDOWPLACEMENT w2;
 			GetWindowPlacement(&w2);
-			if (w2.showCmd & SW_SHOWMAXIMIZED)
+			if (w2.flags & SW_SHOWMAXIMIZED)
 			{
-			*/
 				rw.top = w1.rcNormalPosition.top;
 				rw.left = w1.rcNormalPosition.left;
 				rw.right = w1.rcNormalPosition.right;
 				rw.bottom = w1.rcNormalPosition.bottom+64;
-				/*
 			}
 			else
 			{
@@ -684,7 +683,6 @@ namespace psycle { namespace host {
 				rw.bottom = w1.rcNormalPosition.bottom + w2.rcNormalPosition.top;
 				rw.right = w1.rcNormalPosition.right + w2.rcNormalPosition.left;
 			}
-			*/
 
 			int x = rw.left+point.x-((r.right-r.left)/2);
 			int y = rw.top+point.y-((r.bottom-r.top)/2);

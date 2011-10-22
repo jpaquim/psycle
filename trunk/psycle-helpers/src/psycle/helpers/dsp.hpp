@@ -252,7 +252,7 @@ using namespace universalis::stdlib;
 	};
 
 	/// finds the RMS volume value in a signal buffer.
-	/// Note: Values are buffered since the standard calculation requires 50ms or data.
+	/// Note: Values are buffered since the standard calculation requires 50ms of data.
 	inline float GetRMSVol(RMSData &rms,float * UNIVERSALIS__COMPILER__RESTRICT pSamplesL, float * UNIVERSALIS__COMPILER__RESTRICT pSamplesR, int numSamples)
 	{
 		float * pL = pSamplesL;
