@@ -17,7 +17,8 @@ CMachineParameter const prEndAmp = {"End Amp", "Ending Amplitude", 0, 32767, MPF
 CMachineParameter const prLength = {"Length", "Duration of the note (ms)", 10, 500, MPF_STATE, 220};
 CMachineParameter const prOutVol = {"Volume", "Volume (0-32767)", 0, 32767, MPF_STATE, 32767};
 CMachineParameter const prDecMode = {"Dec Mode", "Decrement Mode", 0, 3, MPF_STATE, 2};
-CMachineParameter const prComp = {"Compatibility", "Compatible With version", 0, 2, MPF_STATE, 2};
+///\todo: Add the new compatibility when it's ready
+CMachineParameter const prComp = {"Compatibility", "Compatible With version", 0, 1, MPF_STATE, 1};
 CMachineParameter const prNNA = {"NNA Command", "NNA Command when New Note", 0, 1, MPF_STATE, 0};
 CMachineParameter const prAttack = {"Attack up to", "Attack from 0/100 to x/100", 0, 99, MPF_STATE, 2};
 CMachineParameter const prDecay = {"Decay up to", "Decay from Attack to x/100", 1, 100, MPF_STATE, 51};

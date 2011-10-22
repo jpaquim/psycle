@@ -136,7 +136,7 @@ void CTrack::Tick( tvals const &tv)
 		else
 		{
 			Glide = true;
-			GlideTime = tv.Glide*10000000/pmi->currentSR;
+			GlideTime = tv.Glide*10000000/44100;
 		}
 	}
 
@@ -291,7 +291,7 @@ void CTrack::Tick( tvals const &tv)
 				else
 				{				GlideMul = std::pow(0.5, 1. / GlideTime); }
 				GlideFactor = 1;
-				GlideCount = (int)(log( Frequency/FrequencyFrom)/log(GlideMul));
+				GlideCount = (int)(log( Frequency/FrequencyFrom)/log(GlideMul))* (pmi->currentSR/44100);
 			}
 			else
 			{				GlideActive = false; }

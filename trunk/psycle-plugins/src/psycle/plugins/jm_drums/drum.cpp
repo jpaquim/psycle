@@ -57,12 +57,13 @@ void Drum::NoteOn(int note, DrumPars* pars)
 
 	if(pars->compatibleMode >= 2) {
 		ThumpVol=0;
+		ThumpDec=-pars->ThumpDec;
 	}
 	else  {
 		ThumpVol=pars->ThumpVol;
+		ThumpDec=pars->ThumpDec;
 	}
 
-	ThumpDec=pars->ThumpDec;
 
 	OutVol = pars->OutVol;
 	Drummy.setEnvPos(0);

@@ -339,6 +339,7 @@ void mi::Init()
 	globals.sampleRate = pCB->GetSamplingRate();
 	globals.srCorrection = 44100.0f / (float)globals.sampleRate;
 	globals.wavetableCorrection=44100.f/globals.sampleRate;
+	fxsamples=256*globals.sampleRate/44100;
 
 	globals.restartfx=0;
 	globals.stereoPos=0;
@@ -570,6 +571,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		fxsamples-=minimum;
 		numsamples-=minimum;
 	}
+
 	if(fxsamples == 0) {
 		//SyncViber and FiltViber ar not samplerate-corrected, because fxsamples is.
 		SyncViber.next();
@@ -591,12 +593,11 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				track[c].PerformFx();
 			}
 		}
-		fxsamples=256.f*globals.sampleRate/44100.0f;
+		fxsamples=256*globals.sampleRate/44100;
 	}
 	if (numsamples > 0 ) {
 		float *psamplesleft2=psamplesleft+minimum;
 		float *psamplesright2=psamplesright+minimum;
-		minimum=numsamples;
 		for(int c=0;c<tracks;c++){
 			if(track[c].ampEnvStage){
 				float *xpsamplesleft=psamplesleft2;
@@ -604,7 +605,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				--xpsamplesleft;
 				--xpsamplesright;
 
-				int xnumsamples = minimum;
+				int xnumsamples = numsamples;
 				do {
 					track[c].GetSample(slr);
 					*++xpsamplesleft+=slr[0];
@@ -612,6 +613,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				} while(--xnumsamples);
 			}
 		}
+		fxsamples-=numsamples;
 	}
 }
 

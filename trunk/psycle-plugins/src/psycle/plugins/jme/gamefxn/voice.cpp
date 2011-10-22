@@ -456,7 +456,7 @@ void CSynthTrack::InitEffect(int cmd, int val)
 
 	// Init glide
 	if(cmd==0x03)
-		oscglide=(float)(val*val)*0.0000625f*wtNewACorrection*wavetableCorrection;
+		oscglide=(float)(val*val)*0.0000625f*pow(2.0f,wtNewACorrection*wavetableCorrection*srCorrection);
 	else
 		oscglide=99999.0f;
 	//Vol
