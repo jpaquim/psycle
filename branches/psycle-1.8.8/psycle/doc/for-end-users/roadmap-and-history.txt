@@ -16,7 +16,7 @@ For several weeks Psycle stayed without a coder, period after which Mats Höjlund
 Along with this, Mats began the development of a new version of Psycle, Psycle 2, in December 2000. The new program's main feature was a sequencer which had the ability to play several patterns at the same time (a multipattern sequencer), but maintaining the patterns like they were (i.e. no link to machines).
 
 When Mats left, Psycle 2 stopped, and a guy called by the nickname of [JAZ] took on the task of continuing the Psycle history.
-[JAZ]'s initial goals were to fix several of the astounding bugs, and add some notably missing features. This took form in versions 1.5 and 1.6.
+[JAZ]'s initial goals were to fix several of the outstanding bugs, and add some notably missing features. This took form in versions 1.5 and 1.6.
 After that, the idea of a version 2 appeared again, but instead of focusing on Mats code, [JAZ] started a new (internal) design codenamed Psyclean, which was never completed.
 
 There existed also a version of Psycle that was temporarily called 1.9. This was started by Dan who had to leave it due to work commitments.  This version had some Data structure changes which aimed to give more tracks, a volume column (panning too?), more lines per pattern, a new song file format. The work was partly dismissed due to the incompatibilities it was generating.
