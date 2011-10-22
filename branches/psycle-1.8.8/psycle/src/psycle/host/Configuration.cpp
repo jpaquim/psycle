@@ -42,16 +42,21 @@ namespace psycle { namespace host {
 		}
 		void Configuration::Load(ConfigStorage & store)
 		{
-			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-			#endif
-			#if defined _WIN64
-				store.Read("PluginDir64",plugin_dir_);
-				store.Read("PluginDir",plugin_dir_other);
-			#elif defined _WIN32
-				store.Read("PluginDir",plugin_dir_);
-				store.Read("PluginDir64",plugin_dir_other);
-			#endif
+			if(
+				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+					!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS")
+				#else
+					true
+				#endif
+			) {
+				#if defined _WIN64
+					store.Read("PluginDir64",plugin_dir_);
+					store.Read("PluginDir",plugin_dir_other);
+				#elif defined _WIN32
+					store.Read("PluginDir",plugin_dir_);
+					store.Read("PluginDir64",plugin_dir_other);
+				#endif
+			}
 			store.Read("VstDir",vst32_dir_);
 			store.Read("VstDir64",vst64_dir_);
 			bool use=false;
@@ -80,16 +85,21 @@ namespace psycle { namespace host {
 		}
 		void Configuration::Save(ConfigStorage & store)
 		{
-			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-			#endif
-				#if defined _WIN64
-					store.Write("PluginDir64",plugin_dir_);
-					store.Write("PluginDir",plugin_dir_other);
-				#elif defined _WIN32
-					store.Write("PluginDir",plugin_dir_);
-					store.Write("PluginDir64",plugin_dir_other);
+			if(
+				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+					!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS")
+				#else
+					true
 				#endif
+			) {
+					#if defined _WIN64
+						store.Write("PluginDir64",plugin_dir_);
+						store.Write("PluginDir",plugin_dir_other);
+					#elif defined _WIN32
+						store.Write("PluginDir",plugin_dir_);
+						store.Write("PluginDir64",plugin_dir_other);
+					#endif
+			}
 			store.Write("VstDir",vst32_dir_);
 			store.Write("VstDir64",vst64_dir_);
 
