@@ -5,12 +5,12 @@
 
 #include <universalis/detail/config.hpp>
 
-#include <universalis/compiler/setup_feature_test_macros.hpp>
-#include <universalis/compiler/setup_warnings.hpp>
-#include <universalis/compiler/setup_optimizations.hpp>
-
 #include <diversalis.hpp>
 #ifndef DIVERSALIS__COMPILER__RESOURCE
+	#include <universalis/compiler/setup_feature_test_macros.hpp>
+	#include <universalis/compiler/setup_warnings.hpp>
+	#include <universalis/compiler/setup_optimizations.hpp>
+
 	#include <universalis/compiler/dyn_link.hpp>
 
 	#ifdef UNIVERSALIS__SHARED
