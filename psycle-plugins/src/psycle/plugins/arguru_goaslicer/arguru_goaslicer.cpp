@@ -38,6 +38,7 @@ class mi : public CMachineInterface {
 	public:
 		mi();
 		virtual ~mi();
+		virtual void Init();
 		virtual void SequencerTick();
 		virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks);
 		virtual bool DescribeValue(char* txt,int const param, int const value);
@@ -64,7 +65,14 @@ m_CurrentVolume(1.0f), m_TargetVolume(1.0f), currentSR(44100), m_Timer(0) {
 mi::~mi() {
 	delete[] Vals;
 }
-
+void mi::Init() {
+	currentSR = pCB->GetSamplingRate();
+	m_Timer = 0;
+	muted = false;
+	changing = false;
+	m_CurrentVolume = 1.0f;
+	m_TargetVolume = 1.0f;
+}
 void mi::SequencerTick() {
 	if (currentSR != pCB->GetSamplingRate()) {
 		currentSR = pCB->GetSamplingRate();
@@ -72,7 +80,7 @@ void mi::SequencerTick() {
 		float multiplier = currentSR/44100.0f;
 
 		timerSamples = Vals[0]*multiplier;
-		slopeAmount = Vals[1]*multiplier/8192.f;
+		slopeAmount = Vals[1]*44100.f/(8192.f*currentSR);
 	}
 	m_Timer = 0;
 	if (muted) {
@@ -105,6 +113,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				m_CurrentVolume+=slopeAmount;
 			}
 		}
+		//Add the remaining samples
 		psamplesleft+=diff;
 		psamplesright+=diff;
 		changing = true;

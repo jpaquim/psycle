@@ -212,6 +212,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 // Process each sequence tick if note on or note off is pressed.
 void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 {
+	//\todo: Add synchronization code. Due to the way Psycle works, ticks
+	// might not come each n samples so sending them to MIDI when received is
+	// not correct.
 	if ( cmd == 0xC2 ) assignChannel(channel,val&0x0F);
 	else if (cmd == 0xC1)
 	{

@@ -177,12 +177,12 @@ void mi::SequencerTick() {
 		Stop();
 		currentSR = pCB->GetSamplingRate();
 		InitWaveTableSR(true);
-		//force an update of all the parameters.
-		ParameterTweak(-1,-1);
 		for (int i = 0; i < MAX_TRACKS; ++i) {
 			track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 		}
-		fxsamples=256*currentSR/44100.0f;
+		//force an update of all the parameters.
+		ParameterTweak(-1,-1);
+		fxsamples=256*currentSR/44100;
 	}
 	for (int i = 0; i < MAX_TRACKS; ++i) reinitChannel[i] = true;
 }
@@ -286,58 +286,101 @@ void mi::Command() {
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks) {
-	int fxsamplescnt = fxsamples;
-	for(int c=0;c<tracks;c++) {
-		fxsamplescnt=fxsamples;
-		if(track[c].AmpEnvStage) {
-			float *xpsamplesleft=psamplesleft;
-			float *xpsamplesright=psamplesright;
-			--xpsamplesleft;
-			--xpsamplesright;
-			
-			CSynthTrack *ptrack=&track[c];
-			if(reinitChannel[c]) {
-				ptrack->InitEffect(0,0);
-				reinitChannel[c]=false;
-			}
+	int minimum = std::min(numsamples,fxsamples);
+	if (minimum>0) {
+		for(int c=0;c<tracks;c++) {
+			if(track[c].AmpEnvStage) {
+				float *xpsamplesleft=psamplesleft;
+				float *xpsamplesright=psamplesright;
+				--xpsamplesleft;
+				--xpsamplesright;
+				
+				CSynthTrack *ptrack=&track[c];
+				if(reinitChannel[c]) {
+					ptrack->InitEffect(0,0);
+					reinitChannel[c]=false;
+				}
 
-			int xnumsamples = numsamples;
-			do
-			{
-				int minimum = std::min(xnumsamples,fxsamplescnt);
-				xnumsamples-=minimum;
-				fxsamplescnt-=minimum;
+				int xnumsamples = minimum;
 				if(globalpar.osc_mix == 0) {
 					do {
 						const float sl=ptrack->GetSampleOsc1();
 						*++xpsamplesleft+=sl;
 						*++xpsamplesright+=sl;
-						} while(--minimum);
+					} while(--xnumsamples);
 				}
 				else if(globalpar.osc_mix == 256) {
 					do {
 						const float sl=ptrack->GetSampleOsc2();
 						*++xpsamplesleft+=sl;
 						*++xpsamplesright+=sl;
-						} while(--minimum);
+					} while(--xnumsamples);
 				}
 				else {
 					do {
 						const float sl=ptrack->GetSample();
 						*++xpsamplesleft+=sl;
 						*++xpsamplesright+=sl;
-						} while(--minimum);
-					}
-					if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=numsamples;
-	
-					if(fxsamplescnt<=0) {
-						ptrack->PerformFx();
-						fxsamplescnt=256*currentSR/44100.0f;
+					} while(--xnumsamples);
 				}
-			}while(xnumsamples>0);
+				if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=minimum;
+			}
 		}
+		fxsamples-=minimum;
+		numsamples-=minimum;
 	}
-	fxsamples=fxsamplescnt;
+	if(fxsamples == 0) {
+		for(int c=0;c<tracks;c++){
+			if(track[c].AmpEnvStage){
+				track[c].PerformFx();
+			}
+		}
+		fxsamples=256*currentSR/44100;
+	}
+	if (numsamples > 0 ) {
+		float *psamplesleft2=psamplesleft+minimum;
+		float *psamplesright2=psamplesright+minimum;
+		minimum=numsamples;
+		for(int c=0;c<tracks;c++) {
+			if(track[c].AmpEnvStage) {
+				float *xpsamplesleft=psamplesleft2;
+				float *xpsamplesright=psamplesright2;
+				--xpsamplesleft;
+				--xpsamplesright;
+				
+				CSynthTrack *ptrack=&track[c];
+				if(reinitChannel[c]) {
+					ptrack->InitEffect(0,0);
+					reinitChannel[c]=false;
+				}
+
+				int xnumsamples = minimum;
+				if(globalpar.osc_mix == 0) {
+					do {
+						const float sl=ptrack->GetSampleOsc1();
+						*++xpsamplesleft+=sl;
+						*++xpsamplesright+=sl;
+					} while(--xnumsamples);
+				}
+				else if(globalpar.osc_mix == 256) {
+					do {
+						const float sl=ptrack->GetSampleOsc2();
+						*++xpsamplesleft+=sl;
+						*++xpsamplesright+=sl;
+					} while(--xnumsamples);
+				}
+				else {
+					do {
+						const float sl=ptrack->GetSample();
+						*++xpsamplesleft+=sl;
+						*++xpsamplesright+=sl;
+					} while(--xnumsamples);
+				}
+				if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=minimum;
+			}
+		}
+		fxsamples-=minimum;
+	}
 }
 
 // Function that describes value on client's displaying

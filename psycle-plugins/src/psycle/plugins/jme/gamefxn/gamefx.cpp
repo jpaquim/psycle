@@ -472,42 +472,60 @@ void mi::Command()
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	globals.noiseused=false;
-	for(int c=0;c<tracks;c++)
-	{
-		int fxsamplescur=fxsamples;
-		if(track[c].AmpEnvStage)
+	int minimum = std::min(numsamples,fxsamples);
+	if (minimum>0) {
+		for(int c=0;c<tracks;c++)
 		{
-			float *xpsamplesleft=psamplesleft;
-			float *xpsamplesright=psamplesright;
+			if(track[c].AmpEnvStage)
+			{
+				float *xpsamplesleft=psamplesleft;
+				float *xpsamplesright=psamplesright;
+				--xpsamplesleft;
+				--xpsamplesright;
 
-			--xpsamplesleft;
-			--xpsamplesright;
-
-			int xnumsamples = numsamples;
-			do {
-				int minimum = std::min(xnumsamples,fxsamplescur);
-				xnumsamples-=minimum;
-				fxsamplescur-=minimum;
-
+				int xnumsamples = numsamples;
 				do
 				{
 					const float sl=track[c].GetSample();
-
 					*++xpsamplesleft+=sl;
 					*++xpsamplesright+=sl;
-				
-				} while(--minimum);
-
-				if(fxsamplescur<=0) {
-					track[c].PerformFx();
-					fxsamplescur=256.f*currentSR/44100.0f;
-				}
-			}while(xnumsamples>0);
+				} while(--xnumsamples);
+			}
 		}
+		fxsamples-=minimum;
+		numsamples-=minimum;
 	}
-	fxsamples-=numsamples;
-	if(fxsamples<=0) {
-		fxsamples=256.f*currentSR/44100.0f;
+	if(fxsamples == 0) {
+		for(int c=0;c<tracks;c++) {
+			if(track[c].AmpEnvStage) {
+				track[c].PerformFx();
+			}
+		}
+		fxsamples=256*currentSR/44100;
+	}
+	if (numsamples > 0 ) {
+		float *psamplesleft2=psamplesleft+minimum;
+		float *psamplesright2=psamplesright+minimum;
+		minimum=numsamples;
+		for(int c=0;c<tracks;c++)
+		{
+			if(track[c].AmpEnvStage)
+			{
+				float *xpsamplesleft=psamplesleft2;
+				float *xpsamplesright=psamplesright2;
+				--xpsamplesleft;
+				--xpsamplesright;
+
+				int xnumsamples = numsamples;
+				do
+				{
+					const float sl=track[c].GetSample();
+					*++xpsamplesleft+=sl;
+					*++xpsamplesright+=sl;
+				} while(--xnumsamples);
+			}
+		}
+		fxsamples-=minimum;
 	}
 
 	if (globals.noiseused)

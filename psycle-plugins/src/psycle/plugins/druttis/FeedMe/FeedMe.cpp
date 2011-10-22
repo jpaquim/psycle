@@ -502,7 +502,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 		if (cmd == 0x0d) {
 			if (val == 0)
 				val = 16;
-			tracks[channel][0].slide_speed = GLOBAL_TICKS/((float) val *32.0f);
+			tracks[channel][0].slide_speed = GLOBAL_TICKS*44100.f/((float) val *32.0f*globals.samplingrate);
 			if (tracks[channel][0].IsFinished())
 				tracks[channel][0].NoteOn(note, vol, true);
 			else

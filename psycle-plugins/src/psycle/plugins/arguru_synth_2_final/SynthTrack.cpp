@@ -271,14 +271,14 @@ void CSynthTrack::PerformFx()
 	{
 		/* 0x01 : Pitch Up */
 		case 0x01:
-			shift=(float)sp_val*0.001f*wtNewACorrection*wavetableCorrection;
+			shift=(float)sp_val*0.001f*pow(2.0f,wtNewACorrection*wavetableCorrection*srCorrection);
 			ROSC1Speed+=shift;
 			ROSC2Speed+=shift;
 			break;
 
 		/* 0x02 : Pitch Down */
 		case 0x02:
-			shift=(float)sp_val*0.001f*wtNewACorrection*wavetableCorrection;
+			shift=(float)sp_val*0.001f*pow(2.0f,wtNewACorrection*wavetableCorrection*srCorrection);
 			ROSC1Speed-=shift;
 			ROSC2Speed-=shift;
 			if(ROSC1Speed<0.0f)ROSC1Speed=0.0f;
@@ -307,11 +307,11 @@ void CSynthTrack::InitEffect(int cmd, int val)
 	sp_val=val;
 
 	// Init glide
-	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f*wtNewACorrection*wavetableCorrection; }
+	if (cmd==3) { if ( val != 0 ) oscglide= (float)val*0.001f*pow(2.0f,wtNewACorrection*wavetableCorrection*srCorrection); }
 	else 
 	{
 		const float synthglide = 256-syntp->synthglide;
-		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f*wtNewACorrection*wavetableCorrection;
+		if (synthglide < 256.0f) oscglide = (synthglide*synthglide)*0.0000625f*pow(2.0f,wtNewACorrection*wavetableCorrection*srCorrection);
 		else oscglide= 0.0f;
 
 		if(cmd==0x0C) 

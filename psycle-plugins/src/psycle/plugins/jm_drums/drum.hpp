@@ -34,9 +34,22 @@ typedef struct {
 }DrumPars;
 
 
-
 class Drum
 {
+public:
+	Drum();
+	virtual ~Drum();
+
+	void NoteOn(int note,DrumPars* pars);
+	void NoteOff();
+	inline float GetSample();
+
+	float OutVol;				// Master volume. Values between 0 and 1!
+	int Chan;
+	bool Started;				// Used only to avoid New notes to start when Machine is muted.
+	int AmpEnvStage;			// Status of playback
+
+private:
 	Coscillator Drummy;
 	Coscillator Thump;
 
@@ -62,74 +75,63 @@ class Drum
 	float ThumpVol;
 	float ThumpDec;
 	double VolDec;				// Decrement for OutVol when doing noteOff()
+};
 
-public:
-	float OutVol;				// Master volume. Values between 0 and 1!
-	int Chan;
-	bool Started;				// Used only to avoid New notes to start when Machine is muted.
-	int AmpEnvStage;			// Status of playback
-
-	void NoteOn(int note,DrumPars* pars);
-	void NoteOff();
-	float GetSample(){
-		//Function Inlined to Speed Up the machine (1.9% usage inlined, 2.0~2.1% not inlined)
-		
-		float output;
-
-		if (Spos<ThumpLength){
-			output=((sin(Drummy.GetPos()) * SinVol) + (sin(Thump.GetPos()) * ThumpVol)) * OutVol;
-			ThumpVol+=ThumpDec;
-		}
-		else output=(sin(Drummy.GetPos()) * SinVol) * OutVol;
+float Drum::GetSample() {
+	//Function Inlined to Speed Up the machine (1.9% usage inlined, 2.0~2.1% not inlined)
 	
-		if (Spos<DecLength)
+	float output;
+
+	if (Spos<ThumpLength){
+		output=((sin(Drummy.GetPos()) * SinVol) + (sin(Thump.GetPos()) * ThumpVol)) * OutVol;
+		ThumpVol-=ThumpDec;
+	}
+	else output=(sin(Drummy.GetPos()) * SinVol) * OutVol;
+
+	if (Spos<DecLength)
+	{
+		switch(DecMode){
+		case 0: Drummy.IncSpeedin(IncSpeed); 
+			Thump.IncSpeedin(ThumpIncSpeed);
+			break;
+		case 1: Drummy.IncSpeedin(IncSpeed*(2.25 - DecConstant*(1 + Spos)));
+			Thump.IncSpeedin(ThumpIncSpeed*(2.25 - DecConstant*(1 + Spos*ThumpLength/DecLength)));
+			break;
+		case 2: Drummy.IncSpeedin(IncSpeed*((DecConstant - Spos)/DecLength)); 
+			 Thump.IncSpeedin(ThumpIncSpeed*((ThumpDecConstant - Spos)/ThumpLength)); 
+			break;
+		case 3://fallthrough
+		default:
+			break;
+		}
+	}
+	
+	if ( Spos == Slength) NoteOff();
+
+	switch(AmpEnvStage) {
+
+	case ST_NOTESUSTAIN:
+
+		if ( Spos==VolChangePos)
 		{
-			switch(DecMode){
-			case 0: Drummy.IncSpeedin(IncSpeed); 
-				Thump.IncSpeedin(ThumpIncSpeed);
-				break;
-			case 1: Drummy.IncSpeedin(IncSpeed*(2.25 - DecConstant*(1 + Spos)));
-				Thump.IncSpeedin(ThumpIncSpeed*(2.25 - DecConstant*(1 + Spos*ThumpLength/DecLength)));
-				break;
-			case 2: Drummy.IncSpeedin(IncSpeed*((DecConstant - Spos)/DecLength)); 
-				 Thump.IncSpeedin(ThumpIncSpeed*((ThumpDecConstant - Spos)/ThumpLength)); 
-				break;
-			default:break; // case 3
-			}
+			if ( Spos<VolDecay) { VolChangePos=VolDecay;				SinInc=VolDecayDec; }
+			else { VolChangePos=Slength;				SinInc=VolSustainDec; }
 		}
-		
-		if ( Spos == Slength) NoteOff();
+		SinVol+=SinInc;
 
-		switch(AmpEnvStage) {
+		break;
 
-		case ST_NOTESUSTAIN:
-
-			if ( Spos==VolChangePos)
-			{
-				if ( Spos<VolDecay) { VolChangePos=VolDecay;				SinInc=VolDecayDec; }
-				else { VolChangePos=Slength;				SinInc=VolSustainDec; }
-			}
-			SinVol+=SinInc;
-
-			break;
-
-		case ST_NOTERELEASE:
-			if ( OutVol > 0.00003 ) OutVol -=VolDec;
-			else {
-				AmpEnvStage=ST_NONOTE;
-			}
-			break;
-
-		default:break;
+	case ST_NOTERELEASE:
+		if ( OutVol > 0.00003 ) OutVol -=VolDec;
+		else {
+			AmpEnvStage=ST_NONOTE;
 		}
-	
-		Spos++;
+		break;
 
-		return(output);
-
+	default:break;
 	}
 
-	Drum();
-	virtual ~Drum();
+	Spos++;
 
-};
+	return(output);
+}

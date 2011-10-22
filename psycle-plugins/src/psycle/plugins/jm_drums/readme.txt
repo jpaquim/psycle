@@ -1,11 +1,11 @@
         ___________________________
        /|                         |\
-      / | JM Drum  v. 2.2         | \
+      / | JM Drum  v. 2.5         | \
      /  | Developed by [JAZ]      |  \
     /___|                         |___\
    /\   | For comments/whatever   |   /\
-  /\/\  | mail to: jaz_e@terra.es |  /\/\
- /  \/\ |                         | /\/  \
+  /\/\  | mail to:                |  /\/\
+ /  \/\ |   jaz@pastnotecut.org   | /\/  \
 /____\/\| Code Donated to the     |/\/____\
 \     \/| "Psycle Community"      |\/     /
 /______\|_________________________|/______\

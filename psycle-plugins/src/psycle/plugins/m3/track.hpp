@@ -188,42 +188,43 @@ class mi : public psycle::plugin_interface::CMachineInterface {
 		virtual void SeqTick(int channel, int note, int ins, int cmd, int val);
 		virtual void Stop();
 
-		void ComputeCoefs( float *coefs, int f, int r, int t);
-		// skalefuncs
-		inline float Cutoff(int v);
-		inline float Resonance(float v);
-		inline float Bandwidth(int v);
-		inline float LFOFreq( int v);
-		inline float EnvTime( int v);
+		inline static float Cutoff(int v);
+		inline static float Resonance(float v);
+		inline static float Bandwidth(int v);
+		inline static float LFOFreq( int v);
+		inline static float EnvTime( int v);
 
 		float TabSizeDivSampleFreq;
 		int currentSR;
-		
-
 	private:
 		void SetNoValue(tvals &tv);
+		void ComputeCoefs( float *coefs, int f, int r, int t);
+		void InitWaveTable();
+		// skalefuncs
+
+		
 		CTrack Tracks[MAX_SIMUL_TRACKS];
 };
 
 // scale functions
 
-inline float mi::Cutoff(int v) {
+float mi::Cutoff(int v) {
 	return std::pow((v + 5.0) / (127.0 + 5.0), 1.7) * 13000.0 + 30.0;
 }
 
-inline float mi::Resonance(float v) {
+float mi::Resonance(float v) {
 	return std::pow(v / 127.0, 4.0) * 150.0 + 0.1;
 }
 
-inline float mi::Bandwidth(int v) {
+float mi::Bandwidth(int v) {
 	return std::pow(v / 127.0, 4.0) * 4.0 + 0.1;
 }
 
-inline float mi::LFOFreq(int v) {
+float mi::LFOFreq(int v) {
 	return (std::pow((v + 8.0) / (116.0 + 8.0), 4.0) - 0.000017324998565270) * 40.00072;
 }
 
-inline float mi::EnvTime(int v) {
+float mi::EnvTime(int v) {
 	return std::pow((v + 2.0) / (127.0 + 2.0), 3.0) * 10000;
 }
 ////////////////////////////////
