@@ -377,11 +377,15 @@ namespace psycle { namespace host {
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
 
-				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-					if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-				#endif
-						reg.QueryValue("PluginDir", plugin_dir_);
-
+				if(
+					#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+						!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS")
+					#else
+						true
+					#endif
+				) {
+					reg.QueryValue("PluginDir", plugin_dir_);
+				}
 				reg.QueryValue("VstDir", vst_dir_);
 				reg.QueryValue("WaveRecDir", wave_rec_dir_);
 				SetCurrentWaveRecDir(GetWaveRecDir());
@@ -539,10 +543,15 @@ namespace psycle { namespace host {
 			reg.SetValue("InstrumentDir", GetInstrumentDir());
 			reg.SetValue("SongDir", GetSongDir());
 
-			#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-				if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-			#endif
-					reg.SetValue("PluginDir", GetPluginDir());
+			if(
+				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+					!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS")
+				#else
+					true
+				#endif
+			) {
+				reg.SetValue("PluginDir", GetPluginDir());
+			}
 
 			reg.SetValue("VstDir", GetVstDir());
 			reg.SetValue("SkinDir", GetSkinDir());
@@ -932,10 +941,15 @@ namespace psycle { namespace host {
 				SetCurrentSongDir(GetSongDir());
 				reg.QueryValue("SkinDir", skin_dir_);
 
-				#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
-					if(!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS"))
-				#endif
-						reg.QueryValue("PluginDir", plugin_dir_);
+				if(
+					#if PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS
+						!std::getenv("PSYCLE__CONFIGURATION__USE_BUILT_PLUGINS")
+					#else
+						true
+					#endif
+				) {
+					reg.QueryValue("PluginDir", plugin_dir_);
+				}
 
 				reg.QueryValue("VstDir", vst_dir_);
 				SetWaveRecDir(GetSongDir());
