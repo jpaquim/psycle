@@ -427,6 +427,7 @@ namespace host {
 			afx_msg void OnBarrec();
 			afx_msg void OnBarstop();
 			afx_msg void OnRecordWav();
+			afx_msg void OnFullScreen();
 		protected:
 			afx_msg void OnTimer( UINT_PTR nIDEvent );
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
@@ -439,6 +440,7 @@ namespace host {
 			afx_msg void OnHelpSaludos();
 			afx_msg void OnUpdatePatternView(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMachineview(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateFullScreen(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateBarplay(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateBarplayFromStart(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateBarrec(CCmdUI* pCmdUI);

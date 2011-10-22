@@ -328,7 +328,7 @@ namespace psycle
 					virtual bool IsShellMaster() { return false; }
 					virtual int GetShellIdx() { return 0; }
 					virtual bool NeedsAuxColumn() { return false; }
-					virtual const char* AuxColumnName(int idx) {return ""; }
+					virtual const char* AuxColumnName(int idx) const {return ""; }
 					virtual int NumAuxColumnIndexes() { return 0;}
 			///\}
 

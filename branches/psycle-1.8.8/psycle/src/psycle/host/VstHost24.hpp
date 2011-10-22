@@ -121,7 +121,7 @@ namespace psycle
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
 				virtual bool NeedsAuxColumn() { return _type == MACH_VST; }
-				virtual const char* AuxColumnName(int idx) { return MIDI_CHAN_NAMES[idx]; }
+				virtual const char* AuxColumnName(int idx) const { return MIDI_CHAN_NAMES[idx]; }
 				virtual int NumAuxColumnIndexes() { return 16;}
 				// old fileformat {
 				virtual bool PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance);

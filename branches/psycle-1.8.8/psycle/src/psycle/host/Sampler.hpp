@@ -109,7 +109,7 @@ namespace psycle
 			virtual float GetAudioRange() const { return 32768.0f; }
 			virtual void SetSampleRate(int sr);
 			virtual bool NeedsAuxColumn() { return true; }
-			virtual const char* AuxColumnName(int idx);
+			virtual const char* AuxColumnName(int idx) const;
 			virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENTS-1; } // last instrument is the preview instrument
 			virtual bool playsTrack(const int track) const;
 

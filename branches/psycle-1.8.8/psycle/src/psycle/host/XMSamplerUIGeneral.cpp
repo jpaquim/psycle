@@ -81,6 +81,7 @@ namespace psycle { namespace host {
 15xx: Set Envelope position\r\n\t\
 17xy: Tremor Effect ( ontime x, offtime y )\r\n\t\
 18xx: Panbrello\r\n\t\
+1Exx: Send xx to volume colum\r\n\t\
 9xxx: Sample Offset\r\n\r\n\
 Extended Commands:\r\n\t\
 30/1: Glissando mode Off/on\r\n\t\

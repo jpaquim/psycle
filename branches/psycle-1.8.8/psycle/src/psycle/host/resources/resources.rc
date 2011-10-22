@@ -195,6 +195,8 @@ BEGIN
         MENUITEM "Machine view\tF2",            ID_MACHINEVIEW
         MENUITEM "Pattern editor\tF3",          ID_PATTERNVIEW
         MENUITEM SEPARATOR
+        MENUITEM "Full screen",                 IDC_FULL_SCREEN
+        MENUITEM SEPARATOR
         MENUITEM "Gear rack dialog",            IDC_GEAR_RACK
         MENUITEM "Add machine\tF9",             ID_NEWMACHINE
         MENUITEM "Instrument editor\tF10",      ID_VIEW_INSTRUMENTEDITOR

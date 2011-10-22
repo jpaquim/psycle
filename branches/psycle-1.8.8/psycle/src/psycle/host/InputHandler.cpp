@@ -808,21 +808,8 @@ namespace psycle
 				pChildView->OnNewmachine();
 				break;
 
-			case cdefMaxPattern:		
-				if (pChildView->maxView == true) 
-				{
-					pChildView->maxView = false;
-					pMainFrame->ShowControlBar(&pMainFrame->m_seqBar,TRUE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_songBar,TRUE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,TRUE,FALSE);
-				} 
-				else
-				{			
-					pChildView->maxView = true;
-					pMainFrame->ShowControlBar(&pMainFrame->m_seqBar,FALSE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_songBar,FALSE,FALSE);
-					pMainFrame->ShowControlBar(&pMainFrame->m_wndToolBar,FALSE,FALSE);
-				}
+			case cdefMaxPattern:
+				pChildView->OnFullScreen();
 				break;
 
 			case cdefPatternInc:

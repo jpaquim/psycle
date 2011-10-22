@@ -60,6 +60,7 @@ XMSampler::Channel::PerformFX().
 							//0x16
 		TREMOR				=	0x17,// Tremor								(*t)
 		PANBRELLO			=	0x18,// Panbrello							(*t)
+		SENDTOVOLUME		=	0x1E,// Panbrello							(*t)
 		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};

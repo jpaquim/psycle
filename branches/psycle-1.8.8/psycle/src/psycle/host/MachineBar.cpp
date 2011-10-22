@@ -414,6 +414,10 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 						m_inscombo.AddString(buffer);
 					}
 				}
+				if (updatelist) 
+				{
+					m_inscombo.AddString("No Machine");
+				}
 			}
 			else
 			{
@@ -480,6 +484,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
+		bool found=false;
 		if (tmac) 
 		{
 			if ( tmac->_type == MACH_XMSAMPLER)
@@ -488,6 +493,24 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				m_pParentMain->ShowMachineGui(nmac,point);
 				return;
 			}
+			else if ( tmac->_type != MACH_SAMPLER) {
+				for(int i=0;i<MAX_MACHINES;i++) {
+					if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+						m_pSong->seqBus = i;
+						m_pParentMain->UpdateComboGen();
+						m_pWndView->Repaint();
+						found=true;
+						break;
+					}
+				}
+			}
+		}
+		if(!found) {
+			int i = m_pSong->GetFreeMachine();
+			m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
+			m_pSong->seqBus = i;
+			m_pParentMain->UpdateComboGen();
+			m_pWndView->Repaint();
 		}
 
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
@@ -557,7 +580,18 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		WaveFile output;
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-		
+		int nmac = m_pSong->seqBus;
+		Machine *tmac = m_pSong->_pMachine[nmac];
+		if (tmac && tmac->_type != MACH_SAMPLER) {
+			for(int i=0;i<MAX_MACHINES;i++) {
+				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+					m_pSong->seqBus = i;
+					m_pParentMain->UpdateComboGen();
+					m_pWndView->Repaint();
+				}
+			}
+		}
+
 		if (m_pSong->_pInstrument[m_pSong->instSelected]->waveLength)
 		{
 			CFileDialog dlg(FALSE, "wav", m_pSong->_pInstrument[m_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
@@ -588,6 +622,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
+		bool found=false;
 		if (tmac) 
 		{
 			if ( tmac->_type == MACH_XMSAMPLER)
@@ -596,6 +631,25 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				m_pParentMain->ShowMachineGui(nmac,point);
 				return;
 			}
+			else if ( tmac->_type != MACH_SAMPLER) {
+				bool found=false;
+				for(int i=0;i<MAX_MACHINES;i++) {
+					if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+						m_pSong->seqBus = i;
+						m_pParentMain->UpdateComboGen();
+						m_pWndView->Repaint();
+						found=true;
+						break;
+					}
+				}
+			}
+		}
+		if(!found) {
+			int i = m_pSong->GetFreeMachine();
+			m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
+			m_pSong->seqBus = i;
+			m_pParentMain->UpdateComboGen();
+			m_pWndView->Repaint();
 		}
 		m_pParentMain->ShowInstrumentEditor();
 		((CButton*)GetDlgItem(IDC_EDITWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
@@ -603,6 +657,28 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::OnWavebut() 
 	{
+		int nmac = m_pSong->seqBus;
+		Machine *tmac = m_pSong->_pMachine[nmac];
+		bool found=false;
+		if (tmac && tmac->_type != MACH_SAMPLER) {
+			bool found=false;
+			for(int i=0;i<MAX_MACHINES;i++) {
+				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+					m_pSong->seqBus = i;
+					m_pParentMain->UpdateComboGen();
+					m_pWndView->Repaint();
+					found=true;
+					break;
+				}
+			}
+		}
+		if(!found) {
+			int i = m_pSong->GetFreeMachine();
+			m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
+			m_pSong->seqBus = i;
+			m_pParentMain->UpdateComboGen();
+			m_pWndView->Repaint();
+		}
 		m_pParentMain->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
 		m_pParentMain->m_pWndWed->SetActiveWindow();
 		((CButton*)GetDlgItem(IDC_WAVEBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);

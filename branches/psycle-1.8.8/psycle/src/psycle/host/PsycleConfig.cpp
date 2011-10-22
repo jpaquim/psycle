@@ -1159,9 +1159,12 @@ namespace psycle { namespace host {
 			if(itSet->second.first != 0 || itSet->second.second != 0) {
 				std::map<std::pair<int,int>,CmdDef>::iterator itPrevKey;
 				itPrevKey = keyMap.find(itSet->second);
-				if(itPrevKey != keyMap.end()) 
+				if(itPrevKey != keyMap.end())
 				{
-					itPrevKey->second=cmd;
+					if(itPrevKey->first.first != theKey.first ||
+						itPrevKey->first.second != theKey.second) {
+						itPrevKey->second=cdefNull;
+					}
 				} else {
 					//Command mapped, but the mapped key not found? Well, whatever, let's fix it.
 					keyMap[theKey]=cmd;

@@ -243,8 +243,18 @@ namespace psycle { namespace host {
 					}
 					if(pluginName && _pPlugsInfo[i]->error.empty())
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-					else
-						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else {
+						boost::filesystem::path path(_pPlugsInfo[i]->dllname);
+						if (path.filename() != "blwtbl.dll"
+								&& path.filename() != "fluidsynth.dll"
+								&& path.filename() != "asio.dll"
+								&& path.filename() != "msvcp71.dll"
+								&& path.filename() != "msvcr71.dll"
+								&& path.filename() != "msvcp80.dll"
+								&& path.filename() != "msvcr80.dll") {
+							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+						}
+					}
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);
 				hInt[1] = m_browser.InsertItem("Dummy plug",1,1,intFxNode,TVI_SORT);
@@ -301,8 +311,18 @@ namespace psycle { namespace host {
 					}
 					if(pluginName && _pPlugsInfo[i]->error.empty())
 						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
-					else
-						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					else {
+						boost::filesystem::path path(_pPlugsInfo[i]->dllname);
+						if (path.filename() != "blwtbl.dll"
+								&& path.filename() != "fluidsynth.dll"
+								&& path.filename() != "asio.dll"
+								&& path.filename() != "msvcp71.dll"
+								&& path.filename() != "msvcr71.dll"
+								&& path.filename() != "msvcp80.dll"
+								&& path.filename() != "msvcr80.dll") {
+							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+						}
+					}
 
 				}
 				hInt[0] = m_browser.InsertItem("Sampler",0, 0, hNodes[0], TVI_SORT);

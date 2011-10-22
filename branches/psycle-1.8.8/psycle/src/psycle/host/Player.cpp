@@ -42,6 +42,7 @@ namespace psycle
 			_linejump=-1;
 			_loop_count=0;
 			_loop_line=0;
+			_playPosition=0;
 			measure_cpu_usage_=false;
 			m_SampleRate=44100;
 			SetBPM(125,4);
@@ -422,32 +423,7 @@ void Player::clear_plan() {
 							{
 								// If the midi command uses a command less than 0x80, then interpret it as
 								// send a tracker command to the specified track of the specified machine.
-								if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
-								{
-									int voice(pEntry->_inst);
-									// make a copy of the pattern entry, because we're going to modify it.
-									PatternEntry entry(*pEntry);
-									entry._note = 255;
-									entry._inst = 255;
-									// check for out of range voice values.
-									if(voice < pSong->SONGTRACKS)
-									{
-										pMachine->Tick(voice, &entry);
-									}
-									else if(voice == 0xFF)
-									{
-										// special voice value which means we want to send the same command to all voices
-										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
-										{
-											pMachine->Tick(voice, &entry);
-										}
-									}
-									else {}//Invalid index. do nothing.
-									pMachine->TriggerDelayCounter[track] = 0;
-									pMachine->ArpeggioCount[track] = 0;
-								}
-								// tweaks or midi cc
-								else 
+								if(pEntry->_note != notecommands::midicc || pEntry->_inst >= 0x80)
 								{
 									// classic tracking, use the track number as the channel/voice number
 									pMachine->Tick(track, pEntry);
@@ -484,7 +460,8 @@ void Player::clear_plan() {
 			for(int track=0; track<pSong->SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(( !pSong->_trackMuted[track]) && (pEntry->_note < notecommands::tweak || pEntry->_note == 255)) // Is it not muted and is a note or command?
+				if(( !pSong->_trackMuted[track]) && 
+					(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::midicc || pEntry->_note == 255)) // Is it not muted and is a note or command?
 				{
 					int mac = pEntry->_mach;
 					if(mac < MAX_MACHINES) prevMachines[track] = mac;
@@ -502,7 +479,7 @@ void Player::clear_plan() {
 								 && pMachine->_type != MACH_SAMPLER && pMachine->_type != MACH_XMSAMPLER) {
 								playTrack[track]=false;
 							}
-							else {
+							else if(pEntry->_note <= notecommands::b9){
 								playTrack[track]=true;
 							}
 							if(!pMachine->_mute) // Does this machine really exist and is not muted?
@@ -540,6 +517,31 @@ void Player::clear_plan() {
 										pMachine->ArpeggioCount[track] = 1;
 									}
 									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
+								}
+								else if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
+								{
+									int voice(pEntry->_inst);
+									// make a copy of the pattern entry, because we're going to modify it.
+									PatternEntry entry(*pEntry);
+									entry._note = 255;
+									entry._inst = 255;
+									// check for out of range voice values.
+									if(voice < pSong->SONGTRACKS)
+									{
+										pMachine->Tick(voice, &entry);
+									}
+									else if(voice == 0xFF)
+									{
+										// special voice value which means we want to send the same command to all voices
+										for(int voice(0) ; voice < pSong->SONGTRACKS ; ++voice)
+										{
+											pMachine->Tick(voice, &entry);
+										}
+									}
+									else {}//Invalid index. do nothing.
+									pMachine->TriggerDelay[track]._cmd = 0;
+									pMachine->TriggerDelayCounter[track] = 0;
+									pMachine->ArpeggioCount[track] = 0;
 								}
 								else
 								{

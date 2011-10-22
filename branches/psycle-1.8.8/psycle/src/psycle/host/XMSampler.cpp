@@ -2252,15 +2252,20 @@ namespace psycle
 				}
 			if ( newVoice == NULL ) newVoice = currentVoice;
 			// Effect Command
+			if (pData->_cmd == CMD::SENDTOVOLUME) {
+				thisChannel.SetEffect(newVoice,pData->_parameter,0,0);
+			}
+			else {
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
+				thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
 	#else
-			thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);
+				thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);
 	#endif
 #endif
+			}
 		}
 
 		int XMSampler::GenerateAudioInTicks(int /*startSample*/,  int numSamples)

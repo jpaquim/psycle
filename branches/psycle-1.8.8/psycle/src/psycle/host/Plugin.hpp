@@ -148,7 +148,7 @@ namespace psycle
 				private: bool		needsAux_;
 
 				//\todo: Dynamic
-				virtual const char* AuxColumnName(int idx) { 
+				virtual const char* AuxColumnName(int idx) const { 
 					/*if(needsAux_) {
 
 					}

@@ -241,7 +241,9 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_LOOPPLAYBACK, OnUpdateConfigurationLoopplayback)
 			ON_COMMAND(ID_MACHINEVIEW, OnMachineview)
 			ON_COMMAND(ID_PATTERNVIEW, OnPatternView)	
-			ON_COMMAND(ID_SHOWPSEQ, OnShowPatternSeq)
+			ON_COMMAND(IDC_FULL_SCREEN, OnFullScreen)
+			ON_UPDATE_COMMAND_UI(IDC_FULL_SCREEN, OnUpdateFullScreen)
+			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
 			//Show Gear Rack is the command IDC_GEAR_RACK of the machine bar (in mainfrm)
 			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
 			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
@@ -1483,6 +1485,27 @@ namespace psycle { namespace host {
 			}
 			//Repaint();
 			pParentMain->RedrawGearRackList();
+		}
+		void CChildView::OnFullScreen()
+		{
+			if (maxView) 
+			{
+				maxView = false;
+				pParentMain->ShowControlBar(&pParentMain->m_seqBar,TRUE,FALSE);
+				pParentMain->ShowControlBar(&pParentMain->m_songBar,TRUE,FALSE);
+				pParentMain->ShowControlBar(&pParentMain->m_wndToolBar,TRUE,FALSE);
+			} 
+			else
+			{			
+				maxView = true;
+				pParentMain->ShowControlBar(&pParentMain->m_seqBar,FALSE,FALSE);
+				pParentMain->ShowControlBar(&pParentMain->m_songBar,FALSE,FALSE);
+				pParentMain->ShowControlBar(&pParentMain->m_wndToolBar,FALSE,FALSE);
+			}
+		}
+		void CChildView::OnUpdateFullScreen(CCmdUI* pCmdUI) 
+		{
+			pCmdUI->SetCheck(maxView?TRUE:FALSE);
 		}
 
 		void CChildView::OnConfigurationSettings() 

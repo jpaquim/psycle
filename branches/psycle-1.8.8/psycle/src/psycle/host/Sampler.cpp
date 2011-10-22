@@ -80,7 +80,7 @@ namespace psycle
 				}
 			}
 		}
-		const char* Sampler::AuxColumnName(int idx) {
+		const char* Sampler::AuxColumnName(int idx) const {
 			return Global::_pSong->_pInstrument[ idx]->_sName;
 		}
 

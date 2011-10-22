@@ -426,7 +426,7 @@ namespace psycle
 				case cdefEditPattern:	return "Screen of Patterns";
 				case cdefEditInstr:		return "Edit Instrument";
 				case cdefAddMachine:		return "Add New Machine";
-				case cdefMaxPattern:		return "Maximise Pattern View";
+				case cdefMaxPattern:		return "Maximise View (Fullscreen)";
 
 				case cdefPatternInc:		return "Current Pattern +1";
 				case cdefPatternDec:		return "Current Pattern -1";

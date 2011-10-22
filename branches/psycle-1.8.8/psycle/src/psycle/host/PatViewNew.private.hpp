@@ -1941,9 +1941,12 @@ namespace psycle { namespace host {
 						devc->SetBkColor(pBkg[trackcount]);
 						devc->SetTextColor(pvc_font[trackcount]);
 					}
-					OutNote(devc,xOffset+COLX[0],yOffset,*patOffset++);
-					OutData(devc,xOffset+COLX[1],yOffset,*patOffset++,*(patOffset) == 255);
-					OutData(devc,xOffset+COLX[3],yOffset,*patOffset++,*(patOffset) == 255);
+					OutNote(devc,xOffset+COLX[0],yOffset,*patOffset);
+					patOffset++;
+					OutData(devc,xOffset+COLX[1],yOffset,*patOffset,*(patOffset) == 255);
+					patOffset++;
+					OutData(devc,xOffset+COLX[3],yOffset,*patOffset,*(patOffset) == 255);
+					patOffset++;
 					bool trflag = *(patOffset) == 0 && *(patOffset+1) == 0 && 
 						(*(patOffset-3) <= notecommands::release || *(patOffset-3) == 255 );
 					OutData(devc,xOffset+COLX[5],yOffset,*patOffset++,trflag);

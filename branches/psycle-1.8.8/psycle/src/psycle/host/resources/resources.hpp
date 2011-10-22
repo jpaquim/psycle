@@ -1070,6 +1070,8 @@
 #define ID_CONTEXTMENU_ADDNEWTRACKONCURSOR 34279
 #define ID_CONTEXTMENU_NOTETRANSPOSITION 34280
 #define ID_POP_ADDNEWTRACK              34281
+#define ID_Menu                         34282
+#define IDC_FULL_SCREEN                 34283
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1078,7 +1080,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        314
-#define _APS_NEXT_COMMAND_VALUE         34282
+#define _APS_NEXT_COMMAND_VALUE         34284
 #define _APS_NEXT_CONTROL_VALUE         1838
 #define _APS_NEXT_SYMED_VALUE           62
 #endif
