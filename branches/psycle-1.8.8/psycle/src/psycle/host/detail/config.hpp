@@ -9,7 +9,7 @@
 /// The advantage of using an env var is that it doesn't hardcode the behaviour in the executable,
 /// hence it continues working normally when launched outside the IDE.
 ///
-/// Note 1: Visual sutio saves the debug settings in the .user file,
+/// Note 1: Visual studio saves the debug settings in the .user file,
 ///         so these don't go in the repository, which is a good thing.
 ///
 /// Note 2: With visual studio, you need to set the env var as
