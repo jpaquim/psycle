@@ -1,5 +1,0 @@
-To copile Psycle help, it is necessary to download and install HTML Help Workshop from Microsoft.
-
-Then, launch the program (hhw.exe) open the Psycle Help.hhk file and run compile.
-
-It will some some warnings about the <?xml> header, but that's because it doesn't know about xhtml.The final results works anyway.
