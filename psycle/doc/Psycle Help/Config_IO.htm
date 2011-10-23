@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Config_Dirs.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Config_MIDI.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Input/Output</p>
+<p class="under">(Configuration &gt; Settings... &gt; Input/Output)</p>
+
+<p><img src="config_io.png"/></p>
+<p class="head3">Audio I/O</p>
+<p>
+Depending on your system and soundcard, you will get several different
+options for sound output. Options include Silent (no output), Windows waveout MME,
+Directsound, ASIO (if supported) and WASAPI (If Vista or 7)</p>
+By clicking the "Configure..." button, you can
+then set device/soundcard to use, the sample rate and bit depth (depending on setting).
+You can also set the buffer length, in total samples or in blocks of buffers depending on
+driver. These will determine the latency (the delay in playback). If you
+find your audio skips and breaks unnecessarily, you may need to increase
+these values.
+<p>Note: Most ASIO drivers, as well as WASAPI exclusive, will only allow sound
+to be played by Psycle, dissallowing other applications to use the same soundcard
+at the same time.</p>
+<p />
+
+<p class="head3">MIDI I/O</p>
+<p>Select the MIDI input device from the dropdown list. This will be the main device.
+Sometimes there will be more than one port for your hardware, such as a MIDI through port and/or a data port.</p>
+<p>If you are only using a MIDI keyboard or controller to send notes and tweaks to Psycle
+while composing, you might find easier to use the Immediate Playback option. This doesn't
+need a MIDI clock and there is no synchronization to the audio.</p>
+<p>On the other hand, if you want to do so in realtime, using Psycle as a softsynth, it is
+recommended that you setup a clock (which can be sent by the same MIDI device or another one),
+and messages will get queued and played in synchronization with the audio.<br/>
+This second method is covered in the  <a href="MIDI.htm">MIDI Tutorial</a></p>
+<p>Both methods support receiving messages from multiple MIDI channels, route them to different
+machines and remap the messages. The main difference is how they are processed by Psycle.</p>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Config_Dirs.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Config_MIDI.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+</body>
+</html>
