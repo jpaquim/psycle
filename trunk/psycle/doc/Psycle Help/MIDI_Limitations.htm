@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td align="left"><a href="MIDI_Tips.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="MIDI_Chart.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+<p class="head2">Limitations</p>
+<p>Currently the main limitations of the MIDI input offered by Psycle are
+relating to the delay in the MIDI getting into Psycle (through Microsoft
+Windows) and, in a way, any audio engine drop-outs.<br/>
+Audio engine
+drop-outs are nothing to do with the MIDI interface, and can usually be
+rectified (or made much better) by increasing the number of audio
+buffers and/or the size of these buffers.</p>
+<p>To account for delays in MIDI
+messages getting to Psycle the amount of midi headroom (in milliseconds)
+is user-configurable. If you are experiencing a lot of lost messages
+and/or poor syncronisation then try increasing this value. The default
+is 0 milliseconds, but on slower systems or systems that are running a
+lot of heavy-duty applications concurrently with Psycle, it may be wise
+to increase this value.<br/>
+ This will increase the audio latency, but MIDI
+will be more stable and predictable.</p>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td align="left"><a href="MIDI_Tips.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="MIDI_Chart.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+</body>
+</html>
