@@ -281,7 +281,7 @@ namespace detail {
 				::LARGE_INTEGER counter;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				
-				last_time += nanoseconds::period::den * (counter.QuadPart - last_counter) / last_frequency;
+				last_time += (counter.QuadPart - last_counter) * (nanoseconds::period::den / last_frequency);
 				last_counter = counter.QuadPart;
 				return time_point(nanoseconds(last_time));
 			}
