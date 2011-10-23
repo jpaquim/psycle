@@ -632,7 +632,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				return;
 			}
 			else if ( tmac->_type != MACH_SAMPLER) {
-				bool found=false;
 				for(int i=0;i<MAX_MACHINES;i++) {
 					if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
 						m_pSong->seqBus = i;
@@ -661,7 +660,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		Machine *tmac = m_pSong->_pMachine[nmac];
 		bool found=false;
 		if (tmac && tmac->_type != MACH_SAMPLER) {
-			bool found=false;
 			for(int i=0;i<MAX_MACHINES;i++) {
 				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
 					m_pSong->seqBus = i;

@@ -131,18 +131,12 @@ namespace psycle
 				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
 				///
 				/// Note that the crashable argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
-//				#define PSYCLE__HOST__CATCH_ALL(crashable) \
-//					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+				#define PSYCLE__HOST__CATCH_ALL(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 
 				///\see PSYCLE__HOST__CATCH_ALL
-//				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
-//					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
-
-
-				#define PSYCLE__HOST__CATCH_ALL(crashable) catch(bool) {throw;}
-					//UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW
-				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) catch(bool){throw;}
-					//UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__NO_CLASS
+				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 			}
 		}
 
