@@ -43,7 +43,7 @@
 				typename Clock::time_point t1;
 				typename Clock::time_point const t0(Clock::now());
 				do { t1 = Clock::now(); ++timeout; } while(t1 == t0 && timeout < 1000 * 1000 * 100);
-				if(Clock::is_monotonic) BOOST_CHECK(t1 >= t0);
+				if(Clock::is_steady) BOOST_CHECK(t1 >= t0);
 				if(t1 == t0) max = hours(1); // reports the timeout as a bogus big value
 				nanoseconds const d(t1 - t0);
 				if(d < min) min = d;

@@ -5,52 +5,70 @@
 #include <universalis/stdlib/detail/chrono/duration_and_time_point.hpp>
 namespace universalis { namespace os { namespace clocks {
 
+// recommended reading: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
+
 namespace detail {
-	template<typename Final, bool Is_Monotonic>
+	template<typename Final, bool Is_Steady>
 	struct basic_clock {
 		typedef stdlib::chrono::nanoseconds duration;
 		typedef duration::rep rep;
 		typedef duration::period period;
 		typedef stdlib::chrono::time_point<Final, duration> time_point;
-		static const bool is_monotonic = Is_Monotonic;
+		static const bool is_steady = Is_Steady;
 	};
 }
 
-// recommended: http://icl.cs.utk.edu/papi/custom/index.html?lid=62&slid=96
-
-/// a real time clock that counts the UTC time elasped since the unix epoch (1970-01-01T00:00:00UTC).
+/// a clock that returns the official, wall time, with UTC timezone, with the origin (zero) being the unix epoch (1970-01-01T00:00:00UTC).
 ///
-/// This is the UTC time, and hence not monotonic since UTC has leap seconds to readjust with TAI time.
+/// Even if it's using the UTC timezone and hence not subject to daylight time saving,
+/// the clock may still jump forward and backward to take things like leap seconds into account.
+/// It may also go slower or faster to adjust to an external reference clock (using ntpdate for example).
+///
+/// So, this clock should only be used for absolute timeouts (functions named *_until).
+///
 /// http://www.ucolick.org/~sla/leapsecs/timescales.html
 struct utc_since_epoch : public detail::basic_clock<utc_since_epoch, false> {
 	static UNIVERSALIS__DECL time_point now();
 };
 
-/// a clock that counts the real time elapsed since some unspecified origin.
+/// a clock that counts the real, physical time elapsed since some unspecified origin, and which is not only monotonic but also steady.
+/// For the definition, see the ISO C++2011 standard: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3128.html#time.clock.steady
+///
+/// So, this clock is suited for relative timeouts (functions named *_for).
 ///
 /// The implementation reads, if available, the tick count register of some unspecified CPU.
 /// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles, but often the count value and the tick events are unrelated,
 /// i.e. the value might not be incremented one by one. So the period corresponding to 1 count unit may be even smaller than the period of a CPU cycle, but should probably stay in the same order of magnitude.
 /// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long, it is possible to count an uptime period in the order of a century without wrapping.
-/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time. This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845.
-/// The implementation for mswindows is unpsecified on SMP systems.
-struct monotonic : public detail::basic_clock<monotonic, true> { // note: new name in c++0x is "steady"
+/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time.
+/// This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845 .
+/// The implementation on MS-Windows is even unpsecified on SMP systems! Thank you again Microsoft.
+struct steady : public detail::basic_clock<steady, true> {
 	static UNIVERSALIS__DECL time_point now();
 };
 
 /// a virtual clock that counts the time spent by the CPU(s) in the current process.
-struct process : public detail::basic_clock<process, true> {
+///
+/// Because it's not counting the real time, this clock should not be used for timeouts.
+///
+struct process : public detail::basic_clock<process, false> {
 	static UNIVERSALIS__DECL time_point now();
 };
 
 /// a virtual clock that counts the time spent by the CPU(s) in the current thread.
-struct thread : public detail::basic_clock<thread, true> {
+///
+/// Because it's not counting the real time, this clock should not be used for timeouts.
+///
+struct thread : public detail::basic_clock<thread, false> {
 	static UNIVERSALIS__DECL time_point now();
 };
 
 /// a virtual clock that counts the time spent by the CPU(s) in the current thread
-/// or fallback to process or monotonic clock if the resolution is low.
-struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fallback, true> {
+/// or fallback to process or steady clock if the resolution is low.
+///
+/// Because it's not counting the real time, this clock should not be used for timeouts.
+///
+struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fallback, false> {
 	static UNIVERSALIS__DECL time_point now();
 };
 
@@ -60,7 +78,7 @@ struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fal
 	// Due to a mutual dependency with <universalis/stdlib/chrono.hpp>, we define the typedefs here.
 	namespace universalis { namespace stdlib { namespace chrono {
 		typedef os::clocks::utc_since_epoch system_clock;
-		typedef os::clocks::monotonic monotonic_clock;
+		typedef os::clocks::steady steady_clock;
 		typedef system_clock high_resolution_clock; // as done in gcc 4.4
 	}}}
 #endif
@@ -73,14 +91,14 @@ struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fal
 			using stdlib::chrono::test::measure_clock_against_sleep;
 			using stdlib::chrono::test::measure_clock_resolution;
 			measure_clock_against_sleep<utc_since_epoch>();
-			measure_clock_against_sleep<monotonic>();
+			measure_clock_against_sleep<steady>();
 			#if 0 // illogic for these clocks
 				measure_clock_against_sleep<process>();
 				measure_clock_against_sleep<thread>();
 				measure_clock_against_sleep<hires_thread_or_fallback>();
 			#endif
 			measure_clock_resolution<utc_since_epoch>();
-			measure_clock_resolution<monotonic>();
+			measure_clock_resolution<steady>();
 			measure_clock_resolution<process>(10);
 			measure_clock_resolution<thread>(10);
 			measure_clock_resolution<hires_thread_or_fallback>();

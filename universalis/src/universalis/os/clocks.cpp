@@ -184,6 +184,8 @@ namespace detail {
 		return time_point(nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC));
 	}
 
+	/******************************************************************************************/
+	
 	#if defined DIVERSALIS__OS__POSIX
 		namespace posix {
 			namespace {
@@ -316,7 +318,7 @@ namespace detail {
 
 			/// wall clock.
 			/// ::GetTickCount() returns the uptime (i.e., time elapsed since computer was booted), in milliseconds.
-			/// Microsoft doesn't even specifies wether it's monotonic and as linear as possible, but we can probably assume so.
+			/// Microsoft doesn't even specifies wether it's monotonic and as steady as possible, but we can probably assume so.
 			/// This function returns a value which is read from a context value which is updated only on context switches,
 			/// and hence is very inaccurate: it can lag behind the real clock value as much as 15ms, and sometimes more.
 			/// Possibly realised using the PIT/PIC PC hardware.
@@ -389,7 +391,7 @@ utc_since_epoch::time_point utc_since_epoch::now() {
 	#endif
 }
 
-monotonic::time_point monotonic::now() {
+steady::time_point steady::now() {
 	#if defined DIVERSALIS__OS__POSIX
 		detail::posix::config();
 		if(detail::posix::monotonic_clock_supported) return time_point(detail::posix::monotonic::now().time_since_epoch());
@@ -405,7 +407,7 @@ process::time_point process::now() {
 	#if defined DIVERSALIS__OS__POSIX
 		detail::posix::config();
 		if(detail::posix::process_cpu_time_supported) return time_point(detail::posix::process_cpu_time::now().time_since_epoch());
-		else return time_point(monotonic::now().time_since_epoch());
+		else return time_point(steady::now().time_since_epoch());
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		return time_point(detail::microsoft::process_time::now().time_since_epoch());
 	#else

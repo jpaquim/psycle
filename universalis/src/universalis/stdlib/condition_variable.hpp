@@ -162,7 +162,7 @@
 
 		class condition_variable_speed_test_class {
 			private:
-				typedef os::clocks::monotonic clock;
+				typedef os::clocks::steady clock;
 
 				class tls {
 					public:
