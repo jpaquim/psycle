@@ -11,15 +11,16 @@
 namespace psycle { namespace core {
 
 /// This clock is meant to have the following characteristics:
-/// - high resolution: can measure very short durations,
-/// - monotonic: does not jump nor accelerate/deccelerate to adjust to official time,
-/// - virtual thread time: ideally, this counts the time spent by cpu(s) in the current thread, blocked time not counted.
+/// - virtual thread time: ideally, this counts the time spent by cpu(s) in the current thread, blocked time not counted,
+/// - monotonic: does not jump to follow the official time,
+/// - high resolution: can measure very short durations.
 typedef universalis::os::clocks::hires_thread_or_fallback cpu_time_clock;
 
 /// This clock is meant to have the following characteristics:
-/// - high resolution: can measure very short durations,
-/// - monotonic: does not jump nor accelerate/deccelerate to adjust to official time,
-/// - real, wall time: counts the real time elapsed, since some unspecified origin.
-typedef universalis::os::clocks::monotonic wall_time_clock;
+/// - real time: counts the real, physical time elapsed, independent of the official time,
+/// - monotonic: does not jump to follow the official time,
+/// - steady: does not accelerate/deccelerate to adjust to official time,
+/// - high resolution: can measure very short durations.
+typedef universalis::os::clocks::steady steady_clock;
 
 }}

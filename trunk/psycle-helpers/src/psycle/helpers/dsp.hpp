@@ -629,7 +629,7 @@ using namespace universalis::stdlib;
 				v1.push_back(s);
 				v2.push_back(s);
 			}
-			typedef universalis::os::clocks::monotonic clock;
+			typedef universalis::os::clocks::steady clock;
 			int const iterations = 10000;
 			float const vol = 0.5;
 

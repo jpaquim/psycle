@@ -108,7 +108,7 @@ bool inline atomic_compare_and_swap(Value & address, Value old_value, Value new_
 
 		class atomic_compare_and_swap_speed_test_class {
 			private:
-				typedef os::clocks::monotonic clock;
+				typedef os::clocks::steady clock;
 
 				class tls {
 					public:
