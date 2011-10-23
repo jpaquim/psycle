@@ -1,6 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2003-2007 johan boule <bohan@jabber.org>
-// copyright 2003-2007 psycledelics http://psycle.pastnotecut.org
+// copyright 2003-2011 members of the psycle project http://psycle.sourceforge.net ; Arguru, johan boule <bohan@jabber.org>, JosepMa
 
 /// \file
 /// \brief filter in the frequency domain using 2 poles
@@ -15,14 +14,14 @@ class Filter_2_Poles : public Plugin
 public:
 	/*override*/ void help(std::ostream & out) throw()
 	{
-		out << "filter in the frequency domain using 2 poles" << std::endl;
-		out << "compatible with original psycle 1 arguru's 2 poles filter" << std::endl;
-		out << "no more sample rate bug like in the original one" << std::endl;
-		out << "the cutoff frequency is 'modulated' in an unsusal way via an oscillator (not a sine)" << std::endl;
-		out << "(contact arguru if you want to know why the modulation is done like this)" << std::endl;
-		out << std::endl;
-		out << "commands:" << std::endl;
-		out << "0x01 0x00-0xff: cutoff frequency modulation phase" << std::endl;
+		out <<
+			"Filter in the frequency domain using 2 poles\n"
+			"\n"
+			"The cutoff frequency is modulated in an unsusal way since the LFO is not a sine.\n"
+			"This behavior of the modulation is the same as in Arguru's original code, did he do it intentionally or not.\n"
+			"\n"
+			"Commands:\n"
+			"01 XX: sets the cutoff frequency modulation phase - XX in the range 00 to ff\n";
 	}
 
 	enum Parameters
@@ -41,9 +40,11 @@ public:
 			static const Information::Parameter parameters [] =
 			{
 				Information::Parameter::discrete("response", low, high),
-				Information::Parameter::exponential("cutoff frequency", 73, 7276, 7276),
+				/// note: The actual cutoff frequence really is in the range 15Hz to 22050Hz,
+				///       but we premultiply it by pi here to spare us from doing the multiplication when recomputing cutoff_sin_.
+				Information::Parameter::exponential("cutoff frequency", 15 * pi, 22050 * pi, 22050 * pi),
 				Information::Parameter::linear("resonance", 0, 0, 1),
-				Information::Parameter::exponential("mod. frequency", pi * 2 / 10000, 0, pi * 2 * 2 * 3 * 4 * 5 * 7),
+				Information::Parameter::exponential("mod. period", pi * 2 / 10000, 0, pi * 2 * 2 * 3 * 4 * 5 * 7),
 				Information::Parameter::linear("mod. amplitude", 0, 0, 1),
 				Information::Parameter::linear("mod. stereodephase", 0, 0, pi)
 			};
@@ -72,14 +73,13 @@ public:
 			}
 			break;
 		case cutoff_frequency:
-			out << (*this)(cutoff_frequency) << " hertz";
+			out << (*this)(cutoff_frequency) / pi << " Hertz";
 			break;
 		case modulation_sequencer_ticks:
 			out << pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
 			break;
 		case modulation_amplitude:
-			//information.parameter(cutoff_frequency).scale.output_maximum()  <-- The Exponential scale mangles min and max
-			out << "(+/-)" << 7276  * (*this)(modulation_amplitude) << " hertz";
+			out << "(+/-) " << (*this)(modulation_amplitude) * 22050 << " Hertz";
 			break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
@@ -93,7 +93,7 @@ public:
 
 	Filter_2_Poles() : Plugin(information()), modulation_phase_(0), cutoff_sin_(0)
 	{
-		::memset(buffers_, 0, sizeof buffers_);
+		std::memset(buffers_, 0, sizeof buffers_);
 	}
 
 	/*override*/ void Work(Sample l[], Sample r[], int samples, int);
@@ -106,9 +106,7 @@ protected:
 	inline void update_coefficients();
 	inline void update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase = 0);
 	enum Channels { left, right, channels };
-	void erase_NaNs_Infinities_And_Denormals( float* inSample );
-	inline const Real WorkLow(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
-	inline const Real WorkHigh(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
+	inline const Sample Work(const Real & input, Real buffer[channels], const Real coefficients[poles + 1]);
 	Real cutoff_sin_, modulation_radians_per_sample_, modulation_phase_, buffers_ [channels][poles], coefficients_ [channels][poles + 1];
 };
 
@@ -134,7 +132,7 @@ void Filter_2_Poles::parameter(const int & parameter)
 	switch(parameter)
 	{
 	case cutoff_frequency:
-		cutoff_sin_ = static_cast<Sample>((*this)(cutoff_frequency)* 6.283 * seconds_per_sample());
+		cutoff_sin_ = static_cast<Sample>(std::sin((*this)(cutoff_frequency) * seconds_per_sample()));
 		break;
 	case modulation_sequencer_ticks:
 		modulation_radians_per_sample_ = (*this)(modulation_sequencer_ticks) / samples_per_sequencer_tick();
@@ -150,7 +148,14 @@ void Filter_2_Poles::update_coefficients()
 
 inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], const Real & modulation_stereo_dephase)
 {
-	const Real minimum(static_cast<Real>(1e-2));
+	// Notes:
+	// The cutoff frequency is modulated in an unsusal way since the LFO is not added directly to the cutoff frequency,
+	// but to a computed sine (cutoff_sin_).
+	// This behavior of the modulation is the same as in Arguru's original code, did he do it intentionally or not.
+	// If the modulation amp is "too big", the LFO will get stuck for a long time at SR/2.
+	// This is again due to the sum of the two sines (the base freq + the LFO) giving a range [0, 2] but being then clamped to the ]0, 1] range.
+
+	const Real minimum(Real(1e-2));
 	const Real maximum(1 - minimum);
 	coefficients[0] = clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
 	coefficients[1] = 1 - coefficients[0];
@@ -161,47 +166,37 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 void Filter_2_Poles::Work(Sample l[], Sample r[], int samples, int)
 {
 	switch((*this)[response]) {
-	case low:
-		for(int sample(0) ; sample < samples ; ++sample)
-		{
-			l[sample] = static_cast<Sample>(WorkLow(l[sample], buffers_[left] , coefficients_[left]));
-			r[sample] = static_cast<Sample>(WorkLow(r[sample], buffers_[right], coefficients_[right]));
-		}
-		break;
-	case high:
-		for(int sample(0) ; sample < samples ; ++sample)
-		{
-			l[sample] = static_cast<Sample>(WorkHigh(l[sample], buffers_[left] , coefficients_[left]));
-			r[sample] = static_cast<Sample>(WorkHigh(r[sample], buffers_[right], coefficients_[right]));
-		}
-		break;
-	default:
-		throw Exception("unknown response type");
+		case low:
+			for(int sample = 0; sample < samples ; ++sample) {
+				l[sample] = Work(l[sample], buffers_[left] , coefficients_[left]);
+				r[sample] = Work(r[sample], buffers_[right], coefficients_[right]);
+			}
+			break;
+		case high:
+			for(int sample = 0; sample < samples ; ++sample) {
+				l[sample] -= Work(l[sample], buffers_[left] , coefficients_[left]);
+				r[sample] -= Work(r[sample], buffers_[right], coefficients_[right]);
+			}
+			break;
+		default:
+			throw Exception("unknown response type");
 	}
+
+	erase_all_nans_infinities_and_denormals(buffers_[left], channels);
+	erase_all_nans_infinities_and_denormals(buffers_[right], channels);
 
 	if((*this)(modulation_amplitude)) // note: this would be done each sample for perfect quality
 	{
-		//\fixme: lowpass at half (~800Hz), ressonance 0.9,  mod freq 6Ticks, mod amp 0.5. Use arguru synth with the white noise setting.
-		// The sound is not sinusoidal, because the modulation is not exponential
-		//(i.e. since the parameter is exponential, this change has to be exponential too)
 		modulation_phase_ = std::fmod(modulation_phase_ + modulation_radians_per_sample_ * samples, pi * 2);
 		update_coefficients();
 	}
 }
 
-inline const Filter_2_Poles::Real Filter_2_Poles::WorkLow(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
+inline const Filter_2_Poles::Sample Filter_2_Poles::Work(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
 {
 	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
 	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
-	erase_all_nans_infinities_and_denormals(buffer, channels);
-	return buffer[1];
+	return static_cast<Sample>(buffer[1]);
 }
 
-inline const Filter_2_Poles::Real Filter_2_Poles::WorkHigh(const Real & input, Real buffer[poles], const Real coefficients[poles + 1])
-{
-	buffer[0] = coefficients[1] * buffer[0] + coefficients[0] * (input + coefficients[2] * (buffer[0] - buffer[1]));
-	buffer[1] = coefficients[1] * buffer[1] + coefficients[0] * buffer[0];
-	erase_all_nans_infinities_and_denormals(buffer, channels);
-	return input - buffer[1];
-}
 }}
