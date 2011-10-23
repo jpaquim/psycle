@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Config_IO.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Config_Skins.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">MIDI Controllers</p>
+<p class="under">(Configuration &gt; Settings... &gt; MIDI Controllers)</p>
+<center><img src="config_MIDI.png" alt="" /></center>
+
+<p>This screen allows to change the meaning of the MIDI messages received
+by Psycle and do a different action instead.</p>
+<p>The two dropdown boxes of Set Generator and Set Instrument configure in
+which way Psycle will know the generator and/or instrument that is
+going to receive the message.<br/>
+Example: If it is set "by Program change", then
+the messages received in the same MIDI channel will be sent to the machine
+indicated by the MIDI Program Change message received. (This is the original
+behaviour of the Synchronized mode)<br/>
+If it is set at "Currenty selected in Psycle", then, any message received
+will always go to the generator and/or instrument selected in the 
+machine dropdown box in the main toolbar. (This is the original behaviour
+of the Immediate mode)</p>
+<p>The setting for Record Raw MIDI as mcm does not try to apply any of the
+controller mappings below (except the Velocity map) and sends instead
+an mcm command directly to the machine, who is responsible to understand it.</p>
+<p>The Map velocity option tells which command to use for the note on command
+as well as the velocity MIDI command.</p>
+<p>The Map pitch option allows to map the Pitch message (the wheel in many MIDI
+keyboards) to a command.</p>
+<p>The rest of the Maps are user configurable and will have an effect only if
+the "Record Raw MIDI as mcm" is unchecked.</p>
+<p>To map a command to a parameter, type its number in the leftmost
+box (this is the MIDI CC number - read your synthetiser's manual for
+more details). Then, select the function you want to use, and specify
+the minimum and maximum values of the function (this means that your
+controller's input will be scaled between the two values). They behave
+as follows:</p>
+<table border="0" cellspacing="0" cellpadding="5">
+	<col width="120" />
+	<tr valign="top">
+		<td><b>Function</b></td>
+		<td><b>Translates the MIDI CC into:</b></td>
+	</tr>
+	<tr valign="top">
+		<td><code>cmd</code></td>
+		<td>Internal machine commands - read your plugin's manual for
+		details.</td>
+	</tr>
+	<tr valign="top">
+		<td><code>twk/tws</code></td>
+		<td>Tweak/Tweak Smooth Smooth - the value to the right of the
+		drop-down box is the parameter number.</td>
+	</tr>
+	<tr valign="top">
+		<td><code>mcm</code></td>
+		<td>Raw mcm command.</td>
+	</tr>
+</table>
+<p>Note: The Synchronized mode does also offer a dynamic mapping set by sending
+MIDI commands. See the CC 126 and CC127 on the <a href="MIDI_Chart.htm">MIDI chart</a></p>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Config_IO.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Config_Skins.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+</body>
+</html>

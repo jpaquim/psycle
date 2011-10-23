@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td />
+		<td align="right"><a href="Machine_Add.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+<p class="head2">Machine Types</p>
+Machines are divided into two types:
+<b><i>Generators</i></b>
+(coloured black in Psycle's default skin) and
+<b><i>Effects</i></b>
+(blue). Generators produce sounds, and Effects modify those sounds. To
+create audible sound, your generator must be
+<a href="Machine_Wires.htm">connected</a>
+to the
+<a href="Machine_Master.htm">Master Machine</a>
+, either directly or through some Effects.
+<p />
+<center><img src="machine.png" border="0" alt="" /></center>
+<p />
+<table border="0" cellspacing="0" cellpadding="5">
+	<col width="120" />
+	<tr>
+		<td valign="top"><i><b>Mute:</b></i></td>
+		<td>Stops all sound output from the machine.</td>
+	</tr>
+	<tr>
+		<td valign="top"><i><b>Solo:</b></i></td>
+		<td>Allows sound output only from the particular Generator.</td>
+	</tr>
+	<tr>
+		<td valign="top"><i><b>Machine number:</b></i></td>
+		<td>The number of the generator or effect that is used inside the pattern
+		editor. Generator numbers start at 00 and can go up to 3F and Effect numbers
+		start at 40 and can go up to 7F (they are expressed in Hexadecimal numbers,
+		so there are up to 64 machines of each type).</td>
+	</tr>
+	<tr>
+		<td valign="top"><i><b>Machine name:</b></i></td>
+		<td>The name of the machine - this by default is the name of the
+		plugin e.g. TB 303, but it can be changed by right-clicking
+		the machine and entering a new name.</td>
+	</tr>
+	<tr>
+		<td valign="top"><i><b>Panning:</b></i></td>
+		<td>Modifies the left or right bias of the machine.</td>
+	</tr>
+	<tr>
+		<td valign="top"><i><b>VU Meter:</b></i></td>
+		<td>Shows the volume of the machine during playback. It is the RMS value expressed in dB, where the bottom is -40dB and the top 0dB</td>
+	</tr>
+	<tr>
+		<td valign="top"><i><b>Bypass:</b></i></td>
+		<td>Bypasses (skips) the particular machine during playback (and
+		rendering).</td>
+	</tr>
+</table>
+<p>If Psycle cannot find the correct plugin when loading a song, a <a
+	href="Internal_Dummy.htm">dummy plugin</a> is inserted in its place,
+which is denoted by an X in front of the original plugin's name.</p>
+<p />
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td />
+		<td align="right"><a href="Machine_Add.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+<font />
+</body>
+</html>

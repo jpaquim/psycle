@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+
+
+
+<body>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Internal_Mixer.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+	</tr>
+</table>
+
+<p class="head2">Wave In Machine</p>
+<p>The Wavein Machine is a very simple machine that acts as a door
+for audio from an external source. Basically, it will try to record
+whatever you have selected in your soundcard mixer as recording source
+(microphone, line in, cdrom... ) and send it to the effects you wire it
+to.<br/>
+With Windows Vista and 7, the recording source is directly selectable
+from the Wavein listbox, since these OSes show them differently than in XP.</p>
+<p>
+This allows to use Psycle as a realtime effect machine (depending on how
+much latency your audio card adds).<br />
+With ASIO, it only works with stereo sources, so trying to use the
+microphone input will result in no input sound.<br/>
+Also, note that it will try to use the same bitdepth that is configured for 
+output. Some drivers might not support 24 or 32bits for recording but will do
+for playback.</p>
+<center><img src="wavein_machine.png" border="0" alt="" /></center>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Internal_Mixer.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+	</tr>
+</table>
+</body>
+</html>

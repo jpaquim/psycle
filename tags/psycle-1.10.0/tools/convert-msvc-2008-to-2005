@@ -1,0 +1,35 @@
+#! /bin/sh
+
+# This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+# copyright 2006-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+
+# This script converts msvc-2008 projects and solutions to msvc-2005
+
+cd $(dirname $0)/.. &&
+
+# converts the projects
+for f in $(find . -name \*.msvc-2008.vcproj)
+do
+	if grep -F 'Keyword="MakeFileProj"' $f 1> /dev/null
+	then
+		continue
+	fi &&
+	echo $f | sed 's/msvc-2008/msvc-{2008->2005}/' &&
+	sed \
+		-e s/msvc-2008/msvc-2005/g \
+		-e 's/Version=\"9[.,]00\"/Version=\"8\.00\"/' \
+		< $f > $(echo $f | sed s/msvc-2008/msvc-2005/) ||
+	break
+done &&
+
+# converts the solutions
+for f in  $(find . -name \*.msvc-2008.sln)
+do
+	echo $f | sed 's/msvc-2008/msvc-{2008->2005}/' &&
+	sed \
+		-e s/msvc-2008/msvc-2005/g \
+		-e 's/^Microsoft Visual Studio Solution File, Format Version 10.00$/Microsoft Visual Studio Solution File, Format Version 9.00/' \
+		-e 's/^# Visual Studio 2008$/# Visual Studio 2005/' \
+		< $f > $(echo $f | sed s/msvc-2008/msvc-2005/) ||
+	break
+done
