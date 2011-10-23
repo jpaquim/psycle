@@ -73,13 +73,13 @@ public:
 			}
 			break;
 		case cutoff_frequency:
-			out << (*this)(cutoff_frequency) / pi << " Hertz";
+			out << (*this)(cutoff_frequency) / (2*pi) << " Hertz";
 			break;
 		case modulation_sequencer_ticks:
 			out << pi * 2 / (*this)(modulation_sequencer_ticks) << " ticks (lines)";
 			break;
 		case modulation_amplitude:
-			out << "(+/-) " << (*this)(modulation_amplitude) * 22050 << " Hertz";
+			out << "(+/-) " << (*this)(modulation_amplitude) * 7276 << " Hertz";
 			break;
 		case modulation_stereo_dephase:
 			if((*this)(modulation_stereo_dephase) == 0) out << 0;
