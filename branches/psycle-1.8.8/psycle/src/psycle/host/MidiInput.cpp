@@ -117,7 +117,9 @@ namespace psycle
 
 				if( m_devId[ DRIVER_MIDI ] == m_devId[ DRIVER_SYNC ] || m_devId[ DRIVER_SYNC ] == -1)
 				{
-					m_pc_clock_base = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
+					chrono::nanoseconds::rep thenow = cpu_time_clock::now().time_since_epoch().count();
+					chrono::nanoseconds::rep nanostomillis = cpu_time_clock::period::den / std::milli::den;
+					m_pc_clock_base = thenow / nanostomillis;
 				}
 				else
 				{
@@ -128,7 +130,9 @@ namespace psycle
 					result = midiInStart( m_midiInHandle[ DRIVER_SYNC ] );
 					BREAK_ON_ERROR(result, 0x08)
 
-					m_pc_clock_base = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
+					chrono::nanoseconds::rep thenow = cpu_time_clock::now().time_since_epoch().count();
+					chrono::nanoseconds::rep nanostomillis = cpu_time_clock::period::den / std::milli::den;
+					m_pc_clock_base = thenow / nanostomillis;
 				}
 			}
 Exit:
@@ -730,12 +734,12 @@ Exit:
 									// sync?
 									if( data2 )
 									{
-										note = 254;
+										note = notecommands::midi_sync;
 									}
 									else
 									{
 										// zero data means do a note off
-										note = 120;
+										note = notecommands::release;
 									}
 								}
 								break;
@@ -888,7 +892,7 @@ Exit:
 					}
 
 					// invalid machine/channel?
-					if( !Global::_pSong->_pMachine[ busMachine ] && note != 254 )
+					if( !Global::_pSong->_pMachine[ busMachine ] && note != notecommands::midi_sync )
 					{
 						return;
 					}
@@ -1178,10 +1182,16 @@ Exit:
 
 		void CMidiInput::InternalClock( DWORD_PTR dwParam2 )
 		{
-			int pcClock = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den) - m_resyncClockBase;
+			chrono::nanoseconds::rep thenow = cpu_time_clock::now().time_since_epoch().count();
+			chrono::nanoseconds::rep nanostomillis = cpu_time_clock::period::den / std::milli::den;
+			int pcClock =  thenow / nanostomillis  - m_resyncClockBase;
 			int midiClock = dwParam2 - m_resyncMidiStampTime;
 			// calc the deviation of the MIDI clock.
 			int clockDeviation = pcClock - midiClock;
+			if (abs(clockDeviation - m_stats.clockDeviation) > 10000) {
+				InternalReSync(dwParam2);
+				return;
+			}
 			m_stats.clockDeviation = clockDeviation;
 
 			// get the current play sample position
@@ -1205,7 +1215,9 @@ Exit:
 
 		void CMidiInput::InternalReSync( DWORD_PTR dwParam2 )
 		{
- 			m_resyncClockBase = cpu_time_clock::now().time_since_epoch().count() / float(cpu_time_clock::period::den / std::milli::den);
+			chrono::nanoseconds::rep thenow = cpu_time_clock::now().time_since_epoch().count();
+			chrono::nanoseconds::rep nanostomillis = cpu_time_clock::period::den / std::milli::den;
+ 			m_resyncClockBase = thenow / nanostomillis;
  			m_resyncPlayPos = Global::pConfig->_pOutputDriver->GetPlayPosInSamples();
 
 			// save vars
@@ -1303,7 +1315,7 @@ Exit:
 				// get the machine pointer
 				Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
 				// make sure machine is still valid
-				if( pMachine || note == 254 )
+				if( pMachine || note == notecommands::midi_sync )
 				{
 					// switch on note code
 					switch( note )

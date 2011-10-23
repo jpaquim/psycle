@@ -66,17 +66,23 @@ A)	The way trackers change pitch of a sample is by speeding up or slowing down t
 
 - Psycle Usage -
 --------------
-Q)	When Psycle loses focus, the music stops. Why?
-
-A)	The "Exclusive" mode is selected in the Directsound Configuration. Go to the Configuration
-	Menu -> Settings and select the Input/output tab, and press the configure button.
-	There you will see the Exclusive option. Uncheck it.
-
 Q)	I've put my xxx VST plugin in the "plugins" dir and Psycle doesn't show it!
 
 A)	Psycle uses a different paths for Native plugins and VST plugins. By default, Native Plugins go
 	under "Plugins\" and VST's go under "Vst\". If you want to change it, go to Configure-Settings,
 	select the "Directories" tab, and select your VST plugins' dir.
+
+	
+Q)	What is the difference between the 32bits and 64bits builds, and what implications
+	does it have when using VST plugins?
+
+A)	The 64bits version of Psycle is made for users of the 64bits of Windows. Both the 32 and 64bits
+	can be used in these OSs, but there is a restriction: The 64bits version can only load 64bit
+	versions of VST plugins	and the 32bits can only load 32bit versions of them.
+	If you use a VST bit bridging, like jBridge ( http://jstuff.wordpress.com/jbridge/ ),
+	then that software can allow to use 32bits on 64bit version and 64bit on 32bit version.
+	Remember to activate the support in Psycle Directories settings.
+
 
 Q)	Why doesn't/Can't/won't Psycle support buzz machines?
 

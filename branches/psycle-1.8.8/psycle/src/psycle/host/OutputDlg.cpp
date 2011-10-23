@@ -74,6 +74,7 @@ namespace psycle { namespace host {
 
 
 			// setup spinner
+			m_midiHeadroom = conf.midi()._midiHeadroom;
 			CString str;
 			str.Format("%d", m_midiHeadroom);
 			m_midiHeadroomEdit.SetWindowText(str);
@@ -83,7 +84,7 @@ namespace psycle { namespace host {
 			acc.nInc = 50;
 			m_midiHeadroomSpin.SetAccel(1, &acc);
 
-			if(Global::psycleconf().midi()._midiMachineViewSeqMode) {
+			if(conf.midi()._midiMachineViewSeqMode) {
 				m_sequenced.SetCheck(TRUE);
 				EnableClockOptions();
 			}

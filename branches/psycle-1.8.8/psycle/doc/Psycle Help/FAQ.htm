@@ -122,15 +122,6 @@ button in the toolbar, or F10 key)</p>
 
 <p class="head3"><b>Psycle Usage</b></p>
 
-<p><b>Q)</b> When Psycle loses focus, the music stops. Why?<br />
-
-<span style="font-weight: bold;">A)</span> The "Exclusive" mode is
-selected in the Directsound Configuration.<br />
-
-Go to the Configuration Menu -&gt; Settings and select the Input/output
-tab, and press the configure button. There you will see the Exclusive
-option. Uncheck it.</p>
-
 <p><span style="font-weight: bold;">Q)</span> I've put my xxx VST
 plugin in the "plugins" dir and Psycle doesn't show it!<br />
 
@@ -140,6 +131,17 @@ for Native plugins and VST plugins. By default, Native Plugins go under
 
 If you want to change it, go to Configure-Settings, select the
 "Directories" tab, and select your VST plugins' dir.</p>
+
+<p><span style="font-weight: bold;">Q)</span> What is the difference between the 32bits
+and 64bits builds, and what implications does it have when using VST plugins?<br />
+
+<span style="font-weight: bold;">A)</span>The 64bits version of Psycle is
+made for users of the 64bits of Windows. Both the 32 and 64bits can be used in these OSs,
+but there is a restriction: The 64bits version can only load 64bit versions of VST plugins
+and the 32bits can only load 32bit versions of them.<br/>
+If you use a VST bit bridging, like <a href="http://jstuff.wordpress.com/jbridge/" target="_blank">jBridge</a>,
+then that software can allow to use 32bits on 64bit version and 64bit on 32bit version.<br/>
+Remember to activate the support in Psycle Directories settings.</p>
 
 <p><span style="font-weight: bold;">Q)</span> Why
 doesn't/Can't/won't Psycle support buzz machines?<br />
