@@ -259,22 +259,40 @@ namespace detail {
 		}
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		namespace microsoft {
-			/// wall clock.
-			/// ::QueryPerformanceCounter() is realised using timers from the CPUs (TSC on i386, AR.ITC on Itanium).
+			/// The implementation of QueryPerformanceCounter reads, if available, the timer/tick count register of some *unspecified* (!!!) CPU,
+			/// i.e. this is realised using the TSC on i386, AR.ITC on Itanium ...
+			///
+			/// On most CPU architectures, the register is updated at a rate based on the frequency of the cycles,
+			/// but often the count value and the tick events are unrelated,
+			/// i.e. the value might not be incremented one by one.
+			/// So the period corresponding to 1 count unit may be even smaller than the period of a CPU cycle,
+			/// but should probably stay in the same order of magnitude.
+			/// If the counter is increased by 4,000,000,000 over a second, and is 64-bit long,
+			/// it is possible to count an uptime period in the order of a century without wrapping.
+			///
+			/// The implementation for x86, doesn't work well at all on some of the CPUs whose frequency varies over time.
+			/// This will eventually be fixed http://www.x86-secret.com/?option=newsd&nid=845 .
+			///
+			/// The implementation on MS-Windows is even unpsecified on SMP systems! Thank you again Microsoft.
+			///
+			/// http://en.wikipedia.org/wiki/Time_Stamp_Counter
+			/// http://msdn.microsoft.com/en-us/library/ee417693.aspx
+			/// http://stackoverflow.com/questions/644510/cpu-clock-frequency-and-thus-queryperformancecounter-wrong
+			///
 			/// test result on AMD64: clock resolution: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
 			performance_counter::time_point performance_counter::now() {
-				// http://en.wikipedia.org/wiki/Time_Stamp_Counter
-				// http://msdn.microsoft.com/en-us/library/ee417693.aspx
-				// http://stackoverflow.com/questions/644510/cpu-clock-frequency-and-thus-queryperformancecounter-wrong
-
-				static thread_local nanoseconds::rep last_time = 0;
+				// These are all thread-local variable becauses of (potential?) problems with SMP systems.
+				// This becomes useful when we ask the OS to bind each thread to a specific CPU (using SetThreadAffinityMask).
+				static thread_local nanoseconds::rep last_counter_time = 0;
 				static thread_local nanoseconds::rep last_frequency_time = 0;
-				static thread_local ::LONGLONG last_frequency(0);
-				static thread_local ::LONGLONG last_counter(0);
+				static thread_local ::LONGLONG last_frequency = 0;
+				static thread_local ::LONGLONG last_counter = 0;
 
-				if(!last_frequency_time || nanoseconds(last_time - last_frequency_time) > seconds(1)) {
-					last_frequency_time = last_time;
+				// We call QueryPerformanceFrequency the first time and then every time at least second has elapsed.
+				// This is done because Microsoft refuses to specify whether QueryPerformanceFrequency may change or not.
+				if(!last_frequency_time || nanoseconds(last_counter_time - last_frequency_time) > seconds(1)) {
+					last_frequency_time = last_counter_time;
 					::LARGE_INTEGER frequency;
 					if(!::QueryPerformanceFrequency(&frequency)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 					last_frequency = frequency.QuadPart;
@@ -283,12 +301,27 @@ namespace detail {
 				::LARGE_INTEGER counter;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				
-				last_time += (counter.QuadPart - last_counter) * (nanoseconds::period::den / last_frequency);
+				#if 1 // TODO ouch.. on my winxp sp2 running on virtualbox, this is not working :O
+					/*
+						Entering test case "measure_clocks_os_test"
+						clock:              struct universalis::os::clocks::utc_since_epoch: absolute: 0, ratio: 0
+						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
+						clock:              struct universalis::os::clocks::utc_since_epoch: absolute: 1, ratio: 0
+						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
+						clock:                       struct universalis::os::clocks::steady: absolute: 0, ratio: 0
+						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
+						clock:                       struct universalis::os::clocks::steady: absolute: 1, ratio: 0
+						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
+					*/
+					last_counter_time += (counter.QuadPart - last_counter) * (nanoseconds::period::den / last_frequency);
+				#else
+					last_counter_time += (counter.QuadPart - last_counter) * nanoseconds::period::den / last_frequency;
+				#endif
+
 				last_counter = counter.QuadPart;
-				return time_point(nanoseconds(last_time));
+				return time_point(nanoseconds(last_counter_time));
 			}
 
-			/// wall clock.
 			/// ::timeGetTime() is equivalent to ::GetTickCount() but Microsoft very loosely tries to express the idea that
 			/// it might be more precise, especially if calling ::timeBeginPeriod and ::timeEndPeriod.
 			/// Possibly realised using the PIT/PIC PC hardware.
@@ -316,7 +349,6 @@ namespace detail {
 				return time_point(ns);
 			}
 
-			/// wall clock.
 			/// ::GetTickCount() returns the uptime (i.e., time elapsed since computer was booted), in milliseconds.
 			/// Microsoft doesn't even specifies wether it's monotonic and as steady as possible, but we can probably assume so.
 			/// This function returns a value which is read from a context value which is updated only on context switches,
@@ -328,7 +360,6 @@ namespace detail {
 				return time_point(ns);
 			}
 
-			/// wall clock.
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
 			system_time_as_file_time_since_epoch::time_point system_time_as_file_time_since_epoch::now() {
 				union winapi_is_badly_designed {
@@ -391,17 +422,19 @@ utc_since_epoch::time_point utc_since_epoch::now() {
 	#endif
 }
 
-steady::time_point steady::now() {
-	#if defined DIVERSALIS__OS__POSIX
-		detail::posix::config();
-		if(detail::posix::monotonic_clock_supported) return time_point(detail::posix::monotonic::now().time_since_epoch());
-		else return time_point(detail::posix::real_time::now().time_since_epoch());
-	#elif defined DIVERSALIS__OS__MICROSOFT
-		return time_point(detail::microsoft::performance_counter::now().time_since_epoch());
-	#else
-		return time_point(detail::iso_std_time::now().time_since_epoch());
-	#endif
-}
+#if !defined DIVERSALIS__COMPILER__FEATURE__CXX0X || defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+	steady::time_point steady::now() {
+		#if defined DIVERSALIS__OS__POSIX
+			detail::posix::config();
+			if(detail::posix::monotonic_clock_supported) return time_point(detail::posix::monotonic::now().time_since_epoch());
+			else return time_point(detail::posix::real_time::now().time_since_epoch());
+		#elif defined DIVERSALIS__OS__MICROSOFT
+			return time_point(detail::microsoft::performance_counter::now().time_since_epoch());
+		#else
+			return time_point(detail::iso_std_time::now().time_since_epoch());
+		#endif
+	}
+#endif
 
 process::time_point process::now() {
 	#if defined DIVERSALIS__OS__POSIX
