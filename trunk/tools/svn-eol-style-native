@@ -23,8 +23,8 @@ for i in $(find "${@:-$(dirname $0)/..}" \( \
 	-name \*.svg -or \
 	-name \*.iss -or \
 	-name \*.txt -or \
-	-name \*.text -or \
 	-name \*.html -or \
+	-name \*.htm -or \
 	-name \*.xml -or \
 	-name \*.pro -or \
 	-name \*.pri -or \
