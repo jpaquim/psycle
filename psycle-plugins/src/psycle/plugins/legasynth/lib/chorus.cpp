@@ -24,7 +24,7 @@
 Chorus::Chorus(){
 	delay_ms=3;
 	lfo_speed_hz=2;
-	lfo_depth_ms=0.1;
+	lfo_depth_ms=0.1f;
 	feedback_1=0.64f;
 	width_1=-0.078f;
 
