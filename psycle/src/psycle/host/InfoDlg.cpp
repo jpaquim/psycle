@@ -94,7 +94,7 @@ namespace psycle { namespace host {
 				char buffer[128];
 				
 				cpu_time_clock::duration total_machine_processing_time(0);
-				wall_time_clock::time_point const now = wall_time_clock::now();
+				steady_clock::time_point const now = steady_clock::now();
 				float const real_time_duration = std::chrono::nanoseconds(now - last_update_time_).count();
 				float const multicore_real_time_duration = real_time_duration * num_threads_running;
 				bool cpu_usage = Global::pPlayer->measure_cpu_usage_;

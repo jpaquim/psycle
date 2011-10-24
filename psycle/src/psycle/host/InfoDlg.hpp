@@ -43,7 +43,7 @@ namespace psycle { namespace host {
 			CButton m_cpu_perf;
 
 			unsigned int item_count_;
-			wall_time_clock::time_point last_update_time_;
+			steady_clock::time_point last_update_time_;
 
 		};
 }}
