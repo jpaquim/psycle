@@ -78,7 +78,7 @@ namespace psycle { namespace host {
 		}
 		void CInfoDlg::InitTimer()
 		{
-			if(!SetTimer(ID_TIMER_INFODLG,500,NULL))
+			if(!SetTimer(ID_TIMER_INFODLG,1000,NULL))
 				MessageBox("Error! Couldn't initialize timer","CPU Perfomance Dialog", MB_OK | MB_ICONERROR);
 		}
 
