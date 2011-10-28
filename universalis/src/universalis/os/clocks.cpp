@@ -282,14 +282,14 @@ namespace detail {
 			/// test result on AMD64: clock resolution: QueryPerformancefrequency: 3579545Hz (3.6MHz)
 			/// test result on AMD64: clock: QueryPerformanceCounter, min: 3.073e-006s, avg: 3.524e-006s, max: 0.000375746s
 			performance_counter::time_point performance_counter::now() {
-				// These are all thread-local variable becauses of (potential?) problems with SMP systems.
+				// These are all thread-local variables becauses of (potential?) problems with SMP systems.
 				// This becomes useful when we ask the OS to bind each thread to a specific CPU (using SetThreadAffinityMask).
 				static thread_local nanoseconds::rep last_counter_time = 0;
 				static thread_local nanoseconds::rep last_frequency_time = 0;
 				static thread_local ::LONGLONG last_frequency = 0;
 				static thread_local ::LONGLONG last_counter = 0;
 
-				// We call QueryPerformanceFrequency the first time and then every time at least second has elapsed.
+				// We call QueryPerformanceFrequency the first time and then every time at least a second has elapsed.
 				// This is done because Microsoft refuses to specify whether QueryPerformanceFrequency may change or not.
 				if(!last_frequency_time || nanoseconds(last_counter_time - last_frequency_time) > seconds(1)) {
 					last_frequency_time = last_counter_time;
@@ -301,23 +301,20 @@ namespace detail {
 				::LARGE_INTEGER counter;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				
-				#if 1 // TODO ouch.. on my winxp sp2 running on virtualbox, this is not working :O
-					/*
-						Entering test case "measure_clocks_os_test"
-						clock:              struct universalis::os::clocks::utc_since_epoch: absolute: 0, ratio: 0
-						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
-						clock:              struct universalis::os::clocks::utc_since_epoch: absolute: 1, ratio: 0
-						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
-						clock:                       struct universalis::os::clocks::steady: absolute: 0, ratio: 0
-						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
-						clock:                       struct universalis::os::clocks::steady: absolute: 1, ratio: 0
-						x:/sf/psycle/trunk/universalis/src/universalis/stdlib/detail/chrono/measure_clock.hpp(27): error in "measure_clocks_os_test": check sleep_duration - tolerance < d && d < sleep_duration + tolerance failed
-					*/
-					last_counter_time += (counter.QuadPart - last_counter) * (nanoseconds::period::den / last_frequency);
-				#else
-					last_counter_time += (counter.QuadPart - last_counter) * nanoseconds::period::den / last_frequency;
-				#endif
-
+				const nanoseconds::rep counter_diff = counter.QuadPart - last_counter;
+				// Note that the counter may go backward for two reasons:
+				// 1) after resuming from hibernation:
+				//    the computer just booted and hence its counters were reset to zero on boot,
+				//    and the operating system restored all data from a persistent medium, including our last_counter value,
+				//    which is now greater than the current counter!
+				// 2) the operating system, for some reason, moved our thread from one CPU to another,
+				//    and the new CPU has its counter behind the one of the previous CPU.
+				if(counter_diff > 0) {
+					if(nanoseconds::period::den < last_frequency)
+						last_counter_time += counter_diff * nanoseconds::period::den / last_frequency;
+					else
+						last_counter_time += counter_diff * (nanoseconds::period::den / last_frequency);
+				}
 				last_counter = counter.QuadPart;
 				return time_point(nanoseconds(last_counter_time));
 			}
