@@ -301,19 +301,22 @@ namespace detail {
 				::LARGE_INTEGER counter;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				
-				const nanoseconds::rep counter_diff = counter.QuadPart - last_counter;
-				// Note that the counter may go backward for two reasons:
-				// 1) after resuming from hibernation:
-				//    the computer just booted and hence its counters were reset to zero on boot,
-				//    and the operating system restored all data from a persistent medium, including our last_counter value,
-				//    which is now greater than the current counter!
-				// 2) the operating system, for some reason, moved our thread from one CPU to another,
-				//    and the new CPU has its counter behind the one of the previous CPU.
-				if(counter_diff > 0) {
-					if(nanoseconds::period::den < last_frequency)
-						last_counter_time += counter_diff * nanoseconds::period::den / last_frequency;
-					else
-						last_counter_time += counter_diff * (nanoseconds::period::den / last_frequency);
+				// If last_counter still has its initial zero value,
+				// the difference between current counter and last_counter will be the whole duration of the computer uptime,
+				// which may trigger an overflow when doing "counter_diff * nanoseconds::period::den".
+				// So, the first call, where last_counter still is zero, we don't try to compute the difference,
+				// and just return a zero time_point, which is okay since this clock is specified to have an arbitrary origin.
+				// *** credits go to JosepMa for spotting that problem ***
+				if(last_counter) {
+					const nanoseconds::rep counter_diff = counter.QuadPart - last_counter;
+					// Note that the counter may go backward for two reasons:
+					// 1) after resuming from hibernation:
+					//    the computer just booted and hence its counters were reset to zero on boot,
+					//    and the operating system restored all data from a persistent medium, including our last_counter value,
+					//    which is now greater than the current counter!
+					// 2) the operating system, for some reason, moved our thread from one CPU to another,
+					//    and the new CPU has its counter behind the one of the previous CPU.
+					if(counter_diff > 0) last_counter_time += counter_diff * nanoseconds::period::den / last_frequency;
 				}
 				last_counter = counter.QuadPart;
 				return time_point(nanoseconds(last_counter_time));
