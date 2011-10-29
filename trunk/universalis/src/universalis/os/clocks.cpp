@@ -325,10 +325,10 @@ namespace detail {
 					// - Example 2:
 					//   On a modern motherboard, QueryPerformanceFrequency indicates 3MHz,
 					//   which means after 1 second, the counter has increased by 3e6, and after 1 hour, has increased by 1.8e10.
-					//   If we multiply 1.8e10 with 1e9 (nanoseconds::period::den), we get 1.8e19, wich is 1.95 times 2^63.
+					//   If we multiply 1.8e10 with 1e9 (nanoseconds::period::den), we get 1.8e19, which is 1.95 times 2^63.
 					//
 					// Note also that the behavior of *signed* integer overflow is unspecified in the C programming language.
-					// So, we can't rely on counter_diff being < 0 due to overflow.
+					// So, we can't rely on "counter_diff * nanoseconds::period::den" being < 0 due to overflow.
 					if(counter_diff < std::numeric_limits<nanoseconds::rep>::max() / nanoseconds::period::den) {
 						last_counter_time += counter_diff * nanoseconds::period::den / last_frequency;
 					} else {
