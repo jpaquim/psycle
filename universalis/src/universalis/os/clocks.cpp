@@ -11,6 +11,7 @@
 	#include <sys/time.h>
 #endif
 #include <ctime>
+#include <limits>
 #include <iostream>
 #include <sstream>
 namespace universalis { namespace os { namespace clocks {
@@ -301,22 +302,38 @@ namespace detail {
 				::LARGE_INTEGER counter;
 				if(!::QueryPerformanceCounter(&counter)) throw exception(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				
-				// If last_counter still has its initial zero value,
-				// the difference between current counter and last_counter will be the whole duration of the computer uptime,
-				// which may trigger an overflow when doing "counter_diff * nanoseconds::period::den".
-				// So, the first call, where last_counter still is zero, we don't try to compute the difference,
-				// and just return a zero time_point, which is okay since this clock is specified to have an arbitrary origin.
-				// *** credits go to JosepMa for spotting that problem ***
-				if(last_counter) {
-					const nanoseconds::rep counter_diff = counter.QuadPart - last_counter;
-					// Note that the counter may go backward for two reasons:
-					// 1) after resuming from hibernation:
-					//    the computer just booted and hence its counters were reset to zero on boot,
-					//    and the operating system restored all data from a persistent medium, including our last_counter value,
-					//    which is now greater than the current counter!
-					// 2) the operating system, for some reason, moved our thread from one CPU to another,
-					//    and the new CPU has its counter behind the one of the previous CPU.
-					if(counter_diff > 0) last_counter_time += counter_diff * nanoseconds::period::den / last_frequency;
+				const nanoseconds::rep counter_diff = counter.QuadPart - last_counter;
+				// Note that the counter may go backward for two reasons:
+				// 1) After resuming from hibernation:
+				//    The computer just booted and hence its counters were reset to zero on boot,
+				//    and the operating system restored all data from a persistent medium, including our last_counter value,
+				//    which is now greater than the current counter!
+				// 2) The operating system, for some reason, moved our thread from one CPU to another,
+				//    and the new CPU has its counter behind the one of the previous CPU.
+				if(counter_diff > 0) {
+					// Note that we may overflow when doing "counter_diff * nanoseconds::period::den", in various cases:
+					// 1) The first call to this function, last_counter still has its initial zero value,
+					//    and the difference between the current counter and last_counter will be the whole duration of the computer uptime,
+					//    *** credits go to JosepMa for spotting this problem ***
+					// 2) The counter is increasing fast enough and this function has not been called frequently enough.
+					//
+					// Examples of overflow cases:
+					// - Example 1:
+					//   On a virtualbox QueryPerformanceFrequency indicates 2.5GHz,
+					//   which means after 1 second, the counter has increased by 2.5e9, and after 10 seconds, has increased by 2.5e10.
+					//   If we multiply 2.5e10 with 1e9 (nanoseconds::period::den), we get 2.5e19, which is 2.7 times 2^63.
+					// - Example 2:
+					//   On a modern motherboard, QueryPerformanceFrequency indicates 3MHz,
+					//   which means after 1 second, the counter has increased by 3e6, and after 1 hour, has increased by 1.8e10.
+					//   If we multiply 1.8e10 with 1e9 (nanoseconds::period::den), we get 1.8e19, wich is 1.95 times 2^63.
+					//
+					// Note also that the behavior of *signed* integer overflow is unspecified in the C programming language.
+					// So, we can't rely on counter_diff being < 0 due to overflow.
+					if(counter_diff < std::numeric_limits<nanoseconds::rep>::max() / nanoseconds::period::den) {
+						last_counter_time += counter_diff * nanoseconds::period::den / last_frequency;
+					} else {
+						last_counter_time += static_cast<nanoseconds::rep>(double(counter_diff) * nanoseconds::period::den / last_frequency);
+					}
 				}
 				last_counter = counter.QuadPart;
 				return time_point(nanoseconds(last_counter_time));
