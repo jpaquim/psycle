@@ -6,7 +6,10 @@
 #include "detail/clocks.hpp"
 #include "exception.hpp"
 #include <universalis/compiler/thread_local_storage.hpp>
-#if defined DIVERSALIS__OS__POSIX
+#ifdef DIVERSALIS__COMPILER__FEATURE__OPEN_MP
+	#include <omp.h>
+#endif
+#ifdef DIVERSALIS__OS__POSIX
 	#include <unistd.h> // for sysconf
 	#include <sys/time.h>
 #endif
@@ -171,7 +174,7 @@ namespace detail {
 	/// returns the time since the Epoch (00:00:00 UTC, January 1, 1970), measured in seconds.
 	/// test result: clock: std::time, min: 1s, avg: 1s, max: 1s
 	iso_std_time::time_point iso_std_time::now() {
-		std::time_t const t(std::time(0));
+		const std::time_t t = std::time(0);
 		if(t < 0) throw exceptions::iso_or_posix_std(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 		return time_point(seconds(t));
 	}
@@ -180,13 +183,21 @@ namespace detail {
 	/// returns an approximation of processor time used by the program
 	/// test result on colinux AMD64: clock: std::clock, min: 0.01s, avg: 0.01511s, max: 0.02s
 	iso_std_clock::time_point iso_std_clock::now() {
-		std::clock_t const t(std::clock());
+		const std::clock_t t = std::clock();
 		if(t < 0) throw exceptions::iso_or_posix_std(UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
-		return time_point(nanoseconds(1000 * 1000 * 1000LL * t / CLOCKS_PER_SEC));
+		return time_point(nanoseconds(t * nanoseconds::period::den / CLOCKS_PER_SEC));
 	}
 
 	/******************************************************************************************/
+
+	#ifdef DIVERSALIS__COMPILER__FEATURE__OPEN_MP
+		omp::time_point omp::now() {
+			return time_point(nanoseconds(static_cast<nanoseconds::rep>(omp_get_wtime() * nanoseconds::period::den)));
+		}
+	#endif
 	
+	/******************************************************************************************/
+
 	#if defined DIVERSALIS__OS__POSIX
 		namespace posix {
 			namespace {
@@ -361,9 +372,8 @@ namespace detail {
 							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO /* looks like microsoft invented LOLCode! */)
 								return; // cannot throw in a destructor
 						}
-				} static once;
-				nanoseconds ns(1000LL * 1000 * ::timeGetTime());
-				return time_point(ns);
+				} //static once; disabled because this affects to whole OS scheduling frequency, which may have bad side effects!
+				return time_point(nanoseconds(::timeGetTime() * nanoseconds::period::den / milliseconds::period::den));
 			}
 
 			/// ::GetTickCount() returns the uptime (i.e., time elapsed since computer was booted), in milliseconds.
@@ -373,8 +383,7 @@ namespace detail {
 			/// Possibly realised using the PIT/PIC PC hardware.
 			/// test result: clock: GetTickCount, min: 0.015s, avg: 0.015719s, max: 0.063s.
 			tick_count::time_point tick_count::now() {
-				nanoseconds ns(1000LL * 1000 * ::GetTickCount());
-				return time_point(ns);
+				return time_point(nanoseconds(::GetTickCount() * nanoseconds::period::den / milliseconds::period::den));
 			}
 
 			/// test result: clock: GetSystemTimeAsFileTime, min: 0.015625s, avg: 0.0161875s, max: 0.09375s.
@@ -385,8 +394,7 @@ namespace detail {
 				} u;
 				::GetSystemTimeAsFileTime(&u.file_time);
 				u.large_integer.QuadPart -= 116444736000000000LL; // microsoft disregards the unix/posix epoch time, so we need to apply an offset
-				nanoseconds ns(100 * u.large_integer.QuadPart);
-				return time_point(ns);
+				return time_point(nanoseconds(u.large_integer.QuadPart * 100));
 			}
 
 			/// virtual clock. kernel time not included.
@@ -397,8 +405,7 @@ namespace detail {
 					::LARGE_INTEGER large_integer;
 				} creation, exit, kernel, user;
 				::GetProcessTimes(::GetCurrentProcess(), &creation.file_time, &exit.file_time, &kernel.file_time, &user.file_time);
-				nanoseconds ns(100 * user.large_integer.QuadPart);
-				return time_point(ns);
+				return time_point(nanoseconds(user.large_integer.QuadPart * 100));
 			}
 
 			/// virtual clock. kernel time not included.
@@ -410,8 +417,7 @@ namespace detail {
 					::LARGE_INTEGER large_integer;
 				} creation, exit, kernel, user;
 				::GetThreadTimes(::GetCurrentThread(), &creation.file_time, &exit.file_time, &kernel.file_time, &user.file_time);
-				nanoseconds ns(100 * user.large_integer.QuadPart);
-				return time_point(ns);
+				return time_point(nanoseconds(user.large_integer.QuadPart * 100));
 			}
 		}
 	#endif // defined DIVERSALIS__OS__MICROSOFT
@@ -420,20 +426,11 @@ namespace detail {
 /******************************************************************************************/
 
 utc_since_epoch::time_point utc_since_epoch::now() {
+	///\todo UTC timezone, no daylight time saving
 	#if defined DIVERSALIS__OS__POSIX
 		return time_point(detail::posix::real_time::now().time_since_epoch());
 	#elif defined DIVERSALIS__OS__MICROSOFT
-		// On microsoft's platform, only the performance_counter has a high resolution ;
-		// the system_time_as_file_time_since_epoch lags 15ms at the minimum, and randomly has even much longer lags.
-		// So, we need to compute an offset once between the system_time_as_file_time_since_epoch clock
-		// and the performance_counter one, that we can apply to what the performance_counter clock
-		// returns in every call to this function.
-		nanoseconds const static performance_counter_to_utc_since_epoch_offset =
-			detail::microsoft::system_time_as_file_time_since_epoch::now().time_since_epoch() -
-			detail::microsoft::performance_counter::now().time_since_epoch();
-		detail::microsoft::performance_counter::time_point const t =
-			detail::microsoft::performance_counter::now() + performance_counter_to_utc_since_epoch_offset;
-		return time_point(t.time_since_epoch());
+		return time_point(detail::microsoft::system_time_as_file_time_since_epoch::now().time_since_epoch());
 	#else
 		return time_point(detail::iso_std_time::now().time_since_epoch());
 	#endif
