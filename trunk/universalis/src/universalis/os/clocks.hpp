@@ -23,7 +23,7 @@ namespace detail {
 	};
 }
 
-/// a clock that returns the official, wall time, with UTC timezone, with the origin (zero) being the unix epoch (1970-01-01T00:00:00UTC).
+/// a clock that returns the official time, with UTC timezone, with the origin (zero) being the unix epoch (1970-01-01T00:00:00UTC).
 ///
 /// This clock is NOT monotonic:
 /// Even if it's using the UTC timezone and hence not subject to daylight time saving,
