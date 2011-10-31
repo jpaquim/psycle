@@ -372,7 +372,7 @@ namespace detail {
 							if(::timeEndPeriod(milliseconds) == TIMERR_NOCANDO /* looks like microsoft invented LOLCode! */)
 								return; // cannot throw in a destructor
 						}
-				} //static once; disabled because this affects to whole OS scheduling frequency, which may have bad side effects!
+				}; //static once; disabled because this affects to whole OS scheduling frequency, which may have bad side effects!
 				return time_point(nanoseconds(::timeGetTime() * nanoseconds::period::den / milliseconds::period::den));
 			}
 
