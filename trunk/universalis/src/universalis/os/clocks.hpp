@@ -93,11 +93,11 @@ struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fal
 				measure_clock_against_sleep<thread>();
 				measure_clock_against_sleep<hires_thread_or_fallback>();
 			#endif
-			measure_clock_resolution<utc_since_epoch>();
-			measure_clock_resolution<steady>();
+			measure_clock_resolution<utc_since_epoch>(1000);
+			measure_clock_resolution<steady>(100000);
 			measure_clock_resolution<process>(10);
 			measure_clock_resolution<thread>(10);
-			measure_clock_resolution<hires_thread_or_fallback>();
+			measure_clock_resolution<hires_thread_or_fallback>(100000);
 		}
 	}}}}
 #endif
