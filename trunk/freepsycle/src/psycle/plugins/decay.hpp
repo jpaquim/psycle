@@ -26,8 +26,8 @@ class PSYCLE__DECL decay : public node {
 
 	private:
 		template<
-			channel::flags::type pulse_flag,
-			channel::flags::type decay_flag
+			channel::flags pulse_flag,
+			channel::flags decay_flag
 		>
 		void do_process_template(); friend class node;
 

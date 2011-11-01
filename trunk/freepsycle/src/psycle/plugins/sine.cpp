@@ -31,24 +31,66 @@ void sine::seconds_per_event_change_notification_from_port(port const & port) {
 
 void sine::do_process() {
 	if(!out_port_) return;
-	channel::flags::type const phase_flag = phase_port_ ? phase_chn().flag() : channel::flags::empty;
-	channel::flags::type const  freq_flag =  freq_port_ ?  freq_chn().flag() : channel::flags::empty;
-	channel::flags::type const   amp_flag =   amp_port_ ?   amp_chn().flag() : channel::flags::empty;
-	#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
-		#if 1
-			do_process_template_switch(*this, phase_flag, freq_flag, amp_flag);
-		#else
-			ports::inputs::single * ports[] = {&phase_port_, &freq_port_, &amp_port_};
-			do_process_split<sizeof ports / sizeof *ports>(ports);
-			out_chn().flag(channel::flags::continuous);
-		#endif
+	channel::flags const phase_flag = phase_port_ ? phase_chn().flag() : channel::flags::empty;
+	channel::flags const  freq_flag =  freq_port_ ?  freq_chn().flag() : channel::flags::empty;
+	channel::flags const   amp_flag =   amp_port_ ?   amp_chn().flag() : channel::flags::empty;
+	#if 1
+		do_process_template_switch(*this, phase_flag, freq_flag, amp_flag);
 	#else
-		PSYCLE__ENGINE__TEMPLATE_SWITCH(do_process_template, (phase_flag)(freq_flag)(amp_flag));
+		ports::inputs::single * ports[] = {&phase_port_, &freq_port_, &amp_port_};
+		do_process_split<sizeof ports / sizeof *ports>(ports);
+		out_chn().flag(channel::flags::continuous);
 	#endif
-	
 }
 
-#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+#if 1
+	template<
+		channel::flags phase_flag,
+		channel::flags  freq_flag,
+		channel::flags   amp_flag
+	>
+	void sine::do_process_template() {
+		for(std::size_t phase_evt = 0, freq_evt = 0, amp_evt = 0, out_evt = 0; out_evt < out_chn().size(); ++out_evt) {
+			switch(phase_flag) {
+				case channel::flags::continuous:
+					phase_ = std::fmod(phase_chn()[out_evt].sample() + math::pi, 2 * math::pi) - math::pi;
+				break;
+				case channel::flags::discrete:
+					if(phase_evt < phase_chn().size() && phase_chn()[phase_evt].index() == out_evt)
+						phase_ = std::fmod(phase_chn()[phase_evt++].sample() + math::pi, 2 * math::pi) - math::pi;
+				break;
+				case channel::flags::empty: default: /* nothing */ ;
+			}
+
+			switch(freq_flag) {
+				case channel::flags::continuous:
+					freq(freq_chn()[out_evt].sample());
+				break;
+				case channel::flags::discrete:
+					if(freq_evt < freq_chn().size() && freq_chn()[freq_evt].index() == out_evt)
+						freq(freq_chn()[freq_evt++].sample());
+				break;
+				case channel::flags::empty: default: /* nothing */ ;
+			}
+
+			switch(amp_flag) {
+				case channel::flags::continuous:
+					amp_ = amp_chn()[out_evt].sample();
+				break;
+				case channel::flags::discrete:
+					if(amp_evt < amp_chn().size() && amp_chn()[amp_evt].index() == out_evt)
+						amp_ = amp_chn()[amp_evt++].sample();
+				break;
+				case channel::flags::empty: default: /* nothing */ ;
+			}
+
+			out_chn()[out_evt](out_evt, amp_ * math::fast_sin<2>(phase_));
+			phase_ += step_;
+			if(phase_ > math::pi) phase_ -= 2 * math::pi;
+		}
+		out_chn().flag(channel::flags::continuous);
+	}
+#else
 	template<int Ports>
 	void sine::do_process_split(ports::inputs::single * ports[Ports]) {
 		std::size_t const size = out_chn().size();
@@ -101,52 +143,5 @@ void sine::do_process() {
 		}
 	}
 #endif
-
-template<
-	channel::flags::type phase_flag,
-	channel::flags::type  freq_flag,
-	channel::flags::type   amp_flag
->
-void sine::do_process_template() {
-	for(std::size_t phase_evt = 0, freq_evt = 0, amp_evt = 0, out_evt = 0; out_evt < out_chn().size(); ++out_evt) {
-		switch(phase_flag) {
-			case channel::flags::continuous:
-				phase_ = std::fmod(phase_chn()[out_evt].sample() + math::pi, 2 * math::pi) - math::pi;
-			break;
-			case channel::flags::discrete:
-				if(phase_evt < phase_chn().size() && phase_chn()[phase_evt].index() == out_evt)
-					phase_ = std::fmod(phase_chn()[phase_evt++].sample() + math::pi, 2 * math::pi) - math::pi;
-			break;
-			case channel::flags::empty: default: /* nothing */ ;
-		}
-		
-		switch(freq_flag) {
-			case channel::flags::continuous:
-				freq(freq_chn()[out_evt].sample());
-			break;
-			case channel::flags::discrete:
-				if(freq_evt < freq_chn().size() && freq_chn()[freq_evt].index() == out_evt)
-					freq(freq_chn()[freq_evt++].sample());
-			break;
-			case channel::flags::empty: default: /* nothing */ ;
-		}
-
-		switch(amp_flag) {
-			case channel::flags::continuous:
-				amp_ = amp_chn()[out_evt].sample();
-			break;
-			case channel::flags::discrete:
-				if(amp_evt < amp_chn().size() && amp_chn()[amp_evt].index() == out_evt)
-					amp_ = amp_chn()[amp_evt++].sample();
-			break;
-			case channel::flags::empty: default: /* nothing */ ;
-		}
-
-		out_chn()[out_evt](out_evt, amp_ * math::fast_sin<2>(phase_));
-		phase_ += step_;
-		if(phase_ > math::pi) phase_ -= 2 * math::pi;
-	}
-	out_chn().flag(channel::flags::continuous);
-}
 
 }}
