@@ -26,18 +26,14 @@ void decay::seconds_per_event_change_notification_from_port(engine::port const &
 
 void decay::do_process() {
 	if(!have_out()) return;
-	channel::flags::type const pulse_flag = have_pulse() ? pulse_channel().flag() : channel::flags::empty;
-	channel::flags::type const decay_flag = have_decay() ? decay_channel().flag() : channel::flags::empty;
-	#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
-		do_process_template_switch(*this, pulse_flag, decay_flag);
-	#else
-		PSYCLE__ENGINE__TEMPLATE_SWITCH(do_process_template, (pulse_flag)(decay_flag));
-	#endif
+	channel::flags const pulse_flag = have_pulse() ? pulse_channel().flag() : channel::flags::empty;
+	channel::flags const decay_flag = have_decay() ? decay_channel().flag() : channel::flags::empty;
+	do_process_template_switch(*this, pulse_flag, decay_flag);
 }
 
 template<
-	channel::flags::type pulse_flag,
-	channel::flags::type decay_flag
+	channel::flags pulse_flag,
+	channel::flags decay_flag
 >
 void decay::do_process_template() {
 	for(std::size_t

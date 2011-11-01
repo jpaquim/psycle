@@ -75,18 +75,16 @@ class PSYCLE__DECL channel {
 	///\name flags to give hint to process loops
 	///\{
 		public:
-			struct flags {
-				enum type {
-					empty, ///< indicates there is no event
-					discrete, ///< indicates there are events, but not one for every sample
-					continuous ///< indicates there is an event for every sample
-				};
+			enum class flags {
+				empty, ///< indicates there is no event
+				discrete, ///< indicates there are events, but not one for every sample
+				continuous ///< indicates there is an event for every sample
 			};
 			
-			flags::type flag() const { return flag_; }
-			void flag(flags::type flag) { flag_ = flag; }
+			flags flag() const { return flag_; }
+			void flag(flags flag) { flag_ = flag; }
 		private:
-			flags::type flag_;
+			flags flag_;
 	///\}
 
 	public:

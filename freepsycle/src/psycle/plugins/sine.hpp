@@ -20,18 +20,18 @@ class PSYCLE__DECL sine : public node {
 		real amp() const { return amp_; }
 
 	protected:
-		void seconds_per_event_change_notification_from_port(port const &) /*override*/;
-		void do_process() /*override*/;
+		void seconds_per_event_change_notification_from_port(port const &) override;
+		void do_process() override;
 
 	private:
-		template<
-			channel::flags::type phase_flag,
-			channel::flags::type  freq_flag,
-			channel::flags::type   amp_flag
-		>
-		void do_process_template(); friend class node;
-		
-		#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+		#if 1
+			template<
+				channel::flags phase_flag,
+				channel::flags  freq_flag,
+				channel::flags   amp_flag
+			>
+			void do_process_template(); friend class node;
+		#else
 			template<bool have_phase, bool have_freq, bool have_amp>
 			void do_process_template(std::size_t begin, std::size_t end);
 
