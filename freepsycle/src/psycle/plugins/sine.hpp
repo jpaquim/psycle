@@ -26,9 +26,9 @@ class PSYCLE__DECL sine : public node {
 	private:
 		#if 1
 			template<
-				channel::flags phase_flag,
-				channel::flags  freq_flag,
-				channel::flags   amp_flag
+				buffer::flags phase_flag,
+				buffer::flags  freq_flag,
+				buffer::flags   amp_flag
 			>
 			void do_process_template(); friend class node;
 		#else

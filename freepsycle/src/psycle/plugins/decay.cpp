@@ -26,14 +26,14 @@ void decay::seconds_per_event_change_notification_from_port(engine::port const &
 
 void decay::do_process() {
 	if(!have_out()) return;
-	channel::flags const pulse_flag = have_pulse() ? pulse_channel().flag() : channel::flags::empty;
-	channel::flags const decay_flag = have_decay() ? decay_channel().flag() : channel::flags::empty;
+	buffer::flags const pulse_flag = have_pulse() ? pulse_port_.buffer().flag() : buffer::flags::empty;
+	buffer::flags const decay_flag = have_decay() ? decay_port_.buffer().flag() : buffer::flags::empty;
 	do_process_template_switch(*this, pulse_flag, decay_flag);
 }
 
 template<
-	channel::flags pulse_flag,
-	channel::flags decay_flag
+	buffer::flags pulse_flag,
+	buffer::flags decay_flag
 >
 void decay::do_process_template() {
 	for(std::size_t
@@ -42,20 +42,20 @@ void decay::do_process_template() {
 		out_event(0); out_event < out_channel().size(); ++out_event
 	) {
 		switch(pulse_flag) {
-			case channel::flags::continuous:
+			case buffer::flags::continuous:
 				this->current_ = pulse_channel()[out_event].sample();
 			break;
-			case channel::flags::discrete:
+			case buffer::flags::discrete:
 				if(pulse_event < pulse_channel().size() && pulse_channel()[pulse_event].index() == out_event)
 					this->current_ = pulse_channel()[pulse_event++].sample();
 			break;
-			case channel::flags::empty: default: /* nothing */ ;
+			case buffer::flags::empty: default: /* nothing */ ;
 		}
 		switch(decay_flag) {
-			case channel::flags::continuous:
+			case buffer::flags::continuous:
 				this->decay_per_second(decay_channel()[out_event].sample());
 			break;
-			case channel::flags::discrete:
+			case buffer::flags::discrete:
 				#if 0 // more friendly way
 					auto decay = decay_channel()[out_event];
 					if(decay) this->decay_per_second(decay.sample());
@@ -64,14 +64,14 @@ void decay::do_process_template() {
 						this->decay_per_second(decay_channel()[decay_event++].sample());
 				#endif
 			break;
-			case channel::flags::empty: default: /* nothing */ ;
+			case buffer::flags::empty: default: /* nothing */ ;
 		}
 		out_channel()[out_event](out_event, current_);
 		current_ *= decay_;
 	}
 	///\todo flush to zero
-	if(current_) out_channel().flag(channel::flags::continuous);
-	else out_channel().flag(channel::flags::empty);
+	if(current_) out_port_.buffer().flag(buffer::flags::continuous);
+	else out_port_.buffer().flag(buffer::flags::empty);
 }
 
 }}

@@ -257,24 +257,24 @@ class PSYCLE__DECL node : public named {
 			/// re-implement this function in a derived class and put your own code in it.
 			virtual void do_process() = 0;
 
-			template<channel::flags... Evaluated_Flags, typename Node, typename... Flags_To_Evaluate>
-			static void do_process_template_switch(Node & node, channel::flags flag_to_evaluate, Flags_To_Evaluate... flags_to_evaluate) {
+			template<buffer::flags... Evaluated_Flags, typename Node, typename... Flags_To_Evaluate>
+			static void do_process_template_switch(Node & node, buffer::flags flag_to_evaluate, Flags_To_Evaluate... flags_to_evaluate) {
 				switch(flag_to_evaluate) {
-					case channel::flags::empty:
-						do_process_template_switch<Evaluated_Flags..., channel::flags::empty>(node, flags_to_evaluate...);
+					case buffer::flags::empty:
+						do_process_template_switch<Evaluated_Flags..., buffer::flags::empty>(node, flags_to_evaluate...);
 					break;
-					case channel::flags::discrete:
-						do_process_template_switch<Evaluated_Flags..., channel::flags::discrete>(node, flags_to_evaluate...);
+					case buffer::flags::discrete:
+						do_process_template_switch<Evaluated_Flags..., buffer::flags::discrete>(node, flags_to_evaluate...);
 					break;
-					case channel::flags::continuous:
-						do_process_template_switch<Evaluated_Flags..., channel::flags::continuous>(node, flags_to_evaluate...);
+					case buffer::flags::continuous:
+						do_process_template_switch<Evaluated_Flags..., buffer::flags::continuous>(node, flags_to_evaluate...);
 					break;
 					default:
 						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				}
 			}
 		private:
-			template<channel::flags... Evaluated_Flags, typename Node>
+			template<buffer::flags... Evaluated_Flags, typename Node>
 			static void do_process_template_switch(Node & node) {
 				node.template do_process_template<Evaluated_Flags...>();
 			}

@@ -82,8 +82,8 @@ void sequence_iterator::process(buffer & out, real events_per_second, std::size_
 			break;
 		}
 	}
-	if(last_event) for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::discrete);
-	else for(std::size_t c(0); c < channels; ++c) out[c].flag(channel::flags::empty);
+	if(last_event) out.flag(buffer::flags::discrete);
+	else out.flag(buffer::flags::empty);
 	if(last_event < out.events()) for(std::size_t c(0); c < channels; ++c) out[c][last_event].index(out.events());
 	beat_ = last_beat;
 }
