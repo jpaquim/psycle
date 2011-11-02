@@ -511,6 +511,14 @@ namespace ports {
 				single(class node &, name_type const &, std::size_t channels = 0);
 				virtual ~single();
 
+			///\name const buffer
+			///\{
+				public:
+					using input::buffer;
+					/// the buffer to read data from (buffers are shared accross several ports).
+					class buffer const & buffer() const { return input::buffer(); }
+			///\}
+
 			///\name connected output port
 			///\{
 				public:

@@ -11,7 +11,7 @@ void multiplier::do_process() {
 	if(!out_port()) return;
 	if(!in_port()) return;
 	bipolar_filter::do_process();
-	buffer & in(in_port().buffer());
+	buffer const & in(in_port().buffer());
 	buffer & out(out_port().buffer());
 	assert(out.channels() == in.channels());
 	for(std::size_t channel = 0; channel < in.channels() ; ++channel)

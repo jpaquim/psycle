@@ -42,15 +42,15 @@ namespace psycle { namespace plugins { namespace outputs {
 		public:
 			direct_sound(class plugin_library_reference &, name_type const &);
 			ports::inputs::single & in_port() { return *single_input_ports()[0]; }
-			bool opened()  const /*override*/;
-			bool started() const /*override*/;
+			bool opened()  const override;
+			bool started() const override;
 		protected:
-			void do_open() /*override*/;
-			void do_start() /*override*/;
-			void do_process() /*override*/;
-			void do_stop() /*override*/;
-			void do_close() /*override*/;
-			void channel_change_notification_from_port(engine::port const &) /*override*/;
+			void do_open() override;
+			void do_start() override;
+			void do_process() override;
+			void do_stop() override;
+			void do_close() override;
+			void channel_change_notification_from_port(port const &) override;
 		private:
 			::IDirectSound * direct_sound_;
 			::IDirectSound & direct_sound_implementation() { assert(direct_sound_); return *direct_sound_; }
@@ -67,6 +67,8 @@ namespace psycle { namespace plugins { namespace outputs {
 			/// position in byte offset
 			unsigned int current_position_;
 			unsigned int samples_per_buffer_;
+			
+			ports::inputs::single in_, amp_;
 	};
 }}}
 #include <psycle/detail/decl.hpp>

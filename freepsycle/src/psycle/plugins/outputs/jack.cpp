@@ -265,7 +265,7 @@ void jack::do_process() {
 		for(unsigned int c(0); c < channels; ++c) {
 			::jack_ringbuffer_data_t vec[2];
 			::jack_ringbuffer_get_read_vector(ringbuffer_, vec);
-			engine::buffer::channel & in(in_port().buffer()[c]);
+			buffer::channel const & in(in_port().buffer()[c]);
 			unsigned int spread(0);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {
 				last_samples_[c] = in[e].sample();
