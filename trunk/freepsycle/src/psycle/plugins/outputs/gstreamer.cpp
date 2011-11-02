@@ -408,7 +408,7 @@ void gstreamer::do_process() {
 		unsigned int const samples_per_buffer(graph().events_per_buffer());
 		assert(last_samples_.size() == channels);
 		for(unsigned int c(0); c < channels; ++c) {
-			engine::buffer::channel & in(in_port().buffer()[c]);
+			buffer::channel const & in(in_port().buffer()[c]);
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + c);
 			unsigned int spread(0);
 			for(std::size_t e(0), s(in.size()); e < s; ++e) {

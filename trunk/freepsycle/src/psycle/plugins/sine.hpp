@@ -56,10 +56,10 @@ class PSYCLE__DECL sine : public node {
 		ports::output out_port_;
 		ports::inputs::single phase_port_, freq_port_, amp_port_;
 
-		channel & phase_chn() { return phase_port_.buffer()[0]; }
-		channel &  freq_chn() { return  freq_port_.buffer()[0]; }
-		channel &   amp_chn() { return   amp_port_.buffer()[0]; }
-		channel &   out_chn() { return   out_port_.buffer()[0]; }
+		channel const & phase_chn() { return phase_port_.buffer()[0]; }
+		channel const &  freq_chn() { return  freq_port_.buffer()[0]; }
+		channel const &   amp_chn() { return   amp_port_.buffer()[0]; }
+		channel       &   out_chn() { return   out_port_.buffer()[0]; }
 };
 
 }}

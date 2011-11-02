@@ -30,7 +30,7 @@ void bipolar_filter::do_process_first() {
 	if(!in_port_) return;
 	assert(&in_port_.buffer());
 	assert(&out_port_.buffer());
-	buffer & in = in_port_.buffer();
+	buffer const & in = in_port_.buffer();
 	buffer & out = out_port_.buffer();
 	assert(out.channels() == in.channels());
 	#pragma omp parallel for
@@ -45,7 +45,7 @@ void bipolar_filter::do_process_first() {
 void bipolar_filter::do_process() {
 	if(!out_port_) return;
 	if(!in_port_) return;
-	buffer & in = in_port_.buffer();
+	buffer const & in = in_port_.buffer();
 	buffer & out = out_port_.buffer();
 	out.flag(in.flag());
 }

@@ -631,7 +631,7 @@ void alsa::do_process() {
 		::snd_pcm_uframes_t const samples_per_buffer(graph().events_per_buffer());
 		//assert(last_samples_.size() == channels); ///\todo last_samples_
 		for(unsigned int c(0); c < channels; ++c) {
-			engine::buffer::channel & in(in_port().buffer()[c]);
+			engine::buffer::channel const & in(in_port().buffer()[c]);
 			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
 		
 			// retrieve the last sample written on this channel

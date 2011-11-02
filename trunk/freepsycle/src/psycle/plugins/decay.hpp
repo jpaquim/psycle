@@ -38,8 +38,8 @@ class PSYCLE__DECL decay : public node {
 		bool have_decay() { return *single_input_ports()[1]; }
 		bool have_out()   { return *output_ports()[0]; }
 
-		channel & pulse_channel() { return single_input_ports()[0]->buffer()[0]; }
-		channel & decay_channel() { return single_input_ports()[1]->buffer()[0]; }
+		channel const & pulse_channel() { return single_input_ports()[0]->buffer()[0]; }
+		channel const & decay_channel() { return single_input_ports()[1]->buffer()[0]; }
 		channel & out_channel()   { return output_ports()[0]->buffer()[0]; }
 
 		ports::output out_port_;

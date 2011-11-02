@@ -531,7 +531,7 @@ void scheduler::process(class node & node) {
 			if(node.engine().multiple_input_port()->single_connection_is_identity_transform()) { // this is the identity transform when we have a single input
 				engine::ports::output & output_port = *node.engine().output_ports().front();
 				if(
-					static_cast<buffer&>(node.engine().multiple_input_port()->buffer()).reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
+					static_cast<buffer const &>(node.engine().multiple_input_port()->buffer()).reference_count() == 1 || // We are the last input port to read the buffer of the output port, so, we can take over its buffer.
 					node.engine().multiple_input_port()->output_ports().size() == 1 // We have a single input, so, this is the identity transform, i.e., the buffer will not be modified.
 				) {
 					if(false && loggers::trace()) {
@@ -540,7 +540,7 @@ void scheduler::process(class node & node) {
 						loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
 					// copy pointer of input buffer to pointer of output buffer
-					set_buffer_for_output_port(output_port, static_cast<buffer&>(node.engine().multiple_input_port()->buffer()));
+					set_buffer_for_output_port(output_port, static_cast<buffer &>(node.engine().multiple_input_port()->buffer()));
 				} else { // we have several inputs, so, this cannot be the identity transform, i.e., the buffer would be modified. but its content must be preserved for further reading
 					// get buffer for output port
 					set_buffer_for_output_port(output_port, (*buffer_pool_)());
