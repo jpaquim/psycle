@@ -47,7 +47,7 @@ void bipolar_filter::do_process() {
 	if(!in_port_) return;
 	buffer & in = in_port_.buffer();
 	buffer & out = out_port_.buffer();
-	for(std::size_t channel = 0; channel < in.channels(); ++channel) out[channel].flag(in[channel].flag());
+	out.flag(in.flag());
 }
 
 }}

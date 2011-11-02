@@ -72,30 +72,15 @@ class event {
 
 /// a vector of events.
 class PSYCLE__DECL channel {
-	///\name flags to give hint to process loops
-	///\{
-		public:
-			enum class flags {
-				empty, ///< indicates there is no event
-				discrete, ///< indicates there are events, but not one for every sample
-				continuous ///< indicates there is an event for every sample
-			};
-			
-			flags flag() const { return flag_; }
-			void flag(flags flag) { flag_ = flag; }
-		private:
-			flags flag_;
-	///\}
-
 	public:
 		typedef class event event;
 
 		/// creates a new zero-sized channel.
-		channel() : flag_() {}
+		channel() {}
 
 		/// creates a new channel with the given number of events.
 		///\param events the number of events
-		channel(std::size_t events) : flag_(), events_(events) {}
+		channel(std::size_t events) : events_(events) {}
 
 	///\name vector of events
 	///\{
@@ -163,6 +148,21 @@ class PSYCLE__DECL buffer {
 	private:
 		std::size_t events_;
 
+	///\name flags to give hint to process loops
+	///\{
+		public:
+			enum class flags {
+				empty, ///< indicates there is no event
+				discrete, ///< indicates there are events, but not one for every sample
+				continuous ///< indicates there is an event for every sample
+			};
+			
+			flags flag() const { return flag_; }
+			void flag(flags flag) { flag_ = flag; }
+		private:
+			flags flag_;
+	///\}
+	
 	///\name vector of channels
 	///\{
 		private:
@@ -189,10 +189,9 @@ class PSYCLE__DECL buffer {
 namespace psycle { namespace engine {
 
 void buffer::clear(std::size_t channels) {
-	for(std::size_t channel(0) ; channel < channels ; ++channel) {
-		(*this)[channel].flag(channel::flags::empty);
+	for(std::size_t channel(0) ; channel < channels ; ++channel)
 		(*this)[channel].begin()->index(events());
-	}
+	flag(flags::empty);
 }
 
 void buffer::copy(buffer const & buffer, std::size_t channels) {
@@ -203,11 +202,11 @@ void buffer::copy(buffer const & buffer, std::size_t channels) {
 	}
 	assert("not copying itself: " && this != &buffer); // would not cause a bug, but this catches lacks of optimizations.
 	for(std::size_t channel = 0; channel < channels ; ++channel) {
-		(*this)[channel].flag(buffer[channel].flag());
 		///\todo we can even optimise the loop with the flag information
 		for(std::size_t event = 0; event < events() && buffer[channel][event].index() < events() ; ++event)
 			(*this)[channel][event] = buffer[channel][event];
 	}
+	flag(buffer.flag());
 }
 
 }}
