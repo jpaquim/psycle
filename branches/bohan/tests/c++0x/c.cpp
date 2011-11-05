@@ -1,4 +1,5 @@
 
+#if 0
 namespace std {
 	template<typename T>
 	class allocator {};
@@ -9,12 +10,14 @@ namespace std {
 		T * array_;
 	};
 }
+#endif
 
 /////////////////////////////////////////////////////////////////
+// using C++2011 variadic templates
 
-template<typename T, template<typename> class Underlying>
+template<typename T, template<typename, typename...> class Underlying, template<typename> class... ExtraArgs>
 class Foo {
-	Underlying<T> data_;
+	Underlying<T, ExtraArgs<T>...> data_;
 };
 
 /////////////////////////////////////////////////////////////////
@@ -28,18 +31,13 @@ class ctn {
 Foo<int, ctn> x;
 
 /////////////////////////////////////////////////////////////////
-// using C++2011 template aliases
-
-template<template<typename, typename> class Underlying, template<typename> class Allocator = std::allocator>
-struct remove_allocator_parameter {
-	template<typename T>
-	using template_type = Underlying<T, Allocator<T>>;
-};
-
-/////////////////////////////////////////////////////////////////
 // with standard container, having an Allocator parameter
 
-Foo<int, remove_allocator_parameter<std::vector>::template_type> y;
+#include <vector>
+#include <list>
+
+Foo<int, std::vector> y;
+Foo<int, std::list, std::allocator> z;
 
 /////////////////////////////////////////////////////////////////
 int main() {}
