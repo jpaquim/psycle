@@ -20,8 +20,8 @@
 #define PSYCLE__LICENSE "Some parts GPL, others public domain"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 10
-#define PSYCLE__VERSION__PATCH 0
-#define PSYCLE__VERSION__QUALITY "release"
+#define PSYCLE__VERSION__PATCH 65535
+#define PSYCLE__VERSION__QUALITY "random"
 #define PSYCLE__SOURCE_URL "Subversion $URL$"
 
 /// identifies what source version the build comes from.
