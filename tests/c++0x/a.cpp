@@ -24,7 +24,7 @@ class Foo2 {
 	Underlying<T, Allocator<T> > data_;
 };
 
-Foo2<int, std::vector> z;
+Foo2<int, std::vector> y;
 
 /////////////////////////////////////////////////////////////////
 int main() {}
