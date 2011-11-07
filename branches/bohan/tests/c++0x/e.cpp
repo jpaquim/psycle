@@ -5,12 +5,12 @@
 
 struct b {
 	int i;
-	virtual void f() { std::cout << "b: " << i << '\n'; }
+	virtual void f() { std::cout << "b\n"; }
 };
 
 struct d : public b {
 	int j;
-	void f() { std::cout << "d: " << i << ", " << j << '\n'; }
+	void f() { std::cout << "d\n"; }
 };
 
 template<typename T>
@@ -25,8 +25,6 @@ struct v : public std::vector<T*> {
 
 int main() {
 	d d0;
-	d0.i = 1;
-	d0.j = 2;
 	v<d> vd0;
 	vd0.push_back(&d0);
 	v<b> const & vb0 = vd0;
