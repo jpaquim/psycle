@@ -1,0 +1,6 @@
+.svn
++*
+*.user
+*.pyc
+*.pyo
+*$py.class
