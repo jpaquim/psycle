@@ -189,7 +189,7 @@ class PSYCLE__DECL buffer {
 namespace psycle { namespace engine {
 
 void buffer::clear(std::size_t channels) {
-	for(std::size_t channel(0) ; channel < channels ; ++channel)
+	for(std::size_t channel = 0 ; channel < channels ; ++channel)
 		(*this)[channel].begin()->index(events());
 	flag(flags::empty);
 }

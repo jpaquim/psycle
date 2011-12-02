@@ -22,9 +22,10 @@ class named {
 		/// sets a new name.
 		///\post the given name is copied.
 		void name(name_type const & name) { do_name(name); }
+		virtual ~named() /*throw()*/ {}
+	protected:
 		/// overridable virtual setter.
 		virtual void do_name(name_type const & name) { this->name_ = name; }
-		virtual ~named() {}
 	private:
 		name_type name_;
 };
