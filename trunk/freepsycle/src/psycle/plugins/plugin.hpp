@@ -23,16 +23,8 @@ using engine::real;
 using engine::channel;
 using engine::buffer;
 using engine::port;
-//namespace ports = engine::ports;
-namespace ports {
-	using engine::ports::output;
-	using engine::ports::input;
-	namespace inputs {
-		using namespace engine::ports::inputs;
-	}
-}
-//namespace math = engine::math;
-namespace math { using namespace engine::math; }
+namespace ports = engine::ports;
+namespace math = engine::math;
 
 #define PSYCLE__PLUGINS__CALLING_CONVENTION  UNIVERSALIS__COMPILER__CALLING_CONVENTION__C
 
