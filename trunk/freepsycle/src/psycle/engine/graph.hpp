@@ -244,7 +244,7 @@ class PSYCLE__DECL node : public named {
 		public:
 			/// called by schedulers
 			void inline process_first();
-		protected:
+		private:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
 			virtual void do_process_first() {}
@@ -252,11 +252,16 @@ class PSYCLE__DECL node : public named {
 		public:
 			/// called by schedulers
 			void inline process();
-		protected:
+		private:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
 			virtual void do_process() = 0;
 
+			template<buffer::flags... Evaluated_Flags, typename Node>
+			static void do_process_template_switch(Node & node) {
+				node.template do_process_template<Evaluated_Flags...>();
+			}
+		protected:
 			template<buffer::flags... Evaluated_Flags, typename Node, typename... Flags_To_Evaluate>
 			static void do_process_template_switch(Node & node, buffer::flags flag_to_evaluate, Flags_To_Evaluate... flags_to_evaluate) {
 				switch(flag_to_evaluate) {
@@ -273,16 +278,11 @@ class PSYCLE__DECL node : public named {
 						throw engine::exceptions::runtime_error("unhandled enumeration value", UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
 				}
 			}
-		private:
-			template<buffer::flags... Evaluated_Flags, typename Node>
-			static void do_process_template_switch(Node & node) {
-				node.template do_process_template<Evaluated_Flags...>();
-			}
 
 		public:
 			/// called by schedulers, reset the state of this node so that it prepares for the next call to process()
 			void inline reset();
-		protected:
+		private:
 			virtual void do_reset() {}
 	///\}
 
