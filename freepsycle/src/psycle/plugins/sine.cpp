@@ -132,13 +132,16 @@ void sine::do_process() {
 	}
 
 	template<bool have_phase, bool have_freq, bool have_amp>
-	void sine::do_process_template(std::size_t i, std::size_t end) {
+	void sine::do_process_template(
+		std::size_t phase_begin, std::size_t freq_begin, std::size_t amp_begin,
+		std::size_t out_begin, std::size_t out_end
+	) {
 		///\todo need iterator for each input
-		for(; i < end; ++i) {
-			if(have_phase) phase_ = std::fmod(phase_chn()[i] + math::pi, 2 * math::pi) - math::pi;
-			if(have_freq) freq(freq_chn()[i]);
-			if(have_amp) amp_ = amp_chn()[i];
-			out_chn()[i](i, amp_ * math::fast_sin<2>(phase_));
+		for(std::size_t i = out_begin; i < out_end; ++i) {
+			if(have_phase) phase_ = std::fmod(phase_chn()[phase_begin + i] + math::pi, 2 * math::pi) - math::pi;
+			if(have_freq) freq(freq_chn()[freq_begin + i]);
+			if(have_amp) amp_ = amp_chn()[amp_begin + i];
+			out_chn()[out_begin + i](out_begin + i, amp_ * math::fast_sin<2>(phase_));
 			phase_ += step_;
 			if(phase_ > math::pi) phase_ -= 2 * math::pi;
 		}
