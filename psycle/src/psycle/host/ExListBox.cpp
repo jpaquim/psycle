@@ -64,12 +64,12 @@ void CExListBox::ShowEditBox(bool isName)
 	myedit.SetFont(&font);
 	if(isName) {
 		myedit.SetLimitText(30);
-		myedit.SetWindowText(Global::_pSong->patternName[Global::_pSong->playOrder[row]]);
+		myedit.SetWindowText(Global::song().patternName[Global::song().playOrder[row]]);
 	}
 	else {
 		myedit.SetLimitText(3);
 		char bla[10];
-		sprintf(bla, "%.2X", Global::_pSong->playOrder[row]);
+		sprintf(bla, "%.2X", Global::song().playOrder[row]);
 		myedit.SetWindowText(bla);
 	}
 	myedit.SetSel(0,-1);
@@ -88,12 +88,12 @@ void CExListBox::OnChangePatternName()
 	CString string;
 	myedit.GetWindowText(string);
 	if(isName) {
-		strncpy(Global::_pSong->patternName[Global::_pSong->playOrder[GetCurSel()]],string,32);
+		strncpy(Global::song().patternName[Global::song().playOrder[GetCurSel()]],string,32);
 	}
 	else {
 		int val = hexstring_to_integer(static_cast<LPCTSTR>(string));
 		if(val < MAX_PATTERNS) {
-			Global::_pSong->playOrder[GetCurSel()] = val;
+			Global::song().playOrder[GetCurSel()] = val;
 		}
 	}
 }
@@ -125,7 +125,7 @@ BOOL CExListBox::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
 	// need to handle both ANSI and UNICODE versions of the message
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	CString strTipText = Global::_pSong->patternName[Global::_pSong->playOrder[pNMHDR->idFrom]];
+	CString strTipText = Global::song().patternName[Global::song().playOrder[pNMHDR->idFrom]];
 //	UINT nID = pNMHDR->idFrom;
 //	GetText( nID ,strTipText);
 

@@ -8,10 +8,10 @@ namespace psycle { namespace host {
 
 		IMPLEMENT_DYNAMIC(CTransformPatternDlg, CDialog)
 
-		CTransformPatternDlg::CTransformPatternDlg(Song* _pSong, CWnd* pParent /*=NULL*/)
+		CTransformPatternDlg::CTransformPatternDlg(Song& _pSong, CWnd* pParent /*=NULL*/)
 			: CDialog(CTransformPatternDlg::IDD, pParent)
+			, song(_pSong)
 		{
-			pSong = _pSong;
 			m_applyto = 0;
 		}
 
@@ -115,7 +115,7 @@ namespace psycle { namespace host {
 				int currentColumn;
 				int currentLine;
 
-				int lastPatternUsed = pSong->GetHighestPatternIndexInSequence();
+				int lastPatternUsed = song.GetHighestPatternIndexInSequence();
 				int columnCount = MAX_TRACKS;
 				int lineCount;
 
@@ -127,10 +127,10 @@ namespace psycle { namespace host {
 
 				for (currentPattern = 0; currentPattern <= lastPatternUsed; currentPattern++)
 				{
-					if (!pSong->IsPatternEmpty(currentPattern))
+					if (!song.IsPatternEmpty(currentPattern))
 					{				
-						patternEntry = (PatternEntry*) pSong->_ppattern(currentPattern);
-						lineCount = pSong->patternLines[currentPattern];
+						patternEntry = (PatternEntry*) song._ppattern(currentPattern);
+						lineCount = song.patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)
 						{

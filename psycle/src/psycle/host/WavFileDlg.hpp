@@ -13,7 +13,7 @@ namespace psycle { namespace host {
 		{
 			DECLARE_DYNAMIC(CWavFileDlg)
 		public:
-			Song *_pSong;
+			Song* m_pSong;
 			CString _lastFile;
 			CWavFileDlg(
 				BOOL bOpenFileDialog, // TRUE for FileOpen, FALSE for FileSaveAs

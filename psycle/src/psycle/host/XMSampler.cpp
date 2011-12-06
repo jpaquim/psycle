@@ -255,9 +255,9 @@ namespace psycle
 		{
 //			if ( m_Mode == EnvelopeMode::TICK )
 //			{
-			m_sRateDeviation = (Global::pPlayer->SampleRate() *60) / (24 * Global::pPlayer->bpm);
+			m_sRateDeviation = (Global::player().SampleRate() *60) / (24 * Global::player().bpm);
 //			} else if ( m_Mode == EnvelopeMode::MILIS ) {
-//				m_sRateDeviation = (Global::pPlayer->SampleRate() / 1000.0f;
+//				m_sRateDeviation = (Global::player().SampleRate() / 1000.0f;
 //			}
 		}
 
@@ -394,7 +394,7 @@ namespace psycle
 
 //			m_Filter.Init();
 			m_Filter.Reset();
-			m_Filter.SampleRate(Global::pPlayer->SampleRate());
+			m_Filter.SampleRate(Global::player().SampleRate());
 
 			//\todo: add the missing  Random options
 /*			if (_inst.RandomCutoff())
@@ -1996,7 +1996,7 @@ namespace psycle
 				zxxMap[i].value=0;
 			}
 			sprintf(_editName, _psName);
-//			xdsp.Init(Global::pPlayer->SampleRate(), 1.0 / (1 << 20));
+//			xdsp.Init(Global::player().SampleRate(), 1.0 / (1 << 20));
 		}
 
 		void XMSampler::Init(void)
@@ -2035,8 +2035,8 @@ namespace psycle
 			SampleCounter(0);
 			m_TickCount=0;
 
-			m_DeltaTick = Global::pPlayer->SampleRate() * 60
-				/ (Global::pPlayer->bpm * 24/*ticksPerBeat*/);
+			m_DeltaTick = Global::player().SampleRate() * 60
+				/ (Global::player().bpm * 24/*ticksPerBeat*/);
 
 			NextSampleTick(m_DeltaTick+1);// +1 is to avoid one Tick too much at the end, because m_DeltaTick is rounded down.
 
@@ -2275,7 +2275,7 @@ namespace psycle
 			if (!_mute)
 			{
 				Standby(false);
-				int _songtracks = Global::_pSong->SongTracks();
+				int _songtracks = Global::song().SongTracks();
 				int ns = numSamples;
 				int nextevent;
 
@@ -2338,7 +2338,7 @@ namespace psycle
 									// do event
 									Tick(i,&TriggerDelay[i]);
 									TriggerDelayCounter[i] 
-									= (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+									= (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 								}
 								else
 								{
@@ -2351,7 +2351,7 @@ namespace psycle
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
-									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+									TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 									int parameter = TriggerDelay[i]._parameter&0x0f;
 									if (parameter < 9)
 									{
@@ -2393,7 +2393,7 @@ namespace psycle
 										ArpeggioCount[i]=0;
 										break;
 									}
-									TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+									TriggerDelayCounter[i] = Global::player().SamplesPerRow()*Global::player().tpb/24;
 								}
 								else
 								{
@@ -2490,20 +2490,20 @@ namespace psycle
 			int tmp = 24 / ((TicksPerRow() == 0)?6:TicksPerRow());
 			if (tmp*TicksPerRow() == 24)
 			{
-				Global::_pSong->LinesPerBeat(tmp);
-				Global::_pSong->BeatsPerMin(BPM());
+				Global::song().LinesPerBeat(tmp);
+				Global::song().BeatsPerMin(BPM());
 			}
 			else
 			{
-				Global::_pSong->LinesPerBeat(4);
-				Global::_pSong->BeatsPerMin(6 * BPM() / TicksPerRow() );
+				Global::song().LinesPerBeat(4);
+				Global::song().BeatsPerMin(6 * BPM() / TicksPerRow() );
 			}
 
 			int t= Global::player().SampleRate() * 60;
-			int v=Global::_pSong->BeatsPerMin();
-			int z=Global::_pSong->LinesPerBeat();
-			Global::pPlayer->SamplesPerRow(	t / (v * z) );
-			m_DeltaTick = t / (Global::_pSong->BeatsPerMin() * 24);
+			int v=Global::song().BeatsPerMin();
+			int z=Global::song().LinesPerBeat();
+			Global::player().SamplesPerRow(	t / (v * z) );
+			m_DeltaTick = t / (Global::song().BeatsPerMin() * 24);
 		}
 */
 		bool XMSampler::Load(RiffFile* riffFile)

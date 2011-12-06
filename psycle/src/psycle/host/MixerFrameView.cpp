@@ -429,7 +429,7 @@ namespace psycle { namespace host {
 					}
 				}
 				prevval = tweakbase;
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 			}
 			CWnd::OnLButtonDown(nFlags, point);
 		}

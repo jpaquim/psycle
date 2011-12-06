@@ -123,7 +123,7 @@ namespace psycle
 		}
 		////////////////////////////////////////////////////
 
-		bool WasapiDriver::PortEnum::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode)
+		bool WasapiDriver::PortEnum::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode) const
 		{
 			IMMDeviceEnumerator *pEnumerator = NULL;
 			IMMDevice			*device = NULL;
@@ -609,13 +609,13 @@ Exit:
 Exit:
 			SAFE_RELEASE(pEnumerator)
 		}
-		void WasapiDriver::GetPlaybackPorts(std::vector<std::string> &ports)
+		void WasapiDriver::GetPlaybackPorts(std::vector<std::string> &ports) const
 		{
 			ports.resize(0);
 			for (unsigned int i=0;i<_playEnums.size();i++) ports.push_back(_playEnums[i].portName);
 		}
 
-		void WasapiDriver::GetCapturePorts(std::vector<std::string> &ports)
+		void WasapiDriver::GetCapturePorts(std::vector<std::string> &ports) const
 		{
 			ports.resize(0);
 			for (unsigned int i=0;i<_capEnums.size();i++) ports.push_back(_capEnums[i].portName);
@@ -796,7 +796,7 @@ Exit:
 			SAFE_RELEASE(pProps)
 			SAFE_RELEASE(pEndpoint)
 		}
-		HRESULT WasapiDriver::GetStreamFormat(PaWasapiSubStream& stream, WAVEFORMATEXTENSIBLE* wfOut)
+		HRESULT WasapiDriver::GetStreamFormat(PaWasapiSubStream& stream, WAVEFORMATEXTENSIBLE* wfOut) const
 		{
 			HRESULT hr;
 			if (stream.shareMode == AUDCLNT_SHAREMODE_SHARED)
@@ -828,7 +828,7 @@ Exit:
 			return hr;
 		}
 
-		std::uint32_t WasapiDriver::GetWritePosInSamples() { return writeMark; }
+		std::uint32_t WasapiDriver::GetWritePosInSamples() const { return writeMark; }
 
 		std::uint32_t WasapiDriver::GetPlayPosInSamples() {
 			UINT64 pos;
@@ -848,7 +848,7 @@ Exit:
 			return retVal;
 		}
 
-		std::uint32_t WasapiDriver::GetInputLatencyMs(){
+		std::uint32_t WasapiDriver::GetInputLatencyMs() const{
 			if(_capPorts.size() > 0) {
 				///\todo: The documentation suggests that the period has to be added to the latency. verify it.
 				return portaudio::nano100ToMillis(_capPorts[0].device_latency+_capPorts[0].period);
@@ -856,12 +856,14 @@ Exit:
 			else return 0;
 		}
 
-		std::uint32_t WasapiDriver::GetOutputLatencyMs(){
+		std::uint32_t WasapiDriver::GetOutputLatencyMs() const{
 			///\todo: The documentation suggests that the period has to be added to the latency. verify it.
 			return portaudio::nano100ToMillis(out.device_latency+out.period);
 		}
+		std::uint32_t WasapiDriver::GetInputLatencySamples() const { return GetInputLatencyMs()*settings_->samplesPerSec()*0.001f; }
+		std::uint32_t WasapiDriver::GetOutputLatencySamples() const { return GetOutputLatencyMs()*settings_->samplesPerSec()*0.001f; }
 
-		std::uint32_t WasapiDriver::GetIdxFromDevice(WCHAR* szDeviceID) {
+		std::uint32_t WasapiDriver::GetIdxFromDevice(WCHAR* szDeviceID) const {
 			for(int i = 0; i < _playEnums.size() ; ++i)
 			{
 				if(wcscmp(_playEnums[i].szDeviceID,szDeviceID) == 0)

@@ -21,6 +21,7 @@ namespace psycle { namespace host {
 			, m_oldMidiDriverIndex(0)
 			, m_oldSyncDriverIndex(0)
 			, m_midiHeadroom(0)
+			, m_numberThreads(0)
 		{
 		}
 
@@ -32,9 +33,11 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_MIDI_KEYBOARD, m_inmediate);
 			DDX_Control(pDX, IDC_MIDI_SEQUENCED, m_sequenced);
 			DDX_Control(pDX, IDC_SYNC_DRIVER, m_midiSyncComboBox);
-			DDX_Control(pDX, IDC_MIDI_HEADROOM, m_midiHeadroomEdit);
 			DDX_Control(pDX, IDC_MIDI_HEADROOM_SPIN, m_midiHeadroomSpin);
+			DDX_Control(pDX, IDC_MIDI_HEADROOM, m_midiHeadroomEdit);
 			DDX_Text(pDX, IDC_MIDI_HEADROOM, m_midiHeadroom);
+			DDX_Control(pDX, IDC_NUMBER_THREADS, m_numberThreadsEdit);
+			DDX_Text(pDX, IDC_NUMBER_THREADS, m_numberThreads);
 			DDV_MinMaxInt(pDX, m_midiHeadroom, MIN_HEADROOM, MAX_HEADROOM);
 		}
 
@@ -50,7 +53,7 @@ namespace psycle { namespace host {
 		BOOL COutputDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			PsycleConfig& conf = Global::psycleconf();
+			PsycleConfig& conf = PsycleGlobal::conf();
 			m_driverIndex = conf.outputDriverIndex();
 			m_midiDriverIndex = conf.midiDriverIndex();
 			m_syncDriverIndex = conf.syncDriverIndex();
@@ -63,6 +66,13 @@ namespace psycle { namespace host {
 			m_driverComboBox.SetCurSel(m_driverIndex);
 			m_oldDriverIndex = m_driverIndex;
 
+			{
+				std::stringstream s;
+				s << conf.GetNumThreads();
+				m_numberThreads = conf.GetNumThreads();
+				m_numberThreadsEdit.SetWindowText(s.str().c_str());
+			}
+
 			int _numMidiDrivers = CMidiInput::GetNumDevices();
 			PopulateListbox( &m_midiDriverComboBox, _numMidiDrivers, false );
 			m_midiDriverComboBox.SetCurSel(m_midiDriverIndex);
@@ -74,10 +84,12 @@ namespace psycle { namespace host {
 
 
 			// setup spinner
-			m_midiHeadroom = conf.midi()._midiHeadroom;
-			CString str;
-			str.Format("%d", m_midiHeadroom);
-			m_midiHeadroomEdit.SetWindowText(str);
+			{
+				std::stringstream s;
+				s << conf.midi()._midiHeadroom;
+				m_midiHeadroom = conf.midi()._midiHeadroom;
+				m_midiHeadroomEdit.SetWindowText(s.str().c_str());
+			}
 			m_midiHeadroomSpin.SetRange32(MIN_HEADROOM, MAX_HEADROOM);
 			UDACCEL acc;
 			acc.nSec = 0;
@@ -99,32 +111,33 @@ namespace psycle { namespace host {
 		void COutputDlg::OnSelChangeOutput()
 		{
 			m_driverIndex = m_driverComboBox.GetCurSel();
-			Global::psycleconf().OutputChanged(m_driverIndex);
+			PsycleGlobal::conf().OutputChanged(m_driverIndex);
 		}
 
 		void COutputDlg::OnSelChangeMidi()
 		{
 			m_midiDriverIndex = m_midiDriverComboBox.GetCurSel();
-			Global::psycleconf().MidiChanged(m_midiDriverIndex);
+			PsycleGlobal::conf().MidiChanged(m_midiDriverIndex);
 		}
 
 		void COutputDlg::OnSelChangeSync()
 		{
 			m_syncDriverIndex = m_midiSyncComboBox.GetCurSel();
-			Global::psycleconf().SyncChanged(m_syncDriverIndex);
+			PsycleGlobal::conf().SyncChanged(m_syncDriverIndex);
 		}
 
 		void COutputDlg::OnOK() 
 		{
-			PsycleConfig::Midi& config = Global::psycleconf().midi();
+			PsycleConfig::Midi& config = PsycleGlobal::conf().midi();
 			config._midiHeadroom = m_midiHeadroom;
 			config._midiMachineViewSeqMode = m_sequenced.GetCheck();
+			PsycleGlobal::conf().SetNumThreads(m_numberThreads);
 			CDialog::OnOK();
 		}
 
 		void COutputDlg::OnCancel() 
 		{
-			PsycleConfig& config = Global::psycleconf();
+			PsycleConfig& config = PsycleGlobal::conf();
 			if( m_oldDriverIndex != m_driverIndex )
 			{
 				config.OutputChanged(m_oldDriverIndex);
@@ -141,8 +154,8 @@ namespace psycle { namespace host {
 
 		void COutputDlg::OnConfig() 
 		{
-			Global::psycleconf()._pOutputDriver->Configure();
-			Global::pPlayer->SetSampleRate(Global::pConfig->_pOutputDriver->GetSamplesPerSec());
+			PsycleGlobal::conf()._pOutputDriver->Configure();
+			Global::player().SetSampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 		}
 		void COutputDlg::OnEnableInmediate()
 		{

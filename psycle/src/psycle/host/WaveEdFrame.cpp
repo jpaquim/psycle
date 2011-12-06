@@ -46,10 +46,10 @@ namespace psycle { namespace host {
 		CWaveEdFrame::CWaveEdFrame()
 		{
 		}
-		CWaveEdFrame::CWaveEdFrame(Song* _sng, CMainFrame* pframe)
+		CWaveEdFrame::CWaveEdFrame(Song& _sng, CMainFrame* pframe)
 		{
-			this->_pSong=_sng;
-			wavview.SetSong(this->_pSong);
+			this->_pSong = &_sng;
+			wavview.SetSong(_sng);
 			wavview.SetMainFrame(pframe);
 		}
 

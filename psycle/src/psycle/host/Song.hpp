@@ -4,7 +4,6 @@
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
-#include "SongStructs.hpp"
 #include "Instrument.hpp"
 #include "ExclusiveLock.hpp"
 #include "cpu_time_clock.hpp"

@@ -22,7 +22,7 @@ namespace psycle { namespace host {
 		CStatic			m_tpblabel;
 
 
-		void InitializeValues(CMainFrame* frame, CChildView* view, Song* song);
+		void InitializeValues(CMainFrame* frame, CChildView* view, Song& song);
 		void SetAppSongBpm(int x);
 		void SetAppSongTpb(int x);
 		void ShiftOctave(int x);
@@ -51,7 +51,7 @@ namespace psycle { namespace host {
 	protected:
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;
-		Song*		m_pSong;
+		Song* m_pSong;
 
 		int vuprevL;
 		int vuprevR;

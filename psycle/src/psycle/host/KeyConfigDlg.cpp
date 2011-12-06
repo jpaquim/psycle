@@ -11,7 +11,7 @@ namespace psycle { namespace host {
 		IMPLEMENT_DYNCREATE(CKeyConfigDlg, CPropertyPage)
 
 		CKeyConfigDlg::CKeyConfigDlg() : CPropertyPage(CKeyConfigDlg::IDD)
-			, handler(Global::psycleconf().inputHandler())
+			, handler(PsycleGlobal::conf().inputHandler())
 		{
 			
 			m_prvIdx = 0;
@@ -81,7 +81,7 @@ namespace psycle { namespace host {
 		}
 		void CKeyConfigDlg::RefreshDialog() 
 		{
-			PsycleConfig& config = Global::psycleconf();
+			PsycleConfig& config = PsycleGlobal::conf();
 			m_cmdCtrlPlay.SetCheck(handler.bCtrlPlay?1:0);
 			m_cmdNewHomeBehaviour.SetCheck(handler.bFT2HomeBehaviour?1:0);
 			m_cmdFT2Del.SetCheck(handler.bFT2DelBehaviour?1:0);
@@ -105,7 +105,7 @@ namespace psycle { namespace host {
 			m_allowinstances.SetCheck(config._allowMultipleInstances?1:0);
 			m_storeplaces.SetCurSel(config.store_place_);
 
-			itoa(Global::psycleconf().GetDefaultPatLines(),buffer,10);
+			itoa(PsycleGlobal::conf().GetDefaultPatLines(),buffer,10);
 			m_numlines.SetWindowText(buffer);
 			bInit = TRUE;
 			OnUpdateNumLines();
@@ -118,7 +118,7 @@ namespace psycle { namespace host {
 
 		void CKeyConfigDlg::OnOK() 
 		{
-			PsycleConfig& config = Global::psycleconf();
+			PsycleConfig& config = PsycleGlobal::conf();
 			// update last key
 			WORD mods=0;
 			WORD key=0;
@@ -193,7 +193,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrInitialDir =  Global::psycleconf().GetSkinDir().c_str();
+			ofn.lpstrInitialDir =  PsycleGlobal::conf().GetSkinDir().c_str();
 			// Display the Open dialog box. 
 			
 			if (GetOpenFileName(&ofn)==TRUE)
@@ -223,7 +223,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
-			ofn.lpstrInitialDir = Global::psycleconf().GetSkinDir().c_str();
+			ofn.lpstrInitialDir = PsycleGlobal::conf().GetSkinDir().c_str();
 
 			if (GetSaveFileName(&ofn)==TRUE)
 			{

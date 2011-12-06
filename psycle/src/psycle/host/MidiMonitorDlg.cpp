@@ -180,11 +180,11 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::UpdateInfo( void )
 		{
 			// fill in the numeric stats
-			MIDI_STATS * pStats = Global::midi().GetStatsPtr();
-			MIDI_CONFIG * pConfig = Global::midi().GetConfigPtr();
+			MIDI_STATS * pStats = PsycleGlobal::midi().GetStatsPtr();
+			MIDI_CONFIG * pConfig = PsycleGlobal::midi().GetConfigPtr();
 			m_midiVersion.SetWindowText( pConfig->versionStr );
 
-			if(Global::midi().m_midiMode == MODE_REALTIME) {
+			if(PsycleGlobal::midi().m_midiMode == MODE_REALTIME) {
 				char tmp[ 64 ];
 				sprintf( tmp, "%d\0", pStats->bufferCount );
 				m_bufferUsed.SetWindowText( tmp );
@@ -212,7 +212,7 @@ namespace psycle { namespace host {
 			}
 
 			// fill in the flags
-			if( !Global::midi().Active()) { 
+			if( !PsycleGlobal::midi().Active()) { 
 				pStats->flags &= ~FSTAT_ACTIVE;
 			} else {
 				pStats->flags |= FSTAT_ACTIVE;
@@ -305,7 +305,7 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::fnClearEventsLost( void )
 		{
 			// clear the events lost counter
-			MIDI_STATS * pStats = Global::midi().GetStatsPtr();
+			MIDI_STATS * pStats = PsycleGlobal::midi().GetStatsPtr();
 			pStats->eventsLost = 0;
 
 			// disable ourselves until next after next n updates
@@ -325,7 +325,7 @@ namespace psycle { namespace host {
 			// get the default background brush
 			HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
 
-			MIDI_STATS * pStats = Global::midi().GetStatsPtr();
+			MIDI_STATS * pStats = PsycleGlobal::midi().GetStatsPtr();
 
 			// set required static colours
 
@@ -367,7 +367,7 @@ namespace psycle { namespace host {
 		void CMidiMonitorDlg::FillChannelMap( bool overridden )
 		{
 			// get the midi input interface
-			CMidiInput& midiInput = Global::midi();
+			CMidiInput& midiInput = PsycleGlobal::midi();
 			if( !overridden && (midiInput.GetStatsPtr()->channelMapUpdate == false) )
 			{
 				return;
@@ -381,23 +381,23 @@ namespace psycle { namespace host {
 				int selIdx=-1;
 
 				//Generator/effect selector
-				switch(Global::psycleconf().midi().gen_select_with())
+				switch(PsycleGlobal::conf().midi().gen_select_with())
 				{
 				case PsycleConfig::Midi::MS_USE_SELECTED:
-					selIdx = Global::_pSong->seqBus;
-					pMachine = Global::_pSong->_pMachine[ selIdx ];
+					selIdx = Global::song().seqBus;
+					pMachine = Global::song()._pMachine[ selIdx ];
 					break;
 				case PsycleConfig::Midi::MS_BANK:
 				case PsycleConfig::Midi::MS_PROGRAM:
 					 selIdx = midiInput.GetGenMap( ch );
 					if( selIdx >= 0 && selIdx < MAX_MACHINES)
 					{
-						pMachine = Global::_pSong->_pMachine[ selIdx ];
+						pMachine = Global::song()._pMachine[ selIdx ];
 					}
 					break;
 				case PsycleConfig::Midi::MS_MIDI_CHAN:
 					selIdx = ch;
-					pMachine = Global::_pSong->_pMachine[ selIdx ];
+					pMachine = Global::song()._pMachine[ selIdx ];
 					break;
 				}
 				if (pMachine == NULL) strcpy( txtBuffer, "-");
@@ -405,10 +405,10 @@ namespace psycle { namespace host {
 				m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 				//instrument selection
-				switch(Global::psycleconf().midi().inst_select_with())
+				switch(PsycleGlobal::conf().midi().inst_select_with())
 				{
 				case PsycleConfig::Midi::MS_USE_SELECTED:
-					selIdx = Global::_pSong->auxcolSelected;
+					selIdx = Global::song().auxcolSelected;
 					break;
 				case PsycleConfig::Midi::MS_BANK:
 				case PsycleConfig::Midi::MS_PROGRAM:

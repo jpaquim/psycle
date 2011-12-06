@@ -3,6 +3,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "GearTracker.hpp"
 #include "Sampler.hpp"
+#include "PsycleConfig.hpp"
 
 namespace psycle { namespace host {
 
@@ -41,7 +42,7 @@ namespace psycle { namespace host {
 
 			m_interpol.SetCurSel(machine._resampler.quality());
 			m_defaultC4.SetCheck(machine.isDefaultC4());
-			if(Global::psycleconf().patView().showA440) {
+			if(PsycleGlobal::conf().patView().showA440) {
 				m_defaultC4.SetWindowTextA("C4 plays the default speed (Otherwise, C3 does it)");
 			}
 			else {

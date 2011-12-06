@@ -101,25 +101,25 @@ namespace psycle
 			delete[] sRemap;
 
 		}
-		bool ITModule2::LoadITModule(Song *song)
+		bool ITModule2::LoadITModule(Song& song)
 		{
-			CExclusiveLock lock(&song->semaphore, 2, true);
-			s=song;
+			CExclusiveLock lock(&song.semaphore, 2, true);
+			_pSong=&song;
 			if (Read(&itFileH,sizeof(itFileH))==0 ) return false;
 			if (itFileH.tag != IMPM_ID ) return false;
 
-			s->name = itFileH.songName;
-			s->author = "";
-			s->comments = "Imported from Impulse Tracker Module: ";
-			s->comments.append(szName);
+			song.name = itFileH.songName;
+			song.author = "";
+			song.comments = "Imported from Impulse Tracker Module: ";
+			song.comments.append(szName);
 
-			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			s->InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
-			s->seqBus=0;
-			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
+			song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
+			song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
+			song.seqBus=0;
+			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
-			song->BeatsPerMin(itFileH.iTempo);
-			song->LinesPerBeat(sampler->Speed2LPB(itFileH.iSpeed));
+			song.BeatsPerMin(itFileH.iTempo);
+			song.LinesPerBeat(sampler->Speed2LPB(itFileH.iSpeed));
 
 			sampler->IsAmigaSlides(itFileH.flags&Flags::LINEARSLIDES?false:true);
 			sampler->GlobalVolume(itFileH.gVol);
@@ -195,8 +195,8 @@ Special:  Bit 0: On = song message attached.
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
 			{
-				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
-				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
+				song.playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
+				if (song.playOrder[i]!= 254 &&song.playOrder[i] != 255 ) i++;
 			}
 			Skip(itFileH.ordNum-j);
 /*
@@ -206,11 +206,11 @@ Special:  Bit 0: On = song message attached.
 				j++;
 			}
 */
-			s->playLength=i;
-			if ( s->playLength == 0) // Add at least one pattern to the sequence.
+			song.playLength=i;
+			if ( song.playLength == 0) // Add at least one pattern to the sequence.
 			{
-				s->playLength = 1;
-				s->playOrder[0]=0;
+				song.playLength = 1;
+				song.playOrder[0]=0;
 			}
 
 			unsigned long *pointersi = new unsigned long[itFileH.insNum];
@@ -301,13 +301,13 @@ Special:  Bit 0: On = song message attached.
 			{
 				if (pointersp[i]==0)
 				{
-					s->AllocNewPattern(i,"unnamed",64,false);
+					song.AllocNewPattern(i,"unnamed",64,false);
 				} else {
 					Seek(pointersp[i]);
 					LoadITPattern(i,numchans);
 				}
 			}
-			song->SONGTRACKS = std::max(numchans+1,4);
+			song.SONGTRACKS = std::max(numchans+1,4);
 
 			delete[] pointersi;
 			delete[] pointerss;
@@ -832,7 +832,7 @@ Special:  Bit 0: On = song message attached.
 			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
-			s->AllocNewPattern(patIdx,"unnamed",rowCount,false);
+			_pSong->AllocNewPattern(patIdx,"unnamed",rowCount,false);
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
@@ -948,7 +948,7 @@ Special:  Bit 0: On = song message attached.
 						pent._parameter = lasteff[channel];
 					}
 
-					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
+					PatternEntry* pData = (PatternEntry*) _pSong->_ptrackline(patIdx,channel,row);
 
 					*pData = pent;
 					pent=pempty;
@@ -1127,40 +1127,40 @@ Special:  Bit 0: On = song message attached.
 //     S3M Module Members
 
 
-		bool ITModule2::LoadS3MModuleX(Song *song)
+		bool ITModule2::LoadS3MModuleX(Song& song)
 		{
-			CExclusiveLock lock(&song->semaphore, 2, true);
-			s=song;
+			CExclusiveLock lock(&song.semaphore, 2, true);
+			_pSong=&song;
 			if (Read(&s3mFileH,sizeof(s3mFileH))==0 ) return 0;
 			if (s3mFileH.tag != SCRM_ID || s3mFileH.type != 0x10 ) return 0;
 
 			s3mFileH.songName[28]='\0';
-			s->name = s3mFileH.songName;
-			s->author = "";
-			s->comments = "Imported from Scream Tracker 3 Module: ";
-			s->comments.append(szName);
+			song.name = s3mFileH.songName;
+			song.author = "";
+			song.comments = "Imported from Scream Tracker 3 Module: ";
+			song.comments.append(szName);
 
-			s->CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			s->InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
-			s->seqBus=0;
-			XMSampler* sampler = ((XMSampler*)s->_pMachine[0]);
+			song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
+			song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
+			song.seqBus=0;
+			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
-			song->BeatsPerMin(s3mFileH.iTempo);
-			song->LinesPerBeat(sampler->Speed2LPB(s3mFileH.iSpeed));
+			song.BeatsPerMin(s3mFileH.iTempo);
+			song.LinesPerBeat(sampler->Speed2LPB(s3mFileH.iSpeed));
 			sampler->IsAmigaSlides(true);
 			sampler->GlobalVolume((s3mFileH.gVol&0x7F)*2);
 			
 			int j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
 			{
-				s->playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
-				if (s->playOrder[i]!= 254 &&s->playOrder[i] != 255 ) i++;
+				song.playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
+				if (song.playOrder[i]!= 254 &&song.playOrder[i] != 255 ) i++;
 			}
-			s->playLength=i;
-			if ( s->playLength == 0) // Add at least one pattern to the sequence.
+			song.playLength=i;
+			if ( song.playLength == 0) // Add at least one pattern to the sequence.
 			{
-				s->playLength = 1;
-				s->playOrder[0]=0;
+				song.playLength = 1;
+				song.playOrder[0]=0;
 			}
 
 			unsigned short *pointersi = new unsigned short[s3mFileH.insNum];
@@ -1196,7 +1196,7 @@ Special:  Bit 0: On = song message attached.
 					sampler->rChannel(i).DefaultIsMute(true);
 				}
 			}
-			s->SONGTRACKS=std::max(numchans,4);
+			song.SONGTRACKS=std::max(numchans,4);
 
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
@@ -1448,7 +1448,7 @@ OFFSET              Count TYPE   Description
 			PatternEntry pent=pempty;
 
 			Skip(2);//int packedSize=ReadInt(2);
-			s->AllocNewPattern(patIdx,"unnamed",64,false);
+			_pSong->AllocNewPattern(patIdx,"unnamed",64,false);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
@@ -1514,7 +1514,7 @@ OFFSET              Count TYPE   Description
 							}
 						}
 					}
-					PatternEntry* pData = (PatternEntry*) s->_ptrackline(patIdx,channel,row);
+					PatternEntry* pData = (PatternEntry*) _pSong->_ptrackline(patIdx,channel,row);
 
 					*pData = pent;
 					pent=pempty;

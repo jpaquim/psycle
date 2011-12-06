@@ -22,7 +22,7 @@ namespace psycle { namespace host {
 			{
 				for (int c=0; c<MAX_MACHINES-1; c++)
 				{
-					Machine* pMac = _pSong->_pMachine[c];
+					Machine* pMac = _pSong._pMachine[c];
 					if (pMac)
 					{
 						pMac->_volumeMaxCounterLife--;
@@ -42,7 +42,7 @@ namespace psycle { namespace host {
 		{
 			if (macView->draw_vus)
 			{
-				Machine* pMac = _pSong->_pMachine[c];
+				Machine* pMac = _pSong._pMachine[c];
 				if (pMac)
 				{
 					pMac->_volumeMaxCounterLife--;
@@ -117,7 +117,7 @@ namespace psycle { namespace host {
 				// Draw wire [connections]
 				for(int c=0;c<MAX_MACHINES;c++)
 				{
-					Machine *tmac=_pSong->_pMachine[c];
+					Machine *tmac=_pSong._pMachine[c];
 					if(tmac)
 					{
 						int oriX=0;
@@ -145,7 +145,7 @@ namespace psycle { namespace host {
 							{
 								int desX = 0;
 								int desY = 0;
-								Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
+								Machine* pout = _pSong._pMachine[tmac->_outputMachines[w]];
 								if (pout)
 								{
 									switch (pout->_mode)
@@ -295,7 +295,7 @@ namespace psycle { namespace host {
 				
 				for(int c=0;c<MAX_MACHINES;c++)
 				{
-					Machine *tmac=_pSong->_pMachine[c];
+					Machine *tmac=_pSong._pMachine[c];
 					if(tmac)
 					{
 
@@ -330,7 +330,7 @@ namespace psycle { namespace host {
 							{
 								int desX = 0;
 								int desY = 0;
-								Machine* pout = _pSong->_pMachine[tmac->_outputMachines[w]];
+								Machine* pout = _pSong._pMachine[tmac->_outputMachines[w]];
 								if (pout)
 								{
 									switch (pout->_mode)
@@ -464,7 +464,7 @@ namespace psycle { namespace host {
 			// Draw machine boxes
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
-				if(_pSong->_pMachine[c])
+				if(_pSong._pMachine[c])
 				{
 					DrawMachine(c , devc);
 				}// Machine exist
@@ -488,7 +488,7 @@ namespace psycle { namespace host {
 
 		void CChildView::DrawMachineVol(int c,CDC *devc)
 		{
-			Machine* pMac = Global::_pSong->_pMachine[c];
+			Machine* pMac = Global::song()._pMachine[c];
 			if (pMac)
 			{
 				CDC memDC;
@@ -766,7 +766,7 @@ namespace psycle { namespace host {
 
 		void CChildView::ClearMachineSpace(int macnum, CDC *devc)
 		{
-			Machine* mac = _pSong->_pMachine[macnum];
+			Machine* mac = _pSong._pMachine[macnum];
 			if(!mac)
 			{
 				return;
@@ -809,7 +809,7 @@ namespace psycle { namespace host {
 			switch (mac->_mode) 
 			{
 			case MACHMODE_GENERATOR:
-				if (macnum == _pSong->seqBus) {	
+				if (macnum == _pSong.seqBus) {	
 
 					pol[0].x = x - hdistance;
 					pol[0].y = y - hdistance + hlength;
@@ -850,7 +850,7 @@ namespace psycle { namespace host {
 				}
 				break;
 			case MACHMODE_FX:
-				if (macnum == _pSong->seqBus) {
+				if (macnum == _pSong.seqBus) {
 
 					pol[0].x = x - hdistance;
 					pol[0].y = y - hdistance + hlength;
@@ -897,7 +897,7 @@ namespace psycle { namespace host {
 
 		void CChildView::DrawMachine(int macnum, CDC *devc)
 		{
-			Machine* mac = _pSong->_pMachine[macnum];
+			Machine* mac = _pSong._pMachine[macnum];
 			if(!mac)
 			{
 				return;
@@ -962,7 +962,7 @@ namespace psycle { namespace host {
 									MachineCoords->sGeneratorMute.x, 
 									MachineCoords->sGeneratorMute.y);
 					}
-					else if (_pSong->machineSoloed == macnum)
+					else if (_pSong.machineSoloed == macnum)
 					{
 						TransparentBlt(devc,
 									x+MachineCoords->dGeneratorSolo.x, 
@@ -1122,7 +1122,7 @@ namespace psycle { namespace host {
 									MachineCoords->sGeneratorMute.y, 
 									SRCCOPY);
 					}
-					else if (_pSong->machineSoloed == macnum)
+					else if (_pSong.machineSoloed == macnum)
 					{
 						devc->BitBlt(x+MachineCoords->dGeneratorSolo.x, 
 									y+MachineCoords->dGeneratorSolo.y, 
@@ -1255,7 +1255,7 @@ namespace psycle { namespace host {
 			
 			for (int c=MAX_MACHINES-1; c>=0; c--)
 			{
-				Machine* pMac = Global::_pSong->_pMachine[c];
+				Machine* pMac = Global::song()._pMachine[c];
 				if (pMac)
 				{
 					int x1 = pMac->_x;
@@ -1291,7 +1291,7 @@ namespace psycle { namespace host {
 		{
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
-				Machine *tmac = Global::_pSong->_pMachine[c];
+				Machine *tmac = Global::song()._pMachine[c];
 				if (tmac)
 				{
 					for (int w = 0; w<MAX_CONNECTIONS; w++)

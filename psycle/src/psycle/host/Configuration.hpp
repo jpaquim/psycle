@@ -2,8 +2,8 @@
 ///\interface psycle::host::Configuration.
 #pragma once
 #include <psycle/host/detail/project.hpp>
-#include <universalis/os/fs.hpp>
 #include "Global.hpp"
+#include <universalis/os/fs.hpp>
 #include <string>
 
 namespace psycle
@@ -24,7 +24,7 @@ namespace psycle
 			virtual void SetDefaultSettings(bool include_others=true);
 			virtual void Load(ConfigStorage &);
 			virtual void Save(ConfigStorage &);
-			virtual void RefreshSettings() {}
+			virtual void RefreshSettings();
 
 			//Members
 
@@ -42,13 +42,15 @@ namespace psycle
 			               bool UsesJBridge          () const;
 			               void UsePsycleVstBridge   (bool use);
 			               bool UsesPsycleVstBridge  () const;
-			AudioDriver const & audioDriver          () const { return *_pOutputDriver; }
+			      AudioDriver & audioDriver          () const { return *_pOutputDriver; }
 			               void SetDefaultPatLines   (int);
 			               int  GetDefaultPatLines   () const;
 			               void UseAutoStopMachines  (bool use);
 			               bool UsesAutoStopMachines () const;
 			               void LoadNewBlitz         (bool use);
 			               bool LoadsNewBlitz        () const;
+			               void SetNumThreads         (int numThreads);
+			               int  GetNumThreads        () const;
 
 		public:
 			AudioDriver* _pOutputDriver;
@@ -56,6 +58,7 @@ namespace psycle
 			void SetCacheDir          (boost::filesystem::path const &cachedir) { cache_dir_ = cachedir; }
 		private:
 			bool prefferNewBlitz;
+			int numThreads_;
 			std::string program_executable_dir_;
 			std::string plugin_dir_;
 			std::string plugin_dir_other;

@@ -399,10 +399,10 @@ void XMSamplerUISample::OnBnClickedLoad()
 	{
 		m_wndView.AddMacViewUndo();
 
-		int si = _pSong->instSelected;
+		int si = _pSong.instSelected;
 
 		//added by sampler
-		if ( _pSong->_pInstrument[si]->waveLength != 0)
+		if ( _pSong._pInstrument[si]->waveLength != 0)
 		{
 			if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
 		}
@@ -413,7 +413,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 
 		if ( CurrExt == "wav" )
 		{
-			if (_pSong->WavAlloc(si,dlg.GetPathName()))
+			if (_pSong.WavAlloc(si,dlg.GetPathName()))
 			{
 				UpdateComboIns();
 				m_wndStatusBar.SetWindowText("New wave loaded");
@@ -423,7 +423,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 		}
 		else if ( CurrExt == "iff" )
 		{
-			if (_pSong->IffAlloc(si,dlg.GetPathName()))
+			if (_pSong.IffAlloc(si,dlg.GetPathName()))
 			{
 				UpdateComboIns();
 				m_wndStatusBar.SetWindowText("New wave loaded");
@@ -439,16 +439,16 @@ void XMSamplerUISample::OnBnClickedLoad()
 			Global::configuration().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 		}
 	}
-	if ( _pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
+	if ( _pSong._pInstrument[PREV_WAV_INS]->waveLength > 0)
 	{
 		// Stopping wavepreview if not stopped.
-		if(_pSong->PW_Stage)
+		if(_pSong.PW_Stage)
 		{
-			_pSong->PW_Stage=0;
+			_pSong.PW_Stage=0;
 		}
 
 		//Delete it.
-		_pSong->DeleteLayer(PREV_WAV_INS);
+		_pSong.DeleteLayer(PREV_WAV_INS);
 	}
 */
 }

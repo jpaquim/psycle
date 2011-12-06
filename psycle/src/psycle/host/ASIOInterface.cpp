@@ -93,7 +93,7 @@ namespace psycle
 			store.CloseGroup();
 		}
 
-		std::string ASIOInterface::PortEnum::GetName()
+		std::string ASIOInterface::PortEnum::GetName() const
 		{
 			std::string fullname = _info.name;
 			switch(_info.type)
@@ -347,7 +347,7 @@ namespace psycle
 			_running = true;
 			writePos = 0;
 			m_wrapControl = 0;
-			Global::midi().ReSync(); // MIDI IMPLEMENTATION
+			PsycleGlobal::midi().ReSync(); // MIDI IMPLEMENTATION
 			delete[] info;
 			return true;
 		}
@@ -370,7 +370,7 @@ namespace psycle
 			asioDrivers.removeCurrentDriver();
 			return true;
 		}
-		void ASIOInterface::GetPlaybackPorts(std::vector<std::string> &ports)
+		void ASIOInterface::GetPlaybackPorts(std::vector<std::string> &ports) const
 		{
 			ports.resize(0);
 			for (unsigned int j=0;j<drivEnum_.size();++j) {
@@ -383,7 +383,7 @@ namespace psycle
 			}
 		}
 
-		void ASIOInterface::GetCapturePorts(std::vector<std::string> &ports)
+		void ASIOInterface::GetCapturePorts(std::vector<std::string> &ports) const
 		{
 			ports.resize(0);
 			DriverEnum *driver =  _selectedout.driver;
@@ -448,7 +448,7 @@ namespace psycle
 			*pright=_selectedins[_portMapping[idx]].pright+mpos;
 			_selectedins[_portMapping[idx]].machinepos+=numsamples;
 		}
-		ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(int driverID)
+		ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(int driverID) const
 		{
 			int counter=0;
 			for (unsigned int i(0); i < drivEnum_.size(); ++i)
@@ -478,7 +478,7 @@ namespace psycle
 			}
 			return port;
 		}
-		int ASIOInterface::GetidxFromOutPort(PortOut&port)
+		int ASIOInterface::GetidxFromOutPort(PortOut&port) const
 		{
 			int counter=0;
 			for (unsigned int i(0); i < drivEnum_.size(); ++i)
@@ -526,13 +526,13 @@ namespace psycle
 			return writePos - GetOutputLatencySamples();
 		}
 
-		std::uint32_t ASIOInterface::GetWritePosInSamples()
+		std::uint32_t ASIOInterface::GetWritePosInSamples() const
 		{
 			if(!_running) return 0;
 			return writePos;
 		}
 
-		bool ASIOInterface::PortEnum::IsFormatSupported(DriverEnum* driver, int samplerate)
+		bool ASIOInterface::PortEnum::IsFormatSupported(DriverEnum* driver, int samplerate) const
 		{
 			if(!asioDrivers.loadDriver(const_cast<char*>(driver->_name.c_str())))
 			{
@@ -615,7 +615,7 @@ namespace psycle
 			writePos = timeInfo->timeInfo.samplePosition.lo;
 			if (timeInfo->timeInfo.samplePosition.hi != m_wrapControl) {
 				m_wrapControl = timeInfo->timeInfo.samplePosition.hi;
-				Global::midi().ReSync();	// MIDI IMPLEMENTATION
+				PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
 			}
 
 			const unsigned int _ASIObufferSamples = settings_->blockFrames();

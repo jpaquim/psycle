@@ -10,7 +10,7 @@ namespace psycle { namespace host {
 		class ITModule2 : public OldPsyFile
 		{
 		private:
-			Song * s;
+			Song* _pSong;
 
 		public:
 			ITModule2();
@@ -360,7 +360,7 @@ namespace psycle { namespace host {
 				};
 			};
 		public:
-			bool LoadITModule(Song *song);
+			bool LoadITModule(Song& song);
 			bool LoadOldITInst(XMSampler *sampler,int iInstIdx);
 			bool LoadITInst(XMSampler *sampler,int iInstIdx);
 			void LoadInstrumentFromFile(XMSampler & sampler, const int idx);
@@ -480,7 +480,7 @@ namespace psycle { namespace host {
 			};
 
 		public:
-			bool LoadS3MModuleX(Song *song);
+			bool LoadS3MModuleX(Song& song);
 			bool LoadS3MInstX(XMSampler *sampler,int iInstIdx);
 			bool LoadS3MSampleX(XMSampler *sampler,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx);
 			bool LoadS3MSampleDataX(XMSampler *sampler,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed);

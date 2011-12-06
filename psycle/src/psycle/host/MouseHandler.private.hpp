@@ -20,22 +20,22 @@ namespace psycle { namespace host {
 					int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
 					if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
 					{
-						wiredest = _pSong->_pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
-						wiremove = _pSong->_pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection index in destination machine
+						wiredest = _pSong._pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
+						wiremove = _pSong._pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection index in destination machine
 
-						switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
+						switch (_pSong._pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
 						{
 						//case MACHMODE_GENERATOR: //A wire can't end in a generator								
 						case MACHMODE_FX:
-							wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
-							wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
+							wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
+							wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
 							wireSX = point.x;
 							wireSY = point.y;
 							break;
 
 						case MACHMODE_MASTER:
-							wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
-							wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
+							wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
+							wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
 							wireSX = point.x;
 							wireSY = point.y;
 							break;
@@ -52,17 +52,17 @@ namespace psycle { namespace host {
 					}
 					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable wire creation/move
 					{
-						switch (_pSong->_pMachine[wiresource]->_mode)
+						switch (_pSong._pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
+							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
+							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
+							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
+							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
@@ -94,9 +94,9 @@ namespace psycle { namespace host {
 					}
 					else if (wiresource != -1) // Did we RButtonDown over a machine?
 					{
-						Machine *tmac = _pSong->_pMachine[wiresource];
-						Machine *dmac = _pSong->_pMachine[propMac];
-						Global::pInputHandler->AddMacViewUndo();
+						Machine *tmac = _pSong._pMachine[wiresource];
+						Machine *dmac = _pSong._pMachine[propMac];
+						PsycleGlobal::inputHandler().AddMacViewUndo();
 						if (wiremove != -1) //were we moving a wire?
 						{
 							int w(-1);
@@ -110,7 +110,7 @@ namespace psycle { namespace host {
 								else { w = dmac->GetFreeInputWire(0); }
 							}
 							else { w = dmac->GetFreeInputWire(0); }
-							if (!_pSong->ChangeWireDestMacBlocking(tmac,dmac,wiremove,w))
+							if (!_pSong.ChangeWireDestMacBlocking(tmac,dmac,wiremove,w))
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
@@ -129,7 +129,7 @@ namespace psycle { namespace host {
 									dsttype=1;
 								}
 							}
-							if (_pSong->InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
+							if (_pSong.InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 							{
 								MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 							}
@@ -138,12 +138,12 @@ namespace psycle { namespace host {
 					}
 					else if ( wiremove != -1) //were we moving a wire then?
 					{
-						Machine *tmac = _pSong->_pMachine[propMac];
-						Machine *dmac = _pSong->_pMachine[wiredest];
+						Machine *tmac = _pSong._pMachine[propMac];
+						Machine *dmac = _pSong._pMachine[wiredest];
 						int srctype=0;
 						///\todo: for multi-io.
 						//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-						if (!_pSong->ChangeWireSourceMacBlocking(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
+						if (!_pSong.ChangeWireSourceMacBlocking(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
 						{
 							MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 						}
@@ -156,8 +156,8 @@ namespace psycle { namespace host {
 					if ( w != -1 )	// Are we over a wire?
 					{
 						allowcontextmenu=false;
-						Machine *tmac = _pSong->_pMachine[wiresource];
-						Machine *dmac = _pSong->_pMachine[tmac->_outputMachines[w]];
+						Machine *tmac = _pSong._pMachine[wiresource];
+						Machine *dmac = _pSong._pMachine[tmac->_outputMachines[w]];
 						int free=-1;
 						for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 						{
@@ -208,9 +208,9 @@ namespace psycle { namespace host {
 				ASSERT(pPopup != NULL);
 				CPoint mypoint = point;
 				if(mypoint.x < 0 || mypoint.y < 0){ // Context menu button pressed
-					if(_pSong->_pMachine[_pSong->seqBus]) {
-						mypoint.x = _pSong->_pMachine[_pSong->seqBus]->_x;
-						mypoint.y = _pSong->_pMachine[_pSong->seqBus]->_y;
+					if(_pSong._pMachine[_pSong.seqBus]) {
+						mypoint.x = _pSong._pMachine[_pSong.seqBus]->_x;
+						mypoint.y = _pSong._pMachine[_pSong.seqBus]->_y;
 						//\todo: needs to add the clientoffset too
 					}
 				}
@@ -255,13 +255,13 @@ namespace psycle { namespace host {
 					smac=GetMachine(point);
 					if ( smac != -1 ) // Clicked on a machine. Let's select it.
 					{
-						switch (_pSong->_pMachine[smac]->_mode)
+						switch (_pSong._pMachine[smac]->_mode)
 						{
 						case MACHMODE_GENERATOR:
 						case MACHMODE_FX:
-							mcd_x = point.x - _pSong->_pMachine[smac]->_x;
-							mcd_y = point.y - _pSong->_pMachine[smac]->_y;
-							_pSong->seqBus = _pSong->FindBusFromIndex(smac);
+							mcd_x = point.x - _pSong._pMachine[smac]->_x;
+							mcd_y = point.y - _pSong._pMachine[smac]->_y;
+							_pSong.seqBus = _pSong.FindBusFromIndex(smac);
 							pParentMain->UpdateComboGen();
 							Repaint();	
 							break;
@@ -272,26 +272,26 @@ namespace psycle { namespace host {
 						int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
 						if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
 						{
-							wiredest = _pSong->_pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
-							wiremove = _pSong->_pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection point in destination machine
+							wiredest = _pSong._pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
+							wiremove = _pSong._pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection point in destination machine
 
-							switch (_pSong->_pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
+							switch (_pSong._pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
 							{
 /*							case MACHMODE_GENERATOR: //A wire can't end in a generator
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sGenerator.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sGenerator.height/2);
+								wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sGenerator.width/2);
+								wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sGenerator.height/2);
 								break;
 */								
 							case MACHMODE_FX:
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
+								wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
+								wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
 
 							case MACHMODE_MASTER:
-								wireDX = _pSong->_pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
-								wireDY = _pSong->_pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
+								wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
+								wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
@@ -310,23 +310,23 @@ namespace psycle { namespace host {
 					}
 					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable origin-wire creation/move
 					{
-						switch (_pSong->_pMachine[wiresource]->_mode)
+						switch (_pSong._pMachine[wiresource]->_mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
+							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
+							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
+							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
+							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in Master.
-							wireSX = _pSong->_pMachine[wiresource]->_x+(MachineCoords->sMaster.width/2);
-							wireSY = _pSong->_pMachine[wiresource]->_y+(MachineCoords->sMaster.height/2);
+							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sMaster.width/2);
+							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sMaster.height/2);
 							break;
 */							
 						}
@@ -339,7 +339,7 @@ namespace psycle { namespace host {
 					if ( smac != -1 ) // found a machine, let's do something on it.
 					{
 						int panning;
-						Machine* tmac=Global::_pSong->_pMachine[smac];
+						Machine* tmac=Global::song()._pMachine[smac];
 						mcd_x = point.x - tmac->_x;
 						mcd_y = point.y - tmac->_y;
 
@@ -349,7 +349,7 @@ namespace psycle { namespace host {
 						case MACHMODE_GENERATOR:
 							
 							// Since this is a generator, select it.
-							_pSong->seqBus = _pSong->FindBusFromIndex(smac);
+							_pSong.seqBus = _pSong.FindBusFromIndex(smac);
 							pParentMain->UpdateComboGen();
 							
 							panning = tmac->_panning*MachineCoords->dGeneratorPan.width;
@@ -366,23 +366,23 @@ namespace psycle { namespace host {
 								{
 									tmac->_volumeCounter=0.0f;
 									tmac->_volumeDisplay=0;
-									if (_pSong->machineSoloed == smac )
+									if (_pSong.machineSoloed == smac )
 									{
-										_pSong->machineSoloed = -1;
+										_pSong.machineSoloed = -1;
 									}
 									
 								}
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords->dGeneratorSolo,MachineCoords->sGeneratorSolo)) //Solo 
 							{
-								if (_pSong->machineSoloed == smac )
+								if (_pSong.machineSoloed == smac )
 								{
-									_pSong->machineSoloed = -1;
+									_pSong.machineSoloed = -1;
 									for ( int i=0;i<MAX_MACHINES;i++ )
-									{	if ( _pSong->_pMachine[i] )
-										{	if (( _pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR ))
+									{	if ( _pSong._pMachine[i] )
+										{	if (( _pSong._pMachine[i]->_mode == MACHMODE_GENERATOR ))
 											{
-												_pSong->_pMachine[i]->_mute = false;
+												_pSong._pMachine[i]->_mute = false;
 											}
 										}
 									}
@@ -391,18 +391,18 @@ namespace psycle { namespace host {
 								{
 									for ( int i=0;i<MAX_MACHINES;i++ )
 									{
-										if ( _pSong->_pMachine[i] )
+										if ( _pSong._pMachine[i] )
 										{
-											if (( _pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != smac))
+											if (( _pSong._pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != smac))
 											{
-												_pSong->_pMachine[i]->_mute = true;
-												_pSong->_pMachine[i]->_volumeCounter=0.0f;
-												_pSong->_pMachine[i]->_volumeDisplay=0;
+												_pSong._pMachine[i]->_mute = true;
+												_pSong._pMachine[i]->_volumeCounter=0.0f;
+												_pSong._pMachine[i]->_volumeDisplay=0;
 											}
 										}
 									}
 									tmac->_mute = false;
-									_pSong->machineSoloed = smac;
+									_pSong.machineSoloed = smac;
 								}
 							}
 							Repaint();
@@ -449,7 +449,7 @@ namespace psycle { namespace host {
 			else if ( viewMode==view_modes::pattern)
 			{			
 				int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
-				if ( ttm >= _pSong->SONGTRACKS ) ttm = _pSong->SONGTRACKS-1;
+				if ( ttm >= _pSong.SONGTRACKS ) ttm = _pSong.SONGTRACKS-1;
 				else if ( ttm < 0 ) ttm = 0;
 				
 				if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
@@ -457,43 +457,43 @@ namespace psycle { namespace host {
 					int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
 					if (point.x < XOFFSET) // Mouse is in the "Line" column
 					{
-						Global::psycleconf().patView().showTrackNames_ = !Global::psycleconf().patView().showTrackNames_;
+						PsycleGlobal::conf().patView().showTrackNames_ = !PsycleGlobal::conf().patView().showTrackNames_;
 						Repaint();
 					}
 					if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOn,PatHeaderCoords->sRecordOn))
 					{
-						_pSong->_trackArmed[ttm] = !_pSong->_trackArmed[ttm];
-						_pSong->_trackArmedCount = 0;
+						_pSong._trackArmed[ttm] = !_pSong._trackArmed[ttm];
+						_pSong._trackArmedCount = 0;
 						for ( int i=0;i<MAX_TRACKS;i++ )
 						{
-							if (_pSong->_trackArmed[i])
+							if (_pSong._trackArmed[i])
 							{
-								_pSong->_trackArmedCount++;
+								_pSong._trackArmedCount++;
 							}
 						}
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOn,PatHeaderCoords->sMuteOn))
 					{
-						_pSong->_trackMuted[ttm] = !_pSong->_trackMuted[ttm];
+						_pSong._trackMuted[ttm] = !_pSong._trackMuted[ttm];
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOn,PatHeaderCoords->sSoloOn))
 					{
-						if (Global::_pSong->_trackSoloed != ttm )
+						if (Global::song()._trackSoloed != ttm )
 						{
 							for ( int i=0;i<MAX_TRACKS;i++ )
 							{
-								_pSong->_trackMuted[i] = true;
+								_pSong._trackMuted[i] = true;
 							}
-							_pSong->_trackMuted[ttm] = false;
-							_pSong->_trackSoloed = ttm;
+							_pSong._trackMuted[ttm] = false;
+							_pSong._trackSoloed = ttm;
 						}
 						else
 						{
 							for ( int i=0;i<MAX_TRACKS;i++ )
 							{
-								_pSong->_trackMuted[i] = false;
+								_pSong._trackMuted[i] = false;
 							}
-							_pSong->_trackSoloed = -1;
+							_pSong._trackSoloed = -1;
 						}
 					}
 					oldm.track = -1;
@@ -503,7 +503,7 @@ namespace psycle { namespace host {
 				{
 					oldm.track=ttm;
 
-					int plines = _pSong->patternLines[_ps()];
+					int plines = _pSong.patternLines[_ps()];
 					oldm.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
 					if ( oldm.line >= plines ) { oldm.line = plines - 1; }
 					else if ( oldm.line < 0 ) oldm.line = 0;
@@ -512,7 +512,7 @@ namespace psycle { namespace host {
 
 					if (blockSelected
 						&& oldm.track >=blockSel.start.track && oldm.track <= blockSel.end.track
-						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && Global::psycleconf().inputHandler()._windowsBlocks)
+						&& oldm.line >=blockSel.start.line && oldm.line <= blockSel.end.line && PsycleGlobal::conf().inputHandler()._windowsBlocks)
 					{
 						blockswitch=true;
 						blockLastOrigin = blockSel;
@@ -540,11 +540,11 @@ namespace psycle { namespace host {
 				{
 					if (wiremove >= 0) // are we moving a wire?
 					{
-						Global::pInputHandler->AddMacViewUndo();
+						PsycleGlobal::inputHandler().AddMacViewUndo();
 						if (wiredest == -1)
 						{
-							Machine *tmac = _pSong->_pMachine[wiresource];
-							Machine *dmac = _pSong->_pMachine[propMac];
+							Machine *tmac = _pSong._pMachine[wiresource];
+							Machine *dmac = _pSong._pMachine[propMac];
 							int w(-1);
 							///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
 							if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
@@ -556,19 +556,19 @@ namespace psycle { namespace host {
 								else { w = dmac->GetFreeInputWire(0); }
 							}
 							else { w = dmac->GetFreeInputWire(0); }
-							if (!_pSong->ChangeWireDestMacBlocking(tmac,dmac,wiremove,w))
+							if (!_pSong.ChangeWireDestMacBlocking(tmac,dmac,wiremove,w))
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
 						}
 						else
 						{
-							Machine *tmac = _pSong->_pMachine[propMac];
-							Machine *dmac = _pSong->_pMachine[wiredest];
+							Machine *tmac = _pSong._pMachine[propMac];
+							Machine *dmac = _pSong._pMachine[wiredest];
 							int srctype=0;
 							///\todo: for multi-io.
 							//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
-							if (!_pSong->ChangeWireSourceMacBlocking(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
+							if (!_pSong.ChangeWireSourceMacBlocking(tmac,dmac,tmac->GetFreeOutputWire(srctype),wiremove))
 							{
 								MessageBox("Wire move could not be completed!","Error!", MB_ICONERROR);
 							}
@@ -576,9 +576,9 @@ namespace psycle { namespace host {
 					}
 					else if ((wiresource != -1) && (propMac != wiresource)) // Are we creating a connection?
 					{
-						Global::pInputHandler->AddMacViewUndo();
-						Machine *tmac = _pSong->_pMachine[wiresource];
-						Machine *dmac = _pSong->_pMachine[propMac];
+						PsycleGlobal::inputHandler().AddMacViewUndo();
+						Machine *tmac = _pSong._pMachine[wiresource];
+						Machine *dmac = _pSong._pMachine[propMac];
 						int dsttype=0;
 						///\todo: for multi-io.
 						//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
@@ -590,7 +590,7 @@ namespace psycle { namespace host {
 								dsttype=1;
 							}
 						}
-						if (_pSong->InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
+						if (_pSong.InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 						{
 							MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
 						}
@@ -598,9 +598,9 @@ namespace psycle { namespace host {
 					else if ( smacmode == smac_modes::move && smac != -1 ) // Are we moving a machine?
 					{
 						SSkinSource ssrc;
-						Global::pInputHandler->AddMacViewUndo();
+						PsycleGlobal::inputHandler().AddMacViewUndo();
 
-						switch(_pSong->_pMachine[smac]->_mode)
+						switch(_pSong._pMachine[smac]->_mode)
 						{
 							case MACHMODE_GENERATOR:
 								ssrc = MachineCoords->sGenerator;break;
@@ -611,16 +611,16 @@ namespace psycle { namespace host {
 							default:
 								assert(false);ssrc=SSkinSource();break;
 						}
-						if (point.x-mcd_x < 0 ) _pSong->_pMachine[smac]->_x = 0;
+						if (point.x-mcd_x < 0 ) _pSong._pMachine[smac]->_x = 0;
 						else if	(point.x-mcd_x+ssrc.width > CW) 
 						{ 
-							_pSong->_pMachine[smac]->_x = CW-ssrc.width; 
+							_pSong._pMachine[smac]->_x = CW-ssrc.width; 
 						}
 
-						if (point.y-mcd_y < 0 ) _pSong->_pMachine[smac]->_y = 0; 
+						if (point.y-mcd_y < 0 ) _pSong._pMachine[smac]->_y = 0; 
 						else if (point.y-mcd_y+ssrc.height > CH) 
 						{ 
-						_pSong->_pMachine[smac]->_y = CH-ssrc.height; 
+						_pSong._pMachine[smac]->_y = CH-ssrc.height; 
 						}
 						Repaint(); 
 					}
@@ -640,10 +640,10 @@ namespace psycle { namespace host {
 					(point.x > XOFFSET && point.x < XOFFSET+(maxt*ROWWIDTH)))
 				{
 					editcur.track = tOff + char((point.x-XOFFSET)/ROWWIDTH);
-		//			if ( editcur.track >= _pSong->SONGTRACKS ) editcur.track = _pSong->SONGTRACKS-1;
+		//			if ( editcur.track >= _pSong.SONGTRACKS ) editcur.track = _pSong.SONGTRACKS-1;
 		//			else if ( editcur.track < 0 ) editcur.track = 0;
 
-		//			int plines = _pSong->patternLines[_ps()];
+		//			int plines = _pSong.patternLines[_ps()];
 					editcur.line = lOff + (point.y-YOFFSET)/ROWHEIGHT;
 		//			if ( editcur.line >= plines ) {  editcur.line = plines - 1; }
 		//			else if ( editcur.line < 0 ) editcur.line = 0;
@@ -651,7 +651,7 @@ namespace psycle { namespace host {
 					editcur.col = _xtoCol((point.x-XOFFSET)%ROWWIDTH);
 					Repaint(draw_modes::cursor);
 					pParentMain->StatusBarIdle();
-					if (!(nFlags & MK_SHIFT) && Global::psycleconf().inputHandler()._windowsBlocks)
+					if (!(nFlags & MK_SHIFT) && PsycleGlobal::conf().inputHandler()._windowsBlocks)
 					{
 						blockSelected=false;
 						blockSel.end.line=0;
@@ -691,32 +691,32 @@ namespace psycle { namespace host {
 			{
 				if (smac > -1 && (nFlags & MK_LBUTTON))
 				{
-					if (_pSong->_pMachine[smac])
+					if (_pSong._pMachine[smac])
 					{
 						if (smacmode == smac_modes::move)
 						{
-							_pSong->_pMachine[smac]->_x = point.x-mcd_x;
-							_pSong->_pMachine[smac]->_y = point.y-mcd_y;
+							_pSong._pMachine[smac]->_x = point.x-mcd_x;
+							_pSong._pMachine[smac]->_y = point.y-mcd_y;
 
 							char buf[128];
-							sprintf(buf, "%s (%d,%d)", _pSong->_pMachine[smac]->_editName, _pSong->_pMachine[smac]->_x, _pSong->_pMachine[smac]->_y);
+							sprintf(buf, "%s (%d,%d)", _pSong._pMachine[smac]->_editName, _pSong._pMachine[smac]->_x, _pSong._pMachine[smac]->_y);
 							pParentMain->StatusBarText(buf);
 							Repaint();
 						}
-						else if ((smacmode == smac_modes::panning) && (_pSong->_pMachine[smac]->_mode != MACHMODE_MASTER))
+						else if ((smacmode == smac_modes::panning) && (_pSong._pMachine[smac]->_mode != MACHMODE_MASTER))
 						{
 							int newpan = 64;
-							switch(_pSong->_pMachine[smac]->_mode)
+							switch(_pSong._pMachine[smac]->_mode)
 							{
 							case MACHMODE_GENERATOR:
-								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords->dGeneratorPan.x - (MachineCoords->sGeneratorPan.width/2))*128;
+								newpan = (point.x - _pSong._pMachine[smac]->_x - MachineCoords->dGeneratorPan.x - (MachineCoords->sGeneratorPan.width/2))*128;
 								if (MachineCoords->dGeneratorPan.width)
 								{
 									newpan /= MachineCoords->dGeneratorPan.width;
 								}
 								break;
 							case MACHMODE_FX:
-								newpan = (point.x - _pSong->_pMachine[smac]->_x - MachineCoords->dEffectPan.x - (MachineCoords->sEffectPan.width/2))*128;
+								newpan = (point.x - _pSong._pMachine[smac]->_x - MachineCoords->dEffectPan.x - (MachineCoords->sEffectPan.width/2))*128;
 								if (MachineCoords->dEffectPan.width)
 								{
 									newpan /= MachineCoords->dEffectPan.width;
@@ -724,21 +724,21 @@ namespace psycle { namespace host {
 								break;
 							}
 
-							if (_pSong->_pMachine[smac]->_panning != newpan)
+							if (_pSong._pMachine[smac]->_panning != newpan)
 							{
-								Global::pInputHandler->AddMacViewUndo();
+								PsycleGlobal::inputHandler().AddMacViewUndo();
 
-								_pSong->_pMachine[smac]->SetPan(newpan);
-								newpan= _pSong->_pMachine[smac]->_panning;
+								_pSong._pMachine[smac]->SetPan(newpan);
+								newpan= _pSong._pMachine[smac]->_panning;
 								
 								char buf[128];
 								if (newpan != 64)
 								{
-									sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", _pSong->_pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
+									sprintf(buf, "%s Pan: %.0f%% Left / %.0f%% Right", _pSong._pMachine[smac]->_editName, 100.0f - ((float)newpan*0.78125f), (float)newpan*0.78125f);
 								}
 								else
 								{
-									sprintf(buf, "%s Pan: Center", _pSong->_pMachine[smac]->_editName);
+									sprintf(buf, "%s Pan: Center", _pSong._pMachine[smac]->_editName);
 								}
 								pParentMain->StatusBarText(buf);
 								updatePar = smac;
@@ -788,9 +788,9 @@ namespace psycle { namespace host {
 					else if ( ttm - tOff >= VISTRACKS ) // Exceeded from right
 					{
 						ccm=8;
-						if ( ttm >= _pSong->SONGTRACKS ) // Out of Range
+						if ( ttm >= _pSong.SONGTRACKS ) // Out of Range
 						{	
-							ttm = _pSong->SONGTRACKS-1;
+							ttm = _pSong.SONGTRACKS-1;
 							if ( tOff != ttm-VISTRACKS ) 
 							{ 
 								ntOff = ttm-VISTRACKS+1; 
@@ -809,7 +809,7 @@ namespace psycle { namespace host {
 						ccm=_xtoCol((point.x-XOFFSET)%ROWWIDTH);
 					}
 
-					int plines = _pSong->patternLines[_ps()];
+					int plines = _pSong.patternLines[_ps()];
 					int llm = lOff + (point.y-YOFFSET)/ROWHEIGHT;
 					if ( point.y < YOFFSET ) llm--; // 1/2 = 0 , -1/2 = 0 too!
 
@@ -869,7 +869,7 @@ namespace psycle { namespace host {
 
 							int tstart = (blockLastOrigin.start.track+(ttm-editcur.track) >= 0)?(ttm-editcur.track):-blockLastOrigin.start.track;
 							int lstart = (blockLastOrigin.start.line+(llm-editcur.line) >= 0)?(llm-editcur.line):-blockLastOrigin.start.line;
-							if (blockLastOrigin.end.track+(ttm-editcur.track) >= _pSong->SONGTRACKS) tstart = _pSong->SONGTRACKS-blockLastOrigin.end.track-1;
+							if (blockLastOrigin.end.track+(ttm-editcur.track) >= _pSong.SONGTRACKS) tstart = _pSong.SONGTRACKS-blockLastOrigin.end.track-1;
 							if (blockLastOrigin.end.line+(llm-editcur.line) >= plines) lstart = plines - blockLastOrigin.end.line-1;
 
 							blockSel.start.track=blockLastOrigin.start.track+(tstart);
@@ -913,7 +913,7 @@ namespace psycle { namespace host {
 					// scrolling
 					if (abs(point.y - MBStart.y) > ROWHEIGHT)
 					{
-						int nlines = _pSong->patternLines[_ps()];
+						int nlines = _pSong.patternLines[_ps()];
 						int delta = (point.y - MBStart.y)/ROWHEIGHT;
 						int nPos = lOff - delta;
 						if (nPos > lOff )
@@ -953,8 +953,8 @@ namespace psycle { namespace host {
 						{
 							if (nPos < 0)
 								ntOff= 0;
-							else if (nPos>_pSong->SONGTRACKS-VISTRACKS)
-								ntOff=_pSong->SONGTRACKS-VISTRACKS;
+							else if (nPos>_pSong.SONGTRACKS-VISTRACKS)
+								ntOff=_pSong.SONGTRACKS-VISTRACKS;
 							else
 								ntOff=nPos;
 							bScrollDetatch=true;
@@ -966,8 +966,8 @@ namespace psycle { namespace host {
 						{
 							if (nPos < 0)
 								ntOff= 0;
-							else if (nPos>_pSong->SONGTRACKS-VISTRACKS)
-								ntOff=_pSong->SONGTRACKS-VISTRACKS;
+							else if (nPos>_pSong.SONGTRACKS-VISTRACKS)
+								ntOff=_pSong.SONGTRACKS-VISTRACKS;
 							else
 								ntOff=nPos;
 							bScrollDetatch=true;
@@ -996,7 +996,7 @@ namespace psycle { namespace host {
 
 					if(tmac>-1)
 					{
-						Machine *pMac =  _pSong->_pMachine[tmac];
+						Machine *pMac =  _pSong._pMachine[tmac];
 						SSkinDest tmpsrc;
 						switch (pMac->_mode)
 						{
@@ -1016,9 +1016,9 @@ namespace psycle { namespace host {
 								{
 									pMac->_volumeCounter=0.0f;
 									pMac->_volumeDisplay=0;
-									if (_pSong->machineSoloed == tmac )
+									if (_pSong.machineSoloed == tmac )
 									{
-										_pSong->machineSoloed = -1;
+										_pSong.machineSoloed = -1;
 									}
 								}
 								updatePar = tmac;
@@ -1027,16 +1027,16 @@ namespace psycle { namespace host {
 							}
 							else if (InRect(mcd_x,mcd_y,MachineCoords->dGeneratorSolo,MachineCoords->sGeneratorSolo)) //Solo 
 							{
-								if (_pSong->machineSoloed == tmac )
+								if (_pSong.machineSoloed == tmac )
 								{
-									_pSong->machineSoloed = -1;
+									_pSong.machineSoloed = -1;
 									for ( int i=0;i<MAX_MACHINES;i++ )
 									{
-										if ( _pSong->_pMachine[i] )
+										if ( _pSong._pMachine[i] )
 										{
-											if ( _pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR )
+											if ( _pSong._pMachine[i]->_mode == MACHMODE_GENERATOR )
 											{
-												_pSong->_pMachine[i]->_mute = false;
+												_pSong._pMachine[i]->_mute = false;
 											}
 										}
 									}
@@ -1045,18 +1045,18 @@ namespace psycle { namespace host {
 								{
 									for ( int i=0;i<MAX_MACHINES;i++ )
 									{
-										if ( _pSong->_pMachine[i] ) 
+										if ( _pSong._pMachine[i] ) 
 										{
-											if (( _pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != tmac))
+											if (( _pSong._pMachine[i]->_mode == MACHMODE_GENERATOR ) && (i != tmac))
 											{
-												_pSong->_pMachine[i]->_mute = true;
-												_pSong->_pMachine[i]->_volumeCounter=0.0f;
-												_pSong->_pMachine[i]->_volumeDisplay=0;
+												_pSong._pMachine[i]->_mute = true;
+												_pSong._pMachine[i]->_volumeCounter=0.0f;
+												_pSong._pMachine[i]->_volumeDisplay=0;
 											}
 										}
 									}
 									pMac->_mute = false;
-									_pSong->machineSoloed = tmac;
+									_pSong.machineSoloed = tmac;
 								}
 								updatePar = tmac;
 								Repaint(draw_modes::machine);
@@ -1109,8 +1109,8 @@ namespace psycle { namespace host {
 						int w = GetWire(point,wiresource);
 						if ( w != -1 )
 						{
-							Machine *tmac = _pSong->_pMachine[wiresource];
-							Machine *dmac = _pSong->_pMachine[tmac->_outputMachines[w]];
+							Machine *tmac = _pSong._pMachine[wiresource];
+							Machine *dmac = _pSong._pMachine[tmac->_outputMachines[w]];
 							int free=-1;
 							for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 							{
@@ -1154,7 +1154,7 @@ namespace psycle { namespace host {
 					if (( point.y >= YOFFSET ) && (point.x >= XOFFSET))
 					{
 						const int ttm = tOff + (point.x-XOFFSET)/ROWWIDTH;
-						const int nl = _pSong->patternLines[_pSong->playOrder[editPosition]];
+						const int nl = _pSong.patternLines[_pSong.playOrder[editPosition]];
 
 						StartBlock(ttm,0,0);
 						EndBlock(ttm,nl-1,8);
@@ -1174,7 +1174,7 @@ namespace psycle { namespace host {
 		{
 			if ( viewMode == view_modes::pattern )
 			{
-				int nlines = _pSong->patternLines[_ps()];
+				int nlines = _pSong.patternLines[_ps()];
 				int nPos = lOff - (zDelta/30);
 				if (nPos > lOff )
 				{
@@ -1220,7 +1220,7 @@ namespace psycle { namespace host {
 				switch(nSBCode)
 				{
 					case SB_LINEDOWN:
-						if ( lOff<_pSong->patternLines[_ps()]-VISLINES)
+						if ( lOff<_pSong.patternLines[_ps()]-VISLINES)
 						{
 							nlOff=lOff+1;
 							bScrollDetatch=true;
@@ -1240,9 +1240,9 @@ namespace psycle { namespace host {
 						}
 						break;
 					case SB_PAGEDOWN:
-						if ( lOff<_pSong->patternLines[_ps()]-VISLINES)
+						if ( lOff<_pSong.patternLines[_ps()]-VISLINES)
 						{
-							const int nl = _pSong->patternLines[_ps()]-VISLINES;
+							const int nl = _pSong.patternLines[_ps()]-VISLINES;
 							nlOff=lOff+16;
 							if (nlOff > nl)
 							{
@@ -1272,7 +1272,7 @@ namespace psycle { namespace host {
 					case SB_THUMBTRACK:
 						if (nlOff!=(int)nPos)
 						{
-							const int nl = _pSong->patternLines[_ps()]-VISLINES;
+							const int nl = _pSong.patternLines[_ps()]-VISLINES;
 							nlOff=(int)nPos;
 							if (nlOff > nl)
 							{
@@ -1304,7 +1304,7 @@ namespace psycle { namespace host {
 				{
 					case SB_LINERIGHT:
 					case SB_PAGERIGHT:
-						if ( tOff<_pSong->SONGTRACKS-VISTRACKS)
+						if ( tOff<_pSong.SONGTRACKS-VISTRACKS)
 						{
 							ntOff=tOff+1;
 //	Disabled, since people find it as a bug, not as a feature.
@@ -1335,7 +1335,7 @@ namespace psycle { namespace host {
 					case SB_THUMBTRACK:
 						if (ntOff!=(int)nPos)
 						{
-							const int nt = _pSong->SONGTRACKS;
+							const int nt = _pSong.SONGTRACKS;
 							ntOff=(int)nPos;
 							if (ntOff >= nt)
 							{

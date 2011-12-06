@@ -21,6 +21,7 @@
 #include "PatDlg.hpp"
 #include "SwingFillDlg.hpp"
 #include "InterpolateCurveDlg.hpp"
+#include "ProgressDialog.hpp"
 
 #include "ITModule2.h"
 #include "XMSongLoader.hpp"
@@ -136,6 +137,7 @@ namespace psycle { namespace host {
 			,mcd_y(0)
 			,patBufferLines(0)
 			,patBufferCopy(false)
+			,_pSong(Global::song())
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -149,24 +151,20 @@ namespace psycle { namespace host {
 			MBStart.x=0;
 			MBStart.y=0;
 
-			patView = &Global::psycleconf().patView();
-			macView = &Global::psycleconf().macView();
+			patView = &PsycleGlobal::conf().patView();
+			macView = &PsycleGlobal::conf().macView();
 			PatHeaderCoords = &patView->PatHeaderCoords;
 			MachineCoords = &macView->MachineCoords;
 
-			Global::pInputHandler->SetChildView(this);
+			PsycleGlobal::inputHandler().SetChildView(this);
 
 			// Creates a new song object. The application Song.
-			Global::_pSong->New();
-
-			// Referencing the childView song pointer to the
-			// Main Global::_pSong object [The application Global::_pSong]
-			_pSong = Global::_pSong;
+			_pSong.New();
 		}
 
 		CChildView::~CChildView()
 		{
-			Global::pInputHandler->SetChildView(NULL);
+			PsycleGlobal::inputHandler().SetChildView(NULL);
 
 			if ( bmpDC != NULL )
 			{
@@ -334,9 +332,9 @@ namespace psycle { namespace host {
 				AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 			}
 
-			if ( Global::psycleconf().autosaveSong )
+			if ( PsycleGlobal::conf().autosaveSong )
 			{
-				if (!SetTimer(ID_TIMER_AUTOSAVE,Global::psycleconf().autosaveSongTime*60000,NULL)) // Autosave Song
+				if (!SetTimer(ID_TIMER_AUTOSAVE,PsycleGlobal::conf().autosaveSongTime*60000,NULL)) // Autosave Song
 				{
 					AfxMessageBox(IDS_COULDNT_INITIALIZE_TIMER, MB_ICONERROR);
 				}
@@ -348,9 +346,9 @@ namespace psycle { namespace host {
 		{
 			if (nIDEvent == ID_TIMER_VIEW_REFRESH)
 			{
-				CSingleLock lock(&_pSong->semaphore, FALSE);
+				CSingleLock lock(&_pSong.semaphore, FALSE);
 				if (!lock.Lock(50)) return;
-				Master* master = ((Master*)_pSong->_pMachine[MASTER_INDEX]);
+				Master* master = ((Master*)_pSong._pMachine[MASTER_INDEX]);
 				if (master)
 				{
 					pParentMain->UpdateVumeters();
@@ -361,9 +359,9 @@ namespace psycle { namespace host {
 						{
 							if ( master->_inputCon[i])
 							{
-								if (_pSong->_pMachine[master->_inputMachines[i]])
+								if (_pSong._pMachine[master->_inputMachines[i]])
 								{
-									strcpy(MasterMachineDialog->macname[i],_pSong->_pMachine[master->_inputMachines[i]]->_editName);
+									strcpy(MasterMachineDialog->macname[i],_pSong._pMachine[master->_inputMachines[i]]->_editName);
 								}
 							}
 							else {
@@ -379,40 +377,40 @@ namespace psycle { namespace host {
 
 				for(int c=0; c<MAX_MACHINES; c++)
 				{
-					if (_pSong->_pMachine[c])
+					if (_pSong._pMachine[c])
 					{
-						if ( _pSong->_pMachine[c]->_type == MACH_VST ||
-							_pSong->_pMachine[c]->_type == MACH_VSTFX )
+						if ( _pSong._pMachine[c]->_type == MACH_VST ||
+							_pSong._pMachine[c]->_type == MACH_VSTFX )
 						{
 							//I don't know if this has to be done in a synchronized thread
 							//(like this one) neither if it can take a moderate amount of time.
-							((vst::plugin*)_pSong->_pMachine[c])->Idle();
+							((vst::plugin*)_pSong._pMachine[c])->Idle();
 						}
 					}
 				}
 
 				if (XMSamplerMachineDialog != NULL ) XMSamplerMachineDialog->UpdateUI();
-				if (Global::pPlayer->_playing)
+				if (Global::player()._playing)
 				{
-					if (Global::pPlayer->_lineChanged)
+					if (Global::player()._lineChanged)
 					{
-						Global::pPlayer->_lineChanged = false;
+						Global::player()._lineChanged = false;
 						pParentMain->SetAppSongBpm(0);
 						pParentMain->SetAppSongTpb(0);
 
-						if (Global::psycleconf()._followSong)
+						if (PsycleGlobal::conf()._followSong)
 						{
 							CListBox* pSeqList = (CListBox*)pParentMain->m_seqBar.GetDlgItem(IDC_SEQLIST);
-							editcur.line=Global::pPlayer->_lineCounter;
-							if (editPosition != Global::pPlayer->_playPosition)
-							//if (pSeqList->GetCurSel() != Global::pPlayer->_playPosition)
+							editcur.line=Global::player()._lineCounter;
+							if (editPosition != Global::player()._playPosition)
+							//if (pSeqList->GetCurSel() != Global::player()._playPosition)
 							{
 								pSeqList->SelItemRange(false,0,pSeqList->GetCount());
-								pSeqList->SetSel(Global::pPlayer->_playPosition,true);
-								int top = Global::pPlayer->_playPosition - 0xC;
+								pSeqList->SetSel(Global::player()._playPosition,true);
+								int top = Global::player()._playPosition - 0xC;
 								if (top < 0) top = 0;
 								pSeqList->SetTopIndex(top);
-								editPosition=Global::pPlayer->_playPosition;
+								editPosition=Global::player()._playPosition;
 								if ( viewMode == view_modes::pattern ) 
 								{ 
 									Repaint(draw_modes::pattern);//draw_modes::playback_change);  // Until this mode is coded there is no point in calling it since it just makes patterns not refresh correctly currently
@@ -426,14 +424,14 @@ namespace psycle { namespace host {
 					}
 				}
 			}
-			if (nIDEvent == ID_TIMER_AUTOSAVE && !Global::pPlayer->_recording)
+			if (nIDEvent == ID_TIMER_AUTOSAVE && !Global::player()._recording)
 			{
-				CString filepath = Global::psycleconf().GetSongDir().c_str();
+				CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
 				filepath += "\\autosave.psy";
 				OldPsyFile file;
 				if(!file.Create(static_cast<LPCTSTR>(filepath), true)) return;
 				CProgressDialog progress(NULL,false);
-				_pSong->Save(&file,progress, true);
+				_pSong.Save(&file,progress, true);
 				if (!file.Close())
 				{
 					std::ostringstream s;
@@ -445,7 +443,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnEnableAudio()
 		{
-			AudioDriver* pOut = Global::psycleconf()._pOutputDriver;
+			AudioDriver* pOut = PsycleGlobal::conf()._pOutputDriver;
 			if (pOut->Enabled()) {
 				pOut->Enable(false);
 				_outputActive = false;
@@ -456,14 +454,14 @@ namespace psycle { namespace host {
 		}
 		void CChildView::OnUpdateEnableAudio(CCmdUI* pCmdUI) 
 		{
-			AudioDriver* pOut = Global::psycleconf()._pOutputDriver;
+			AudioDriver* pOut = PsycleGlobal::conf()._pOutputDriver;
 			pCmdUI->SetCheck(pOut->Enabled());
 		}
 		void CChildView::EnableSound()
 		{
 			if (_outputActive)
 			{
-				AudioDriver* pOut = Global::psycleconf()._pOutputDriver;
+				AudioDriver* pOut = PsycleGlobal::conf()._pOutputDriver;
 
 				_outputActive = false;
 				if (!pOut->Enabled())
@@ -475,19 +473,19 @@ namespace psycle { namespace host {
 				}
 			}
 			// set midi input mode to real-time or step
-			if(viewMode == view_modes::machine && Global::psycleconf().midi()._midiMachineViewSeqMode)
-				Global::midi().m_midiMode = MODE_REALTIME;
+			if(viewMode == view_modes::machine && PsycleGlobal::conf().midi()._midiMachineViewSeqMode)
+				PsycleGlobal::midi().m_midiMode = MODE_REALTIME;
 			else
-				Global::midi().m_midiMode = MODE_STEP;
+				PsycleGlobal::midi().m_midiMode = MODE_STEP;
 		}
 
 
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
 		{
-			if (Global::psycleconf()._pOutputDriver->Initialized())
+			if (PsycleGlobal::conf()._pOutputDriver->Initialized())
 			{
-				Global::psycleconf()._pOutputDriver->Reset();
+				PsycleGlobal::conf()._pOutputDriver->Reset();
 			}
 			KillTimer(ID_TIMER_VIEW_REFRESH);
 			KillTimer(ID_TIMER_AUTOSAVE);
@@ -520,7 +518,7 @@ namespace psycle { namespace host {
 					DrawMachineEditor(&bufDC);
 					break;
 				case draw_modes::machine:
-					//ClearMachineSpace(Global::_pSong->_pMachines[updatePar], updatePar, &bufDC);
+					//ClearMachineSpace(Global::song()._pMachines[updatePar], updatePar, &bufDC);
 					DrawMachine(updatePar, &bufDC);
 					DrawMachineVumeters(updatePar, &bufDC);
 					updateMode=draw_modes::all;
@@ -534,7 +532,7 @@ namespace psycle { namespace host {
 				case draw_modes::all_machines:
 					for (int i=0;i<MAX_MACHINES;i++)
 					{
-						if (_pSong->_pMachine[i])
+						if (_pSong._pMachine[i])
 						{
 							DrawMachine(i, &bufDC);
 						}
@@ -617,7 +615,7 @@ namespace psycle { namespace host {
 		BOOL CChildView::OnExport(UINT id) 
 		{
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::_pSong->fileName.substr(0,Global::_pSong->fileName.length()-4) + ".xm";
+			std::string ifile = Global::song().fileName.substr(0,Global::song().fileName.length()-4) + ".xm";
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
@@ -635,7 +633,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
+			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
@@ -652,7 +650,7 @@ namespace psycle { namespace host {
 
 				if (index != -1)
 				{
-					Global::psycleconf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+					PsycleGlobal::conf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 				}
 				
 				if (!file.Create(static_cast<LPCTSTR>(str), true))
@@ -660,7 +658,7 @@ namespace psycle { namespace host {
 					MessageBox("Error creating file!", "Error!", MB_OK);
 					return FALSE;
 				}
-				file.exportsong(*Global::_pSong);
+				file.exportsong(Global::song());
 				file.Close();
 			}
 			else
@@ -676,13 +674,13 @@ namespace psycle { namespace host {
 			//MessageBox("Saving Disabled");
 			//return false;
 			BOOL bResult = TRUE;
-			if ( Global::_pSong->_saved )
+			if ( Global::song()._saved )
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
 				{
-					std::string filepath = Global::psycleconf().GetCurrentSongDir();
+					std::string filepath = PsycleGlobal::conf().GetCurrentSongDir();
 					filepath += '\\';
-					filepath += Global::_pSong->fileName;
+					filepath += Global::song().fileName;
 					
 					OldPsyFile file;
 					CProgressDialog progress;
@@ -693,15 +691,15 @@ namespace psycle { namespace host {
 					}
 					progress.SetWindowText("Saving...");
 					progress.ShowWindow(SW_SHOW);
-					if (!_pSong->Save(&file, progress))
+					if (!_pSong.Save(&file, progress))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
 					}
 					else 
 					{
-						_pSong->_saved=true;
-						Global::pInputHandler->SafePoint();
+						_pSong._saved=true;
+						PsycleGlobal::inputHandler().SafePoint();
 					}
 					progress.SendMessage(WM_CLOSE);
 					if (!file.Close())
@@ -731,7 +729,7 @@ namespace psycle { namespace host {
 			//MessageBox("Saving Disabled");
 			//return false;
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::_pSong->fileName;
+			std::string ifile = Global::song().fileName;
 			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
@@ -749,7 +747,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
+			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 			BOOL bResult = TRUE;
@@ -777,12 +775,12 @@ namespace psycle { namespace host {
 					CProgressDialog progress;
 					if (index != -1)
 					{
-						Global::psycleconf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-						Global::_pSong->fileName = str.Mid(index+1);
+						PsycleGlobal::conf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+						Global::song().fileName = str.Mid(index+1);
 					}
 					else
 					{
-						Global::_pSong->fileName = str;
+						Global::song().fileName = str;
 					}
 					
 					if (!file.Create(static_cast<LPCTSTR>(str), true))
@@ -793,18 +791,18 @@ namespace psycle { namespace host {
 
 					progress.SetWindowText("Saving...");
 					progress.ShowWindow(SW_SHOW);
-					if (!_pSong->Save(&file,progress))
+					if (!_pSong.Save(&file,progress))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
 						bResult = FALSE;
 					}
 					else 
 					{
-						_pSong->_saved=true;
+						_pSong._saved=true;
 						std::string recent = static_cast<LPCTSTR>(str);
 						AppendToRecent(recent);
 						
-						Global::pInputHandler->SafePoint();
+						PsycleGlobal::inputHandler().SafePoint();
 					}
 					progress.SendMessage(WM_CLOSE);
 					if (!file.Close())
@@ -840,7 +838,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
+			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			
@@ -902,19 +900,19 @@ namespace psycle { namespace host {
 		{
 			if (CheckUnsavedSong("New Song"))
 			{
-				Global::pInputHandler->KillUndo();
-				Global::pInputHandler->KillRedo();
+				PsycleGlobal::inputHandler().KillUndo();
+				PsycleGlobal::inputHandler().KillRedo();
 				pParentMain->CloseAllMacGuis();
-				Global::pPlayer->Stop();
+				Global::player().Stop();
 
-				Global::_pSong->New();
-				Global::_pSong->_pMachine[MASTER_INDEX]->_x = (CW - Global::psycleconf().macView().MachineCoords.sMaster.width) / 2;
-				Global::_pSong->_pMachine[MASTER_INDEX]->_y = (CH - Global::psycleconf().macView().MachineCoords.sMaster.height) / 2;
+				Global::song().New();
+				Global::song()._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
+				Global::song()._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 
-				Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(),Global::_pSong->LinesPerBeat());
+				Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 				SetTitleBarText();
 				editPosition=0;
-				Global::_pSong->seqBus=0;
+				Global::song().seqBus=0;
 				pParentMain->PsybarsUpdate(); // Updates all values of the bars
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
@@ -944,16 +942,16 @@ namespace psycle { namespace host {
 		//  <JosepMa> is this still the case? or what does "machine changes" mean?
 		BOOL CChildView::CheckUnsavedSong(std::string szTitle)
 		{
-			if (Global::pInputHandler->IsModified()
-				&& Global::psycleconf().bFileSaveReminders)
+			if (PsycleGlobal::inputHandler().IsModified()
+				&& PsycleGlobal::conf().bFileSaveReminders)
 			{
-				std::string filepath = Global::psycleconf().GetCurrentSongDir();
+				std::string filepath = PsycleGlobal::conf().GetCurrentSongDir();
 				filepath += '\\';
-				filepath += Global::_pSong->fileName;
+				filepath += Global::song().fileName;
 				OldPsyFile file;
 				CProgressDialog progress;
 				std::ostringstream szText;
-				szText << "Save changes to \"" << Global::_pSong->fileName
+				szText << "Save changes to \"" << Global::song().fileName
 					<< "\"?";
 				int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 				switch (result)
@@ -968,7 +966,7 @@ namespace psycle { namespace host {
 						MessageBox(szText.str().c_str(),szTitle.c_str(),MB_ICONEXCLAMATION);
 						return FALSE;
 					}
-					_pSong->Save(&file,progress);
+					_pSong.Save(&file,progress);
 					progress.SendMessage(WM_CLOSE);
 					if (!file.Close())
 					{
@@ -993,11 +991,11 @@ namespace psycle { namespace host {
 		{
 			if (MessageBox("Warning! You will lose all changes since song was last saved! Proceed?","Revert to Saved",MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
 			{
-				if (Global::_pSong->_saved)
+				if (Global::song()._saved)
 				{
 					std::ostringstream fullpath;
-					fullpath << Global::psycleconf().GetCurrentSongDir().c_str()
-						<< '\\' << Global::_pSong->fileName.c_str();
+					fullpath << PsycleGlobal::conf().GetCurrentSongDir().c_str()
+						<< '\\' << Global::song().fileName.c_str();
 					FileLoadsongNamed(fullpath.str());
 				}
 			}
@@ -1013,10 +1011,10 @@ namespace psycle { namespace host {
 				ShowScrollBar(SB_BOTH,FALSE);
 
 				// set midi input mode to real-time or Step
-				if(Global::psycleconf().midi()._midiMachineViewSeqMode)
-					Global::midi().m_midiMode = MODE_REALTIME;
+				if(PsycleGlobal::conf().midi()._midiMachineViewSeqMode)
+					PsycleGlobal::midi().m_midiMode = MODE_REALTIME;
 				else
-					Global::midi().m_midiMode = MODE_STEP;
+					PsycleGlobal::midi().m_midiMode = MODE_STEP;
 
 				Repaint();
 				pParentMain->StatusBarIdle();
@@ -1042,15 +1040,15 @@ namespace psycle { namespace host {
 				//ShowScrollBar(SB_BOTH,FALSE);
 				
 				// set midi input mode to step insert
-				Global::midi().m_midiMode = MODE_STEP;
+				PsycleGlobal::midi().m_midiMode = MODE_STEP;
 				
 				GetParent()->SetActiveWindow();
 
-				if (Global::psycleconf()._followSong &&
-					editPosition  != Global::pPlayer->_playPosition &&
-					Global::pPlayer->_playing)
+				if (PsycleGlobal::conf()._followSong &&
+					editPosition  != Global::player()._playPosition &&
+					Global::player()._playing)
 				{
-					editPosition=Global::pPlayer->_playPosition;
+					editPosition=Global::player()._playPosition;
 				}
 				Repaint();
 				pParentMain->StatusBarIdle();
@@ -1075,7 +1073,7 @@ namespace psycle { namespace host {
 				ShowScrollBar(SB_BOTH,FALSE);
 				
 				// set midi input mode to step insert
-				Global::midi().m_midiMode = MODE_STEP;
+				PsycleGlobal::midi().m_midiMode = MODE_STEP;
 				
 				GetParent()->SetActiveWindow();
 				Repaint();
@@ -1095,29 +1093,29 @@ namespace psycle { namespace host {
 
 		void CChildView::OnBarplay() 
 		{
-			if (Global::psycleconf()._followSong)
+			if (PsycleGlobal::conf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
 			prevEditPosition=editPosition;
-			Global::pPlayer->Start(editPosition,0);
+			Global::player().Start(editPosition,0);
 			pParentMain->StatusBarIdle();
 		}
 
 		void CChildView::OnBarplayFromStart() 
 		{
-			if (Global::psycleconf()._followSong)
+			if (PsycleGlobal::conf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
 			prevEditPosition=editPosition;
-			Global::pPlayer->Start(0,0);
+			Global::player().Start(0,0);
 			pParentMain->StatusBarIdle();
 		}
 
 		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
 		{
-			if (Global::pPlayer->_playing)
+			if (Global::player()._playing)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1130,13 +1128,13 @@ namespace psycle { namespace host {
 
 		void CChildView::OnBarrec() 
 		{
-			if (Global::psycleconf()._followSong && bEditMode)
+			if (PsycleGlobal::conf()._followSong && bEditMode)
 			{
 				bEditMode = FALSE;
 			}
 			else
 			{
-				Global::psycleconf()._followSong = TRUE;
+				PsycleGlobal::conf()._followSong = TRUE;
 				bEditMode = TRUE;
 				CButton*cb=(CButton*)pParentMain->m_seqBar.GetDlgItem(IDC_FOLLOW);
 				cb->SetCheck(1);
@@ -1146,7 +1144,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
 		{
-			if (Global::psycleconf()._followSong && bEditMode)
+			if (PsycleGlobal::conf()._followSong && bEditMode)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);
@@ -1154,19 +1152,19 @@ namespace psycle { namespace host {
 
 		void CChildView::OnButtonplayseqblock() 
 		{
-			if (Global::psycleconf()._followSong)
+			if (PsycleGlobal::conf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
 
 			prevEditPosition=editPosition;
 			int i=0;
-			while ( Global::_pSong->playOrderSel[i] == false ) i++;
+			while ( Global::song().playOrderSel[i] == false ) i++;
 			
-			if(!Global::pPlayer->_playing)
-				Global::pPlayer->Start(i,0);
+			if(!Global::player()._playing)
+				Global::player().Start(i,0);
 
-			Global::pPlayer->_playBlock=!Global::pPlayer->_playBlock;
+			Global::player()._playBlock=!Global::player()._playBlock;
 
 			pParentMain->StatusBarIdle();
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
@@ -1174,22 +1172,22 @@ namespace psycle { namespace host {
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
 		{
-			if ( Global::pPlayer->_playBlock == true ) pCmdUI->SetCheck(TRUE);
+			if ( Global::player()._playBlock == true ) pCmdUI->SetCheck(TRUE);
 			else pCmdUI->SetCheck(FALSE);
 		}
 
 		void CChildView::OnBarstop()
 		{
-			bool pl = Global::pPlayer->_playing;
-			bool blk = Global::pPlayer->_playBlock;
-			Global::pPlayer->Stop();
+			bool pl = Global::player()._playing;
+			bool blk = Global::player()._playBlock;
+			Global::player().Stop();
 			Repaint(draw_modes::playback);
 			pParentMain->SetAppSongBpm(0);
 			pParentMain->SetAppSongTpb(0);
 
 			if (pl)
 			{
-				if ( Global::psycleconf()._followSong && blk)
+				if ( PsycleGlobal::conf()._followSong && blk)
 				{
 					editPosition=prevEditPosition;
 					pParentMain->UpdatePlayOrder(false); // <- This restores the selected block
@@ -1197,8 +1195,8 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					memset(Global::_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-					Global::_pSong->playOrderSel[editPosition] = true;
+					memset(Global::song().playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+					Global::song().playOrderSel[editPosition] = true;
 					Repaint(draw_modes::cursor); 
 				}
 			}
@@ -1206,30 +1204,30 @@ namespace psycle { namespace host {
 
 		void CChildView::OnRecordWav() 
 		{
-			if (!Global::pPlayer->_recording)
+			if (!Global::player()._recording)
 			{
 				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 				
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
-					Global::pPlayer->StartRecording(static_cast<LPCTSTR>(dlg.GetPathName()));
+					Global::player().StartRecording(static_cast<LPCTSTR>(dlg.GetPathName()));
 				}
 				//If autoStopMachine is activated, deactivate it while recording
-				if ( Global::psycleconf().UsesAutoStopMachines() ) 
+				if ( PsycleGlobal::conf().UsesAutoStopMachines() ) 
 				{
 					OnAutostop();
 				}
 			}
 			else
 			{
-				Global::pPlayer->StopRecording();
+				Global::player().StopRecording();
 			}
 		}
 
 		void CChildView::OnUpdateRecordWav(CCmdUI* pCmdUI) 
 		{
-			if (Global::pPlayer->_recording)
+			if (Global::player()._recording)
 			{
 				pCmdUI->SetCheck(1);
 			}
@@ -1241,28 +1239,28 @@ namespace psycle { namespace host {
 
 		void CChildView::OnAutostop() 
 		{
-			if ( Global::psycleconf().UsesAutoStopMachines() )
+			if ( PsycleGlobal::conf().UsesAutoStopMachines() )
 			{
-				Global::psycleconf().UseAutoStopMachines(false);
+				PsycleGlobal::conf().UseAutoStopMachines(false);
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					if (Global::_pSong->_pMachine[c])
+					if (Global::song()._pMachine[c])
 					{
-						Global::_pSong->_pMachine[c]->Standby(false);
+						Global::song()._pMachine[c]->Standby(false);
 					}
 				}
 			}
-			else Global::psycleconf().UseAutoStopMachines(true);
+			else PsycleGlobal::conf().UseAutoStopMachines(true);
 		}
 
 		void CChildView::OnUpdateAutostop(CCmdUI* pCmdUI) 
 		{
-			if (Global::psycleconf().UsesAutoStopMachines() ) pCmdUI->SetCheck(TRUE);
+			if (PsycleGlobal::conf().UsesAutoStopMachines() ) pCmdUI->SetCheck(TRUE);
 			else pCmdUI->SetCheck(FALSE);
 		}
 
 		void CChildView::OnFileSongproperties() 
-		{	CSongpDlg dlg(Global::_pSong);
+		{	CSongpDlg dlg(Global::song());
 			dlg.DoModal();
 			pParentMain->StatusBarIdle();
 			//Repaint();
@@ -1298,18 +1296,17 @@ namespace psycle { namespace host {
 
 		void CChildView::ShowPatternDlg(void)
 		{
-			CPatDlg dlg;
-			int patNum = _pSong->playOrder[editPosition];
-			int nlines = _pSong->patternLines[patNum];
+			CPatDlg dlg(_pSong);
+			int patNum = _pSong.playOrder[editPosition];
+			int nlines = _pSong.patternLines[patNum];
 			char name[32];
-			strcpy(name,_pSong->patternName[patNum]);
+			strcpy(name,_pSong.patternName[patNum]);
 
 			dlg.patLines= nlines;
 			strcpy(dlg.patName,name);
 			dlg.patIdx = patNum;
-			dlg.m_pSong = _pSong;
-			dlg.m_shownames = Global::psycleconf().patView().showTrackNames_?1:0;
-			dlg.m_independentnames = _pSong->shareTrackNames?0:1;
+			dlg.m_shownames = PsycleGlobal::conf().patView().showTrackNames_?1:0;
+			dlg.m_independentnames = _pSong.shareTrackNames?0:1;
 
 			pParentMain->UpdateSequencer();
 			
@@ -1317,19 +1314,19 @@ namespace psycle { namespace host {
 			{
 				if ( nlines != dlg.patLines )
 				{
-					Global::pInputHandler->AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					Global::pInputHandler->AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					_pSong->AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
+					PsycleGlobal::inputHandler().AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+					PsycleGlobal::inputHandler().AddUndoLength(patNum,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+					_pSong.AllocNewPattern(patNum,dlg.patName,dlg.patLines,dlg.m_adaptsize?true:false);
 					if ( strcmp(name,dlg.patName) != 0 )
 					{
-						strcpy(_pSong->patternName[patNum],dlg.patName);
+						strcpy(_pSong.patternName[patNum],dlg.patName);
 						pParentMain->StatusBarIdle();
 					}
 					Repaint();
 				}
 				else if ( strcmp(name,dlg.patName) != 0 )
 				{
-					strcpy(_pSong->patternName[patNum],dlg.patName);
+					strcpy(_pSong.patternName[patNum],dlg.patName);
 					pParentMain->UpdateSequencer();
 					pParentMain->StatusBarIdle();
 					//Repaint(draw_modes::patternHeader);
@@ -1362,16 +1359,16 @@ namespace psycle { namespace host {
 				int fb,xs,ys;
 				if (mac < 0)
 				{
-					Global::pInputHandler->AddMacViewUndo();
+					PsycleGlobal::inputHandler().AddMacViewUndo();
 					if (dlg.selectedMode == modegen) 
 					{
-						fb = Global::_pSong->GetFreeBus();
+						fb = Global::song().GetFreeBus();
 						xs = MachineCoords->sGenerator.width;
 						ys = MachineCoords->sGenerator.height;
 					}
 					else 
 					{
-						fb = Global::_pSong->GetFreeFxBus();
+						fb = Global::song().GetFreeFxBus();
 						xs = MachineCoords->sEffect.width;
 						ys = MachineCoords->sEffect.height;
 					}
@@ -1380,14 +1377,14 @@ namespace psycle { namespace host {
 				{
 					if (mac >= MAX_BUSES && dlg.selectedMode != modegen)
 					{
-						Global::pInputHandler->AddMacViewUndo();
+						PsycleGlobal::inputHandler().AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords->sEffect.width;
 						ys = MachineCoords->sEffect.height;
 					}
 					else if (mac < MAX_BUSES && dlg.selectedMode == modegen)
 					{
-						Global::pInputHandler->AddMacViewUndo();
+						PsycleGlobal::inputHandler().AddMacViewUndo();
 						fb = mac;
 						xs = MachineCoords->sGenerator.width;
 						ys = MachineCoords->sGenerator.height;
@@ -1399,10 +1396,10 @@ namespace psycle { namespace host {
 					}
 				}
 				// Get info of old machine and close any open gui.
-				if (Global::_pSong->_pMachine[fb])
+				if (Global::song()._pMachine[fb])
 				{
-					x = Global::_pSong->_pMachine[fb]->_x;
-					y = Global::_pSong->_pMachine[fb]->_y;
+					x = Global::song()._pMachine[fb]->_x;
+					y = Global::song()._pMachine[fb]->_y;
 					pParentMain->CloseMacGui(fb);
 				}
 				else if ((x < 0) || (y < 0))
@@ -1416,10 +1413,10 @@ namespace psycle { namespace host {
 						bCovered = FALSE;
 						for (int i=0; i < MAX_MACHINES; i++)
 						{
-							if (Global::_pSong->_pMachine[i])
+							if (Global::song()._pMachine[i])
 							{
-								if ((abs(Global::_pSong->_pMachine[i]->_x - x) < 32) &&
-									(abs(Global::_pSong->_pMachine[i]->_y - y) < 32))
+								if ((abs(Global::song()._pMachine[i]->_x - x) < 32) &&
+									(abs(Global::song()._pMachine[i]->_y - y) < 32))
 								{
 									bCovered = TRUE;
 									i = MAX_MACHINES;
@@ -1436,45 +1433,45 @@ namespace psycle { namespace host {
 				else
 				{
 					bool created=false;
-					if (Global::_pSong->_pMachine[fb] )
+					if (Global::song()._pMachine[fb] )
 					{
-						created = Global::_pSong->ReplaceMachine(Global::_pSong->_pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+						created = Global::song().ReplaceMachine(Global::song()._pMachine[fb],(MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 					}
 					else 
 					{
-						created = Global::_pSong->CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+						created = Global::song().CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
 					}
 					if (created)
 					{
 						if ( dlg.selectedMode == modegen)
 						{
-							Global::_pSong->seqBus = fb;
+							Global::song().seqBus = fb;
 						}
 
 						// make sure that no 2 machines have the same name, because that is irritating
 
 						int number = 1;
-						char buf[sizeof(_pSong->_pMachine[fb]->_editName)+4];
-						strcpy (buf,_pSong->_pMachine[fb]->_editName);
+						char buf[sizeof(_pSong._pMachine[fb]->_editName)+4];
+						strcpy (buf,_pSong._pMachine[fb]->_editName);
 
 						for (int i = 0; i < MAX_MACHINES-1; i++)
 						{
 							if (i!=fb)
 							{
-								if (_pSong->_pMachine[i])
+								if (_pSong._pMachine[i])
 								{
-									if (strcmp(_pSong->_pMachine[i]->_editName,buf)==0)
+									if (strcmp(_pSong._pMachine[i]->_editName,buf)==0)
 									{
 										number++;
-										sprintf(buf,"%s %d",_pSong->_pMachine[fb]->_editName,number);
+										sprintf(buf,"%s %d",_pSong._pMachine[fb]->_editName,number);
 										i = -1;
 									}
 								}
 							}
 						}
 
-						buf[sizeof(_pSong->_pMachine[fb]->_editName)-1] = 0;
-						strcpy(_pSong->_pMachine[fb]->_editName,buf);
+						buf[sizeof(_pSong._pMachine[fb]->_editName)-1] = 0;
+						strcpy(_pSong._pMachine[fb]->_editName,buf);
 
 						pParentMain->UpdateComboGen();
 						Repaint(draw_modes::all);
@@ -1501,6 +1498,7 @@ namespace psycle { namespace host {
 				pParentMain->ShowControlBar(&pParentMain->m_seqBar,FALSE,FALSE);
 				pParentMain->ShowControlBar(&pParentMain->m_songBar,FALSE,FALSE);
 				pParentMain->ShowControlBar(&pParentMain->m_wndToolBar,FALSE,FALSE);
+				pParentMain->ShowWindow(SW_MAXIMIZE);
 			}
 		}
 		void CChildView::OnUpdateFullScreen(CCmdUI* pCmdUI) 
@@ -1513,7 +1511,7 @@ namespace psycle { namespace host {
 			CConfigDlg dlg("Psycle Settings");
 			if (dlg.DoModal() == IDOK)
 			{
-				Global::psycleconf().RefreshSettings();
+				PsycleGlobal::conf().RefreshSettings();
 				RecalculateColourGrid();
 				RecalcMetrics();
 				InitTimer();
@@ -1532,7 +1530,7 @@ namespace psycle { namespace host {
 
 		void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		{
-			int st = Global::_pSong->BeatsPerMin();
+			int st = Global::song().BeatsPerMin();
 			static int sw = 2;
 			static float sv = 13.0f;
 			static float sp = -90.0f;
@@ -1568,7 +1566,7 @@ namespace psycle { namespace host {
 				{
 					x = editcur.track;
 					y = 0;
-					ny = _pSong->patternLines[_ps()];
+					ny = _pSong.patternLines[_ps()];
 				}
 				else
 				{
@@ -1596,7 +1594,7 @@ namespace psycle { namespace host {
 				unsigned char *base = _ppattern();
 				if (base)
 				{
-					Global::pInputHandler->AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
+					PsycleGlobal::inputHandler().AddUndo(_ps(),x,y,1,ny,editcur.track,editcur.line,editcur.col,editPosition);
 					for (l=y;l<y+ny;l++)
 					{
 						int const displace=x*EVENT_SIZE+l*MULTIPLY;
@@ -1647,13 +1645,13 @@ namespace psycle { namespace host {
 		
 		void CChildView::OnPopAddNewTrack() 
 		{
-			int pattern = _pSong->playOrder[editPosition];
+			int pattern = _pSong.playOrder[editPosition];
 			if (MessageBox("Do you want to add the track to all patterns?","Add pattern track",MB_YESNO) == IDYES )
 			{
 				pattern = -1;
 			}
 
-			_pSong->AddNewTrack(pattern, editcur.track);
+			_pSong.AddNewTrack(pattern, editcur.track);
 			pParentMain->PsybarsUpdate();
 			RecalculateColourGrid();
 			Repaint();
@@ -1664,10 +1662,10 @@ namespace psycle { namespace host {
 
 		void CChildView::OnPopInterpolateCurve()
 		{
-			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong->LinesPerBeat());
+			CInterpolateCurve dlg(blockSel.start.line,blockSel.end.line,_pSong.LinesPerBeat());
 			
 			int* valuearray = new int[blockSel.end.line-blockSel.start.line+1];
-			int ps=_pSong->playOrder[editPosition];
+			int ps=_pSong.playOrder[editPosition];
 			unsigned char notecommand = notecommands::empty;
 			unsigned char targetmac = 255;
 			unsigned char targettwk = 255;
@@ -1691,8 +1689,8 @@ namespace psycle { namespace host {
 			}
 			if ( notecommand == notecommands::tweak ) {
 				int min=0, max=0xFFFF;
-				if(_pSong->_pMachine[targetmac] != NULL) {
-					_pSong->_pMachine[targetmac]->GetParamRange(targettwk,min,max);
+				if(_pSong._pMachine[targetmac] != NULL) {
+					_pSong._pMachine[targetmac]->GetParamRange(targettwk,min,max);
 				}
 				//If the parameter uses negative number, the values are shifted up.
 				max-=min;
@@ -1702,8 +1700,8 @@ namespace psycle { namespace host {
 			}
 			else if ( notecommand == notecommands::tweakslide ) {
 				int min=0, max=0xFFFF;
-				if(_pSong->_pMachine[targetmac] != NULL) {
-					_pSong->_pMachine[targetmac]->GetParamRange(targettwk,min,max);
+				if(_pSong._pMachine[targetmac] != NULL) {
+					_pSong._pMachine[targetmac]->GetParamRange(targettwk,min,max);
 				}
 				//If the parameter uses negative number, the values are shifted up.
 				max-=min;
@@ -1728,9 +1726,9 @@ namespace psycle { namespace host {
 		}
 
 
-		void CChildView::OnPopChangegenerator() { BlockGenChange(_pSong->seqBus); }
+		void CChildView::OnPopChangegenerator() { BlockGenChange(_pSong.seqBus); }
 
-		void CChildView::OnPopChangeinstrument() { BlockInsChange(_pSong->auxcolSelected); }
+		void CChildView::OnPopChangeinstrument() { BlockInsChange(_pSong.auxcolSelected); }
 
 		void CChildView::OnPopTranspose1() { BlockTranspose(1); }
 
@@ -1764,7 +1762,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
-			if(Global::pInputHandler->HasUndo(viewMode))
+			if(PsycleGlobal::inputHandler().HasUndo(viewMode))
 			{
 				pCmdUI->Enable(TRUE);
 			}
@@ -1776,7 +1774,7 @@ namespace psycle { namespace host {
 
 		void CChildView::OnUpdateRedo(CCmdUI* pCmdUI)
 		{
-			if(Global::pInputHandler->HasRedo(viewMode))
+			if(PsycleGlobal::inputHandler().HasRedo(viewMode))
 			{
 				pCmdUI->Enable(TRUE);
 			}
@@ -1820,16 +1818,16 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = Global::psycleconf().GetCurrentSongDir();
+			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if (GetOpenFileName(&ofn)==TRUE)
 			{
-				Global::pInputHandler->KillUndo();
-				Global::pInputHandler->KillRedo();
+				PsycleGlobal::inputHandler().KillUndo();
+				PsycleGlobal::inputHandler().KillRedo();
 				pParentMain->CloseAllMacGuis();
-				Global::pPlayer->Stop();
+				Global::player().Stop();
 
 				CString str = ofn.lpstrFile;
 				int index = str.ReverseFind('.');
@@ -1840,13 +1838,13 @@ namespace psycle { namespace host {
 					{
 						XMSongLoader xmfile;
 						xmfile.Open(ofn.lpstrFile);
-						Global::_pSong->New();
+						Global::song().New();
 						editPosition=0;
-						xmfile.Load(*_pSong);
+						xmfile.Load(_pSong);
 						xmfile.Close();
-						if (Global::psycleconf().bShowSongInfoOnLoad)
+						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
 						{
-							CSongpDlg dlg(Global::_pSong);
+							CSongpDlg dlg(Global::song());
 							dlg.SetReadOnly();
 							dlg.DoModal();
 						}
@@ -1854,19 +1852,19 @@ namespace psycle { namespace host {
 					{
 						ITModule2 it;
 						it.Open(ofn.lpstrFile);
-						Global::_pSong->New();
+						Global::song().New();
 						editPosition=0;
 						if(!it.LoadITModule(_pSong))
 						{			
 							MessageBox("Load failed");
-							Global::_pSong->New();
+							Global::song().New();
 							it.Close();
 							return;
 						}
 						it.Close();
-						if (Global::psycleconf().bShowSongInfoOnLoad)
+						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
 						{
-							CSongpDlg dlg(Global::_pSong);
+							CSongpDlg dlg(Global::song());
 							dlg.SetReadOnly();
 							dlg.DoModal();
 						}
@@ -1874,19 +1872,19 @@ namespace psycle { namespace host {
 					{
 						ITModule2 s3m;
 						s3m.Open(ofn.lpstrFile);
-						Global::_pSong->New();
+						Global::song().New();
 						editPosition=0;
 						if(!s3m.LoadS3MModuleX(_pSong))
 						{			
 							MessageBox("Load failed");
-							Global::_pSong->New();
+							Global::song().New();
 							s3m.Close();
 							return;
 						}
 						s3m.Close();
-						if (Global::psycleconf().bShowSongInfoOnLoad)
+						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
 						{
-							CSongpDlg dlg(Global::_pSong);
+							CSongpDlg dlg(Global::song());
 							dlg.SetReadOnly();
 							dlg.DoModal();
 						}
@@ -1894,13 +1892,13 @@ namespace psycle { namespace host {
 					{
 						MODSongLoader modfile;
 						modfile.Open(ofn.lpstrFile);
-						Global::_pSong->New();
+						Global::song().New();
 						editPosition=0;
-						modfile.Load(*_pSong);
+						modfile.Load(_pSong);
 						modfile.Close();
-						if (Global::psycleconf().bShowSongInfoOnLoad)
+						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
 						{
-							CSongpDlg dlg(Global::_pSong);
+							CSongpDlg dlg(Global::song());
 							dlg.SetReadOnly();
 							dlg.DoModal();
 						}
@@ -1911,15 +1909,15 @@ namespace psycle { namespace host {
 				index = str.ReverseFind('\\');
 				if (index != -1)
 				{
-					Global::psycleconf().SetCurrentSongDir((LPCSTR)str.Left(index));
-					Global::_pSong->fileName = str.Mid(index+1)+".psy";
+					PsycleGlobal::conf().SetCurrentSongDir((LPCSTR)str.Left(index));
+					Global::song().fileName = str.Mid(index+1)+".psy";
 				}
 				else
 				{
-					Global::_pSong->fileName = str+".psy";
+					Global::song().fileName = str+".psy";
 				}
-				Global::_pSong->_pMachine[MASTER_INDEX]->_x = (CW - Global::psycleconf().macView().MachineCoords.sMaster.width) / 2;
-				Global::_pSong->_pMachine[MASTER_INDEX]->_y = (CH - Global::psycleconf().macView().MachineCoords.sMaster.height) / 2;
+				Global::song()._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
+				Global::song()._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->m_wndInst.WaveUpdate();
@@ -1982,11 +1980,11 @@ namespace psycle { namespace host {
 				hTempItemInfo.wID		= ids[iCount];
 				SetMenuItemInfo(hRecentMenu, iCount, true, &hTempItemInfo);
 			}
-			Global::psycleconf().AddRecentFile(fName);
+			PsycleGlobal::conf().AddRecentFile(fName);
 		}
 		void CChildView::RestoreRecent()
 		{
-			const std::vector<std::string> recent = Global::psycleconf().GetRecentFiles();
+			const std::vector<std::string> recent = PsycleGlobal::conf().GetRecentFiles();
 			UINT ids[] =
 				{
 					ID_FILE_RECENT_01,
@@ -2051,7 +2049,7 @@ namespace psycle { namespace host {
 		void CChildView::FileLoadsongNamed(std::string fName)
 		{
 			pParentMain->CloseAllMacGuis();
-			Global::pPlayer->Stop();
+			Global::player().Stop();
 			
 			OldPsyFile file;
 			if (!file.Open(fName.c_str()))
@@ -2062,26 +2060,26 @@ namespace psycle { namespace host {
 			editPosition = 0;
 			CProgressDialog progress;
 			progress.ShowWindow(SW_SHOW);
-			if(!_pSong->Load(&file,progress) || !file.Close())
+			if(!_pSong.Load(&file,progress) || !file.Close())
 			{
 				std::ostringstream s;
 				s << "Error reading from file '" << file.szName << "'" << std::endl;
 				MessageBox(s.str().c_str(), "File Error!!!", 0);
 			}
 			progress.SendMessage(WM_CLOSE);
-			_pSong->_saved=true;
+			_pSong._saved=true;
 			AppendToRecent(fName);
 			std::string::size_type index = fName.rfind('\\');
 			if (index != std::string::npos)
 			{
-				Global::psycleconf().SetCurrentSongDir(fName.substr(0,index));
-				Global::_pSong->fileName = fName.substr(index+1);
+				PsycleGlobal::conf().SetCurrentSongDir(fName.substr(0,index));
+				Global::song().fileName = fName.substr(index+1);
 			}
 			else
 			{
-				Global::_pSong->fileName = fName;
+				Global::song().fileName = fName;
 			}
-			Global::pPlayer->SetBPM(Global::_pSong->BeatsPerMin(), Global::_pSong->LinesPerBeat());
+			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
 			EnforceAllMachinesOnView();
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
@@ -2092,12 +2090,12 @@ namespace psycle { namespace host {
 			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
 			RecalculateColourGrid();
 			Repaint();
-			Global::pInputHandler->KillUndo();
-			Global::pInputHandler->KillRedo();
+			PsycleGlobal::inputHandler().KillUndo();
+			PsycleGlobal::inputHandler().KillRedo();
 			SetTitleBarText();
-			if (Global::psycleconf().bShowSongInfoOnLoad)
+			if (PsycleGlobal::conf().bShowSongInfoOnLoad)
 			{
-				CSongpDlg dlg(Global::_pSong);
+				CSongpDlg dlg(Global::song());
 				dlg.SetReadOnly();
 				dlg.DoModal();
 			}
@@ -2116,8 +2114,8 @@ namespace psycle { namespace host {
 		void CChildView::SetTitleBarText()
 		{
 			std::string titlename = "[";
-			titlename+=Global::_pSong->fileName;
-			if(Global::pInputHandler->IsModified())
+			titlename+=Global::song().fileName;
+			if(PsycleGlobal::inputHandler().IsModified())
 			{
 				titlename+=" *";
 			}
@@ -2129,41 +2127,41 @@ namespace psycle { namespace host {
 		void CChildView::OnHelpKeybtxt() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\keys.txt",Global::psycleconf().appPath().c_str());
+			sprintf(path,"%sdocs\\keys.txt",PsycleGlobal::conf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpReadme() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\readme.txt",Global::psycleconf().appPath().c_str());
+			sprintf(path,"%sdocs\\readme.txt",PsycleGlobal::conf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpTweaking() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\tweaking.txt",Global::psycleconf().appPath().c_str());
+			sprintf(path,"%sdocs\\tweaking.txt",PsycleGlobal::conf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::OnHelpWhatsnew() 
 		{
 			char path[MAX_PATH];
-			sprintf(path,"%sdocs\\whatsnew.txt",Global::psycleconf().appPath().c_str());
+			sprintf(path,"%sdocs\\whatsnew.txt",PsycleGlobal::conf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
 
 		void CChildView::EnforceAllMachinesOnView()
 		{
-			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
+			SMachineCoords mcoords = PsycleGlobal::conf().macView().MachineCoords;
 			for(int i(0);i<MAX_MACHINES;i++)
 			{
-				if(_pSong->_pMachine[i])
+				if(_pSong._pMachine[i])
 				{
-					int x = _pSong->_pMachine[i]->_x;
-					int y = _pSong->_pMachine[i]->_y;
-					switch (_pSong->_pMachine[i]->_mode)
+					int x = _pSong._pMachine[i]->_x;
+					int y = _pSong._pMachine[i]->_y;
+					switch (_pSong._pMachine[i]->_mode)
 					{
 					case MACHMODE_GENERATOR:
 						if ( x > CW-mcoords.sGenerator.width ) 
@@ -2197,8 +2195,8 @@ namespace psycle { namespace host {
 						}
 						break;
 					}
-					_pSong->_pMachine[i]->_x = x;
-					_pSong->_pMachine[i]->_y = y;
+					_pSong._pMachine[i]->_x = x;
+					_pSong._pMachine[i]->_y = y;
 				}
 			}
 		}
@@ -2322,7 +2320,7 @@ namespace psycle { namespace host {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong->_trackMuted[editcur.track] = !_pSong->_trackMuted[editcur.track];
+				_pSong._trackMuted[editcur.track] = !_pSong._trackMuted[editcur.track];
 				Repaint(draw_modes::track_header);
 			}
 		}
@@ -2331,22 +2329,22 @@ namespace psycle { namespace host {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				if (_pSong->_trackSoloed == editcur.track)
+				if (_pSong._trackSoloed == editcur.track)
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = FALSE;
+						_pSong._trackMuted[i] = FALSE;
 					}
-					_pSong->_trackSoloed = -1;
+					_pSong._trackSoloed = -1;
 				}
 				else
 				{
 					for (int i = 0; i < MAX_TRACKS; i++)
 					{
-						_pSong->_trackMuted[i] = TRUE;
+						_pSong._trackMuted[i] = TRUE;
 					}
-					_pSong->_trackMuted[editcur.track] = FALSE;
-					_pSong->_trackSoloed = editcur.track;
+					_pSong._trackMuted[editcur.track] = FALSE;
+					_pSong._trackSoloed = editcur.track;
 				}
 				Repaint(draw_modes::track_header);
 			}
@@ -2356,13 +2354,13 @@ namespace psycle { namespace host {
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				_pSong->_trackArmed[editcur.track] = !_pSong->_trackArmed[editcur.track];
-				_pSong->_trackArmedCount = 0;
+				_pSong._trackArmed[editcur.track] = !_pSong._trackArmed[editcur.track];
+				_pSong._trackArmedCount = 0;
 				for ( int i=0;i<MAX_TRACKS;i++ )
 				{
-					if (_pSong->_trackArmed[i])
+					if (_pSong._trackArmed[i])
 					{
-						_pSong->_trackArmedCount++;
+						_pSong._trackArmedCount++;
 					}
 				}
 				Repaint(draw_modes::track_header);
@@ -2372,10 +2370,9 @@ namespace psycle { namespace host {
 		void CChildView::DoMacPropDialog(int propMac)
 		{
 			if((propMac < 0 ) || (propMac >= MAX_MACHINES-1)) return;
-			CMacProp dlg;
+			CMacProp dlg(_pSong);
 			dlg.m_view=this;
-			dlg.pMachine = Global::_pSong->_pMachine[propMac];
-			dlg.pSong = Global::_pSong;
+			dlg.pMachine = _pSong._pMachine[propMac];
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
@@ -2391,7 +2388,7 @@ namespace psycle { namespace host {
 			if(dlg.deleted)
 			{
 				pParentMain->CloseMacGui(propMac);
-				CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+				CExclusiveLock lock(&Global::song().semaphore, 2, true);
 				Machine* pMac = Global::song()._pMachine[propMac];
 				// move wires before deleting. Don't do inside DeleteMachine since that is used in song internally
 				if( pMac->_numInputs > 0 && pMac->_numOutputs > 0) {
@@ -2418,7 +2415,7 @@ namespace psycle { namespace host {
 						}
 					}
 				}
-				Global::_pSong->DestroyMachine(propMac);
+				Global::song().DestroyMachine(propMac);
 
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
@@ -2431,12 +2428,12 @@ namespace psycle { namespace host {
 
 		void CChildView::OnConfigurationLoopplayback() 
 		{
-			Global::pPlayer->_loopSong = !Global::pPlayer->_loopSong;
+			Global::player()._loopSong = !Global::player()._loopSong;
 		}
 
 		void CChildView::OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI) 
 		{
-			if (Global::pPlayer->_loopSong)
+			if (Global::player()._loopSong)
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);	

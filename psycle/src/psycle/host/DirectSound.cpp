@@ -6,7 +6,7 @@
 #include "DSoundConfig.hpp"
 #include "ConfigStorage.hpp"
 #include "MidiInput.hpp"
-#include "Psycle.hpp"
+#include "Global.hpp"
 
 #include <universalis.hpp>
 #include <universalis/os/thread_name.hpp>
@@ -248,12 +248,12 @@ namespace psycle
 			return true;
 		}
 
-		void DirectSound::GetPlaybackPorts(std::vector<std::string>&ports)
+		void DirectSound::GetPlaybackPorts(std::vector<std::string>&ports) const
 		{
 			ports.resize(0);
 			for (unsigned int i=0;i<_playEnums.size();i++) ports.push_back(_playEnums[i].portname);
 		}
-		void DirectSound::GetCapturePorts(std::vector<std::string>&ports)
+		void DirectSound::GetCapturePorts(std::vector<std::string>&ports) const
 		{
 			ports.resize(0);
 			for (unsigned int i=0;i<_capEnums.size();i++) ports.push_back(_capEnums[i].portname);
@@ -631,7 +631,7 @@ namespace psycle
 					if((std::uint64_t)m_readPosWraps * (std::uint64_t)_dsBufferSize >= 0x100000000LL)
 					{
 						m_readPosWraps = 0;
-						Global::midi().ReSync();	// MIDI IMPLEMENTATION
+						PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
 					}
 				}
 				_highMark = _lowMark + settings_->blockBytes();
@@ -642,7 +642,7 @@ namespace psycle
 
 					if(SUCCEEDED(hr)) {
 						_playing = true;
-						Global::midi().ReSync(); // MIDI IMPLEMENTATION
+						PsycleGlobal::midi().ReSync(); // MIDI IMPLEMENTATION
 					}
 				}
 			}
@@ -678,7 +678,7 @@ namespace psycle
 			Enable(true);
 		}
 
-		std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) {
+		std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) const {
 			for(int i = 0; i < _playEnums.size() ; ++i)
 			{
 				if(memcmp(device,_playEnums[i].guid,sizeof(GUID)) == 0)
@@ -710,7 +710,7 @@ namespace psycle
 			}
 		}
 
-		std::uint32_t DirectSound::GetWritePosInSamples()
+		std::uint32_t DirectSound::GetWritePosInSamples() const
 		{
 			//http://msdn.microsoft.com/en-us/library/ee418744%28v=VS.85%29.aspx
 			//The write cursor is the point after which it is safe to write data into the buffer.
@@ -738,7 +738,7 @@ namespace psycle
 			}
 		}
 
-		bool DirectSound::PortEnums::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput)
+		bool DirectSound::PortEnums::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput) const
 		{
 			///\todo: Implement
 			return true;

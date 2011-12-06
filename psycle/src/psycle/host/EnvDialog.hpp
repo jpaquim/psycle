@@ -11,8 +11,8 @@ namespace psycle { namespace host {
 		class CEnvDialog : public CDialog
 		{
 		public:
-			CEnvDialog(CWnd* pParent = 0);
-			Song* _pSong;
+			CEnvDialog(Song& song, CWnd* pParent = 0);
+			Song& thesong;
 			void DrawADSR(int AX,int BX,int CX,int DX);
 			void DrawADSRFil(int AX,int BX,int CX,int DX);
 			enum { IDD = IDD_ENVDIALOG };

@@ -17,7 +17,7 @@ namespace psycle { namespace host {
 		MachineBar(void);
 		virtual ~MachineBar(void);
 
-		void InitializeValues(CMainFrame* frame, CChildView* view, Song* song);
+		void InitializeValues(CMainFrame* frame, CChildView* view, Song& song);
 		void ChangeIns(int i);
 		void ChangeGen(int i);
 		void UpdateComboIns(bool updatelist=true);
@@ -58,7 +58,7 @@ namespace psycle { namespace host {
 
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;
-		Song*		m_pSong;
+		Song* m_pSong;
 
 		bool macComboInitialized;
 	};

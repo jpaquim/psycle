@@ -5,13 +5,7 @@
 #include "Plugin.hpp"
 #include "FileIO.hpp"
 #include "Song.hpp"
-
-#if !defined WINAMP_PLUGIN
-	#include "InputHandler.hpp"
-	#include "NewMachine.hpp"
-#else
-	#include "player_plugins/winamp/shrunk_newmachine.hpp"
-#endif //!defined WINAMP_PLUGIN
+#include "machineloader.hpp"
 
 #include "Zap.hpp"
 #include <diversalis/os.hpp>
@@ -122,7 +116,7 @@ namespace psycle
 				// grows the search path with intermediate dirs between the configured root dir for plugins and the dir of this plugin
 				{
 					// configured root dir for plugins
-					boost::filesystem::path root_path(Global::pConfig->GetPluginDir(), boost::filesystem::native);
+					boost::filesystem::path root_path(Global::configuration().GetPluginDir(), boost::filesystem::native);
 					// grow the search path with each compound of the sub dir until we reached the root dir
 					// first, normalize the path so we don't have
 					// dirs that are not intermediate because of things like foo/../bar
@@ -270,7 +264,7 @@ namespace psycle
 			std::string sPath;
 			int shellIdx=0;
 
-			if(!CNewMachine::lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) 
+			if(!Global::machineload().lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
@@ -293,12 +287,12 @@ namespace psycle
 						psFileName = "gamefx13.dll";
 					}
 				}
-				if(!CNewMachine::lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) {
+				if(!Global::machineload().lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) {
 					sPath = psFileName;
 				}
 			}
 
-			if(!CNewMachine::TestFilename(sPath,shellIdx) ) 
+			if(!Global::machineload().TestFilename(sPath,shellIdx) ) 
 			{
 				return false;
 			}
@@ -310,8 +304,7 @@ namespace psycle
 			{
 #ifndef NDEBUG 
 					throw e;
-					return false;
-#else
+#elif !defined WINAMP_PLUGIN
 
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath << std::endl
@@ -319,22 +312,21 @@ namespace psycle
 					<< typeid(e).name() << std::endl
 					<< e.what();
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-				return false;
 #endif
+				return false;
 			}
 			catch(...)
 			{
 #ifndef NDEBUG 
 					throw;
-					return false;
-#else
+#elif !defined WINAMP_PLUGIN
 				std::ostringstream s; s
 					<< "Exception while instanciating: " << sPath2 << std::endl
 					<< "Replacing with dummy." << std::endl
 					<< "Unkown type of exception";
 				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
-				return false;
 #endif
+					return false;
 			}
 			return true;
 		}
@@ -469,7 +461,7 @@ namespace psycle
 					while (ns)
 					{
 						int nextevent = (TWSActive)?TWSSamples:ns+1;
-						for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+						for (int i=0; i < Global::song().SONGTRACKS; i++)
 						{
 							if (TriggerDelay[i]._cmd)
 							{
@@ -485,7 +477,7 @@ namespace psycle
 							{
 								TWSSamples -= ns;
 							}
-							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+							for (int i=0; i < Global::song().SONGTRACKS; i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd)
@@ -495,7 +487,7 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::_pSong->SONGTRACKS);
+								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::song().SONGTRACKS);
 							}
 							catch(const std::exception & e)
 							{
@@ -515,7 +507,7 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::_pSong->SONGTRACKS);
+									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::song().SONGTRACKS);
 								}
 								catch(const std::exception &e)
 								{
@@ -568,7 +560,7 @@ namespace psycle
 									if(!activecount) TWSActive = false;
 								}
 							}
-							for (int i=0; i < Global::_pSong->SONGTRACKS; i++)
+							for (int i=0; i < Global::song().SONGTRACKS; i++)
 							{
 								// come back to this
 								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -614,7 +606,7 @@ namespace psycle
 					return 0;
 #endif
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 									}
 									else
 									{
@@ -639,7 +631,7 @@ namespace psycle
 					return 0;
 #endif
 										}
-										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::pPlayer->SamplesPerRow())/256;
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
 										if (parameter < 9)
 										{
@@ -717,7 +709,7 @@ namespace psycle
 											ArpeggioCount[i]=0;
 											break;
 										}
-										TriggerDelayCounter[i] = Global::pPlayer->SamplesPerRow()*Global::pPlayer->tpb/24;
+										TriggerDelayCounter[i] = Global::player().SamplesPerRow()*Global::player().tpb/24;
 									}
 									else
 									{
@@ -956,7 +948,7 @@ namespace psycle
 					return;
 #endif
 						}
-						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::pPlayer->SamplesPerRow();
+						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::player().SamplesPerRow();
 						TWSSamples = 0;
 						TWSActive = TRUE;
 					}
@@ -1037,10 +1029,10 @@ namespace psycle
 					Machine::GetCurrentPreset(preset);
 				}
 			}
-			catch(const std::exception &)
+			catch(const std::exception &e)
 			{
 #ifndef NDEBUG 
-					throw e;
+				throw e;
 				delete[] pData;
 				preset.Init(numParameters);
 #else
@@ -1124,7 +1116,7 @@ namespace psycle
 
 			std::string sPath2;
 			CString sPath;
-			if ( !CNewMachine::lookupDllName(sDllName,sPath2,MACH_PLUGIN,shellIdx) ) 
+			if ( !Global::machineload().lookupDllName(sDllName,sPath2,MACH_PLUGIN,shellIdx) ) 
 			{
 				// Check Compatibility Table.
 				// Probably could be done with the dllNames lockup.
@@ -1132,7 +1124,7 @@ namespace psycle
 				sPath2 = sDllName;
 			}
 			
-			if ( !CNewMachine::TestFilename(sPath2,shellIdx) ) 
+			if ( !Global::machineload().TestFilename(sPath2,shellIdx) ) 
 			{
 				result = false;
 			}
@@ -1144,9 +1136,11 @@ namespace psycle
 				}
 				catch(...)
 				{
+#if !defined WINAMP_PLUGIN
 					char sError[_MAX_PATH];
 					sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
 					MessageBox(NULL,sError, "Error", MB_OK);
+#endif //!defined WINAMP_PLUGIN
 					result = false;
 				}
 			}

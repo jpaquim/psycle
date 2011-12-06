@@ -13,9 +13,9 @@ namespace psycle { namespace host {
 			DECLARE_DYNAMIC(CTransformPatternDlg)
 
 		private:
-			Song* pSong;
+			Song& song;
 		public:
-			CTransformPatternDlg(Song* _pSong, CWnd* pParent = NULL);   // standard constructor
+			CTransformPatternDlg(Song& _pSong, CWnd* pParent = NULL);   // standard constructor
 			virtual ~CTransformPatternDlg();
 
 			enum { IDD = IDD_TRANSFORMPATTERN };			

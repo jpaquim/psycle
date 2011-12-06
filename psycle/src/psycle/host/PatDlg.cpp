@@ -8,7 +8,8 @@
 
 namespace psycle { namespace host {
 
-		CPatDlg::CPatDlg(CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
+		CPatDlg::CPatDlg(Song& song, CWnd* pParent) : CDialog(CPatDlg::IDD, pParent)
+			, m_song(song)
 		{
 			m_adaptsize = FALSE;
 			bInit = FALSE;
@@ -93,14 +94,14 @@ namespace psycle { namespace host {
 			buffer[31]='\0';
 			strcpy(patName,buffer);
 
-			Global::psycleconf().patView().showTrackNames_= (m_shownames != 0);
+			PsycleGlobal::conf().patView().showTrackNames_= (m_shownames != 0);
 
 			CString text;
 			m_trackedit.GetWindowText(text);
 			tracknames[prevsel] = static_cast<LPCTSTR>(text);
-			m_pSong->shareTrackNames = (m_independentnames == 0);
-			for(int i(0); i< m_pSong->SONGTRACKS; i++) {
-				m_pSong->ChangeTrackName(patIdx,i,tracknames[i]);
+			m_song.shareTrackNames = (m_independentnames == 0);
+			for(int i(0); i< m_song.SONGTRACKS; i++) {
+				m_song.ChangeTrackName(patIdx,i,tracknames[i]);
 			}
 
 			CDialog::OnOK();
@@ -154,7 +155,7 @@ namespace psycle { namespace host {
 		void CPatDlg::OnCopyNames()
 		{
 			int sel = m_patternlist.GetCurSel();
-			m_pSong->CopyNamesFrom(sel,patIdx);
+			m_song.CopyNamesFrom(sel,patIdx);
 			FillTrackList();
 			bInit = false;
 			m_trackedit.SetWindowText(tracknames[prevsel].c_str());
@@ -188,12 +189,12 @@ namespace psycle { namespace host {
 		void CPatDlg::FillTrackList() 
 		{
 			char buffer[256];
-			for(int i(0); i<m_pSong->SONGTRACKS; i++) 
+			for(int i(0); i<m_song.SONGTRACKS; i++) 
 			{
-				tracknames[i] = m_pSong->_trackNames[patIdx][i];
+				tracknames[i] = m_song._trackNames[patIdx][i];
 			}
 			m_tracklist.ResetContent();
-			for(int i(0); i<m_pSong->SONGTRACKS; i++) 
+			for(int i(0); i<m_song.SONGTRACKS; i++) 
 			{
 				sprintf(buffer,"%.2d: %s",i,tracknames[i].c_str());
 				m_tracklist.AddString(buffer);
@@ -204,11 +205,11 @@ namespace psycle { namespace host {
 		{
 			char buffer[256];
 			m_patternlist.ResetContent();
-			int lastPatternUsed = m_pSong->GetHighestPatternIndexInSequence();
+			int lastPatternUsed = m_song.GetHighestPatternIndexInSequence();
 			for(int i(0); i<=lastPatternUsed; i++) 
 			{
-				if(!m_pSong->IsPatternEmpty(i)) {
-					sprintf(buffer,"%.2d: %s",i,m_pSong->patternName[i]);
+				if(!m_song.IsPatternEmpty(i)) {
+					sprintf(buffer,"%.2d: %s",i,m_song.patternName[i]);
 					m_patternlist.AddString(buffer);
 				}
 			}

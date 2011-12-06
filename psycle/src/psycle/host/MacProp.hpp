@@ -14,9 +14,9 @@ namespace psycle { namespace host {
 		class CMacProp : public CDialog
 		{
 		public:
-			CMacProp(CWnd* pParent = 0);
+			CMacProp(Song& song, CWnd* pParent = 0);
 			Machine *pMachine;
-			Song* pSong;
+			Song& thesong;
 			CChildView *m_view;
 			int thisMac;
 			char txt[32];

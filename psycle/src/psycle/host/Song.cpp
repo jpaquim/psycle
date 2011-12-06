@@ -3,16 +3,16 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "Song.hpp"
+#include "machineloader.hpp"
 
 #if !defined WINAMP_PLUGIN
 	#include "PsycleConfig.hpp"
-	#include "NewMachine.hpp"
 	#include "ProgressDialog.hpp"
 	#include "InputHandler.hpp"
+	#include <psycle/helpers/riff.hpp> // for Wave file loading.
 #else
 	#include "Configuration.hpp"
 	#include "player_plugins/winamp/fake_progressDialog.hpp"
-	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
 
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
@@ -22,11 +22,9 @@
 #include "VstHost24.hpp"
 
 #include <psycle/helpers/datacompression.hpp>
-#include "convert_internal_machines.private.hpp"
+#include <psycle/helpers/math.hpp>
 namespace loggers = universalis::os::loggers;
-#if !defined WINAMP_PLUGIN
-	#include <psycle/helpers/riff.hpp> // for Wave file loading.
-#endif //!defined WINAMP_PLUGIN
+#include "convert_internal_machines.private.hpp"
 
 #include "Zap.hpp"
 
@@ -34,7 +32,6 @@ namespace psycle
 {
 	namespace host
 	{
-		extern CPsycleApp theApp;
 		int Song::defaultPatLines = 64;
 
 		/// the riff WAVE/fmt chunk.
@@ -99,7 +96,7 @@ namespace psycle
 				break;
 			case MACH_PLUGIN:
 				{
-					if(!CNewMachine::TestFilename(psPluginDll,shellIdx))
+					if(!Global::machineload().TestFilename(psPluginDll,shellIdx))
 					{
 						return false;
 					}
@@ -124,7 +121,7 @@ namespace psycle
 			case MACH_VST:
 			case MACH_VSTFX:
 				{
-					if(!CNewMachine::TestFilename(psPluginDll,shellIdx)) 
+					if(!Global::machineload().TestFilename(psPluginDll,shellIdx)) 
 					{
 						return false;
 					}
@@ -214,7 +211,7 @@ namespace psycle
 				// store out volumes aswell
 				if (connection[i])
 				{
-					origmac->GetDestWireVolume(this,songIdx,i,outputConVol[i]);
+					origmac->GetDestWireVolume(*this,songIdx,i,outputConVol[i]);
 				}
 			}
 
@@ -277,8 +274,8 @@ namespace psycle
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					// Store the volumes of each wire and exchange.
-					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(this,mac1->_macIndex,i,tmp1ovol[i]);	}
-					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(this,mac2->_macIndex,i,tmp2ovol[i]); }				
+					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(*this,mac1->_macIndex,i,tmp1ovol[i]);	}
+					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(*this,mac2->_macIndex,i,tmp2ovol[i]); }				
 					mac1->GetWireVolume(i,tmp1ivol[i]);
 					mac2->GetWireVolume(i,tmp2ivol[i]);
 
@@ -322,23 +319,23 @@ namespace psycle
 					if (mac1->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac1->_inputMachines[i]];
-						mac1->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
+						mac1->InsertInputWireIndex(*this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
 					}
 					if (mac2->_inputCon[i])
 					{
 						Machine* macsrc = _pMachine[mac2->_inputMachines[i]];
-						mac2->InsertInputWireIndex(this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
+						mac2->InsertInputWireIndex(*this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
 					}
 
 					if (mac1->_connection[i])
 					{
 						Machine* macdst = _pMachine[mac1->_outputMachines[i]];
-						macdst->InsertInputWireIndex(this,macdst->FindInputWire(two),two,mac1->GetAudioRange()/macdst->GetAudioRange(),tmp2ovol[i]);
+						macdst->InsertInputWireIndex(*this,macdst->FindInputWire(two),two,mac1->GetAudioRange()/macdst->GetAudioRange(),tmp2ovol[i]);
 					}
 					if (mac2->_connection[i])
 					{
 						Machine* macdst = _pMachine[mac2->_outputMachines[i]];
-						macdst->InsertInputWireIndex(this,macdst->FindInputWire(one),one,mac2->GetAudioRange()/macdst->GetAudioRange(),tmp1ovol[i]);
+						macdst->InsertInputWireIndex(*this,macdst->FindInputWire(one),one,mac2->GetAudioRange()/macdst->GetAudioRange(),tmp1ovol[i]);
 					}					
 				}
 
@@ -523,13 +520,10 @@ namespace psycle
 			m_LinesPerBeat=4;
 //			LineCounter=0;
 //			LineChanged=false;
-			//MessageBox(0, "Machines", 0, 0);
 			// Clean up allocated machines.
 			DestroyAllMachines(true);
-			//MessageBox(0, "Insts", 0, 0);
 			// Cleaning instruments
 			DeleteInstruments();
-			//MessageBox(0, "Pats", 0, 0);
 			// Clear patterns
 			DeleteAllPatterns();
 			// Clear sequence
@@ -605,16 +599,13 @@ namespace psycle
 		{
 			for (int i(0);i < MAX_MACHINES; ++i)
 			{
-				if (_pMachine[i])
+				if (_pMachine[i] && _pMachine[i]->_type == MACH_MIXER)
 				{
-					if (_pMachine[i]->_type == MACH_MIXER)
+					Mixer* mac = static_cast<Mixer*>(_pMachine[i]);
+					for (int j(0); j<mac->numreturns(); ++j)
 					{
-						Mixer* mac = static_cast<Mixer*>(_pMachine[i]);
-						for (int j(0); j<mac->numreturns(); ++j)
-						{
-							if ( mac->Return(j).IsValid())
-								mac->SetMixerSendFlag(this,_pMachine[mac->Return(j).Wire().machine_]);
-						}
+						if ( mac->Return(j).IsValid())
+							mac->SetMixerSendFlag(*this,_pMachine[mac->Return(j).Wire().machine_]);
 					}
 				}
 			}
@@ -644,8 +635,8 @@ namespace psycle
 			if(freebus == -1 || dfreebus == -1 ) return -1;
 
 			// If everything went right, connect them.
-			srcMac->InsertOutputWireIndex(this,freebus,dstMac->_macIndex);
-			dstMac->InsertInputWireIndex(this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
+			srcMac->InsertOutputWireIndex(*this,freebus,dstMac->_macIndex);
+			dstMac->InsertInputWireIndex(*this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
 			return dfreebus;
 		}
 		bool Song::ChangeWireDestMacNonBlocking(Machine* srcMac,Machine* newdstMac, int wiresrc,int newwiredest)
@@ -678,9 +669,9 @@ namespace psycle
 					return false;
 
 				oldmac->GetWireVolume(w,volume);
-				oldmac->DeleteInputWireIndex(this,w);
-				srcMac->InsertOutputWireIndex(this,wiresrc,newdstMac->_macIndex);
-				newdstMac->InsertInputWireIndex(this,newwiredest,srcMac->_macIndex,srcMac->GetAudioRange()/newdstMac->GetAudioRange(),volume);
+				oldmac->DeleteInputWireIndex(*this,w);
+				srcMac->InsertOutputWireIndex(*this,wiresrc,newdstMac->_macIndex);
+				newdstMac->InsertInputWireIndex(*this,newwiredest,srcMac->_macIndex,srcMac->GetAudioRange()/newdstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -726,10 +717,10 @@ namespace psycle
 				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
 					return false;
 
-				oldmac->DeleteOutputWireIndex(this,w);
-				newsrcMac->InsertOutputWireIndex(this,newwiresrc,dstMac->_macIndex);
+				oldmac->DeleteOutputWireIndex(*this,w);
+				newsrcMac->InsertOutputWireIndex(*this,newwiresrc,dstMac->_macIndex);
 				dstMac->GetWireVolume(wiredest,volume);
-				dstMac->InsertInputWireIndex(this,wiredest,newsrcMac->_macIndex,newsrcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+				dstMac->InsertInputWireIndex(*this,wiredest,newsrcMac->_macIndex,newsrcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
 				return true;
 			}
 			return false;
@@ -740,7 +731,7 @@ namespace psycle
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
-				iMac->DeleteWires(this);
+				iMac->DeleteWires(*this);
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 				try
@@ -1281,7 +1272,9 @@ namespace psycle
 				pFile->Read(&size,sizeof(size));
 				if(version > CURRENT_FILE_VERSION)
 				{
+#if !defined WINAMP_PLUGIN
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
+#endif //!defined WINAMP_PLUGIN
 				}
 				pFile->Read(&chunkcount,sizeof(chunkcount));
 				int bytesread = 4;
@@ -1399,7 +1392,7 @@ namespace psycle
 								///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
 								/// It should be coded in some way to get this information from the loading song, since doing it here
 								/// is bad for the Winamp plugin (or any other multi-document situation).
-								Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
+								Global::player().SetBPM(BeatsPerMin(), LinesPerBeat());
 							}
 						}
 						pFile->Seek(begins + size);
@@ -1629,7 +1622,7 @@ namespace psycle
 					}
 				}
 
-				RestoreMixerSendFlags();
+				if (fullopen) { RestoreMixerSendFlags(); }
 				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 				// translate any data that is required
 				machineSoloed = solo;
@@ -1675,10 +1668,10 @@ namespace psycle
 					///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
 					/// It should be coded in some way to get this information from the loading song, since doing it here
 					/// is bad for the Winamp plugin (or any other multi-document situation).
-					Global::pPlayer->SetBPM(BeatsPerMin(), LinesPerBeat());
-	//				Global::pPlayer->bpm = m_BeatsPerMin;
-	//				Global::pPlayer->tpb = m_LinesPerBeat;
-	//				Global::pPlayer->SamplesPerRow(sampR * Global::pConfig->_pOutputDriver->_samplesPerSec / 44100);
+					Global::player().SetBPM(BeatsPerMin(), LinesPerBeat());
+	//				Global::player().bpm = m_BeatsPerMin;
+	//				Global::player().tpb = m_LinesPerBeat;
+	//				Global::player().SamplesPerRow(sampR * Global::configuration()._pOutputDriver->_samplesPerSec / 44100);
 				}
 				pFile->Read(&currentOctave, sizeof(char));
 				pFile->Read(busMachine, 64);
@@ -1917,9 +1910,6 @@ namespace psycle
 								Machine* pOldMachine = pMac[i];
 								pMac[i] = new Dummy(pOldMachine);
 								pMac[i]->_macIndex=i;
-								std::stringstream s;
-								s << "X!" << pOldMachine->GetEditName();
-								pMac[i]->SetEditName(s.str());
 								zapObject(pOldMachine);
 								// Warning: It cannot be known if the missing plugin is a generator
 								// or an effect. This will be guessed from the busMachine array.
@@ -1942,7 +1932,7 @@ namespace psycle
 								pTempMac->PreLoad(pFile,program,instance);
 								assert(instance < OLD_MAX_PLUGINS);
 								int shellIdx=0;
-								if((!vstL[instance].valid) || (!CNewMachine::lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
+								if((!vstL[instance].valid) || (!Global::machineload().lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
 								{
 									berror=true;
 									sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
@@ -1950,7 +1940,7 @@ namespace psycle
 								else
 								{
 									strcpy(sPath,temp.c_str());
-									if (!CNewMachine::TestFilename(sPath,shellIdx))
+									if (!Global::machineload().TestFilename(sPath,shellIdx))
 									{
 										berror=true;
 										sprintf(sError,"This VST plug-in is Disabled \"%s\" - replacing with Dummy.",sPath);
@@ -1989,15 +1979,13 @@ namespace psycle
 								}
 								if (berror)
 								{
+#if !defined WINAMP_PLUGIN
 									MessageBox(NULL,sError, "Loading Error", MB_OK);
-
+#endif // !defined WINAMP_PLUGIN
 									pMac[i] = new Dummy(pTempMac);
 									pMac[i]->_macIndex=i;
-									std::stringstream s;
-									s << "X!" << pTempMac->GetEditName();
-									pMac[i]->SetEditName(s.str());
 									zapObject(pTempMac);
-									if (type == MACH_VST ) pMac[i]->_mode = MACHMODE_FX;
+									if (type == MACH_VSTFX ) pMac[i]->_mode = MACHMODE_FX;
 									else pMac[i]->_mode = MACHMODE_GENERATOR;
 								}
 							break;
@@ -2009,11 +1997,13 @@ namespace psycle
 							pMac[i]->Load(pFile);
 							break;
 						default:
+#if !defined WINAMP_PLUGIN
 							{
 								char buf[MAX_PATH];
 								sprintf(buf,"unkown machine type: %i",type);
 								MessageBox(0, buf, "Loading old song", MB_ICONERROR);
 							}
+#endif // !defined WINAMP_PLUGIN
 							pMac[i] = new Dummy(i);
 							pMac[i]->Init();
 							pMac[i]->Load(pFile);
@@ -2225,7 +2215,7 @@ namespace psycle
 										val*=32768.0f; // BugFix
 									}
 									// and set the volume.
-									pMac[i]->InsertInputWireIndex(this,c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
+									pMac[i]->InsertInputWireIndex(*this,c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
 								}
 							}
 							else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
@@ -2235,7 +2225,7 @@ namespace psycle
 				
 				// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
 				// to the real machine.
-				// Due to this, we have to move machines to where they really are, 
+				// Due to *this, we have to move machines to where they really are, 
 				// and remap the inputs and outputs indexes again... ouch
 				// At the same time, we validate each wire, and the number count.
 				progress.m_Progress.SetPos(8192+4096+2048+1024);
@@ -2755,6 +2745,7 @@ namespace psycle
 
 		bool Song::CloneMac(int src,int dst)
 		{
+#if !defined WINAMP_PLUGIN
 			CExclusiveLock lock(&semaphore, 2, true);
 			// src has to be occupied and dst must be empty
 			if (_pMachine[src] && _pMachine[dst])
@@ -2784,12 +2775,10 @@ namespace psycle
 			}
 
 			// save our file
-#if !defined WINAMP_PLUGIN
-			Global::pInputHandler->AddMacViewUndo();
-#endif //!defined WINAMP_PLUGIN
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 			///\todo: Wrong song dir causes "machine cloning failed"! 
 			///\todo: the process should be changed and save the data in memory.
-			CString filepath = Global::psycleconf().GetSongDir().c_str();
+			CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;
@@ -2866,8 +2855,7 @@ namespace psycle
 
 			// randomize the dst's position
 
-#if !defined WINAMP_PLUGIN
-			SMachineCoords mcoords = Global::psycleconf().macView().MachineCoords;
+			SMachineCoords mcoords = PsycleGlobal::conf().macView().MachineCoords;
 
 			int xs,ys;
 			if (src >= MAX_BUSES)
@@ -2883,11 +2871,10 @@ namespace psycle
 
 			_pMachine[dst]->_x = _pMachine[dst]->_x+32;
 			_pMachine[dst]->_y = _pMachine[dst]->_y+ys+8;
-#endif //!defined WINAMP_PLUGIN
 
 			// delete all connections
 
-			_pMachine[dst]->DeleteWires(this);
+			_pMachine[dst]->DeleteWires(*this);
 
 			int number = 1;
 			char buf[sizeof(_pMachine[dst]->_editName)+4];
@@ -2926,6 +2913,7 @@ namespace psycle
 
 			buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
 			strcpy(_pMachine[dst]->_editName,buf);
+#endif //!defined WINAMP_PLUGIN
 
 			return true;
 		}
@@ -2933,6 +2921,8 @@ namespace psycle
 
 		bool Song::CloneIns(int src,int dst)
 		{
+#if !defined WINAMP_PLUGIN
+
 			CExclusiveLock lock(&semaphore, 2, true);
 			// src has to be occupied and dst must be empty
 			if (!_pInstrument[src]->Empty() && !_pInstrument[dst]->Empty())
@@ -2950,14 +2940,11 @@ namespace psycle
 				return false;
 			}
 			// ok now we get down to business
-#if !defined WINAMP_PLUGIN
-
-			Global::pInputHandler->AddMacViewUndo();
-#endif //!defined WINAMP_PLUGIN
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			// save our file
 
-			CString filepath = Global::psycleconf().GetSongDir().c_str();
+			CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;
@@ -3032,6 +3019,7 @@ namespace psycle
 			}
 			file.Close();
 			DeleteFile(filepath);
+#endif //!defined WINAMP_PLUGIN
 			return true;
 		}
 

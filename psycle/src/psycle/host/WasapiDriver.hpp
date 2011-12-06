@@ -26,7 +26,7 @@ namespace psycle
 			virtual bool operator!=(WasapiSettings const &);
 			virtual bool operator==(WasapiSettings const & other) { return !((*this) != other); }
 			virtual AudioDriver* NewDriver();
-			virtual AudioDriverInfo& GetInfo() { return info_; }
+			virtual const AudioDriverInfo& GetInfo() const { return info_; }
 
 			virtual void SetDefaultSettings();
 			virtual void Load(ConfigStorage &);
@@ -44,7 +44,7 @@ namespace psycle
 			{
 			public:
 				PortEnum() {};
-				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode);
+				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, AUDCLNT_SHAREMODE sharemode) const;
 				// from GetId
 				WCHAR szDeviceID[MAX_STR_LEN];
 				// from PropVariant
@@ -78,35 +78,37 @@ namespace psycle
 		public:
 			WasapiDriver(WasapiSettings* settings);
 			virtual ~WasapiDriver();
-			virtual AudioDriverSettings& settings() { return *settings_;}
+			virtual AudioDriverSettings& settings() const { return *settings_;}
 
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
 			virtual bool Enable(bool e) { return e ? Start() : Stop(); }
 			virtual void Reset(void);
 			virtual void Configure(void);
-			virtual bool Initialized(void) {return _initialized; }
-			virtual bool Enabled() { return running; }
-			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
-			virtual void GetCapturePorts(std::vector<std::string> &ports);
+			virtual bool Initialized(void) const { return _initialized; }
+			virtual bool Enabled() const { return running; }
+			virtual void GetPlaybackPorts(std::vector<std::string> &ports) const;
+			virtual void GetCapturePorts(std::vector<std::string> &ports) const;
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual	void RefreshAvailablePorts();
-			virtual std::uint32_t GetWritePosInSamples();
+			virtual std::uint32_t GetWritePosInSamples() const;
 			virtual std::uint32_t GetPlayPosInSamples();
-			virtual std::uint32_t GetInputLatencyMs();
-			virtual std::uint32_t GetOutputLatencyMs();
+			virtual std::uint32_t GetInputLatencyMs() const;
+			virtual std::uint32_t GetOutputLatencyMs() const;
+			virtual std::uint32_t GetInputLatencySamples() const;
+			virtual std::uint32_t GetOutputLatencySamples() const;
 		private:
 			static void Error(const TCHAR msg[]);
 			static const char* GetError(HRESULT hr);
 			void RefreshPorts(IMMDeviceEnumerator *pEnumerator);
 			void FillPortList(std::vector<PortEnum>& portList, IMMDeviceCollection *pCollection, LPWSTR defaultID);
-			std::uint32_t GetIdxFromDevice(WCHAR* szDeviceID);
+			std::uint32_t GetIdxFromDevice(WCHAR* szDeviceID) const;
 			bool Start();
 			bool Stop();
 			static DWORD WINAPI EventAudioThread(void* pWasapi);
 			HRESULT CreateCapturePort(IMMDeviceEnumerator* pEnumerator, PaWasapiSubStream &port);
-			HRESULT GetStreamFormat(PaWasapiSubStream& stream, WAVEFORMATEXTENSIBLE* pwfx);
+			HRESULT GetStreamFormat(PaWasapiSubStream& stream, WAVEFORMATEXTENSIBLE* pwfx) const;
 			HRESULT DoBlock(IAudioRenderClient *pRenderClient, int numFramesAvailable);
 			HRESULT DoBlockRecording(PaWasapiSubStream& port, IAudioCaptureClient *pCaptureClient, int numFramesAvailable);
 

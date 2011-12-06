@@ -22,6 +22,7 @@ namespace psycle { namespace host {
 			DECLARE_MESSAGE_MAP()
 			afx_msg void OnBrowseSong();
 			afx_msg void OnChangeSongedit();
+			afx_msg void OnRecordUsePsyDir();
 			afx_msg void OnBnClickedBrowsewaverec();
 			afx_msg void OnEnChangeWaverecedit();
 			afx_msg void OnBrowseInst();
@@ -44,7 +45,9 @@ namespace psycle { namespace host {
 			void DisableAllBridges();
 		protected:
 			CEdit	m_songEdit;
+			CButton m_waveInPsyDir;
 			CEdit   m_waveRec;
+			CButton m_browseWaveRec;
 			CEdit	m_instEdit;
 			CEdit	m_pluginEdit;
 			CEdit	m_vst32Edit;

@@ -34,8 +34,6 @@ namespace psycle { namespace host {
 		static const char registry_config_subkey[] = "configuration";
 	}
 
-		extern CPsycleApp theApp;
-
 		PsycleConfig::MachineParam::MachineParam()
 		{
 			CNativeView::uiSetting = this;
@@ -1297,7 +1295,7 @@ namespace psycle { namespace host {
 		}
 		void PsycleConfig::Midi::RefreshSettings()
 		{
-			Global::midi().GetConfigPtr()->midiHeadroom = _midiHeadroom;
+			PsycleGlobal::midi().GetConfigPtr()->midiHeadroom = _midiHeadroom;
 		}
 
 
@@ -1405,6 +1403,7 @@ namespace psycle { namespace host {
 					store = new Registry(Registry::HKCU, "");
 					if(!store->OpenLocation(registry_root_path))
 					{
+						delete store;
 						return false;
 					}
 					else {
@@ -1504,6 +1503,7 @@ namespace psycle { namespace host {
 				if(!store->OpenGroup("configuration--1.8")) {
 					// If neither, return.
 					store->CloseLocation();
+					delete store;
 					return false;
 				}
 			}
@@ -1567,6 +1567,7 @@ namespace psycle { namespace host {
 
 			store.Read("SongDir", song_dir_);
 			store.Read("WaveRecDir", wave_rec_dir_);
+			store.Read("WaveRecInPSYDir", rec_in_psy_dir_);
 			store.Read("InstrumentDir", instrument_dir_);
 			store.Read("SkinDir", skin_dir_);
 			store.Read("PresetsDir", presets_dir_);
@@ -1645,6 +1646,7 @@ namespace psycle { namespace host {
 
 			store.Write("SongDir", GetSongDir());
 			store.Write("WaveRecDir", GetWaveRecDir());
+			store.Write("WaveRecInPSYDir", rec_in_psy_dir_);
 			store.Write("InstrumentDir", GetInstrumentDir());
 			store.Write("SkinDir", GetSkinDir());
 			store.Write("PresetsDir", GetPresetsDir());
@@ -1689,7 +1691,13 @@ namespace psycle { namespace host {
 		{
 			Configuration::RefreshSettings();
 			SetCurrentSongDir(GetSongDir());
-			SetCurrentWaveRecDir(GetWaveRecDir());
+			if(IsRecInPSYDir()) {
+				SetCurrentWaveRecDir(GetSongDir());
+			}
+			else {
+				SetCurrentWaveRecDir(GetWaveRecDir());
+			}
+			
 			SetCurrentInstrumentDir(GetInstrumentDir());
 			
 			patView_.RefreshSettings();
@@ -1724,10 +1732,10 @@ namespace psycle { namespace host {
 				OutputChanged(_outputDriverIndex);
 			}
 			if(refreshMidi) {
-				Global::midi().Close();
-				Global::midi().SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
-				Global::midi().SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
-				Global::midi().Open();
+				PsycleGlobal::midi().Close();
+				PsycleGlobal::midi().SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
+				PsycleGlobal::midi().SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
+				PsycleGlobal::midi().Open();
 			}
 		}
 		void PsycleConfig::OutputChanged(int newidx)
@@ -1738,8 +1746,8 @@ namespace psycle { namespace host {
 			else { _outputDriverIndex = newidx; }
 			delete _pOutputDriver;
 			_pOutputDriver = audioSettings[_outputDriverIndex]->NewDriver();
-			_pOutputDriver->Initialize(Global::pPlayer->Work, Global::pPlayer);
-			Global::pPlayer->SetSampleRate(audioSettings[_outputDriverIndex]->samplesPerSec());
+			_pOutputDriver->Initialize(Global::player().Work, &Global::player());
+			Global::player().SetSampleRate(audioSettings[_outputDriverIndex]->samplesPerSec());
 			_pOutputDriver->Enable(true);
 		}
 		void PsycleConfig::MidiChanged(int newidx)
@@ -1748,9 +1756,9 @@ namespace psycle { namespace host {
 				_midiDriverIndex = 0;
 			}
 			else { _midiDriverIndex = newidx; }
-			Global::midi().Close();
-			Global::midi().SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
-			Global::midi().Open();
+			PsycleGlobal::midi().Close();
+			PsycleGlobal::midi().SetDeviceId(DRIVER_MIDI, _midiDriverIndex - 1);
+			PsycleGlobal::midi().Open();
 		}
 		void PsycleConfig::SyncChanged(int newidx)
 		{
@@ -1758,9 +1766,9 @@ namespace psycle { namespace host {
 				_syncDriverIndex = 0;
 			}
 			else { _syncDriverIndex = newidx; }
-			Global::midi().Close();
-			Global::midi().SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
-			Global::midi().Open();
+			PsycleGlobal::midi().Close();
+			PsycleGlobal::midi().SetDeviceId(DRIVER_SYNC, _syncDriverIndex - 1);
+			PsycleGlobal::midi().Open();
 		}
 
         void PsycleConfig::AddRecentFile(std::string const &f)

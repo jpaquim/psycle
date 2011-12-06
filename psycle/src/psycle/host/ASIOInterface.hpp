@@ -24,7 +24,7 @@ namespace psycle
 			bool operator!=(ASIODriverSettings const &);
 			bool operator==(ASIODriverSettings const & other) { return !((*this) != other); }
 			virtual AudioDriver* NewDriver();
-			inline virtual AudioDriverInfo& GetInfo() { return info_; };
+			virtual const AudioDriverInfo& GetInfo() const { return info_; };
 
 			virtual void SetDefaultSettings();
 			virtual void Load(ConfigStorage &);
@@ -55,8 +55,8 @@ namespace psycle
 					_info.isActive=info.isActive;	_info.channelGroup=info.channelGroup;
 					_info.type=info.type;			strcpy(_info.name,info.name);
 				}
-				std::string GetName();
-				bool IsFormatSupported(DriverEnum* driver, int samplerate);
+				std::string GetName() const;
+				bool IsFormatSupported(DriverEnum* driver, int samplerate) const;
 			public:
 				int _idx;
 				ASIOChannelInfo _info;
@@ -120,28 +120,28 @@ namespace psycle
 		public:
 			ASIOInterface(ASIODriverSettings* settings);
 			virtual ~ASIOInterface() throw();
-			inline virtual AudioDriverSettings& settings() { return *settings_; };
+			inline virtual AudioDriverSettings& settings() const { return *settings_; };
 
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context);
 			virtual bool Enable(bool e);
 			virtual void Reset();
-			inline virtual bool Initialized() { return _initialized; };
-			virtual bool Enabled() { return _running; };
+			inline virtual bool Initialized() const { return _initialized; };
+			virtual bool Enabled() const { return _running; };
 			virtual void Configure();
 			virtual void RefreshAvailablePorts();
-			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
-			virtual void GetCapturePorts(std::vector<std::string> &ports);
+			virtual void GetPlaybackPorts(std::vector<std::string> &ports) const;
+			virtual void GetCapturePorts(std::vector<std::string> &ports) const;
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-			virtual std::uint32_t GetWritePosInSamples();
+			virtual std::uint32_t GetWritePosInSamples() const;
 			virtual std::uint32_t GetPlayPosInSamples();
-			inline virtual std::uint32_t GetInputLatencySamples() { return _inlatency; }
-			inline virtual std::uint32_t GetOutputLatencySamples() { return _outlatency; }
+			inline virtual std::uint32_t GetInputLatencySamples() const { return _inlatency; }
+			inline virtual std::uint32_t GetOutputLatencySamples() const { return _outlatency; }
 
-			DriverEnum GetDriverFromidx(int driverID);
+			DriverEnum GetDriverFromidx(int driverID) const;
 			PortOut GetOutPortFromidx(int driverID);
-			int GetidxFromOutPort(PortOut&port);
+			int GetidxFromOutPort(PortOut&port) const;
 			void ControlPanel(int driverID);
 
 			static bool SupportsAsio();

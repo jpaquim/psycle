@@ -79,7 +79,7 @@ namespace psycle { namespace host {
 		BOOL CGearRackDlg::PreTranslateMessage(MSG* pMsg) 
 		{
 			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
-				CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+				CmdDef def = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,0);
 				if(def.GetType() == CT_Note) {
 					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 					return true;
@@ -105,16 +105,16 @@ namespace psycle { namespace host {
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::_pSong->seqBus;
+				selected = Global::song().seqBus;
 				if (selected >= MAX_BUSES)
 				{
 					selected = 0;
 				}
 				for (b=0; b<MAX_BUSES; b++) // Check Generators
 				{
-					if(Global::_pSong->_pMachine[b])
+					if(Global::song()._pMachine[b])
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
+						sprintf(buffer,"%.2X: %s",b,Global::song()._pMachine[b]->_editName);
 						m_list.AddString(buffer);
 					}
 					else
@@ -131,7 +131,7 @@ namespace psycle { namespace host {
 				m_radio_efx.SetCheck(1);
 				m_radio_ins.SetCheck(0);
 
-				selected = Global::_pSong->seqBus;
+				selected = Global::song().seqBus;
 				if (selected < MAX_BUSES)
 				{
 					selected = 0;
@@ -142,9 +142,9 @@ namespace psycle { namespace host {
 				}
 				for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 				{
-					if(Global::_pSong->_pMachine[b])
+					if(Global::song()._pMachine[b])
 					{
-						sprintf(buffer,"%.2X: %s",b,Global::_pSong->_pMachine[b]->_editName);
+						sprintf(buffer,"%.2X: %s",b,Global::song()._pMachine[b]->_editName);
 						m_list.AddString(buffer);
 					}
 					else
@@ -164,19 +164,19 @@ namespace psycle { namespace host {
 				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
-					sprintf(buffer, "%.2X: %s", b, Global::_pSong->_pInstrument[b]->_sName);
+					sprintf(buffer, "%.2X: %s", b, Global::song()._pInstrument[b]->_sName);
 					m_list.AddString(buffer);
 				}
 				CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() == AUX_INSTRUMENT)
 				{
-					selected = Global::_pSong->instSelected;
+					selected = Global::song().instSelected;
 				}
 				else
 				{
 					cc->SetCurSel(AUX_INSTRUMENT);
 					mainFrame->UpdateComboIns(true);
-					selected = Global::_pSong->instSelected;
+					selected = Global::song().instSelected;
 				}
 				break;
 			}
@@ -193,7 +193,7 @@ namespace psycle { namespace host {
 			case 1:
 				tmac += MAX_BUSES;
 			case 0:
-				Global::_pSong->seqBus = tmac;
+				Global::song().seqBus = tmac;
 				mainFrame->UpdateComboGen();
 				break;
 			case 2:
@@ -201,13 +201,13 @@ namespace psycle { namespace host {
 					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					if (cc->GetCurSel() == AUX_INSTRUMENT)
 					{
-						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+						Global::song().instSelected = Global::song().auxcolSelected=tmac;
 						mainFrame->UpdateComboIns(false);
 					}
 					else
 					{
 						cc->SetCurSel(AUX_INSTRUMENT);
-						Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+						Global::song().instSelected = Global::song().auxcolSelected=tmac;
 						mainFrame->UpdateComboIns(true);
 					}
 					mainFrame->m_wndInst.WaveUpdate();
@@ -239,7 +239,7 @@ namespace psycle { namespace host {
 				{
 					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_INSTRUMENT);
-					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+					Global::song().instSelected = Global::song().auxcolSelected=tmac;
 					mainFrame->UpdateComboIns(true);
 					mainFrame->m_wndInst.WaveUpdate();
 				}
@@ -253,7 +253,7 @@ namespace psycle { namespace host {
 		void CGearRackDlg::OnDelete() 
 		{
 			int tmac = m_list.GetCurSel();
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 			switch (DisplayMode)
 			{
 			case 1:
@@ -262,12 +262,12 @@ namespace psycle { namespace host {
 			case 0:
 				if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
-					if (Global::_pSong->_pMachine[tmac])
+					if (Global::song()._pMachine[tmac])
 					{
 						mainFrame->CloseMacGui(tmac);
 						{
-							CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-							Global::_pSong->DestroyMachine(tmac);
+							CExclusiveLock lock(&Global::song().semaphore, 2, true);
+							Global::song().DestroyMachine(tmac);
 						}
 						mainFrame->UpdateEnvInfo();
 						mainFrame->UpdateComboGen();
@@ -282,8 +282,8 @@ namespace psycle { namespace host {
 				if (MessageBox("Are you sure?","Delete Instruments", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
 					{
-						CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-						Global::_pSong->DeleteInstrument(Global::_pSong->instSelected);
+						CExclusiveLock lock(&Global::song().semaphore, 2, true);
+						Global::song().DeleteInstrument(Global::song().instSelected);
 					}
 					mainFrame->UpdateComboIns(true);
 					mainFrame->m_wndInst.WaveUpdate();
@@ -305,7 +305,7 @@ namespace psycle { namespace host {
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::_pSong->_pMachine[tmac])
+				if (Global::song()._pMachine[tmac])
 				{
 					mainView->DoMacPropDialog(tmac);
 					mainFrame->UpdateEnvInfo();
@@ -317,7 +317,7 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 1:
-				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
+				if (Global::song()._pMachine[tmac+MAX_BUSES])
 				{
 					mainView->DoMacPropDialog(tmac+MAX_BUSES);
 					mainFrame->UpdateEnvInfo();
@@ -332,7 +332,7 @@ namespace psycle { namespace host {
 				{
 					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_INSTRUMENT);
-					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+					Global::song().instSelected = Global::song().auxcolSelected=tmac;
 					mainFrame->UpdateComboIns(true);
 					mainFrame->m_wndInst.WaveUpdate();
 				}
@@ -352,13 +352,13 @@ namespace psycle { namespace host {
 			switch (DisplayMode)
 			{
 			case 0:
-				if (Global::_pSong->_pMachine[tmac])
+				if (Global::song()._pMachine[tmac])
 				{
 					mainFrame->ShowMachineGui(tmac,point);
 				}
 				break;
 			case 1:
-				if (Global::_pSong->_pMachine[tmac+MAX_BUSES])
+				if (Global::song()._pMachine[tmac+MAX_BUSES])
 				{
 					mainFrame->ShowMachineGui(tmac+MAX_BUSES,point);
 				}
@@ -367,7 +367,7 @@ namespace psycle { namespace host {
 				{
 					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cc->SetCurSel(AUX_INSTRUMENT);
-					Global::_pSong->instSelected = Global::_pSong->auxcolSelected=tmac;
+					Global::song().instSelected = Global::song().auxcolSelected=tmac;
 					mainFrame->UpdateComboIns(true);
 					mainFrame->m_wndInst.WaveUpdate();
 				}
@@ -426,8 +426,8 @@ namespace psycle { namespace host {
 				sel[1]+=MAX_BUSES;
 				//fallthrough
 			case 0:
-				Global::pInputHandler->AddMacViewUndo();
-				Global::_pSong->ExchangeMachines(sel[0],sel[1]);
+				PsycleGlobal::inputHandler().AddMacViewUndo();
+				Global::song().ExchangeMachines(sel[0],sel[1]);
 				mainFrame->UpdateComboGen(true);
 				if (mainView->viewMode==view_modes::machine)
 				{
@@ -435,8 +435,8 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				Global::pInputHandler->AddMacViewUndo();
-				Global::_pSong->ExchangeInstruments(sel[0],sel[1]);
+				PsycleGlobal::inputHandler().AddMacViewUndo();
+				Global::song().ExchangeInstruments(sel[0],sel[1]);
 				
 				mainFrame->UpdateComboIns(true);
 				break;
@@ -474,11 +474,11 @@ namespace psycle { namespace host {
 			case 0:
 				if (tmac2 < 0)
 				{
-					tmac2 = Global::_pSong->GetFreeBus();
+					tmac2 = Global::song().GetFreeBus();
 				}
 				if (tmac2 >= 0)
 				{
-					if (!Global::_pSong->CloneMac(tmac1,tmac2))
+					if (!Global::song().CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -498,11 +498,11 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-					tmac2 = Global::_pSong->GetFreeFxBus();
+					tmac2 = Global::song().GetFreeFxBus();
 				}
 				if (tmac2 >= 0)
 				{
-					if (!Global::_pSong->CloneMac(tmac1,tmac2))
+					if (!Global::song().CloneMac(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;
@@ -519,7 +519,7 @@ namespace psycle { namespace host {
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
 					{
-						if (Global::_pSong->_pInstrument[i]->Empty())
+						if (Global::song()._pInstrument[i]->Empty())
 						{
 							tmac2 = i;
 							break;
@@ -528,7 +528,7 @@ namespace psycle { namespace host {
 				}
 				if (tmac2 >=0)
 				{
-					if (!Global::_pSong->CloneIns(tmac1,tmac2))
+					if (!Global::song().CloneIns(tmac1,tmac2))
 					{
 						MessageBox("Select 1 active slot (and optionally 1 empty destination slot)","Gear Rack Dialog");
 						return;

@@ -5,6 +5,7 @@
 #include "Configuration.hpp"
 #include "ConfigStorage.hpp"
 #include "Song.hpp"
+#include "Player.hpp"
 #include "VstHost24.hpp"
 namespace psycle { namespace host {
 
@@ -39,6 +40,7 @@ namespace psycle { namespace host {
 			SetDefaultPatLines(64);
 			UseAutoStopMachines(false);
 			LoadNewBlitz(false);
+			SetNumThreads(0);
 		}
 		void Configuration::Load(ConfigStorage & store)
 		{
@@ -82,6 +84,11 @@ namespace psycle { namespace host {
 			{
 				LoadNewBlitz(use);
 			}
+			int numThreads=0;
+			if(store.Read("numThreads", numThreads))
+			{
+				SetNumThreads(numThreads);
+			}
 		}
 		void Configuration::Save(ConfigStorage & store)
 		{
@@ -117,7 +124,31 @@ namespace psycle { namespace host {
 
 			use=LoadsNewBlitz();
 			store.Write("prefferNewBlitz", use);
+
+			int numThreads=GetNumThreads();
+			store.Write("numThreads", numThreads);
 		}
+		void Configuration::RefreshSettings() 
+		{
+			Global::player().stop_threads();
+			unsigned int thread_count = 0;
+			if (numThreads_ > 0)
+			{
+				thread_count = numThreads_;
+			}
+			else
+			{	 // thread count env var
+				char const * const env(std::getenv("PSYCLE_THREADS"));
+				if(env) {
+					std::stringstream s;
+					s << env;
+					s >> thread_count;
+				}
+			}
+
+			Global::player().start_threads(thread_count);
+		}
+
 
 		bool Configuration::SupportsJBridge() const
 		{
@@ -165,6 +196,14 @@ namespace psycle { namespace host {
        bool Configuration::LoadsNewBlitz() const
 	   {
 		   return prefferNewBlitz;
+	   }
+       void Configuration::SetNumThreads(int numThreads)
+	   {
+		   numThreads_ = numThreads;
+	   }
+       int  Configuration::GetNumThreads() const
+	   {
+		   return numThreads_;
 	   }
 	}
 }

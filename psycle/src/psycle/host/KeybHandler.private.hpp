@@ -7,17 +7,17 @@ namespace psycle { namespace host {
 		void CChildView::KeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 			// undo code not required, enter note handles it
-			CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);	
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);	
 			if (cmd.GetType() == CT_Note)
 			{
 				const int outnote = cmd.GetNote();
-				if(viewMode == view_modes::pattern && bEditMode && Global::pPlayer->_playing && Global::psycleconf()._followSong && Global::psycleconf().inputHandler()._RecordNoteoff)
+				if(viewMode == view_modes::pattern && bEditMode && Global::player()._playing && PsycleGlobal::conf()._followSong && PsycleGlobal::conf().inputHandler()._RecordNoteoff)
 				{ 
 					EnterNote(outnote,255,0,true);	// note end
 				}
 				else
 				{
-					Global::pInputHandler->StopNote(outnote);
+					PsycleGlobal::inputHandler().StopNote(outnote);
 				}
 			}
 			else if ((nChar == 16) && ((nFlags & 0xC000) == 0xC000) && ChordModeOffs)
@@ -26,7 +26,7 @@ namespace psycle { namespace host {
 				editcur.line = ChordModeLine;
 				editcur.track = ChordModeTrack;
 				ChordModeOffs = 0;
-				AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,true);
+				AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,true);
 		//		pParentMain->StatusBarIdle();
 		//		Repaint(draw_modes::cursor);
 			}
@@ -46,11 +46,11 @@ namespace psycle { namespace host {
 
 			if(viewMode == view_modes::pattern && bEditMode)
 			{
-				if (!(Global::pPlayer->_playing && Global::psycleconf()._followSong && bRepeat))
+				if (!(Global::player()._playing && PsycleGlobal::conf()._followSong && bRepeat))
 				{
 					bool success;
 					// add data
-					success = Global::pInputHandler->EnterData(nChar,nFlags);
+					success = PsycleGlobal::inputHandler().EnterData(nChar,nFlags);
 
 					if ( success )
 					{
@@ -63,7 +63,7 @@ namespace psycle { namespace host {
 			{
 				bool success;
 				// add data
-				success = Global::pInputHandler->EnterDataSeq(nChar,nFlags);
+				success = PsycleGlobal::inputHandler().EnterDataSeq(nChar,nFlags);
 				if ( success )
 				{
 					CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
@@ -76,14 +76,14 @@ namespace psycle { namespace host {
 			}
 
 			// get command
-			CmdDef cmd = Global::pInputHandler->KeyToCmd(nChar,nFlags);
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);
 
 			if(cmd.IsValid())
 			{
 				if((cmd.GetType() == CT_Immediate) ||
 				(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					PsycleGlobal::inputHandler().PerformCmd(cmd,bRepeat);
 				}
 				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
 				{
@@ -91,7 +91,7 @@ namespace psycle { namespace host {
 					{	
 						const int outnote = cmd.GetNote();
 						// play note
-						Global::pInputHandler->PlayNote(outnote); 
+						PsycleGlobal::inputHandler().PlayNote(outnote); 
 					}
 				}
 			}
@@ -112,7 +112,7 @@ namespace psycle { namespace host {
 			// build entry
 			PatternEntry entry;
 			entry._mach = busMachine;
-			entry._inst = _pSong->auxcolSelected;
+			entry._inst = _pSong.auxcolSelected;
 			entry._cmd = command;
 			entry._parameter = value;
 			entry._note = notecommands::empty;
@@ -121,18 +121,18 @@ namespace psycle { namespace host {
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
+				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
 				{
-					if(_pSong->_trackArmedCount)
+					if(_pSong._trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
+					else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
 					{		
-						Machine* pMachine = _pSong->_pMachine[busMachine];
+						Machine* pMachine = _pSong._pMachine[busMachine];
 
 						if (pMachine)
 						{
@@ -156,7 +156,7 @@ namespace psycle { namespace host {
 					|| (pentry->_cmd != entry._cmd) 
 					|| (pentry->_parameter != entry._parameter))
 				{
-					Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+					PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 					pentry->_mach = entry._mach;
 					pentry->_cmd = entry._cmd;
 					pentry->_parameter = entry._parameter;
@@ -169,7 +169,7 @@ namespace psycle { namespace host {
 		//	else
 			{
 				// play it
-				Machine* pMachine = _pSong->_pMachine[busMachine];
+				Machine* pMachine = _pSong._pMachine[busMachine];
 
 				if (pMachine)
 				{
@@ -193,18 +193,18 @@ namespace psycle { namespace host {
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset; 
 
-				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
+				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
 				{
-					if(_pSong->_trackArmedCount)
+					if(_pSong._trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
+					else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
 					{		
-						Machine* pMachine = _pSong->_pMachine[busMachine];
+						Machine* pMachine = _pSong._pMachine[busMachine];
 
 						if (pMachine)
 						{
@@ -231,7 +231,7 @@ namespace psycle { namespace host {
 						|| (pentry->_inst != entry._inst) 
 						|| (pentry->_note != notecommands::midicc))
 					{
-						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						pentry->_mach = entry._mach;
 						pentry->_cmd = entry._cmd;
 						pentry->_parameter = entry._parameter;
@@ -245,7 +245,7 @@ namespace psycle { namespace host {
 			}
 		//	else
 			{
-				Machine* pMachine = _pSong->_pMachine[busMachine];
+				Machine* pMachine = _pSong._pMachine[busMachine];
 
 				if (pMachine)
 				{
@@ -263,15 +263,15 @@ namespace psycle { namespace host {
 			{ 
 				// write effect
 				const int ps = _ps();
-				int line = Global::pPlayer->_lineCounter;
+				int line = Global::player()._lineCounter;
 				unsigned char * toffset;
-				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
+				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
 				{
-					if(_pSong->_trackArmedCount)
+					if(_pSong._trackArmedCount)
 					{
 						SelectNextTrack();
 					}
-					else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
+					else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
 					{	
 						return;
 					}
@@ -289,7 +289,7 @@ namespace psycle { namespace host {
 				{
 					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
 					{
-						Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 						entry->_mach = machine;
 						entry->_cmd = (value>>8)&255;
 						entry->_parameter = value&255;
@@ -316,11 +316,11 @@ namespace psycle { namespace host {
 
 			int macIdx;
 			if (mac) macIdx = mac->_macIndex;
-			else macIdx = _pSong->seqBus;
+			else macIdx = _pSong.seqBus;
 
 			int instNo;
 			if (instr < 255) instNo = instr;
-			else instNo = _pSong->auxcolSelected;
+			else instNo = _pSong.auxcolSelected;
 			
 			if (note < 0 || note >= notecommands::invalid ) return;
 
@@ -328,26 +328,26 @@ namespace psycle { namespace host {
 			if(note<notecommands::release)
 			{
 				if(bTranspose)
-					note+=_pSong->currentOctave*12;
+					note+=_pSong.currentOctave*12;
 
 				if (note > 119) 
 					note = 119;
 			}
 			
 			// realtime note entering
-			if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
+			if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
 			{
 				// If there is at least one track selected for recording, select the proper track
-				if(_pSong->_trackArmedCount)
+				if(_pSong._trackArmedCount)
 				{
 					if (velocity == 0)
 					{
 						int i;
-						for (i = 0; i < _pSong->SONGTRACKS; i++)
+						for (i = 0; i < _pSong.SONGTRACKS; i++)
 						{
-							if (_pSong->_trackArmed[i])
+							if (_pSong._trackArmed[i])
 							{
-								if (Global::pInputHandler->notetrack[i] == note && Global::pInputHandler->instrtrack[i] == instNo)
+								if (PsycleGlobal::inputHandler().notetrack[i] == note && PsycleGlobal::inputHandler().instrtrack[i] == instNo)
 								{
 									editcur.track = i;
 									break;
@@ -355,9 +355,9 @@ namespace psycle { namespace host {
 							}
 						}
 						/// if not found, stop and leave
-						if (i == _pSong->SONGTRACKS)
+						if (i == _pSong.SONGTRACKS)
 						{
-							Global::pInputHandler->StopNote(note,instNo,false, mac);
+							PsycleGlobal::inputHandler().StopNote(note,instNo,false, mac);
 							return;
 						}
 					}
@@ -367,7 +367,7 @@ namespace psycle { namespace host {
 					}
 				}
 				//If the FT2 recording behaviour is not selected, do not record, but play the note.
-				else if (!Global::psycleconf().inputHandler()._RecordUnarmed)
+				else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
 				{
 					// build entry
 					PatternEntry entry;
@@ -376,33 +376,33 @@ namespace psycle { namespace host {
 					if (velocity==0)
 						note = notecommands::release;
 
-					if ( macIdx < MAX_MACHINES && _pSong->_pMachine[macIdx] != 0 ) 
+					if ( macIdx < MAX_MACHINES && _pSong._pMachine[macIdx] != 0 ) 
 					{
 						// if the current machine is a sampler, check 
 						// if current sample is locked to a machine.
 						// if so, switch entry._mach to that machine number
-						if (((Machine*)_pSong->_pMachine[macIdx])->_type == MACH_SAMPLER)
+						if (((Machine*)_pSong._pMachine[macIdx])->_type == MACH_SAMPLER)
 						{
-							if ((_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
-								&& (_pSong->_pInstrument[instNo]->_LOCKINST == true))
+							if ((_pSong._pInstrument[instNo]->_lock_instrument_to_machine != -1)
+								&& (_pSong._pInstrument[instNo]->_LOCKINST == true))
 							{
-								entry._mach = _pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
+								entry._mach = _pSong._pInstrument[instNo]->_lock_instrument_to_machine;
 							}
 						}
 					}
 
-					if ( note < notecommands::release && Global::psycleconf().inputHandler()._RecordTweaks && velocity < 127)
+					if ( note < notecommands::release && PsycleGlobal::conf().inputHandler()._RecordTweaks && velocity < 127)
 					{
-						if (Global::psycleconf().midi().raw())
+						if (PsycleGlobal::conf().midi().raw())
 						{
 							entry._cmd = 0x0c;
 							entry._parameter = velocity*2;
 						}
-						else if (Global::psycleconf().midi().velocity().record())
+						else if (PsycleGlobal::conf().midi().velocity().record())
 						{
 							// command
-							entry._cmd = Global::psycleconf().midi().velocity().command();
-							int par = Global::psycleconf().midi().velocity().from() + (Global::psycleconf().midi().velocity().to() - Global::psycleconf().midi().velocity().from()) * velocity / 127;
+							entry._cmd = PsycleGlobal::conf().midi().velocity().command();
+							int par = PsycleGlobal::conf().midi().velocity().from() + (PsycleGlobal::conf().midi().velocity().to() - PsycleGlobal::conf().midi().velocity().from()) * velocity / 127;
 							if (par > 255) 
 							{
 								par = 255;
@@ -415,7 +415,7 @@ namespace psycle { namespace host {
 						}
 					}
 
-					Machine *tmac = _pSong->_pMachine[entry._mach];
+					Machine *tmac = _pSong._pMachine[entry._mach];
 					if (tmac)
 					{
 						// if the current machine is a sampler, check 
@@ -423,11 +423,11 @@ namespace psycle { namespace host {
 						// if so, switch entry._mach to that machine number
 						if (tmac->_type == MACH_SAMPLER)
 						{
-							if ((_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
-								&& (_pSong->_pInstrument[instNo]->_LOCKINST == true))
+							if ((_pSong._pInstrument[instNo]->_lock_instrument_to_machine != -1)
+								&& (_pSong._pInstrument[instNo]->_LOCKINST == true))
 							{
-								entry._mach = _pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
-								tmac = _pSong->_pMachine[entry._mach];
+								entry._mach = _pSong._pInstrument[instNo]->_lock_instrument_to_machine;
+								tmac = _pSong._pMachine[entry._mach];
 								if (!tmac) return;
 							}
 						}
@@ -441,11 +441,11 @@ namespace psycle { namespace host {
 							tmac->Tick(editcur.track, &entry);
 						}
 					}
-					Global::pInputHandler->notetrack[editcur.track]=note;
-					Global::pInputHandler->instrtrack[editcur.track]=instNo;
+					PsycleGlobal::inputHandler().notetrack[editcur.track]=note;
+					PsycleGlobal::inputHandler().instrtrack[editcur.track]=instNo;
 					return;
 				}
-				line = Global::pPlayer->_lineCounter;
+				line = Global::player()._lineCounter;
 				toffset = _ptrack(ps)+(line*MULTIPLY);
 				ChordModeOffs = 0;
 			}
@@ -458,7 +458,7 @@ namespace psycle { namespace host {
 						ChordModeLine = editcur.line;
 						ChordModeTrack = editcur.track;
 					}
-					editcur.track = (ChordModeTrack+ChordModeOffs)%_pSong->SONGTRACKS;
+					editcur.track = (ChordModeTrack+ChordModeOffs)%_pSong.SONGTRACKS;
 					editcur.line = line = ChordModeLine;
 					toffset = _ptrackline(ps, editcur.track, line);
 					ChordModeOffs++;
@@ -470,7 +470,7 @@ namespace psycle { namespace host {
 						editcur.line = ChordModeLine;
 						editcur.track = ChordModeTrack;
 						ChordModeOffs = 0;
-						AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
+						AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 					}
 					line = editcur.line;
 					toffset = _ptrackline(ps);
@@ -484,48 +484,48 @@ namespace psycle { namespace host {
 				//This prevents writing a noteoff over its own noteon.
 				if (entry->_note == note && entry->_inst == instNo)
 				{
-					Global::pInputHandler->StopNote(note,instNo,false, mac);
+					PsycleGlobal::inputHandler().StopNote(note,instNo,false, mac);
 					return;
 				}
 				note = notecommands::release;
 			}
-			Global::pInputHandler->AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
+			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
 			entry->_note = note;
 			entry->_mach = macIdx;
 
 			if (note>notecommands::release)
 			{
-				entry->_inst = _pSong->auxcolSelected;
+				entry->_inst = _pSong.auxcolSelected;
 			}
 			else
 			{
-				if ( macIdx < MAX_MACHINES && _pSong->_pMachine[macIdx] != 0 ) 
+				if ( macIdx < MAX_MACHINES && _pSong._pMachine[macIdx] != 0 ) 
 				{
 					// if the current machine is a sampler, check 
 					// if current sample is locked to a machine.
 					// if so, switch entry._mach to that machine number
-					if (((Machine*)_pSong->_pMachine[macIdx])->_type == MACH_SAMPLER)
+					if (((Machine*)_pSong._pMachine[macIdx])->_type == MACH_SAMPLER)
 					{
-						if ((_pSong->_pInstrument[instNo]->_lock_instrument_to_machine != -1)
-							&& (_pSong->_pInstrument[instNo]->_LOCKINST == true))
+						if ((_pSong._pInstrument[instNo]->_lock_instrument_to_machine != -1)
+							&& (_pSong._pInstrument[instNo]->_LOCKINST == true))
 						{
-							entry->_mach = _pSong->_pInstrument[instNo]->_lock_instrument_to_machine;
+							entry->_mach = _pSong._pInstrument[instNo]->_lock_instrument_to_machine;
 						}
 					}
 				}
 
-				if ( note < notecommands::release && Global::psycleconf().inputHandler()._RecordTweaks && velocity < 127)
+				if ( note < notecommands::release && PsycleGlobal::conf().inputHandler()._RecordTweaks && velocity < 127)
 				{
-					if (Global::psycleconf().midi().raw())
+					if (PsycleGlobal::conf().midi().raw())
 					{
 						entry->_cmd = 0x0c;
 						entry->_parameter = velocity * 2;
 					}
-					else if (Global::psycleconf().midi().velocity().record())
+					else if (PsycleGlobal::conf().midi().velocity().record())
 					{
 						// command
-						entry->_cmd = Global::psycleconf().midi().velocity().command();
-						int par = Global::psycleconf().midi().velocity().from() + (Global::psycleconf().midi().velocity().to() - Global::psycleconf().midi().velocity().from()) * velocity / 127;
+						entry->_cmd = PsycleGlobal::conf().midi().velocity().command();
+						int par = PsycleGlobal::conf().midi().velocity().from() + (PsycleGlobal::conf().midi().velocity().to() - PsycleGlobal::conf().midi().velocity().from()) * velocity / 127;
 						if (par > 255) 
 						{
 							par = 255;
@@ -537,7 +537,7 @@ namespace psycle { namespace host {
 						entry->_parameter = par;
 					}
 				}
-				Machine *tmac = _pSong->_pMachine[entry->_mach];
+				Machine *tmac = _pSong._pMachine[entry->_mach];
 				if (tmac)
 				{
 					if (tmac->NeedsAuxColumn())
@@ -548,23 +548,23 @@ namespace psycle { namespace host {
 				}
 			}
 
-			Global::pInputHandler->notetrack[editcur.track]=note;
-			Global::pInputHandler->instrtrack[editcur.track]=instNo;
+			PsycleGlobal::inputHandler().notetrack[editcur.track]=note;
+			PsycleGlobal::inputHandler().instrtrack[editcur.track]=instNo;
 			NewPatternDraw(editcur.track,editcur.track,line,line);
-			if (!(Global::pPlayer->_playing&&Global::psycleconf()._followSong))
+			if (!(Global::player()._playing&&PsycleGlobal::conf()._followSong))
 			{
 				if (ChordModeOffs)
 				{
-					AdvanceLine(-1,Global::psycleconf().inputHandler()._wrapAround,false); //Advance track?
+					AdvanceLine(-1,PsycleGlobal::conf().inputHandler()._wrapAround,false); //Advance track?
 				}
 				else
 				{
-					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
+					AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 				}
 			}
 
 			bScrollDetatch=false;
-			Global::pInputHandler->bDoingSelection = false;
+			PsycleGlobal::inputHandler().bDoingSelection = false;
 			Repaint(draw_modes::data);
 		}
 
@@ -576,9 +576,9 @@ namespace psycle { namespace host {
 				unsigned char * toffset;
 				
 				// realtime note entering
-				if (Global::pPlayer->_playing&&Global::psycleconf()._followSong)
+				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
 				{
-					toffset = _ptrack(ps)+(Global::pPlayer->_lineCounter*MULTIPLY);
+					toffset = _ptrack(ps)+(Global::player()._lineCounter*MULTIPLY);
 				}
 				else
 				{
@@ -587,21 +587,21 @@ namespace psycle { namespace host {
 
 				// build entry
 				PatternEntry *entry = (PatternEntry*) toffset;
-				Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 				entry->_note = notecommands::release;
 
-				Global::pInputHandler->notetrack[editcur.track]=notecommands::release;
-				Global::pInputHandler->instrtrack[editcur.track]=255;
+				PsycleGlobal::inputHandler().notetrack[editcur.track]=notecommands::release;
+				PsycleGlobal::inputHandler().instrtrack[editcur.track]=255;
 
 				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-				if (!(Global::pPlayer->_playing&&Global::psycleconf()._followSong))
+				if (!(Global::player()._playing&&PsycleGlobal::conf()._followSong))
 				{
-					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
+					AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 				}
 
 				bScrollDetatch=false;
-				Global::pInputHandler->bDoingSelection = false;
+				PsycleGlobal::inputHandler().bDoingSelection = false;
 				Repaint(draw_modes::data);
 			}
 		}
@@ -623,7 +623,7 @@ namespace psycle { namespace host {
 
 			if (editcur.col < 5 && oldValue == 255)	{ oldValue = 0; }
 
-			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			switch ((editcur.col+1)%2)
 			{
@@ -636,16 +636,16 @@ namespace psycle { namespace host {
 				break;
 			}
 
-			if (Global::psycleconf().inputHandler()._cursorAlwaysDown)
+			if (PsycleGlobal::conf().inputHandler()._cursorAlwaysDown)
 			{
-				AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
+				AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 			}
 			else
 			{
 				switch (editcur.col)
 				{
 				case 0:
-					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
+					AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 					break;
 				case 1:
 				case 3:
@@ -660,12 +660,12 @@ namespace psycle { namespace host {
 				case 2:
 				case 4:
 					PrevCol(false,false);
-					AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
+					AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 					break;
 				}
 			}
 			bScrollDetatch=false;
-			Global::pInputHandler->bDoingSelection = false;
+			PsycleGlobal::inputHandler().bDoingSelection = false;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 			Repaint(draw_modes::data);
 			return true;
@@ -678,7 +678,7 @@ namespace psycle { namespace host {
 			unsigned char * offset = _ptrack(ps);
 			unsigned char * toffset = _ptrackline(ps);
 
-			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 
 			// &&&&& hardcoded # of bytes per event
 			if ( editcur.col == 0 )
@@ -691,8 +691,8 @@ namespace psycle { namespace host {
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
 
-			AdvanceLine(patStep,Global::psycleconf().inputHandler()._wrapAround,false);
-			Global::pInputHandler->bDoingSelection = false;
+			AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
+			PsycleGlobal::inputHandler().bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
 			Repaint(draw_modes::data);
@@ -703,9 +703,9 @@ namespace psycle { namespace host {
 			// UNDO CODE DELETE
 			const int ps = _ps();
 			unsigned char * offset = _ptrack(ps);
-			int patlines = _pSong->patternLines[ps];
+			int patlines = _pSong.patternLines[ps];
 
-			if ( Global::psycleconf().inputHandler().bFT2DelBehaviour )
+			if ( PsycleGlobal::conf().inputHandler().bFT2DelBehaviour )
 			{
 				if(editcur.line==0)
 					return;
@@ -713,7 +713,7 @@ namespace psycle { namespace host {
 					editcur.line--;
 			}
 
-			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
+			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int i;
 			for (i=editcur.line; i < patlines-1; i++)
@@ -724,7 +724,7 @@ namespace psycle { namespace host {
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
-			Global::pInputHandler->bDoingSelection = false;
+			PsycleGlobal::inputHandler().bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
 			Repaint(draw_modes::data);
@@ -735,9 +735,9 @@ namespace psycle { namespace host {
 			// UNDO CODE INSERT
 			const int ps = _ps();
 			unsigned char * offset = _ptrack(ps);
-			int patlines = _pSong->patternLines[ps];
+			int patlines = _pSong.patternLines[ps];
 
-			Global::pInputHandler->AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
+			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,patlines-editcur.line,editcur.track,editcur.line,editcur.col,editPosition);
 
 			int i;
 			for (i=patlines-1; i > editcur.line; i--)
@@ -748,7 +748,7 @@ namespace psycle { namespace host {
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
-			Global::pInputHandler->bDoingSelection = false;
+			PsycleGlobal::inputHandler().bDoingSelection = false;
 			ChordModeOffs = 0;
 			bScrollDetatch=false;
 			Repaint(draw_modes::data);
@@ -761,17 +761,17 @@ namespace psycle { namespace host {
 
 		void CChildView::PlayCurrentRow(void)
 		{
-			if (Global::psycleconf()._followSong)
+			if (PsycleGlobal::conf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
 			PatternEntry* pEntry = (PatternEntry*)_ptrackline(_ps(),0,editcur.line);
 
-			for (int i=0; i<_pSong->SONGTRACKS;i++)
+			for (int i=0; i<_pSong.SONGTRACKS;i++)
 			{
-				if (pEntry->_mach < MAX_MACHINES && !_pSong->_trackMuted[i])
+				if (pEntry->_mach < MAX_MACHINES && !_pSong._trackMuted[i])
 				{
-					Machine *pMachine = _pSong->_pMachine[pEntry->_mach];
+					Machine *pMachine = _pSong._pMachine[pEntry->_mach];
 					if (pMachine)
 					{
 						if ( !pMachine->_mute)	
@@ -786,7 +786,7 @@ namespace psycle { namespace host {
 
 		void CChildView::PlayCurrentNote(void)
 		{
-			if (Global::psycleconf()._followSong)
+			if (PsycleGlobal::conf()._followSong)
 			{
 				bScrollDetatch=false;
 			}
@@ -794,7 +794,7 @@ namespace psycle { namespace host {
 			PatternEntry* pEntry = (PatternEntry*)_ptrackline();
 			if (pEntry->_mach < MAX_MACHINES)
 			{
-				Machine *pMachine = _pSong->_pMachine[pEntry->_mach];
+				Machine *pMachine = _pSong._pMachine[pEntry->_mach];
 				if (pMachine)
 				{
 					if ( !pMachine->_mute)	
@@ -820,7 +820,7 @@ namespace psycle { namespace host {
 				if (editcur.track == 0)
 				{
 					if ( wrap ) 
-						editcur.track = _pSong->SONGTRACKS-1;
+						editcur.track = _pSong.SONGTRACKS-1;
 					else 
 						editcur.col=0;
 				}
@@ -842,7 +842,7 @@ namespace psycle { namespace host {
 			{
 				editcur.col = 0;
 				pParentMain->StatusBarIdle();
-				if (editcur.track == _pSong->SONGTRACKS-1)
+				if (editcur.track == _pSong.SONGTRACKS-1)
 				{
 					if ( wrap ) 
 						editcur.track = 0;
@@ -863,7 +863,7 @@ namespace psycle { namespace host {
 			//reinitialise the select bar state
 			CChildView::blockSelectBarState = 1;
 
-			const int nl = _pSong->patternLines[_ps()];
+			const int nl = _pSong.patternLines[_ps()];
 
 			editcur.line -= x;
 
@@ -887,13 +887,13 @@ namespace psycle { namespace host {
 			//reinitialise the select bar state
 			CChildView::blockSelectBarState = 1;
 
-			const int nl = _pSong->patternLines[_ps()];
+			const int nl = _pSong.patternLines[_ps()];
 
 			// <sampler> a bit recoded. 
 			if (x<0) //kind of trick used to advance track (related to chord mode).
 			{
 				editcur.track+=1;
-				if (editcur.track >= _pSong->SONGTRACKS)
+				if (editcur.track >= _pSong.SONGTRACKS)
 				{
 					editcur.track=0;
 					editcur.line+=1;
@@ -926,10 +926,10 @@ namespace psycle { namespace host {
 			editcur.track+=x;
 			editcur.col=0;
 			
-			if(editcur.track>= _pSong->SONGTRACKS)
+			if(editcur.track>= _pSong.SONGTRACKS)
 			{
 				if ( wrap ) editcur.track=0;
-				else editcur.track=_pSong->SONGTRACKS-1;
+				else editcur.track=_pSong.SONGTRACKS-1;
 			}
 			
 			pParentMain->StatusBarIdle();
@@ -946,7 +946,7 @@ namespace psycle { namespace host {
 			
 			if(editcur.track<0)
 			{
-				if (wrap) editcur.track=_pSong->SONGTRACKS-1;
+				if (wrap) editcur.track=_pSong.SONGTRACKS-1;
 				else editcur.track=0;
 			}
 			
@@ -967,8 +967,8 @@ namespace psycle { namespace host {
 				unsigned char *soffset = _ppattern(ps);
 				PatternEntry blank;
 
-				patBufferLines = _pSong->patternLines[ps];
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+				patBufferLines = _pSong.patternLines[ps];
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int length = patBufferLines*EVENT_SIZE*MAX_TRACKS;
 				
@@ -980,7 +980,7 @@ namespace psycle { namespace host {
 				}
 				patBufferCopy = true;
 
-				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+				NewPatternDraw(0,_pSong.SONGTRACKS,0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
 		}
@@ -992,7 +992,7 @@ namespace psycle { namespace host {
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
 				
-				patBufferLines=_pSong->patternLines[ps];
+				patBufferLines=_pSong.patternLines[ps];
 				int length=patBufferLines*EVENT_SIZE*MAX_TRACKS;
 				
 				memcpy(patBufferData,soffset,length);
@@ -1009,11 +1009,11 @@ namespace psycle { namespace host {
 				const int ps = _ps();
 				unsigned char *soffset = _ppattern(ps);
 				// **************** funky shit goin on here yo with the pattern resize or some shit
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-				if ( patBufferLines != _pSong->patternLines[ps] )
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,_pSong.patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+				if ( patBufferLines != _pSong.patternLines[ps] )
 				{
-					Global::pInputHandler->AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-					_pSong->AllocNewPattern(ps,"",patBufferLines,false);
+					PsycleGlobal::inputHandler().AddUndoLength(ps,_pSong.patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+					_pSong.AllocNewPattern(ps,"",patBufferLines,false);
 				}
 				memcpy(soffset,patBufferData,patBufferLines*EVENT_SIZE*MAX_TRACKS);
 
@@ -1030,11 +1030,11 @@ namespace psycle { namespace host {
 				unsigned char* offset_target = _ppattern(ps);
 				unsigned char* offset_source = patBufferData;
 				// **************** funky shit goin on here yo with the pattern resize or some shit
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-				if ( patBufferLines != _pSong->patternLines[ps] )
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,_pSong.patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+				if ( patBufferLines != _pSong.patternLines[ps] )
 				{
-					Global::pInputHandler->AddUndoLength(ps,_pSong->patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
-					_pSong->AllocNewPattern(ps,"",patBufferLines,false);
+					PsycleGlobal::inputHandler().AddUndoLength(ps,_pSong.patternLines[ps],editcur.track,editcur.line,editcur.col,editPosition);
+					_pSong.AllocNewPattern(ps,"",patBufferLines,false);
 				}
 
 				for (int i = 0; i < MAX_TRACKS*patBufferLines; i++)
@@ -1061,8 +1061,8 @@ namespace psycle { namespace host {
 				unsigned char *soffset = _ppattern(ps);
 				PatternEntry blank;
 
-				patBufferLines = _pSong->patternLines[ps];
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
+				patBufferLines = _pSong.patternLines[ps];
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,patBufferLines,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int length = patBufferLines*EVENT_SIZE*MAX_TRACKS;
 				
@@ -1072,7 +1072,7 @@ namespace psycle { namespace host {
 					soffset+=EVENT_SIZE;
 				}
 
-				NewPatternDraw(0,_pSong->SONGTRACKS,0,patBufferLines-1);
+				NewPatternDraw(0,_pSong.SONGTRACKS,0,patBufferLines-1);
 				Repaint(draw_modes::data);
 			}
 		}
@@ -1085,10 +1085,10 @@ namespace psycle { namespace host {
 
 			if(viewMode == view_modes::pattern)
 			{
-				int pLines=_pSong->patternLines[ps];
+				int pLines=_pSong.patternLines[ps];
 				int length=pLines*EVENT_SIZE*MAX_TRACKS;
 
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,pLines,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,pLines,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for	(int c=editcur.line*EVENT_SIZE*MAX_TRACKS;c<length;c+=EVENT_SIZE)
 				{
@@ -1101,7 +1101,7 @@ namespace psycle { namespace host {
 						soffset[c]=static_cast<unsigned char>(note);
 					}
 				}
-				NewPatternDraw(0,_pSong->SONGTRACKS,editcur.line,pLines-1);
+				NewPatternDraw(0,_pSong.SONGTRACKS,editcur.line,pLines-1);
 
 				Repaint(draw_modes::data);
 			}
@@ -1228,7 +1228,7 @@ namespace psycle { namespace host {
 				blockNTracks=(blockSel.end.track-blockSel.start.track)+1;
 				blockNLines=(blockSel.end.line-blockSel.start.line)+1;
 				
-				int ps=_pSong->playOrder[editPosition];
+				int ps=_pSong.playOrder[editPosition];
 				
 				int ls=0;
 				int ts=0;
@@ -1236,7 +1236,7 @@ namespace psycle { namespace host {
 
 				if (cutit)
 				{
-					Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+					PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				}
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1268,12 +1268,12 @@ namespace psycle { namespace host {
 		{
 			if(blockSelected)
 			{
-				int ps=_pSong->playOrder[editPosition];
+				int ps=_pSong.playOrder[editPosition];
 				
 				PatternEntry blank;
 
 				// UNDO CODE HERE CUT
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockNTracks,blockNLines,editcur.track,editcur.line,editcur.col,editPosition);
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
 					for (int l=blockSel.start.line;l<blockSel.end.line+1;l++)
@@ -1290,11 +1290,11 @@ namespace psycle { namespace host {
 		{
 			if(isBlockCopied)
 			{
-				int ps=_pSong->playOrder[editPosition];
-				int nl = _pSong->patternLines[ps];
+				int ps=_pSong.playOrder[editPosition];
+				int nl = _pSong.patternLines[ps];
 
 				// UNDO CODE PASTE AND MIX PASTE
-				if (save) Global::pInputHandler->AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				if (save) PsycleGlobal::inputHandler().AddUndo(ps,tx,lx,blockNTracks,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				int ls=0;
 				int ts=0;
@@ -1303,12 +1303,12 @@ namespace psycle { namespace host {
 				if (blockNLines > nl) 
 					if (MessageBox("Do you want to autoincrease this pattern lines?","Block doesn't fit in current pattern",MB_YESNO) == IDYES)
 					{
-						_pSong->patternLines[ps] = blockNLines;
+						_pSong.patternLines[ps] = blockNLines;
 						nl = blockNLines;
 					}
 				//end of added by sampler
 
-				for (int t=tx;t<tx+blockNTracks && t<_pSong->SONGTRACKS;t++)
+				for (int t=tx;t<tx+blockNTracks && t<_pSong.SONGTRACKS;t++)
 				{
 					ls=0;
 					for (int l=lx;l<lx+blockNLines && l<nl;l++)
@@ -1332,7 +1332,7 @@ namespace psycle { namespace host {
 					++ts;
 				}
 				
-				if (Global::psycleconf().inputHandler().bMoveCursorPaste)
+				if (PsycleGlobal::conf().inputHandler().bMoveCursorPaste)
 				{
 					if (lx+blockNLines < nl ) editcur.line = lx+blockNLines;
 					else editcur.line = nl-1;
@@ -1348,8 +1348,8 @@ namespace psycle { namespace host {
 		{
 			if(blockSelected || isBlockCopied)// With shift+arrows, moving the cursor unselects the block, so in this case it is a three step
 			{									// operation: select, copy, switch, instead of select, switch.
-				int ps=_pSong->playOrder[editPosition];
-				int nl = _pSong->patternLines[ps];
+				int ps=_pSong.playOrder[editPosition];
+				int nl = _pSong.patternLines[ps];
 				bool bSwapTracks = false;
 				bool bSwapLines = false;
 				int ls=0;
@@ -1367,7 +1367,7 @@ namespace psycle { namespace host {
 				int stopL=destl+blockNLines;
 
 				// We backup the data of the whole block.
-				Global::pInputHandler->AddUndo(ps,0,0,_pSong->SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,_pSong.SONGTRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 
 				// Do the blocks overlap? Then take care of moving the appropiate data.
 				if (abs(blockLastOrigin.start.track-destt) < blockNTracks	&& abs(blockLastOrigin.start.line-destl) < blockNLines )
@@ -1438,7 +1438,7 @@ namespace psycle { namespace host {
 							}
 							// We exchange just the lines here. The loop outside will exchange the tracks.
 							ts = startWT2;
-							for (int t=startRT2;t<stopT2 && t<_pSong->SONGTRACKS && ts<_pSong->SONGTRACKS;t++)
+							for (int t=startRT2;t<stopT2 && t<_pSong.SONGTRACKS && ts<_pSong.SONGTRACKS;t++)
 							{
 								ls=startWL2;
 								for (int l=startRL2;l<stopL2 && l<nl && ls <nl;l++)
@@ -1476,7 +1476,7 @@ namespace psycle { namespace host {
 			
 				// do Swap "inplace".
 				ts = startWT;
-				for (int t=startRT;t<stopT && t<_pSong->SONGTRACKS && ts <_pSong->SONGTRACKS;t++)
+				for (int t=startRT;t<stopT && t<_pSong.SONGTRACKS && ts <_pSong.SONGTRACKS;t++)
 				{
 					ls=startWL;
 					for (int l=startRL;l<stopL && l<nl && ls<nl;l++)
@@ -1494,7 +1494,7 @@ namespace psycle { namespace host {
 				// Finally, paste the Original selected block on the freed space.
 				PasteBlock(destt, destl, false,false);
 				
-				NewPatternDraw(0,_pSong->SONGTRACKS-1,0,nl-1);
+				NewPatternDraw(0,_pSong.SONGTRACKS-1,0,nl-1);
 				Repaint(draw_modes::data);
 			}
 		}
@@ -1504,12 +1504,12 @@ namespace psycle { namespace host {
 		{
 
 			int ps = _ps();
-			int nlines = _pSong->patternLines[ps];
+			int nlines = _pSong.patternLines[ps];
 
-			fwrite(&_pSong->SONGTRACKS, sizeof(int), 1, file);
+			fwrite(&_pSong.SONGTRACKS, sizeof(int), 1, file);
 			fwrite(&nlines, sizeof(int), 1, file);
 
-			for (int t=0;t<_pSong->SONGTRACKS;t++)
+			for (int t=0;t<_pSong.SONGTRACKS;t++)
 			{
 				for (int l=0;l<nlines;l++)
 				{
@@ -1530,12 +1530,12 @@ namespace psycle { namespace host {
 			{
 
 				int ps = _ps();
-				int nlines = _pSong->patternLines[ps];
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+				int nlines = _pSong.patternLines[ps];
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 				if (nlines != nl)
 				{
-					Global::pInputHandler->AddUndoLength(ps,nlines,editcur.track,editcur.line,editcur.col,editPosition);
-					_pSong->patternLines[ps] = nl;
+					PsycleGlobal::inputHandler().AddUndoLength(ps,nlines,editcur.track,editcur.line,editcur.col,editPosition);
+					_pSong.patternLines[ps] = nl;
 				}
 
 				for (int t=0;t<nt;t++)
@@ -1579,16 +1579,16 @@ namespace psycle { namespace host {
 				sl=blockSel.start.line;			
 				nl=((blockSel.end.line-sl)/2)+1;
 				el=blockSel.end.line;
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl*2,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 			else 
 			{
 				st=0;		
-				et=_pSong->SONGTRACKS;		
+				et=_pSong.SONGTRACKS;		
 				sl=0;
-				nl= _pSong->patternLines[ps]/2;	
-				el=_pSong->patternLines[ps]-1;
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
+				nl= _pSong.patternLines[ps]/2;	
+				el=_pSong.patternLines[ps]-1;
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,el+1,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 
 			for (int t=st;t<et;t++)
@@ -1622,16 +1622,16 @@ namespace psycle { namespace host {
 				sl=blockSel.start.line;		
 				nl=blockSel.end.line-sl+1;
 				el=nl/2;
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,nl,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 			else 
 			{
 				st=0;	
-				et=_pSong->SONGTRACKS;		
+				et=_pSong.SONGTRACKS;		
 				sl=0;
-				nl=_pSong->patternLines[ps];	
-				el=_pSong->patternLines[ps]/2;
-				Global::pInputHandler->AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
+				nl=_pSong.patternLines[ps];	
+				el=_pSong.patternLines[ps]/2;
+				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,nl,editcur.track,editcur.line,editcur.col,editPosition);
 			}
 			
 			for (int t=st;t<et;t++)
@@ -1661,7 +1661,7 @@ namespace psycle { namespace host {
 			{
 				int ps = _ps();
 
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1691,7 +1691,7 @@ namespace psycle { namespace host {
 			if ( blockSelected == true ) 
 			{
 				int ps = _ps();
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1722,7 +1722,7 @@ namespace psycle { namespace host {
 			{
 				const int ps=_ps();
 
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
 				{
@@ -1754,7 +1754,7 @@ namespace psycle { namespace host {
 				///////////////////////////////////////////////////////// Add ROW
 				unsigned char *toffset=_ppattern(ps);
 				
-				Global::pInputHandler->AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
+				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 				
 				const int initvalue = 
 					*(toffset+blockSel.start.track*EVENT_SIZE+blockSel.start.line*MULTIPLY+3) * 0x100 +
@@ -1769,8 +1769,8 @@ namespace psycle { namespace host {
 				if ( toffset[firstrow] == notecommands::tweak || toffset[firstrow] == notecommands::tweakeffect || toffset[firstrow] == notecommands::tweakslide || toffset[firstrow] == notecommands::midicc || twktype != notecommands::empty)
 				{
 					unsigned char note = (twktype != notecommands::empty)?twktype:toffset[firstrow];
-					unsigned char aux = (twktype != notecommands::empty)?Global::_pSong->auxcolSelected:toffset[firstrow+1];
-					unsigned char mac = (twktype != notecommands::empty)?Global::_pSong->seqBus:toffset[firstrow+2];
+					unsigned char aux = (twktype != notecommands::empty)?Global::song().auxcolSelected:toffset[firstrow+1];
+					unsigned char mac = (twktype != notecommands::empty)?Global::song().seqBus:toffset[firstrow+2];
 					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
 					{
 						toffset[displace]=note;
@@ -1804,10 +1804,10 @@ namespace psycle { namespace host {
 
 		void CChildView::IncCurPattern()
 		{
-			if(_pSong->playOrder[editPosition]<(MAX_PATTERNS-1))
+			if(_pSong.playOrder[editPosition]<(MAX_PATTERNS-1))
 			{
-				Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
-				++_pSong->playOrder[editPosition];
+				PsycleGlobal::inputHandler().AddUndoSequence(_pSong.playLength,editcur.track,editcur.line,editcur.col,editPosition);
+				++_pSong.playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
 			}
@@ -1816,10 +1816,10 @@ namespace psycle { namespace host {
 
 		void CChildView::DecCurPattern()
 		{
-			if(_pSong->playOrder[editPosition]>0)
+			if(_pSong.playOrder[editPosition]>0)
 			{
-				Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
-				--_pSong->playOrder[editPosition];
+				PsycleGlobal::inputHandler().AddUndoSequence(_pSong.playLength,editcur.track,editcur.line,editcur.col,editPosition);
+				--_pSong.playOrder[editPosition];
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
 			}
@@ -1828,19 +1828,19 @@ namespace psycle { namespace host {
 		void CChildView::DecPosition()
 		{
 		//	case cdefPlaySkipBack:
-			if (Global::pPlayer->_playing && Global::psycleconf()._followSong)
+			if (Global::player()._playing && PsycleGlobal::conf()._followSong)
 			{
-				if (Global::pPlayer->_playPosition > 0 )
+				if (Global::player()._playPosition > 0 )
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(Global::pPlayer->_playPosition-1,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(Global::player()._playPosition-1,0);
+					Global::player()._playBlock = b;
 				}
 				else
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(_pSong->playLength-1,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(_pSong.playLength-1,0);
+					Global::player()._playBlock = b;
 				}
 			}
 			else
@@ -1851,16 +1851,16 @@ namespace psycle { namespace host {
 				}
 				else
 				{
-		//			editPosition = _pSong->playLength-1;
+		//			editPosition = _pSong.playLength-1;
 					editPosition = 0;
 				}
 				
-				memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-				_pSong->playOrderSel[editPosition]=true;
+				memset(_pSong.playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+				_pSong.playOrderSel[editPosition]=true;
 
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
-				if (Global::pPlayer->_playing) {
+				if (Global::player()._playing) {
 					Repaint(draw_modes::playback);
 				}
 			}
@@ -1869,55 +1869,55 @@ namespace psycle { namespace host {
 		void CChildView::IncPosition(bool bRepeat)
 		{
 		//	case cdefPlaySkipAhead:
-			if (Global::pPlayer->_playing && Global::psycleconf()._followSong)
+			if (Global::player()._playing && PsycleGlobal::conf()._followSong)
 			{
-				if (Global::pPlayer->_playPosition < _pSong->playLength-1)
+				if (Global::player()._playPosition < _pSong.playLength-1)
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(Global::pPlayer->_playPosition+1,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(Global::player()._playPosition+1,0);
+					Global::player()._playBlock = b;
 				}
 				else
 				{
-					bool b = Global::pPlayer->_playBlock;
-					Global::pPlayer->Start(0,0);
-					Global::pPlayer->_playBlock = b;
+					bool b = Global::player()._playBlock;
+					Global::player().Start(0,0);
+					Global::player()._playBlock = b;
 				}
 			}
 			else 
 			{
-				if(editPosition < _pSong->playLength-1)
+				if(editPosition < _pSong.playLength-1)
 				{
 					++editPosition;
 				}
 				else if (!bRepeat) // This prevents adding patterns when only trying to reach the end.
 				{
-					if ( _pSong->playLength+1 > MAX_SONG_POSITIONS) return;
+					if ( _pSong.playLength+1 > MAX_SONG_POSITIONS) return;
 
-					Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition);
-					int patternum=_pSong->GetBlankPatternUnused();
+					PsycleGlobal::inputHandler().AddUndoSequence(_pSong.playLength,editcur.track,editcur.line,editcur.col,editPosition);
+					int patternum=_pSong.GetBlankPatternUnused();
 					if ( patternum>= MAX_PATTERNS )
 					{
 						patternum=MAX_PATTERNS-1;
 					}
 					else 
 					{
-						_pSong->AllocNewPattern(patternum,"",Global::psycleconf().GetDefaultPatLines(),false);
+						_pSong.AllocNewPattern(patternum,"",PsycleGlobal::conf().GetDefaultPatLines(),false);
 					}
 			
-					++_pSong->playLength;
+					++_pSong.playLength;
 					++editPosition;
-					_pSong->playOrder[editPosition]=patternum;
+					_pSong.playOrder[editPosition]=patternum;
 					
 					pParentMain->UpdateSequencer();
 				}
 
-				memset(_pSong->playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
-				_pSong->playOrderSel[editPosition]=true;
+				memset(_pSong.playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
+				_pSong.playOrderSel[editPosition]=true;
 
 				pParentMain->UpdatePlayOrder(true);
 				Repaint(draw_modes::pattern);
-				if (Global::pPlayer->_playing) {
+				if (Global::player()._playing) {
 					Repaint(draw_modes::playback);
 				}
 			}
@@ -1929,25 +1929,25 @@ namespace psycle { namespace host {
 
 			PatternEntry *entry = (PatternEntry*) toffset;
 
-			if ( entry->_mach < MAX_BUSES*2 ) _pSong->seqBus = entry->_mach;
-			pParentMain->ChangeGen(_pSong->seqBus);
-			if ( entry->_inst != 255 ) _pSong->auxcolSelected = entry->_inst;
-			pParentMain->ChangeIns(_pSong->auxcolSelected);
+			if ( entry->_mach < MAX_BUSES*2 ) _pSong.seqBus = entry->_mach;
+			pParentMain->ChangeGen(_pSong.seqBus);
+			if ( entry->_inst != 255 ) _pSong.auxcolSelected = entry->_inst;
+			pParentMain->ChangeIns(_pSong.auxcolSelected);
 
 		}
 
 
 		void CChildView::OnEditUndo() 
 		{
-			if (!Global::pInputHandler->pUndoList.empty())
+			if (!PsycleGlobal::inputHandler().pUndoList.empty())
 			{
-				SPatternUndo& pUndo = Global::pInputHandler->pUndoList.back();
+				SPatternUndo& pUndo = PsycleGlobal::inputHandler().pUndoList.back();
 				switch (pUndo.type)
 				{
 				case UNDO_PATTERN:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddRedo(pUndo.pattern,pUndo.x,pUndo.y,pUndo.tracks,pUndo.lines,editcur.track,editcur.line,editcur.col,pUndo.seqpos,pUndo.counter);
+						PsycleGlobal::inputHandler().AddRedo(pUndo.pattern,pUndo.x,pUndo.y,pUndo.tracks,pUndo.lines,editcur.track,editcur.line,editcur.col,pUndo.seqpos,pUndo.counter);
 						// do undo
 						unsigned char* pData = pUndo.pData;
 
@@ -1979,15 +1979,15 @@ namespace psycle { namespace host {
 							
 						}
 						// delete undo from list
-						Global::pInputHandler->pUndoList.pop_back();
+						PsycleGlobal::inputHandler().pUndoList.pop_back();
 					}
 					break;
 				case UNDO_LENGTH:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddRedoLength(pUndo.pattern,_pSong->patternLines[pUndo.pattern],editcur.track,editcur.line,editcur.col,pUndo.seqpos,pUndo.counter);
+						PsycleGlobal::inputHandler().AddRedoLength(pUndo.pattern,_pSong.patternLines[pUndo.pattern],editcur.track,editcur.line,editcur.col,pUndo.seqpos,pUndo.counter);
 						// do undo
-						_pSong->patternLines[pUndo.pattern]=pUndo.lines;
+						_pSong.patternLines[pUndo.pattern]=pUndo.lines;
 						// set up cursor
 						editcur.track = pUndo.edittrack;
 						editcur.line = pUndo.editline;
@@ -2001,14 +2001,14 @@ namespace psycle { namespace host {
 						Repaint(draw_modes::pattern);
 						
 						// delete undo from list
-						Global::pInputHandler->pUndoList.pop_back();
+						PsycleGlobal::inputHandler().pUndoList.pop_back();
 						break;
 					}
 				case UNDO_SEQUENCE:
-					Global::pInputHandler->AddRedoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndo.counter);
+					PsycleGlobal::inputHandler().AddRedoSequence(_pSong.playLength,editcur.track,editcur.line,editcur.col,editPosition,pUndo.counter);
 					// do undo
-					memcpy(_pSong->playOrder, pUndo.pData, MAX_SONG_POSITIONS*sizeof(char));
-					_pSong->playLength = pUndo.lines;
+					memcpy(_pSong.playOrder, pUndo.pData, MAX_SONG_POSITIONS*sizeof(char));
+					_pSong.playLength = pUndo.lines;
 					// set up cursor
 					editcur.track = pUndo.edittrack;
 					editcur.line = pUndo.editline;
@@ -2020,13 +2020,13 @@ namespace psycle { namespace host {
 					Repaint(draw_modes::pattern);
 					
 					// delete undo from list
-					Global::pInputHandler->pUndoList.pop_back();
+					PsycleGlobal::inputHandler().pUndoList.pop_back();
 					break;
 				case UNDO_SONG:
-					Global::pInputHandler->AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndo.counter);
+					PsycleGlobal::inputHandler().AddRedoSong(editcur.track,editcur.line,editcur.col,editPosition,pUndo.counter);
 					// do undo
 					unsigned char * pData = pUndo.pData;
-					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
+					memcpy(_pSong.playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
 					pData += MAX_SONG_POSITIONS;
 					unsigned char count = *pData;
 					pData += sizeof(count);
@@ -2039,7 +2039,7 @@ namespace psycle { namespace host {
 						memcpy(pWrite,pData,MULTIPLY2);
 						pData+= MULTIPLY2;
 					}
-					_pSong->playLength = pUndo.lines;
+					_pSong.playLength = pUndo.lines;
 					// set up cursor
 					editcur.track = pUndo.edittrack;
 					editcur.line = pUndo.editline;
@@ -2051,7 +2051,7 @@ namespace psycle { namespace host {
 					Repaint(draw_modes::pattern);
 					
 					// delete undo from list
-					Global::pInputHandler->pUndoList.pop_back();
+					PsycleGlobal::inputHandler().pUndoList.pop_back();
 					break;
 
 				}
@@ -2062,15 +2062,15 @@ namespace psycle { namespace host {
 
 		void CChildView::OnEditRedo() 
 		{
-			if (!Global::pInputHandler->pRedoList.empty())
+			if (!PsycleGlobal::inputHandler().pRedoList.empty())
 			{
-				SPatternUndo& pRedo = Global::pInputHandler->pRedoList.back();
+				SPatternUndo& pRedo = PsycleGlobal::inputHandler().pRedoList.back();
 				switch (pRedo.type)
 				{
 				case UNDO_PATTERN:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddUndo(pRedo.pattern,pRedo.x,pRedo.y,pRedo.tracks,pRedo.lines,editcur.track,editcur.line,editcur.col,pRedo.seqpos,false,pRedo.counter);
+						PsycleGlobal::inputHandler().AddUndo(pRedo.pattern,pRedo.x,pRedo.y,pRedo.tracks,pRedo.lines,editcur.track,editcur.line,editcur.col,pRedo.seqpos,false,pRedo.counter);
 						// do redo
 						unsigned char* pData = pRedo.pData;
 
@@ -2103,15 +2103,15 @@ namespace psycle { namespace host {
 							
 						}
 						// delete redo from list
-						Global::pInputHandler->pRedoList.pop_back();
+						PsycleGlobal::inputHandler().pRedoList.pop_back();
 					}
 					break;
 				case UNDO_LENGTH:
 					if(viewMode == view_modes::pattern)// && bEditMode)
 					{
-						Global::pInputHandler->AddUndoLength(pRedo.pattern,_pSong->patternLines[pRedo.pattern],editcur.track,editcur.line,editcur.col,pRedo.seqpos,false,pRedo.counter);
+						PsycleGlobal::inputHandler().AddUndoLength(pRedo.pattern,_pSong.patternLines[pRedo.pattern],editcur.track,editcur.line,editcur.col,pRedo.seqpos,false,pRedo.counter);
 						// do undo
-						_pSong->patternLines[pRedo.pattern]=pRedo.lines;
+						_pSong.patternLines[pRedo.pattern]=pRedo.lines;
 						// set up cursor
 						editcur.track = pRedo.edittrack;
 						editcur.line = pRedo.editline;
@@ -2125,14 +2125,14 @@ namespace psycle { namespace host {
 						Repaint(draw_modes::pattern);
 						
 						// delete redo from list
-						Global::pInputHandler->pRedoList.pop_back();
+						PsycleGlobal::inputHandler().pRedoList.pop_back();
 						break;
 					}
 				case UNDO_SEQUENCE:
-					Global::pInputHandler->AddUndoSequence(_pSong->playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedo.counter);
+					PsycleGlobal::inputHandler().AddUndoSequence(_pSong.playLength,editcur.track,editcur.line,editcur.col,editPosition,false,pRedo.counter);
 					// do undo
-					memcpy(_pSong->playOrder, pRedo.pData, MAX_SONG_POSITIONS*sizeof(char));
-					_pSong->playLength = pRedo.lines;
+					memcpy(_pSong.playOrder, pRedo.pData, MAX_SONG_POSITIONS*sizeof(char));
+					_pSong.playLength = pRedo.lines;
 					// set up cursor
 					editcur.track = pRedo.edittrack;
 					editcur.line = pRedo.editline;
@@ -2143,13 +2143,13 @@ namespace psycle { namespace host {
 					// display changes
 					Repaint(draw_modes::pattern);
 					
-					Global::pInputHandler->pRedoList.pop_back();
+					PsycleGlobal::inputHandler().pRedoList.pop_back();
 					break;
 				case UNDO_SONG:
-					Global::pInputHandler->AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedo.counter);
+					PsycleGlobal::inputHandler().AddUndoSong(editcur.track,editcur.line,editcur.col,editPosition,false,pRedo.counter);
 					// do undo
 					unsigned char * pData = pRedo.pData;
-					memcpy(_pSong->playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
+					memcpy(_pSong.playOrder, pData, MAX_SONG_POSITIONS*sizeof(char));
 					pData += MAX_SONG_POSITIONS;
 					unsigned char count = *pData;
 					pData += sizeof(count);
@@ -2173,7 +2173,7 @@ namespace psycle { namespace host {
 					// display changes
 					Repaint(draw_modes::pattern);
 					
-					Global::pInputHandler->pRedoList.pop_back();
+					PsycleGlobal::inputHandler().pRedoList.pop_back();
 					break;
 				}
 				SetTitleBarText();
@@ -2183,23 +2183,23 @@ namespace psycle { namespace host {
 		void CChildView::SelectNextTrack()
 		{
 			int i;
-			for (i = editcur.track+1; i < _pSong->SONGTRACKS; i++)
+			for (i = editcur.track+1; i < _pSong.SONGTRACKS; i++)
 			{
-				if (_pSong->_trackArmed[i])
+				if (_pSong._trackArmed[i])
 				{
-					if (Global::pInputHandler->notetrack[i] == notecommands::release)
+					if (PsycleGlobal::inputHandler().notetrack[i] == notecommands::release)
 					{
 						break;
 					}
 				}
 			}
-			if (i >= _pSong->SONGTRACKS)
+			if (i >= _pSong.SONGTRACKS)
 			{
 				for (i = 0; i <= editcur.track; i++)
 				{
-					if (_pSong->_trackArmed[i])
+					if (_pSong._trackArmed[i])
 					{
-						if (Global::pInputHandler->notetrack[i] == notecommands::release)
+						if (PsycleGlobal::inputHandler().notetrack[i] == notecommands::release)
 						{
 							break;
 						}
@@ -2207,9 +2207,9 @@ namespace psycle { namespace host {
 				}
 			}
 			editcur.track = i;
-			while(_pSong->_trackArmed[editcur.track] == 0)
+			while(_pSong._trackArmed[editcur.track] == 0)
 			{
-				if(++editcur.track >= _pSong->SONGTRACKS)
+				if(++editcur.track >= _pSong.SONGTRACKS)
 					editcur.track=0;
 			}
 			editcur.col = 0;

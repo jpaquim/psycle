@@ -41,11 +41,11 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		ON_MESSAGE(WM_INITDIALOG, OnInitDialog )
 	END_MESSAGE_MAP()
 
-	void MachineBar::InitializeValues(CMainFrame* frame, CChildView* view, Song* song)
+	void MachineBar::InitializeValues(CMainFrame* frame, CChildView* view, Song& song)
 	{
 		m_pParentMain = frame;
 		m_pWndView = view;
-		m_pSong = song;
+		m_pSong = &song;
 	}
 
 
@@ -485,25 +485,26 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
 		bool found=false;
-		if (tmac) 
-		{
-			if ( tmac->_type == MACH_XMSAMPLER)
-			{
-				CPoint point(-1,-1);
-				m_pParentMain->ShowMachineGui(nmac,point);
-				return;
-			}
-			else if ( tmac->_type != MACH_SAMPLER) {
-				for(int i=0;i<MAX_MACHINES;i++) {
-					if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
-						m_pSong->seqBus = i;
-						m_pParentMain->UpdateComboGen();
-						m_pWndView->Repaint();
-						found=true;
-						break;
-					}
+		if (!tmac || (tmac->_type != MACH_SAMPLER
+						&& tmac->_type != MACH_XMSAMPLER)) {
+			for(int i=0;i<MAX_MACHINES;i++) {
+				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+					m_pSong->seqBus = i;
+					m_pParentMain->UpdateComboGen();
+					m_pWndView->Repaint();
+					found=true;
+					break;
 				}
 			}
+		}
+		else if (tmac->_type == MACH_XMSAMPLER)
+		{
+			CPoint point(-1,-1);
+			m_pParentMain->ShowMachineGui(nmac,point);
+			return;
+		}
+		else {
+			found = true;
 		}
 		if(!found) {
 			int i = m_pSong->GetFreeMachine();
@@ -516,12 +517,12 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
 		
 		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
-		dlg._pSong = m_pSong;
-		std::string tmpstr = Global::psycleconf().GetCurrentInstrumentDir();
+		dlg.m_pSong = m_pSong;
+		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		if (dlg.DoModal() == IDOK)
 		{
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			int si = m_pSong->instSelected;
 			
@@ -561,7 +562,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			int index = str.ReverseFind('\\');
 			if (index != -1)
 			{
-				Global::psycleconf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
+				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 			}
 		}
 		if ( m_pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
@@ -580,16 +581,14 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		WaveFile output;
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
+
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
-		if (tmac && tmac->_type != MACH_SAMPLER) {
-			for(int i=0;i<MAX_MACHINES;i++) {
-				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
-					m_pSong->seqBus = i;
-					m_pParentMain->UpdateComboGen();
-					m_pWndView->Repaint();
-				}
-			}
+		if (tmac && tmac->_type == MACH_XMSAMPLER)
+		{
+			CPoint point(-1,-1);
+			m_pParentMain->ShowMachineGui(nmac,point);
+			return;
 		}
 
 		if (m_pSong->_pInstrument[m_pSong->instSelected]->waveLength)
@@ -623,25 +622,26 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
 		bool found=false;
-		if (tmac) 
-		{
-			if ( tmac->_type == MACH_XMSAMPLER)
-			{
-				CPoint point(-1,-1);
-				m_pParentMain->ShowMachineGui(nmac,point);
-				return;
-			}
-			else if ( tmac->_type != MACH_SAMPLER) {
-				for(int i=0;i<MAX_MACHINES;i++) {
-					if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
-						m_pSong->seqBus = i;
-						m_pParentMain->UpdateComboGen();
-						m_pWndView->Repaint();
-						found=true;
-						break;
-					}
+		if (!tmac || (tmac->_type != MACH_SAMPLER
+						&& tmac->_type != MACH_XMSAMPLER)) {
+			for(int i=0;i<MAX_MACHINES;i++) {
+				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+					m_pSong->seqBus = i;
+					m_pParentMain->UpdateComboGen();
+					m_pWndView->Repaint();
+					found=true;
+					break;
 				}
 			}
+		}
+		else if (tmac->_type == MACH_XMSAMPLER)
+		{
+			CPoint point(-1,-1);
+			m_pParentMain->ShowMachineGui(nmac,point);
+			return;
+		}
+		else {
+			found = true;
 		}
 		if(!found) {
 			int i = m_pSong->GetFreeMachine();
@@ -659,7 +659,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
 		bool found=false;
-		if (tmac && tmac->_type != MACH_SAMPLER) {
+		if (!tmac || (tmac->_type != MACH_SAMPLER
+						&& tmac->_type != MACH_XMSAMPLER)) {
 			for(int i=0;i<MAX_MACHINES;i++) {
 				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
 					m_pSong->seqBus = i;
@@ -669,6 +670,15 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 					break;
 				}
 			}
+		}
+		else if (tmac->_type == MACH_XMSAMPLER)
+		{
+			CPoint point(-1,-1);
+			m_pParentMain->ShowMachineGui(nmac,point);
+			return;
+		}
+		else {
+			found = true;
 		}
 		if(!found) {
 			int i = m_pSong->GetFreeMachine();

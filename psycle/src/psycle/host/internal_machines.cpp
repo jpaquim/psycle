@@ -6,6 +6,7 @@
 #include "Player.hpp"
 #include "AudioDriver.hpp"
 #include "cpu_time_clock.hpp"
+#include <psycle/helpers/math.hpp>
 
 namespace psycle
 {
@@ -31,6 +32,11 @@ namespace psycle
 			:Machine(mac)
 		{
 			_type = MACH_DUMMY;
+			_macIndex=mac->_macIndex;
+			std::stringstream s;
+			s << "X!" << mac->GetEditName();
+			SetEditName(s.str());
+
 			if (mac->_type == MACH_VST || mac->_type == MACH_VSTFX)
 				wasVST = true;
 			else
@@ -123,15 +129,15 @@ namespace psycle
 				bisTicking=true;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
+					if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
 					{
 						AllocateVoice(channel,i);
 						PatternEntry pTemp = *pData;
 						CustomTick(channel,i, pTemp);
 						// this can happen if the parameter is the machine itself.
-						if (Global::_pSong->_pMachine[macOutput[i]] != this) 
+						if (Global::song()._pMachine[macOutput[i]] != this) 
 						{
-							Global::_pSong->_pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
+							Global::song()._pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
 							if (pTemp._note >= notecommands::release )
 							{
 								DeallocateVoice(channel,i);
@@ -224,10 +230,10 @@ namespace psycle
 		{
 			for (int i=0;i<NUMMACHINES;i++)
 			{
-				if (macOutput[i] != -1 && Global::_pSong->_pMachine[macOutput[i]] != NULL )
+				if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
 				{
 					if(allocatedchans[track][i] != -1 &&
-						Global::_pSong->_pMachine[macOutput[i]]->playsTrack(allocatedchans[track][i]))
+						Global::song()._pMachine[macOutput[i]]->playsTrack(allocatedchans[track][i]))
 					{
 							return true;
 					}
@@ -265,9 +271,9 @@ namespace psycle
 		{
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::_pSong->_pMachine[macOutput[numparam]] != NULL))
+				if ((macOutput[numparam] != -1 ) &&( Global::song()._pMachine[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::_pSong->_pMachine[macOutput[numparam]]->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song()._pMachine[macOutput[numparam]]->_editName);
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
@@ -328,7 +334,7 @@ namespace psycle
 		}
 		AudioRecorder::~AudioRecorder()
 		{
-			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+			AudioDriver &mydriver = *Global::configuration()._pOutputDriver;
 			if (_initialized) mydriver.RemoveCapturePort(_captureidx);
 		}
 		void AudioRecorder::Init(void)
@@ -336,14 +342,14 @@ namespace psycle
 			Machine::Init();
 			if (!_initialized)
 			{
-				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+				AudioDriver &mydriver = *Global::configuration()._pOutputDriver;
 				_initialized = mydriver.AddCapturePort(_captureidx);
 				strncpy(drivername,mydriver.settings().GetInfo()._psName,32);
 			}
 		}
 		void AudioRecorder::ChangePort(int newport)
 		{
-			AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+			AudioDriver &mydriver = *Global::configuration()._pOutputDriver;
 			if ( _initialized )
 			{
 				mydriver.Enable(false);
@@ -359,8 +365,8 @@ namespace psycle
 		{
 			if (!_mute &&_initialized)
 			{
-				AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
-				AudioDriverInfo &myinfo = mydriver.settings().GetInfo();
+				AudioDriver &mydriver = *Global::configuration()._pOutputDriver;
+				const AudioDriverInfo &myinfo = mydriver.settings().GetInfo();
 				if(strcmp(myinfo._psName, drivername)) {
 					_initialized = false;
 					return numSamples;
@@ -632,7 +638,7 @@ namespace psycle
 				// step 2: get the output from return fx that have been processed
 				for(unsigned int i = sched_returns_processed_prev; i < sched_returns_processed_curr; ++i) {
 					if(Return(i).IsValid()) {
-						Machine & returned(*Global::_pSong->_pMachine[Return(i).Wire().machine_]);
+						Machine & returned(*Global::song()._pMachine[Return(i).Wire().machine_]);
 						result.push_back(&returned);
 					}
 				}
@@ -644,7 +650,7 @@ namespace psycle
 			if(!mixed) {
 				// step 1: signal sent to sends. Identify them.
 				for (unsigned int i=sched_returns_processed_prev; i<sched_returns_processed_curr; i++) if (Send(i).IsValid()) {
-					Machine & input(*Global::_pSong->_pMachine[Send(i).machine_]);
+					Machine & input(*Global::song()._pMachine[Send(i).machine_]);
 					result.push_back(&input);
 				}
 			} else {
@@ -719,7 +725,7 @@ namespace psycle
 				RecalcReturn(wireIndex-MAX_CONNECTIONS);
 			}
 		}
-		void Mixer::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		void Mixer::InsertInputWireIndex(Song& pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
 		{
 			if (wireIndex< MAX_CONNECTIONS)
 			{
@@ -741,7 +747,7 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				SetMixerSendFlag(pSong,pSong->_pMachine[srcmac]);
+				SetMixerSendFlag(pSong,pSong._pMachine[srcmac]);
 				MixerWire wire(srcmac,0);
 				// If we're replacing an existing connection
 				if ( ReturnValid(wireIndex))
@@ -797,7 +803,7 @@ namespace psycle
 			}
 		}
 
-		void Mixer::DeleteInputWireIndex(Song* pSong,int wireIndex)
+		void Mixer::DeleteInputWireIndex(Song& pSong,int wireIndex)
 		{
 			if ( wireIndex < MAX_CONNECTIONS)
 			{
@@ -807,17 +813,17 @@ namespace psycle
 			else
 			{
 				wireIndex-=MAX_CONNECTIONS;
-				DeleteMixerSendFlag(pSong,pSong->_pMachine[Return(wireIndex).Wire().machine_]);
+				DeleteMixerSendFlag(pSong,pSong._pMachine[Return(wireIndex).Wire().machine_]);
 				Return(wireIndex).Wire().machine_=-1;
 				sends_[wireIndex].machine_ = -1;
 				DiscardReturn(wireIndex);
 				DiscardSend(wireIndex);
 			}
 		}
-		void Mixer::NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac)
+		void Mixer::NotifyNewSendtoMixer(Song& pSong,int callerMac,int senderMac)
 		{
 			// Mixer reached, set flags upwards.
-			SetMixerSendFlag(pSong,pSong->_pMachine[callerMac]);
+			SetMixerSendFlag(pSong,pSong._pMachine[callerMac]);
 			bool found=false;
 			int i=0;
 			for (;i < MAX_CONNECTIONS; i++)
@@ -830,11 +836,11 @@ namespace psycle
 						break;
 					}
 					//Else, try to find it inside this chain.
-					Machine* pMac = pSong->_pMachine[Return(i).Wire().machine_];
+					Machine* pMac = pSong._pMachine[Return(i).Wire().machine_];
 					for(int c=0; c<MAX_CONNECTIONS; c++)
 					{
 						if(pMac->_inputCon[c])	{
-							pMac = pSong->_pMachine[pMac->_inputMachines[c]];
+							pMac = pSong._pMachine[pMac->_inputMachines[c]];
 							if ( callerMac == pMac->_macIndex) {
 								found = true;
 								goto endfor;
@@ -849,31 +855,31 @@ endfor:
 			if (found)
 			{
 				sends_[i].machine_ = senderMac;
-				sends_[i].normalize_ = GetAudioRange()/pSong->_pMachine[senderMac]->GetAudioRange();
+				sends_[i].normalize_ = GetAudioRange()/pSong._pMachine[senderMac]->GetAudioRange();
 				for (int ch(0);ch<numinputs();ch++)
 				{
 					RecalcSend(ch,i);
 				}
 			}
 		}
-		void Mixer::SetMixerSendFlag(Song* pSong,Machine* mac)
+		void Mixer::SetMixerSendFlag(Song& pSong,Machine* mac)
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
+				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong._pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=true;
 		}
-		void Mixer::DeleteMixerSendFlag(Song* pSong,Machine* mac)
+		void Mixer::DeleteMixerSendFlag(Song& pSong,Machine* mac)
 		{
 			for (int i(0);i<MAX_CONNECTIONS;++i)
 			{
-				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong->_pMachine[mac->_inputMachines[i]]);
+				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong._pMachine[mac->_inputMachines[i]]);
 			}
 			mac->_isMixerSend=false;
 		}
 
-		void Mixer::DeleteWires(Song* pSong)
+		void Mixer::DeleteWires(Song& pSong)
 		{
 			Machine::DeleteWires(pSong);
 			Machine *iMac;
@@ -882,7 +888,7 @@ endfor:
 				// Checking send/return Wires
 				if(Return(w).IsValid())
 				{
-					iMac = pSong->_pMachine[Return(w).Wire().machine_];
+					iMac = pSong._pMachine[Return(w).Wire().machine_];
 					if (iMac)
 					{
 						int wix = iMac->FindOutputWire(_macIndex);
@@ -1256,7 +1262,10 @@ endfor:
 			{
 				if (!ChannelValid(channel-1)) return false;
 				if (param == 0) { Channel(channel-1).DryMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
-				else if (param <= 12) { Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1); } 
+				else if (param <= 12) {
+					 if(!SendValid(param-1)) return false;
+					Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1);
+				} 
 				else if (param == 13)
 				{
 					Channel(channel-1).Mute() = (value == 3)?true:false;

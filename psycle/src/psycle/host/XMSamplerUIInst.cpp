@@ -703,7 +703,7 @@ void XMSamplerUIInst::OnNMCustomdrawFadeoutRes(NMHDR *pNMHDR, LRESULT *pResult)
 //		(24.0f * Global::player().bpm/60.0f) = number of ticks in a second.
 //		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::player().bpm/60.0f));
 		if (m_SlFadeoutRes.GetPos() == 0) strcpy(tmp,"off");
-		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::pPlayer->bpm *m_SlFadeoutRes.GetPos()) );
+		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::player().bpm *m_SlFadeoutRes.GetPos()) );
 
 		if (m_bInitialized)
 		{
@@ -956,7 +956,7 @@ void XMSamplerUIInst::OnBnClickedLoadins()
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	std::string tmpstr = Global::psycleconf().GetCurrentInstrumentDir();
+	std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 	ofn.lpstrInitialDir = tmpstr.c_str();
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 	// Display the Open dialog box. 
@@ -1367,7 +1367,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
 			_new_point = 0;
 		}
 
-		CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 	//\todo : Verify that we aren't trying to add an existing point!!!
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
@@ -1378,7 +1378,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		m_pEnvelope->SustainBegin(m_EditPoint);
 		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
 		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1389,7 +1389,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopSustainEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
 		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
 		m_pEnvelope->SustainEnd(m_EditPoint);
@@ -1400,7 +1400,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 	{
-		CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		m_pEnvelope->LoopStart(m_EditPoint);
 		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
 		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1411,7 +1411,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopLoopEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
 		{
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
 		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
 		m_pEnvelope->LoopEnd(m_EditPoint);
@@ -1432,7 +1432,7 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 
 	if(m_EditPoint != _points)
 		{
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		m_pEnvelope->Delete(m_EditPoint);
 		m_EditPoint = _points;
 			Invalidate();
@@ -1440,21 +1440,21 @@ void XMSamplerUIInst::CEnvelopeEditor::OnPopRemovePoint()
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveSustain()
 { 
-	CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+	CExclusiveLock lock(&Global::song().semaphore, 2, true);
 	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
 	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
 	Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveLoop()
 { 
-		CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
 		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
 		Invalidate();
 }
 void XMSamplerUIInst::CEnvelopeEditor::OnPopRemoveEnvelope()
 {
-	CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+	CExclusiveLock lock(&Global::song().semaphore, 2, true);
 	m_pEnvelope->Clear();
 	Invalidate();
 }
