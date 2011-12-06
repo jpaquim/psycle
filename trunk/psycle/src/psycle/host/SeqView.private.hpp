@@ -98,7 +98,7 @@ namespace host {
 				for(i=0; i<MAX_MACHINES; i++)
 				{
 					curXoffset=SEQ_XOFFSET;
-					Machine *tmac = _pSong->_pMachine[i];
+					Machine *tmac = _pSong._pMachine[i];
 					if (tmac)
 					{
 						seqGenPos[m++]=i;
@@ -125,16 +125,16 @@ namespace host {
 
 							curcol = seqTickOffs; // this will be used to know where to start drawing the pattern
 							j=0;curcolf=0;
-							while (curXoffset < CW && j < _pSong->playLength)
+							while (curXoffset < CW && j < _pSong.playLength)
 							{
 								// Needs modification, since the patterns don't need to come one after the other in Multipattern sequence.
 
-								int psize=(_pSong->patternLines[_pSong->playOrder[j]]*SEQ_ROWWIDTH)/(_pSong->LinesPerBeat()*seqSteps);
+								int psize=(_pSong.patternLines[_pSong.playOrder[j]]*SEQ_ROWWIDTH)/(_pSong.LinesPerBeat()*seqSteps);
 								rect.left=curXoffset;
 								//rect.right=curXoffset+psize;
 								//devc->FillSolidRect(rect,patView->row4beat);
 								devc->SetBkColor(patView->row4beat);
-								sprintf(cbuffer,"%.2d:%s",_pSong->playOrder[j],_pSong->patternName[_pSong->playOrder[j]]);
+								sprintf(cbuffer,"%.2d:%s",_pSong.playOrder[j],_pSong.patternName[_pSong.playOrder[j]]);
 								TXT(devc,cbuffer,curXoffset,curYoffset,psize-1,SEQ_ROWHEIGHT-1);
 								curXoffset+=psize;
 								j++;
@@ -202,9 +202,9 @@ namespace host {
 				k=0;
 				for (i=0;k<seqTick;i++)
 				{
-					k+=_pSong->patternLines[_pSong->playOrder[i]]/(seqSteps*_pSong->LinesPerBeat());
+					k+=_pSong.patternLines[_pSong.playOrder[i]]/(seqSteps*_pSong.LinesPerBeat());
 				}
-				if ( k == seqTick ) sprintf(cbuffer,"%.2d",_pSong->playOrder[i]);
+				if ( k == seqTick ) sprintf(cbuffer,"%.2d",_pSong.playOrder[i]);
 				else strcpy(cbuffer,"...");
 			}
 			else
@@ -254,9 +254,9 @@ namespace host {
 
 			curcol = seqTickOffs - (seqTickOffs%seqSteps);
 			
-			float curtime = (Global::player().sampleCount * Global::pPlayer->bpm) / (60.0f * Global::player().SampleRate());
+			float curtime = (Global::player().sampleCount * Global::player().bpm) / (60.0f * Global::player().SampleRate());
 
-			if ( (float)(curcol*seqSteps) <= curtime && Global::pPlayer->_playing )
+			if ( (float)(curcol*seqSteps) <= curtime && Global::player()._playing )
 			{
 				if ( (float)(curcol+(seqNumCols*seqSteps)) <= curtime )
 					rect.right=CW;

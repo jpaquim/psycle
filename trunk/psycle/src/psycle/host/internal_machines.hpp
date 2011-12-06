@@ -17,9 +17,12 @@ public:
 	virtual float GetAudioRange() const { return 32768.0f; }
 	virtual char* GetName(void) { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+	virtual const char * const GetDllName() const throw() { return dllName.c_str(); }
 
 	/// Marks that the Dummy was in fact a VST plugin that couldn't be loaded
 	bool wasVST;
+	/// Indicates the dll name of the plugin that could not be loaded
+	std::string dllName;
 protected:
 	static char * _psName;
 };
@@ -324,15 +327,15 @@ public:
 	virtual void GetWireVolume(int wireIndex, float &value){ value = GetWireVolume(wireIndex); }
 	virtual float GetWireVolume(int wireIndex);
 	virtual void SetWireVolume(int wireIndex,float value);
-	virtual void InsertInputWireIndex(Song* pSong,int wireIndex,int srcmac,float wiremultiplier, float initialvol=1.0f);
+	virtual void InsertInputWireIndex(Song& pSong,int wireIndex,int srcmac,float wiremultiplier, float initialvol=1.0f);
 	virtual int FindInputWire(int macIndex);
-	virtual void NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac);
+	virtual void NotifyNewSendtoMixer(Song& pSong,int callerMac,int senderMac);
 	virtual int GetFreeInputWire(int slottype=0);
 	virtual int GetInputSlotTypes() { return 2; }
-	virtual void DeleteInputWireIndex(Song* pSong,int wireIndex);
-	virtual void DeleteMixerSendFlag(Song* pSong,Machine* mac);
-	virtual void SetMixerSendFlag(Song* pSong,Machine* mac);
-	virtual void DeleteWires(Song* pSong);
+	virtual void DeleteInputWireIndex(Song& pSong,int wireIndex);
+	virtual void DeleteMixerSendFlag(Song& pSong,Machine* mac);
+	virtual void SetMixerSendFlag(Song& pSong,Machine* mac);
+	virtual void DeleteWires(Song& pSong);
 	virtual float GetAudioRange() const { return 32768.0f; }
 	std::string GetAudioInputName(int port);
 	virtual int GetAudioInputs() { return 24; }

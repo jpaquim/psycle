@@ -32,7 +32,9 @@ namespace psycle { namespace host {
 		{
 			CPropertyPage::DoDataExchange(pDX);
 			DDX_Control(pDX, IDC_SONGEDIT, m_songEdit);
+			DDX_Control(pDX, IDC_RECORD_USE_PSYDIR, m_waveInPsyDir);
 			DDX_Control(pDX, IDC_WAVERECEDIT, m_waveRec);
+			DDX_Control(pDX, IDC_BROWSEWAVEREC, m_browseWaveRec);
 			DDX_Control(pDX, IDC_INSTEDIT, m_instEdit);
 			DDX_Control(pDX, IDC_PLUGINEDIT, m_pluginEdit);
 			DDX_Control(pDX, IDC_VSTEDIT32, m_vst32Edit);
@@ -47,6 +49,7 @@ namespace psycle { namespace host {
 		BEGIN_MESSAGE_MAP(CDirectoryDlg, CPropertyPage)
 			ON_BN_CLICKED(IDC_BROWSESONG, OnBrowseSong)
 			ON_EN_CHANGE(IDC_SONGEDIT, OnChangeSongedit)
+			ON_BN_CLICKED(IDC_RECORD_USE_PSYDIR, OnRecordUsePsyDir)
 			ON_BN_CLICKED(IDC_BROWSEWAVEREC, OnBnClickedBrowsewaverec)
 			ON_EN_CHANGE(IDC_WAVERECEDIT, OnEnChangeWaverecedit)
 			ON_BN_CLICKED(IDC_BROWSEINST, OnBrowseInst)
@@ -72,7 +75,7 @@ namespace psycle { namespace host {
 		BOOL CDirectoryDlg::OnInitDialog() 
 		{
 			CPropertyPage::OnInitDialog();
-			PsycleConfig& config = Global::psycleconf();
+			PsycleConfig& config = PsycleGlobal::conf();
 			initializingDlg=true;
 
 			_songPathBuf    = config.GetSongDir();
@@ -95,6 +98,12 @@ namespace psycle { namespace host {
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			m_presetEdit.SetWindowText(_presetPathBuf.c_str());
 
+			if(config.IsRecInPSYDir()) {
+				m_waveInPsyDir.SetCheck(TRUE);
+				m_waveRec.EnableWindow(FALSE);
+				m_browseWaveRec.EnableWindow(FALSE);
+			}
+
 			EnableSupportedBridges();
 			m_jBridge.SetCheck(_isJbridged);
 			m_PsycleVstBridge.SetCheck(_isPsycleBridged);
@@ -106,9 +115,12 @@ namespace psycle { namespace host {
 
 		void CDirectoryDlg::OnOK()
 		{
-			PsycleConfig& config = Global::psycleconf();
+			PsycleConfig& config = PsycleGlobal::conf();
 			if (_songPathChanged)    config.SetSongDir(_songPathBuf);
-			if (_waveRecPathChanged) config.SetWaveRecDir(_waveRecPathBuf);
+			if (_waveRecPathChanged) {
+				config.SetWaveRecDir(_waveRecPathBuf);
+				config.SetRecInPSYDir(m_waveInPsyDir.GetCheck());
+			}
 			if (_instPathChanged)    config.SetInstrumentDir(_instPathBuf);
 			if (_pluginPathChanged)  config.SetPluginDir(_pluginPathBuf);
 			if (_vstPath32Changed)   config.SetVst32Dir(_vstPath32Buf);
@@ -155,7 +167,18 @@ namespace psycle { namespace host {
 				_waveRecPathBuf=temp;
 			}
 		}
-
+		void CDirectoryDlg::OnRecordUsePsyDir()
+		{
+			if(m_waveInPsyDir.GetCheck()) {
+				_waveRecPathChanged = true;
+				m_waveRec.EnableWindow(FALSE);
+				m_browseWaveRec.EnableWindow(FALSE);
+			}
+			else {
+				m_waveRec.EnableWindow(TRUE);
+				m_browseWaveRec.EnableWindow(TRUE);
+			}
+		}
 		void CDirectoryDlg::OnBrowseInst() 
 		{
 			if (CPsycleApp::BrowseForFolder(m_hWnd, _T("Select Instrument Directory"), _instPathBuf))
@@ -289,7 +312,7 @@ namespace psycle { namespace host {
 
 		void CDirectoryDlg::EnableSupportedBridges() {
 			bool bridging = false;
-			if (Global::psycleconf().SupportsJBridge())
+			if (PsycleGlobal::conf().SupportsJBridge())
 			{
 				m_jBridge.EnableWindow();
 				bridging = true;

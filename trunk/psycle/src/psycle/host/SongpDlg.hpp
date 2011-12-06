@@ -13,8 +13,8 @@ namespace psycle {
 		{
 		public:
 			/// mfc compliant constructor.
-			CSongpDlg(Song *song, CWnd* pParent = 0);
-			Song* _pSong;
+			CSongpDlg(Song& song, CWnd* pParent = 0);
+			Song& _pSong;
 		// Dialog Data
 			enum { IDD = IDD_SONGPROP };
 			CEdit	m_songcomments;

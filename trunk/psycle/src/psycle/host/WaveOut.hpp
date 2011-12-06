@@ -35,7 +35,7 @@ namespace psycle
 			virtual bool operator!=(WaveOutSettings const &);
 			virtual bool operator==(WaveOutSettings const & other) { return !((*this) != other); }
 			virtual AudioDriver* NewDriver();
-			virtual AudioDriverInfo& GetInfo() { return info_; }
+			virtual const AudioDriverInfo& GetInfo() const { return info_; }
 
 			virtual void SetDefaultSettings();
 			virtual void Load(ConfigStorage &);
@@ -65,7 +65,7 @@ namespace psycle
 			public:
 				PortEnums() {};
 				PortEnums(std::string _pname, int _idx):portname(_pname),idx(_idx){}
-				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput);
+				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput) const;
 				std::string portname;
 				int idx;
 			};
@@ -89,34 +89,35 @@ namespace psycle
 		public:
 			WaveOut(WaveOutSettings* settings);
 			virtual ~WaveOut() throw();
-			virtual AudioDriverSettings& settings() { return *settings_; }
+			virtual AudioDriverSettings& settings() const { return *settings_; }
 
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 			virtual bool Enable(bool e);
 			virtual void Reset();
-			virtual bool Initialized() { return _initialized; }
-			virtual bool Enabled() { return _running; }
+			virtual bool Initialized() const { return _initialized; }
+			virtual bool Enabled() const { return _running; }
 			virtual void Configure();
 			virtual void RefreshAvailablePorts();
-			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
-			virtual void GetCapturePorts(std::vector<std::string> &ports);
+			virtual void GetPlaybackPorts(std::vector<std::string> &ports) const;
+			virtual void GetCapturePorts(std::vector<std::string> &ports) const;
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
-			virtual bool CreateCapturePort(PortCapt &port);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 
-			virtual std::uint32_t GetInputLatencySamples() { return settings().blockCount() * settings().blockFrames(); }
-			virtual std::uint32_t GetOutputLatencySamples() { return settings().blockCount() * settings().blockFrames(); }
-			virtual std::uint32_t GetWritePosInSamples();
+			virtual std::uint32_t GetInputLatencySamples() const { return settings().blockCount() * settings().blockFrames(); }
+			virtual std::uint32_t GetOutputLatencySamples() const { return settings().blockCount() * settings().blockFrames(); }
+			virtual std::uint32_t GetWritePosInSamples() const;
 			virtual std::uint32_t GetPlayPosInSamples();
-			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID);
+
+			bool CreateCapturePort(PortCapt &port);
+			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID) const;
 			static void PollerThread(void *pWaveOut);
 		protected:
+			static void Error(const char msg[]);
 			void EnumeratePlaybackPorts();
 			void EnumerateCapturePorts();
 			void ReadConfig();
 			void WriteConfig();
-			void Error(const char msg[]);
 			void DoBlocks();
 			bool WantsMoreBlocks();
 			void DoBlocksRecording(PortCapt& port);

@@ -128,9 +128,9 @@ namespace psycle
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
-				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL(*this); }
-				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL(*this); }
-				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL(*this); }
+				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL_RETURN(*this); }
+				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL_RETURN(*this); }
+				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL_RETURN(*this); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual bool Bypass(void) const { return Machine::Bypass(); }
@@ -239,28 +239,28 @@ namespace psycle
 				};
 				virtual int GetNumBanks(){ return numPrograms()/128;};
 
-				virtual void InsertOutputWireIndex(Song* pSong,int wireIndex,int dstmac)
+				virtual void InsertOutputWireIndex(Song& pSong,int wireIndex,int dstmac)
 				{
 					try
 					{
 						MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(pSong,wireIndex,dstmac);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void InsertInputWireIndex(Song* pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
+				virtual void InsertInputWireIndex(Song& pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
 				{
 					try
 					{
 						MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(pSong,wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void DeleteOutputWireIndex(Song* pSong,int wireIndex)
+				virtual void DeleteOutputWireIndex(Song& pSong,int wireIndex)
 				{
 					try
 					{
 						MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(pSong,wireIndex);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void DeleteInputWireIndex(Song* pSong,int wireIndex)
+				virtual void DeleteInputWireIndex(Song& pSong,int wireIndex)
 				{ 
 					try
 					{

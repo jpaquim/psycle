@@ -27,7 +27,7 @@ namespace psycle
 			virtual bool operator!=(DirectSoundSettings const &);
 			virtual bool operator==(DirectSoundSettings const & other) { return !((*this) != other); }
 			virtual AudioDriver* NewDriver();
-			virtual AudioDriverInfo& GetInfo() { return info_; }
+			virtual const AudioDriverInfo& GetInfo() const { return info_; }
 
 			virtual void SetDefaultSettings();
 			virtual void Load(ConfigStorage &);
@@ -45,7 +45,7 @@ namespace psycle
 			public:
 				PortEnums():guid(0) {};
 				PortEnums(LPGUID _guid,std::string _pname):guid(_guid),portname(_pname){}
-				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput);
+				bool IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput) const;
 				std::string portname;
 				LPGUID guid;
 			};
@@ -65,33 +65,34 @@ namespace psycle
 		public:
 			DirectSound(DirectSoundSettings* settings);
 			virtual ~DirectSound() throw();
-			inline virtual AudioDriverSettings& settings() { return *settings_; };
+			inline virtual AudioDriverSettings& settings() const { return *settings_; };
 
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void * context);
 			virtual bool Enable(bool e);
 			virtual void Reset();
 			virtual void Configure();
-			virtual bool Initialized() { return _initialized; }
-			virtual bool Enabled() { return _running; }
+			virtual bool Initialized() const { return _initialized; }
+			virtual bool Enabled() const { return _running; }
 			virtual void RefreshAvailablePorts();
-			virtual void GetPlaybackPorts(std::vector<std::string> &ports);
-			virtual void GetCapturePorts(std::vector<std::string> &ports);
+			virtual void GetPlaybackPorts(std::vector<std::string> &ports) const;
+			virtual void GetCapturePorts(std::vector<std::string> &ports) const;
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
-			virtual bool CreateCapturePort(PortCapt &port);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
+			virtual std::uint32_t GetInputLatencySamples() const { return _dsBufferSize/GetSampleSizeBytes(); }
+			virtual std::uint32_t GetOutputLatencySamples() const { return _dsBufferSize/GetSampleSizeBytes(); }
+			virtual std::uint32_t GetWritePosInSamples() const;
+			virtual std::uint32_t GetPlayPosInSamples();
+
+			bool CreateCapturePort(PortCapt &port);
 			static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
 			static BOOL CALLBACK DSCaptureEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
-			virtual std::uint32_t GetInputLatencySamples() { return _dsBufferSize/GetSampleSizeBytes(); }
-			virtual std::uint32_t GetOutputLatencySamples() { return _dsBufferSize/GetSampleSizeBytes(); }
-			virtual std::uint32_t GetWritePosInSamples();
-			virtual std::uint32_t GetPlayPosInSamples();
 		protected:
-			void Error(const TCHAR msg[]);
+			static void Error(const TCHAR msg[]);
 			bool Start();
 			bool Stop();
 
-			std::uint32_t DirectSound::GetIdxFromDevice(GUID* device);
+			std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) const;
 			static DWORD WINAPI NotifyThread(void* pDirectSound);
 			static DWORD WINAPI PollerThread(void* pDirectSound);
 			void DoBlocks();

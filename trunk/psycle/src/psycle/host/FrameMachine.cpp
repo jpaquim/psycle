@@ -58,6 +58,8 @@ namespace psycle { namespace host {
 			ON_WM_KEYUP()
 			ON_WM_SIZING()
 			ON_WM_INITMENUPOPUP()
+			ON_COMMAND(ID_PROGRAMS_OPENPRESET, OnProgramsOpenpreset)
+			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
 			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
@@ -209,7 +211,7 @@ namespace psycle { namespace host {
 		{
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			CmdDef cmd(PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags));
 			if(cmd.IsValid())
 			{
 				switch(cmd.GetType())
@@ -219,16 +221,16 @@ namespace psycle { namespace host {
 					{
 						///\todo: change the option: "notesToEffects" to mean "notesToWindowOwner".
 						const int outnote = cmd.GetNote();
-						if ( _machine->_mode == MACHMODE_GENERATOR || Global::psycleconf().inputHandler()._notesToEffects)
-							Global::pInputHandler->PlayNote(outnote,255,127,true,_machine);
+						if ( _machine->_mode == MACHMODE_GENERATOR || PsycleGlobal::conf().inputHandler()._notesToEffects)
+							PsycleGlobal::inputHandler().PlayNote(outnote,255,127,true,_machine);
 						else
-							Global::pInputHandler->PlayNote(outnote);
+							PsycleGlobal::inputHandler().PlayNote(outnote);
 					}
 					break;
 
 				case CT_Immediate:
 				case CT_Editor:
-					Global::pInputHandler->PerformCmd(cmd,bRepeat);
+					PsycleGlobal::inputHandler().PerformCmd(cmd,bRepeat);
 					break;
 				}
 			}
@@ -243,15 +245,15 @@ namespace psycle { namespace host {
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
 
-			CmdDef cmd(Global::pInputHandler->KeyToCmd(nChar,nFlags));
+			CmdDef cmd(PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
 			if(outnote>=0)
 			{
-				if ( _machine->_mode == MACHMODE_GENERATOR ||Global::psycleconf().inputHandler()._notesToEffects)
+				if ( _machine->_mode == MACHMODE_GENERATOR ||PsycleGlobal::conf().inputHandler()._notesToEffects)
 				{
-					Global::pInputHandler->StopNote(outnote,255,true,_machine);
+					PsycleGlobal::inputHandler().StopNote(outnote,255,true,_machine);
 				}
-				else Global::pInputHandler->StopNote(outnote);
+				else PsycleGlobal::inputHandler().StopNote(outnote);
 			}
 
 			CFrameWnd::OnKeyUp(nChar, nRepCnt, nFlags);
@@ -278,6 +280,15 @@ namespace psycle { namespace host {
 			}
 
 			CFrameWnd::OnInitMenuPopup(pPopupMenu, nIndex, bSysMenu);
+		}
+
+		void CFrameMachine::OnProgramsOpenpreset()
+		{
+			MessageBox("Please, use Views->Bank manager with Native Plugins to import presets.","Parameters window");
+		}
+		void CFrameMachine::OnProgramsSavepreset()
+		{
+			MessageBox("Please, use Views->Bank manager with Native Plugins to export presets.","Parameters window");
 		}
 		void CFrameMachine::OnSetBank(UINT nID)
 		{
@@ -322,7 +333,7 @@ namespace psycle { namespace host {
 
 				float roffset = randsem*(float)dif;
 
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 				machine().SetParameter(c,minran+int(roffset));
 			}
 			Invalidate(false);
@@ -336,7 +347,7 @@ namespace psycle { namespace host {
 				for (int c=0; c<numpars; c++)
 				{
 					int dv = ((Plugin*)_machine)->GetInfo()->Parameters[c]->DefValue;
-					Global::pInputHandler->AddMacViewUndo();
+					PsycleGlobal::inputHandler().AddMacViewUndo();
 					_machine->SetParameter(c,dv);
 				}
 			}
@@ -415,16 +426,16 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnViewsShowtoolbar()
 		{
-			Global::psycleconf().macParam().toolbarOnMachineParams = !Global::psycleconf().macParam().toolbarOnMachineParams;
+			PsycleGlobal::conf().macParam().toolbarOnMachineParams = !PsycleGlobal::conf().macParam().toolbarOnMachineParams;
 
-			if (Global::psycleconf().macParam().toolbarOnMachineParams) ShowControlBar(&toolBar,TRUE,FALSE);
+			if (PsycleGlobal::conf().macParam().toolbarOnMachineParams) ShowControlBar(&toolBar,TRUE,FALSE);
 			else ShowControlBar(&toolBar,FALSE,FALSE);
 			ResizeWindow(0);
 		}
 
 		void CFrameMachine::OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI)
 		{
-			pCmdUI->SetCheck(Global::psycleconf().macParam().toolbarOnMachineParams);
+			pCmdUI->SetCheck(PsycleGlobal::conf().macParam().toolbarOnMachineParams);
 		}
 
 		void CFrameMachine::OnParametersCommand() 
@@ -600,7 +611,7 @@ namespace psycle { namespace host {
 			rcFrame.right +=
 				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
 
-			if ( Global::psycleconf().macParam().toolbarOnMachineParams && !(toolBar.GetBarStyle() & CBRS_FLOATING))
+			if ( PsycleGlobal::conf().macParam().toolbarOnMachineParams && !(toolBar.GetBarStyle() & CBRS_FLOATING))
 			{
 				//SM_CYBORDER The height of a window border, in pixels. This is equivalent to the SM_CYEDGE value for windows with the 3-D look.
 				CRect tbRect;
@@ -640,7 +651,7 @@ namespace psycle { namespace host {
 				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,internalPresets,false);
 			}
 
-			buffer = Global::psycleconf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
+			buffer = PsycleGlobal::conf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
 			boost::filesystem::path inpath2(buffer);
 			if(boost::filesystem::exists(inpath2))
 			{
@@ -901,7 +912,7 @@ namespace psycle { namespace host {
 		}
 		void CFrameMachine::Automate(int param, int value, bool undo)
 		{
-			Global::inputHandler().Automate(machine()._macIndex, param, value, undo);
+			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value, undo);
 			if(pParamGui)
 				pParamGui->UpdateNew(param, value);
 		}

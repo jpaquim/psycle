@@ -22,8 +22,6 @@ namespace psycle
 {
 	namespace host
 	{
-		extern CPsycleApp theApp;
-
 		CMidiInput::CMidiInput() : 
 			m_midiInHandlesTried( false ),
 			m_bufWriteIdx( 0 ),
@@ -412,7 +410,7 @@ Exit:
 
 		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
-			CMidiInput& midiInput = Global::midi();
+			CMidiInput& midiInput = PsycleGlobal::midi();
 
 			// do nothing if there is no reference object or the object is not active
 			if((!midiInput.GetHandle( DRIVER_MIDI ) && !midiInput.GetHandle( DRIVER_SYNC )))
@@ -481,7 +479,7 @@ Exit:
 					int statusLN = (status & 0x0F);
 					int channel = statusLN;
 
-					switch(Global::psycleconf().midi().gen_select_with())
+					switch(PsycleGlobal::conf().midi().gen_select_with())
 					{
 					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetGenMap( channel, Global::song().seqBus );
@@ -490,7 +488,7 @@ Exit:
 						SetGenMap( channel, channel );
 						break;
 					}
-					switch(Global::psycleconf().midi().inst_select_with())
+					switch(PsycleGlobal::conf().midi().inst_select_with())
 					{
 					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetInstMap( channel, Global::song().auxcolSelected );
@@ -556,10 +554,10 @@ Exit:
 						case 0x0C:
 						{
 							// program change -> map generator/effect to channel
-							if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							if(PsycleGlobal::conf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								// machine active?
-								if( program < MAX_MACHINES && Global::_pSong->_pMachine[ program ] )
+								if( program < MAX_MACHINES && Global::song()._pMachine[ program ] )
 								{
 									// ok, map
 									SetGenMap( channel, program );
@@ -571,7 +569,7 @@ Exit:
 								}
 								return;
 							}
-							else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							else if(PsycleGlobal::conf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								SetInstMap( channel, program );
 								return;
@@ -637,7 +635,7 @@ Exit:
 									m_stats.flags |= FSTAT_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->Stop();
+									Global::player().Stop();
 									return;
 								}
 								break;
@@ -660,10 +658,10 @@ Exit:
 								case 0:
 								{
 									// banks select -> map generator to channel
-									if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
+									if(PsycleGlobal::conf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										// machine active?
-										if( program < MAX_MACHINES && Global::_pSong->_pMachine[ data2 ] )
+										if( program < MAX_MACHINES && Global::song()._pMachine[ data2 ] )
 										{
 											// ok, map
 											SetGenMap( channel, data2 );
@@ -676,7 +674,7 @@ Exit:
 										return;
 									}
 									// banks select -> map instrument to channel
-									else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
+									else if(PsycleGlobal::conf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										SetInstMap( channel, data2 );
 										return;
@@ -751,7 +749,7 @@ Exit:
 									m_stats.flags |= FSTAT_EMULATED_FCSTOP;
 
 									// stop the song play (in effect, stops all sound)
-									Global::pPlayer->Stop();
+									Global::player().Stop();
 									return;
 								}
 								break;
@@ -808,10 +806,10 @@ Exit:
 									{
 										note = notecommands::tweak;
 										inst  = gParameter;
-										if(Global::_pSong->_pMachine[busMachine] && inst < Global::_pSong->_pMachine[busMachine]->GetNumParams())
+										if(Global::song()._pMachine[busMachine] && inst < Global::song()._pMachine[busMachine]->GetNumParams())
 										{	
 											int minval, maxval;
-											Global::_pSong->_pMachine[busMachine]->GetParamRange(inst, minval, maxval);
+											Global::song()._pMachine[busMachine]->GetParamRange(inst, minval, maxval);
 											int value = minval + helpers::math::lround<int, float>( data2 * (maxval-minval) / 127.f);
 											cmd = value / 256;
 											parameter = value % 256;
@@ -819,7 +817,7 @@ Exit:
 										else
 											parameter = data2;
 									}
-									else if (Global::psycleconf().midi().raw())
+									else if (PsycleGlobal::conf().midi().raw())
 									{
 										note = notecommands::midicc;
 										inst  = (status&0xF0) | (inst&0x0F);
@@ -832,32 +830,32 @@ Exit:
 										int i;
 										for(i =0 ; i < 16 ; ++i)
 										{
-											if(Global::psycleconf().midi().group(i).record() && (Global::psycleconf().midi().group(i).message() == data1 ))
+											if(PsycleGlobal::conf().midi().group(i).record() && (PsycleGlobal::conf().midi().group(i).message() == data1 ))
 											{
-												int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
-												switch(Global::psycleconf().midi().group(i).type())
+												int const value(PsycleGlobal::conf().midi().group(i).from() + (PsycleGlobal::conf().midi().group(i).to() - PsycleGlobal::conf().midi().group(i).from()) * data2 / 127);
+												switch(PsycleGlobal::conf().midi().group(i).type())
 												{
 												case PsycleConfig::Midi::group_t::t_command:
 														note = notecommands::empty;
 														inst = 255;
-														cmd = Global::psycleconf().midi().group(i).command();
+														cmd = PsycleGlobal::conf().midi().group(i).command();
 														parameter = value;
 														break;
 												case PsycleConfig::Midi::group_t::t_tweak:
 														note = notecommands::tweak;
-														inst = Global::psycleconf().midi().group(i).command();
+														inst = PsycleGlobal::conf().midi().group(i).command();
 														cmd = (value>>8)&255;
 														parameter = value&255;
 														break;
 												case PsycleConfig::Midi::group_t::t_tweakslide:
 														note = notecommands::tweakslide;
-														inst = Global::psycleconf().midi().group(i).command();
+														inst = PsycleGlobal::conf().midi().group(i).command();
 														cmd = (value>>8)&255;
 														parameter = value&255;
 														break;
 												case PsycleConfig::Midi::group_t::t_mcm:
 														note = notecommands::midicc;
-														inst = Global::psycleconf().midi().group(i).command() | (inst&0x0F);
+														inst = PsycleGlobal::conf().midi().group(i).command() | (inst&0x0F);
 														cmd = data1;
 														parameter = data2;
 														break;
@@ -892,7 +890,7 @@ Exit:
 					}
 
 					// invalid machine/channel?
-					if( !Global::_pSong->_pMachine[ busMachine ] && note != notecommands::midi_sync )
+					if( !Global::song()._pMachine[ busMachine ] && note != notecommands::midi_sync )
 					{
 						return;
 					}
@@ -971,7 +969,7 @@ Exit:
 					int statusLN = (status & 0x0F);
 					int channel = statusLN;
 
-					switch(Global::psycleconf().midi().gen_select_with())
+					switch(PsycleGlobal::conf().midi().gen_select_with())
 					{
 					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetGenMap( channel, Global::song().seqBus );
@@ -980,7 +978,7 @@ Exit:
 						SetGenMap( channel, channel );
 						break;
 					}
-					switch(Global::psycleconf().midi().inst_select_with())
+					switch(PsycleGlobal::conf().midi().inst_select_with())
 					{
 					case PsycleConfig::Midi::MS_USE_SELECTED:
 						SetInstMap( channel, Global::song().auxcolSelected );
@@ -1010,7 +1008,7 @@ Exit:
     						// limit to playable range (above this is special codes)
     						if(note>119) 
     							note=119;
-							Global::inputHandler().MidiPatternNote(note, busMachine, inst, velocity);
+							PsycleGlobal::inputHandler().MidiPatternNote(note, busMachine, inst, velocity);
 							return;
 						// controller
 						case 0x0B:
@@ -1022,10 +1020,10 @@ Exit:
 								case 0:
 								{
 									// banks select -> map generator to channel
-									if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
+									if(PsycleGlobal::conf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										// machine active?
-										if( data2 < MAX_MACHINES && Global::_pSong->_pMachine[ data2 ] )
+										if( data2 < MAX_MACHINES && Global::song()._pMachine[ data2 ] )
 										{
 											// ok, map
 											SetGenMap( channel, data2 );
@@ -1038,7 +1036,7 @@ Exit:
 										return;
 									}
 									// banks select -> map instrument to channel
-									else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
+									else if(PsycleGlobal::conf().midi().inst_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										SetInstMap( channel, data2 );
 										return;
@@ -1051,10 +1049,10 @@ Exit:
 						case 0x0C:
 						{
 							// program change -> map generator/effect to channel
-							if(Global::psycleconf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							if(PsycleGlobal::conf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								// machine active?
-								if( data1 < MAX_MACHINES && Global::_pSong->_pMachine[ data1 ] )
+								if( data1 < MAX_MACHINES && Global::song()._pMachine[ data1 ] )
 								{
 									// ok, map
 									SetGenMap( channel, data1 );
@@ -1066,7 +1064,7 @@ Exit:
 								}
 								return;
 							}
-							else if(Global::psycleconf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
+							else if(PsycleGlobal::conf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								SetInstMap( channel, data1 );
 								return;
@@ -1075,11 +1073,11 @@ Exit:
 						default:break;
 					}
 
-					if (Global::psycleconf().inputHandler()._RecordTweaks)
+					if (PsycleGlobal::conf().inputHandler()._RecordTweaks)
 					{
-						if (Global::psycleconf().midi().raw() && status != 0xFE )
+						if (PsycleGlobal::conf().midi().raw() && status != 0xFE )
 						{
-							Global::inputHandler().MidiPatternMidiCommand(status,busMachine,(data1 << 8) | data2);
+							PsycleGlobal::inputHandler().MidiPatternMidiCommand(status,busMachine,(data1 << 8) | data2);
 						}
 						// branch on status code
 						else switch(statusHN)
@@ -1089,22 +1087,22 @@ Exit:
 								// data 2 contains the info
 								for(int i(0) ; i < 16 ; ++i)
 								{
-									if(Global::psycleconf().midi().group(i).record() && (Global::psycleconf().midi().group(i).message() == data1 ))
+									if(PsycleGlobal::conf().midi().group(i).record() && (PsycleGlobal::conf().midi().group(i).message() == data1 ))
 									{
-										int const value(Global::psycleconf().midi().group(i).from() + (Global::psycleconf().midi().group(i).to() - Global::psycleconf().midi().group(i).from()) * data2 / 127);
-										switch(Global::psycleconf().midi().group(i).type())
+										int const value(PsycleGlobal::conf().midi().group(i).from() + (PsycleGlobal::conf().midi().group(i).to() - PsycleGlobal::conf().midi().group(i).from()) * data2 / 127);
+										switch(PsycleGlobal::conf().midi().group(i).type())
 										{
 											case PsycleConfig::Midi::group_t::t_command:
-												Global::inputHandler().MidiPatternCommand(busMachine,Global::psycleconf().midi().group(i).command(), value);
+												PsycleGlobal::inputHandler().MidiPatternCommand(busMachine,PsycleGlobal::conf().midi().group(i).command(), value);
 												break;
 											case PsycleConfig::Midi::group_t::t_tweak:
-												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().group(i).command(), value);
+												PsycleGlobal::inputHandler().MidiPatternTweak(busMachine,PsycleGlobal::conf().midi().group(i).command(), value);
 												break;
 											case PsycleConfig::Midi::group_t::t_tweakslide:
-												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().group(i).command(), value, true);
+												PsycleGlobal::inputHandler().MidiPatternTweak(busMachine,PsycleGlobal::conf().midi().group(i).command(), value, true);
 												break;
 											case PsycleConfig::Midi::group_t::t_mcm:
-												Global::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
+												PsycleGlobal::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
 												break;
 										}
 									}
@@ -1113,24 +1111,24 @@ Exit:
 							case 0x0E:
 								// pitch wheel
 								// data 2 contains the info
-								if (Global::psycleconf().inputHandler()._RecordTweaks)
+								if (PsycleGlobal::conf().inputHandler()._RecordTweaks)
 								{
-									if (Global::psycleconf().midi().pitch().record())
+									if (PsycleGlobal::conf().midi().pitch().record())
 									{
-										int const value(Global::psycleconf().midi().pitch().from() + (Global::psycleconf().midi().pitch().to() - Global::psycleconf().midi().pitch().from()) * data / 0x3fff);
-										switch (Global::psycleconf().midi().pitch().type())
+										int const value(PsycleGlobal::conf().midi().pitch().from() + (PsycleGlobal::conf().midi().pitch().to() - PsycleGlobal::conf().midi().pitch().from()) * data / 0x3fff);
+										switch (PsycleGlobal::conf().midi().pitch().type())
 										{
 											case PsycleConfig::Midi::group_t::t_command:
-												Global::inputHandler().MidiPatternCommand(busMachine,Global::psycleconf().midi().pitch().command(), value);
+												PsycleGlobal::inputHandler().MidiPatternCommand(busMachine,PsycleGlobal::conf().midi().pitch().command(), value);
 												break;
 											case PsycleConfig::Midi::group_t::t_tweak:
-												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().pitch().command(), value);
+												PsycleGlobal::inputHandler().MidiPatternTweak(busMachine,PsycleGlobal::conf().midi().pitch().command(), value);
 												break;
 											case PsycleConfig::Midi::group_t::t_tweakslide:
-												Global::inputHandler().MidiPatternTweak(busMachine,Global::psycleconf().midi().pitch().command(), value, true);
+												PsycleGlobal::inputHandler().MidiPatternTweak(busMachine,PsycleGlobal::conf().midi().pitch().command(), value, true);
 												break;
 											case PsycleConfig::Midi::group_t::t_mcm:
-												Global::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
+												PsycleGlobal::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
 												break;
 										}
 									}
@@ -1141,7 +1139,7 @@ Exit:
 					{
 						if (busMachine >= 0 && busMachine < MAX_MACHINES)
 						{
-							Machine* pMachine = Global::_pSong->_pMachine[busMachine];
+							Machine* pMachine = Global::song()._pMachine[busMachine];
 							if (pMachine)
 							{
 								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
@@ -1195,7 +1193,7 @@ Exit:
 			m_stats.clockDeviation = clockDeviation;
 
 			// get the current play sample position
- 			int playPos = Global::pConfig->_pOutputDriver->GetPlayPosInSamples();
+ 			int playPos = Global::configuration()._pOutputDriver->GetPlayPosInSamples();
 			int samplesPerSecond = Global::player().SampleRate();
 
 			// convert this back to a ms counter
@@ -1218,7 +1216,7 @@ Exit:
 			chrono::nanoseconds::rep thenow = cpu_time_clock::now().time_since_epoch().count();
 			chrono::nanoseconds::rep nanostomillis = cpu_time_clock::period::den / std::milli::den;
  			m_resyncClockBase = thenow / nanostomillis;
- 			m_resyncPlayPos = Global::pConfig->_pOutputDriver->GetPlayPosInSamples();
+ 			m_resyncPlayPos = Global::configuration()._pOutputDriver->GetPlayPosInSamples();
 
 			// save vars
 			m_resyncMidiStampTime = dwParam2;
@@ -1253,7 +1251,7 @@ Exit:
 			{
 				m_stats.flags |= FSTAT_SYNC;
 				// get the write position
-				int writePos = Global::pConfig->_pOutputDriver->GetWritePosInSamples() + Global::player().sampleOffset;
+				int writePos = Global::configuration()._pOutputDriver->GetWritePosInSamples() + Global::player().sampleOffset;
 				
 				// calculate our final adjuster
 				int syncAdjuster = writePos - m_resyncPlayPos;
@@ -1313,7 +1311,7 @@ Exit:
 				int track = m_midiBuffer[ m_bufReadIdx ].track;
 
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::_pSong->_pMachine[ machine ];
+				Plugin * pMachine = (Plugin*) Global::song()._pMachine[ machine ];
 				// make sure machine is still valid
 				if( pMachine || note == notecommands::midi_sync )
 				{
@@ -1334,9 +1332,9 @@ Exit:
 							// simulate a tracker 'tick' (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
-								if( Global::_pSong->_pMachine[tc])
+								if( Global::song()._pMachine[tc])
 								{
-									Global::_pSong->_pMachine[tc]->Tick();
+									Global::song()._pMachine[tc]->Tick();
 								}
 							}
 							m_stats.flags |= FSTAT_SYNC_TICK;
@@ -1367,14 +1365,14 @@ Exit:
 			if (velocity == 0)
 			{
 				int i;
-				for (i = 0; i < Global::_pSong->SONGTRACKS; i++)
+				for (i = 0; i < Global::song().SONGTRACKS; i++)
 				{
 					if (notetrack[i] == note && instrtrack[i] == instNo)
 					{
 						break;
 					}
 				}
-				if(i >= Global::_pSong->SONGTRACKS) i=0;
+				if(i >= Global::song().SONGTRACKS) i=0;
 				currenttrack = i;
 				notetrack[currenttrack] = notecommands::release;
 				instrtrack[currenttrack] = instNo;
@@ -1382,14 +1380,14 @@ Exit:
 			else
 			{
 				int i;
-				for (i = currenttrack+1; i < Global::_pSong->SONGTRACKS; i++)
+				for (i = currenttrack+1; i < Global::song().SONGTRACKS; i++)
 				{
 					if (notetrack[i] == notecommands::release)
 					{
 						break;
 					}
 				}
-				if (i >= Global::_pSong->SONGTRACKS)
+				if (i >= Global::song().SONGTRACKS)
 				{
 					for (i = 0; i <= currenttrack; i++)
 					{

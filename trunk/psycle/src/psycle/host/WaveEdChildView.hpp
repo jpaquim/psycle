@@ -21,7 +21,7 @@ namespace psycle { namespace host {
 		{
 		public:
 			CWaveEdChildView();
-			void SetSong(Song*);
+			void SetSong(Song& );
 			void SetMainFrame(CMainFrame*);
 			virtual ~CWaveEdChildView();
 			CMainFrame* GetMainFrame() {return mainFrame; };
@@ -123,7 +123,7 @@ namespace psycle { namespace host {
 			void Mix(short* lhs, short *rhs, int lhsSize, int rhsSize, float lhsVol=1.0f, float rhsVol=1.0f);
 			void Fade(short* data, int length, float startVol, float endVol);
 			void Amplify(short* data, int length, float vol);
-			Song *_pSong;
+			Song* _pSong;
 			
 			// Painting pens
 			CPen cpen_lo;

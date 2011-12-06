@@ -81,6 +81,8 @@ namespace host {
 			afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 			afx_msg void OnSetBank(UINT nID);
 			afx_msg void OnSetProgram(UINT nID);
+			afx_msg void OnProgramsOpenpreset();
+			afx_msg void OnProgramsSavepreset();
 			afx_msg void OnProgramsRandomizeprogram();
 			afx_msg void OnParametersResetparameters();
 			afx_msg void OnOperationsEnabled();

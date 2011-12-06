@@ -206,7 +206,7 @@ namespace host {
 			HMENU hRecentMenu;
 
 			CFrameWnd* pParentFrame;
-			Song* _pSong;
+			Song& _pSong;
 		//	bool multiPattern;
 			CMasterDlg * MasterMachineDialog;
 			CGearTracker * SamplerMachineDialog;
@@ -568,7 +568,7 @@ namespace host {
 		inline int CChildView::_ps()
 		{
 			// retrieves the pattern index
-			return _pSong->playOrder[editPosition];
+			return _pSong.playOrder[editPosition];
 		}
 
 		// ALWAYS USE THESE MACROS BECAUSE THEY TEST TO SEE IF THE PATTERN HAS BEEN ALLOCATED!
@@ -576,32 +576,32 @@ namespace host {
 
 		inline unsigned char * CChildView::_ptrack(int ps, int track)
 		{
-			return _pSong->_ptrack(ps,track);
+			return _pSong._ptrack(ps,track);
 		}	
 
 		inline unsigned char * CChildView::_ptrack(int ps)
 		{
-			return _pSong->_ptrack(ps,editcur.track);
+			return _pSong._ptrack(ps,editcur.track);
 		}	
 
 		inline unsigned char * CChildView::_ptrack()
 		{
-			return _pSong->_ptrack(_ps(),editcur.track);
+			return _pSong._ptrack(_ps(),editcur.track);
 		}	
 
 		inline unsigned char * CChildView::_ptrackline(int ps, int track, int line)
 		{
-			return _pSong->_ptrackline(ps,track,line);
+			return _pSong._ptrackline(ps,track,line);
 		}
 
 		inline unsigned char * CChildView::_ptrackline(int ps)
 		{
-			return _pSong->_ptrackline(ps,editcur.track,editcur.line);
+			return _pSong._ptrackline(ps,editcur.track,editcur.line);
 		}
 
 		inline unsigned char * CChildView::_ptrackline()
 		{
-			return _pSong->_ptrackline(_ps(),editcur.track,editcur.line);
+			return _pSong._ptrackline(_ps(),editcur.track,editcur.line);
 		}
 
 		//_ppattern think it either returns a requested pattern or creates one
@@ -609,12 +609,12 @@ namespace host {
 
 		inline unsigned char * CChildView::_ppattern(int ps)
 		{
-			return _pSong->_ppattern(ps);
+			return _pSong._ppattern(ps);
 		}
 
 		inline unsigned char * CChildView::_ppattern()
 		{
-			return _pSong->_ppattern(_ps());
+			return _pSong._ppattern(_ps());
 		}
 
 		inline int CChildView::_xtoCol(int pointpos)

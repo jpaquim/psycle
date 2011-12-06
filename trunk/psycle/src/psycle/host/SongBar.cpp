@@ -26,11 +26,11 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	SongBar::~SongBar()
 	{
 	}
-	void SongBar::InitializeValues(CMainFrame* frame, CChildView* view, Song* song)
+	void SongBar::InitializeValues(CMainFrame* frame, CChildView* view, Song& song)
 	{
 		m_pParentMain = frame;
 		m_pWndView = view;
-		m_pSong = song;
+		m_pSong = &song;
 	}
 
 	void SongBar::DoDataExchange(CDataExchange* pDX)
@@ -160,15 +160,15 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		char buffer[16];
 		if ( x != 0 )
 		{
-			if (Global::pPlayer->_playing ) 
+			if (Global::player()._playing ) 
 			{
-				Global::song().BeatsPerMin(Global::pPlayer->bpm+x);
+				Global::song().BeatsPerMin(Global::player().bpm+x);
 			}
 			else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
-			Global::pPlayer->SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+			Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 			sprintf(buffer,"%d",Global::song().BeatsPerMin());
 		}
-		else sprintf(buffer,"%d",Global::pPlayer->bpm);
+		else sprintf(buffer,"%d",Global::player().bpm);
 		
 		m_bpmlabel.SetWindowText(buffer);
 	}
@@ -178,15 +178,15 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		char buffer[16];
 		if ( x != 0)
 		{
-			if (Global::pPlayer->_playing ) 
+			if (Global::player()._playing ) 
 			{
-				Global::song().LinesPerBeat(Global::pPlayer->tpb+x);
+				Global::song().LinesPerBeat(Global::player().tpb+x);
 			}
 			else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
-			Global::pPlayer->SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
+			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
 			sprintf(buffer,"%d",Global::song().LinesPerBeat());
 		}
-		else sprintf(buffer, "%d", Global::pPlayer->tpb);
+		else sprintf(buffer, "%d", Global::player().tpb);
 		
 		m_tpblabel.SetWindowText(buffer);
 	}
@@ -262,7 +262,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	//l and r are the left and right vu meter values
 	void SongBar::UpdateVumeters()
 	{
-		PsycleConfig::MachineView& macView = Global::psycleconf().macView();
+		PsycleConfig::MachineView& macView = PsycleGlobal::conf().macView();
 		Master* master = ((Master*)m_pSong->_pMachine[MASTER_INDEX]);
 		if (macView.draw_vus)
 		{
@@ -332,8 +332,12 @@ BOOL SongBar::OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult )
 	{
 		// idFrom is actually the HWND of the tool
 		//nID = ::GetDlgCtrlID((HWND)nID);
-
-		sprintf(pstTTT->szText, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos())));
+		if(m_masterslider.GetPos() == 0) {
+			sprintf(pstTTT->szText, "-inf");
+		}
+		else {
+			sprintf(pstTTT->szText, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos())));
+		}
 		pstTTT->hinst = AfxGetResourceHandle();
 		return(TRUE);
 	}

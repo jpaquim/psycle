@@ -4,7 +4,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "VstHost24.hpp"
 #include "Global.hpp"
-#include "Psycle.hpp"
+//#include "Psycle.hpp"
 #include "Player.hpp"
 #include "Zap.hpp"
 
@@ -92,12 +92,12 @@ namespace psycle
 			}
 			long host::OnGetOutputLatency(CEffect &pEffect)
 			{
-				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
+				AudioDriver* pdriver = Global::configuration()._pOutputDriver;
 				return pdriver->GetOutputLatencySamples();
 			}
 			long host::OnGetInputLatency(CEffect &pEffect)
 			{
-				AudioDriver* pdriver = Global::pConfig->_pOutputDriver;
+				AudioDriver* pdriver = Global::configuration()._pOutputDriver;
 				return pdriver->GetInputLatencySamples();
 			}
 			void host::Log(std::string message)
@@ -578,7 +578,7 @@ namespace psycle
 						TWSDestination[i] = ((pData->_cmd * 256) + pData->_parameter) / 65535.0f;
 						TWSInst[i] = pData->_inst;
 						TWSCurrent[i] = GetParameter(TWSInst[i]);
-						TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::pPlayer->SamplesPerRow();
+						TWSDelta[i] = ((TWSDestination[i] - TWSCurrent[i]) * TWEAK_SLIDE_SAMPLES) / Global::player().SamplesPerRow();
 						TWSSamples = 0;
 						TWSActive = true;
 					}
@@ -638,7 +638,7 @@ namespace psycle
 							
 							NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
 							NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);						
-							NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
+							NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / Global::player().SamplesPerRow();
 							NSSamples[midiChannel] = 0;
 							NSActive[midiChannel] = true;
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
@@ -650,7 +650,7 @@ namespace psycle
 							int speedToSlide = pData->_parameter;
 							NSDestination[midiChannel] = NSDestination[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
 							NSTargetDistance[midiChannel] = (NSDestination[midiChannel] - NSCurrent[midiChannel]);
-							NSDelta[midiChannel] = (NSTargetDistance[midiChannel] * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
+							NSDelta[midiChannel] = (NSTargetDistance[midiChannel] * (speedToSlide*2)) / Global::player().SamplesPerRow();
 							NSSamples[midiChannel] = 0;
 							NSActive[midiChannel] = true;
 						}
@@ -696,7 +696,7 @@ namespace psycle
 						else if(pData->_cmd == 0xC3) //slide to note . Used to change the speed.
 						{
 							int speedToSlide = pData->_parameter;
-							NSDelta[midiChannel] = (NSTargetDistance[midiChannel] * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
+							NSDelta[midiChannel] = (NSTargetDistance[midiChannel] * (speedToSlide*2)) / Global::player().SamplesPerRow();
 						}
 						else if((pData->_cmd & 0xF0) == 0xD0 || (pData->_cmd & 0xF0) == 0xE0) //semislide
 						{
@@ -722,7 +722,7 @@ namespace psycle
 							
 							NSCurrent[midiChannel] = pitchWheelCentre + (currentSemi[midiChannel] * (pitchWheelCentre / rangeInSemis));
 							NSDestination[midiChannel] = NSCurrent[midiChannel] + ((pitchWheelCentre / rangeInSemis) * semisToSlide);
-							NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / Global::pPlayer->SamplesPerRow();
+							NSDelta[midiChannel] = ((NSDestination[midiChannel] - NSCurrent[midiChannel]) * (speedToSlide*2)) / Global::player().SamplesPerRow();
 							NSSamples[midiChannel] = 0;
 							NSActive[midiChannel] = true;
 							currentSemi[midiChannel] = currentSemi[midiChannel] + semisToSlide;
@@ -789,14 +789,14 @@ namespace psycle
 						{
 							int nextevent;
 							if(TWSActive) nextevent = TWSSamples; else nextevent = ns + 1;
-							for(int i(0) ; i < Global::_pSong->SONGTRACKS ; ++i)
+							for(int i(0) ; i < Global::song().SONGTRACKS ; ++i)
 							{
 								if(TriggerDelay[i]._cmd && TriggerDelayCounter[i] < nextevent) nextevent = TriggerDelayCounter[i];
 							}
 							if(nextevent > ns)
 							{
 								if(TWSActive) TWSSamples -= ns;
-								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
+								for(int i(0) ; i < Global::song().SONGTRACKS; ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd) TriggerDelayCounter[i] -= ns;
@@ -861,7 +861,7 @@ namespace psycle
 										if(activecount == 0) TWSActive = false;
 									}
 								}
-								for(int i(0) ; i < Global::_pSong->SONGTRACKS; ++i)
+								for(int i(0) ; i < Global::song().SONGTRACKS; ++i)
 								{
 									// come back to this
 									if(TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
@@ -880,7 +880,7 @@ namespace psycle
 										{
 											// do event
 											Tick(i, &TriggerDelay[i]);
-											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 										}
 										else TriggerDelayCounter[i] -= nextevent;
 									}
@@ -890,7 +890,7 @@ namespace psycle
 										{
 											// do event
 											Tick(i, &TriggerDelay[i]);
-											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::pPlayer->SamplesPerRow()) / 256;
+											TriggerDelayCounter[i] = (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 											int parameter(TriggerDelay[i]._parameter & 0x0f);
 											if(parameter < 9) RetriggerRate[i] += 4 * parameter;
 											else

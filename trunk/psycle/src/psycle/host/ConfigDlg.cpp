@@ -42,7 +42,7 @@ namespace psycle { namespace host {
 			int retVal = CPropertySheet::DoModal();
 			if (retVal == IDOK)
 			{
-				Global::psycleconf().SavePsycleSettings();
+				PsycleGlobal::conf().SavePsycleSettings();
 			}
 			return retVal;
 		}

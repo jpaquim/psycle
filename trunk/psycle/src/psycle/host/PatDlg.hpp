@@ -11,7 +11,7 @@ namespace psycle {
 		class CPatDlg : public CDialog
 		{
 		public:
-			CPatDlg(CWnd* pParent = 0);
+			CPatDlg(Song& song, CWnd* pParent = 0);
 			enum { IDD = IDD_PATDLG };
 			CEdit	m_patname;
 			char patName[32];
@@ -30,7 +30,7 @@ namespace psycle {
 			CComboBox m_patternlist;
 
 			int patIdx;
-			Song* m_pSong;
+			Song& m_song;
 			int prevsel;
 			std::string tracknames[MAX_TRACKS];
 			BOOL bInit;

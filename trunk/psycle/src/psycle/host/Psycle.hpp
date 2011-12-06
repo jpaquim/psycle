@@ -3,8 +3,10 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "resources/resources.hpp" // main symbols
-#include "Global.hpp"
+#include "PsycleGlobal.hpp"
 #include <psycle/helpers/hexstring_to_integer.hpp>
+#include <psycle/helpers/math.hpp>
+#include <psycle/helpers/value_mapper.hpp>
 
 namespace psycle { namespace host {
 
@@ -28,7 +30,7 @@ namespace psycle { namespace host {
 			DECLARE_MESSAGE_MAP()
 			afx_msg void OnAppAbout();
 		public:
-			Global global_;
+			PsycleGlobal global_;
 		private:
 			void ProcessCmdLine(LPSTR cmdline);
 

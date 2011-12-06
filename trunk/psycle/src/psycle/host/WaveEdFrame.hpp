@@ -14,7 +14,7 @@ namespace psycle { namespace host {
 		{
 			DECLARE_DYNAMIC(CWaveEdFrame)
 		public:
-			CWaveEdFrame(Song* _sng, CMainFrame* pframe);
+			CWaveEdFrame(Song& _sng, CMainFrame* pframe);
 			virtual ~CWaveEdFrame() throw();
 		protected: 
 			CWaveEdFrame();
@@ -23,7 +23,7 @@ namespace psycle { namespace host {
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
 			void Notify(void);
-			Song *_pSong;
+			Song* _pSong;
 			CMainFrame *_pFrame;
 		public:
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);

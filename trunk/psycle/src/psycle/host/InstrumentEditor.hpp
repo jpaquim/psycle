@@ -18,7 +18,7 @@ namespace psycle { namespace host {
 			
 			void WaveUpdate();
 			void UpdateCombo();
-			Song* _pSong;
+			Song* pSong;
 			bool cando;
 			bool initializingDialog;
 			CMainFrame* pParentMain;

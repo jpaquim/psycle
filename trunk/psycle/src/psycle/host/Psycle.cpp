@@ -9,7 +9,9 @@
 
 #include "AudioDriver.hpp"
 #include "MidiInput.hpp"
-#include "NewMachine.hpp"
+#include "Player.hpp"
+#include <psycle/host/machineloader.hpp>
+#include "Machine.hpp"
 
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/loggers.hpp>
@@ -68,10 +70,10 @@ namespace psycle { namespace host {
 
 			loggers::information()("Build identifier: \n" PSYCLE__BUILD__IDENTIFIER("\n"));
 
-			bool loaded = global_.psycleconf().LoadPsycleSettings();
+			bool loaded = global_.conf().LoadPsycleSettings();
 			if (loaded &&
 				instanceChecker.PreviousInstanceRunning() &&
-				!global_.psycleconf()._allowMultipleInstances)
+				!global_.conf()._allowMultipleInstances)
 			{
 				HWND prevWnd = instanceChecker.ActivatePreviousInstance();
 				if(*(m_lpCmdLine) != 0)
@@ -102,7 +104,7 @@ namespace psycle { namespace host {
 			{
 				pFrame->m_wndView._outputActive = true;
 			}
-			global_.psycleconf().RefreshSettings();
+			global_.conf().RefreshSettings();
 
 			// create and load the frame with its resources
 			pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, 0, 0);
@@ -113,10 +115,10 @@ namespace psycle { namespace host {
 			pFrame->ShowWindow(SW_MAXIMIZE);
 			
 			pFrame->m_wndView.RestoreRecent();
-			global_.psycleconf().RefreshAudio();
+			global_.conf().RefreshAudio();
 			// center master machine. Cannot be done until here because it's when we have the window size.
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
-			pFrame->m_wndView._pSong->_pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
+			pFrame->m_wndView._pSong._pMachine[MASTER_INDEX]->_x=(pFrame->m_wndView.CW-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
+			pFrame->m_wndView._pSong._pMachine[MASTER_INDEX]->_y=(pFrame->m_wndView.CH-pFrame->m_wndView.MachineCoords->sMaster.width)/2;
 
 			//Psycle maintains its own recent
 			//LoadRecent(pFrame); // Import recent files from registry.
@@ -125,9 +127,9 @@ namespace psycle { namespace host {
 				ProcessCmdLine(m_lpCmdLine); // Process Command Line
 			else
 			{
-				CNewMachine::LoadPluginInfo(false);
+				global_.machineload().LoadPluginInfo(false);
 				// Show splash screen
-				if (global_.psycleconf()._showAboutAtStart)
+				if (global_.conf()._showAboutAtStart)
 				{
 					OnAppAbout();
 				}
@@ -138,11 +140,11 @@ namespace psycle { namespace host {
 
 		int CPsycleApp::ExitInstance() 
 		{
-			if(global_.psycleconf()._pOutputDriver != NULL) {
-				global_.psycleconf()._pOutputDriver->Enable(false);
+			if(global_.conf()._pOutputDriver != NULL) {
+				global_.conf()._pOutputDriver->Enable(false);
 				global_.midi().Close();
-				global_.psycleconf().SavePsycleSettings();
-				CNewMachine::DestroyPluginInfo();
+				global_.player().stop_threads();
+				global_.conf().SavePsycleSettings();
 			}
 
 			return CWinAppEx::ExitInstance();
@@ -186,7 +188,7 @@ namespace psycle { namespace host {
 			if (*(cmdline) != 0)
 			{
 				if(strcmp(cmdline,"/skipscan") != 0) {
-					CNewMachine::LoadPluginInfo(false);
+					global_.machineload().LoadPluginInfo(false);
 					char tmpName [MAX_PATH];
 					std::strncpy(tmpName, m_lpCmdLine+1, MAX_PATH-1 );
 					tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
@@ -347,7 +349,7 @@ namespace psycle { namespace host {
 				"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 				"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 			);
-			m_showabout.SetCheck(Global::psycleconf()._showAboutAtStart);
+			m_showabout.SetCheck(PsycleGlobal::conf()._showAboutAtStart);
 
 			m_psycledelics.SetWindowText("http://psycle.pastnotecut.org");
 			m_sourceforge.SetWindowText("http://psycle.sourceforge.net");
@@ -360,8 +362,8 @@ namespace psycle { namespace host {
 
 		void CAboutDlg::OnShowatstartup() 
 		{
-			if ( m_showabout.GetCheck() )  Global::psycleconf()._showAboutAtStart = true;
-			else Global::psycleconf()._showAboutAtStart=false;
+			if ( m_showabout.GetCheck() )  PsycleGlobal::conf()._showAboutAtStart = true;
+			else PsycleGlobal::conf()._showAboutAtStart=false;
 		}
 
 }}

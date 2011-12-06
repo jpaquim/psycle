@@ -1,6 +1,6 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
-#include "Psycle.hpp"
+#include "Global.hpp"
 
 class CExclusiveLock
 {

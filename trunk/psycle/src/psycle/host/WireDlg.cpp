@@ -158,7 +158,7 @@ namespace psycle { namespace host {
 		void CWireDlg::PostNcDestroy()
 		{
 			CDialog::PostNcDestroy();
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 			srcMachine._pScopeBufferL = NULL;
 			srcMachine._pScopeBufferR = NULL;
 			srcMachine._scopeBufferIndex = 0;
@@ -891,7 +891,7 @@ namespace psycle { namespace host {
 			dstMachine.GetWireVolume(dstWireIdx, f);
 			if (f != invol)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 				dstMachine.SetWireVolume(dstWireIdx, invol );
 			}
 		}
@@ -925,15 +925,15 @@ namespace psycle { namespace host {
 		}
 		void CWireDlg::OnDelete() 
 		{
-			Global::pInputHandler->AddMacViewUndo();
-			CExclusiveLock lock(&Global::_pSong->semaphore, 2, true);
-			srcMachine.DeleteOutputWireIndex(Global::_pSong,srcWireIdx);
-			dstMachine.DeleteInputWireIndex(Global::_pSong,dstWireIdx);
+			PsycleGlobal::inputHandler().AddMacViewUndo();
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+			srcMachine.DeleteOutputWireIndex(Global::song(),srcWireIdx);
+			dstMachine.DeleteInputWireIndex(Global::song(),dstWireIdx);
 			PostMessage (WM_CLOSE);
 		}
 		void CWireDlg::OnAddEffectHere()
 		{
-			int newMacidx = Global::_pSong->GetFreeFxBus();
+			int newMacidx = Global::song().GetFreeFxBus();
 			mainView->NewMachine((srcMachine._x+dstMachine._x)/2,(srcMachine._y+dstMachine._y)/2,newMacidx);
 
 			Machine* newMac = Global::song()._pMachine[newMacidx];

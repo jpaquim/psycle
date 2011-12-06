@@ -5,7 +5,7 @@
 #include "Song.hpp"
 namespace psycle { namespace host {
 
-		CSongpDlg::CSongpDlg(Song *song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
+		CSongpDlg::CSongpDlg(Song& song, CWnd* pParent /* = 0 */) : CDialog(CSongpDlg::IDD, pParent)
 		,readonlystate(false)
 		,_pSong(song)
 		{
@@ -29,9 +29,9 @@ namespace psycle { namespace host {
 			m_songtitle.SetLimitText(128);
 			m_songcredits.SetLimitText(64);
 			m_songcomments.SetLimitText(65535);
-			m_songtitle.SetWindowText(_pSong->name.c_str());
-			m_songcredits.SetWindowText(_pSong->author.c_str());
-			m_songcomments.SetWindowText(_pSong->comments.c_str());
+			m_songtitle.SetWindowText(_pSong.name.c_str());
+			m_songcredits.SetWindowText(_pSong.author.c_str());
+			m_songcomments.SetWindowText(_pSong.comments.c_str());
 			m_songtitle.SetFocus();
 			m_songtitle.SetSel(0,-1);
 
@@ -59,9 +59,9 @@ namespace psycle { namespace host {
 				m_songtitle.GetWindowText(name,128);
 				m_songcredits.GetWindowText(author,64);
 				m_songcomments.GetWindowText(comments,65535);
-				_pSong->name = name;
-				_pSong->author = author;
-				_pSong->comments = comments;
+				_pSong.name = name;
+				_pSong.author = author;
+				_pSong.comments = comments;
 				CDialog::OnOK();
 			}
 			else CDialog::OnCancel();

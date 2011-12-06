@@ -75,7 +75,7 @@ namespace psycle { namespace host {
 		BOOL CMidiInputDlg::OnInitDialog() 
 		{
 			CPropertyPage::OnInitDialog();
-			PsycleConfig::Midi& midi = Global::psycleconf().midi();
+			PsycleConfig::Midi& midi = PsycleGlobal::conf().midi();
 			raw.SetCheck(midi.raw());
 			gen_select_type.SetCurSel(midi.gen_select_with());
 			inst_select_type.SetCurSel(midi.inst_select_with());
@@ -125,7 +125,7 @@ namespace psycle { namespace host {
 
 		void CMidiInputDlg::OnOK() 
 		{
-			PsycleConfig::Midi& midi = Global::psycleconf().midi();
+			PsycleConfig::Midi& midi = PsycleGlobal::conf().midi();
 			midi.gen_select_with() = (PsycleConfig::Midi::selector_t) gen_select_type.GetCurSel();
 			midi.inst_select_with() = (PsycleConfig::Midi::selector_t) inst_select_type.GetCurSel();
 			midi.raw() = raw.GetCheck();

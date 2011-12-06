@@ -829,7 +829,7 @@ namespace psycle { namespace host {
 
 				if ( nFlags & MK_CONTROL )
 				{
-					Global::pInputHandler->AddMacViewUndo();
+					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					_pSong->StopInstrument(wsInstrument);
 
@@ -873,7 +873,7 @@ namespace psycle { namespace host {
 
 				if ( nFlags & MK_CONTROL )
 				{
-					Global::pInputHandler->AddMacViewUndo();
+					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					_pSong->StopInstrument(wsInstrument);
 
@@ -1161,7 +1161,7 @@ namespace psycle { namespace host {
 			if(wdWave)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				Fade(wdLeft+startPoint, length, 0, 1.0f);
 				if(wdStereo)
@@ -1180,7 +1180,7 @@ namespace psycle { namespace host {
 			if(wdWave)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				Fade(wdLeft+startPoint, length, 1.0f, 0);
 				if(wdStereo)
@@ -1201,7 +1201,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				for (c = startPoint ; c < startPoint+length ; c++)
@@ -1259,7 +1259,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				for (c=startPoint; c<startPoint+length; c++)
@@ -1322,7 +1322,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 				CWaveEdAmplifyDialog AmpDialog(GetOwner());
 				pos = AmpDialog.DoModal();
 				if (pos != AMP_DIALOG_CANCEL)
@@ -1349,7 +1349,7 @@ namespace psycle { namespace host {
 
 			if (wdWave)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				//halved = (int) floor(length/2.0);	
@@ -1456,7 +1456,7 @@ namespace psycle { namespace host {
 		{
 			if (wdWave && wdStereo)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				//SetUndo(4, wdLeft, wdRight, wdLength); 
@@ -1616,7 +1616,7 @@ namespace psycle { namespace host {
 
 			if (wdWave && blSelection)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				_pSong->StopInstrument(wsInstrument);
@@ -1776,7 +1776,7 @@ namespace psycle { namespace host {
 		{
 			unsigned long c = 0;
 
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			char *pData;
 			std::uint32_t lFmt, lData;
@@ -1893,7 +1893,7 @@ namespace psycle { namespace host {
 		{
 			unsigned long startPoint;
 
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			char *pData;
 			std::uint32_t lFmt, lData;
@@ -1983,7 +1983,7 @@ namespace psycle { namespace host {
 			if(MixDlg.DoModal() != IDCANCEL)
 			{
 
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				char *pData;
 				std::uint32_t lFmt, lData;
@@ -2118,7 +2118,7 @@ namespace psycle { namespace host {
 				unsigned long c = 0;
 				unsigned long startPoint, endPoint;
 
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				char *pData;
 				std::uint32_t lFmt, lData;
@@ -2240,7 +2240,7 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnPopupSetLoopStart()
 		{
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
@@ -2264,7 +2264,7 @@ namespace psycle { namespace host {
 		}
 		void CWaveEdChildView::OnPopupSetLoopEnd()
 		{
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
@@ -2311,9 +2311,9 @@ namespace psycle { namespace host {
 		}
 
 
-		void CWaveEdChildView::SetSong(Song* _sng)
+		void CWaveEdChildView::SetSong(Song& _sng)
 		{
-			_pSong = _sng;
+			_pSong = &_sng;
 		}
 		void CWaveEdChildView::SetMainFrame(CMainFrame* parent)
 		{

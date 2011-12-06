@@ -46,7 +46,7 @@ namespace psycle
 		virtual void Load(ConfigStorage &) = 0;
 		virtual void Save(ConfigStorage &) = 0;
 
-		virtual AudioDriverInfo& GetInfo() = 0;
+		virtual const AudioDriverInfo& GetInfo() const = 0;
 		virtual AudioDriver* NewDriver() = 0;
 
 	///\name getter/setter for sample rate
@@ -128,7 +128,7 @@ namespace psycle
 		public:
 			virtual ~AudioDriver() {};
 
-			virtual AudioDriverSettings& settings() = 0;
+			virtual AudioDriverSettings& settings() const = 0;
 
 			//Sets the callback and initializes the info (like which ports there are)
 			virtual void Initialize(AUDIODRIVERWORKFN pCallback, void* context) {};
@@ -137,44 +137,45 @@ namespace psycle
 			//Enables or disables the playback/recording with this driver.
 			virtual bool Enable(bool e) { return false; }
 			//Initalize has been called.
-			virtual bool Initialized(void) { return true; }
+			virtual bool Initialized(void) const { return true; }
 			//Is enabled?
-			virtual bool Enabled() { return false; }
+			virtual bool Enabled() const { return false; }
 			//Launches the configuration dialog
 			virtual void Configure(void) {};
 			//Refreshes the playback and capture port lists.
 			virtual void RefreshAvailablePorts() {}
-			virtual void GetPlaybackPorts(std::vector<std::string> &ports) { ports.resize(0); }
-			virtual void GetCapturePorts(std::vector<std::string> &ports) { ports.resize(0); }
+			virtual void GetPlaybackPorts(std::vector<std::string> &ports) const { ports.resize(0); }
+			virtual void GetCapturePorts(std::vector<std::string> &ports) const { ports.resize(0); }
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples) { pleft=0; pright=0; return; }
 			virtual bool AddCapturePort(int idx){ return false; };
 			virtual bool RemoveCapturePort(int idx){ return false; }
-			virtual std::uint32_t GetWritePosInSamples() { return 0; }
-			virtual std::uint32_t GetPlayPosInSamples() { return 0; }
-			virtual std::uint32_t GetInputLatencyMs() { return GetInputLatencySamples()*0.001f / settings().samplesPerSec(); }
-			virtual std::uint32_t GetInputLatencySamples() { return 0; }
-			virtual std::uint32_t GetOutputLatencyMs() { return GetOutputLatencySamples()*0.001f / settings().samplesPerSec(); }
-			virtual std::uint32_t GetOutputLatencySamples() { return 0; }
+			virtual std::uint32_t GetWritePosInSamples() const { return 0; }
+			virtual std::uint32_t GetPlayPosInSamples() { return 0; }/*cannot be const, because of the way the directsound method is implemented*/
+			virtual std::uint32_t GetInputLatencyMs() const { return GetInputLatencySamples()*1000 / settings().samplesPerSec(); }
+			virtual std::uint32_t GetInputLatencySamples() const = 0;
+			virtual std::uint32_t GetOutputLatencyMs() const { return GetOutputLatencySamples()*1000 / settings().samplesPerSec(); }
+			virtual std::uint32_t GetOutputLatencySamples() const = 0;
 
 			//amount of buffers.
-			int GetNumBuffers() { return settings().blockCount(); }
+			int GetNumBuffers() const { return settings().blockCount(); }
 			//size of each buffer
-			int GetBufferBytes() { return settings().blockBytes(); }
+			int GetBufferBytes() const { return settings().blockBytes(); }
 			//size of each buffer, for a whole sample (counting all channels)
-			int GetBufferSamples()  { return settings().blockFrames(); }
+			int GetBufferSamples() const { return settings().blockFrames(); }
 			//Size of a whole sample (counting all channels)
-			int GetSampleSizeBytes()  { return settings().frameBytes(); }
+			int GetSampleSizeBytes() const { return settings().frameBytes(); }
 			//Size of a mono sample in bits. If validBits=32 floats are assumed!
-			int GetSampleBits() { return settings().bitDepth(); }
+			int GetSampleBits() const { return settings().bitDepth(); }
 			//Amount of bits valid inside a mono sample. (left aligned. i.e. lower bits unused). If validBits=32 floats are assumed!
-			int GetSampleValidBits() { return settings().validBitDepth(); }
-			int GetSamplesPerSec() { return settings().samplesPerSec(); }
-			channel_mode GetChannelMode() { return settings().channelMode(); }
+			int GetSampleValidBits() const { return settings().validBitDepth(); }
+			int GetSamplesPerSec() const { return settings().samplesPerSec(); }
+			channel_mode GetChannelMode() const { return settings().channelMode(); }
 
 			static void PrepareWaveFormat(WAVEFORMATEXTENSIBLE& wf, int channels, int sampleRate, int bits, int validBits);
 			static void Quantize16(float *pin, int *piout, int c);
 			static void Quantize16WithDither(float *pin, int *piout, int c);
 			static void Quantize24in32Bit(float *pin, int *piout, int c);
+			static void Quantize24(float *pin, int *piout, int c);
 			static void DeQuantize16AndDeinterlace(short int *pin, float *poutleft,float *poutright,int c);
 			static void DeQuantize32AndDeinterlace(int *pin, float *poutleft,float *poutright,int c);
 			static void DeinterlaceFloat(float *pin, float *poutleft,float *poutright,int c);
@@ -186,7 +187,7 @@ namespace psycle
 			SilentSettings(){ SetDefaultSettings(); };
 			SilentSettings(const SilentSettings& othersettings):AudioDriverSettings(othersettings){};
 			virtual AudioDriver* NewDriver();
-			virtual AudioDriverInfo& GetInfo() { return info_; };
+			virtual AudioDriverInfo& GetInfo() const { return info_; };
 
 			virtual void Load(ConfigStorage &) {};
 			virtual void Save(ConfigStorage &) {};
@@ -198,7 +199,9 @@ namespace psycle
 		{
 		public:
 			SilentDriver(SilentSettings* settings):settings_(settings) {}
-			virtual AudioDriverSettings& settings() { return *settings_; };
+			virtual AudioDriverSettings& settings() const { return *settings_; };
+			virtual std::uint32_t GetInputLatencySamples() const { return 0; }
+			virtual std::uint32_t GetOutputLatencySamples() const { return 0; }
 		protected:
 			SilentSettings* settings_;
 		};

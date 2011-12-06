@@ -207,7 +207,7 @@ namespace psycle
 			_event.ResetEvent();
 			::_beginthread(PollerThread, 0, this);
 			_running = true;
-			Global::midi().ReSync();	// MIDI IMPLEMENTATION
+			PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
 			return true;
 		}
 
@@ -292,12 +292,12 @@ namespace psycle
 			_running = false;
 			return true;
 		}
-		void WaveOut::GetPlaybackPorts(std::vector<std::string> &ports)
+		void WaveOut::GetPlaybackPorts(std::vector<std::string> &ports) const
 		{
 			ports.resize(0);
 			for (unsigned int i=0;i<_playEnums.size();i++) ports.push_back(_playEnums[i].portname);
 		}
-		void WaveOut::GetCapturePorts(std::vector<std::string> &ports)
+		void WaveOut::GetCapturePorts(std::vector<std::string> &ports) const
 		{
 			ports.resize(0);
 			for (unsigned int i=0;i<_capEnums.size();i++) ports.push_back(_capEnums[i].portname);
@@ -584,14 +584,14 @@ namespace psycle
 				m_readPosWraps++;
 				if(m_lastPlayPos > _writePos) {
 					m_readPosWraps = 0;
-					Global::midi().ReSync();	// MIDI IMPLEMENTATION
+					PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
 				}
 			}
 			m_lastPlayPos = retval;
 			return retval + (m_readPosWraps*0x800000);
 		}
 
-		std::uint32_t WaveOut::GetWritePosInSamples()
+		std::uint32_t WaveOut::GetWritePosInSamples() const
 		{
 			if(!_stopPolling) return 0;
 			return _writePos;
@@ -602,7 +602,7 @@ namespace psycle
 			return e ? Start() : Stop();
 		}
 
-		bool WaveOut::PortEnums::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput) 
+		bool WaveOut::PortEnums::IsFormatSupported(WAVEFORMATEXTENSIBLE& pwfx, bool isInput) const
 		{ 
 			if(isInput) {
 				return MMSYSERR_NOERROR == waveInOpen(

@@ -36,17 +36,26 @@ namespace psycle
 					Machine * pointer_to_machine = &plugin;
 					try
 					{
-						if(!plugin.LoadDll(const_cast<char *>((plugin_names()(type) + ".dll").c_str())))
+						const char* name = const_cast<char *>((plugin_names()(type) + ".dll").c_str());
+						bool bDeleted=false;
+						if(!plugin.LoadDll(name))
 						{
 							pointer_to_machine = 0; // for delete pointer_to_machine in the catch clause
 							delete & plugin;
 							pointer_to_machine = new Dummy(index);
+							((Dummy*)pointer_to_machine)->dllName=name;
+							bDeleted=true;
 						}
 						Machine & machine = *pointer_to_machine;
 						machine_converted_from[&machine] = new int(type);
 						machine.Init();
 						assert(sizeof(int) == 4);
 						riff.Read(machine._editName, 16); /* sizeof machine._editName); */ machine._editName[16] = 0;
+						if(bDeleted) {
+							std::stringstream s;
+							s << "X!" << machine.GetEditName();
+							machine.SetEditName(s.str());
+						}
 						riff.Read(machine._inputMachines, sizeof machine._inputMachines);
 						riff.Read(machine._outputMachines, sizeof machine._outputMachines);
 						riff.Read(machine._inputConVol, sizeof machine._inputConVol);
@@ -58,6 +67,7 @@ namespace psycle
 						riff.Read(&machine._panning, sizeof machine._panning);
 						machine.SetPan(machine._panning);
 						riff.Skip(40); // skips shiatz
+
 						switch(type)
 						{
 						case delay:
@@ -295,7 +305,7 @@ namespace psycle
 							{
 							case left_delay:
 							case right_delay:
-								value *= Real(2 * 3 * 4 * 5 * 7) / Global::pPlayer->SamplesPerRow();
+								value *= Real(2 * 3 * 4 * 5 * 7) / Global::player().SamplesPerRow();
 								break;
 							case left_feedback:
 							case right_feedback:
@@ -353,7 +363,7 @@ namespace psycle
 								break;
 							case modulation_sequencer_ticks:
 								if ( value < 1.0f) value = 0;
-								else value = helpers::scale::Exponential(maximum, helpers::math::pi * 2 / 10000, helpers::math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::pPlayer->SamplesPerRow());
+								else value = helpers::scale::Exponential(maximum, helpers::math::pi * 2 / 10000, helpers::math::pi * 2 * 2 * 3 * 4 * 5 * 7).apply_inverse(value * 3e-8 * Global::player().SamplesPerRow());
 								break;
 							case resonance:
 							case modulation_amplitude:

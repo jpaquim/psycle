@@ -6,17 +6,13 @@
 // Included for "Work()" function and wirevolumes. Maybe this could be worked out
 // in a different way
 #include "Song.hpp"
+#include "machineloader.hpp"
 
 #if !defined WINAMP_PLUGIN
-	// Included for the machine position on the machine view.
-	#include "PsycleConfig.hpp"
 	// This one is included to update the buffers that wiredlg uses for display. 
 	// Find a way to manage these buffers without its inclusion
 	#include "WireDlg.hpp"
 	// Included due to the plugin caching, which should be separated from the dialog.
-	#include "NewMachine.hpp"
-#else
-	#include "player_plugins/winamp/shrunk_newmachine.hpp"
 #endif //!defined WINAMP_PLUGIN
 
 // The inclusion of the following headers is needed because of a bad design.
@@ -29,16 +25,13 @@
 #include "VstHost24.hpp"
 
 #include <universalis/os/aligned_alloc.hpp>
+#include <psycle/helpers/value_mapper.hpp>
 #include "cpu_time_clock.hpp"
 
 namespace psycle
 {
 	namespace host
 	{
-#if !defined WINAMP_PLUGIN
-		extern CPsycleApp theApp;
-#endif //!defined WINAMP_PLUGIN
-
 		char* Master::_psName = "Master";
 		bool Machine::autoStopMachine = false;
 
@@ -56,7 +49,7 @@ namespace psycle
 				<< "The machine has been set to bypassed/muted to prevent it from making the host crash." << std::endl
 				<< "You should save your work to a new file, and restart the host.";
 			if(loggers::exception()) loggers::exception()(s.str());
-			MessageBox(0, s.str().c_str(), "Error", MB_OK | MB_ICONERROR);
+			MessageBox(NULL, s.str().c_str(), "Error", MB_OK | MB_ICONERROR);
 		}
 
 
@@ -284,13 +277,13 @@ namespace psycle
 			}
 			_panning = newPan;
 		}
-		void Machine::InsertOutputWireIndex(Song* pSong,int wireIndex, int dstmac)
+		void Machine::InsertOutputWireIndex(Song& pSong,int wireIndex, int dstmac)
 		{
 			if (!_connection[wireIndex]) _numOutputs++;
 			_outputMachines[wireIndex] = dstmac;
 			_connection[wireIndex] = true;
 		}
-		void Machine::InsertInputWireIndex(Song* pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		void Machine::InsertInputWireIndex(Song& pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
 		{
 			if (!_inputCon[wireIndex]) _numInputs++;
 			_inputMachines[wireIndex] = srcmac;
@@ -302,11 +295,11 @@ namespace psycle
 				//Let's find if the new machine has still other machines connected to it.
 				// Right now the UI doesn't allow such configurations, but there isn't a reason
 				// not to allow it in the future.
-				Machine* pMac = pSong->_pMachine[srcmac];
+				Machine* pMac = pSong._pMachine[srcmac];
 				for(int c=0; c<MAX_CONNECTIONS; c++)
 				{
 					if(pMac->_inputCon[c])	{
-						pMac = pSong->_pMachine[pMac->_inputMachines[c]];
+						pMac = pSong._pMachine[pMac->_inputMachines[c]];
 						c=0;
 						continue;
 					}
@@ -361,11 +354,11 @@ namespace psycle
 			return -1;
 		}
 
-		bool Machine::SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value)
+		bool Machine::SetDestWireVolume(Song& thesong,int srcIndex, int WireIndex,float value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = thesong._pMachine[_outputMachines[WireIndex]];
 
 			if (_pDstMachine)
 			{
@@ -379,11 +372,11 @@ namespace psycle
 			return false;
 		}
 
-		bool Machine::GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value)
+		bool Machine::GetDestWireVolume(Song& pSong,int srcIndex, int WireIndex,float &value)
 		{
 			// Get reference to the destination machine
 			if ((WireIndex > MAX_CONNECTIONS) || (!_connection[WireIndex])) return false;
-			Machine *_pDstMachine = pSong->_pMachine[_outputMachines[WireIndex]];
+			Machine *_pDstMachine = pSong._pMachine[_outputMachines[WireIndex]];
 			
 			if (_pDstMachine)
 			{
@@ -400,7 +393,7 @@ namespace psycle
 			return false;
 		}
 
-		void Machine::DeleteOutputWireIndex(Song* pSong,int wireIndex)
+		void Machine::DeleteOutputWireIndex(Song& pSong,int wireIndex)
 		{
 			if ( _isMixerSend)
 			{
@@ -410,7 +403,7 @@ namespace psycle
 			_outputMachines[wireIndex] = -1;
 			_numOutputs--;
 		}
-		void Machine::DeleteInputWireIndex(Song* pSong,int wireIndex)
+		void Machine::DeleteInputWireIndex(Song& pSong,int wireIndex)
 		{
 			_inputCon[wireIndex] = false;
 			_inputMachines[wireIndex] = -1;
@@ -421,7 +414,7 @@ namespace psycle
 				NotifyNewSendtoMixer(pSong,_macIndex,_macIndex);
 			}
 		}
-		void Machine::DeleteWires(Song* pSong)
+		void Machine::DeleteWires(Song& pSong)
 		{
 			Machine *iMac;
 			// Deleting the connections to/from other machines
@@ -432,7 +425,7 @@ namespace psycle
 				{
 					if((_inputMachines[w] >= 0) && (_inputMachines[w] < MAX_MACHINES))
 					{
-						iMac = pSong->_pMachine[_inputMachines[w]];
+						iMac = pSong._pMachine[_inputMachines[w]];
 						if (iMac)
 						{
 							int wix = iMac->FindOutputWire(_macIndex);
@@ -449,7 +442,7 @@ namespace psycle
 				{
 					if((_outputMachines[w] >= 0) && (_outputMachines[w] < MAX_MACHINES))
 					{
-						iMac = pSong->_pMachine[_outputMachines[w]];
+						iMac = pSong._pMachine[_outputMachines[w]];
 						if (iMac)
 						{
 							int wix = iMac->FindInputWire(_macIndex);
@@ -492,19 +485,19 @@ namespace psycle
 			_connection[first]=_connection[second];
 			_connection[second]=tmp3;
 		}
-		void Machine::NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac)
+		void Machine::NotifyNewSendtoMixer(Song& pSong,int callerMac,int senderMac)
 		{
 			//Work down the connection wires until finding the mixer.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
-				if ( _connection[i]) pSong->_pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
+				if ( _connection[i]) pSong._pMachine[_outputMachines[i]]->NotifyNewSendtoMixer(pSong,_macIndex,senderMac);
 		}
-		void Machine::ClearMixerSendFlag(Song* pSong)
+		void Machine::ClearMixerSendFlag(Song& pSong)
 		{
 			//Work up the connection wires to clear others' flag.
 			for (int i(0);i< MAX_CONNECTIONS; ++i)
 				if ( _inputCon[i])
 				{
-					pSong->_pMachine[_inputMachines[i]]->ClearMixerSendFlag(pSong);
+					pSong._pMachine[_inputMachines[i]]->ClearMixerSendFlag(pSong);
 				}
 				
 			_isMixerSend=false;
@@ -764,7 +757,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
 			if (_volumeDisplay>0 )--_volumeDisplay;
-			if ( Global::pConfig->UsesAutoStopMachines() )
+			if ( Global::configuration().UsesAutoStopMachines() )
 			{
 				if (_volumeCounter < 8.0f)	{
 					_volumeCounter = 0.0f;
@@ -835,10 +828,13 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						pMachine = p = new Plugin(index);
 						if(!p->LoadDll(dllName))
 						{
+#if !defined WINAMP_PLUGIN
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
 							MessageBox(NULL,sError, "Loading Error", MB_OK);
+#endif //!defined WINAMP_PLUGIN
 							pMachine = new Dummy(index);
+							
 							delete p;
 							bDeleted = true;
 						}
@@ -855,23 +851,25 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						vst::plugin *vstPlug=0;
 						int shellIdx=0;
 
-						if(!CNewMachine::lookupDllName(dllName,sPath,MACH_VST,shellIdx)) 
+						if(!Global::machineload().lookupDllName(dllName,sPath,MACH_VST,shellIdx)) 
 						{
 							// Check Compatibility Table.
-							// Probably could be done with the dllNames lockup.
+							// Probably could be done with the dllNames lookup.
 							//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
 							sPath = dllName;
 						}
-						if(CNewMachine::TestFilename(sPath,shellIdx) ) 
+						if(Global::machineload().TestFilename(sPath,shellIdx) ) 
 						{
 							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
 						}
 
 						if(!vstPlug)
 						{
+#if !defined WINAMP_PLUGIN
 							char sError[MAX_PATH + 100];
 							sprintf(sError,"Replacing VST plug-in \"%s\" with Dummy.",dllName);
 							MessageBox(NULL,sError, "Loading Error", MB_OK);
+#endif //!defined WINAMP_PLUGIN
 							pMachine = new Dummy(index);
 							((Dummy*)pMachine)->wasVST=true;
 							bDeleted = true;
@@ -886,15 +884,16 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				}
 				break;
 			default:
+#if !defined WINAMP_PLUGIN
 				if (type != MACH_DUMMY ) MessageBox(0, "Please inform the devers about this message: unknown kind of machine while loading new file format", "Loading Error", MB_OK | MB_ICONERROR);
+#endif //!defined WINAMP_PLUGIN
 				pMachine = new Dummy(index);
 				break;
 			}
 			pMachine->Init();
 			if(!bDeleted)
 			{
-				///\todo: Is it even necessary???
-				/// for the winamp plugin maybe?
+				//this is when "fullopen=false", since then only dummys are loaded
 				pMachine->_type = type;
 			}
 			pFile->Read(&pMachine->_bypass,sizeof(pMachine->_bypass));
@@ -916,18 +915,20 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			pFile->ReadString(pMachine->_editName,32);
 			if(bDeleted)
 			{
-				char buf[34];
-				sprintf(buf,"X %s",pMachine->_editName);
-				buf[31]=0;
-				strcpy(pMachine->_editName,buf);
+				((Dummy*)pMachine)->dllName=dllName;
+				std::stringstream s;
+				s << "X!" << pMachine->GetEditName();
+				((Dummy*)pMachine)->SetEditName(s.str());
 			}
 			if(!fullopen) return pMachine;
 
 			if(!pMachine->LoadSpecificChunk(pFile,version))
 			{
+#if !defined WINAMP_PLUGIN
 				char sError[MAX_PATH + 100];
 				sprintf(sError,"Missing or Corrupted Machine Specific Chunk \"%s\" - replacing with Dummy.",dllName);
 				MessageBox(NULL,sError, "Loading Error", MB_OK);
+#endif //!defined WINAMP_PLUGIN
 				Machine* p = new Dummy(index);
 				p->Init();
 				p->_type=MACH_DUMMY;

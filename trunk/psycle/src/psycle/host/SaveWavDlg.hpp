@@ -131,6 +131,6 @@ namespace psycle {
 			afx_msg void OnOutputfile();
 			afx_msg void OnOutputclipboard();
 			afx_msg void OnOutputsample();
-};
-
-}}
+		};
+	}
+}

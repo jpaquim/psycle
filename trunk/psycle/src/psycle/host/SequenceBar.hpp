@@ -17,7 +17,7 @@ namespace psycle { namespace host {
 		SequenceBar();   // standard constructor
 		virtual ~SequenceBar();
 		
-		void InitializeValues(CMainFrame* frame, CChildView* view, Song* song);
+		void InitializeValues(CMainFrame* frame, CChildView* view, Song& song);
 	protected:
 		virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
@@ -68,7 +68,7 @@ namespace psycle { namespace host {
 
 		CMainFrame* m_pParentMain;
 		CChildView*  m_pWndView;
-		Song*		m_pSong;
+		Song* m_pSong;
 
 		int seqcopybuffer[MAX_SONG_POSITIONS];
 		int seqcopybufferlength;

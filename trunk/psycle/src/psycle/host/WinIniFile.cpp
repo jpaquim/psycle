@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "WinIniFile.hpp"
 #include <psycle/helpers/hexstring_to_binary.hpp>
+#include <psycle/helpers/hexstring_to_integer.hpp>
 namespace psycle
 {
 	namespace host

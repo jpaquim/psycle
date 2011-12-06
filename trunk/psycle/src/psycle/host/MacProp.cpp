@@ -11,8 +11,9 @@ namespace psycle { namespace host {
 
 		extern CPsycleApp theApp;
 
-		CMacProp::CMacProp(CWnd* pParent)
+		CMacProp::CMacProp(Song& song, CWnd* pParent)
 			: CDialog(CMacProp::IDD, pParent)
+			, thesong(song)
 		{
 			m_view=NULL;
 		}
@@ -47,13 +48,13 @@ namespace psycle { namespace host {
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",Global::_pSong->FindBusFromIndex(thisMac),pMachine->_editName);
+			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(thisMac),pMachine->_editName);
 			SetWindowText(buffer);
 
 			m_macname.SetWindowText(pMachine->_editName);
 
 			m_muteCheck.SetCheck(pMachine->_mute);
-			m_soloCheck.SetCheck(pSong->machineSoloed == thisMac);
+			m_soloCheck.SetCheck(thesong.machineSoloed == thisMac);
 			m_bypassCheck.SetCheck(pMachine->Bypass());
 			if (pMachine->_mode == MACHMODE_GENERATOR ) 
 			{
@@ -84,7 +85,7 @@ namespace psycle { namespace host {
 			// Delete MACHINE!
 			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				deleted = true;
 				PostMessage (WM_CLOSE);
@@ -98,7 +99,7 @@ namespace psycle { namespace host {
 			pMachine->_volumeDisplay = 0;
 			if ( m_view != NULL )
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 				m_view->updatePar=thisMac;
 				m_view->Repaint(draw_modes::machine);
 			}
@@ -108,7 +109,7 @@ namespace psycle { namespace host {
 			pMachine->Bypass(m_bypassCheck.GetCheck() == 1);
 			if ( m_view != NULL )
 			{
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 				m_view->updatePar=thisMac;
 				m_view->Repaint(draw_modes::machine);
 			}
@@ -116,33 +117,33 @@ namespace psycle { namespace host {
 
 		void CMacProp::OnSolo() 
 		{
-			Global::pInputHandler->AddMacViewUndo();
+			PsycleGlobal::inputHandler().AddMacViewUndo();
 			if (m_soloCheck.GetCheck() == 1)
 			{
 				for ( int i=0;i<MAX_MACHINES;i++ )
 				{
-					if (pSong->_pMachine[i])
+					if (thesong._pMachine[i])
 					{
-						if ( pSong->_pMachine[i]->_mode == MACHMODE_GENERATOR )
+						if ( thesong._pMachine[i]->_mode == MACHMODE_GENERATOR )
 						{
-							pSong->_pMachine[i]->_mute = true;
-							pSong->_pMachine[i]->_volumeCounter=0.0f;
-							pSong->_pMachine[i]->_volumeDisplay =0;
+							thesong._pMachine[i]->_mute = true;
+							thesong._pMachine[i]->_volumeCounter=0.0f;
+							thesong._pMachine[i]->_volumeDisplay =0;
 						}
 					}
 				}
 				pMachine->_mute = false;
 				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
-				pSong->machineSoloed = thisMac;
+				thesong.machineSoloed = thisMac;
 			}
 			else
 			{
-				pSong->machineSoloed = -1;
+				thesong.machineSoloed = -1;
 				for ( int i=0;i<MAX_BUSES;i++ )
 				{
-					if (pSong->_pMachine[i])
+					if (thesong._pMachine[i])
 					{
-						pSong->_pMachine[i]->_mute = false;
+						thesong._pMachine[i]->_mute = false;
 					}
 				}
 				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
@@ -160,15 +161,15 @@ namespace psycle { namespace host {
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
-				dst = Global::_pSong->GetFreeBus();
+				dst = Global::song().GetFreeBus();
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				dst = Global::_pSong->GetFreeFxBus();
+				dst = Global::song().GetFreeFxBus();
 			}
 			if (dst >= 0)
 			{
-				if (!Global::_pSong->CloneMac(src,dst))
+				if (!Global::song().CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed","Cloning failed");
 				}
@@ -185,7 +186,7 @@ namespace psycle { namespace host {
 		}
 		void CMacProp::OnAddNewBefore()
 		{
-			int newMacidx = Global::_pSong->GetFreeFxBus();
+			int newMacidx = Global::song().GetFreeFxBus();
 			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
 
 			Machine* newMac = Global::song()._pMachine[newMacidx];
@@ -211,7 +212,7 @@ namespace psycle { namespace host {
 		}
 		void CMacProp::OnAddNewAfter()
 		{
-			int newMacidx = Global::_pSong->GetFreeFxBus();
+			int newMacidx = Global::song().GetFreeFxBus();
 			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
 
 			Machine* newMac = Global::song()._pMachine[newMacidx];

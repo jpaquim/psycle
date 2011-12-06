@@ -137,13 +137,13 @@ namespace psycle { namespace host {
 		//(See sampulse UI)
 		void CInterpolateCurve::AdjustPointToView(CPoint&point)
 		{
-			CDPI& g_metrics = Global::dpiSetting();
+			CDPI& g_metrics = PsycleGlobal::dpiSetting();
 
 			point.y-=g_metrics.ScaleY(20); point.x-=g_metrics.ScaleX(10)+xoffset;
 		}
 		void CInterpolateCurve::AdjustRectToView(RECT&rect)
 		{
-			CDPI& g_metrics = Global::dpiSetting();
+			CDPI& g_metrics = PsycleGlobal::dpiSetting();
 			rect.top += g_metrics.ScaleY(20); rect.left += g_metrics.ScaleX(10); rect.right -= g_metrics.ScaleX(10); rect.bottom -= g_metrics.ScaleY(100);
 		}
 		int CInterpolateCurve::GetPointFromX(LONG x)
@@ -224,7 +224,7 @@ namespace psycle { namespace host {
 		void CInterpolateCurve::OnPaint()
 		{
 			CPaintDC dc(this); // device context for painting
-			CDPI& g_metrics = Global::dpiSetting();
+			CDPI& g_metrics = PsycleGlobal::dpiSetting();
 
 			RECT tmprect = grapharea;
 			//set an extra border.

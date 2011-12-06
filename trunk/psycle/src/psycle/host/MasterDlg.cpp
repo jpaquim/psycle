@@ -80,7 +80,7 @@ namespace psycle { namespace host {
 				sliders_.push_back(slider);
 			}
 			// Using CDPI example class
-			CDPI& g_metrics = Global::dpiSetting();
+			CDPI& g_metrics = PsycleGlobal::dpiSetting();
 
 			numbersMasterX = g_metrics.ScaleX(numbersMasterX);
 			numbersX = g_metrics.ScaleX(numbersX);
@@ -137,7 +137,7 @@ namespace psycle { namespace host {
 
 		BOOL CMasterDlg::PreTranslateMessage(MSG* pMsg) {
 			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
-				CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+				CmdDef def = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,0);
 				if(def.GetType() == CT_Note) {
 					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 					return true;
@@ -422,7 +422,7 @@ namespace psycle { namespace host {
 					CDC* pDC = CDC::FromHandle( nmcd.hdc );
 					CDC memDC;
 					CBitmap* oldbmp;
-					CDPI& g_metrics = Global::dpiSetting();
+					CDPI& g_metrics = PsycleGlobal::dpiSetting();
 					pDC->SetStretchBltMode(HALFTONE);
 					memDC.CreateCompatibleDC(pDC);
 					oldbmp=memDC.SelectObject(&m_back);
@@ -451,7 +451,7 @@ namespace psycle { namespace host {
 			if (m_back.m_hObject != NULL)
 			{
 				// Using CDPI example class
-				CDPI& g_metrics = Global::dpiSetting();
+				CDPI& g_metrics = PsycleGlobal::dpiSetting();
 				pDC->SetStretchBltMode(HALFTONE);
 				CDC memDC;
 				memDC.CreateCompatibleDC(pDC);

@@ -432,8 +432,8 @@ namespace psycle
 			virtual void RefreshSettings();
 			virtual void RefreshAudio();
 
-			virtual bool LoadPsycleSettings();
-			virtual bool SavePsycleSettings();
+			bool LoadPsycleSettings();
+			bool SavePsycleSettings();
 
 			void AddRecentFile(std::string const &f);
 			void OutputChanged(int newidx);
@@ -449,6 +449,8 @@ namespace psycle
 			               void inline	SetWaveRecDir         (std::string const &d) { wave_rec_dir_ = d;}
 			std::string const inline & GetCurrentWaveRecDir   () const { return current_wave_rec_dir_; }
 			               void inline SetCurrentWaveRecDir   (std::string const &d) { current_wave_rec_dir_ = d;}
+			bool		const inline   IsRecInPSYDir          () { return rec_in_psy_dir_; }
+						   void inline SetRecInPSYDir         (bool rec) {	rec_in_psy_dir_ = rec; }
 			std::string const inline & GetInstrumentDir       () const { return instrument_dir_; }
 			               void inline SetInstrumentDir       (std::string const &d) { instrument_dir_ = d;}
 			std::string const inline & GetCurrentInstrumentDir() const { return current_instrument_dir_; }
@@ -502,6 +504,7 @@ namespace psycle
 			//On DirectoryDlg
 			std::string song_dir_;
 			std::string current_song_dir_;
+			bool rec_in_psy_dir_;
 			std::string wave_rec_dir_;
 			std::string current_wave_rec_dir_;
 			std::string instrument_dir_;

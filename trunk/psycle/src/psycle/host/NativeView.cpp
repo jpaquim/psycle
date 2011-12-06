@@ -187,7 +187,7 @@ namespace psycle { namespace host {
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
 				istweak = true;
 				visualtweakvalue= tweakbase;
-				Global::pInputHandler->AddMacViewUndo();
+				PsycleGlobal::inputHandler().AddMacViewUndo();
 				SetCapture();
 			}
 			else
@@ -204,7 +204,7 @@ namespace psycle { namespace host {
 				int par = ConvertXYtoParam(pt.x,pt.y);
 				if(par>=0 && par <= _pMachine->GetNumParams() )
 				{
-					Global::pInputHandler->AddMacViewUndo();
+					PsycleGlobal::inputHandler().AddMacViewUndo();
 					_pMachine->SetParameter(par,  ((Plugin*)_pMachine)->GetInfo()->Parameters[par]->DefValue);
 				}
 			}
@@ -276,11 +276,11 @@ namespace psycle { namespace host {
 				if (nFlags & MK_CONTROL)
 				{
 					
-/*					Global::_pSong->seqBus = machine()._macIndex;
+/*					Global::song().seqBus = machine()._macIndex;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
 					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 					cb2->SetCurSel(AUX_PARAMS);
-					Global::_pSong->auxcolSelected=tweakpar;
+					Global::song().auxcolSelected=tweakpar;
 					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
 */
 				}
@@ -305,7 +305,7 @@ namespace psycle { namespace host {
 					CNewVal dlg(machine()._macIndex,tweakpar,_pMachine->GetParamValue(tweakpar),min_v,max_v,title);
 					if ( dlg.DoModal() == IDOK)
 					{
-						Global::pInputHandler->AddMacViewUndo();
+						PsycleGlobal::inputHandler().AddMacViewUndo();
 						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
 						parentFrame->Automate(tweakpar,(int)dlg.m_Value,false);
 					}

@@ -96,7 +96,7 @@ END_MESSAGE_MAP()
 BOOL XMSamplerMixerPage::OnSetActive()
 {
 	m_UpdatingGraphics=true;
-	m_slChannels.SetRangeMax((Global::_pSong->SongTracks()>8)?(Global::_pSong->SongTracks()-8):0); // maxchans-visiblechans
+	m_slChannels.SetRangeMax((Global::song().SongTracks()>8)?(Global::song().SongTracks()-8):0); // maxchans-visiblechans
 	if ( m_bShowPlay.GetCheck() == 0 ) { m_bShowChan.SetCheck(1); }
 	for (int i=0;i<8;i++)
 	{

@@ -24,8 +24,6 @@
 
 namespace psycle { namespace host {
 
-	extern CPsycleApp theApp;
-
 /*****************************************************************************/
 /* Create : creates the dialog                                               */
 /*****************************************************************************/
@@ -78,7 +76,7 @@ namespace psycle { namespace host {
 
 		BOOL CParamList::PreTranslateMessage(MSG* pMsg) {
 			if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
-				CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+				CmdDef def = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,0);
 				if(def.GetType() == CT_Note) {
 					parentFrame->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 					return true;

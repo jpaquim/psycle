@@ -21,8 +21,10 @@ namespace psycle { namespace host {
 			CComboBox       m_midiSyncComboBox;
 			CEdit           m_midiHeadroomEdit;
 			CSpinButtonCtrl m_midiHeadroomSpin;
+			CEdit           m_numberThreadsEdit;
 		public:
 			int m_driverIndex;
+			int m_numberThreads;
 			int m_midiDriverIndex;
 			int m_syncDriverIndex;
 			int m_midiHeadroom;

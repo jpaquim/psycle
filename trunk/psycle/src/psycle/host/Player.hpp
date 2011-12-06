@@ -9,11 +9,9 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include "Machine.hpp"
-#if !defined WINAMP_PLUGIN
-	#include "AudioDriver.hpp"
-	#include <psycle/helpers/riff.hpp>
-	#include <psycle/helpers/dither.hpp>
-#endif //!defined WINAMP_PLUGIN
+#include "AudioDriver.hpp"
+#include <psycle/helpers/riff.hpp>
+#include <psycle/helpers/dither.hpp>
 namespace psycle
 {
 	namespace host
@@ -133,12 +131,10 @@ namespace psycle
 			int prevInstrument[MAX_TRACKS];
 			/// Temporary buffer to get all the audio from Master (which work in small chunks), and send it to the soundcard after converting it to float.
 			float* _pBuffer;
-#if !defined WINAMP_PLUGIN
 			/// file to which to output signal.
 			WaveFile _outputWaveFile;
 			/// dither handler
 			helpers::dsp::Dither dither;
-#endif //!defined WINAMP_PLUGIN
 
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()
@@ -153,10 +149,10 @@ namespace psycle
 
 		///\name multithreaded scheduler
 		///\{
-		private:
-			void start_threads();
+		public:
+			void start_threads(int thread_count);
 			void stop_threads();
-
+		private:
 			typedef std::list<std::thread*> threads_type;
 			threads_type threads_;
 		public:

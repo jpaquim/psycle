@@ -29,17 +29,17 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			CString CurrExt=GetFileExt();
 			
 			CurrExt.MakeLower();
-			_pSong->wavprev.SetInstrument(_pSong->_pInstrument[PREV_WAV_INS]);
+			m_pSong->wavprev.SetInstrument(m_pSong->_pInstrument[PREV_WAV_INS]);
 			
-			_pSong->wavprev.Stop();
-			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			m_pSong->wavprev.Stop();
+			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			if (CurrExt=="wav" && _lastFile != GetPathName())
 			{
 				_lastFile=GetPathName();
 				
-				if (_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
+				if (m_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
-					_pSong->wavprev.Play();
+					m_pSong->wavprev.Play();
 					
 				}
 			}
@@ -47,9 +47,9 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			{
 				_lastFile=GetPathName();
 				
-				if (_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
+				if (m_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
 				{
-					_pSong->wavprev.Play();
+					m_pSong->wavprev.Play();
 				}
 			}
 

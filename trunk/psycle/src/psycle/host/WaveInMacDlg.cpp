@@ -67,7 +67,7 @@ void CWaveInMacDlg::PostNcDestroy()
 BOOL CWaveInMacDlg::PreTranslateMessage(MSG* pMsg) 
 {
 	if ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_KEYUP)) {
-		CmdDef def = Global::pInputHandler->KeyToCmd(pMsg->wParam,0);
+		CmdDef def = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,0);
 		if(def.GetType() == CT_Note) {
 			mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
 			return true;
@@ -96,7 +96,7 @@ void CWaveInMacDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
 
 void CWaveInMacDlg::FillCombobox()
 {
-	AudioDriver &mydriver = *Global::pConfig->_pOutputDriver;
+	AudioDriver &mydriver = *Global::configuration()._pOutputDriver;
 	std::vector<std::string> ports;
 	mydriver.RefreshAvailablePorts();
 	mydriver.GetCapturePorts(ports);

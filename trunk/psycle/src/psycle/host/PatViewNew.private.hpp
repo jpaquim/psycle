@@ -18,8 +18,8 @@ namespace psycle { namespace host {
 
 			CRect rect;	
 			updateMode=drawMode;					// this is ununsed for patterns
-			const int snt = _pSong->SONGTRACKS;
-			const int plines = _pSong->patternLines[_pSong->playOrder[editPosition]];
+			const int snt = _pSong.SONGTRACKS;
+			const int plines = _pSong.patternLines[_pSong.playOrder[editPosition]];
 			if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
 			{							// Else, there is a problem.
 				TRACE("editcur.track out of range in PreparePatternRefresh");
@@ -295,9 +295,9 @@ namespace psycle { namespace host {
 				break;
 			case draw_modes::playback: 
 				{
-					int pos = Global::pPlayer->_lineCounter;
+					int pos = Global::player()._lineCounter;
 					if (( pos-rnlOff >= 0 ) &&  ( pos-rnlOff <maxl ) &&
-						(_pSong->playOrder[editPosition] == _pSong->playOrder[Global::pPlayer->_playPosition]))
+						(_pSong.playOrder[editPosition] == _pSong.playOrder[Global::player()._playPosition]))
 					{
 						if (pos != playpos)
 						{
@@ -307,7 +307,7 @@ namespace psycle { namespace host {
 							rect.bottom=rect.top+ROWHEIGHT;	// left never changes and is set at ChildView init.
 							rect.left = 0;
 							rect.right=CW;
-							NewPatternDraw(0, _pSong->SONGTRACKS, pos, pos);
+							NewPatternDraw(0, _pSong.SONGTRACKS, pos, pos);
 							updatePar |= DRAW_DATA;
 							InvalidateRect(rect,false);
 							if ((playpos >= 0) && (playpos != newplaypos))
@@ -316,7 +316,7 @@ namespace psycle { namespace host {
 								rect.bottom = rect.top+ROWHEIGHT;
 								rect.left = 0;
 								rect.right = CW;
-								NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
+								NewPatternDraw(0, _pSong.SONGTRACKS, playpos, playpos);
 								updatePar |= DRAW_DATA;
 								playpos =-1;
 								InvalidateRect(rect,false);
@@ -332,7 +332,7 @@ namespace psycle { namespace host {
 							rect.bottom = rect.top+ROWHEIGHT;
 							rect.left = 0;
 							rect.right = CW;
-							NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
+							NewPatternDraw(0, _pSong.SONGTRACKS, playpos, playpos);
 							updatePar |= DRAW_DATA;
 							playpos = -1;
 							InvalidateRect(rect,false);
@@ -350,9 +350,9 @@ namespace psycle { namespace host {
 				}
 				break;
 			case draw_modes::playback_change: 
-				if (_pSong->playOrder[editPosition] == _pSong->playOrder[Global::pPlayer->_playPosition])
+				if (_pSong.playOrder[editPosition] == _pSong.playOrder[Global::player()._playPosition])
 				{
-					newplaypos= Global::pPlayer->_lineCounter;
+					newplaypos= Global::player()._lineCounter;
 				}
 				else 
 				{
@@ -825,14 +825,14 @@ namespace psycle { namespace host {
 			}
 
 			// turn off play line if not playing
-			if (playpos >= 0 && !Global::pPlayer->_playing) 
+			if (playpos >= 0 && !Global::player()._playing) 
 			{
 				newplaypos=-1;
 				rect.top = YOFFSET+ (playpos-rnlOff)*ROWHEIGHT;
 				rect.bottom = rect.top+ROWHEIGHT;
 				rect.left = 0;
 				rect.right = XOFFSET+(maxt)*ROWWIDTH;
-				NewPatternDraw(0, _pSong->SONGTRACKS, playpos, playpos);
+				NewPatternDraw(0, _pSong.SONGTRACKS, playpos, playpos);
 				playpos =-1;
 				updatePar |= DRAW_DATA;
 				InvalidateRect(rect,false);
@@ -909,7 +909,7 @@ namespace psycle { namespace host {
 						rect.left++;
 						rect.right+= ROWWIDTH-1;
 						devc->FillSolidRect(&rect,pvc_background[i+1]);
-						sprintf(buffer,"%.2d:%s",i,_pSong->_trackNames[_ps()][i].c_str());
+						sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
 						TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
 						xOffset += ROWWIDTH;
 					}
@@ -957,7 +957,7 @@ namespace psycle { namespace host {
 							PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
 							PatHeaderCoords->sNumber0.y);
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::_pSong->_trackMuted[i])
+						if (Global::song()._trackMuted[i])
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
 								1+PatHeaderCoords->dMuteOn.y, 
@@ -968,7 +968,7 @@ namespace psycle { namespace host {
 								PatHeaderCoords->sMuteOn.x, 
 								PatHeaderCoords->sMuteOn.y);
 
-						if (Global::_pSong->_trackArmed[i])
+						if (Global::song()._trackArmed[i])
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
 								1+PatHeaderCoords->dRecordOn.y, 
@@ -979,7 +979,7 @@ namespace psycle { namespace host {
 								PatHeaderCoords->sRecordOn.x, 
 								PatHeaderCoords->sRecordOn.y);
 
-						if (Global::_pSong->_trackSoloed == i )
+						if (Global::song()._trackSoloed == i )
 							TransparentBlt(devc,
 								xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
 								1+PatHeaderCoords->dSoloOn.y, 
@@ -1047,7 +1047,7 @@ namespace psycle { namespace host {
 							SRCCOPY);
 
 						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::_pSong->_trackMuted[i])
+						if (Global::song()._trackMuted[i])
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
 								1+PatHeaderCoords->dMuteOn.y, 
@@ -1058,7 +1058,7 @@ namespace psycle { namespace host {
 								PatHeaderCoords->sMuteOn.y, 
 								SRCCOPY);
 
-						if (Global::_pSong->_trackArmed[i])
+						if (Global::song()._trackArmed[i])
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
 								1+PatHeaderCoords->dRecordOn.y, 
@@ -1069,7 +1069,7 @@ namespace psycle { namespace host {
 								PatHeaderCoords->sRecordOn.y, 
 								SRCCOPY);
 
-						if (Global::_pSong->_trackSoloed == i )
+						if (Global::song()._trackSoloed == i )
 							devc->BitBlt(
 								xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
 								1+PatHeaderCoords->dSoloOn.y, 
@@ -1278,7 +1278,7 @@ namespace psycle { namespace host {
 										rect.left++;
 										rect.right+= ROWWIDTH-1;
 										devc->FillSolidRect(&rect,pvc_background[i+1]);
-										sprintf(buffer,"%.2d:%s",i,_pSong->_trackNames[_ps()][i].c_str());
+										sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
 										TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
 										xOffset += ROWWIDTH;
 									}
@@ -1319,7 +1319,7 @@ namespace psycle { namespace host {
 											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
 											PatHeaderCoords->sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
 												1+PatHeaderCoords->dMuteOn.y, 
@@ -1330,7 +1330,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sMuteOn.x, 
 												PatHeaderCoords->sMuteOn.y);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
 												1+PatHeaderCoords->dRecordOn.y, 
@@ -1341,7 +1341,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sRecordOn.x, 
 												PatHeaderCoords->sRecordOn.y);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
 												1+PatHeaderCoords->dSoloOn.y, 
@@ -1403,7 +1403,7 @@ namespace psycle { namespace host {
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
 												1+PatHeaderCoords->dMuteOn.y, 
@@ -1414,7 +1414,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sMuteOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
 												1+PatHeaderCoords->dRecordOn.y, 
@@ -1425,7 +1425,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sRecordOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
 												1+PatHeaderCoords->dSoloOn.y, 
@@ -1493,7 +1493,7 @@ namespace psycle { namespace host {
 										rect.left++;
 										rect.right+= ROWWIDTH-1;
 										devc->FillSolidRect(&rect,pvc_background[i+1]);
-										sprintf(buffer,"%.2d:%s",i,_pSong->_trackNames[_ps()][i].c_str());
+										sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
 										TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
 										xOffset += ROWWIDTH;
 									}
@@ -1534,7 +1534,7 @@ namespace psycle { namespace host {
 											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
 											PatHeaderCoords->sNumber0.y);
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
 												1+PatHeaderCoords->dMuteOn.y, 
@@ -1545,7 +1545,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sMuteOn.x, 
 												PatHeaderCoords->sMuteOn.y);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
 												1+PatHeaderCoords->dRecordOn.y, 
@@ -1556,7 +1556,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sRecordOn.x, 
 												PatHeaderCoords->sRecordOn.y);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											TransparentBlt(devc,
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
 												1+PatHeaderCoords->dSoloOn.y, 
@@ -1618,7 +1618,7 @@ namespace psycle { namespace host {
 											SRCCOPY);
 
 										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::_pSong->_trackMuted[i])
+										if (Global::song()._trackMuted[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
 												1+PatHeaderCoords->dMuteOn.y, 
@@ -1629,7 +1629,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sMuteOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackArmed[i])
+										if (Global::song()._trackArmed[i])
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
 												1+PatHeaderCoords->dRecordOn.y, 
@@ -1640,7 +1640,7 @@ namespace psycle { namespace host {
 												PatHeaderCoords->sRecordOn.y, 
 												SRCCOPY);
 
-										if (Global::_pSong->_trackSoloed == i )
+										if (Global::song()._trackSoloed == i )
 											devc->BitBlt(
 												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
 												1+PatHeaderCoords->dSoloOn.y, 
@@ -1858,7 +1858,7 @@ namespace psycle { namespace host {
 			char tBuf[16];
 
 			COLORREF* pBkg;
-			int linesPerBar = (_pSong->LinesPerBeat()*patView->timesig);
+			int linesPerBar = (_pSong.LinesPerBeat()*patView->timesig);
 			char* linecountformat;
 
 			if (patView->_linenumbersHex) {
@@ -1870,7 +1870,7 @@ namespace psycle { namespace host {
 			for (int i=lstart;i<lend;i++) // Lines
 			{
 				// break this up into several more general loops for speed
-				if((linecount%_pSong->LinesPerBeat()) == 0)
+				if((linecount%_pSong.LinesPerBeat()) == 0)
 				{
 					if ((linecount%linesPerBar) == 0) 
 						pBkg = pvc_row4beat;
@@ -2055,7 +2055,7 @@ namespace psycle { namespace host {
 			float d1 = float((source2>>8)&0xff);
 			float d2 = float(source2&0xff);
 
-			int len = _pSong->SONGTRACKS+1;
+			int len = _pSong.SONGTRACKS+1;
 
 			float a0=(d0-p0)/(len);
 			float a1=(d1-p1)/(len);

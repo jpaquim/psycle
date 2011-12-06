@@ -22,10 +22,10 @@ namespace psycle
 		{
 			public:
 				inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) const { MessageBox(hWnd,ptxt,caption,type); }
-				inline virtual int GetTickLength() const { return Global::pPlayer->SamplesPerRow(); }
+				inline virtual int GetTickLength() const { return Global::player().SamplesPerRow(); }
 				inline virtual int GetSamplingRate() const { return Global::player().SampleRate(); }
-				inline virtual int GetBPM() const { return Global::pPlayer->bpm; }
-				inline virtual int GetTPB() const { return Global::pPlayer->tpb; }
+				inline virtual int GetBPM() const { return Global::player().bpm; }
+				inline virtual int GetTPB() const { return Global::player().tpb; }
 				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/);
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				inline virtual float * unused0(int, int) { return NULL;};

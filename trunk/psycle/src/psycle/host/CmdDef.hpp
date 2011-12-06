@@ -2,7 +2,7 @@
 ///\brief interface file for psycle::host::InputHandler.
 #pragma once
 #include <psycle/host/detail/project.hpp>
-#include "Psycle.hpp"
+#include "Global.hpp"
 namespace psycle
 {
 	namespace host

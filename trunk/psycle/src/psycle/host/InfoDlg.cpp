@@ -50,7 +50,7 @@ namespace psycle { namespace host {
 			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
 			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
 			m_machlist.InsertColumn(5,"1 CPU",LVCFMT_RIGHT,48,1);
-			m_cpu_perf.SetCheck(Global::pPlayer->measure_cpu_usage_? 1:0);
+			m_cpu_perf.SetCheck(Global::player().measure_cpu_usage_? 1:0);
 			UpdateInfo();
 			InitTimer();
 			return TRUE;
@@ -84,24 +84,24 @@ namespace psycle { namespace host {
 
 		void CInfoDlg::OnTimer(UINT_PTR nIDEvent) 
 		{
-			Song* _pSong = Global::_pSong;
+			Song& song = Global::song();
 			if(nIDEvent==ID_TIMER_INFODLG)
 			{
-				CSingleLock lock(&Global::_pSong->semaphore, FALSE);
+				CSingleLock lock(&Global::song().semaphore, FALSE);
 				if (!lock.Lock(50)) return;
 
-				unsigned long num_threads_running = Global::pPlayer->num_threads();
+				unsigned long num_threads_running = Global::player().num_threads();
 				char buffer[128];
 				
 				cpu_time_clock::duration total_machine_processing_time(0);
 				steady_clock::time_point const now = steady_clock::now();
 				float const real_time_duration = std::chrono::nanoseconds(now - last_update_time_).count();
 				float const multicore_real_time_duration = real_time_duration * num_threads_running;
-				bool cpu_usage = Global::pPlayer->measure_cpu_usage_;
+				bool cpu_usage = Global::player().measure_cpu_usage_;
 				int n=0;
 				for (int c=0; c<MAX_MACHINES; c++)
 				{
-					Machine *tmac = _pSong->_pMachine[c];
+					Machine *tmac = song._pMachine[c];
 					if(tmac)
 					{
 						// Input numbers
@@ -135,7 +135,7 @@ namespace psycle { namespace host {
 
 				{ // total cpu percent (counts everything, not just machine processing + routing)
 					//Accumulated processing time does not divide by "num_threads_running" since it is acummulated in the Player thread (single threaded)
-					float const percent = 100.0f * std::chrono::nanoseconds(_pSong->accumulated_processing_time()).count() / real_time_duration;
+					float const percent = 100.0f * std::chrono::nanoseconds(song.accumulated_processing_time()).count() / real_time_duration;
 					sprintf(buffer, "%.1f%%", percent);
 					m_cpuidlelabel.SetWindowText(buffer);
 				}
@@ -153,7 +153,7 @@ namespace psycle { namespace host {
 
 				{ // routing cpu percent
 					if(cpu_usage) {
-						float const percent = 100.0f * chrono::nanoseconds(_pSong->accumulated_routing_time()).count() / multicore_real_time_duration;
+						float const percent = 100.0f * chrono::nanoseconds(song.accumulated_routing_time()).count() / multicore_real_time_duration;
 						sprintf(buffer, "%.1f%%", percent);
 					}
 					else {
@@ -169,7 +169,7 @@ namespace psycle { namespace host {
 					m_processor_label.SetWindowText(buffer);
 				}
 
-				_pSong->reset_time_measurement();	
+				song.reset_time_measurement();	
 				// Memory status -------------------------------------------------
 				
 				MEMORYSTATUSEX lpBuffer;
@@ -200,10 +200,10 @@ namespace psycle { namespace host {
 			m_machlist.DeleteAllItems();
 			
 			int n=0;
-			Song* _pSong = Global::_pSong;
+			Song& song = Global::song();
 			for(int c=0; c<MAX_MACHINES; c++)
 			{
-				Machine *tmac = _pSong->_pMachine[c];
+				Machine *tmac = song._pMachine[c];
 				if(tmac)
 				{
 					char buffer[128];
@@ -238,7 +238,7 @@ namespace psycle { namespace host {
 			item_count_ = n;
 		}
 		void CInfoDlg::OnCpuPerf() {
-			Global::pPlayer->measure_cpu_usage_ = m_cpu_perf.GetCheck() != 0;
+			Global::player().measure_cpu_usage_ = m_cpu_perf.GetCheck() != 0;
 		}
 }}
 

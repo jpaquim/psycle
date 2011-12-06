@@ -43,13 +43,13 @@ namespace psycle { namespace host {
 			numParameters = iniPreset.GetNumPars();
 			dataSizeStruct = iniPreset.GetDataSize();
 
-			boost::filesystem::path thepath(Global::psycleconf().GetPresetsDir());
+			boost::filesystem::path thepath(PsycleGlobal::conf().GetPresetsDir());
 			if(!boost::filesystem::exists(thepath)) {
 				boost::filesystem::create_directory(thepath);
 			}
 			CString buffer;
 			buffer = _pMachine->GetDllName();
-			buffer = Global::psycleconf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
+			buffer = PsycleGlobal::conf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
 			presetFile= buffer;
@@ -132,7 +132,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetPluginDir().c_str();
+			ofn.lpstrInitialDir = Global::configuration().GetPluginDir().c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if(GetOpenFileName(&ofn) == TRUE)
@@ -173,7 +173,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::pConfig->GetPluginDir().c_str();
+			ofn.lpstrInitialDir = Global::configuration().GetPluginDir().c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 
 			// Display the Open dialog box. 

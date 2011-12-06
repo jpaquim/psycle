@@ -3,9 +3,9 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "AudioDriver.hpp"
-#include "Constants.hpp"
 #include <ks.h>
 #include <KsMedia.h>
+#include <psycle/helpers/math.hpp>
 namespace psycle
 {
 	namespace host
@@ -165,6 +165,25 @@ namespace psycle
 			for(int i = 0; i < c; ++i) {
 				*piout++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 65536.0f, float(max)));
 				*piout++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 65536.0f, float(max)));
+			}
+		}
+
+		void AudioDriver::Quantize24(float *pin, int *piout, int c)
+		{
+			// Don't really know why, but the -100 is what made the clipping work correctly.
+			int const max((1u << 23) - 1);
+			int const min(-max - 1);
+            unsigned char *cptr = (unsigned char *) piout;
+			for(int i = 0; i < c; ++i) {
+				int outval = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 256.0f, float(max)));
+                *cptr++ = (unsigned char) outval;
+                *cptr++ = (unsigned char) (outval >> 8);
+                *cptr++ = (unsigned char) (outval >> 16);
+
+				outval = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 256.0f, float(max)));
+                *cptr++ = (unsigned char) outval;
+                *cptr++ = (unsigned char) (outval >> 8);
+                *cptr++ = (unsigned char) (outval >> 16);
 			}
 		}
 

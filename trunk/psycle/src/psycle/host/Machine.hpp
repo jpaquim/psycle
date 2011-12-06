@@ -5,7 +5,7 @@
 #include "Global.hpp"
 #include <psycle/helpers/dsp.hpp>
 #include "FileIO.hpp"
-#include "PresetIO.hpp"
+#include "Preset.hpp"
 #include "cpu_time_clock.hpp"
 #include <universalis/exception.hpp>
 #include <universalis/compiler/location.hpp>
@@ -137,6 +137,17 @@ namespace psycle
 				///\see PSYCLE__HOST__CATCH_ALL
 				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+
+				//The following two defines are to avoid a warning when using them on methods that return a value.
+				#define PSYCLE__HOST__CATCH_ALL_RETURN(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable)) \
+					return 0;
+
+				///\see PSYCLE__HOST__CATCH_ALL
+				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS_RETURN(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable)) \
+					return 0;
+
 			}
 		}
 
@@ -275,16 +286,16 @@ namespace psycle
 			///\{
 				public:
 					// Set or replace output wire
-					virtual void InsertOutputWireIndex(Song* pSong,int wireIndex,int dstmac);
+					virtual void InsertOutputWireIndex(Song& pSong,int wireIndex,int dstmac);
 					// Set or replace input wire
-					virtual void InsertInputWireIndex(Song* pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
+					virtual void InsertInputWireIndex(Song& pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
 					virtual void ExchangeInputWires(int first,int second);
 					virtual void ExchangeOutputWires(int first,int second);
-					virtual void NotifyNewSendtoMixer(Song* pSong,int callerMac,int senderMac);
-					virtual void ClearMixerSendFlag(Song* pSong);
-					virtual void DeleteOutputWireIndex(Song* pSong,int wireIndex);
-					virtual void DeleteInputWireIndex(Song* pSong,int wireIndex);
-					virtual void DeleteWires(Song *pSong);
+					virtual void NotifyNewSendtoMixer(Song& pSong,int callerMac,int senderMac);
+					virtual void ClearMixerSendFlag(Song& pSong);
+					virtual void DeleteOutputWireIndex(Song& pSong,int wireIndex);
+					virtual void DeleteInputWireIndex(Song& pSong,int wireIndex);
+					virtual void DeleteWires(Song& pSong);
 					virtual int FindInputWire(int macIndex);
 					virtual int FindOutputWire(int macIndex);
 					virtual int GetFreeInputWire(int slottype=0);
@@ -301,8 +312,8 @@ namespace psycle
 					virtual void GetWireVolume(int wireIndex, float &value) { value = GetWireVolume(wireIndex); }
 					virtual float GetWireVolume(int wireIndex) { return _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
 					virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; }
-					virtual bool GetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float &value);
-					virtual bool SetDestWireVolume(Song* pSong,int srcIndex, int WireIndex,float value);
+					virtual bool GetDestWireVolume(Song& thesong,int srcIndex, int WireIndex,float &value);
+					virtual bool SetDestWireVolume(Song& thesong,int srcIndex, int WireIndex,float value);
 			///\}
 
 			///\name general information
