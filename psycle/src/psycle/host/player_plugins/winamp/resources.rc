@@ -26,25 +26,35 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 // Dialog
 //
 
-IDD_CONFIGDLG DIALOGEX 0, 0, 204, 143
+IDD_CONFIGDLG DIALOGEX 0, 0, 220, 215
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "in_psycle Configuration"
+CAPTION "Psycle plugin configuration"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Ok",IDOK,147,7,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,147,24,50,14
-    LTEXT           "Sampling Rate",IDC_STATIC,12,12,46,8
-    COMBOBOX        IDC_SRATE,64,10,73,89,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Autostop Machines",IDC_AUTOSTOP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,29,77,10
-    EDITTEXT        IDC_NATIVEPATH,23,67,137,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BWNATIVE,167,67,18,13
-    EDITTEXT        IDC_VSTPATH,24,95,137,13,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_BWVST,167,95,18,13
-    GROUPBOX        "Plugins",IDC_STATIC,12,44,181,89
-    LTEXT           "Native Directory",IDC_STATIC,24,55,53,8
-    LTEXT           "VST Directory",IDC_STATIC,24,84,44,8
-    PUSHBUTTON      "Regenerate Cache File",IDC_REGENERATE,24,114,80,14
-    LTEXT           "File is valid",IDC_CACHEVALID,111,115,75,11,0,WS_EX_STATICEDGE
+    DEFPUSHBUTTON   "Ok",IDOK,163,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,163,24,50,14
+    LTEXT           "Sampling Rate",IDC_STATIC,14,28,46,8
+    COMBOBOX        IDC_SRATE,95,25,54,89,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Autostop Machines",IDC_AUTOSTOP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,11,77,10
+    EDITTEXT        IDC_NATIVEPATH,44,103,137,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BWNATIVE,188,103,18,13
+    EDITTEXT        IDC_VSTPATH,43,140,137,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_BWVST,187,140,18,13
+    GROUPBOX        "Vst Plugins Directory",IDC_STATIC,7,127,206,61
+    LTEXT           "32 bit",IDC_STATIC,19,142,19,8
+    PUSHBUTTON      "Regenerate Cache File",IDC_REGENERATE,20,194,92,14
+    LTEXT           "Text",IDC_CACHEVALID,131,195,75,11,0,WS_EX_STATICEDGE
+    EDITTEXT        IDC_VSTPATH64,43,157,137,13,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "...",IDC_BWVST64,187,157,18,13,WS_DISABLED
+    LTEXT           "64 bit",IDC_STATIC,19,159,19,8
+    GROUPBOX        "Native Plugins Directory",IDC_STATIC,8,89,205,33
+    CONTROL         "Enable 32<->64 bit bridging",IDC_CKBRIDGING,"Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,44,173,136,10
+    LTEXT           "Audio Threads",IDC_STATIC,14,60,47,8
+    EDITTEXT        IDC_NUMBER_THREADS,95,58,55,12,ES_AUTOHSCROLL
+    LTEXT           "Use the value 0 to autodetect your cpu threads",IDC_STATIC,14,75,198,8
+    EDITTEXT        IDC_RUNNING_THREADS,164,58,49,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Bit depth",IDC_STATIC,14,44,30,8
+    COMBOBOX        IDC_BITDEPTH,96,41,54,89,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_INFODLG DIALOGEX 0, 0, 373, 260
@@ -78,9 +88,9 @@ BEGIN
     IDD_CONFIGDLG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 197
+        RIGHTMARGIN, 213
         TOPMARGIN, 7
-        BOTTOMMARGIN, 136
+        BOTTOMMARGIN, 208
     END
 
     IDD_INFODLG, DIALOG
@@ -118,6 +128,24 @@ BEGIN
     IDC_SRATE, 0x403, 6, 0
 0x3838, 0x3032, 0x0030, 
     IDC_SRATE, 0x403, 6, 0
+0x3639, 0x3030, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3131, 0x3230, 0x0035, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3231, 0x3030, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3232, 0x3530, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3432, 0x3030, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3434, 0x3031, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3834, 0x3030, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3436, 0x3030, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
+0x3838, 0x3032, 0x0030, 
+    IDC_BITDEPTH, 0x403, 6, 0
 0x3639, 0x3030, 0x0030, 
     0
 END
@@ -163,8 +191,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,2,0
- PRODUCTVERSION 1,8,8,0
+ FILEVERSION 1,10,0,0
+ PRODUCTVERSION 1,10,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -181,12 +209,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Psycledelics"
             VALUE "FileDescription", "Psycle Winamp Plugin"
-            VALUE "FileVersion", "1, 3, 2, 0"
+            VALUE "FileVersion", "1, 10, 0, 0"
             VALUE "InternalName", "in_psycle.dll"
-            VALUE "LegalCopyright", "(c) Psycledelics 2001-2010"
+            VALUE "LegalCopyright", "(c) Psycledelics 2001-2011"
             VALUE "OriginalFilename", "in_psycle.dll"
             VALUE "ProductName", "Psycle Playback Engine"
-            VALUE "ProductVersion", "1, 8, 8, 0"
+            VALUE "ProductVersion", "1, 10, 1, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -196,6 +224,52 @@ BEGIN
 END
 
 #endif    // Neutral (Default) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Catalan resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
+#ifdef _WIN32
+LANGUAGE LANG_CATALAN, SUBLANG_DEFAULT
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUT1              "This Plugin plays .psy files using Winamp 2.x/5.x and compatible players\nBased on Psycle Engine"
+    IDS_UNINSTALL_CONFIRM_REMOVE_SETTINGS 
+                            "Do you want to remove the configuration settings also?"
+    IDS_BROWSE_SELECTDIR    "Select Directory"
+    IDS_ABOUT_TITLE         "Psycle Winamp Plugin"
+    IDS_CONFIG_CACHE_MISSING "Not Found. Regenerate."
+    IDS_CONFIG_CACHE_EXISTS "File Exists."
+END
+
+STRINGTABLE 
+BEGIN
+    HASH                    "{131996C0-65E2-4721-A5E7-0C839F7EC472}"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_INFO_FILESIZE       "File size:"
+    IDS_INFO_BPM            "Beats per min.:"
+    IDS_INFO_LPB            "Lines per beat:"
+    IDS_INFO_SONG_LENGTH    "Song length:"
+    IDS_INFO_PATTERNS_USED  "Patterns used:"
+    IDS_INFO_MACHINES_USED  "Machines used:"
+    IDS_ABOUT2              "Coded by Psycledelics on"
+    IDS_ABOUT3              "Some of the code is based on out_wave and in_mpc plugins.\nThanks to their authors."
+END
+
+#endif    // Catalan resources
 /////////////////////////////////////////////////////////////////////////////
 
 
