@@ -51,8 +51,12 @@ namespace psycle { namespace helpers { namespace math {
 #if DIVERSALIS__STDLIB__MATH >= 199901
 	using std::asinh;
 #else
-	double inline asinh(double x) throw() UNIVERSALIS__COMPILER__CONST {
-		return std::log(x + std::sqrt(1.0 + x * x));
+	template<typename Real> UNIVERSALIS__COMPILER__CONST
+	Real inline asinh(Real x) throw() {
+		return
+			x > 0 ?
+			+std::log(+x + std::sqrt(Real(1) + x * x)) :
+			-std::log(-x + std::sqrt(Real(1) + x * x));
 	}
 #endif
 
