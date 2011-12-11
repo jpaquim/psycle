@@ -24,13 +24,13 @@ CSIDFilter::CSIDFilter()
 {
 	m_f = m_fb = 0;
 	reset();
-};
+}
 
 
 void CSIDFilter::reset()
 {
 	m_low=m_high=m_band=0;
-};
+}
 
 void CSIDFilter::setAlgorithm(eAlgorithm a_algo)
 {

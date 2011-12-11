@@ -513,6 +513,6 @@ void Plugin::SaveSpecificChunk(RiffFile* pFile) const {
 		pFile->WriteArray(pData, size2); // Number of parameters
 		delete[] pData;
 	}
-};
+}
 
 }}

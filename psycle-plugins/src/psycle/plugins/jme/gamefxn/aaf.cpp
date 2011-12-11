@@ -19,8 +19,12 @@
 */
 
 #include "aaf.h"
-#include <cmath>
-double const pi = /* std::acos(-1) */ 3.1415926535897932384626433832795028841971693993751/*...*/;
+#include <psycle/helpers/math.hpp>
+#include <stdexcept>
+#include <sstream>
+
+using psycle::helpers::math::pi;
+using psycle::helpers::math::asinh;
 
 std::complex<double> blt(std::complex<double>& pz)
 {
@@ -30,10 +34,6 @@ std::complex<double> blt(std::complex<double>& pz)
 std::complex<double> expj(double theta)
 {
 	return std::complex<double>(cos(theta), sin(theta));
-}
-double asinh(double x)
-{
-    return log(x + sqrt(1.0 + x*x));
 }
 
 // evaluate polynomial in z, substituting for z
@@ -62,18 +62,18 @@ void multin(std::complex<double>& w, int npz, std::complex<double> coeffs[])
 // compute product of poles or zeros as a polynomial of z
 static void expand(std::complex<double> pz[], int npz, std::complex<double> coeffs[])
 {
-#define EPS	    1e-10
+	double const epsilon = 1e-10;
 	coeffs[0] = 1.0;
-	for (int i=0; i < npz; i++) coeffs[i+1] = 0.0;
-	for (int i=0; i < npz; i++) multin(pz[i], npz, coeffs);
+	for(int i = 0; i < npz; ++i) coeffs[i + 1] = 0.0;
+	for(int i = 0; i < npz; ++i) multin(pz[i], npz, coeffs);
 	// check computed coeffs of z^k are all real
-	for (int i=0; i < npz+1; i++)
-	{ if (fabs(coeffs[i].imag()) > EPS)
-		{ fprintf(stderr, "mkfilter: coeff of z^%d is not real; poles/zeros are not std::complex conjugates\n", i);
-			throw((int)1);
+	for(int i = 0; i < npz + 1; ++i) {
+		if(std::abs(coeffs[i].imag()) > epsilon) {
+			std::ostringstream s;
+			s << "coeff of z^" << i << " is not real; poles/zeros are not complex conjugates.";
+			throw std::runtime_error(s.str());
 		}
 	}
-#undef EPS
 }
 
 // Chebyshev Lowpass, 3rd order

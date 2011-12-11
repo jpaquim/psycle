@@ -616,7 +616,7 @@ void CoreSong::patternTweakSlide(int /*machine*/, int /*command*/, int /*value*/
 
 Song::Song() {
 	clearMyData();
-};
+}
 
 void Song::clear() {
 	CoreSong::clear();
