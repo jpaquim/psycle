@@ -47,6 +47,15 @@ remainder/modulo:
 
 namespace psycle { namespace helpers { namespace math {
 
+/// asinh
+#if DIVERSALIS__STDLIB__MATH >= 199901
+	using std::asinh;
+#else
+	double asinh(double x) throw() UNIVERSALIS__COMPILER__CONST {
+		return std::log(x + std::sqrt(1.0 + x * x));
+	}
+#endif
+
 /// compares two floating point numbers for rough equality (difference less than epsilon by default).
 template<typename Real> UNIVERSALIS__COMPILER__CONST
 bool inline roughly_equals(Real a, Real b, Real tolerance = std::numeric_limits<Real>::epsilon()) {
