@@ -10,7 +10,7 @@ module_begin(crapculator)
 
 	using ops::number;
 	number add_impl(number, number);
-	number inline add(number a, number b) { return private_::add_impl(a, b); }
+	number inline add(number a, number b) { return add_impl(a, b); }
 
 	module_export(number)
 	module_export(add)
