@@ -176,14 +176,14 @@ namespace psycle
             unsigned char *cptr = (unsigned char *) piout;
 			for(int i = 0; i < c; ++i) {
 				int outval = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 256.0f, float(max)));
-                *cptr++ = (unsigned char) outval;
-                *cptr++ = (unsigned char) (outval >> 8);
-                *cptr++ = (unsigned char) (outval >> 16);
+                *cptr++ = (unsigned char) (outval & 0xFF);
+                *cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
+                *cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 
 				outval = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 256.0f, float(max)));
-                *cptr++ = (unsigned char) outval;
-                *cptr++ = (unsigned char) (outval >> 8);
-                *cptr++ = (unsigned char) (outval >> 16);
+                *cptr++ = (unsigned char) (outval & 0xFF);
+                *cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
+                *cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 			}
 		}
 

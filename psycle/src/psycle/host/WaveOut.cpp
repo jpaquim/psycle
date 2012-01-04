@@ -348,7 +348,7 @@ namespace psycle
 		bool WaveOut::CreateCapturePort(PortCapt &port)
 		{
 			HRESULT hr;
-			//not try to open a port twice
+			//avoid opening a port twice
 			if (port._handle) return true;
 
 			WAVEFORMATPCMEX format;

@@ -70,7 +70,7 @@ BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 bool BrowseForFolder(HWND m_hWnd, std::string& rpath);
 
-int CalcSongLength(psycle::host::Song& pSong);
+int CalcOrSeek(psycle::host::Song& pSong, float seektime = -1, bool allowLoop=false);
 
 extern In_Module mod;
 
@@ -228,7 +228,7 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 		{
 			if (title) { sprintf(title,"%s - %s\0",global_.song().author.c_str(),global_.song().name.c_str()); }
 			
-			if (length_in_ms) { *length_in_ms = CalcSongLength(global_.song()); }
+			if (length_in_ms) { *length_in_ms = CalcOrSeek(global_.song()); }
 		}
 	}
 	else
@@ -254,7 +254,7 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 				if (title) { sprintf(title,"%s - %s\0",pSong->author.c_str(),pSong->name.c_str()); }
 				if (length_in_ms)
 				{
-					*length_in_ms = CalcSongLength(*pSong);
+					*length_in_ms = CalcOrSeek(*pSong);
 				}
 				songfile.Close();
 				delete pSong;
@@ -408,27 +408,11 @@ void stop()
 }
 
 
-int getlength() { return CalcSongLength(global_.song()); }
+int getlength() { return CalcOrSeek(global_.song()); }
 int getoutputtime() { return mod.outMod->GetOutputTime(); }
 void setoutputtime(int time_in_ms)
 {
-	psycle::host::Song& pSong = global_.song();
-	int time_left = time_in_ms;
-	int patline=-1;
-	int i;
-	for (i=0;i<pSong.playLength;i++)
-	{
-		int pattern = pSong.playOrder[i];
-		int tmp;
-		if ((tmp = pSong.patternLines[pattern] * 60000/(pSong.BeatsPerMin() * pSong.LinesPerBeat())) >= time_left )
-		{
-			patline = time_left * (pSong.BeatsPerMin() * pSong.LinesPerBeat())/60000;
-			break;
-		}
-		else time_left-=tmp;
-	}
-	global_.player().Start(i,patline);
-
+	CalcOrSeek(global_.song(),time_in_ms/1000.f);
 	mod.outMod->Flush(time_in_ms);
 }
 
@@ -524,23 +508,30 @@ extern "C" {
 // Internal methods
 //
 
-int CalcSongLength(psycle::host::Song& pSong)
+int CalcOrSeek(psycle::host::Song& song, float seektime,bool allowLoop)
 {
-	// take ff and fe commands into account
-	
 	float songLength = 0;
-	int bpm = pSong.BeatsPerMin();
-	int tpb = pSong.LinesPerBeat();
-	for (int i=0; i <pSong.playLength; i++)
+	int bpm = song.BeatsPerMin();
+	int tpb = song.LinesPerBeat();
+	float lineSeconds = 60.f/float(bpm*tpb);
+	int _playPosition=0;
+	while(_playPosition <song.playLength)
 	{
-		int pattern = pSong.playOrder[i];
-		// this should parse each line for ffxx commands if you want it to be truly accurate
-		unsigned char* const plineOffset = pSong._ppattern(pattern);
-		for (int l = 0; l < pSong.patternLines[pattern]*psycle::host::MULTIPLY; l+=psycle::host::MULTIPLY)
+		int pattern = song.playOrder[_playPosition];
+		unsigned char* const plineOffset = song._ppattern(pattern);
+		int _loop_count=0;
+		int _loop_line=0;
+		int _patternjump = -1;
+		int _lineCounter=0;
+		int l = 0;
+		while( _lineCounter < song.patternLines[pattern])
 		{
-			for (int t = 0; t < pSong.SONGTRACKS*5; t+=5)
+			int _linejump = -1;
+			int _SPRChanged = false;
+			for(int track=0; track<song.SONGTRACKS; track++)
 			{
-				psycle::host::PatternEntry* pEntry = (psycle::host::PatternEntry*)(plineOffset+l+t);
+				psycle::host::PatternEntry* pEntry = (psycle::host::PatternEntry*)(plineOffset+l+track);
+
 				if(pEntry->_note < psycle::host::notecommands::tweak || pEntry->_note == psycle::host::notecommands::empty) // If This isn't a tweak (twk/tws/mcm) then do
 				{
 					switch(pEntry->_cmd)
@@ -548,26 +539,120 @@ int CalcSongLength(psycle::host::Song& pSong)
 					case psycle::host::PatternCmd::SET_TEMPO:
 						if(pEntry->_parameter != 0)
 						{
-							bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+							bpm=pEntry->_parameter;
 						}
 						break;
 					case psycle::host::PatternCmd::EXTENDED:
-						if((pEntry->_parameter != 0) && ( (pEntry->_parameter&0xE0) == 0 )) // range from 0 to 1F for LinesPerBeat.
+						if(pEntry->_parameter != 0)
 						{
-							tpb=pEntry->_parameter;
+							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
+							{
+								tpb=pEntry->_parameter;
+							}
+							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::PATTERN_DELAY )
+							{
+								lineSeconds*=1+(pEntry->_parameter&0x0F);
+								_SPRChanged=true;
+							}
+							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::FINE_PATTERN_DELAY)
+							{
+								lineSeconds*=1.0f+((pEntry->_parameter&0x0F)*tpb/24.0f);
+								_SPRChanged=true;
+							}
+							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::PATTERN_LOOP)
+							{
+								int value = pEntry->_parameter&0x0F;
+								if (value == 0 )
+								{
+									_loop_line = _lineCounter;
+								} else if ( _loop_count == 0 ) {
+									_loop_count = value;
+									_linejump = _loop_line;
+								} else {
+									if (--_loop_count) _linejump = _loop_line;
+									else _loop_line = _lineCounter+1; //This prevents infinite loop in specific cases.
+								}
+							}
 						}
+						break;
+					case psycle::host::PatternCmd::JUMP_TO_ORDER:
+						if ( pEntry->_parameter < song.playLength ){
+							_patternjump=pEntry->_parameter;
+							_linejump=0;
+						}
+						break;
+					case psycle::host::PatternCmd::BREAK_TO_LINE:
+						if (_patternjump ==-1) 
+						{
+							_patternjump=(_playPosition+1>=song.playLength)?0:_playPosition+1;
+						}
+						//No need to check limits. That is done by the loop.
+						_linejump= pEntry->_parameter;
 						break;
 					}
 				}
 			}
-			songLength += (60.0f/(bpm * tpb));
+			songLength += lineSeconds;
+			if ( seektime > -1 && seektime <= songLength) {
+				global_.player().Start(_playPosition,_lineCounter);
+				return songLength;
+			}
+			if ( _SPRChanged ) { lineSeconds = 60.f/float(bpm*tpb); _SPRChanged = false; }
+			if ( _linejump!=-1 ) {
+				_lineCounter=_linejump;
+				l=_lineCounter*psycle::host::MULTIPLY;
+			}
+			else {
+				_lineCounter++;
+				l+=psycle::host::MULTIPLY;
+			}
+			if ( _patternjump!=-1  && (_patternjump > _playPosition || allowLoop)) {
+				_playPosition= _patternjump;
+				break;
+			}
+		}
+		if ( _patternjump==-1 ) {
+			_playPosition++;
 		}
 	}
-	
 	return lround<int>(songLength*1000.0f);
 }
 
+void SaveDialogSettings(HWND hwndDlg)
+{
+	int c;
+	char tmptext[_MAX_PATH];
+	if (global_.player()._playing ) stop();
+	//SRATE
+	c = SendDlgItemMessage(hwndDlg,IDC_SRATE,CB_GETCURSEL,0,0);
+	if ( (c % 2) == 0) global_.conf().SetSamplesPerSec((int)(11025*powf(2.0f,(float)(c/2))));
+	else global_.conf().SetSamplesPerSec((int)(12000*powf(2.0f,(float)(c/2))));
+	//BITDEPTH
+	c = SendDlgItemMessage(hwndDlg,IDC_BITDEPTH,CB_GETCURSEL,0,0);
+	c = 16 + (8*c);
+	global_.conf().audioDriver().settings().setValidBitDepth(c);
+	if (c==16) {
+		global_.conf().audioDriver().settings().setDither(true);
+	}
+	else {
+		global_.conf().audioDriver().settings().setDither(false);
+	}
 
+	c = SendDlgItemMessage(hwndDlg,IDC_AUTOSTOP,BM_GETCHECK,0,0);
+	global_.conf().UseAutoStopMachines(c>0?true:false);
+
+	GetDlgItemText(hwndDlg,IDC_NUMBER_THREADS,tmptext,_MAX_PATH);
+	global_.conf().SetNumThreads(std::atoi(tmptext));
+	GetDlgItemText(hwndDlg,IDC_NATIVEPATH,tmptext,_MAX_PATH);
+	global_.conf().SetPluginDir(tmptext);
+	GetDlgItemText(hwndDlg,IDC_VSTPATH,tmptext,_MAX_PATH);
+	global_.conf().SetVst32Dir(tmptext);
+	GetDlgItemText(hwndDlg,IDC_VSTPATH64,tmptext,_MAX_PATH);
+	global_.conf().SetVst64Dir(tmptext);
+	global_.conf().UseJBridge(SendDlgItemMessage(hwndDlg,IDC_CKBRIDGING,BM_GETCHECK,0,0) == BST_CHECKED);
+	global_.conf().SaveWinampSettings(mod);
+	global_.conf().RefreshSettings();
+}
 
 BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -667,45 +752,17 @@ BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_COMMAND:
 	{
-		int c;
 		switch(wParam)
 		{
 		case IDOK:
-			if (global_.player()._playing ) stop();
-			//SRATE
-			c = SendDlgItemMessage(hwndDlg,IDC_SRATE,CB_GETCURSEL,0,0);
-			if ( (c % 2) == 0) global_.conf().SetSamplesPerSec((int)(11025*powf(2.0f,(float)(c/2))));
-			else global_.conf().SetSamplesPerSec((int)(12000*powf(2.0f,(float)(c/2))));
-			//BITDEPTH
-			c = SendDlgItemMessage(hwndDlg,IDC_BITDEPTH,CB_GETCURSEL,0,0);
-			c = 16 + (8*c);
-			global_.conf().audioDriver().settings().setValidBitDepth(c);
-			if (c==16) {
-				global_.conf().audioDriver().settings().setDither(true);
-			}
-			else {
-				global_.conf().audioDriver().settings().setDither(false);
-			}
-
-			c = SendDlgItemMessage(hwndDlg,IDC_AUTOSTOP,BM_GETCHECK,0,0);
-			global_.conf().UseAutoStopMachines(c>0?true:false);
-
-			GetDlgItemText(hwndDlg,IDC_NUMBER_THREADS,tmptext,_MAX_PATH);
-			global_.conf().SetNumThreads(std::atoi(tmptext));
-			GetDlgItemText(hwndDlg,IDC_NATIVEPATH,tmptext,_MAX_PATH);
-			global_.conf().SetPluginDir(tmptext);
-			GetDlgItemText(hwndDlg,IDC_VSTPATH,tmptext,_MAX_PATH);
-			global_.conf().SetVst32Dir(tmptext);
-			GetDlgItemText(hwndDlg,IDC_VSTPATH64,tmptext,_MAX_PATH);
-			global_.conf().SetVst64Dir(tmptext);
-			global_.conf().SaveWinampSettings(mod);
-			global_.conf().RefreshSettings();
+			SaveDialogSettings(hwndDlg);
 			EndDialog(hwndDlg,1);
 			break;
 		case IDCANCEL:
 			EndDialog(hwndDlg,0);
 			break;
 		case IDC_REGENERATE:
+			SaveDialogSettings(hwndDlg);
 			global_.machineload().ReScan(true);
 			if(usewasabi)
 			{
@@ -729,40 +786,39 @@ BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDC_BWNATIVE:
 			{
-				std::string plugdir = global_.conf().GetPluginDir();
-				if (BrowseForFolder(hwndDlg,plugdir))
+				GetDlgItemText(hwndDlg,IDC_NATIVEPATH,tmptext,_MAX_PATH);
+				std::string plugin = tmptext;
+				if (BrowseForFolder(hwndDlg,plugin))
 				{
-					global_.conf().SetPluginDir(plugdir);
-					SetDlgItemText(hwndDlg,IDC_NATIVEPATH,global_.conf().GetPluginDir().c_str());
+					SetDlgItemText(hwndDlg,IDC_NATIVEPATH,plugin.c_str());
 				}
 			}
 			break;
 		case IDC_BWVST:
 			{
-				std::string plugdir = global_.conf().GetVst32Dir();
-				if (BrowseForFolder(hwndDlg,plugdir))
+				GetDlgItemText(hwndDlg,IDC_VSTPATH,tmptext,_MAX_PATH);
+				std::string plugin = tmptext;
+				if (BrowseForFolder(hwndDlg,plugin))
 				{
-					global_.conf().SetVst32Dir(plugdir);
-					SetDlgItemText(hwndDlg,IDC_VSTPATH,global_.conf().GetVst32Dir().c_str());
+					SetDlgItemText(hwndDlg,IDC_VSTPATH,plugin.c_str());
 				}
 			}
 			break;
 		case IDC_BWVST64:
 			{
-				std::string plugdir = global_.conf().GetVst64Dir();
-				if (BrowseForFolder(hwndDlg,plugdir))
+				GetDlgItemText(hwndDlg,IDC_VSTPATH64,tmptext,_MAX_PATH);
+				std::string plugin = tmptext;
+				if (BrowseForFolder(hwndDlg,plugin))
 				{
-					global_.conf().SetVst64Dir(plugdir);
-					SetDlgItemText(hwndDlg,IDC_VSTPATH64,global_.conf().GetVst64Dir().c_str());
+					SetDlgItemText(hwndDlg,IDC_VSTPATH64,plugin.c_str());
 				}
 			}
 			break;
 		case IDC_CKBRIDGING:
 			{
 				LRESULT result = SendDlgItemMessage(hwndDlg,IDC_CKBRIDGING,BM_GETCHECK,0,0);
-				global_.conf().UseJBridge(result == BST_CHECKED);
-				EnableWindow(GetDlgItem(hwndDlg,IDC_VSTPATH64),global_.conf().UsesJBridge()?TRUE:FALSE);
-				EnableWindow(GetDlgItem(hwndDlg,IDC_BWVST64),global_.conf().UsesJBridge()?TRUE:FALSE);
+				EnableWindow(GetDlgItem(hwndDlg,IDC_VSTPATH64),result==BST_CHECKED?TRUE:FALSE);
+				EnableWindow(GetDlgItem(hwndDlg,IDC_BWVST64),result==BST_CHECKED?TRUE:FALSE);
 			}
 			break;
 		}
@@ -828,7 +884,7 @@ BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		
-		i=CalcSongLength(*pSong)/1000;
+		i=CalcOrSeek(*pSong)/1000;
 
 		if(usewasabi) 
 		{

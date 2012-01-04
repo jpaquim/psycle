@@ -53,9 +53,13 @@ namespace psycle { namespace host {
 				lstrcpyn(ini_path,(char*)SendMessage(inMod.hMainWindow,WM_WA_IPC,0,IPC_GETINIDIRECTORY),sizeof(ini_path));
 				config_file = ini_path;
 				config_file = config_file + "\\Plugins\\in_psycle.ini";
+				std::string cachepath = ini_path;
+				cachepath = cachepath + "\\Plugins\\";
+				SetCacheDir(cachepath);
 		    }
 		    else{
 				config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").native_file_string();
+				SetCacheDir(appPath());
 			}
 			if(!store->OpenLocation(config_file))
 			{

@@ -351,7 +351,7 @@ Exit:
 
 		HRESULT WasapiDriver::CreateCapturePort(IMMDeviceEnumerator* pEnumerator, PaWasapiSubStream &port)
 		{
-			//not try to open a port twice
+			//avoid opening a port twice
 			if(port.client != NULL) return true;
 			port._machinepos=0;
 			HRESULT hr;

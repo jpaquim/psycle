@@ -633,7 +633,7 @@ void Player::thread_function(std::size_t thread_number) {
 				DWORD taskIndex = 0;
 				hTask = Global::pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
 			}
-		} catch(operation_not_permitted e) {
+		} catch(const operation_not_permitted& e) {
 			if(loggers::warning()) {
 				std::ostringstream s; s << "no permission to set thread scheduling policy and priority to realtime: " << e.what();
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -648,7 +648,7 @@ void Player::thread_function(std::size_t thread_number) {
 				while(!af(cpu_index) || rotated++ != thread_number) cpu_index = (cpu_index + 1) % af.size();
 				thread::affinity_mask_type new_af; new_af(cpu_index, true); t.affinity_mask(new_af);
 			}
-		} catch(operation_not_permitted e) {
+		} catch(const operation_not_permitted& e) {
 			if(loggers::warning()) {
 				std::ostringstream s; s << "no permission to set thread cpu affinity: " << e.what();
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
@@ -657,15 +657,11 @@ void Player::thread_function(std::size_t thread_number) {
 	}
 
 	try {
-		try {
-			process_loop(thread_number);
-		} catch(...) {
-			loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
-			throw;
-		}
-	} catch(std::exception const & e) {
+		process_loop(thread_number);
+	} catch(const std::exception & e) {
 		if(loggers::exception()) {
 			std::ostringstream s;
+			s << "caught exception in scheduler thread";
 			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
@@ -673,6 +669,7 @@ void Player::thread_function(std::size_t thread_number) {
 	} catch(...) {
 		if(loggers::exception()) {
 			std::ostringstream s;
+			s << "caught exception in scheduler thread";
 			s << "exception: " << universalis::compiler::exceptions::ellipsis_desc();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
@@ -795,7 +792,20 @@ void Player::stop_threads() {
 			Player* pThis = (Player*)context;
 			//Avoid possible deadlocks
 			if(crit.Lock(100)) {
-				pThis->Work(numSamples);
+				try {
+					pThis->Work(numSamples);
+				}
+				catch(const std::exception& e) {
+						loggers::exception()(e.what());
+#ifndef NDEBUG
+					throw e;
+#endif
+				}
+				catch(...) {
+#ifndef NDEBUG
+					throw;
+#endif
+				}
 			}
 			else {
 				dsp::Clear(pThis->_pBuffer,numSamples*2);
@@ -817,7 +827,7 @@ void Player::stop_threads() {
 				// Song play
 				if((_samplesRemaining <=0))
 				{
-					//this double if is meant to prevent new line to play if song looping is disabled.
+					//this double "if" is meant to prevent new line to play if song looping is disabled.
 					if(_playing) 
 					{
 						// Advance position in the sequencer

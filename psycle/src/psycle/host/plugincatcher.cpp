@@ -74,14 +74,15 @@ namespace psycle
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{
-				if ((name == _pPlugsInfo[i]->dllname) &&
-					(shellIdx == 0 || shellIdx == _pPlugsInfo[i]->identifier))
+				PluginInfo * pInfo = _pPlugsInfo[i];
+				if ((name == pInfo->dllname) &&
+					(shellIdx == 0 || shellIdx == pInfo->identifier))
 				{
 					// bad plugins always have allow = false
-					if(_pPlugsInfo[i]->allow) return true;
+					if(pInfo->allow) return true;
 					std::ostringstream s; s
 						<< "Plugin " << name << " is disabled because:" << std::endl
-						<< _pPlugsInfo[i]->error << std::endl
+						<< pInfo->error << std::endl
 						<< "Try to load anyway?";
 					return ::MessageBox(0,s.str().c_str(), "Plugin Warning!", MB_YESNO | MB_ICONWARNING) == IDYES;
 				}
@@ -308,16 +309,17 @@ namespace psycle
 			// Verify if the plugin is already in the cache.
 			for(int i(0) ; i < _numPlugins; ++i)
 			{
+				PluginInfo* pInfo =_pPlugsInfo[i];
 				if
 					(
-					_pPlugsInfo[i]->FileTime.dwHighDateTime == time.dwHighDateTime &&
-					_pPlugsInfo[i]->FileTime.dwLowDateTime == time.dwLowDateTime
+					pInfo->FileTime.dwHighDateTime == time.dwHighDateTime &&
+					pInfo->FileTime.dwLowDateTime == time.dwLowDateTime
 					)
 				{
-					if(_pPlugsInfo[i]->dllname == fileName)
+					if(pInfo->dllname == fileName)
 					{
 						exists = true;
-						const std::string error(_pPlugsInfo[i]->error);
+						const std::string error(pInfo->error);
 						std::stringstream s;
 						if(error.empty())
 							s << "found in cache.";
@@ -340,12 +342,12 @@ namespace psycle
 					out << "new plugin added to cache ; ";
 					out.flush();
 					loggers::information()(fileName + "\nnew plugin added to cache.");
-					_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-					_pPlugsInfo[currentPlugsCount]->dllname = fileName;
-					_pPlugsInfo[currentPlugsCount]->FileTime = time;
+					PluginInfo* pInfo = _pPlugsInfo[currentPlugsCount]= new PluginInfo();
+					pInfo->dllname = fileName;
+					pInfo->FileTime = time;
 					if(type == MACH_PLUGIN)
 					{
-						_pPlugsInfo[currentPlugsCount]->type = MACH_PLUGIN;
+						pInfo->type = MACH_PLUGIN;
 						Plugin plug(0);
 						try
 						{
@@ -356,48 +358,48 @@ namespace psycle
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-							_pPlugsInfo[currentPlugsCount]->error = s.str();
+							pInfo->error = s.str();
 						}
 						catch(...)
 						{
 							std::ostringstream s; s
 								<< "Type of exception is unknown, cannot display any further information." << std::endl;
-							_pPlugsInfo[currentPlugsCount]->error = s.str();
+							pInfo->error = s.str();
 						}
-						if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+						if(!pInfo->error.empty())
 						{
 							out << "### ERRONEOUS ###" << std::endl;
 							out.flush();
-							out << _pPlugsInfo[currentPlugsCount]->error;
+							out << pInfo->error;
 							out.flush();
 							std::stringstream title; title
 								<< "Machine crashed: " << fileName;
-							loggers::exception()(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
-							_pPlugsInfo[currentPlugsCount]->allow = false;
-							_pPlugsInfo[currentPlugsCount]->name = "???";
-							_pPlugsInfo[currentPlugsCount]->identifier = 0;
-							_pPlugsInfo[currentPlugsCount]->vendor = "???";
-							_pPlugsInfo[currentPlugsCount]->desc = "???";
-							_pPlugsInfo[currentPlugsCount]->version = "???";
-							_pPlugsInfo[currentPlugsCount]->APIversion = 0;
+							loggers::exception()(title.str() + '\n' + pInfo->error);
+							pInfo->allow = false;
+							pInfo->name = "???";
+							pInfo->identifier = 0;
+							pInfo->vendor = "???";
+							pInfo->desc = "???";
+							pInfo->version = "???";
+							pInfo->APIversion = 0;
 							++currentBadPlugsCount;
 						}
 						else
 						{
-							_pPlugsInfo[currentPlugsCount]->allow = true;
-							_pPlugsInfo[currentPlugsCount]->name = plug.GetName();
-							_pPlugsInfo[currentPlugsCount]->identifier = 0;
-							_pPlugsInfo[currentPlugsCount]->vendor = plug.GetAuthor();
-							if(plug.IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-							else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+							pInfo->allow = true;
+							pInfo->name = plug.GetName();
+							pInfo->identifier = 0;
+							pInfo->vendor = plug.GetAuthor();
+							if(plug.IsSynth()) pInfo->mode = MACHMODE_GENERATOR;
+							else pInfo->mode = MACHMODE_FX;
 							{
 								std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
-								_pPlugsInfo[currentPlugsCount]->desc = s.str();
+								pInfo->desc = s.str();
 							}
-								_pPlugsInfo[currentPlugsCount]->APIversion = plug.GetInfo()->APIVersion;
+								pInfo->APIversion = plug.GetInfo()->APIVersion;
 							{
 									std::ostringstream s; s << std::setfill('0') << std::setw(3) << std::hex << plug.GetInfo()->PlugVersion;
-								_pPlugsInfo[currentPlugsCount]->version = s.str();
+								pInfo->version = s.str();
 							}
 							out << plug.GetName() << " - successfully instanciated";
 							out.flush();
@@ -446,7 +448,7 @@ namespace psycle
 					}
 					else if(type == MACH_VST)
 					{
-						_pPlugsInfo[currentPlugsCount]->type = MACH_VST;
+						pInfo->type = MACH_VST;
 						vst::plugin *vstPlug=0;
 						try
 						{
@@ -456,29 +458,29 @@ namespace psycle
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-							_pPlugsInfo[currentPlugsCount]->error = s.str();
+							pInfo->error = s.str();
 						}
 						catch(...)
 						{
 							std::ostringstream s; s << "Type of exception is unknown, cannot display any further information." << std::endl;
-							_pPlugsInfo[currentPlugsCount]->error = s.str();
+							pInfo->error = s.str();
 						}
-						if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+						if(!pInfo->error.empty())
 						{
 							out << "### ERRONEOUS ###" << std::endl;
 							out.flush();
-							out << _pPlugsInfo[currentPlugsCount]->error;
+							out << pInfo->error;
 							out.flush();
 							std::stringstream title; title
 								<< "Machine crashed: " << fileName;
-							loggers::exception()(title.str() + '\n' + _pPlugsInfo[currentPlugsCount]->error);
-							_pPlugsInfo[currentPlugsCount]->allow = false;
-							_pPlugsInfo[currentPlugsCount]->identifier = 0;
-							_pPlugsInfo[currentPlugsCount]->name = "???";
-							_pPlugsInfo[currentPlugsCount]->vendor = "???";
-							_pPlugsInfo[currentPlugsCount]->desc = "???";
-							_pPlugsInfo[currentPlugsCount]->version = "???";
-							_pPlugsInfo[currentPlugsCount]->APIversion = 0;
+							loggers::exception()(title.str() + '\n' + pInfo->error);
+							pInfo->allow = false;
+							pInfo->identifier = 0;
+							pInfo->name = "???";
+							pInfo->vendor = "???";
+							pInfo->desc = "???";
+							pInfo->version = "???";
+							pInfo->APIversion = 0;
 							++currentBadPlugsCount;
 							if (vstPlug) delete vstPlug;
 						}
@@ -493,58 +495,59 @@ namespace psycle
 								{ 
 									if (tempName[0] != 0)
 									{
+										PluginInfo* pInfo2 = _pPlugsInfo[currentPlugsCount];
 										if ( !firstrun )
 										{
 											++currentPlugsCount;
-											_pPlugsInfo[currentPlugsCount]= new PluginInfo;
-											_pPlugsInfo[currentPlugsCount]->dllname = fileName;
-											_pPlugsInfo[currentPlugsCount]->FileTime = time;
+											pInfo2 = _pPlugsInfo[currentPlugsCount]= new PluginInfo();
+											pInfo2->dllname = fileName;
+											pInfo2->FileTime = time;
 										}
 
-										_pPlugsInfo[currentPlugsCount]->allow = true;
+										pInfo2->allow = true;
 										{
 											std::ostringstream s;
 											s << vstPlug->GetVendorName() << " " << tempName;
-											_pPlugsInfo[currentPlugsCount]->name = s.str();
+											pInfo2->name = s.str();
 										}
-										_pPlugsInfo[currentPlugsCount]->identifier = plugUniqueID;
-										_pPlugsInfo[currentPlugsCount]->vendor = vstPlug->GetVendorName();
-										if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-										else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+										pInfo2->identifier = plugUniqueID;
+										pInfo2->vendor = vstPlug->GetVendorName();
+										if(vstPlug->IsSynth()) pInfo2->mode = MACHMODE_GENERATOR;
+										else pInfo2->mode = MACHMODE_FX;
 										{
 											std::ostringstream s;
 											s << (vstPlug->IsSynth() ? "VST Shell instrument" : "VST Shell effect") << " by " << vstPlug->GetVendorName();
-											_pPlugsInfo[currentPlugsCount]->desc = s.str();
+											pInfo2->desc = s.str();
 										}
 										{
 											std::ostringstream s;
 											s << vstPlug->GetVersion();
-											_pPlugsInfo[currentPlugsCount]->version = s.str();
+											pInfo2->version = s.str();
 										}
-										_pPlugsInfo[currentPlugsCount]->APIversion = vstPlug->GetVstVersion();
+										pInfo2->APIversion = vstPlug->GetVstVersion();
 										firstrun=false;
 									}
 								}
 							}
 							else
 							{
-								_pPlugsInfo[currentPlugsCount]->allow = true;
-								_pPlugsInfo[currentPlugsCount]->name = vstPlug->GetName();
-								_pPlugsInfo[currentPlugsCount]->identifier = vstPlug->uniqueId();
-								_pPlugsInfo[currentPlugsCount]->vendor = vstPlug->GetVendorName();
-								if(vstPlug->IsSynth()) _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_GENERATOR;
-								else _pPlugsInfo[currentPlugsCount]->mode = MACHMODE_FX;
+								pInfo->allow = true;
+								pInfo->name = vstPlug->GetName();
+								pInfo->identifier = vstPlug->uniqueId();
+								pInfo->vendor = vstPlug->GetVendorName();
+								if(vstPlug->IsSynth()) pInfo->mode = MACHMODE_GENERATOR;
+								else pInfo->mode = MACHMODE_FX;
 								{
 									std::ostringstream s;
 									s << (vstPlug->IsSynth() ? "VST instrument" : "VST effect") << " by " << vstPlug->GetVendorName();
-									_pPlugsInfo[currentPlugsCount]->desc = s.str();
+									pInfo->desc = s.str();
 								}
 								{
 									std::ostringstream s;
 									s << vstPlug->GetVersion();
-									_pPlugsInfo[currentPlugsCount]->version = s.str();
+									pInfo->version = s.str();
 								}
-								_pPlugsInfo[currentPlugsCount]->APIversion = vstPlug->GetVstVersion();
+								pInfo->APIversion = vstPlug->GetVstVersion();
 							}
 							out << vstPlug->GetName() << " - successfully instanciated";
 							out.flush();
@@ -722,35 +725,35 @@ namespace psycle
 							p.FileTime.dwLowDateTime == time.dwLowDateTime
 							)
 						{
-							_pPlugsInfo[currentPlugsCount]= new PluginInfo;
+							PluginInfo* pInfo = _pPlugsInfo[currentPlugsCount]= new PluginInfo();
 
-							_pPlugsInfo[currentPlugsCount]->dllname = Temp;
-							_pPlugsInfo[currentPlugsCount]->FileTime = p.FileTime;
+							pInfo->dllname = Temp;
+							pInfo->FileTime = p.FileTime;
 
 							///\todo this could be better handled
-							if(!_pPlugsInfo[currentPlugsCount]->error.empty())
+							if(!pInfo->error.empty())
 							{
-								_pPlugsInfo[currentPlugsCount]->error = "";
+								pInfo->error = "";
 							}
 							if(!p.error.empty())
 							{
-								_pPlugsInfo[currentPlugsCount]->error = p.error;
+								pInfo->error = p.error;
 							}
 
-							_pPlugsInfo[currentPlugsCount]->allow = p.allow;
+							pInfo->allow = p.allow;
 
-							_pPlugsInfo[currentPlugsCount]->mode = p.mode;
-							_pPlugsInfo[currentPlugsCount]->type = p.type;
-							_pPlugsInfo[currentPlugsCount]->name = p.name;
-							_pPlugsInfo[currentPlugsCount]->identifier = p.identifier;
-							_pPlugsInfo[currentPlugsCount]->vendor = p.vendor;
-							_pPlugsInfo[currentPlugsCount]->desc = p.desc;
-							_pPlugsInfo[currentPlugsCount]->version = p.version;
-							_pPlugsInfo[currentPlugsCount]->APIversion = p.APIversion;
+							pInfo->mode = p.mode;
+							pInfo->type = p.type;
+							pInfo->name = p.name;
+							pInfo->identifier = p.identifier;
+							pInfo->vendor = p.vendor;
+							pInfo->desc = p.desc;
+							pInfo->version = p.version;
+							pInfo->APIversion = p.APIversion;
 
 							if(p.error.empty())
 							{
-								learnDllName(_pPlugsInfo[currentPlugsCount]->dllname,_pPlugsInfo[currentPlugsCount]->type);
+								learnDllName(pInfo->dllname,pInfo->type);
 							}
 							++currentPlugsCount;
 						}
@@ -787,23 +790,24 @@ namespace psycle
 			file.Write(&_numPlugins,sizeof(_numPlugins));
 			for (int i=0; i<_numPlugins; i++ )
 			{
-				file.Write(_pPlugsInfo[i]->dllname.c_str(),_pPlugsInfo[i]->dllname.length()+1);
-				file.Write(&_pPlugsInfo[i]->FileTime,sizeof(_pPlugsInfo[i]->FileTime));
+				PluginInfo* pInfo = _pPlugsInfo[i];
+				file.Write(pInfo->dllname.c_str(),pInfo->dllname.length()+1);
+				file.Write(&pInfo->FileTime,sizeof(pInfo->FileTime));
 				{
-					const std::string error(_pPlugsInfo[i]->error);
+					const std::string error(pInfo->error);
 					UINT size((UINT)error.size());
 					file.Write(&size, sizeof size);
 					if(size) file.Write(error.data(), size);
 				}
-				file.Write(&_pPlugsInfo[i]->allow,sizeof(_pPlugsInfo[i]->allow));
-				file.Write(&_pPlugsInfo[i]->mode,sizeof(_pPlugsInfo[i]->mode));
-				file.Write(&_pPlugsInfo[i]->type,sizeof(_pPlugsInfo[i]->type));
-				file.Write(_pPlugsInfo[i]->name.c_str(),_pPlugsInfo[i]->name.length()+1);
-				file.Write(&_pPlugsInfo[i]->identifier,sizeof(_pPlugsInfo[i]->identifier));
-				file.Write(_pPlugsInfo[i]->vendor.c_str(),_pPlugsInfo[i]->vendor.length()+1);
-				file.Write(_pPlugsInfo[i]->desc.c_str(),_pPlugsInfo[i]->desc.length()+1);
-				file.Write(_pPlugsInfo[i]->version.c_str(),_pPlugsInfo[i]->version.length()+1);
-				file.Write(&_pPlugsInfo[i]->APIversion,sizeof(_pPlugsInfo[i]->APIversion));
+				file.Write(&pInfo->allow,sizeof(pInfo->allow));
+				file.Write(&pInfo->mode,sizeof(pInfo->mode));
+				file.Write(&pInfo->type,sizeof(pInfo->type));
+				file.Write(pInfo->name.c_str(),pInfo->name.length()+1);
+				file.Write(&pInfo->identifier,sizeof(pInfo->identifier));
+				file.Write(pInfo->vendor.c_str(),pInfo->vendor.length()+1);
+				file.Write(pInfo->desc.c_str(),pInfo->desc.length()+1);
+				file.Write(pInfo->version.c_str(),pInfo->version.length()+1);
+				file.Write(&pInfo->APIversion,sizeof(pInfo->APIversion));
 			}
 			file.Close();
 			return true;

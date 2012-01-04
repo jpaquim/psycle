@@ -53,7 +53,6 @@ namespace psycle
 		void WinampSettings::SetDefaultSettings()
 		{
 			AudioDriverSettings::SetDefaultSettings();
-			//TODO
 		}
 		void WinampSettings::Load(ConfigStorage &store)
 		{
@@ -202,7 +201,7 @@ namespace psycle
 				{
 					if (pPlayer->_playing)
 					{
-						float_buffer = pPlayer->Work(pPlayer,plug_stream_size);
+						float_buffer = Player::Work(pPlayer,plug_stream_size);
 						if(_sampleValidBits == 32) {
 							Quantize24in32Bit(float_buffer, stream_buffer, plug_stream_size);
 						}
@@ -235,7 +234,6 @@ namespace psycle
 					else t=plug_stream_size*sampleSize;
 
 					int s=themod->outMod->GetWrittenTime();
-					//int s=pPlayer->sampleCount*1000/settings.samplesPerSec();
 					themod->SAAddPCMData((char*)stream_buffer,settings.numChannels(),settings.validBitDepth(),s);
 					themod->VSAAddPCMData((char*)stream_buffer,settings.numChannels(),settings.validBitDepth(),s);
 

@@ -105,7 +105,7 @@ namespace psycle
 						pMachine = pPlugin = new Plugin(songIdx);
 						pPlugin->Instance(psPluginDll);
 					}
-					catch(std::exception const & e)
+					catch(const std::exception& e)
 					{
 						loggers::exception()(e.what());
 						zapObject(pMachine); 
@@ -133,7 +133,7 @@ namespace psycle
 							vstPlug->_macIndex=songIdx;
 						}
 					}
-					catch(std::exception const & e)
+					catch(const std::exception & e)
 					{
 						loggers::exception()(e.what());
 						zapObject(pMachine); 
@@ -1959,14 +1959,7 @@ namespace psycle
 												const int numpars = vstL[instance].numpars;
 												for (int c(0) ; c < numpars; ++c)
 												{
-													try
-													{
-														pVstPlugin->SetParameter(c, vstL[instance].pars[c]);
-													}
-													catch(const std::exception &)
-													{
-														// o_O`
-													}
+													pVstPlugin->SetParameter(c, vstL[instance].pars[c]);
 												}
 											}
 										}
@@ -1974,6 +1967,7 @@ namespace psycle
 										{
 											berror=true;
 											sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",sPath);
+											if (pVstPlugin) { delete pVstPlugin; }
 										}
 									}
 								}

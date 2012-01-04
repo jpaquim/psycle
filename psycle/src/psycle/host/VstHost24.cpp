@@ -130,17 +130,14 @@ namespace psycle
 				}
 
 				_nCols=0;
-				try
+				if ( IsSynth())
 				{
-					if ( IsSynth())
-					{
-						_mode=MACHMODE_GENERATOR; _type=MACH_VST;
-					}
-					else 
-					{
-						_mode=MACHMODE_FX; _type=MACH_VSTFX;
-					}
-				}PSYCLE__HOST__CATCH_ALL(crashclass);
+					_mode=MACHMODE_GENERATOR; _type=MACH_VST;
+				}
+				else 
+				{
+					_mode=MACHMODE_FX; _type=MACH_VSTFX;
+				}
 				// Compatibility hacks
 				{
 					if(uniqueId() == 0x41446c45 ) //"sc-101"
@@ -158,24 +155,21 @@ namespace psycle
 				}
 				inputs[0] = _pSamplesL;
 				inputs[1] = _pSamplesR;
-				try
+				if (WillProcessReplace())
 				{
-					if (WillProcessReplace())
-					{
-						_pOutSamplesL = _pOutSamplesR = junk;
-						outputs[0] = inputs[0];
-						outputs[1] = inputs[1];
-					}
-					else
-					{
-						universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
-						universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
-						helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-						helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
-						outputs[0] = _pOutSamplesL;
-						outputs[1] = _pOutSamplesR;
-					}
-				}PSYCLE__HOST__CATCH_ALL(crashclass);
+					_pOutSamplesL = _pOutSamplesR = junk;
+					outputs[0] = inputs[0];
+					outputs[1] = inputs[1];
+				}
+				else
+				{
+					universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
+					universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
+					helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
+					helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
+					outputs[0] = _pOutSamplesL;
+					outputs[1] = _pOutSamplesR;
+				}
 
 				for(int i(0) ; i < MAX_TRACKS; ++i)
 				{
@@ -185,32 +179,15 @@ namespace psycle
 				_sDllName= (char*)(loadstruct.pluginloader->sFileName);
 				char temp[kVstMaxVendorStrLen];
 				memset(temp,0,sizeof(temp));
-				try
+				if ( GetPlugCategory() != kPlugCategShell )
 				{
-					if ( GetPlugCategory() != kPlugCategShell )
-					{
-						// GetEffectName is the better option to GetProductString.
-						// To the few that they show different values in these,
-						// synthedit plugins show only "SyntheditVST" in GetProductString()
-						// and others like battery 1 or psp-nitro, don't have GetProductString(),
-						// so it's almost a no-go.
-						if (GetEffectName(temp) && temp[0])_sProductName=temp;
-						else if(GetProductString(temp) && temp[0]) _sProductName=temp;
-						else
-						{
-							std::string temp;
-							std::string::size_type pos;
-							pos = _sDllName.rfind('\\');
-							if(pos==std::string::npos)
-								temp=_sDllName;
-							else
-								temp=_sDllName.substr(pos+1);
-							_sProductName=temp.substr(0,temp.rfind('.'));
-						}
-						// This is a safe measure against some plugins that have noise at its output for some
-						// unexplained reason ( example : mda piano.dll )
-						GenerateAudioInTicks(0,STREAM_SIZE);
-					}
+					// GetEffectName is the better option to GetProductString.
+					// To the few that they show different values in these,
+					// synthedit plugins show only "SyntheditVST" in GetProductString()
+					// and others like battery 1 or psp-nitro, don't have GetProductString(),
+					// so it's almost a no-go.
+					if (GetEffectName(temp) && temp[0])_sProductName=temp;
+					else if(GetProductString(temp) && temp[0]) _sProductName=temp;
 					else
 					{
 						std::string temp;
@@ -222,10 +199,24 @@ namespace psycle
 							temp=_sDllName.substr(pos+1);
 						_sProductName=temp.substr(0,temp.rfind('.'));
 					}
-					if(GetVendorString(temp) && temp[0]) _sVendorName = temp;
-					else _sVendorName = "Unknown vendor";
-					std::strcpy(_editName,_sProductName.c_str());
-				}PSYCLE__HOST__CATCH_ALL(crashclass);
+					// This is a safe measure against some plugins that have noise at its output for some
+					// unexplained reason ( example : mda piano.dll )
+					GenerateAudioInTicks(0,STREAM_SIZE);
+				}
+				else
+				{
+					std::string temp;
+					std::string::size_type pos;
+					pos = _sDllName.rfind('\\');
+					if(pos==std::string::npos)
+						temp=_sDllName;
+					else
+						temp=_sDllName.substr(pos+1);
+					_sProductName=temp.substr(0,temp.rfind('.'));
+				}
+				if(GetVendorString(temp) && temp[0]) _sVendorName = temp;
+				else _sVendorName = "Unknown vendor";
+				std::strcpy(_editName,_sProductName.c_str());
 			}
 
 			plugin::~plugin()
@@ -267,63 +258,69 @@ namespace psycle
 
 			bool plugin::DescribeValue(int parameter, char * psTxt)
 			{
-				if(parameter >= 0 && parameter < numParams())
-				{
-					char par_display[kVstMaxProgNameLen+1]={0}; 
-					char par_label[kVstMaxProgNameLen+1]={0};
-					GetParamDisplay(parameter,par_display);
-					GetParamLabel(parameter,par_label);
-					std::sprintf(psTxt, "%s(%s)", par_display, par_label);
-					return true;
+				try {
+					if(parameter >= 0 && parameter < numParams())
+					{
+						char par_display[kVstMaxProgNameLen+1]={0}; 
+						char par_label[kVstMaxProgNameLen+1]={0};
+						GetParamDisplay(parameter,par_display);
+						GetParamLabel(parameter,par_label);
+						std::sprintf(psTxt, "%s(%s)", par_display, par_label);
+						return true;
+					}
+					else std::sprintf(psTxt, "Invalid NumParams Value");
 				}
-				else std::sprintf(psTxt, "Invalid NumParams Value");
+				catch(...){}
 				return false;
 			}
 			bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 			{
-				UINT size;
-				unsigned char _program;
-				pFile->Read(&size, sizeof size );
-				if(size)
-				{
-					UINT count;
-					pFile->Read(&_program, sizeof _program);
-					pFile->Read(&count, sizeof count);
-					size -= sizeof _program + sizeof count + sizeof(float) * count;
-					if(!size)
+				try {
+					UINT size;
+					unsigned char _program;
+					pFile->Read(&size, sizeof size );
+					if(size)
 					{
-						BeginSetProgram();
-						SetProgram(_program);
-						for(UINT i(0) ; i < count ; ++i)
+						UINT count;
+						pFile->Read(&_program, sizeof _program);
+						pFile->Read(&count, sizeof count);
+						size -= sizeof _program + sizeof count + sizeof(float) * count;
+						if(!size)
 						{
-							float temp;
-							pFile->Read(&temp, sizeof temp);
-							SetParameter(i, temp);
-						}
-						EndSetProgram();
-					}
-					else
-					{
-						BeginSetProgram();
-						SetProgram(_program);
-						EndSetProgram();
-						pFile->Skip(sizeof(float) *count);
-						if(ProgramIsChunk())
-						{
-							char * data(new char[size]);
-							pFile->Read(data, size); // Number of parameters
-							SetChunk(data,size);
-							zapArray(data);
+							BeginSetProgram();
+							SetProgram(_program);
+							for(UINT i(0) ; i < count ; ++i)
+							{
+								float temp;
+								pFile->Read(&temp, sizeof temp);
+								SetParameter(i, temp);
+							}
+							EndSetProgram();
 						}
 						else
 						{
-							// there is a data chunk, but this machine does not want one.
-							pFile->Skip(size);
-							return false;
+							BeginSetProgram();
+							SetProgram(_program);
+							EndSetProgram();
+							pFile->Skip(sizeof(float) *count);
+							if(ProgramIsChunk())
+							{
+								char * data(new char[size]);
+								pFile->Read(data, size); // Number of parameters
+								SetChunk(data,size);
+								zapArray(data);
+							}
+							else
+							{
+								// there is a data chunk, but this machine does not want one.
+								pFile->Skip(size);
+								return false;
+							}
 						}
 					}
+					return true;
 				}
-				return true;
+				catch(...){return false;}
 			}
 
 			void plugin::SaveSpecificChunk(RiffFile * pFile) 
@@ -471,46 +468,48 @@ namespace psycle
 				assert(queue_size >= 0);
 				assert(queue_size <= MAX_VST_EVENTS);
 
+				try {
+					if(queue_size > 0)
+					{
+						// Prepare MIDI events and free queue dispatching all events
+						mevents.numEvents = queue_size;
+						mevents.reserved = 0;
+						for(int q(0) ; q < queue_size ; ++q) {
+	#ifndef NDEBUG
 
-				if(queue_size > 0)
-				{
-					// Prepare MIDI events and free queue dispatching all events
-					mevents.numEvents = queue_size;
-					mevents.reserved = 0;
-					for(int q(0) ; q < queue_size ; ++q) {
-#ifndef NDEBUG
+							// assert that events are sent in order.
+							// although the standard doesn't require this,
+							// many synths rely on this.
+							if(q>0) {
+								assert(midievent[q-1].deltaFrames <= 
+									midievent[q].deltaFrames);
+							}
 
-						// assert that events are sent in order.
-						// although the standard doesn't require this,
-						// many synths rely on this.
-						if(q>0) {
-							assert(midievent[q-1].deltaFrames <= 
-								midievent[q].deltaFrames);
+	/*						// assert that the note sequence is well-formed,
+							// which means, no note-offs happen without a
+							// corresponding preceding note-on.
+							switch(midievent[q].midiData[0]&0xf0) {
+							case 0x90: // note-on
+								note_checker_.note_on(midievent[q].midiData[1],
+									midievent[q].midiData[0]&0x0f);
+								break;
+							case 0x80: // note-off
+								note_checker_.note_off(midievent[q].midiData[1],
+									midievent[q].midiData[0]&0x0f);
+								break;
+							}
+	*/
+	#endif
+
+							mevents.events[q] = (VstEvent*) &midievent[q];
 						}
-
-/*						// assert that the note sequence is well-formed,
-						// which means, no note-offs happen without a
-						// corresponding preceding note-on.
-						switch(midievent[q].midiData[0]&0xf0) {
-						case 0x90: // note-on
-							note_checker_.note_on(midievent[q].midiData[1],
-								midievent[q].midiData[0]&0x0f);
-							break;
-						case 0x80: // note-off
-							note_checker_.note_off(midievent[q].midiData[1],
-								midievent[q].midiData[0]&0x0f);
-							break;
-						}
-*/
-#endif
-
-						mevents.events[q] = (VstEvent*) &midievent[q];
+						//Finally Send the events.
+						queue_size = 0;
+	//					WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
+						ProcessEvents(reinterpret_cast<VstEvents*>(&mevents));
 					}
-					//Finally Send the events.
-					queue_size = 0;
-//					WantsMidi(ProcessEvents(reinterpret_cast<VstEvents*>(&mevents)));
-					ProcessEvents(reinterpret_cast<VstEvents*>(&mevents));
 				}
+				catch(...){}
 			}
 			void plugin::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 			{

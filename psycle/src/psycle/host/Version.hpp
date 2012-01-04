@@ -32,6 +32,12 @@
 	UNIVERSALIS__COMPILER__STRINGIZE(PSYCLE__VERSION__PATCH) " " \
 	PSYCLE__VERSION__QUALITY
 
+#define PSYCLE__VERSION__NUMBER \
+	PSYCLE__VERSION__MAJOR * 10000 + \
+	PSYCLE__VERSION__MINOR * 100 + \
+	PSYCLE__VERSION__PATCH * 10
+
+
 /// identifies both what sources the build comes from, and what build options were used.
 #define PSYCLE__BUILD__IDENTIFIER(EOL) \
 	"Version: " PSYCLE__VERSION EOL \

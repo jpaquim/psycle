@@ -128,9 +128,9 @@ namespace psycle
 				virtual bool LoadFromMac(vst::plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
-				virtual bool IsShellMaster() { try { return (GetPlugCategory() == kPlugCategShell); }PSYCLE__HOST__CATCH_ALL_RETURN(*this); }
-				virtual int GetShellIdx() { try { return ( IsShellPlugin()) ? uniqueId() : 0;	}PSYCLE__HOST__CATCH_ALL_RETURN(*this); }
-				virtual int GetPluginCategory() { try { return GetPlugCategory(); }PSYCLE__HOST__CATCH_ALL_RETURN(*this); }
+				virtual bool IsShellMaster() {return (GetPlugCategory() == kPlugCategShell); }
+				virtual int GetShellIdx() { return ( IsShellPlugin()) ? uniqueId() : 0;	}
+				virtual int GetPluginCategory() { return GetPlugCategory(); }
 				virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual bool Bypass(void) const { return Machine::Bypass(); }
@@ -177,17 +177,23 @@ namespace psycle
 				}
 				// Properties
 				//////////////////////////////////////////////////////////////////////////
-				virtual void SetSampleRate(int sr) { Machine::SetSampleRate(sr); CEffect::SetSampleRate((float)sr); }
+				virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); CEffect::SetSampleRate((float)sr); }catch(...){} }
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
 				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
-				virtual const std::uint32_t GetAPIVersion() { return GetVstVersion(); }
-				virtual const std::uint32_t GetVersion() { return GetVendorVersion(); }
+				virtual const std::uint32_t GetAPIVersion() { try {return GetVstVersion(); }catch(...){return 0;} }
+				virtual const std::uint32_t GetVersion() { try { return GetVendorVersion(); }catch(...){return 0;}}
 				//
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; }
 				virtual int GetNumParams() { return numParams(); }
 				virtual int GetParamType(int numparam) { return 2; }
-				virtual void GetParamName(int numparam, char * parval) { if (numparam<numParams()) CEffect::GetParamName(numparam,parval); }
+				virtual void GetParamName(int numparam, char * parval)
+				{
+					try {
+						if (numparam<numParams()) CEffect::GetParamName(numparam,parval);
+					}catch(...){}
+				}
+
 				virtual void GetParamValue(int numparam, char * parval);
 				virtual int GetParamValue(int numparam)
 				{
@@ -229,7 +235,7 @@ namespace psycle
 				virtual int GetNumPrograms(){ return numPrograms()<128?numPrograms():128;};
 				virtual int GetTotalPrograms(){ return numPrograms();};
 				virtual void SetCurrentBank(int idx) { SetProgram(idx*128+GetCurrentProgram());};
-				virtual int GetCurrentBank() {return GetProgram()/128;};
+				virtual int GetCurrentBank() { try {return GetProgram()/128; } catch(...){return 0;}};
 				virtual void GetCurrentBankName(char* val) {GetIndexBankName(GetCurrentBank(),val);};
 				virtual void GetIndexBankName(int bnkidx, char* val){
 					if(bnkidx < GetNumBanks())
@@ -273,8 +279,6 @@ namespace psycle
 
 				// CEffect overloaded functions
 				//////////////////////////////////////////////////////////////////////////
-				virtual void EnterCritical() {;}
-				virtual void LeaveCritical() {;}
 				virtual void crashed2(std::exception const & e) { Machine::crashed(e); }
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 				/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
@@ -309,7 +313,7 @@ namespace psycle
 
 				///> Plugin gets Info from the host
 				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }
-				virtual long OnGetHostVendorVersion() { return 1850; }
+				virtual long OnGetHostVendorVersion() { return PSYCLE__VERSION__NUMBER; }
 				virtual bool OnCanDo(CEffect &pEffect,const char *ptr);
 				virtual long OnGetHostLanguage() { return kVstLangEnglish; }
 				virtual void CalcTimeInfo(long lMask = -1);

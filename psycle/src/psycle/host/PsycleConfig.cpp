@@ -1550,9 +1550,14 @@ namespace psycle { namespace host {
 				store->CloseLocation();
 				delete store;
 				return true;
+			} catch(std::runtime_error e) {
+				delete store;
+				MessageBox(NULL,e.what(),"Error saving settings",MB_OK);
+				return false;
 			} catch(...) {
 				delete store;
-				throw;
+				MessageBox(NULL,"Error saving settings","Settings",MB_OK);
+				return false;
 			}
 		}
 

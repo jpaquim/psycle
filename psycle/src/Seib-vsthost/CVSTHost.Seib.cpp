@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 #include <psycle/host/detail/project.private.hpp>
-#include "CVSTHost.Seib.hpp"                   /* private prototypes                */
+#include "CVSTHost.Seib.hpp"  
 
 #include "EffectWnd.hpp"
 
@@ -39,6 +39,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 	#error unimplemented
 #endif
+// This is part of Psycle, to catch the exceptions that happen when interacting
+// with the plugins. To use your own, replace 
+// CATCH_WRAP_AND_RETHROW(*this) by whatever you find appropiate, like
+// catch(...) {} 
+#include <psycle/host/Machine.hpp> // for throw.
+//////////////////////////////////////////////////////////////////////////
 
 namespace seib {
 	namespace vst {
@@ -176,7 +182,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* CEffect : constructor                                                     */
 		/*****************************************************************************/
-		void Crashingclass::crashed(std::exception const & e) const{ ef->crashed2(e); }
+		void Crashingclass::crashed(std::exception const & e) { ef->crashed2(e); }
 
 
 		CEffect::CEffect(LoadedAEffect &loadstruct)
@@ -269,43 +275,40 @@ namespace seib {
 			// I am unsure what other hosts use for resvd1 and resvd2
 			aEffect->resvd1 = ToVstPtr(this);
 
-			try
+			if ( GetPlugCategory() != kPlugCategShell )
 			{
-				if ( GetPlugCategory() != kPlugCategShell )
+				// 2: Host to Plug, setSampleRate ( 44100.000000 )
+				SetSampleRate(CVSTHost::pHost->GetSampleRate());
+				// 3: Host to Plug, setBlockSize ( 512 ) 
+				SetBlockSize(CVSTHost::pHost->GetBlockSize());
+
+				SetProcessPrecision(kVstProcessPrecision32);
+				// 4: Host to Plug, open
+				Open();
+				// 5: Host to Plug, setSpeakerArrangement returned: false 
+				// The correct behaviour is try to check the return value of
+				// SetSpeakerArrangement, and if false, GetSpeakerArrangement
+				// And SetSpeakerArrangement with those values.
 				{
-					// 2: Host to Plug, setSampleRate ( 44100.000000 )
-					SetSampleRate(CVSTHost::pHost->GetSampleRate());
-					// 3: Host to Plug, setBlockSize ( 512 ) 
-					SetBlockSize(CVSTHost::pHost->GetBlockSize());
-
-					SetProcessPrecision(kVstProcessPrecision32);
-					// 4: Host to Plug, open
-					Open();
-					// 5: Host to Plug, setSpeakerArrangement returned: false 
-					// The correct behaviour is try to check the return value of
-					// SetSpeakerArrangement, and if false, GetSpeakerArrangement
-					// And SetSpeakerArrangement with those values.
-					{
-						VstSpeakerArrangement VSTsa;
-						VSTsa.type = kSpeakerArrStereo;
-						VSTsa.numChannels = 2;
-						VSTsa.speakers[0].type = kSpeakerL;
-						VSTsa.speakers[1].type = kSpeakerR;
-						SetSpeakerArrangement(&VSTsa,&VSTsa);
-					}
-					// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
-					SetSampleRate(CVSTHost::pHost->GetSampleRate());
-					// 7: Host to Plug, setBlockSize ( 512 ) 
-					SetBlockSize(CVSTHost::pHost->GetBlockSize());
-
-					// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
-					if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
-					KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
-					SetPanLaw(kLinearPanLaw,1.0f);
-					MainsChanged(true);                 //   then force resume.                
-
+					VstSpeakerArrangement VSTsa;
+					VSTsa.type = kSpeakerArrStereo;
+					VSTsa.numChannels = 2;
+					VSTsa.speakers[0].type = kSpeakerL;
+					VSTsa.speakers[1].type = kSpeakerR;
+					SetSpeakerArrangement(&VSTsa,&VSTsa);
 				}
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
+				SetSampleRate(CVSTHost::pHost->GetSampleRate());
+				// 7: Host to Plug, setBlockSize ( 512 ) 
+				SetBlockSize(CVSTHost::pHost->GetBlockSize());
+
+				// deal with changed behaviour in V2.4 plugins that don't call wantEvents()
+				if (GetVstVersion() >= 2400 ) WantsMidi(CanDo(PlugCanDos::canDoReceiveVstEvents));
+				KnowsToBypass(CanDo(PlugCanDos::canDoBypass));
+				SetPanLaw(kLinearPanLaw,1.0f);
+				MainsChanged(true);                 //   then force resume.                
+
+			}
 		}
 
 		/*****************************************************************************/
@@ -314,11 +317,8 @@ namespace seib {
 
 		void CEffect::Unload()
 		{
-			try
-			{
-				MainsChanged(false);
-				Close();                             /* make sure it's closed             */
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			MainsChanged(false);
+			Close();                             /* make sure it's closed             */
 
 			aEffect = NULL;                         /* and reset the pointer             */
 			delete ploader;
@@ -552,86 +552,87 @@ namespace seib {
 		/* EffDispatch : calls an effect's dispatcher                                */
 		/*****************************************************************************/
 
-		VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+		VstIntPtr CEffect::Dispatch(VstInt32 opCode, VstInt32 index, VstIntPtr value, void* ptr, float opt) throw(std::runtime_error)
 		{
 			if (!aEffect)
-				throw psycle::host::exception("Invalid AEffect!");
+				throw std::runtime_error("Invalid AEffect!");
 			try
 			{
 				return aEffect->dispatcher(aEffect, opCode, index, value, ptr, opt);
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			}CATCH_WRAP_AND_RETHROW(crashclass);
+			return 0;
 		}
 
 		/*****************************************************************************/
 		/* EffProcess : calls an effect's process() function                         */
 		/*****************************************************************************/
 
-		void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes)
+		void CEffect::Process(float **inputs, float **outputs, VstInt32 sampleframes) throw(std::runtime_error)
 		{
 			if (!aEffect)
-				throw psycle::host::exception("Invalid AEffect!");
+				throw std::runtime_error("Invalid AEffect!");
 
 			try
 			{
 				aEffect->process(aEffect, inputs, outputs, sampleframes);
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			}CATCH_WRAP_AND_RETHROW(crashclass);
 		}
 
 		/*****************************************************************************/
 		/* EffProcessReplacing : calls an effect's processReplacing() function       */
 		/*****************************************************************************/
 
-		void CEffect::ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes)
+		void CEffect::ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes) throw(std::runtime_error)
 		{
-			if ((!aEffect) ||
-				(!(aEffect->flags & effFlagsCanReplacing)))
-				throw psycle::host::exception("Invalid AEffect!");
+			if (!aEffect || !CanProcessReplace())
+				throw std::runtime_error("Invalid AEffect!");
 
 			try
 			{
 				aEffect->processReplacing(aEffect, inputs, outputs, sampleframes);
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			}CATCH_WRAP_AND_RETHROW(crashclass);
 		}
 
-		void CEffect::ProcessDouble(double **inputs, double **outputs, VstInt32 sampleframes)
+		void CEffect::ProcessDouble(double **inputs, double **outputs, VstInt32 sampleframes) throw(std::runtime_error)
 		{
 			if (!aEffect)
-				throw psycle::host::exception("Invalid AEffect!");
+				throw std::runtime_error("Invalid AEffect!");
 
 			try
 			{
 				aEffect->processDoubleReplacing(aEffect, inputs, outputs, sampleframes);
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			}CATCH_WRAP_AND_RETHROW(crashclass);
 		}
 
 		/*****************************************************************************/
 		/* EffSetParameter : calls an effect's setParameter() function               */
 		/*****************************************************************************/
 
-		void CEffect::SetParameter(VstInt32 index, float parameter)
+		void CEffect::SetParameter(VstInt32 index, float parameter) throw(std::runtime_error)
 		{
 			if (!aEffect)
-				throw psycle::host::exception("Invalid AEffect!");
+				throw std::runtime_error("Invalid AEffect!");
 
 			try
 			{
 				aEffect->setParameter(aEffect, index, parameter);
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			}CATCH_WRAP_AND_RETHROW(crashclass);
 		}
 
 		/*****************************************************************************/
 		/* EffGetParameter : calls an effect's getParameter() function               */
 		/*****************************************************************************/
 
-		float CEffect::GetParameter(VstInt32 index)
+		float CEffect::GetParameter(VstInt32 index) throw(std::runtime_error)
 		{
 			if (!aEffect)
-				throw psycle::host::exception("Invalid AEffect!");
+				throw std::runtime_error("Invalid AEffect!");
 
 			try
 			{
 				return aEffect->getParameter(aEffect, index);
-			}PSYCLE__HOST__CATCH_ALL(crashclass);
+			}CATCH_WRAP_AND_RETHROW(crashclass);
+			return 0.f;
 		}
 
 		bool CEffect::OnSizeEditorWindow(long width, long height)
@@ -799,11 +800,7 @@ namespace seib {
 				loadingEffect = true;
 				loadingShellId = shellIdx;
 				isShell = false;
-				CEffect crashtest(0);
-				try
-				{
-					effect = mainEntry (AudioMasterCallback);
-				}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
+				effect = mainEntry (AudioMasterCallback);
 			}
 			else if (useJBridge && loader->loadJBridgeLibrary(sName))
 			{
@@ -818,19 +815,14 @@ namespace seib {
 				loadingEffect = true;
 				loadingShellId = shellIdx;
 				isShell = false;
-				CEffect crashtest(0);
-				try
+				effect = pfnBridgeMain( AudioMasterCallback, const_cast<char*>(sName) );
+				if (effect && (effect->magic != kEffectMagic))
 				{
-					effect = pfnBridgeMain( AudioMasterCallback, const_cast<char*>(sName) );
-					if (effect && (effect->magic != kEffectMagic))
-					{
-						// Fix for a possible bug. When loading asio.dll (a non VST),
-						// jBridge reports that it cannot load it, but then returns an effect,
-						// which makes the host crash if deleted. I assume it is already deleting it.
-						effect = NULL;
-					}
-
-				}PSYCLE__HOST__CATCH_ALL(crashtest.crashclass);
+					// Fix for a possible bug. When loading asio.dll (a non VST),
+					// jBridge reports that it cannot load it, but then returns an effect,
+					// which makes the host crash if deleted. I assume it is already deleting it.
+					effect = NULL;
+				}
 			}
 			else if (usePsycleVstBridge && loader->loadPsycleBridgeLibrary(sName))
 			{
@@ -855,11 +847,7 @@ namespace seib {
 				loadstruct.aEffect = effect;
 				loadstruct.pluginloader = loader;
 				CEffect *neweffect(0);
-				CEffect crashtest2(effect);
-				try 
-				{
-					 neweffect = CreateEffect(loadstruct);
-				}PSYCLE__HOST__CATCH_ALL(crashtest2.crashclass);
+				neweffect = CreateEffect(loadstruct);
 				if (isShell) neweffect->IsShellPlugin(true);
 				loadingEffect=false;
 				loadingShellId=0;
@@ -1068,7 +1056,7 @@ namespace seib {
 		// function in order to refresh the plugin UI. This is done in the "idle" thread.
 		// (the UI redrawing timer, usually).
 		// Note that EditIdle() needs to be called repetitively. This just forces an
-		// inmediate (as soon as possible) 
+		// inmediate call (as soon as possible) 
 		void CVSTHost::OnIdle(CEffect & pEffect)
 		{
 			pEffect.NeedsEditIdle(true);
@@ -1372,8 +1360,8 @@ namespace seib {
 			#endif
 
 				}
-				// This is PSYCLE__HOST__CATCH_ALL() for static members.
-			}PSYCLE__HOST__CATCH_ALL__NO_CLASS(pEffect->crashclass);
+				// This is CATCH_WRAP_AND_RETHROW(), which does not rethrow.
+			}CATCH_WRAP_STATIC(pEffect->crashclass);
 			if (fakeeffect )delete pEffect;
 			return 0L;
 		}
