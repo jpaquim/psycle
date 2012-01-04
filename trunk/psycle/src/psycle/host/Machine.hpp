@@ -83,7 +83,7 @@ namespace psycle
 					class rethrow_functor
 					{
 						public:
-							rethrow_functor(Crashable & crashable) : crashable_(crashable) {}
+							rethrow_functor(Crashable & crashable, bool do_rethrow) : crashable_(crashable), do_rethrow_(do_rethrow) {}
 							template<typename E> void operator_                (universalis::compiler::location const & location,              E const * const e = 0) const throw(function_error) { rethrow(location, e, 0); }
 							template<          > void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e    ) const throw(function_error) { rethrow(location, e, e); }
 						private:
@@ -105,15 +105,16 @@ namespace psycle
 								}
 								function_error const f_error(s.str(), standard);
 								crashable_.crashed(f_error);
-								throw f_error;
+								if (do_rethrow_) { throw f_error; }
 							}
 							Crashable & crashable_;
+							bool do_rethrow_;
 					};
 
 					template<typename Crashable>
-					rethrow_functor<Crashable> make_rethrow_functor(Crashable & crashable)
+					rethrow_functor<Crashable> make_rethrow_functor(Crashable & crashable, bool do_rethrow=true)
 					{
-						return rethrow_functor<Crashable>(crashable);
+						return rethrow_functor<Crashable>(crashable, do_rethrow);
 					}
 				}
 
@@ -126,28 +127,22 @@ namespace psycle
 				/// - It throws the converted exception.
 				/// The usage is:
 				/// - for the proxy between the host and a machine:
-				///     try { some_machine.do_something(); } PSYCLE__HOST__CATCH_ALL(some_machine)
+				///     try { some_machine.do_something(); } CATCH_WRAP_AND_RETHROW(some_machine)
 				/// - for the host:
 				///     try { machine_proxy.do_something(); } catch(std::exception) { /* don't rethrow the exception */ }
 				///
 				/// Note that the crashable argument can be of any type as long as it has a member function void crashed(std::exception const &) throw();
-				#define PSYCLE__HOST__CATCH_ALL(crashable) \
+				#define CATCH_WRAP_AND_RETHROW(crashable) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
 
-				///\see PSYCLE__HOST__CATCH_ALL
-				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS(crashable) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable))
+				///\see CATCH_WRAP_AND_RETHROW
+				#define CATCH_WRAP_STATIC(crashable) \
+					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable, false))
 
-				//The following two defines are to avoid a warning when using them on methods that return a value.
-				#define PSYCLE__HOST__CATCH_ALL_RETURN(crashable) \
+				//This is to avoid a warning when using on methods that return a value.
+				#define CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(crashable) \
 					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable)) \
 					return 0;
-
-				///\see PSYCLE__HOST__CATCH_ALL
-				#define PSYCLE__HOST__CATCH_ALL__NO_CLASS_RETURN(crashable) \
-					UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW__WITH_FUNCTOR__NO_CLASS(psycle::host::exceptions::function_errors::detail::make_rethrow_functor(crashable)) \
-					return 0;
-
 			}
 		}
 

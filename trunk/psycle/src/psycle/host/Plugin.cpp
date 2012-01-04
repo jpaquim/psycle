@@ -60,7 +60,9 @@ namespace psycle
 
 		Plugin::~Plugin() throw()
 		{
-			Free();
+			try {
+				Free();
+			} catch(...){}
 		}
 
 		#if 1 /* <bohan> i'm really not sure about the origin of the problem so i prefer to add the work around unconditionally */ 
@@ -86,7 +88,7 @@ namespace psycle
 			}}
 		#endif
 
-		void Plugin::Instance(std::string file_name)
+		void Plugin::Instance(std::string file_name) throw(psycle::host::exception)
 		{
 			char const static path_env_var_name[] =
 			{
@@ -188,7 +190,7 @@ namespace psycle
 			{
 				_pInfo = GetInfo();
 			}
-			PSYCLE__HOST__CATCH_ALL(*this)
+			CATCH_WRAP_AND_RETHROW(*this)
 
 			// checks that version is 11 (0x0B) while MI_VERSION is still 0x1N
 			// or version is 0xNM being compatible with the current MI_VERSION.
@@ -221,7 +223,7 @@ namespace psycle
 			{
 				proxy()(GetInterface());
 			}
-			PSYCLE__HOST__CATCH_ALL(*this)
+			CATCH_WRAP_AND_RETHROW(*this)
 		}
 
 		void Plugin::Init()
@@ -237,6 +239,7 @@ namespace psycle
 				}
 				catch(const std::exception &e)
 				{
+					e;
 #ifndef NDEBUG 
 					throw e;
 #endif
@@ -249,6 +252,7 @@ namespace psycle
 					}
 					catch(const std::exception &e)
 					{
+						e;
 #ifndef NDEBUG 
 						throw e;
 #endif
@@ -302,6 +306,7 @@ namespace psycle
 			}
 			catch(const std::exception & e)
 			{
+				e;
 #ifndef NDEBUG 
 					throw e;
 #elif !defined WINAMP_PLUGIN
@@ -340,12 +345,7 @@ namespace psycle
 			}
 			catch(const std::exception & e)
 			{
-#ifndef NDEBUG 
-					if(!exception) exception = &e;
-					throw e;
-#else
 				if(!exception) exception = &e;
-#endif
 			}
 			if(_dll)
 			{
@@ -391,6 +391,7 @@ namespace psycle
 						throw e;
 						return false;
 #else
+						e;
 						delete[] pData;
 						return false;
 #endif
@@ -412,6 +413,7 @@ namespace psycle
 			}
 			catch(const std::exception &e)
 			{
+				e;
 #ifndef NDEBUG 
 					throw e;
 #endif
@@ -435,6 +437,7 @@ namespace psycle
 				}
 				catch(const std::exception &e)
 				{
+					e;
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
 #ifndef NDEBUG 
@@ -495,6 +498,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 							}
@@ -515,6 +519,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 								}
@@ -552,6 +557,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 											}
@@ -578,6 +584,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 										}
@@ -603,6 +610,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 										}
@@ -628,6 +636,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 										}
@@ -669,6 +678,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 											}
@@ -686,6 +696,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 											}
@@ -703,6 +714,7 @@ namespace psycle
 					throw e;
 					return 0;
 #else
+					e;
 					return 0;
 #endif
 											}
@@ -742,6 +754,7 @@ namespace psycle
 					throw e;
 					return false;
 #else
+					e;
 					return false;
 #endif
 				}
@@ -794,6 +807,7 @@ namespace psycle
 					throw e;
 					return -1;
 #else
+					e;
 					return -1; // hmm
 #endif
 				}
@@ -816,6 +830,7 @@ namespace psycle
 					throw e;
 					return;
 #else
+					e;
 					return;
 #endif
 				}
@@ -832,10 +847,11 @@ namespace psycle
 			catch(const std::exception &e)
 			{
 #ifndef NDEBUG 
-					throw e;
-					return;
+				throw e;
+				return;
 #else
-					return;
+				e;
+				return;
 #endif
 			}
 		}
@@ -854,10 +870,11 @@ namespace psycle
 			catch(const std::exception &e)
 			{
 #ifndef NDEBUG 
-					throw e;
-					return;
+				throw e;
+				return;
 #else
-					return;
+				e;
+				return;
 #endif
 			}
 		}
@@ -883,6 +900,7 @@ namespace psycle
 					throw e;
 					return;
 #else
+					e;
 					return;
 #endif
 					}
@@ -945,6 +963,7 @@ namespace psycle
 					throw e;
 					return;
 #else
+					e;
 					return;
 #endif
 						}
@@ -970,6 +989,7 @@ namespace psycle
 					throw e;
 					return;
 #else
+					e;
 					return;
 #endif
 						}
@@ -987,6 +1007,7 @@ namespace psycle
 					throw e;
 					return;
 #else
+					e;
 					return;
 #endif
 				}
@@ -1005,6 +1026,7 @@ namespace psycle
 					throw e;
 					return;
 #else
+					e;
 					return;
 #endif
 				}
@@ -1036,6 +1058,7 @@ namespace psycle
 				delete[] pData;
 				preset.Init(numParameters);
 #else
+				e;
 				delete[] pData;
 				preset.Init(numParameters);
 #endif
@@ -1052,6 +1075,7 @@ namespace psycle
 				}
 				catch(const std::exception &e)
 				{
+					e;
 #ifndef NDEBUG 
 					throw e;
 #endif

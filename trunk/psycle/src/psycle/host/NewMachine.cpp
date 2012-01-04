@@ -124,11 +124,12 @@ namespace psycle { namespace host {
 				{
 					int imgindex;
 					HTREEITEM hitem;
-					if ( _pPlugsInfo[i]->error.empty())
+					PluginInfo* pInfo = _pPlugsInfo[i];
+					if ( pInfo->error.empty())
 					{
-						if( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+						if( pInfo->mode == MACHMODE_GENERATOR)
 						{
-							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
+							if( pInfo->type == MACH_PLUGIN) 
 							{ 
 								imgindex = 2; 
 								hitem= hNodes[1]; 
@@ -141,7 +142,7 @@ namespace psycle { namespace host {
 						}
 						else
 						{
-							if( _pPlugsInfo[i]->type == MACH_PLUGIN) 
+							if( pInfo->type == MACH_PLUGIN) 
 							{ 
 								imgindex = 3; 
 								hitem= hNodes[1];
@@ -158,10 +159,10 @@ namespace psycle { namespace host {
 						imgindex = 6;
 						hitem=hNodes[3];
 					}
-					if(pluginName && _pPlugsInfo[i]->error.empty())
-						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					if(pluginName && pInfo->error.empty())
+						hPlug[i] = m_browser.InsertItem(pInfo->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					else {
-						boost::filesystem::path path(_pPlugsInfo[i]->dllname);
+						boost::filesystem::path path(pInfo->dllname);
 						if (path.filename() != "blwtbl.dll"
 								&& path.filename() != "fluidsynth.dll"
 								&& path.filename() != "asio.dll"
@@ -169,7 +170,7 @@ namespace psycle { namespace host {
 								&& path.filename() != "msvcr71.dll"
 								&& path.filename() != "msvcp80.dll"
 								&& path.filename() != "msvcr80.dll") {
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+							hPlug[i] = m_browser.InsertItem(pInfo->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 						}
 					}
 				}
@@ -192,11 +193,12 @@ namespace psycle { namespace host {
 				{
 					int imgindex;
 					HTREEITEM hitem;
-					if(_pPlugsInfo[i]->error.empty())
+					PluginInfo* pInfo = _pPlugsInfo[i];
+					if(pInfo->error.empty())
 					{
-						if(_pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+						if(pInfo->mode == MACHMODE_GENERATOR)
 						{
-							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+							if(pInfo->type == MACH_PLUGIN) 
 							{ 
 								imgindex = 2; 
 								hitem= hNodes[0]; 
@@ -209,7 +211,7 @@ namespace psycle { namespace host {
 						}
 						else
 						{
-							if(_pPlugsInfo[i]->type == MACH_PLUGIN) 
+							if(pInfo->type == MACH_PLUGIN) 
 							{ 
 								imgindex = 3; 
 								hitem= hNodes[1]; 
@@ -226,10 +228,10 @@ namespace psycle { namespace host {
 						imgindex = 6;
 						hitem=hNodes[2];
 					}
-					if(pluginName && _pPlugsInfo[i]->error.empty())
-						hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+					if(pluginName && pInfo->error.empty())
+						hPlug[i] = m_browser.InsertItem(pInfo->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 					else {
-						boost::filesystem::path path(_pPlugsInfo[i]->dllname);
+						boost::filesystem::path path(pInfo->dllname);
 						if (path.filename() != "blwtbl.dll"
 								&& path.filename() != "fluidsynth.dll"
 								&& path.filename() != "asio.dll"
@@ -237,7 +239,7 @@ namespace psycle { namespace host {
 								&& path.filename() != "msvcr71.dll"
 								&& path.filename() != "msvcp80.dll"
 								&& path.filename() != "msvcr80.dll") {
-							hPlug[i] = m_browser.InsertItem(_pPlugsInfo[i]->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
+							hPlug[i] = m_browser.InsertItem(pInfo->dllname.c_str(), imgindex, imgindex, hitem, TVI_SORT);
 						}
 					}
 
@@ -340,21 +342,22 @@ namespace psycle { namespace host {
 			}
 			else for (int i=0; i<_numPlugins; i++)
 			{
+				PluginInfo* pInfo = _pPlugsInfo[i];
 				if (tHand == hPlug[i])
 				{
 					{ //  Strip the directory and put just the dll name.
-						std::string str = _pPlugsInfo[i]->dllname;
+						std::string str = pInfo->dllname;
 						std::string::size_type pos = str.rfind('\\');
 						if(pos != std::string::npos)
 							str=str.substr(pos+1);
 						m_dllnameLabel.SetWindowText(str.c_str());
 					}
-					m_nameLabel.SetWindowText(_pPlugsInfo[i]->name.c_str());
-					if ( _pPlugsInfo[i]->error.empty())
-						m_descLabel.SetWindowText(_pPlugsInfo[i]->desc.c_str());
+					m_nameLabel.SetWindowText(pInfo->name.c_str());
+					if ( pInfo->error.empty())
+						m_descLabel.SetWindowText(pInfo->desc.c_str());
 					else
 					{	// Strip the function, and show only the error.
-						std::string str = _pPlugsInfo[i]->error;
+						std::string str = pInfo->error;
 						std::ostringstream s; s << std::endl;
 						std::string::size_type pos = str.find(s.str());
 						if(pos != std::string::npos)
@@ -362,34 +365,34 @@ namespace psycle { namespace host {
 
 						m_descLabel.SetWindowText(str.c_str());
 					}
-					if(_pPlugsInfo[i]->type == MACH_PLUGIN)
+					if(pInfo->type == MACH_PLUGIN)
 					{
-						m_versionLabel.SetWindowText(_pPlugsInfo[i]->version.c_str());
+						m_versionLabel.SetWindowText(pInfo->version.c_str());
 					} 
 					else
 					{	// convert integer to string.
 						std::ostringstream s;
-						std::istringstream s2(_pPlugsInfo[i]->version);
+						std::istringstream s2(pInfo->version);
 						int iver = 0;
 						s2 >> iver;
-						s << _pPlugsInfo[i]->version << " or " << std::hex << iver;
+						s << pInfo->version << " or " << std::hex << iver;
 						m_versionLabel.SetWindowText(s.str().c_str());
 					}
 					{	// convert integer to string.
 						std::ostringstream s;
-						if(_pPlugsInfo[i]->type == MACH_PLUGIN  && _pPlugsInfo[i]->APIversion > 0x10) {
-							s << std::hex << (_pPlugsInfo[i]->APIversion&0x7FFF);
+						if(pInfo->type == MACH_PLUGIN  && pInfo->APIversion > 0x10) {
+							s << std::hex << (pInfo->APIversion&0x7FFF);
 						}
 						else {
-							 s << _pPlugsInfo[i]->APIversion;
+							 s << pInfo->APIversion;
 						}
 						m_APIversionLabel.SetWindowText(s.str().c_str());
 					}
-					if ( _pPlugsInfo[i]->type == MACH_PLUGIN )
+					if ( pInfo->type == MACH_PLUGIN )
 					{
 						Outputmachine = MACH_PLUGIN;
 						selectedClass = native;
-						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR)
+						if ( pInfo->mode == MACHMODE_GENERATOR)
 						{
 							selectedMode = modegen;
 						}
@@ -401,7 +404,7 @@ namespace psycle { namespace host {
 					else
 					{
 						selectedClass = vstmac;
-						if ( _pPlugsInfo[i]->mode == MACHMODE_GENERATOR )
+						if ( pInfo->mode == MACHMODE_GENERATOR )
 						{
 							Outputmachine = MACH_VST;
 							selectedMode = modegen;
@@ -413,10 +416,10 @@ namespace psycle { namespace host {
 						}
 					}
 
-					shellIdx = _pPlugsInfo[i]->identifier;
-					psOutputDll = _pPlugsInfo[i]->dllname;
+					shellIdx = pInfo->identifier;
+					psOutputDll = pInfo->dllname;
 
-					m_Allow.SetCheck(!_pPlugsInfo[i]->allow);
+					m_Allow.SetCheck(!pInfo->allow);
 					m_Allow.EnableWindow(TRUE);
 				}
 			}

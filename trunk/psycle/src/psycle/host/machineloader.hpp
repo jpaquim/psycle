@@ -9,6 +9,8 @@ namespace psycle { namespace host {
 
 /*abstact*/ class MachineLoader {
 	public:
+		MachineLoader(){};
+		virtual ~MachineLoader(){};
 		virtual bool lookupDllName(const std::string, std::string & result, MachineType tye,int& shellIdx) = 0;
 		virtual bool TestFilename(const std::string & name,int shellIdx) = 0;
 

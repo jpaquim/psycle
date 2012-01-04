@@ -36,7 +36,6 @@ namespace psycle
 		bool Machine::autoStopMachine = false;
 
 		void Machine::crashed(std::exception const & e) throw() {
-			///\todo do we need thread synchronization?
 			///\todo gui needs to update
 			crashed_ = true;
 			_bypass = true;

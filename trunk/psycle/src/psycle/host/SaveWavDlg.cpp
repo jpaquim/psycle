@@ -699,7 +699,7 @@ namespace psycle { namespace host {
 			int stream_size = 16384; // Player has just a single buffer of 65535 samples to allocate both channels
 			while(!((CSaveWavDlg*)b)->kill_thread && theplayer._playing)  // the player automatically stops at end, if not looping.
 			{
-				theplayer.Work(&theplayer,stream_size);
+				Player::Work(&theplayer,stream_size);
 				((CSaveWavDlg*)b)->SaveTick();
 			}
 			theplayer.Stop();

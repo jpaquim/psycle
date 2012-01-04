@@ -70,7 +70,7 @@ namespace psycle
 			if(
 				// First, try current path since version 1.8.8
 				store.OpenGroup("devices\\direct-sound") ||
-				// else, resort try the old path used from versions 1.8.0 to 1.8.6 included
+				// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
 				store.OpenGroup("configuration--1.8\\devices\\direct-sound")
 			) {
 				store.ReadRaw("DeviceGuid", &device_guid_, sizeof(device_guid_));
@@ -318,7 +318,7 @@ namespace psycle
 		bool DirectSound::CreateCapturePort(PortCapt &port)
 		{
 			HRESULT hr;
-			//not try to open a port twice
+			//avoid opening a port twice
 			if (port._pDs) return true;
 			port._machinepos=0;
 

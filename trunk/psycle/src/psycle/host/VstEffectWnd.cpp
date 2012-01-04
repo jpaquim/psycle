@@ -60,9 +60,7 @@ namespace psycle { namespace host {
 
 		void CVstEffectWnd::OnClose()
 		{
-//			vstmachine().EnterCritical();             // make sure we're not processing 
 			vstmachine().EditClose();              // tell effect edit window's closed 
-//			vstmachine().LeaveCritical();             // re-enable processing          
 			std::list<HWND>::iterator it = secwinlist.begin();
 			while ( it != secwinlist.end() )
 			{

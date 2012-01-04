@@ -459,7 +459,7 @@ namespace psycle { namespace host {
 				this->SetFocus();
 			}
 			else
-				throw;
+				MessageBox("Unexpected scroll bar");
 			
 			CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
@@ -1408,7 +1408,8 @@ namespace psycle { namespace host {
 						insertPos = cursorPos;
 						break;
 					default:
-						throw;
+						MessageBox("Invalid option");
+						return;
 					}
 
 					short *pTmp = new signed short[timeInSamps + wdLength];		//create new buffer

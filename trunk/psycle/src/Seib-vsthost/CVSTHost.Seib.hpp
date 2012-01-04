@@ -32,12 +32,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "JBridgeEnabler.hpp"
 #include "CVSTPreset.hpp"
 //////////////////////////////////////////////////////////////////////////
-// This is part of Psycle, to catch the exceptions that happen when interacting
-// with the plugins. To use your own, replace 
-// PSYCLE__HOST__CATCH_ALL(*this) by whatever you find appropiate, like
-// catch(...) {} 
-#include <psycle/host/Machine.hpp> // for throw.
-//////////////////////////////////////////////////////////////////////////
 
 namespace seib {
 	namespace vst {
@@ -207,23 +201,30 @@ namespace seib {
 			PluginLoader *pluginloader;
 		};
 
+
+
 		/*****************************************************************************/
-		/* CEffect : class definition for audio effect objects                       */
+		/* Crashingclass : Helper class for exceptions                               */
+		/*                it is used in Psycle's implementation to indicate that the */
+		/*                plugin has crashed and disable it.                         */
 		/*****************************************************************************/
-		class CEffectWnd;
 		class CEffect;
 		class Crashingclass
 		{
 		public:
 			Crashingclass(){};
 			void SetEff(CEffect* ef){ this->ef = ef;}
-			void crashed(std::exception const & e) const;
+			void crashed(std::exception const & e);
 			CEffect* ef;
 		};
+		/*****************************************************************************/
+		/* CEffect : class definition for audio effect objects                       */
+		/*****************************************************************************/
+		class CEffectWnd;
 		class CEffect
 		{
 		public:
-			// Try to avoid to use the AEffect constructor. It acts as a wrapper then, not as an object.
+			// Try to avoid using the AEffect constructor. It acts as a wrapper then, not as an object.
 			CEffect(AEffect *effect);
 			CEffect(LoadedAEffect &loadstruct);
 			virtual ~CEffect();
@@ -244,6 +245,8 @@ namespace seib {
 			bool bShellPlugin;
 			bool bCanBypass;
 			bool bMainsState;
+		public:
+			Crashingclass crashclass;
 
 			// overridables
 		public:
@@ -251,9 +254,6 @@ namespace seib {
 			virtual bool LoadProgram(CFxProgram& fxstore);
 			virtual CFxBank SaveBank(bool preferchunk=false);
 			virtual CFxProgram SaveProgram(bool preferchunk=true);
-			virtual void EnterCritical(){;}
-			virtual void LeaveCritical(){;}
-			Crashingclass crashclass;
 			virtual void crashed2(std::exception const & e) {};
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
 			virtual bool WantsMidi() { return bWantMidi; }
@@ -292,11 +292,11 @@ namespace seib {
 
 			//////////////////////////////////////////////////////////////////////////
 			// Following comes the Wrapping of the VST Interface functions.
-			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes);
-			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes);
-			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames);
-			virtual void SetParameter(VstInt32 index, float parameter);
-			virtual float GetParameter(VstInt32 index);
+			virtual void DECLARE_VST_DEPRECATED(Process)(float **inputs, float **outputs, VstInt32 sampleframes) throw(std::runtime_error);
+			virtual void ProcessReplacing(float **inputs, float **outputs, VstInt32 sampleframes) throw(std::runtime_error);
+			virtual void ProcessDouble (double** inputs, double** outputs, VstInt32 sampleFrames) throw(std::runtime_error);
+			virtual void SetParameter(VstInt32 index, float parameter) throw(std::runtime_error);
+			virtual float GetParameter(VstInt32 index) throw(std::runtime_error);
 		public:
 			// Not to be used, except if no other way.
 			inline AEffect	*GetAEffect() { return aEffect; }
@@ -304,34 +304,35 @@ namespace seib {
 			// AEffect Properties
 			// magic is only used in the loader to verify that it is a VST plugin
 			//long int magic()
-			inline VstInt32 numPrograms() const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->numPrograms;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline VstInt32 numParams() const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->numParams;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline VstInt32 numInputs() const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->numInputs;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline VstInt32 numOutputs() const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->numOutputs;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
+			inline VstInt32 numPrograms() const	 { return aEffect->numPrograms;	}
+			inline VstInt32 numParams() const	 { return aEffect->numParams;	}
+			inline VstInt32 numInputs() const	 { return aEffect->numInputs;	}
+			inline VstInt32 numOutputs() const	 { return aEffect->numOutputs;	}
 			//flags
-			inline bool HasEditor()const	 throw(psycle::host::exceptions::function_error)					{	try { return aEffect->flags & effFlagsHasEditor;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool DECLARE_VST_DEPRECATED(HasClip)() const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->flags & effFlagsHasClip;		} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool DECLARE_VST_DEPRECATED(HasVu)() const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->flags & effFlagsHasVu;		} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool DECLARE_VST_DEPRECATED(CanInputMono)()const	 throw(psycle::host::exceptions::function_error){	try { return aEffect->flags & effFlagsCanMono;			} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool CanProcessReplace() const	throw(psycle::host::exceptions::function_error)				{	try { return aEffect->flags & effFlagsCanReplacing;		} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool ProgramIsChunk() const	throw(psycle::host::exceptions::function_error)					{	try { return aEffect->flags & effFlagsProgramChunks;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool IsSynth() const	throw(psycle::host::exceptions::function_error)							{	try { return aEffect->flags & effFlagsIsSynth;			} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool HasNoTail() const	throw(psycle::host::exceptions::function_error)						{	try { return aEffect->flags & effFlagsNoSoundInStop;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool DECLARE_VST_DEPRECATED(ExternalAsync)() const	throw(psycle::host::exceptions::function_error){	try { return aEffect->flags & effFlagsExtIsAsync;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline bool DECLARE_VST_DEPRECATED(ExternalBuffer)() const	throw(psycle::host::exceptions::function_error){	try { return aEffect->flags & effFlagsExtHasBuffer;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
+			inline bool HasEditor() const								{ return aEffect->flags & effFlagsHasEditor;	}
+			inline bool DECLARE_VST_DEPRECATED(HasClip)() const			{ return aEffect->flags & effFlagsHasClip;		}
+			inline bool DECLARE_VST_DEPRECATED(HasVu)() const			{ return aEffect->flags & effFlagsHasVu;		}
+			inline bool DECLARE_VST_DEPRECATED(CanInputMono)() const	{ return aEffect->flags & effFlagsCanMono;		}
+			inline bool CanProcessReplace() const						{ return aEffect->flags & effFlagsCanReplacing;	}
+			inline bool ProgramIsChunk() const							{ return aEffect->flags & effFlagsProgramChunks;}
+			inline bool IsSynth() const									{ return aEffect->flags & effFlagsIsSynth;		}
+			inline bool HasNoTail() const								{ return aEffect->flags & effFlagsNoSoundInStop;}
+			inline bool DECLARE_VST_DEPRECATED(ExternalAsync)() const	{ return aEffect->flags & effFlagsExtIsAsync;	}
+			inline bool DECLARE_VST_DEPRECATED(ExternalBuffer)() const	{ return aEffect->flags & effFlagsExtHasBuffer;	}
+			inline bool CanProcessDouble() const						{ return aEffect->flags & effFlagsCanDoubleReplacing;	}
 
-			inline VstInt32 DECLARE_VST_DEPRECATED(RealQualities)() const	throw(psycle::host::exceptions::function_error){	try { return aEffect->realQualities;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline VstInt32 DECLARE_VST_DEPRECATED(OffQualities)() const	throw(psycle::host::exceptions::function_error){	try { return aEffect->offQualities;		} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline float DECLARE_VST_DEPRECATED(IORatio)() const	throw(psycle::host::exceptions::function_error)		{	try { return aEffect->ioRatio;			} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass)  }
+			inline VstInt32 DECLARE_VST_DEPRECATED(RealQualities)() const	{ return aEffect->realQualities;	}
+			inline VstInt32 DECLARE_VST_DEPRECATED(OffQualities)() const	{ return aEffect->offQualities;		}
+			inline float DECLARE_VST_DEPRECATED(IORatio)() const			{ return aEffect->ioRatio;			}
 
 			// the real plugin ID.
-			inline VstInt32 uniqueId() const	throw(psycle::host::exceptions::function_error)	{	try { return aEffect->uniqueID;		} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
+			inline VstInt32 uniqueId() const	{ return aEffect->uniqueID;		}
 			// version() is never used (from my experience), in favour of GetVendorVersion(). Yet, it hasn't been deprecated in 2.4.
-			inline VstInt32 version() const	throw(psycle::host::exceptions::function_error)		{	try { return aEffect->version;		} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
-			inline VstInt32 initialDelay() const	throw(psycle::host::exceptions::function_error){	try { return aEffect->initialDelay;	} PSYCLE__HOST__CATCH_ALL_RETURN(crashclass) }
+			inline VstInt32 version() const		{ return aEffect->version;		}
+			inline VstInt32 initialDelay() const	{ return aEffect->initialDelay;	}
 
 		protected:
-			virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.) throw(psycle::host::exceptions::function_error);
+			virtual VstIntPtr Dispatch(VstInt32 opCode, VstInt32 index=0, VstIntPtr value=0, void* ptr=0, float opt=0.) throw(std::runtime_error);
 		public:
 			//////////////////////////////////////////////////////////////////////////
 			// plugin dispatch functions

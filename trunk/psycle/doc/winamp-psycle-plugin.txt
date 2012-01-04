@@ -36,7 +36,7 @@ $$      $$$$              $..$$     $$...........
 	This Plugin allows you to play .psy files containing Psycle Songs with
 	winamp, or any player compatible with winamp plugins (like XMPlay)
 
-	This release is based on the source code of Psycle 1.8.6.1
+	This release is based on the source code of Psycle 1.10.1
 	Newer releases will be based on psycle-core.
 
 
@@ -45,24 +45,39 @@ $$      $$$$              $..$$     $$...........
 
 	The package contains several files. This is the exact place where they should go:
 	
-	Winamp's directory (the directory where winamp.exe is located, Generally 
+	Winamp's directory (The directory where winamp.exe is located, generally 
 	C:\Program Files\Winamp)
 	
-	- boost_filesystem-vc71-mt-1_32.dll
-	- boost_thread-vc71-mt-1_32.dll
+	- boost_date_time-vc90-mt-1_41.dll
+	- boost_filesystem-vc90-mt-1_41.dll
+	- boost_system-vc90-mt-1_41.dll
+	- boost_thread-vc90-mt-1_41.dll
 	- universalis.dll
-	
-	Winamp's plugin directory (the directory of its plugins, Generally C:\Program Files\
-	Winamp\Plugins)
-	
-	- in_psycle.dll
 	- winamp-psycle-plugin.txt
 	
 	Note:
-	
 	If you have a file namde blwtbl.dll in your winamp's directory, delete it. The older
 	plugin needed that file to be there, but the new one doesn't, and if it finds it,
 	Druttis sublime won't work.
+	
+	Winamp's plugin directory (The directory of its plugins, generally C:\Program Files\
+	Winamp\Plugins)
+	
+	- in_psycle.dll
+	
+	If you use the Spanish translation of winamp, then you can also use the spanish
+	translation for the in_psycle plugin located in Lang\es-US.
+	It goes in the language dir (Concretely, C:\Program Files\Winamp\Lang\es-US\)
+	
+	- in_psycle.lng
+	
+	In the root directory of the .zip file, there is another "in_psycle.lng" file. This 
+	one is the english one, that you can use to create your own translation.
+	Modify it with a resource editor and copy it to Winamp\Lang\yourlang\.
+	Some resource editors:
+		ResEdit (free) (http://www.resedit.net/)
+		XN Resource Editor (free) (http://www.wilsonc.demon.co.uk/d10resourceeditor.htm)
+		Resource Editor (free) (http://melander.dk/reseditor/) 
 	
 
 \/ Limitations
@@ -73,11 +88,21 @@ $$      $$$$              $..$$     $$...........
 	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
 	· Cannot save the info.
 
+
 \/ Version Revision
 --------------------
+1.10 (12-12-2011)
+-----------------
+. Engine update to 1.10.1
+. Update of the plugin to support Winamp 5.5 translations. Compatibility maintained with 2.x compatible players
+. Support to specify audio bit depth and audio threads.
+. Support to save the configuration/cache on winamp's config dir (allows also portable use).
+
+
 1.3 (12-10-2009)
 ----------------
 · Engine update to 1.8.6.
+
 
 1.2 (19-10-2007)
 ----------------
