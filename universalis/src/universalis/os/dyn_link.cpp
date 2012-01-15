@@ -100,7 +100,11 @@ path_list_type lib_path() {
 void lib_path(path_list_type const & new_path) {
 	std::ostringstream s;
 	for(path_list_type::const_iterator i(new_path.begin()), e(new_path.end()); i != e;) {
-		s << i->directory_string();
+		#if BOOST_FILESYSTEM_VERSION >= 3
+			s << i->string();
+		#else
+			s << i->directory_string();
+		#endif
 		if(++i != e) s << path_list_sep;
 	}
 
@@ -152,7 +156,11 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 				//"lib" +
 			#endif
 			path.branch_path() / (
-				path.leaf() +
+				#if BOOST_FILESYSTEM_VERSION >= 3
+					path.string() +
+				#else
+					path.leaf() +
+				#endif
 				#if defined DIVERSALIS__OS__BIN_FMT__ELF
 					".so" // "." + version_string.str() // libfoo.so.0
 				#elif defined DIVERSALIS__OS__BIN_FMT__MAC_O
@@ -187,7 +195,11 @@ resolver::resolver(boost::filesystem::path const & path, unsigned int const & ve
 	underlying_(0)
 {
 	#if !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__POSIX
-		underlying_ = ::dlopen(path_.file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
+		#if BOOST_FILESYSTEM_VERSION >= 3
+			underlying_ = ::dlopen(path_.string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
+		#else
+			underlying_ = ::dlopen(path_.file_string().c_str(), RTLD_LAZY /*RTLD_NOW*/);
+		#endif
 		if(!opened()) open_error(path_, std::string(::dlerror()));
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 		// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
