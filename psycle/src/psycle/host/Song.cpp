@@ -860,6 +860,10 @@ namespace psycle
 					memmove(offset_source+EVENT_SIZE,offset_source,(SONGTRACKS-1-trackIdx)*EVENT_SIZE);
 					memcpy(offset_source,&blank,EVENT_SIZE);
 				}
+				for(int j(SONGTRACKS-1); j > trackIdx; j--) {
+					_trackNames[pat][j] = _trackNames[pat][j-1];
+				}
+				_trackNames[pat][trackIdx] = "";
 			}
 		}
 		int Song::GetHighestInstrumentIndex()

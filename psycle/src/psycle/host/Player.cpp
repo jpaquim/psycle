@@ -18,12 +18,13 @@
 #include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/value_mapper.hpp>
 #include <seib-vsthost/CVSTHost.Seib.hpp> // Included to interact directly with the host.
-
+#include <psycle/helpers/math.hpp>
 namespace psycle
 {
 	namespace host
 	{
 		using namespace seib::vst;
+		using namespace psycle::helpers::math;
 		namespace {
 			static thread_local bool this_thread_suspended_ = false;
 		}
@@ -597,6 +598,137 @@ void Player::clear_plan() {
 			_playPattern = song.playOrder[_playPosition];
 			_lineChanged = true;
 		}
+
+int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int seektime_ms,bool allowLoop)
+{
+	float songLength = 0;
+	float seektime = seektime_ms/1000.f;
+	int bpm_calc = song.BeatsPerMin();
+	int tpb_calc = song.LinesPerBeat();
+	float lineSeconds = 60.f/float(bpm_calc*tpb_calc);
+	int playPos=0;
+	while(playPos <song.playLength)
+	{
+		int pattern = song.playOrder[playPos];
+		unsigned char* const plineOffset = song._ppattern(pattern);
+		int loopCount=0;
+		int loopLine=0;
+		int patternJump = -1;
+		int playLine=0;
+		int l = 0;
+		while( playLine < song.patternLines[pattern])
+		{
+			int lineJump = -1;
+			int lsecChanged = false;
+			for(int track=0; track<song.SONGTRACKS; track++)
+			{
+				psycle::host::PatternEntry* pEntry = (psycle::host::PatternEntry*)(plineOffset+l+track);
+
+				if(pEntry->_note < psycle::host::notecommands::tweak || pEntry->_note == psycle::host::notecommands::empty) // If This isn't a tweak (twk/tws/mcm) then do
+				{
+					switch(pEntry->_cmd)
+					{
+					case psycle::host::PatternCmd::SET_TEMPO:
+						if(pEntry->_parameter != 0)
+						{
+							bpm_calc=pEntry->_parameter;
+						}
+						break;
+					case psycle::host::PatternCmd::EXTENDED:
+						if(pEntry->_parameter != 0)
+						{
+							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
+							{
+								tpb_calc=pEntry->_parameter;
+							}
+							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::PATTERN_DELAY )
+							{
+								lineSeconds*=1+(pEntry->_parameter&0x0F);
+								lsecChanged=true;
+							}
+							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::FINE_PATTERN_DELAY)
+							{
+								lineSeconds*=1.0f+((pEntry->_parameter&0x0F)*tpb_calc/24.0f);
+								lsecChanged=true;
+							}
+							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::PATTERN_LOOP)
+							{
+								int value = pEntry->_parameter&0x0F;
+								if (value == 0 )
+								{
+									loopLine = playLine;
+								} else if ( loopCount == 0 ) {
+									loopCount = value;
+									lineJump = loopLine;
+								} else {
+									if (--loopCount) lineJump = loopLine;
+									else loopLine = playLine+1; //This prevents infinite loop in specific cases.
+								}
+							}
+						}
+						break;
+					case psycle::host::PatternCmd::JUMP_TO_ORDER:
+						if ( pEntry->_parameter < song.playLength) {
+							if (pEntry->_parameter <= playPos && !allowLoop){
+								return lround<int>(songLength*1000.0f);
+							}
+							patternJump=pEntry->_parameter;
+							lineJump=0;
+						}
+						break;
+					case psycle::host::PatternCmd::BREAK_TO_LINE:
+						if (patternJump ==-1 ) 
+						{
+							if(playPos+1>=song.playLength) {
+								if(allowLoop) {
+									patternJump=0;
+								}
+								else {
+									return lround<int>(songLength*1000.0f);
+								}
+							}
+							else patternJump=playPos+1;
+						}
+						else if (patternJump == playPos && pEntry->_parameter <= playLine && !allowLoop) {
+							return lround<int>(songLength*1000.0f);
+						}
+						//No need to check limits. That is done by the loop.
+						lineJump= pEntry->_parameter;
+						break;
+					}
+				}
+			}
+			songLength += lineSeconds;
+			if ( seektime_ms > -1 && seektime <= songLength) {
+				Start(playPos,playLine);
+				return lround<int>(songLength*1000.0f);
+			}
+			else if (seqPos >=0 && seqPos <= playPos &&
+				(patLine == -1 || patLine <= playLine)) {
+				return lround<int>(songLength*1000.0f);
+			}
+			if ( lsecChanged ) { lineSeconds = 60.f/float(bpm_calc*tpb_calc); lsecChanged = false; }
+			if ( patternJump!=-1 ) {
+				playPos= patternJump;
+				playLine=lineJump;
+				l=playLine*MULTIPLY;
+				break;
+			}
+			else if ( lineJump!=-1) {
+				playLine=lineJump;
+				l=playLine*MULTIPLY;
+			}
+			else {
+				playLine++;
+				l+=MULTIPLY;
+			}
+		}
+		if ( patternJump==-1 ) {
+			playPos++;
+		}
+	}
+	return lround<int>(songLength*1000.0f);
+}
 
 void Player::thread_function(std::size_t thread_number) {
 	if(loggers::trace()) {

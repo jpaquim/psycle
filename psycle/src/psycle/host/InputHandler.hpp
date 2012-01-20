@@ -109,9 +109,10 @@ namespace psycle
 			UINT GetModifierIdx(UINT nFlags)
 			{
 				UINT idx=0;
-				if(GetKeyState(VK_SHIFT)<0) idx|=MOD_S;		// shift?
-				if(GetKeyState(VK_CONTROL)<0) idx|=MOD_C;	// ctrl?
-				if(nFlags&(1<<8)) idx|=MOD_E;				// extended?
+				if(GetKeyState(VK_SHIFT)<0) idx|=MOD_S;		// shift
+				if(GetKeyState(VK_CONTROL)<0) idx|=MOD_C;	// ctrl
+				if(nFlags&(1<<8)) idx|=MOD_E;				// extended
+				//todo: detection of alt? (simple alt is captured by windows. alt-gr could be captured)
 				return idx;
 			}
 		public:	

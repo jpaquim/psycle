@@ -288,6 +288,7 @@ namespace host {
 			void DrawMachineVol(int c, CDC *devc);
 			void DrawMachineVumeters(int c, CDC *devc);	
 			void DrawAllMachineVumeters(CDC *devc);	
+			void PrepareDrawAllMacVus();
 			void DrawMachineEditor(CDC *devc);
 			void DrawMachineHighlight(int macnum, CDC *devc, Machine *mac, int x, int y);
 			void DrawMachine(int macnum, CDC *devc);
@@ -475,6 +476,7 @@ namespace host {
 			afx_msg void OnConfigurationSettings();
 			afx_msg void OnEnableAudio();
 			afx_msg void OnUpdateEnableAudio(CCmdUI* pCmdUI);
+			afx_msg void OnRegenerateCache();
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

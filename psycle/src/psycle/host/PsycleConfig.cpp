@@ -260,7 +260,7 @@ namespace psycle { namespace host {
 			//wirecolour =	0x00C0C0C0;
 			colour =	0x009D7B71;
 			polycolour =	0x00B1978D;
-			wirecolour =	0x005F4741;
+			wirecolour =	0x00634D47;
 			triangle_size = 12;
 			wirewidth = 1;
 			wireaa = 1;
@@ -364,7 +364,7 @@ namespace psycle { namespace host {
 			MachineCoords.dEffectMute.y = 2;
 			MachineCoords.dEffectBypass.x = 89;
 			MachineCoords.dEffectBypass.y = 2;
-			MachineCoords.dEffectName.x = 19;
+			MachineCoords.dEffectName.x = 10;
 			MachineCoords.dEffectName.y = 47;
 			MachineCoords.bHasTransparency = true;
 			MachineCoords.cTransparency = 0x0000FF00;
@@ -625,10 +625,10 @@ namespace psycle { namespace host {
 			PatHeaderCoords.sBackground.x=0;
 			PatHeaderCoords.sBackground.y=0;
 			PatHeaderCoords.sBackground.width=113;
-			PatHeaderCoords.sBackground.height=22;
+			PatHeaderCoords.sBackground.height=23;
 			PatHeaderCoords.sNumber0.x = 0;
 			PatHeaderCoords.sNumber0.y = 44;
-			PatHeaderCoords.sNumber0.width = 9;
+			PatHeaderCoords.sNumber0.width = 7;
 			PatHeaderCoords.sNumber0.height = 12;
 			PatHeaderCoords.sRecordOn.x = 59;
 			PatHeaderCoords.sRecordOn.y = 24;

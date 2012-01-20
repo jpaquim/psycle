@@ -264,12 +264,12 @@ namespace psycle { namespace host {
 		void CKeyConfigDlg::OnBnClickedSpecialKeys()
 		{
 			CSpecialKeys dlg;
+			m_hotkey0.GetHotKey(dlg.key,dlg.mod);
 			if ( dlg.DoModal() == IDOK )
 			{
 				int idx = m_lstCmds.GetCurSel();
-				SaveHotKey(idx, dlg.mod, dlg.key);
-
-				FillCmdList();
+				SaveHotKey(idx, dlg.key, dlg.mod);
+				m_hotkey0.SetHotKey(dlg.key,dlg.mod);
 			}
 		}
 		void CKeyConfigDlg::OnNone() 
