@@ -16,6 +16,33 @@ namespace psycle { namespace host {
 			}
 		}
 
+		void CChildView::PrepareDrawAllMacVus()
+		{
+			for (int c=0; c<MAX_MACHINES-1; c++)
+			{
+				Machine* pMac = _pSong._pMachine[c];
+				if (pMac)
+				{
+					RECT r;
+					switch (pMac->_mode)
+					{
+					case MACHMODE_GENERATOR:
+						r.left = pMac->_x+MachineCoords->dGeneratorVu.x;
+						r.top = pMac->_y+MachineCoords->dGeneratorVu.y;
+						r.right = r.left + MachineCoords->dGeneratorVu.width;
+						r.bottom = r.top + MachineCoords->sGeneratorVu0.height;
+						break;
+					case MACHMODE_FX:
+						r.left = pMac->_x+MachineCoords->dEffectVu.x;
+						r.top = pMac->_y+MachineCoords->dEffectVu.y;
+						r.right = r.left + MachineCoords->dEffectVu.width;
+						r.bottom = r.top + MachineCoords->sEffectVu0.height;
+						break;
+					}
+					InvalidateRect(&r,false);
+				}
+			}
+		}
 		void CChildView::DrawAllMachineVumeters(CDC *devc)
 		{
 			if (macView->draw_vus)

@@ -13,8 +13,8 @@ public:
 	CSpecialKeys(CWnd* pParent = NULL);   // standard constructor
 	enum { IDD = IDD_SPECIALKEYS };
 
-	int key;
-	int mod;
+	WORD key;
+	WORD mod;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

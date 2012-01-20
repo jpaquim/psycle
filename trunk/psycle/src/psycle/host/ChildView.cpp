@@ -252,6 +252,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
 			ON_COMMAND(ID_CONFIGURATION_ENABLEAUDIO, OnEnableAudio)
 			ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_ENABLEAUDIO, OnUpdateEnableAudio)
+			ON_COMMAND(ID_CONFIGURATION_REGENERATEPLUGINCACHE, OnRegenerateCache)
 			ON_COMMAND(ID_CPUPERFORMANCE, OnHelpPsycleenviromentinfo)
 			ON_COMMAND(ID_MIDI_MONITOR, OnMidiMonitorDlg)
 			ON_COMMAND(ID_HELP_README, OnHelpReadme)
@@ -478,7 +479,10 @@ namespace psycle { namespace host {
 			else
 				PsycleGlobal::midi().m_midiMode = MODE_STEP;
 		}
-
+		void CChildView::OnRegenerateCache()
+		{
+			Global::machineload().ReScan();
+		}
 
 		/// Put exit destroying code here...
 		void CChildView::OnDestroy()
@@ -568,10 +572,10 @@ namespace psycle { namespace host {
 						updateMode = drawMode;
 						Invalidate(false);
 					}
-					else if ( drawMode == draw_modes::playback )
+					else if ( drawMode == draw_modes::playback && macView->draw_vus)
 					{
 						updateMode = drawMode;
-						Invalidate(false);
+						PrepareDrawAllMacVus();
 					}
 				}
 				break;

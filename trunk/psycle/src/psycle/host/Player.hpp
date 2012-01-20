@@ -38,6 +38,9 @@ namespace psycle
 		public:
 			/// Function to encapsulate the three functions above.
 			void ExecuteLine();
+			/// Calculates duration (of song or of sequence until position and line), or seeks to time.
+			/// returns number of milliseconds. seektime_ms is in milliseconds too
+			int CalcOrSeek(psycle::host::Song& song, int seqPos=-1, int patLine=-1, int seektime_ms = -1,bool allowLoop=false);
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
 			/// Contains the number of samples until a line change comes in.

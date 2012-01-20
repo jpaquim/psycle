@@ -706,43 +706,9 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	void SequenceBar::UpdatePlayOrder(bool mode)
 	{
 
-		int ll = m_pSong->playLength;
-
-		// take ff and fe commands into account
-		float songLength = 0;
-		int bpm = m_pSong->BeatsPerMin();
-		int tpb = m_pSong->LinesPerBeat();
-		for (int i=0; i <ll; i++)
-		{
-			int pattern = m_pSong->playOrder[i];
-			unsigned char* const plineOffset = m_pSong->_ppattern(pattern);
-			for (int l = 0; l < m_pSong->patternLines[pattern]*MULTIPLY; l+=MULTIPLY)
-			{
-				for (int t = 0; t < m_pSong->SONGTRACKS*EVENT_SIZE; t+=EVENT_SIZE)
-				{
-					PatternEntry* pEntry = (PatternEntry*)(plineOffset+l+t);
-					switch (pEntry->_cmd)
-					{
-					case 0xFF:
-						if ( pEntry->_parameter != 0 && (pEntry->_note < 121 || pEntry->_note == 255))
-						{
-							bpm=pEntry->_parameter;//+0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
-						}
-						break;
-						
-					case 0xFE:
-						if ( pEntry->_parameter != 0 && (pEntry->_note < 121 || pEntry->_note == 255))
-						{
-							tpb=pEntry->_parameter;
-						}
-						break;
-					}
-				}
-				songLength += (60.0f/(bpm * tpb));
-			}
-		}
-		
 		char buffer[16];
+		int songLength = Global::player().CalcOrSeek(*m_pSong)/1000;
+
 		sprintf(buffer, "%02d:%02d", ((int)songLength) / 60, ((int)songLength) % 60);
 		m_duration.SetWindowText(buffer);
 		

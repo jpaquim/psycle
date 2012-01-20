@@ -385,7 +385,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnViewsBankmanager()
 		{
-			CPresetsDlg dlg;
+			CPresetsDlg dlg(this);
 			dlg._pMachine=_machine;
 			dlg.DoModal();
 			int tempSelected=userSelected;

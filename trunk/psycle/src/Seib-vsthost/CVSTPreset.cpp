@@ -128,8 +128,8 @@ namespace seib {
 		bool CFxBase::WriteHeader()
 		{
 			Write(cMagic);
-			Write(0);
 			byteSizePos=ftell(pf);
+			Write(0);
 			Write(fxMagic);
 			Write(version);
 			Write(fxID);
