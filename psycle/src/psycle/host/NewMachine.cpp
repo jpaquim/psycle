@@ -180,6 +180,7 @@ namespace psycle { namespace host {
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
+				hInt[6] = m_browser.InsertItem("Note Duplicator2",0, 0, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[selectedClass],TVGN_CARET);
 			}
 			else
@@ -250,6 +251,7 @@ namespace psycle { namespace host {
 				hInt[3] = m_browser.InsertItem("Note Duplicator",0, 0, hNodes[0], TVI_SORT);
 				hInt[4] = m_browser.InsertItem("Send-Return Mixer",1, 1, intFxNode, TVI_SORT);
 				hInt[5] = m_browser.InsertItem("Wave In Recorder",0, 0, hNodes[0], TVI_SORT);
+				hInt[6] = m_browser.InsertItem("Note Duplicator2",0, 0, hNodes[0], TVI_SORT);
 				m_browser.Select(hNodes[selectedMode],TVGN_CARET);
 			}
 			Outputmachine = -1;
@@ -335,6 +337,18 @@ namespace psycle { namespace host {
 				m_versionLabel.SetWindowText("V1.1");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_RECORDER;
+				selectedClass = internal;
+				selectedMode = modegen;
+				m_Allow.SetCheck(FALSE);
+				m_Allow.EnableWindow(FALSE);
+			} else if (tHand == hInt[6]) 
+			{
+				m_nameLabel.SetWindowText("Note Duplicator 2");
+				m_descLabel.SetWindowText("Repeats and/or Splits the Events received to the selected machines");
+				m_dllnameLabel.SetWindowText("Internal Machine");
+				m_versionLabel.SetWindowText("V1.0");
+				m_APIversionLabel.SetWindowText("Internal");
+				Outputmachine = MACH_DUPLICATOR2;
 				selectedClass = internal;
 				selectedMode = modegen;
 				m_Allow.SetCheck(FALSE);

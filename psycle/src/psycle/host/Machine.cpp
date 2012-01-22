@@ -811,6 +811,10 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				if ( fullopen ) pMachine = new DuplicatorMac(index);
 				else pMachine = new Dummy(index);
 				break;
+			case MACH_DUPLICATOR2:
+				if ( fullopen ) pMachine = new DuplicatorMac2(index);
+				else pMachine = new Dummy(index);
+				break;
 			case MACH_MIXER:
 				if ( fullopen ) pMachine = new Mixer(index);
 				else pMachine = new Dummy(index);

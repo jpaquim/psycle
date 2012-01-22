@@ -83,7 +83,7 @@ namespace psycle { namespace host {
 
 			bool bAllowChanged;
 			HTREEITEM hNodes[MAX_BROWSER_NODES];
-			HTREEITEM hInt[6];
+			HTREEITEM hInt[7];
 			HTREEITEM hPlug[MAX_BROWSER_PLUGINS];
 
 		};

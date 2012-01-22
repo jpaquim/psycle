@@ -618,6 +618,7 @@ namespace psycle { namespace host {
 						break;
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
+                    case MACH_DUPLICATOR2:
 					case MACH_MIXER:
 						{
 							CFrameMachine* newwin;

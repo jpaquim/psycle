@@ -88,6 +88,9 @@ namespace psycle
 			case MACH_DUPLICATOR:
 				pMachine = new DuplicatorMac(songIdx);
 				break;
+			case MACH_DUPLICATOR2:
+				pMachine = new DuplicatorMac2(songIdx);
+				break;
 			case MACH_MIXER:
 				pMachine = new Mixer(songIdx);
 				break;
