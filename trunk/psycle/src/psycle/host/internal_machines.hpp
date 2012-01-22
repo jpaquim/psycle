@@ -32,23 +32,23 @@ class MultiMachine: public Machine
 {
 public:
 	MultiMachine();
-	MultiMachine(int index);
+	MultiMachine(int index, int nums);
 	virtual ~MultiMachine();
 	virtual void Init();
 	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 
 protected:
-	static const int NUMMACHINES=8;
+	int NUMMACHINES;
 	void AllocateVoice(int channel, int machine);
 	void DeallocateVoice(int channel, int machine);
 	virtual void CustomTick(int channel,int i, PatternEntry& pData) = 0;
 	virtual bool playsTrack(const int track) const;
-	short macOutput[NUMMACHINES];
-	short noteOffset[NUMMACHINES];
+	short macOutput[MAX_MACHINES];
+	short noteOffset[MAX_MACHINES];
 	bool bisTicking;
 	// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
-	int allocatedchans[MAX_TRACKS][NUMMACHINES];
+	int allocatedchans[MAX_TRACKS][MAX_MACHINES];
 	// indicates if the channel of the specified machine is in use or not
 	bool availablechans[MAX_MACHINES][MAX_TRACKS];
 };
@@ -75,9 +75,38 @@ public:
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
 protected:
-	short noteOffset[NUMMACHINES];
+	short noteOffset[MAX_MACHINES];
 	static char* _psName;
 };
+//////////////////////////////////////////////////////////////////////////
+/// Duplicator machine.
+class DuplicatorMac2 : public MultiMachine
+{
+public:
+	DuplicatorMac2();
+	DuplicatorMac2(int index);
+	virtual void CustomTick(int channel,int i, PatternEntry& pData);
+	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
+	virtual bool playsTrack(const int track) const;
+	virtual float GetAudioRange() const { return 32768.0f; }
+	virtual char* GetName(void) { return _psName; }
+	virtual int GetParamType(int numparam) { return 2; }
+	virtual void GetParamName(int numparam,char *name);
+	virtual void GetParamRange(int numparam, int &minval, int &maxval);
+	virtual void GetParamValue(int numparam,char *parVal);
+	virtual int GetParamValue(int numparam);
+	virtual bool SetParameter(int numparam,int value);
+	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
+	virtual void SaveSpecificChunk(RiffFile * pFile);
+	virtual void Tick(int channel,PatternEntry* pData);
+
+protected:
+	std::vector<short> noteOffset;
+	std::vector<short> lowKey;
+	std::vector<short> highKey;	
+	static char* _psName;
+};
+
 /*
 //////////////////////////////////////////////////////////////////////////
 /// Drum Matrix Machine 

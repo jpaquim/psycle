@@ -6,6 +6,7 @@
 #include "Player.hpp"
 #include "AudioDriver.hpp"
 #include "cpu_time_clock.hpp"
+#include "PsycleConfig.hpp"
 #include <psycle/helpers/math.hpp>
 
 namespace psycle
@@ -15,6 +16,7 @@ namespace psycle
 
 		char* Dummy::_psName = "DummyPlug";
 		char* DuplicatorMac::_psName = "Dupe it!";
+		char* DuplicatorMac2::_psName = "Split and Dupe it!";
 		char* AudioRecorder::_psName = "Recorder";
 		char* Mixer::_psName = "Mixer";
 
@@ -61,8 +63,9 @@ namespace psycle
 		}
 		//////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
-		MultiMachine::MultiMachine(int index)
-		{
+		MultiMachine::MultiMachine(int index, int nums)
+			: NUMMACHINES(nums)
+		{			
 			bisTicking = false;
 			for (int i=0;i<NUMMACHINES;i++)
 			{
@@ -122,7 +125,7 @@ namespace psycle
 		}
 
 
-		void MultiMachine::Tick( int channel,PatternEntry* pData)
+		void MultiMachine::Tick(int channel,PatternEntry* pData)
 		{
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
@@ -187,7 +190,7 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 		DuplicatorMac::DuplicatorMac(int index):
-			MultiMachine(index)
+			MultiMachine(index, 8)
 		{
 			_macIndex = index;
 			_numPars = NUMMACHINES*2;
@@ -222,7 +225,7 @@ namespace psycle
 			{
 				int note = pData._note+noteOffset[i];
 				if ( note>=notecommands::release) note=119;
-				else if (note<0 ) note=0;
+				else if (note<0 ) note=0;				
 				pData._note = static_cast<std::uint8_t>(note);
 			}
 		}
@@ -317,6 +320,195 @@ namespace psycle
 			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&macOutput,sizeof macOutput);
 			pFile->Write(&noteOffset,sizeof noteOffset);
+		}
+
+
+		//////////////////////////////////////////////////////////////////////////
+		// NoteDuplicator2
+		DuplicatorMac2::DuplicatorMac2(int index):
+			MultiMachine(index, 16), noteOffset(16, 0), lowKey(16, 0), highKey(16, 119)
+		{			
+			_macIndex = index;
+			_numPars = NUMMACHINES*4;
+			_nCols = 4;
+			_type = MACH_DUPLICATOR2;
+			_mode = MACHMODE_GENERATOR;
+			sprintf(_editName, _psName);
+		}		
+
+		void DuplicatorMac2::Tick(int channel,PatternEntry* pData) {
+			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
+			{
+				bisTicking=true;
+				for (int i=0;i<NUMMACHINES;i++)
+				{
+					if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
+					{	
+						PatternEntry pTemp = *pData;						
+						int note = pData->_note;
+						if (note>=lowKey[i]  && note<=highKey[i])
+						{
+							AllocateVoice(channel,i);						
+							CustomTick(channel,i, pTemp);
+						}
+						// this can happen if the parameter is the machine itself.
+						if (Global::song()._pMachine[macOutput[i]] != this) 
+						{
+							if ((note>=lowKey[i]  && note<=highKey[i]) || (pTemp._note >= notecommands::release && allocatedchans[channel][i]!=-1)) {
+								Global::song()._pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
+							}
+							if (pTemp._note >= notecommands::release)
+							{
+								DeallocateVoice(channel,i);
+							}							
+						} else
+						{
+							DeallocateVoice(channel,i);
+						}
+					}
+				}
+			}
+			bisTicking=false;
+		}
+
+		void DuplicatorMac2::CustomTick(int channel,int i,PatternEntry& pData)
+		{		
+			if ( pData._note < notecommands::release )
+			{
+				int note = pData._note+noteOffset[i];
+				if ( note>=notecommands::release) note=119;
+				else if (note<0 ) note=0;				
+				pData._note = static_cast<std::uint8_t>(note);
+			}
+		}
+
+		bool DuplicatorMac2::playsTrack(const int track) const
+		{
+			for (int i=0;i<NUMMACHINES;i++)
+			{
+				if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
+				{
+					if(allocatedchans[track][i] != -1 &&
+						Global::song()._pMachine[macOutput[i]]->playsTrack(allocatedchans[track][i]))
+					{
+							return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		void DuplicatorMac2::GetParamName(int numparam,char *name)
+		{
+			if (numparam >=0 && numparam<NUMMACHINES)
+			{
+				sprintf(name,"Output Machine %d",numparam);
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
+				sprintf(name,"Transpose %d",numparam-NUMMACHINES);
+			} else if (numparam<NUMMACHINES*3) {
+				sprintf(name,"Low Note %d",numparam-2*NUMMACHINES);
+			} else if (numparam < NUMMACHINES*4) {
+				sprintf(name,"High Note %d",numparam-3*NUMMACHINES);
+			}
+			else name[0] = '\0';
+		}
+
+		void DuplicatorMac2::GetParamRange(int numparam,int &minval,int &maxval)
+		{
+			if ( numparam < NUMMACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			else if ( numparam < NUMMACHINES*2) { minval = -48; maxval = 48; }
+			else { minval = 0; maxval = 119; }
+		}
+
+		int DuplicatorMac2::GetParamValue(int numparam)
+		{
+			if (numparam >=0 && numparam<NUMMACHINES)
+			{
+				return macOutput[numparam];
+			} else if (numparam >=NUMMACHINES && numparam <NUMMACHINES*2) {
+				return noteOffset[numparam-NUMMACHINES];
+			} else if (numparam >=NUMMACHINES && numparam <NUMMACHINES*3) {
+				return lowKey[numparam-2*NUMMACHINES];
+			} else if (numparam >=NUMMACHINES && numparam <NUMMACHINES*4) {
+				return highKey[numparam-3*NUMMACHINES];
+			}
+
+			else return 0;
+		}
+
+		void DuplicatorMac2::GetParamValue(int numparam, char *parVal)
+		{
+			int a440 = (PsycleGlobal::conf().patView().showA440) ? -12 : 0;
+			if (numparam >=0 && numparam <NUMMACHINES)
+			{
+				if ((macOutput[numparam] != -1 ) &&( Global::song()._pMachine[macOutput[numparam]] != NULL))
+				{
+					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song()._pMachine[macOutput[numparam]]->_editName);
+				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
+				else sprintf(parVal,"(disabled)");
+
+			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
+				if (noteOffset[numparam-NUMMACHINES] > 1 || noteOffset[numparam-NUMMACHINES] < -1)
+					sprintf(parVal,"%d Halftones",noteOffset[numparam-NUMMACHINES]);
+				else
+					sprintf(parVal,"%d Halftone",noteOffset[numparam-NUMMACHINES]);
+				/*char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUMMACHINES]+60)%12],(noteOffset[numparam-NUMMACHINES]+60)/12);*/
+			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*3) {
+				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+				sprintf(parVal,"%s%d",notes[(lowKey[numparam-2*NUMMACHINES])%12],(lowKey[numparam-2*NUMMACHINES]+a440)/12);
+			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*4) {
+				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+				sprintf(parVal,"%s%d",notes[(highKey[numparam-3*NUMMACHINES])%12],(highKey[numparam-3*NUMMACHINES]+a440)/12);
+			}
+
+			else parVal[0] = '\0';
+		}
+
+		bool DuplicatorMac2::SetParameter(int numparam, int value)
+		{
+			if (numparam >=0 && numparam<NUMMACHINES)
+			{
+				macOutput[numparam]=value;
+				return true;
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
+				noteOffset[numparam-NUMMACHINES]=value;
+				return true;
+			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*3) {
+				lowKey[numparam-2*NUMMACHINES]=value;
+				return true;
+			} if (numparam >=NUMMACHINES && numparam<NUMMACHINES*4) {
+				highKey[numparam-3*NUMMACHINES]=value;
+				return true;
+			}
+			else return false;
+		}
+
+		int DuplicatorMac2::GenerateAudio(int numSamples, bool measure_cpu_usage)
+		{
+			recursive_processed_ = true;
+			Standby(true);
+			return numSamples;
+		}
+		bool DuplicatorMac2::LoadSpecificChunk(RiffFile* pFile, int version)
+		{
+			UINT size;
+			pFile->Read(&size, sizeof size); // size of this part params to load
+			pFile->Read(&macOutput[0],sizeof macOutput);
+			pFile->Read(&noteOffset[0],sizeof noteOffset);
+			pFile->Read(&lowKey[0],sizeof lowKey);
+			pFile->Read(&highKey[0],sizeof highKey);
+			return true;
+		}
+
+		void DuplicatorMac2::SaveSpecificChunk(RiffFile* pFile)
+		{
+			UINT size = sizeof macOutput+ sizeof noteOffset + sizeof lowKey + sizeof highKey;
+			pFile->Write(&size, sizeof size); // size of this part params to save
+			pFile->Write(&macOutput[0],sizeof macOutput);
+			pFile->Write(&noteOffset[0],sizeof noteOffset);
+			pFile->Write(&lowKey[0],sizeof lowKey);
+			pFile->Write(&highKey[0],sizeof highKey);
 		}
 
 		//////////////////////////////////////////////////////////////////////////
