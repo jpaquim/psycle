@@ -80,6 +80,21 @@
       <OutputFile>$(TopOutputDir)/lib/$(RootNameSpace).lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+    <Lib>
+      <OutputFile>$(TopOutputDir)/lib/$(RootNameSpace).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+    <Lib>
+      <OutputFile>$(TopOutputDir)/lib/$(RootNameSpace).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+    <Lib>
+      <OutputFile>$(TopOutputDir)/lib/$(RootNameSpace).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\asio\asio.cpp" />
     <ClCompile Include="src\asio\asiodrivers.cpp" />
