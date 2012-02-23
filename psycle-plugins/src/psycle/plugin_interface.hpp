@@ -244,18 +244,22 @@ class CMachineInterface {
 		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		psycle::plugin_interface::CMachineInfo const * const \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
-		GetInfo() { return &info; } \
+		PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO() { return &info; } \
 		\
 		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		psycle::plugin_interface::CMachineInterface * \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
-		CreateMachine() { return new typename; } \
+		PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE() { return new typename; } \
 		\
 		PSYCLE__PLUGIN__DYN_LINK__EXPORT \
 		void \
 		PSYCLE__PLUGIN__CALLING_CONVENTION \
-		DeleteMachine(psycle::plugin_interface::CMachineInterface & plugin) { delete &plugin; } \
+		PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE(psycle::plugin_interface::CMachineInterface & plugin) { delete &plugin; } \
 	}
+
+#define PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO GetInfo
+#define PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE CreateMachine
+#define PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE DeleteMachine
 
 /// we don't use universalis/diversalis here because we want no dependency
 #if !defined _WIN32 && !defined __CYGWIN__ && !defined __MSYS__ && !defined _UWIN
@@ -270,5 +274,31 @@ class CMachineInterface {
 #else
 	#error please add definition for your compiler
 #endif
+
+#define PSYCLE__PLUGIN__DETAIL__STRINGIZED(x) PSYCLE__PLUGIN__DETAIL__STRINGIZED__NO_EXPANSION(x)
+#define PSYCLE__PLUGIN__DETAIL__STRINGIZED__NO_EXPANSION(x) #x
+
+namespace symbols {
+	const char get_info_function_name[] =
+		PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO);
+	typedef
+		psycle::plugin_interface::CMachineInfo const * const
+		(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
+		();
+	
+	const char create_machine_function_name[] =
+		PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__CREATE_MACHINE);
+	typedef
+		psycle::plugin_interface::CMachineInterface *
+		(PSYCLE__PLUGIN__CALLING_CONVENTION * create_machine_function)
+		();
+
+	const char delete_machine_function_name[] =
+		PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__DELETE_MACHINE);
+	typedef
+		void
+		(PSYCLE__PLUGIN__CALLING_CONVENTION * delete_machine_function)
+		(psycle::plugin_interface::CMachineInterface &);
+}
 	
 }}
