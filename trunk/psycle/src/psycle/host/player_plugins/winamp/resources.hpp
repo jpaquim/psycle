@@ -18,6 +18,9 @@
 #define IDS_INFO_MACHINES_USED          3013
 #define IDS_ABOUT2                      3014
 #define IDS_ABOUT3                      3015
+#define IDS_INFO_TRACKS                 3016
+#define IDS_INFO_ORDERS                 3017
+#define IDS_INFO_INSTRUMENTS_USED       3018
 #define IDC_SRATE                       4000
 #define IDC_AUTOSTOP                    4001
 #define IDC_NATIVEPATH                  4002
@@ -30,7 +33,6 @@
 #define IDC_TITLE                       4008
 #define IDC_BWVST64                     4008
 #define IDC_COMMENTS                    4009
-#define IDC_SRATE2                      4009
 #define IDC_BITDEPTH                    4009
 #define IDC_ARTIST                      4010
 #define IDC_INFO                        4011
