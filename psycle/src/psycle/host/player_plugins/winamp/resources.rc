@@ -267,6 +267,9 @@ BEGIN
     IDS_INFO_MACHINES_USED  "Machines used:"
     IDS_ABOUT2              "Coded by Psycledelics on"
     IDS_ABOUT3              "Some of the code is based on out_wave and in_mpc plugins.\nThanks to their authors."
+    IDS_INFO_TRACKS         "Song tracks:"
+    IDS_INFO_ORDERS         "Sequence:"
+    IDS_INFO_INSTRUMENTS_USED "Instruments used:"
 END
 
 #endif    // Catalan resources

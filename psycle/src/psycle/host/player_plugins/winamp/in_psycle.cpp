@@ -69,6 +69,7 @@ bool uninstallDelete=false;
 BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 bool BrowseForFolder(HWND m_hWnd, std::string& rpath);
+void GenerateSongTitle(in_char *title, const in_char *file, const in_char *author, const in_char *name);
 
 extern In_Module mod;
 
@@ -224,7 +225,9 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 	{
 		if (global_.player()._playing)
 		{
-			if (title) { sprintf(title,"%s - %s\0",global_.song().author.c_str(),global_.song().name.c_str()); }
+			if (title) { 
+				GenerateSongTitle(title, file, global_.song().author.c_str(), global_.song().name.c_str());
+			}
 			
 			if (length_in_ms) { *length_in_ms = global_.player().CalcOrSeek(global_.song()); }
 		}
@@ -249,7 +252,7 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 				songfile.Seek(0);
 				pSong->Load(&songfile,dlg,false);
 
-				if (title) { sprintf(title,"%s - %s\0",pSong->author.c_str(),pSong->name.c_str()); }
+				if (title) { GenerateSongTitle(title, file, pSong->author.c_str(), pSong->name.c_str()); }
 				if (length_in_ms)
 				{
 					*length_in_ms = global_.player().CalcOrSeek(*pSong);
@@ -266,7 +269,7 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 				
 				songfile.Read(Name, 32); Name[32]='\0';
 				songfile.Read(Author, 32); Author[32]='\0';
-				if (title) { sprintf(title,"%s - %s\0",Author,Name); }
+				if (title) { GenerateSongTitle(title, file, Author, Name); }
 
 				if (length_in_ms) { 
 					songfile.Skip(128); // Comment;
@@ -306,12 +309,7 @@ void getfileinfo(const in_char *file, in_char *title, int *length_in_ms)
 			}
 			songfile.Close();
 		}
-		if (title)
-		{
-			const char *p=file+strlen(file);
-			while (*p != '\\' && p >= file) p--;
-			strcpy(title,++p);
-		}
+		if (title) { GenerateSongTitle(title, file, NULL, NULL); }
 		if (length_in_ms ) *length_in_ms = -1000;
 	}
 }
@@ -505,6 +503,19 @@ extern "C" {
 //
 // Internal methods
 //
+void GenerateSongTitle(in_char *title, const in_char *file, const in_char *author, const in_char *name)
+{
+	if( author != NULL && name != NULL
+			&& (strcmp(author,"Unnamed") || strlen(author) == 0)
+			&& (strcmp(author,"Untitled") || strlen(name) == 0)) {
+		sprintf(title,"%s - %s",author,name);
+	}
+	else {
+		const char *p=file+strlen(file);
+		while (*p != '\\' && p >= file) p--;
+		strcpy(title,++p);
+	}
+}
 
 void SaveDialogSettings(HWND hwndDlg)
 {
@@ -753,7 +764,7 @@ BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				char valstr[255];
 				switch( pSong->_pMachine[i]->_type )
 				{
-					case psycle::host::MACH_VST: strcpy(tmp2,"V");break;
+					case psycle::host::MACH_VST: //fallthrough
 					case psycle::host::MACH_VSTFX: strcpy(tmp2,"V");break;
 					case psycle::host::MACH_PLUGIN: strcpy(tmp2,"N");break;
 					case psycle::host::MACH_MASTER: strcpy(tmp2,"M");break;
@@ -776,63 +787,86 @@ BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		if(usewasabi) 
 		{
-			wchar_t valstrw[255];
+			wchar_t valstrw[1024];
 			wchar_t* strfz = WASABI_API_LNGSTRINGW(IDS_INFO_FILESIZE);
+			wchar_t strtra[256];
 			wchar_t strbpm[256];
 			wchar_t strlpb[256];
+			wchar_t stror[256];
 			wchar_t strsl[256];
 			wchar_t strpu[256];
 			wchar_t strmu[256];
+			wchar_t striu[256];
+			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_TRACKS,strtra,256);
 			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_BPM,strbpm,256);
 			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_LPB,strlpb,256);
+			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_ORDERS,stror,256);
 			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_SONG_LENGTH,strsl,256);
 			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_PATTERNS_USED,strpu,256);
 			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_MACHINES_USED,strmu,256);
-
-			wsprintfW(valstrw,L"%s %i\n%s %i\n%s %i\n%s %02i:%02i\n%s %i\n%s %i",
+			WASABI_API_LNGSTRINGW_BUF(IDS_INFO_INSTRUMENTS_USED,striu,256);
+			wsprintfW(valstrw,L"%s %i\n%s %i\n%s %i\n%s %i\n%s %i\n%s %02i:%02i\n%s %i\n%s %i\n%s %i",
 				strfz,
 				pSong->filesize,
+				strtra,
+				pSong->SongTracks(),
 				strbpm,
 				pSong->BeatsPerMin(),
 				strlpb,
 				pSong->LinesPerBeat(),
+				stror,
+				pSong->playLength,
 				strsl,
 				i / 60, i % 60,
 				strpu,
 				pSong->GetNumPatterns(),
 				strmu,
-				j);
+				j,
+				striu,
+				pSong->GetNumInstruments());
 			SetDlgItemTextW(hwndDlg,IDC_INFO,valstrw);
 		}
 		else
 		{
-			char valstr[255];
+			char valstr[1024];
 			char strfz[128];
+			char strtra[128];
 			char strbpm[128];
 			char strlpb[128];
+			char stror[128];
 			char strsl[128];
 			char strpu[128];
 			char strmu[128];
+			char striu[128];
 			LoadString(mod.hDllInstance,IDS_INFO_FILESIZE,strfz,128);
+			LoadString(mod.hDllInstance,IDS_INFO_TRACKS,strtra,128);
 			LoadString(mod.hDllInstance,IDS_INFO_BPM,strbpm,128);
 			LoadString(mod.hDllInstance,IDS_INFO_LPB,strlpb,128);
+			LoadString(mod.hDllInstance,IDS_INFO_ORDERS,stror,128);
 			LoadString(mod.hDllInstance,IDS_INFO_SONG_LENGTH,strsl,128);
 			LoadString(mod.hDllInstance,IDS_INFO_PATTERNS_USED,strpu,128);
 			LoadString(mod.hDllInstance,IDS_INFO_MACHINES_USED,strmu,128);
+			LoadString(mod.hDllInstance,IDS_INFO_INSTRUMENTS_USED,striu,128);
 
-			sprintf(valstr,"%s %i\n%s %i\n%s %i\n%s %02i:%02i\n%s %i\n%s %i",
+			sprintf(valstr,"%s %i\n%s %i\n%s %i\n%s %i\n%s %i\n%s %02i:%02i\n%s %i\n%s %i\n%s %i",
 				strfz,
 				pSong->filesize,
+				strtra,
+				pSong->SongTracks(),
 				strbpm,
 				pSong->BeatsPerMin(),
 				strlpb,
 				pSong->LinesPerBeat(),
+				stror,
+				pSong->playLength,
 				strsl,
 				i / 60, i % 60,
 				strpu,
 				pSong->GetNumPatterns(),
 				strmu,
-				j);
+				j,
+				striu,
+				pSong->GetNumInstruments());
 			SetDlgItemText(hwndDlg,IDC_INFO,valstr);
 		}		
 		
