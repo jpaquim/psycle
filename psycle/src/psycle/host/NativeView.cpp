@@ -248,8 +248,16 @@ namespace psycle { namespace host {
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 
-				if (nv < minval) nv = minval;
-				if (nv > maxval) nv = maxval;
+				if (nv < minval) {
+					nv = minval;
+					tweakbase = helpers::math::lround<int,float>(nv);
+					sourcepoint=point.y;
+				}
+				if (nv > maxval) {
+					nv = maxval;
+					tweakbase = helpers::math::lround<int,float>(nv);
+					sourcepoint=point.y;
+				}
 				visualtweakvalue = nv;
 				prevval=helpers::math::lround<int,float>(nv);
 				_pMachine->SetParameter(tweakpar,prevval);
