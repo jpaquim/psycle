@@ -70,7 +70,7 @@ namespace psycle
 		//Version for the pattern data
 		#define CURRENT_FILE_VERSION_PATD	0x0001
 		//Version for the machine data
-		#define CURRENT_FILE_VERSION_MACD	0x0000
+		#define CURRENT_FILE_VERSION_MACD	0x0001
 		//Version for the instrument (Old sampler) data
 		#define CURRENT_FILE_VERSION_INSD	0x0001
 		//Version for the wave (old sampler) data

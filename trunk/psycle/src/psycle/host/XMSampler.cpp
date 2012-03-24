@@ -1965,6 +1965,7 @@ namespace psycle
 			_type = MACH_XMSAMPLER;
 			_mode = MACHMODE_GENERATOR;
 
+			InitializeSamplesVector();
 			_numVoices=0;
 			_resampler.quality(helpers::dsp::resampler::quality::linear);
 
@@ -1995,7 +1996,9 @@ namespace psycle
 				zxxMap[i].mode=0;
 				zxxMap[i].value=0;
 			}
-			sprintf(_editName, _psName);
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
+
 //			xdsp.Init(Global::player().SampleRate(), 1.0 / (1 << 20));
 		}
 
@@ -2408,14 +2411,13 @@ namespace psycle
 			}
 
 			else Standby(true);
-			recursive_processed_ = true;
 			return numSamples;
 		}// XMSampler::Work()
 
 		void XMSampler::WorkVoices(int numsamples)
 		{
-			float* psamL = _pSamplesL;
-			float* psamR = _pSamplesR;
+			float* psamL = samplesV[0];
+			float* psamR = samplesV[1];
 			int tmpsamples = numsamples;
 			//////////////////////////////////////////////////////////////////////////
 			//  If there is a tick change in this "numsamples" period, process it.
@@ -2427,7 +2429,7 @@ namespace psycle
 				{
 					//VoiceWork(ns, voice);
 					if(m_Voices[voice].IsPlaying()){
-						m_Voices[voice].Work(remainingticks,_pSamplesL,_pSamplesR,_resampler);
+						m_Voices[voice].Work(remainingticks,samplesV[0],samplesV[1],_resampler);
 					}
 				}
 				// Do the Tick jump.
@@ -2455,8 +2457,8 @@ namespace psycle
 			}
 			// Doing this here is faster than in voice, because it is done once per voice then.
 			float multip = m_GlobalVolume/128.0f;
-			psamL = _pSamplesL;
-			psamR = _pSamplesR;
+			psamL = samplesV[0];
+			psamR = samplesV[1];
 			for (int i=0; i<tmpsamples;i++)
 			{
 				*psamL = *(psamL++)*multip;

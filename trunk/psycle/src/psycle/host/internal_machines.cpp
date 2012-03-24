@@ -23,21 +23,25 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////
 		// Dummy
 		Dummy::Dummy(int index)
+			: wasVST(false)
 		{
 			_macIndex = index;
 			_type = MACH_DUMMY;
 			_mode = MACHMODE_FX;
-			sprintf(_editName, _psName);
-			wasVST = false;
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
+			InitializeSamplesVector();
 		}
 		Dummy::Dummy(Machine *mac)
-			:Machine(mac)
+			: Machine(mac)
 		{
 			_type = MACH_DUMMY;
-			_macIndex=mac->_macIndex;
+			_numPars = 0;
+			_nCols = 1;
 			std::stringstream s;
 			s << "X!" << mac->GetEditName();
 			SetEditName(s.str());
+			InitializeSamplesVector();
 
 			if (mac->_type == MACH_VST || mac->_type == MACH_VSTFX)
 				wasVST = true;
@@ -47,7 +51,6 @@ namespace psycle
 		int Dummy::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
 			UpdateVuAndStanbyFlag(numSamples);
-			recursive_processed_ = true;
 			return numSamples;
 		}
 
@@ -64,7 +67,7 @@ namespace psycle
 		//////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator
 		MultiMachine::MultiMachine(int index, int nums)
-			: NUMMACHINES(nums)
+			: NUMMACHINES(nums), noteOffset(nums, 0), macOutput(nums, 0)
 		{			
 			bisTicking = false;
 			for (int i=0;i<NUMMACHINES;i++)
@@ -82,6 +85,8 @@ namespace psycle
 					availablechans[i][j] = true;
 				}
 			}
+			///\todo: multimachine does not need buffers.
+			InitializeSamplesVector();
 		}
 		MultiMachine::~MultiMachine()
 		{
@@ -130,17 +135,18 @@ namespace psycle
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
+				Machine** machines = Global::song()._pMachine;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
+					if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
 					{
 						AllocateVoice(channel,i);
 						PatternEntry pTemp = *pData;
 						CustomTick(channel,i, pTemp);
 						// this can happen if the parameter is the machine itself.
-						if (Global::song()._pMachine[macOutput[i]] != this) 
+						if (machines[macOutput[i]] != this) 
 						{
-							Global::song()._pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
+							machines[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
 							if (pTemp._note >= notecommands::release )
 							{
 								DeallocateVoice(channel,i);
@@ -197,7 +203,8 @@ namespace psycle
 			_nCols = 2;
 			_type = MACH_DUPLICATOR;
 			_mode = MACHMODE_GENERATOR;
-			sprintf(_editName, _psName);
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
 
 			for (int i=0;i<NUMMACHINES;i++)
 			{
@@ -231,12 +238,13 @@ namespace psycle
 		}
 		bool DuplicatorMac::playsTrack(const int track) const
 		{
+			Machine** machines = Global::song()._pMachine;
 			for (int i=0;i<NUMMACHINES;i++)
 			{
-				if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
+				if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
 				{
 					if(allocatedchans[track][i] != -1 &&
-						Global::song()._pMachine[macOutput[i]]->playsTrack(allocatedchans[track][i]))
+						machines[macOutput[i]]->playsTrack(allocatedchans[track][i]))
 					{
 							return true;
 					}
@@ -272,11 +280,12 @@ namespace psycle
 		}
 		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
 		{
+			Machine** machines = Global::song()._pMachine;
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::song()._pMachine[macOutput[numparam]] != NULL))
+				if ((macOutput[numparam] != -1 ) &&( machines[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song()._pMachine[macOutput[numparam]]->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam],machines[macOutput[numparam]]->_editName);
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
@@ -301,7 +310,6 @@ namespace psycle
 
 		int DuplicatorMac::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
-			recursive_processed_ = true;
 			Standby(true);
 			return numSamples;
 		}
@@ -309,8 +317,8 @@ namespace psycle
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
-			pFile->Read(&macOutput,sizeof macOutput);
-			pFile->Read(&noteOffset,sizeof noteOffset);
+			pFile->Read(&macOutput,NUMMACHINES*sizeof(short));
+			pFile->Read(&noteOffset,NUMMACHINES*sizeof(short));
 			return true;
 		}
 
@@ -318,31 +326,33 @@ namespace psycle
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset;
 			pFile->Write(&size, sizeof size); // size of this part params to save
-			pFile->Write(&macOutput,sizeof macOutput);
-			pFile->Write(&noteOffset,sizeof noteOffset);
+			pFile->Write(&macOutput,NUMMACHINES*sizeof(short));
+			pFile->Write(&noteOffset,NUMMACHINES*sizeof(short));
 		}
 
 
 		//////////////////////////////////////////////////////////////////////////
 		// NoteDuplicator2
 		DuplicatorMac2::DuplicatorMac2(int index):
-			MultiMachine(index, 16), noteOffset(16, 0), lowKey(16, 0), highKey(16, 119)
+			MultiMachine(index, 16), lowKey(16, 0), highKey(16, 119)
 		{			
 			_macIndex = index;
 			_numPars = NUMMACHINES*4;
 			_nCols = 4;
 			_type = MACH_DUPLICATOR2;
 			_mode = MACHMODE_GENERATOR;
-			sprintf(_editName, _psName);
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
 		}		
 
 		void DuplicatorMac2::Tick(int channel,PatternEntry* pData) {
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
+				Machine** machines = Global::song()._pMachine;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
+					if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
 					{	
 						PatternEntry pTemp = *pData;						
 						int note = pData->_note;
@@ -352,10 +362,10 @@ namespace psycle
 							CustomTick(channel,i, pTemp);
 						}
 						// this can happen if the parameter is the machine itself.
-						if (Global::song()._pMachine[macOutput[i]] != this) 
+						if (machines[macOutput[i]] != this) 
 						{
 							if ((note>=lowKey[i]  && note<=highKey[i]) || (pTemp._note >= notecommands::release && allocatedchans[channel][i]!=-1)) {
-								Global::song()._pMachine[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
+								machines[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
 							}
 							if (pTemp._note >= notecommands::release)
 							{
@@ -384,12 +394,13 @@ namespace psycle
 
 		bool DuplicatorMac2::playsTrack(const int track) const
 		{
+			Machine** machines = Global::song()._pMachine;
 			for (int i=0;i<NUMMACHINES;i++)
 			{
-				if (macOutput[i] != -1 && Global::song()._pMachine[macOutput[i]] != NULL )
+				if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
 				{
 					if(allocatedchans[track][i] != -1 &&
-						Global::song()._pMachine[macOutput[i]]->playsTrack(allocatedchans[track][i]))
+						machines[macOutput[i]]->playsTrack(allocatedchans[track][i]))
 					{
 							return true;
 					}
@@ -438,12 +449,13 @@ namespace psycle
 
 		void DuplicatorMac2::GetParamValue(int numparam, char *parVal)
 		{
+			Machine** machines = Global::song()._pMachine;
 			int a440 = (PsycleGlobal::conf().patView().showA440) ? -12 : 0;
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( Global::song()._pMachine[macOutput[numparam]] != NULL))
+				if ((macOutput[numparam] != -1 ) &&( machines[macOutput[numparam]] != NULL))
 				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],Global::song()._pMachine[macOutput[numparam]]->_editName);
+					sprintf(parVal,"%X -%s",macOutput[numparam],machines[macOutput[numparam]]->_editName);
 				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
@@ -486,7 +498,6 @@ namespace psycle
 
 		int DuplicatorMac2::GenerateAudio(int numSamples, bool measure_cpu_usage)
 		{
-			recursive_processed_ = true;
 			Standby(true);
 			return numSamples;
 		}
@@ -494,10 +505,10 @@ namespace psycle
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
-			pFile->Read(&macOutput[0],sizeof macOutput);
-			pFile->Read(&noteOffset[0],sizeof noteOffset);
-			pFile->Read(&lowKey[0],sizeof lowKey);
-			pFile->Read(&highKey[0],sizeof highKey);
+			pFile->Read(&macOutput[0],NUMMACHINES*sizeof(short));
+			pFile->Read(&noteOffset[0],NUMMACHINES*sizeof(short));
+			pFile->Read(&lowKey[0],NUMMACHINES*sizeof(short));
+			pFile->Read(&highKey[0],NUMMACHINES*sizeof(short));
 			return true;
 		}
 
@@ -505,24 +516,26 @@ namespace psycle
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset + sizeof lowKey + sizeof highKey;
 			pFile->Write(&size, sizeof size); // size of this part params to save
-			pFile->Write(&macOutput[0],sizeof macOutput);
-			pFile->Write(&noteOffset[0],sizeof noteOffset);
-			pFile->Write(&lowKey[0],sizeof lowKey);
-			pFile->Write(&highKey[0],sizeof highKey);
+			pFile->Write(&macOutput[0],NUMMACHINES*sizeof(short));
+			pFile->Write(&noteOffset[0],NUMMACHINES*sizeof(short));
+			pFile->Write(&lowKey[0],NUMMACHINES*sizeof(short));
+			pFile->Write(&highKey[0],NUMMACHINES*sizeof(short));
 		}
 
 		//////////////////////////////////////////////////////////////////////////
 		// AudioRecorder
 		AudioRecorder::AudioRecorder(int index)
+			:_initialized(false)
+			,_captureidx(0)
+			,_gainvol(1.0f)
 		{
 			_macIndex = index;
 			_numPars = 0;
 			_type = MACH_RECORDER;
 			_mode = MACHMODE_GENERATOR;
-			sprintf(_editName, _psName);
-			_initialized=false;
-			_captureidx=0;
-			_gainvol=1.0f;
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
+			InitializeSamplesVector();
 		}
 		AudioRecorder::~AudioRecorder()
 		{
@@ -565,17 +578,16 @@ namespace psycle
 				}
 				mydriver.GetReadBuffers(_captureidx,&pleftorig,&prightorig,numSamples);
 				if(pleftorig == NULL) {
-					helpers::dsp::Clear(_pSamplesL,numSamples);
-					helpers::dsp::Clear(_pSamplesR,numSamples);
+					helpers::dsp::Clear(samplesV[0],numSamples);
+					helpers::dsp::Clear(samplesV[0],numSamples);
 				}
 				else {
-					helpers::dsp::MovMul(pleftorig,_pSamplesL,numSamples,_gainvol);
-					helpers::dsp::MovMul(prightorig,_pSamplesR,numSamples,_gainvol);
+					helpers::dsp::MovMul(pleftorig,samplesV[0],numSamples,_gainvol);
+					helpers::dsp::MovMul(prightorig,samplesV[0],numSamples,_gainvol);
 				}
 				UpdateVuAndStanbyFlag(numSamples);
 			}
 			else Standby(true);
-			recursive_processed_ = true;
 			return numSamples;
 		}
 		bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
@@ -603,10 +615,17 @@ namespace psycle
 			_numPars = 0x100;
 			_type = MACH_MIXER;
 			_mode = MACHMODE_FX;
-			sprintf(_editName, _psName);
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
 			mixed=true;
 			sched_returns_processed_curr=0;
 			sched_returns_processed_prev=0;
+			InitializeSamplesVector();
+			inputs_.reserve(MAX_CONNECTIONS);
+			sends_.reserve(MAX_CONNECTIONS);
+			//This reserve is especially important, since it contains the
+			//addresses of Wire, which are referenced by from outWires.
+			returns_.reserve(MAX_CONNECTIONS);
 		}
 
 		Mixer::~Mixer() throw()
@@ -654,8 +673,8 @@ namespace psycle
 				cpu_time_clock::time_point t0;
 				if(measure_cpu_usage) t0 = cpu_time_clock::now();
 				Mix(frames);
-				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-				Machine::UpdateVuAndStanbyFlag(frames);
+				helpers::dsp::Undenormalize(samplesV[0], samplesV[1], frames);
+				UpdateVuAndStanbyFlag(frames);
 				if(measure_cpu_usage) {
 					cpu_time_clock::time_point const t1(cpu_time_clock::now());
 					accumulate_processing_time(t1 - t0);
@@ -673,11 +692,10 @@ namespace psycle
 			int i;
 			for (i=sched_returns_processed_curr; i<numsends(); i++)
 			{
-				if (sends_[i].IsValid())
+				if (SendValid(i))
 				{
-					Machine* pSendMachine = Global::song()._pMachine[sends_[i].machine_];
-					assert(pSendMachine);
-					if (!pSendMachine->recursive_processed_ && !pSendMachine->recursive_is_processing_)
+					Machine& pSendMachine = Send(i).GetDstMachine();
+					if (!pSendMachine.recursive_processed_ && !pSendMachine.recursive_is_processing_)
 					{ 
 						cpu_time_clock::time_point t0;
 						if(measure_cpu_usage) t0 = cpu_time_clock::now();
@@ -687,56 +705,50 @@ namespace psycle
 							if ( solocolumn_ >=0 && solocolumn_ < MAX_CONNECTIONS)
 							{
 								int j = solocolumn_;
-								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
+								if (inWires[j].Enabled() && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
-									assert(pInMachine);
-									if(!pInMachine->_mute && !pInMachine->Standby())
+									Machine& pInMachine = inWires[j].GetSrcMachine();
+									if(!pInMachine._mute && !pInMachine.Standby())
 									{
-										helpers::dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
-										helpers::dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+										MixInToSend(j,i, numSamples);
 										soundready=true;
 									}
 								}
 							}
 							else for (int j=0; j<numinputs(); j++)
 							{
-								if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
+								if (inWires[j].Enabled() && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 								{
-									Machine* pInMachine = Global::song()._pMachine[_inputMachines[j]];
-									assert(pInMachine);
-									if(!pInMachine->_mute && !pInMachine->Standby())
+									Machine& pInMachine = inWires[j].GetSrcMachine();
+									if(!pInMachine._mute && !pInMachine.Standby())
 									{
-										helpers::dsp::Add(pInMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pInMachine->_lVol*_sendvolpl[j][i]);
-										helpers::dsp::Add(pInMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pInMachine->_rVol*_sendvolpr[j][i]);
+										MixInToSend(j,i, numSamples);
 										soundready=true;
 									}
 								}
 							}
 							for (int j=0; j<i; j++)
 							{
-								if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j][i] != 0.0f || mixvolretpr[j][i] != 0.0f ))
+								if (Return(j).IsValid() && Return(j).SendsTo(i) && !Return(j).Mute() && (mixvolretpl[j][i] != 0.0f || mixvolretpr[j][i] != 0.0f ))
 								{
-									Machine* pRetMachine = Global::song()._pMachine[Return(j).Wire().machine_];
-									assert(pRetMachine);
+									Machine& pRetMachine = Return(j).GetWire().GetSrcMachine();
 									// Note: Since mixer allows to route returns to other sends, this needs
 									// to stop when the first of such routes is found.
 									if(!recurse) 
 									{
-										if(!pRetMachine->sched_processed_) {
+										if(!pRetMachine.sched_processed_) {
 											sched_returns_processed_curr=i;
 											return;
 										}
 									}
-									if(!pRetMachine->_mute && !pRetMachine->Standby())
+									if(!pRetMachine._mute && !pRetMachine.Standby())
 									{
-										helpers::dsp::Add(pRetMachine->_pSamplesL, pSendMachine->_pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[j][i]);
-										helpers::dsp::Add(pRetMachine->_pSamplesR, pSendMachine->_pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[j][i]);
+										MixReturnToSend(j,i, numSamples);
 										soundready=true;
 									}
 								}
 							}
-							if (soundready) pSendMachine->Standby(false);
+							if (soundready) pSendMachine.Standby(false);
 						}
 
 						// tell the FX to work, now that the input is ready.
@@ -746,17 +758,40 @@ namespace psycle
 								cpu_time_clock::time_point const t1(cpu_time_clock::now());
 								accumulate_processing_time(t1 - t0);
 							}
-							Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
-							pRetMachine->recursive_process(numSamples, measure_cpu_usage);
+							Machine& pRetMachine = Return(i).GetWire().GetSrcMachine();
+							pRetMachine.recursive_process(numSamples, measure_cpu_usage);
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
-							if(!pRetMachine->Standby())Standby(false);
+							if(!pRetMachine.Standby())Standby(false);
 						}
 					}
 				}
 			}
 			sched_returns_processed_curr=i;
 		}
-
+		void Mixer::MixInToSend(int inIdx,int outIdx, int numSamples)
+		{
+			const Wire::Mapping & map = sendMapping[inIdx][outIdx];
+			const Machine &pInMachine = inWires[inIdx].GetSrcMachine();
+			const Machine &pSendMachine = sends_[outIdx]->GetDstMachine();
+			for(int i(0);i<map.size();i++) {
+				Wire::PinConnection pin = map[i];
+				helpers::dsp::Add(pInMachine.samplesV[pin.first], pSendMachine.samplesV[pin.second], numSamples, 
+					(pin.first%2)?pInMachine._rVol*_sendvolpr[inIdx][outIdx]:pInMachine._lVol*_sendvolpl[inIdx][outIdx]);
+				//math::erase_all_nans_infinities_and_denormals(pSendMachine.samplesV[pin.second], numSamples);
+			}
+		}
+		void Mixer::MixReturnToSend(int inIdx,int outIdx, int numSamples)
+		{
+			const Wire::Mapping & map = sendMapping[MAX_CONNECTIONS+inIdx][outIdx];
+			Machine &pRetMachine = Return(inIdx).GetWire().GetSrcMachine();
+			Machine &pSendMachine = sends_[outIdx]->GetDstMachine();
+			for(int i(0);i<map.size();i++) {
+				Wire::PinConnection pin = map[i];
+				helpers::dsp::Add(pRetMachine.samplesV[pin.first], pSendMachine.samplesV[pin.second], numSamples,
+					(pin.first%2)?pRetMachine._rVol*mixvolretpr[inIdx][outIdx]:pRetMachine._lVol*mixvolretpl[inIdx][outIdx]);
+				//math::erase_all_nans_infinities_and_denormals(pSendMachine.samplesV[pin.second], numSamples);
+			}
+		}
 		void Mixer::Mix(int numSamples)
 		{
 			if ( master_.DryWetMix() > 0.0f)
@@ -766,25 +801,21 @@ namespace psycle
 					int i= solocolumn_-MAX_CONNECTIONS;
 					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
-						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
-						assert(pRetMachine);
-						if(!pRetMachine->_mute && !pRetMachine->Standby())
+						Machine& pRetMachine = Return(i).GetWire().GetSrcMachine();
+						if(!pRetMachine._mute && !pRetMachine.Standby())
 						{
-							helpers::dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i][MAX_CONNECTIONS]);
-							helpers::dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i][MAX_CONNECTIONS]);
+							Return(i).GetWire().Mix(numSamples,pRetMachine._lVol*mixvolretpl[i][MAX_CONNECTIONS],pRetMachine._rVol*mixvolretpr[i][MAX_CONNECTIONS]);
 						}
 					}
 				}
 				else for (int i=0; i<numreturns(); i++)
 				{
-					if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
+					if (ReturnValid(i) && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 					{
-						Machine* pRetMachine = Global::song()._pMachine[Return(i).Wire().machine_];
-						assert(pRetMachine);
-						if(!pRetMachine->_mute && !pRetMachine->Standby())
+						Machine& pRetMachine = Return(i).GetWire().GetSrcMachine();
+						if(!pRetMachine._mute && !pRetMachine.Standby())
 						{
-							helpers::dsp::Add(pRetMachine->_pSamplesL, _pSamplesL, numSamples, pRetMachine->_lVol*mixvolretpl[i][MAX_CONNECTIONS]);
-							helpers::dsp::Add(pRetMachine->_pSamplesR, _pSamplesR, numSamples, pRetMachine->_rVol*mixvolretpr[i][MAX_CONNECTIONS]);
+							Return(i).GetWire().Mix(numSamples,pRetMachine._lVol*mixvolretpl[i][MAX_CONNECTIONS],pRetMachine._rVol*mixvolretpr[i][MAX_CONNECTIONS]);
 						}
 					}
 				}
@@ -796,25 +827,21 @@ namespace psycle
 					int i = solocolumn_;
 					if (ChannelValid(i) && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
-						assert(pInMachine);
-						if(!pInMachine->_mute && !pInMachine->Standby())
+						Machine& pInMachine = inWires[i].GetSrcMachine();
+						if(!pInMachine._mute && !pInMachine.Standby())
 						{
-							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
-							helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
+							inWires[i].Mix(numSamples,pInMachine._lVol*mixvolpl[i],pInMachine._rVol*mixvolpr[i]);
 						}
 					}
 				}
 				else for (int i=0; i<numinputs(); i++)
 				{
-					if (_inputCon[i] && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
+					if (inWires[i].Enabled() && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 					{
-						Machine* pInMachine = Global::song()._pMachine[_inputMachines[i]];
-						assert(pInMachine);
-						if(!pInMachine->_mute && !pInMachine->Standby())
+						Machine& pInMachine = inWires[i].GetSrcMachine();
+						if(!pInMachine._mute && !pInMachine.Standby())
 						{
-							helpers::dsp::Add(pInMachine->_pSamplesL, _pSamplesL, numSamples, pInMachine->_lVol*mixvolpl[i]);
-							helpers::dsp::Add(pInMachine->_pSamplesR, _pSamplesR, numSamples, pInMachine->_rVol*mixvolpr[i]);
+							inWires[i].Mix(numSamples,pInMachine._lVol*mixvolpl[i],pInMachine._rVol*mixvolpr[i]);
 						}
 					}
 				}
@@ -822,15 +849,21 @@ namespace psycle
 		}
 
 		/// tells the scheduler which machines to process before this one
-		void Mixer::sched_inputs(sched_deps & result) const {
+		void Mixer::sched_inputs(sched_deps & result) const
+		{
 			if(mixed) {
 				// step 1: receive all standard inputs
-				Machine::sched_inputs(result);
+				for(int c(0); c < MAX_CONNECTIONS; ++c) if(inWires[c].Enabled()) {
+					if (inWires[c].GetSrcMachine()._isMixerSend) {
+						continue;
+					}
+					result.push_back(&inWires[c].GetSrcMachine());
+				}
 			} else {
 				// step 2: get the output from return fx that have been processed
 				for(unsigned int i = sched_returns_processed_prev; i < sched_returns_processed_curr; ++i) {
 					if(Return(i).IsValid()) {
-						Machine & returned(*Global::song()._pMachine[Return(i).Wire().machine_]);
+						Machine & returned = Return(i).GetWire().GetSrcMachine();
 						result.push_back(&returned);
 					}
 				}
@@ -838,11 +871,12 @@ namespace psycle
 		}
 
 		/// tells the scheduler which machines may be processed after this one
-		void Mixer::sched_outputs(sched_deps & result) const {
+		void Mixer::sched_outputs(sched_deps & result) const
+		{
 			if(!mixed) {
 				// step 1: signal sent to sends. Identify them.
-				for (unsigned int i=sched_returns_processed_prev; i<sched_returns_processed_curr; i++) if (Send(i).IsValid()) {
-					Machine & input(*Global::song()._pMachine[Send(i).machine_]);
+				for (unsigned int i=sched_returns_processed_prev; i<sched_returns_processed_curr; i++) if (SendValid(i)) {
+					Machine & input = Send(i).GetDstMachine();
 					result.push_back(&input);
 				}
 			} else {
@@ -852,7 +886,8 @@ namespace psycle
 		}
 
 		/// called by the scheduler to ask for the actual processing of the machine
-		bool Mixer::sched_process(unsigned int frames, bool measure_cpu_usage) {
+		bool Mixer::sched_process(unsigned int frames, bool measure_cpu_usage)
+		{
 			cpu_time_clock::time_point t0;
 			if(measure_cpu_usage) t0 = cpu_time_clock::now();
 
@@ -866,27 +901,30 @@ namespace psycle
 					sched_returns_processed_prev = sched_returns_processed_curr;
 					sched_returns_processed_curr = numreturns();
 				}
-			} else {
+			}
+			else {
 				// step 2: mix input with return fx to generate output
 				if(Bypass()) {
-					for (int i=0; i<numinputs(); i++) if (_inputCon[i])	{
-						Machine & input_node(*Global::song()._pMachine[_inputMachines[i]]);
+					for (int i=0; i<numinputs(); i++) if (inWires[i].Enabled())	{
+						Machine & input_node = inWires[i].GetSrcMachine();
 						if(!input_node._mute && !input_node.Standby()) {
-							helpers::dsp::Add(input_node._pSamplesL, _pSamplesL, frames, input_node._lVol);
-							helpers::dsp::Add(input_node._pSamplesR, _pSamplesR, frames, input_node._rVol);
+							inWires[i].Mix(frames,input_node._lVol,input_node._rVol);
 						}
 					}
 				}
 				else if(!_mute) {
 					Mix(frames);
 				}
-				helpers::dsp::Undenormalize(_pSamplesL, _pSamplesR, frames);
-				Machine::UpdateVuAndStanbyFlag(frames);
+				int pins = GetNumInputPins();
+				for(int i(0);i<pins;i++) {
+					math::erase_all_nans_infinities_and_denormals(samplesV[i], frames);
+				}
+				UpdateVuAndStanbyFlag(frames);
 				mixed = true;
 				sched_returns_processed_curr=0;
 				++processing_count_;
 			}
-			if(measure_cpu_usage){ 
+			if (measure_cpu_usage) { 
 				cpu_time_clock::time_point const t1(cpu_time_clock::now());
 				accumulate_processing_time(t1 - t0);
 			}
@@ -895,85 +933,69 @@ namespace psycle
 
 		float Mixer::GetWireVolume(int wireIndex)
 		{
-			if (wireIndex< MAX_CONNECTIONS)
+			if (wireIndex< MAX_CONNECTIONS) {
 				return Machine::GetWireVolume(wireIndex);
-			else if ( ReturnValid(wireIndex-MAX_CONNECTIONS) )
-				return Return(wireIndex-MAX_CONNECTIONS).Wire().volume_;
+			}
+			else if ( ReturnValid(wireIndex-MAX_CONNECTIONS) ) {
+				return Return(wireIndex-MAX_CONNECTIONS).GetWire().GetVolume();
+			}
 			return 0;
 		}
 		void Mixer::SetWireVolume(int wireIndex,float value)
 		{
-			if (wireIndex < MAX_CONNECTIONS)
-			{
+			if (wireIndex < MAX_CONNECTIONS) {
 				Machine::SetWireVolume(wireIndex,value);
-				if (ChannelValid(wireIndex))
-				{
+			}
+			else if (ReturnValid(wireIndex-MAX_CONNECTIONS)) {
+				Return(wireIndex-MAX_CONNECTIONS).GetWire().SetVolume(value);
+			}
+		}
+		void Mixer::OnWireVolChanged(Wire & wire) 
+		{
+			int wireIndex = FindInputWire(&wire);
+			if (wireIndex < MAX_CONNECTIONS) {
+				Machine::OnWireVolChanged(wire);
+				if (ChannelValid(wireIndex)) {
 					RecalcChannel(wireIndex);
 				}
 			}
-			else if (ReturnValid(wireIndex-MAX_CONNECTIONS))
-			{
-				Return(wireIndex-MAX_CONNECTIONS).Wire().volume_ = value;
+			else if (ReturnValid(wireIndex-MAX_CONNECTIONS)) {
 				RecalcReturn(wireIndex-MAX_CONNECTIONS);
 			}
 		}
-		void Mixer::InsertInputWireIndex(Song& pSong,int wireIndex, int srcmac, float wiremultiplier,float initialvol)
+		int Mixer::FindInputWire(const Wire* pWireToFind) const
 		{
-			if (wireIndex< MAX_CONNECTIONS)
-			{
-				// If we're replacing an existing connection, keep the sends
-				if (ChannelValid(wireIndex))
-				{
-					InputChannel chan = Channel(wireIndex);
-					InsertChannel(wireIndex,&chan);
-				} else {
-					InsertChannel(wireIndex);
-				}
-				Machine::InsertInputWireIndex(pSong,wireIndex,srcmac,wiremultiplier,initialvol);
-				RecalcChannel(wireIndex);
-				for (int i(0);i<numsends();++i)
-				{
-					RecalcSend(wireIndex,i);
+			int wire = Machine::FindInputWire(pWireToFind);
+			if (wire == -1) {
+				for (int c=0; c<numreturns(); c++) {
+					if (&Return(c).GetWire() == pWireToFind) {
+						wire = c+MAX_CONNECTIONS;
+						break;
+					}
 				}
 			}
-			else
-			{
-				wireIndex-=MAX_CONNECTIONS;
-				SetMixerSendFlag(pSong,pSong._pMachine[srcmac]);
-				MixerWire wire(srcmac,0);
-				// If we're replacing an existing connection
-				if ( ReturnValid(wireIndex))
-				{
-					ReturnChannel ret = Return(wireIndex);
-					ret.Wire() = wire;
-					InsertReturn(wireIndex,&ret);
-					InsertSend(wireIndex,wire);
-
-				} else {
-					InsertReturn(wireIndex,wire);
-					InsertSend(wireIndex,wire);
-				}
-				Return(wireIndex).Wire().volume_ = initialvol;
-				Return(wireIndex).Wire().normalize_ = wiremultiplier;
-				sends_[wireIndex].volume_ = 1.0f;
-				sends_[wireIndex].normalize_ = 1.0f/wiremultiplier;
-				RecalcReturn(wireIndex);
-				for(int c(0) ; c < numinputs() ; ++c)
-				{
-					RecalcSend(c,wireIndex);	
+			return wire;
+		}
+		int Mixer::FindOutputWire(const Wire* pWireToFind) const
+		{
+			int wire = Machine::FindOutputWire(pWireToFind);
+			if (wire == -1) {
+				for (int c=0; c<numsends(); c++) {
+					if (sends_[c] == pWireToFind) {
+						wire = c+MAX_CONNECTIONS;
+						break;
+					}
 				}
 			}
+			return wire;
 		}
 
-		int Mixer::FindInputWire(int macIndex)
+		int Mixer::FindInputWire(int macIndex) const
 		{
 			int ret=Machine::FindInputWire(macIndex);
-			if ( ret == -1)
-			{
-				for (int c=0; c<numreturns(); c++)
-				{
-					if (Return(c).Wire().machine_ == macIndex)
-					{
+			if ( ret == -1) {
+				for (int c=0; c<numreturns(); c++) {
+					if (Return(c).GetWire().GetSrcMachine()._macIndex == macIndex) {
 						ret = c+MAX_CONNECTIONS;
 						break;
 					}
@@ -981,115 +1003,180 @@ namespace psycle
 			}
 			return ret;
 		}
-		int Mixer::GetFreeInputWire(int slottype)
+		int Mixer::FindOutputWire(int macIndex) const
+		{
+			int ret = Machine::FindOutputWire(macIndex);
+			if (ret == -1) {
+				for (int c=0; c<numsends(); c++) {
+					if (SendValid(c) && Send(c).GetDstMachine()._macIndex == macIndex) {
+						ret = c+MAX_CONNECTIONS;
+						break;
+					}
+				}
+			}
+			return ret;
+		}
+		int Mixer::GetFreeInputWire(int slottype) const
 		{
 			if ( slottype == 0) return Machine::GetFreeInputWire(0);
-			else 
-			{
+			else {
 				// Get a free sendfx slot
-				for(int c(0) ; c < MAX_CONNECTIONS ; ++c)
-				{
+				for(int c(0) ; c < MAX_CONNECTIONS ; ++c) {
 					if(!ReturnValid(c)) return c+MAX_CONNECTIONS;
 				}
 				return -1;
 			}
 		}
-
-		void Mixer::DeleteInputWireIndex(Song& pSong,int wireIndex)
+		void Mixer::OnPinChange(Wire & wire, Wire::Mapping const & newMapping)
 		{
-			if ( wireIndex < MAX_CONNECTIONS)
-			{
-				Machine::DeleteInputWireIndex(pSong,wireIndex);
-				DiscardChannel(wireIndex);
-			}
-			else
-			{
-				wireIndex-=MAX_CONNECTIONS;
-				DeleteMixerSendFlag(pSong,pSong._pMachine[Return(wireIndex).Wire().machine_]);
-				Return(wireIndex).Wire().machine_=-1;
-				sends_[wireIndex].machine_ = -1;
-				DiscardReturn(wireIndex);
-				DiscardSend(wireIndex);
-			}
-		}
-		void Mixer::NotifyNewSendtoMixer(Song& pSong,int callerMac,int senderMac)
-		{
-			// Mixer reached, set flags upwards.
-			SetMixerSendFlag(pSong,pSong._pMachine[callerMac]);
-			bool found=false;
-			int i=0;
-			for (;i < MAX_CONNECTIONS; i++)
-			{
-				if ( ReturnValid(i))
-				{
-					//If the caller is any of the ends of the chain, found.
-					if( Send(i).machine_ == callerMac || Return(i).Wire().machine_ == callerMac) {
-						found=true;
-						break;
+			if (wire.GetSrcMachine()._macIndex == _macIndex) {
+				int outWire = wire.GetSrcWireIndex();
+				if (outWire != -1) {
+					outWire-=MAX_CONNECTIONS;
+					for(int c=0;c<numinputs();++c) {
+						RecalcInMapping(c, outWire, inWires[c].GetMapping(), newMapping);
 					}
-					//Else, try to find it inside this chain.
-					Machine* pMac = pSong._pMachine[Return(i).Wire().machine_];
-					for(int c=0; c<MAX_CONNECTIONS; c++)
-					{
-						if(pMac->_inputCon[c])	{
-							pMac = pSong._pMachine[pMac->_inputMachines[c]];
-							if ( callerMac == pMac->_macIndex) {
-								found = true;
-								goto endfor;
-							}
-							c=0;
-							continue;
+					for(int r=0;r<numreturns();++r) {
+						if (Return(r).SendsTo(outWire)) {
+							RecalcRetMapping(r, outWire, Return(r).GetWire().GetMapping(), newMapping);
 						}
 					}
 				}
 			}
-endfor:
-			if (found)
-			{
-				sends_[i].machine_ = senderMac;
-				sends_[i].normalize_ = GetAudioRange()/pSong._pMachine[senderMac]->GetAudioRange();
-				for (int ch(0);ch<numinputs();ch++)
-				{
-					RecalcSend(ch,i);
+			else if (wire.GetSrcMachine()._isMixerSend) {
+				int wireIndex = wire.GetDstWireIndex();
+				if (wireIndex != -1) {
+					wireIndex-=MAX_CONNECTIONS;
+					for (int s(0);s<numsends();++s) {
+						if (Return(wireIndex).SendsTo(s)) {
+							RecalcRetMapping(wireIndex, s, newMapping, Send(s).GetMapping());
+						}
+					}
+				}
+			}
+			else {
+				int wireIndex = wire.GetDstWireIndex();
+				if (wireIndex != -1) {
+					for (int s(0);s<numsends();++s) {
+						RecalcInMapping(wireIndex, s, newMapping, Send(s).GetMapping());
+					}
 				}
 			}
 		}
-		void Mixer::SetMixerSendFlag(Song& pSong,Machine* mac)
+		void Mixer::OnOutputConnected(Wire & wire, int outType, int outWire)
 		{
-			for (int i(0);i<MAX_CONNECTIONS;++i)
-			{
-				if (mac->_inputCon[i]) SetMixerSendFlag(pSong,pSong._pMachine[mac->_inputMachines[i]]);
+			if (outType == 0 ) {
+				Machine::OnOutputConnected(wire, outType, outWire);
 			}
-			mac->_isMixerSend=true;
+			else {
+				InsertSend(outWire,&wire);
+				for(int i=0;i<numinputs();i++) {
+					if(ChannelValid(i)) {
+						RecalcSend(i,outWire);
+					}
+				}
+			}
 		}
-		void Mixer::DeleteMixerSendFlag(Song& pSong,Machine* mac)
+		void Mixer::OnOutputDisconnected(Wire & wire)
 		{
-			for (int i(0);i<MAX_CONNECTIONS;++i)
-			{
-				if (mac->_inputCon[i]) DeleteMixerSendFlag(pSong,pSong._pMachine[mac->_inputMachines[i]]);
+			int wireIndex = wire.GetSrcWireIndex();
+			if (wireIndex < MAX_CONNECTIONS) {
+				Machine::OnOutputDisconnected(wire);
 			}
-			mac->_isMixerSend=false;
+			else {
+				wireIndex-=MAX_CONNECTIONS;
+				sends_[wireIndex] = NULL;
+			}
+		}
+		void Mixer::OnInputConnected(Wire& wire)
+		{
+			int wireIndex = wire.GetDstWireIndex();
+			if (wireIndex< MAX_CONNECTIONS)
+			{
+				if (!ChannelValid(wireIndex))
+				{
+					InsertChannel(wireIndex);
+				}
+				Machine::OnInputConnected(wire);
+				RecalcChannel(wireIndex);
+			}
+			else
+			{
+				wireIndex-=MAX_CONNECTIONS;
+				if ( !ReturnValid(wireIndex)) {
+					InsertReturn(wireIndex);
+				}
+				Machine& send = wire.GetSrcMachine().SetMixerSendFlag(true);
+				if (send.FindInputWire(_macIndex) == -1) {
+					int i = send.GetFreeInputWire(0);
+					send.inWires[i].ConnectSource(*this,1, wireIndex);
+				}
+				RecalcReturn(wireIndex);
+			}
 		}
 
-		void Mixer::DeleteWires(Song& pSong)
+		void Mixer::OnInputDisconnected(Wire & wire)
 		{
-			Machine::DeleteWires(pSong);
-			Machine *iMac;
+			int wireIndex = wire.GetDstWireIndex();
+			if ( wireIndex < MAX_CONNECTIONS)
+			{
+				Machine::OnInputDisconnected(wire);
+				DiscardChannel(wireIndex, wireIndex);
+			}
+			else
+			{
+				wireIndex-=MAX_CONNECTIONS;
+				wire.GetSrcMachine().SetMixerSendFlag(false);
+				Send(wireIndex).Disconnect();
+				DiscardReturn(wireIndex, wireIndex);
+				DiscardSend(wireIndex, wireIndex);
+			}
+		}
+		void Mixer::NotifyNewSendtoMixer(Machine & callerMac, Machine & senderMac)
+		{
+			// Mixer reached, set connections.
+			for (int i=0;i < numreturns(); i++)
+			{
+				if ( ReturnValid(i) && Return(i).GetWire().GetSrcMachine()._macIndex == callerMac._macIndex)
+				{
+					int d = senderMac.GetFreeInputWire();
+					if ( SendValid(i) ) {
+						Wire copy = *sends_[i];
+						sends_[i]->ChangeDest(senderMac.inWires[d]);
+						senderMac.inWires[d].SetVolume(copy.GetVolume());
+					}
+					else {
+						senderMac.inWires[d].ConnectSource(*this,1,i);
+					}
+					for (int ch(0);ch<numinputs();ch++)
+					{
+						if(ChannelValid(i)) {
+							RecalcSend(ch,i);
+						}
+					}
+					break;
+				}
+			}
+		}
+
+
+		void Mixer::DeleteWires()
+		{
+			Machine::DeleteWires();
 			for(int w=0; w<numreturns(); w++)
 			{
 				// Checking send/return Wires
 				if(Return(w).IsValid())
 				{
-					iMac = pSong._pMachine[Return(w).Wire().machine_];
-					if (iMac)
-					{
-						int wix = iMac->FindOutputWire(_macIndex);
-						if (wix >=0)
-						{
-							iMac->DeleteOutputWireIndex(pSong,wix);
-						}
-					}
-					DeleteInputWireIndex(pSong,w+MAX_CONNECTIONS);
+					Return(w).GetWire().Disconnect();
+				}
+			}
+			for(int w=0; w<numsends(); w++)
+			{
+				// Checking send/return Wires
+				if(SendValid(w))
+				{
+					Send(w).Disconnect();
 				}
 			}
 		}
@@ -1237,7 +1324,7 @@ endfor:
 				else if (param <= 12)
 				{
 					if ( !ReturnValid(param-1)) return 0;
-					else return Channel(channel-1).Send(param-1)*0x100;
+					else return Channel(channel-1).SendVol(param-1)*0x100;
 				}
 				else if (param == 13)
 				{
@@ -1260,7 +1347,7 @@ endfor:
 					if (Return(param-1).Mute()) val|=1;
 					for (int i(0);i<numreturns();i++)
 					{
-						if (Return(param-1).Send(i)) val|=(2<<i);
+						if (Return(param-1).SendsTo(i)) val|=(2<<i);
 					}
 					if (Return(param-1).MasterSend()) val|=(1<<13);
 					return val;
@@ -1342,8 +1429,8 @@ endfor:
 				else if (param <= 12)
 				{
 					if ( !ReturnValid(param-1)) return;
-					else if (Channel(channel-1).Send(param-1) == 0.0f) strcpy(parVal,"Off");
-					else sprintf(parVal,"%.0f%%",Channel(channel-1).Send(param-1)*100.0f);
+					else if (Channel(channel-1).SendVol(param-1) == 0.0f) strcpy(parVal,"Off");
+					else sprintf(parVal,"%.0f%%",Channel(channel-1).SendVol(param-1)*100.0f);
 				}
 				else if (param == 13)
 				{
@@ -1375,18 +1462,18 @@ endfor:
 				else 
 				{
 					parVal[0]= (Return(param-1).Mute())?'M':' ';
-					parVal[1]= (Return(param-1).Send(0))?'1':' ';
-					parVal[2]= (Return(param-1).Send(1))?'2':' ';
-					parVal[3]= (Return(param-1).Send(2))?'3':' ';
-					parVal[4]= (Return(param-1).Send(3))?'4':' ';
-					parVal[5]= (Return(param-1).Send(4))?'5':' ';
-					parVal[6]= (Return(param-1).Send(5))?'6':' ';
-					parVal[7]= (Return(param-1).Send(6))?'7':' ';
-					parVal[8]= (Return(param-1).Send(7))?'8':' ';
-					parVal[9]= (Return(param-1).Send(8))?'9':' ';
-					parVal[10]= (Return(param-1).Send(9))?'A':' ';
-					parVal[11]= (Return(param-1).Send(10))?'B':' ';
-					parVal[12]= (Return(param-1).Send(11))?'C':' ';
+					parVal[1]= (Return(param-1).SendsTo(0))?'1':' ';
+					parVal[2]= (Return(param-1).SendsTo(1))?'2':' ';
+					parVal[3]= (Return(param-1).SendsTo(2))?'3':' ';
+					parVal[4]= (Return(param-1).SendsTo(3))?'4':' ';
+					parVal[5]= (Return(param-1).SendsTo(4))?'5':' ';
+					parVal[6]= (Return(param-1).SendsTo(5))?'6':' ';
+					parVal[7]= (Return(param-1).SendsTo(6))?'7':' ';
+					parVal[8]= (Return(param-1).SendsTo(7))?'8':' ';
+					parVal[9]= (Return(param-1).SendsTo(8))?'9':' ';
+					parVal[10]= (Return(param-1).SendsTo(9))?'A':' ';
+					parVal[11]= (Return(param-1).SendsTo(10))?'B':' ';
+					parVal[12]= (Return(param-1).SendsTo(11))?'C':' ';
 					parVal[13]= (Return(param-1).MasterSend())?'O':' ';
 					parVal[14]= '\0';
 				}
@@ -1456,7 +1543,7 @@ endfor:
 				if (param == 0) { Channel(channel-1).DryMix() = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcChannel(channel-1); }
 				else if (param <= 12) {
 					 if(!SendValid(param-1)) return false;
-					Channel(channel-1).Send(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1);
+					Channel(channel-1).SendVol(param-1) = (value==256)?1.0f:((value&0xFF)/256.0f); RecalcSend(channel-1,param-1);
 				} 
 				else if (param == 13)
 				{
@@ -1478,7 +1565,7 @@ endfor:
 					Return(param-1).Mute() = (value&1)?true:false;
 					for (int i(param);i<numreturns();i++)
 					{
-						Return(param-1).Send(i,(value&(2<<i))?true:false);
+						Return(param-1).SendsTo(i,(value&(2<<i))?true:false);
 					}
 					Return(param-1).MasterSend() = (value&(1<<13))?true:false;
 					RecalcReturn(param-1);
@@ -1514,7 +1601,7 @@ endfor:
 
 		float Mixer::VuChan(int idx)
 		{
-			if ( _inputCon[idx] ) 
+			if ( inWires[idx].Enabled() ) 
 			{
 				//Note that since volumeDisplay is integer, when using positive gain,
 				//the result can visually differ from the calculated one
@@ -1522,7 +1609,7 @@ endfor:
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
 				int temp(lround<int>(50.0f * std::log10(vol)));
-				return (Global::song()._pMachine[_inputMachines[idx]]->_volumeDisplay+temp)/97.0f;
+				return (inWires[idx].GetSrcMachine()._volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
 		}
@@ -1537,7 +1624,7 @@ endfor:
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
 				int temp(lround<int>(50.0f * std::log10(vol)));
-				return (Global::song()._pMachine[Return(idx).Wire().machine_]->_volumeDisplay+temp)/97.0f;
+				return (Send(idx).GetDstMachine()._volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
 		}
@@ -1563,10 +1650,25 @@ endfor:
 			{
 				for(int i=numreturns(); i<idx; ++i)
 				{
-					returns_.push_back(ReturnChannel(numsends()));
+					returns_.push_back(ReturnChannel(this,numsends()));
 				}
 				if (retchan) returns_.push_back(*retchan);
-				else returns_.push_back(ReturnChannel(numsends()));
+				else returns_.push_back(ReturnChannel(this,numsends()));
+			}
+			else if (retchan) returns_[idx]=*retchan;
+			else { returns_[idx].Init(); returns_[idx].ResizeTo(numsends());}
+		}
+
+		void Mixer::InsertSend(int idx,Wire* swire)
+		{
+			assert(idx<MAX_CONNECTIONS);
+			if ( idx >= numsends())
+			{
+				for(int i=numsends(); i<idx; ++i)
+				{
+					sends_.push_back(NULL);
+				}
+				sends_.push_back(swire);
 				for(int i=0; i<numinputs(); ++i)
 				{
 					Channel(i).ResizeTo(numsends());
@@ -1576,63 +1678,40 @@ endfor:
 					Return(i).ResizeTo(numsends());
 				}
 			}
-			else if (retchan) returns_[idx]=*retchan;
-			else { returns_[idx].Init(); returns_[idx].ResizeTo(numsends());}
-		}
-
-		void Mixer::InsertSend(int idx,MixerWire swire)
-		{
-			assert(idx<MAX_CONNECTIONS);
-			if ( idx >= numsends())
-			{
-				for(int i=numsends(); i<idx; ++i)
-				{
-					sends_.push_back(MixerWire());
-				}
-				sends_.push_back(swire);
-			}
 			else sends_[idx]=swire;
-			for(int i=0; i<numinputs(); ++i)
-			{
-				Channel(i).ResizeTo(numsends());
-			}
-			for(int i=0; i<numreturns(); ++i)
-			{
-				Return(i).ResizeTo(numsends());
-			}
 		}
-		void Mixer::DiscardChannel(int idx)
+		void Mixer::DiscardChannel(int idx, int idxdeleting)
 		{
 			assert(idx<MAX_CONNECTIONS);
 			if (idx!=numinputs()-1) return;
 			int i;
 			for (i = idx; i >= 0; i--)
 			{
-				if (_inputCon[i])
+				if (i != idxdeleting && inWires[i].Enabled())
 					break;
 			}
 			inputs_.resize(i+1);
 		}
-		void Mixer::DiscardReturn(int idx)
+		void Mixer::DiscardReturn(int idx, int idxdeleting)
 		{
 			assert(idx<MAX_CONNECTIONS);
 			if (idx!=numreturns()-1) return;
 			int i;
 			for (i = idx; i >= 0; i--)
 			{
-				if (Return(i).IsValid())
+				if (i != idxdeleting && Return(i).IsValid())
 					break;
 			}
 			returns_.resize(i+1);
 		}
-		void Mixer::DiscardSend(int idx)
+		void Mixer::DiscardSend(int idx, int idxdeleting)
 		{
 			assert(idx<MAX_CONNECTIONS);
 			if (idx!=numsends()-1) return;
 			int i;
 			for (i = idx; i >= 0; i--)
 			{
-				if (sends_[i].machine_ != -1)
+				if (i != idxdeleting && SendValid(i))
 					break;
 			}
 			sends_.resize(i+1);
@@ -1652,51 +1731,51 @@ endfor:
 		}
 		void Mixer::ExchangeReturns(int chann1,int chann2)
 		{
-			ReturnChannel tmp = returns_[chann1];
+			ReturnChannel tmp(returns_[chann1]);
 			returns_[chann1] = returns_[chann2];
 			returns_[chann2] = tmp;
-			RecalcReturn(chann1);
-			RecalcReturn(chann2);
-			ExchangeSends(chann1,chann2);
-			//The following lines autoclean the left-out send/returns at the end.
-			DiscardReturn(numreturns()-1);
-			DiscardSend(numsends()-1);
-		}
-		void Mixer::ExchangeSends(int send1,int send2)
-		{
-			MixerWire tmp = sends_[send1];
-			sends_[send1] = sends_[send2];
-			sends_[send2] = tmp;
+			Wire* tmp2 = sends_[chann1];
+			sends_[chann1] = sends_[chann2];
+			sends_[chann2] = tmp2;
 			for (int i(0); i < numinputs(); ++i)
 			{
-				Channel(i).ExchangeSends(send1,send2);
-				RecalcSend(i,send1);
-				RecalcSend(i,send2);
+				Channel(i).ExchangeSends(chann1,chann2);
+				if(SendValid(chann1)) RecalcSend(i,chann1);
+				if(SendValid(chann2)) RecalcSend(i,chann2);
 			}
 			for (int i(0); i < numreturns(); ++i)
 			{
-				Return(i).ExchangeSends(send1,send2);
+				Return(i).ExchangeSends(chann1,chann2);
 			}
+			//Recalculating all because of the return-to-send which can apply to other returns
+			//For example, exchanging returns 2 and 3 on Example - Mixerdemo.psy
+			for (int i(0); i < numreturns(); ++i)
+			{
+				RecalcReturn(i);
+			}
+			//The following lines autoclean the left-out send/returns at the end.
+			DiscardReturn(numreturns()-1);
+			DiscardSend(numsends()-1);
 		}
 		void Mixer::ResizeTo(int inputs, int sends)
 		{
 			inputs_.resize(inputs);
 			returns_.resize(sends);
 			sends_.resize(sends);
-			for(int i=0; i<numinputs(); ++i)
+			for(int i=0; i<inputs; ++i)
 			{
-				Channel(i).ResizeTo(numsends());
+				Channel(i).ResizeTo(sends);
 			}
-			for(int i=0; i<numreturns(); ++i)
+			for(int i=0; i<sends; ++i)
 			{
-				Return(i).ResizeTo(numsends());
+				Return(i).ResizeTo(sends);
 			}
 		}
 		void Mixer::RecalcMaster()
 		{
 			for (int i(0);i<numinputs();i++)
 			{
-				if (_inputCon[i]) RecalcChannel(i);
+				if (inWires[i].Enabled()) RecalcChannel(i);
 			}
 			for (int i(0);i<numreturns();i++)
 			{
@@ -1708,51 +1787,57 @@ endfor:
 			assert(idx<MAX_CONNECTIONS);
 			float val;
 			GetWireVolume(idx,val);
-
-			for(int send=0; send < numsends(); ++send)
-			{
-				if (Return(idx).Send(send))
-				{
-					mixvolretpl[idx][send] = mixvolretpr[idx][send] = Return(idx).Volume()*( Return(idx).Wire().normalize_/ Send(send).normalize_);
-					if (Return(idx).Panning() >= 0.5f )
-					{
-						mixvolretpl[idx][send] *= (1.0f-Return(idx).Panning())*2.0f;
+			const ReturnChannel & ret = Return(idx);
+			//Volumes/mapping for return redirected to send
+			for(int send=0; send < numsends(); ++send) {
+				if (ret.SendsTo(send) && SendValid(send)) {
+					mixvolretpl[idx][send] = mixvolretpr[idx][send] = ret.Volume()*( ret.GetWire().GetVolMultiplier()/ Send(send).GetVolMultiplier());
+					if (ret.Panning() >= 0.5f ) {
+						mixvolretpl[idx][send] *= (1.0f-ret.Panning())*2.0f;
 					}
-					else mixvolretpr[idx][send] *= (Return(idx).Panning())*2.0f;
+					else mixvolretpr[idx][send] *= (ret.Panning())*2.0f;
+					RecalcRetMapping(idx, send, ret.GetWire().GetMapping(), Send(send).GetMapping());
 				}
 			}
+			//Volume for return to master
 			float wet = master_.Volume()*master_.Gain();
 			if (master_.DryWetMix() < 0.5f )
 			{
 				wet *= (master_.DryWetMix())*2.0f;
 			}
 
-			mixvolretpl[idx][MAX_CONNECTIONS] = mixvolretpr[idx][MAX_CONNECTIONS] = Return(idx).Volume()*val*wet/Return(idx).Wire().normalize_;
-			if (Return(idx).Panning() >= 0.5f )
+			mixvolretpl[idx][MAX_CONNECTIONS] = mixvolretpr[idx][MAX_CONNECTIONS] = ret.Volume()*val*wet/ret.GetWire().GetVolMultiplier();
+			if (ret.Panning() >= 0.5f )
 			{
-				mixvolretpl[idx][MAX_CONNECTIONS] *= (1.0f-Return(idx).Panning())*2.0f;
+				mixvolretpl[idx][MAX_CONNECTIONS] *= (1.0f-ret.Panning())*2.0f;
 			}
-			else mixvolretpr[idx][MAX_CONNECTIONS] *= (Return(idx).Panning())*2.0f;
+			else mixvolretpr[idx][MAX_CONNECTIONS] *= (ret.Panning())*2.0f;
 		}
 		void Mixer::RecalcChannel(int idx)
 		{
 			assert(idx<MAX_CONNECTIONS);
 			float val;
 			GetWireVolume(idx,val);
+			const InputChannel & chan = Channel(idx);
 
 			float dry = master_.Volume()*master_.Gain();
 			if (master_.DryWetMix() > 0.5f )
 			{
 				dry *= (1.0f-master_.DryWetMix())*2.0f;
 			}
-
-			mixvolpl[idx] = mixvolpr[idx] = Channel(idx).Volume()*val*Channel(idx).DryMix()*dry/_wireMultiplier[idx];
-			if (Channel(idx).Panning() >= 0.5f )
+			//Volumes from in to master.
+			mixvolpl[idx] = mixvolpr[idx] = chan.Volume()*val*chan.DryMix()*dry/inWires[idx].GetVolMultiplier();
+			if (chan.Panning() >= 0.5f )
 			{
-				mixvolpl[idx] *= (1.0f-Channel(idx).Panning())*2.0f;
+				mixvolpl[idx] *= (1.0f-chan.Panning())*2.0f;
 			}
-			else mixvolpr[idx] *= (Channel(idx).Panning())*2.0f;
-			for (int i(0);i<numsends();i++) RecalcSend(idx,i);
+			else mixvolpr[idx] *= (chan.Panning())*2.0f;
+			//Volumes and mapping from in to sends.
+			for (int i(0);i<numsends();i++) {
+				if (SendValid(i)) {
+					RecalcSend(idx,i);
+				}
+			}
 		}
 		void Mixer::RecalcSend(int chan,int send)
 		{
@@ -1760,14 +1845,44 @@ endfor:
 			assert(send<MAX_CONNECTIONS);
 			float val;
 			GetWireVolume(chan,val);
+			const InputChannel &chann = Channel(chan);
 
-			_sendvolpl[chan][send] =  _sendvolpr[chan][send] = Channel(chan).Volume()*val*Channel(chan).Send(send)/(sends_[send].normalize_*_wireMultiplier[chan]);
-			if (Channel(chan).Panning() >= 0.5f )
+			_sendvolpl[chan][send] =  _sendvolpr[chan][send] = chann.Volume()*val*chann.SendVol(send)/(Send(send).GetVolMultiplier()*inWires[chan].GetVolMultiplier());
+			if (chann.Panning() >= 0.5f )
 			{
-				_sendvolpl[chan][send] *= (1.0f-Channel(chan).Panning())*2.0f;
+				_sendvolpl[chan][send] *= (1.0f-chann.Panning())*2.0f;
 			}
-			else _sendvolpr[chan][send] *= (Channel(chan).Panning())*2.0f;
+			else _sendvolpr[chan][send] *= (chann.Panning())*2.0f;
+			RecalcInMapping(chan, send, inWires[chan].GetMapping(), Send(send).GetMapping());
 		}
+
+		void Mixer::RecalcInMapping(int inIdx, int sendIdx, const Wire::Mapping& inMap, const Wire::Mapping& sendMap)
+		{
+			Wire::Mapping& newMap = sendMapping[inIdx][sendIdx];
+			newMap.clear();
+			for(int i(0);i<inMap.size();i++) {
+				for (int k(0);k<sendMap.size();k++)
+				{
+					if(inMap[i].second == sendMap[k].first) {
+						newMap.push_back(Wire::PinConnection(inMap[i].first,sendMap[k].second));
+					}
+				}
+			}
+		}
+		void Mixer::RecalcRetMapping(int retIdx, int sendIdx, const Wire::Mapping& retMap, const Wire::Mapping& sendMap)
+		{
+			Wire::Mapping& newMap = sendMapping[MAX_CONNECTIONS+retIdx][sendIdx];
+			newMap.clear();
+			for(int i(0);i<retMap.size();i++) {
+				for (int k(0);k<sendMap.size();k++)
+				{
+					if(retMap[i].second == sendMap[k].first) {
+						newMap.push_back(Wire::PinConnection(retMap[i].first,sendMap[k].second));
+					}
+				}
+			}
+		}
+
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
 			std::uint32_t filesize;
@@ -1783,14 +1898,14 @@ endfor:
 			pFile->Read(&numrets,sizeof(int));
 			if ( numins >0 ) InsertChannel(numins-1);
 			if ( numrets >0 ) InsertReturn(numrets-1);
-			if ( numrets >0 ) InsertSend(numrets-1,MixerWire());
+			if ( numrets >0 ) InsertSend(numrets-1, NULL);
 			for (int i(0);i<numinputs();i++)
 			{
-				for (int j(0);j<numsends();j++)
+				for (int j(0);j<numrets;j++)
 				{
 					float send(0.0f);
 					pFile->Read(&send,sizeof(float));
-					Channel(i).Send(j)=send;
+					Channel(i).SendVol(j)=send;
 				}
 				pFile->Read(&Channel(i).Volume(),sizeof(float));
 				pFile->Read(&Channel(i).Panning(),sizeof(float));
@@ -1799,29 +1914,32 @@ endfor:
 				pFile->Read(&Channel(i).DryOnly(),sizeof(bool));
 				pFile->Read(&Channel(i).WetOnly(),sizeof(bool));
 			}
-			for (int i(0);i<numreturns();i++)
+			legacyReturn_.resize(numrets);
+			legacySend_.resize(numrets);
+			for (int i(0);i<numrets;i++)
 			{
-				pFile->Read(&Return(i).Wire().machine_,sizeof(int));
-				pFile->Read(&Return(i).Wire().volume_,sizeof(float));
-				pFile->Read(&Return(i).Wire().normalize_,sizeof(float));
-				pFile->Read(&sends_[i].machine_,sizeof(int));
-				pFile->Read(&sends_[i].volume_,sizeof(float));
-				pFile->Read(&sends_[i].normalize_,sizeof(float));
-				for (int j(0);j<numsends();j++)
+				LegacyWire& leg = legacyReturn_[i];
+				pFile->Read(&leg._inputMachine,sizeof(leg._inputMachine));	// Incoming (Return) connections Machine number
+				pFile->Read(&leg._inputConVol,sizeof(leg._inputConVol));	// Incoming connections Machine vol
+				pFile->Read(&leg._wireMultiplier,sizeof(leg._wireMultiplier));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				if (leg._inputMachine == -1) leg._inputCon = false;
+				
+				LegacyWire& leg2 = legacySend_[i];
+				pFile->Read(&leg2._inputMachine,sizeof(leg2._inputMachine));	// Outgoing (Send) connections Machine number
+				pFile->Read(&leg2._inputConVol,sizeof(leg2._inputConVol));	// Incoming connections Machine vol
+				pFile->Read(&leg2._wireMultiplier,sizeof(leg2._wireMultiplier));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				
+				for (int j(0);j<numrets;j++)
 				{
 					bool send(false);
 					pFile->Read(&send,sizeof(bool));
-					Return(i).Send(j,send);
+					Return(i).SendsTo(j,send);
 				}
 				pFile->Read(&Return(i).MasterSend(),sizeof(bool));
 				pFile->Read(&Return(i).Volume(),sizeof(float));
 				pFile->Read(&Return(i).Panning(),sizeof(float));
 				pFile->Read(&Return(i).Mute(),sizeof(bool));
 			}
-			RecalcMaster();
-			for (int i(0);i<numinputs();i++)
-				for(int j(0);j<numsends();j++)
-					RecalcSend(i,j);
 			return true;
 		}
 
@@ -1846,7 +1964,7 @@ endfor:
 			{
 				for (int j(0);j<numsends();j++)
 				{
-					pFile->Write(&Channel(i).Send(j),sizeof(float));
+					pFile->Write(&Channel(i).SendVol(j),sizeof(float));
 				}
 				pFile->Write(&Channel(i).Volume(),sizeof(float));
 				pFile->Write(&Channel(i).Panning(),sizeof(float));
@@ -1857,15 +1975,37 @@ endfor:
 			}
 			for (int i(0);i<numreturns();i++)
 			{
-				pFile->Write(&Return(i).Wire().machine_,sizeof(int));
-				pFile->Write(&Return(i).Wire().volume_,sizeof(float));
-				pFile->Write(&Return(i).Wire().normalize_,sizeof(float));
-				pFile->Write(&sends_[i].machine_,sizeof(int));
-				pFile->Write(&sends_[i].volume_,sizeof(float));
-				pFile->Write(&sends_[i].normalize_,sizeof(float));
+				float volume, volMultiplier; 
+				int wMacIdx;
+				
+				//Returning machines and values
+				const Wire & wireRet = Return(i).GetWire();
+				wMacIdx = (wireRet.Enabled()) ? wireRet.GetSrcMachine()._macIndex : -1;
+				volume = wireRet.GetVolume();
+				volMultiplier = wireRet.GetVolMultiplier();
+				pFile->Write(&wMacIdx,sizeof(int));	// Incoming connections Machine number
+				pFile->Write(&volume,sizeof(float));	// Incoming connections Machine vol
+				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+
+				//Sending machines and values
+				if (SendValid(i)) {
+					wMacIdx = Send(i).GetDstMachine()._macIndex;
+					volume = Send(i).GetVolume();
+					volMultiplier = Send(i).GetVolMultiplier();
+				}
+				else {
+					wMacIdx = -1;
+					volume = 1.0f;
+					volMultiplier = 1.0f;
+				}
+				pFile->Write(&wMacIdx,sizeof(int));	// send connections Machine number
+				pFile->Write(&volume,sizeof(float));	// send connections Machine vol
+				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+
+				//Rewiring of returns to sends and mix values
 				for (int j(0);j<numsends();j++)
 				{
-					bool send(Return(i).Send(j));
+					bool send(Return(i).SendsTo(j));
 					pFile->Write(&send,sizeof(bool));
 				}
 				pFile->Write(&Return(i).MasterSend(),sizeof(bool));
@@ -1873,6 +2013,89 @@ endfor:
 				pFile->Write(&Return(i).Panning(),sizeof(float));
 				pFile->Write(&Return(i).Mute(),sizeof(bool));
 			}
+		}
+		bool Mixer::LoadWireMapping(RiffFile* pFile, int version)
+		{
+			Machine::LoadWireMapping(pFile, version);
+			int numWires = 0;
+			for (int i(0);i<MAX_CONNECTIONS;i++) {
+				if (legacyWires[i+MAX_CONNECTIONS]._inputCon) numWires++;
+			}
+
+			for(int countWires=0; countWires < numWires; countWires++)
+			{
+				int wireIdx, numPairs;
+				Wire::PinConnection::first_type src;
+				Wire::PinConnection::second_type dst;
+				pFile->Read(wireIdx);
+				if(wireIdx >= MAX_CONNECTIONS) {
+					//We cannot ensure correctness from now onwards.
+					return false;
+				}
+				pFile->Read(numPairs);
+				Wire::Mapping& pinMapping = legacyWires[wireIdx+MAX_CONNECTIONS].pinMapping;
+				pinMapping.reserve(numPairs);
+				for(int j=0; j < numPairs; j++){
+					pFile->Read(src);
+					pFile->Read(dst);
+					pinMapping.push_back(Wire::PinConnection(src,dst));
+				}
+			}
+			return true;
+		}
+		bool Mixer::SaveWireMapping(RiffFile* pFile)
+		{
+			Machine::SaveWireMapping(pFile);
+			for(int i = 0; i < MAX_CONNECTIONS; i++)
+			{
+				if (!ReturnValid(i)) {
+					continue;
+				}
+				const Wire::Mapping& pinMapping = Return(i).GetWire().GetMapping();
+				int numPairs=pinMapping.size();
+				pFile->Write(i);
+				pFile->Write(numPairs);
+				for(int j=0; j <pinMapping.size(); j++) {
+					const Wire::PinConnection &pin = pinMapping[j];
+					pFile->Write(pin.first);
+					pFile->Write(pin.second);
+				}
+			}
+			return true;
+		}
+
+		void Mixer::PostLoad(Machine** _pMachine)
+		{
+			Machine::PostLoad(_pMachine);
+			for (int j(0); j<numreturns(); ++j)
+			{
+				LegacyWire& wire = legacyReturn_[j];
+				if (wire._inputCon
+					&& wire._inputMachine >= 0 	&& wire._inputMachine < MAX_MACHINES
+					&& _macIndex != wire._inputMachine && _pMachine[wire._inputMachine])
+				{
+					if (wire.pinMapping.size() > 0) {
+						Return(j).GetWire().ConnectSource(*_pMachine[wire._inputMachine],1
+							, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex)
+							, &wire.pinMapping);
+					}
+					else {
+						Return(j).GetWire().ConnectSource(*_pMachine[wire._inputMachine],1
+							, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex));
+					}
+					Return(j).GetWire().SetVolume(wire._inputConVol*wire._wireMultiplier);
+					LegacyWire& wire2 = legacySend_[j];
+					Send(j).SetVolume(wire2._inputConVol*wire2._wireMultiplier);
+					if (wire2.pinMapping.size() > 0) {
+						Send(j).ChangeMapping(wire2.pinMapping);
+					}
+				}
+			}
+			RecalcMaster();
+
+			legacyReturn_.clear();
+			legacySend_.clear();
+
 		}
 	}
 }

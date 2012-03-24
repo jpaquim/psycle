@@ -17,30 +17,30 @@ namespace psycle { namespace host {
 				wiremove = -1;
 				if (nFlags & MK_CONTROL) // Control+Rightclick. Action: Move the wire origin.
 				{
-					int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
-					if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
+					int tmp;
+					Wire* w = GetWire(point, tmp, wiremove);  // wiremove = wire connection index in destination machine
+					if ( w != NULL ) // we are in a wire, let's enable origin-wire move.
 					{
-						wiredest = _pSong._pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
-						wiremove = _pSong._pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection index in destination machine
+						Machine & macDest = w->GetDstMachine();
+						wiredest = macDest._macIndex; // wiredest = destination machine *index*
 
-						switch (_pSong._pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
+						switch (macDest._mode) // Assing wireDX and wireDY for the next draw.
 						{
 						//case MACHMODE_GENERATOR: //A wire can't end in a generator								
 						case MACHMODE_FX:
-							wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
-							wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
+							wireDX = macDest._x+(MachineCoords->sEffect.width/2);
+							wireDY = macDest._y+(MachineCoords->sEffect.height/2);
 							wireSX = point.x;
 							wireSY = point.y;
 							break;
 
 						case MACHMODE_MASTER:
-							wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
-							wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
+							wireDX = macDest._x+(MachineCoords->sMaster.width/2);
+							wireDY = macDest._y+(MachineCoords->sMaster.height/2);
 							wireSX = point.x;
 							wireSY = point.y;
 							break;
-						}		
-						wiresource=-1;
+						}
 					}
 				}
 				else if (nFlags == MK_RBUTTON) // Right click alone. Action: Create a new wire or move wire destination.
@@ -48,21 +48,26 @@ namespace psycle { namespace host {
 					wiresource = GetMachine(point); //See if we have clicked over a machine.
 					if ( wiresource == -1 ) // not a machine. Let's see if it is a wire
 					{
-						wiremove = GetWire(point,wiresource); // wiresource = origin machine *index*. wiremove = wire connection index in origin machine
+						int tmp;
+						Wire* w = GetWire(point, wiremove, tmp);
+						if (w != NULL) {
+							wiresource = w->GetSrcMachine()._macIndex;
+						}
 					}
 					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable wire creation/move
 					{
-						switch (_pSong._pMachine[wiresource]->_mode)
+						Machine& mac = *_pSong._pMachine[wiresource];
+						switch (mac._mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
-							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
+							wireSX = mac._x+(MachineCoords->sGenerator.width/2);
+							wireSY = mac._y+(MachineCoords->sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
-							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
+							wireSX = mac._x+(MachineCoords->sEffect.width/2);
+							wireSY = mac._y+(MachineCoords->sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
@@ -151,20 +156,21 @@ namespace psycle { namespace host {
 					}
 				}
 				else
-				{					
-					int w = GetWire(point,wiresource);
-					if ( w != -1 )	// Are we over a wire?
+				{
+					int tmp1,tmp2;
+					Wire* w = GetWire(point,tmp1,tmp2);
+					if ( w != NULL )	// Are we over a wire?
 					{
 						allowcontextmenu=false;
-						Machine *tmac = _pSong._pMachine[wiresource];
-						Machine *dmac = _pSong._pMachine[tmac->_outputMachines[w]];
+						Machine& tmac = w->GetSrcMachine();
+						Machine& dmac = w->GetDstMachine();
 						int free=-1;
 						for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 						{
 							if (WireDialog[i])
 							{
-								if ((WireDialog[i]->srcMachine._macIndex == tmac->_macIndex) &&
-									(WireDialog[i]->dstMachine._macIndex == dmac->_macIndex))  // If this is true, the dialog is already open
+								if ((WireDialog[i]->srcMachine._macIndex == tmac._macIndex) &&
+									(WireDialog[i]->dstMachine._macIndex == dmac._macIndex))  // If this is true, the dialog is already open
 								{
 									wiresource = -1;
 									wiredest = -1;
@@ -179,8 +185,8 @@ namespace psycle { namespace host {
 						if (free != -1) //If there is any dialog slot free
 						{
 					   		CWireDlg* wdlg;
-							wdlg = WireDialog[free] = new CWireDlg(this, &WireDialog[free], 
-								free, *tmac, w,  *dmac, dmac->FindInputWire(wiresource));
+							wdlg = WireDialog[free] = new CWireDlg(this, &WireDialog[free], free,
+								*w);
 							pParentMain->CenterWindowOnPoint(wdlg, point);
 							wdlg->ShowWindow(SW_SHOW);
 						}
@@ -268,37 +274,38 @@ namespace psycle { namespace host {
 						}
 					} 
 					else // not a machine
-					{						
-						int w = GetWire(point,wiresource); // wiresource = origin machine *index*. w = wire connection point in origin machine
-						if ( w != -1 ) // we are in a wire, let's enable origin-wire move.
+					{	
+						int tmp;
+						Wire* w = GetWire(point,tmp, wiremove);
+						if ( w != NULL ) // we are in a wire, let's enable origin-wire move.
 						{
-							wiredest = _pSong._pMachine[wiresource]->_outputMachines[w]; // wiredest = destination machine *index*
-							wiremove = _pSong._pMachine[wiredest]->FindInputWire(wiresource); // wiremove = wire connection point in destination machine
+							Machine &mac = w->GetDstMachine();
+							wiredest = mac._macIndex; // wiredest = destination machine *index*
 
-							switch (_pSong._pMachine[wiredest]->_mode) // Assing wireDX and wireDY for the next draw.
+							switch (mac._mode) // Assing wireDX and wireDY for the next draw.
 							{
 /*							case MACHMODE_GENERATOR: //A wire can't end in a generator
-								wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sGenerator.width/2);
-								wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sGenerator.height/2);
+								wireDX = mac._x+(MachineCoords->sGenerator.width/2);
+								wireDY = mac._y+(MachineCoords->sGenerator.height/2);
 								break;
 */								
 							case MACHMODE_FX:
-								wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sEffect.width/2);
-								wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sEffect.height/2);
+								wireDX = mac._x+(MachineCoords->sEffect.width/2);
+								wireDY = mac._y+(MachineCoords->sEffect.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
 
 							case MACHMODE_MASTER:
-								wireDX = _pSong._pMachine[wiredest]->_x+(MachineCoords->sMaster.width/2);
-								wireDY = _pSong._pMachine[wiredest]->_y+(MachineCoords->sMaster.height/2);
+								wireDX = mac._x+(MachineCoords->sMaster.width/2);
+								wireDY = mac._y+(MachineCoords->sMaster.height/2);
 								wireSX = point.x;
 								wireSY = point.y;
 								break;
 							}		
-							wiresource=-1;
 //							OnMouseMove(nFlags,point);
 						}
+						wiresource=-1;
 					}
 				}
 				else if (nFlags & MK_SHIFT)
@@ -306,27 +313,32 @@ namespace psycle { namespace host {
 					wiresource = GetMachine(point);
 					if (wiresource == -1)
 					{
-						wiremove = GetWire(point,wiresource);
+						int tmp;
+						Wire* w = GetWire(point, wiremove, tmp);
+						if (w != NULL) {
+							wiresource = w->GetSrcMachine()._macIndex;
+						}
 					}
 					if (wiresource != -1) // found a machine (either clicked, or via a wire), enable origin-wire creation/move
 					{
-						switch (_pSong._pMachine[wiresource]->_mode)
+						Machine& mac = *_pSong._pMachine[wiresource];
+						switch (mac._mode)
 						{
 						case MACHMODE_GENERATOR:
-							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sGenerator.width/2);
-							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sGenerator.height/2);
+							wireSX = mac._x+(MachineCoords->sGenerator.width/2);
+							wireSY = mac._y+(MachineCoords->sGenerator.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 						case MACHMODE_FX:
-							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sEffect.width/2);
-							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sEffect.height/2);
+							wireSX = mac._x+(MachineCoords->sEffect.width/2);
+							wireSY = mac._y+(MachineCoords->sEffect.height/2);
 							wireDX = point.x;
 							wireDY = point.y;
 							break;
 /*						case MACHMODE_MASTER: // A wire can't be sourced in Master.
-							wireSX = _pSong._pMachine[wiresource]->_x+(MachineCoords->sMaster.width/2);
-							wireSY = _pSong._pMachine[wiresource]->_y+(MachineCoords->sMaster.height/2);
+							wireSX = mac._x+(MachineCoords->sMaster.width/2);
+							wireSY = mac._y+(MachineCoords->sMaster.height/2);
 							break;
 */							
 						}
@@ -352,7 +364,7 @@ namespace psycle { namespace host {
 							_pSong.seqBus = _pSong.FindBusFromIndex(smac);
 							pParentMain->UpdateComboGen();
 							
-							panning = tmac->_panning*MachineCoords->dGeneratorPan.width;
+							panning = tmac->GetPan()*MachineCoords->dGeneratorPan.width;
 							panning /= 128;
 							tmpsrc.x=MachineCoords->dGeneratorPan.x; tmpsrc.y=MachineCoords->dGeneratorPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords->sGeneratorPan,panning)) //changing panning
@@ -409,7 +421,7 @@ namespace psycle { namespace host {
 							break;
 
 						case MACHMODE_FX:
-							panning = tmac->_panning*MachineCoords->dEffectPan.width;
+							panning = tmac->GetPan()*MachineCoords->dEffectPan.width;
 							panning /= 128;
 							tmpsrc.x=MachineCoords->dEffectPan.x; tmpsrc.y=MachineCoords->dEffectPan.y;
 							if (InRect(mcd_x,mcd_y,tmpsrc,MachineCoords->sEffectPan,panning)) //changing panning
@@ -724,12 +736,12 @@ namespace psycle { namespace host {
 								break;
 							}
 
-							if (_pSong._pMachine[smac]->_panning != newpan)
+							if (_pSong._pMachine[smac]->GetPan() != newpan)
 							{
 								PsycleGlobal::inputHandler().AddMacViewUndo();
 
 								_pSong._pMachine[smac]->SetPan(newpan);
-								newpan= _pSong._pMachine[smac]->_panning;
+								newpan= _pSong._pMachine[smac]->GetPan();
 								
 								char buf[128];
 								if (newpan != 64)
@@ -1106,18 +1118,20 @@ namespace psycle { namespace host {
 					}
 					else
 					{
-						int w = GetWire(point,wiresource);
-						if ( w != -1 )
+						int tmp, tmp2;
+						Wire* w = GetWire(point,tmp,tmp2);
+						if ( w != NULL )
 						{
-							Machine *tmac = _pSong._pMachine[wiresource];
-							Machine *dmac = _pSong._pMachine[tmac->_outputMachines[w]];
+							Machine &tmac = w->GetSrcMachine();
+							wiresource = tmac._macIndex;
+							Machine &dmac = w->GetDstMachine();
 							int free=-1;
 							for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
 							{
 								if (WireDialog[i])
 								{
-									if ((WireDialog[i]->srcMachine._macIndex == tmac->_macIndex) &&
-										(WireDialog[i]->dstMachine._macIndex == dmac->_macIndex))  // If this is true, the dialog is already open
+									if ((WireDialog[i]->srcMachine._macIndex == tmac._macIndex) &&
+										(WireDialog[i]->dstMachine._macIndex == dmac._macIndex))  // If this is true, the dialog is already open
 									{
 										wiresource = -1;
 										return;
@@ -1129,7 +1143,7 @@ namespace psycle { namespace host {
 							{
 								CWireDlg* wdlg;
 								wdlg = WireDialog[free] = new CWireDlg(this, &WireDialog[free], 
-										free, *tmac, w, *dmac, dmac->FindInputWire(wiresource));
+										free, *w);
 								pParentMain->CenterWindowOnPoint(wdlg, point);
 								wdlg->ShowWindow(SW_SHOW);
 								wiresource = -1;

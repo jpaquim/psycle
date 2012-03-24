@@ -388,7 +388,7 @@ void Player::clear_plan() {
 							int mIndex = pEntry->_mach;
 							if(mIndex < MAX_MACHINES)
 							{
-								if(song._pMachine[mIndex]) song._pMachine[mIndex]->SetDestWireVolume(song,mIndex,pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
+								if(song._pMachine[mIndex]) song._pMachine[mIndex]->SetDestWireVolume(pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
 							}
 						}
 						break;
@@ -1029,8 +1029,8 @@ void Player::stop_threads() {
 					}
 					if(_recording)
 					{
-						float* pL(song._pMachine[MASTER_INDEX]->_pSamplesL);
-						float* pR(song._pMachine[MASTER_INDEX]->_pSamplesR);
+						float* pL(((Master*)song._pMachine[MASTER_INDEX])->getLeft());
+						float* pR(((Master*)song._pMachine[MASTER_INDEX])->getRight());
 						if(_dodither)
 						{
 							dither.Process(pL, amount);

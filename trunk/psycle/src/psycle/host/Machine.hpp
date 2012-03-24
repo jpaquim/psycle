@@ -158,9 +158,93 @@ namespace psycle
 			int maxValue;
 		};
 
+		class Wire
+		{
+		public:
+			//first = srcpin, second = dstpin.
+			typedef std::pair<short,short> PinConnection;
+			typedef std::vector<PinConnection> Mapping;
+			Wire(Machine * const dstMac);
+			Wire(const Wire &wire);
+			void ConnectSource(Machine & srcMac, int outType, int outWire, const Mapping * const mapping = NULL);
+			void ChangeSource(Machine & newSource, int outType, int outWire, const Mapping * const mapping = NULL);
+			void ChangeDest(Wire& newWireDest);
+			void Disconnect();
+			void Mix(int numSamples, float lVol, float rVol) const;
+			void ChangeMapping(Mapping const & newmapping);
+			void SetBestMapping();
+			Mapping EnsureCorrectness(Mapping const & mapping);
+			Mapping const & GetMapping() const { return pinMapping; }
+			inline float GetVolume() const { return volume * volMultiplier; };
+			inline void GetVolume(float &value) const { value = volume * volMultiplier; };
+			inline void SetVolume(float value);
+			inline float GetVolMultiplier() const { return volMultiplier; }
+			inline Machine & GetSrcMachine() const { assert(srcMachine); return *srcMachine; };
+			inline Machine & GetDstMachine() const { assert(dstMachine); return *dstMachine; };
+			inline int GetSrcWireIndex() const;
+			inline int GetDstWireIndex() const;
+			inline bool Enabled() const { return enabled; };
+			Wire & operator=(const Wire & wireOrig);
+		protected:
+			/// Is this wire enabled, or has been deleted?
+			bool enabled;
+			/// Incoming connection Machine
+			Machine* srcMachine;	
+			/// Incoming connection Machine vol
+			float volume;
+			/// Value to multiply "volume" with to have a 0.0...1.0 range
+			// The reason of the volMultiplier variable is because VSTs output wave data
+			// in the range -1.0 to +1.0, while natives and internals output at -32768.0 to +32768.0
+			// Initially (when the format was made), Psycle did convert this in the "Work" function,
+			// but since it already needs to multiply the output by "volume", I decided to remove
+			// that extra conversion and use directly the volume to do so. So now the variable
+			// is used simply for the Get/SetVolume.
+			float volMultiplier;
+			//Pin mapping ([outputs][inputs])
+			Mapping pinMapping;
+
+			/// Outgoing connection Machine
+			Machine* dstMachine;	
+		};
+
+		typedef struct LegacyWire_s
+		{
+		///\name input ports
+		///\{
+			/// Incoming connections Machine number
+			int _inputMachine;
+			/// Incoming connections activated
+			bool _inputCon;
+			/// Incoming connections Machine vol
+			float _inputConVol;
+			/// Value to multiply _inputConVol[] with to have a 0.0...1.0 range
+			// The reason of the _wireMultiplier variable is because VSTs output wave data
+			// in the range -1.0 to +1.0, while natives and internals output at -32768.0 to +32768.0
+			// Initially (when the format was made), Psycle did convert this in the "Work" function,
+			// but since it already needs to multiply the output by inputConVol, I decided to remove
+			// that extra conversion and use directly the volume to do so.
+			float _wireMultiplier;
+			//Pin mapping (for loading)
+			Wire::Mapping pinMapping;
+		///\}
+
+		///\name output ports
+		///\{
+			/// Outgoing connections Machine number
+			int _outputMachine;
+			/// Outgoing connections activated
+			bool _connection;
+		///\}
+
+		} LegacyWire;
+		class WireDlg;
+		class Mixer;
 		/// Base class for "Machines", the audio producing elements.
 		class Machine
 		{
+			friend class WireDlg;
+			friend class Wire;
+			friend class Mixer;
 			///\name crash handling
 			///\{
 				public:
@@ -264,58 +348,116 @@ namespace psycle
 					/// called by the scheduler to ask for the actual processing of the machine
 					virtual bool sched_process(unsigned int frames, bool measure_cpu_usage);
 			///\}
+			///\name used by the single-threaded, recursive scheduler
+			///\{
+				/// guard to avoid feedback loops
+				bool recursive_is_processing_;
+				bool recursive_processed_;
+			///\}
 
+			///\name used by the multi-threaded scheduler
+			///\{
+				/// The multi-threaded scheduler cannot use _worked because it's not thread-synchronised.
+				/// So, we define another boolean that's modified only by the multi-threaded scheduler,
+				/// with proper thread synchronisations.
+				/// The multi-threaded scheduler doesn't use recursive_processed_ nor recursive_is_processing_.
+				bool sched_processed_;
+			///\}
 			///\name (de)serialization
 			///\{
 				public:
 					virtual bool Load(RiffFile * pFile);
 					static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
+					virtual bool LoadWireMapping(RiffFile* pFile, int version);
 					virtual void SaveDllNameAndIndex(RiffFile * pFile,int index);
 					virtual void SaveFileChunk(RiffFile * pFile);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
-					virtual void PostLoad(){};
+					virtual bool SaveWireMapping(RiffFile* pFile);
+					virtual void PostLoad(Machine** _pMachine);
+					//Helper for PSY2/PSY3 Song loading.
+					static int FindLegacyOutput(Machine* sourceMac, int macIndex);
+
 			///\}
 
 			///\name connections ... wires
 			///\{
 				public:
-					// Set or replace output wire
-					virtual void InsertOutputWireIndex(Song& pSong,int wireIndex,int dstmac);
-					// Set or replace input wire
-					virtual void InsertInputWireIndex(Song& pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f);
+					virtual void OnPinChange(Wire & wire, Wire::Mapping const & newMapping) {}
+					virtual void OnInputConnected(Wire & wire);
+					virtual void OnOutputConnected(Wire & wire, int outType, int outWire);
+					virtual void OnInputDisconnected(Wire & wire);
+					virtual void OnOutputDisconnected(Wire & wire);
 					virtual void ExchangeInputWires(int first,int second);
 					virtual void ExchangeOutputWires(int first,int second);
-					virtual void NotifyNewSendtoMixer(Song& pSong,int callerMac,int senderMac);
-					virtual void ClearMixerSendFlag(Song& pSong);
-					virtual void DeleteOutputWireIndex(Song& pSong,int wireIndex);
-					virtual void DeleteInputWireIndex(Song& pSong,int wireIndex);
-					virtual void DeleteWires(Song& pSong);
-					virtual int FindInputWire(int macIndex);
-					virtual int FindOutputWire(int macIndex);
-					virtual int GetFreeInputWire(int slottype=0);
-					virtual int GetFreeOutputWire(int slottype=0);
-					virtual int GetInputSlotTypes() { return 1; }
-					virtual int GetOutputSlotTypes() { return 1; }
+					virtual void NotifyNewSendtoMixer(Machine & callerMac, Machine & senderMac);
+					virtual Machine& SetMixerSendFlag(bool set);
+					virtual void DeleteWires();
+					virtual int FindInputWire(const Wire* pWireToFind) const;
+					virtual int FindOutputWire(const Wire* pWireToFind) const;
+					virtual int FindInputWire(int macIndex) const;
+					virtual int FindOutputWire(int macIndex) const;
+					virtual int GetFreeInputWire(int slottype=0) const;
+					virtual int GetFreeOutputWire(int slottype=0) const;
+					virtual int GetInputSlotTypes() const { return 1; }
+					virtual int GetOutputSlotTypes() const { return 1; }
 					virtual float GetAudioRange() const { return 1.0f; }
-
+					//For song loading with PSY2 and PSY3 fileformats
+					std::vector<LegacyWire> legacyWires;
+					/// Incoming connections
+					std::vector<Wire> inWires;
+					int connectedInputs() const;
+					virtual std::string GetInputPinName(int pin) const {
+						if(pin==0) return "Left";
+						else if(pin==1) return "Right";
+						else return "Unknown";
+					}
+					virtual int GetNumInputPins() const { return (_mode==MACHMODE_GENERATOR)?0:2; }
+					/// Outgoing connections (reference to the destination wire)
+					std::vector<Wire*> outWires;
+					int connectedOutputs() const;
+					virtual std::string GetOutputPinName(int pin) const {
+						if(pin==0) return "Left";
+						else if(pin==1) return "Right";
+						else return "Unknown";
+					}
+					virtual int GetNumOutputPins() const { return (_mode==MACHMODE_MASTER)?0:2; }
 			///\}
 
 			///\name amplification of the signal in connections/wires
 			///\{
 				public:
-					virtual void GetWireVolume(int wireIndex, float &value) { value = GetWireVolume(wireIndex); }
-					virtual float GetWireVolume(int wireIndex) { return _inputConVol[wireIndex] * _wireMultiplier[wireIndex]; }
-					virtual void SetWireVolume(int wireIndex,float value) { _inputConVol[wireIndex] = value / _wireMultiplier[wireIndex]; }
-					virtual bool GetDestWireVolume(Song& thesong,int srcIndex, int WireIndex,float &value);
-					virtual bool SetDestWireVolume(Song& thesong,int srcIndex, int WireIndex,float value);
+					virtual void GetWireVolume(int wireIndex, float &value) { value = inWires[wireIndex].GetVolume(); }
+					virtual float GetWireVolume(int wireIndex) { return inWires[wireIndex].GetVolume(); }
+					virtual void SetWireVolume(int wireIndex,float value) { inWires[wireIndex].SetVolume(value); }
+					virtual bool GetDestWireVolume(int WireIndex,float &value);
+					virtual bool SetDestWireVolume(int WireIndex,float value);
+					virtual void OnWireVolChanged(Wire & wire) {}
+			///\}
+			///\name panning
+			///\{
+				public:
+					inline int GetPan() { return _panning; }
+					///\todo 3 dimensional?
+					virtual void SetPan(int newpan);
+					void InitializeSamplesVector(int numChans=2);
+					/// numerical value of panning
+					int _panning;							
+					/// left chan volume
+					float _lVol;							
+					/// right chan volume
+					float _rVol;							
+					std::vector<float*> samplesV;
 			///\}
 
 			///\name general information
 			///\{
 				public:
 					///\todo: update this to std::string.
-					virtual void SetEditName(std::string const & newname) { std::strncpy(_editName,newname.c_str(),32); }
+					virtual void SetEditName(std::string const & newname) {
+						std::strncpy(_editName,newname.c_str(),sizeof(_editName)-1);
+						_editName[sizeof(_editName)-1]='\0';
+					}
 					const char * GetEditName() const { return _editName; }
 				public:///\todo private:
 					///\todo this was a std::string in v1.9
@@ -394,21 +536,6 @@ namespace psycle
 					bool _mute;
 			///\}
 
-			///\name panning
-			///\{
-				public:
-					///\todo int GetPan() { return _panning; }
-					///\todo 3 dimensional?
-					virtual void SetPan(int newpan);
-				public:///\todo private:
-					/// numerical value of panning
-					int _panning;							
-					/// left chan volume
-					float _lVol;							
-					/// right chan volume
-					float _rVol;							
-			///\}
-
 		public:
 			Machine();
 			Machine(Machine* mac);
@@ -425,7 +552,7 @@ namespace psycle
 #endif
 			}
 		protected:
-			void UpdateVuAndStanbyFlag(int numSamples);
+			virtual void UpdateVuAndStanbyFlag(int numSamples);
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -435,12 +562,6 @@ namespace psycle
 		public://\todo private:
 
 			virtual bool playsTrack(const int track) const;
-			///\name gui stuff
-			///\{
-				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
-				///\todo hardcoded limits and wastes with MAX_CONNECTIONS
-				CPoint _connectionPoint[MAX_CONNECTIONS];
-			///\}
 
 			///\name signal measurements (and also gui stuff)
 			///\{
@@ -455,6 +576,7 @@ namespace psycle
 				int _volumeMaxDisplay;
 				/// output peak level for display
 				int _volumeMaxCounterLife;
+
 				///\todo doc
 				int _scopePrevNumSamples;
 				///\todo doc
@@ -469,25 +591,6 @@ namespace psycle
 			///\{
 				/// this machine is used by a send/return mixer. (Some things cannot be done on these machines)
 				bool _isMixerSend;
-				/// left data
-				float *_pSamplesL;
-				/// right data
-				float *_pSamplesR;						
-			///\}
-			///\name used by the single-threaded, recursive scheduler
-			///\{
-				/// guard to avoid feedback loops
-				bool recursive_is_processing_;
-				bool recursive_processed_;
-			///\}
-
-			///\name used by the multi-threaded scheduler
-			///\{
-				/// The multi-threaded scheduler cannot use _worked because it's not thread-synchronised.
-				/// So, we define another boolean that's modified only by the multi-threaded scheduler,
-				/// with proper thread synchronisations.
-				/// The multi-threaded scheduler doesn't use recursive_processed_ nor recursive_is_processing_.
-				bool sched_processed_;
 			///\}
 			///\name various player-related states
 			///\todo hardcoded limits and wastes with MAX_TRACKS
@@ -513,36 +616,17 @@ namespace psycle
 				///\todo doc
 				float TWSDestination[MAX_TWS];
 			///\}
-
-			///\name input ports
+			///\name gui stuff
 			///\{
-				/// number of Incoming connections
-				int _numInputs;							
-				/// Incoming connections Machine number
-				int _inputMachines[MAX_CONNECTIONS];	
-				/// Incoming connections activated
-				bool _inputCon[MAX_CONNECTIONS];		
-				/// Incoming connections Machine vol
-				float _inputConVol[MAX_CONNECTIONS];	
-				/// Value to multiply _inputConVol[] with to have a 0.0...1.0 range
-				// The reason of the _wireMultiplier variable is because VSTs output wave data
-				// in the range -1.0 to +1.0, while natives and internals output at -32768.0 to +32768.0
-				// Initially (when the format was made), Psycle did convert this in the "Work" function,
-				// but since it already needs to multiply the output by inputConVol, I decided to remove
-				// that extra conversion and use directly the volume to do so.
-				float _wireMultiplier[MAX_CONNECTIONS];	
-			///\}
-
-			///\name output ports
-			///\{
-				/// number of Outgoing connections
-				int _numOutputs;						
-				/// Outgoing connections Machine number
-				int _outputMachines[MAX_CONNECTIONS];	
-				/// Outgoing connections activated
-				bool _connection[MAX_CONNECTIONS];      
+				/// The topleft point of a square where the wire triangle is centered when drawn. (Used to detect when to open the wire dialog)
+				///\todo hardcoded limits and wastes with MAX_CONNECTIONS
+				CPoint _connectionPoint[MAX_CONNECTIONS];
 			///\}
 		};
+
+		inline int Wire::GetSrcWireIndex() const { return (enabled) ? GetSrcMachine().FindOutputWire(this) : -1; };
+		inline int Wire::GetDstWireIndex() const { return GetDstMachine().FindInputWire(this); };
+
 
 		/// master machine.
 		class Master : public Machine
@@ -559,6 +643,9 @@ namespace psycle
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 
+			float* getLeft() const { return samplesV[0]; }
+			float* getRight() const { return samplesV[1]; }
+
 			int _outDry;
 			bool vuupdated;
 			bool _clip;
@@ -574,5 +661,6 @@ namespace psycle
 		protected:
 			static char* _psName;
 		};
+
 	}
 }

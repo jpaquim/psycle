@@ -64,20 +64,28 @@ namespace psycle
 		}
 		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
+			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx);
+			pMachine->_x = x;
+			pMachine->_y = y;
+			if(_pMachine[songIdx]) DestroyMachine(songIdx);
+			_pMachine[songIdx] = pMachine;
+			return true;
+		}
+		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int shellIdx)
+		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
 			vst::plugin *vstPlug(0);
 			if(songIdx < 0)
 			{
 				songIdx =	GetFreeMachine();
-				if(songIdx < 0) return false;
+				if(songIdx < 0) return NULL;
 			}
 			switch (type)
 			{
 			case MACH_MASTER:
-				if(_pMachine[MASTER_INDEX]) return false;
-				pMachine = new Master(songIdx);
-				songIdx = MASTER_INDEX;
+				if(_pMachine[MASTER_INDEX]) pMachine = _pMachine[MASTER_INDEX];
+				else pMachine = new Master(songIdx);
 				break;
 			case MACH_SAMPLER:
 				pMachine = new Sampler(songIdx);
@@ -99,53 +107,47 @@ namespace psycle
 				break;
 			case MACH_PLUGIN:
 				{
-					if(!Global::machineload().TestFilename(psPluginDll,shellIdx))
+					if(Global::machineload().TestFilename(psPluginDll,shellIdx))
 					{
-						return false;
-					}
-					try
-					{
-						pMachine = pPlugin = new Plugin(songIdx);
-						pPlugin->Instance(psPluginDll);
-					}
-					catch(const std::exception& e)
-					{
-						loggers::exception()(e.what());
-						zapObject(pMachine); 
-						return false;
-					}
-					catch(...)
-					{
-						zapObject(pMachine); 
-						return false;
+						try
+						{
+							pMachine = pPlugin = new Plugin(songIdx);
+							pPlugin->Instance(psPluginDll);
+						}
+						catch(const std::exception& e)
+						{
+							loggers::exception()(e.what());
+							zapObject(pMachine); 
+						}
+						catch(...)
+						{
+							zapObject(pMachine); 
+						}
 					}
 					break;
 				}
 			case MACH_VST:
 			case MACH_VSTFX:
 				{
-					if(!Global::machineload().TestFilename(psPluginDll,shellIdx)) 
+					if(Global::machineload().TestFilename(psPluginDll,shellIdx)) 
 					{
-						return false;
-					}
-					try
-					{
-						pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll,shellIdx));
-						if(vstPlug)
+						try
 						{
-							vstPlug->_macIndex=songIdx;
+							pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll,shellIdx));
+							if(vstPlug)
+							{
+								vstPlug->_macIndex=songIdx;
+							}
 						}
-					}
-					catch(const std::exception & e)
-					{
-						loggers::exception()(e.what());
-						zapObject(pMachine); 
-						return false;
-					}
-					catch(...)
-					{
-						zapObject(pMachine);
-						return false;
+						catch(const std::exception & e)
+						{
+							loggers::exception()(e.what());
+							zapObject(pMachine); 
+						}
+						catch(...)
+						{
+							zapObject(pMachine);
+						}
 					}
 					break;
 				}
@@ -153,16 +155,14 @@ namespace psycle
 				pMachine = new Dummy(songIdx);
 				break;
 			default:
-				return false; ///< hmm?
+				break;
 			}
-			if(_pMachine[songIdx]) DestroyMachine(songIdx);
-			pMachine->Init();
-			pMachine->_x = x;
-			pMachine->_y = y;
-			// Finally, activate the machine
-			_pMachine[songIdx] = pMachine;
-			return true;
+			if (pMachine) {
+				pMachine->Init();
+			}
+			return pMachine;
 		}
+
 
 		int Song::FindBusFromIndex(int smac)
 		{
@@ -193,57 +193,29 @@ namespace psycle
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			assert(origmac);
 
-			// buffer all the connection info
-			int outputMachines[MAX_CONNECTIONS];
-			int inputMachines[MAX_CONNECTIONS];
-			float inputConVol[MAX_CONNECTIONS];
-			float outputConVol[MAX_CONNECTIONS];
-			bool connection[MAX_CONNECTIONS];
-			bool inputCon[MAX_CONNECTIONS];
-
-			int numOutputs = origmac->_numOutputs;
-			int numInputs = origmac->_numInputs;
-
-			for (int i = 0; i < MAX_CONNECTIONS; i++)
-			{
-				outputMachines[i] = origmac->_outputMachines[i];
-				inputMachines[i] = origmac->_inputMachines[i];
-				inputConVol[i] = origmac->_inputConVol[i]*origmac->_wireMultiplier[i];
-				connection[i] = origmac->_connection[i];
-				inputCon[i] = origmac->_inputCon[i];
-				// store out volumes aswell
-				if (connection[i])
-				{
-					origmac->GetDestWireVolume(*this,songIdx,i,outputConVol[i]);
-				}
-			}
-
-			// CreateMachine automatically deletes the previous machine if exists.
-			if (!CreateMachine(type,x,y,psPluginDll,songIdx,shellIdx))
-				return false;
-
+			Machine* newmac = CreateMachine(type,psPluginDll,songIdx,shellIdx);
 			// replace all the connection info
-			Machine* newmac = _pMachine[songIdx];
 			if (newmac)
 			{
-				newmac->_numOutputs = numOutputs;
-				newmac->_numInputs = numInputs;
-
+				// Finally, Rewire.
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
-					// restore input connections
-					if (inputCon[i])
-					{
-						InsertConnectionNonBlocking(_pMachine[inputMachines[i]], _pMachine[songIdx],0,0, inputConVol[i]);
+					if (origmac->inWires[i].Enabled()) {
+						origmac->inWires[i].ChangeDest(newmac->inWires[i]);
 					}
-					// restore output connections
-					if (connection[i])
-					{
-						InsertConnectionNonBlocking(_pMachine[songIdx], _pMachine[outputMachines[i]], 0,0, outputConVol[i]);
+					if (origmac->outWires[i] && origmac->outWires[i]->Enabled()) {
+						origmac->outWires[i]->ChangeSource(*newmac, 0, i
+							, &origmac->outWires[i]->GetMapping());
 					}
 				}
+				if(_pMachine[songIdx]) DestroyMachine(songIdx);
+				_pMachine[songIdx] = newmac;
+				newmac->_x = x;
+				newmac->_y = y;
+				return true;
 			}
-			return true;
+
+			return false;
 		}
 
 		bool Song::ExchangeMachines(int one, int two)
@@ -264,84 +236,85 @@ namespace psycle
 			// if they are both valid
 			if (mac1 && mac2)
 			{
+				std::vector<Wire> inWire1;
+				std::vector<Wire> inWire2;
+				std::vector<Wire> outWire1;
+				std::vector<Wire> outWire2;
+				Wire unused(mac1);
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					inWire1.push_back(mac1->inWires[i]);
+					inWire2.push_back(mac2->inWires[i]);
+					mac1->inWires[i].Disconnect();
+					mac2->inWires[i].Disconnect();
+					if (mac1->outWires[i]) {
+						outWire1.push_back(*mac1->outWires[i]);
+						outWire2.push_back(*mac2->outWires[i]);
+						mac1->outWires[i]->Disconnect();
+						mac2->outWires[i]->Disconnect();
+					}
+					else {
+						outWire1.push_back(unused);
+						outWire2.push_back(unused);
+					}
+				}
+
+				// Finally, Rewire.
+				for (int i = 0; i < MAX_CONNECTIONS; i++)
+				{
+					if (inWire1[i].Enabled()) {
+						if (inWire1[i].GetSrcMachine()._macIndex != mac2->_macIndex) {
+							mac2->inWires[i].ConnectSource(inWire1[i].GetSrcMachine(), 0
+								,inWire1[i].GetSrcWireIndex()
+								,&inWire1[i].GetMapping());
+							mac2->inWires[i].SetVolume(inWire1[i].GetVolume());
+						}
+						else {
+							mac1->inWires[i].ConnectSource(*mac2,0
+								,inWire1[i].GetSrcWireIndex()
+								,&inWire1[i].GetMapping());
+						}
+					}
+					if (inWire2[i].Enabled()) {
+						if (inWire2[i].GetSrcMachine()._macIndex != mac1->_macIndex) {
+							mac1->inWires[i].ConnectSource(inWire2[i].GetSrcMachine(), 0
+								,inWire2[i].GetSrcWireIndex()
+								,&inWire2[i].GetMapping());
+							mac1->inWires[i].SetVolume(inWire2[i].GetVolume());
+						}
+						else {
+							mac2->inWires[i].ConnectSource(*mac1,0
+								,inWire2[i].GetSrcWireIndex()
+								,&inWire2[i].GetMapping());
+						}
+					}
+					if (outWire1[i].Enabled()) {
+						if (outWire1[i].GetDstMachine()._macIndex != mac2->_macIndex) {
+							outWire1[i].ConnectSource(*mac2, 0, i, &outWire1[i].GetMapping());
+							outWire1[i].SetVolume(outWire1[i].GetVolume());
+						}
+					}
+					if (outWire2[i].Enabled()) {
+						if (outWire2[i].GetDstMachine()._macIndex != mac1->_macIndex) {
+							outWire2[i].ConnectSource(*mac1, 0, i, &outWire2[i].GetMapping());
+							outWire2[i].SetVolume(outWire2[i].GetVolume());
+						}
+					}
+				}
+
 				// exchange positions
 				int temp = mac1->_x;
 				mac1->_x = mac2->_x;
 				mac2->_x = temp;
-
 				temp = mac1->_y;
 				mac1->_y = mac2->_y;
 				mac2->_y = temp;
 
-				float tmp1ivol[MAX_CONNECTIONS],tmp2ivol[MAX_CONNECTIONS], tmp1ovol[MAX_CONNECTIONS],tmp2ovol[MAX_CONNECTIONS];
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					// Store the volumes of each wire and exchange.
-					if (mac1->_connection[i]) {	mac1->GetDestWireVolume(*this,mac1->_macIndex,i,tmp1ovol[i]);	}
-					if (mac2->_connection[i]) {	mac2->GetDestWireVolume(*this,mac2->_macIndex,i,tmp2ovol[i]); }				
-					mac1->GetWireVolume(i,tmp1ivol[i]);
-					mac2->GetWireVolume(i,tmp2ivol[i]);
-
-					temp = mac1->_outputMachines[i];
-					mac1->_outputMachines[i] = mac2->_outputMachines[i];
-					mac2->_outputMachines[i] = temp;
-
-					temp = mac1->_inputMachines[i];
-					mac1->_inputMachines[i] = mac2->_inputMachines[i];
-					mac2->_inputMachines[i] = temp;
-
-
-					bool btemp = mac1->_connection[i];
-					mac1->_connection[i] = mac2->_connection[i];
-					mac2->_connection[i] = btemp;
-
-					btemp = mac1->_inputCon[i];
-					mac1->_inputCon[i] = mac2->_inputCon[i];
-					mac2->_inputCon[i] = btemp;
-
-				}
-
-				temp = mac1->_numOutputs;
-				mac1->_numOutputs = mac2->_numOutputs;
-				mac2->_numOutputs = temp;
-
-				temp = mac1->_numInputs;
-				mac1->_numInputs = mac2->_numInputs;
-				mac2->_numInputs = temp;
-
 				// Exchange the Machine number.
 				_pMachine[one] = mac2;
 				_pMachine[two] = mac1;
-
 				mac1->_macIndex = two;
 				mac2->_macIndex = one;
-
-				// Finally, Reinitialize the volumes of the wires. Remember that we have exchanged the wires, so the volume indexes are the opposite ones.
-				for (int i = 0; i < MAX_CONNECTIONS; i++)
-				{
-					if (mac1->_inputCon[i])
-					{
-						Machine* macsrc = _pMachine[mac1->_inputMachines[i]];
-						mac1->InsertInputWireIndex(*this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac1->GetAudioRange(),tmp2ivol[i]);
-					}
-					if (mac2->_inputCon[i])
-					{
-						Machine* macsrc = _pMachine[mac2->_inputMachines[i]];
-						mac2->InsertInputWireIndex(*this,i,macsrc->_macIndex,macsrc->GetAudioRange()/mac2->GetAudioRange(),tmp1ivol[i]);
-					}
-
-					if (mac1->_connection[i])
-					{
-						Machine* macdst = _pMachine[mac1->_outputMachines[i]];
-						macdst->InsertInputWireIndex(*this,macdst->FindInputWire(two),two,mac1->GetAudioRange()/macdst->GetAudioRange(),tmp2ovol[i]);
-					}
-					if (mac2->_connection[i])
-					{
-						Machine* macdst = _pMachine[mac2->_outputMachines[i]];
-						macdst->InsertInputWireIndex(*this,macdst->FindInputWire(one),one,mac2->GetAudioRange()/macdst->GetAudioRange(),tmp1ovol[i]);
-					}					
-				}
-
 				return true;
 			}
 			else if (mac1)
@@ -351,21 +324,6 @@ namespace psycle
 				_pMachine[two] = mac1;
 
 				mac1->_macIndex = two;
-
-				// and replace the index in any machine that pointed to this one.
-				for (int i=0; i < MAX_CONNECTIONS; i++)
-				{
-					if ( mac1->_inputCon[i])
-					{
-						Machine* cmp = _pMachine[mac1->_inputMachines[i]];
-						cmp->_outputMachines[cmp->FindOutputWire(one)]=two;
-					}
-					if ( mac1->_connection[i])
-					{
-						Machine* cmp = _pMachine[mac1->_outputMachines[i]];
-						cmp->_inputMachines[cmp->FindInputWire(one)]=two;
-					}
-				}
 				return true;
 			}
 			else if (mac2)
@@ -375,27 +333,12 @@ namespace psycle
 				_pMachine[two] = NULL;
 
 				mac2->_macIndex = one;
-
-				// and replace the index in any machine that pointed to this one.
-				for (int i=0; i < MAX_CONNECTIONS; i++)
-				{
-					if ( mac2->_inputCon[i])
-					{
-						Machine* cmp = _pMachine[mac2->_inputMachines[i]];
-						cmp->_outputMachines[cmp->FindOutputWire(two)]=one;
-					}
-					if ( mac2->_connection[i])
-					{
-						Machine* cmp = _pMachine[mac2->_outputMachines[i]];
-						cmp->_inputMachines[cmp->FindInputWire(two)]=one;
-					}
-				}
 				return true;
 			}
 			return false;
 		}
 
-		void Song::DestroyAllMachines(bool write_locked)
+		void Song::DestroyAllMachines()
 		{
 			for(int c(0) ;  c < MAX_MACHINES; ++c)
 			{
@@ -412,7 +355,7 @@ namespace psycle
 							_pMachine[j] = 0;
 						}
 					}
-					DestroyMachine(c, write_locked);
+					DestroyMachine(c);
 				}
 				_pMachine[c] = 0;
 			}
@@ -524,7 +467,7 @@ namespace psycle
 //			LineCounter=0;
 //			LineChanged=false;
 			// Clean up allocated machines.
-			DestroyAllMachines(true);
+			DestroyAllMachines();
 			// Cleaning instruments
 			DeleteInstruments();
 			// Clear patterns
@@ -581,16 +524,16 @@ namespace psycle
 			}
 			return idx;
 		}
-		bool Song::ValidateMixerSendCandidate(Machine* mac,bool rewiring)
+		bool Song::ValidateMixerSendCandidate(Machine& mac,bool rewiring)
 		{
 			// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
-			if ( mac->_mode == MACHMODE_GENERATOR) return false;
-			if ( mac->_numOutputs > 1 || (mac->_numOutputs > 0 && !rewiring) ) return false;
+			if ( mac._mode == MACHMODE_GENERATOR) return false;
+			if ( mac.connectedInputs() > 1 || (mac.connectedOutputs() > 0 && !rewiring) ) return false;
 			for (int i(0); i<MAX_CONNECTIONS; ++i)
 			{
-				if (mac->_inputCon[i])
+				if (mac.inWires[i].Enabled())
 				{
-					if (!ValidateMixerSendCandidate(_pMachine[mac->_inputMachines[i]],true)) //true because obviously it has one output
+					if (!ValidateMixerSendCandidate(mac.inWires[i].GetSrcMachine(),true)) //true because obviously it has one output
 					{
 						return false;
 					}
@@ -598,23 +541,8 @@ namespace psycle
 			}
 			return true;
 		}
-		void Song::RestoreMixerSendFlags()
-		{
-			for (int i(0);i < MAX_MACHINES; ++i)
-			{
-				if (_pMachine[i] && _pMachine[i]->_type == MACH_MIXER)
-				{
-					Mixer* mac = static_cast<Mixer*>(_pMachine[i]);
-					for (int j(0); j<mac->numreturns(); ++j)
-					{
-						if ( mac->Return(j).IsValid())
-							mac->SetMixerSendFlag(*this,_pMachine[mac->Return(j).Wire().machine_]);
-					}
-				}
-			}
-		}
 
-		int Song::InsertConnectionNonBlocking(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float value)
+		int Song::InsertConnectionNonBlocking(Machine* srcMac,Machine* dstMac, int srctype, int dsttype,float initialVol)
 		{
 			// Assert that we have two machines
 			assert(srcMac); assert(dstMac);
@@ -629,7 +557,7 @@ namespace psycle
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
 			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && dsttype == 1))
 			{
-				if (!ValidateMixerSendCandidate(srcMac)) return -1;
+				if (!ValidateMixerSendCandidate(*srcMac)) return -1;
 			}
 
 			// Try to get free indexes from each machine
@@ -638,8 +566,19 @@ namespace psycle
 			if(freebus == -1 || dfreebus == -1 ) return -1;
 
 			// If everything went right, connect them.
-			srcMac->InsertOutputWireIndex(*this,freebus,dstMac->_macIndex);
-			dstMac->InsertInputWireIndex(*this,dfreebus,srcMac->_macIndex,srcMac->GetAudioRange()/dstMac->GetAudioRange(),value);
+			//Patch for Mixer. These methods should really be using Wire objects now, not indexes.
+			if (dstMac->_type == MACH_MIXER && dfreebus >= MAX_CONNECTIONS) {
+				dfreebus-=MAX_CONNECTIONS;
+				Mixer &mixer = *static_cast<Mixer*>(dstMac);
+				mixer.InsertReturn(dfreebus);
+				Wire &wire = mixer.Return(dfreebus).GetWire();
+				wire.ConnectSource(*srcMac,srctype,freebus);
+				wire.SetVolume(initialVol);
+			}
+			else {
+				dstMac->inWires[dfreebus].ConnectSource(*srcMac,srctype,freebus);
+				dstMac->inWires[dfreebus].SetVolume(initialVol);
+			}
 			return dfreebus;
 		}
 		bool Song::ChangeWireDestMacNonBlocking(Machine* srcMac,Machine* newdstMac, int wiresrc,int newwiredest)
@@ -647,37 +586,32 @@ namespace psycle
 			// Assert that we have two machines
 			assert(srcMac); assert(newdstMac);
 			// Verify that the destination is not a generator
-			if(newdstMac->_mode == MACHMODE_GENERATOR) return false;
+			if (newdstMac->_mode == MACHMODE_GENERATOR) return false;
 			// Verify that src is not connected to dst already, and that destination is not connected to source.
 			if (srcMac->FindOutputWire(newdstMac->_macIndex) > -1 || newdstMac->FindOutputWire(srcMac->_macIndex) > -1) return false;
-			// If source is in a mixer chain, dissallow the new connection.
+			// If source and dest are a mixer chain, dissallow connection if connecting as send.
 			if ( srcMac->_type == MACH_MIXER && newdstMac->_type == MACH_MIXER && newwiredest >=MAX_CONNECTIONS) return false;
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
 			if ( newdstMac->_isMixerSend || (newdstMac->_type == MACH_MIXER && newwiredest >= MAX_CONNECTIONS))
 			{
 				///\todo: validate for the case where srcMac->_isMixerSend
-				if (!ValidateMixerSendCandidate(srcMac,true)) return false;
+				if (!ValidateMixerSendCandidate(*srcMac,true)) return false;
 			}
 
-			if (wiresrc == -1 || newwiredest == -1 || srcMac->_outputMachines[wiresrc] == -1)
+			if (wiresrc == -1 || newwiredest == -1 || srcMac->outWires[wiresrc] == NULL || srcMac->outWires[wiresrc]->Enabled() == false)
 				return false;
 
-			int w;
-			float volume = 1.0f;
-			///\todo: this assignation will need to change with multi-io.
-			Machine *oldmac = _pMachine[srcMac->_outputMachines[wiresrc]];
-			if (oldmac)
-			{
-				if ((w = oldmac->FindInputWire(srcMac->_macIndex))== -1)
-					return false;
-
-				oldmac->GetWireVolume(w,volume);
-				oldmac->DeleteInputWireIndex(*this,w);
-				srcMac->InsertOutputWireIndex(*this,wiresrc,newdstMac->_macIndex);
-				newdstMac->InsertInputWireIndex(*this,newwiredest,srcMac->_macIndex,srcMac->GetAudioRange()/newdstMac->GetAudioRange(),volume);
-				return true;
+			//Patch for Mixer. These methods should really be using Wire objects now, not indexes.
+			if (newdstMac->_type == MACH_MIXER && newwiredest >= MAX_CONNECTIONS) {
+				newwiredest-=MAX_CONNECTIONS;
+				Mixer &mixer = *static_cast<Mixer*>(newdstMac);
+				mixer.InsertReturn(newwiredest);
+				srcMac->outWires[wiresrc]->ChangeDest(mixer.Return(newwiredest).GetWire());
 			}
-			return false;
+			else {
+				srcMac->outWires[wiresrc]->ChangeDest(newdstMac->inWires[newwiredest]);
+			}
+			return true;
 		}
 		bool Song::ChangeWireSourceMacNonBlocking(Machine* newsrcMac,Machine* dstMac, int newwiresrc, int wiredest)
 		{
@@ -694,47 +628,35 @@ namespace psycle
 			// If destination is in a mixer chain (or the mixer itself), validate the sender first
 			if ( dstMac->_isMixerSend || (dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS))
 			{
-				if (!ValidateMixerSendCandidate(newsrcMac,false)) return false;
+				if (!ValidateMixerSendCandidate(*newsrcMac,false)) return false;
 			}
 
 			if (newwiresrc == -1 || wiredest == -1)
 				return false;
 
-			Machine *oldmac(0);
 			if ( dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS)
 			{
-				if (!((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
-					return false;
-				else oldmac = _pMachine[((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).Wire().machine_];
+				if (((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
+				{
+					((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).GetWire()
+						.ChangeSource(*newsrcMac,0,newwiresrc, &dstMac->inWires[wiredest].GetMapping());
+					return true;
+				}
 			}
-			else if (dstMac->_inputMachines[wiredest] == -1) 
-				return false;
-			else oldmac = _pMachine[dstMac->_inputMachines[wiredest]];
-
-			int w;
-			float volume = 1.0f;
-			///\todo: this assignation will need to change with multi-io.
-			 
-			if (oldmac)
-			{
-				if ((w =oldmac->FindOutputWire(dstMac->_macIndex)) == -1)
-					return false;
-
-				oldmac->DeleteOutputWireIndex(*this,w);
-				newsrcMac->InsertOutputWireIndex(*this,newwiresrc,dstMac->_macIndex);
-				dstMac->GetWireVolume(wiredest,volume);
-				dstMac->InsertInputWireIndex(*this,wiredest,newsrcMac->_macIndex,newsrcMac->GetAudioRange()/dstMac->GetAudioRange(),volume);
+			else if (dstMac->inWires[wiredest].Enabled()) {
+				dstMac->inWires[wiredest].ChangeSource(*newsrcMac,0,newwiresrc,
+					&dstMac->inWires[wiredest].GetMapping());
 				return true;
 			}
 			return false;
 		}
 
-		void Song::DestroyMachine(int mac, bool write_locked)
+		void Song::DestroyMachine(int mac)
 		{
 			Machine *iMac = _pMachine[mac];
 			if(iMac)
 			{
-				iMac->DeleteWires(*this);
+				iMac->DeleteWires();
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 				try
@@ -1492,7 +1414,6 @@ namespace psycle
 							if(index < MAX_MACHINES)
 							{
 								// we had better load it
-								DestroyMachine(index);
 								_pMachine[index] = Machine::LoadFileChunk(pFile, index, version, fullopen);
 								//Bugfix.
 								if (fullopen) {
@@ -1578,59 +1499,16 @@ namespace psycle
 				}
 				// now that we have loaded all the modules, time to prepare them.
 				progress.m_Progress.SetPos(16384);
-				::Sleep(1); ///< ???
-				// test all connections for invalid machines. disconnect invalid machines.
-				for(int i(0) ; i < MAX_MACHINES ; ++i)
-				{
-					if(_pMachine[i])
-					{
-						_pMachine[i]->_numInputs = 0;
-						_pMachine[i]->_numOutputs = 0;
-						for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
-						{
-							if(_pMachine[i]->_connection[c])
-							{
-								if(_pMachine[i]->_outputMachines[c] < 0 || _pMachine[i]->_outputMachines[c] >= MAX_MACHINES
-									|| !_pMachine[_pMachine[i]->_outputMachines[c]]
-									|| i == _pMachine[i]->_outputMachines[c])
-								{
-									_pMachine[i]->_connection[c] = false;
-									_pMachine[i]->_outputMachines[c] = -1;
-								}
-								else 
-								{
-									_pMachine[i]->_numOutputs++;
-								}
-							}
-							else
-							{
-								_pMachine[i]->_outputMachines[c] = -1;
-							}
+				::Sleep(1);
 
-							if (_pMachine[i]->_inputCon[c])
-							{
-								if (_pMachine[i]->_inputMachines[c] < 0 || _pMachine[i]->_inputMachines[c] >= MAX_MACHINES
-									|| !_pMachine[_pMachine[i]->_inputMachines[c]]
-									|| i == _pMachine[i]->_inputMachines[c])
-								{
-									_pMachine[i]->_inputCon[c] = false;
-									_pMachine[i]->_inputMachines[c] = -1;
-								}
-								else
-								{
-									_pMachine[i]->_numInputs++;
-								}
-							}
-							else
-							{
-								_pMachine[i]->_inputMachines[c] = -1;
-							}
-						}
-					}
+				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) {
+					_pMachine[i]->PostLoad(_pMachine);
+				}
+				// Clean memory.
+				for(int i(0) ; i < MAX_MACHINES ; ++i) if(_pMachine[i])	{
+					_pMachine[i]->legacyWires.clear();
 				}
 
-				if (fullopen) { RestoreMixerSendFlags(); }
-				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
 				// translate any data that is required
 				machineSoloed = solo;
 				// Safe measures for damaged files.
@@ -2025,10 +1903,8 @@ namespace psycle
 					pFile->Read(&_pInstrument[i]->_lines, sizeof(_pInstrument[0]->_lines));
 				}
 
-				// Validate the machine arrays. At the same time we fill volMatrix that
-				// we will use later on to correctly initialize the wire volumes.
-				float volMatrix[128][MAX_CONNECTIONS];
-				for (int i=0; i<128; i++) // First, we add the output volumes to a Matrix for latter reference
+				// Validate the machine arrays. 
+				for (int i=0; i<128; i++) // First, we add the output volumes to a Matrix for reference later
 				{
 					if (!_machineActive[i])
 					{
@@ -2037,13 +1913,6 @@ namespace psycle
 					else if (!pMac[i])
 					{
 						_machineActive[i] = false;
-					}
-					else 
-					{
-						for (int c=0; c<MAX_CONNECTIONS; c++)
-						{
-							volMatrix[i][c] = pMac[i]->_inputConVol[c];
-						}
 					}
 				}
 
@@ -2185,8 +2054,8 @@ namespace psycle
 				//Finished all the file loading. Now Process the data to the current structures
 
 				// The old fileformat stored the volumes on each output, 
-				// so what we have in inputConVol is really the output
-				// and we have to convert it.
+				// so what we have in inputConVol is really outputConVol
+				// and we have to convert while recreating them.
 				progress.m_Progress.SetPos(8192+4096+2048);
 				::Sleep(1);
 				for (int i=0; i<128; i++) // we go to fix this for each
@@ -2195,18 +2064,15 @@ namespace psycle
 					{
 						for (int c=0; c<MAX_CONNECTIONS; c++) // all for each of its input connections.
 						{
-							if (pMac[i]->_inputCon[c] && pMac[i]->_inputMachines[c] > -1 && pMac[pMac[i]->_inputMachines[c]])	// If there's a valid machine in this inputconnection,
+							LegacyWire& wire = pMac[i]->legacyWires[c];
+							if (wire._inputCon && wire._inputMachine > -1 && wire._inputMachine < 128
+								&& pMac[wire._inputMachine])	// If there's a valid machine in this inputconnection,
 							{
-								Machine* pOrigMachine = pMac[pMac[i]->_inputMachines[c]]; // We get that machine
-								int d = pOrigMachine->FindOutputWire(i);				// and wire
-
-								if ( d == -1 )
+								Machine* pSourceMac = pMac[wire._inputMachine];
+								int d = Machine::FindLegacyOutput(pSourceMac, i); // We get that machine and wire
+								if ( d != -1 )
 								{
-									 pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; 
-								}
-								else
-								{
-									float val = volMatrix[pMac[i]->_inputMachines[c]][d];
+									float val = pSourceMac->legacyWires[d]._inputConVol;
 									if( val > 4.1f )
 									{
 										val*=0.000030517578125f; // BugFix
@@ -2216,19 +2082,24 @@ namespace psycle
 										val*=32768.0f; // BugFix
 									}
 									// and set the volume.
-									pMac[i]->InsertInputWireIndex(*this,c,pOrigMachine->_macIndex,pOrigMachine->GetAudioRange()/pMac[i]->GetAudioRange(),val);
+									if (wire.pinMapping.size() > 0) {
+										pMac[i]->inWires[c].ConnectSource(*pSourceMac,0,d,&wire.pinMapping);
+									}
+									else {
+										pMac[i]->inWires[c].ConnectSource(*pSourceMac,0,d);
+									}
+									pMac[i]->inWires[c].SetVolume(val*wire._wireMultiplier);
 								}
 							}
-							else { pMac[i]->_inputCon[c] = false; pMac[i]->_inputMachines[c] = -1; }
 						}
 					}
 				}
 				
 				// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
 				// to the real machine.
-				// Due to *this, we have to move machines to where they really are, 
+				// Due to this, we have to move machines to where they really are, 
 				// and remap the inputs and outputs indexes again... ouch
-				// At the same time, we validate each wire, and the number count.
+				// At the same time, we validate each wire.
 				progress.m_Progress.SetPos(8192+4096+2048+1024);
 				::Sleep(1);
 				unsigned char invmach[128];
@@ -2244,51 +2115,9 @@ namespace psycle
 				{
 					if (invmach[i] != 255)
 					{
-						;
 						Machine *cMac = _pMachine[invmach[i]] = pMac[i];
 						cMac->_macIndex = invmach[i];
 						_machineActive[i] = false; // mark as "converted"
-						cMac->_numInputs = 0;
-						cMac->_numOutputs = 0;
-						for (int c=0; c<MAX_CONNECTIONS; c++)
-						{
-							if (cMac->_inputCon[c])
-							{
-								if (cMac->_inputMachines[c] < 0 || cMac->_inputMachines[c] >= MAX_MACHINES-1)
-								{
-									cMac->_inputCon[c]=false;
-									cMac->_inputMachines[c]=-1;
-								}
-								else if (!pMac[cMac->_inputMachines[c]])
-								{
-									cMac->_inputCon[c]=false;
-									cMac->_inputMachines[c]=-1;
-								}
-								else
-								{
-									cMac->_inputMachines[c] = invmach[cMac->_inputMachines[c]];
-									cMac->_numInputs++;
-								}
-							}
-							if (cMac->_connection[c])
-							{
-								if (cMac->_outputMachines[c] < 0 || cMac->_outputMachines[c] >= MAX_MACHINES)
-								{
-									cMac->_connection[c]=false;
-									cMac->_outputMachines[c]=-1;
-								}
-								else if (!pMac[cMac->_outputMachines[c]])
-								{
-									cMac->_connection[c]=false;
-									cMac->_outputMachines[c]=-1;
-								}
-								else 
-								{
-									cMac->_outputMachines[c] = invmach[cMac->_outputMachines[c]];
-									cMac->_numOutputs++;
-								}
-							}
-						}
 					}
 				}
 				// verify that there isn't any machine that hasn't been copied into _pMachine
@@ -2315,8 +2144,12 @@ namespace psycle
 				progress.m_Progress.SetPos(16384);
 				::Sleep(1);
 				if(fullopen) converter.retweak(*this);
-				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad();
+				for (int i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad(_pMachine);
 				seqBus=0;
+				// Clean memory.
+				for(int i(0) ; i < MAX_MACHINES ; ++i) if(_pMachine[i])	{
+					_pMachine[i]->legacyWires.clear();
+				}
 				// Clean the vst loader helpers.
 				for (int i=0; i<OLD_MAX_PLUGINS; i++)
 				{
@@ -2332,7 +2165,6 @@ namespace psycle
 			MessageBox(NULL,"Incorrect file format","Error",MB_OK);
 			return false;
 		}
-
 
 		bool Song::Save(RiffFile* pFile,CProgressDialog& progress,bool autosave)
 		{
@@ -2733,17 +2565,50 @@ namespace psycle
 		{
 #if !defined WINAMP_PLUGIN
 			//todo do better.. use a vector<InstPreview*> or something instead
+			float* pL(((Master*)_pMachine[MASTER_INDEX])->getLeft());
+			float* pR(((Master*)_pMachine[MASTER_INDEX])->getRight());
 			if(wavprev.IsEnabled())
 			{
-				wavprev.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+				wavprev.Work(pL, pR, amount);
 			}
 			if(waved.IsEnabled())
 			{
-				waved.Work(_pMachine[MASTER_INDEX]->_pSamplesL, _pMachine[MASTER_INDEX]->_pSamplesR, amount);
+				waved.Work(pL, pL, amount);
 			}
 #endif // !defined WINAMP_PLUGIN
 		}
-
+		void Song::DeleteMachineRewiring(int macIdx)
+		{
+			Machine* pMac = _pMachine[macIdx];
+			// move wires before deleting. Don't do inside DeleteMachine since that is used in song internally
+			if( pMac->connectedInputs() > 0 && pMac->connectedOutputs() > 0) {
+				//For each input connection
+				for(int i = 0; i < MAX_CONNECTIONS; i++) if(pMac->inWires[i].Enabled()) {
+					Machine& srcMac = pMac->inWires[i].GetSrcMachine();
+					int wiresrc = pMac->inWires[i].GetSrcWireIndex();
+					bool first = true;
+					//Connect it to each output connection
+					for(int i = 0; i < MAX_CONNECTIONS; i++) if(pMac->outWires[i] && pMac->outWires[i]->Enabled()) {
+						Machine& dstMac = pMac->outWires[i]->GetDstMachine();
+						//Except if already connected
+						if( dstMac.FindInputWire(srcMac._macIndex) == -1) {
+							int wiredst = pMac->outWires[i]->GetDstWireIndex();
+							//If first wire change, it can be moved. Else it needs a new connection.
+							if(first) {
+								ChangeWireDestMacNonBlocking(&srcMac,&dstMac,wiresrc,wiredst);
+								first = false;
+							}
+							else {
+								float vol = pMac->outWires[i]->GetVolume();
+								int dwire = InsertConnectionNonBlocking(&srcMac, &dstMac);
+								dstMac.inWires[dwire].SetVolume(vol);
+							}
+						}
+					}
+				}
+			}
+			DestroyMachine(macIdx);
+		}
 		bool Song::CloneMac(int src,int dst)
 		{
 #if !defined WINAMP_PLUGIN
@@ -2873,10 +2738,6 @@ namespace psycle
 			_pMachine[dst]->_x = _pMachine[dst]->_x+32;
 			_pMachine[dst]->_y = _pMachine[dst]->_y+ys+8;
 
-			// delete all connections
-
-			_pMachine[dst]->DeleteWires(*this);
-
 			int number = 1;
 			char buf[sizeof(_pMachine[dst]->_editName)+4];
 			strcpy (buf,_pMachine[dst]->_editName);
@@ -2913,7 +2774,7 @@ namespace psycle
 			}
 
 			buf[sizeof(_pMachine[dst]->_editName)-1] = 0;
-			strcpy(_pMachine[dst]->_editName,buf);
+			strncpy(_pMachine[dst]->_editName,buf,sizeof(_pMachine[dst]->_editName)-1);
 #endif //!defined WINAMP_PLUGIN
 
 			return true;

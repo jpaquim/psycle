@@ -21,7 +21,10 @@ namespace psycle
 			_numPars=0;
 			_type = MACH_SAMPLER;
 			_mode = MACHMODE_GENERATOR;
-			sprintf(_editName, "Sampler");
+			strncpy(_editName, _psName, sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
+			InitializeSamplesVector();
+			
 			baseC = 60;
 			_resampler.quality(helpers::dsp::resampler::quality::linear);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
@@ -587,7 +590,6 @@ namespace psycle
 			}
 
 			else Standby(true);
-			recursive_processed_ = true;
 			return numSamples;
 		}
 
@@ -595,8 +597,8 @@ namespace psycle
 		{
 			helpers::dsp::resampler::work_func_type pResamplerWork;
 			Voice* pVoice = &_voices[voice];
-			float* pSamplesL = _pSamplesL;
-			float* pSamplesR = _pSamplesR;
+			float* pSamplesL = samplesV[0];
+			float* pSamplesR = samplesV[1];
 			float left_output;
 			float right_output;
 
@@ -935,14 +937,25 @@ namespace psycle
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
 
-			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
-			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
-			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
-			pFile->Read(&_connection[0], sizeof(_connection));
-			pFile->Read(&_inputCon[0], sizeof(_inputCon));
+			legacyWires.resize(MAX_CONNECTIONS);
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputMachine,sizeof(legacyWires[i]._inputMachine));	// Incoming connections Machine number
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._outputMachine,sizeof(legacyWires[i]._outputMachine));	// Outgoing connections Machine number
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputConVol,sizeof(legacyWires[i]._inputConVol));	// Incoming connections Machine vol
+				legacyWires[i]._wireMultiplier = 1.0f;
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._connection,sizeof(legacyWires[i]._connection));      // Outgoing connections activated
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputCon,sizeof(legacyWires[i]._inputCon));		// Incoming connections activated
+			}
 			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			pFile->Read(&_numInputs, sizeof(_numInputs));
-			pFile->Read(&_numOutputs, sizeof(_numOutputs));
+			pFile->Skip(2*sizeof(int)); // numInputs and numOutputs
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);

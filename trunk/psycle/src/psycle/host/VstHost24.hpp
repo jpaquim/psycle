@@ -28,9 +28,6 @@ namespace psycle
 	{
 		namespace vst
 		{
-			// Maximum number of Audio Input/outputs
-			// \todo : this shouldn't be a static value. Host should ask the plugin and the array get created dynamically.
-			const int max_io = 16;
 			// Dialog max ticks for parameters.
 			const int quantization = 65535;
 			const int MAX_VST_EVENTS = 128;
@@ -79,13 +76,9 @@ namespace psycle
 				int currentSemi[16];
 				int oldNote[16];
 
-				float * inputs[max_io];
-				float * outputs[max_io];
-				float * _pOutSamplesL;
-				float * _pOutSamplesR;
-				// Junk is a safe buffer for vst plugins that would want more buffers than
-				// supplied.
-				float* junk;
+				std::vector<float *> inputs;
+				std::vector<float *> outputs;
+
 				std::string _sDllName;
 				std::string _sProductName;
 				std::string _sVendorName;
@@ -104,10 +97,8 @@ namespace psycle
 					requiresRepl = 0;
 					requiresProcess = 0;
 					_nCols=0;
-					_pOutSamplesL = 0;
-					_pOutSamplesR = 0;
-					junk = 0;
 					_type=MACH_VST;
+					InitializeSamplesVector();
 				}
 				virtual ~plugin();
 
@@ -244,38 +235,58 @@ namespace psycle
 						val[0]='\0';
 				};
 				virtual int GetNumBanks(){ return numPrograms()/128;};
-
-				virtual void InsertOutputWireIndex(Song& pSong,int wireIndex,int dstmac)
+				virtual void OnPinChange(Wire & wire, Wire::Mapping const & newMapping)
 				{
 					try
 					{
-						MainsChanged(false); ConnectOutput(0,true); ConnectOutput(1,true); Machine::InsertOutputWireIndex(pSong,wireIndex,dstmac);  MainsChanged(true);
+						MainsChanged(false);
+						if(wire.GetSrcMachine()._macIndex == _macIndex) {
+							OutputMapping(wire.GetMapping(),false);
+							OutputMapping(newMapping,true);
+						}
+						else {
+							InputMapping(wire.GetMapping(),false);
+							InputMapping(newMapping,true);
+						}
+						MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void InsertInputWireIndex(Song& pSong,int wireIndex,int srcmac,float wiremultiplier,float initialvol=1.0f)
+				virtual void OnOutputConnected(Wire & wire, int outType, int outWire)
 				{
 					try
 					{
-						MainsChanged(false); ConnectInput(0,true); ConnectInput(1,true); Machine::InsertInputWireIndex(pSong,wireIndex,srcmac,wiremultiplier,initialvol);  MainsChanged(true);
+						MainsChanged(false); OutputMapping(wire.GetMapping(),true); Machine::OnOutputConnected(wire, outType, outWire);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void DeleteOutputWireIndex(Song& pSong,int wireIndex)
+				virtual void OnInputConnected(Wire & wire)
 				{
 					try
 					{
-						MainsChanged(false); ConnectOutput(0,false); ConnectOutput(1,false); Machine::DeleteOutputWireIndex(pSong,wireIndex);  MainsChanged(true);
+					    MainsChanged(false); InputMapping(wire.GetMapping(),true); Machine::OnInputConnected(wire);  MainsChanged(true);
 					}catch(...){}
 				}
-				virtual void DeleteInputWireIndex(Song& pSong,int wireIndex)
+				virtual void OnOutputDisconnected(Wire & wire)
+				{
+					try
+					{
+						MainsChanged(false); OutputMapping(wire.GetMapping(),false); Machine::OnOutputDisconnected(wire);  MainsChanged(true);
+					}catch(...){}
+				}
+				virtual void OnInputDisconnected(Wire & wire)
 				{ 
 					try
 					{
-						MainsChanged(false); ConnectInput(0,false); ConnectInput(1,false); Machine::DeleteInputWireIndex(pSong,wireIndex);  MainsChanged(true);
+						MainsChanged(false); InputMapping(wire.GetMapping(),false); Machine::OnInputDisconnected(wire);  MainsChanged(true);
 					}catch(...){}
 				}
+				virtual int GetNumInputPins() const { return (aEffect)?numInputs():Machine::GetNumInputPins();}
+				virtual int GetNumOutputPins() const { return (aEffect)?numOutputs():Machine::GetNumOutputPins();}
+				virtual std::string GetOutputPinName(int pin) const ;
+				virtual std::string GetInputPinName(int pin) const;
 				virtual float GetAudioRange() const { return 1.0f; }
 
-
+				void InputMapping(Wire::Mapping const &mapping, bool enabled);
+				void OutputMapping(Wire::Mapping const &mapping, bool enabled);
 
 				// CEffect overloaded functions
 				//////////////////////////////////////////////////////////////////////////
@@ -283,13 +294,13 @@ namespace psycle
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 				/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 				/// doing an "off/on" when a connection changes.
-				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return ((input < 2)&& (_numInputs!=0)); } 
-				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output) { return ((output < 2) && (_numOutputs!=0)); }
+				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input);
+				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output);
 				// AEffect asks host about its input/outputspeakers.
-				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
-				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
+				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement();
+				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement();
 				// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
-				virtual bool OnIOChanged() { return false; }
+				virtual bool OnIOChanged();
 /*
 				virtual void SetEditWnd(CEffectWnd* wnd)
 				{
@@ -302,8 +313,9 @@ namespace psycle
 			class host : public CVSTHost
 			{
 			public:
-				host(){	quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); SetTimeSignature(4,4); vstTimeInfo.smpteFrameRate = kVstSmpte25fps; }
+				host();
 				virtual ~host(){;}
+				VstSpeakerArrangement stereoSpeaker;
 
 				///< Helper class for Machine Creation.
 				//static Machine* CreateFromType(int _id, std::string _dllname);

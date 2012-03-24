@@ -455,7 +455,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 
 void XMSamplerUISample::OnBnClickedSave()
 {
-	// TODO: Agregue aquí su código de controlador de notificación de control
+	// TODO: Implement
 }
 
 void XMSamplerUISample::OnBnClickedDupe()

@@ -60,7 +60,6 @@ namespace psycle
 				static inline vst::host		 & vsthost(){ return *pVstHost; }
 				static inline MachineLoader  & machineload() { return *pMacLoad; }
 
-			///\todo use accessors, dont make everything static/global, otherwise we get uninitialised vars, like _cpuHz
 			protected:
 				static Configuration * pConfig;
 				static Song * pSong;

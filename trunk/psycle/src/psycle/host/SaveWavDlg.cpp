@@ -463,13 +463,14 @@ namespace psycle { namespace host {
 				}
 				else if (m_savewires.GetCheck())
 				{
+					Master& master = *((Master*)thesong._pMachine[MASTER_INDEX]);
 					// this is tricky - sort of
 					// back up our connections first
 					for (int i = 0; i < MAX_CONNECTIONS; i++)
 					{
-						if (thesong._pMachine[MASTER_INDEX]->_inputCon[i])
+						if (master.inWires[i].Enabled())
 						{
-							_Muted[i] = thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute;
+							_Muted[i] = master.inWires[i].GetSrcMachine()._mute;
 						}
 						else
 						{
@@ -484,21 +485,21 @@ namespace psycle { namespace host {
 							current = i;
 							for (int j = 0; j < MAX_CONNECTIONS; j++)
 							{
-								if (thesong._pMachine[MASTER_INDEX]->_inputCon[j])
+								if (master.inWires[i].Enabled())
 								{
 									if (j != i)
 									{
-										thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+										master.inWires[i].GetSrcMachine()._mute = true;
 									}
 									else
 									{
-										thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+										master.inWires[i].GetSrcMachine()._mute = false;
 									}
 								}
 							}
 							// now save the song
 							char filename[MAX_PATH];
-							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+							sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,master.inWires[i].GetSrcMachine()._editName);
 							SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 							return;
 						}
@@ -804,6 +805,7 @@ namespace psycle { namespace host {
 			else if (m_savewires.GetCheck())
 			{
 				Song& thesong = Global::song();
+				Master& master = *((Master*)thesong._pMachine[MASTER_INDEX]);
 
 				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
 				const int real_bits[]={8,16,24,32,32};
@@ -816,21 +818,21 @@ namespace psycle { namespace host {
 						current = i;
 						for (int j = 0; j < MAX_CONNECTIONS; j++)
 						{
-							if (thesong._pMachine[MASTER_INDEX]->_inputCon[j])
+							if (master.inWires[j].Enabled())
 							{
 								if (j != i)
 								{
-									thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = true;
+									master.inWires[i].GetSrcMachine()._mute = true;
 								}
 								else
 								{
-									thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[j]]->_mute = false;
+									master.inWires[i].GetSrcMachine()._mute = false;
 								}
 							}
 						}
 						// now save the song
 						char filename[MAX_PATH];
-						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[i]]->_editName);
+						sprintf(filename,"%s-wire %.2u %s.wav",rootname.c_str(),i,master.inWires[i].GetSrcMachine()._editName);
 						SaveWav(filename,real_bits[bits],real_rate[rate],channelmode,isFloat);
 						return;
 					}
@@ -838,9 +840,9 @@ namespace psycle { namespace host {
 
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
-					if (thesong._pMachine[MASTER_INDEX]->_inputCon[i])
+					if (master.inWires[i].Enabled())
 					{
-						thesong._pMachine[thesong._pMachine[MASTER_INDEX]->_inputMachines[i]]->_mute = _Muted[i];
+						master.inWires[i].GetSrcMachine()._mute = _Muted[i];
 					}
 				}
 			}

@@ -169,7 +169,7 @@ namespace psycle
 				std::memset(pData,0,maxBytes);
 
 				char c;
-				for(std::size_t index = 0; index < maxBytes; index++)
+				for(std::size_t index = 0; index < maxBytes-1; index++)
 				{
 					if (Read(&c, sizeof c))
 					{

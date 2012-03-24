@@ -55,6 +55,7 @@ namespace psycle
 				_type = MACH_PLUGIN;
 				_mode = MACHMODE_FX;
 				std::sprintf(_editName, "native plugin");
+				InitializeSamplesVector();
 			}
 		#pragma warning(pop)
 
@@ -206,8 +207,8 @@ namespace psycle
 			if(_isSynth) _mode = MACHMODE_GENERATOR;
 			strncpy(_psShortName,_pInfo->ShortName,15);
 			_psShortName[15]='\0';
-			strncpy(_editName, _pInfo->ShortName,31);
-			_editName[31]='\0';
+			strncpy(_editName, _pInfo->ShortName,sizeof(_editName)-1);
+			_editName[sizeof(_editName)-1]='\0';
 			_psAuthor = _pInfo->Author;
 			_psName = _pInfo->Name;
 			_psDllName = file_name;
@@ -490,7 +491,8 @@ namespace psycle
 							}
 							try
 							{
-								proxy().Work(_pSamplesL+us, _pSamplesR+us, ns, Global::song().SONGTRACKS);
+								//todo: this should change if we implement multi-io for native plugins (complicated right now. needs new API calls)
+								proxy().Work(samplesV[0]+us, samplesV[1]+us, ns, Global::song().SONGTRACKS);
 							}
 							catch(const std::exception & e)
 							{
@@ -511,7 +513,8 @@ namespace psycle
 								ns -= nextevent;
 								try
 								{
-									proxy().Work(_pSamplesL+us, _pSamplesR+us, nextevent, Global::song().SONGTRACKS);
+									//todo: this should change if we implement multi-io for native plugins (complicated right now. needs new API calls)
+									proxy().Work(samplesV[0]+us, samplesV[1]+us, nextevent, Global::song().SONGTRACKS);
 								}
 								catch(const std::exception &e)
 								{
@@ -735,7 +738,6 @@ namespace psycle
 				}
 			}
 			else Standby(true);
-			recursive_processed_ = true;
 			return numSamples;
 		}
 
@@ -1269,14 +1271,25 @@ namespace psycle
 				}*/
 			}
 
-			pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
-			pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
-			pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
-			pFile->Read(&_connection[0], sizeof(_connection));
-			pFile->Read(&_inputCon[0], sizeof(_inputCon));
+			legacyWires.resize(MAX_CONNECTIONS);
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputMachine,sizeof(legacyWires[i]._inputMachine));	// Incoming connections Machine number
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._outputMachine,sizeof(legacyWires[i]._outputMachine));	// Outgoing connections Machine number
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputConVol,sizeof(legacyWires[i]._inputConVol));	// Incoming connections Machine vol
+				legacyWires[i]._wireMultiplier = 1.0f;
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._connection,sizeof(legacyWires[i]._connection));      // Outgoing connections activated
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputCon,sizeof(legacyWires[i]._inputCon));		// Incoming connections activated
+			}
 			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-			pFile->Read(&_numInputs, sizeof(_numInputs));
-			pFile->Read(&_numOutputs, sizeof(_numOutputs));
+			pFile->Skip(2*sizeof(int)); // numInputs and numOutputs
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);

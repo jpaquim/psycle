@@ -267,7 +267,7 @@ namespace psycle { namespace host {
 						mainFrame->CloseMacGui(tmac);
 						{
 							CExclusiveLock lock(&Global::song().semaphore, 2, true);
-							Global::song().DestroyMachine(tmac);
+							Global::song().DeleteMachineRewiring(tmac);
 						}
 						mainFrame->UpdateEnvInfo();
 						mainFrame->UpdateComboGen();

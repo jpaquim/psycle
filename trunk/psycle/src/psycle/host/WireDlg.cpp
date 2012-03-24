@@ -6,6 +6,7 @@
 #include "PsycleConfig.hpp"
 #include "InputHandler.hpp"
 #include "VolumeDlg.hpp"
+#include "ChannelMappingDlg.hpp"
 
 #include "Machine.hpp"
 #include "Player.hpp"
@@ -29,15 +30,14 @@ namespace psycle { namespace host {
 		extern CPsycleApp theApp;
 
 		CWireDlg::CWireDlg(CChildView* mainView_, CWireDlg** windowVar_, int wireDlgIdx_,
-			Machine& srcMac_, int srcWireIdx_, Machine& dstMac_, int dstWireIdx_)
+			Wire & wireIn)
 			: CDialog(CWireDlg::IDD, AfxGetMainWnd())
 			, mainView(mainView_)
 			, windowVar(windowVar_)
 			, wireDlgIdx(wireDlgIdx_)
-			, srcMachine(srcMac_)
-			, srcWireIdx(srcWireIdx_)
-			, dstMachine(dstMac_)
-			, dstWireIdx(dstWireIdx_)
+			, wire(wireIn)
+			, srcMachine(wireIn.GetSrcMachine())
+			, dstMachine(wireIn.GetDstMachine())
 		{
 			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
 			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
@@ -70,6 +70,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_DELETE, OnDelete)
 			ON_BN_CLICKED(IDC_MODE, OnMode)
 			ON_BN_CLICKED(IDC_HOLD, OnHold)
+			ON_BN_CLICKED(IDC_BUT_CHANNEL, OnChannelMap)
 			ON_BN_CLICKED(IDC_VOLUME_DB, OnVolumeDb)
 			ON_BN_CLICKED(IDC_VOLUME_PER, OnVolumePer)
 			ON_BN_CLICKED(IDC_ADDEFFECTHERE, OnAddEffectHere)
@@ -94,8 +95,7 @@ namespace psycle { namespace host {
 			m_volslider.SetRange(0,256*4);
 			m_volslider.SetTicFreq(16*4);
 
-			float val;
-			dstMachine.GetWireVolume(dstWireIdx,val);
+			float val = wire.GetVolume();
 			invol = val;
 			UpdateVolPerDb();
 			m_volslider.SetPos(helpers::dsp::AmountToSlider(val));
@@ -110,7 +110,7 @@ namespace psycle { namespace host {
 			}	
 
 			char buf[128];
-			sprintf(buf,"[%d] %s -> %s Connection Volume", srcWireIdx, srcMachine._editName, dstMachine._editName);
+			sprintf(buf,"[%d] %s -> %s Connection Volume", wire.GetSrcWireIndex(), srcMachine._editName, dstMachine._editName);
 			SetWindowText(buf);
 
 			hold = FALSE;
@@ -887,12 +887,11 @@ namespace psycle { namespace host {
 			invol = helpers::dsp::SliderToAmount(nPos);
 
 			UpdateVolPerDb();
-			float f;
-			dstMachine.GetWireVolume(dstWireIdx, f);
+			float f = wire.GetVolume();
 			if (f != invol)
 			{
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-				dstMachine.SetWireVolume(dstWireIdx, invol );
+				wire.SetVolume(invol);
 			}
 		}
 
@@ -927,8 +926,7 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&Global::song().semaphore, 2, true);
-			srcMachine.DeleteOutputWireIndex(Global::song(),srcWireIdx);
-			dstMachine.DeleteInputWireIndex(Global::song(),dstWireIdx);
+			wire.Disconnect();
 			PostMessage (WM_CLOSE);
 		}
 		void CWireDlg::OnAddEffectHere()
@@ -938,7 +936,7 @@ namespace psycle { namespace host {
 
 			Machine* newMac = Global::song()._pMachine[newMacidx];
 			if(newMac) {
-				Global::song().ChangeWireSourceMacBlocking(newMac,&dstMachine,newMac->GetFreeOutputWire(0),dstWireIdx);
+				Global::song().ChangeWireSourceMacBlocking(newMac,&dstMachine,newMac->GetFreeOutputWire(0),wire.GetDstWireIndex());
 				{
 					CExclusiveLock lock(&Global::song().semaphore, 2, true);
 					Global::song().InsertConnectionNonBlocking(&srcMachine, newMac);
@@ -1006,7 +1004,13 @@ namespace psycle { namespace host {
 				OnChangeSliderVol(pos);
 			}
 		}
-
+		void CWireDlg::OnChannelMap() 
+		{
+			CChannelMappingDlg dlg(wire);
+			if(dlg.DoModal() == IDOK) 
+			{
+			}
+		}
 		void CWireDlg::OnVolumePer() 
 		{
 			CVolumeDlg dlg;
