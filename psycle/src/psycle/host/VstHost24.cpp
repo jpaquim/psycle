@@ -4,7 +4,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "VstHost24.hpp"
 #include "Global.hpp"
-//#include "Psycle.hpp"
 #include "Player.hpp"
 #include "Zap.hpp"
 
@@ -38,6 +37,18 @@ namespace psycle
 				"MIDI Channel 09","MIDI Channel 10","MIDI Channel 11","MIDI Channel 12",
 				"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
 			};
+			host::host()
+			{
+				quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); 
+				SetTimeSignature(4,4);
+				vstTimeInfo.smpteFrameRate = kVstSmpte25fps;
+				stereoSpeaker.numChannels=2;
+				stereoSpeaker.type = kSpeakerArrStereo;
+				memset(&stereoSpeaker.speakers[0],0,sizeof(stereoSpeaker.speakers[0]));
+				memset(&stereoSpeaker.speakers[1],0,sizeof(stereoSpeaker.speakers[1]));
+				stereoSpeaker.speakers[0].type = kSpeakerL;
+				stereoSpeaker.speakers[1].type = kSpeakerR;
+			}
 
 			void host::CalcTimeInfo(long lMask)
 			{
@@ -145,30 +156,32 @@ namespace psycle
 						requiresRepl = true;
 					}
 				}
-
-				universalis::os::aligned_memory_alloc(16, junk, STREAM_SIZE);
-				helpers::dsp::Clear(junk, STREAM_SIZE);
-				for(int i(2) ; i < vst::max_io ; ++i)
-				{
-					inputs[i]=junk;
-					outputs[i]=junk;
+				
+				if(WillProcessReplace()) {
+					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+					int maxval = std::max(std::max(numInputs(),numOutputs()),2);
+					InitializeSamplesVector(maxval);
+					inputs.resize(numInputs());
+					for(int i(0);i<numInputs();i++)	{
+						inputs[i]=samplesV[i];
+					}
+					outputs.resize(numOutputs());
+					for(int i(0);i<numOutputs();i++) {
+						outputs[i]=samplesV[i];
+					}
 				}
-				inputs[0] = _pSamplesL;
-				inputs[1] = _pSamplesR;
-				if (WillProcessReplace())
-				{
-					_pOutSamplesL = _pOutSamplesR = junk;
-					outputs[0] = inputs[0];
-					outputs[1] = inputs[1];
-				}
-				else
-				{
-					universalis::os::aligned_memory_alloc(16, _pOutSamplesL, STREAM_SIZE);
-					universalis::os::aligned_memory_alloc(16, _pOutSamplesR, STREAM_SIZE);
-					helpers::dsp::Clear(_pOutSamplesL, STREAM_SIZE);
-					helpers::dsp::Clear(_pOutSamplesR, STREAM_SIZE);
-					outputs[0] = _pOutSamplesL;
-					outputs[1] = _pOutSamplesR;
+				else {
+					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+					InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
+					int i=0;
+					inputs.resize(numInputs());
+					for(;i<numInputs();i++)	{
+						inputs[i]=samplesV[i];
+					}
+					inputs.resize(numOutputs());
+					for(int j(0);j<numOutputs();j++, i++) {
+						outputs[j]=samplesV[i];
+					}
 				}
 
 				for(int i(0) ; i < MAX_TRACKS; ++i)
@@ -216,23 +229,37 @@ namespace psycle
 				}
 				if(GetVendorString(temp) && temp[0]) _sVendorName = temp;
 				else _sVendorName = "Unknown vendor";
-				std::strcpy(_editName,_sProductName.c_str());
+				std::strncpy(_editName,_sProductName.c_str(),sizeof(_editName)-1);
+				_editName[sizeof(_editName)-1]='\0';
 			}
 
 			plugin::~plugin()
 			{
-				if (aEffect)
-				{
-					universalis::os::aligned_memory_dealloc(junk);
-					if (!WillProcessReplace())
-					{
-						universalis::os::aligned_memory_dealloc(_pOutSamplesL);
-						universalis::os::aligned_memory_dealloc(_pOutSamplesR);
-						_pOutSamplesL = _pOutSamplesR=0;
+			}
+			bool plugin::OnIOChanged() {
+				///\todo: thread safety?
+				if(WillProcessReplace()) {
+					int maxval = std::max(numInputs(),numOutputs());
+					InitializeSamplesVector(maxval);
+					for(int i(0);i<numInputs();i++)	{
+						inputs[i]=samplesV[i];
+					}
+					for(int i(0);i<numOutputs();i++) {
+						outputs[i]=samplesV[i];
 					}
 				}
+				else {
+					InitializeSamplesVector(numInputs() + numOutputs());
+					int i=0;
+					for(;i<numInputs();i++)	{
+						inputs[i]=samplesV[i];
+					}
+					for(int j(0);j<numOutputs();j++, i++) {
+						outputs[j]=samplesV[i];
+					}
+				}
+				return true;
 			}
-
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
 				try
@@ -273,6 +300,72 @@ namespace psycle
 				catch(...){}
 				return false;
 			}
+			// AEffect asks host about its input/outputspeakers.
+			VstSpeakerArrangement* plugin::OnHostInputSpeakerArrangement()
+			{
+				return 0;
+			}
+			VstSpeakerArrangement* plugin::OnHostOutputSpeakerArrangement()
+			{
+				return 0;
+			}
+			/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
+			/// doing an "off/on" when a connection changes.
+			bool plugin::DECLARE_VST_DEPRECATED(IsInputConnected)(int input)
+			{
+				for (int i(0);i<inWires.size();i++) {
+					if(inWires[i].Enabled()) {
+						const Wire::Mapping& map = inWires[i].GetMapping();
+						for(int j(0);j<map.size();j++) {
+							if ( map[j].second == input) {
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			} 
+			bool plugin::DECLARE_VST_DEPRECATED(IsOutputConnected)(int output)
+			{
+				for (int i(0);i<outWires.size();i++) {
+					if(outWires[i] && outWires[i]->Enabled()) {
+						const Wire::Mapping& map = outWires[i]->GetMapping();
+						for(int j(0);j<map.size();j++) {
+							if ( map[j].first == output) {
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+			void plugin::InputMapping(Wire::Mapping const &mapping, bool enabled)
+			{
+				for(int i(0); i < mapping.size();i++) {
+					ConnectInput(mapping[i].second, enabled);
+				}
+			}
+
+			void plugin::OutputMapping(Wire::Mapping const &mapping, bool enabled)
+			{
+				for(int i(0); i < mapping.size();i++) {
+					ConnectOutput(mapping[i].first, enabled);
+				}
+			}
+
+			std::string plugin::GetOutputPinName(int pin) const {
+				VstPinProperties pinprop;
+				ZeroMemory(&pinprop, sizeof(VstPinProperties));
+				GetOutputProperties(pin,&pinprop);
+				return pinprop.shortLabel;
+			}
+			std::string plugin::GetInputPinName(int pin) const {
+				VstPinProperties pinprop;
+				ZeroMemory(&pinprop, sizeof(VstPinProperties));
+				GetInputProperties(pin,&pinprop);
+				return pinprop.shortLabel;
+			}
+
 			bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 			{
 				try {
@@ -516,11 +609,6 @@ namespace psycle
 				Machine::PreWork(numSamples,clear, measure_cpu_usage);
 				cpu_time_clock::time_point t0;
 				if(measure_cpu_usage) t0 = cpu_time_clock::now();
-				if(!WillProcessReplace())
-				{
-					helpers::dsp::Clear(_pOutSamplesL, numSamples);
-					helpers::dsp::Clear(_pOutSamplesR, numSamples);
-				}
 
 				for (int midiChannel=0; midiChannel<16; midiChannel++)
 				{
@@ -769,20 +857,16 @@ namespace psycle
 						{
 							// o_O`
 						}
-						if(numInputs() == 1)
+/*						if(numInputs() == 1)
 						{
 							helpers::dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
 						}
-
+*/
 						///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
 						// Store temporary pointers so that we can increase the address in the retrigger code
-						float * tempinputs[vst::max_io];
-						float * tempoutputs[vst::max_io];
-						for(int i(0) ; i < vst::max_io; ++i)
-						{
-							tempinputs[i] = inputs[i];
-							tempoutputs[i] = outputs[i];
-						}
+						float ** tempinputs = (inputs.size() > 0)?&inputs[0]:NULL;
+						float ** tempoutputs = (outputs.size() > 0)?&outputs[0]:NULL;
+						
 						int ns(numSamples);
 						while(ns)
 						{
@@ -829,9 +913,12 @@ namespace psycle
 									{
 										// o_O`
 									}
-									for(int i(0) ; i < vst::max_io ; ++i)
+									for(int i(0) ; i < numInputs() ; ++i)
 									{
 										tempinputs[i]+=nextevent;
+									}
+									for(int i(0) ; i < numOutputs() ; ++i)
+									{
 										tempoutputs[i]+=nextevent;
 									}
 								}
@@ -903,7 +990,7 @@ namespace psycle
 								}
 							}
 						}
-						try
+/*						try
 						{
 							if(numOutputs() == 1) helpers::dsp::Mov(outputs[0],outputs[1], numSamples);
 						}
@@ -911,16 +998,18 @@ namespace psycle
 						{
 							// o_O`
 						}
+*/
 						if (!WillProcessReplace())
 						{
 							// We need the output in _pSamples, so we invert the
 							// pointers to avoid copying _pOutSamples into _pSamples
-							float* const tempSamplesL = inputs[0];
-							float* const tempSamplesR = inputs[1];	
-							_pSamplesL = inputs[0] = outputs[0];
-							_pSamplesR = inputs[1] = outputs[1];
-							_pOutSamplesL = outputs[0] = tempSamplesL;
-							_pOutSamplesR = outputs[1] = tempSamplesR;
+							
+							int j=numInputs();
+							for(int i=0; i<numOutputs();i++, j++) {
+								float* const tempSamples = samplesV[i];
+								samplesV[i] = outputs[i];
+								samplesV[j] = tempSamples;
+							}
 							/*
 							memcpy(inputs[0],outputs[0],numSamples*sizeof(float));
 							memcpy(inputs[1],outputs[1],numSamples*sizeof(float));
@@ -929,7 +1018,6 @@ namespace psycle
 						UpdateVuAndStanbyFlag(numSamples);
 					}
 				}
-				recursive_processed_ = true;
 				return numSamples;
 			}
 
@@ -945,14 +1033,26 @@ namespace psycle
 
 				pFile->Read(&_editName, 16);	//Remove when changing the fileformat.
 				_editName[15]='\0';
-				pFile->Read(&_inputMachines[0], sizeof(_inputMachines));
-				pFile->Read(&_outputMachines[0], sizeof(_outputMachines));
-				pFile->Read(&_inputConVol[0], sizeof(_inputConVol));
-				pFile->Read(&_connection[0], sizeof(_connection));
-				pFile->Read(&_inputCon[0], sizeof(_inputCon));
+
+				legacyWires.resize(MAX_CONNECTIONS);
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					pFile->Read(&legacyWires[i]._inputMachine,sizeof(legacyWires[i]._inputMachine));	// Incoming connections Machine number
+				}
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					pFile->Read(&legacyWires[i]._outputMachine,sizeof(legacyWires[i]._outputMachine));	// Outgoing connections Machine number
+				}
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					pFile->Read(&legacyWires[i]._inputConVol,sizeof(legacyWires[i]._inputConVol));	// Incoming connections Machine vol
+					legacyWires[i]._wireMultiplier = 1.0f;
+				}
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					pFile->Read(&legacyWires[i]._connection,sizeof(legacyWires[i]._connection));      // Outgoing connections activated
+				}
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					pFile->Read(&legacyWires[i]._inputCon,sizeof(legacyWires[i]._inputCon));		// Incoming connections activated
+				}
 				pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
-				pFile->Read(&_numInputs, sizeof(_numInputs));
-				pFile->Read(&_numOutputs, sizeof(_numOutputs));
+				pFile->Skip(2*sizeof(int)); // numInputs and numOutputs
 
 				pFile->Read(&_panning, sizeof(_panning));
 				Machine::SetPan(_panning);
@@ -1005,15 +1105,11 @@ namespace psycle
 			{
 				Machine::Init();
 				strcpy(_editName,pMac->_editName);
-				memcpy(_inputMachines,pMac->_inputMachines,sizeof(_inputMachines));
-				memcpy(_outputMachines,pMac->_outputMachines,sizeof(_outputMachines));
-				memcpy(_inputConVol,pMac->_inputConVol,sizeof(_inputConVol));
-				memcpy(_connection,pMac->_connection,sizeof(_connection));
-				memcpy(_inputCon,pMac->_inputCon,sizeof(_inputCon));
+				legacyWires.resize(MAX_CONNECTIONS);
+				for(int i=0; i < MAX_CONNECTIONS; i++) {
+					memcpy(&legacyWires[i],&pMac->legacyWires[i],sizeof(LegacyWire));
+				}				
 				memcpy(_connectionPoint,pMac->_connectionPoint,sizeof(_connectionPoint));
-				_numInputs= pMac->_numInputs;
-				_numOutputs= pMac->_numOutputs;
-				
 				Machine::SetPan(pMac->_panning);
 				return true;
 			}

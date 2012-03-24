@@ -187,16 +187,16 @@ namespace psycle { namespace host {
 		void CMacProp::OnAddNewBefore()
 		{
 			int newMacidx = Global::song().GetFreeFxBus();
-			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
+			m_view->NewMachine(pMachine->_x-16,pMachine->_y-16,newMacidx);
 
 			Machine* newMac = Global::song()._pMachine[newMacidx];
 			if(newMac) {
 				CExclusiveLock lock(&Global::song().semaphore, 2, true);
 				for(int i = 0; i < MAX_CONNECTIONS; i++) {
-					if(pMachine->_inputCon[i]) {
-						Machine* srcMac = Global::song()._pMachine[pMachine->_inputMachines[i]];
-						int wiresrc = srcMac->FindOutputWire(pMachine->_macIndex);
-						Global::song().ChangeWireDestMacNonBlocking(srcMac,newMac,wiresrc,newMac->GetFreeInputWire(0));
+					if(pMachine->inWires[i].Enabled()) {
+						Machine& srcMac = pMachine->inWires[i].GetSrcMachine();
+						int wiresrc = srcMac.FindOutputWire(pMachine->_macIndex);
+						Global::song().ChangeWireDestMacNonBlocking(&srcMac,newMac,wiresrc,newMac->GetFreeInputWire(0));
 					}
 				}
 				Global::song().InsertConnectionNonBlocking(newMac, pMachine);
@@ -219,10 +219,11 @@ namespace psycle { namespace host {
 			if(newMac) {
 				CExclusiveLock lock(&Global::song().semaphore, 2, true);
 				for(int i = 0; i < MAX_CONNECTIONS; i++) {
-					if(pMachine->_connection[i]) {
-						Machine* dstMac = Global::song()._pMachine[pMachine->_outputMachines[i]];
-						int wiredst = dstMac->FindInputWire(pMachine->_macIndex);
-						Global::song().ChangeWireSourceMacNonBlocking(newMac,dstMac,newMac->GetFreeOutputWire(0),wiredst);
+					Wire* wire = pMachine->outWires[i];
+					if(wire && wire->Enabled()) {
+						Machine& dstMac = wire->GetDstMachine();
+						int wiredst = wire->GetDstWireIndex();
+						Global::song().ChangeWireSourceMacNonBlocking(newMac,&dstMac,newMac->GetFreeOutputWire(0),wiredst);
 					}
 				}
 				Global::song().InsertConnectionNonBlocking(pMachine, newMac);

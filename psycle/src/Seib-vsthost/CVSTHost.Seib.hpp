@@ -454,8 +454,8 @@ namespace seib {
 			inline void DECLARE_VST_DEPRECATED(ConnectInput)(long index, bool state) { Dispatch(effConnectInput, index, state); }
 			//Output index has been (dis-)connected. The application may issue this call when implemented.
 			inline void DECLARE_VST_DEPRECATED(ConnectOutput)(long index, bool state) { Dispatch(effConnectOutput, index, state); }
-			inline bool GetInputProperties(long index, VstPinProperties *ptr) { return (bool)Dispatch(effGetInputProperties, index, 0, ptr); }
-			inline bool GetOutputProperties(long index, VstPinProperties *ptr) { return (bool)Dispatch(effGetOutputProperties, index, 0, ptr); }
+			inline bool GetInputProperties(long index, VstPinProperties *ptr) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetInputProperties, index, 0, ptr); }
+			inline bool GetOutputProperties(long index, VstPinProperties *ptr) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetOutputProperties, index, 0, ptr); }
 			inline VstPlugCategory GetPlugCategory() { return (VstPlugCategory)Dispatch(effGetPlugCategory); }
 			// get position of dsp buffer. (to verify that it is "on time")
 			inline long DECLARE_VST_DEPRECATED(GetCurrentPosition)() { return Dispatch(effGetCurrentPosition); }

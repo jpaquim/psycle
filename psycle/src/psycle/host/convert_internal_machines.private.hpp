@@ -36,7 +36,8 @@ namespace psycle
 					Machine * pointer_to_machine = &plugin;
 					try
 					{
-						const char* name = const_cast<char *>((plugin_names()(type) + ".dll").c_str());
+						std::string name = (plugin_names()(type)  + ".dll").c_str();
+
 						bool bDeleted=false;
 						if(!plugin.LoadDll(name))
 						{
@@ -56,16 +57,29 @@ namespace psycle
 							s << "X!" << machine.GetEditName();
 							machine.SetEditName(s.str());
 						}
-						riff.Read(machine._inputMachines, sizeof machine._inputMachines);
-						riff.Read(machine._outputMachines, sizeof machine._outputMachines);
-						riff.Read(machine._inputConVol, sizeof machine._inputConVol);
-						riff.Read(machine._connection, sizeof machine._connection);
-						riff.Read(machine._inputCon, sizeof machine._inputCon);
-						riff.Read(machine._connectionPoint, sizeof machine._connectionPoint);
-						riff.Read(&machine._numInputs, sizeof machine._numInputs);
-						riff.Read(&machine._numOutputs, sizeof machine._numOutputs);
-						riff.Read(&machine._panning, sizeof machine._panning);
-						machine.SetPan(machine._panning);
+						machine.legacyWires.resize(MAX_CONNECTIONS);
+						for(int i = 0; i < MAX_CONNECTIONS; i++) {
+							riff.Read(&machine.legacyWires[i]._inputMachine,sizeof(machine.legacyWires[i]._inputMachine));	// Incoming connections Machine number
+						}
+						for(int i = 0; i < MAX_CONNECTIONS; i++) {
+							riff.Read(&machine.legacyWires[i]._outputMachine,sizeof(machine.legacyWires[i]._outputMachine));	// Outgoing connections Machine number
+						}
+						for(int i = 0; i < MAX_CONNECTIONS; i++) {
+							riff.Read(&machine.legacyWires[i]._inputConVol,sizeof(machine.legacyWires[i]._inputConVol));	// Incoming connections Machine vol
+							machine.legacyWires[i]._wireMultiplier = 1.0f;
+						}
+						for(int i = 0; i < MAX_CONNECTIONS; i++) {
+							riff.Read(&machine.legacyWires[i]._connection,sizeof(machine.legacyWires[i]._connection));      // Outgoing connections activated
+						}
+						for(int i = 0; i < MAX_CONNECTIONS; i++) {
+							riff.Read(&machine.legacyWires[i]._inputCon,sizeof(machine.legacyWires[i]._inputCon));		// Incoming connections activated
+						}
+						riff.Read(machine._connectionPoint, sizeof(machine._connectionPoint));
+						riff.Skip(2*sizeof(int)); // numInputs and numOutputs
+
+						int panning;
+						riff.Read(&panning, sizeof(int));
+						machine.SetPan(panning);
 						riff.Skip(40); // skips shiatz
 
 						switch(type)

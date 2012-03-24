@@ -168,29 +168,26 @@ namespace psycle { namespace host {
 
 						for (int w=0; w<MAX_CONNECTIONS; w++)
 						{
-							if (tmac->_connection[w])
+							if (tmac->outWires[w] && tmac->outWires[w]->Enabled())
 							{
 								int desX = 0;
 								int desY = 0;
-								Machine* pout = _pSong._pMachine[tmac->_outputMachines[w]];
-								if (pout)
+								Machine& pout = tmac->outWires[w]->GetDstMachine();
+								switch (pout._mode)
 								{
-									switch (pout->_mode)
-									{
-									case MACHMODE_GENERATOR:
-										desX = pout->_x+(MachineCoords->sGenerator.width/2);
-										desY = pout->_y+(MachineCoords->sGenerator.height/2);
-										break;
-									case MACHMODE_FX:
-										desX = pout->_x+(MachineCoords->sEffect.width/2);
-										desY = pout->_y+(MachineCoords->sEffect.height/2);
-										break;
+								case MACHMODE_GENERATOR:
+									desX = pout._x+(MachineCoords->sGenerator.width/2);
+									desY = pout._y+(MachineCoords->sGenerator.height/2);
+									break;
+								case MACHMODE_FX:
+									desX = pout._x+(MachineCoords->sEffect.width/2);
+									desY = pout._y+(MachineCoords->sEffect.height/2);
+									break;
 
-									case MACHMODE_MASTER:
-										desX = pout->_x+(MachineCoords->sMaster.width/2);
-										desY = pout->_y+(MachineCoords->sMaster.height/2);
-										break;
-									}
+								case MACHMODE_MASTER:
+									desX = pout._x+(MachineCoords->sMaster.width/2);
+									desY = pout._y+(MachineCoords->sMaster.height/2);
+									break;
 								}
 								
 								int const f1 = (desX+oriX)/2;
@@ -353,29 +350,26 @@ namespace psycle { namespace host {
 
 						for (int w=0; w<MAX_CONNECTIONS; w++)
 						{
-							if (tmac->_connection[w])
+							if (tmac->outWires[w] && tmac->outWires[w]->Enabled())
 							{
 								int desX = 0;
 								int desY = 0;
-								Machine* pout = _pSong._pMachine[tmac->_outputMachines[w]];
-								if (pout)
+								Machine& pout = tmac->outWires[w]->GetDstMachine();
+								switch (pout._mode)
 								{
-									switch (pout->_mode)
-									{
-									case MACHMODE_GENERATOR:
-										desX = pout->_x+(MachineCoords->sGenerator.width/2);
-										desY = pout->_y+(MachineCoords->sGenerator.height/2);
-										break;
-									case MACHMODE_FX:
-										desX = pout->_x+(MachineCoords->sEffect.width/2);
-										desY = pout->_y+(MachineCoords->sEffect.height/2);
-										break;
+								case MACHMODE_GENERATOR:
+									desX = pout._x+(MachineCoords->sGenerator.width/2);
+									desY = pout._y+(MachineCoords->sGenerator.height/2);
+									break;
+								case MACHMODE_FX:
+									desX = pout._x+(MachineCoords->sEffect.width/2);
+									desY = pout._y+(MachineCoords->sEffect.height/2);
+									break;
 
-									case MACHMODE_MASTER:
-										desX = pout->_x+(MachineCoords->sMaster.width/2);
-										desY = pout->_y+(MachineCoords->sMaster.height/2);
-										break;
-									}
+								case MACHMODE_MASTER:
+									desX = pout._x+(MachineCoords->sMaster.width/2);
+									desY = pout._y+(MachineCoords->sMaster.height/2);
+									break;
 								}
 								
 								int const f1 = (desX+oriX)/2;
@@ -965,7 +959,7 @@ namespace psycle { namespace host {
 								MachineCoords->sGenerator.y);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords->dGeneratorPan.width;
+						int panning = mac->GetPan()*MachineCoords->dGeneratorPan.width;
 						panning /= 128;
 						TransparentBlt(devc,
 									x+panning+MachineCoords->dGeneratorPan.x, 
@@ -1043,7 +1037,7 @@ namespace psycle { namespace host {
 								MachineCoords->sEffect.y);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords->dEffectPan.width;
+						int panning = mac->GetPan()*MachineCoords->dEffectPan.width;
 						panning /= 128;
 						TransparentBlt(devc,
 									x+panning+MachineCoords->dEffectPan.x, 
@@ -1127,7 +1121,7 @@ namespace psycle { namespace host {
 								SRCCOPY);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords->dGeneratorPan.width;
+						int panning = mac->GetPan()*MachineCoords->dGeneratorPan.width;
 						panning /= 128;
 						devc->BitBlt(x+panning+MachineCoords->dGeneratorPan.x, 
 									y+MachineCoords->dGeneratorPan.y, 
@@ -1190,7 +1184,7 @@ namespace psycle { namespace host {
 								SRCCOPY);
 					// Draw pan
 					{
-						int panning = mac->_panning*MachineCoords->dEffectPan.width;
+						int panning = mac->GetPan()*MachineCoords->dEffectPan.width;
 						panning /= 128;
 						devc->BitBlt(x+panning+MachineCoords->dEffectPan.x, 
 									y+MachineCoords->dEffectPan.y, 
@@ -1314,7 +1308,7 @@ namespace psycle { namespace host {
 			}
 			return tmac;
 		}
-		int CChildView::GetWire(CPoint point,int& wiresource)
+		Wire* CChildView::GetWire(CPoint point, int& srcOutIdx, int& destInIdx)
 		{
 			for (int c=0; c<MAX_MACHINES; c++)
 			{
@@ -1323,22 +1317,24 @@ namespace psycle { namespace host {
 				{
 					for (int w = 0; w<MAX_CONNECTIONS; w++)
 					{
-						if (tmac->_connection[w])
+						if (tmac->outWires[w] && tmac->outWires[w]->Enabled())
 						{
 							int xt = tmac->_connectionPoint[w].x;
 							int yt = tmac->_connectionPoint[w].y;
 
 							if ((point.x > xt) && (point.x < xt+triangle_size_tall) && (point.y > yt) && (point.y < yt+triangle_size_tall))
 							{
-								wiresource=c;
-								return w;
+								srcOutIdx = w;
+								destInIdx = tmac->outWires[w]->GetDstWireIndex();
+								return tmac->outWires[w];
 							}
 						}
 					}
 				}
 			}
-			wiresource = -1;
-			return -1;
+			srcOutIdx=-1;
+			destInIdx=-1;
+			return NULL;
 		}
 
 }}

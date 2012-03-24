@@ -257,7 +257,7 @@ namespace psycle { namespace host {
 			std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
 			for ( int i = 0; it != sliders_.end(); ++it, ++i ) {
 				CVolumeCtrl* slider = *it;
-				if (machine._inputCon[i]) {		
+				if (machine.inWires[i].Enabled()) {		
 					machine.GetWireVolume(i,val);
 					slider->SetPos(832-(int)((helpers::dsp::dB(val)+40.0f)*16.0f));
 				} else {

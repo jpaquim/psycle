@@ -358,12 +358,9 @@ namespace psycle { namespace host {
 						MasterMachineDialog->UpdateUI();
 						for (int i=0;i<MAX_CONNECTIONS; i++)
 						{
-							if ( master->_inputCon[i])
+							if ( master->inWires[i].Enabled())
 							{
-								if (_pSong._pMachine[master->_inputMachines[i]])
-								{
-									strcpy(MasterMachineDialog->macname[i],_pSong._pMachine[master->_inputMachines[i]]->_editName);
-								}
+								strcpy(MasterMachineDialog->macname[i], master->inWires[i].GetSrcMachine()._editName);
 							}
 							else {
 								strcpy(MasterMachineDialog->macname[i],"");
@@ -1376,6 +1373,8 @@ namespace psycle { namespace host {
 						xs = MachineCoords->sEffect.width;
 						ys = MachineCoords->sEffect.height;
 					}
+					x-=xs/2;
+					y-=ys/2;
 				}
 				else
 				{
@@ -1475,7 +1474,7 @@ namespace psycle { namespace host {
 						}
 
 						buf[sizeof(_pSong._pMachine[fb]->_editName)-1] = 0;
-						strcpy(_pSong._pMachine[fb]->_editName,buf);
+						strncpy(_pSong._pMachine[fb]->_editName,buf,sizeof(_pSong._pMachine[fb]->_editName)-1);
 
 						pParentMain->UpdateComboGen();
 						Repaint(draw_modes::all);
@@ -2380,7 +2379,7 @@ namespace psycle { namespace host {
 			dlg.thisMac = propMac;
 			if(dlg.DoModal() == IDOK)
 			{
-				sprintf(dlg.pMachine->_editName, dlg.txt);
+				strncpy(dlg.pMachine->_editName, dlg.txt,sizeof(dlg.pMachine->_editName)-1);
 				pParentMain->StatusBarText(dlg.txt);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
@@ -2393,33 +2392,7 @@ namespace psycle { namespace host {
 			{
 				pParentMain->CloseMacGui(propMac);
 				CExclusiveLock lock(&Global::song().semaphore, 2, true);
-				Machine* pMac = Global::song()._pMachine[propMac];
-				// move wires before deleting. Don't do inside DeleteMachine since that is used in song internally
-				if( pMac->_numInputs > 0 && pMac->_numOutputs > 0) {
-					//For each input connection
-					for(int i = 0; i < MAX_CONNECTIONS; i++) if(pMac->_inputCon[i]) {
-						Machine* srcMac = Global::song()._pMachine[pMac->_inputMachines[i]];
-						int wiresrc = srcMac->FindOutputWire(pMac->_macIndex);
-						bool first = true;
-						//Connect it to each output connection
-						for(int i = 0; i < MAX_CONNECTIONS; i++) if(pMac->_connection[i]) {
-							Machine* dstMac = Global::song()._pMachine[pMac->_outputMachines[i]];
-							//Except if already connected
-							if( dstMac->FindInputWire(srcMac->_macIndex) == -1) {
-								int wiredst = dstMac->FindInputWire(pMac->_macIndex);
-								//If first wire change, it can be moved. Else it needs a new connection.
-								if(first) {
-									Global::song().ChangeWireDestMacNonBlocking(srcMac,dstMac,wiresrc,wiredst);
-									first = false;
-								}
-								else {
-									Global::song().InsertConnectionNonBlocking(srcMac, dstMac);
-								}
-							}
-						}
-					}
-				}
-				Global::song().DestroyMachine(propMac);
+				Global::song().DeleteMachineRewiring(propMac);
 
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();

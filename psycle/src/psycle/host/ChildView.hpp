@@ -14,6 +14,7 @@ namespace host {
 		class XMSamplerUI;
 		class CWaveInMacDlg;
 
+		class Wire;
 		class SPatternHeaderCoords;
 		class SMachineCoords;
 
@@ -295,7 +296,7 @@ namespace host {
 			void ClearMachineSpace(int macnum, CDC *devc);
 			void amosDraw(CDC *devc, int oX,int oY,int dX,int dY);
 			int GetMachine(CPoint point);
-			int GetWire(CPoint point,int&wiresource);
+			Wire* GetWire(CPoint point, int& srcOutIdx, int& destInIdx);
 			inline bool InRect(int _x,int _y,SSkinDest _src,SSkinSource _src2,int _offs=0);
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);

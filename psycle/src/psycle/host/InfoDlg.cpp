@@ -105,11 +105,11 @@ namespace psycle { namespace host {
 					if(tmac)
 					{
 						// Input numbers
-						sprintf(buffer,"%d",tmac->_numInputs);
+						sprintf(buffer,"%d",tmac->connectedInputs());
 						m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 
 						// OutPut numbers
-						sprintf(buffer,"%d",tmac->_numOutputs);
+						sprintf(buffer,"%d",tmac->connectedOutputs());
 						m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 
 						{ // processing cpu percent
@@ -226,11 +226,11 @@ namespace psycle { namespace host {
 					m_machlist.SetItem(n,2,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// Input numbers
-					sprintf(buffer,"%d",tmac->_numInputs);
+					sprintf(buffer,"%d",tmac->connectedInputs());
 					m_machlist.SetItem(n,3,LVIF_TEXT,buffer,0,0,0,NULL);
 					
 					// OutPut numbers
-					sprintf(buffer,"%d",tmac->_numOutputs);
+					sprintf(buffer,"%d",tmac->connectedOutputs());
 					m_machlist.SetItem(n,4,LVIF_TEXT,buffer,0,0,0,NULL);
 					n++;
 				}

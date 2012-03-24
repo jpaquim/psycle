@@ -155,7 +155,6 @@ namespace psycle { namespace host {
 
 			// Columns 2 onwards, controls
 			xoffset+=realwidth;
-			Machine** machines = Global::song()._pMachine;
 			for (int i(0); i<mixer().numinputs(); i++)
 			{
 				yoffset=0;
@@ -165,9 +164,9 @@ namespace psycle { namespace host {
 					if (mixer().ChannelValid(i))
 					{
 						if ( _swapend == i+chan1)
-							InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),machines[mixer()._inputMachines[i]]->_editName);
+							InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),mixer().inWires[i].GetSrcMachine()._editName);
 						else 
-							InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),machines[mixer()._inputMachines[i]]->_editName);
+							InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),mixer().inWires[i].GetSrcMachine()._editName);
 					}
 					else
 					{
@@ -210,7 +209,10 @@ namespace psycle { namespace host {
 					VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer().VuChan(i));
 					CheckedButton::Draw(bufferDC,mixer().GetSoloState(i)?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"S");
 					yoffset+=uiSetting->checkedheight;
-					CheckedButton::Draw(bufferDC,mixer().Channel(i).Mute()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"M");
+					CheckedButton::Draw(bufferDC,
+						(mixer().Channel(i).Mute() ||
+						(mixer().IsSoloState() && !mixer().GetSoloState(i)))?checkedOnDC:checkedOffDC
+						,xoffset+uiSetting->sliderwidth,yoffset,"M");
 					yoffset+=uiSetting->checkedheight;
 					CheckedButton::Draw(bufferDC,mixer().Channel(i).DryOnly()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"D");
 					yoffset+=uiSetting->checkedheight;
@@ -273,7 +275,10 @@ namespace psycle { namespace host {
 					VuMeter::Draw(bufferDC,VuOnDC,xoffset+vuxoffset,yoffset+vuyoffset,mixer().VuSend(i));
 					CheckedButton::Draw(bufferDC,mixer().GetSoloState(i+Mixer::return1)?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"S");
 					yoffset+=uiSetting->checkedheight;
-					CheckedButton::Draw(bufferDC,mixer().Return(i).Mute()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"M");
+					CheckedButton::Draw(bufferDC,
+						(mixer().Return(i).Mute() ||
+						(mixer().IsSoloState() && !mixer().GetSoloState(i+Mixer::return1)))?checkedOnDC:checkedOffDC
+						,xoffset+uiSetting->sliderwidth,yoffset,"M");
 				}
 				else {
 					std::string sendtxt = mixer().GetAudioInputName(int(i+Mixer::return1));
@@ -535,11 +540,10 @@ namespace psycle { namespace host {
 		bool MixerFrameView::UpdateSendsandChans()
 		{
 			//int sends(0),cols(0);
-			Machine** machines=Global::song()._pMachine;
 			for (int i=0; i<mixer().numreturns(); i++)
 			{
 				if (mixer().Return(i).IsValid()) {
-					sendNames[i]=machines[mixer().Return(i).Wire().machine_]->GetEditName();
+					sendNames[i]=mixer().Return(i).GetWire().GetSrcMachine().GetEditName();
 					//sends++;
 				}
 				else sendNames[i]="";
@@ -634,7 +638,7 @@ namespace psycle { namespace host {
 				std::string chantxt = mixer().GetAudioInputName(int(i+Mixer::chan1));
 				if (mixer().ChannelValid(i))
 				{
-					InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),Global::song()._pMachine[mixer()._inputMachines[i]]->_editName);
+					InfoLabel::DrawHeader2(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),mixer().inWires[i].GetSrcMachine()._editName);
 				}
 				else InfoLabel::DrawHLight(bufferDC,xoffset,yoffset,colwidth,chantxt.c_str(),"");
 				bufferDC.Draw3dRect(xoffset-1,yoffset-1,realwidth+1,realheight+1,titleColor,titleColor);
@@ -778,7 +782,7 @@ namespace psycle { namespace host {
 		bool MixerFrameView::GetRouteState(int ret,int send)
 		{
 			if (send < sendmax)
-				return mixer().Return(ret).Send(send);
+				return mixer().Return(ret).SendsTo(send);
 			else if ( send == 13)
 				return mixer().Return(ret).MasterSend();
 			return false;

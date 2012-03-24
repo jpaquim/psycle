@@ -558,12 +558,12 @@ namespace psycle { namespace host {
 							m_wndView.MasterMachineDialog = new CMasterDlg(&m_wndView, *(Master*)ma, &m_wndView.MasterMachineDialog);
 							for (int i=0;i<MAX_CONNECTIONS; i++)
 							{
-								if ( ma->_inputCon[i])
+								if ( ma->inWires[i].Enabled())
 								{
-									if (_pSong->_pMachine[ma->_inputMachines[i]])
-									{
-										strcpy(m_wndView.MasterMachineDialog->macname[i],_pSong->_pMachine[ma->_inputMachines[i]]->_editName);
-									}
+									strcpy(m_wndView.MasterMachineDialog->macname[i], ma->inWires[i].GetSrcMachine()._editName);
+								}
+								else {
+									strcpy(m_wndView.MasterMachineDialog->macname[i],"");
 								}
 							}
 						}

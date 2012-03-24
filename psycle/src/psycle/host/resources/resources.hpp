@@ -110,6 +110,7 @@
 #define IDB_MASTER_VUON_RIGHT           311
 #define IDB_SWITCHMINI_OFF              312
 #define IDB_SWITCHMINI_ON               313
+#define IDD_WIRE_CHANMAP                314
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -592,6 +593,7 @@
 #define IDC_SLIDER                      1482
 #define IDC_MACHINEBOTTOM_CAN2          1482
 #define IDC_MACHINEFONTBOTTOM_CAN2      1483
+#define IDC_BUT_CHANNEL                 1483
 #define IDC_VOLSLIDER                   1484
 #define IDC_DEFAULTSKIN                 1484
 #define IDC_ASIO_SAMPLERATE_COMBO       1486
@@ -917,6 +919,10 @@
 #define IDC_DEFAULTC4                   1833
 #define IDC_LOAD_NEW_BLITZ              1837
 #define IDC_RECORD_USE_PSYDIR           1838
+#define IDC_CHK_CHANMAP_0               1839
+#define IDC_CHK_CHANMAP_255             2095
+#define IDC_WIRE_OUTPUT_NAMES           2096
+#define IDC_WIRE_INPUT_NAMES            2097
 #define IDC_NUMBER_THREADS              4015
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1082,9 +1088,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        314
+#define _APS_NEXT_RESOURCE_VALUE        315
 #define _APS_NEXT_COMMAND_VALUE         34285
-#define _APS_NEXT_CONTROL_VALUE         1839
+#define _APS_NEXT_CONTROL_VALUE         2097
 #define _APS_NEXT_SYMED_VALUE           62
 #endif
 #endif

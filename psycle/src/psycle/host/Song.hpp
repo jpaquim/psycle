@@ -116,15 +116,21 @@ namespace psycle
 			/// Gets the first free slot in the pMachine[] Array
 			int GetFreeMachine();
 			/// creates a new machine in this song.
+		protected:
+			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int shellIdx);
+		public:
+			/// creates a new machine in this song.
 			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
 			/// Creates a new machine, replacing an existing one.
 			bool ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
 			/// exchanges the position of two machines.
 			bool ExchangeMachines(int one, int two);
 			/// destroy a machine of this song.
-			void DestroyMachine(int mac, bool write_locked = false);
+			void DestroyMachine(int mac);
+			/// destroys a machine, but rewires its neighbours
+			void DeleteMachineRewiring(int macIdx);
 			/// destroys all the machines of this song.
-			void DestroyAllMachines(bool write_locked = false);
+			void DestroyAllMachines();
 			/// Tells all the samplers of this song, that if they play this sample, stop playing it. (I know this isn't exactly a thing to do for a Song Class)
 			void StopInstrument(int instrumentIdx);
 			// the highest index of the instruments used
@@ -166,8 +172,8 @@ namespace psycle
 			}
 			bool ChangeWireSourceMacNonBlocking(Machine* newsrcMac, Machine* dstMac, int newoutputwiresrc, int inputwiredest);
 			/// Verifies that the new connection doesn't conflict with the mixer machine.
-			bool Song::ValidateMixerSendCandidate(Machine* mac,bool rewiring=false);
-			void RestoreMixerSendFlags();
+			bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
+			void RestoreMixerSendsReturns();
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			int GetFreeBus();
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
