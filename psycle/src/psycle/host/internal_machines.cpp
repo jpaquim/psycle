@@ -1086,6 +1086,7 @@ namespace psycle
 			else {
 				wireIndex-=MAX_CONNECTIONS;
 				sends_[wireIndex] = NULL;
+				DiscardSend(wireIndex, wireIndex);
 			}
 		}
 		void Mixer::OnInputConnected(Wire& wire)
@@ -1127,9 +1128,12 @@ namespace psycle
 			{
 				wireIndex-=MAX_CONNECTIONS;
 				wire.GetSrcMachine().SetMixerSendFlag(false);
-				Send(wireIndex).Disconnect();
 				DiscardReturn(wireIndex, wireIndex);
-				DiscardSend(wireIndex, wireIndex);
+				//Send can be invalid when deleting a send machine (since it deletes its inwires first)
+				if(SendValid(wireIndex)) {
+					Send(wireIndex).Disconnect();
+					DiscardSend(wireIndex, wireIndex);
+				}
 			}
 		}
 		void Mixer::NotifyNewSendtoMixer(Machine & callerMac, Machine & senderMac)
