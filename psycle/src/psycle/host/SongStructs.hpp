@@ -96,7 +96,7 @@ namespace psycle
 			MACH_PLUGIN = 8,
 			MACH_VST = 9,
 			MACH_VSTFX = 10,
-			MACH_SCOPE = 11,
+			MACH_SCOPE = 11, ///< Test machine. removed
 			MACH_XMSAMPLER = 12,
 			MACH_DUPLICATOR = 13,
 			MACH_MIXER = 14,

@@ -1,8 +1,8 @@
 Fileformat Documentation of .psy Files
 
 Psycle Version : 1.7+
-Document Version: 1.5
-Date:17-April-2011
+Document Version: 1.6
+Date:25-March-2012
 
 This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle >= 1.7
 It is Riff-like, with independant versioning for each chunk, and a "total" version number for
@@ -31,7 +31,7 @@ DATA:
 int chunkcount;		// Number of chunks in the file, not counting the File Header.
 
 DESCRIPTION:
-Data in the "PSY3SONG" Chunk describes the file. (Currently only the number of chunks, but could include other format-related information).
+Data in the "PSY3SONG" chunk describes the file. (Currently only the number of chunks, but could include other format-related information).
 
 ===================
 SONG INFO TEXT
@@ -188,6 +188,8 @@ enum MachineType
 	MACH_XMSAMPLER = 12,
 	MACH_DUPLICATOR = 13,
 	MACH_MIXER	= 14,
+	MACH_RECORDER = 15,
+	MACH_DUPLICATOR2 = 16,
 	MACH_DUMMY	= 255
 };
 
@@ -208,8 +210,8 @@ int pan; 			// Indicates the value of the panning in the machine box. It affects
 						// Values: 0 top left, 64center 128 top right.
 int x; 				// top-left x position of the machine in the machine view
 int y; 				// top-left y position of the machine in the machine view
-int numInputs;		// Number of input wires for this machine (only valid for effects).
-int numOutputs;	// Number of output wires for this machine.
+int numInputs;		// Number of connected input wires for this machine (only valid for effects).
+int numOutputs;	// Number of connected output wires for this machine.
 
 *for each connection up to MAX_CONNECTIONS (currently this value is 12)
 {
@@ -305,11 +307,28 @@ MACHINE SPECIFIC DATA(MACH_XMSAMPLER)
 
 ===================
 MACHINE SPECIFIC DATA(MACH_DUPLICATOR)
-size = 2*12*sizeof(short int)
+size = 2*8*sizeof(short)
 ===================
 
-int macOutput[12]; // Array with the machine index to send events to.
-int noteOffset[12]; // Array of the noteOffsets for the current machine.
+short macOutput[8]; // Array with the machine index to send events to.
+short noteOffset[8]; // Array of the noteOffsets for the current machine.
+
+===================
+MACHINE SPECIFIC DATA(MACH_DUPLICATOR2)
+size = 4*16*sizeof(short)
+===================
+
+short macOutput[16]; // Array with the machine index to send events to.
+short noteOffset[16]; // Array of the noteOffsets for the current machine.
+short lowKey[16];  // Array of lower note key where this mapping is activated
+short highKey[16]; // Array of upper note key where this mapping is activated
+
+===================
+MACHINE SPECIFIC DATA(MACH_DUPLICATOR2)
+size = sizeof(int)+sizeof(float)
+===================
+int captureidx;	// index of the audiodriver selected for capturing
+int gainvol; // gain applied to the captured audio
 
 ===================
 MACHINE SPECIFIC DATA(MACH_DUMMY)
@@ -319,7 +338,80 @@ size = 0
 // The default loader for Dummy just does a "Skip(size);", because the loader
 // uses the dummy when it cannot load a plugin from a song.
 
+===================
+MACHINE SPECIFIC DATA(MACH_MIXER)
+size = sizeof(int)+ //solocolumn
+       3*sizeof(float) + //master
+	   2*sizeof(int) + //ins and returns
+	   (3*sizeof(float)+3*sizeof(bool)+numsends()*sizeof(float))*numinputs() +  //inputs
+	   (2*sizeof(float)+2*sizeof(bool)+numsends()*sizeof(bool)+2*sizeof(float)+sizeof(int))*numreturns() + //returns
+	   (2*sizeof(float)+sizeof(int))*numsends(); /sends
+===================
+int solocolumn;  //column index of solo. If 0..11 -> input, if 12..23 -> return.
+float volume;   // master volume
+float drywetmix; // dry/wet knob (0.0 -> full dry, 1.0 -> full wet)
+float gain; // gain applied to output.
 
+int numinputs; //number of input channels stored.
+int numreturns; //number of return channels stored. Note: numreturns and numsends are equal in this version of Psycle.
+for each numinput
+  for each numsend
+    float sendvol; // volume for this send for this channel.
+  float volume; // volume of this input channel
+  float panning; // panning of this input channel 0.0 -> full left, 1.0f -> full right
+  float drymix; // volume of the dry path (i.e. path from input to output, without effects)
+  bool mute;   // mute indicator
+  bool dryonly; // only send the dry signal (do not bypass drymix).
+  bool wetonly; // only send the wet signal (mute the dry path).
+
+for each numreturn
+  int returnMacIdx;  //Machine index that connects to this return wire. -1 if none.
+  float returnVolume; //volume value for the current return wire.
+  float returnVolMulti;  // value to multiply returnVolume to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
+  int sendMacIdx;	//Machine index that connects this send wire to. -1 if none.
+  float sendVolume;	//volume value for the current send wire.
+  float sendVolMulti;// value to multiply sendVolume to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
+  for each numsend
+    bool sendTo;   //Indicator if this return is redirected to this send
+  bool masterSend; //Indicator if this return is redirected to master
+  float volume;  // volume of the return
+  float panning; // panning of the return (0.0f full left, 1.0f full right)
+  bool mute;  // indicator of return muted.
+
+	
+  
+HEADER:
+id = "MACD"; 
+version = 1;
+size = ...  // depends for each machine.
+
+DATA:
+Version 1 contains the same data than version 0, but adds the wire mapping.
+Wire mapping is stored for each machine, just after its data (i.e. MACD and machine specific data).
+Only mappings of valid input wires (as defined by the bool inputCon value) are stored
+
+for each valid input wire (as defined by the bool inputCon value) read:
+  int wireIdx; //Index of the wire to which this mapping corresponds
+  short numPairs; //Number of mapping pairs stored for this mapping
+  for each numPair
+    short sourcePin; //Pin on the source machine
+    short destPin; //Pin on the destination machine
+
+
+If the machine is a MACH_MIXER, then, also the mappings of the sends and returns are stored (only the mappings of the returns are directly accessible from current Psycle, sends are not)
+for each valid return wire (as defined by the returnMacIdx being different than -1)
+  int wireIdx; Index of the return that this mapping corresponds
+  short numPairs; //Number of mapping pairs stored for this mapping
+  for each numPair
+    short sourcePin; //Pin on the source machine
+    short destPin; //Pin on the destination machine
+  
+for each valid send wire (as defined by the returnMacIdx being different than -1)
+  int wireIdx; Index of the send that this mapping corresponds
+  short numPairs; //Number of mapping pairs stored for this mapping
+  for each numPair
+    short sourcePin; //Pin on the source machine
+    short destPin; //Pin on the destination machine
 
 ===================
 INSTRUMENT DATA
@@ -395,3 +487,18 @@ bool use_lock;           // indicates if instrument locking is enabled or not.
 
 DESCRIPTION:
 Each INSD chunk contains a sampled waveform and its parameters. To play this waveform, a Sampler machine is needed.
+
+
+===================================
+Extended Instrument DATA (Sampulse)
+===================================
+HEADER:
+id = "EINS"; 
+version = 0x10000 and 0x10001
+size = variable, depends on the samples.
+
+DATA:
+Undocumented (Incomplete)
+
+DESCRIPTION:
+If there is a EINS chunk, it contains the instruments and samples for the XMSampler machines.

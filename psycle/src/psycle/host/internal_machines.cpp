@@ -2018,8 +2018,8 @@ namespace psycle
 		{
 			Machine::LoadWireMapping(pFile, version);
 			int numWires = 0;
-			for (int i(0);i<MAX_CONNECTIONS;i++) {
-				if (legacyWires[i+MAX_CONNECTIONS]._inputCon) numWires++;
+			for (int i(0);i<legacyReturn_.size();i++) {
+				if (legacyReturn_[i]._inputCon) numWires++;
 			}
 
 			for(int countWires=0; countWires < numWires; countWires++)
@@ -2033,7 +2033,31 @@ namespace psycle
 					return false;
 				}
 				pFile->Read(numPairs);
-				Wire::Mapping& pinMapping = legacyWires[wireIdx+MAX_CONNECTIONS].pinMapping;
+				Wire::Mapping& pinMapping = legacyReturn_[wireIdx].pinMapping;
+				pinMapping.reserve(numPairs);
+				for(int j=0; j < numPairs; j++){
+					pFile->Read(src);
+					pFile->Read(dst);
+					pinMapping.push_back(Wire::PinConnection(src,dst));
+				}
+			}
+			numWires=0;
+			for (int i(0);i<legacySend_.size();i++) {
+				if (legacySend_[i]._inputCon) numWires++;
+			}
+
+			for(int countWires=0; countWires < numWires; countWires++)
+			{
+				int wireIdx, numPairs;
+				Wire::PinConnection::first_type src;
+				Wire::PinConnection::second_type dst;
+				pFile->Read(wireIdx);
+				if(wireIdx >= MAX_CONNECTIONS) {
+					//We cannot ensure correctness from now onwards.
+					return false;
+				}
+				pFile->Read(numPairs);
+				Wire::Mapping& pinMapping = legacySend_[wireIdx].pinMapping;
 				pinMapping.reserve(numPairs);
 				for(int j=0; j < numPairs; j++){
 					pFile->Read(src);
@@ -2052,6 +2076,21 @@ namespace psycle
 					continue;
 				}
 				const Wire::Mapping& pinMapping = Return(i).GetWire().GetMapping();
+				int numPairs=pinMapping.size();
+				pFile->Write(i);
+				pFile->Write(numPairs);
+				for(int j=0; j <pinMapping.size(); j++) {
+					const Wire::PinConnection &pin = pinMapping[j];
+					pFile->Write(pin.first);
+					pFile->Write(pin.second);
+				}
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++)
+			{
+				if (!SendValid(i)) {
+					continue;
+				}
+				const Wire::Mapping& pinMapping = Send(i).GetMapping();
 				int numPairs=pinMapping.size();
 				pFile->Write(i);
 				pFile->Write(numPairs);
