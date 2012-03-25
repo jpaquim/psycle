@@ -317,8 +317,8 @@ namespace psycle
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
-			pFile->Read(&macOutput,NUMMACHINES*sizeof(short));
-			pFile->Read(&noteOffset,NUMMACHINES*sizeof(short));
+			pFile->Read(&macOutput[0],NUMMACHINES*sizeof(short));
+			pFile->Read(&noteOffset[0],NUMMACHINES*sizeof(short));
 			return true;
 		}
 
@@ -326,8 +326,8 @@ namespace psycle
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset;
 			pFile->Write(&size, sizeof size); // size of this part params to save
-			pFile->Write(&macOutput,NUMMACHINES*sizeof(short));
-			pFile->Write(&noteOffset,NUMMACHINES*sizeof(short));
+			pFile->Write(&macOutput[0],NUMMACHINES*sizeof(short));
+			pFile->Write(&noteOffset[0],NUMMACHINES*sizeof(short));
 		}
 
 
