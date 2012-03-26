@@ -582,12 +582,14 @@ Exit:
 						}
 						break;
 
-						/*
 						case 0x0E:
 							// pitch wheel
 							// data 2 contains the info
+							note = notecommands::midicc;
+							inst = (status&0xF0) | (inst&0x0F);
+							cmd = data1;
+							parameter = data2;
 							break;
-							*/
 
 						// extended codes
 						case 0x0F:

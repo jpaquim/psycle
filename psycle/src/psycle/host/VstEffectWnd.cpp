@@ -61,6 +61,7 @@ namespace psycle { namespace host {
 		void CVstEffectWnd::OnClose()
 		{
 			vstmachine().EditClose();              // tell effect edit window's closed 
+			vstmachine().SetEditWnd(NULL);
 			std::list<HWND>::iterator it = secwinlist.begin();
 			while ( it != secwinlist.end() )
 			{
@@ -69,7 +70,6 @@ namespace psycle { namespace host {
 			}
 			CFrameMachine::OnClose();
 		}
-
 
 		void CVstEffectWnd::OnProgramsOpenpreset()
 		{

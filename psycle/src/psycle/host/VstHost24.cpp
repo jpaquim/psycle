@@ -495,8 +495,8 @@ namespace psycle
 				pevent->reserved2 = 0;
 				pevent->noteOffVelocity = 0;
 				pevent->midiData[0] = data0;
-				pevent->midiData[1] = data1;
-				pevent->midiData[2] = data2;
+				pevent->midiData[1] = data1 & 0x7f;
+				pevent->midiData[2] = data2 & 0x7f;
 				pevent->midiData[3] = 0;
 				return true;
 			}

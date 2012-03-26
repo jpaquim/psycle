@@ -285,20 +285,20 @@ namespace psycle { namespace host {
 			MachineCoords.sMaster.x = 0;
 			MachineCoords.sMaster.y = 0;
 			MachineCoords.sMaster.width = 148;
-			MachineCoords.sMaster.height = 47;
+			MachineCoords.sMaster.height = 48;
 
 			MachineCoords.sGenerator.x = 0;
 			MachineCoords.sGenerator.y = 48;
 			MachineCoords.sGenerator.width = 148;
-			MachineCoords.sGenerator.height = 47;
+			MachineCoords.sGenerator.height = 48;
 			MachineCoords.sGeneratorVu0.x = 10;
-			MachineCoords.sGeneratorVu0.y = 114;
+			MachineCoords.sGeneratorVu0.y = 113;
 			MachineCoords.sGeneratorVu0.width = 1;
-			MachineCoords.sGeneratorVu0.height = 12;
-			MachineCoords.sGeneratorVuPeak.x = 133;
-			MachineCoords.sGeneratorVuPeak.y = 114;
-			MachineCoords.sGeneratorVuPeak.width = 3;
-			MachineCoords.sGeneratorVuPeak.height = 12;
+			MachineCoords.sGeneratorVu0.height = 13;
+			MachineCoords.sGeneratorVuPeak.x = 0;
+			MachineCoords.sGeneratorVuPeak.y = 0;
+			MachineCoords.sGeneratorVuPeak.width = 0;
+			MachineCoords.sGeneratorVuPeak.height = 0;
 			MachineCoords.sGeneratorPan.x = 91;
 			MachineCoords.sGeneratorPan.y = 128;
 			MachineCoords.sGeneratorPan.width = 10;
@@ -315,15 +315,15 @@ namespace psycle { namespace host {
 			MachineCoords.sEffect.x = 0;
 			MachineCoords.sEffect.y = 144;
 			MachineCoords.sEffect.width = 148;
-			MachineCoords.sEffect.height = 47;
+			MachineCoords.sEffect.height = 48;
 			MachineCoords.sEffectVu0.x = 10;
-			MachineCoords.sEffectVu0.y = 210;
+			MachineCoords.sEffectVu0.y = 209;
 			MachineCoords.sEffectVu0.width = 1;
-			MachineCoords.sEffectVu0.height = 12;
-			MachineCoords.sEffectVuPeak.x = 133;
-			MachineCoords.sEffectVuPeak.y = 210;
-			MachineCoords.sEffectVuPeak.width = 3;
-			MachineCoords.sEffectVuPeak.height = 12;
+			MachineCoords.sEffectVu0.height = 13;
+			MachineCoords.sEffectVuPeak.x = 0;
+			MachineCoords.sEffectVuPeak.y = 0;
+			MachineCoords.sEffectVuPeak.width = 0;
+			MachineCoords.sEffectVuPeak.height = 0;
 			MachineCoords.sEffectPan.x = 91;
 			MachineCoords.sEffectPan.y = 224;
 			MachineCoords.sEffectPan.width = 10;
@@ -338,7 +338,7 @@ namespace psycle { namespace host {
 			MachineCoords.sEffectBypass.height = 16;
 
 			MachineCoords.dGeneratorVu.x = 10;
-			MachineCoords.dGeneratorVu.y = 18;
+			MachineCoords.dGeneratorVu.y = 17;
 			MachineCoords.dGeneratorVu.width = 128;
 			MachineCoords.dGeneratorVu.height = 0;
 			MachineCoords.dGeneratorPan.x = 21;
@@ -350,10 +350,10 @@ namespace psycle { namespace host {
 			MachineCoords.dGeneratorSolo.x = 89;
 			MachineCoords.dGeneratorSolo.y = 2;
 			MachineCoords.dGeneratorName.x = 10;
-			MachineCoords.dGeneratorName.y = 47;
+			MachineCoords.dGeneratorName.y = 46;
 
 			MachineCoords.dEffectVu.x = 10;
-			MachineCoords.dEffectVu.y = 18;
+			MachineCoords.dEffectVu.y = 17;
 			MachineCoords.dEffectVu.width = 128;
 			MachineCoords.dEffectVu.height = 0;
 			MachineCoords.dEffectPan.x = 21;
@@ -365,7 +365,7 @@ namespace psycle { namespace host {
 			MachineCoords.dEffectBypass.x = 89;
 			MachineCoords.dEffectBypass.y = 2;
 			MachineCoords.dEffectName.x = 10;
-			MachineCoords.dEffectName.y = 47;
+			MachineCoords.dEffectName.y = 46;
 			MachineCoords.bHasTransparency = true;
 			MachineCoords.cTransparency = 0x0000FF00;
 		}
@@ -1694,6 +1694,7 @@ namespace psycle { namespace host {
 
 		void PsycleConfig::RefreshSettings()
 		{
+			if(_pOutputDriver) _pOutputDriver->Enable(false);
 			Configuration::RefreshSettings();
 			SetCurrentSongDir(GetSongDir());
 			if(IsRecInPSYDir()) {

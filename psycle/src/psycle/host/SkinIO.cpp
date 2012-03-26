@@ -295,7 +295,6 @@ namespace psycle { namespace host {
 			{
 				std::string str1 = patView.header_skin;
 				std::string str2 = str1.substr(str1.rfind('\\'));
-				str2 = str2.substr(0,str2.length()-4);
 				std::fprintf(hfile,"\"pattern_header_skin\"=\"%s\"\n", str2.c_str());
 			}
 			std::fprintf(hfile,"\"pvc_separator\"=dword:%.8X\n", patView.separator);
@@ -340,7 +339,6 @@ namespace psycle { namespace host {
 			{
 				std::string str1 = macView.machine_skin;
 				std::string str2 = str1.substr(str1.rfind('\\'));
-				str2 = str2.substr(0,str2.length()-4);
 				std::fprintf(hfile,"\"machine_skin\"=\"%s\"\n", str2.c_str());
 			}
 
