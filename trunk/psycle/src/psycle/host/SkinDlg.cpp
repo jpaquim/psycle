@@ -392,7 +392,7 @@ namespace psycle { namespace host {
 		{
 			int pos = m_pattern_header_skin.GetCurSel();
 			if(pos == 0) {
-				patConfig.header_skin="";
+				patConfig.SetDefaultSkin();
 			}
 			else {
 				std::list<std::string>::const_iterator it;
@@ -413,7 +413,7 @@ namespace psycle { namespace host {
 		{
 			int pos = m_machine_skin.GetCurSel();
 			if(pos == 0) {
-				macConfig.machine_skin="";
+				macConfig.SetDefaultSkin();
 			}
 			else {
 				std::list<std::string>::const_iterator it;
