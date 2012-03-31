@@ -1360,7 +1360,9 @@ namespace psycle { namespace host {
 			_midiDriverIndex = 0;
 			_syncDriverIndex = 0;
 
-			store_place_ = STORE_REGEDIT;
+			if (store_place_ < 0 || store_place_ >= STORE_TYPES) {
+				store_place_ = STORE_USER_REGEDIT;
+			}
 			_allowMultipleInstances = false;
 			_showAboutAtStart = true;
 			bShowSongInfoOnLoad = true;
@@ -1389,35 +1391,64 @@ namespace psycle { namespace host {
 
 		bool PsycleConfig::LoadPsycleSettings()
 		{
-			//There is no "prefered setting". If the file exists, it is used.
-			ConfigStorage* store;
-			store = new WinIniFile(PSYCLE__VERSION);
-			if(!store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string()))
-			{
-				delete store;
-				SetCacheDir(universalis::os::fs::home_app_local(PSYCLE__NAME));
-				store = new WinIniFile(PSYCLE__VERSION);
-				if(!store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string()))
+			//There is no default setting. If the storage exists, it is used.
+			ConfigStorage* store = NULL;
+			boost::filesystem::path cachedir;
+			bool opened = false;
+			for(int i=0;i < STORE_TYPES; i++) {
+				switch(i) 
 				{
+					case STORE_EXE_DIR:
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string());
+						cachedir = boost::filesystem::path(appPath());
+						break;
+					case STORE_USER_DATA:
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
+						break;
+					case STORE_USER_REGEDIT:
+						store = new Registry(Registry::HKCU, "");
+						opened = store->OpenLocation(registry_root_path);
+						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
+						break;
+					case STORE_ALL_DATA:
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->OpenLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
+						break;
+					case STORE_ALL_REGEDIT:
+						store = new Registry(Registry::HKLM, "");
+						opened = store->OpenLocation(registry_root_path);
+						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
+						break;
+					default:
+						break;
+				}
+				if(!opened) {
 					delete store;
-					store = new Registry(Registry::HKCU, "");
-					if(!store->OpenLocation(registry_root_path))
-					{
+					continue;
+				}
+				// So here we go,
+				// First, try current path since version 1.8.8
+				if(!store->OpenGroup(registry_config_subkey)) {
+					// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
+					if(!store->OpenGroup("configuration--1.8")) {
+						// If neither, return.
+						store->CloseLocation();
 						delete store;
 						return false;
 					}
-					else {
-						store_place_ = STORE_REGEDIT;
-					}
 				}
-				else {
-					store_place_ = STORE_USER_DATA;
-				}
+				SetCacheDir(cachedir);
+				store_place_ = static_cast<store_t>(i);
+				Load(*store);
+				store->CloseLocation();
+				delete store;
+				break;
 			}
-			else {
-				SetCacheDir(boost::filesystem::path(appPath()));
-				store_place_ = STORE_EXE_DIR;
-			}
+			return opened;
 
 			//////////////////////
 			//
@@ -1495,61 +1526,47 @@ namespace psycle { namespace host {
 			// Thankfully, each psycle version migrated the config flawlessly by importing the config from older paths.
 			//
 			//////////////////////
-			//
-			// So here we go,
-			// First, try current path since version 1.8.8
-			if(!store->OpenGroup(registry_config_subkey)) {
-				// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
-				if(!store->OpenGroup("configuration--1.8")) {
-					// If neither, return.
-					store->CloseLocation();
-					delete store;
-					return false;
-				}
-			}
-			Load(*store);
-			store->CloseLocation();
-			delete store;
-			return true;
 		}
 
 		bool PsycleConfig::SavePsycleSettings() {
 			ConfigStorage* store = 0;
+			bool opened = false;
 			try {
 				switch(store_place_) {
-					case STORE_REGEDIT: 
-						store = new Registry(Registry::HKCU, PSYCLE__VERSION);
-						if(!store->CreateLocation(registry_root_path)) {
-							delete store;
-							return false;
-						}
+					case STORE_EXE_DIR: 
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string());
 						break;
 					case STORE_USER_DATA: 
 						store = new WinIniFile(PSYCLE__VERSION);
-						if(!store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string())) {
-							delete store;
-							return false;
-						}
+						opened = store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
 						break;
-					case STORE_EXE_DIR: 
+					case STORE_USER_REGEDIT: 
+						store = new Registry(Registry::HKCU, PSYCLE__VERSION);
+						opened = store->CreateLocation(registry_root_path);
+						break;
+					case STORE_ALL_DATA: 
 						store = new WinIniFile(PSYCLE__VERSION);
-						if(!store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string())) {
-							delete store;
-							return false;
-						}
+						opened = store->CreateLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						break;
+					case STORE_ALL_REGEDIT: 
+						store = new Registry(Registry::HKLM, PSYCLE__VERSION);
+						opened = store->CreateLocation(registry_root_path);
 						break;
 					default:
-						return false;
+						break;
 				}
-				if(!store->CreateGroup(registry_config_subkey)) {
+				if (opened) {
+					if(store->CreateGroup(registry_config_subkey)) {
+						Save(*store);
+					}
+					else {
+						opened = false;
+					}
 					store->CloseLocation();
-					delete store;
-					return false;
 				}
-				Save(*store);
-				store->CloseLocation();
 				delete store;
-				return true;
+				return opened;
 			} catch(std::runtime_error e) {
 				delete store;
 				MessageBox(NULL,e.what(),"Error saving settings",MB_OK);
@@ -1560,7 +1577,43 @@ namespace psycle { namespace host {
 				return false;
 			}
 		}
-
+		void PsycleConfig::DeleteStorage(store_t storetodelete)
+		{
+			switch(storetodelete) {
+				case STORE_EXE_DIR:
+					{
+					WinIniFile store(WinIniFile(PSYCLE__VERSION));
+					store.DeleteLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string());
+					break;
+					}
+				case STORE_USER_DATA: 
+					{
+					WinIniFile store(WinIniFile(PSYCLE__VERSION));
+					store.DeleteLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+					break;
+					}
+				case STORE_USER_REGEDIT: 
+					{
+					Registry store(Registry(Registry::HKCU, PSYCLE__VERSION));
+					store.DeleteLocation(registry_root_path);
+					break;
+					}
+				case STORE_ALL_DATA: 
+					{
+					WinIniFile store(WinIniFile(PSYCLE__VERSION));
+					store.DeleteLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+					break;
+					}
+				case STORE_ALL_REGEDIT: 
+					{
+					Registry store(Registry(Registry::HKLM, PSYCLE__VERSION));
+					store.DeleteLocation(registry_root_path);
+					break;
+					}
+				default:
+					break;
+			}
+		}
 		void PsycleConfig::Load(ConfigStorage & store)
 		{
 			Configuration::Load(store);
@@ -1583,15 +1636,18 @@ namespace psycle { namespace host {
 			store.Read("bFileSaveReminders", bFileSaveReminders);
 			store.Read("autosaveSong", autosaveSong);
 			store.Read("autosaveSongTime", autosaveSongTime);
-			int storepl = 0;
+			//Restoring the place were the setting was saved is counterproductive.
+			//Concretely, it can cause the settings to be loaded from a store, and saved 
+			//to a different one.
+			/*int storepl = 0;
 			store.Read("storePlace",storepl);
-			if (storepl < 0 || storepl > STORE_TYPES) {
+			if (storepl < 0 || storepl >= STORE_TYPES) {
 				store_place_ = STORE_REGEDIT;
 			}
 			else {
 				store_place_ = static_cast<store_t>(storepl);
 			}
-
+			*/
 
 			store.Read("ShowPatternNames", _bShowPatternNames);
 			store.Read("FollowSong", _followSong);
@@ -1662,7 +1718,7 @@ namespace psycle { namespace host {
 			store.Write("bFileSaveReminders", bFileSaveReminders);
 			store.Write("autosaveSong", autosaveSong);
 			store.Write("autosaveSongTime", autosaveSongTime);
-			store.Write("storePlace",static_cast<int>(store_place_));
+			//store.Write("storePlace",static_cast<int>(store_place_));
 			store.Write("FollowSong", _followSong);
 			store.Write("ShowPatternNames", _bShowPatternNames);
 

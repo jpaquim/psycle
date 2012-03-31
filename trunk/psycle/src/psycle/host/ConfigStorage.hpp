@@ -18,6 +18,7 @@ namespace psycle
 			virtual bool CreateLocation(std::string const & location, bool overwrite=true) = 0;
 			virtual bool OpenLocation(std::string const & location, bool create_if_missing=false) = 0;
 			virtual void CloseLocation() = 0;
+			virtual bool DeleteLocation(std::string const & location) = 0;
 			virtual bool CreateGroup(std::string const & group, bool overwrite=true) = 0;
 			virtual bool OpenGroup(std::string const & group, bool create_if_missing=false) = 0;
 			virtual bool DeleteGroup(std::string const & key, bool fail_if_not_empty=false) = 0;

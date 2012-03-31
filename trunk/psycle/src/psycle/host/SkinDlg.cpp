@@ -498,6 +498,7 @@ namespace psycle { namespace host {
 			patConfig.RefreshSettings();
 			macConfig.RefreshSettings();
 			paramConfig.RefreshSettings();
+			RefreshAllValues();
 		}
 		void CSkinDlg::OnImportReg() 
 		{

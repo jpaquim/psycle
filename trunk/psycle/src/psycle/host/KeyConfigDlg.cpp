@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CKeyConfigDlg.
 
 #include <psycle/host/detail/project.private.hpp>
+#include <psycle/host/ConfigStorage.hpp>
 #include "KeyConfigDlg.hpp"
 #include "KeyPresetIO.hpp"
 #include "SpecialKeys.hpp"
@@ -241,9 +242,20 @@ namespace psycle { namespace host {
 		}
 		void CKeyConfigDlg::OnSelchangeStore()
 		{
-			MessageBox("This setting only affects where Psycle is going to save the settings.\n\n"
-				"Settings are always loaded checking first on Psycle's dir, then on User's dir and then on regedit",
-				"Configuration Store", MB_OK);
+			UINT result = MessageBox("This setting only affects where Psycle is going to save the settings.\n"
+				"The loader checks each location in the order defined in this dropdown list and uses the first that it finds.\n\n"
+				"Do you want to also REMOVE the settings located in the other places?",
+				"Places of the configuration stores", MB_YESNO|MB_ICONQUESTION);
+
+			PsycleConfig& config = PsycleGlobal::conf();
+			if (result == IDYES) {
+				int selected = m_storeplaces.GetCurSel();
+				for(int i=0; i < m_storeplaces.GetCount(); i++) {
+					if (i != selected) {
+						config.DeleteStorage(static_cast<PsycleConfig::store_t>(i));
+					}
+				}
+			}
 		}
 		/// update key on show
 		void CKeyConfigDlg::OnSelchangeCmdlist() 

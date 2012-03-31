@@ -91,4 +91,15 @@ path const & home_app_roaming(std::string const & app_name) {
 	return once;
 }
 
+path const & all_users_app_settings(std::string const & app_name) {
+	path const static once(
+		#if defined DIVERSALIS__OS__MICROSOFT
+			detail::microsoft::known_folder(CSIDL_COMMON_APPDATA) / app_name
+		#else
+			path("/etc") / ("." + app_name)
+		#endif
+	);
+	return once;
+}
+
 }}}

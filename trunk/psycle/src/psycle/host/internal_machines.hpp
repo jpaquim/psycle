@@ -373,7 +373,9 @@ public:
 	virtual bool SaveWireMapping(RiffFile* pFile);
 	virtual void PostLoad(Machine** _pMachine);
 
-	bool IsSoloState() { return solocolumn_ != -1;}
+	bool IsSoloColumn() { return solocolumn_ != -1;}
+	bool IsSoloChannel() { return solocolumn_ >= 0 && solocolumn_ < MAX_CONNECTIONS;}
+	bool IsSoloReturn() { return solocolumn_ >= MAX_CONNECTIONS;}
 	bool GetSoloState(int column) { return column==solocolumn_; }
 	void SetSoloState(int column,bool solo)
 	{
