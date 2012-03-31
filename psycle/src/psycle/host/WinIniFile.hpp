@@ -24,6 +24,7 @@ namespace psycle
 			/*override*/ bool CreateLocation(std::string const & location, bool overwrite=true);
 			/*override*/ bool OpenLocation(std::string const & location, bool create_if_missing=false);
 			/*override*/ void CloseLocation();
+			/*override*/ bool DeleteLocation(std::string const & location);
 			/*override*/ bool CreateGroup(std::string const & group, bool overwrite=true);
 			/*override*/ bool OpenGroup(std::string const & group, bool create_if_missing=false);
 			/*override*/ bool DeleteGroup(std::string const & group, bool fail_if_not_empty=false);

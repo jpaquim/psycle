@@ -33,7 +33,7 @@ public:
 	inline float Tick(float sample)
 	{
 		erase_all_nans_infinities_and_denormals(sample);
-		static float temp;
+		float temp;
 		//
 		//
 		temp = sample * gain;

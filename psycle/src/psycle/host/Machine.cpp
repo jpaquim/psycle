@@ -640,9 +640,14 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
-TODO: //mono VST
 				float *pSamplesL = samplesV[0];
-				float *pSamplesR = samplesV[1];
+				float *pSamplesR;
+				if(samplesV.size() == 1) {
+					pSamplesR = samplesV[0];
+				}
+				else {
+					pSamplesR = samplesV[1];
+				}
 				int i = _scopePrevNumSamples & ~0x3; // & ~0x3 to ensure aligned to 16byte
 				if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
 				{   
@@ -778,12 +783,12 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 	return 0;
 }
 		bool Machine::playsTrack(const int track) const {
-			if (Standby()) {
+			if (Standby() || _mode != MACHMODE_GENERATOR) {
 				return false;
 			}
 #if PSYCLE__CONFIGURATION__RMS_VUS
 			//This is made to prevent calculating it when the count has been reseted.
-			if ( rms.count > 512) {
+			if ( rms.count > 512 && TriggerDelayCounter[track] <= 0) {
 				double bla = std::sqrt(std::max(rms.AccumLeft,rms.AccumRight)*(1.0/GetAudioRange())  / (double)rms.count);
 				if( bla < 0.00024 )
 				{
@@ -801,8 +806,16 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		void Machine::UpdateVuAndStanbyFlag(int numSamples)
 		{
 #if PSYCLE__CONFIGURATION__RMS_VUS
-TODO: //mono VST
-			_volumeCounter = helpers::dsp::GetRMSVol(rms,samplesV[0],samplesV[1],numSamples)*(1.f/GetAudioRange());
+			float *pSamplesL = samplesV[0];
+			float *pSamplesR;
+			if(samplesV.size() == 1) {
+				pSamplesR = samplesV[0];
+			}
+			else {
+				pSamplesR = samplesV[1];
+			}
+
+			_volumeCounter = helpers::dsp::GetRMSVol(rms,pSamplesL,pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
@@ -833,7 +846,7 @@ TODO: //mono VST
 				}
 			}
 #else
-			_volumeCounter = helpers::dsp::GetMaxVol(samplesV[0], samplesV[1], numSamples)*(1.f/GetAudioRange());
+			_volumeCounter = helpers::dsp::GetMaxVol(pSamplesL, pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
 			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values

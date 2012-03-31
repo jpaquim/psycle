@@ -915,6 +915,17 @@ void Player::stop_threads() {
 }
 		bool Player::trackPlaying(int track)
 		{
+			Song& song = Global::song();
+			for(int track=0; track < song.SONGTRACKS; track++) {
+				if(playTrack[track] && prevMachines[track] < MAX_MACHINES 
+						&& song._pMachine[prevMachines[track]]) {
+					Machine& mac = *song._pMachine[prevMachines[track]];
+					playTrack[track] = mac.playsTrack(track);
+				}
+				else {
+					playTrack[track] = false;
+				}
+			}
 			return playTrack[track];
 		}
 
@@ -1016,17 +1027,6 @@ void Player::stop_threads() {
 					}
 					sampleCount += amount;
 
-					for(int track=0; track < song.SONGTRACKS; track++) {
-						if (playTrack[track] && amount > 128) {
-							if(prevMachines[track] < MAX_MACHINES && song._pMachine[prevMachines[track]]) {
-								Machine& mac = *song._pMachine[prevMachines[track]];
-								playTrack[track] = mac.playsTrack(track);
-							}
-							else {
-								playTrack[track] = false;
-							}
-						}
-					}
 					if(_recording)
 					{
 						float* pL(((Master*)song._pMachine[MASTER_INDEX])->getLeft());
@@ -1102,6 +1102,7 @@ void Player::stop_threads() {
 				 sampleOffset += amount;
 				 CVSTHost::vstTimeInfo.flags &= ~kVstTransportChanged;
 			} while(numSamples>0);
+
 			cpu_time_clock::time_point const t1(cpu_time_clock::now());
 			song.accumulate_processing_time(t1 - t0);
 			return _pBuffer;

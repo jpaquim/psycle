@@ -50,9 +50,6 @@ namespace psycle
 				config_root = NULL;
 				version_config_ = "";
 				result = ::RegOpenKeyEx(hk_root, location.c_str(), 0, KEY_READ, &config_root);
-				if(result == ERROR_SUCCESS)
-				{
-				}
 			}
 			if(result == ERROR_SUCCESS) 
 			{
@@ -69,6 +66,94 @@ namespace psycle
 			::RegCloseKey(config_root);
 			config_root = NULL;
 		}
+		bool Registry::DeleteLocation(std::string const & location)
+		{
+			if(config_root != NULL) {
+				CloseLocation();
+			}
+			TCHAR szDelKey[MAX_PATH*2];
+			strncpy(szDelKey,location.c_str(),MAX_PATH*2);
+			return (RegDelnodeRecurse(hk_root, szDelKey) == ERROR_SUCCESS);
+		}
+		//*************************************************************
+		//  http://msdn.microsoft.com/en-us/library/windows/desktop/ms724235%28v=vs.85%29.aspx
+		//  RegDelnodeRecurse()
+		//
+		//  Purpose:    Deletes a registry key and all its subkeys / values.
+		//
+		//  Parameters: hKeyRoot    -   Root key
+		//              lpSubKey    -   SubKey to delete
+		//
+		//  Return:     TRUE if successful.
+		//              FALSE if an error occurs.
+		//
+		//*************************************************************
+		BOOL Registry::RegDelnodeRecurse (HKEY hKeyRoot, LPTSTR lpSubKey)
+		{
+			LPTSTR lpEnd;
+			LONG lResult;
+			DWORD dwSize;
+			TCHAR szName[MAX_PATH];
+			HKEY hKey;
+			FILETIME ftWrite;
+
+			// First, see if we can delete the key without having
+			// to recurse.
+
+			lResult = RegDeleteKey(hKeyRoot, lpSubKey);
+			if (lResult == ERROR_SUCCESS) {
+				return TRUE;
+			}
+
+			if ( RegOpenKeyEx (hKeyRoot, lpSubKey, 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+				return lResult;
+			}
+
+			// Check for an ending slash and add one if it is missing.
+			lpEnd = lpSubKey + lstrlen(lpSubKey);
+			if (*(lpEnd - 1) != TEXT('\\')) 
+			{
+				*lpEnd =  TEXT('\\');
+				lpEnd++;
+				*lpEnd =  TEXT('\0');
+			}
+
+			// Enumerate the keys
+
+			dwSize = MAX_PATH;
+			lResult = RegEnumKeyEx(hKey, 0, szName, &dwSize, NULL, NULL, NULL, &ftWrite);
+
+			if (lResult == ERROR_SUCCESS) 
+			{
+				do {
+
+					strncpy(lpEnd, szName, MAX_PATH*2);
+
+					if (!RegDelnodeRecurse(hKeyRoot, lpSubKey)) {
+						break;
+					}
+
+					dwSize = MAX_PATH;
+
+					lResult = RegEnumKeyEx(hKey, 0, szName, &dwSize, NULL,
+										   NULL, NULL, &ftWrite);
+
+				} while (lResult == ERROR_SUCCESS);
+			}
+
+			lpEnd--;
+			*lpEnd = TEXT('\0');
+
+			RegCloseKey (hKey);
+
+			// Try again to delete the key.
+			lResult = RegDeleteKey(hKeyRoot, lpSubKey);
+			if (lResult == ERROR_SUCCESS) 
+				return TRUE;
+
+			return FALSE;
+		}
+
 		bool Registry::CreateGroup(std::string const & group, bool overwrite)
 		{
 			::RegCloseKey(current_group);

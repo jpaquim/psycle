@@ -327,7 +327,7 @@ namespace psycle
 			UINT size = sizeof macOutput+ sizeof noteOffset;
 			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&macOutput[0],NUMMACHINES*sizeof(short));
-			pFile->Write(&noteOffset[0],NUMMACHINES*sizeof(short));
+			pFile->Write(&noteOffset,NUMMACHINES*sizeof(short));
 		}
 
 
@@ -449,6 +449,7 @@ namespace psycle
 
 		void DuplicatorMac2::GetParamValue(int numparam, char *parVal)
 		{
+#if !defined WINAMP_PLUGIN
 			Machine** machines = Global::song()._pMachine;
 			int a440 = (PsycleGlobal::conf().patView().showA440) ? -12 : 0;
 			if (numparam >=0 && numparam <NUMMACHINES)
@@ -475,6 +476,7 @@ namespace psycle
 			}
 
 			else parVal[0] = '\0';
+#endif //#if !defined WINAMP_PLUGIN
 		}
 
 		bool DuplicatorMac2::SetParameter(int numparam, int value)

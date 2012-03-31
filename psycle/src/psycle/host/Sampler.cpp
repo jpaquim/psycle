@@ -104,7 +104,9 @@ namespace psycle
 		}
 
 		bool Sampler::playsTrack(const int track) const
-		{
+		{ 
+			if (TriggerDelayCounter[track] > 0) return true;
+
 			for ( int voice=0; voice<_numVoices; voice++)
 			{
 				if ( _voices[voice]._channel == track && _voices[voice]._envelope._stage != ENV_OFF)

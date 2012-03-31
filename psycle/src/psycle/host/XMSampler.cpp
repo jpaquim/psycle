@@ -2031,7 +2031,7 @@ namespace psycle
 		
 		bool XMSampler::playsTrack(const int track) const
 		{
-			return GetCurrentVoice(track) != NULL;
+			return (TriggerDelayCounter[track] > 0 || GetCurrentVoice(track) != NULL);
 		}
 		void XMSampler::Tick()
 		{

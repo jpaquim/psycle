@@ -41,6 +41,16 @@ namespace psycle
 			current_group.clear();
 			config_root.clear();
 		}
+		bool WinIniFile::DeleteLocation(std::string const & location)
+		{
+			if(!current_group.empty()) {
+				CloseLocation();
+			}
+			if(!location.empty()) {
+				return DeleteFile(location.c_str());
+			}
+			return false;
+		}
 		bool WinIniFile::CreateGroup(std::string const & group, bool overwrite)
 		{
 			current_group = group;

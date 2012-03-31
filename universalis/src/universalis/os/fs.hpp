@@ -20,6 +20,9 @@ namespace universalis { namespace os { namespace fs {
 	/// the path in the user's home dir where an application should write data that are not local to the computer
 	UNIVERSALIS__DECL path const & home_app_roaming(std::string const & app_name);
 
+	// the path in the filesystem where an application should write settings for all users.
+	UNIVERSALIS__DECL path const & all_users_app_settings(std::string const & app_name);
+
 	#if 0 ///\todo not implemented yet on posix
 		/// the path to the image file of the currently executing process
 		UNIVERSALIS__DECL path const & process_executable_file_path()

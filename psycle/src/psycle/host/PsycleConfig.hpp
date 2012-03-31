@@ -416,9 +416,11 @@ namespace psycle
 				selector_t       inst_select_with_;
 			};
 			typedef enum {
-				STORE_REGEDIT = 0,
+				STORE_EXE_DIR = 0,
 				STORE_USER_DATA,
-				STORE_EXE_DIR,
+				STORE_USER_REGEDIT,
+				STORE_ALL_DATA,
+				STORE_ALL_REGEDIT,
 				STORE_TYPES
 			} store_t;
 
@@ -434,6 +436,7 @@ namespace psycle
 
 			bool LoadPsycleSettings();
 			bool SavePsycleSettings();
+			void DeleteStorage(store_t store);
 
 			void AddRecentFile(std::string const &f);
 			void OutputChanged(int newidx);

@@ -211,7 +211,7 @@ namespace psycle { namespace host {
 					yoffset+=uiSetting->checkedheight;
 					CheckedButton::Draw(bufferDC,
 						(mixer().Channel(i).Mute() ||
-						(mixer().IsSoloState() && !mixer().GetSoloState(i)))?checkedOnDC:checkedOffDC
+						(mixer().IsSoloColumn() && !mixer().GetSoloState(i)))?checkedOnDC:checkedOffDC
 						,xoffset+uiSetting->sliderwidth,yoffset,"M");
 					yoffset+=uiSetting->checkedheight;
 					CheckedButton::Draw(bufferDC,mixer().Channel(i).DryOnly()?checkedOnDC:checkedOffDC,xoffset+uiSetting->sliderwidth,yoffset,"D");
@@ -277,7 +277,7 @@ namespace psycle { namespace host {
 					yoffset+=uiSetting->checkedheight;
 					CheckedButton::Draw(bufferDC,
 						(mixer().Return(i).Mute() ||
-						(mixer().IsSoloState() && !mixer().GetSoloState(i+Mixer::return1)))?checkedOnDC:checkedOffDC
+						(mixer().IsSoloReturn() && !mixer().GetSoloState(i+Mixer::return1)))?checkedOnDC:checkedOffDC
 						,xoffset+uiSetting->sliderwidth,yoffset,"M");
 				}
 				else {
