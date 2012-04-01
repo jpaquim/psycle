@@ -10,9 +10,10 @@ namespace psycle { namespace host {
 		class CChannelMappingDlg : public CDialog
 		{
 		public:
-			CChannelMappingDlg(Wire& wire, CWnd* pParent = 0);
+			CChannelMappingDlg(Wire& wire, CWnd* mainView_, CWnd* pParent = 0);
 			enum { IDD = IDD_WIRE_CHANMAP };
 		protected:
+			virtual BOOL PreTranslateMessage(MSG* pMsg);
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
 			virtual void OnOK();
@@ -26,6 +27,7 @@ namespace psycle { namespace host {
 			CStatic			m_srcnames;
 			CStatic			m_dstnames;
 			std::vector<CButton*> buttons;
+			CWnd*        mainView;
 		};
 
 	}   // namespace

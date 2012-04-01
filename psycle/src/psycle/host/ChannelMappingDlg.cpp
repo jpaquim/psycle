@@ -8,9 +8,10 @@
 #include <sstream>
 
 namespace psycle { namespace host {
-		CChannelMappingDlg::CChannelMappingDlg(Wire& wire, CWnd* pParent)
+		CChannelMappingDlg::CChannelMappingDlg(Wire& wire, CWnd* mainView_, CWnd* pParent)
 			: CDialog(CChannelMappingDlg::IDD, pParent)
 			, m_wire(wire)
+			, mainView(mainView_)
 		{
 		}
 
@@ -25,6 +26,43 @@ namespace psycle { namespace host {
 			ON_COMMAND_RANGE(IDC_CHK_CHANMAP_0, IDC_CHK_CHANMAP_0+255, OnCheckChanMap)
 		END_MESSAGE_MAP()
 
+		BOOL CChannelMappingDlg::PreTranslateMessage(MSG* pMsg) 
+		{
+			if (pMsg->message == WM_KEYDOWN)
+			{
+				if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN
+					|| pMsg->wParam == VK_LEFT ||pMsg->wParam == VK_RIGHT
+					|| pMsg->wParam == VK_RETURN ||pMsg->wParam == VK_TAB
+					|| pMsg->wParam == VK_SPACE) {
+					return CDialog::PreTranslateMessage(pMsg);
+				}
+				else if (pMsg->wParam == VK_ESCAPE) {
+					PostMessage (WM_CLOSE);
+					return true;
+				}
+				else {
+					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+					return true;
+				}
+			}
+			else if (pMsg->message == WM_KEYUP)
+			{
+				if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN
+					|| pMsg->wParam == VK_LEFT ||pMsg->wParam == VK_RIGHT
+					|| pMsg->wParam == VK_RETURN ||pMsg->wParam == VK_TAB
+					|| pMsg->wParam == VK_SPACE) {
+					return CDialog::PreTranslateMessage(pMsg);
+				}
+				else if (pMsg->wParam == VK_ESCAPE) {
+					return true;
+				}
+				else {
+					mainView->SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+					return true;
+				}
+			}
+			return CDialog::PreTranslateMessage(pMsg);
+		}
 		BOOL CChannelMappingDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();

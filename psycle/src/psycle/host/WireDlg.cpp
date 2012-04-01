@@ -1006,7 +1006,7 @@ namespace psycle { namespace host {
 		}
 		void CWireDlg::OnChannelMap() 
 		{
-			CChannelMappingDlg dlg(wire);
+			CChannelMappingDlg dlg(wire,mainView);
 			if(dlg.DoModal() == IDOK) 
 			{
 			}
