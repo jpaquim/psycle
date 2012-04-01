@@ -69,37 +69,47 @@ path const & home() {
 	return once;
 }
 
-path const & home_app_local(std::string const & app_name) {
+path const home_app_local(std::string const & app_name) {
 	path const static once(
 		#if defined DIVERSALIS__OS__MICROSOFT
-			detail::microsoft::known_folder(CSIDL_LOCAL_APPDATA) / app_name
+			detail::microsoft::known_folder(CSIDL_LOCAL_APPDATA)
 		#else
-			home() / ("." + app_name)
+			home()
 		#endif
 	);
-	return once;
+	return once / 
+		#if defined DIVERSALIS__OS__MICROSOFT
+			app_name;
+		#else
+			("." + app_name);
+		#endif
 }
 
-path const & home_app_roaming(std::string const & app_name) {
+path const home_app_roaming(std::string const & app_name) {
 	path const static once(
 		#if defined DIVERSALIS__OS__MICROSOFT
-			detail::microsoft::known_folder(CSIDL_APPDATA) / app_name
+			detail::microsoft::known_folder(CSIDL_APPDATA)
 		#else
-			home() / ("." + app_name)
+			home()
 		#endif
 	);
-	return once;
+	return once / 
+		#if defined DIVERSALIS__OS__MICROSOFT
+			app_name;
+		#else
+			("." + app_name);
+		#endif
 }
 
-path const & all_users_app_settings(std::string const & app_name) {
+path const all_users_app_settings(std::string const & app_name) {
 	path const static once(
 		#if defined DIVERSALIS__OS__MICROSOFT
-			detail::microsoft::known_folder(CSIDL_COMMON_APPDATA) / app_name
+			detail::microsoft::known_folder(CSIDL_COMMON_APPDATA)
 		#else
-			path("/etc") / ("." + app_name)
+			"/etc"
 		#endif
 	);
-	return once;
+	return once / app_name;
 }
 
 }}}
