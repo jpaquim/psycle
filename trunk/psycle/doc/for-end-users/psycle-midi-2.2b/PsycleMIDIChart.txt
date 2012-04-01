@@ -1,7 +1,7 @@
 Psycle 1.5xx MIDI Implementation Chart
 --------------------------------------
 
-Interal MIDI Version: 2.3
+Internal MIDI Version: 2.3
                 Date: 21-08-2011
 
 Table Key

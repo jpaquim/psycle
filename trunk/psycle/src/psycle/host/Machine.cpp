@@ -62,8 +62,8 @@ namespace psycle
 				dstMachine->OnInputDisconnected(*this);
 			}
 			srcMachine = &srcMac;
-			volume = 1.0f;
 			volMultiplier = srcMachine->GetAudioRange()/dstMachine->GetAudioRange();
+			volume = 1.0f / volMultiplier;
 			if (mapping) {
 				pinMapping = EnsureCorrectness(*mapping);
 			}
@@ -550,22 +550,18 @@ namespace psycle
 		void Machine::ExchangeInputWires(int first, int second)
 		{
 			//Since the exchange of input wires implies copying,
-			//the references from outWires need to be swapped too.
+			//the pointers in outWires need to be swapped too.
 			Wire* dummy = NULL;
 			Wire** wirefirst = &dummy;
 			Wire** wiresecond = &dummy;
 
 			if (inWires[first].Enabled()) {
-				Machine* macfirst = NULL;
-				macfirst = &inWires[first].GetSrcMachine();
-				int idx = macfirst->FindOutputWire(&inWires[first]);
-				wirefirst = &macfirst->outWires[idx];
+				int idx = inWires[first].GetSrcWireIndex();
+				wirefirst = &inWires[first].GetSrcMachine().outWires[idx];
 			}
 			if (inWires[second].Enabled()) {
-				Machine* macsecond = NULL;
-				macsecond = &inWires[second].GetSrcMachine();
-				int idx = macsecond->FindOutputWire(&inWires[second]);
-				wiresecond = &macsecond->outWires[idx];
+				int idx = inWires[second].GetSrcWireIndex();
+				wiresecond = &inWires[second].GetSrcMachine().outWires[idx];
 			}
 			Wire* wiretmp = *wirefirst;
 			*wirefirst = *wiresecond;
@@ -1110,6 +1106,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 				}
 				float volume; volume = inWires[i].GetVolume();
 				float volMultiplier; volMultiplier = inWires[i].GetVolMultiplier();
+				volume /= volMultiplier;
 				pFile->Write(&volume,sizeof(float));	// Incoming connections Machine vol
 				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
 				pFile->Write(&out,sizeof(out));      // Outgoing connections activated
