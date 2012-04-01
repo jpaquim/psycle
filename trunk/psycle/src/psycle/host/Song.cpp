@@ -2579,7 +2579,7 @@ namespace psycle
 			}
 			if(waved.IsEnabled())
 			{
-				waved.Work(pL, pL, amount);
+				waved.Work(pL, pR, amount);
 			}
 #endif // !defined WINAMP_PLUGIN
 		}

@@ -1223,6 +1223,12 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 							inWires[c].ConnectSource(*_pMachine[wire._inputMachine],0
 								,FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex));
 						}
+						while (wire._inputConVol*wire._wireMultiplier > 8.0f) { //psycle 1.10.1 alpha bugfix
+							wire._inputConVol/=32768.f;
+						}
+						while (wire._inputConVol*wire._wireMultiplier < 0.0002f) { //psycle 1.10.1 alpha bugfix
+							wire._inputConVol*=32768.f;
+						}
 						inWires[c].SetVolume(wire._inputConVol*wire._wireMultiplier);
 					}
 				}
