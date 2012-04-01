@@ -21,17 +21,17 @@ namespace psycle
 			pSong = new Song();
 			pResampler = new helpers::dsp::cubic_resampler();
 			pResampler->quality(helpers::dsp::resampler::quality::linear);
-			pPlayer = new Player();
 			pVstHost = new vst::host();
+			pPlayer = new Player();
 			pMacLoad = new PluginCatcher();
 		}
 
 		WinampGlobal::~WinampGlobal()
 		{
 			delete pSong; pSong = 0;
+			delete pPlayer; pPlayer = 0;
 			//vst host has to be deleted after song.
 			delete pVstHost; pVstHost = 0;
-			delete pPlayer; pPlayer = 0;
 			delete pMacLoad; pMacLoad = 0;
 			delete pResampler; pResampler = 0;
 			delete pConfig; pConfig = 0;

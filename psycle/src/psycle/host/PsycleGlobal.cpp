@@ -28,8 +28,8 @@ namespace psycle
 			pResampler = new helpers::dsp::cubic_resampler();
 			pResampler->quality(helpers::dsp::resampler::quality::linear);
 			pMidiInput = new CMidiInput();
-			pPlayer = new Player();
 			pVstHost = new vst::host();
+			pPlayer = new Player();
 			pInputHandler = new InputHandler();
 			pMacLoad = new PluginCatcher();
 		}
@@ -37,9 +37,9 @@ namespace psycle
 		PsycleGlobal::~PsycleGlobal()
 		{
 			delete pSong; pSong = 0;
+			delete pPlayer; pPlayer = 0;
 			//vst host has to be deleted after song.
 			delete pVstHost; pVstHost = 0;
-			delete pPlayer; pPlayer = 0;
 			delete pMacLoad; pMacLoad = 0;
 			delete pMidiInput; pMidiInput = 0;
 			delete pResampler; pResampler = 0;

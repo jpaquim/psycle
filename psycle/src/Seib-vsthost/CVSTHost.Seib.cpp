@@ -288,14 +288,59 @@ namespace seib {
 				// 5: Host to Plug, setSpeakerArrangement returned: false 
 				// The correct behaviour is try to check the return value of
 				// SetSpeakerArrangement, and if false, GetSpeakerArrangement
-				// And SetSpeakerArrangement with those values.
+				// and SetSpeakerArrangement with those values.
 				{
-					VstSpeakerArrangement VSTsa;
-					VSTsa.type = kSpeakerArrStereo;
-					VSTsa.numChannels = 2;
-					VSTsa.speakers[0].type = kSpeakerL;
-					VSTsa.speakers[1].type = kSpeakerR;
-					SetSpeakerArrangement(&VSTsa,&VSTsa);
+					VstSpeakerArrangement SAi;
+					memset(&SAi,0,sizeof(VstSpeakerArrangement));
+					VstSpeakerArrangement SAo;
+					memset(&SAo,0,sizeof(VstSpeakerArrangement));
+					if (numInputs() > 0) {
+						SAi.type = kSpeakerArrStereo;
+						SAi.numChannels = 2;
+						SAi.speakers[0].type = kSpeakerL;
+						SAi.speakers[1].type = kSpeakerR;
+					}
+					else {
+						SAi.type = kSpeakerArrEmpty;
+						SAi.numChannels = 0;
+					}
+					if (numOutputs() > 0) {
+						SAo.type = kSpeakerArrStereo;
+						SAo.numChannels = 2;
+						SAo.speakers[0].type = kSpeakerL;
+						SAo.speakers[1].type = kSpeakerR;
+					}
+					else {
+						SAo.type = kSpeakerArrEmpty;
+						SAo.numChannels = 0;
+					}
+					/*
+					This makes jme CR-777 crash on SetSpeakerArrangement (Synthedit based)
+					if (GetVstVersion() >= 2300 && !SetSpeakerArrangement(&SAi,&SAo)) {
+						VstSpeakerArrangement* SAip;
+						VstSpeakerArrangement* SAop;
+						if (GetSpeakerArrangement(&SAip,&SAop)) {
+							SetSpeakerArrangement(SAip,SAop);
+						}
+					}
+					*/
+
+/*					VstSpeakerArrangement SAi;
+					memset(&SAi,0,sizeof(VstSpeakerArrangement));
+					SAi.type = kSpeakerArr40Music;
+					SAi.numChannels = 4;
+					SAi.speakers[0].type = kSpeakerL;
+					SAi.speakers[1].type = kSpeakerR;
+					SAi.speakers[2].type = kSpeakerLs;
+					SAi.speakers[3].type = kSpeakerRs;
+					VstSpeakerArrangement SAo;
+					memset(&SAo,0,sizeof(VstSpeakerArrangement));
+					SAo.type = kSpeakerArrStereo;
+					SAo.numChannels = 2;
+					SAo.speakers[0].type = kSpeakerL;
+					SAo.speakers[1].type = kSpeakerR;
+					SetSpeakerArrangement(&SAi,&SAo)
+*/
 				}
 				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
 				SetSampleRate(CVSTHost::pHost->GetSampleRate());
@@ -896,8 +941,8 @@ namespace seib {
 				if(lMask & kVstClockValid)
 				{
 //					option 1:
-					const double onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
-					vstTimeInfo.samplesToNextClock = onesampleclock * (((int)vstTimeInfo.samplePos / (int)onesampleclock)+1); // quantize.
+					const int onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
+					vstTimeInfo.samplesToNextClock =((int)vstTimeInfo.samplePos) % onesampleclock; // quantize.
 
 //					option 2:
 //					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
@@ -1020,7 +1065,7 @@ namespace seib {
 				//||	(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
 
 				//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
-				//||	(!strcmp(ptr, canDoOffline] ))			// "offline",
+				//||	(!strcmp(ptr, canDoOffline ))			// "offline",
 				||	(!strcmp(ptr, "supplyIdle" ))				// DEPRECATED
 				//||	(!strcmp(ptr, "supportShell" ))			// DEPRECATED
 				||	(!strcmp(ptr, canDoOpenFileSelector ))		// "openFileSelector"

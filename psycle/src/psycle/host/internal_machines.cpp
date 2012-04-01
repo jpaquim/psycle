@@ -327,7 +327,7 @@ namespace psycle
 			UINT size = sizeof macOutput+ sizeof noteOffset;
 			pFile->Write(&size, sizeof size); // size of this part params to save
 			pFile->Write(&macOutput[0],NUMMACHINES*sizeof(short));
-			pFile->Write(&noteOffset,NUMMACHINES*sizeof(short));
+			pFile->Write(&noteOffset[0],NUMMACHINES*sizeof(short));
 		}
 
 
@@ -745,7 +745,7 @@ namespace psycle
 									}
 									if(!pRetMachine._mute && !pRetMachine.Standby())
 									{
-										MixReturnToSend(j,i, numSamples);
+										MixReturnToSend(j,i, numSamples, Return(j).GetWire().GetVolume());
 										soundready=true;
 									}
 								}
@@ -782,7 +782,7 @@ namespace psycle
 				//math::erase_all_nans_infinities_and_denormals(pSendMachine.samplesV[pin.second], numSamples);
 			}
 		}
-		void Mixer::MixReturnToSend(int inIdx,int outIdx, int numSamples)
+		void Mixer::MixReturnToSend(int inIdx,int outIdx, int numSamples, float wirevol)
 		{
 			const Wire::Mapping & map = sendMapping[MAX_CONNECTIONS+inIdx][outIdx];
 			Machine &pRetMachine = Return(inIdx).GetWire().GetSrcMachine();
@@ -790,7 +790,7 @@ namespace psycle
 			for(int i(0);i<map.size();i++) {
 				Wire::PinConnection pin = map[i];
 				helpers::dsp::Add(pRetMachine.samplesV[pin.first], pSendMachine.samplesV[pin.second], numSamples,
-					(pin.first%2)?pRetMachine._rVol*mixvolretpr[inIdx][outIdx]:pRetMachine._lVol*mixvolretpl[inIdx][outIdx]);
+					(pin.first%2)?pRetMachine._rVol*mixvolretpr[inIdx][outIdx]*wirevol:pRetMachine._lVol*mixvolretpl[inIdx][outIdx]*wirevol);
 				//math::erase_all_nans_infinities_and_denormals(pSendMachine.samplesV[pin.second], numSamples);
 			}
 		}
@@ -1737,6 +1737,24 @@ namespace psycle
 		}
 		void Mixer::ExchangeReturns(int chann1,int chann2)
 		{
+			//Since the exchange of input wires implies copying,
+			//the pointers in outWires need to be swapped too.
+			Wire* dummy = NULL;
+			Wire** wirefirst = &dummy;
+			Wire** wiresecond = &dummy;
+
+			if (Return(chann1).GetWire().Enabled()) {
+				int idx = Return(chann1).GetWire().GetSrcWireIndex();
+				wirefirst = &Return(chann1).GetWire().GetSrcMachine().outWires[idx];
+			}
+			if (Return(chann2).GetWire().Enabled()) {
+				int idx = Return(chann2).GetWire().GetSrcWireIndex();
+				wiresecond = &Return(chann2).GetWire().GetSrcMachine().outWires[idx];
+			}
+			Wire* wiretmp = *wirefirst;
+			*wirefirst = *wiresecond;
+			*wiresecond = wiretmp;
+
 			ReturnChannel tmp(returns_[chann1]);
 			returns_[chann1] = returns_[chann2];
 			returns_[chann2] = tmp;
@@ -1745,12 +1763,14 @@ namespace psycle
 			sends_[chann2] = tmp2;
 			for (int i(0); i < numinputs(); ++i)
 			{
+				//Exchange and recalculate sendVol
 				Channel(i).ExchangeSends(chann1,chann2);
 				if(SendValid(chann1)) RecalcSend(i,chann1);
 				if(SendValid(chann2)) RecalcSend(i,chann2);
 			}
 			for (int i(0); i < numreturns(); ++i)
 			{
+				//exchange sendsTo
 				Return(i).ExchangeSends(chann1,chann2);
 			}
 			//Recalculating all because of the return-to-send which can apply to other returns
@@ -1791,13 +1811,11 @@ namespace psycle
 		void Mixer::RecalcReturn(int idx)
 		{
 			assert(idx<MAX_CONNECTIONS);
-			float val;
-			GetWireVolume(idx,val);
 			const ReturnChannel & ret = Return(idx);
 			//Volumes/mapping for return redirected to send
 			for(int send=0; send < numsends(); ++send) {
 				if (ret.SendsTo(send) && SendValid(send)) {
-					mixvolretpl[idx][send] = mixvolretpr[idx][send] = ret.Volume()*( ret.GetWire().GetVolMultiplier()/ Send(send).GetVolMultiplier());
+					mixvolretpl[idx][send] = mixvolretpr[idx][send] = ret.Volume()*( Send(send).GetDstMachine().GetAudioRange() /ret.GetWire().GetSrcMachine().GetAudioRange());
 					if (ret.Panning() >= 0.5f ) {
 						mixvolretpl[idx][send] *= (1.0f-ret.Panning())*2.0f;
 					}
@@ -1812,7 +1830,7 @@ namespace psycle
 				wet *= (master_.DryWetMix())*2.0f;
 			}
 
-			mixvolretpl[idx][MAX_CONNECTIONS] = mixvolretpr[idx][MAX_CONNECTIONS] = ret.Volume()*val*wet/ret.GetWire().GetVolMultiplier();
+			mixvolretpl[idx][MAX_CONNECTIONS] = mixvolretpr[idx][MAX_CONNECTIONS] = ret.Volume()*wet;
 			if (ret.Panning() >= 0.5f )
 			{
 				mixvolretpl[idx][MAX_CONNECTIONS] *= (1.0f-ret.Panning())*2.0f;
@@ -1822,8 +1840,6 @@ namespace psycle
 		void Mixer::RecalcChannel(int idx)
 		{
 			assert(idx<MAX_CONNECTIONS);
-			float val;
-			GetWireVolume(idx,val);
 			const InputChannel & chan = Channel(idx);
 
 			float dry = master_.Volume()*master_.Gain();
@@ -1832,7 +1848,7 @@ namespace psycle
 				dry *= (1.0f-master_.DryWetMix())*2.0f;
 			}
 			//Volumes from in to master.
-			mixvolpl[idx] = mixvolpr[idx] = chan.Volume()*val*chan.DryMix()*dry/inWires[idx].GetVolMultiplier();
+			mixvolpl[idx] = mixvolpr[idx] = chan.Volume()*chan.DryMix()*dry;
 			if (chan.Panning() >= 0.5f )
 			{
 				mixvolpl[idx] *= (1.0f-chan.Panning())*2.0f;
@@ -1989,6 +2005,7 @@ namespace psycle
 				wMacIdx = (wireRet.Enabled()) ? wireRet.GetSrcMachine()._macIndex : -1;
 				volume = wireRet.GetVolume();
 				volMultiplier = wireRet.GetVolMultiplier();
+				volume /= volMultiplier;
 				pFile->Write(&wMacIdx,sizeof(int));	// Incoming connections Machine number
 				pFile->Write(&volume,sizeof(float));	// Incoming connections Machine vol
 				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
@@ -2004,6 +2021,7 @@ namespace psycle
 					volume = 1.0f;
 					volMultiplier = 1.0f;
 				}
+				volume /= volMultiplier;
 				pFile->Write(&wMacIdx,sizeof(int));	// send connections Machine number
 				pFile->Write(&volume,sizeof(float));	// send connections Machine vol
 				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range

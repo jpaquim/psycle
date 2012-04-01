@@ -65,11 +65,16 @@ namespace psycle
 		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
 		{
 			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx);
-			pMachine->_x = x;
-			pMachine->_y = y;
-			if(_pMachine[songIdx]) DestroyMachine(songIdx);
-			_pMachine[songIdx] = pMachine;
-			return true;
+			if (pMachine) {
+				pMachine->_x = x;
+				pMachine->_y = y;
+				if(_pMachine[songIdx]) DestroyMachine(songIdx);
+				_pMachine[songIdx] = pMachine;
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int shellIdx)
 		{
@@ -146,6 +151,7 @@ namespace psycle
 						}
 						catch(...)
 						{
+							loggers::exception()("unknown exception");
 							zapObject(pMachine);
 						}
 					}

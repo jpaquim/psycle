@@ -103,7 +103,7 @@ namespace psycle { namespace host {
 			CBitmap *checkedonbmp=checkedOffDC.SelectObject(&uiSetting->checkedOff);
 			CBitmap *checkedoffbmp=checkedOnDC.SelectObject(&uiSetting->checkedOn);
 
-			if (updateBuffer) 
+			if (updateBuffer || refreshheaders) 
 			{
 				if ( backgroundBmp ) { backgroundBmp->DeleteObject(); delete backgroundBmp; }
 				CDC backgroundDC;

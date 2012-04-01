@@ -337,7 +337,7 @@ public:
 	///\}
 	void FxSend(int numSamples, bool recurse, bool measure_cpu_usage);
 	void MixInToSend(int inIdx,int outIdx, int numSamples);
-	void MixReturnToSend(int inIdx,int outIdx, int numSamples);
+	void MixReturnToSend(int inIdx,int outIdx, int numSamples, float wirevol);
 	void Mix(int numSamples);
 public:
 	virtual void GetWireVolume(int wireIndex, float &value){ value = GetWireVolume(wireIndex); }

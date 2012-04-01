@@ -78,6 +78,8 @@ namespace psycle
 
 				std::vector<float *> inputs;
 				std::vector<float *> outputs;
+				std::vector<float *> tmpinputs;
+				std::vector<float *> tmpoutputs;
 
 				std::string _sDllName;
 				std::string _sProductName;

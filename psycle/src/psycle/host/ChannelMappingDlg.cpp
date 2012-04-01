@@ -35,7 +35,7 @@ namespace psycle { namespace host {
 			{
 				std::stringstream s;
 				for (int i=0;i< dstpins; i++) {
-					s << std::setprecision(2) << i << ": " << dstMac.GetInputPinName(i) << std::endl;
+					s << std::setprecision(2) << i << ": " << dstMac.GetInputPinName(i) << " ";
 				}
 				m_dstnames.SetWindowText(s.str().c_str());
 			}
@@ -49,8 +49,8 @@ namespace psycle { namespace host {
 
 			std::vector<std::vector<bool>> checked;
 			checked.resize(srcpins);
-			for (int d=0;d< srcpins; d++) {
-				checked[d].resize(dstpins);
+			for (int s=0;s< srcpins; s++) {
+				checked[s].resize(dstpins);
 			}
 				
 			const Wire::Mapping &mapping = m_wire.GetMapping();
@@ -60,17 +60,36 @@ namespace psycle { namespace host {
 				assert(con.second < dstpins);
 				checked[con.first][con.second] = true;
 			}
-			for (int d=0;d< dstpins; d++) {
-				for (int s=0;s< srcpins; s++) {
-					AddButton(s,d,srcpins, checked[s][d]);
+			for (int s=0;s< srcpins; s++) {
+				for (int d=0;d< dstpins; d++) {
+					AddButton(s,d,dstpins, checked[s][d]);
 				}
 			}
+			// 7 -> the dialog margin set in the left/right resource editor
+			// 7 -> the dialog margin set in the top/bottom
+			// 67 -> 60 (left text) + 7 margin right. 
+			// 72 -> 30 (top text) + 14 (button height) * 2 + 7 (margin bottom) + 7 (space from check to button)
+			CRect rect(7,7,67 + dstpins*40, 72 + srcpins*9);
+			MapDialogRect(&rect);
+			CRect rect2;
+			GetDlgItem(IDOK)->GetWindowRect(&rect2);
+			GetDlgItem(IDOK)->SetWindowPos(NULL,
+				rect.right-(rect2.right-rect2.left) - rect.left,
+				rect.bottom-((rect2.bottom-rect2.top)*2)- rect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
+			GetDlgItem(IDCANCEL)->SetWindowPos(NULL,
+				rect.right-(rect2.right-rect2.left) - rect.left,
+				rect.bottom-((rect2.bottom-rect2.top)) - rect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
+			rect.bottom += ::GetSystemMetrics(SM_CYCAPTION) + ::GetSystemMetrics(SM_CYFIXEDFRAME);
+			rect.right += 2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
+			SetWindowPos(NULL,0,0,rect.right,rect.bottom, SWP_NOZORDER | SWP_NOMOVE);
 			return FALSE;
 		}
-		void CChannelMappingDlg::AddButton(int xRel, int yRel, int numins, bool checked)
+		void CChannelMappingDlg::AddButton(int yRel, int xRel, int numins, bool checked)
 		{
-			int x = 60 + xRel*10;
-			int y = 20 + yRel*10;
+			// 60 -> left text
+			// 30 -> top text
+			int x = 60 + xRel*40;
+			int y = 30 + yRel*9;
 			CButton* m_button = new CButton();
 			CRect rect(x,y,x+10,y+8);
 			MapDialogRect(&rect);
@@ -89,8 +108,8 @@ namespace psycle { namespace host {
 			int srcpins = std::min(m_wire.GetSrcMachine().GetNumOutputPins(),16);
 			int dstpins = std::min(m_wire.GetDstMachine().GetNumInputPins(),16);
 			int count=0;
-			for (int d=0;d< dstpins; d++) {
-				for (int s=0;s< srcpins; s++, count++) {
+			for (int s=0;s< srcpins; s++) {
+				for (int d=0;d< dstpins; d++, count++) {
 					if (buttons[count]->GetCheck()) {
 						mapping.push_back(Wire::PinConnection(s,d));
 					}

@@ -82,8 +82,8 @@ namespace psycle
 					//||	(!strcmp(ptr, "receiveVstTimeInfo" ))// DEPRECATED
 
 					(!strcmp(ptr, canDoReportConnectionChanges )) // "reportConnectionChanges",
-					//||	(!strcmp(ptr, canDoAcceptIOChanges ))	// "acceptIOChanges",
-					||(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
+					||	(!strcmp(ptr, canDoAcceptIOChanges ))	// "acceptIOChanges",
+					||	(!strcmp(ptr, canDoSizeWindow ))		// "sizeWindow",
 
 					//||	(!strcmp(ptr, canDoAsyncProcessing ))	// DEPRECATED
 					//||	(!strcmp(ptr, canDoOffline ))			// "offline",
@@ -178,7 +178,7 @@ namespace psycle
 					for(;i<numInputs();i++)	{
 						inputs[i]=samplesV[i];
 					}
-					inputs.resize(numOutputs());
+					outputs.resize(numOutputs());
 					for(int j(0);j<numOutputs();j++, i++) {
 						outputs[j]=samplesV[i];
 					}
@@ -239,25 +239,32 @@ namespace psycle
 			bool plugin::OnIOChanged() {
 				///\todo: thread safety?
 				if(WillProcessReplace()) {
-					int maxval = std::max(numInputs(),numOutputs());
+					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+					int maxval = std::max(std::max(numInputs(),numOutputs()),2);
 					InitializeSamplesVector(maxval);
+					inputs.resize(numInputs());
 					for(int i(0);i<numInputs();i++)	{
 						inputs[i]=samplesV[i];
 					}
+					outputs.resize(numOutputs());
 					for(int i(0);i<numOutputs();i++) {
 						outputs[i]=samplesV[i];
 					}
 				}
 				else {
-					InitializeSamplesVector(numInputs() + numOutputs());
+					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+					InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
 					int i=0;
+					inputs.resize(numInputs());
 					for(;i<numInputs();i++)	{
 						inputs[i]=samplesV[i];
 					}
+					outputs.resize(numOutputs());
 					for(int j(0);j<numOutputs();j++, i++) {
 						outputs[j]=samplesV[i];
 					}
 				}
+				//validate pin mappings of wires already connected
 				return true;
 			}
 			void plugin::GetParamValue(int numparam, char * parval)
@@ -356,14 +363,29 @@ namespace psycle
 			std::string plugin::GetOutputPinName(int pin) const {
 				VstPinProperties pinprop;
 				ZeroMemory(&pinprop, sizeof(VstPinProperties));
-				GetOutputProperties(pin,&pinprop);
-				return pinprop.shortLabel;
+				if (GetOutputProperties(pin,&pinprop) ) {
+					if (pinprop.shortLabel[0] != '\0' ) {
+						return pinprop.shortLabel;
+					}
+					else if(pinprop.label[0] != '\0') {
+						return pinprop.label;
+					}
+				}
+				return (pin%2)?"Right":"Left";
+
 			}
 			std::string plugin::GetInputPinName(int pin) const {
 				VstPinProperties pinprop;
 				ZeroMemory(&pinprop, sizeof(VstPinProperties));
-				GetInputProperties(pin,&pinprop);
-				return pinprop.shortLabel;
+				if(GetInputProperties(pin,&pinprop)) {
+					if (pinprop.shortLabel[0] != '\0' ) {
+						return pinprop.shortLabel;
+					}
+					else if(pinprop.label[0] != '\0') {
+						return pinprop.label;
+					}
+				}
+				return (pin%2)?"Right":"Left";
 			}
 
 			bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
@@ -864,8 +886,22 @@ namespace psycle
 */
 						///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
 						// Store temporary pointers so that we can increase the address in the retrigger code
-						float ** tempinputs = (inputs.size() > 0)?&inputs[0]:NULL;
-						float ** tempoutputs = (outputs.size() > 0)?&outputs[0]:NULL;
+						float ** tempinputs;
+						float ** tempoutputs;
+						if (inputs.size() > 0) {
+							tmpinputs = inputs;
+							tempinputs = &tmpinputs[0];
+						}
+						else {
+							tempinputs = NULL;
+						}
+						if (outputs.size() > 0) {
+							tmpoutputs = outputs;
+							tempoutputs = &tmpoutputs[0];
+						}
+						else {
+							tempoutputs = NULL;
+						}
 						
 						int ns(numSamples);
 						while(ns)

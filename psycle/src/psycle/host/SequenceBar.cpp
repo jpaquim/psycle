@@ -706,7 +706,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	void SequenceBar::UpdatePlayOrder(bool mode)
 	{
 
-		char buffer[16];
+		char buffer[64];
 		int songLength = Global::player().CalcOrSeek(*m_pSong)/1000;
 
 		sprintf(buffer, "%02d:%02d", ((int)songLength) / 60, ((int)songLength) % 60);
