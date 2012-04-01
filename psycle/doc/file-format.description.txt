@@ -217,7 +217,7 @@ int numOutputs;	// Number of connected output wires for this machine.
 {
 	int inputmachine; 	// index of the machine that connects to this input wire. -1 if none.
 	int outputmachine 	// index of the machine that connects to this output wire. -1 if none.
-	float inputConVol; 	// volume value for the current input wire.
+	float inputConVol; 	// volume value for the current input wire. Range depends on wireMultiplier.
 	float wireMultiplier;  // value to multiply inputConVol to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
 	bool connection;		// true if this is a valid output wire.
 	bool inputCon;			// true if this is a valid input wire.
@@ -366,11 +366,11 @@ for each numinput
 
 for each numreturn
   int returnMacIdx;  //Machine index that connects to this return wire. -1 if none.
-  float returnVolume; //volume value for the current return wire.
-  float returnVolMulti;  // value to multiply returnVolume to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
+  float returnVolume; //volume value for the current return wire. Range 0.0..1.0. (As opposed to the standard wires)
+  float returnVolMulti;  // Ignore and calculate on wire creation (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
   int sendMacIdx;	//Machine index that connects this send wire to. -1 if none.
-  float sendVolume;	//volume value for the current send wire.
-  float sendVolMulti;// value to multiply sendVolume to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
+  float sendVolume;	//volume value for the current send wire. Range 0.0..1.0. (As opposed to the standard wires)
+  float sendVolMulti;  // Ignore and calculate on wire creation. (value to divide sendVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
   for each numsend
     bool sendTo;   //Indicator if this return is redirected to this send
   bool masterSend; //Indicator if this return is redirected to master

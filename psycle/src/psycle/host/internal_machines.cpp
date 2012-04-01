@@ -1942,14 +1942,20 @@ namespace psycle
 			{
 				LegacyWire& leg = legacyReturn_[i];
 				pFile->Read(&leg._inputMachine,sizeof(leg._inputMachine));	// Incoming (Return) connections Machine number
-				pFile->Read(&leg._inputConVol,sizeof(leg._inputConVol));	// Incoming connections Machine vol
-				pFile->Read(&leg._wireMultiplier,sizeof(leg._wireMultiplier));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				pFile->Read(&leg._inputConVol,sizeof(leg._inputConVol));	// /volume value for the current return wire. Range 0.0..1.0. (As opposed to the standard wires)
+				pFile->Read(&leg._wireMultiplier,sizeof(leg._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
 				if (leg._inputMachine == -1) leg._inputCon = false;
+				if (leg._inputConVol > 8.0f) { //bugfix on 1.10.1 alpha
+					leg._inputConVol /= 32768.f;
+				}
 				
 				LegacyWire& leg2 = legacySend_[i];
 				pFile->Read(&leg2._inputMachine,sizeof(leg2._inputMachine));	// Outgoing (Send) connections Machine number
-				pFile->Read(&leg2._inputConVol,sizeof(leg2._inputConVol));	// Incoming connections Machine vol
-				pFile->Read(&leg2._wireMultiplier,sizeof(leg2._wireMultiplier));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+				pFile->Read(&leg2._inputConVol,sizeof(leg2._inputConVol));	//volume value for the current send wire. Range 0.0..1.0. (As opposed to the standard wires)
+				pFile->Read(&leg2._wireMultiplier,sizeof(leg2._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
+				if (leg._inputConVol < 0.0002f) { //bugfix on 1.10.1 alpha
+					leg._inputConVol *= 32768.f;
+				}
 				
 				for (int j(0);j<numrets;j++)
 				{
@@ -2005,7 +2011,6 @@ namespace psycle
 				wMacIdx = (wireRet.Enabled()) ? wireRet.GetSrcMachine()._macIndex : -1;
 				volume = wireRet.GetVolume();
 				volMultiplier = wireRet.GetVolMultiplier();
-				volume /= volMultiplier;
 				pFile->Write(&wMacIdx,sizeof(int));	// Incoming connections Machine number
 				pFile->Write(&volume,sizeof(float));	// Incoming connections Machine vol
 				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
@@ -2021,7 +2026,6 @@ namespace psycle
 					volume = 1.0f;
 					volMultiplier = 1.0f;
 				}
-				volume /= volMultiplier;
 				pFile->Write(&wMacIdx,sizeof(int));	// send connections Machine number
 				pFile->Write(&volume,sizeof(float));	// send connections Machine vol
 				pFile->Write(&volMultiplier,sizeof(float));	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
@@ -2146,9 +2150,9 @@ namespace psycle
 						Return(j).GetWire().ConnectSource(*_pMachine[wire._inputMachine],1
 							, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex));
 					}
-					Return(j).GetWire().SetVolume(wire._inputConVol*wire._wireMultiplier);
+					Return(j).GetWire().SetVolume(wire._inputConVol);
 					LegacyWire& wire2 = legacySend_[j];
-					Send(j).SetVolume(wire2._inputConVol*wire2._wireMultiplier);
+					Send(j).SetVolume(wire2._inputConVol);
 					if (wire2.pinMapping.size() > 0) {
 						Send(j).ChangeMapping(wire2.pinMapping);
 					}
