@@ -317,8 +317,8 @@ namespace seib {
 					/*
 					This makes jme CR-777 crash on SetSpeakerArrangement (Synthedit based)
 					if (GetVstVersion() >= 2300 && !SetSpeakerArrangement(&SAi,&SAo)) {
-						VstSpeakerArrangement* SAip;
-						VstSpeakerArrangement* SAop;
+						VstSpeakerArrangement* SAip = 0;
+						VstSpeakerArrangement* SAop = 0;
 						if (GetSpeakerArrangement(&SAip,&SAop)) {
 							SetSpeakerArrangement(SAip,SAop);
 						}
@@ -1212,12 +1212,15 @@ namespace seib {
 					pHost->OnIdle(*pEffect);
 					break;
 				case audioMasterPinConnected :
-					// for compatibility with VST 1.0, false means connected.
-					result = !((value) ? 
-						pHost->OnOutputConnected(*pEffect, index) :
-						pHost->OnInputConnected(*pEffect, index));
-					if (fakeeffect )delete pEffect;
-					return result;
+					{
+						bool connected = ((value) ? 
+							pHost->OnOutputConnected(*pEffect, index) :
+							pHost->OnInputConnected(*pEffect, index));
+						// for compatibility with VST 1.0, 0 means connected.
+						result = connected? 0 : 1;
+						if (fakeeffect )delete pEffect;
+						return result;
+					}
 			// VST 2.0
 				case audioMasterWantMidi :
 					pHost->OnWantEvents(*pEffect, value);
@@ -1351,7 +1354,7 @@ namespace seib {
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterOpenWindow :
-					result = (long)pHost->OnOpenWindow(*pEffect, (VstWindow *)ptr);
+					result = (VstIntPtr)pHost->OnOpenWindow(*pEffect, (VstWindow *)ptr);
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterCloseWindow :

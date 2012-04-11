@@ -42,6 +42,8 @@ namespace psycle
 				quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); 
 				SetTimeSignature(4,4);
 				vstTimeInfo.smpteFrameRate = kVstSmpte25fps;
+				//TODO: this isn't being used right now.
+				memset(&stereoSpeaker,0,sizeof(VstSpeakerArrangement));
 				stereoSpeaker.numChannels=2;
 				stereoSpeaker.type = kSpeakerArrStereo;
 				memset(&stereoSpeaker.speakers[0],0,sizeof(stereoSpeaker.speakers[0]));
@@ -237,35 +239,46 @@ namespace psycle
 			{
 			}
 			bool plugin::OnIOChanged() {
-				///\todo: thread safety?
-				if(WillProcessReplace()) {
-					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-					int maxval = std::max(std::max(numInputs(),numOutputs()),2);
-					InitializeSamplesVector(maxval);
-					inputs.resize(numInputs());
-					for(int i(0);i<numInputs();i++)	{
-						inputs[i]=samplesV[i];
+				//TODO: IOChanged does not only reflect input pin changes.
+				// it also (usually?) means changing latency.
+				CExclusiveLock crit = Global::player().GetLockObject();
+				//Avoid possible deadlocks
+				if(crit.Lock(200)) {
+					VstSpeakerArrangement* SAip = 0;
+					VstSpeakerArrangement* SAop = 0;
+					if (GetSpeakerArrangement(&SAip,&SAop)) {
+						int i=0;
 					}
-					outputs.resize(numOutputs());
-					for(int i(0);i<numOutputs();i++) {
-						outputs[i]=samplesV[i];
+					if(WillProcessReplace()) {
+						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+						int maxval = std::max(std::max(numInputs(),numOutputs()),2);
+						InitializeSamplesVector(maxval);
+						inputs.resize(numInputs());
+						for(int i(0);i<numInputs();i++)	{
+							inputs[i]=samplesV[i];
+						}
+						outputs.resize(numOutputs());
+						for(int i(0);i<numOutputs();i++) {
+							outputs[i]=samplesV[i];
+						}
 					}
+					else {
+						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+						InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
+						int i=0;
+						inputs.resize(numInputs());
+						for(;i<numInputs();i++)	{
+							inputs[i]=samplesV[i];
+						}
+						outputs.resize(numOutputs());
+						for(int j(0);j<numOutputs();j++, i++) {
+							outputs[j]=samplesV[i];
+						}
+					}
+					//validate pin mappings of wires already connected
+					return true;
 				}
-				else {
-					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-					InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
-					int i=0;
-					inputs.resize(numInputs());
-					for(;i<numInputs();i++)	{
-						inputs[i]=samplesV[i];
-					}
-					outputs.resize(numOutputs());
-					for(int j(0);j<numOutputs();j++, i++) {
-						outputs[j]=samplesV[i];
-					}
-				}
-				//validate pin mappings of wires already connected
-				return true;
+				return false;
 			}
 			void plugin::GetParamValue(int numparam, char * parval)
 			{
@@ -364,11 +377,11 @@ namespace psycle
 				VstPinProperties pinprop;
 				ZeroMemory(&pinprop, sizeof(VstPinProperties));
 				if (GetOutputProperties(pin,&pinprop) ) {
-					if (pinprop.shortLabel[0] != '\0' ) {
-						return pinprop.shortLabel;
-					}
-					else if(pinprop.label[0] != '\0') {
+					if(pinprop.label[0] != '\0') {
 						return pinprop.label;
+					}
+					else if (pinprop.shortLabel[0] != '\0' ) {
+						return pinprop.shortLabel;
 					}
 				}
 				return (pin%2)?"Right":"Left";
@@ -378,11 +391,11 @@ namespace psycle
 				VstPinProperties pinprop;
 				ZeroMemory(&pinprop, sizeof(VstPinProperties));
 				if(GetInputProperties(pin,&pinprop)) {
-					if (pinprop.shortLabel[0] != '\0' ) {
-						return pinprop.shortLabel;
-					}
-					else if(pinprop.label[0] != '\0') {
+					if(pinprop.label[0] != '\0') {
 						return pinprop.label;
+					}
+					else if (pinprop.shortLabel[0] != '\0' ) {
+						return pinprop.shortLabel;
 					}
 				}
 				return (pin%2)?"Right":"Left";

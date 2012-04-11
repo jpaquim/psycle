@@ -3,7 +3,8 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "ChannelMappingDlg.hpp"
 #include <psycle/host/Machine.hpp>
-
+#include <psycle/host/Song.hpp>
+#include "ExclusiveLock.hpp"
 #include <string>
 #include <sstream>
 
@@ -18,12 +19,14 @@ namespace psycle { namespace host {
 		void CChannelMappingDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			DDX_Control(pDX, IDC_WIRE_OUTPUT_NAMES, m_dstnames);
-			DDX_Control(pDX, IDC_WIRE_INPUT_NAMES, m_srcnames);
 		}
 
 		BEGIN_MESSAGE_MAP(CChannelMappingDlg, CDialog)
+			ON_COMMAND(IDC_AUTOWIRE, OnAutoWire)
+			ON_COMMAND(IDC_UNSELECT, OnUnselectAll)
 			ON_COMMAND_RANGE(IDC_CHK_CHANMAP_0, IDC_CHK_CHANMAP_0+255, OnCheckChanMap)
+			ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTW, 0, 255, OnToolTipText)
+			ON_NOTIFY_EX_RANGE(TTN_NEEDTEXTA, 0, 255, OnToolTipText)
 		END_MESSAGE_MAP()
 
 		BOOL CChannelMappingDlg::PreTranslateMessage(MSG* pMsg) 
@@ -66,82 +69,169 @@ namespace psycle { namespace host {
 		BOOL CChannelMappingDlg::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
+			EnableToolTips(TRUE);
+			EnableTrackingToolTips(TRUE);
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			CFont font;
+			font.Attach( hFont );
+
 			const Machine & dstMac = m_wire.GetDstMachine();
 			const Machine & srcMac = m_wire.GetSrcMachine();
 			int srcpins=std::min(srcMac.GetNumOutputPins(),16);
-			int dstpins =std::min(dstMac.GetNumInputPins(),16);
+			int dstpins=std::min(dstMac.GetNumInputPins(),16);
+			//
+			// Add names.
+			//
 			{
-				std::stringstream s;
+				int y = 16;
 				for (int i=0;i< dstpins; i++) {
-					s << std::setprecision(2) << i << ": " << dstMac.GetInputPinName(i) << " ";
+					std::stringstream s;
+					s << std::setprecision(2) << i << ": " << dstMac.GetInputPinName(i).substr(0,9);
+					int x = 60 + i*40;
+					CRect rect(x,y,x+40,y+9);
+					MapDialogRect(rect);
+					CStatic* label = new CStatic();
+					label->Create(s.str().c_str(),WS_CHILD|WS_VISIBLE,rect,this);
+					label->SetFont(&font,false);
+					dstnames.push_back(label);
 				}
-				m_dstnames.SetWindowText(s.str().c_str());
 			}
+			//
+			// Create, position and mark checkboxes
+			//
 			{
-				std::stringstream s;
-				for (int i=0;i< srcpins; i++) {
-					s << std::setprecision(2) << i << ": " << srcMac.GetOutputPinName(i) << std::endl;
-				}
-				m_srcnames.SetWindowText(s.str().c_str());
-			}
+				std::vector<std::vector<bool>> checked;
+				FillCheckedVector(checked, srcpins, dstpins);
 
-			std::vector<std::vector<bool>> checked;
-			checked.resize(srcpins);
-			for (int s=0;s< srcpins; s++) {
-				checked[s].resize(dstpins);
-			}
-				
-			const Wire::Mapping &mapping = m_wire.GetMapping();
-			for (int i(0);i<mapping.size();i++) {
-				const Wire::PinConnection & con = mapping[i];
-				assert(con.first < srcpins);
-				assert(con.second < dstpins);
-				checked[con.first][con.second] = true;
-			}
-			for (int s=0;s< srcpins; s++) {
-				for (int d=0;d< dstpins; d++) {
-					AddButton(s,d,dstpins, checked[s][d]);
+				for (int s=0;s< srcpins; s++) {
+					for (int d=0;d< dstpins; d++) {
+						std::stringstream str;
+						if (d==0) {
+							str << std::setprecision(2) << s << ": " << srcMac.GetOutputPinName(s).substr(0,9);
+						}
+						AddButton(s,d,dstpins, checked[s][d], font, str.str());
+					}
 				}
 			}
-			// 7 -> the dialog margin set in the left/right resource editor
-			// 7 -> the dialog margin set in the top/bottom
-			// 67 -> 60 (left text) + 7 margin right. 
-			// 72 -> 30 (top text) + 14 (button height) * 2 + 7 (margin bottom) + 7 (space from check to button)
-			CRect rect(7,7,67 + dstpins*40, 72 + srcpins*9);
-			MapDialogRect(&rect);
-			CRect rect2;
-			GetDlgItem(IDOK)->GetWindowRect(&rect2);
-			GetDlgItem(IDOK)->SetWindowPos(NULL,
-				rect.right-(rect2.right-rect2.left) - rect.left,
-				rect.bottom-((rect2.bottom-rect2.top)*2)- rect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
-			GetDlgItem(IDCANCEL)->SetWindowPos(NULL,
-				rect.right-(rect2.right-rect2.left) - rect.left,
-				rect.bottom-((rect2.bottom-rect2.top)) - rect.top,0,0,SWP_NOZORDER | SWP_NOSIZE);
-			rect.bottom += ::GetSystemMetrics(SM_CYCAPTION) + ::GetSystemMetrics(SM_CYFIXEDFRAME);
-			rect.right += 2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
-			SetWindowPos(NULL,0,0,rect.right,rect.bottom, SWP_NOZORDER | SWP_NOMOVE);
+			//
+			// Position buttons and resize window.
+			//
+			{
+				CRect rect2;
+				CRect margins(0,0,7,7);
+				// calculate frame size (See in AddButton method for sizes)
+				CRect rect(0,0,60 + dstpins*40, 30 + srcpins*9);
+				MapDialogRect(&margins);
+				MapDialogRect(&rect);
+				rect.bottom+=margins.bottom; //Add space between checks and buttons.
+				GetDlgItem(IDOK)->GetClientRect(&rect2);
+				rect.bottom+=2*rect2.bottom; //add size of (two) buttons.
+				GetDlgItem(IDOK)->SetWindowPos(NULL,
+					rect.right - rect2.right,
+					rect.bottom - (2*rect2.bottom),0,0,SWP_NOZORDER | SWP_NOSIZE);
+				GetDlgItem(IDCANCEL)->SetWindowPos(NULL,
+					rect.right - rect2.right,
+					rect.bottom - rect2.bottom,0,0,SWP_NOZORDER | SWP_NOSIZE);
+				GetDlgItem(IDC_AUTOWIRE)->GetClientRect(&rect2);
+				GetDlgItem(IDC_AUTOWIRE)->SetWindowPos(NULL,
+					margins.right,
+					rect.bottom - (2*rect2.bottom),0,0,SWP_NOZORDER | SWP_NOSIZE);
+				GetDlgItem(IDC_UNSELECT)->SetWindowPos(NULL,
+					margins.right,
+					rect.bottom - rect2.bottom,0,0,SWP_NOZORDER | SWP_NOSIZE);
+				//add frame margins
+				rect.bottom+=margins.bottom;
+				rect.right+=margins.right;
+				CalcWindowRect(rect);
+				SetWindowPos(NULL,0,0,rect.right - rect.left,rect.bottom-rect.top, SWP_NOZORDER | SWP_NOMOVE);
+			}
 			return FALSE;
 		}
-		void CChannelMappingDlg::AddButton(int yRel, int xRel, int numins, bool checked)
+
+		void CChannelMappingDlg::OnAutoWire()
 		{
-			// 60 -> left text
-			// 30 -> top text
-			int x = 60 + xRel*40;
-			int y = 30 + yRel*9;
-			CButton* m_button = new CButton();
-			CRect rect(x,y,x+10,y+8);
-			MapDialogRect(&rect);
-			
-			m_button->Create(_T(""),WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_CHECKBOX,
-				rect,this,IDC_CHK_CHANMAP_0+((yRel*numins)+xRel));
-			m_button->ShowWindow(SW_SHOW);
-			
-			m_button->SetCheck(checked);
-			buttons.push_back(m_button);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+			const Machine & dstMac = m_wire.GetDstMachine();
+			const Machine & srcMac = m_wire.GetSrcMachine();
+			int srcpins=std::min(srcMac.GetNumOutputPins(),16);
+			int dstpins=std::min(dstMac.GetNumInputPins(),16);
+
+			m_wire.SetBestMapping();
+			std::vector<std::vector<bool>> vector;
+			FillCheckedVector(vector,srcpins, dstpins);
+			int count=0;
+			for (int s=0;s< srcpins; s++) {
+				for (int d=0;d< dstpins; d++, count++) {
+					buttons[count]->SetCheck(vector[s][d]);
+				}
+			}
+		}
+		void CChannelMappingDlg::OnUnselectAll()
+		{
+			Wire::Mapping mapping;
+			for(int count(0);count<buttons.size();count++) {
+				buttons[count]->SetCheck(false);
+			}
 		}
 
+		void CChannelMappingDlg::OnCheckChanMap(UINT index) 
+		{
+			int i = index-IDC_CHK_CHANMAP_0;
+			buttons[i]->SetCheck(!buttons[i]->GetCheck());
+		}
+
+		INT_PTR CChannelMappingDlg::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
+		{
+			int row;
+			RECT cellrect;   // cellrect		- to hold the bounding rect
+
+			row = CheckFromPoint(point, cellrect);
+			if ( row < 0) 
+				return -1;
+
+			//set up the TOOLINFO structure.
+			pTI->rect = cellrect;
+			pTI->hwnd = m_hWnd;
+			pTI->uId = (UINT)((row));   //The ‘uId’ is assigned a value according to the check.
+			pTI->lpszText = LPSTR_TEXTCALLBACK;
+			pTI->uFlags |= TTF_ALWAYSTIP;
+			return pTI->uId;
+		}
+		//Define OnToolTipText(). This is the handler for the TTN_NEEDTEXT notification from 
+		//support ansi and unicode 
+		BOOL CChannelMappingDlg::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult )
+		{
+			// need to handle both ANSI and UNICODE versions of the message
+			TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
+			TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
+			const Machine & dstMac = m_wire.GetDstMachine();
+			const Machine & srcMac = m_wire.GetSrcMachine();
+			UINT dstpins = std::min(dstMac.GetNumInputPins(),16);
+			UINT srcpos= pNMHDR->idFrom/dstpins;
+			UINT dstpos= pNMHDR->idFrom%dstpins;
+			std::stringstream ss;
+			ss << srcpos << ":" << srcMac.GetOutputPinName(srcpos) 
+				<< " => " << dstpos << ":" << dstMac.GetInputPinName(dstpos);
+				
+
+		#ifndef _UNICODE
+			if (pNMHDR->code == TTN_NEEDTEXTA)
+				lstrcpyn(pTTTA->szText, ss.str().c_str(), 80);
+			else
+				_mbstowcsz(pTTTW->szText, ss.str().c_str(), 80);
+		#else
+			if (pNMHDR->code == TTN_NEEDTEXTA)
+				_wcstombsz(pTTTA->szText, ss.str().c_str(), 80);
+			else
+				lstrcpyn(pTTTW->szText, ss.str().c_str(), 80);
+		#endif
+			*pResult = 0;
+
+			return TRUE;    
+		}
 		void CChannelMappingDlg::OnOK() 
 		{
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 			Wire::Mapping mapping;
 			int srcpins = std::min(m_wire.GetSrcMachine().GetNumOutputPins(),16);
 			int dstpins = std::min(m_wire.GetDstMachine().GetNumInputPins(),16);
@@ -158,6 +248,9 @@ namespace psycle { namespace host {
 			for(int i=0; i < buttons.size();i++) {
 				delete buttons[i];
 			}
+			for(int i=0; i < dstnames.size();i++) {
+				delete dstnames[i];
+			}
 
 			CDialog::OnOK();
 		}
@@ -167,14 +260,66 @@ namespace psycle { namespace host {
 			for(int i=0; i < buttons.size();i++) {
 				delete buttons[i];
 			}
+			for(int i=0; i < dstnames.size();i++) {
+				delete dstnames[i];
+			}
+
 			CDialog::OnCancel();
 		}
 
-		void CChannelMappingDlg::OnCheckChanMap(UINT index) 
+		void CChannelMappingDlg::FillCheckedVector(std::vector<std::vector<bool>>& checked, int srcpins, int dstpins)
 		{
-			int i = index-IDC_CHK_CHANMAP_0;
-			buttons[i]->SetCheck(!buttons[i]->GetCheck());
+			checked.resize(srcpins);
+			for (int s=0;s< srcpins; s++) {
+				checked[s].resize(dstpins);
+			}
+			const Wire::Mapping &mapping = m_wire.GetMapping();
+			for (int i(0);i<mapping.size();i++) {
+				const Wire::PinConnection & con = mapping[i];
+				assert(con.first < srcpins);
+				assert(con.second < dstpins);
+				checked[con.first][con.second] = true;
+			}
+		}
+		void CChannelMappingDlg::AddButton(int yRel, int xRel, int amountx, bool checked, CFont &font, std::string text)
+		{
+			int x = 30 + xRel*40;
+			int y = 30 + yRel*9;
+			CButton* m_button = new CButton();
+			if (xRel==0) {
+				CRect rect(7,y,x+38,y+8);
+				MapDialogRect(&rect);
+				m_button->Create(text.c_str(),WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON|BS_CHECKBOX|BS_LEFTTEXT,
+					rect,this,IDC_CHK_CHANMAP_0+((yRel*amountx)+xRel));
+			}
+			else {
+				CRect rect(x,y,x+38,y+8);
+				MapDialogRect(&rect);
+				m_button->Create(_T(""),WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_CHECKBOX|BS_LEFTTEXT,
+					rect,this,IDC_CHK_CHANMAP_0+((yRel*amountx)+xRel));
+			}
+			m_button->SetFont(&font,false);
+			m_button->ShowWindow(SW_SHOW);
+			
+			m_button->SetCheck(checked);
+			buttons.push_back(m_button);
 		}
 
+
+		int CChannelMappingDlg::CheckFromPoint(CPoint point, RECT& rect) const
+		{
+			int result=-1;
+			WINDOWPLACEMENT plc;
+			for(int i=0; i < buttons.size();i++) {
+				BOOL done = buttons[i]->GetWindowPlacement(&plc);
+				CRect brect(plc.rcNormalPosition);
+				if (done && brect.PtInRect(point)) {
+					rect = plc.rcNormalPosition;
+					result = i;
+					break;
+				}
+			}
+			return result;
+		}
 	}   // namespace
 }   // namespace

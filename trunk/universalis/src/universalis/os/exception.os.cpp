@@ -58,7 +58,7 @@ namespace exceptions { namespace detail {
 						reinterpret_cast<char*>(&error_message_pointer), // we *must* hard-cast! this seems to be a hack to extend an originally badly designed api... there is no other way to do it
 						0, 0
 				)) s << error_message_pointer;
-				else s << "unkown exception code: " << code << " 0x" << std::hex << code;
+				else s << "unknown exception code: " << code << " 0x" << std::hex << code;
 				if(error_message_pointer) ::LocalFree(error_message_pointer);
 			} catch(...) {
 				if(module) ::FreeLibrary(module);

@@ -2,6 +2,8 @@
 ///\implementation psycle::host::Configuration.
 
 #include <psycle/host/detail/project.private.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include "Configuration.hpp"
 #include "ConfigStorage.hpp"
 #include "Song.hpp"
@@ -149,6 +151,31 @@ namespace psycle { namespace host {
 			Global::player().start_threads(thread_count);
 		}
 
+		std::string Configuration::AsAbsolute(std::string dir) const
+		{
+			boost::filesystem::path mypath(dir);
+			if (!mypath.has_root_directory()) {
+				boost::filesystem::path root_begin = appPath();
+				mypath = root_begin / mypath;
+				mypath.normalize();
+				return mypath.native_directory_string();
+			}
+			else {
+				return dir;
+			}
+		}
+		std::string Configuration::GetAbsolutePluginDir() const
+		{
+			return AsAbsolute(plugin_dir_);
+		}
+		std::string Configuration::GetAbsoluteVst32Dir() const
+		{
+			return AsAbsolute(vst32_dir_);
+		}
+		std::string Configuration::GetAbsoluteVst64Dir() const
+		{
+			return AsAbsolute(vst64_dir_);
+		}
 
 		bool Configuration::SupportsJBridge() const
 		{

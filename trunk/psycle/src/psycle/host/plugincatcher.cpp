@@ -181,26 +181,26 @@ namespace psycle
 				std::string s(c);
 				loggers::information()("Scanning plugins ... Current Directory: " + s);
 			}
-			loggers::information()("Scanning plugins ... Directory for Natives: " + Global::configuration().GetPluginDir());
-			loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::configuration().GetVst32Dir());
-			loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::configuration().GetVst64Dir());
+			loggers::information()("Scanning plugins ... Directory for Natives: " + Global::configuration().GetAbsolutePluginDir());
+			loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::configuration().GetAbsoluteVst32Dir());
+			loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::configuration().GetAbsoluteVst64Dir());
 			loggers::information()("Scanning plugins ... Listing ...");
 
 			progress.SetWindowText("Scanning plugins ... Listing ...");
 			progress.ShowWindow(SW_SHOW);
 
-			populate_plugin_list(nativePlugs,Global::configuration().GetPluginDir());
+			populate_plugin_list(nativePlugs,Global::configuration().GetAbsolutePluginDir());
 #if	defined _WIN64
-			populate_plugin_list(vstPlugs,Global::configuration().GetVst64Dir());
+			populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
 			if(Global::configuration().UsesJBridge() || Global::configuration().UsesPsycleVstBridge())
 			{
-				populate_plugin_list(vstPlugs,Global::configuration().GetVst32Dir());
+				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst32Dir());
 			}
 #elif defined _WIN32
-			populate_plugin_list(vstPlugs,Global::configuration().GetVst32Dir());
+			populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst32Dir());
 			if(Global::configuration().UsesJBridge() || Global::configuration().UsesPsycleVstBridge())
 			{
-				populate_plugin_list(vstPlugs,Global::configuration().GetVst64Dir());
+				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
 			}
 #endif
 
@@ -455,6 +455,12 @@ namespace psycle
 							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
 						}
 						catch(const std::exception & e)
+						{
+							std::ostringstream s; s << typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+							pInfo->error = s.str();
+						}
+						catch(const std::runtime_error & e)
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;

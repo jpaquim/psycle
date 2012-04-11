@@ -215,7 +215,7 @@ namespace host{
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		//using std::max;
-		song.SONGTRACKS = std::max(m_Header.channels, std::uint16_t(4));
+		song.SONGTRACKS = std::max((int)m_Header.channels, 4);
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
 		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));

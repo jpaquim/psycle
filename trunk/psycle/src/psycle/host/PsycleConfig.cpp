@@ -1752,15 +1752,15 @@ namespace psycle { namespace host {
 		{
 			if(_pOutputDriver) _pOutputDriver->Enable(false);
 			Configuration::RefreshSettings();
-			SetCurrentSongDir(GetSongDir());
+			SetCurrentSongDir(GetAbsoluteSongDir());
 			if(IsRecInPSYDir()) {
-				SetCurrentWaveRecDir(GetSongDir());
+				SetCurrentWaveRecDir(GetAbsoluteSongDir());
 			}
 			else {
-				SetCurrentWaveRecDir(GetWaveRecDir());
+				SetCurrentWaveRecDir(GetAbsoluteWaveRecDir());
 			}
 			
-			SetCurrentInstrumentDir(GetInstrumentDir());
+			SetCurrentInstrumentDir(GetAbsoluteInstrumentDir());
 			
 			patView_.RefreshSettings();
 			macView_.RefreshSettings();
@@ -1855,7 +1855,6 @@ namespace psycle { namespace host {
 			}
 			recent_files_[0]=f;
 		}
-
 
 		void PsycleConfig::Error(std::string const & what)
 		{

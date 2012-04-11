@@ -384,7 +384,7 @@ namespace psycle { namespace host {
 
 		void CMainFrame::CheckForAutosave()
 		{
-			CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
+			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
 			filepath += "\\autosave.psy";
 
 			OldPsyFile file;
@@ -440,7 +440,7 @@ namespace psycle { namespace host {
 				//Psycle manages its own list for recent files
 				//((CPsycleApp*)AfxGetApp())->SaveRecent(this);
 
-				CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
+				CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
 				filepath += "\\autosave.psy";
 				DeleteFile(filepath);
 				SaveBarState(_T("General"));

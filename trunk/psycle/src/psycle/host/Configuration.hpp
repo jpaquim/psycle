@@ -25,16 +25,20 @@ namespace psycle
 			virtual void Load(ConfigStorage &);
 			virtual void Save(ConfigStorage &);
 			virtual void RefreshSettings();
+			std::string AsAbsolute(std::string dir) const;
 
 			//Members
 
 			std::string const & appPath              () const { return program_executable_dir_; }
 			boost::filesystem::path const & cacheDir () const { return cache_dir_; }
 
+			std::string         GetAbsolutePluginDir () const;
 			std::string const & GetPluginDir         () const { return plugin_dir_; }
 			               void SetPluginDir         (std::string const &d) { plugin_dir_ = d; }
+			std::string         GetAbsoluteVst32Dir  () const;
 			std::string const & GetVst32Dir          () const { return vst32_dir_; }
 			               void SetVst32Dir          (std::string const &d) { vst32_dir_ = d;}
+			std::string         GetAbsoluteVst64Dir  () const;
 			std::string const & GetVst64Dir          () const { return vst64_dir_; }
 			               void SetVst64Dir          (std::string const &d) { vst64_dir_ = d;}
 						   bool SupportsJBridge      () const;

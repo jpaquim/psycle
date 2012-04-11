@@ -444,22 +444,27 @@ namespace psycle
 			void SyncChanged(int newidx);
 
 			//Members
+			std::string       inline   GetAbsoluteSongDir     () const { return AsAbsolute(song_dir_); }
 			std::string const inline & GetSongDir             () const { return song_dir_; }
 			               void inline SetSongDir             (std::string const &d) { song_dir_ = d; }
 			std::string const inline & GetCurrentSongDir      () const { return current_song_dir_; }
 			               void inline SetCurrentSongDir      (std::string const &d) { current_song_dir_ = d;}
+			std::string       inline   GetAbsoluteWaveRecDir  () const { return AsAbsolute(wave_rec_dir_); }
 			std::string const inline & GetWaveRecDir          () const { return wave_rec_dir_; }
-			               void inline	SetWaveRecDir         (std::string const &d) { wave_rec_dir_ = d;}
+			               void inline SetWaveRecDir          (std::string const &d) { wave_rec_dir_ = d;}
 			std::string const inline & GetCurrentWaveRecDir   () const { return current_wave_rec_dir_; }
 			               void inline SetCurrentWaveRecDir   (std::string const &d) { current_wave_rec_dir_ = d;}
-			bool		const inline   IsRecInPSYDir          () { return rec_in_psy_dir_; }
+			bool		const inline   IsRecInPSYDir          () const { return rec_in_psy_dir_; }
 						   void inline SetRecInPSYDir         (bool rec) {	rec_in_psy_dir_ = rec; }
+			std::string       inline   GetAbsoluteInstrumentDir() const { return AsAbsolute(instrument_dir_); }
 			std::string const inline & GetInstrumentDir       () const { return instrument_dir_; }
 			               void inline SetInstrumentDir       (std::string const &d) { instrument_dir_ = d;}
 			std::string const inline & GetCurrentInstrumentDir() const { return current_instrument_dir_; }
 			               void inline SetCurrentInstrumentDir(std::string const &d) { current_instrument_dir_ = d; }
+			std::string       inline   GetAbsoluteSkinDir     () const { return AsAbsolute(skin_dir_); }
 			std::string const inline & GetSkinDir             () const { return skin_dir_; }
 			               void inline SetSkinDir             (std::string const &d) { skin_dir_ = d; }
+			std::string       inline   GetAbsolutePresetsDir  () const { return AsAbsolute(presets_dir_); }
 			std::string const inline & GetPresetsDir          () const { return presets_dir_; }
 			               void inline SetPresetsDir          (std::string const &d){ presets_dir_ = d; }
 			std::vector<std::string> const inline & GetRecentFiles() const { return recent_files_; }

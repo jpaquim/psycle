@@ -194,7 +194,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrInitialDir =  PsycleGlobal::conf().GetSkinDir().c_str();
+			ofn.lpstrInitialDir =  PsycleGlobal::conf().GetAbsoluteSkinDir().c_str();
 			// Display the Open dialog box. 
 			
 			if (GetOpenFileName(&ofn)==TRUE)
@@ -224,7 +224,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
-			ofn.lpstrInitialDir = PsycleGlobal::conf().GetSkinDir().c_str();
+			ofn.lpstrInitialDir = PsycleGlobal::conf().GetAbsoluteSkinDir().c_str();
 
 			if (GetSaveFileName(&ofn)==TRUE)
 			{

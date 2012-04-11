@@ -96,10 +96,10 @@ VkeysT CEffectWnd::VKeys[] =
 
 bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect)
 {
-	if (!pRect)
-		pEffect->EditGetRect(&pRect);
-	if (!pRect)
-		return false;
+	if (!pRect) {
+		if (!pEffect->EditGetRect(&pRect) || !pRect)
+			return false;
+	}
 
 	rcClient.left = rcClient.top = 0;
 	rcClient.right = pRect->right - pRect->left;

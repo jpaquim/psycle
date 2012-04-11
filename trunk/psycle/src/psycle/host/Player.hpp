@@ -9,6 +9,7 @@
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include "Machine.hpp"
+#include "ExclusiveLock.hpp"
 #include "AudioDriver.hpp"
 #include <psycle/helpers/riff.hpp>
 #include <psycle/helpers/dither.hpp>
@@ -155,6 +156,7 @@ namespace psycle
 		public:
 			void start_threads(int thread_count);
 			void stop_threads();
+			CExclusiveLock GetLockObject();
 		private:
 			typedef std::list<std::thread*> threads_type;
 			threads_type threads_;

@@ -1614,7 +1614,7 @@ namespace psycle
 				float vol;
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
-				int temp(lround<int>(50.0f * std::log10(vol)));
+				int temp(lround<int>(50.0f * std::log10f(vol)));
 				return (inWires[idx].GetSrcMachine()._volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;

@@ -12,12 +12,12 @@ CExclusiveLock::~CExclusiveLock()
 {
 	if (locked) { UnLock(); }
 }
-void CExclusiveLock::Lock() {
-	if (locked) return;
-	for(int i=0;i<num_places;i++) semaphore->Lock();
-	locked=true;
+bool CExclusiveLock::Lock(int timeout) {
+	if (locked) return true;
+	locked = true;
+	for(int i=0;i<num_places;i++) locked &= (bool)semaphore->Lock(timeout);
+	return locked;
 }
-
 void CExclusiveLock::UnLock() {
 	if(!locked) return;
 	for(int i=0;i<num_places;i++) semaphore->Unlock();

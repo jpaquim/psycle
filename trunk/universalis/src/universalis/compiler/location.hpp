@@ -76,7 +76,7 @@ class location {
 	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE UNIVERSALIS__META__MODULE__NAME
 #else
 	///\internal
-	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unkown module)"
+	#define UNIVERSALIS__COMPILER__LOCATION__DETAIL__MODULE "(unknown module)"
 #endif
 
 ///\internal

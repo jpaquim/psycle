@@ -172,7 +172,7 @@ namespace psycle
 			void Disconnect();
 			void Mix(int numSamples, float lVol, float rVol) const;
 			void ChangeMapping(Mapping const & newmapping);
-			void SetBestMapping();
+			void SetBestMapping(bool notify=true);
 			Mapping EnsureCorrectness(Mapping const & mapping);
 			Mapping const & GetMapping() const { return pinMapping; }
 			inline float GetVolume() const { return volume * volMultiplier; };

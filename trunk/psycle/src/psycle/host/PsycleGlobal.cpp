@@ -37,6 +37,7 @@ namespace psycle
 		PsycleGlobal::~PsycleGlobal()
 		{
 			delete pSong; pSong = 0;
+			//player has to be deleted before vsthost
 			delete pPlayer; pPlayer = 0;
 			//vst host has to be deleted after song.
 			delete pVstHost; pVstHost = 0;

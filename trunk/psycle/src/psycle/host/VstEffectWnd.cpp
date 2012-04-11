@@ -21,8 +21,7 @@ namespace psycle { namespace host {
 		bool CVstGui::GetViewSize(CRect& rect)
 		{
 			ERect* pRect(0);
-			pEffect->EditGetRect(&pRect);
-			if (!pRect)
+			if (!pEffect->EditGetRect(&pRect) || !pRect)
 				return false;
 
 			rect.left = rect.top = 0;

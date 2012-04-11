@@ -68,7 +68,7 @@ namespace psycle
 				pinMapping = EnsureCorrectness(*mapping);
 			}
 			else {
-				SetBestMapping();
+				SetBestMapping(false);
 			}
 			enabled = true;
 			srcMachine->OnOutputConnected(*this, outType, outWire);
@@ -88,7 +88,7 @@ namespace psycle
 				pinMapping = EnsureCorrectness(*mapping);
 			}
 			else {
-				SetBestMapping();
+				SetBestMapping(false);
 			}
 			enabled = true;
 			srcMachine->OnOutputConnected(*this, outType, outWire);
@@ -133,19 +133,23 @@ namespace psycle
 				math::erase_all_nans_infinities_and_denormals(dstMachine->samplesV[pin.second], numSamples);
 			}
 		}
-		void Wire::SetBestMapping()
+		void Wire::SetBestMapping(bool notify)
 		{
 			int srcpins = srcMachine->GetNumOutputPins();
 			int dstpins = dstMachine->GetNumInputPins();
-			pinMapping.clear();
+			Mapping mapping;
 			for (int s=0;s< srcpins; s++) {
 				for (int d=0;d< dstpins; d++) {	
-				//Only map natural pairs, or map mono to all.
-					if (s==d || srcpins == 1 || dstpins == 1) {
-						pinMapping.push_back(PinConnection(s,d));
+					if (s==d || s%dstpins == d || d%srcpins == s) {
+						mapping.push_back(PinConnection(s,d));
 					}
 				}
 			}
+			if(notify) {
+				GetSrcMachine().OnPinChange(*this,mapping);
+				GetDstMachine().OnPinChange(*this,mapping);
+			}
+			pinMapping = mapping;
 		}
 
 		void Wire::ChangeMapping(Mapping const & newmapping)

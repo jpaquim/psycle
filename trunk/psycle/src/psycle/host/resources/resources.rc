@@ -1999,9 +1999,9 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,226,161,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,226,175,50,14
-    LTEXT           "Source \\  Destination",IDC_STATIC,7,7,101,11
-    LTEXT           "1\n2\n3\n4\n5\n6\n7\n8\n9\n0\n1\n2\n3\n4\n5\n6",IDC_WIRE_INPUT_NAMES,8,30,52,130
-    LTEXT           "1:",IDC_WIRE_OUTPUT_NAMES,64,16,212,10
+    LTEXT           "Source \\  Destination",IDC_SRCDEST_LABEL,7,7,101,9
+    PUSHBUTTON      "Unselect all",IDC_UNSELECT,7,175,50,14
+    PUSHBUTTON      "AutoWire",IDC_AUTOWIRE,7,161,50,14
 END
 
 
