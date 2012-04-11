@@ -6,12 +6,11 @@ class CExclusiveLock
 {
 public:
 //Constructors / Destructors
-  CExclusiveLock(CSemaphore* in_semaphore,int places, bool lock_now=true);
+  CExclusiveLock(CSemaphore* in_semaphore,int places, bool lock_now);
   ~CExclusiveLock();
 
-  void Lock();
+  bool Lock(int timeout=-1);
   void UnLock();
-  CSemaphore & operator=(const CSemaphore& other);
 protected:
 	CSemaphore* semaphore;
 	int		num_places;

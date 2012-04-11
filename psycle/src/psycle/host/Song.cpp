@@ -151,8 +151,12 @@ namespace psycle
 						}
 						catch(...)
 						{
+#ifndef NDEBUG 
+							throw;
+#else
 							loggers::exception()("unknown exception");
 							zapObject(pMachine);
+#endif
 						}
 					}
 					break;
@@ -1885,7 +1889,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 							{
 								char buf[MAX_PATH];
-								sprintf(buf,"unkown machine type: %i",type);
+								sprintf(buf,"unknown machine type: %i",type);
 								MessageBox(0, buf, "Loading old song", MB_ICONERROR);
 							}
 #endif // !defined WINAMP_PLUGIN
@@ -2650,7 +2654,7 @@ namespace psycle
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			///\todo: Wrong song dir causes "machine cloning failed"! 
 			///\todo: the process should be changed and save the data in memory.
-			CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
+			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;
@@ -2812,7 +2816,7 @@ namespace psycle
 
 			// save our file
 
-			CString filepath = PsycleGlobal::conf().GetSongDir().c_str();
+			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
 			OldPsyFile file;

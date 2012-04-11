@@ -1348,26 +1348,26 @@ void XMSamplerUIInst::CEnvelopeEditor::OnContextMenu(CWnd* pWnd, CPoint point)
 void XMSamplerUIInst::CEnvelopeEditor::OnPopAddPoint()
 {
 		
-		int _new_point = (int)((float)m_EditPointX / m_Zoom);
+	int _new_point = (int)((float)m_EditPointX / m_Zoom);
 	float _new_value = (1.0f - (float)m_EditPointY / (float)m_WindowHeight);
 
 		
-		if(_new_value > 1.0f)
-		{
-			_new_value = 1.0f;
-		}
+	if(_new_value > 1.0f)
+	{
+		_new_value = 1.0f;
+	}
 
-		if(_new_value < 0.0f)
-		{
-			_new_value = 0.0f;
-		}
+	if(_new_value < 0.0f)
+	{
+		_new_value = 0.0f;
+	}
 
-		if( _new_point < 0)
-		{
-			_new_point = 0;
-		}
+	if( _new_point < 0)
+	{
+		_new_point = 0;
+	}
 
-		CExclusiveLock lock(&Global::song().semaphore, 2, true);
+	CExclusiveLock lock(&Global::song().semaphore, 2, true);
 	//\todo : Verify that we aren't trying to add an existing point!!!
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);

@@ -119,7 +119,7 @@ namespace psycle
 				// grows the search path with intermediate dirs between the configured root dir for plugins and the dir of this plugin
 				{
 					// configured root dir for plugins
-					boost::filesystem::path root_path(Global::configuration().GetPluginDir(), boost::filesystem::native);
+					boost::filesystem::path root_path(Global::configuration().GetAbsolutePluginDir(), boost::filesystem::native);
 					// grow the search path with each compound of the sub dir until we reached the root dir
 					// first, normalize the path so we don't have
 					// dirs that are not intermediate because of things like foo/../bar

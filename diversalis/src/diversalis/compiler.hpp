@@ -355,7 +355,7 @@
 // consistency check
 
 #if !defined DIVERSALIS__COMPILER
-	#error unkown compiler
+	#error unknown compiler
 #endif
 	
 #if !defined __cplusplus && !defined DIVERSALIS__COMPILER__RESOURCE

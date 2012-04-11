@@ -164,7 +164,7 @@ namespace psycle { namespace host {
 				m_triangle_size.AddString(s);
 			}
 			// ok now browse our folder for skins
-			SkinIO::LocateSkins(PsycleGlobal::conf().GetSkinDir().c_str(), pattern_skins, machine_skins);
+			SkinIO::LocateSkins(PsycleGlobal::conf().GetAbsoluteSkinDir().c_str(), pattern_skins, machine_skins);
 
 			m_pattern_header_skin.AddString(PSYCLE__PATH__DEFAULT_PATTERN_HEADER_SKIN);
 			m_machine_skin.AddString(PSYCLE__PATH__DEFAULT_MACHINE_SKIN);
@@ -515,7 +515,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = 0;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrInitialDir = PsycleGlobal::conf().GetSkinDir().c_str();
+			ofn.lpstrInitialDir = PsycleGlobal::conf().GetAbsoluteSkinDir().c_str();
 			// Display the Open dialog box. 
 			if(::GetOpenFileName(&ofn))
 			{
@@ -539,7 +539,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = 0;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
-			ofn.lpstrInitialDir = PsycleGlobal::conf().GetSkinDir().c_str();
+			ofn.lpstrInitialDir = PsycleGlobal::conf().GetAbsoluteSkinDir().c_str();
 			if(::GetSaveFileName(&ofn))
 			{
 				SkinIO::SaveTheme(szFile, macConfig, paramConfig, patConfig);
@@ -746,7 +746,7 @@ namespace psycle { namespace host {
 			szFile[0]='\0';
 			szPath[0]='\0';
 			if(filename.empty()) {
-				std::strcpy(szPath,PsycleGlobal::conf().GetSkinDir().c_str());
+				std::strcpy(szPath,PsycleGlobal::conf().GetAbsoluteSkinDir().c_str());
 			}
 			else{
 				CString str1(filename.c_str());

@@ -929,6 +929,9 @@ void Player::stop_threads() {
 			return playTrack[track];
 		}
 
+		CExclusiveLock Player::GetLockObject() {
+			return CExclusiveLock(&Global::song().semaphore, 2, FALSE);
+		}
 		float * Player::Work(void* context, int numSamples)
 		{
 			CSingleLock crit(&Global::song().semaphore, FALSE);

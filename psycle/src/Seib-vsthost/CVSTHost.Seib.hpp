@@ -466,7 +466,7 @@ namespace seib {
 			inline bool OfflineRun(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflineRun, 0, count, ptr); }
 			/// This function is for Offline processing.
 			inline bool ProcessVarIo(VstVariableIo* varIo) { return (bool)Dispatch(effProcessVarIo, 0, 0, varIo); }
-			inline bool SetSpeakerArrangement(VstSpeakerArrangement* pluginInput, VstSpeakerArrangement* pluginOutput) { return (bool)Dispatch(effSetSpeakerArrangement, 0, (long)pluginInput, pluginOutput); }
+			inline bool SetSpeakerArrangement(VstSpeakerArrangement* pluginInput, VstSpeakerArrangement* pluginOutput) { return (bool)Dispatch(effSetSpeakerArrangement, 0, (VstIntPtr)pluginInput, pluginOutput); }
 			inline void DECLARE_VST_DEPRECATED(SetBlockSizeAndSampleRate)(long blockSize, float sampleRate) { Dispatch(effSetBlockSizeAndSampleRate, 0, blockSize, 0, sampleRate); }
 			inline bool SetBypass(bool onOff) { return (bool)Dispatch(effSetBypass, 0, onOff); }
 			// ptr is a string up to kVstMaxEffectNameLen chars + \0 delimiter
@@ -505,7 +505,7 @@ namespace seib {
 			inline bool BeginSetProgram() { return (bool)Dispatch(effBeginSetProgram); }
 			inline bool EndSetProgram() { return (bool)Dispatch(effEndSetProgram); }
 		// VST 2.3 Extensions
-			inline bool GetSpeakerArrangement(VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) { return (bool)Dispatch(effGetSpeakerArrangement, 0, (long)pluginInput, pluginOutput); }
+			inline bool GetSpeakerArrangement(VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) { return (bool)Dispatch(effGetSpeakerArrangement, 0, (VstIntPtr)pluginInput, pluginOutput); }
 			//Called in offline (non RealTime) processing before process is called, indicates how many samples will be processed.	Actually returns value.
 			inline long SetTotalSampleToProcess (long value) { return Dispatch(effSetTotalSampleToProcess, 0, value); }
 			//Points to a char buffer of size 64, which is to be filled with the name of the plugin including the terminating 0.

@@ -599,18 +599,11 @@ namespace psycle { namespace host {
 				rcClient.top = 0; rcClient.left = 0;
 				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
 			}
-			//(non rezisable) SM_CXFIXEDFRAME is the height of the horizontal border, and SM_CYFIXEDFRAME is the width of the vertical border.
-			//This value is the same as SM_CXDLGFRAME/SM_CYDLGFRAME.
-			//(resizable) SM_CXSIZEFRAME is the width of the horizontal border, and SM_CYSIZEFRAME is the height of the vertical border.
-			//This value is the same as SM_CXFRAME/SM_CYFRAME.
-			//SM_CYMENU The height of a single-line menu bar, in pixels.
-			//SM_CYCAPTION The height of a caption area, in pixels.
-			rcFrame.bottom += ::GetSystemMetrics(SM_CYCAPTION) +
-				::GetSystemMetrics(SM_CYMENU) +
-				2 * ::GetSystemMetrics(SM_CYFIXEDFRAME);
-			rcFrame.right +=
-				2 * ::GetSystemMetrics(SM_CXFIXEDFRAME);
+			//Add frame border/caption size.
+			CalcWindowRect(rcFrame);
 
+			//SM_CYMENU The height of a single-line menu bar, in pixels.
+			rcFrame.bottom += ::GetSystemMetrics(SM_CYMENU);
 			if ( PsycleGlobal::conf().macParam().toolbarOnMachineParams && !(toolBar.GetBarStyle() & CBRS_FLOATING))
 			{
 				//SM_CYBORDER The height of a window border, in pixels. This is equivalent to the SM_CYEDGE value for windows with the 3-D look.
@@ -651,7 +644,7 @@ namespace psycle { namespace host {
 				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,internalPresets,false);
 			}
 
-			buffer = PsycleGlobal::conf().GetPresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
+			buffer = PsycleGlobal::conf().GetAbsolutePresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
 			boost::filesystem::path inpath2(buffer);
 			if(boost::filesystem::exists(inpath2))
 			{

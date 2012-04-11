@@ -66,8 +66,8 @@ bool usewasabi=false;
 bool uninstallDelete=false;
 
 //Forward Declarations
-BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 bool BrowseForFolder(HWND m_hWnd, std::string& rpath);
 void GenerateSongTitle(in_char *title, const in_char *file, const in_char *author, const in_char *name);
 
@@ -553,7 +553,7 @@ void SaveDialogSettings(HWND hwndDlg)
 	global_.conf().RefreshSettings();
 }
 
-BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char tmptext[_MAX_PATH];
 	
@@ -726,7 +726,7 @@ BOOL CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	return 0;
 }
-BOOL CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int i,j=0;
 	psycle::host::Song* pSong;

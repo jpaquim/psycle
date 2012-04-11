@@ -921,9 +921,9 @@
 #define IDC_RECORD_USE_PSYDIR           1838
 #define IDC_CHK_CHANMAP_0               1839
 #define IDC_CHK_CHANMAP_255             2095
-#define IDC_WIRE_INPUT_NAME             2096
-#define IDC_WIRE_INPUT_NAMES            2096
-#define IDC_WIRE_OUTPUT_NAMES           2097
+#define IDC_SRCDEST_LABEL               2098
+#define IDC_AUTOWIRE                    2099
+#define IDC_UNSELECT                    2100
 #define IDC_NUMBER_THREADS              4015
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1091,7 +1091,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        315
 #define _APS_NEXT_COMMAND_VALUE         34285
-#define _APS_NEXT_CONTROL_VALUE         2097
+#define _APS_NEXT_CONTROL_VALUE         2101
 #define _APS_NEXT_SYMED_VALUE           62
 #endif
 #endif
