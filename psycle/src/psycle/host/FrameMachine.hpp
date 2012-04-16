@@ -67,6 +67,9 @@ namespace host {
 			bool isInternal;
 			bool isUser;
 			int userSelected;
+			int refreshcounter;
+			int lastprogram;
+			int lastnumprogrs;
 
 		protected:
 			DECLARE_MESSAGE_MAP()

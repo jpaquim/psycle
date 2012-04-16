@@ -43,10 +43,14 @@ namespace seib {
 			extern const char* canDoSendVstTimeInfo;
 			extern const char* canDoReceiveVstEvents;
 			extern const char* canDoReceiveVstMidiEvent;
+			extern const char* DECLARE_VST_DEPRECATED(canDoReceiveVstTimeInfo);
 			extern const char* canDoReportConnectionChanges;
 			extern const char* canDoAcceptIOChanges;
 			extern const char* canDoSizeWindow;
+			extern const char* DECLARE_VST_DEPRECATED(canDoAsyncProcessing);
 			extern const char* canDoOffline;
+			extern const char* DECLARE_VST_DEPRECATED(canDoSupplyIdle);
+			extern const char* DECLARE_VST_DEPRECATED(canDoSupportShell);
 			extern const char* canDoOpenFileSelector;
 			extern const char* canDoCloseFileSelector;
 			extern const char* canDoStartStopProcess;
@@ -255,6 +259,7 @@ namespace seib {
 			virtual CFxBank SaveBank(bool preferchunk=false);
 			virtual CFxProgram SaveProgram(bool preferchunk=true);
 			virtual void crashed2(std::exception const & e) {};
+			virtual std::string GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, int pin) const;
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
 			virtual bool WantsMidi() { return bWantMidi; }
 			virtual void KnowsToBypass(bool enable) { bCanBypass=enable; }
@@ -402,7 +407,7 @@ namespace seib {
 					else {  StopProcess(); Dispatch(effMainsChanged, 0, bOn); }
 				}
 			}
-			inline bool EditGetRect(ERect **ptr) { return Dispatch(effEditGetRect, 0, 0, ptr)==1?true:false; }
+			inline bool EditGetRect(ERect **ptr) { return Dispatch(effEditGetRect, 0, 0, ptr)>0; }
 			inline void EditOpen(void *ptr) { Dispatch(effEditOpen, 0, 0, ptr); bEditOpen = true; }
 			inline void EditClose() { Dispatch(effEditClose); bEditOpen = false; }
 			// This has to be called repeatedly from the idle process ( usually the UI thread, with idle priority )
@@ -430,14 +435,23 @@ namespace seib {
 			// text is a string up to kVstMaxProgNameLen chars + \0 delimiter
 			inline bool GetProgramNameIndexed(long category, long index, char* text)
 			{
-				char s1[kVstMaxProgNameLen*3+1]; // You know, there's always the plugin that don't like to follow the limits
+				char s1[kVstMaxProgNameLen*3+1]; // You know, there's always the plugin that doesn't like to follow the limits
 
 				if (!Dispatch(effGetProgramNameIndexed, index, category, s1))
 				{
+					//Backup current program, since some plugins (ex: mda vocoder) restore the setting when assigning a program.
 					VstInt32 cprog= GetProgram();
+					float* params = new float[numParams()];
+					for(int i(0); i<numParams();i++){
+						params[i] = GetParameter(i);
+					}
 					SetProgram(index);
 					GetProgramName(text);
 					SetProgram(cprog);
+					for(int i(0); i<numParams();i++){
+						SetParameter(i,params[i]);
+					}
+					delete[] params;
 					if (!*text)
 						sprintf(text, "Program %d", index);
 				}
@@ -505,7 +519,7 @@ namespace seib {
 			inline bool BeginSetProgram() { return (bool)Dispatch(effBeginSetProgram); }
 			inline bool EndSetProgram() { return (bool)Dispatch(effEndSetProgram); }
 		// VST 2.3 Extensions
-			inline bool GetSpeakerArrangement(VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) { return (bool)Dispatch(effGetSpeakerArrangement, 0, (VstIntPtr)pluginInput, pluginOutput); }
+			inline bool GetSpeakerArrangement(VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetSpeakerArrangement, 0, (VstIntPtr)pluginInput, pluginOutput); }
 			//Called in offline (non RealTime) processing before process is called, indicates how many samples will be processed.	Actually returns value.
 			inline long SetTotalSampleToProcess (long value) { return Dispatch(effSetTotalSampleToProcess, 0, value); }
 			//Points to a char buffer of size 64, which is to be filled with the name of the plugin including the terminating 0.

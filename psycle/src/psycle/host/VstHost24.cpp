@@ -42,14 +42,6 @@ namespace psycle
 				quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); 
 				SetTimeSignature(4,4);
 				vstTimeInfo.smpteFrameRate = kVstSmpte25fps;
-				//TODO: this isn't being used right now.
-				memset(&stereoSpeaker,0,sizeof(VstSpeakerArrangement));
-				stereoSpeaker.numChannels=2;
-				stereoSpeaker.type = kSpeakerArrStereo;
-				memset(&stereoSpeaker.speakers[0],0,sizeof(stereoSpeaker.speakers[0]));
-				memset(&stereoSpeaker.speakers[1],0,sizeof(stereoSpeaker.speakers[1]));
-				stereoSpeaker.speakers[0].type = kSpeakerL;
-				stereoSpeaker.speakers[1].type = kSpeakerR;
 			}
 
 			void host::CalcTimeInfo(long lMask)
@@ -192,7 +184,7 @@ namespace psycle
 					trackNote[i].midichan = 0;
 				}
 				_sDllName= (char*)(loadstruct.pluginloader->sFileName);
-				char temp[kVstMaxVendorStrLen];
+				char temp[kVstMaxVendorStrLen+1];
 				memset(temp,0,sizeof(temp));
 				if ( GetPlugCategory() != kPlugCategShell )
 				{
@@ -201,9 +193,14 @@ namespace psycle
 					// synthedit plugins show only "SyntheditVST" in GetProductString()
 					// and others like battery 1 or psp-nitro, don't have GetProductString(),
 					// so it's almost a no-go.
-					if (GetEffectName(temp) && temp[0])_sProductName=temp;
-					else if(GetProductString(temp) && temp[0]) _sProductName=temp;
-					else
+					std::stringstream ss;
+					if (GetEffectName(temp) && temp[0]) { ss <<temp; temp[0]='\0'; }
+					if (GetProductString(temp) && temp[0]) {
+						if (ss.str().empty()) {	ss << temp; }
+						else if(strcmp(ss.str().c_str(),temp)) {	ss<< " (" << temp << ")"; }
+						temp[0]='\0';
+					}
+					if (ss.str().empty())
 					{
 						std::string temp;
 						std::string::size_type pos;
@@ -212,8 +209,9 @@ namespace psycle
 							temp=_sDllName;
 						else
 							temp=_sDllName.substr(pos+1);
-						_sProductName=temp.substr(0,temp.rfind('.'));
+						ss << temp.substr(0,temp.rfind('.'));
 					}
+					_sProductName= ss.str();
 					// This is a safe measure against some plugins that have noise at its output for some
 					// unexplained reason ( example : mda piano.dll )
 					GenerateAudioInTicks(0,STREAM_SIZE);
@@ -240,42 +238,83 @@ namespace psycle
 			}
 			bool plugin::OnIOChanged() {
 				//TODO: IOChanged does not only reflect input pin changes.
-				// it also (usually?) means changing latency.
+				// it also (usually?) means changing latency, but Psycle does not support initialDelay.
 				CExclusiveLock crit = Global::player().GetLockObject();
 				//Avoid possible deadlocks
 				if(crit.Lock(200)) {
+					MainsChanged(false);
+					int numIns = numInputs();
+					int numOuts = numOutputs();
 					VstSpeakerArrangement* SAip = 0;
 					VstSpeakerArrangement* SAop = 0;
 					if (GetSpeakerArrangement(&SAip,&SAop)) {
-						int i=0;
+						numIns = SAip->numChannels;
+						numOuts = SAop->numChannels;
 					}
 					if(WillProcessReplace()) {
 						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-						int maxval = std::max(std::max(numInputs(),numOutputs()),2);
+						int maxval = std::max(std::max(numIns,numOuts),2);
 						InitializeSamplesVector(maxval);
-						inputs.resize(numInputs());
-						for(int i(0);i<numInputs();i++)	{
+						inputs.resize(numIns);
+						for(int i(0);i<numIns;i++)	{
 							inputs[i]=samplesV[i];
 						}
-						outputs.resize(numOutputs());
-						for(int i(0);i<numOutputs();i++) {
+						outputs.resize(numOuts);
+						for(int i(0);i<numOuts;i++) {
 							outputs[i]=samplesV[i];
 						}
 					}
 					else {
 						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-						InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
+						InitializeSamplesVector(std::max(numIns + numOuts,2));
 						int i=0;
-						inputs.resize(numInputs());
-						for(;i<numInputs();i++)	{
+						inputs.resize(numIns);
+						for(;i<numIns;i++)	{
 							inputs[i]=samplesV[i];
 						}
-						outputs.resize(numOutputs());
-						for(int j(0);j<numOutputs();j++, i++) {
+						outputs.resize(numOuts);
+						for(int j(0);j<numOuts;j++, i++) {
 							outputs[j]=samplesV[i];
 						}
 					}
 					//validate pin mappings of wires already connected
+					for(int i(0);i< MAX_CONNECTIONS;i++) {
+						if(inWires[i].Enabled()) {
+							bool changed =false;
+							Wire::Mapping map = inWires[i].GetMapping();
+							Wire::Mapping::iterator ite = map.begin();
+							while (ite != map.end()) {
+								if (ite->second >= numIns) {
+									ite = map.erase(ite);
+									changed=true;
+								}
+								else {
+									ite++;
+								}
+							}
+							if(changed) {
+								inWires[i].ChangeMapping(map);
+							}
+						}
+						if(outWires[i] && outWires[i]->Enabled()) {
+							bool changed =false;
+							Wire::Mapping map = outWires[i]->GetMapping();
+							Wire::Mapping::iterator ite = map.begin();
+							while (ite != map.end()) {
+								if (ite->first>= numOuts) {
+									ite = map.erase(ite);
+									changed=true;
+								}
+								else {
+									ite++;
+								}
+							}
+							if(changed) {
+								outWires[i]->ChangeMapping(map);
+							}
+						}
+					}
+					MainsChanged(true);
 					return true;
 				}
 				return false;
@@ -323,11 +362,13 @@ namespace psycle
 			// AEffect asks host about its input/outputspeakers.
 			VstSpeakerArrangement* plugin::OnHostInputSpeakerArrangement()
 			{
-				return 0;
+				//TODO: Implement a per-plugin channel setup (i.e. not per wire)
+				return NULL;
 			}
 			VstSpeakerArrangement* plugin::OnHostOutputSpeakerArrangement()
 			{
-				return 0;
+				//TODO: Implement a per-plugin channel setup (i.e. not per wire)
+				return NULL;
 			}
 			/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 			/// doing an "off/on" when a connection changes.
@@ -384,6 +425,10 @@ namespace psycle
 						return pinprop.shortLabel;
 					}
 				}
+				VstSpeakerArrangement *sai, *sao;
+				if(GetSpeakerArrangement(&sai,&sao)) {
+					return GetNameFromSpeakerArrangement(*sao, pin);
+				}
 				return (pin%2)?"Right":"Left";
 
 			}
@@ -397,6 +442,10 @@ namespace psycle
 					else if (pinprop.shortLabel[0] != '\0' ) {
 						return pinprop.shortLabel;
 					}
+				}
+				VstSpeakerArrangement *sai, *sao;
+				if(GetSpeakerArrangement(&sai,&sao)) {
+					return GetNameFromSpeakerArrangement(*sai,pin);
 				}
 				return (pin%2)?"Right":"Left";
 			}
@@ -462,12 +511,9 @@ namespace psycle
 					bool b = ProgramIsChunk();
 					if(b)
 					{
-						// can't do this! we have  a thing called "autosave" and everything is stopped then.
-		//					MainsChanged(false);
 						count=0;
 						chunksize = GetChunk((void**)&pData);
 						size+=chunksize;
-		//					MainsChanged(true);
 					}
 					else
 					{
@@ -612,21 +658,6 @@ namespace psycle
 								assert(midievent[q-1].deltaFrames <= 
 									midievent[q].deltaFrames);
 							}
-
-	/*						// assert that the note sequence is well-formed,
-							// which means, no note-offs happen without a
-							// corresponding preceding note-on.
-							switch(midievent[q].midiData[0]&0xf0) {
-							case 0x90: // note-on
-								note_checker_.note_on(midievent[q].midiData[1],
-									midievent[q].midiData[0]&0x0f);
-								break;
-							case 0x80: // note-off
-								note_checker_.note_off(midievent[q].midiData[1],
-									midievent[q].midiData[0]&0x0f);
-								break;
-							}
-	*/
 	#endif
 
 							mevents.events[q] = (VstEvent*) &midievent[q];
@@ -881,7 +912,6 @@ namespace psycle
 							{
 								// o_O`
 							}
-
 						}
 */
 						try
@@ -892,11 +922,6 @@ namespace psycle
 						{
 							// o_O`
 						}
-/*						if(numInputs() == 1)
-						{
-							helpers::dsp::Add(inputs[1],inputs[0],numSamples,0.5f);
-						}
-*/
 						///\todo: Move all this messy retrigger code to somewhere else. (it is repeated in each machine subclass)
 						// Store temporary pointers so that we can increase the address in the retrigger code
 						float ** tempinputs;
@@ -1039,15 +1064,6 @@ namespace psycle
 								}
 							}
 						}
-/*						try
-						{
-							if(numOutputs() == 1) helpers::dsp::Mov(outputs[0],outputs[1], numSamples);
-						}
-						catch(const std::exception &)
-						{
-							// o_O`
-						}
-*/
 						if (!WillProcessReplace())
 						{
 							// We need the output in _pSamples, so we invert the
@@ -1059,10 +1075,6 @@ namespace psycle
 								samplesV[i] = outputs[i];
 								samplesV[j] = tempSamples;
 							}
-							/*
-							memcpy(inputs[0],outputs[0],numSamples*sizeof(float));
-							memcpy(inputs[1],outputs[1],numSamples*sizeof(float));
-							*/
 						}
 						UpdateVuAndStanbyFlag(numSamples);
 					}
@@ -1076,8 +1088,6 @@ namespace psycle
 			///////////////////////////////////////////////
 			bool plugin::PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance)
 			{
-				char junkdata[256];
-				std::memset(&junkdata, 0, sizeof(junkdata));
 				Machine::Init();
 
 				pFile->Read(&_editName, 16);	//Remove when changing the fileformat.
@@ -1105,35 +1115,7 @@ namespace psycle
 
 				pFile->Read(&_panning, sizeof(_panning));
 				Machine::SetPan(_panning);
-				pFile->Read(&junkdata[0], 8*sizeof(int)); // SubTrack[]
-				pFile->Read(&junkdata[0], sizeof(int)); // numSubtracks
-				pFile->Read(&junkdata[0], sizeof(int)); // interpol
-
-				pFile->Read(&junkdata[0], sizeof(int)); // outwet
-				pFile->Read(&junkdata[0], sizeof(int)); // outdry
-
-				pFile->Read(&junkdata[0], sizeof(int)); // distPosThreshold
-				pFile->Read(&junkdata[0], sizeof(int)); // distPosClamp
-				pFile->Read(&junkdata[0], sizeof(int)); // distNegThreshold
-				pFile->Read(&junkdata[0], sizeof(int)); // distNegClamp
-
-				pFile->Read(&junkdata[0], sizeof(char)); // sinespeed
-				pFile->Read(&junkdata[0], sizeof(char)); // sineglide
-				pFile->Read(&junkdata[0], sizeof(char)); // sinevolume
-				pFile->Read(&junkdata[0], sizeof(char)); // sinelfospeed
-				pFile->Read(&junkdata[0], sizeof(char)); // sinelfoamp
-
-				pFile->Read(&junkdata[0], sizeof(int)); // delayTimeL
-				pFile->Read(&junkdata[0], sizeof(int)); // delayTimeR
-				pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackL
-				pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackR
-
-				pFile->Read(&junkdata[0], sizeof(int)); // filterCutoff
-				pFile->Read(&junkdata[0], sizeof(int)); // filterResonance
-				pFile->Read(&junkdata[0], sizeof(int)); // filterLfospeed
-				pFile->Read(&junkdata[0], sizeof(int)); // filterLfoamp
-				pFile->Read(&junkdata[0], sizeof(int)); // filterLfophase
-				pFile->Read(&junkdata[0], sizeof(int)); // filterMode
+				pFile->Skip(109);
 
 				bool old;
 				pFile->Read(&old, sizeof old); // old format

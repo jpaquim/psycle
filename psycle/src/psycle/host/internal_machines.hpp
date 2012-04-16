@@ -327,14 +327,19 @@ public:
 	virtual void recursive_process(unsigned int frames, bool measure_cpu_usage);
 	///\name used by the multi-threaded scheduler
 	///\{
-		protected:
 			/// tells the scheduler which machines to process before this one
 			/*override*/ void sched_inputs(sched_deps&) const;
 			/// tells the scheduler which machines may be processed after this one
 			/*override*/ void sched_outputs(sched_deps&) const;
 			/// called by the scheduler to ask for the actual processing of the machine
 			/*override*/ bool sched_process(unsigned int frames, bool measure_cpu_usage);
+			void inline InitialWorkState() {
+				mixed=true;
+				sched_returns_processed_curr=0;
+				sched_returns_processed_prev=0;
+			}
 	///\}
+	protected:
 	void FxSend(int numSamples, bool recurse, bool measure_cpu_usage);
 	void MixInToSend(int inIdx,int outIdx, int numSamples);
 	void MixReturnToSend(int inIdx,int outIdx, int numSamples, float wirevol);

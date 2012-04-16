@@ -97,7 +97,9 @@ VkeysT CEffectWnd::VKeys[] =
 bool CEffectGui::GetViewSize(ERect &rcClient, ERect *pRect)
 {
 	if (!pRect) {
-		if (!pEffect->EditGetRect(&pRect) || !pRect)
+		//The return of this method is not reliable (example: oatmeal). That's why i just check the rect.
+		pEffect->EditGetRect(&pRect);
+		if (!pRect)
 			return false;
 	}
 

@@ -366,7 +366,7 @@ namespace psycle
 			///\name (de)serialization
 			///\{
 				public:
-					virtual bool Load(RiffFile * pFile);
+					virtual bool Load(RiffFile * pFile); //old fileformat
 					static Machine * LoadFileChunk(RiffFile* pFile, int index, int version,bool fullopen=true);
 					virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 					virtual bool LoadWireMapping(RiffFile* pFile, int version);
@@ -639,7 +639,7 @@ namespace psycle
 			virtual void UpdateVuAndStanbyFlag(int numSamples);
 			virtual float GetAudioRange() const { return 32768.0f; }
 			virtual char* GetName(void) { return _psName; }
-			virtual bool Load(RiffFile * pFile);
+			virtual bool Load(RiffFile * pFile); //old fileformat
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);
 

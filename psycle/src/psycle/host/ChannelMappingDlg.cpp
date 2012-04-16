@@ -77,7 +77,8 @@ namespace psycle { namespace host {
 
 			const Machine & dstMac = m_wire.GetDstMachine();
 			const Machine & srcMac = m_wire.GetSrcMachine();
-			int srcpins=std::min(srcMac.GetNumOutputPins(),16);
+			//This is done only to prevent a window too big.
+			int srcpins=std::min(srcMac.GetNumOutputPins(),24);
 			int dstpins=std::min(dstMac.GetNumInputPins(),16);
 			//
 			// Add names.
@@ -153,7 +154,8 @@ namespace psycle { namespace host {
 			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 			const Machine & dstMac = m_wire.GetDstMachine();
 			const Machine & srcMac = m_wire.GetSrcMachine();
-			int srcpins=std::min(srcMac.GetNumOutputPins(),16);
+			//This is done only to prevent a window too big.
+			int srcpins=std::min(srcMac.GetNumOutputPins(),24);
 			int dstpins=std::min(dstMac.GetNumInputPins(),16);
 
 			m_wire.SetBestMapping();
@@ -176,8 +178,8 @@ namespace psycle { namespace host {
 
 		void CChannelMappingDlg::OnCheckChanMap(UINT index) 
 		{
-			int i = index-IDC_CHK_CHANMAP_0;
-			buttons[i]->SetCheck(!buttons[i]->GetCheck());
+			//int i = index-IDC_CHK_CHANMAP_0;
+			//buttons[i]->DoSomething();
 		}
 
 		INT_PTR CChannelMappingDlg::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
@@ -206,6 +208,7 @@ namespace psycle { namespace host {
 			TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
 			const Machine & dstMac = m_wire.GetDstMachine();
 			const Machine & srcMac = m_wire.GetSrcMachine();
+			//This is done only to prevent a window too big.
 			UINT dstpins = std::min(dstMac.GetNumInputPins(),16);
 			UINT srcpos= pNMHDR->idFrom/dstpins;
 			UINT dstpos= pNMHDR->idFrom%dstpins;
@@ -233,7 +236,8 @@ namespace psycle { namespace host {
 		{
 			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 			Wire::Mapping mapping;
-			int srcpins = std::min(m_wire.GetSrcMachine().GetNumOutputPins(),16);
+			//This is done only to prevent a window too big.
+			int srcpins = std::min(m_wire.GetSrcMachine().GetNumOutputPins(),24);
 			int dstpins = std::min(m_wire.GetDstMachine().GetNumInputPins(),16);
 			int count=0;
 			for (int s=0;s< srcpins; s++) {
@@ -276,9 +280,10 @@ namespace psycle { namespace host {
 			const Wire::Mapping &mapping = m_wire.GetMapping();
 			for (int i(0);i<mapping.size();i++) {
 				const Wire::PinConnection & con = mapping[i];
-				assert(con.first < srcpins);
-				assert(con.second < dstpins);
-				checked[con.first][con.second] = true;
+				//This is done only to prevent a window too big.
+				if (con.first < srcpins && con.second < dstpins) {
+					checked[con.first][con.second] = true;
+				}
 			}
 		}
 		void CChannelMappingDlg::AddButton(int yRel, int xRel, int amountx, bool checked, CFont &font, std::string text)
@@ -295,7 +300,7 @@ namespace psycle { namespace host {
 			else {
 				CRect rect(x,y,x+38,y+8);
 				MapDialogRect(&rect);
-				m_button->Create(_T(""),WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_CHECKBOX|BS_LEFTTEXT,
+				m_button->Create(_T(""),WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON|BS_CHECKBOX|BS_LEFTTEXT,
 					rect,this,IDC_CHK_CHANMAP_0+((yRel*amountx)+xRel));
 			}
 			m_button->SetFont(&font,false);

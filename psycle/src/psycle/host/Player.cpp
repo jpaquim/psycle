@@ -7,6 +7,9 @@
 #include "Machine.hpp"
 #include "Configuration.hpp"
 
+//For the patch in compute_plan()
+#include "internal_machines.hpp"
+
 #if !defined WINAMP_PLUGIN
 	#include "MidiInput.hpp"
 	#include "InputHandler.hpp"
@@ -259,6 +262,9 @@ void Player::compute_plan() {
 	for(int m(0); m < MAX_MACHINES; ++m) if(song._pMachine[m]) {
 		++graph_size_;
 		Machine & n(*song._pMachine[m]);
+		if(n._type == MACH_MIXER) {
+			reinterpret_cast<Mixer*>(&n)->InitialWorkState();
+		}
 		// find the terminal nodes in the graph (nodes with no connected input ports)
 		input_nodes_.clear(); n.sched_inputs(input_nodes_);
 		if(input_nodes_.empty()) terminal_nodes_.push_back(&n);

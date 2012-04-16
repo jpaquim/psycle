@@ -83,7 +83,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
-		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0)
 		{
 			//Use OnCreate.
 		}
@@ -197,6 +197,20 @@ namespace psycle { namespace host {
 			if ( nIDEvent == ID_TIMER_PARAM_REFRESH )
 			{
 				pView->WindowIdle();
+				if (--refreshcounter <= 0) {
+					int tmp = _machine->GetCurrentProgram();
+					if (lastprogram != tmp) {
+						if(lastnumprogrs != _machine->GetNumPrograms()) {
+							lastnumprogrs = _machine->GetNumPrograms();
+							FillProgramCombobox();
+						}
+						else {
+							ChangeProgram(tmp);	
+						}
+						
+					}
+					refreshcounter=30;
+				}
 			}
 			CFrameWnd::OnTimer(nIDEvent);
 		}
@@ -498,7 +512,7 @@ namespace psycle { namespace host {
 				i = userSelected;
 			}
 			else {
-				i = _machine->GetCurrentProgram();
+				i = lastprogram;
 			}
 			ChangeProgram(i-1);
 			UpdateWindow();
@@ -512,7 +526,7 @@ namespace psycle { namespace host {
 				i = userSelected;
 			}
 			else {
-				i = _machine->GetCurrentProgram();
+				i = lastprogram;
 			}
 			if ( i == 0)
 			{
@@ -529,7 +543,7 @@ namespace psycle { namespace host {
 				i = userSelected;
 			}
 			else {
-				i = _machine->GetCurrentProgram();
+				i = lastprogram;
 			}
 			ChangeProgram(i+1);
 			UpdateWindow();
@@ -546,8 +560,8 @@ namespace psycle { namespace host {
 				nump = userPresets.size();
 			}
 			else {
-				i = _machine->GetCurrentProgram();
-				nump =  _machine->GetNumPrograms();
+				i = lastprogram;
+				nump = lastnumprogrs;
 			}
 
 			if ( i+1 == nump || nump==0)
@@ -685,7 +699,7 @@ namespace psycle { namespace host {
 					popup.AppendMenu(MF_STRING, ID_SELECTBANK_0 + j, s1);
 				}
 				char szSub[256] = "";;
-				std::sprintf(szSub,"Programs %d-%d",i,i+15);
+				std::sprintf(szSub,"Banks %d-%d",i,i+15);
 				popBnk->AppendMenu(MF_POPUP | MF_STRING,
 					(UINT)popup.Detach(),
 					szSub);
@@ -853,6 +867,8 @@ namespace psycle { namespace host {
 
 			if ( i > nump || i < 0) {  i = 0; }
 			comboProgram.SetCurSel(i);
+			lastprogram = i;
+			lastnumprogrs = nump;
 			if (pParamGui){
 				pParamGui->InitializePrograms();
 			}
@@ -899,6 +915,7 @@ namespace psycle { namespace host {
 				_machine->SetCurrentProgram(numProgram);
 			}
 			comboProgram.SetCurSel(numProgram);
+			lastprogram = numProgram;
 			if (pParamGui){
 				pParamGui->SelectProgram(numProgram);
 			}

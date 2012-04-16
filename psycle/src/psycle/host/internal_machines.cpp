@@ -619,15 +619,13 @@ namespace psycle
 			_mode = MACHMODE_FX;
 			strncpy(_editName, _psName, sizeof(_editName)-1);
 			_editName[sizeof(_editName)-1]='\0';
-			mixed=true;
-			sched_returns_processed_curr=0;
-			sched_returns_processed_prev=0;
 			InitializeSamplesVector();
 			inputs_.reserve(MAX_CONNECTIONS);
 			sends_.reserve(MAX_CONNECTIONS);
 			//This reserve is especially important, since it contains the
 			//addresses of Wire, which are referenced by from outWires.
 			returns_.reserve(MAX_CONNECTIONS);
+			InitialWorkState();
 		}
 
 		Mixer::~Mixer() throw()
@@ -761,7 +759,9 @@ namespace psycle
 								accumulate_processing_time(t1 - t0);
 							}
 							Machine& pRetMachine = Return(i).GetWire().GetSrcMachine();
+							recursive_is_processing_=true;
 							pRetMachine.recursive_process(numSamples, measure_cpu_usage);
+							recursive_is_processing_=false;
 							/// pInMachines are verified in Machine::WorkNoMix, so we only check the returns.
 							if(!pRetMachine.Standby())Standby(false);
 						}
@@ -922,8 +922,7 @@ namespace psycle
 					math::erase_all_nans_infinities_and_denormals(samplesV[i], frames);
 				}
 				UpdateVuAndStanbyFlag(frames);
-				mixed = true;
-				sched_returns_processed_curr=0;
+				InitialWorkState();
 				++processing_count_;
 			}
 			if (measure_cpu_usage) { 
@@ -1953,7 +1952,7 @@ namespace psycle
 				pFile->Read(&leg2._inputMachine,sizeof(leg2._inputMachine));	// Outgoing (Send) connections Machine number
 				pFile->Read(&leg2._inputConVol,sizeof(leg2._inputConVol));	//volume value for the current send wire. Range 0.0..1.0. (As opposed to the standard wires)
 				pFile->Read(&leg2._wireMultiplier,sizeof(leg2._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
-				if (leg._inputConVol < 0.0002f) { //bugfix on 1.10.1 alpha
+				if (leg._inputConVol > 0.f && leg._inputConVol < 0.0002f) { //bugfix on 1.10.1 alpha
 					leg._inputConVol *= 32768.f;
 				}
 				

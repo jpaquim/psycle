@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
+1.10.1  | 2012 | release                     | [JAZ] & bohan
 1.10.0  | 2011 | release					 | [JAZ] & bohan.
 1.8.8   | 2010 | beta, RC					 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
@@ -43,6 +44,38 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.10.1 
+--------
++ New release of Winamp plugin with support for winamp localization languages, 24 and 32bit integer output, saves configuration in winamp instead of registry and all the features of Psycle 1.10.
++ Number of audio threads configurable in the settings dialog. Value of 0 detects it automatically.
++ Added back the option to save .wav file in the same directory than .psy file
++ New note duplicator machine that allows keyboard splitting.
++ Implementation of Multi-io audio. Support for multi-pin VST machines. (Find the option in the wire dialog)
++ pitch wheel for sequenced midi mode (it was already possible in immediate mode).
++ Added save to HKLM registry (all users) and All users directory. Allow configuring relative directories (easier usage from USB drive. Warning: saving settings in .ini files is slow. Need to make a new implementation).
++ Added option to delete the other settings files/registry when selecting one in the settings dialog.
+* Better song duration calculation. Also improved seeking in winamp plugin.
+* Changes to better catch unhandled exceptions.
+* Changes in new machine dialog for better usage in smaller screens. Also option to recreate cache in the configuration menu.
+* Internal source code changes to have multiple "Global" classes and separation of plugin cache classes (This eases the development of the winamp plugin).
+* Change in mouse tweaking, now reaching the end and moving back is easier.
+! Fixes in the configuration of vst bit bridging.
+! Add new track in pattern now shifts the names correctly.
+! Fixed crash in Mixer machine when tweaking a non-valid send.
+! Special keys dialog in the configuration was not working.
+! Fixed increased CPU usage in machine view.
+! Fixed creation of a new sampler machine each time load, edit or wave edit buttons where pushed
+! Fixed saving .fxb and .fxp using the "Save Preset" for VSTs.
+! Fix for CPU clock calculation on P4 and similar. This affected especially the MIDI synchronization code.
+! Fix crash after opening and closing a vst machine and receiving an Automation (f.ex: with FreeAmp 2.5)
+! Fix in loading and saving of skins.
+! Fix on plucked string where two instances caused wrong sound.
+! Fix where settings could be loaded from one place, and saved to a different one.
+! Fix in sking (theme) loading and saving.
+! Fix in the plugin cache (now keeps the lettercase of the plugin dll). This fixes FabFilter plugins.
+! Compatibility improvements for older songs made with arguru synth/bass plugins.
+! Other smaller fixes and changes.
+
 v1.10.0 (1.8.8 was renamed 1.10 before release)
 --------
 + New default option to show note A4 in patterns as standard A4 (440Hz). Unchecking it keeps the old A5 = 440Hz.
@@ -50,14 +83,14 @@ v1.10.0 (1.8.8 was renamed 1.10 before release)
 + add a machine before or after another machine. Also option to add a machine in the middle of an existing wire.
 + deleting an effect with connected wires can keep neighbours connected now.
 + Playback cursor position in wave editor.
-+ Blue led on track header used to indicate track is playing. (Beware: It detects only if the machine produces audio, except for the sampler that is accurate).
++ Blue led on track header used to indicate track is playing. (Beware: It detects only if the machine produces audio, it is only accurate with the sampler machine).
 * Application is a bit more DPI aware now. (Just behaving a bit better at 125% increase. It probably will never be fully DPI aware).
 * Scrolling in pattern view made slower.
 * Vumeter in main view made RMS. Stereo vu in Master window.
 * Dropped option of graphics double buffering. Now always enabled.
 ! Rewiring of mixer sends/returns would not work sometimes.
 ! Prevent crash on savewav dialog if path does not exist
-! RC1 bugfixes (recent menu was not keeping the correct entries. Feature of saving pattern track names was not reading them back, Mixer can be muted and bypassed again, Render wav adding looped audio at the end, undo in pattern crashing Psycle, MIDI driver not getting selected, problem loading skins and more).
+! RC1 bugfixes (recent menu was not keeping the correct entries. Feature of saving pattern track names was not reading them back, Mixer can be muted and bypassed again, Render wav added looped audio at the end, undo in pattern crashing Psycle, MIDI driver not getting selected, problem loading skins and more).
 
 v1.8.8 RC1
 ------------

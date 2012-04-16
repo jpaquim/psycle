@@ -83,7 +83,7 @@ private:
 	inline void ArpTick(void);
 	inline void FilterTick(void);
 
-	static const signed char ArpNote[9][16];
+	static const signed char ArpNote[16][16];
 	filter m_filter;
 	SYNPAR *syntp;
 	//Ok, the explanation of all these:
@@ -144,7 +144,9 @@ private:
 	float OSCvib;
 
 	// Arpeggiator
+public:
 	int ArpMode;
+protected:
 	int Arp_tickcounter;
 	int Arp_samplespertick;
 	float Arp_basenote;

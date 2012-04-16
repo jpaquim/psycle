@@ -994,7 +994,7 @@ XMSampler::Channel::PerformFX().
 	virtual const char* AuxColumnName(int idx) const { return rInstrument(idx).Name().c_str(); }
 	virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENT;}
 
-	virtual bool Load(RiffFile* riffFile);
+	virtual bool Load(RiffFile* riffFile); // Old fileformat
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
 	virtual void SaveSpecificChunk(RiffFile* riffFile);
 
