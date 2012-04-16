@@ -88,7 +88,7 @@
 
 	You have different ways to know the parameter number of one plugin.
 
-	* The easiest one is selecting "Params" in the "MIDI/Params/Waves", combobox.
+	* The easiest one is selecting "Params" in the "Params/Instrum", combobox.
 	  This way, the next combobox will be updated with the parameter list of the current
 	  selected machine.
 	  The selected number will automatically be added to the pattern when doing twk.
@@ -101,9 +101,10 @@
 	  of the parameter.
 	  Also, in this dialog, now you have a complete "twk" line that shows you the value
 	  that you'd use to set this parameter to the current value.
+	  There's also the parameters View, like with VSTs.
 
 	* With VST plugins:
-	  Opening the parameters' window, you have the option to show the parameters list
+	  Opening the parameters' View, you have the option to show the parameters list
 	  via the "View" Menu. This will popup a window with a list of the parameters 
 	  numbered in HEX. This is the number you need.
 
@@ -131,8 +132,8 @@
 	  Use the same procedure than with Native plugins.
 
 
-- Mcm Command. Use MIDI CC's to control VST Plugins
------------------------------------------------
+- Mcm Command 1. Send MIDI commands (like Control commands) to control Plugins (80 to FF)
+--------------------------------------------------------------------------
 
 	The Mcm command works in a similar way than the Twk Command:
 
@@ -167,10 +168,10 @@
 				40 to 40 (in a scale of 0 to 7F, HEX)
 				
 
-- Mcm Command with Native plugins. Send a command to a desired channel.
+- Mcm Command 2. Send a command to a desired track. (00 to 7F)
 -------------------------------------------------------------------
 
-	The Mcm command can also be used for another purpose with Native plugins.
+	The Mcm command can also be used for another purpose with both, Native and VST plugins.
 	It allows to send a command to another channel. This way, you can workaround
 	the limitation where you can only put one of them per channel.
 	

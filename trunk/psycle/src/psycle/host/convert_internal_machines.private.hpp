@@ -18,37 +18,61 @@ namespace psycle
 				enum Type
 				{
 					master,
-					ring_modulator, distortion, sampler, delay, filter_2_poles, gainer, flanger,
-					plugin,
+					ring_modulator, distortion, 
+					sampler, 
+					delay, filter_2_poles, gainer, flanger,
+					nativeplug,
 					vsti, vstfx,
 					scope,
 					dummy = 255
 				};
+				//converted
+				static const char* convnames[];
+				static const char asynth2f[];
+
+				//To convert
+				static std::string abass;
+				static std::string asynth;
+				static std::string asynth2;
+				static std::string asynth21;
+				static std::string asynth22;
 
 				virtual ~Converter() throw()
 				{
-					for(std::map<Machine * const, const int *>::const_iterator i = machine_converted_from.begin() ; i != machine_converted_from.end() ; ++i) delete const_cast<int *>(i->second);
+
 				}
 
-				Machine & redirect(const int & index, const int & type, RiffFile & riff) throw(std::exception)
+				Machine & redirect(const int & index, const std::pair<int,std::string> & type, RiffFile & riff) throw(std::exception)
 				{
 					Plugin & plugin = * new Plugin(index);
 					Machine * pointer_to_machine = &plugin;
 					try
 					{
-						std::string name = (plugin_names()(type)  + ".dll").c_str();
+						std::string name = plugin_names()(type);
 
 						bool bDeleted=false;
 						if(!plugin.LoadDll(name))
 						{
 							pointer_to_machine = 0; // for delete pointer_to_machine in the catch clause
-							delete & plugin;
-							pointer_to_machine = new Dummy(index);
-							((Dummy*)pointer_to_machine)->dllName=name;
-							bDeleted=true;
+							if (type.first == nativeplug)
+							{
+								plugin.SkipLoad(&riff);
+								pointer_to_machine = new Dummy(&plugin);
+								((Dummy*)pointer_to_machine)->dllName=name;
+								pointer_to_machine->_macIndex=index;
+								pointer_to_machine->Init();
+								delete & plugin;
+								return *pointer_to_machine;
+							}
+							else {
+								delete & plugin;
+								pointer_to_machine = new Dummy(index);
+								((Dummy*)pointer_to_machine)->dllName=name;
+								bDeleted=true;
+							}
 						}
 						Machine & machine = *pointer_to_machine;
-						machine_converted_from[&machine] = new int(type);
+						machine_converted_from[&machine] = type;
 						machine.Init();
 						assert(sizeof(int) == 4);
 						riff.Read(machine._editName, 16); /* sizeof machine._editName); */ machine._editName[16] = 0;
@@ -56,6 +80,10 @@ namespace psycle
 							std::stringstream s;
 							s << "X!" << machine.GetEditName();
 							machine.SetEditName(s.str());
+						}
+						if (type.first == nativeplug)
+						{
+							ReadPlugin(type,machine,riff);
 						}
 						machine.legacyWires.resize(MAX_CONNECTIONS);
 						for(int i = 0; i < MAX_CONNECTIONS; i++) {
@@ -80,9 +108,12 @@ namespace psycle
 						int panning;
 						riff.Read(&panning, sizeof(int));
 						machine.SetPan(panning);
-						riff.Skip(40); // skips shiatz
+						//
+						// See details of the following at the end of this file (or in the fileformat doc)
+						//
+						riff.Skip(40); // skips sampler data.
 
-						switch(type)
+						switch(type.first)
 						{
 						case delay:
 							{
@@ -100,13 +131,13 @@ namespace psycle
 							riff.Skip(sizeof(int));
 							{
 								int parameters [1]; riff.Read(parameters, sizeof parameters);
-								if(type == gainer) retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
+								retweak(machine, type, parameters, sizeof parameters / sizeof *parameters);
 							}
 							break;
 						default:
 							riff.Skip(2 * sizeof(int));
 						}
-						switch(type)
+						switch(type.first)
 						{
 						case distortion:
 							int parameters [4]; riff.Read(parameters, sizeof parameters);
@@ -115,7 +146,7 @@ namespace psycle
 						default:
 							riff.Skip(4 * sizeof(int));
 						}
-						switch(type)
+						switch(type.first)
 						{
 						case ring_modulator:
 							{
@@ -201,16 +232,27 @@ namespace psycle
 								}
 								if(event._note == notecommands::tweak)
 								{
-									std::map<Machine * const, const int *>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
+									std::map<Machine * const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 									if(i != machine_converted_from.end())
 									{
-										//Machine & machine(*i->first);
-										const int & type(*i->second);
 										int parameter(event._inst);
 										int value((event._cmd << 8) + event._parameter);
-										retweak(type, parameter, value);
+										retweak(i->second, parameter, value);
 										event._inst = parameter;
 										event._cmd = value >> 8; event._parameter = 0xff & value;
+									}
+								}
+								else if (event._cmd == 0x0E) {
+									std::map<Machine * const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
+									if(i != machine_converted_from.end())
+									{
+										if (i->second.second==asynth22) {
+											int param(25);
+											int value(event._parameter);
+											retweak(i->second,param,value);
+											event._cmd = 0x0F;
+											event._parameter = value;
+										}
 									}
 								}
 							}
@@ -219,36 +261,55 @@ namespace psycle
 				}
 
 			private:
-				class Plugin_Names : private std::map<const int, const std::string *>
+				class Plugin_Names : private std::map<std::pair<int, std::string>, const char *>
 				{
 				public:
 					Plugin_Names()
 					{
-						(*this)[ring_modulator] = new std::string("ring_modulator");
-						(*this)[distortion] = new std::string("distortion");
-						(*this)[delay] = new std::string("delay");
-						(*this)[filter_2_poles] = new std::string("filter_2_poles");
-						(*this)[gainer] = new std::string("gainer");
-						(*this)[flanger] = new std::string("flanger");
+						(*this)[std::pair<int, std::string>(ring_modulator,"")] = convnames[ring_modulator];
+						(*this)[std::pair<int, std::string>(distortion,"")] = convnames[distortion];
+						(*this)[std::pair<int, std::string>(delay,"")] = convnames[delay];
+						(*this)[std::pair<int, std::string>(filter_2_poles,"")] = convnames[filter_2_poles];
+						(*this)[std::pair<int, std::string>(gainer,"")] = convnames[gainer];
+						(*this)[std::pair<int, std::string>(flanger,"")] = convnames[flanger];
+						(*this)[std::pair<int, std::string>(nativeplug,abass)] = asynth2f;
+						(*this)[std::pair<int, std::string>(nativeplug,asynth)] = asynth2f;
+						(*this)[std::pair<int, std::string>(nativeplug,asynth2)] = asynth2f;
+						(*this)[std::pair<int, std::string>(nativeplug,asynth21)] = asynth2f;
+						(*this)[std::pair<int, std::string>(nativeplug,asynth22)] = asynth2f;
 					}
 					~Plugin_Names()
 					{
-						delete (*this)[ring_modulator];
-						delete (*this)[distortion];
-						delete (*this)[delay];
-						delete (*this)[filter_2_poles];
-						delete (*this)[gainer];
-						delete (*this)[flanger];
 					}
-					const bool exists(const int & type) const throw()
+					bool exists(const std::pair<int,std::string>& type) const throw()
 					{
 						return find(type) != end();
 					}
-					const std::string & operator()(const int & type) const throw(std::exception)
+					bool exists(const int & type) const throw()
+					{
+						return find(std::pair<int,std::string>(type,NULL)) != end();
+					}
+					bool exists(std::string plugname) const throw()
+					{
+						return find(std::pair<int,std::string>(nativeplug,plugname)) != end();
+					}
+					const char* operator()(const std::pair<int,std::string>& type) const throw(std::exception)
 					{
 						const_iterator i = find(type);
 						if(i == end()) throw std::exception("internal machine replacement plugin not declared");
-						return *i->second;
+						return i->second;
+					}
+					const char* operator()(const int & type) const throw(std::exception)
+					{
+						const_iterator i = find(std::pair<int,std::string>(type,NULL));
+						if(i == end()) throw std::exception("internal machine replacement plugin not declared");
+						return i->second;
+					}
+					const char* operator()(std::string plugname) const throw(std::exception)
+					{
+						const_iterator i = find(std::pair<int,std::string>(nativeplug,plugname));
+						if(i == end()) throw std::exception("internal machine replacement plugin not declared");
+						return i->second;
 					}
 				};
 
@@ -260,9 +321,52 @@ namespace psycle
 				}
 
 			private:
-				std::map<Machine * const, const int *> machine_converted_from;
+				std::map<Machine * const, std::pair<int, std::string>> machine_converted_from;
+				void ReadPlugin(const std::pair<int,std::string> type, Machine& machine, RiffFile& riff)
+				{
+					int numParameters;
+					riff.Read(&numParameters, sizeof(numParameters));
+					int *Vals = new int[numParameters];
+					riff.Read(Vals, numParameters*sizeof(int));
 
-				template<typename Parameter> void retweak(Machine & machine, const int & type, Parameter parameters [], const int & parameter_count, const int & parameter_offset = 1)
+					if(machine._type == MACH_DUMMY) {
+						//do nothing.
+					}
+					else if(type.second==abass) {
+						retweak(machine,type,Vals,15,0);
+						machine.SetParameter(19,0);
+						retweak(machine,type,Vals+15,1,15);
+						if (numParameters>16) {
+							retweak(machine,type,Vals+16,2,16);
+						}
+						else {
+							machine.SetParameter(24,0);
+							machine.SetParameter(25,0);
+						}
+					}
+					else if(type.second==asynth) {
+						retweak(machine,type,Vals,numParameters,0);
+						machine.SetParameter(24,0);
+						machine.SetParameter(25,0);
+						machine.SetParameter(27,1);
+					}
+					else if(type.second==asynth2) {
+						retweak(machine,type,Vals,numParameters,0);
+						machine.SetParameter(24,0);
+						machine.SetParameter(25,0);
+					}
+					else if(type.second==asynth21) {
+						//I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs)
+						retweak(machine,type,Vals,numParameters,0);
+						machine.SetParameter(24,0);
+						machine.SetParameter(25,0);
+					}
+					else if(type.second==asynth22) {
+						retweak(machine,type,Vals,numParameters,0);
+					}
+					delete[] Vals;
+				}
+				template<typename Parameter> void retweak(Machine & machine, const std::pair<int, std::string> & type, Parameter parameters [], const int & parameter_count, const int & parameter_offset = 1)
 				{
 					for(int parameter(0) ; parameter < parameter_count ; ++parameter)
 					{
@@ -273,12 +377,12 @@ namespace psycle
 					}
 				}
 
-				void retweak(const int & type, int & parameter, int & integral_value) const
+				void retweak(const std::pair<int, std::string> & type, int & parameter, int & integral_value) const
 				{
 					typedef double Real;
 					Real value(integral_value);
 					const Real maximum(0xffff);
-					switch(type)
+					switch(type.first)
 					{
 					case gainer:
 						{
@@ -413,10 +517,109 @@ namespace psycle
 							}
 						}
 						break;
+					case nativeplug:
+						{
+							if(type.second == abass) {
+								if(parameter > 0 && parameter < 15)  {
+									parameter+=4;
+								}
+								else if (parameter == 15 ) {
+									parameter+=5;
+								}
+								else if (parameter > 15) {
+									parameter+=8;
+								}
+							}
+							else if(type.second == asynth) {
+								if((parameter == 0 ||parameter == 1)&& integral_value == 4) {
+									value = 5;
+								}
+								if(parameter==17) {
+									value+=10.f;
+								}
+							}
+							else if(type.second == asynth2) {
+								if((parameter == 0 ||parameter == 1)&& integral_value == 4) {
+									value = 5;
+								}
+							}
+							else if(type.second == asynth21) {
+								if((parameter == 0 ||parameter == 1)&& integral_value == 4) {
+									value = 5;
+								}
+							}
+							else if(type.second == asynth22) {
+								if((parameter == 0 ||parameter == 1)&& integral_value == 4) {
+									value = 5;
+								}
+								if (parameter==7 && integral_value == 0) {
+									value = 1.f;
+								}
+								else if (parameter==25) {
+									value = 256 - sqrtf(16000.f - value*16000.f/127.f);
+									parameter+=1;
+								}
+								else if (parameter==26) {
+									parameter-=1;
+								}
+							}
+						}
+						break;
 					}
 					integral_value = std::floor(value + Real(0.5));
 				}
 			};
+			const char* Converter::convnames[] =
+			{
+				"",
+				"ring_modulator.dll",
+				"distortion.dll",
+				"",
+				"delay.dll",
+				"filter_2_poles.dll",
+				"gainer.dll",
+				"flanger.dll"
+			};
+			const char Converter::asynth2f[] = "arguru synth 2f.dll";
+
+			//To convert
+			std::string Converter::abass = "arguru bass.dll";
+			std::string Converter::asynth = "arguru synth.dll";
+			std::string Converter::asynth2 = "arguru synth 2.dll";
+			std::string Converter::asynth21 = "synth21.dll";
+			std::string Converter::asynth22 = "synth22.dll";
 		}
 	}
 }
+/*
+	pFile->Read(&junkdata[0], 8*sizeof(int)); // SubTrack[]
+	pFile->Read(&junkdata[0], sizeof(int)); // numSubtracks
+	pFile->Read(&junkdata[0], sizeof(int)); // interpol
+
+	pFile->Read(&junkdata[0], sizeof(int)); // outwet
+	pFile->Read(&junkdata[0], sizeof(int)); // outdry
+
+	pFile->Read(&junkdata[0], sizeof(int)); // distPosThreshold
+	pFile->Read(&junkdata[0], sizeof(int)); // distPosClamp
+	pFile->Read(&junkdata[0], sizeof(int)); // distNegThreshold
+	pFile->Read(&junkdata[0], sizeof(int)); // distNegClamp
+
+	pFile->Read(&junkdata[0], sizeof(char)); // sinespeed
+	pFile->Read(&junkdata[0], sizeof(char)); // sineglide
+	pFile->Read(&junkdata[0], sizeof(char)); // sinevolume
+	pFile->Read(&junkdata[0], sizeof(char)); // sinelfospeed
+	pFile->Read(&junkdata[0], sizeof(char)); // sinelfoamp
+
+	pFile->Read(&junkdata[0], sizeof(int)); // delayTimeL
+	pFile->Read(&junkdata[0], sizeof(int)); // delayTimeR
+	pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackL
+	pFile->Read(&junkdata[0], sizeof(int)); // delayFeedbackR
+
+	pFile->Read(&junkdata[0], sizeof(int)); // filterCutoff
+	pFile->Read(&junkdata[0], sizeof(int)); // filterResonance
+	pFile->Read(&junkdata[0], sizeof(int)); // filterLfospeed
+	pFile->Read(&junkdata[0], sizeof(int)); // filterLfoamp
+	pFile->Read(&junkdata[0], sizeof(int)); // filterLfophase
+	pFile->Read(&junkdata[0], sizeof(int)); // filterMode
+
+*/

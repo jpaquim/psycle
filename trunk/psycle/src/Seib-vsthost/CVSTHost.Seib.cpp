@@ -133,10 +133,14 @@ namespace seib {
 			const char* canDoSendVstTimeInfo = "sendVstTimeInfo"; ///< Host supports send of VstTimeInfo to plug-in
 			const char* canDoReceiveVstEvents = "receiveVstEvents"; ///< Host can receive Vst events from plug-in
 			const char* canDoReceiveVstMidiEvent = "receiveVstMidiEvent"; ///< Host can receive MIDI events from plug-in 
+			const char* DECLARE_VST_DEPRECATED(canDoReceiveVstTimeInfo) = "receiveVstTimeInfo"; //Deprecated in 2.4
 			const char* canDoReportConnectionChanges = "reportConnectionChanges"; ///< Host will indicates the plug-in when something change in plug-in´s routing/connections with #suspend/#resume/#setSpeakerArrangement 
 			const char* canDoAcceptIOChanges = "acceptIOChanges"; ///< Host supports #ioChanged ()
 			const char* canDoSizeWindow = "sizeWindow"; ///< used by VSTGUI
+			const char* DECLARE_VST_DEPRECATED(canDoAsyncProcessing) = "asyncProcessing"; //Deprecated in 2.4
 			const char* canDoOffline = "offline"; ///< Host supports offline feature
+			const char* DECLARE_VST_DEPRECATED(canDoSupplyIdle) = "supplyIdle"; //Deprecated in 2.4
+			const char* DECLARE_VST_DEPRECATED(canDoSupportShell) = "supportShell"; //Deprecated in 2.4 in favour of shellCategory
 			const char* canDoOpenFileSelector = "openFileSelector"; ///< Host supports function #openFileSelector ()
 			const char* canDoCloseFileSelector = "closeFileSelector"; ///< Host supports function #closeFileSelector ()
 			const char* canDoStartStopProcess = "startStopProcess"; ///< Host supports functions #startProcess () and #stopProcess ()
@@ -156,6 +160,7 @@ namespace seib {
 			const char* canDoOffline = "offline"; ///< plug-in supports offline functions (#offlineNotify, #offlinePrepare, #offlineRun)
 			const char* canDoMidiProgramNames = "midiProgramNames"; ///< plug-in supports function #getMidiProgramName ()
 			const char* canDoBypass = "bypass"; ///< plug-in supports function #setBypass ()
+			//There are many deprecated ones. See vst 2.3.
 		}
 
 		CPatchChunkInfo::CPatchChunkInfo(const CFxProgram& fxstore)
@@ -238,6 +243,9 @@ namespace seib {
 			{
 				if  (ploader)	Unload();
 			}
+			catch(const std::runtime_error& e)
+			{
+			}
 			catch(...)
 			{
 			}
@@ -289,7 +297,8 @@ namespace seib {
 				// The correct behaviour is try to check the return value of
 				// SetSpeakerArrangement, and if false, GetSpeakerArrangement
 				// and SetSpeakerArrangement with those values.
-				{
+				if (false) {
+					//TODO: Implement a per-plugin speaker configuration. For now, let the plugins have their default configuration.
 					VstSpeakerArrangement SAi;
 					memset(&SAi,0,sizeof(VstSpeakerArrangement));
 					VstSpeakerArrangement SAo;
@@ -314,33 +323,14 @@ namespace seib {
 						SAo.type = kSpeakerArrEmpty;
 						SAo.numChannels = 0;
 					}
-					/*
-					This makes jme CR-777 crash on SetSpeakerArrangement (Synthedit based)
 					if (GetVstVersion() >= 2300 && !SetSpeakerArrangement(&SAi,&SAo)) {
+						//This makes jme CR-777 crash on SetSpeakerArrangement (Synthedit based)
 						VstSpeakerArrangement* SAip = 0;
 						VstSpeakerArrangement* SAop = 0;
 						if (GetSpeakerArrangement(&SAip,&SAop)) {
 							SetSpeakerArrangement(SAip,SAop);
 						}
 					}
-					*/
-
-/*					VstSpeakerArrangement SAi;
-					memset(&SAi,0,sizeof(VstSpeakerArrangement));
-					SAi.type = kSpeakerArr40Music;
-					SAi.numChannels = 4;
-					SAi.speakers[0].type = kSpeakerL;
-					SAi.speakers[1].type = kSpeakerR;
-					SAi.speakers[2].type = kSpeakerLs;
-					SAi.speakers[3].type = kSpeakerRs;
-					VstSpeakerArrangement SAo;
-					memset(&SAo,0,sizeof(VstSpeakerArrangement));
-					SAo.type = kSpeakerArrStereo;
-					SAo.numChannels = 2;
-					SAo.speakers[0].type = kSpeakerL;
-					SAo.speakers[1].type = kSpeakerR;
-					SetSpeakerArrangement(&SAi,&SAo)
-*/
 				}
 				// 6: Host to Plug, setSampleRate ( 44100.000000 ) 
 				SetSampleRate(CVSTHost::pHost->GetSampleRate());
@@ -769,6 +759,47 @@ namespace seib {
 			if (editorWnd) return editorWnd->CloseFileSelector(ptr);
 			else return false;
 		}
+		std::string CEffect::GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, int pin) const {
+			const char* chanName[] = { "Mono","Left", "Right", "Center", "Subbass", "Left Surround", "Right Surround",
+			"Left of Center", "Right of Center", "Surround", "Side Left", "Side Right", "Top Middle",
+			"Top Front Left", "Top Front Center", "Top Front Right", "Top Rear Left", "TopRear Center",
+			"Top Rear Right", "Subbass 2"};
+			const VstSpeakerType arrangement[][8] = {{kSpeakerM},{kSpeakerL,kSpeakerR},{kSpeakerLs,kSpeakerRs},{kSpeakerLc,kSpeakerRc},
+			{kSpeakerSl,kSpeakerSr},{kSpeakerC,kSpeakerLfe},{kSpeakerL,kSpeakerR,kSpeakerC},{kSpeakerL,kSpeakerR,kSpeakerS},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe},
+			{kSpeakerL,kSpeakerR,kSpeakerLfe,kSpeakerS},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerS},
+			{kSpeakerL,kSpeakerR,kSpeakerLs,kSpeakerRs},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerS},
+			{kSpeakerL,kSpeakerR,kSpeakerLfe,kSpeakerLs,kSpeakerRs},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs,kSpeakerCs},
+			{kSpeakerL,kSpeakerR,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerCs},
+			{kSpeakerL,kSpeakerR,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs,kSpeakerLc,kSpeakerRc},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerLc,kSpeakerRc},
+			{kSpeakerL,kSpeakerR,kSpeakerC,kSpeakerLfe,kSpeakerLs,kSpeakerRs,kSpeakerSl,kSpeakerSr},
+			};
+			std::stringstream name;
+			if(pin < arr.numChannels) {
+				if (arr.type >= 0 && arr.type < 24) {
+					name << chanName[arrangement[arr.type][pin]];
+				}
+				else if (arr.speakers[pin].type > 0 && arr.speakers[pin].type < 23) {
+					name << chanName[arr.speakers[pin].type];
+				}
+				else {
+					name << arr.speakers[pin].name;
+				}
+			}
+			else {
+				name << pin;
+			}
+			return name.str();
+		}
 
 		/*===========================================================================*/
 		/* CVSTHost class members                                                    */
@@ -781,7 +812,7 @@ namespace seib {
 		CVSTHost::CVSTHost()
 		{
 			if (pHost)                              /* disallow more than one host!      */
-				throw((int)1);
+				throw std::runtime_error("VST Host already created!");
 
 			lBlockSize = 1024;
 			vstTimeInfo.samplePos = 0.0;
@@ -1135,7 +1166,7 @@ namespace seib {
 		)
 		{
 			if (!pHost)
-				throw (int)1;	// It would have no sense that there is no host.
+				throw std::runtime_error("Missing VST Host instance!");	// It would have no sense that there is no host.
 
 			CEffect *pEffect=0;
 			bool fakeeffect=false;
@@ -1278,13 +1309,19 @@ namespace seib {
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterGetPreviousPlug :
-					result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index));
-					if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetPreviousPlugIn(*pEffect,index)->GetAEffect());
+					{
+						CEffect* effect = pHost->GetPreviousPlugIn(*pEffect,index);
+						if (effect) result = reinterpret_cast<VstIntPtr>(effect->GetAEffect());
+						else result=NULL;
+					}
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterGetNextPlug :
-					result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index));
-					if (result) result = reinterpret_cast<VstIntPtr>(pHost->GetNextPlugIn(*pEffect,index)->GetAEffect());
+					{
+						CEffect* effect = pHost->GetNextPlugIn(*pEffect,index);
+						if (effect) result = reinterpret_cast<VstIntPtr>(effect->GetAEffect());
+						else result=NULL;
+					}
 					if (fakeeffect )delete pEffect;
 					return result;
 				case audioMasterWillReplaceOrAccumulate :

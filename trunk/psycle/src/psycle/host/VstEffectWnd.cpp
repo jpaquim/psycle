@@ -21,7 +21,9 @@ namespace psycle { namespace host {
 		bool CVstGui::GetViewSize(CRect& rect)
 		{
 			ERect* pRect(0);
-			if (!pEffect->EditGetRect(&pRect) || !pRect)
+			//The return of this method is not reliable (example: oatmeal). That's why i just check the rect.
+			pEffect->EditGetRect(&pRect);
+			if (!pRect)
 				return false;
 
 			rect.left = rect.top = 0;
@@ -46,6 +48,15 @@ namespace psycle { namespace host {
 		: CEffectWnd(effect)
 		, CFrameMachine(effect, wndView_, windowVar_)
 		{
+			testWnd.xPos=100;
+			testWnd.yPos=60;
+			testWnd.height=300;
+			testWnd.width=600;
+			strcpy(testWnd.title,"Bla");
+			testWnd.style=0;
+			testWnd.parent=0;
+			testWnd.userHandle=0;
+			testWnd.winHandle=0;
 		}
 		int CVstEffectWnd::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 		{
@@ -347,22 +358,27 @@ namespace psycle { namespace host {
 
 		void * CVstEffectWnd::OpenSecondaryWnd(VstWindow& window)
 		{
-			CFrameWnd *pWnd = new CFrameWnd;
-			if (pWnd)
-			{
-				HWND hWnd = pWnd->GetSafeHwnd();
-				// ignored at the moment: style, position
-				ERect rc = {0};
-				rc.right = window.width;
-				rc.bottom = window.height;
-				pWnd->SetWindowText(window.title);
+			CFrameWnd *pWnd = new CFrameWnd();
+			HWND hWnd = NULL;
+			VstWindow* theWin = (&window)?&window:&testWnd;
+			CRect rect(theWin->xPos,theWin->yPos, theWin->xPos+theWin->width,theWin->yPos+theWin->height);
+			// 0: with title, 1: without title
+			DWORD style = (theWin->style&1) ? WS_OVERLAPPED|WS_THICKFRAME : WS_OVERLAPPEDWINDOW;
+			if (pWnd->Create(NULL, NULL, style, rect, this)) {
+				if(!(style&1)) {
+					pWnd->SetWindowText(theWin->title);
+				}
 				pWnd->ShowWindow(SW_SHOWNORMAL);
-				pWnd->MoveWindow(0,0,window.width,window.height,true);
-				window.winHandle = hWnd;
+				hWnd = pWnd->GetSafeHwnd();
 				secwinlist.push_back(hWnd);
-				return hWnd;
+				theWin->parent = this;
+				theWin->userHandle = pWnd;
+				theWin->winHandle = hWnd;
 			}
-			return 0;
+			else {
+				delete pWnd;
+			}
+			return hWnd;
 		}
 
 		//////////////////////////////////////////////////////////////////////////
@@ -371,12 +387,13 @@ namespace psycle { namespace host {
 
 		bool CVstEffectWnd::CloseSecondaryWnd(VstWindow& window)
 		{
-			if (!::IsWindow((HWND)window.winHandle))
+			VstWindow* theWin = (&window)?&window:&testWnd;
+			if (!::IsWindow((HWND)theWin->winHandle))
 				return false;
 
-			secwinlist.remove((HWND)window.winHandle);
-			::SendMessage((HWND)window.winHandle, WM_CLOSE, 0, 0);
-			window.winHandle = 0;
+			secwinlist.remove((HWND)theWin->winHandle);
+			::SendMessage((HWND)theWin->winHandle, WM_CLOSE, 0, 0);
+			theWin->winHandle = 0;
 			return true;
 		}
 

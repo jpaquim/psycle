@@ -57,6 +57,7 @@ namespace psycle {
 			virtual CBaseParamView* CreateView();
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); }
 			std::list<HWND> secwinlist;
+			VstWindow testWnd;
 
 		// Implementation
 		public:

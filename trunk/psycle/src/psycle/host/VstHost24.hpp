@@ -143,17 +143,6 @@ namespace psycle
 				virtual void Standby(bool e)
 				{
 					Machine::Standby(e);
-					if (aEffect && _mode == MACHMODE_FX)
-					{
-						// some plugins ( psp vintage warmer ) might not like to change the state too
-						// frequently, or might have a delay which makes fast switching unusable.
-						// This is why this is commented out until another solution is found.
-//						if (!bCanBypass) MainsChanged(!e);
-						try
-						{
-							SetBypass(e);
-						}catch(...){}
-					}
 				}
 				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0, unsigned int sampleoffset=0);
 				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0, unsigned int sampleoffset=0,bool slide=false);
@@ -223,8 +212,8 @@ namespace psycle
 				};
 				virtual void GetCurrentProgramName(char* val) {GetProgramName(val);};
 				virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val){
-
-					GetProgramNameIndexed(-1, bnkidx*128 + prgIdx, val);};
+					GetProgramNameIndexed(-1, bnkidx*128 + prgIdx, val);
+				};
 				virtual int GetNumPrograms(){ return numPrograms()<128?numPrograms():128;};
 				virtual int GetTotalPrograms(){ return numPrograms();};
 				virtual void SetCurrentBank(int idx) { SetProgram(idx*128+GetCurrentProgram());};
@@ -236,12 +225,13 @@ namespace psycle
 					else
 						val[0]='\0';
 				};
-				virtual int GetNumBanks(){ return numPrograms()/128;};
+				virtual int GetNumBanks(){ return (numPrograms()/128)+1;};
 				virtual void OnPinChange(Wire & wire, Wire::Mapping const & newMapping)
 				{
 					try
 					{
-						MainsChanged(false);
+						bool state=bMainsState;
+						if(state )MainsChanged(false);
 						if(wire.GetSrcMachine()._macIndex == _macIndex) {
 							OutputMapping(wire.GetMapping(),false);
 							OutputMapping(newMapping,true);
@@ -250,7 +240,7 @@ namespace psycle
 							InputMapping(wire.GetMapping(),false);
 							InputMapping(newMapping,true);
 						}
-						MainsChanged(true);
+						if(state) MainsChanged(true);
 					}catch(...){}
 				}
 				virtual void OnOutputConnected(Wire & wire, int outType, int outWire)
@@ -317,7 +307,6 @@ namespace psycle
 			public:
 				host();
 				virtual ~host(){;}
-				VstSpeakerArrangement stereoSpeaker;
 
 				///< Helper class for Machine Creation.
 				//static Machine* CreateFromType(int _id, std::string _dllname);

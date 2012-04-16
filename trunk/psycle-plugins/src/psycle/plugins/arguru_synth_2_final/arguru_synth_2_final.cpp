@@ -9,11 +9,12 @@ using namespace psycle::helpers;
 using namespace psycle::helpers::math;
 using namespace universalis::stdlib;
 
-int const WAVETABLES = 4;
+int const WAVETABLES = 6;
+int const WAVE_REAL_NOISE = 6;
 int const MAX_ENV_TIME = 220500;
 
-CMachineParameter const paraOSC1wave = {"OSC1 Wave", "OSC1 Wave", 0, 4, MPF_STATE, 1};
-CMachineParameter const paraOSC2wave = {"OSC2 Wave", "OSC2 Wave", 0, 4, MPF_STATE, 1};
+CMachineParameter const paraOSC1wave = {"OSC1 Wave", "OSC1 Wave", 0, WAVETABLES, MPF_STATE, 1};
+CMachineParameter const paraOSC2wave = {"OSC2 Wave", "OSC2 Wave", 0, WAVETABLES, MPF_STATE, 1};
 CMachineParameter const paraOSC2detune = {"OSC2 Detune", "OSC2 Detune", -36, 36, MPF_STATE, 0};
 CMachineParameter const paraOSC2finetune = {"OSC2 Finetune", "OSC2 Finetune", 0, 256, MPF_STATE, 27};
 CMachineParameter const paraOSC2sync = {"OSC2 Sync", "OSC2 Sync", 0, 1, MPF_STATE, 0};
@@ -192,14 +193,14 @@ void mi::ParameterTweak(int par, int val) {
 	if (par >= 0 ) { Vals[par]=val; }
 	float multiplier = currentSR/44100.0f;
 
-	if (Vals[0] == 4) {
+	if (Vals[0] == WAVE_REAL_NOISE) {
 		globalpar.wave1noise=true;
 	}
 	else {
 		globalpar.wave1noise=false;
 		globalpar.pWave=WaveTable[Vals[0]];
 	}
-	if (Vals[1] == 4) {
+	if (Vals[1] == WAVE_REAL_NOISE) {
 		globalpar.wave2noise=true;
 	}
 	else {
@@ -267,16 +268,21 @@ void mi::Command() {
 	char buffer[2048];
 
 	std::sprintf(
-			buffer,"%s%s%s%s%s%s%s%s%s%s%s",
+			buffer,"%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 			"Pattern commands\n",
 			"\n01xx : Pitch slide-up",
 			"\n02xx : Pitch slide-down",
 			"\n03xx : Pitch glide",
 			"\n04xy : Vibrato [x=depth, y=speed]",
+			"\n06xy : Change vca sustain",
 			"\n07xx : Change vcf env modulation [$00=-128, $80=0, $FF=+128]",
 			"\n08xx : Change vcf cutoff frequency",
 			"\n09xx : Change vcf resonance amount",
+			"\n0Axx : Synth volume",
+			"\n0Bxx : Change vca attack (*22 millis)",
+			"\n0Cxx : Note volume",
 			"\n0Exx : NoteCut in xx/2 milliseconds",
+			"\n0Fxx : Change Glide"
 			"\n11xx : Vcf cutoff slide-up",
 			"\n12xx : Vcf cutoff slide-down\0"
 			);
@@ -299,6 +305,10 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 				if(reinitChannel[c]) {
 					ptrack->InitEffect(0,0);
 					reinitChannel[c]=false;
+				}
+				//Allowing it to change while note is active
+				if (ptrack->ArpMode!=globalpar.arp_mod) {
+					ptrack->ArpMode=globalpar.arp_mod;
 				}
 
 				int xnumsamples = minimum;
@@ -397,7 +407,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 				case 1:std::strcpy(txt,"Sawtooth");return true;
 				case 2:std::strcpy(txt,"Square");return true;
 				case 3:std::strcpy(txt,"Triangle");return true;
-				case 4:std::strcpy(txt,"White noise");return true;
+				case 4:std::strcpy(txt,"Sampled noise");return true;
+				case 5:std::strcpy(txt,"Low noise");return true;
+				case 6:std::strcpy(txt,"White noise");return true;
 			}
 			break;
 	case 2:
@@ -624,6 +636,12 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 	// Global scope synth pattern commands
 	switch(cmd)
 	{
+	case 6: // Change sustain
+		globalpar.amp_env_sustain=val;
+		if(track[channel].AmpEnvStage != 0) {
+			track[channel].InitEnvelopes(false);
+		}
+	break;
 	case 7: // Change envmod
 		globalpar.vcf_envmod=val-128;
 		if(track[channel].AmpEnvStage != 0) {
@@ -644,10 +662,27 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 			track[channel].InitEnvelopes(false);
 		}
 	break;
+	case 0x0A: // Change volume
+		globalpar.out_vol=val/2;
+	break;
+	case 0x0B: // Change attack
+		{
+			float multiplier = currentSR/44100.0f;
+			globalpar.amp_env_attack=((val*970.2)+32)*multiplier;
+			if(track[channel].AmpEnvStage != 0) {
+				track[channel].InitEnvelopes(false);
+			}
+		}
+	break;
+	case 0x0F: // Change glide
+		{
+			globalpar.synthglide=256 - sqrtf(16000.f - val*16000.f/127.f);
+		}
+
 	}
 
 	if(note<=NOTE_MAX)
-		//Note zero is A-1 (Which is note 9 in Psycle)
+		//Note zero is A_-1 (Which is note 9 in Psycle)
 		track[channel].NoteOn(note-9);
 	else if(note==NOTE_NOTEOFF)
 		track[channel].NoteOff();
@@ -664,6 +699,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	//Ensure the value is even, we need to divide it by two.
 	const uint32_t amount = lround<uint32_t>(currentSR / 13.75f) & 0xFFFFFFFE;
 	const uint32_t half = amount >> 1;
+	const uint32_t thirtytwo = amount*32/204;
 
 	const double sinFraction = 2.0*psycle::plugin_interface::pi/(double)amount;
 	const float increase = 32768.0f/(float)amount;
@@ -672,7 +708,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	//Skipping noise wavetable. It is useless.
 	for (uint32_t i=0;i < WAVETABLES; i++) {
 		if (delArray) {
-			delete WaveTable[i];
+			delete[] WaveTable[i];
 		}
 		//Two more shorts allocated for the interpolation routine.
 		WaveTable[i]=new float[amount+2];
@@ -683,6 +719,7 @@ void mi::InitWaveTableSR(bool delArray) {
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=-16384;
 		WaveTable[3][c]=(c*increase2)-16384;
+		WaveTable[4][c]=rand()-16384;
 	}
 	for(uint32_t c=half;c<amount;c++) {
 		double sval=(double)c*sinFraction;
@@ -690,6 +727,13 @@ void mi::InitWaveTableSR(bool delArray) {
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=16384;
 		WaveTable[3][c]=16384-((c-half)*increase2);
+		WaveTable[4][c]=rand()-16384;
+	}
+	for(uint32_t c=0;c<thirtytwo;c++) {
+		WaveTable[5][c]=16384;
+	}
+	for(uint32_t c=thirtytwo;c<amount;c++) {
+		WaveTable[5][c]=0;
 	}
 	//Two more shorts allocated for the interpolation routine.
 	for (uint32_t i=0;i < WAVETABLES; i++) {

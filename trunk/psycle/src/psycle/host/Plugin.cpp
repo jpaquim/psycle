@@ -293,12 +293,24 @@ namespace psycle
 					}
 				}
 				if(!Global::machineload().lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) {
-					sPath = psFileName;
+#if !defined WINAMP_PLUGIN
+				std::ostringstream s; s
+					<< "The plugin could not be found :" << psFileName << std::endl
+					<< "Replacing with dummy.";
+				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+#endif
+					return false;
 				}
 			}
 
 			if(!Global::machineload().TestFilename(sPath,shellIdx) ) 
 			{
+#if !defined WINAMP_PLUGIN
+				std::ostringstream s; s
+					<< "This plugin is Disabled :" << sPath << std::endl
+					<< "Replacing with dummy.";
+				MessageBox(0, s.str().c_str(), "Loading Error", MB_OK | MB_ICONWARNING);
+#endif
 				return false;
 			}
 			try
@@ -1103,173 +1115,44 @@ namespace psycle
 		/// old file format vomit. don't look at it.
 		bool Plugin::Load(RiffFile* pFile)
 		{
-			bool result = true;
-			char junk[256];
-			memset(&junk, 0, sizeof(junk));
-
-			char sDllName[256];
 			int numParameters;
-			int shellIdx=0;
-
-
-			pFile->Read(sDllName, sizeof(sDllName)); // Plugin dll name
-			_strlwr(sDllName);
-
-			//Patch: Automatically replace old AS's by AS2F.
-			bool wasAB=false;
-			bool wasAS1=false;
-			bool wasAS2=false;
-			if (strcmp(sDllName,"arguru bass.dll" ) == 0)
-			{
-				strcpy(sDllName,"arguru synth 2f.dll");
-				wasAB=true;
-			}
-			if (strcmp(sDllName,"arguru synth.dll" ) == 0)
-			{
-				strcpy(sDllName,"arguru synth 2f.dll");
-				wasAS1=true;
-			}
-			if (!strcmp(sDllName,"arguru synth 2.dll" ))
-			{
-				strcpy(sDllName,"arguru synth 2f.dll");
-				wasAS2=true;
-			}
-			if (!strcmp(sDllName,"synth21.dll" ))
-			{
-				strcpy(sDllName,"arguru synth 2f.dll");
-				wasAS2=true;
-			}
-
-			std::string sPath2;
-			CString sPath;
-			if ( !Global::machineload().lookupDllName(sDllName,sPath2,MACH_PLUGIN,shellIdx) ) 
-			{
-				// Check Compatibility Table.
-				// Probably could be done with the dllNames lockup.
-				//GetCompatible(sDllName,sPath2) // If no one found, it will return a null string.
-				sPath2 = sDllName;
-			}
-			
-			if ( !Global::machineload().TestFilename(sPath2,shellIdx) ) 
-			{
-				result = false;
-			}
-			else 
-			{
-				try
-				{
-					Instance(sPath2.c_str());
-				}
-				catch(...)
-				{
-#if !defined WINAMP_PLUGIN
-					char sError[_MAX_PATH];
-					sprintf(sError,"Missing or corrupted native Plug-in \"%s\" - replacing with Dummy.",sDllName);
-					MessageBox(NULL,sError, "Error", MB_OK);
-#endif //!defined WINAMP_PLUGIN
-					result = false;
-				}
-			}
-			Init();
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
 			pFile->Read(&numParameters, sizeof(numParameters));
-			if(result)
+			int *Vals = new int[numParameters];
+			pFile->Read(Vals, numParameters*sizeof(int));
+			try
 			{
-				int *Vals = new int[numParameters];
-				pFile->Read(Vals, numParameters*sizeof(int));
-				try
+				 for (int i=0; i<numParameters; i++)
 				{
-					if ( wasAB ) // Patch to replace Arguru Bass by Arguru Synth 2f
-					{
-						proxy().ParameterTweak(0,Vals[0]);
-						for (int i=1;i<15;i++)
-						{
-							proxy().ParameterTweak(i+4,Vals[i]);
-						}
-						proxy().ParameterTweak(19,0);
-						proxy().ParameterTweak(20,Vals[15]);
-						if (numParameters>16)
-						{
-							proxy().ParameterTweak(24,Vals[16]);
-							proxy().ParameterTweak(25,Vals[17]);
-						}
-						else
-						{
-							proxy().ParameterTweak(24,0);
-							proxy().ParameterTweak(25,0);
-						}
-					}
-					else for (int i=0; i<numParameters; i++)
-					{
-						proxy().ParameterTweak(i,Vals[i]);
-					}
+					proxy().ParameterTweak(i,Vals[i]);
 				}
-				catch(const std::exception &)
+			}
+			catch(const std::exception &)
+			{
+			}
+			try
+			{
+				int size = proxy().GetDataSize();
+				//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
+				if(size)
 				{
-				}
-				try
-				{
-					int size = proxy().GetDataSize();
-					//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
-					if(size)
-					{
-						byte* pData = new byte[size];
-						pFile->Read(pData, size); // Number of parameters
-						try
-						{
-							proxy().PutData(pData); // Internal load
-						}
-						catch(const std::exception &)
-						{
-						}
-						zapArray(pData);
-					}
-				}
-				catch(const std::exception &)
-				{
-				}
-				if(wasAS1) // Patch to replace Synth1 by Arguru Synth 2f
-				{
+					byte* pData = new byte[size];
+					pFile->Read(pData, size); // Number of parameters
 					try
 					{
-						proxy().ParameterTweak(17,Vals[17]+10);
-						proxy().ParameterTweak(24,0);
-						proxy().ParameterTweak(25,0);
-						proxy().ParameterTweak(27,1);
+						proxy().PutData(pData); // Internal load
 					}
 					catch(const std::exception &)
 					{
 					}
-				}
-				if(wasAS2)
-				{
-					try
-					{
-						proxy().ParameterTweak(24,0);
-						proxy().ParameterTweak(25,0);
-					}
-					catch(const std::exception&)
-					{
-					}
-				}
-				zapArray(Vals);
-			}
-			else
-			{
-				for (int i=0; i<numParameters; i++)
-				{
-					pFile->Read(&junk[0], sizeof(int));			
-				}
-				/*int size;		// This SHOULD be done, but it breaks the fileformat.
-				pFile->Read(&size,sizeof(int));
-				if (size)
-				{
-					byte* pData = new byte[size];
-					pFile->Read(pData, size); // Number of parameters
 					zapArray(pData);
-				}*/
+				}
 			}
+			catch(const std::exception &)
+			{
+			}
+			zapArray(Vals);
 
 			legacyWires.resize(MAX_CONNECTIONS);
 			for(int i = 0; i < MAX_CONNECTIONS; i++) {
@@ -1293,37 +1176,49 @@ namespace psycle
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-			pFile->Read(&junk[0], sizeof(int)); // numSubtracks
-			pFile->Read(&junk[0], sizeof(int)); // interpol
+			pFile->Skip(109);
 
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-			pFile->Read(&junk[0], sizeof(int)); // outdry
+			return true;
+		}
 
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
+		void Plugin::SkipLoad(RiffFile* pFile)
+		{
+			int numParameters;
+			pFile->Read(&_editName,16);
+			_editName[15] = 0;
+			pFile->Read(&numParameters, sizeof(numParameters));
+			pFile->Skip(numParameters*sizeof(int));
+			/* This SHOULD be done, but it breaks the fileformat.
+			int size;
+			pFile->Read(&size,sizeof(int));
+			if (size)
+			{
+				pFile->Skip(size);
+			}*/
 
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
+			legacyWires.resize(MAX_CONNECTIONS);
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputMachine,sizeof(legacyWires[i]._inputMachine));	// Incoming connections Machine number
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._outputMachine,sizeof(legacyWires[i]._outputMachine));	// Outgoing connections Machine number
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputConVol,sizeof(legacyWires[i]._inputConVol));	// Incoming connections Machine vol
+				legacyWires[i]._wireMultiplier = 1.0f;
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._connection,sizeof(legacyWires[i]._connection));      // Outgoing connections activated
+			}
+			for(int i = 0; i < MAX_CONNECTIONS; i++) {
+				pFile->Read(&legacyWires[i]._inputCon,sizeof(legacyWires[i]._inputCon));		// Incoming connections activated
+			}
+			pFile->Read(&_connectionPoint[0], sizeof(_connectionPoint));
+			pFile->Skip(2*sizeof(int)); // numInputs and numOutputs
 
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
-
-			return result;
+			pFile->Read(&_panning, sizeof(_panning));
+			Machine::SetPan(_panning);
+			pFile->Skip(109);
 		}
 	}
 }

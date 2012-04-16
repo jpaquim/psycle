@@ -933,8 +933,6 @@ namespace psycle
 		bool Sampler::Load(RiffFile* pFile)
 		{
 			int i;
-			char junk[256];
-			memset(&junk, 0, sizeof(junk));
 
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
@@ -961,7 +959,7 @@ namespace psycle
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
+			pFile->Skip(8*sizeof(int)); // SubTrack[]
 			pFile->Read(&_numVoices, sizeof(_numVoices)); // numSubtracks
 
 			if (_numVoices < 4)
@@ -979,32 +977,7 @@ namespace psycle
 				case 1:
 				default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 			}
-
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-			pFile->Read(&junk[0], sizeof(int)); // outdry
-
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
-
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
-
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
+			pFile->Skip(69);
 
 			return true;
 		}

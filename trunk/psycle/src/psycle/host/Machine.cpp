@@ -319,6 +319,7 @@ namespace psycle
 			//the vector could reassing the array, so it is better that it be constant.
 			inWires.reserve(MAX_CONNECTIONS);
 			outWires.resize(MAX_CONNECTIONS);
+			legacyWires = mac->legacyWires;
 			for (int i(0);i<MAX_CONNECTIONS;i++)
 			{
 				inWires.push_back(Wire(this));
@@ -704,7 +705,7 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix, bool measure
 			if(!pInMachine.recursive_processed_ && !pInMachine.recursive_is_processing_)
 				pInMachine.recursive_process(frames,measure_cpu_usage);
 			if(!pInMachine.Standby()) Standby(false);
-			if(!_mute && !Standby() && mix) {
+			if(!_mute && !Standby() && mix && (!_isMixerSend || pInMachine._type != MACH_MIXER)) {
 				cpu_time_clock::time_point t0;
 				if(measure_cpu_usage) t0 = cpu_time_clock::now();
 				inWires[i].Mix(frames,pInMachine._lVol,pInMachine._rVol);
@@ -715,16 +716,17 @@ void Machine::recursive_process_deps(unsigned int frames, bool mix, bool measure
 			}
 		}
 	}
-	cpu_time_clock::time_point t0;
-	if(measure_cpu_usage) t0 = cpu_time_clock::now();
-	for(int i(0);i<samplesV.size();i++) {
-		helpers::math::erase_all_nans_infinities_and_denormals(samplesV[i], frames);
+	if(mix) {
+		cpu_time_clock::time_point t0;
+		if(measure_cpu_usage) t0 = cpu_time_clock::now();
+		for(int i(0);i<samplesV.size();i++) {
+			helpers::math::erase_all_nans_infinities_and_denormals(samplesV[i], frames);
+		}
+		if(measure_cpu_usage) {
+			cpu_time_clock::time_point const t1(cpu_time_clock::now());
+			Global::song().accumulate_routing_time(t1 - t0);
+		}
 	}
-	if(measure_cpu_usage) {
-		cpu_time_clock::time_point const t1(cpu_time_clock::now());
-		Global::song().accumulate_routing_time(t1 - t0);
-	}
-
 	recursive_is_processing_ = false;
 }
 
@@ -928,11 +930,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						pMachine = p = new Plugin(index);
 						if(!p->LoadDll(dllName))
 						{
-#if !defined WINAMP_PLUGIN
-							char sError[MAX_PATH + 100];
-							sprintf(sError,"Replacing Native plug-in \"%s\" with Dummy.",dllName);
-							MessageBox(NULL,sError, "Loading Error", MB_OK);
-#endif //!defined WINAMP_PLUGIN
 							pMachine = new Dummy(index);
 							
 							delete p;
@@ -960,7 +957,29 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						}
 						if(Global::machineload().TestFilename(sPath,shellIdx) ) 
 						{
-							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
+							try
+							{
+								vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
+							}
+							//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
+							catch(const std::exception & e)
+							{
+								loggers::exception()(e.what());
+							}
+							catch(const std::runtime_error & e)
+							{
+								std::ostringstream s; s << typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+								loggers::exception()(s.str());
+							}
+							catch(...)
+							{
+	#ifndef NDEBUG 
+								throw;
+	#else
+								loggers::exception()("unknown exception");
+	#endif
+							}
 						}
 
 						if(!vstPlug)
@@ -1230,7 +1249,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						while (wire._inputConVol*wire._wireMultiplier > 8.0f) { //psycle 1.10.1 alpha bugfix
 							wire._inputConVol/=32768.f;
 						}
-						while (wire._inputConVol*wire._wireMultiplier < 0.0002f) { //psycle 1.10.1 alpha bugfix
+						while (wire._inputConVol > 0.f && wire._inputConVol*wire._wireMultiplier < 0.0002f) { //psycle 1.10.1 alpha bugfix
 							wire._inputConVol*=32768.f;
 						}
 						inWires[c].SetVolume(wire._inputConVol*wire._wireMultiplier);
@@ -1452,8 +1471,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		// old file format vomit. don't look at it!
 		bool Machine::Load(RiffFile* pFile)
 		{
-			char junk[256];
-			std::memset(&junk, 0, sizeof(junk));
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
 
@@ -1479,35 +1496,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-			pFile->Read(&junk[0], sizeof(int)); // numSubtracks
-			pFile->Read(&junk[0], sizeof(int)); // interpol
-
-			pFile->Read(&junk[0], sizeof(int)); // outdry
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
-
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
-
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
+			pFile->Skip(109);
 
 			return true;
 		}
@@ -1515,9 +1504,6 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 		// old file format vomit. don't look at it!
 		bool Master::Load(RiffFile* pFile)
 		{
-			char junk[256];
-			memset(&junk, 0, sizeof(junk));
-
 			pFile->Read(&_editName,16);
 			_editName[15] = 0;
 			legacyWires.resize(MAX_CONNECTIONS);
@@ -1542,35 +1528,10 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 			pFile->Read(&_panning, sizeof(_panning));
 			Machine::SetPan(_panning);
-			pFile->Read(&junk[0], 8*sizeof(int)); // SubTrack[]
-			pFile->Read(&junk[0], sizeof(int)); // numSubtracks
-			pFile->Read(&junk[0], sizeof(int)); // interpol
+			pFile->Skip(40);
 
 			pFile->Read(&_outDry, sizeof(int)); // outdry
-			pFile->Read(&junk[0], sizeof(int)); // outwet
-
-			pFile->Read(&junk[0], sizeof(int)); // distPosThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distPosClamp
-			pFile->Read(&junk[0], sizeof(int)); // distNegThreshold
-			pFile->Read(&junk[0], sizeof(int)); // distNegClamp
-
-			pFile->Read(&junk[0], sizeof(char)); // sinespeed
-			pFile->Read(&junk[0], sizeof(char)); // sineglide
-			pFile->Read(&junk[0], sizeof(char)); // sinevolume
-			pFile->Read(&junk[0], sizeof(char)); // sinelfospeed
-			pFile->Read(&junk[0], sizeof(char)); // sinelfoamp
-
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeL
-			pFile->Read(&junk[0], sizeof(int)); // delayTimeR
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackL
-			pFile->Read(&junk[0], sizeof(int)); // delayFeedbackR
-
-			pFile->Read(&junk[0], sizeof(int)); // filterCutoff
-			pFile->Read(&junk[0], sizeof(int)); // filterResonance
-			pFile->Read(&junk[0], sizeof(int)); // filterLfospeed
-			pFile->Read(&junk[0], sizeof(int)); // filterLfoamp
-			pFile->Read(&junk[0], sizeof(int)); // filterLfophase
-			pFile->Read(&junk[0], sizeof(int)); // filterMode
+			pFile->Skip(65);
 
 			return true;
 		}

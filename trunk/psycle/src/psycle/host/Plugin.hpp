@@ -224,9 +224,10 @@ namespace psycle
 			///\name (de)serialization
 			///\{
 				public:
-					virtual bool Load(RiffFile * pFile);
 					virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 					virtual void SaveSpecificChunk(RiffFile * pFile);
+					virtual bool Load(RiffFile * pFile); //Old fileformat
+					void SkipLoad(RiffFile* pFile); //Old fileformat
 			///\}
 		};
 	}

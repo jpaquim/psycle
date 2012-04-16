@@ -159,10 +159,19 @@ namespace psycle
 						else
 						{
 							CString filePath=finder.GetFilePath();
+							std::string sfilePath = filePath;
 							filePath.MakeLower();
+/*
+		#if defined DIVERSALIS__OS__MICROSOFT
+			".dll";
+		#elif defined DIVERSALIS__OS__APPLE
+			".dylib"
+		#else
+			".so"
+		#endif
+*/
 							if(filePath.Right(4) == ".dll")
 							{
-								std::string sfilePath = filePath;
 								result.push_back(sfilePath);
 							}
 						}
@@ -454,6 +463,7 @@ namespace psycle
 						{
 							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
 						}
+						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
 						catch(const std::exception & e)
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
@@ -821,7 +831,13 @@ namespace psycle
 
 		std::string PluginCatcher::preprocessName(std::string dllName) {
 			{ // 1) remove extension
+			#if defined DIVERSALIS__OS__MICROSOFT
 				std::string::size_type const pos(dllName.find(".dll"));
+			#elif defined DIVERSALIS__OS__APPLE
+				std::string::size_type const pos(dllName.find(".dylib"));
+			#else
+				std::string::size_type const pos(dllName.find(".so"));
+			#endif
 				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
 			}
 

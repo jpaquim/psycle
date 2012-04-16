@@ -102,7 +102,7 @@ namespace psycle
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual void Stop(void);
 			virtual int GenerateAudioInTicks(int startSample,  int numSamples);
-			virtual bool Load(RiffFile* pFile);
+			virtual bool Load(RiffFile* pFile); //old fileformat
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile* pFile);
 			virtual char* GetName(void) { return _psName; }

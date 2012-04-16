@@ -144,10 +144,17 @@ namespace psycle
 								vstPlug->_macIndex=songIdx;
 							}
 						}
+						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
 						catch(const std::exception & e)
 						{
 							loggers::exception()(e.what());
 							zapObject(pMachine); 
+						}
+						catch(const std::runtime_error & e)
+						{
+							std::ostringstream s; s << typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+							loggers::exception()(s.str());
 						}
 						catch(...)
 						{
@@ -1710,17 +1717,10 @@ namespace psycle
 							else 
 							{
 								bool stereo;
-								char *junk =new char[42+sizeof(bool)];
-								pFile->Read(junk,sizeof(junk));
-								delete[] junk;
+								pFile->Skip(42+sizeof(bool));
 								pFile->Read(&stereo,sizeof(bool));
-								short *junk2 = new signed short[wltemp];
-								pFile->Read(junk2, sizeof(junk2));
-								if ( stereo )
-								{
-									pFile->Read(junk2, sizeof(junk2));
-								}
-								delete[] junk2;
+								pFile->Skip(wltemp);
+								if(stereo)pFile->Skip(wltemp);
 							}
 						}
 					}
@@ -1776,8 +1776,9 @@ namespace psycle
 
 						pFile->Read(&type, sizeof(type));
 
-						if(converter.plugin_names().exists(type))
-							pMac[i] = &converter.redirect(i, type, *pFile);
+						std::pair<int, std::string> bla(type,"");
+						if(converter.plugin_names().exists(bla))
+							pMac[i] = &converter.redirect(i, bla, *pFile);
 						else switch (type)
 						{
 						case MACH_MASTER:
@@ -1797,20 +1798,33 @@ namespace psycle
 							pMac[i]->Load(pFile);
 							break;
 						case MACH_PLUGIN:
-							{
-							pMac[i] = pPlugin = new Plugin(i);
-							// Should the "Init()" function go here? -> No. Needs to load the dll first.
-							if (!pMac[i]->Load(pFile))
-							{
-								Machine* pOldMachine = pMac[i];
-								pMac[i] = new Dummy(pOldMachine);
-								pMac[i]->_macIndex=i;
-								zapObject(pOldMachine);
-								// Warning: It cannot be known if the missing plugin is a generator
-								// or an effect. This will be guessed from the busMachine array.
+						{
+							char sDllName[256];
+							pFile->Read(sDllName, sizeof(sDllName)); // Plugin dll name
+							_strlwr(sDllName);
+
+							std::pair<int, std::string> bla2(type,sDllName);
+							if(converter.plugin_names().exists(bla2))
+								pMac[i] = &converter.redirect(i, bla2, *pFile);
+							else {
+								pMac[i] = pPlugin = new Plugin(i);
+								if (pPlugin->LoadDll(sDllName)) {
+									pMac[i]->Init();
+									pMac[i]->Load(pFile);
+								}
+								else {
+									pPlugin->SkipLoad(pFile);
+									Machine* pOldMachine = pMac[i];
+									pMac[i] = new Dummy(pOldMachine);
+									pMac[i]->_macIndex=i;
+									pMac[i]->Init();
+									zapObject(pOldMachine);
+									// Warning: It cannot be known if the missing plugin is a generator
+									// or an effect. This will be guessed from the busMachine array.
+								}
 							}
 							break;
-							}
+						}
 						case MACH_VST:
 						case MACH_VSTFX:
 							{

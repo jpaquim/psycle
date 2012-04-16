@@ -696,6 +696,7 @@ new_fluid_synth(fluid_settings_t *settings)
   /* Allocate event queue for rvoice mixer */
   fluid_settings_getint(settings, "synth.parallel-render", &i);
   /* In an overflow situation, a new voice takes about 50 spaces in the queue! */
+  //FIXME: fluidsynth\src\synth\fluid_synth.c(701) : warning C4020: 'new_fluid_rvoice_eventhandler' : too many actual parameters
   synth->eventhandler = new_fluid_rvoice_eventhandler(i, synth->polyphony*64, 
 						      synth->polyphony,
 						      nbuf, synth->effects_channels, (int)synth->sample_rate);

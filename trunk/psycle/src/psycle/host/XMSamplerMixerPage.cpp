@@ -1,7 +1,6 @@
 // XMSamplerMixerPage.cpp: archivo de implementación
 
 #include <psycle/host/detail/project.private.hpp>
-#include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerMixerPage.hpp"
 
 #include "Song.hpp"
