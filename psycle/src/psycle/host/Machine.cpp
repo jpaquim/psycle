@@ -1230,6 +1230,13 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			for (int c(0) ; c < MAX_CONNECTIONS ; ++c)
 			{
 				LegacyWire& wire = legacyWires[c];
+				//load bugfix: Ensure no duplicate wires could be created.
+				for(int f=0;f<c;f++) {
+					if (wire._inputCon && legacyWires[f]._inputCon && 
+						wire._inputMachine==legacyWires[f]._inputMachine) {
+							wire._inputCon=false;
+					}
+				}
 				if (wire._inputCon
 					&& wire._inputMachine >= 0 	&& wire._inputMachine < MAX_MACHINES
 					&& _macIndex != wire._inputMachine && _pMachine[wire._inputMachine])
