@@ -738,6 +738,10 @@ namespace psycle { namespace host {
 					else if(row == 1) return mute;
 					else if(row == 2) return dryonly;
 					else if(row == 3) return wetonly;
+					else {
+						yoffset = y - (realheight*(mixer().numsends()+4 ));
+						return slider;
+					}
 				}
 			}
 			return -1;

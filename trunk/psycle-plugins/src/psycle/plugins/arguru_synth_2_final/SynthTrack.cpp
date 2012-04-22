@@ -102,12 +102,12 @@ void CSynthTrack::NoteOn(int note)
 	float nnote=(float)note+
 		(float)syntp->globalfinetune*0.00389625f+
 		(float)syntp->globaldetune;
-	OSC1Speed=(float)pow(2.0, nnote/12.0)*wavetableCorrection;
+	OSC1Speed=powf(2.f, nnote/12.f)*wavetableCorrection;
 
 	float note2=nnote+
 		syntp->osc2finetune+
 		syntp->osc2detune;
-	OSC2Speed=(float)pow(2.0, note2/12.0)*wavetableCorrection;
+	OSC2Speed=powf(2.f, note2/12.f)*wavetableCorrection;
 
 	//if (oscglide == 0.0f)
 	if (sp_cmd != 0x03)

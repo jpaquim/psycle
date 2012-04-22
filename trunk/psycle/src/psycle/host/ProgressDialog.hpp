@@ -17,6 +17,7 @@ namespace psycle { namespace host {
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();
+			virtual	void OnCancel();
 		protected:
 			DECLARE_MESSAGE_MAP()
 			afx_msg void OnClose();

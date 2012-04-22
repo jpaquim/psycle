@@ -103,6 +103,7 @@ namespace psycle
 					InitializeSamplesVector();
 				}
 				virtual ~plugin();
+				void Free() throw(::std::exception) { if  (ploader)	Unload(); };
 
 				// Machine overloaded functions
 				//////////////////////////////////////////////////////////////////////////

@@ -84,8 +84,9 @@ namespace seib {
 		//-------------------------------------------------------------------------------------------------------
 		typedef AEffect* (*PluginEntryProc) (audioMasterCallback audioMaster);
 
-		struct PluginLoader
+		class PluginLoader
 		{
+		public:
 			void* module;
 			void* sFileName;
 

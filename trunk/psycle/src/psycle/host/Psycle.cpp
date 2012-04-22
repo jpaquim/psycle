@@ -333,7 +333,7 @@ namespace psycle { namespace host {
 				"David Buist\t\t\tAdditional Graphics" "\r\n"
 				"frown\t\t\t\tAdditional Graphics" "\r\n"
 				"/\\/\\ark\t\t\t\tAdditional Graphics" "\r\n"
-				"Angelus\t\t\t\tNew Skin for 1.10.0" "\r\n"
+				"Angelus\t\t\t\tNew Skin for 1.10, example songs, beta tester" "\r\n"
 				"ikkkle\t\t\t\tNew toolbar graphics for 1.10.0" "\r\n"
 				"Haralabos Michael\t\t\tInstaller and Debugging help" "\r\n\r\n"
 				"This release of Psycle also contains VST plugins from:" "\r\n"

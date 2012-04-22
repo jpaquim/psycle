@@ -895,7 +895,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			switch (type)
 			{
 			case MACH_MASTER:
-				if ( fullopen ) pMachine = new Master(index);
+				if ( fullopen) pMachine = new Master(index);
 				else pMachine = new Dummy(index);
 				break;
 			case MACH_SAMPLER:

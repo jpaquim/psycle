@@ -165,7 +165,7 @@ void mi::Init() {
 	for (int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 	}
-	fxsamples=256*currentSR/44100.0f;
+	fxsamples=(256*currentSR)/44100;
 }
 
 void mi::Stop() {
@@ -183,7 +183,7 @@ void mi::SequencerTick() {
 		}
 		//force an update of all the parameters.
 		ParameterTweak(-1,-1);
-		fxsamples=256*currentSR/44100;
+		fxsamples=(256*currentSR)/44100;
 	}
 	for (int i = 0; i < MAX_TRACKS; ++i) reinitChannel[i] = true;
 }
@@ -191,7 +191,7 @@ void mi::SequencerTick() {
 void mi::ParameterTweak(int par, int val) {
 	// Called when a parameter is changed by the host app / user gui
 	if (par >= 0 ) { Vals[par]=val; }
-	float multiplier = currentSR/44100.0f;
+	float multiplier = (float)currentSR/44100.0f;
 
 	if (Vals[0] == WAVE_REAL_NOISE) {
 		globalpar.wave1noise=true;
@@ -213,17 +213,17 @@ void mi::ParameterTweak(int par, int val) {
 	globalpar.osc2sync=(Vals[4]>0);
 	
 	//All parameters that are sample rate dependant are corrected here.
-	globalpar.amp_env_attack=Vals[5]*multiplier;
-	globalpar.amp_env_decay=Vals[6]*multiplier;
+	globalpar.amp_env_attack=(float)Vals[5]*multiplier;
+	globalpar.amp_env_decay=(float)Vals[6]*multiplier;
 	globalpar.amp_env_sustain=Vals[7];
-	globalpar.amp_env_release=Vals[8]*multiplier;
+	globalpar.amp_env_release=(float)Vals[8]*multiplier;
 
-	globalpar.vcf_env_attack=Vals[9]*multiplier;
-	globalpar.vcf_env_decay=Vals[10]*multiplier;
+	globalpar.vcf_env_attack=(float)Vals[9]*multiplier;
+	globalpar.vcf_env_decay=(float)Vals[10]*multiplier;
 	globalpar.vcf_env_sustain=Vals[11];
-	globalpar.vcf_env_release=Vals[12]*multiplier;
+	globalpar.vcf_env_release=(float)Vals[12]*multiplier;
 	//in case of lfo_speed it is a division.
-	globalpar.vcf_lfo_speed=Vals[13]/multiplier;
+	globalpar.vcf_lfo_speed=(float)Vals[13]/multiplier;
 	globalpar.vcf_lfo_amplitude=Vals[14];
 	if(par == 13 || par == 14 ) {
 		for(int channel=0; channel<MAX_TRACKS;channel++) {
@@ -292,8 +292,17 @@ void mi::Command() {
 
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks) {
-	int minimum = std::min(numsamples,fxsamples);
-	if (minimum>0) {
+	while (numsamples > 0 ) {
+		if(fxsamples == 0) {
+			for(int c=0;c<tracks;c++){
+				if(track[c].AmpEnvStage){
+					track[c].PerformFx();
+				}
+			}
+			fxsamples=(256*currentSR)/44100;
+		}
+
+		int minimum = std::min(numsamples,fxsamples);
 		for(int c=0;c<tracks;c++) {
 			if(track[c].AmpEnvStage) {
 				float *xpsamplesleft=psamplesleft;
@@ -338,58 +347,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 		}
 		fxsamples-=minimum;
 		numsamples-=minimum;
-	}
-	if(fxsamples == 0) {
-		for(int c=0;c<tracks;c++){
-			if(track[c].AmpEnvStage){
-				track[c].PerformFx();
-			}
-		}
-		fxsamples=256*currentSR/44100;
-	}
-	if (numsamples > 0 ) {
-		float *psamplesleft2=psamplesleft+minimum;
-		float *psamplesright2=psamplesright+minimum;
-		minimum=numsamples;
-		for(int c=0;c<tracks;c++) {
-			if(track[c].AmpEnvStage) {
-				float *xpsamplesleft=psamplesleft2;
-				float *xpsamplesright=psamplesright2;
-				--xpsamplesleft;
-				--xpsamplesright;
-				
-				CSynthTrack *ptrack=&track[c];
-				if(reinitChannel[c]) {
-					ptrack->InitEffect(0,0);
-					reinitChannel[c]=false;
-				}
-
-				int xnumsamples = minimum;
-				if(globalpar.osc_mix == 0) {
-					do {
-						const float sl=ptrack->GetSampleOsc1();
-						*++xpsamplesleft+=sl;
-						*++xpsamplesright+=sl;
-					} while(--xnumsamples);
-				}
-				else if(globalpar.osc_mix == 256) {
-					do {
-						const float sl=ptrack->GetSampleOsc2();
-						*++xpsamplesleft+=sl;
-						*++xpsamplesright+=sl;
-					} while(--xnumsamples);
-				}
-				else {
-					do {
-						const float sl=ptrack->GetSample();
-						*++xpsamplesleft+=sl;
-						*++xpsamplesright+=sl;
-					} while(--xnumsamples);
-				}
-				if(ptrack->NoteCutTime >0) ptrack->NoteCutTime-=minimum;
-			}
-		}
-		fxsamples-=minimum;
+		psamplesleft+=minimum;
+		psamplesright+=minimum;
 	}
 }
 
@@ -667,8 +626,8 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 	break;
 	case 0x0B: // Change attack
 		{
-			float multiplier = currentSR/44100.0f;
-			globalpar.amp_env_attack=((val*970.2)+32)*multiplier;
+			float multiplier = (float)currentSR/44100.0f;
+			globalpar.amp_env_attack=float((val*970.2)+32)*multiplier;
 			if(track[channel].AmpEnvStage != 0) {
 				track[channel].InitEnvelopes(false);
 			}
@@ -697,9 +656,9 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 //the OSC speed.
 void mi::InitWaveTableSR(bool delArray) {
 	//Ensure the value is even, we need to divide it by two.
-	const uint32_t amount = lround<uint32_t>(currentSR / 13.75f) & 0xFFFFFFFE;
+	const uint32_t amount = lround<uint32_t>((float)currentSR / 13.75f) & 0xFFFFFFFE;
 	const uint32_t half = amount >> 1;
-	const uint32_t thirtytwo = amount*32/204;
+	const uint32_t thirtytwo = amount*32/2048;
 
 	const double sinFraction = 2.0*psycle::plugin_interface::pi/(double)amount;
 	const float increase = 32768.0f/(float)amount;

@@ -384,7 +384,7 @@ void mi::Init()
 	for (int i = 0; i < MAX_TRACKS; ++i) {
 		track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 	}
-	fxsamples=256*currentSR/44100.0f;
+	fxsamples=(256*currentSR)/44100;
 }
 
 void mi::Stop()
@@ -404,7 +404,7 @@ void mi::SequencerTick() {
 		for (int i = 0; i < MAX_TRACKS; ++i) {
 			track[i].setSampleRate(currentSR, waveTableSize, wavetableCorrection);
 		}
-		fxsamples=256*currentSR/44100.0f;
+		fxsamples=(256*currentSR)/44100;
 	}
 }
 
@@ -439,8 +439,8 @@ void mi::ParameterTweak(int par, int val)
 		globals.StartPos=Vals[112]-1;
 		globals.LoopStart=Vals[113]-1;
 		globals.LoopEnd=Vals[114]-1;
-		globals.ReplaySpeed=Vals[115]*multiplier;
-		globals.AEGAttack=Vals[116]*multiplier;
+		globals.ReplaySpeed=(float)Vals[115]*multiplier;
+		globals.AEGAttack=(float)Vals[116]*multiplier;
 		//decay and release are "special" and are corrected in the envelope
 		globals.AEGDecay=Vals[117];
 		globals.AEGSustain=Vals[118];
@@ -448,10 +448,10 @@ void mi::ParameterTweak(int par, int val)
 		globals.Cutoff=Vals[120];
 		globals.Resonance=Vals[121];
 		globals.EnvMod=Vals[122];
-		globals.FEGAttack=Vals[123]*multiplier;
-		globals.FEGDecay=Vals[124]*multiplier;
+		globals.FEGAttack=(float)Vals[123]*multiplier;
+		globals.FEGDecay=(float)Vals[124]*multiplier;
 		globals.FEGSustain=Vals[125];
-		globals.FEGRelease=Vals[126]*multiplier;
+		globals.FEGRelease=(float)Vals[126]*multiplier;
 		globals.Finetune=Vals[127];
 	}
 }
@@ -472,8 +472,16 @@ void mi::Command()
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks)
 {
 	globals.noiseused=false;
-	int minimum = std::min(numsamples,fxsamples);
-	if (minimum>0) {
+	while(numsamples > 0) {
+		if(fxsamples == 0) {
+			for(int c=0;c<tracks;c++) {
+				if(track[c].AmpEnvStage) {
+					track[c].PerformFx();
+				}
+			}
+			fxsamples=(256*currentSR)/44100;
+		}
+		int minimum = std::min(numsamples,fxsamples);
 		for(int c=0;c<tracks;c++)
 		{
 			if(track[c].AmpEnvStage)
@@ -483,7 +491,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 				--xpsamplesleft;
 				--xpsamplesright;
 
-				int xnumsamples = numsamples;
+				int xnumsamples = minimum;
 				do
 				{
 					const float sl=track[c].GetSample();
@@ -494,38 +502,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		fxsamples-=minimum;
 		numsamples-=minimum;
-	}
-	if(fxsamples == 0) {
-		for(int c=0;c<tracks;c++) {
-			if(track[c].AmpEnvStage) {
-				track[c].PerformFx();
-			}
-		}
-		fxsamples=256*currentSR/44100;
-	}
-	if (numsamples > 0 ) {
-		float *psamplesleft2=psamplesleft+minimum;
-		float *psamplesright2=psamplesright+minimum;
-		minimum=numsamples;
-		for(int c=0;c<tracks;c++)
-		{
-			if(track[c].AmpEnvStage)
-			{
-				float *xpsamplesleft=psamplesleft2;
-				float *xpsamplesright=psamplesright2;
-				--xpsamplesleft;
-				--xpsamplesright;
-
-				int xnumsamples = numsamples;
-				do
-				{
-					const float sl=track[c].GetSample();
-					*++xpsamplesleft+=sl;
-					*++xpsamplesright+=sl;
-				} while(--xnumsamples);
-			}
-		}
-		fxsamples-=minimum;
+		psamplesleft+=minimum;
+		psamplesright+=minimum;
 	}
 
 	if (globals.noiseused)
