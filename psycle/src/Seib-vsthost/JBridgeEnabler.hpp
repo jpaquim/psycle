@@ -8,6 +8,7 @@ typedef AEffect * (*PFNBRIDGEMAIN)( audioMasterCallback audiomaster, char * pszP
 class JBridge {
 public:
 	static bool IsBootStrapDll(const char * path);
+	static bool IsBootStrapDll(HMODULE hModule);
 	static void getJBridgeLibrary(char szProxyPath[], DWORD pathsize);
 	static PFNBRIDGEMAIN getBridgeMainEntry(const HMODULE hModuleProxy);
 };

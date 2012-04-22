@@ -357,6 +357,7 @@ namespace seib {
 
 			aEffect = NULL;                         /* and reset the pointer             */
 			delete ploader;
+			ploader = NULL;
 
 		#if defined _WIN64 || defined _WIN32
 			if (sDir)                               /* reset directory            */
@@ -854,17 +855,17 @@ namespace seib {
 		{
 			PluginLoader* loader = new PluginLoader();
 			AEffect* effect(0);
-			if(JBridge::IsBootStrapDll(sName)) 
+			if (loader->loadLibrary(sName))
 			{
-				delete loader;
-				loader = NULL;
-				std::ostringstream s; s
-					<< "This is a JBridge wrapper. Ignoring it. " << sName << std::endl;
-					throw psycle::host::exceptions::library_errors::loading_error(s.str());
-			}
-			else if (loader->loadLibrary(sName))
-			{
-				PluginEntryProc mainEntry = loader->getMainEntry ();
+				if(useJBridge && JBridge::IsBootStrapDll((HMODULE)loader->module)) 
+				{
+					delete loader;
+					loader = NULL;
+					std::ostringstream s; s
+						<< "This is a JBridge wrapper. Ignoring it. " << sName << std::endl;
+						throw psycle::host::exceptions::library_errors::loading_error(s.str());
+				}
+				PluginEntryProc mainEntry = loader->getMainEntry();
 				if(!mainEntry)
 				{
 					delete loader;

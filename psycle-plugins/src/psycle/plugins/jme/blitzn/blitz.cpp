@@ -339,7 +339,7 @@ void mi::Init()
 	globals.sampleRate = pCB->GetSamplingRate();
 	globals.srCorrection = 44100.0f / (float)globals.sampleRate;
 	globals.wavetableCorrection=44100.f/globals.sampleRate;
-	fxsamples=256*globals.sampleRate/44100;
+	fxsamples=256*(globals.sampleRate)/44100;
 
 	globals.restartfx=0;
 	globals.stereoPos=0;
@@ -551,8 +551,31 @@ void mi::Command(){
 // Work... where all is cooked
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tracks){
 	float slr[2]={0.0f,0.0f};
-	int minimum = std::min(numsamples,fxsamples);
-	if (minimum>0) {
+	while (numsamples > 0) {
+		if(fxsamples == 0) {
+			//SyncViber and FiltViber ar not samplerate-corrected, because fxsamples is.
+			SyncViber.next();
+			globals.syncvibe=(float)SyncViber.getPosition();
+			FiltViber.next();
+			globals.filtvibe=(float)FiltViber.getPosition();
+			//InitLoop is not samplerate-corrected, because fxsamples is.
+			InitLoop[0].next();
+			InitLoop[1].next();
+			InitLoop[2].next();
+			InitLoop[3].next();
+			globals.initposition[0]=InitLoop[0].getPosition();
+			globals.initposition[1]=InitLoop[1].getPosition();
+			globals.initposition[2]=InitLoop[2].getPosition();
+			globals.initposition[3]=InitLoop[3].getPosition();
+
+			for(int c=0;c<tracks;c++){
+				if(track[c].ampEnvStage){
+					track[c].PerformFx();
+				}
+			}
+			fxsamples=(256*globals.sampleRate)/44100;
+		}
+		int minimum = std::min(numsamples,fxsamples);
 		for(int c=0;c<tracks;c++){
 			if(track[c].ampEnvStage){
 				float *xpsamplesleft=psamplesleft;
@@ -570,50 +593,8 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		fxsamples-=minimum;
 		numsamples-=minimum;
-	}
-
-	if(fxsamples == 0) {
-		//SyncViber and FiltViber ar not samplerate-corrected, because fxsamples is.
-		SyncViber.next();
-		globals.syncvibe=(float)SyncViber.getPosition();
-		FiltViber.next();
-		globals.filtvibe=(float)FiltViber.getPosition();
-		//InitLoop is not samplerate-corrected, because fxsamples is.
-		InitLoop[0].next();
-		InitLoop[1].next();
-		InitLoop[2].next();
-		InitLoop[3].next();
-		globals.initposition[0]=InitLoop[0].getPosition();
-		globals.initposition[1]=InitLoop[1].getPosition();
-		globals.initposition[2]=InitLoop[2].getPosition();
-		globals.initposition[3]=InitLoop[3].getPosition();
-
-		for(int c=0;c<tracks;c++){
-			if(track[c].ampEnvStage){
-				track[c].PerformFx();
-			}
-		}
-		fxsamples=256*globals.sampleRate/44100;
-	}
-	if (numsamples > 0 ) {
-		float *psamplesleft2=psamplesleft+minimum;
-		float *psamplesright2=psamplesright+minimum;
-		for(int c=0;c<tracks;c++){
-			if(track[c].ampEnvStage){
-				float *xpsamplesleft=psamplesleft2;
-				float *xpsamplesright=psamplesright2;
-				--xpsamplesleft;
-				--xpsamplesright;
-
-				int xnumsamples = numsamples;
-				do {
-					track[c].GetSample(slr);
-					*++xpsamplesleft+=slr[0];
-					*++xpsamplesright+=slr[1];
-				} while(--xnumsamples);
-			}
-		}
-		fxsamples-=numsamples;
+		psamplesleft+=minimum;
+		psamplesright+=minimum;
 	}
 }
 

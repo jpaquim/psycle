@@ -1939,23 +1939,24 @@ namespace psycle
 			legacySend_.resize(numrets);
 			for (int i(0);i<numrets;i++)
 			{
-				LegacyWire& leg = legacyReturn_[i];
-				pFile->Read(&leg._inputMachine,sizeof(leg._inputMachine));	// Incoming (Return) connections Machine number
-				pFile->Read(&leg._inputConVol,sizeof(leg._inputConVol));	// /volume value for the current return wire. Range 0.0..1.0. (As opposed to the standard wires)
-				pFile->Read(&leg._wireMultiplier,sizeof(leg._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
-				if (leg._inputMachine == -1) leg._inputCon = false;
-				if (leg._inputConVol > 8.0f) { //bugfix on 1.10.1 alpha
-					leg._inputConVol /= 32768.f;
+				{
+					LegacyWire& leg = legacyReturn_[i];
+					pFile->Read(&leg._inputMachine,sizeof(leg._inputMachine));	// Incoming (Return) connections Machine number
+					pFile->Read(&leg._inputConVol,sizeof(leg._inputConVol));	// /volume value for the current return wire. Range 0.0..1.0. (As opposed to the standard wires)
+					pFile->Read(&leg._wireMultiplier,sizeof(leg._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
+					if (leg._inputConVol > 8.0f) { //bugfix on 1.10.1 alpha
+						leg._inputConVol /= 32768.f;
+					}
 				}
-				
-				LegacyWire& leg2 = legacySend_[i];
-				pFile->Read(&leg2._inputMachine,sizeof(leg2._inputMachine));	// Outgoing (Send) connections Machine number
-				pFile->Read(&leg2._inputConVol,sizeof(leg2._inputConVol));	//volume value for the current send wire. Range 0.0..1.0. (As opposed to the standard wires)
-				pFile->Read(&leg2._wireMultiplier,sizeof(leg2._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
-				if (leg._inputConVol > 0.f && leg._inputConVol < 0.0002f) { //bugfix on 1.10.1 alpha
-					leg._inputConVol *= 32768.f;
-				}
-				
+				{
+					LegacyWire& leg2 = legacySend_[i];
+					pFile->Read(&leg2._inputMachine,sizeof(leg2._inputMachine));	// Outgoing (Send) connections Machine number
+					pFile->Read(&leg2._inputConVol,sizeof(leg2._inputConVol));	//volume value for the current send wire. Range 0.0..1.0. (As opposed to the standard wires)
+					pFile->Read(&leg2._wireMultiplier,sizeof(leg2._wireMultiplier));	// Ignore. (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
+					if (leg2._inputConVol > 0.f && leg2._inputConVol < 0.0002f) { //bugfix on 1.10.1 alpha
+						leg2._inputConVol *= 32768.f;
+					}
+				}				
 				for (int j(0);j<numrets;j++)
 				{
 					bool send(false);
@@ -2136,8 +2137,8 @@ namespace psycle
 			for (int j(0); j<numreturns(); ++j)
 			{
 				LegacyWire& wire = legacyReturn_[j];
-				if (wire._inputCon
-					&& wire._inputMachine >= 0 	&& wire._inputMachine < MAX_MACHINES
+				//inputCon is not used in legacyReturn.
+				if ( wire._inputMachine >= 0 && wire._inputMachine < MAX_MACHINES
 					&& _macIndex != wire._inputMachine && _pMachine[wire._inputMachine])
 				{
 					if (wire.pinMapping.size() > 0) {
@@ -2157,6 +2158,7 @@ namespace psycle
 					}
 				}
 			}
+			
 			RecalcMaster();
 
 			legacyReturn_.clear();

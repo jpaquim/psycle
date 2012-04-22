@@ -84,7 +84,7 @@ void Player::start_threads(int thread_count) {
 	//compute_plan();
 
 	stop_requested_ = suspend_requested_ = false;
-	processed_node_count_ = suspended_ = 0;
+	processed_node_count_ = suspended_ = waiting_ = 0;
 
 	if(loggers::information()) {
 		std::ostringstream s;
@@ -233,12 +233,9 @@ void Player::start_threads(int thread_count) {
 			CVSTHost::vstTimeInfo.flags |= kVstTempoValid;
 		}
 
+//This method should be called from an exclusively locked thread (since changing the plan in the middle
+//of work can cause unexpected problems (this is especially true with the send_return mixer.
 void Player::suspend_and_compute_plan() {
-	if(!_playing) {
-		// no threads running, so no nothing to suspend; simply compute the plan and return.
-		compute_plan();
-		return;
-	}
 	// before we compute the plan, we need to suspend all the threads.
 	{ scoped_lock lock(mutex_);
 		suspend_requested_ = true;
@@ -827,11 +824,12 @@ void Player::process_loop(std::size_t thread_number) throw(std::exception) {
 	while(true) {
 		Machine * node_;
 		{ scoped_lock lock(mutex_);
-			while(
-				!nodes_queue_.size() &&
-				!suspend_requested_ &&
-				!stop_requested_
-			) condition_.wait(lock);
+			while( !nodes_queue_.size() && !suspend_requested_ && !stop_requested_ )
+			{	
+				waiting_++;
+				condition_.wait(lock);
+				waiting_--;
+			}
 
 			if(stop_requested_) break;
 
@@ -857,6 +855,7 @@ void Player::process_loop(std::size_t thread_number) throw(std::exception) {
 		bool const done(node.sched_process(samples_to_process_, measure_cpu_usage_));
 
 		int notify(0);
+		bool all_threads_waiting(false);
 		{ scoped_lock lock(mutex_);
 			node.sched_processed_ = done;
 			//If not done, it means it needs to be reprocessed somewhere.
@@ -890,10 +889,21 @@ void Player::process_loop(std::size_t thread_number) throw(std::exception) {
 					}
 				}
 			}
+			all_threads_waiting=waiting_+1 == threads_.size();
 		}
 		switch(notify) {
 			case -1: main_condition_.notify_all(); break; // wake up the main processing loop
-			case 0: break; // no successor ready
+			case 0: //no successor ready. Maybe another thread is working.
+				if (all_threads_waiting && nodes_queue_.empty()) { //This should not happen, but when it does, it causes a deadlock. So at least, prevent the application hang.
+					char buf[250];
+					sprintf(buf,"Invalid condition found: no successor. Preventing application hang. w:%d,q:%d,t:%d,g:%d:p:%d",
+						waiting_,nodes_queue_.size(),threads_.size(),graph_size_,processed_node_count_);
+					if(loggers::warning()) loggers::warning()(buf, UNIVERSALIS__COMPILER__LOCATION);
+					//::MessageBox(NULL,buf, "bla",MB_OK);
+					processed_node_count_ = graph_size_;
+					main_condition_.notify_all();// wake up the main processing loop
+				}
+				break;
 			case 1: break; // If there's only one successor ready, we don't notify since it can be processed in the same thread.
 			case 2: condition_.notify_one(); break; // notify one thread that we added nodes to the queue
 			default: condition_.notify_all(); // notify all threads that we added nodes to the queue

@@ -28,13 +28,18 @@ namespace psycle { namespace host {
 			m_Progress.SetPos(0);
 			m_Progress.SetRange(0,16384);
 			AfxGetApp()->DoWaitCursor(1);
-			return true;
+			return TRUE;
+		}
+		void CProgressDialog::OnCancel()
+		{
+			OnClose();
 		}
 
 		void CProgressDialog::OnClose()
 		{
 			CDialog::OnClose();
 			AfxGetApp()->DoWaitCursor(-1);
+			DestroyWindow();
 		}
 
 	}   // namespace

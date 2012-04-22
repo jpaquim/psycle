@@ -272,7 +272,7 @@ namespace psycle
 			if(!Global::machineload().lookupDllName(psFileName,sPath,MACH_PLUGIN,shellIdx)) 
 			{
 				// Check Compatibility Table.
-				// Probably could be done with the dllNames lockup.
+				// Probably could be done with the dllNames lookup.
 				//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
 				if (psFileName == "blitz.dll")
 				{

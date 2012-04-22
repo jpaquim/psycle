@@ -22,17 +22,16 @@ bool JBridge::IsBootStrapDll(const char * path)
 		//some error…
 		return ret;
 	}
-
-	//Exported dummy function to identify this as a bootstrap dll.
-	if( GetProcAddress(hModule, "JBridgeBootstrap") )
-	{
-		//it’s a bootstrap dll
-		ret = true;
-	}
+	ret = IsBootStrapDll(hModule);
 
 	FreeLibrary( hModule );
 
 	return ret;
+}
+bool JBridge::IsBootStrapDll(HMODULE hModule)
+{
+	//Exported dummy function to identify this as a bootstrap dll.
+	return GetProcAddress(hModule, "JBridgeBootstrap") != 0;
 }
 
 // Get path to JBridge proxy

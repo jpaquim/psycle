@@ -172,6 +172,7 @@ namespace psycle
 			bool stop_requested_;
 			bool suspend_requested_;
 			std::size_t suspended_;
+			std::size_t waiting_;
 
 			typedef std::list<Machine*> nodes_queue_type;
 			/// nodes with no dependency.

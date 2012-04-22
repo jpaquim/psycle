@@ -252,7 +252,7 @@ namespace psycle
 				<< std::endl;
 			out.flush();
 
-			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, cacheValid ? &progress : 0);
+			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, nativePlugs, MACH_PLUGIN, out, &progress);
 
 			out.flush();
 			{
@@ -268,7 +268,7 @@ namespace psycle
 				<< std::endl;
 			out.flush();
 
-			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, cacheValid ? &progress : 0);
+			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, &progress);
 
 			{
 				std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
@@ -575,6 +575,7 @@ namespace psycle
 							// [bohan] So, we catch exceptions here by calling vstPlug.Free(); explicitly.
 							try
 							{
+								vstPlug->Free();
 								delete vstPlug;
 								// [bohan] phatmatik crashes here...
 								// <magnus> so does PSP Easyverb, in FreeLibrary
