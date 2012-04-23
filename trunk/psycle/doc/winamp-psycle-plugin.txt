@@ -91,7 +91,7 @@ $$      $$$$              $..$$     $$...........
 
 \/ Version Revision
 --------------------
-1.10 (12-12-2011)
+1.10 (23-04-2012)
 -----------------
 . Engine update to 1.10.1
 . Update of the plugin to support Winamp 5.5 translations. Compatibility maintained with 2.x compatible players

@@ -287,6 +287,10 @@
 				<param name="ImageNumber" value="11">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Split and dupe">
+				<param name="Local" value="Internal_Duplicator2.htm">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Mixer Machine">
 				<param name="Local" value="Internal_Mixer.htm">
 				<param name="ImageNumber" value="11">

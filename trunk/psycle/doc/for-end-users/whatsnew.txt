@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
-1.10.1  | 2012 | release                     | [JAZ] & bohan
+1.10.1  | 2012 | release                     | [JAZ] with collaboration from others
 1.10.0  | 2011 | release					 | [JAZ] & bohan.
 1.8.8   | 2010 | beta, RC					 | [JAZ] & bohan.
 1.8.6.1	| 2009 | maintenance                 | [JAZ] & alk & bohan.
@@ -49,7 +49,7 @@ v1.10.1
 + New release of Winamp plugin with support for winamp localization languages, 24 and 32bit integer output, saves configuration in winamp instead of registry and all the features of Psycle 1.10.
 + Number of audio threads configurable in the settings dialog. Value of 0 detects it automatically.
 + Added back the option to save .wav file in the same directory than .psy file
-+ New note duplicator machine that allows keyboard splitting.
++ New note duplicator machine that allows keyboard splitting. (thanks stefan)
 + Implementation of Multi-io audio. Support for multi-pin VST machines. (Find the option in the wire dialog)
 + pitch wheel for sequenced midi mode (it was already possible in immediate mode).
 + Added save to HKLM registry (all users) and All users directory. Allow configuring relative directories (easier usage from USB drive. Warning: saving settings in .ini files is slow. Need to make a new implementation).
@@ -58,21 +58,20 @@ v1.10.1
 * Changes to better catch unhandled exceptions.
 * Changes in new machine dialog for better usage in smaller screens. Also option to recreate cache in the configuration menu.
 * Internal source code changes to have multiple "Global" classes and separation of plugin cache classes (This eases the development of the winamp plugin).
-* Change in mouse tweaking, now reaching the end and moving back is easier.
+* Change in mouse tweaking, now reaching the end and moving back is easier. (thanks stefan)
 ! Fixes in the configuration of vst bit bridging.
 ! Add new track in pattern now shifts the names correctly.
 ! Fixed crash in Mixer machine when tweaking a non-valid send.
 ! Special keys dialog in the configuration was not working.
-! Fixed increased CPU usage in machine view.
-! Fixed creation of a new sampler machine each time load, edit or wave edit buttons where pushed
-! Fixed saving .fxb and .fxp using the "Save Preset" for VSTs.
+! Fixed increased CPU usage in machine view. (thanks stefan)
+! Fixed creation of a new sampler machine each time load, edit or wave edit buttons where pushed.
+! Fixed saving .fxb and .fxp using the "Save Preset" for VSTs. (thanks angelus)
 ! Fix for CPU clock calculation on P4 and similar. This affected especially the MIDI synchronization code.
-! Fix crash after opening and closing a vst machine and receiving an Automation (f.ex: with FreeAmp 2.5)
-! Fix in loading and saving of skins.
-! Fix on plucked string where two instances caused wrong sound.
+! Fix crash after opening and closing a vst machine and receiving an Automation (f.ex: with FreeAmp 2.5) (thanks 
+! Fix on plucked string where two instances caused wrong sound. (thanks angelus)
 ! Fix where settings could be loaded from one place, and saved to a different one.
-! Fix in sking (theme) loading and saving.
-! Fix in the plugin cache (now keeps the lettercase of the plugin dll). This fixes FabFilter plugins.
+! Fix in sking (theme) loading and saving. (thanks angelus)
+! Fix in the plugin cache (now keeps the lettercase of the plugin dll). This fixes FabFilter plugins. (thanks jme for making us aware of this)
 ! Compatibility improvements for older songs made with arguru synth/bass plugins.
 ! Other smaller fixes and changes.
 

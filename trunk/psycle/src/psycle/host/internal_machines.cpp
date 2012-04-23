@@ -259,7 +259,7 @@ namespace psycle
 			{
 				sprintf(name,"Output Machine %d",numparam);
 			} else if (numparam >=NUMMACHINES && numparam<NUMMACHINES*2) {
-				sprintf(name,"Note Offset %d",numparam-NUMMACHINES);
+				sprintf(name,"Transpose %d",numparam-NUMMACHINES);
 			}
 			else name[0] = '\0';
 		}
@@ -290,8 +290,10 @@ namespace psycle
 				else sprintf(parVal,"(disabled)");
 
 			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
-				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUMMACHINES]+60)%12],(noteOffset[numparam-NUMMACHINES]+60)/12);
+				if (noteOffset[numparam-NUMMACHINES] > 1 || noteOffset[numparam-NUMMACHINES] < -1)
+					sprintf(parVal,"%d Halftones",noteOffset[numparam-NUMMACHINES]);
+				else
+					sprintf(parVal,"%d Halftone",noteOffset[numparam-NUMMACHINES]);
 			}
 			else parVal[0] = '\0';
 		}
@@ -465,8 +467,6 @@ namespace psycle
 					sprintf(parVal,"%d Halftones",noteOffset[numparam-NUMMACHINES]);
 				else
 					sprintf(parVal,"%d Halftone",noteOffset[numparam-NUMMACHINES]);
-				/*char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-				sprintf(parVal,"%s%d",notes[(noteOffset[numparam-NUMMACHINES]+60)%12],(noteOffset[numparam-NUMMACHINES]+60)/12);*/
 			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*3) {
 				char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 				sprintf(parVal,"%s%d",notes[(lowKey[numparam-2*NUMMACHINES])%12],(lowKey[numparam-2*NUMMACHINES]+a440)/12);

@@ -58,7 +58,9 @@ JosepMa didn't leave immediately, and in autumn of 2009, Psycle 1.8.6 (and 1.8.6
 
 Most of the 2010 passed without development, as JosepMa had progressively left, and there was no other developer. But at the end of summer, due to requests on the boards and feelings about Psycle, JosepMa decided to put back on the hat of developer and started working on Psycle 1.8.8 beta1.
 
-The original goal was only to add a couple more features to the 1.8.5/1.8.6 branch from the development branch (like multithreaded audio engine) but soon it evolved into a full upgrade making it a more up-to-date software (x86 and x64 compatibility, better Vista/7 integration, reimplementation of several parts of the code, like the whole settings system, better audio and MIDI integration, new skins and graphics and an upgrade of most of the plugins with better parameter window information and samplerate awareness). For this reason, 1.8.8 was released as 1.10.0.
+The original goal was only to add a couple more features to the 1.8.5/1.8.6 branch from the development branch (like multithreaded audio engine) but soon it evolved into a full upgrade making it a more up-to-date software (x86 and x64 compatibility, better Vista/7 integration, reimplementation of several parts of the code, like the whole settings system, better audio and MIDI integration, new skins and graphics and an upgrade of most of the plugins with better parameter window information and samplerate awareness). For this reason, 1.8.8 was released as 1.10.0 in october 2011.
+
+In april 2012, version 1.10.1 was released. This version had two main features: multi-io support for VSTs (Pin connections. There is no speaker setup) and an up-to-date winamp plugin (both, the engine used, and the plugin itself), as well as many small and not so small bugfixes.
 
 Roadmap
 =======

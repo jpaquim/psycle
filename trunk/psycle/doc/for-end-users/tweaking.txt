@@ -172,8 +172,8 @@
 -------------------------------------------------------------------
 
 	The Mcm command can also be used for another purpose with both, Native and VST plugins.
-	It allows to send a command to another channel. This way, you can workaround
-	the limitation where you can only put one of them per channel.
+	It allows to send a command to another track. This way, you can workaround
+	the limitation where you can only put one of them per track.
 	
 	Syntax is as follows:
 	

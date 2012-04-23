@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.10.0 ---------
+				------------------------------- 1.10.1 ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -35,7 +35,7 @@ Here some features of Psycle:
 
 - A 64 Tracks Pattern Editor, with up to 1024 lines.
 - 256 sequence positions.
-- Audio Routing (machine) view to interconnect the virtual machines in order to
+- Multi-channel audio Routing (machine) view to interconnect the virtual machines in order to
   apply different effects.
 - Internal Stereo Sampler unit which supports .wav and .iff files of any
   sampling rate, 8/16 and 24bits, mono or stereo.
