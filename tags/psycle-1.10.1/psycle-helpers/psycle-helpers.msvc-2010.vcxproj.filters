@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="psycle">
+      <UniqueIdentifier>{09cc4c04-df8f-4967-91dc-c7ae7af4f67e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\helpers">
+      <UniqueIdentifier>{fecab29e-afd1-4a18-b3d5-7d9822cc6651}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\helpers\math">
+      <UniqueIdentifier>{22a380b1-590a-4cd4-9314-4ba5f4d5a180}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\helpers\dsp">
+      <UniqueIdentifier>{58068a94-a219-49f5-9ca1-5c3def6a97a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\helpers\file">
+      <UniqueIdentifier>{214e4682-ec75-4d33-bb3c-62e43a3da063}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\psycle\helpers\hexstring_to_binary.cpp">
+      <Filter>psycle\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\hexstring_to_integer.cpp">
+      <Filter>psycle\helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\dither.cpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\dsp.cpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\fft.cpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\filter.cpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\mersennetwister.cpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\abstractiff.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\appleaiff.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\binread.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\datacompression.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\eaiff.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\msriff.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\riff.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\riffwave.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\psycle\helpers\hexstring_to_binary.hpp">
+      <Filter>psycle\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\hexstring_to_integer.hpp">
+      <Filter>psycle\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math.hpp">
+      <Filter>psycle\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\ring_buffer.hpp">
+      <Filter>psycle\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\scale.hpp">
+      <Filter>psycle\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\value_mapper.hpp">
+      <Filter>psycle\helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\clip.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\constants.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\erase_all_nans_infinities_and_denormals.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\erase_denormals.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\log.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\lrint.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\lround.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\math.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\sin.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\sincos.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\sinseq.hpp">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\dither.hpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\dsp.hpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\fft.hpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\filter.hpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\mersennetwister.hpp">
+      <Filter>psycle\helpers\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\abstractiff.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\appleaiff.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\binread.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\datacompression.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\eaiff.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\msriff.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\riff.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\riffwave.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

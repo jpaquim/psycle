@@ -1,0 +1,13 @@
+* #include scanner for msvc: cl.exe -showincludes ... http://www.conifersystems.com/2008/10/09/dependencies-from-showincludes/
+
+* --help shouldn't create the build dir.
+
+* need a way to select a script from the command line instead of just a source dir (via --src-dir).
+
+* integrate binreloc.
+
+* versionned libs; also take care of relinking clients of shared libs when their version changed.
+
+* rewrite colorgcc in python; low priority, since clang already has colors natively.
+
+* experiment with beta-mode like tup.

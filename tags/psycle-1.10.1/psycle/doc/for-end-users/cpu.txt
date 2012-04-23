@@ -1,0 +1,12 @@
+CPU Requirements depend on the version that you install.
+.
+Currently, there are two versions. a x86 version and an x64 version. They are installed by the setup depending on the OS that you have.
+
+	- x86, SSE2 support required:
+			AMD: Athlon 64, Athlon FX.
+			Intel: Pentium 4, Celeron Pentium 4, Pentium M, Centrino and newer
+
+	- x64, 64bits processor needed
+			AMD: Athlon 64 or newer.
+			Intel: Pentium Core, Core 2 and above. (x86-64. This excludes IA-64).
+
