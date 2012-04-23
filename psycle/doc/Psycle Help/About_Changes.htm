@@ -175,6 +175,12 @@
 			<td>release</td>
 			<td>[JAZ] &amp; bohan.</td>
 		</tr>
+		<tr>
+			<td>1.10.1</td>
+			<td>2012</td>
+			<td>release</td>
+			<td>[JAZ] with collaboration from others.</td>
+		</tr>
 	</tbody>
 </table>
 <p>Versions are composed this way since 1.7.24, (except 1.8.5, which was a release):</p>
@@ -195,6 +201,39 @@ each CVS update.<br />
 <span class="change">*</span> = change <br />
 <span class="bugfix">!</span> = bugfix</p>
 <br />
+<p class="head3">v1.10.1 </p>
+<p>
+<span class="addition">+</span> New release of Winamp plugin with support for winamp localization languages, 24 and 32bit integer output, saves configuration in winamp instead of registry and all the features of Psycle 1.10.<br />
+<span class="addition">+</span> Number of audio threads configurable in the settings dialog. Value of 0 detects it automatically.<br />
+<span class="addition">+</span> Added back the option to save .wav file in the same directory than .psy file<br />
+<span class="addition">+</span> New note duplicator machine that allows keyboard splitting.<br />
+<span class="addition">+</span> Implementation of Multi-io audio. Support for multi-pin VST machines. (Find the option in the wire dialog)<br />
+<span class="addition">+</span> pitch wheel for sequenced midi mode (it was already possible in immediate mode).<br />
+<span class="addition">+</span> Added save to HKLM registry (all users) and All users directory. Allow configuring relative directories (easier usage from USB drive. Warning: saving settings in .ini files is slow. Need to make a new implementation).<br />
+<span class="addition">+</span>  Added option to delete the other settings files/registry when selecting one in the settings dialog.<br />
+<span class="change">*</span> Better song duration calculation. Also improved seeking in winamp plugin.<br />
+<span class="change">*</span> Changes to better catch unhandled exceptions.<br />
+<span class="change">*</span> Changes in new machine dialog for better usage in smaller screens. Also option to recreate cache in the configuration menu.<br />
+<span class="change">*</span> Internal source code changes to have multiple "Global" classes and separation of plugin cache classes (This eases the development of the winamp plugin).<br />
+<span class="change">*</span> Change in mouse tweaking, now reaching the end and moving back is easier.<br />
+<span class="bugfix">!</span> Fixes in the configuration of vst bit bridging.<br />
+<span class="bugfix">!</span> Add new track in pattern now shifts the names correctly.<br />
+<span class="bugfix">!</span> Fixed crash in Mixer machine when tweaking a non-valid send.<br />
+<span class="bugfix">!</span> Special keys dialog in the configuration was not working.<br />
+<span class="bugfix">!</span> Fixed increased CPU usage in machine view.<br />
+<span class="bugfix">!</span> Fixed creation of a new sampler machine each time load, edit or wave edit buttons where pushed<br />
+<span class="bugfix">!</span> Fixed saving .fxb and .fxp using the "Save Preset" for VSTs.<br />
+<span class="bugfix">!</span> Fix for CPU clock calculation on P4 and similar. This affected especially the MIDI synchronization code.<br />
+<span class="bugfix">!</span> Fix crash after opening and closing a vst machine and receiving an Automation (f.ex: with FreeAmp 2.5)<br />
+<span class="bugfix">!</span> Fix in loading and saving of skins.<br />
+<span class="bugfix">!</span> Fix on plucked string where two instances caused wrong sound.<br />
+<span class="bugfix">!</span> Fix where settings could be loaded from one place, and saved to a different one.<br />
+<span class="bugfix">!</span> Fix in sking (theme) loading and saving.<br />
+<span class="bugfix">!</span> Fix in the plugin cache (now keeps the lettercase of the plugin dll). This fixes FabFilter plugins.<br />
+<span class="bugfix">!</span> Compatibility improvements for older songs made with arguru synth/bass plugins.<br />
+<span class="bugfix">!</span> Other smaller fixes and changes.<br />
+</p>
+
 <p class="head3">v1.10.0 (1.8.8 was renamed 1.10 before release)</p>
 <p>
 <span class="addition">+</span> New default option to show note A4 in patterns as standard A4 (440Hz). Unchecking it keeps the old A5 = 440Hz.<br />

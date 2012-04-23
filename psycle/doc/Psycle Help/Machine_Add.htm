@@ -50,11 +50,21 @@ and from the <a href="Machine_Wires.htm">Wire dialog</a>
 	</tr>
 	<tr>
 		<td valign="top"><b><i>Load new blitz and gamefx:</i></b></td>
-		<td>This is a song loading compatibility option. gamefx and blitz have a new dll name
-		now and are incompatible with the old version. This option tells the loader to use
-		the new dll instead of the old one. This should only be necessary for songs made
-		with the 1.8.8 beta (or by having used the unofficial release of the plugin). Once saved
+		<td>This is a song loading compatibility option.<br /> New versions of gamefx and blitz are incompatible with the old ones (settings work differently and has a sligtly different sound) so now they have a different dll name.<br />
+		The option tells the loader to use the new dll instead of the old one.
+		It should only be necessary for songs made
+		with the 1.8.8 beta, or with the unofficial release of the plugin. <br />Once the psy file is saved again,
 		the dll name will be either the older of the newer and the option will not matter.</td>
+	</tr>
+	<tr>
+		<td valign="top"><b><i><a name="regenerate">Regenerate plugin cache</a>:</i></b></td>
+		<td>Psycle uses a caching mechanism to store the names and 
+		location of the different machines that it can use. With this button, the file is deleted and completely regenerated.</td>
+	</tr>
+	<tr>
+		<td valign="top"><b><i>Check for new plugins:</i></b></td>
+		<td>Every time Psycle starts, it removes from the cache those plugins that do not exist anymore, or which dll has been modified. It does not automatically scan for new plugins. This option allows scanning for new plugins keeping
+		the existing cache.</td>
 	</tr>
 </table>
 
