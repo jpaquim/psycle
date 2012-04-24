@@ -255,8 +255,8 @@ namespace psycle
 			{
 				std::vector<Wire> inWire1;
 				std::vector<Wire> inWire2;
-				std::vector<Wire> outWire1;
-				std::vector<Wire> outWire2;
+				std::vector<Wire*> outWire1;
+				std::vector<Wire*> outWire2;
 				Wire unused(mac1);
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
@@ -265,14 +265,18 @@ namespace psycle
 					mac1->inWires[i].Disconnect();
 					mac2->inWires[i].Disconnect();
 					if (mac1->outWires[i]) {
-						outWire1.push_back(*mac1->outWires[i]);
-						outWire2.push_back(*mac2->outWires[i]);
+						outWire1.push_back(mac1->outWires[i]);
 						mac1->outWires[i]->Disconnect();
+					}
+					else {
+						outWire1.push_back(&unused);
+					}
+					if (mac2->outWires[i]) {
+						outWire2.push_back(mac2->outWires[i]);
 						mac2->outWires[i]->Disconnect();
 					}
 					else {
-						outWire1.push_back(unused);
-						outWire2.push_back(unused);
+						outWire2.push_back(&unused);
 					}
 				}
 
@@ -305,16 +309,16 @@ namespace psycle
 								,&inWire2[i].GetMapping());
 						}
 					}
-					if (outWire1[i].Enabled()) {
-						if (outWire1[i].GetDstMachine()._macIndex != mac2->_macIndex) {
-							outWire1[i].ConnectSource(*mac2, 0, i, &outWire1[i].GetMapping());
-							outWire1[i].SetVolume(outWire1[i].GetVolume());
+					if (outWire1[i] != &unused) {
+						if (outWire1[i]->GetDstMachine()._macIndex != mac2->_macIndex) {
+							outWire1[i]->ConnectSource(*mac2, 0, i, &outWire1[i]->GetMapping());
+							outWire1[i]->SetVolume(outWire1[i]->GetVolume());
 						}
 					}
-					if (outWire2[i].Enabled()) {
-						if (outWire2[i].GetDstMachine()._macIndex != mac1->_macIndex) {
-							outWire2[i].ConnectSource(*mac1, 0, i, &outWire2[i].GetMapping());
-							outWire2[i].SetVolume(outWire2[i].GetVolume());
+					if (outWire2[i] != &unused) {
+						if (outWire2[i]->GetDstMachine()._macIndex != mac1->_macIndex) {
+							outWire2[i]->ConnectSource(*mac1, 0, i, &outWire2[i]->GetMapping());
+							outWire2[i]->SetVolume(outWire2[i]->GetVolume());
 						}
 					}
 				}

@@ -470,25 +470,26 @@ inline void CTrack::NewPhases() {
 			currentcenter1 = Center1 + (float)pwavetabLFO1[((unsigned)PhaseLFO1) >> 21] * LFO1Amount / (127.0 * 0x8000);
 			if(currentcenter1 <= 0) currentcenter1 = 0.00001f;
 			else if(currentcenter1 >= 1) currentcenter1 = 0.99999f;
-		} else // No LFO
+		} else {// No LFO
 			currentcenter1 = Center1;
-			PhScale1A = 0.5 / currentcenter1;
-			PhScale1B = 0.5 / (1 - currentcenter1);
-			currentcenter1 *= 0x8000000;
-			// PW2
-			if(LFO_PW2) { //LFO_PW_Mod
-				currentcenter2 = Center2 + (float)pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount / (127.0 * 0x8000);
-				if(currentcenter2 <= 0) currentcenter2 = 0.00001f;
-				else if(currentcenter2 >= 1) currentcenter2 = 0.99999f;
-			} else // No LFO
-				currentcenter2 = Center2;
-				
-			PhScale2A = 0.5 / currentcenter2;
-			PhScale2B = 0.5 / (1 - currentcenter2);
-			currentcenter2 *= 0x8000000;
+		}
+		PhScale1A = 0.5 / currentcenter1;
+		PhScale1B = 0.5 / (1 - currentcenter1);
+		currentcenter1 *= 0x8000000;
+		// PW2
+		if(LFO_PW2) { //LFO_PW_Mod
+			currentcenter2 = Center2 + (float)pwavetabLFO2[((unsigned)PhaseLFO2) >> 21] * LFO2Amount / (127.0 * 0x8000);
+			if(currentcenter2 <= 0) currentcenter2 = 0.00001f;
+			else if(currentcenter2 >= 1) currentcenter2 = 0.99999f;
+		} else { // No LFO
+			currentcenter2 = Center2;
+		}
+		PhScale2A = 0.5 / currentcenter2;
+		PhScale2B = 0.5 / (1 - currentcenter2);
+		currentcenter2 *= 0x8000000;
 
-			// SYNC
-			if(Sync) Phase2 = Phase1; // !!!!!
+		// SYNC
+		if(Sync) Phase2 = Phase1; // !!!!!
 	}
 
 	Phase1 &= 0x7ffffff;

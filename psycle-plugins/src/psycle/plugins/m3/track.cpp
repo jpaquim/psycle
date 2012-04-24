@@ -12,55 +12,61 @@ void CTrack::Stop()
 void CTrack::Init()
 {
 	_channel = -1;
-
-	noise1 = noise2 = Sync = false;
-	RandomMixType = false;
-	RandomWave1 = false;
-	RandomWave2 = false;
-	RandomWaveSub = false;
-	LFO1Noise = LFO2Noise = false;
-	LFO1Synced = LFO2Synced = false;
-	AEGState = EGS_NONE;
-	FEGState = EGS_NONE;
-	PEGState = EGS_NONE;
-	Frequency = FrequencyFrom = 0.0;
-	r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
-	noisePhase = Phase1 = Phase2 = PhaseSub = PhaseLFO1 = PhaseLFO2 = 0; // Osc starten neu
-	x1 = x2 = y1 = y2 = 0;
-	pnoise = WaveTable[4];
-	OldOut = 0;
+	Note = 0;
 	pwavetab1=pwavetab2=pwavetabsub=pwavetabLFO1=pwavetabLFO2= WaveTable[0];
-	
-	coefsTabOffs = coefsTab; // lp
-	Cutoff = 127;
-	Resonance = 32;
-	FEGAttackTime = MSToSamples( pmi->EnvTime( 0));
-	FEGSustainTime = MSToSamples( pmi->EnvTime( 0));
-	FEGReleaseTime = MSToSamples( pmi->EnvTime( 0));
+	SubOscVol = 64;
+	noise1 = noise2 = Sync = false;
+	Bal1 = 63;
+	Bal2 = 64;
+	MixType = 0;
+	Phase1 = Phase2 = PhaseSub = 0; // Osc starten neu
+	Ph1=Ph2=1.0;
+	currentcenter1=currentcenter2=64.f;
+	Center1 = Center2 = 64/127;
+	PhScale1A = PhScale1B = PhScale2A = PhScale2B = 1.0;
+	PhaseAdd1=PhaseAdd2=0;
+	Frequency = FrequencyFrom = 0.0;
+	DetuneSemi = DetuneFine = 1;
+	Glide =  GlideActive = false;
+	GlideMul = GlideFactor = 0.f;
+	GlideTime = GlideCount = 0;
+	PitchMod = PitchModActive = false;
+	PEGState = EGS_NONE;
+	PEGAttackTime = MSToSamples( pmi->EnvTime( 0));
+	PEGDecayTime = MSToSamples( pmi->EnvTime( 0));
+	PEGCount = PEGAttackTime;
+	PitchMul = PitchFactor = 1.f;
+	PEnvMod = 0;
+	r1=26474; r2=13075; r3=18376; r4=31291; // randomGenerator
+	OldOut = 0;
+	Volume = (float)(64/245.0);
+	AEGState = EGS_NONE;
 	AEGAttackTime = MSToSamples( pmi->EnvTime( 10));
 	AEGSustainTime = MSToSamples( pmi->EnvTime( 50));
 	AEGReleaseTime = MSToSamples( pmi->EnvTime( 30));
+	AEGCount = AEGAttackTime;
+	Amp=1.f;
+	AmpAdd = 0.f;
+	coefsTabOffs = coefsTab; // lp
+	Cutoff = 127;
+	Resonance = 32;
+	x1 = x2 = y1 = y2 = 0;
 	FEnvMod = 0;
-	PEGAttackTime = MSToSamples( pmi->EnvTime( 0));
-	PEGDecayTime = MSToSamples( pmi->EnvTime( 0));
-	PEnvMod = 0;
-	Bal1 = 63;;
-	Bal2 = 64;;
-	Glide =  GlideActive = false;
-	RandomWave1 = RandomWave2 = RandomWaveSub = false;
-	SubOscVol = 64;;
-	Center1 = 64/127;
-	Center2 = 64/127;
-	DetuneSemi = DetuneFine = 1;
-	Volume = (float)(64/245.0);
+	FEGState = EGS_NONE;
+	FEGAttackTime = MSToSamples( pmi->EnvTime( 0));
+	FEGSustainTime = MSToSamples( pmi->EnvTime( 0));
+	FEGReleaseTime = MSToSamples( pmi->EnvTime( 0));
+	FEGCount = 0;
+	Cut = 0.f;
+	CutAdd = 0.f;
 	LFO_Osc1 = LFO_PW1 = LFO_Amp = LFO_Cut = false;				
 	LFO_Osc2 = LFO_PW2 = LFO_Mix = LFO_Reso = false;
-	PhaseAddLFO1 = PhaseAddLFO2 = 0;
-	MixType = 0;
-	PhScale2A=1.0;
-	PhScale2B=1.0;
-	Ph1=1.0;
-	Ph2=1.0;
+	LFO1Noise = LFO2Noise = LFO1Synced = LFO2Synced = false;
+	LFO1Amount = LFO2Amount = 0;
+	PhaseLFO1 = PhaseLFO2 = PhaseAddLFO1 = PhaseAddLFO2 = noisePhase = 0;
+	LFO1Freq=LFO2Freq=0;
+	pnoise = WaveTable[4];
+	RandomMixType = RandomWave1 = RandomWave2 = RandomWaveSub = false;
 }
 
 void CTrack::Tick( tvals const &tv)
