@@ -155,6 +155,10 @@ namespace psycle { namespace host {
 		void CPatDlg::OnCopyNames()
 		{
 			int sel = m_patternlist.GetCurSel();
+			if (sel == -1) {
+				MessageBox("No pattern selected!\nNames can only be copied from patterns with data","Copy pattern names", MB_ICONERROR|MB_OK);
+				return;
+			}
 			m_song.CopyNamesFrom(sel,patIdx);
 			FillTrackList();
 			bInit = false;

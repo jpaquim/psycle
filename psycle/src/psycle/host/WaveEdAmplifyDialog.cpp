@@ -9,23 +9,17 @@ namespace psycle { namespace host {
 		CWaveEdAmplifyDialog::CWaveEdAmplifyDialog(CWnd* pParent)
 			: CDialog(CWaveEdAmplifyDialog::IDD, pParent)
 		{
-			//{{AFX_DATA_INIT(CWaveEdAmplifyDialog)
-			//}}AFX_DATA_INIT
 		}
 
 		void CWaveEdAmplifyDialog::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CWaveEdAmplifyDialog)
 			DDX_Control(pDX, IDC_EDIT2, m_dbedit);
 			DDX_Control(pDX, IDC_SLIDER3, m_slider);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CWaveEdAmplifyDialog, CDialog)
-			//{{AFX_MSG_MAP(CWaveEdAmplifyDialog)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER3, OnCustomdrawSlider)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CWaveEdAmplifyDialog::OnInitDialog() 
@@ -51,9 +45,9 @@ namespace psycle { namespace host {
 		void CWaveEdAmplifyDialog::OnOK() 
 		{
 			
-			char db_t[6];
-			int db_i = 0;
-			m_dbedit.GetLine(0, db_t);
+			char db_t[10];
+			int db_i = 0;		
+			m_dbedit.GetWindowText(db_t,9);
 			db_i = (int)(100*atof(db_t));
 			if (db_i) EndDialog( db_i );
 			else EndDialog( AMP_DIALOG_CANCEL);
