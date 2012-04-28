@@ -176,18 +176,8 @@ Exit:
 			_callbackContext = context;
 			_pCallback = pCallback;
 			running = false;
-			HRESULT hr = S_OK;
-			IMMDeviceEnumerator *pEnumerator = NULL;
-
-			hr = CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-				IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-			EXIT_ON_ERROR(hr)
-
-			RefreshPorts(pEnumerator);
-
-Exit:
-			SAFE_RELEASE(pEnumerator)
-				_initialized = true;
+			RefreshAvailablePorts();
+			_initialized = true;
 		}
 		void WasapiDriver::Reset(void){
 			Stop();

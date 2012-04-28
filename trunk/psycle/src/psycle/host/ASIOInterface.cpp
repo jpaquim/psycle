@@ -176,6 +176,8 @@ namespace psycle
 
 		void ASIOInterface::RefreshAvailablePorts()
 		{
+			bool isPlaying = _running;
+			if (isPlaying) Stop();
 			char szNameBuf[MAX_ASIO_DRIVERS][33];
 			char* pNameBuf[MAX_ASIO_DRIVERS];
 			for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
@@ -231,6 +233,7 @@ namespace psycle
 					asioDrivers.removeCurrentDriver();
 				}
 			}
+			if (isPlaying) Start();
 		}
 		void ASIOInterface::Reset()
 		{
