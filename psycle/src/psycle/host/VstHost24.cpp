@@ -29,22 +29,21 @@ namespace psycle
 	{
 		namespace vst
 		{
-			using namespace seib::vst;
-			int plugin::pitchWheelCentre(8191);
+			int Plugin::pitchWheelCentre(8191);
 			const char* MIDI_CHAN_NAMES[16] = {
 				"MIDI Channel 01", "MIDI Channel 02","MIDI Channel 03","MIDI Channel 04",
 				"MIDI Channel 05","MIDI Channel 06","MIDI Channel 07","MIDI Channel 08",
 				"MIDI Channel 09","MIDI Channel 10","MIDI Channel 11","MIDI Channel 12",
 				"MIDI Channel 13","MIDI Channel 14","MIDI Channel 15","MIDI Channel 16"
 			};
-			host::host()
+			Host::Host()
 			{
 				quantization = 0xFFFF; SetBlockSize(STREAM_SIZE); 
 				SetTimeSignature(4,4);
 				vstTimeInfo.smpteFrameRate = kVstSmpte25fps;
 			}
 
-			void host::CalcTimeInfo(long lMask)
+			void Host::CalcTimeInfo(long lMask)
 			{
 				///\todo: cycleactive and recording to a "Start()" function.
 				// automationwriting and automationreading.
@@ -65,7 +64,7 @@ namespace psycle
 			}
 
 
-			bool host::OnCanDo(CEffect &pEffect, const char *ptr)
+			bool Host::OnCanDo(seib::vst::CEffect &pEffect, const char *ptr)
 			{
 				using namespace seib::vst::HostCanDos;
 				bool value =  CVSTHost::OnCanDo(pEffect,ptr);
@@ -89,35 +88,35 @@ namespace psycle
 				return false;                           /* per default, no.                  */
 			}
 
-			long host::DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos)
+			long Host::DECLARE_VST_DEPRECATED(OnTempoAt)(seib::vst::CEffect &pEffect, long pos)
 			{
 				//\todo: return the real tempo in the future, not always the current one
 				// pos in Sample frames, return bpm* 10000
 				return vstTimeInfo.tempo * 10000;
 			}
-			long host::OnGetOutputLatency(CEffect &pEffect)
+			long Host::OnGetOutputLatency(seib::vst::CEffect &pEffect)
 			{
 				AudioDriver* pdriver = Global::configuration()._pOutputDriver;
 				return pdriver->GetOutputLatencySamples();
 			}
-			long host::OnGetInputLatency(CEffect &pEffect)
+			long Host::OnGetInputLatency(seib::vst::CEffect &pEffect)
 			{
 				AudioDriver* pdriver = Global::configuration()._pOutputDriver;
 				return pdriver->GetInputLatencySamples();
 			}
-			void host::Log(std::string message)
+			void Host::Log(std::string message)
 			{
 				loggers::information()(message);
 			}
 
 			///\todo: Get information about this function
-			long host::OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
+			long Host::OnGetAutomationState(seib::vst::CEffect &pEffect) { return kVstAutomationUnsupported; }
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-			plugin::plugin(LoadedAEffect &loadstruct)
-				:CEffect(loadstruct)
+			Plugin::Plugin(seib::vst::LoadedAEffect &loadstruct)
+				:seib::vst::CEffect(loadstruct)
 				,queue_size(0)
 				,requiresRepl(0)
 				,requiresProcess(0)
@@ -233,10 +232,10 @@ namespace psycle
 				_editName[sizeof(_editName)-1]='\0';
 			}
 
-			plugin::~plugin()
+			Plugin::~Plugin()
 			{
 			}
-			bool plugin::OnIOChanged() {
+			bool Plugin::OnIOChanged() {
 				//TODO: IOChanged does not only reflect input pin changes.
 				// it also (usually?) means changing latency, but Psycle does not support initialDelay.
 				CExclusiveLock crit = Global::player().GetLockObject();
@@ -319,7 +318,7 @@ namespace psycle
 				}
 				return false;
 			}
-			void plugin::GetParamValue(int numparam, char * parval)
+			void Plugin::GetParamValue(int numparam, char * parval)
 			{
 				try
 				{
@@ -342,7 +341,7 @@ namespace psycle
 				}
 			}
 
-			bool plugin::DescribeValue(int parameter, char * psTxt)
+			bool Plugin::DescribeValue(int parameter, char * psTxt)
 			{
 				try {
 					if(parameter >= 0 && parameter < numParams())
@@ -360,19 +359,19 @@ namespace psycle
 				return false;
 			}
 			// AEffect asks host about its input/outputspeakers.
-			VstSpeakerArrangement* plugin::OnHostInputSpeakerArrangement()
+			VstSpeakerArrangement* Plugin::OnHostInputSpeakerArrangement()
 			{
 				//TODO: Implement a per-plugin channel setup (i.e. not per wire)
 				return NULL;
 			}
-			VstSpeakerArrangement* plugin::OnHostOutputSpeakerArrangement()
+			VstSpeakerArrangement* Plugin::OnHostOutputSpeakerArrangement()
 			{
 				//TODO: Implement a per-plugin channel setup (i.e. not per wire)
 				return NULL;
 			}
 			/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 			/// doing an "off/on" when a connection changes.
-			bool plugin::DECLARE_VST_DEPRECATED(IsInputConnected)(int input)
+			bool Plugin::DECLARE_VST_DEPRECATED(IsInputConnected)(int input)
 			{
 				for (int i(0);i<inWires.size();i++) {
 					if(inWires[i].Enabled()) {
@@ -386,7 +385,7 @@ namespace psycle
 				}
 				return false;
 			} 
-			bool plugin::DECLARE_VST_DEPRECATED(IsOutputConnected)(int output)
+			bool Plugin::DECLARE_VST_DEPRECATED(IsOutputConnected)(int output)
 			{
 				for (int i(0);i<outWires.size();i++) {
 					if(outWires[i] && outWires[i]->Enabled()) {
@@ -400,21 +399,21 @@ namespace psycle
 				}
 				return false;
 			}
-			void plugin::InputMapping(Wire::Mapping const &mapping, bool enabled)
+			void Plugin::InputMapping(Wire::Mapping const &mapping, bool enabled)
 			{
 				for(int i(0); i < mapping.size();i++) {
 					ConnectInput(mapping[i].second, enabled);
 				}
 			}
 
-			void plugin::OutputMapping(Wire::Mapping const &mapping, bool enabled)
+			void Plugin::OutputMapping(Wire::Mapping const &mapping, bool enabled)
 			{
 				for(int i(0); i < mapping.size();i++) {
 					ConnectOutput(mapping[i].first, enabled);
 				}
 			}
 
-			std::string plugin::GetOutputPinName(int pin) const {
+			std::string Plugin::GetOutputPinName(int pin) const {
 				VstPinProperties pinprop;
 				ZeroMemory(&pinprop, sizeof(VstPinProperties));
 				if (GetOutputProperties(pin,&pinprop) ) {
@@ -432,7 +431,7 @@ namespace psycle
 				return (pin%2)?"Right":"Left";
 
 			}
-			std::string plugin::GetInputPinName(int pin) const {
+			std::string Plugin::GetInputPinName(int pin) const {
 				VstPinProperties pinprop;
 				ZeroMemory(&pinprop, sizeof(VstPinProperties));
 				if(GetInputProperties(pin,&pinprop)) {
@@ -450,7 +449,7 @@ namespace psycle
 				return (pin%2)?"Right":"Left";
 			}
 
-			bool plugin::LoadSpecificChunk(RiffFile * pFile, int version)
+			bool Plugin::LoadSpecificChunk(RiffFile * pFile, int version)
 			{
 				try {
 					UINT size;
@@ -500,7 +499,7 @@ namespace psycle
 				catch(...){return false;}
 			}
 
-			void plugin::SaveSpecificChunk(RiffFile * pFile) 
+			void Plugin::SaveSpecificChunk(RiffFile * pFile) 
 			{
 				try {
 					UINT count(numParams());
@@ -540,19 +539,19 @@ namespace psycle
 				}
 			}
 
-			VstMidiEvent* plugin::reserveVstMidiEvent() {
+			VstMidiEvent* Plugin::reserveVstMidiEvent() {
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
-					loggers::information()("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+					loggers::information()("vst::Plugin warning: event buffer full, midi message could not be sent to plugin");
 					return NULL;
 				}
 				return &midievent[queue_size++];
 			}
 
-			VstMidiEvent* plugin::reserveVstMidiEventAtFront() {
+			VstMidiEvent* Plugin::reserveVstMidiEventAtFront() {
 				assert(queue_size>=0 && queue_size <= MAX_VST_EVENTS);
 				if(queue_size >= MAX_VST_EVENTS) {
-					loggers::information()("vst::plugin warning: event buffer full, midi message could not be sent to plugin");
+					loggers::information()("vst::Plugin warning: event buffer full, midi message could not be sent to plugin");
 					return NULL;
 				}
 				for(int i=queue_size; i > 0 ; --i) midievent[i] = midievent[i - 1];
@@ -561,7 +560,7 @@ namespace psycle
 			}
 
 
-			bool plugin::AddMIDI(unsigned char data0, unsigned char data1, unsigned char data2,unsigned int sampleoffset)
+			bool Plugin::AddMIDI(unsigned char data0, unsigned char data1, unsigned char data2,unsigned int sampleoffset)
 			{
 				VstMidiEvent * pevent(reserveVstMidiEvent());
 				if(!pevent) return false;
@@ -581,7 +580,7 @@ namespace psycle
 				pevent->midiData[3] = 0;
 				return true;
 			}
-			bool plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel,unsigned int sampleoffset, bool slide)
+			bool Plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel,unsigned int sampleoffset, bool slide)
 			{
 				if(trackNote[channel].key != notecommands::empty && !slide)
 					AddNoteOff(channel, trackNote[channel].key, true);
@@ -596,7 +595,7 @@ namespace psycle
 				return false;
 			}
 
-			bool plugin::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart,unsigned int sampleoffset)
+			bool Plugin::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart,unsigned int sampleoffset)
 			{
 				if(trackNote[channel].key == notecommands::empty)
 					return false;
@@ -637,7 +636,7 @@ namespace psycle
 				trackNote[channel] = thisnote;
 				return true;
 			}
-			void plugin::SendMidi()
+			void Plugin::SendMidi()
 			{
 				assert(queue_size >= 0);
 				assert(queue_size <= MAX_VST_EVENTS);
@@ -660,7 +659,7 @@ namespace psycle
 							}
 	#endif
 
-							mevents.events[q] = (VstEvent*) &midievent[q];
+							mevents.events[q] = reinterpret_cast<VstEvent*>(&midievent[q]);
 						}
 						//Finally Send the events.
 						queue_size = 0;
@@ -670,7 +669,7 @@ namespace psycle
 				}
 				catch(...){}
 			}
-			void plugin::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
+			void Plugin::PreWork(int numSamples,bool clear, bool measure_cpu_usage)
 			{
 				Machine::PreWork(numSamples,clear, measure_cpu_usage);
 				cpu_time_clock::time_point t0;
@@ -705,7 +704,7 @@ namespace psycle
 					Global::song().accumulate_routing_time(t1 - t0);
 				}
 			}
-			void plugin::Tick(int channel, PatternEntry * pData)
+			void Plugin::Tick(int channel, PatternEntry * pData)
 			{
 				const int note = pData->_note;
 				int midiChannel;
@@ -742,12 +741,16 @@ namespace psycle
 						SetParameter(pData->_inst, value);
 					}
 				}
-				else if(pData->_note == notecommands::midicc) // Mcm (MIDI CC) Command
+				else if(pData->_note == notecommands::midicc && pData->_inst >= 0x80 && pData->_inst < 0xFF) // Mcm (MIDI CC) Command
 				{
 					AddMIDI(pData->_inst, pData->_cmd, pData->_parameter);
 				}
 				else
 				{
+					if(pData->_note==notecommands::midicc) {
+						pData->_note=notecommands::empty;
+						pData->_inst=0xFF;
+					}
 					if(pData->_cmd == 0xC1) //set the pitch bend range
 					{
 						rangeInSemis = pData->_parameter;
@@ -885,13 +888,13 @@ namespace psycle
 				}
 			}
 
-			void plugin::Stop()
+			void Plugin::Stop()
 			{
 				for(int chan(0) ; chan < 16 ; ++chan) AddMIDI(0xB0 | chan, 0x7B); // All Notes Off
 				for(int track(0) ; track < MAX_TRACKS ; ++track) AddNoteOff(track);
 			}
 
-			int plugin::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
+			int Plugin::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 			{
 				if(_mode == MACHMODE_GENERATOR){
 					if (!_mute) Standby(false);
@@ -1086,7 +1089,7 @@ namespace psycle
 
 			/// old file format vomit, don't look at it.
 			///////////////////////////////////////////////
-			bool plugin::PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance)
+			bool Plugin::PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance)
 			{
 				Machine::Init();
 
@@ -1132,7 +1135,7 @@ namespace psycle
 				}
 				return true;
 			}
-			bool plugin::LoadFromMac(vst::plugin *pMac)
+			bool Plugin::LoadFromMac(vst::Plugin *pMac)
 			{
 				Machine::Init();
 				strcpy(_editName,pMac->_editName);
@@ -1145,7 +1148,7 @@ namespace psycle
 				return true;
 			}
 			// Load for Old Psycle fileformat
-			bool plugin::LoadChunk(RiffFile * pFile)
+			bool Plugin::LoadChunk(RiffFile * pFile)
 			{
 				bool b;
 				try

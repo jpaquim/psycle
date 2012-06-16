@@ -373,7 +373,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 						bool label(false);
 						if(tmac->_type == MACH_PLUGIN)
 						{
-							if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & MPF_STATE))
+							if(!(static_cast<Plugin*>(tmac)->GetInfo()->Parameters[i]->Flags & psycle::plugin_interface::MPF_STATE))
 								label = true;
 						}
 						if(label)
@@ -501,6 +501,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			CPoint point(-1,-1);
 			m_pParentMain->ShowMachineGui(nmac,point);
+			((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 			return;
 		}
 		else {
@@ -588,6 +589,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			CPoint point(-1,-1);
 			m_pParentMain->ShowMachineGui(nmac,point);
+			((CButton*)GetDlgItem(IDC_SAVEWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 			return;
 		}
 
@@ -638,6 +640,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			CPoint point(-1,-1);
 			m_pParentMain->ShowMachineGui(nmac,point);
+			((CButton*)GetDlgItem(IDC_EDITWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 			return;
 		}
 		else {
@@ -675,6 +678,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			CPoint point(-1,-1);
 			m_pParentMain->ShowMachineGui(nmac,point);
+			((CButton*)GetDlgItem(IDC_WAVEBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 			return;
 		}
 		else {

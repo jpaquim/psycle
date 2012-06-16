@@ -28,7 +28,7 @@ namespace psycle
 			pResampler = new helpers::dsp::cubic_resampler();
 			pResampler->quality(helpers::dsp::resampler::quality::linear);
 			pMidiInput = new CMidiInput();
-			pVstHost = new vst::host();
+			pVstHost = new vst::Host();
 			pPlayer = new Player();
 			pInputHandler = new InputHandler();
 			pMacLoad = new PluginCatcher();

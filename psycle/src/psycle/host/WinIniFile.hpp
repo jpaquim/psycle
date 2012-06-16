@@ -96,8 +96,8 @@ namespace psycle
 			/*override*/ bool Read(std::string const & key, std::string &);
 			/*override*/ bool Read(std::string const & key, char *, std::size_t max_length);
 			/*override*/ bool Write(std::string const & key, std::string const &);
-			/*override*/ bool Read(std::string const & key, WCHAR *, std::size_t max_length_bytes);
-			/*override*/ bool Write(std::string const & key, WCHAR *);
+			/*override*/ bool Read(std::string const & key, wchar_t *, std::size_t max_length_bytes);
+			/*override*/ bool Write(std::string const & key, wchar_t *);
 		///\}
 		///\raw data. Store decides how to save/load it.
 		///\{

@@ -18,31 +18,31 @@ namespace psycle { namespace host {
 		/// do this on the currently playing note:
 		struct NewNoteAction {
 			enum Type {
-			STOP = 0x0,		///  [Note Cut]	(This one actually does a very fast fadeout)
-			CONTINUE = 0x1,	///  [Ignore]
-			NOTEOFF = 0x2,		///  [Note off]
-			FADEOUT = 0x3		///  [Note fade]
+				STOP = 0x0,		///  [Note Cut]	(This one actually does a very fast fadeout)
+				CONTINUE = 0x1,	///  [Ignore]
+				NOTEOFF = 0x2,		///  [Note off]
+				FADEOUT = 0x3		///  [Note fade]
 			};
 		};
 
 		/// In some cases, the default NNA is not adequate. This option lets choose one type of element
 		/// that, if it is equal than the currently playing, will apply the DCAction intead.
-		/// A common example is using NNA NOTEOFF, DCT_NOTE and DCA_STOP
-		struct DCType	{
+		/// A common example is using NNA NOTEOFF, DCT NOTE and DCA STOP
+		struct DupeCheck {
 			enum Type {
-			 DCT_NONE=0x0,
-			 DCT_NOTE,
-			 DCT_SAMPLE,
-			 DCT_INSTRUMENT
+			 NONE=0x0,
+			 NOTE,
+			 SAMPLE,
+			 INSTRUMENT
 			};
 		};
 /*
 	Using NewNoteAction instead so that we can convert easily from DCA to NNA.
 		struct DCAction {
 			enum Type {
-			DCA_STOP=0x0,
-			DCA_NOTEOFF,
-			DCA_FADEOUT
+			STOP=0x0,
+			NOTEOFF,
+			FADEOUT
 			};
 		};
 */
@@ -52,6 +52,7 @@ namespace psycle { namespace host {
 
 		class WaveData {
 		public:
+			static const std::uint32_t WAVEVERSION = 0x00000001;
 			/// Wave Loop Types
 			struct LoopType {
 				enum Type {
@@ -73,64 +74,20 @@ namespace psycle { namespace host {
 			};
 
 			/// Constructor
-			WaveData() : m_pWaveDataL(0), m_pWaveDataR(0),m_WaveLength(0) {}
-
-			/// Initialize
-			void Init(){
-				DeleteWaveData();
-				m_WaveName= _T("");
-				m_WaveLength = 0;
-				m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
-				m_WaveDefVolume = 128; // Default volume ( volume at which it starts to play. corresponds to 0Cxx/volume command )
-				m_WaveLoopStart = 0;
-				m_WaveLoopEnd = 0;
-				m_WaveLoopType = LoopType::DO_NOT;
-				m_WaveSusLoopStart = 0;
-				m_WaveSusLoopEnd = 0;
-				m_WaveSusLoopType = LoopType::DO_NOT;
-				//todo: Add SampleRate functionality, and change WaveTune's one.
-				// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
-				m_WaveSampleRate = 8363;
-				m_WaveTune = 0;
-				m_WaveFineTune = 0;	
-				m_WaveStereo = false;
-				m_PanFactor = 0.5f;
-				m_PanEnabled = false;
-				m_VibratoAttack = 0;
-				m_VibratoSpeed = 0;
-				m_VibratoDepth = 0;
-				m_VibratoType = 0;
+			WaveData() : m_pWaveDataL(0), m_pWaveDataR(0),m_WaveLength(0) {Init();}
+			WaveData(const WaveData& data) {
+				operator=(data);
 			}
-
 			/// Destructor
-			~WaveData(){
+			virtual ~WaveData(){
 				DeleteWaveData();
 			}
 
 			//	Object Functions
+			void Init();
+			void DeleteWaveData();
 
-			void DeleteWaveData(){
-				if ( m_pWaveDataL)
-				{
-					delete[] m_pWaveDataL;
-					m_pWaveDataL=0;
-					if (m_WaveStereo)
-					{
-						delete[] m_pWaveDataR;
-						m_pWaveDataR=0;
-					}
-				}
-				m_WaveLength = 0;
-			}
-
-			void AllocWaveData(const int iLen,const bool bStereo)
-			{
-				DeleteWaveData();
-				m_pWaveDataL = new std::int16_t[iLen];
-				m_pWaveDataR = bStereo?new std::int16_t[iLen]:NULL;
-				m_WaveStereo = bStereo;
-				m_WaveLength  = iLen;
-			}
+			void AllocWaveData(const int iLen,const bool bStereo);
 
 			int Load(RiffFile& riffFile);
 			void Save(RiffFile& riffFile);
@@ -149,9 +106,13 @@ namespace psycle { namespace host {
 				m_WaveSusLoopStart = source.m_WaveSusLoopStart;
 				m_WaveSusLoopEnd = source.m_WaveSusLoopEnd;
 				m_WaveSusLoopType = source.m_WaveSusLoopType;
+				m_WaveSampleRate = source.m_WaveSampleRate;
 				m_WaveTune = source.m_WaveTune;
 				m_WaveFineTune = source.m_WaveFineTune;	
 				m_WaveStereo = source.m_WaveStereo;
+				m_PanEnabled = source.m_PanEnabled;
+				m_PanFactor = source.m_PanFactor;
+				m_Surround = source.m_Surround;
 				m_VibratoAttack = source.m_VibratoAttack;
 				m_VibratoSpeed = source.m_VibratoSpeed;
 				m_VibratoDepth = source.m_VibratoDepth;
@@ -168,8 +129,8 @@ namespace psycle { namespace host {
 
 			// Properties
 
-			std::string WaveName() const { return m_WaveName;}
-			void WaveName(std::string newname){ m_WaveName = newname;}
+			const std::string & WaveName() const { return m_WaveName;}
+			void WaveName(const std::string& newname){ m_WaveName = newname;}
 
 			std::uint32_t WaveLength() const { return m_WaveLength;}
 			void WaveLength (const std::uint32_t value){m_WaveLength = value;}
@@ -183,7 +144,9 @@ namespace psycle { namespace host {
 			float PanFactor() const { return m_PanFactor;}
 			void PanFactor(const float value){m_PanFactor = value;}
 			bool PanEnabled() const { return m_PanEnabled;}
-			void PanEnabled(bool pan){ m_PanEnabled=pan;}
+			void PanEnabled(const bool pan){ m_PanEnabled=pan;}
+			bool IsSurround() const { return m_Surround;}
+			void IsSurround(const bool surround){ m_Surround=surround;}
 
 			std::uint32_t WaveLoopStart() const { return m_WaveLoopStart;}
 			void WaveLoopStart(const std::uint32_t value){m_WaveLoopStart = value;}
@@ -235,6 +198,9 @@ namespace psycle { namespace host {
 			std::string m_WaveName;
 			/// Wave length in Samples.
 			std::uint32_t m_WaveLength;
+			/// Difference between Glob volume and defVolume is that defVolume determines
+			/// the volume if no volume is specified in the pattern, while globVolume is
+			/// an attenuator for all notes of this sample.
 			float m_WaveGlobVolume;
 			std::uint16_t m_WaveDefVolume;
 			std::uint32_t m_WaveLoopStart;
@@ -251,8 +217,9 @@ namespace psycle { namespace host {
 			std::int16_t *m_pWaveDataL;
 			std::int16_t *m_pWaveDataR;
 			bool m_PanEnabled;
-			/// Default position for panning ( 0..1 ) 0left 1 right
+			/// Default position for panning ( 0..1 ) 0left 1 right.
 			float m_PanFactor;
+			bool m_Surround;
 			std::uint8_t m_VibratoAttack;
 			std::uint8_t m_VibratoSpeed;
 			std::uint8_t m_VibratoDepth;
@@ -279,8 +246,8 @@ namespace psycle { namespace host {
 			typedef std::vector< PointValue > Points;
 
 			/// constructor
-			explicit Envelope()
-			{	Init();
+			Envelope() {
+				Init();
 			}
 
 			/// copy Constructor
@@ -288,45 +255,34 @@ namespace psycle { namespace host {
 			{
 				operator=(other);
 			}
-
-			~Envelope(){}
-
-			/// Init
-			void Init()
-			{	m_Enabled = false;
-				m_Carry = false;
-				m_SustainBegin = INVALID;
-				m_SustainEnd = INVALID;
-				m_LoopStart = INVALID;
-				m_LoopEnd = INVALID;
-				if (!m_Points.empty()) { m_Points.clear(); }
-			}
+			virtual ~Envelope(){}
 
 			// Object Functions.
+			void Init();
 
 			/// Gets the time at which the pointIndex point is located.
-			int GetTime(const unsigned int pointIndex) const 
+			inline int GetTime(const unsigned int pointIndex) const 
 			{	
-				if(pointIndex >= 0 && pointIndex < m_Points.size()) return m_Points[pointIndex].first;
+				if(pointIndex >= 0 && pointIndex <NumOfPoints()) return m_Points[pointIndex].first;
 				return INVALID;
 			}
 			/// Sets a new time for an existing pointIndex point.
-			int SetTime(const unsigned int pointIndex,const int pointTime)
+			inline int SetTime(const unsigned int pointIndex,const int pointTime)
 			{ 
-				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				ASSERT(pointIndex >= 0 && pointIndex < NumOfPoints());
 				m_Points[pointIndex].first = pointTime;
 				return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
 			}
 			/// Gets the value of the pointIndex point.
-			ValueType GetValue(const unsigned int pointIndex) const 
+			inline ValueType GetValue(const unsigned int pointIndex) const 
 			{ 
-				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				ASSERT(pointIndex >= 0 && pointIndex < NumOfPoints());
 				return m_Points[pointIndex].second;
 			}
 			/// Sets the value pointVal to pointIndex point.
-			void SetValue(const unsigned int pointIndex,const ValueType pointVal)
+			inline void SetValue(const unsigned int pointIndex,const ValueType pointVal)
 			{
-				ASSERT(pointIndex >= 0 && pointIndex < (int)m_Points.size());
+				ASSERT(pointIndex >= 0 && pointIndex < NumOfPoints());
 				m_Points[pointIndex].second = pointVal;
 			}
 			/// Appends a new point at the end of the array.
@@ -349,28 +305,7 @@ namespace psycle { namespace host {
 			void Delete(const unsigned int pointIndex);
 
 			/// Clears the points Array
-			void Clear()
-			{
-				m_Points.clear();
-			}
-			/// Set or Get the point Index for Sustain and Loop.
-			int SustainBegin() const { return m_SustainBegin;}
-			/// value has to be an existing point!
-			void SustainBegin(const unsigned int value){m_SustainBegin = value;}
-
-			int SustainEnd() const { return m_SustainEnd;}
-			/// value has to be an existing point!
-			void SustainEnd(const unsigned int value){m_SustainEnd = value;}
-
-			int LoopStart() const {return m_LoopStart;}
-			/// value has to be an existing point!
-			void LoopStart(const unsigned int value){m_LoopStart = value;}
-
-			int LoopEnd() const {return m_LoopEnd;}
-			/// value has to be an existing point!
-			void LoopEnd(const unsigned int value){m_LoopEnd = value;}
-
-			unsigned int NumOfPoints() const { return (unsigned int)m_Points.size();}
+			void Clear() { m_Points.clear(); }
 
 			void Load(RiffFile& riffFile,const std::uint32_t version);
 			void Save(RiffFile& riffFile,const std::uint32_t version);
@@ -383,31 +318,44 @@ namespace psycle { namespace host {
 				m_Enabled = other.m_Enabled;
 				m_Carry = other.m_Carry;
 
-				m_Points.clear();
-				for(Points::const_iterator it = other.m_Points.begin();it != other.m_Points.end();it++)
-				{
-					m_Points.push_back(*it);
-				}
+				m_Points = other.m_Points;
 
-				m_SustainBegin = other.m_SustainBegin;
-				m_SustainEnd = other.m_SustainEnd;
 				m_LoopStart = other.m_LoopStart;
 				m_LoopEnd = other.m_LoopEnd;
+				m_SustainBegin = other.m_SustainBegin;
+				m_SustainEnd = other.m_SustainEnd;
 
 				return *this;
 			}
 			
 			// Properties
-			
+			/// Set or Get the point Index for Sustain and Loop.
+			inline int SustainBegin() const { return m_SustainBegin;}
+			/// value has to be an existing point!
+			inline void SustainBegin(const unsigned int value){m_SustainBegin = value;}
+
+			inline int SustainEnd() const { return m_SustainEnd;}
+			/// value has to be an existing point!
+			inline void SustainEnd(const unsigned int value){m_SustainEnd = value;}
+
+			inline int LoopStart() const {return m_LoopStart;}
+			/// value has to be an existing point!
+			inline void LoopStart(const unsigned int value){m_LoopStart = value;}
+
+			inline int LoopEnd() const {return m_LoopEnd;}
+			/// value has to be an existing point!
+			inline void LoopEnd(const unsigned int value){m_LoopEnd = value;}
+
+			inline unsigned int NumOfPoints() const { return static_cast<unsigned int>(m_Points.size());}
+
 			//// If the envelope IsEnabled, it is used and triggered. Else, it is not.
-			bool IsEnabled() const { return m_Enabled;}
-			void IsEnabled(const bool value){ m_Enabled = value;}
+			inline bool IsEnabled() const { return m_Enabled;}
+			inline void IsEnabled(const bool value){ m_Enabled = value;}
 
 			/// if IsCarry() and a new note enters, the envelope position is set to
 			/// that of the previous note *on the same channel*
-			/// \todo implement carry
-			const bool IsCarry() const { return m_Carry;}
-			void IsCarry(const bool value){ m_Carry = value;}
+			inline const bool IsCarry() const { return m_Carry;}
+			inline void IsCarry(const bool value){ m_Carry = value;}
 
 		private:
 			/// Envelope is enabled or disabled
@@ -432,7 +380,7 @@ namespace psycle { namespace host {
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument Class declaration
 		XMInstrument();
-		~XMInstrument();
+		virtual ~XMInstrument();
 
 		void Init();
 
@@ -455,6 +403,7 @@ namespace psycle { namespace host {
 			// Paninng
 			m_PanEnvelope = other.m_PanEnvelope;
 			m_InitPan = other.m_InitPan;
+			m_Surround = other.m_Surround;
 			m_PanEnabled=other.m_PanEnabled;
 			m_NoteModPanCenter=other.m_NoteModPanCenter;
 			m_NoteModPanSep=other.m_NoteModPanSep;
@@ -494,10 +443,15 @@ namespace psycle { namespace host {
 		std::uint16_t Lines() const { return m_Lines;}
 		void Lines(const std::uint16_t value){ m_Lines = value;}
 
-		Envelope* const AmpEnvelope(){ return &m_AmpEnvelope;}
-		Envelope* const PanEnvelope(){return &m_PanEnvelope;}
-		Envelope* const FilterEnvelope(){ return &m_FilterEnvelope;}
-		Envelope* const PitchEnvelope(){return &m_PitchEnvelope;}
+		Envelope& AmpEnvelope() { return m_AmpEnvelope;}
+		Envelope& PanEnvelope() {return m_PanEnvelope;}
+		Envelope& FilterEnvelope() { return m_FilterEnvelope;}
+		Envelope& PitchEnvelope() {return m_PitchEnvelope;}
+
+		const Envelope& AmpEnvelope() const { return m_AmpEnvelope;}
+		const Envelope& PanEnvelope() const {return m_PanEnvelope;}
+		const Envelope& FilterEnvelope() const { return m_FilterEnvelope;}
+		const Envelope& PitchEnvelope() const {return m_PitchEnvelope;}
 
 		float GlobVol() const { return m_GlobVol;}
 		void GlobVol(const float value){m_GlobVol = value;}
@@ -509,6 +463,8 @@ namespace psycle { namespace host {
 		void Pan(const float pan) { m_InitPan = pan;}
 		bool PanEnabled() const { return m_PanEnabled;}
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;}
+		bool IsSurround() const { return m_Surround;}
+		void IsSurround(const bool surround) { m_Surround = surround;}
 		std::uint8_t NoteModPanCenter() const { return m_NoteModPanCenter;}
 		void NoteModPanCenter(const std::uint8_t pan) { m_NoteModPanCenter = pan;}
 		std::int8_t NoteModPanSep() const { return m_NoteModPanSep;}
@@ -534,12 +490,12 @@ namespace psycle { namespace host {
 
 		NewNoteAction::Type NNA() const { return m_NNA;}
 		void NNA(const NewNoteAction::Type value){ m_NNA = value;}
-		DCType::Type DCT() const { return m_DCT;}
-		void DCT(const DCType::Type value){ m_DCT = value;}
+		DupeCheck::Type DCT() const { return m_DCT;}
+		void DCT(const DupeCheck::Type value){ m_DCT = value;}
 		NewNoteAction::Type DCA() const { return m_DCA;}
 		void DCA(const NewNoteAction::Type value){ m_DCA = value;}
 
-		NotePair NoteToSample(const int note) const {return m_AssignNoteToSample[note];}
+		const NotePair NoteToSample(const int note) const {return m_AssignNoteToSample[note];}
 		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;}
 
 	private:
@@ -569,6 +525,7 @@ namespace psycle { namespace host {
 		bool m_PanEnabled;
 		/// Initial panFactor (if enabled) [-1..1]
 		float m_InitPan;
+		bool m_Surround;
 		/// Note number for center pan position
 		std::uint8_t m_NoteModPanCenter;
 		/// -32..32. 1/256th of panFactor change per seminote.
@@ -596,10 +553,10 @@ namespace psycle { namespace host {
 
 		/// Action to take on the playing voice when any new note comes in the same channel.
 		NewNoteAction::Type m_NNA;
-		/// ?
-		DCType::Type m_DCT;
-		/// Action to take on the playing voice when a new note comes in the same channel 
-		/// and the element defined by m_DCT is the same. (like the same note value).
+		/// Check to do when a new event comes in the channel.
+		DupeCheck::Type m_DCT;
+		/// Action to take on the playing voice when the action defined by m_DCT comes in the same channel 
+		/// (like the same note value).
 		NewNoteAction::Type m_DCA;
 
 		/// Table of mapped notes to samples
@@ -611,59 +568,49 @@ namespace psycle { namespace host {
 	///\todo : implement the following for inter-XMSampler sharing of instruments.
 	class SampleList{
 	public:
-		SampleList(){top=0;}
-		~SampleList(){};
-		int AddSample(XMInstrument::WaveData &wave)
+		SampleList(){m_waves.resize(0);}
+		virtual ~SampleList(){};
+		inline unsigned int AddSample(XMInstrument::WaveData &wave)
 		{
-			if ( top+1<MAX_INSTRUMENTS)
-			{
-				m_waves[top++]=wave;
-				return top-1;
-			}
-			else return -1;
+			m_waves.push_back(wave);
+			return size()-1;
 		}
-		int SetSample(XMInstrument::WaveData &wave,int pos)
+		inline void SetSample(XMInstrument::WaveData &wave,int pos)
 		{
-			ASSERT(pos<MAX_INSTRUMENTS);
+			if (pos>=m_waves.size()) { m_waves.resize(pos+1); }
 			m_waves[pos]=wave;
-			return pos;
 		}
-		XMInstrument::WaveData &operator[](int pos)
+		inline XMInstrument::WaveData &operator[](int pos)
 		{
-			ASSERT(pos<MAX_INSTRUMENTS);
+			ASSERT(pos<m_waves.size());
 			return m_waves[pos];
 		}
+		unsigned int size() const { return static_cast<unsigned int>(m_waves.size()); }
 	private:
-		XMInstrument::WaveData m_waves[MAX_INSTRUMENTS];
-		int top;
+		std::vector<XMInstrument::WaveData> m_waves;
 	};
 
 	///\todo : implement the following for inter-XMSampler sharing of instruments.
 	class InstrumentList {
 	public:
-		InstrumentList(){top=0;}
-		~InstrumentList(){};
-		int AddIns(XMInstrument &ins)
+		InstrumentList(){m_inst.resize(0);}
+		virtual ~InstrumentList(){};
+		inline unsigned int AddIns(XMInstrument &ins)
 		{
-			if ( top+1<MAX_INSTRUMENTS)
-			{
-				m_inst[top++]=ins;
-				return top-1;
-			}
-			else return -1;
+			m_inst.push_back(ins);
+			return size()-1;
 		}
-		int SetInst(XMInstrument &inst,int pos)
+		inline void SetInst(XMInstrument &inst,int pos)
 		{
-			ASSERT(pos<MAX_INSTRUMENTS);
+			if (pos>=m_inst.size()) { m_inst.resize(pos+1); }
 			m_inst[pos]=inst;
-			return pos;
 		}
-		XMInstrument &operator[](int pos){
-			ASSERT(pos<MAX_INSTRUMENTS);
+		inline XMInstrument &operator[](int pos){
+			ASSERT(pos<m_inst.size());
 			return m_inst[pos];
 		}
+		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
 	private:
-		XMInstrument m_inst[MAX_INSTRUMENTS];
-		int top;
+		std::vector<XMInstrument> m_inst;
 	};
 }}

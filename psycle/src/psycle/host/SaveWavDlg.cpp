@@ -689,25 +689,26 @@ namespace psycle { namespace host {
 				return;
 			}
 			unsigned long tmp2;
-			thread_handle = (HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
+			thread_handle = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) RecordThread,(void *) this,0,&tmp2);
 		}
 
 		DWORD WINAPI __stdcall RecordThread(void *b)
 		{
-			((CSaveWavDlg*)b)->threadopen++;
+			CSaveWavDlg& dlg = *reinterpret_cast<CSaveWavDlg*>(b);
+			dlg.threadopen++;
 			Player& theplayer = Global::player();
 			theplayer._loopSong=false;
 			int stream_size = 16384; // Player has just a single buffer of 65535 samples to allocate both channels
-			while(!((CSaveWavDlg*)b)->kill_thread && theplayer._playing)  // the player automatically stops at end, if not looping.
+			while(!dlg.kill_thread && theplayer._playing)  // the player automatically stops at end, if not looping.
 			{
 				Player::Work(&theplayer,stream_size);
-				((CSaveWavDlg*)b)->SaveTick();
+				dlg.SaveTick();
 			}
 			theplayer.Stop();
 			theplayer.StopRecording();
-			((CSaveWavDlg*)b)->SaveEnd();
-			((CSaveWavDlg*)b)->threadopen--;
-			((CSaveWavDlg*)b)->_event.SetEvent();
+			dlg.SaveEnd();
+			dlg.threadopen--;
+			dlg._event.SetEvent();
 			ExitThread(0);
 			//return 0;
 		}

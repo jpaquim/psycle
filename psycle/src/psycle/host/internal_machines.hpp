@@ -59,7 +59,7 @@ public:
 	DuplicatorMac();
 	DuplicatorMac(int index);
 	virtual void Init(void);
-	virtual void Tick();
+	virtual void NewLine();
 	virtual void CustomTick(int channel,int i, PatternEntry& pData);
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual bool playsTrack(const int track) const;
@@ -114,7 +114,7 @@ public:
 	DrumsMatrix();
 	DrumsMatrix(int index);
 	virtual void Init(void);
-	virtual void Tick();
+	virtual void NewLine();
 	virtual void Tick( int channel,PatternEntry* pData);
 	virtual void Stop();
 	virtual void Work(int numSamples);

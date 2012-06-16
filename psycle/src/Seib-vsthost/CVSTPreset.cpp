@@ -102,7 +102,7 @@ namespace seib {
 
 		void CFxBase::SwapBytes(float &f)
 		{
-			VstInt32 *pl = (VstInt32 *)&f;
+			VstInt32 *pl = reinterpret_cast<VstInt32 *>(&f);
 			SwapBytes(*pl);
 		}
 

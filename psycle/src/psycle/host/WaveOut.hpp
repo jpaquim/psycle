@@ -110,7 +110,6 @@ namespace psycle
 			virtual std::uint32_t GetPlayPosInSamples();
 
 			bool CreateCapturePort(PortCapt &port);
-			MMRESULT IsFormatSupported(LPWAVEFORMATEX pwfx, UINT uDeviceID) const;
 			static void PollerThread(void *pWaveOut);
 		protected:
 			static void Error(const char msg[]);

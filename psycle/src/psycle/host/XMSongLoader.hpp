@@ -79,6 +79,8 @@ namespace psycle { namespace host {
 
 		short m_iTempoTicks;
 		short m_iTempoBPM;
+		short m_extracolumn;
+		short m_maxextracolumn;
 		XMFILEHEADER m_Header;
 		XMSampler* m_pSampler;
 	};
@@ -161,6 +163,7 @@ namespace psycle { namespace host {
 		}
 		static const short BIGMODPERIODTABLE[37*8];
 		unsigned short smpLen[32];
+		bool speedpatch;
 		MODHEADER m_Header;
 		MODSAMPLEHEADER m_Samples[32];
 		XMSampler* m_pSampler;

@@ -221,7 +221,7 @@ namespace psycle
 			}
 		}
 
-		void DuplicatorMac::Tick()
+		void DuplicatorMac::NewLine()
 		{
 
 		}

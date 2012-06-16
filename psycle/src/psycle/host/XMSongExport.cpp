@@ -122,7 +122,7 @@ namespace host{
 			for (int j = 0; j < ptHeader.rows && j < 256; j++) {
 				for (int i = 0; i < song.SONGTRACKS; i++) {
 					
-					PatternEntry* pData = (PatternEntry*) song._ptrackline(patIdx,i,j);
+					PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx,i,j));
 					
 					
 					unsigned char note;

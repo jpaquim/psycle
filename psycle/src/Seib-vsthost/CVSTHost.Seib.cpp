@@ -1193,7 +1193,7 @@ namespace seib {
 			}
 			else 
 			{
-				pEffect = (CEffect*)(effect->resvd1);
+				pEffect = reinterpret_cast<CEffect*>(effect->resvd1);
 
 				if ( !pEffect ) 
 				{

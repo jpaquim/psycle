@@ -32,10 +32,12 @@ namespace psycle
 			void AdvancePosition();
 			/// Initial Loop. Read new line and execute Global commands/tweaks.
 			void ExecuteGlobalCommands(void);
-			/// Notify all machines that a new Tick() comes.
+			/// Notify all machines that a new Line comes.
 			void NotifyNewLine(void);
 			/// Final Loop. Read the line again for notes to send to the Machines
 			void ExecuteNotes(void);
+			/// Everything sent. telling it to machines.
+			void NotifyPostNewLine(void);
 		public:
 			/// Function to encapsulate the three functions above.
 			void ExecuteLine();
@@ -68,9 +70,9 @@ namespace psycle
 			/// the current beats per minute at which to play the song.
 			/// can be changed from the song itself using commands.
 			int bpm;
-			/// the current ticks per beat at which to play the song.
+			/// the current lines per beat at which to play the song.
 			/// can be changed from the song itself using commands.
-			int tpb;
+			int lpb;
 			/// starts to play, also specifying a line to stop playing at.
 			void Start(int pos,int lineStart,int lineStop,bool initialize=true);
 			/// starts to play.
@@ -95,7 +97,7 @@ namespace psycle
 			static float * Work(void* context, int nsamples);
 			float * Work(int numSamples);
 			
-			void SetBPM(int _bpm,int _tpb=0);
+			void SetBPM(int _bpm,int _lpb=0);
 
 			//Change the samplerate (Thread safe)
 			void SetSampleRate(const int sampleRate);
@@ -103,12 +105,17 @@ namespace psycle
 			//Change the samplerate (non Thread safe)
 			void SampleRate(const int sampleRate);
 		public:
-			const int SampleRate() { return m_SampleRate; }
-			void RecalcSPR() { SamplesPerRow((m_SampleRate*60)/(bpm*tpb)); }
+			int SampleRate() const { return m_SampleRate; }
+			void RecalcSPR() { 
+				m_SamplesPerTick = (m_SampleRate*60)/(bpm*24);
+				SamplesPerRow(m_SamplesPerTick*(m_extraTicks+(24.f/lpb)));
+			};
 
 			/// Sets the number of samples that it takes for each row of the pattern to be played
-			void SamplesPerRow(const int samplePerRow){m_SamplesPerRow = samplePerRow;}
-			const int SamplesPerRow() { return m_SamplesPerRow; }
+			void SamplesPerRow(const int samplePerRow) {m_SamplesPerRow = samplePerRow;}
+			int SamplesPerRow() const { return m_SamplesPerRow; }
+			int SamplesPerTick() const { return m_SamplesPerTick; }
+			int ExtraTicks() const { return m_extraTicks; }
 
 			///\name secondary output device, write to a file
 			///\{
@@ -140,10 +147,13 @@ namespace psycle
 			/// dither handler
 			helpers::dsp::Dither dither;
 
+			/// Samples of a legacy (tracker) tick. There are 24ticks per beat.
+			int m_SamplesPerTick;
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
-			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond()
+			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond, plus the extra ticks.
 			int m_SamplesPerRow;
 			int m_SampleRate;
+			int m_extraTicks; // Patch for tracker mods. It is a replacement for the speed command with a partially different meaning.
 			short _patternjump;
 			short _linejump;
 			short _loop_count;
@@ -161,7 +171,7 @@ namespace psycle
 			typedef std::list<std::thread*> threads_type;
 			threads_type threads_;
 		public:
-			unsigned long num_threads() { if(threads_.empty()){return 1;} return (unsigned long)threads_.size(); }
+			unsigned long num_threads() const { if(threads_.empty()){return 1;} return (unsigned long)threads_.size(); }
 		private:
 			void thread_function(std::size_t thread_number);
 

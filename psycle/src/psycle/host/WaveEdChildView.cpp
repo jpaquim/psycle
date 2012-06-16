@@ -397,9 +397,9 @@ namespace psycle { namespace host {
 			int delta;
 			int nWidth;
 
-			CScrollBar* hScroll = (CScrollBar*) zoombar.GetDlgItem(IDC_HSCROLL);
-			CSliderCtrl* zoomSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_ZOOMSLIDE);
-			CSliderCtrl* volSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_VOLSLIDER);
+			CScrollBar* hScroll = static_cast<CScrollBar*>(zoombar.GetDlgItem(IDC_HSCROLL));
+			CSliderCtrl* zoomSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_ZOOMSLIDE));
+			CSliderCtrl* volSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_VOLSLIDER));
 			
 			if(pScrollBar == hScroll)
 			{
@@ -1909,7 +1909,7 @@ namespace psycle { namespace host {
 
 			if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
 			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+			pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
 			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
@@ -1999,7 +1999,7 @@ namespace psycle { namespace host {
 
 				if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
 				lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-				pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+				pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
 				lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 				pData = (char*)pPasteData + 20 + lFmt + 8;
@@ -2134,7 +2134,7 @@ namespace psycle { namespace host {
 
 				if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
 				lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-				pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+				pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
 
 				lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 				pData = (char*)pPasteData + 20 + lFmt + 8;
@@ -2362,9 +2362,9 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::ResetScrollBars(bool bNewLength)
 		{
-			CScrollBar* hScroll = (CScrollBar*) zoombar.GetDlgItem(IDC_HSCROLL);
-			CSliderCtrl* zoomSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_ZOOMSLIDE);
-			CSliderCtrl* volSlider = (CSliderCtrl*) zoombar.GetDlgItem(IDC_VOLSLIDER);
+			CScrollBar* hScroll = static_cast<CScrollBar*>(zoombar.GetDlgItem(IDC_HSCROLL));
+			CSliderCtrl* zoomSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_ZOOMSLIDE));
+			CSliderCtrl* volSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_VOLSLIDER));
 
 			if(wdWave)
 			{

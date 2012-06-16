@@ -21,6 +21,7 @@ namespace psycle
 {
 	namespace host
 	{
+		using namespace psycle::plugin_interface;
 		namespace loggers = universalis::os::loggers;
 		typedef CMachineInfo * (* GETINFO) ();
 		typedef CMachineInterface * (* CREATEMACHINE) ();
@@ -736,7 +737,7 @@ namespace psycle
 											ArpeggioCount[i]=0;
 											break;
 										}
-										TriggerDelayCounter[i] = Global::player().SamplesPerRow()*Global::player().tpb/24;
+										TriggerDelayCounter[i] = Global::player().SamplesPerTick();
 									}
 									else
 									{
@@ -872,10 +873,10 @@ namespace psycle
 		void Plugin::SetSampleRate(int sr)
 		{
 			Machine::SetSampleRate(sr);
-			Tick();
+			NewLine();
 		}
 
-		void Plugin::Tick()
+		void Plugin::NewLine()
 		{
 			try
 			{
@@ -1010,7 +1011,7 @@ namespace psycle
 					}
 				}
 			}
-			else if (pData->_note == notecommands::midicc) {
+			else if (pData->_note == notecommands::midicc && pData->_inst >= 0x80 && pData->_inst < 0xFF) {
 				try
 				{
 					proxy().MidiEvent(pData->_inst&0x0F, pData->_inst&0xF0, (pData->_cmd<<8) + pData->_parameter);
@@ -1029,8 +1030,9 @@ namespace psycle
 			else {
 				try
 				{
-					if(channel == -1) {
-						//channel = GetFreePlayTrack(pData->_note, pData->_inst);
+					if(pData->_note==notecommands::midicc) {
+						pData->_note=notecommands::empty;
+						pData->_inst=0xFF;
 					}
 					proxy().SeqTick(channel, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
 				}

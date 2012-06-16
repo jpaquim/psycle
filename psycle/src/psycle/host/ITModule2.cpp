@@ -119,7 +119,11 @@ namespace psycle
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
 			song.BeatsPerMin(itFileH.iTempo);
-			song.LinesPerBeat(sampler->Speed2LPB(itFileH.iSpeed));
+			int extraticks=0;
+			song.LinesPerBeat(XMSampler::CalcLPBFromSpeed(itFileH.iSpeed,extraticks));
+			if (extraticks != 0) {
+				//\todo: setup something...
+			}
 
 			sampler->IsAmigaSlides(itFileH.flags&Flags::LINEARSLIDES?false:true);
 			sampler->GlobalVolume(itFileH.gVol);
@@ -188,9 +192,12 @@ Special:  Bit 0: On = song message attached.
 				{
 					sampler->rChannel(i).DefaultIsMute(true);
 				}
+				else {
+					m_maxextracolumn=i;
+				}
 				sampler->rChannel(i).DefaultFilterType(dsp::F_LOWPASS12);
 			}
-
+			if(m_maxextracolumn==63) { m_maxextracolumn=15; }
 
 			i=0;
 			for (j=0;j<itFileH.ordNum && i<MAX_SONG_POSITIONS;j++)
@@ -296,7 +303,8 @@ Special:  Bit 0: On = song message attached.
 				Seek(pointerss[i]);
 				LoadITSample(sampler,i);
 			}
-			int numchans=0;
+			int numchans=m_maxextracolumn;
+			m_maxextracolumn=0;
 			for (i=0;i<itFileH.patNum;i++)
 			{
 				if (pointersp[i]==0)
@@ -307,7 +315,7 @@ Special:  Bit 0: On = song message attached.
 					LoadITPattern(i,numchans);
 				}
 			}
-			song.SONGTRACKS = std::max(numchans+1,4);
+			song.SONGTRACKS = std::max(numchans+1,(int)m_maxextracolumn);
 
 			delete[] pointersi;
 			delete[] pointerss;
@@ -330,7 +338,7 @@ Special:  Bit 0: On = song message attached.
 			xins.NNA((XMInstrument::NewNoteAction::Type)curH.NNA);
 			if ( curH.DNC )
 			{	
-				xins.DCT(XMInstrument::DCType::DCT_NOTE);
+				xins.DCT(XMInstrument::DupeCheck::NOTE);
 				xins.DCA(XMInstrument::NewNoteAction::STOP);
 			}
 			XMInstrument::NotePair npair;
@@ -340,18 +348,18 @@ Special:  Bit 0: On = song message attached.
 				npair.second=short(curH.notes[i].second)-1;
 				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
 			}
-			xins.AmpEnvelope()->Init();
+			xins.AmpEnvelope().Init();
 			if(curH.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
-				xins.AmpEnvelope()->IsEnabled(true);
+				xins.AmpEnvelope().IsEnabled(true);
 
 				if(curH.flg& EnvFlags::USE_SUSTAIN){
-					xins.AmpEnvelope()->SustainBegin(curH.sustainS);
-					xins.AmpEnvelope()->SustainEnd(curH.sustainE);
+					xins.AmpEnvelope().SustainBegin(curH.sustainS);
+					xins.AmpEnvelope().SustainEnd(curH.sustainE);
 				}
 
 				if(curH.flg & EnvFlags::USE_LOOP){
-					xins.AmpEnvelope()->LoopStart(curH.loopS);
-					xins.AmpEnvelope()->LoopEnd(curH.loopE);
+					xins.AmpEnvelope().LoopStart(curH.loopS);
+					xins.AmpEnvelope().LoopEnd(curH.loopE);
 				}
 
 /*
@@ -378,9 +386,9 @@ Special:  Bit 0: On = song message attached.
  */
 
 			}
-			xins.PanEnvelope()->Init();
-			xins.PitchEnvelope()->Init();
-			xins.FilterEnvelope()->Init();
+			xins.PanEnvelope().Init();
+			xins.PitchEnvelope().Init();
+			xins.FilterEnvelope().Init();
 			xins.IsEnabled(true);
 			return true;
 		}
@@ -394,15 +402,14 @@ Special:  Bit 0: On = song message attached.
 			xins.Name(itname);
 
 			xins.NNA((XMInstrument::NewNoteAction::Type)curH.NNA);
-			xins.DCT((XMInstrument::DCType::Type)curH.DCT);
+			xins.DCT((XMInstrument::DupeCheck::Type)curH.DCT);
 			switch (curH.DCA)
 			{
-			case 1:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF);break;
-			case 2:xins.DCA(XMInstrument::NewNoteAction::FADEOUT);break;
-			case 0:
-			default:xins.DCA(XMInstrument::NewNoteAction::STOP);break;
+			case DCAction::NOTEOFF:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF);break;
+			case DCAction::FADEOUT:xins.DCA(XMInstrument::NewNoteAction::FADEOUT);break;
+			case DCAction::STOP://fallthrough
+			default:xins.DCA(XMInstrument::NewNoteAction::NOTEOFF);break;
 			}
-			xins.DCA((XMInstrument::NewNoteAction::Type)curH.DCA);
 
 			xins.Pan((curH.defPan & 0x7F)/64.0f);
 			xins.PanEnabled((curH.defPan & 0x80)?false:true);
@@ -434,19 +441,19 @@ Special:  Bit 0: On = song message attached.
 			}
 
 			// volume envelope
-			xins.AmpEnvelope()->Init();
+			xins.AmpEnvelope().Init();
 			
 			if(curH.volEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
-				xins.AmpEnvelope()->IsEnabled(true);
-				if(curH.volEnv.flg& EnvFlags::ENABLE_CARRY) xins.AmpEnvelope()->IsCarry(true);
+				xins.AmpEnvelope().IsEnabled(true);
+				if(curH.volEnv.flg& EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
 				if(curH.volEnv.flg& EnvFlags::USE_SUSTAIN){
-					xins.AmpEnvelope()->SustainBegin(curH.volEnv.sustainS);
-					xins.AmpEnvelope()->SustainEnd(curH.volEnv.sustainE);
+					xins.AmpEnvelope().SustainBegin(curH.volEnv.sustainS);
+					xins.AmpEnvelope().SustainEnd(curH.volEnv.sustainE);
 				}
 
 				if(curH.volEnv.flg & EnvFlags::USE_LOOP){
-					xins.AmpEnvelope()->LoopStart(curH.volEnv.loopS);
-					xins.AmpEnvelope()->LoopEnd(curH.volEnv.loopE);
+					xins.AmpEnvelope().LoopStart(curH.volEnv.loopS);
+					xins.AmpEnvelope().LoopEnd(curH.volEnv.loopE);
 				}
 
 				int envelope_point_num = curH.volEnv.numP;
@@ -456,27 +463,27 @@ Special:  Bit 0: On = song message attached.
 
 				for(int i = 0; i < envelope_point_num;i++){
 					short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
-					xins.AmpEnvelope()->Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
+					xins.AmpEnvelope().Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
 				}
 
 			} else {
-				xins.AmpEnvelope()->IsEnabled(false);
+				xins.AmpEnvelope().IsEnabled(false);
 			}
 
 			// Pan envelope
-			xins.PanEnvelope()->Init();
+			xins.PanEnvelope().Init();
 
 			if(curH.panEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
-				xins.PanEnvelope()->IsEnabled(true);
-				if(curH.panEnv.flg& EnvFlags::ENABLE_CARRY) xins.PanEnvelope()->IsCarry(true);
+				xins.PanEnvelope().IsEnabled(true);
+				if(curH.panEnv.flg& EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
 				if(curH.panEnv.flg& EnvFlags::USE_SUSTAIN){
-					xins.PanEnvelope()->SustainBegin(curH.panEnv.sustainS);
-					xins.PanEnvelope()->SustainEnd(curH.panEnv.sustainE);
+					xins.PanEnvelope().SustainBegin(curH.panEnv.sustainS);
+					xins.PanEnvelope().SustainEnd(curH.panEnv.sustainE);
 				}
 
 				if(curH.panEnv.flg & EnvFlags::USE_LOOP){
-					xins.PanEnvelope()->LoopStart(curH.panEnv.loopS);
-					xins.PanEnvelope()->LoopEnd(curH.panEnv.loopE);
+					xins.PanEnvelope().LoopStart(curH.panEnv.loopS);
+					xins.PanEnvelope().LoopEnd(curH.panEnv.loopE);
 				}
 
 				int envelope_point_num = curH.panEnv.numP;
@@ -486,15 +493,15 @@ Special:  Bit 0: On = song message attached.
 
 				for(int i = 0; i < envelope_point_num;i++){
 					short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
-					xins.PanEnvelope()->Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
+					xins.PanEnvelope().Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
 				}
 
 			} else {
-				xins.PanEnvelope()->IsEnabled(false);
+				xins.PanEnvelope().IsEnabled(false);
 			}
 			// Pitch/Filter envelope
-			xins.PitchEnvelope()->Init();
-			xins.FilterEnvelope()->Init();
+			xins.PitchEnvelope().Init();
+			xins.FilterEnvelope().Init();
 
 			if(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE){// enable pitch/filter envelope
 				int envelope_point_num = curH.pitchEnv.numP;
@@ -505,49 +512,49 @@ Special:  Bit 0: On = song message attached.
 				if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
 				{
 					xins.FilterType(dsp::F_LOWPASS12);
-					xins.FilterEnvelope()->IsEnabled(true);
-					xins.PitchEnvelope()->IsEnabled(false);
-					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.FilterEnvelope()->IsCarry(true);
+					xins.FilterEnvelope().IsEnabled(true);
+					xins.PitchEnvelope().IsEnabled(false);
+					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
 					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
-						xins.FilterEnvelope()->SustainBegin(curH.pitchEnv.sustainS);
-						xins.FilterEnvelope()->SustainEnd(curH.pitchEnv.sustainE);
+						xins.FilterEnvelope().SustainBegin(curH.pitchEnv.sustainS);
+						xins.FilterEnvelope().SustainEnd(curH.pitchEnv.sustainE);
 					}
 
 					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
-						xins.FilterEnvelope()->LoopStart(curH.pitchEnv.loopS);
-						xins.FilterEnvelope()->LoopEnd(curH.pitchEnv.loopE);
+						xins.FilterEnvelope().LoopStart(curH.pitchEnv.loopS);
+						xins.FilterEnvelope().LoopEnd(curH.pitchEnv.loopE);
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
 						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
-						xins.FilterEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
+						xins.FilterEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
 					}
 					if ( xins.FilterCutoff() < 127 )
 					{
 						xins.FilterEnvAmount((-1)*xins.FilterCutoff());
 					} else { xins.FilterEnvAmount(-128); }
 				} else {
-					xins.PitchEnvelope()->IsEnabled(true);
-					xins.FilterEnvelope()->IsEnabled(false);
-					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.PitchEnvelope()->IsCarry(true);
+					xins.PitchEnvelope().IsEnabled(true);
+					xins.FilterEnvelope().IsEnabled(false);
+					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.PitchEnvelope().IsCarry(true);
 					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
-						xins.PitchEnvelope()->SustainBegin(curH.pitchEnv.sustainS);
-						xins.PitchEnvelope()->SustainEnd(curH.pitchEnv.sustainE);
+						xins.PitchEnvelope().SustainBegin(curH.pitchEnv.sustainS);
+						xins.PitchEnvelope().SustainEnd(curH.pitchEnv.sustainE);
 					}
 
 					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
-						xins.PitchEnvelope()->LoopStart(curH.pitchEnv.loopS);
-						xins.PitchEnvelope()->LoopEnd(curH.pitchEnv.loopE);
+						xins.PitchEnvelope().LoopStart(curH.pitchEnv.loopS);
+						xins.PitchEnvelope().LoopEnd(curH.pitchEnv.loopE);
 					}
 
 					for(int i = 0; i < envelope_point_num;i++){
 						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
-						xins.PitchEnvelope()->Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
+						xins.PitchEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
 					}
 				}
 			} else {
-				xins.PitchEnvelope()->IsEnabled(false);
-				xins.FilterEnvelope()->IsEnabled(false);
+				xins.PitchEnvelope().IsEnabled(false);
+				xins.FilterEnvelope().IsEnabled(false);
 			}
 
 			xins.IsEnabled(true);
@@ -837,11 +844,14 @@ Special:  Bit 0: On = song message attached.
 			//Read(packedpattern, packedSize);
 			for (int row=0;row<rowCount;row++)
 			{
+				m_extracolumn = numchans+1;
 				Read(&newEntry,1);
 				while ( newEntry )
 				{
 					unsigned char channel=(newEntry-1)&0x3F;
+					if (channel >= m_extracolumn) { m_extracolumn = channel+1;}
 					if (newEntry&0x80) mask[channel]=ReadUInt8();
+					unsigned char volume=255;
 					if(mask[channel]&1)
 					{
 						unsigned char note=ReadUInt8();
@@ -875,67 +885,56 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
 						if ( tmp<=64)
 						{
-							pent._volume=tmp<64?tmp:63;
+							volume=tmp<64?tmp:63;
 						}
 						else if (tmp<75)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP | (tmp-65);
+							volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP | (tmp-65);
 						}
 						else if (tmp<85)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN | (tmp-75);
+							volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN | (tmp-75);
 						}
 						else if (tmp<95)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-85);
+							volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-85);
 						}
 						else if (tmp<105)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-95);
+							volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-95);
 						}
 						else if (tmp<115)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_DOWN | (tmp-105);
+							volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_DOWN | (tmp-105);
 						}
 						else if (tmp<125)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_UP | (tmp-115);
+							volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_UP | (tmp-115);
 						}
 						else if (tmp<193)
 						{
 							tmp= (tmp==192)?15:(tmp-128)/4;
-							pent._volume=XMSampler::CMD_VOL::VOL_PANNING | tmp;
+							volume=XMSampler::CMD_VOL::VOL_PANNING | tmp;
 						}
 						else if (tmp<203)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_TONEPORTAMENTO | (tmp-193);
+							volume=XMSampler::CMD_VOL::VOL_TONEPORTAMENTO | (tmp-193);
 						}
 						else if (tmp<213)
 						{
-							pent._volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
+							volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
 						}
-	#else
-						if ( tmp<=64)
-						{
-							pent._cmd=0x0C;
-							pent._parameter= tmp*2;
-						}
-	#endif
-#endif
 					}
+					std::uint8_t param=6;
 					if(mask[channel]&8)
 					{
 						pent._mach=0;
 						std::uint8_t command=ReadUInt8();
-						std::uint8_t param=ReadUInt8();
+						param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
-						ParseEffect(pent,command,param,channel);
+						ParseEffect(pent,patIdx,row,command,param,channel);
 						lastcom[channel]=pent._cmd;
 						lasteff[channel]=pent._parameter;
 
@@ -948,20 +947,47 @@ Special:  Bit 0: On = song message attached.
 						pent._parameter = lasteff[channel];
 					}
 
-					PatternEntry* pData = (PatternEntry*) _pSong->_ptrackline(patIdx,channel,row);
-
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+					pent._volume = volume;
+#else
+					if(pent._cmd != 0 || pent._parameter != 0) {
+						if(volume!=255 && m_extracolumn < MAX_TRACKS) {
+							PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
+							pData->_note = notecommands::midicc;
+							pData->_inst = channel;
+							pData->_mach = pent._mach;
+							pData->_cmd = XMSampler::CMD::SENDTOVOLUME;
+							pData->_parameter = volume;
+							m_extracolumn++;
+						}
+					}
+					else if(volume < 0x40) {
+						pent._cmd = XMSampler::CMD::VOLUME;
+						pent._parameter = volume*2;
+					}
+					else if(volume!=255) {
+						pent._cmd = XMSampler::CMD::SENDTOVOLUME;
+						pent._parameter = volume;
+					}
+	#endif
+#endif
+					PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,channel,row));
 					*pData = pent;
 					pent=pempty;
 
-					numchans = std::max(static_cast<int>(channel),numchans);
+					numchans = std::max((int)channel,numchans);
 
 					Read(&newEntry,1);
 				}
+				m_maxextracolumn = std::max(m_maxextracolumn,m_extracolumn);
 			}
 			return true;
 		}
 
-		void ITModule2::ParseEffect(PatternEntry&pent, int command,int param,int channel)
+		void ITModule2::ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel)
 		{
 			int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 				XMInstrument::WaveData::WaveForms::SAWDOWN,
@@ -970,8 +996,20 @@ Special:  Bit 0: On = song message attached.
 			};
 			switch(command){
 				case ITModule2::CMD::SET_SPEED:
-					pent._cmd=PatternCmd::EXTENDED;
-					pent._parameter = 24 / ((param == 0)?6:param);;
+					{
+						pent._cmd=PatternCmd::EXTENDED;
+						int extraticks=0;
+						pent._parameter = XMSampler::CalcLPBFromSpeed(param,extraticks);
+						if (extraticks != 0 && m_extracolumn < MAX_TRACKS) {
+							PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
+							pData->_note = notecommands::empty;
+							pData->_inst = 255;
+							pData->_mach = pent._mach;
+							pData->_cmd = PatternCmd::EXTENDED;
+							pData->_parameter = PatternCmd::MEMORY_PAT_DELAY | extraticks;
+							m_extracolumn++;
+						}
+					}
 					break;
 				case ITModule2::CMD::JUMP_TO_ORDER:
 					pent._cmd = PatternCmd::JUMP_TO_ORDER;
@@ -1146,7 +1184,12 @@ Special:  Bit 0: On = song message attached.
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
 			song.BeatsPerMin(s3mFileH.iTempo);
-			song.LinesPerBeat(sampler->Speed2LPB(s3mFileH.iSpeed));
+			int extraticks=0;
+			song.LinesPerBeat(XMSampler::CalcLPBFromSpeed(s3mFileH.iSpeed,extraticks));
+			if (extraticks != 0) {
+				//\todo: setup something...
+			}
+
 			sampler->IsAmigaSlides(true);
 			sampler->GlobalVolume((s3mFileH.gVol&0x7F)*2);
 			
@@ -1220,11 +1263,13 @@ Special:  Bit 0: On = song message attached.
 				Seek(pointersi[i]<<4);
 				LoadS3MInstX(sampler,i);
 			}
+			m_maxextracolumn=song.SONGTRACKS;
 			for (i=0;i<s3mFileH.patNum;i++)
 			{
 				Seek(pointersp[i]<<4);
 				LoadS3MPatternX(i);
 			}
+			song.SONGTRACKS=m_maxextracolumn;
 			delete [] pointersi; pointersi = 0;
 			delete [] pointersp; pointersp = 0;
 
@@ -1453,10 +1498,12 @@ OFFSET              Count TYPE   Description
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
 			{
+				m_extracolumn=_pSong->SONGTRACKS;
 				Read(&newEntry,1);
 				while ( newEntry )
 				{
 					char channel=newEntry&31;
+					unsigned char volume=255;
 					if(newEntry&32)
 					{
 						std::uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
@@ -1469,24 +1516,8 @@ OFFSET              Count TYPE   Description
 					if(newEntry&64)
 					{
 						std::uint8_t tmp=ReadUInt8();
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-						if ( tmp<=64)
-						{
-							pent._mach =0;
-							pent._volume=(tmp<64)?tmp:63;
-						}
-	#else
-						if ( tmp<=64)
-						{
-							pent._mach =0;
-							pent._cmd = 0x0C;
-							pent._parameter = tmp*2;
-						}
-	#endif
-#endif
+						pent._mach =0;
+						volume = (tmp<64)?tmp:63;
 					}
 					if(newEntry&128)
 					{
@@ -1494,7 +1525,7 @@ OFFSET              Count TYPE   Description
 						std::uint8_t command=ReadUInt8();
 						std::uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
-						ParseEffect(pent,command,param,channel);
+						ParseEffect(pent,patIdx,row,command,param,channel);
 						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )
 						{
 							pent._parameter = ((pent._parameter&0xF0)>>4)*10 + (pent._parameter&0x0F);
@@ -1514,13 +1545,42 @@ OFFSET              Count TYPE   Description
 							}
 						}
 					}
-					PatternEntry* pData = (PatternEntry*) _pSong->_ptrackline(patIdx,channel,row);
-
-					*pData = pent;
+#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
+	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
+#else
+	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+					pent._volume = volume;
+#else
+					if(pent._cmd != 0 || pent._parameter != 0) {
+						if(volume!=255) {
+							PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
+							pData->_note = notecommands::midicc;
+							pData->_inst = channel;
+							pData->_mach = pent._mach;
+							pData->_cmd = XMSampler::CMD::SENDTOVOLUME;
+							pData->_parameter = volume;
+							m_extracolumn++;
+						}
+					}
+					else if(volume < 0x40) {
+						pent._cmd = XMSampler::CMD::VOLUME;
+						pent._parameter = volume*2;
+					}
+					else if(volume!=255) {
+						pent._cmd = XMSampler::CMD::SENDTOVOLUME;
+						pent._parameter = volume;
+					}
+	#endif
+#endif
+					if (channel < _pSong->SONGTRACKS) {
+						PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,channel,row));
+						*pData = pent;
+					}
 					pent=pempty;
 
 					Read(&newEntry,1);
 				}
+				m_maxextracolumn = std::max(m_maxextracolumn,m_extracolumn);
 			}
 			return true;
 		}

@@ -155,7 +155,7 @@ void CEffectWnd::ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstK
 /* SaveBank saves bank to file                                               */
 /*****************************************************************************/
 
-bool CEffectWnd::SaveBank(std::string sName)
+bool CEffectWnd::SaveBank(const std::string sName)
 {
 	pEffect->SetChunkFile(sName.c_str());
 	CFxBank b = pEffect->SaveBank();
@@ -167,7 +167,7 @@ bool CEffectWnd::SaveBank(std::string sName)
 	else return false;
 }
 
-bool CEffectWnd::SaveProgram(std::string sName)
+bool CEffectWnd::SaveProgram(const std::string sName)
 {
 	pEffect->SetChunkFile(sName.c_str());
 	CFxProgram p = pEffect->SaveProgram();

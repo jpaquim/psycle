@@ -548,11 +548,11 @@ void XMSamplerUISample::OnBnClickedPanenabled()
 		rWave().PanEnabled(check->GetCheck()?true:false);
 		if ( check->GetCheck() == 2 ) 
 		{
-			rWave().PanFactor(rWave().PanFactor()+1.0f);
+			rWave().IsSurround(true);
 		}
-		else if ( rWave().PanFactor()>1.0f)  
+		else 
 		{
-			rWave().PanFactor(rWave().PanFactor()-1.0f);
+			rWave().IsSurround(false);
 		}
 	}
 	if ( check->GetCheck() == 2 ) 
@@ -562,7 +562,19 @@ void XMSamplerUISample::OnBnClickedPanenabled()
 	else
 	{
 		char tmp[40];
-		sprintf(tmp,"%d",(int)(rWave().PanFactor()*128));
+		int val = (int)(rWave().PanFactor()*128);
+		switch(val)
+		{
+		case 0: sprintf(tmp,"||%02d  ",val); break;
+		case 64: sprintf(tmp," |%02d| ",val); break;
+		case 128: sprintf(tmp,"  %02d||",val); break;
+		default:
+			if ( val < 32) sprintf(tmp,"<<%02d  ",val);
+			else if ( val < 64) sprintf(tmp," <%02d< ",val);
+			else if ( val <= 96) sprintf(tmp," >%02d> ",val);
+			else sprintf(tmp,"  %02d>>",val);
+			break;
+		}
 		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
 	}
 }
@@ -582,16 +594,17 @@ void XMSamplerUISample::OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult)
 	if ( check->GetCheck() != 2 ) // 2 == SurrounD
 	{
 	char tmp[40];
-		switch(slid->GetPos())
+		int val = slid->GetPos();
+		switch(val)
 		{
-		case 0: sprintf(tmp,"||%02d  ",slid->GetPos()); break;
-		case 64: sprintf(tmp," |%02d| ",slid->GetPos()); break;
-		case 128: sprintf(tmp,"  %02d||",slid->GetPos()); break;
+		case 0: sprintf(tmp,"||%02d  ",val); break;
+		case 64: sprintf(tmp," |%02d| ",val); break;
+		case 128: sprintf(tmp,"  %02d||",val); break;
 		default:
-			if ( slid->GetPos() < 32) sprintf(tmp,"<<%02d  ",slid->GetPos());
-			else if ( slid->GetPos() < 64) sprintf(tmp," <%02d< ",slid->GetPos());
-			else if ( slid->GetPos() <= 96) sprintf(tmp," >%02d> ",slid->GetPos());
-			else sprintf(tmp,"  %02d>>",slid->GetPos());
+			if ( val < 32) sprintf(tmp,"<<%02d  ",val);
+			else if ( val < 64) sprintf(tmp," <%02d< ",val);
+			else if ( val <= 96) sprintf(tmp," >%02d> ",val);
+			else sprintf(tmp,"  %02d>>",val);
 			break;
 		}
 

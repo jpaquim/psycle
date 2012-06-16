@@ -285,11 +285,12 @@ namespace psycle { namespace host {
 				{
 					
 /*					Global::song().seqBus = machine()._macIndex;
-					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(FALSE);
-					CComboBox *cb2=(CComboBox *)((CMainFrame *)theApp.m_pMainWnd)->m_machineBar.GetDlgItem(IDC_AUXSELECT);
+					CMainFrame& mframe = *static_cast<CMainFrame*>(theApp.m_pMainWnd);
+					mframe.UpdateComboGen(FALSE);
+					CComboBox *cb2=reinterpret_cast<CComboBox *>(mframe.m_machineBar.GetDlgItem(IDC_AUXSELECT));
 					cb2->SetCurSel(AUX_PARAMS);
 					Global::song().auxcolSelected=tweakpar;
-					((CMainFrame *)theApp.m_pMainWnd)->UpdateComboIns();
+					mframe.UpdateComboIns();
 */
 				}
 				else 

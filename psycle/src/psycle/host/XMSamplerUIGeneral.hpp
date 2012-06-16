@@ -29,17 +29,16 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	void SliderPolyphony(CSliderCtrl* slid);
 private:
 	XMSampler* _pMachine;
 	bool m_bInitialize;
-//	CEdit m_GlobalVolume;
 protected:
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnCbnSelchangeXminterpol();
-	afx_msg void OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedCheck1();
-	afx_msg void OnBnClickedCheck2();
-	afx_msg void OnBnClickedCheck3();
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnBnClickedAmigaSlide();
+	afx_msg void OnBnClickedFilter();
+	afx_msg void OnCbnSelendokXminterpol();
 	afx_msg void OnCbnSelendokXmpanningmode();
 };
 

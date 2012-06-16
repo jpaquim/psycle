@@ -233,7 +233,9 @@ void XMSamplerMixerPage::SliderPanning(CSliderCtrl* slid, int offset)
 	{
 		rChan.DefaultPanFactorFloat(slid->GetPos()/(float)panningRange);
 	}
-	//todo? else
+	else {
+		rChan.PanFactor(slid->GetPos()/(float)panningRange);
+	}
 }
 
 void XMSamplerMixerPage::OnBnClickedChSurr1() { ClickSurround(0); }
@@ -246,16 +248,16 @@ void XMSamplerMixerPage::OnBnClickedChSurr7() { ClickSurround(6); }
 void XMSamplerMixerPage::OnBnClickedChSurr8() { ClickSurround(7); }
 void XMSamplerMixerPage::ClickSurround(int offset)
 {
-	//todo? playback mode
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[offset]);
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		if ( surr->GetCheck() == 0 ) {
-			rChan.DefaultIsSurround(false);
+		if (m_bShowChan.GetCheck())
+		{
+			rChan.DefaultIsSurround(surr->GetCheck());
 		}
 		else {
-			rChan.DefaultIsSurround(true);
+			rChan.IsSurround(surr->GetCheck());
 		}
 	}
 }
@@ -270,27 +272,22 @@ void XMSamplerMixerPage::OnBnClickedChMute7() { ClickMute(6); }
 void XMSamplerMixerPage::OnBnClickedChMute8() { ClickMute(7); }
 void XMSamplerMixerPage::ClickMute(int offset)
 {
-	//todo? playback mode
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		if ( mute->GetCheck() == 0 ) {
-			rChan.DefaultIsMute(false);
-		}
-		else {
-			rChan.DefaultIsMute(true);
-		}
+		rChan.DefaultIsMute(mute->GetCheck());
 	}
 }
 void XMSamplerMixerPage::SliderVolume(CSliderCtrl* slid, int offset)
 {
+	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
 	if (m_bShowChan.GetCheck())
 	{
-		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
 		rChan.DefaultVolumeFloat((volumeRange-slid->GetPos())/(float)volumeRange);
+	} else if(rChan.ForegroundVoice()) {
+		rChan.Volume((volumeRange-slid->GetPos())/(float)volumeRange);
 	}
-	//todo? else
 }
 
 
