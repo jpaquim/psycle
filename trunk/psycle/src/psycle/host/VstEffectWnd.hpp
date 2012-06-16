@@ -16,18 +16,18 @@ namespace psycle {
 
 		namespace vst
 		{
-			class plugin;
+			class Plugin;
 		}
 
 		class CVstGui : public CBaseParamView
 		{
 		public:
-			CVstGui(CFrameMachine* frame,vst::plugin*effect);
+			CVstGui(CFrameMachine* frame,vst::Plugin*effect);
 			void Open();
 			bool GetViewSize(CRect& rect);
 			void WindowIdle();
 		protected:
-			vst::plugin* pEffect;
+			vst::Plugin* pEffect;
 		};
 
 		/// vst editor window.
@@ -35,7 +35,7 @@ namespace psycle {
 		{
 			DECLARE_DYNAMIC(CVstEffectWnd)
 		public: 
-			CVstEffectWnd(vst::plugin* effect, CChildView* wndView_, CFrameMachine** windowVar_);
+			CVstEffectWnd(vst::Plugin* effect, CChildView* wndView_, CFrameMachine** windowVar_);
 			virtual ~CVstEffectWnd(){};
 		protected:
 			CVstEffectWnd(){}; // protected constructor used by dynamic creation
@@ -53,7 +53,7 @@ namespace psycle {
 			virtual void* OpenSecondaryWnd(VstWindow& window);
 			virtual bool CloseSecondaryWnd(VstWindow& window);
 		protected:
-			inline vst::plugin& vstmachine(){ return *reinterpret_cast<vst::plugin*>(_machine); }
+			inline vst::Plugin& vstmachine(){ return *reinterpret_cast<vst::Plugin*>(_machine); }
 			virtual CBaseParamView* CreateView();
 			virtual void UpdateTitle(){ SetWindowText(sTitle.c_str()); }
 			std::list<HWND> secwinlist;

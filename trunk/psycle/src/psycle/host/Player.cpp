@@ -50,6 +50,7 @@ namespace psycle
 			_playPosition=0;
 			measure_cpu_usage_=false;
 			m_SampleRate=44100;
+			m_extraTicks=0;
 			SetBPM(125,4);
 			for(int i=0;i<MAX_TRACKS;i++) {
 				prevMachines[i]=255;
@@ -130,7 +131,7 @@ void Player::start_threads(int thread_count) {
 				_recording = false;
 				Work(256);
 				_recording = recording;
-				((Master*)(Global::song()._pMachine[MASTER_INDEX]))->_clip = false;
+				static_cast<Master*>(Global::song()._pMachine[MASTER_INDEX])->_clip = false;
 			}
 			_lineChanged = true;
 			_lineCounter = line;
@@ -143,7 +144,7 @@ void Player::start_threads(int thread_count) {
 				{
 					int pattern = Global::song().playOrder[i];
 					// this should parse each line for ffxx commands if you want it to be truly accurate
-					songLength += (Global::song().patternLines[pattern] * 60/(tpb * bpm));
+					songLength += (Global::song().patternLines[pattern] * 60/(lpb * bpm));
 				}
 
 				sampleCount=songLength*m_SampleRate;
@@ -223,10 +224,10 @@ void Player::start_threads(int thread_count) {
 				}
 			}
 		}
-		void Player::SetBPM(int _bpm,int _tpb)
+		void Player::SetBPM(int _bpm,int _lpb)
 		{
-			if ( _tpb != 0) tpb=_tpb;
-			if ( _bpm != 0) bpm=_bpm;
+			if ( _lpb != 0) { lpb=_lpb; m_extraTicks = 0;}
+			if ( _bpm != 0) { bpm=_bpm; }
 			RecalcSPR();
 			CVSTHost::vstTimeInfo.tempo = bpm;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
@@ -260,7 +261,7 @@ void Player::compute_plan() {
 		++graph_size_;
 		Machine & n(*song._pMachine[m]);
 		if(n._type == MACH_MIXER) {
-			reinterpret_cast<Mixer*>(&n)->InitialWorkState();
+			static_cast<Mixer*>(&n)->InitialWorkState();
 		}
 		// find the terminal nodes in the graph (nodes with no connected input ports)
 		input_nodes_.clear(); n.sched_inputs(input_nodes_);
@@ -279,9 +280,12 @@ void Player::clear_plan() {
 
 		void Player::ExecuteLine(void)
 		{
+			// Global commands are executed first so that the values for BPM and alike
+			// are up-to-date when "NotifyNewLine()" is called.
 			ExecuteGlobalCommands();
 			NotifyNewLine();
 			ExecuteNotes();
+			NotifyPostNewLine();
 		}
 		// Initial Loop. Read new line and Interpret the Global commands.
 		void Player::ExecuteGlobalCommands(void)
@@ -294,8 +298,9 @@ void Player::clear_plan() {
 
 			for(int track=0; track<song.SONGTRACKS; track++)
 			{
-				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
-				if(pEntry->_note < notecommands::tweak || pEntry->_note == 255) // If This isn't a tweak (twk/tws/mcm) then do
+				PatternEntry* pEntry = reinterpret_cast<PatternEntry*>(plineOffset + track*EVENT_SIZE);
+				// If This isn't a tweak (twk/tws/mcm) then do
+				if(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty)
 				{
 					switch(pEntry->_cmd)
 					{
@@ -338,12 +343,23 @@ void Player::clear_plan() {
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-								SamplesPerRow(SamplesPerRow()*(1+(pEntry->_parameter&0x0F)));
+								int memextra = m_extraTicks;
+								m_extraTicks = 24 * (pEntry->_parameter&0x0F);
+								RecalcSPR();
+								m_extraTicks = memextra;
 								_SPRChanged=true;
+							}
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_PAT_DELAY )
+							{
+								m_extraTicks = pEntry->_parameter&0x0F;
+								RecalcSPR();
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
-								SamplesPerRow(SamplesPerRow()*(1.0f+((pEntry->_parameter&0x0F)*tpb/24.0f)));
+								int memextra = m_extraTicks;
+								m_extraTicks = pEntry->_parameter&0x0F;
+								RecalcSPR();
+								m_extraTicks = memextra;
 								_SPRChanged=true;
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
@@ -366,73 +382,75 @@ void Player::clear_plan() {
 						}
 						break;
 					case PatternCmd::JUMP_TO_ORDER:
-						if ( pEntry->_parameter < song.playLength ){
+						if ( pEntry->_parameter < song.playLength ) {
 							_patternjump=pEntry->_parameter;
 							_linejump=0;
 						}
 						break;
 					case PatternCmd::BREAK_TO_LINE:
-						if (_patternjump ==-1) 
-						{
+						if (_patternjump ==-1) {
 							_patternjump=(_playPosition+1>=song.playLength)?0:_playPosition+1;
 						}
-						if ( pEntry->_parameter >= song.patternLines[_patternjump])
-						{
+						if ( pEntry->_parameter >= song.patternLines[_patternjump]) {
 							_linejump = song.patternLines[_patternjump];
-						} else { _linejump= pEntry->_parameter; }
+						}
+						else { _linejump= pEntry->_parameter; }
 						break;
 					case PatternCmd::SET_VOLUME:
-						if(pEntry->_mach == 255)
-						{
-							((Master*)(song._pMachine[MASTER_INDEX]))->_outDry = pEntry->_parameter;
+						if(pEntry->_mach == 255) {
+							static_cast<Master*>(song._pMachine[MASTER_INDEX])->_outDry = pEntry->_parameter;
 						}
-						else 
-						{
+						else {
 							int mIndex = pEntry->_mach;
-							if(mIndex < MAX_MACHINES)
-							{
-								if(song._pMachine[mIndex]) song._pMachine[mIndex]->SetDestWireVolume(pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
+							if(mIndex < MAX_MACHINES && song._pMachine[mIndex]) {
+								song._pMachine[mIndex]->SetDestWireVolume(pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
 							}
 						}
 						break;
 					case  PatternCmd::SET_PANNING:
 						mIndex = pEntry->_mach;
-						if(mIndex < MAX_MACHINES)
-						{
-							if(song._pMachine[mIndex]) song._pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
+						if(mIndex < MAX_MACHINES && song._pMachine[mIndex]) {
+							song._pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
 						}
-
 						break;
 					}
 				}
 				// Check For Tweak or MIDI CC
 				else if(!song._trackMuted[track])
 				{
-					int mac = pEntry->_mach;
-					if((mac != 255) || (prevMachines[track] != 255))
-					{
-						if(mac != 255) prevMachines[track] = mac;
-						else mac = prevMachines[track];
-						if(mac < MAX_MACHINES)
+					if(pEntry->_mach < MAX_MACHINES) prevMachines[track] = pEntry->_mach;
+
+					int mac = prevMachines[track];
+					if(mac < MAX_MACHINES && song._pMachine[mac]) {
+						if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
 						{
-							Machine *pMachine = song._pMachine[mac];
-							if(pMachine)
+							int voice(pEntry->_inst);
+							// make a copy of the pattern entry, because we're going to modify it.
+							PatternEntry entry(*pEntry);
+							// check for out of range voice values.
+							if(voice < song.SONGTRACKS)
 							{
-								// If the midi command uses a command less than 0x80, then interpret it as
-								// send a tracker command to the specified track of the specified machine.
-								if(pEntry->_note != notecommands::midicc || pEntry->_inst >= 0x80)
+								song._pMachine[mac]->Tick(voice, &entry);
+							}
+							else if(voice == 0xFF)
+							{
+								entry._inst = 0x00;
+								// special voice value which means we want to send the same command to all voices
+								for(int voice(0) ; voice < song.SONGTRACKS ; ++voice)
 								{
-									// classic tracking, use the track number as the channel/voice number
-									pMachine->Tick(track, pEntry);
+									song._pMachine[mac]->Tick(voice, &entry);
 								}
 							}
+						}
+						else {
+							song._pMachine[mac]->Tick(track, pEntry);
 						}
 					}
 				}
 			}
 		}
 
-			// Notify all machines that a new Tick() comes.
+			// Notify all machines that a new Line comes.
 		void Player::NotifyNewLine(void)
 		{
 			Song& song = Global::song();
@@ -440,7 +458,7 @@ void Player::clear_plan() {
 			{
 				if(song._pMachine[tc])
 				{
-					song._pMachine[tc]->Tick();
+					song._pMachine[tc]->NewLine();
 					for(int c = 0; c < MAX_TRACKS; c++) song._pMachine[tc]->TriggerDelay[c]._cmd = 0;
 				}
 			}
@@ -456,22 +474,24 @@ void Player::clear_plan() {
 
 			for(int track=0; track<song.SONGTRACKS; track++)
 			{
-				PatternEntry* pEntry = (PatternEntry*)(plineOffset + track*EVENT_SIZE);
+				PatternEntry* pEntry = reinterpret_cast<PatternEntry*>(plineOffset + track*EVENT_SIZE);
 				if(( !song._trackMuted[track]) && 
-					(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::midicc || pEntry->_note == 255)) // Is it not muted and is a note or command?
+					(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty)) // Is it not muted and is a note or command?
 				{
 					int mac = pEntry->_mach;
 					if(mac < MAX_MACHINES) prevMachines[track] = mac;
 					else mac = prevMachines[track];
 					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
 					{
-						int ins = pEntry->_inst;
-						if(pEntry->_inst != 255) prevInstrument[track] = pEntry->_inst;
-						else ins = prevInstrument[track];
-
 						if(mac < MAX_MACHINES && song._pMachine[mac] != NULL) //looks like a valid machine index?
 						{
 							Machine *pMachine = song._pMachine[mac];
+							//XMSampler maintains this, and also has special meanings when no instrument is set.
+							int ins = pEntry->_inst;
+							if(pMachine->_type != MACH_XMSAMPLER) {
+								if(pEntry->_inst != 255) prevInstrument[track] = pEntry->_inst;
+								else ins = prevInstrument[track];
+							}
 							if(pEntry->_note == notecommands::release
 								 && pMachine->_type != MACH_SAMPLER && pMachine->_type != MACH_XMSAMPLER) {
 								playTrack[track]=false;
@@ -513,34 +533,9 @@ void Player::clear_plan() {
 										memcpy(&pMachine->TriggerDelay[track], &entry, sizeof(PatternEntry));
 										pMachine->ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = SamplesPerRow()*tpb/24;
+									pMachine->RetriggerRate[track] = SamplesPerRow()*lpb/24;
 								}
-								else if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
-								{
-									int voice(pEntry->_inst);
-									// make a copy of the pattern entry, because we're going to modify it.
-									PatternEntry entry(*pEntry);
-									entry._note = 255;
-									entry._inst = 255;
-									// check for out of range voice values.
-									if(voice < song.SONGTRACKS)
-									{
-										pMachine->Tick(voice, &entry);
-									}
-									else if(voice == 0xFF)
-									{
-										// special voice value which means we want to send the same command to all voices
-										for(int voice(0) ; voice < song.SONGTRACKS ; ++voice)
-										{
-											pMachine->Tick(voice, &entry);
-										}
-									}
-									else {}//Invalid index. do nothing.
-									pMachine->TriggerDelay[track]._cmd = 0;
-									pMachine->TriggerDelayCounter[track] = 0;
-									pMachine->ArpeggioCount[track] = 0;
-								}
-								else
+								else 
 								{
 									pMachine->TriggerDelay[track]._cmd = 0;
 									pMachine->Tick(track, &entry);
@@ -554,6 +549,18 @@ void Player::clear_plan() {
 			}
 		}	
 
+			// Notify all machines that a new Line comes.
+		void Player::NotifyPostNewLine(void)
+		{
+			Song& song = Global::song();
+			for(int tc=0; tc<MAX_MACHINES; tc++)
+			{
+				if(song._pMachine[tc])
+				{
+					song._pMachine[tc]->PostNewLine();
+				}
+			}
+		}
 
 		void Player::AdvancePosition()
 		{
@@ -562,7 +569,7 @@ void Player::clear_plan() {
 			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = false; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
 			else _lineCounter++;
-			_playTime += 60 / float (bpm * tpb);
+			_playTime += 60 / float (bpm * lpb);
 			if(_playTime>60)
 			{
 				_playTime-=60;
@@ -602,13 +609,14 @@ void Player::clear_plan() {
 			_lineChanged = true;
 		}
 
-int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int seektime_ms,bool allowLoop)
+int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool allowLoop)
 {
 	float songLength = 0;
 	float seektime = seektime_ms/1000.f;
 	int bpm_calc = song.BeatsPerMin();
-	int tpb_calc = song.LinesPerBeat();
-	float lineSeconds = 60.f/float(bpm_calc*tpb_calc);
+	int lpb_calc = song.LinesPerBeat();
+	int extratick_calc = 0;
+	float lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
 	int playPos=0;
 	while(playPos <song.playLength)
 	{
@@ -622,39 +630,47 @@ int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int se
 		while( playLine < song.patternLines[pattern])
 		{
 			int lineJump = -1;
-			int lsecChanged = false;
+			int resetLineSec = false;
 			for(int track=0; track<song.SONGTRACKS; track++)
 			{
-				psycle::host::PatternEntry* pEntry = (psycle::host::PatternEntry*)(plineOffset+l+track);
+				PatternEntry* pEntry = reinterpret_cast<PatternEntry*>(plineOffset+l+track*EVENT_SIZE);
 
-				if(pEntry->_note < psycle::host::notecommands::tweak || pEntry->_note == psycle::host::notecommands::empty) // If This isn't a tweak (twk/tws/mcm) then do
+				if(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty) // If This isn't a tweak (twk/tws/mcm) then do
 				{
 					switch(pEntry->_cmd)
 					{
-					case psycle::host::PatternCmd::SET_TEMPO:
+					case PatternCmd::SET_TEMPO:
 						if(pEntry->_parameter != 0)
 						{
 							bpm_calc=pEntry->_parameter;
+							lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
 						}
 						break;
-					case psycle::host::PatternCmd::EXTENDED:
+					case PatternCmd::EXTENDED:
 						if(pEntry->_parameter != 0)
 						{
 							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
 							{
-								tpb_calc=pEntry->_parameter;
+								lpb_calc=pEntry->_parameter;
+								extratick_calc=0;
+								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
 							}
-							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::PATTERN_DELAY )
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-								lineSeconds*=1+(pEntry->_parameter&0x0F);
-								lsecChanged=true;
+								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (pEntry->_parameter&0x0F));
+								resetLineSec=true;
 							}
-							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::FINE_PATTERN_DELAY)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_PAT_DELAY)
 							{
-								lineSeconds*=1.0f+((pEntry->_parameter&0x0F)*tpb_calc/24.0f);
-								lsecChanged=true;
+								extratick_calc=pEntry->_parameter&0x0F;
+								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
 							}
-							else if ( (pEntry->_parameter&0xF0) == psycle::host::PatternCmd::PATTERN_LOOP)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
+							{
+								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + ((pEntry->_parameter&0x0F)/24.f));
+								resetLineSec=true;
+							}
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
 							{
 								int value = pEntry->_parameter&0x0F;
 								if (value == 0 )
@@ -670,7 +686,7 @@ int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int se
 							}
 						}
 						break;
-					case psycle::host::PatternCmd::JUMP_TO_ORDER:
+					case PatternCmd::JUMP_TO_ORDER:
 						if ( pEntry->_parameter < song.playLength) {
 							if (pEntry->_parameter <= playPos && !allowLoop){
 								return lround<int>(songLength*1000.0f);
@@ -679,7 +695,7 @@ int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int se
 							lineJump=0;
 						}
 						break;
-					case psycle::host::PatternCmd::BREAK_TO_LINE:
+					case PatternCmd::BREAK_TO_LINE:
 						if (patternJump ==-1 ) 
 						{
 							if(playPos+1>=song.playLength) {
@@ -698,6 +714,7 @@ int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int se
 						//No need to check limits. That is done by the loop.
 						lineJump= pEntry->_parameter;
 						break;
+					default:break;
 					}
 				}
 			}
@@ -710,7 +727,7 @@ int Player::CalcOrSeek(psycle::host::Song& song, int seqPos, int patLine, int se
 				(patLine == -1 || patLine <= playLine)) {
 				return lround<int>(songLength*1000.0f);
 			}
-			if ( lsecChanged ) { lineSeconds = 60.f/float(bpm_calc*tpb_calc); lsecChanged = false; }
+			if ( resetLineSec ) { lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f)); resetLineSec = false; }
 			if ( patternJump!=-1 ) {
 				playPos= patternJump;
 				playLine=lineJump;
@@ -997,15 +1014,12 @@ void Player::stop_threads() {
 					}
 					if (_playing)
 					{
-						// Global commands are executed first so that the values for BPM and alike
-						// are up-to-date when "NotifyNewLine()" is called.
-						ExecuteGlobalCommands();
-						NotifyNewLine();
-						ExecuteNotes();
+						ExecuteLine();
 					}
 					else
 					{
 						NotifyNewLine();
+						NotifyPostNewLine();
 					}
 					_samplesRemaining = SamplesPerRow();
 				}

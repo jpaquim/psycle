@@ -219,7 +219,7 @@ If this parameter is NULL, all key names in the section specified by the lpAppNa
 			 return done;
 		 }
 
-		bool WinIniFile::Read(std::string const & key, WCHAR *string, std::size_t max_length_bytes)
+		bool WinIniFile::Read(std::string const & key, wchar_t *string, std::size_t max_length_bytes)
 		{
 			char result[8192];
 			bool done = GetPrivateProfileString(current_group.c_str(), key.c_str(), NULL, result, 8192, filename.c_str());
@@ -228,7 +228,7 @@ If this parameter is NULL, all key names in the section specified by the lpAppNa
 			}
 			 return done;
 		}
-		bool WinIniFile::Write(std::string const & key, WCHAR *string)
+		bool WinIniFile::Write(std::string const & key, wchar_t *string)
 		{
 			int wlen = wcslen(string);
 			char* res = new char[wlen*2+1];

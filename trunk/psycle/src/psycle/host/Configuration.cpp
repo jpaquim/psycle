@@ -185,19 +185,19 @@ namespace psycle { namespace host {
 		}
 		void Configuration::UseJBridge(bool use) 
 		{
-			vst::host::UseJBridge(use);
+			vst::Host::UseJBridge(use);
 		}
 		bool Configuration::UsesJBridge() const 
 		{
-			return vst::host::UseJBridge();
+			return vst::Host::UseJBridge();
 		}
 		void Configuration::UsePsycleVstBridge(bool use)
 		{
-			vst::host::UsePsycleVstBridge(use);
+			vst::Host::UsePsycleVstBridge(use);
 		}
 		bool Configuration::UsesPsycleVstBridge() const
 		{
-			return vst::host::UsePsycleVstBridge();
+			return vst::Host::UsePsycleVstBridge();
 		}
 
 		void Configuration::SetDefaultPatLines(int defLines)

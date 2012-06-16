@@ -143,7 +143,7 @@ void XMSamplerUIInst::AssignAmplitudeValues(XMInstrument& inst)
 	m_SlSwing1Glide.SetPos(inst.RandomVolume()*100.0f);
 //	m_SlNoteModNote.SetPos(inst.NoteModVolCenter());
 //	m_SlNoteMod.SetPos(inst.NoteModVolSep());
-
+	m_EnvEnabled.SetCheck(inst.AmpEnvelope().IsEnabled());
 	m_EnvelopeEditor.Initialize(m_pMachine,inst.AmpEnvelope());
 	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
 	m_SlADSRBase.ShowWindow(SW_SHOW);
@@ -166,6 +166,7 @@ void XMSamplerUIInst::AssignAmplitudeValues(XMInstrument& inst)
 }
 void XMSamplerUIInst::AssignPanningValues(XMInstrument& inst)
 {
+	m_EnvEnabled.SetCheck(inst.PanEnvelope().IsEnabled());
 	m_cutoffPan.SetCheck(inst.PanEnabled());
 	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f)-64.0f);
 	//FIXME: This is not showing the correct value. Should check if randompanning
@@ -196,6 +197,7 @@ void XMSamplerUIInst::AssignPanningValues(XMInstrument& inst)
 }
 void XMSamplerUIInst::AssignFilterValues(XMInstrument& inst)
 {
+	m_EnvEnabled.SetCheck(inst.FilterEnvelope().IsEnabled());
 	m_SlVolCutoffPan.SetPos(inst.FilterCutoff()&0x7F);
 	if (inst.FilterCutoff()) m_cutoffPan.SetCheck(!(inst.FilterCutoff()&0x80));
 	else m_cutoffPan.SetCheck(0);
@@ -233,6 +235,8 @@ void XMSamplerUIInst::AssignPitchValues(XMInstrument& inst)
 //	m_SlVolCutoffPan.SetPos(inst.Tune());
 //	m_SlSwing1Glide.SetPos(inst.Glide());
 	m_SlNoteMod.SetPos(inst.Lines());
+
+	m_EnvEnabled.SetCheck(inst.PitchEnvelope().IsEnabled());
 
 	m_EnvelopeEditor.Initialize(m_pMachine,inst.PitchEnvelope());
 	((CStatic*)GetDlgItem(IDC_STATIC6))->ShowWindow(SW_SHOW); //ENVADSR
@@ -1042,10 +1046,10 @@ BEGIN_MESSAGE_MAP(XMSamplerUIInst::CEnvelopeEditor, CStatic)
 END_MESSAGE_MAP()
 			
 			
-void XMSamplerUIInst::CEnvelopeEditor::Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope)
+void XMSamplerUIInst::CEnvelopeEditor::Initialize(XMSampler * const pSampler,XMInstrument::Envelope & pEnvelope)
 {
 	m_pXMSampler =pSampler;
-	m_pEnvelope = pEnvelope;
+	m_pEnvelope = &pEnvelope;
 			
 	CRect _rect;
 	GetClientRect(&_rect);

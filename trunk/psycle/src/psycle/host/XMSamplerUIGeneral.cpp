@@ -17,21 +17,19 @@ namespace psycle { namespace host {
 	void XMSamplerUIGeneral::DoDataExchange(CDataExchange* pDX)
 	{
 		CPropertyPage::DoDataExchange(pDX);
-		//{{AFX_DATA_MAP(CDirectoryDlg)
 		DDX_Control(pDX, IDC_XMINTERPOL, m_interpol);
 		DDX_Control(pDX, IDC_XMPOLY, m_polyslider);
 		DDX_Control(pDX, IDC_XMPOLYLABEL, m_polylabel);
-		//}}AFX_DATA_MAP
 		DDX_Control(pDX, IDC_COMMANDINFO, m_ECommandInfo);
 		DDX_Control(pDX, IDC_CHECK1, m_bAmigaSlides);
 		DDX_Control(pDX, IDC_CHECK2, m_ckFilter);
 		DDX_Control(pDX, IDC_XMPANNINGMODE, m_cbPanningMode);
 	}
 	BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
-		ON_CBN_SELCHANGE(IDC_XMINTERPOL, OnCbnSelchangeXminterpol)
-		ON_NOTIFY(NM_CUSTOMDRAW, IDC_XMPOLY, OnNMCustomdrawXmpoly)
-		ON_BN_CLICKED(IDC_CHECK1, OnBnClickedCheck1)
-		ON_BN_CLICKED(IDC_CHECK2, OnBnClickedCheck2)
+		ON_WM_HSCROLL()
+		ON_CBN_SELENDOK(IDC_XMINTERPOL, OnCbnSelendokXminterpol)
+		ON_BN_CLICKED(IDC_CHECK1, OnBnClickedAmigaSlide)
+		ON_BN_CLICKED(IDC_CHECK2, OnBnClickedFilter)
 		ON_CBN_SELENDOK(IDC_XMPANNINGMODE, OnCbnSelendokXmpanningmode)
 	END_MESSAGE_MAP()
 
@@ -56,6 +54,10 @@ namespace psycle { namespace host {
 
 		m_polyslider.SetRange(2, XMSampler::MAX_POLYPHONY);
 		m_polyslider.SetPos(_pMachine->NumVoices());
+		// Label on dialog display
+		std::stringstream ss;
+		ss << _pMachine->NumVoices();
+		m_polylabel.SetWindowText(ss.str().c_str());
 
 		m_ECommandInfo.SetWindowText("Track Commands:\r\n\t\
 01xx: Portamento Up ( Fx: fine, Ex: Extra fine)\r\n\t\
@@ -136,33 +138,31 @@ Ex: Pitch slide down");
 	// EXCEPTION: OCX Property Pages should return false
 	}
 
-	void XMSamplerUIGeneral::OnCbnSelchangeXminterpol()
+	void XMSamplerUIGeneral::OnCbnSelendokXminterpol()
 	{
 		_pMachine->ResamplerQuality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 	}
 
-	void XMSamplerUIGeneral::OnNMCustomdrawXmpoly(NMHDR *pNMHDR, LRESULT *pResult)
+	void XMSamplerUIGeneral::SliderPolyphony(CSliderCtrl* slid)
 	{
-		//LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 		for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
 		{
 			_pMachine->rVoice(c).NoteOffFast();
 		}
 
-		_pMachine->NumVoices(m_polyslider.GetPos());
+		_pMachine->NumVoices(slid->GetPos());
 		// Label on dialog display
-		char buffer[15];
-		sprintf(buffer,"%d",_pMachine->NumVoices());
-		m_polylabel.SetWindowText(buffer);
-		*pResult = 0;
+		std::stringstream ss;
+		ss << _pMachine->NumVoices();
+		m_polylabel.SetWindowText(ss.str().c_str());
 	}
 
-	void XMSamplerUIGeneral::OnBnClickedCheck1()
+	void XMSamplerUIGeneral::OnBnClickedAmigaSlide()
 	{
 		_pMachine->IsAmigaSlides(( m_bAmigaSlides.GetCheck() == 1 )?true:false);
 	}
 
-	void XMSamplerUIGeneral::OnBnClickedCheck2()
+	void XMSamplerUIGeneral::OnBnClickedFilter()
 	{
 		_pMachine->UseFilters(m_ckFilter.GetCheck()?true:false);
 	}
@@ -170,6 +170,28 @@ Ex: Pitch slide down");
 	void XMSamplerUIGeneral::OnCbnSelendokXmpanningmode()
 	{
 		_pMachine->PanningMode(m_cbPanningMode.GetCurSel());
+	}
+
+	void XMSamplerUIGeneral::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {
+		CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+
+		switch(nSBCode){
+		case TB_BOTTOM: //fallthrough
+		case TB_LINEDOWN: //fallthrough
+		case TB_PAGEDOWN: //fallthrough
+		case TB_TOP: //fallthrough
+		case TB_LINEUP: //fallthrough
+		case TB_PAGEUP: //fallthrough
+		case TB_THUMBPOSITION: //fallthrough
+		case TB_THUMBTRACK:
+			if ( the_slider->GetDlgCtrlID() == m_polyslider.GetDlgCtrlID() ) {
+				SliderPolyphony(the_slider);
+			}
+			break;
+		case TB_ENDTRACK:
+			break;
+		}
+		CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 	}
 
 }}

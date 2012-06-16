@@ -1900,8 +1900,8 @@ namespace psycle { namespace host {
 			hdcSrc.CreateCompatibleDC(NULL);
 			hdcDst.CreateCompatibleDC(NULL);
 			// Load the bitmaps into memory DC
-			CBitmap* hbmSrcT = (CBitmap*) hdcSrc.SelectObject(pBmpSource);
-			CBitmap* hbmDstT = (CBitmap*) hdcDst.SelectObject(pBmpMask);
+			CBitmap* hbmSrcT = hdcSrc.SelectObject(pBmpSource);
+			CBitmap* hbmDstT = hdcDst.SelectObject(pBmpMask);
 			// Change the background to trans color
 			hdcSrc.SetBkColor(clrTrans);
 			// This call sets up the mask bitmap.

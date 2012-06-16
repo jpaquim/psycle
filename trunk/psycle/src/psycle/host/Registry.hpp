@@ -19,6 +19,9 @@ namespace psycle
 				HKLM = 0,
 				HKCU
 			} root_t;
+#if !defined COLORREF
+			typedef unsigned long COLORREF;
+#endif
 
 			Registry(root_t tree_root, std::string version);
 			virtual ~Registry();
@@ -105,8 +108,8 @@ namespace psycle
 		///\{
 			/*override*/ bool ReadRaw(std::string const & key, void *, std::size_t max_length);
 			/*override*/ bool WriteRaw(std::string const & key, void *, std::size_t bytesize);
-			/*override*/ bool Read(std::string const & key, WCHAR *, std::size_t max_length_bytes);
-			/*override*/ bool Write(std::string const & key, WCHAR *);
+			/*override*/ bool Read(std::string const & key, wchar_t *, std::size_t max_length_bytes);
+			/*override*/ bool Write(std::string const & key, wchar_t *);
 		///\}
 			result QueryTypeAndSize(std::string const &, type & type, std::size_t & size);
 

@@ -98,7 +98,7 @@ namespace psycle
 		public:
 			Sampler(int index);
 			virtual void Init(void);
-			virtual void Tick();
+			virtual void NewLine();
 			virtual void Tick(int channel, PatternEntry* pData);
 			virtual void Stop(void);
 			virtual int GenerateAudioInTicks(int startSample,  int numSamples);

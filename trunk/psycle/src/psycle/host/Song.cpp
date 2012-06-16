@@ -80,7 +80,7 @@ namespace psycle
 		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
-			vst::plugin *vstPlug(0);
+			vst::Plugin *vstPlug(0);
 			if(songIdx < 0)
 			{
 				songIdx =	GetFreeMachine();
@@ -138,7 +138,7 @@ namespace psycle
 					{
 						try
 						{
-							pMachine = vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(psPluginDll,shellIdx));
+							pMachine = vstPlug = dynamic_cast<vst::Plugin*>(Global::vsthost().LoadPlugin(psPluginDll,shellIdx));
 							if(vstPlug)
 							{
 								vstPlug->_macIndex=songIdx;
@@ -1439,7 +1439,7 @@ namespace psycle
 								//Bugfix.
 								if (fullopen) {
 									if ((_pMachine[index]->_type == MACH_VST || _pMachine[index]->_type == MACH_VSTFX)
-										&& ((vst::plugin*)_pMachine[index])->ProgramIsChunk() == false) {
+										&& dynamic_cast<vst::Plugin*>(_pMachine[index])->ProgramIsChunk() == false) {
 											size = (UINT)(pFile->GetPos() - begins);
 /*									} else if ((version&0xFF) == 0) {
 										size = (pFile->GetPos() - begins) 
@@ -1576,7 +1576,7 @@ namespace psycle
 					/// is bad for the Winamp plugin (or any other multi-document situation).
 					Global::player().SetBPM(BeatsPerMin(), LinesPerBeat());
 	//				Global::player().bpm = m_BeatsPerMin;
-	//				Global::player().tpb = m_LinesPerBeat;
+	//				Global::player().lpb = m_LinesPerBeat;
 	//				Global::player().SamplesPerRow(sampR * Global::configuration()._pOutputDriver->_samplesPerSec / 44100);
 				}
 				pFile->Read(&currentOctave, sizeof(char));
@@ -1768,7 +1768,7 @@ namespace psycle
 					Sampler* pSampler;
 					XMSampler* pXMSampler;
 					Plugin* pPlugin;
-					vst::plugin * pVstPlugin(0);
+					vst::Plugin * pVstPlugin(0);
 					int x,y,type;
 					if (_machineActive[i])
 					{
@@ -1836,7 +1836,7 @@ namespace psycle
 								char sPath[_MAX_PATH];
 								char sError[128];
 								bool berror=false;
-								vst::plugin* pTempMac = new vst::plugin(0);
+								vst::Plugin* pTempMac = new vst::Plugin(0);
 								unsigned char program;
 								int instance;
 								// The trick: We need to load the information from the file in order to know the "instance" number
@@ -1862,7 +1862,7 @@ namespace psycle
 									{
 										try
 										{
-											pMac[i] = pVstPlugin = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath,shellIdx));
+											pMac[i] = pVstPlugin = dynamic_cast<vst::Plugin*>(Global::vsthost().LoadPlugin(sPath,shellIdx));
 
 											if (pVstPlugin)
 											{
@@ -2066,7 +2066,7 @@ namespace psycle
 							bool chunkread = false;
 							try
 							{
-								vst::plugin & plugin(*reinterpret_cast<vst::plugin*>(pMac[i]));
+								vst::Plugin & plugin(*static_cast<vst::Plugin*>(pMac[i]));
 								if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
 							}
 							catch(const std::exception &)

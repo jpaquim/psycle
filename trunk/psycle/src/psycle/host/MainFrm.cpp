@@ -638,7 +638,7 @@ namespace psycle { namespace host {
 					case MACH_VSTFX:
 						{
 							CVstEffectWnd* newwin;
-							m_pWndMac[tmac] = newwin = new CVstEffectWnd(reinterpret_cast<vst::plugin*>(ma), &m_wndView, &m_pWndMac[tmac]);
+							m_pWndMac[tmac] = newwin = new CVstEffectWnd(static_cast<vst::Plugin*>(ma), &m_wndView, &m_pWndMac[tmac]);
 							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;

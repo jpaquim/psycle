@@ -267,7 +267,7 @@ namespace psycle
 			 return (error == ERROR_SUCCESS);
 		 }
 
-		bool Registry::Read(std::string const & key, WCHAR *string, std::size_t max_length_bytes)
+		bool Registry::Read(std::string const & key, wchar_t *string, std::size_t max_length_bytes)
 		{
 			char result[8192];
 			bool done = Read(key,result,8191);
@@ -276,7 +276,7 @@ namespace psycle
 			}
 			 return done;
 		}
-		bool Registry::Write(std::string const & key, WCHAR *string)
+		bool Registry::Write(std::string const & key, wchar_t *string)
 		{
 			int wlen = wcslen(string);
 			char* res = new char[wlen*2+1];

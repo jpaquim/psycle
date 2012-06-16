@@ -150,7 +150,7 @@ namespace psycle { namespace host {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
+				PatternEntry *pentry = reinterpret_cast<PatternEntry*>(toffset);
 				if ((pentry->_mach != entry._mach) 
 					|| (pentry->_inst != entry._inst) 
 					|| (pentry->_cmd != entry._cmd) 
@@ -222,7 +222,7 @@ namespace psycle { namespace host {
 				}
 
 				// build entry
-				PatternEntry *pentry = (PatternEntry*) toffset;
+				PatternEntry *pentry = reinterpret_cast<PatternEntry*>(toffset);
 				if (pentry->_note >= notecommands::release)
 				{
 					if ((pentry->_mach != entry._mach) 
@@ -284,7 +284,7 @@ namespace psycle { namespace host {
 				}
 
 				// build entry
-				PatternEntry *entry = (PatternEntry*) toffset;
+				PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
 				if (entry->_note >= notecommands::release)
 				{
 					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
@@ -478,7 +478,7 @@ namespace psycle { namespace host {
 			}
 
 			// build the entry to add it to the pattern
-			PatternEntry *entry = (PatternEntry*) toffset;
+			PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
 			if (velocity==0)
 			{
 				//This prevents writing a noteoff over its own noteon.
@@ -586,7 +586,7 @@ namespace psycle { namespace host {
 				}
 
 				// build entry
-				PatternEntry *entry = (PatternEntry*) toffset;
+				PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
 				PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
 				entry->_note = notecommands::release;
 
@@ -1927,7 +1927,7 @@ namespace psycle { namespace host {
 		{
 			unsigned char *toffset=_ptrackline();
 
-			PatternEntry *entry = (PatternEntry*) toffset;
+			PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
 
 			if ( entry->_mach < MAX_BUSES*2 ) _pSong.seqBus = entry->_mach;
 			pParentMain->ChangeGen(_pSong.seqBus);

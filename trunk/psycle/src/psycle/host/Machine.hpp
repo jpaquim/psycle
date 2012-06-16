@@ -327,8 +327,9 @@ namespace psycle
 					virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage);
 					virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
 					virtual int GenerateAudioInTicks(int startSample, int numsamples);
-					virtual void Tick() {}
+					virtual void NewLine() {}
 					virtual void Tick(int track, PatternEntry * pData) {}
+					virtual void PostNewLine() {}
 					virtual void Stop() {}
 			///\}
 			///\name used by the single-threaded, recursive scheduler

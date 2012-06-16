@@ -16,6 +16,54 @@ namespace psycle
 	{
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
+		void XMInstrument::WaveData::Init(){
+			DeleteWaveData();
+			m_WaveName= "";
+			m_WaveLength = 0;
+			m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
+			m_WaveDefVolume = 128; // Default volume ( volume at which it starts to play. corresponds to 0Cxx/volume command )
+			m_WaveLoopStart = 0;
+			m_WaveLoopEnd = 0;
+			m_WaveLoopType = LoopType::DO_NOT;
+			m_WaveSusLoopStart = 0;
+			m_WaveSusLoopEnd = 0;
+			m_WaveSusLoopType = LoopType::DO_NOT;
+			//todo: Add SampleRate functionality, and change WaveTune's one.
+			// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
+			m_WaveSampleRate = 8363;
+			m_WaveTune = 0;
+			m_WaveFineTune = 0;	
+			m_WaveStereo = false;
+			m_PanFactor = 0.5f;
+			m_PanEnabled = false;
+			m_Surround = false;
+			m_VibratoAttack = 0;
+			m_VibratoSpeed = 0;
+			m_VibratoDepth = 0;
+			m_VibratoType = 0;
+		}
+		void XMInstrument::WaveData::DeleteWaveData(){
+			if ( m_pWaveDataL)
+			{
+				delete[] m_pWaveDataL;
+				m_pWaveDataL=0;
+				if (m_WaveStereo)
+				{
+					delete[] m_pWaveDataR;
+					m_pWaveDataR=0;
+				}
+			}
+			m_WaveLength = 0;
+		}
+
+		void XMInstrument::WaveData::AllocWaveData(const int iLen,const bool bStereo)
+		{
+			DeleteWaveData();
+			m_pWaveDataL = new std::int16_t[iLen];
+			m_pWaveDataR = bStereo?new std::int16_t[iLen]:NULL;
+			m_WaveStereo = bStereo;
+			m_WaveLength  = iLen;
+		}
 
 		void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
 			//todo: Readapt Tune and FineTune, respect of the new SampleRate.
@@ -27,13 +75,16 @@ namespace psycle
 			std::uint32_t size1,size2;
 			
 			char temp[6];
+			std::uint32_t filevers;
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
 			if (strcmp(temp,"SMPD")) return size;
 
-			//\todo: add version
-			//riffFile.Read(version);
+			riffFile.Read(filevers);
+			if (filevers == 0 || filevers > 0x1F) {
+				riffFile.Seek(riffFile.GetPos()-sizeof(filevers));
+			}
 
 			CT2A _wave_name("");
 			riffFile.ReadStringA2T(_wave_name,32);
@@ -45,18 +96,28 @@ namespace psycle
 
 			riffFile.Read(m_WaveLoopStart);
 			riffFile.Read(m_WaveLoopEnd);
-			riffFile.Read(&m_WaveLoopType, sizeof m_WaveLoopType); ///\todo make sure it's 1 byte
+			riffFile.Read(&m_WaveLoopType, sizeof(char));
 
 			riffFile.Read(m_WaveSusLoopStart);
 			riffFile.Read(m_WaveSusLoopEnd);
-			riffFile.Read(&m_WaveSusLoopType, sizeof m_WaveSusLoopType); ///\todo make sure it's 1 byte
+			riffFile.Read(&m_WaveSusLoopType, sizeof(char));
 
+			if(filevers == 1) {
+				riffFile.Read(m_WaveSampleRate);
+			}
 			riffFile.Read(m_WaveTune);
 			riffFile.Read(m_WaveFineTune);
 
 			riffFile.Read(m_WaveStereo);
 			riffFile.Read(m_PanEnabled);
 			riffFile.Read(m_PanFactor);
+			if(filevers == 1) {
+				riffFile.Read(m_Surround);
+			}
+			else if (m_PanFactor > 1.0f) {
+				m_Surround = true;
+				m_PanFactor = m_PanFactor-=1.0f;
+			} else { m_Surround = false; }
 
 			riffFile.Read(m_VibratoAttack);
 			riffFile.Read(m_VibratoAttack);
@@ -67,16 +128,16 @@ namespace psycle
 			unsigned char * pData = new unsigned char[size1];
 			riffFile.Read((void*)pData,size1);
 			DataCompression::SoundDesquash(pData, &m_pWaveDataL);
+			delete[] pData;
 			
 			if (m_WaveStereo)
 			{
-				delete[] pData;
 				riffFile.Read(size2);
 				pData = new unsigned char[size2];
 				riffFile.Read(pData,size2);
 				DataCompression::SoundDesquash(pData, &m_pWaveDataR);
+				delete[] pData;
 			}
-			delete[] pData;
 			return size;
 		}
 
@@ -103,6 +164,7 @@ namespace psycle
 
 			riffFile.Write("SMPD",4);
 			riffFile.Write(size);
+			riffFile.Write(WAVEVERSION);
 			//\todo: add version
 
 			riffFile.Write(_wave_name, std::strlen(_wave_name) + 1);
@@ -113,11 +175,11 @@ namespace psycle
 
 			riffFile.Write(m_WaveLoopStart);
 			riffFile.Write(m_WaveLoopEnd);
-			riffFile.Write(&m_WaveLoopType, sizeof m_WaveLoopType); ///\todo make sure it's 1 byte
+			riffFile.Write(&m_WaveLoopType, sizeof(char));
 
 			riffFile.Write(m_WaveSusLoopStart);
 			riffFile.Write(m_WaveSusLoopEnd);
-			riffFile.Write(&m_WaveSusLoopType, sizeof m_WaveSusLoopType); ///\todo make sure it's 1 byte
+			riffFile.Write(&m_WaveSusLoopType, sizeof(char));
 
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
@@ -125,6 +187,7 @@ namespace psycle
 			riffFile.Write(m_WaveStereo);
 			riffFile.Write(m_PanEnabled);
 			riffFile.Write(m_PanFactor);
+			riffFile.Write(m_Surround);
 
 			riffFile.Write(m_VibratoAttack);
 			riffFile.Write(m_VibratoSpeed);
@@ -147,6 +210,15 @@ namespace psycle
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::Envelope Implementation.
 
+		void XMInstrument::Envelope::Init()
+		{	m_Enabled = false;
+			m_Carry = false;
+			m_SustainBegin = INVALID;
+			m_SustainEnd = INVALID;
+			m_LoopStart = INVALID;
+			m_LoopEnd = INVALID;
+			if (!m_Points.empty()) { m_Points.clear(); }
+		}
 		/** 
 		* @param pointIndex : Current point index.
 		* @param pointTime  : Desired point Time.
@@ -414,7 +486,7 @@ namespace psycle
 		{
 			m_bEnabled = false;
 
-			m_Name = _T("");
+			m_Name = "";
 
 			m_Lines = 16;
 
@@ -423,6 +495,7 @@ namespace psycle
 
 			m_PanEnabled=false;
 			m_InitPan = 0.5f;
+			m_Surround = false;
 			m_NoteModPanCenter = 60;
 			m_NoteModPanSep = 0;
 
@@ -437,7 +510,7 @@ namespace psycle
 			m_RandomResonance = 0;
 
 			m_NNA = NewNoteAction::STOP;
-			m_DCT = DCType::DCT_NONE;
+			m_DCT = DupeCheck::NONE;
 			m_DCA = NewNoteAction::STOP;
 
 			NotePair npair;
@@ -478,6 +551,7 @@ namespace psycle
 
 			riffFile.Read(m_InitPan);
 			riffFile.Read(m_PanEnabled);
+			//TODO: ADD surround
 			riffFile.Read(m_NoteModPanCenter);
 			riffFile.Read(&m_NoteModPanSep,sizeof(std::int8_t));
 
@@ -534,22 +608,23 @@ namespace psycle
 
 			riffFile.Write(m_InitPan);
 			riffFile.Write(m_PanEnabled);
+			//TODO: ADD surround
 			riffFile.Write(m_NoteModPanCenter);
-			riffFile.Write(&m_NoteModPanSep,sizeof(std::int8_t));
+			riffFile.Write(m_NoteModPanSep);
 
 			riffFile.Write(m_FilterCutoff);
 			riffFile.Write(m_FilterResonance);
 			riffFile.Write(m_FilterEnvAmount);
-			riffFile.Write(&m_FilterType,sizeof(m_FilterType));
+			riffFile.Write(&m_FilterType,sizeof(char));
 
 			riffFile.Write(m_RandomVolume);
 			riffFile.Write(m_RandomPanning);
 			riffFile.Write(m_RandomCutoff);
 			riffFile.Write(m_RandomResonance);
 
-			riffFile.Write(&m_NNA,sizeof(m_NNA));
-			riffFile.Write(&m_DCT,sizeof(m_DCT));
-			riffFile.Write(&m_DCA,sizeof(m_DCA));
+			riffFile.Write(&m_NNA,sizeof(char));
+			riffFile.Write(&m_DCT,sizeof(char));
+			riffFile.Write(&m_DCA,sizeof(char));
 
 			NotePair npair;
 			for(i = 0;i < NOTE_MAP_SIZE;i++){

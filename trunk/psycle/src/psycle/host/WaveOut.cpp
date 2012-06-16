@@ -410,7 +410,7 @@ namespace psycle
 		{
 			universalis::os::thread_name thread_name("mme wave out");
 			universalis::cpu::exceptions::install_handler_in_thread();
-			WaveOut * pThis = (WaveOut*) pWaveOut;
+			WaveOut * pThis = reinterpret_cast<WaveOut*>(pWaveOut);
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			unsigned int _numBlocks = pThis->settings_->blockCount();
 			while(!pThis->_stopPolling)

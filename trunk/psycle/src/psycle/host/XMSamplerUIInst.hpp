@@ -19,7 +19,7 @@ public:
 		CEnvelopeEditor();
 		virtual ~CEnvelopeEditor();
 
-		void Initialize(XMSampler * const pSampler,XMInstrument::Envelope * const pEnvelope);
+		void Initialize(XMSampler * const pSampler,XMInstrument::Envelope& pEnvelope);
 		virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
 
 	protected:

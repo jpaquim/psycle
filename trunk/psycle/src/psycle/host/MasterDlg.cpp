@@ -383,7 +383,7 @@ namespace psycle { namespace host {
 			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
 			if (nmcd.dwDrawStage == CDDS_POSTPAINT)
 			{
-				CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
+				CVolumeCtrl* slider =reinterpret_cast<CVolumeCtrl*>(GetDlgItem(pNMHDR->idFrom));
 				float db = ((832-slider->GetPos())/16.0f)-40.0f;
 				CClientDC dc(this);
 				PaintNumbersDC(&dc,db,numbersX + slider->index()*numbersAddX,numbersY);
@@ -426,7 +426,7 @@ namespace psycle { namespace host {
 					pDC->SetStretchBltMode(HALFTONE);
 					memDC.CreateCompatibleDC(pDC);
 					oldbmp=memDC.SelectObject(&m_back);
-					CVolumeCtrl* slider =(CVolumeCtrl*) GetDlgItem(pNMHDR->idFrom);
+					CVolumeCtrl* slider =reinterpret_cast<CVolumeCtrl*>(GetDlgItem(pNMHDR->idFrom));
 					CRect crect, wrect;
 					slider->GetClientRect(&crect);
 					slider->GetWindowRect(&wrect);

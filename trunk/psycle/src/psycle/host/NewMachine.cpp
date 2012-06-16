@@ -92,8 +92,8 @@ namespace psycle { namespace host {
 			m_browser.DeleteAllItems();
 			HTREEITEM intFxNode;
 
-			const int  _numPlugins = ((PluginCatcher*)&Global::machineload())->_numPlugins;
-			PluginInfo** const _pPlugsInfo = ((PluginCatcher*)&Global::machineload())->_pPlugsInfo;
+			const int  _numPlugins = static_cast<PluginCatcher*>(&Global::machineload())->_numPlugins;
+			PluginInfo** const _pPlugsInfo = static_cast<PluginCatcher*>(&Global::machineload())->_pPlugsInfo;
 			
 			if(!pluginOrder)
 			{
@@ -259,8 +259,8 @@ namespace psycle { namespace host {
 
 		void CNewMachine::OnSelchangedBrowser(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			const int  _numPlugins = ((PluginCatcher*)&Global::machineload())->_numPlugins;
-			PluginInfo** const _pPlugsInfo = ((PluginCatcher*)&Global::machineload())->_pPlugsInfo;
+			const int  _numPlugins = static_cast<PluginCatcher*>(&Global::machineload())->_numPlugins;
+			PluginInfo** const _pPlugsInfo = static_cast<PluginCatcher*>(&Global::machineload())->_pPlugsInfo;
 			NM_TREEVIEW* pNMTreeView = (NM_TREEVIEW*)pNMHDR; pNMTreeView; // not used
 			tHand = m_browser.GetSelectedItem();
 			Outputmachine = -1;
@@ -502,7 +502,7 @@ namespace psycle { namespace host {
 			{
 				if (bAllowChanged)
 				{
-					((PluginCatcher*)&Global::machineload())->SaveCacheFile();
+					static_cast<PluginCatcher*>(&Global::machineload())->SaveCacheFile();
 				}
 				CDialog::OnOK();
 			}
@@ -510,8 +510,8 @@ namespace psycle { namespace host {
 
 		void CNewMachine::OnCheckAllow() 
 		{
-			const int  _numPlugins = ((PluginCatcher*)&Global::machineload())->_numPlugins;
-			PluginInfo** const _pPlugsInfo = ((PluginCatcher*)&Global::machineload())->_pPlugsInfo;
+			const int  _numPlugins = static_cast<PluginCatcher*>(&Global::machineload())->_numPlugins;
+			PluginInfo** const _pPlugsInfo = static_cast<PluginCatcher*>(&Global::machineload())->_pPlugsInfo;
 			for (int i=0; i<_numPlugins; i++)
 			{
 				if (tHand == hPlug[i])

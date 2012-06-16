@@ -90,8 +90,8 @@ namespace psycle
 			virtual bool Read(std::string const & key, std::string &) = 0;
 			virtual bool Read(std::string const & key, char *, std::size_t max_length) = 0;
 			virtual bool Write(std::string const & key, std::string const &) = 0;
-			virtual bool Read(std::string const & key, WCHAR *, std::size_t max_length) = 0;
-			virtual bool Write(std::string const & key, WCHAR *) = 0;
+			virtual bool Read(std::string const & key, wchar_t *, std::size_t max_length) = 0;
+			virtual bool Write(std::string const & key, wchar_t *) = 0;
 		///\}
 		///\raw data. Store decides how to save/load it.
 		///\{

@@ -945,7 +945,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					if(fullopen)
 					{
 						std::string sPath;
-						vst::plugin *vstPlug=0;
+						vst::Plugin *vstPlug=0;
 						int shellIdx=0;
 
 						if(!Global::machineload().lookupDllName(dllName,sPath,MACH_VST,shellIdx)) 
@@ -959,7 +959,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						{
 							try
 							{
-								vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
+								vstPlug = dynamic_cast<vst::Plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
 							}
 							//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
 							catch(const std::exception & e)

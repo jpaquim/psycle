@@ -320,6 +320,13 @@ namespace psycle { namespace host {
 					ISFILTER     = 0x80, // Only meaningful in a pitch envelope
 				};
 			};
+			struct DCAction {
+				enum Type {
+				STOP=0x0,
+				NOTEOFF,
+				FADEOUT
+				};
+			};
 
 			struct itSampleHeader
 			{
@@ -368,11 +375,13 @@ namespace psycle { namespace host {
 			bool LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
 			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans);
-			void ParseEffect(PatternEntry&pent, int command,int param,int channel);
+			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:
 			unsigned char highOffset[64];
 			EmbeddedMIDIData* embeddedData;
 			itHeader itFileH;
+			short m_extracolumn;
+			short m_maxextracolumn;
 
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -129,7 +129,7 @@ namespace psycle { namespace host {
 				{
 					if (!song.IsPatternEmpty(currentPattern))
 					{				
-						patternEntry = (PatternEntry*) song._ppattern(currentPattern);
+						patternEntry = reinterpret_cast<PatternEntry*>(song._ppattern(currentPattern));
 						lineCount = song.patternLines[currentPattern];
 						
 						for (currentLine = 0; currentLine < lineCount; currentLine++)

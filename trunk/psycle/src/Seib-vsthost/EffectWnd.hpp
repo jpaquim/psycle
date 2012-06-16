@@ -64,8 +64,8 @@ public:
 
 protected:
 	void ConvertToVstKeyCode(UINT nChar, UINT nRepCnt, UINT nFlags, VstKeyCode &keyCode);
-	bool SaveBank(std::string file);
-	bool SaveProgram(std::string file);
+	bool SaveBank(const std::string file);
+	bool SaveProgram(const std::string file);
 
 // Overridables
 public:

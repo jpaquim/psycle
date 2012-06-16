@@ -458,10 +458,10 @@ namespace psycle
 					else if(type == MACH_VST)
 					{
 						pInfo->type = MACH_VST;
-						vst::plugin *vstPlug=0;
+						vst::Plugin *vstPlug=0;
 						try
 						{
-							vstPlug = dynamic_cast<vst::plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
+							vstPlug = dynamic_cast<vst::Plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
 						}
 						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
 						catch(const std::exception & e)

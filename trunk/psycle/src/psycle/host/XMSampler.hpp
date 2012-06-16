@@ -20,7 +20,6 @@ public:
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const std::uint32_t VERSION = 0x00010001;
 	static const std::uint32_t VERSION_ONE = 0x00010000;
-	static const float SURROUND_THRESHOLD;
 
 /*
 * = remembers its last value when called with param 00.
@@ -60,7 +59,7 @@ XMSampler::Channel::PerformFX().
 							//0x16
 		TREMOR				=	0x17,// Tremor								(*t)
 		PANBRELLO			=	0x18,// Panbrello							(*t)
-		SENDTOVOLUME		=	0x1E,// Panbrello							(*t)
+		SENDTOVOLUME		=	0x1E,// Interprets this as a volume command	()
 		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};
@@ -159,20 +158,19 @@ XMSampler::Channel::PerformFX().
 				BACKWARD
 			};
 		};
+		WaveDataController(){};
+		virtual ~WaveDataController(){};
 
 		virtual void Init(XMInstrument::WaveData* wave, const int layer);
 		virtual void NoteOff(void);
 		virtual void Work(float *pLeftw,float *pRightw,  const helpers::dsp::resampler::work_func_type resampler_work)
 		{
-
 			//Process sample
-			*pLeftw = resampler_work(
-				pLeft() + m_Position.HighPart,
+			*pLeftw = resampler_work(pLeft() + m_Position.HighPart,
 				m_Position.HighPart, m_Position.LowPart, Length());
 			if (IsStereo())
 			{
-				*pRightw = resampler_work(
-					pRight() + m_Position.HighPart,
+				*pRightw = resampler_work(pRight() + m_Position.HighPart,
 					m_Position.HighPart, m_Position.LowPart, Length());
 			}
 
@@ -180,18 +178,16 @@ XMSampler::Channel::PerformFX().
 			if(CurrentLoopDirection() == LoopDirection::FORWARD)
 			{
 				m_Position.QuadPart+=Speed();
-			const int curIntPos = m_Position.HighPart;
-			switch(m_CurrentLoopType)
-			{
-			case XMInstrument::WaveData::LoopType::NORMAL:
-
-				if(curIntPos >= m_CurrentLoopEnd)
+				const int curIntPos = m_Position.HighPart;
+				switch(m_CurrentLoopType)
 				{
-					Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
-				}
-				break;
-			case XMInstrument::WaveData::LoopType::BIDI:
-
+				case XMInstrument::WaveData::LoopType::NORMAL:
+					if(curIntPos >= m_CurrentLoopEnd)
+					{
+						Position(m_CurrentLoopStart+(curIntPos-m_CurrentLoopEnd));
+					}
+					break;
+				case XMInstrument::WaveData::LoopType::BIDI:
 					if(curIntPos  >= m_CurrentLoopEnd)
 					{
 						Position(m_CurrentLoopEnd-(curIntPos-m_CurrentLoopEnd));
@@ -199,7 +195,6 @@ XMSampler::Channel::PerformFX().
 					} 
 					break;
 				case XMInstrument::WaveData::LoopType::DO_NOT:
-
 					if (curIntPos >= Length()-1)
 					{
 						Playing(false);
@@ -207,29 +202,27 @@ XMSampler::Channel::PerformFX().
 				default:
 					break;
 				}
-				} else {
+			} else {
 				m_Position.QuadPart-=Speed();
 				const int curIntPos = m_Position.HighPart;
 				switch(m_CurrentLoopType)
 				{
-				case XMInstrument::WaveData::LoopType::NORMAL:
+				case XMInstrument::WaveData::LoopType::NORMAL://fallthrough
 				case XMInstrument::WaveData::LoopType::BIDI:
-
 					if(curIntPos <= m_CurrentLoopStart)
 					{
 						Position(m_CurrentLoopStart+(m_CurrentLoopStart-curIntPos));
 						CurrentLoopDirection(LoopDirection::FORWARD);
 					} 
 				break;
-			case XMInstrument::WaveData::LoopType::DO_NOT:
-
+				case XMInstrument::WaveData::LoopType::DO_NOT:
 					if (curIntPos <= 0)
-				{
-					Playing(false);
+					{
+						Playing(false);
+					}
+				default:
+					break;
 				}
-			default:
-				break;
-			}
 			}
 		}
 
@@ -237,22 +230,22 @@ XMSampler::Channel::PerformFX().
 		virtual int Layer() const { return m_Layer;}
 		virtual const XMInstrument::WaveData &Wave() const { return *m_pWave; }
 
-		virtual bool Playing(){ return m_Playing;}
+		virtual bool Playing() const { return m_Playing;}
 		virtual void Playing(bool play){ m_Playing=play; }
 
 		// Current sample position 
-		virtual __int64  Position() const { return m_Position.HighPart;}
-		virtual void Position(const	__int64 value){ 
+		virtual int  Position() const { return m_Position.HighPart;}
+		virtual void Position(const	int value){ 
 			if ( value < Length()) m_Position.HighPart = value;
 			else m_Position.HighPart = Length()-1;
 		}
 		
 		// Current sample Speed
 		virtual __int64 Speed() const {return m_Speed;}
-		virtual void Speed(const double value){m_Speed = value * 4294967296.0f;} // 4294967296 is a left shift of 32bits
+		virtual void Speed(const double value){m_Speed = value * 4294967296.0;} // 4294967296 is a left shift of 32bits
 
-		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}
 		virtual int CurrentLoopDirection() const {return m_LoopDirection;}
+		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}
 
 		virtual int LoopType() const {return m_pWave->WaveLoopType();}
 		virtual int LoopStart() const {return m_pWave->WaveLoopStart();}
@@ -267,9 +260,9 @@ XMSampler::Channel::PerformFX().
 		virtual bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
 		// pointer to Start of Left sample
-		virtual const short* pLeft() const {return m_pL;}
+		virtual const std::int16_t* pLeft() const {return m_pL;}
 		// pointer to Start of Right sample
-		virtual const short* pRight() const {return m_pR;}
+		virtual const std::int16_t* pRight() const {return m_pR;}
 
 
 	protected:
@@ -287,24 +280,10 @@ XMSampler::Channel::PerformFX().
 		int _length;
 
 		int m_LoopDirection;
-		short* m_pL;
-		short* m_pR;
+		std::int16_t* m_pL;
+		std::int16_t* m_pR;
 	};
-/*
-	class XDSPWaveController : public WaveDataController
-	{
-	public:
-		XDSPWaveController(){};
-		virtual ~XDSPWaveController();
-		void Init(XMInstrument::WaveData* wave, const int layer);
-		static void Workxdsp(int numSamples);
-		void Speed(const double value);
-	protected:
-		void XMSampler::XDSPWaveController::RecreateResampler(void);
-	private:
-		int m_Speed1x;
-	};
-*/
+
 //////////////////////////////////////////////////////////////////////////
 //  XMSampler::EnvelopeController Declaration
 	//\todo: Recall "CalcStep" after a SampleRate change, and also after a Tempo Change.
@@ -322,24 +301,27 @@ XMSampler::Channel::PerformFX().
 		// EnvelopeMode defines what the first value of a PointValue means
 		// TICK = one tracker tick ( speed depends on the BPM )
 		// MILIS = a millisecond. (independant of BPM).
-/*		struct EnvelopeMode {
+		struct EnvelopeMode {
 			enum Type {
 				TICK=0,
 				MILIS
 			};
-		};*/
+		};
 		EnvelopeController(){};
-		~EnvelopeController(){};
+		virtual ~EnvelopeController(){};
 
-		void Init(XMInstrument::Envelope *pEnvelope = NULL);
-
-//		EnvelopeMode Mode() const { return m_Mode; }
-//		void Mode(EnvelopeMode _mode){ m_Mode=_mode; }
+		void Init();
+		void Init(const XMInstrument::Envelope& envelope) {
+			m_pEnvelope = &envelope;
+			Init();
+		}
 
 		void NoteOn();
 		void NoteOff();
+		void Pause();
+		void Continue();
 
-		void Work()
+		inline void Work()
 		{
 			if(m_Stage&EnvelopeStage::DOSTEP)
 			{
@@ -390,31 +372,33 @@ XMSampler::Channel::PerformFX().
 		}
 
 		/// 
+		inline void CalcStep(const int start,const int  end);
+		void SetPositionInSamples(const int samplePos);
+		int GetPositionInSamples();
+		void RecalcDeviation();
 		XMInstrument::Envelope::ValueType ModulationAmount() const
 		{
 			return m_ModulationAmount;
 		}
-		
+
+		const XMInstrument::Envelope & Envelope()const {return *m_pEnvelope;}
+		EnvelopeMode::Type Mode() const { return m_Mode; }
+		void Mode(const EnvelopeMode::Type _mode){ m_Mode=_mode; }
 		EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
-		XMInstrument::Envelope & Envelope(){return *m_pEnvelope;}
-		inline void CalcStep(const int start,const int  end);
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; } // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
 		int GetPosition(void) { return m_PositionIndex; }
-		void SetPositionInSamples(const int samplePos);
-		int GetPositionInSamples();
-		void RecalcDeviation();
 	private:
 		inline float SRateDeviation() { return m_sRateDeviation; }
 
 		int m_Samples;
 		float m_sRateDeviation;
-		int m_Mode;
+		EnvelopeMode::Type m_Mode;
 		int m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage::Type m_Stage;
 
-		XMInstrument::Envelope * m_pEnvelope;
+		const XMInstrument::Envelope* m_pEnvelope;
 
 		XMInstrument::Envelope::ValueType m_ModulationAmount;
 		XMInstrument::Envelope::ValueType m_Step;
@@ -445,7 +429,7 @@ XMSampler::Channel::PerformFX().
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
-		// This one is Psycle's "Tick"
+		// This one is Psycle's "NewLine"
 		void NewLine();
 
 		void NoteOn(const std::uint8_t note,const std::int16_t playvol=-1,bool reset=true);
@@ -488,6 +472,7 @@ XMSampler::Channel::PerformFX().
 		int InstrumentNum() const{ return _instrument;}
 		void InstrumentNum(const int value){_instrument = value;}
 		XMInstrument &rInstrument() { return *m_pInstrument;}
+		const XMInstrument &rInstrument() const { return *m_pInstrument;}
 		void pInstrument(XMInstrument *p){m_pInstrument = p;}
 
 		int ChannelNum() const { return m_ChannelNum;}
@@ -503,7 +488,7 @@ XMSampler::Channel::PerformFX().
 		XMSampler::EnvelopeController& PitchEnvelope(){return m_PitchEnvelope;}
 		XMSampler::EnvelopeController& PanEnvelope(){return m_PanEnvelope;}
 
-		WaveDataController& rWave(){return m_WaveDataController;}
+		WaveDataController& rWave() {return m_WaveDataController;}
 
 		bool IsPlaying() const { return m_bPlay;}
 		void IsPlaying(const bool value)
@@ -543,9 +528,12 @@ XMSampler::Channel::PerformFX().
 		void PanFactor(float pan)
 		{
 			m_PanFactor = pan;
-			m_PanRange = 0.5f -(fabs(0.5-m_PanFactor)*2);
+			m_PanRange = 2.f * (0.5-std::abs(pan-0.5));
 		}
 		float PanFactor() { return m_PanFactor; }
+		void IsSurround(bool surround) { m_Surround = surround; }
+		bool IsSurround() { return m_Surround; }
+
 
 		int CutOff() const { return m_CutOff; }
 		void CutOff(int co)
@@ -572,7 +560,7 @@ XMSampler::Channel::PerformFX().
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); }
 		int Period() { return m_Period; }
 		// convert note to period
-		double NoteToPeriod(const int note) const;
+		double NoteToPeriod(const int note, bool correctNote=true) const;
 		// convert period to note 
 		int PeriodToNote(const double period) const;
 
@@ -597,14 +585,12 @@ XMSampler::Channel::PerformFX().
 		XMInstrument::NewNoteAction::Type m_NNA;
 
 
-		// Todo: do we need 4 controllers? wouldn't it be better 1 controller for all 4 envelopes?
 		EnvelopeController m_FilterEnvelope;
 		EnvelopeController m_AmplitudeEnvelope;
 		EnvelopeController m_PanEnvelope;
 		EnvelopeController m_PitchEnvelope;
 
 		WaveDataController m_WaveDataController;
-//		XDSPWaveController m_WaveDataController;
 
 		dsp::ITFilter m_Filter;
 		int m_CutOff;
@@ -621,6 +607,7 @@ XMSampler::Channel::PerformFX().
 
 		float m_PanFactor;
 		float m_PanRange;
+		bool m_Surround;
 
 		int m_Slide2NoteDestPeriod;
 		int m_PitchSlideSpeed;
@@ -760,7 +747,9 @@ XMSampler::Channel::PerformFX().
 		int Note() const { return m_Note;}
 		void Note(const int note)
 		{	m_Note = note;
-			if (ForegroundVoice()) m_Period = ForegroundVoice()->NoteToPeriod(note);
+			if (ForegroundVoice()) {
+				m_Period = ForegroundVoice()->NoteToPeriod(note);
+			}
 		}
 		double Period() const {return m_Period;}
 		void Period(const double value){m_Period = value;}
@@ -833,12 +822,8 @@ XMSampler::Channel::PerformFX().
 
 		bool IsSurround() const { return m_bSurround;}
 		void IsSurround(const bool value){
-			if ( value )
-			{
-				///\todo:
-				/* if ( STANDARDSURROUND ) */ m_PanFactor = 0.5f;
-			}
 			m_bSurround = value;
+			if ( ForegroundVoice()) ForegroundVoice()->IsSurround(value);
 		}
 		bool IsMute() const { return m_bMute;}
 		void IsMute(const bool value){
@@ -930,7 +915,7 @@ XMSampler::Channel::PerformFX().
 		
 		// Note Cut Command 
 		int m_NoteCutTick;
-		PatternEntry m_DelayedNote;
+		std::vector<PatternEntry> m_DelayedNote;
 
 		int m_RetrigOperation;
 		int m_RetrigVol;
@@ -981,12 +966,12 @@ XMSampler::Channel::PerformFX().
 
 	virtual void Init(void);
 	
-	//These Tick() are "NewLine()" and NewEvent(). The API needs to be renamed.
-	void Tick();
+	virtual void NewLine();
 	virtual int GenerateAudioInTicks(int startSample,  int numSamples);
 	virtual void Stop(void);
 	virtual bool playsTrack(const int track) const;
 	virtual void Tick(int channel, PatternEntry* pData);
+	virtual void PostNewLine();
 	virtual float GetAudioRange() const { return 32768; }
 	virtual char* GetName(void) { return _psName; }
 	virtual void SetSampleRate(int sr);
@@ -998,21 +983,6 @@ XMSampler::Channel::PerformFX().
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
 	virtual void SaveSpecificChunk(RiffFile* riffFile);
 
-/*	Deprecated. See why in the body of "CalcBPMAndTick()"
-
-	//Beats Per Minute
-	void BPM (const int value){m_BPM = value;}
-	int BPM () const {return m_BPM;}
-	
-	// MOD Tick 
-	void TicksPerRow(const int value){m_TicksPerRow = value;}
-	int TicksPerRow() const { return m_TicksPerRow;}
-
-	/// BPM Speed
-	void CalcBPMAndTick();
-*/
-	int Speed2LPB(int speed) const { return 24/((speed==0)?6:speed); }
-	int LPB2Speed(int lpb) const { return 24/lpb; }
 	const Voice* GetCurrentVoice(int channelNum) const {
 		for(int current = 0;current < _numVoices;current++)
 		{
@@ -1107,7 +1077,7 @@ XMSampler::Channel::PerformFX().
 	void CurrentTick(const int value){m_TickCount = value;}// Current Tracker Tick number
 	int CurrentTick() const { return m_TickCount;}// ""
 
-	int GetDeltaTick() const { return m_DeltaTick; }
+	static int XMSampler::CalcLPBFromSpeed(int trackerspeed, int &outextraticks);
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 protected:
@@ -1120,9 +1090,6 @@ protected:
 	psycle::helpers::dsp::cubic_resampler _resampler;
 	ZxxMacro zxxMap[128];
 
-	
-	void DeltaTick(const int value){m_DeltaTick = value;}
-	int DeltaTick() const {return m_DeltaTick;}
 	void WorkVoices(int numsamples);
 
 private:
@@ -1131,13 +1098,10 @@ private:
 	bool m_UseFilters;
 	int m_GlobalVolume;
 	int m_PanningMode;
-/*	int m_BPM;
-	int m_TicksPerRow;	// Tracker Ticks. Also called "speed".
-*/
 	int m_TickCount;	// Current Tick number.
-	int m_DeltaTick;	// Duration in Samples of a tracker tick.
 	int m_NextSampleTick;// The sample position of the next Tracker Tick
 	int _sampleCounter;	// Number of Samples since note start
+	std::vector<PatternEntry> multicmdMem;
 
 	static XMInstrument m_Instruments[MAX_INSTRUMENT+1];
 	static XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT+1];

@@ -17,7 +17,7 @@
 *<@JosepMa> as such it maps all the dispatch calls to functions with parameter validation, and helps
 *           in the construction and destruction processes. Tries to help on other simpler tasks, and
 *           in the handling of parameter windows (VstEffectWnd.cpp/.hpp)
-*<@JosepMa> vst::host and vst::plugin are subclasses of the aforementioned classes, which both: extend
+*<@JosepMa> vst::Host and vst::Plugin are subclasses of the aforementioned classes, which both: extend
 *           the functionality of the base classes, and adapts them to its usage inside psycle
 *<@JosepMa> the host one doesn't provide much more (since the base class is good enough), and the
 *           plugin one wraps the CEffect into a Machine class
@@ -40,13 +40,12 @@ namespace psycle
 				VstEvent* events[MAX_VST_EVENTS];	///< event pointer array, variable size
 			} VstEventsDynamic;
 			extern const char* MIDI_CHAN_NAMES[16];
-			using namespace seib::vst;
 
 
-			class host;
+			class Host;
 			class CVstEffectWnd;
 
-			class plugin : public Machine, public CEffect
+			class Plugin : public Machine, public seib::vst::CEffect
 			{
 			protected:
 				class note
@@ -91,9 +90,9 @@ namespace psycle
 				bool requiresRepl;
 
 			public:
-				plugin(LoadedAEffect &loadstruct);
+				Plugin(seib::vst::LoadedAEffect &loadstruct);
 				//this constructor is to be used with the old Song loading routine, in order to create an "empty" plugin.
-				plugin(AEffect *effect):CEffect(effect)
+				Plugin(AEffect *effect):seib::vst::CEffect(effect)
 				{
 					queue_size = 0;
 					requiresRepl = 0;
@@ -102,7 +101,7 @@ namespace psycle
 					_type=MACH_VST;
 					InitializeSamplesVector();
 				}
-				virtual ~plugin();
+				virtual ~Plugin();
 				void Free() throw(::std::exception) { if  (ploader)	Unload(); };
 
 				// Machine overloaded functions
@@ -111,7 +110,7 @@ namespace psycle
 				virtual void Init(){ Machine::Init();}
 				virtual void PreWork(int numSamples,bool clear, bool measure_cpu_usage);
 				virtual int GenerateAudioInTicks(int startSample,  int numSamples);
-				virtual void Tick() { Machine::Tick(); }
+				virtual void NewLine() { Machine::NewLine(); }
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop();
 				virtual bool NeedsAuxColumn() { return _type == MACH_VST; }
@@ -119,7 +118,7 @@ namespace psycle
 				virtual int NumAuxColumnIndexes() { return 16;}
 				// old fileformat {
 				virtual bool PreLoad(RiffFile * pFile, unsigned char &_program, int &_instance);
-				virtual bool LoadFromMac(vst::plugin *pMac);
+				virtual bool LoadFromMac(vst::Plugin *pMac);
 				virtual bool LoadChunk(RiffFile* pFile);
 				// }
 				virtual bool IsShellMaster() {return (GetPlugCategory() == kPlugCategShell); }
@@ -298,40 +297,40 @@ namespace psycle
 				virtual void SetEditWnd(CEffectWnd* wnd)
 				{
 					CEffect::SetEditWnd(wnd);
-					editorWindow = reinterpret_cast<CVstEffectWnd*>(wnd);
+					editorWindow = static_cast<CVstEffectWnd*>(wnd);
 				}
 */
 			};
 
-			class host : public CVSTHost
+			class Host : public seib::vst::CVSTHost
 			{
 			public:
-				host();
-				virtual ~host(){;}
+				Host();
+				virtual ~Host(){;}
 
 				///< Helper class for Machine Creation.
 				//static Machine* CreateFromType(int _id, std::string _dllname);
-				virtual CEffect * CreateEffect(LoadedAEffect &loadstruct) { return new plugin(loadstruct); }
-				virtual CEffect * CreateWrapper(AEffect *effect) { return new plugin(effect); }
+				virtual seib::vst::CEffect * CreateEffect(seib::vst::LoadedAEffect &loadstruct) { return new Plugin(loadstruct); }
+				virtual seib::vst::CEffect * CreateWrapper(AEffect *effect) { return new Plugin(effect); }
 				virtual void Log(std::string message);
 
 				///> Plugin gets Info from the host
 				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }
 				virtual long OnGetHostVendorVersion() { return PSYCLE__VERSION__NUMBER; }
-				virtual bool OnCanDo(CEffect &pEffect,const char *ptr);
+				virtual bool OnCanDo(seib::vst::CEffect &pEffect,const char *ptr);
 				virtual long OnGetHostLanguage() { return kVstLangEnglish; }
 				virtual void CalcTimeInfo(long lMask = -1);
-				virtual long DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos);
-				virtual long DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(CEffect &pEffect) { return 0xFF; } // the size of the aux column.
-				virtual long OnGetAutomationState(CEffect &pEffect);
-				virtual long OnGetInputLatency(CEffect &pEffect);
-				virtual long OnGetOutputLatency(CEffect &pEffect);
+				virtual long DECLARE_VST_DEPRECATED(OnTempoAt)(seib::vst::CEffect &pEffect, long pos);
+				virtual long DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(seib::vst::CEffect &pEffect) { return 0xFF; } // the size of the aux column.
+				virtual long OnGetAutomationState(seib::vst::CEffect &pEffect);
+				virtual long OnGetInputLatency(seib::vst::CEffect &pEffect);
+				virtual long OnGetOutputLatency(seib::vst::CEffect &pEffect);
 				//\todo : how can this function be implemented? :o
-				virtual long OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
-				virtual bool OnWillProcessReplacing(CEffect &pEffect) { return ((plugin*)&pEffect)->WillProcessReplace(); }
+				virtual long OnGetCurrentProcessLevel(seib::vst::CEffect &pEffect) { return 0; }
+				virtual bool OnWillProcessReplacing(seib::vst::CEffect &pEffect) { return static_cast<Plugin*>(&pEffect)->WillProcessReplace(); }
 
 				///> Plugin sends actions to the host
-				virtual bool OnProcessEvents(CEffect &pEffect, VstEvents* events) { return false; }
+				virtual bool OnProcessEvents(seib::vst::CEffect &pEffect, VstEvents* events) { return false; }
 			};
 		}
 	}

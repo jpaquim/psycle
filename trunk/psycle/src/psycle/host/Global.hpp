@@ -28,7 +28,7 @@ namespace psycle
 		class MachineLoader;
 		namespace vst
 		{
-			class host;
+			class Host;
 		}
 
 		extern BOOL Is_Vista_or_Later();
@@ -57,7 +57,7 @@ namespace psycle
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
 				static inline helpers::dsp::resampler & resampler(){ return *pResampler; }
-				static inline vst::host		 & vsthost(){ return *pVstHost; }
+				static inline vst::Host		 & vsthost(){ return *pVstHost; }
 				static inline MachineLoader  & machineload() { return *pMacLoad; }
 
 			protected:
@@ -65,7 +65,7 @@ namespace psycle
 				static Song * pSong;
 				static helpers::dsp::resampler * pResampler;
 				static Player * pPlayer;
-				static vst::host * pVstHost;
+				static vst::Host * pVstHost;
 				static MachineLoader * pMacLoad;
 		};
 	}

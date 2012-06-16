@@ -14,18 +14,17 @@ namespace psycle
 {
 	namespace host
 	{
-		using namespace psycle::plugin_interface;
 		extern const char* MIDI_CHAN_NAMES[16];
 
 		/// calls that the plugin side can make to the host side
-		class PluginFxCallback : public CFxCallback
+		class PluginFxCallback : public psycle::plugin_interface::CFxCallback
 		{
 			public:
 				inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) const { MessageBox(hWnd,ptxt,caption,type); }
 				inline virtual int GetTickLength() const { return Global::player().SamplesPerRow(); }
 				inline virtual int GetSamplingRate() const { return Global::player().SampleRate(); }
 				inline virtual int GetBPM() const { return Global::player().bpm; }
-				inline virtual int GetTPB() const { return Global::player().tpb; }
+				inline virtual int GetTPB() const { return Global::player().lpb; }
 				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/);
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				inline virtual float * unused0(int, int) { return NULL;};
@@ -42,7 +41,7 @@ namespace psycle
 		class proxy
 		{
 			public:
-				proxy(Plugin & host, CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
+				proxy(Plugin & host, psycle::plugin_interface::CMachineInterface * plugin = 0) : host_(host), plugin_(0) { (*this)(plugin); }
 				~proxy() throw() { (*this)(0); }
 
 			///\name reference to the host side
@@ -58,14 +57,14 @@ namespace psycle
 			///\name reference to the plugin side
 			///\{
 				private:
-					CMachineInterface const & plugin() const throw() { return *plugin_; }
-					CMachineInterface       & plugin()       throw() { return *plugin_; }
+					psycle::plugin_interface::CMachineInterface const & plugin() const throw() { return *plugin_; }
+					psycle::plugin_interface::CMachineInterface       & plugin()       throw() { return *plugin_; }
 				private:
-					CMachineInterface       * plugin_;
+					psycle::plugin_interface::CMachineInterface       * plugin_;
 
 				public:
 					bool const operator()() const throw() { return plugin_; }
-					inline void operator()(CMachineInterface * plugin) throw(exceptions::function_error);
+					inline void operator()(psycle::plugin_interface::CMachineInterface * plugin) throw(exceptions::function_error);
 			///\}
 
 			///\name protected calls from the host side to the plugin side
@@ -163,10 +162,10 @@ namespace psycle
 			///\name parameter info
 			///\{
 				public:///\todo private: move this to the proxy class
-					inline CMachineInfo * GetInfo() throw() { return _pInfo; }
+					inline psycle::plugin_interface::CMachineInfo * GetInfo() throw() { return _pInfo; }
 				private:
 					///\todo move this to the proxy class
-					CMachineInfo * _pInfo;
+					psycle::plugin_interface::CMachineInfo * _pInfo;
 			///\}
 
 			///\name calls to the plugin side go thru the proxy
@@ -190,7 +189,7 @@ namespace psycle
 					virtual int GenerateAudioInTicks( int startSample, int numSamples );
 					virtual float GetAudioRange() const { return 32768.0f; }
 					virtual void SetSampleRate(int sr);
-					virtual void Tick();
+					virtual void NewLine();
 					virtual void Tick(int channel, PatternEntry * pEntry);
 					virtual void Stop();
 			///\}
@@ -240,7 +239,7 @@ namespace psycle
 {
 	namespace host
 	{
-		inline void proxy::operator()(CMachineInterface * plugin) throw(exceptions::function_error)
+		inline void proxy::operator()(psycle::plugin_interface::CMachineInterface * plugin) throw(exceptions::function_error)
 		{
 			delete this->plugin_; this->plugin_ = plugin;
 			//if((*this)())
@@ -266,7 +265,7 @@ namespace psycle
 		int  inline proxy:: GetDataSize()                                                                  throw(exceptions::function_error) { try { return plugin().GetDataSize();                                          } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }
 		void inline proxy:: Command()                                                                      throw(exceptions::function_error) { try { plugin().Command();                                                     } CATCH_WRAP_AND_RETHROW(host()) }
 		void inline proxy:: unused0(const int i)                                                           throw(exceptions::function_error) { try { plugin().unused0(i);                                                    } CATCH_WRAP_AND_RETHROW(host()) }
-		bool inline proxy:: unused1(const int i)                                                           throw(exceptions::function_error) { try { return const_cast<const CMachineInterface &>(plugin()).unused1(i);      } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }
+		bool inline proxy:: unused1(const int i)                                                           throw(exceptions::function_error) { try { return const_cast<const psycle::plugin_interface::CMachineInterface &>(plugin()).unused1(i);      } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }
 		void inline proxy:: MidiEvent(const int channel, const int value, const int velocity)              throw(exceptions::function_error) { try { plugin().MidiEvent(channel, value, velocity);                           } CATCH_WRAP_AND_RETHROW(host()) }
 		void inline proxy:: unused2(std::uint32_t const data)                                              throw(exceptions::function_error) { try { plugin().unused2(data);                                                 } CATCH_WRAP_AND_RETHROW(host()) }
 		bool inline proxy:: DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error) { try { return plugin().DescribeValue(txt, param, value);                       } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }

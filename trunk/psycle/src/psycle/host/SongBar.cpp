@@ -167,8 +167,12 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 			else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
 			Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 			sprintf(buffer,"%d",Global::song().BeatsPerMin());
+			m_pParentMain->UpdatePlayOrder(false);
 		}
-		else sprintf(buffer,"%d",Global::player().bpm);
+		else {
+			int realbpm = Global::player().bpm * (1.f - (Global::player().lpb*Global::player().ExtraTicks())/24.f);
+			sprintf(buffer,"%d",realbpm);
+		}
 		
 		m_bpmlabel.SetWindowText(buffer);
 	}
@@ -180,13 +184,13 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		{
 			if (Global::player()._playing ) 
 			{
-				Global::song().LinesPerBeat(Global::player().tpb+x);
+				Global::song().LinesPerBeat(Global::player().lpb+x);
 			}
 			else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
 			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
 			sprintf(buffer,"%d",Global::song().LinesPerBeat());
 		}
-		else sprintf(buffer, "%d", Global::player().tpb);
+		else sprintf(buffer, "%d", Global::player().lpb);
 		
 		m_tpblabel.SetWindowText(buffer);
 	}
@@ -254,8 +258,8 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 
 	void SongBar::OnClipbut() 
 	{
-		((Master*)(Global::song()._pMachine[MASTER_INDEX]))->_clip = false;
-		((CButton*)GetDlgItem(IDC_CLIPBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
+		static_cast<Master*>(Global::song()._pMachine[MASTER_INDEX])->_clip = false;
+		reinterpret_cast<CButton*>(GetDlgItem(IDC_CLIPBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 
@@ -263,7 +267,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	void SongBar::UpdateVumeters()
 	{
 		PsycleConfig::MachineView& macView = PsycleGlobal::conf().macView();
-		Master* master = ((Master*)m_pSong->_pMachine[MASTER_INDEX]);
+		Master* master = static_cast<Master*>(m_pSong->_pMachine[MASTER_INDEX]);
 		if (macView.draw_vus)
 		{
 

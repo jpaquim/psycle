@@ -13,11 +13,13 @@ namespace psycle
 {
 	namespace host
 	{
+		#define ASIO_VERSION 2L
 		using namespace helpers;
 		//#define ALLOW_NON_ASIO
 
-		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
+		extern CPsycleApp theApp;
 
+		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 		AudioDriverInfo ASIODriverSettings::info_ = { "ASIO 2.2 Output" };
 		ASIODriverSettings* ASIOInterface::settings_;
 		CCriticalSection ASIOInterface::_lock;
@@ -183,9 +185,7 @@ namespace psycle
 			for(int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
 			int drivers = asioDrivers.getDriverNames((char**)pNameBuf,MAX_ASIO_DRIVERS);
 			drivEnum_.resize(0);
-//			drivercount = 0;
 			ASIODriverInfo driverInfo;
-			driverInfo.sysRef = 0;
 			for(int i(0) ; i < drivers; ++i)
 			{
 				#if !defined ALLOW_NON_ASIO
@@ -193,6 +193,9 @@ namespace psycle
 					if(std::strcmp("ASIO DirectX Full Duplex Driver",szNameBuf[i])==0) continue;
 					if(std::strcmp("ASIO Multimedia Driver",szNameBuf[i])==0) continue;
 				#endif
+				memset(&driverInfo,0,sizeof(ASIODriverInfo));
+				driverInfo.asioVersion=ASIO_VERSION;
+				driverInfo.sysRef = theApp.m_pMainWnd->m_hWnd;
 				if(asioDrivers.loadDriver(szNameBuf[i]))
 				{
 					// initialize the driver
@@ -206,19 +209,16 @@ namespace psycle
 							// += 2 because we pair them in stereo
 							for(int j(0) ; j < out ; j += 2)
 							{
-//								driverindex[drivercount]=i;
 								ASIOChannelInfo channelInfo;
 								channelInfo.isInput = ASIOFalse;
 								channelInfo.channel = j;
 								ASIOGetChannelInfo(&channelInfo);
 								PortEnum port(j,channelInfo);
 								driver.AddOutPort(port);
-//								++drivercount;
 							}
 							// += 2 because we pair them in stereo
 							for(int j(0) ; j < in ; j += 2)
 							{
-//								driverindex[drivercount]=i;
 								ASIOChannelInfo channelInfo;
 								channelInfo.isInput = ASIOTrue;
 								channelInfo.channel = j;
@@ -271,7 +271,9 @@ namespace psycle
 			}
 			// initialize the driver
 			ASIODriverInfo driverInfo;
-			driverInfo.sysRef = 0;
+			memset(&driverInfo,0,sizeof(ASIODriverInfo));
+			driverInfo.asioVersion=ASIO_VERSION;
+			driverInfo.sysRef = theApp.m_pMainWnd->m_hWnd;
 			if (ASIOInit(&driverInfo) != ASE_OK)
 			{
 				//ASIOExit();
@@ -543,14 +545,21 @@ namespace psycle
 			}
 			// initialize the driver
 			ASIODriverInfo driverInfo;
-			driverInfo.sysRef = 0;
+			memset(&driverInfo,0,sizeof(ASIODriverInfo));
+			driverInfo.asioVersion=ASIO_VERSION;
+			driverInfo.sysRef = theApp.m_pMainWnd->m_hWnd;
 			if (ASIOInit(&driverInfo) != ASE_OK)
 			{
 				//ASIOExit();
 				asioDrivers.removeCurrentDriver();
 				return false;
 			}
-			if(ASIOSetSampleRate(samplerate) != ASE_OK)
+			ASIOError error = ASIOCanSampleRate(samplerate);
+			if (error == ASE_NoClock) {
+				asioDrivers.removeCurrentDriver();
+				return false;
+			}
+			else if(error != ASE_OK && ASIOSetSampleRate(samplerate) != ASE_OK)
 			{
 				asioDrivers.removeCurrentDriver();
 				return false;
@@ -563,37 +572,21 @@ namespace psycle
 		{
 			PortOut pout = GetOutPortFromidx(driverID);
 			DriverEnum* newdriver = pout.driver;
-			if(_selectedout.driver != newdriver)
-			{
-				if(_running)
-				{
-					Stop();
-					// load it
-					if(asioDrivers.loadDriver(const_cast<char*>(newdriver->_name.c_str())))
-					{
-						ASIOControlPanel(); // you might want to check wether the ASIOControlPanel() can open
-						asioDrivers.removeCurrentDriver();
-					}
-					Start();
-				}
-				else if(asioDrivers.loadDriver(const_cast<char*>(newdriver->_name.c_str())))
-				{
-					ASIOControlPanel(); // you might want to check wether the ASIOControlPanel() can open
-					asioDrivers.removeCurrentDriver();
-				}
-			}
-			else if(_running)
+			if(_selectedout.driver == newdriver && _running)
 			{
 				ASIOControlPanel(); //you might want to check wether the ASIOControlPanel() can open
 			}
 			else
 			{
+				bool isPlaying = _running;
+				if(isPlaying) Stop();
 				// load it
-				if(asioDrivers.loadDriver(const_cast<char*>(_selectedout.driver->_name.c_str())))
+				if(asioDrivers.loadDriver(const_cast<char*>(newdriver->_name.c_str())))
 				{
-					ASIOControlPanel(); //you might want to check wether the ASIOControlPanel() can open
+					ASIOControlPanel(); // you might want to check wether the ASIOControlPanel() can open
 					asioDrivers.removeCurrentDriver();
 				}
+				if(isPlaying) Start();
 			}
 		}
 
@@ -1230,7 +1223,7 @@ namespace psycle
 					// return the supported ASIO version of the host application
 					// If a host applications does not implement this selector, ASIO 1.0 is assumed
 					// by the driver
-					ret = 2L;
+					ret = ASIO_VERSION;
 					break;
 				case kAsioSupportsTimeInfo:
 					// informs the driver wether the asioCallbacks.bufferSwitchTimeInfo() callback

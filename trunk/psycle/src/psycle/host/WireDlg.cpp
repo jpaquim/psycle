@@ -100,7 +100,7 @@ namespace psycle { namespace host {
 			UpdateVolPerDb();
 			m_volslider.SetPos(helpers::dsp::AmountToSlider(val));
 			if ( srcMachine._type == MACH_VST || srcMachine._type == MACH_VSTFX 
-				|| (srcMachine._type == MACH_DUMMY && ((Dummy*)&srcMachine)->wasVST)) // native to VST, divide.
+				|| (srcMachine._type == MACH_DUMMY && static_cast<Dummy*>(&srcMachine)->wasVST)) // native to VST, divide.
 			{
 				mult = 32768.0f;
 			}

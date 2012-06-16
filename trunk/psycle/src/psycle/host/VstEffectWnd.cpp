@@ -8,7 +8,7 @@ namespace psycle { namespace host {
 
 	using namespace seib::vst;
 	
-		CVstGui::CVstGui(CFrameMachine* frame,vst::plugin* effect)
+		CVstGui::CVstGui(CFrameMachine* frame,vst::Plugin* effect)
 		:CBaseParamView(frame)
 		,pEffect(effect)
 		{}
@@ -44,7 +44,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 		END_MESSAGE_MAP()
 
-		CVstEffectWnd::CVstEffectWnd(vst::plugin* effect, CChildView* wndView_, CFrameMachine** windowVar_)
+		CVstEffectWnd::CVstEffectWnd(vst::Plugin* effect, CChildView* wndView_, CFrameMachine** windowVar_)
 		: CEffectWnd(effect)
 		, CFrameMachine(effect, wndView_, windowVar_)
 		{
@@ -134,9 +134,9 @@ namespace psycle { namespace host {
 			if (dlg.DoModal() == IDOK)
 			{
 				if ( dlg.GetFileExt() == "fxb")
-					SaveBank((char *)(LPCSTR)dlg.GetPathName());
+					SaveBank((LPCSTR)dlg.GetPathName());
 				else if ( dlg.GetFileExt() == "fxp")
-					SaveProgram((char *)(LPCSTR)dlg.GetPathName());
+					SaveProgram((LPCSTR)dlg.GetPathName());
 			}
 		}
 

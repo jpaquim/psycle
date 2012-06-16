@@ -489,7 +489,7 @@ namespace psycle { namespace host {
 			else if ( _machine->_type == MACH_VST || _machine->_type == MACH_VSTFX)
 			{
 				///\todo: made an informative dialog like in seib's vsthost.
-				MessageBox(CString("Vst Plugin by " )+ CString(((vst::plugin*)_machine)->GetVendorName()),
+				MessageBox(CString("Vst Plugin by " )+ CString(static_cast<vst::Plugin*>(_machine)->GetVendorName()),
 					CString("About") + CString(machine().GetName()));
 			}
 		}

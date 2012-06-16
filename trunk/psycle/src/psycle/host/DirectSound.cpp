@@ -401,7 +401,7 @@ namespace psycle
 /*
 			universalis::os::thread_name thread_name("direct sound");
 			universalis::cpu::exceptions::install_handler_in_thread();
-			DirectSound * pThis = (DirectSound*) pDirectSound;
+			DirectSound * pThis = reinterpret_cast<DirectSound*>(pDirectSound);
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			// Ask MMCSS to temporarily boost the thread priority
 			// to reduce glitches while the low-latency stream plays.
@@ -459,7 +459,7 @@ namespace psycle
 		{
 			universalis::os::thread_name thread_name("direct sound");
 			universalis::cpu::exceptions::install_handler_in_thread();
-			DirectSound * pThis = (DirectSound*) pDirectSound;
+			DirectSound * pThis = reinterpret_cast<DirectSound*>(pDirectSound);
 			::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 			// Ask MMCSS to temporarily boost the thread priority
 			// to reduce glitches while the low-latency stream plays.

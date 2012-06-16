@@ -156,7 +156,7 @@ namespace host{
 		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.35f);
 		song.seqBus=0;
 		// build sampler
-		m_pSampler = (XMSampler *)(song._pMachine[0]);
+		m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
 		// get song name
 
 		char * pSongName = AllocReadStr(20,17);
@@ -218,7 +218,11 @@ namespace host{
 		song.SONGTRACKS = std::max((int)m_Header.channels, 4);
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
-		song.LinesPerBeat(m_pSampler->Speed2LPB(m_Header.speed));
+		int extraticks=0;
+		song.LinesPerBeat(XMSampler::CalcLPBFromSpeed(m_Header.speed,extraticks));
+		if (extraticks != 0) {
+			//\todo: setup something...
+		}
 
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.norder;i++)
 		{
@@ -235,11 +239,13 @@ namespace host{
 			song.playLength=m_Header.norder;
 		}
 
+		m_maxextracolumn = song.SONGTRACKS;
 		// get pattern data
 		size_t nextPatStart = m_Header.size + 60;
 		for(int j = 0;j < m_Header.patterns && nextPatStart > 0;j++){
 			nextPatStart = LoadSinglePattern(song,nextPatStart,j,m_Header.channels);
 		}
+		song.SONGTRACKS = m_maxextracolumn;
 		
 		return nextPatStart;
 	}
@@ -304,6 +310,7 @@ namespace host{
 			// get next values
 			for(int row = 0;row < iNumRows;row++)
 			{
+				m_extracolumn = iTracks;
 				for(int col=0;col<iTracks;col++)
 				{	
 					// reset
@@ -344,52 +351,47 @@ namespace host{
 					// translate
 					e._inst = instr;	
 					e._mach = 0;
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					e._volume = 255;
+					unsigned char volume = 255;
 
 					// volume/command
 					if(vol >= 0x10 && vol <= 0x50)
 					{
-						e._volume=(vol == 0x50)?0x3F:(vol-0x10);
-
-					} else if(vol >= 0x60){						
+						volume=(vol == 0x50)?0x3F:(vol-0x10);
+					} else if(vol >= 0x60){
 						switch(vol&0xF0)
 						{
 						case XMVOL_CMD::XMV_VOLUMESLIDEDOWN:
-							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_VOLUMESLIDEUP:
-							e._volume = XMSampler::CMD_VOL::VOL_VOLSLIDEUP|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_VOLSLIDEUP|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_FINEVOLUMESLIDEDOWN:
-							e._volume = XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_FINEVOLUMESLIDEUP:
-							e._volume = XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_PANNING:
-							e._volume = XMSampler::CMD_VOL::VOL_PANNING|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_PANNING|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDELEFT:
 							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|((vol&0x0F)>>2);
+							volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|((vol&0x0F)>>2);
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDERIGHT:
 							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-							e._volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|((vol&0x0F)>>2);
+							volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|((vol&0x0F)>>2);
 							break;
 // Ignoring this command for now.
 //						case XMVOL_CMD::XMV_VIBRATOSPEED:
-//							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO_SPEED|(vol&0x0F);
+//							volume = XMSampler::CMD_VOL::VOL_VIBRATO_SPEED|(vol&0x0F);
 //							break;
 						case XMVOL_CMD::XMV_VIBRATO:
-							e._volume = XMSampler::CMD_VOL::VOL_VIBRATO|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_VIBRATO|(vol&0x0F);
 							break;
 						case XMVOL_CMD::XMV_PORTA2NOTE:
-							e._volume = XMSampler::CMD_VOL::VOL_TONEPORTAMENTO|(vol&0x0F);
+							volume = XMSampler::CMD_VOL::VOL_TONEPORTAMENTO|(vol&0x0F);
 							break;
 						default:
 							break;
@@ -401,21 +403,6 @@ namespace host{
 						XMInstrument::WaveData::WaveForms::SQUARE
 					};
 					switch(type){
-	#else
-					e._parameter = param;
-					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
-						XMInstrument::WaveData::WaveForms::SAWDOWN,
-						XMInstrument::WaveData::WaveForms::SQUARE
-					};
-					// volume/command
-					if(vol >= 0x10 && vol <= 0x50)
-					{
-						e._cmd = 0x0C;
-						e._parameter = (vol-0x10)*2;
-					}
-					else switch(type){
-	#endif
-#endif
 						case XMCMD::ARPEGGIO:
 							if(param != 0){
 								e._cmd = XMSampler::CMD::ARPEGGIO;
@@ -563,7 +550,13 @@ namespace host{
 							if ( param < 32)
 							{
 								e._cmd=PatternCmd::EXTENDED;
-								e._parameter = 24 / ((param == 0)?6:param);
+								int extraticks=0;
+								e._parameter = XMSampler::CalcLPBFromSpeed(param,extraticks);
+								if (extraticks != 0) {
+									PatternEntry entry(notecommands::empty,255,255,PatternCmd::EXTENDED,PatternCmd::MEMORY_PAT_DELAY | extraticks);
+									WritePatternEntry(song,patIdx,row,m_extracolumn,entry);	
+									m_extracolumn++;
+								}
 							}
 							else
 							{
@@ -707,16 +700,40 @@ namespace host{
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
+					e._volume = volume;
 					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
-	#else
-					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
-	#endif
-#endif
 					{
 						e._mach = 255;
 					}
 					WritePatternEntry(song,patIdx,row,col,e);	
+#else
+					if(e._cmd != 0 || e._parameter != 0) {
+						if(volume!=255) {
+							PatternEntry entry(notecommands::midicc,col,e._mach,0,0);
+							entry._cmd = XMSampler::CMD::SENDTOVOLUME;
+							entry._parameter = volume;
+							WritePatternEntry(song,patIdx,row,m_extracolumn,entry);
+							m_extracolumn++;
+						}
+					}
+					else if(volume < 0x40) {
+						e._cmd = XMSampler::CMD::VOLUME;
+						e._parameter = volume*2;
+					}
+					else if(volume!=255) {
+						e._cmd = XMSampler::CMD::SENDTOVOLUME;
+						e._parameter = volume;
+					}
+
+					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
+					{
+						e._mach = 255;
+					}
+					WritePatternEntry(song,patIdx,row,col,e);
+	#endif
+#endif
 				}
+				m_maxextracolumn = std::max(m_maxextracolumn,m_extracolumn);
 			}
 		}
 
@@ -731,7 +748,7 @@ namespace host{
 		// don't overflow song buffer 
 		if(patIdx>=MAX_PATTERNS) return false;
 
-		PatternEntry* pData = (PatternEntry*) song._ptrackline(patIdx,col,row);
+		PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx,col,row));
 
 		*pData = e;
 
@@ -795,7 +812,7 @@ namespace host{
 				//\todo : Improve autovibrato. (correct depth? fix for sweep?)
 				XMInstrument::WaveData& _wave = sampler.SampleData(sRemap[i]);
 				_wave.VibratoAttack(_samph.vibsweep!=0?255/_samph.vibsweep:255);
-				_wave.VibratoDepth(_samph.vibdepth<<1);
+				_wave.VibratoDepth((std::uint8_t)std::min(255,_samph.vibdepth<<1));
 				_wave.VibratoSpeed(_samph.vibrate);
 				_wave.VibratoType(exchwave[_samph.vibtype&3]);
 			}
@@ -956,9 +973,9 @@ namespace host{
 	void XMSongLoader::SetEnvelopes(XMInstrument & inst,const XMSAMPLEHEADER & sampleHeader)
 	{
 		// volume envelope
-		inst.AmpEnvelope()->Init();
+		inst.AmpEnvelope().Init();
 		if(sampleHeader.vtype & 1){// enable volume envelope
-			inst.AmpEnvelope()->IsEnabled(true);
+			inst.AmpEnvelope().IsEnabled(true);
 			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
 			// volumefadespeed in this case, so that a check during playback time is not needed.
 			inst.VolumeFadeSpeed
@@ -972,69 +989,69 @@ namespace host{
 			// Format of FastTracker points is :
 			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 			// Value : 0..64. , divide by 64 to use it as a multiplier.
-			inst.AmpEnvelope()->Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
+			inst.AmpEnvelope().Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
 			for(int i = 1; i < envelope_point_num;i++){
 				if ( sampleHeader.venv[i*2] > sampleHeader.venv[(i-1)*2] )// Some rare modules have erroneous points. This tries to solve that.
-					inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
+					inst.AmpEnvelope().Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
 			}
 
 			if(sampleHeader.vtype & 2){
-				inst.AmpEnvelope()->SustainBegin(sampleHeader.vsustain);
-				inst.AmpEnvelope()->SustainEnd(sampleHeader.vsustain);
+				inst.AmpEnvelope().SustainBegin(sampleHeader.vsustain);
+				inst.AmpEnvelope().SustainEnd(sampleHeader.vsustain);
 			}
 			else
 			{
 				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 				// IT also sets the Sustain points to the end of the envelope, but i can't see a reason for this to be needed.
-//				inst.AmpEnvelope()->SustainBegin(inst.AmpEnvelope()->NumOfPoints()-1);
-//				inst.AmpEnvelope()->SustainEnd(inst.AmpEnvelope()->NumOfPoints()-1);
+//				inst.AmpEnvelope().SustainBegin(inst.AmpEnvelope().NumOfPoints()-1);
+//				inst.AmpEnvelope().SustainEnd(inst.AmpEnvelope().NumOfPoints()-1);
 			}
 
 			
 			if(sampleHeader.vtype & 4){
 				if(sampleHeader.vloops < sampleHeader.vloope){
-					inst.AmpEnvelope()->LoopStart(sampleHeader.vloops);
-					inst.AmpEnvelope()->LoopEnd(sampleHeader.vloope);
+					inst.AmpEnvelope().LoopStart(sampleHeader.vloops);
+					inst.AmpEnvelope().LoopEnd(sampleHeader.vloope);
 				}
 				// if loopstart >= loopend, Fasttracker ignores the loop!.
 				// We can't ignore them because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
 				else {
-//					inst.AmpEnvelope()->LoopStart(XMInstrument::Envelope::INVALID);
-//					inst.AmpEnvelope()->LoopEnd(XMInstrument::Envelope::INVALID);
-					inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
-					inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
+//					inst.AmpEnvelope().LoopStart(XMInstrument::Envelope::INVALID);
+//					inst.AmpEnvelope().LoopEnd(XMInstrument::Envelope::INVALID);
+					inst.AmpEnvelope().LoopStart(inst.AmpEnvelope().NumOfPoints()-1);
+					inst.AmpEnvelope().LoopEnd(inst.AmpEnvelope().NumOfPoints()-1);
 				}
 			}
 			else
 			{
 				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
-				inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
-				inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
+				inst.AmpEnvelope().LoopStart(inst.AmpEnvelope().NumOfPoints()-1);
+				inst.AmpEnvelope().LoopEnd(inst.AmpEnvelope().NumOfPoints()-1);
 			}
 
 		} else {
-			inst.AmpEnvelope()->IsEnabled(false);
+			inst.AmpEnvelope().IsEnabled(false);
 		}
 
 		// pan envelope
-		inst.PanEnvelope()->Init();
+		inst.PanEnvelope().Init();
 		if(sampleHeader.ptype & 1){// enable volume envelope
 			
-			inst.PanEnvelope()->IsEnabled(true);
+			inst.PanEnvelope().IsEnabled(true);
 			
 			if(sampleHeader.ptype & 2){
-				inst.PanEnvelope()->SustainBegin(sampleHeader.psustain);
-				inst.PanEnvelope()->SustainEnd(sampleHeader.psustain);
+				inst.PanEnvelope().SustainBegin(sampleHeader.psustain);
+				inst.PanEnvelope().SustainEnd(sampleHeader.psustain);
 			}
 
 			
 			if(sampleHeader.ptype & 4){
 				if(sampleHeader.ploops < sampleHeader.ploope){
-					inst.PanEnvelope()->LoopStart(sampleHeader.ploops);
-					inst.PanEnvelope()->LoopEnd(sampleHeader.ploope);
+					inst.PanEnvelope().LoopStart(sampleHeader.ploops);
+					inst.PanEnvelope().LoopEnd(sampleHeader.ploope);
 				} else {
-					inst.PanEnvelope()->LoopStart(sampleHeader.ploope);
-					inst.PanEnvelope()->LoopEnd(sampleHeader.ploops);
+					inst.PanEnvelope().LoopStart(sampleHeader.ploope);
+					inst.PanEnvelope().LoopEnd(sampleHeader.ploops);
 				}
 			}
 			int envelope_point_num = sampleHeader.pnum;
@@ -1043,11 +1060,11 @@ namespace host{
 			}
 
 			for(int i = 0; i < envelope_point_num;i++){
-				inst.PanEnvelope()->Append((int)sampleHeader.penv[i * 2] ,(float)(sampleHeader.penv[i * 2 + 1]-32.0f) / 32.0f);
+				inst.PanEnvelope().Append((int)sampleHeader.penv[i * 2] ,(float)(sampleHeader.penv[i * 2 + 1]-32.0f) / 32.0f);
 			}
 
 		} else {
-			inst.PanEnvelope()->IsEnabled(false);
+			inst.PanEnvelope().IsEnabled(false);
 		}
 		//inst.
 
@@ -1067,6 +1084,7 @@ namespace host{
 		{
 			smpLen[i]=0;
 		}
+		speedpatch = false;
 	}
 
 	MODSongLoader::~MODSongLoader(void)
@@ -1085,7 +1103,7 @@ namespace host{
 //		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=0;
 		// build sampler
-		m_pSampler = (XMSampler *)(song._pMachine[0]);
+		m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
 		// get song name
 
 		char * pSongName = AllocReadStr(20,0);
@@ -1167,6 +1185,9 @@ namespace host{
 		Seek(1084);
 		for(int j = 0;j < npatterns ;j++){
 			LoadSinglePattern(song,j,song.SONGTRACKS );
+		}
+		if(speedpatch) {
+			song.SONGTRACKS++;
 		}
 	}
 
@@ -1351,7 +1372,15 @@ namespace host{
 							if ( param < 32)
 							{
 								e._cmd=PatternCmd::EXTENDED;
-								e._parameter = 24 / ((param == 0)?6:param);
+								int extraticks=0;
+								e._parameter = XMSampler::CalcLPBFromSpeed(param,extraticks);
+								if (extraticks != 0) {
+									speedpatch=true;
+									PatternEntry entry(notecommands::empty,0xFF,0xFF,0,0);
+									entry._cmd = PatternCmd::EXTENDED;
+									entry._parameter = PatternCmd::MEMORY_PAT_DELAY | extraticks;
+									WritePatternEntry(song,patIdx,row,song.SONGTRACKS,entry);	
+								}
 							}
 							else
 							{
@@ -1390,7 +1419,7 @@ namespace host{
 		// don't overflow song buffer 
 		if(patIdx>=MAX_PATTERNS) return false;
 
-		PatternEntry* pData = (PatternEntry*) song._ptrackline(patIdx,col,row);
+		PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx,col,row));
 
 		*pData = e;
 

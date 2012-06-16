@@ -391,7 +391,7 @@ Exit:
 
 			universalis::os::thread_name thread_name("wasapi sound output");
 			universalis::cpu::exceptions::install_handler_in_thread();
-			WasapiDriver * pThis = (WasapiDriver*) pWasapi;
+			WasapiDriver * pThis = reinterpret_cast<WasapiDriver*>(pWasapi);
 			// Ask MMCSS to temporarily boost the thread priority
 			// to reduce glitches while the low-latency stream plays.
 			DWORD taskIndex = 0;

@@ -467,7 +467,7 @@ Exit:
 					int status = p1LowWordLB;
 					int note = p1LowWordHB;
 					int program = p1LowWordHB;
-					int noteOn = p1HiWordLB;
+					int velocity = p1HiWordLB;
 					int data1 = p1LowWordHB;
 					int data2 = p1HiWordLB;
 					int cmd = 0;
@@ -487,6 +487,7 @@ Exit:
 					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetGenMap( channel, channel );
 						break;
+					default: break;
 					}
 					switch(PsycleGlobal::conf().midi().inst_select_with())
 					{
@@ -496,6 +497,7 @@ Exit:
 					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetInstMap( channel, channel );
 						break;
+					default: break;
 					}
 
 					// map channel -> generator
@@ -505,18 +507,21 @@ Exit:
 					// branch on status code
 					switch( statusHN )
 					{
+						// (also) note off
+						case 0x08:		
+							velocity=0;
+						//fallthrough
 						// note on/off
 						case 0x09:
 						{
 							// note on?
-							if( noteOn )
+							if( velocity )
 							{
 								// limit to playable range (above this is special codes)
 								if( note > 119 ) note = 119;
-								track = GetTrackToPlay(note, noteOn, inst);
+								track = GetTrackToPlay(note, velocity, inst);
 								cmd = 0x0C;
-								parameter = p1HiWordLB;
-
+								parameter = velocity;
 							}
 							else
 							{
@@ -532,22 +537,6 @@ Exit:
 								}
 							}
 						}	
-						break;
-
-						// (also) note off
-						case 0x08:
-						{
-							// note off
-							if( m_channelNoteOff[ channel ] )
-							{
-								track = GetTrackToPlay(note, 0, inst);
-								note = 120;
-							}
-							else
-							{
-								return;
-							}
-						}
 						break;
 
 						// program change
@@ -663,7 +652,7 @@ Exit:
 									if(PsycleGlobal::conf().midi().gen_select_with() == PsycleConfig::Midi::MS_BANK)
 									{
 										// machine active?
-										if( program < MAX_MACHINES && Global::song()._pMachine[ data2 ] )
+										if( data2 < MAX_MACHINES && Global::song()._pMachine[ data2 ] )
 										{
 											// ok, map
 											SetGenMap( channel, data2 );
@@ -962,6 +951,7 @@ Exit:
 					// assign uses
 					int status = p1LowWordLB;
 					int note = p1LowWordHB;
+					int program = p1LowWordHB;
 					int velocity = p1HiWordLB;
 					int data1 = p1LowWordHB;
 					int data2 = p1HiWordLB;
@@ -979,6 +969,7 @@ Exit:
 					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetGenMap( channel, channel );
 						break;
+					default: break;
 					}
 					switch(PsycleGlobal::conf().midi().inst_select_with())
 					{
@@ -988,6 +979,7 @@ Exit:
 					case PsycleConfig::Midi::MS_MIDI_CHAN:
 						SetInstMap( channel, channel );
 						break;
+					default: break;
 					}
 
 					// map channel -> generator
@@ -1044,6 +1036,12 @@ Exit:
 										return;
 									}
 								}
+								break;
+								case 0x78:
+									//fallthrough
+								case 0x7B:
+									PsycleGlobal::player().Stop();
+									return;
 								default:break;
 							}
 						}
@@ -1054,10 +1052,10 @@ Exit:
 							if(PsycleGlobal::conf().midi().gen_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
 								// machine active?
-								if( data1 < MAX_MACHINES && Global::song()._pMachine[ data1 ] )
+								if( program < MAX_MACHINES && Global::song()._pMachine[ program ] )
 								{
 									// ok, map
-									SetGenMap( channel, data1 );
+									SetGenMap( channel, program );
 								}
 								else
 								{
@@ -1068,18 +1066,29 @@ Exit:
 							}
 							else if(PsycleGlobal::conf().midi().inst_select_with() == PsycleConfig::Midi::MS_PROGRAM)
 							{
-								SetInstMap( channel, data1 );
+								SetInstMap( channel, program );
 								return;
 							}
 						}
+						break;
+						case 0x0F:
+						{
+							switch(statusLN) {
+						case 0xFA: PsycleGlobal::player().Start(0,0); return;
+						case 0xFB:PsycleGlobal::player().Start(PsycleGlobal::player()._playPosition,PsycleGlobal::player()._lineCounter); return;
+						case 0xFC:PsycleGlobal::player().Stop(); return;
+							}
+						}
+						break;
 						default:break;
 					}
 
+					//When program reaches this line, it means that the command has not been used. So now it is time to do so.
 					if (PsycleGlobal::conf().inputHandler()._RecordTweaks)
 					{
 						if (PsycleGlobal::conf().midi().raw() && status != 0xFE )
 						{
-							PsycleGlobal::inputHandler().MidiPatternMidiCommand(status,busMachine,(data1 << 8) | data2);
+							PsycleGlobal::inputHandler().MidiPatternMidiCommand(busMachine,status,(data1 << 8) | data2);
 						}
 						// branch on status code
 						else switch(statusHN)
@@ -1104,7 +1113,7 @@ Exit:
 												PsycleGlobal::inputHandler().MidiPatternTweak(busMachine,PsycleGlobal::conf().midi().group(i).command(), value, true);
 												break;
 											case PsycleConfig::Midi::group_t::t_mcm:
-												PsycleGlobal::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
+												PsycleGlobal::inputHandler().MidiPatternMidiCommand(busMachine, status, (data1 << 8) | data2);
 												break;
 										}
 									}
@@ -1130,11 +1139,12 @@ Exit:
 												PsycleGlobal::inputHandler().MidiPatternTweak(busMachine,PsycleGlobal::conf().midi().pitch().command(), value, true);
 												break;
 											case PsycleConfig::Midi::group_t::t_mcm:
-												PsycleGlobal::inputHandler().MidiPatternMidiCommand(status, busMachine, (data1 << 8) | data2);
+												PsycleGlobal::inputHandler().MidiPatternMidiCommand(busMachine, status, (data1 << 8) | data2);
 												break;
 										}
 									}
 								}
+								break;
 						}
 					}
 					else
@@ -1144,24 +1154,16 @@ Exit:
 							Machine* pMachine = Global::song()._pMachine[busMachine];
 							if (pMachine)
 							{
-								if (pMachine->_type == MACH_VST || pMachine->_type == MACH_VSTFX )
-								{
-									((vst::plugin*)pMachine)->AddMIDI(status,data1,data2);
-									return;
-								}
-								else
-								{
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 #error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 #if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-									PatternEntry pentry(notecommands::midicc,status,255,data1,data2,busMachine);
+								PatternEntry pentry(notecommands::midicc,status,255,data1,data2,busMachine);
 #else
-									PatternEntry pentry(notecommands::midicc,status,busMachine,data1,data2);
+								PatternEntry pentry(notecommands::midicc,status,busMachine,data1,data2);
 #endif
 #endif
-									pMachine->Tick(0,&pentry);
-								}
+								pMachine->Tick(0,&pentry);
 							}
 						}
 					}
@@ -1313,7 +1315,7 @@ Exit:
 				int track = m_midiBuffer[ m_bufReadIdx ].track;
 
 				// get the machine pointer
-				Plugin * pMachine = (Plugin*) Global::song()._pMachine[ machine ];
+				Plugin * pMachine = static_cast<Plugin*>(Global::song()._pMachine[ machine ]);
 				// make sure machine is still valid
 				if( pMachine || note == notecommands::midi_sync )
 				{
@@ -1331,12 +1333,13 @@ Exit:
 						// SYNC TICK
 						case notecommands::midi_sync:
 						{
-							// simulate a tracker 'tick' (i.e. a line change for all machines)
+							// simulate a newline (i.e. a line change for all machines)
 							for (int tc=0; tc<MAX_MACHINES; tc++)
 							{
 								if( Global::song()._pMachine[tc])
 								{
-									Global::song()._pMachine[tc]->Tick();
+									Global::song()._pMachine[tc]->NewLine();
+									Global::song()._pMachine[tc]->PostNewLine();
 								}
 							}
 							m_stats.flags |= FSTAT_SYNC_TICK;

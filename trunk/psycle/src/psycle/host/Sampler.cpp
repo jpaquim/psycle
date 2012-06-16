@@ -116,7 +116,7 @@ namespace psycle
 			}
 			return false;
 		}
-		void Sampler::Tick()
+		void Sampler::NewLine()
 		{
 			for (int voice=0;voice<_numVoices;voice++)
 			{
@@ -131,6 +131,10 @@ namespace psycle
 			int channel,
 			PatternEntry* pData)
 		{
+			if(pData->_note==notecommands::midicc && (pData->_inst < MAX_TRACKS || pData->_inst == 0xFF)) {
+				pData->_note=notecommands::empty;
+				pData->_inst = 0xFF;
+			}
 			 // don't process twk , twf of Mcm Commands, or empty commands
 			if ( pData->_note > notecommands::release && (pData->_note < notecommands::empty || pData->_cmd == 0) )
 			{
@@ -142,7 +146,6 @@ namespace psycle
 			int useVoice = -1;
 
 			PatternEntry data = *pData;
-
 			if (data._inst >= 255)
 			{
 				data._inst = lastInstrument[channel];
