@@ -26,6 +26,7 @@ namespace psycle { namespace host {
 			virtual void OnFileNameChange();
 		protected:
 			DECLARE_MESSAGE_MAP()
+			afx_msg void OnClose();
 		};
 	}   // namespace
 }   // namespace

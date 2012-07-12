@@ -7,6 +7,7 @@
 #include "AudioDriver.hpp"
 
 #include "MainFrm.hpp"
+#include "XMInstrument.hpp"
 #include "InputHandler.hpp"
 #include "WaveEdFrame.hpp"
 #include "Zap.hpp"
@@ -284,8 +285,8 @@ namespace psycle { namespace host {
 					memDC.MoveTo(cursorX, nHeadHeight);
 					memDC.LineTo(cursorX, nHeadHeight+nHeight);
 				}
-				if(_pSong->waved.IsEnabled()) {
-					int cursorX = helpers::math::lround<int,float>((_pSong->waved.GetPosition()-diStart)*dispRatio);
+				if(_pSong->wavprev.IsEnabled()) {
+					int cursorX = helpers::math::lround<int,float>((_pSong->wavprev.GetPosition()-diStart)*dispRatio);
 					memDC.MoveTo(cursorX, nHeadHeight);
 					memDC.LineTo(cursorX, nHeadHeight+nHeight);
 				}
@@ -367,7 +368,7 @@ namespace psycle { namespace host {
 			bDragLoopStart = bDragLoopEnd = false;
 			SelStart=0;
 			cursorPos=0;
-			_pSong->waved.SetVolume(0.4f);
+			_pSong->wavprev.SetVolume(0.4f);
 			wdWave=false;
 			wsInstrument=-1;
 			prevHeadLoopS = prevBodyLoopS = prevHeadLoopE = prevBodyLoopE = 0;
@@ -454,7 +455,7 @@ namespace psycle { namespace host {
 			}
 			else if((CSliderCtrl*)pScrollBar == volSlider)
 			{
-				_pSong->waved.SetVolume( volSlider->GetPos()/100.0f );
+				_pSong->wavprev.SetVolume( volSlider->GetPos()/100.0f );
 				volSlider->Invalidate(false);
 				this->SetFocus();
 			}
@@ -528,7 +529,7 @@ namespace psycle { namespace host {
 				GetClientRect(&rect);
 				rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 				InvalidateRect(&rect, false);
-				if (!_pSong->waved.IsEnabled()) {
+				if (!_pSong->wavprev.IsEnabled()) {
 					KillTimer(ID_TIMER_WAVED_PLAYING);
 				}
 			}
@@ -558,7 +559,7 @@ namespace psycle { namespace host {
 
 			if ( nmcd.dwDrawStage == CDDS_PREPAINT )
 			{
-				float vol = _pSong->waved.GetVolume();
+				float vol = _pSong->wavprev.GetVolume();
 				CDC* pDC = CDC::FromHandle( nmcd.hdc );
 				CDC memDC;
 				memDC.CreateCompatibleDC(pDC);
@@ -618,21 +619,23 @@ namespace psycle { namespace host {
 
 		void  CWaveEdChildView::SetViewData(int ins)
 		{
-			int wl=_pSong->_pInstrument[ins]->waveLength;
+			int wl=0;
+			if (_pSong->samples.IsEnabled(ins)) {wl = _pSong->samples[ins].WaveLength();}
 
 			wsInstrument=ins;	// Do not put inside of "if(wl)". Pasting needs this.
 
 			if(wl)
 			{
 				wdWave=true;
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					
 				wdLength=wl;
-				wdLeft=_pSong->_pInstrument[ins]->waveDataL;
-				wdRight=_pSong->_pInstrument[ins]->waveDataR;
-				wdStereo=_pSong->_pInstrument[ins]->waveStereo;
-				wdLoop=_pSong->_pInstrument[ins]->waveLoopType;
-				wdLoopS=_pSong->_pInstrument[ins]->waveLoopStart;
-				wdLoopE=_pSong->_pInstrument[ins]->waveLoopEnd;
+				wdLeft=wave.pWaveDataL();
+				wdRight=wave.pWaveDataR();
+				wdStereo=wave.IsWaveStereo();
+				wdLoop=wave.WaveLoopType()==XMInstrument::WaveData::LoopType::NORMAL;
+				wdLoopS=wave.WaveLoopStart();
+				wdLoopE=wave.WaveLoopEnd();
 
 				diStart=0;
 				diLength=wl;
@@ -831,21 +834,22 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					_pSong->StopInstrument(wsInstrument);
 
 					CRect rect;
 					GetClientRect(&rect);
 					wdLoopE = diStart+((x*diLength)/rect.Width());
-					_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-					if (_pSong->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
+					wave.WaveLoopEnd(wdLoopE);
+					if (wave.WaveLoopStart()> wdLoopE )
 					{
-						_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
+						wave.WaveLoopStart(wdLoopE);
 					}
-					wdLoopS = _pSong->_pInstrument[wsInstrument]->waveLoopStart;
+					wdLoopS = wave.WaveLoopStart();
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+						wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 					}
 					mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -875,23 +879,24 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					_pSong->StopInstrument(wsInstrument);
 
 
 					CRect rect;
 					GetClientRect(&rect);
 					wdLoopS = diStart+((x*diLength)/rect.Width());
-					_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-					if (_pSong->_pInstrument[wsInstrument]->waveLoopEnd < wdLoopS )
+					wave.WaveLoopStart(wdLoopS);
+					if (wave.WaveLoopEnd() < wdLoopS )
 					{
-						_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
+						wave.WaveLoopEnd(wdLoopS);
 					}
-					wdLoopE = _pSong->_pInstrument[wsInstrument]->waveLoopEnd;
+					wdLoopE = wave.WaveLoopEnd();
 
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+						wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 					}
 					mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -1137,9 +1142,12 @@ namespace psycle { namespace host {
 			ReleaseCapture();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
-			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-			mainFrame->m_wndInst.WaveUpdate();
+			if(wdWave) {
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				wave.WaveLoopStart(wdLoopS);
+				wave.WaveLoopEnd(wdLoopE);
+				mainFrame->m_wndInst.WaveUpdate();
+			}
 			bDragLoopEnd = bDragLoopStart = false;
 			CRect rect;
 			GetClientRect(&rect);
@@ -1162,10 +1170,8 @@ namespace psycle { namespace host {
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-
-				Fade(wdLeft+startPoint, length, 0, 1.0f);
-				if(wdStereo)
-					Fade(wdRight+startPoint, length, 0, 1.0f);
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				wave.Fade(startPoint, length, 0.f, 1.f);
 
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1181,10 +1187,8 @@ namespace psycle { namespace host {
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-
-				Fade(wdLeft+startPoint, length, 1.0f, 0);
-				if(wdStereo)
-					Fade(wdRight+startPoint, length, 1.0f, 0);
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				wave.Fade(startPoint, length, 1.f, 0.f);
 
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1193,9 +1197,8 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnSelectionNormalize() // (Fideloop's)
 		{
-			signed short maxL = 0, maxR = 0, absBuf;
+			signed short maxL = 0;
 			double ratio = 0;
-			unsigned long c = 0;
 			unsigned long startPoint = (blSelection? blStart: 0);
 			unsigned long length = (blSelection? blLength+1: wdLength);
 
@@ -1204,44 +1207,18 @@ namespace psycle { namespace host {
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				for (c = startPoint ; c < startPoint+length ; c++)
-				{
-
-					if (*(wdLeft+c) < 0)
-					{
-						if (!( *(wdLeft+c) == -32768) )	absBuf = - *(wdLeft + c);
-						else absBuf = 32767;
-					}
-					else absBuf = *(wdLeft + c);
-					if (maxL < absBuf) maxL = absBuf;
+				maxL = CalcBufferPeak(&wdLeft[startPoint], length);
+				if (wdStereo) {
+					short maxR = CalcBufferPeak(&wdRight[startPoint], length);
+					if (maxL < maxR) maxL = maxR;
 				}
-
-				if (wdStereo)
-
-				{
-					for (c = startPoint; c< length; c++)
-					{
-						if (*(wdRight+c) < 0)
-						{
-							if (!( *(wdRight+c) == -32768) )	absBuf = - *(wdRight + c);
-							else absBuf = 32767;
-						}
-						else absBuf = *(wdRight + c);
-						if (maxR < absBuf) maxR = absBuf;
-					}
-				}
-
-				if ( (maxL < maxR) && (wdStereo) ) maxL = maxR;
 				
 				if (maxL) ratio = (double) 32767 / maxL;
 				
 				if (ratio != 1)
 				{
-					Amplify(wdLeft+startPoint, length, ratio);
-					if (wdStereo)
-					{
-						Amplify(wdRight+startPoint, length, ratio);
-					}
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					wave.Amplify(startPoint, startPoint+length, ratio);
 				}
 
 				RefreshDisplayData(true);
@@ -1328,11 +1305,10 @@ namespace psycle { namespace host {
 				if (pos != AMP_DIALOG_CANCEL)
 				{
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
-					Amplify(wdLeft+startPoint, length, ratio);
-					if (wdStereo)
-						Amplify(wdRight+startPoint, length, ratio);
+					wave.Amplify(startPoint, length, ratio);
 
 					RefreshDisplayData(true);
 					Invalidate(true);
@@ -1385,9 +1361,8 @@ namespace psycle { namespace host {
 				if(!wdWave)
 				{
 					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
-					short *pTmp= new signed short[timeInSamps];
-					std::memset(pTmp, 0, timeInSamps*2 );
-					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+					std::memset(_pSong->samples[wsInstrument].pWaveDataL(), 0, timeInSamps*sizeof(short) );
+					wdLeft = _pSong->samples[wsInstrument].pWaveDataL();
 					wdLength=timeInSamps;
 					wdStereo=false;
 					wdWave=true;
@@ -1396,6 +1371,8 @@ namespace psycle { namespace host {
 				else
 				{
 					unsigned long insertPos;
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+
 					switch(SilenceDlg.insertPos)
 					{
 					case CWaveEdInsertSilenceDialog::at_start:
@@ -1411,45 +1388,34 @@ namespace psycle { namespace host {
 						MessageBox("Invalid option");
 						return;
 					}
-
-					short *pTmp = new signed short[timeInSamps + wdLength];		//create new buffer
-					memcpy(pTmp, wdLeft, insertPos*2);							//copy pre-insert data
-					memset(pTmp + insertPos, 0, timeInSamps*2);					//insert silence
-					memcpy((unsigned char*)pTmp + 2*(insertPos+timeInSamps), wdLeft + insertPos, 2*(wdLength - insertPos));	//copy post-insert data
-					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
-
-					if(wdStereo)
-					{
-						short *pTmpR= new signed short[timeInSamps + wdLength];
-						memcpy(pTmpR,wdRight,insertPos*2);
-						memset(pTmpR+insertPos, 0, timeInSamps*2);
-						memcpy((unsigned char*)pTmpR+ 2*(insertPos+timeInSamps), wdRight + insertPos, 2*(wdLength - insertPos));
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
-					}
-
-					_pSong->_pInstrument[wsInstrument]->waveLength = wdLength = wdLength + timeInSamps;
+					XMInstrument::WaveData wavewithS;
+					wavewithS.AllocWaveData(timeInSamps, wave.IsWaveStereo());
+					std::memset(wavewithS.pWaveDataL(), 0, timeInSamps*sizeof(short));					//insert silence
+					wave.InsertAt(insertPos, wavewithS);
+					wdLeft = wave.pWaveDataL();
+					wdRight = wave.pWaveDataR();
+					wdLength += wave.WaveLength();
+					wavewithS.DeleteWaveData();
 
 					if(wdLoop)		//update loop points if necessary
 					{
 						if(insertPos<wdLoopS)
 						{
 							wdLoopS += timeInSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+							wave.WaveLoopStart(wdLoopS);
 						}
 						if(insertPos<wdLoopE)
 						{
 							wdLoopE += timeInSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+							wave.WaveLoopEnd(wdLoopE);
 						}
 						mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 					}
 				}
 
-
 				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
 				RefreshDisplayData(true);
 				Invalidate(true);
-
 			}
 		}
 
@@ -1458,17 +1424,10 @@ namespace psycle { namespace host {
 			if (wdWave && wdStereo)
 			{
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				//SetUndo(4, wdLeft, wdRight, wdLength); 
-				for (unsigned int c = 0; c < wdLength; c++)
-				{
-					*(wdLeft + c) = ( *(wdLeft + c) + *(wdRight + c) ) / 2;
-				}
-
-				_pSong->_pInstrument[wsInstrument]->waveStereo = false;
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				wave.ConvertToMono();
 				wdStereo = false;
-				zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR);
 				RefreshDisplayData(true);
 				Invalidate(true);
 			}
@@ -1612,9 +1571,6 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnEditDelete()
 		{
-			short* pTmp = 0, *pTmpR = 0;
-			long datalen = 0;
-
 			if (wdWave && blSelection)
 			{
 				PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -1624,45 +1580,33 @@ namespace psycle { namespace host {
 
 				unsigned long length = blLength+1;
 
-				datalen = (wdLength - length);
+				long datalen = (wdLength - length);
 				if (datalen)
 				{
-					pTmp = new signed short[datalen];
-					
-					if (wdStereo)
-					{
-						pTmpR= new signed short[datalen];
-						CopyMemory(pTmpR, wdRight, blStart*sizeof(short));
-						CopyMemory( (pTmpR+blStart), (wdRight + blStart + length), (wdLength - blStart - length)*sizeof(short) );
-						zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
-						wdRight = pTmpR;
-					}
-
-					CopyMemory( pTmp, wdLeft, blStart*sizeof(short) );
-					CopyMemory( (pTmp+blStart), (wdLeft + blStart + length), (wdLength - blStart - length)*sizeof(short) );
-					zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
-					wdLeft = pTmp;
-					_pSong->_pInstrument[wsInstrument]->waveLength = datalen;
-					wdLength = datalen;
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					wave.DeleteAt(blStart, length);
+					wdLeft = wave.pWaveDataL();
+					wdRight = wave.pWaveDataR();
+					wdLength += wave.WaveLength();
 					//	adjust loop points if necessary
 					if(wdLoop)
 					{
 						if(blStart+length<wdLoopS)
 						{
 							wdLoopS -= length;
-							_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+							wave.WaveLoopStart(wdLoopS);
 						}
 						if(blStart+length<wdLoopE)
 						{
 							wdLoopE -= length;
-							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+							wave.WaveLoopEnd(wdLoopE);
 						}
 					}
 
 				}
 				else
 				{
-					_pSong->DeleteLayer(wsInstrument);
+					_pSong->samples.RemoveAt(wsInstrument);
 					wdLength = 0;
 					wdWave   = false;
 				}
@@ -1784,7 +1728,6 @@ namespace psycle { namespace host {
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
-			short* pTmp = 0, *pTmpR = 0;
 
 			OpenClipboard();
 			hPasteData = GetClipboardData(CF_WAVE);
@@ -1798,7 +1741,6 @@ namespace psycle { namespace host {
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
 			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-			int bytesPerSamp = (int)(pFmt->nBlockAlign/pFmt->nChannels);
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 
@@ -1807,21 +1749,22 @@ namespace psycle { namespace host {
 				if (pFmt->wBitsPerSample == 16)
 				{
 					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					wdLength = lDataSamps;
-					wdLeft  = _pSong->_pInstrument[wsInstrument]->waveDataL;
+					wdLeft  = wave.pWaveDataL();
 					if (pFmt->nChannels == 1)
 					{
-						memcpy(_pSong->_pInstrument[wsInstrument]->waveDataL, pData, lData);
+						memcpy(wave.pWaveDataL(), pData, lData);
 						wdStereo = false;
 					}
 					else if (pFmt->nChannels == 2)
 					{
 						for (c = 0; c < lDataSamps; ++c)
 						{
-							*(_pSong->_pInstrument[wsInstrument]->waveDataL + c) = *(signed short*)(pData + c*pFmt->nBlockAlign);
-							*(_pSong->_pInstrument[wsInstrument]->waveDataR + c) = *(signed short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
+							*(wave.pWaveDataL() + c) = *(signed short*)(pData + c*pFmt->nBlockAlign);
+							*(wave.pWaveDataR() + c) = *(signed short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
 						}
-						wdRight = _pSong->_pInstrument[wsInstrument]->waveDataR;
+						wdRight = wave.pWaveDataR();
 						wdStereo = true;
 					}
 					wdWave = true;
@@ -1830,37 +1773,32 @@ namespace psycle { namespace host {
 			}
 			else
 			{
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 				if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
 				{
 					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
 						 ((pFmt->nChannels == 2) && (wdStereo == false)) )
 						 return;
 
-					//paste left channel
-					pTmp = new signed short[lDataSamps + wdLength];
-					memcpy(pTmp, wdLeft, cursorPos*bytesPerSamp);
-
-					for (c = 0; c < lDataSamps; c++)
-						*(pTmp + cursorPos + c) = *(short*)(pData + c*pFmt->nBlockAlign);
-
-					memcpy((unsigned char*)pTmp + bytesPerSamp*(cursorPos+lDataSamps), wdLeft+cursorPos, bytesPerSamp*(wdLength-cursorPos));
-					wdLeft  = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
-
-					if(pFmt->nChannels==2)	//if stereo, paste right channel
-					{
-						pTmpR= new signed short[lDataSamps + wdLength];
-						memcpy(pTmpR, wdRight, cursorPos*bytesPerSamp);
-
-						for (c = 0; c < lDataSamps; c++)
-							*(pTmpR+ cursorPos + c) = *(short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
-
-						memcpy((unsigned char*)pTmpR+ bytesPerSamp*(cursorPos+lDataSamps), wdRight + cursorPos, bytesPerSamp*(wdLength - cursorPos));
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+					XMInstrument::WaveData waveToPaste;
+					waveToPaste.AllocWaveData(lDataSamps, wdStereo);
+					//prepare left channel
+					for (c = 0; c < lDataSamps; c++) {
+						waveToPaste.pWaveDataL()[c] = *(short*)(pData + c*pFmt->nBlockAlign);
 					}
 
+					if(wdStereo)	//if stereo, prepare right channel
+					{
+						int align = (int)(pFmt->nBlockAlign/2);
+						for (c = 0; c < lDataSamps; c++)
+							waveToPaste.pWaveDataR()[c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
+					}
+
+					//Insert
+					wave.InsertAt(cursorPos,waveToPaste);
+
 					//update length
-					_pSong->_pInstrument[wsInstrument]->waveLength = wdLength + lDataSamps;
-					wdLength = wdLength + lDataSamps;
+					wdLength = wave.WaveLength();
 
 					//	adjust loop points if necessary
 					if(wdLoop)
@@ -1868,12 +1806,12 @@ namespace psycle { namespace host {
 						if(cursorPos<wdLoopS)
 						{
 							wdLoopS += lDataSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
+							wave.WaveLoopStart(wdLoopS);
 						}
 						if(cursorPos<wdLoopE)
 						{
 							wdLoopE += lDataSamps;
-							_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+							wave.WaveLoopEnd(wdLoopE);
 						}
 					}
 				}
@@ -1901,7 +1839,6 @@ namespace psycle { namespace host {
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
-			short* pTmp = 0, *pTmpR = 0;
 
 			OpenClipboard();
 			hPasteData = GetClipboardData(CF_WAVE);
@@ -1946,22 +1883,16 @@ namespace psycle { namespace host {
 					startPoint=cursorPos;
 				}
 
+				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 				//do left channel
-				pTmp = new signed short[wdLength];
-				memcpy(pTmp, wdLeft, startPoint*2);
 				for (c = 0; c < lDataSamps; c++)
-					*(pTmp + startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign);
-				memcpy((unsigned char*)pTmp + 2*(startPoint+lDataSamps), wdLeft  + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
-				wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
+					wave.pWaveDataL()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign);
 				
-				if(pFmt->nChannels==2)	//do right channel if stereo
+				if(wdStereo)	//do right channel if stereo
 				{
-					pTmpR= new signed short[wdLength];
-					memcpy(pTmpR,wdRight,startPoint*2);
+					int align = (int)(pFmt->nBlockAlign/2);
 					for (c = 0; c < lDataSamps; c++)
-						*(pTmpR+ startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign + int(pFmt->nBlockAlign*0.5));
-					memcpy((unsigned char*)pTmpR+ 2*(startPoint+lDataSamps), wdRight + startPoint+lDataSamps, 2*(wdLength-startPoint-lDataSamps));
-					wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+						wave.pWaveDataR()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
 				}
 			}
 			GlobalUnlock(hPasteData);
@@ -1978,122 +1909,96 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnPasteMix()
 		{
-			unsigned long c = 0;
-			unsigned long startPoint;
 			CWaveEdMixDialog MixDlg(GetOwner());
 			if(MixDlg.DoModal() != IDCANCEL)
 			{
-
-				PsycleGlobal::inputHandler().AddMacViewUndo();
-
 				char *pData;
-				std::uint32_t lFmt, lData;
-				
 				WAVEFORMATEX* pFmt;
-				short* pPasteData;
-				short* pTmp = 0, *pTmpR = 0;
-
-				OpenClipboard();
-				hPasteData = GetClipboardData(CF_WAVE);
-				pPasteData = (short*)GlobalLock(hPasteData);
-
-				if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
-				lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-				pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
-
-				lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
-				pData = (char*)pPasteData + 20 + lFmt + 8;
-
-				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-
-				unsigned long fadeInSamps(0), fadeOutSamps(0);
-				unsigned long destFadeIn(0);	
-
-				if(MixDlg.bFadeIn)
-					fadeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * MixDlg.fadeInTime;
-				if(MixDlg.bFadeOut)
-					fadeOutSamps= Global::configuration()._pOutputDriver->GetSamplesPerSec() * MixDlg.fadeOutTime;
-
-				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				_pSong->StopInstrument(wsInstrument);
-				if (pFmt->wBitsPerSample == 16 && ( pFmt->nChannels==1 || pFmt->nChannels==2 ) )
+				unsigned long lDataSamps;
 				{
-					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
-							((pFmt->nChannels == 2) && (wdStereo == false)) )
-							return;
+					std::uint32_t lFmt, lData;
+					short* pPasteData;
+
+					OpenClipboard();
+					hPasteData = GetClipboardData(CF_WAVE);
+					pPasteData = (short*)GlobalLock(hPasteData);
+
+					if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+					lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
+					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+
+					lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
+					pData = (char*)pPasteData + 20 + lFmt + 8;
+
+					lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+				}
+
+				if (pFmt->wBitsPerSample == 16 //todo: deal with this better.. i.e. dialog box offering to convert clipboard data
+					&& ((pFmt->nChannels == 1 && wdStereo == false) 	
+						||(pFmt->nChannels == 2 && wdStereo == true)))
+				{
+					unsigned long startPoint;
+					unsigned long fadeInSamps(0), fadeOutSamps(0);
+					unsigned long destFadeIn(0);	
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					PsycleGlobal::inputHandler().AddMacViewUndo();
+					_pSong->StopInstrument(wsInstrument);
+
+					if(MixDlg.bFadeIn)
+						fadeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * MixDlg.fadeInTime;
+					if(MixDlg.bFadeOut)
+						fadeOutSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * MixDlg.fadeOutTime;
 
 					if(blSelection)	//overwrite selected block
 					{
 						//if clipboard data is longer than selection, truncate it
-						if(lDataSamps>blLength+1) 
-						{
-							lData=blLength*pFmt->nBlockAlign;
-							lDataSamps = blLength+1;
-						}
+						lDataSamps = std::max(lDataSamps, blLength+1);
 						startPoint=blStart;
 					}
-					else		//overwrite at cursor
+					else {		//overwrite at cursor
 						startPoint=cursorPos;
+					}
 
-					unsigned long newLength;
-					if(startPoint+lDataSamps < wdLength)
-						newLength = wdLength;
-					else
-						newLength = startPoint+lDataSamps;
+					unsigned long newLength = std::max(startPoint+lDataSamps,wdLength);
 
-					if(fadeInSamps>lDataSamps) fadeInSamps=lDataSamps;
-					if(fadeOutSamps>lDataSamps) fadeOutSamps=lDataSamps;
-					if(startPoint+fadeInSamps<wdLength)	destFadeIn = fadeInSamps;		//we need to do some thinking about what reason the user
-					else								destFadeIn = wdLength-startPoint;	//could possibly have for using it this way, and if this
-																							//is how the program should behave if it happens
-					pTmp = new signed short[newLength];
+					fadeInSamps = std::min(fadeInSamps,lDataSamps);
+					fadeOutSamps = std::min(fadeOutSamps,lDataSamps);
+					destFadeIn = std::min(fadeInSamps,wdLength-startPoint);
 
-					for( c=0; c<newLength; c++ ) pTmp[c] = 0;	//zero out pTmp
-					for (c = 0; c < lDataSamps; c++)
-						*(pTmp+startPoint+c) = *(short*)(pData + c*pFmt->nBlockAlign);	//copy clipboard data to pTmp
-					Fade(pTmp+startPoint, fadeInSamps, 0, MixDlg.srcVol);				//do fade in on clipboard data
-					Fade(wdLeft +startPoint, destFadeIn, 1.0f, MixDlg.destVol);			//do fade in on wave data
-					Amplify(pTmp +startPoint+fadeInSamps, lDataSamps-fadeInSamps-fadeOutSamps, MixDlg.srcVol);	//amplify non-faded part of clipboard data
+					XMInstrument::WaveData waveClip;
+					waveClip.AllocWaveData(newLength,wdStereo);
+					waveClip.Silence(0,newLength);
+					if (wdStereo) {
+						int align = int(pFmt->nBlockAlign*0.5);
+						for (unsigned long c = 0; c < lDataSamps; c++) {
+							waveClip.pWaveDataL()[startPoint+c]= *(short*)(pData + c*pFmt->nBlockAlign);	//copy clipboard data to pTmp
+							waveClip.pWaveDataR()[startPoint+c]= *(short*)(pData + c*pFmt->nBlockAlign + align);
+						}
+					}
+					else {
+						for (unsigned long c = 0; c < lDataSamps; c++) {
+							waveClip.pWaveDataL()[startPoint+c] = *(short*)(pData + c*pFmt->nBlockAlign);	//copy clipboard data to pTmp
+						}
+					}
+					waveClip.Fade(startPoint, fadeInSamps, 0, MixDlg.srcVol); //do fade in on clipboard data
+					wave.Fade(startPoint, destFadeIn, 1.0f, MixDlg.destVol); //do fade in on wave data
+					waveClip.Amplify(startPoint+fadeInSamps, lDataSamps-fadeInSamps-fadeOutSamps, MixDlg.srcVol); //amplify non-faded part of clipboard data
 
 					if(startPoint+lDataSamps < wdLength)
 					{
-						Amplify(wdLeft +startPoint+destFadeIn, lDataSamps-destFadeIn-fadeOutSamps, MixDlg.destVol); //amplify wave data
-						Fade(wdLeft +startPoint+lDataSamps-fadeOutSamps, fadeOutSamps, MixDlg.destVol, 1.0f);	//fade out wave data
-						Fade(pTmp   +startPoint+lDataSamps-fadeOutSamps, fadeOutSamps, MixDlg.srcVol, 0);		//fade out clipboard data
+						wave.Amplify(startPoint+destFadeIn, lDataSamps-destFadeIn-fadeOutSamps, MixDlg.destVol); //amplify wave data
+						wave.Fade(startPoint+lDataSamps-fadeOutSamps, fadeOutSamps, MixDlg.destVol, 1.0f);	//fade out wave data
+						wave.Fade(startPoint+lDataSamps-fadeOutSamps, fadeOutSamps, MixDlg.srcVol, 0);		//fade out clipboard data
 					}
 					else	//ignore fade out in this case, it doesn't make sense here
-						Amplify(wdLeft +startPoint+destFadeIn, wdLength-startPoint-destFadeIn, MixDlg.destVol);	//amplify wave data
+						wave.Amplify(startPoint+destFadeIn, wdLength-startPoint-destFadeIn, MixDlg.destVol);	//amplify wave data
 
-					Mix(pTmp, wdLeft, newLength, wdLength);		//mix into pTmp
-					wdLeft =zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL,pTmp);
-
-					if( pFmt->nChannels == 2 )
-					{
-						pTmpR= new signed short[newLength];
-						for ( c=0; c<newLength; c++ )	pTmpR[c]=0;
-						for (c = 0; c < lDataSamps; c++)
-							*(pTmpR+startPoint+c)= *(short*)(pData + c*pFmt->nBlockAlign + int(pFmt->nBlockAlign*0.5));
-
-						Fade(pTmpR+startPoint, fadeInSamps, 0, MixDlg.srcVol);
-						Fade(wdRight+startPoint, destFadeIn, 1.0f, MixDlg.destVol);
-						Amplify(pTmpR+startPoint+fadeInSamps, lDataSamps-fadeInSamps-fadeOutSamps, MixDlg.srcVol);
-
-						if(startPoint+lDataSamps < wdLength)
-						{
-							Amplify(wdRight+startPoint+destFadeIn, lDataSamps-destFadeIn-fadeOutSamps, MixDlg.destVol);
-							Fade(wdRight+startPoint+lDataSamps-fadeOutSamps, fadeOutSamps, MixDlg.destVol, 1.0f);
-							Fade(pTmpR+startPoint+lDataSamps-fadeOutSamps, fadeOutSamps, MixDlg.srcVol, 0);
-						}
-						else
-							Amplify(wdRight+startPoint+destFadeIn, wdLength-startPoint-destFadeIn, MixDlg.destVol);
-
-						Mix(pTmpR, wdRight, newLength, wdLength);		//mix into pTmpR
-						wdRight=zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
-					}
-
-					if(newLength>wdLength)
-						_pSong->_pInstrument[wsInstrument]->waveLength = wdLength = startPoint + lDataSamps;
-
+					wave.Mix(waveClip);		//mix into pTmp
+					wdLeft =wave.pWaveDataL();
+					wdRight=wave.pWaveDataR();
+					wdLength = wave.WaveLength();
 				}
 
 				GlobalUnlock(hPasteData);
@@ -2116,86 +2021,77 @@ namespace psycle { namespace host {
 			CWaveEdCrossfadeDialog XFadeDlg(GetOwner());
 			if(XFadeDlg.DoModal() != IDCANCEL)
 			{
-				unsigned long c = 0;
-				unsigned long startPoint, endPoint;
-
-				PsycleGlobal::inputHandler().AddMacViewUndo();
-
 				char *pData;
-				std::uint32_t lFmt, lData;
-				
 				WAVEFORMATEX* pFmt;
-				short* pPasteData;
-				short* pTmp = 0, *pTmpR = 0;
-
-				OpenClipboard();
-				hPasteData = GetClipboardData(CF_WAVE);
-				pPasteData = (short*)GlobalLock(hPasteData);
-
-				if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
-				lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-				pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
-
-				lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
-				pData = (char*)pPasteData + 20 + lFmt + 8;
-
-				unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-
-				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				_pSong->StopInstrument(wsInstrument);
-				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels == 1 || pFmt->nChannels == 2))
+				unsigned long lDataSamps;
 				{
-					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
-							((pFmt->nChannels == 2) && (wdStereo == false)) )
-							return;
+					std::uint32_t lFmt, lData;
+					short* pPasteData;
+
+					OpenClipboard();
+					hPasteData = GetClipboardData(CF_WAVE);
+					pPasteData = (short*)GlobalLock(hPasteData);
+
+					if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+					lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
+					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+
+					lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
+					pData = (char*)pPasteData + 20 + lFmt + 8;
+
+					lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
+				}
+
+				if (pFmt->wBitsPerSample == 16 //todo: deal with this better.. i.e. dialog box offering to convert clipboard data
+					&& ((pFmt->nChannels == 1 && wdStereo == false) 	
+						||(pFmt->nChannels == 2 && wdStereo == true)))
+				{
+					unsigned long startPoint, endPoint;
+					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					PsycleGlobal::inputHandler().AddMacViewUndo();
+					_pSong->StopInstrument(wsInstrument);
 
 					if(blSelection)	//overwrite selected block
 					{
 						startPoint=blStart;
-						if(lDataSamps>blLength+1)
-							endPoint = startPoint+blLength+1;		//selection determines length of the crossfade
-						else 
-							endPoint = startPoint+lDataSamps;	//if selection is longer, fade length is length of clipboard data
+						endPoint = startPoint+std::min(lDataSamps, blLength+1);
+									//selection determines length of the crossfade
+								//if selection is longer, fade length is length of clipboard data
 					}
 					else		//overwrite at cursor
 					{
 						startPoint=cursorPos;
-						if(startPoint+lDataSamps < wdLength)
-							endPoint = startPoint+lDataSamps;	//if clipboard data fits in existing wave, its length is fade length
-						else
-							endPoint = wdLength;				//if not, the end of the existing wave marks the end of the fade
+						endPoint = std::min(startPoint+lDataSamps,wdLength);
+							//if clipboard data fits in existing wave, its length is fade length
+							//if not, the end of the existing wave marks the end of the fade
 					}
 
-					unsigned long newLength;
-					if(startPoint+lDataSamps < wdLength)
-						newLength = wdLength;				//end wave same size as start wave
-					else
-						newLength = startPoint + lDataSamps;	//end wave larger than at start
+					unsigned long newLength = std::max(startPoint+lDataSamps, wdLength);
 
-					//process left channel:
-
-					pTmp = new signed short[newLength];	
-					for( c=0; c<newLength; c++ ) pTmp[c]=0;									//zero out pTmp
-					for (c = 0; c < lDataSamps; c++)										//copy clipboard into pTmp for processing
-						*(pTmp + startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign);
-					Fade(pTmp +startPoint, endPoint-startPoint, XFadeDlg.srcStartVol, XFadeDlg.srcEndVol);			//fade clipboard data
-					Fade(wdLeft +startPoint, endPoint-startPoint, XFadeDlg.destStartVol, XFadeDlg.destEndVol);		//fade wave data
-					Mix(pTmp, wdLeft, newLength, wdLength);															//mix clipboard with wave
-					wdLeft = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataL, pTmp);
-
-					if(pFmt->nChannels==2)	//process right channel
-					{
-						pTmpR= new signed short[newLength];
-						for( c=0; c<newLength; c++ ) pTmpR[c]=0;
-						for (c = 0; c < lDataSamps; c++)
-							*(pTmpR + startPoint + c) = *(short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign*0.5));
-						Fade(pTmpR+startPoint, endPoint-startPoint, XFadeDlg.srcStartVol, XFadeDlg.srcEndVol);
-						Fade(wdRight+startPoint, endPoint-startPoint, XFadeDlg.destStartVol, XFadeDlg.destEndVol);
-						Mix(pTmpR, wdRight, newLength, wdLength);
-						wdRight = zapArray(_pSong->_pInstrument[wsInstrument]->waveDataR,pTmpR);
+					XMInstrument::WaveData waveClip;
+					waveClip.AllocWaveData(newLength,wdStereo);
+					waveClip.Silence(0,newLength);
+					if (wdStereo) {
+						int align = int(pFmt->nBlockAlign*0.5);
+						for (unsigned long c = 0; c < lDataSamps; c++) {
+							waveClip.pWaveDataL()[startPoint+c]= *(short*)(pData + c*pFmt->nBlockAlign);	//copy clipboard data to pTmp
+							waveClip.pWaveDataR()[startPoint+c]= *(short*)(pData + c*pFmt->nBlockAlign + align);
+						}
 					}
-					if(newLength > wdLength)
-						_pSong->_pInstrument[wsInstrument]->waveLength = wdLength = newLength;
+					else {
+						for (unsigned long c = 0; c < lDataSamps; c++) {
+							waveClip.pWaveDataL()[startPoint+c] = *(short*)(pData + c*pFmt->nBlockAlign);	//copy clipboard data to pTmp
+						}
+					}
+
+					waveClip.Fade(startPoint, endPoint-startPoint, XFadeDlg.srcStartVol, XFadeDlg.srcEndVol);			//fade clipboard data
+					wave.Fade(startPoint, endPoint-startPoint, XFadeDlg.destStartVol, XFadeDlg.destEndVol);		//fade wave data
+					wave.Mix(waveClip);															//mix clipboard with wave
+					wdLeft = wave.pWaveDataL();
+					wdRight = wave.pWaveDataR();
+					wdLength = wave.WaveLength();
 				}
 
 
@@ -2243,21 +2139,22 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
 			int nWidth = rect.Width();
 			wdLoopS = diStart + rbX * diLength/nWidth;
-			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-			if (_pSong->_pInstrument[wsInstrument]->waveLoopEnd< wdLoopS )
+			wave.WaveLoopStart(wdLoopS);
+			if (wave.WaveLoopEnd()< wdLoopS )
 			{
-				_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopS;
+				wave.WaveLoopEnd(wdLoopS);
 			}
-			wdLoopE = _pSong->_pInstrument[wsInstrument]->waveLoopEnd;
+			wdLoopE = wave.WaveLoopEnd();
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
 			mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2267,21 +2164,22 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
 			int nWidth = rect.Width();
 			wdLoopE = diStart + rbX * diLength/nWidth;
-			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
-			if (_pSong->_pInstrument[wsInstrument]->waveLoopStart> wdLoopE )
+			wave.WaveLoopEnd(wdLoopE);
+			if (wave.WaveLoopStart()> wdLoopE )
 			{
-				_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopE;
+				wave.WaveLoopStart(wdLoopE);
 			}
-			wdLoopS = _pSong->_pInstrument[wsInstrument]->waveLoopStart;
+			wdLoopS = wave.WaveLoopStart();
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
 			mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2292,16 +2190,17 @@ namespace psycle { namespace host {
 		{
 			if(!blSelection) return;
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 			_pSong->StopInstrument(wsInstrument);
 
 			wdLoopS = blStart;
 			wdLoopE = blStart+blLength;
-			_pSong->_pInstrument[wsInstrument]->waveLoopStart=wdLoopS;
-			_pSong->_pInstrument[wsInstrument]->waveLoopEnd=wdLoopE;
+			wave.WaveLoopStart(wdLoopS);
+			wave.WaveLoopEnd(wdLoopE);
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				_pSong->_pInstrument[wsInstrument]->waveLoopType=true;
+				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
 
 			mainFrame->m_wndInst.WaveUpdate();
@@ -2425,7 +2324,7 @@ namespace psycle { namespace host {
 
 			//set volume slider
 			volSlider->SetRange(0, 100);
-			volSlider->SetPos( _pSong->waved.GetVolume() );
+			volSlider->SetPos( _pSong->wavprev.GetVolume() );
 			volSlider->Invalidate(false);
 		}
 
@@ -2667,50 +2566,13 @@ namespace psycle { namespace host {
 			}
 		}
 
-		//Mix - mixes two audio buffers, possibly of different lengths.
-		//mixed buffer will be put in the first buffer, so if the lengths are different, be sure that
-		//the bigger one is the first argument.  passing a negative value for lhsVol and/or rhsVol will effectively
-		//invert both/either buffer in addition to mixing.
-		void CWaveEdChildView::Mix(short* lhs, short *rhs, int lhsSize, int rhsSize, float lhsVol, float rhsVol)
-		{
-			if(rhsSize>lhsSize)
-				return;
-			if(lhsSize<=0 || rhsSize<0) return;
-
-			for( int i(0); i<rhsSize; i++ )
-			{
-				*(lhs+i) = *(lhs+i) * lhsVol + *(rhs+i) * rhsVol;
+		short CWaveEdChildView::CalcBufferPeak(short* buffer, int length) const {
+			short  max = 0;
+			for (int c = 0; c < length ; c++) {
+				short const absBuf = std::abs(buffer[c]);
+				if (max < absBuf) max = absBuf;
 			}
-			for( int i(rhsSize); i<lhsSize; ++i )
-			{
-				*(lhs+i)*=lhsVol;
-			}
+			return max;
 		}
 
-		//Fade - fades an audio buffer from one volume level to another.
-		void CWaveEdChildView::Fade(short* data, int length, float startVol, float endVol)
-		{
-			if(length<=0) return;
-			float slope = (endVol-startVol)/(float)length;
-
-			for(int i(0);i<length;++i)
-				*(data+i) *= startVol+i*slope;
-		}
-
-		//Amplify - multiplies an audio buffer by a given factor.  buffer can be inverted by passing
-		//	a negative value for vol.
-		void CWaveEdChildView::Amplify(short *data, int length, float vol)
-		{
-			if(length<=0) return;
-
-			int current;
-			for(int i(0);i<length;++i)
-			{
-				current = *(data+i) * vol;
-				if( current>32767 )		current=32767;
-				else if( current<-32768 )	current=-32768;
-				*(data+i) = static_cast<short>(current);
-			}
-		}
-	
 }}

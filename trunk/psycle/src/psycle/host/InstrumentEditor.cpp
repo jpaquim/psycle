@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CInstrumentEditor.
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentEditor.hpp"
+#include "XMInstrument.hpp"
 #include "MainFrm.hpp"
 #include "EnvDialog.hpp"
 #include "Song.hpp"
@@ -10,14 +11,11 @@ namespace psycle { namespace host {
 		CInstrumentEditor::CInstrumentEditor(CWnd* pParent)
 			: CDialog(CInstrumentEditor::IDD, pParent)
 		{
-			//{{AFX_DATA_INIT(CInstrumentEditor)
-			//}}AFX_DATA_INIT
 		}
 
 		void CInstrumentEditor::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CInstrumentEditor)
 			DDX_Control(pDX, IDC_NOTETUNE, m_notelabel);
 			DDX_Control(pDX, IDC_PANLABEL, m_panlabel);
 			DDX_Control(pDX, IDC_VOLABEL2, m_finelabel);
@@ -39,11 +37,9 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_LOOPEND, m_loopend);
 			DDX_Control(pDX, IDC_LOOPTYPE, m_looptype);
 			DDX_Control(pDX, IDC_INSTNUMBER, m_instlabel);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CInstrumentEditor, CDialog)
-			//{{AFX_MSG_MAP(CInstrumentEditor)
 			ON_BN_CLICKED(IDC_LOOPOFF, OnLoopoff)
 			ON_BN_CLICKED(IDC_LOOPFORWARD, OnLoopforward)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)			
@@ -66,7 +62,6 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_INS_DECNOTE, OnInsDecnote)
 			ON_BN_CLICKED(IDC_INS_INCNOTE, OnInsIncnote)
 			ON_BN_CLICKED(IDC_INS_INCOCTAVE, OnInsIncoctave)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CInstrumentEditor::OnInitDialog() 
@@ -86,8 +81,6 @@ namespace psycle { namespace host {
 			m_nna_combo.AddString("Note Release");
 			m_nna_combo.AddString("None");
 
-		//	pSong->waveSelected=0;
-
 			WaveUpdate();
 			cando=true;
 			return TRUE;
@@ -99,6 +92,9 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::WaveUpdate()
 		{
 			const int si = pSong->instSelected;
+			Instrument *pins = pSong->_pInstrument[si];
+			XMInstrument::WaveData wavetmp;
+			XMInstrument::WaveData& wave = (pSong->samples.IsEnabled(si)) ? pSong->samples[si] : wavetmp;
 
 			char buffer[64];
 			// Set instrument current selected label
@@ -107,17 +103,17 @@ namespace psycle { namespace host {
 
 			char buffer2[64];
 
-			if (pSong->_pInstrument[si]->_lock_instrument_to_machine < 0)
+			if (pins->_lock_instrument_to_machine < 0)
 			{
 				m_lockinstnumber.SetWindowText("");
 			}
 			else
 			{
-				sprintf(buffer2, "%.2X", pSong->_pInstrument[si]->_lock_instrument_to_machine);
+				sprintf(buffer2, "%.2X", pins->_lock_instrument_to_machine);
 				m_lockinstnumber.SetWindowText(buffer2);
 			}
 
-			if (pSong->_pInstrument[si]->_LOCKINST)
+			if (pins->_LOCKINST)
 			{
 				m_lockinst.SetCheck(BST_CHECKED);
 				m_lockinstnumber.EnableWindow(true);
@@ -130,36 +126,36 @@ namespace psycle { namespace host {
 
 			initializingDialog=true;
 			// Set instrument current selected name
-			m_instname.SetWindowText(pSong->_pInstrument[si]->_sName);
+			m_instname.SetWindowText(pins->_sName);
 			initializingDialog=false; // This prevents that "OnChangeInstname()", calls "UpdateComboIns()"
 
 			UpdateCombo();
 
-			m_panslider.SetPos(pSong->_pInstrument[si]->_pan);
-			m_rpan_check.SetCheck(pSong->_pInstrument[si]->_RPAN);
-			m_rcut_check.SetCheck(pSong->_pInstrument[si]->_RCUT);
-			m_rres_check.SetCheck(pSong->_pInstrument[si]->_RRES);
+			m_panslider.SetPos(wave.PanFactor()*256);
+			m_rpan_check.SetCheck(pins->_RPAN);
+			m_rcut_check.SetCheck(pins->_RCUT);
+			m_rres_check.SetCheck(pins->_RRES);
 			
-			sprintf(buffer,"%d",pSong->_pInstrument[si]->_pan);
+			sprintf(buffer,"%d",m_panslider.GetPos());
 			m_panlabel.SetWindowText(buffer);
 			
 
-			bool const ils = pSong->_pInstrument[si]->_loop;
+			bool const ils = pins->_loop;
 
 			m_loopcheck.SetCheck(ils);
-			sprintf(buffer,"%d",pSong->_pInstrument[si]->_lines);
+			sprintf(buffer,"%d",pins->_lines);
 			m_loopedit.EnableWindow(ils);
 			m_loopedit.SetWindowText(buffer);
 
 			// Volume bar
-			m_volumebar.SetPos(pSong->_pInstrument[si]->waveVolume);
-			m_finetune.SetPos(pSong->_pInstrument[si]->waveFinetune+256);
+			m_volumebar.SetPos(wave.WaveGlobVolume()*100);
+			m_finetune.SetPos(wave.WaveFineTune()+256);
 
 			UpdateNoteLabel();	
 			
 			
 			// Set looptype
-			if(pSong->_pInstrument[si]->waveLoopType)
+			if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL)
 			sprintf(buffer,"Forward");
 			else
 			sprintf(buffer,"Off");
@@ -168,13 +164,13 @@ namespace psycle { namespace host {
 
 			// Display Loop Points & Wave Length
 			
-			sprintf(buffer,"%d",pSong->_pInstrument[si]->waveLoopStart);
+			sprintf(buffer,"%d",wave.WaveLoopStart());
 			m_loopstart.SetWindowText(buffer);
 
-			sprintf(buffer,"%d",pSong->_pInstrument[si]->waveLoopEnd);
+			sprintf(buffer,"%d",wave.WaveLoopEnd());
 			m_loopend.SetWindowText(buffer);
 
-			sprintf(buffer,"%d",pSong->_pInstrument[si]->waveLength);
+			sprintf(buffer,"%d",wave.WaveLength());
 			m_wlen.SetWindowText(buffer);
 
 		}
@@ -184,23 +180,27 @@ namespace psycle { namespace host {
 
 		void CInstrumentEditor::OnLoopoff() 
 		{
-		int si = pSong->instSelected;
-
-			if(pSong->_pInstrument[si]->waveLoopType)
-			{
-			pSong->_pInstrument[si]->waveLoopType=0;
-			WaveUpdate();
+			int si = pSong->instSelected;
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL)
+				{
+					wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
+					WaveUpdate();
+				}
 			}
 		}
 
 		void CInstrumentEditor::OnLoopforward() 
 		{
-		int si=pSong->instSelected;
-
-			if(!pSong->_pInstrument[si]->waveLoopType)
-			{
-			pSong->_pInstrument[si]->waveLoopType=1;
-			WaveUpdate();
+			int si=pSong->instSelected;
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::DO_NOT)
+				{
+					wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+					WaveUpdate();
+				}
 			}
 		}
 
@@ -209,14 +209,14 @@ namespace psycle { namespace host {
 
 		void CInstrumentEditor::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-		int si=pSong->instSelected;
-		char buffer[8];
-
-			pSong->_pInstrument[si]->waveVolume=m_volumebar.GetPos();
-			
-			sprintf(buffer,"%d%%",pSong->_pInstrument[si]->waveVolume);
-			m_volabel.SetWindowText(buffer);
-
+			int si=pSong->instSelected;
+			char buffer[8];
+			if (pSong->samples.IsEnabled(si)) {
+				pSong->samples[si].WaveGlobVolume(m_volumebar.GetPos()*0.01f);
+				
+				sprintf(buffer,"%d%%",m_volumebar.GetPos());
+				m_volabel.SetWindowText(buffer);
+			}
 			*pResult = 0;
 		}
 
@@ -307,10 +307,13 @@ namespace psycle { namespace host {
 		{
 			char buffer[8];
 			int si=pSong->instSelected;
-			pSong->_pInstrument[si]->_pan = m_panslider.GetPos();
-			
-			sprintf(buffer,"%d%",pSong->_pInstrument[si]->_pan);
-			m_panlabel.SetWindowText(buffer);
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				wave.PanFactor(m_panslider.GetPos()/256.f);
+				
+				sprintf(buffer,"%d%",m_panslider.GetPos());
+				m_panlabel.SetWindowText(buffer);
+			}
 			*pResult = 0;
 		}
 
@@ -416,13 +419,15 @@ namespace psycle { namespace host {
 		{
 			int si=pSong->instSelected;
 			char buffer[8];
-			
-			if(cando)
-				pSong->_pInstrument[si]->waveFinetune=m_finetune.GetPos()-256;
-			
-			sprintf(buffer,"%d",pSong->_pInstrument[si]->waveFinetune);
-			m_finelabel.SetWindowText(buffer);
-			
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				
+				if(cando)
+					wave.WaveFineTune(m_finetune.GetPos()-256);
+				
+				sprintf(buffer,"%d",wave.WaveFineTune());
+				m_finelabel.SetWindowText(buffer);
+			}
 			*pResult = 0;
 		}
 
@@ -441,61 +446,77 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnInsDecoctave() 
 		{
 			const int si=pSong->instSelected;
-			if ( pSong->_pInstrument[si]->waveTune>-37)
-				pSong->_pInstrument[si]->waveTune-=12;
-			else pSong->_pInstrument[si]->waveTune=-48;
-			UpdateNoteLabel();	
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+
+				if ( wave.WaveTune()>-37)
+					wave.WaveTune(wave.WaveTune()-12);
+				else wave.WaveTune(-48);
+				UpdateNoteLabel();
+			}
 		}
 
 		void CInstrumentEditor::OnInsDecnote() 
 		{
 			const int si=pSong->instSelected;
-			if ( pSong->_pInstrument[si]->waveTune>-47)
-				pSong->_pInstrument[si]->waveTune-=1;
-			else pSong->_pInstrument[si]->waveTune=-48;
-			UpdateNoteLabel();	
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				if ( wave.WaveTune()>-47)
+					wave.WaveTune(wave.WaveTune()-1);
+				else wave.WaveTune(-48);
+				UpdateNoteLabel();	
+			}
 		}
 
 		void CInstrumentEditor::OnInsIncnote() 
 		{
 			const int si=pSong->instSelected;
-			if ( pSong->_pInstrument[si]->waveTune < 71)
-				pSong->_pInstrument[si]->waveTune+=1;
-			else pSong->_pInstrument[si]->waveTune=71;
-			UpdateNoteLabel();	
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				if ( wave.WaveTune()<70)
+					wave.WaveTune(wave.WaveTune()+1);
+				else wave.WaveTune(71);
+				UpdateNoteLabel();	
+			}
 		}
 
 		void CInstrumentEditor::OnInsIncoctave() 
 		{
 			const int si=pSong->instSelected;
-			if ( pSong->_pInstrument[si]->waveTune < 60)
-				pSong->_pInstrument[si]->waveTune+=12;
-			else pSong->_pInstrument[si]->waveTune=71;
-			UpdateNoteLabel();	
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				if ( wave.WaveTune()<60)
+					wave.WaveTune(wave.WaveTune()+12);
+				else wave.WaveTune(71);
+				UpdateNoteLabel();	
+			}
 		}
 
 		void CInstrumentEditor::UpdateNoteLabel()
 		{
 			const int si = pSong->instSelected;
 			char buffer[64];
-			
-			const int octave= ((pSong->_pInstrument[si]->waveTune+48)/12);
-			switch ((pSong->_pInstrument[si]->waveTune+48)%12)
-			{
-			case 0:  sprintf(buffer,"C-%i",octave);break;
-			case 1:  sprintf(buffer,"C#%i",octave);break;
-			case 2:  sprintf(buffer,"D-%i",octave);break;
-			case 3:  sprintf(buffer,"D#%i",octave);break;
-			case 4:  sprintf(buffer,"E-%i",octave);break;
-			case 5:  sprintf(buffer,"F-%i",octave);break;
-			case 6:  sprintf(buffer,"F#%i",octave);break;
-			case 7:  sprintf(buffer,"G-%i",octave);break;
-			case 8:  sprintf(buffer,"G#%i",octave);break;
-			case 9:  sprintf(buffer,"A-%i",octave);break;
-			case 10:  sprintf(buffer,"A#%i",octave);break;
-			case 11:  sprintf(buffer,"B-%i",octave);break;
+			if (pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples[si];
+				
+				const int octave= ((wave.WaveTune()+48)/12);
+				switch ((wave.WaveTune()+48)%12)
+				{
+				case 0:  sprintf(buffer,"C-%i",octave);break;
+				case 1:  sprintf(buffer,"C#%i",octave);break;
+				case 2:  sprintf(buffer,"D-%i",octave);break;
+				case 3:  sprintf(buffer,"D#%i",octave);break;
+				case 4:  sprintf(buffer,"E-%i",octave);break;
+				case 5:  sprintf(buffer,"F-%i",octave);break;
+				case 6:  sprintf(buffer,"F#%i",octave);break;
+				case 7:  sprintf(buffer,"G-%i",octave);break;
+				case 8:  sprintf(buffer,"G#%i",octave);break;
+				case 9:  sprintf(buffer,"A-%i",octave);break;
+				case 10:  sprintf(buffer,"A#%i",octave);break;
+				case 11:  sprintf(buffer,"B-%i",octave);break;
+				}
+				m_notelabel.SetWindowText(buffer);
 			}
-			m_notelabel.SetWindowText(buffer);
 		}
 
 	}   // namespace

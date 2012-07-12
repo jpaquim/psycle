@@ -193,7 +193,7 @@ namespace psycle
 			for(int i(0) ; i < MAX_PATTERNS; ++i) ppPatternData[i] = NULL;
 			for(int i(0) ; i < MAX_MACHINES; ++i) _pMachine[i] = NULL;
 			CreateNewPattern(0);
-			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument;
+			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) _pInstrument[i] = new Instrument();
 			Reset();
 		}
 
@@ -398,7 +398,6 @@ namespace psycle
 			CExclusiveLock lock(&semaphore, 2, true);
 
 			Instrument * tmpins;
-
 			tmpins=_pInstrument[one];
 			_pInstrument[one]=_pInstrument[two];
 			_pInstrument[two]=tmpins;
@@ -406,11 +405,9 @@ namespace psycle
 			//this means that no new data is generated/deleted,and the information is just
 			//copied. If not, we would have had to define the operator=() function and take
 			//care of it.
-
-		}
-		void Song::DeleteLayer(int i)
-		{
-			_pInstrument[i]->DeleteLayer();
+			XMInstrument::WaveData wave = samples[one];
+			samples[one]=samples[two];
+			samples[two]=wave;
 		}
 
 		void Song::DeleteInstruments()
@@ -421,26 +418,25 @@ namespace psycle
 		void Song::DestroyAllInstruments()
 		{
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) zapObject(_pInstrument[i]);
+			samples.Clear();
 		}
 
 		void Song::DeleteInstrument(int i)
 		{
 			_pInstrument[i]->Delete();
+			if (samples.IsEnabled(i)){
+				samples[i].DeleteWaveData();
+			}
 		}
 
 		void Song::Reset()
 		{
 			// Cleaning pattern allocation info
-			for(int i(0) ; i < MAX_INSTRUMENTS; ++i) _pInstrument[i]->waveLength=0;
+			samples.Clear();
+			xminstruments.Clear();
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
-					zapObject(_pMachine[i]);
-			}
-			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				XMSampler::rInstrument(i).Init();
-			}
-			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				XMSampler::SampleData(i).Init();
+				zapObject(_pMachine[i]);
 			}
 
 			for(int i(0) ; i < MAX_PATTERNS; ++i)
@@ -814,20 +810,14 @@ namespace psycle
 		}
 		int Song::GetHighestInstrumentIndex()
 		{
-			int i;
-			for(i=MAX_INSTRUMENTS-1;i>=0;i--)
-			{
-				if(! this->_pInstrument[i]->Empty()) {
-					break;
-				}
-			}
-			return i;
+			return samples.size()-1;
 		}
 		int Song::GetNumInstruments()
 		{
 			int used=0;
-			for( int i=0; i<MAX_INSTRUMENTS;i++) {
-				if (!this->_pInstrument[i]->Empty()) {
+			int size = samples.size();
+			for( int i=0; i<size;i++) {
+				if (samples.IsEnabled(i)) {
 					used++;
 				}
 			}
@@ -974,21 +964,27 @@ namespace psycle
 			{
 				return 0;
 			}
-			DeleteLayer(instrument);
+			XMInstrument::WaveData wave;
+			unsigned int Datalen=0;
 			file.Read(&data,4);
 			if( data == file.FourCC("16SV")) bits = 16;
 			else if(data == file.FourCC("8SVX")) bits = 8;
 			file.Read(&hd,sizeof hd);
 			if(hd._id == file.FourCC("NAME"))
 			{
-				file.Read(_pInstrument[instrument]->waveName, 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
-				strncpy(_pInstrument[instrument]->_sName,str,31);
-				_pInstrument[instrument]->_sName[31]='\0';
+				char tmp[23];
+				file.Read(tmp, 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
+				tmp[22]='\0';
+				wave.WaveName(tmp);
+				if (instrument < PREV_WAV_INS){
+					strncpy(_pInstrument[instrument]->_sName,str,31);
+					_pInstrument[instrument]->_sName[31]='\0';
+				}
 				file.Read(&hd,sizeof hd);
 			}
 			if ( hd._id == file.FourCC("VHDR"))
 			{
-				unsigned int Datalen, ls, le;
+				unsigned int ls, le;
 				file.Read(&tmp,sizeof tmp);
 				Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
 				file.Read(&tmp,sizeof tmp);
@@ -1001,23 +997,20 @@ namespace psycle
 					ls >>= 1;
 					le >>= 1;
 				}
-				_pInstrument[instrument]->waveLength=Datalen;
 				if(ls != le)
 				{
-					_pInstrument[instrument]->waveLoopStart = ls;
-					_pInstrument[instrument]->waveLoopEnd = ls + le;
-					_pInstrument[instrument]->waveLoopType = true;
+					wave.WaveLoopStart(ls);
+					wave.WaveLoopEnd(ls + le);
+					wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 				}
 				file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
 				file.Read(&hd,sizeof hd);
 			}
 			if(hd._id == file.FourCC("BODY"))
 			{
-				short * csamples;
-				const unsigned int Datalen(_pInstrument[instrument]->waveLength);
-				_pInstrument[instrument]->waveStereo = false;
-				_pInstrument[instrument]->waveDataL = new signed short[Datalen];
-				csamples = _pInstrument[instrument]->waveDataL;
+				std::int16_t * csamples;
+				wave.AllocWaveData(Datalen,false);
+				csamples = const_cast<std::int16_t*>(wave.pWaveDataL());
 				if(bits == 16)
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
@@ -1037,6 +1030,12 @@ namespace psycle
 					}
 				}
 			}
+			if (instrument < PREV_WAV_INS) {
+				samples.SetSample(wave,instrument);
+			}
+			else {
+				wavprev.GetWave() = wave;
+			}
 			file.Close();
 			return 1;
 		}
@@ -1044,19 +1043,17 @@ namespace psycle
 		int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
-			DeleteLayer(iInstr);
-			_pInstrument[iInstr]->waveDataL = new signed short[iSamplesPerChan];
-			if(bStereo)
-			{	_pInstrument[iInstr]->waveDataR = new signed short[iSamplesPerChan];
-				_pInstrument[iInstr]->waveStereo = true;
-			} else {
-				_pInstrument[iInstr]->waveStereo = false;
+			if (iInstr < PREV_WAV_INS ) {
+				XMInstrument::WaveData wave;
+				wave.AllocWaveData(iSamplesPerChan,bStereo);
+				wave.WaveName(sName);
+				std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
+				_pInstrument[iInstr]->_sName[31]='\0';
+				samples.SetSample(wave,iInstr);
 			}
-			_pInstrument[iInstr]->waveLength = iSamplesPerChan;
-			std::strncpy(_pInstrument[iInstr]->waveName, sName, 31);
-			_pInstrument[iInstr]->waveName[31] = '\0';
-			std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
-			_pInstrument[iInstr]->_sName[31]='\0';
+			else {
+				wavprev.GetWave().AllocWaveData(iSamplesPerChan,bStereo);
+			}
 			return true;
 		}
 
@@ -1088,7 +1085,8 @@ namespace psycle
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-			short * sampL(_pInstrument[instrument]->waveDataL);
+			XMInstrument::WaveData& wave = (instrument < PREV_WAV_INS )?samples[instrument]:wavprev.GetWave();
+			std::int16_t * sampL = wave.pWaveDataL();
 
 			///\todo use template code for all this semi-repetitive code.
 
@@ -1125,7 +1123,7 @@ namespace psycle
 			// stereo
 			else
 			{
-				short *sampR(_pInstrument[instrument]->waveDataR);
+				std::int16_t * sampR = wave.pWaveDataR();
 				UINT8 smp8;
 				switch(bits)
 				{
@@ -1179,12 +1177,12 @@ namespace psycle
 						unsigned int le(0);
 						file.Read(static_cast<void*>(&ls), 4);
 						file.Read(static_cast<void*>(&le), 4);
-						_pInstrument[instrument]->waveLoopStart = ls;
-						_pInstrument[instrument]->waveLoopEnd = le;
+						wave.WaveLoopStart(ls);
+						wave.WaveLoopEnd(le);
 						// only for my bad sample collection
 						//if(!((ls <= 0) && (le >= Datalen - 1)))
 						{
-							_pInstrument[instrument]->waveLoopType = true;
+							wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 						}
 					}
 					file.Skip(9);
@@ -1462,7 +1460,7 @@ namespace psycle
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_INSTRUMENTS)
 							{
-								_pInstrument[index]->LoadFileChunk(pFile, version, fullopen);
+								_pInstrument[index]->LoadFileChunk(pFile, version, samples, index, fullopen);
 							}
 						}
 						pFile->Seek(begins + size);
@@ -1485,7 +1483,9 @@ namespace psycle
 							{
 								pFile->Read(idx);
 								filepos=pFile->GetPos();
-								int sizeIns = XMSampler::rInstrument(idx).Load(*pFile);
+								XMInstrument inst;
+								int sizeIns = inst.Load(*pFile);
+								xminstruments.SetInst(inst,idx);
 								if ((version&0xFFFF) > 0) {
 									//Version 0 doesn't write the chunk size correctly
 									//so we cannot correct it in case of error
@@ -1499,7 +1499,9 @@ namespace psycle
 							{
 								pFile->Read(idx);
 								filepos=pFile->GetPos();
-								int sizeSamp = XMSampler::SampleData(idx).Load(*pFile);
+								XMInstrument::WaveData wave;
+								int sizeSamp = wave.Load(*pFile);
+								samples.SetSample(wave, idx);
 								if ((version&0xFFFF) > 0) {
 									//Version 0 doesn't write the chunk size correctly
 									//so we cannot correct it in case of error
@@ -1610,6 +1612,7 @@ namespace psycle
 				::Sleep(1); ///< ???
 				// Instruments
 				pFile->Read(&instSelected, sizeof instSelected);
+				int pans[OLD_MAX_INSTRUMENTS];
 				for(int i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
 					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
@@ -1668,7 +1671,7 @@ namespace psycle
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->_pan, sizeof(_pInstrument[0]->_pan));
+					pFile->Read(&pans[i], sizeof(pans[0]));
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
@@ -1695,28 +1698,41 @@ namespace psycle
 					for (int w=0; w<OLD_MAX_WAVES; w++)
 					{
 						int wltemp;
-						pFile->Read(&wltemp, sizeof(_pInstrument[0]->waveLength));
+						pFile->Read(&wltemp, sizeof(wltemp));
 						if (wltemp > 0)
 						{
 							if ( w == 0 )
 							{
+								XMInstrument::WaveData wave;
 								short tmpFineTune;
-								_pInstrument[i]->waveLength=wltemp;
-								pFile->Read(&_pInstrument[i]->waveName, 32);
-								pFile->Read(&_pInstrument[i]->waveVolume, sizeof(_pInstrument[0]->waveVolume));
+								char waveName[33];
+								unsigned short volume = 0;
+								bool stereo =false;
+								bool doloop = false;
+								unsigned int loop;
+								wave.PanFactor(pans[i]/256.f);
+								pFile->Read(waveName, 32);
+								wave.WaveName(waveName);
+								pFile->Read(volume);
+								wave.WaveGlobVolume(volume*0.01f);
 								pFile->Read(&tmpFineTune, sizeof(short));
-								_pInstrument[i]->waveFinetune=(int)tmpFineTune;
-								pFile->Read(&_pInstrument[i]->waveLoopStart, sizeof(_pInstrument[0]->waveLoopStart));
-								pFile->Read(&_pInstrument[i]->waveLoopEnd, sizeof(_pInstrument[0]->waveLoopEnd));
-								pFile->Read(&_pInstrument[i]->waveLoopType, sizeof(_pInstrument[0]->waveLoopType));
-								pFile->Read(&_pInstrument[i]->waveStereo, sizeof(_pInstrument[0]->waveStereo));
-								_pInstrument[i]->waveDataL = new signed short[_pInstrument[i]->waveLength];
-								pFile->Read(_pInstrument[i]->waveDataL, _pInstrument[i]->waveLength*sizeof(short));
-								if (_pInstrument[i]->waveStereo)
+								wave.WaveFineTune(tmpFineTune);
+								pFile->Read(loop);
+								wave.WaveLoopStart(loop);
+								pFile->Read(loop);
+								wave.WaveLoopEnd(loop);
+								pFile->Read(doloop);
+								wave.WaveLoopType(doloop?XMInstrument::WaveData::LoopType::NORMAL:XMInstrument::WaveData::LoopType::DO_NOT);
+								pFile->Read(stereo);
+								wave.AllocWaveData(wltemp,stereo);
+								std::int16_t* data = wave.pWaveDataL();
+								pFile->Read(data, wltemp*sizeof(short));
+								if (stereo)
 								{
-									_pInstrument[i]->waveDataR = new signed short[_pInstrument[i]->waveLength];
-									pFile->Read(_pInstrument[i]->waveDataR, _pInstrument[i]->waveLength*sizeof(short));
+									data = wave.pWaveDataR();
+									pFile->Read(data, wltemp*sizeof(short));
 								}
+								samples.SetSample(wave, i);
 							}
 							else 
 							{
@@ -2223,7 +2239,7 @@ namespace psycle
 
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
-				if (!_pInstrument[i]->Empty())
+				if (samples.IsEnabled(i))
 				{
 					chunkcount++;
 				}
@@ -2231,7 +2247,7 @@ namespace psycle
 			// Instrument Data Save
 			int numInstruments = 0;	
 			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-				if(XMSampler::rInstrument(i).IsEnabled()){
+				if(xminstruments.IsEnabled(i)){
 					numInstruments++;
 				}
 			}
@@ -2504,7 +2520,7 @@ namespace psycle
 			*/
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
-				if (!_pInstrument[i]->Empty())
+				if (samples.IsEnabled(i))
 				{
 					pFile->Write("INSD",4);
 					version = CURRENT_FILE_VERSION_INSD;
@@ -2515,8 +2531,8 @@ namespace psycle
 
 					index = i; // index
 					pFile->Write(&index,sizeof(index));
-
-					_pInstrument[i]->SaveFileChunk(pFile);
+					///TODO: When saving both, INSD and EINS, the samples don't need to be saved twice
+					_pInstrument[i]->SaveFileChunk(pFile, samples, i);
 
 					size_t pos2 = pFile->GetPos(); 
 					size = (UINT)(pos2-pos-sizeof(size));
@@ -2552,16 +2568,16 @@ namespace psycle
 				pFile->Write(numInstruments);
 
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(XMSampler::rInstrument(i).IsEnabled()){
+					if(xminstruments.IsEnabled(i)){
 						pFile->Write(i);
-						XMSampler::rInstrument(i).Save(*pFile);
+						xminstruments[i].Save(*pFile);
 					}
 				}
 
 				// Sample Data Save
 				int numSamples = 0;	
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(XMSampler::SampleData(i).WaveLength() != 0){
+					if(samples.IsEnabled(i)){
 						numSamples++;
 					}
 				}
@@ -2569,9 +2585,10 @@ namespace psycle
 				pFile->Write(numSamples);
 
 				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
-					if(XMSampler::SampleData(i).WaveLength() != 0){
+					if(samples.IsEnabled(i)){
 						pFile->Write(i);
-						XMSampler::SampleData(i).Save(*pFile);
+						///TODO: When saving both, INSD and EINS, the wavedata doesn't need to be saved twice
+						samples[i].Save(*pFile);
 					}
 				}
 				size_t pos2 = pFile->GetPos(); 
@@ -2598,10 +2615,6 @@ namespace psycle
 			if(wavprev.IsEnabled())
 			{
 				wavprev.Work(pL, pR, amount);
-			}
-			if(waved.IsEnabled())
-			{
-				waved.Work(pL, pR, amount);
 			}
 #endif // !defined WINAMP_PLUGIN
 		}
@@ -2815,17 +2828,19 @@ namespace psycle
 
 			CExclusiveLock lock(&semaphore, 2, true);
 			// src has to be occupied and dst must be empty
-			if (!_pInstrument[src]->Empty() && !_pInstrument[dst]->Empty())
+			if (samples.IsEnabled(src) && samples.IsEnabled(dst))
 			{
 				return false;
 			}
-			if (!_pInstrument[dst]->Empty())
+			// also allow dst occupid and src empty. in that case, do it backwards
+			if (samples.IsEnabled(dst))
 			{
 				int temp = src;
 				src = dst;
 				dst = temp;
 			}
-			if (_pInstrument[src]->Empty())
+			//If this is true, both are empty
+			if (!samples.IsEnabled(src))
 			{
 				return false;
 			}
@@ -2853,7 +2868,7 @@ namespace psycle
 			int index = dst; // index
 			file.Write(&index,sizeof(index));
 
-			_pInstrument[src]->SaveFileChunk(&file);
+			_pInstrument[src]->SaveFileChunk(&file, samples, src);
 
 			size_t pos2 = file.GetPos(); 
 			size = (UINT)(pos2-pos-sizeof(size));
@@ -2891,7 +2906,7 @@ namespace psycle
 					if (index < MAX_INSTRUMENTS)
 					{
 						// we had better load it
-						_pInstrument[index]->LoadFileChunk(&file,version);
+						_pInstrument[index]->LoadFileChunk(&file,version, samples, index);
 					}
 					else
 					{

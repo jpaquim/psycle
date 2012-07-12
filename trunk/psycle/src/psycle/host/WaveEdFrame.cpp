@@ -156,17 +156,17 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::OnUpdatePlayButtons(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(!_pSong->waved.IsEnabled());
+			pCmdUI->Enable(!_pSong->wavprev.IsEnabled());
 		}
 
 		void CWaveEdFrame::OnUpdateStopButton(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(_pSong->waved.IsEnabled());
+			pCmdUI->Enable(_pSong->wavprev.IsEnabled());
 		}
 
 		void CWaveEdFrame::OnUpdateReleaseButton(CCmdUI *pCmdUI)
 		{
-			pCmdUI->Enable(_pSong->waved.IsEnabled() && _pSong->waved.IsLooping());
+			pCmdUI->Enable(_pSong->wavprev.IsEnabled() && _pSong->wavprev.IsLooping());
 		}
 
 		void CWaveEdFrame::OnUpdateSelection(CCmdUI *pCmdUI)
@@ -188,14 +188,15 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::AdjustStatusBar(int ins)
 		{
 			char buff[48];
-			int	wl=_pSong->_pInstrument[ins]->waveLength;
+			int	wl=0;
+			if (_pSong->samples.IsEnabled(ins)) { wl = _pSong->samples[ins].WaveLength();}
 			float wlInSecs = wl / float(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 			sprintf(buff, "Size: %u (%0.3f secs.)", wl, wlInSecs);
 			statusbar.SetPaneText(2, buff, true);
 
 			if (wl)
 			{
-				if (_pSong->_pInstrument[ins]->waveStereo) statusbar.SetPaneText(3, "Mode: Stereo", true);
+				if (_pSong->samples[ins].IsWaveStereo()) statusbar.SetPaneText(3, "Mode: Stereo", true);
 				else statusbar.SetPaneText(3, "Mode: Mono", true);
 			}
 			else statusbar.SetPaneText(3, "Mode: Empty", true);
@@ -226,22 +227,24 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::OnPlayFromStart() {PlayFrom(0);}
 		void CWaveEdFrame::OnRelease()
 		{
-			_pSong->waved.Release();
+			_pSong->wavprev.Release();
 		}
 		void CWaveEdFrame::OnStop()
 		{
-			_pSong->waved.Stop();
+			_pSong->wavprev.Stop();
 		}
 
 		void CWaveEdFrame::PlayFrom(unsigned long startPos)
 		{
-			if( startPos<0 || startPos >= _pSong->_pInstrument[wsInstrument]->waveLength )
+			std::uint32_t wl=0;
+			if (_pSong->samples.IsEnabled(wsInstrument)) { wl = _pSong->samples[wsInstrument].WaveLength();}
+			if( startPos >= wl )
 				return;
 
 			OnStop();
-
-			_pSong->waved.SetInstrument( _pSong->_pInstrument[wsInstrument] );
-			_pSong->waved.Play(startPos);
+			//todo: do this only on instrument change! else it copies data every time
+			_pSong->wavprev.GetWave() = _pSong->samples[wsInstrument];
+			_pSong->wavprev.Play(startPos);
 			wavview.SetTimer(ID_TIMER_WAVED_PLAYING, 33, 0);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
@@ -251,7 +254,8 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::OnFastForward()
 		{
-			unsigned long wl = _pSong->_pInstrument[wsInstrument]->waveLength;
+			std::uint32_t wl=0;
+			if (_pSong->samples.IsEnabled(wsInstrument)) { wl = _pSong->samples[wsInstrument].WaveLength();}
 			wavview.SetCursorPos( wl-1 );
 		}
 		void CWaveEdFrame::OnRewind()

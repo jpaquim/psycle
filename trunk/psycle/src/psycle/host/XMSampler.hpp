@@ -45,9 +45,11 @@ XMSampler::Channel::PerformFX().
 		PANNING				=	0x08,// Set Panning Position				(p)
 		PANNINGSLIDE		=	0x09,// PANNING SLIDE						(*t)
 		SET_CHANNEL_VOLUME	=	0x0A,// Set channel's volume				(p)
-		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx)	 (*tp)
+		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0Dy0) down (0D0x), File slide up(0dFy) down(0DyF)	 (*tp)
 		VOLUME				=	0x0C,// Set Volume
-		VOLUMESLIDE			=	0x0D,// Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx)	 (*t)
+		VOLUMESLIDE			=	0x0D,// Volume Slide up (0Dy0), File slide up(0DyF), Slide down (0D0y), Fine slide down(0DFy)	 (*t)
+		FINESLIDEUP         =   0x0F,//Part of the value that indicates it is a fine slide up
+		FINESLIDEDOWN       =   0xF0,//Part of the value that indicates it is a fine slide down
 		EXTENDED			=	0x0E,// Extend Command
 		MIDI_MACRO			=	0x0F,// Impulse Tracker MIDI macro			(p)
 		ARPEGGIO			=	0x10,//	Arpeggio							(*t)
@@ -63,6 +65,13 @@ XMSampler::Channel::PerformFX().
 		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};
+#define ISSLIDEUP(val) !((val)&0x0F)
+#define ISSLIDEDOWN(val) !((val)&0xF0)
+#define ISFINESLIDEUP(val) (((val)&0x0F)==CMD::FINESLIDEUP)
+#define ISFINESLIDEDOWN(val) (((val)&0xF0)==CMD::FINESLIDEDOWN)
+#define GETSLIDEUPVAL(val) (((val)&0xF0)>>4)
+#define GETSLIDEDOWNVAL(val) ((val)&0x0F)
+
 	struct CMD_E
 	{
 		enum Type {
@@ -538,20 +547,12 @@ XMSampler::Channel::PerformFX().
 		int CutOff() const { return m_CutOff; }
 		void CutOff(int co)
 		{
-/*			m_CutOff = co;	m_Filter._cutoff = co;
-			if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
-				m_Filter.Update();
-*/
 			m_CutOff = co; m_Filter.Cutoff(co);
 		}
 		
 		int Ressonance() const { return m_Ressonance; }
 		void Ressonance(int res)
 		{
-/*			m_Ressonance = res; m_Filter._q = res;
-			if ( m_Filter._type == dsp::F_NONE) { m_Filter._type =dsp::F_LOWPASS12; }
-			m_Filter.Update();
-*/
 			m_Ressonance = res; m_Filter.Ressonance(res);
 		}
 
@@ -742,7 +743,7 @@ XMSampler::Channel::PerformFX().
 		void InstrumentNo(const int no){m_InstrumentNo = no;}
 
 		XMSampler::Voice* ForegroundVoice(){ return m_pForegroundVoice; }
-		void ForegroundVoice(XMSampler::Voice* pVoice) { m_pForegroundVoice = pVoice; }
+		void ForegroundVoice(XMSampler::Voice* pVoice) {m_pForegroundVoice = pVoice;}
 
 		int Note() const { return m_Note;}
 		void Note(const int note)
@@ -976,7 +977,7 @@ XMSampler::Channel::PerformFX().
 	virtual char* GetName(void) { return _psName; }
 	virtual void SetSampleRate(int sr);
 	virtual bool NeedsAuxColumn() { return true; }
-	virtual const char* AuxColumnName(int idx) const { return rInstrument(idx).Name().c_str(); }
+	virtual const char* AuxColumnName(int idx) const;
 	virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENT;}
 
 	virtual bool Load(RiffFile* riffFile); // Old fileformat
@@ -1008,14 +1009,30 @@ XMSampler::Channel::PerformFX().
 		}
 		return NULL;
 	}
-	Voice* GetFreeVoice()
+	Voice* GetFreeVoice(int channelNum)
 	{
-		//\todo : this function needs to be upgraded. This is a pretty simple allocation function.
+		//First, see if there's a free voice
 		for (int voice = 0; voice < _numVoices; voice++)
 		{
 			if(!m_Voices[voice].IsPlaying()){
 				return  &(m_Voices[voice]);
 			}
+		}
+		//If there isn't, See if there are background voices in this channel
+		int background = -1;
+		for (int voice = 0; voice < _numVoices; voice++)
+		{
+			if(m_Voices[voice].IsBackground()){
+				background = voice;
+				if(m_Voices[voice].ChannelNum() == channelNum) {
+					return  &(m_Voices[voice]);
+				}
+			}
+		}
+		//If still there isn't, See if there are background voices on other channels.
+		//This could be improved in some sort of "older-first".
+		if (background != -1) {
+			return  &(m_Voices[background]);
 		}
 		return NULL;
 	}
@@ -1033,8 +1050,8 @@ XMSampler::Channel::PerformFX().
 	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];}///< Channel 
 	Voice& rVoice(const int index){ return m_Voices[index];}///< 
 
-	static XMInstrument & rInstrument(const int index){return m_Instruments[index];}
-	static XMInstrument::WaveData & SampleData(const int index){return m_rWaveLayer[index];}
+	XMInstrument & rInstrument(const int index) const;
+	XMInstrument::WaveData & SampleData(const int index) const;
 	
 	bool IsAmigaSlides() const { return m_bAmigaSlides;}
 	void IsAmigaSlides(const bool value){ m_bAmigaSlides = value;}
@@ -1102,9 +1119,6 @@ private:
 	int m_NextSampleTick;// The sample position of the next Tracker Tick
 	int _sampleCounter;	// Number of Samples since note start
 	std::vector<PatternEntry> multicmdMem;
-
-	static XMInstrument m_Instruments[MAX_INSTRUMENT+1];
-	static XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENT+1];
 };
 }
 }

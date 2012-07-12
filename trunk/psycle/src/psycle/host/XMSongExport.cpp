@@ -276,7 +276,7 @@ namespace host{
 		//insHeader.type = 0; Implicit by memset
 
 		//If no samples for this instrument, write it and exit.
-		if (song._pInstrument[instIdx]->Empty()) {
+		if (!song.samples.IsEnabled(instIdx)) {
 			insHeader.size = sizeof(insHeader);
 			//insHeader.samples = 0; Implicit by memset
 			Write(&insHeader,sizeof(insHeader));
@@ -306,7 +306,7 @@ namespace host{
 
 	void XMSongExport::SaveSampleHeader(Song& song, int instIdx)
 	{
-		Instrument& instr = *song._pInstrument[instIdx];
+		XMInstrument::WaveData& wave = song.samples[instIdx];
 
 		XMSAMPLESTRUCT stheader;
 		memset(&stheader,0,sizeof(stheader));
@@ -314,23 +314,24 @@ namespace host{
 		// stheader.res Implicitely set at zero by memset
 
 		//All samples are 16bits in Psycle.
-		stheader.samplen = instr.waveLength *2;
-		stheader.loopstart = instr.waveLoopStart * 2;
-		stheader.looplen = (instr.waveLoopEnd - instr.waveLoopStart) * 2;
-		stheader.vol = std::min(64,instr.waveVolume*64/100);
-		stheader.finetune = ((instr.waveFinetune/2)-28) & 0xFF ;
-		stheader.type = instr._loop?1:0 + 0x10; // 0x10 -> 16bits
-		stheader.pan = instr._pan &0xFF;
-		stheader.relnote = instr.waveTune + 29;
+		stheader.samplen = wave.WaveLength() *2;
+		stheader.loopstart = wave.WaveLoopStart() * 2;
+		stheader.looplen = (wave.WaveLoopEnd() - wave.WaveLoopStart()) * 2;
+		stheader.vol = std::min(64,wave.WaveVolume()*64);
+		stheader.finetune = ((wave.WaveFineTune()/2)-28) & 0xFF ;
+		stheader.type = ((wave.WaveLoopType()==XMInstrument::WaveData::LoopType::NORMAL)?1:0) + 0x10; // 0x10 -> 16bits
+		stheader.pan = int(wave.PanFactor()*256)&0xFF;
+		stheader.relnote = wave.WaveTune() + 29;
 
 		Write(&stheader,sizeof(stheader));
 	}
 	
 	void XMSongExport::SaveSampleData(Song& song,const int instrIdx)
 	{
+		XMInstrument::WaveData& wave = song.samples[instrIdx];
 		// pack sample data
-		short* samples = song._pInstrument[instrIdx]->waveDataL;
-		int length = song._pInstrument[instrIdx]->waveLength;
+		short* samples = wave.pWaveDataL();
+		int length = wave.WaveLength();
 		short prev=0;
 		for(int j=0;j<length;j++)
 		{

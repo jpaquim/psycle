@@ -3,6 +3,7 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "Instrument.hpp"
+#include "XMInstrument.hpp"
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/filter.hpp>
 #include "Zap.hpp"
@@ -13,17 +14,11 @@ namespace psycle
 		Instrument::Instrument()
 		{
 			// clear everythingout
-			waveDataL = NULL;
-			waveDataR = NULL;
-			waveLength = 0;
 			Delete();
 		}
 
 		Instrument::~Instrument()
 		{
-			zapArray(waveDataL);
-			zapArray(waveDataR);
-			waveLength = 0;
 		}
 
 		void Instrument::Delete()
@@ -52,67 +47,44 @@ namespace psycle
 			
 			_NNA = 0; // NNA set to Note Cut [Fast Release]
 			
-			_pan = 128;
 			_RPAN = false;
 			_RCUT = false;
 			_RRES = false;
 			
-			DeleteLayer();
-			
 			sprintf(_sName,"empty");
 		}
 
-		void Instrument::DeleteLayer(void)
-		{
-			sprintf(waveName,"empty");
-			
-			zapArray(waveDataL);
-			zapArray(waveDataR);
-			waveLength = 0;
-			waveStereo=false;
-			waveLoopStart=0;
-			waveLoopEnd=0;
-			waveLoopType=0;
-			waveVolume=100;
-			waveFinetune=0;
-			waveTune=0;
-		}
-
-		bool Instrument::Empty()
-		{
-			return !waveLength;
-		}
-
-		void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
+		void Instrument::LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen)
 		{
 			Delete();
 			
 			if ((version & 0xFF00) == 0)
 			{ // Version 0
 
-				pFile->Read(&_loop,sizeof(_loop));
-				pFile->Read(&_lines,sizeof(_lines));
-				pFile->Read(&_NNA,sizeof(_NNA));
+				pFile->Read(_loop);
+				pFile->Read(_lines);
+				pFile->Read(_NNA);
 
-				pFile->Read(&ENV_AT,sizeof(ENV_AT));
-				pFile->Read(&ENV_DT,sizeof(ENV_DT));
-				pFile->Read(&ENV_SL,sizeof(ENV_SL));
-				pFile->Read(&ENV_RT,sizeof(ENV_RT));
+				pFile->Read(ENV_AT);
+				pFile->Read(ENV_DT);
+				pFile->Read(ENV_SL);
+				pFile->Read(ENV_RT);
 				
-				pFile->Read(&ENV_F_AT,sizeof(ENV_F_AT));
-				pFile->Read(&ENV_F_DT,sizeof(ENV_F_DT));
-				pFile->Read(&ENV_F_SL,sizeof(ENV_F_SL));
-				pFile->Read(&ENV_F_RT,sizeof(ENV_F_RT));
+				pFile->Read(ENV_F_AT);
+				pFile->Read(ENV_F_DT);
+				pFile->Read(ENV_F_SL);
+				pFile->Read(ENV_F_RT);
 
-				pFile->Read(&ENV_F_CO,sizeof(ENV_F_CO));
-				pFile->Read(&ENV_F_RQ,sizeof(ENV_F_RQ));
-				pFile->Read(&ENV_F_EA,sizeof(ENV_F_EA));
-				pFile->Read(&ENV_F_TP,sizeof(ENV_F_TP));
+				pFile->Read(ENV_F_CO);
+				pFile->Read(ENV_F_RQ);
+				pFile->Read(ENV_F_EA);
+				pFile->Read(ENV_F_TP);
 
-				pFile->Read(&_pan,sizeof(_pan));
-				pFile->Read(&_RPAN,sizeof(_RPAN));
-				pFile->Read(&_RCUT,sizeof(_RCUT));
-				pFile->Read(&_RRES,sizeof(_RRES));
+				int pan=128;
+				pFile->Read(pan);
+				pFile->Read(_RPAN);
+				pFile->Read(_RCUT);
+				pFile->Read(_RRES);
 
 				pFile->ReadString(_sName,sizeof(_sName));
 
@@ -143,20 +115,28 @@ namespace psycle
 						}
 						else
 						{
+							XMInstrument::WaveData wave;
+							wave.PanFactor(pan/256.f);
 							UINT index;
 							pFile->Read(&index,sizeof(index));
-
-							pFile->Read(&waveLength,sizeof(waveLength));
-							pFile->Read(&waveVolume,sizeof(waveVolume));
-							pFile->Read(&waveLoopStart,sizeof(waveLoopStart));
-							pFile->Read(&waveLoopEnd,sizeof(waveLoopEnd));
+							pFile->Read(wave.m_WaveLength);
+							unsigned short waveVolume = 0;
+							pFile->Read(waveVolume);
+							wave.WaveGlobVolume(waveVolume*0.01f);
+							pFile->Read(wave.m_WaveLoopStart);
+							pFile->Read(wave.m_WaveLoopEnd);
 							
-							pFile->Read(&waveTune,sizeof(waveTune));
-							pFile->Read(&waveFinetune,sizeof(waveFinetune));
-							pFile->Read(&waveLoopType,sizeof(waveLoopType));
-							pFile->Read(&waveStereo,sizeof(waveStereo));
+							int tmp = 0;
+							pFile->Read(tmp);
+							wave.WaveTune(tmp);
+							pFile->Read(tmp);
+							wave.WaveFineTune(tmp);
+							bool doloop = false;;
+							pFile->Read(doloop);
+							wave.WaveLoopType(doloop?XMInstrument::WaveData::LoopType::NORMAL:XMInstrument::WaveData::LoopType::DO_NOT);
+							pFile->Read(wave.m_WaveStereo);
 							
-							pFile->ReadString(waveName,sizeof(waveName));
+							pFile->ReadString(wave.m_WaveName);
 							
 							pFile->Read(&size,sizeof(size));
 							byte* pData;
@@ -165,31 +145,32 @@ namespace psycle
 							{
 								pData = new byte[size+4];// +4 to avoid any attempt at buffer overflow by the code
 								pFile->Read(pData,size);
-								DataCompression::SoundDesquash(pData,&waveDataL);
+								DataCompression::SoundDesquash(pData,&wave.m_pWaveDataL);
 								zapArray(pData);
 							}
 							else
 							{
 								pFile->Skip(size);
-								waveDataL=new signed short[2];
+								wave.m_pWaveDataL=new signed short[2];
 							}
 
-							if (waveStereo)
+							if (wave.m_WaveStereo)
 							{
 								pFile->Read(&size,sizeof(size));
 								if ( fullopen )
 								{
 									pData = new byte[size+4]; // +4 to avoid any attempt at buffer overflow by the code
 									pFile->Read(pData,size);
-									DataCompression::SoundDesquash(pData,&waveDataR);
+									DataCompression::SoundDesquash(pData,&wave.m_pWaveDataR);
 									zapArray(pData);
 								}
 								else
 								{
 									pFile->Skip(size);
-									waveDataR =new signed short[2];
+									wave.m_pWaveDataR =new signed short[2];
 								}
 							}
+							samples.SetSample(wave, sampleIdx);
 						}
 					}
 					else
@@ -210,62 +191,68 @@ namespace psycle
 			}
 		}
 
-		void Instrument::SaveFileChunk(RiffFile* pFile)
+		void Instrument::SaveFileChunk(RiffFile* pFile,SampleList& samples, int sampleIdx)
 		{
-			pFile->Write(&_loop,sizeof(_loop));
-			pFile->Write(&_lines,sizeof(_lines));
-			pFile->Write(&_NNA,sizeof(_NNA));
+			pFile->Write(_loop);
+			pFile->Write(_lines);
+			pFile->Write(_NNA);
 
-			pFile->Write(&ENV_AT,sizeof(ENV_AT));
-			pFile->Write(&ENV_DT,sizeof(ENV_DT));
-			pFile->Write(&ENV_SL,sizeof(ENV_SL));
-			pFile->Write(&ENV_RT,sizeof(ENV_RT));
+			pFile->Write(ENV_AT);
+			pFile->Write(ENV_DT);
+			pFile->Write(ENV_SL);
+			pFile->Write(ENV_RT);
 			
-			pFile->Write(&ENV_F_AT,sizeof(ENV_F_AT));
-			pFile->Write(&ENV_F_DT,sizeof(ENV_F_DT));
-			pFile->Write(&ENV_F_SL,sizeof(ENV_F_SL));
-			pFile->Write(&ENV_F_RT,sizeof(ENV_F_RT));
+			pFile->Write(ENV_F_AT);
+			pFile->Write(ENV_F_DT);
+			pFile->Write(ENV_F_SL);
+			pFile->Write(ENV_F_RT);
 
-			pFile->Write(&ENV_F_CO,sizeof(ENV_F_CO));
-			pFile->Write(&ENV_F_RQ,sizeof(ENV_F_RQ));
-			pFile->Write(&ENV_F_EA,sizeof(ENV_F_EA));
-			pFile->Write(&ENV_F_TP,sizeof(ENV_F_TP));
+			pFile->Write(ENV_F_CO);
+			pFile->Write(ENV_F_RQ);
+			pFile->Write(ENV_F_EA);
+			pFile->Write(ENV_F_TP);
 
-			pFile->Write(&_pan,sizeof(_pan));
-			pFile->Write(&_RPAN,sizeof(_RPAN));
-			pFile->Write(&_RCUT,sizeof(_RCUT));
-			pFile->Write(&_RRES,sizeof(_RRES));
+			int numwaves = (samples.IsEnabled(sampleIdx))?1:0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
+			int pan = 128;
+			if (numwaves > 0 ) {
+				pan = samples[sampleIdx].PanFactor()*256;
+				pFile->Write(pan);
+			}
+			else { pFile->Write(pan); }
+
+			pFile->Write(_RPAN);
+			pFile->Write(_RCUT);
+			pFile->Write(_RRES);
 
 			pFile->Write(_sName,strlen(_sName)+1);
 
 			// now we have to write out the waves, but only if valid
 
-			int numwaves = (waveLength > 0)?1:0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
-
-			pFile->Write(&numwaves, sizeof(numwaves));
-			if (waveLength > 0)
+			pFile->Write(numwaves);
+			if (numwaves > 0)
 			{
+				XMInstrument::WaveData& wave = samples[sampleIdx];
 				byte * pData1(0);
 				byte * pData2(0);
 				UINT size1=0,size2=0;
-				size1 = DataCompression::SoundSquash(waveDataL,&pData1,waveLength);
-				if (waveStereo)
+				size1 = DataCompression::SoundSquash(wave.m_pWaveDataL,&pData1,wave.m_WaveLength);
+				if (wave.m_WaveStereo)
 				{
-					size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
+					size2 = DataCompression::SoundSquash(wave.m_pWaveDataR,&pData2,wave.m_WaveLength);
 				}
 
 				UINT index = 0;
 				pFile->Write("WAVE",4);
 				UINT version = CURRENT_FILE_VERSION_WAVE;
 				UINT size = sizeof(index)
-							+sizeof(waveLength)
-							+sizeof(waveVolume)
-							+sizeof(waveLoopStart)
-							+sizeof(waveLoopEnd)
-							+sizeof(waveTune)
-							+sizeof(waveFinetune)
-							+sizeof(waveStereo)
-							+(UINT)strlen(waveName)+1
+							+sizeof(wave.m_WaveLength)
+							+sizeof(unsigned short)
+							+sizeof(wave.m_WaveLoopStart)
+							+sizeof(wave.m_WaveLoopEnd)
+							+sizeof(int)
+							+sizeof(int)
+							+sizeof(wave.m_WaveStereo)
+							+wave.m_WaveName.length()+1
 							+size1
 							+size2;
 
@@ -273,22 +260,27 @@ namespace psycle
 				pFile->Write(&size,sizeof(size));
 				pFile->Write(&index,sizeof(index));
 
-				pFile->Write(&waveLength,sizeof(waveLength));
-				pFile->Write(&waveVolume,sizeof(waveVolume));
-				pFile->Write(&waveLoopStart,sizeof(waveLoopStart));
-				pFile->Write(&waveLoopEnd,sizeof(waveLoopEnd));
+				pFile->Write(wave.m_WaveLength);
+				unsigned short waveVolume = (unsigned short)(wave.WaveGlobVolume()*100.f);
 
-				pFile->Write(&waveTune,sizeof(waveTune));
-				pFile->Write(&waveFinetune,sizeof(waveFinetune));
-				pFile->Write(&waveLoopType,sizeof(waveLoopType));
-				pFile->Write(&waveStereo,sizeof(waveStereo));
+				pFile->Write(waveVolume);
+				pFile->Write(wave.m_WaveLoopStart);
+				pFile->Write(wave.m_WaveLoopEnd);
 
-				pFile->Write(waveName,strlen(waveName)+1);
+				int tmp = wave.WaveTune();
+				pFile->Write(tmp);
+				tmp = wave.WaveFineTune();
+				pFile->Write(tmp);
+				bool doloop = wave.m_WaveLoopType == XMInstrument::WaveData::LoopType::NORMAL;
+				pFile->Write(doloop);
+				pFile->Write(wave.m_WaveStereo);
+
+				pFile->WriteString(wave.m_WaveName);
 
 				pFile->Write(&size1,sizeof(size1));
 				pFile->Write(pData1,size1);
 				zapArray(pData1);
-				if (waveStereo)
+				if (wave.m_WaveStereo)
 				{
 					pFile->Write(&size2,sizeof(size2));
 					pFile->Write(pData2,size2);

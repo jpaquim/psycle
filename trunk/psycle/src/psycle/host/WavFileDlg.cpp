@@ -21,6 +21,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 
 		BEGIN_MESSAGE_MAP(CWavFileDlg, CFileDialog)
+			ON_WM_CLOSE()
 		END_MESSAGE_MAP()
 
 
@@ -29,8 +30,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			CString CurrExt=GetFileExt();
 			
 			CurrExt.MakeLower();
-			m_pSong->wavprev.SetInstrument(m_pSong->_pInstrument[PREV_WAV_INS]);
-			
+
 			m_pSong->wavprev.Stop();
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			if (CurrExt=="wav" && _lastFile != GetPathName())
@@ -54,6 +54,13 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 			}
 
 			CFileDialog::OnFileNameChange();
+		}
+		void CWavFileDlg::OnClose()
+		{
+			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
+			m_pSong->wavprev.Stop();
+			m_pSong->wavprev.GetWave().DeleteWaveData();
+			CFileDialog::OnClose();
 		}
 	}   // namespace
 }   // namespace

@@ -553,12 +553,6 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 bool mi::DescribeValue(char* txt,int const param, int const value)
 {
-/*				switch(value)
-	{
-		case 0:sprintf(txt,"off");				break;
-		case 1:sprintf(txt,"on");				break;
-	}
-*/
 	double freqinsecs;								// used for PRM_FREQ, it won't compile unless it's declared here
 
 	switch(param)
@@ -571,9 +565,9 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 							return true;
 
 		case PRM_PLINK:								if(value == LINK_ON) 
-								sprintf(txt, "On");
+								strcpy(txt, "On");
 							else 
-								sprintf(txt, "Off");
+								strcpy(txt, "Off");
 							return true;
 
 		case PRM_SIZE:
@@ -615,37 +609,37 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 		case PRM_OUTGAIN:				if(value!=0)
 								sprintf(txt, "%i%% (%.2f dB)", (int)value, 20 * std::log10(value / (float) GAIN_NORM));
 							else
-								sprintf(txt,"-inf.");
+								strcpy(txt,"-inf.");
 							return true;
 
 		case PRM_LIMITAMT:				if(Vals[PRM_THRESH] == 0)
-								sprintf(txt, "inf dB");
+								strcpy(txt, "inf dB");
 							else if(value!=0)
 								sprintf(txt, "%.2f dB", 20 * std::log10(value / (float) LIM_AMT_SCALER));
 							else
-								sprintf(txt,"0 dB");
+								strcpy(txt,"0 dB");
 							return true;
 
 		case PRM_THRESH:				if(value!=0)
 								sprintf(txt, "%.2f dB", 20 * std::log10(value / 32768.0));
 							else
-								sprintf(txt,"0 dB");
+								strcpy(txt,"0 dB");
 							return true;
 
 		case PRM_LFO1SHAPE:
 		case PRM_LFO2SHAPE:				switch(value)
 							{
-								case LFO_SINE:								sprintf(txt,"Sine");
+								case LFO_SINE:								strcpy(txt,"Sine");
 													break;
-								case LFO_SQUARE:				sprintf(txt,"Square");
+								case LFO_SQUARE:				strcpy(txt,"Square");
 													break;
-								case LFO_TRIANGLE:				sprintf(txt,"Triangle");
+								case LFO_TRIANGLE:				strcpy(txt,"Triangle");
 													break;
-								case LFO_SAWUP:								sprintf(txt,"Saw Up");
+								case LFO_SAWUP:								strcpy(txt,"Saw Up");
 													break;
-								case LFO_SAWDOWN:				sprintf(txt,"Saw Down");
+								case LFO_SAWDOWN:				strcpy(txt,"Saw Down");
 													break;
-								case LFO_RANDOM:				sprintf(txt,"Random");
+								case LFO_RANDOM:				strcpy(txt,"Random");
 													break;
 							}
 							return true;
@@ -660,23 +654,23 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 
 		case PRM_LFOSYNC:				switch(value)
 							{
-								case SYNC_NONE:								sprintf(txt, "<--LFO1  LFO2-->");
+								case SYNC_NONE:								strcpy(txt, "<--LFO1  LFO2-->");
 													return true;
-								case SYNC_L1:								sprintf(txt, "LFO1 Restarted.");
+								case SYNC_L1:								strcpy(txt, "LFO1 Restarted.");
 													return true;
-								case SYNC_L2:								sprintf(txt, "LFO2 Restarted.");
+								case SYNC_L2:								strcpy(txt, "LFO2 Restarted.");
 													return true;
 								case SYNC_BOTH1:
-								case SYNC_BOTH2:				sprintf(txt, "Both LFOs Restarted.");
+								case SYNC_BOTH2:				strcpy(txt, "Both LFOs Restarted.");
 													return true;
 							}
 							break;
 
 		case PRM_GRAINSYNC: switch(value)
 							{
-								case SYNC_NONE:								sprintf(txt, "");
+								case SYNC_NONE:								strcpy(txt, "");
 													return true;
-								case SYNC_GRAIN:				sprintf(txt, "Grain Restarted.");
+								case SYNC_GRAIN:				strcpy(txt, "Grain Restarted.");
 													return true;
 							}
 							break;

@@ -246,41 +246,41 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 						  else if(value>100)
 							  sprintf(txt, "%i%% (downwards)", value-100);
 						  else
-							  sprintf(txt, "0%%");
+							  strcpy(txt, "0%%");
 					  } else {
 						  if(value<100)
 							  sprintf(txt, "%i%% (outwards)", value-100);
 						  else if(value>100)
 							  sprintf(txt, "%i%% (inwards)", value-100);
 						  else
-							  sprintf(txt, "0%%");
+							  strcpy(txt, "0%%");
 					  }
 		return true;
 
 	case prm_gravmode: if(value == grav_updown)
 					   {
-						   sprintf(txt, "Up/Down");
+						   strcpy(txt, "Up/Down");
 					   } else if(value == grav_inout)
 					   {
-						   sprintf(txt, "In/Out");
+						   strcpy(txt, "In/Out");
 					   } else {
 						   return false;
 					   }
 		return true;
 
 	case prm_sync: if(value==1)
-					   sprintf(txt, "lfo restarted!");
+					   strcpy(txt, "lfo restarted!");
 				   else
-					   sprintf(txt, "");
+					   strcpy(txt, "");
 		return true;
 
 	case prm_waveform: switch(value)
 					   {
-						case lfo_sine: sprintf(txt, "sine");
+						case lfo_sine: strcpy(txt, "sine");
 							break;
-						case lfo_tri: sprintf(txt, "triangle");
+						case lfo_tri: strcpy(txt, "triangle");
 							break;
-						case lfo_square: sprintf(txt, "square");
+						case lfo_square: strcpy(txt, "square");
 							break;
 					   }
 		return true;

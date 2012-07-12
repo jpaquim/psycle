@@ -40,8 +40,8 @@ namespace psycle
 		class WaveData
 		{
 		public:
-			short* _pL;
-			short* _pR;
+			std::int16_t* _pL;
+			std::int16_t* _pR;
 			bool _stereo;
 			ULARGE_INTEGER _pos;
 			signed __int64 _speed;

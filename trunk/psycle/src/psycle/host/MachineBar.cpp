@@ -528,7 +528,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			int si = m_pSong->instSelected;
 			
 			//added by sampler
-			if ( m_pSong->_pInstrument[si]->waveLength != 0)
+			if ( m_pSong->samples.IsEnabled(si))
 			{
 				if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;					
 			}
@@ -566,13 +566,13 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 			}
 		}
-		if ( m_pSong->_pInstrument[PREV_WAV_INS]->waveLength > 0)
+		if ( m_pSong->wavprev.GetWave().WaveLength() > 0)
 		{
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			// Stopping wavepreview if not stopped.
 			m_pSong->wavprev.Stop();
 			//Delete it.
-			m_pSong->DeleteLayer(PREV_WAV_INS);
+			m_pSong->wavprev.GetWave().DeleteWaveData();
 		}
 		((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
@@ -593,22 +593,23 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			return;
 		}
 
-		if (m_pSong->_pInstrument[m_pSong->instSelected]->waveLength)
+		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
 		{
-			CFileDialog dlg(FALSE, "wav", m_pSong->_pInstrument[m_pSong->instSelected]->waveName, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+			XMInstrument::WaveData & wave = m_pSong->samples[m_pSong->instSelected];
+			CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			if (dlg.DoModal() == IDOK)
 			{
-				output.OpenForWrite(dlg.GetPathName(), 44100, 16, (m_pSong->_pInstrument[m_pSong->instSelected]->waveStereo) ? (2) : (1) );
-				if (m_pSong->_pInstrument[m_pSong->instSelected]->waveStereo)
+				output.OpenForWrite(dlg.GetPathName(), 44100, 16, (wave.IsWaveStereo()) ? 2 : 1 );
+				if (wave.IsWaveStereo())
 				{
-					for ( unsigned int c=0; c < m_pSong->_pInstrument[m_pSong->instSelected]->waveLength; c++)
+					for ( unsigned int c=0; c < wave.WaveLength(); c++)
 					{
-						output.WriteStereoSample( *(m_pSong->_pInstrument[m_pSong->instSelected]->waveDataL + c), *(m_pSong->_pInstrument[m_pSong->instSelected]->waveDataR + c) );
+						output.WriteStereoSample( *(wave.pWaveDataL() + c), *(wave.pWaveDataR() + c) );
 					}
 				}
 				else
 				{
-					output.WriteData(m_pSong->_pInstrument[m_pSong->instSelected]->waveDataL, m_pSong->_pInstrument[m_pSong->instSelected]->waveLength);
+					output.WriteData(wave.pWaveDataL(), wave.WaveLength());
 				}
 
 				output.Close();
@@ -673,13 +674,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 					break;
 				}
 			}
-		}
-		else if (tmac->_type == MACH_XMSAMPLER)
-		{
-			CPoint point(-1,-1);
-			m_pParentMain->ShowMachineGui(nmac,point);
-			((CButton*)GetDlgItem(IDC_WAVEBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-			return;
 		}
 		else {
 			found = true;
