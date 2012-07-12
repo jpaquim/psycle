@@ -119,10 +119,8 @@ namespace psycle { namespace host {
 			//refreshes wave display data
 			void RefreshDisplayData(bool bRefreshHeader=false);
 
-			//various dsp helpers
-			void Mix(short* lhs, short *rhs, int lhsSize, int rhsSize, float lhsVol=1.0f, float rhsVol=1.0f);
-			void Fade(short* data, int length, float startVol, float endVol);
-			void Amplify(short* data, int length, float vol);
+			short CalcBufferPeak(short* buffer, int length) const;
+
 			Song* _pSong;
 			
 			// Painting pens

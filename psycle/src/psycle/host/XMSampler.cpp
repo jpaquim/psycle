@@ -15,8 +15,6 @@ namespace psycle
 	namespace host
 	{
 		TCHAR* XMSampler::_psName = _T("Sampulse");
-		XMInstrument XMSampler::m_Instruments[MAX_INSTRUMENT+1];
-		XMInstrument::WaveData XMSampler::m_rWaveLayer[MAX_INSTRUMENT+1];
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -417,7 +415,12 @@ namespace psycle
 				CutOff(rChannel().Cutoff());
 //				Ressonance(rChannel().Ressonance());
 			}
-			else
+			else if (_inst.FilterEnvelope().IsEnabled())
+			{
+				FilterType(_inst.FilterType());
+				CutOff(127);
+			}
+			else 
 			{
 				CutOff(127);
 			}
@@ -455,7 +458,7 @@ namespace psycle
 			float left_output = 0.0f;
 			float right_output = 0.0f;
 
-			if (!m_pSampler->m_Instruments[this->InstrumentNum()].IsEnabled())
+			if (!m_pSampler->rInstrument(this->InstrumentNum()).IsEnabled())
 			{
 				IsPlaying(false);
 				return;
@@ -1243,6 +1246,7 @@ namespace psycle
 					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_LOWPASS12;
 					if ( voice ) 
 					{
+						//FIXME: For some reason, this is applying to undergound voices. See acidity_new/old first channel.
 						voice->FilterType(m_FilterType);
 						voice->CutOff(m_Cutoff);
 					}
@@ -1571,24 +1575,24 @@ namespace psycle
 			}
 			else m_GlobalVolSlideMem = speed;
 
-			if ( (speed & 0x0F) == 0 ){ // Slide up
-				speed = (speed & 0xF0)>>4;
+			if ( ISSLIDEUP(speed) ){ // Slide up
+				speed = GETSLIDEUPVAL(speed);
 				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
 				m_GlobalVolSlideSpeed = speed;
 				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
-			else if ( (speed & 0xF0) == 0 )  { // Slide down
-				speed = (speed & 0x0F);
+			else if ( ISSLIDEDOWN(speed))  { // Slide down
+				speed = GETSLIDEDOWNVAL(speed);
 				m_EffectFlags |= EffectFlag::GLOBALVOLSLIDE;
 				m_GlobalVolSlideSpeed = -speed;
 				if (speed == 0xF ) m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
-			else if ( (speed & 0x0F) == 0xF ) { // FineSlide up
-				m_GlobalVolSlideSpeed = ((speed & 0xF0)>>4);
+			else if ( ISFINESLIDEUP(speed) ) { // FineSlide up
+				m_GlobalVolSlideSpeed = GETSLIDEUPVAL(speed);
 				m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			} 
 			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide down
-				m_GlobalVolSlideSpeed = -(speed & 0x0F);
+				m_GlobalVolSlideSpeed = -GETSLIDEDOWNVAL(speed);
 				m_pSampler->SlideVolume(m_GlobalVolSlideSpeed);
 			}
 		}
@@ -1600,24 +1604,24 @@ namespace psycle
 			}
 			else m_PanSlideMem = speed;
 
-			if ( (speed & 0x0F) == 0 ){ // Slide Left
-				speed = (speed & 0xF0)>>4;
+			if ( ISSLIDEUP(speed) ){ // Slide Left
+				speed = GETSLIDEUPVAL(speed);
 				m_EffectFlags |= EffectFlag::PANSLIDE;
 				m_PanSlideSpeed = -speed/64.0f;
 				if (speed == 0xF ) PanningSlide();
 			}
-			else if ( (speed & 0xF0) == 0 )  { // Slide Right
-				speed = (speed & 0x0F);
+			else if ( ISSLIDEDOWN(speed) )  { // Slide Right
+				speed = GETSLIDEDOWNVAL(speed);
 				m_EffectFlags |= EffectFlag::PANSLIDE;
 				m_PanSlideSpeed = speed/64.0f;
 				if (speed == 0xF ) PanningSlide();
 			}
-			else if ( (speed & 0x0F) == 0xF ) { // FineSlide left
-				m_PanSlideSpeed = -((speed & 0xF0)>>4)/64.0f;
+			else if ( ISFINESLIDEUP(speed) ) { // FineSlide left
+				m_PanSlideSpeed = -(GETSLIDEUPVAL(speed))/64.0f;
 				PanningSlide();
 			} 
-			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide right
-				m_PanSlideSpeed = (speed & 0x0F)/64.0f;
+			else if ( ISFINESLIDEDOWN(speed) ) { // FineSlide right
+				m_PanSlideSpeed = GETSLIDEDOWNVAL(speed)/64.0f;
 				PanningSlide();
 			}
 		}
@@ -1629,24 +1633,24 @@ namespace psycle
 			}
 			else m_ChanVolSlideMem = speed;
 
-			if ( (speed & 0x0F) == 0 ){ // Slide up
-				speed = (speed & 0xF0)>>4;
+			if ( ISSLIDEUP(speed) ){ // Slide up
+				speed = GETSLIDEUPVAL(speed);
 				m_EffectFlags |= EffectFlag::CHANNELVOLSLIDE;
 				m_ChanVolSlideSpeed = speed/64.0f;
 				if (speed == 0xF ) ChannelVolumeSlide();
 			}
-			else if ( (speed & 0xF0) == 0 )  { // Slide down
-				speed = (speed & 0x0F);
+			else if ( ISSLIDEDOWN(speed) )  { // Slide down
+				speed = GETSLIDEDOWNVAL(speed);
 				m_EffectFlags |= EffectFlag::CHANNELVOLSLIDE;
 				m_ChanVolSlideSpeed = -speed/64.0f;
 				if (speed == 0xF ) ChannelVolumeSlide();
 			}
-			else if ( (speed & 0x0F) == 0xF ) { // FineSlide up
-				m_ChanVolSlideSpeed = ((speed & 0xF0)>>4)/64.0f;
+			else if ( ISFINESLIDEUP(speed) ) { // FineSlide up
+				m_ChanVolSlideSpeed = (GETSLIDEUPVAL(speed))/64.0f;
 				ChannelVolumeSlide();
 			} 
-			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide down
-				m_ChanVolSlideSpeed = -(speed & 0x0F)/64.0f;
+			else if ( ISFINESLIDEDOWN(speed)) { // FineSlide down
+				m_ChanVolSlideSpeed = -GETSLIDEDOWNVAL(speed)/64.0f;
 				ChannelVolumeSlide();
 			}
 		}
@@ -1693,8 +1697,8 @@ namespace psycle
 			}
 			else m_VolumeSlideMem = speed;
 
-			if ( (speed & 0x0F) == 0 ){ // Slide Up
-				speed = (speed & 0xF0)>>4;
+			if ( ISSLIDEUP(speed)){ // Slide Up
+				speed = GETSLIDEUPVAL(speed);
 				m_EffectFlags |= EffectFlag::VOLUMESLIDE;
 				if ( ForegroundVoice())
 				{
@@ -1702,8 +1706,8 @@ namespace psycle
 					if (speed == 0xF ) ForegroundVoice()->VolumeSlide();
 				}
 			}
-			else if ( (speed & 0xF0) == 0 )  { // Slide Down
-				speed = (speed & 0x0F);
+			else if ( ISSLIDEDOWN(speed) )  { // Slide Down
+				speed = GETSLIDEDOWNVAL(speed);
 				m_EffectFlags |= EffectFlag::VOLUMESLIDE;
 				if ( ForegroundVoice())
 				{
@@ -1711,17 +1715,17 @@ namespace psycle
 					if (speed == 0xF ) ForegroundVoice()->VolumeSlide();
 				}
 			}
-			else if ( (speed & 0x0F) == 0xF ) { // FineSlide Up
+			else if ( ISFINESLIDEUP(speed)) { // FineSlide Up
 				if ( ForegroundVoice())
 				{
-					ForegroundVoice()->m_VolumeSlideSpeed = (speed & 0xF0)>>3;
+					ForegroundVoice()->m_VolumeSlideSpeed = GETSLIDEUPVAL(speed)<<1;
 					ForegroundVoice()->VolumeSlide();
 				}
 			} 
-			else if ( (speed & 0xF0) == 0xF0 ) { // FineSlide Down
+			else if ( ISFINESLIDEDOWN(speed)) { // FineSlide Down
 				if ( ForegroundVoice())
 				{
-					ForegroundVoice()->m_VolumeSlideSpeed = -((speed & 0x0F)<<1);
+					ForegroundVoice()->m_VolumeSlideSpeed = -(GETSLIDEDOWNVAL(speed)<<1);
 					ForegroundVoice()->VolumeSlide();
 				}
 			}
@@ -2141,17 +2145,17 @@ namespace psycle
 					{
 					case XMInstrument::NewNoteAction::STOP:
 						currentVoice->NoteOffFast();
-						currentVoice->IsBackground(true);
 						break;
 					case XMInstrument::NewNoteAction::NOTEOFF:
 						currentVoice->NoteOff();
-						currentVoice->IsBackground(true);
 						break;
 					case XMInstrument::NewNoteAction::FADEOUT:
 						currentVoice->NoteFadeout();
-						currentVoice->IsBackground(true);
+						break;
+					default:
 						break;
 					}
+					currentVoice->IsBackground(true);
 				} else if(pData->_note == notecommands::release ){
 					currentVoice->NoteOff();
 				}
@@ -2202,7 +2206,7 @@ namespace psycle
 				else
 				{
 					if ( pData->_note != notecommands::empty ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
-					newVoice = GetFreeVoice();
+					newVoice = GetFreeVoice(thisChannel.Index());
 					if ( newVoice )
 					{
 						if(thisChannel.InstrumentNo() == 255)
@@ -2211,9 +2215,9 @@ namespace psycle
 							return;
 						}
 
-						XMInstrument & _inst = m_Instruments[thisChannel.InstrumentNo()];
+						XMInstrument & _inst = rInstrument(thisChannel.InstrumentNo());
 						int _layer = _inst.NoteToSample(pData->_note).second;
-						int twlength = m_rWaveLayer[_layer].WaveLength();
+						int twlength = SampleData(_layer).WaveLength();
 						if(twlength > 0)
 						{
 							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
@@ -2548,6 +2552,29 @@ namespace psycle
 			 outextraticks = trackerspeed - 24/lpb;
 			 return lpb;
 		}
+	
+		const char* XMSampler::AuxColumnName(int idx) const {
+			InstrumentList &m_Instruments = Global::song().xminstruments;
+			return m_Instruments.IsEnabled(idx)?m_Instruments[idx].Name().c_str():"";
+		}
+
+		XMInstrument & XMSampler::rInstrument(const int index) const {
+			InstrumentList &m_Instruments = Global::song().xminstruments;
+			if (index >= m_Instruments.size()) {
+				XMInstrument inst;
+				m_Instruments.SetInst(inst, index);
+			}
+			return m_Instruments[index];
+		}
+		XMInstrument::WaveData & XMSampler::SampleData(const int index) const {
+			SampleList &m_rWaveLayer = Global::song().samples;
+			if (index >= m_rWaveLayer.size()) {
+				XMInstrument::WaveData wave;
+				m_rWaveLayer.SetSample(wave, index);
+			}
+			return m_rWaveLayer[index];
+		}
+		
 
 		bool XMSampler::Load(RiffFile* riffFile)
 		{

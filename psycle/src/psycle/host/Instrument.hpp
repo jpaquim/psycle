@@ -8,6 +8,7 @@ namespace psycle
 {
 	namespace host
 	{
+		class SampleList;
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument
 		{
@@ -15,10 +16,8 @@ namespace psycle
 			Instrument();
 			virtual ~Instrument();
 			void Delete();
-			void DeleteLayer(void);
-			void LoadFileChunk(RiffFile* pFile,int version,bool fullopen=true);
-			void SaveFileChunk(RiffFile* pFile);
-			bool Empty();
+			void LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen=true);
+			void SaveFileChunk(RiffFile* pFile,SampleList& samples, int sampleIdx);
 
 			///\name Loop stuff
 			///\{
@@ -72,7 +71,6 @@ namespace psycle
 			int ENV_F_TP;	
 			///\}
 
-			int _pan;
 			bool _RPAN;
 			bool _RCUT;
 			bool _RRES;
@@ -81,6 +79,8 @@ namespace psycle
 
 			///\name wave stuff
 			///\{
+			/*
+			int _pan;
 			unsigned int waveLength;
 			unsigned short waveVolume;
 			unsigned int waveLoopStart;
@@ -91,9 +91,8 @@ namespace psycle
 			bool waveStereo;
 			char waveName[32];
 			signed short *waveDataL;
-			signed short *waveDataR;
+			signed short *waveDataR;*/
 			///\}
-
 		};
 	}
 }

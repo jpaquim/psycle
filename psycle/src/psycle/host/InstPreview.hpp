@@ -3,6 +3,7 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include "XMInstrument.hpp"
 namespace psycle {
 	namespace host {
 
@@ -28,9 +29,7 @@ namespace psycle {
 			bool IsLooping() {return m_bLoop;	}
 
 			//get Instrument to preview
-			Instrument* GetInstrument()						{ return m_pInstrument; }
-			//set Instrument to preview
-			void		SetInstrument(Instrument *pInstrument) { m_pInstrument=pInstrument; }
+			XMInstrument::WaveData& GetWave() { return m_pwave; }
 
 			//get playback volume
 			float	GetVolume()			{ return m_vol; }
@@ -40,7 +39,7 @@ namespace psycle {
 			unsigned long GetPosition()		{return m_pos;}
 		private:
 			//pointer to the instrument associated with the preview
-			Instrument* m_pInstrument;
+			XMInstrument::WaveData m_pwave;
 			//current playback position in samples
 			unsigned long m_pos;
 			//whether we're currently playing

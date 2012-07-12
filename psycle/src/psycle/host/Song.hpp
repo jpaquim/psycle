@@ -5,6 +5,7 @@
 #include "Global.hpp"
 #include "FileIO.hpp"
 #include "Instrument.hpp"
+#include "XMInstrument.hpp"
 #include "ExclusiveLock.hpp"
 #include "cpu_time_clock.hpp"
 #if !defined WINAMP_PLUGIN
@@ -71,6 +72,8 @@ namespace psycle
 			int instSelected;
 			///
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
+			SampleList samples;
+			InstrumentList xminstruments;
 			///\}
 			/// The index of the selected MIDI program for note entering
 			/// \todo This is a gui thing... should not be here.
@@ -198,10 +201,7 @@ namespace psycle
 			void DeleteInstrument(int i);
 			/// deletes (resets) the instrument and deletes (and resets) each sample/layer that it uses. (all instruments)
 			void DeleteInstruments();
-			// Removes the sample/layer of the instrument "instrument"
-			void DeleteLayer(int instrument);
 			/// destroy all instruments in this song.
-			/// \todo ZapObject ??? What does this function really do?
 			void DestroyAllInstruments();
 			///  loads a file into this song object.
 			///\param fullopen  used in context of the winamp/foobar player plugins, where it allows to get the info of the file, without needing to open it completely.
@@ -217,11 +217,9 @@ namespace psycle
 			///\{
 		public:
 			//todo these ought to be dynamically allocated
-			/// Wave preview.
+			/// Wave preview/wave editor playback.
 #if !defined WINAMP_PLUGIN
 			InstPreview wavprev;
-			/// Wave editor playback.
-			InstPreview waved;
 #else
 			int filesize;
 #endif // WINAMP_PLUGIN

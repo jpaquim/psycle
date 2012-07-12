@@ -519,11 +519,11 @@ namespace host{
 								break;
 							case XMCMD_E::E_FINE_VOLUME_UP:
 								e._cmd = XMSampler::CMD::VOLUMESLIDE;
-								e._parameter = 0xf0 + (param & 0xf);
+								e._parameter = 0x0f + ((param & 0xf)<<4);
 								break;
 							case XMCMD_E::E_FINE_VOLUME_DOWN:
 								e._cmd = XMSampler::CMD::VOLUMESLIDE;
-								e._parameter = 0x0f + ((param & 0xf)<<4);
+								e._parameter = 0xf0 + (param & 0xf);
 								break;
 							case XMCMD_E::E_DELAYED_NOTECUT:
 								e._cmd = XMSampler::CMD::EXTENDED;
@@ -875,9 +875,7 @@ namespace host{
 		if ( iLen > 0 ) // Sounds Stupid, but it isn't. Some modules save sample header when there is no sample.
 		{
 			_wave.AllocWaveData(b16Bit?iLen / 2:iLen,false);
-			_wave.WaveLength(b16Bit?iLen / 2:iLen);
 		}
-		else _wave.WaveLength(0);
 		_wave.PanEnabled(true);
 		_wave.PanFactor(iPanning/255.0f);
 //		XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
@@ -1344,11 +1342,11 @@ namespace host{
 							break;
 						case XMCMD_E::E_FINE_VOLUME_UP:
 							e._cmd = XMSampler::CMD::VOLUMESLIDE;
-							e._parameter = 0xf0 + (param & 0xf);
+							e._parameter = 0x0f + ((param & 0xf)<<4);
 							break;
 						case XMCMD_E::E_FINE_VOLUME_DOWN:
 							e._cmd = XMSampler::CMD::VOLUMESLIDE;
-							e._parameter = 0x0f + ((param & 0xf)<<4);
+							e._parameter = 0xf0 + (param & 0xf);
 							break;
 						case XMCMD_E::E_DELAYED_NOTECUT:
 							e._cmd = XMSampler::CMD::EXTENDED;
@@ -1466,9 +1464,7 @@ namespace host{
 		if ( smpLen[iInstrIdx] > 0 )
 		{
 			_wave.AllocWaveData(smpLen[iInstrIdx],false);
-			_wave.WaveLength(smpLen[iInstrIdx]);
 		}
-		else _wave.WaveLength(0);
 
 		if(bLoop)
 		{

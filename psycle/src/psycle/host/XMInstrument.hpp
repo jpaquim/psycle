@@ -51,6 +51,7 @@ namespace psycle { namespace host {
 //  XMInstrument::WaveData Class declaration
 
 		class WaveData {
+			friend class Instrument;
 		public:
 			static const std::uint32_t WAVEVERSION = 0x00000001;
 			/// Wave Loop Types
@@ -76,6 +77,8 @@ namespace psycle { namespace host {
 			/// Constructor
 			WaveData() : m_pWaveDataL(0), m_pWaveDataR(0),m_WaveLength(0) {Init();}
 			WaveData(const WaveData& data) {
+				m_pWaveDataL=NULL;
+				m_pWaveDataR=NULL;
 				operator=(data);
 			}
 			/// Destructor
@@ -88,6 +91,15 @@ namespace psycle { namespace host {
 			void DeleteWaveData();
 
 			void AllocWaveData(const int iLen,const bool bStereo);
+			void ConvertToMono();
+			void ConvertToStereo();
+			void InsertAt(std::uint32_t insertPos, const WaveData& wave);
+			void ModifyAt(std::uint32_t modifyPos, const WaveData& wave);
+			void DeleteAt(std::uint32_t deletePos, std::uint32_t length);
+			void Mix(const WaveData& waveIn, float buf1Vol=1.0f, float buf2Vol=1.0f);
+			void Fade(int fadeStart, int fadeEnd, float startVol, float endVol);
+			void Amplify(int ampStart, int ampEnd, float vol);
+			void Silence(int silStart, int silEnd);
 
 			int Load(RiffFile& riffFile);
 			void Save(RiffFile& riffFile);
@@ -133,7 +145,6 @@ namespace psycle { namespace host {
 			void WaveName(const std::string& newname){ m_WaveName = newname;}
 
 			std::uint32_t WaveLength() const { return m_WaveLength;}
-			void WaveLength (const std::uint32_t value){m_WaveLength = value;}
 
 			float WaveGlobVolume()const{ return m_WaveGlobVolume;}
 			void WaveGlobVolume(const float value){m_WaveGlobVolume = value;}
@@ -170,7 +181,6 @@ namespace psycle { namespace host {
 			void WaveSampleRate(const std::uint32_t value);
 
 			bool IsWaveStereo() const { return m_WaveStereo;}
-			void IsWaveStereo(const bool value){ m_WaveStereo = value;}
 
 			std::uint8_t VibratoType() const {return m_VibratoType;}
 			std::uint8_t VibratoSpeed() const {return m_VibratoSpeed;}
@@ -184,8 +194,8 @@ namespace psycle { namespace host {
 
 			bool IsAutoVibrato() const {return m_VibratoDepth && m_VibratoSpeed;}
 
-			const std::int16_t * pWaveDataL() const { return m_pWaveDataL;}
-			const std::int16_t * pWaveDataR() const { return m_pWaveDataR;}
+			std::int16_t * pWaveDataL() const { return m_pWaveDataL;}
+			std::int16_t * pWaveDataR() const { return m_pWaveDataR;}
 			
 			std::int16_t WaveDataL(const std::int32_t index) const { return *(m_pWaveDataL + index); }
 			std::int16_t WaveDataR(const std::int32_t index) const { return *(m_pWaveDataR + index); }
@@ -570,14 +580,20 @@ namespace psycle { namespace host {
 	public:
 		SampleList(){m_waves.resize(0);}
 		virtual ~SampleList(){};
-		inline unsigned int AddSample(XMInstrument::WaveData &wave)
+		inline unsigned int AddSample(const XMInstrument::WaveData &wave)
 		{
 			m_waves.push_back(wave);
 			return size()-1;
 		}
-		inline void SetSample(XMInstrument::WaveData &wave,int pos)
+		inline void SetSample(const XMInstrument::WaveData &wave,int pos)
 		{
-			if (pos>=m_waves.size()) { m_waves.resize(pos+1); }
+			if (pos>=m_waves.size()) {
+				int val = m_waves.size();
+				m_waves.resize(pos+1);
+				for (int i=val;i<=pos;i++) {
+					m_waves[i].Init();
+				}
+			}
 			m_waves[pos]=wave;
 		}
 		inline XMInstrument::WaveData &operator[](int pos)
@@ -585,7 +601,18 @@ namespace psycle { namespace host {
 			ASSERT(pos<m_waves.size());
 			return m_waves[pos];
 		}
+		inline void RemoveAt(int pos)
+		{
+			if (pos+1 == m_waves.size()) {
+				m_waves.pop_back();
+			}
+			else if (pos<m_waves.size()) {
+				m_waves[pos].Init();
+			}
+		}
+		inline bool IsEnabled(int pos) { return pos < m_waves.size() && m_waves[pos].WaveLength() > 0; }
 		unsigned int size() const { return static_cast<unsigned int>(m_waves.size()); }
+		void Clear() { m_waves.clear(); }
 	private:
 		std::vector<XMInstrument::WaveData> m_waves;
 	};
@@ -595,21 +622,38 @@ namespace psycle { namespace host {
 	public:
 		InstrumentList(){m_inst.resize(0);}
 		virtual ~InstrumentList(){};
-		inline unsigned int AddIns(XMInstrument &ins)
+		inline unsigned int AddIns(const XMInstrument &ins)
 		{
 			m_inst.push_back(ins);
 			return size()-1;
 		}
-		inline void SetInst(XMInstrument &inst,int pos)
+		inline void SetInst(const XMInstrument &inst,int pos)
 		{
-			if (pos>=m_inst.size()) { m_inst.resize(pos+1); }
+			if (pos>=m_inst.size()) {
+				int val = m_inst.size();
+				m_inst.resize(pos+1);
+				for (int i=val;i<pos;i++) {
+					m_inst[i].Init();
+				}
+			}
 			m_inst[pos]=inst;
 		}
 		inline XMInstrument &operator[](int pos){
 			ASSERT(pos<m_inst.size());
 			return m_inst[pos];
 		}
+		inline void RemoveAt(int pos)
+		{
+			if (pos+1 == m_inst.size()) {
+				m_inst.pop_back();
+			}
+			else if (pos<m_inst.size()) {
+				m_inst[pos].Init();
+			}
+		}
+		inline bool IsEnabled(int pos) { return pos < m_inst.size() && m_inst[pos].IsEnabled(); }
 		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
+		void Clear() { m_inst.clear(); }
 	private:
 		std::vector<XMInstrument> m_inst;
 	};

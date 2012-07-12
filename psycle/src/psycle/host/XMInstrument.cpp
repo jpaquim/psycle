@@ -8,6 +8,7 @@
 #include "XMInstrument.hpp"
 #include <psycle/helpers/filter.hpp>
 #include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/math/clip.hpp>
 #include "FileIO.hpp"
 #include <cassert>
 namespace psycle
@@ -65,6 +66,185 @@ namespace psycle
 			m_WaveLength  = iLen;
 		}
 
+		void XMInstrument::WaveData::ConvertToMono()
+		{
+			if (!m_WaveStereo) return;
+			for (std::uint32_t c = 0; c < m_WaveLength; c++)
+			{
+				m_pWaveDataL[c] = ( m_pWaveDataL[c] + m_pWaveDataR[c] ) / 2;
+			}
+			m_WaveStereo = false;
+			delete[] m_pWaveDataR;
+			m_pWaveDataR=0;
+		}
+
+		void XMInstrument::WaveData::ConvertToStereo()
+		{
+			if (m_WaveStereo) return;
+			m_pWaveDataR = new short[m_WaveLength];
+			for (std::uint32_t c = 0; c < m_WaveLength; c++)
+			{
+				m_pWaveDataR[c] = m_pWaveDataL[c];
+			}
+			m_WaveStereo = true;
+		}
+
+		void XMInstrument::WaveData::InsertAt(std::uint32_t insertPos, const WaveData& wave)
+		{
+			std::int16_t* oldLeft = m_pWaveDataL;
+			std::int16_t* oldRight = NULL;
+			m_pWaveDataL = new std::int16_t[m_WaveLength+wave.WaveLength()];
+
+			std::memcpy(m_pWaveDataL, oldLeft, insertPos*sizeof(short));
+			std::memcpy(&m_pWaveDataL[insertPos], wave.pWaveDataL(), wave.WaveLength()*sizeof(short));
+			std::memcpy(&m_pWaveDataL[insertPos+wave.WaveLength()], 
+				&oldLeft[insertPos], 
+				(m_WaveLength - insertPos)*sizeof(short));
+
+			if(m_WaveStereo)
+			{
+				oldRight = m_pWaveDataR;
+				m_pWaveDataR = new std::int16_t[m_WaveLength+wave.WaveLength()];
+				std::memcpy(m_pWaveDataR, oldRight, insertPos*sizeof(short));
+				std::memcpy(&m_pWaveDataR[insertPos], wave.pWaveDataR(), wave.WaveLength()*sizeof(short));
+				std::memcpy(&m_pWaveDataR[insertPos+wave.WaveLength()], 
+					&oldRight[insertPos], 
+					(m_WaveLength - insertPos)*sizeof(short));
+			}
+			m_WaveLength += wave.WaveLength();
+			delete[] oldLeft;
+			delete[] oldRight;
+		}
+
+		void XMInstrument::WaveData::ModifyAt(std::uint32_t modifyPos, const WaveData& wave)
+		{
+			std::memcpy(&m_pWaveDataL[modifyPos], wave.pWaveDataL(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
+			if(m_WaveStereo)
+			{
+				std::memcpy(&m_pWaveDataR[modifyPos], wave.pWaveDataR(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
+			}
+		}
+		void XMInstrument::WaveData::DeleteAt(std::uint32_t deletePos, std::uint32_t length)
+		{
+			std::int16_t* oldLeft = m_pWaveDataL;
+			std::int16_t* oldRight = NULL;
+			m_pWaveDataL = new std::int16_t[m_WaveLength-length];
+
+			std::memcpy(m_pWaveDataL, oldLeft, deletePos*sizeof(short));
+			std::memcpy(&m_pWaveDataL[deletePos], &oldLeft[deletePos+length], 
+				(m_WaveLength - deletePos - length)*sizeof(short));
+
+			if(m_WaveStereo)
+			{
+				oldRight = m_pWaveDataR;
+				m_pWaveDataR = new std::int16_t[m_WaveLength-length];
+				std::memcpy(m_pWaveDataR, oldRight, deletePos*sizeof(short));
+				std::memcpy(&m_pWaveDataR[deletePos], &oldRight[deletePos+length], 
+					(m_WaveLength - deletePos - length)*sizeof(short));
+			}
+			m_WaveLength -= length;
+			delete[] oldLeft;
+			delete[] oldRight;
+		}
+		void XMInstrument::WaveData::Mix(const WaveData& waveIn, float buf1Vol, float buf2Vol)
+		{
+			if (m_WaveLength<=0 || waveIn.WaveLength()<0) return;
+			std::int16_t* oldLeft = m_pWaveDataL;
+			std::int16_t* oldRight = m_pWaveDataR;
+			bool increased=false;
+
+			if (waveIn.WaveLength() > m_WaveLength) {
+				m_pWaveDataL = new std::int16_t[waveIn.WaveLength()];
+				std::memcpy(m_pWaveDataL,oldLeft,m_WaveLength);
+				if(m_WaveStereo)
+				{
+					m_pWaveDataR = new std::int16_t[waveIn.WaveLength()];
+					std::memcpy(m_pWaveDataR,oldRight,m_WaveLength);
+				}
+				m_WaveLength = waveIn.WaveLength();
+				increased=true;
+			}
+
+			if (m_WaveStereo) {
+				for( int i(0); i<waveIn.WaveLength(); i++ )
+				{
+					m_pWaveDataL[i] = m_pWaveDataL[i] * buf1Vol + waveIn.pWaveDataL()[i] * buf2Vol;
+					m_pWaveDataR[i] = m_pWaveDataR[i] * buf1Vol + waveIn.pWaveDataR()[i] * buf2Vol;
+				}
+				for( int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
+				{
+					m_pWaveDataL[i] *= buf1Vol;
+					m_pWaveDataR[i] *= buf1Vol;
+				}
+			}
+			else {
+				for( int i(0); i<waveIn.WaveLength(); i++ )
+				{
+					m_pWaveDataL[i] = m_pWaveDataL[i] * buf1Vol + waveIn.pWaveDataL()[i] * buf2Vol;
+				}
+				for( int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
+				{
+					m_pWaveDataL[i] *= buf1Vol;
+				}
+			}
+			if (increased) {
+				delete[] oldLeft;
+				delete[] oldRight;
+			}
+		}
+		void XMInstrument::WaveData::Silence(int silStart, int silEnd) 
+		{
+			if(silStart<0) silStart=0;
+			if(silEnd<=0) silEnd=m_WaveLength;
+			if(silStart>=m_WaveLength||silEnd>m_WaveLength||silStart==silEnd) return;
+			std::memset(&m_pWaveDataL[silStart], 0, silEnd-silStart);
+			if (m_WaveStereo) {
+				std::memset(&m_pWaveDataR[silStart], 0, silEnd-silStart);
+			}
+		}
+
+		//Fade - fades an audio buffer from one volume level to another.
+		void XMInstrument::WaveData::Fade(int fadeStart, int fadeEnd, float startVol, float endVol)
+		{
+			if(fadeStart<0) fadeStart=0;
+			if(fadeEnd<=0) fadeEnd=m_WaveLength;
+			if(fadeStart>=m_WaveLength||fadeEnd>m_WaveLength||fadeStart==fadeEnd) return;
+
+			float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
+			if (m_WaveStereo) {
+				for(int i(fadeStart);i<fadeEnd;++i) {
+					m_pWaveDataL[i] *= startVol+i*slope;
+					m_pWaveDataR[i] *= startVol+i*slope;
+				}
+			}
+			else {
+				for(int i(fadeStart);i<fadeEnd;++i) {
+					m_pWaveDataL[i] *= startVol+i*slope;
+				}
+			}
+		}
+
+		//Amplify - multiplies an audio buffer by a given factor.  buffer can be inverted by passing
+		//	a negative value for vol.
+		void XMInstrument::WaveData::Amplify(int ampStart, int ampEnd, float vol)
+		{
+			if(ampStart<0) ampStart=0;
+			if(ampEnd<=0) ampEnd=m_WaveLength;
+			if(ampStart>=m_WaveLength||ampEnd>m_WaveLength||ampStart==ampEnd) return;
+
+			if (m_WaveStereo) {
+				for(int i(ampStart);i<ampEnd;++i) {
+					m_pWaveDataL[i] = math::clipped_lrint<std::int16_t>(m_pWaveDataL[i] * vol);
+					m_pWaveDataR[i] = math::clipped_lrint<std::int16_t>(m_pWaveDataR[i] * vol);
+				}
+			}
+			else { 
+				for(int i(ampStart);i<ampEnd;++i) {
+					m_pWaveDataL[i] = math::clipped_lrint<std::int16_t>(m_pWaveDataL[i] * vol);
+				}
+			}
+		}
+
 		void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
 			//todo: Readapt Tune and FineTune, respect of the new SampleRate.
 			m_WaveSampleRate = value;
@@ -84,6 +264,7 @@ namespace psycle
 			riffFile.Read(filevers);
 			if (filevers == 0 || filevers > 0x1F) {
 				riffFile.Seek(riffFile.GetPos()-sizeof(filevers));
+				filevers = 0;
 			}
 
 			CT2A _wave_name("");
@@ -96,11 +277,11 @@ namespace psycle
 
 			riffFile.Read(m_WaveLoopStart);
 			riffFile.Read(m_WaveLoopEnd);
-			riffFile.Read(&m_WaveLoopType, sizeof(char));
+			riffFile.Read(&m_WaveLoopType, sizeof(int));//sizeof(char));
 
 			riffFile.Read(m_WaveSusLoopStart);
 			riffFile.Read(m_WaveSusLoopEnd);
-			riffFile.Read(&m_WaveSusLoopType, sizeof(char));
+			riffFile.Read(&m_WaveSusLoopType, sizeof(int));//sizeof(char));
 
 			if(filevers == 1) {
 				riffFile.Read(m_WaveSampleRate);

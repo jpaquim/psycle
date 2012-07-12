@@ -162,7 +162,7 @@ namespace psycle
 
 			if ( data._note < notecommands::release )	// Handle Note On.
 			{
-				if ( Global::song()._pInstrument[data._inst]->waveLength == 0 ) return; // if no wave, return.
+				if ( !Global::song().samples.IsEnabled(data._inst) ) return; // if no wave, return.
 
 				for (voice=0; voice<_numVoices; voice++)	// Find a voice to apply the new note
 				{
@@ -263,76 +263,60 @@ namespace psycle
 
 		//  All this mess should be really changed with classes using the "operator=" to "copy" values.
 
-			int twlength = Global::song()._pInstrument[pEntry->_inst]->waveLength;
+			int twlength = 0;
+			if (Global::song().samples.IsEnabled(pEntry->_inst)) twlength = Global::song().samples[pEntry->_inst].WaveLength();
+			Instrument * pins = Global::song()._pInstrument[pEntry->_inst];
 			
 			if (pEntry->_note < notecommands::release && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry->_inst;
+				XMInstrument::WaveData& wave = Global::song().samples[pVoice->_instrument];
 				
 				// Init filter synthesizer
 				//
 				pVoice->_filter.Init(Global::player().SampleRate());
 
-				if (Global::song()._pInstrument[pVoice->_instrument]->_RCUT)
-				{
-					pVoice->_cutoff = alteRand(Global::song()._pInstrument[pVoice->_instrument]->ENV_F_CO);
-				}
-				else
-				{
-					pVoice->_cutoff = Global::song()._pInstrument[pVoice->_instrument]->ENV_F_CO;
-				}
-				
-				if (Global::song()._pInstrument[pVoice->_instrument]->_RRES)
-				{
-					pVoice->_filter._q = alteRand(Global::song()._pInstrument[pVoice->_instrument]->ENV_F_RQ);
-				}
-				else
-				{
-					pVoice->_filter._q = Global::song()._pInstrument[pVoice->_instrument]->ENV_F_RQ;
-				}
+				pVoice->_cutoff = (pins->_RCUT) ? alteRand(pins->ENV_F_CO) : pins->ENV_F_CO;
+				pVoice->_filter._q = (pins->_RRES) ? alteRand(pins->ENV_F_RQ) : pins->ENV_F_RQ;
+				pVoice->_filter._type = (dsp::FilterType)pins->ENV_F_TP;
+				pVoice->_coModify = (float)pins->ENV_F_EA;
+				pVoice->_filterEnv._sustain = (float)pins->ENV_F_SL*0.0078125f;
 
-				pVoice->_filter._type = (dsp::FilterType)Global::song()._pInstrument[pVoice->_instrument]->ENV_F_TP;
-				pVoice->_coModify = (float)Global::song()._pInstrument[pVoice->_instrument]->ENV_F_EA;
-				pVoice->_filterEnv._sustain = (float)Global::song()._pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
-
-				if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
+				if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xF0) != SAMPLER_CMD_EXT_NOTEDELAY))
 				{
 					pVoice->_filterEnv._stage = ENV_ATTACK;
 				}
-				pVoice->_filterEnv._step = (1.0f/Global::song()._pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
+				pVoice->_filterEnv._step = (1.0f/pins->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
 				pVoice->_filterEnv._value = 0;
 				
 				// Init Wave
 				//
-				pVoice->_wave._pL = Global::song()._pInstrument[pVoice->_instrument]->waveDataL;
-				pVoice->_wave._pR = Global::song()._pInstrument[pVoice->_instrument]->waveDataR;
-				pVoice->_wave._stereo = Global::song()._pInstrument[pVoice->_instrument]->waveStereo;
+				pVoice->_wave._pL = const_cast<std::int16_t*>(wave.pWaveDataL());
+				pVoice->_wave._pR = const_cast<std::int16_t*>(wave.pWaveDataL());
+				pVoice->_wave._stereo = wave.IsWaveStereo();
 				pVoice->_wave._length = twlength;
 				
 				// Init loop
-				if (Global::song()._pInstrument[pVoice->_instrument]->waveLoopType)
+				if (wave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL)
 				{
 					pVoice->_wave._loop = true;
-					pVoice->_wave._loopStart = Global::song()._pInstrument[pVoice->_instrument]->waveLoopStart;
-					pVoice->_wave._loopEnd = Global::song()._pInstrument[pVoice->_instrument]->waveLoopEnd;
+					pVoice->_wave._loopStart = wave.WaveLoopStart();
+					pVoice->_wave._loopEnd = wave.WaveLoopEnd();
 				}
-				else
-				{
-					pVoice->_wave._loop = false;
-				}
+				else { pVoice->_wave._loop = false; }
 				
 				// Init Resampler
 				//
-				if (Global::song()._pInstrument[pVoice->_instrument]->_loop)
+				if (pins->_loop)
 				{
-					double const totalsamples = double(Global::player().SamplesPerRow()*Global::song()._pInstrument[pVoice->_instrument]->_lines);
+					double const totalsamples = double(Global::player().SamplesPerRow()*pins->_lines);
 					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
 				}	
 				else
 				{
-					float const finetune = helpers::value_mapper::map_256_1(Global::song()._pInstrument[pVoice->_instrument]->waveFinetune);
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+Global::song()._pInstrument[pVoice->_instrument]->waveTune)-baseC +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::player().SampleRate()));
+					float const finetune = helpers::value_mapper::map_256_1(wave.WaveFineTune());
+					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+wave.WaveTune())-baseC +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::player().SampleRate()));
 				}
 				
 
@@ -343,14 +327,11 @@ namespace psycle
 					w_offset = pEntry->_parameter*pVoice->_wave._length;
 					pVoice->_wave._pos.QuadPart = (w_offset << 24);
 				}
-				else
-				{
-					pVoice->_wave._pos.QuadPart = 0;
-				}
+				else { pVoice->_wave._pos.QuadPart = 0; }
 
 				// Calculating volume coef ---------------------------------------
 				//
-				pVoice->_wave._vol = (float)Global::song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
+				pVoice->_wave._vol = wave.WaveGlobVolume();
 
 				if (pEntry->_cmd == SAMPLER_CMD_VOLUME)
 				{
@@ -361,7 +342,7 @@ namespace psycle
 				//
 				float panFactor;
 				
-				if (Global::song()._pInstrument[pVoice->_instrument]->_RPAN)
+				if (pins->_RPAN)
 				{
 					panFactor = (float)rand()*0.000030517578125f;
 				}
@@ -370,7 +351,7 @@ namespace psycle
 					panFactor = helpers::value_mapper::map_256_1(pEntry->_parameter);
 				}
 				else {
-					panFactor = helpers::value_mapper::map_256_1(Global::song()._pInstrument[pVoice->_instrument]->_pan);
+					panFactor = wave.PanFactor();
 				}
 
 				pVoice->_wave._rVolDest = panFactor;
@@ -390,9 +371,9 @@ namespace psycle
 
 				// Init Amplitude Envelope
 				//
-				pVoice->_envelope._step = (1.0f/Global::song()._pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/Global::player().SampleRate());
+				pVoice->_envelope._step = (1.0f/pins->ENV_AT)*(44100.0f/Global::player().SampleRate());
 				pVoice->_envelope._value = 0.0f;
-				pVoice->_envelope._sustain = (float)Global::song()._pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
+				pVoice->_envelope._sustain = (float)pins->ENV_SL*0.01f;
 				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
 					pVoice->_triggerNoteDelay = (Global::player().SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
@@ -441,7 +422,8 @@ namespace psycle
 			{
 				// Calculating volume coef ---------------------------------------
 				//
-				pVoice->_wave._vol = (float)Global::song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
+				pVoice->_wave._vol = 0 ;
+				if (twlength > 0) { pVoice->_wave._vol = Global::song().samples[pVoice->_instrument].WaveGlobVolume(); }
 
 				if ( pEntry->_cmd == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= helpers::value_mapper::map_256_1(pEntry->_parameter);
 				
@@ -449,7 +431,7 @@ namespace psycle
 				//
 				float panFactor;
 				
-				if (Global::song()._pInstrument[pVoice->_instrument]->_RPAN)
+				if (pins->_RPAN)
 				{
 					panFactor = (float)rand()*0.000030517578125f;
 				}
@@ -459,7 +441,7 @@ namespace psycle
 				}
 				else
 				{
-					panFactor = helpers::value_mapper::map_256_1(Global::song()._pInstrument[pVoice->_instrument]->_pan);
+					panFactor = Global::song().samples[pVoice->_instrument].PanFactor();
 				}
 
 				pVoice->_wave._rVolDest = panFactor;
@@ -648,7 +630,7 @@ namespace psycle
 			}
 
 			// If the sample has been deleted while playing...
-			if (Global::song()._pInstrument[pVoice->_instrument]->Empty())
+			if (!Global::song().samples.IsEnabled(pVoice->_instrument))
 			{
 				pVoice->_envelope._stage = ENV_OFF;
 				pVoice->_wave._lVolCurr = 0;

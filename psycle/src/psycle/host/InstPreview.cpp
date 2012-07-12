@@ -9,22 +9,22 @@ namespace psycle {
 
 		void InstPreview::Work(float *pInSamplesL, float *pInSamplesR, int numSamples)
 		{
-			if(!m_pInstrument) return;
+			if(m_pwave.WaveLength() == 0) return;
 
 			float *pSamplesL = pInSamplesL;
 			float *pSamplesR = pInSamplesR;
 			--pSamplesL;
 			--pSamplesR;
 			
-			short *wl = m_pInstrument->waveDataL;
-			short *wr = m_pInstrument->waveDataR;
+			short *wl = m_pwave.pWaveDataL();
+			short *wr = m_pwave.pWaveDataR();
 			float ld = 0;
 			float rd = 0;
 			
 			do
 			{
 				ld=(*(wl+m_pos))*m_vol;
-				if(m_pInstrument->waveStereo)
+				if(m_pwave.IsWaveStereo())
 					rd=(*(wr+m_pos))*m_vol;
 				else
 					rd=ld;
@@ -32,14 +32,14 @@ namespace psycle {
 				*(++pSamplesL)+=ld;
 				*(++pSamplesR)+=rd;
 					
-				if(++m_pos>=m_pInstrument->waveLength)
+				if(++m_pos>=m_pwave.WaveLength())
 				{
 					Stop();
 					return;
 				}
-				if(m_bLoop && m_pInstrument->waveLoopEnd == m_pos)
+				if(m_bLoop && m_pwave.WaveLoopEnd() == m_pos)
 				{
-					m_pos=m_pInstrument->waveLoopStart;
+					m_pos=m_pwave.WaveLoopStart();
 				}
 				
 			} while(--numSamples);
@@ -47,10 +47,10 @@ namespace psycle {
 
 		void InstPreview::Play(unsigned long startPos/*=0*/)
 		{
-			if(!m_pInstrument) return;
+			if(m_pwave.WaveLength() == 0) return;
 
-			m_bLoop = m_pInstrument->waveLoopType;
-			if(startPos < m_pInstrument->waveLength)
+			m_bLoop = m_pwave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL;
+			if(startPos < m_pwave.WaveLength())
 			{
 				m_bPlaying=true;
 				m_pos=startPos;

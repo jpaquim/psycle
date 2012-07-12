@@ -601,7 +601,6 @@ Special:  Bit 0: On = song message attached.
 			{
 				_wave.Init();
 				_wave.AllocWaveData(curH.length,bstereo);
-				_wave.WaveLength(curH.length);
 
 				_wave.WaveLoopStart(curH.loopB);
 				_wave.WaveLoopEnd(curH.loopE);
