@@ -183,7 +183,7 @@ void Filter::Update()
 void ITFilter::Update()
 {
 	double d,e;
-	if ( iRes >0 || iCutoff < 127 )
+	if ( iRes >0 || iCutoff <= 127 )
 	{
 		double fc;
 		fc = 110.0 * pow(2.0,(iCutoff+6)/24.0); // ModPlug.
@@ -199,11 +199,9 @@ void ITFilter::Update()
 	}
 	else { e = 0; d = 0; }
 
-	if ( ftFilter == F_LOWPASS12) { fCoeff[0]= 1.0f / (1.0f + d + e); fCoeff[3] = 0; }
-	else if (ftFilter == F_HIGHPASS12) { fCoeff[0] = 1.0f - (1.0f / (1.0f + d + e)); fCoeff[3] = -1; }
-	fCoeff[2]= -e * fCoeff[0];
-	fCoeff[1]= 1.0f - fCoeff[0] - fCoeff[2]; // equals to (d+e+e ) * fCoeff[0] in lowpass mode
-
+	fCoeff[0]= 1.0f / (1.0f + d + e);
+	fCoeff[1]= (d + e + e) / (1.0f + d + e);
+	fCoeff[2]= -e / (1.f + d + e);
 }
 
 }}}

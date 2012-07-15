@@ -1244,9 +1244,8 @@ namespace psycle
 				case 0:
 					m_Cutoff=realValue;
 					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_LOWPASS12;
-					if ( voice ) 
+					if ( voice) 
 					{
-						//FIXME: For some reason, this is applying to undergound voices. See acidity_new/old first channel.
 						voice->FilterType(m_FilterType);
 						voice->CutOff(m_Cutoff);
 					}
@@ -1998,9 +1997,14 @@ namespace psycle
 				m_Channel[i].Index(i);
 			}
 
-			for(i = 0; i < 128;i++)
+			for(i = 0; i < 16;i++)
 			{
-				zxxMap[i].mode=0;
+				zxxMap[i].mode=1;
+				zxxMap[i].value=i*8;
+			}
+			for(i = 16; i < 128;i++)
+			{
+				zxxMap[i].mode=-1;
 				zxxMap[i].value=0;
 			}
 			strncpy(_editName, _psName, sizeof(_editName)-1);

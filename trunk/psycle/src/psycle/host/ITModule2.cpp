@@ -266,23 +266,17 @@ Special:  Bit 0: On = song message attached.
 			}
 			else // initializing with the default midi.cfg values.
 			{
-				sampler->SetZxxMacro(0,1,0x00);
-				sampler->SetZxxMacro(1,1,0x08);
-				sampler->SetZxxMacro(2,1,0x10);
-				sampler->SetZxxMacro(3,1,0x18);
-				sampler->SetZxxMacro(4,1,0x20);
-				sampler->SetZxxMacro(5,1,0x28);
-				sampler->SetZxxMacro(6,1,0x30);
-				sampler->SetZxxMacro(7,1,0x38);
-				sampler->SetZxxMacro(8,1,0x40);
-				sampler->SetZxxMacro(9,1,0x48);
-				sampler->SetZxxMacro(10,1,0x50);
-				sampler->SetZxxMacro(11,1,0x58);
-				sampler->SetZxxMacro(12,1,0x60);
-				sampler->SetZxxMacro(13,1,0x68);
-				sampler->SetZxxMacro(14,1,0x70);
-				sampler->SetZxxMacro(15,1,0x78);
+				for(i = 0; i < 16;i++)
+				{
+					sampler->SetZxxMacro(i,1,i*8);
+				}
+
+				for(i = 16; i < 128;i++)
+				{
+					sampler->SetZxxMacro(i,-1,0);
+				}
 			}
+
 			if ( itFileH.special&SpecialFlags::HASMESSAGE)
 			{
 				Seek(itFileH.msgOffset);
