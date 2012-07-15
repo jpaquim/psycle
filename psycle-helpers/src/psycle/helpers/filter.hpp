@@ -104,7 +104,7 @@ class ITFilter {
 		int iCutoff;
 		int iRes;
 		FilterType ftFilter;
-		float fCoeff[4];
+		float fCoeff[3];
 		float fLastSampleLeft[2];
 		float fLastSampleRight[2];
 };
@@ -135,13 +135,13 @@ inline void Filter::WorkStereo(float& l, float& r) {
 
 /*Code from Schism Tracker, with modification for highpass filter*/
 #define CLAMP(N,L,H) (((N)>(H))?(H):(((N)<(L))?(L):(N)))
-#define FILT_CLIP(i) CLAMP(i, -0.00001525879, 0.00001525879)
+#define FILT_CLIP(i) CLAMP(i, -4096.0, 4096.0)
 
 inline void ITFilter::Work(float & sample) {
     double y = ((double)sample * fCoeff[0] + fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
 				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
 	fLastSampleLeft[0] = fLastSampleLeft[1];
-	fLastSampleLeft[1] = y - (sample * fCoeff[3]);
+	fLastSampleLeft[1] = y;
     sample = y;
 }
 
@@ -150,14 +150,14 @@ inline void ITFilter::WorkStereo(float& left, float& right) {
 				+ fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
 				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
 	fLastSampleLeft[0] = fLastSampleLeft[1];
-	fLastSampleLeft[1] = fyL - (left * fCoeff[3]);
+	fLastSampleLeft[1] = fyL;
     left = fyL;
 
     double fyR = ((double)right * fCoeff[0] 
 				+ fLastSampleRight[1] * (fCoeff[1] + fCoeff[2]) 
 				+ FILT_CLIP((fLastSampleRight[0]-fLastSampleRight[1]) * fCoeff[2]));
 	fLastSampleRight[0] = fLastSampleRight[1];
-	fLastSampleRight[1] = fyR - (right * fCoeff[3]);;
+	fLastSampleRight[1] = fyR;
     right = fyR;
 }
 #undef CLAMP
