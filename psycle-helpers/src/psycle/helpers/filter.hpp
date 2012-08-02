@@ -75,6 +75,11 @@ class ITFilter {
 			ftFilter= F_NONE;
 			iCutoff=127;
 			iRes=0;
+			iSampleCurrentSpeed = iSampleRate;
+			dBand[0] = 0;
+			dBand[1] = 0;
+			dLow[0] = 0;
+			dLow[1] = 0;
 			fLastSampleLeft[0]=0.0f;
 			fLastSampleLeft[1]=0.0f;
 			fLastSampleRight[0]=0.0f;
@@ -85,11 +90,14 @@ class ITFilter {
 		void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }}
 		void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }}
 		void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }}
+		void SampleSpeed(int _iSampleSpeed) { if ( iSampleCurrentSpeed != _iSampleSpeed) {iSampleCurrentSpeed = _iSampleSpeed; Update(); }}
 		void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }}
 		FilterType Type (void) { return ftFilter; }
 	
 		inline void Work(float & sample);
 		inline void WorkStereo(float & left, float & right);
+		inline void WorkOld(float & sample);
+		inline void WorkStereoOld(float& left, float& right);
 
 	protected:
 		enum coeffNames {
@@ -99,12 +107,16 @@ class ITFilter {
 		};
 
 		void Update(void);
+		void UpdateOld(void);
 
 		int iSampleRate;
 		int iCutoff;
 		int iRes;
+		int iSampleCurrentSpeed;
 		FilterType ftFilter;
-		float fCoeff[3];
+		float fCoeff[4];
+		double dBand[2];
+		double dLow[2];
 		float fLastSampleLeft[2];
 		float fLastSampleRight[2];
 };
@@ -133,35 +145,80 @@ inline void Filter::WorkStereo(float& l, float& r) {
 	r = b;
 }
 
-/*Code from Schism Tracker, with modification for highpass filter*/
-#define CLAMP(N,L,H) (((N)>(H))?(H):(((N)<(L))?(L):(N)))
-#define FILT_CLIP(i) CLAMP(i, -4096.0, 4096.0)
 
 inline void ITFilter::Work(float & sample) {
-    double y = ((double)sample * fCoeff[0] + fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
-				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
-	fLastSampleLeft[0] = fLastSampleLeft[1];
-	fLastSampleLeft[1] = y;
-    sample = y;
+	// This filter code comes from the musicdsp.org archive,
+	// State Variable Filter (Double Sampled, Stable)
+	// Type : 2 Pole Low, High, Band, Notch and Peaking
+	// References : Posted by Andrew Simper
+
+	double notch, high, out;
+
+	notch = sample - fCoeff[damp]*dBand[0];
+	dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+	high = notch - dLow[0];
+	dBand[0] = fCoeff[freq]*high + dBand[0];
+	//out = 0.5*(notch or low or high or band or peak);
+	out = 0.5*dLow[0];
+	notch = sample - fCoeff[damp]*dBand[0];
+	dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+	high = notch - dLow[0];
+	dBand[0] = fCoeff[freq]*high + dBand[0];
+	//out += 0.5*(same out as above);
+	out += 0.5*dLow[0];
+	sample = static_cast< float >(out);
 }
 
-inline void ITFilter::WorkStereo(float& left, float& right) {
-    double fyL = ((double)left * fCoeff[0] 
-				+ fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
-				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
-	fLastSampleLeft[0] = fLastSampleLeft[1];
-	fLastSampleLeft[1] = fyL;
-    left = fyL;
+inline void ITFilter::WorkStereo(float & left, float & right) {
+	double notch, high, out;
 
-    double fyR = ((double)right * fCoeff[0] 
-				+ fLastSampleRight[1] * (fCoeff[1] + fCoeff[2]) 
-				+ FILT_CLIP((fLastSampleRight[0]-fLastSampleRight[1]) * fCoeff[2]));
+	notch = left - fCoeff[damp]*dBand[0];
+	dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+	high  = notch - dLow[0];
+	dBand[0] = fCoeff[freq]*high + dBand[0];
+	//out   = 0.5*(notch or low or high or band or peak);
+	out = 0.5*dLow[0];
+	notch = left - fCoeff[damp]*dBand[0];
+	dLow[0] = dLow[0] + fCoeff[freq]*dBand[0];
+	high  = notch - dLow[0];
+	dBand[0] = fCoeff[freq]*high + dBand[0];
+	//out  += 0.5*(same out as above);
+	out += 0.5*dLow[0];
+	left = static_cast< float >(out);
+
+	notch = right - fCoeff[damp]*dBand[1];
+	dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
+	high  = notch - dLow[1];
+	dBand[1] = fCoeff[freq]*high + dBand[1];
+	//out   = 0.5*(notch or low or high or band or peak);
+	out = 0.5*dLow[1];
+	notch = right - fCoeff[damp]*dBand[1];
+	dLow[1] = dLow[1] + fCoeff[freq]*dBand[1];
+	high  = notch - dLow[1];
+	dBand[1] = fCoeff[freq]*high + dBand[1];
+	//out  += 0.5*(same out as above);
+	out += 0.5*dLow[1];
+	right = static_cast< float >(out);
+}
+
+inline void ITFilter::WorkOld(float & sample) {
+	const float fy = (sample * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+	fLastSampleLeft[0] = fLastSampleLeft[1];
+	fLastSampleLeft[1] = fy - (sample * fCoeff[3]);
+	sample = fy;
+}
+
+inline void ITFilter::WorkStereoOld(float& left, float& right) {
+	const float fyL = (left * fCoeff[0]) + (fLastSampleLeft[1] * fCoeff[1]) + (fLastSampleLeft[0] * fCoeff[2]);
+	fLastSampleLeft[0] = fLastSampleLeft[1];
+	fLastSampleLeft[1] = fyL - (left * fCoeff[3]);
+	left = fyL;
+
+	const float fyR = (right * fCoeff[0]) + (fLastSampleRight[1] * fCoeff[1]) + (fLastSampleRight[0] * fCoeff[2]);
 	fLastSampleRight[0] = fLastSampleRight[1];
-	fLastSampleRight[1] = fyR;
-    right = fyR;
+	fLastSampleRight[1] = fyR - (right * fCoeff[3]);
+	right = fyR;
 }
-#undef CLAMP
-#undef FILT_CLIP
 
 }}}
 

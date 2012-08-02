@@ -28,6 +28,8 @@ CoreSong::CoreSong()
 	for(unsigned int i(0); i < MAX_MACHINES; ++i) machines_[i] = 0;
 	for(unsigned int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
 	clear(); // Warning! Due to C++ semantics, CoreSong::clear() will be called, even in a derived class that implements clear().
+     accumulated_processing_time_ =*new universalis::stdlib::chrono::nanoseconds(0);
+     accumulated_routing_time_ =*new universalis::stdlib::chrono::nanoseconds(0);
 }
 
 CoreSong::~CoreSong() {
@@ -661,4 +663,5 @@ void Song::DeleteMachine(Machine * mac)  {
 	CoreSong::DeleteMachine(mac);
 }
 
-}}
+}
+                 }

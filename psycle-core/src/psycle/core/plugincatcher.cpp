@@ -5,7 +5,9 @@
 #include "plugincatcher.h"
 #include "fileio.h"
 #include <universalis/os/fs.hpp>
+#ifndef Q_MOC_RUN
 #include <boost/filesystem/operations.hpp>
+#endif
 #include <iostream> // only for debug output
 #include <sstream>
 #include <cstring>
@@ -43,7 +45,7 @@ bool PluginFinderCache::loadCache(){
 	uint32_t fileNumPlugs(0);
 	RiffFile file;
 
-	if(!file.Open(cache_path().file_string().c_str())) {
+    if(!file.Open(cache_path().string().c_str())) {
 		return false;
 	}
 
@@ -98,12 +100,12 @@ bool PluginFinderCache::loadCache(){
 					// Only add the information to the cache if the dll hasn't been modified (say, a new version)
 					// Else, we want to get the new information, and that will happen in the plugins scan.
 					if(p.fileTime() == t_time) {
-						MachineKey key(host, path.leaf(), index);
+                        MachineKey key(host, path.filename().string(), index);
 						if(!hasHost(host)) addHost(host);
 						AddInfo(key, p);
 					}
 				}
-				MachineKey key(host, path.leaf(), index);
+                MachineKey key(host, path.filename().string(), index);
 				if(!hasHost(host)) addHost(host);
 				AddInfo(key, p);
 			}
@@ -118,9 +120,9 @@ bool PluginFinderCache::saveCache(){
 	deleteCache();
 
 	RiffFile file;
-	if(!file.Create(cache_path().file_string().c_str(), true)) {
+    if(!file.Create(cache_path().string().c_str(), true)) {
 		boost::filesystem::create_directory(cache_path().branch_path());
-		if(!file.Create(cache_path().file_string().c_str(), true)) return false;
+        if(!file.Create(cache_path().string().c_str(), true)) return false;
 	}
 	file.WriteArray("PSYCACHE", 8);
 	uint32_t version = CURRENT_CACHE_MAP_VERSION;

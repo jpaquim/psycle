@@ -23,7 +23,7 @@ namespace {
 			#elif defined DIVERSALIS__OS__MICROSOFT
 				::GetCurrentThreadId()
 			#else
-				#error unsupported operating system
+				#error "unsupported operating system"
 			#endif
 		;
 	}

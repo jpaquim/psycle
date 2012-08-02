@@ -23,7 +23,7 @@ void JackOut::do_start() throw(std::exception) {
 	// try to become a client of the JACK server
 	const char* registerCPtr = std::string( clientName_ +" "+serverName_  ).c_str();
 
-	if ( (client = jack_client_new ( registerCPtr )) == 0) {
+    if ( (client = jack_client_new( registerCPtr )) == 0) {
 		std::cerr << "jack server not running?\n" << std::endl;
 		return;
 	}
@@ -35,11 +35,11 @@ void JackOut::do_start() throw(std::exception) {
 	// tell the JACK server to call `process()' whenever
 	// there is work to be done.
 
-	jack_set_process_callback (client, process, (void*) this);
+    jack_set_process_callback(client, process, (void*) this);
 
 	// display the current sample rate. 
 
-	std::cout << "engine sample rate: "  << jack_get_sample_rate (client) << std::endl;
+    std::cout << "engine sample rate: "  << jack_get_sample_rate(client) << std::endl;
 
 	// create output port
 

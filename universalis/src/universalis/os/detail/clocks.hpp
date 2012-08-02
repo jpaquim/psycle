@@ -30,7 +30,7 @@
 		#pragma warning(pop)
 	#endif
 #else
-	#error unsupported operating system
+	#error "unsupported operating system"
 #endif
 
 #ifdef BOOST_AUTO_TEST_CASE

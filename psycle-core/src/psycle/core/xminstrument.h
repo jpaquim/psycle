@@ -142,8 +142,8 @@ public:
 			m_WaveLength  = iLen;
 		}
 
-		int Load(RiffFile& riffFile);
-		void Save(RiffFile& riffFile);
+        int Load(RiffFile& riffFile);
+        void Save(RiffFile& riffFile);
 
 		/// Wave Data Copy Operator
 		void operator= (const WaveData& source)

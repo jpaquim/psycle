@@ -13,7 +13,6 @@
 		using std::defer_lock;
 		using std::try_to_lock;
 		using std::adopt_lock;
-		using std::lock_error;
 		using std::unique_lock;
 		using std::lock_guard;
 		using std::once_flag;

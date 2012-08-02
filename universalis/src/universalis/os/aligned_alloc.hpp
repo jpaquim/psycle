@@ -39,7 +39,7 @@ void aligned_memory_alloc(std::size_t alignment, X *& x, std::size_t count) {
 		size; // unused
 		x = new X[count];
 		// note: free with delete[]
-		#error TODO alloc some extra mem and store orig pointer or alignment to the x[-1]
+		#error "TODO alloc some extra mem and store orig pointer or alignment to the x[-1]"
 	#endif
 }
 
@@ -53,7 +53,7 @@ void aligned_memory_dealloc(X *& address) {
 		_aligned_free(address);
 	#else
 		delete[] address;
-		#error TODO alloc some extra mem and store orig pointer or alignment to the x[-1]
+        #error "TODO alloc some extra mem and store orig pointer or alignment to the x[-1]"
 	#endif
 }
 

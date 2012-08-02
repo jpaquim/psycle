@@ -6,7 +6,9 @@
 
 #include "pluginfinder.h"
 
+#ifndef Q_MOC_RUN
 #include <boost/filesystem.hpp>
+#endif
 #include <list>
 
 namespace psycle { namespace core {
@@ -43,9 +45,9 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
 			return;
 		}
 		for(std::list<boost::filesystem::path>::const_iterator i = fileList.begin(); i != fileList.end(); ++i) {
-			std::string const base_name(i->leaf());
+            std::string const base_name(i->filename().string());
 			MachineKey key(hostCode(), base_name, 0);
-			if(!finder.hasKey(key)) FillPluginInfo(i->file_string(), base_name, finder);
+            if(!finder.hasKey(key)) FillPluginInfo(i->string(), base_name, finder);
 		}
 	}
 }

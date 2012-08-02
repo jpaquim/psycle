@@ -384,3 +384,4 @@ AlsaOut::~AlsaOut() throw() {
 
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
+

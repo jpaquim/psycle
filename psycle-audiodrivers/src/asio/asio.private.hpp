@@ -13,5 +13,5 @@
 #elif defined DIVERSALIS__OS__APPLE
 	#define MAC // steinberg's build option
 #else
-	#error internal steinberg error
+	#error "internal steinberg error"
 #endif

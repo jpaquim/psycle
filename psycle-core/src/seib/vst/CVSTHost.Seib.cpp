@@ -745,7 +745,7 @@ void CEffect::Load(LoadedAEffect &loadstruct)
 			((char*)sDir)[0]='\0';
 		}
 	#else
-		#error Freedom is unimplemented in that land; attempt no landing there.
+		#error "Freedom is unimplemented in that land; attempt no landing there."
 	#endif
 
 	// The trick, store the CEffect's class instance so that the host can talk to us.
@@ -810,7 +810,7 @@ void CEffect::Unload()
 		// reset directory
 		delete[] sDir; sDir = 0;
 	#else
-		#error Freedom is unimplemented in that land; attempt no landing there.
+		#error "Freedom is unimplemented in that land; attempt no landing there."
 	#endif
 }
 

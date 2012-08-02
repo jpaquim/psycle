@@ -15,41 +15,6 @@ namespace psycle { namespace helpers { namespace dsp {
 
 FilterCoeff FilterCoeff::singleton;
 
-/*Table from Schism Tracker*/
-static const float dmpfac[] = {
-    131072, 128272, 125533, 122852, 120229, 117661, 115148, 112689,
-    110283, 107928, 105623, 103367, 101160,  98999,  96885,  94816,
-     92791,  90810,  88870,  86973,  85115,  83298,  81519,  79778,
-     78074,  76407,  74775,  73178,  71615,  70086,  68589,  67125,
-     65691,  64288,  62915,  61572,  60257,  58970,  57711,  56478,
-     55272,  54092,  52937,  51806,  50700,  49617,  48557,  47520,
-     46506,  45512,  44540,  43589,  42658,  41747,  40856,  39983,
-     39130,  38294,  37476,  36676,  35893,  35126,  34376,  33642,
-     32923,  32220,  31532,  30859,  30200,  29555,  28924,  28306,
-     27701,  27110,  26531,  25964,  25410,  24867,  24336,  23816,
-     23308,  22810,  22323,  21846,  21380,  20923,  20476,  20039,
-     19611,  19192,  18782,  18381,  17989,  17604,  17228,  16861,
-     16500,  16148,  15803,  15466,  15135,  14812,  14496,  14186,
-     13883,  13587,  13297,  13013,  12735,  12463,  12197,  11936,
-     11681,  11432,  11188,  10949,  10715,  10486,  10262,  10043,
-      9829,   9619,   9413,   9212,   9015,   8823,   8634,   8450,
-      8270,   8093,   7920,   7751,   7585,   7423,   7265,   7110,
-      6958,   6809,   6664,   6522,   6382,   6246,   6113,   5982,
-      5854,   5729,   5607,   5487,   5370,   5255,   5143,   5033,
-      4926,   4820,   4718,   4617,   4518,   4422,   4327,   4235,
-      4144,   4056,   3969,   3884,   3801,   3720,   3641,   3563,
-      3487,   3412,   3340,   3268,   3198,   3130,   3063,   2998,
-      2934,   2871,   2810,   2750,   2691,   2634,   2577,   2522,
-      2468,   2416,   2364,   2314,   2264,   2216,   2169,   2122,
-      2077,   2032,   1989,   1947,   1905,   1864,   1824,   1786,
-      1747,   1710,   1674,   1638,   1603,   1569,   1535,   1502,
-      1470,   1439,   1408,   1378,   1348,   1320,   1291,   1264,
-      1237,   1210,   1185,   1159,   1135,   1110,   1087,   1063,
-      1041,   1018,    997,    975,    955,    934,    914,    895,
-       876,    857,    838,    821,    803,    786,    769,    753,
-       737,    721,    705,    690,    676,    661,    647,    633,
-       620,    606,    593,    581,    568,    556,    544,    533
-};
 FilterCoeff::FilterCoeff() {
 	samplerate = -1;
 	//table is initialized with Filter::Init()
@@ -178,30 +143,93 @@ void Filter::Update()
 	_coeff4 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][4];
 }
 
-
-/*Update from Schism Tracker, using formula from Modplug for cutoff*/
 void ITFilter::Update()
 {
-	double d,e;
-	if ( iRes >0 || iCutoff <= 127 )
+	#define PI 3.1415926535897932384626433832795
+	double fc;
+	if ( iRes >0 || iCutoff < 127 )
 	{
-		double fc;
+		//double fc = 440.0*pow(2.0, (iCutoff - 69.0)/12.0); // suggested
+		//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/12.0); // suggested, shifted one octave.
+		//double fc = 440.0*pow(2.0, (iCutoff - 57.0)/16.0); // variation in 16th's, not in octaves..
 		fc = 110.0 * pow(2.0,(iCutoff+6)/24.0); // ModPlug.
-        fc *= 3.14159265358979 * 2.0 / iSampleRate;
-        double d2 = dmpfac[iRes] / (4.0*65536.0);
-        d = (1.0 - d2) * fc;
+		//double fc = 100.0* (pow(2.0,(iCutoff+10)/24.0));
+	}
+	else { fc = iSampleRate/2.0; }
+	// Attempt at Self-filtered samples. It filters too much.
+	//else { fc = iSampleCurrentSpeed/2.0; }
 
-        if (d > 2.0)
-                d = 2.0;
+	const double frequ = 2.0*sin(PI*std::min(0.25, fc/(iSampleRate*2)));  // the fs*2 is because it's double sampled
+	//fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.007874, 0.25)), min(2.0, 2.0/frequ - frequ*0.5));// original.
+	fCoeff[damp]  = std::min(exp(iRes/128.0*(-LN10*1.2)), std::min(2.0, 2.0/frequ - frequ*0.5));// exp instead of 1-pow.
+	//fCoeff[damp]  = min(2.0*(1.0 - pow(iRes*0.0072, 0.25)), min(2.0, 2.0/frequ - frequ*0.5)); // lowered Q a bit.
+	fCoeff[freq] = frequ;
 
-        d = (d2 - d) / fc;
-        e = 1.0 / (fc * fc);
+	#undef PI
+}
+void ITFilter::UpdateOld()
+{
+	double d,e;
+	if ( iRes >0 || iCutoff < 127 )
+	{
+		#if 0
+		#define PI 3.1415926535897932384626433832795
+		pole[0]=pole[1]=pole[2]=pole[3]=0;
+		float fSampleRate = (float)iSampleRate;
+		float fCutoff = fSampleRate* (pow(2.0f,iCutoff/127.0f)-1.0f)/2.0f;
+			
+		fCoeff[1] =
+			((fSampleRate) - (fCutoff * TPI)) /
+			((fSampleRate) + (fCutoff * TPI));
+		fCoeff[0] =
+		fCoeff[2] =
+			(fCutoff * TPI) /
+			((fCutoff * TPI) + ( fSampleRate));
+		#endif
+
+		#if 0
+			fc *= (float)(2.0*3.14159265358/fs);
+			float dmpfac = pow(10.0f, -((24.0f / 128.0f)*(float)pChn->nResonance) / 20.0f);
+		#endif
+			
+		// sample_freq*pow(0.5, 0.25 + cutoff*1/factor)*1/(2*pi*110.0)))
+		// loss = exp(resonance*(-LOG10*1.2/128))
+
+		//fc = 110.0f * pow(2.0, 0.25f+((double)(pChn->nCutOff*(flt_modifier+256)))/(fx*512.0f));
+		//<@mrsbrisby> fc *= (double)(2.0*PI/fs);
+		//<@mrsbrisby> where pChn->nCutoff is the "cutoff" as set by channel
+		//<@mrsbrisby> and flt_modifier is the envelope value (after having -1 translated to 0x7C; although I think IT used 0x7F)
+		//<@mrsbrisby> fx is 0.21 in libmodplug's "extended filter range" and 0.24 for "it modules"
+		//<@mrsbrisby> but i think that's wrong, i think IT uses closer to 20.0 (but not exactly)
+
+		const double dInvAngle = (float)(iSampleRate * pow(0.5, 0.25 + iCutoff/24.0) /(TPI*110.0));
+		const double dLoss = (float)exp(iRes*(-LN10*1.2/128.0));
+
+		//const double dInvAngle = pow(10.0,(127.0-iCutoff)/96.0)-1.0;
+		//const double dLoss = pow(10.0f, -((float)iRes / 256.0f));
+		//const double dLoss = pow(0.5, iRes/32.0);
+
+		//const double dInvAngle = 1.0 /((pow(2.0f,(iCutoff+1)/128.0f)-1.0f)  * PI);
+		//const double dLoss = pow (10.0 , -((3.0*iRes) / 320.0)); // approx [1...0]  | -(iRes/128.0) * (24.0/20.0)
+		//const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-0.93; // approx [60..0]
+		//const double dInvAngle = pow(10.0,(127.0-iCutoff)/72.0)-1.0; // approx [60..0]
+		//const double dInvAngle = pow(2.0,(127.0-iCutoff)/22.0)-0.93; // approx [60..0]
+		//const double dLoss = pow (2.0,(127.0-iCutoff)/127.0)-1.0; // [1..0]
+	
+		e = dInvAngle* dInvAngle;
+		d = 1.0*( 1.0- dLoss) / dInvAngle;
+		if (d > 2.0f) d = 2.0f;
+		d = (dLoss - d) * dInvAngle;
+		//if ( d + e*2.0 < 0.0 ) d = -e*2.0;
+		//const double d = (dLoss)*(dInvAngle+1.4)-1.4;
 	}
 	else { e = 0; d = 0; }
 
-	fCoeff[0]= 1.0f / (1.0f + d + e);
-	fCoeff[1]= (d + e + e) / (1.0f + d + e);
-	fCoeff[2]= -e / (1.f + d + e);
+	if ( ftFilter == F_LOWPASS12) { fCoeff[0]= 1.0f / (1.0f + d + e); fCoeff[3] = 0; }
+	else if (ftFilter == F_HIGHPASS12) { fCoeff[0] = 1.0f - (1.0f / (1.0f + d + e)); fCoeff[3] = -1; }
+	fCoeff[2]= -e * fCoeff[0];
+	fCoeff[1]= 1.0f - fCoeff[0] - fCoeff[2]; // equals to (d+e+e ) * fCoeff[0]
+
 }
 
 }}}
