@@ -10,7 +10,7 @@
 #pragma once
 
 #ifdef signals
-	#error "<psycle/core/signalslib.hpp> must be included before any qt header"
+    #error "<psycle/core/signalslib.hpp> must be included before any qt header"
 #endif
 #ifndef Q_MOC_RUN
 #include <boost/signal.hpp>
