@@ -144,7 +144,7 @@ void Configuration::loadConfig() {
 	boost::filesystem::path const path(universalis::os::fs::home_app_local("psycle") / "config.xml");
 	if(boost::filesystem::exists(path)) {
 		try {
-			loadConfig(path.file_string());
+			loadConfig(path.string());
 		} catch( std::exception const & e ) {
 			if(loggers::exception()()) {
 				std::ostringstream s;

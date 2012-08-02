@@ -8,6 +8,12 @@
 #pragma once
 
 #include <psycle/core/detail/project.hpp>
+#include <diversalis/os.hpp>
+
+#if defined DIVERSALIS__OS__LINUX
+#define _MAX_PATH 520
+#endif
+
 
 namespace psycle { namespace core {
 

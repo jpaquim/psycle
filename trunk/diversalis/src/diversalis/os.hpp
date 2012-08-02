@@ -271,7 +271,7 @@
 // consistency check
 
 #if !defined DIVERSALIS__OS && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-	#error unknown os
+	#error "unknown os"
 #endif
 
 /**********************************************************************************/

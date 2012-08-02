@@ -14,6 +14,9 @@
 #include "xminstrument.h"
 #include "cpu_time_clock.hpp"
 #include <universalis/stdlib/mutex.hpp>
+#include "universalis/stdlib/chrono.hpp"
+#include "universalis/stdlib/detail/chrono/duration_and_time_point.hpp"
+#include <iostream>
 
 namespace psycle { namespace core {
 
@@ -89,7 +92,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		bool is_ticks() const { return is_ticks_; }
 
 		// access to the machines of the song
-		Machine * machine(Machine::id_type id) { return machines_[id]; }
+        Machine * machine(Machine::id_type id) { return machines_[id]; }
 		// access to the machines of the song
 		Machine const * machine(Machine::id_type id) const { return machines_[id]; }
 		void machine(Machine::id_type id, Machine * machine) {
@@ -105,7 +108,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		// add a new machine. If newIdx is not -1 and a machine
 		// does not exist in that place, it is taken as the new index
 		// If a machine exists, or if newIdx is -1, the index is taken from pmac.
-		// if pmac->id() is -1, then a free index is taken.
+        // if pmac->id() is -1, then a free index is taken.
 		//
 		virtual void AddMachine(Machine * pmac, Machine::id_type newIdx = -1);
 		// (add or) replace the machine in index idx.
@@ -186,7 +189,7 @@ class PSYCLE__CORE__DECL CoreSong {
 		Machine::id_type seqBus;
 
 		/// cpu time usage measurement
-		void reset_time_measurement() { accumulated_processing_time_ = accumulated_routing_time_ = 0; }
+        void reset_time_measurement() { accumulated_processing_time_ = universalis::stdlib::chrono::nanoseconds(0); accumulated_routing_time_ =universalis::stdlib::chrono::nanoseconds(0); }
 
 		/// total processing cpu time usage measurement
 		cpu_time_clock::duration accumulated_processing_time() const throw() { return accumulated_processing_time_; }
@@ -207,7 +210,9 @@ class PSYCLE__CORE__DECL CoreSong {
 				std::ostringstream s;
 				s << "time went backward by: " << chrono::nanoseconds(d).count() * 1e-9 << 's';
 				loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-			} else accumulated_routing_time_ += d;
+            } else{
+                accumulated_routing_time_ = d + accumulated_routing_time_;
+            }
 		}
 
 	protected:
@@ -232,7 +237,8 @@ class PSYCLE__CORE__DECL CoreSong {
 		Sequence sequence_;
 		Machine* machines_[MAX_MACHINES];
 		mutable mutex mutex_;
-		cpu_time_clock::duration accumulated_processing_time_, accumulated_routing_time_;
+        universalis::stdlib::chrono::nanoseconds accumulated_processing_time_;
+        universalis::stdlib::chrono::nanoseconds accumulated_routing_time_;
 };
 
 /// Song extends CoreSong with UI-related stuff

@@ -8,8 +8,9 @@
 #include "psy2filter.h"
 #include "psy3filter.h"
 #include "psy4filter.h"
-
+#ifndef Q_MOC_RUN
 #include <boost/filesystem.hpp>
+#endif
 #include <iostream>
 
 namespace psycle {  namespace core {
@@ -18,7 +19,7 @@ SongSerializer::SongSerializer() {
 	filters.push_back(Psy2Filter::getInstance());
 	filters.push_back(Psy3Filter::getInstance());
 	///\todo Psy4Filter doesn't build currently
-	//filters.push_back( Psy4Filter::getInstance() );
+    filters.push_back( Psy4Filter::getInstance() );
 }
 
 bool SongSerializer::loadSong(const std::string & fileName, CoreSong& song) {

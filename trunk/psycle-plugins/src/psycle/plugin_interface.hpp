@@ -272,7 +272,7 @@ class CMachineInterface {
 	#define PSYCLE__PLUGIN__DYN_LINK__EXPORT __declspec(dllexport)
 	#define PSYCLE__PLUGIN__CALLING_CONVENTION __cdecl
 #else
-	#error please add definition for your compiler
+#error "please add definition for your compiler"
 #endif
 
 #define PSYCLE__PLUGIN__DETAIL__STRINGIZED(x) PSYCLE__PLUGIN__DETAIL__STRINGIZED__NO_EXPANSION(x)

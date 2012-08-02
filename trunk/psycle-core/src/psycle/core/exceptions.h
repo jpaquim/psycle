@@ -64,6 +64,10 @@ namespace exceptions {
 
 		///\internal
 		namespace detail {
+		
+			template<typename T>
+			struct identity { typedef T type; };
+			
 			/// Crashable type concept requirement: it must have a member function void crashed(std::exception const &) throw();
 			template<typename Crashable>
 			class rethrow_functor {
@@ -87,18 +91,26 @@ namespace exceptions {
 						crashable_.crashed(f_error);
 						throw f_error;
 					}
+					template<typename E>
+					void operator_(identity<E>, universalis::compiler::location const & location, E const * const e = 0) const throw(function_error){
+						rethrow(location, e, 0);
+					}
+					void operator_(identity<std::exception>,universalis::compiler::location const & location, std::exception const * const e) const throw(function_error) {
+						rethrow(location, e, e);
+					}
+					
 					Crashable & crashable_;
 				public:
 					rethrow_functor(Crashable & crashable) : crashable_(crashable) {}
 
 					template<typename E>
 					void operator_(universalis::compiler::location const & location, E const * const e = 0) const throw(function_error) {
-							rethrow(location, e, 0);
+						operator_(identity<E>(),location,e);
 					}
 
-					template<>
-					void operator_<std::exception>(universalis::compiler::location const & location, std::exception const * const e) const throw(function_error) {
-						rethrow(location, e, e);
+					
+					void operator_(universalis::compiler::location const & location, std::exception const * const e) const throw(function_error) {
+						operator_(identity<std::exception>(),location, e, e);
 					}
 			};
 

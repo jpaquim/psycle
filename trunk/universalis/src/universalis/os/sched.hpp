@@ -10,7 +10,7 @@
 #elif defined DIVERSALIS__OS__MICROSOFT
 	#include "include_windows_without_crap.hpp"
 #else
-	#error unsupported operating system
+	#error "unsupported operating system"
 #endif
 #if defined BOOST_AUTO_TEST_CASE
 	#include <sstream>
@@ -43,7 +43,7 @@ class UNIVERSALIS__DECL affinity_mask {
 			#elif defined DIVERSALIS__OS__MICROSOFT
 				DWORD_PTR
 			#else
-				#error unsupported operating system
+				#error "unsupported operating system"
 			#endif
 			native_mask_type;
 		native_mask_type native_mask_;
@@ -61,7 +61,7 @@ class UNIVERSALIS__DECL process {
 			#elif defined DIVERSALIS__OS__MICROSOFT
 				HANDLE
 			#else
-				#error unsupported operating system
+				#error "unsupported operating system"
 			#endif
 			native_handle_type;
 	private:
@@ -114,7 +114,7 @@ class UNIVERSALIS__DECL thread {
 			#elif defined DIVERSALIS__OS__MICROSOFT
 				HANDLE
 			#else
-				#error unsupported operating system
+				#error "unsupported operating system"
 			#endif
 			native_handle_type;
 	private:

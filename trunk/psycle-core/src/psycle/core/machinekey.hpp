@@ -6,8 +6,9 @@
 #pragma once
 
 #include <psycle/core/detail/project.hpp>
-
+#ifndef Q_MOC_RUN
 #include <boost/operators.hpp>
+#endif
 #include <string>
 
 namespace psycle { namespace core {

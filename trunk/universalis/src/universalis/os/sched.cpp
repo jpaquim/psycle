@@ -60,7 +60,7 @@ affinity_mask process::affinity_mask() const {
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 		return process;
 	#else
-		#error unsupported operating system
+		#error "unsupported operating system"
 	#endif
 }
 
@@ -85,7 +85,7 @@ affinity_mask process::affinity_mask() const {
 			if(!SetProcessAffinityMask(native_handle_, affinity_mask.native_mask_))
 				throw exception(UNIVERSALIS__COMPILER__LOCATION);
 		#else
-			#error unsupported operating system
+			#error "unsupported operating system"
 		#endif
 	}
 #endif
@@ -130,7 +130,7 @@ void process::become_realtime(/* realtime constraints: deadline, period, bugdet,
 		if(!SetPriorityClass(native_handle_, REALTIME_PRIORITY_CLASS))
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#else
-		#error unsupported operating system
+		#error "unsupported operating system"
 	#endif
 }
 
@@ -143,7 +143,7 @@ thread::thread() : native_handle_(
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		::GetCurrentThread()
 	#else
-		#error unsupported operating system
+		#error "unsupported operating system"
 	#endif
 ) {}
 
@@ -168,7 +168,7 @@ affinity_mask thread::affinity_mask() const {
 		class affinity_mask result(p.affinity_mask());
 		return result;
 	#else
-		#error unsupported operating system
+		#error "unsupported operating system"
 	#endif
 }
 
@@ -184,7 +184,7 @@ void thread::affinity_mask(class affinity_mask const & affinity_mask) {
 		if(!SetThreadAffinityMask(native_handle_, affinity_mask.native_mask_))
 			throw exception(UNIVERSALIS__COMPILER__LOCATION);
 	#else
-		#error unsupported operating system
+		#error "unsupported operating system"
 	#endif
 }
 
@@ -242,7 +242,7 @@ unsigned int affinity_mask::size() const {
 		#elif defined DIVERSALIS__OS__MICROSOFT
 			sizeof native_mask_ << 3;
 		#else
-			#error unsupported operating system
+			#error "unsupported operating system"
 		#endif
 }
 
@@ -254,7 +254,7 @@ bool affinity_mask::operator()(unsigned int cpu_index) const {
 		#elif defined DIVERSALIS__OS__MICROSOFT
 			native_mask_ & native_mask_type(1) << cpu_index;
 		#else
-			#error unsupported operating system
+			#error "unsupported operating system"
 		#endif
 }
 
@@ -268,7 +268,7 @@ void affinity_mask::operator()(unsigned int cpu_index, bool active) {
 	#elif defined DIVERSALIS__OS__MICROSOFT
 		native_mask_ |= native_mask_type(1) << cpu_index;
 	#else
-		#error unsupported operating system
+		#error "unsupported operating system"
 	#endif
 	assert((*this)(cpu_index) == active);
 }

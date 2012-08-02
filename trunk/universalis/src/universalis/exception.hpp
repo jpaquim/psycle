@@ -83,13 +83,18 @@ namespace exceptions {
 
 	///\internal
 	namespace detail {
+		template<typename E>
+		void operator_(compiler::location const & location, E const * const e = 0) throw(runtime_error) {
+			throw runtime_error(exceptions::string(*e), location, e);
+		}
 		class rethrow_functor {
 			public:
 				template<typename E>
 				void operator_(compiler::location const & location, E const * const e = 0) const throw(runtime_error) {
-					throw runtime_error(exceptions::string(*e), location, e);
+					detail::operator_<E>(location, e );
 				}
 		};
+		
 	}
 
 	#define UNIVERSALIS__EXCEPTIONS__CATCH_ALL_AND_CONVERT_TO_STANDARD_AND_RETHROW \

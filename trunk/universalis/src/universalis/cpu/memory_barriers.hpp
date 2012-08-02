@@ -100,7 +100,7 @@
 				// The lock is what's needed, so the 'add' is setup, essentially, as a no-op.
 				__asm { lock add [esp], 0 }
 			#else
-				#error sorry
+				#error "sorry"
 			#endif
 			#if defined DIVERSALIS__COMPILER__INTEL
 				__memory_barrier();
@@ -138,7 +138,7 @@
 			#if defined DIVERSALIS__CPU__X86
 				_asm { lock add [esp], 0 }
 			#else
-				#error sorry
+				#error "sorry"
 			#endif
 		}
 		void inline  read() { full(); }

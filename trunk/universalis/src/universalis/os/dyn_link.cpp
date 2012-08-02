@@ -35,7 +35,7 @@ namespace {
 			// note: macosx also has: DYLD_LIBRARY_PATH and DYLD_FALLBACK_LIBRARY_PATH.
 			// note: cygwin's dlopen uses LD_LIBRARY_PATH to locate the absolute dll path, and then calls LoadLibrary with it.
 		#else
-			#error unknown dynamic linker
+			#error "unknown dynamic linker"
 		#endif
 	};
 
@@ -45,7 +45,7 @@ namespace {
 		#elif defined DIVERSALIS__OS__MICROSOFT
 			';';
 		#else
-			#error unknown path list separator
+			#error "unknown path list separator"
 		#endif
 }
 
@@ -171,7 +171,7 @@ boost::filesystem::path resolver::decorated_filename(boost::filesystem::path con
 					// [bohan] otherwise, we have to explicitly add the .dll suffix.
 					// [bohan] note: for cygwin's dlopen, we always need to add the .dll suffix.
 				#else
-					#error bogus preprocessor conditions
+					#error "bogus preprocessor conditions"
 				#endif
 			);
 		#else

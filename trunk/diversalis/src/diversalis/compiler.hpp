@@ -228,7 +228,7 @@
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#endif
 
-	#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    #if (defined __GXX_EXPERIMENTAL_CXX0X__  || __cplusplus >= 201103L )
 		#define DIVERSALIS__COMPILER__FEATURE__CXX0X
 	#endif
 
@@ -303,14 +303,14 @@
 		#define DIVERSALIS__COMPILER__FEATURE__RTTI
 	#else
 		///\todo _CPPRTTI is not defined in msvc8!?
-		//#error please enable rtti
+        //#error "please enable rtti"
 	#endif
 
 	#if defined _CPPUNWIND // defined for code compiled with -GX (Enable Exception Handling).
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#else
 		///\todo _CPPUNWIND is not defined in msvc8!?
-		//#error please enable exception handling
+        //#error "please enable exception handling"
 	#endif
 #endif
 
@@ -355,9 +355,9 @@
 // consistency check
 
 #if !defined DIVERSALIS__COMPILER
-	#error unknown compiler
+	#error "unknown compiler"
 #endif
 	
 #if !defined __cplusplus && !defined DIVERSALIS__COMPILER__RESOURCE
-	#error Not a c++ compiler. For the gnu compiler, please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver).
+	#error "Not a c++ compiler. For the gnu compiler, please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver)."
 #endif

@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #elif defined DIVERSALIS__OS__APPLE
 	#define MAC // steinberg's build option
 #else
-	#error internal steinberg error
+	#error "internal steinberg error"
 #endif
 
 /// Tell the SDK that we want to support all the VST specs, not only VST2.4
@@ -331,7 +331,7 @@ namespace seib { namespace vst {
 					CFRelease(url);
 					if(module && !CFBundleLoadExecutable((CFBundleRef)module)) return false;
 				#else
-					#error Freedom is unimplemented in that land; attempt no landing there.
+					#error "Freedom is unimplemented in that land; attempt no landing there."
 				#endif
 				return module != 0;
 			}
@@ -346,7 +346,7 @@ namespace seib { namespace vst {
 					mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("VSTPluginMain"));
 					if(!mainProc) mainProc = (PluginEntryProc)CFBundleGetFunctionPointerForName((CFBundleRef)module, CFSTR("main_macho"));
 				#else
-					#error Freedom is unimplemented in that land; attempt no landing there.
+					#error "Freedom is unimplemented in that land; attempt no landing there."
 				#endif
 				return mainProc;
 			}

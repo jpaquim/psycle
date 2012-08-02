@@ -67,8 +67,10 @@ class PSYCLE__CORE__DECL Wire {
 		}
 		virtual void Connect(AudioPort *senderp,AudioPort *receiverp);
 		virtual void ChangeSource(AudioPort* newsource);
+        virtual AudioPort* getSource(){return senderport;}
 		virtual void ChangeDestination(AudioPort* newdest);
 		virtual void CollectData(int numSamples);
+        virtual AudioPort* getDestination(){return receiverport;}
 		virtual void SetVolume(float newvol);
 		// Range of pan is -1.0f for top left and 1.0f for top right. 0.0f is both channels full scale.
 		virtual void SetPan(float newpan);
@@ -229,6 +231,7 @@ class MachineCallbacks {
 /// Base class for "Machines", the audio producing elements.
 class PSYCLE__CORE__DECL Machine {
 	friend class CoreSong; friend class Psy2Filter; friend class Player;
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Draft for a new Machine Specification.
@@ -403,7 +406,7 @@ class PSYCLE__CORE__DECL Machine {
 
 	///\name cpu time usage measurement
 	///\{
-		public: void reset_time_measurement() throw() { accumulated_processing_time_ = 0; processing_count_ = 0; }
+public: void reset_time_measurement() throw() { accumulated_processing_time_ = *new universalis::stdlib::chrono::nanoseconds(0);processing_count_ = 0; }
 
 		public:  cpu_time_clock::duration accumulated_processing_time() const throw() { return accumulated_processing_time_; }
 		private: cpu_time_clock::duration accumulated_processing_time_;
@@ -517,7 +520,7 @@ class PSYCLE__CORE__DECL Machine {
 			int32_t _connectedOutputs;
 			/// Outgoing connections Machine numbers
 			///\todo hardcoded limits and wastes
-			Machine::id_type _outputMachines[MAX_CONNECTIONS];
+            Machine::id_type _outputMachines[MAX_CONNECTIONS];
 			/// Outgoing connections activated
 			///\todo hardcoded limits and wastes
 			bool _connection[MAX_CONNECTIONS];

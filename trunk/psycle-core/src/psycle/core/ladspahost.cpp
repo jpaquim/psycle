@@ -7,7 +7,9 @@
 #include "pluginfinder.h"
 #include "ladspamachine.h"
 #include "playertimeinfo.h"
+#ifndef Q_MOC_RUN
 #include <boost/filesystem.hpp>
+#endif
 #include <iostream>
 
 #if defined DIVERSALIS__OS__POSIX
@@ -15,7 +17,7 @@
 #elif defined DIVERSALIS__OS__MICROSOFT
 	#include <universalis/os/include_windows_without_crap.hpp>
 #else
-	#error unsupported platform
+	#error "unsupported platform"
 #endif
 
 namespace psycle { namespace core {

@@ -2,6 +2,7 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/detail/project.private.hpp>
+#include "fileio.h"
 #include "xmsampler.h"
 #include "xminstrument.h"
 #include "song.h"

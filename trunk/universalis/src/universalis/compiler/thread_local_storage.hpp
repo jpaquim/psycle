@@ -7,7 +7,7 @@
 #pragma once
 #include <universalis/detail/project.hpp>
 
-#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && !defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && !defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD && !defined DIVERSALIS__COMPILER__GNU
 	// thread_local is a keyword
 #else
 	#include "attribute.hpp"

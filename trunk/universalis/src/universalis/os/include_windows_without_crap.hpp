@@ -74,7 +74,7 @@
 	#endif
 
 	#if defined min || defined max
-		#error min and/or max macros managed to creep up!
+		#error "min and/or max macros managed to creep up!"
 	#endif
 
 	#if defined DIVERSALIS__COMPILER__MICROSOFT

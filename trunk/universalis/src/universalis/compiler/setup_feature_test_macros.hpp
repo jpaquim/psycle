@@ -7,8 +7,8 @@
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
 	// http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=575997
-	#define _GLIBCXX_USE_SCHED_YIELD
-	#define _GLIBCXX_USE_NANOSLEEP
+    //#define _GLIBCXX_USE_SCHED_YIELD
+    //#define _GLIBCXX_USE_NANOSLEEP
 	//#define _GLIBCXX_USE_CLOCK_REALTIME
 	//#define _GLIBCXX_USE_CLOCK_MONOTONIC
 #endif

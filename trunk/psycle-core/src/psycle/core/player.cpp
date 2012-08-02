@@ -20,10 +20,13 @@
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
+#include <universalis/compiler/thread_local_storage.hpp>
 #include <universalis/os/sched.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_alloc.hpp>
+#ifndef Q_MOC_RUN
 #include <boost/bind.hpp>
+#endif
 
 namespace psycle { namespace core {
 
@@ -33,7 +36,7 @@ using namespace audiodrivers;
 namespace loggers = universalis::os::loggers;
 
 namespace {
-	static thread_local bool this_thread_suspended_ = false;
+    static thread_local bool this_thread_suspended_ = false;
 	bool const ultra_trace(false);
 }
 
@@ -619,4 +622,5 @@ void Player::stopRecording() {
 	recording_ = false;
 }
 
-}}
+}
+                 }

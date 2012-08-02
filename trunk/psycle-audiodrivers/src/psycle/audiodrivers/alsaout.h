@@ -86,3 +86,4 @@ class AlsaOut : public AudioDriver {
 }}
 #endif // defined PSYCLE__ALSA_AVAILABLE
 #endif
+

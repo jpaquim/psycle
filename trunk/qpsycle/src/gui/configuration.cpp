@@ -8,7 +8,7 @@
 **********************************************************************************************/
 
 #include "configuration.hpp"
-#include <psycle/core/file.h>
+#include <psycle/core/fileio.h>
 
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/audiodrivers/wavefileout.h>
