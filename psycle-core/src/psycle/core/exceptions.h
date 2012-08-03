@@ -110,7 +110,7 @@ namespace exceptions {
 
 					
 					void operator_(universalis::compiler::location const & location, std::exception const * const e) const throw(function_error) {
-						operator_(identity<std::exception>(),location, e, e);
+						operator_(identity<std::exception>(),location, e);
 					}
 			};
 

@@ -204,7 +204,11 @@ resolver::resolver(boost::filesystem::path const & path, unsigned int const & ve
 	#elif !defined UNIVERSALIS__QUAQUAVERSALIS && defined DIVERSALIS__OS__MICROSOFT
 		// we use \ here instead of / because ::LoadLibraryEx will not use the LOAD_WITH_ALTERED_SEARCH_PATH option if it does not see a \ character in the file path:
 		boost::filesystem::path const final_path(decorated_filename(path, version));
-		underlying_ = ::LoadLibraryExA(final_path.file_string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
+		#if BOOST_FILESYSTEM_VERSION >= 3
+			underlying_ = ::LoadLibraryExA(final_path.string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
+		#else
+			underlying_ = ::LoadLibraryExA(final_path.file_string().c_str(), 0, LOAD_WITH_ALTERED_SEARCH_PATH);
+		#endif
 		if(!opened()) open_error(final_path, exceptions::desc());
 	#else
 		assert(Glib::Module::get_supported());
