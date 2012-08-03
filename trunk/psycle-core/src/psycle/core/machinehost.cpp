@@ -45,9 +45,15 @@ void MachineHost::FillFinderData(PluginFinder& finder, bool clearfirst) {
 			return;
 		}
 		for(std::list<boost::filesystem::path>::const_iterator i = fileList.begin(); i != fileList.end(); ++i) {
+		#if BOOST_FILESYSTEM_VERSION >= 3
             std::string const base_name(i->filename().string());
 			MachineKey key(hostCode(), base_name, 0);
             if(!finder.hasKey(key)) FillPluginInfo(i->string(), base_name, finder);
+		#else
+            std::string const base_name(i->leaf());
+			MachineKey key(hostCode(), base_name, 0);
+            if(!finder.hasKey(key)) FillPluginInfo(i->file_string(), base_name, finder);
+		#endif
 		}
 	}
 }
