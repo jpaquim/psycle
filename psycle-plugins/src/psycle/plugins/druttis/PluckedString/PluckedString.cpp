@@ -8,6 +8,7 @@
 #include "CVoice.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

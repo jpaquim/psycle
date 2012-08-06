@@ -1,6 +1,7 @@
 #include <psycle/plugin_interface.hpp>
 #include "SynthTrack.hpp"
 #include <cstdlib>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

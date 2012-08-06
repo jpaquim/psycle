@@ -8,6 +8,7 @@
 #include "CTrack.h"
 #include <psycle/plugin_interface.hpp>
 #include <memory>
+#include <cstdio>
 #include <cstring>
 
 using namespace psycle::plugin_interface;

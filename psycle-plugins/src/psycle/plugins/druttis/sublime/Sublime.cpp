@@ -8,6 +8,7 @@
 //#include <windows.h>
 #include "Voice.h"
 #include "../blwtbl/blwtbl.h"
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

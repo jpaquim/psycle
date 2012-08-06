@@ -20,6 +20,7 @@
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math.hpp>
 #include <universalis/stdlib/cstdint.hpp>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

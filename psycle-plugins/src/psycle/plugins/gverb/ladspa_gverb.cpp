@@ -17,6 +17,7 @@ Comments and suggestions should be mailed to Juhana Sadeharju
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

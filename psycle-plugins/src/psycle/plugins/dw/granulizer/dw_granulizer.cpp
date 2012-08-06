@@ -2,6 +2,8 @@
 #include <vector>
 #include <cmath>
 #include <cstdlib>
+#include <string.h>
+#include <cstdio>
 
 //////////////////////////////////////////////////////////////////////
 // dw granulizer plugin

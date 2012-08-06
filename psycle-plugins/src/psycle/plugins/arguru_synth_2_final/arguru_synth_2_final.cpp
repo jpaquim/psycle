@@ -3,6 +3,7 @@
 #include <psycle/helpers/math.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <cstdlib>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers;
