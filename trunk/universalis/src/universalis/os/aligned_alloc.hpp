@@ -9,6 +9,7 @@
 #include <diversalis/os.hpp>
 #include <diversalis/compiler.hpp>
 #include <universalis/compiler/location.hpp>
+#include <limits>
 
 #if defined DIVERSALIS__OS__POSIX
 	#include <cstdlib> // for posix_memalign
