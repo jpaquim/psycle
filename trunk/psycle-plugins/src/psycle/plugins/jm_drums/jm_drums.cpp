@@ -2,6 +2,8 @@
 #include "drum.hpp"
 #include <cstdlib>
 #include <cstdio>
+#include <cmath>
+#include <string.h>
 
 using namespace psycle::plugin_interface;
 
@@ -399,8 +401,8 @@ bool mi::DescribeValue(char* txt,int const param, int const value)
 			}
 			 return true;
 		case 13:
-			if ( value == -100 ) std::strcpy(txt,"Drum");
-			else if ( value == 100 ) std::strcpy(txt,"Thump");
+			if ( value == -100 ) strcpy(txt,"Drum");
+			else if ( value == 100 ) strcpy(txt,"Thump");
 			else if ( value < 0 ) std::sprintf(txt,"0.00 dB: %.02f dB",
 				20.0f * std::log10((100+value)*0.01f));
 			else std::sprintf(txt,"%.02f dB: 0.00 dB",

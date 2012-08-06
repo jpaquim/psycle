@@ -4,6 +4,7 @@
 #include "AllPass.hpp"
 #include "CombFilter.hpp"
 #include "LowPass.hpp"
+#include <cstdio>
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
