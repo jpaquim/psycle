@@ -7,6 +7,8 @@
 // http://ccrma.stanford.edu/software/stk/
 
 #include <psycle/plugin_interface.hpp>
+#include <cstdio>
+#include <cmath>
 #include <stk/Stk.h>
 #include <stk/Shakers.h>
 

@@ -7,6 +7,7 @@
 #include "./lib/chorus.h"
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #include <vector>
 #include <psycle/plugin_interface.hpp>
 #include <psycle/helpers/math/clip.hpp>
