@@ -2,6 +2,7 @@
 #include "track.hpp"
 #include <psycle/helpers/math.hpp>
 #include <cstring>
+#include <cstdio>
 #include <cmath>
 
 using namespace psycle::plugin_interface;

@@ -179,6 +179,7 @@ TODO LIST
 	
 #include "SynthTrack.h"
 #include <cstring>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 

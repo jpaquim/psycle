@@ -45,6 +45,7 @@ v0.01b
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
+#include <cstdio>
 
 #include "filter.h"
 

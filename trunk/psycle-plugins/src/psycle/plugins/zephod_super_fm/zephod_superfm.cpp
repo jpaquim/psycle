@@ -2,6 +2,7 @@
 #include "envelope.hpp"
 #include <universalis/stdlib/cstdint.hpp>
 #include <cmath>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 using namespace universalis::stdlib;

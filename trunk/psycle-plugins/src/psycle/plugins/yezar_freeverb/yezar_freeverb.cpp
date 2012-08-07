@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
+#include <cstdio>
 #include <cmath>
 
 /////////////////////////////////////////////////////////////////////

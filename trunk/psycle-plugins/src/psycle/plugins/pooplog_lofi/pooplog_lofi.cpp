@@ -25,6 +25,7 @@ v0.01b
 #include <cstring>
 #include <cstdlib>
 #include <cassert>
+#include <cstdio>
 
 using namespace psycle::plugin_interface;
 using namespace psycle::helpers::math;
