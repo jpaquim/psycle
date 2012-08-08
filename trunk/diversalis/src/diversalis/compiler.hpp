@@ -228,7 +228,7 @@
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#endif
 
-    #if (defined __GXX_EXPERIMENTAL_CXX0X__  || __cplusplus >= 201103L )
+	#ifdef __GXX_EXPERIMENTAL_CXX0X__
 		#define DIVERSALIS__COMPILER__FEATURE__CXX0X
 	#endif
 
@@ -336,7 +336,7 @@
 // table that lists C++0x features and their support in popular compilers
 // http://wiki.apache.org/stdcxx/C++0xCompilerSupport
 
-#if __cplusplus > 199711
+#if __cplusplus >= 201103L
 	#define DIVERSALIS__COMPILER__FEATURE__CXX0X
 #endif
 

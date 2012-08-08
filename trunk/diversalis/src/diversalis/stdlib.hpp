@@ -7,16 +7,15 @@
 #include "compiler.hpp"
 #include "os.hpp"
 
-#if __cplusplus >= 201100 || __STDC__VERSION__ >= 199901 || \
+#if __cplusplus >= 201103L || __STDC__VERSION__ >= 199901 || \
 	defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40000 && !defined DIVERSALIS__OS__CYGWIN
 
 	#define DIVERSALIS__STDLIB__MATH 199901
 #endif
 
-#ifdef DIVERSALIS__COMPILER__FEATURE__CXX0X
-	#if __cplusplus < 201100 && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION < 50000
-		#define DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
-	#endif
+#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && __cplusplus < 201103L && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION < 50000
+	/// C++ 2011 thread support still broken
+	#define DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
 #endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT
