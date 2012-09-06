@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2006-2010 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+# copyright 2006-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 # This script ensures source files have the subversion property "svn:eol-style" set to "native".
 
@@ -38,6 +38,9 @@ for i in $(find "${@:-$(dirname $0)/..}" \( \
 	-name \*.sln -or \
 	-name \*.vcproj -or \
 	-name \*.vsprops -or \
+	-name \*.vcxproj -or \
+	-name \*.vcxproj.filters -or \
+	-name \*.props -or \
 	-name README -or \
 	-name README-alpha -or \
 	-name INSTALL -or \
