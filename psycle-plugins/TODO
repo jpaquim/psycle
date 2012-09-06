@@ -1,4 +1,4 @@
-*	many plugins don't work fine with compiler optimisation -O2
+*	many plugins don't work fine with compiler optimisation -O3
 
 *	the external-packages/stk code is too old and incompatible with current distributions 
 
