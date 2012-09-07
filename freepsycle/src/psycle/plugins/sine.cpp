@@ -31,9 +31,9 @@ void sine::seconds_per_event_change_notification_from_port(port const & port) {
 
 void sine::do_process() {
 	if(!out_port_) return;
-	buffer::flags const phase_flag = phase_port_ ? phase_port_.buffer().flag() : buffer::flags::empty;
-	buffer::flags const  freq_flag =  freq_port_ ?  freq_port_.buffer().flag() : buffer::flags::empty;
-	buffer::flags const   amp_flag =   amp_port_ ?   amp_port_.buffer().flag() : buffer::flags::empty;
+	buffer::flags const phase_flag = phase_port_.buffer_flag();
+	buffer::flags const freq_flag = freq_port_.buffer_flag();
+	buffer::flags const amp_flag = amp_port_.buffer_flag();
 	#if 1
 		do_process_template_switch(*this, phase_flag, freq_flag, amp_flag);
 	#else

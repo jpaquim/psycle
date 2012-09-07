@@ -461,6 +461,8 @@ namespace ports {
 
 		public:
 			operator bool() const { return input_ports().size(); }
+
+		public:
 			void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 	};
 	
@@ -494,6 +496,7 @@ namespace ports {
 				}
 				return false;
 			}
+			buffer::flags buffer_flag() const { return *this ? this->buffer().flag() : buffer::flags::empty; }
 			
 		public:
 			void dump(std::ostream &, std::size_t tabulations = 0) const = 0;
@@ -543,10 +546,10 @@ namespace ports {
 				void do_propagate_seconds_per_event() /*override*/;
 
 			public:
-				operator bool() const {
-					return this->output_port() &&
-					static_cast<bool>(static_cast<input const &>(*this));
-				}
+				operator bool() const { return this->output_port() && static_cast<input const &>(*this); }
+				buffer::flags buffer_flag() const { return *this ? this->buffer().flag() : buffer::flags::empty; }
+
+			public:
 				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};
 
@@ -588,10 +591,10 @@ namespace ports {
 				bool single_connection_is_identity_transform_;
 
 			public:
-				operator bool() const {
-					return this->output_ports().size() &&
-					static_cast<bool>(static_cast<input const &>(*this));
-				}
+				operator bool() const { return this->output_ports().size() && static_cast<input const &>(*this); }
+				buffer::flags buffer_flag() const { return *this ? this->buffer().flag() : buffer::flags::empty; }
+
+			public:
 				void dump(std::ostream &, std::size_t tabulations = 0) const /*override*/;
 		};
 	}
