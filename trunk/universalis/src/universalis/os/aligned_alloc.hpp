@@ -54,7 +54,7 @@ void aligned_memory_dealloc(X *& address) {
 		_aligned_free(address);
 	#else
 		delete[] address;
-        #error "TODO alloc some extra mem and store orig pointer or alignment to the x[-1]"
+		#error "TODO alloc some extra mem and store orig pointer or alignment to the x[-1]"
 	#endif
 }
 

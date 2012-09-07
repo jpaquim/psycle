@@ -394,13 +394,13 @@
 // consistency check
 
 #if !defined DIVERSALIS__CPU && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-    #error "unknown cpu"
+	#error "unknown cpu"
 #endif
 
 #if !defined DIVERSALIS__CPU__ENDIAN && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-    #error "unknown byte sex"
+	#error "unknown byte sex"
 #endif
 
 #if !defined DIVERSALIS__CPU__FLOAT_ENDIAN && !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
-    #error "unknown float byte sex"
+	#error "unknown float byte sex"
 #endif

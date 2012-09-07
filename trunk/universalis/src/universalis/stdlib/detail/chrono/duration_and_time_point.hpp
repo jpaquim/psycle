@@ -9,13 +9,12 @@
 #if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && !defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
 	#include <chrono>
 	namespace universalis { namespace stdlib { namespace chrono {
-    typedef std::chrono::nanoseconds nanoseconds;
-        typedef std::chrono::microseconds microseconds;
-        typedef std::chrono::milliseconds milliseconds;
-        typedef std::chrono::seconds seconds;
-        typedef std::chrono::minutes minutes;
-        typedef std::chrono::hours hours;
-
+		using std::chrono::nanoseconds;
+		using std::chrono::microseconds;
+		using std::chrono::milliseconds;
+		using std::chrono::seconds;
+		using std::chrono::minutes;
+		using std::chrono::hours;
 		using std::chrono::time_point;
 	}}}
 #else
@@ -54,7 +53,7 @@
 			};
 		}
 
-        class nanoseconds : public detail::basic_duration<nanoseconds, int64_t, nano> {
+		class nanoseconds : public detail::basic_duration<nanoseconds, int64_t, nano> {
 			public:
 				nanoseconds(rep ns = 0) : basic_duration_type(ns) {}
 		};

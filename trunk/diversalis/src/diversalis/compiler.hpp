@@ -303,14 +303,14 @@
 		#define DIVERSALIS__COMPILER__FEATURE__RTTI
 	#else
 		///\todo _CPPRTTI is not defined in msvc8!?
-        //#error "please enable rtti"
+		//#error "please enable rtti"
 	#endif
 
 	#if defined _CPPUNWIND // defined for code compiled with -GX (Enable Exception Handling).
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#else
 		///\todo _CPPUNWIND is not defined in msvc8!?
-        //#error "please enable exception handling"
+		//#error "please enable exception handling"
 	#endif
 #endif
 
