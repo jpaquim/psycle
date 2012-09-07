@@ -6,8 +6,8 @@
 #pragma once
 
 #include "patternevent.h"
-#include "signalslib.h"
 #include "timesignature.h"
+#include <boost/signals.hpp>
 
 namespace psycle { namespace core {
 

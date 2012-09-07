@@ -39,7 +39,7 @@ namespace qpsycle {
 		public:
 		BehaviourPage( QWidget *parent = 0 );
 
-	public slots:
+	public Q_SLOTS:
 		void onSaveButtonClicked();
 		void onSettingsChanged();
 

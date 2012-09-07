@@ -6,9 +6,7 @@
 #pragma once
 
 #include "pattern.h"
-#ifndef Q_MOC_RUN
 #include <boost/noncopyable.hpp>
-#endif
 
 namespace psycle { namespace core {
 

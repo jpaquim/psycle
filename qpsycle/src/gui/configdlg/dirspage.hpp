@@ -41,7 +41,7 @@ Q_OBJECT
 public:
 	DirsPage( QWidget *parent = 0 );
 
-private slots:
+private Q_SLOTS:
 	void onSongBrowse();
 	void onPluginsBrowse();
 	void onPresetsBrowse();

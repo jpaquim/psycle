@@ -5,9 +5,7 @@
 #include "plugincatcher.h"
 #include "fileio.h"
 #include <universalis/os/fs.hpp>
-#ifndef Q_MOC_RUN
 #include <boost/filesystem/operations.hpp>
-#endif
 #include <iostream> // only for debug output
 #include <sstream>
 #include <cstring>

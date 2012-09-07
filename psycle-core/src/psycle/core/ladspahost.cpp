@@ -7,9 +7,7 @@
 #include "pluginfinder.h"
 #include "ladspamachine.h"
 #include "playertimeinfo.h"
-#ifndef Q_MOC_RUN
 #include <boost/filesystem.hpp>
-#endif
 #include <iostream>
 
 #if defined DIVERSALIS__OS__POSIX

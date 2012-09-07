@@ -40,7 +40,7 @@ private:
 public:
 	LooksPage( QWidget *parent = 0 );
 
-public slots:
+public Q_SLOTS:
 	void oncolorSchemeComboChanged( const QString &sheetName );
 	void onthemeComboChanged( const QString &themeName );
 
