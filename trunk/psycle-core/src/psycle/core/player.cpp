@@ -24,9 +24,7 @@
 #include <universalis/os/sched.hpp>
 #include <universalis/cpu/exception.hpp>
 #include <universalis/os/aligned_alloc.hpp>
-#ifndef Q_MOC_RUN
 #include <boost/bind.hpp>
-#endif
 
 namespace psycle { namespace core {
 

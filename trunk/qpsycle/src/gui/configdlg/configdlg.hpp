@@ -35,7 +35,7 @@ namespace qpsycle {
 		public:
 		ConfigDialog();
 
-	public slots:
+	public Q_SLOTS:
 		void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 
 	private:

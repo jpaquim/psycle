@@ -9,9 +9,7 @@
 #include "plugin.h"
 
 #include <universalis/os/dyn_link.hpp>
-#ifndef Q_MOC_RUN
 #include <boost/filesystem.hpp>
-#endif
 #include <iostream>
 #include <sstream>
 

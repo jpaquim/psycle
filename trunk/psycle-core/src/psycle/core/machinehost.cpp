@@ -6,9 +6,7 @@
 
 #include "pluginfinder.h"
 
-#ifndef Q_MOC_RUN
 #include <boost/filesystem.hpp>
-#endif
 #include <list>
 
 namespace psycle { namespace core {
