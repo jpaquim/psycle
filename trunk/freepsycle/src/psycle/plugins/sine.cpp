@@ -21,7 +21,7 @@ sine::sine(class plugin_library_reference & plugin_library_reference, name_type 
 void sine::seconds_per_event_change_notification_from_port(port const & port) {
 	quaquaversal_propagation_of_seconds_per_event_change_notification_from_port(port);
 		
-	// no easy way to get the value for old_events_per_second
+	// TODO no easy way to get the value for old_events_per_second
 	//this->step_ *= old_events_per_second * port.seconds_per_event();
 	
 	real const freq = this->freq();
@@ -35,8 +35,10 @@ void sine::do_process() {
 	buffer::flags const freq_flag = freq_port_.buffer_flag();
 	buffer::flags const amp_flag = amp_port_.buffer_flag();
 	#if 1
+		// Note: not ideal
 		do_process_template_switch(*this, phase_flag, freq_flag, amp_flag);
 	#else
+		// Note: ideal
 		ports::inputs::single * ports[] = {&phase_port_, &freq_port_, &amp_port_};
 		do_process_split<sizeof ports / sizeof *ports>(ports);
 		out_port_.buffer().flag(flags::continuous);
@@ -44,6 +46,7 @@ void sine::do_process() {
 }
 
 #if 1
+	// Note: this is not the ideal way to write the algorithm as there still is code duplication between the continuous and discrete cases.
 	template<
 		buffer::flags phase_flag,
 		buffer::flags  freq_flag,
@@ -105,6 +108,8 @@ void sine::do_process() {
 				ports::inputs::single & port = *ports[p];
 				if(port) {
 					auto buffer = port.buffer();
+					// TODO This is not taking multiple channels into account,
+					// TODO but see note in buffer::event about moving the indexes out of the per-channel aera.
 					auto chn = buffer[0];
 					switch(buffer.flag()) {
 						case buffer::flags::continuous:
@@ -126,17 +131,18 @@ void sine::do_process() {
 				}
 			}
 			{ std::ostringstream s; s << "loop i" << i << " e" << end << " p" << in[0] << " " << in[1] << " " << in[2]; loggers::trace()(s.str()); }
-			do_process_template_switch_x(i, end, *this, in[0], in[1], in[2]); ///\todo variadic
+			do_process_template_switch_x(i, end, *this, in[0], in[1], in[2]); // TODO variadic
 			i = end;
 		}
 	}
 
+	// TODO This would be the ideal way to write the algorithm as there is no code duplication. It relies on do_process_split calling it on slices.
 	template<bool have_phase, bool have_freq, bool have_amp>
 	void sine::do_process_template(
 		std::size_t phase_begin, std::size_t freq_begin, std::size_t amp_begin,
 		std::size_t out_begin, std::size_t out_end
 	) {
-		///\todo need iterator for each input
+		// TODO need iterator for each input
 		for(std::size_t i = out_begin; i < out_end; ++i) {
 			if(have_phase) phase_ = std::fmod(phase_chn()[phase_begin + i] + math::pi, 2 * math::pi) - math::pi;
 			if(have_freq) freq(freq_chn()[freq_begin + i]);

@@ -25,6 +25,7 @@ class PSYCLE__DECL sine : public node {
 
 	private:
 		#if 1
+			// Note: not ideal
 			template<
 				buffer::flags phase_flag,
 				buffer::flags  freq_flag,
@@ -32,17 +33,20 @@ class PSYCLE__DECL sine : public node {
 			>
 			void do_process_template(); friend class node;
 		#else
+			// Note: ideal
 			template<bool have_phase, bool have_freq, bool have_amp>
 			void do_process_template(std::size_t begin, std::size_t end);
 
 			template<int Ports>
 			void do_process_split(ports::inputs::single * ports[Ports]);
 
+			// a variant of what's declared in engine::node
 			template<bool... Evaluated_Bools, typename Node>
 			static void do_process_template_switch_x(std::size_t begin, std::size_t end, Node & node) {
 				node.template do_process_template<Evaluated_Bools...>(begin, end);
 			}
 
+			// a variant of what's declared in engine::node
 			template<bool... Evaluated_Bools, typename Node, typename... Bools_To_Evaluate>
 			static void do_process_template_switch_x(std::size_t begin, std::size_t end, Node & node, bool bool_to_evaluate, Bools_To_Evaluate... bools_to_evaluate) {
 				if(bool_to_evaluate)
