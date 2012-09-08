@@ -37,7 +37,7 @@ class event {
 			real sample_;
 	///\}
 
-	///\name index \todo move index to buffer, just like flag
+	///\name index TODO move index to buffer, just like flag
 	///\{
 		public:
 			/// the logical index of the sample.
