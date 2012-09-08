@@ -20,7 +20,7 @@ class score1 {
 		void connect(engine::node & out);
 		void generate();
 	private:
-		std::size_t const static size = 50;
+		std::size_t const static size = 200;
 		
 		std::vector<engine::sequence*> freq_seqs_;
 		std::vector<engine::sequence*> pulse_seqs_;
