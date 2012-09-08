@@ -24,7 +24,8 @@ class PSYCLE__DECL sine : public node {
 		void do_process() override;
 
 	private:
-		#if 1
+		#define PSYCLE__TODO__IDEAL 1
+		#if PSYCLE__TODO__IDEAL
 			// Note: not ideal
 			template<
 				buffer::flags phase_flag,
@@ -35,7 +36,10 @@ class PSYCLE__DECL sine : public node {
 		#else
 			// Note: ideal
 			template<bool have_phase, bool have_freq, bool have_amp>
-			void do_process_template(std::size_t begin, std::size_t end);
+			void do_process_template(
+				std::size_t out_begin, std::size_t out_end,
+				std::size_t phase_begin, std::size_t freq_begin, std::size_t amp_begin
+			);
 
 			template<int Ports>
 			void do_process_split(ports::inputs::single * ports[Ports]);
@@ -53,6 +57,21 @@ class PSYCLE__DECL sine : public node {
 					do_process_template_switch_x<Evaluated_Bools..., true>(begin, end, node, bools_to_evaluate...);
 				else
 					do_process_template_switch_x<Evaluated_Bools..., false>(begin, end, node, bools_to_evaluate...);
+			}
+
+			// a variant of what's declared in engine::node
+			template<bool... Evaluated_Bools, typename Node, typename... Begins>
+			static void do_process_template_switch_xx(std::size_t begin, std::size_t end, Node & node, Begins... begins) {
+				node.template do_process_template<Evaluated_Bools...>(begin, end, begins...);
+			}
+
+			// a variant of what's declared in engine::node
+			template<bool... Evaluated_Bools, typename Node, typename... Bools_To_Evaluate>
+			static void do_process_template_switch_xx(std::size_t begin, std::size_t end, Node & node, bool bool_to_evaluate, std::size_t input_begin, Bools_To_Evaluate... bools_to_evaluate) {
+				if(bool_to_evaluate)
+					do_process_template_switch_xx<Evaluated_Bools..., true>(begin, end, node, input_begin, bools_to_evaluate...);
+				else
+					do_process_template_switch_xx<Evaluated_Bools..., false>(begin, end, node, input_begin, bools_to_evaluate...);
 			}
 		#endif
 
