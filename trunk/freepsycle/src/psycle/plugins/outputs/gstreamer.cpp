@@ -404,24 +404,24 @@ void gstreamer::do_process() {
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the intermediate buffer
-		unsigned int const channels(in_port().channels());
-		unsigned int const samples_per_buffer(graph().events_per_buffer());
+		unsigned int const channels = in_port().channels();
+		unsigned int const samples_per_buffer = graph().events_per_buffer();
 		assert(last_samples_.size() == channels);
-		for(unsigned int c(0); c < channels; ++c) {
-			buffer::channel const & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_) + c);
-			unsigned int spread(0);
-			for(std::size_t e(0), s(in.size()); e < s; ++e) {
-				real s(in[e].sample());
+		for(unsigned int channel = 0; channel < channels; ++channel) {
+			buffer const & in = in_port().buffer();
+			output_sample_type * out = reinterpret_cast<output_sample_type*>(intermediate_buffer_) + channel;
+			unsigned int spread = 0;
+			for(std::size_t event = 0, end = in.events(); event < end; ++event) {
+				real s = in.sample(event);
 				{
 					s *= std::numeric_limits<output_sample_type>::max();
 					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
 					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
 				}
-				last_samples_[c] = static_cast<output_sample_type>(s);
-				for( ; spread <= in[e].index() ; ++spread, ++out) *out = last_samples_[c];
+				last_samples_[channel] = static_cast<output_sample_type>(s);
+				for( ; spread <= in.index(event) ; ++spread, ++out) *out = last_samples_[channel];
 			}
-			for( ; spread < samples_per_buffer ; ++spread, ++out) *out = last_samples_[c];
+			for( ; spread < samples_per_buffer ; ++spread, ++out) *out = last_samples_[channel];
 		}
 	}
 	{ scoped_lock lock(mutex_);

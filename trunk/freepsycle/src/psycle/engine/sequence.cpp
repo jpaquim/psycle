@@ -53,14 +53,15 @@ void sequence_iterator::beat(real beat) {
 void sequence_iterator::process(buffer & out, real events_per_second, std::size_t channels) {
 	real const samples_per_beat = events_per_second * seconds_per_beat_;
 	if(!samples_per_beat) return;
-	uint64_t const initial_sample(static_cast<std::size_t>(beat_ * samples_per_beat));
-	real last_beat(beat_ + (out.events() - 1) / samples_per_beat);
-	std::size_t last_event(0), last_event_index(0);
+	uint64_t const initial_sample = static_cast<std::size_t>(beat_ * samples_per_beat);
+	real last_beat = beat_ + (out.events() - 1) / samples_per_beat;
+	std::size_t last_event = 0, last_event_index = 0;
 	for(; i_ != sequence_.events_.end() && i_->first < last_beat; ++i_) {
-		real const b(i_->first), s(i_->second);
-		std::size_t const i(static_cast<std::size_t>(b * samples_per_beat - initial_sample));
+		real const b = i_->first, s = i_->second;
+		std::size_t const i = static_cast<std::size_t>(b * samples_per_beat - initial_sample);
 		if(i < out.events() && last_event < out.events()) {
-			for(std::size_t c(0); c < channels; ++c) out[c][last_event](i, s);
+			out.index(last_event) = i;
+			for(std::size_t c(0); c < channels; ++c) out.sample(last_event, c) = s;
 			if(i != last_event_index) {
 				last_event_index = i;
 				++last_event;
@@ -82,9 +83,8 @@ void sequence_iterator::process(buffer & out, real events_per_second, std::size_
 			break;
 		}
 	}
-	if(last_event) out.flag(buffer::flags::discrete);
-	else out.flag(buffer::flags::empty);
-	if(last_event < out.events()) for(std::size_t c(0); c < channels; ++c) out[c][last_event].index(out.events());
+	out.flag(last_event ? buffer::flags::discrete : buffer::flags::empty);
+	if(last_event < out.events()) for(std::size_t c(0); c < channels; ++c) out.index(last_event) = out.events();
 	beat_ = last_beat;
 }
 

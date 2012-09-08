@@ -53,41 +53,45 @@ void sine::do_process() {
 		buffer::flags   amp_flag
 	>
 	void sine::do_process_template() {
-		for(std::size_t phase_evt = 0, freq_evt = 0, amp_evt = 0, out_evt = 0; out_evt < out_chn().size(); ++out_evt) {
+		for(
+			std::size_t phase_evt = 0, freq_evt = 0, amp_evt = 0, out_evt = 0, end = out_port_.buffer().events();
+			out_evt < end; ++out_evt
+		) {
 			switch(phase_flag) {
 				case buffer::flags::continuous:
-					phase_ = std::fmod(phase_chn()[out_evt].sample() + math::pi, 2 * math::pi) - math::pi;
+					phase_ = std::fmod(phase_port_.buffer().sample(out_evt) + math::pi, 2 * math::pi) - math::pi;
 				break;
 				case buffer::flags::discrete:
-					if(phase_evt < phase_chn().size() && phase_chn()[phase_evt].index() == out_evt)
-						phase_ = std::fmod(phase_chn()[phase_evt++].sample() + math::pi, 2 * math::pi) - math::pi;
+					if(phase_evt < end && phase_port_.buffer().index(phase_evt) == out_evt)
+						phase_ = std::fmod(phase_port_.buffer().sample(phase_evt++) + math::pi, 2 * math::pi) - math::pi;
 				break;
 				case buffer::flags::empty: default: /* nothing */ ;
 			}
 
 			switch(freq_flag) {
 				case buffer::flags::continuous:
-					freq(freq_chn()[out_evt].sample());
+					freq(freq_port_.buffer().sample(out_evt));
 				break;
 				case buffer::flags::discrete:
-					if(freq_evt < freq_chn().size() && freq_chn()[freq_evt].index() == out_evt)
-						freq(freq_chn()[freq_evt++].sample());
+					if(freq_evt < end && freq_port_.buffer().index(freq_evt) == out_evt)
+						freq(freq_port_.buffer().sample(freq_evt++));
 				break;
 				case buffer::flags::empty: default: /* nothing */ ;
 			}
 
 			switch(amp_flag) {
 				case buffer::flags::continuous:
-					amp_ = amp_chn()[out_evt].sample();
+					amp_ = amp_port_.buffer().sample(out_evt);
 				break;
 				case buffer::flags::discrete:
-					if(amp_evt < amp_chn().size() && amp_chn()[amp_evt].index() == out_evt)
-						amp_ = amp_chn()[amp_evt++].sample();
+					if(amp_evt < end && amp_port_.buffer().index(amp_evt) == out_evt)
+						amp_ = amp_port_.buffer().sample(amp_evt++);
 				break;
 				case buffer::flags::empty: default: /* nothing */ ;
 			}
 
-			out_chn()[out_evt](out_evt, amp_ * math::fast_sin<2>(phase_));
+			out_port_.buffer().index(out_evt) = out_evt;
+			out_port_.buffer().sample(out_evt) = amp_ * math::fast_sin<2>(phase_);
 			phase_ += step_;
 			if(phase_ > math::pi) phase_ -= 2 * math::pi;
 		}

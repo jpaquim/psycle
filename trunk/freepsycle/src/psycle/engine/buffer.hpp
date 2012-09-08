@@ -14,99 +14,9 @@ typedef double real;
 
 namespace math = helpers::math;
 
-/// a sample with an associated, logical, index.
-/// the index corresponds to a logical (i.e., not physical) position in a buffer.
-class event {
-	///\name sample
-	///\{
-		public:
-			/// the immutable value of the sample.
-			///\return immutable value of the sample
-			real sample() const { return sample_; }
-			operator real() const { return sample_; }
-
-			/// the mutable value of the sample.
-			///\return mutable value of the sample
-			real & sample() { return sample_; }
-			operator real&() { return sample_; }
-
-			/// sets the value of the sample.
-			///\param the value of the sample
-			void sample(real const & sample) { sample_ = sample; }
-		private:
-			real sample_;
-	///\}
-
-	///\name index TODO move index to buffer, just like flag
-	///\{
-		public:
-			/// the logical index of the sample.
-			///\returns the logical index of the sample
-			std::size_t index() const { return index_; }
-
-			/// the mutable logical index of the sample.
-			///\returns mutable value of the logical index of the sample
-			std::size_t & index() { return index_; }
-
-			/// sets the logical index of the sample.
-			///\param the logical index of the sample
-			void index(std::size_t index) { index_ = index; }
-		private:
-			std::size_t index_;
-	///\}
-
-	public:
-		/// sets both the logical index and the sample value.
-		void operator()(std::size_t index, real const & sample) { index_ = index; sample_ = sample; }
-	
-		/// compares the logical indexes of two events.
-		/// The value of the sample is not taken into account.
-		///\return true if this event has a logical index equal to the one of the other event.
-		bool operator==(event const & event) const { return index_ == event.index_; }
-
-		/// compares the logical indexes of two events.
-		/// The value of the sample is not taken into account.
-		///\return true if this event has a logical index lower than the one of the other event.
-		bool operator<(event const & event) const { return index_ < event.index_; }
-};
-
-/// a vector of events.
-class PSYCLE__DECL channel {
-	public:
-		typedef class event event;
-		
-		/// creates a new zero-sized channel.
-		channel() {}
-
-		/// creates a new channel with the given number of events.
-		///\param events the number of events
-		channel(std::size_t events) : events_(events) {}
-
-	///\name vector of events
-	///\{
-		private:
-			typedef std::vector<event> events_type;
-			events_type events_;
-		public:
-			events_type::size_type size() const { return events_.size(); }
-			void resize(events_type::size_type events) { events_.resize(events); }
-			typedef events_type::const_iterator const_iterator;
-			typedef events_type::iterator iterator;
-			const_iterator begin() const { return events_.begin(); }
-			iterator begin() { return events_.begin(); }
-			const_iterator end() const { return events_.end(); }
-			iterator end() { return events_.end(); }
-			events_type::const_reference operator[](events_type::size_type event) const { assert(event < size()); return events_[event]; }
-			events_type::reference operator[](events_type::size_type event) { assert(event < size()); return events_[event]; }
-	///\}
-};
-
-/// a vector of channels.
+/// vectors of channels of samples, and logical indexes.
 class PSYCLE__DECL buffer {
 	public:
-		typedef class channel channel;
-		typedef class event event;
-
 		/// creates a new buffer with the given number of channels and the given number of events in each channel.
 		///\param channels the number of channels
 		///\param events the number of events in each channel
@@ -117,7 +27,7 @@ class PSYCLE__DECL buffer {
 
 		/// the number of channels (size of the vector of channels).
 		///\return the number of channels
-		std::size_t channels() const { return channels_.size(); }
+		std::size_t channels() const { return samples_.size(); }
 
 		/// sets the number of channels.
 		///\param the number of channels
@@ -137,12 +47,12 @@ class PSYCLE__DECL buffer {
 		void resize(std::size_t channels, std::size_t events);
 
 		/// clears all events.
-		/// A complexity of o(channels) is achieved by simply setting the index of the first event.
-		void inline clear(std::size_t channels);
+		/// A complexity of o(1) is achieved by simply setting the index of the first event. TODO only setting flag is necessary.
+		void clear() { *indexes_.begin() = events(); flag(flags::empty); /* TODO only setting flag is necessary */ }
 
 		/// copies the first given number of channels from another buffer into this buffer.
 		///\param buffer the buffer to copy from
-		///\param the number of channels to copy
+		///\param channels the number of channels to copy
 		void inline copy(buffer const &, std::size_t channels);
 
 	private:
@@ -163,21 +73,39 @@ class PSYCLE__DECL buffer {
 			flags flag_;
 	///\}
 	
-	///\name vector of channels
+	///\name access to samples
+	///\{
+		public:
+			real const & sample(std::size_t event, std::size_t channel = 0) const {
+				assert(event < events());
+				assert(channel < channels());
+				return samples_[channel][event];
+			}
+
+			real & sample(std::size_t event, std::size_t channel = 0) {
+				assert(event < events());
+				assert(channel < channels());
+				return samples_[channel][event];
+			}
+		private:
+			typedef std::vector<std::vector<real>> samples_type;
+			samples_type samples_;
+	///\}
+
+	///\name vector of indexes
+	/// Samples are associated a logical index.
+	/// The index corresponds to a logical (i.e., not physical) position in a buffer.
 	///\{
 		private:
-			typedef std::vector<channel> channels_type;
-			channels_type channels_;
+			typedef std::vector<std::size_t> indexes_type;
+			indexes_type indexes_;
 		public:
-			typedef channels_type::const_iterator const_iterator;
-			typedef channels_type::iterator iterator;
-			const_iterator begin() const { return channels_.begin(); }
-			iterator begin() { return channels_.begin(); }
-			const_iterator end() const { return channels_.end(); }
-			iterator end() { return channels_.end(); }
-			channels_type::const_reference operator[](channels_type::size_type channel) const { assert(channel < channels()); return channels_[channel]; }
-			channels_type::reference operator[](channels_type::size_type channel) { assert(channel < channels()); return channels_[channel]; }
+			indexes_type::const_reference index(indexes_type::size_type event) const { assert(event < events()); return indexes_[event]; }
+			indexes_type::reference index(indexes_type::size_type event) { assert(event < events()); return indexes_[event]; }
 	///\}
+	
+	public:
+		operator bool() const { return events() && events() > index(0); }
 };
 
 }}
@@ -188,12 +116,6 @@ class PSYCLE__DECL buffer {
 
 namespace psycle { namespace engine {
 
-void buffer::clear(std::size_t channels) {
-	for(std::size_t channel = 0 ; channel < channels ; ++channel)
-		(*this)[channel].begin()->index(events());
-	flag(flags::empty);
-}
-
 void buffer::copy(buffer const & buffer, std::size_t channels) {
 	if(loggers::trace()()) {
 		std::ostringstream s;
@@ -201,10 +123,11 @@ void buffer::copy(buffer const & buffer, std::size_t channels) {
 		loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 	}
 	assert("not copying itself: " && this != &buffer); // would not cause a bug, but this catches lacks of optimizations.
-	for(std::size_t channel = 0; channel < channels ; ++channel) {
-		///\todo we can even optimise the loop with the flag information
-		for(std::size_t event = 0; event < events() && buffer[channel][event].index() < events() ; ++event)
-			(*this)[channel][event] = buffer[channel][event];
+	// TODO We can even optimise the loop with the flag information.
+	for(std::size_t event = 0; event < events() && buffer.indexes_[event] < events() ; ++event) {
+		indexes_[event] = buffer.indexes_[event];
+		for(std::size_t channel = 0; channel < channels ; ++channel)
+			samples_[channel][event] = buffer.samples_[channel][event];
 	}
 	flag(buffer.flag());
 }
