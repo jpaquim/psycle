@@ -31,21 +31,21 @@ void sine::seconds_per_event_change_notification_from_port(port const & port) {
 
 void sine::do_process() {
 	if(!out_port_) return;
-	buffer::flags const phase_flag = phase_port_.buffer_flag();
-	buffer::flags const freq_flag = freq_port_.buffer_flag();
-	buffer::flags const amp_flag = amp_port_.buffer_flag();
-	#if 1
+	#if PSYCLE__TODO__IDEAL
 		// Note: not ideal
+		buffer::flags const phase_flag = phase_port_.buffer_flag();
+		buffer::flags const freq_flag = freq_port_.buffer_flag();
+		buffer::flags const amp_flag = amp_port_.buffer_flag();
 		do_process_template_switch(*this, phase_flag, freq_flag, amp_flag);
 	#else
 		// Note: ideal
 		ports::inputs::single * ports[] = {&phase_port_, &freq_port_, &amp_port_};
 		do_process_split<sizeof ports / sizeof *ports>(ports);
-		out_port_.buffer().flag(flags::continuous);
+		out_port_.buffer().flag(buffer::flags::continuous);
 	#endif
 }
 
-#if 1
+#if PSYCLE__TODO__IDEAL
 	// Note: this is not the ideal way to write the algorithm as there still is code duplication between the continuous and discrete cases.
 	template<
 		buffer::flags phase_flag,
@@ -100,10 +100,9 @@ void sine::do_process() {
 #else
 	template<int Ports>
 	void sine::do_process_split(ports::inputs::single * ports[Ports]) {
-		std::size_t const size = out_chn().size();
-		std::size_t is[Ports];
+		std::size_t const size = out_port_.buffer().events();
+		std::size_t is[Ports]; for(std::size_t i = 0; i < Ports; ++i) is[i] = 0;
 		std::size_t i = 0;
-		for(std::size_t i = 0; i < Ports; ++i) is[i] = 0;
 		while(i < size) {
 			std::size_t end = size;
 			bool in[Ports];
@@ -112,22 +111,19 @@ void sine::do_process() {
 				ports::inputs::single & port = *ports[p];
 				if(port) {
 					auto buffer = port.buffer();
-					// TODO This is not taking multiple channels into account,
-					// TODO but see note in buffer::event about moving the indexes out of the per-channel aera.
-					auto chn = buffer[0];
 					switch(buffer.flag()) {
 						case buffer::flags::continuous:
 							in[p] = true;
 						break;
 						case buffer::flags::discrete:
-							if(is[p] < chn.size()) {
-								if(chn[is[p]].index() == i) {
+							if(is[p] < buffer.events()) {
+								if(buffer.index(is[p]) == i) {
 									{ std::ostringstream s; s << "pulse i" << i << " p" << p << " is" << is[p]; loggers::trace()(s.str()); }
 									end = i;
 									++is[p];
 									in[p] = true;
-								} else if(chn[is[p]].index() < end) {
-									end = chn[is[p]].index();
+								} else if(buffer.index(is[p]) < end) {
+									end = buffer.index(is[p]);
 									{ std::ostringstream s; s << "end i" << i << " p" << p << " e" << end; loggers::trace()(s.str()); }
 								}
 							}
@@ -135,7 +131,7 @@ void sine::do_process() {
 				}
 			}
 			{ std::ostringstream s; s << "loop i" << i << " e" << end << " p" << in[0] << " " << in[1] << " " << in[2]; loggers::trace()(s.str()); }
-			do_process_template_switch_x(i, end, *this, in[0], in[1], in[2]); // TODO variadic
+			do_process_template_switch_xx(i, end, *this, in[0], is[0], in[1], is[1], in[2], is[2]); // TODO variadic
 			i = end;
 		}
 	}
@@ -143,15 +139,16 @@ void sine::do_process() {
 	// TODO This would be the ideal way to write the algorithm as there is no code duplication. It relies on do_process_split calling it on slices.
 	template<bool have_phase, bool have_freq, bool have_amp>
 	void sine::do_process_template(
-		std::size_t phase_begin, std::size_t freq_begin, std::size_t amp_begin,
-		std::size_t out_begin, std::size_t out_end
+		std::size_t out_begin, std::size_t out_end,
+		std::size_t phase_begin, std::size_t freq_begin, std::size_t amp_begin
 	) {
 		// TODO need iterator for each input
 		for(std::size_t i = out_begin; i < out_end; ++i) {
-			if(have_phase) phase_ = std::fmod(phase_chn()[phase_begin + i] + math::pi, 2 * math::pi) - math::pi;
-			if(have_freq) freq(freq_chn()[freq_begin + i]);
-			if(have_amp) amp_ = amp_chn()[amp_begin + i];
-			out_chn()[out_begin + i](out_begin + i, amp_ * math::fast_sin<2>(phase_));
+			if(have_phase) phase_ = std::fmod(phase_port_.buffer().sample(phase_begin + i) + math::pi, 2 * math::pi) - math::pi;
+			if(have_freq) freq(freq_port_.buffer().sample(freq_begin + i));
+			if(have_amp) amp_ = amp_port_.buffer().sample(amp_begin + i);
+			out_port_.buffer().index(out_begin + i) = out_begin + i;
+			out_port_.buffer().sample(out_begin + i) = amp_ * math::fast_sin<2>(phase_);
 			phase_ += step_;
 			if(phase_ > math::pi) phase_ -= 2 * math::pi;
 		}
