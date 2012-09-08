@@ -255,6 +255,7 @@ class PSYCLE__DECL node : public named {
 		private:
 			/// this function is the placeholder where to put the dsp algorithm.
 			/// re-implement this function in a derived class and put your own code in it.
+			/// Note: in the derived node class, you must declare the base engine node class as a friend.
 			virtual void do_process() = 0;
 
 			template<buffer::flags... Evaluated_Flags, typename Node>
