@@ -36,42 +36,36 @@ template<
 	buffer::flags decay_flag
 >
 void decay::do_process_template() {
-	for(std::size_t
-		pulse_event(0),
-		decay_event(0),
-		out_event(0); out_event < out_channel().size(); ++out_event
+	for(
+		std::size_t pulse_event = 0, decay_event = 0, out_event = 0, end = out_port_.buffer().events();
+		out_event < end; ++out_event
 	) {
 		switch(pulse_flag) {
 			case buffer::flags::continuous:
-				this->current_ = pulse_channel()[out_event].sample();
+				this->current_ = pulse_port_.buffer().sample(out_event);
 			break;
 			case buffer::flags::discrete:
-				if(pulse_event < pulse_channel().size() && pulse_channel()[pulse_event].index() == out_event)
-					this->current_ = pulse_channel()[pulse_event++].sample();
+				if(pulse_event < end && pulse_port_.buffer().index(pulse_event) == out_event)
+					current_ = pulse_port_.buffer().sample(pulse_event++);
 			break;
 			case buffer::flags::empty: default: /* nothing */ ;
 		}
 		switch(decay_flag) {
 			case buffer::flags::continuous:
-				this->decay_per_second(decay_channel()[out_event].sample());
+				decay_per_second(decay_port_.buffer().sample(out_event));
 			break;
 			case buffer::flags::discrete:
-				#if 0 // more friendly way
-					auto decay = decay_channel()[out_event];
-					if(decay) this->decay_per_second(decay.sample());
-				#else
-					if(decay_event < decay_channel().size() && decay_channel()[decay_event].index() == out_event)
-						this->decay_per_second(decay_channel()[decay_event++].sample());
-				#endif
+				if(decay_event < end && decay_port_.buffer().index(decay_event) == out_event)
+					decay_per_second(decay_port_.buffer().sample(decay_event++));
 			break;
 			case buffer::flags::empty: default: /* nothing */ ;
 		}
-		out_channel()[out_event](out_event, current_);
+		out_port_.buffer().index(out_event) = out_event;
+		out_port_.buffer().sample(out_event) = current_;
 		current_ *= decay_;
 	}
-	///\todo flush to zero
-	if(current_) out_port_.buffer().flag(buffer::flags::continuous);
-	else out_port_.buffer().flag(buffer::flags::empty);
+	// TODO flush to zero
+	out_port_.buffer().flag(current_ ? buffer::flags::continuous : buffer::flags::empty);
 }
 
 }}

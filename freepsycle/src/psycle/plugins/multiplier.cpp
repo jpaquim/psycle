@@ -14,9 +14,9 @@ void multiplier::do_process() {
 	buffer const & in(in_port().buffer());
 	buffer & out(out_port().buffer());
 	assert(out.channels() == in.channels());
-	for(std::size_t channel = 0; channel < in.channels() ; ++channel)
-		for(std::size_t event = 0; event < in.events() && in[channel][event].index() < in.events() ; ++event)
-			out[channel][event].sample() *= in[channel][event].sample();
+	for(std::size_t event = 0; event < in.events() && in.index(event) < in.events() ; ++event)
+		for(std::size_t channel = 0; channel < in.channels() ; ++channel)
+			out.sample(event, channel) *= in.sample(event, channel);
 			// note that we do not need to set the index because in and out have the same buffer.
 }
 

@@ -627,31 +627,31 @@ void alsa::do_process() {
 		while(!io_ready()) condition_.wait(lock);
 	}
 	{ // fill the intermediate buffer
-		unsigned int const channels(in_port().channels());
-		::snd_pcm_uframes_t const samples_per_buffer(graph().events_per_buffer());
-		//assert(last_samples_.size() == channels); ///\todo last_samples_
-		for(unsigned int c(0); c < channels; ++c) {
-			engine::buffer::channel const & in(in_port().buffer()[c]);
-			output_sample_type * out(reinterpret_cast<output_sample_type*>(intermediate_buffer_));
+		unsigned int const channels = in_port().channels();
+		::snd_pcm_uframes_t const samples_per_buffer = graph().events_per_buffer();
+		//assert(last_samples_.size() == channels); // TODO last_samples_
+		for(unsigned int channel = 0; channel < channels; ++channel) {
+			engine::buffer const & in = in_port().buffer();
+			output_sample_type * out = reinterpret_cast<output_sample_type*>(intermediate_buffer_);
 		
 			// retrieve the last sample written on this channel
 			// sss: sparse spread sample
-			///\todo last_samples_
-			output_sample_type sss(0); ///\todo support for non-interleaved channels
+			// TODO last_samples_
+			output_sample_type sss = 0; // TODO support for non-interleaved channels
 			// ssi: sparse spread index
-			unsigned int ssi(0);
-			for(std::size_t e(0), s(in.size()); e < s && in[e].index() < samples_per_buffer; ++e) {
-				real s(in[e].sample());
+			unsigned int ssi = 0;
+			for(std::size_t event = 0, end = in.events(); event < end && in.index(event) < samples_per_buffer; ++event) {
+				real s = in.sample(event, channel);
 				{
-					///\todo use bits_per_channel_sample_;
+					// TODO use bits_per_channel_sample_;
 					s *= std::numeric_limits<output_sample_type>::max();
 					if     (s < std::numeric_limits<output_sample_type>::min()) s = std::numeric_limits<output_sample_type>::min();
 					else if(s > std::numeric_limits<output_sample_type>::max()) s = std::numeric_limits<output_sample_type>::max();
 				}
 				sss = ::lrint(s);
-				for( ; ssi <= in[e].index(); ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
+				for( ; ssi <= in.index(event); ++ssi) out[ssi + channel] = sss; // TODO support for non-interleaved channels
 			}
-			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + c] = sss; ///\todo support for non-interleaved channels
+			for( ; ssi < samples_per_buffer; ++ssi) out[ssi + channel] = sss; // TODO support for non-interleaved channels
 		}
 	}
 	// We don't write to the device here, because it must be done by the poller thread or libasound crashes.
