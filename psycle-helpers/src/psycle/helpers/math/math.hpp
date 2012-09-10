@@ -48,18 +48,17 @@ remainder/modulo:
 namespace psycle { namespace helpers { namespace math {
 
 /// asinh
-/*
-#if DIVERSALIS__STDLIB__MATH >= 199901
+#if DIVERSALIS__STDLIB__MATH >= 199901L
 	using std::asinh;
 #else
-*/	template<typename Real> UNIVERSALIS__COMPILER__CONST
+	template<typename Real> UNIVERSALIS__COMPILER__CONST
 	Real inline asinh(Real x) throw() {
 		return
 			x > 0 ?
 			+std::log(+x + std::sqrt(Real(1) + x * x)) :
 			-std::log(-x + std::sqrt(Real(1) + x * x));
 	}
-//#endif
+#endif
 
 
 /// compares two floating point numbers for rough equality (difference less than epsilon by default).

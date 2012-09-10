@@ -138,22 +138,22 @@ inline void Filter::WorkStereo(float& l, float& r) {
 #define FILT_CLIP(i) CLAMP(i, -4096.0, 4096.0)
 
 inline void ITFilter::Work(float & sample) {
-    double y = ((double)sample * fCoeff[0] + fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
+	double y = ((double)sample * fCoeff[0] + fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
 				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
 	fLastSampleLeft[0] = fLastSampleLeft[1];
 	fLastSampleLeft[1] = y;
-    sample = y;
+	sample = y;
 }
 
 inline void ITFilter::WorkStereo(float & left, float & right) {
-    double fyL = ((double)left * fCoeff[0] 
+	double fyL = ((double)left * fCoeff[0] 
 				+ fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
 				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
 	fLastSampleLeft[0] = fLastSampleLeft[1];
 	fLastSampleLeft[1] = fyL;
 	left = fyL;
 
-    double fyR = ((double)right * fCoeff[0] 
+	double fyR = ((double)right * fCoeff[0] 
 				+ fLastSampleRight[1] * (fCoeff[1] + fCoeff[2]) 
 				+ FILT_CLIP((fLastSampleRight[0]-fLastSampleRight[1]) * fCoeff[2]));
 	fLastSampleRight[0] = fLastSampleRight[1];
