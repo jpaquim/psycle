@@ -316,9 +316,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 				if(parameter != 1) break;
 				enum Parameters { gain };
 				static const int parameters [] = { gain };
-                int & p = parameter;
-                parameter--;
-                p = parameters[parameter];
+				parameter = parameters[--parameter];
 				switch(parameter) {
 					case gain:
 						if( value < 1.0f) value = 0;
@@ -331,10 +329,8 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { input_gain, output_gain, positive_threshold, positive_clamp, negative_threshold, negative_clamp, symmetric };
 				static const int parameters [] = { positive_threshold, positive_clamp, negative_threshold, negative_clamp };
-                int & p = parameter;
-                parameter--;
-                p = parameters[parameter];
-                switch(parameter) {
+				parameter = parameters[--parameter];
+				switch(parameter) {
 					case negative_threshold:
 					case negative_clamp:
 					case positive_threshold:
@@ -348,10 +344,8 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { dry, wet, left_delay, left_feedback, right_delay, right_feedback };
 				static const int parameters [] = { left_delay, left_feedback, right_delay, right_feedback, dry, wet };
-                int & p = parameter;
-                parameter--;
-                p = parameters[parameter];
-                switch(parameter) {
+				parameter = parameters[--parameter];
+				switch(parameter) {
 					case left_delay:
 					case right_delay:
 						value *= Real(2 * 3 * 4 * 5 * 7) / Player::singleton().timeInfo().samplesPerTick();
@@ -371,10 +365,8 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { delay, modulation_amplitude, modulation_radians_per_second, modulation_stereo_dephase, interpolation, dry, wet, left_feedback, right_feedback };
 				static const int parameters [] = { delay, modulation_amplitude, modulation_radians_per_second, left_feedback, modulation_stereo_dephase, right_feedback, dry, wet, interpolation };
-                int & p = parameter;
-                parameter--;
-                p = parameters[parameter];
-                switch(parameter) {
+				parameter = parameters[--parameter];
+				switch(parameter) {
 					case delay:
 						value *= maximum / 0.1 / Player::singleton().timeInfo().sampleRate();
 						break;
@@ -404,10 +396,8 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
 				static const int parameters [] = { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
-                int & p = parameter;
-                parameter--;
-                p = parameters[parameter];
-                switch(parameter) {
+				parameter = parameters[--parameter];
+				switch(parameter) {
 					case cutoff_frequency:
 						if(value < 1.0f) value = 0;
 						else value = scale::Exponential(maximum, 15 * math::pi, 22050 * math::pi).apply_inverse(std::asin(value / 0x100) * Player::singleton().timeInfo().sampleRate());
@@ -428,10 +418,8 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
 				static const int parameters [] = { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
-                int & p = parameter;
-                parameter--;
-                p = parameters[parameter];
-                switch(parameter) {
+				parameter = parameters[--parameter];
+				switch(parameter) {
 					case am_radians_per_second:
 						if(value < 1.0f) value = 0;
 						else value = scale::Exponential(maximum, 0.0001 * math::pi * 2, 22050 * math::pi * 2).apply_inverse(value * 2.5e-3 * Player::singleton().timeInfo().sampleRate());

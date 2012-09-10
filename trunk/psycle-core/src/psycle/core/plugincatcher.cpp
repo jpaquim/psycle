@@ -44,11 +44,11 @@ bool PluginFinderCache::loadCache(){
 	RiffFile file;
 
 #if BOOST_FILESYSTEM_VERSION >= 3
-    if(!file.Open(cache_path().string().c_str())) {
+	if(!file.Open(cache_path().string().c_str())) {
 		return false;
 	}
 #else
-    if(!file.Open(cache_path().file_string().c_str())) {
+	if(!file.Open(cache_path().file_string().c_str())) {
 		return false;
 	}
 #endif
@@ -104,18 +104,18 @@ bool PluginFinderCache::loadCache(){
 					// Else, we want to get the new information, and that will happen in the plugins scan.
 					if(p.fileTime() == t_time) {
 					#if BOOST_FILESYSTEM_VERSION >= 3
-                        MachineKey key(host, path.filename().string(), index);
+						MachineKey key(host, path.filename().string(), index);
 					#else
-                        MachineKey key(host, path.leaf(), index);
+						MachineKey key(host, path.leaf(), index);
 					#endif
 						if(!hasHost(host)) addHost(host);
 						AddInfo(key, p);
 					}
 				}
 			#if BOOST_FILESYSTEM_VERSION >= 3
-                MachineKey key(host, path.filename().string(), index);
+				MachineKey key(host, path.filename().string(), index);
 			#else
-                MachineKey key(host, path.leaf(), index);
+				MachineKey key(host, path.leaf(), index);
 			#endif
 				if(!hasHost(host)) addHost(host);
 				AddInfo(key, p);
@@ -132,14 +132,14 @@ bool PluginFinderCache::saveCache(){
 
 	RiffFile file;
 #if BOOST_FILESYSTEM_VERSION >= 3
-    if(!file.Create(cache_path().string().c_str(), true)) {
+	if(!file.Create(cache_path().string().c_str(), true)) {
 		boost::filesystem::create_directory(cache_path().branch_path());
-        if(!file.Create(cache_path().string().c_str(), true)) return false;
+		if(!file.Create(cache_path().string().c_str(), true)) return false;
 	}
 #else
-    if(!file.Create(cache_path().file_string().c_str(), true)) {
+	if(!file.Create(cache_path().file_string().c_str(), true)) {
 		boost::filesystem::create_directory(cache_path().branch_path());
-        if(!file.Create(cache_path().file_string().c_str(), true)) return false;
+		if(!file.Create(cache_path().file_string().c_str(), true)) return false;
 	}
 #endif
 	file.WriteArray("PSYCACHE", 8);

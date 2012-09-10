@@ -9,7 +9,9 @@
 
 #ifndef DIVERSALIS__COMPILER__RESOURCE
 	namespace psycle { namespace core {
+
 		using namespace universalis::stdlib;
+		namespace loggers = universalis::os::loggers;
 
 		#ifdef PSYCLE__CORE__SHARED
 			#ifdef PSYCLE__CORE__SOURCE

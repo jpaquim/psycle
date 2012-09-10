@@ -13,8 +13,6 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-
 class RiffFile;
 
 /// an instrument is a waveform with some extra features added around it.

@@ -12,8 +12,6 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-
 class PSYCLE__CORE__DECL PatternEvent {
 	public:
 		typedef std::pair<uint8_t, uint8_t> PcmType;

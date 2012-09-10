@@ -8,8 +8,6 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-
 void InstPreview::Work(float * pInSamplesL, float * pInSamplesR, int numSamples) {
 	if(!m_pInstrument) return;
 

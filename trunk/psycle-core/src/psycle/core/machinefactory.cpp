@@ -52,13 +52,13 @@ void MachineFactory::FillHosts() {
 	hosts_.push_back( &NativeHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::NATIVE);
 
-	#if defined _WIN32 || defined _WIN64 
+	#ifdef DIVERSALIS__OS__MICROSOFT
 		hosts_.push_back( &vst::host::getInstance(callbacks_) );
 		finder_->addHost(Hosts::VST);
-    #else
-        hosts_.push_back(&NativeHost::getInstance(callbacks_) );
-        finder_->addHost(Hosts::NATIVE);
-    #endif
+	#else
+		hosts_.push_back(&NativeHost::getInstance(callbacks_) );
+		finder_->addHost(Hosts::NATIVE);
+	#endif
 
 	hosts_.push_back( &LadspaHost::getInstance(callbacks_) );
 	finder_->addHost(Hosts::LADSPA);
@@ -67,7 +67,7 @@ void MachineFactory::FillHosts() {
 
 Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id) {
 
-    assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
+	assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
 
 	// a check for these machines is done, because we don't add it into the finder,
 	// to prevent a user to create them manually.
@@ -87,7 +87,7 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 				s << "psycle: core: machine factory: create machine: plugin not allowed to run: " << key.dllName();
 				loggers::warning()(s.str());
 			}
-            return hosts_[Hosts::INTERNAL]->CreateMachine(*finder_,InternalKeys::dummy,id);
+			return hosts_[Hosts::INTERNAL]->CreateMachine(*finder_,InternalKeys::dummy,id);
 		}
 	}
 	if(loggers::information()()) {
@@ -97,9 +97,9 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 			//<< " | " << finder_->info(key).name()
 			;
 		loggers::information()(s.str());
-    }
-    Machine* mac = hosts_[key.host()]->CreateMachine(*finder_, key, id);
-    if (mac && mac->getMachineKey() != InternalKeys::master &&
+	}
+	Machine* mac = hosts_[key.host()]->CreateMachine(*finder_, key, id);
+	if (mac && mac->getMachineKey() != InternalKeys::master &&
 		mac->getMachineKey() != InternalKeys::failednative &&
 		mac->getMachineKey() != InternalKeys::wrapperVst &&
 		mac->getMachineKey() != InternalKeys::invalid) {
@@ -111,7 +111,7 @@ Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id
 			mac->PreWork(MAX_BUFFER_LENGTH, true);
 			mac->GenerateAudio(MAX_BUFFER_LENGTH);
 		}
-    }
+	}
 	return mac;
 	#if 0
 		for(int i = 0; i < hosts_.size(); ++i) {
