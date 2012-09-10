@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #include <universalis/detail/project.private.hpp>
 #include "clocks.hpp"
@@ -436,7 +436,7 @@ utc_since_epoch::time_point utc_since_epoch::now() {
 	#endif
 }
 
-#if !defined DIVERSALIS__COMPILER__FEATURE__CXX0X || defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+#if __cplusplus < 201103L
 	steady::time_point steady::now() {
 		#if defined DIVERSALIS__OS__POSIX
 			detail::posix::config();

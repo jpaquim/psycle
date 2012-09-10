@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 ///\brief compiler-independant meta-information about the standard/runtime library.
@@ -7,15 +7,10 @@
 #include "compiler.hpp"
 #include "os.hpp"
 
-#if __cplusplus >= 201103L || __STDC__VERSION__ >= 199901 || \
+#if __cplusplus >= 201103L || __STDC__VERSION__ >= 199901L || \
 	defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40000 && !defined DIVERSALIS__OS__CYGWIN
 
-	#define DIVERSALIS__STDLIB__MATH 199901
-#endif
-
-#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && __cplusplus < 201103L && defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION < 50000
-	/// C++ 2011 thread support still broken
-	#define DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+	#define DIVERSALIS__STDLIB__MATH 199901L
 #endif
 
 #if defined DIVERSALIS__COMPILER__MICROSOFT

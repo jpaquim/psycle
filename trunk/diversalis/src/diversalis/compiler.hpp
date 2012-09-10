@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 ///\brief compiler-independant meta-information about the compiler
@@ -229,7 +229,7 @@
 	#endif
 
 	#ifdef __GXX_EXPERIMENTAL_CXX0X__
-		#define DIVERSALIS__COMPILER__FEATURE__CXX0X
+		#define DIVERSALIS__COMPILER__FEATURE__CXX11_ENABLED
 	#endif
 
 	// check if version supports pre-compilation. gcc < 3.4 does not support pre-compilation.
@@ -331,13 +331,13 @@
 #endif
 
 /////////
-// C++0x
+// C++11
 
-// table that lists C++0x features and their support in popular compilers
+// table that lists C++11 features and their support in popular compilers
 // http://wiki.apache.org/stdcxx/C++0xCompilerSupport
 
 #if __cplusplus >= 201103L
-	#define DIVERSALIS__COMPILER__FEATURE__CXX0X
+	#define DIVERSALIS__COMPILER__FEATURE__CXX11_ENABLED
 #endif
 
 ///////////////////

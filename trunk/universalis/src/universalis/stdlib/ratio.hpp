@@ -1,12 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2011-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
-
-///\file \brief ratio standard header
-/// C++0x standards proposal http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2615.html
+// copyright 2011-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #pragma once
 #include <universalis/detail/project.hpp>
-#ifdef DIVERSALIS__COMPILER__FEATURE__CXX0X
+#if __cplusplus >= 201103L
 	#include <ratio>
 	namespace universalis { namespace stdlib {
 		using std::intmax_t;
