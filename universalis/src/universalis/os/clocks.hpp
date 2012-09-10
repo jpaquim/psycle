@@ -1,10 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #pragma once
 #include <universalis/stdlib/detail/chrono/duration_and_time_point.hpp>
 
-#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && !defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+#if __cplusplus >= 201103L
 	#include <chrono>
 #endif
 
@@ -44,7 +44,7 @@ struct utc_since_epoch : public detail::basic_clock<utc_since_epoch, false> {
 /// For the definition, see the ISO C++2011 standard: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3128.html#time.clock.steady
 ///
 /// This clock is suited for relative timeouts (functions named *_for).
-#if defined DIVERSALIS__COMPILER__FEATURE__CXX0X && !defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+#if __cplusplus >= 201103L
 	typedef std::chrono::steady_clock steady;
 #else
 	struct steady : public detail::basic_clock<steady, true> {
@@ -70,7 +70,7 @@ struct hires_thread_or_fallback : public detail::basic_clock<hires_thread_or_fal
 
 }}}
 
-#if !defined DIVERSALIS__COMPILER__FEATURE__CXX0X || defined DIVERSALIS__STDLIB__CXX0X__BROKEN__THREAD
+#if __cplusplus < 201103L
 	// Due to a mutual dependency with <universalis/stdlib/chrono.hpp>, we define the typedefs here.
 	namespace universalis { namespace stdlib { namespace chrono {
 		typedef os::clocks::utc_since_epoch system_clock;

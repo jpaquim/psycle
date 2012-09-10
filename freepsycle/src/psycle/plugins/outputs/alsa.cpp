@@ -545,7 +545,7 @@ void alsa::poll_loop() {
 								std::ostringstream s; s << "again: " << ::snd_strerror(error);
 								loggers::trace()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 							}
-							std::this_thread::yield();
+							this_thread::yield();
 							{ scoped_lock lock(mutex_);
 								if(stop_requested_) return;
 							}

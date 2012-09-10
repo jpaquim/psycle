@@ -1,11 +1,11 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file \brief cstdint standard header
 
 #pragma once
 #include <universalis/detail/project.hpp>
-#ifdef DIVERSALIS__COMPILER__FEATURE__CXX0X
+#if __cplusplus >= 201103L
 	#include <cstdint>
 	namespace universalis { namespace stdlib {
 		using std::int8_t;
@@ -42,7 +42,7 @@
 #else
 	#include <boost/cstdint.hpp>
 	#ifdef DIVERSALIS__OS__MICROSOFT
-		#include <climits> // for UINT_MAX and ULLONG_MAX
+		#include <climits> // for UINT_MAX and ULLONG_MAX (see TODO note below)
 	#endif
 	namespace universalis { namespace stdlib {
 		using boost::int8_t;
@@ -60,7 +60,7 @@
 		using boost::uint_fast16_t;
 
 		// don't let boost use 'long int'
-		///\todo come back to this.. it's too ugly!
+		// TODO come back to this.. it's too ugly!
 		#if defined DIVERSALIS__OS__MICROSOFT && UINT_MAX == 0xffffffffu && ULLONG_MAX == 0xffffffffffffffffull
 			typedef signed int int32_t;
 			typedef unsigned int uint32_t;
