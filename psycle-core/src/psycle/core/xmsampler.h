@@ -16,8 +16,6 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-
 class PSYCLE__CORE__DECL XMSampler : public Machine {
 public:
 	static const int MAX_POLYPHONY = 64;///< max polyphony

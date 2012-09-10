@@ -25,9 +25,6 @@
 
 namespace psycle { namespace core {
 
-using namespace universalis::stdlib;
-namespace loggers = universalis::os::loggers;
-
 class RiffFile;
 
 ///\todo FIXME: stole these from analzyer.h just to fix compile error.
@@ -67,10 +64,10 @@ class PSYCLE__CORE__DECL Wire {
 		}
 		virtual void Connect(AudioPort *senderp,AudioPort *receiverp);
 		virtual void ChangeSource(AudioPort* newsource);
-        virtual AudioPort* getSource(){return senderport;}
+		virtual AudioPort* getSource(){return senderport;}
 		virtual void ChangeDestination(AudioPort* newdest);
 		virtual void CollectData(int numSamples);
-        virtual AudioPort* getDestination(){return receiverport;}
+		virtual AudioPort* getDestination(){return receiverport;}
 		virtual void SetVolume(float newvol);
 		// Range of pan is -1.0f for top left and 1.0f for top right. 0.0f is both channels full scale.
 		virtual void SetPan(float newpan);
@@ -520,7 +517,7 @@ public: void reset_time_measurement() throw() { accumulated_processing_time_ = *
 			int32_t _connectedOutputs;
 			/// Outgoing connections Machine numbers
 			///\todo hardcoded limits and wastes
-            Machine::id_type _outputMachines[MAX_CONNECTIONS];
+			Machine::id_type _outputMachines[MAX_CONNECTIONS];
 			/// Outgoing connections activated
 			///\todo hardcoded limits and wastes
 			bool _connection[MAX_CONNECTIONS];

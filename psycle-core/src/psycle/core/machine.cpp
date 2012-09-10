@@ -291,7 +291,7 @@ void Machine::CloneFrom(Machine & src) {
 void Machine::Init() {
 	// Standard gear initalization
 	processing_count_ = 0;
-    accumulated_processing_time_ = *new universalis::stdlib::chrono::nanoseconds(0);
+	accumulated_processing_time_ = 0;
 	_mute = false;
 	Standby(false);
 	_bypass = false;
@@ -920,5 +920,4 @@ void Machine::reallocateRemainingEvents(double beatOffset) {
 		return !acceptsConnections();
 	}
 
-}
-                 }
+}}

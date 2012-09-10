@@ -31,10 +31,8 @@ namespace psycle { namespace core {
 using namespace helpers;
 using namespace audiodrivers;
 
-namespace loggers = universalis::os::loggers;
-
 namespace {
-    static thread_local bool this_thread_suspended_ = false;
+	static thread_local bool this_thread_suspended_ = false;
 	bool const ultra_trace(false);
 }
 
@@ -620,5 +618,4 @@ void Player::stopRecording() {
 	recording_ = false;
 }
 
-}
-                 }
+}}
