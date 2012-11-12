@@ -3,6 +3,7 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include <psycle/helpers/fft.hpp>
 
 namespace psycle {
 	namespace host {
@@ -12,8 +13,8 @@ namespace psycle {
 		class CChildView;
 
 		const int MAX_SCOPE_BANDS = 128;
-		const int SCOPE_BUF_SIZE = 4096;
-		const int MAX_SCOPE_SPEC_SAMPLES = SCOPE_BUF_SIZE;
+		const int SCOPE_BUF_SIZE_LOG = 12;
+		const int SCOPE_BUF_SIZE = 1 << SCOPE_BUF_SIZE_LOG;
 
 		/// wire monitor window.
 		class CWireDlg : public CDialog
@@ -45,6 +46,7 @@ namespace psycle {
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 			void InitSpectrum();
+			void FillLinearFromBuffer(float inBuffer[], float outBuffer[], float vol);
 			void SetMode();
 			void OnChangeSliderMode(UINT nPos);
 			void OnChangeSliderRate(UINT nPos);
@@ -107,8 +109,11 @@ namespace psycle {
 			//Memories and precalculated values for spectrum
 			int bar_heightsl[MAX_SCOPE_BANDS];
 			int bar_heightsr[MAX_SCOPE_BANDS];
-			float sth[MAX_SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
-			float cth[MAX_SCOPE_SPEC_SAMPLES][MAX_SCOPE_BANDS];
+			float sth[SCOPE_BUF_SIZE][MAX_SCOPE_BANDS];
+			float cth[SCOPE_BUF_SIZE][MAX_SCOPE_BANDS];
+
+			helpers::dsp::FFTClass fftSpec;
+			int FFTMethod;
 		};
 
 	}   // namespace

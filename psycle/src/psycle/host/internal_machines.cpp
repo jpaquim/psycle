@@ -581,11 +581,11 @@ namespace psycle
 				mydriver.GetReadBuffers(_captureidx,&pleftorig,&prightorig,numSamples);
 				if(pleftorig == NULL) {
 					helpers::dsp::Clear(samplesV[0],numSamples);
-					helpers::dsp::Clear(samplesV[0],numSamples);
+					helpers::dsp::Clear(samplesV[1],numSamples);
 				}
 				else {
 					helpers::dsp::MovMul(pleftorig,samplesV[0],numSamples,_gainvol);
-					helpers::dsp::MovMul(prightorig,samplesV[0],numSamples,_gainvol);
+					helpers::dsp::MovMul(prightorig,samplesV[1],numSamples,_gainvol);
 				}
 				UpdateVuAndStanbyFlag(numSamples);
 			}
@@ -595,9 +595,11 @@ namespace psycle
 		bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
 		{
 			UINT size;
+			int readcaptureidx;
 			pFile->Read(&size, sizeof size); // size of this part params to load
-			pFile->Read(&_captureidx,sizeof _captureidx);
+			pFile->Read(&readcaptureidx,sizeof readcaptureidx);
 			pFile->Read(&_gainvol,sizeof _gainvol);
+			ChangePort(readcaptureidx);
 			return true;
 		}
 		void AudioRecorder::SaveSpecificChunk(RiffFile * pFile)

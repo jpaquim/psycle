@@ -44,6 +44,22 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.10.2
+--------
+* Sampulse: Correct support for mcm command (commands applied at the same time, instead of one after another).
+* Sampulse: Improved loaders of module formats to support mcm and better support for the speed command. (See FEEx command)
+* Sampulse: Filter algorithm changed again. Now based on SchismTracker's one.
+* Sampulse: Combined classic Sampler and Sampulse sample banks. This allows to use the wave editor with Sampulse.
+* Improvements in ASIODriver and MidiInput.
+* New Power spectrum algorithm in the Wire dialog
+* (source-code) Improvements on data casting.
+! Sampulse: Fixes in filter commands and voice allocations.
+! ASIO: Ensure driver is stopped when refreshing port names.
+! Fixed machine exchange (crash restoring wires)
+! Touches in m3 to try, once more, to avoid crashes.
+! do not crash if trying to copy names and no pattern selected.
+! wave amplify not working sometimes.
+
 v1.10.1 
 --------
 + New release of Winamp plugin with support for winamp localization languages, 24 and 32bit integer output, saves configuration in winamp instead of registry and all the features of Psycle 1.10.

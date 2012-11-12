@@ -1,4 +1,11 @@
 /**********************************************************************
+	This file contains two different implementations of the FFT algorithm
+	to calculate Power spectrums.
+	Function based one is original from Dominic Mazzoni.
+	Class based one is made from sources of schismtracker.
+	FFTClass is a bit faster, but with a few more spikes.
+
+	Original copyright follows:
 
 	FFT.cpp
 
@@ -25,19 +32,17 @@
 **********************************************************************/
 #include "fft.hpp"
 #include <universalis.hpp>
+#include <universalis/os/aligned_alloc.hpp>
+#include <psycle/helpers/math.hpp>
 #include <cstdlib>
 #include <cstdio>
-#include <cmath>
 
-namespace psycle
-{
-	namespace helpers
-	{
-		namespace dsp
-		{
+namespace psycle { namespace helpers { namespace dsp {
+	namespace dmfft {
 
 int **gFFTBitTable = NULL;
-const int MaxFastBits = 16;
+//const int MaxFastBits = 16;
+const int MaxFastBits = 12;
 
 /* Declare Static functions */
 static bool IsPowerOfTwo(int x);
@@ -85,14 +90,6 @@ void InitFFT()
 	}
 }
 
-inline int FastReverseBits(int i, int NumBits)
-{
-	if (NumBits <= MaxFastBits)
-		return gFFTBitTable[NumBits - 1][i];
-	else
-		return ReverseBits(i, NumBits);
-}
-
 /*
 	* Complex Fast Fourier Transform
 	*/
@@ -105,7 +102,7 @@ void FFT(int NumSamples,
 	int i, j, k, n;
 	int BlockSize, BlockEnd;
 
-	double angle_numerator = 2.0 * M_PI;
+	double angle_numerator = 2.0 * math::pi;
 	double tr, ti;                /* temp real, temp imaginary */
 
 	if (!IsPowerOfTwo(NumSamples)) {
@@ -126,11 +123,19 @@ void FFT(int NumSamples,
 	/*
 	**   Do simultaneous data copy and bit-reversal ordering into outputs...
 	*/
-
+	if (NumBits <= MaxFastBits) {
+		for (i = 0; i < NumSamples; i++) {
+			j = gFFTBitTable[NumBits - 1][i];
+			RealOut[j] = RealIn[i];
+			ImagOut[j] = (ImagIn == NULL) ? 0.0 : ImagIn[i];
+		}
+	}
+	else {
 	for (i = 0; i < NumSamples; i++) {
-		j = FastReverseBits(i, NumBits);
+			j = ReverseBits(i, NumBits);
 		RealOut[j] = RealIn[i];
 		ImagOut[j] = (ImagIn == NULL) ? 0.0 : ImagIn[i];
+	}
 	}
 
 	/*
@@ -214,7 +219,7 @@ void RealFFT(int NumSamples, float *RealIn, float *RealOut, float *ImagOut)
 	int Half = NumSamples / 2;
 	int i;
 
-	float theta = M_PI / Half;
+	float theta = math::pi_f / Half;
 
 	float *tmpReal = new float[Half];
 	float *tmpImag = new float[Half];
@@ -279,7 +284,7 @@ void PowerSpectrum(int NumSamples, float *In, float *Out)
 	int Half = NumSamples / 2;
 	int i;
 
-	float theta = M_PI / Half;
+	float theta = math::pi_f / Half;
 
 	float *tmpReal = new float[Half];
 	float *tmpImag = new float[Half];
@@ -381,15 +386,212 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	if (whichFunction == 2) {
 		// Hamming
 		for (i = 0; i < NumSamples; i++)
-			in[i] *= 0.54 - 0.46 * cos(2 * M_PI * i / (NumSamples - 1));
+			in[i] *= 0.54 - 0.46 * cos(2 * math::pi * i / (NumSamples - 1));
 	}
 
 	if (whichFunction == 3) {
 		// Hanning
 		for (i = 0; i < NumSamples; i++)
-			in[i] *= 0.50 - 0.50 * cos(2 * M_PI * i / (NumSamples - 1));
+			in[i] *= 0.50 - 0.50 * cos(2 * math::pi * i / (NumSamples - 1));
 	}
 }
+}
+
+//
+///////////////////////////////////////////////////
+//
+	FFTClass::FFTClass() :
+		bit_reverse(0),
+		window(0),
+		precos(0),
+		presin(0),
+		state_real(0),
+		state_imag(0),
+		fftLog(0)
+	{
+	}
+	FFTClass::~FFTClass()
+	{
+		Reset();
+	}
+	void FFTClass::Reset()
+	{
+		delete[] bit_reverse;
+		universalis::os::aligned_memory_dealloc(window);
+		universalis::os::aligned_memory_dealloc(precos);
+		universalis::os::aligned_memory_dealloc(presin);
+
+		universalis::os::aligned_memory_dealloc(state_real);
+		universalis::os::aligned_memory_dealloc(state_imag);
+
+		delete[] fftLog;
+	}
+
+	void FFTClass::FillRectangularWindow(float window[], const std::size_t size, const float scale) {
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = scale;
+        }
+	}
+	void FFTClass::FillCosineWindow(float window[], const std::size_t size, const float scale) {
+		const int sizem1 = size-1;
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = std::sinf(math::pi_f * n/ sizem1) * scale;
+        }
+	}
+	void FFTClass::FillHannWindow(float window[], const std::size_t size, const float scale) {
+		const int sizem1 = size-1;
+		const float twopi = 2.0f*math::pi_f;
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = (0.50f - 0.50f * cosf( twopi* n / sizem1)) * scale;
+        }
+	}
+	void FFTClass::FillHammingWindow(float window[], const std::size_t size, const float scale) {
+		const int sizem1 = size-1;
+		const float twopi = 2.0f*math::pi_f;
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = (0.54f - 0.46f * cosf(twopi * n / sizem1)) * scale;
+        }
+	}
+	void FFTClass::FillGaussianWindow(float window[], const std::size_t size, const float scale) {
+		const int sizem1 = size-1;
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = powf(math::e,-0.5f *powf((n-sizem1/2.f)/(0.4*sizem1/2.f),2.f)) * scale;
+        }
+	}
+	void FFTClass::FillBlackmannWindow(float window[], const std::size_t size, const float scale) {
+		const int sizem1 = size-1;
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = (0.42659 - 0.49656 * cosf(2.0*math::pi_f * n/ sizem1) + 0.076849 * cosf(4.0*math::pi_f * n /sizem1)) * scale;
+        }
+	}
+	void FFTClass::FillBlackmannHarrisWindow(float window[], const std::size_t size, const float scale) {
+		const int sizem1 = size-1;
+        for (std::size_t n = 0; n < size; n++) {
+			window[n] = (0.35875 - 0.48829 * cosf(2.0*math::pi_f * n/ sizem1) + 0.14128 * cosf(4.0*math::pi_f * n /sizem1) - 0.01168 * cosf(6.0*math::pi_f * n /sizem1)) * scale;
+        }
+	}
+
+	std::size_t FFTClass::Reverse_bits(std::size_t in) {
+        std::size_t r = 0, n;
+	    for (n = 0; n < bufferSizeLog; n++) {
+			r = (r << 1) | (in & 1);
+            in >>= 1;
+		}
+		return r;
+	}
+	bool FFTClass::IsPowerOfTwo(int x)
+	{
+		return ((x & (x - 1))==0);
+	}
+	void FFTClass::Setup(FftWindowType type, std::size_t sizeBuf, std::size_t sizeBands)
+	{
+		if (!IsPowerOfTwo(sizeBuf)) {
+			std::ostringstream s;
+			s << "FFT called with size "<< sizeBuf;
+			throw universalis::exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION__NO_CLASS);
+		}
+		bands = sizeBands;
+		if (window == NULL || sizeBuf != bufferSize) {
+			Reset();
+			bufferSize = sizeBuf;
+			outputSize = sizeBuf >> 1;
+			bit_reverse = new std::size_t[bufferSize];
+			universalis::os::aligned_memory_alloc(16, window, bufferSize);
+			universalis::os::aligned_memory_alloc(16, precos, outputSize);
+			universalis::os::aligned_memory_alloc(16, presin, outputSize);
+			universalis::os::aligned_memory_alloc(16, state_real, bufferSize);
+			universalis::os::aligned_memory_alloc(16, state_imag, bufferSize);
+			fftLog = new float[bands];
+
+			bufferSizeLog = 0;
+			for(size_t sizetmp = bufferSize; sizetmp > 1; sizetmp>>=1) { bufferSizeLog++; } 
+			for (int n = 0; n < bufferSize; n++) {
+				bit_reverse[n] = Reverse_bits(n);
+			}
+			for (int n = 0; n < outputSize; n++) {
+				float j = 2.0f*helpers::math::pi_f * n / bufferSize;
+				precos[n] = cosf(j);
+				presin[n] = sinf(j);
+			}
+		}
+		switch(type){
+			case rectangular: FillRectangularWindow(window, bufferSize, 1.0f);break;
+			case cosine: FillCosineWindow(window, bufferSize, 1.0f);break;
+			case hann: FillHannWindow(window, bufferSize, 1.0f);break;
+			case hamming: FillHammingWindow(window, bufferSize, 1.0f);break;
+			case gaussian: FillGaussianWindow(window, bufferSize, 1.0f);break;
+			case blackmann: FillBlackmannWindow(window, bufferSize, 1.0f);break;
+			case blackmannHarris: FillBlackmannHarrisWindow(window, bufferSize, 1.0f);break;
+			default:break;
+		}
+		if ( outputSize/bands == 1 ) {
+			for (std::size_t n = 0; n < bands; n++ ) {
+				fftLog[n]=n;
+			}
+		}
+		else if (outputSize/bands <= 4 ) {
+			//exponential.
+			float factor = (float)outputSize/(bands*bands);
+			for (std::size_t n = 0; n < bands; n++ ) {
+				fftLog[n]=n*n*factor;
+			}
+		}
+		else {
+			//constant note scale.
+			//factor -> set range from 2^0 to 2^8.
+			//factor2 -> scale the result to the FFT output size
+			float factor = 8.f/(float)bands;
+			float factor2 = (float)outputSize/256.f;
+			for (std::size_t n = 0; n < bands; n++ ) {
+				fftLog[n]=(powf(2.0f,n*factor)-1.f)*factor2;
+			}
+		}
+	}
+	void FFTClass::CalculateSpectrum(float samplesIn[], float samplesOut[])
+	{
+        unsigned int n, k, y;
+        unsigned int ex, ff;
+        float fr, fi;
+        float tr, ti;
+        int yp;
+
+        /* fft */
+        float *rp = state_real;
+        float *ip = state_imag;
+        for (n = 0; n < bufferSize; n++) {
+			const int nr = bit_reverse[n];
+            *rp++ = samplesIn[ nr ] * window[nr];
+            *ip++ = 0;
+        }
+        ex = 1;
+        ff = outputSize;
+        for (n = bufferSizeLog; n != 0; n--) {
+			for (k = 0; k != ex; k++) {
+				fr = precos[k * ff];
+				fi = presin[k * ff];
+                for (y = k; y < bufferSize; y += ex << 1) {
+                   yp = y + ex;
+                   tr = fr * state_real[yp] - fi * state_imag[yp];
+                   ti = fr * state_imag[yp] + fi * state_real[yp];
+                   state_real[yp] = state_real[y] - tr;
+                   state_imag[yp] = state_imag[y] - ti;
+                   state_real[y] += tr;
+                   state_imag[y] += ti;
+                }
+            }
+            ex <<= 1;
+            ff >>= 1;
+        }
+
+        /* collect fft */
+        rp = state_real; rp++;
+        ip = state_imag; ip++;
+        for (n = 0; n < outputSize; n++) {
+            samplesOut[n] = ((*rp) * (*rp)) + ((*ip) * (*ip));
+            rp++;ip++;
+        }
+	}
+}}}
 
 // Indentation settings for Vim and Emacs and unique identifier for Arch, a
 // version control system. Please do not modify past this point.
@@ -401,7 +603,3 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 //
 // vim: et sts=3 sw=3
 // arch-tag: 47691958-d393-488c-abc5-81178ea2686e
-
-}
-}
-}

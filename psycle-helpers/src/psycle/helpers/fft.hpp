@@ -1,4 +1,11 @@
 /**********************************************************************
+	This file contains two different implementations of the FFT algorithm
+	to calculate Power spectrums.
+	Function based one is original from Dominic Mazzoni.
+	Class based one is made from sources of schismtracker and windows from wikipedia.
+	FFTClass is a bit faster, but with a few more spikes.
+
+	Original copyright follows:
 
 	FFT.h
 
@@ -31,10 +38,7 @@
 **********************************************************************/
 #pragma once
 namespace psycle { namespace helpers { namespace dsp {
-	#ifndef M_PI
-		#define M_PI 3.14159265358979323846
-	#endif
-
+	namespace dmfft {
 	/**
 	* This is the function you will use the most often.
 	* Given an array of floats, this will compute the power
@@ -42,6 +46,14 @@ namespace psycle { namespace helpers { namespace dsp {
 	* sum of the squares of the real and imaginary parts.
 	* Note that the output array is half the length of the
 	* input array, and that NumSamples must be a power of two.
+		* Understanding In and Out:
+		* In is the samples (so, it is amplitude). You need to use a window function
+		* on it before calling this method.
+		* Out is the total power for each band.
+		* To get amplitude from "Out", use sqrt(out[N])/(numSamples>>2)
+		* To get dB from "Out", use powerdB(out[N])+db(1/(numSamples>>2)).
+		* powerdB is = 10 * log10(in)
+		* dB is = 20 * log10(in)
 	*/
 	void PowerSpectrum(int NumSamples, float *In, float *Out);
 
@@ -78,6 +90,73 @@ namespace psycle { namespace helpers { namespace dsp {
 
 	/// Returns the number of windowing functions supported
 	int NumWindowFuncs();
+	}
+
+	typedef enum FftWindowEnum {
+		rectangular,
+		cosine,
+		hann,
+		hamming,
+		gaussian,
+		blackmann,
+		blackmannHarris
+	} FftWindowType;
+
+	class FFTClass {
+	public:
+		FFTClass();
+		~FFTClass();
+		void Setup(FftWindowType type, std::size_t sizeBuf, std::size_t sizeBands);
+		/*
+		* Understanding In and Out:
+		* In is the samples (so, it is amplitude). The window function specified in setup
+		* will automatically be applied.
+		* Out is the total power for each band.
+		* To get amplitude from "Out", use sqrt(out[N])/(sizeBuf>>2)
+		* To get dB from "Out", use powerdB(out[N])+db(1/(sizeBuf>>2)).
+		* powerdB is = 10 * log10(in)
+		* dB is = 20 * log10(in)
+		*/
+		void CalculateSpectrum(float samplesIn[], float samplesOut[]); 
+	protected:
+		void Reset();
+		void FillRectangularWindow(float window[], const std::size_t size, const float scale);
+		void FillCosineWindow(float window[], const std::size_t size, const float scale);
+		void FillHannWindow(float window[], const std::size_t size, const float scale);
+		void FillHammingWindow(float window[], const std::size_t size, const float scale);
+		void FillGaussianWindow(float window[], const std::size_t size, const float scale);
+		void FillBlackmannWindow(float window[], const std::size_t size, const float scale);
+		void FillBlackmannHarrisWindow(float window[], const std::size_t size, const float scale);
+		std::size_t  Reverse_bits(std::size_t in);
+		bool IsPowerOfTwo(int x);
+	private:
+		std::size_t bufferSize;
+		std::size_t bufferSizeLog;
+		std::size_t outputSize;
+		std::size_t bands;
+		/* tables */
+		std::size_t *bit_reverse;
+		//window to apply to the signal previous to the fft. Can be scaled if using the scale parameter.
+		float *window;
+		float *precos;
+		float *presin;
+
+		/* fft state */
+		float *state_real;
+		float *state_imag;
+	public:
+		//fftLog is initialized in setup, and can be used to scale the frequency, like this:
+		//	for (int h=0, a=0;h<sizeBands;h++) {
+		//		float j=tempout[a];
+		//		while(a<=fftSpec.fftLog[h]){
+		//			j = std::max(j,tempout[a]);
+		//			a++;
+		//		}
+		//		db[h]=powerdB(j+0.0000001f)+dbinvSamples;
+		//	}
+
+		float *fftLog;
+	};
 }}}
 
 // Indentation settings for Vim and Emacs and unique identifier for Arch, a

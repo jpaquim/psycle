@@ -356,7 +356,7 @@ namespace psycle { namespace host {
 			rootname=rootname.substr(0,
 				std::max(std::string::size_type(0),rootname.length()-4));
 
-			boost::filesystem::path mypath(name);
+			boost::filesystem::path mypath(name.GetString());
 
 			if (!boost::filesystem::exists(mypath.parent_path())) {
 				MessageBox("The folder where to store the file does not exists. Please, create it first","Save Wav dialog");

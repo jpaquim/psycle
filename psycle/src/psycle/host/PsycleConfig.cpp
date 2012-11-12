@@ -1376,11 +1376,11 @@ namespace psycle { namespace host {
 
 			// paths
 			{
-				SetSongDir((universalis::os::fs::home() / "Songs").native_file_string());
-				SetWaveRecDir((universalis::os::fs::home() / "Songs").native_file_string());
-				SetInstrumentDir((universalis::os::fs::home() / "Instruments").native_file_string());
+				SetSongDir((universalis::os::fs::home() / "Songs").string());
+				SetWaveRecDir((universalis::os::fs::home() / "Songs").string());
+				SetInstrumentDir((universalis::os::fs::home() / "Instruments").string());
 				SetSkinDir(appPath()+"Skins");
-				SetPresetsDir((universalis::os::fs::home() / "Presets").native_file_string());
+				SetPresetsDir((universalis::os::fs::home() / "Presets").string());
 			}
 			recent_files_.clear();
 			recent_files_.push_back("");
@@ -1400,12 +1400,12 @@ namespace psycle { namespace host {
 				{
 					case STORE_EXE_DIR:
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string());
+						opened = store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").string());
 						cachedir = boost::filesystem::path(appPath());
 						break;
 					case STORE_USER_DATA:
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						opened = store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
 						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
 						break;
 					case STORE_USER_REGEDIT:
@@ -1415,7 +1415,7 @@ namespace psycle { namespace host {
 						break;
 					case STORE_ALL_DATA:
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->OpenLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						opened = store->OpenLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
 						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
 						break;
 					case STORE_ALL_REGEDIT:
@@ -1531,31 +1531,38 @@ namespace psycle { namespace host {
 		bool PsycleConfig::SavePsycleSettings() {
 			ConfigStorage* store = 0;
 			bool opened = false;
+			boost::filesystem::path cachedir;
 			try {
 				switch(store_place_) {
 					case STORE_EXE_DIR: 
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string());
+						opened = store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").string());
+						cachedir = boost::filesystem::path(appPath());
 						break;
 					case STORE_USER_DATA: 
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						opened = store->CreateLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
+						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
 						break;
 					case STORE_USER_REGEDIT: 
 						store = new Registry(Registry::HKCU, PSYCLE__VERSION);
 						opened = store->CreateLocation(registry_root_path);
+						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
 						break;
 					case STORE_ALL_DATA: 
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->CreateLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+						opened = store->CreateLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
+						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
 						break;
 					case STORE_ALL_REGEDIT: 
 						store = new Registry(Registry::HKLM, PSYCLE__VERSION);
 						opened = store->CreateLocation(registry_root_path);
+						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
 						break;
 					default:
 						break;
 				}
+				SetCacheDir(cachedir);
 				if (opened) {
 					if(store->CreateGroup(registry_config_subkey)) {
 						Save(*store);
@@ -1583,13 +1590,13 @@ namespace psycle { namespace host {
 				case STORE_EXE_DIR:
 					{
 					WinIniFile store(WinIniFile(PSYCLE__VERSION));
-					store.DeleteLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").native_file_string());
+					store.DeleteLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").string());
 					break;
 					}
 				case STORE_USER_DATA: 
 					{
 					WinIniFile store(WinIniFile(PSYCLE__VERSION));
-					store.DeleteLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+					store.DeleteLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
 					break;
 					}
 				case STORE_USER_REGEDIT: 
@@ -1601,7 +1608,7 @@ namespace psycle { namespace host {
 				case STORE_ALL_DATA: 
 					{
 					WinIniFile store(WinIniFile(PSYCLE__VERSION));
-					store.DeleteLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").native_file_string());
+					store.DeleteLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
 					break;
 					}
 				case STORE_ALL_REGEDIT: 

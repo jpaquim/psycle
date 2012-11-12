@@ -1205,6 +1205,7 @@ Special:  Bit 0: On = song message attached.
 			Read(pointersp,s3mFileH.patNum*sizeof(unsigned short));
 
 			bool stereo=s3mFileH.mVol&0x80;
+			if (!stereo) sampler->PanningMode(XMSampler::PanningMode::TwoWay);
 			int numchans=0;
 			for (i=0;i<32;i++)
 			{
@@ -1344,7 +1345,7 @@ OFFSET              Count TYPE   Description
 			_wave.Init();
 
 			_wave.WaveLoopStart(currHeader->loopb);
-			_wave.WaveLoopEnd(currHeader->loope);
+			_wave.WaveLoopEnd(currHeader->loope-1);
 			if(bLoop) {
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			} else {

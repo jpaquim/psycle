@@ -117,9 +117,9 @@ namespace psycle
 
 			if (regenerate) {
 #if defined _WIN64
-			DeleteFile((Global::configuration().cacheDir() / "psycle64.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((Global::configuration().cacheDir() / "psycle64.plugin-scan.cache").string().c_str());
 #elif defined _WIN32
-			DeleteFile((Global::configuration().cacheDir() / "psycle.plugin-scan.cache").native_file_string().c_str());
+			DeleteFile((Global::configuration().cacheDir() / "psycle.plugin-scan.cache").string().c_str());
 #else
 #error unexpected platform
 #endif
@@ -225,11 +225,11 @@ namespace psycle
 			{
 				boost::filesystem::path log_dir(Global::configuration().cacheDir());
 				// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
-				mkdir(log_dir.native_directory_string().c_str());
+				mkdir(log_dir.string().c_str());
 #if defined _WIN64
-				out.open((log_dir / "psycle64.plugin-scan.log.txt").native_file_string().c_str());
+				out.open((log_dir / "psycle64.plugin-scan.log.txt").string().c_str());
 #elif defined _WIN32
-				out.open((log_dir / "psycle.plugin-scan.log.txt").native_file_string().c_str());
+				out.open((log_dir / "psycle.plugin-scan.log.txt").string().c_str());
 #else
 #error unexpected platform
 #endif
@@ -661,9 +661,9 @@ namespace psycle
 		bool PluginCatcher::LoadCacheFile(int& currentPlugsCount, int& currentBadPlugsCount, bool verify)
 		{
 #if defined _WIN64
-			std::string cache((Global::configuration().cacheDir() / "psycle64.plugin-scan.cache").native_file_string());
+			std::string cache((Global::configuration().cacheDir() / "psycle64.plugin-scan.cache").string());
 #elif defined _WIN32
-			std::string cache((Global::configuration().cacheDir() / "psycle.plugin-scan.cache").native_file_string());
+			std::string cache((Global::configuration().cacheDir() / "psycle.plugin-scan.cache").string());
 #else
 #error unexpected platform
 #endif
@@ -674,7 +674,7 @@ namespace psycle
 			{
 #if defined _WIN32
 				/// try old location
-				std::string cache2((boost::filesystem::path(Global::configuration().appPath()) / "psycle.plugin-scan.cache").native_file_string());
+				std::string cache2((boost::filesystem::path(Global::configuration().appPath()) / "psycle.plugin-scan.cache").string());
 				if (!file.Open(cache2.c_str())) return false;
 #else
 				return false;
@@ -793,13 +793,13 @@ namespace psycle
 	#error unexpected platform
 #endif
 
-			DeleteFile(cache.native_file_string().c_str());
+			DeleteFile(cache.string().c_str());
 			RiffFile file;
-			if (!file.Create(cache.native_file_string().c_str(),true)) 
+			if (!file.Create(cache.string().c_str(),true)) 
 			{
 				// note mkdir is posix, not iso, on msvc, it's defined only #if !__STDC__ (in direct.h)
-				mkdir(cache.branch_path().native_directory_string().c_str());
-				if (!file.Create(cache.native_file_string().c_str(),true)) return false;
+				mkdir(cache.branch_path().string().c_str());
+				if (!file.Create(cache.string().c_str(),true)) return false;
 			}
 			file.Write("PSYCACHE",8);
 			UINT version = CURRENT_CACHE_MAP_VERSION;
