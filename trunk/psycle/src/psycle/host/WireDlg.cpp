@@ -38,6 +38,7 @@ namespace psycle { namespace host {
 			, wire(wireIn)
 			, srcMachine(wireIn.GetSrcMachine())
 			, dstMachine(wireIn.GetDstMachine())
+			, FFTMethod(0)
 		{
 			universalis::os::aligned_memory_alloc(16, pSamplesL, SCOPE_BUF_SIZE);
 			universalis::os::aligned_memory_alloc(16, pSamplesR, SCOPE_BUF_SIZE);
@@ -85,7 +86,7 @@ namespace psycle { namespace host {
 			scope_peak_rate = 20;
 			scope_osc_freq = 10;
 			scope_osc_rate = 20;
-			scope_spec_bands = 128;
+			scope_spec_bands = MAX_SCOPE_BANDS;
 			scope_spec_rate = 20;
 			scope_spec_mode = 2;
 			SCOPE_SPEC_SAMPLES = 1024;
@@ -464,22 +465,94 @@ namespace psycle { namespace host {
 
 				case 2: // spectrum analyzer
 					{
+
+						universalis::stdlib::chrono::nanoseconds tM1;
+						universalis::stdlib::chrono::nanoseconds tM2;
+						universalis::stdlib::chrono::nanoseconds tM3;
+						universalis::stdlib::chrono::nanoseconds tM4;
+
+						float db_left[MAX_SCOPE_BANDS];
+						float db_right[MAX_SCOPE_BANDS];
+						const int width = 128/scope_spec_bands;
+						const float multleft= invol*mult/32768.0f *srcMachine._lVol;
+						const float multright= invol*mult/32768.0f *srcMachine._rVol;
+						const float dbinvSamples = psycle::helpers::dsp::dB(1.0f/(SCOPE_SPEC_SAMPLES>>2)); // >>2, because else seems 12dB's off
+
+						if (FFTMethod == 0)
+						{
+							//schism mod FFT
+							float temp[SCOPE_BUF_SIZE];
+							float tempout[SCOPE_BUF_SIZE>>1];
+							FillLinearFromBuffer(pSamplesL,temp, multleft);
+							fftSpec.CalculateSpectrum(temp,tempout);
+							helpers::math::erase_all_nans_infinities_and_denormals(tempout,SCOPE_SPEC_SAMPLES);
+							for (int h=0, a=0;h<scope_spec_bands;h++) 
+							{
+								float j=tempout[a];
+								while(a<=fftSpec.fftLog[h]){
+									j = std::max(j,tempout[a]);
+									a++;
+								}
+								db_left[h]=psycle::helpers::dsp::powerdB(j+0.0000001f)+dbinvSamples;
+							}
+							FillLinearFromBuffer(pSamplesR,temp, multright);
+							fftSpec.CalculateSpectrum(temp,tempout);
+							helpers::math::erase_all_nans_infinities_and_denormals(tempout,SCOPE_SPEC_SAMPLES);
+							for (int h=0, a=0;h<scope_spec_bands;h++) 
+							{
+								float j=tempout[a];
+								while(a<=fftSpec.fftLog[h]){
+									j = std::max(j,tempout[a]);
+									a++;
+								}
+								db_right[h]=psycle::helpers::dsp::powerdB(j+0.0000001f)+dbinvSamples;
+							}
+						}
+						else if (FFTMethod == 1)
+						{
+							//DM FFT
+							float temp[SCOPE_BUF_SIZE];
+							float tempout[SCOPE_BUF_SIZE>>1];
+
+							FillLinearFromBuffer(pSamplesL,temp, multleft);
+							helpers::dsp::dmfft::WindowFunc(3,SCOPE_SPEC_SAMPLES,temp);
+							helpers::dsp::dmfft::PowerSpectrum(SCOPE_SPEC_SAMPLES,temp, tempout);
+							helpers::math::erase_all_nans_infinities_and_denormals(tempout,SCOPE_SPEC_SAMPLES);
+							for (int h=0, a=0;h<scope_spec_bands;h++) 
+							{
+								float j=tempout[a];
+								while(a<=fftSpec.fftLog[h]){
+									j = std::max(j,tempout[a]);
+									a++;
+								}
+								db_left[h]=psycle::helpers::dsp::powerdB(j+0.0000001f)+dbinvSamples;
+							}
+							FillLinearFromBuffer(pSamplesR,temp, multright);
+							helpers::dsp::dmfft::WindowFunc(3,SCOPE_SPEC_SAMPLES,temp);
+							helpers::dsp::dmfft::PowerSpectrum(SCOPE_SPEC_SAMPLES,temp, tempout);
+							helpers::math::erase_all_nans_infinities_and_denormals(tempout,SCOPE_SPEC_SAMPLES);
+							for (int h=0, a=0;h<scope_spec_bands;h++) 
+							{
+								float j=tempout[a];
+								while(a<=fftSpec.fftLog[h]){
+									j = std::max(j,tempout[a]);
+									a++;
+								}
+								db_right[h]=psycle::helpers::dsp::powerdB(j+0.0000001f)+dbinvSamples;
+							}
+						}
+						else if (FFTMethod == 2)
+						{
+							// Psycle's pseudo FT
 						float aal[MAX_SCOPE_BANDS]; 
 						float aar[MAX_SCOPE_BANDS]; 
 						float bbl[MAX_SCOPE_BANDS]; 
 						float bbr[MAX_SCOPE_BANDS]; 
-						float ampl[MAX_SCOPE_BANDS];
-						float ampr[MAX_SCOPE_BANDS];
 						memset (aal,0,sizeof(aal));
 						memset (bbl,0,sizeof(bbl));
 						memset (aar,0,sizeof(aar));
 						memset (bbr,0,sizeof(bbr));
 
-						int width = 128/scope_spec_bands;
-						const float multleft= invol*mult/32768.0f *srcMachine._lVol;
-						const float multright= invol*mult/32768.0f *srcMachine._rVol;
-						const float invSamples = 1.0f/(SCOPE_SPEC_SAMPLES>>1);
-						// calculate our bands using same buffer chasing technique
 						int index = srcMachine._scopeBufferIndex;
 						for (int i=0;i<SCOPE_SPEC_SAMPLES;i++) 
 						{ 
@@ -498,8 +571,11 @@ namespace psycle { namespace host {
 
 						for (int h=0;h<scope_spec_bands;h++) 
 						{
-							ampl[h]= sqrtf(aal[h]*aal[h]+bbl[h]*bbl[h])*invSamples; 
-							ampr[h]= sqrtf(aar[h]*aar[h]+bbr[h]*bbr[h])*invSamples;
+								float out = aal[h]*aal[h]+bbl[h]*bbl[h];
+								db_left[h]= helpers::dsp::powerdB(out+0.0000001f)+dbinvSamples;
+								out = aar[h]*aar[h]+bbr[h]*bbr[h];
+								db_right[h]= helpers::dsp::powerdB(out+0.0000001f)+dbinvSamples;
+							}
 						}
 
 						COLORREF cl = 0x402020;
@@ -512,7 +588,7 @@ namespace psycle { namespace host {
 
 						for (int i = 0; i < scope_spec_bands; i++)
 						{
-							int aml = - (psycle::helpers::dsp::dB(ampl[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
+							int aml = - db_left[i] * 2; // Reducing range from 128dB to 64dB.
 
 							if (aml < 0)
 							{
@@ -537,7 +613,7 @@ namespace psycle { namespace host {
 							
 							rect.left+=width;
 
-							int amr = - (psycle::helpers::dsp::dB(ampr[i]+0.0000001f)+6) * 2; // 128dB of range is TOO much. reducing it to 64dB.
+							int amr = - db_right[i] * 2; // Reducing range from 128dB to 64dB.
 							if (amr < 0)
 							{
 								amr = 0;
@@ -963,6 +1039,10 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnHold()
 		{
+//			FFTMethod++;
+//			if (FFTMethod>2) FFTMethod=0;
+//			return;
+
 			hold = !hold;
 			pos = 1;
 			switch (scope_mode)
@@ -1026,6 +1106,14 @@ namespace psycle { namespace host {
 
 		void CWireDlg::InitSpectrum()
 		{
+			//Setup schismMod FFT
+			//fftSpec.Setup(helpers::dsp::hann, SCOPE_SPEC_SAMPLES, scope_spec_bands);
+			fftSpec.Setup(helpers::dsp::gaussian, SCOPE_SPEC_SAMPLES, scope_spec_bands);
+
+			//Setup DM FFT
+			//(Could setup window, but right now it is calculated on work)
+			
+			//Setup Psycle's pseudo FT
 			const float barsize = float(SCOPE_SPEC_SAMPLES>>1)/scope_spec_bands;
 			for (int i=SCOPE_SPEC_SAMPLES-1;i>=0;i--)
 			{ 
@@ -1056,6 +1144,19 @@ namespace psycle { namespace host {
 			}
 			for (int i=SCOPE_SPEC_SAMPLES-1;i>=0;i--)	{
 				helpers::math::erase_all_nans_infinities_and_denormals(cth[i], scope_spec_bands);
+				helpers::math::erase_all_nans_infinities_and_denormals(sth[i], scope_spec_bands);
+			}
+		}
+		void CWireDlg::FillLinearFromBuffer(float inBuffer[], float outBuffer[], float vol)
+		{
+			int index = srcMachine._scopeBufferIndex;
+			if (index <= SCOPE_SPEC_SAMPLES) {
+				int remaining = SCOPE_SPEC_SAMPLES-index; //Remaining samples at the end of the buffer.
+				dsp::MovMul(inBuffer+SCOPE_BUF_SIZE-remaining,outBuffer,remaining,vol);
+				dsp::MovMul(inBuffer,outBuffer+remaining,index,vol);
+			}
+			else {
+				dsp::MovMul(inBuffer+index-SCOPE_SPEC_SAMPLES,outBuffer,SCOPE_SPEC_SAMPLES,vol);
 			}
 		}
 

@@ -32,7 +32,20 @@ using namespace universalis::stdlib;
 		///\todo merge with psycle::helpers::math::deci_bell_to_linear
 		return std::pow(10.0f, db / 20.0f);
 	}
+	/// linear -> deciBell
+	/// power normalized to 1.0f.
+	float inline UNIVERSALIS__COMPILER__CONST
+	powerdB(float power)
+	{
+		return 10.0f * std::log10(power);
+	}
 
+	/// deciBell -> linear
+	float inline UNIVERSALIS__COMPILER__CONST
+	dB2power(float db)
+	{
+		return std::pow(10.0f, db / 10.0f);
+	}
 	float inline UNIVERSALIS__COMPILER__CONST
 	SliderToAmount(int nPos) {
 		return ((1024-nPos)*(1024-nPos))/(16384.f*4.f*4.f);

@@ -158,7 +158,7 @@ namespace psycle { namespace host {
 				boost::filesystem::path root_begin = appPath();
 				mypath = root_begin / mypath;
 				mypath.normalize();
-				return mypath.native_directory_string();
+				return mypath.string();
 			}
 			else {
 				return dir;

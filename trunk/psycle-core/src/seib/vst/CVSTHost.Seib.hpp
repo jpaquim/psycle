@@ -31,9 +31,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 // so we need to detect the platform ourselves,
 // and declare steinberg's unstandard/specific options: WIN32/MAC
 #if defined DIVERSALIS__OS__MICROSOFT
-	#define WIN32 // steinberg's build option
+	#if !defined WIN32
+		#define WIN32 // steinberg's build option
+	#endif
 #elif defined DIVERSALIS__OS__APPLE
-	#define MAC // steinberg's build option
+	#if !defined MAC
+		#define MAC // steinberg's build option
+	#endif
 #else
 	#error "internal steinberg error"
 #endif

@@ -82,7 +82,7 @@ namespace psycle
 								path operator()(path const & input) {
 									std::string s((input.is_complete() ? input : current_path() / input).string());
 									std::transform(s.begin(), s.end(), s.begin(), std::tolower);
-									return path(s, no_check);
+									return path(s);
 								}
 						} unique;
 						return unique(path1) == unique(path2);
@@ -109,7 +109,7 @@ namespace psycle
 			{
 				boost::filesystem::path path(file_name, boost::filesystem::native);
 				// the base name, i.e. just the file name compound of the path
-				std::string base_name(path.leaf());
+				std::string base_name(path.leaf().string());
 				// save the original path env var
 				std::string old_path;
 				{
@@ -136,7 +136,7 @@ namespace psycle
 						// the loop would never exit because boost::filesystem::equivalent returns false if any of the directory doesn't exist.
 						if(path.empty()) throw exceptions::library_errors::loading_error("Directory does not exits.");
 						// appends the intermediate dir to the list of paths
-						new_path << path.native_directory_string() << ";";
+						new_path << path.string() << ";";
 					}
 					while(!boost::filesystem::equivalent(path, root_path));
 					// append the old path value, at the end so it's searched last

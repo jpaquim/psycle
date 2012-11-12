@@ -652,14 +652,15 @@ namespace psycle { namespace host {
 			buffer = machine().GetDllName();
 			buffer = buffer.Left(buffer.GetLength()-4);
 			buffer += ".prs";
-			boost::filesystem::path inpath(buffer);
+			boost::filesystem::path inpath(buffer.GetString());
 			if(boost::filesystem::exists(inpath))
 			{
 				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,internalPresets,false);
 			}
 
-			buffer = PsycleGlobal::conf().GetAbsolutePresetsDir().c_str() + buffer.Mid(buffer.ReverseFind('\\'));
-			boost::filesystem::path inpath2(buffer);
+			buffer = PsycleGlobal::conf().GetAbsolutePresetsDir().c_str();
+			buffer = buffer + "\\" + buffer.Mid(buffer.ReverseFind('\\'));
+			boost::filesystem::path inpath2(buffer.GetString());
 			if(boost::filesystem::exists(inpath2))
 			{
 				PresetIO::LoadPresets(buffer,machine().GetNumParams(),dataSizeStruct,userPresets,false);
