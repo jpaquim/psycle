@@ -67,7 +67,12 @@
 		//#pragma inline_recursion(on)
 		//#define inline __forceinline
 		
-		#if 0 // would be good, but requires to rebuild boost; see https://svn.boost.org/trac/boost/ticket/1917
+		#if 1 // would be good, but requires to rebuild boost; see https://svn.boost.org/trac/boost/ticket/1917
+			#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+				#warning Compiling with _SECURE_SCL 0 and _HAS_ITERATOR_DEBUGGING. Remember to build Boost libs this way too
+			#else
+				#pragma message(__FILE__ " : Compiling with _SECURE_SCL 0 and _HAS_ITERATOR_DEBUGGING 0. Remember to build Boost libs this way too")
+			#endif
 			#define _SECURE_SCL 0 // disable checked iterators. see http://msdn.microsoft.com/en-us/library/aa985896.aspx
 			#define _HAS_ITERATOR_DEBUGGING 0 // see http://msdn.microsoft.com/en-us/library/aa985939.aspx
 		#endif

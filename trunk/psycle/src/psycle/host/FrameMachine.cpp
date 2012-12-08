@@ -702,7 +702,7 @@ namespace psycle { namespace host {
 				char szSub[256] = "";;
 				std::sprintf(szSub,"Banks %d-%d",i,i+15);
 				popBnk->AppendMenu(MF_POPUP | MF_STRING,
-					(UINT)popup.Detach(),
+					(UINT_PTR)popup.Detach(),
 					szSub);
 			}
 			i = machine().GetNumBanks();
@@ -779,7 +779,7 @@ namespace psycle { namespace host {
 					char szSub[256] = "";;
 					std::sprintf(szSub,"Programs %d-%d",i,i+15);
 					popPrg->AppendMenu(MF_POPUP | MF_STRING,
-						(UINT)popup.Detach(),
+						(UINT_PTR)popup.Detach(),
 						szSub);
 				}
 			}
@@ -814,7 +814,7 @@ namespace psycle { namespace host {
 				char szSub[256] = "";;
 				std::sprintf(szSub,"Programs %d-%d",i,i+15);
 				popPrg->AppendMenu(MF_POPUP | MF_STRING,
-					(UINT)popup.Detach(),
+					(UINT_PTR)popup.Detach(),
 					szSub);
 			}
 		}

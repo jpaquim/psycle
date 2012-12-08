@@ -243,7 +243,7 @@ namespace seib {
 			{
 				if  (ploader)	Unload();
 			}
-			catch(const std::runtime_error& e)
+			catch(const std::runtime_error&)
 			{
 			}
 			catch(...)
