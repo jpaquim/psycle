@@ -744,7 +744,7 @@ namespace psycle { namespace host {
 					}
 				}
 			}
-			return -1;
+			//return -1;
 		}
 		int MixerFrameView::GetParamFromPos(int col,int row)
 		{

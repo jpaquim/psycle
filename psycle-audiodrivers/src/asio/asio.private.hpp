@@ -6,12 +6,16 @@
 // and declare steinberg's unstandard/specific options: WIN32/MAC
 #include <diversalis/os.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
-	#define WIN32 // steinberg's build option
+	#if !defined WIN32
+		#define WIN32 // steinberg's build option
+	#endif
 	// steinberg's headers also lack some #include,
 	// so we include the missing headers ourselves
 	#include <objbase.h>
 #elif defined DIVERSALIS__OS__APPLE
-	#define MAC // steinberg's build option
+	#if !defined MAC
+		#define MAC // steinberg's build option
+	#endif
 #else
 	#error "internal steinberg error"
 #endif
