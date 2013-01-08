@@ -435,7 +435,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	void FFTClass::FillCosineWindow(float window[], const std::size_t size, const float scale) {
 		const int sizem1 = size-1;
         for (std::size_t n = 0; n < size; n++) {
-			window[n] = std::sinf(math::pi_f * n/ sizem1) * scale;
+			window[n] = std::sin(math::pi_f * n/ sizem1) * scale;
         }
 	}
 	void FFTClass::FillHannWindow(float window[], const std::size_t size, const float scale) {

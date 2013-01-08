@@ -37,6 +37,7 @@
 
 **********************************************************************/
 #pragma once
+#include <cstddef>
 namespace psycle { namespace helpers { namespace dsp {
 	namespace dmfft {
 	/**
