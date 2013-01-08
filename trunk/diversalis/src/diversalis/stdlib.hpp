@@ -7,8 +7,7 @@
 #include "compiler.hpp"
 #include "os.hpp"
 
-#if __cplusplus >= 201103L || __STDC__VERSION__ >= 199901L || \
-	(defined DIVERSALIS__COMPILER__GNU && DIVERSALIS__COMPILER__VERSION >= 40000 && !defined DIVERSALIS__OS__CYGWIN)
+#if __cplusplus >= 201103L || __STDC__VERSION__ >= 199901L
 
 	#define DIVERSALIS__STDLIB__MATH 199901L
 #endif

@@ -316,7 +316,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 				if(parameter != 1) break;
 				enum Parameters { gain };
 				static const int parameters [] = { gain };
-				parameter = parameters[--parameter];
+				parameter = parameters[parameter-1];
 				switch(parameter) {
 					case gain:
 						if( value < 1.0f) value = 0;
@@ -329,7 +329,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { input_gain, output_gain, positive_threshold, positive_clamp, negative_threshold, negative_clamp, symmetric };
 				static const int parameters [] = { positive_threshold, positive_clamp, negative_threshold, negative_clamp };
-				parameter = parameters[--parameter];
+				parameter = parameters[parameter-1];
 				switch(parameter) {
 					case negative_threshold:
 					case negative_clamp:
@@ -344,7 +344,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { dry, wet, left_delay, left_feedback, right_delay, right_feedback };
 				static const int parameters [] = { left_delay, left_feedback, right_delay, right_feedback, dry, wet };
-				parameter = parameters[--parameter];
+				parameter = parameters[parameter-1];
 				switch(parameter) {
 					case left_delay:
 					case right_delay:
@@ -365,7 +365,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { delay, modulation_amplitude, modulation_radians_per_second, modulation_stereo_dephase, interpolation, dry, wet, left_feedback, right_feedback };
 				static const int parameters [] = { delay, modulation_amplitude, modulation_radians_per_second, left_feedback, modulation_stereo_dephase, right_feedback, dry, wet, interpolation };
-				parameter = parameters[--parameter];
+				parameter = parameters[parameter-1];
 				switch(parameter) {
 					case delay:
 						value *= maximum / 0.1 / Player::singleton().timeInfo().sampleRate();
@@ -396,7 +396,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
 				static const int parameters [] = { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
-				parameter = parameters[--parameter];
+				parameter = parameters[parameter-1];
 				switch(parameter) {
 					case cutoff_frequency:
 						if(value < 1.0f) value = 0;
@@ -418,7 +418,7 @@ void Converter::retweak(int type, int & parameter, int & integral_value) const {
 			{
 				enum Parameters { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
 				static const int parameters [] = { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
-				parameter = parameters[--parameter];
+				parameter = parameters[parameter-1];
 				switch(parameter) {
 					case am_radians_per_second:
 						if(value < 1.0f) value = 0;
