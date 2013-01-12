@@ -22,6 +22,7 @@
 #include <psycle/helpers/math.hpp>
 #include <stdexcept>
 #include <sstream>
+#include <cstdio>
 
 using psycle::helpers::math::pi;
 using psycle::helpers::math::asinh;
