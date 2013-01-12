@@ -271,7 +271,7 @@ namespace psycle
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry->_inst;
-				XMInstrument::WaveData& wave = Global::song().samples[pVoice->_instrument];
+				const XMInstrument::WaveData& wave = Global::song().samples[pVoice->_instrument];
 				
 				// Init filter synthesizer
 				//
@@ -292,8 +292,8 @@ namespace psycle
 				
 				// Init Wave
 				//
-				pVoice->_wave._pL = const_cast<std::int16_t*>(wave.pWaveDataL());
-				pVoice->_wave._pR = const_cast<std::int16_t*>(wave.pWaveDataL());
+				pVoice->_wave._pL = wave.pWaveDataL();
+				pVoice->_wave._pR = wave.pWaveDataR();
 				pVoice->_wave._stereo = wave.IsWaveStereo();
 				pVoice->_wave._length = twlength;
 				
@@ -439,9 +439,12 @@ namespace psycle
 				{
 					panFactor = helpers::value_mapper::map_256_1(pEntry->_parameter);
 				}
-				else
+				else if (twlength > 0) 
 				{
 					panFactor = Global::song().samples[pVoice->_instrument].PanFactor();
+				}
+				else {
+					panFactor = 0.5f;
 				}
 
 				pVoice->_wave._rVolDest = panFactor;

@@ -2,6 +2,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
+#include "XMInstrument.hpp"
 
 namespace psycle { namespace host {
 		class Song;
@@ -368,12 +369,12 @@ namespace psycle { namespace host {
 			};
 		public:
 			bool LoadITModule(Song& song);
-			bool LoadOldITInst(XMSampler *sampler,int iInstIdx);
-			bool LoadITInst(XMSampler *sampler,int iInstIdx);
-			void LoadInstrumentFromFile(XMSampler & sampler, const int idx);
-			bool LoadITSample(XMSampler *sampler,int iSampleIdx);
-			bool LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
-			bool LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert);
+			bool LoadOldITInst(XMInstrument &xins,int iInstIdx);
+			bool LoadITInst(XMInstrument &xins,int iInstIdx);
+			void LoadInstrumentFromFile(Song& song, const int idx);
+			bool LoadITSample(XMInstrument::WaveData& _wave,int iSampleIdx);
+			bool LoadITSampleData(XMInstrument::WaveData& _wave,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert);
+			bool LoadITCompressedData(XMInstrument::WaveData& _wave,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans);
 			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:
@@ -490,9 +491,9 @@ namespace psycle { namespace host {
 
 		public:
 			bool LoadS3MModuleX(Song& song);
-			bool LoadS3MInstX(XMSampler *sampler,int iInstIdx);
-			bool LoadS3MSampleX(XMSampler *sampler,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx);
-			bool LoadS3MSampleDataX(XMSampler *sampler,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed);
+			bool LoadS3MInstX(Song& song, XMInstrument &xins,int iInstIdx);
+			bool LoadS3MSampleX(XMInstrument::WaveData& _wave,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx);
+			bool LoadS3MSampleDataX(XMInstrument::WaveData& _wave,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed);
 			bool LoadS3MPatternX(int patIdx);
 		private:
 			s3mHeader  s3mFileH;

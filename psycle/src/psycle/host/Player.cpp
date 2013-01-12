@@ -344,7 +344,7 @@ void Player::clear_plan() {
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
 								int memextra = m_extraTicks;
-								m_extraTicks = 24 * (pEntry->_parameter&0x0F);
+								m_extraTicks = 24/lpb * (pEntry->_parameter&0x0F);
 								RecalcSPR();
 								m_extraTicks = memextra;
 								_SPRChanged=true;
@@ -481,7 +481,7 @@ void Player::clear_plan() {
 					int mac = pEntry->_mach;
 					if(mac < MAX_MACHINES) prevMachines[track] = mac;
 					else mac = prevMachines[track];
-					if( mac != 255 && (pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
+					if( mac != 255 && (pEntry->_inst != 255 || pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
 					{
 						if(mac < MAX_MACHINES && song._pMachine[mac] != NULL) //looks like a valid machine index?
 						{

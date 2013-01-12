@@ -195,7 +195,7 @@ namespace psycle
 			delete [] _buffer;
 			return pData;
 		}
-		bool RiffFile::WriteString(std::string & result)
+		bool RiffFile::WriteString(const std::string & result)
 		{
 			Write(result.c_str(),result.length());
 			return Write('\0');

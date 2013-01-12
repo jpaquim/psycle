@@ -17,8 +17,6 @@ namespace psycle
 {
 	namespace host
 	{
-		class Machine;
-
 		/// schedule the processing of machines, sends signal buffers and sequence events to them, ...
 		class Player
 		{

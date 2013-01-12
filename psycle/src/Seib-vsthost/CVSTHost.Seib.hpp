@@ -475,7 +475,7 @@ namespace seib {
 			// get position of dsp buffer. (to verify that it is "on time")
 			inline long DECLARE_VST_DEPRECATED(GetCurrentPosition)() { return Dispatch(effGetCurrentPosition); }
 			// get the address of the dsp buffer.
-			inline float* DECLARE_VST_DEPRECATED(GetDestinationBuffer)() { return (float*)Dispatch(effGetDestinationBuffer); }
+			inline float* DECLARE_VST_DEPRECATED(GetDestinationBuffer)() { return reinterpret_cast<float*>(Dispatch(effGetDestinationBuffer)); }
 			inline bool OfflineNotify(VstAudioFile* ptr, long numAudioFiles, bool start) { return (bool)Dispatch(effOfflineNotify, start, numAudioFiles, ptr); }
 			inline bool OfflinePrepare(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflinePrepare, 0, count, ptr); }
 			inline bool OfflineRun(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflineRun, 0, count, ptr); }

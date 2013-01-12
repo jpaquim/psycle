@@ -1,36 +1,16 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include "XMInstrument.hpp"
+#include "WaveScopeCtrl.hpp"
+#include <psycle/host/XMInstrument.hpp>
 
 namespace psycle { namespace host {
 
 class XMSampler;
-class CWaveScopeCtrl : public CStatic
-{
-public:
-	CWaveScopeCtrl();
-	virtual ~CWaveScopeCtrl();
-
-	void SetWave(XMInstrument::WaveData *pWave) { m_pWave = pWave; }
-	XMInstrument::WaveData& rWave() { return *m_pWave; }
-
-	virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
-
-protected:
-	XMInstrument::WaveData* m_pWave;
-	CPen cpen_lo;
-	CPen cpen_med;
-	CPen cpen_hi;
-	CPen cpen_sus;
-
-};
-
-
-
 
 class XMSamplerUISample : public CPropertyPage
 {
+public:
 	DECLARE_DYNAMIC(XMSamplerUISample)
 
 public:
@@ -42,6 +22,7 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
+	virtual BOOL OnInitDialog();
 
 
 public:
@@ -51,6 +32,7 @@ public:
 	XMInstrument::WaveData& rWave(){return *m_pWave;};
 	void DrawScope(void);
 
+protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnLbnSelchangeSamplelist();

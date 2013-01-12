@@ -546,6 +546,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 				fftLog[n]=(powf(2.0f,n*factor)-1.f)*factor2;
 			}
 		}
+		resampler.quality(dsp::resampler::quality::linear);
 	}
 	void FFTClass::CalculateSpectrum(float samplesIn[], float samplesOut[])
 	{
@@ -590,6 +591,10 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
             samplesOut[n] = ((*rp) * (*rp)) + ((*ip) * (*ip));
             rp++;ip++;
         }
+	}
+	float FFTClass::resample(float const * data, float offset, uint64_t length)
+	{
+		return resampler.work_float(data, offset, length);
 	}
 }}}
 

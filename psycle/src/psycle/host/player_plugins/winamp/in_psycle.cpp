@@ -200,11 +200,11 @@ void init()
 			//
 			if (IsWindowUnicode(mod.hMainWindow))
 			{
-				lpWndProcOld = (WNDPROC)SetWindowLongPtrW(mod.hMainWindow,GWLP_WNDPROC,(LONG)WndProc);
+				lpWndProcOld = (WNDPROC)SetWindowLongPtrW(mod.hMainWindow,GWLP_WNDPROC,(LONG_PTR)WndProc);
 			}
 			else
 			{
-				lpWndProcOld = (WNDPROC)SetWindowLongPtrA(mod.hMainWindow,GWLP_WNDPROC,(LONG)WndProc);
+				lpWndProcOld = (WNDPROC)SetWindowLongPtrA(mod.hMainWindow,GWLP_WNDPROC,(LONG_PTR)WndProc);
 			}
 		}
 	}
@@ -568,9 +568,9 @@ INT_PTR CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		for (int c=0;c<4;c++)
 		{
 			sprintf(valstr,"%i",(int)(11025*powf(2.0f,(float)c)));
-			SendDlgItemMessage(hwndDlg,IDC_SRATE,CB_ADDSTRING,0,(long)valstr);
+			SendDlgItemMessage(hwndDlg,IDC_SRATE,CB_ADDSTRING,0,reinterpret_cast<LPARAM>(valstr));
 			sprintf(valstr,"%i",(int)(12000*powf(2.0f,(float)c)));
-			SendDlgItemMessage(hwndDlg,IDC_SRATE,CB_ADDSTRING,0,(long)valstr);
+			SendDlgItemMessage(hwndDlg,IDC_SRATE,CB_ADDSTRING,0,reinterpret_cast<LPARAM>(valstr));
 		}
 		switch (global_.conf().audioDriver().GetSamplesPerSec())
 		{
@@ -588,7 +588,7 @@ INT_PTR CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		for (int c=16;c<33;c+=8)
 		{
 			sprintf(valstr,"%i", c);
-			SendDlgItemMessage(hwndDlg,IDC_BITDEPTH,CB_ADDSTRING,0,(long)valstr);
+			SendDlgItemMessage(hwndDlg,IDC_BITDEPTH,CB_ADDSTRING,0,reinterpret_cast<LPARAM>(valstr));
 		}
 		switch (global_.conf().audioDriver().GetSampleValidBits())
 		{
@@ -752,7 +752,7 @@ INT_PTR CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		
 		//SetWindowText(hwndDlg,"Psycle Song Information");
 		char tmp2[20];
-		SetDlgItemText(hwndDlg,IDC_FILENAME,pSong->fileName.c_str());
+		SetDlgItemText(hwndDlg,IDC_DLG_FILENAME,pSong->fileName.c_str());
 		SetDlgItemText(hwndDlg,IDC_ARTIST,pSong->author.c_str());
 		SetDlgItemText(hwndDlg,IDC_TITLE,pSong->name.c_str());
 		SetDlgItemText(hwndDlg,IDC_COMMENTS,pSong->comments.c_str());
@@ -778,7 +778,7 @@ INT_PTR CALLBACK InfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 				else sprintf(valstr,"%.02x:[%s]  %s",i,tmp2,pSong->_pMachine[i]->_editName);
 				
-				SendDlgItemMessage(hwndDlg,IDC_MACHINES,LB_ADDSTRING,0,(long)valstr);
+				SendDlgItemMessage(hwndDlg,IDC_MACHINES,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(valstr));
 				j++;
 			}
 		}

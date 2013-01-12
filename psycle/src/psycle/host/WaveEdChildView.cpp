@@ -31,7 +31,6 @@ namespace psycle { namespace host {
 
 
 		BEGIN_MESSAGE_MAP(CWaveEdChildView, CWnd)
-			//{{AFX_MSG_MAP(CWaveEdChildView)
 			ON_WM_PAINT()
 			ON_WM_RBUTTONDOWN()
 			ON_WM_LBUTTONDOWN()
@@ -97,14 +96,13 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_PASTE_MIX, OnUpdatePasteMix)
 			ON_UPDATE_COMMAND_UI(ID_POPUP_SETLOOPSTART, OnUpdateSetLoopStart)
 			ON_UPDATE_COMMAND_UI(ID_POPUP_SETLOOPEND, OnUpdateSetLoopEnd)
-			ON_WM_DESTROYCLIPBOARD()
-			//}}AFX_MSG_MAP
 			ON_COMMAND(ID_POPUP_SETLOOPSTART, OnPopupSetLoopStart)
 			ON_COMMAND(ID_POPUP_SETLOOPEND, OnPopupSetLoopEnd)
 			ON_COMMAND(ID_POPUP_SELECTIONTOLOOP, OnPopupSelectionToLoop)
 			ON_COMMAND(ID_POPUP_ZOOMIN, OnPopupZoomIn)
 			ON_COMMAND(ID_POPUP_ZOOMOUT, OnPopupZoomOut)
 
+			ON_WM_DESTROYCLIPBOARD()
 			ON_WM_CREATE()
 			ON_WM_DESTROY()
 			ON_WM_HSCROLL()
@@ -127,7 +125,7 @@ namespace psycle { namespace host {
 
 			int wrHeight = 0;
 			int wrHeadHeight=0;
-			__int32 c;
+			long c;
 
 			int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
 				
@@ -627,7 +625,7 @@ namespace psycle { namespace host {
 			if(wl)
 			{
 				wdWave=true;
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					
 				wdLength=wl;
 				wdLeft=wave.pWaveDataL();
@@ -834,7 +832,7 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					_pSong->StopInstrument(wsInstrument);
 
 					CRect rect;
@@ -879,7 +877,7 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					_pSong->StopInstrument(wsInstrument);
 
 
@@ -1143,7 +1141,7 @@ namespace psycle { namespace host {
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 			if(wdWave) {
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				wave.WaveLoopStart(wdLoopS);
 				wave.WaveLoopEnd(wdLoopE);
 				mainFrame->m_wndInst.WaveUpdate();
@@ -1170,7 +1168,7 @@ namespace psycle { namespace host {
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				wave.Fade(startPoint, length, 0.f, 1.f);
 
 				RefreshDisplayData(true);
@@ -1187,7 +1185,7 @@ namespace psycle { namespace host {
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				wave.Fade(startPoint, length, 1.f, 0.f);
 
 				RefreshDisplayData(true);
@@ -1217,7 +1215,7 @@ namespace psycle { namespace host {
 				
 				if (ratio != 1)
 				{
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					wave.Amplify(startPoint, startPoint+length, ratio);
 				}
 
@@ -1305,7 +1303,7 @@ namespace psycle { namespace host {
 				if (pos != AMP_DIALOG_CANCEL)
 				{
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
 					wave.Amplify(startPoint, length, ratio);
@@ -1371,7 +1369,7 @@ namespace psycle { namespace host {
 				else
 				{
 					unsigned long insertPos;
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 
 					switch(SilenceDlg.insertPos)
 					{
@@ -1425,7 +1423,7 @@ namespace psycle { namespace host {
 			{
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				wave.ConvertToMono();
 				wdStereo = false;
 				RefreshDisplayData(true);
@@ -1583,7 +1581,7 @@ namespace psycle { namespace host {
 				long datalen = (wdLength - length);
 				if (datalen)
 				{
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					wave.DeleteAt(blStart, length);
 					wdLeft = wave.pWaveDataL();
 					wdRight = wave.pWaveDataR();
@@ -1749,7 +1747,7 @@ namespace psycle { namespace host {
 				if (pFmt->wBitsPerSample == 16)
 				{
 					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 					wdLength = lDataSamps;
 					wdLeft  = wave.pWaveDataL();
 					if (pFmt->nChannels == 1)
@@ -1773,7 +1771,7 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
 				{
 					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
@@ -1883,7 +1881,7 @@ namespace psycle { namespace host {
 					startPoint=cursorPos;
 				}
 
-				XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 				//do left channel
 				for (c = 0; c < lDataSamps; c++)
 					wave.pWaveDataL()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign);
@@ -1940,7 +1938,7 @@ namespace psycle { namespace host {
 					unsigned long startPoint;
 					unsigned long fadeInSamps(0), fadeOutSamps(0);
 					unsigned long destFadeIn(0);	
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -2047,7 +2045,7 @@ namespace psycle { namespace host {
 						||(pFmt->nChannels == 2 && wdStereo == true)))
 				{
 					unsigned long startPoint, endPoint;
-					XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -2139,7 +2137,7 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+			XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
@@ -2164,7 +2162,7 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+			XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
@@ -2190,7 +2188,7 @@ namespace psycle { namespace host {
 		{
 			if(!blSelection) return;
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+			XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 			_pSong->StopInstrument(wsInstrument);
 
 			wdLoopS = blStart;

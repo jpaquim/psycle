@@ -102,7 +102,7 @@ namespace psycle { namespace host {
 			void Silence(int silStart, int silEnd);
 
 			int Load(RiffFile& riffFile);
-			void Save(RiffFile& riffFile);
+			void Save(RiffFile& riffFile) const;
 
 			/// Wave Data Copy Operator
 			WaveData& operator= (const WaveData& source)
@@ -194,15 +194,9 @@ namespace psycle { namespace host {
 
 			bool IsAutoVibrato() const {return m_VibratoDepth && m_VibratoSpeed;}
 
-			std::int16_t * pWaveDataL() const { return m_pWaveDataL;}
-			std::int16_t * pWaveDataR() const { return m_pWaveDataR;}
+			std::int16_t * const pWaveDataL() const { return m_pWaveDataL;}
+			std::int16_t * const pWaveDataR() const { return m_pWaveDataR;}
 			
-			std::int16_t WaveDataL(const std::int32_t index) const { return *(m_pWaveDataL + index); }
-			std::int16_t WaveDataR(const std::int32_t index) const { return *(m_pWaveDataR + index); }
-			
-			void WaveDataL(const int index,const std::int16_t value){ *(m_pWaveDataL + index) = value;}
-			void WaveDataR(const int index,const std::int16_t value){ *(m_pWaveDataR + index) = value;}
-
 		private:
 
 			std::string m_WaveName;
@@ -318,7 +312,7 @@ namespace psycle { namespace host {
 			void Clear() { m_Points.clear(); }
 
 			void Load(RiffFile& riffFile,const std::uint32_t version);
-			void Save(RiffFile& riffFile,const std::uint32_t version);
+			void Save(RiffFile& riffFile,const std::uint32_t version) const;
 
 			/// overloaded copy function
 			Envelope& operator=(const Envelope& other)
@@ -395,7 +389,7 @@ namespace psycle { namespace host {
 		void Init();
 
 		int Load(RiffFile& riffFile);
-		void Save(RiffFile& riffFile);
+		void Save(RiffFile& riffFile) const;
 
 		XMInstrument & operator= (const XMInstrument & other)
 		{
@@ -575,86 +569,135 @@ namespace psycle { namespace host {
 		NotePair m_AssignNoteToSample[NOTE_MAP_SIZE];
 	};
 
-	///\todo : implement the following for inter-XMSampler sharing of instruments.
 	class SampleList{
 	public:
 		SampleList(){m_waves.resize(0);}
-		virtual ~SampleList(){};
+		virtual ~SampleList(){Clear();}
 		inline unsigned int AddSample(const XMInstrument::WaveData &wave)
 		{
-			m_waves.push_back(wave);
+			XMInstrument::WaveData* wavecopy = new XMInstrument::WaveData(wave);
+			m_waves.push_back(wavecopy);
 			return size()-1;
 		}
 		inline void SetSample(const XMInstrument::WaveData &wave,int pos)
 		{
+			XMInstrument::WaveData* wavecopy = new XMInstrument::WaveData(wave);
 			if (pos>=m_waves.size()) {
-				int val = m_waves.size();
+				size_t val = m_waves.size();
 				m_waves.resize(pos+1);
-				for (int i=val;i<=pos;i++) {
-					m_waves[i].Init();
+				for (size_t i=val;i<=pos;i++) {
+					m_waves[i]=NULL;
 				}
 			}
-			m_waves[pos]=wave;
+			else if(m_waves[pos] != NULL) { delete m_waves[pos]; }
+			m_waves[pos]=wavecopy;
 		}
-		inline XMInstrument::WaveData &operator[](int pos)
+		inline const XMInstrument::WaveData &operator[](int pos) const
 		{
 			ASSERT(pos<m_waves.size());
-			return m_waves[pos];
+			ASSERT(m_waves[pos]!=NULL);
+			return *m_waves[pos];
+		}
+		inline XMInstrument::WaveData &get(int pos)
+		{
+			ASSERT(pos<m_waves.size());
+			ASSERT(m_waves[pos]!=NULL);
+			return *m_waves[pos];
 		}
 		inline void RemoveAt(int pos)
 		{
-			if (pos+1 == m_waves.size()) {
-				m_waves.pop_back();
-			}
-			else if (pos<m_waves.size()) {
-				m_waves[pos].Init();
+			if(pos < m_waves.size()) {
+				if(m_waves[pos] != NULL) {delete m_waves[pos]; m_waves[pos]=NULL;}
+				for(size_t i=m_waves.size()-1;i>=0&&m_waves[i]==NULL;i--){
+					m_waves.pop_back();
+				}
 			}
 		}
-		inline bool IsEnabled(int pos) { return pos < m_waves.size() && m_waves[pos].WaveLength() > 0; }
+		inline void ExchangeSamples(int pos1, int pos2)
+		{
+			XMInstrument::WaveData* wave = m_waves[pos1];
+			m_waves[pos1]=m_waves[pos2];
+			m_waves[pos2]=wave;
+		}
+
+		inline bool IsEnabled(int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0; }
 		unsigned int size() const { return static_cast<unsigned int>(m_waves.size()); }
-		void Clear() { m_waves.clear(); }
+		void Clear() {
+			const size_t val = m_waves.size();
+			for (size_t i=0;i<val;i++) {
+				if (m_waves[i] != NULL) {
+					delete m_waves[i];
+					m_waves[i]=NULL;
+				}
+			}
+			m_waves.clear();
+		}
 	private:
-		std::vector<XMInstrument::WaveData> m_waves;
+		std::vector<XMInstrument::WaveData*> m_waves;
 	};
 
 	///\todo : implement the following for inter-XMSampler sharing of instruments.
 	class InstrumentList {
 	public:
 		InstrumentList(){m_inst.resize(0);}
-		virtual ~InstrumentList(){};
+		virtual ~InstrumentList(){Clear();}
 		inline unsigned int AddIns(const XMInstrument &ins)
 		{
-			m_inst.push_back(ins);
+			XMInstrument* inscopy = new XMInstrument(ins);
+			m_inst.push_back(inscopy);
 			return size()-1;
 		}
 		inline void SetInst(const XMInstrument &inst,int pos)
 		{
+			XMInstrument* inscopy = new XMInstrument(inst);
 			if (pos>=m_inst.size()) {
-				int val = m_inst.size();
+				size_t val = m_inst.size();
 				m_inst.resize(pos+1);
-				for (int i=val;i<pos;i++) {
-					m_inst[i].Init();
+				for (size_t i=val;i<pos;i++) {
+					m_inst[i]=NULL;
 				}
 			}
-			m_inst[pos]=inst;
+			else if(m_inst[pos] != NULL) { delete m_inst[pos]; }
+			m_inst[pos]=inscopy;
 		}
-		inline XMInstrument &operator[](int pos){
+		inline const XMInstrument &operator[](int pos) const {
 			ASSERT(pos<m_inst.size());
-			return m_inst[pos];
+			ASSERT(m_inst[pos]!=NULL);
+			return *m_inst[pos];
+		}
+		inline XMInstrument &get(int pos) {
+			ASSERT(pos<m_inst.size());
+			ASSERT(m_inst[pos]!=NULL);
+			return *m_inst[pos];
 		}
 		inline void RemoveAt(int pos)
 		{
-			if (pos+1 == m_inst.size()) {
-				m_inst.pop_back();
-			}
-			else if (pos<m_inst.size()) {
-				m_inst[pos].Init();
+			if(pos < m_inst.size()) {
+				if(m_inst[pos] != NULL) {delete m_inst[pos]; m_inst[pos]=NULL;}
+				for(size_t i=m_inst.size()-1;i>=0&&m_inst[i]==NULL;i--){
+					m_inst.pop_back();
+				}
 			}
 		}
-		inline bool IsEnabled(int pos) { return pos < m_inst.size() && m_inst[pos].IsEnabled(); }
+		inline void ExchangeInstruments(int pos1, int pos2)
+		{
+			XMInstrument* instr = m_inst[pos1];
+			m_inst[pos1]=m_inst[pos2];
+			m_inst[pos2]=instr;
+		}
+		inline bool IsEnabled(int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
 		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
-		void Clear() { m_inst.clear(); }
+		void Clear() { 
+			const size_t val = m_inst.size();
+			for (int i=0;i<val;i++) {
+				if (m_inst[i] != NULL) {
+					delete m_inst[i];
+					m_inst[i]=NULL;
+				}
+			}
+			m_inst.clear();
+		}
 	private:
-		std::vector<XMInstrument> m_inst;
+		std::vector<XMInstrument*> m_inst;
 	};
 }}

@@ -22,7 +22,7 @@ namespace host{
 
 	}
 
-	void XMSongExport::exportsong(Song& song)
+	void XMSongExport::exportsong(const Song& song)
 	{
 
 		writeSongHeader(song);
@@ -32,7 +32,7 @@ namespace host{
 
 	}
 
-	void XMSongExport::writeSongHeader(Song &song)
+	void XMSongExport::writeSongHeader(const Song &song)
 	{
 		//We find the last index of machine, to use as first index of instruments
 		lastMachine=63;
@@ -76,7 +76,7 @@ namespace host{
 		Write(&m_Header,sizeof(m_Header));
 	}
 
-	void XMSongExport::SavePatterns(Song & song)
+	void XMSongExport::SavePatterns(const Song & song)
 	{
 		for (int i = 0; i < m_Header.patterns ; i++)
 		{
@@ -85,7 +85,7 @@ namespace host{
 	}
 
 	// Load instruments
-	void XMSongExport::SaveInstruments(Song& song)
+	void XMSongExport::SaveInstruments(const Song& song)
 	{
 		for (int i = 0; i < lastMachine ; i++ ) {
 			if ( song._pMachine[i] != 0 ) {
@@ -103,7 +103,7 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	void XMSongExport::SaveSinglePattern(Song & song, const int patIdx)
+	void XMSongExport::SaveSinglePattern(const Song & song, const int patIdx)
 	{
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));
@@ -122,7 +122,7 @@ namespace host{
 			for (int j = 0; j < ptHeader.rows && j < 256; j++) {
 				for (int i = 0; i < song.SONGTRACKS; i++) {
 					
-					PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx,i,j));
+					const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx,i,j));
 					
 					
 					unsigned char note;
@@ -256,7 +256,7 @@ namespace host{
 			Write(&ptHeader,sizeof(ptHeader));
 		}
 	}
-	void XMSongExport::SaveEmptyInstrument(std::string name)
+	void XMSongExport::SaveEmptyInstrument(const std::string& name)
 	{
 		XMINSTRUMENTHEADER insHeader;
 		memset(&insHeader,0,sizeof(insHeader));
@@ -268,7 +268,7 @@ namespace host{
 	}
 
 
-	void XMSongExport::SaveInstrument(Song& song, int instIdx)
+	void XMSongExport::SaveInstrument(const Song& song, int instIdx)
 	{
 		XMINSTRUMENTHEADER insHeader;
 		memset(&insHeader,0,sizeof(insHeader));
@@ -304,9 +304,9 @@ namespace host{
 
 	}
 
-	void XMSongExport::SaveSampleHeader(Song& song, int instIdx)
+	void XMSongExport::SaveSampleHeader(const Song& song, int instIdx)
 	{
-		XMInstrument::WaveData& wave = song.samples[instIdx];
+		const XMInstrument::WaveData& wave = song.samples[instIdx];
 
 		XMSAMPLESTRUCT stheader;
 		memset(&stheader,0,sizeof(stheader));
@@ -326,9 +326,9 @@ namespace host{
 		Write(&stheader,sizeof(stheader));
 	}
 	
-	void XMSongExport::SaveSampleData(Song& song,const int instrIdx)
+	void XMSongExport::SaveSampleData(const Song& song,const int instrIdx)
 	{
-		XMInstrument::WaveData& wave = song.samples[instrIdx];
+		const XMInstrument::WaveData& wave = song.samples[instrIdx];
 		// pack sample data
 		short* samples = wave.pWaveDataL();
 		int length = wave.WaveLength();
@@ -342,7 +342,7 @@ namespace host{
 	}
 
 	
-	void XMSongExport::SetEnvelopes(Song& song, int instrIdx, XMSAMPLEHEADER & sampleHeader)
+	void XMSongExport::SetEnvelopes(const Song& song, int instrIdx, const XMSAMPLEHEADER & sampleHeader)
 	{
 /*
 		// volume envelope

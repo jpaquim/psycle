@@ -120,9 +120,26 @@ namespace psycle { namespace host {
 			void RefreshDisplayData(bool bRefreshHeader=false);
 
 			short CalcBufferPeak(short* buffer, int length) const;
-
-			Song* _pSong;
 			
+			//References and child
+			Song* _pSong;
+			CMainFrame* mainFrame;
+			CScrollableDlgBar zoombar;
+
+			//Clipboard
+			char*	pClipboardData;
+			HGLOBAL hClipboardData, hPasteData;
+			// Wave data
+			bool wdWave;				//whether we have a wave to display
+			int wsInstrument;
+			signed short* wdLeft;
+			signed short* wdRight;
+			bool wdStereo;
+			unsigned long wdLength;
+			unsigned long wdLoopS;
+			unsigned long wdLoopE;
+			bool wdLoop;
+
 			// Painting pens
 			CPen cpen_lo;
 			CPen cpen_me;
@@ -132,33 +149,22 @@ namespace psycle { namespace host {
 			HCURSOR hResizeLR;		//left/right arrows cursor for sizing selection
 			HCURSOR hIBeam;			//i beam cursor
 
-			//Clipboard
-			char*	pClipboardData;
-			HGLOBAL hClipboardData, hPasteData;
-
 			float const static zoomBase;	//base of the logarithmic scale used for zooming with zoom slider
-
-			// Wave data
-			signed short* wdLeft;
-			signed short* wdRight;
-			bool wdStereo;
-			unsigned long wdLength;
-			unsigned long wdLoopS;
-			unsigned long wdLoopE;
-			bool wdLoop;
+			//wave display data
+			std::deque<std::pair<short, short> > lDisplay;
+			std::deque<std::pair<short, short> > rDisplay;
+			std::deque<std::pair<short, short> > lHeadDisplay;
+			std::deque<std::pair<short, short> > rHeadDisplay;
 
 			// Display data
 			unsigned long diStart;		//first sample in current window
 			unsigned long diLength;		//number of samples in window
 			unsigned long blStart;		//first sample of selection
 			unsigned long blLength;		//number of samples selected
-			unsigned long cursorPos;	//location of the cursor
 			bool blSelection;			//whether data is selected currently
-			bool wdWave;				//whether we have a wave to display
+			unsigned long cursorPos;	//location of the cursor
 			bool cursorBlink;			//switched on timer messages.. cursor is visible when true
 
-			int wsInstrument;
-			bool drawwave;
 			bool bSnapToZero;
 			bool bDragLoopStart, bDragLoopEnd;	//indicates that the user is dragging the loop start/end
 			unsigned long SelStart;		//the end of the selection -not- being moved 
@@ -169,16 +175,6 @@ namespace psycle { namespace host {
 			int prevBodyLoopE, prevHeadLoopE;
 
 			int rbX, rbY;				//mouse pos on rbuttonup- used for some location-sensitive context menu commands
-
-			//wave display data
-			std::deque<std::pair<short, short> > lDisplay;
-			std::deque<std::pair<short, short> > rDisplay;
-			std::deque<std::pair<short, short> > lHeadDisplay;
-			std::deque<std::pair<short, short> > rHeadDisplay;
-
-			CScrollableDlgBar zoombar;
-
-			CMainFrame* mainFrame;
 		};
 	}   // namespace
 }   // namespace

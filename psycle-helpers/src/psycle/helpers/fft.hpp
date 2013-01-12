@@ -38,6 +38,7 @@
 **********************************************************************/
 #pragma once
 #include <cstddef>
+#include "dsp.hpp"
 namespace psycle { namespace helpers { namespace dsp {
 	namespace dmfft {
 	/**
@@ -145,6 +146,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		/* fft state */
 		float *state_real;
 		float *state_imag;
+		dsp::cubic_resampler resampler;
+
 	public:
 		//fftLog is initialized in setup, and can be used to scale the frequency, like this:
 		//	for (int h=0, a=0;h<sizeBands;h++) {
@@ -155,7 +158,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		//		}
 		//		db[h]=powerdB(j+0.0000001f)+dbinvSamples;
 		//	}
-
+		inline std::size_t getOutputSize() { return outputSize; }
+		float resample(float const * data, float offset, uint64_t length);
 		float *fftLog;
 	};
 }}}

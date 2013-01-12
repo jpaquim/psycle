@@ -14,18 +14,18 @@ namespace psycle { namespace host {
 		XMSongExport();
 		virtual ~XMSongExport();
 		/// RIFF 
-		virtual void exportsong(Song& song);
+		virtual void exportsong(const Song& song);
 	private:
-		void writeSongHeader(Song &song);
-		void SavePatterns(Song & song);
-		void SaveSinglePattern(Song & song, const int patIdx);
+		void writeSongHeader(const Song &song);
+		void SavePatterns(const Song & song);
+		void SaveSinglePattern(const Song & song, const int patIdx);
 		
-		void SaveInstruments(Song & song);
-		void SaveEmptyInstrument(std::string name);
-		void SaveInstrument(Song& song, int instIdx);
-		void SaveSampleHeader(Song & song, const int instrIdx);
-		void SaveSampleData(Song & song, const int instrIdx);
-		void SetEnvelopes(Song & song, int instIdx, XMSAMPLEHEADER & sampleHeader);		
+		void SaveInstruments(const Song & song);
+		void SaveEmptyInstrument(const std::string& name);
+		void SaveInstrument(const Song& song, int instIdx);
+		void SaveSampleHeader(const Song & song, const int instrIdx);
+		void SaveSampleData(const Song & song, const int instrIdx);
+		void SetEnvelopes(const Song & song, int instIdx, const XMSAMPLEHEADER & sampleHeader);		
 		
 		XMFILEHEADER m_Header;
 		int lastMachine;

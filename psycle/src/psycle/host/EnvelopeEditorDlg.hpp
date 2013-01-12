@@ -1,0 +1,50 @@
+#pragma once
+#include <psycle/host/detail/project.hpp>
+#include "Psycle.hpp"
+#include "XMInstrument.hpp"
+#include "EnvelopeEditor.hpp"
+
+namespace psycle { namespace host {
+
+class XMSampler;
+
+class CEnvelopeEditorDlg : public CDialog
+{
+public:
+	CEnvelopeEditorDlg();
+	virtual ~CEnvelopeEditorDlg();
+
+	/// Dialog ID
+	enum { IDD = IDD_XMENVDLG };
+
+public:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+protected:
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnBnClickedEnvadsr();
+	afx_msg void OnBnClickedEnvfreeform();
+	afx_msg void OnBnClickedEnvcheck();
+
+public:
+	CEnvelopeEditor m_EnvelopeEditor;
+
+	CButton m_EnvEnabled;
+private:
+	void SliderBase(CSliderCtrl* slid);
+	void SliderMod(CSliderCtrl* slid);
+	void SliderAttack(CSliderCtrl* slid);
+	void SliderDecay(CSliderCtrl* slid);
+	void SliderSustain(CSliderCtrl* slid);
+	void SliderRelease(CSliderCtrl* slid);
+
+	CSliderCtrl m_SlADSRBase;
+	CSliderCtrl m_SlADSRMod;
+	CSliderCtrl m_SlADSRAttack;
+	CSliderCtrl m_SlADSRDecay;
+	CSliderCtrl m_SlADSRSustain;
+	CSliderCtrl m_SlADSRRelease;
+};
+
+}}
