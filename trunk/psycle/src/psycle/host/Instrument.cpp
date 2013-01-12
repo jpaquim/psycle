@@ -14,14 +14,14 @@ namespace psycle
 		Instrument::Instrument()
 		{
 			// clear everythingout
-			Delete();
+			Init();
 		}
 
 		Instrument::~Instrument()
 		{
 		}
 
-		void Instrument::Delete()
+		void Instrument::Init()
 		{
 			_lock_instrument_to_machine = -1;
 			_LOCKINST = false;
@@ -56,7 +56,7 @@ namespace psycle
 
 		void Instrument::LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen)
 		{
-			Delete();
+			Init();
 			
 			if ((version & 0xFF00) == 0)
 			{ // Version 0
@@ -191,7 +191,7 @@ namespace psycle
 			}
 		}
 
-		void Instrument::SaveFileChunk(RiffFile* pFile,SampleList& samples, int sampleIdx)
+		void Instrument::SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx)
 		{
 			pFile->Write(_loop);
 			pFile->Write(_lines);
@@ -231,7 +231,7 @@ namespace psycle
 			pFile->Write(numwaves);
 			if (numwaves > 0)
 			{
-				XMInstrument::WaveData& wave = samples[sampleIdx];
+				const XMInstrument::WaveData& wave = samples[sampleIdx];
 				byte * pData1(0);
 				byte * pData2(0);
 				UINT size1=0,size2=0;

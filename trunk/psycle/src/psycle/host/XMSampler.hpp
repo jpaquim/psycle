@@ -170,7 +170,7 @@ XMSampler::Channel::PerformFX().
 		WaveDataController(){};
 		virtual ~WaveDataController(){};
 
-		virtual void Init(XMInstrument::WaveData* wave, const int layer);
+		virtual void Init(const XMInstrument::WaveData* wave, const int layer);
 		virtual void NoteOff(void);
 		virtual void Work(float *pLeftw,float *pRightw,  const helpers::dsp::resampler::work_func_type resampler_work)
 		{
@@ -276,7 +276,7 @@ XMSampler::Channel::PerformFX().
 
 	protected:
 		int m_Layer;
-		XMInstrument::WaveData *m_pWave;
+		const XMInstrument::WaveData *m_pWave;
 		ULARGE_INTEGER m_Position;
 		double m_Speed;
 		bool m_Playing;
@@ -289,8 +289,8 @@ XMSampler::Channel::PerformFX().
 		int _length;
 
 		int m_LoopDirection;
-		std::int16_t* m_pL;
-		std::int16_t* m_pR;
+		const std::int16_t* m_pL;
+		const std::int16_t* m_pR;
 	};
 
 //////////////////////////////////////////////////////////////////////////
@@ -433,7 +433,7 @@ XMSampler::Channel::PerformFX().
 		void Reset();
 		void ResetEffects();
 
-		void VoiceInit(int channelNum,int instrumentNum);
+		void VoiceInit(const XMInstrument& xins, int channelNum,int instrumentNum);
 		void Work(int numSamples,float * pSampleL,float *pSamlpesR,helpers::dsp::resampler& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
@@ -451,7 +451,7 @@ XMSampler::Channel::PerformFX().
 		
 		void ResetVolAndPan(std::int16_t playvol,bool reset=true);
 		void UpdateSpeed();
-		double PeriodToSpeed(int period);
+		double PeriodToSpeed(int period) const;
 
 
 		// Effect-Related Object Functions
@@ -472,7 +472,7 @@ XMSampler::Channel::PerformFX().
 
 		// Do Auto Vibrato
 		void AutoVibrato();
-		bool IsAutoVibrato() { return m_AutoVibratoAmount!=0; }
+		bool IsAutoVibrato() const { return m_AutoVibratoAmount!=0; }
 		// Get Auto Vibrato Amount
 		double AutoVibratoAmount() const {return m_AutoVibratoAmount;}
 
@@ -480,17 +480,20 @@ XMSampler::Channel::PerformFX().
 // Properties
 		int InstrumentNum() const{ return _instrument;}
 		void InstrumentNum(const int value){_instrument = value;}
-		XMInstrument &rInstrument() { return *m_pInstrument;}
+//		XMInstrument &rInstrument() { return *m_pInstrument;}
 		const XMInstrument &rInstrument() const { return *m_pInstrument;}
-		void pInstrument(XMInstrument *p){m_pInstrument = p;}
+		void pInstrument(const XMInstrument * const p){m_pInstrument = p;}
 
 		int ChannelNum() const { return m_ChannelNum;}
 		void ChannelNum(const int value){ m_ChannelNum = value;}
-		void pChannel(XMSampler::Channel *p){m_pChannel = p;};
+		void pChannel(XMSampler::Channel * const p){m_pChannel = p;};
+//		void pChannel(const XMSampler::Channel * const p){m_pChannel = p;};
 		XMSampler::Channel& rChannel(){return *m_pChannel;}
+		const XMSampler::Channel& rChannel() const {return *m_pChannel;}
 
 		void pSampler(XMSampler * const p){m_pSampler = p;}
 		XMSampler * const pSampler() {return m_pSampler;}
+		const XMSampler * const pSampler() const {return m_pSampler;}
 
 		XMSampler::EnvelopeController& AmplitudeEnvelope(){return m_AmplitudeEnvelope;}
 		XMSampler::EnvelopeController& FilterEnvelope(){return m_FilterEnvelope;}
@@ -541,7 +544,7 @@ XMSampler::Channel::PerformFX().
 		}
 		float PanFactor() { return m_PanFactor; }
 		void IsSurround(bool surround) { m_Surround = surround; }
-		bool IsSurround() { return m_Surround; }
+		bool IsSurround() const { return m_Surround; }
 
 
 		int CutOff() const { return m_CutOff; }
@@ -559,7 +562,7 @@ XMSampler::Channel::PerformFX().
 		void FilterType(dsp::FilterType ftype) { m_Filter.Type(ftype);}
 
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); }
-		int Period() { return m_Period; }
+		int Period() const { return m_Period; }
 		// convert note to period
 		double NoteToPeriod(const int note, bool correctNote=true) const;
 		// convert period to note 
@@ -579,10 +582,10 @@ XMSampler::Channel::PerformFX().
 
 		int m_ChannelNum;
 		XMSampler::Channel* m_pChannel;
-		XMSampler *m_pSampler;
+		XMSampler * m_pSampler;
 
 		int _instrument;// Instrument
-		XMInstrument *m_pInstrument;
+		const XMInstrument * m_pInstrument;
 		XMInstrument::NewNoteAction::Type m_NNA;
 
 
@@ -684,7 +687,7 @@ XMSampler::Channel::PerformFX().
 			Init();
 		}
 		bool Load(RiffFile& riffFile);
-		void Save(RiffFile& riffFile);
+		void Save(RiffFile& riffFile) const;
 		void Init();
 		void EffectInit();
 		void Restore();
@@ -742,7 +745,8 @@ XMSampler::Channel::PerformFX().
 		int InstrumentNo() const {return m_InstrumentNo;}
 		void InstrumentNo(const int no){m_InstrumentNo = no;}
 
-		XMSampler::Voice* ForegroundVoice(){ return m_pForegroundVoice; }
+		XMSampler::Voice* ForegroundVoice() { return m_pForegroundVoice; }
+		const XMSampler::Voice* ForegroundVoice() const { return m_pForegroundVoice; }
 		void ForegroundVoice(XMSampler::Voice* pVoice) {m_pForegroundVoice = pVoice;}
 
 		int Note() const { return m_Note;}
@@ -1047,12 +1051,10 @@ XMSampler::Channel::PerformFX().
 	}
 
 /// properties
-	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];}///< Channel 
-	Voice& rVoice(const int index){ return m_Voices[index];}///< 
+	XMSampler::Channel& rChannel(const int index){ return m_Channel[index];}
+	const XMSampler::Channel& rChannel(const int index) const { return m_Channel[index];}
+	Voice& rVoice(const int index){ return m_Voices[index];}
 
-	XMInstrument & rInstrument(const int index) const;
-	XMInstrument::WaveData & SampleData(const int index) const;
-	
 	bool IsAmigaSlides() const { return m_bAmigaSlides;}
 	void IsAmigaSlides(const bool value){ m_bAmigaSlides = value;}
 

@@ -1,217 +1,10 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUISample.hpp"
-#include "XMSampler.hpp"
+#include <psycle/host/XMSampler.hpp>
+#include <psycle/host/Song.hpp>
 
 namespace psycle { namespace host {
 
-// CWaveScopeCtrl
-CWaveScopeCtrl::CWaveScopeCtrl()
-: m_pWave(NULL)
-{
-	cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
-	cpen_med.CreatePen(PS_SOLID,0,0xCCCCCC);
-	cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
-	cpen_sus.CreatePen(PS_DOT,0,0xFF0000);
-}
-CWaveScopeCtrl::~CWaveScopeCtrl(){
-	cpen_lo.DeleteObject();
-	cpen_med.DeleteObject();
-	cpen_hi.DeleteObject();
-	cpen_sus.DeleteObject();
-}
-
-void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
-{
-	if (m_pWave && lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
-	{
-		CDC dc;
-		dc.Attach(lpDrawItemStruct->hDC);
-
-		int wrHeight = 0, yLow = 0, yHi = 0;
-		double OffsetStep = 0;
-		__int32 c, d;
-
-		CRect rect;
-		GetClientRect(&rect);
-
-		int const nWidth=rect.Width();
-		int const nHeight=rect.Height();
-		int const my=nHeight/2;
-		if(rWave().IsWaveStereo()) wrHeight=my/2;
-		else wrHeight=my;
-		helpers::dsp::cubic_resampler resampler;
-		resampler.quality(helpers::dsp::resampler::quality::spline);
-
-		dc.FillSolidRect(&rect,RGB(255,255,255));
-		dc.SetBkMode(TRANSPARENT);
-
-		if(rWave().WaveLength())
-		{
-
-			// Draw preliminary stuff
-
-			CPen *oldpen= dc.SelectObject(&cpen_med);
-
-			// Left channel 0 amplitude line
-			dc.MoveTo(0,wrHeight);
-			dc.LineTo(nWidth,wrHeight);
-
-			int const wrHeight_R = my + wrHeight;
-
-			if(rWave().IsWaveStereo())
-			{
-				// Right channel 0 amplitude line
-				dc.MoveTo(0,wrHeight_R);
-				dc.LineTo(nWidth,wrHeight_R);
-
-				// Stereo channels separator line
-				dc.SelectObject(&cpen_lo);
-				dc.MoveTo(0,my);
-				dc.LineTo(nWidth,my);
-			}
-
-			dc.SelectObject(&cpen_hi);
-
-			OffsetStep = (double) rWave().WaveLength() / nWidth;
-
-			if ( OffsetStep > 4)
-			{
-				for(c = 0; c < nWidth; c++)
-				{
-					long const offset = (long)floorf(c * OffsetStep);
-					yLow=0;yHi=0;
-					// Alternate search. Doing the same than in the next "else if"
-					// can be slow on big ( 100.000+ sample) samples
-					for (d = offset; d < offset + OffsetStep; d+=(OffsetStep/4))
-					{
-						if (yLow > rWave().WaveDataL(d)) yLow = rWave().WaveDataL(d);
-						if (yHi < rWave().WaveDataL(d)) yHi = rWave().WaveDataL(d);
-					}
-					int const ryLow = (wrHeight * yLow)/32768;
-					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) + ryLow);
-					dc.LineTo(c,(wrHeight) + ryHi);
-				}
-			}
-			else if ( OffsetStep >1)
-			{
-				for(c = 0; c < nWidth; c++)
-				{
-					long const offset = (long)floorf(c * OffsetStep);
-					yLow=0;yHi=0;
-					for (d = offset; d < offset + ((OffsetStep <1) ? 1 : OffsetStep); d++)
-					{
-						if (yLow > rWave().WaveDataL(d)) yLow = rWave().WaveDataL(d);
-						if (yHi < rWave().WaveDataL(d)) yHi = rWave().WaveDataL(d);
-					}
-					int const ryLow = (wrHeight * yLow)/32768;
-					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) + ryLow);
-					dc.LineTo(c,(wrHeight) + ryHi);
-				}
-			}
-			else
-			{
-				for(c = 0; c < nWidth; c++)
-				{
-					ULARGE_INTEGER posin;
-					posin.QuadPart = c * OffsetStep* 4294967296.0f;
-					yHi=0;
-					yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
-
-					int const ryLow = (wrHeight * yLow)/32768;
-					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) + ryLow);
-					dc.LineTo(c,(wrHeight) + ryHi);
-				}
-			}
-
-			if(rWave().IsWaveStereo())
-			{
-				if ( OffsetStep > 4)
-				{
-					for(c = 0; c < nWidth; c++)
-					{
-						long const offset = (long)floorf(c * OffsetStep);
-						yLow=0;yHi=0;
-						for (d = offset; d < offset + OffsetStep; d+=(OffsetStep/4))
-						{
-							if (yLow > rWave().WaveDataR(d)) yLow = rWave().WaveDataR(d);
-							if (yHi < rWave().WaveDataR(d)) yHi = rWave().WaveDataR(d);
-						}
-						int const ryLow = (wrHeight * yLow)/32768;
-						int const ryHi = (wrHeight * yHi)/32768;
-						dc.MoveTo(c,wrHeight_R - ryLow);
-						dc.LineTo(c,wrHeight_R - ryHi);
-					}
-				}
-				else if ( OffsetStep >1)
-				{
-					for(c = 0; c < nWidth; c++)
-					{
-						long const offset = (long)floorf(c * OffsetStep);
-						yLow=0;yHi=0;
-						for (d = offset; d < offset + ((OffsetStep <1) ? 1 : OffsetStep); d++)
-						{
-							if (yLow > rWave().WaveDataR(d)) yLow = rWave().WaveDataR(d);
-							if (yHi < rWave().WaveDataR(d)) yHi = rWave().WaveDataR(d);
-						}
-						int const ryLow = (wrHeight * yLow)/32768;
-						int const ryHi = (wrHeight * yHi)/32768;
-						dc.MoveTo(c,wrHeight_R - ryLow);
-						dc.LineTo(c,wrHeight_R - ryHi);
-					}
-				}
-				else
-				{
-					for(c = 0; c < nWidth; c++)
-					{
-						ULARGE_INTEGER posin;
-						posin.QuadPart = c * OffsetStep* 4294967296.0f;
-						yHi=0;
-						yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
-
-						int const ryLow = (wrHeight * yLow)/32768;
-						int const ryHi = (wrHeight * yHi)/32768;
-						dc.MoveTo(c,wrHeight_R - ryLow);
-						dc.LineTo(c,wrHeight_R - ryHi);
-					}
-				}
-			}
-			if ( rWave().WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT )
-			{
-				dc.SelectObject(&cpen_lo);
-				int ls = (rWave().WaveLoopStart()* nWidth) /rWave().WaveLength();
-				dc.MoveTo(ls,0);
-				dc.LineTo(ls,nHeight);
-				dc.TextOut(ls,12,"Start");
-				int le = (rWave().WaveLoopEnd()* nWidth)/rWave().WaveLength();
-				dc.MoveTo(le,0);
-				dc.LineTo(le,nHeight);
-				dc.TextOut(le-18,nHeight-24,"End");
-
-			}
-			if ( rWave().WaveSusLoopType() != XMInstrument::WaveData::LoopType::DO_NOT )
-			{
-				dc.SelectObject(&cpen_sus);
-				int ls = (rWave().WaveSusLoopStart()* nWidth)/rWave().WaveLength();
-				dc.MoveTo(ls,0);
-				dc.LineTo(ls,nHeight);
-				dc.TextOut(ls,0,"Start");
-				int le = (rWave().WaveSusLoopEnd()* nWidth)/rWave().WaveLength();
-				dc.MoveTo(le,0);
-				dc.LineTo(le,nHeight);
-				dc.TextOut(le-18,nHeight-12,"End");
-			}
-			dc.SelectObject(oldpen);
-		}
-		else
-		{
-			dc.TextOut(4,4,"No Wave Data");
-		}
-		dc.Detach();
-	}
-}
 
 // XMSamplerUISample
 
@@ -266,49 +59,61 @@ BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 END_MESSAGE_MAP()
 
 // Controladores de mensajes de XMSamplerUISample
-BOOL XMSamplerUISample::OnSetActive()
+BOOL XMSamplerUISample::OnInitDialog()
 {
-	if (!m_Init ) {
-		((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
-		((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
-		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
-		((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-59);
-		((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(59);
-		((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(1);
-		((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
-		((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
-		((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(26);
-		((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetRangeMax(255);
-		((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetRangeMax(64);
-		((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetRangeMax(32);
-		CComboBox* vibratoType = ((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE));
-		vibratoType->ResetContent();
-		vibratoType->AddString("Sinus");
-		vibratoType->AddString("Square");
-		vibratoType->AddString("RampUp");
-		vibratoType->AddString("RampDown");
-		vibratoType->AddString("Random");
-		CComboBox* sustainLoop = ((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP));
-		sustainLoop->ResetContent();
-		sustainLoop->AddString("Disabled");
-		sustainLoop->AddString("Forward");
-		sustainLoop->AddString("Bidirection");
-		CComboBox* loop =  ((CComboBox*)GetDlgItem(IDC_LOOP));
-		loop->ResetContent();
-		loop->AddString("Disabled");
-		loop->AddString("Forward");
-		loop->AddString("Bidirection");
-		m_SampleList.SetCurSel(0);
-		m_SampleList.ResetContent();
-		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
-		{
-			char line[48];
-			XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
+	CPropertyPage::OnInitDialog();
+	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
+	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
+	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-59);
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(59);
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(1);
+	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
+	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
+	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(26);
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetRangeMax(255);
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetRangeMax(64);
+	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetRangeMax(32);
+	CComboBox* vibratoType = ((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE));
+	vibratoType->ResetContent();
+	vibratoType->AddString("Sinus");
+	vibratoType->AddString("Square");
+	vibratoType->AddString("RampUp");
+	vibratoType->AddString("RampDown");
+	vibratoType->AddString("Random");
+	CComboBox* sustainLoop = ((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP));
+	sustainLoop->ResetContent();
+	sustainLoop->AddString("Disabled");
+	sustainLoop->AddString("Forward");
+	sustainLoop->AddString("Bidirection");
+	CComboBox* loop =  ((CComboBox*)GetDlgItem(IDC_LOOP));
+	loop->ResetContent();
+	loop->AddString("Disabled");
+	loop->AddString("Forward");
+	loop->AddString("Bidirection");
+	m_SampleList.ResetContent();
+	SampleList& list = Global::song().samples;
+	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
+	{
+		char line[48];
+		if (list.IsEnabled(i)) {
+			const XMInstrument::WaveData& wave = list[i];
 			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
-			m_SampleList.AddString(line);
 		}
+		else {
+			sprintf(line,"%02X : ",i);
+		}
+		m_SampleList.AddString(line);
 	}
+	m_SampleList.SetCurSel(0);
+	return TRUE;
+	// return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+BOOL XMSamplerUISample::OnSetActive()
+{
 	if ( m_SampleList.GetCurSel() == -1 ) {
 		m_SampleList.SetCurSel(0);
 	}
@@ -323,7 +128,12 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	m_Init=false;
 	char tmp[40];
 	int i= m_SampleList.GetCurSel();
-	XMInstrument::WaveData& wave = m_pMachine->SampleData(i);
+	if (Global::song().samples.IsEnabled(i) == false) {
+		XMInstrument::WaveData wave;
+		wave.Init();
+		Global::song().samples.SetSample(wave,i);
+	}
+	XMInstrument::WaveData& wave = Global::song().samples.get(i);
 	pWave(&wave);
 
 	strcpy(tmp,wave.WaveName().c_str());
@@ -462,9 +272,9 @@ void XMSamplerUISample::OnBnClickedDupe()
 {
 	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
 	{
-		if ( m_pMachine->SampleData(j).WaveLength() == 0 ) 
+		if (Global::song().samples.IsEnabled(j) == false ) 
 		{
-			XMInstrument::WaveData& wavenew = m_pMachine->SampleData(j);
+			XMInstrument::WaveData& wavenew = Global::song().samples.get(j);
 			wavenew = rWave();
 			return;
 		}
@@ -627,8 +437,8 @@ void XMSamplerUISample::OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 	if (rWave().WaveLength() > 0) {
-	sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
-	sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
+		sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
+		sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
 	}
 	else {
 		sprintf(tmp2,"%s%d",notes[0],5);

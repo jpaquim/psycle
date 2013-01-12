@@ -181,7 +181,7 @@ namespace psycle
 		}
 
 
-		int Song::FindBusFromIndex(int smac)
+		int Song::FindBusFromIndex(int smac) const
 		{
 			if(!_pMachine[smac])  return 255;
 			return smac;
@@ -401,13 +401,7 @@ namespace psycle
 			tmpins=_pInstrument[one];
 			_pInstrument[one]=_pInstrument[two];
 			_pInstrument[two]=tmpins;
-			//The above works because we are not creating new objects, just swaping them.
-			//this means that no new data is generated/deleted,and the information is just
-			//copied. If not, we would have had to define the operator=() function and take
-			//care of it.
-			XMInstrument::WaveData wave = samples[one];
-			samples[one]=samples[two];
-			samples[two]=wave;
+			samples.ExchangeSamples(one,two);
 		}
 
 		void Song::DeleteInstruments()
@@ -418,14 +412,15 @@ namespace psycle
 		void Song::DestroyAllInstruments()
 		{
 			for(int i(0) ; i < MAX_INSTRUMENTS ; ++i) zapObject(_pInstrument[i]);
+			xminstruments.Clear();
 			samples.Clear();
 		}
 
 		void Song::DeleteInstrument(int i)
 		{
-			_pInstrument[i]->Delete();
+			_pInstrument[i]->Init();
 			if (samples.IsEnabled(i)){
-				samples[i].DeleteWaveData();
+				samples.get(i).Init();
 			}
 		}
 
@@ -529,7 +524,7 @@ namespace psycle
 			}
 		}
 
-		int Song::GetFreeMachine()
+		int Song::GetFreeMachine() const
 		{
 			int idx=-1;
 			for(int tmac = 0; tmac < MAX_MACHINES; tmac++)
@@ -808,11 +803,11 @@ namespace psycle
 				_trackNames[pat][trackIdx] = "";
 			}
 		}
-		int Song::GetHighestInstrumentIndex()
+		int Song::GetHighestInstrumentIndex() const
 		{
 			return samples.size()-1;
 		}
-		int Song::GetNumInstruments()
+		int Song::GetNumInstruments() const
 		{
 			int used=0;
 			int size = samples.size();
@@ -824,14 +819,14 @@ namespace psycle
 			return used;
 		}
 
-		int Song::GetHighestPatternIndexInSequence()
+		int Song::GetHighestPatternIndexInSequence() const
 		{
 			int rval(0);
 			for(int c(0) ; c < playLength ; ++c) if(rval < playOrder[c]) rval = playOrder[c];
 			return rval;
 		}
 
-		int Song::GetNumPatterns() {
+		int Song::GetNumPatterns() const {
 			int used=0;
 			for(int i =0; i < MAX_PATTERNS; i++) {
 				if(!IsPatternEmpty(i)) used++;
@@ -839,7 +834,7 @@ namespace psycle
 			return used;
 		}
 
-		int Song::GetBlankPatternUnused(int rval)
+		int Song::GetBlankPatternUnused(int rval) const
 		{
 			//Check for one unexistant pattern.
 			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
@@ -860,7 +855,7 @@ namespace psycle
 				bTryAgain = false;
 				if(rval < MAX_PATTERNS - 1)
 				{
-					unsigned char *offset_source(_ppattern(rval));
+					unsigned char *offset_source(ppPatternData[rval]);
 					for(int t(0) ; t < MULTIPLY2 ; t += EVENT_SIZE)
 					{
 						if(memcmp(offset_source+t,&blank,EVENT_SIZE) != 0 )
@@ -888,13 +883,13 @@ namespace psycle
 			return rval;
 		}
 
-		int Song::GetFreeBus()
+		int Song::GetFreeBus() const
 		{
 			for(int c(0) ; c < MAX_BUSES ; ++c) if(!_pMachine[c]) return c;
 			return -1; 
 		}
 
-		int Song::GetFreeFxBus()
+		int Song::GetFreeFxBus() const
 		{
 			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
 			return -1; 
@@ -1085,12 +1080,11 @@ namespace psycle
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-			XMInstrument::WaveData& wave = (instrument < PREV_WAV_INS )?samples[instrument]:wavprev.GetWave();
+			XMInstrument::WaveData& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.GetWave();
 			std::int16_t * sampL = wave.pWaveDataL();
 
 			///\todo use template code for all this semi-repetitive code.
 
-			long io; ///< \todo why is this declared here?
 			// mono
 			if(st_type == 1)
 			{
@@ -1098,7 +1092,7 @@ namespace psycle
 				switch(bits)
 				{
 					case 8:
-						for(io = 0 ; io < Datalen ; ++io)
+						for(long io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							*sampL = (smp8 << 8) - 32768;
@@ -1109,7 +1103,7 @@ namespace psycle
 							file.ReadData(sampL, Datalen);
 						break;
 					case 24:
-						for(io = 0 ; io < Datalen ; ++io)
+						for(long io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							file.ReadData(sampL, 1);
@@ -1128,7 +1122,7 @@ namespace psycle
 				switch(bits)
 				{
 					case 8:
-						for(io = 0 ; io < Datalen ; ++io)
+						for(long io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							*sampL = (smp8 << 8) - 32768;
@@ -1139,7 +1133,7 @@ namespace psycle
 						}
 						break;
 					case 16:
-						for(io = 0 ; io < Datalen ; ++io)
+						for(long io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(sampL, 1);
 							file.ReadData(sampR, 1);
@@ -1148,7 +1142,7 @@ namespace psycle
 						}
 						break;
 					case 24:
-						for(io = 0 ; io < Datalen ; ++io)
+						for(long io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							file.ReadData(sampL, 1);
@@ -2928,7 +2922,7 @@ namespace psycle
 			return true;
 		}
 
-		bool Song::IsPatternUsed(int i)
+		bool Song::IsPatternUsed(int i) const
 		{
 			bool bUsed = false;
 			if (ppPatternData[i])
@@ -2951,7 +2945,7 @@ namespace psycle
 			return bUsed;
 		}
 
-		bool Song::IsPatternEmpty(int i) {
+		bool Song::IsPatternEmpty(int i) const {
 			if (!ppPatternData[i]) {
 				return true;
 			}

@@ -595,7 +595,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
 		{
-			XMInstrument::WaveData & wave = m_pSong->samples[m_pSong->instSelected];
+			const XMInstrument::WaveData & wave = m_pSong->samples[m_pSong->instSelected];
 			CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			if (dlg.DoModal() == IDOK)
 			{

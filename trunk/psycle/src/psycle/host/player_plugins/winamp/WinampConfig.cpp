@@ -58,7 +58,7 @@ namespace psycle { namespace host {
 				SetCacheDir(cachepath);
 		    }
 		    else{
-				config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").native_file_string();
+				config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").string();
 				SetCacheDir(appPath());
 			}
 			if(!store->OpenLocation(config_file))
@@ -90,7 +90,7 @@ namespace psycle { namespace host {
 					config_file = config_file + "\\Plugins\\in_psycle.ini";
 				}
 				else{
-					config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").native_file_string();
+					config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").string();
 				}
 				if(!store->CreateLocation(config_file)) {
 					delete store;
@@ -123,7 +123,7 @@ namespace psycle { namespace host {
 				config_file = config_file + "\\Plugins\\in_psycle.ini";
 		    }
 		    else{
-				config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").native_file_string();
+				config_file = (boost::filesystem::path(appPath()) / "in_psycle.ini").string();
 			}
 			if(!store->OpenLocation(config_file))
 			{

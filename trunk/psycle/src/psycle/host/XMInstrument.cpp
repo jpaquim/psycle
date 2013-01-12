@@ -322,7 +322,7 @@ namespace psycle
 			return size;
 		}
 
-		void XMInstrument::WaveData::Save(RiffFile& riffFile)
+		void XMInstrument::WaveData::Save(RiffFile& riffFile) const
 		{
 			unsigned char * pData1(0);
 			unsigned char * pData2(0);
@@ -630,7 +630,7 @@ namespace psycle
 		}
 
 		/// Saving Procedure
-		void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t version)
+		void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t version) const
 		{
 			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 			riffFile.Write(m_Enabled);
@@ -765,7 +765,7 @@ namespace psycle
 		}
 
 		// save XMInstrument
-		void XMInstrument::Save(RiffFile& riffFile)
+		void XMInstrument::Save(RiffFile& riffFile) const
 		{
 			if ( ! m_bEnabled ) return;
 

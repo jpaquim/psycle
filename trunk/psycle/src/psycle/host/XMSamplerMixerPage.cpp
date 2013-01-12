@@ -310,9 +310,9 @@ void XMSamplerMixerPage::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollB
 			int uId = the_slider->GetDlgCtrlID();
 			for (int i=0;i<8;i++)
 			{
-				if(uId == dlgCut[i]) { SliderCutoff((CSliderCtrl*)the_slider, i); break; }
-				if(uId == dlgRes[i]) { SliderRessonance((CSliderCtrl*)the_slider, i); break; }
-				if(uId == dlgPan[i]) { SliderPanning((CSliderCtrl*)the_slider, i); break; }
+				if(uId == dlgCut[i]) { SliderCutoff(the_slider, i); break; }
+				if(uId == dlgRes[i]) { SliderRessonance(the_slider, i); break; }
+				if(uId == dlgPan[i]) { SliderPanning(the_slider, i); break; }
 			}
 		}
 		break;
@@ -340,14 +340,14 @@ void XMSamplerMixerPage::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollB
 		else {
 			for (int i=0;i<8;i++)
 			{
-				if(uId == dlgVol[i]) { SliderVolume((CSliderCtrl*)the_slider, i); break; }
+				if(uId == dlgVol[i]) { SliderVolume(the_slider, i); break; }
 			}
 		}
 		break;
 	case TB_ENDTRACK:
 		break;
 	}
-	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
+	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
 

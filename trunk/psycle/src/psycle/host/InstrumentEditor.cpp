@@ -94,7 +94,7 @@ namespace psycle { namespace host {
 			const int si = pSong->instSelected;
 			Instrument *pins = pSong->_pInstrument[si];
 			XMInstrument::WaveData wavetmp;
-			XMInstrument::WaveData& wave = (pSong->samples.IsEnabled(si)) ? pSong->samples[si] : wavetmp;
+			const XMInstrument::WaveData& wave = (pSong->samples.IsEnabled(si)) ? pSong->samples[si] : wavetmp;
 
 			char buffer[64];
 			// Set instrument current selected label
@@ -182,7 +182,7 @@ namespace psycle { namespace host {
 		{
 			int si = pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL)
 				{
 					wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
@@ -195,7 +195,7 @@ namespace psycle { namespace host {
 		{
 			int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::DO_NOT)
 				{
 					wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
@@ -212,7 +212,7 @@ namespace psycle { namespace host {
 			int si=pSong->instSelected;
 			char buffer[8];
 			if (pSong->samples.IsEnabled(si)) {
-				pSong->samples[si].WaveGlobVolume(m_volumebar.GetPos()*0.01f);
+				pSong->samples.get(si).WaveGlobVolume(m_volumebar.GetPos()*0.01f);
 				
 				sprintf(buffer,"%d%%",m_volumebar.GetPos());
 				m_volabel.SetWindowText(buffer);
@@ -308,7 +308,7 @@ namespace psycle { namespace host {
 			char buffer[8];
 			int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				wave.PanFactor(m_panslider.GetPos()/256.f);
 				
 				sprintf(buffer,"%d%",m_panslider.GetPos());
@@ -420,7 +420,7 @@ namespace psycle { namespace host {
 			int si=pSong->instSelected;
 			char buffer[8];
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				
 				if(cando)
 					wave.WaveFineTune(m_finetune.GetPos()-256);
@@ -447,7 +447,7 @@ namespace psycle { namespace host {
 		{
 			const int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 
 				if ( wave.WaveTune()>-37)
 					wave.WaveTune(wave.WaveTune()-12);
@@ -460,7 +460,7 @@ namespace psycle { namespace host {
 		{
 			const int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if ( wave.WaveTune()>-47)
 					wave.WaveTune(wave.WaveTune()-1);
 				else wave.WaveTune(-48);
@@ -472,7 +472,7 @@ namespace psycle { namespace host {
 		{
 			const int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if ( wave.WaveTune()<70)
 					wave.WaveTune(wave.WaveTune()+1);
 				else wave.WaveTune(71);
@@ -484,7 +484,7 @@ namespace psycle { namespace host {
 		{
 			const int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if ( wave.WaveTune()<60)
 					wave.WaveTune(wave.WaveTune()+12);
 				else wave.WaveTune(71);
@@ -497,7 +497,7 @@ namespace psycle { namespace host {
 			const int si = pSong->instSelected;
 			char buffer[64];
 			if (pSong->samples.IsEnabled(si)) {
-				XMInstrument::WaveData& wave = pSong->samples[si];
+				const XMInstrument::WaveData& wave = pSong->samples[si];
 				
 				const int octave= ((wave.WaveTune()+48)/12);
 				switch ((wave.WaveTune()+48)%12)

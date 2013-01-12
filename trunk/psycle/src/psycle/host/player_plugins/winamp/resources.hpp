@@ -36,7 +36,7 @@
 #define IDC_BITDEPTH                    4009
 #define IDC_ARTIST                      4010
 #define IDC_INFO                        4011
-#define IDC_FILENAME                    4012
+#define IDC_DLG_FILENAME                4012
 #define IDC_CACHEVALID                  4013
 #define IDC_CKBRIDGING                  4014
 #define IDC_NUMBER_THREADS              4015

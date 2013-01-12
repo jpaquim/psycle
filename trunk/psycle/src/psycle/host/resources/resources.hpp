@@ -111,6 +111,12 @@
 #define IDB_SWITCHMINI_OFF              312
 #define IDB_SWITCHMINI_ON               313
 #define IDD_WIRE_CHANMAP                314
+#define IDD_XMSAMP_INSTGEN              315
+#define IDD_XMSAMP_INSTAMP              316
+#define IDD_XMSAMP_INSTPAN              317
+#define IDD_XMSAMP_INSTFIL              318
+#define IDD_XMSAMP_INSTPIT              319
+#define IDD_XMENVDLG                    320
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -924,7 +930,8 @@
 #define IDC_SRCDEST_LABEL               2098
 #define IDC_AUTOWIRE                    2099
 #define IDC_UNSELECT                    2100
-#define IDC_XMSPEED                     2101
+#define IDC_XMINST_TAB                  2104
+#define IDC_GROUP_ENV                   2105
 #define IDC_NUMBER_THREADS              4015
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1090,9 +1097,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        315
+#define _APS_NEXT_RESOURCE_VALUE        321
 #define _APS_NEXT_COMMAND_VALUE         34285
-#define _APS_NEXT_CONTROL_VALUE         2103
+#define _APS_NEXT_CONTROL_VALUE         2106
 #define _APS_NEXT_SYMED_VALUE           62
 #endif
 #endif

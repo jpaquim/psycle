@@ -132,7 +132,7 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
-		void XMSampler::WaveDataController::Init(XMInstrument::WaveData* wave, const int layer)
+		void XMSampler::WaveDataController::Init(const XMInstrument::WaveData* wave, const int layer)
 		{
 			m_Layer = layer;
 			m_pWave = wave;
@@ -378,7 +378,7 @@ namespace psycle
 			m_RetrigTicks=0;
 
 		}
-		void XMSampler::Voice::VoiceInit(int channelNum, int instrumentNum)
+		void XMSampler::Voice::VoiceInit(const XMInstrument & _inst, int channelNum, int instrumentNum)
 		{
 			IsBackground(false);
 			IsStopping(false);
@@ -386,7 +386,6 @@ namespace psycle
 			m_ChannelNum = channelNum;
 			pChannel(&pSampler()->rChannel(channelNum));
 			InstrumentNum(instrumentNum);
-			XMInstrument & _inst = pSampler()->rInstrument(instrumentNum);
 			m_pInstrument = &_inst;
 
 			// Envelopes
@@ -458,7 +457,7 @@ namespace psycle
 			float left_output = 0.0f;
 			float right_output = 0.0f;
 
-			if (!m_pSampler->rInstrument(this->InstrumentNum()).IsEnabled())
+			if (!rInstrument().IsEnabled())
 			{
 				IsPlaying(false);
 				return;
@@ -605,9 +604,9 @@ namespace psycle
 		{	
 			XMInstrument::NotePair pair = rInstrument().NoteToSample(note);
 			int wavelayer = pair.second;
-			XMInstrument::WaveData& wave = pSampler()->SampleData(wavelayer);
-			if ( wave.WaveLength() == 0 ) return;
+			if ( Global::song().samples.IsEnabled(wavelayer) == false ) return;
 
+			const XMInstrument::WaveData& wave = Global::song().samples[wavelayer];
 			m_WaveDataController.Init(&wave,wavelayer);
 			m_Note = note;
 			m_Period=NoteToPeriod(pair.first,false);
@@ -945,7 +944,7 @@ namespace psycle
 //			m_Filter.SampleSpeed(speed*(double)Global::player().SampleRate());
 		}
 
-		double XMSampler::Voice::PeriodToSpeed(int period)
+		double XMSampler::Voice::PeriodToSpeed(int period) const
 		{
 			if(m_pSampler->IsAmigaSlides()){
 				// amiga period mode
@@ -1947,7 +1946,7 @@ namespace psycle
 
 			return true;
 		}
-		void XMSampler::Channel::Save(RiffFile& riffFile)
+		void XMSampler::Channel::Save(RiffFile& riffFile) const
 		{
 			int size=5*sizeof(int);
 			riffFile.Write("CHAN",4);
@@ -2218,13 +2217,13 @@ namespace psycle
 							//\todo : actually, we should check for commands!
 							return;
 						}
-
-						XMInstrument & _inst = rInstrument(thisChannel.InstrumentNo());
+						const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
 						int _layer = _inst.NoteToSample(pData->_note).second;
-						int twlength = SampleData(_layer).WaveLength();
-						if(twlength > 0)
+						if(Global::song().samples.IsEnabled(_layer))
 						{
-							newVoice->VoiceInit(channelNum,thisChannel.InstrumentNo());
+							const XMInstrument::WaveData& wave = Global::song().samples[_layer];
+							int twlength = wave.WaveLength();
+							newVoice->VoiceInit(_inst, channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
 							if (currentVoice)
 							{
@@ -2561,24 +2560,6 @@ namespace psycle
 			InstrumentList &m_Instruments = Global::song().xminstruments;
 			return m_Instruments.IsEnabled(idx)?m_Instruments[idx].Name().c_str():"";
 		}
-
-		XMInstrument & XMSampler::rInstrument(const int index) const {
-			InstrumentList &m_Instruments = Global::song().xminstruments;
-			if (index >= m_Instruments.size()) {
-				XMInstrument inst;
-				m_Instruments.SetInst(inst, index);
-			}
-			return m_Instruments[index];
-		}
-		XMInstrument::WaveData & XMSampler::SampleData(const int index) const {
-			SampleList &m_rWaveLayer = Global::song().samples;
-			if (index >= m_rWaveLayer.size()) {
-				XMInstrument::WaveData wave;
-				m_rWaveLayer.SetSample(wave, index);
-			}
-			return m_rWaveLayer[index];
-		}
-		
 
 		bool XMSampler::Load(RiffFile* riffFile)
 		{

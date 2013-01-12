@@ -461,9 +461,11 @@ using namespace universalis::stdlib;
 				switch(quality) {
 					case quality::none:
 					work = none;
+					work_float = none;
 					break;
 				case quality::linear:
 					work = linear;
+					work_float = linear_float;
 					break;
 				case quality::spline:
 					work = spline;
@@ -471,6 +473,7 @@ using namespace universalis::stdlib;
 					break;
 				case quality::band_limited:
 					work = band_limited;
+					work_float = none;
 					break;
 				}
 			}
@@ -482,14 +485,21 @@ using namespace universalis::stdlib;
 				float y1 = offset + 1 == length ? 0 : *(data + 1);
 				return y0 + (y1 - y0) * l_table_[res >> 21];
 			}
-			
+			/// interpolation work function which does linear interpolation.
+			static float linear_float(float const * data, float offset, uint64_t length) {
+				int iOsc = std::floor(offset);
+				uint32_t fractpart = (offset - iOsc) * CUBIC_RESOLUTION;
+				float y0 = data[iOsc];
+				float y1 = iOsc >= length-1 ? 0 : data[iOsc + 1];
+				return y0 + (y1 - y0) * l_table_[fractpart];
+			}			
 			/// interpolation work function which does spline interpolation.
 			static float spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length) {
 				res = res >> 21;
 				float yo = offset == 0 ? 0 : *(data - 1);
 				float y0 = *data;
-				float y1 = offset + 1 == length ? 0 : *(data + 1);
-				float y2 = offset + 2 == length ? 0 : *(data + 2);
+				float y1 = offset >= length-1 ? 0 : *(data + 1);
+				float y2 = offset >= length-2 ? 0 : *(data + 2);
 				return a_table_[res] * yo + b_table_[res] * y0 + c_table_[res] * y1 + d_table_[res] * y2;
 			}
 			
@@ -500,8 +510,8 @@ using namespace universalis::stdlib;
 
 				float d0;
 				float d1 = data[iOsc];
-				float d2 = data[iOsc + 1];
-				float d3 = data[iOsc + 2];
+				float d2 = iOsc >= length-1 ? 0 : data[iOsc + 1];
+				float d3 = iOsc >= length-2 ? 0 : data[iOsc + 2];
 				if(iOsc == 0)
 					d0 = data[length - 1];
 				else

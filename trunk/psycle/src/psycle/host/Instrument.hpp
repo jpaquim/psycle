@@ -15,9 +15,9 @@ namespace psycle
 		public:
 			Instrument();
 			virtual ~Instrument();
-			void Delete();
+			void Init();
 			void LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen=true);
-			void SaveFileChunk(RiffFile* pFile,SampleList& samples, int sampleIdx);
+			void SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx);
 
 			///\name Loop stuff
 			///\{
@@ -76,23 +76,6 @@ namespace psycle
 			bool _RRES;
 
 			char _sName[32];
-
-			///\name wave stuff
-			///\{
-			/*
-			int _pan;
-			unsigned int waveLength;
-			unsigned short waveVolume;
-			unsigned int waveLoopStart;
-			unsigned int waveLoopEnd;
-			int waveTune;
-			int waveFinetune;
-			bool waveLoopType;
-			bool waveStereo;
-			char waveName[32];
-			signed short *waveDataL;
-			signed short *waveDataR;*/
-			///\}
 		};
 	}
 }

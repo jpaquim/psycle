@@ -489,7 +489,12 @@ namespace psycle { namespace host {
 							for (int h=0, a=0;h<scope_spec_bands;h++) 
 							{
 								float j=tempout[a];
-								while(a<=fftSpec.fftLog[h]){
+								float afloat = fftSpec.fftLog[h];
+								if (h == 0 || fftSpec.fftLog[h-1] +1.0f > afloat) {
+									j = fftSpec.resample(tempout,afloat,fftSpec.getOutputSize());
+									a = std::floor(afloat);
+								}
+								else while(a<=afloat){
 									j = std::max(j,tempout[a]);
 									a++;
 								}
@@ -501,7 +506,12 @@ namespace psycle { namespace host {
 							for (int h=0, a=0;h<scope_spec_bands;h++) 
 							{
 								float j=tempout[a];
-								while(a<=fftSpec.fftLog[h]){
+								float afloat = fftSpec.fftLog[h];
+								if (h == 0 || fftSpec.fftLog[h-1] +1.0f > afloat) {
+									j = fftSpec.resample(tempout,afloat,fftSpec.getOutputSize());
+									a = std::floor(afloat);
+								}
+								else while(a<=afloat){
 									j = std::max(j,tempout[a]);
 									a++;
 								}
@@ -521,7 +531,13 @@ namespace psycle { namespace host {
 							for (int h=0, a=0;h<scope_spec_bands;h++) 
 							{
 								float j=tempout[a];
-								while(a<=fftSpec.fftLog[h]){
+								float afloat = fftSpec.fftLog[h];
+								if (h == 0 || fftSpec.fftLog[h-1] +1.0f > afloat) {
+									j = fftSpec.resample(tempout,afloat,fftSpec.getOutputSize());
+									a = std::floor(afloat);
+								}
+								else while(a<=afloat){
+
 									j = std::max(j,tempout[a]);
 									a++;
 								}
@@ -534,7 +550,12 @@ namespace psycle { namespace host {
 							for (int h=0, a=0;h<scope_spec_bands;h++) 
 							{
 								float j=tempout[a];
-								while(a<=fftSpec.fftLog[h]){
+								float afloat = fftSpec.fftLog[h];
+								if (h == 0 || fftSpec.fftLog[h-1] +1.0f > afloat) {
+									j = fftSpec.resample(tempout,afloat,fftSpec.getOutputSize());
+									a = std::floor(afloat);
+								}
+								else while(a<=afloat){
 									j = std::max(j,tempout[a]);
 									a++;
 								}

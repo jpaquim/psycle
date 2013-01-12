@@ -8,9 +8,7 @@
 #include "XMInstrument.hpp"
 #include "ExclusiveLock.hpp"
 #include "cpu_time_clock.hpp"
-#if !defined WINAMP_PLUGIN
-	#include "InstPreview.hpp"
-#endif
+#include "InstPreview.hpp"
 #include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/loggers.hpp>
 
@@ -117,7 +115,7 @@ namespace psycle
 			/// Resets some variables to their default values (used inside New(); )
 			void Reset();
 			/// Gets the first free slot in the pMachine[] Array
-			int GetFreeMachine();
+			int GetFreeMachine() const ;
 			/// creates a new machine in this song.
 		protected:
 			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int shellIdx);
@@ -137,13 +135,13 @@ namespace psycle
 			/// Tells all the samplers of this song, that if they play this sample, stop playing it. (I know this isn't exactly a thing to do for a Song Class)
 			void StopInstrument(int instrumentIdx);
 			// the highest index of the instruments used
-			int GetHighestInstrumentIndex();
+			int GetHighestInstrumentIndex() const;
 			// the highest index of the patterns used
-			int GetHighestPatternIndexInSequence();
+			int GetHighestPatternIndexInSequence() const;
 			// the number of instruments used.
-			int GetNumInstruments();
+			int GetNumInstruments() const;
 			/// the number of pattern used in this song.
-			int GetNumPatterns();
+			int GetNumPatterns() const;
 
 			/// creates a new connection between two machines. returns index in the dest machine, or -1 if error.
 			int InsertConnectionBlocking(Machine* srcMac,Machine* dstMac,int srctype=0, int dsttype=0,float value = 1.0f)
@@ -178,13 +176,13 @@ namespace psycle
 			bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
 			void RestoreMixerSendsReturns();
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
-			int GetFreeBus();
+			int GetFreeBus() const;
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
-			int GetFreeFxBus();
+			int GetFreeFxBus() const;
 			/// Returns the Bus index out of a pMachine index. (Legacy code. Used for validation purposes now)
-			int FindBusFromIndex(int smac);
+			int FindBusFromIndex(int smac) const;
 			/// Returns the first unused pattern in the pPatternData[] Array.
-			int GetBlankPatternUnused(int rval = 0);
+			int GetBlankPatternUnused(int rval = 0) const;
 			/// creates a new pattern.
 			bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
 			/// Adds an empty track at the index indicated. If pattern is -1, it does it for all patterns.
@@ -209,18 +207,17 @@ namespace psycle
 			/// saves this song to a file.
 			bool Save(RiffFile* pFile,CProgressDialog& progress,bool autosave=false);
 			/// Used to detect if an especific pattern index is used in the sequence.
-			bool IsPatternUsed(int i);
+			bool IsPatternUsed(int i) const;
 			//Used to check the contents of the pattern.
-			bool IsPatternEmpty(int i);
+			bool IsPatternEmpty(int i) const;
 			///\name wave file previewing
 			///\todo shouldn't belong to the song class.
 			///\{
 		public:
 			//todo these ought to be dynamically allocated
 			/// Wave preview/wave editor playback.
-#if !defined WINAMP_PLUGIN
 			InstPreview wavprev;
-#else
+#if defined WINAMP_PLUGIN
 			int filesize;
 #endif // WINAMP_PLUGIN
 			/// runs the wave previewing.
@@ -245,16 +242,19 @@ namespace psycle
 				if(!ppPatternData[ps]) return CreateNewPattern(ps)+ (track*EVENT_SIZE) + (line*MULTIPLY);
 				return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
 			}
+			inline const unsigned char * _ptrackline(int ps, int track, int line) const {
+				return ppPatternData[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+			}
 			/// Allocates the memory fo a new pattern at position ps of the array pPatternData.
 			unsigned char * CreateNewPattern(int ps);
 			/// removes a pattern from this song.
 			void RemovePattern(int ps);
 
 			
-			const int SongTracks(){return SONGTRACKS;}
+			const int SongTracks() const {return SONGTRACKS;}
 			void SongTracks(const int value){ SONGTRACKS = value;}
 
-			const int BeatsPerMin(){return m_BeatsPerMin;}
+			const int BeatsPerMin() const {return m_BeatsPerMin;}
 			void BeatsPerMin(const int value)
 			{ 
 				if ( value < 32 ) m_BeatsPerMin = 32;
@@ -262,7 +262,7 @@ namespace psycle
 				else m_BeatsPerMin = value;
 			}
 
-			const int LinesPerBeat(){return m_LinesPerBeat;}
+			const int LinesPerBeat() const {return m_LinesPerBeat;}
 			void LinesPerBeat(const int value)
 			{
 				if ( value < 1 )m_LinesPerBeat = 1;

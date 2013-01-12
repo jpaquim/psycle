@@ -69,37 +69,40 @@ namespace psycle
 
 			return val;
 		}
-		void ITModule2::LoadInstrumentFromFile(XMSampler & sampler, const int idx)
+		void ITModule2::LoadInstrumentFromFile(Song& song, const int idx)
 		{
 			itFileH.flags=0;
 			itInsHeader2x inshead;
 			Read(&inshead,sizeof(inshead));
 			Seek(0);
-			sampler.rInstrument(idx).Init();
-			LoadITInst(&sampler,idx);
+			XMInstrument instr;
+			instr.Init();
+			LoadITInst(instr,idx);
 			Skip(2);
 
 			int curSample(0);
 			unsigned char *sRemap = new unsigned char[inshead.noS];
 			for (unsigned int i(0); i<inshead.noS; i++)
 			{
-				while (sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-1) curSample++;
-				LoadITSample(&sampler,curSample);
+				while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
+				XMInstrument::WaveData wave;
+				LoadITSample(wave,curSample);
 				// Only get REAL samples.
-				if ( sampler.SampleData(curSample).WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {	sRemap[i]=curSample; }
+				if ( wave.WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {
+					song.samples.SetSample(wave, curSample);
+					sRemap[i]=curSample;
+				}
 				else { sRemap[i]=MAX_INSTRUMENTS-1; }
 			}
 
-			int i;
-			
-			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
+			for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
 			{
-				XMInstrument::NotePair npair = sampler.rInstrument(idx).NoteToSample(i);
+				XMInstrument::NotePair npair = instr.NoteToSample(i);
 				npair.second=sRemap[(npair.second<inshead.noS)?npair.second:0];
-				sampler.rInstrument(idx).NoteToSample(i,npair);
+				instr.NoteToSample(i,npair);
 			}
+			song.xminstruments.SetInst(instr,idx);
 			delete[] sRemap;
-
 		}
 		bool ITModule2::LoadITModule(Song& song)
 		{
@@ -289,13 +292,37 @@ Special:  Bit 0: On = song message attached.
 			for (i=0;i<itFileH.insNum;i++)
 			{
 				Seek(pointersi[i]);
-				if (itFileH.ffv < 0x200 ) LoadOldITInst(sampler,i);
-				else LoadITInst(sampler,i);
+				if (itFileH.ffv < 0x200 ) {
+					XMInstrument instr;
+					LoadOldITInst(instr,i);
+					song.xminstruments.SetInst(instr,i);
+				}
+				else {
+					XMInstrument instr;
+					LoadITInst(instr,i);
+					song.xminstruments.SetInst(instr,i);
+				}
 			}
 			for (i=0;i<itFileH.sampNum;i++)
 			{
 				Seek(pointerss[i]);
-				LoadITSample(sampler,i);
+				XMInstrument::WaveData wave;
+				LoadITSample(wave,i);
+				// If this MOD doesn't use Instruments, we need to map the notes manually.
+				if ( !(itFileH.flags & Flags::USEINSTR)) 
+				{
+					XMInstrument instr;
+					instr.Init();
+					XMInstrument::NotePair npair;
+					npair.second=i;
+					for(int j = 0;j < XMInstrument::NOTE_MAP_SIZE;j++){
+						npair.first=j;
+						instr.NoteToSample(j,npair);
+					}
+					instr.IsEnabled(true);
+					song.xminstruments.SetInst(instr,i);
+				}
+				song.samples.SetSample(wave,i);
 			}
 			int numchans=m_maxextracolumn;
 			m_maxextracolumn=0;
@@ -318,10 +345,9 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadOldITInst(XMSampler *sampler,int iInstIdx)
+		bool ITModule2::LoadOldITInst(XMInstrument &xins,int iInstIdx)
 		{
 			itInsHeader1x curH;
-			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 			Read(&curH,sizeof(curH));
 
 			std::string itname(curH.sName);
@@ -340,7 +366,7 @@ Special:  Bit 0: On = song message attached.
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=short(curH.notes[i].first);
 				npair.second=short(curH.notes[i].second)-1;
-				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
+				xins.NoteToSample(i,npair);
 			}
 			xins.AmpEnvelope().Init();
 			if(curH.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
@@ -386,10 +412,9 @@ Special:  Bit 0: On = song message attached.
 			xins.IsEnabled(true);
 			return true;
 		}
-		bool ITModule2::LoadITInst(XMSampler *sampler,int iInstIdx)
+		bool ITModule2::LoadITInst(XMInstrument &xins,int iInstIdx)
 		{
 			itInsHeader2x curH;
-			XMInstrument &xins = sampler->rInstrument(iInstIdx);
 
             Read(&curH,sizeof(curH));
 			std::string itname(curH.sName);
@@ -431,7 +456,7 @@ Special:  Bit 0: On = song message attached.
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=curH.notes[i].first;
 				npair.second=curH.notes[i].second-1;
-				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
+				xins.NoteToSample(i,npair);
 			}
 
 			// volume envelope
@@ -555,11 +580,10 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITSample(XMSampler *sampler,int iSampleIdx)
+		bool ITModule2::LoadITSample(XMInstrument::WaveData& _wave,int iSampleIdx)
 		{
 			itSampleHeader curH;
 			Read(&curH,sizeof(curH));
-			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 
 /*		      Flg:      Bit 0. On = sample associated with header.
 			Bit 1. On = 16 bit, Off = 8 bit.
@@ -575,21 +599,6 @@ Special:  Bit 0: On = song message attached.
 			bool bcompressed=curH.flg&SampleFlags::ISCOMPRESSED;
 			bool bLoop=curH.flg&SampleFlags::USELOOP;
 			bool bsustainloop=curH.flg&SampleFlags::USESUSTAIN;
-
-
-			// If this MOD doesn't use Instruments, we need to map the notes manually.
-			if ( !(itFileH.flags & Flags::USEINSTR)) 
-			{
-				int i;
-				XMInstrument::NotePair npair;
-				npair.second=iSampleIdx;
-				for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-					npair.first=i;
-					sampler->rInstrument(iSampleIdx).NoteToSample(i,npair);
-				}
-				sampler->rInstrument(iSampleIdx).IsEnabled(true);
-			}
-
 
 			if (curH.flg&SampleFlags::HAS_SAMPLE)
 			{
@@ -647,18 +656,16 @@ Special:  Bit 0: On = song message attached.
 					curH.flg &= ~SampleFlags::HAS_SAMPLE;
 				else {
 					Seek(curH.smpData);
-					if (bcompressed) LoadITCompressedData(sampler,iSampleIdx,curH.length,b16Bit,curH.cvt);
-					else LoadITSampleData(sampler,iSampleIdx,curH.length,bstereo,b16Bit,curH.cvt);
+					if (bcompressed) LoadITCompressedData(_wave,iSampleIdx,curH.length,b16Bit,curH.cvt);
+					else LoadITSampleData(_wave,iSampleIdx,curH.length,bstereo,b16Bit,curH.cvt);
 				}
 			}
 
 			return true;
 		}
 
-		bool ITModule2::LoadITSampleData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert)
+		bool ITModule2::LoadITSampleData(XMInstrument::WaveData& _wave,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
-			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
-
 			signed short wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
 			int lobit=(convert & SampleConvert::IS_MOTOROLA)?8:0;
@@ -704,7 +711,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMSampler *sampler,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert)
+		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData& _wave,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
 			unsigned long topsize, val,j;
@@ -718,7 +725,6 @@ Special:  Bit 0: On = song message attached.
 			} else {
 				topsize=0x8000;		packsize=3;	maxbitsize=8;
 			}
-			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 			
 			j=0;
 			while(j<iLen) // While we haven't decompressed the whole sample
@@ -1255,7 +1261,9 @@ Special:  Bit 0: On = song message attached.
 			for (i=0;i<s3mFileH.insNum;i++)
 			{
 				Seek(pointersi[i]<<4);
-				LoadS3MInstX(sampler,i);
+				XMInstrument instr;
+				LoadS3MInstX(song, instr,i);
+				song.xminstruments.SetInst(instr,i);
 			}
 			m_maxextracolumn=song.SONGTRACKS;
 			for (i=0;i<s3mFileH.patNum;i++)
@@ -1270,25 +1278,29 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadS3MInstX(XMSampler *sampler,int iInstIdx)
+		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,int iInstIdx)
 		{
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
 
-			sampler->rInstrument(iInstIdx).Name(curH.sName);
+			xins.Init();
+			xins.Name(curH.sName);
 
 			int i;
 			XMInstrument::NotePair npair;
 			npair.second=iInstIdx;
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 				npair.first=i;
-				sampler->rInstrument(iInstIdx).NoteToSample(i,npair);
+				xins.NoteToSample(i,npair);
 			}
 			
 			if ( curH.type == 1) 
 			{
-				sampler->rInstrument(iInstIdx).IsEnabled(true);
-				return LoadS3MSampleX(sampler,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,iInstIdx);
+				xins.IsEnabled(true);
+				XMInstrument::WaveData wave;
+				bool result = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,iInstIdx);
+				song.samples.SetSample(wave,iInstIdx);
+				return result;
 			}
 			else if ( curH.type != 0)
 			{
@@ -1334,10 +1346,8 @@ OFFSET              Count TYPE   Description
 			return false;
 		}
 
-		bool ITModule2::LoadS3MSampleX(XMSampler *sampler,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx)
+		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData& _wave,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx)
 		{
-
-			XMInstrument::WaveData& _wave = sampler->SampleData(iSampleIdx);
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
 			bool b16Bit=currHeader->flags&S3MSampleFlags::IS16BIT;
@@ -1345,7 +1355,7 @@ OFFSET              Count TYPE   Description
 			_wave.Init();
 
 			_wave.WaveLoopStart(currHeader->loopb);
-			_wave.WaveLoopEnd(currHeader->loope-1);
+			_wave.WaveLoopEnd(currHeader->loope);
 			if(bLoop) {
 				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			} else {
@@ -1394,16 +1404,15 @@ OFFSET              Count TYPE   Description
 */
 			int newpos=((currHeader->hiMemSeg<<16)+currHeader->lomemSeg)<<4;
 			Seek(newpos);
-			LoadS3MSampleDataX(sampler,iInstIdx,iSampleIdx,currHeader->length,bstereo,b16Bit,currHeader->packed);
+			LoadS3MSampleDataX(_wave,iInstIdx,iSampleIdx,currHeader->length,bstereo,b16Bit,currHeader->packed);
 
 			return true;
 		}
 
-		bool ITModule2::LoadS3MSampleDataX(XMSampler *sampler,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed)
+		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData& _wave,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed)
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{
-				XMInstrument::WaveData& _wave =  sampler->SampleData(iSampleIdx);
 				char * smpbuf;
 				if(b16Bit)
 				{
@@ -1473,7 +1482,7 @@ OFFSET              Count TYPE   Description
 				}
 
 				// cleanup
-				delete [] smpbuf; smpbuf = 0;
+				delete[] smpbuf; smpbuf = 0;
 				return true;
 			}
 			return false;

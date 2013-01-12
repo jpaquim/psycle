@@ -310,6 +310,114 @@
     <ClInclude Include="src\psycle\host\VstEffectWnd.hpp">
       <Filter>psycle\mfc\machine\vst</Filter>
     </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\host\XMSamplerMixerPage.hpp">
       <Filter>psycle\mfc\machine\XMSampler</Filter>
     </ClInclude>
@@ -336,6 +444,12 @@
     </ClInclude>
     <ClInclude Include="src\psycle\host\TransformPatternDlg.hpp">
       <Filter>psycle\mfc\pattern</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\ChannelMappingDlg.cpp>
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClInclude>
+	<ClInclude Include=".\src\psycle\host\ChannelMappingDlg.hpp>
+      <Filter>psycle\mfc\monitors</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\host\InfoDlg.hpp">
       <Filter>psycle\mfc\monitors</Filter>
@@ -639,6 +753,60 @@
     <ClCompile Include="src\psycle\host\VstEffectWnd.cpp">
       <Filter>psycle\mfc\machine\vst</Filter>
     </ClCompile>
+	<ClCompile Include=".\src\psycle\host\EnvelopeEditor.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\EnvelopeEditor.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\EnvelopeEditorDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\EnvelopeEditorDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentAmpDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentAmpDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentFilDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentFilDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentGenDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentGenDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentPanDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentPanDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentPitDlg.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\InstrumentPitDlg.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\SampleAssignEditor.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\SampleAssignEditor.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\WaveScopeCtrl.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\WaveScopeCtrl.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
     <ClCompile Include="src\psycle\host\XMSamplerMixerPage.cpp">
       <Filter>psycle\mfc\machine\XMSampler</Filter>
     </ClCompile>
@@ -665,6 +833,12 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\TransformPatternDlg.cpp">
       <Filter>psycle\mfc\pattern</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\ChannelMappingDlg.cpp>
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClCompile>
+	<ClCompile Include=".\src\psycle\host\ChannelMappingDlg.hpp>
+      <Filter>psycle\mfc\monitors</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\InfoDlg.cpp">
       <Filter>psycle\mfc\monitors</Filter>
