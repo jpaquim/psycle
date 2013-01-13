@@ -816,12 +816,14 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		//////////////////////////////////////////////////////////////
 		//				Render all voices now
 		//////////////////////////////////////////////////////////////
+		bool is_synth_active = false;
 		for (ti = 0; ti < numtracks; ti++)
 		{
 			for (vi = 0; vi < MAX_VOICES; vi++)
 			{
 				if (voices[ti][vi].IsActive())
 				{
+					is_synth_active = true;
 					pleft = psamplesleft2;
 					pright = psamplesright2;
 					nsamples = amount;
@@ -860,42 +862,57 @@ void mi::Work(float *psamplesleft, float* psamplesright, int numsamples, int num
 		//////////////////////////////////////////////////////////////
 		//				Chorus & Phase
 		//////////////////////////////////////////////////////////////
-		pleft = psamplesleft2;
-		pright = psamplesright2;
-		nsamples = amount;
-		do
-		{
-			//////////////////////////////////////////////////////////
-			//				Update phaser
-			//////////////////////////////////////////////////////////
-			phaser_left.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f + get_sample_l(wavetable[0], phaser_left_phase, WAVEMASK)) * 0.5f);
-			phaser_right.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f - get_sample_l(wavetable[0], phaser_right_phase, WAVEMASK)) * 0.5f);
-			phaser_left_phase = fand(phaser_left_phase + phaser_increment, WAVEMASK);
-			phaser_right_phase = fand(phaser_right_phase + phaser_increment * 1.1111f, WAVEMASK);
-			//////////////////////////////////////////////////////////
-			//				Update chorus
-			//////////////////////////////////////////////////////////
-			chorus_left.SetDelay(chorus_delay + chorus_depth * (1.0f + get_sample_l(wavetable[0], chorus_left_phase, WAVEMASK)) * 0.5f);
-			chorus_right.SetDelay(chorus_delay + chorus_depth * (1.0f - get_sample_l(wavetable[0], chorus_right_phase, WAVEMASK)) * 0.5f);
-			chorus_left_phase = fand(chorus_left_phase + chorus_increment, WAVEMASK);
-			chorus_right_phase = fand(chorus_right_phase + chorus_increment * 1.1111f, WAVEMASK);
-			//////////////////////////////////////////////////////////
-			// To prevent chorus (0) calls.
-			//////////////////////////////////////////////////////////
-			rnd = CDsp::GetRandomSignal() * 0.001f;
-			//////////////////////////////////////////////////////////
-			//				Left
-			//////////////////////////////////////////////////////////
-			++pleft;
-			*pleft = phaser_left.Tick(chorus_left.Tick(*pleft + rnd));
-			//////////////////////////////////////////////////////////
-			//				Right
-			//////////////////////////////////////////////////////////
-			++pright;
-			*pright = phaser_right.Tick(chorus_right.Tick(*pright + rnd));
+        if (is_synth_active)
+        {
+			pleft = psamplesleft2;
+			pright = psamplesright2;
+			nsamples = amount;
+			do
+			{
+				//////////////////////////////////////////////////////////
+				//				Update phaser
+				//////////////////////////////////////////////////////////
+				phaser_left.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f + get_sample_l(wavetable[0], phaser_left_phase, WAVEMASK)) * 0.5f);
+				phaser_right.SetDelay(phaser_min + (phaser_max - phaser_min) * (1.0f - get_sample_l(wavetable[0], phaser_right_phase, WAVEMASK)) * 0.5f);
+				phaser_left_phase = fand(phaser_left_phase + phaser_increment, WAVEMASK);
+				phaser_right_phase = fand(phaser_right_phase + phaser_increment * 1.1111f, WAVEMASK);
+				//////////////////////////////////////////////////////////
+				//				Update chorus
+				//////////////////////////////////////////////////////////
+				chorus_left.SetDelay(chorus_delay + chorus_depth * (1.0f + get_sample_l(wavetable[0], chorus_left_phase, WAVEMASK)) * 0.5f);
+				chorus_right.SetDelay(chorus_delay + chorus_depth * (1.0f - get_sample_l(wavetable[0], chorus_right_phase, WAVEMASK)) * 0.5f);
+				chorus_left_phase = fand(chorus_left_phase + chorus_increment, WAVEMASK);
+				chorus_right_phase = fand(chorus_right_phase + chorus_increment * 1.1111f, WAVEMASK);
+				//////////////////////////////////////////////////////////
+				// To prevent chorus (0) calls.
+				//////////////////////////////////////////////////////////
+				rnd = CDsp::GetRandomSignal() * 0.001f;
+				//////////////////////////////////////////////////////////
+				//				Left
+				//////////////////////////////////////////////////////////
+				++pleft;
+				*pleft = phaser_left.Tick(chorus_left.Tick(*pleft + rnd));
+				//////////////////////////////////////////////////////////
+				//				Right
+				//////////////////////////////////////////////////////////
+				++pright;
+				*pright = phaser_right.Tick(chorus_right.Tick(*pright + rnd));
+			}
+			while (--nsamples);
 		}
-		while (--nsamples);
-
+        else
+        {
+            // synth inactive: don't process FX
+            pleft = psamplesleft2;
+            pright = psamplesright2;
+            nsamples = amount;
+            do
+            {
+            	*++pleft = 0.f;
+            	*++pright = 0.f;
+            }                     
+            while (--nsamples);          
+        }
 		//////////////////////////////////////////////////////////////
 		//				Adjust for next iteration
 		//////////////////////////////////////////////////////////////
