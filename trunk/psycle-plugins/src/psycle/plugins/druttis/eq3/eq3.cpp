@@ -139,6 +139,8 @@ private:
 
 	float master[2];
 	int currentSR;
+	
+    bool last_empty;
 	//////////////////////////////////////////////////////////////////
 	//
 	//				Machine Methods
@@ -158,6 +160,7 @@ public:
 	virtual void SequencerTick();
 	virtual void Work(float *psamplesleft, float *psamplesright , int numsamples, int numtracks);
 	// Custom
+	virtual inline bool buffer_has_signals(const float *buffer, int ns);
 };
 PSYCLE__PLUGIN__INSTANTIATOR(mi, MacInfo)
 //////////////////////////////////////////////////////////////////////
@@ -398,8 +401,28 @@ void mi::SequencerTick()
 //				Work
 //
 //////////////////////////////////////////////////////////////////////
+
+#define SIGNAL_TRESHOLD (0.0000158489f)
+ 
+inline bool mi::buffer_has_signals(const float *buffer, int ns) { // From zzub/plugin.h
+    while (ns--) {
+        if ((*buffer > SIGNAL_TRESHOLD)||(*buffer < -SIGNAL_TRESHOLD)) {
+            return true;
+        }
+        buffer++;
+    }
+    return false;
+}
+
 void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int numtracks)
 {
+    if (last_empty &&
+            !buffer_has_signals(psamplesleft, numsamples) &&
+            !buffer_has_signals(psamplesright, numsamples)) {
+        return;
+    }
+    int  numsamplesOrig = numsamples;
+    
 	float il, ir;
 	--psamplesleft;
 	--psamplesright;
@@ -417,4 +440,12 @@ void mi::Work(float *psamplesleft, float *psamplesright, int numsamples, int num
 							* master[1];
 	}
 	while (--numsamples);
+	
+    if (!buffer_has_signals(++psamplesleft - numsamplesOrig, numsamplesOrig) &&
+            !buffer_has_signals(++psamplesright - numsamplesOrig, numsamplesOrig)) {
+        last_empty = true;
+        Stop();
+    } else {
+        last_empty = false;
+    }
 }
