@@ -69,7 +69,7 @@ void render::start() {
 	try {
 		unsigned int const y_step(thread_count_);
 		for(std::size_t i(0); i < thread_count_; ++i)
-			threads_.push_back(new std::thread(boost::bind(&render::process_loop, this, i, x, x + width, y + i, y + height, y_step)));
+			threads_.push_back(new thread(boost::bind(&render::process_loop, this, i, x, x + width, y + i, y + height, y_step)));
 	} catch(...) {
 		stop();
 		throw;

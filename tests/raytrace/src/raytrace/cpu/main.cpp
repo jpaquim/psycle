@@ -164,7 +164,7 @@ int main(int /*const*/ argument_count, char /*const*/ * /*const*/ arguments[]) {
 	pixels.fill(color(1, 1, 1));
 	render render(scene, view, pixels);
 	render.start();
-	std::thread t(boost::bind(animate, boost::ref(scene), boost::ref(view), boost::ref(render)));
+	thread t(boost::bind(animate, boost::ref(scene), boost::ref(view), boost::ref(render)));
 	{ lock lock;
 		window window(render);
 		main.run(window);

@@ -15,6 +15,8 @@
 
 namespace raytrace {
 
+using namespace universalis::stdlib;
+
 class render {
 	public:
 		render(class scene const & scene, class view const & view, class pixels & pixels);
@@ -50,13 +52,13 @@ class render {
 		boost::signal<void ()> update_signal_;
 
 	private:
-		typedef std::unique_lock<std::mutex> scoped_lock;
-		std::mutex mutable mutex_, update_signal_mutex_, done_mutex_;
-		std::condition_variable mutable condition_, condition_done_;
+		typedef unique_lock<mutex> scoped_lock;
+		mutex mutable mutex_, update_signal_mutex_, done_mutex_;
+		condition_variable mutable condition_, condition_done_;
 		bool process_requested_, done_, stop_requested_;
 		unsigned int count_, update_signal_count_;
 		std::size_t thread_count_, thread_done_count_, thread_done_count2_;
-		typedef std::list<std::thread *> threads_type;
+		typedef std::list<thread *> threads_type;
 		threads_type threads_;
 		void process_loop(std::size_t i, unsigned int min_x, unsigned int max_x, unsigned int min_y, unsigned int max_y, unsigned int y_step);
 		void trace(unsigned int x, unsigned int y);
