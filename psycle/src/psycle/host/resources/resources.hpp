@@ -12,6 +12,7 @@
 #define ID_INDICATOR_TWEAKS             59
 #define ID_INDICATOR_OCTAVE             60
 #define IDC_SEQEDITBOX                  61
+#define PSYC_ENVELOPE_CHANGED           62
 #define IDR_MAINFRAME                   101
 #define IDD_SONGBAR                     102
 #define IDD_WAVED_ZOOMBAR               103
@@ -932,6 +933,11 @@
 #define IDC_UNSELECT                    2100
 #define IDC_XMINST_TAB                  2104
 #define IDC_GROUP_ENV                   2105
+#define IDC_SAMPLE_NUMBER               2106
+#define IDC_SET_ALL_SAMPLE              2107
+#define IDC_INCREASEOCT                 2108
+#define IDC_DECREASEOCT                 2109
+#define IDC_SETDEFAULT                  2110
 #define IDC_NUMBER_THREADS              4015
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1099,7 +1105,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        321
 #define _APS_NEXT_COMMAND_VALUE         34285
-#define _APS_NEXT_CONTROL_VALUE         2106
-#define _APS_NEXT_SYMED_VALUE           62
+#define _APS_NEXT_CONTROL_VALUE         2111
+#define _APS_NEXT_SYMED_VALUE           63
 #endif
 #endif

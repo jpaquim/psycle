@@ -26,7 +26,11 @@ protected:
 	afx_msg void OnBnClickedEnvadsr();
 	afx_msg void OnBnClickedEnvfreeform();
 	afx_msg void OnBnClickedEnvcheck();
-
+	afx_msg void OnBnClickedSusBegin();
+	afx_msg void OnBnClickedSusEnd();
+	afx_msg void OnBnClickedLoopStart();
+	afx_msg void OnBnClickedLoopEnd();
+	afx_msg void OnEnvelopeChanged();
 public:
 	CEnvelopeEditor m_EnvelopeEditor;
 
@@ -38,6 +42,7 @@ private:
 	void SliderDecay(CSliderCtrl* slid);
 	void SliderSustain(CSliderCtrl* slid);
 	void SliderRelease(CSliderCtrl* slid);
+	void RefreshButtons();
 
 	CSliderCtrl m_SlADSRBase;
 	CSliderCtrl m_SlADSRMod;

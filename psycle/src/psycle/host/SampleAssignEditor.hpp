@@ -16,13 +16,16 @@ class CSampleAssignEditor : public CStatic
 			SharpKey
 		};
 
-		static const int m_NaturalKeysPerOctave;
-		static const int m_SharpKeysPerOctave;
-		static const int m_KeysPerOctave;
-		static const int m_SharpKey_Xpos[];
-		static const TNoteKey m_NoteAssign[];
-		static const int m_noteAssignindex[];
-	
+		static const int c_NaturalKeysPerOctave;
+		static const int c_SharpKeysPerOctave;
+		static const int c_KeysPerOctave;
+		static const int c_SharpKey_Xpos[];
+		static const TNoteKey c_NoteAssign[];
+		static const int c_noteAssignindex[];
+		static const CString c_Key_name[];
+		static const CString c_NaturalKey_name[];
+		static const int c_NaturalKey_index[];
+		static const int c_SharpKey_index[];
 	public:
 		CSampleAssignEditor();
 		virtual ~CSampleAssignEditor();
@@ -42,7 +45,15 @@ class CSampleAssignEditor : public CStatic
 
 	protected:
 		int GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect);
-
+		inline void TXT(CDC *devc,const CString& txt, int x,int y,int w,int h)
+		{
+			CRect Rect;
+			Rect.left=x-1;
+			Rect.top=y;
+			Rect.right=x+w;
+			Rect.bottom=y+h;
+			devc->ExtTextOut(x,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
+		}
 		XMInstrument *m_pInst;
 		int m_naturalkey_width;
 		int m_naturalkey_height;
@@ -57,6 +68,7 @@ class CSampleAssignEditor : public CStatic
 		CBitmap m_NaturalKey;
 		CBitmap m_SharpKey;
 		CBitmap m_BackKey;
+		CBitmap* bmpDC;
 
 	};
 }}

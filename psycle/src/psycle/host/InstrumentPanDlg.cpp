@@ -52,6 +52,7 @@ BOOL CInstrumentPanDlg::OnInitDialog()
 	((CStatic*)GetDlgItem(IDC_GROUP_ENV))->GetWindowRect(rect);
 	this->GetWindowRect(rect2);
 	rect.OffsetRect(-rect2.left,-rect2.top);
+	m_EnvelopeEditorDlg.m_EnvelopeEditor.negative(true);
 	m_EnvelopeEditorDlg.SetWindowPos(this,rect.left+12,rect.top+12,0,0,SWP_NOZORDER|SWP_NOREDRAW|SWP_NOSIZE);
 	m_EnvelopeEditorDlg.ShowWindow(SW_SHOW);
 	return TRUE;

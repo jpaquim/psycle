@@ -694,18 +694,21 @@ namespace psycle
 			m_DCT = DupeCheck::NONE;
 			m_DCA = NewNoteAction::STOP;
 
-			NotePair npair;
-			npair.second=255;
-			for(int i = 0;i < NOTE_MAP_SIZE;i++){
-				npair.first=i;
-				m_AssignNoteToSample[i] = npair;
-			}
+			SetDefaultNoteMap();
 
 			m_AmpEnvelope.Init();
 			m_PanEnvelope.Init();
 			m_PitchEnvelope.Init();
 			m_FilterEnvelope.Init();
 
+		}
+		void XMInstrument::SetDefaultNoteMap() {
+			NotePair npair;
+			npair.second=255;
+			for(int i = 0;i < NOTE_MAP_SIZE;i++){
+				npair.first=i;
+				m_AssignNoteToSample[i] = npair;
+			}
 		}
 
 		/// load XMInstrument

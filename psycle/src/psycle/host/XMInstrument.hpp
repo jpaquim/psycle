@@ -387,6 +387,7 @@ namespace psycle { namespace host {
 		virtual ~XMInstrument();
 
 		void Init();
+		void SetDefaultNoteMap();
 
 		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile) const;
@@ -499,7 +500,7 @@ namespace psycle { namespace host {
 		NewNoteAction::Type DCA() const { return m_DCA;}
 		void DCA(const NewNoteAction::Type value){ m_DCA = value;}
 
-		const NotePair NoteToSample(const int note) const {return m_AssignNoteToSample[note];}
+		const NotePair& NoteToSample(const int note) const {return m_AssignNoteToSample[note];}
 		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;}
 
 	private:

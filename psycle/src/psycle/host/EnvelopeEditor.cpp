@@ -12,12 +12,13 @@ CEnvelopeEditor::CEnvelopeEditor()
 : m_pEnvelope(NULL)
 , m_bInitialized(false)
 , m_bFreeform(true)
+, m_bnegative(false)
 , m_bPointEditing(false)
 , m_EditPoint(0)
 {
 	_line_pen.CreatePen(PS_SOLID,0,RGB(0,0,255));
-	_gridpen.CreatePen(PS_SOLID,0,RGB(224,224,255));
-	_gridpen1.CreatePen(PS_SOLID,0,RGB(255,224,224));
+	_gridpen.CreatePen(PS_SOLID,0,RGB(192,192,255));
+	_gridpen1.CreatePen(PS_SOLID,0,RGB(255,192,192));
 	_point_brush.CreateSolidBrush(RGB(0,0,255));
 }
 CEnvelopeEditor::~CEnvelopeEditor(){
@@ -58,12 +59,12 @@ void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope)
 	m_EditPoint = _points;
 
 	if (_points > 0 )
-				{
+	{
 		while (m_Zoom * m_pEnvelope->GetTime(_points-1) > m_WindowWidth)
-					{
+		{
 			m_Zoom= m_Zoom/2.0f;
-				}
-			}
+		}
+	}
 
 	m_bInitialized = true;
 	Invalidate();
@@ -73,7 +74,7 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 {
 	if(m_bInitialized){
 		if (m_pEnvelope && lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
-			{
+		{
 			CDC dc;
 			dc.Attach(lpDrawItemStruct->hDC);
 			CPen *oldpen= dc.SelectObject(&_gridpen);
@@ -87,11 +88,19 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			
 			// ***** Background lines *****
 			float _stepy = ((float)(m_WindowHeight)) / 100.0f * 10.0f;
-			
-			for(float i = 0; i <= (float)m_WindowHeight; i += _stepy)
+			int pos=0;
+			for(float i = 0; i <= (float)m_WindowHeight; i += _stepy, pos++)
 			{
-				dc.MoveTo(0,i);
-				dc.LineTo(m_WindowWidth,i);
+				if (pos==5 && m_bnegative) {
+					dc.SelectObject(&_gridpen1);
+					dc.MoveTo(0,i);
+					dc.LineTo(m_WindowWidth,i);
+					dc.SelectObject(&_gridpen);
+				}
+				else {
+					dc.MoveTo(0,i);
+					dc.LineTo(m_WindowWidth,i);
+				}
 			}
 			
 			const int _points =  m_pEnvelope->NumOfPoints();
@@ -172,27 +181,32 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			// ***** Draw Envelope line and points *****
 			CPoint _pt_start;
 			if ( _points > 0 ) 
-				{
+			{
 				_pt_start.x=0;
-				_pt_start.y=(int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(0)));
-				}
+				_pt_start.y = (m_bnegative) 
+					? (int)((float)m_WindowHeight * (1.0f - (1.0f+m_pEnvelope->GetValue(0))*0.5f))
+					: (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(0)));
+			}
 			for(int i = 1;i < _points ;i++)
-				{
+			{
 				CPoint _pt_end;
 				_pt_end.x = (int)(m_Zoom * (float)m_pEnvelope->GetTime(i)); 
-				_pt_end.y = (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
+				_pt_end.y = (m_bnegative) 
+					? (int)((float)m_WindowHeight * (1.0f - (1.0f+m_pEnvelope->GetValue(i))*0.5f))
+					: (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
 				dc.SelectObject(&_line_pen);
 				dc.MoveTo(_pt_start);
 				dc.LineTo(_pt_end);
 				_pt_start = _pt_end;
-				}
+			}
 
 			for(unsigned int i = 0;i < _points ;i++)
 			{
-				CPoint _pt(
-					(int)(m_Zoom * (float)m_pEnvelope->GetTime(i)), 
-					(int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)))
-					);
+				CPoint _pt;
+				_pt.x = (int)(m_Zoom * (float)m_pEnvelope->GetTime(i));
+				_pt.y = (m_bnegative) 
+					? (int)((float)m_WindowHeight * (1.0f - (1.0f+m_pEnvelope->GetValue(i))*0.5f))
+					: (int)((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
 				CRect rect(_pt.x - (POINT_SIZE / 2),_pt.y - (POINT_SIZE / 2),_pt.x + (POINT_SIZE / 2),_pt.y + (POINT_SIZE / 2));
 				if ( m_EditPoint == i )
 				{
@@ -208,7 +222,7 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			dc.SelectObject(oldpen);
 			dc.Detach();
 		}
-			}
+	}
 }
 
 void CEnvelopeEditor::OnLButtonDown( UINT nFlags, CPoint point )
@@ -234,9 +248,9 @@ void CEnvelopeEditor::OnLButtonDown( UINT nFlags, CPoint point )
 }
 void CEnvelopeEditor::OnLButtonUp( UINT nFlags, CPoint point )
 {
-		if(m_bPointEditing){
-			ReleaseCapture();
-			m_bPointEditing =  false;
+	if(m_bPointEditing){
+		ReleaseCapture();
+		m_bPointEditing =  false;
 				
 		if (point.x > m_WindowWidth ) m_Zoom = m_Zoom /2.0f;
 		else if ( m_pEnvelope->GetTime(m_pEnvelope->NumOfPoints()-1)*m_Zoom < m_WindowWidth/2 && m_Zoom < 8.0f) m_Zoom = m_Zoom *2.0f;
@@ -262,42 +276,48 @@ void CEnvelopeEditor::OnLButtonUp( UINT nFlags, CPoint point )
 			}
 		m_pEnvelope->SetTimeAndValue(m_EditPoint,_new_point,_new_value);
 		*/
-			Invalidate();
-		}
+		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
+		Invalidate();
+	}
 }
 void CEnvelopeEditor::OnMouseMove( UINT nFlags, CPoint point )
 {
-		if(m_bPointEditing)
-		{
+	if(m_bPointEditing)
+	{
 		if(point.y > m_WindowHeight)
 		{
 			point.y = m_WindowHeight;
-	}
+		}
 
 		if(point.y < 0)
-	{
+		{
 			point.y = 0;
-			}
+		}
 
 		if( point.x < 0)
 		{
 			point.x = 0;
 		}
 		if ( point.x > m_WindowWidth)
-			{
-			//what to do? unzoom... but what about the mouse?
-			}
+		{
+		//what to do? unzoom... but what about the mouse?
+		}
 		if ( m_EditPoint == 0 )
 		{
 			point.x=0;
 		}
 		m_EditPointX = point.x;
 		m_EditPointY = point.y;
-		m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
-			(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
-
+		if (m_bnegative) {
+			m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+				(1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight));
+		}
+		else {
+			m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+				(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
+		}
 		Invalidate();
-			}
+	}
 }
 			
 void CEnvelopeEditor::OnContextMenu(CWnd* pWnd, CPoint point) 
@@ -373,29 +393,32 @@ void CEnvelopeEditor::OnPopAddPoint()
 
 	if ( m_pEnvelope->NumOfPoints() == 0 && _new_point != 0 ) m_EditPoint = m_pEnvelope->Insert(0,1.0f);
 	m_EditPoint = m_pEnvelope->Insert(_new_point,_new_value);
+	this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
 	Invalidate();
 }
 void CEnvelopeEditor::OnPopSustainStart()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-		{
-			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+	{
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		m_pEnvelope->SustainBegin(m_EditPoint);
 		if (m_pEnvelope->SustainEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainEnd(m_EditPoint);
 		else if (m_pEnvelope->SustainEnd() < m_EditPoint )m_pEnvelope->SustainEnd(m_EditPoint);
-			Invalidate();
-		}
+		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
+		Invalidate();
+	}
 }
 void CEnvelopeEditor::OnPopSustainEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-		{
-			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+	{
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		if (m_pEnvelope->SustainBegin()== XMInstrument::Envelope::INVALID ) m_pEnvelope->SustainBegin(m_EditPoint);
 		else if (m_pEnvelope->SustainBegin() > m_EditPoint )m_pEnvelope->SustainBegin(m_EditPoint);
 		m_pEnvelope->SustainEnd(m_EditPoint);
-			Invalidate();
-		}
+		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
+		Invalidate();
+	}
 }
 void CEnvelopeEditor::OnPopLoopStart()
 {
@@ -405,19 +428,21 @@ void CEnvelopeEditor::OnPopLoopStart()
 		m_pEnvelope->LoopStart(m_EditPoint);
 		if (m_pEnvelope->LoopEnd()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopEnd(m_EditPoint);
 		else if (m_pEnvelope->LoopEnd() < m_EditPoint )m_pEnvelope->LoopEnd(m_EditPoint);
+		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
 		Invalidate();
 	}
 }
 void CEnvelopeEditor::OnPopLoopEnd()
 {
 	if ( m_EditPoint != m_pEnvelope->NumOfPoints())
-		{
-			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+	{
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		if (m_pEnvelope->LoopStart()== XMInstrument::Envelope::INVALID ) m_pEnvelope->LoopStart(m_EditPoint);
 		else if (m_pEnvelope->LoopStart() > m_EditPoint )m_pEnvelope->LoopStart(m_EditPoint);
 		m_pEnvelope->LoopEnd(m_EditPoint);
-			Invalidate();
-		}
+		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
+		Invalidate();
+	}
 }
 void CEnvelopeEditor::OnPopRemovePoint()
 {
@@ -432,31 +457,35 @@ void CEnvelopeEditor::OnPopRemovePoint()
 
 
 	if(m_EditPoint != _points)
-		{
-			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+	{
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		m_pEnvelope->Delete(m_EditPoint);
 		m_EditPoint = _points;
-			Invalidate();
-		}
+		Invalidate();
+		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
+	}
 }
 void CEnvelopeEditor::OnPopRemoveSustain()
 { 
 	CExclusiveLock lock(&Global::song().semaphore, 2, true);
 	m_pEnvelope->SustainBegin(XMInstrument::Envelope::INVALID);
 	m_pEnvelope->SustainEnd(XMInstrument::Envelope::INVALID);
+	this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
 	Invalidate();
 }
 void CEnvelopeEditor::OnPopRemoveLoop()
 { 
-		CExclusiveLock lock(&Global::song().semaphore, 2, true);
-		m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
-		m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
-		Invalidate();
+	CExclusiveLock lock(&Global::song().semaphore, 2, true);
+	m_pEnvelope->LoopStart(XMInstrument::Envelope::INVALID);
+	m_pEnvelope->LoopEnd(XMInstrument::Envelope::INVALID);
+	this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
+	Invalidate();
 }
 void CEnvelopeEditor::OnPopRemoveEnvelope()
 {
 	CExclusiveLock lock(&Global::song().semaphore, 2, true);
 	m_pEnvelope->Clear();
+	this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED);
 	Invalidate();
 }
 

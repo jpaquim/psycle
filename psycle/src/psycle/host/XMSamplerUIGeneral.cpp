@@ -44,11 +44,10 @@ namespace psycle { namespace host {
 	{
 		CPropertyPage::OnInitDialog();
 		m_bInitialize=false;
-		m_interpol.AddString(_T("No Interpolation"));
-		m_interpol.AddString(_T("Linear Interpolation"));
-		m_interpol.AddString(_T("Spline Interpolation"));
-		m_interpol.AddString(_T("512p. Sinc Interpolation"));
-
+		m_interpol.AddString("Hold/Chip Interp. [Lowest quality]");
+		m_interpol.AddString("Linear Interpolation [Low quality]");
+		m_interpol.AddString("Spline Interpolation [Medium quality]");
+		m_interpol.AddString("15Tap Sinc Interp. [High quality]");
 		m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 
 
@@ -193,5 +192,4 @@ Ex: Pitch slide down");
 		}
 		CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 	}
-
 }}

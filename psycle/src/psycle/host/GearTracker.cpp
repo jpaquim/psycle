@@ -35,11 +35,10 @@ namespace psycle { namespace host {
 		{
 			CDialog::OnInitDialog();
 
-			m_interpol.AddString("None [Lowest quality]");
-			m_interpol.AddString("Linear [Low quality]");
-			m_interpol.AddString("Spline [Medium Quality]");
-			m_interpol.AddString("512p Sinc [Highest Quality]");
-
+			m_interpol.AddString("Hold/Chip Interp. [Lowest quality]");
+			m_interpol.AddString("Linear Interpolation [Low quality]");
+			m_interpol.AddString("Spline Interpolation [Medium quality]");
+			m_interpol.AddString("15Tap Sinc Interp. [High quality]");
 			m_interpol.SetCurSel(machine._resampler.quality());
 			m_defaultC4.SetCheck(machine.isDefaultC4());
 			if(PsycleGlobal::conf().patView().showA440) {
