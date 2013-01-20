@@ -604,7 +604,7 @@ void mi::Init()
 void mi::Stop()
 {
 	m_pos = 0;
-	m_remainer = 0;
+	m_remainer = 44100 / SPEED_FACTORS[Vals[PARAM_SPEED_FAC]];
 	DoStep(44100);
 	m_level.Reset();
 	m_pan.Reset();
@@ -765,7 +765,13 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_LEVEL14:
 		case PARAM_LEVEL15:
 		case PARAM_LEVEL16:
-			sprintf(txt, "%.2f %%", (float) (value * 0.390625f));
+			if (m_programs[GetProgramNr()].length < param - PARAM_LEVEL1 +1) {
+				sprintf(txt, "------");
+			}
+			else {
+				sprintf(txt, "%.2f %%", (float) (value * 0.390625f));
+				
+			}
 			break;
 		case PARAM_NO_TICKS:
 			sprintf(txt, "%d", value);
@@ -786,7 +792,10 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_PAN14:
 		case PARAM_PAN15:
 		case PARAM_PAN16:
-			if (value < 128)
+			if (m_programs[GetProgramNr()].length < param - PARAM_PAN1 +1) {
+				sprintf(txt, "------");
+			}
+			else if (value < 128)
 			{
 				sprintf(txt, "]> %.2f %%", (float) (128 - value) / 1.28f);
 			}
@@ -818,7 +827,12 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_ATTACK14:
 		case PARAM_ATTACK15:
 		case PARAM_ATTACK16:
-			sprintf(txt, "%.2f ms", float(value) * 0.125f + 5.0f);				// 5.0 - 37 ms
+			if (m_programs[GetProgramNr()].length < param - PARAM_ATTACK1 +1) {
+				sprintf(txt, "------");
+			}
+			else {
+				sprintf(txt, "%.2f ms", float(value) * 0.125f + 5.0f);				// 5.0 - 37 ms
+			}
 			break;
 		case PARAM_FILTER_TYPE:
 			sprintf(txt, "%s", FTYPE_STRING[value]);
@@ -839,7 +853,12 @@ bool mi::DescribeValue(char* txt,int const param, int const value) {
 		case PARAM_FFREQ14:
 		case PARAM_FFREQ15:
 		case PARAM_FFREQ16:
-			sprintf(txt, "%.2f Hz", (float) pCB->GetSamplingRate() * 0.5f * (float) value * 0.00390625);
+			if (m_programs[GetProgramNr()].length < param - PARAM_FFREQ1 +1) {
+				sprintf(txt, "------");
+			}
+			else {
+				sprintf(txt, "%.2f Hz", (float) pCB->GetSamplingRate() * 0.5f * (float) value * 0.00390625);
+			}
 			break;
 		default:
 			return false;

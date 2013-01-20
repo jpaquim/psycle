@@ -89,8 +89,8 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					}
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) + ryLow);
-					dc.LineTo(c,(wrHeight) + ryHi);
+					dc.MoveTo(c,(wrHeight) - ryLow);
+					dc.LineTo(c,(wrHeight) - ryHi);
 				}
 			}
 			else if ( OffsetStep >1)
@@ -107,8 +107,8 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					}
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) + ryLow);
-					dc.LineTo(c,(wrHeight) + ryHi);
+					dc.MoveTo(c,(wrHeight) - ryLow);
+					dc.LineTo(c,(wrHeight) - ryHi);
 				}
 			}
 			else
@@ -122,8 +122,8 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) + ryLow);
-					dc.LineTo(c,(wrHeight) + ryHi);
+					dc.MoveTo(c,(wrHeight) - ryLow);
+					dc.LineTo(c,(wrHeight) - ryHi);
 				}
 			}
 

@@ -32,20 +32,22 @@ namespace psycle { namespace helpers { namespace dsp {
 		// one-sided-- the function is symmetrical, one wing of the sinc will suffice.
 		sinc_table_[0] = 1; // save the trouble of evaluating 0/0
 		for(int i(1); i < sincSize; ++i) {
+			//sinc runs at half speed of SINC_RESOLUTION (i.e. two zero crossing points per period).
 			sinc_table_[i] = std::sin(i * pi / (float)SINC_RESOLUTION) / float(i * pi / (float)SINC_RESOLUTION); // equivalent to i * pi * SINC_ZEROS / sincSize
 
 			///\todo decide which window we like best.
 			///\todo kaiser windows might be our best option, but i have no clue how to calculate one :)
 
+			// we also only apply half window (from pi..2pi instead of 0..2pi, going half speed) because of the way the sinc is generated.
 			#if 1
 				// blackman window
-				sinc_table_[i] *= 0.42f - 0.5f * std::cos( 2 * pi * i / (float)sincSize * 2 + pi) + 0.08f * std::cos( 4 * pi * i / (float)sincSize * 2 + 2 * pi);
+				  sinc_table_[i] *= 0.42659f - 0.49656f * std::cos(pi+ pi * i/ ((float)sincSize -1.f)) + 0.076849f * std::cos(2.f * pi * i / ((float)sincSize-1.f));
 			#elif 0
 				// hann(ing) window
-				sinc_table_[i] *= .5f * (1 - std::cos( 2 * pi * i / (float)sincSize * 2 + pi));
-			#else
+				sinc_table_[i] *= .5f * (1.f - std::cos(pi + pi * i / (float)sincSize));
+			#elif 0
 				// hamming window
-				sinc_table_[i] *= 0.53836f - 0.46164f * std::cos( 2 * pi * i / (float)sincSize * 2 + pi);
+				sinc_table_[i] *= 0.53836f - 0.46164f * std::cos(pi +  pi * i / (float)sincSize);
 			#endif
 		}
 		for(int i(0); i < sincSize - 1; ++i) sinc_delta_[i] = sinc_table_[i + 1] - sinc_table_[i];

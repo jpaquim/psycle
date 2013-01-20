@@ -2212,7 +2212,8 @@ namespace psycle
 					newVoice = GetFreeVoice(thisChannel.Index());
 					if ( newVoice )
 					{
-						if(thisChannel.InstrumentNo() == 255)
+						if(thisChannel.InstrumentNo() == 255
+							|| Global::song().xminstruments.IsEnabled(thisChannel.InstrumentNo())==false)
 						{	//this is a note to an undefined instrument. we can't continue.
 							//\todo : actually, we should check for commands!
 							return;

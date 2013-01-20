@@ -22,6 +22,9 @@ class CEnvelopeEditor : public CStatic
 		XMInstrument::Envelope& envelope() { return *m_pEnvelope; }
 		bool freeform() { return m_bFreeform; }
 		void freeform(bool freeform) { m_bFreeform=freeform; }
+		bool negative() { return m_bnegative; }
+		void negative(bool negative) { m_bnegative=negative; }
+		int editPoint() { return m_EditPoint; }
 
 	protected:
 		DECLARE_MESSAGE_MAP()
@@ -48,7 +51,9 @@ class CEnvelopeEditor : public CStatic
 			for(unsigned int i = 0;i < _points ;i++)
 			{
 				CPoint _pt_env;
-				_pt_env.y = static_cast<int>((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
+				_pt_env.y = (m_bnegative) 
+					? static_cast<int>((float)m_WindowHeight * (1.0f - (1.0f+m_pEnvelope->GetValue(i))*0.5f))
+					: static_cast<int>((float)m_WindowHeight * (1.0f - m_pEnvelope->GetValue(i)));
 				_pt_env.x = static_cast<int>(m_Zoom * (float)m_pEnvelope->GetTime(i));
 
 				if(((_pt_env.x - POINT_SIZE / 2) <= x) & ((_pt_env.x + POINT_SIZE / 2) >= x) &
@@ -64,6 +69,7 @@ class CEnvelopeEditor : public CStatic
 		XMInstrument::Envelope* m_pEnvelope;
 		bool m_bInitialized;
 		bool m_bFreeform;
+		bool m_bnegative;
 		float m_Zoom;///< Zoom
 		int m_WindowHeight;
 		int m_WindowWidth;

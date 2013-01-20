@@ -29,6 +29,11 @@ BEGIN_MESSAGE_MAP(CEnvelopeEditorDlg, CDialog)
 	ON_BN_CLICKED(IDC_ENVCHECK, OnBnClickedEnvcheck)
 	ON_BN_CLICKED(IDC_ENVADSR, OnBnClickedEnvadsr)
 	ON_BN_CLICKED(IDC_ENVFREEFORM, OnBnClickedEnvfreeform)
+	ON_BN_CLICKED(IDC_ENV_SUSBEGIN, OnBnClickedSusBegin)
+	ON_BN_CLICKED(IDC_ENV_SUSEND, OnBnClickedSusEnd)
+	ON_BN_CLICKED(IDC_ENV_LOOPSTART, OnBnClickedLoopStart)
+	ON_BN_CLICKED(IDC_ENV_LOOPEND, OnBnClickedLoopEnd)
+	ON_MESSAGE_VOID(PSYC_ENVELOPE_CHANGED, OnEnvelopeChanged)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
@@ -76,6 +81,17 @@ void CEnvelopeEditorDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollB
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
+void CEnvelopeEditorDlg::RefreshButtons()
+{
+	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
+	const int point = m_EnvelopeEditor.editPoint();
+	((CButton*)GetDlgItem(IDC_ENV_SUSBEGIN))->SetCheck(point==env.SustainBegin());
+	((CButton*)GetDlgItem(IDC_ENV_SUSEND))->SetCheck(point==env.SustainEnd());
+	((CButton*)GetDlgItem(IDC_ENV_LOOPSTART))->SetCheck(point==env.LoopStart());
+	((CButton*)GetDlgItem(IDC_ENV_LOOPEND))->SetCheck(point==env.LoopEnd());
+}
+
+
 void CEnvelopeEditorDlg::OnBnClickedEnvcheck()
 {
 	m_EnvelopeEditor.envelope().IsEnabled(m_EnvEnabled.GetCheck()!=0);
@@ -102,12 +118,13 @@ void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 		min=std::min(min,env.GetValue(i));
 		max=std::max(max,env.GetValue(i));
 	}
+	if(max==min) {min=0.0f; max = 1.0f;}
 	env.SetValue(0,min);
 	env.SetValue(1,max);
 	env.SetValue(3,min);
 	m_SlADSRBase.SetPos(min*100);
 	if(max!=min) {
-		m_SlADSRMod.SetPos((max-min)*100);
+		m_SlADSRMod.SetPos((max-min)*100.f);
 	}
 	else {m_SlADSRMod.SetPos(100);}
 	m_SlADSRAttack.SetPos(env.GetTime(1)-env.GetTime(0));
@@ -116,6 +133,7 @@ void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 	m_SlADSRRelease.SetPos(env.GetTime(3)-env.GetTime(2));
 
 	m_EnvelopeEditor.freeform(false);
+	m_EnvelopeEditor.Invalidate();
 }
 		
 void CEnvelopeEditorDlg::OnBnClickedEnvfreeform()
@@ -192,4 +210,65 @@ void CEnvelopeEditorDlg::SliderRelease(CSliderCtrl* slid)
 	((CStatic*)GetDlgItem(IDC_LADSRREL))->SetWindowText(tmp);
 }
 
+void CEnvelopeEditorDlg::OnBnClickedSusBegin()
+{
+	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
+	const int point = m_EnvelopeEditor.editPoint();
+	if(point < env.NumOfPoints()) {
+		if (env.SustainBegin() == point) {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_REMOVESUSTAIN);
+		}
+		else {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_SETSUSTAINBEGIN);
+		}
+		RefreshButtons();
+	}
+}
+void CEnvelopeEditorDlg::OnBnClickedSusEnd()
+{
+	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
+	const int point = m_EnvelopeEditor.editPoint();
+	if(point < env.NumOfPoints()) {
+		if (env.SustainEnd() == point) {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_REMOVESUSTAIN);
+		}
+		else {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_SETSUSTAINEND);
+		}
+		RefreshButtons();
+	}
+}
+void CEnvelopeEditorDlg::OnBnClickedLoopStart()
+{
+	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
+	const int point = m_EnvelopeEditor.editPoint();
+	if(point < env.NumOfPoints()) {
+		if (env.LoopStart() == point) {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_REMOVELOOP);
+		}
+		else {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_SETLOOPSTART);
+		}
+		RefreshButtons();
+	}
+}
+void CEnvelopeEditorDlg::OnBnClickedLoopEnd()
+{
+	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
+	const int point = m_EnvelopeEditor.editPoint();
+	if(point < env.NumOfPoints()) {
+		if (env.LoopEnd() == point) {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_REMOVELOOP);
+		}
+		else {
+			m_EnvelopeEditor.SendMessage(WM_COMMAND, ID__ENV_SETLOOPEND);
+		}
+		RefreshButtons();
+	}
+}
+
+void CEnvelopeEditorDlg::OnEnvelopeChanged()
+{
+	RefreshButtons();
+}
 }}

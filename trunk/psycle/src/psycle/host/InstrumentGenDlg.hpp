@@ -1,12 +1,12 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include "XMInstrument.hpp"
 #include "SampleAssignEditor.hpp"
 
 namespace psycle { namespace host {
 
 class XMSampler;
+class XMInstrument;
 
 class CInstrumentGenDlg : public CDialog
 {
@@ -28,6 +28,10 @@ protected:
 	afx_msg void OnCbnSelendokInsDctcombo();
 	afx_msg void OnCbnSelendokInsDcacombo();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnBtnSetDefaults();
+	afx_msg void OnBtnSetSample();
+	afx_msg void OnBtnIncreaseOct();
+	afx_msg void OnBtnDecreaseOct();
 
 public:
 	void AssignGeneralValues(XMInstrument& inst);
@@ -41,6 +45,7 @@ private:
 	CComboBox m_NNA;
 	CComboBox m_DCT;
 	CComboBox m_DCA;
+	CEdit m_SampleNumber;
 	CScrollBar m_scBar;
 
 	bool m_bInitialized;

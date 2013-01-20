@@ -1,5 +1,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentGenDlg.hpp"
+#include "XMInstrument.hpp"
 
 
 namespace psycle { namespace host {
@@ -22,6 +23,7 @@ void CInstrumentGenDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_INS_NNACOMBO, m_NNA);
 	DDX_Control(pDX, IDC_INS_DCTCOMBO, m_DCT);
 	DDX_Control(pDX, IDC_INS_DCACOMBO, m_DCA);
+	DDX_Control(pDX, IDC_SAMPLE_NUMBER, m_SampleNumber);
 
 	DDX_Control(pDX, IDC_INS_NOTEMAP, m_SampleAssign);
 	DDX_Control(pDX, IDC_INS_NOTESCROLL, m_scBar);
@@ -33,12 +35,17 @@ BEGIN_MESSAGE_MAP(CInstrumentGenDlg, CDialog)
 	ON_CBN_SELENDOK(IDC_INS_NNACOMBO, OnCbnSelendokInsNnacombo)
 	ON_CBN_SELENDOK(IDC_INS_DCTCOMBO, OnCbnSelendokInsDctcombo)
 	ON_CBN_SELENDOK(IDC_INS_DCACOMBO, OnCbnSelendokInsDcacombo)
+	ON_BN_CLICKED(IDC_SETDEFAULT,OnBtnSetDefaults)
+	ON_BN_CLICKED(IDC_SET_ALL_SAMPLE,OnBtnSetSample)
+	ON_BN_CLICKED(IDC_INCREASEOCT,OnBtnIncreaseOct)
+	ON_BN_CLICKED(IDC_DECREASEOCT,OnBtnDecreaseOct)
 END_MESSAGE_MAP()
 
 BOOL CInstrumentGenDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	((CEdit*)GetDlgItem(IDC_INS_NAME))->SetLimitText(31);
+	m_InstrumentName.SetLimitText(31);
+	m_SampleNumber.SetLimitText(3);
 
 	m_NNA.AddString(_T("Note Cut"));
 	m_NNA.AddString(_T("Note Continue"));
@@ -110,7 +117,6 @@ void CInstrumentGenDlg::OnCbnSelendokInsDcacombo()
 void CInstrumentGenDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	int m_Octave = m_SampleAssign.Octave();
-	int m_OctaveOrig = m_Octave;
 	switch(nSBCode)
 	{
 		case SB_TOP:
@@ -134,12 +140,47 @@ void CInstrumentGenDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		default: 
 			break;
 	}
-	if (m_Octave != m_OctaveOrig) {
-		//m_scBar.SetScrollPos(m_Octave);
+	if (m_Octave != m_SampleAssign.Octave()) {
+		m_scBar.SetScrollPos(m_Octave);
 		m_SampleAssign.Octave(m_Octave);
 		m_SampleAssign.Invalidate();
 	}
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
+void CInstrumentGenDlg::OnBtnSetDefaults()
+{
+	m_instr->SetDefaultNoteMap();
+	m_SampleAssign.Invalidate();
+}
+void CInstrumentGenDlg::OnBtnSetSample()
+{
+	TCHAR sample_number[5];
+	m_SampleNumber.GetWindowText(sample_number,4);
+	int sample =_ttoi(sample_number);
+	for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
+		XMInstrument::NotePair pair = m_instr->NoteToSample(i);
+		pair.second = sample;
+		m_instr->NoteToSample(i, pair);
+	}
+	m_SampleAssign.Invalidate();
+}
+void CInstrumentGenDlg::OnBtnIncreaseOct()
+{
+	for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
+		XMInstrument::NotePair pair = m_instr->NoteToSample(i);
+		pair.first = (pair.first < 108)? pair.first+12:pair.first;
+		m_instr->NoteToSample(i, pair);
+	}
+	m_SampleAssign.Invalidate();
+}
+void CInstrumentGenDlg::OnBtnDecreaseOct()
+{
+	for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
+		XMInstrument::NotePair pair = m_instr->NoteToSample(i);
+		pair.first = (pair.first > 11)? pair.first-12:pair.first;
+		m_instr->NoteToSample(i, pair);
+	}
+	m_SampleAssign.Invalidate();
+}
 }}

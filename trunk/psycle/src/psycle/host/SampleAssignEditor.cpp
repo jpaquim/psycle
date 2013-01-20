@@ -4,25 +4,30 @@
 
 namespace psycle { namespace host {
 
+const int CSampleAssignEditor::c_NaturalKeysPerOctave = 7;
+const int CSampleAssignEditor::c_SharpKeysPerOctave = 5;
+const int CSampleAssignEditor::c_KeysPerOctave = 12;
+
+const int CSampleAssignEditor::c_SharpKey_Xpos[]= {15,44,92,121,150};
+const CSampleAssignEditor::TNoteKey CSampleAssignEditor::c_NoteAssign[]=
+	{CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,
+	CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey};
+const int CSampleAssignEditor::c_noteAssignindex[] = {0,0,1,1,2,3,2,4,3,5,4,6};
+
+const CString CSampleAssignEditor::c_Key_name[] = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
+const CString CSampleAssignEditor::c_NaturalKey_name[] = {"C","D","E","F","G","A","B"};
+const int CSampleAssignEditor::c_NaturalKey_index[] = {0,2,4,5,7,9,11};
+const int CSampleAssignEditor::c_SharpKey_index[] = {1,3,6,8,10};
+
 //////////////////////////////////////////////////////////////////////////////
 // SampleAssignEditor ------------------------------------------------------------
 //////////////////////////////////////////////////////////////////////////////
-const int CSampleAssignEditor::m_NaturalKeysPerOctave = 7;
-const int CSampleAssignEditor::m_SharpKeysPerOctave = 5;
-const int CSampleAssignEditor::m_KeysPerOctave = 12;
-
-//static const unsigned int CSampleAssignEditor::m_Sharpkey_Xpos[5]= {27,96,190,246,304};
-//const unsigned int CSampleAssignEditor::m_Sharpkey_Xpos[]= {16,55,110,148,185};
-const int CSampleAssignEditor::m_SharpKey_Xpos[]= {15,44,92,121,150};
-const CSampleAssignEditor::TNoteKey CSampleAssignEditor::m_NoteAssign[]=
-	{CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,
-	CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey,CSampleAssignEditor::SharpKey,CSampleAssignEditor::NaturalKey};
-const int CSampleAssignEditor::m_noteAssignindex[m_KeysPerOctave] = {0,0,1,1,2,3,2,4,3,5,4,6};
 
 
 CSampleAssignEditor::CSampleAssignEditor()
 : m_bInitialized(false)
 , m_Octave(3)
+, bmpDC(NULL)
 {
 	m_NaturalKey.LoadBitmap(IDB_KEYS_NORMAL);
 	m_SharpKey.LoadBitmap(IDB_KEYS_SHARP);
@@ -36,13 +41,18 @@ CSampleAssignEditor::CSampleAssignEditor()
 	m_sharpkey_width = _bmp2.bmWidth;
 	m_sharpkey_height = _bmp2.bmHeight;
 
-	m_octave_width = m_naturalkey_width * m_NaturalKeysPerOctave;
+	m_octave_width = m_naturalkey_width * c_NaturalKeysPerOctave;
 }
 CSampleAssignEditor::~CSampleAssignEditor()
 {
 	m_NaturalKey.DeleteObject();
 	m_SharpKey.DeleteObject();
 	m_BackKey.DeleteObject();
+	if ( bmpDC != NULL )
+	{
+		bmpDC->DeleteObject();
+		delete bmpDC; bmpDC = 0;
+	}
 }
 
 BEGIN_MESSAGE_MAP(CSampleAssignEditor, CStatic)
@@ -67,101 +77,119 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 	if(m_bInitialized){
 		if (lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
 		{
-			const CString _Key_name[m_KeysPerOctave] = {"C","C#","D","D#","E","F","F#","G","G#","A","A#","B"};
-			const CString _NaturalKey_name[m_NaturalKeysPerOctave] = {"C","D","E","F","G","A","B"};
-			const int _NaturalKey_index[m_NaturalKeysPerOctave] = {0,2,4,5,7,9,11};
-//			const CString _SharpKey_name[m_SharpKeysPerOctave] = {"C#","D#","F#","G#","A#"};
-			const int _SharpKey_index[m_SharpKeysPerOctave] = {1,3,6,8,10};
-//			const unsigned int _end = 2*m_NaturalKeysPerOctave;//show two octaves.
-//			const unsigned int _ends = 2*m_SharpKeysPerOctave;//show two octaves.
-
-
-			CDC dc;
-			dc.Attach(lpDrawItemStruct->hDC);
+			CDC dc, memDC, keyDC;
 			CRect _rect;
 			GetClientRect(&_rect);
-			dc.FillSolidRect(&_rect,RGB(0,0,0));
-			dc.SetBkMode(TRANSPARENT);
-	
-
-			CDC memDC;
+			dc.Attach(lpDrawItemStruct->hDC);
 			memDC.CreateCompatibleDC(&dc);
-			CBitmap* oldbmp = memDC.SelectObject(&m_BackKey);
-			dc.SetTextColor(RGB(255,255,255));
+			CFont* font = dc.GetCurrentFont();
+			CFont* oldmemfont = memDC.SelectObject(font);
+			keyDC.CreateCompatibleDC(&dc);
+			if ( bmpDC == NULL ) // buffer creation
+			{
+				bmpDC = new CBitmap();
+				bmpDC->CreateCompatibleBitmap(&dc,_rect.Width(),_rect.Height());
+			}
 
+			//Draw top header image.
+			CBitmap* oldMemBmp = memDC.SelectObject(bmpDC);
+			CBitmap* oldKeyBmp = keyDC.SelectObject(&m_BackKey);
+			memDC.FillSolidRect(&_rect,RGB(0,0,0));
+			memDC.SetBkMode(TRANSPARENT);
+			memDC.SetTextColor(RGB(255,255,255));
+			const int head_width = 26;
+			const int head_height = 20;
+			int text_xOffset = 5;
+			int text_yOffset = 4;
 			CString _tmp_str;
-			int _index = 0,_octave = 0;
-
-			//Draw top background image.
-			for(int i = 0;i < _rect.Width() && m_Octave+_octave<10;i+=26)
+			int _index = 0,_octave = m_Octave;
+			for(int i = 0;i < _rect.Width() && _octave<10;i+=head_width)
 			{
-				dc.BitBlt(i,0, 	26,20, 	&memDC, 0,0,	SRCCOPY);
-				_tmp_str.Format("%s%d",_NaturalKey_name[_index],_octave+m_Octave);
-				if (m_FocusKeyRect.left>=i && m_FocusKeyRect.left<i+26 && m_FocusKeyRect.left!=m_FocusKeyRect.right){
-					dc.SetTextColor(RGB(255,255,0));
-					dc.TextOut(i+7,4,_tmp_str);
-					dc.SetTextColor(RGB(255,255,255));
+				_tmp_str.Format("%s%d",c_NaturalKey_name[_index],_octave);
+				memDC.BitBlt(i,0, 	head_width,head_height, 	&keyDC, 0,0,	SRCCOPY);
+				if (m_FocusKeyRect.left>=i && m_FocusKeyRect.left<i+head_width && m_FocusKeyRect.left!=m_FocusKeyRect.right){
+					memDC.SetTextColor(RGB(255,255,0));
+					memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str);
+					memDC.SetTextColor(RGB(255,255,255));
 				}
-				else { dc.TextOut(i+7,4,_tmp_str); }
+				else { memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str); }
 				
 				_index++;
-				if(_index == m_NaturalKeysPerOctave){
+				if(_index == c_NaturalKeysPerOctave){
 					_index = 0;
 					_octave++;
 				}
 			}
 
-			BITMAP _bmp, _bmps;
-			m_NaturalKey.GetBitmap(&_bmp);
-			m_SharpKey.GetBitmap(&_bmps);
-
-			memDC.SelectObject(&m_NaturalKey);
-			dc.SetTextColor(RGB(128,96,32));
-
-			_index = 0,_octave = 0;
-			for(int i = 0;i*_bmp.bmWidth < _rect.Width() && m_Octave+_octave<10;i++)
+			//Draw natural keys
+			keyDC.SelectObject(&m_NaturalKey);
+			memDC.SetBkMode(TRANSPARENT);
+			memDC.SetTextColor(RGB(160,128,48));
+			memDC.SetBkColor(RGB(255,255,255));
+			text_xOffset=2;
+			text_yOffset=head_height+m_sharpkey_height;
+			_index = 0,_octave = m_Octave;
+			for(int i = 0; i < _rect.Width() && _octave<10;i+=m_naturalkey_width )
 			{
-				dc.BitBlt(i*_bmp.bmWidth,20, 
-					_bmp.bmWidth,_bmp.bmHeight, &memDC, 0,0,	SRCCOPY);
-				_tmp_str.Format("%s-%d"
-					,_Key_name[m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).first%12]
-					,m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).first/12);
-				dc.TextOut(7+i*_bmp.bmWidth,68,_tmp_str);
-				int _sample = m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second;
+				XMInstrument::NotePair noteToSample = m_pInst->NoteToSample(_octave*c_KeysPerOctave+c_NaturalKey_index[_index]);
+				_tmp_str.Format("%s-%d" ,c_Key_name[noteToSample.first%c_KeysPerOctave]  ,noteToSample.first/c_KeysPerOctave);
+				memDC.BitBlt(i,head_height,   m_naturalkey_width,m_naturalkey_height,   &keyDC, 0,0,	SRCCOPY);
+				if (i == m_FocusKeyRect.left){
+					TXT(&memDC,_tmp_str,i+text_xOffset,text_yOffset,m_naturalkey_width-4,12);
+				} else{ memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str); }
+
+				int _sample = noteToSample.second;
 				if ( _sample == 255 ) _tmp_str="--";
-				else _tmp_str.Format("%02X",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_NaturalKey_index[_index]).second);
-				dc.TextOut(7+i*_bmp.bmWidth,80,_tmp_str);
+				else _tmp_str.Format("%02X",_sample);
+				if (i == m_FocusKeyRect.left){
+					TXT(&memDC,_tmp_str,i+text_xOffset,text_yOffset+12,m_naturalkey_width-4,12);
+				} else { memDC.TextOut(i+text_xOffset,text_yOffset+12,_tmp_str); }
+
 				_index++;
-				if(_index == m_NaturalKeysPerOctave){
+				if(_index == c_NaturalKeysPerOctave){
 					_index = 0;
 					_octave++;
 				}
 			}
 
-			_index = 0,_octave = 0;
-			memDC.SelectObject(&m_SharpKey);
-			for(int i = 0;m_SharpKey_Xpos[_index]+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave < _rect.Width() && m_Octave+_octave<10;i++)
+			//Draw sharp keys
+			keyDC.SelectObject(&m_SharpKey);
+			//text_xOffset-=c_SharpKey_Xpos[0];
+			text_yOffset=head_height+4;
+			int octavebmpoffset = 0;
+			_index = 0,_octave = m_Octave;
+			for(int i = c_SharpKey_Xpos[0];i < _rect.Width() && _octave<10;i = octavebmpoffset + c_SharpKey_Xpos[_index])
 			{
-				dc.BitBlt(m_SharpKey_Xpos[_index]+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,20, 
-				_bmps.bmWidth,	_bmps.bmHeight, 	&memDC,		0,0,	SRCCOPY);
-				_tmp_str.Format("%s%d"
-					,_Key_name[m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).first%12]
-					,m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).first/12);
-				dc.TextOut(m_SharpKey_Xpos[_index]-10+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,24,_tmp_str);
+				XMInstrument::NotePair noteToSample = m_pInst->NoteToSample(_octave*c_KeysPerOctave+c_SharpKey_index[_index]);
+				_tmp_str.Format("%s%d" ,c_Key_name[noteToSample.first%c_KeysPerOctave]	,noteToSample.first/c_KeysPerOctave);
+
+				memDC.BitBlt(i,head_height, m_sharpkey_width,m_sharpkey_height, 	&keyDC,		0,0,	SRCCOPY);
+				if (i == m_FocusKeyRect.left){
+					TXT(&memDC,_tmp_str,i+text_xOffset,text_yOffset,m_naturalkey_width-4,12);
+				} else { memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str); }
 				
-				int _sample=m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second;
+				int _sample=noteToSample.second;
 				if ( _sample == 255 ) _tmp_str="--";
-				else  _tmp_str.Format("%02X",m_pInst->NoteToSample((m_Octave+_octave)*m_KeysPerOctave+_SharpKey_index[_index]).second);
-				dc.TextOut(m_SharpKey_Xpos[_index]-10+ _bmp.bmWidth*m_NaturalKeysPerOctave*_octave,36,_tmp_str);
+				else  _tmp_str.Format("%02X",_sample);
+				if (i == m_FocusKeyRect.left){
+					TXT(&memDC,_tmp_str,i+text_xOffset,text_yOffset+12,m_naturalkey_width-4,12);
+				} else { memDC.TextOut(i+text_xOffset,text_yOffset+12,_tmp_str); }
+
 				_index++;
-				if(_index == m_SharpKeysPerOctave){
+				if(_index == c_SharpKeysPerOctave){
 					_index = 0;
 					_octave++;
+					octavebmpoffset += m_octave_width;
 				}
 			}
 
-			//
-			memDC.SelectObject(oldbmp);
+			//render and cleanup
+			dc.BitBlt(0,0,	_rect.Width(),_rect.Height(),	&memDC,	0,0,SRCCOPY);
+			keyDC.SelectObject(oldKeyBmp);
+			memDC.SelectObject(oldMemBmp);
+			memDC.SelectObject(oldmemfont);
+			keyDC.DeleteDC();
+			memDC.DeleteDC();
 			dc.Detach();
 		}
 	}
@@ -169,59 +197,54 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 
 int CSampleAssignEditor::GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect)
 {
-	if ( y < 20 || y > 20+m_naturalkey_height ) return notecommands::empty;
+	const int head_height = 20;
+
+	if ( y < head_height || y > head_height+m_naturalkey_height ) return notecommands::empty;
 
 	//Get the X position in natural key notes.
-	int notenatural= ((x/m_octave_width)*m_NaturalKeysPerOctave);
-	int indexnote = ((x%m_octave_width)/m_naturalkey_width);
-	notenatural+=indexnote;
+	int visualoctave = (x/m_octave_width);
+	int notenatural = (x/m_naturalkey_width);
+	int indexnote = c_NaturalKey_index[notenatural%c_NaturalKeysPerOctave];
 
-	keyRect.top = 20;
-	keyRect.bottom = 20+m_naturalkey_height;
-	keyRect.left = (notenatural)*m_naturalkey_width;
+	keyRect.top = head_height;
+	keyRect.bottom = head_height+m_naturalkey_height;
+	keyRect.left = notenatural*m_naturalkey_width;
 	keyRect.right = keyRect.left+m_naturalkey_width;
 
-	//Adapt the index note to a 12note range instead of 7note.
-	int note = ((x/m_octave_width)*m_KeysPerOctave);
-	int cnt=0;
-	while(m_noteAssignindex[cnt]!= indexnote) cnt++;
-	indexnote=cnt;
-	note += cnt;
-
-	if ( y > 20+m_sharpkey_height ) 
+	if ( y < head_height+m_sharpkey_height ) 
 	{
-		return note+(m_Octave*m_KeysPerOctave);
-	}
+		//If the code reaches here, we have to check if it is a sharp key or a natural one.
 
-
-	//If the code reaches here, we have to check if it is a sharp key or a natural one.
-
-	//Check previous sharp note
-	if (indexnote > 0 && m_NoteAssign[indexnote-1]==SharpKey)
-	{
-		const int _xpos = m_SharpKey_Xpos[m_noteAssignindex[indexnote-1]] + (note / m_KeysPerOctave) * m_octave_width;
-		if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
+		//Check previous sharp note
+		if (indexnote > 0 && c_NoteAssign[indexnote-1]==SharpKey)
 		{
-			keyRect.bottom = m_sharpkey_height;
-			keyRect.left = _xpos;
-			keyRect.right = _xpos + m_sharpkey_width;
-			return note-1+(m_Octave*m_KeysPerOctave);
+			const int note = c_noteAssignindex[indexnote-1];
+			const int _xpos = c_SharpKey_Xpos[note] + visualoctave * m_octave_width;
+			if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
+			{
+				keyRect.bottom = m_sharpkey_height;
+				keyRect.left = _xpos;
+				keyRect.right = _xpos + m_sharpkey_width;
+				return (m_Octave + visualoctave)*c_KeysPerOctave + indexnote-1;
 			}
 		}
-	//Check next sharp note
-	if ( indexnote+1<m_KeysPerOctave && m_NoteAssign[indexnote+1]==SharpKey)
-	{
-		const int _xpos = m_SharpKey_Xpos[m_noteAssignindex[indexnote+1]] + (note / m_KeysPerOctave) * m_octave_width;
-		if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
+		//Check next sharp note
+		if ( indexnote+1<c_KeysPerOctave && c_NoteAssign[indexnote+1]==SharpKey)
 		{
-			keyRect.bottom = m_sharpkey_height;
-			keyRect.left = _xpos;
-			keyRect.right = _xpos + m_sharpkey_width;
-			return note+1+(m_Octave*m_KeysPerOctave);
+			const int note = c_noteAssignindex[indexnote+1];
+			const int _xpos = c_SharpKey_Xpos[note] + visualoctave * m_octave_width;
+			if(x >= _xpos && x <= (_xpos + m_sharpkey_width))
+			{
+				keyRect.bottom = m_sharpkey_height;
+				keyRect.left = _xpos;
+				keyRect.right = _xpos + m_sharpkey_width;
+				return (m_Octave + visualoctave)*c_KeysPerOctave + indexnote+1;
+			}
 		}
 	}
 	//Not a valid sharp note. Return the already found note.
-	return note+(m_Octave*m_KeysPerOctave);
+	return (m_Octave + visualoctave)*c_KeysPerOctave + indexnote;
+
 }
 void CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
 {
@@ -231,11 +254,15 @@ void CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
 }
 void CSampleAssignEditor::OnLButtonDown( UINT nFlags, CPoint point )
 {
-MessageBox("hola");
+	if (notecommands::empty != m_FocusKeyIndex) {
+		MessageBox("Not done yet");
+	}
 }
 void CSampleAssignEditor::OnLButtonUp( UINT nFlags, CPoint point )
 {
-MessageBox("hola");
+	if (notecommands::empty != m_FocusKeyIndex) {
+		MessageBox("Not done yet");
+	}
 }
 
 }}

@@ -496,37 +496,19 @@ using namespace universalis::stdlib;
 			/// interpolation work function which does spline interpolation.
 			static float spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length) {
 				res = res >> 21;
-				float yo = offset == 0 ? 0 : *(data - 1);
+				float yo = (offset == 0) ? 0 : *(data - 1);
 				float y0 = *data;
-				float y1 = offset >= length-1 ? 0 : *(data + 1);
-				float y2 = offset >= length-2 ? 0 : *(data + 2);
+				float y1 = (offset >= length-1) ? 0 : *(data + 1);
+				float y2 = (offset >= length-2) ? 0 : *(data + 2);
 				return a_table_[res] * yo + b_table_[res] * y0 + c_table_[res] * y1 + d_table_[res] * y2;
 			}
-			
-			/// interpolation work function which does spline interpolation.
-			static float spline_float(float const * data, float offset, uint64_t length) {
-				int iOsc = std::floor(offset);
-				uint32_t fractpart = (offset - iOsc) * CUBIC_RESOLUTION;
-
-				float d0;
-				float d1 = data[iOsc];
-				float d2 = iOsc >= length-1 ? 0 : data[iOsc + 1];
-				float d3 = iOsc >= length-2 ? 0 : data[iOsc + 2];
-				if(iOsc == 0)
-					d0 = data[length - 1];
-				else
-					d0 = data[iOsc - 1];
-				return a_table_[fractpart] * d0 + b_table_[fractpart] * d1 + c_table_[fractpart] * d2 + d_table_[fractpart] * d3;
-			}
-			
 			// yo = y[-1] [sample at x-1]
 			// y0 = y[0]  [sample at x (input)]
 			// y1 = y[1]  [sample at x+1]
 			// y2 = y[2]  [sample at x+2]
 			
 			// res = distance between two neighboughing sample points [y0 and y1], so [0...1.0].
-			// You have to multiply this distance * RESOLUTION used
-			// on the spline conversion table. [2048 by default]
+			// You have to multiply this distance * RESOLUTION used on the spline conversion table. [2048 by default]
 			// If you are using 2048 is asumed you are using 12 bit decimal
 			// fixed point offsets for resampling.
 			
@@ -536,95 +518,53 @@ using namespace universalis::stdlib;
 			// either or both of these can be fine-tuned to find a tolerable compromise between quality and memory/cpu usage
 			// make sure any changes to SINC_RESOLUTION are reflected in Bandlimit()!
 			
+			/// interpolation work function which does spline interpolation.
+			static float spline_float(float const * data, float offset, uint64_t length) {
+				int iOsc = std::floor(offset);
+				uint32_t fractpart = (offset - iOsc) * CUBIC_RESOLUTION;
+
+				float yo = (iOsc == 0) ? 0 : data[iOsc - 1];
+				float y0 = data[iOsc];
+				float y1 = iOsc >= length-1 ? 0 : data[iOsc + 1];
+				float y2 = iOsc >= length-2 ? 0 : data[iOsc + 2];
+				return a_table_[fractpart] * yo + b_table_[fractpart] * y0 + c_table_[fractpart] * y1 + d_table_[fractpart] * y2;
+			}
+			
+		
 			/// sinc table values per zero crossing -- keep it a power of 2!!
 			// note: even with this optimization, interpolating the sinc table roughly doubles the cpu usage on my machine.
 			// since we're working in realtime here, it may be best to just make SINC_RESOLUTION a whole lot bigger, and drop
 			// the table interpolation altogether..
-			#define SINC_RESOLUTION 512
+			#define SINC_RESOLUTION 2048
 			/// sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu.
-			#define SINC_ZEROS 11
+			#define SINC_ZEROS 8
 			#define SINC_TABLESIZE SINC_RESOLUTION * SINC_ZEROS
 
 			/// interpolation work function which does band-limited interpolation.
 			static float band_limited(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length) {
-				res = res >> 23; // TODO assumes SINC_RESOLUTION == 512
-				int leftExtent(SINC_ZEROS), rightExtent(SINC_ZEROS);
-				if(offset < SINC_ZEROS) leftExtent = offset;
-				if(length - offset < SINC_ZEROS) rightExtent = length - offset;
-				
+				res = res >> 21; // TODO assumes SINC_RESOLUTION == 2048
+				const int leftExtent = (offset < SINC_ZEROS) ? offset : SINC_ZEROS;
+				const int rightExtent = (length - offset < SINC_ZEROS) ? length - offset : SINC_ZEROS;
 				const int sincInc(SINC_RESOLUTION);
+				const float weight =(float)res/(float)SINC_RESOLUTION;
 
+				//"Now" point. (would go on the left side of the sinc, but since we use a mirrored one, we increase from zero)
 				float newval = sinc_table_[res] * *data;
-				float sincIndex(sincInc + res);
-				float weight(sincIndex - std::floor(sincIndex));
-				for(int i(1); i < leftExtent; ++i, sincIndex += sincInc)
-					newval += (sinc_table_[int(sincIndex)] + sinc_delta_[int(sincIndex)] * weight) * *(data - i);
 
+				//Past points (would go on the left side of the sinc, but since we use a mirrored one, we increase from sincInc)
+				int sincIndex = sincInc + res;
+				for(int i(1); i < leftExtent; ++i, sincIndex += sincInc)
+					newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data - i);
+
+				//Future points, we decrease from sincInc, since they are approaching the "Now" point
 				sincIndex = sincInc - res;
-				weight = sincIndex - std::floor(sincIndex);
 				for(int i(1); i < rightExtent; ++i, sincIndex += sincInc)
-					newval += (sinc_table_[int(sincIndex)] + sinc_delta_[int(sincIndex)] * weight) * *(data + i);
+					newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data + i);
 
 				return newval;
 			}
 
 			/****************************************************************************/
-			#if 0
-				static float FIRResampling(int16_t const * pData, uint64_t offset, uint32_t res, uint64_t length)
-
-				static float FIRResampling(
-					int interp_factor, int decim_factor, int inp_size, const double *p_H,
-					int H_size)
-				{
-					double *p_inp_real, *p_out_real, *p_Z_real,
-
-					int ii, num_out = 0, current_phase;
-					int num_phases = H_size / interp_factor;
-					int out_size = inp_size * interp_factor / decim_factor + 1;
-
-					// enforce input parameter assumptions
-					assert(interp_factor > 0);
-					assert(decim_factor > 0);
-					assert(inp_size > 0);
-					assert(p_H);
-					assert(H_size > 0);
-					assert(H_size % interp_factor == 0);
-
-					// allocate storage for inputs, outputs, and delay line
-					p_inp_real = calloc(inp_size, sizeof(double));
-					p_out_real = calloc(out_size, sizeof(double));
-					p_Z_real = calloc(num_phases, sizeof(double));
-
-					if (test_method == SINE_TEST) {
-						gen_complex_sine(inp_size, interp_factor, 1.0, inp_size, p_inp_real,
-							p_inp_imag);
-					} else {
-						gen_complex_impulse(inp_size, p_inp_real, p_inp_imag);
-					}
-
-					// clear Z delay line
-					for (ii = 0; ii < num_phases; ii++) {
-						p_Z_real[ii] = 0.0;
-					}
-
-					// set current_phase to interp_factor so that resampler will
-					//load new data into the delay line prior to calculating any
-					//outputs
-					current_phase = interp_factor;   
-					resamp_complex(interp_factor, decim_factor, num_phases,
-						&current_phase, p_H, p_Z_real, inp_size,
-						p_inp_real, p_out_real,
-						&num_out);
-
-					// free allocated storage
-					std::free(p_inp_real);
-					std::free(p_inp_imag);
-					std::free(p_out_real);
-					std::free(p_out_imag);
-					std::free(p_Z_real);
-					std::free(p_Z_imag);
-				}
-			#endif
 
 		private:
 			/// Currently is 2048
