@@ -3,6 +3,7 @@
 
 #pragma once
 #include "../resource.hpp"
+#include <universalis/stdlib/chrono.hpp>
 #include <universalis/stdlib/thread.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/condition_variable.hpp>

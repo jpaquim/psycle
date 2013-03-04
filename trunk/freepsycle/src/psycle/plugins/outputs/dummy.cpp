@@ -32,7 +32,8 @@ bool dummy::opened() const {
 
 void dummy::do_start() {
 	resource::do_start();
-	sleep_ = static_cast<chrono::nanoseconds::rep>(1e9 * graph().events_per_buffer() / in_port().events_per_second());
+	using sleep_type = decltype(sleep_);
+	sleep_ = sleep_type(static_cast<sleep_type::rep>(1e9 * graph().events_per_buffer() / in_port().events_per_second()));
 	io_ready(false);
 	stop_requested_ = false;
 	// start the thread
