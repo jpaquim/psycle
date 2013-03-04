@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2012 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 1999-2013 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 ///\brief compiler-independant meta-information about the compiler
@@ -102,12 +102,12 @@
 	///\name meta-information about the compiler's brand
 	///\{
 		/// gnu g++/gcc, g++, autodetected via __GNUG__ (equivalent to __GNUC__ && __cplusplus).
-		/// To see the predefined macros, run: g++ -xc++ -std=c++0x -dM -E /dev/null
+		/// To see the predefined macros, run: g++ -xc++ -std=c++11 -dM -E /dev/null
 		#define DIVERSALIS__COMPILER__GNU
 		#undef DIVERSALIS__COMPILER__GNU // was just defined to insert documentation.
 
 		/// llvm clang, autodetected via __clang__.
-		/// To see the predefined macros, run: clang++ -xc++ -std=c++0x -dM -E /dev/null
+		/// To see the predefined macros, run: clang++ -xc++ -std=c++11 -dM -E /dev/null
 		/// Note that clang disguises itself as gcc, so you will also have
 		/// DIVERSALIS__COMPILER__GNU defined.
 		#define DIVERSALIS__COMPILER__CLANG
@@ -228,10 +228,6 @@
 		#define DIVERSALIS__COMPILER__FEATURE__EXCEPTION
 	#endif
 
-	#ifdef __GXX_EXPERIMENTAL_CXX0X__
-		#define DIVERSALIS__COMPILER__FEATURE__CXX11_ENABLED
-	#endif
-
 	// check if version supports pre-compilation. gcc < 3.4 does not support pre-compilation.
 	#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
 		#define DIVERSALIS__COMPILER__FEATURE__PRE_COMPILATION
@@ -333,12 +329,15 @@
 /////////
 // C++11
 
-// table that lists C++11 features and their support in popular compilers
+// Detecting which version of the standard is supported is standardised itself.
+// So, there is no need to define our own macro, we can just use "#if __cplusplus >= 201103L" directly.
+// There you can find a table that lists C++11 features and their support in popular compilers:
 // http://wiki.apache.org/stdcxx/C++0xCompilerSupport
-
-#if __cplusplus >= 201103L
-	#define DIVERSALIS__COMPILER__FEATURE__CXX11_ENABLED
-#endif
+// A standard-conformant compiler shall only define __cplusplus >= 201103L once it implements *all* of the standard.
+// Such violation happened e.g. with gcc 4.7 in which the option -std=c++11 or -std=gnu++11 defines __cplusplus to 201103L,
+// but 'thread_local' is not a keyword (partial support is obtained with the old '__thread' nonstandard keyword).
+// If it happens that this rule is more often blatantly violated, we might then have to define our own trustable macro here,
+// or fined-grained macros about specific C++11 features.
 
 ///////////////////
 // openmp standard

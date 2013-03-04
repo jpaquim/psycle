@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2004-2013 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
 ///\brief thread_local keyword - thread local storage
@@ -7,7 +7,14 @@
 #pragma once
 #include <universalis/detail/project.hpp>
 
-#if __cplusplus >= 201103L
+#if \
+	__cplusplus >= 201103L && ( \
+		/* A standard-conformant compiler shall only define __cplusplus >= 201103L once it implements *all* of the standard. */ \
+		/* However gcc 4.7 claims to be fully conformant with the C++11 standard since it defines __cplusplus to 201103L, */ \
+		/* but has no thread_local keyword! That keyword is only implemented since version 4.8. */ \
+		!defined DIVERSALIS__COMPILER__GNU || \
+		DIVERSALIS__COMPILER__VERSION >= 408000 \
+	)
 	// thread_local is a keyword
 #elif \
 	defined DIVERSALIS__COMPILER__GNU && ( \
