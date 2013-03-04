@@ -157,9 +157,9 @@ scheduler::scheduler(engine::graph & engine, std::size_t threads)
 			) {
 				// The underlying layer is already connected, we only have to connect this wrapping layer.
 				engine::ports::input & engine = **i;
-				const_iterator i = std::find_if(begin(), end(), predicate(engine.node())); // or composition with boost::bind
-				assert(i != end());
-				class node & node = **i;
+				const_iterator ix = std::find_if(begin(), end(), predicate(engine.node())); // or composition with boost::bind
+				assert(ix != end());
+				class node & node = **ix;
 				output_port.connected_nodes().push_back(&node);
 			}
 		}
