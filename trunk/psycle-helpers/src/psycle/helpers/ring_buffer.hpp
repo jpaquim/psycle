@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2008-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+// copyright 2008-2013 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #ifndef PSYCLE__HELPERS__RING_BUFFER__INCLUDED
 #define PSYCLE__HELPERS__RING_BUFFER__INCLUDED
@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <cassert>
 #include <algorithm>
-#ifdef DIVERSALIS__COMPILER__FEATURE__CXX0X
+#if __cplusplus >= 201103L
 	#include <cstdatomic>
 #endif
 namespace psycle { namespace helpers { namespace ring_buffers {
@@ -42,8 +42,8 @@ namespace psycle { namespace helpers { namespace ring_buffers {
 #endif
 
 /******************************************************************************************/
-/// ring buffer using c++0x atomic types
-#ifdef DIVERSALIS__COMPILER__FEATURE__CXX0X
+/// ring buffer using c++11 atomic types
+#if __cplusplus >= 201103L
 class ring_buffer_with_atomic_stdlib {
 	std::size_t const size_, size_mask_, size_mask2_;
 	std::atomic<std::size_t> read_, write_;
@@ -104,7 +104,7 @@ class ring_buffer_with_atomic_stdlib {
 			}
 		}
 };
-#endif // defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+#endif // __cplusplus >= 201103L
 
 /******************************************************************************************/
 /// ring buffer using explict memory barriers
@@ -231,7 +231,7 @@ class ring_buffer_with_compiler_volatile {
 }}}
 
 /******************************************************************************************/
-#if defined BOOST_AUTO_TEST_CASE && defined DIVERSALIS__COMPILER__FEATURE__CXX0X
+#if defined BOOST_AUTO_TEST_CASE && __cplusplus >= 201103L
 	#include <universalis/compiler/typenameof.hpp>
 	#include <universalis/os/sched.hpp>
 	#include <thread>
