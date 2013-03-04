@@ -39,7 +39,7 @@ node::node(class scheduler & scheduler, engine::node & engine)
 }
 
 void node::reset_time_measurement() {
-	accumulated_processing_time_ = 0;
+	accumulated_processing_time_ = accumulated_processing_time_.zero();
 	processing_count_ = processing_count_no_zeroes_ = 0;
 }
 

@@ -3,6 +3,7 @@
 
 #include <psycle/detail/project.private.hpp>
 #include "alsa.hpp"
+#include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/thread_name.hpp>
 #include <poll.h>
 #include <alloca.h> // beware: this is not in posix, but this is available on *bsd and linux.
