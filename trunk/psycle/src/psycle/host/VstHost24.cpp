@@ -42,8 +42,11 @@ namespace psycle
 				SetTimeSignature(4,4);
 				vstTimeInfo.smpteFrameRate = kVstSmpte25fps;
 			}
+			seib::vst::CEffect * Host::CreateEffect(seib::vst::LoadedAEffect &loadstruct) { return new Plugin(loadstruct); }
+			seib::vst::CEffect * Host::CreateWrapper(AEffect *effect) { return new Plugin(effect); }
+			bool Host::OnWillProcessReplacing(seib::vst::CEffect &pEffect) { return static_cast<Plugin*>(&pEffect)->WillProcessReplace(); }
 
-			void Host::CalcTimeInfo(long lMask)
+			void Host::CalcTimeInfo(VstInt32 lMask)
 			{
 				///\todo: cycleactive and recording to a "Start()" function.
 				// automationwriting and automationreading.
@@ -88,18 +91,18 @@ namespace psycle
 				return false;                           /* per default, no.                  */
 			}
 
-			long Host::DECLARE_VST_DEPRECATED(OnTempoAt)(seib::vst::CEffect &pEffect, long pos)
+			VstInt32 Host::DECLARE_VST_DEPRECATED(OnTempoAt)(seib::vst::CEffect &pEffect, VstInt32 pos)
 			{
 				//\todo: return the real tempo in the future, not always the current one
 				// pos in Sample frames, return bpm* 10000
 				return vstTimeInfo.tempo * 10000;
 			}
-			long Host::OnGetOutputLatency(seib::vst::CEffect &pEffect)
+			VstInt32 Host::OnGetOutputLatency(seib::vst::CEffect &pEffect)
 			{
 				AudioDriver* pdriver = Global::configuration()._pOutputDriver;
 				return pdriver->GetOutputLatencySamples();
 			}
-			long Host::OnGetInputLatency(seib::vst::CEffect &pEffect)
+			VstInt32 Host::OnGetInputLatency(seib::vst::CEffect &pEffect)
 			{
 				AudioDriver* pdriver = Global::configuration()._pOutputDriver;
 				return pdriver->GetInputLatencySamples();
@@ -110,7 +113,7 @@ namespace psycle
 			}
 
 			///\todo: Get information about this function
-			long Host::OnGetAutomationState(seib::vst::CEffect &pEffect) { return kVstAutomationUnsupported; }
+			VstInt32 Host::OnGetAutomationState(seib::vst::CEffect &pEffect) { return kVstAutomationUnsupported; }
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -152,27 +155,27 @@ namespace psycle
 				
 				if(WillProcessReplace()) {
 					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-					int maxval = std::max(std::max(numInputs(),numOutputs()),2);
+					VstInt32 maxval = std::max(std::max(numInputs(),numOutputs()),2);
 					InitializeSamplesVector(maxval);
 					inputs.resize(numInputs());
-					for(int i(0);i<numInputs();i++)	{
+					for(VstInt32 i(0);i<numInputs();i++)	{
 						inputs[i]=samplesV[i];
 					}
 					outputs.resize(numOutputs());
-					for(int i(0);i<numOutputs();i++) {
+					for(VstInt32 i(0);i<numOutputs();i++) {
 						outputs[i]=samplesV[i];
 					}
 				}
 				else {
 					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
 					InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
-					int i=0;
+					VstInt32 i=0;
 					inputs.resize(numInputs());
 					for(;i<numInputs();i++)	{
 						inputs[i]=samplesV[i];
 					}
 					outputs.resize(numOutputs());
-					for(int j(0);j<numOutputs();j++, i++) {
+					for(VstInt32 j(0);j<numOutputs();j++, i++) {
 						outputs[j]=samplesV[i];
 					}
 				}
@@ -242,8 +245,8 @@ namespace psycle
 				//Avoid possible deadlocks
 				if(crit.Lock(200)) {
 					MainsChanged(false);
-					int numIns = numInputs();
-					int numOuts = numOutputs();
+					VstInt32 numIns = numInputs();
+					VstInt32 numOuts = numOutputs();
 					VstSpeakerArrangement* SAip = 0;
 					VstSpeakerArrangement* SAop = 0;
 					if (GetSpeakerArrangement(&SAip,&SAop)) {
@@ -252,27 +255,27 @@ namespace psycle
 					}
 					if(WillProcessReplace()) {
 						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-						int maxval = std::max(std::max(numIns,numOuts),2);
+						VstInt32 maxval = std::max(std::max(numIns,numOuts),2);
 						InitializeSamplesVector(maxval);
 						inputs.resize(numIns);
-						for(int i(0);i<numIns;i++)	{
+						for(VstInt32 i(0);i<numIns;i++)	{
 							inputs[i]=samplesV[i];
 						}
 						outputs.resize(numOuts);
-						for(int i(0);i<numOuts;i++) {
+						for(VstInt32 i(0);i<numOuts;i++) {
 							outputs[i]=samplesV[i];
 						}
 					}
 					else {
 						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
 						InitializeSamplesVector(std::max(numIns + numOuts,2));
-						int i=0;
+						VstInt32 i=0;
 						inputs.resize(numIns);
 						for(;i<numIns;i++)	{
 							inputs[i]=samplesV[i];
 						}
 						outputs.resize(numOuts);
-						for(int j(0);j<numOuts;j++, i++) {
+						for(VstInt32 j(0);j<numOuts;j++, i++) {
 							outputs[j]=samplesV[i];
 						}
 					}
@@ -326,7 +329,7 @@ namespace psycle
 					{
 						if(!DescribeValue(numparam, parval))
 						{
-							std::sprintf(parval,"%.0f",GetParameter(numparam) * quantization);
+							std::sprintf(parval,"%.0f",GetParameter(numparam) * Host::quantizationVal());
 						}
 					}
 					else std::strcpy(parval,"Out of Range");
@@ -371,7 +374,7 @@ namespace psycle
 			}
 			/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 			/// doing an "off/on" when a connection changes.
-			bool Plugin::DECLARE_VST_DEPRECATED(IsInputConnected)(int input)
+			bool Plugin::DECLARE_VST_DEPRECATED(IsInputConnected)(VstInt32 input)
 			{
 				for (int i(0);i<inWires.size();i++) {
 					if(inWires[i].Enabled()) {
@@ -385,7 +388,7 @@ namespace psycle
 				}
 				return false;
 			} 
-			bool Plugin::DECLARE_VST_DEPRECATED(IsOutputConnected)(int output)
+			bool Plugin::DECLARE_VST_DEPRECATED(IsOutputConnected)(VstInt32 output)
 			{
 				for (int i(0);i<outWires.size();i++) {
 					if(outWires[i] && outWires[i]->Enabled()) {
@@ -582,10 +585,15 @@ namespace psycle
 			}
 			bool Plugin::AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel,unsigned int sampleoffset, bool slide)
 			{
-				if(trackNote[channel].key != notecommands::empty && !slide)
-					AddNoteOff(channel, trackNote[channel].key, true);
+				if(trackNote[channel].key != notecommands::empty && !slide) {
+					AddNoteOff(channel, true);
+				}
 
 				if(AddMIDI(0x90 | midichannel /*Midi On*/, key, velocity,sampleoffset)) {
+					if(trackNote[channel].key != notecommands::empty && slide) {
+						// Noteoff previous glide note after the new note, but before overwriting the trackNote array.
+						AddNoteOff(channel);
+					}
 					note thisnote;
 					thisnote.key = key;
 					thisnote.midichan = midichannel;
@@ -595,45 +603,44 @@ namespace psycle
 				return false;
 			}
 
-			bool Plugin::AddNoteOff(unsigned char channel, unsigned char midichannel, bool addatStart,unsigned int sampleoffset)
+			bool Plugin::AddNoteOff(unsigned char channel, bool addatStart, unsigned int sampleoffset)
 			{
 				if(trackNote[channel].key == notecommands::empty)
 					return false;
-				VstMidiEvent * pevent;
-				if( addatStart)
-				{
-					// PATCH:
-					// When a new note enters, it adds a note-off for the previous note playing in
-					// the track (this is ok). But if you have like: A-4 C-5 and in the next line
-					// C-5 E-5 , you will only hear E-5.
-					// Solution: Move the NoteOffs at the beginning.
-					pevent = reserveVstMidiEventAtFront();
-				}
-				else 
-				{
-					pevent = reserveVstMidiEvent();
-				}
-				if(!pevent)
-					return false;
-				pevent->type = kVstMidiType;
-				pevent->byteSize = 24;
-				pevent->deltaFrames = sampleoffset;
-				pevent->flags = 0;
-				pevent->detune = 0;
-				pevent->noteLength = 0;
-				pevent->noteOffset = 0;
-				pevent->reserved1 = 0;
-				pevent->reserved2 = 0;
-				pevent->noteOffVelocity = 0;
-				pevent->midiData[0] = 0x80 | static_cast<unsigned char>(trackNote[channel].midichan); //midichannel; // Midi Off
-				pevent->midiData[1] = trackNote[channel].key;
-				pevent->midiData[2] = 0;
-				pevent->midiData[3] = 0;
+					VstMidiEvent * pevent;
+					if( addatStart)
+					{
+						// PATCH:
+						// When a new note enters, it adds a note-off for the previous note playing in
+						// the track (this is ok). But if you have like: A-4 C-5 and in the next line
+						// C-5 E-5 , you will only hear E-5.
+						// Solution: Move the NoteOffs at the beginning.
+						pevent = reserveVstMidiEventAtFront();
+					}
+					else 
+					{
+						pevent = reserveVstMidiEvent();
+					}
+					if(!pevent)
+						return false;
+					note thenote = trackNote[channel];
+					pevent->type = kVstMidiType;
+					pevent->byteSize = 24;
+					pevent->deltaFrames = sampleoffset;
+					pevent->flags = 0;
+					pevent->detune = 0;
+					pevent->noteLength = 0;
+					pevent->noteOffset = 0;
+					pevent->reserved1 = 0;
+					pevent->reserved2 = 0;
+					pevent->noteOffVelocity = 0;
+					pevent->midiData[0] = 0x80 | thenote.midichan; //midichannel; // Midi Off
+					pevent->midiData[1] = thenote.key;
+					pevent->midiData[2] = 0;
+					pevent->midiData[3] = 0;
 
-				note thisnote;
-				thisnote.key = 255;
-				thisnote.midichan = 0;
-				trackNote[channel] = thisnote;
+					trackNote[channel].key = 255;
+					trackNote[channel].midichan = 0;
 				return true;
 			}
 			void Plugin::SendMidi()
@@ -830,7 +837,7 @@ namespace psycle
 					}
 					else if(note == notecommands::release) // Note Off. 
 					{
-						AddNoteOff(channel, midiChannel);
+						AddNoteOff(channel);
 						oldNote[midiChannel] = -1;
 					}
 					else if(pData->_note == notecommands::empty)
@@ -890,8 +897,9 @@ namespace psycle
 
 			void Plugin::Stop()
 			{
-				for(int chan(0) ; chan < 16 ; ++chan) AddMIDI(0xB0 | chan, 0x7B); // All Notes Off
-				for(int track(0) ; track < MAX_TRACKS ; ++track) AddNoteOff(track);
+				for(int track(0) ; track < MAX_TRACKS ; ++track) AddNoteOff(track); //note off any known note.
+				for(int chan(0) ; chan < 16 ; ++chan) AddMIDI(0xB0 | chan, 0x7B); // Send All Notes Off
+				for(int chan(0) ; chan < 16 ; ++chan) AddMIDI(0xB0 | chan, 0x78); // Send All Sounds Off
 			}
 
 			int Plugin::GenerateAudioInTicks(int /*startSample*/,  int numSamples)
@@ -1161,7 +1169,7 @@ namespace psycle
 				}
 				if(!b) return false;
 				// read chunk size
-				long chunk_size;
+				VstInt32 chunk_size;
 				pFile->Read(&chunk_size, sizeof chunk_size);
 				// read chunk data
 				char * chunk(new char[chunk_size]);

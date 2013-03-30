@@ -47,7 +47,7 @@ namespace seib {
 		{
 			fxMagic=0; version = 0; fxID = 0; fxVersion = 0; pf = 0; byteSizePos = 0;
 			const char szChnk[] = "CcnK";
-			const long lChnk = cMagic;
+			const VstInt32 lChnk = cMagic;
 			NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
 			initialized = false;
 		}
@@ -60,7 +60,7 @@ namespace seib {
 			, byteSizePos(0)
 		{
 			const char szChnk[] = "CcnK";
-			const long lChnk = cMagic;
+			const VstInt32 lChnk = cMagic;
 			NeedsBSwap = (memcmp(szChnk, &lChnk, 4) != 0);
 			initialized = false;
 		}
@@ -110,8 +110,8 @@ namespace seib {
 		bool CFxBase::Read(T &f,bool allowswap)	{ size_t i=fread(&f,sizeof(T),1,pf); if (NeedsBSwap && allowswap) SwapBytes(f); return (bool)i; }
 		template <class T>
 		bool CFxBase::Write(T f, bool allowswap)	{ if (NeedsBSwap && allowswap) SwapBytes(f); size_t i=fwrite(&f,sizeof(T),1,pf);  return (bool)i; }
-		bool CFxBase::ReadArray(void* f,int size)	{ size_t i=fread(f,size,1,pf); return (bool)i; }
-		bool CFxBase::WriteArray(void* f, int size)	{ size_t i=fwrite(f,size,1,pf); return (bool)i; }
+		bool CFxBase::ReadArray(void* f, VstInt32 size)	{ size_t i=fread(f,size,1,pf); return (bool)i; }
+		bool CFxBase::WriteArray(void* f, VstInt32 size)	{ size_t i=fwrite(f,size,1,pf); return (bool)i; }
 		bool CFxBase::ReadHeader()
 		{
 			VstInt32 chunkMagic(0),byteSize(0);
@@ -138,7 +138,7 @@ namespace seib {
 		}
 		void CFxBase::UpdateSize() 
 		{
-			int tmpPos = ftell(pf);
+			VstInt32 tmpPos = ftell(pf);
 			fseek(pf, byteSizePos, SEEK_SET);
 			Write(tmpPos-byteSizePos);
 			fseek(pf, tmpPos, SEEK_SET);
@@ -244,7 +244,7 @@ namespace seib {
 			return *this;
 		}
 
-		bool CFxProgram::SetParameters(const float* pnewparams,int params)
+		bool CFxProgram::SetParameters(const float* pnewparams,VstInt32 params)
 		{
 			if (!SetNumParams(params,false))
 				return false;
@@ -264,7 +264,7 @@ namespace seib {
 				memset(pParams,0,nPars*sizeof(float));
 			return !!pParams;
 		}
-		bool CFxProgram::SetParameter(int nParm, float val)
+		bool CFxProgram::SetParameter(VstInt32 nParm, float val)
 		{
 			if (nParm >= numParams)
 				return false;
@@ -319,7 +319,7 @@ namespace seib {
 			{
 				if (!SetNumParams(numParams,false))
 					return false;
-				for(int i = 0 ; i < numParams ; i++)
+				for(VstInt32 i = 0 ; i < numParams ; i++)
 					Read(pParams[i]);
 			}
 			initialized=true;
@@ -332,13 +332,13 @@ namespace seib {
 			WriteArray(prgName,sizeof(prgName));
 			if(IsChunk())
 			{
-				const int size = GetChunkSize();
+				const VstInt32 size = GetChunkSize();
 				Write(size);
 				WriteArray(pChunk,size);
 			}
 			else
 			{
-				for (int i = 0; i < numParams ; i++)
+				for (VstInt32 i = 0; i < numParams ; i++)
 					Write(pParams[i]);
 			}
 			UpdateSize();
@@ -349,7 +349,7 @@ namespace seib {
 		/* CFxBank class members                                                     */
 		/*===========================================================================*/
 
-		CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk, int _size, void*_data)
+		CFxBank::CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk, VstInt32 _size, void*_data)
 			: CFxBase(2,_fxID, _fxVersion)
 		{
 			Init();
@@ -362,7 +362,7 @@ namespace seib {
 				ProgramMode();
 				if ( _data )
 				{
-					for ( int i = 0; i < _numPrograms ; i++)
+					for ( VstInt32 i = 0; i < _numPrograms ; i++)
 					{
 						CFxProgram& prog = static_cast<CFxProgram*>(_data)[i];
 						programs.push_back(prog);
@@ -371,7 +371,7 @@ namespace seib {
 				}
 				else
 				{
-					for ( int i = 0; i < _numPrograms ; i++)
+					for ( VstInt32 i = 0; i < _numPrograms ; i++)
 					{
 						CFxProgram prog(_fxID,_fxVersion,_size);
 						programs.push_back(prog);
@@ -444,7 +444,7 @@ namespace seib {
 			}
 			else
 			{
-				for (int i=0; i < org.numPrograms; i++)
+				for (VstInt32 i=0; i < org.numPrograms; i++)
 				{
 					CFxProgram newprog(org.programs[i]);
 					programs.push_back(newprog);
@@ -506,7 +506,7 @@ namespace seib {
 			}
 			else
 			{
-				for (int i=0; i< numPrograms; i++)
+				for (VstInt32 i=0; i< numPrograms; i++)
 				{
 					CFxProgram loadprog(pf);
 					programs.push_back(loadprog);
@@ -535,7 +535,7 @@ namespace seib {
 			}
 			else
 			{
-				for (int i=0; i< numPrograms; i++)
+				for (VstInt32 i=0; i< numPrograms; i++)
 				{
 					programs[i].SaveData(pf);
 				}

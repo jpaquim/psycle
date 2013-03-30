@@ -29,7 +29,6 @@ namespace psycle
 		namespace vst
 		{
 			// Dialog max ticks for parameters.
-			const int quantization = 65535;
 			const int MAX_VST_EVENTS = 128;
 
 			// The real VstEvents in the SDK is defined as events[2], so  it cannot be used from a Host point of view.
@@ -42,9 +41,39 @@ namespace psycle
 			extern const char* MIDI_CHAN_NAMES[16];
 
 
-			class Host;
 			class CVstEffectWnd;
 
+			class Host : public seib::vst::CVSTHost
+			{
+			public:
+				Host();
+				virtual ~Host(){;}
+
+				static VstInt32 quantizationVal() { return quantization; }
+
+				///< Helper class for Machine Creation.
+				virtual seib::vst::CEffect * CreateEffect(seib::vst::LoadedAEffect &loadstruct);
+				virtual seib::vst::CEffect * CreateWrapper(AEffect *effect);
+				virtual void Log(std::string message);
+
+				///> Plugin gets Info from the host
+				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }
+				virtual VstInt32 OnGetHostVendorVersion() { return PSYCLE__VERSION__NUMBER; }
+				virtual bool OnCanDo(seib::vst::CEffect &pEffect,const char *ptr);
+				virtual VstInt32 OnGetHostLanguage() { return kVstLangEnglish; }
+				virtual void CalcTimeInfo(VstInt32 lMask = -1);
+				virtual VstInt32 DECLARE_VST_DEPRECATED(OnTempoAt)(seib::vst::CEffect &pEffect, VstInt32 pos);
+				virtual VstInt32 DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(seib::vst::CEffect &pEffect) { return 0xFF; } // the size of the aux column.
+				virtual VstInt32 OnGetAutomationState(seib::vst::CEffect &pEffect);
+				virtual VstInt32 OnGetInputLatency(seib::vst::CEffect &pEffect);
+				virtual VstInt32 OnGetOutputLatency(seib::vst::CEffect &pEffect);
+				//\todo : how can this function be implemented? :o
+				virtual VstInt32 OnGetCurrentProcessLevel(seib::vst::CEffect &pEffect) { return 0; }
+				virtual bool OnWillProcessReplacing(seib::vst::CEffect &pEffect);
+
+				///> Plugin sends actions to the host
+				virtual bool OnProcessEvents(seib::vst::CEffect &pEffect, VstEvents* events) { return false; }
+			};
 			class Plugin : public Machine, public seib::vst::CEffect
 			{
 			protected:
@@ -146,7 +175,7 @@ namespace psycle
 				}
 				bool AddMIDI(unsigned char data0, unsigned char data1 = 0, unsigned char data2 = 0, unsigned int sampleoffset=0);
 				bool AddNoteOn(unsigned char channel, unsigned char key, unsigned char velocity, unsigned char midichannel = 0, unsigned int sampleoffset=0,bool slide=false);
-				bool AddNoteOff(unsigned char channel, unsigned char midichannel = 0, bool addatStart = false, unsigned int sampleoffset=0);
+				bool AddNoteOff(unsigned char channel, bool addatStart = false, unsigned int sampleoffset=0);
 				inline void SendMidi();
 				int LSB(int val)
 				{				
@@ -166,7 +195,7 @@ namespace psycle
 				virtual const std::uint32_t GetAPIVersion() { try {return GetVstVersion(); }catch(...){return 0;} }
 				virtual const std::uint32_t GetVersion() { try { return GetVendorVersion(); }catch(...){return 0;}}
 				//
-				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = quantization; }
+				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = Host::quantizationVal(); }
 				virtual int GetNumParams() { return numParams(); }
 				virtual int GetParamType(int numparam) { return 2; }
 				virtual void GetParamName(int numparam, char * parval)
@@ -182,7 +211,7 @@ namespace psycle
 					try
 					{
 						if(numparam < numParams())
-							return helpers::math::lround<int, float>(GetParameter(numparam) * quantization);
+							return helpers::math::lround<int, float>(GetParameter(numparam) * Host::quantizationVal());
 					}catch(...){}
 					return 0;
 				}
@@ -192,7 +221,7 @@ namespace psycle
 					{
 						if(numparam < numParams())
 						{
-							CEffect::SetParameter(numparam,float(value)/float(quantization));
+							CEffect::SetParameter(numparam,float(value)/float(Host::quantizationVal()));
 							return true;
 						}
 					}catch(...){}
@@ -286,8 +315,8 @@ namespace psycle
 				virtual bool WillProcessReplace() { return !requiresProcess && (CanProcessReplace() || requiresRepl); }
 				/// IsIn/OutputConnected are called when the machine receives a mainschanged(on), so the correct way to work is
 				/// doing an "off/on" when a connection changes.
-				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input);
-				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int output);
+				virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(VstInt32 input);
+				virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(VstInt32 output);
 				// AEffect asks host about its input/outputspeakers.
 				virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement();
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement();
@@ -300,37 +329,6 @@ namespace psycle
 					editorWindow = static_cast<CVstEffectWnd*>(wnd);
 				}
 */
-			};
-
-			class Host : public seib::vst::CVSTHost
-			{
-			public:
-				Host();
-				virtual ~Host(){;}
-
-				///< Helper class for Machine Creation.
-				//static Machine* CreateFromType(int _id, std::string _dllname);
-				virtual seib::vst::CEffect * CreateEffect(seib::vst::LoadedAEffect &loadstruct) { return new Plugin(loadstruct); }
-				virtual seib::vst::CEffect * CreateWrapper(AEffect *effect) { return new Plugin(effect); }
-				virtual void Log(std::string message);
-
-				///> Plugin gets Info from the host
-				virtual bool OnGetProductString(char *text) { strcpy(text, "Psycle"); return true; }
-				virtual long OnGetHostVendorVersion() { return PSYCLE__VERSION__NUMBER; }
-				virtual bool OnCanDo(seib::vst::CEffect &pEffect,const char *ptr);
-				virtual long OnGetHostLanguage() { return kVstLangEnglish; }
-				virtual void CalcTimeInfo(long lMask = -1);
-				virtual long DECLARE_VST_DEPRECATED(OnTempoAt)(seib::vst::CEffect &pEffect, long pos);
-				virtual long DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(seib::vst::CEffect &pEffect) { return 0xFF; } // the size of the aux column.
-				virtual long OnGetAutomationState(seib::vst::CEffect &pEffect);
-				virtual long OnGetInputLatency(seib::vst::CEffect &pEffect);
-				virtual long OnGetOutputLatency(seib::vst::CEffect &pEffect);
-				//\todo : how can this function be implemented? :o
-				virtual long OnGetCurrentProcessLevel(seib::vst::CEffect &pEffect) { return 0; }
-				virtual bool OnWillProcessReplacing(seib::vst::CEffect &pEffect) { return static_cast<Plugin*>(&pEffect)->WillProcessReplace(); }
-
-				///> Plugin sends actions to the host
-				virtual bool OnProcessEvents(seib::vst::CEffect &pEffect, VstEvents* events) { return false; }
 			};
 		}
 	}

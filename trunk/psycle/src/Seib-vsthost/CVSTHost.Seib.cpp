@@ -52,7 +52,7 @@ namespace seib {
 		/*****************************************************************************/
 		/* Static Data                                                               */
 		/*****************************************************************************/
-		int CVSTHost::quantization = 0x40000000;
+		VstInt32 CVSTHost::quantization = 0x40000000;
 		bool CVSTHost::useJBridge = false;
 		bool CVSTHost::usePsycleVstBridge = false;
 		VstTimeInfo CVSTHost::vstTimeInfo;
@@ -63,7 +63,7 @@ namespace seib {
 		{
 			namespace dispatch_errors
 			{
-				std::string am_opcode_to_string(long opcode) throw()
+				std::string am_opcode_to_string(VstInt32 opcode) throw()
 				{
 					switch(opcode)
 					{
@@ -110,7 +110,7 @@ namespace seib {
 						}
 					}
 				}
-				const std::string operation_description(long code) throw()
+				const std::string operation_description(VstInt32 code) throw()
 				{
 					std::ostringstream s; s << code << ": " << am_opcode_to_string(code);
 					return s.str();
@@ -409,7 +409,7 @@ namespace seib {
 //					MessageBox("Plugin didn't accept the bank info data", "VST Preset Load Error", MB_ICONERROR);
 					return false;
 				}
-				for (int i = 0; i < fxstore.GetNumPrograms(); i++)
+				for (VstInt32 i = 0; i < fxstore.GetNumPrograms(); i++)
 				{
 					const CFxProgram &storep = fxstore.GetProgram(i);
 					CPatchChunkInfo pinfo(storep);
@@ -426,8 +426,8 @@ namespace seib {
 					}
 					else 
 					{
-						int nParms = storep.GetNumParams();
-						for (int j = 0; j < nParms; j++)
+						VstInt32 nParms = storep.GetNumParams();
+						for (VstInt32 j = 0; j < nParms; j++)
 							SetParameter(j, storep.GetParameter(j));
 					}
 					EndSetProgram();
@@ -473,8 +473,8 @@ namespace seib {
 				}
 				BeginSetProgram();
 				SetProgramName(fxstore.GetProgramName());
-				int nParms = fxstore.GetNumParams();
-				for (int j = 0; j < nParms; j++)
+				VstInt32 nParms = fxstore.GetNumParams();
+				for (VstInt32 j = 0; j < nParms; j++)
 					SetParameter(j, fxstore.GetParameter(j));
 				EndSetProgram();
 			}
@@ -496,7 +496,7 @@ namespace seib {
 					bool mainsstate = bMainsState;
 					MainsChanged(false);
 					void *chunk=0;
-					int size=GetChunk(&chunk);
+					VstInt32 size=GetChunk(&chunk);
 					CFxBank b(uniqueId(),version(),numPrograms(),true,size,chunk);
 					b.SetProgramIndex(GetProgram());
 					if (mainsstate) MainsChanged(true);
@@ -508,7 +508,7 @@ namespace seib {
 					MainsChanged(false);
 					CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
 					b.SetProgramIndex(GetProgram());
-					for (int i = 0; i < numPrograms(); i++)
+					for (VstInt32 i = 0; i < numPrograms(); i++)
 					{
 						CFxProgram &storep = b.GetProgram(i);
 						SetProgram(i);
@@ -516,7 +516,7 @@ namespace seib {
 						GetProgramName(name);
 						storep.SetProgramName(name);
 						void *chunk=0;
-						int size=GetChunk(&chunk,true);
+						VstInt32 size=GetChunk(&chunk,true);
 						storep.CopyChunk(chunk,size);
 						storep.ManuallyInitialized();
 					}
@@ -533,15 +533,15 @@ namespace seib {
 				MainsChanged(false);
 				CFxBank b(uniqueId(),version(),numPrograms(),false,numParams());
 				b.SetProgramIndex(GetProgram());
-				for (int i = 0; i < numPrograms(); i++)
+				for (VstInt32 i = 0; i < numPrograms(); i++)
 				{
 					CFxProgram &storep = b.GetProgram(i);
 					SetProgram(i);
 					char name[kVstMaxProgNameLen+1];
 					GetProgramName(name);
 					storep.SetProgramName(name);
-					int nParms = numParams();
-					for (int j = 0; j < nParms; j++)
+					VstInt32 nParms = numParams();
+					for (VstInt32 j = 0; j < nParms; j++)
 						storep.SetParameter(j,GetParameter(j));
 					storep.ManuallyInitialized();
 				}
@@ -559,7 +559,7 @@ namespace seib {
 				bool mainsstate = bMainsState;
 				if (mainsstate) MainsChanged(false);
 				void *chunk=0;
-				int size=GetChunk(&chunk,true);
+				VstInt32 size=GetChunk(&chunk,true);
 				CFxProgram p(uniqueId(),version(),size,true,chunk);
 				char name[kVstMaxProgNameLen+1];
 				GetProgramName(name);
@@ -576,8 +576,8 @@ namespace seib {
 				char name[kVstMaxProgNameLen+1];
 				GetProgramName(name);
 				storep.SetProgramName(name);
-				int nParms = numParams();
-				for (int j = 0; j < nParms; j++)
+				VstInt32 nParms = numParams();
+				for (VstInt32 j = 0; j < nParms; j++)
 					storep.SetParameter(j,GetParameter(j));
 				storep.ManuallyInitialized();
 				if (mainsstate) MainsChanged(true);
@@ -671,7 +671,7 @@ namespace seib {
 			return 0.f;
 		}
 
-		bool CEffect::OnSizeEditorWindow(long width, long height)
+		bool CEffect::OnSizeEditorWindow(VstInt32 width, VstInt32 height)
 		{
 			if (editorWnd)
 			{
@@ -738,19 +738,21 @@ namespace seib {
 			return false;
 		}
 
-		bool CEffect::OnBeginAutomating(long index)
+		bool CEffect::OnBeginAutomating(VstInt32 index)
 		{
 			if (editorWnd) return editorWnd->BeginAutomating(index);
 			else return false;
 		}
-		bool CEffect::OnEndAutomating(long index)
+		bool CEffect::OnEndAutomating(VstInt32 index)
 		{
 			if (editorWnd) return editorWnd->EndAutomating(index); 
 			else return false;
 		}
-		void CEffect::OnSetParameterAutomated(long index, float value)
+		void CEffect::OnSetParameterAutomated(VstInt32 index, float value)
 		{
-			if (editorWnd) editorWnd->SetParameterAutomated(index,value);
+			if (editorWnd && CanBeAutomated(index)) {
+				editorWnd->SetParameterAutomated(index,value);
+			}
 		}
 		bool CEffect::OnOpenFileSelector (VstFileSelect *ptr) {
 			if (editorWnd) return editorWnd->OpenFileSelector(ptr);
@@ -760,7 +762,7 @@ namespace seib {
 			if (editorWnd) return editorWnd->CloseFileSelector(ptr);
 			else return false;
 		}
-		std::string CEffect::GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, int pin) const {
+		std::string CEffect::GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, VstInt32 pin) const {
 			const char* chanName[] = { "Mono","Left", "Right", "Center", "Subbass", "Left Surround", "Right Surround",
 			"Left of Center", "Right of Center", "Surround", "Side Left", "Side Right", "Top Middle",
 			"Top Front Left", "Top Front Center", "Top Front Right", "Top Rear Left", "TopRear Center",
@@ -943,7 +945,7 @@ namespace seib {
 		/* CalcTimeInfo : calculates time info from nanoSeconds                      */
 		/*****************************************************************************/
 
-		void CVSTHost::CalcTimeInfo(long lMask)
+		void CVSTHost::CalcTimeInfo(VstInt32 lMask)
 		{
 			// Either your player/sequencer or your overloaded member should update the following ones.
 			// They shouldn't need any calculations appart from your usual work procedures.
@@ -966,15 +968,15 @@ namespace seib {
 				//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
 				if(lMask & kVstBarsValid)
 				{
-					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* ((int)vstTimeInfo.ppqPos / (int)vstTimeInfo.timeSigDenominator);
+					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* (static_cast<VstInt32>(vstTimeInfo.ppqPos) / vstTimeInfo.timeSigDenominator);
 					vstTimeInfo.flags |= kVstBarsValid;
 				}
 				//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
 				if(lMask & kVstClockValid)
 				{
 //					option 1:
-					const int onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
-					vstTimeInfo.samplesToNextClock =((int)vstTimeInfo.samplePos) % onesampleclock; // quantize.
+					const VstInt32 onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
+					vstTimeInfo.samplesToNextClock =static_cast<VstInt32>(vstTimeInfo.samplePos) % onesampleclock; // quantize.
 
 //					option 2:
 //					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
@@ -993,7 +995,7 @@ namespace seib {
 					23.976f,	24.976f,	59.94f,		60.f
 				};
 				double dOffsetInSecond = seconds - floor(seconds);
-				vstTimeInfo.smpteOffset = (long)(dOffsetInSecond *
+				vstTimeInfo.smpteOffset = (VstInt32)(dOffsetInSecond *
 					fSmpteDiv[vstTimeInfo.smpteFrameRate] *
 					80.L);
 				vstTimeInfo.flags |= kVstSmpteValid;
@@ -1026,14 +1028,14 @@ namespace seib {
 		/* SetBlockSize : sets the block size                                        */
 		/*****************************************************************************/
 
-		void CVSTHost::SetBlockSize(long lSize)
+		void CVSTHost::SetBlockSize(VstInt32 lSize)
 		{
 			if (lSize == lBlockSize)                /* if no change                      */
 				return;                               /* do nothing.                       */
 			lBlockSize = lSize;                     /* remember new block size           */
 		}
 
-		void CVSTHost::SetTimeSignature(long numerator, long denominator)
+		void CVSTHost::SetTimeSignature(VstInt32 numerator, VstInt32 denominator)
 		{
 			vstTimeInfo.timeSigNumerator=numerator;
 			vstTimeInfo.timeSigDenominator=denominator; 
@@ -1047,7 +1049,7 @@ namespace seib {
 		/* and in fact there is a bug in the audioeffectx.cpp (in the host call)	 */
 		/* where it forgets about the index completely.								 */
 		/*****************************************************************************/
-		CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, int pinIndex)
+		CEffect* CVSTHost::GetPreviousPlugIn(CEffect & pEffect, VstInt32 pinIndex)
 		{
 			/* What this function might have to do:
 			if (pinIndex == -1)
@@ -1066,7 +1068,7 @@ namespace seib {
 		/* where it forgets about the index completely.								 */
 		/*****************************************************************************/
 
-		CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, int pinIndex)
+		CEffect* CVSTHost::GetNextPlugIn(CEffect & pEffect, VstInt32 pinIndex)
 		{
 			/* What this function might have to do:
 			if (pinIndex == -1)
@@ -1118,7 +1120,7 @@ namespace seib {
 		/*****************************************************************************/
 		// This is called by pre-2.4 VST plugins when resume() is called to indicate
 		// that it is going to accept events.
-		void CVSTHost::OnWantEvents(CEffect & pEffect, long filter)
+		void CVSTHost::OnWantEvents(CEffect & pEffect, VstInt32 filter)
 		{
 			if ( filter == kVstMidiType )
 			{
@@ -1177,9 +1179,9 @@ namespace seib {
 				if (!pHost->loadingEffect)
 				{
 					std::stringstream s; s
-						<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin)" << std::endl
-						<< "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
-						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
+						<< "AudioMaster call with unknown AEffect (this is a bad behaviour from a plugin). " << std::endl
+						<< "opcode is: " << exceptions::dispatch_errors::operation_description(opcode)
+						<< ", with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
 					pHost->Log(title.str() + '\n' + s.str());
@@ -1202,9 +1204,9 @@ namespace seib {
 					name[4]='\0';
 
 					std::stringstream s; s
-						<< "AudioMaster call, with unknown pEffect" << std::endl
-						<< "Aeffect: " << name << "opcode is " << exceptions::dispatch_errors::operation_description(opcode)
-						<< " with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
+						<< "AudioMaster call, with unknown pEffect. " << std::endl
+						<< "Aeffect: " << name << ", opcode is: " << exceptions::dispatch_errors::operation_description(opcode)
+						<< ", with index: " << index << ", value: " << value << ", and opt:" << opt << std::endl;
 					std::stringstream title; title
 						<< "Machine Error: ";
 					pHost->Log(title.str() + '\n' + s.str());
