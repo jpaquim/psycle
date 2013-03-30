@@ -94,7 +94,7 @@ namespace psycle
 
 
 		// calculated table from the following formula:
-		// period =  pow(2.0,double(5-(note/12.0f))) * 1712;
+		// period =  pow(2.0,5.0-double(note)/12.0) * 1712;
 		// being 5 = the middle octave (on PC), 1712 the middle C period on PC
 		// (on Amiga it was 428, which was multiplied by 4 on PC, to add fine pitch slide).
 		const float XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
@@ -933,22 +933,30 @@ namespace psycle
 			}
 			//\todo: Attention, AutoVibrato uses linear slides with IT. This needs to be fixed.
 			_period = _period + AutoVibratoAmount() +  VibratoAmount();
-			if ( _period > 65535) _period = 65535;
-			else if ( _period < 32 ) _period = 32;
-
-			const double speed=PeriodToSpeed(_period);
-			rWave().Speed(speed);
-			m_pSampler->Resampler().UpdateSpeed(resampler_data, speed);
+			if ( _period > 65535.0) {
+				NoteOffFast();
+			}
+			else if ( _period < 1.0 ) {
+				//This behaviour exists in ST3 and IT, and is in fact documented for slide up command in the latter.
+				NoteOffFast();
+			}
+			else {
+				const double speed=PeriodToSpeed(_period);
+				rWave().Speed(speed);
+				m_pSampler->Resampler().UpdateSpeed(resampler_data, speed);
+			}
 		}
 
 		double XMSampler::Voice::PeriodToSpeed(int period) const
 		{
 			if(m_pSampler->IsAmigaSlides()){
 				// Amiga period mode. Original conversion:
-				//	PAL:   7093789.2 / (428 * 2) = 8287.14 samples   ( Amiga clock frequency, middle C period 
-				//	NSTC:  7159090.5 / (428 * 2) = 8363.42 samples     and *2 to adapt frequency to samples)
-				// in PC, the middle C period is 1712, because there are fine pitch slides.
-				return ( 1712 * rWave().Wave().WaveSampleRate() / period ) / (double)Global::player().SampleRate() * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0);
+				//	PAL:   7093789.2 / (428*2) = 8287.14 Hz   ( Amiga clock frequency, middle C period and final samplerate)
+				//	NSTC:  7159090.5 / (428*2) = 8363.42 Hz   ( *2 is used to convert clock frequency to ticks).
+				// in PC, the middle C period is 1712. It was increased by 4 to add extra fine pitch slides.
+				// so 1712 *8363 = 14317456, which is used in IT and FT2 (and in ST3, if the value that exists in their doc is a typo).
+				// One could also use 7159090.5 /2 *4 = 14318181
+				return ( 14317456.0 / period ) * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0) / (double)Global::player().SampleRate();
 			} else {
 				// Linear Frequency
 				// base_samplerate * 2^((7*12*64 - Period) / (12*64))
@@ -969,12 +977,11 @@ namespace psycle
 
 			if(m_pSampler->IsAmigaSlides())
 			{
-				// Amiga Period . Nonstandard table, but *maybe* more accurate.
-				double speedfactor =  pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0);
-//				double c5speed =  8363.0*speedfactor;
-				return AmigaPeriod[note]/speedfactor;
+				// Amiga Period.
+				double c5speed = (double)rWave().Wave().WaveSampleRate()*pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0);
+				return AmigaPeriod[note]*8363.0/c5speed;
 			} else {
-				// 9216 = 12notes*12octaves*64fine.
+				// 9216 = 12octaves*12notes*64fine.
 				return 9216 - ((double)(note + _wave.WaveTune()) * 64.0)
 					- ((double)(_wave.WaveFineTune()) * 0.64); // 0.64 since the range is +-100 for XMSampler as opposed to +-128 for FT.
 			}
@@ -985,17 +992,14 @@ namespace psycle
 			const XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides()){
-				// f1
-				//period =  pow(2.0,double(15.74154-(note/12.0f)))
-				// log2(period) = 15.74154 - (note+wavetune+(finetune*0.01))/12.0f
-				// note = (15.74154 - log2(period))*12 - tune - (fine*0.01)
-				//f2
-				//period = pow(2.0,(116.898 - ((double)(note + _wave.WaveTune()) + ((double)_wave.WaveFineTune() *0.01))/12.0) * 32;
-				//log2(period/32) = (116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune()*0.01))/12.0;
-				//log2(period/32)*12 =  116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune()*0.01)
-				//note = 116.898 - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune()*0.01) - (log2(period/32)*12); 
-				int _note = (int)(116.898 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune()*0.01) 
-					-(12.0 * log((double)period / 32.0)/(0.301029995f /*log(2)*/ )));
+				// period_t (table) = pow(2.0,5.0-note/12.0) * 1712.0;
+				// final_period = period_t*8363.0/ ( _wave.WaveSampleRate()*pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0)  )
+				// final_period * _wave.WaveSampleRate()*pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0) = pow(2.0,5.0-note/12.0) * 1712.0 *8363.0
+				// final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)*pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0) = pow(2.0,5.0-note/12.0)
+				// log2(final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)) + log2(pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0)) = 5.0-note/12.0
+				// note = 60 - 12*log2(final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)) + (_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0
+				int _note = 60 -12*(log(period * _wave.WaveSampleRate()) * 3.3219280948873623478703194294894 /*1/log(2)*/ 
+							-23.77127183403184445503933415201/*log2(1.0/(1712.0 *8363.0))*/) + (_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0;
 				return _note+12;
 			} else {
 				// period = ((12.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
