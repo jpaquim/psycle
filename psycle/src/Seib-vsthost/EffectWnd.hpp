@@ -72,9 +72,9 @@ public:
 	virtual void CloseEditorWnd()=0;
 	virtual void ResizeWindow(int width, int height)=0;
 	virtual void RefreshUI()=0;
-	virtual bool BeginAutomating(long index){ return false; }
-	virtual bool SetParameterAutomated(long index, float value) { return false; }
-	virtual bool EndAutomating(long index) { return false; }
+	virtual bool BeginAutomating(VstInt32 index){ return false; }
+	virtual bool SetParameterAutomated(VstInt32 index, float value) { return false; }
+	virtual bool EndAutomating(VstInt32 index) { return false; }
 	virtual bool OpenFileSelector (VstFileSelect *ptr) { return false; }
 	virtual bool CloseFileSelector (VstFileSelect *ptr) { return false; }
 	virtual void* OpenSecondaryWnd(VstWindow& window) { return 0; }

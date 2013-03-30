@@ -47,10 +47,10 @@ namespace seib {
 			CFxBase & DoCopy(const CFxBase &org);
 
 			bool Save(const char *pszFile);
-			long GetMagic() const { return version; }
-			long GetVersion() const { return version; }
-			long GetFxID() const {  return fxID; }
-			long GetFxVersion() const { return fxVersion; }
+			VstInt32 GetMagic() const { return fxMagic; }
+			VstInt32 GetVersion() const { return version; }
+			VstInt32 GetFxID() const {  return fxID; }
+			VstInt32 GetFxVersion() const { return fxVersion; }
 			bool Initialized() const { return initialized; }
 			std::string GetPathName() { return pathName; }
 			// This function would normally be protected, but it is needed in the saving of Programs from a Bank.
@@ -72,17 +72,17 @@ namespace seib {
 			bool Read(T &f,bool allowswap=true);
 			template <class T>
 			bool Write(T f,bool allowswap=true);
-			bool ReadArray(void *f,int size);	
-			bool WriteArray(void *f, int size);
-			void Rewind(int bytes) { fseek(pf,-bytes,SEEK_CUR); }
-			void Forward(int bytes) { fseek(pf,bytes,SEEK_CUR); }
+			bool ReadArray(void *f, VstInt32 size);	
+			bool WriteArray(void *f, VstInt32 size);
+			void Rewind(VstInt32 bytes) { fseek(pf,-bytes,SEEK_CUR); }
+			void Forward(VstInt32 bytes) { fseek(pf,bytes,SEEK_CUR); }
 			bool ReadHeader();
 			bool WriteHeader();
 			void UpdateSize();
 			virtual void CreateInitialized();
 		private:
 			static bool NeedsBSwap;
-			int byteSizePos;
+			VstInt32 byteSizePos;
 		private:
 			void SwapBytes(VstInt32 &f);
 			void SwapBytes(float &f);
@@ -113,12 +113,12 @@ namespace seib {
 				//leave last char for null.
 				std::strncpy(prgName, name, 27);
 			}
-			long GetNumParams() const{ return numParams; }
+			VstInt32 GetNumParams() const{ return numParams; }
 			float GetParameter(VstInt32 nParm) const{  return (nParm < numParams) ? pParams[nParm] : 0; }
 			bool SetParameter(VstInt32 nParm, float val = 0.0);
-			long GetChunkSize() const{ return chunkSize; }
+			VstInt32 GetChunkSize() const{ return chunkSize; }
 			const void *GetChunk() const { return pChunk; }
-			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
+			bool CopyChunk(const void *chunk,const VstInt32 size) {	ChunkMode(); return SetChunk(chunk,size);	}
 			bool IsChunk() const{ return fxMagic == chunkPresetMagic; }
 			void ManuallyInitialized() { initialized = true; }
 
@@ -129,7 +129,7 @@ namespace seib {
 
 			VstInt32 numParams;			///< number of parameters
 			float* pParams;				///< variable sized array with parameter values
-			int chunkSize;				///< Size of the opaque chunk.
+			VstInt32 chunkSize;				///< Size of the opaque chunk.
 			unsigned char* pChunk;		///< variable sized array with opaque program data
 
 		protected:
@@ -142,7 +142,7 @@ namespace seib {
 		private:
 			void ChunkMode() { FreeMemory(); fxMagic = chunkPresetMagic; }
 			void ParamMode() { FreeMemory(); fxMagic = fMagic; }
-			bool SetParameters(const float* pnewparams,int params);
+			bool SetParameters(const float* pnewparams,VstInt32 params);
 			bool SetChunk(const void *chunk, VstInt32 size);
 			bool SetNumParams(VstInt32 nPars,bool initializeData=true);
 			bool SetChunkSize(VstInt32 size,bool initializeData=true);
@@ -163,17 +163,17 @@ namespace seib {
 			// If isChunk == false, the Bank is created as a regular bank of numPrograms, _size is then the
 			// number of parameters of the program, and data can be zero, or an array of CFxPrograms to copy to the CFxBank.
 			// if isChunk == true ,create a chunk of size "_size", and copy the contents of "data".
-			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk=false, int _size=0, void *_data=0);
+			CFxBank(VstInt32 _fxID, VstInt32 _fxVersion, VstInt32 _numPrograms, bool isChunk=false, VstInt32 _size=0, void *_data=0);
 			CFxBank(CFxBank const &org) { Init(); DoCopy(org); }
 			virtual ~CFxBank();
 			CFxBank & operator=(CFxBank const &org) { FreeMemory(); return DoCopy(org); }
 
 			// access functions
-			long GetNumPrograms() const { return numPrograms; }
+			VstInt32 GetNumPrograms() const { return numPrograms; }
 			
-			long GetChunkSize() const { return chunkSize; }
+			VstInt32 GetChunkSize() const { return chunkSize; }
 			void * const GetChunk() const { return pChunk; }
-			bool CopyChunk(const void *chunk,const int size) {	ChunkMode(); return SetChunk(chunk,size);	}
+			bool CopyChunk(const void *chunk,const VstInt32 size) {	ChunkMode(); return SetChunk(chunk,size);	}
 			bool IsChunk() const{ return fxMagic == chunkBankMagic; }
 
 			// if nProgNum is not specified (i.e, it is -1) , currentProgram is used as index.
@@ -190,7 +190,7 @@ namespace seib {
 		protected:
 			VstInt32 numPrograms;
 			VstInt32 currentProgram;
-			int chunkSize;
+			VstInt32 chunkSize;
 			unsigned char * pChunk;
 			std::vector<CFxProgram> programs;
 

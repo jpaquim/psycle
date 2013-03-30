@@ -260,7 +260,7 @@ namespace seib {
 			virtual CFxBank SaveBank(bool preferchunk=false);
 			virtual CFxProgram SaveProgram(bool preferchunk=true);
 			virtual void crashed2(std::exception const & e) {};
-			virtual std::string GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, int pin) const;
+			virtual std::string GetNameFromSpeakerArrangement(VstSpeakerArrangement& arr, VstInt32 pin) const;
 			virtual void WantsMidi(bool enable) { bWantMidi=enable; }
 			virtual bool WantsMidi() { return bWantMidi; }
 			virtual void KnowsToBypass(bool enable) { bCanBypass=enable; }
@@ -278,21 +278,21 @@ namespace seib {
 			// if your implementation needs that)
 			virtual void * OnGetDirectory();
 			virtual bool OnGetChunkFile(char * nativePath);
-			virtual bool OnSizeEditorWindow(long width, long height);
+			virtual bool OnSizeEditorWindow(VstInt32 width, VstInt32 height);
 			///\todo: You might need to override the OnUpdateDisplay in order to check other changes.
 			virtual bool OnUpdateDisplay();
 			virtual void * OnOpenWindow(VstWindow* window);
 			virtual bool OnCloseWindow(VstWindow* window);
-			virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(int input) { return true; } 
-			virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(int input) { return true; }
+			virtual bool DECLARE_VST_DEPRECATED(IsInputConnected)(VstInt32 input) { return true; } 
+			virtual bool DECLARE_VST_DEPRECATED(IsOutputConnected)(VstInt32 input) { return true; }
 			// AEffect asks host about its input/outputspeakers.
 			virtual VstSpeakerArrangement* OnHostInputSpeakerArrangement() { return 0; }
 			virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement() { return 0; }
 			// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 			virtual bool OnIOChanged() { return false; }
-			virtual bool OnBeginAutomating(long index);
-			virtual bool OnEndAutomating(long index);
-			virtual void OnSetParameterAutomated(long index, float value);
+			virtual bool OnBeginAutomating(VstInt32 index);
+			virtual bool OnEndAutomating(VstInt32 index);
+			virtual void OnSetParameterAutomated(VstInt32 index, float value);
 			virtual bool OnOpenFileSelector (VstFileSelect *ptr);
 			virtual bool OnCloseFileSelector (VstFileSelect *ptr);
 
@@ -309,7 +309,7 @@ namespace seib {
 			//////////////////////////////////////////////////////////////////////////
 			// AEffect Properties
 			// magic is only used in the loader to verify that it is a VST plugin
-			//long int magic()
+			//VstInt32 magic()
 			inline VstInt32 numPrograms() const	 { return aEffect->numPrograms;	}
 			inline VstInt32 numParams() const	 { return aEffect->numParams;	}
 			inline VstInt32 numInputs() const	 { return aEffect->numInputs;	}
@@ -416,25 +416,25 @@ namespace seib {
 			inline void EditIdle() { if(bEditOpen) Dispatch(effEditIdle); bNeedEditIdle=false; }
 		#if MAC
 			inline void DECLARE_VST_DEPRECATED(EditDraw)(void *rectarea) { Dispatch(effEditDraw, 0, 0, rectarea); }
-			inline long DECLARE_VST_DEPRECATED(EditMouse)(VstInt32 x, VstIntPtr y) { return Dispatch(effEditMouse, x, y); }
-			inline long DECLARE_VST_DEPRECATED(EditKey)(long value) { return Dispatch(effEditKey, 0, value); }
+			inline VstInt32 DECLARE_VST_DEPRECATED(EditMouse)(VstInt32 x, VstIntPtr y) { return Dispatch(effEditMouse, x, y); }
+			inline VstInt32 DECLARE_VST_DEPRECATED(EditKey)(VstInt32 value) { return Dispatch(effEditKey, 0, value); }
 			inline void DECLARE_VST_DEPRECATED(EditTop)() { Dispatch(effEditTop); }
 			inline void DECLARE_VST_DEPRECATED(EditSleep)() { Dispatch(effEditSleep); }
 		#endif
 			// 2nd check that it is a valid VST. (appart from kEffectMagic )
 			inline bool DECLARE_VST_DEPRECATED(Identify)() { return (Dispatch(effIdentify) == CCONST ('N', 'v', 'E', 'f')); }
 			// returns "byteSize".
-			inline long GetChunk(void **ptr, bool onlyCurrentProgram = false) { return Dispatch(effGetChunk, onlyCurrentProgram, 0, ptr); }
+			inline VstInt32 GetChunk(void **ptr, bool onlyCurrentProgram = false) { return Dispatch(effGetChunk, onlyCurrentProgram, 0, ptr); }
 			// return value is not specified in the VST SDK. Don't assume anything.
-			inline long SetChunk(const void *data, long byteSize, bool onlyCurrentProgram = false) { return Dispatch(effSetChunk, onlyCurrentProgram, byteSize, const_cast<void*>(data)); }
+			inline VstInt32 SetChunk(const void *data, VstInt32 byteSize, bool onlyCurrentProgram = false) { return Dispatch(effSetChunk, onlyCurrentProgram, byteSize, const_cast<void*>(data)); }
 		// VST 2.0
-			inline long ProcessEvents(VstEvents* ptr) { return Dispatch(effProcessEvents, 0, 0, ptr); }
-			inline bool CanBeAutomated(long index) { return (bool)Dispatch(effCanBeAutomated, index); }
+			inline VstInt32 ProcessEvents(VstEvents* ptr) { return Dispatch(effProcessEvents, 0, 0, ptr); }
+			inline bool CanBeAutomated(VstInt32 index) { return (bool)Dispatch(effCanBeAutomated, index); }
 			// A textual description of the parameter's value. A null pointer is used to check the capability (return true).
-			inline bool String2Parameter(long index, char *text) { return (bool)Dispatch(effString2Parameter, index, 0, text); }
-			inline long DECLARE_VST_DEPRECATED(GetNumProgramCategories)() { return Dispatch(effGetNumProgramCategories); }
+			inline bool String2Parameter(VstInt32 index, char *text) { return (bool)Dispatch(effString2Parameter, index, 0, text); }
+			inline VstInt32 DECLARE_VST_DEPRECATED(GetNumProgramCategories)() { return Dispatch(effGetNumProgramCategories); }
 			// text is a string up to kVstMaxProgNameLen chars + \0 delimiter
-			inline bool GetProgramNameIndexed(long category, long index, char* text)
+			inline bool GetProgramNameIndexed(VstInt32 category, VstInt32 index, char* text)
 			{
 				char s1[kVstMaxProgNameLen*3+1]; // You know, there's always the plugin that doesn't like to follow the limits
 
@@ -443,13 +443,13 @@ namespace seib {
 					//Backup current program, since some plugins (ex: mda vocoder) restore the setting when assigning a program.
 					VstInt32 cprog= GetProgram();
 					float* params = new float[numParams()];
-					for(int i(0); i<numParams();i++){
+					for(VstInt32 i(0); i<numParams();i++){
 						params[i] = GetParameter(i);
 					}
 					SetProgram(index);
 					GetProgramName(text);
 					SetProgram(cprog);
-					for(int i(0); i<numParams();i++){
+					for(VstInt32 i(0); i<numParams();i++){
 						SetParameter(i,params[i]);
 					}
 					delete[] params;
@@ -464,25 +464,25 @@ namespace seib {
 				return true;
 			}
 			// copy current program to the one in index.
-			inline bool DECLARE_VST_DEPRECATED(CopyProgram)(long index) { return (bool)Dispatch(effCopyProgram, index); }
+			inline bool DECLARE_VST_DEPRECATED(CopyProgram)(VstInt32 index) { return (bool)Dispatch(effCopyProgram, index); }
 			//Input index has been (dis-)connected. The application may issue this call when implemented.
-			inline void DECLARE_VST_DEPRECATED(ConnectInput)(long index, bool state) { Dispatch(effConnectInput, index, state); }
+			inline void DECLARE_VST_DEPRECATED(ConnectInput)(VstInt32 index, bool state) { Dispatch(effConnectInput, index, state); }
 			//Output index has been (dis-)connected. The application may issue this call when implemented.
-			inline void DECLARE_VST_DEPRECATED(ConnectOutput)(long index, bool state) { Dispatch(effConnectOutput, index, state); }
-			inline bool GetInputProperties(long index, VstPinProperties *ptr) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetInputProperties, index, 0, ptr); }
-			inline bool GetOutputProperties(long index, VstPinProperties *ptr) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetOutputProperties, index, 0, ptr); }
+			inline void DECLARE_VST_DEPRECATED(ConnectOutput)(VstInt32 index, bool state) { Dispatch(effConnectOutput, index, state); }
+			inline bool GetInputProperties(VstInt32 index, VstPinProperties *ptr) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetInputProperties, index, 0, ptr); }
+			inline bool GetOutputProperties(VstInt32 index, VstPinProperties *ptr) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetOutputProperties, index, 0, ptr); }
 			inline VstPlugCategory GetPlugCategory() { return (VstPlugCategory)Dispatch(effGetPlugCategory); }
 			// get position of dsp buffer. (to verify that it is "on time")
-			inline long DECLARE_VST_DEPRECATED(GetCurrentPosition)() { return Dispatch(effGetCurrentPosition); }
+			inline VstInt32 DECLARE_VST_DEPRECATED(GetCurrentPosition)() { return Dispatch(effGetCurrentPosition); }
 			// get the address of the dsp buffer.
 			inline float* DECLARE_VST_DEPRECATED(GetDestinationBuffer)() { return reinterpret_cast<float*>(Dispatch(effGetDestinationBuffer)); }
-			inline bool OfflineNotify(VstAudioFile* ptr, long numAudioFiles, bool start) { return (bool)Dispatch(effOfflineNotify, start, numAudioFiles, ptr); }
-			inline bool OfflinePrepare(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflinePrepare, 0, count, ptr); }
-			inline bool OfflineRun(VstOfflineTask *ptr, long count) { return (bool)Dispatch(effOfflineRun, 0, count, ptr); }
+			inline bool OfflineNotify(VstAudioFile* ptr, VstInt32 numAudioFiles, bool start) { return (bool)Dispatch(effOfflineNotify, start, numAudioFiles, ptr); }
+			inline bool OfflinePrepare(VstOfflineTask *ptr, VstInt32 count) { return (bool)Dispatch(effOfflinePrepare, 0, count, ptr); }
+			inline bool OfflineRun(VstOfflineTask *ptr, VstInt32 count) { return (bool)Dispatch(effOfflineRun, 0, count, ptr); }
 			/// This function is for Offline processing.
 			inline bool ProcessVarIo(VstVariableIo* varIo) { return (bool)Dispatch(effProcessVarIo, 0, 0, varIo); }
 			inline bool SetSpeakerArrangement(VstSpeakerArrangement* pluginInput, VstSpeakerArrangement* pluginOutput) { return (bool)Dispatch(effSetSpeakerArrangement, 0, (VstIntPtr)pluginInput, pluginOutput); }
-			inline void DECLARE_VST_DEPRECATED(SetBlockSizeAndSampleRate)(long blockSize, float sampleRate) { Dispatch(effSetBlockSizeAndSampleRate, 0, blockSize, 0, sampleRate); }
+			inline void DECLARE_VST_DEPRECATED(SetBlockSizeAndSampleRate)(VstInt32 blockSize, float sampleRate) { Dispatch(effSetBlockSizeAndSampleRate, 0, blockSize, 0, sampleRate); }
 			inline bool SetBypass(bool onOff) { return (bool)Dispatch(effSetBypass, 0, onOff); }
 			// ptr is a string up to kVstMaxEffectNameLen chars + \0 delimiter
 			inline bool GetEffectName(char *ptr) { return (bool)Dispatch(effGetEffectName, 0, 0, ptr); }
@@ -492,52 +492,52 @@ namespace seib {
 			inline bool GetVendorString(char *ptr) { return (bool)Dispatch(effGetVendorString, 0, 0, ptr); }
 			// ptr is a string up to kVstMaxProductStrLen chars + \0 delimiter
 			inline bool GetProductString(char *ptr) { return (bool)Dispatch(effGetProductString, 0, 0, ptr); }
-			inline long GetVendorVersion() { return Dispatch(effGetVendorVersion); }
-			inline long VendorSpecific(long index, long value, void *ptr, float opt) { return Dispatch(effVendorSpecific, index, value, ptr, opt); }
+			inline VstInt32 GetVendorVersion() { return Dispatch(effGetVendorVersion); }
+			inline VstInt32 VendorSpecific(VstInt32 index, VstInt32 value, void *ptr, float opt) { return Dispatch(effVendorSpecific, index, value, ptr, opt); }
 			//returns 0 -> don't know, 1 -> yes, -1 -> no. Use the PlugCanDo's strings.
-			inline long CanDoInt(const char *ptr) { return Dispatch(effCanDo, 0, 0, (void *)ptr); }
+			inline VstInt32 CanDoInt(const char *ptr) { return Dispatch(effCanDo, 0, 0, (void *)ptr); }
 			inline bool CanDo(const char *ptr) { return (Dispatch(effCanDo, 0, 0, (void *)ptr)>0); }
-			inline long GetTailSize() { return Dispatch(effGetTailSize); }
+			inline VstInt32 GetTailSize() { return Dispatch(effGetTailSize); }
 			// Recursive Idle() call for plugin. bNeedIdle is set to true when the plugin calls "pHost->OnNeedIdle()"
 			inline void DECLARE_VST_DEPRECATED(Idle)() { VstInt32 l=0; if (bNeedIdle) l = Dispatch(effIdle); if (!l) bNeedIdle=false; }
-			inline long DECLARE_VST_DEPRECATED(GetIcon)() { return Dispatch(effGetIcon); }
-			inline long DECLARE_VST_DEPRECATED(SetViewPosition)(long x, long y) { return Dispatch(effSetViewPosition, x, y); }
-			inline long GetParameterProperties(long index, VstParameterProperties* ptr) { return Dispatch(effGetParameterProperties, index, 0, ptr); }
+			inline VstInt32 DECLARE_VST_DEPRECATED(GetIcon)() { return Dispatch(effGetIcon); }
+			inline VstInt32 DECLARE_VST_DEPRECATED(SetViewPosition)(VstInt32 x, VstInt32 y) { return Dispatch(effSetViewPosition, x, y); }
+			inline VstInt32 GetParameterProperties(VstInt32 index, VstParameterProperties* ptr) { return Dispatch(effGetParameterProperties, index, 0, ptr); }
 			// Seems something related to MAC ( to be used with editkey )
 			inline bool DECLARE_VST_DEPRECATED(KeysRequired)() { return (bool)Dispatch(effKeysRequired); }
-			inline long GetVstVersion() { VstInt32 v=Dispatch(effGetVstVersion); if (v > 1000) return v; else return (v)?2000:1000; }
+			inline VstInt32 GetVstVersion() { VstInt32 v=Dispatch(effGetVstVersion); if (v > 1000) return v; else return (v)?2000:1000; }
 		// VST 2.1 extensions
 			// Seems something related to MAC ( to be used with editkey )
-			inline long KeyDown(VstKeyCode &keyCode) { return Dispatch(effEditKeyDown, keyCode.character, keyCode.virt, 0, keyCode.modifier); }
+			inline VstInt32 KeyDown(VstKeyCode &keyCode) { return Dispatch(effEditKeyDown, keyCode.character, keyCode.virt, 0, keyCode.modifier); }
 			// Seems something related to MAC ( to be used with editkey )
-			inline long KeyUp(VstKeyCode &keyCode) { return Dispatch(effEditKeyUp, keyCode.character, keyCode.virt, 0, keyCode.modifier); }
-			inline void SetKnobMode(long value) { Dispatch(effSetEditKnobMode, 0, value); }
-			inline long GetMidiProgramName(long channel, MidiProgramName* midiProgramName) { return Dispatch(effGetMidiProgramName, channel, 0, midiProgramName); }
-			inline long GetCurrentMidiProgram (long channel, MidiProgramName* currentProgram) { return Dispatch(effGetCurrentMidiProgram, channel, 0, currentProgram); }
-			inline long GetMidiProgramCategory (long channel, MidiProgramCategory* category) { return Dispatch(effGetMidiProgramCategory, channel, 0, category); }
-			inline long HasMidiProgramsChanged (long channel) { return Dispatch(effHasMidiProgramsChanged, channel); }
-			inline long GetMidiKeyName(long channel, MidiKeyName* keyName) { return Dispatch(effGetMidiKeyName, channel, 0, keyName); }
+			inline VstInt32 KeyUp(VstKeyCode &keyCode) { return Dispatch(effEditKeyUp, keyCode.character, keyCode.virt, 0, keyCode.modifier); }
+			inline void SetKnobMode(VstInt32 value) { Dispatch(effSetEditKnobMode, 0, value); }
+			inline VstInt32 GetMidiProgramName(VstInt32 channel, MidiProgramName* midiProgramName) { return Dispatch(effGetMidiProgramName, channel, 0, midiProgramName); }
+			inline VstInt32 GetCurrentMidiProgram (VstInt32 channel, MidiProgramName* currentProgram) { return Dispatch(effGetCurrentMidiProgram, channel, 0, currentProgram); }
+			inline VstInt32 GetMidiProgramCategory (VstInt32 channel, MidiProgramCategory* category) { return Dispatch(effGetMidiProgramCategory, channel, 0, category); }
+			inline VstInt32 HasMidiProgramsChanged (VstInt32 channel) { return Dispatch(effHasMidiProgramsChanged, channel); }
+			inline VstInt32 GetMidiKeyName(VstInt32 channel, MidiKeyName* keyName) { return Dispatch(effGetMidiKeyName, channel, 0, keyName); }
 			inline bool BeginSetProgram() { return (bool)Dispatch(effBeginSetProgram); }
 			inline bool EndSetProgram() { return (bool)Dispatch(effEndSetProgram); }
 		// VST 2.3 Extensions
 			inline bool GetSpeakerArrangement(VstSpeakerArrangement** pluginInput, VstSpeakerArrangement** pluginOutput) const { return (bool)const_cast<CEffect*>(this)->Dispatch(effGetSpeakerArrangement, 0, (VstIntPtr)pluginInput, pluginOutput); }
 			//Called in offline (non RealTime) processing before process is called, indicates how many samples will be processed.	Actually returns value.
-			inline long SetTotalSampleToProcess (long value) { return Dispatch(effSetTotalSampleToProcess, 0, value); }
+			inline VstInt32 SetTotalSampleToProcess (VstInt32 value) { return Dispatch(effSetTotalSampleToProcess, 0, value); }
 			//Points to a char buffer of size 64, which is to be filled with the name of the plugin including the terminating 0.
-			inline long GetNextShellPlugin(char *name) { return Dispatch(effShellGetNextPlugin, 0, 0, name); }
+			inline VstInt32 GetNextShellPlugin(char *name) { return Dispatch(effShellGetNextPlugin, 0, 0, name); }
 			//Called one time before the start of process call.
-			inline long StartProcess() { return Dispatch(effStartProcess); }
-			inline long StopProcess() { return Dispatch(effStopProcess); }
-			inline bool SetPanLaw(long type, float val) { return (bool)Dispatch(effSetPanLaw, 0, type, 0, val); }
+			inline VstInt32 StartProcess() { return Dispatch(effStartProcess); }
+			inline VstInt32 StopProcess() { return Dispatch(effStopProcess); }
+			inline bool SetPanLaw(VstInt32 type, float val) { return (bool)Dispatch(effSetPanLaw, 0, type, 0, val); }
 			//	0 : 	Not implemented.
 			//	1 : 	The bank/program can be loaded.
 			//-1  : 	The bank/program can't be loaded.
-			inline long BeginLoadBank(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadBank, 0, 0, ptr); }
-			inline long BeginLoadProgram(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadProgram, 0, 0, ptr); }
+			inline VstInt32 BeginLoadBank(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadBank, 0, 0, ptr); }
+			inline VstInt32 BeginLoadProgram(VstPatchChunkInfo* ptr) { return Dispatch(effBeginLoadProgram, 0, 0, ptr); }
 		// VST 2.4 Extensions
 			inline bool SetProcessPrecision(VstProcessPrecision precision)	{ return Dispatch(effSetProcessPrecision,0,precision,0,0); }
-			inline long	GetNumMidiInputChannels() { return Dispatch(effGetNumMidiInputChannels,0,0,0,0); }
-			inline long	GetNumMidiOutputChannels() { return Dispatch(effGetNumMidiOutputChannels,0,0,0,0); }
+			inline VstInt32	GetNumMidiInputChannels() { return Dispatch(effGetNumMidiInputChannels,0,0,0,0); }
+			inline VstInt32	GetNumMidiOutputChannels() { return Dispatch(effGetNumMidiOutputChannels,0,0,0,0); }
 		};
 
 		/*****************************************************************************/
@@ -555,8 +555,8 @@ namespace seib {
 			static VstTimeInfo vstTimeInfo;
 
 		protected:
-			long lBlockSize;
-			static int quantization;
+			VstInt32 lBlockSize;
+			static VstInt32 quantization;
 			static bool useJBridge;
 			static bool usePsycleVstBridge;
 			bool loadingEffect;
@@ -578,45 +578,45 @@ namespace seib {
 			virtual CEffect * CreateWrapper(AEffect *effect) { return new CEffect(effect); }
 			// The base class function gives kVstPpqPosValid, kVstBarsValid, kVstClockValid, kVstSmpteValid, and kVstNanosValid
 			// Ensure that samplePos, sampleRate, tempo, and timesigNumerator/Denominator are correct before calling it.
-			virtual void CalcTimeInfo(long lMask = -1);
+			virtual void CalcTimeInfo(VstInt32 lMask = -1);
 		public:
 			virtual void Log(std::string message) {};
 			virtual void SetSampleRate(float fSampleRate=44100.);
-			virtual void SetBlockSize(long lSize=1024);
-			virtual void SetTimeSignature(long numerator, long denominator);
+			virtual void SetBlockSize(VstInt32 lSize=1024);
+			virtual void SetTimeSignature(VstInt32 numerator, VstInt32 denominator);
 			virtual float GetSampleRate() { return vstTimeInfo.sampleRate; }
-			virtual long GetBlockSize() { return lBlockSize; }
+			virtual VstInt32 GetBlockSize() { return lBlockSize; }
 
 			// text is a string up to kVstMaxVendorStrLen chars + \0 delimiter
 			virtual bool OnGetVendorString(char *text) { strcpy(text, "Seib-Psycledelics"); return true; }
 			// text is a string up to kVstMaxProductStrLen chars + \0 delimiter
 			virtual bool OnGetProductString(char *text) { strcpy(text, "Default CVSTHost."); return true; }
-			virtual long OnGetHostVendorVersion() { return 1612; } // 1.16l
-			virtual long OnHostVendorSpecific(CEffect &pEffect, long lArg1, long lArg2, void* ptrArg, float floatArg) { return 0; }
-			virtual long OnGetVSTVersion() { return kVstVersion; }
+			virtual VstInt32 OnGetHostVendorVersion() { return 1612; } // 1.16l
+			virtual VstInt32 OnHostVendorSpecific(CEffect &pEffect, VstInt32 lArg1, VstInt32 lArg2, void* ptrArg, float floatArg) { return 0; }
+			virtual VstInt32 OnGetVSTVersion() { return kVstVersion; }
 
 			// Plugin calls this function when it has changed one parameter (from the GUI)in order for the host to record it.
-			virtual void OnSetParameterAutomated(CEffect &pEffect, long index, float value) { pEffect.OnSetParameterAutomated(index,value); }
+			virtual void OnSetParameterAutomated(CEffect &pEffect, VstInt32 index, float value) { pEffect.OnSetParameterAutomated(index,value); }
 			// onCurrentId is used normally when loading Shell type plugins. This is taken care in the AudioMaster callback.
 			// the function here is called in any other cases.
-			virtual long OnCurrentId(CEffect &pEffect) { return pEffect.uniqueId(); }
+			virtual VstInt32 OnCurrentId(CEffect &pEffect) { return pEffect.uniqueId(); }
 			// This callback forces an inmediate "EditIdle()" call for the plugins.
 			virtual void OnIdle(CEffect &pEffect);
-			virtual bool DECLARE_VST_DEPRECATED(OnInputConnected)(CEffect &pEffect, long input) { return pEffect.IsInputConnected(input); }
-			virtual bool DECLARE_VST_DEPRECATED(OnOutputConnected)(CEffect &pEffect, long output) { return pEffect.IsOutputConnected(output); }
-			virtual void DECLARE_VST_DEPRECATED(OnWantEvents)(CEffect &pEffect, long filter);
+			virtual bool DECLARE_VST_DEPRECATED(OnInputConnected)(CEffect &pEffect, VstInt32 input) { return pEffect.IsInputConnected(input); }
+			virtual bool DECLARE_VST_DEPRECATED(OnOutputConnected)(CEffect &pEffect, VstInt32 output) { return pEffect.IsOutputConnected(output); }
+			virtual void DECLARE_VST_DEPRECATED(OnWantEvents)(CEffect &pEffect, VstInt32 filter);
 			//\todo : investigate if the "flags" of vstTimeInfo should be per-plugin, instead of per-host.
-			virtual VstTimeInfo *OnGetTime(CEffect &pEffect, long lMask) { CalcTimeInfo(lMask); return &vstTimeInfo; }
+			virtual VstTimeInfo *OnGetTime(CEffect &pEffect, VstInt32 lMask) { CalcTimeInfo(lMask); return &vstTimeInfo; }
 			virtual bool OnProcessEvents(CEffect &pEffect, VstEvents* events) { return false; }
 			// aeffectx.hpp: "VstTimenfo* in <ptr>, filter in <value>, not supported". Not Implemented in the VST SDK.
-			virtual bool DECLARE_VST_DEPRECATED(OnSetTime)(CEffect &pEffect, long filter, VstTimeInfo *timeInfo) { return false; }
+			virtual bool DECLARE_VST_DEPRECATED(OnSetTime)(CEffect &pEffect, VstInt32 filter, VstTimeInfo *timeInfo) { return false; }
 			//  pos in Sample frames, return bpm* 10000
-			virtual long DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, long pos) { return 0; }
-			virtual long DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(CEffect &pEffect) { return 0; }
+			virtual VstInt32 DECLARE_VST_DEPRECATED(OnTempoAt)(CEffect &pEffect, VstInt32 pos) { return 0; }
+			virtual VstInt32 DECLARE_VST_DEPRECATED(OnGetNumAutomatableParameters)(CEffect &pEffect) { return 0; }
 			//	0 :  	Not implemented.
 			//	1 : 	Full single float precision is maintained in automation.
 			//other : 	The integer value that represents +1.0.
-			virtual long DECLARE_VST_DEPRECATED(OnGetParameterQuantization)(CEffect &pEffect) { return quantization; }
+			virtual VstInt32 DECLARE_VST_DEPRECATED(OnGetParameterQuantization)(CEffect &pEffect) { return quantization; }
 			// Tell host numInputs and/or numOutputs and/or initialDelay has changed.
 			// The host could call a suspend (if the plugin was enabled (in resume state)) and then ask for getSpeakerArrangement
 			// and/or check the numInputs and numOutputs and initialDelay and then call a resume.
@@ -625,20 +625,20 @@ namespace seib {
 			// You should have a continuous call to CEffect::Idle() on your Idle Call.
 			// CVSTHost::OnNeedIdle() and CEffect::Idle() take care of calling only when needed.
 			virtual bool DECLARE_VST_DEPRECATED(OnNeedIdle)(CEffect &pEffect);
-			virtual bool OnSizeWindow(CEffect &pEffect, long width, long height) { return pEffect.OnSizeEditorWindow(width, height); }
+			virtual bool OnSizeWindow(CEffect &pEffect, VstInt32 width, VstInt32 height) { return pEffect.OnSizeEditorWindow(width, height); }
 			// Will cause application to call AudioEffect's  setSampleRate/setBlockSize method (when implemented).
-			virtual long OnUpdateSampleRate(CEffect &pEffect){
+			virtual VstInt32 OnUpdateSampleRate(CEffect &pEffect){
 				if (!loadingEffect) pEffect.SetSampleRate(vstTimeInfo.sampleRate,true);
 				return vstTimeInfo.sampleRate; }
-			virtual long OnUpdateBlockSize(CEffect &pEffect) {
+			virtual VstInt32 OnUpdateBlockSize(CEffect &pEffect) {
 				pEffect.SetSampleRate(vstTimeInfo.sampleRate,true);
 				return lBlockSize; }
 			//	Returns the ASIO input latency values.
-			virtual long OnGetInputLatency(CEffect &pEffect) { return 0; }
+			virtual VstInt32 OnGetInputLatency(CEffect &pEffect) { return 0; }
 			// Returns the ASIO output latency values. To be used mostly for GUI sync with audio.
-			virtual long OnGetOutputLatency(CEffect &pEffect) { return 0; }
-			virtual CEffect *DECLARE_VST_DEPRECATED(GetPreviousPlugIn)(CEffect &pEffect,int pinIndex);
-			virtual CEffect *DECLARE_VST_DEPRECATED(GetNextPlugIn)(CEffect &pEffect, int pinIndex);
+			virtual VstInt32 OnGetOutputLatency(CEffect &pEffect) { return 0; }
+			virtual CEffect *DECLARE_VST_DEPRECATED(GetPreviousPlugIn)(CEffect &pEffect,VstInt32 pinIndex);
+			virtual CEffect *DECLARE_VST_DEPRECATED(GetNextPlugIn)(CEffect &pEffect, VstInt32 pinIndex);
 			// asks the host if it will use this plugin with "processReplacing"
 			virtual bool DECLARE_VST_DEPRECATED(OnWillProcessReplacing)(CEffect &pEffect) { return false; }
 			//	0 :  	Not supported.
@@ -647,13 +647,13 @@ namespace seib {
 			//	3 : 	Currently in 'sequencer' thread or irq (midi, timer etc).
 			//	4 : 	Currently offline processing and thus in user thread.
 			//other : 	Not defined, but probably pre-empting user thread.
-			virtual long OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
+			virtual VstInt32 OnGetCurrentProcessLevel(CEffect &pEffect) { return 0; }
 			//	kVstAutomationUnsupported 	not supported by Host
 			//	kVstAutomationOff 	off
 			//	kVstAutomationRead 	read
 			//	kVstAutomationWrite 	write
 			//	kVstAutomationReadWrite 	read and write
-			virtual long OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
+			virtual VstInt32 OnGetAutomationState(CEffect &pEffect) { return kVstAutomationUnsupported; }
 			// As already seen, a single VstOfflineTask structure can be used both to read an existing file, and to overwrite it.
 			// Moreover, the offline specification states that it is possible, at any time, to read both the original samples
 			// and the new ones (the "overwritten" samples). This is the reason for the readSource parameter:
@@ -661,15 +661,15 @@ namespace seib {
 			virtual bool OnOfflineRead(CEffect &pEffect, VstOfflineTask* offline, VstOfflineOption option, bool readSource = true) { return false; }
 			virtual bool OnOfflineWrite(CEffect &pEffect, VstOfflineTask* offline, VstOfflineOption option) { return false; }
 			// The parameter numNewAudioFiles is the number of files that the Plug-In want to create. 
-			virtual bool OnOfflineStart(CEffect &pEffect, VstAudioFile* audioFiles, long numAudioFiles, long numNewAudioFiles) { return false; }
-			virtual long OnOfflineGetCurrentPass(CEffect &pEffect) { return 0; }
-			virtual long OnOfflineGetCurrentMetaPass(CEffect &pEffect) { return 0; }
+			virtual bool OnOfflineStart(CEffect &pEffect, VstAudioFile* audioFiles, VstInt32 numAudioFiles, VstInt32 numNewAudioFiles) { return false; }
+			virtual VstInt32 OnOfflineGetCurrentPass(CEffect &pEffect) { return 0; }
+			virtual VstInt32 OnOfflineGetCurrentMetaPass(CEffect &pEffect) { return 0; }
 			// Used for variable I/O processing. ( offline processing )
 			virtual void DECLARE_VST_DEPRECATED(OnSetOutputSampleRate)(CEffect &pEffect, float sampleRate) { return; }
 			virtual VstSpeakerArrangement* DECLARE_VST_DEPRECATED(OnGetOutputSpeakerArrangement)(CEffect &pEffect) { return pEffect.OnHostOutputSpeakerArrangement(); }
 			// Specification says 0 -> don't know, 1 ->yes, -1 : no, but audioeffectx.cpp says "!= 0 -> true", and since plugins use audioeffectx...
 			virtual bool OnCanDo(CEffect &pEffect,const char *ptr);
-			virtual long OnGetHostLanguage() { return kVstLangEnglish; }
+			virtual VstInt32 OnGetHostLanguage() { return kVstLangEnglish; }
 			virtual void * DECLARE_VST_DEPRECATED(OnOpenWindow)(CEffect &pEffect, VstWindow* window) { return pEffect.OnOpenWindow(window); }
 			virtual bool DECLARE_VST_DEPRECATED(OnCloseWindow)(CEffect &pEffect, VstWindow* window) { return pEffect.OnCloseWindow(window); }
 			virtual void * OnGetDirectory(CEffect &pEffect) { return pEffect.OnGetDirectory(); }
@@ -677,8 +677,8 @@ namespace seib {
 			virtual bool OnUpdateDisplay(CEffect &pEffect) { return pEffect.OnUpdateDisplay(); }
 			// VST 2.1 Extensions
 			// Notifies that "OnSetParameterAutomated" is going to be called. (once per mouse clic)
-			virtual bool OnBeginEdit(CEffect &pEffect,long index) { return pEffect.OnBeginAutomating(index); }
-			virtual bool OnEndEdit(CEffect &pEffect,long index) { return pEffect.OnEndAutomating(index); }
+			virtual bool OnBeginEdit(CEffect &pEffect,VstInt32 index) { return pEffect.OnBeginAutomating(index); }
+			virtual bool OnEndEdit(CEffect &pEffect,VstInt32 index) { return pEffect.OnEndAutomating(index); }
 			virtual bool OnOpenFileSelector (CEffect &pEffect, VstFileSelect *ptr) { return pEffect.OnOpenFileSelector(ptr); }
 			// VST 2.2 Extensions
 			virtual bool OnCloseFileSelector (CEffect &pEffect, VstFileSelect *ptr) { return pEffect.OnCloseFileSelector(ptr); }
