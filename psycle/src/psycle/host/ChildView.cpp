@@ -168,7 +168,7 @@ namespace psycle { namespace host {
 
 			if ( bmpDC != NULL )
 			{
-				char buf[100];
+				char buf[128];
 				sprintf(buf,"CChildView::~CChildView(). Deleted bmpDC (was 0x%p)\n",(void*)bmpDC);
 				TRACE(buf);
 				bmpDC->DeleteObject();
@@ -503,7 +503,7 @@ namespace psycle { namespace host {
 				GetClientRect(&rc);
 				bmpDC = new CBitmap;
 				bmpDC->CreateCompatibleBitmap(&dc,rc.right-rc.left,rc.bottom-rc.top);
-				char buf[100];
+				char buf[128];
 				sprintf(buf,"CChildView::OnPaint(). Initialized bmpDC to 0x%p\n",(void*)bmpDC);
 				TRACE(buf);
 			}

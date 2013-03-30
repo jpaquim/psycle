@@ -4,6 +4,7 @@
 #include "GearTracker.hpp"
 #include "Sampler.hpp"
 #include "PsycleConfig.hpp"
+#include "Song.hpp"
 
 namespace psycle { namespace host {
 
@@ -38,7 +39,7 @@ namespace psycle { namespace host {
 			m_interpol.AddString("Hold/Chip Interp. [Lowest quality]");
 			m_interpol.AddString("Linear Interpolation [Low quality]");
 			m_interpol.AddString("Spline Interpolation [Medium quality]");
-			m_interpol.AddString("15Tap Sinc Interp. [High quality]");
+			m_interpol.AddString("32Tap Sinc Interp. [High quality]");
 			m_interpol.SetCurSel(machine._resampler.quality());
 			m_defaultC4.SetCheck(machine.isDefaultC4());
 			if(PsycleGlobal::conf().patView().showA440) {
@@ -81,7 +82,8 @@ namespace psycle { namespace host {
 
 		void CGearTracker::OnSelchangeCombo1() 
 		{
-			machine._resampler.quality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
+			machine.ChangeResamplerQuality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 		}
 		void CGearTracker::OnDefaultC4() 
 		{

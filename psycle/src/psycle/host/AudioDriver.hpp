@@ -29,6 +29,8 @@ namespace psycle
 		class AudioDriverInfo
 		{
 		public:
+			//Don't make it longer than 32 chars (WaveIn machine saves this name)
+			AudioDriverInfo(char const *info);
 			char const *_psName;
 		};
 

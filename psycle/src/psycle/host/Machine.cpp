@@ -641,28 +641,43 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			if (_pScopeBufferL && _pScopeBufferR)
 			{
-				float *pSamplesL = samplesV[0];
-				float *pSamplesR;
-				if(samplesV.size() == 1) {
-					pSamplesR = samplesV[0];
-				}
-				else {
-					pSamplesR = samplesV[1];
-				}
-				int i = _scopePrevNumSamples & ~0x3; // & ~0x3 to ensure aligned to 16byte
-				if (i+_scopeBufferIndex >= SCOPE_BUF_SIZE)   
+				float *pL = samplesV[0];
+				float *pR = (samplesV.size() == 1) ? samplesV[0] : samplesV[1];
+
+				int i = _scopePrevNumSamples;
+				int diff = 0;
+				if (i+_scopeBufferIndex > SCOPE_BUF_SIZE)   
 				{   
-					int const amountSamples=SCOPE_BUF_SIZE-_scopeBufferIndex;
-					helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], amountSamples);
-					helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], amountSamples);
-					pSamplesL+=amountSamples;
-					pSamplesR+=amountSamples;
+					int const amountSamples=(SCOPE_BUF_SIZE-_scopeBufferIndex);
+					helpers::dsp::Mov(pL,&_pScopeBufferL[_scopeBufferIndex], amountSamples);
+					helpers::dsp::Mov(pR,&_pScopeBufferR[_scopeBufferIndex], amountSamples);
+					diff = 4 - (amountSamples&0x3); // check for alignment.
+					pL+=amountSamples;
+					pR+=amountSamples;
 					i -= amountSamples;
 					_scopeBufferIndex = 0;
 				}
-				helpers::dsp::Mov(pSamplesL,&_pScopeBufferL[_scopeBufferIndex], i);
-				helpers::dsp::Mov(pSamplesR,&_pScopeBufferR[_scopeBufferIndex], i);
+				if (diff) { //If not aligned, realign the source buffer.
+					if (i <= diff) {
+						std::memcpy(&_pScopeBufferL[_scopeBufferIndex], pL, i * sizeof(float));
+						std::memcpy(&_pScopeBufferR[_scopeBufferIndex], pR, i * sizeof(float));
+					} else {
+						std::memcpy(&_pScopeBufferL[_scopeBufferIndex], pL, diff * sizeof(float));
+						std::memcpy(&_pScopeBufferR[_scopeBufferIndex], pR, diff * sizeof(float));
+						pL+=diff;
+						pR+=diff;
+						_scopeBufferIndex += diff;
+						i-=diff;
+						helpers::dsp::Mov(pL,&_pScopeBufferL[_scopeBufferIndex], i);
+						helpers::dsp::Mov(pR,&_pScopeBufferR[_scopeBufferIndex], i);
+					}
+				}
+				else {
+					helpers::dsp::Mov(pL,&_pScopeBufferL[_scopeBufferIndex], i);
+					helpers::dsp::Mov(pR,&_pScopeBufferR[_scopeBufferIndex], i);
+				}
 				_scopeBufferIndex += i;
+				if (_scopeBufferIndex == SCOPE_BUF_SIZE) _scopeBufferIndex = 0;
 				i = 0;
 			}
 			_scopePrevNumSamples=numSamples;
@@ -961,16 +976,16 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 							{
 								vstPlug = dynamic_cast<vst::Plugin*>(Global::vsthost().LoadPlugin(sPath.c_str(),shellIdx));
 							}
-							//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
-							catch(const std::exception & e)
-							{
-								loggers::exception()(e.what());
-							}
 							catch(const std::runtime_error & e)
 							{
 								std::ostringstream s; s << typeid(e).name() << std::endl;
 								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 								loggers::exception()(s.str());
+							}
+							//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
+							catch(const std::exception & e)
+							{
+								loggers::exception()(e.what());
 							}
 							catch(...)
 							{
@@ -1163,7 +1178,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 			if (index != 0)
 			{
-				char idxtext[5];
+				char idxtext[8];
 				int divisor=16777216;
 				idxtext[4]=0;
 				for (int i=0; i < 4; i++)

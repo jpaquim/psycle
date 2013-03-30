@@ -313,15 +313,26 @@ namespace host{
 		// stheader.name Implicitely set at zero by memset
 		// stheader.res Implicitely set at zero by memset
 
+		int tune = wave.WaveTune();
+		int finetune = static_cast<int>((float)wave.WaveFineTune()*1.28);
+		if (wave.WaveSampleRate() != 8363) {
+			//correct the tuning
+			double newtune = log(double(wave.WaveSampleRate())/8363.0)/0.301029995f; /*log(2)*/
+			double floortune = floor(newtune*12.0);
+			tune += static_cast<int>(floortune);
+			finetune += static_cast<int>(floor(((tune*12)-floortune)*127));
+			if (finetune > 127) { tune--; finetune -=127; }
+		}
+
 		//All samples are 16bits in Psycle.
 		stheader.samplen = wave.WaveLength() *2;
 		stheader.loopstart = wave.WaveLoopStart() * 2;
 		stheader.looplen = (wave.WaveLoopEnd() - wave.WaveLoopStart()) * 2;
 		stheader.vol = std::min(64,wave.WaveVolume()*64);
-		stheader.finetune = ((wave.WaveFineTune()/2)-28) & 0xFF ;
+		stheader.relnote = tune;
+		stheader.finetune = finetune;
 		stheader.type = ((wave.WaveLoopType()==XMInstrument::WaveData::LoopType::NORMAL)?1:0) + 0x10; // 0x10 -> 16bits
 		stheader.pan = int(wave.PanFactor()*256)&0xFF;
-		stheader.relnote = wave.WaveTune() + 29;
 
 		Write(&stheader,sizeof(stheader));
 	}

@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include <psycle/helpers/fft.hpp>
+#include <psycle/helpers/resampler.hpp>
 
 namespace psycle {
 	namespace host {
@@ -12,9 +13,14 @@ namespace psycle {
 		class Wire;
 		class CChildView;
 
-		const int MAX_SCOPE_BANDS = 128;
-		const int SCOPE_BUF_SIZE_LOG = 12;
+		const int SCOPE_SPEC_BANDS = 256;
+		const int SCOPE_BARS_WIDTH = 256/SCOPE_SPEC_BANDS;
+		const int SCOPE_BUF_SIZE_LOG = 13;
 		const int SCOPE_BUF_SIZE = 1 << SCOPE_BUF_SIZE_LOG;
+		const COLORREF CLBARPEAK = 0xC0C0C0;
+		const COLORREF CLLEFT =    0xC06060;
+		const COLORREF CLRIGHT =   0x60C060;
+		const COLORREF CLBOTH =    0xC0C060;
 
 		/// wire monitor window.
 		class CWireDlg : public CDialog
@@ -46,13 +52,13 @@ namespace psycle {
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
 			void InitSpectrum();
-			void FillLinearFromBuffer(float inBuffer[], float outBuffer[], float vol);
+			void FillLinearFromCircularBuffer(float inBuffer[], float outBuffer[], float vol);
 			void SetMode();
 			void OnChangeSliderMode(UINT nPos);
 			void OnChangeSliderRate(UINT nPos);
 			void OnChangeSliderVol(UINT nPos);
 			void UpdateVolPerDb();
-			inline int GetY(float f);
+			inline int GetY(float f, float multi);
 
 		public:
 			Machine& srcMachine;
@@ -89,9 +95,8 @@ namespace psycle {
 			int scope_mode;
 			int scope_peak_rate;
 			int scope_osc_freq;
-			int SCOPE_SPEC_SAMPLES;
 			int scope_osc_rate;
-			int scope_spec_bands;
+			int scope_spec_samples;
 			int scope_spec_rate;
 			int scope_spec_mode;
 			int scope_phase_rate;
@@ -102,17 +107,16 @@ namespace psycle {
 			int pos;
 			//memories for vu-meter
 			float peakL,peakR;
-			float peak2L,peak2R;
 			int peakLifeL,peakLifeR;
 			//Memories for phase
 			float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
 			//Memories and precalculated values for spectrum
-			int bar_heightsl[MAX_SCOPE_BANDS];
-			int bar_heightsr[MAX_SCOPE_BANDS];
-			float sth[SCOPE_BUF_SIZE][MAX_SCOPE_BANDS];
-			float cth[SCOPE_BUF_SIZE][MAX_SCOPE_BANDS];
+			int bar_heights[SCOPE_SPEC_BANDS];
+			float sth[SCOPE_BUF_SIZE][SCOPE_SPEC_BANDS];
+			float cth[SCOPE_BUF_SIZE][SCOPE_SPEC_BANDS];
 
 			helpers::dsp::FFTClass fftSpec;
+			helpers::dsp::cubic_resampler resampler;
 			int FFTMethod;
 		};
 

@@ -1,11 +1,10 @@
 ///\file
-///\brief interface file for psycle::host::Filter.
+///\brief implementation file for psycle::host::Instrument.
 
 #include <psycle/host/detail/project.private.hpp>
 #include "Instrument.hpp"
 #include "XMInstrument.hpp"
 #include <psycle/helpers/datacompression.hpp>
-#include <psycle/helpers/filter.hpp>
 #include "Zap.hpp"
 namespace psycle
 {
@@ -78,7 +77,9 @@ namespace psycle
 				pFile->Read(ENV_F_CO);
 				pFile->Read(ENV_F_RQ);
 				pFile->Read(ENV_F_EA);
-				pFile->Read(ENV_F_TP);
+				int val;
+				pFile->Read(val);
+				ENV_F_TP = static_cast<helpers::dsp::FilterType>(val);
 
 				int pan=128;
 				pFile->Read(pan);
@@ -94,7 +95,7 @@ namespace psycle
 				pFile->Read(&numwaves, sizeof(numwaves));
 				for (int i = 0; i < numwaves; i++)
 				{
-					char Header[5];
+					char Header[8];
 
 					pFile->Read(&Header,4);
 					Header[4] = 0;
@@ -117,6 +118,7 @@ namespace psycle
 						{
 							XMInstrument::WaveData wave;
 							wave.PanFactor(pan/256.f);
+							wave.WaveSampleRate(44100);
 							UINT index;
 							pFile->Read(&index,sizeof(index));
 							pFile->Read(wave.m_WaveLength);
@@ -130,6 +132,8 @@ namespace psycle
 							pFile->Read(tmp);
 							wave.WaveTune(tmp);
 							pFile->Read(tmp);
+							//Current sample uses 100 cents. Older used +-256
+							tmp = static_cast<int>((float)tmp/2.56f);
 							wave.WaveFineTune(tmp);
 							bool doloop = false;;
 							pFile->Read(doloop);
@@ -269,7 +273,8 @@ namespace psycle
 
 				int tmp = wave.WaveTune();
 				pFile->Write(tmp);
-				tmp = wave.WaveFineTune();
+				//Current sample uses 100 cents. Older used +-256
+				tmp = static_cast<int>((float)wave.WaveFineTune()*2.56);
 				pFile->Write(tmp);
 				bool doloop = wave.m_WaveLoopType == XMInstrument::WaveData::LoopType::NORMAL;
 				pFile->Write(doloop);

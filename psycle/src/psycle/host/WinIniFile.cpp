@@ -29,9 +29,9 @@ namespace psycle
 		}
 		bool WinIniFile::OpenLocation(std::string const & location, bool create_if_missing)
 		{
-			char result[65535];
+			char result[1024];
 			filename = location;
-			bool done = GetPrivateProfileString("Version", "ConfigVersion", NULL, result, 65535, filename.c_str());
+			bool done = GetPrivateProfileString("Version", "ConfigVersion", NULL, result, 1024, filename.c_str());
 			current_group.clear();
 			if (done) version_config_ = result;
 			return done;

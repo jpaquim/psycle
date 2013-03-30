@@ -7,7 +7,6 @@
 #include <psycle/host/Player.hpp>
 #include <psycle/host/VstHost24.hpp>
 #include <psycle/host/plugincatcher.hpp>
-#include <psycle/helpers/dsp.hpp>
 
 
 namespace psycle
@@ -34,7 +33,6 @@ namespace psycle
 			//vst host has to be deleted after song.
 			delete pVstHost; pVstHost = 0;
 			delete pMacLoad; pMacLoad = 0;
-			delete pResampler; pResampler = 0;
 			delete pConfig; pConfig = 0;
 		}
 	}

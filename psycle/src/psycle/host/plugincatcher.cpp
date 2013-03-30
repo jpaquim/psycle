@@ -28,7 +28,7 @@ namespace psycle
 			DestroyPluginInfo();
 		}
 
-		bool PluginCatcher::lookupDllName(const std::string name, std::string & result, MachineType type,int& shellidx)
+		bool PluginCatcher::lookupDllName(const std::string& name, std::string & result, MachineType type, std::int32_t& shellidx)
 		{
 			std::string tmp = name;
 			std::string extension = name.substr(name.length()-4,4);
@@ -70,7 +70,7 @@ namespace psycle
 			return false;
 		}
 
-		bool PluginCatcher::TestFilename(const std::string & name, const int shellIdx)
+		bool PluginCatcher::TestFilename(const std::string & name, const std::int32_t shellIdx)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{
@@ -463,14 +463,14 @@ namespace psycle
 						{
 							vstPlug = dynamic_cast<vst::Plugin*>(Global::vsthost().LoadPlugin(fileName.c_str()));
 						}
-						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
-						catch(const std::exception & e)
+						catch(const std::runtime_error & e)
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 							pInfo->error = s.str();
 						}
-						catch(const std::runtime_error & e)
+						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
+						catch(const std::exception & e)
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
@@ -830,7 +830,8 @@ namespace psycle
 			return true;
 		}
 
-		std::string PluginCatcher::preprocessName(std::string dllName) {
+		std::string PluginCatcher::preprocessName(const std::string& dllNameOrig) {
+			std::string dllName = dllNameOrig;
 			{ // 1) remove extension
 			#if defined DIVERSALIS__OS__MICROSOFT
 				std::string::size_type const pos(dllName.find(".dll"));

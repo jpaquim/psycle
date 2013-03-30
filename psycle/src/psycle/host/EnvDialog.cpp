@@ -10,14 +10,11 @@ namespace psycle { namespace host {
 			: CDialog(CEnvDialog::IDD, pParent)
 			, thesong(song)
 		{
-			//{{AFX_DATA_INIT(CEnvDialog)
-			//}}AFX_DATA_INIT
 		}
 
 		void CEnvDialog::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CEnvDialog)
 			DDX_Control(pDX, IDC_A_A_LABEL7, m_envelope_label);
 			DDX_Control(pDX, IDC_ENVELOPE, m_envelope_slider);
 			DDX_Control(pDX, IDC_COMBO1, m_filtercombo);
@@ -43,11 +40,9 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_SLIDER3, m_a_sustain_slider);
 			DDX_Control(pDX, IDC_SLIDER2, m_a_decay_slider);
 			DDX_Control(pDX, IDC_SLIDER1, m_a_attack_slider);
-			//}}AFX_DATA_MAP
 		}
 
 		BEGIN_MESSAGE_MAP(CEnvDialog, CDialog)
-			//{{AFX_MSG_MAP(CEnvDialog)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnDrawAmpAttackSlider)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER2, OnDrawAmpDecaySlider)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER3, OnDrawAmpSustainSlider)
@@ -60,13 +55,12 @@ namespace psycle { namespace host {
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER10, OnCustomdrawSliderQ)
 			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_ENVELOPE, OnCustomdrawEnvelope)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CEnvDialog::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			int si = thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
 			// Set slider ranges
 			m_a_attack_slider.SetRange(1,65536);
@@ -82,50 +76,53 @@ namespace psycle { namespace host {
 			m_cutoff_slider.SetRange(0,127);
 			m_q_slider.SetRange(0,127);
 			
-			m_envelope_slider.SetRange(0,256); // Don't use (-,+) range. It fucks up with the "0"
+			m_envelope_slider.SetRange(-128,128);
+			//Hack to fix "0 placed on leftmost on start".
+			m_envelope_slider.SetPos(-128);
 			
 			m_filtercombo.AddString("LowPass");
 			m_filtercombo.AddString("HiPass");
 			m_filtercombo.AddString("BandPass");
 			m_filtercombo.AddString("NotchBand");
 			m_filtercombo.AddString("None");
+			m_filtercombo.AddString("LowPass/IT");
 
-			m_filtercombo.SetCurSel(thesong._pInstrument[si]->ENV_F_TP);
+			m_filtercombo.SetCurSel(pins->ENV_F_TP);
 
 			// Update sliders
-			m_a_attack_slider.SetPos(thesong._pInstrument[si]->ENV_AT);
-			m_a_decay_slider.SetPos(thesong._pInstrument[si]->ENV_DT);
-			m_a_sustain_slider.SetPos(thesong._pInstrument[si]->ENV_SL);
-			m_a_release_slider.SetPos(thesong._pInstrument[si]->ENV_RT);
+			m_a_attack_slider.SetPos(pins->ENV_AT);
+			m_a_decay_slider.SetPos(pins->ENV_DT);
+			m_a_sustain_slider.SetPos(pins->ENV_SL);
+			m_a_release_slider.SetPos(pins->ENV_RT);
 
-			m_f_attack_slider.SetPos(thesong._pInstrument[si]->ENV_F_AT);
-			m_f_decay_slider.SetPos(thesong._pInstrument[si]->ENV_F_DT);
-			m_f_sustain_slider.SetPos(thesong._pInstrument[si]->ENV_F_SL);
-			m_f_release_slider.SetPos(thesong._pInstrument[si]->ENV_F_RT);
+			m_f_attack_slider.SetPos(pins->ENV_F_AT);
+			m_f_decay_slider.SetPos(pins->ENV_F_DT);
+			m_f_sustain_slider.SetPos(pins->ENV_F_SL);
+			m_f_release_slider.SetPos(pins->ENV_F_RT);
 			
-			m_cutoff_slider.SetPos(thesong._pInstrument[si]->ENV_F_CO);
-			m_q_slider.SetPos(thesong._pInstrument[si]->ENV_F_RQ);
-			m_envelope_slider.SetPos(thesong._pInstrument[si]->ENV_F_EA+128);
+			m_cutoff_slider.SetPos(pins->ENV_F_CO);
+			m_q_slider.SetPos(pins->ENV_F_RQ);
+			m_envelope_slider.SetPos(pins->ENV_F_EA);
 			
 			return TRUE;
 		}
 
 		void CEnvDialog::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si = thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_AT = m_a_attack_slider.GetPos();
+			pins->ENV_AT = m_a_attack_slider.GetPos();
 			
 			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)thesong._pInstrument[si]->ENV_AT*0.0226757f);
+			sprintf(buffer,"%.2f ms.",(float)pins->ENV_AT*0.0226757f);
 			m_a_a_label.SetWindowText(buffer);
 
 			// Update ADSR
 			DrawADSR(
-				thesong._pInstrument[si]->ENV_AT,
-				thesong._pInstrument[si]->ENV_DT,
-				thesong._pInstrument[si]->ENV_SL,
-				thesong._pInstrument[si]->ENV_RT);
+				pins->ENV_AT,
+				pins->ENV_DT,
+				pins->ENV_SL,
+				pins->ENV_RT);
 
 			*pResult = 0;
 
@@ -133,60 +130,60 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::OnDrawAmpDecaySlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_DT = m_a_decay_slider.GetPos();
+			pins->ENV_DT = m_a_decay_slider.GetPos();
 			
 			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)thesong._pInstrument[si]->ENV_DT*0.0226757f);
+			sprintf(buffer,"%.2f ms.",(float)pins->ENV_DT*0.0226757f);
 			m_a_d_label.SetWindowText(buffer);
 
 			// Update ADSR
 			DrawADSR(
-				thesong._pInstrument[si]->ENV_AT,
-				thesong._pInstrument[si]->ENV_DT,
-				thesong._pInstrument[si]->ENV_SL,
-				thesong._pInstrument[si]->ENV_RT);
+				pins->ENV_AT,
+				pins->ENV_DT,
+				pins->ENV_SL,
+				pins->ENV_RT);
 
 			*pResult = 0;
 		}
 
 		void CEnvDialog::OnDrawAmpSustainSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_SL = m_a_sustain_slider.GetPos();
+			pins->ENV_SL = m_a_sustain_slider.GetPos();
 			
 			char buffer[12];
-			sprintf(buffer,"%d%%",thesong._pInstrument[si]->ENV_SL);
+			sprintf(buffer,"%d%%",pins->ENV_SL);
 			m_a_s_label.SetWindowText(buffer);
 
 			// Update ADSR
 			DrawADSR(
-				thesong._pInstrument[si]->ENV_AT,
-				thesong._pInstrument[si]->ENV_DT,
-				thesong._pInstrument[si]->ENV_SL,
-				thesong._pInstrument[si]->ENV_RT);
+				pins->ENV_AT,
+				pins->ENV_DT,
+				pins->ENV_SL,
+				pins->ENV_RT);
 
 			*pResult = 0;
 		}
 
 		void CEnvDialog::OnDrawAmpReleaseSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_RT = m_a_release_slider.GetPos();
+			pins->ENV_RT = m_a_release_slider.GetPos();
 			
 			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)thesong._pInstrument[si]->ENV_RT*0.0226757f);
+			sprintf(buffer,"%.2f ms.",(float)pins->ENV_RT*0.0226757f);
 			m_a_r_label.SetWindowText(buffer);
 			
 			// Update ADSR
 			DrawADSR(
-					thesong._pInstrument[si]->ENV_AT,
-					thesong._pInstrument[si]->ENV_DT,
-					thesong._pInstrument[si]->ENV_SL,
-					thesong._pInstrument[si]->ENV_RT);
+					pins->ENV_AT,
+					pins->ENV_DT,
+					pins->ENV_SL,
+					pins->ENV_RT);
 
 			*pResult = 0;
 		}
@@ -196,73 +193,73 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::OnCustomdrawFSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_F_AT = m_f_attack_slider.GetPos();
+			pins->ENV_F_AT = m_f_attack_slider.GetPos();
 			
 			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)thesong._pInstrument[si]->ENV_F_AT*0.0226757f);
+			sprintf(buffer,"%.2f ms.",(float)pins->ENV_F_AT*0.0226757f);
 			m_f_a_label.SetWindowText(buffer);
 
 			// Update filter ADSR
-			DrawADSRFil(thesong._pInstrument[si]->ENV_F_AT,
-						thesong._pInstrument[si]->ENV_F_DT,
-						thesong._pInstrument[si]->ENV_F_SL,
-						thesong._pInstrument[si]->ENV_F_RT);
+			DrawADSRFil(pins->ENV_F_AT,
+						pins->ENV_F_DT,
+						pins->ENV_F_SL,
+						pins->ENV_F_RT);
 
 			*pResult = 0;
 		}
 
 		void CEnvDialog::OnCustomdrawFSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_F_DT=m_f_decay_slider.GetPos();
+			pins->ENV_F_DT=m_f_decay_slider.GetPos();
 			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)thesong._pInstrument[si]->ENV_F_DT*0.0226757f);
+			sprintf(buffer,"%.2f ms.",(float)pins->ENV_F_DT*0.0226757f);
 			m_f_d_label.SetWindowText(buffer);
 
 			// Update filter ADSR
-			DrawADSRFil(thesong._pInstrument[si]->ENV_F_AT,
-						thesong._pInstrument[si]->ENV_F_DT,
-						thesong._pInstrument[si]->ENV_F_SL,
-						thesong._pInstrument[si]->ENV_F_RT);
+			DrawADSRFil(pins->ENV_F_AT,
+						pins->ENV_F_DT,
+						pins->ENV_F_SL,
+						pins->ENV_F_RT);
 
 			*pResult = 0;
 		}
 
 		void CEnvDialog::OnCustomdrawFSlider3(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
 			char buffer[12];
-			thesong._pInstrument[si]->ENV_F_SL=m_f_sustain_slider.GetPos();
-			sprintf(buffer,"%.0f%%",thesong._pInstrument[si]->ENV_F_SL*0.78125);
+			pins->ENV_F_SL=m_f_sustain_slider.GetPos();
+			sprintf(buffer,"%.0f%%",pins->ENV_F_SL*0.78125);
 			m_f_s_label.SetWindowText(buffer);
 
 			// Update filter ADSR
-			DrawADSRFil(thesong._pInstrument[si]->ENV_F_AT,
-						thesong._pInstrument[si]->ENV_F_DT,
-						thesong._pInstrument[si]->ENV_F_SL,
-						thesong._pInstrument[si]->ENV_F_RT);
+			DrawADSRFil(pins->ENV_F_AT,
+						pins->ENV_F_DT,
+						pins->ENV_F_SL,
+						pins->ENV_F_RT);
 
 			*pResult = 0;
 		}
 
 		void CEnvDialog::OnCustomdrawFSlider4(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_F_RT = m_f_release_slider.GetPos();
+			pins->ENV_F_RT = m_f_release_slider.GetPos();
 			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)thesong._pInstrument[si]->ENV_F_RT*0.0226757f);
+			sprintf(buffer,"%.2f ms.",(float)pins->ENV_F_RT*0.0226757f);
 			m_f_r_label.SetWindowText(buffer);
 
 			// Update filter ADSR
-			DrawADSRFil(thesong._pInstrument[si]->ENV_F_AT,
-						thesong._pInstrument[si]->ENV_F_DT,
-						thesong._pInstrument[si]->ENV_F_SL,
-						thesong._pInstrument[si]->ENV_F_RT);
+			DrawADSRFil(pins->ENV_F_AT,
+						pins->ENV_F_DT,
+						pins->ENV_F_SL,
+						pins->ENV_F_RT);
 			
 			*pResult = 0;
 		}
@@ -358,11 +355,11 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::OnCustomdrawSliderCutoff(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_F_CO = m_cutoff_slider.GetPos();
+			pins->ENV_F_CO = m_cutoff_slider.GetPos();
 			char buffer[12];
-			sprintf(buffer,"%d",thesong._pInstrument[si]->ENV_F_CO);
+			sprintf(buffer,"%d",pins->ENV_F_CO);
 			m_cutoff_label.SetWindowText(buffer);
 
 			*pResult = 0;
@@ -370,12 +367,12 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::OnCustomdrawSliderQ(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
 
-			thesong._pInstrument[si]->ENV_F_RQ = m_q_slider.GetPos();
+			pins->ENV_F_RQ = m_q_slider.GetPos();
 
 			char buffer[12];
-			sprintf(buffer,"%.0f%%",thesong._pInstrument[si]->ENV_F_RQ*0.78740);
+			sprintf(buffer,"%.0f%%",pins->ENV_F_RQ*0.78740);
 			m_q_label.SetWindowText(buffer);
 
 			*pResult = 0;
@@ -383,16 +380,16 @@ namespace psycle { namespace host {
 
 		void CEnvDialog::OnSelchangeCombo1() 
 		{
-			int si=thesong.instSelected;
-			thesong._pInstrument[si]->ENV_F_TP = m_filtercombo.GetCurSel();
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
+			pins->ENV_F_TP = static_cast<dsp::FilterType>(m_filtercombo.GetCurSel());
 		}
 
 		void CEnvDialog::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			int si=thesong.instSelected;
-			thesong._pInstrument[si]->ENV_F_EA = m_envelope_slider.GetPos()-128;
+			Instrument* pins = thesong._pInstrument[thesong.instSelected];
+			pins->ENV_F_EA = m_envelope_slider.GetPos();
 			char buffer[12];
-			sprintf(buffer,"%.0f",(float)thesong._pInstrument[si]->ENV_F_EA*0.78125f);
+			sprintf(buffer,"%.0f",(float)pins->ENV_F_EA*0.78125f);
 			m_envelope_label.SetWindowText(buffer);
 			
 			*pResult = 0;

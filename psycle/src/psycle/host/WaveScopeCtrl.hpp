@@ -3,6 +3,7 @@
 #include "Psycle.hpp"
 
 #include <psycle/host/XMInstrument.hpp>
+#include <psycle/helpers/resampler.hpp>
 
 namespace psycle { namespace host {
 
@@ -19,6 +20,7 @@ public:
 
 protected:
 	XMInstrument::WaveData* m_pWave;
+	helpers::dsp::cubic_resampler resampler;
 	CPen cpen_lo;
 	CPen cpen_med;
 	CPen cpen_hi;

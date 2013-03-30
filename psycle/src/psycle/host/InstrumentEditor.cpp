@@ -45,6 +45,7 @@ namespace psycle { namespace host {
 			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER1, OnCustomdrawSlider1)			
 			ON_EN_CHANGE(IDC_LOCKINSTNUMBER, OnChangeLockInst)
 			ON_EN_CHANGE(IDC_INSTNAME, OnChangeInstname)
+			ON_EN_CHANGE(IDC_SAMPLERATE, OnEnChangeSamplerate)
 			ON_CBN_SELCHANGE(IDC_NNA_COMBO, OnSelchangeNnaCombo)
 			ON_BN_CLICKED(IDC_PREV_INSTRUMENT, OnPrevInstrument)
 			ON_BN_CLICKED(IDC_NEXT_INSTRUMENT, OnNextInstrument)
@@ -70,10 +71,11 @@ namespace psycle { namespace host {
 			
 			cando=false;
 			
-			m_volumebar.SetRange(0,512);
-			m_finetune.SetRange(0,512);	// Don't use (-,+) range. It fucks up with the "0"
-
 			m_instname.SetLimitText(31);
+			m_volumebar.SetRange(0,400);
+			m_finetune.SetRange(-100,100);
+			//Hack to fix "0 placed on leftmost on start".
+			m_finetune.SetPos(-100);
 			
 			m_panslider.SetRange(0,256);
 			
@@ -87,7 +89,7 @@ namespace psycle { namespace host {
 		}
 
 		//////////////////////////////////////////////////////////////////////
-		// Auxiliar members
+		// Auxiliary members
 
 		void CInstrumentEditor::WaveUpdate()
 		{
@@ -138,7 +140,10 @@ namespace psycle { namespace host {
 			
 			sprintf(buffer,"%d",m_panslider.GetPos());
 			m_panlabel.SetWindowText(buffer);
-			
+
+			CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
+			sprintf(buffer,"%d",wave.WaveSampleRate());
+			cedit->SetWindowText(buffer);
 
 			bool const ils = pins->_loop;
 
@@ -149,7 +154,7 @@ namespace psycle { namespace host {
 
 			// Volume bar
 			m_volumebar.SetPos(wave.WaveGlobVolume()*100);
-			m_finetune.SetPos(wave.WaveFineTune()+256);
+			m_finetune.SetPos(wave.WaveFineTune());
 
 			UpdateNoteLabel();	
 			
@@ -210,11 +215,17 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			int si=pSong->instSelected;
-			char buffer[8];
+			char buffer[16];
 			if (pSong->samples.IsEnabled(si)) {
 				pSong->samples.get(si).WaveGlobVolume(m_volumebar.GetPos()*0.01f);
-				
-				sprintf(buffer,"%d%%",m_volumebar.GetPos());
+				if(m_volumebar.GetPos()==0) {
+					sprintf(buffer,"-inf dB");
+				}
+				else
+				{
+					float db = 20 * log10(m_volumebar.GetPos()*0.01f);
+					sprintf(buffer,"%.1f dB",db);
+				}
 				m_volabel.SetWindowText(buffer);
 			}
 			*pResult = 0;
@@ -258,6 +269,17 @@ namespace psycle { namespace host {
 			{
 				pParentMain->UpdateComboIns();
 				pParentMain->RedrawGearRackList();
+			}
+		}
+		void CInstrumentEditor::OnEnChangeSamplerate()
+		{
+			int si=pSong->instSelected;
+			char tmp[40];
+			if ( !initializingDialog  && pSong->samples.IsEnabled(si)) {
+				XMInstrument::WaveData& wave = pSong->samples.get(si);
+				CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
+				cedit->GetWindowText(tmp,40);
+				wave.WaveSampleRate(atoi(tmp));
 			}
 		}
 
@@ -305,13 +327,23 @@ namespace psycle { namespace host {
 
 		void CInstrumentEditor::OnCustomdrawPanslider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			char buffer[8];
+			char buffer[16];
 			int si=pSong->instSelected;
 			if (pSong->samples.IsEnabled(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				wave.PanFactor(m_panslider.GetPos()/256.f);
-				
-				sprintf(buffer,"%d%",m_panslider.GetPos());
+				switch(m_panslider.GetPos())
+				{
+				case 0: sprintf(buffer,"||%02d  ",m_panslider.GetPos()); break;
+				case 128: sprintf(buffer," |%02d| ",m_panslider.GetPos()); break;
+				case 256: sprintf(buffer,"  %02d||",m_panslider.GetPos()); break;
+				default:
+					if ( m_panslider.GetPos() < 64) sprintf(buffer,"<<%02d  ",m_panslider.GetPos());
+					else if ( m_panslider.GetPos() < 128) sprintf(buffer," <%02d< ",m_panslider.GetPos());
+					else if ( m_panslider.GetPos() <= 192) sprintf(buffer," >%02d> ",m_panslider.GetPos());
+					else sprintf(buffer,"  %02d>>",m_panslider.GetPos());
+					break;
+				}
 				m_panlabel.SetWindowText(buffer);
 			}
 			*pResult = 0;
@@ -418,14 +450,14 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnCustomdrawSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
 			int si=pSong->instSelected;
-			char buffer[8];
+			char buffer[16];
 			if (pSong->samples.IsEnabled(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				
 				if(cando)
-					wave.WaveFineTune(m_finetune.GetPos()-256);
+					wave.WaveFineTune(m_finetune.GetPos());
 				
-				sprintf(buffer,"%d",wave.WaveFineTune());
+				sprintf(buffer,"%d ct.",wave.WaveFineTune());
 				m_finelabel.SetWindowText(buffer);
 			}
 			*pResult = 0;

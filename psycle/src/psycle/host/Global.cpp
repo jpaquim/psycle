@@ -44,7 +44,6 @@ namespace psycle
 	{
 		Configuration * Global::pConfig(0);
 		Song * Global::pSong(0);
-		helpers::dsp::resampler * Global::pResampler(0);
 		Player * Global::pPlayer(0);
 		vst::Host * Global::pVstHost(0);
 		MachineLoader * Global::pMacLoad(0);

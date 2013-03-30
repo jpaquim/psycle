@@ -4,6 +4,7 @@
 #include "XMSamplerUIGeneral.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
+#include "Song.hpp"
 
 namespace psycle { namespace host {
 
@@ -22,14 +23,14 @@ namespace psycle { namespace host {
 		DDX_Control(pDX, IDC_XMPOLYLABEL, m_polylabel);
 		DDX_Control(pDX, IDC_COMMANDINFO, m_ECommandInfo);
 		DDX_Control(pDX, IDC_CHECK1, m_bAmigaSlides);
-		DDX_Control(pDX, IDC_CHECK2, m_ckFilter);
+		DDX_Control(pDX, IDC_FILTERED, m_ckFilter);
 		DDX_Control(pDX, IDC_XMPANNINGMODE, m_cbPanningMode);
 	}
 	BEGIN_MESSAGE_MAP(XMSamplerUIGeneral, CPropertyPage)
 		ON_WM_HSCROLL()
 		ON_CBN_SELENDOK(IDC_XMINTERPOL, OnCbnSelendokXminterpol)
 		ON_BN_CLICKED(IDC_CHECK1, OnBnClickedAmigaSlide)
-		ON_BN_CLICKED(IDC_CHECK2, OnBnClickedFilter)
+		ON_BN_CLICKED(IDC_FILTERED, OnBnClickedFilter)
 		ON_CBN_SELENDOK(IDC_XMPANNINGMODE, OnCbnSelendokXmpanningmode)
 	END_MESSAGE_MAP()
 
@@ -47,7 +48,7 @@ namespace psycle { namespace host {
 		m_interpol.AddString("Hold/Chip Interp. [Lowest quality]");
 		m_interpol.AddString("Linear Interpolation [Low quality]");
 		m_interpol.AddString("Spline Interpolation [Medium quality]");
-		m_interpol.AddString("15Tap Sinc Interp. [High quality]");
+		m_interpol.AddString("32Tap Sinc Interp. [High quality]");
 		m_interpol.SetCurSel(_pMachine->ResamplerQuality());
 
 
@@ -139,6 +140,7 @@ Ex: Pitch slide down");
 
 	void XMSamplerUIGeneral::OnCbnSelendokXminterpol()
 	{
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		_pMachine->ResamplerQuality((helpers::dsp::resampler::quality::type)m_interpol.GetCurSel());
 	}
 

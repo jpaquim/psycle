@@ -21,25 +21,26 @@ namespace host{
 	
 	int16_t const MODSongLoader::BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
 	{
+	//-8fine(also note minus one).......Note........................+7fine
 		907,900,894,887,881,875,868,862,856,850,844,838,832,826,820,814,
-			808,802,796,791,785,779,774,768,762,757,752,746,741,736,730,725,
-			720,715,709,704,699,694,689,684,678,675,670,665,660,655,651,646,
-			640,636,632,628,623,619,614,610,604,601,597,592,588,584,580,575,
-			570,567,563,559,555,551,547,543,538,535,532,528,524,520,516,513,
-			508,505,502,498,494,491,487,484,480,477,474,470,467,463,460,457,
-			453,450,447,444,441,437,434,431,428,425,422,419,416,413,410,407,
-			404,401,398,395,392,390,387,384,381,379,376,373,370,368,365,363,
-			360,357,355,352,350,347,345,342,339,337,335,332,330,328,325,323,
-			320,318,316,314,312,309,307,305,302,300,298,296,294,292,290,288,
-			285,284,282,280,278,276,274,272,269,268,266,264,262,260,258,256,
-			254,253,251,249,247,245,244,242,240,239,237,235,233,232,230,228,
-			226,225,224,222,220,219,217,216,214,212,211,209,208,206,205,203,
-			202,200,199,198,196,195,193,192,190,189,188,187,185,184,183,181,
-			180,179,177,176,175,174,172,171,170,169,167,166,165,164,163,161,
-			160,159,158,157,156,155,154,152,151,150,149,148,147,146,145,144,
-			143,142,141,140,139,138,137,136,135,134,133,132,131,130,129,128,
-			127,126,125,125,123,123,122,121,120,119,118,118,117,116,115,114,
-			113,113,112,111,110,109,109,108
+		808,802,796,791,785,779,774,768,762,757,752,746,741,736,730,725,
+		720,715,709,704,699,694,689,684,678,675,670,665,660,655,651,646,
+		640,636,632,628,623,619,614,610,604,601,597,592,588,584,580,575,
+		570,567,563,559,555,551,547,543,538,535,532,528,524,520,516,513,
+		508,505,502,498,494,491,487,484,480,477,474,470,467,463,460,457,
+		453,450,447,444,441,437,434,431,428,425,422,419,416,413,410,407,
+		404,401,398,395,392,390,387,384,381,379,376,373,370,368,365,363,
+		360,357,355,352,350,347,345,342,339,337,335,332,330,328,325,323,
+		320,318,316,314,312,309,307,305,302,300,298,296,294,292,290,288,
+		285,284,282,280,278,276,274,272,269,268,266,264,262,260,258,256,
+		254,253,251,249,247,245,244,242,240,239,237,235,233,232,230,228,
+		226,225,224,222,220,219,217,216,214,212,211,209,208,206,205,203,
+		202,200,199,198,196,195,193,192,190,189,188,187,185,184,183,181,
+		180,179,177,176,175,174,172,171,170,169,167,166,165,164,163,161,
+		160,159,158,157,156,155,154,152,151,150,149,148,147,146,145,144,
+		143,142,141,140,139,138,137,136,135,134,133,132,131,130,129,128,
+		127,126,125,125,123,123,122,121,120,119,118,118,117,116,115,114,
+		113,113,112,111,110,109,109,108
 	};
 
 
@@ -84,7 +85,8 @@ namespace host{
 		};
 		
 		XMSAMPLEHEADER _insheaderb;
-		memcpy(&_insheader,&_insheaderb+4,sizeof(XMSAMPLEFILEHEADER)-2);
+		char * _pinsheaderb = reinterpret_cast<char *>(&_insheaderb)+4;
+		memcpy(_pinsheaderb,&_insheader,sizeof(XMSAMPLEFILEHEADER)-2);
 		SetEnvelopes(instr,_insheaderb);
 
 		std::uint32_t iSampleCount(0);
@@ -770,7 +772,7 @@ namespace host{
 		// read header
 		int iInstrSize = ReadInt4();
 		//assert(iInstrSize==0x107||iInstrSize==0x21); // Skale Tracker (or MadTracker or who knows which more) don't have the "reserved[20]" parameter in the XMSAMPLEHEADER
-		char sInstrName[23] = {0}; ///\todo it's probably useless to zero-initialise the array content
+		char sInstrName[23] = {0};
 		Read(sInstrName,22);
 		sInstrName[22]= 0;
 
@@ -918,7 +920,7 @@ namespace host{
 
 		_wave.WaveVolume(iVol * 2);
 		_wave.WaveTune(iRelativeNote);
-		_wave.WaveFineTune(iFineTune*2); // WaveFineTune has double range.
+		_wave.WaveFineTune(iFineTune/1.28); // WaveFineTune has +-100 range in Psycle.
 		std::string sName = cName;
 		_wave.WaveName(sName);
 		delete[] cName;
@@ -1108,8 +1110,8 @@ namespace host{
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 //		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.75f); // This is done later, when determining the number of channels.
 		song.seqBus=0;
-		// build sampler
 		m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
+		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 		// get song name
 
 		char * pSongName = AllocReadStr(20,0);
@@ -1137,9 +1139,9 @@ namespace host{
 		
 		
 		m_pSampler->IsAmigaSlides(true);
-		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.75f); }
-		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.75f); }
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); }
+		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); }
+		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); }
+		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.35f); }
 		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.35f);}
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
@@ -1493,7 +1495,7 @@ namespace host{
 		_wave.WaveVolume(m_Samples[iInstrIdx].volume * 2);
 		char tmpfine = (char)m_Samples[iInstrIdx].finetune;
 		if (tmpfine > 7 ) tmpfine -= 16;
-		_wave.WaveFineTune(tmpfine*32);
+		_wave.WaveFineTune(tmpfine*12.5);// finetune has +-100 range in Psycle
 		std::string sName = m_Samples[iInstrIdx].sampleName;
 		_wave.WaveName(sName);
 

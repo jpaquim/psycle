@@ -104,7 +104,7 @@ namespace psycle
 			return bytesWritten == numBytes;
 		}
 
-		bool RiffFile::Expect(void* pData, std::size_t numBytes)
+		bool RiffFile::Expect(const void* pData, std::size_t numBytes)
 		{
 			DWORD bytesRead;
 			unsigned char c;
@@ -254,7 +254,7 @@ namespace psycle
 			return bytesWritten == numBytes;
 		}
 
-		bool OldPsyFile::Expect(void* pData, std::size_t numBytes)
+		bool OldPsyFile::Expect(const void* pData, std::size_t numBytes)
 		{
 			unsigned char c;
 			while (numBytes-- != 0)

@@ -578,13 +578,13 @@ namespace psycle
 				/// output peak level for display
 				int _volumeMaxCounterLife;
 
-				///\todo doc
+				/// amount of samples processed in the previous work call. It is used to copy the samples to scope buffer in PreWork
 				int _scopePrevNumSamples;
-				///\todo doc
+				/// scope buffer writing position. 16byte aligned (i.e. aligned by 4).
 				int	_scopeBufferIndex;
-				///\todo doc
+				/// scope buffer, left channel
 				float *_pScopeBufferL;
-				///\todo doc
+				/// scope buffer, right channel
 				float *_pScopeBufferR;
 			///\}
 

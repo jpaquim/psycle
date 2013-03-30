@@ -68,7 +68,7 @@ void CExListBox::ShowEditBox(bool isName)
 	}
 	else {
 		myedit.SetLimitText(3);
-		char bla[10];
+		char bla[8];
 		sprintf(bla, "%.2X", Global::song().playOrder[row]);
 		myedit.SetWindowText(bla);
 	}

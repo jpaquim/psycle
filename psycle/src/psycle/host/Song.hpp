@@ -104,7 +104,7 @@ namespace psycle
 			/// ???
 			int WavAlloc(int iInstr,const char * str);
 			/// ???
-			int WavAlloc(int iInstr,bool bStereo,long iSamplesPerChan,const char * sName);
+			int WavAlloc(int iInstr,bool bStereo,std::uint32_t iSamplesPerChan,const char * sName);
 			/// ???
 			int IffAlloc(int instrument,const char * str);
 			///\}
@@ -118,12 +118,12 @@ namespace psycle
 			int GetFreeMachine() const ;
 			/// creates a new machine in this song.
 		protected:
-			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int shellIdx);
+			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,std::int32_t shellIdx);
 		public:
 			/// creates a new machine in this song.
-			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
+			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,std::int32_t shellIdx=0);
 			/// Creates a new machine, replacing an existing one.
-			bool ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx=0);
+			bool ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,std::int32_t shellIdx=0);
 			/// exchanges the position of two machines.
 			bool ExchangeMachines(int one, int two);
 			/// destroy a machine of this song.

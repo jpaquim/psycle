@@ -36,13 +36,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnLbnSelchangeSamplelist();
-	afx_msg void OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawGlobvolume(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCbnSelendokVibratotype();
-	afx_msg void OnNMCustomdrawVibratoAttack(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnCbnSelendokLoop();
 	afx_msg void OnCbnSelendokSustainloop();
 	afx_msg void OnEnChangeLoopstart();
@@ -52,16 +46,27 @@ protected:
 	afx_msg void OnEnChangeWavename();
 	afx_msg void OnEnChangeSamplerate();
 	afx_msg void OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMCustomdrawFinetune(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedOpenwaveeditor();
 	afx_msg void OnBnClickedLoad();
 	afx_msg void OnBnClickedSave();
 	afx_msg void OnBnClickedDupe();
 	afx_msg void OnBnClickedDelete();
 	afx_msg void OnBnClickedPanenabled();
-
+	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult);
 protected:
+
+	void SliderDefvolume(CSliderCtrl* slid);
+	void SliderGlobvolume(CSliderCtrl* slid);
+	void SliderPan(CSliderCtrl* slid);
+	void SliderVibratoAttack(CSliderCtrl* slid);
+	void SliderVibratospeed(CSliderCtrl* slid);
+	void SliderVibratodepth(CSliderCtrl* slid);
+	void SliderSamplenote(CSliderCtrl* slid);
+	void SliderFinetune(CSliderCtrl* slid);
+	void FillPanDescription(int val);
+	void RefreshSampleList();
+
 	XMSampler *m_pMachine;
 	XMInstrument::WaveData *m_pWave;
 	bool m_Init;

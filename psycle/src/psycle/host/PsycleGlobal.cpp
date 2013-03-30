@@ -12,7 +12,7 @@
 #include "Player.hpp"
 #include "VstHost24.hpp"
 #include "plugincatcher.hpp"
-#include <psycle/helpers/dsp.hpp>
+
 namespace psycle
 {
 	namespace host
@@ -25,8 +25,6 @@ namespace psycle
 		{
 			pConfig = new PsycleConfig();
 			pSong = new Song();
-			pResampler = new helpers::dsp::cubic_resampler();
-			pResampler->quality(helpers::dsp::resampler::quality::linear);
 			pMidiInput = new CMidiInput();
 			pVstHost = new vst::Host();
 			pPlayer = new Player();
@@ -43,7 +41,6 @@ namespace psycle
 			delete pVstHost; pVstHost = 0;
 			delete pMacLoad; pMacLoad = 0;
 			delete pMidiInput; pMidiInput = 0;
-			delete pResampler; pResampler = 0;
 			delete pInputHandler; pInputHandler = 0;
 			delete pConfig; pConfig = 0;
 		}

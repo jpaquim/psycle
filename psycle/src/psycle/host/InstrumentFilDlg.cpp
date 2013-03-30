@@ -40,25 +40,23 @@ BOOL CInstrumentFilDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_FilterType.AddString(_T("LowPass"));
-	m_FilterType.AddString(_T("HighPass"));
-	m_FilterType.AddString(_T("BandPass"));
-	m_FilterType.AddString(_T("NotchBand"));
-	m_FilterType.AddString(_T("Off"));
+	m_FilterType.AddString("LowPass");
+	m_FilterType.AddString("HiPass");
+	m_FilterType.AddString("BandPass");
+	m_FilterType.AddString("NotchBand");
+	m_FilterType.AddString("None");
+	m_FilterType.AddString("LowPass/IT");
 
-	m_SlVolCutoffPan.SetRangeMax(127);
-	m_SlVolCutoffPan.SetRangeMin(0);
+	m_SlVolCutoffPan.SetRange(0, 127);
 	m_SlSwing1Glide.SetRangeMax(100);
 	m_SlFadeoutRes.SetRangeMax(127);
 	m_SlSwing2.SetRangeMax(100);
 
-	m_SlNoteModNote.SetRangeMin(0);
-	m_SlNoteModNote.SetRangeMax(119);
+	m_SlNoteModNote.SetRange(0, 119);
 
-	m_SlNoteMod.SetRangeMax(32);
-	m_SlNoteMod.SetRangeMin(-32);
+	m_SlNoteMod.SetRange(-32, 32);
 	//Hack to fix "0 placed on leftmost on start".
-	m_SlNoteMod.SetPos(1);
+	m_SlNoteMod.SetPos(-32);
 	m_EnvelopeEditorDlg.Create(CEnvelopeEditorDlg::IDD,this);
 	CRect rect, rect2;
 	((CStatic*)GetDlgItem(IDC_GROUP_ENV))->GetWindowRect(rect);

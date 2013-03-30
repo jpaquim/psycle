@@ -20,7 +20,7 @@ namespace psycle { namespace host {
 			friend bool operator!=(PluginInfo& info1,PluginInfo& info2);
 			*/
 			std::string dllname;
-			long identifier;
+			std::int32_t identifier;
 			std::string error;
 			MachineMode mode;
 			MachineType type;

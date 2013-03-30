@@ -24,7 +24,7 @@ namespace psycle
 	{
 		extern CPsycleApp theApp;
 
-		AudioDriverInfo DirectSoundSettings::info_ = { "DirectSound Output" };
+		AudioDriverInfo DirectSoundSettings::info_("DirectSound Output");
 		AudioDriverEvent DirectSound::_event;
 
 		void DirectSound::Error(const TCHAR msg[])

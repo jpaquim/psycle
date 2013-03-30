@@ -50,15 +50,20 @@ v1.10.2
 * Sampulse: Improved loaders of module formats to support mcm and better support for the speed command. (See FEEx command)
 * Sampulse: Filter algorithm changed again. Now based on SchismTracker's one.
 * Sampulse: Combined classic Sampler and Sampulse sample banks. This allows to use the wave editor with Sampulse.
+* Sampulse/Sampler: Improvements in the dialogs of both machines. Also fixed loaders of .xi and .iti instruments.
+* Sampulse/Sampler: Samplerate can now be set and is used. Also in XMSongExport.
+* Sampulse/Sampler: Much improved sinc resampling mode (faster, correct windowing, lower distortion and filtered by wave speed).
 * Improvements in ASIODriver and MidiInput.
-* New Power spectrum algorithm in the Wire dialog
-* (source-code) Improvements on data casting.
+* Changes in the display of Wire dialog: RMS and Peak VU, better Oscilloscope, New Power spectrum and improved phase bars.
+* (source-code) Improvements on data casting, type usage and array sizes.
 ! Sampulse: Fixes in filter commands and voice allocations.
 ! ASIO: Ensure driver is stopped when refreshing port names.
 ! Fixed machine exchange (crash restoring wires)
 ! Touches in m3 to try, once more, to avoid crashes.
 ! do not crash if trying to copy names and no pattern selected.
 ! wave amplify not working sometimes.
+! Fix Export to wav was using the settings from the audiodriver instead of the ones indicated
+! Fix Wave editor now correctly uses windows clipboard (can now copy&paste into other applications. Note: Audacity does not use windows clipboard)
 
 v1.10.1 
 --------

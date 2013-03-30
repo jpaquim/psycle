@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CEnvelopeEditorDlg, CDialog)
 	ON_BN_CLICKED(IDC_ENV_SUSEND, OnBnClickedSusEnd)
 	ON_BN_CLICKED(IDC_ENV_LOOPSTART, OnBnClickedLoopStart)
 	ON_BN_CLICKED(IDC_ENV_LOOPEND, OnBnClickedLoopEnd)
+	ON_NOTIFY_RANGE(NM_CUSTOMDRAW, IDC_ADSRBASE, IDC_ADSRREL, OnCustomdrawSliderm)
 	ON_MESSAGE_VOID(PSYC_ENVELOPE_CHANGED, OnEnvelopeChanged)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
@@ -157,9 +158,6 @@ void CEnvelopeEditorDlg::SliderBase(CSliderCtrl* slid)
 	env.SetValue(2, base+((float)m_SlADSRSustain.GetPos()*0.01f*diff));
 	env.SetValue(3, base);
 	m_EnvelopeEditor.Invalidate();
-	char tmp[64];
-	sprintf(tmp,"%d%%",m_SlADSRBase.GetPos());
-	((CStatic*)GetDlgItem(IDC_LADSRBASE))->SetWindowText(tmp);
 }
 void CEnvelopeEditorDlg::SliderMod(CSliderCtrl* slid)
 {
@@ -169,26 +167,17 @@ void CEnvelopeEditorDlg::SliderMod(CSliderCtrl* slid)
 	env.SetValue(1, base+diff);
 	env.SetValue(2, base+((float)m_SlADSRSustain.GetPos()*0.01f*diff));
 	m_EnvelopeEditor.Invalidate();
-	char tmp[64];
-	sprintf(tmp,"%d%%",m_SlADSRMod.GetPos());
-	((CStatic*)GetDlgItem(IDC_LADSRMOD))->SetWindowText(tmp);
 }
 void CEnvelopeEditorDlg::SliderAttack(CSliderCtrl* slid)
 {
 	m_EnvelopeEditor.envelope().SetTime(1,m_SlADSRAttack.GetPos());
 	m_EnvelopeEditor.Invalidate();
-	char tmp[64];
-	sprintf(tmp,"%.0fms",m_SlADSRAttack.GetPos()*2500.f / Global::player().bpm );
-	((CStatic*)GetDlgItem(IDC_LADSRATT))->SetWindowText(tmp);
 }
 void CEnvelopeEditorDlg::SliderDecay(CSliderCtrl* slid)
 {
 	m_EnvelopeEditor.envelope().SetTime(2,
 			m_EnvelopeEditor.envelope().GetTime(1)+m_SlADSRDecay.GetPos());
 	m_EnvelopeEditor.Invalidate();
-	char tmp[64];
-	sprintf(tmp,"%.0fms",m_SlADSRDecay.GetPos()*2500.f / Global::player().bpm );
-	((CStatic*)GetDlgItem(IDC_LADSRDEC))->SetWindowText(tmp);
 }
 void CEnvelopeEditorDlg::SliderSustain(CSliderCtrl* slid)
 {
@@ -196,20 +185,58 @@ void CEnvelopeEditorDlg::SliderSustain(CSliderCtrl* slid)
 	float base = m_SlADSRBase.GetPos()*0.01f;
 	m_EnvelopeEditor.envelope().SetValue(2, base+((float)m_SlADSRSustain.GetPos()*0.01f*diff));
 	m_EnvelopeEditor.Invalidate();
-	char tmp[64];
-	sprintf(tmp,"%d%%",m_SlADSRSustain.GetPos());
-	((CStatic*)GetDlgItem(IDC_LADSRSUS))->SetWindowText(tmp);
 }
 void CEnvelopeEditorDlg::SliderRelease(CSliderCtrl* slid)
 {
 	m_EnvelopeEditor.envelope().SetTime(3,
 			m_EnvelopeEditor.envelope().GetTime(2)+m_SlADSRRelease.GetPos());
 	m_EnvelopeEditor.Invalidate();
-	char tmp[64];
-	sprintf(tmp,"%.0fms",m_SlADSRRelease.GetPos()*2500.f / Global::player().bpm );
-	((CStatic*)GetDlgItem(IDC_LADSRREL))->SetWindowText(tmp);
 }
 
+void CEnvelopeEditorDlg::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	if (nmcd.dwDrawStage == CDDS_POSTPAINT)
+	{
+		char tmp[64];
+		int label = 0;
+		CSliderCtrl* slider = reinterpret_cast<CSliderCtrl*>(GetDlgItem(pNMHDR->idFrom));
+		if (pNMHDR->idFrom == IDC_ADSRBASE) {
+			sprintf(tmp,"%d%%",slider->GetPos());
+			label = IDC_LADSRBASE;
+		}
+		else if(pNMHDR->idFrom == IDC_ADSRMOD) {
+			sprintf(tmp,"%d%%",slider->GetPos());
+			label = IDC_LADSRMOD;
+		}
+		else if(pNMHDR->idFrom == IDC_ADSRSUS) {
+			sprintf(tmp,"%d%%",slider->GetPos());
+			label = IDC_LADSRSUS;
+		}
+		else if (pNMHDR->idFrom == IDC_ADSRATT) {
+			sprintf(tmp,"%.0fms",slider->GetPos()*2500.f / Global::player().bpm );
+			label = IDC_LADSRATT;
+		}
+		else if (pNMHDR->idFrom == IDC_ADSRDEC) {
+			sprintf(tmp,"%.0fms",slider->GetPos()*2500.f / Global::player().bpm );
+			label = IDC_LADSRDEC;
+		}
+		else if (pNMHDR->idFrom == IDC_ADSRREL) {
+			sprintf(tmp,"%.0fms",slider->GetPos()*2500.f / Global::player().bpm );
+			label = IDC_LADSRREL;
+		}
+		if (label != 0) {
+			((CStatic*)GetDlgItem(label))->SetWindowText(tmp);
+		}
+		*pResult = CDRF_DODEFAULT;
+	}
+	else if (nmcd.dwDrawStage == CDDS_PREPAINT ){
+		*pResult = CDRF_NOTIFYITEMDRAW|CDRF_NOTIFYPOSTPAINT;
+	}
+	else {
+		*pResult = CDRF_DODEFAULT;
+	}
+}
 void CEnvelopeEditorDlg::OnBnClickedSusBegin()
 {
 	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
@@ -271,4 +298,5 @@ void CEnvelopeEditorDlg::OnEnvelopeChanged()
 {
 	RefreshButtons();
 }
+
 }}
