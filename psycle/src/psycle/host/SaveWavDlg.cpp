@@ -123,29 +123,29 @@ namespace psycle { namespace host {
 			m_linestart.EnableWindow(false);
 			m_patnumber2.EnableWindow(false);
 
-			char num[3];
-			sprintf(num,"%02x",thesong.playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
+			char num[4];
+			sprintf(num,"%02X",thesong.playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
 			m_patnumber.SetWindowText(num);
-			sprintf(num,"%02x",0);
+			sprintf(num,"%02X",0);
 			m_rangestart.SetWindowText(num);
-			sprintf(num,"%02x",thesong.playLength-1);
+			sprintf(num,"%02X",thesong.playLength-1);
 			m_rangeend.SetWindowText(num);			
 
-			sprintf(num,"%02x",thesong.playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
+			sprintf(num,"%02X",thesong.playOrder[((CMainFrame *)theApp.m_pMainWnd)->m_wndView.editPosition]);
 			m_patnumber2.SetWindowText(num);
 
 			if (pChildView->blockSelected)
 			{
-				sprintf(num,"%02x",pBlockSel->start.line);
+				sprintf(num,"%02X",pBlockSel->start.line);
 				m_linestart.SetWindowText(num);
-				sprintf(num,"%02x",pBlockSel->end.line+1);
+				sprintf(num,"%02X",pBlockSel->end.line+1);
 				m_lineend.SetWindowText(num);
 			}
 			else
 			{
-				sprintf(num,"%02x",0);
+				sprintf(num,"%02X",0);
 				m_linestart.SetWindowText(num);
-				sprintf(num,"%02x",1);
+				sprintf(num,"%02X",1);
 				m_lineend.SetWindowText(num);
 			}
 
@@ -560,7 +560,7 @@ namespace psycle { namespace host {
 			}
 			else if (m_outputtype == 1 || m_outputtype == 2)
 			{
-				// Clear clipboardmem if needed (should not. it's a safety measure)
+				// Clear clipboardmem if needed (not needed. it's a safety measure)
 				if ( clipboardmem.size() > 0)
 				{
 					for (unsigned int i=0;i<clipboardmem.size();i++)
@@ -570,9 +570,9 @@ namespace psycle { namespace host {
 					clipboardmem.clear();
 				}
 				//allocate first vector value to store the size of the clipboard memory.
-				char *size = new char[4];
+				int *size = new int[1];
 				memset(size,0,4);
-				clipboardmem.push_back(size);
+				clipboardmem.push_back(reinterpret_cast<char*>(size));
 				// No name -> record to clipboard.
 				SaveWav("",real_bits[bits],real_rate[rate],channelmode,isFloat);
 			}
@@ -941,21 +941,24 @@ namespace psycle { namespace host {
 			EmptyClipboard();
 
 			const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
-			const int real_bits[]={8,16,24,32};
+			const int real_bits[]={8,16,24,32,32};
+			//not supported for now
+			//const bool isFloat = (bits == 4);
 
-			///\todo: Investigate why i can't paste to audacity (psycle's fault?)
-			clipboardwavheader.head = 'RIFF';
-			clipboardwavheader.head2= 'WAVE';
-			clipboardwavheader.fmthead = 'fmt ';
-			clipboardwavheader.fmtsize = sizeof(WAVEFORMATEX) + 2; // !!!!!!!!!!!!!!!!????????? - works...
+			///Note: Audacity does not use windows clipboard. This works for modplug tracker
+			///\todo: support waveformatextensible?
+			clipboardwavheader.head = FourCC("RIFF");
+			clipboardwavheader.head2= FourCC("WAVE");
+			clipboardwavheader.fmthead = FourCC("fmt ");
+			clipboardwavheader.fmtsize = sizeof(WAVEFORMATEX);
 			clipboardwavheader.fmtcontent.wFormatTag = WAVE_FORMAT_PCM;
-			clipboardwavheader.fmtcontent.nChannels = (channelmode == 3) ? 2 : 1;
+			clipboardwavheader.fmtcontent.nChannels = (channelmode == stereo || channelmode == no_mode) ? 2 : 1;
 			clipboardwavheader.fmtcontent.nSamplesPerSec = real_rate[rate];
 			clipboardwavheader.fmtcontent.wBitsPerSample = real_bits[bits];
 			clipboardwavheader.fmtcontent.nBlockAlign = clipboardwavheader.fmtcontent.wBitsPerSample/8*clipboardwavheader.fmtcontent.nChannels;
 			clipboardwavheader.fmtcontent.nAvgBytesPerSec =clipboardwavheader.fmtcontent.nBlockAlign*clipboardwavheader.fmtcontent.nSamplesPerSec;
 			clipboardwavheader.fmtcontent.cbSize = 0;
-			clipboardwavheader.datahead = 'data';
+			clipboardwavheader.datahead = FourCC("data");
 
 			int length = *reinterpret_cast<int*>(clipboardmem[0]);
 

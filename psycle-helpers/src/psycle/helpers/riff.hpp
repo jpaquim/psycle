@@ -14,6 +14,8 @@ namespace psycle { namespace helpers {
 
 using namespace universalis::stdlib;
 
+extern uint32_t FourCC(const char * ChunkName);
+
 enum DDCRET {
 	DDC_SUCCESS,           ///< operation succeded
 	DDC_FAILURE,           ///< operation failed for unspecified reasons
