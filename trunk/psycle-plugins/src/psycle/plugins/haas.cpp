@@ -64,12 +64,12 @@ public:
 	{
 		static const Information::Parameter parameters [] =
 		{
-			/* overall_gain                        = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
+			/* overall_gain                        = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
 			/* overall_dry_wet                     = */ Information::Parameter::linear("dry / wet", 0, 1, 1),
 
 			/* separator_direct                    = */ Information::Parameter("direct"),
 
-			/* direct_gain                         = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), 1, std::pow(10., +24. / 20)),
+			/* direct_gain                         = */ Information::Parameter::exponential("gain", std::pow(10., -60. / 20), .5, std::pow(10., +24. / 20)),
 			/* direct_pan                          = */ Information::Parameter::linear("pan", -1, 0, 1),
 			/* direct_delay_stereo_delta           = */ Information::Parameter::linear("delay stereo delta", -.006, 0, +.006),
 
@@ -106,23 +106,28 @@ public:
 				}
 			case early_reflection_delay:
 			case late_reflection_delay:
-				out << (*this)(parameter) * 1000 << " ms";
+				out << (*this)(parameter) * 1000.f << " ms";
 				break;
 			case overall_dry_wet:
 				out
 					<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
 					<< " ("
-					<< std::setw(6) << 20 * std::log10(1 - (*this)(parameter)) << ", "
-					<< std::setw(6) << 20 * std::log10(    (*this)(parameter))
+					<< std::setw(6) << 20.f * std::log10(1 - (*this)(parameter)) << ", "
+					<< std::setw(6) << 20.f * std::log10(    (*this)(parameter))
 					<< " dB)";
 				break;
 			case overall_gain:
+				out
+					<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
+					<< " (" << std::setw(6) << 20.f * std::log10((*this)(parameter)) << " dB)";
+				break;
 			case direct_gain:
 			case early_reflection_gain:
 			case late_reflection_gain:
+				//The internal gains are compensated because input is added, so it's like multiplying by two.
 				out
 					<< std::setprecision(3) << std::setw(6) << (*this)(parameter)
-					<< " (" << std::setw(6) << 20 * std::log10((*this)(parameter)) << " dB)";
+					<< " (" << std::setw(6) << 20.f * std::log10((*this)(parameter)*2.f) << " dB)";
 				break;
 			case channel_mix:
 				switch((*this)[parameter])
