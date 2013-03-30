@@ -1,6 +1,7 @@
 ///\file
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include <psycle/host/detail/project.private.hpp>
+#include <psycle/helpers/riff.hpp>
 #include "WaveEdChildView.hpp"
 
 #include "PsycleConfig.hpp"
@@ -1654,20 +1655,21 @@ namespace psycle { namespace host {
 			OpenClipboard();
 			EmptyClipboard();
 			hClipboardData = GlobalAlloc(GMEM_MOVEABLE, ( wdStereo ? length*4 + sizeof(fullheader) : length*2 + sizeof(fullheader)));
+			const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
 			
-			wavheader.head = 'RIFF';
+			wavheader.head = FourCC("RIFF");
 			wavheader.size = wdStereo ? (length*4 + sizeof(fullheader) - 8) : (length*2 + sizeof(fullheader) - 8);
-			wavheader.head2= 'WAVE';
-			wavheader.fmthead = 'fmt ';
-			wavheader.fmtsize = sizeof(WAVEFORMATEX) + 2; // !!!!!!!!!!!!!!!!????????? - works...
+			wavheader.head2= FourCC("WAVE");
+			wavheader.fmthead = FourCC("fmt ");
+			wavheader.fmtsize = sizeof(WAVEFORMATEX);
 			wavheader.fmtcontent.wFormatTag = WAVE_FORMAT_PCM;
 			wavheader.fmtcontent.nChannels = wdStereo ? 2 : 1;
-			wavheader.fmtcontent.nSamplesPerSec = 44100;
+			wavheader.fmtcontent.nSamplesPerSec = wave.WaveSampleRate();
 			wavheader.fmtcontent.wBitsPerSample = 16;
 			wavheader.fmtcontent.nAvgBytesPerSec = wavheader.fmtcontent.wBitsPerSample/8*wavheader.fmtcontent.nChannels*wavheader.fmtcontent.nSamplesPerSec;
 			wavheader.fmtcontent.nBlockAlign = wdStereo ? 4 : 2 ;
 			wavheader.fmtcontent.cbSize = 0;
-			wavheader.datahead = 'data';
+			wavheader.datahead = FourCC("data");
 			wavheader.datasize = wdStereo ? length*4 : length*2;
 
 			pClipboardData = (char*) GlobalLock(hClipboardData);
@@ -1731,9 +1733,9 @@ namespace psycle { namespace host {
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(std::uint32_t*)pPasteData != 'RIFF') && (*((std::uint32_t*)pPasteData + 2)!='WAVE')) return;
+			if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
 			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-			pFmt = (WAVEFORMATEX*)((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+			pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
 			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
@@ -1744,10 +1746,11 @@ namespace psycle { namespace host {
 
 			if (!wdWave)
 			{
+				//\todo: support different bitdepths
 				if (pFmt->wBitsPerSample == 16)
 				{
 					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
-					const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					wdLength = lDataSamps;
 					wdLeft  = wave.pWaveDataL();
 					if (pFmt->nChannels == 1)
@@ -1767,12 +1770,13 @@ namespace psycle { namespace host {
 					}
 					wdWave = true;
 					OnSelectionShowall();
+					wave.WaveSampleRate(pFmt->nSamplesPerSec);
 				}
 			}
 			else
 			{
 				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
-				if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
+				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
 				{
 					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
 						 ((pFmt->nChannels == 2) && (wdStereo == false)) )
@@ -1794,6 +1798,8 @@ namespace psycle { namespace host {
 
 					//Insert
 					wave.InsertAt(cursorPos,waveToPaste);
+					wdLeft = wave.pWaveDataL();
+					wdRight = wave.pWaveDataR();
 
 					//update length
 					wdLength = wave.WaveLength();
@@ -1842,9 +1848,9 @@ namespace psycle { namespace host {
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+			if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
 			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-			pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+			pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
 			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
@@ -1853,7 +1859,7 @@ namespace psycle { namespace host {
 
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
-			if (pFmt->wBitsPerSample == 16 && pFmt->nChannels==1 || pFmt->nChannels==2)
+			if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
 			{
 				if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
 						((pFmt->nChannels == 2) && (wdStereo == false)) )
@@ -1881,7 +1887,7 @@ namespace psycle { namespace host {
 					startPoint=cursorPos;
 				}
 
-				const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				//do left channel
 				for (c = 0; c < lDataSamps; c++)
 					wave.pWaveDataL()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign);
@@ -1892,6 +1898,7 @@ namespace psycle { namespace host {
 					for (c = 0; c < lDataSamps; c++)
 						wave.pWaveDataR()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
 				}
+				wave.WaveSampleRate(pFmt->nSamplesPerSec);
 			}
 			GlobalUnlock(hPasteData);
 			CloseClipboard();
@@ -1921,9 +1928,9 @@ namespace psycle { namespace host {
 					hPasteData = GetClipboardData(CF_WAVE);
 					pPasteData = (short*)GlobalLock(hPasteData);
 
-					if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+					if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
 					lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
 					lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 					pData = (char*)pPasteData + 20 + lFmt + 8;
@@ -2030,9 +2037,9 @@ namespace psycle { namespace host {
 					hPasteData = GetClipboardData(CF_WAVE);
 					pPasteData = (short*)GlobalLock(hPasteData);
 
-					if ((*(std::uint32_t*)pPasteData != 'FFIR') && (*((std::uint32_t*)pPasteData + 2)!='EVAW')) return;
+					if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
 					lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
-					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //'RIFF' + len. +'WAVE' + 'fmt ' + len. = 20 bytes.
+					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
 					lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 					pData = (char*)pPasteData + 20 + lFmt + 8;
