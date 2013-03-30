@@ -47,6 +47,7 @@ DDCRET ExtRiffFile::Open(const char * Filename, ExtRiffFileMode NewMode) {
 						remove(Filename);
 						fmode = RFM_UNKNOWN;
 						file = 0;
+						retcode = DDC_FILE_ERROR;
 					} else fmode = RFM_WRITE;
 				} else {
 					fmode = RFM_UNKNOWN;
@@ -61,6 +62,7 @@ DDCRET ExtRiffFile::Open(const char * Filename, ExtRiffFileMode NewMode) {
 						std::fclose(file);
 						fmode = RFM_UNKNOWN;
 						file = 0;
+						retcode = DDC_FILE_ERROR;
 					}
 					else fmode = RFM_READ;
 				} else {

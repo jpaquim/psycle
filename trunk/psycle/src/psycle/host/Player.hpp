@@ -144,7 +144,8 @@ namespace psycle
 			WaveFile _outputWaveFile;
 			/// dither handler
 			helpers::dsp::Dither dither;
-
+			int m_recording_depth;
+			channel_mode m_recording_chans;
 			/// Samples of a legacy (tracker) tick. There are 24ticks per beat.
 			int m_SamplesPerTick;
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
@@ -169,7 +170,7 @@ namespace psycle
 			typedef std::list<std::thread*> threads_type;
 			threads_type threads_;
 		public:
-			unsigned long num_threads() const { if(threads_.empty()){return 1;} return (unsigned long)threads_.size(); }
+			std::size_t num_threads() const { if(threads_.empty()){return 1;} return threads_.size(); }
 		private:
 			void thread_function(std::size_t thread_number);
 

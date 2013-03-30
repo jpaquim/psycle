@@ -161,7 +161,9 @@ void Player::start_threads(int thread_count) {
 			if (initialize)
 			{
 				SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-				SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
+				if (!_recording) {
+					SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
+				}
 				for(int i=0;i<MAX_TRACKS;i++) 
 				{
 					prevMachines[i] = 255;
@@ -200,7 +202,9 @@ void Player::start_threads(int thread_count) {
 				playTrack[i]=false;
 			}
 			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-			SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
+			if (!_recording) {
+				SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
+			}
 			CVSTHost::vstTimeInfo.flags &= ~kVstTransportPlaying;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 		}
@@ -912,7 +916,7 @@ void Player::process_loop(std::size_t thread_number) throw(std::exception) {
 			case -1: main_condition_.notify_all(); break; // wake up the main processing loop
 			case 0: //no successor ready. Maybe another thread is working.
 				if (all_threads_waiting && nodes_queue_.empty()) { //This should not happen, but when it does, it causes a deadlock. So at least, prevent the application hang.
-					char buf[250];
+					char buf[256];
 					sprintf(buf,"Invalid condition found: no successor. Preventing application hang. w:%d,q:%d,t:%d,g:%d:p:%d",
 						waiting_,nodes_queue_.size(),threads_.size(),graph_size_,processed_node_count_);
 					if(loggers::warning()) loggers::warning()(buf, UNIVERSALIS__COMPILER__LOCATION);
@@ -1000,9 +1004,6 @@ void Player::stop_threads() {
 			sampleOffset = 0;
 			do
 			{
-				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
-				// Tick handler function
-				if(amount >= _samplesRemaining) amount = _samplesRemaining;
 				// Song play
 				if((_samplesRemaining <=0))
 				{
@@ -1023,6 +1024,9 @@ void Player::stop_threads() {
 					}
 					_samplesRemaining = SamplesPerRow();
 				}
+				if(numSamples > STREAM_SIZE) amount = STREAM_SIZE; else amount = numSamples;
+				// Tick handler function
+				if(amount >= _samplesRemaining) amount = _samplesRemaining;
 				// Processing plant
 				if(amount > 0)
 				{
@@ -1072,7 +1076,7 @@ void Player::stop_threads() {
 						int i;
 						if ( _clipboardrecording)
 						{
-							switch(Global::configuration()._pOutputDriver->GetChannelMode())
+							switch(m_recording_chans)
 							{
 							case mono_mix: // mono mix
 								for(i=0; i<amount; i++)
@@ -1098,8 +1102,9 @@ void Player::stop_threads() {
 									if (!ClipboardWriteStereo(*pL++,*pR++)) StopRecording(false);
 								}
 								break;
-							}						}
-						else switch(Global::configuration()._pOutputDriver->GetChannelMode())
+							}
+						}
+						else switch(m_recording_chans)
 						{
 						case mono_mix: // mono mix
 							for(i=0; i<amount; i++)
@@ -1143,48 +1148,43 @@ void Player::stop_threads() {
 		bool Player::ClipboardWriteMono(float sample)
 		{
 			// right now the implementation does not support these two being different
-			if (Global::configuration()._pOutputDriver->GetSampleValidBits() !=
+/*			if (Global::configuration()._pOutputDriver->GetSampleValidBits() !=
 				Global::configuration()._pOutputDriver->GetSampleBits()) {
 					return false;
 			}
+*/
+			//total length.
 			int *length = reinterpret_cast<int*>((*pClipboardmem)[0]);
+			//position in this buffer.
 			int pos = *length%1000000;
-			int endpos = pos;
-			
-			switch( Global::configuration()._pOutputDriver->GetSampleBits())
-			{
-			case 8: endpos+=1; break;
-			case 16: endpos+=2; break;
-			case 24: endpos+=3; break;
-			case 32: endpos+=4; break;
-			}
 
 			int d(0);
 			if(sample > 32767.0f) sample = 32767.0f;
 			else if(sample < -32768.0f) sample = -32768.0f;
-			switch( Global::configuration()._pOutputDriver->GetSampleBits())
+			switch( m_recording_depth)
 			{
 			case 8:
 				d = int(sample/256.0f);
 				d += 128;
-				(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
+				(*pClipboardmem)[clipbufferindex][pos++]=static_cast<char>(d&0xFF);
 				*length+=1;
 				break;
 			case 16:
 				d = static_cast<int>(sample);
-				(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
-				(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
+				(*pClipboardmem)[clipbufferindex][pos++]=static_cast<char>(d&0xFF);
+				(*pClipboardmem)[clipbufferindex][pos++]=*(reinterpret_cast<char*>(&d)+1);
 				*length+=2;
 				break;
 			case 24:
 				d = int(sample * 256.0f);
-				if ( endpos < 1000000 )
+				if ( pos+3 < 1000000 )
 				{
-					(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
-					(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
-					(*pClipboardmem)[clipbufferindex][pos+2]=*(reinterpret_cast<char*>(&d)+2);
+					(*pClipboardmem)[clipbufferindex][pos++]=static_cast<char>(d&0xFF);
+					(*pClipboardmem)[clipbufferindex][pos++]=*(reinterpret_cast<char*>(&d)+1);
+					(*pClipboardmem)[clipbufferindex][pos++]=*(reinterpret_cast<char*>(&d)+2);
 					*length+=3;
 				}
+				else { pos+=3; } //Delay operation after buffer creation.
 				break;
 			case 32:
 				d = int(sample * 65536.0f);
@@ -1198,16 +1198,18 @@ void Player::stop_threads() {
 				break;
 			}
 
-			if ( endpos >= 1000000 )
+			//if reached buffer end.
+			if ( pos >= 1000000)
 			{
 				clipbufferindex++;
 				char *newbuf = new char[1000000];
 				if (!newbuf) return false;
 				pClipboardmem->push_back(newbuf);
 				// bitdepth == 24 is the only "odd" value, since it uses 3 chars each, nondivisible by 1000000
-				if ( Global::configuration()._pOutputDriver->GetSampleBits() == 24)
+				if ( m_recording_depth == 24)
 				{
 					clipbufferindex--;
+					pos-=3;
 					(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
 					if ( ++pos = 1000000) { pos = 0; clipbufferindex++; }
 					(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
@@ -1233,17 +1235,16 @@ void Player::stop_threads() {
 
 				if(samplerate > 0) SampleRate(samplerate);
 
-				int the_depth;
-				if(bitdepth>0)	the_depth = bitdepth;
+				if(bitdepth>0)	m_recording_depth = bitdepth;
 				else {
-					the_depth = Global::configuration()._pOutputDriver->GetSampleValidBits();
+					m_recording_depth = Global::configuration()._pOutputDriver->GetSampleValidBits();
 					if(Global::configuration()._pOutputDriver->GetSampleBits() == 32) isFloat = true;
 				}
 
 				_dodither=dodither;
 				if(dodither)
 				{
-					dither.SetBitDepth(the_depth);
+					dither.SetBitDepth(m_recording_depth);
 					dither.SetPdf((helpers::dsp::Dither::Pdf::type)ditherpdf);
 					dither.SetNoiseShaping((helpers::dsp::Dither::NoiseShape::type)noiseshape);
 				}
@@ -1251,15 +1252,14 @@ void Player::stop_threads() {
 				int channels;
 				if(channelmode != no_mode && channelmode != stereo) { channels = 1; }
 				else { channels = 2; }
+				m_recording_chans = channelmode;
 
 				if (!psFilename.empty())
 				{
-					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), m_SampleRate, the_depth, channels, isFloat) == DDC_SUCCESS)
+					if(_outputWaveFile.OpenForWrite(psFilename.c_str(), m_SampleRate, m_recording_depth, channels, isFloat) == DDC_SUCCESS)
 						_recording = true;
 					else
 					{
-						//recording to true so that StopRecording can reset the values.
-						_recording = true;
 						StopRecording(false);
 					}
 				}
@@ -1275,7 +1275,6 @@ void Player::stop_threads() {
 						_recording = true;
 					}
 					else {
-						_recording = true;
 						StopRecording(false);
 					}
 				}
@@ -1284,7 +1283,7 @@ void Player::stop_threads() {
 
 		void Player::StopRecording(bool bOk)
 		{
-			if(_recording)
+			if(_recording || !bOk)
 			{
 				SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 				if (!_clipboardrecording)
