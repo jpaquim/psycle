@@ -25,32 +25,33 @@ namespace psycle { namespace host {
 		BOOL CWaveEdAmplifyDialog::OnInitDialog() 
 		{
 			CDialog::OnInitDialog();
-			m_slider.SetRange(0, 14400); 	// Don't use (-,+) range. It fucks up with the "0"
-			m_slider.SetPos(9600);
+			m_slider.SetRange(-9600, 4800);
+			//Hack to fix "0 placed on leftmost on start".
+			m_slider.SetPos(-9600);
+			m_slider.SetPos(0);
 			return TRUE;
 		}
 
 		void CWaveEdAmplifyDialog::OnCustomdrawSlider(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			char tmp[10];
-			float db;
-			db =  (float) (m_slider.GetPos()-9600)*0.01f;
-			_gcvt(db ,4 ,tmp);
-			if (tmp[strlen(tmp) -1] == '.') tmp[strlen(tmp) -1] = 0; //Remove dot if last.
-			
-			m_dbedit.SetWindowText(tmp);
+			float db = float(m_slider.GetPos())*0.01f;
+			std::ostringstream temp;
+			temp.setf(std::ios::fixed);
+			temp<<std::setprecision(2)<<db;
+			m_dbedit.SetWindowText(temp.str().c_str());
 			*pResult = 0;
 		}
 
 		void CWaveEdAmplifyDialog::OnOK() 
 		{
-			
 			char db_t[10];
 			int db_i = 0;		
-			m_dbedit.GetWindowText(db_t,9);
+			m_dbedit.GetWindowText(db_t,10);
 			db_i = (int)(100*atof(db_t));
 			if (db_i) EndDialog( db_i );
-			else EndDialog( AMP_DIALOG_CANCEL);
+			else {
+				MessageBox("Warning: The amplification is zero, or the value isn't correct. Check it.");
+			}
 			//	CDialog::OnOK();
 		}
 
