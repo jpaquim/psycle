@@ -39,9 +39,9 @@ namespace psycle
 			return true;
 		}
 
-		unsigned long ITModule2::BitsBlock::ReadBits(unsigned char bitwidth)
+		std::uint32_t ITModule2::BitsBlock::ReadBits(unsigned char bitwidth)
 		{
-			unsigned long val = 0;
+			std::uint32_t val = 0;
 			int b = 0;
 
 			// If reached the end of the buffer, exit.
@@ -72,27 +72,45 @@ namespace psycle
 		void ITModule2::LoadInstrumentFromFile(Song& song, const int idx)
 		{
 			itFileH.flags=0;
-			itInsHeader2x inshead;
-			Read(&inshead,sizeof(inshead));
-			Seek(0);
+			itInsHeader1x inshead;
+			Read(&inshead,sizeof(itInsHeader1x));
 			XMInstrument instr;
 			instr.Init();
-			LoadITInst(instr,idx);
-			Skip(2);
-
+			if (inshead.trackerV < 0x200 ) {
+				LoadOldITInst(inshead,instr,idx);
+			}
+			else {
+				LoadITInst(*reinterpret_cast<itInsHeader2x*>(&inshead),instr,idx);
+				//From ITTECH: Total length of an instrument is 547 bytes, but 554 bytes are
+				//written, just to simplify the loading of the old format.
+			}
+			if (inshead.noS < 1 && !Eof()) {
+				inshead.noS = 0;
+				//The header sample count might be wrong. Let's recalculate it.
+				std::size_t curpos = GetPos();
+				while(Expect(&IMPS_ID,sizeof(IMPS_ID))) {
+					inshead.noS++;
+					Skip(sizeof(itSampleHeader)-sizeof(IMPS_ID));
+				}
+				Seek(curpos);
+			}
 			int curSample(0);
-			unsigned char *sRemap = new unsigned char[inshead.noS];
+			std::vector<unsigned char> sRemap;
 			for (unsigned int i(0); i<inshead.noS; i++)
 			{
 				while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
 				XMInstrument::WaveData wave;
-				LoadITSample(wave,curSample);
+				itSampleHeader curH;
+				Read(&curH,sizeof(curH));
+				std::size_t curpos = GetPos();
+				LoadITSample(curH,wave,curSample);
+				Seek(curpos);
 				// Only get REAL samples.
 				if ( wave.WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {
 					song.samples.SetSample(wave, curSample);
-					sRemap[i]=curSample;
+					sRemap.push_back(curSample);
 				}
-				else { sRemap[i]=MAX_INSTRUMENTS-1; }
+				else { sRemap.push_back(MAX_INSTRUMENTS-1); }
 			}
 
 			for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
@@ -102,7 +120,6 @@ namespace psycle
 				instr.NoteToSample(i,npair);
 			}
 			song.xminstruments.SetInst(instr,idx);
-			delete[] sRemap;
 		}
 		bool ITModule2::LoadITModule(Song& song)
 		{
@@ -175,15 +192,14 @@ Special:  Bit 0: On = song message attached.
 			int i,j;
 			for (i=0;i<64;i++)
 			{
-				if (stereo)
+				if (stereo && !(itFileH.chanPan[i]&ChanFlags::IS_DISABLED))
 				{
 					if (itFileH.chanPan[i]==ChanFlags::IS_SURROUND )
 					{
 						sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
 						sampler->rChannel(i).DefaultIsSurround(true);
 					}
-					else if ( !(itFileH.chanPan[i]&ChanFlags::IS_DISABLED) )
-					{
+					else {
 						sampler->rChannel(i).DefaultPanFactorFloat((itFileH.chanPan[i]&0x7F)/64.0f,true);
 					}
 				}
@@ -198,7 +214,7 @@ Special:  Bit 0: On = song message attached.
 				else {
 					m_maxextracolumn=i;
 				}
-				sampler->rChannel(i).DefaultFilterType(dsp::F_LOWPASS12);
+				sampler->rChannel(i).DefaultFilterType(dsp::F_ITLOWPASS);
 			}
 			if(m_maxextracolumn==63) { m_maxextracolumn=15; }
 
@@ -223,45 +239,43 @@ Special:  Bit 0: On = song message attached.
 				song.playOrder[0]=0;
 			}
 
-			unsigned long *pointersi = new unsigned long[itFileH.insNum];
-			Read(pointersi,itFileH.insNum*sizeof(unsigned long));
-			unsigned long * pointerss = new unsigned long[itFileH.sampNum];
-			Read(pointerss,itFileH.sampNum*sizeof(unsigned long));
-			unsigned long * pointersp = new unsigned long[itFileH.patNum];
-			Read(pointersp,itFileH.patNum*sizeof(unsigned long));
+			std::uint32_t *pointersi = new std::uint32_t[itFileH.insNum];
+			Read(pointersi,itFileH.insNum*sizeof(std::uint32_t));
+			std::uint32_t * pointerss = new std::uint32_t[itFileH.sampNum];
+			Read(pointerss,itFileH.sampNum*sizeof(std::uint32_t));
+			std::uint32_t * pointersp = new std::uint32_t[itFileH.patNum];
+			Read(pointersp,itFileH.patNum*sizeof(std::uint32_t));
 
 			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
 			{
 				embeddedData = new EmbeddedMIDIData;
-				EmbeddedMIDIData mdata;
 				short skipnum;
 				Read(&skipnum,sizeof(short));
 				Skip(skipnum*8); // This is some strange data. It is not documented.
 
-				Read(&mdata,sizeof(mdata));
+				Read(embeddedData,sizeof(EmbeddedMIDIData));
 
 				for ( int i=0; i<128; i++ )
 				{
-					CString zxx = mdata.Zxx[i];
-					CString zxx2 = zxx.Left(5);
-					if ( strcmp("F0F00",zxx2) == 0)
+					std::string zxx = embeddedData->Zxx[i];
+					std::string zxx2 = zxx.substr(0,5);
+					if ( zxx2 == "F0F00")
 					{
+						int mode=0;
+						if (embeddedData->Zxx[i][5] >= '0' && embeddedData->Zxx[i][5] <= '9')
+							mode = embeddedData->Zxx[i][5] - '0';
+						else if (embeddedData->Zxx[i][5] >= 'A' && embeddedData->Zxx[i][5] <= 'F')
+							mode = embeddedData->Zxx[i][5] - 'A' + 0xA;
+
 						int tmp=0;
-						if (mdata.Zxx[i][5] >= '0' && mdata.Zxx[i][5] <= '9')
-							tmp = mdata.Zxx[i][5] - '0';
-						else if (mdata.Zxx[i][5] >= 'A' && mdata.Zxx[i][5] <= 'F')
-							tmp = mdata.Zxx[i][5] - 'A' + 0xA;
-
-						int mode = tmp;
-
-						if (mdata.Zxx[i][6] >= '0' && mdata.Zxx[i][6] <= '9')
-							tmp = (mdata.Zxx[i][6] - '0') * 10;
-						else if (mdata.Zxx[i][6] >= 'A' && mdata.Zxx[i][6] <= 'F')
-							tmp = (mdata.Zxx[i][6] - 'A' + 0xA) * 10;
-						if (mdata.Zxx[i][7] >= '0' && mdata.Zxx[i][7] <= '9')
-							tmp += (mdata.Zxx[i][7] - '0');
-						else if (mdata.Zxx[i][7] >= 'A' && mdata.Zxx[i][7] <= 'F')
-							tmp += (mdata.Zxx[i][7] - 'A' + 0xA);
+						if (embeddedData->Zxx[i][6] >= '0' && embeddedData->Zxx[i][6] <= '9')
+							tmp = (embeddedData->Zxx[i][6] - '0') * 0x10;
+						else if (embeddedData->Zxx[i][6] >= 'A' && embeddedData->Zxx[i][6] <= 'F')
+							tmp = (embeddedData->Zxx[i][6] - 'A' + 0xA) * 0x10;
+						if (embeddedData->Zxx[i][7] >= '0' && embeddedData->Zxx[i][7] <= '9')
+							tmp += (embeddedData->Zxx[i][7] - '0');
+						else if (embeddedData->Zxx[i][7] >= 'A' && embeddedData->Zxx[i][7] <= 'F')
+							tmp += (embeddedData->Zxx[i][7] - 'A' + 0xA);
 
 						sampler->SetZxxMacro(i,mode,tmp);
 					}
@@ -292,35 +306,42 @@ Special:  Bit 0: On = song message attached.
 			for (i=0;i<itFileH.insNum;i++)
 			{
 				Seek(pointersi[i]);
+				XMInstrument instr;
 				if (itFileH.ffv < 0x200 ) {
-					XMInstrument instr;
-					LoadOldITInst(instr,i);
-					song.xminstruments.SetInst(instr,i);
+					itInsHeader1x curH;
+					Read(&curH,sizeof(curH));
+					LoadOldITInst(curH,instr,i);
 				}
 				else {
-					XMInstrument instr;
-					LoadITInst(instr,i);
-					song.xminstruments.SetInst(instr,i);
+					itInsHeader2x curH;
+					Read(&curH,sizeof(curH));
+					LoadITInst(curH, instr,i);
 				}
+				song.xminstruments.SetInst(instr,i);
 			}
 			for (i=0;i<itFileH.sampNum;i++)
 			{
 				Seek(pointerss[i]);
 				XMInstrument::WaveData wave;
-				LoadITSample(wave,i);
+				itSampleHeader curH;
+				Read(&curH,sizeof(curH));
+				bool created = LoadITSample(curH,wave,i);
 				// If this MOD doesn't use Instruments, we need to map the notes manually.
-				if ( !(itFileH.flags & Flags::USEINSTR)) 
+				if (created && !(itFileH.flags & Flags::USEINSTR)) 
 				{
-					XMInstrument instr;
-					instr.Init();
+					if (song.xminstruments.IsEnabled(i) ==false) {
+						XMInstrument instr;
+						instr.Init();
+						song.xminstruments.SetInst(instr,i);
+					}
+					XMInstrument& instrument = song.xminstruments.get(i);
 					XMInstrument::NotePair npair;
 					npair.second=i;
 					for(int j = 0;j < XMInstrument::NOTE_MAP_SIZE;j++){
 						npair.first=j;
-						instr.NoteToSample(j,npair);
+						instrument.NoteToSample(j,npair);
 					}
-					instr.IsEnabled(true);
-					song.xminstruments.SetInst(instr,i);
+					instrument.IsEnabled(true);
 				}
 				song.samples.SetSample(wave,i);
 			}
@@ -345,11 +366,8 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadOldITInst(XMInstrument &xins,int iInstIdx)
+		bool ITModule2::LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins,int iInstIdx)
 		{
-			itInsHeader1x curH;
-			Read(&curH,sizeof(curH));
-
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
@@ -381,30 +399,13 @@ Special:  Bit 0: On = song message attached.
 					xins.AmpEnvelope().LoopStart(curH.loopS);
 					xins.AmpEnvelope().LoopEnd(curH.loopE);
 				}
+				for(int i = 0; i < 25;i++){
+					std::uint8_t tick = curH.nodepair[i].first;
+					std::uint8_t value = curH.nodepair[i].second;
+					if (value == 0xFF || tick == 0xFF) break;
 
-/*
-			// load IT 1xx volume envelope
-				_mm_read_UBYTES (ih.volenv, 200, modreader);
-				for (lp = 0; lp < ITENVCNT; lp++)
-				{
-					ih.oldvoltick[lp] = _mm_read_UBYTE (modreader);
-					ih.volnode[lp] = _mm_read_UBYTE (modreader);
+					xins.AmpEnvelope().Append(tick,(float)value/ 64.0f);
 				}
-				if (ih.volflg & 1)
-				{
-				for (u = 0; u < ITENVCNT; u++)
-					{
-						if (ih.oldvoltick[d->volpts] != 0xff)
-						{
-							d->volenv[d->volpts].val = (ih.volnode[d->volpts] << 2);
-							d->volenv[d->volpts].pos = ih.oldvoltick[d->volpts];
-							d->volpts++;
-						}
-						else break;
-					}
-				}
- */
-
 			}
 			xins.PanEnvelope().Init();
 			xins.PitchEnvelope().Init();
@@ -412,11 +413,8 @@ Special:  Bit 0: On = song message attached.
 			xins.IsEnabled(true);
 			return true;
 		}
-		bool ITModule2::LoadITInst(XMInstrument &xins,int iInstIdx)
+		bool ITModule2::LoadITInst(const itInsHeader2x& curH, XMInstrument &xins,int iInstIdx)
 		{
-			itInsHeader2x curH;
-
-            Read(&curH,sizeof(curH));
 			std::string itname(curH.sName);
 			xins.Name(itname);
 
@@ -440,13 +438,13 @@ Special:  Bit 0: On = song message attached.
 			xins.RandomPanning(curH.randPan);
 			if ( (curH.inFC&0x80) != 0)
 			{
-				xins.FilterType(dsp::F_LOWPASS12);
+				xins.FilterType(dsp::F_ITLOWPASS);
 				int fc = curH.inFC&0x7F;
 				xins.FilterCutoff(fc);
 			}
 			if ((curH.inFR&0x80) != 0)
 			{
-					xins.FilterType(dsp::F_LOWPASS12);
+				xins.FilterType(dsp::F_ITLOWPASS);
 				xins.FilterResonance(curH.inFR&0x7F);
 			}
 
@@ -530,7 +528,7 @@ Special:  Bit 0: On = song message attached.
 
 				if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
 				{
-					xins.FilterType(dsp::F_LOWPASS12);
+					xins.FilterType(dsp::F_ITLOWPASS);
 					xins.FilterEnvelope().IsEnabled(true);
 					xins.PitchEnvelope().IsEnabled(false);
 					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
@@ -580,10 +578,15 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITSample(XMInstrument::WaveData& _wave,int iSampleIdx)
+		bool ITModule2::LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData& _wave,int iSampleIdx)
 		{
-			itSampleHeader curH;
-			Read(&curH,sizeof(curH));
+			char renamed[26];
+			for(int i=0;i<25;i++){
+				if(curH.sName[i]=='\0') renamed[i]=' ';
+				else renamed[i] = curH.sName[i];
+			}
+			renamed[25]='\0';
+			std::string sName = renamed;
 
 /*		      Flg:      Bit 0. On = sample associated with header.
 			Bit 1. On = 16 bit, Off = 8 bit.
@@ -632,18 +635,20 @@ Special:  Bit 0: On = song message attached.
 				_wave.WaveVolume(curH.vol *2);
 				_wave.WaveGlobVolume(curH.gVol /64.0f);
 
-				double tune = log(double(curH.c5Speed)/8363.0f)/log(double(2));
-				double maintune = floor(tune*12);
-				double finetune = floor(((tune*12)-maintune)*256);
+
+//				Older method. conversion from speed to tune. Replaced by using the samplerate directly
+//				double tune = log(double(curH.c5Speed)/8363.0f)/log(double(2));
+//				double maintune = floor(tune*12);
+//				double finetune = floor(((tune*12)-maintune)*100);
 
 				int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
 					XMInstrument::WaveData::WaveForms::SAWDOWN,
 					XMInstrument::WaveData::WaveForms::SQUARE,
 					XMInstrument::WaveData::WaveForms::RANDOM
 				};
-				_wave.WaveTune(maintune);
-				_wave.WaveFineTune(finetune);
-				std::string sName = curH.sName;
+//				_wave.WaveTune(maintune);
+//				_wave.WaveFineTune(finetune);
+				_wave.WaveSampleRate(curH.c5Speed);
 				_wave.WaveName(sName);
 				_wave.PanEnabled(curH.dfp&0x80);
 				_wave.PanFactor((curH.dfp&0x7F)/64.0f);
@@ -652,25 +657,24 @@ Special:  Bit 0: On = song message attached.
 				_wave.VibratoDepth(curH.vibD);
 				_wave.VibratoType(exchwave[curH.vibT&3]);
 
-				if (curH.length == 0)
-					curH.flg &= ~SampleFlags::HAS_SAMPLE;
-				else {
+				if (curH.length > 0) {
 					Seek(curH.smpData);
 					if (bcompressed) LoadITCompressedData(_wave,iSampleIdx,curH.length,b16Bit,curH.cvt);
 					else LoadITSampleData(_wave,iSampleIdx,curH.length,bstereo,b16Bit,curH.cvt);
 				}
+				return true;
 			}
 
-			return true;
+			return false;
 		}
 
-		bool ITModule2::LoadITSampleData(XMInstrument::WaveData& _wave,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit, unsigned char convert)
+		bool ITModule2::LoadITSampleData(XMInstrument::WaveData& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
 			signed short wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
 			int lobit=(convert & SampleConvert::IS_MOTOROLA)?8:0;
 			int hibit=8-lobit;
-			unsigned int j,out;
+			std::uint32_t j,out;
 
 			if (b16Bit) iLen*=2;
 			unsigned char * smpbuf = new unsigned char[iLen];
@@ -711,10 +715,10 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData& _wave,int iSampleIdx,unsigned int iLen,bool b16Bit,unsigned char convert)
+		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
-			unsigned long topsize, val,j;
+			std::uint32_t topsize, val,j;
 			short d1, d2,wNew;
 			char d18,d28;
 
@@ -733,8 +737,8 @@ Special:  Bit 0: On = song message attached.
 				if (!block.ReadBlock(this)) return false;
 
 				// Size of the block of data to process, in blocks of max size=0x8000bytes ( 0x4000 samples if 16bits)
-				int blocksize=(iLen-j<topsize)?iLen-j:topsize;
-				long blockpos=0;
+				std::uint32_t blocksize=(iLen-j<topsize)?iLen-j:topsize;
+				std::uint32_t blockpos=0;
 
 				bitwidth = maxbitsize+1;
 				d1 = d2 = 0;
@@ -1122,9 +1126,12 @@ Special:  Bit 0: On = song message attached.
 							pent._cmd = XMSampler::CMD::EXTENDED;
 							if ( embeddedData)
 							{
-								//\todo: SFx is never initialized. I need to check why I did it this way also. Leaving the defaults for now.
-							//	pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xf)][5]-48);
-								pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (param & 0xf);
+								std::string zxx = embeddedData->SFx[(param & 0xF)];
+								std::string zxx2 = zxx.substr(0,5);
+								if ( zxx2 == "F0F00")
+								{
+									pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xF)][5]-'0');
+								}
 							}
 							break;
 					}
@@ -1178,7 +1185,7 @@ Special:  Bit 0: On = song message attached.
 			song.comments.append(szName);
 
 			song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
+			int connectionIdx = song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
 			song.seqBus=0;
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
@@ -1192,7 +1199,7 @@ Special:  Bit 0: On = song message attached.
 			sampler->IsAmigaSlides(true);
 			sampler->GlobalVolume((s3mFileH.gVol&0x7F)*2);
 			
-			int j,i=0;
+			std::uint16_t j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
 			{
 				song.playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
@@ -1209,54 +1216,49 @@ Special:  Bit 0: On = song message attached.
 			Read(pointersi,s3mFileH.insNum*sizeof(unsigned short));
 			unsigned short * pointersp = new unsigned short[s3mFileH.patNum];
 			Read(pointersp,s3mFileH.patNum*sizeof(unsigned short));
-
-			bool stereo=s3mFileH.mVol&0x80;
-			if (!stereo) sampler->PanningMode(XMSampler::PanningMode::TwoWay);
-			int numchans=0;
-			for (i=0;i<32;i++)
-			{
-				if (stereo)
-				{
-					if (s3mFileH.chanSet[i]&S3MChanType::ISRIGHTCHAN)
-						sampler->rChannel(i).DefaultPanFactorFloat(0.75f,true);
-					else if ( !(s3mFileH.chanSet[i]&S3MChanType::ISADLIBCHAN))
-						sampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
-					else 
-						sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
-				}
-				else
-					sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
-				if ( s3mFileH.chanSet[i]!=S3MChanType::ISUNUSED) 
-				{
-					numchans=i+1; // topmost used channel.
-					if((s3mFileH.chanSet[i]&S3MChanType::ISDISABLED))
-					{
-						sampler->rChannel(i).DefaultIsMute(true);
-					}
-				}
-				else
-				{
-					sampler->rChannel(i).DefaultIsMute(true);
-				}
-			}
-			song.SONGTRACKS=std::max(numchans,4);
-
 			unsigned char chansettings[32];
 			if ( s3mFileH.defPan==0xFC )
 			{
 				Read(chansettings,sizeof(chansettings));
-				if (stereo)
+			}
+			bool stereo=s3mFileH.mVol&0x80;
+			if (stereo) {
+				// Note that in stereo, the mastermul is internally multiplied by 11/8 inside the player since
+				// there is generally more room in the output stream
+				sampler->SetDestWireVolume(connectionIdx,((s3mFileH.mVol&0x7F)/128.0f)*(11.f/8.f));
+			}
+			int numchans=0;
+			for (i=0;i<32;i++)
+			{
+				if ( s3mFileH.chanSet[i]==S3MChanType::ISUNUSED) 
 				{
-					for (i=0;i<32;i++)
+					sampler->rChannel(i).DefaultIsMute(true);
+					sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
+				}
+				else
+				{
+					numchans=i+1; // topmost used channel.
+					if(s3mFileH.chanSet[i]&S3MChanType::ISDISABLED)
 					{
-						if (chansettings[i]&S3MChanType::HASCUSTOMPOS)
+						sampler->rChannel(i).DefaultIsMute(true);
+					}
+					if (stereo && !(s3mFileH.chanSet[i]&S3MChanType::ISADLIBCHAN))
+					{
+						if (s3mFileH.defPan && chansettings[i]&S3MChanType::HASCUSTOMPOS)
 						{
 							float flttmp=(chansettings[i]&0x0F)/15.0f;
 							sampler->rChannel(i).DefaultPanFactorFloat(flttmp,true);
 						}
+						else if (s3mFileH.chanSet[i]&S3MChanType::ISRIGHTCHAN)
+							sampler->rChannel(i).DefaultPanFactorFloat(0.80f,true);
+						else 
+							sampler->rChannel(i).DefaultPanFactorFloat(0.20f,true);
 					}
+					else
+						sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
 				}
 			}
+			song.SONGTRACKS=std::max(numchans,4);
 
 			for (i=0;i<s3mFileH.insNum;i++)
 			{
@@ -1272,13 +1274,13 @@ Special:  Bit 0: On = song message attached.
 				LoadS3MPatternX(i);
 			}
 			song.SONGTRACKS=m_maxextracolumn;
-			delete [] pointersi; pointersi = 0;
-			delete [] pointersp; pointersp = 0;
+			delete[] pointersi; pointersi = 0;
+			delete[] pointersp; pointersp = 0;
 
 			return true;
 		}
 
-		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,int iInstIdx)
+		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,std::uint16_t iInstIdx)
 		{
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
@@ -1304,7 +1306,7 @@ Special:  Bit 0: On = song message attached.
 			}
 			else if ( curH.type != 0)
 			{
-/*
+/*					reinterpret_cast<s3madlibheader*>(&curH)
 *
 OFFSET              Count TYPE   Description
 0000h                   1 byte   Instrument type
@@ -1346,7 +1348,7 @@ OFFSET              Count TYPE   Description
 			return false;
 		}
 
-		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData& _wave,s3mSampleHeader *currHeader,int iInstIdx,int iSampleIdx)
+		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx)
 		{
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
@@ -1364,44 +1366,18 @@ OFFSET              Count TYPE   Description
 
 			_wave.WaveVolume(currHeader->vol * 2);
 
-			double tune = log(double(currHeader->c2speed)/8363.0f)/log(double(2));
-			double maintune = floor(tune*12);
-			double finetune = floor(((tune*12)-maintune)*256);
+//			Older method. conversion from speed to tune. Replaced by using the samplerate directly
+//			double tune = log(double(currHeader->c2speed)/8363.0f)/log(double(2));
+//			double maintune = floor(tune*12);
+//			double finetune = floor(((tune*12)-maintune)*100);
 
-			_wave.WaveTune(maintune);
-			_wave.WaveFineTune(finetune);
+//			_wave.WaveTune(maintune);
+//			_wave.WaveFineTune(finetune);
+			_wave.WaveSampleRate(currHeader->c2speed);
 
 			std::string sName = currHeader->sName;
 			_wave.WaveName(sName);
 
-/*|4|
-			+-+In your MOD loader, when loading in the fine tune value, convert it to
-			C2SPD.  You do this by looking up what finetune matches what C2SPD.
-			i.e.  Like this. (this is a switch statement I use that is fed the value
-			read from the file, and returns the C2SPD to match it)
-
-			The value is a signed char, ranging from -8 to 7 , so actually,  8= -8 , 9 = -7 ....
-
-			case  0 : return 8363; 0
-			case  1 : return 8413; 1
-			case  2 : return 8463; 2
-			case  3 : return 8529; 3
-			case  4 : return 8581; 4
-			case  5 : return 8651; 5
-			case  6 : return 8723; 6
-			case  7 : return 8757; 7 
-			case  8 : return 7895; -8
-			case  9 : return 7941; -7
-			case 10 : return 7985; -6
-			case 11 : return 8046; -5
-			case 12 : return 8107; -4
-			case 13 : return 8169; -3
-			case 14 : return 8232; -2
-			case 15 : return 8280; -1
-			default : return 8363; 0
-
-			In Scream Tracker, the command S2x can use these values, but they are shifted ( S20 = -8 , S21 = -7 .. S2F =7)
-*/
 			int newpos=((currHeader->hiMemSeg<<16)+currHeader->lomemSeg)<<4;
 			Seek(newpos);
 			LoadS3MSampleDataX(_wave,iInstIdx,iSampleIdx,currHeader->length,bstereo,b16Bit,currHeader->packed);
@@ -1409,7 +1385,7 @@ OFFSET              Count TYPE   Description
 			return true;
 		}
 
-		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData& _wave,int iInstIdx,int iSampleIdx,unsigned int iLen,bool bstereo,bool b16Bit,bool packed)
+		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{
@@ -1427,9 +1403,11 @@ OFFSET              Count TYPE   Description
 				if ( s3mFileH.trackerInf==1) offset=0; // 1=[VERY OLD] signed samples, 2=unsigned samples
 				else offset=-32768;
 
+				//+2=stereo (after Length bytes for LEFT channel, another Length bytes for RIGHT channel)
+                //+4=16-bit sample (intel LO-HI byteorder) (+2/+4 not supported by ST3.01)
 				if(b16Bit) {
 					int out=0;
-					if (bstereo) { // \todo : The storage of stereo samples needs to be checked.
+					if (bstereo) {
 						_wave.AllocWaveData(iLen,true);
 						unsigned int j;
 						for(j=0;j<iLen*2;j+=2)
@@ -1451,7 +1429,7 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 							out++;
 						}
 					}
@@ -1462,13 +1440,13 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 						Read(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					} else {
 						_wave.AllocWaveData(iLen,false);
@@ -1476,7 +1454,7 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					}
 				}
@@ -1488,9 +1466,9 @@ OFFSET              Count TYPE   Description
 			return false;
 		}
 
-		bool ITModule2::LoadS3MPatternX(int patIdx)
+		bool ITModule2::LoadS3MPatternX(std::uint16_t patIdx)
 		{
-			unsigned char newEntry;
+			std::uint8_t newEntry;
 			PatternEntry pempty;
 			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
@@ -1505,8 +1483,8 @@ OFFSET              Count TYPE   Description
 				Read(&newEntry,1);
 				while ( newEntry )
 				{
-					char channel=newEntry&31;
-					unsigned char volume=255;
+					std::uint8_t channel=newEntry&31;
+					std::uint8_t volume=255;
 					if(newEntry&32)
 					{
 						std::uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off

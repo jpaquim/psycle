@@ -1,4 +1,3 @@
-
 #include <psycle/host/detail/project.private.hpp>
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
@@ -95,27 +94,23 @@ namespace psycle
 
 
 		// calculated table from the following formula:
-		// period =  pow(2.0,double(5-(note/12.0f))) * (2*7159090.5/8363);
-		// being 5 = the middle octave, 7159090.5 the Amiga Clock Speed and 8363 the middle C sample rate,
-		// so (2*7159090.5/8363) ~ 1712 ( middle C period )
-		// The original middle C period was 856, but it was multiplied by two on PC's to add fine pitch slide.
-		// The original table takes the lower octave values and multiplies them by two. 
-		// That didn't take care of the roundings of the values.
-
+		// period =  pow(2.0,double(5-(note/12.0f))) * 1712;
+		// being 5 = the middle octave (on PC), 1712 the middle C period on PC
+		// (on Amiga it was 428, which was multiplied by 4 on PC, to add fine pitch slide).
 		const float XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
-			54787,	51712,	48809,	46070,	43484,	41044,	38740,	36566,	34514,	32576,	30748,	29022,
-			27393,	25856,	24405,	23035,	21742,	20522,	19370,	18283,	17257,	16288,	15374,	14511,
-			13697,	12928,	12202,	11517,	10871,	10261,	9685,	9141,	8628,	8144,	7687,	7256,
-			6848,	6464,	6101,	5759,	5436,	5130,	4843,	4571,	4314,	4072,	3844,	3628,
-			3424,	3232,	3051,	2879,	2718,	2565,	2421,	2285,	2157,	2036,	1922,	1814,
-			1712,	1616,	1525,	1440,	1359,	1283,	1211,	1143,	1079,	1018,	961,	907,
-			856,	808,	763,	720,	679,	641,	605,	571,	539,	509,	480,	453,
-			428,	404,	381,	360,	340,	321,	303,	286,	270,	255,	240,	227,
-			214,	202,	191,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		57 
-
+			54784.00f,	51709.21f,	48806.99f,	46067.67f,	43482.09f,	41041.62f,	38738.13f,	36563.93f,	34511.76f,	32574.76f,	30746.48f,	29020.81f, //Oct 0
+			27392.00f,	25854.61f,	24403.50f,	23033.83f,	21741.04f,	20520.81f,	19369.07f,	18281.97f,	17255.88f,	16287.38f,	15373.24f,	14510.41f, //Oct 1
+			13696.00f,	12927.30f,	12201.75f,	11516.92f,	10870.52f,	10260.41f,	9684.53f,	9140.98f,	8627.94f,	8143.69f,	7686.62f,	7255.20f, //Oct 2
+			6848.00f,	6463.65f,	6100.87f,	5758.46f,	5435.26f,	5130.20f,	4842.27f,	4570.49f,	4313.97f,	4071.85f,	3843.31f,	3627.60f, //Oct 3
+			3424.00f,	3231.83f,	3050.44f,	2879.23f,	2717.63f,	2565.10f,	2421.13f,	2285.25f,	2156.98f,	2035.92f,	1921.66f,	1813.80f, //Oct 4
+			1712.00f,	1615.91f,	1525.22f,	1439.61f,	1358.82f,	1282.55f,	1210.57f,	1142.62f,	1078.49f,	1017.96f,	960.828f,	906.900f, //Oct 5 (middle)
+			856.000f,	807.956f,	762.609f,	719.807f,	679.408f,	641.275f,	605.283f,	571.311f,	539.246f,	508.981f,	480.414f,	453.450f, //Oct 6
+			428.000f,	403.978f,	381.305f,	359.904f,	339.704f,	320.638f,	302.642f,	285.656f,	269.623f,	254.490f,	240.207f,	226.725f, //Oct 7
+			214.000f,	201.989f,	190.652f,	179.952f,	169.852f,	160.319f,	151.321f,	142.828f,	134.812f,	127.245f,	120.103f,	113.363f, //Oct 8
+			107.000f,	100.995f,	95.3262f,	89.9759f,	84.9259f,	80.1594f,	75.6604f,	71.4139f,	67.4058f,	63.6226f,	60.0517f,	56.6813f //Oct 9
 		};
-		// Original table
+		// The original table, which takes the lower octave values and multiplies them by two,  
+		// failing to take care of the roundings of the values.
 /*		const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
 			54784,	51712,	48768,	46080,	43392,	40960,	38656,	36480,	34432,	32512,	30720,	29008,
 			27392,	25856,	24384,	23040,	21696,	20480,	19328,	18240,	17216,	16256,	15360,	14504,
@@ -304,6 +299,9 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::Voice  Implementation 
+		XMSampler::Voice::~Voice()
+		{
+		}
 		void XMSampler::Voice::Reset()
 		{
 			m_ChannelNum = -1;
@@ -317,7 +315,9 @@ namespace psycle
 			m_PitchEnvelope.Init();
 			m_PanEnvelope.Init();
 
-			m_Filter.Reset();
+			m_FilterIT.Reset();
+			m_FilterClassic.Reset();
+			m_Filter = &m_FilterIT;
 			m_CutOff = 127;
 			m_Ressonance = 0;
 			_coModify = 0;
@@ -337,6 +337,20 @@ namespace psycle
 
 			ResetEffects();
 		}
+		void XMSampler::Voice::DisposeResampleData() 
+		{
+			if (resampler_data != NULL ) {
+				m_pSampler->Resampler().DisposeResamplerData(resampler_data);
+				resampler_data = NULL;
+			}
+		}
+		void XMSampler::Voice::RecreateResampleData(helpers::dsp::resampler& resampler)
+		{
+			if (IsPlaying()) {
+				resampler_data = resampler.GetResamplerData(static_cast<double>(rWave().Speed())/ 4294967296.0);
+			}
+		}
+
 
 		void XMSampler::Voice::ResetEffects()
 		{
@@ -394,55 +408,40 @@ namespace psycle
 			m_PitchEnvelope.Init(_inst.PitchEnvelope());
 			m_FilterEnvelope.Init(_inst.FilterEnvelope());
 
-//			m_Filter.Init();
-			m_Filter.Reset();
-			m_Filter.SampleRate(Global::player().SampleRate());
+			m_Filter->Init(Global::player().SampleRate());
 
-			//\todo: add the missing  Random options
-/*			if (_inst.RandomCutoff())
+			if (_inst.FilterCutoff() < 127 || _inst.FilterResonance() > 0)
 			{
-				CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
-			}
-			else*/ if (_inst.FilterCutoff() < 127)
-			{
-				CutOff(_inst.FilterCutoff());
-//				Ressonance(_inst.FilterResonance());
 				FilterType(_inst.FilterType());
-			} else if ( rChannel().Cutoff() < 127)
+				//\todo: add the missing  Random options
+	/*			if (_inst.RandomCutoff()) {
+					CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
+				} else */ {
+					CutOff(_inst.FilterCutoff());
+				}
+	/*			if (_inst.RandomResonance()) {
+					Ressonance(_inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f);
+				}
+				else */ {
+					Ressonance(_inst.FilterResonance());
+				}
+			}
+			else if ( rChannel().Cutoff() < 127 || rChannel().Ressonance() > 0)
 			{
 				FilterType(rChannel().FilterType());
 				CutOff(rChannel().Cutoff());
-//				Ressonance(rChannel().Ressonance());
+				Ressonance(rChannel().Ressonance());
 			}
+			//TODO: Study this situation for precedence.
 			else if (_inst.FilterEnvelope().IsEnabled())
 			{
 				FilterType(_inst.FilterType());
 				CutOff(127);
+				Ressonance(0);
 			}
 			else 
 			{
 				CutOff(127);
-			}
-
-			
-/*			if (_inst.RandomResonance())
-			{
-				m_Filter._q = _inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f;
-			}
-			else */ if (_inst.FilterResonance() > 0)
-			{
-//				CutOff(_inst.FilterCutoff());
-				Ressonance(_inst.FilterResonance());
-				FilterType(_inst.FilterType());
-			} else if ( rChannel().Ressonance() > 0)
-			{
-				FilterType(rChannel().FilterType());
-//				CutOff(rChannel().Cutoff());
-				Ressonance(rChannel().Ressonance());
-			}
-			else
-			{
-				//CutOff(127);
 				Ressonance(0);
 			}
 
@@ -452,8 +451,6 @@ namespace psycle
 
 		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, dsp::resampler& resampler)
 		{
-			dsp::resampler::work_func_type resampler_work = resampler.work;
-
 			float left_output = 0.0f;
 			float right_output = 0.0f;
 
@@ -467,7 +464,7 @@ namespace psycle
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 1 : Get the unprocessed wave data.
 
-				m_WaveDataController.Work(&left_output,&right_output,resampler_work);
+				m_WaveDataController.Work(&left_output,&right_output,resampler.work, resampler_data);
 
 			//////////////////////////////////////////////////////////////////////////
 			//  Step 2 : Process the Envelopes.
@@ -528,24 +525,24 @@ namespace psycle
 				right_output *= volume;
 
 				// Filter section
-				if (m_Filter.Type() != dsp::F_NONE)
+				if (m_Filter->Type() != dsp::F_NONE)
 				{
 					if(m_FilterEnvelope.Envelope().IsEnabled()){
 						m_FilterEnvelope.Work();
 						int tmpCO = int(m_CutOff * m_FilterEnvelope.ModulationAmount());
 						if (tmpCO < 0) { tmpCO = 0; }
 						else if (tmpCO > 127) { tmpCO = 127; }
-						m_Filter.Cutoff(tmpCO);
+						m_Filter->Cutoff(tmpCO);
 					}
 					if ( m_pSampler->UseFilters() )
 					{
 						if (m_WaveDataController.IsStereo())
 						{
-							m_Filter.WorkStereo(left_output, right_output);
+							m_Filter->WorkStereo(left_output, right_output);
 						}
 						else
 						{
-							m_Filter.Work(left_output);
+							left_output = m_Filter->Work(left_output);
 						}
 					}
 				}
@@ -612,6 +609,11 @@ namespace psycle
 			m_Period=NoteToPeriod(pair.first,false);
 			m_NNA = rInstrument().NNA();
 			//\todo : add pInstrument().LinesMode
+			if (resampler_data != NULL) {
+				m_pSampler->Resampler().DisposeResamplerData(resampler_data);
+				resampler_data = NULL;
+			}
+			resampler_data = m_pSampler->Resampler().GetResamplerData(1.0);
 
 			ResetVolAndPan(playvol,reset);
 
@@ -623,8 +625,6 @@ namespace psycle
 			}
 			//Important, put it after m_PitchEnvelope.NoteOn(); (currently done inside ResetVolAndPan)
 			UpdateSpeed();
-			// Attempt at Self-filtered samples. It filters too much.
-			//if  (m_Filter.Type() == dsp::F_NONE && m_pSampler->UseFilters()) m_Filter.Type(dsp::F_LOWPASS12);
 
 			m_WaveDataController.Playing(true);
 			IsPlaying(true);
@@ -938,31 +938,27 @@ namespace psycle
 
 			const double speed=PeriodToSpeed(_period);
 			rWave().Speed(speed);
-			// Attempt at Self-filtered samples. It filters too much.
-			// Instead, what has to be done is set the speed to the resampler
-			// and apply a filter before resampling.
-//			m_Filter.SampleSpeed(speed*(double)Global::player().SampleRate());
+			m_pSampler->Resampler().UpdateSpeed(resampler_data, speed);
 		}
 
 		double XMSampler::Voice::PeriodToSpeed(int period) const
 		{
 			if(m_pSampler->IsAmigaSlides()){
-				// amiga period mode
-				// 14318181 = 7159090.5*2 (clockspeed*2)
-				// in xm-form.txt, there is 14317456 = 8363Hz* 1712(center-period),
-				// and in fs3mdoc there's the value 14317056 , which i assume wrong.
-				return ( 14318181  / period ) / (double)Global::player().SampleRate() * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0);
+				// Amiga period mode. Original conversion:
+				//	PAL:   7093789.2 / (428 * 2) = 8287.14 samples   ( Amiga clock frequency, middle C period 
+				//	NSTC:  7159090.5 / (428 * 2) = 8363.42 samples     and *2 to adapt frequency to samples)
+				// in PC, the middle C period is 1712, because there are fine pitch slides.
+				return ( 1712 * rWave().Wave().WaveSampleRate() / period ) / (double)Global::player().SampleRate() * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0);
 			} else {
 				// Linear Frequency
-				// 8363*2^((7*12*64 - Period) / (12*64))
-				// 8363=Hz for Middle-C note
+				// base_samplerate * 2^((7*12*64 - Period) / (12*64))
 				// 12*64 = 12 notes * 64 finetune steps.
-				// 7 = 12-middle_C ( if C-4 is middle_C, then 8*12*64, if C-3, then 9*12*64, etc..)
+				// 7 = 12 - middle_C ( if C-4 is middle_C, then 8*12*64, if C-3, then 9*12*64, etc..)
 				return	pow(2.0,
 							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
 							 /768.0)
 						)
-						* 8363 / (double)Global::player().SampleRate();
+						* rWave().Wave().WaveSampleRate() / (double)Global::player().SampleRate();
 			}
 		}
 
@@ -974,13 +970,13 @@ namespace psycle
 			if(m_pSampler->IsAmigaSlides())
 			{
 				// Amiga Period . Nonstandard table, but *maybe* more accurate.
-				double speedfactor =  pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()/256.0))/12.0);
+				double speedfactor =  pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0);
 //				double c5speed =  8363.0*speedfactor;
 				return AmigaPeriod[note]/speedfactor;
 			} else {
 				// 9216 = 12notes*12octaves*64fine.
 				return 9216 - ((double)(note + _wave.WaveTune()) * 64.0)
-					- ((double)(_wave.WaveFineTune()) * 0.25); // 0.25 since the range is +-256 for XMSampler as opposed to +-128 for FT.
+					- ((double)(_wave.WaveFineTune()) * 0.64); // 0.64 since the range is +-100 for XMSampler as opposed to +-128 for FT.
 			}
 		}
 
@@ -991,23 +987,23 @@ namespace psycle
 			if(m_pSampler->IsAmigaSlides()){
 				// f1
 				//period =  pow(2.0,double(15.74154-(note/12.0f)))
-				// log2(period) = 15.74154 - (note+wavetune+(finetune/256.0f))/12.0f
-				// note = (15.74154 - log2(period))*12 - tune - (fine/256)
+				// log2(period) = 15.74154 - (note+wavetune+(finetune*0.01))/12.0f
+				// note = (15.74154 - log2(period))*12 - tune - (fine*0.01)
 				//f2
-				//period = pow(2.0,(116.898 - ((double)(note + _wave.WaveTune()) + ((double)_wave.WaveFineTune() / 128.0))/12.0) * 32;
-				//log2(period/32) = (116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune() / 128.0))/12.0;
-				//log2(period/32)*12 =  116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune() / 128.0)
-				//note = 116.898 - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune() / 128.0) - (log2(period/32)*12); 
-				int _note = (int)(116.898 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0) 
+				//period = pow(2.0,(116.898 - ((double)(note + _wave.WaveTune()) + ((double)_wave.WaveFineTune() *0.01))/12.0) * 32;
+				//log2(period/32) = (116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune()*0.01))/12.0;
+				//log2(period/32)*12 =  116.898 - (double)note - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune()*0.01)
+				//note = 116.898 - (double)_wave.WaveTune() + ((double)_wave.WaveFineTune()*0.01) - (log2(period/32)*12); 
+				int _note = (int)(116.898 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune()*0.01) 
 					-(12.0 * log((double)period / 32.0)/(0.301029995f /*log(2)*/ )));
 				return _note+12;
 			} else {
 				// period = ((12.0 * 12.0 * 64.0 - ((double)note + (double)_wave.WaveTune()) * 64.0)
-				//	- (_wave.WaveFineTune() / 256.0) * 64.0);
-				// period / 64.0 = 12.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune() / 256.0;
-				// note = (int)(12.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() / 256.0 - period / 64.0 + 0.5);
+				//	- (_wave.WaveFineTune() *0.01) * 64.0);
+				// period / 64.0 = 12.0 * 12.0  - ((double)note + (double)_wave.WaveTune()) - _wave.WaveFineTune()*0.01;
+				// note = (int)(12.0 * 12.0  - (double)_wave.WaveTune() - _wave.WaveFineTune() *0.01 - period / 64.0 + 0.5);
 
-				return (int)(144 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() / 256.0)  - (period / 64.0)); // Apparently,  (int)(x.5) rounds to x+1, so no need for +0.5
+				return (int)(144 - (double)_wave.WaveTune() - ((double)_wave.WaveFineTune() *0.01)  - (period *0.015625)); // Apparently,  (int)(x.5) rounds to x+1, so no need for +0.5
 			}
 		}
 
@@ -1242,7 +1238,7 @@ namespace psycle
 				{
 				case 0:
 					m_Cutoff=realValue;
-					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_LOWPASS12;
+					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_ITLOWPASS;
 					if ( voice) 
 					{
 						voice->FilterType(m_FilterType);
@@ -1251,7 +1247,7 @@ namespace psycle
 					break;
 				case 1:
 					m_Ressonance=realValue;
-					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_LOWPASS12;
+					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_ITLOWPASS;
 					if ( voice )
 					{
 						voice->FilterType(m_FilterType);
@@ -1932,7 +1928,7 @@ namespace psycle
 		}
 		bool XMSampler::Channel::Load(RiffFile& riffFile)
 		{
-			char temp[6];
+			char temp[8];
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
@@ -1942,7 +1938,9 @@ namespace psycle
 			riffFile.Read(m_DefaultPanFactor);
 			riffFile.Read(m_DefaultCutoff);
 			riffFile.Read(m_DefaultRessonance);
-			riffFile.Read(&m_DefaultFilterType,sizeof(dsp::FilterType));
+			int var;
+			riffFile.Read(var);
+			m_DefaultFilterType = static_cast<dsp::FilterType>(var);
 
 			return true;
 		}
@@ -1955,7 +1953,9 @@ namespace psycle
 			riffFile.Write(m_DefaultPanFactor);
 			riffFile.Write(m_DefaultCutoff);
 			riffFile.Write(m_DefaultRessonance);
-			riffFile.Write(&m_DefaultFilterType,sizeof(dsp::FilterType));
+			int var;
+			var = m_DefaultFilterType;
+			riffFile.Write(var);
 		}
 
 
@@ -2219,7 +2219,7 @@ namespace psycle
 							return;
 						}
 						const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
-						int _layer = _inst.NoteToSample(pData->_note).second;
+						int _layer = _inst.NoteToSample(thisChannel.Note()).second;
 						if(Global::song().samples.IsEnabled(_layer))
 						{
 							const XMInstrument::WaveData& wave = Global::song().samples[_layer];
@@ -2576,16 +2576,16 @@ namespace psycle
 			int temp;
 			// we cannot calculate the size previous to save, so we write a placeholder
 			// and seek back to write the correct value.
-			unsigned long size = 0;
+			std::uint32_t size = 0;
 			size_t filepos = riffFile->GetPos();
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
 			riffFile->Write(_numVoices);
 			switch (_resampler.quality())
 			{
-				case helpers::dsp::resampler::quality::none: temp = 0; break;
+				case helpers::dsp::resampler::quality::zero_order: temp = 0; break;
 				case helpers::dsp::resampler::quality::spline: temp = 2; break;
-				case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
+				case helpers::dsp::resampler::quality::sinc: temp = 3; break;
 				case helpers::dsp::resampler::quality::linear: //fallthrough
 				default: temp = 1;
 			}
@@ -2639,7 +2639,7 @@ namespace psycle
 			
 			size_t endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
-			size = (unsigned long) (endpos - filepos -sizeof(size));
+			size = static_cast<std::uint32_t>(endpos - filepos -sizeof(size));
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Seek(endpos);
 
@@ -2651,7 +2651,7 @@ namespace psycle
 			bool wrongState=false;
 			std::uint32_t filevers;
 			size_t filepos;
-			long size=0;
+			std::uint32_t size=0;
 			riffFile->Read(&size,sizeof(size));
 			filepos=riffFile->GetPos();
 			riffFile->Read(filevers);
@@ -2666,8 +2666,8 @@ namespace psycle
 				switch (temp)
 				{
 					case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
-					case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
-					case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+					case 3:	_resampler.quality(helpers::dsp::resampler::quality::sinc); break;
+					case 0:	_resampler.quality(helpers::dsp::resampler::quality::zero_order); break;
 					case 1:
 					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}

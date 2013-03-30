@@ -5,6 +5,7 @@
 #include "Global.hpp"
 #include "Machine.hpp"
 #include <psycle/helpers/filter.hpp>
+#include <psycle/helpers/resampler.hpp>
 namespace psycle
 {
 	namespace host
@@ -43,6 +44,7 @@ namespace psycle
 			const std::int16_t* _pL;
 			const std::int16_t* _pR;
 			bool _stereo;
+			int _samplerate;
 			ULARGE_INTEGER _pos;
 			signed __int64 _speed;
 			bool _loop;
@@ -71,6 +73,8 @@ namespace psycle
 		class Voice
 		{
 		public:
+			Voice();
+			~Voice();
 			Envelope _filterEnv;
 			Envelope _envelope;
 			int _sampleCounter;
@@ -89,6 +93,7 @@ namespace psycle
 			int effretTicks;
 			float effretVol;
 			int effOld;
+			void* resampler_data;
 		};
 
 		/// sampler.
@@ -97,6 +102,7 @@ namespace psycle
 			friend CGearTracker;
 		public:
 			Sampler(int index);
+			virtual ~Sampler();
 			virtual void Init(void);
 			virtual void NewLine();
 			virtual void Tick(int channel, PatternEntry* pData);
@@ -119,6 +125,20 @@ namespace psycle
 			}
 			bool isDefaultC4() {
 				return baseC == 60;
+			}
+			void ChangeResamplerQuality(helpers::dsp::resampler::quality::type quality) {
+				for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+				{
+					if (_voices[i].resampler_data != NULL) _resampler.DisposeResamplerData(_voices[i].resampler_data);
+				}
+				_resampler.quality(quality);
+				for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+				{
+					if (_voices[i]._envelope._stage != ENV_OFF) {
+						double speeddouble = static_cast<double>(_voices[i]._wave._speed)/4294967296.0f;
+						_voices[i].resampler_data = _resampler.GetResamplerData(speeddouble);
+					}
+				}
 			}
 
 		protected:

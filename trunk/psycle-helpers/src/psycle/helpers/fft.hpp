@@ -38,7 +38,7 @@
 **********************************************************************/
 #pragma once
 #include <cstddef>
-#include "dsp.hpp"
+#include "resampler.hpp"
 namespace psycle { namespace helpers { namespace dsp {
 	namespace dmfft {
 	/**
@@ -46,7 +46,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	* Given an array of floats, this will compute the power
 	* spectrum by doing a Real FFT and then computing the
 	* sum of the squares of the real and imaginary parts.
-	* Note that the output array is half the length of the
+	* Note that the output array is half the length PLUS ONE of the
 	* input array, and that NumSamples must be a power of two.
 		* Understanding In and Out:
 		* In is the samples (so, it is amplitude). You need to use a window function
@@ -119,7 +119,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		* powerdB is = 10 * log10(in)
 		* dB is = 20 * log10(in)
 		*/
-		void CalculateSpectrum(float samplesIn[], float samplesOut[]); 
+		void CalculateSpectrum(float samplesIn[], float samplesOut[]);
+		//This tries to reduce the calculated fft to represent the amount of bands indicated in setup
+		void FillBandsFromFFT(float calculatedfftIn[], float banddBOut[]);
 	protected:
 		void Reset();
 		void FillRectangularWindow(float window[], const std::size_t size, const float scale);
@@ -130,7 +132,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		void FillBlackmannWindow(float window[], const std::size_t size, const float scale);
 		void FillBlackmannHarrisWindow(float window[], const std::size_t size, const float scale);
 		std::size_t  Reverse_bits(std::size_t in);
-		bool IsPowerOfTwo(int x);
+		bool IsPowerOfTwo(size_t x);
+		float resample(float const * data, float offset, uint64_t length);
+		inline std::size_t getOutputSize() { return outputSize; }
 	private:
 		std::size_t bufferSize;
 		std::size_t bufferSizeLog;
@@ -148,18 +152,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		float *state_imag;
 		dsp::cubic_resampler resampler;
 
-	public:
-		//fftLog is initialized in setup, and can be used to scale the frequency, like this:
-		//	for (int h=0, a=0;h<sizeBands;h++) {
-		//		float j=tempout[a];
-		//		while(a<=fftSpec.fftLog[h]){
-		//			j = std::max(j,tempout[a]);
-		//			a++;
-		//		}
-		//		db[h]=powerdB(j+0.0000001f)+dbinvSamples;
-		//	}
-		inline std::size_t getOutputSize() { return outputSize; }
-		float resample(float const * data, float offset, uint64_t length);
+		//fftLog is initialized in setup, and can be used to scale the frequency, like is done in FillBandsFromFFT:
 		float *fftLog;
 	};
 }}}

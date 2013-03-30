@@ -13,7 +13,7 @@ namespace psycle
 		#define SHORT_MIN -32768
 		#define SHORT_MAX 32767
 
-		AudioDriverInfo SilentSettings::info_ = { "Silent" };
+		AudioDriverInfo SilentSettings::info_("Silent");
 
 		// returns random value between 0 and 1
 		// i got the magic numbers from csound so they should be ok but 
@@ -23,6 +23,8 @@ namespace psycle
 			static long stat = 0x16BA2118;
 			stat = (stat * 1103515245 + 12345) & 0x7fffffff;
 			return (double)stat * (1.0 / 0x7fffffff);
+		}
+		AudioDriverInfo::AudioDriverInfo(char const *info):_psName(info) {
 		}
 
 		AudioDriverSettings::AudioDriverSettings()

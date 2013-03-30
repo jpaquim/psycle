@@ -7,6 +7,7 @@
 #include "XMInstrument.hpp"
 
 #include <psycle/helpers/filter.hpp>
+#include <psycle/helpers/resampler.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 
@@ -172,15 +173,15 @@ XMSampler::Channel::PerformFX().
 
 		virtual void Init(const XMInstrument::WaveData* wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float *pLeftw,float *pRightw,  const helpers::dsp::resampler::work_func_type resampler_work)
+		virtual void Work(float *pLeftw,float *pRightw,  const helpers::dsp::resampler::work_func_type resampler_work, void* resampler_data)
 		{
 			//Process sample
 			*pLeftw = resampler_work(pLeft() + m_Position.HighPart,
-				m_Position.HighPart, m_Position.LowPart, Length());
+				m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
 			if (IsStereo())
 			{
 				*pRightw = resampler_work(pRight() + m_Position.HighPart,
-					m_Position.HighPart, m_Position.LowPart, Length());
+					m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
 			}
 
 			// Update Position
@@ -200,6 +201,7 @@ XMSampler::Channel::PerformFX().
 					if(curIntPos  >= m_CurrentLoopEnd)
 					{
 						Position(m_CurrentLoopEnd-(curIntPos-m_CurrentLoopEnd));
+						m_Position.LowPart = 4294967295 -m_Position.LowPart;
 						CurrentLoopDirection(LoopDirection::BACKWARD);
 					} 
 					break;
@@ -221,6 +223,7 @@ XMSampler::Channel::PerformFX().
 					if(curIntPos <= m_CurrentLoopStart)
 					{
 						Position(m_CurrentLoopStart+(m_CurrentLoopStart-curIntPos));
+						m_Position.LowPart = 4294967295 -m_Position.LowPart;
 						CurrentLoopDirection(LoopDirection::FORWARD);
 					} 
 				break;
@@ -251,7 +254,9 @@ XMSampler::Channel::PerformFX().
 		
 		// Current sample Speed
 		virtual __int64 Speed() const {return m_Speed;}
-		virtual void Speed(const double value){m_Speed = value * 4294967296.0;} // 4294967296 is a left shift of 32bits
+		virtual void Speed(const double value){
+			m_Speed = value * 4294967296.0; // 4294967296 is a left shift of 32bits
+		}
 
 		virtual int CurrentLoopDirection() const {return m_LoopDirection;}
 		virtual void CurrentLoopDirection(const int dir){m_LoopDirection = dir;}
@@ -278,7 +283,7 @@ XMSampler::Channel::PerformFX().
 		int m_Layer;
 		const XMInstrument::WaveData *m_pWave;
 		ULARGE_INTEGER m_Position;
-		double m_Speed;
+		__int64 m_Speed;
 		bool m_Playing;
 
 		int m_CurrentLoopType;
@@ -425,16 +430,17 @@ XMSampler::Channel::PerformFX().
 		///
 		friend class XMSampler::Channel;
 
-		Voice(){
+		Voice():resampler_data(NULL) {
 			Reset();
 		}
+		virtual ~Voice();
 
 		// Object Functions
 		void Reset();
 		void ResetEffects();
 
 		void VoiceInit(const XMInstrument& xins, int channelNum,int instrumentNum);
-		void Work(int numSamples,float * pSampleL,float *pSamlpesR,helpers::dsp::resampler& _resampler);
+		void Work(int numSamples,float * pSamplesL,float *pSamplesR,helpers::dsp::resampler& _resampler);
 
 		// This one is Tracker Tick (Mod-tick)
 		void Tick();
@@ -501,6 +507,9 @@ XMSampler::Channel::PerformFX().
 		XMSampler::EnvelopeController& PanEnvelope(){return m_PanEnvelope;}
 
 		WaveDataController& rWave() {return m_WaveDataController;}
+		const WaveDataController& rWave() const {return m_WaveDataController;}
+		void DisposeResampleData();
+		void RecreateResampleData(helpers::dsp::resampler& resampler);
 
 		bool IsPlaying() const { return m_bPlay;}
 		void IsPlaying(const bool value)
@@ -550,16 +559,28 @@ XMSampler::Channel::PerformFX().
 		int CutOff() const { return m_CutOff; }
 		void CutOff(int co)
 		{
-			m_CutOff = co; m_Filter.Cutoff(co);
+			m_CutOff = co; 
+			m_FilterIT.Cutoff(co);
+			m_FilterClassic.Cutoff(co);
 		}
 		
 		int Ressonance() const { return m_Ressonance; }
 		void Ressonance(int res)
 		{
-			m_Ressonance = res; m_Filter.Ressonance(res);
+			m_Ressonance = res; 
+			m_FilterIT.Ressonance(res);
+			m_FilterClassic.Ressonance(res);
 		}
 
-		void FilterType(dsp::FilterType ftype) { m_Filter.Type(ftype);}
+		void FilterType(dsp::FilterType ftype) {
+			if (ftype==dsp::F_ITLOWPASS) {
+				m_Filter = &m_FilterIT;
+			}
+			else {
+				m_Filter = &m_FilterClassic;
+			}
+			m_Filter->Type(ftype); 
+		}
 
 		void Period(int newperiod) { m_Period = newperiod; UpdateSpeed(); }
 		int Period() const { return m_Period; }
@@ -595,8 +616,11 @@ XMSampler::Channel::PerformFX().
 		EnvelopeController m_PitchEnvelope;
 
 		WaveDataController m_WaveDataController;
+		void * resampler_data;
 
-		dsp::ITFilter m_Filter;
+		dsp::ITFilter m_FilterIT;
+		dsp::Filter m_FilterClassic;
+		dsp::Filter* m_Filter;
 		int m_CutOff;
 		int m_Ressonance;
 		float _coModify;
@@ -967,7 +991,11 @@ XMSampler::Channel::PerformFX().
 
 
 	XMSampler(int index);
-	~XMSampler(){};
+	virtual ~XMSampler() {
+		for (int i=0;i<MAX_POLYPHONY;i++) {
+			rVoice(i).DisposeResampleData();
+		}
+	}
 
 	virtual void Init(void);
 	
@@ -1073,11 +1101,20 @@ XMSampler::Channel::PerformFX().
 
 	/// set resampler quality 
 	void ResamplerQuality(const helpers::dsp::resampler::quality::type value){
+		for (int i=0;i<MAX_POLYPHONY;i++) {
+			rVoice(i).DisposeResampleData();
+		}
 		_resampler.quality(value);
+		for (int i=0;i<MAX_POLYPHONY;i++) {
+			rVoice(i).RecreateResampleData(_resampler);
+		}
 	}
 
 	helpers::dsp::resampler::quality::type ResamplerQuality() const {
 		return _resampler.quality();
+	}
+	const helpers::dsp::resampler& Resampler() const {
+		return _resampler;
 	}
 	bool UseFilters(void) const { return m_UseFilters; }
 	void UseFilters(bool usefilters) { m_UseFilters = usefilters; }
@@ -1087,7 +1124,7 @@ XMSampler::Channel::PerformFX().
 	void SetZxxMacro(int index,int mode, int val) { zxxMap[index].mode= mode; zxxMap[index].value=val; }
 	ZxxMacro GetMap(int index) const { return zxxMap[index]; }
 
-	int SampleCounter() const {return _sampleCounter;}// Sample pos since last linechange.
+	int SampleCounter() const {return _sampleCounter;}// Sample pos since last line change.
 	void SampleCounter(const int value){_sampleCounter = value;}// ""
 
 	void NextSampleTick(const int value){m_NextSampleTick = value;}// Sample Pos of the next (tracker) tick

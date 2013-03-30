@@ -35,17 +35,14 @@ BOOL CInstrumentAmpDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	m_SlVolCutoffPan.SetRangeMax(128);
-	m_SlVolCutoffPan.SetRangeMin(0);
 	m_SlSwing1Glide.SetRangeMax(100);
 	m_SlFadeoutRes.SetRangeMax(256);
 
-	m_SlNoteModNote.SetRangeMin(0);
 	m_SlNoteModNote.SetRangeMax(119);
 
-	m_SlNoteMod.SetRangeMax(32);
-	m_SlNoteMod.SetRangeMin(-32);
+	m_SlNoteMod.SetRange(-32, 32);
 	//Hack to fix "0 placed on leftmost on start".
-	m_SlNoteMod.SetPos(1);
+	m_SlNoteMod.SetPos(-32);
 	m_EnvelopeEditorDlg.Create(CEnvelopeEditorDlg::IDD,this);
 	CRect rect, rect2;
 	((CStatic*)GetDlgItem(IDC_GROUP_ENV))->GetWindowRect(rect);

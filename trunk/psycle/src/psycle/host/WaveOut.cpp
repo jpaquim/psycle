@@ -18,7 +18,7 @@ namespace psycle
 {
 	namespace host
 	{
-		AudioDriverInfo WaveOutSettings::info_ = { "Windows WaveOut MME" };
+		AudioDriverInfo WaveOutSettings::info_("Windows WaveOut MME");
 		AudioDriverEvent WaveOut::_event;
 
 		void WaveOut::Error(char const msg[])

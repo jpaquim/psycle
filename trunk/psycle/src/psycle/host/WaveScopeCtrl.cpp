@@ -1,6 +1,5 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "WaveScopeCtrl.hpp"
-#include <psycle/helpers/dsp.hpp>
 namespace psycle { namespace host {
 
 // CWaveScopeCtrl
@@ -11,6 +10,7 @@ CWaveScopeCtrl::CWaveScopeCtrl()
 	cpen_med.CreatePen(PS_SOLID,0,0xCCCCCC);
 	cpen_hi.CreatePen(PS_SOLID,0,0x00FF00);
 	cpen_sus.CreatePen(PS_DOT,0,0xFF0000);
+	resampler.quality(helpers::dsp::resampler::quality::spline);
 }
 CWaveScopeCtrl::~CWaveScopeCtrl(){
 	cpen_lo.DeleteObject();
@@ -38,8 +38,6 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 		int const my=nHeight/2;
 		if(rWave().IsWaveStereo()) wrHeight=my/2;
 		else wrHeight=my;
-		helpers::dsp::cubic_resampler resampler;
-		resampler.quality(helpers::dsp::resampler::quality::spline);
 
 		dc.FillSolidRect(&rect,RGB(255,255,255));
 		dc.SetBkMode(TRANSPARENT);
@@ -118,7 +116,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					ULARGE_INTEGER posin;
 					posin.QuadPart = c * OffsetStep* 4294967296.0f;
 					yHi=0;
-					yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+					yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength(), NULL);
 
 					int const ryLow = (wrHeight * yLow)/32768;
 					int const ryHi = (wrHeight * yHi)/32768;
@@ -172,7 +170,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 						ULARGE_INTEGER posin;
 						posin.QuadPart = c * OffsetStep* 4294967296.0f;
 						yHi=0;
-						yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength());
+						yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength(), NULL);
 
 						int const ryLow = (wrHeight * yLow)/32768;
 						int const ryHi = (wrHeight * yHi)/32768;

@@ -90,7 +90,7 @@ namespace psycle { namespace host {
 				CSingleLock lock(&Global::song().semaphore, FALSE);
 				if (!lock.Lock(50)) return;
 
-				unsigned long num_threads_running = Global::player().num_threads();
+				size_t num_threads_running = Global::player().num_threads();
 				char buffer[128];
 				
 				cpu_time_clock::duration total_machine_processing_time(0);

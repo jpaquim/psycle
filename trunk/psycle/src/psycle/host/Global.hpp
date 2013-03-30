@@ -13,13 +13,6 @@ typedef BOOL   (WINAPI *FAvRevertMmThreadCharacteristics)(HANDLE);
 
 namespace psycle
 {
-	namespace helpers
-	{
-		namespace dsp
-		{
-			class resampler;
-		}
-	}
 	namespace host
 	{
 		class Configuration;
@@ -56,14 +49,12 @@ namespace psycle
 				static inline Song           & song() { return *pSong; }
 				static inline Player         & player(){ return *pPlayer; }
 				static inline Configuration  & configuration(){ return *pConfig; }
-				static inline helpers::dsp::resampler & resampler(){ return *pResampler; }
 				static inline vst::Host		 & vsthost(){ return *pVstHost; }
 				static inline MachineLoader  & machineload() { return *pMacLoad; }
 
 			protected:
 				static Configuration * pConfig;
 				static Song * pSong;
-				static helpers::dsp::resampler * pResampler;
 				static Player * pPlayer;
 				static vst::Host * pVstHost;
 				static MachineLoader * pMacLoad;

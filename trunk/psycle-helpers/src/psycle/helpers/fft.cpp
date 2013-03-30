@@ -34,6 +34,7 @@
 #include <universalis.hpp>
 #include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/math.hpp>
+#include <psycle/helpers/dsp.hpp>
 #include <cstdlib>
 #include <cstdio>
 
@@ -131,11 +132,11 @@ void FFT(int NumSamples,
 		}
 	}
 	else {
-	for (i = 0; i < NumSamples; i++) {
-			j = ReverseBits(i, NumBits);
-		RealOut[j] = RealIn[i];
-		ImagOut[j] = (ImagIn == NULL) ? 0.0 : ImagIn[i];
-	}
+		for (i = 0; i < NumSamples; i++) {
+				j = ReverseBits(i, NumBits);
+			RealOut[j] = RealIn[i];
+			ImagOut[j] = (ImagIn == NULL) ? 0.0 : ImagIn[i];
+		}
 	}
 
 	/*
@@ -340,10 +341,10 @@ void PowerSpectrum(int NumSamples, float *In, float *Out)
 	it = ImagOut[Half / 2];
 	Out[Half / 2] = rt * rt + it * it;
 
-	delete[]tmpReal;
-	delete[]tmpImag;
-	delete[]RealOut;
-	delete[]ImagOut;
+	delete[] tmpReal;
+	delete[] tmpImag;
+	delete[] RealOut;
+	delete[] ImagOut;
 }
 
 /*
@@ -433,39 +434,39 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
         }
 	}
 	void FFTClass::FillCosineWindow(float window[], const std::size_t size, const float scale) {
-		const int sizem1 = size-1;
+		const size_t sizem1 = size-1;
         for (std::size_t n = 0; n < size; n++) {
 			window[n] = std::sin(math::pi_f * n/ sizem1) * scale;
         }
 	}
 	void FFTClass::FillHannWindow(float window[], const std::size_t size, const float scale) {
-		const int sizem1 = size-1;
+		const size_t sizem1 = size-1;
 		const float twopi = 2.0f*math::pi_f;
         for (std::size_t n = 0; n < size; n++) {
 			window[n] = (0.50f - 0.50f * cosf( twopi* n / sizem1)) * scale;
         }
 	}
 	void FFTClass::FillHammingWindow(float window[], const std::size_t size, const float scale) {
-		const int sizem1 = size-1;
+		const size_t sizem1 = size-1;
 		const float twopi = 2.0f*math::pi_f;
         for (std::size_t n = 0; n < size; n++) {
 			window[n] = (0.54f - 0.46f * cosf(twopi * n / sizem1)) * scale;
         }
 	}
 	void FFTClass::FillGaussianWindow(float window[], const std::size_t size, const float scale) {
-		const int sizem1 = size-1;
+		const size_t sizem1 = size-1;
         for (std::size_t n = 0; n < size; n++) {
 			window[n] = powf(math::e,-0.5f *powf((n-sizem1/2.f)/(0.4*sizem1/2.f),2.f)) * scale;
         }
 	}
 	void FFTClass::FillBlackmannWindow(float window[], const std::size_t size, const float scale) {
-		const int sizem1 = size-1;
+		const size_t sizem1 = size-1;
         for (std::size_t n = 0; n < size; n++) {
 			window[n] = (0.42659 - 0.49656 * cosf(2.0*math::pi_f * n/ sizem1) + 0.076849 * cosf(4.0*math::pi_f * n /sizem1)) * scale;
         }
 	}
 	void FFTClass::FillBlackmannHarrisWindow(float window[], const std::size_t size, const float scale) {
-		const int sizem1 = size-1;
+		const size_t sizem1 = size-1;
         for (std::size_t n = 0; n < size; n++) {
 			window[n] = (0.35875 - 0.48829 * cosf(2.0*math::pi_f * n/ sizem1) + 0.14128 * cosf(4.0*math::pi_f * n /sizem1) - 0.01168 * cosf(6.0*math::pi_f * n /sizem1)) * scale;
         }
@@ -479,7 +480,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		}
 		return r;
 	}
-	bool FFTClass::IsPowerOfTwo(int x)
+	bool FFTClass::IsPowerOfTwo(size_t x)
 	{
 		return ((x & (x - 1))==0);
 	}
@@ -505,10 +506,10 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 
 			bufferSizeLog = 0;
 			for(size_t sizetmp = bufferSize; sizetmp > 1; sizetmp>>=1) { bufferSizeLog++; } 
-			for (int n = 0; n < bufferSize; n++) {
+			for (size_t n = 0; n < bufferSize; n++) {
 				bit_reverse[n] = Reverse_bits(n);
 			}
-			for (int n = 0; n < outputSize; n++) {
+			for (size_t n = 0; n < outputSize; n++) {
 				float j = 2.0f*helpers::math::pi_f * n / bufferSize;
 				precos[n] = cosf(j);
 				presin[n] = sinf(j);
@@ -531,7 +532,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		}
 		else if (outputSize/bands <= 4 ) {
 			//exponential.
-			float factor = (float)outputSize/(bands*bands);
+			const float factor = (float)outputSize/(bands*bands);
 			for (std::size_t n = 0; n < bands; n++ ) {
 				fftLog[n]=n*n*factor;
 			}
@@ -540,8 +541,9 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			//constant note scale.
 			//factor -> set range from 2^0 to 2^8.
 			//factor2 -> scale the result to the FFT output size
-			float factor = 8.f/(float)bands;
-			float factor2 = (float)outputSize/256.f;
+			//Note: x^(y*z) = (x^z)^y
+			const float factor = 8.f/(float)bands;
+			const float factor2 = (float)outputSize/256.f;
 			for (std::size_t n = 0; n < bands; n++ ) {
 				fftLog[n]=(powf(2.0f,n*factor)-1.f)*factor2;
 			}
@@ -560,7 +562,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
         float *rp = state_real;
         float *ip = state_imag;
         for (n = 0; n < bufferSize; n++) {
-			const int nr = bit_reverse[n];
+			const size_t nr = bit_reverse[n];
             *rp++ = samplesIn[ nr ] * window[nr];
             *ip++ = 0;
         }
@@ -592,9 +594,31 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
             rp++;ip++;
         }
 	}
+	void FFTClass::FillBandsFromFFT(float calculatedfftIn[], float banddBOut[])
+	{
+		helpers::math::erase_all_nans_infinities_and_denormals(calculatedfftIn,outputSize);
+		float j=0.0f;
+		const float dbinvSamples = psycle::helpers::dsp::dB(1.0f/(bufferSize>>2));
+		for (int h=0, a=0;h<bands;h++) 
+		{
+			float afloat = fftLog[h];
+			if (afloat +1.0f > fftLog[h+1]) {
+				j = resampler.work_float(calculatedfftIn,afloat,outputSize, NULL);
+				a = math::lround<int,float>(afloat);
+			}
+			else {
+				j = calculatedfftIn[a];
+				while(a<=afloat){
+					j = std::max(j,calculatedfftIn[a]);
+					a++;
+				}
+			}//+0.0000000001f is -100dB of power. Used to prevent avaluating powerdB(0.0)
+			banddBOut[h]=powerdB(j+0.0000000001f)+dbinvSamples;
+		}
+	}
 	float FFTClass::resample(float const * data, float offset, uint64_t length)
 	{
-		return resampler.work_float(data, offset, length);
+		return resampler.work_float(data, offset, length, NULL);
 	}
 }}}
 

@@ -54,6 +54,7 @@ namespace psycle { namespace host {
 			afx_msg void OnCustomdrawSlider1(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnChangeLockInst();
 			afx_msg void OnChangeInstname();
+			afx_msg void OnEnChangeSamplerate();
 			afx_msg void OnSelchangeNnaCombo();
 			afx_msg void OnPrevInstrument();
 			afx_msg void OnNextInstrument();

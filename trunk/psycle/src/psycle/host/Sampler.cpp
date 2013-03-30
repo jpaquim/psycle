@@ -15,6 +15,13 @@ namespace psycle
 	{
 		char* Sampler::_psName = "Sampler";
 
+		Voice::Voice():resampler_data(NULL)
+		{
+		}
+		Voice::~Voice()
+		{
+		}
+
 		Sampler::Sampler(int index)
 		{
 			_macIndex = index;
@@ -33,7 +40,6 @@ namespace psycle
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init(44100);
 				_voices[i]._cutoff = 0;
 				_voices[i]._sampleCounter = 0;
 				_voices[i]._triggerNoteOff = 0;
@@ -47,6 +53,13 @@ namespace psycle
 			for (int i = 0; i < MAX_TRACKS; i++)
 			{
 				lastInstrument[i]=255;
+			}
+		}
+
+		Sampler::~Sampler() {
+			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+			{
+				if (_voices[i].resampler_data != NULL) _resampler.DisposeResamplerData(_voices[i].resampler_data);
 			}
 		}
 		void Sampler::Init(void)
@@ -97,7 +110,7 @@ namespace psycle
 				_voices[i]._envelope._sustain = 0;
 				_voices[i]._filterEnv._stage = ENV_OFF;
 				_voices[i]._filterEnv._sustain = 0;
-				_voices[i]._filter.Init(sr);
+				_voices[i]._filter.SampleRate(sr);
 				_voices[i]._triggerNoteOff = 0;
 				_voices[i]._triggerNoteDelay = 0;
 			}
@@ -266,20 +279,16 @@ namespace psycle
 			int twlength = 0;
 			if (Global::song().samples.IsEnabled(pEntry->_inst)) twlength = Global::song().samples[pEntry->_inst].WaveLength();
 			Instrument * pins = Global::song()._pInstrument[pEntry->_inst];
-			
+
 			if (pEntry->_note < notecommands::release && twlength > 0)
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry->_inst;
 				const XMInstrument::WaveData& wave = Global::song().samples[pVoice->_instrument];
 				
-				// Init filter synthesizer
-				//
-				pVoice->_filter.Init(Global::player().SampleRate());
-
 				pVoice->_cutoff = (pins->_RCUT) ? alteRand(pins->ENV_F_CO) : pins->ENV_F_CO;
-				pVoice->_filter._q = (pins->_RRES) ? alteRand(pins->ENV_F_RQ) : pins->ENV_F_RQ;
-				pVoice->_filter._type = (dsp::FilterType)pins->ENV_F_TP;
+				pVoice->_filter.Ressonance((pins->_RRES) ? alteRand(pins->ENV_F_RQ) : pins->ENV_F_RQ);
+				pVoice->_filter.Type(pins->ENV_F_TP);
 				pVoice->_coModify = (float)pins->ENV_F_EA;
 				pVoice->_filterEnv._sustain = (float)pins->ENV_F_SL*0.0078125f;
 
@@ -295,6 +304,7 @@ namespace psycle
 				pVoice->_wave._pL = wave.pWaveDataL();
 				pVoice->_wave._pR = wave.pWaveDataR();
 				pVoice->_wave._stereo = wave.IsWaveStereo();
+				pVoice->_wave._samplerate = wave.WaveSampleRate();
 				pVoice->_wave._length = twlength;
 				
 				// Init loop
@@ -308,17 +318,21 @@ namespace psycle
 				
 				// Init Resampler
 				//
+				double speeddouble;
 				if (pins->_loop)
 				{
 					double const totalsamples = double(Global::player().SamplesPerRow()*pins->_lines);
-					pVoice->_wave._speed = (__int64)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+					speeddouble = (pVoice->_wave._length/totalsamples);
 				}	
 				else
 				{
-					float const finetune = helpers::value_mapper::map_256_1(wave.WaveFineTune());
-					pVoice->_wave._speed = (__int64)(pow(2.0f, ((pEntry->_note+wave.WaveTune())-baseC +finetune)/12.0f)*4294967296.0f*(44100.0f/Global::player().SampleRate()));
+					float const finetune = (float)wave.WaveFineTune()*0.01f;
+					speeddouble = pow(2.0f, ((pEntry->_note+wave.WaveTune())-baseC +finetune)/12.0f)*((float)wave.WaveSampleRate()/Global::player().SampleRate());
 				}
-				
+				pVoice->_wave._speed = (__int64)(speeddouble*4294967296.0f);
+
+				if (pVoice->resampler_data != NULL) _resampler.DisposeResamplerData(pVoice->resampler_data);
+				pVoice->resampler_data = _resampler.GetResamplerData(speeddouble);
 
 				// Handle wave_start_offset cmd
 				//
@@ -391,18 +405,22 @@ namespace psycle
 						{
 							case 0:
 							case 8:	pVoice->effretVol = 0; pVoice->effretMode=0; break;
+
 							case 1:
 							case 2:
 							case 3:
 							case 4:
 							case 5: pVoice->effretVol = (float)(std::pow(2.,volmod-1)/64); pVoice->effretMode=1; break;
+
 							case 6: pVoice->effretVol = 0.66666666f;	 pVoice->effretMode=2; break;
 							case 7: pVoice->effretVol = 0.5f;			 pVoice->effretMode=2; break;
+
 							case 9:
 							case 10:
 							case 11:
 							case 12:
 							case 13: pVoice->effretVol = (float)(std::pow(2.,volmod-9)*(-1))/64; pVoice->effretMode=1; break;
+
 							case 14: pVoice->effretVol = 1.5f;					pVoice->effretMode=2; break;
 							case 15: pVoice->effretVol = 2.0f;					pVoice->effretMode=2; break;
 						}
@@ -651,30 +669,27 @@ namespace psycle
 				{
 					left_output = pResamplerWork(
 						pVoice->_wave._pL + pVoice->_wave._pos.HighPart,
-						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+						pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length, pVoice->resampler_data);
 					if (pVoice->_wave._stereo)
 					{
 						right_output = pResamplerWork(
 							pVoice->_wave._pR + pVoice->_wave._pos.HighPart,
-							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length);
+							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length, pVoice->resampler_data);
 					}
 
 					// Filter section
 					//
-					if (pVoice->_filter._type < dsp::F_NONE)
+					if (pVoice->_filter.Type() != dsp::F_NONE)
 					{
 						TickFilterEnvelope(voice);
-						pVoice->_filter._cutoff = pVoice->_cutoff + helpers::math::lround<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
-						if (pVoice->_filter._cutoff < 0)
-						{
-							pVoice->_filter._cutoff = 0;
+						int newcutoff = pVoice->_cutoff + helpers::math::lround<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
+						if (newcutoff < 0) {
+							newcutoff = 0;
 						}
-						if (pVoice->_filter._cutoff > 127)
-						{
-							pVoice->_filter._cutoff = 127;
+						else if (newcutoff > 127) {
+							newcutoff = 127;
 						}
-
-						pVoice->_filter.Update();
+						pVoice->_filter.Cutoff(newcutoff);
 						if (pVoice->_wave._stereo)
 						{
 							pVoice->_filter.WorkStereo(left_output, right_output);
@@ -684,43 +699,47 @@ namespace psycle
 							left_output = pVoice->_filter.Work(left_output);
 						}
 					}
+					// Amplitude section
+					{
+						TickEnvelope(voice);
 
-					TickEnvelope(voice);
+						// calculate volume  (volume ramped)
+						
+						if(pVoice->_wave._lVolCurr<0)
+							pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
+						if(pVoice->_wave._rVolCurr<0)
+							pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
 
-					// calculate volume
+						if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
+							pVoice->_wave._lVolCurr-=0.005f;
+						if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
+							pVoice->_wave._lVolCurr+=0.005f;
+						if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
+							pVoice->_wave._rVolCurr-=0.005f;
+						if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
+							pVoice->_wave._rVolCurr+=0.005f;
+
+					}
 					
-					if(pVoice->_wave._lVolCurr<0)
-						pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
-					if(pVoice->_wave._rVolCurr<0)
-						pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
-
-					if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
-						pVoice->_wave._lVolCurr-=0.005f;
-					if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
-						pVoice->_wave._lVolCurr+=0.005f;
-					if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
-						pVoice->_wave._rVolCurr-=0.005f;
-					if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
-						pVoice->_wave._rVolCurr+=0.005f;
-
 					if(!pVoice->_wave._stereo)
 						right_output=left_output;
 					right_output *= pVoice->_wave._rVolCurr*pVoice->_envelope._value;
 					left_output *= pVoice->_wave._lVolCurr*pVoice->_envelope._value;
 
-
-
-					pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
-
-					// Loop handler
-					//
-					if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
+					// Move sample position
 					{
-						pVoice->_wave._pos.HighPart -= (pVoice->_wave._loopEnd - pVoice->_wave._loopStart);
-					}
-					if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
-					{
-						pVoice->_envelope._stage = ENV_OFF;
+						pVoice->_wave._pos.QuadPart += pVoice->_wave._speed;
+
+						// Loop handler
+						//
+						if ((pVoice->_wave._loop) && (pVoice->_wave._pos.HighPart >= pVoice->_wave._loopEnd))
+						{
+							pVoice->_wave._pos.HighPart -= (pVoice->_wave._loopEnd - pVoice->_wave._loopStart);
+						}
+						if (pVoice->_wave._pos.HighPart >= pVoice->_wave._length)
+						{
+							pVoice->_envelope._stage = ENV_OFF;
+						}
 					}
 				}
 					
@@ -833,22 +852,24 @@ namespace psycle
 
 		void Sampler::PerformFx(int voice)
 		{
-			// 189408044700 stands for (2^30/250)*44100, meaning that
+			// 4294967 stands for (2^30/250), meaning that
 			//value 250 = (inc)decreases the speed in in 1/4th of the original (wave) speed each PerformFx call.
 			__int64 shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up
 				case 0x01:
-					shift=_voices[voice].effVal*189408044700/Global::player().SampleRate();
+					shift=_voices[voice].effVal*4294967 * _voices[voice]._wave._samplerate/Global::player().SampleRate();
 					_voices[voice]._wave._speed+=shift;
+					_resampler.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 				break;
 
 				// 0x02 : Pitch Down
 				case 0x02:
-					shift=_voices[voice].effVal*189408044700/Global::player().SampleRate();
+					shift=_voices[voice].effVal*4294967 * _voices[voice]._wave._samplerate/Global::player().SampleRate();
 					_voices[voice]._wave._speed-=shift;
 					if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
+					_resampler.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 				break;
 				
 				default:
@@ -872,8 +893,8 @@ namespace psycle
 				switch (temp)
 				{
 					case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
-					case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
-					case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+					case 3:	_resampler.quality(helpers::dsp::resampler::quality::sinc); break;
+					case 0:	_resampler.quality(helpers::dsp::resampler::quality::zero_order); break;
 					case 1:
 					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
@@ -900,9 +921,9 @@ namespace psycle
 			pFile->Write(&temp, sizeof(temp)); // numSubtracks
 			switch (_resampler.quality())
 			{
-				case helpers::dsp::resampler::quality::none: temp = 0; break;
+				case helpers::dsp::resampler::quality::zero_order: temp = 0; break;
 				case helpers::dsp::resampler::quality::spline: temp = 2; break;
-				case helpers::dsp::resampler::quality::band_limited: temp = 3; break;
+				case helpers::dsp::resampler::quality::sinc: temp = 3; break;
 				case helpers::dsp::resampler::quality::linear: //fallthrough
 				default: temp = 1;
 			}
@@ -960,8 +981,8 @@ namespace psycle
 			switch (i)
 			{
 				case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
-				case 3:	_resampler.quality(helpers::dsp::resampler::quality::band_limited); break;
-				case 0:	_resampler.quality(helpers::dsp::resampler::quality::none); break;
+				case 3:	_resampler.quality(helpers::dsp::resampler::quality::sinc); break;
+				case 0:	_resampler.quality(helpers::dsp::resampler::quality::zero_order); break;
 				case 1:
 				default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 			}

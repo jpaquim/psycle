@@ -67,7 +67,7 @@ namespace psycle { namespace host {
 			destVol	= (2000-m_destVol.GetPos())/1000.0f;
 			if(m_bFadeIn.GetCheck())
 			{
-				m_fadeInTime.GetWindowText(temp, 15);
+				m_fadeInTime.GetWindowText(temp, 16);
 				bFadeIn = (fadeInTime=atof(temp));
 			}
 			if(m_bFadeOut.GetCheck())

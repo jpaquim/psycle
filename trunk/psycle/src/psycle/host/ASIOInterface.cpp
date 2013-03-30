@@ -20,7 +20,7 @@ namespace psycle
 		extern CPsycleApp theApp;
 
 		// note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
-		AudioDriverInfo ASIODriverSettings::info_ = { "ASIO 2.2 Output" };
+		AudioDriverInfo ASIODriverSettings::info_("ASIO 2.2 Output");
 		ASIODriverSettings* ASIOInterface::settings_;
 		CCriticalSection ASIOInterface::_lock;
 		AsioDrivers ASIOInterface::asioDrivers;

@@ -35,7 +35,7 @@ namespace psycle
 {
 	namespace host
 	{
-		AudioDriverInfo WasapiSettings::info_ = { "Windows WASAPI inteface" };
+		AudioDriverInfo WasapiSettings::info_("Windows WASAPI inteface");
 		AudioDriverEvent WasapiDriver::_event;
 
 		const CLSID CLSID_MMDeviceEnumerator = __uuidof(MMDeviceEnumerator);

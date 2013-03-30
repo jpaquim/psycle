@@ -39,13 +39,13 @@ namespace psycle
 		{
 		public:
 			char chunkID[4];
-			long chunkSize;
+			std::uint32_t chunkSize;
 			short wFormatTag;
-			unsigned short wChannels;
-			unsigned long  dwSamplesPerSec;
-			unsigned long  dwAvgBytesPerSec;
-			unsigned short wBlockAlign;
-			unsigned short wBitsPerSample;
+			std::uint16_t wChannels;
+			std::uint32_t  dwSamplesPerSec;
+			std::uint32_t  dwAvgBytesPerSec;
+			std::uint16_t wBlockAlign;
+			std::uint16_t wBitsPerSample;
 		};
 
 		/// Helper class for the PSY2 loader.
@@ -54,7 +54,7 @@ namespace psycle
 		public:
 			bool valid;
 			char dllName[128];
-			int numpars;
+			std::int32_t numpars;
 			float * pars;
 		};
 
@@ -62,7 +62,7 @@ namespace psycle
 		{
 			defaultPatLines = lines;
 		}
-		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
+		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,std::int32_t shellIdx)
 		{
 			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx);
 			if (pMachine) {
@@ -76,7 +76,7 @@ namespace psycle
 				return false;
 			}
 		}
-		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int shellIdx)
+		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,std::int32_t shellIdx)
 		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
@@ -144,17 +144,17 @@ namespace psycle
 								vstPlug->_macIndex=songIdx;
 							}
 						}
-						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
-						catch(const std::exception & e)
-						{
-							loggers::exception()(e.what());
-							zapObject(pMachine); 
-						}
 						catch(const std::runtime_error & e)
 						{
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 							loggers::exception()(s.str());
+						}
+						//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
+						catch(const std::exception & e)
+						{
+							loggers::exception()(e.what());
+							zapObject(pMachine); 
 						}
 						catch(...)
 						{
@@ -204,7 +204,7 @@ namespace psycle
 			DeleteAllPatterns();
 		}
 
-		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int shellIdx)
+		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,std::int32_t shellIdx)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
@@ -949,6 +949,14 @@ namespace psycle
 
 		int Song::IffAlloc(int instrument,const char * str)
 		{
+			//In big endian:
+			typedef struct
+			{	unsigned int	oneShotHiSamples, repeatHiSamples, samplesPerHiCycle ;
+				unsigned short	samplesPerSec ;
+				unsigned char	octave, compression ;
+				unsigned int	volume ;
+			} VHDR_CHUNK ;
+
 			RiffFile file;
 			RiffChunkHeader hd;
 			ULONG data;
@@ -998,9 +1006,14 @@ namespace psycle
 					wave.WaveLoopEnd(ls + le);
 					wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 				}
-				file.Skip(8); // Skipping unknown bytes (and volume on bytes 6&7)
+				unsigned short srbe, sr;
+				file.Read(&srbe,sizeof srbe);
+				sr = (srbe&0xFF)<<8 | ((srbe&0xFF00) >> 8);
+				wave.WaveSampleRate(sr);
+ 				file.Skip(6); // Skipping octave, compression and volume
 				file.Read(&hd,sizeof hd);
 			}
+
 			if(hd._id == file.FourCC("BODY"))
 			{
 				std::int16_t * csamples;
@@ -1035,9 +1048,9 @@ namespace psycle
 			return 1;
 		}
 
-		int Song::WavAlloc(int iInstr, bool bStereo, long iSamplesPerChan, const char * sName)
+		int Song::WavAlloc(int iInstr, bool bStereo, std::uint32_t iSamplesPerChan, const char * sName)
 		{
-			assert(iSamplesPerChan<(1<<30)); ///< Since in some places, signed values are used, we cannot use the whole range.
+			assert(iSamplesPerChan<(1<<30)); ///< FIXME: Since in some places, signed values are used, we cannot use the whole range.
 			if (iInstr < PREV_WAV_INS ) {
 				XMInstrument::WaveData wave;
 				wave.AllocWaveData(iSamplesPerChan,bStereo);
@@ -1067,7 +1080,7 @@ namespace psycle
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
-			long Datalen(file.NumSamples());
+			std::uint32_t Datalen(file.NumSamples());
 			// Initializes the layer.
 			char* filename = const_cast<char*>(strrchr(wavfile,'\\'));
 			if (filename == NULL) {
@@ -1081,6 +1094,7 @@ namespace psycle
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
 			XMInstrument::WaveData& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.GetWave();
+			wave.WaveSampleRate(file.SamplingRate());
 			std::int16_t * sampL = wave.pWaveDataL();
 
 			///\todo use template code for all this semi-repetitive code.
@@ -1092,7 +1106,7 @@ namespace psycle
 				switch(bits)
 				{
 					case 8:
-						for(long io = 0 ; io < Datalen ; ++io)
+						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							*sampL = (smp8 << 8) - 32768;
@@ -1103,7 +1117,7 @@ namespace psycle
 							file.ReadData(sampL, Datalen);
 						break;
 					case 24:
-						for(long io = 0 ; io < Datalen ; ++io)
+						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							file.ReadData(sampL, 1);
@@ -1122,7 +1136,7 @@ namespace psycle
 				switch(bits)
 				{
 					case 8:
-						for(long io = 0 ; io < Datalen ; ++io)
+						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							*sampL = (smp8 << 8) - 32768;
@@ -1133,7 +1147,7 @@ namespace psycle
 						}
 						break;
 					case 16:
-						for(long io = 0 ; io < Datalen ; ++io)
+						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(sampL, 1);
 							file.ReadData(sampR, 1);
@@ -1142,7 +1156,7 @@ namespace psycle
 						}
 						break;
 					case 24:
-						for(long io = 0 ; io < Datalen ; ++io)
+						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							file.ReadData(sampL, 1);
@@ -1167,15 +1181,13 @@ namespace psycle
 					if(pl == 1)
 					{
 						file.Skip(15);
-						unsigned int ls(0);
-						unsigned int le(0);
+						std::uint32_t ls(0);
+						std::uint32_t le(0);
 						file.Read(static_cast<void*>(&ls), 4);
 						file.Read(static_cast<void*>(&le), 4);
-						wave.WaveLoopStart(ls);
-						wave.WaveLoopEnd(le);
-						// only for my bad sample collection
-						//if(!((ls <= 0) && (le >= Datalen - 1)))
-						{
+						if (ls >= 0 && ls <= le && le < Datalen){
+							wave.WaveLoopStart(ls);
+							wave.WaveLoopEnd(le);
 							wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 						}
 					}
@@ -1710,6 +1722,8 @@ namespace psycle
 								pFile->Read(volume);
 								wave.WaveGlobVolume(volume*0.01f);
 								pFile->Read(&tmpFineTune, sizeof(short));
+								//Current sample uses 100 cents. Older used +-256
+								tmpFineTune = static_cast<int>((float)tmpFineTune/2.56f);
 								wave.WaveFineTune(tmpFineTune);
 								pFile->Read(loop);
 								wave.WaveLoopStart(loop);
@@ -1753,7 +1767,7 @@ namespace psycle
 					{
 						pFile->Read(vstL[i].dllName,sizeof(vstL[i].dllName));
 						_strlwr(vstL[i].dllName);
-						pFile->Read(&(vstL[i].numpars), sizeof(int));
+						pFile->Read(&(vstL[i].numpars), sizeof(std::int32_t));
 						vstL[i].pars = new float[vstL[i].numpars];
 
 						for (int c=0; c<vstL[i].numpars; c++)
@@ -1854,7 +1868,7 @@ namespace psycle
 								// the newly created plugin.
 								pTempMac->PreLoad(pFile,program,instance);
 								assert(instance < OLD_MAX_PLUGINS);
-								int shellIdx=0;
+								std::int32_t shellIdx=0;
 								if((!vstL[instance].valid) || (!Global::machineload().lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
 								{
 									berror=true;

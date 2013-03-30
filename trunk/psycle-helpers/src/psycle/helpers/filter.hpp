@@ -18,38 +18,60 @@ enum FilterType {
 	F_HIGHPASS12 = 1,
 	F_BANDPASS12 = 2,
 	F_BANDREJECT12 = 3,
-	F_NONE = 4
+	F_NONE = 4,//This one is kept here because it is used in load/save
+	F_ITLOWPASS = 5,
+	F_NUMFILTERS
 };
 
 class FilterCoeff {
 	public:
-		float _coeffs[5][128][128][5];
-		FilterCoeff();
-		void setSampleRate(float samplerate);
 		static FilterCoeff singleton;
-	private:
-		float samplerate;
-		double _coeff[5];
+
+		void setSampleRate(float samplerate);
+		float getSampleRate() {return samplerate; };
+
+		float _coeffs[F_NUMFILTERS-1][128][128][5];
+	protected:
+		FilterCoeff();
 		void ComputeCoeffs(int freq, int r, int t);
 
 		static float Cutoff(int v);
 		static float Resonance(float v);
 		static float Bandwidth(int v);
+
+		float samplerate;
+		double _coeff[5];
 };
 
 /// filter.
 class Filter {
 	public:
+		Filter();
+		virtual inline ~Filter(){};
+		void Init(int sampleRate);
+		void Reset(void);//Same as init, without samplerate
+
+		void Cutoff(int iCutoff) { if ( _cutoff != iCutoff) { _cutoff = iCutoff; Update(); }}
+		void Ressonance(int iRes) { if ( _q != iRes ) { _q = iRes; Update(); }}
+		void SampleRate(int iSampleRate) {
+			if ( FilterCoeff::singleton.getSampleRate() != iSampleRate) {
+				FilterCoeff::singleton.setSampleRate(iSampleRate);
+				Update();
+			}
+		}
+		void Type (FilterType newftype) { if ( newftype != _type ) { _type = newftype; Update(); }}
+		FilterType Type (void) { return _type; }
+
+
+		virtual inline float Work(float x);
+		virtual inline void WorkStereo(float& l, float& r);
+	protected:
+		void Update(void);
+
 		FilterType _type;
 		int _cutoff;
 		int _q;
 
-		Filter();
-		void Init(int sampleRate);
-		void Update(void);
-		inline float Work(float x);
-		inline void WorkStereo(float& l, float& r);
-	protected:
 		float _coeff0;
 		float _coeff1;
 		float _coeff2;
@@ -60,105 +82,56 @@ class Filter {
 };
 
 
-class ITFilter {
-	#define LN10 2.30258509299 // neperian-base log of 10
+class ITFilter : public Filter {
 
 	public:
-		ITFilter() : iSampleRate(44100)
-		{
-			Reset();
-		}
-
+		ITFilter(){}
 		virtual inline ~ITFilter() throw() {}
-
-		void Reset(void) {
-			ftFilter= F_NONE;
-			iCutoff=127;
-			iRes=0;
-			fLastSampleLeft[0]=0.0f;
-			fLastSampleLeft[1]=0.0f;
-			fLastSampleRight[0]=0.0f;
-			fLastSampleRight[1]=0.0f;
-			Update();
-		}
-
-		void Cutoff(int _iCutoff) { if ( _iCutoff != iCutoff) { iCutoff = _iCutoff; Update(); }}
-		void Ressonance(int _iRes) { if ( _iRes != iRes ) { iRes = _iRes; Update(); }}
-		void SampleRate(int _iSampleRate) { if ( _iSampleRate != iSampleRate) {iSampleRate = _iSampleRate; Update(); }}
-		void Type (FilterType newftype) { if ( newftype != ftFilter ) { ftFilter = newftype; Update(); }}
-		FilterType Type (void) { return ftFilter; }
 	
-		inline void Work(float & sample);
-		inline void WorkStereo(float & left, float & right);
-
-	protected:
-		enum coeffNames {
-			damp=0,
-			band,
-			freq
-		};
-
-		void Update(void);
-
-		int iSampleRate;
-		int iCutoff;
-		int iRes;
-		FilterType ftFilter;
-		float fCoeff[3];
-		float fLastSampleLeft[2];
-		float fLastSampleRight[2];
+		/*override*/ inline float Work(float sample);
+		/*override*/ inline void WorkStereo(float & left, float & right);
 };
 
 
 inline float Filter::Work(float x) {
-	float y = _coeff0*x + _coeff1*_x1 + _coeff2*_x2 + _coeff3*_y1 + _coeff4*_y2;
-	_y2 = _y1;
-	_y1 = y;
-	_x2 = _x1;
-	_x1 = x;
+	float y = x*_coeff0 + _x1*_coeff1 + _x2*_coeff2 + _y1*_coeff3 + _y2*_coeff4;
+	_y2 = _y1;  _y1 = y;
+	_x2 = _x1;  _x1 = x;
 	return y;
 }
 inline void Filter::WorkStereo(float& l, float& r) {
-	float y = _coeff0*l + _coeff1*_x1 + _coeff2*_x2 + _coeff3*_y1 + _coeff4*_y2;
-	_y2 = _y1;
-	_y1 = y;
-	_x2 = _x1;
-	_x1 = l;
+	float y = l*_coeff0 + _x1*_coeff1 + _x2*_coeff2 + _y1*_coeff3 + _y2*_coeff4;
+	_y2 = _y1;  _y1 = y;
+	_x2 = _x1;  _x1 = l;
 	l = y;
-	float b = _coeff0*r + _coeff1*_a1 + _coeff2*_a2 + _coeff3*_b1 + _coeff4*_b2;
-	_b2 = _b1;
-	_b1 = b;
-	_a2 = _a1;
-	_a1 = r;
+	float b = r*_coeff0 + _a1*_coeff1 + _a2*_coeff2 + _b1*_coeff3 + _b2*_coeff4;
+	_b2 = _b1;  _b1 = b;
+	_a2 = _a1;  _a1 = r;
 	r = b;
 }
 
-/*Code from Schism Tracker, with modification for highpass filter*/
+/*Code from Schism Tracker, with small modifications. Note: full scale is 32768*/
 #define CLAMP(N,L,H) (((N)>(H))?(H):(((N)<(L))?(L):(N)))
-#define FILT_CLIP(i) CLAMP(i, -4096.0, 4096.0)
-
-inline void ITFilter::Work(float & sample) {
-	double y = ((double)sample * fCoeff[0] + fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
-				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
-	fLastSampleLeft[0] = fLastSampleLeft[1];
-	fLastSampleLeft[1] = y;
-	sample = y;
+#define FILT_CLIP(i) CLAMP(i, -4096.f, 4096.f)
+inline float ITFilter::Work(float sample) {
+	float y = sample * _coeff0
+		+ _y1 * (_coeff3 + _coeff4)  + FILT_CLIP((_y2-_y1) * _coeff4);
+	_y2 = _y1;   _y1 = y;
+	_x2 = _x1;   _x1 = sample;
+	return y;
 }
-
 inline void ITFilter::WorkStereo(float & left, float & right) {
-	double fyL = ((double)left * fCoeff[0] 
-				+ fLastSampleLeft[1] * (fCoeff[1] + fCoeff[2]) 
-				+ FILT_CLIP((fLastSampleLeft[0]-fLastSampleLeft[1]) * fCoeff[2]));
-	fLastSampleLeft[0] = fLastSampleLeft[1];
-	fLastSampleLeft[1] = fyL;
-	left = fyL;
+	float y = left * _coeff0 
+		+ _y1 * (_coeff3 + _coeff4)  + FILT_CLIP((_y2-_y1) * _coeff4);
+	_y2 = _y1;   _y1 = y;
+	_x2 = _x1;   _x1 = left;
+	left = y;
 
-	double fyR = ((double)right * fCoeff[0] 
-				+ fLastSampleRight[1] * (fCoeff[1] + fCoeff[2]) 
-				+ FILT_CLIP((fLastSampleRight[0]-fLastSampleRight[1]) * fCoeff[2]));
-	fLastSampleRight[0] = fLastSampleRight[1];
-	fLastSampleRight[1] = fyR;
-	right = fyR;
+	y = right * _coeff0 
+		+ _b1 * (_coeff3 + _coeff4) + FILT_CLIP((_b2-_b1) * _coeff4);
+	_b2 = _b1;   _b1 = y;
+	_a2 = _a1;   _a1 = right;
+	right = y;
 }
 #undef CLAMP
 #undef FILT_CLIP

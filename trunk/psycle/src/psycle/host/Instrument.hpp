@@ -1,9 +1,10 @@
 ///\file
-///\brief interface file for psycle::host::Filter.
+///\brief interface file for psycle::host::Instrument.
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
+#include <psycle/helpers/filter.hpp>
 namespace psycle
 {
 	namespace host
@@ -67,8 +68,8 @@ namespace psycle
 			int ENV_F_RQ;	
 			/// EnvAmount [-128,128]
 			int ENV_F_EA;	
-			/// Filter Type [0-4]
-			int ENV_F_TP;	
+			/// Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
+			dsp::FilterType ENV_F_TP;	
 			///\}
 
 			bool _RPAN;

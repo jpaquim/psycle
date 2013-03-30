@@ -151,7 +151,7 @@ namespace psycle { namespace host {
 			std::uint16_t WaveVolume() const { return m_WaveDefVolume;}
 			void WaveVolume(const std::uint16_t value){m_WaveDefVolume = value;}
 
-			/// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
+			/// Default position for panning ( 0..1 ) 0left 1 right.
 			float PanFactor() const { return m_PanFactor;}
 			void PanFactor(const float value){m_PanFactor = value;}
 			bool PanEnabled() const { return m_PanEnabled;}
@@ -205,7 +205,7 @@ namespace psycle { namespace host {
 			/// Difference between Glob volume and defVolume is that defVolume determines
 			/// the volume if no volume is specified in the pattern, while globVolume is
 			/// an attenuator for all notes of this sample.
-			float m_WaveGlobVolume;
+			float m_WaveGlobVolume; // range ( 0..1 ) 
 			std::uint16_t m_WaveDefVolume;
 			std::uint32_t m_WaveLoopStart;
 			std::uint32_t m_WaveLoopEnd;
@@ -215,7 +215,7 @@ namespace psycle { namespace host {
 			LoopType::Type m_WaveSusLoopType;
 			std::uint32_t m_WaveSampleRate;
 			std::int16_t m_WaveTune;
-			/// [ -256 .. 256] full range = -/+ 1 seminote
+			/// [ -100 .. 100] full range = -/+ 1 seminote
 			std::int16_t m_WaveFineTune;
 			bool m_WaveStereo;
 			std::int16_t *m_pWaveDataL;
@@ -463,7 +463,7 @@ namespace psycle { namespace host {
 		float VolumeFadeSpeed() const { return m_VolumeFadeSpeed;}
 		void VolumeFadeSpeed(const float value){ m_VolumeFadeSpeed = value;}
 
-		/// Default position for panning ( 0..1 ) 0left 1 right. Bigger than XMSampler::SURROUND_THRESHOLD -> Surround!
+		/// Default position for panning ( 0..1 ) 0left 1 right.
 		float Pan() const { return m_InitPan;}
 		void Pan(const float pan) { m_InitPan = pan;}
 		bool PanEnabled() const { return m_PanEnabled;}
@@ -542,7 +542,7 @@ namespace psycle { namespace host {
 		std::uint8_t m_FilterResonance;
 		/// EnvAmount [-128..128]
 		std::int16_t m_FilterEnvAmount;
-		/// Filter Type [0..4]
+		/// Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
 		dsp::FilterType m_FilterType;
 
 		// Randomness. Applies on new notes.
@@ -637,7 +637,7 @@ namespace psycle { namespace host {
 		std::vector<XMInstrument::WaveData*> m_waves;
 	};
 
-	///\todo : implement the following for inter-XMSampler sharing of instruments.
+
 	class InstrumentList {
 	public:
 		InstrumentList(){m_inst.resize(0);}

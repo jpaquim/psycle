@@ -61,18 +61,22 @@ void FilterCoeff::setSampleRate(float samplerate)
 	if (samplerate != this->samplerate)
 	{
 		this->samplerate = samplerate;
-		for (int r=0; r<5; r++)
+		for (int t=0; t<F_NUMFILTERS; t++)
 		{
+			int tdest = t;
+			if (t == F_NONE) continue;//Skip filter F_NONE.
+			else if (t > F_NONE) tdest--;
+
 			for (int f=0; f<128; f++)
 			{
 				for (int q=0; q<128; q++)
 				{
-					ComputeCoeffs(f, q, r);
-					_coeffs[r][f][q][0] = (float)_coeff[0];
-					_coeffs[r][f][q][1] = (float)_coeff[1];
-					_coeffs[r][f][q][2] = (float)_coeff[2];
-					_coeffs[r][f][q][3] = (float)_coeff[3];
-					_coeffs[r][f][q][4] = (float)_coeff[4];
+					ComputeCoeffs(f, q, t);
+					_coeffs[tdest][f][q][0] = (float)_coeff[0];
+					_coeffs[tdest][f][q][1] = (float)_coeff[1];
+					_coeffs[tdest][f][q][2] = (float)_coeff[2];
+					_coeffs[tdest][f][q][3] = (float)_coeff[3];
+					_coeffs[tdest][f][q][4] = (float)_coeff[4];
 				}
 			}
 		}
@@ -100,48 +104,71 @@ void FilterCoeff::ComputeCoeffs(int freq, int r, int t)
 	float sn = (float)sin(omega);
 	float cs = (float)cos(omega);
 	float alpha;
-	if (t < 2) alpha = float(sn / Resonance( r *(freq+70)/(127.0f+70)));
+	if (t < F_BANDPASS12) alpha = float(sn / Resonance( r *(freq+70)/(127.0f+70.f)));
 	else alpha = float(sn * sinh( Bandwidth( r) * omega/sn));
 	float a0, a1, a2, b0, b1, b2;
 	switch (t)
 	{
 	case F_LOWPASS12:
-		b0 =  (1 - cs)/2;
-		b1 =   1 - cs;
-		b2 =  (1 - cs)/2;
-		a0 =   1 + alpha;
-		a1 =  -2*cs;
-		a2 =   1 - alpha;
+		b0 =  (1.f - cs)/2.f;
+		b1 =   1.f - cs;
+		b2 =  (1.f - cs)/2.f;
+		a0 =   1.f + alpha;
+		a1 =  -2.f*cs;
+		a2 =   1.f - alpha;
 		break;
 	case F_HIGHPASS12:
-		b0 =  (1 + cs)/2;
-		b1 = -(1 + cs);
-		b2 =  (1 + cs)/2;
-		a0 =   1 + alpha;
-		a1 =  -2*cs;
-		a2 =   1 - alpha;
+		b0 =  (1.f + cs)/2.f;
+		b1 = -(1.f + cs);
+		b2 =  (1.f + cs)/2.f;
+		a0 =   1.f + alpha;
+		a1 =  -2.f*cs;
+		a2 =   1.f - alpha;
 		break;
 	case F_BANDPASS12:
 		b0 =   alpha;
-		b1 =   0;
+		b1 =   0.f;
 		b2 =  -alpha;
-		a0 =   1 + alpha;
-		a1 =  -2*cs;
-		a2 =   1 - alpha;
+		a0 =   1.f + alpha;
+		a1 =  -2.f*cs;
+		a2 =   1.f - alpha;
 		break;
 	case F_BANDREJECT12:
-		b0 =   1;
-		b1 =  -2*cs;
-		b2 =   1;
-		a0 =   1 + alpha;
-		a1 =  -2*cs;
-		a2 =   1 - alpha;
+		b0 =   1.f;
+		b1 =  -2.f*cs;
+		b2 =   1.f;
+		a0 =   1.f + alpha;
+		a1 =  -2.f*cs;
+		a2 =   1.f - alpha;
+		break;
+	case F_ITLOWPASS:
+		/*Coefficients from Schism Tracker, using formula from Modplug for cutoff*/
+		double d,e;
+		if ( r >0 || freq < 127 )
+		{
+			double fc = TPI* (110.0 * pow(2.0,(freq+6)/24.0)) / samplerate;  // ModPlug.
+			double d2 = dmpfac[r] / (4.0*65536.0);
+			d = (1.0 - d2) * fc;
+
+			if (d > 2.0)
+				d = 2.0;
+
+			d = (d2 - d) / fc;
+			e = 1.0 / (fc * fc);
+		}
+		else { e = 0; d = 0; }
+		b0 = 1.0f;
+		b1 = 0.0f;
+		b2 = 0.0f;
+		a0 = 1.0f + d + e;
+		a1 = -(d + e + e);
+		a2 = e;
 		break;
 	default:
-		b0 =  0;
+		b0 =  1;
 		b1 =  0;
 		b2 =  0;
-		a0 =  0;
+		a0 =  1;
 		a1 =  0;
 		a2 =  0;
 	}
@@ -154,55 +181,43 @@ void FilterCoeff::ComputeCoeffs(int freq, int r, int t)
 
 Filter::Filter()
 {
-	//Filtercoef is automatially initialized.
-	//FilterCoeff::singleton.Init();
+	//Filtercoef is initialized when calling setSampleRate().
 	Init(44100);
-	_x1 = _x2 = _y1 = _y2 = 0;
-	_a1 = _a2 = _b1 = _b2 = 0;
 }
 
 void Filter::Init(int sampleRate)
 {
+	FilterCoeff::singleton.setSampleRate(sampleRate);
+	Reset();
+}
+void Filter::Reset(void) {
 	_cutoff=127;
 	_q=0;
-	_type = F_LOWPASS12;
-	FilterCoeff::singleton.setSampleRate(sampleRate);
+	_type = F_NONE;
+	_x1 = _x2 = _y1 = _y2 = 0;
+	_a1 = _a2 = _b1 = _b2 = 0;
 	Update();
 }
 
 void Filter::Update()
 {
-	_coeff0 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][0];
-	_coeff1 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][1];
-	_coeff2 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][2];
-	_coeff3 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][3];
-	_coeff4 = FilterCoeff::singleton._coeffs[_type][_cutoff][_q][4];
-}
-
-
-/*Update from Schism Tracker, using formula from Modplug for cutoff*/
-void ITFilter::Update()
-{
-	double d,e;
-	if ( iRes >0 || iCutoff <= 127 )
-	{
-		double fc;
-		fc = 110.0 * pow(2.0,(iCutoff+6)/24.0); // ModPlug.
-		fc *= 3.14159265358979 * 2.0 / iSampleRate;
-		double d2 = dmpfac[iRes] / (4.0*65536.0);
-		d = (1.0 - d2) * fc;
-
-		if (d > 2.0)
-			d = 2.0;
-
-		d = (d2 - d) / fc;
-		e = 1.0 / (fc * fc);
+	if (_type == F_NONE) {
+		_coeff0 =  1;
+		_coeff1 =  0;
+		_coeff2 =  0;
+		_coeff3 =  0;
+		_coeff4 =  0;
+		return;
 	}
-	else { e = 0; d = 0; }
-
-	fCoeff[0]= 1.0f / (1.0f + d + e);
-	fCoeff[1]= (d + e + e) / (1.0f + d + e);
-	fCoeff[2]= -e / (1.f + d + e);
+	else {
+		int type = _type;
+		if (type > F_NONE) type--;
+		_coeff0 = FilterCoeff::singleton._coeffs[type][_cutoff][_q][0];
+		_coeff1 = FilterCoeff::singleton._coeffs[type][_cutoff][_q][1];
+		_coeff2 = FilterCoeff::singleton._coeffs[type][_cutoff][_q][2];
+		_coeff3 = FilterCoeff::singleton._coeffs[type][_cutoff][_q][3];
+		_coeff4 = FilterCoeff::singleton._coeffs[type][_cutoff][_q][4];
+	}
 }
 
 }}}

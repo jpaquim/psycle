@@ -69,7 +69,7 @@ namespace psycle
 			virtual bool Open(std::string const & FileName);
 			virtual bool Create(std::string const & FileName, bool overwrite);
 			virtual bool Close();
-			virtual bool Expect(void* pData, std::size_t numBytes);
+			virtual bool Expect(const void* pData, std::size_t numBytes);
 			virtual int Seek(std::size_t offset);
 			virtual int Skip(std::size_t numBytes);
 			virtual bool Eof();
@@ -324,7 +324,7 @@ namespace psycle
 			bool Open(std::string const & FileName);
 			bool Create(std::string const & FileName, bool overwrite);
 			bool Close();
-			bool Expect(void* pData, std::size_t numBytes);
+			bool Expect(const void* pData, std::size_t numBytes);
 			int Seek(std::size_t offset);
 			int Skip(std::size_t numBytes);
 			bool Eof();

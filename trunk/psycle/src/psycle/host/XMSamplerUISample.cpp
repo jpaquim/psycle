@@ -2,6 +2,7 @@
 #include "XMSamplerUISample.hpp"
 #include <psycle/host/XMSampler.hpp>
 #include <psycle/host/Song.hpp>
+#include <psycle/host/PsycleConfig.hpp>
 
 namespace psycle { namespace host {
 
@@ -32,13 +33,7 @@ void XMSamplerUISample::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_SAMPLELIST, OnLbnSelchangeSamplelist)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_DEFVOLUME, OnNMCustomdrawDefvolume)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_GLOBVOLUME, OnNMCustomdrawGlobvolume)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PAN, OnNMCustomdrawPan)
 	ON_CBN_SELENDOK(IDC_VIBRATOTYPE, OnCbnSelendokVibratotype)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATOATTACK, OnNMCustomdrawVibratoAttack)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATOSPEED, OnNMCustomdrawVibratospeed)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_VIBRATODEPTH, OnNMCustomdrawVibratodepth)
 	ON_CBN_SELENDOK(IDC_LOOP, OnCbnSelendokLoop)
 	ON_CBN_SELENDOK(IDC_SUSTAINLOOP, OnCbnSelendokSustainloop)
 	ON_EN_CHANGE(IDC_LOOPSTART, OnEnChangeLoopstart)
@@ -48,14 +43,14 @@ BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 	ON_EN_CHANGE(IDC_WAVENAME, OnEnChangeWavename)
 	ON_EN_CHANGE(IDC_SAMPLERATE, OnEnChangeSamplerate)
 	ON_NOTIFY(UDN_DELTAPOS, IDC_SPINSAMPLERATE, OnDeltaposSpinsamplerate)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SAMPLENOTE, OnNMCustomdrawSamplenote)
-	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FINETUNE, OnNMCustomdrawFinetune)
+	ON_NOTIFY_RANGE(NM_CUSTOMDRAW, IDC_DEFVOLUME, IDC_VIBRATODEPTH, OnCustomdrawSliderm)
 	ON_BN_CLICKED(IDC_OPENWAVEEDITOR, OnBnClickedOpenwaveeditor)
 	ON_BN_CLICKED(IDC_LOAD, OnBnClickedLoad)
 	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
 	ON_BN_CLICKED(IDC_DUPE, OnBnClickedDupe)
 	ON_BN_CLICKED(IDC_DELETE, OnBnClickedDelete)
 	ON_BN_CLICKED(IDC_PANENABLED, OnBnClickedPanenabled)
+	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
 // Controladores de mensajes de XMSamplerUISample
@@ -65,32 +60,39 @@ BOOL XMSamplerUISample::OnInitDialog()
 	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
 	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
 	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMin(-59);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRangeMax(59);
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(1);
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMax(256);
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRangeMin(-256);
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(26);
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRange(-60, 59);
+	//Hack to fix "0 placed on leftmost on start".
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(-60);
+	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetRange(-100, 100);
+	//Hack to fix "0 placed on leftmost on start".
+	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(-100);
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetRangeMax(255);
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetRangeMax(64);
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetRangeMax(32);
 	CComboBox* vibratoType = ((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE));
-	vibratoType->ResetContent();
 	vibratoType->AddString("Sinus");
 	vibratoType->AddString("Square");
 	vibratoType->AddString("RampUp");
 	vibratoType->AddString("RampDown");
 	vibratoType->AddString("Random");
 	CComboBox* sustainLoop = ((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP));
-	sustainLoop->ResetContent();
 	sustainLoop->AddString("Disabled");
 	sustainLoop->AddString("Forward");
 	sustainLoop->AddString("Bidirection");
 	CComboBox* loop =  ((CComboBox*)GetDlgItem(IDC_LOOP));
-	loop->ResetContent();
 	loop->AddString("Disabled");
 	loop->AddString("Forward");
 	loop->AddString("Bidirection");
+	RefreshSampleList();
+	m_SampleList.SetCurSel(0);
+	return TRUE;
+	// return TRUE unless you set the focus to a control
+	// EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void XMSamplerUISample::RefreshSampleList()
+{
+	int i = m_SampleList.GetCurSel();
 	m_SampleList.ResetContent();
 	SampleList& list = Global::song().samples;
 	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
@@ -106,15 +108,13 @@ BOOL XMSamplerUISample::OnInitDialog()
 		}
 		m_SampleList.AddString(line);
 	}
-	m_SampleList.SetCurSel(0);
-	return TRUE;
-	// return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+	if (i !=  LB_ERR) {
+		m_SampleList.SetCurSel(i);
+	}
 }
-
 BOOL XMSamplerUISample::OnSetActive()
 {
-	if ( m_SampleList.GetCurSel() == -1 ) {
+	if ( m_SampleList.GetCurSel() == LB_ERR ) {
 		m_SampleList.SetCurSel(0);
 	}
 	OnLbnSelchangeSamplelist();
@@ -146,35 +146,14 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 
 	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetPos(int(wave.WaveGlobVolume()*128.0f));
 	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetPos(wave.WaveVolume());
-	if ( wave.PanFactor() > 1.0f )// SurrounD
-	{
-		((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?2:0);
-		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(int((wave.PanFactor()-1.0f)*128.0f));
-		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText("SurrounD");
-	}
-	else
-	{
-		const int panpos=wave.PanFactor()*128.0f;
-		((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
-		((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
-		char tmp[40];
-		switch(panpos)
-		{
-		case 0: sprintf(tmp,"||%02d  ",panpos); break;
-		case 64: sprintf(tmp," |%02d| ",panpos); break;
-		case 128: sprintf(tmp,"  %02d||",panpos); break;
-		default:
-			if ( panpos < 32) sprintf(tmp,"<<%02d  ",panpos);
-			else if ( panpos < 64) sprintf(tmp," <%02d< ",panpos);
-			else if ( panpos <= 96) sprintf(tmp," >%02d> ",panpos);
-			else sprintf(tmp,"  %02d>>",panpos);
-			break;
-		}
-		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
-	}
 
-	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(-1*int(wave.WaveTune()));
-	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(int(wave.WaveFineTune()));
+	const int panpos=wave.PanFactor()*128.0f;
+	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
+	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
+	FillPanDescription(panpos);
+
+	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetPos(-1*wave.WaveTune());
+	((CSliderCtrl*)GetDlgItem(IDC_FINETUNE))->SetPos(wave.WaveFineTune());
 
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetPos(wave.VibratoAttack());
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSpeed());
@@ -312,42 +291,84 @@ void XMSamplerUISample::OnEnChangeSamplerate()
 void XMSamplerUISample::OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMUPDOWN pNMUpDown = reinterpret_cast<LPNMUPDOWN>(pNMHDR);
-	if ( pNMUpDown->iDelta > 0 )
-	{
-		rWave().WaveSampleRate(rWave().WaveSampleRate()*2);
-
+	int newval;
+	if ( pNMUpDown->iDelta < 0 ) {
+		newval = rWave().WaveSampleRate()*2;
 	} else {
-		rWave().WaveSampleRate(rWave().WaveSampleRate()*0.5f);
+		newval = rWave().WaveSampleRate()*0.5f;
 	}
+	rWave().WaveSampleRate(newval);
+	char tmp[40];
+	CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
+	sprintf(tmp,"%d",newval);
+	cedit->SetWindowText(tmp);
 	*pResult = 0;
 }
 
-void XMSamplerUISample::OnNMCustomdrawDefvolume(NMHDR *pNMHDR, LRESULT *pResult)
+void XMSamplerUISample::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME);
-	if ( m_Init )
-	{
-		rWave().WaveVolume(slid->GetPos());
+	CSliderCtrl* the_slider = reinterpret_cast<CSliderCtrl*>(pScrollBar);
+	int uId = the_slider->GetDlgCtrlID();
+
+	switch(nSBCode){
+	case TB_BOTTOM: //fallthrough
+	case TB_LINEDOWN: //fallthrough
+	case TB_PAGEDOWN: //fallthrough
+	case TB_TOP: //fallthrough
+	case TB_LINEUP: //fallthrough
+	case TB_PAGEUP: //fallthrough
+	case TB_THUMBPOSITION: //fallthrough
+	case TB_THUMBTRACK:
+		if (uId == IDC_DEFVOLUME) { SliderDefvolume(the_slider); }
+		else if (uId == IDC_GLOBVOLUME) { SliderGlobvolume(the_slider); }
+		else if (uId == IDC_PAN) { SliderPan(the_slider); }
+		else if (uId == IDC_SAMPLENOTE) { SliderSamplenote(the_slider); }
+		else if (uId == IDC_FINETUNE) { SliderFinetune(the_slider); }
+		else if (uId == IDC_VIBRATOATTACK) { SliderVibratoAttack(the_slider); }
+		else if (uId == IDC_VIBRATOSPEED) { SliderVibratospeed(the_slider); }
+		else if (uId == IDC_VIBRATODEPTH) { SliderVibratodepth(the_slider); }
+		break;
+	case TB_ENDTRACK:
+		break;
 	}
-	char tmp[40];
-	sprintf(tmp,"%d",slid->GetPos());
-	((CStatic*)GetDlgItem(IDC_LDEFVOL))->SetWindowText(tmp);
-	*pResult = 0;
+	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
-void XMSamplerUISample::OnNMCustomdrawGlobvolume(NMHDR *pNMHDR, LRESULT *pResult)
+void XMSamplerUISample::SliderDefvolume(CSliderCtrl* slid)
 {
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME);
-	if ( m_Init )
+	rWave().WaveVolume(slid->GetPos());
+}
+void XMSamplerUISample:: SliderGlobvolume(CSliderCtrl* slid)
+{
+	rWave().WaveGlobVolume(slid->GetPos()/128.0f);
+}
+void XMSamplerUISample::SliderPan(CSliderCtrl* slid)
+{
+	CButton* check = (CButton*)GetDlgItem(IDC_PANENABLED);
+	if ( check->GetCheck() != 2 ) // 2 == SurrounD
 	{
-		rWave().WaveGlobVolume(slid->GetPos()/128.0f);
+		rWave().PanFactor(slid->GetPos()/128.0f);
 	}
-	char tmp[40];
-	sprintf(tmp,"%d",slid->GetPos());
-	((CStatic*)GetDlgItem(IDC_LGLOBVOL))->SetWindowText(tmp);
-	*pResult = 0;
+}
+void XMSamplerUISample::SliderVibratoAttack(CSliderCtrl* slid)
+{
+	rWave().VibratoAttack(slid->GetPos());
+}
+void XMSamplerUISample::SliderVibratospeed(CSliderCtrl* slid)
+{
+	rWave().VibratoSpeed(slid->GetPos());
+}
+void XMSamplerUISample::SliderVibratodepth(CSliderCtrl* slid)
+{
+	rWave().VibratoDepth(slid->GetPos());
+}
+void XMSamplerUISample::SliderSamplenote(CSliderCtrl* slid)
+{
+	rWave().WaveTune(-1*slid->GetPos());
+}
+void XMSamplerUISample::SliderFinetune(CSliderCtrl* slid)
+{
+	rWave().WaveFineTune(slid->GetPos());
 }
 
 void XMSamplerUISample::OnBnClickedPanenabled()
@@ -355,111 +376,108 @@ void XMSamplerUISample::OnBnClickedPanenabled()
 	CButton* check = (CButton*)GetDlgItem(IDC_PANENABLED);
 	if ( m_Init )
 	{
-		rWave().PanEnabled(check->GetCheck()?true:false);
-		if ( check->GetCheck() == 2 ) 
-		{
-			rWave().IsSurround(true);
-		}
-		else 
-		{
-			rWave().IsSurround(false);
-		}
+		rWave().PanEnabled(check->GetCheck() > 0);
+		rWave().IsSurround(check->GetCheck() == 2);
 	}
-	if ( check->GetCheck() == 2 ) 
-	{
-		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText("SurrounD");
-	}
-	else
-	{
-		char tmp[40];
-		int val = (int)(rWave().PanFactor()*128);
-		switch(val)
-		{
-		case 0: sprintf(tmp,"||%02d  ",val); break;
-		case 64: sprintf(tmp," |%02d| ",val); break;
-		case 128: sprintf(tmp,"  %02d||",val); break;
-		default:
-			if ( val < 32) sprintf(tmp,"<<%02d  ",val);
-			else if ( val < 64) sprintf(tmp," <%02d< ",val);
-			else if ( val <= 96) sprintf(tmp," >%02d> ",val);
-			else sprintf(tmp,"  %02d>>",val);
-			break;
-		}
-		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
-	}
+
+	FillPanDescription(static_cast<int>(rWave().PanFactor()*128));
 }
 
-void XMSamplerUISample::OnNMCustomdrawPan(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_PAN);
+void XMSamplerUISample::FillPanDescription(int val) {
+	char value[40];
 	CButton* check = (CButton*)GetDlgItem(IDC_PANENABLED);
-	if ( m_Init )
-	{
-		if ( check->GetCheck() != 2 ) // 2 == SurrounD
-		{
-			rWave().PanFactor(slid->GetPos()/128.0f);
-		}
+	if ( check->GetCheck() == 2 ) {
+		strcpy(value, "SurrounD");
 	}
-	if ( check->GetCheck() != 2 ) // 2 == SurrounD
-	{
-	char tmp[40];
-		int val = slid->GetPos();
+	else{
 		switch(val)
 		{
-		case 0: sprintf(tmp,"||%02d  ",val); break;
-		case 64: sprintf(tmp," |%02d| ",val); break;
-		case 128: sprintf(tmp,"  %02d||",val); break;
+		case 0: sprintf(value,"||%02d  ",val); break;
+		case 64: sprintf(value," |%02d| ",val); break;
+		case 128: sprintf(value,"  %02d||",val); break;
 		default:
-			if ( val < 32) sprintf(tmp,"<<%02d  ",val);
-			else if ( val < 64) sprintf(tmp," <%02d< ",val);
-			else if ( val <= 96) sprintf(tmp," >%02d> ",val);
-			else sprintf(tmp,"  %02d>>",val);
+			if ( val < 32) sprintf(value,"<<%02d  ",val);
+			else if ( val < 64) sprintf(value," <%02d< ",val);
+			else if ( val <= 96) sprintf(value," >%02d> ",val);
+			else sprintf(value,"  %02d>>",val);
 			break;
 		}
-
-		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(tmp);
 	}
-	else
-	{
-		((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText("SurrounD");
-	}
-	*pResult = 0;
+	((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(value);
 }
-void XMSamplerUISample::OnNMCustomdrawSamplenote(NMHDR *pNMHDR, LRESULT *pResult)
+
+
+void XMSamplerUISample::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult) 
 {
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE);
-	if ( m_Init )
+	static const char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+	NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	if (nmcd.dwDrawStage == CDDS_POSTPAINT)
 	{
-		rWave().WaveTune(-1*slid->GetPos());
+		char tmp[64];
+		int label=0;
+		CSliderCtrl* slider = reinterpret_cast<CSliderCtrl*>(GetDlgItem(pNMHDR->idFrom));
+		if (pNMHDR->idFrom == IDC_DEFVOLUME) {
+			sprintf(tmp,"C%02X",slider->GetPos());
+			label = IDC_LDEFVOL;
+		}
+		else if(pNMHDR->idFrom == IDC_GLOBVOLUME) {
+			std::ostringstream temp;
+			temp.setf(std::ios::fixed);
+			if(slider->GetPos()==0)
+				temp<<"-inf. dB";
+			else
+			{
+				float vol = float(slider->GetPos())/1.28f;
+				float db = 20 * log10(vol/100.0f);
+				temp<<std::setprecision(1)<<db<<"dB";
+			}
+			strcpy(tmp,temp.str().c_str());
+			label = IDC_LGLOBVOL;
+		}
+		else if(pNMHDR->idFrom == IDC_PAN) {
+			FillPanDescription(slider->GetPos());
+			*pResult = CDRF_DODEFAULT;
+			return;
+		}
+		else if (pNMHDR->idFrom == IDC_SAMPLENOTE) {
+			if (rWave().WaveLength() > 0) {
+				int offset = (PsycleGlobal::conf().patView().showA440) ? -1 : 0;
+				int pos = slider->GetPos()-slider->GetRangeMin();
+				sprintf(tmp,"%s%d", notes[pos%12], offset+(pos/12));
+			}
+			else {
+				sprintf(tmp,"%s%d",notes[0],5);
+			}
+			label = IDC_LSAMPLENOTE;
+		}
+		else if (pNMHDR->idFrom == IDC_FINETUNE) {
+			sprintf(tmp,"%d ct.",slider->GetPos());
+			label = IDC_LFINETUNE;
+		}
+		else if (pNMHDR->idFrom == IDC_VIBRATOATTACK) {
+			if ( slider->GetPos()>0 ) sprintf(tmp,"%d",slider->GetPos());
+			else strcpy(tmp,"Disabled");
+			label = IDC_LVIBRATOATTACK;
+		}
+		else if (pNMHDR->idFrom == IDC_VIBRATOSPEED) {
+			sprintf(tmp,"%d",slider->GetPos());
+			label = IDC_LVIBRATOSPEED;
+		}
+		else if (pNMHDR->idFrom == IDC_VIBRATODEPTH) {
+			sprintf(tmp,"%d",slider->GetPos());
+			label = IDC_LVIBRATODEPTH;
+		}
+		if (label != 0) {
+			((CStatic*)GetDlgItem(label))->SetWindowText(tmp);
+		}
+		*pResult = CDRF_DODEFAULT;
 	}
-	char tmp[40], tmp2[40];
-	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
-	if (rWave().WaveLength() > 0) {
-		sprintf(tmp,"%s",notes[(60+rWave().WaveTune())%12]);
-		sprintf(tmp2,"%s%d",tmp,(60+rWave().WaveTune())/12);
+	else if (nmcd.dwDrawStage == CDDS_PREPAINT ){
+		*pResult = CDRF_NOTIFYITEMDRAW|CDRF_NOTIFYPOSTPAINT;
 	}
 	else {
-		sprintf(tmp2,"%s%d",notes[0],5);
+		*pResult = CDRF_DODEFAULT;
 	}
-	((CStatic*)GetDlgItem(IDC_LSAMPLENOTE))->SetWindowText(tmp2);
-
-	*pResult = 0;
-}
-
-void XMSamplerUISample::OnNMCustomdrawFinetune(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_FINETUNE);
-	if ( m_Init )
-	{
-		rWave().WaveFineTune(slid->GetPos());
-	}
-	char tmp[40];
-	sprintf(tmp,"%.02f",slid->GetPos()/256.0f);
-	((CStatic*)GetDlgItem(IDC_LFINETUNE))->SetWindowText(tmp);
-	*pResult = 0;
 }
 
 void XMSamplerUISample::OnBnClickedOpenwaveeditor()
@@ -470,49 +488,6 @@ void XMSamplerUISample::OnCbnSelendokVibratotype()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_VIBRATOTYPE);
 	rWave().VibratoType((XMInstrument::WaveData::WaveForms::Type)cbox->GetCurSel());
-}
-
-void XMSamplerUISample::OnNMCustomdrawVibratoAttack(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK);
-	if ( m_Init )
-	{
-		rWave().VibratoAttack(slid->GetPos());
-	}
-	char tmp[40];
-	if ( slid->GetPos()>0 ) sprintf(tmp,"%d",slid->GetPos());
-	else strcpy(tmp,"Disabled");
-	((CStatic*)GetDlgItem(IDC_LVIBRATOATTACK))->SetWindowText(tmp);
-	*pResult = 0;
-}
-
-void XMSamplerUISample::OnNMCustomdrawVibratospeed(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED);
-	if ( m_Init )
-	{
-		rWave().VibratoSpeed(slid->GetPos());
-	}
-	char tmp[40];
-	sprintf(tmp,"%d",slid->GetPos());
-	((CStatic*)GetDlgItem(IDC_LVIBRATOSPEED))->SetWindowText(tmp);
-	*pResult = 0;
-}
-
-void XMSamplerUISample::OnNMCustomdrawVibratodepth(NMHDR *pNMHDR, LRESULT *pResult)
-{
-//	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
-	CSliderCtrl* slid = (CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH);
-	if ( m_Init )
-	{
-		rWave().VibratoDepth(slid->GetPos());
-	}
-	char tmp[40];
-	sprintf(tmp,"%d",slid->GetPos());
-	((CStatic*)GetDlgItem(IDC_LVIBRATODEPTH))->SetWindowText(tmp);
-	*pResult = 0;
 }
 
 void XMSamplerUISample::OnCbnSelendokLoop()
@@ -534,8 +509,8 @@ void XMSamplerUISample::OnEnChangeLoopstart()
 	char tmp[40];
 	if ( m_Init )
 	{
-	CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPSTART);
-	cedit->GetWindowText(tmp,40);
+		CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPSTART);
+		cedit->GetWindowText(tmp,40);
 		rWave().WaveLoopStart(atoi(tmp));
 		DrawScope();
 	}
@@ -546,8 +521,8 @@ void XMSamplerUISample::OnEnChangeLoopend()
 	char tmp[40];
 	if ( m_Init )
 	{
-	CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPEND);
-	cedit->GetWindowText(tmp,40);
+		CEdit* cedit = (CEdit*)GetDlgItem(IDC_LOOPEND);
+		cedit->GetWindowText(tmp,40);
 		rWave().WaveLoopEnd(atoi(tmp));
 		DrawScope();
 	}
@@ -558,8 +533,8 @@ void XMSamplerUISample::OnEnChangeSustainstart()
 	char tmp[40];
 	if ( m_Init )
 	{
-	CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINSTART);
-	cedit->GetWindowText(tmp,40);
+		CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINSTART);
+		cedit->GetWindowText(tmp,40);
 		rWave().WaveSusLoopStart(atoi(tmp));
 		DrawScope();
 	}
@@ -570,8 +545,8 @@ void XMSamplerUISample::OnEnChangeSustainend()
 	char tmp[40];
 	if ( m_Init )
 	{
-	CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINEND);
-	cedit->GetWindowText(tmp,40);
+		CEdit* cedit = (CEdit*)GetDlgItem(IDC_SUSTAINEND);
+		cedit->GetWindowText(tmp,40);
 		rWave().WaveSusLoopEnd(atoi(tmp));
 		DrawScope();
 	}

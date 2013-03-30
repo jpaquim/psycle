@@ -254,7 +254,7 @@ namespace psycle
 		{	
 			std::uint32_t size1,size2;
 			
-			char temp[6];
+			char temp[8];
 			std::uint32_t filevers;
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
@@ -714,7 +714,7 @@ namespace psycle
 		/// load XMInstrument
 		int XMInstrument::Load(RiffFile& riffFile)
 		{
-			char temp[6];
+			char temp[8];
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
@@ -742,7 +742,9 @@ namespace psycle
 			riffFile.Read(m_FilterCutoff);
 			riffFile.Read(m_FilterResonance);
 			riffFile.Read(m_FilterEnvAmount);
-			riffFile.Read(&m_FilterType,sizeof(m_FilterType));
+			int val;
+			riffFile.Read(val);
+			m_FilterType = static_cast<dsp::FilterType>(val);
 
 			riffFile.Read(m_RandomVolume);
 			riffFile.Read(m_RandomPanning);
@@ -799,7 +801,8 @@ namespace psycle
 			riffFile.Write(m_FilterCutoff);
 			riffFile.Write(m_FilterResonance);
 			riffFile.Write(m_FilterEnvAmount);
-			riffFile.Write(&m_FilterType,sizeof(char));
+			int var = m_FilterType;
+			riffFile.Write(var);
 
 			riffFile.Write(m_RandomVolume);
 			riffFile.Write(m_RandomPanning);
