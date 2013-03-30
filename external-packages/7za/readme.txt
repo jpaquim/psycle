@@ -1,45 +1,47 @@
-7-Zip Command line version 4.42
--------------------------------
+7-Zip 9.20
+----------
 
-7-Zip is a file archiver with hig compression ratio.
-7za.exe is a standalone command line version if 7-Zip.
+7-Zip is a file archiver for Windows 95/98/ME/NT/2000/2003/2008/XP/Vista/7. 
 
-7-Zip Copyright (C) 1999-2006 Igor Pavlov.
+7-Zip Copyright (C) 1999-2010 Igor Pavlov.
 
-Features of 7za.exe: 
-  - Highest compression ratio in new 7z format
-  - 7z, ZIP, GZIP, BZIP2, Z and TAR formats support
-  - Highest compression ratio for ZIP and GZIP formats
+The main features of 7-Zip: 
+
+  - High compression ratio in the new 7z format
+  - Supported formats:
+     - Packing / unpacking: 7z, XZ, BZIP2, GZIP, TAR, ZIP and WIM.
+     - Unpacking only: ARJ, CAB, CHM, CPIO, CramFS, DEB, DMG, FAT, HFS, ISO, LZH, LZMA, 
+                       MBR, MSI, NSIS, NTFS, RAR, RPM, SquashFS, UDF, VHD, WIM, XAR and Z.
   - Fast compression and decompression
-  - Strong AES-256 encryption in 7z format
+  - Self-extracting capability for 7z format
+  - Strong AES-256 encryption in 7z and ZIP formats
+  - Integration with Windows Shell
+  - Powerful File Manager
+  - Powerful command line version
+  - Localizations for 79 languages
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+7-Zip is free software distributed under the GNU LGPL (except for unRar code).
+Read License.txt for more infomation about license.
 
-7-Zip is a free software. However, you can support 
-development of 7-Zip by registering.
-For information about how to register 7-Zip visit page
-http://www.7-zip.org/register.html
 
-Source code of 7za.exe and 7-Zip can be found at
-http://www.7-zip.org/
+  This distribution contains the following files:
 
-7za.exe can work in Windows 95/98/ME/NT/2000/XP/2003 and 
-in Linux via Wine program. 
+  7zFM.exe      - 7-Zip File Manager
+  7-zip.dll     - Plugin for Windows Shell and for 7-Zip File Manager
+  7zg.exe       - GUI module
+  7z.exe        - Command line version
+  7z.dll        - 7-Zip engine module
+  7z.sfx        - SFX module (Windows version)
+  7zCon.sfx     - SFX module (Console version)
 
-  This distrubutive packet contains the following files:
+  License.txt   - License information
+  readme.txt    - This file
+  History.txt   - History of 7-Zip
+  7-zip.chm     - User's Manual in HTML Help format
 
-  7za.exe       - 7-Zip standalone command line version.
-  readme.txt    - This file.
-  copying.txt   - GNU LGPL.
-  7-zip.chm     - User's Manual in HTML Help format.
+  Lang\en.ttt   - English (base) localization file
+  Lang\*.txt    - Localization files
 
 
 ---
