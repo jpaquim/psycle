@@ -4,6 +4,7 @@
 #include <psycle/core/detail/project.private.hpp>
 #include "xminstrument.h"
 
+#include <psycle/helpers/math.hpp>
 #include <psycle/helpers/datacompression.hpp>
 #include "fileio.h"
 #include <cassert>
@@ -15,23 +16,253 @@ using namespace helpers;
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
+void XMInstrument::WaveData::Init(){
+	DeleteWaveData();
+	m_WaveName= "";
+	m_WaveLength = 0;
+	m_WaveGlobVolume = 1.0f; // Global volume ( global multiplier )
+	m_WaveDefVolume = 128; // Default volume ( volume at which it starts to play. corresponds to 0Cxx/volume command )
+	m_WaveLoopStart = 0;
+	m_WaveLoopEnd = 0;
+	m_WaveLoopType = LoopType::DO_NOT;
+	m_WaveSusLoopStart = 0;
+	m_WaveSusLoopEnd = 0;
+	m_WaveSusLoopType = LoopType::DO_NOT;
+	//todo: Add SampleRate functionality, and change WaveTune's one.
+	// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
+	m_WaveSampleRate = 8363;
+	m_WaveTune = 0;
+	m_WaveFineTune = 0;	
+	m_WaveStereo = false;
+	m_PanFactor = 0.5f;
+	m_PanEnabled = false;
+	m_Surround = false;
+	m_VibratoAttack = 0;
+	m_VibratoSpeed = 0;
+	m_VibratoDepth = 0;
+	m_VibratoType = 0;
+}
+void XMInstrument::WaveData::DeleteWaveData(){
+	if ( m_pWaveDataL)
+	{
+		delete[] m_pWaveDataL;
+		m_pWaveDataL=0;
+		if (m_WaveStereo)
+		{
+			delete[] m_pWaveDataR;
+			m_pWaveDataR=0;
+		}
+	}
+	m_WaveLength = 0;
+}
+
+void XMInstrument::WaveData::AllocWaveData(const int iLen,const bool bStereo)
+{
+	DeleteWaveData();
+	m_pWaveDataL = new int16_t[iLen];
+	m_pWaveDataR = bStereo?new int16_t[iLen]:NULL;
+	m_WaveStereo = bStereo;
+	m_WaveLength  = iLen;
+}
+
+void XMInstrument::WaveData::ConvertToMono()
+{
+	if (!m_WaveStereo) return;
+	for (uint32_t c = 0; c < m_WaveLength; c++)
+	{
+		m_pWaveDataL[c] = ( m_pWaveDataL[c] + m_pWaveDataR[c] ) / 2;
+	}
+	m_WaveStereo = false;
+	delete[] m_pWaveDataR;
+	m_pWaveDataR=0;
+}
+
+void XMInstrument::WaveData::ConvertToStereo()
+{
+	if (m_WaveStereo) return;
+	m_pWaveDataR = new short[m_WaveLength];
+	for (uint32_t c = 0; c < m_WaveLength; c++)
+	{
+		m_pWaveDataR[c] = m_pWaveDataL[c];
+	}
+	m_WaveStereo = true;
+}
+
+void XMInstrument::WaveData::InsertAt(uint32_t insertPos, const WaveData& wave)
+{
+	int16_t* oldLeft = m_pWaveDataL;
+	int16_t* oldRight = NULL;
+	m_pWaveDataL = new int16_t[m_WaveLength+wave.WaveLength()];
+
+	std::memcpy(m_pWaveDataL, oldLeft, insertPos*sizeof(short));
+	std::memcpy(&m_pWaveDataL[insertPos], wave.pWaveDataL(), wave.WaveLength()*sizeof(short));
+	std::memcpy(&m_pWaveDataL[insertPos+wave.WaveLength()], 
+		&oldLeft[insertPos], 
+		(m_WaveLength - insertPos)*sizeof(short));
+
+	if(m_WaveStereo)
+	{
+		oldRight = m_pWaveDataR;
+		m_pWaveDataR = new int16_t[m_WaveLength+wave.WaveLength()];
+		std::memcpy(m_pWaveDataR, oldRight, insertPos*sizeof(short));
+		std::memcpy(&m_pWaveDataR[insertPos], wave.pWaveDataR(), wave.WaveLength()*sizeof(short));
+		std::memcpy(&m_pWaveDataR[insertPos+wave.WaveLength()], 
+			&oldRight[insertPos], 
+			(m_WaveLength - insertPos)*sizeof(short));
+	}
+	m_WaveLength += wave.WaveLength();
+	delete[] oldLeft;
+	delete[] oldRight;
+}
+
+void XMInstrument::WaveData::ModifyAt(uint32_t modifyPos, const WaveData& wave)
+{
+	std::memcpy(&m_pWaveDataL[modifyPos], wave.pWaveDataL(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
+	if(m_WaveStereo)
+	{
+		std::memcpy(&m_pWaveDataR[modifyPos], wave.pWaveDataR(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
+	}
+}
+void XMInstrument::WaveData::DeleteAt(uint32_t deletePos, uint32_t length)
+{
+	int16_t* oldLeft = m_pWaveDataL;
+	int16_t* oldRight = NULL;
+	m_pWaveDataL = new int16_t[m_WaveLength-length];
+
+	std::memcpy(m_pWaveDataL, oldLeft, deletePos*sizeof(short));
+	std::memcpy(&m_pWaveDataL[deletePos], &oldLeft[deletePos+length], 
+		(m_WaveLength - deletePos - length)*sizeof(short));
+
+	if(m_WaveStereo)
+	{
+		oldRight = m_pWaveDataR;
+		m_pWaveDataR = new int16_t[m_WaveLength-length];
+		std::memcpy(m_pWaveDataR, oldRight, deletePos*sizeof(short));
+		std::memcpy(&m_pWaveDataR[deletePos], &oldRight[deletePos+length], 
+			(m_WaveLength - deletePos - length)*sizeof(short));
+	}
+	m_WaveLength -= length;
+	delete[] oldLeft;
+	delete[] oldRight;
+}
+void XMInstrument::WaveData::Mix(const WaveData& waveIn, float buf1Vol, float buf2Vol)
+{
+	if (m_WaveLength<=0 || waveIn.WaveLength()<0) return;
+	int16_t* oldLeft = m_pWaveDataL;
+	int16_t* oldRight = m_pWaveDataR;
+	bool increased=false;
+
+	if (waveIn.WaveLength() > m_WaveLength) {
+		m_pWaveDataL = new int16_t[waveIn.WaveLength()];
+		std::memcpy(m_pWaveDataL,oldLeft,m_WaveLength);
+		if(m_WaveStereo)
+		{
+			m_pWaveDataR = new int16_t[waveIn.WaveLength()];
+			std::memcpy(m_pWaveDataR,oldRight,m_WaveLength);
+		}
+		m_WaveLength = waveIn.WaveLength();
+		increased=true;
+	}
+
+	if (m_WaveStereo) {
+		for( int i(0); i<waveIn.WaveLength(); i++ )
+		{
+			m_pWaveDataL[i] = m_pWaveDataL[i] * buf1Vol + waveIn.pWaveDataL()[i] * buf2Vol;
+			m_pWaveDataR[i] = m_pWaveDataR[i] * buf1Vol + waveIn.pWaveDataR()[i] * buf2Vol;
+		}
+		for( int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
+		{
+			m_pWaveDataL[i] *= buf1Vol;
+			m_pWaveDataR[i] *= buf1Vol;
+		}
+	}
+	else {
+		for( int i(0); i<waveIn.WaveLength(); i++ )
+		{
+			m_pWaveDataL[i] = m_pWaveDataL[i] * buf1Vol + waveIn.pWaveDataL()[i] * buf2Vol;
+		}
+		for( int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
+		{
+			m_pWaveDataL[i] *= buf1Vol;
+		}
+	}
+	if (increased) {
+		delete[] oldLeft;
+		delete[] oldRight;
+	}
+}
+void XMInstrument::WaveData::Silence(int silStart, int silEnd) 
+{
+	if(silStart<0) silStart=0;
+	if(silEnd<=0) silEnd=m_WaveLength;
+	if(silStart>=m_WaveLength||silEnd>m_WaveLength||silStart==silEnd) return;
+	std::memset(&m_pWaveDataL[silStart], 0, silEnd-silStart);
+	if (m_WaveStereo) {
+		std::memset(&m_pWaveDataR[silStart], 0, silEnd-silStart);
+	}
+}
+
+//Fade - fades an audio buffer from one volume level to another.
+void XMInstrument::WaveData::Fade(int fadeStart, int fadeEnd, float startVol, float endVol)
+{
+	if(fadeStart<0) fadeStart=0;
+	if(fadeEnd<=0) fadeEnd=m_WaveLength;
+	if(fadeStart>=m_WaveLength||fadeEnd>m_WaveLength||fadeStart==fadeEnd) return;
+
+	float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
+	if (m_WaveStereo) {
+		for(int i(fadeStart);i<fadeEnd;++i) {
+			m_pWaveDataL[i] *= startVol+i*slope;
+			m_pWaveDataR[i] *= startVol+i*slope;
+		}
+	}
+	else {
+		for(int i(fadeStart);i<fadeEnd;++i) {
+			m_pWaveDataL[i] *= startVol+i*slope;
+		}
+	}
+}
+
+//Amplify - multiplies an audio buffer by a given factor.  buffer can be inverted by passing
+//	a negative value for vol.
+void XMInstrument::WaveData::Amplify(int ampStart, int ampEnd, float vol)
+{
+	if(ampStart<0) ampStart=0;
+	if(ampEnd<=0) ampEnd=m_WaveLength;
+	if(ampStart>=m_WaveLength||ampEnd>m_WaveLength||ampStart==ampEnd) return;
+
+	if (m_WaveStereo) {
+		for(int i(ampStart);i<ampEnd;++i) {
+			m_pWaveDataL[i] = math::clipped_lrint<int16_t>(m_pWaveDataL[i] * vol);
+			m_pWaveDataR[i] = math::clipped_lrint<int16_t>(m_pWaveDataR[i] * vol);
+		}
+	}
+	else { 
+		for(int i(ampStart);i<ampEnd;++i) {
+			m_pWaveDataL[i] = math::clipped_lrint<int16_t>(m_pWaveDataL[i] * vol);
+		}
+	}
+}
 
 void XMInstrument::WaveData::WaveSampleRate(const uint32_t value) {
-	//todo: Readapt Tune and FineTune, respect of the new SampleRate.
 	m_WaveSampleRate = value;
 }
 
 int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 	uint32_t size1 = 0, size2 = 0;
 
-	char temp[6];
+	char temp[8];
 	int size=0;
 	riffFile.ReadArray(temp,4); temp[4]='\0';
 	riffFile.Read(size);
-			if (strcmp(temp,"SMPD")) return size;
+	if (strcmp(temp,"SMPD")) return size;
+	uint32_t filevers=0;
+	riffFile.Read(filevers);
+	if (filevers == 0 || filevers > 0x1F) {
+		riffFile.Seek(riffFile.GetPos()-sizeof(filevers));
+		filevers = 0;
+	}
 
-	//\todo: add version
-	//riffFile.Read(version);
 
 	std::string _wave_name;
 	riffFile.ReadString(_wave_name);
@@ -49,12 +280,22 @@ int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 	riffFile.Read(m_WaveSusLoopEnd);
 	{ uint32_t i(0); riffFile.Read(i); m_WaveSusLoopType = static_cast<LoopType::Type>(i); }
 
+	if(filevers == 1) {
+		riffFile.Read(m_WaveSampleRate);
+	}
 	riffFile.Read(m_WaveTune);
 	riffFile.Read(m_WaveFineTune);
 
 	riffFile.Read(m_WaveStereo);
 	riffFile.Read(m_PanEnabled);
 	riffFile.Read(m_PanFactor);
+	if(filevers == 1) {
+		riffFile.Read(m_Surround);
+	}
+	else if (m_PanFactor > 1.0f) {
+		m_Surround = true;
+		m_PanFactor = m_PanFactor-=1.0f;
+	} else { m_Surround = false; }
 
 	riffFile.Read(m_VibratoAttack);
 	riffFile.Read(m_VibratoAttack);
@@ -65,20 +306,20 @@ int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 	unsigned char * pData = new unsigned char[size1];
 	riffFile.ReadArray(pData,size1);
 	DataCompression::SoundDesquash(pData, &m_pWaveDataL);
+	delete[] pData;
 
 	if (m_WaveStereo)
 	{
-		delete pData;
 		riffFile.Read(size2);
 		pData = new unsigned char[size2];
 		riffFile.ReadArray(pData,size2);
 		DataCompression::SoundDesquash(pData, &m_pWaveDataR);
+		delete[] pData;
 	}
-	delete pData;
 	return size;
 }
 
-void XMInstrument::WaveData::Save(RiffFile& riffFile)
+void XMInstrument::WaveData::Save(RiffFile& riffFile) const
 {
 	unsigned char * pData1(0);
 	unsigned char * pData2(0);
@@ -101,6 +342,7 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 
 	riffFile.WriteArray("SMPD",4);
 	riffFile.Write(size);
+	riffFile.Write(WAVEVERSION);
 	//\todo: add version
 
 	riffFile.WriteString(_wave_name);
@@ -123,6 +365,7 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 	riffFile.Write(m_WaveStereo);
 	riffFile.Write(m_PanEnabled);
 	riffFile.Write(m_PanFactor);
+	riffFile.Write(m_Surround);
 
 	riffFile.Write(m_VibratoAttack);
 	riffFile.Write(m_VibratoSpeed);
@@ -131,13 +374,13 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 
 	riffFile.Write(size1);
 	riffFile.WriteArray(pData1,size1);
-	delete pData1;
+	delete[] pData1;
 
 	if (m_WaveStereo)
 	{
 		riffFile.Write(size2);
 		riffFile.WriteArray(pData2,size2);
-		delete pData2;
+		delete[] pData2;
 	}
 }
 
@@ -145,11 +388,20 @@ void XMInstrument::WaveData::Save(RiffFile& riffFile)
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::Envelope Implementation.
 
+void XMInstrument::Envelope::Init()
+{	m_Enabled = false;
+	m_Carry = false;
+	m_SustainBegin = INVALID;
+	m_SustainEnd = INVALID;
+	m_LoopStart = INVALID;
+	m_LoopEnd = INVALID;
+	if (!m_Points.empty()) { m_Points.clear(); }
+}
 /**
-* @param pointIndex Current point index.
-* @param pointTime Desired point Time.
-* @param value Desired point Value.
-* @return New point index.
+* @param pointIndex : Current point index.
+* @param pointTime  : Desired point Time.
+* @param value		: Desired point Value.
+* @return			: New point index.
 */
 int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
 {
@@ -263,9 +515,9 @@ int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const 
 	return INVALID;
 }
 /**
-* @param pointTime Point Time.
-* @param value Point Value.
-* @return New point index.
+* @param pointTime  : Point Time.
+* @param value		: Point Value.
+* @return			: New point index.
 */
 unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
 {
@@ -377,7 +629,7 @@ void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t version)
 }
 
 /// Saving Procedure
-void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version)
+void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version) const
 {
 	// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 	riffFile.Write(m_Enabled);
@@ -423,6 +675,7 @@ void XMInstrument::Init()
 
 	m_PanEnabled=false;
 	m_InitPan = 0.5f;
+	m_Surround = false;
 	m_NoteModPanCenter = 60;
 	m_NoteModPanSep = 0;
 
@@ -440,12 +693,7 @@ void XMInstrument::Init()
 	m_DCT = DCType::DCT_NONE;
 	m_DCA = NewNoteAction::STOP;
 
-	NotePair npair;
-	npair.second=255;
-	for(int i = 0;i < NOTE_MAP_SIZE;i++){
-		npair.first=i;
-		m_AssignNoteToSample[i] = npair;
-	}
+	SetDefaultNoteMap();
 
 	m_AmpEnvelope.Init();
 	m_PanEnvelope.Init();
@@ -453,11 +701,19 @@ void XMInstrument::Init()
 	m_FilterEnvelope.Init();
 
 }
+void XMInstrument::SetDefaultNoteMap() {
+	NotePair npair;
+	npair.second=255;
+	for(int i = 0;i < NOTE_MAP_SIZE;i++){
+		npair.first=i;
+		m_AssignNoteToSample[i] = npair;
+	}
+}
 
 /// load XMInstrument
 int XMInstrument::Load(RiffFile& riffFile)
 {
-	char temp[6];
+	char temp[8];
 	int32_t size = 0;
 	riffFile.ReadArray(temp,4); temp[4]='\0';
 	riffFile.Read(size);
@@ -477,6 +733,7 @@ int XMInstrument::Load(RiffFile& riffFile)
 
 	riffFile.Read(m_InitPan);
 	riffFile.Read(m_PanEnabled);
+	//TODO: ADD surround
 	riffFile.Read(m_NoteModPanCenter);
 	riffFile.Read(m_NoteModPanSep);
 
@@ -513,7 +770,7 @@ int XMInstrument::Load(RiffFile& riffFile)
 }
 
 // save XMInstrument
-void XMInstrument::Save(RiffFile& riffFile)
+void XMInstrument::Save(RiffFile& riffFile) const
 {
 	if ( ! m_bEnabled ) return;
 	//size is saved in 32bits.
@@ -535,6 +792,7 @@ void XMInstrument::Save(RiffFile& riffFile)
 
 	riffFile.Write(m_InitPan);
 	riffFile.Write(m_PanEnabled);
+	//TODO: ADD surround
 	riffFile.Write(m_NoteModPanCenter);
 	riffFile.Write(m_NoteModPanSep);
 

@@ -9,6 +9,7 @@
 
 #include <psycle/core/detail/project.hpp>
 #include <universalis/stdlib/cstdint.hpp>
+#include <psycle/helpers/filter.hpp>
 #include <string>
 
 namespace psycle { namespace core {
@@ -81,7 +82,7 @@ class PSYCLE__CORE__DECL Instrument {
 			/// EnvAmount [-128,128]
 			int32_t ENV_F_EA;
 			/// Filter Type [0-4]
-			int32_t ENV_F_TP;
+			helpers::dsp::FilterType ENV_F_TP;
 		///\}
 
 		int32_t _pan;
@@ -108,7 +109,6 @@ class PSYCLE__CORE__DECL Instrument {
 			// xml copy paste methods
 			std::string toXml() const;
 			void setName( const std::string & name );
-			void createHeader( const std::string & header );
 			void createWavHeader( const std::string & name, const std::string & header );
 			void setCompressedData( unsigned char* left, unsigned char* right );
 

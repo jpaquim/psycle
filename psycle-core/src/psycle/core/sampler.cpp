@@ -25,6 +25,13 @@ static inline int alteRand(int x) {
 	return (x*rand())/RAND_MAX;
 }
 
+Voice::Voice():resampler_data(NULL)
+{
+}
+Voice::~Voice()
+{
+}
+
 
 Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id)
 :
@@ -35,6 +42,7 @@ Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id)
 	SetAudioRange(32768.0f);
 	//DefineStereoOutput(1);
 
+	baseC = 60;
 	resampler_.quality(dsp::resampler::quality::linear);
 	for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 	{
@@ -42,7 +50,6 @@ Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id)
 		_voices[i]._envelope._sustain = 0;
 		_voices[i]._filterEnv._stage = ENV_OFF;
 		_voices[i]._filterEnv._sustain = 0;
-		_voices[i]._filter.Init(44100);
 		_voices[i]._cutoff = 0;
 		_voices[i]._sampleCounter = 0;
 		_voices[i]._triggerNoteOff = 0;
@@ -56,6 +63,12 @@ Sampler::Sampler(MachineCallbacks* callbacks, Machine::id_type id)
 	for (Instrument::id_type i(0); i < MAX_TRACKS; i++) lastInstrument[i]=255;
 }
 
+Sampler::~Sampler() {
+	for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+	{
+		if (_voices[i].resampler_data != NULL) resampler_.DisposeResamplerData(_voices[i].resampler_data);
+	}
+}
 void Sampler::Init()
 {
 	Machine::Init();
@@ -205,7 +218,7 @@ void Sampler::SetSampleRate(int sr)
 		_voices[i]._envelope._sustain = 0;
 		_voices[i]._filterEnv._stage = ENV_OFF;
 		_voices[i]._filterEnv._sustain = 0;
-		_voices[i]._filter.Init(sr);
+		_voices[i]._filter.SampleRate(sr);
 		_voices[i]._triggerNoteOff = 0;
 		_voices[i]._triggerNoteDelay = 0;
 	}
@@ -281,31 +294,25 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 			left_output = resampler_work(pVoice->_wave._pL + (pVoice->_wave._pos >> 32),
 								pVoice->_wave._pos>>32,
 								pVoice->_wave._pos & 0xFFFFFFFF,
-								pVoice->_wave._length);
+								pVoice->_wave._length, pVoice->resampler_data);
 			if (pVoice->_wave._stereo)
 			{
 				right_output = resampler_work(pVoice->_wave._pR + (pVoice->_wave._pos >> 32),
 									pVoice->_wave._pos >> 32,
 									pVoice->_wave._pos & 0xFFFFFFFF,
-									pVoice->_wave._length);
+									pVoice->_wave._length, pVoice->resampler_data);
 			}
 
 			// Filter section
 			//
-			if (pVoice->_filter._type < dsp::F_NONE)
+			if (pVoice->_filter.Type() < dsp::F_NONE)
 			{
 				TickFilterEnvelope( voice );
-				pVoice->_filter._cutoff = pVoice->_cutoff + lround<int>(pVoice->_filterEnv._value*pVoice->_coModify);
-				if (pVoice->_filter._cutoff < 0)
-				{
-					pVoice->_filter._cutoff = 0;
-				}
-				if (pVoice->_filter._cutoff > 127)
-				{
-					pVoice->_filter._cutoff = 127;
-				}
+				int newcutoff = pVoice->_cutoff + lround<int>(pVoice->_filterEnv._value*pVoice->_coModify);
+				if (newcutoff < 0) { newcutoff = 0; }
+				else if (newcutoff > 127) { newcutoff = 127; }
+				pVoice->_filter.Cutoff(newcutoff);
 
-				pVoice->_filter.Update();
 				if (pVoice->_wave._stereo)
 				{
 					pVoice->_filter.WorkStereo(left_output, right_output);
@@ -477,6 +484,8 @@ void Sampler::Tick( int channel, const PatternEvent & event )
 
 bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 {
+	//Old version had default C4 as false
+	DefaultC4(false);
 	uint32_t size = 0;
 	pFile->Read(size);
 	if (size) {
@@ -486,25 +495,28 @@ bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 			return false;
 		}
 		else {
+			/// Version 0
 			int32_t temp = 0;
 			pFile->Read(temp); // numSubtracks
 			_numVoices=temp;
 			pFile->Read(temp); // quality
 			
 			switch (temp) {
-			case 2:
-				resampler_.quality(dsp::resampler::quality::spline);
-				break;
-			case 3:
-				resampler_.quality(dsp::resampler::quality::band_limited);
-				break;
-			case 0:
-				resampler_.quality(dsp::resampler::quality::none);
-				break;
-			default:
+			case 2:	resampler_.quality(helpers::dsp::resampler::quality::spline); break;
+			case 3:	resampler_.quality(helpers::dsp::resampler::quality::sinc); break;
+			case 0:	resampler_.quality(helpers::dsp::resampler::quality::zero_order); break;
 			case 1:
-				resampler_.quality(dsp::resampler::quality::linear);
-				break;
+			default: resampler_.quality(helpers::dsp::resampler::quality::linear);
+			}
+			if(size > 3*sizeof(uint32_t ))
+			{
+				uint32_t internalversion;
+				pFile->Read(internalversion);
+				if (internalversion >= SAMPLERVERSION) {
+					bool defaultC4;
+					pFile->Read(defaultC4); // correct A4 frequency.
+					DefaultC4(defaultC4);
+				}
 			}
 		}
 	}
@@ -514,25 +526,22 @@ bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 void Sampler::SaveSpecificChunk(RiffFile* pFile) const
 {
 	int32_t temp;
-	uint32_t size = 2 * sizeof temp;
+	uint32_t size = 3*sizeof(temp) + 1*sizeof(bool);
 	pFile->Write(size);
 	temp = _numVoices;
 	pFile->Write(temp); // numSubtracks
 	switch (resampler_.quality()) {
-	case dsp::resampler::quality::none:
-		temp = 0;
-		break;
-	case dsp::resampler::quality::linear:
-		temp = 1;
-		break;
-	case dsp::resampler::quality::spline:
-		temp = 2;
-		break;
-	case dsp::resampler::quality::band_limited:
-		temp = 3;
-		break;
+		case helpers::dsp::resampler::quality::zero_order: temp = 0; break;
+		case helpers::dsp::resampler::quality::spline: temp = 2; break;
+		case helpers::dsp::resampler::quality::sinc: temp = 3; break;
+		case helpers::dsp::resampler::quality::linear: //fallthrough
+		default: temp = 1;
 	}
 	pFile->Write(temp); // quality
+
+	pFile->Write(SAMPLERVERSION);
+	bool defaultC4 = isDefaultC4();
+	pFile->Write(defaultC4); // correct A4
 }
 
 int Sampler::VoiceTick( int voice, const PatternEvent & entry )
@@ -570,8 +579,8 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 	
 
 //  All this mess should be really changed with classes using the "operator=" to "copy" values.
-
-	int twlength = callbacks->song()._pInstrument[pEntry.instrument()]->waveLength;
+	Instrument* pIns = callbacks->song()._pInstrument[pEntry.instrument()];
+	int twlength = pIns->waveLength;
 	
 	if (pEntry.note() < notetypes::release && twlength > 0)
 	{
@@ -582,66 +591,56 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		//
 		pVoice->_filter.Init(timeInfo.sampleRate());
 
-		if (callbacks->song()._pInstrument[pVoice->_instrument]->_RCUT)
-		{
-			pVoice->_cutoff = alteRand( callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_CO);
-		}
-		else
-		{
-			pVoice->_cutoff = callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_CO;
-		}
-		
-		if (callbacks->song()._pInstrument[pVoice->_instrument]->_RRES)
-		{
-			pVoice->_filter._q = alteRand( callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_RQ);
-		}
-		else
-		{
-			pVoice->_filter._q = callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_RQ;
-		}
-
-		pVoice->_filter._type = (dsp::FilterType)callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_TP;
-		pVoice->_coModify = (float) callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_EA;
-		pVoice->_filterEnv._sustain = (float)callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_SL*0.0078125f;
+		pVoice->_cutoff = (pIns->_RCUT) ? alteRand(pIns->ENV_F_CO) : pIns->ENV_F_CO;
+		pVoice->_filter.Ressonance((pIns->_RRES) ? alteRand(pIns->ENV_F_RQ) : pIns->ENV_F_RQ);
+		pVoice->_filter.Type(pIns->ENV_F_TP);
+		pVoice->_coModify = (float) pIns->ENV_F_EA;
+		pVoice->_filterEnv._sustain = (float)pIns->ENV_F_SL*0.0078125f;
 
 		if (( pEntry.command() != SAMPLER_CMD_EXTENDED) || ((pEntry.parameter() & 0xf0) != SAMPLER_CMD_EXT_NOTEDELAY))
 		{
 			pVoice->_filterEnv._stage = ENV_ATTACK;
 		}
-		pVoice->_filterEnv._step = (1.0f/callbacks->song()._pInstrument[pVoice->_instrument]->ENV_F_AT)*(44100.0f/timeInfo.sampleRate());
+		pVoice->_filterEnv._step = (1.0f/pIns->ENV_F_AT)*(44100.0f/timeInfo.sampleRate());
 		pVoice->_filterEnv._value = 0;
 		
 		// Init Wave
 		//
-		pVoice->_wave._pL = callbacks->song()._pInstrument[pVoice->_instrument]->waveDataL;
-		pVoice->_wave._pR = callbacks->song()._pInstrument[pVoice->_instrument]->waveDataR;
-		pVoice->_wave._stereo = callbacks->song()._pInstrument[pVoice->_instrument]->waveStereo;
+		pVoice->_wave._pL = pIns->waveDataL;
+		pVoice->_wave._pR = pIns->waveDataR;
+		pVoice->_wave._stereo = pIns->waveStereo;
 		pVoice->_wave._length = twlength;
 		
 		// Init loop
-		if (callbacks->song()._pInstrument[pVoice->_instrument]->waveLoopType)
+		if (pIns->waveLoopType)
 		{
 			pVoice->_wave._loop = true;
-			pVoice->_wave._loopStart = callbacks->song()._pInstrument[pVoice->_instrument]->waveLoopStart;
-			pVoice->_wave._loopEnd = callbacks->song()._pInstrument[pVoice->_instrument]->waveLoopEnd;
+			pVoice->_wave._loopStart = pIns->waveLoopStart;
+			pVoice->_wave._loopEnd = pIns->waveLoopEnd;
 		}
 		else
 		{
 			pVoice->_wave._loop = false;
 		}
 		
+
 		// Init Resampler
 		//
-		if ( callbacks->song()._pInstrument[pVoice->_instrument]->_loop)
+		double speeddouble;
+		if ( pIns->_loop)
 		{
-			double const totalsamples = double(timeInfo.samplesPerTick()*callbacks->song()._pInstrument[pVoice->_instrument]->_lines);
-			pVoice->_wave._speed = (int64_t)((pVoice->_wave._length/totalsamples)*4294967296.0f);
+			double const totalsamples = double(timeInfo.samplesPerTick()*pIns->_lines);
+			speeddouble = (pVoice->_wave._length/totalsamples)*4294967296.0f;
 		}
 		else
 		{
-			float const finetune = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->waveFinetune);
-			pVoice->_wave._speed = (int64_t)(pow(2.0f, ((pEntry.note()+callbacks->song()._pInstrument[pVoice->_instrument]->waveTune)-48 +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate()));
+			float const finetune = (float)pIns->waveFinetune/256.f;
+			speeddouble = pow(2.0f, (pEntry.note()+pIns->waveTune-baseC +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate());
 		}
+		pVoice->_wave._speed = (__int64)(speeddouble*4294967296.0f);
+
+		if (pVoice->resampler_data != NULL) resampler_.DisposeResamplerData(pVoice->resampler_data);
+		pVoice->resampler_data = resampler_.GetResamplerData(speeddouble);
 		
 
 		// Handle wave_start_offset cmd
@@ -658,7 +657,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 
 		// Calculating volume coef ---------------------------------------
 		//
-		pVoice->_wave._vol = (float)callbacks->song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
+		pVoice->_wave._vol = (float)pIns->waveVolume*0.01f;
 
 		if (pEntry.command() == SAMPLER_CMD_VOLUME)
 		{
@@ -669,7 +668,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		//
 		float panFactor;
 		
-		if (callbacks->song()._pInstrument[pVoice->_instrument]->_RPAN)
+		if (pIns->_RPAN)
 		{
 			panFactor = (float)rand()/RAND_MAX;
 		}
@@ -678,7 +677,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 			panFactor = value_mapper::map_256_1( pEntry.parameter() );
 		}
 		else {
-			panFactor = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
+			panFactor = value_mapper::map_256_1(pIns->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -698,9 +697,9 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 
 		// Init Amplitude Envelope
 		//
-		pVoice->_envelope._step = (1.0f/callbacks->song()._pInstrument[pVoice->_instrument]->ENV_AT)*(44100.0f/timeInfo.sampleRate());
+		pVoice->_envelope._step = (1.0f/pIns->ENV_AT)*(44100.0f/timeInfo.sampleRate());
 		pVoice->_envelope._value = 0.0f;
-		pVoice->_envelope._sustain = (float)callbacks->song()._pInstrument[pVoice->_instrument]->ENV_SL*0.01f;
+		pVoice->_envelope._sustain = (float)pIns->ENV_SL*0.01f;
 		if (( pEntry.command() == SAMPLER_CMD_EXTENDED) && ((pEntry.parameter() & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 		{
 			pVoice->_triggerNoteDelay = static_cast<int>( (timeInfo.samplesPerTick()/6)*(pEntry.parameter() & 0x0f) );
@@ -749,7 +748,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 	{
 		// Calculating volume coef ---------------------------------------
 		//
-		pVoice->_wave._vol = (float)callbacks->song()._pInstrument[pVoice->_instrument]->waveVolume*0.01f;
+		pVoice->_wave._vol = (float)pIns->waveVolume*0.01f;
 
 		if ( pEntry.command() == SAMPLER_CMD_VOLUME ) pVoice->_wave._vol *= value_mapper::map_256_1(pEntry.parameter() );
 		
@@ -757,7 +756,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		//
 		float panFactor;
 		
-		if (callbacks->song()._pInstrument[pVoice->_instrument]->_RPAN)
+		if (pIns->_RPAN)
 		{
 			panFactor = (float)rand()/RAND_MAX;
 		}
@@ -767,7 +766,7 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 		}
 		else
 		{
-			panFactor = value_mapper::map_256_1(callbacks->song()._pInstrument[pVoice->_instrument]->_pan);
+			panFactor = value_mapper::map_256_1(pIns->_pan);
 		}
 
 		pVoice->_wave._rVolDest = panFactor;
@@ -903,6 +902,7 @@ void Sampler::PerformFx( int voice )
 		case 0x01:
 			shift=_voices[voice].effVal*4294967;
 			_voices[voice]._wave._speed+=shift;
+			resampler_.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 		break;
 
 		// 0x02 : Pitch Down
@@ -910,6 +910,7 @@ void Sampler::PerformFx( int voice )
 			shift=_voices[voice].effVal*4294967;
 			_voices[voice]._wave._speed-=shift;
 			if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
+			resampler_.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 		break;
 		
 		default:

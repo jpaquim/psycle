@@ -141,7 +141,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 	pFile->Read(ENV_F_CO);
 	pFile->Read(ENV_F_RQ);
 	pFile->Read(ENV_F_EA);
-	pFile->Read(ENV_F_TP);
+	{ int val; pFile->Read(val); ENV_F_TP = static_cast<helpers::dsp::FilterType>(val); }
 
 	pFile->Read(_pan);
 	pFile->Read(_RPAN);
@@ -287,6 +287,7 @@ void Instrument::SaveFileChunk(RiffFile* pFile)
 	pFile->Write(ENV_F_RQ);
 	pFile->Write(ENV_F_EA);
 	pFile->Write(ENV_F_TP);
+	{ int val; val = ENV_F_TP; pFile->Write(val); }
 
 	pFile->Write(_pan);
 	pFile->Write(_RPAN);
@@ -456,36 +457,6 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 	xml << "</instrument>";
 
 	return xml.str();
-}
-
-void Instrument::createHeader( const std::string & header )
-{
-	int pos=0;
-	
-	_loop = str_hex<int> (header, pos++);
-	_lines = str_hex<int> (header, pos++);
-	_NNA = str_hex<int> (header, pos++);
-	ENV_AT = str_hex<int> (header, pos++);
-	ENV_DT = str_hex<int> (header, pos++);
-	ENV_SL = str_hex<int> (header, pos++);
-	ENV_RT = str_hex<int> (header, pos++);
-	
-	ENV_F_AT = str_hex<int> (header,pos++);
-	ENV_F_DT = str_hex<int> (header,pos++);
-	ENV_F_SL = str_hex<int> (header,pos++);
-	ENV_F_RT = str_hex<int> (header,pos++);
-
-	ENV_F_CO = str_hex<int> (header,pos++);
-	ENV_F_RQ = str_hex<int> (header,pos++);
-	ENV_F_EA = str_hex<int> (header,pos++);
-	ENV_F_TP = str_hex<int> (header,pos++);
-
-	_pan = str_hex<int> (header,pos++);
-	_RPAN = str_hex<int> (header,pos++);
-	_RCUT = str_hex<int> (header,pos++);
-	_RRES = str_hex<int> (header,pos++);
-
-	int numwaves = str_hex<int>(header, pos++); ///\todo unused?
 }
 
 void Instrument::setName( const std::string & name )
