@@ -36,19 +36,19 @@ XMSampler::Channel::PerformFX().
 	struct CMD {
 		enum Type {
 		NONE				=	0x00,
-		PORTAMENTO_UP		=	0x01,// Portamento Up , Fine porta (0x01fx, and Extra fine porta 01ex )	(*t)
-		PORTAMENTO_DOWN		=	0x02,// Portamento Down, Fine porta (0x02fx, and Extra fine porta 02ex ) (*t)
+		PORTAMENTO_UP		=	0x01,// Portamento Up , Fine porta (01Fx, and Extra fine porta 01Ex )	(*t)
+		PORTAMENTO_DOWN		=	0x02,// Portamento Down, Fine porta (02Fx, and Extra fine porta 02Ex ) (*t)
 		PORTA2NOTE			=	0x03,// Tone Portamento						(*tn)
 		VIBRATO				=	0x04,// Do Vibrato							(*t)
 		TONEPORTAVOL		=	0x05,// Tone Portament & Volume Slide		(*t)
 		VIBRATOVOL			=	0x06,// Vibrato & Volume Slide				(*t)
 		TREMOLO				=	0x07,// Tremolo								(*t)
 		PANNING				=	0x08,// Set Panning Position				(p)
-		PANNINGSLIDE		=	0x09,// PANNING SLIDE						(*t)
+		PANNINGSLIDE		=	0x09,// Panning slide						(*t)
 		SET_CHANNEL_VOLUME	=	0x0A,// Set channel's volume				(p)
-		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0Dy0) down (0D0x), File slide up(0dFy) down(0DyF)	 (*tp)
+		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0Dy0) down (0D0x), Fine slide up(0DFy) down(0DxF)	 (*tp)
 		VOLUME				=	0x0C,// Set Volume
-		VOLUMESLIDE			=	0x0D,// Volume Slide up (0Dy0), File slide up(0DyF), Slide down (0D0y), Fine slide down(0DFy)	 (*t)
+		VOLUMESLIDE			=	0x0D,// Volume Slide up (0Dy0), down (0D0x), Fine slide up(0DyF), down(0DFy)	 (*t)
 		FINESLIDEUP         =   0x0F,//Part of the value that indicates it is a fine slide up
 		FINESLIDEDOWN       =   0xF0,//Part of the value that indicates it is a fine slide down
 		EXTENDED			=	0x0E,// Extend Command
@@ -171,7 +171,7 @@ XMSampler::Channel::PerformFX().
 		WaveDataController(){};
 		virtual ~WaveDataController(){};
 
-		virtual void Init(const XMInstrument::WaveData* wave, const int layer);
+		virtual void Init(const XMInstrument::WaveData* const wave, const int layer);
 		virtual void NoteOff(void);
 		virtual void Work(float *pLeftw,float *pRightw,  const helpers::dsp::resampler::work_func_type resampler_work, void* resampler_data)
 		{
@@ -388,7 +388,7 @@ XMSampler::Channel::PerformFX().
 		/// 
 		inline void CalcStep(const int start,const int  end);
 		void SetPositionInSamples(const int samplePos);
-		int GetPositionInSamples();
+		int GetPositionInSamples() const;
 		void RecalcDeviation();
 		XMInstrument::Envelope::ValueType ModulationAmount() const
 		{
@@ -401,9 +401,9 @@ XMSampler::Channel::PerformFX().
 		EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; } // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
-		int GetPosition(void) { return m_PositionIndex; }
+		int GetPosition(void) const { return m_PositionIndex; }
 	private:
-		inline float SRateDeviation() { return m_sRateDeviation; }
+		inline float SRateDeviation() const { return m_sRateDeviation; }
 
 		int m_Samples;
 		float m_sRateDeviation;
@@ -508,7 +508,7 @@ XMSampler::Channel::PerformFX().
 
 		WaveDataController& rWave() {return m_WaveDataController;}
 		const WaveDataController& rWave() const {return m_WaveDataController;}
-		void DisposeResampleData();
+		void DisposeResampleData(helpers::dsp::resampler& resampler);
 		void RecreateResampleData(helpers::dsp::resampler& resampler);
 
 		bool IsPlaying() const { return m_bPlay;}
@@ -551,7 +551,7 @@ XMSampler::Channel::PerformFX().
 			m_PanFactor = pan;
 			m_PanRange = 2.f * (0.5-std::abs(pan-0.5));
 		}
-		float PanFactor() { return m_PanFactor; }
+		float PanFactor() const { return m_PanFactor; }
 		void IsSurround(bool surround) { m_Surround = surround; }
 		bool IsSurround() const { return m_Surround; }
 
@@ -593,7 +593,7 @@ XMSampler::Channel::PerformFX().
 
 	protected:
 		// Gets the delta between the points of the wavetables for tremolo/panbrello/vibrato
-		int GetDelta(int wavetype,int wavepos);	
+		int GetDelta(int wavetype,int wavepos) const;
 		float PanRange() const { return m_PanRange; }
 		bool IsTremorMute() const {return m_bTremorMute;}
 		void IsTremorMute(const bool value){m_bTremorMute = value;}
@@ -630,7 +630,7 @@ XMSampler::Channel::PerformFX().
 		bool m_Stopping;
 		int m_Note;
 		int m_Period;
-		float m_Volume;
+		int m_Volume;
 		float m_RealVolume;
 
 		float m_PanFactor;
@@ -888,8 +888,6 @@ XMSampler::Channel::PerformFX().
 */
 
 	private:
-
-
 		int m_Index;// Channel Index.
 		XMSampler *m_pSampler;
 		int m_InstrumentNo;///< ( 0 .. 255 )
@@ -993,7 +991,7 @@ XMSampler::Channel::PerformFX().
 	XMSampler(int index);
 	virtual ~XMSampler() {
 		for (int i=0;i<MAX_POLYPHONY;i++) {
-			rVoice(i).DisposeResampleData();
+			rVoice(i).DisposeResampleData(_resampler);
 		}
 	}
 
@@ -1102,7 +1100,7 @@ XMSampler::Channel::PerformFX().
 	/// set resampler quality 
 	void ResamplerQuality(const helpers::dsp::resampler::quality::type value){
 		for (int i=0;i<MAX_POLYPHONY;i++) {
-			rVoice(i).DisposeResampleData();
+			rVoice(i).DisposeResampleData(_resampler);
 		}
 		_resampler.quality(value);
 		for (int i=0;i<MAX_POLYPHONY;i++) {

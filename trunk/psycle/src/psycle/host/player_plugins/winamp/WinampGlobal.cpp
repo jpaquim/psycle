@@ -18,8 +18,6 @@ namespace psycle
 		{
 			pConfig = new WinampConfig();
 			pSong = new Song();
-			pResampler = new helpers::dsp::cubic_resampler();
-			pResampler->quality(helpers::dsp::resampler::quality::linear);
 			pVstHost = new vst::Host();
 			pPlayer = new Player();
 			pMacLoad = new PluginCatcher();

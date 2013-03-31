@@ -246,7 +246,6 @@ namespace psycle
 		}
 
 		void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
-			//todo: Readapt Tune and FineTune, respect of the new SampleRate.
 			m_WaveSampleRate = value;
 		}
 
@@ -277,11 +276,11 @@ namespace psycle
 
 			riffFile.Read(m_WaveLoopStart);
 			riffFile.Read(m_WaveLoopEnd);
-			riffFile.Read(&m_WaveLoopType, sizeof(int));//sizeof(char));
+			{ std::uint32_t i(0); riffFile.Read(i); m_WaveLoopType = static_cast<LoopType::Type>(i); }
 
 			riffFile.Read(m_WaveSusLoopStart);
 			riffFile.Read(m_WaveSusLoopEnd);
-			riffFile.Read(&m_WaveSusLoopType, sizeof(int));//sizeof(char));
+			{ std::uint32_t i(0); riffFile.Read(i); m_WaveSusLoopType = static_cast<LoopType::Type>(i); }
 
 			if(filevers == 1) {
 				riffFile.Read(m_WaveSampleRate);
@@ -356,11 +355,11 @@ namespace psycle
 
 			riffFile.Write(m_WaveLoopStart);
 			riffFile.Write(m_WaveLoopEnd);
-			riffFile.Write(&m_WaveLoopType, sizeof(char));
+			{ std::uint32_t i = m_WaveLoopType; riffFile.Write(i); }
 
 			riffFile.Write(m_WaveSusLoopStart);
 			riffFile.Write(m_WaveSusLoopEnd);
-			riffFile.Write(&m_WaveSusLoopType, sizeof(char));
+			{ std::uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
 
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
@@ -613,19 +612,21 @@ namespace psycle
 		{
 			riffFile.Read(m_Enabled);
 			riffFile.Read(m_Carry);
-			riffFile.Read(m_LoopStart);
-			riffFile.Read(m_LoopEnd);
-			riffFile.Read(m_SustainBegin);
-			riffFile.Read(m_SustainEnd);
-
-			std::int32_t num_of_points;
-			riffFile.Read(num_of_points);
-			for(int i = 0; i < num_of_points; i++)
 			{
-				PointValue value;
-				riffFile.Read(value.first); // point
-				riffFile.Read(value.second); // value
-				m_Points.push_back(value);
+				std::int32_t i32(0);
+				riffFile.Read(i32); m_LoopStart = i32;
+				riffFile.Read(i32); m_LoopEnd = i32;
+				riffFile.Read(i32); m_SustainBegin = i32;
+				riffFile.Read(i32); m_SustainEnd = i32;
+			}
+			{
+				uint32_t num_of_points = 0; riffFile.Read(num_of_points);
+				for(int i = 0; i < num_of_points; i++){
+					PointValue value;
+					riffFile.Read(value.first); // point
+					riffFile.Read(value.second); // value
+					m_Points.push_back(value);
+				}
 			}
 		}
 
@@ -635,13 +636,16 @@ namespace psycle
 			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 			riffFile.Write(m_Enabled);
 			riffFile.Write(m_Carry);
-			riffFile.Write(m_LoopStart);
-			riffFile.Write(m_LoopEnd);
-			riffFile.Write(m_SustainBegin);
-			riffFile.Write(m_SustainEnd);
-			riffFile.Write(m_Points.size());
+			{
+				int32_t i;
+				i = m_LoopStart; riffFile.Write(i);
+				i = m_LoopEnd; riffFile.Write(i);
+				i = m_SustainBegin; riffFile.Write(i);
+				i = m_SustainEnd; riffFile.Write(i);
+			}
+			{ uint32_t s = static_cast<uint32_t>(m_Points.size()); riffFile.Write(s); }
 
-			for(unsigned int i = 0; i < m_Points.size(); i++)
+			for(std::size_t i = 0; i < m_Points.size(); i++)
 			{
 				riffFile.Write(m_Points[i].first); // point
 				riffFile.Write(m_Points[i].second); // value
@@ -737,27 +741,29 @@ namespace psycle
 			riffFile.Read(m_PanEnabled);
 			//TODO: ADD surround
 			riffFile.Read(m_NoteModPanCenter);
-			riffFile.Read(&m_NoteModPanSep,sizeof(std::int8_t));
+			riffFile.Read(m_NoteModPanSep);
 
 			riffFile.Read(m_FilterCutoff);
 			riffFile.Read(m_FilterResonance);
 			riffFile.Read(m_FilterEnvAmount);
-			int val;
-			riffFile.Read(val);
-			m_FilterType = static_cast<dsp::FilterType>(val);
+			{ std::uint32_t i(0); riffFile.Read(i); m_FilterType = static_cast<dsp::FilterType>(i); }
 
 			riffFile.Read(m_RandomVolume);
 			riffFile.Read(m_RandomPanning);
 			riffFile.Read(m_RandomCutoff);
 			riffFile.Read(m_RandomResonance);
 
-			riffFile.Read(&m_NNA,sizeof(m_NNA));
-			riffFile.Read(&m_DCT,sizeof(m_DCT));
-			riffFile.Read(&m_DCA,sizeof(m_DCA));
+			{
+				std::uint32_t i(0);
+				riffFile.Read(i); m_NNA = static_cast<NewNoteAction::Type>(i);
+				riffFile.Read(i); m_DCT = static_cast<DupeCheck::Type>(i);
+				riffFile.Read(i); m_DCA = static_cast<NewNoteAction::Type>(i);
+			}
 
 			NotePair npair;
 			for(int i = 0;i < NOTE_MAP_SIZE;i++){
-				riffFile.Read(&npair,sizeof(npair));
+				riffFile.Read(npair.first);
+				riffFile.Read(npair.second);
 				NoteToSample(i,npair);
 			}
 
@@ -801,22 +807,25 @@ namespace psycle
 			riffFile.Write(m_FilterCutoff);
 			riffFile.Write(m_FilterResonance);
 			riffFile.Write(m_FilterEnvAmount);
-			int var = m_FilterType;
-			riffFile.Write(var);
+			{ std::uint32_t i = m_FilterType; riffFile.Write(i); }
 
 			riffFile.Write(m_RandomVolume);
 			riffFile.Write(m_RandomPanning);
 			riffFile.Write(m_RandomCutoff);
 			riffFile.Write(m_RandomResonance);
+			{
+				std::uint32_t i;
+				i = m_NNA; riffFile.Write(i);
+				i = m_DCT; riffFile.Write(i);
+				i = m_DCA; riffFile.Write(i);
+			}
 
-			riffFile.Write(&m_NNA,sizeof(char));
-			riffFile.Write(&m_DCT,sizeof(char));
-			riffFile.Write(&m_DCA,sizeof(char));
 
 			NotePair npair;
 			for(i = 0;i < NOTE_MAP_SIZE;i++){
 				npair = NoteToSample(i);
-				riffFile.Write(&npair,sizeof(npair));
+				riffFile.Write(npair.first);
+				riffFile.Write(npair.second);
 			}
 
 			int version = 0;
@@ -826,7 +835,7 @@ namespace psycle
 			m_PitchEnvelope.Save(riffFile,version);
 			size_t endpos = riffFile.GetPos();
 			riffFile.Seek(filepos+4);
-			riffFile.Write((unsigned int)(endpos-filepos));
+			{ std::uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
 			riffFile.Seek(endpos);
 		}
 

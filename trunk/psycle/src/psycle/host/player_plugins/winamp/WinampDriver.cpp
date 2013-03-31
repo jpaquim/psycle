@@ -18,7 +18,7 @@ namespace psycle
 	{
 		int stream_buffer[WA_STREAM_SIZE*4]; // stereo, and double size (for special dsp plugins)
 
-		AudioDriverInfo WinampSettings::info_ = { "Winamp output plugin" };
+		AudioDriverInfo WinampSettings::info_("Winamp output plugin");
 
 		void WinampDriver::Error(const TCHAR msg[])
 		{
