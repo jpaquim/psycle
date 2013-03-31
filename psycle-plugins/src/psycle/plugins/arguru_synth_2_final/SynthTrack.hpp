@@ -1,7 +1,7 @@
 #pragma once
 #include "filter.hpp"
 #include <psycle/helpers/math.hpp>
-#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/resampler.hpp>
 
 ///\file SynthTrack.h
 ///\brief interface for the CSynthTrack class.

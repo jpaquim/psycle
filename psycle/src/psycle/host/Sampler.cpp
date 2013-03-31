@@ -327,7 +327,7 @@ namespace psycle
 				else
 				{
 					float const finetune = (float)wave.WaveFineTune()*0.01f;
-					speeddouble = pow(2.0f, ((pEntry->_note+wave.WaveTune())-baseC +finetune)/12.0f)*((float)wave.WaveSampleRate()/Global::player().SampleRate());
+					speeddouble = pow(2.0f, (pEntry->_note+wave.WaveTune()-baseC +finetune)/12.0f)*((float)wave.WaveSampleRate()/Global::player().SampleRate());
 				}
 				pVoice->_wave._speed = (__int64)(speeddouble*4294967296.0f);
 
@@ -879,8 +879,9 @@ namespace psycle
 
 		bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
+			//Old version had default C4 as false
 			DefaultC4(false);
-			UINT size;
+			std::uint32_t size=0;
 			pFile->Read(&size,sizeof(size));
 			if (size)
 			{
@@ -898,11 +899,11 @@ namespace psycle
 					case 1:
 					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
-				if(size > 3*sizeof(UINT))
+				if(size > 3*sizeof(std::uint32_t))
 				{
-					UINT internalversion;
-					pFile->Read(&internalversion, sizeof(UINT));
-					if (internalversion == 1) {
+					std::uint32_t internalversion;
+					pFile->Read(internalversion);
+					if (internalversion >= SAMPLERVERSION) {
 						bool defaultC4;
 						pFile->Read(&defaultC4, sizeof(bool)); // correct A4 frequency.
 						DefaultC4(defaultC4);
@@ -914,8 +915,8 @@ namespace psycle
 
 		void Sampler::SaveSpecificChunk(RiffFile* pFile) 
 		{
-			UINT temp;
-			UINT size = 3*sizeof(temp) + 1*sizeof(bool);
+			std::uint32_t temp;
+			std::uint32_t size = 3*sizeof(temp) + 1*sizeof(bool);
 			pFile->Write(&size,sizeof(size));
 			temp = _numVoices;
 			pFile->Write(&temp, sizeof(temp)); // numSubtracks
@@ -929,8 +930,7 @@ namespace psycle
 			}
 			pFile->Write(&temp, sizeof(temp)); // quality
 
-			UINT internalversion = 1;
-			pFile->Write(&internalversion, sizeof(UINT));
+			pFile->Write(SAMPLERVERSION);
 			bool defaultC4 = isDefaultC4();
 			pFile->Write(&defaultC4, sizeof(bool)); // correct A4
 		}

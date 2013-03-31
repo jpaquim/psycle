@@ -358,7 +358,7 @@ namespace psycle { namespace host {
 
 			/// if IsCarry() and a new note enters, the envelope position is set to
 			/// that of the previous note *on the same channel*
-			inline const bool IsCarry() const { return m_Carry;}
+			inline bool IsCarry() const { return m_Carry;}
 			inline void IsCarry(const bool value){ m_Carry = value;}
 
 		private:

@@ -99,6 +99,7 @@ namespace psycle
 		/// sampler.
 		class Sampler : public Machine
 		{
+			static const uint32_t SAMPLERVERSION = 0x00000001;
 			friend CGearTracker;
 		public:
 			Sampler(int index);

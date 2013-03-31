@@ -127,7 +127,7 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
-		void XMSampler::WaveDataController::Init(const XMInstrument::WaveData* wave, const int layer)
+		void XMSampler::WaveDataController::Init(const XMInstrument::WaveData* const wave, const int layer)
 		{
 			m_Layer = layer;
 			m_pWave = wave;
@@ -287,9 +287,8 @@ namespace psycle
 			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
 //			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
 //			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
-
 		}
-		int XMSampler::EnvelopeController::GetPositionInSamples()
+		int XMSampler::EnvelopeController::GetPositionInSamples() const
 		{
 			//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
 //			TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
@@ -337,10 +336,10 @@ namespace psycle
 
 			ResetEffects();
 		}
-		void XMSampler::Voice::DisposeResampleData() 
+		void XMSampler::Voice::DisposeResampleData(helpers::dsp::resampler& resampler) 
 		{
 			if (resampler_data != NULL ) {
-				m_pSampler->Resampler().DisposeResamplerData(resampler_data);
+				resampler.DisposeResamplerData(resampler_data);
 				resampler_data = NULL;
 			}
 		}
@@ -777,7 +776,7 @@ namespace psycle
 				}
 				UpdateSpeed();
 			}
-		}// Porta2Note() -------------------------------------------------------
+		}
 
 		void XMSampler::Voice::VolumeSlide()
 		{
@@ -900,7 +899,7 @@ namespace psycle
 				}
 			}
 
-		int XMSampler::Voice::GetDelta(int wavetype,int wavepos)
+		int XMSampler::Voice::GetDelta(int wavetype,int wavepos) const
 		{
 			switch (wavetype)
 			{
@@ -1942,9 +1941,7 @@ namespace psycle
 			riffFile.Read(m_DefaultPanFactor);
 			riffFile.Read(m_DefaultCutoff);
 			riffFile.Read(m_DefaultRessonance);
-			int var;
-			riffFile.Read(var);
-			m_DefaultFilterType = static_cast<dsp::FilterType>(var);
+			{ uint32_t i(0); riffFile.Read(i); m_DefaultFilterType = static_cast<dsp::FilterType>(i); }
 
 			return true;
 		}
@@ -1957,9 +1954,7 @@ namespace psycle
 			riffFile.Write(m_DefaultPanFactor);
 			riffFile.Write(m_DefaultCutoff);
 			riffFile.Write(m_DefaultRessonance);
-			int var;
-			var = m_DefaultFilterType;
-			riffFile.Write(var);
+			{ uint32_t i = m_DefaultFilterType; riffFile.Write(i); }
 		}
 
 
@@ -2086,7 +2081,7 @@ namespace psycle
 			for (std::vector<PatternEntry>::const_iterator ite = multicmdMem.begin(); ite != multicmdMem.end(); ++ite) {
 				if(ite->_inst == channelNum) {
 					bPortaEffect |= (ite->_cmd == CMD::PORTA2NOTE) 	
-						|| (pData->_cmd == CMD::SENDTOVOLUME && (pData->_parameter&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO);
+						|| (ite->_cmd == CMD::SENDTOVOLUME && (ite->_parameter&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO);
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
@@ -2261,7 +2256,7 @@ namespace psycle
 										vol = ite->_parameter<<1;
 									}
 									else if ((ite->_cmd&0xF0) == CMD::OFFSET) {
-										offset = ((pData->_cmd&0x0F) << 16) +pData->_parameter<<8;
+										offset = ((ite->_cmd&0x0F) << 16) +ite->_parameter<<8;
 										if (offset == 0) offset = thisChannel.OffsetMem();
 									}
 								}
@@ -2595,7 +2590,10 @@ namespace psycle
 			}
 			riffFile->Write(temp); // quality
 
-			for (int i=0; i < 128; i++) riffFile->Write(&zxxMap[i],sizeof(ZxxMacro));
+			for (int i=0; i < 128; i++) {
+				riffFile->Write(zxxMap[i].mode);
+				riffFile->Write(zxxMap[i].value);
+			}
 			riffFile->Write(m_bAmigaSlides);
 			riffFile->Write(m_UseFilters);
 			riffFile->Write(m_GlobalVolume);
@@ -2662,7 +2660,7 @@ namespace psycle
 			
 			// Check higher bits of version (AAAABBBB). 
 			// different A, incompatible, different B, compatible
- 			if ( (filevers&0x11110000) == (VERSION&0x11110000) )
+ 			if ( (filevers&0xFFFF0000) == VERSION_ONE )
 			{
 				riffFile->Read(_numVoices); // numSubtracks
 				riffFile->Read(temp); // quality
@@ -2676,7 +2674,10 @@ namespace psycle
 					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
 
-				for (int i=0; i < 128; i++) riffFile->Read(&zxxMap[i],sizeof(ZxxMacro));
+				for (int i=0; i < 128; i++) {
+					riffFile->Read(zxxMap[i].mode);
+					riffFile->Read(zxxMap[i].value);
+				}
 
 				riffFile->Read(m_bAmigaSlides);
 				riffFile->Read(m_UseFilters);

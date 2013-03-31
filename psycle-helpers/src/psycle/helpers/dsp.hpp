@@ -160,9 +160,9 @@ using namespace universalis::stdlib;
 			const __m128 volps = _mm_set_ps1(multi);
 			const __m128 *psrc = (__m128*)pSrcSamples;
 #if DIVERSALIS__CPU__SIZEOF_POINTER == 8
-			if (reinterpret_cast<long>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int64>(pDstSamples)&0xF) {
 #else
-			if (reinterpret_cast<int>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int32>(pDstSamples)&0xF) {
 #endif
 				while(numSamples>3)
 				{
@@ -186,9 +186,9 @@ using namespace universalis::stdlib;
 			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 #if DIVERSALIS__CPU__SIZEOF_POINTER == 8
-			if (reinterpret_cast<long>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int64>(pDstSamples)&0xF) {
 #else
-			if (reinterpret_cast<int>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int32>(pDstSamples)&0xF) {
 #endif
 				__asm
 				{
@@ -244,9 +244,9 @@ using namespace universalis::stdlib;
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 #if DIVERSALIS__CPU__SIZEOF_POINTER == 8
-			if (reinterpret_cast<long>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int64>(pDstSamples)&0xF) {
 #else
-			if (reinterpret_cast<int>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int32>(pDstSamples)&0xF) {
 #endif
 				while(numSamples>3)
 				{
@@ -270,9 +270,9 @@ using namespace universalis::stdlib;
 			}
 		#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 #if DIVERSALIS__CPU__SIZEOF_POINTER == 8
-			if (reinterpret_cast<long>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int64>(pDstSamples)&0xF) {
 #else
-			if (reinterpret_cast<int>(pDstSamples)&0xF) {
+			if (reinterpret_cast<__int32>(pDstSamples)&0xF) {
 #endif
 				__asm
 				{
