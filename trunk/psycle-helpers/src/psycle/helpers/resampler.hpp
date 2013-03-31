@@ -128,7 +128,7 @@ using namespace universalis::stdlib;
 			/*override*/ void DisposeResamplerData(void * resampler_data) const;
 
 		protected:
-			typedef struct sinc_data_t {
+			struct sinc_data_t {
 				bool enabled;
 				double fcpi;
 				double fcpidivperiodsize;

@@ -398,8 +398,7 @@ XMSampler::Channel::PerformFX().
 			}
 		}
 
-		///
-		inline void CalcStep(const int start,const int  end);
+		void CalcStep(const int start,const int  end);
 		void SetPositionInSamples(const int samplePos);
 		int GetPositionInSamples() const;
 		void RecalcDeviation();
@@ -1150,7 +1149,7 @@ XMSampler::Channel::PerformFX().
 	void CurrentTick(const int value){m_TickCount = value;}// Current Tracker Tick number
 	int CurrentTick() const { return m_TickCount;}// ""
 
-	static int XMSampler::CalcLPBFromSpeed(int trackerspeed, int &outextraticks);
+	static int CalcLPBFromSpeed(int trackerspeed, int &outextraticks);
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 

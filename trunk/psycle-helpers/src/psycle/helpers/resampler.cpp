@@ -108,7 +108,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 	void cubic_resampler::UpdateSpeed(void * resampler_data, double speed) const {
 		if (quality() == quality::sinc) {
-			sinc_data_t* t = reinterpret_cast<sinc_data_t*>(resampler_data);
+			sinc_data_t* t = static_cast<sinc_data_t*>(resampler_data);
 			if (speed > 1.0) {
 				t->enabled=true;
 				t->fcpi = math::pi/speed;
@@ -120,15 +120,15 @@ namespace psycle { namespace helpers { namespace dsp {
 		}
 		else if (quality() == quality::soxr) {
 			/* Set the initial resampling ratio (N.B. 3rd parameter = 0): */
-			soxr_set_io_ratio(reinterpret_cast<soxr_t>(resampler_data), speed, 0);
+			soxr_set_io_ratio(static_cast<soxr_t>(resampler_data), speed, 0);
 		}
 	}
 	void cubic_resampler::DisposeResamplerData(void * resampler_data) const {
 		if (quality() == quality::sinc) {
-			delete resampler_data;
+			delete static_cast<sinc_data_t*>(resampler_data);
 		}
 		else if (quality() == quality::soxr) {
-			soxr_delete(reinterpret_cast<soxr_t>(resampler_data));
+			soxr_delete(static_cast<soxr_t>(resampler_data));
 		}
 	}
 
@@ -174,7 +174,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		res >>= 32-CUBIC_RESOLUTION_LOG;
 		res <<=2;//Since we have four floats, the position is 16byte aligned.
 
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
+	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
 		__m128 y = _mm_setzero_ps();
 		if (offset != 0) y.m128_f32[0] = *(data - 1);
 		y.m128_f32[1] = *data;
@@ -208,7 +209,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		res <<=2;//Since we have four floats, the position is 16byte aligned.
 		data+=ioffset;
 
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
+	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
 		__m128 y = _mm_setzero_ps();
 		if (ioffset != 0) y.m128_f32[0] = *(data - 1);
 		y.m128_f32[1] = *data;
@@ -232,9 +234,10 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 	
 
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
+	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
 	float cubic_resampler::sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data) {
-		sinc_data_t * t = reinterpret_cast<sinc_data_t*>(resampler_data);
+		sinc_data_t * t = static_cast<sinc_data_t*>(resampler_data);
 		if (t->enabled) {
 			return sinc_filtered(data, offset, res, length, t);
 		}
@@ -311,8 +314,8 @@ namespace psycle { namespace helpers { namespace dsp {
 #elif USE_SINC_DELTA
 	/// interpolation work function which does windowed sinc interpolation.
 	// Version with two tables, one of sinc, and one of deltas which is linearly interpolated
-	float cubic_resampler::sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
-		sinc_data_t * t = reinterpret_cast<sinc_data_t*>(resampler_data);
+	float cubic_resampler::sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data) {
+		sinc_data_t * t = static_cast<sinc_data_t*>(resampler_data);
 		if (t->enabled) {
 			return sinc_filtered(data, offset, res, length, t);
 		}
@@ -337,8 +340,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		return newval;
 	}
 #else
-	float cubic_resampler::sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
-		sinc_data_t * t = reinterpret_cast<sinc_data_t*>(resampler_data);
+	float cubic_resampler::sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data) {
+		sinc_data_t * t = static_cast<sinc_data_t*>(resampler_data);
 		if (t->enabled) {
 			return sinc_filtered(data, offset, res, length, t);
 		}
@@ -421,7 +424,8 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 
 
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
+	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
 	float cubic_resampler::sinc_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
 		uint32_t res = (offset - foffset) * SINC_RESOLUTION;

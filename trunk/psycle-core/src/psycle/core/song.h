@@ -189,8 +189,8 @@ class PSYCLE__CORE__DECL CoreSong {
 
 		/// cpu time usage measurement
 		void reset_time_measurement() {
-			accumulated_processing_time_ = 0;
-			accumulated_routing_time_ = 0;
+			accumulated_processing_time_ = accumulated_processing_time_.zero();
+			accumulated_routing_time_ = accumulated_routing_time_.zero();
 		}
 
 		/// total processing cpu time usage measurement

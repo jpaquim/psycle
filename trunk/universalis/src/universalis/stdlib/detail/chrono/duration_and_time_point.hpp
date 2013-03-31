@@ -35,6 +35,8 @@
 					typedef Period period;
 					basic_duration(rep r = 0) : rep_(r) {}
 					rep count() const { return rep_; }
+					
+					Final const static zero() { return Final(); }
 
 					bool operator == (Final const & that) const { return this->rep_ == that.rep_; }
 					bool operator < (Final const & that) const { return this->rep_ <  that.rep_; }

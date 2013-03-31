@@ -291,7 +291,7 @@ void Machine::CloneFrom(Machine & src) {
 void Machine::Init() {
 	// Standard gear initalization
 	processing_count_ = 0;
-	accumulated_processing_time_ = 0;
+	accumulated_processing_time_ = accumulated_processing_time_.zero();
 	_mute = false;
 	Standby(false);
 	_bypass = false;
