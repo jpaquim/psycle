@@ -12,7 +12,7 @@
 #include "machine.h"
 #include "internalkeys.hpp"
 
-#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/resampler.hpp>
 #include <psycle/helpers/filter.hpp>
 
 namespace psycle { namespace core {
@@ -72,6 +72,8 @@ namespace psycle { namespace core {
 
 	class Voice {
 		public:
+			Voice();
+			~Voice();
 			Envelope _filterEnv;
 			Envelope _envelope;
 			int _sampleCounter;
@@ -90,14 +92,17 @@ namespace psycle { namespace core {
 			int effretTicks;
 			float effretVol;
 			int effOld;
+			void* resampler_data;
 	};
 
 	/// sampler.
 	class PSYCLE__CORE__DECL Sampler : public Machine {
+			static const uint32_t SAMPLERVERSION = 0x00000001;
 		protected:
 			Sampler(MachineCallbacks* callbacks, Machine::id_type id); friend class InternalHost;
 
 		public:
+			virtual ~Sampler();
 			void Tick( );
 
 			virtual void Init();
@@ -115,7 +120,7 @@ namespace psycle { namespace core {
 
 		///\name wave file previewing
 		///\{
-			public:
+		public:
 				//todo these ought to be dynamically allocated
 				/// Wave preview.
 				static InstPreview wavprev;
@@ -125,6 +130,27 @@ namespace psycle { namespace core {
 				/// runs the wave previewing.
 				static void DoPreviews(int amount, float* pLeft, float* pRight);
 		///\}
+
+			void DefaultC4(bool correct) {
+				baseC = correct? 60 : 48;
+			}
+			bool isDefaultC4() const {
+				return baseC == 60;
+			}
+			void ChangeResamplerQuality(helpers::dsp::resampler::quality::type quality) {
+				for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+				{
+					if (_voices[i].resampler_data != NULL) resampler_.DisposeResamplerData(_voices[i].resampler_data);
+				}
+				resampler_.quality(quality);
+				for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
+				{
+					if (_voices[i]._envelope._stage != ENV_OFF) {
+						double speeddouble = static_cast<double>(_voices[i]._wave._speed)/4294967296.0f;
+						_voices[i].resampler_data = resampler_.GetResamplerData(speeddouble);
+					}
+				}
+			}
 
 		protected:
 			static std::string _psName;
@@ -142,6 +168,7 @@ namespace psycle { namespace core {
 			inline void TickEnvelope( int voice );
 			inline void TickFilterEnvelope( int voice );
 			Instrument::id_type lastInstrument[MAX_TRACKS];
+			int baseC;
 	};
 
 }}

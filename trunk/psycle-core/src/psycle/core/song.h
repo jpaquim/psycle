@@ -33,8 +33,8 @@ class PSYCLE__CORE__DECL CoreSong {
 
 		//todo private
 		Instrument* _pInstrument[MAX_INSTRUMENTS];
-		XMInstrument m_Instruments[MAX_INSTRUMENTS];
-		XMInstrument::WaveData m_rWaveLayer[MAX_INSTRUMENTS];
+		InstrumentList m_Instruments;
+		SampleList m_rWaveLayers;
 
 		const Sequence& sequence() const throw() { return sequence_; }
 		Sequence& sequence() throw() { return sequence_; }
@@ -100,9 +100,9 @@ class PSYCLE__CORE__DECL CoreSong {
 			machine->id(id);
 		}
 		
-		XMInstrument & rInstrument(int index) { return m_Instruments[index]; }
+		XMInstrument & rInstrument(int index) { return m_Instruments.get(index); }
 
-		XMInstrument::WaveData & SampleData(int index) { return m_rWaveLayer[index]; }
+		XMInstrument::WaveData & SampleData(int index) { return m_rWaveLayers.get(index); }
 
 		// add a new machine. If newIdx is not -1 and a machine
 		// does not exist in that place, it is taken as the new index

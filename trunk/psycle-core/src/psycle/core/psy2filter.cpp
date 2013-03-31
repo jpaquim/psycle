@@ -247,8 +247,11 @@ bool Psy2Filter::LoadINSD(RiffFile * file, CoreSong & song) {
 		file->Read(song._pInstrument[i]->ENV_F_RQ);
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i)
 		file->Read(song._pInstrument[i]->ENV_F_EA);
-	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i)
-		file->Read(song._pInstrument[i]->ENV_F_TP);
+	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i) {
+		int val;
+		file->Read(val);
+		song._pInstrument[i]->ENV_F_TP = static_cast<helpers::dsp::FilterType>(val);
+	}
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i)
 		file->Read(song._pInstrument[i]->_pan);
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i)
@@ -816,7 +819,7 @@ bool Sampler::LoadPsy2FileFormat(RiffFile * pFile) {
 			resampler_.quality(dsp::resampler::quality::spline);
 			break;
 		case 0:
-			resampler_.quality(dsp::resampler::quality::none);
+			resampler_.quality(dsp::resampler::quality::zero_order);
 			break;
 		case 1:
 		default:

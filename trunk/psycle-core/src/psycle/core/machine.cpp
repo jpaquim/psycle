@@ -866,11 +866,13 @@ int Machine::GenerateAudio(int numsamples) {
 	}
 	int samplestoprocess = 0;
 	int processedsamples = 0;
+	bool doPostTick = false;
 	for(; processedsamples < numsamples; processedsamples += samplestoprocess) {
 		if(processedsamples == nextLineInSamples) {
 			Tick();
 			previousline = nextLineInSamples;
 			nextLineInSamples += static_cast<int>(timeInfo.samplesPerTick());
+			doPostTick = true;
 		}
 		while(processedsamples == nextevent) {
 			if(workEvents.empty()) nextevent = numsamples + 1;
@@ -893,6 +895,7 @@ int Machine::GenerateAudio(int numsamples) {
 				} 
 			} 
 		}
+		if (doPostTick) {PostNewLine(); doPostTick = false;}
 		assert(nextLineInSamples >= processedsamples);
 		assert(nextevent >= processedsamples);
 

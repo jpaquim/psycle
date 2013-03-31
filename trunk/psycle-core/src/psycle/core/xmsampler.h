@@ -9,7 +9,7 @@
 #include "machine.h"
 #include "internalkeys.hpp"
 
-#include <psycle/helpers/dsp.hpp>
+#include <psycle/helpers/resampler.hpp>
 #include <psycle/helpers/filter.hpp>
 
 #include <universalis/stdlib/mutex.hpp>
@@ -22,7 +22,6 @@ public:
 	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const uint32_t VERSION = 0x00010001;
 	static const uint32_t VERSION_ONE = 0x00010000;
-	static const float SURROUND_THRESHOLD;
 
 /*
 * = remembers its last value when called with param 00.
@@ -38,8 +37,8 @@ XMSampler::Channel::PerformFX().
 	struct CMD {
 		enum Type {
 			NONE                 = 0x00,
-			PORTAMENTO_UP        = 0x01, ///< Portamento Up , Fine porta (0x01fx, and Extra fine porta 01ex ) (*t)
-			PORTAMENTO_DOWN      = 0x02, ///< Portamento Down, Fine porta (0x02fx, and Extra fine porta 02ex ) (*t)
+			PORTAMENTO_UP        = 0x01, ///< Portamento Up , Fine porta (01Fx, and Extra fine porta 01Ex ) (*t)
+			PORTAMENTO_DOWN      = 0x02, ///< Portamento Down, Fine porta (02Fx, and Extra fine porta 02Ex ) (*t)
 			PORTA2NOTE           = 0x03, ///< Tone Portamento (*tn)
 			VIBRATO              = 0x04, ///< Do Vibrato (*t)
 			TONEPORTAVOL         = 0x05, ///< Tone Portament & Volume Slide (*t)
@@ -48,9 +47,11 @@ XMSampler::Channel::PerformFX().
 			PANNING              = 0x08, ///< Set Panning Position (p)
 			PANNINGSLIDE         = 0x09, ///< Panning slide (*t)
 			SET_CHANNEL_VOLUME   = 0x0A, ///< Set channel's volume (p)
-			CHANNEL_VOLUME_SLIDE = 0x0B, ///< channel Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx) (*tp)
+			CHANNEL_VOLUME_SLIDE = 0x0B, ///< channel Volume Slide up (0Dy0) down (0D0x), Fine slide up(0DFy) down(0DxF) (*tp)
 			VOLUME               = 0x0C, ///< Set Volume
-			VOLUMESLIDE          = 0x0D, ///< Volume Slide up (0dx0) down (0d0x), File slide up(0dxf) down(0dfx) (*t)
+			VOLUMESLIDE          = 0x0D, ///< Volume Slide up (0Dy0), down (0D0x), Fine slide up(0DyF), down(0DFx) (*t)
+			FINESLIDEUP          = 0x0F, ///< Part of the value that indicates it is a fine slide up
+			FINESLIDEDOWN        = 0xF0, ///< Part of the value that indicates it is a fine slide down
 			EXTENDED             = 0x0E, ///< Extend Command
 			MIDI_MACRO           = 0x0F, ///< Impulse Tracker MIDI macro (p)
 			ARPEGGIO             = 0x10, ///< Arpeggio (*t)
@@ -62,9 +63,17 @@ XMSampler::Channel::PerformFX().
 			//0x16
 			TREMOR               = 0x17, ///< Tremor (*t)
 			PANBRELLO            = 0x18, ///< Panbrello (*t)
+			SENDTOVOLUME         = 0x1E, ///< Interprets this as a volume command
 			OFFSET               = 0x90  ///< Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
 	};
+#define ISSLIDEUP(val) !((val)&0x0F)
+#define ISSLIDEDOWN(val) !((val)&0xF0)
+#define ISFINESLIDEUP(val) (((val)&0x0F)==CMD::FINESLIDEUP)
+#define ISFINESLIDEDOWN(val) (((val)&0xF0)==CMD::FINESLIDEDOWN)
+#define GETSLIDEUPVAL(val) (((val)&0xF0)>>4)
+#define GETSLIDEDOWNVAL(val) ((val)&0x0F)
+
 	struct CMD_E {
 		enum Type {
 			E_GLISSANDO_TYPE  = 0x30, ///< E3 Set gliss control (p)
@@ -157,19 +166,17 @@ XMSampler::Channel::PerformFX().
 			};
 		};
 
-		virtual void Init(XMInstrument::WaveData* const wave, const int layer);
+		virtual void Init(const XMInstrument::WaveData* const wave, const int layer);
 		virtual void NoteOff(void);
-		virtual void Work(float * const pLeftw,float * const pRightw, const helpers::dsp::resampler::work_func_type resampler_work)
+		virtual void Work(float * const pLeftw,float * const pRightw, const helpers::dsp::resampler::work_func_type resampler_work, void* resampler_data)
 		{
 			//Process sample
-			*pLeftw = resampler_work(
-				pLeft() + (m_Position >> 32),
-				m_Position >> 32, m_Position & 0xFFFFFFFF, Length());
+			*pLeftw = resampler_work(pLeft() + (m_Position >> 32),
+				m_Position >> 32, m_Position & 0xFFFFFFFF, Length(), resampler_data);
 			if (IsStereo())
 			{
-				*pRightw = resampler_work(
-					pRight() + (m_Position >> 32),
-					m_Position >> 32, m_Position & 0xFFFFFFFF, Length());
+				*pRightw = resampler_work(pRight() + (m_Position >> 32),
+					m_Position >> 32, m_Position & 0xFFFFFFFF, Length(), resampler_data);
 			}
 
 			// Update Position
@@ -231,7 +238,7 @@ XMSampler::Channel::PerformFX().
 
 		// Properties
 		virtual int Layer() const { return m_Layer;}
-		virtual XMInstrument::WaveData &Wave() const { return *m_pWave; }
+		virtual const XMInstrument::WaveData &Wave() const { return *m_pWave; }
 
 		virtual bool Playing() const { return m_Playing;}
 		virtual void Playing(const bool play){ m_Playing=play; }
@@ -271,7 +278,7 @@ XMSampler::Channel::PerformFX().
 
 	protected:
 		int m_Layer;
-		XMInstrument::WaveData *m_pWave;
+		const XMInstrument::WaveData *m_pWave;
 		uint64_t m_Position;
 		double m_Speed;
 		bool m_Playing;
@@ -316,29 +323,32 @@ XMSampler::Channel::PerformFX().
 				RELEASE    = 8  ///< Indicates that a Note-Off has been issued.
 			};
 		};
-		#if 0
-			// EnvelopeMode defines what the first value of a PointValue means
-			// TICK = one tracker tick ( speed depends on the BPM )
-			// MILIS = a millisecond. (independant of BPM).
-			struct EnvelopeMode {
-				enum Type {
-					TICK=0,
-					MILIS
-				};
+		// EnvelopeMode defines what the first value of a PointValue means
+		// TICK = one tracker tick ( speed depends on the BPM )
+		// MILIS = a millisecond. (independant of BPM).
+		struct EnvelopeMode {
+			enum Type {
+				TICK=0,
+				MILIS
 			};
-		#endif
+		};
 		EnvelopeController(){};
-		~EnvelopeController(){};
+		virtual ~EnvelopeController(){};
 
-		void Init(const XMInstrument::Envelope * const pEnvelope = NULL, const MachineCallbacks * const callbacks = NULL);
+		void Init();
+		void Init(const XMInstrument::Envelope& envelope, const MachineCallbacks* const callbacks) {
+			m_pEnvelope = &envelope;
+			m_pCallbacks = callbacks;
+			Init();
+		}
 
-		//const EnvelopeMode Mode() { return m_Mode; }
-		//const Mode(EnvelopeMode _mode){ m_Mode=_mode; }
 
 		void NoteOn();
 		void NoteOff();
+		void Pause();
+		void Continue();
 
-		void Work()
+		inline void Work()
 		{
 			if(m_Stage&EnvelopeStage::DOSTEP)
 			{
@@ -389,26 +399,28 @@ XMSampler::Channel::PerformFX().
 		}
 
 		///
+		inline void CalcStep(const int start,const int  end);
+		void SetPositionInSamples(const int samplePos);
+		int GetPositionInSamples() const;
+		void RecalcDeviation();
 		XMInstrument::Envelope::ValueType ModulationAmount() const
 		{
 			return m_ModulationAmount;
 		}
 
+		const XMInstrument::Envelope & Envelope() const {return *m_pEnvelope;}
+		EnvelopeMode::Type Mode() const { return m_Mode; }
+		void Mode(const EnvelopeMode::Type _mode){ m_Mode=_mode; }
 		EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
-		const XMInstrument::Envelope & Envelope() const {return *m_pEnvelope;}
-		void CalcStep(const int start,const int  end);
 		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; } // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
 		int GetPosition(void) const { return m_PositionIndex; }
-		void SetPositionInSamples(const int samplePos);
-		int GetPositionInSamples() const;
-		void RecalcDeviation();
 	private:
 		inline float SRateDeviation() const { return m_sRateDeviation; }
 
 		int m_Samples;
 		float m_sRateDeviation;
-		int m_Mode;
+		EnvelopeMode::Type m_Mode;
 		int m_PositionIndex;
 		int m_NextEventSample;
 		const MachineCallbacks * m_pCallbacks;
@@ -432,15 +444,16 @@ XMSampler::Channel::PerformFX().
 		///
 		friend class XMSampler::Channel;
 
-		Voice(){
+		Voice():resampler_data(0){
 			Reset();
 		}
+		virtual ~Voice();
 
 		// Object Functions
 		void Reset();
 		void ResetEffects();
 
-		void VoiceInit(int channelNum,int instrumentNum);
+		void VoiceInit(const XMInstrument & _inst, int channelNum,int instrumentNum);
 		void Work(int numSamples,float * const pSamplesL,float * const pSamplesR, const helpers::dsp::resampler & resampler);
 
 		// This one is Tracker Tick (Mod-tick)
@@ -458,7 +471,7 @@ XMSampler::Channel::PerformFX().
 
 		void ResetVolAndPan(int16_t playvol,bool reset=true);
 		void UpdateSpeed();
-		double PeriodToSpeed(int period);
+		double PeriodToSpeed(int period) const;
 
 
 		// Effect-Related Object Functions
@@ -488,17 +501,17 @@ XMSampler::Channel::PerformFX().
 		int InstrumentNum() const { return _instrument;}
 		void InstrumentNum(const int value){_instrument = value;}
 		const XMInstrument & rInstrument() const { return *m_pInstrument;}
-		void pInstrument(XMInstrument* const p){m_pInstrument = p;}
+		void pInstrument(const XMInstrument* const p){m_pInstrument = p;}
 
 		int ChannelNum() const { return m_ChannelNum;}
 		void ChannelNum(const int value){ m_ChannelNum = value;}
 		void pChannel(XMSampler::Channel * const p){m_pChannel = p;};
-		const XMSampler::Channel& rChannel() const {return *m_pChannel;}
 		XMSampler::Channel& rChannel() {return *m_pChannel;}
+		const XMSampler::Channel& rChannel() const {return *m_pChannel;}
 
 		void pSampler(XMSampler * const p){m_pSampler = p;}
-		const XMSampler* pSampler() const { return m_pSampler; }
-		XMSampler* pSampler() { return m_pSampler; }
+		XMSampler* const pSampler() { return m_pSampler; }
+		const XMSampler * const pSampler() const { return m_pSampler; }
 
 		const XMSampler::EnvelopeController& AmplitudeEnvelope() const {return m_AmplitudeEnvelope;}
 		const XMSampler::EnvelopeController& FilterEnvelope() const {return m_FilterEnvelope;}
@@ -510,8 +523,10 @@ XMSampler::Channel::PerformFX().
 		XMSampler::EnvelopeController& PitchEnvelope() {return m_PitchEnvelope;}
 		XMSampler::EnvelopeController& PanEnvelope() {return m_PanEnvelope;}
 
-		const WaveDataController& rWave() const {return m_WaveDataController;}
 		WaveDataController& rWave() {return m_WaveDataController;}
+		const WaveDataController& rWave() const {return m_WaveDataController;}
+		void DisposeResampleData(helpers::dsp::resampler& resampler);
+		void RecreateResampleData(helpers::dsp::resampler& resampler);
 
 		bool IsPlaying() const { return m_bPlay;}
 		void IsPlaying(const bool value)
@@ -521,7 +536,6 @@ XMSampler::Channel::PerformFX().
 				if ( rChannel().ForegroundVoice() == this)
 				{
 					rChannel().LastVoicePanFactor(m_PanFactor);
-					//FIXME: warning! float to int!? i smell a bug
 					rChannel().LastVoiceVolume(m_Volume);
 					rChannel().LastAmpEnvelopePosInSamples(0);
 					rChannel().LastPanEnvelopePosInSamples(0);
@@ -540,7 +554,6 @@ XMSampler::Channel::PerformFX().
 		void IsStopping(const bool stop) { m_Stopping = stop; }
 
 		// Volume of the current note.
-		//fixme: m_Volume is float! what's going on here?
 		uint16_t Volume() const { return m_Volume; }
 		void Volume(const uint16_t vol)
 		{
@@ -553,38 +566,43 @@ XMSampler::Channel::PerformFX().
 		void PanFactor(const float pan)
 		{
 			m_PanFactor = pan;
-			m_PanRange = 0.5f -(fabs(0.5-m_PanFactor)*2);
+			m_PanRange = 2.f * (0.5-std::abs(pan-0.5));
 		}
 		float PanFactor() const { return m_PanFactor; }
+		void IsSurround(bool surround) { m_Surround = surround; }
+		bool IsSurround() const { return m_Surround; }
+
 
 		int CutOff() const { return m_CutOff; }
 		void CutOff(const int co)
 		{
-			#if 0
-				m_CutOff = co; m_Filter._cutoff = co;
-				if ( m_Filter._type == psycle::helpers::dsp::F_NONE) { m_Filter._type =psycle::helpers::dsp::F_LOWPASS12; }
-					m_Filter.Update();
-			#endif
-			m_CutOff = co; m_Filter.Cutoff(co);
+			m_CutOff = co; 
+			m_FilterIT.Cutoff(co);
+			m_FilterClassic.Cutoff(co);
 		}
 
 		int Ressonance() const { return m_Ressonance; }
 		void Ressonance(const int res)
 		{
-			#if 0
-				m_Ressonance = res; m_Filter._q = res;
-				if ( m_Filter._type == psycle::helpers::dsp::F_NONE) { m_Filter._type =psycle::helpers::dsp::F_LOWPASS12; }
-				m_Filter.Update();
-			#endif
-			m_Ressonance = res; m_Filter.Ressonance(res);
+			m_Ressonance = res;
+			m_FilterIT.Ressonance(res);
+			m_FilterClassic.Ressonance(res);
 		}
 
-		void FilterType(const helpers::dsp::FilterType ftype) { m_Filter.Type(ftype);}
+		void FilterType(const helpers::dsp::FilterType ftype) {
+			if (ftype==helpers::dsp::F_ITLOWPASS) {
+				m_Filter = &m_FilterIT;
+			}
+			else {
+				m_Filter = &m_FilterClassic;
+			}
+			m_Filter->Type(ftype); 
+		}
 
 		void Period(const int newperiod) { m_Period = newperiod; UpdateSpeed(); }
 		int Period() const { return m_Period; }
 		// convert note to period
-		double NoteToPeriod(const int note) const;
+		double NoteToPeriod(const int note, bool correctNote=true) const;
 		// convert period to note
 		int PeriodToNote(const double period) const;
 
@@ -617,8 +635,11 @@ XMSampler::Channel::PerformFX().
 
 		WaveDataController m_WaveDataController;
 		//XDSPWaveController m_WaveDataController;
+		void * resampler_data;
 
-		helpers::dsp::ITFilter m_Filter;
+		helpers::dsp::ITFilter m_FilterIT;
+		helpers::dsp::Filter m_FilterClassic;
+		helpers::dsp::Filter* m_Filter;
 		int m_CutOff;
 		int m_Ressonance;
 		float _coModify;
@@ -628,11 +649,12 @@ XMSampler::Channel::PerformFX().
 		bool m_Stopping;
 		int m_Note;
 		int m_Period;
-		float m_Volume;
+		int m_Volume;
 		float m_RealVolume;
 
 		float m_PanFactor;
 		float m_PanRange;
+		bool m_Surround;
 
 		int m_Slide2NoteDestPeriod;
 		int m_PitchSlideSpeed;
@@ -763,10 +785,11 @@ XMSampler::Channel::PerformFX().
 
 		void pSampler(XMSampler * const pSampler){m_pSampler = pSampler;}
 
-		const int InstrumentNo(){return m_InstrumentNo;}
+		int InstrumentNo() const {return m_InstrumentNo;}
 		void InstrumentNo(const int no){m_InstrumentNo = no;}
 
-		XMSampler::Voice* const ForegroundVoice() const{ return m_pForegroundVoice; }
+		XMSampler::Voice* ForegroundVoice() { return m_pForegroundVoice; }
+		const XMSampler::Voice* ForegroundVoice() const{ return m_pForegroundVoice; }
 		void ForegroundVoice(XMSampler::Voice* const pVoice) { m_pForegroundVoice = pVoice; }
 
 		int Note() const { return m_Note;}
@@ -845,12 +868,8 @@ XMSampler::Channel::PerformFX().
 
 		bool IsSurround() const { return m_bSurround;}
 		void IsSurround(const bool value){
-			if ( value )
-			{
-				///\todo:
-				/* if ( STANDARDSURROUND ) */ m_PanFactor = 0.5f;
-			}
 			m_bSurround = value;
+			if ( ForegroundVoice()) ForegroundVoice()->IsSurround(value);
 		}
 		bool IsMute() const { return m_bMute;}
 		void IsMute(const bool value){
@@ -939,7 +958,7 @@ XMSampler::Channel::PerformFX().
 
 		// Note Cut Command
 		int m_NoteCutTick;
-		PatternEvent m_DelayedNote;
+		std::vector<PatternEvent> m_DelayedNote;
 
 		int m_RetrigOperation;
 		int m_RetrigVol;
@@ -986,18 +1005,24 @@ XMSampler::Channel::PerformFX().
 
 
 	XMSampler(MachineCallbacks* const callb, const Machine::id_type id); friend class InternalHost;
-	~XMSampler(){};
+	virtual ~XMSampler() {
+		for (int i=0;i<MAX_POLYPHONY;i++) {
+			rVoice(i).DisposeResampleData(resampler_);
+		}
+	}
 
 	virtual void Init(void);
 
 	//These Tick() are "NewLine()" and NewEvent(). The API needs to be renamed.
 	void Tick();
 	virtual int GenerateAudioInTicks( int startSample, int numSamples );
-	virtual void SetSampleRate(int sr);
 	virtual void Stop(void);
 	virtual void Tick(int channel, const PatternEvent & data );
-	virtual const MachineKey& getMachineKey() const { return InternalKeys::sampulse; }
+	virtual void PostNewLine();
 	virtual std::string GetName(void) const { return _psName; }
+	virtual void SetSampleRate(int sr);
+	virtual const MachineKey& getMachineKey() const { return InternalKeys::sampulse; }
+
 
 	virtual bool LoadPsy2FileFormat(RiffFile* pFile);
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
@@ -1005,23 +1030,19 @@ XMSampler::Channel::PerformFX().
 
 	MachineCallbacks* const pCallbacks() const { return callbacks; }
 
-	#if 0 // Deprecated. See why in the body of "CalcBPMAndTick()"
-		//Beats Per Minute
-		void BPM (const int value){m_BPM = value;}
-		const int BPM (){return m_BPM;}
-
-		// MOD Tick
-		void TicksPerRow(const int value){m_TicksPerRow = value;}
-		const int TicksPerRow(){ return m_TicksPerRow;}
-
-		/// BPM Speed
-		void CalcBPMAndTick();
-	#endif
-
-	static int Speed2LPB(const int speed) { return 24/((speed==0)?6:speed); }
-	static int LPB2Speed(const int lpb) { return 24/lpb; }
-	static float Speed2LPBf(const int speed) { return 24.0f/((speed==0)?6.0f:speed); }
-	static float LPB2Speedf(const int lpb) { return 24.0f/lpb; }
+	const Voice* GetCurrentVoice(const int channelNum) const
+	{
+		for(int current = 0;current < _numVoices;current++)
+		{
+			if ( (m_Voices[current].ChannelNum() == channelNum)  // Is this one an active note in this channel?
+				&& m_Voices[current].IsPlaying() && !m_Voices[current].IsBackground())
+			{
+				//There can be only one foreground active voice for each channel, so we go out of the loop.
+				return &m_Voices[current];
+			}
+		}
+		return NULL;
+	}
 	Voice* GetCurrentVoice(const int channelNum)
 	{
 		for(int current = 0;current < _numVoices;current++)
@@ -1035,14 +1056,30 @@ XMSampler::Channel::PerformFX().
 		}
 		return NULL;
 	}
-	Voice* GetFreeVoice()
+	Voice* GetFreeVoice(int channelNum)
 	{
-		//\todo : this function needs to be upgraded. This is a pretty simple allocation function.
+		//First, see if there's a free voice
 		for (int voice = 0; voice < _numVoices; voice++)
 		{
 			if(!m_Voices[voice].IsPlaying()){
 				return  &(m_Voices[voice]);
 			}
+		}
+		//If there isn't, See if there are background voices in this channel
+		int background = -1;
+		for (int voice = 0; voice < _numVoices; voice++)
+		{
+			if(m_Voices[voice].IsBackground()){
+				background = voice;
+				if(m_Voices[voice].ChannelNum() == channelNum) {
+					return  &(m_Voices[voice]);
+				}
+			}
+		}
+		//If still there isn't, See if there are background voices on other channels.
+		//This could be improved in some sort of "older-first".
+		if (background != -1) {
+			return  &(m_Voices[background]);
 		}
 		return NULL;
 	}
@@ -1057,9 +1094,8 @@ XMSampler::Channel::PerformFX().
 	}
 
 /// properties
-	const XMSampler::Channel& rChannel(const int index) const { return m_Channel[index];}///< Channel
 	XMSampler::Channel& rChannel(const int index) { return m_Channel[index];}///< Channel
-	const Voice& rVoice(const int index) const { return m_Voices[index];}///<
+	const XMSampler::Channel& rChannel(const int index) const { return m_Channel[index];}///< Channel
 	Voice& rVoice(const int index) { return m_Voices[index];}///<
 
 	bool IsAmigaSlides() const { return m_bAmigaSlides;}
@@ -1080,10 +1116,20 @@ XMSampler::Channel::PerformFX().
 
 	/// set resampler quality
 	void ResamplerQuality(helpers::dsp::resampler::quality::type value){
+		for (int i=0;i<MAX_POLYPHONY;i++) {
+			rVoice(i).DisposeResampleData(resampler_);
+		}
 		resampler_.quality(value);
+		for (int i=0;i<MAX_POLYPHONY;i++) {
+			rVoice(i).RecreateResampleData(resampler_);
+		}
 	}
+
 	helpers::dsp::resampler::quality::type ResamplerQuality() const {
 		return resampler_.quality();
+	}
+	const helpers::dsp::resampler& Resampler() const {
+		return resampler_;
 	}
 	
 	bool UseFilters(void) const { return m_UseFilters; }
@@ -1104,7 +1150,7 @@ XMSampler::Channel::PerformFX().
 	void CurrentTick(const int value){m_TickCount = value;}// Current Tracker Tick number
 	int CurrentTick() const { return m_TickCount;}// ""
 
-	int GetDeltaTick() { return m_DeltaTick; }
+	static int XMSampler::CalcLPBFromSpeed(int trackerspeed, int &outextraticks);
 
 	static const float AmigaPeriod[XMInstrument::NOTE_MAP_SIZE];
 
@@ -1117,33 +1163,21 @@ protected:
 	helpers::dsp::cubic_resampler resampler_;
 	ZxxMacro zxxMap[128];
 
-
-	void DeltaTick(const int value){m_DeltaTick = value;}
-	int DeltaTick() const {return m_DeltaTick;}
 	void WorkVoices(const int sampleOffset, const int numsamples);
 
 private:
-	/// Using Linear or Amiga Slides.
-	bool m_bAmigaSlides;
-
+	
+	bool m_bAmigaSlides; /// Using Linear or Amiga Slides.
 	bool m_UseFilters;
 	int m_GlobalVolume;
 	int m_PanningMode;
-	
-	#if 0
-		int m_BPM;
-		/// Tracker Ticks. Also called "speed".
-		int m_TicksPerRow;
-	#endif
-	
 	/// Current Tick number.
 	int m_TickCount;
-	/// Duration in Samples of a tracker tick.
-	int m_DeltaTick;
 	/// The sample position of the next Tracker Tick
 	int m_NextSampleTick;
 	/// Number of Samples since note start
 	int _sampleCounter;
+	std::vector<PatternEvent> multicmdMem;
 
 	///\name thread synchronisation
 	///\{

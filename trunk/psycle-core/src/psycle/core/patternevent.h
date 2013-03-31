@@ -27,10 +27,7 @@ class PSYCLE__CORE__DECL PatternEvent {
 		}
 
 		bool IsGlobal() const {
-			if (cmd_ == commandtypes::SET_VOLUME)
-				return true;
-			else
-				return false;
+			return (cmd_ >= 0xF0);
 		}
 
 		uint8_t note() const { return note_; }

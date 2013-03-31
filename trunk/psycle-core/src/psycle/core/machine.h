@@ -291,6 +291,7 @@ class PSYCLE__CORE__DECL Machine {
 		virtual void AddEvent(double offset, int track, const PatternEvent & event);
 		virtual void Tick() {}
 		virtual void Tick(int /*channel*/, const PatternEvent &) {}
+		virtual void PostNewLine() {};
 		virtual void Stop() { playCol.clear(); playColIndex =0; }
 
 	protected:

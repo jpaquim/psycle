@@ -17,6 +17,7 @@
 
 #include <psycle/audiodrivers/audiodriver.h>
 #include <psycle/helpers/value_mapper.hpp>
+#include <psycle/helpers/dsp.hpp>
 #include <universalis/compiler/typenameof.hpp>
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
@@ -294,15 +295,11 @@ void Player::thread_function(std::size_t thread_number) {
 	}
 
 	try {
-		try {
-			process_loop();
-		} catch(...) {
-			loggers::exception()("caught exception in scheduler thread", UNIVERSALIS__COMPILER__LOCATION);
-			throw;
-		}
+		process_loop();
 	} catch(std::exception const & e) {
 		if(loggers::exception()) {
 			std::ostringstream s;
+			s << "caught exception in scheduler thread";
 			s << "exception: " << universalis::compiler::typenameof(e) << ": " << e.what();
 			loggers::exception()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 		}
