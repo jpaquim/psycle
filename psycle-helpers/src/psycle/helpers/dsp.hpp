@@ -7,6 +7,7 @@
 #endif
 #include <cmath>
 #include <cstring>
+#include <cstddef> // for std::ptrdiff_t
 
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/aligned_alloc.hpp>
@@ -159,11 +160,7 @@ using namespace universalis::stdlib;
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 			const __m128 volps = _mm_set_ps1(multi);
 			const __m128 *psrc = (__m128*)pSrcSamples;
-#if DIVERSALIS__CPU__SIZEOF_POINTER == 8
-			if (reinterpret_cast<__int64>(pDstSamples)&0xF) {
-#else
-			if (reinterpret_cast<__int32>(pDstSamples)&0xF) {
-#endif
+			if (reinterpret_cast<std::ptrdiff_t>(pDstSamples)&0xF) {
 				while(numSamples>3)
 				{
 					_mm_storeu_ps(pDstSamples,_mm_mul_ps(*psrc,volps));
@@ -243,11 +240,7 @@ using namespace universalis::stdlib;
 	inline void Mov(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples)
 	{
 		#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-#if DIVERSALIS__CPU__SIZEOF_POINTER == 8
-			if (reinterpret_cast<__int64>(pDstSamples)&0xF) {
-#else
-			if (reinterpret_cast<__int32>(pDstSamples)&0xF) {
-#endif
+			if (reinterpret_cast<std::ptrdiff_t>(pDstSamples)&0xF) {
 				while(numSamples>3)
 				{
 					_mm_storeu_ps(pDstSamples,_mm_load_ps(pSrcSamples));
