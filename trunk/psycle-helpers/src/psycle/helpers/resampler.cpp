@@ -210,7 +210,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		data+=ioffset;
 
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
-	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
+    defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
 		__m128 y = _mm_setzero_ps();
 		if (ioffset != 0) y.m128_f32[0] = *(data - 1);
 		y.m128_f32[1] = *data;
@@ -228,7 +228,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		float y0 = *data;
 		float y1 = (ioffset >= length-1) ? 0 : *(data + 1);
 		float y2 = (ioffset >= length-2) ? 0 : *(data + 2);
-		float *table = &cubic_table_[fractpart];
+        float *table = &cubic_table_[res];
 		return table[0] * yo + table[1] * y0 + table[2] * y1 + table[3] * y2;
 #endif
 	}
@@ -535,7 +535,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points
 		if (res == 0) return *data;
 
-		int16_t const * initdata = data;
+        float const * initdata = data;
 		float *psinc = &sinc_table_[res];
 		float newval = 0.0f;
 
