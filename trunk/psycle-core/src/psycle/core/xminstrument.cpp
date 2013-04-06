@@ -294,7 +294,7 @@ int XMInstrument::WaveData::Load(RiffFile & riffFile) {
 	}
 	else if (m_PanFactor > 1.0f) {
 		m_Surround = true;
-		m_PanFactor = m_PanFactor-=1.0f;
+        m_PanFactor-=1.0f;
 	} else { m_Surround = false; }
 
 	riffFile.Read(m_VibratoAttack);
