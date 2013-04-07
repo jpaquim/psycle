@@ -49,7 +49,7 @@ namespace psycle { namespace host {
 			m_machlist.InsertColumn(2,"Type",LVCFMT_LEFT,64,1);
 			m_machlist.InsertColumn(3,"InWire",LVCFMT_RIGHT,46,1);
 			m_machlist.InsertColumn(4,"Outwire",LVCFMT_RIGHT,50,1);
-			m_machlist.InsertColumn(5,"1 CPU",LVCFMT_RIGHT,48,1);
+			m_machlist.InsertColumn(5,"Thread",LVCFMT_RIGHT,48,1);
 			m_cpu_perf.SetCheck(Global::player().measure_cpu_usage_? 1:0);
 			UpdateInfo();
 			InitTimer();

@@ -397,7 +397,8 @@ namespace psycle
 			m_SustainEnd = INVALID;
 			m_LoopStart = INVALID;
 			m_LoopEnd = INVALID;
-			if (!m_Points.empty()) { m_Points.clear(); }
+			m_Mode = Mode::TICK;
+			m_Points.clear();
 		}
 		/** 
 		* @param pointIndex : Current point index.
@@ -628,6 +629,7 @@ namespace psycle
 					m_Points.push_back(value);
 				}
 			}
+			//TODO: Update version to add mode
 		}
 
 		/// Saving Procedure
@@ -650,6 +652,7 @@ namespace psycle
 				riffFile.Write(m_Points[i].first); // point
 				riffFile.Write(m_Points[i].second); // value
 			}
+			//TODO: Update version to add mode
 		}
 
 

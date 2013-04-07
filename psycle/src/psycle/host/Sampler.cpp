@@ -248,7 +248,7 @@ namespace psycle
 
 			Voice* pVoice = &_voices[voice];
 			int triggered = 0;
-			unsigned __int64 w_offset = 0;
+			std::uint64_t w_offset = 0;
 
 			pVoice->_sampleCounter=0;
 			pVoice->effCmd=pEntry->_cmd;
@@ -329,10 +329,11 @@ namespace psycle
 					float const finetune = (float)wave.WaveFineTune()*0.01f;
 					speeddouble = pow(2.0f, (pEntry->_note+wave.WaveTune()-baseC +finetune)/12.0f)*((float)wave.WaveSampleRate()/Global::player().SampleRate());
 				}
-				pVoice->_wave._speed = (__int64)(speeddouble*4294967296.0f);
+				pVoice->_wave._speed = static_cast<std::int64_t>(speeddouble*4294967296.0f);
 
 				if (pVoice->resampler_data != NULL) _resampler.DisposeResamplerData(pVoice->resampler_data);
-				pVoice->resampler_data = _resampler.GetResamplerData(speeddouble);
+				pVoice->resampler_data = _resampler.GetResamplerData();
+				_resampler.UpdateSpeed(pVoice->resampler_data,speeddouble);
 
 				// Handle wave_start_offset cmd
 				//
@@ -677,6 +678,35 @@ namespace psycle
 							pVoice->_wave._pos.HighPart, pVoice->_wave._pos.LowPart, pVoice->_wave._length, pVoice->resampler_data);
 					}
 
+					// Amplitude section
+					{
+						TickEnvelope(voice);
+
+						// calculate volume  (volume ramped)
+						if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest) {
+							pVoice->_wave._lVolCurr-=0.005f;
+							if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
+								pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
+
+						}
+						else if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest) {
+							pVoice->_wave._lVolCurr+=0.005f;
+							if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
+								pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
+						}
+						if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest) {
+							pVoice->_wave._rVolCurr-=0.005f;
+							if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
+								pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
+
+						}
+						else if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest) {
+							pVoice->_wave._rVolCurr+=0.005f;
+							if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
+								pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
+						}
+
+					}
 					// Filter section
 					//
 					if (pVoice->_filter.Type() != dsp::F_NONE)
@@ -699,28 +729,7 @@ namespace psycle
 							left_output = pVoice->_filter.Work(left_output);
 						}
 					}
-					// Amplitude section
-					{
-						TickEnvelope(voice);
 
-						// calculate volume  (volume ramped)
-						
-						if(pVoice->_wave._lVolCurr<0)
-							pVoice->_wave._lVolCurr=pVoice->_wave._lVolDest;
-						if(pVoice->_wave._rVolCurr<0)
-							pVoice->_wave._rVolCurr=pVoice->_wave._rVolDest;
-
-						if(pVoice->_wave._lVolCurr>pVoice->_wave._lVolDest)
-							pVoice->_wave._lVolCurr-=0.005f;
-						if(pVoice->_wave._lVolCurr<pVoice->_wave._lVolDest)
-							pVoice->_wave._lVolCurr+=0.005f;
-						if(pVoice->_wave._rVolCurr>pVoice->_wave._rVolDest)
-							pVoice->_wave._rVolCurr-=0.005f;
-						if(pVoice->_wave._rVolCurr<pVoice->_wave._rVolDest)
-							pVoice->_wave._rVolCurr+=0.005f;
-
-					}
-					
 					if(!pVoice->_wave._stereo)
 						right_output=left_output;
 					right_output *= pVoice->_wave._rVolCurr*pVoice->_envelope._value;
@@ -854,7 +863,7 @@ namespace psycle
 		{
 			// 4294967 stands for (2^30/250), meaning that
 			//value 250 = (inc)decreases the speed in in 1/4th of the original (wave) speed each PerformFx call.
-			__int64 shift;
+			std::int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up

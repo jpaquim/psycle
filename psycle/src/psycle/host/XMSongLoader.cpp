@@ -699,8 +699,8 @@ namespace host{
 							break;// noteoff		
 						
 						default: 
-							if(note >= 96 || note < 0)
-								TRACE(_T("invalid note\n"));
+							if(note > 96 || note <= 0)
+								TRACE(_T("invalid note: %d\n"), note);
 							e._note  = note+11; // +11 -> +12 ( FT2 C-0 is Psycle's C-1) -1 ( Ft2 C-0 is value 1)
 
 							break;	// transpose

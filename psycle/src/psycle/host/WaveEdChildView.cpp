@@ -2,6 +2,7 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include <psycle/host/detail/project.private.hpp>
 #include <psycle/helpers/riff.hpp>
+#include <psycle/helpers/resampler.hpp>
 #include "WaveEdChildView.hpp"
 
 #include "PsycleConfig.hpp"
@@ -2484,39 +2485,64 @@ namespace psycle { namespace host {
 				int yLow, yHi;
 
 				lDisplay.resize(nWidth);
-				
-				for(int c(0); c < nWidth; c++)
-				{
-					long const offset = diStart + (long)(c * OffsetStep);
-					yLow = 0, yHi = 0;
-
-					for (long d(offset); d < offset + ((OffsetStep <1) ? 1 : OffsetStep); d++)
-					{
-						int value = *(wdLeft+d);
-						if (yLow > value) yLow = value;
-						if (yHi <  value) yHi  = value;
-					}
-
-					lDisplay[c].first  = (wrHeight * yLow)/32768;
-					lDisplay[c].second = (wrHeight * yHi )/32768;
-				}
-				if(wdStereo)
-				{
-					rDisplay.resize(nWidth);
+				helpers::dsp::cubic_resampler resampler;
+				resampler.quality(helpers::dsp::resampler::quality::spline);
+				if ( OffsetStep >4) {
 					for(int c(0); c < nWidth; c++)
 					{
 						long const offset = diStart + (long)(c * OffsetStep);
 						yLow = 0, yHi = 0;
-
-						for (long d(offset); d < offset + ((OffsetStep <1) ? 1 : OffsetStep); d++)
+						for (long d(offset); d < offset + OffsetStep; d+=4)
 						{
-							int value = *(wdRight+d);
+							int value = *(wdLeft+d);
 							if (yLow > value) yLow = value;
 							if (yHi <  value) yHi  = value;
 						}
+						lDisplay[c].first  = (wrHeight * yLow)/32768;
+						lDisplay[c].second = (wrHeight * yHi )/32768;
+					}
+					if(wdStereo)
+					{
+						rDisplay.resize(nWidth);
+						for(int c(0); c < nWidth; c++)
+						{
+							long const offset = diStart + (long)(c * OffsetStep);
+							yLow = 0, yHi = 0;
+							for (long d(offset); d < offset + OffsetStep; d+=4)
+							{
+								int value = *(wdRight+d);
+								if (yLow > value) yLow = value;
+								if (yHi <  value) yHi  = value;
+							}
+							rDisplay[c].first  = (wrHeight * yLow)/32768;
+							rDisplay[c].second = (wrHeight * yHi )/32768;
+						}
+					}
+				}
+				else {
+					for(int c(0); c < nWidth; c++)
+					{
+						ULARGE_INTEGER posin;
+						posin.QuadPart = (diStart + c * OffsetStep)* 4294967296.0f;
+						yHi=0;
+						yLow=resampler.work(wdLeft+posin.HighPart,posin.HighPart,posin.LowPart,wdLength,NULL);
 
-						rDisplay[c].first  = (wrHeight * yLow)/32768;
-						rDisplay[c].second = (wrHeight * yHi )/32768;
+						lDisplay[c].first  = (wrHeight * yLow)/32768;
+						lDisplay[c].second = (wrHeight * yHi )/32768;
+					}
+					if(wdStereo)
+					{
+						rDisplay.resize(nWidth);
+						for(int c(0); c < nWidth; c++)
+						{
+							ULARGE_INTEGER posin;
+							posin.QuadPart = (diStart + c * OffsetStep)* 4294967296.0f;
+							yHi=0;
+							yLow=resampler.work(wdRight+posin.HighPart,posin.HighPart,posin.LowPart,wdLength,NULL);
+
+							rDisplay[c].first  = (wrHeight * yLow)/32768;
+							rDisplay[c].second = (wrHeight * yHi )/32768;
+						}
 					}
 				}
 				if(bRefreshHeader)
