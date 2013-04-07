@@ -46,7 +46,7 @@ namespace psycle
 			bool _stereo;
 			int _samplerate;
 			ULARGE_INTEGER _pos;
-			signed __int64 _speed;
+			std::int64_t _speed;
 			bool _loop;
 			ULONG _loopStart;
 			ULONG _loopEnd;
@@ -137,7 +137,8 @@ namespace psycle
 				{
 					if (_voices[i]._envelope._stage != ENV_OFF) {
 						double speeddouble = static_cast<double>(_voices[i]._wave._speed)/4294967296.0f;
-						_voices[i].resampler_data = _resampler.GetResamplerData(speeddouble);
+						_voices[i].resampler_data = _resampler.GetResamplerData();
+						_resampler.UpdateSpeed(_voices[i].resampler_data, speeddouble);
 					}
 				}
 			}

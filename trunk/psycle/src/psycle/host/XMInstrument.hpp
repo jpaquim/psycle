@@ -246,8 +246,18 @@ namespace psycle { namespace host {
 			/// The meaning of the first value (int), is time, and the unit depends on the context.
 			typedef std::pair<int,ValueType> PointValue;
 			
-			/// ?
+			/// The envelope is made of a vector of pointvalues.
 			typedef std::vector< PointValue > Points;
+
+			// Mode defines what the first value of a PointValue means
+			// TICK = one tracker tick ( speed depends on the BPM )
+			// MILIS = a millisecond. (independant of BPM).
+			struct Mode {
+				enum Type {
+					TICK=0,
+					MILIS
+				};
+			};
 
 			/// constructor
 			Envelope() {
@@ -323,6 +333,7 @@ namespace psycle { namespace host {
 				m_Carry = other.m_Carry;
 
 				m_Points = other.m_Points;
+				m_Mode = other.m_Mode;
 
 				m_LoopStart = other.m_LoopStart;
 				m_LoopEnd = other.m_LoopEnd;
@@ -356,15 +367,17 @@ namespace psycle { namespace host {
 			inline bool IsEnabled() const { return m_Enabled;}
 			inline void IsEnabled(const bool value){ m_Enabled = value;}
 
-			/// if IsCarry() and a new note enters, the envelope position is set to
-			/// that of the previous note *on the same channel*
+			/// if IsCarry() and a new note enters, the envelope position is set to that of the previous note *on the same channel*
 			inline bool IsCarry() const { return m_Carry;}
 			inline void IsCarry(const bool value){ m_Carry = value;}
+
+			inline Mode::Type Mode() const { return m_Mode; }
+			inline void Mode(const Mode::Type _mode){ m_Mode=_mode; }
 
 		private:
 			/// Envelope is enabled or disabled
 			bool m_Enabled;
-			/// ????
+			/// if m_Carry and a new note enters, the envelope position is set to that of the previous note *on the same channel*
 			bool m_Carry;
 			/// Array of Points of the envelope.
 			/// first : time at which to set the value. Unit can be different things depending on the context.
@@ -378,6 +391,8 @@ namespace psycle { namespace host {
 			int m_SustainBegin;
 			/// Sustain End Point
 			int m_SustainEnd;
+			/// Envelope mode (meaning of the time value)
+			Mode::Type m_Mode;
 		};// class Envelope
 
 

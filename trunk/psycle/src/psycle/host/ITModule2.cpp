@@ -1105,6 +1105,8 @@ Special:  Bit 0: On = song message attached.
 							break;
 						case CMD_S::S_SET_HIGH_OFFSET: // IT
 							highOffset[channel] = param &0x0F;
+							pent._cmd = XMSampler::CMD::NONE;
+							pent._parameter = 0;
 							break;
 						case CMD_S::S_PATTERN_LOOP:
 							pent._cmd = PatternCmd::EXTENDED;
@@ -1246,7 +1248,7 @@ Special:  Bit 0: On = song message attached.
 					{
 						if (s3mFileH.defPan && chansettings[i]&S3MChanType::HASCUSTOMPOS)
 						{
-							float flttmp=(chansettings[i]&0x0F)/15.0f;
+							float flttmp=XMSampler::E8VolMap[(chansettings[i]&0x0F)]/64.0f;
 							sampler->rChannel(i).DefaultPanFactorFloat(flttmp,true);
 						}
 						else if (s3mFileH.chanSet[i]&S3MChanType::ISRIGHTCHAN)

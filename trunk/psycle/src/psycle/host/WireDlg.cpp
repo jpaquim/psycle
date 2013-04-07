@@ -416,6 +416,7 @@ namespace psycle { namespace host {
 						//scopeBufferIndex is the position where it will write new data. Pos is the buffer position on Hold.
 						 //keeping nOrig, since the buffer can change while we draw it.
 						int nOrig  = (srcMachine._scopeBufferIndex == 0) ? SCOPE_BUF_SIZE-pos : srcMachine._scopeBufferIndex-pos;
+						if (nOrig < 0.f) { nOrig+=SCOPE_BUF_SIZE; }
 						// osc_freq range 5..100, freq range 10..10K
 						const int freq = scope_osc_freq*scope_osc_freq;
 						const float add = (float(Global::player().SampleRate())/float(freq))/256.0f;
@@ -423,7 +424,7 @@ namespace psycle { namespace host {
 						const float multright= invol*mult *srcMachine._rVol;
 
 						CPen *oldpen = bufDC.SelectObject(&linepenL);
-						float n = nOrig-2;//Since we use the cubic interpolation, we need two forward points
+						float n=nOrig;
 						bufDC.MoveTo(256,GetY(resampler.work_float(pSamplesL,n,SCOPE_BUF_SIZE, NULL), multleft));
 						for (int x = 256; x >= 0; x--)
 						{
@@ -433,8 +434,8 @@ namespace psycle { namespace host {
 							bufDC.LineTo(x,GetY(0,multleft));
 						}
 
-						n = nOrig-2;//Since we use the cubic interpolation, we need two forward points
 						bufDC.SelectObject(&linepenR);
+						n=nOrig;
 						bufDC.MoveTo(256,GetY(resampler.work_float(pSamplesR,n,SCOPE_BUF_SIZE, NULL),multright));
 						for (int x = 256; x >= 0; x--)
 						{
@@ -575,7 +576,7 @@ namespace psycle { namespace host {
 							if (curpeak < bar_heights[i]) { bar_heights[i] = curpeak; }
 							else if (!hold && bar_heights[i]<128)
 							{
-								bar_heights[i]+=128*scope_spec_rate/500;//two seconds to decay
+								bar_heights[i]+=128/scope_spec_rate*0.5;//two seconds to decay
 								if (bar_heights[i] > 128) { bar_heights[i] = 128; }
 							}
 

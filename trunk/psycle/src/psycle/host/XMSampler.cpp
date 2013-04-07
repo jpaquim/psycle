@@ -1,12 +1,9 @@
 #include <psycle/host/detail/project.private.hpp>
-#include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
 #include "Song.hpp"
-#include "FileIO.hpp"
-#include "Configuration.hpp"
-#include "Global.hpp"
 #include <universalis/stdlib/cstdint.hpp>
+#include <psycle/helpers/dsp.hpp>
 
 #include <algorithm>
 namespace psycle
@@ -14,6 +11,8 @@ namespace psycle
 	namespace host
 	{
 		TCHAR* XMSampler::_psName = _T("Sampulse");
+
+		const char XMSampler::E8VolMap[16]={0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64};
 
 		const int XMSampler::Voice::m_FineSineData[256] = {
 			0,  2,  3,  5,  6,  8,  9, 11, 12, 14, 16, 17, 19, 20, 22, 23,
@@ -127,7 +126,7 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
-		void XMSampler::WaveDataController::Init(const XMInstrument::WaveData* const wave, const int layer)
+		void XMSampler::WaveDataController::Init(const XMInstrument::WaveData* const wave, const int layer, const helpers::dsp::resampler & resampler)
 		{
 			m_Layer = layer;
 			m_pWave = wave;
@@ -135,42 +134,267 @@ namespace psycle
 			m_Speed=0;
 			m_Playing=false;
 
-			m_pL = const_cast<std::int16_t *>(wave->pWaveDataL());
-			m_pR = const_cast<std::int16_t *>(wave->pWaveDataR());
-
-			_stereo=wave->IsWaveStereo();
-			_length=wave->WaveLength();
-
 			if ( SustainLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
 			{
 				m_CurrentLoopType = SustainLoopType();
 				m_CurrentLoopStart = SustainLoopStart();
 				m_CurrentLoopEnd = SustainLoopEnd();
 
-			} else {
+			} else if (LoopType() != XMInstrument::WaveData::LoopType::DO_NOT) {
 				m_CurrentLoopType = LoopType();
 				m_CurrentLoopStart = LoopStart();
 				m_CurrentLoopEnd = LoopEnd();
+			} else { // No loop is considered a loop that stops at the end.
+				//This way, it is not needed to check if a loop is enabled when checking if end loop is reached.
+				m_CurrentLoopType = XMInstrument::WaveData::LoopType::DO_NOT;
+				m_CurrentLoopStart = 0;
+				m_CurrentLoopEnd = Length();
 			}
+			m_CurrentLoopDirection = LoopDirection::FORWARD;
+			m_SpeedInternal = m_Speed;
 
-			CurrentLoopDirection(LoopDirection::FORWARD);
+			DisposeResampleData(resampler);
+			RecreateResampleData(resampler);
+			RefillBuffers();
+		}
+
+		void XMSampler::WaveDataController::DisposeResampleData(const helpers::dsp::resampler& resampler)
+		{
+			if (resampler_data != NULL ) {
+				resampler.DisposeResamplerData(resampler_data);
+				resampler_data = NULL;
+			}
+		}
+		void XMSampler::WaveDataController::RecreateResampleData(const helpers::dsp::resampler& resampler)
+		{
+			resampler_work = resampler.work_unchecked;
+			resampler_data = resampler.GetResamplerData();
+			if (Speed() != 0) {
+				resampler.UpdateSpeed(resampler_data,static_cast<double>(Speed())/ 4294967296.0);
+			}
+		}
+		void XMSampler::WaveDataController::RefillBuffers()
+		{
+			const int presamples=15;
+			const int postsamples=16;
+			const int totalsamples=32;
+			const int secbegin=64;
+			const int thirdbegin=128;
+			//Begin
+			memset(lBuffer,0,presamples*sizeof(std::int16_t));
+			memcpy(lBuffer+presamples,m_pWave->pWaveDataL(), totalsamples*sizeof(std::int16_t));
+			if (LoopType()==XMInstrument::WaveData::LoopType::DO_NOT) {
+				//End
+				memcpy(lBuffer+secbegin,m_pWave->pWaveDataL()+Length()-totalsamples, totalsamples*sizeof(std::int16_t));
+				memset(lBuffer+secbegin+totalsamples,0,postsamples);
+			}
+			else if (LoopType()==XMInstrument::WaveData::LoopType::NORMAL) {
+				//Forward only loop.
+				memcpy(lBuffer+secbegin,m_pWave->pWaveDataL()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+				memcpy(lBuffer+secbegin+totalsamples,m_pWave->pWaveDataL()+LoopStart(),totalsamples*sizeof(std::int16_t));
+			}
+			else if (LoopType()==XMInstrument::WaveData::LoopType::BIDI) {
+				//Ping pong loop (end).
+				memcpy(lBuffer+secbegin,m_pWave->pWaveDataL()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+				for (int i=0;i<totalsamples;i++) {
+					lBuffer[secbegin+totalsamples+i]=m_pWave->pWaveDataL()[LoopEnd()-i-1];
+				}
+				//Ping pong loop (start).
+				for (int i=0;i<totalsamples;i++) {
+					lBuffer[thirdbegin+i]=m_pWave->pWaveDataL()[LoopStart()+totalsamples-i];
+				}
+				memcpy(lBuffer+thirdbegin+totalsamples,m_pWave->pWaveDataL()+LoopStart(),totalsamples*sizeof(std::int16_t));
+			}
+			if (IsStereo()) {
+				//Begin
+				memset(rBuffer,0,presamples*sizeof(std::int16_t));
+				memcpy(rBuffer+presamples,m_pWave->pWaveDataR(), totalsamples*sizeof(std::int16_t));
+				if (LoopType()==XMInstrument::WaveData::LoopType::DO_NOT) {
+					//End
+					memcpy(rBuffer+secbegin,m_pWave->pWaveDataR()+Length()-totalsamples, totalsamples*sizeof(std::int16_t));
+					memset(rBuffer+secbegin+totalsamples,0,postsamples);
+				}
+				else if (LoopType()==XMInstrument::WaveData::LoopType::NORMAL) {
+					//Forward only loop.
+					memcpy(rBuffer+secbegin,m_pWave->pWaveDataR()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+					memcpy(rBuffer+secbegin+totalsamples,m_pWave->pWaveDataR()+LoopStart(),totalsamples*sizeof(std::int16_t));
+				}
+				else if (LoopType()==XMInstrument::WaveData::LoopType::BIDI) {
+					//Ping pong loop (end).
+					memcpy(rBuffer+secbegin,m_pWave->pWaveDataR()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+					for (int i=0;i<totalsamples;i++) {
+						rBuffer[secbegin+totalsamples+i]=m_pWave->pWaveDataR()[LoopEnd()-i-1];
+					}
+					//Ping pong loop (start).
+					for (int i=0;i<totalsamples;i++) {
+						rBuffer[thirdbegin+i]=m_pWave->pWaveDataR()[LoopStart()+totalsamples-i];
+					}
+					memcpy(rBuffer+thirdbegin+totalsamples,m_pWave->pWaveDataR()+LoopStart(),postsamples*sizeof(std::int16_t));
+				}
+			}
+		}
+		int XMSampler::WaveDataController::PreWork(int numSamples, WorkFunction* pWork) {
+			*pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
+
+			const int presamples=15;
+			const int postsamples=16;
+			const int totalsamples=32;
+			const int secbegin=64;
+			const int thirdbegin=128;
+
+			std::int32_t max;
+			ULARGE_INTEGER amount;
+			amount.QuadPart = m_Position.QuadPart + m_SpeedInternal*numSamples;
+			std::int32_t pos = m_Position.HighPart;
+#ifndef NDEBUG
+			if(m_pWave->WaveLength() == 35710) {
+				int i=0;
+			}
+#endif
+			//TRACE("RealPos %d\n",pos);
+			if (CurrentLoopDirection() == LoopDirection::FORWARD) {
+				if (pos < presamples) {
+					m_pL = &lBuffer[presamples+pos];
+					m_pR = &rBuffer[presamples+pos];
+					max=presamples-pos;
+					//TRACE("Begin buffer at pos %d for samples %d\n" ,pos+presamples , max);
+				}
+				else if (pos+postsamples >= m_CurrentLoopEnd && pos< m_CurrentLoopEnd+postsamples) {
+					m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
+					m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
+					if(LoopType() == XMInstrument::WaveData::LoopType::DO_NOT) {
+						max=m_CurrentLoopEnd-pos;
+						//TRACE("End buffer at pos %d for samples %d\n", secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
+					}
+					else {
+						max=presamples+m_CurrentLoopEnd-pos;
+						//TRACE("forward-loop buffer at pos %d for samples %d\n" , secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
+					}
+				}
+				else {
+					m_pL = const_cast<std::int16_t *>(m_pWave->pWaveDataL()+pos);
+					m_pR = const_cast<std::int16_t *>(m_pWave->pWaveDataR()+pos);
+					if (static_cast<std::int32_t>(amount.HighPart)+postsamples<m_CurrentLoopEnd) {
+						return numSamples;
+					}
+					max = m_CurrentLoopEnd-static_cast<std::int32_t>(m_Position.HighPart)-postsamples;
+					//TRACE("sample buffer at pos %d for samples %d\n" , pos , max);
+				}
+				if(max<0) {
+					//Disallow negative values;(Generally, it indicates a bug in calculations)
+					max=1;
+				}
+				amount.HighPart = static_cast<DWORD>(max);
+				amount.LowPart = 0;
+				amount.QuadPart-=m_Position.LowPart;
+			}
+			else if (CurrentLoopDirection() == LoopDirection::BACKWARD) {
+				if (pos-presamples <= m_CurrentLoopStart) {
+					m_pL = &lBuffer[thirdbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					m_pR = &rBuffer[thirdbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					max=pos-m_CurrentLoopStart;
+					//TRACE("backward-loop buffer at pos %d for samples %d\n" ,thirdbegin+(pos+totalsamples-m_CurrentLoopStart) , max);
+				}
+				else {
+					m_pL = const_cast<std::int16_t *>(m_pWave->pWaveDataL()+pos);
+					m_pR = const_cast<std::int16_t *>(m_pWave->pWaveDataR()+pos);
+					if (static_cast<std::int32_t>(amount.HighPart)-presamples>= m_CurrentLoopStart) {
+						return numSamples;
+					}
+					max = static_cast<std::int32_t>(m_Position.HighPart)-m_CurrentLoopStart-postsamples;
+					//TRACE("sample buffer (backwards) at pos %d for samples %d\n",  pos , max);
+				}
+				if(max<0) {
+					//Disallow negative values; (Generally, it indicates a bug in calculations)
+					max=1;
+				}
+				amount.HighPart = static_cast<DWORD>(max);
+				amount.LowPart = m_Position.LowPart;
+			}
+			/*if (*m_pL!=*(m_pWave->pWaveDataL()+pos)) {
+				TRACE("ERROR. Samples differ! %d - %d\n", *m_pL , *(m_pWave->pWaveDataL()+pos));
+			}*/
+			amount.QuadPart/=Speed();
+			return amount.LowPart+1;
+		}
+
+		void XMSampler::WaveDataController::PostWork()
+		{
+			const std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+			if( CurrentLoopDirection() == LoopDirection::FORWARD && newIntPos >= m_CurrentLoopEnd)
+			{
+				switch(m_CurrentLoopType)
+				{
+				case XMInstrument::WaveData::LoopType::NORMAL:
+					m_Position.HighPart = m_CurrentLoopStart+(newIntPos-m_CurrentLoopEnd);
+#ifndef NDEBUG
+					if (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd) {
+						int i=0;
+					}
+#endif
+					break;
+				case XMInstrument::WaveData::LoopType::BIDI:
+					m_Position.HighPart = m_CurrentLoopEnd-(newIntPos-m_CurrentLoopEnd);
+					m_Position.LowPart = 4294967295 -m_Position.LowPart;
+					m_CurrentLoopDirection = LoopDirection::BACKWARD;
+					m_SpeedInternal = -1*m_Speed;
+#ifndef NDEBUG
+					if (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd) {
+						int i=0;
+					}
+#endif
+					break;
+				case XMInstrument::WaveData::LoopType::DO_NOT://fallthrough
+				default:
+					Playing(false);
+					break;
+				}
+			} 
+			else if( CurrentLoopDirection() == LoopDirection::BACKWARD && newIntPos <= m_CurrentLoopStart)
+			{
+				switch(m_CurrentLoopType)
+				{
+				case XMInstrument::WaveData::LoopType::NORMAL://fallthrough
+				case XMInstrument::WaveData::LoopType::BIDI:
+					m_Position.HighPart = m_CurrentLoopStart+(m_CurrentLoopStart-newIntPos);
+					m_Position.LowPart = 4294967295 -m_Position.LowPart;
+					m_CurrentLoopDirection = LoopDirection::FORWARD;
+					m_SpeedInternal = m_Speed;
+#ifndef NDEBUG
+					if (static_cast<std::int32_t>(m_Position.HighPart) < m_CurrentLoopStart) {
+						int i=0;
+					}
+#endif
+				break;
+				case XMInstrument::WaveData::LoopType::DO_NOT://fallthrough
+				default:
+					Playing(false);
+					break;
+				}
+			}
 		}
 		void XMSampler::WaveDataController::NoteOff(void)
 		{
 			if ( SustainLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
 			{
-				m_CurrentLoopType = LoopType();
-				m_CurrentLoopStart = LoopStart();
-				m_CurrentLoopEnd = LoopEnd();
+				if (LoopType() != XMInstrument::WaveData::LoopType::DO_NOT) {
+					m_CurrentLoopType = LoopType();
+					m_CurrentLoopStart = LoopStart();
+					m_CurrentLoopEnd = LoopEnd();
+				} else {
+					m_CurrentLoopType = XMInstrument::WaveData::LoopType::DO_NOT;
+					m_CurrentLoopStart = 0;
+					m_CurrentLoopEnd = Length()-1;
+				}
 			}
 		}
+
 
 //////////////////////////////////////////////////////////////////////////
 //      XMSampler::EnvelopeController Implementation
 		void XMSampler::EnvelopeController::Init()
 		{
 			m_Samples = 0;
-			m_Mode = EnvelopeMode::TICK;
 			m_PositionIndex = 0;
 			m_ModulationAmount = 0;
 			m_Step = 0;
@@ -251,10 +475,10 @@ namespace psycle
 
 		void XMSampler::EnvelopeController::RecalcDeviation()
 		{
-			if ( m_Mode == EnvelopeMode::TICK )	{
-				m_sRateDeviation = (Global::player().SampleRate() *60) / (24 * Global::player().bpm);
-			} else if ( m_Mode == EnvelopeMode::MILIS ) {
-				m_sRateDeviation = Global::player().SampleRate() / 1000.0f;
+			if ( m_pEnvelope->Mode() == XMInstrument::Envelope::Mode::TICK )	{
+				m_sRateDeviation = (voice.SampleRate() *60) / (24 * Global::player().bpm);
+			} else if ( m_pEnvelope->Mode() == XMInstrument::Envelope::Mode::MILIS ) {
+				m_sRateDeviation = voice.SampleRate() / 1000.0f;
 			}
 		}
 
@@ -287,12 +511,6 @@ namespace psycle
 			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
 //			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
 //			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
-		}
-		int XMSampler::EnvelopeController::GetPositionInSamples() const
-		{
-			//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
-//			TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
-			return m_Samples;
 		}
 
 
@@ -329,6 +547,11 @@ namespace psycle
 			m_Note = notecommands::empty;
 			m_Volume = 128;
 			m_RealVolume = 1.0f;
+			m_lVolCurr=0.f;
+			m_lVolDest=0.f;
+			m_rVolCurr=0.f;
+			m_rVolDest=0.f;
+
 
 			m_PanFactor=0.5f;
 			m_PanRange=1;
@@ -338,15 +561,12 @@ namespace psycle
 		}
 		void XMSampler::Voice::DisposeResampleData(helpers::dsp::resampler& resampler) 
 		{
-			if (resampler_data != NULL ) {
-				resampler.DisposeResamplerData(resampler_data);
-				resampler_data = NULL;
-			}
+			m_WaveDataController.DisposeResampleData(resampler);
 		}
 		void XMSampler::Voice::RecreateResampleData(helpers::dsp::resampler& resampler)
 		{
 			if (IsPlaying()) {
-				resampler_data = resampler.GetResamplerData(static_cast<double>(rWave().Speed())/ 4294967296.0);
+				m_WaveDataController.RecreateResampleData(resampler);
 			}
 		}
 
@@ -407,7 +627,7 @@ namespace psycle
 			m_PitchEnvelope.Init(_inst.PitchEnvelope());
 			m_FilterEnvelope.Init(_inst.FilterEnvelope());
 
-			m_Filter->Init(Global::player().SampleRate());
+			m_Filter->Init(SampleRate());
 
 			if (_inst.FilterCutoff() < 127 || _inst.FilterResonance() > 0)
 			{
@@ -448,7 +668,7 @@ namespace psycle
 			
 		}// XMSampler::Voice::VoiceInit) 
 
-		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR, dsp::resampler& resampler)
+		void XMSampler::Voice::Work(int numSamples,float * pSamplesL,float * pSamplesR)
 		{
 			float left_output = 0.0f;
 			float right_output = 0.0f;
@@ -458,125 +678,165 @@ namespace psycle
 				IsPlaying(false);
 				return;
 			}
-			while (numSamples)
-			{
-			//////////////////////////////////////////////////////////////////////////
-			//  Step 1 : Get the unprocessed wave data.
-
-				m_WaveDataController.Work(&left_output,&right_output,resampler.work, resampler_data);
-
-			//////////////////////////////////////////////////////////////////////////
-			//  Step 2 : Process the Envelopes.
-
-				// Amplitude Envelope 
-				// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-
-				float volume = RealVolume() * rChannel().Volume();
-				if(m_AmplitudeEnvelope.Envelope().IsEnabled())
+			float voldelta=500.f/SampleRate(); //delta samples for two milliseconds.
+			while(numSamples) {
+				WaveDataController::WorkFunction pWork;
+				int nextsamples = std::min(m_WaveDataController.PreWork(numSamples, &pWork), numSamples);
+				numSamples-=nextsamples;
+#ifndef NDEBUG
+				if (numSamples > 256 || numSamples < 0) {
+					int i=0;
+				}
+#endif
+				while (nextsamples)
 				{
-					m_AmplitudeEnvelope.Work();
-					volume *= m_AmplitudeEnvelope.ModulationAmount();
-					if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF)
+				//////////////////////////////////////////////////////////////////////////
+				//  Step 1 : Get the unprocessed wave data.
+
+					pWork(m_WaveDataController,&left_output, &right_output);
+
+				//////////////////////////////////////////////////////////////////////////
+				//  Step 2 : Process the Envelopes.
+
+					// Amplitude Envelope 
+					// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
+					float volume = RealVolume() * rChannel().Volume();
+					if(m_AmplitudeEnvelope.Envelope().IsEnabled())
 					{
-						if ( m_AmplitudeEnvelope.ModulationAmount() <= 0.0f){ IsPlaying(false); return; }
-						else if (m_VolumeFadeSpeed == 0.0f) NoteFadeout();
-					}
-				}
-				// Volume Fade Out
-				if(m_VolumeFadeSpeed > 0.0f)
-				{
-					UpdateFadeout();
-					if ( m_VolumeFadeAmount <= 0) { IsPlaying(false); return; }
-					volume *= m_VolumeFadeAmount;
-				}
-				
-				// Panning Envelope 
-				// (actually, the correct word for panning is panoramization. "panning" comes from the diminutive "pan")
-				// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
-				float rvol = PanFactor() + m_PanbrelloAmount;
-				
-				if(m_PanEnvelope.Envelope().IsEnabled()){
-					m_PanEnvelope.Work();
-					// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
-					rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
-				}
-
-				float lvol=0;
-				if ( m_pSampler->PanningMode()== PanningMode::Linear) {
-					lvol = (1.0f - rvol);
-				} else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
-					//using std::min;
-					lvol = std::min(1.0f, (1.0f - rvol) * 2);
-				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
-					//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
-					lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
-				}
-
-				// PanningMode::Linear is already on rvol, so we omit the case.
-				if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
-					rvol = std::min(1.0f, rvol*2.0f);
-				} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
-					//rvol = powf(rvol, 0.5f);// This is the commonly used one
-					rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
-				}
-
-				left_output *=  volume;
-				right_output *= volume;
-
-				// Filter section
-				if (m_Filter->Type() != dsp::F_NONE)
-				{
-					if(m_FilterEnvelope.Envelope().IsEnabled()){
-						m_FilterEnvelope.Work();
-						int tmpCO = int(m_CutOff * m_FilterEnvelope.ModulationAmount());
-						if (tmpCO < 0) { tmpCO = 0; }
-						else if (tmpCO > 127) { tmpCO = 127; }
-						m_Filter->Cutoff(tmpCO);
-					}
-					if ( m_pSampler->UseFilters() )
-					{
-						if (m_WaveDataController.IsStereo())
+						m_AmplitudeEnvelope.Work();
+						volume *= m_AmplitudeEnvelope.ModulationAmount();
+						if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF)
 						{
-							m_Filter->WorkStereo(left_output, right_output);
-						}
-						else
-						{
-							left_output = m_Filter->Work(left_output);
+							if ( m_AmplitudeEnvelope.ModulationAmount() <= 0.0f){ IsPlaying(false); return; }
+							else if (m_VolumeFadeSpeed == 0.0f) NoteFadeout();
 						}
 					}
-				}
+					// Volume Fade Out
+					if(m_VolumeFadeSpeed > 0.0f)
+					{
+						UpdateFadeout();
+						if ( m_VolumeFadeAmount <= 0) { IsPlaying(false); return; }
+						volume *= m_VolumeFadeAmount;
+					}
+					
+					if(IsSurround()){
+						if ( m_pSampler->PanningMode()== PanningMode::Linear) {
+							m_lVolDest = 0.5f*volume;
+							m_rVolDest = -0.5f*volume;
+						}
+						else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
+							m_lVolDest = volume;
+							m_rVolDest = -1.f*volume;
+						}
+						else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+							m_lVolDest = 0.705f*volume;
+							m_rVolDest = -0.705f*volume;
+						}
+					} else if (!m_pChannel->IsMute()){
+						// Panning Envelope 
+						// (actually, the correct word for panning is panoramization. "panning" comes from the diminutive "pan")
+						// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
+						float lvol=0;
+						float rvol= PanFactor() + m_PanbrelloAmount;
+						
+						if(m_PanEnvelope.Envelope().IsEnabled()){
+							m_PanEnvelope.Work();
+							// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
+							rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
+						}
 
-				// Picth Envelope. Currently, the pitch envelope Amount is only updated on NewLine().
-				if(m_PitchEnvelope.Envelope().IsEnabled()){
-					m_PitchEnvelope.Work();
-				}
+						if ( m_pSampler->PanningMode()== PanningMode::Linear) {
+							lvol = (1.0f - rvol);
+							// PanningMode::Linear is already on rvol, so we omit the case.
+						} else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
+							lvol = std::min(1.0f, (1.0f - rvol) * 2);
+							rvol = std::min(1.0f, rvol*2.0f);
+						} else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
+							//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
+							lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
+							//rvol = powf(rvol, 0.5f);// This is the commonly used one
+							rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
+						}
+						m_lVolDest = lvol*volume;
+						m_rVolDest = rvol*volume;
+					}
+					//Volume Ramping.
+					if(m_lVolCurr>m_lVolDest) {
+						m_lVolCurr-=voldelta;
+						if(m_lVolCurr<m_lVolDest)
+							m_lVolCurr=m_lVolDest;
 
-				
-			//////////////////////////////////////////////////////////////////////////
-			//  Step 3: Add the processed data to the sampler's buffer.
-				if(!m_WaveDataController.IsStereo()){
-				// Monoaural output‚ copy left to right output.
-					right_output = left_output;
-				}
+					}
+					else if(m_lVolCurr<m_lVolDest) {
+						m_lVolCurr+=voldelta;
+						if(m_lVolCurr>m_lVolDest)
+							m_lVolCurr=m_lVolDest;
+					}
+					if(m_rVolCurr>m_rVolDest) {
+						m_rVolCurr-=voldelta;
+						if(m_rVolCurr<m_rVolDest)
+							m_rVolCurr=m_rVolDest;
 
-				if(IsSurround()){
-					*pSamplesL++ += left_output;
-					*pSamplesR++ -= right_output;
-				} else if (!m_pChannel->IsMute()){
-					*pSamplesL++ += left_output*lvol;
-					*pSamplesR++ += right_output*rvol;
-				}
-				else
-				{
-					pSamplesL++;
-					pSamplesR++;
-				}
+					}
+					else if(m_rVolCurr<m_rVolDest) {
+						m_rVolCurr+=voldelta;
+						if(m_rVolCurr>m_rVolDest)
+							m_rVolCurr=m_rVolDest;
+					}
 
+					// Filter section
+					if (m_Filter->Type() != dsp::F_NONE)
+					{
+						if(m_FilterEnvelope.Envelope().IsEnabled()){
+							m_FilterEnvelope.Work();
+							int tmpCO = int(m_CutOff * m_FilterEnvelope.ModulationAmount());
+							if (tmpCO < 0) { tmpCO = 0; }
+							else if (tmpCO > 127) { tmpCO = 127; }
+							m_Filter->Cutoff(tmpCO);
+						}
+						if ( m_pSampler->UseFilters() )
+						{
+							if (m_WaveDataController.IsStereo())
+							{
+								m_Filter->WorkStereo(left_output, right_output);
+							}
+							else
+							{
+								left_output = m_Filter->Work(left_output);
+							}
+						}
+					}
+
+					// Pitch Envelope. Currently, the pitch envelope Amount is only updated on NewLine().
+					if(m_PitchEnvelope.Envelope().IsEnabled()){
+						m_PitchEnvelope.Work();
+					}
+
+					
+				//////////////////////////////////////////////////////////////////////////
+				//  Step 3: Add the processed data to the sampler's buffer.
+					if(!m_WaveDataController.IsStereo()){
+					// Monoaural output‚ copy left to right output.
+						right_output = left_output;
+					}
+					//cannot apply volume before filter, due to mono-mode filter and volcur having panning information.
+					left_output*=m_lVolCurr;
+					right_output*=m_rVolCurr;
+
+					if (m_pChannel->IsMute()) {
+						pSamplesL++;
+						pSamplesR++;
+					} else {
+						*pSamplesL++ += left_output;
+						*pSamplesR++ += right_output;
+					}
+
+					nextsamples--;
+				}
+				m_WaveDataController.PostWork();
 				if (!m_WaveDataController.Playing()) {
 					IsPlaying(false); return; 
 				}
-
-				numSamples--;
 			}
 		}
 		// This one is Tracker-Tick (Mod-Tick).
@@ -603,16 +863,11 @@ namespace psycle
 			if ( Global::song().samples.IsEnabled(wavelayer) == false ) return;
 
 			const XMInstrument::WaveData& wave = Global::song().samples[wavelayer];
-			m_WaveDataController.Init(&wave,wavelayer);
+			m_WaveDataController.Init(&wave,wavelayer, m_pSampler->Resampler());
 			m_Note = note;
 			m_Period=NoteToPeriod(pair.first,false);
 			m_NNA = rInstrument().NNA();
 			//\todo : add pInstrument().LinesMode
-			if (resampler_data != NULL) {
-				m_pSampler->Resampler().DisposeResamplerData(resampler_data);
-				resampler_data = NULL;
-			}
-			resampler_data = m_pSampler->Resampler().GetResamplerData(1.0);
 
 			ResetVolAndPan(playvol,reset);
 
@@ -936,13 +1191,12 @@ namespace psycle
 				NoteOffFast();
 			}
 			else if ( _period < 1.0 ) {
-				//This behaviour exists in ST3 and IT, and is in fact documented for slide up command in the latter.
+				//This behaviour exists in ST3 and IT, and is in fact documented for the slide up command in the latter.
 				NoteOffFast();
 			}
 			else {
 				const double speed=PeriodToSpeed(_period);
-				rWave().Speed(speed);
-				m_pSampler->Resampler().UpdateSpeed(resampler_data, speed);
+				rWave().Speed(m_pSampler->Resampler(), speed);
 			}
 		}
 
@@ -955,7 +1209,7 @@ namespace psycle
 				// in PC, the middle C period is 1712. It was increased by 4 to add extra fine pitch slides.
 				// so 1712 *8363 = 14317456, which is used in IT and FT2 (and in ST3, if the value that exists in their doc is a typo).
 				// One could also use 7159090.5 /2 *4 = 14318181
-				return ( 14317456.0 / period ) * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0) / (double)Global::player().SampleRate();
+				return ( 14317456.0 / period ) * pow(2.0,(m_PitchEnvelope.ModulationAmount()*16.0)/12.0) / (double)SampleRate();
 			} else {
 				// Linear Frequency
 				// base_samplerate * 2^((7*12*64 - Period) / (12*64))
@@ -965,7 +1219,7 @@ namespace psycle
 							((5376 - period + m_PitchEnvelope.ModulationAmount()*1024.0)
 							 /768.0)
 						)
-						* rWave().Wave().WaveSampleRate() / (double)Global::player().SampleRate();
+						* rWave().Wave().WaveSampleRate() / (double)SampleRate();
 			}
 		}
 
@@ -1204,7 +1458,7 @@ namespace psycle
 					}
 					break;
 				case CMD_E::E_SET_PAN:
-					PanFactor((parameter&0xf)/15.0f);
+					PanFactor(XMSampler::E8VolMap[(parameter&0xf)]/64.0f);
 					break;
 				case CMD_E::E_SET_MIDI_MACRO:
 					m_MIDI_Set = parameter&0x0F;
@@ -1346,10 +1600,9 @@ namespace psycle
 							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::FORWARD);
 							break;
 						case CMD_E9::E9_PLAY_BACKWARD:
-							if (voice->rWave().LoopType() == XMInstrument::WaveData::LoopType::DO_NOT &&
-								voice->rWave().Position() == 0)
+							if (voice->rWave().Position() == 0)
 							{
-								voice->rWave().Position(voice->rWave().Length());
+								voice->rWave().Position(voice->rWave().Length()-1);
 							}
 							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::BACKWARD);
 							break;
@@ -2017,6 +2270,7 @@ namespace psycle
 
 			_numVoices = XMSampler::MAX_POLYPHONY;
 			multicmdMem.resize(0);
+			m_sampleRate = Global::player().SampleRate();
 			int i;
 			for (i=0; i < _numVoices; i++)
 			{
@@ -2032,9 +2286,15 @@ namespace psycle
 		void XMSampler::SetSampleRate(int sr)
 		{
 			Machine::SetSampleRate(sr);
+			m_sampleRate = sr;
+			for (int i=0; i < _numVoices; i++)
+			{
+				if (m_Voices[i].IsPlaying()) {
 			//\todo
 			//update envelopes
 			//
+				}
+			}
 		}
 		
 		bool XMSampler::playsTrack(const int track) const
@@ -2281,7 +2541,7 @@ namespace psycle
 							if (offset != 0) {
 								thisChannel.OffsetMem(offset);
 								if (offset < twlength) { newVoice->rWave().Position(offset); }
-								else { newVoice->rWave().Position(twlength); }
+								else { newVoice->rWave().Position(twlength-1); }
 							}
 							else{ newVoice->rWave().Position(0); }
 						}
@@ -2484,9 +2744,8 @@ namespace psycle
 				int remainingticks = NextSampleTick()-_sampleCounter;
 				for (int voice = 0; voice < _numVoices; voice++)
 				{
-					//VoiceWork(ns, voice);
 					if(m_Voices[voice].IsPlaying()){
-						m_Voices[voice].Work(remainingticks,samplesV[0],samplesV[1],_resampler);
+						m_Voices[voice].Work(remainingticks,samplesV[0],samplesV[1]);
 					}
 				}
 				// Do the Tick jump.
@@ -2506,21 +2765,15 @@ namespace psycle
 			{
 				for (int voice = 0; voice < _numVoices; voice++)
 				{
-					//VoiceWork(ns, voice);
 					if(m_Voices[voice].IsPlaying()){
-						m_Voices[voice].Work(numsamples,psamL,psamR,_resampler);
+						m_Voices[voice].Work(numsamples,psamL,psamR);
 					}
 				}
 			}
-			// Doing this here is faster than in voice, because it is done once per voice then.
+			// Apply the global volume to the final mix.
 			float multip = m_GlobalVolume/128.0f;
-			psamL = samplesV[0];
-			psamR = samplesV[1];
-			for (int i=0; i<tmpsamples;i++)
-			{
-				*psamL = *(psamL++)*multip;
-				*psamR = *(psamR++)*multip;
-			}
+			helpers::dsp::Mul(samplesV[0],tmpsamples,multip);
+			helpers::dsp::Mul(samplesV[1],tmpsamples,multip);
 			_sampleCounter+=numsamples;
 		}
 
