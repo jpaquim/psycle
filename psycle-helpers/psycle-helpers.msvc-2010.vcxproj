@@ -76,11 +76,6 @@
     <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='release|x64'" />
     <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='release|x64'" />
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'">
-    <Lib>
-      <OutputFile>$(TopOutputDir)/lib/$(RootNameSpace).lib</OutputFile>
-    </Lib>
-  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\helpers\hexstring_to_binary.cpp" />
     <ClCompile Include="src\psycle\helpers\hexstring_to_integer.cpp" />
@@ -89,7 +84,10 @@
     <ClCompile Include="src\psycle\helpers\fft.cpp" />
     <ClCompile Include="src\psycle\helpers\filter.cpp" />
     <ClCompile Include="src\psycle\helpers\mersennetwister.cpp" />
+    <ClCompile Include="src\psycle\helpers\resampler.cpp" />
+    <ClCompile Include="src\psycle\helpers\sampleconverter.cpp" />
     <ClCompile Include="src\psycle\helpers\abstractiff.cpp" />
+	<ClCompile Include="src\psycle\helpers\amigasvx.cpp" />
     <ClCompile Include="src\psycle\helpers\appleaiff.cpp" />
     <ClCompile Include="src\psycle\helpers\binread.cpp" />
     <ClCompile Include="src\psycle\helpers\datacompression.cpp" />
@@ -121,7 +119,10 @@
     <ClInclude Include="src\psycle\helpers\fft.hpp" />
     <ClInclude Include="src\psycle\helpers\filter.hpp" />
     <ClInclude Include="src\psycle\helpers\mersennetwister.hpp" />
+	<ClInclude Include="src\psycle\helpers\resampler.hpp" />
+	<ClInclude Include="src\psycle\helpers\sampleconverter.hpp" />
     <ClInclude Include="src\psycle\helpers\abstractiff.hpp" />
+	<ClInclude Include="src\psycle\helpers\amigasvx.hpp" />
     <ClInclude Include="src\psycle\helpers\appleaiff.hpp" />
     <ClInclude Include="src\psycle\helpers\binread.hpp" />
     <ClInclude Include="src\psycle\helpers\datacompression.hpp" />
