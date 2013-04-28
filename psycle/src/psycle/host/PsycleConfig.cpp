@@ -1843,8 +1843,8 @@ namespace psycle { namespace host {
         void PsycleConfig::AddRecentFile(std::string const &f)
 		{
 			bool found = false;
-			int initial = recent_files_.size()-1;
-			for(int i = 0; i < recent_files_.size(); ++i) 
+			std::size_t initial = recent_files_.size()-1;
+			for(std::size_t i = 0; i < recent_files_.size(); ++i) 
 			{
 				if( f == recent_files_[i]) {
 					found = true;

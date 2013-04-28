@@ -1188,7 +1188,7 @@ namespace seib {
 				}
 				
 				// We try to simulate a pEffect plugin for this call, so that calls to
-				// GetVersion, GetProductString and similar can be answered.
+				// GetVSTVersion, GetProductString and similar can be answered.
 				// CEffect will throw an exception if the function requires a callback to the plugin.
 				fakeeffect=true;
 				pEffect = pHost->CreateWrapper(0);

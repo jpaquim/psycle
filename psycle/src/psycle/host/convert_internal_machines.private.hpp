@@ -287,7 +287,7 @@ namespace psycle
 					}
 					bool exists(const int & type) const throw()
 					{
-						return find(std::pair<int,std::string>(type,NULL)) != end();
+						return find(std::pair<int,std::string>(type,"")) != end();
 					}
 					bool exists(std::string plugname) const throw()
 					{
@@ -301,7 +301,7 @@ namespace psycle
 					}
 					const char* operator()(const int & type) const throw(std::exception)
 					{
-						const_iterator i = find(std::pair<int,std::string>(type,NULL));
+						const_iterator i = find(std::pair<int,std::string>(type,""));
 						if(i == end()) throw std::exception("internal machine replacement plugin not declared");
 						return i->second;
 					}

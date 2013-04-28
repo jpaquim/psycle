@@ -112,7 +112,7 @@ namespace psycle
 			virtual bool Load(RiffFile* pFile); //old fileformat
 			virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile* pFile);
-			virtual char* GetName(void) { return _psName; }
+			virtual const char* const GetName(void) const { return _psName; }
 			virtual float GetAudioRange() const { return 32768.0f; }
 			virtual void SetSampleRate(int sr);
 			virtual bool NeedsAuxColumn() { return true; }

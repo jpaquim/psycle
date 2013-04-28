@@ -526,6 +526,9 @@
     <ClInclude Include="src\psycle\host\vsthost24.hpp">
       <Filter>psycle\engine\machine</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaHost.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\host\Instrument.hpp">
       <Filter>psycle\engine\machine\sampler</Filter>
     </ClInclude>
@@ -895,6 +898,9 @@
       <Filter>psycle\engine\machine</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\vsthost24.cpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaHost.cpp">
       <Filter>psycle\engine\machine</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\Instrument.cpp">

@@ -719,7 +719,6 @@ namespace psycle { namespace host {
 			{
 				current = 256;
 				kill_thread=1;
-				CSingleLock event(&_event, TRUE);
 			}
 			else if (threadopen <= 0)
 			{

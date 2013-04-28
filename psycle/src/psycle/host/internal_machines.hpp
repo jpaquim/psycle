@@ -15,7 +15,7 @@ public:
 	Dummy(Machine *mac);
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange() const { return 32768.0f; }
-	virtual char* GetName(void) { return _psName; }
+	virtual const char* const GetName(void) const { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 	virtual const char * const GetDllName() const throw() { return dllName.c_str(); }
 
@@ -64,7 +64,7 @@ public:
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual bool playsTrack(const int track) const;
 	virtual float GetAudioRange() const { return 32768.0f; }
-	virtual char* GetName(void) { return _psName; }
+	virtual const char* const GetName(void) const { return _psName; }
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
@@ -88,7 +88,7 @@ public:
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual bool playsTrack(const int track) const;
 	virtual float GetAudioRange() const { return 32768.0f; }
-	virtual char* GetName(void) { return _psName; }
+	virtual const char* const GetName(void) const { return _psName; }
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
@@ -119,7 +119,7 @@ public:
 	virtual void Stop();
 	virtual void Work(int numSamples);
 	virtual float GetAudioRange() const { return 32768.0f; }
-	virtual char* GetName(void) { return _psName; }
+	virtual const char* const GetName(void) const { return _psName; }
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);
 	virtual void GetParamRange(int numparam, int &minval, int &maxval);
@@ -145,7 +145,7 @@ public:
 	virtual void Init(void);
 	virtual int GenerateAudio(int numSamples, bool measure_cpu_usage);
 	virtual float GetAudioRange() const { return 32768.0f; }
-	virtual char* GetName(void) { return _psName; }
+	virtual const char* const GetName(void) const { return _psName; }
 	virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
 
@@ -364,7 +364,7 @@ public:
 	virtual void DeleteWires();
 	virtual float GetAudioRange() const { return 32768.0f; }
 	std::string GetAudioInputName(int port);
-	virtual char* GetName(void) { return _psName; }
+	virtual const char* const GetName(void) const { return _psName; }
 	virtual int GetNumCols();
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam,char *name);

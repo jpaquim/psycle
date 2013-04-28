@@ -129,7 +129,7 @@ namespace psycle
 				private: std::string                _psDllName;
 
 				///\todo this was called GetBrand in in v1.9
-				public:  virtual char * GetName() { return (char *)_psName.c_str(); }
+				public:  virtual const char* const GetName(void) const { return _psName.c_str(); }
 				private: std::string    _psName;
 
 				///\todo there was no ShortName in v1.9
@@ -147,6 +147,7 @@ namespace psycle
 				private: bool		needsAux_;
 
 				//\todo: Dynamic
+				public:
 				virtual const char* AuxColumnName(int idx) const { 
 					/*if(needsAux_) {
 
@@ -156,6 +157,9 @@ namespace psycle
 					}
 				}
 				virtual int NumAuxColumnIndexes() { return 16;}
+
+				virtual const std::uint32_t GetAPIVersion() { try {return GetInfo()->APIVersion; }catch(...){return 0;} }
+				virtual const std::uint32_t GetPlugVersion() { try { return GetInfo()->PlugVersion; }catch(...){return 0;}}
 
 			///\}
 

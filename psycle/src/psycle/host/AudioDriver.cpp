@@ -172,7 +172,6 @@ namespace psycle
 
 		void AudioDriver::Quantize24(float *pin, int *piout, int c)
 		{
-			// Don't really know why, but the -100 is what made the clipping work correctly.
 			int const max((1u << 23) - 1);
 			int const min(-max - 1);
             unsigned char *cptr = (unsigned char *) piout;
