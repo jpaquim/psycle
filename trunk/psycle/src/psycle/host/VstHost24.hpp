@@ -190,10 +190,10 @@ namespace psycle
 				//////////////////////////////////////////////////////////////////////////
 				virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); CEffect::SetSampleRate((float)sr); }catch(...){} }
 				virtual const char * const GetDllName() const throw() { return _sDllName.c_str(); }
-				virtual char * GetName() throw() { return (char*)_sProductName.c_str(); }
+				virtual const char* const GetName(void) const { return _sProductName.c_str(); }
 				inline const char * const GetVendorName() const throw() { return _sVendorName.c_str(); }
 				virtual const std::uint32_t GetAPIVersion() { try {return GetVstVersion(); }catch(...){return 0;} }
-				virtual const std::uint32_t GetVersion() { try { return GetVendorVersion(); }catch(...){return 0;}}
+				virtual const std::uint32_t GetPlugVersion() { try { return GetVendorVersion(); }catch(...){return 0;}}
 				//
 				virtual void GetParamRange(int numparam,int &minval, int &maxval) {	minval = 0; maxval = Host::quantizationVal(); }
 				virtual int GetNumParams() { return numParams(); }

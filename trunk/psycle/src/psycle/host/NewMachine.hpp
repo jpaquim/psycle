@@ -20,7 +20,8 @@ namespace psycle { namespace host {
 		{
 			internal=0,
 			native=1,
-			vstmac=2
+			vstmac=2,
+			luascript=2
 		};
 		enum selectionmodes
 		{

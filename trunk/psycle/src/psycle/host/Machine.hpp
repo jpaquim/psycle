@@ -465,7 +465,7 @@ namespace psycle
 					char _editName[32];
 
 				public:
-					virtual char * GetName() = 0;
+					virtual const char* const GetName(void) const = 0;
 					virtual const char * const GetDllName() const throw() { return ""; }
 					virtual int GetPluginCategory() { return 0; }
 					virtual bool IsShellMaster() { return false; }
@@ -639,7 +639,7 @@ namespace psycle
 			virtual int GenerateAudio(int numsamples, bool measure_cpu_usage);
 			virtual void UpdateVuAndStanbyFlag(int numSamples);
 			virtual float GetAudioRange() const { return 32768.0f; }
-			virtual char* GetName(void) { return _psName; }
+			virtual const char* const GetName(void) const { return _psName; }
 			virtual bool Load(RiffFile * pFile); //old fileformat
 			virtual bool LoadSpecificChunk(RiffFile * pFile, int version);
 			virtual void SaveSpecificChunk(RiffFile * pFile);

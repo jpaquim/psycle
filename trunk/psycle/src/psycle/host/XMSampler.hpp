@@ -993,7 +993,7 @@ XMSampler::Channel::PerformFX().
 	virtual void Tick(int channel, PatternEntry* pData);
 	virtual void PostNewLine();
 	virtual float GetAudioRange() const { return 32768; }
-	virtual char* GetName(void) { return _psName; }
+	const char* const GetName(void) const { return _psName; }
 	virtual void SetSampleRate(int sr);
 	int SampleRate() const { return m_sampleRate; }
 	virtual bool NeedsAuxColumn() { return true; }

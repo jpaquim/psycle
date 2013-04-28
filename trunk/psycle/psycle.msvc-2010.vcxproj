@@ -242,8 +242,8 @@
     <ClInclude Include="src\psycle\host\PatDlg.hpp" />
     <ClInclude Include="src\psycle\host\SwingFillDlg.hpp" />
     <ClInclude Include="src\psycle\host\TransformPatternDlg.hpp" />
-	<ClInclude Include=".\src\psycle\host\ChannelMappingDlg.cpp />
-	<ClInclude Include=".\src\psycle\host\ChannelMappingDlg.hpp />
+	<ClInclude Include="src\psycle\host\ChannelMappingDlg.cpp" />
+	<ClInclude Include="src\psycle\host\ChannelMappingDlg.hpp" />
     <ClInclude Include="src\psycle\host\InfoDlg.hpp" />
     <ClInclude Include="src\psycle\host\MidiMonitorDlg.hpp" />
     <ClInclude Include="src\psycle\host\ProgressDialog.hpp" />
@@ -268,6 +268,7 @@
     <ClInclude Include="src\psycle\host\Machine.hpp" />
     <ClInclude Include="src\psycle\host\Plugin.hpp" />
     <ClInclude Include="..\psycle-plugins\src\psycle\plugin_interface.hpp" />
+    <ClInclude Include="src\psycle\host\LuaHost.hpp" />
     <ClInclude Include="src\psycle\host\vsthost24.hpp" />
     <ClInclude Include="src\psycle\host\Instrument.hpp" />
     <ClInclude Include="src\psycle\host\Sampler.hpp" />
@@ -391,6 +392,7 @@
     <ClCompile Include="src\psycle\host\internal_machines.cpp" />
     <ClCompile Include="src\psycle\host\Machine.cpp" />
     <ClCompile Include="src\psycle\host\Plugin.cpp" />
+    <ClCompile Include="src\psycle\host\LuaHost.cpp" />
     <ClCompile Include="src\psycle\host\vsthost24.cpp" />
     <ClCompile Include="src\psycle\host\Instrument.cpp" />
     <ClCompile Include="src\psycle\host\Sampler.cpp" />

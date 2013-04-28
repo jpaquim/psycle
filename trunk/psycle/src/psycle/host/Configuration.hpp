@@ -35,6 +35,9 @@ namespace psycle
 			std::string         GetAbsolutePluginDir () const;
 			std::string const & GetPluginDir         () const { return plugin_dir_; }
 			               void SetPluginDir         (std::string const &d) { plugin_dir_ = d; }
+			std::string         GetAbsoluteLuaDir    () const;
+			std::string const & GetLuaDir            () const { return lua_dir_; }
+			               void SetLuaDir            (std::string const &d) { lua_dir_ = d;}
 			std::string         GetAbsoluteVst32Dir  () const;
 			std::string const & GetVst32Dir          () const { return vst32_dir_; }
 			               void SetVst32Dir          (std::string const &d) { vst32_dir_ = d;}
@@ -67,6 +70,7 @@ namespace psycle
 			std::string plugin_dir_;
 			std::string plugin_dir_other;
 			boost::filesystem::path cache_dir_;
+			std::string lua_dir_;
 			std::string vst32_dir_;
 			std::string vst64_dir_;
 		};

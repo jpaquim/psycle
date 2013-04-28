@@ -9,6 +9,7 @@
 
 #include <psycle/host/Plugin.hpp>
 #include <psycle/host/VstHost24.hpp>
+#include <psycle/host/LuaHost.hpp>
 
 #include <string>
 #include <sstream>
@@ -32,7 +33,15 @@ namespace psycle
 		{
 			std::string tmp = name;
 			std::string extension = name.substr(name.length()-4,4);
-			if ( extension != ".dll")
+			if ( extension != 
+				#if defined DIVERSALIS__OS__MICROSOFT
+					".dll"
+				#elif defined DIVERSALIS__OS__APPLE
+					".dylib"
+				#else
+					".so"
+				#endif
+				&& extension != ".lua")
 			{
 				shellidx =  extension[0] + extension[1]*256 + extension[2]*65536 + extension[3]*16777216;
 				tmp = name.substr(0,name.length()-4);
@@ -64,6 +73,17 @@ namespace psycle
 					}
 					break;
 				}
+			case MACH_LUA:
+				{
+					std::map<std::string,std::string>::iterator iterator = LuaNames.find(tmp);
+					if(iterator != LuaNames.end())
+					{
+						result=iterator->second;
+						return true;
+					}
+					break;
+				}
+				break;
 			default:
 				break;
 			}
@@ -161,16 +181,16 @@ namespace psycle
 							CString filePath=finder.GetFilePath();
 							std::string sfilePath = filePath;
 							filePath.MakeLower();
-/*
-		#if defined DIVERSALIS__OS__MICROSOFT
-			".dll";
-		#elif defined DIVERSALIS__OS__APPLE
-			".dylib"
-		#else
-			".so"
-		#endif
-*/
-							if(filePath.Right(4) == ".dll")
+
+							if(filePath.Right(4) == 
+								#if defined DIVERSALIS__OS__MICROSOFT
+									".dll"
+								#elif defined DIVERSALIS__OS__APPLE
+									".dylib"
+								#else
+									".so"
+								#endif
+								|| filePath.Right(4) == ".lua")
 							{
 								result.push_back(sfilePath);
 							}
@@ -182,6 +202,7 @@ namespace psycle
 
 			std::vector<std::string> nativePlugs;
 			std::vector<std::string> vstPlugs;
+			std::vector<std::string> luaPlugs;
 
 			CProgressDialog progress;
 			{
@@ -193,6 +214,7 @@ namespace psycle
 			loggers::information()("Scanning plugins ... Directory for Natives: " + Global::configuration().GetAbsolutePluginDir());
 			loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::configuration().GetAbsoluteVst32Dir());
 			loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::configuration().GetAbsoluteVst64Dir());
+			loggers::information()("Scanning plugins ... Directory for Luas : " + Global::configuration().GetAbsoluteLuaDir());
 			loggers::information()("Scanning plugins ... Listing ...");
 
 			progress.SetWindowText("Scanning plugins ... Listing ...");
@@ -212,8 +234,9 @@ namespace psycle
 				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
 			}
 #endif
+			populate_plugin_list(luaPlugs,Global::configuration().GetAbsoluteLuaDir());
 
-			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size());
+			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size() + luaPlugs.size());
 
 			{
 				std::ostringstream s; s << "Scanning plugins ... Counted " << plugin_count << " plugins.";
@@ -270,8 +293,23 @@ namespace psycle
 
 			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, vstPlugs, MACH_VST, out, &progress);
 
+			out.flush();
 			{
-				std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " plugins found";
+				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing Luas ...";
+				progress.SetWindowText(s.str().c_str());
+			}
+
+			loggers::information()("Scanning plugins ... Testing Luas ...");
+			out
+				<< std::endl
+				<< "===================" << std::endl
+				<< "=== Lua Scripts ===" << std::endl
+				<< std::endl;
+			out.flush();
+
+			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, luaPlugs, MACH_LUA, out, &progress);
+			{
+				std::ostringstream s; s << "Scanned " << plugin_count << " Files." << plugsCount << " scripts found";
 				out << std::endl << s.str() << std::endl;
 				out.flush();
 				loggers::information()(s.str().c_str());
@@ -405,9 +443,9 @@ namespace psycle
 								std::ostringstream s; s << (plug.IsSynth() ? "Psycle instrument" : "Psycle effect") << " by " << plug.GetAuthor();
 								pInfo->desc = s.str();
 							}
-								pInfo->APIversion = plug.GetInfo()->APIVersion;
+							pInfo->APIversion = plug.GetAPIVersion();
 							{
-									std::ostringstream s; s << std::setfill('0') << std::setw(3) << std::hex << plug.GetInfo()->PlugVersion;
+								std::ostringstream s; s << std::setfill('0') << std::setw(3) << std::hex << plug.GetPlugVersion();
 								pInfo->version = s.str();
 							}
 							out << plug.GetName() << " - successfully instanciated";
@@ -537,7 +575,7 @@ namespace psycle
 										}
 										{
 											std::ostringstream s;
-											s << vstPlug->GetVersion();
+											s << vstPlug->GetPlugVersion();
 											pInfo2->version = s.str();
 										}
 										pInfo2->APIversion = vstPlug->GetVstVersion();
@@ -560,10 +598,10 @@ namespace psycle
 								}
 								{
 									std::ostringstream s;
-									s << vstPlug->GetVersion();
+									s << vstPlug->GetPlugVersion();
 									pInfo->version = s.str();
 								}
-								pInfo->APIversion = vstPlug->GetVstVersion();
+								pInfo->APIversion = vstPlug->GetAPIVersion();
 							}
 							out << vstPlug->GetName() << " - successfully instanciated";
 							out.flush();
@@ -613,6 +651,104 @@ namespace psycle
 							}
 						}
 						learnDllName(fileName,type);
+					}
+					else if(type == MACH_LUA)
+					{
+						pInfo->type = MACH_LUA;
+						LuaPlugin *plug = NULL;
+						try
+						{
+							plug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(fileName.c_str(),0));
+						}
+						catch(const std::exception & e)
+						{
+							std::ostringstream s; s << typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+							pInfo->error = s.str();
+						}
+						catch(...)
+						{
+							std::ostringstream s; s
+								<< "Type of exception is unknown, cannot display any further information." << std::endl;
+							pInfo->error = s.str();
+						}
+						if(!pInfo->error.empty())
+						{
+							out << "### ERRONEOUS ###" << std::endl;
+							out.flush();
+							out << pInfo->error;
+							out.flush();
+							std::stringstream title; title
+								<< "Machine crashed: " << fileName;
+							loggers::exception()(title.str() + '\n' + pInfo->error);
+							pInfo->allow = false;
+							pInfo->name = "???";
+							pInfo->identifier = 0;
+							pInfo->vendor = "???";
+							pInfo->desc = "???";
+							pInfo->version = "???";
+							pInfo->APIversion = 0;
+							++currentBadPlugsCount;
+						}
+						else
+						{
+							pInfo->allow = true;
+							pInfo->name = plug->GetName();
+							pInfo->identifier = 0;
+							pInfo->vendor = plug->GetAuthor();
+							if(plug->IsSynth()) pInfo->mode = MACHMODE_GENERATOR;
+							else pInfo->mode = MACHMODE_FX;
+							{
+								std::ostringstream s; s << (plug->IsSynth() ? "Lua instrument" : "Lua effect") << " by " << plug->GetAuthor();
+								pInfo->desc = s.str();
+							}
+							pInfo->APIversion = plug->GetAPIVersion();
+							{
+								std::ostringstream s; s << std::setfill('0') << std::setw(3) << std::hex << plug->GetPlugVersion();
+								pInfo->version = s.str();
+							}
+							out << plug->GetName() << " - successfully instanciated";
+							out.flush();
+						}
+						learnDllName(fileName,type);
+						try
+						{
+							if (plug) { 
+								plug->Free();
+								delete plug;
+							}
+						}
+						catch(const std::exception & e)
+						{
+							std::stringstream s; s
+								<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+								<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+								<< typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+							out
+								<< std::endl
+								<< "### ERRONEOUS ###" << std::endl
+								<< s.str().c_str();
+							out.flush();
+							std::stringstream title; title
+								<< "Machine crashed: " << fileName;
+							loggers::exception()(title.str() + '\n' + s.str());
+						}
+						catch(...)
+						{
+							std::stringstream s; s
+								<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
+								<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
+								<< "Type of exception is unknown, no further information available.";
+							out
+								<< std::endl
+								<< "### ERRONEOUS ###" << std::endl
+								<< s.str().c_str();
+							out.flush();
+							std::stringstream title; title
+								<< "Machine crashed: " << fileName;
+							loggers::exception()(title.str() + '\n' + s.str());
+						}
 					}
 					++currentPlugsCount;
 				}
@@ -841,6 +977,8 @@ namespace psycle
 				std::string::size_type const pos(dllName.find(".so"));
 			#endif
 				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
+				std::string::size_type const pos2(dllName.find(".lua"));
+				if(pos2 != std::string::npos) dllName = dllName.substr(0, pos2);
 			}
 
 			// 2) ensure lower case
@@ -860,6 +998,9 @@ namespace psycle
 			std::string::size_type pos=str.rfind('\\');
 			if(pos != std::string::npos)
 				str=str.substr(pos+1);
+			pos=str.rfind('/');
+			if(pos != std::string::npos)
+				str=str.substr(pos+1);
 
 			str = preprocessName(str);
 
@@ -868,7 +1009,9 @@ namespace psycle
 			case MACH_PLUGIN: NativeNames[str]=fullname;
 				break;
 			case MACH_VST:
-			case MACH_VSTFX:VstNames[str]=fullname;
+			case MACH_VSTFX: VstNames[str]=fullname;
+				break;
+			case MACH_LUA: LuaNames[str]=fullname;
 				break;
 			default:
 				break;

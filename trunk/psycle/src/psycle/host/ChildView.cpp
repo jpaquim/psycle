@@ -1999,7 +1999,7 @@ namespace psycle { namespace host {
 			{
 				DeleteMenu(hRecentMenu, iCount, MF_BYPOSITION);
 			}
-			for(int iCount = recent.size()-1; iCount>= 0;iCount--)
+			for(int iCount = static_cast<int>(recent.size())-1; iCount>= 0;iCount--)
 			{
 				::MENUITEMINFO hNewItemInfo;
 				hNewItemInfo.cbSize		= sizeof(MENUITEMINFO);

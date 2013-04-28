@@ -814,7 +814,7 @@ namespace psycle { namespace host {
 			diStart = 0;
 			diLength = wdLength;
 
-			ResetScrollBars(0);
+			ResetScrollBars(false);
 			RefreshDisplayData();
 			Invalidate(true);
 		}
@@ -1366,6 +1366,7 @@ namespace psycle { namespace host {
 					wdLength=timeInSamps;
 					wdStereo=false;
 					wdWave=true;
+					ResetScrollBars(true);
 					OnSelectionShowall();
 				}
 				else
@@ -1394,7 +1395,7 @@ namespace psycle { namespace host {
 					wave.InsertAt(insertPos, wavewithS);
 					wdLeft = wave.pWaveDataL();
 					wdRight = wave.pWaveDataR();
-					wdLength += wave.WaveLength();
+					wdLength = wave.WaveLength();
 					wavewithS.DeleteWaveData();
 
 					if(wdLoop)		//update loop points if necessary
@@ -1414,6 +1415,7 @@ namespace psycle { namespace host {
 				}
 
 				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				ResetScrollBars(true);
 				RefreshDisplayData(true);
 				Invalidate(true);
 			}
@@ -1587,7 +1589,7 @@ namespace psycle { namespace host {
 					wave.DeleteAt(blStart, length);
 					wdLeft = wave.pWaveDataL();
 					wdRight = wave.pWaveDataR();
-					wdLength += wave.WaveLength();
+					wdLength = wave.WaveLength();
 					//	adjust loop points if necessary
 					if(wdLoop)
 					{
@@ -1626,11 +1628,8 @@ namespace psycle { namespace host {
 				blLength  = 0;
 				blStart   = 0;
 
-				ResetScrollBars();
-				RefreshDisplayData();
-
 				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
-
+				ResetScrollBars(true);
 				RefreshDisplayData(true);
 				Invalidate(true);
 			}
@@ -1770,6 +1769,7 @@ namespace psycle { namespace host {
 						wdStereo = true;
 					}
 					wdWave = true;
+					ResetScrollBars(true);
 					OnSelectionShowall();
 					wave.WaveSampleRate(pFmt->nSamplesPerSec);
 				}
@@ -1826,7 +1826,7 @@ namespace psycle { namespace host {
 			CloseClipboard();
 			//OnSelectionShowall();
 
-			ResetScrollBars();
+			ResetScrollBars(true);
 			RefreshDisplayData(true);
 
 			mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
@@ -2011,7 +2011,7 @@ namespace psycle { namespace host {
 				CloseClipboard();
 				//OnSelectionShowall();
 
-				ResetScrollBars();
+				ResetScrollBars(true);
 				RefreshDisplayData(true);
 
 				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
@@ -2104,7 +2104,7 @@ namespace psycle { namespace host {
 				GlobalUnlock(hPasteData);
 				CloseClipboard();
 
-				ResetScrollBars();
+				ResetScrollBars(true);
 				RefreshDisplayData(true);
 
 				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.

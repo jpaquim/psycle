@@ -20,6 +20,7 @@
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
+#include "LuaHost.hpp"
 
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/math.hpp>
@@ -33,20 +34,6 @@ namespace psycle
 	namespace host
 	{
 		int Song::defaultPatLines = 64;
-
-		/// the riff WAVE/fmt chunk.
-		class WavHeader
-		{
-		public:
-			char chunkID[4];
-			std::uint32_t chunkSize;
-			short wFormatTag;
-			std::uint16_t wChannels;
-			std::uint32_t  dwSamplesPerSec;
-			std::uint32_t  dwAvgBytesPerSec;
-			std::uint16_t wBlockAlign;
-			std::uint16_t wBitsPerSample;
-		};
 
 		/// Helper class for the PSY2 loader.
 		class VSTLoader
@@ -80,6 +67,7 @@ namespace psycle
 		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
+			LuaPlugin *luaPlug(0);
 			vst::Plugin *vstPlug(0);
 			if(songIdx < 0)
 			{
@@ -104,6 +92,26 @@ namespace psycle
 			case MACH_DUPLICATOR2:
 				pMachine = new DuplicatorMac2(songIdx);
 				break;
+			case MACH_LUA:
+				{
+					if(Global::machineload().TestFilename(psPluginDll,shellIdx))
+					{
+						try
+						{
+							pMachine = luaPlug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(psPluginDll,songIdx));
+						}
+						catch(const std::exception& e)
+						{
+							loggers::exception()(e.what());
+							zapObject(pMachine); 
+						}
+						catch(...)
+						{
+							zapObject(pMachine); 
+						}
+					}
+					break;
+				}
 			case MACH_MIXER:
 				pMachine = new Mixer(songIdx);
 				break;
@@ -465,6 +473,7 @@ namespace psycle
 			CExclusiveLock lock(&semaphore, 2, true);
 			DoNew();
 		}
+
 		void Song::DoNew() {
 			seqBus=0;
 			shareTrackNames=true;

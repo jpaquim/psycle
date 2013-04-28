@@ -88,7 +88,7 @@ namespace psycle { namespace host {
 
 		void CNewMachine::UpdateList(bool bInit)
 		{
-			int nodeindex;
+			//int nodeindex;
 			m_browser.DeleteAllItems();
 			HTREEITEM intFxNode;
 
@@ -100,9 +100,10 @@ namespace psycle { namespace host {
 				hNodes[0] = m_browser.InsertItem("Internal machines",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Psycle Host machines",2,2,TVI_ROOT,TVI_LAST);
 				hNodes[2] = m_browser.InsertItem("VST 2.x Host machines",4,4,TVI_ROOT,TVI_LAST);
-				hNodes[3] = m_browser.InsertItem("Non-working or not a machine",6,6,TVI_ROOT,TVI_LAST);
+				hNodes[3] = m_browser.InsertItem("Lua script machines",6,6,TVI_ROOT,TVI_LAST);
+				hNodes[4] = m_browser.InsertItem("Non-working or not a machine",8,8,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[0];
-				nodeindex = 3;
+				//nodeindex = 4;
 				//The following is unfinished. It is for nested branches.
 				/*
 				int i=_numPlugins;	// I Search from the end because when creating the array, the deepest dir is saved first.
@@ -134,8 +135,12 @@ namespace psycle { namespace host {
 								imgindex = 2; 
 								hitem= hNodes[1]; 
 							}
-							else 
+							else if ( pInfo->type == MACH_LUA) 
 							{ 
+								imgindex = 6; 
+								hitem=hNodes[3]; 
+							}
+							else {
 								imgindex = 4; 
 								hitem=hNodes[2]; 
 							}
@@ -147,6 +152,11 @@ namespace psycle { namespace host {
 								imgindex = 3; 
 								hitem= hNodes[1];
 							}
+							else if ( pInfo->type == MACH_LUA) 
+							{ 
+								imgindex = 7; 
+								hitem=hNodes[3]; 
+							}
 							else 
 							{ 
 								imgindex = 5; 
@@ -156,8 +166,8 @@ namespace psycle { namespace host {
 					}
 					else
 					{
-						imgindex = 6;
-						hitem=hNodes[3];
+						imgindex = 8;
+						hitem=hNodes[4];
 					}
 					if(pluginName && pInfo->error.empty())
 						hPlug[i] = m_browser.InsertItem(pInfo->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
@@ -189,7 +199,7 @@ namespace psycle { namespace host {
 				hNodes[1] = m_browser.InsertItem("Sound Effects (DSP)",1,1,TVI_ROOT,TVI_LAST);
 				hNodes[2] = m_browser.InsertItem("Non-working or not a machine",6,6,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[1];
-				nodeindex=2;
+				//nodeindex=2;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
 				{
 					int imgindex;
@@ -204,6 +214,11 @@ namespace psycle { namespace host {
 								imgindex = 2; 
 								hitem= hNodes[0]; 
 							}
+							else if ( pInfo->type == MACH_LUA) 
+							{ 
+								imgindex = 6; 
+								hitem=hNodes[0]; 
+							}
 							else 
 							{ 
 								imgindex = 4; 
@@ -217,6 +232,11 @@ namespace psycle { namespace host {
 								imgindex = 3; 
 								hitem= hNodes[1]; 
 							}
+							else if ( pInfo->type == MACH_LUA) 
+							{ 
+								imgindex = 7; 
+								hitem=hNodes[1]; 
+							}
 							else 
 							{ 
 								imgindex = 5; 
@@ -226,7 +246,7 @@ namespace psycle { namespace host {
 					}
 					else
 					{
-						imgindex = 6;
+						imgindex = 8;
 						hitem=hNodes[2];
 					}
 					if(pluginName && pInfo->error.empty())
@@ -383,6 +403,10 @@ namespace psycle { namespace host {
 					{
 						m_versionLabel.SetWindowText(pInfo->version.c_str());
 					} 
+					else if(pInfo->type == MACH_LUA)
+					{
+						m_versionLabel.SetWindowText(pInfo->version.c_str());
+					} 
 					else
 					{	// convert integer to string.
 						std::ostringstream s;
@@ -402,32 +426,21 @@ namespace psycle { namespace host {
 						}
 						m_APIversionLabel.SetWindowText(s.str().c_str());
 					}
+					Outputmachine = pInfo->type;
+					selectedMode = ( pInfo->mode == MACHMODE_GENERATOR) ? modegen : modefx;
+
 					if ( pInfo->type == MACH_PLUGIN )
 					{
-						Outputmachine = MACH_PLUGIN;
 						selectedClass = native;
-						if ( pInfo->mode == MACHMODE_GENERATOR)
-						{
-							selectedMode = modegen;
-						}
-						else
-						{
-							selectedMode = modefx;
-						}
+					}
+					else if ( pInfo->type == MACH_LUA )
+					{
+						selectedClass = luascript;
 					}
 					else
 					{
 						selectedClass = vstmac;
-						if ( pInfo->mode == MACHMODE_GENERATOR )
-						{
-							Outputmachine = MACH_VST;
-							selectedMode = modegen;
-						}
-						else
-						{
-							Outputmachine = MACH_VSTFX;
-							selectedMode = modefx;
-						}
+						Outputmachine = ( pInfo->mode == MACHMODE_GENERATOR) ? MACH_VST : MACH_VSTFX;
 					}
 
 					shellIdx = pInfo->identifier;
