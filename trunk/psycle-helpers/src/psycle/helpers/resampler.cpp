@@ -445,11 +445,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	/// interpolation work function which does windowed sinc interpolation.
 	// Version with two tables, one of sinc, and one of deltas which is linearly interpolated
 	float cubic_resampler::sinc_internal(int16_t const * data, uint32_t res, int leftExtent, int rightExtent) {
-		sinc_data_t * t = static_cast<sinc_data_t*>(resampler_data);
-		if (t->enabled) {
-			return sinc_filtered(data, offset, res, length, t);
-		}
-		const float weight = l_table_[res>>21];
+		const float weight = l_table_[res>>31-CUBIC_RESOLUTION];
 		res >>= (32-SINC_RESOLUTION_LOG);
 
 		//"Now" point. (would go on the left side of the sinc, but since we use a mirrored one, so we increase from zero)
@@ -496,10 +492,6 @@ namespace psycle { namespace helpers { namespace dsp {
 
 #else
 	float cubic_resampler::sinc_internal(int16_t const * data, uint32_t res, int leftExtent, int rightExtent) {
-		sinc_data_t * t = static_cast<sinc_data_t*>(resampler_data);
-		if (t->enabled) {
-			return sinc_filtered(data, offset, res, length, t);
-		}
 		res >>= (32-SINC_RESOLUTION_LOG);
 	#if defined OPTIMIZED_RES_SHIFT
 		res <<= OPTIMIZED_RES_SHIFT;
@@ -588,7 +580,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		double w = res * resampler_data->fcpidivperiodsize;
 		const double fcpi = resampler_data->fcpi;
 		for(int i(0); i < leftExtent; ++i, w += fcpi) {
-			double sinc = std::sin(w) * *ppretab;
+			//double sinc = std::sin(w) *  *ppretab;
+			while(w > math::pi) w -= 2.f * math::pi;
+			float sinc = math::fast_sin<4>(w) *  *ppretab;
 			newval += sinc * *pdata;
 			pdata--;
 			ppretab++;
@@ -603,7 +597,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
 		for(int i(0); i < rightExtent; ++i, w += fcpi) {
-			double sinc = std::sin(w) *  *ppretab;
+			//double sinc = std::sin(w) *  *ppretab;
+			while(w > math::pi) w -= 2.f * math::pi;
+			float sinc = math::fast_sin<4>(w) *  *ppretab;
 			newval += sinc * *pdata;
 			pdata++;
 			ppretab++;

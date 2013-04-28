@@ -8,7 +8,8 @@ class Dither {
 	public:
 		Dither();
 		virtual ~Dither() {}
-
+		//Psycle uses -32768.0..32768.0 range for insamples. This Process is done with that in mind.
+		// Modify the bdMultiplier and bdQ values in the switch case for other use cases.
 		void Process(float * inSamps, unsigned int length);
 
 		struct Pdf {
