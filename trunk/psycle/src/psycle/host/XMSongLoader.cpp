@@ -12,6 +12,7 @@
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
+#include <psycle/helpers/math.hpp>
 
 #include <algorithm>
 #include <cstring>
@@ -123,10 +124,8 @@ namespace host{
 				instr.IsEnabled(true);
 				XMInstrument::WaveData& _wave = song.samples.get(sRemap[i]);
 				LoadSampleData(_wave,GetPos(),idx,sRemap[i]);
-
-				//\todo : Improve autovibrato. (correct depth? fix for sweep?)
-				_wave.VibratoAttack(_insheader.vibsweep!=0?255/_insheader.vibsweep:255);
-				_wave.VibratoDepth(_insheader.vibdepth<<1);
+				_wave.VibratoAttack(_insheader.vibsweep==0?0:256-_insheader.vibsweep);
+				_wave.VibratoDepth(_insheader.vibdepth);
 				_wave.VibratoSpeed(_insheader.vibrate);
 				_wave.VibratoType(exchwave[_insheader.vibtype&3]);
 			}
@@ -161,7 +160,7 @@ namespace host{
 			return;
 		}
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.35f);
+		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); //-9dB
 		song.seqBus=0;
 		// build sampler
 		m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
@@ -823,9 +822,8 @@ namespace host{
 				instr.IsEnabled(true);
 				XMInstrument::WaveData& _wave = song.samples.get(sRemap[i]);
 				iStart = LoadSampleData(_wave,iStart,idx,sRemap[i]);
-				//\todo : Improve autovibrato. (correct depth? fix for sweep?)
-				_wave.VibratoAttack(_samph.vibsweep!=0?255/_samph.vibsweep:255);
-				_wave.VibratoDepth((std::uint8_t)std::min(255,_samph.vibdepth<<1));
+				_wave.VibratoAttack(_samph.vibsweep==0?0:256-_samph.vibsweep);
+				_wave.VibratoDepth(_samph.vibdepth);
 				_wave.VibratoSpeed(_samph.vibrate);
 				_wave.VibratoType(exchwave[_samph.vibtype&3]);
 			}
@@ -1108,7 +1106,7 @@ namespace host{
 			return;
 		}
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-//		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.75f); // This is done later, when determining the number of channels.
+//		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); // This is done later, when determining the number of channels.
 		song.seqBus=0;
 		m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
@@ -1139,19 +1137,26 @@ namespace host{
 		
 		
 		m_pSampler->IsAmigaSlides(true);
-		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); }
-		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); }
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.35f); }
-		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.35f);}
+		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
+		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
+		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); } //-9dB
+		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f);}//-9dB
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
 
-		for (int i = 0; i< song.SONGTRACKS ; i++ )
-		{
-			if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
-			else m_pSampler->rChannel(i).DefaultPanFactorFloat(0.75,true);
+		if (song.SONGTRACKS<=8) {
+			for (int i = 0; i< song.SONGTRACKS ; i++ )
+			{
+				if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
+				else m_pSampler->rChannel(i).DefaultPanFactorFloat(0.75,true);
+			}
 		}
-
+		else {
+			for (int i = 0; i< song.SONGTRACKS ; i++ )
+			{
+				m_pSampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
+			}
+		}
 
 		LoadPatterns(song);
 		for(int i = 0;i < 31;i++){
@@ -1417,12 +1422,34 @@ namespace host{
 	}
 	unsigned char MODSongLoader::ConvertPeriodtoNote(unsigned short period)
 	{
-		for (int count2=1;count2<37; count2++)
-		{
-			if (period > BIGMODPERIODTABLE[count2*8]-2 && period < BIGMODPERIODTABLE[count2*8]+2 )
-				return count2-1+36; // three octaves above.
+		if (period==0) {
+			return 255;
 		}
-		return 255;
+		else if (period <= BIGMODPERIODTABLE[0] && period >= BIGMODPERIODTABLE[295]) {
+			int count2=0;
+			for (;count2<37; count2++)
+			{
+				if (period == BIGMODPERIODTABLE[count2*8]) {
+					break;
+				}
+				else if (period > BIGMODPERIODTABLE[count2*8]) {
+					for (int i=0;i<4;i--) {
+						if (period < BIGMODPERIODTABLE[i*8]) {
+							break;
+						}
+					}
+					count2--;
+					break;
+					//TODO: Supposedly, we should add the command XMCMD_E::E_FINETUNE
+				}
+			}
+			return count2-1+36;
+		}
+		else {
+			int note = lround<int,double>(152.89760383681376337437517761588 /*48 + 12*log2(1.0/428.0)*/
+				-log10(static_cast<double>(period)) * 39.863137138648348174443833153873) /*12/log10(2)*/;
+			return static_cast<unsigned char>(note);
+		}
 	}
 
 	BOOL MODSongLoader::WritePatternEntry(Song & song,

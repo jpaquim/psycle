@@ -636,6 +636,7 @@ namespace psycle { namespace host {
 			m_waves[pos2]=wave;
 		}
 
+		inline bool Exists(int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL; }
 		inline bool IsEnabled(int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0; }
 		unsigned int size() const { return static_cast<unsigned int>(m_waves.size()); }
 		void Clear() {
@@ -701,6 +702,7 @@ namespace psycle { namespace host {
 			m_inst[pos1]=m_inst[pos2];
 			m_inst[pos2]=instr;
 		}
+		inline bool Exists(int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL; }
 		inline bool IsEnabled(int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
 		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
 		void Clear() { 

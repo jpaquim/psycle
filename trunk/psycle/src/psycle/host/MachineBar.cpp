@@ -497,13 +497,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				}
 			}
 		}
-		else if (tmac->_type == MACH_XMSAMPLER)
-		{
-			CPoint point(-1,-1);
-			m_pParentMain->ShowMachineGui(nmac,point);
-			((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-			return;
-		}
 		else {
 			found = true;
 		}
@@ -585,13 +578,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
-		if (tmac && tmac->_type == MACH_XMSAMPLER)
-		{
-			CPoint point(-1,-1);
-			m_pParentMain->ShowMachineGui(nmac,point);
-			((CButton*)GetDlgItem(IDC_SAVEWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-			return;
-		}
 
 		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
 		{

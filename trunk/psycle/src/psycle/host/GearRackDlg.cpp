@@ -519,7 +519,7 @@ namespace psycle { namespace host {
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)
 					{
-						if (!Global::song().samples.IsEnabled(i))
+						if (Global::song().samples.IsEnabled(i) == false)
 						{
 							tmac2 = i;
 							break;

@@ -11,6 +11,7 @@ namespace psycle
 	namespace host
 	{
 		TCHAR* XMSampler::_psName = _T("Sampulse");
+		double XMSampler::TESTspeed = 1.0;
 
 		const char XMSampler::E8VolMap[16]={0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64};
 
@@ -236,11 +237,12 @@ namespace psycle
 		int XMSampler::WaveDataController::PreWork(int numSamples, WorkFunction* pWork) {
 			*pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
 
+			//These values are for the max size of resampler (which suits the rest).
 			const int presamples=15;
 			const int postsamples=16;
-			const int totalsamples=32;
-			const int secbegin=64;
-			const int thirdbegin=128;
+			const int totalsamples=32; //pre+post+current
+			const int secbegin=64;	// start of second window = totalsamples*2
+			const int thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
 
 			std::int32_t max;
 			ULARGE_INTEGER amount;
@@ -433,7 +435,7 @@ namespace psycle
 				{ 
 					// Since we do not make a CalcStep, m_NextEventSample=0 and the first "Work()" call enters
 					// the check of what to do, forcing a new decision.
-					m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::DOSTEP);
+					m_Stage = EnvelopeStage::Type((m_Stage & (~(EnvelopeStage::PAUSED|EnvelopeStage::RELEASE))) | EnvelopeStage::DOSTEP );
 				}
 			} else { m_ModulationAmount = 1.0f; }
 
@@ -451,11 +453,11 @@ namespace psycle
 				m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::RELEASE);
 
 				// If we are paused, check why
-				if (!(m_Stage&EnvelopeStage::DOSTEP))
+				if (m_Stage & EnvelopeStage::PAUSED)
 				{
 					if ( m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
-						m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::DOSTEP);
+						Continue();
 						m_Samples=m_NextEventSample-1;
 						m_PositionIndex--;
 					}
@@ -465,11 +467,12 @@ namespace psycle
 
 		void XMSampler::EnvelopeController::Pause()
 		{
-			m_Stage = EnvelopeStage::Type(m_Stage & ~EnvelopeStage::DOSTEP);
+			m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::PAUSED);
 		}
 		void XMSampler::EnvelopeController::Continue()
 		{
-			m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::DOSTEP);
+			//disable pause and start it if it is stopped (CHRIS31B, bass).
+			m_Stage = EnvelopeStage::Type((m_Stage& (~EnvelopeStage::PAUSED)) | EnvelopeStage::DOSTEP );
 		}
 
 
@@ -503,7 +506,7 @@ namespace psycle
 			}
 			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is either zero or INVALID, and samplePos is positive.
 			m_PositionIndex=i-2;
-			m_Stage = EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); 
+			Continue();
 			m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
 			Work();
 			m_Samples=samplePos;//and this sets the real position, once all vars are setup.
@@ -678,7 +681,7 @@ namespace psycle
 				IsPlaying(false);
 				return;
 			}
-			float voldelta=500.f/SampleRate(); //delta samples for two milliseconds.
+			float voldelta = 1000.0f/(3.f*SampleRate()); // 3 milliseconds of samples.
 			while(numSamples) {
 				WaveDataController::WorkFunction pWork;
 				int nextsamples = std::min(m_WaveDataController.PreWork(numSamples, &pWork), numSamples);
@@ -701,7 +704,7 @@ namespace psycle
 					// Amplitude Envelope 
 					// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 					float volume = RealVolume() * rChannel().Volume();
-					if(m_AmplitudeEnvelope.Envelope().IsEnabled())
+					if(m_AmplitudeEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP)
 					{
 						m_AmplitudeEnvelope.Work();
 						volume *= m_AmplitudeEnvelope.ModulationAmount();
@@ -739,7 +742,7 @@ namespace psycle
 						float lvol=0;
 						float rvol= PanFactor() + m_PanbrelloAmount;
 						
-						if(m_PanEnvelope.Envelope().IsEnabled()){
+						if(m_PanEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP){
 							m_PanEnvelope.Work();
 							// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
 							rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
@@ -765,7 +768,6 @@ namespace psycle
 						m_lVolCurr-=voldelta;
 						if(m_lVolCurr<m_lVolDest)
 							m_lVolCurr=m_lVolDest;
-
 					}
 					else if(m_lVolCurr<m_lVolDest) {
 						m_lVolCurr+=voldelta;
@@ -787,7 +789,7 @@ namespace psycle
 					// Filter section
 					if (m_Filter->Type() != dsp::F_NONE)
 					{
-						if(m_FilterEnvelope.Envelope().IsEnabled()){
+						if(m_FilterEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP){
 							m_FilterEnvelope.Work();
 							int tmpCO = int(m_CutOff * m_FilterEnvelope.ModulationAmount());
 							if (tmpCO < 0) { tmpCO = 0; }
@@ -808,7 +810,7 @@ namespace psycle
 					}
 
 					// Pitch Envelope. Currently, the pitch envelope Amount is only updated on NewLine().
-					if(m_PitchEnvelope.Envelope().IsEnabled()){
+					if(m_PitchEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP){
 						m_PitchEnvelope.Work();
 					}
 
@@ -874,7 +876,7 @@ namespace psycle
 			if ( rWave().Wave().IsAutoVibrato())
 			{
 				m_AutoVibratoPos=0;
-				m_AutoVibratoDepth=rWave().Wave().VibratoDepth();
+				m_AutoVibratoDepth=0;
 				AutoVibrato();
 			}
 			//Important, put it after m_PitchEnvelope.NoteOn(); (currently done inside ResetVolAndPan)
@@ -927,26 +929,30 @@ namespace psycle
 
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOn();
-				if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset)
+				if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset) {
 					m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
+				}
 			}
-
 			if(m_PanEnvelope.Envelope().IsEnabled()){
 				m_PanEnvelope.NoteOn();
-				if (m_PanEnvelope.Envelope().IsCarry() || !reset)
+				if (m_PanEnvelope.Envelope().IsCarry() || !reset) {
 					m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
+				}
 			}
-
 			if(m_FilterEnvelope.Envelope().IsEnabled()){
 				m_FilterEnvelope.NoteOn();
 				if (m_FilterEnvelope.Envelope().IsCarry() || !reset)
 					m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
 			}
-
 			if(m_PitchEnvelope.Envelope().IsEnabled()){
 				m_PitchEnvelope.NoteOn();
 				if (m_PitchEnvelope.Envelope().IsCarry() || !reset)
 					m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
+			}
+			//If a new note, let's start from volume zero. Else it's a glide.
+			if (!IsPlaying()) {
+				m_lVolCurr=0.f;
+				m_rVolCurr=0.f;
 			}
 		}
 
@@ -982,12 +988,16 @@ namespace psycle
 			if(!IsPlaying()){
 				return;
 			}
+			if ( RealVolume() * rChannel().Volume() == 0.0f ) {
+				IsPlaying(false);
+				return;
+			}
 			IsStopping(true);
 			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
 				m_AmplitudeEnvelope.NoteOff();
 			}
 			// Fade Out Volume
-			m_VolumeFadeSpeed = 64.0f;
+			m_VolumeFadeSpeed = 1000.0f/(3.f*SampleRate()); // 3 milliseconds of samples. (same as volume ramping)
 			m_VolumeFadeAmount = 1.0f;
 			
 			m_PanEnvelope.NoteOff();
@@ -1002,7 +1012,8 @@ namespace psycle
 			m_VolumeFadeSpeed = m_pInstrument->VolumeFadeSpeed()/Global::player().SamplesPerTick();
 			m_VolumeFadeAmount = 1.0f;
 			if ( RealVolume() * rChannel().Volume() == 0.0f ) IsPlaying(false);
-			else if ( m_AmplitudeEnvelope.Envelope().IsEnabled() && m_AmplitudeEnvelope.ModulationAmount() == 0.0f) IsPlaying(false);
+			//The following is incorrect, at least with looped envelopes that also have sustain loops.
+			//else if ( m_AmplitudeEnvelope.Envelope().IsEnabled() && m_AmplitudeEnvelope.ModulationAmount() == 0.0f) IsPlaying(false);
 		}
 		void XMSampler::Voice::UpdateFadeout()
 		{
@@ -1058,21 +1069,21 @@ namespace psycle
 
 		void XMSampler::Voice::AutoVibrato()
 		{
-			int vdelta = GetDelta(rWave().Wave().VibratoType(),m_AutoVibratoPos);
-
-			if(rWave().Wave().VibratoAttack())
+			int targetDepth = rWave().Wave().VibratoDepth()<<8;
+			if(rWave().Wave().VibratoAttack() && m_AutoVibratoDepth < targetDepth)
 			{
-				m_AutoVibratoDepth += rWave().Wave().VibratoAttack()<<1;
-				if((m_AutoVibratoDepth) > rWave().Wave().VibratoDepth()<<8)
+				m_AutoVibratoDepth += rWave().Wave().VibratoAttack();
+				if(m_AutoVibratoDepth > targetDepth)
 				{
-					m_AutoVibratoDepth = rWave().Wave().VibratoDepth()<<8;
+					m_AutoVibratoDepth = targetDepth;
 				}
 			} else {
-				m_AutoVibratoDepth = rWave().Wave().VibratoDepth()<<8;
+				m_AutoVibratoDepth = targetDepth;
 			}
 
+			int vdelta = GetDelta(rWave().Wave().VibratoType(),m_AutoVibratoPos);
 			vdelta = vdelta * (m_AutoVibratoDepth>>8);
-			m_AutoVibratoAmount=(double)vdelta / 128.0;
+			m_AutoVibratoAmount=(double)vdelta / 64.0;
 			m_AutoVibratoPos = (m_AutoVibratoPos - (rWave().Wave().VibratoSpeed())) & 0xFF;
 			UpdateSpeed();
 
@@ -1185,8 +1196,7 @@ namespace psycle
 				int _note = PeriodToNote(_period);
 				_period = NoteToPeriod(_note, false);
 			}
-			//\todo: Attention, AutoVibrato uses linear slides with IT. This needs to be fixed.
-			_period = _period + AutoVibratoAmount() +  VibratoAmount();
+			_period = _period + VibratoAmount();
 			if ( _period > 65535.0) {
 				NoteOffFast();
 			}
@@ -1195,7 +1205,9 @@ namespace psycle
 				NoteOffFast();
 			}
 			else {
-				const double speed=PeriodToSpeed(_period);
+				double speed=PeriodToSpeed(_period);
+				//\todo: Attention, AutoVibrato always use linear slides with IT, but in FT2 it depends on amigaslides switch.
+				speed*= pow(2.0, ((-AutoVibratoAmount())/768.0));
 				rWave().Speed(m_pSampler->Resampler(), speed);
 			}
 		}
@@ -1251,7 +1263,7 @@ namespace psycle
 				// final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)*pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0) = pow(2.0,5.0-note/12.0)
 				// log2(final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)) + log2(pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0)) = 5.0-note/12.0
 				// note = 60 - 12*log2(final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)) + (_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0
-				int _note = 60 -12*(log(period * _wave.WaveSampleRate()) * 3.3219280948873623478703194294894 /*1/log(2)*/ 
+				int _note = 60 -12*(log10(period * _wave.WaveSampleRate()) * 3.3219280948873623478703194294894 /*1/log10(2)*/ 
 							-23.77127183403184445503933415201/*log2(1.0/(1712.0 *8363.0))*/) + (_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0;
 				return _note+12;
 			} else {
@@ -1351,7 +1363,7 @@ namespace psycle
 			m_TremoloPos = 0;
 			m_TremoloDepth = 0;
 			m_VibratoAmount = 0;
-			m_AutoVibratoAmount = 0;
+			m_AutoVibratoAmount = 0.0;
 			m_PanbrelloPos = 0;
 */
 		}
@@ -2387,10 +2399,13 @@ namespace psycle
 						}
 						break;
 					case XMInstrument::DupeCheck::SAMPLE:
-						//\todo: Implement DCType Sample.
-						if ( pData->_inst == thisChannel.InstrumentNo())
 						{
-							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
+							const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
+							int _layer = _inst.NoteToSample(thisChannel.Note()).second;
+							if ( _layer == thisChannel.ForegroundVoice()->rWave().Layer())
+							{
+								if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
+							}
 						}
 						break;
 					case XMInstrument::DupeCheck::NOTE:
@@ -2405,7 +2420,7 @@ namespace psycle
 				
 					switch (currentVoice->NNA())
 					{
-					case XMInstrument::NewNoteAction::STOP:
+					case XMInstrument::NewNoteAction::STOP: 
 						currentVoice->NoteOffFast();
 						break;
 					case XMInstrument::NewNoteAction::NOTEOFF:
@@ -2423,16 +2438,16 @@ namespace psycle
 				}
 				else 
 				{
-					if (bInstrumentSet)
-					{
-						//\todo: Fix: Set the wave and instrument to the one in the entry.
-						currentVoice->ResetVolAndPan(-1);
-					}
 					if ( bPorta2Note ) 
 					{
 						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
 						//		  and the position reset to 0.
 						thisChannel.Note(pData->_note);
+					}
+					if (bInstrumentSet)
+					{
+						//\todo: Fix: Set the wave and instrument to the one in the entry.
+						currentVoice->ResetVolAndPan(-1);
 					}
 				}
 			}
@@ -2469,14 +2484,9 @@ namespace psycle
 				{
 					if ( pData->_note != notecommands::empty ) thisChannel.Note(pData->_note); // If instrument set and no note, we don't want to reset the note.
 					newVoice = GetFreeVoice(thisChannel.Index());
-					if ( newVoice )
-					{
-						if(thisChannel.InstrumentNo() == 255
-							|| Global::song().xminstruments.IsEnabled(thisChannel.InstrumentNo())==false)
-						{	//this is a note to an undefined instrument. we can't continue.
-							//\todo : actually, we should check for commands!
-							return;
-						}
+					if ( newVoice && thisChannel.InstrumentNo() != 255
+						&& Global::song().xminstruments.IsEnabled(thisChannel.InstrumentNo())) {
+
 						const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
 						int _layer = _inst.NoteToSample(thisChannel.Note()).second;
 						if(Global::song().samples.IsEnabled(_layer))
@@ -2557,6 +2567,7 @@ namespace psycle
 					{
 						// This is a noteon command, but we are out of voices. We will try to process the effect.
 						bNoteOn=false;
+						newVoice = NULL;
 						///\TODO: multicommand
 						if ( pData->_cmd == 0 ) return;
 					}
@@ -2811,7 +2822,7 @@ namespace psycle
 	
 		const char* XMSampler::AuxColumnName(int idx) const {
 			InstrumentList &m_Instruments = Global::song().xminstruments;
-			return m_Instruments.IsEnabled(idx)?m_Instruments[idx].Name().c_str():"";
+			return m_Instruments.Exists(idx)?m_Instruments[idx].Name().c_str():"";
 		}
 
 		bool XMSampler::Load(RiffFile* riffFile)

@@ -38,6 +38,14 @@ BEGIN_MESSAGE_MAP(CEnvelopeEditorDlg, CDialog)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
+BOOL CEnvelopeEditorDlg::PreTranslateMessage(MSG* pMsg) 
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent().GetParent()->GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
+	return res;
+}
+
 BOOL CEnvelopeEditorDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();

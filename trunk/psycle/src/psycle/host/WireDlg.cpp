@@ -100,15 +100,7 @@ namespace psycle { namespace host {
 			invol = val;
 			UpdateVolPerDb();
 			m_volslider.SetPos(helpers::dsp::AmountToSlider(val));
-			if ( srcMachine._type == MACH_VST || srcMachine._type == MACH_VSTFX 
-				|| (srcMachine._type == MACH_DUMMY && static_cast<Dummy*>(&srcMachine)->wasVST)) // native to VST, divide.
-			{
-				mult = 1.0f;
-			}
-			else // native to native, no need to convert.
-			{
-				mult = 1.0f/32768.0f;
-			}	
+			mult = 1.0f / srcMachine.GetAudioRange();
 
 			char buf[128];
 			sprintf(buf,"[%d] %s -> %s Connection Volume", wire.GetSrcWireIndex(), srcMachine._editName, dstMachine._editName);
@@ -1236,10 +1228,11 @@ namespace psycle { namespace host {
 
 					rect.top=0;
 					rect.bottom=256;
+					float invlog2 = 1.0/log10(2.0);
 					float thebar = 440.f*2.f*256.f/Global::player().SampleRate();
 					if (scope_spec_mode == 1) rect.left=thebar;
 					else if (scope_spec_mode == 2) rect.left=16*sqrt(thebar);
-					else if (scope_spec_mode == 3) rect.left=32*log(1+thebar)/log(2.0f);
+					else if (scope_spec_mode == 3) rect.left=32*log10(1+thebar)*invlog2;
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"440");
@@ -1249,7 +1242,7 @@ namespace psycle { namespace host {
 					thebar = 7000*2.f*256.f/Global::player().SampleRate();
 					if (scope_spec_mode == 1) rect.left=thebar;
 					else if (scope_spec_mode == 2) rect.left=16*sqrt(thebar);
-					else if (scope_spec_mode == 3) rect.left=32*log(1+thebar)/log(2.0f);
+					else if (scope_spec_mode == 3) rect.left=32*log10(1+thebar)*invlog2;
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"7K");
@@ -1259,7 +1252,7 @@ namespace psycle { namespace host {
 					thebar = 16000*2.f*256.f/Global::player().SampleRate();
 					if (scope_spec_mode == 1) rect.left=thebar;
 					else if (scope_spec_mode == 2) rect.left=16*sqrt(thebar);
-					else if (scope_spec_mode == 3) rect.left=32*log(1+thebar)/log(2.0f);
+					else if (scope_spec_mode == 3) rect.left=32*log10(1+thebar)*invlog2;
 					rect.right=rect.left+1;
 					bufDC.FillSolidRect(&rect,0x00606060);
 					sprintf(buf,"16K");

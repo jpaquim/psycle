@@ -37,6 +37,7 @@ class XMSamplerUI : public CPropertySheet
 		void Init(XMSampler* pMachine,XMSamplerUI** windowVar);
 		void UpdateUI(void);
 		XMSampler* GetMachine(){ return _pMachine; }
+		BOOL PreTranslateChildMessage(MSG* pMsg, HWND focusWin);
 
 	protected:
 		DECLARE_MESSAGE_MAP()

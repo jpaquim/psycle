@@ -1081,7 +1081,7 @@ void Player::stop_threads() {
 							case mono_mix: // mono mix
 								for(i=0; i<amount; i++)
 								{
-									if (!ClipboardWriteMono(((*pL++)+(*pR++))/2)) StopRecording(false);
+									if (!ClipboardWriteMono(((*pL++)+(*pR++))*0.5f)) StopRecording(false);
 								}
 								break;
 							case mono_left: // mono L
@@ -1110,7 +1110,7 @@ void Player::stop_threads() {
 							for(i=0; i<amount; i++)
 							{
 								//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
-								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))/2) != DDC_SUCCESS) StopRecording(false);
+								if(_outputWaveFile.WriteMonoSample(((*pL++)+(*pR++))*0.5f) != DDC_SUCCESS) StopRecording(false);
 							}
 							break;
 						case mono_left: // mono L

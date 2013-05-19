@@ -2,7 +2,10 @@
 #include "XMSamplerUISample.hpp"
 #include <psycle/host/XMSampler.hpp>
 #include <psycle/host/Song.hpp>
+#include <psycle/host/player.hpp>
 #include <psycle/host/PsycleConfig.hpp>
+#include "XMSamplerUI.hpp"
+#include "MainFrm.hpp"
 
 namespace psycle { namespace host {
 
@@ -10,6 +13,7 @@ namespace psycle { namespace host {
 // XMSamplerUISample
 
 IMPLEMENT_DYNAMIC(XMSamplerUISample, CPropertyPage)
+
 XMSamplerUISample::XMSamplerUISample()
 : CPropertyPage(XMSamplerUISample::IDD)
 , m_Init(false)
@@ -53,6 +57,13 @@ BEGIN_MESSAGE_MAP(XMSamplerUISample, CPropertyPage)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
 
+BOOL XMSamplerUISample::PreTranslateMessage(MSG* pMsg) 
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
+	return res;
+}
 // Controladores de mensajes de XMSamplerUISample
 BOOL XMSamplerUISample::OnInitDialog()
 {
@@ -98,7 +109,7 @@ void XMSamplerUISample::RefreshSampleList()
 	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
 	{
 		char line[48];
-		if (list.IsEnabled(i)) {
+		if (list.Exists(i)) {
 			const XMInstrument::WaveData& wave = list[i];
 			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
@@ -126,16 +137,25 @@ BOOL XMSamplerUISample::OnSetActive()
 void XMSamplerUISample::OnLbnSelchangeSamplelist()
 {
 	m_Init=false;
-	char tmp[40];
 	int i= m_SampleList.GetCurSel();
-	if (Global::song().samples.IsEnabled(i) == false) {
+	if (Global::song().samples.Exists(i) == false) {
 		XMInstrument::WaveData wave;
 		wave.Init();
 		Global::song().samples.SetSample(wave,i);
 	}
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	win->ChangeIns(i);
+
 	XMInstrument::WaveData& wave = Global::song().samples.get(i);
 	pWave(&wave);
+	RefreshSampleData();
+	m_Init=true;
+}
 
+void XMSamplerUISample::RefreshSampleData()
+{
+	char tmp[40];
+	XMInstrument::WaveData& wave = rWave();
 	strcpy(tmp,wave.WaveName().c_str());
 	((CEdit*)GetDlgItem(IDC_WAVENAME))->SetWindowText(tmp);
 	sprintf(tmp,"%.0d",wave.WaveSampleRate());
@@ -173,88 +193,33 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
     //
 	m_WaveScope.SetWave(&wave);
 	DrawScope();
-	m_Init=true;
 }
-
 void XMSamplerUISample::OnBnClickedLoad()
 {
-/*	static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
-
-	CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
-	dlg._pSong = _pSong;
-	std::string tmpstr = Global::configuration().GetCurrentInstrumentDir();
-	dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
-	if (dlg.DoModal() == IDOK)
-	{
-		m_wndView.AddMacViewUndo();
-
-		int si = _pSong.instSelected;
-
-		//added by sampler
-		if ( _pSong._pInstrument[si]->waveLength != 0)
-		{
-			if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;
-		}
-		//end of added by sampler
-
-		CString CurrExt=dlg.GetFileExt();
-		CurrExt.MakeLower();
-
-		if ( CurrExt == "wav" )
-		{
-			if (_pSong.WavAlloc(si,dlg.GetPathName()))
-			{
-				UpdateComboIns();
-				m_wndStatusBar.SetWindowText("New wave loaded");
-				WaveEditorBackUpdate();
-				m_wndInst.WaveUpdate();
-			}
-		}
-		else if ( CurrExt == "iff" )
-		{
-			if (_pSong.IffAlloc(si,dlg.GetPathName()))
-			{
-				UpdateComboIns();
-				m_wndStatusBar.SetWindowText("New wave loaded");
-				WaveEditorBackUpdate();
-				m_wndInst.WaveUpdate();
-				RedrawGearRackList();
-			}
-		}
-		CString str = dlg.m_ofn.lpstrFile;
-		int index = str.ReverseFind('\\');
-		if (index != -1)
-		{
-			Global::configuration().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
-		}
-	}
-	if ( _pSong._pInstrument[PREV_WAV_INS]->waveLength > 0)
-	{
-		// Stopping wavepreview if not stopped.
-		if(_pSong.PW_Stage)
-		{
-			_pSong.PW_Stage=0;
-		}
-
-		//Delete it.
-		_pSong.DeleteLayer(PREV_WAV_INS);
-	}
-*/
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	win->ChangeIns(m_SampleList.GetCurSel());
+	win->SendMessage(WM_COMMAND,IDC_LOADWAVE);
+	XMInstrument::WaveData& wave = Global::song().samples.get(m_SampleList.GetCurSel());
+	pWave(&wave);
+	RefreshSampleList();
+	RefreshSampleData();
 }
 
 void XMSamplerUISample::OnBnClickedSave()
 {
-	// TODO: Implement
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	win->ChangeIns(m_SampleList.GetCurSel());
+	win->SendMessage(WM_COMMAND,IDC_SAVEWAVE);
 }
 
 void XMSamplerUISample::OnBnClickedDupe()
 {
 	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
 	{
-		if (Global::song().samples.IsEnabled(j) == false ) 
+		if (Global::song().samples.Exists(j) == false ) 
 		{
-			XMInstrument::WaveData& wavenew = Global::song().samples.get(j);
-			wavenew = rWave();
+			Global::song().samples.SetSample(rWave(),j);
+			RefreshSampleList();
 			return;
 		}
 	}
@@ -264,6 +229,8 @@ void XMSamplerUISample::OnBnClickedDupe()
 void XMSamplerUISample::OnBnClickedDelete()
 {
 	rWave().Init();
+	RefreshSampleList();
+	RefreshSampleData();
 	//\todo: Do a search for instruments using this sample and remove it from them.
 }
 
@@ -275,6 +242,7 @@ void XMSamplerUISample::OnEnChangeWavename()
 		CEdit* cedit = (CEdit*)GetDlgItem(IDC_WAVENAME);
 		cedit->GetWindowText(tmp,40);
 		rWave().WaveName(tmp);
+		RefreshSampleList();
 	}
 }
 
@@ -285,7 +253,9 @@ void XMSamplerUISample::OnEnChangeSamplerate()
 	{
 		CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
 		cedit->GetWindowText(tmp,40);
-		rWave().WaveSampleRate(atoi(tmp));
+		int i = atoi(tmp);
+		if (i==0) i=8363;
+		rWave().WaveSampleRate(i);
 	}
 }
 void XMSamplerUISample::OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult)
@@ -296,6 +266,7 @@ void XMSamplerUISample::OnDeltaposSpinsamplerate(NMHDR *pNMHDR, LRESULT *pResult
 		newval = rWave().WaveSampleRate()*2;
 	} else {
 		newval = rWave().WaveSampleRate()*0.5f;
+		if (newval==0) newval=8363;
 	}
 	rWave().WaveSampleRate(newval);
 	char tmp[40];
@@ -455,16 +426,20 @@ void XMSamplerUISample::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pR
 			label = IDC_LFINETUNE;
 		}
 		else if (pNMHDR->idFrom == IDC_VIBRATOATTACK) {
-			if ( slider->GetPos()>0 ) sprintf(tmp,"%d",slider->GetPos());
-			else strcpy(tmp,"Disabled");
+			if ( slider->GetPos() == 0 ) strcpy(tmp,"No Delay");
+			else sprintf(tmp,"%.0fms", (4096000.0f*Global::player().SamplesPerTick())
+				/(slider->GetPos()*Global::player().SampleRate()));
 			label = IDC_LVIBRATOATTACK;
 		}
 		else if (pNMHDR->idFrom == IDC_VIBRATOSPEED) {
-			sprintf(tmp,"%d",slider->GetPos());
+			if (slider->GetPos() == 0) strcpy(tmp,"off");
+			else sprintf(tmp,"%.0fms", (256000.0f*Global::player().SamplesPerTick())
+				/(slider->GetPos()*Global::player().SampleRate()));
 			label = IDC_LVIBRATOSPEED;
 		}
 		else if (pNMHDR->idFrom == IDC_VIBRATODEPTH) {
-			sprintf(tmp,"%d",slider->GetPos());
+			if (slider->GetPos() == 0) strcpy(tmp,"off");
+			else sprintf(tmp,"%d",slider->GetPos());
 			label = IDC_LVIBRATODEPTH;
 		}
 		if (label != 0) {
@@ -482,7 +457,8 @@ void XMSamplerUISample::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pR
 
 void XMSamplerUISample::OnBnClickedOpenwaveeditor()
 {
-	//\todo : pParent->OnWavebut();
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	win->SendMessage(WM_COMMAND,IDC_WAVEBUT);
 }
 void XMSamplerUISample::OnCbnSelendokVibratotype()
 {

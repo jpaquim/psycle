@@ -18,6 +18,7 @@ public:
 	enum { IDD = IDD_XMENVDLG };
 
 public:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 protected:

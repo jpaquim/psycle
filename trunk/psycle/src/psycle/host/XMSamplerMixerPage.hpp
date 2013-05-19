@@ -20,6 +20,7 @@ public:
 	enum { IDD = IDD_XMSAMPLER_MIXER };
 
 protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 
 public:

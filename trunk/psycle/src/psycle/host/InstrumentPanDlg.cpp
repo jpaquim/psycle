@@ -1,6 +1,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentPanDlg.hpp"
-
+#include "XMSamplerUI.hpp"
+#include "PsycleConfig.hpp"
 
 namespace psycle { namespace host {
 
@@ -30,6 +31,14 @@ BEGIN_MESSAGE_MAP(CInstrumentPanDlg, CDialog)
 	ON_WM_HSCROLL()
 	ON_BN_CLICKED(IDC_CUTOFFPAN, OnBnEnablePan)
 END_MESSAGE_MAP()
+
+BOOL CInstrumentPanDlg::PreTranslateMessage(MSG* pMsg)
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
+	return res;
+}
 
 BOOL CInstrumentPanDlg::OnInitDialog() 
 {
@@ -135,8 +144,9 @@ void CInstrumentPanDlg::SliderModNote(CSliderCtrl* slid)
 {
 	char tmp[40], tmp2[40];
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
+	int offset = (PsycleGlobal::conf().patView().showA440) ? -1 : 0;
 	sprintf(tmp,"%s",notes[slid->GetPos()%12]);
-	sprintf(tmp2,"%s%d",tmp,(slid->GetPos()/12));
+	sprintf(tmp2,"%s%d",tmp,offset+(slid->GetPos()/12));
 	m_instr->NoteModPanCenter(slid->GetPos());
 	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->SetWindowText(tmp2);
 }

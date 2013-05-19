@@ -96,7 +96,7 @@ namespace psycle { namespace host {
 			const int si = pSong->instSelected;
 			Instrument *pins = pSong->_pInstrument[si];
 			XMInstrument::WaveData wavetmp;
-			const XMInstrument::WaveData& wave = (pSong->samples.IsEnabled(si)) ? pSong->samples[si] : wavetmp;
+			const XMInstrument::WaveData& wave = (pSong->samples.Exists(si)) ? pSong->samples[si] : wavetmp;
 
 			char buffer[64];
 			// Set instrument current selected label
@@ -186,7 +186,7 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnLoopoff() 
 		{
 			int si = pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL)
 				{
@@ -199,7 +199,7 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnLoopforward() 
 		{
 			int si=pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if(wave.WaveLoopType() == XMInstrument::WaveData::LoopType::DO_NOT)
 				{
@@ -216,7 +216,7 @@ namespace psycle { namespace host {
 		{
 			int si=pSong->instSelected;
 			char buffer[16];
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				pSong->samples.get(si).WaveGlobVolume(m_volumebar.GetPos()*0.01f);
 				if(m_volumebar.GetPos()==0) {
 					sprintf(buffer,"-inf dB");
@@ -275,7 +275,7 @@ namespace psycle { namespace host {
 		{
 			int si=pSong->instSelected;
 			char tmp[40];
-			if ( !initializingDialog  && pSong->samples.IsEnabled(si)) {
+			if ( !initializingDialog  && pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
 				cedit->GetWindowText(tmp,40);
@@ -329,7 +329,7 @@ namespace psycle { namespace host {
 		{
 			char buffer[16];
 			int si=pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				wave.PanFactor(m_panslider.GetPos()/256.f);
 				switch(m_panslider.GetPos())
@@ -451,7 +451,7 @@ namespace psycle { namespace host {
 		{
 			int si=pSong->instSelected;
 			char buffer[16];
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				
 				if(cando)
@@ -478,7 +478,7 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnInsDecoctave() 
 		{
 			const int si=pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 
 				if ( wave.WaveTune()>-37)
@@ -491,7 +491,7 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnInsDecnote() 
 		{
 			const int si=pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if ( wave.WaveTune()>-47)
 					wave.WaveTune(wave.WaveTune()-1);
@@ -503,7 +503,7 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnInsIncnote() 
 		{
 			const int si=pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if ( wave.WaveTune()<70)
 					wave.WaveTune(wave.WaveTune()+1);
@@ -515,7 +515,7 @@ namespace psycle { namespace host {
 		void CInstrumentEditor::OnInsIncoctave() 
 		{
 			const int si=pSong->instSelected;
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				XMInstrument::WaveData& wave = pSong->samples.get(si);
 				if ( wave.WaveTune()<60)
 					wave.WaveTune(wave.WaveTune()+12);
@@ -528,7 +528,7 @@ namespace psycle { namespace host {
 		{
 			const int si = pSong->instSelected;
 			char buffer[64];
-			if (pSong->samples.IsEnabled(si)) {
+			if (pSong->samples.Exists(si)) {
 				const XMInstrument::WaveData& wave = pSong->samples[si];
 				
 				const int octave= ((wave.WaveTune()+48)/12);

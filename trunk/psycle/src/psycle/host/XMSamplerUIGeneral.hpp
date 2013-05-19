@@ -27,6 +27,7 @@ public:
 	CButton m_ckFilter;
 	CComboBox m_cbPanningMode;
 protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	void SliderPolyphony(CSliderCtrl* slid);

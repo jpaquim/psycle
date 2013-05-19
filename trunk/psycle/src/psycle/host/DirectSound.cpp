@@ -626,7 +626,7 @@ namespace psycle
 				// Release the data back to DirectSound. 
 				hr = _pBuffer->Unlock(pBlock1, blockSize1, pBlock2, blockSize2);
 				if(_lowMark >= _dsBufferSize) {
-					_lowMark = 0;
+					_lowMark -= _dsBufferSize;
 					m_readPosWraps++;
 					if((std::uint64_t)m_readPosWraps * (std::uint64_t)_dsBufferSize >= 0x100000000LL)
 					{

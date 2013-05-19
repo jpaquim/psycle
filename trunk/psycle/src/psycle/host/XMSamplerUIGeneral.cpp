@@ -5,6 +5,7 @@
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Song.hpp"
+#include "XMSamplerUI.hpp"
 
 namespace psycle { namespace host {
 
@@ -38,6 +39,13 @@ namespace psycle { namespace host {
 	{
 	}
 
+	BOOL XMSamplerUIGeneral::PreTranslateMessage(MSG* pMsg) 
+	{
+		XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent());
+		BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+		if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
+		return res;
+	}
 	/////////////////////////////////////////////////////////////////////////////
 	// XMSamplerUIGeneral message handlers
 
@@ -146,6 +154,9 @@ Ex: Pitch slide down");
 
 	void XMSamplerUIGeneral::SliderPolyphony(CSliderCtrl* slid)
 	{
+		XMSampler::TESTspeed = 64.0/slid->GetPos();
+		return;
+
 		for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
 		{
 			_pMachine->rVoice(c).NoteOffFast();

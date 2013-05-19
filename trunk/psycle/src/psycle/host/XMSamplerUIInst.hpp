@@ -28,6 +28,7 @@ public:
 	XMSampler * const pMachine(){return m_pMachine;};
 
 protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 	virtual BOOL OnInitDialog();
 
@@ -47,8 +48,9 @@ protected:
 private:
 
 	void SetInstrumentData(const int instno);
-
-
+public:
+	void FillInstrumentList();
+private:
 	XMSampler *m_pMachine;
 	bool m_bInitialized;
 	int		m_iCurrentSelected;
