@@ -1,6 +1,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "EnvelopeEditorDlg.hpp"
 #include <psycle/host/Player.hpp>
+#include "XMSamplerUI.hpp"
 
 namespace psycle { namespace host {
 
@@ -40,9 +41,9 @@ END_MESSAGE_MAP()
 
 BOOL CEnvelopeEditorDlg::PreTranslateMessage(MSG* pMsg) 
 {
-	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent().GetParent()->GetParent());
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent()->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
-	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
+	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;
 }
 
