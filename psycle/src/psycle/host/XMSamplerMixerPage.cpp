@@ -5,6 +5,7 @@
 
 #include "Song.hpp"
 #include "XMSampler.hpp"
+#include "XMSamplerUI.hpp"
 
 namespace psycle { namespace host {
 
@@ -90,6 +91,13 @@ BEGIN_MESSAGE_MAP(XMSamplerMixerPage, CPropertyPage)
 	ON_BN_CLICKED(IDC_CH_MUTE8, OnBnClickedChMute8)
 END_MESSAGE_MAP()
 
+BOOL XMSamplerMixerPage::PreTranslateMessage(MSG* pMsg) 
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
+	return res;
+}
 
 // Controladores de mensajes de XMSamplerMixerPage
 BOOL XMSamplerMixerPage::OnSetActive()

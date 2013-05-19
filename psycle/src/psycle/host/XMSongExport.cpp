@@ -284,7 +284,7 @@ namespace host{
 		}
 		
 		insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
-		// sampler just has one sample per instrument.
+		// TODO: Implement multisample.
 		insHeader.samples = 1;
 		Write(&insHeader,sizeof(insHeader));
 
@@ -317,7 +317,7 @@ namespace host{
 		int finetune = static_cast<int>((float)wave.WaveFineTune()*1.28);
 		if (wave.WaveSampleRate() != 8363) {
 			//correct the tuning
-			double newtune = log(double(wave.WaveSampleRate())/8363.0)/0.301029995f; /*log(2)*/
+			double newtune = log10(double(wave.WaveSampleRate())/8363.0)/0.301029995f; /*log10(2)*/
 			double floortune = floor(newtune*12.0);
 			tune += static_cast<int>(floortune);
 			finetune += static_cast<int>(floor(((tune*12)-floortune)*127));

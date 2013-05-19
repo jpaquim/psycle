@@ -16,6 +16,8 @@
 #include "Song.hpp"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
+#include "XMSamplerUI.hpp"
+#include "MainFrm.hpp"
 
 namespace psycle { namespace host {
 
@@ -49,6 +51,13 @@ BEGIN_MESSAGE_MAP(XMSamplerUIInst, CPropertyPage)
 	ON_BN_CLICKED(IDC_DELETEINS, OnBnClickedDeleteins)
 END_MESSAGE_MAP()
 
+BOOL XMSamplerUIInst::PreTranslateMessage(MSG* pMsg) 
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
+	return res;
+}
 
 BOOL XMSamplerUIInst::OnInitDialog() 
 {
@@ -85,8 +94,7 @@ BOOL XMSamplerUIInst::OnInitDialog()
 
 void XMSamplerUIInst::SetInstrumentData(const int instno)
 {
-	TRACE("in setInstrumentData\n");
-	if (Global::song().xminstruments.IsEnabled(instno) == false) {
+	if (Global::song().xminstruments.Exists(instno) == false) {
 		XMInstrument inst;
 		inst.Init();
 		Global::song().xminstruments.SetInst(inst,instno);
@@ -100,8 +108,6 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 	m_panTab.AssignPanningValues(inst);
 	m_filTab.AssignFilterValues(inst);
 	m_pitTab.AssignPitchValues(inst);
-
-	//TODO: Force reload of samples tab (since samples array might have changed)
 }
 
 
@@ -110,23 +116,7 @@ BOOL XMSamplerUIInst::OnSetActive()
 	TRACE("in setActive\n");
 	if ( m_bInitialized == false )
 	{
-		InstrumentList& list = Global::song().xminstruments;
-
-		for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
-		{
-			char line[48];
-			if (list.IsEnabled(i)) {
-				const XMInstrument& inst = list[i];
-				sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
-				strcat(line,inst.Name().c_str());
-			}
-			else {
-				sprintf(line,"%02X : ",i);
-			}
-			m_InstrumentList.AddString(line);
-		}
-		m_InstrumentList.SetCurSel(0);
-
+		FillInstrumentList();
 		SetInstrumentData(0);
 		m_bInitialized = true;
 	}
@@ -134,6 +124,30 @@ BOOL XMSamplerUIInst::OnSetActive()
 	return CPropertyPage::OnSetActive();
 }
 
+void XMSamplerUIInst::FillInstrumentList() {
+	int i = m_InstrumentList.GetCurSel();
+	m_InstrumentList.ResetContent();
+	InstrumentList& list = Global::song().xminstruments;
+	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
+	{
+		char line[48];
+		if (list.Exists(i)) {
+			const XMInstrument& inst = list[i];
+			sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
+			strcat(line,inst.Name().c_str());
+		}
+		else {
+			sprintf(line,"%02X : ",i);
+		}
+		m_InstrumentList.AddString(line);
+	}
+	if (i !=  LB_ERR) {
+		m_InstrumentList.SetCurSel(i);
+	}
+	else {
+		m_InstrumentList.SetCurSel(0);
+	}
+}
 	
 void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 {
@@ -141,6 +155,8 @@ void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 	{
 		m_bInitialized = false;
 		SetInstrumentData(m_InstrumentList.GetCurSel());
+		CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+		win->ChangeIns(m_InstrumentList.GetCurSel());
 		m_bInitialized = true;
 	}
 }
@@ -227,12 +243,25 @@ void XMSamplerUIInst::OnBnClickedSaveins()
 
 void XMSamplerUIInst::OnBnClickedDupeins()
 {
-	///\todo Agregue aquí su código de controlador de notificación de control
+	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
+	{
+		if (Global::song().xminstruments.Exists(j) == false ) 
+		{
+			const XMInstrument& inst = Global::song().xminstruments[m_iCurrentSelected];
+			Global::song().xminstruments.SetInst(inst,j);
+			FillInstrumentList();
+			return;
+		}
+	}
+	MessageBox("Couldn't find an appropiate instrument slot to copy to.","Error While Duplicating!");
 }
 
 void XMSamplerUIInst::OnBnClickedDeleteins()
 {
-	///\todo Agregue aquí su código de controlador de notificación de control
+	XMInstrument& inst = Global::song().xminstruments.get(m_iCurrentSelected);
+	inst.Init();
+	FillInstrumentList();
+	SetInstrumentData(m_iCurrentSelected);
 }
 			
 }}

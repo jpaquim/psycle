@@ -3,7 +3,9 @@
 #include <psycle/helpers/math.hpp>
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
-	#include <emmintrin.h>
+	#if DIVERSALIS__CPU__X86__SSE == 2
+		#include <emmintrin.h>
+	#endif
 #endif
 #include <psycle/helpers/math/constants.hpp>
 
@@ -63,13 +65,14 @@ namespace psycle { namespace helpers { namespace dsp {
 				tempval = 0.53836f - 0.46164f * std::cos(math::pi +  math::pi * i / ((float)SINC_TABLESIZE -1.f));
 			#endif
 
-			#if USE_SINC_DELTA && !(defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS)
+			#if USE_SINC_DELTA && !(DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS)
 				int write_pos = i;
 			#else
 				//Optimized version. Instead of putting the sinc linearly in the table, we allocate the zeroes of a specific offset consecutively.
 				int idxzero = (i/SINC_RESOLUTION);
 				int write_pos = (i%SINC_RESOLUTION)*SINC_ZEROS + idxzero;
 			#endif
+
 			tempval /= double(i * math::pi / (double)SINC_RESOLUTION);
 			sinc_pre_table_[write_pos] = tempval;
 			//sinc runs at half speed of SINC_RESOLUTION (i.e. two zero crossing points per period).
@@ -179,7 +182,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	float cubic_resampler::linear_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
 		uint32_t res = (offset - foffset) * CUBIC_RESOLUTION;
-		int ioffset = foffset;
+		const int ioffset = foffset;
 		data+=ioffset;
 		float y0 = *data;
 		float y1 = (ioffset == length-1) ? 0 : *(data + 1);
@@ -192,34 +195,33 @@ namespace psycle { namespace helpers { namespace dsp {
 	// y0 = y[0]  [sample at x (input)]
 	// y1 = y[1]  [sample at x+1]
 	// y2 = y[2]  [sample at x+2]
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
-	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
+#if DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	float cubic_resampler::spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
 		res >>= 32-CUBIC_RESOLUTION_LOG;
 		res <<=2;//Since we have four floats in the table, the position is 16byte aligned.
-		__m128 y = _mm_setzero_ps();
-		if (offset != 0) y.m128_f32[0] = *(data - 1);
-		y.m128_f32[1] = *data;
-		if (offset < length-2) {
-			y.m128_f32[2] = *(data + 1);
-			y.m128_f32[3] = *(data + 2);
-		}
-		else if (offset < length-1) y.m128_f32[2] =  *(data + 1);
-		__m128 t = _mm_load_ps(&cubic_table_[res]);
-		__m128 result = _mm_mul_ps(y,t);
-		return result.m128_f32[0]+result.m128_f32[1]+result.m128_f32[2]+result.m128_f32[3];
+		const short d0 = (offset == 0)? 0:*(data-1);
+		__m128i data128;
+		if (offset < length-2) { data128 = _mm_set_epi32(data[2],data[1],*data,d0); }
+		else if (offset < length-1) { data128 = _mm_set_epi32(0,data[1],*data,d0); }
+		else {  data128 = _mm_set_epi32(0,0,*data,d0); }
+		register __m128 y = _mm_cvtepi32_ps(data128);
+		register __m128 result = _mm_mul_ps(y,_mm_load_ps(&cubic_table_[res]));
+		result = _mm_add_ps(result,_mm_movehl_ps(result, result));
+		result = _mm_add_ss(result,_mm_shuffle_ps(result, result, 0x11));
+		float newval;
+		_mm_store_ss(&newval, result);
+		return newval;
 	}
 	float cubic_resampler::spline_unchecked(int16_t const * data, uint32_t res, void* /*resampler_data*/) {
 		res >>= 32-CUBIC_RESOLUTION_LOG;
 		res <<=2;//Since we have four floats in the table, the position is 16byte aligned.
-		__m128 y;
-		y.m128_f32[0] = *(data - 1);
-		y.m128_f32[1] = *data;
-		y.m128_f32[2] = *(data + 1);
-		y.m128_f32[3] = *(data + 2);
-		__m128 t = _mm_load_ps(&cubic_table_[res]);
-		__m128 result = _mm_mul_ps(y,t);
-		return result.m128_f32[0]+result.m128_f32[1]+result.m128_f32[2]+result.m128_f32[3];
+		register __m128 y = _mm_cvtepi32_ps(_mm_set_epi32(data[2],data[1],*data,*(data - 1)));
+		register __m128 result = _mm_mul_ps(y,_mm_load_ps(&cubic_table_[res]));
+		result = _mm_add_ps(result,_mm_movehl_ps(result, result));
+		result = _mm_add_ss(result,_mm_shuffle_ps(result, result, 0x11));
+		float newval;
+		_mm_store_ss(&newval, result);
+		return newval;
 	}
 	float cubic_resampler::spline_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
@@ -227,18 +229,17 @@ namespace psycle { namespace helpers { namespace dsp {
 		uint32_t res = (offset - foffset) * CUBIC_RESOLUTION;
 		res <<=2;//Since we have four floats in the table, the position is 16byte aligned.
 		data+=ioffset;
-		__m128 y = _mm_setzero_ps();
-		if (ioffset != 0) y.m128_f32[0] = *(data - 1);
-		y.m128_f32[1] = *data;
-		if (ioffset < length-2) {
-			y.m128_f32[2] =  *(data + 1);
-			y.m128_f32[3] =  *(data + 2);
-		}
-		else if (ioffset < length-1) y.m128_f32[2] =  *(data + 1);
-
-		__m128 t = _mm_load_ps(&cubic_table_[res]);
-		__m128 result = _mm_mul_ps(y,t);
-		return result.m128_f32[0]+result.m128_f32[1]+result.m128_f32[2]+result.m128_f32[3];
+		const float d0 = (ioffset == 0)? 0.f:*(data-1);
+		__m128 y;
+		if (ioffset < length-2) { y = _mm_set_ps(data[2],data[1],*data,d0); }
+		else if (ioffset < length-1) { y = _mm_set_ps(0.f,data[1],*data,d0); }
+		else { y = _mm_set_ps(0.f,0.f,*data,d0); }
+		register __m128 result = _mm_mul_ps(y,_mm_load_ps(&cubic_table_[res]));
+		result = _mm_add_ps(result,_mm_movehl_ps(result, result));
+		result = _mm_add_ss(result,_mm_shuffle_ps(result, result, 0x11));
+		float newval;
+		_mm_store_ss(&newval, result);
+		return newval;
 	}
 #else
 	float cubic_resampler::spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
@@ -246,8 +247,10 @@ namespace psycle { namespace helpers { namespace dsp {
 		res <<=2;//Since we have four floats in the table, the position is 16byte aligned.
 		float yo = (offset == 0) ? 0 : *(data - 1);
 		float y0 = *data;
-		float y1 = (offset >= length-1) ? 0 : *(data + 1);
-		float y2 = (offset >= length-2) ? 0 : *(data + 2);
+		float y1,y2;
+		if (ioffset < length-2) { y1=data[1];y2=data[2]; }
+		else if (ioffset < length-1) { y1 = data[1]; y2=0; }
+		else { y1 = 0; y2 = 0; }
 		float *table = &cubic_table_[res];
 		return table[0] * yo + table[1] * y0 + table[2] * y1 + table[3] * y2;
 	}
@@ -269,8 +272,10 @@ namespace psycle { namespace helpers { namespace dsp {
 		data+=ioffset;
 		float yo = (ioffset == 0) ? 0 : *(data - 1);
 		float y0 = *data;
-		float y1 = (ioffset >= length-1) ? 0 : *(data + 1);
-		float y2 = (ioffset >= length-2) ? 0 : *(data + 2);
+		float y1,y2;
+		if (ioffset < length-2) { y1=data[1];y2=data[2]; }
+		else if (ioffset < length-1) { y1 = data[1]; y2=0; }
+		else { y1 = 0; y2 = 0; }
         float *table = &cubic_table_[res];
 		return table[0] * yo + table[1] * y0 + table[2] * y1 + table[3] * y2;
 	}
@@ -297,8 +302,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 
 
-#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS && \
-	defined DIVERSALIS__COMPILER__MICROSOFT // TODO gcc understands __m128 but the .m128_f32 notation is msvc-specific
+#if DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 
 	//interpolation work function which does windowed sinc (bandlimited) interpolation.
 	float cubic_resampler::sinc_internal(int16_t const * data, uint32_t res, int leftExtent, int rightExtent) {
@@ -308,7 +312,8 @@ namespace psycle { namespace helpers { namespace dsp {
 	#else
 		res *= SINC_ZEROS;
 	#endif
-		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points
+		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
+		//On the non-filtered version, we can just return the data
 		if (res == 0) return *data;
 
 		float newval = 0.0f;
@@ -317,11 +322,7 @@ namespace psycle { namespace helpers { namespace dsp {
 
 		float *psinc = &sinc_table_[res];
 		while (leftExtent > 3) {
-			register __m128i data128;
-			data128.m128i_i32[0] = pdata[0];
-			data128.m128i_i32[1] = pdata[-1];
-			data128.m128i_i32[2] = pdata[-2];
-			data128.m128i_i32[3] = pdata[-3];
+			register __m128i data128 = _mm_set_epi32(pdata[-3],pdata[-2],pdata[-1],pdata[0]);
 			register __m128 datafloat = _mm_cvtepi32_ps(data128);
 	#if OPTIMIZED_RES_SHIFT > 1
 			register __m128 sincfloat = _mm_load_ps(psinc);
@@ -342,11 +343,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		pdata = data+1;
 		psinc = &sinc_table_[SINC_TABLESIZE-res];
 		while (rightExtent > 3) {
-			register __m128i data128;
-			data128.m128i_i32[0] = pdata[0];
-			data128.m128i_i32[1] = pdata[1];
-			data128.m128i_i32[2] = pdata[2];
-			data128.m128i_i32[3] = pdata[3];
+			register __m128i data128 = _mm_set_epi32(pdata[3],pdata[2],pdata[1],pdata[0]);
 			register __m128 datafloat = _mm_cvtepi32_ps(data128);
 	#if OPTIMIZED_RES_SHIFT > 1
 			register __m128 sincfloat = _mm_load_ps(psinc);
@@ -372,16 +369,20 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 
 	float cubic_resampler::sinc_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
+		//TODO: Add filter-aware companion.
+
 		const float foffset = std::floor(offset);
 		uint32_t res = (offset - foffset) * SINC_RESOLUTION;
+		const int ioffset = static_cast<int>(foffset);
 	#if defined OPTIMIZED_RES_SHIFT
 		res <<= OPTIMIZED_RES_SHIFT;
 	#else
 		res *= SINC_ZEROS;
 	#endif
-		data+=static_cast<int>(foffset);
+		data+=ioffset;
 
-		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points
+		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
+		//On the non-filtered version, we can just return the data
 		if (res == 0) return *data;
 
 		float newval = 0.0f;
@@ -389,13 +390,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		float const * pdata = data;
 
 		float *psinc = &sinc_table_[res];
-		int leftExtent = (offset < SINC_ZEROS) ? offset +1: SINC_ZEROS;
+		int leftExtent = (ioffset < SINC_ZEROS) ? ioffset +1: SINC_ZEROS;
 		while (leftExtent > 3) {
-			register __m128 datafloat;
-			datafloat.m128_f32[0] = pdata[0];
-			datafloat.m128_f32[1] = pdata[-1];
-			datafloat.m128_f32[2] = pdata[-2];
-			datafloat.m128_f32[3] = pdata[-3];
+			register __m128 datafloat = _mm_set_ps(pdata[-3],pdata[-2],pdata[-1],pdata[0]);
 	#if OPTIMIZED_RES_SHIFT > 1
 			register __m128 sincfloat = _mm_load_ps(psinc);
 	#else
@@ -412,7 +409,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			psinc++;
 			leftExtent--;
 		}
-		int rightExtent = (length - offset -1< SINC_ZEROS) ? length - offset -1: SINC_ZEROS;
+		int rightExtent = (length - ioffset -1< SINC_ZEROS) ? length - ioffset -1: SINC_ZEROS;
 		pdata = data+1;
 		psinc = &sinc_table_[SINC_TABLESIZE-res];
 		while (rightExtent > 3) {
@@ -468,22 +465,23 @@ namespace psycle { namespace helpers { namespace dsp {
 	// Version with two tables, one of sinc, and one of deltas which is linearly interpolated
 	float cubic_resampler::sinc_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
+		const int ioffset = static_cast<int>(foffset);
 		uint32_t res = (offset - foffset) * SINC_RESOLUTION;
 		const float weight = l_table_[(offset - foffset) * CUBIC_RESOLUTION];
-		data += static_cast<int>(foffset);
+		data += ioffset;
 
 		//"Now" point. (would go on the left side of the sinc, but since we use a mirrored one, so we increase from zero)
 		float newval = (sinc_table_[res] + sinc_delta_[res] * weight) * *data;
 
 		//Past points (would go on the left side of the sinc, but since we use a mirrored one, so we increase from SINC_RESOLUTION)
 		int sincIndex = SINC_RESOLUTION + res;
-		const int leftExtent = (offset < SINC_ZEROS) ? offset + 1 : SINC_ZEROS;
+		const int leftExtent = (ioffset < SINC_ZEROS) ? ioffset + 1 : SINC_ZEROS;
 		for(int i(1); i < leftExtent; ++i, sincIndex += SINC_RESOLUTION)
 			newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data - i);
 
 		//Future points, we decrease from SINC_RESOLUTION, since they are approaching the "Now" point
 		sincIndex = SINC_RESOLUTION - res;
-		const int rightExtent = (length - offset -1< SINC_ZEROS) ? length - offset -1: SINC_ZEROS;
+		const int rightExtent = (length - ioffset -1< SINC_ZEROS) ? length - ioffset -1: SINC_ZEROS;
 		for(int i(0); i < rightExtent; ++i, sincIndex += SINC_RESOLUTION)
 			newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data + i);
 
@@ -498,7 +496,8 @@ namespace psycle { namespace helpers { namespace dsp {
 	#else
 		res *= SINC_ZEROS;
 	#endif
-		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points
+		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
+		//On the non-filtered version, we can just return the data
 		if (res == 0) return *data;
 
 		int16_t const * pdata = data;
@@ -526,15 +525,17 @@ namespace psycle { namespace helpers { namespace dsp {
 
 	float cubic_resampler::sinc_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
+		const int ioffset = static_cast<int>(foffset);
 		uint32_t res = (offset - foffset) * SINC_RESOLUTION;
 	#if defined OPTIMIZED_RES_SHIFT
 		res <<= OPTIMIZED_RES_SHIFT;
 	#else
 		res *= SINC_ZEROS;
 	#endif
-		data += static_cast<int>(foffset);
+		data += ioffset;
 
-		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points
+		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
+		//On the non-filtered version, we can just return the data
 		if (res == 0) return *data;
 
         float const * pdata = data;
@@ -542,7 +543,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		float newval = 0.0f;
 
 		//Current and Past points (would go on the left side of the sinc, but we use a mirrored one)
-		const int leftExtent = (offset < SINC_ZEROS) ? offset +1 : SINC_ZEROS;
+		const int leftExtent = (ioffset < SINC_ZEROS) ? ioffset +1 : SINC_ZEROS;
 		for(int i(0); i < leftExtent; ++i) {
 			newval += *psinc * *pdata;
 			pdata--;
@@ -552,7 +553,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		// future points decrease from SINC_RESOLUTION since they are reaching us.
 		pdata = data+1;
 		psinc = &sinc_table_[SINC_TABLESIZE-res];
-		const int rightExtent = (length - offset -1< SINC_ZEROS) ? length - offset -1: SINC_ZEROS;
+		const int rightExtent = (length - ioffset -1< SINC_ZEROS) ? length - ioffset -1: SINC_ZEROS;
 		for(int i(0); i < rightExtent; ++i) {
 			newval += *psinc * *pdata;
 			pdata++;
@@ -563,9 +564,141 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 #endif
 
+#if DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	float cubic_resampler::sinc_filtered(int16_t const * data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data) {
 		res >>= (32-SINC_RESOLUTION_LOG);
-		if (res==0) return *data;
+		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
+		//On the filtered version, we just use position 1 instead. (since we're upsampling, the filter needs to happen anyway)
+		if (res == 0) res++;
+
+		float newval = 0.0f;
+		register __m128 result =  _mm_setzero_ps();
+		int16_t const * pdata = data;
+		//Current and Past points. They increase from 0 because they are leaving us.
+		// (they would decrease from zero if it wasn't a mirrored sinc)
+	#if defined OPTIMIZED_RES_SHIFT
+		float *ppretab = &sinc_pre_table_[res << OPTIMIZED_RES_SHIFT];
+	#else
+		float *ppretab = &sinc_pre_table_[res *SINC_ZEROS];
+	#endif
+		double w = res * resampler_data->fcpidivperiodsize;
+		const double fcpi = resampler_data->fcpi;
+		while (leftExtent > 3) {
+			float vals[4];
+#if defined UNOPTIMIZED_SIN
+			vals[0] = sin(w);
+			w+=fcpi;
+			vals[1] = sin(w);
+			w+=fcpi; 
+			vals[2] = sin(w);
+			w+=fcpi;
+			vals[3] = sin(w);
+			w+=fcpi;
+#else 
+			vals[0] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals[1] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals[2] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals[3] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+#endif
+			register __m128 sin128 = _mm_loadu_ps(vals);
+			register __m128i data128 = _mm_set_epi32(pdata[-3],pdata[-2],pdata[-1],pdata[0]);
+			register __m128 datafloat = _mm_cvtepi32_ps(data128);
+	#if OPTIMIZED_RES_SHIFT > 1
+			register __m128 sincfloat = _mm_load_ps(ppretab);
+	#else
+			register __m128 sincfloat = _mm_loadu_ps(ppretab);
+	#endif
+			result = _mm_add_ps(result,_mm_mul_ps(datafloat,_mm_mul_ps(sin128,sincfloat)));
+			pdata-=4;
+			ppretab+=4;
+			leftExtent-=4;
+		}
+		while (leftExtent > 0) {
+#if defined UNOPTIMIZED_SIN
+			float sinc = sin(w) *  *ppretab;
+#else
+			if(w > math::pi) w -= 2.f * math::pi;
+			float sinc = math::fast_sin<4>(w) *  *ppretab;
+#endif
+			newval += sinc * *pdata;
+			pdata--;
+			ppretab++;
+			leftExtent--;
+			w += fcpi;
+		}
+		//Future points. They decrease from SINC_RESOLUTION since they are reaching the "Now" point.
+	#if defined OPTIMIZED_RES_SHIFT
+		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
+	#else
+		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res *SINC_ZEROS)];
+	#endif
+		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
+		pdata = data+1;
+		while (rightExtent > 3) {
+			float vals[4];
+#if defined UNOPTIMIZED_SIN
+			vals[0] = sin(w);
+			w+=fcpi;
+			vals[1] = sin(w);
+			w+=fcpi; 
+			vals[2] = sin(w);
+			w+=fcpi;
+			vals[3] = sin(w);
+			w+=fcpi;
+#else 
+			vals[0] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals[1] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals[2] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals[3] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+#endif
+			register __m128 sin128 = _mm_loadu_ps(vals);
+			register __m128i data128 = _mm_set_epi32(pdata[3],pdata[2],pdata[1],pdata[0]);
+			register __m128 datafloat = _mm_cvtepi32_ps(data128);
+	#if OPTIMIZED_RES_SHIFT > 1
+			register __m128 sincfloat = _mm_load_ps(ppretab);
+	#else
+			register __m128 sincfloat = _mm_loadu_ps(ppretab);
+	#endif
+			result = _mm_add_ps(result,_mm_mul_ps(datafloat,_mm_mul_ps(sin128,sincfloat)));
+			pdata+=4;
+			ppretab+=4;
+			rightExtent-=4;
+		}
+		while (rightExtent > 0) {
+#if defined UNOPTIMIZED_SIN
+			float sinc = sin(w) *  *ppretab;
+#else
+			if(w > math::pi) w -= 2.f * math::pi;
+			float sinc = math::fast_sin<4>(w) *  *ppretab;
+#endif
+			newval += sinc * *pdata;
+			pdata++;
+			ppretab++;
+			rightExtent--;
+			w += fcpi;
+		}
+
+		result = _mm_add_ps(result,_mm_movehl_ps(result, result));
+		result = _mm_add_ss(result,_mm_shuffle_ps(result, result, 0x11));
+		float newval2;
+		_mm_store_ss(&newval2, result);
+		return newval+newval2;
+	}
+
+#else
+	float cubic_resampler::sinc_filtered(int16_t const * data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data) {
+		res >>= (32-SINC_RESOLUTION_LOG);
+		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
+		//On the filtered version, we just use position 1 instead. (since we're upsampling, the filter needs to happen anyway)
+		if (res == 0) res++;
 
 		int16_t const * pdata = data;
 		float newval = 0.0f;
@@ -580,9 +713,12 @@ namespace psycle { namespace helpers { namespace dsp {
 		double w = res * resampler_data->fcpidivperiodsize;
 		const double fcpi = resampler_data->fcpi;
 		for(int i(0); i < leftExtent; ++i, w += fcpi) {
-			//double sinc = std::sin(w) *  *ppretab;
+#if defined UNOPTIMIZED_SIN
+			double sinc = std::sin(w) *  *ppretab;
+#else
 			while(w > math::pi) w -= 2.f * math::pi;
 			float sinc = math::fast_sin<4>(w) *  *ppretab;
+#endif
 			newval += sinc * *pdata;
 			pdata--;
 			ppretab++;
@@ -597,9 +733,12 @@ namespace psycle { namespace helpers { namespace dsp {
 		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
 		for(int i(0); i < rightExtent; ++i, w += fcpi) {
-			//double sinc = std::sin(w) *  *ppretab;
+#if defined UNOPTIMIZED_SIN
+			double sinc = std::sin(w) *  *ppretab;
+#else
 			while(w > math::pi) w -= 2.f * math::pi;
 			float sinc = math::fast_sin<4>(w) *  *ppretab;
+#endif
 			newval += sinc * *pdata;
 			pdata++;
 			ppretab++;
@@ -607,6 +746,7 @@ namespace psycle { namespace helpers { namespace dsp {
 
 		return newval;
 	}
+#endif
 
 	float cubic_resampler::soxr(int16_t const * dataIn, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
 		return 0.f;

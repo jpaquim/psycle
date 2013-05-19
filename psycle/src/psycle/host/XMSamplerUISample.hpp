@@ -21,6 +21,7 @@ public:
 	enum { IDD = IDD_XMSAMPLERUISAMPLE };
 
 protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // Compatibilidad con DDX o DDV
 	virtual BOOL OnInitDialog();
 
@@ -66,6 +67,7 @@ protected:
 	void SliderFinetune(CSliderCtrl* slid);
 	void FillPanDescription(int val);
 	void RefreshSampleList();
+	void RefreshSampleData();
 
 	XMSampler *m_pMachine;
 	XMInstrument::WaveData *m_pWave;

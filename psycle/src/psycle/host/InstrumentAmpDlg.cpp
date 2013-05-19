@@ -1,5 +1,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentAmpDlg.hpp"
+#include "XMSamplerUI.hpp"
 
 #include <psycle/host/Player.hpp>
 
@@ -30,6 +31,14 @@ void CInstrumentAmpDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CInstrumentAmpDlg, CDialog)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
+
+BOOL CInstrumentAmpDlg::PreTranslateMessage(MSG* pMsg)
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
+	return res;
+}
 
 BOOL CInstrumentAmpDlg::OnInitDialog() 
 {
@@ -115,10 +124,11 @@ void CInstrumentAmpDlg::SliderFadeout(CSliderCtrl* slid)
 	char tmp[64];
 
 //		1024 / getpos() = number of ticks that needs to decrease to 0.
-//		(24.0f * Global::player().bpm/60.0f) = number of ticks in a second.
-//		sprintf(tmp,"%.0fms",(float) (1024/m_SlFadeoutRes.GetPos()) / (24.0f * Global::player().bpm/60.0f));
+//      SamplesPerTick() / SampleRate() = seconds per tick
+//      *1000 -> milliseconds
 		if (m_SlFadeoutRes.GetPos() == 0) strcpy(tmp,"off");
-		else sprintf(tmp,"%.0fms",2560000.0f/ (Global::player().bpm *m_SlFadeoutRes.GetPos()) );
+		else sprintf(tmp,"%.0fms",(1024000.0f*Global::player().SamplesPerTick())
+			/(m_SlFadeoutRes.GetPos()*Global::player().SampleRate()) );
 
 	m_instr->VolumeFadeSpeed(m_SlFadeoutRes.GetPos()/1024.0f);
 	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->SetWindowText(tmp);

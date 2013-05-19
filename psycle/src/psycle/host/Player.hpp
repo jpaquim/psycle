@@ -112,6 +112,7 @@ namespace psycle
 			/// Sets the number of samples that it takes for each row of the pattern to be played
 			void SamplesPerRow(const int samplePerRow) {m_SamplesPerRow = samplePerRow;}
 			int SamplesPerRow() const { return m_SamplesPerRow; }
+			/// Samples per (tracker) tick.
 			int SamplesPerTick() const { return m_SamplesPerTick; }
 			int ExtraTicks() const { return m_extraTicks; }
 

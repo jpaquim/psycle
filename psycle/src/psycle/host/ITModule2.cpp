@@ -459,119 +459,104 @@ Special:  Bit 0: On = song message attached.
 
 			// volume envelope
 			xins.AmpEnvelope().Init();
-			
-			if(curH.volEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
-				xins.AmpEnvelope().IsEnabled(true);
-				if(curH.volEnv.flg& EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
-				if(curH.volEnv.flg& EnvFlags::USE_SUSTAIN){
-					xins.AmpEnvelope().SustainBegin(curH.volEnv.sustainS);
-					xins.AmpEnvelope().SustainEnd(curH.volEnv.sustainE);
-				}
+			xins.AmpEnvelope().IsEnabled(curH.volEnv.flg & EnvFlags::USE_ENVELOPE);
+			if(curH.volEnv.flg& EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
+			if(curH.volEnv.flg& EnvFlags::USE_SUSTAIN){
+				xins.AmpEnvelope().SustainBegin(curH.volEnv.sustainS);
+				xins.AmpEnvelope().SustainEnd(curH.volEnv.sustainE);
+			}
 
-				if(curH.volEnv.flg & EnvFlags::USE_LOOP){
-					xins.AmpEnvelope().LoopStart(curH.volEnv.loopS);
-					xins.AmpEnvelope().LoopEnd(curH.volEnv.loopE);
-				}
+			if(curH.volEnv.flg & EnvFlags::USE_LOOP){
+				xins.AmpEnvelope().LoopStart(curH.volEnv.loopS);
+				xins.AmpEnvelope().LoopEnd(curH.volEnv.loopE);
+			}
 
-				int envelope_point_num = curH.volEnv.numP;
-				if(envelope_point_num > 25){
-					envelope_point_num = 25;
-				}
+			int envelope_point_num = curH.volEnv.numP;
+			if(envelope_point_num > 25){
+				envelope_point_num = 25;
+			}
 
-				for(int i = 0; i < envelope_point_num;i++){
-					short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
-					xins.AmpEnvelope().Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
-				}
-
-			} else {
-				xins.AmpEnvelope().IsEnabled(false);
+			for(int i = 0; i < envelope_point_num;i++){
+				short envtmp = curH.volEnv.nodes[i].secondlo | (curH.volEnv.nodes[i].secondhi <<8);
+				xins.AmpEnvelope().Append(envtmp ,(float)curH.volEnv.nodes[i].first/ 64.0f);
 			}
 
 			// Pan envelope
 			xins.PanEnvelope().Init();
 
-			if(curH.panEnv.flg & EnvFlags::USE_ENVELOPE){// enable volume envelope
-				xins.PanEnvelope().IsEnabled(true);
-				if(curH.panEnv.flg& EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
-				if(curH.panEnv.flg& EnvFlags::USE_SUSTAIN){
-					xins.PanEnvelope().SustainBegin(curH.panEnv.sustainS);
-					xins.PanEnvelope().SustainEnd(curH.panEnv.sustainE);
-				}
-
-				if(curH.panEnv.flg & EnvFlags::USE_LOOP){
-					xins.PanEnvelope().LoopStart(curH.panEnv.loopS);
-					xins.PanEnvelope().LoopEnd(curH.panEnv.loopE);
-				}
-
-				int envelope_point_num = curH.panEnv.numP;
-				if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.
-					envelope_point_num = 25;
-				}
-
-				for(int i = 0; i < envelope_point_num;i++){
-					short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
-					xins.PanEnvelope().Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
-				}
-
-			} else {
-				xins.PanEnvelope().IsEnabled(false);
+			xins.PanEnvelope().IsEnabled(curH.panEnv.flg & EnvFlags::USE_ENVELOPE);
+			if(curH.panEnv.flg& EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
+			if(curH.panEnv.flg& EnvFlags::USE_SUSTAIN){
+				xins.PanEnvelope().SustainBegin(curH.panEnv.sustainS);
+				xins.PanEnvelope().SustainEnd(curH.panEnv.sustainE);
 			}
+
+			if(curH.panEnv.flg & EnvFlags::USE_LOOP){
+				xins.PanEnvelope().LoopStart(curH.panEnv.loopS);
+				xins.PanEnvelope().LoopEnd(curH.panEnv.loopE);
+			}
+
+			envelope_point_num = curH.panEnv.numP;
+			if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.
+				envelope_point_num = 25;
+			}
+
+			for(int i = 0; i < envelope_point_num;i++){
+				short pantmp = curH.panEnv.nodes[i].secondlo | (curH.panEnv.nodes[i].secondhi <<8);
+				xins.PanEnvelope().Append(pantmp,(float)(curH.panEnv.nodes[i].first)/ 32.0f);
+			}
+
 			// Pitch/Filter envelope
 			xins.PitchEnvelope().Init();
 			xins.FilterEnvelope().Init();
 
-			if(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE){// enable pitch/filter envelope
-				int envelope_point_num = curH.pitchEnv.numP;
-				if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.
-					envelope_point_num = 25;
-				}
+			envelope_point_num = curH.pitchEnv.numP;
+			if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.
+				envelope_point_num = 25;
+			}
 
-				if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
-				{
-					xins.FilterType(dsp::F_ITLOWPASS);
-					xins.FilterEnvelope().IsEnabled(true);
-					xins.PitchEnvelope().IsEnabled(false);
-					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
-					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
-						xins.FilterEnvelope().SustainBegin(curH.pitchEnv.sustainS);
-						xins.FilterEnvelope().SustainEnd(curH.pitchEnv.sustainE);
-					}
-
-					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
-						xins.FilterEnvelope().LoopStart(curH.pitchEnv.loopS);
-						xins.FilterEnvelope().LoopEnd(curH.pitchEnv.loopE);
-					}
-
-					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
-						xins.FilterEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
-					}
-					if ( xins.FilterCutoff() < 127 )
-					{
-						xins.FilterEnvAmount((-1)*xins.FilterCutoff());
-					} else { xins.FilterEnvAmount(-128); }
-				} else {
-					xins.PitchEnvelope().IsEnabled(true);
-					xins.FilterEnvelope().IsEnabled(false);
-					if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.PitchEnvelope().IsCarry(true);
-					if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
-						xins.PitchEnvelope().SustainBegin(curH.pitchEnv.sustainS);
-						xins.PitchEnvelope().SustainEnd(curH.pitchEnv.sustainE);
-					}
-
-					if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
-						xins.PitchEnvelope().LoopStart(curH.pitchEnv.loopS);
-						xins.PitchEnvelope().LoopEnd(curH.pitchEnv.loopE);
-					}
-
-					for(int i = 0; i < envelope_point_num;i++){
-						short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
-						xins.PitchEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
-					}
-				}
-			} else {
+			if (curH.pitchEnv.flg & EnvFlags::ISFILTER)
+			{
+				xins.FilterType(dsp::F_ITLOWPASS);
+				xins.FilterEnvelope().IsEnabled(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
 				xins.PitchEnvelope().IsEnabled(false);
+				if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.FilterEnvelope().IsCarry(true);
+				if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
+					xins.FilterEnvelope().SustainBegin(curH.pitchEnv.sustainS);
+					xins.FilterEnvelope().SustainEnd(curH.pitchEnv.sustainE);
+				}
+
+				if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
+					xins.FilterEnvelope().LoopStart(curH.pitchEnv.loopS);
+					xins.FilterEnvelope().LoopEnd(curH.pitchEnv.loopE);
+				}
+
+				for(int i = 0; i < envelope_point_num;i++){
+					short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+					xins.FilterEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
+				}
+				if ( xins.FilterCutoff() < 127 )
+				{
+					xins.FilterEnvAmount((-1)*xins.FilterCutoff());
+				} else { xins.FilterEnvAmount(-128); }
+			} else {
+				xins.PitchEnvelope().IsEnabled(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
 				xins.FilterEnvelope().IsEnabled(false);
+				if(curH.pitchEnv.flg& EnvFlags::ENABLE_CARRY) xins.PitchEnvelope().IsCarry(true);
+				if(curH.pitchEnv.flg& EnvFlags::USE_SUSTAIN){
+					xins.PitchEnvelope().SustainBegin(curH.pitchEnv.sustainS);
+					xins.PitchEnvelope().SustainEnd(curH.pitchEnv.sustainE);
+				}
+
+				if(curH.pitchEnv.flg & EnvFlags::USE_LOOP){
+					xins.PitchEnvelope().LoopStart(curH.pitchEnv.loopS);
+					xins.PitchEnvelope().LoopEnd(curH.pitchEnv.loopE);
+				}
+
+				for(int i = 0; i < envelope_point_num;i++){
+					short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
+					xins.PitchEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first)/ 32.0f);
+				}
 			}
 
 			xins.IsEnabled(true);
@@ -637,7 +622,7 @@ Special:  Bit 0: On = song message attached.
 
 
 //				Older method. conversion from speed to tune. Replaced by using the samplerate directly
-//				double tune = log(double(curH.c5Speed)/8363.0f)/log(double(2));
+//				double tune = log10(double(curH.c5Speed)/8363.0f)/log10(2.0);
 //				double maintune = floor(tune*12);
 //				double finetune = floor(((tune*12)-maintune)*100);
 
@@ -652,7 +637,7 @@ Special:  Bit 0: On = song message attached.
 				_wave.WaveName(sName);
 				_wave.PanEnabled(curH.dfp&0x80);
 				_wave.PanFactor((curH.dfp&0x7F)/64.0f);
-				_wave.VibratoAttack(curH.vibR);
+				_wave.VibratoAttack(curH.vibR==0?1:curH.vibR);
 				_wave.VibratoSpeed(curH.vibS);
 				_wave.VibratoDepth(curH.vibD);
 				_wave.VibratoType(exchwave[curH.vibT&3]);
@@ -1369,7 +1354,7 @@ OFFSET              Count TYPE   Description
 			_wave.WaveVolume(currHeader->vol * 2);
 
 //			Older method. conversion from speed to tune. Replaced by using the samplerate directly
-//			double tune = log(double(currHeader->c2speed)/8363.0f)/log(double(2));
+//			double tune = log10(double(currHeader->c2speed)/8363.0f)/log10(2.0);
 //			double maintune = floor(tune*12);
 //			double finetune = floor(((tune*12)-maintune)*100);
 

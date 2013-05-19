@@ -1,6 +1,8 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentGenDlg.hpp"
 #include "XMInstrument.hpp"
+#include "XMSamplerUI.hpp"
+#include "XMSamplerUIInst.hpp"
 
 
 namespace psycle { namespace host {
@@ -40,6 +42,14 @@ BEGIN_MESSAGE_MAP(CInstrumentGenDlg, CDialog)
 	ON_BN_CLICKED(IDC_INCREASEOCT,OnBtnIncreaseOct)
 	ON_BN_CLICKED(IDC_DECREASEOCT,OnBtnDecreaseOct)
 END_MESSAGE_MAP()
+
+BOOL CInstrumentGenDlg::PreTranslateMessage(MSG* pMsg)
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
+	return res;
+}
 
 BOOL CInstrumentGenDlg::OnInitDialog() 
 {
@@ -97,21 +107,28 @@ void CInstrumentGenDlg::OnEnChangeInsName()
 		TCHAR _buf[256];
 		m_InstrumentName.GetWindowText(_buf,sizeof(_buf));
 		m_instr->Name(_buf);
+		m_instr->IsEnabled(true);
+		XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
+		win->FillInstrumentList();
 	}
 }
 
 void CInstrumentGenDlg::OnCbnSelendokInsNnacombo()
 {
 	m_instr->NNA((XMInstrument::NewNoteAction::Type)m_NNA.GetCurSel());
+	m_instr->IsEnabled(true);
 }
 	
 void CInstrumentGenDlg::OnCbnSelendokInsDctcombo()
 {
-	m_instr->DCT((XMInstrument::DupeCheck::Type)m_DCT.GetCurSel());}
+	m_instr->DCT((XMInstrument::DupeCheck::Type)m_DCT.GetCurSel());
+	m_instr->IsEnabled(true);
+}
 
 void CInstrumentGenDlg::OnCbnSelendokInsDcacombo()
 {
 	m_instr->DCA((XMInstrument::NewNoteAction::Type)m_DCA.GetCurSel());
+	m_instr->IsEnabled(true);
 }
 
 void CInstrumentGenDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -152,6 +169,7 @@ void CInstrumentGenDlg::OnBtnSetDefaults()
 {
 	m_instr->SetDefaultNoteMap();
 	m_SampleAssign.Invalidate();
+	m_instr->IsEnabled(true);
 }
 void CInstrumentGenDlg::OnBtnSetSample()
 {
@@ -164,6 +182,9 @@ void CInstrumentGenDlg::OnBtnSetSample()
 		m_instr->NoteToSample(i, pair);
 	}
 	m_SampleAssign.Invalidate();
+	m_instr->IsEnabled(true);
+	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
+	win->FillInstrumentList();
 }
 void CInstrumentGenDlg::OnBtnIncreaseOct()
 {
@@ -173,6 +194,7 @@ void CInstrumentGenDlg::OnBtnIncreaseOct()
 		m_instr->NoteToSample(i, pair);
 	}
 	m_SampleAssign.Invalidate();
+	m_instr->IsEnabled(true);
 }
 void CInstrumentGenDlg::OnBtnDecreaseOct()
 {
@@ -182,5 +204,6 @@ void CInstrumentGenDlg::OnBtnDecreaseOct()
 		m_instr->NoteToSample(i, pair);
 	}
 	m_SampleAssign.Invalidate();
+	m_instr->IsEnabled(true);
 }
 }}

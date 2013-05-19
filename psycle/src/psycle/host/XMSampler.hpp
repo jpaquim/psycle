@@ -283,7 +283,7 @@ XMSampler::Channel::PerformFX().
 		const std::int16_t* m_pR;
 
 		helpers::dsp::resampler::work_unchecked_func_type resampler_work;
-		void* resampler_data;
+	void* resampler_data;
 		std::int16_t lBuffer[64*3];
 		std::int16_t rBuffer[64*3];
 		int requiredpre;
@@ -301,7 +301,8 @@ XMSampler::Channel::PerformFX().
 				DOSTEP	= 1, // normal operation, follow the steps.
 				HASLOOP	= 2, // Indicates that the envelope *has* a (normal) loop (not that it is playing it)
 				HASSUSTAIN	= 4, // This indicates that the envelope *has* a sustain (not that it is playing it)
-				RELEASE = 8  // Indicates that a Note-Off has been issued.
+				RELEASE = 8,  // Indicates that a Note-Off has been issued.
+				PAUSED = 16 // Indicates that it is either paused by user ( EE commands) or by loop
 			};
 		};
 		EnvelopeController(Voice& invoice):voice(invoice){};
@@ -320,7 +321,7 @@ XMSampler::Channel::PerformFX().
 
 		inline void Work()
 		{
-			if(m_Stage&EnvelopeStage::DOSTEP)
+			if(!(m_Stage&EnvelopeStage::PAUSED))
 			{
 				if(++m_Samples >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
 				{
@@ -332,7 +333,7 @@ XMSampler::Channel::PerformFX().
 							// if the begin==end, pause the envelope.
 							if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
 							{
-								m_Stage = EnvelopeStage::Type(m_Stage & ~EnvelopeStage::DOSTEP);
+								m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::PAUSED);
 							}
 							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
 						}
@@ -344,12 +345,12 @@ XMSampler::Channel::PerformFX().
 							// if the begin==end, pause the envelope.
 							if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
 							{
-								m_Stage = EnvelopeStage::Type(m_Stage & ~EnvelopeStage::DOSTEP);
+								m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::PAUSED);
 							}
 							else { m_PositionIndex = m_pEnvelope->LoopStart(); }
 						}
 					}
-					if (m_Stage & EnvelopeStage::DOSTEP) 
+					if (!(m_Stage&EnvelopeStage::PAUSED)) 
 					{
 						if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
 						{
@@ -383,7 +384,11 @@ XMSampler::Channel::PerformFX().
 		inline const XMInstrument::Envelope & Envelope()const {return *m_pEnvelope;}
 		inline EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
-		void SetPosition(const int posi) { m_PositionIndex=posi-1; m_Stage= EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP); m_Samples= m_NextEventSample-1; } // m_Samples=m_NextEventSample-1 only forces a recalc when entering Work().
+		void SetPosition(const int posi) { 
+			m_PositionIndex=posi-1; 
+			Continue();
+			m_Samples= m_NextEventSample-1;  // this forces a recalc when entering Work().
+		}
 		inline int GetPosition(void) const { return m_PositionIndex; }
 	private:
 		inline float SRateDeviation() const { return m_sRateDeviation; }
@@ -461,7 +466,7 @@ XMSampler::Channel::PerformFX().
 
 		// Do Auto Vibrato
 		void AutoVibrato();
-		bool IsAutoVibrato() const { return m_AutoVibratoAmount!=0; }
+		bool IsAutoVibrato() const { return rWave().Wave().IsAutoVibrato(); }
 		// Get Auto Vibrato Amount
 		double AutoVibratoAmount() const {return m_AutoVibratoAmount;}
 

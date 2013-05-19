@@ -1,5 +1,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentPitDlg.hpp"
+#include "XMSamplerUI.hpp"
 
 
 namespace psycle { namespace host {
@@ -23,6 +24,14 @@ void CInstrumentPitDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CInstrumentPitDlg, CDialog)
 	ON_WM_HSCROLL()
 END_MESSAGE_MAP()
+
+BOOL CInstrumentPitDlg::PreTranslateMessage(MSG* pMsg)
+{
+	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
+	return res;
+}
 
 BOOL CInstrumentPitDlg::OnInitDialog() 
 {
