@@ -154,9 +154,6 @@ Ex: Pitch slide down");
 
 	void XMSamplerUIGeneral::SliderPolyphony(CSliderCtrl* slid)
 	{
-		XMSampler::TESTspeed = 64.0/slid->GetPos();
-		return;
-
 		for(int c = _pMachine->NumVoices(); c < XMSampler::MAX_POLYPHONY; c++)
 		{
 			_pMachine->rVoice(c).NoteOffFast();
