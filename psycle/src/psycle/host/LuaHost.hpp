@@ -1,82 +1,64 @@
-///\file
-///\brief interface file for psycle::host::CSkinDlg.
 #pragma once
 #include <psycle/host/detail/project.hpp>
-#include "Global.hpp"
-#include "Machine.hpp"
+#include "plugininfo.hpp"
+#include "LuaArray.hpp"
 
 struct lua_State;
 
 namespace psycle { namespace host {
 
-class LuaPlugin : public Machine
-{
-public:
-	LuaPlugin(lua_State* state, int index);
-	virtual ~LuaPlugin();
-	void Free();
+class LuaPlugin;
 
-	virtual int GenerateAudioInTicks( int startSample, int numSamples );
-	virtual float GetAudioRange() const { return 32768.0f; }
-	virtual const char* const GetName(void) const { return productName.c_str(); }
-	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
-	virtual void SaveSpecificChunk(RiffFile * pFile);
-	virtual const char * const GetDllName() const throw() { return luaName.c_str(); }
+class LuaProxy {
+public:    
+    static const std::string meta_name;
+	static const std::string userdata_name;
 
-	//TODO: implement
-	virtual const std::string GetAuthor() { return authorName; }
-	virtual const std::uint32_t GetAPIVersion() { return 0; }
-	virtual const std::uint32_t GetPlugVersion() { return 0; }
-	bool const & IsSynth() const throw() { return _isSynth; }
+	LuaProxy(LuaPlugin* plug, lua_State* state);
+	~LuaProxy();
 
-	//TODO: implement
-	virtual void NewLine() { Machine::NewLine(); }
-	virtual void Tick(int track, PatternEntry * pData){}
-	virtual void Stop(){}
+	float get_parameter(int numparam);
+	const char* get_parameter_name(int numparam);
+	const char* get_parameter_display(int numparam);
+	const char* get_parameter_label(int numparam);
+	
+	void run_call_init(std::vector<float*>& sample_buf);
+	void call_seqtick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/);
+	void call_work(int num) throw (...);
+    void call_parameter(int numparameter, float val);
+	void call_stop();
 
-	//TODO: implement
-	virtual void GetParamRange(int numparam,int &minval, int &maxval) {minval=0; maxval=1;}
-	virtual int GetNumParams() {return 0; }
-	virtual int GetParamType(int numparam) { return 2; }
-	virtual void GetParamName(int numparam, char * parval){parval[0]='\0';}
-	virtual void GetParamValue(int numparam, char * parval){parval[0]='\0';}
-	virtual int GetParamValue(int numparam) {return 0;}
-	virtual bool SetParameter(int numparam, int value){ return false;}
-	virtual void SetParameter(int numparam, float value){}
-	virtual bool DescribeValue(int parameter, char * psTxt){psTxt[0]='\0'; return false; }
+	const PluginInfo& info() const { return info_; }
 
+	int num_parameter() const { return num_parameter_; }
+	void free_state();
+	void set_state(lua_State* state);
 
-protected:
-	lua_State * L;
+	void lock() const;
+    void unlock() const;
+private:
+	static int set_machine_info(lua_State* L);
+	static int set_parameter(lua_State* L);
+	static int message(lua_State* L);
+	void export_c_funcs();
 
+	// some call helper 
+	int GetRawParameter(const char* field, int index);
+	const char* GetString();
 
-	/// Indicates the lua script name
-	std::string luaName;
-	/// Indicates the name (product) of this script
-	std::string productName;
-	/// Indicates the author of this script
-	std::string authorName;
-	/// content of the script.
-	std::string scriptText;
-
-	bool        _isSynth;
+	PluginInfo info_;
+	int num_parameter_;
+	LuaPlugin *plug_;
+	lua_State* L;
+    LuaArrayBind array_bind_;
+	mutable CRITICAL_SECTION cs;
 };
 
 
-class LuaHost
-{
-public:
-	LuaHost();
-	~LuaHost();
-
-	static LuaPlugin* LoadPlugin(const char * sName, int macIdx);
-	static void freestate(lua_State* L);
-	static int getsample(lua_State* L);
-	static int setsample(lua_State* L);
-
-public:
-	static std::map<lua_State*, LuaPlugin*> host;
+struct LuaHost {
+   static lua_State* load_script(const char * sName);
+   static LuaPlugin* LoadPlugin(const char * sName, int macIdx);	
 };
 
-	}   // namespace
-}   // namespace
+}
+}

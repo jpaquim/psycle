@@ -10,6 +10,7 @@
 #include <psycle/host/Plugin.hpp>
 #include <psycle/host/VstHost24.hpp>
 #include <psycle/host/LuaHost.hpp>
+#include <psycle/host/LuaPlugin.hpp>
 
 #include <string>
 #include <sstream>

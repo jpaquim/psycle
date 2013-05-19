@@ -21,6 +21,7 @@
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
 #include "LuaHost.hpp"
+#include "LuaPlugin.hpp"
 
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/math.hpp>

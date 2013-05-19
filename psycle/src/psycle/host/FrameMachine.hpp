@@ -97,6 +97,8 @@ namespace host {
 			afx_msg void OnUpdateViewsShowtoolbar(CCmdUI *pCmdUI);
 			afx_msg void OnParametersCommand();
 			afx_msg void OnUpdateParametersCommand(CCmdUI *pCmdUI);
+			afx_msg void OnMachineReloadScript();
+			afx_msg void OnUpdateMachineReloadScript(CCmdUI *pCmdUI);
 			afx_msg void OnMachineAboutthismachine();
 			afx_msg void OnSelchangeProgram();
 			afx_msg void OnCloseupProgram();

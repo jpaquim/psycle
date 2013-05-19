@@ -9,6 +9,7 @@
 #include "MixerFrameView.hpp"
 #include "Plugin.hpp"
 #include "vsthost24.hpp"
+#include "LuaPlugin.hpp"
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
 
@@ -73,6 +74,8 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_VIEWS_SHOWTOOLBAR, OnUpdateViewsShowtoolbar)
 			ON_COMMAND(ID_MACHINE_COMMAND, OnParametersCommand)
 			ON_UPDATE_COMMAND_UI(ID_MACHINE_COMMAND, OnUpdateParametersCommand)
+			ON_COMMAND(ID_PARAMETERS_VIEWS_RELOAD, OnMachineReloadScript)
+			ON_UPDATE_COMMAND_UI(ID_PARAMETERS_VIEWS_RELOAD, OnUpdateMachineReloadScript)
 			ON_COMMAND(ID_ABOUT_ABOUTMAC, OnMachineAboutthismachine)
 			ON_LBN_SELCHANGE(ID_COMBO_PRG, OnSelchangeProgram)
 			ON_CBN_CLOSEUP(ID_COMBO_PRG, OnCloseupProgram)
@@ -479,6 +482,23 @@ namespace psycle { namespace host {
 			}
 		}
 
+		void CFrameMachine::OnMachineReloadScript()
+		{
+			if ( _machine->_type == MACH_LUA)
+			{
+				dynamic_cast<LuaPlugin*>(_machine)->ReloadScript();
+			}
+		}
+		void CFrameMachine::OnUpdateMachineReloadScript(CCmdUI *pCmdUI)
+		{
+			if ( _machine->_type == MACH_LUA)
+			{
+				pCmdUI->Enable(true);
+			}
+			else {
+				pCmdUI->Enable(false);
+			}
+		}
 		void CFrameMachine::OnMachineAboutthismachine() 
 		{
 			if ( _machine->_type == MACH_PLUGIN)
