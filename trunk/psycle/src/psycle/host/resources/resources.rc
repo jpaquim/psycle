@@ -92,7 +92,7 @@ IDR_FRAMEMACHINE MENU
 BEGIN
     POPUP "Programs"
     BEGIN
-        MENUITEM "Open preset",                 ID_PROGRAMS_OPENPRESET
+        MENUITEM "Open &preset\tALT+P",         ID_PROGRAMS_OPENPRESET
         MENUITEM "Save preset",                 ID_PROGRAMS_SAVEPRESET
         MENUITEM SEPARATOR
         POPUP "Select bank"
@@ -118,6 +118,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Help",                        ID_MACHINE_COMMAND
         MENUITEM "Machine info",                ID_ABOUT_ABOUTMAC
+        MENUITEM "&Reload\tAlt+R",              ID_PARAMETERS_VIEWS_RELOAD
     END
 END
 
@@ -406,7 +407,8 @@ END
 
 IDR_FRAMEMACHINE ACCELERATORS 
 BEGIN
-    "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_PARAMETERS_SHOWPRESET, VIRTKEY, ALT, NOINVERT
+    "R",            ID_PARAMETERS_VIEWS_RELOAD, VIRTKEY, ALT, NOINVERT
 END
 
 IDR_WAVEFRAME ACCELERATORS 

@@ -1096,6 +1096,8 @@
 #define ID_Menu                         34282
 #define IDC_FULL_SCREEN                 34283
 #define ID_CONFIGURATION_REGENERATEPLUGINCACHE 34284
+#define ID_VIEWS_RELOAD                 34285
+#define ID_PARAMETERS_VIEWS_RELOAD      34286
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1104,7 +1106,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        321
-#define _APS_NEXT_COMMAND_VALUE         34285
+#define _APS_NEXT_COMMAND_VALUE         34288
 #define _APS_NEXT_CONTROL_VALUE         2111
 #define _APS_NEXT_SYMED_VALUE           63
 #endif

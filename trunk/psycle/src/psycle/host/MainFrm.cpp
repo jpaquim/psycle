@@ -620,6 +620,7 @@ namespace psycle { namespace host {
 					case MACH_DUPLICATOR:
                     case MACH_DUPLICATOR2:
 					case MACH_MIXER:
+					case MACH_LUA:
 						{
 							CFrameMachine* newwin;
 							m_pWndMac[tmac] = newwin = new CFrameMachine(ma, &m_wndView, &m_pWndMac[tmac]);
