@@ -19,7 +19,6 @@ class XMSampler : public Machine
 public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
-	static const int MAX_INSTRUMENT = 255;///< max instrument
 	static const std::uint32_t VERSION = 0x00010001;
 	static const std::uint32_t VERSION_ONE = 0x00010000;
 
@@ -180,6 +179,7 @@ XMSampler::Channel::PerformFX().
 		virtual void DisposeResampleData(const helpers::dsp::resampler& resampler);
 		virtual void RecreateResampleData(const helpers::dsp::resampler& resampler);
 		virtual void RefillBuffers();
+		virtual void RefillBuffer(std::int16_t buffer[192], const std::int16_t* data);
 		virtual void NoteOff(void);
 		virtual int PreWork(int numSamples, WorkFunction* pWork);
 		static void WorkMonoStatic(WaveDataController& contr,float *pLeftw,float *pRightw) { contr.WorkMono(pLeftw, pRightw);}
@@ -204,6 +204,7 @@ XMSampler::Channel::PerformFX().
 		inline void WorkStereo(float *pLeftw,float *pRightw)
 		{
 			//Process sample
+			//todo: sinc resampling would benefit from having a stereo version of resampler_work
 			*pLeftw  = resampler_work(m_pL, m_Position.LowPart, resampler_data);
 			*pRightw = resampler_work(m_pR, m_Position.LowPart, resampler_data);
 			/*
@@ -245,18 +246,18 @@ XMSampler::Channel::PerformFX().
 			m_SpeedInternal = (CurrentLoopDirection() == LoopDirection::FORWARD) ? m_Speed : -1*m_Speed;
 		}
 
-		inline int CurrentLoopDirection() const {return m_CurrentLoopDirection;}
-		virtual void CurrentLoopDirection(const int dir){m_CurrentLoopDirection = dir;}
+		inline LoopDirection::Type CurrentLoopDirection() const {return m_CurrentLoopDirection;}
+		virtual void CurrentLoopDirection(const LoopDirection::Type dir){m_CurrentLoopDirection = dir;}
 
-		inline int LoopType() const {return m_pWave->WaveLoopType();}
-		inline int LoopStart() const {return m_pWave->WaveLoopStart();}
-		inline int LoopEnd() const { return m_pWave->WaveLoopEnd();}
+		inline XMInstrument::WaveData::LoopType::Type LoopType() const {return m_pWave->WaveLoopType();}
+		inline std::uint32_t LoopStart() const {return m_pWave->WaveLoopStart();}
+		inline std::uint32_t LoopEnd() const { return m_pWave->WaveLoopEnd();}
 
-		inline int SustainLoopType() const {return m_pWave->WaveSusLoopType();}
-		inline int SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
-		inline int SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
+		inline XMInstrument::WaveData::LoopType::Type SustainLoopType() const {return m_pWave->WaveSusLoopType();}
+		inline std::uint32_t SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
+		inline std::uint32_t SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
 
-		inline int Length() const {return m_pWave->WaveLength();}
+		inline std::uint32_t Length() const {return m_pWave->WaveLength();}
 
 		inline bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
@@ -274,20 +275,21 @@ XMSampler::Channel::PerformFX().
 		std::int64_t m_SpeedInternal;
 		bool m_Playing;
 
-		int m_CurrentLoopType;
+		XMInstrument::WaveData::LoopType::Type m_CurrentLoopType;
 		int m_CurrentLoopEnd;
 		int m_CurrentLoopStart;
-		int m_CurrentLoopDirection;
+		LoopDirection::Type m_CurrentLoopDirection;
 
 		const std::int16_t* m_pL;
 		const std::int16_t* m_pR;
 
 		helpers::dsp::resampler::work_unchecked_func_type resampler_work;
-	void* resampler_data;
+		void* resampler_data;
+
 		std::int16_t lBuffer[64*3];
 		std::int16_t rBuffer[64*3];
-		int requiredpre;
-		int requiredpost;
+		//int requiredpre;  //Currently assumed to be the highest one, i.e. SINC sizes.
+		//int requiredpost;
 	};
 
 //////////////////////////////////////////////////////////////////////////
@@ -1003,7 +1005,7 @@ XMSampler::Channel::PerformFX().
 	int SampleRate() const { return m_sampleRate; }
 	virtual bool NeedsAuxColumn() { return true; }
 	virtual const char* AuxColumnName(int idx) const;
-	virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENT;}
+	virtual int NumAuxColumnIndexes() { return XMInstrument::MAX_INSTRUMENT;}
 
 	virtual bool Load(RiffFile* riffFile); // Old fileformat
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);

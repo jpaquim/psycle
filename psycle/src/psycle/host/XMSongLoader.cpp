@@ -887,8 +887,6 @@ namespace host{
 		}
 		_wave.PanEnabled(true);
 		_wave.PanFactor(iPanning/255.0f);
-//		XMInstrument::WaveData& _data = sampler.Instrument(iInstrIdx).rWaveData(0).
-//		sampler.Instrument(iInstrIdx).rWaveData()..Name() = sName;
 		
 		if(bLoop)
 		{
@@ -915,7 +913,7 @@ namespace host{
 			_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
 		}
 
-
+		_wave.WaveSampleRate(8363);
 		_wave.WaveVolume(iVol * 2);
 		_wave.WaveTune(iRelativeNote);
 		_wave.WaveFineTune(iFineTune/1.28); // WaveFineTune has +-100 range in Psycle.
@@ -984,8 +982,7 @@ namespace host{
 			inst.AmpEnvelope().IsEnabled(true);
 			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
 			// volumefadespeed in this case, so that a check during playback time is not needed.
-			inst.VolumeFadeSpeed
-				((float)sampleHeader.volfade / 32768.0f);
+			inst.VolumeFadeSpeed((float)sampleHeader.volfade / 32768.0f);
 			
 			int envelope_point_num = sampleHeader.vnum;
 			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.
@@ -1495,7 +1492,7 @@ namespace host{
 		m_Samples[iInstrIdx].sampleLength = smpLen[iInstrIdx];
 		m_Samples[iInstrIdx].finetune = ReadUInt1();
 		m_Samples[iInstrIdx].volume = ReadUInt1();
-		m_Samples[iInstrIdx].loopStart =(ReadUInt1()*256+ReadUInt1())*2; 
+		m_Samples[iInstrIdx].loopStart =((ReadUInt1()*256+ReadUInt1())*2); 
 		m_Samples[iInstrIdx].loopLength = (ReadUInt1()*256+ReadUInt1())*2; 
 
 		// parse
@@ -1520,6 +1517,7 @@ namespace host{
 		}
 
 		_wave.WaveVolume(m_Samples[iInstrIdx].volume * 2);
+		_wave.WaveSampleRate(8363);
 		char tmpfine = (char)m_Samples[iInstrIdx].finetune;
 		if (tmpfine > 7 ) tmpfine -= 16;
 		_wave.WaveFineTune(tmpfine*12.5);// finetune has +-100 range in Psycle

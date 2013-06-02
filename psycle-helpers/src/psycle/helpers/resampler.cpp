@@ -90,6 +90,38 @@ namespace psycle { namespace helpers { namespace dsp {
 	// }
 	}
 
+	void cubic_resampler::quality(quality::type quality)
+	{
+		quality_ = quality;
+		switch(quality) {
+			case quality::zero_order:
+			work = zoh;
+			work_unchecked = zoh_unchecked;
+			work_float = zoh_float;
+			break;
+		case quality::linear:
+			work = linear;
+			work_unchecked = linear_unchecked;
+			work_float = linear_float;
+			break;
+		case quality::spline:
+			work = spline;
+			work_unchecked = spline_unchecked;
+			work_float = spline_float;
+			break;
+		case quality::sinc:
+			work = sinc;
+			work_unchecked = sinc_unchecked;
+			work_float = sinc_float;
+			break;
+		case quality::soxr:
+			work = soxr;
+			work_unchecked = zoh_unchecked;
+			work_float = zoh_float;
+			break;
+		}
+	}
+
 	void * cubic_resampler::GetResamplerData() const {
 		if (quality() == quality::sinc) {
 			sinc_data_t* t = new sinc_data_t();
@@ -248,8 +280,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		float yo = (offset == 0) ? 0 : *(data - 1);
 		float y0 = *data;
 		float y1,y2;
-		if (ioffset < length-2) { y1=data[1];y2=data[2]; }
-		else if (ioffset < length-1) { y1 = data[1]; y2=0; }
+		if (offset < length-2) { y1=data[1];y2=data[2]; }
+		else if (offset < length-1) { y1 = data[1]; y2=0; }
 		else { y1 = 0; y2 = 0; }
 		float *table = &cubic_table_[res];
 		return table[0] * yo + table[1] * y0 + table[2] * y1 + table[3] * y2;

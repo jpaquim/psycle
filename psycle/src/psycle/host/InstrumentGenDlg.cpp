@@ -1,7 +1,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentGenDlg.hpp"
 #include "XMInstrument.hpp"
-#include "XMSamplerUI.hpp"
+#include "InstrumentEditorUI.hpp"
 #include "XMSamplerUIInst.hpp"
 
 
@@ -45,7 +45,7 @@ END_MESSAGE_MAP()
 
 BOOL CInstrumentGenDlg::PreTranslateMessage(MSG* pMsg)
 {
-	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent()->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;

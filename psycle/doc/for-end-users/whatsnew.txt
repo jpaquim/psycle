@@ -47,17 +47,18 @@ Legend :       + = addition        * = change        ! = bugfix
 v1.10.2
 --------
 + New plugin host: Lua script based.
+* Wave editor now shows the wave interpolated/reconstructed (spline/sinc). Top (smaller version) still shows raw points.
 * Sampulse: Correct support for mcm command (commands applied at the same time, instead of one after another).
 * Sampulse: Improved loaders of module formats to support mcm and better support for the speed command. (See FEEx command)
 * Sampulse: Filter algorithm changed again. Now based on SchismTracker's one.
-* Sampulse: Combined classic Sampler and Sampulse sample banks. This allows to use the wave editor with Sampulse.
+* Sampulse/Sampler: Combined classic Sampler and Sampulse samples. Also, new Instrument window with both instrument settings included. As such, now the wave editor can show sampulse samples
 * Sampulse/Sampler: Improvements in the dialogs of both machines. Also fixed loaders of .xi and .iti instruments.
 * Sampulse/Sampler: Samplerate can now be set and is used. Also in XMSongExport.
 * Sampulse/Sampler: Much improved sinc resampling mode (correct windowing, filter when downsample, increased from 8 to 32 taps and increased from 512 to 16384points the sinc period). The rest of the resampling modes are faster now.
 * Improvements in ASIODriver and MidiInput.
 * Changes in the display of Wire dialog: RMS and Peak VU, better Oscilloscope, New Power spectrum and improved phase bars.
 * (source-code) Improvements on data casting, type usage and array sizes.
-! Sampulse: Fixes in filter commands, voice allocations and several commands.
+! Sampulse: Fixes in filter commands, voice allocations and several other pattern commands, better playback of looped samples, volume/panning ramped.
 ! ASIO: Ensure driver is stopped when refreshing port names.
 ! Fixed machine exchange (crash restoring wires)
 ! Touches in m3 to try, once more, to avoid crashes.

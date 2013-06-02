@@ -1,10 +1,9 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUISample.hpp"
-#include <psycle/host/XMSampler.hpp>
 #include <psycle/host/Song.hpp>
 #include <psycle/host/player.hpp>
 #include <psycle/host/PsycleConfig.hpp>
-#include "XMSamplerUI.hpp"
+#include "InstrumentEditorUI.hpp"
 #include "MainFrm.hpp"
 
 namespace psycle { namespace host {
@@ -17,7 +16,6 @@ IMPLEMENT_DYNAMIC(XMSamplerUISample, CPropertyPage)
 XMSamplerUISample::XMSamplerUISample()
 : CPropertyPage(XMSamplerUISample::IDD)
 , m_Init(false)
-, m_pMachine(NULL)
 , m_pWave(NULL)
 {
 }
@@ -59,7 +57,7 @@ END_MESSAGE_MAP()
 
 BOOL XMSamplerUISample::PreTranslateMessage(MSG* pMsg) 
 {
-	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent());
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
 	return res;
@@ -106,7 +104,7 @@ void XMSamplerUISample::RefreshSampleList()
 	int i = m_SampleList.GetCurSel();
 	m_SampleList.ResetContent();
 	SampleList& list = Global::song().samples;
-	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
+	for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
 	{
 		char line[48];
 		if (list.Exists(i)) {
@@ -214,7 +212,7 @@ void XMSamplerUISample::OnBnClickedSave()
 
 void XMSamplerUISample::OnBnClickedDupe()
 {
-	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
+	for (int j=0;j<XMInstrument::MAX_INSTRUMENT;j++)
 	{
 		if (Global::song().samples.Exists(j) == false ) 
 		{
@@ -254,7 +252,7 @@ void XMSamplerUISample::OnEnChangeSamplerate()
 		CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
 		cedit->GetWindowText(tmp,40);
 		int i = atoi(tmp);
-		if (i==0) i=8363;
+		if (i==0) i=44100;
 		rWave().WaveSampleRate(i);
 	}
 }

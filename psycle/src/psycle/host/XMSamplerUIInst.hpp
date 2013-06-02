@@ -22,10 +22,7 @@ public:
 	virtual ~XMSamplerUIInst();
 
 	/// Dialog ID
-	enum { IDD = IDD_XMSAMPLERUIINST };
-
-	void pMachine(XMSampler * const p){m_pMachine = p;};
-	XMSampler * const pMachine(){return m_pMachine;};
+	enum { IDD = IDD_INST_SAMPULSE_INSTRUMENT };
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -51,7 +48,6 @@ private:
 public:
 	void FillInstrumentList();
 private:
-	XMSampler *m_pMachine;
 	bool m_bInitialized;
 	int		m_iCurrentSelected;
 

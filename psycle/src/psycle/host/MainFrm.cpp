@@ -52,10 +52,11 @@ namespace psycle { namespace host {
 		};
 
 		CMainFrame::CMainFrame()
+			:m_wndInst(NULL)
+			,_pSong(NULL)
+			,pGearRackDialog(NULL)
 		{
 			PsycleGlobal::inputHandler().SetMainFrame(this);
-			_pSong = 0;
-			pGearRackDialog = 0;
 			for(int c=0;c<MAX_MACHINES;c++) m_pWndMac[c]=NULL;
 		}
 
@@ -218,11 +219,6 @@ namespace psycle { namespace host {
 			// MIDI monitor Dialog
 			m_midiMonitorDlg.Create(IDD_MIDI_MONITOR,this);
 			
-			// Instrument editor
-			m_wndInst.pSong=_pSong;
-			m_wndInst.pParentMain=this;
-			m_wndInst.Create(IDD_INSTRUMENT,this);
-			m_wndInst.Validate();
 			// Wave Editor Window
 			m_pWndWed = new CWaveEdFrame(*this->_pSong,this);
 			m_pWndWed->LoadFrame(IDR_WAVEFRAME ,WS_OVERLAPPEDWINDOW, this);
@@ -368,13 +364,13 @@ namespace psycle { namespace host {
 		{
 			m_wndInfo.DestroyWindow();
 			m_midiMonitorDlg.DestroyWindow();
-			m_wndInst.DestroyWindow();
 			m_wndToolBar.DestroyWindow();
 			m_songBar.DestroyWindow();
 			m_machineBar.DestroyWindow();
 			m_seqBar.DestroyWindow();
 			// m_pWndWed->DestroyWindow(); is called by the default CWnd::DestroyWindow() function, and the memory freed by subsequent CWnd::OnPostNCDestroy()
 			m_wndView.DestroyWindow();
+			// m_wndInst is autodeleted when closed.
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
 			DragAcceptFiles(false);
@@ -510,6 +506,12 @@ namespace psycle { namespace host {
 			m_midiMonitorDlg.SetActiveWindow();
 		}
 
+		void CMainFrame::UpdateInstrumentEditor()
+		{
+			if(m_wndInst != NULL) {
+				m_wndInst->UpdateUI();
+			}
+		}
 		void CMainFrame::ShowInstrumentEditor()
 		{
 			CComboBox *cc2=(CComboBox *)m_machineBar.GetDlgItem(IDC_AUXSELECT);
@@ -519,9 +521,18 @@ namespace psycle { namespace host {
 
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
-			m_wndInst.WaveUpdate();
-			m_wndInst.ShowWindow(SW_SHOWNORMAL);
-			m_wndInst.SetActiveWindow();
+			if (m_wndInst == NULL) {
+				m_wndInst = new InstrumentEditorUI("Instrument Window",this);
+				m_wndInst->Init(&m_wndInst);
+				m_wndInst->Create(this);
+			}
+			else {
+				m_wndInst->ShowWindow(SW_SHOW);
+				m_wndInst->SetActiveWindow();
+			}
+			// Instrument editor
+			m_wndInst->UpdateUI();
+			m_wndInst->SetActiveWindow();
 		}
 
 		void CMainFrame::OnPsyhelp() 

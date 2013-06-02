@@ -23,6 +23,8 @@
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
+#include "LuaHost.hpp"
+#include "LuaPlugin.hpp"
 
 #include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/value_mapper.hpp>
@@ -954,6 +956,66 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					else pMachine = new Dummy(index);
 				}
 				break;
+				case MACH_LUA:
+				  if(fullopen)
+					{
+						std::string sPath;
+						LuaPlugin *luaPlug=0;
+						int shellIdx=0;
+
+						if(!Global::machineload().lookupDllName(dllName,sPath,MACH_LUA,shellIdx)) 
+						{
+							// Check Compatibility Table.
+							// Probably could be done with the dllNames lookup.
+							//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+							sPath = dllName;
+						}
+						if(Global::machineload().TestFilename(sPath,shellIdx) ) 
+						{
+							try
+							{
+								luaPlug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(sPath.c_str(),shellIdx));								
+							}
+							catch(const std::runtime_error & e)
+							{
+								std::ostringstream s; s << typeid(e).name() << std::endl;
+								if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+								loggers::exception()(s.str());
+							}
+							//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
+							catch(const std::exception & e)
+							{
+								loggers::exception()(e.what());
+							}
+							catch(...)
+							{
+	#ifndef NDEBUG 
+								throw;
+	#else
+								loggers::exception()("unknown exception");
+	#endif
+							}
+						}
+
+						if(!luaPlug)
+						{
+#if !defined WINAMP_PLUGIN
+							char sError[MAX_PATH + 100];
+							sprintf(sError,"Replacing Lua plug-in \"%s\" with Dummy.",dllName);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
+#endif //!defined WINAMP_PLUGIN
+							pMachine = new Dummy(index);
+							// ((Dummy*)pMachine)->wasVST=true;
+							bDeleted = true;
+						}
+						else
+						{
+							luaPlug->_macIndex=index;
+							pMachine = luaPlug;
+						}
+					}
+					else pMachine = new Dummy(index);				
+				break;			
 			case MACH_VST:
 			case MACH_VSTFX:
 				{

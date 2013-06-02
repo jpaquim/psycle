@@ -400,6 +400,7 @@ struct SYNPAR
 // normal synth
 struct OSCPAR
 {
+	//FIXME:  64bit portability!!!! This causes a difference in size in CMachineInterface.GetDataSize()!!!
 	float *pWave[2];
 	float *poscplfowave;
 	float *poscwlfowave;
@@ -478,6 +479,7 @@ struct OSCVALS
 struct SYNPAR
 {
 	int version;
+	//FIXME:  64bit portability!!!! This causes a difference in size in CMachineInterface.GetDataSize()!!!
 	float *ptremolo_wave;
 	float *pvibrato_wave;
 	float *pgain_lfo_wave;

@@ -17,7 +17,7 @@ public:
 	virtual ~XMSamplerMixerPage();
 
 // Datos del cuadro de diálogo
-	enum { IDD = IDD_XMSAMPLER_MIXER };
+	enum { IDD = IDD_GEAR_SAMPULSE_MIXER };
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

@@ -12,7 +12,7 @@ namespace psycle { namespace host {
 		public:
 			WasapiConfig(CWnd* pParent = 0);
 		// Dialog Data
-			enum { IDD = IDD_WASAPI_CONFIG };
+			enum { IDD = IDD_CONFIG_WASAPI };
 			CComboBox	m_driverComboBox;
 			CStatic	m_latency;
 			CComboBox	m_sampleRateCombo;

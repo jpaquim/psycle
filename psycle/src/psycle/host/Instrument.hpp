@@ -75,8 +75,6 @@ namespace psycle
 			bool _RPAN;
 			bool _RCUT;
 			bool _RRES;
-
-			char _sName[32];
 		};
 	}
 }

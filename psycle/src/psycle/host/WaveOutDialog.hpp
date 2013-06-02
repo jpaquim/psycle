@@ -12,7 +12,7 @@ namespace psycle { namespace host {
 		{
 		public:
 			CWaveOutDialog(CWnd * pParent = 0);
-			enum { IDD = IDD_WAVEOUTCONFIG };
+			enum { IDD = IDD_CONFIG_WAVEOUT };
 			CComboBox	m_deviceList;
 			CComboBox	m_sampleRateBox;
 			CComboBox	m_bitDepthBox;

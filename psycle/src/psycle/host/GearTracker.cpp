@@ -27,7 +27,8 @@ namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CGearTracker, CDialog)
 			ON_WM_CLOSE()
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawTrackslider2)
+			ON_WM_HSCROLL()
+			ON_NOTIFY(NM_CUSTOMDRAW, IDC_TRACKSLIDER2, OnCustomdrawNumVoices)
 			ON_CBN_SELCHANGE(IDC_COMBO1, OnSelchangeCombo1)
 			ON_BN_CLICKED(IDC_DEFAULTC4, OnDefaultC4)
 		END_MESSAGE_MAP()
@@ -57,22 +58,43 @@ namespace psycle { namespace host {
 			return TRUE;
 		}
 
-		void CGearTracker::OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CGearTracker::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
-			*pResult = 0;
-		}
-
-		void CGearTracker::OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			// Assign new value
-			machine._numVoices = m_polyslider.GetPos();
-
-			for(int c=0; c<SAMPLER_MAX_POLYPHONY; c++)
+			int voices = machine._numVoices;
+			switch(nSBCode)
 			{
-				machine.NoteOffFast(c);
+				case SB_TOP:
+					voices=0;
+					break;
+				case SB_BOTTOM:
+					voices=SAMPLER_MAX_POLYPHONY;
+					break;
+				case SB_LINERIGHT:
+				case SB_PAGERIGHT:
+					if ( voices < SAMPLER_MAX_POLYPHONY) { voices++; }
+					break;
+				case SB_LINELEFT:
+				case SB_PAGELEFT:
+					if ( voices>0 ) { voices--; }
+					break;
+				case SB_THUMBPOSITION:
+				case SB_THUMBTRACK:
+					voices=(int)std::max(0,std::min((int)nPos,SAMPLER_MAX_POLYPHONY));
+					break;
+				default: 
+					break;
 			}
-
-			// Label on dialog display
+			if (voices != machine._numVoices) {
+				machine._numVoices = m_polyslider.GetPos();
+				for(int c=machine._numVoices; c<SAMPLER_MAX_POLYPHONY; c++)
+				{
+					machine.NoteOffFast(c);
+				}
+			}
+			CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
+		}
+		void CGearTracker::OnCustomdrawNumVoices(NMHDR* pNMHDR, LRESULT* pResult) 
+		{
 			char buffer[8];
 			sprintf(buffer, "%d", machine._numVoices);
 			m_polylabel.SetWindowText(buffer);

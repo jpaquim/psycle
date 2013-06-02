@@ -112,16 +112,8 @@ namespace psycle { namespace host {
 				}
 				for (b=0; b<MAX_BUSES; b++) // Check Generators
 				{
-					if(Global::song()._pMachine[b])
-					{
-						sprintf(buffer,"%.2X: %s",b,Global::song()._pMachine[b]->_editName);
-						m_list.AddString(buffer);
-					}
-					else
-					{
-						sprintf(buffer,"%.2X: empty",b);
-						m_list.AddString(buffer);
-					}
+					sprintf(buffer,"%.2X: %s",b,Global::song()._pMachine[b] ? Global::song()._pMachine[b]->_editName :"empty");
+					m_list.AddString(buffer);
 				}
 				break;
 			case 1:
@@ -142,20 +134,12 @@ namespace psycle { namespace host {
 				}
 				for (b=MAX_BUSES; b<MAX_BUSES*2; b++) // Write Effects Names.
 				{
-					if(Global::song()._pMachine[b])
-					{
-						sprintf(buffer,"%.2X: %s",b,Global::song()._pMachine[b]->_editName);
-						m_list.AddString(buffer);
-					}
-					else
-					{
-						sprintf(buffer,"%.2X: empty",b);
-						m_list.AddString(buffer);
-					}
+					sprintf(buffer,"%.2X: %s",b,Global::song()._pMachine[b] ? Global::song()._pMachine[b]->_editName : "empty");
+					m_list.AddString(buffer);
 				}
 				break;
 			case 2:
-				m_text.SetWindowText("Sample Instruments");
+				m_text.SetWindowText("Sampled instruments");
 				m_props.SetWindowText("Wave Editor");
 				m_radio_gen.SetCheck(0);
 				m_radio_efx.SetCheck(0);
@@ -164,20 +148,16 @@ namespace psycle { namespace host {
 				char buffer[64];
 				for (int b=0;b<PREV_WAV_INS;b++)
 				{
-					sprintf(buffer, "%.2X: %s", b, Global::song()._pInstrument[b]->_sName);
+					sprintf(buffer, "%.2X: %s", b, Global::song().samples.IsEnabled(b) ? Global::song().samples[b].WaveName().c_str(): "empty");
 					m_list.AddString(buffer);
 				}
 				CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-				if (cc->GetCurSel() == AUX_INSTRUMENT)
-				{
-					selected = Global::song().instSelected;
-				}
-				else
+				if (cc->GetCurSel() != AUX_INSTRUMENT)
 				{
 					cc->SetCurSel(AUX_INSTRUMENT);
 					mainFrame->UpdateComboIns(true);
-					selected = Global::song().instSelected;
 				}
+				selected = Global::song().instSelected;
 				break;
 			}
 			m_list.ShowWindow(SW_SHOW);
@@ -210,7 +190,7 @@ namespace psycle { namespace host {
 						Global::song().instSelected = Global::song().auxcolSelected=tmac;
 						mainFrame->UpdateComboIns(true);
 					}
-					mainFrame->m_wndInst.WaveUpdate();
+					mainFrame->UpdateInstrumentEditor();
 				}
 				break;
 			}
@@ -241,7 +221,7 @@ namespace psycle { namespace host {
 					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::song().instSelected = Global::song().auxcolSelected=tmac;
 					mainFrame->UpdateComboIns(true);
-					mainFrame->m_wndInst.WaveUpdate();
+					mainFrame->UpdateInstrumentEditor();
 				}
 				mainFrame->OnLoadwave();
 				mainFrame->UpdateComboIns(true);
@@ -286,7 +266,7 @@ namespace psycle { namespace host {
 						Global::song().DeleteInstrument(Global::song().instSelected);
 					}
 					mainFrame->UpdateComboIns(true);
-					mainFrame->m_wndInst.WaveUpdate();
+					mainFrame->UpdateInstrumentEditor();
 				}
 				break;
 			}
@@ -334,7 +314,7 @@ namespace psycle { namespace host {
 					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::song().instSelected = Global::song().auxcolSelected=tmac;
 					mainFrame->UpdateComboIns(true);
-					mainFrame->m_wndInst.WaveUpdate();
+					mainFrame->UpdateInstrumentEditor();
 				}
 
 				mainFrame->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
@@ -369,7 +349,7 @@ namespace psycle { namespace host {
 					cc->SetCurSel(AUX_INSTRUMENT);
 					Global::song().instSelected = Global::song().auxcolSelected=tmac;
 					mainFrame->UpdateComboIns(true);
-					mainFrame->m_wndInst.WaveUpdate();
+					mainFrame->UpdateInstrumentEditor();
 				}
 				mainFrame->ShowInstrumentEditor();
 				mainFrame->UpdateComboIns(true);

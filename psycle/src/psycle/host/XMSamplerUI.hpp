@@ -2,8 +2,6 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "XMSamplerUIGeneral.hpp"
-#include "XMSamplerUIInst.hpp"
-#include "XMSamplerUISample.hpp"
 #include "XMSamplerMixerPage.hpp"
 
 namespace psycle { namespace host {
@@ -21,14 +19,12 @@ class XMSamplerUI : public CPropertySheet
 		XMSamplerUI(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 		virtual ~XMSamplerUI();
 
-		enum { IDD = IDD_XM_SAMPLER };
+		enum { IDD = IDD_GEAR_SAMPULSEUI };
 
 	private:
 		XMSampler* _pMachine;
 		XMSamplerUI** windowVar_;
 		XMSamplerUIGeneral m_General;
-		XMSamplerUIInst m_Instrument;
-		XMSamplerUISample m_Sample;
 		XMSamplerMixerPage m_Mixer;
 		bool init;
 

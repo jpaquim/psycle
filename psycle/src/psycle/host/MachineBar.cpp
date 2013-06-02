@@ -425,7 +425,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			}
 	//		m_pSong->instSelected=m_pSong->auxcolSelected;
 	//		WaveEditorBackUpdate();
-	//		m_wndInst.WaveUpdate();
+	//		m_pParentMain->UpdateInstrumentEditor();
 	//		RedrawGearRackList();
 		}
 		if (m_pSong->auxcolSelected >= listlen)
@@ -441,7 +441,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			m_pSong->instSelected=m_inscombo.GetCurSel();
 			m_pParentMain->WaveEditorBackUpdate();
-			m_pParentMain->m_wndInst.WaveUpdate();
+			m_pParentMain->UpdateInstrumentEditor();
 			m_pParentMain->RedrawGearRackList();
 		}
 
@@ -473,7 +473,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				m_pSong->instSelected=i;
 				m_pSong->auxcolSelected=i;
 				m_pParentMain->WaveEditorBackUpdate();
-				m_pParentMain->m_wndInst.WaveUpdate();
+				m_pParentMain->UpdateInstrumentEditor();
 				m_pParentMain->RedrawGearRackList();
 			}
 		}
@@ -538,7 +538,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 					UpdateComboIns();
 					m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
 					m_pParentMain->WaveEditorBackUpdate();
-					m_pParentMain->m_wndInst.WaveUpdate();
+					m_pParentMain->UpdateInstrumentEditor();
 				}
 			}
 			else if ( CurrExt == "iff" )
@@ -548,7 +548,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 					UpdateComboIns();
 					m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
 					m_pParentMain->WaveEditorBackUpdate();
-					m_pParentMain->m_wndInst.WaveUpdate();
+					m_pParentMain->UpdateInstrumentEditor();
 					m_pParentMain->RedrawGearRackList();
 				}
 			}
@@ -575,9 +575,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		WaveFile output;
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
-
-		int nmac = m_pSong->seqBus;
-		Machine *tmac = m_pSong->_pMachine[nmac];
 
 		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
 		{
@@ -622,13 +619,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 					break;
 				}
 			}
-		}
-		else if (tmac->_type == MACH_XMSAMPLER)
-		{
-			CPoint point(-1,-1);
-			m_pParentMain->ShowMachineGui(nmac,point);
-			((CButton*)GetDlgItem(IDC_EDITWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-			return;
 		}
 		else {
 			found = true;

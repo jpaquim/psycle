@@ -12,7 +12,7 @@ namespace psycle { namespace host {
 		{
 			public:
 				CDSoundConfig(CWnd * pParent = 0);
-				int const static IDD = IDD_DSOUNDCONFIG;
+				int const static IDD = IDD_CONFIG_DSOUND;
 				CComboBox       m_deviceComboBox;
 				CComboBox       m_sampleRateCombo;
 				CComboBox       m_bitDepthCombo;

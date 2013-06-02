@@ -1,6 +1,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentPanDlg.hpp"
-#include "XMSamplerUI.hpp"
+#include "InstrumentEditorUI.hpp"
 #include "PsycleConfig.hpp"
 
 namespace psycle { namespace host {
@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 BOOL CInstrumentPanDlg::PreTranslateMessage(MSG* pMsg)
 {
-	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent()->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;

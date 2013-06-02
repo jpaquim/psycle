@@ -26,7 +26,7 @@ protected:
 	virtual void OnCancel();
 	virtual void PostNcDestroy();
 
-	enum { IDD = IDD_MACWAVEIN };
+	enum { IDD = IDD_GEAR_WAVEIN };
 	CStatic m_vollabel;
 	CSliderCtrl m_volslider;
 	CComboBox m_listbox;

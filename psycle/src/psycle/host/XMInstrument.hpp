@@ -9,6 +9,7 @@ namespace psycle { namespace host {
 	class XMInstrument
 	{
 	public:
+		static const int MAX_INSTRUMENT = 255;///< max instrument
 		/// Size of the Instrument's note mapping.
 		static const int NOTE_MAP_SIZE = 120; // C-0 .. B-9
 		/// A Note pair (note number=first, and sample number=second)

@@ -14,7 +14,7 @@ public:
 	virtual ~CInstrumentPitDlg();
 
 	/// Dialog ID
-	enum { IDD = IDD_XMSAMP_INSTPIT };
+	enum { IDD = IDD_INST_SAMPULSE_INSTPIT };
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

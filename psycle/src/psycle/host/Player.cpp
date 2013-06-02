@@ -312,7 +312,11 @@ void Player::clear_plan() {
 						if(pEntry->_parameter != 0)
 						{	///\todo: implement the Tempo slide
 							// SET_SONG_TEMPO=			20, // T0x Slide tempo down . T1x slide tempo up
-							SetBPM(pEntry->_parameter);
+							if (pEntry->_parameter < 0x20) {
+							}
+							else {
+								SetBPM(pEntry->_parameter);
+							}
 						}
 						break;
 					case PatternCmd::EXTENDED:

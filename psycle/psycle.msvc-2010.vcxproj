@@ -203,7 +203,7 @@
     <ClInclude Include="src\psycle\host\ParamList.hpp" />
     <ClInclude Include="src\psycle\host\PresetsDlg.hpp" />
     <ClInclude Include="src\psycle\host\WaveInMacDlg.hpp" />
-    <ClInclude Include="src\psycle\host\EnvDialog.hpp" />
+    <ClInclude Include="src\psycle\host\InstrumentEditorUI.cpp.hpp" />
     <ClInclude Include="src\psycle\host\GearTracker.hpp" />
     <ClInclude Include="src\psycle\host\InstrumentEditor.hpp" />
     <ClInclude Include="src\psycle\host\WavFileDlg.hpp" />
@@ -268,7 +268,9 @@
     <ClInclude Include="src\psycle\host\Machine.hpp" />
     <ClInclude Include="src\psycle\host\Plugin.hpp" />
     <ClInclude Include="..\psycle-plugins\src\psycle\plugin_interface.hpp" />
+    <ClInclude Include="src\psycle\host\LuaArray.hpp" />
     <ClInclude Include="src\psycle\host\LuaHost.hpp" />
+    <ClInclude Include="src\psycle\host\LuaPlugin.hpp" />
     <ClInclude Include="src\psycle\host\vsthost24.hpp" />
     <ClInclude Include="src\psycle\host\Instrument.hpp" />
     <ClInclude Include="src\psycle\host\Sampler.hpp" />
@@ -335,7 +337,7 @@
     <ClCompile Include="src\psycle\host\ParamList.cpp" />
     <ClCompile Include="src\psycle\host\PresetsDlg.cpp" />
     <ClCompile Include="src\psycle\host\WaveInMacDlg.cpp" />
-    <ClCompile Include="src\psycle\host\EnvDialog.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp.cpp" />
     <ClCompile Include="src\psycle\host\GearTracker.cpp" />
     <ClCompile Include="src\psycle\host\InstrumentEditor.cpp" />
     <ClCompile Include="src\psycle\host\wavfiledlg.cpp" />
@@ -392,7 +394,9 @@
     <ClCompile Include="src\psycle\host\internal_machines.cpp" />
     <ClCompile Include="src\psycle\host\Machine.cpp" />
     <ClCompile Include="src\psycle\host\Plugin.cpp" />
+    <ClCompile Include="src\psycle\host\LuaArray.cpp" />
     <ClCompile Include="src\psycle\host\LuaHost.cpp" />
+    <ClCompile Include="src\psycle\host\LuaPlugin.cpp" />
     <ClCompile Include="src\psycle\host\vsthost24.cpp" />
     <ClCompile Include="src\psycle\host\Instrument.cpp" />
     <ClCompile Include="src\psycle\host\Sampler.cpp" />

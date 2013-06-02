@@ -14,7 +14,7 @@ namespace psycle { namespace host {
 		public:
 			CMidiInputDlg();
 			virtual ~CMidiInputDlg();
-			int const static IDD = IDD_MIDI_INPUT;
+			int const static IDD = IDD_CONFIG_MIDI_INPUT;
 
 		protected:
 			virtual BOOL OnInitDialog();
