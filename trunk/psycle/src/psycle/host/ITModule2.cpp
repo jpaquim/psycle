@@ -297,9 +297,31 @@ Special:  Bit 0: On = song message attached.
 			if ( itFileH.special&SpecialFlags::HASMESSAGE)
 			{
 				Seek(itFileH.msgOffset);
-				// read itFileH.msgLen
+				char comments_[65536];
 				// NewLine = 0Dh (13 dec)
 				// EndOfMsg = 0
+				Read(comments_,std::min(sizeof(comments_)-song.comments.length(), static_cast<std::size_t>(itFileH.msgLen)));
+				comments_[65535]='\0';
+				std::string temp = comments_;
+#if !defined DIVERSALIS__OS__APPLE
+				size_t pos = 0;
+				char bla = '\r';
+#ifdef DIVERSALIS__OS__MICROSOFT
+				while ((pos = temp.find(bla, pos)) != std::string::npos) {
+					 temp.replace(pos, 1, "\r\n");
+					 pos += 2;
+				}
+				song.comments.append("\r\n").append(temp);
+#else
+				while ((pos = temp.find(bla, pos)) != std::string::npos) {
+					 temp.replace(pos, 1, "\n");
+					 pos += 1;
+				}
+				song.comments.append("\n").append(temp);
+#endif
+#else 
+				song.comments.append("\r").append(temp);
+#endif
 			}
 
 

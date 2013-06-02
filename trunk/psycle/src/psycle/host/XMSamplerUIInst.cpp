@@ -15,8 +15,7 @@
 #include "Player.hpp"
 #include "Song.hpp"
 #include "XMInstrument.hpp"
-#include "XMSampler.hpp"
-#include "XMSamplerUI.hpp"
+#include "InstrumentEditorUI.hpp"
 #include "MainFrm.hpp"
 
 namespace psycle { namespace host {
@@ -53,7 +52,7 @@ END_MESSAGE_MAP()
 
 BOOL XMSamplerUIInst::PreTranslateMessage(MSG* pMsg) 
 {
-	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent());
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
 	return res;
@@ -68,11 +67,11 @@ BOOL XMSamplerUIInst::OnInitDialog()
 	m_tabMain.InsertItem(2,_T("Pan"));
 	m_tabMain.InsertItem(3,_T("Filter"));
 	m_tabMain.InsertItem(4,_T("Pitch"));
-	m_genTab.Create(IDD_XMSAMP_INSTGEN,&m_tabMain);
-	m_ampTab.Create(IDD_XMSAMP_INSTAMP,&m_tabMain);
-	m_panTab.Create(IDD_XMSAMP_INSTPAN,&m_tabMain);
-	m_filTab.Create(IDD_XMSAMP_INSTFIL,&m_tabMain);
-	m_pitTab.Create(IDD_XMSAMP_INSTPIT,&m_tabMain);
+	m_genTab.Create(IDD_INST_SAMPULSE_INSTGEN,&m_tabMain);
+	m_ampTab.Create(IDD_INST_SAMPULSE_INSTAMP,&m_tabMain);
+	m_panTab.Create(IDD_INST_SAMPULSE_INSTPAN,&m_tabMain);
+	m_filTab.Create(IDD_INST_SAMPULSE_INSTFIL,&m_tabMain);
+	m_pitTab.Create(IDD_INST_SAMPULSE_INSTPIT,&m_tabMain);
 
 	m_tabMain.GetWindowRect(rect);
 	rect2.CopyRect(rect);
@@ -128,7 +127,7 @@ void XMSamplerUIInst::FillInstrumentList() {
 	int i = m_InstrumentList.GetCurSel();
 	m_InstrumentList.ResetContent();
 	InstrumentList& list = Global::song().xminstruments;
-	for (int i=0;i<XMSampler::MAX_INSTRUMENT;i++)
+	for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
 	{
 		char line[48];
 		if (list.Exists(i)) {
@@ -243,7 +242,7 @@ void XMSamplerUIInst::OnBnClickedSaveins()
 
 void XMSamplerUIInst::OnBnClickedDupeins()
 {
-	for (int j=0;j<XMSampler::MAX_INSTRUMENT;j++)
+	for (int j=0;j<XMInstrument::MAX_INSTRUMENT;j++)
 	{
 		if (Global::song().xminstruments.Exists(j) == false ) 
 		{

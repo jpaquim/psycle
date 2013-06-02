@@ -244,7 +244,6 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
 			//Show Gear Rack is the command IDC_GEAR_RACK of the machine bar (in mainfrm)
 			ON_COMMAND(ID_NEWMACHINE, OnNewmachine)
-			ON_COMMAND(ID_VIEW_INSTRUMENTEDITOR, OnViewInstrumenteditor)
 			//Show Wave editor is the command IDC_WAVEBUT of the machine bar (in mainfrm)
 			ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
 			ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
@@ -916,7 +915,7 @@ namespace psycle { namespace host {
 				Global::song().seqBus=0;
 				pParentMain->PsybarsUpdate(); // Updates all values of the bars
 				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
+				pParentMain->UpdateInstrumentEditor();
 				pParentMain->RedrawGearRackList();
 				pParentMain->UpdateSequencer();
 				pParentMain->UpdatePlayOrder(false); // should be done always after updatesequencer
@@ -1923,7 +1922,7 @@ namespace psycle { namespace host {
 				Global::song()._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 				pParentMain->PsybarsUpdate();
 				pParentMain->WaveEditorBackUpdate();
-				pParentMain->m_wndInst.WaveUpdate();
+				pParentMain->UpdateInstrumentEditor();
 				pParentMain->RedrawGearRackList();
 				pParentMain->UpdateSequencer();
 				pParentMain->UpdatePlayOrder(false);
@@ -2086,7 +2085,7 @@ namespace psycle { namespace host {
 			EnforceAllMachinesOnView();
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();
-			pParentMain->m_wndInst.WaveUpdate();
+			pParentMain->UpdateInstrumentEditor();
 			pParentMain->RedrawGearRackList();
 			pParentMain->UpdateSequencer();
 			pParentMain->UpdatePlayOrder(false);

@@ -1034,7 +1034,7 @@ namespace psycle
 		{
 			if (wire.GetSrcMachine()._macIndex == _macIndex) {
 				int outWire = wire.GetSrcWireIndex();
-				if (outWire != -1) {
+				if (outWire >= MAX_CONNECTIONS) {
 					outWire-=MAX_CONNECTIONS;
 					for(int c=0;c<numinputs();++c) {
 						RecalcInMapping(c, outWire, inWires[c].GetMapping(), newMapping);
@@ -1048,7 +1048,7 @@ namespace psycle
 			}
 			else if (wire.GetSrcMachine()._isMixerSend) {
 				int wireIndex = wire.GetDstWireIndex();
-				if (wireIndex != -1) {
+				if (wireIndex >= MAX_CONNECTIONS) {
 					wireIndex-=MAX_CONNECTIONS;
 					for (int s(0);s<numsends();++s) {
 						if (Return(wireIndex).SendsTo(s)) {

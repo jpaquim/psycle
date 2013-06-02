@@ -12,7 +12,7 @@ namespace psycle { namespace host {
 			DECLARE_DYNCREATE(CKeyConfigDlg)
 		public:
 			CKeyConfigDlg();
-			enum { IDD = IDD_KEYCONFIG };
+			enum { IDD = IDD_CONFIG_KEY };
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();

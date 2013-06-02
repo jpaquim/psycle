@@ -18,7 +18,7 @@ public:
 	virtual ~XMSamplerUISample();
 
 	// Datos del cuadro de diálogo
-	enum { IDD = IDD_XMSAMPLERUISAMPLE };
+	enum { IDD = IDD_INST_SAMPLEBANK };
 
 protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -27,8 +27,6 @@ protected:
 
 
 public:
-	void pMachine(XMSampler *const p){m_pMachine = p;};
-	XMSampler * const pMachine(){return m_pMachine;};
 	void pWave(XMInstrument::WaveData *const p){m_pWave = p;};
 	XMInstrument::WaveData& rWave(){return *m_pWave;};
 	void DrawScope(void);
@@ -69,7 +67,6 @@ protected:
 	void RefreshSampleList();
 	void RefreshSampleData();
 
-	XMSampler *m_pMachine;
 	XMInstrument::WaveData *m_pWave;
 	bool m_Init;
 

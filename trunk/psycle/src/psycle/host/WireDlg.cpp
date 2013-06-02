@@ -85,7 +85,7 @@ namespace psycle { namespace host {
 			scope_mode = 0;
 			m_sliderMode.ShowWindow(SW_HIDE);
 			scope_peak_rate = 20;
-			scope_osc_freq = 10;
+			scope_osc_freq = 14;
 			scope_osc_rate = 20;
 			scope_spec_rate = 20;
 			scope_spec_mode = 2;
@@ -409,8 +409,8 @@ namespace psycle { namespace host {
 						 //keeping nOrig, since the buffer can change while we draw it.
 						int nOrig  = (srcMachine._scopeBufferIndex == 0) ? SCOPE_BUF_SIZE-pos : srcMachine._scopeBufferIndex-pos;
 						if (nOrig < 0.f) { nOrig+=SCOPE_BUF_SIZE; }
-						// osc_freq range 5..100, freq range 10..10K
-						const int freq = scope_osc_freq*scope_osc_freq;
+						// osc_freq range 5..100, freq range 12..5K
+						const int freq = (scope_osc_freq*scope_osc_freq)>>1;
 						const float add = (float(Global::player().SampleRate())/float(freq))/256.0f;
 						const float multleft= invol*mult *srcMachine._lVol;
 						const float multright= invol*mult *srcMachine._rVol;
@@ -794,7 +794,9 @@ namespace psycle { namespace host {
 				scope_osc_freq = nPos;
 				if (hold)
 				{
-					int minus = std::min(SCOPE_BUF_SIZE,Global::player().SampleRate()/(scope_osc_freq*scope_osc_freq));
+					// osc_freq range 5..100, freq range 12..5K
+					const int freq = (scope_osc_freq*scope_osc_freq)>>1;
+					int minus = std::min(SCOPE_BUF_SIZE,Global::player().SampleRate()/freq);
 					m_sliderRate.SetRange(1,1+SCOPE_BUF_SIZE-minus);
 				}
 				break;
@@ -950,7 +952,9 @@ namespace psycle { namespace host {
 			case 1:
 				if (hold)
 				{
-					int minus = std::min(SCOPE_BUF_SIZE,Global::player().SampleRate()/(scope_osc_freq*scope_osc_freq));
+					// osc_freq range 5..100, freq range 12..5K
+					const int freq = (scope_osc_freq*scope_osc_freq)>>1;
+					int minus = std::min(SCOPE_BUF_SIZE,Global::player().SampleRate()/freq);
 					m_sliderRate.SetRange(1,1+SCOPE_BUF_SIZE-minus);
 					m_sliderRate.SetPos(100);
 					m_sliderRate.SetPos(1);
@@ -1104,6 +1108,14 @@ namespace psycle { namespace host {
 					RECT rect;
 					rect.left = 32+24;
 					rect.right = 256-32-24;
+
+					rect.top=2;
+					rect.bottom=rect.top+1;
+					sprintf(buf,"Peak");
+					bufDC.TextOut(128-42, rect.top, buf);
+					sprintf(buf,"RMS");
+					bufDC.TextOut(128+25, rect.top, buf);
+
 
 					rect.top = 36-18;
 					rect.bottom = rect.top+1;

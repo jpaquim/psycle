@@ -986,13 +986,9 @@ namespace psycle
 			if(hd._id == file.FourCC("NAME"))
 			{
 				char tmp[23];
-				file.Read(tmp, 22); ///\todo should be hd._size instead of "22", but it is incorrectly read.
+				file.Read(tmp, 22); ///\todo should be hd._size instead of "22", but it is in big endian and we read in litle endian.
 				tmp[22]='\0';
 				wave.WaveName(tmp);
-				if (instrument < PREV_WAV_INS){
-					strncpy(_pInstrument[instrument]->_sName,str,31);
-					_pInstrument[instrument]->_sName[31]='\0';
-				}
 				file.Read(&hd,sizeof hd);
 			}
 			if ( hd._id == file.FourCC("VHDR"))
@@ -1065,8 +1061,6 @@ namespace psycle
 				XMInstrument::WaveData wave;
 				wave.AllocWaveData(iSamplesPerChan,bStereo);
 				wave.WaveName(sName);
-				std::strncpy(_pInstrument[iInstr]->_sName,sName,31);
-				_pInstrument[iInstr]->_sName[31]='\0';
 				samples.SetSample(wave,iInstr);
 			}
 			else {
@@ -1339,7 +1333,7 @@ namespace psycle
 							}
 							// fix for a bug existing in the song saver in the 1.7.x series
 							if(version == 0) {
-								size = 11 * sizeof(std::uint32_t) + SONGTRACKS * 2 * sizeof(bool);
+								size = (11 * sizeof(std::uint32_t)) + (SONGTRACKS * 2 * sizeof(bool));
 							}
 							else if(version > 0) {
 								pFile->Read(shareTrackNames);
@@ -1629,9 +1623,10 @@ namespace psycle
 				// Instruments
 				pFile->Read(&instSelected, sizeof instSelected);
 				int pans[OLD_MAX_INSTRUMENTS];
+				char names[OLD_MAX_INSTRUMENTS][32];
 				for(int i=0 ; i < OLD_MAX_INSTRUMENTS ; ++i)
 				{
-					pFile->Read(&_pInstrument[i]->_sName, sizeof(_pInstrument[0]->_sName));
+					pFile->Read(names[i], sizeof(names[0]));
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
@@ -1721,14 +1716,17 @@ namespace psycle
 							{
 								XMInstrument::WaveData wave;
 								short tmpFineTune;
-								char waveName[33];
+								char dummy[33];
 								unsigned short volume = 0;
 								bool stereo =false;
 								bool doloop = false;
 								unsigned int loop;
+								//Old format assumed 44Khz
+								wave.WaveSampleRate(44100);
 								wave.PanFactor(pans[i]/256.f);
-								pFile->Read(waveName, 32);
-								wave.WaveName(waveName);
+								//Old wavename, not really used anyway.
+								pFile->Read(dummy, 32);
+								wave.WaveName(names[i]);
 								pFile->Read(volume);
 								wave.WaveGlobVolume(volume*0.01f);
 								pFile->Read(&tmpFineTune, sizeof(short));
@@ -2264,7 +2262,7 @@ namespace psycle
 			}
 			// Instrument Data Save
 			int numInstruments = 0;	
-			for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+			for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 				if(xminstruments.IsEnabled(i)){
 					numInstruments++;
 				}
@@ -2339,7 +2337,7 @@ namespace psycle
 
 			pFile->Write("SNGI",4);
 			version = CURRENT_FILE_VERSION_SNGI;
-			size = (11*sizeof(temp))+(SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])))
+			size = (11*sizeof(temp)) + (SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])))
 				+ sizeof(bool); 
 			if( shareTrackNames) {
 				for(int t(0); t < SONGTRACKS; t++) {
@@ -2585,7 +2583,7 @@ namespace psycle
 
 				pFile->Write(numInstruments);
 
-				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(xminstruments.IsEnabled(i)){
 						pFile->Write(i);
 						xminstruments[i].Save(*pFile);
@@ -2594,7 +2592,7 @@ namespace psycle
 
 				// Sample Data Save
 				int numSamples = 0;	
-				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(samples.IsEnabled(i)){
 						numSamples++;
 					}
@@ -2602,7 +2600,7 @@ namespace psycle
 
 				pFile->Write(numSamples);
 
-				for(int i = 0;i < XMSampler::MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(samples.IsEnabled(i)){
 						pFile->Write(i);
 						///TODO: When saving both, INSD and EINS, the wavedata doesn't need to be saved twice

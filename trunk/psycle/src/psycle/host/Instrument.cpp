@@ -49,8 +49,6 @@ namespace psycle
 			_RPAN = false;
 			_RCUT = false;
 			_RRES = false;
-			
-			sprintf(_sName,"empty");
 		}
 
 		void Instrument::LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen)
@@ -86,8 +84,8 @@ namespace psycle
 				pFile->Read(_RPAN);
 				pFile->Read(_RCUT);
 				pFile->Read(_RRES);
-
-				pFile->ReadString(_sName,sizeof(_sName));
+				char instrum_name[32];
+				pFile->ReadString(instrum_name,sizeof(instrum_name));
 
 				// now we have to read waves
 
@@ -139,8 +137,10 @@ namespace psycle
 							pFile->Read(doloop);
 							wave.WaveLoopType(doloop?XMInstrument::WaveData::LoopType::NORMAL:XMInstrument::WaveData::LoopType::DO_NOT);
 							pFile->Read(wave.m_WaveStereo);
-							
-							pFile->ReadString(wave.m_WaveName);
+							char dummy[32];
+							//Old sample name, never used.
+							pFile->ReadString(dummy,sizeof(dummy));
+							wave.WaveName(instrum_name);
 							
 							pFile->Read(&size,sizeof(size));
 							byte* pData;
@@ -228,7 +228,13 @@ namespace psycle
 			pFile->Write(_RCUT);
 			pFile->Write(_RRES);
 
-			pFile->Write(_sName,strlen(_sName)+1);
+			//TODO: Verify this.
+			if (samples.Exists(sampleIdx)) {
+				pFile->Write(samples[sampleIdx].WaveName().c_str(),32+1);
+			}
+			else {
+				pFile->Write("",32);
+			}
 
 			// now we have to write out the waves, but only if valid
 
@@ -238,7 +244,7 @@ namespace psycle
 				const XMInstrument::WaveData& wave = samples[sampleIdx];
 				byte * pData1(0);
 				byte * pData2(0);
-				UINT size1=0,size2=0;
+				std::uint32_t size1=0,size2=0;
 				size1 = DataCompression::SoundSquash(wave.m_pWaveDataL,&pData1,wave.m_WaveLength);
 				if (wave.m_WaveStereo)
 				{
@@ -291,10 +297,9 @@ namespace psycle
 					pFile->Write(pData2,size2);
 				}
 				zapArray(pData2);
-
-				pFile->Write(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
-				pFile->Write(&_LOCKINST,sizeof(_LOCKINST));
 			}
+			pFile->Write(&_lock_instrument_to_machine,sizeof(_lock_instrument_to_machine));
+			pFile->Write(&_LOCKINST,sizeof(_LOCKINST));
 		}
 	}
 }

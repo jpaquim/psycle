@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "Sampler.hpp"
 #include "Song.hpp"
+#include "XMInstrument.hpp"
 #include "Player.hpp"
 #include "FileIO.hpp"
 #include "Configuration.hpp"
@@ -33,7 +34,7 @@ namespace psycle
 			InitializeSamplesVector();
 			
 			baseC = 60;
-			_resampler.quality(helpers::dsp::resampler::quality::linear);
+			_resampler.quality(helpers::dsp::resampler::quality::spline);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 			{
 				_voices[i]._envelope._stage = ENV_OFF;
@@ -98,7 +99,8 @@ namespace psycle
 			}
 		}
 		const char* Sampler::AuxColumnName(int idx) const {
-			return Global::song()._pInstrument[ idx]->_sName;
+			SampleList &m_Samples = Global::song().samples;
+			return m_Samples.Exists(idx)?m_Samples[idx].WaveName().c_str():"";
 		}
 
 		void Sampler::SetSampleRate(int sr)

@@ -13,7 +13,7 @@ namespace psycle { namespace host {
 		{
 		public:
 			CASIOConfig(CWnd* pParent = 0);
-			enum { IDD = IDD_ASIO_CONFIG };
+			enum { IDD = IDD_CONFIG_ASIO };
 
 			CComboBox	m_driverComboBox;
 			CStatic		m_latency;

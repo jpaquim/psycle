@@ -1,6 +1,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentAmpDlg.hpp"
-#include "XMSamplerUI.hpp"
+#include "InstrumentEditorUI.hpp"
 
 #include <psycle/host/Player.hpp>
 
@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 BOOL CInstrumentAmpDlg::PreTranslateMessage(MSG* pMsg)
 {
-	XMSamplerUI* parent = dynamic_cast<XMSamplerUI*>(GetParent()->GetParent());
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent()->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;
@@ -101,10 +101,10 @@ void CInstrumentAmpDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 	case TB_THUMBPOSITION: //fallthrough
 	case TB_THUMBTRACK:
 		if (uId == IDC_VOLCUTOFFPAN) { SliderVolume(the_slider); }
-		if (uId == IDC_SWING1) { SliderGlideVol(the_slider); }
-		if (uId == IDC_FADEOUTRES) { SliderFadeout(the_slider); }
-		if (uId == IDC_SLNOTEMODNOTE) { SliderModNote(the_slider); }
-		if (uId == IDC_NOTEMOD) { SliderMod(the_slider); }
+		else if (uId == IDC_SWING1) { SliderGlideVol(the_slider); }
+		else if (uId == IDC_FADEOUTRES) { SliderFadeout(the_slider); }
+		else if (uId == IDC_SLNOTEMODNOTE) { SliderModNote(the_slider); }
+		else if (uId == IDC_NOTEMOD) { SliderMod(the_slider); }
 		break;
 	case TB_ENDTRACK:
 		break;

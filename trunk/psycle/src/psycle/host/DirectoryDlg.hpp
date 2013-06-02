@@ -13,7 +13,7 @@ namespace psycle { namespace host {
 		public:
 			CDirectoryDlg();
 			virtual ~CDirectoryDlg();
-			enum { IDD = IDD_DIRECTORIES };
+			enum { IDD = IDD_CONFIG_DIRECTORIES };
 		protected:
 			virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 			virtual BOOL OnInitDialog();

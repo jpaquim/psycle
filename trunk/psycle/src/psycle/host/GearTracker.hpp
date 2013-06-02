@@ -15,7 +15,7 @@ namespace host {
 		public:
 			CGearTracker(CGearTracker** windowVar, Sampler& machineref);
 		// Dialog Data
-			enum { IDD = IDD_GEAR_TRACKER };
+			enum { IDD = IDD_GEAR_SAMPLER };
 			CComboBox	m_interpol;
 			CSliderCtrl	m_polyslider;
 			CStatic	m_polylabel;
@@ -32,8 +32,8 @@ namespace host {
 		protected:
 			DECLARE_MESSAGE_MAP()
 			afx_msg void OnClose();
-			afx_msg void OnCustomdrawTrackslider(NMHDR* pNMHDR, LRESULT* pResult);
-			afx_msg void OnCustomdrawTrackslider2(NMHDR* pNMHDR, LRESULT* pResult);
+			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+			afx_msg void OnCustomdrawNumVoices(NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnSelchangeCombo1();
 			afx_msg void OnDefaultC4();
 		};

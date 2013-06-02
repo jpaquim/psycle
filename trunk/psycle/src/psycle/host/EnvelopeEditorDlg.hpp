@@ -15,7 +15,7 @@ public:
 	virtual ~CEnvelopeEditorDlg();
 
 	/// Dialog ID
-	enum { IDD = IDD_XMENVDLG };
+	enum { IDD = IDD_INST_SAMPULSE_ENVDLG };
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

@@ -21,6 +21,8 @@ static const int CUBIC_RESOLUTION = 1<<CUBIC_RESOLUTION_LOG;
 /// sinc table values per zero crossing
 #define SINC_RESOLUTION_LOG 14
 /// sinc table zero crossings (per side) -- too low and it aliases, too high uses lots of cpu. Recommended to be even.
+//  Note: If increasing this value, also adapt requiredPreSamples(), requiredPostSamples() ,
+//  XMSampler::WaveDataController::RefillBuffer() and XMSampler::WaveDataController::PreWork()
 static const int SINC_ZEROS = 16;
 /// IF SINC_ZEROS is power of two, define OPTIMIZED_RES_SHIFT to allow the algorithm to do shift instead of multiply
 #define OPTIMIZED_RES_SHIFT 4
@@ -108,36 +110,7 @@ using namespace universalis::stdlib;
 
 			/*override*/ quality::type quality() const { return quality_; }
 
-			/*override*/ void quality(quality::type quality) {
-				quality_ = quality;
-				switch(quality) {
-					case quality::zero_order:
-					work = zoh;
-					work_unchecked = zoh_unchecked;
-					work_float = zoh_float;
-					break;
-				case quality::linear:
-					work = linear;
-					work_unchecked = linear_unchecked;
-					work_float = linear_float;
-					break;
-				case quality::spline:
-					work = spline;
-					work_unchecked = spline_unchecked;
-					work_float = spline_float;
-					break;
-				case quality::sinc:
-					work = sinc;
-					work_unchecked = sinc_unchecked;
-					work_float = sinc_float;
-					break;
-				case quality::soxr:
-					work = soxr;
-					work_unchecked = zoh_unchecked;
-					work_float = zoh_float;
-					break;
-				}
-			}
+			/*override*/ void quality(quality::type quality);
 			/*override*/ void * GetResamplerData() const;
 			/*override*/ void UpdateSpeed(void * resampler_data, double speed) const;
 			/*override*/ void DisposeResamplerData(void * resampler_data) const;

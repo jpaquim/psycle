@@ -272,7 +272,7 @@ namespace host{
 	{
 		XMINSTRUMENTHEADER insHeader;
 		memset(&insHeader,0,sizeof(insHeader));
-		strncpy(insHeader.name,song._pInstrument[instIdx]->_sName,21);
+		strncpy(insHeader.name,song.samples[instIdx].WaveName().c_str(),21);
 		//insHeader.type = 0; Implicit by memset
 
 		//If no samples for this instrument, write it and exit.
@@ -362,8 +362,7 @@ namespace host{
 			inst.AmpEnvelope()->IsEnabled(true);
 			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
 			// volumefadespeed in this case, so that a check during playback time is not needed.
-			inst.VolumeFadeSpeed
-				((float)sampleHeader.volfade / 32768.0f);
+			inst.VolumeFadeSpeed((float)sampleHeader.volfade / 32768.0f);
 			
 			int envelope_point_num = sampleHeader.vnum;
 			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.

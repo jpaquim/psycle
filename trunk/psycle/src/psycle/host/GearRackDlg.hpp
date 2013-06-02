@@ -15,7 +15,7 @@ namespace psycle { namespace host {
 			CGearRackDlg(CMainFrame* pParent, CChildView* pMain, CGearRackDlg** windowVar);
 			void RedrawList();
 		// Dialog Data
-			enum { IDD = IDD_GEAR_RACK };
+			enum { IDD = IDD_GEARRACK };
 			CButton	m_props;
 			CButton	m_radio_ins;
 			CButton	m_radio_gen;

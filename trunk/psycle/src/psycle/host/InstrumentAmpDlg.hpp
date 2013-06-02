@@ -15,7 +15,7 @@ public:
 	virtual ~CInstrumentAmpDlg();
 
 	/// Dialog ID
-	enum { IDD = IDD_XMSAMP_INSTAMP };
+	enum { IDD = IDD_INST_SAMPULSE_INSTAMP };
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

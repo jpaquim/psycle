@@ -14,7 +14,7 @@ namespace psycle { namespace host {
 		public:
 			CSkinDlg();
 			virtual ~CSkinDlg();
-			enum { IDD = IDD_SKIN };
+			enum { IDD = IDD_CONFIG_SKIN };
 
 			CButton	m_pattern_draw_empty_data;
 			CButton	m_pattern_fontface;

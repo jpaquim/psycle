@@ -8,7 +8,7 @@
 #include "SongBar.hpp"
 #include "MachineBar.hpp"
 #include "InfoDlg.hpp"
-#include "InstrumentEditor.hpp"
+#include "InstrumentEditorUI.hpp"
 #include "MidiMonitorDlg.hpp"
 
 namespace psycle { namespace host {
@@ -53,6 +53,7 @@ namespace psycle { namespace host {
 			void ShowPerformanceDlg();
 			void ShowMidiMonitorDlg();
 			void ShowInstrumentEditor();
+			void UpdateInstrumentEditor();
 			void StatusBarText(std::string txt);
 			void PsybarsUpdate();
 			BOOL StatusBarIdleText();
@@ -91,7 +92,7 @@ namespace psycle { namespace host {
 			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;
 			CGearRackDlg* pGearRackDialog;
-			CInstrumentEditor	m_wndInst;
+			InstrumentEditorUI* m_wndInst;
 			CWaveEdFrame*	m_pWndWed;
 
 			// Attributes

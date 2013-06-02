@@ -2,7 +2,6 @@
 ///\brief implementation file for psycle::host::CWaveEdChildView.
 #include <psycle/host/detail/project.private.hpp>
 #include <psycle/helpers/riff.hpp>
-#include <psycle/helpers/resampler.hpp>
 #include "WaveEdChildView.hpp"
 
 #include "PsycleConfig.hpp"
@@ -25,6 +24,9 @@ namespace psycle { namespace host {
 
 		CWaveEdChildView::CWaveEdChildView()
 		{
+			resampler.quality(helpers::dsp::resampler::quality::spline);
+			resampler_data =resampler.GetResamplerData();
+			resampler.UpdateSpeed(resampler_data,1.0);
 		}
 
 		CWaveEdChildView::~CWaveEdChildView()
@@ -103,6 +105,12 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POPUP_SELECTIONTOLOOP, OnPopupSelectionToLoop)
 			ON_COMMAND(ID_POPUP_ZOOMIN, OnPopupZoomIn)
 			ON_COMMAND(ID_POPUP_ZOOMOUT, OnPopupZoomOut)
+			ON_COMMAND(ID_VISUALREPRESENTATION_SAMPLEHOLD, OnViewSampleHold)
+			ON_COMMAND(ID_VISUALREPRESENTATION_SPLINE, OnViewSpline)
+			ON_COMMAND(ID_VISUALREPRESENTATION_SINC, OnViewSinc)
+			ON_UPDATE_COMMAND_UI(ID_VISUALREPRESENTATION_SAMPLEHOLD, OnUpdateViewSampleHold)
+			ON_UPDATE_COMMAND_UI(ID_VISUALREPRESENTATION_SPLINE, OnUpdateViewSpline)
+			ON_UPDATE_COMMAND_UI(ID_VISUALREPRESENTATION_SINC, OnUpdateViewSinc)
 
 			ON_WM_DESTROYCLIPBOARD()
 			ON_WM_CREATE()
@@ -130,7 +138,7 @@ namespace psycle { namespace host {
 			long c;
 
 			int cyHScroll = GetSystemMetrics(SM_CYHSCROLL);
-				
+			CSingleLock lock(&semaphore, TRUE);
 			if(wdWave)
 			{
 				CRect invalidRect;
@@ -851,7 +859,7 @@ namespace psycle { namespace host {
 						wdLoop=true;
 						wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 					}
-					mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+					mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
 
@@ -898,7 +906,7 @@ namespace psycle { namespace host {
 						wdLoop=true;
 						wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 					}
-					mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+					mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
 				}
@@ -1146,7 +1154,7 @@ namespace psycle { namespace host {
 				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 				wave.WaveLoopStart(wdLoopS);
 				wave.WaveLoopEnd(wdLoopE);
-				mainFrame->m_wndInst.WaveUpdate();
+				mainFrame->UpdateInstrumentEditor();
 			}
 			bDragLoopEnd = bDragLoopStart = false;
 			CRect rect;
@@ -1171,7 +1179,7 @@ namespace psycle { namespace host {
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
-				wave.Fade(startPoint, length, 0.f, 1.f);
+				wave.Fade(startPoint, startPoint+length, 0.f, 1.f);
 
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1188,7 +1196,7 @@ namespace psycle { namespace host {
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
-				wave.Fade(startPoint, length, 1.f, 0.f);
+				wave.Fade(startPoint, startPoint+length, 1.f, 0.f);
 
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1308,7 +1316,7 @@ namespace psycle { namespace host {
 					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
-					wave.Amplify(startPoint, length, ratio);
+					wave.Amplify(startPoint, startPoint+length, ratio);
 
 					RefreshDisplayData(true);
 					Invalidate(true);
@@ -1410,7 +1418,7 @@ namespace psycle { namespace host {
 							wdLoopE += timeInSamps;
 							wave.WaveLoopEnd(wdLoopE);
 						}
-						mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+						mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					}
 				}
 
@@ -1558,13 +1566,56 @@ namespace psycle { namespace host {
 			pCmdUI->Enable();
 		}
 
-		afx_msg void CWaveEdChildView::OnUpdateSetLoopStart(CCmdUI* pCmdUI)
+		void CWaveEdChildView::OnUpdateSetLoopStart(CCmdUI* pCmdUI)
 		{
 			pCmdUI->Enable( wdWave );
 		}
-		afx_msg void CWaveEdChildView::OnUpdateSetLoopEnd(CCmdUI* pCmdUI)
+		void CWaveEdChildView::OnUpdateSetLoopEnd(CCmdUI* pCmdUI)
 		{
 			pCmdUI->Enable( wdWave );
+		}
+
+		void CWaveEdChildView::OnViewSampleHold()
+		{
+			CSingleLock lock(&semaphore, TRUE);
+			resampler.DisposeResamplerData(resampler_data);
+			resampler.quality(helpers::dsp::resampler::quality::zero_order);
+			resampler_data = resampler.GetResamplerData();
+			resampler.UpdateSpeed(resampler_data,1.0);
+			RefreshDisplayData();
+			Invalidate(true);
+		}
+		void CWaveEdChildView::OnViewSpline()
+		{
+			CSingleLock lock(&semaphore, TRUE);
+			resampler.DisposeResamplerData(resampler_data);
+			resampler.quality(helpers::dsp::resampler::quality::spline);
+			resampler_data = resampler.GetResamplerData();
+			resampler.UpdateSpeed(resampler_data,1.0);
+			RefreshDisplayData();
+			Invalidate(true);
+		}
+		void CWaveEdChildView::OnViewSinc()
+		{
+			CSingleLock lock(&semaphore, TRUE);
+			resampler.DisposeResamplerData(resampler_data);
+			resampler.quality(helpers::dsp::resampler::quality::sinc);
+			resampler_data = resampler.GetResamplerData();
+			resampler.UpdateSpeed(resampler_data,1.0);
+			RefreshDisplayData();
+			Invalidate(true);
+		}
+		void CWaveEdChildView::OnUpdateViewSampleHold(CCmdUI* pCmdUI)
+		{
+			pCmdUI->SetCheck(resampler.quality() == helpers::dsp::resampler::quality::zero_order);
+		}
+		void CWaveEdChildView::OnUpdateViewSpline(CCmdUI* pCmdUI)
+		{
+			pCmdUI->SetCheck(resampler.quality() == helpers::dsp::resampler::quality::spline);
+		}
+		void CWaveEdChildView::OnUpdateViewSinc(CCmdUI* pCmdUI)
+		{
+			pCmdUI->SetCheck(resampler.quality() == helpers::dsp::resampler::quality::sinc);
 		}
 
 
@@ -2162,7 +2213,7 @@ namespace psycle { namespace host {
 				wdLoop=true;
 				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
-			mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+			mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
@@ -2187,7 +2238,7 @@ namespace psycle { namespace host {
 				wdLoop=true;
 				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
-			mainFrame->m_wndInst.WaveUpdate();// This causes an update of the Instrument Editor.
+			mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
@@ -2209,7 +2260,7 @@ namespace psycle { namespace host {
 				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
 			}
 
-			mainFrame->m_wndInst.WaveUpdate();
+			mainFrame->UpdateInstrumentEditor();
 			CRect rect;
 			GetClientRect(&rect);
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2485,108 +2536,133 @@ namespace psycle { namespace host {
 				int yLow, yHi;
 
 				lDisplay.resize(nWidth);
-				helpers::dsp::cubic_resampler resampler;
-				resampler.quality(helpers::dsp::resampler::quality::spline);
-				if ( OffsetStep >4) {
+				if ( OffsetStep >1.f)
+				{
+					long offsetEnd=diStart;
 					for(int c(0); c < nWidth; c++)
 					{
-						long const offset = diStart + (long)(c * OffsetStep);
-						yLow = 0, yHi = 0;
-						for (long d(offset); d < offset + OffsetStep; d+=4)
+						int yLow=0, yHi=0;
+						long d = offsetEnd;
+						offsetEnd = diStart + (long)floorf((c+1) * OffsetStep);
+						for (; d < offsetEnd; d+=1)
 						{
 							int value = *(wdLeft+d);
 							if (yLow > value) yLow = value;
 							if (yHi <  value) yHi  = value;
 						}
-						lDisplay[c].first  = (wrHeight * yLow)/32768;
-						lDisplay[c].second = (wrHeight * yHi )/32768;
+						lDisplay[c].first  = (wrHeight * yLow) >> 15;
+						lDisplay[c].second = (wrHeight * yHi ) >> 15;
 					}
 					if(wdStereo)
 					{
 						rDisplay.resize(nWidth);
+						offsetEnd=diStart;
 						for(int c(0); c < nWidth; c++)
 						{
-							long const offset = diStart + (long)(c * OffsetStep);
-							yLow = 0, yHi = 0;
-							for (long d(offset); d < offset + OffsetStep; d+=4)
+							int yLow=0, yHi=0;
+							long d = offsetEnd;
+							offsetEnd = diStart + (long)floorf((c+1) * OffsetStep);
+							for (; d < offsetEnd; d+=1)
 							{
 								int value = *(wdRight+d);
 								if (yLow > value) yLow = value;
 								if (yHi <  value) yHi  = value;
 							}
-							rDisplay[c].first  = (wrHeight * yLow)/32768;
-							rDisplay[c].second = (wrHeight * yHi )/32768;
+							rDisplay[c].first  = (wrHeight * yLow) >> 15;
+							rDisplay[c].second = (wrHeight * yHi ) >> 15;
 						}
 					}
 				}
 				else {
-					for(int c(0); c < nWidth; c++)
+					ULARGE_INTEGER offsetStepRes; offsetStepRes.QuadPart = (double)OffsetStep* 4294967296.0;
+					ULARGE_INTEGER posin; posin.QuadPart = diStart * 4294967296.0;
+					for(int c = 0; c < nWidth; c++)
 					{
-						ULARGE_INTEGER posin;
-						posin.QuadPart = (diStart + c * OffsetStep)* 4294967296.0f;
-						yHi=0;
-						yLow=resampler.work(wdLeft+posin.HighPart,posin.HighPart,posin.LowPart,wdLength,NULL);
+						yLow=resampler.work(wdLeft+posin.HighPart,posin.HighPart,posin.LowPart,wdLength,resampler_data);
+						posin.QuadPart += offsetStepRes.QuadPart;
 
-						lDisplay[c].first  = (wrHeight * yLow)/32768;
-						lDisplay[c].second = (wrHeight * yHi )/32768;
+						lDisplay[c].first  = (wrHeight * yLow) >> 15;
+						lDisplay[c].second = 0;
 					}
 					if(wdStereo)
 					{
 						rDisplay.resize(nWidth);
+						posin.QuadPart = diStart * 4294967296.0;
 						for(int c(0); c < nWidth; c++)
 						{
-							ULARGE_INTEGER posin;
-							posin.QuadPart = (diStart + c * OffsetStep)* 4294967296.0f;
-							yHi=0;
-							yLow=resampler.work(wdRight+posin.HighPart,posin.HighPart,posin.LowPart,wdLength,NULL);
+							yLow=resampler.work(wdRight+posin.HighPart,posin.HighPart,posin.LowPart,wdLength,resampler_data);
+							posin.QuadPart += offsetStepRes.QuadPart;
 
-							rDisplay[c].first  = (wrHeight * yLow)/32768;
-							rDisplay[c].second = (wrHeight * yHi )/32768;
+							rDisplay[c].first  = (wrHeight * yLow) >> 15;
+							rDisplay[c].second = 0;
 						}
 					}
 				}
 				if(bRefreshHeader)
 				{
 					// left channel of header
-					// todo: very low-volume samples tend to disappear.. we should round up instead of down
 					lHeadDisplay.resize(nWidth);
-					for(int c(0); c < nWidth; c++)
-					{
-						long const offset = long(c * HeaderStep);
-						yLow = 0; yHi = 0;
-
-						for (long d(offset); d < offset + (HeaderStep<1? 1: HeaderStep); d++)
-						{
-							int value = *(wdLeft+d);
-							if (yLow > value) yLow = value;
-							if (yHi <  value) yHi  = value;
-						}
-						lHeadDisplay[c].first = (wrHeadHeight * yLow)/32768;
-						lHeadDisplay[c].second= (wrHeadHeight * yHi )/32768;
-					}
-					if(wdStereo)
-					{
-						// right channel of header
-						// todo: very low-volume samples tend to disappear.. we should round up instead of down
-						rHeadDisplay.resize(nWidth);
+					if (HeaderStep> 1.f) {
+						long offsetEnd=0;
 						for(int c(0); c < nWidth; c++)
 						{
-							long const offset = long(c * HeaderStep);
-							yLow = 0; yHi = 0;
-
-							for ( long d(offset); d < offset + (HeaderStep<1? 1: HeaderStep); d++)
+							yLow=0;yHi=0;
+							long d = offsetEnd;
+							offsetEnd = (long)floorf((c+1) * HeaderStep);
+							for (; d < offsetEnd; d+=1)
 							{
-								int value = *(wdRight+d);
+								int value = *(wdLeft+d);
 								if (yLow > value) yLow = value;
 								if (yHi <  value) yHi  = value;
 							}
-							rHeadDisplay[c].first = (wrHeadHeight * yLow)/32768;
-							rHeadDisplay[c].second= (wrHeadHeight * yHi )/32768;
+							// todo: very low-volume samples tend to disappear.. we should round up instead of down
+							lHeadDisplay[c].first = (wrHeadHeight * yLow) >> 15;
+							lHeadDisplay[c].second= (wrHeadHeight * yHi ) >> 15;
+						}
+						if(wdStereo)
+						{
+							// right channel of header
+							rHeadDisplay.resize(nWidth);
+							offsetEnd=0;
+							for(int c(0); c < nWidth; c++)
+							{
+								yLow=0;yHi=0;
+								long d = offsetEnd;
+								offsetEnd = (long)floorf((c+1) * HeaderStep);
+								for (; d < offsetEnd; d+=1)
+								{
+									int value = *(wdRight+d);
+									if (yLow > value) yLow = value;
+									if (yHi <  value) yHi  = value;
+								}
+								// todo: very low-volume samples tend to disappear. we should round up instead of down
+								rHeadDisplay[c].first = (wrHeadHeight * yLow) >> 15;
+								rHeadDisplay[c].second= (wrHeadHeight * yHi ) >> 15;
+							}
 						}
 					}
-
+					else {
+						for(int c(0); c < nWidth; c++)
+						{
+							long d = floorf(c * HeaderStep);
+							int value = *(wdLeft+d);
+							// todo: very low-volume samples tend to disappear. we should round up instead of down
+							lHeadDisplay[c].first = (wrHeadHeight * value) >> 15;
+							lHeadDisplay[c].second= 0;
+						}
+						if(wdStereo)
+						{
+							for(int c(0); c < nWidth; c++)
+							{
+								long d = floorf(c * HeaderStep);
+								int value = *(wdRight+d);
+								// todo: very low-volume samples tend to disappear. we should round up instead of down
+								rHeadDisplay[c].first = (wrHeadHeight * value) >> 15;
+								rHeadDisplay[c].second= 0;
+							}
+						}
+					}
 				}
-
 			}
 			else
 			{

@@ -18,7 +18,7 @@ public:
 	XMSampler * const pMachine() { return _pMachine;};
 	void pMachine(XMSampler * const p) { _pMachine = p;};
 
-	enum { IDD = IDD_XM_GENERAL };
+	enum { IDD = IDD_GEAR_SAMPULSE_GEN };
 	CComboBox	m_interpol;
 	CSliderCtrl	m_polyslider;
 	CStatic m_polylabel;

@@ -8,6 +8,7 @@
 #include <psycle/host/WaveEdInsertSilenceDialog.hpp>
 #include <psycle/host/WaveEdCrossfadeDialog.hpp>
 #include <psycle/host/ScrollableDlgBar.hpp>
+#include <psycle/helpers/resampler.hpp>
 #include <deque>
 #include <utility>
 namespace psycle { namespace host {
@@ -101,6 +102,12 @@ namespace psycle { namespace host {
 			afx_msg void OnPopupSelectionToLoop();
 			afx_msg void OnPopupZoomIn();
 			afx_msg void OnPopupZoomOut();
+			afx_msg void OnViewSampleHold();
+			afx_msg void OnViewSpline();
+			afx_msg void OnViewSinc();
+			afx_msg void OnUpdateViewSampleHold(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateViewSpline(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateViewSinc(CCmdUI* pCmdUI);
 
 			afx_msg void OnDestroyClipboard();
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -168,6 +175,10 @@ namespace psycle { namespace host {
 			bool bSnapToZero;
 			bool bDragLoopStart, bDragLoopEnd;	//indicates that the user is dragging the loop start/end
 			unsigned long SelStart;		//the end of the selection -not- being moved 
+
+			helpers::dsp::cubic_resampler resampler;
+			void* resampler_data;
+			CSemaphore mutable semaphore;
 
 			//used for finding invalid rect when resizing selection/moving loop points
 			int prevHeadX, prevBodyX;

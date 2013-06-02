@@ -73,7 +73,7 @@ protected:
 			afx_msg void OnPaint();
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 
-			enum { IDD = IDD_MASTERDLG };
+			enum { IDD = IDD_GEAR_MASTER };
 			CStatic	m_masterpeak;
 			CVolumeCtrl	m_slidermaster;
 			std::vector<CVolumeCtrl*> sliders_;

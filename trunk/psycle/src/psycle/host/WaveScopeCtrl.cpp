@@ -24,36 +24,27 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 	if (m_pWave && lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
 	{
 		CDC dc;
-		dc.Attach(lpDrawItemStruct->hDC);
-
-		int wrHeight = 0, yLow = 0, yHi = 0;
-		double OffsetStep = 0;
-		long c, d;
-
 		CRect rect;
 		GetClientRect(&rect);
-
-		int const nWidth=rect.Width();
-		int const nHeight=rect.Height();
-		int const my=nHeight/2;
-		if(rWave().IsWaveStereo()) wrHeight=my/2;
-		else wrHeight=my;
-
+		dc.Attach(lpDrawItemStruct->hDC);
 		dc.FillSolidRect(&rect,RGB(255,255,255));
 		dc.SetBkMode(TRANSPARENT);
 
 		if(rWave().WaveLength())
 		{
+			int const nWidth=rect.Width();
+			int const nHeight=rect.Height();
+			int const my=nHeight/2;
+			int const wrHeight = (rWave().IsWaveStereo()) ? my/2 : my;
+			int const wrHeight_R = my + wrHeight;
+			float OffsetStep = (float) rWave().WaveLength() / nWidth;
 
 			// Draw preliminary stuff
-
 			CPen *oldpen= dc.SelectObject(&cpen_med);
 
 			// Left channel 0 amplitude line
 			dc.MoveTo(0,wrHeight);
 			dc.LineTo(nWidth,wrHeight);
-
-			int const wrHeight_R = my + wrHeight;
 
 			if(rWave().IsWaveStereo())
 			{
@@ -69,113 +60,79 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 
 			dc.SelectObject(&cpen_hi);
 
-			OffsetStep = (double) rWave().WaveLength() / nWidth;
-
-			if ( OffsetStep > 4)
+			if ( OffsetStep >1.f)
 			{
 				const std::int16_t * const pData = rWave().pWaveDataL();
-				for(c = 0; c < nWidth; c++)
+				// Increasing by one can be slow on big ( 100.000+ ) samples
+				int offsetInc = ( OffsetStep > 4.f) ? (OffsetStep/4) : 1;
+				long offsetEnd=0;
+				for(int c(0); c < nWidth; c++)
 				{
-					long const offset = (long)floorf(c * OffsetStep);
-					yLow=0;yHi=0;
-					// Alternate search. Doing the same than in the next "else if"
-					// can be slow on big ( 100.000+ sample) samples
-					for (d = offset; d < offset + OffsetStep; d+=(OffsetStep/4))
+					int yLow=0, yHi=0;
+					long d = offsetEnd;
+					offsetEnd = (long)floorf((c+1) * OffsetStep);
+					for (; d < offsetEnd; d+=offsetInc)
 					{
 						if (yLow > pData[d]) yLow = pData[d];
 						if (yHi < pData[d]) yHi = pData[d];
 					}
-					int const ryLow = (wrHeight * yLow)/32768;
-					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) - ryLow);
-					dc.LineTo(c,(wrHeight) - ryHi);
-				}
-			}
-			else if ( OffsetStep >1)
-			{
-				const std::int16_t * const pData = rWave().pWaveDataL();
-				for(c = 0; c < nWidth; c++)
-				{
-					long const offset = (long)floorf(c * OffsetStep);
-					yLow=0;yHi=0;
-					for (d = offset; d < offset + ((OffsetStep <1) ? 1 : OffsetStep); d++)
-					{
-						if (yLow > pData[d]) yLow = pData[d];
-						if (yHi < pData[d]) yHi = pData[d];
-					}
-					int const ryLow = (wrHeight * yLow)/32768;
-					int const ryHi = (wrHeight * yHi)/32768;
+					int const ryLow = (wrHeight * yLow) >> 15;
+					int const ryHi = (wrHeight * yHi) >> 15;
 					dc.MoveTo(c,(wrHeight) - ryLow);
 					dc.LineTo(c,(wrHeight) - ryHi);
 				}
 			}
 			else
 			{
-				for(c = 0; c < nWidth; c++)
+				ULARGE_INTEGER offsetStepRes; offsetStepRes.QuadPart = (double)OffsetStep* 4294967296.0;
+				ULARGE_INTEGER posin; posin.QuadPart = 0;
+				for(int c = 0; c < nWidth; c++)
 				{
-					ULARGE_INTEGER posin;
-					posin.QuadPart = c * OffsetStep* 4294967296.0f;
-					yHi=0;
-					yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength(), NULL);
+					int yLow=resampler.work(rWave().pWaveDataL()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength(), NULL);
+					posin.QuadPart += offsetStepRes.QuadPart;
 
-					int const ryLow = (wrHeight * yLow)/32768;
-					int const ryHi = (wrHeight * yHi)/32768;
-					dc.MoveTo(c,(wrHeight) - ryLow);
-					dc.LineTo(c,(wrHeight) - ryHi);
+					int const ryLow = (wrHeight * yLow) >>15;
+					dc.MoveTo(c,wrHeight - ryLow);
+					dc.LineTo(c,wrHeight);
 				}
 			}
 
 			if(rWave().IsWaveStereo())
 			{
-				if ( OffsetStep > 4)
+				if ( OffsetStep >1.f)
 				{
 					const std::int16_t * const pData = rWave().pWaveDataR();
-					for(c = 0; c < nWidth; c++)
+					// Increasing by one can be slow on big ( 100.000+ ) samples
+					int offsetInc = ( OffsetStep > 4.f) ? (OffsetStep/4) : 1;
+					long offsetEnd=0;
+					for(int c(0); c < nWidth; c++)
 					{
-						long const offset = (long)floorf(c * OffsetStep);
-						yLow=0;yHi=0;
-						for (d = offset; d < offset + OffsetStep; d+=(OffsetStep/4))
+						int yLow=0, yHi=0;
+						long d = offsetEnd;
+						offsetEnd = (long)floorf((c+1) * OffsetStep);
+						for (; d < offsetEnd; d+=offsetInc)
 						{
 							if (yLow > pData[d]) yLow = pData[d];
 							if (yHi < pData[d]) yHi = pData[d];
 						}
-						int const ryLow = (wrHeight * yLow)/32768;
-						int const ryHi = (wrHeight * yHi)/32768;
-						dc.MoveTo(c,wrHeight_R - ryLow);
-						dc.LineTo(c,wrHeight_R - ryHi);
-					}
-				}
-				else if ( OffsetStep >1)
-				{
-					const std::int16_t * const pData = rWave().pWaveDataR();
-					for(c = 0; c < nWidth; c++)
-					{
-						long const offset = (long)floorf(c * OffsetStep);
-						yLow=0;yHi=0;
-						for (d = offset; d < offset + ((OffsetStep <1) ? 1 : OffsetStep); d++)
-						{
-							if (yLow > pData[d]) yLow = pData[d];
-							if (yHi < pData[d]) yHi = pData[d];
-						}
-						int const ryLow = (wrHeight * yLow)/32768;
-						int const ryHi = (wrHeight * yHi)/32768;
+						int const ryLow = (wrHeight * yLow) >> 15;
+						int const ryHi = (wrHeight * yHi) >> 15;
 						dc.MoveTo(c,wrHeight_R - ryLow);
 						dc.LineTo(c,wrHeight_R - ryHi);
 					}
 				}
 				else
 				{
-					for(c = 0; c < nWidth; c++)
+					ULARGE_INTEGER offsetStepRes; offsetStepRes.QuadPart = (double)OffsetStep* 4294967296.0;
+					ULARGE_INTEGER posin; posin.QuadPart = 0;
+					for(int c = 0; c < nWidth; c++)
 					{
-						ULARGE_INTEGER posin;
-						posin.QuadPart = c * OffsetStep* 4294967296.0f;
-						yHi=0;
-						yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength(), NULL);
+						int yLow=resampler.work(rWave().pWaveDataR()+posin.HighPart,posin.HighPart,posin.LowPart,rWave().WaveLength(), NULL);
+						posin.QuadPart += offsetStepRes.QuadPart;
 
-						int const ryLow = (wrHeight * yLow)/32768;
-						int const ryHi = (wrHeight * yHi)/32768;
+						int const ryLow = (wrHeight * yLow) >> 15;
 						dc.MoveTo(c,wrHeight_R - ryLow);
-						dc.LineTo(c,wrHeight_R - ryHi);
+						dc.LineTo(c,wrHeight_R);
 					}
 				}
 			}

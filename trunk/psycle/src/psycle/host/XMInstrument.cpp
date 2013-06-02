@@ -29,9 +29,7 @@ namespace psycle
 			m_WaveSusLoopStart = 0;
 			m_WaveSusLoopEnd = 0;
 			m_WaveSusLoopType = LoopType::DO_NOT;
-			//todo: Add SampleRate functionality, and change WaveTune's one.
-			// This means modifying the functions PeriodToSpeed (for linear slides) and NoteToPeriod (for amiga slides)
-			m_WaveSampleRate = 8363;
+			m_WaveSampleRate = 44100;
 			m_WaveTune = 0;
 			m_WaveFineTune = 0;	
 			m_WaveStereo = false;
@@ -212,14 +210,14 @@ namespace psycle
 
 			float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
 			if (m_WaveStereo) {
-				for(int i(fadeStart);i<fadeEnd;++i) {
-					m_pWaveDataL[i] *= startVol+i*slope;
-					m_pWaveDataR[i] *= startVol+i*slope;
+				for(int i(fadeStart),j(0);i<fadeEnd;++i,++j) {
+					m_pWaveDataL[i] *= startVol+j*slope;
+					m_pWaveDataR[i] *= startVol+j*slope;
 				}
 			}
 			else {
-				for(int i(fadeStart);i<fadeEnd;++i) {
-					m_pWaveDataL[i] *= startVol+i*slope;
+				for(int i(fadeStart),j(0);i<fadeEnd;++i,++j) {
+					m_pWaveDataL[i] *= startVol+j*slope;
 				}
 			}
 		}
@@ -258,7 +256,7 @@ namespace psycle
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
-			if (strcmp(temp,"SMPD")) return size;
+			if (strcmp(temp,"SMPD")) return size+8;
 
 			riffFile.Read(filevers);
 			if (filevers == 0 || filevers > 0x1F) {
@@ -284,6 +282,9 @@ namespace psycle
 
 			if(filevers == 1) {
 				riffFile.Read(m_WaveSampleRate);
+			}
+			else {
+				m_WaveSampleRate=8363;
 			}
 			riffFile.Read(m_WaveTune);
 			riffFile.Read(m_WaveFineTune);
@@ -318,7 +319,7 @@ namespace psycle
 				DataCompression::SoundDesquash(pData, &m_pWaveDataR);
 				delete[] pData;
 			}
-			return size;
+			return size+8;
 		}
 
 		void XMInstrument::WaveData::Save(RiffFile& riffFile) const
@@ -334,18 +335,12 @@ namespace psycle
 			}
 
 			CT2A _wave_name(m_WaveName.c_str());
-			std::uint32_t size =
-				sizeof(XMInstrument::WaveData)
-				- sizeof m_pWaveDataL
-				- sizeof m_pWaveDataR
-				+ 2 * sizeof size1
-				+ size1
-				+ size2;
 
+			int size = 0;
 			riffFile.Write("SMPD",4);
 			riffFile.Write(size);
+			size_t filepos = riffFile.GetPos();
 			riffFile.Write(WAVEVERSION);
-			//\todo: add version
 
 			riffFile.Write(_wave_name, std::strlen(_wave_name) + 1);
 
@@ -361,6 +356,7 @@ namespace psycle
 			riffFile.Write(m_WaveSusLoopEnd);
 			{ std::uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
 
+			riffFile.Write(m_WaveSampleRate);
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
 
@@ -384,6 +380,10 @@ namespace psycle
 				riffFile.Write((void*)pData2,size2);
 				delete[] pData2;
 			}
+			size_t endpos = riffFile.GetPos();
+			riffFile.Seek(filepos-4);
+			{ std::uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
+			riffFile.Seek(endpos);
 		}
 
 
@@ -725,7 +725,7 @@ namespace psycle
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
-			if (strcmp(temp,"INST")) return size;
+			if (strcmp(temp,"INST")) return size+8;
 
 			//\todo: add version
 			//riffFile.Read(version);
@@ -775,7 +775,7 @@ namespace psycle
 			m_PanEnvelope.Load(riffFile,version);
 			m_FilterEnvelope.Load(riffFile,version);
 			m_PitchEnvelope.Load(riffFile,version);
-			return size;
+			return size+8;//Size of the whole data, including chunk header.
 		}
 
 		// save XMInstrument
@@ -785,10 +785,9 @@ namespace psycle
 
 			int i;
 			int size = 0;
-			size_t filepos = riffFile.GetPos();
-
 			riffFile.Write("INST",4);
 			riffFile.Write(size);
+			size_t filepos = riffFile.GetPos();
 			//\todo : add version.
 
 			CT2A _name(m_Name.c_str());
@@ -837,7 +836,7 @@ namespace psycle
 			m_FilterEnvelope.Save(riffFile,version);
 			m_PitchEnvelope.Save(riffFile,version);
 			size_t endpos = riffFile.GetPos();
-			riffFile.Seek(filepos+4);
+			riffFile.Seek(filepos-4);
 			{ std::uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
 			riffFile.Seek(endpos);
 		}

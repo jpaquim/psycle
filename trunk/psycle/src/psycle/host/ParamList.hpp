@@ -16,7 +16,7 @@ namespace psycle {
 			CParamList(Machine& effect, CFrameMachine* parent, CParamList** windowVar);   // standard constructor
 			virtual ~CParamList();
 
-			enum { IDD = IDD_VSTRACK };
+			enum { IDD = IDD_GEAR_VSTPARAMS };
 			CComboBox	m_program;
 			CSliderCtrl	m_slider;
 			CStatic		m_text;

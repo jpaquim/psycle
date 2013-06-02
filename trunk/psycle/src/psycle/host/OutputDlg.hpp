@@ -13,7 +13,7 @@ namespace psycle { namespace host {
 			DECLARE_DYNCREATE(COutputDlg)
 		public:
 			COutputDlg();
-			enum { IDD = IDD_OUTPUT };
+			enum { IDD = IDD_CONFIG_OUTPUT };
 			CComboBox       m_driverComboBox;
 			CComboBox       m_midiDriverComboBox;
 			CButton         m_inmediate;

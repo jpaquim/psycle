@@ -175,71 +175,97 @@ namespace psycle
 		}
 		void XMSampler::WaveDataController::RefillBuffers()
 		{
-			const int presamples=15;
-			const int postsamples=16;
-			const int totalsamples=32;
-			const int secbegin=64;
-			const int thirdbegin=128;
+			RefillBuffer(lBuffer,m_pWave->pWaveDataL());
+			if (IsStereo()) {
+				RefillBuffer(rBuffer,m_pWave->pWaveDataR());
+			}
+		}
+		void XMSampler::WaveDataController::RefillBuffer(std::int16_t buffer[192], const std::int16_t* data)
+		{
+			//These values are for the max size of resampler (which suits the rest).
+			const std::uint32_t presamples=15;
+			const std::uint32_t postsamples=16;
+			const std::uint32_t totalsamples=presamples+postsamples+1; //pre+post+current
+			const std::uint32_t secbegin=64;	// start of second window = totalsamples*2
+			const std::uint32_t thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
 			//Begin
-			memset(lBuffer,0,presamples*sizeof(std::int16_t));
-			memcpy(lBuffer+presamples,m_pWave->pWaveDataL(), totalsamples*sizeof(std::int16_t));
+			memset(buffer,0,sizeof(lBuffer));
+			memcpy(buffer+presamples,data, std::min(Length(),totalsamples)*sizeof(std::int16_t));
 			if (LoopType()==XMInstrument::WaveData::LoopType::DO_NOT) {
 				//End
-				memcpy(lBuffer+secbegin,m_pWave->pWaveDataL()+Length()-totalsamples, totalsamples*sizeof(std::int16_t));
-				memset(lBuffer+secbegin+totalsamples,0,postsamples);
+				if (Length() < totalsamples) {
+					memcpy(buffer+secbegin+totalsamples-Length(),data, Length()*sizeof(std::int16_t));
+					memset(buffer+secbegin+totalsamples,0,postsamples);
+				}
+				else {
+					memcpy(buffer+secbegin,data+Length()-totalsamples, totalsamples*sizeof(std::int16_t));
+					memset(buffer+secbegin+totalsamples,0,postsamples);
+				}
 			}
 			else if (LoopType()==XMInstrument::WaveData::LoopType::NORMAL) {
 				//Forward only loop.
-				memcpy(lBuffer+secbegin,m_pWave->pWaveDataL()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
-				memcpy(lBuffer+secbegin+totalsamples,m_pWave->pWaveDataL()+LoopStart(),totalsamples*sizeof(std::int16_t));
+				if (LoopEnd()-LoopStart() < totalsamples) {
+					int startpos=LoopStart();
+					int endpos=LoopEnd();
+					for (int i=0;i<totalsamples;i++) {
+						buffer[secbegin+totalsamples-i]=data[endpos];
+						buffer[secbegin+totalsamples+i]=data[startpos];
+						endpos--;
+						startpos++;
+						if (endpos < LoopStart()) {
+							endpos=LoopEnd();
+							startpos=LoopStart();
+						}
+					}
+				}
+				else {
+					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+					memcpy(buffer+secbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(std::int16_t));
+				}
 			}
 			else if (LoopType()==XMInstrument::WaveData::LoopType::BIDI) {
-				//Ping pong loop (end).
-				memcpy(lBuffer+secbegin,m_pWave->pWaveDataL()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
-				for (int i=0;i<totalsamples;i++) {
-					lBuffer[secbegin+totalsamples+i]=m_pWave->pWaveDataL()[LoopEnd()-i-1];
-				}
-				//Ping pong loop (start).
-				for (int i=0;i<totalsamples;i++) {
-					lBuffer[thirdbegin+i]=m_pWave->pWaveDataL()[LoopStart()+totalsamples-i];
-				}
-				memcpy(lBuffer+thirdbegin+totalsamples,m_pWave->pWaveDataL()+LoopStart(),totalsamples*sizeof(std::int16_t));
-			}
-			if (IsStereo()) {
-				//Begin
-				memset(rBuffer,0,presamples*sizeof(std::int16_t));
-				memcpy(rBuffer+presamples,m_pWave->pWaveDataR(), totalsamples*sizeof(std::int16_t));
-				if (LoopType()==XMInstrument::WaveData::LoopType::DO_NOT) {
-					//End
-					memcpy(rBuffer+secbegin,m_pWave->pWaveDataR()+Length()-totalsamples, totalsamples*sizeof(std::int16_t));
-					memset(rBuffer+secbegin+totalsamples,0,postsamples);
-				}
-				else if (LoopType()==XMInstrument::WaveData::LoopType::NORMAL) {
-					//Forward only loop.
-					memcpy(rBuffer+secbegin,m_pWave->pWaveDataR()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
-					memcpy(rBuffer+secbegin+totalsamples,m_pWave->pWaveDataR()+LoopStart(),totalsamples*sizeof(std::int16_t));
-				}
-				else if (LoopType()==XMInstrument::WaveData::LoopType::BIDI) {
-					//Ping pong loop (end).
-					memcpy(rBuffer+secbegin,m_pWave->pWaveDataR()+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+				if (LoopEnd()-LoopStart() < totalsamples) {
+					//Ping pong loop (end and start).
+					int pos=LoopEnd();
+					bool forward=false;
 					for (int i=0;i<totalsamples;i++) {
-						rBuffer[secbegin+totalsamples+i]=m_pWave->pWaveDataR()[LoopEnd()-i-1];
+						buffer[secbegin+totalsamples-i]=data[pos];
+						buffer[secbegin+totalsamples+i]=data[pos];
+						if (forward) {
+							pos++;
+							if (pos > LoopEnd()) {
+								pos=LoopEnd()-1;
+								forward=false;
+							}
+						}
+						else {
+							pos--;
+							if (pos < LoopStart()) {
+								pos=LoopStart()+1;
+								forward=true;
+							}
+						}
 					}
-					//Ping pong loop (start).
+				}
+				else {
+					//Ping pong loop (end and start).
+					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
+					memcpy(buffer+thirdbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(std::int16_t));
 					for (int i=0;i<totalsamples;i++) {
-						rBuffer[thirdbegin+i]=m_pWave->pWaveDataR()[LoopStart()+totalsamples-i];
+						buffer[secbegin+totalsamples+i]=data[LoopEnd()-i-1];
+						buffer[thirdbegin+i]=data[LoopStart()+totalsamples-i];
 					}
-					memcpy(rBuffer+thirdbegin+totalsamples,m_pWave->pWaveDataR()+LoopStart(),postsamples*sizeof(std::int16_t));
 				}
 			}
 		}
+
 		int XMSampler::WaveDataController::PreWork(int numSamples, WorkFunction* pWork) {
 			*pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
 
 			//These values are for the max size of resampler (which suits the rest).
 			const int presamples=15;
 			const int postsamples=16;
-			const int totalsamples=32; //pre+post+current
+			const int totalsamples=presamples+postsamples+1; //pre+post+current
 			const int secbegin=64;	// start of second window = totalsamples*2
 			const int thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
 
@@ -247,11 +273,7 @@ namespace psycle
 			ULARGE_INTEGER amount;
 			amount.QuadPart = m_Position.QuadPart + m_SpeedInternal*numSamples;
 			std::int32_t pos = m_Position.HighPart;
-#ifndef NDEBUG
-			if(m_pWave->WaveLength() == 35710) {
-				int i=0;
-			}
-#endif
+
 			//TRACE("RealPos %d\n",pos);
 			if (CurrentLoopDirection() == LoopDirection::FORWARD) {
 				if (pos < presamples) {
@@ -282,8 +304,9 @@ namespace psycle
 					//TRACE("sample buffer at pos %d for samples %d\n" , pos , max);
 				}
 				if(max<0) {
-					//Disallow negative values;(Generally, it indicates a bug in calculations)
+					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
+					TRACE("max<0 bug triggered!");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = 0;
@@ -306,44 +329,45 @@ namespace psycle
 					//TRACE("sample buffer (backwards) at pos %d for samples %d\n",  pos , max);
 				}
 				if(max<0) {
-					//Disallow negative values; (Generally, it indicates a bug in calculations)
+					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
+					TRACE("max<0 bug triggered!");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = m_Position.LowPart;
 			}
-			/*if (*m_pL!=*(m_pWave->pWaveDataL()+pos)) {
+#ifndef NDEBUG
+			if (*m_pL!=*(m_pWave->pWaveDataL()+pos) && pos < Length()) {
 				TRACE("ERROR. Samples differ! %d - %d\n", *m_pL , *(m_pWave->pWaveDataL()+pos));
-			}*/
+			}
+#endif
 			amount.QuadPart/=Speed();
 			return amount.LowPart+1;
 		}
 
 		void XMSampler::WaveDataController::PostWork()
 		{
-			const std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+			std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
 			if( CurrentLoopDirection() == LoopDirection::FORWARD && newIntPos >= m_CurrentLoopEnd)
 			{
 				switch(m_CurrentLoopType)
 				{
 				case XMInstrument::WaveData::LoopType::NORMAL:
-					m_Position.HighPart = m_CurrentLoopStart+(newIntPos-m_CurrentLoopEnd);
-#ifndef NDEBUG
-					if (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd) {
-						int i=0;
-					}
-#endif
+					do {
+						m_Position.HighPart = m_CurrentLoopStart+(newIntPos-m_CurrentLoopEnd);
+						newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+						//For very small loops, the while is necessary
+					} while (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
 					break;
 				case XMInstrument::WaveData::LoopType::BIDI:
-					m_Position.HighPart = m_CurrentLoopEnd-(newIntPos-m_CurrentLoopEnd);
+					do {
+						m_Position.HighPart = m_CurrentLoopEnd-(newIntPos-m_CurrentLoopEnd);
+						newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+						//For very small loops, the while is necessary
+					} while (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
 					m_Position.LowPart = 4294967295 -m_Position.LowPart;
 					m_CurrentLoopDirection = LoopDirection::BACKWARD;
 					m_SpeedInternal = -1*m_Speed;
-#ifndef NDEBUG
-					if (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd) {
-						int i=0;
-					}
-#endif
 					break;
 				case XMInstrument::WaveData::LoopType::DO_NOT://fallthrough
 				default:
@@ -357,15 +381,14 @@ namespace psycle
 				{
 				case XMInstrument::WaveData::LoopType::NORMAL://fallthrough
 				case XMInstrument::WaveData::LoopType::BIDI:
-					m_Position.HighPart = m_CurrentLoopStart+(m_CurrentLoopStart-newIntPos);
+					do {
+						std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+						m_Position.HighPart = m_CurrentLoopStart+(m_CurrentLoopStart-newIntPos);
+						//For very small loops, the while is necessary
+					} while (static_cast<std::int32_t>(m_Position.HighPart) < m_CurrentLoopStart);
 					m_Position.LowPart = 4294967295 -m_Position.LowPart;
 					m_CurrentLoopDirection = LoopDirection::FORWARD;
 					m_SpeedInternal = m_Speed;
-#ifndef NDEBUG
-					if (static_cast<std::int32_t>(m_Position.HighPart) < m_CurrentLoopStart) {
-						int i=0;
-					}
-#endif
 				break;
 				case XMInstrument::WaveData::LoopType::DO_NOT://fallthrough
 				default:
@@ -2236,7 +2259,7 @@ namespace psycle
 
 			InitializeSamplesVector();
 			_numVoices=0;
-			_resampler.quality(helpers::dsp::resampler::quality::linear);
+			_resampler.quality(helpers::dsp::resampler::quality::spline);
 
 			m_bAmigaSlides = false;
 			m_UseFilters = true;
@@ -2375,7 +2398,11 @@ namespace psycle
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
 			if(bInstrumentSet)
 			{
-				if ( pData->_inst != thisChannel.InstrumentNo() && thisChannel.Note() !=0)
+				//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, differently in ST2/ST3 
+				// (in st2, note is retriggered always, and in st3 it changes the instrument but continues from where it was) and not by FT2/XMPlay.
+				//Concretely if an instrument comes without a note, the last note is retriggered.
+				//Also note that if the instrument is the same, it is only retriggered if it has stopped (See below).
+				if(thisChannel.InstrumentNo() != pData->_inst && !bNoteOn && thisChannel.Note() !=0)
 				{
 					bNoteOn=true;
 				}
@@ -2437,16 +2464,16 @@ namespace psycle
 				}
 				else 
 				{
+					if (bInstrumentSet)
+					{
+						//\todo: Fix: Set the wave and instrument to the one in the entry.
+						currentVoice->ResetVolAndPan(-1);
+					}
 					if ( bPorta2Note ) 
 					{
 						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
 						//		  and the position reset to 0.
 						thisChannel.Note(pData->_note);
-					}
-					if (bInstrumentSet)
-					{
-						//\todo: Fix: Set the wave and instrument to the one in the entry.
-						currentVoice->ResetVolAndPan(-1);
 					}
 				}
 			}
@@ -2454,6 +2481,15 @@ namespace psycle
 			{
 				// If there is a Porta2Note command, but there is no voice playing, this is converted to a noteOn.
 				bPorta2Note=false; bNoteOn = true;
+			}
+			else {
+				//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, but not in ST3/FT2/XMPlay
+				//Concretely if a sample has been played, has stopped, and the instrument comes again without a note, that last note is
+				//retriggered.
+				if(bInstrumentSet && !bNoteOn && thisChannel.Note() !=0)
+				{
+					bNoteOn=true;
+				}
 			}
 			
 			// STEP B: Get a Voice to work with, and initialize it if needed.
@@ -2853,6 +2889,7 @@ namespace psycle
 			}
 			riffFile->Write(temp); // quality
 
+			//TODO: zxxMap cannot be edited right now.
 			for (int i=0; i < 128; i++) {
 				riffFile->Write(zxxMap[i].mode);
 				riffFile->Write(zxxMap[i].value);
@@ -2869,7 +2906,7 @@ namespace psycle
 			#if 0
 				// Instrument Data Save
 				int numInstruments = 0;	
-				for(int i = 0;i < MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(m_Instruments[i].IsEnabled()){
 						numInstruments++;
 					}
@@ -2877,7 +2914,7 @@ namespace psycle
 
 				riffFile->Write(numInstruments);
 
-				for(int i = 0;i < MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(m_Instruments[i].IsEnabled()){
 						riffFile->Write(i);
 						m_Instruments[i].Save(*riffFile);
@@ -2886,7 +2923,7 @@ namespace psycle
 
 				// Sample Data Save
 				int numSamples = 0;	
-				for(int i = 0;i < MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(m_rWaveLayer[i].WaveLength() != 0){
 						numSamples++;
 					}
@@ -2894,7 +2931,7 @@ namespace psycle
 
 				riffFile->Write(numSamples);
 
-				for(int i = 0;i < MAX_INSTRUMENT;i++){
+				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(m_rWaveLayer[i].WaveLength() != 0){
 						riffFile->Write(i);
 						m_rWaveLayer[i].Save(*riffFile);
