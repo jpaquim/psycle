@@ -3,13 +3,31 @@
 #include <psycle/helpers/math.hpp>
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
-	#if DIVERSALIS__CPU__X86__SSE == 2
+	#if DIVERSALIS__CPU__X86__SSE >= 2
 		#include <emmintrin.h>
+namespace psycle { namespace helpers { namespace math {
+		#define USE_SSE2
+		#include <psycle/helpers/math/sse_mathfun.h>
+		#undef USE_SSE2
+		typedef ALIGN16_BEG union {
+		  float f[4];
+		  int i[4];
+		  v4sf  v;
+		} ALIGN16_END V4SF;
+}}}
 	#endif
 #endif
 #include <psycle/helpers/math/constants.hpp>
 
 namespace psycle { namespace helpers { namespace dsp {
+/*
+#include <sstream>
+#define TRACE(msg1,msg2) {\
+    std::ostringstream ss; \
+    ss << msg1 << "-" << msg2 << "\n"; \
+    OutputDebugString(ss.str().c_str()); \
+}
+*/
 
 	bool cubic_resampler::initialized = false;
 	float cubic_resampler::cubic_table_[CUBIC_RESOLUTION*4];
@@ -48,6 +66,8 @@ namespace psycle { namespace helpers { namespace dsp {
 		// one-sided-- the function is symmetrical, one wing of the sinc will be sufficient.
 		sinc_table_[0] = 1.f; // save the trouble of evaluating 0/0.
 		sinc_pre_table_[0] = 1.f;
+		static const double ONEDIVSINC_TBSIZEMINONE = 1.0/ (static_cast<double>(SINC_TABLESIZE) -1.0);
+		static const double ONEDIVSINC_RESOLUTION = 1.0/static_cast<double>(SINC_RESOLUTION);
 		for(int i(1); i < SINC_TABLESIZE; ++i) {
 			///\todo decide which window we like best.
 			///\todo kaiser windows might be our best option, but i have no clue how to calculate one :)
@@ -56,7 +76,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			double tempval;
 			#if 1
 				// blackman window
-			tempval = 0.42659 - 0.49656 * std::cos(math::pi+ math::pi * i/ ((double)SINC_TABLESIZE -1.0)) + 0.076849 * std::cos(2.0 * math::pi * i / ((double)SINC_TABLESIZE-1.0));
+			tempval = 0.42659 - 0.49656 * std::cos(math::pi+ math::pi * i *ONEDIVSINC_TBSIZEMINONE) + 0.076849 * std::cos(2.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE);
 			#elif 0
 				// hann(ing) window
 				tempval = .5f * (1.f - std::cos(math::pi + math::pi * i / ((float)SINC_TABLESIZE -1.f)));
@@ -65,7 +85,7 @@ namespace psycle { namespace helpers { namespace dsp {
 				tempval = 0.53836f - 0.46164f * std::cos(math::pi +  math::pi * i / ((float)SINC_TABLESIZE -1.f));
 			#endif
 
-			#if USE_SINC_DELTA && !(DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS)
+			#if USE_SINC_DELTA && !(DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS)
 				int write_pos = i;
 			#else
 				//Optimized version. Instead of putting the sinc linearly in the table, we allocate the zeroes of a specific offset consecutively.
@@ -73,11 +93,11 @@ namespace psycle { namespace helpers { namespace dsp {
 				int write_pos = (i%SINC_RESOLUTION)*SINC_ZEROS + idxzero;
 			#endif
 
-			tempval /= double(i * math::pi / (double)SINC_RESOLUTION);
+			tempval /= static_cast<double>(i) * math::pi *ONEDIVSINC_RESOLUTION;
 			sinc_pre_table_[write_pos] = tempval;
 			//sinc runs at half speed of SINC_RESOLUTION (i.e. two zero crossing points per period).
 			//This means filter cutoff is at 0.5 (half of samplerate, full bandwidth)
-			sinc_table_[write_pos] = std::sin(i * math::pi / (double)SINC_RESOLUTION) * tempval;
+			sinc_table_[write_pos] = std::sin(i * math::pi *ONEDIVSINC_RESOLUTION) * tempval;
 		}
 		helpers::math::erase_all_nans_infinities_and_denormals(sinc_table_,SINC_TABLESIZE);
 #if USE_SINC_DELTA
@@ -227,7 +247,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	// y0 = y[0]  [sample at x (input)]
 	// y1 = y[1]  [sample at x+1]
 	// y2 = y[2]  [sample at x+2]
-#if DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	float cubic_resampler::spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
 		res >>= 32-CUBIC_RESOLUTION_LOG;
 		res <<=2;//Since we have four floats in the table, the position is 16byte aligned.
@@ -334,7 +354,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 
 
-#if DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 
 	//interpolation work function which does windowed sinc (bandlimited) interpolation.
 	float cubic_resampler::sinc_internal(int16_t const * data, uint32_t res, int leftExtent, int rightExtent) {
@@ -596,7 +616,8 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 #endif
 
-#if DIVERSALIS__CPU__X86__SSE == 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#define OPTIMIZED_SIN
+#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	float cubic_resampler::sinc_filtered(int16_t const * data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data) {
 		res >>= (32-SINC_RESOLUTION_LOG);
 		//Avoid evaluating position zero. It would need special treatment on the sinc_table of future points.
@@ -613,30 +634,35 @@ namespace psycle { namespace helpers { namespace dsp {
 	#else
 		float *ppretab = &sinc_pre_table_[res *SINC_ZEROS];
 	#endif
-		double w = res * resampler_data->fcpidivperiodsize;
-		const double fcpi = resampler_data->fcpi;
+		float w = double(res) * resampler_data->fcpidivperiodsize;
+		const float fcpi = resampler_data->fcpi;
+		//Small helper table to avoid doing an if.
+		static const float ANDTB[] = {0.f,2.f * math::pi_f};
 		while (leftExtent > 3) {
-			float vals[4];
-#if defined UNOPTIMIZED_SIN
-			vals[0] = sin(w);
-			w+=fcpi;
-			vals[1] = sin(w);
-			w+=fcpi; 
-			vals[2] = sin(w);
-			w+=fcpi;
-			vals[3] = sin(w);
-			w+=fcpi;
-#else 
-			vals[0] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
-			vals[1] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
-			vals[2] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
-			vals[3] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			math::V4SF vals;
+#if defined OPTIMIZED_SIN
+			vals.f[0] = w; w+=fcpi;
+			vals.f[1] = w; w+=fcpi;
+			vals.f[2] = w; w+=fcpi;
+			vals.f[3] = w; w+=fcpi;
+			register __m128 sin128 = math::sin_ps(vals.v);
+#elif defined SIN_POLINOMIAL
+			vals.f[0] = math::fast_sin<4>(w);
+			w += fcpi - ANDTB[static_cast<int>(w > math::pi_f)];
+			vals.f[1] = math::fast_sin<4>(w);
+			w += fcpi - ANDTB[static_cast<int>(w > math::pi_f)];
+			vals.f[2] = math::fast_sin<4>(w);
+			w += fcpi - ANDTB[static_cast<int>(w > math::pi_f)];
+			vals.f[3] = math::fast_sin<4>(w);
+			w += fcpi - ANDTB[static_cast<int>(w > math::pi_f)];
+			register __m128 sin128 = vals.v;
+#else
+			vals.f[0] = sin(w);  w+=fcpi;
+			vals.f[1] = sin(w);  w+=fcpi; 
+			vals.f[2] = sin(w);  w+=fcpi;
+			vals.f[3] = sin(w);  w+=fcpi;
+			register __m128 sin128 = vals.v;
 #endif
-			register __m128 sin128 = _mm_loadu_ps(vals);
 			register __m128i data128 = _mm_set_epi32(pdata[-3],pdata[-2],pdata[-1],pdata[0]);
 			register __m128 datafloat = _mm_cvtepi32_ps(data128);
 	#if OPTIMIZED_RES_SHIFT > 1
@@ -650,12 +676,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			leftExtent-=4;
 		}
 		while (leftExtent > 0) {
-#if defined UNOPTIMIZED_SIN
 			float sinc = sin(w) *  *ppretab;
-#else
-			if(w > math::pi) w -= 2.f * math::pi;
-			float sinc = math::fast_sin<4>(w) *  *ppretab;
-#endif
 			newval += sinc * *pdata;
 			pdata--;
 			ppretab++;
@@ -668,30 +689,33 @@ namespace psycle { namespace helpers { namespace dsp {
 	#else
 		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res *SINC_ZEROS)];
 	#endif
-		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
+		w = double(SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
 		while (rightExtent > 3) {
-			float vals[4];
-#if defined UNOPTIMIZED_SIN
-			vals[0] = sin(w);
-			w+=fcpi;
-			vals[1] = sin(w);
-			w+=fcpi; 
-			vals[2] = sin(w);
-			w+=fcpi;
-			vals[3] = sin(w);
-			w+=fcpi;
+			math::V4SF vals;
+#if defined OPTIMIZED_SIN
+			vals.f[0] = w; w+=fcpi;
+			vals.f[1] = w; w+=fcpi;
+			vals.f[2] = w; w+=fcpi;
+			vals.f[3] = w; w+=fcpi;
+			register __m128 sin128 = math::sin_ps(vals.v);
+#elif defined SIN_POLINOMIAL
+			vals.f[0] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi_f) w -= TWOPI;
+			vals.f[1] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi_f) w -= TWOPI;
+			vals.f[2] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi_f) w -= TWOPI;
+			vals.f[3] = math::fast_sin<4>(w);
+			w+=fcpi; if(w > math::pi_f) w -= TWOPI;
+			register __m128 sin128 = vals.v;
 #else 
-			vals[0] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
-			vals[1] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
-			vals[2] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
-			vals[3] = math::fast_sin<4>(w);
-			w+=fcpi; if(w > math::pi) w -= 2.f * math::pi;
+			vals.f[0] = sin(w);  w+=fcpi;
+			vals.f[1] = sin(w);  w+=fcpi; 
+			vals.f[2] = sin(w);  w+=fcpi;
+			vals.f[3] = sin(w);  w+=fcpi;
+			register __m128 sin128 = vals.v;
 #endif
-			register __m128 sin128 = _mm_loadu_ps(vals);
 			register __m128i data128 = _mm_set_epi32(pdata[3],pdata[2],pdata[1],pdata[0]);
 			register __m128 datafloat = _mm_cvtepi32_ps(data128);
 	#if OPTIMIZED_RES_SHIFT > 1
@@ -705,12 +729,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			rightExtent-=4;
 		}
 		while (rightExtent > 0) {
-#if defined UNOPTIMIZED_SIN
 			float sinc = sin(w) *  *ppretab;
-#else
-			if(w > math::pi) w -= 2.f * math::pi;
-			float sinc = math::fast_sin<4>(w) *  *ppretab;
-#endif
 			newval += sinc * *pdata;
 			pdata++;
 			ppretab++;
@@ -745,12 +764,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		double w = res * resampler_data->fcpidivperiodsize;
 		const double fcpi = resampler_data->fcpi;
 		for(int i(0); i < leftExtent; ++i, w += fcpi) {
-#if defined UNOPTIMIZED_SIN
 			double sinc = std::sin(w) *  *ppretab;
-#else
-			while(w > math::pi) w -= 2.f * math::pi;
-			float sinc = math::fast_sin<4>(w) *  *ppretab;
-#endif
 			newval += sinc * *pdata;
 			pdata--;
 			ppretab++;
@@ -765,12 +779,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
 		for(int i(0); i < rightExtent; ++i, w += fcpi) {
-#if defined UNOPTIMIZED_SIN
 			double sinc = std::sin(w) *  *ppretab;
-#else
-			while(w > math::pi) w -= 2.f * math::pi;
-			float sinc = math::fast_sin<4>(w) *  *ppretab;
-#endif
 			newval += sinc * *pdata;
 			pdata++;
 			ppretab++;

@@ -200,6 +200,7 @@ namespace psycle
 			_type=msubclass;
 			_mode=mode;
 			_macIndex=id;
+			_sharedBuf=false;
 		}
 
 		Machine::Machine()
@@ -231,6 +232,7 @@ namespace psycle
 			, _pScopeBufferR(0)
 			, _scopeBufferIndex(0)
 			, _scopePrevNumSamples(0)
+			, _sharedBuf(false)
 		{
 			_editName[0] = '\0';
 
@@ -345,11 +347,14 @@ namespace psycle
 		}
 		Machine::~Machine() throw()
 		{
-			for(int i(0);i<samplesV.size();i++){
+			if (!_sharedBuf) {
+			  for(int i(0);i<samplesV.size();i++){
 				universalis::os::aligned_memory_dealloc(samplesV[i]);
+			  }
+			  samplesV.clear();
 			}
-			samplesV.clear();
 		}
+	
 		void Machine::InitializeSamplesVector(int numChans)
 		{
 			for(int i(0);i<samplesV.size();i++){
@@ -364,6 +369,7 @@ namespace psycle
 				samplesV.push_back(channel);
 			}
 		}
+
 		void Machine::Init()
 		{
 			// Standard gear initalization
@@ -381,6 +387,21 @@ namespace psycle
 			rms.previousRight=0.;
 #endif
 			reset_time_measurement();
+		}
+
+		void Machine::change_buffer(std::vector<float*>& buf) {
+			if (!_sharedBuf) {
+			   for(int i(0);i<samplesV.size();i++){
+			     universalis::os::aligned_memory_dealloc(samplesV[i]);			
+			   }
+			}
+			std::vector<float*>& sv = samplesV;
+			std::vector<float*>::iterator it = sv.begin();
+			std::vector<float*>::iterator bit = buf.begin();
+			for ( ; it != sv.end(); ++it, ++bit) {		
+				*it = *bit;
+			}
+			_sharedBuf = true;
 		}
 
 		void Machine::SetPan(int newPan)

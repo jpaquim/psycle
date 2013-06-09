@@ -85,18 +85,18 @@ namespace psycle { namespace host {
 0Fxx: Filter.\r\n\t\
 10xy: Arpeggio with note, note+x and note+y\r\n\t\
 11xy: Retrig note after y ticks\r\n\t\
-12xx: Global Volume, 00 = Min, 80 = Max\r\n\t\
-13xx: Global Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)\r\n\t\
 14xx: Fine Vibrato with speed y and depth x\r\n\t\
-15xx: Set Envelope position\r\n\t\
 17xy: Tremor Effect ( ontime x, offtime y )\r\n\t\
 18xx: Panbrello\r\n\t\
-1Exx: Send xx to volume colum\r\n\t\
-9xxx: Sample Offset\r\n\r\n\
+19xx: Set Envelope position (in ticks)\r\n\t\
+1Cxx: Global Volume, 00 = Min, 80 = Max\r\n\t\
+1Dxx: Global Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)\r\n\t\
+1Exx: Send xx to volume colum (see below)\r\n\t\
+9xxx: Sample Offset x*256\r\n\r\n\
 Extended Commands:\r\n\t\
 30/1: Glissando mode Off/on\r\n\t\
 4x: Vibrato Wave\r\n\t\
-6x: Panbrello Wave\r\n\t\
+5x: Panbrello Wave\r\n\t\
 7x: Tremolo Wave\r\n\t\
 Waves: 0:Sinus, 1:Square\r\n\t\
 2:Ramp Up, 3:Ramp Down, 4: Random\r\n\t\
@@ -106,9 +106,9 @@ Waves: 0:Sinus, 1:Square\r\n\t\
 9F: Play Backward\r\n\t\
 Cx: Delay NoteCut by x ticks\r\n\t\
 Dx: Delay New Note by x ticks\r\n\t\
-E0: Send Notecut to past notes\r\n\t\
-E1: Send Noteoff to past notes\r\n\t\
-E2: Send NoteFade to past notes\r\n\t\
+E0: Notecut background notes\r\n\t\
+E1: Noteoff background notes\r\n\t\
+E2: NoteFade background notes\r\n\t\
 E3: Set NNA NoteCut for this voice\r\n\t\
 E4: Set NNA NoteContinue for this voice\r\n\t\
 E5: Set NNA Noteoff for this voice\r\n\t\

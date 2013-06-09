@@ -43,9 +43,8 @@ BOOL CInstrumentPanDlg::PreTranslateMessage(MSG* pMsg)
 BOOL CInstrumentPanDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	m_SlVolCutoffPan.SetRange(-64, 64);
-	//Hack to fix "0 placed on leftmost on start".
-	m_SlVolCutoffPan.SetPos(-64);
+	m_SlVolCutoffPan.SetRange(0, 128);
+
 	m_SlSwing1Glide.SetRangeMax(100);
 
 	m_SlNoteModNote.SetRange(0, 119);
@@ -71,7 +70,7 @@ void CInstrumentPanDlg::AssignPanningValues(XMInstrument& inst)
 	m_instr = &inst;
 
 	m_cutoffPan.SetCheck(inst.PanEnabled());
-	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f)-64.0f);
+	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f));
 	//FIXME: This is not showing the correct value. Should check if randompanning
 	//is erroneous or is not the value to check.
 	m_SlSwing1Glide.SetPos(inst.RandomPanning()*100.0f);
@@ -114,47 +113,44 @@ void CInstrumentPanDlg::OnBnEnablePan()
 {
 	m_instr->PanEnabled(m_cutoffPan.GetCheck()!=0);
 }
-
+///TODO: Separate the label drawings from the control.
 void CInstrumentPanDlg::SliderPan(CSliderCtrl* slid)
 {
-	char tmp[64];
-	switch(m_SlVolCutoffPan.GetPos()+64)
-	{
-	case 0: sprintf(tmp,"||%02d  ",m_SlVolCutoffPan.GetPos()); break;
-	case 64: sprintf(tmp," |%02d| ",m_SlVolCutoffPan.GetPos()); break;
-	case 128: sprintf(tmp,"  %02d||",m_SlVolCutoffPan.GetPos()); break;
-	default:
-		if ( m_SlVolCutoffPan.GetPos() < -32) sprintf(tmp,"<<%02d  ",m_SlVolCutoffPan.GetPos());
-		else if ( m_SlVolCutoffPan.GetPos() < 0) sprintf(tmp," <%02d< ",m_SlVolCutoffPan.GetPos());
-		else if ( m_SlVolCutoffPan.GetPos() <= 32) sprintf(tmp," >%02d> ",m_SlVolCutoffPan.GetPos());
-		else sprintf(tmp,"  %02d>>",m_SlVolCutoffPan.GetPos());
-		break;
-	}
-	m_instr->Pan((m_SlVolCutoffPan.GetPos()+64)/128.0f);
-	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->SetWindowText(tmp);
+	char buffer[64];
+	int nPos = slid->GetPos();
+	m_instr->Pan(nPos/128.0f);
+
+	if ( nPos == 0) sprintf(buffer,"||%02d  ",nPos);
+	else if ( nPos < 32) sprintf(buffer,"<<%02d  ",nPos);
+	else if ( nPos < 64) sprintf(buffer," <%02d< ",nPos);
+	else if ( nPos == 64) sprintf(buffer," |%02d| ",nPos);
+	else if ( nPos <= 96) sprintf(buffer," >%02d> ",nPos);
+	else if (nPos < 128) sprintf(buffer,"  %02d>>",nPos);
+	else sprintf(buffer,"  %02d||",nPos);
+	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->SetWindowText(buffer);
 }
 void CInstrumentPanDlg::SliderGlide(CSliderCtrl* slid)
 {
 	char tmp[64];
-	sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
 	m_instr->RandomPanning(m_SlSwing1Glide.GetPos()/100.0f);
+	sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
 	((CStatic*)GetDlgItem(IDC_LSWING))->SetWindowText(tmp);
 }
 void CInstrumentPanDlg::SliderModNote(CSliderCtrl* slid)
 {
 	char tmp[40], tmp2[40];
+	m_instr->NoteModPanCenter(slid->GetPos());
 	char notes[12][3]={"C-","C#","D-","D#","E-","F-","F#","G-","G#","A-","A#","B-"};
 	int offset = (PsycleGlobal::conf().patView().showA440) ? -1 : 0;
 	sprintf(tmp,"%s",notes[slid->GetPos()%12]);
 	sprintf(tmp2,"%s%d",tmp,offset+(slid->GetPos()/12));
-	m_instr->NoteModPanCenter(slid->GetPos());
 	((CStatic*)GetDlgItem(IDC_LNOTEMODNOTE))->SetWindowText(tmp2);
 }
 void CInstrumentPanDlg::SliderMod(CSliderCtrl* slid)
 {
 	char tmp[40];
-	sprintf(tmp,"%.02f%%",(slid->GetPos()/2.56f));
 	m_instr->NoteModPanSep(slid->GetPos());
+	sprintf(tmp,"%.02f%%",(slid->GetPos()/2.56f));
 	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->SetWindowText(tmp);
 }
 

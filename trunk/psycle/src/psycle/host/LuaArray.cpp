@@ -12,42 +12,40 @@
 namespace psycle { namespace host {
 
 // for psycle samples
-PSArray::PSArray(float start, float stop, float step) 
+
+PSArray::PSArray(int len, float v) : len_(len), shared_(0) {  
+  universalis::os::aligned_memory_alloc(16, ptr_, len);
+  if (v == 0) {
+     psycle::helpers::dsp::Clear(ptr_, len_);
+  } else {		
+	for (int i=0; i < len; ++i) ptr_[i] = v;
+  }
+}
+
+PSArray::PSArray(double start, double stop, double step) 
 	:  shared_(0) {
-		float size = (stop-start)/step;
-		data_.reserve(size);
-		for (float i=start; i < stop; i+=step)
-			data_.push_back(i);
-		len_ = data_.size();
-		ptr_ = (len_ > 0) ? &data_[0] : 0;
+		len_ = (stop-start+0.5)/step;
+	    universalis::os::aligned_memory_alloc(16, ptr_, len_); // reserve		
+        int count = 0;
+		for (double i=start; i < stop; i+=step, ++count)
+			ptr_[count] = i;
 }   
 
 PSArray::PSArray(PSArray& a1, PSArray& a2) : shared_(0) {
-	data_.resize(a1.len() + a2.len());
-	for (int i=0; i < a1.len_; ++i) data_[i] = a1.data_[i];
-	for (int i=0; i < a2.len_; ++i) data_[i+a1.len_] = a2.data_[i];	
-	len_ = data_.size();
-	ptr_ = (len_ > 0) ? &data_[0] : 0;
+	len_ = a1.len() + a2.len();
+	universalis::os::aligned_memory_alloc(16, ptr_, len_); // reserve
+	for (int i=0; i < a1.len_; ++i) ptr_[i] = a1.ptr_[i];
+	for (int i=0; i < a2.len_; ++i) ptr_[i+a1.len_] = a2.ptr_[i];	
 }
 
 void PSArray::resize(int newsize) {
-	if (shared_) {
-		len_ = newsize;
-	} else {
-		data_.resize(newsize, 0);
-		len_ = newsize;
-		ptr_ = (len_ > 0) ? &data_[0] : 0;
-	}
+  len_ = newsize;
 }
 
 int PSArray::copyfrom(PSArray& src) {
     if (src.len() != len_)
 		return 0;
-	if (!src.shared_ && !shared_) {
-		data_ = src.data_;
-		ptr_ = (len_ > 0) ? &data_[0] : 0;
-	} else {
-	  for (int i = 0; i < len_; ++i)
+    for (int i = 0; i < len_; ++i) {
 		ptr_[i] = src.get_val(i);
 	}
 	return 1;
@@ -65,13 +63,12 @@ std::string PSArray::tostring() const {
 template<class T>
 void PSArray::do_op(T& func) {
 	if (len_ > 0) {
-	  func.p = &data_[0];
+	  func.p = ptr_;
 	  for (int i=0; i < len_; ++i) ptr_[i] = func(i);
 	}
 }
 
 // delay
-
 void PSDelay::work(PSArray& x, PSArray& y) {
 	int n = x.len();
 	int k = mem.len();
@@ -99,18 +96,18 @@ int LuaArrayBind::array_new(lua_State *L) {
 	PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
 	luaL_setmetatable(L, "array_meta");
 	int size;
-	float val;
+	double val;
 	switch (n) {
-	  case 0 :
+	  case 1 :
 		  *udata = new PSArray();
 		  break;
-	  case 1 :
-		  size = luaL_checknumber (L, 1);
+	  case 2 :
+		  size = luaL_checknumber (L, 2);
 		  *udata = new PSArray(size, 0);
 		  break;
-	  case 2:
-		  size = luaL_checknumber (L, 1);
-		  val = luaL_checknumber (L, 2);
+	  case 3:
+		  size = luaL_checknumber (L, 2);
+		  val = luaL_checknumber (L, 3);
 		  *udata = new PSArray(size, val);
 		  break;
       default:;
@@ -157,11 +154,23 @@ int LuaArrayBind::array_copyto(lua_State* L) {
 }
 
 int LuaArrayBind::array_arange(lua_State* L) {	
-    float start = luaL_checknumber (L, 1);
-	float stop = luaL_checknumber (L, 2);
-	float step = luaL_checknumber (L, 3);
+    float start = luaL_checknumber (L, 2);
+	float stop = luaL_checknumber (L, 3);
+	float step = luaL_checknumber (L, 4);
 	PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
 	*udata = new PSArray(start, stop, step);
+	luaL_setmetatable(L, "array_meta");	
+	return 1;
+}
+
+int LuaArrayBind::array_random(lua_State* L) {
+	int size = luaL_checknumber (L, 1);
+    PSArray ** ud = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
+	*ud = new PSArray(size, 1);
+	struct {float* p; float operator()(int y) {
+		return p[y] = (lua_Number)(rand()%RAND_MAX) / (lua_Number)RAND_MAX; }
+	} f;
+	(*ud)->do_op(f);
 	luaL_setmetatable(L, "array_meta");	
 	return 1;
 }
@@ -177,7 +186,6 @@ int LuaArrayBind::delay_gc (lua_State *L) {
 	delete ptr;	
 	return 0;
 }
-
 
 PSArray* LuaArrayBind::create_copy_array(lua_State* L, int idx) {
 	PSArray* udata = *(PSArray **)luaL_checkudata(L, idx, "array_meta");
@@ -207,6 +215,31 @@ int LuaArrayBind::array_add(lua_State* L) {
 		 rv = create_copy_array(L, 2);
 	   }	 
 	   struct {float* p; float c; float operator()(int y) {return p[y]+c;}} f;
+	   f.c = param1;
+	   rv->do_op(f);
+	}
+    return 1;
+}
+
+int LuaArrayBind::array_sub(lua_State* L) {
+	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
+		PSArray* rv = create_copy_array(L);
+	    PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+		luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+		struct {float* p; float* v; float operator()(int y) {return p[y]-v[y];}} f;
+		f.v = v->data();
+		rv->do_op(f);
+	} else {
+	   float param1 = 0;
+	   PSArray* rv = 0;
+	   if ((lua_isuserdata(L, 1)) && (lua_isnumber(L, 2))) {
+	     param1 = luaL_checknumber (L, 2);
+	     rv = create_copy_array(L);
+	   } else {
+		 param1 = luaL_checknumber (L, 1);
+		 rv = create_copy_array(L, 2);
+	   }	 
+	   struct {float* p; float c; float operator()(int y) {return p[y]-c;}} f;
 	   f.c = param1;
 	   rv->do_op(f);
 	}
@@ -295,6 +328,16 @@ int LuaArrayBind::array_tan(lua_State* L) {
 	PSArray* rv = create_copy_array(L);	
 	if (rv) {
 	  struct {float* p; float operator()(int y) {return ::tan(p[y]);}} f;	
+	  rv->do_op(f);
+	}
+	return 1;
+}
+
+int LuaArrayBind::array_pow(lua_State* L) {		
+	double exp = luaL_checknumber (L, 2);
+	PSArray* rv = create_copy_array(L);	
+	if (rv) {
+	  struct {float* p; double exp; float operator()(int y) {return ::pow((double)p[y], exp);}} f;	
 	  rv->do_op(f);
 	}
 	return 1;
@@ -413,17 +456,20 @@ void LuaArrayBind::export_c_funcs(lua_State* L) {
 		{ "channel", &array_new_from_sampleV},
 		{ "copyto", &LuaArrayBind::array_copyto },
 		{ "arange", &LuaArrayBind::array_arange },
+		{ "random", &LuaArrayBind::array_random },
 		{ "sin", &LuaArrayBind::array_sin },
 		{ "cos", &LuaArrayBind::array_cos },
 		{ "tan", &LuaArrayBind::array_tan },
 		{ "sqrt", &LuaArrayBind::array_sqrt },
 		{ "sum", &LuaArrayBind::array_sum },
 		{ "rsum", &LuaArrayBind::array_rsum },
+		{ "pow", &LuaArrayBind::array_pow },
 		{ NULL, NULL }
 	};
 	static const luaL_Reg pm_methods[] = {
 		{ "size", &LuaArrayBind::array_size},
 		{ "resize", &LuaArrayBind::array_resize},
+		{ "copy", &LuaArrayBind::array_copyto},
 		{ NULL, NULL }
 	}; 
 	static const luaL_Reg delay_meta[] = {
@@ -439,6 +485,7 @@ void LuaArrayBind::export_c_funcs(lua_State* L) {
 		{ "__gc", &LuaArrayBind::array_gc },
 		{ "__tostring", &LuaArrayBind::array_tostring },
 		{ "__add", &LuaArrayBind::array_add },
+		{ "__sub", &LuaArrayBind::array_sub },
 		{ "__mul", &LuaArrayBind::array_mul },
 		{ "__concat", &LuaArrayBind::array_concat },		
 		{ NULL, NULL }

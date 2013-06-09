@@ -849,6 +849,7 @@ Special:  Bit 0: On = song message attached.
 			std::int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
+			else if (rowCount < 0 ) rowCount = 0;
 			_pSong->AllocNewPattern(patIdx,"unnamed",rowCount,false);
 			//char* packedpattern = new char[packedSize];
 			//Read(packedpattern, packedSize);
@@ -895,7 +896,7 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-						if ( tmp<=64)
+						if ( tmp<65)
 						{
 							volume=tmp<64?tmp:63;
 						}
@@ -1139,8 +1140,14 @@ Special:  Bit 0: On = song message attached.
 								std::string zxx2 = zxx.substr(0,5);
 								if ( zxx2 == "F0F00")
 								{
-									pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (embeddedData->SFx[(param & 0xF)][5]-'0');
+									int val = (embeddedData->SFx[(param & 0xF)][5]-'0');
+									if (val < 2) {
+										pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | val;
+									}
 								}
+							}
+							else if ((param &0xF) < 2) {
+								pent._parameter = XMSampler::CMD_E::E_SET_MIDI_MACRO | (param&0xf);
 							}
 							break;
 					}

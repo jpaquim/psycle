@@ -552,6 +552,10 @@ namespace psycle
 				rms.previousRight=0.;
 #endif
 			}
+
+			virtual void change_buffer(std::vector<float*>& buf);
+			bool _sharedBuf;
+
 		protected:
 			virtual void UpdateVuAndStanbyFlag(int numSamples);
 

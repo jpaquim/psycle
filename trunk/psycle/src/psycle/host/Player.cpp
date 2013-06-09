@@ -399,10 +399,13 @@ void Player::clear_plan() {
 						if (_patternjump ==-1) {
 							_patternjump=(_playPosition+1>=song.playLength)?0:_playPosition+1;
 						}
-						if ( pEntry->_parameter >= song.patternLines[_patternjump]) {
-							_linejump = song.patternLines[_patternjump];
+						{
+							int lines = song.patternLines[song.playOrder[_playPosition]];
+							if ( pEntry->_parameter >= lines) {
+								_linejump = lines-1;
+							}
+							else { _linejump= pEntry->_parameter; }
 						}
-						else { _linejump= pEntry->_parameter; }
 						break;
 					case PatternCmd::SET_VOLUME:
 						if(pEntry->_mach == 255) {

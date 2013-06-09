@@ -228,13 +228,12 @@ namespace psycle
 			pFile->Write(_RCUT);
 			pFile->Write(_RRES);
 
-			//TODO: Verify this.
+			char instrum_name[32]={0};
 			if (samples.Exists(sampleIdx)) {
-				pFile->Write(samples[sampleIdx].WaveName().c_str(),32+1);
+				strcpy(instrum_name,samples[sampleIdx].WaveName().substr(0,31).c_str());
+				instrum_name[31]='\0';
 			}
-			else {
-				pFile->Write("",32);
-			}
+			pFile->Write(instrum_name,strlen(instrum_name)+1);
 
 			// now we have to write out the waves, but only if valid
 

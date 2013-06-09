@@ -1,5 +1,6 @@
 #include <psycle/host/detail/project.hpp>
-#include "lua.hpp"
+#include "plugincatcher.hpp"
+#include "Song.hpp"
 #include "LuaHost.hpp"
 #include "LuaPlugin.hpp"
 
@@ -17,6 +18,46 @@ namespace psycle { namespace host {
 
 const std::string LuaProxy::meta_name = "psyhostcall";
 const std::string LuaProxy::userdata_name = "psyhost";
+
+const std::string PSLuaPluginImport::metaname = "psypluginmeta";
+
+void PSLuaPluginImport::load(const char* name) {
+   PluginCatcher* plug_catcher = static_cast<PluginCatcher*>(&Global::machineload());  
+   PluginInfo* info = plug_catcher->info(name);
+   if (info) {
+     Song& song =  Global::song();
+	 mac_ = song.CreateMachine(info->type, info->dllname.c_str(), 1024, 0);
+	 mac_->Init();
+	 build_buffer(mac_->samplesV, 256);	
+   } else
+   throw std::runtime_error("plugin not found error");
+}
+
+void PSLuaPluginImport::work(int samples) {
+	update_num_samples(samples);	
+	mac_->GenerateAudio(samples, false);	
+}
+
+void PSLuaPluginImport::build_buffer(std::vector<float*>& buf, int num) {
+	    sampleV_.clear();
+		std::vector<float*>::iterator it = buf.begin();
+		for ( ; it != buf.end(); ++it) {
+  		  sampleV_.push_back(PSArray(*it, num));
+		}
+	}
+
+void PSLuaPluginImport::set_buffer(std::vector<float*>& buf) {
+	mac_->change_buffer(buf);
+	build_buffer(mac_->samplesV, 256);
+}
+
+void PSLuaPluginImport::update_num_samples(int num) {
+		psybuffer::iterator it = sampleV_.begin();
+		for ( ; it != sampleV_.end(); ++it) {
+			(*it).set_len(num);
+		}
+	}
+
 
 LuaProxy::LuaProxy(LuaPlugin* plug, lua_State* state) : 
         array_bind_(state),
@@ -94,6 +135,106 @@ int LuaProxy::message(lua_State* L) {
 	return 0;
 }
 
+int LuaProxy::plugin_new(lua_State* L) {
+   PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+   size_t len;
+   const char* plug_name = luaL_checklstring(L, 2, &len);   
+   PSLuaPluginImport ** udata = (PSLuaPluginImport **)lua_newuserdata(L, sizeof(PSLuaPluginImport *));	
+   *udata = new PSLuaPluginImport();
+   try {
+     (*udata)->load(plug_name);   
+   } catch (std::exception &e) {
+	  luaL_error(L, "plugin not found error");
+   }
+
+   luaL_setmetatable(L, PSLuaPluginImport::metaname.c_str());   
+   return 1;
+}
+
+int LuaProxy::plugin_work(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int num = luaL_checknumber (L, 2);
+	(*ud)->work(num);
+	return 0;
+}
+
+int LuaProxy::plugin_resize(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int size = luaL_checknumber (L, 2);	
+	(*ud)->update_num_samples(size);
+	return 0;
+}
+
+int LuaProxy::plugin_channel(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int idx = luaL_checknumber (L, 2);	
+	PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
+	PSArray* a = (*ud)->channel(idx);
+	*udata = new PSArray(a->data(), a->len());
+    luaL_setmetatable(L, "array_meta");
+	return 1;
+}
+
+int LuaProxy::plugin_param(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int idx = luaL_checknumber (L, 2);	
+	double val = (*ud)->mac()->GetParamValue(idx) / (double) 0xFFFF;
+	lua_pushnumber(L, val);
+	return 1;
+}
+
+int LuaProxy::plugin_numparams(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());	
+	double val = (*ud)->mac()->GetNumParams();
+	lua_pushnumber(L, val);
+	return 1;
+}
+
+
+int LuaProxy::plugin_paramname(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int idx = luaL_checknumber (L, 2);
+	char buf[128];
+	(*ud)->mac()->GetParamName(idx, buf);
+	lua_pushstring(L, buf);
+	return 1;
+}
+
+int LuaProxy::plugin_paramdisplay(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int idx = luaL_checknumber (L, 2);
+	char buf[128];
+	(*ud)->mac()-> GetParamValue(idx, buf);
+	lua_pushstring(L, buf);
+	return 1;
+}
+
+int LuaProxy::plugin_setparam(lua_State* L) {
+	PSLuaPluginImport** ud = (PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	int idx = luaL_checknumber (L, 2);
+	double val = luaL_checknumber (L, 3);
+	(*ud)->mac()->SetParameter(idx, val * 0xFFFF);
+	return 0;
+}
+
+int LuaProxy::plugin_gc(lua_State* L) {
+	PSLuaPluginImport* ud = *(PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	delete ud;
+	return 0;
+}
+
+int LuaProxy::plugin_setbuffer(lua_State* L) {
+	PSLuaPluginImport* ud = *(PSLuaPluginImport**) luaL_checkudata(L, 1, PSLuaPluginImport::metaname.c_str());
+	luaL_checktype(L, 2, LUA_TTABLE);	
+	std::vector<float*> sampleV;
+	for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
+  	     PSArray* v = *(PSArray **)luaL_checkudata(L, -1, "array_meta");
+		 sampleV.push_back(v->data());		 
+	}
+	ud->set_buffer(sampleV);
+	return 0;
+}
+
 void LuaProxy::export_c_funcs() {
   static const luaL_Reg putils_lib[] = {	  
 	  { NULL, NULL }
@@ -103,6 +244,20 @@ void LuaProxy::export_c_funcs() {
 	  {"message", message },
   	  { NULL, NULL }
   };
+  static const luaL_Reg pl_methods[] = {
+  	  {"work", plugin_work },
+	  {"new", plugin_new},
+	  {"channel", plugin_channel},
+	  {"resize", plugin_resize},
+	  {"param", plugin_param},
+	  {"numparams", plugin_numparams},
+	  {"paramdisplay", plugin_paramdisplay},
+	  {"paramname", plugin_paramname},
+	  {"setparameter", plugin_setparam},
+	  {"__gc", plugin_gc},
+	  {"setbuffer", plugin_setbuffer},
+  	  { NULL, NULL }
+  };
   luaL_newmetatable(L, LuaProxy::meta_name.c_str());
   luaL_newlib(L, ph_methods);
   lua_setfield(L, -2, "__index");
@@ -110,12 +265,27 @@ void LuaProxy::export_c_funcs() {
   LuaProxy ** ud = (LuaProxy **)lua_newuserdata(L, sizeof(LuaProxy*));
   *ud = this;
   luaL_setmetatable(L, LuaProxy::meta_name.c_str());
-  lua_setglobal(L, LuaProxy::userdata_name.c_str());    
+  lua_setglobal(L, LuaProxy::userdata_name.c_str());  
+  // pluginimport
+  luaL_newmetatable(L, PSLuaPluginImport::metaname.c_str());
+  luaL_newlib(L, pl_methods);
+  lua_setfield(L, -2, "__index");
+  lua_pop(L,1);
+  PSLuaPluginImport** pud = (PSLuaPluginImport **)lua_newuserdata(L, sizeof(PSLuaPluginImport*));
+  *pud = 0;
+  luaL_setmetatable(L, PSLuaPluginImport::metaname.c_str());
+  lua_setglobal(L, "psyplugin");
+}
+
+void LuaProxy::push_proxy() {
+  LuaProxy ** ud = (LuaProxy **)lua_newuserdata(L, sizeof(LuaProxy*));
+  *ud = this;
+  luaL_setmetatable(L, LuaProxy::meta_name.c_str());
 }
 
 void LuaProxy::run_call_init(std::vector<float*>& sample_buf) {
   // share samples
-  array_bind_.build_buffer(sample_buf, 256);
+  array_bind_.build_buffer(sample_buf, 256);    
   // run now whole script at once
   lua_pcall(L, 0, LUA_MULTRET, 0);
   // call script, so it can do some init stuff
@@ -125,7 +295,8 @@ void LuaProxy::run_call_init(std::vector<float*>& sample_buf) {
 	  lua_pop(L, 2);
 	  return;
   }
-  int status = lua_pcall(L, 0, 0 ,0);  // call Lua Work method with 1 param and 1 results   			
+  push_proxy();
+  int status = lua_pcall(L, 1, 0 ,0);  // call pc:init()
   if (status) {
       CString msg(lua_tostring(L, -1));
 	  AfxMessageBox(msg);
@@ -137,12 +308,12 @@ void LuaProxy::call_seqtick(int channel, int note, int ins, int cmd, int val) {
   try {	
     lua_getglobal(L, LuaProxy::meta_name.c_str());
     lua_getfield(L, -1, "seqtick");
-	// todo translate keys to freq
+	push_proxy();
     lua_pushnumber( L, channel);
 	lua_pushnumber( L, note);
 	lua_pushnumber( L, ins);
 	lua_pushnumber( L, val);
-    int status = lua_pcall(L, 4, 0 ,0);    // call with 4 parameters
+    int status = lua_pcall(L, 5, 0 ,0);    // pc:seqtick(channel, note, ins, cmd)
     if (status) {
       CString msg(lua_tostring(L, -1));
 	  unlock();
@@ -162,8 +333,9 @@ void LuaProxy::call_work(int numSamples) throw(psycle::host::exception) {
 	  unlock();
 	  return;
 	}
+	push_proxy();
     lua_pushnumber(L, numSamples);
-    int status = lua_pcall(L, 1, 0 ,0);	
+    int status = lua_pcall(L, 2, 0 ,0);	// pc:work(num)
 	try {
       if (status) {
          std::string s(lua_tostring(L, -1));	
@@ -185,7 +357,8 @@ void LuaProxy::call_stop() {
 	  return;
     }
 	// todo translate keys to freq
-    int status = lua_pcall(L, 0, 0 ,0);
+	push_proxy();
+    int status = lua_pcall(L, 1, 0 ,0);
     if (status) {
       CString msg(lua_tostring(L, -1));
 	  unlock();
@@ -204,9 +377,10 @@ void LuaProxy::call_parameter(int numparameter, float val) {
 	  unlock();
 	  return;
   }
+  push_proxy();
   lua_pushnumber(L, numparameter);
   lua_pushnumber(L, val);
-  int status = lua_pcall(L, 2, 0 ,0);   			
+  int status = lua_pcall(L, 3, 0 ,0);   			
   try {
     if (status) {
         std::string s(lua_tostring(L, -1));	
@@ -296,8 +470,9 @@ int LuaProxy::GetRawParameter(const char* field, int index) {
 	lua_pop(L, 2);
 	return 0;
   }
+  push_proxy();
   lua_pushnumber ( L, index );
-  int status = lua_pcall(L, 1, 1 ,0);    // call Lua Work method with 1 param and 1 results   			
+  int status = lua_pcall(L, 2, 1 ,0);    // call Lua Work method with 1 param and 1 results   			
   try {
     if (status) {
        std::string s(lua_tostring(L, -1));	

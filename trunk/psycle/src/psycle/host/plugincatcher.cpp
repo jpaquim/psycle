@@ -9,8 +9,8 @@
 
 #include <psycle/host/Plugin.hpp>
 #include <psycle/host/VstHost24.hpp>
-#include <psycle/host/LuaHost.hpp>
 #include <psycle/host/LuaPlugin.hpp>
+#include <psycle/host/LuaHost.hpp>
 
 #include <string>
 #include <sstream>
@@ -89,6 +89,48 @@ namespace psycle
 				break;
 			}
 			return false;
+		}
+
+
+		PluginInfo* PluginCatcher::info(const std::string& name) {
+			std::string result;
+			std::map<std::string,std::string>::iterator iterator = VstNames.find(name);
+            if(iterator != VstNames.end()) {
+			  result=iterator->second;
+			} else {
+				std::map<std::string,std::string>::iterator iterator = LuaNames.find(name);
+				if(iterator != LuaNames.end()) {
+				  result=iterator->second;				  
+				} else {
+					std::map<std::string,std::string>::iterator iterator = NativeNames.find(name);
+					if(iterator != NativeNames.end()) {
+						result=iterator->second;
+					}
+				}
+			}
+
+			int shellIdx = 0;
+			for(int i(0) ; i < _numPlugins ; ++i)
+			{
+				PluginInfo * pInfo = _pPlugsInfo[i];
+				if ((result == pInfo->dllname) &&
+					(shellIdx == 0 || shellIdx == pInfo->identifier))
+				{
+					// bad plugins always have allow = false
+					if(pInfo->allow) return pInfo;
+					std::ostringstream s; s
+						<< "Plugin " << name << " is disabled because:" << std::endl
+						<< pInfo->error << std::endl
+						<< "Try to load anyway?";
+					if (::MessageBox(0,s.str().c_str(), "Plugin Warning!", MB_YESNO | MB_ICONWARNING) == IDYES) {
+						return pInfo;
+					}
+					else {
+						return 0;
+					}
+				}
+			}
+			return 0;
 		}
 
 		bool PluginCatcher::TestFilename(const std::string & name, const std::int32_t shellIdx)

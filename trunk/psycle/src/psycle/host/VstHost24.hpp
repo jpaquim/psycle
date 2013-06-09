@@ -73,6 +73,8 @@ namespace psycle
 
 				///> Plugin sends actions to the host
 				virtual bool OnProcessEvents(seib::vst::CEffect &pEffect, VstEvents* events) { return false; }
+
+				
 			};
 			class Plugin : public Machine, public seib::vst::CEffect
 			{
@@ -329,6 +331,7 @@ namespace psycle
 					editorWindow = static_cast<CVstEffectWnd*>(wnd);
 				}
 */
+				virtual void change_buffer(std::vector<float*>& buf);
 			};
 		}
 	}

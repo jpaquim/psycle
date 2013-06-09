@@ -221,7 +221,6 @@ namespace host{
 
 		m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
 		m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
-		//using std::max;
 		song.SONGTRACKS = std::max((int)m_Header.channels, 4);
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
@@ -366,7 +365,8 @@ namespace host{
 					if(vol >= 0x10 && vol <= 0x50)
 					{
 						volume=(vol == 0x50)?0x3F:(vol-0x10);
-					} else if(vol >= 0x60){
+					}
+					else if(vol >= 0x60){
 						switch(vol&0xF0)
 						{
 						case XMVOL_CMD::XMV_VOLUMESLIDEDOWN:
@@ -386,11 +386,11 @@ namespace host{
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDELEFT:
 							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-							volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|((vol&0x0F)>>2);
+							volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|(((vol&0x0F) > 4)?1:(vol&0x0F)>>2);
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDERIGHT:
 							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-							volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|((vol&0x0F)>>2);
+							volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|(((vol&0x0F) > 4)?1:(vol&0x0F)>>2);
 							break;
 // Ignoring this command for now.
 //						case XMVOL_CMD::XMV_VIBRATOSPEED:

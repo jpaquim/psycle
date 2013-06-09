@@ -22,8 +22,6 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			CDialog::DoDataExchange(pDX);
 			DDX_Control(pDX, IDC_NOTETUNE, m_notelabel);
-			DDX_Control(pDX, IDC_PANLABEL, m_panlabel);
-			DDX_Control(pDX, IDC_FINELABEL, m_finelabel);
 			DDX_Control(pDX, IDC_SLIDERFINE, m_finetune);
 			DDX_Control(pDX, IDC_LOOPEDIT, m_loopedit);
 			DDX_Control(pDX, IDC_CHECK4, m_loopcheck);
@@ -34,38 +32,26 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			DDX_Control(pDX, IDC_RCUT, m_rcut_check);
 			DDX_Control(pDX, IDC_NNA_COMBO, m_nna_combo);			
 			DDX_Control(pDX, IDC_LOCKINSTNUMBER, m_lockinstnumber);
-			DDX_Control(pDX, IDC_VOLABEL, m_volabel);
 			DDX_Control(pDX, IDC_SLIDERVOL, m_volumebar);
 			DDX_Control(pDX, IDC_WAVELENGTH, m_wlen);
 			DDX_Control(pDX, IDC_LOOPSTART, m_loopstart);
 			DDX_Control(pDX, IDC_LOOPEND, m_loopend);
 			DDX_Control(pDX, IDC_LOOPTYPE, m_looptype);
 			DDX_Control(pDX, IDC_INSTRUMENT_LABEL, m_instlabel);
-			DDX_Control(pDX, IDC_F_AMOUNTLABEL, m_f_amount_label);
-			DDX_Control(pDX, IDC_SLIDER_FILAMT, m_f_amount_slider);
 			DDX_Control(pDX, IDC_COMBOFILTER, m_filtercombo);
-			DDX_Control(pDX, IDC_LABELQ, m_q_label);
-			DDX_Control(pDX, IDC_CUTOFF_LBL, m_cutoff_label);
 			DDX_Control(pDX, IDC_SLIDER_FRES, m_q_slider);
 			DDX_Control(pDX, IDC_SLIDER_FCUT, m_cutoff_slider);
-			DDX_Control(pDX, IDC_F_S_LABEL, m_f_s_label);
-			DDX_Control(pDX, IDC_F_R_LABEL, m_f_r_label);
-			DDX_Control(pDX, IDC_F_D_LABEL, m_f_d_label);
-			DDX_Control(pDX, IDC_F_A_LABEL, m_f_a_label);
-			DDX_Control(pDX, IDC_SLIDER_FILREL, m_f_release_slider);
-			DDX_Control(pDX, IDC_SLIDER_FILSUS, m_f_sustain_slider);
-			DDX_Control(pDX, IDC_SLIDER_FILDEC, m_f_decay_slider);
-			DDX_Control(pDX, IDC_SLIDER_FILATT, m_f_attack_slider);
-			DDX_Control(pDX, IDC_A_A_LABEL, m_a_a_label);
-			DDX_Control(pDX, IDC_A_S_LABEL, m_a_s_label);
-			DDX_Control(pDX, IDC_A_R_LABEL, m_a_r_label);
-			DDX_Control(pDX, IDC_A_D_LABEL, m_a_d_label);
 			DDX_Control(pDX, IDC_SLIDER_AMPREL, m_a_release_slider);
 			DDX_Control(pDX, IDC_SLIDER_AMPSUS, m_a_sustain_slider);
 			DDX_Control(pDX, IDC_SLIDER_AMPDEC, m_a_decay_slider);
 			DDX_Control(pDX, IDC_SLIDER_AMPATT, m_a_attack_slider);
-			DDX_Control(pDX, IDC_FILFRAME, m_filframe);
+			DDX_Control(pDX, IDC_SLIDER_FILREL, m_f_release_slider);
+			DDX_Control(pDX, IDC_SLIDER_FILSUS, m_f_sustain_slider);
+			DDX_Control(pDX, IDC_SLIDER_FILDEC, m_f_decay_slider);
+			DDX_Control(pDX, IDC_SLIDER_FILATT, m_f_attack_slider);
+			DDX_Control(pDX, IDC_SLIDER_FILAMT, m_f_amount_slider);
 			DDX_Control(pDX, IDC_AMPFRAME, m_ampframe);
+			DDX_Control(pDX, IDC_FILFRAME, m_filframe);
 		}
 
 		BEGIN_MESSAGE_MAP(CInstrumentEditor, CDialog)
@@ -91,20 +77,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			ON_BN_CLICKED(IDC_INS_INCNOTE, OnInsIncnote)
 			ON_BN_CLICKED(IDC_INS_INCOCTAVE, OnInsIncoctave)
 			ON_CBN_SELCHANGE(IDC_COMBOFILTER, OnSelchangeFilterType)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERVOL, OnCustomdrawSliderVol)			
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_PANSLIDER, OnCustomdrawPanslider)			
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERFINE, OnCustomdrawSliderFine)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_AMPATT, OnDrawAmpAttackSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_AMPDEC, OnDrawAmpDecaySlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_AMPSUS, OnDrawAmpSustainSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_AMPREL, OnDrawAmpReleaseSlider)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FILATT, OnCustomdrawFSlider1)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FILDEC, OnCustomdrawFSlider2)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FILSUS, OnCustomdrawFSlider3)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FILREL, OnCustomdrawFSlider4)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FCUT, OnCustomdrawSliderCutoff)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FRES, OnCustomdrawSliderQ)
-			ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDER_FILAMT, OnCustomdrawEnvelope)
+			ON_NOTIFY_RANGE(NM_CUSTOMDRAW, IDC_SLIDERVOL, IDC_SLIDER_FRES, OnCustomdrawSliderm)
 		END_MESSAGE_MAP()
 
 		
@@ -137,23 +110,49 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			m_finetune.SetRange(-100,100);
 			//Hack to fix "0 placed on leftmost on start".
 			m_finetune.SetPos(-100);
-			m_panslider.SetRange(0,256);
+			m_panslider.SetRange(0,128);
 
 			// Set slider ranges
-			m_a_attack_slider.SetRange(1,65536);
-			m_a_decay_slider.SetRange(1,65536);
+			m_a_attack_slider.SetRange(1,1024);
+			m_a_decay_slider.SetRange(1,1024);
 			m_a_sustain_slider.SetRange(0,100);
-			m_a_release_slider.SetRange(16,65536);
+			m_a_release_slider.SetRange(16,2048);
 
-			m_f_attack_slider.SetRange(1,65536);
-			m_f_decay_slider.SetRange(1,65536);
+			m_f_attack_slider.SetRange(1,1024);
+			m_f_decay_slider.SetRange(1,1024);
 			m_f_sustain_slider.SetRange(0,128);
-			m_f_release_slider.SetRange(16,65536);
+			m_f_release_slider.SetRange(16,2048);
 				
 			m_f_amount_slider.SetRange(-128,128);
 			//Hack to fix "0 placed on leftmost on start".
 			m_f_amount_slider.SetPos(-128);
 			
+			m_ampframe.freeform(false);
+			m_ampframe.envelopeIdx(0);
+			m_ampframe.canSustain(false);
+			m_ampframe.canLoop(false);
+			m_ampEnv.Clear();
+			m_ampEnv.Append(0, 0);
+			m_ampEnv.Append(1, 1);
+			m_ampEnv.Append(2, 0);
+			m_ampEnv.Append(3, 0);
+			m_ampEnv.SustainBegin(2);
+			m_ampEnv.SustainEnd(2);
+			m_ampframe.Initialize(m_ampEnv);
+
+			m_filframe.freeform(false);
+			m_filframe.envelopeIdx(1);
+			m_filframe.canSustain(false);
+			m_filframe.canLoop(false);
+			m_filEnv.Clear();
+			m_filEnv.Append(0, 0);
+			m_filEnv.Append(1, 1);
+			m_filEnv.Append(2, 0);
+			m_filEnv.Append(3, 0);
+			m_filEnv.SustainBegin(2);
+			m_filEnv.SustainEnd(2);
+			m_filframe.Initialize(m_filEnv);
+
 			return TRUE;
 		}
 
@@ -215,7 +214,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			// Volume bar
 			m_volumebar.SetPos(wave.WaveGlobVolume()*100);
 			m_finetune.SetPos(wave.WaveFineTune());
-			m_panslider.SetPos(wave.PanFactor()*256);
+			m_panslider.SetPos(wave.PanFactor()*128);
 
 			UpdateNoteLabel();	
 			
@@ -243,19 +242,43 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			initializingDialog=false;
 
 
-			// Update sliders
-			m_a_attack_slider.SetPos(pins->ENV_AT);
-			m_a_decay_slider.SetPos(pins->ENV_DT);
-			m_a_sustain_slider.SetPos(pins->ENV_SL);
-			m_a_release_slider.SetPos(pins->ENV_RT);
+			RefreshEnvelopes();
+		}
 
-			m_f_attack_slider.SetPos(pins->ENV_F_AT);
-			m_f_decay_slider.SetPos(pins->ENV_F_DT);
+		void CInstrumentEditor::RefreshEnvelopes()
+		{
+			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			// Update sliders
+			m_a_attack_slider.SetPos(pins->ENV_AT/256);//Reduced original range from samples to 5 milliseconds
+			m_a_decay_slider.SetPos(pins->ENV_DT/256);//Reduced original range from samples to 5 milliseconds
+			m_a_sustain_slider.SetPos(pins->ENV_SL);
+			m_a_release_slider.SetPos(pins->ENV_RT/256);//Reduced original range from samples to 5 milliseconds
+
+			m_f_attack_slider.SetPos(pins->ENV_F_AT/256);//Reduced original range from samples to 5 milliseconds
+			m_f_decay_slider.SetPos(pins->ENV_F_DT/256);//Reduced original range from samples to 5 milliseconds
 			m_f_sustain_slider.SetPos(pins->ENV_F_SL);
-			m_f_release_slider.SetPos(pins->ENV_F_RT);
+			m_f_release_slider.SetPos(pins->ENV_F_RT/256);//Reduced original range from samples to 5 milliseconds
 			
 			m_f_amount_slider.SetPos(pins->ENV_F_EA);
+		}
 
+		void CInstrumentEditor::OnEnvelopeChanged(WPARAM wParam, LPARAM lParam)
+		{
+			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			int envIdx = wParam;
+			if (envIdx == 0) { //amp
+				pins->ENV_AT = m_ampframe.AttackTime()*256;
+				pins->ENV_DT = m_ampframe.DecayTime()*256;
+				pins->ENV_SL = m_ampframe.SustainValue()*100.f;
+				pins->ENV_RT = m_ampframe.ReleaseTime()*256;
+			}
+			else { //filter
+				pins->ENV_F_AT = m_filframe.AttackTime()*256;
+				pins->ENV_F_DT = m_filframe.DecayTime()*256;
+				pins->ENV_F_SL = m_filframe.SustainValue()*128.f;
+				pins->ENV_F_RT = m_filframe.ReleaseTime()*256;
+			}
+			RefreshEnvelopes();
 		}
 
 		//////////////////////////////////////////////////////////////////////
@@ -274,20 +297,20 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			case TB_PAGEUP: //fallthrough
 			case TB_THUMBPOSITION: //fallthrough
 			case TB_THUMBTRACK:
-				if (uId == IDC_SLIDERVOL) { SliderVolume(*the_slider); }
-				else if (uId == IDC_SLIDERFINE) { SliderFinetune(*the_slider); }
-				else if (uId == IDC_PANSLIDER) { SliderPan(*the_slider); }
-				else if (uId == IDC_SLIDER_FCUT) { SliderFilterCut(*the_slider); }
+				if (uId == IDC_SLIDER_FCUT) { SliderFilterCut(*the_slider); }
 				else if (uId == IDC_SLIDER_FRES) { SliderFilterRes(*the_slider); }
-				else if (uId == IDC_SLIDER_AMPREL) { SliderAmpRel(*the_slider); }
-				else if (uId == IDC_SLIDER_AMPSUS) { SliderAmpSus(*the_slider); }
-				else if (uId == IDC_SLIDER_AMPDEC) { SliderAmpDec(*the_slider); }
+				else if (uId == IDC_SLIDERVOL) { SliderVolume(*the_slider); }
+				else if (uId == IDC_PANSLIDER) { SliderPan(*the_slider); }
+				else if (uId == IDC_SLIDERFINE) { SliderFinetune(*the_slider); }
 				else if (uId == IDC_SLIDER_AMPATT) { SliderAmpAtt(*the_slider); }
-				else if (uId == IDC_SLIDER_FILAMT) { SliderFilterMod(*the_slider); }
-				else if (uId == IDC_SLIDER_FILREL) { SliderFilterRel(*the_slider); }
-				else if (uId == IDC_SLIDER_FILSUS) { SliderFilterSus(*the_slider); }
-				else if (uId == IDC_SLIDER_FILDEC) { SliderFilterDec(*the_slider); }
+				else if (uId == IDC_SLIDER_AMPDEC) { SliderAmpDec(*the_slider); }
+				else if (uId == IDC_SLIDER_AMPSUS) { SliderAmpSus(*the_slider); }
+				else if (uId == IDC_SLIDER_AMPREL) { SliderAmpRel(*the_slider); }
 				else if (uId == IDC_SLIDER_FILATT) { SliderFilterAtt(*the_slider); }
+				else if (uId == IDC_SLIDER_FILDEC) { SliderFilterDec(*the_slider); }
+				else if (uId == IDC_SLIDER_FILSUS) { SliderFilterSus(*the_slider); }
+				else if (uId == IDC_SLIDER_FILREL) { SliderFilterRel(*the_slider); }
+				else if (uId == IDC_SLIDER_FILAMT) { SliderFilterMod(*the_slider); }
 				break;
 			case TB_ENDTRACK:
 				break;
@@ -295,27 +318,6 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			CPropertyPage::OnHScroll(nSBCode, nPos, pScrollBar);
 		}
 
-		void CInstrumentEditor::SliderVolume(CSliderCtrl& the_slider)
-		{
-			int si = Global::song().instSelected;
-			if (Global::song().samples.Exists(si)) {
-				Global::song().samples.get(si).WaveGlobVolume(the_slider.GetPos()*0.01f);
-			}
-		}
-		void CInstrumentEditor::SliderFinetune(CSliderCtrl& the_slider)
-		{
-			int si = Global::song().instSelected;
-			if (Global::song().samples.Exists(si)) {
-				 Global::song().samples.get(si).WaveFineTune(the_slider.GetPos());
-			}
-		}
-		void CInstrumentEditor::SliderPan(CSliderCtrl& the_slider)
-		{
-			int si = Global::song().instSelected;
-			if (Global::song().samples.Exists(si)) {
-				 Global::song().samples.get(si).PanFactor(the_slider.GetPos()/256.f);
-			}
-		}
 		void CInstrumentEditor::SliderFilterCut(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
@@ -326,50 +328,71 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
 			pins->ENV_F_RQ = the_slider.GetPos();
 		}
-		void CInstrumentEditor::SliderAmpRel(CSliderCtrl& the_slider)
+		void CInstrumentEditor::SliderVolume(CSliderCtrl& the_slider)
+		{
+			int si = Global::song().instSelected;
+			if (Global::song().samples.Exists(si)) {
+				Global::song().samples.get(si).WaveGlobVolume(the_slider.GetPos()*0.01f);
+			}
+		}
+		void CInstrumentEditor::SliderPan(CSliderCtrl& the_slider)
+		{
+			int si = Global::song().instSelected;
+			if (Global::song().samples.Exists(si)) {
+				 Global::song().samples.get(si).PanFactor(the_slider.GetPos()/128.f);
+			}
+		}
+		void CInstrumentEditor::SliderFinetune(CSliderCtrl& the_slider)
+		{
+			int si = Global::song().instSelected;
+			if (Global::song().samples.Exists(si)) {
+				 Global::song().samples.get(si).WaveFineTune(the_slider.GetPos());
+			}
+		}
+		void CInstrumentEditor::SliderAmpAtt(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_RT = the_slider.GetPos();
+			pins->ENV_AT = the_slider.GetPos()*256;//Reduced original range from samples to 5 milliseconds
+		}
+		void CInstrumentEditor::SliderAmpDec(CSliderCtrl& the_slider)
+		{
+			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			pins->ENV_DT = the_slider.GetPos()*256;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderAmpSus(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
 			pins->ENV_SL = the_slider.GetPos();
 		}
-		void CInstrumentEditor::SliderAmpDec(CSliderCtrl& the_slider)
+		void CInstrumentEditor::SliderAmpRel(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_DT = the_slider.GetPos();
+			pins->ENV_RT = the_slider.GetPos()*256;//Reduced original range from samples to 5 milliseconds
 		}
-		void CInstrumentEditor::SliderAmpAtt(CSliderCtrl& the_slider)
+		void CInstrumentEditor::SliderFilterAtt(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_AT = the_slider.GetPos();
+			pins->ENV_F_AT = the_slider.GetPos()*256;//Reduced original range from samples to 5 milliseconds
 		}
-		void CInstrumentEditor::SliderFilterMod(CSliderCtrl& the_slider)
+		void CInstrumentEditor::SliderFilterDec(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_F_EA = the_slider.GetPos();
-		}
-		void CInstrumentEditor::SliderFilterRel(CSliderCtrl& the_slider)
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_F_RT = the_slider.GetPos();
+			pins->ENV_F_DT = the_slider.GetPos()*256;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderFilterSus(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
 			pins->ENV_F_SL = the_slider.GetPos();
 		}
-		void CInstrumentEditor::SliderFilterDec(CSliderCtrl& the_slider)
+		void CInstrumentEditor::SliderFilterRel(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_F_DT = the_slider.GetPos();
+			pins->ENV_F_RT = the_slider.GetPos()*256;//Reduced original range from samples to 5 milliseconds
 		}
-		void CInstrumentEditor::SliderFilterAtt(CSliderCtrl& the_slider)
+		void CInstrumentEditor::SliderFilterMod(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			pins->ENV_F_AT = the_slider.GetPos();
+			pins->ENV_F_EA = the_slider.GetPos();
 		}
 
 
@@ -630,312 +653,126 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			}
 		}
 
-		void CInstrumentEditor::OnCustomdrawSliderCutoff(NMHDR* pNMHDR, LRESULT* pResult) 
+		void CInstrumentEditor::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			char buffer[12];
-			sprintf(buffer,"%.0f",2333*pow(6.,m_cutoff_slider.GetPos()/127.));
-			m_cutoff_label.SetWindowText(buffer);
-
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnCustomdrawSliderQ(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			char buffer[12];
-			sprintf(buffer,"%.0f%%",m_q_slider.GetPos()*0.78740);
-			m_q_label.SetWindowText(buffer);
-
-			*pResult = 0;
-		}
-		void CInstrumentEditor::OnCustomdrawSliderVol(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			int si=Global::song().instSelected;
-			char buffer[16];
-			if (Global::song().samples.Exists(si)) {
-				if(m_volumebar.GetPos()==0) {
-					sprintf(buffer,"-inf dB");
-				} else {
-					float db = 20 * log10(m_volumebar.GetPos()*0.01f);
-					sprintf(buffer,"%.1f dB",db);
+			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+			if (nmcd.dwDrawStage == CDDS_POSTPAINT)
+			{
+				char buffer[64];
+				int label = 0;
+				CSliderCtrl* slider = reinterpret_cast<CSliderCtrl*>(GetDlgItem(pNMHDR->idFrom));
+				int si=Global::song().instSelected;
+				Instrument *pins = Global::song()._pInstrument[si];
+				int nPos = slider->GetPos();
+				if (pNMHDR->idFrom == IDC_SLIDER_FCUT) {
+					sprintf(buffer,"%.0f",2333.0*pow(6.0,nPos/127.0));
+					label = IDC_CUTOFF_LBL;
 				}
-			}
-			else {
-				buffer[0]='\0';
-			}
-			m_volabel.SetWindowText(buffer);
-			*pResult = 0;
-		}
-		void CInstrumentEditor::OnCustomdrawPanslider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			char buffer[16];
-			int si=Global::song().instSelected;
-			if (Global::song().samples.Exists(si)) {
-				switch(m_panslider.GetPos())
-				{
-				case 0: sprintf(buffer,"||%02d  ",m_panslider.GetPos()); break;
-				case 128: sprintf(buffer," |%02d| ",m_panslider.GetPos()); break;
-				case 256: sprintf(buffer,"  %02d||",m_panslider.GetPos()); break;
-				default:
-					if ( m_panslider.GetPos() < 64) sprintf(buffer,"<<%02d  ",m_panslider.GetPos());
-					else if ( m_panslider.GetPos() < 128) sprintf(buffer," <%02d< ",m_panslider.GetPos());
-					else if ( m_panslider.GetPos() <= 192) sprintf(buffer," >%02d> ",m_panslider.GetPos());
-					else sprintf(buffer,"  %02d>>",m_panslider.GetPos());
-					break;
+				else if (pNMHDR->idFrom == IDC_SLIDER_FRES) {
+					sprintf(buffer,"%.0f%%",nPos*0.78740);
+					label = IDC_LABELQ;
 				}
+				else if (pNMHDR->idFrom == IDC_SLIDERVOL) {
+					if (Global::song().samples.Exists(si)) {
+						if(m_volumebar.GetPos()==0) {
+							sprintf(buffer,"-inf dB");
+						} else {
+							float db = 20 * log10(nPos*0.01f);
+							sprintf(buffer,"%.1f dB",db);
+						}
+					}
+					else {
+						buffer[0]='\0';
+					}
+					label = IDC_VOLABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_PANSLIDER) {
+					if (Global::song().samples.Exists(si)) {
+						if ( nPos == 0) sprintf(buffer,"||%02d  ",nPos);
+						else if ( nPos < 32) sprintf(buffer,"<<%02d  ",nPos);
+						else if ( nPos < 64) sprintf(buffer," <%02d< ",nPos);
+						else if ( nPos == 64) sprintf(buffer," |%02d| ",nPos);
+						else if ( nPos <= 96) sprintf(buffer," >%02d> ",nPos);
+						else if (nPos < 128) sprintf(buffer,"  %02d>>",nPos);
+						else sprintf(buffer,"  %02d||",nPos);
+					}
+					else {
+						buffer[0]='\0';
+					}
+					label = IDC_PANLABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDERFINE) {
+					if (Global::song().samples.Exists(si)) {
+						sprintf(buffer,"%d ct.",m_finetune.GetPos());
+					}
+					else {
+						buffer[0]='\0';
+					}
+					label = IDC_FINELABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_AMPATT) {
+					m_ampframe.AttackTime(pins->ENV_AT/256);
+					m_ampframe.Invalidate();
+					sprintf(buffer,"%.2f ms.",nPos*0.0226757f);
+					label = IDC_A_A_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_AMPDEC) {
+					m_ampframe.DecayTime(pins->ENV_DT/256);
+					m_ampframe.Invalidate();
+					sprintf(buffer,"%.2f ms.",nPos*5.8049792f);
+					label = IDC_A_D_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_AMPSUS) {
+					m_ampframe.SustainValue((float)pins->ENV_SL*0.01f);
+					m_ampframe.Invalidate();
+					sprintf(buffer,"%d%%",nPos);
+					label = IDC_A_S_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_AMPREL) {
+					m_ampframe.ReleaseTime(pins->ENV_RT/256);
+					m_ampframe.Invalidate();
+					sprintf(buffer,"%.2f ms.",nPos*5.8049792f);
+					label = IDC_A_R_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_FILATT) {
+					m_filframe.AttackTime(pins->ENV_F_AT/256);
+					m_filframe.Invalidate();
+					sprintf(buffer,"%.2f ms.",nPos*5.8049792f);
+					label = IDC_F_A_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_FILDEC) {
+					m_filframe.DecayTime(pins->ENV_F_DT/256);
+					m_filframe.Invalidate();
+					sprintf(buffer,"%.2f ms.",nPos*5.8049792f);
+					label = IDC_F_D_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_FILSUS) {
+					m_filframe.SustainValue((float)pins->ENV_F_SL*0.0078125f);
+					m_filframe.Invalidate();
+					sprintf(buffer,"%d%%",nPos);
+					label = IDC_F_S_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_FILREL) {
+					m_filframe.ReleaseTime(pins->ENV_F_RT/256);
+					m_filframe.Invalidate();
+					sprintf(buffer,"%.2f ms.",nPos*5.8049792);
+					label = IDC_F_R_LABEL;
+				}
+				else if (pNMHDR->idFrom == IDC_SLIDER_FILAMT) {
+					sprintf(buffer,"%.0f%%",nPos*0.78125f);
+					label = IDC_F_AMOUNTLABEL;
+				}
+				if (label != 0) {
+					((CStatic*)GetDlgItem(label))->SetWindowText(buffer);
+				}
+				*pResult = CDRF_DODEFAULT;
+			}
+			else if (nmcd.dwDrawStage == CDDS_PREPAINT ){
+				*pResult = CDRF_NOTIFYITEMDRAW|CDRF_NOTIFYPOSTPAINT;
 			}
 			else {
-				buffer[0]='\0';
+				*pResult = CDRF_DODEFAULT;
 			}
-			m_panlabel.SetWindowText(buffer);
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnCustomdrawSliderFine(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			int si=Global::song().instSelected;
-			char buffer[16];
-			if (Global::song().samples.Exists(si)) {
-				sprintf(buffer,"%d ct.",m_finetune.GetPos());
-			}
-			else {
-				buffer[0]='\0';
-			}
-			m_finelabel.SetWindowText(buffer);
-			*pResult = 0;
-		}
-
-
-		void CInstrumentEditor::OnDrawAmpAttackSlider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)m_a_attack_slider.GetPos()*0.0226757f);
-			m_a_a_label.SetWindowText(buffer);
-
-			// Update ADSR
-			DrawADSR(
-				pins->ENV_AT,
-				pins->ENV_DT,
-				pins->ENV_SL,
-				pins->ENV_RT);
-
-			*pResult = 0;
-
-		}
-
-		void CInstrumentEditor::OnDrawAmpDecaySlider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)m_a_decay_slider.GetPos()*0.0226757f);
-			m_a_d_label.SetWindowText(buffer);
-
-			// Update ADSR
-			DrawADSR(
-				pins->ENV_AT,
-				pins->ENV_DT,
-				pins->ENV_SL,
-				pins->ENV_RT);
-
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnDrawAmpSustainSlider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%d%%",m_a_sustain_slider.GetPos());
-			m_a_s_label.SetWindowText(buffer);
-
-			// Update ADSR
-			DrawADSR(
-				pins->ENV_AT,
-				pins->ENV_DT,
-				pins->ENV_SL,
-				pins->ENV_RT);
-
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnDrawAmpReleaseSlider(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)m_a_release_slider.GetPos()*0.0226757f);
-			m_a_r_label.SetWindowText(buffer);
-			
-			// Update ADSR
-			DrawADSR(
-					pins->ENV_AT,
-					pins->ENV_DT,
-					pins->ENV_SL,
-					pins->ENV_RT);
-
-			*pResult = 0;
-		}
-
-		//////////////////////////////////////////////////////////////////////
-		// Filter envelope
-
-		void CInstrumentEditor::OnCustomdrawFSlider1(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)m_f_attack_slider.GetPos()*0.0226757f);
-			m_f_a_label.SetWindowText(buffer);
-
-			// Update filter ADSR
-			DrawADSRFil(pins->ENV_F_AT,
-						pins->ENV_F_DT,
-						pins->ENV_F_SL,
-						pins->ENV_F_RT);
-
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnCustomdrawFSlider2(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)m_f_decay_slider.GetPos()*0.0226757f);
-			m_f_d_label.SetWindowText(buffer);
-
-			// Update filter ADSR
-			DrawADSRFil(pins->ENV_F_AT,
-						pins->ENV_F_DT,
-						pins->ENV_F_SL,
-						pins->ENV_F_RT);
-
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnCustomdrawFSlider3(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.0f%%",m_f_sustain_slider.GetPos()*0.78125);
-			m_f_s_label.SetWindowText(buffer);
-
-			// Update filter ADSR
-			DrawADSRFil(pins->ENV_F_AT,
-						pins->ENV_F_DT,
-						pins->ENV_F_SL,
-						pins->ENV_F_RT);
-
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnCustomdrawFSlider4(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
-			char buffer[12];
-			sprintf(buffer,"%.2f ms.",(float)m_f_release_slider.GetPos()*0.0226757f);
-			m_f_r_label.SetWindowText(buffer);
-
-			// Update filter ADSR
-			DrawADSRFil(pins->ENV_F_AT,
-						pins->ENV_F_DT,
-						pins->ENV_F_SL,
-						pins->ENV_F_RT);
-			
-			*pResult = 0;
-		}
-
-		void CInstrumentEditor::OnCustomdrawEnvelope(NMHDR* pNMHDR, LRESULT* pResult) 
-		{
-			char buffer[12];
-			sprintf(buffer,"%.0f%%",(float)m_f_amount_slider.GetPos()*0.78125f);
-			m_f_amount_label.SetWindowText(buffer);
-			
-			*pResult = 0;
-		}
-
-		//////////////////////////////////////////////////////////////////////
-		// GDI Envelope Drawing Members
-
-		void CInstrumentEditor::DrawADSR(int AX,int BX,int CX,int DX)
-		{
-			CClientDC dc(&m_ampframe);
-			CRect rect;
-			m_ampframe.GetClientRect(&rect);
-			CPoint pol[5];
-			int CH=rect.Height()-1;
-			int CW=rect.Width();
-
-			int samplesperpixel = 65536*3/rect.Width();
-			AX/=samplesperpixel;
-			BX/=samplesperpixel;
-			CX*=CH;
-			CX/=100;
-			DX/=samplesperpixel;
-
-			//dc.FillSolidRect(0,0,494,CH+1,0xCC7788);
-			dc.FillSolidRect(0,0,CW,CH,RGB(50, 50, 50));
-			pol[0].x=0;
-			pol[0].y=CH;
-
-			pol[1].x=AX;
-			pol[1].y=0;
-			
-			pol[2].x=AX+BX;
-			pol[2].y=CH-CX;
-			
-			pol[3].x=AX+BX;
-			pol[3].y=CH-CX;
-			
-			pol[4].x=AX+BX+DX;
-			pol[4].y=CH;
-			
-			//CBrush newBrush(RGB(255, 128, 64));
-			//dc.SelectObject(&newBrush);	
-
-			dc.Polygon(&pol[0],5);
-
-			dc.MoveTo(AX+BX,0);
-			dc.LineTo(AX+BX,CH);
-		}
-
-		void CInstrumentEditor::DrawADSRFil(int AX,int BX,int CX,int DX)
-		{
-			CClientDC dc(&m_filframe);
-			CRect rect;
-			m_filframe.GetClientRect(&rect);
-			CPoint pol[5];
-			int CH=rect.Height()-1;
-			int CW=rect.Width();
-
-			int samplesperpixel = 65536*3/rect.Width();
-			AX/=samplesperpixel;
-			BX/=samplesperpixel;
-			CX*=CH;
-			CX/=128;
-			DX/=samplesperpixel;
-
-
-			//dc.FillSolidRect(0,0,494,CH+1,0x4422CC);
-			dc.FillSolidRect(0,0,CW,CH+1,RGB(50, 50, 50));
-			pol[0].x=0;
-			pol[0].y=CH;
-
-			pol[1].x=AX;
-			pol[1].y=0;
-			
-			pol[2].x=AX+BX;
-			pol[2].y=CH-CX;
-			
-			pol[3].x=AX+BX;
-			pol[3].y=CH-CX;
-			
-			pol[4].x=AX+BX+DX;
-			pol[4].y=CH;
-			
-			//CBrush newBrush(RGB(255, 128, 64));
-			//dc.SelectObject(&newBrush);		
-
-			dc.Polygon(&pol[0],5);
-
-			dc.MoveTo(AX+BX,0);
-			dc.LineTo(AX+BX,CH);
 		}
 	}   // namespace
 }   // namespace
