@@ -3,6 +3,9 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <universalis/os/aligned_alloc.hpp>
+#include <psycle/helpers/value_mapper.hpp>
+#include <psycle/helpers/dsp.hpp>
 
 struct lua_State;
 
@@ -12,14 +15,15 @@ namespace psycle { namespace host {
 class PSArray {
 public:
 	PSArray() : ptr_(0), len_(0), shared_(0) {}
-	PSArray(int len, float v) : data_(len, v), len_(len),
-		shared_(0) {
-	  ptr_ = (len_ > 0) ? &data_[0] : 0;
-	}
-	PSArray(float start, float stop, float step);
+	PSArray(int len, float v);
+	PSArray(double start, double stop, double step);
 	PSArray(float* ptr, int len) : ptr_(ptr), len_(len), shared_(1) {}	
 	PSArray(PSArray& a1, PSArray& a2);
-	~PSArray() {}
+	~PSArray() {
+	  if (!shared_) {
+		 universalis::os::aligned_memory_dealloc(ptr_);
+	  }
+	}
 
 	void set_val(int i, float val) { ptr_[i] = val; }
 	float get_val(int i) const { return ptr_[i]; }
@@ -28,17 +32,13 @@ public:
 	int copyfrom(PSArray& src);
 	void resize(int newsize);
 	std::string tostring() const;
-	//// ops
-	void add(PSArray& a);
-	void add(float c);
-	void mult_scalar(float c);	
 	
 	float* data() { return ptr_; }
 
 	template<class T>
 	void do_op(T&);
-private:
-	std::vector<float> data_;
+	
+private:	
 	float* ptr_;
 	int len_;
 	int shared_;
@@ -47,7 +47,7 @@ private:
 class PSDelay {
 public:
   PSDelay(int k) : mem(k,0) {}
-  PSArray mem;
+  PSArray mem;  
   void work(PSArray& x, PSArray& y);
 };
 
@@ -105,6 +105,7 @@ private:
 	static int array_concat(lua_State* L);
 	// ops
 	static int array_add(lua_State* L);
+	static int array_sub(lua_State* L);
 	static int array_mul(lua_State* L);
 	static int array_sum(lua_State* L);
 	static int array_rsum(lua_State* L); // x(n)=E(n-p), p=0..N-1
@@ -113,6 +114,8 @@ private:
 	static int array_cos(lua_State* L);
 	static int array_tan(lua_State* L);
 	static int array_sqrt(lua_State* L);
+	static int array_random(lua_State* L);
+	static int array_pow(lua_State* L);
 
 	void export_c_funcs(lua_State* L);
 

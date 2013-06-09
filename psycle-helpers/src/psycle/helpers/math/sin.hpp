@@ -26,6 +26,10 @@ namespace psycle { namespace helpers { namespace math {
 /// worth reading:
 /// http://www.audiomulch.com/~rossb/code/sinusoids/
 /// http://www.devmaster.net/forums/showthread.php?t=5784
+/// 
+/// WARNING!!!!! This does not work for a sinc(). The 2nd degree is completely out of the question (makes like a top-cut triangle), 
+/// and the 4th degree pushes the top of the sinc down. (rebounds). 
+///	In this case, the problematic range is 	-0.46 .. 0.46, and only for that first lob.
 template<unsigned int Polynomial_Degree, typename Real> UNIVERSALIS__COMPILER__CONST
 Real inline fast_sin(Real radians) {
 	//assert(-pi <= radians && radians <= pi);
@@ -33,8 +37,8 @@ Real inline fast_sin(Real radians) {
 	// y(x) = a + b x + c x^2
 	// with the constraints: y(0) = 0, y(pi / 2) = 1, y(pi) = 0
 	// this gives, a = 0, b = 4 / pi, c = -4 / pi^2
-	Real const b(4 / pi);
-	Real const c(-b / pi); // pi^2 = 9.86960440108935861883449099987615114
+	Real static const b(4 / pi);
+	Real static const c(-b / pi); // pi^2 = 9.86960440108935861883449099987615114
 	// we use absolute values to mirror the parabola around the orign 
 	Real y(b * radians + c * radians * std::abs(radians));
 	if(Polynomial_Degree > 2) {
@@ -43,16 +47,17 @@ Real inline fast_sin(Real radians) {
 		// q = 0.782, p = 0.218 for minimal relative error
 		// q = ?, p = ? for minimal THD error
 		#if 1
-			Real const p(Real(0.224008178776));
+			Real static const p(Real(0.224008178776));
 			y = p * (y * std::abs(y) - y) + y;
 		#else
-			Real const q(Real(0.775991821224));
+			Real static const q(Real(0.775991821224));
 			y = q * y + p * y * std::abs(y);
 		#endif
 	}
 	//assert(-1 <= y && y <= 1);
 	return y;
 }
+
 
 /******************************************************************************************/
 #ifdef BOOST_AUTO_TEST_CASE

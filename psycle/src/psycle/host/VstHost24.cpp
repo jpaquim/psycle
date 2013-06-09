@@ -238,6 +238,18 @@ namespace psycle
 			Plugin::~Plugin()
 			{
 			}
+
+			void Plugin::change_buffer(std::vector<float*>& buf) {
+				Machine::change_buffer(buf);
+				for(VstInt32 i(0);i<numInputs();i++)	{
+						inputs[i]=samplesV[i];
+				}
+				outputs.resize(numOutputs());
+				for(VstInt32 i(0);i<numOutputs();i++) {
+					outputs[i]=samplesV[i];
+				}				
+			}
+
 			bool Plugin::OnIOChanged() {
 				//TODO: IOChanged does not only reflect input pin changes.
 				// it also (usually?) means changing latency, but Psycle does not support initialDelay.

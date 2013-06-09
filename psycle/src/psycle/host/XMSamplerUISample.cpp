@@ -352,27 +352,22 @@ void XMSamplerUISample::OnBnClickedPanenabled()
 	FillPanDescription(static_cast<int>(rWave().PanFactor()*128));
 }
 
-void XMSamplerUISample::FillPanDescription(int val) {
-	char value[40];
+void XMSamplerUISample::FillPanDescription(int nPos) {
+	char buffer[40];
 	CButton* check = (CButton*)GetDlgItem(IDC_PANENABLED);
 	if ( check->GetCheck() == 2 ) {
-		strcpy(value, "SurrounD");
+		strcpy(buffer, "SurrounD");
 	}
 	else{
-		switch(val)
-		{
-		case 0: sprintf(value,"||%02d  ",val); break;
-		case 64: sprintf(value," |%02d| ",val); break;
-		case 128: sprintf(value,"  %02d||",val); break;
-		default:
-			if ( val < 32) sprintf(value,"<<%02d  ",val);
-			else if ( val < 64) sprintf(value," <%02d< ",val);
-			else if ( val <= 96) sprintf(value," >%02d> ",val);
-			else sprintf(value,"  %02d>>",val);
-			break;
-		}
+		if ( nPos == 0) sprintf(buffer,"||%02d  ",nPos);
+		else if ( nPos < 32) sprintf(buffer,"<<%02d  ",nPos);
+		else if ( nPos < 64) sprintf(buffer," <%02d< ",nPos);
+		else if ( nPos == 64) sprintf(buffer," |%02d| ",nPos);
+		else if ( nPos <= 96) sprintf(buffer," >%02d> ",nPos);
+		else if (nPos < 128) sprintf(buffer,"  %02d>>",nPos);
+		else sprintf(buffer,"  %02d||",nPos);
 	}
-	((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(value);
+	((CStatic*)GetDlgItem(IDC_LPAN))->SetWindowText(buffer);
 }
 
 

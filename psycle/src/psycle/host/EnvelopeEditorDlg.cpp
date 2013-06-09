@@ -137,10 +137,10 @@ void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 		m_SlADSRMod.SetPos((max-min)*100.f);
 	}
 	else {m_SlADSRMod.SetPos(100);}
-	m_SlADSRAttack.SetPos(env.GetTime(1)-env.GetTime(0));
-	m_SlADSRDecay.SetPos(env.GetTime(2)-env.GetTime(1));
-	m_SlADSRSustain.SetPos(env.GetValue(2)*100.f);
-	m_SlADSRRelease.SetPos(env.GetTime(3)-env.GetTime(2));
+	m_SlADSRAttack.SetPos(m_EnvelopeEditor.AttackTime());
+	m_SlADSRDecay.SetPos(m_EnvelopeEditor.DecayTime());
+	m_SlADSRSustain.SetPos(m_EnvelopeEditor.SustainValue()*100.f);
+	m_SlADSRRelease.SetPos(m_EnvelopeEditor.ReleaseTime());
 
 	m_EnvelopeEditor.freeform(false);
 	m_EnvelopeEditor.Invalidate();
@@ -179,26 +179,24 @@ void CEnvelopeEditorDlg::SliderMod(CSliderCtrl* slid)
 }
 void CEnvelopeEditorDlg::SliderAttack(CSliderCtrl* slid)
 {
-	m_EnvelopeEditor.envelope().SetTime(1,m_SlADSRAttack.GetPos());
+	m_EnvelopeEditor.AttackTime(m_SlADSRAttack.GetPos());
 	m_EnvelopeEditor.Invalidate();
 }
 void CEnvelopeEditorDlg::SliderDecay(CSliderCtrl* slid)
 {
-	m_EnvelopeEditor.envelope().SetTime(2,
-			m_EnvelopeEditor.envelope().GetTime(1)+m_SlADSRDecay.GetPos());
+	m_EnvelopeEditor.DecayTime(m_SlADSRDecay.GetPos());
 	m_EnvelopeEditor.Invalidate();
 }
 void CEnvelopeEditorDlg::SliderSustain(CSliderCtrl* slid)
 {
 	float diff = std::min(100-m_SlADSRBase.GetPos(),m_SlADSRMod.GetPos()) * 0.01f;
 	float base = m_SlADSRBase.GetPos()*0.01f;
-	m_EnvelopeEditor.envelope().SetValue(2, base+((float)m_SlADSRSustain.GetPos()*0.01f*diff));
+	m_EnvelopeEditor.SustainValue(base+((float)m_SlADSRSustain.GetPos()*0.01f*diff));
 	m_EnvelopeEditor.Invalidate();
 }
 void CEnvelopeEditorDlg::SliderRelease(CSliderCtrl* slid)
 {
-	m_EnvelopeEditor.envelope().SetTime(3,
-			m_EnvelopeEditor.envelope().GetTime(2)+m_SlADSRRelease.GetPos());
+	m_EnvelopeEditor.ReleaseTime(m_SlADSRRelease.GetPos());
 	m_EnvelopeEditor.Invalidate();
 }
 
@@ -303,7 +301,7 @@ void CEnvelopeEditorDlg::OnBnClickedLoopEnd()
 	}
 }
 
-void CEnvelopeEditorDlg::OnEnvelopeChanged()
+void CEnvelopeEditorDlg::OnEnvelopeChanged(WPARAM wParam, LPARAM lParam)
 {
 	RefreshButtons();
 }

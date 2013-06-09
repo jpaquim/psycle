@@ -125,6 +125,9 @@
     <ClInclude Include="src\psycle\helpers\math\sinseq.hpp">
       <Filter>psycle\helpers\math</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\helpers\math\sse_mathfun.h">
+      <Filter>psycle\helpers\math</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\helpers\dither.hpp">
       <Filter>psycle\helpers\dsp</Filter>
     </ClInclude>

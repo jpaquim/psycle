@@ -9,6 +9,28 @@ namespace psycle { namespace host {
 
 class LuaPlugin;
 
+class PSLuaPluginImport {
+public:
+    static const std::string metaname;
+
+	PSLuaPluginImport() {}
+	~PSLuaPluginImport() {}
+
+	void load(const char* name);
+	void work(int samples);
+	
+	Machine* mac() { return mac_; }
+
+	PSArray* channel(int idx) { return &sampleV_[idx]; }
+	void update_num_samples(int num);
+	void build_buffer(std::vector<float*>& buf, int num);
+	void set_buffer(std::vector<float*>& buf);
+private:
+		
+	Machine* mac_;
+	psybuffer sampleV_;
+};
+
 class LuaProxy {
 public:    
     static const std::string meta_name;
@@ -40,11 +62,24 @@ private:
 	static int set_machine_info(lua_State* L);
 	static int set_parameter(lua_State* L);
 	static int message(lua_State* L);
+	static int plugin_new(lua_State* L);
+	static int plugin_work(lua_State* L);
+	static int plugin_channel(lua_State* L);
+	static int plugin_resize(lua_State* L);
+	static int plugin_param(lua_State* L);
+	static int plugin_numparams(lua_State* L);
+	static int plugin_paramdisplay(lua_State* L);
+	static int plugin_setparam(lua_State* L);
+	static int plugin_paramname(lua_State* L);
+	static int plugin_gc(lua_State* L);	
+	static int plugin_setbuffer(lua_State* L);
+
 	void export_c_funcs();
 
 	// some call helper 
 	int GetRawParameter(const char* field, int index);
 	const char* GetString();
+	void push_proxy();
 
 	PluginInfo info_;
 	int num_parameter_;

@@ -480,7 +480,7 @@ namespace psycle
 					if ( m_Stage&EnvelopeStage::HASSUSTAIN)
 					{
 						Continue();
-						m_Samples=m_NextEventSample-1;
+						m_Samples=m_NextEventSample-1;  // this forces a recalc when entering Work().
 						m_PositionIndex--;
 					}
 				}
@@ -527,15 +527,24 @@ namespace psycle
 				i++;
 			}
 			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is either zero or INVALID, and samplePos is positive.
-			m_PositionIndex=i-2;
-			Continue();
-			m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
-			Work();
-			m_Samples=samplePos;//and this sets the real position, once all vars are setup.
-//			TRACE("ModAmount Before:%f.",m_ModulationAmount);
-			m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
-//			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
-//			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
+			else if (m_pEnvelope->GetTime(i) == XMInstrument::Envelope::INVALID) {
+				//Point is invalid and i > 0. We've moved to past the envelope. In this case, fasttracker stops it at the last point.
+				Pause();
+				m_PositionIndex=i-1;
+				CalcStep(m_PositionIndex,m_PositionIndex);
+			}
+			else {
+				m_PositionIndex=i-2;
+				Continue();
+				m_Stage = EnvelopeStage::Type(m_Stage& (~EnvelopeStage::RELEASE));
+				m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
+				Work();
+				m_Samples=samplePos;//and this sets the real position, once all vars are setup.
+	//			TRACE("ModAmount Before:%f.",m_ModulationAmount);
+				m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
+	//			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
+	//			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
+			}
 		}
 
 
@@ -1657,14 +1666,23 @@ namespace psycle
 						case CMD_EE::EE_SETNOTEFADE:
 							voice->NNA(XMInstrument::NewNoteAction::FADEOUT);
 							break;
-						case CMD_EE::EE_BACKGROUNDNOTECUT:
-							StopBackgroundNotes(XMInstrument::NewNoteAction::STOP);
+						case CMD_EE::EE_VOLENVOFF:
+							voice->AmplitudeEnvelope().Pause();
 							break;
-						case CMD_EE::EE_BACKGROUNDNOTEOFF:
-							StopBackgroundNotes(XMInstrument::NewNoteAction::NOTEOFF);
+						case CMD_EE::EE_VOLENVON:
+							voice->AmplitudeEnvelope().Continue();
 							break;
-						case CMD_EE::EE_BACKGROUNDNOTEFADE:
-							StopBackgroundNotes(XMInstrument::NewNoteAction::FADEOUT);
+						case CMD_EE::EE_PANENVOFF:
+							voice->PanEnvelope().Pause();
+							break;
+						case CMD_EE::EE_PANENVON:
+							voice->PanEnvelope().Continue();
+							break;
+						case CMD_EE::EE_PITCHENVON:
+							voice->PitchEnvelope().Pause();
+							break;
+						case CMD_EE::EE_PITCHENVOFF:
+							voice->PitchEnvelope().Continue();
 							break;
 						}
 						break;
@@ -1724,23 +1742,14 @@ namespace psycle
 			{
 				switch(parameter&0x0F)
 				{
-				case CMD_EE::EE_VOLENVOFF:
-					voice->AmplitudeEnvelope().Pause();
+				case CMD_EE::EE_BACKGROUNDNOTECUT:
+					StopBackgroundNotes(XMInstrument::NewNoteAction::STOP);
 					break;
-				case CMD_EE::EE_VOLENVON:
-					voice->AmplitudeEnvelope().Continue();
+				case CMD_EE::EE_BACKGROUNDNOTEOFF:
+					StopBackgroundNotes(XMInstrument::NewNoteAction::NOTEOFF);
 					break;
-				case CMD_EE::EE_PANENVOFF:
-					voice->PanEnvelope().Pause();
-					break;
-				case CMD_EE::EE_PANENVON:
-					voice->PanEnvelope().Continue();
-					break;
-				case CMD_EE::EE_PITCHENVON:
-					voice->PitchEnvelope().Pause();
-					break;
-				case CMD_EE::EE_PITCHENVOFF:
-					voice->PitchEnvelope().Continue();
+				case CMD_EE::EE_BACKGROUNDNOTEFADE:
+					StopBackgroundNotes(XMInstrument::NewNoteAction::FADEOUT);
 					break;
 				}
 			}

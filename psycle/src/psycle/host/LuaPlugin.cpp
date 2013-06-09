@@ -148,6 +148,9 @@ namespace psycle { namespace host {
 		}
 
 		void LuaPlugin::GetParamValue(int numparam, char * parval) {
+			if (crashed()) {
+				return;
+			}
 			if(numparam < GetNumParams()) {
 				try {
 					if(!DescribeValue(numparam, parval)) {

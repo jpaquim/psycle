@@ -117,7 +117,7 @@ namespace psycle
 			/// Gets the first free slot in the pMachine[] Array
 			int GetFreeMachine() const ;
 			/// creates a new machine in this song.
-		protected:
+		public:
 			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,std::int32_t shellIdx);
 		public:
 			/// creates a new machine in this song.

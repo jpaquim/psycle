@@ -36,8 +36,8 @@ XMSampler::Channel::PerformFX().
 	struct CMD {
 		enum Type {
 		NONE				=	0x00,
-		PORTAMENTO_UP		=	0x01,// Portamento Up , Fine porta (01Fx, and Extra fine porta 01Ex )	(*t)
-		PORTAMENTO_DOWN		=	0x02,// Portamento Down, Fine porta (02Fx, and Extra fine porta 02Ex ) (*t)
+		PORTAMENTO_UP		=	0x01,// Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
+		PORTAMENTO_DOWN		=	0x02,// Portamento Down, Fine porta (02Fx), and Extra fine porta (02Ex) (*t)
 		PORTA2NOTE			=	0x03,// Tone Portamento						(*tn)
 		VIBRATO				=	0x04,// Do Vibrato							(*t)
 		TONEPORTAVOL		=	0x05,// Tone Portament & Volume Slide		(*t)
@@ -46,7 +46,7 @@ XMSampler::Channel::PerformFX().
 		PANNING				=	0x08,// Set Panning Position				(p)
 		PANNINGSLIDE		=	0x09,// Panning slide						(*t)
 		SET_CHANNEL_VOLUME	=	0x0A,// Set channel's volume				(p)
-		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0Dy0) down (0D0x), Fine slide up(0DFy) down(0DxF)	 (*tp)
+		CHANNEL_VOLUME_SLIDE=	0x0B,// channel Volume Slide up (0By0) down (0B0x), Fine slide up(0BFy) down(0BxF)	 (*tp)
 		VOLUME				=	0x0C,// Set Volume
 		VOLUMESLIDE			=	0x0D,// Volume Slide up (0Dy0), down (0D0x), Fine slide up(0DyF), down(0DFy)	 (*t)
 		FINESLIDEUP         =   0x0F,//Part of the value that indicates it is a fine slide up
@@ -55,13 +55,12 @@ XMSampler::Channel::PerformFX().
 		MIDI_MACRO			=	0x0F,// Impulse Tracker MIDI macro			(p)
 		ARPEGGIO			=	0x10,//	Arpeggio							(*t)
 		RETRIG				=	0x11,// Retrigger Note						(*t)
-		SET_GLOBAL_VOLUME	=	0x12,// Sets Global Volume
-		GLOBAL_VOLUME_SLIDE =	0x13,// Slides Global Volume				(*t)
 		FINE_VIBRATO		=	0x14,// Vibrato 4 times finer				(*t)
-		SET_ENV_POSITION	=	0x15,// Set Envelope Position
-							//0x16
 		TREMOR				=	0x17,// Tremor								(*t)
 		PANBRELLO			=	0x18,// Panbrello							(*t)
+		SET_ENV_POSITION	=	0x19,// Set Envelope Position
+		SET_GLOBAL_VOLUME	=	0x1C,// Sets Global Volume
+		GLOBAL_VOLUME_SLIDE =	0x1D,// Slides Global Volume				(*t)
 		SENDTOVOLUME		=	0x1E,// Interprets this as a volume command	()
 		OFFSET				=	0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)
 		};
@@ -78,8 +77,8 @@ XMSampler::Channel::PerformFX().
 		enum Type {
 		E_GLISSANDO_TYPE	=	0x30, //E3     Set gliss control			(p)
 		E_VIBRATO_WAVE		=	0x40, //E4     Set vibrato control			(p)
-								//0x50
-		E_PANBRELLO_WAVE	=	0x60, //									(p)
+		E_PANBRELLO_WAVE	=	0x50, //									(p)
+								//0x60
 		E_TREMOLO_WAVE		=	0x70, //E7     Set tremolo control			(p)
 		E_SET_PAN			=	0x80,									//	(p)
 		E9					=	0x90,
@@ -120,8 +119,8 @@ XMSampler::Channel::PerformFX().
 		EE_VOLENVON				=	0x08,
 		EE_PANENVOFF			=	0x09,
 		EE_PANENVON				=	0x0A,
-		EE_PITCHENVON			=	0x0B,
-		EE_PITCHENVOFF			=	0x0C
+		EE_PITCHENVOFF			=	0x0B,
+		EE_PITCHENVON			=	0x0C
 		};
 	};
 	
@@ -361,6 +360,7 @@ XMSampler::Channel::PerformFX().
 							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
 							CalcStep(m_PositionIndex,m_PositionIndex);
 						}
+						//TODO: Fix saga_musix_arrival.it, pattern 0F (position 0E).
 						else CalcStep(m_PositionIndex,m_PositionIndex + 1);
 					}
 					else CalcStep(m_PositionIndex,m_PositionIndex);

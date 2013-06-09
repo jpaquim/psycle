@@ -24,7 +24,23 @@ class CEnvelopeEditor : public CStatic
 		void freeform(bool freeform) { m_bFreeform=freeform; }
 		bool negative() { return m_bnegative; }
 		void negative(bool negative) { m_bnegative=negative; }
+		bool canSustain() { return m_bCanSustain; }
+		void canSustain(bool sustain) { m_bCanSustain=sustain; }
+		bool canLoop() { return m_bCanLoop; }
+		void canLoop(bool loop) { m_bCanLoop=loop; }
+		void envelopeIdx(int idx) { m_envelopeIdx=idx; }
+		int envelopeIdx() { return m_envelopeIdx; }
 		int editPoint() { return m_EditPoint; }
+
+		// Only meaningful when freeform is false
+		void AttackTime(int time);
+		int AttackTime() { return m_pEnvelope->GetTime(1)-m_pEnvelope->GetTime(0); }
+		void DecayTime(int time);
+		int DecayTime() { return m_pEnvelope->GetTime(2)-m_pEnvelope->GetTime(1); }
+		void SustainValue(XMInstrument::Envelope::ValueType value) { m_pEnvelope->SetValue(2,value); }
+		XMInstrument::Envelope::ValueType SustainValue() { return m_pEnvelope->GetValue(2); }
+		void ReleaseTime(int time);
+		int ReleaseTime() { return m_pEnvelope->GetTime(3)-m_pEnvelope->GetTime(2); }
 
 	protected:
 		DECLARE_MESSAGE_MAP()
@@ -65,14 +81,18 @@ class CEnvelopeEditor : public CStatic
 
 			return _points; // return == _points -> Point not found.
 		}
+		void FitZoom();
 
 		XMInstrument::Envelope* m_pEnvelope;
 		bool m_bInitialized;
 		bool m_bFreeform;
 		bool m_bnegative;
+		int m_envelopeIdx;
 		float m_Zoom;///< Zoom
 		int m_WindowHeight;
 		int m_WindowWidth;
+		bool m_bCanSustain;
+		bool m_bCanLoop;
 
 		bool m_bPointEditing;///< EnvelopePoint 
 		int m_EditPoint;///< ***** Envelope Point Index

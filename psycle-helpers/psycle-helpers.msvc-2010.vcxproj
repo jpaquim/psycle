@@ -114,6 +114,7 @@
     <ClInclude Include="src\psycle\helpers\math\sin.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sincos.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sinseq.hpp" />
+    <ClInclude Include="src\psycle\helpers\math\sse_mathfun.h" />
     <ClInclude Include="src\psycle\helpers\dither.hpp" />
     <ClInclude Include="src\psycle\helpers\dsp.hpp" />
     <ClInclude Include="src\psycle\helpers\fft.hpp" />

@@ -36,6 +36,8 @@ namespace psycle
 			/*override*/ void LoadPluginInfo(bool verify=true);
 			/*override*/ void ReScan(bool regenerate=true);
 			/*override*/ bool IsLoaded(){ return _numPlugins>0; }
+			PluginInfo* info(const std::string& name);
+
 			bool SaveCacheFile();
 			void DestroyPluginInfo();
 		protected:

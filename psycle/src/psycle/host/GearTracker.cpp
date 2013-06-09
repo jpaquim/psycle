@@ -95,11 +95,20 @@ namespace psycle { namespace host {
 		}
 		void CGearTracker::OnCustomdrawNumVoices(NMHDR* pNMHDR, LRESULT* pResult) 
 		{
-			char buffer[8];
-			sprintf(buffer, "%d", machine._numVoices);
-			m_polylabel.SetWindowText(buffer);
-
-			*pResult = 0;
+			NMCUSTOMDRAW nmcd = *reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+			if (nmcd.dwDrawStage == CDDS_POSTPAINT)
+			{
+				char buffer[8];
+				sprintf(buffer, "%d", machine._numVoices);
+				m_polylabel.SetWindowText(buffer);
+				*pResult = CDRF_DODEFAULT;
+			}
+			else if (nmcd.dwDrawStage == CDDS_PREPAINT ){
+				*pResult = CDRF_NOTIFYITEMDRAW|CDRF_NOTIFYPOSTPAINT;
+			}
+			else {
+				*pResult = CDRF_DODEFAULT;
+			}
 		}
 
 		void CGearTracker::OnSelchangeCombo1() 
