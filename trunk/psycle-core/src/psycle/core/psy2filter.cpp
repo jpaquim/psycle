@@ -65,7 +65,7 @@ void Psy2Filter::prepareSequence( CoreSong & song) {
 }
 
 bool Psy2Filter::load(const std::string & fileName, CoreSong & song) {
-	int32_t num;
+    int32_t num = 0;
 	RiffFile file;
 	file.Open(fileName);
 	//progress.emit(1,0,"");
@@ -109,7 +109,7 @@ bool Psy2Filter::LoadINFO(RiffFile * file, CoreSong & song) {
 }
 
 bool Psy2Filter::LoadSNGI(RiffFile * file, CoreSong & song) {
-	int32_t tmp;
+    int32_t tmp = 0;
 	file->Read(tmp);
 	song.bpm(tmp);
 
@@ -130,6 +130,7 @@ bool Psy2Filter::LoadSNGI(RiffFile * file, CoreSong & song) {
 
 bool Psy2Filter::LoadSEQD(RiffFile * file, CoreSong & song) {
 	int32_t length,tmp;
+    tmp = length = 0;
 	unsigned char playOrder[128];
 	file->ReadArray(playOrder,128);
 	file->Read(length);
@@ -248,7 +249,7 @@ bool Psy2Filter::LoadINSD(RiffFile * file, CoreSong & song) {
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i)
 		file->Read(song._pInstrument[i]->ENV_F_EA);
 	for(i = 0; i < PSY2_MAX_INSTRUMENTS; ++i) {
-		int val;
+        int val = 0;
 		file->Read(val);
 		song._pInstrument[i]->ENV_F_TP = static_cast<helpers::dsp::FilterType>(val);
 	}
@@ -274,7 +275,7 @@ bool Psy2Filter::LoadWAVD(RiffFile * file, CoreSong & song) {
 			if(wltemp > 0) {
 				if(w == 0) {
 					Instrument& pIns = *(song._pInstrument[i]);
-					int16_t tmpFineTune;
+                    int16_t tmpFineTune = 0;
 					pIns.waveLength=wltemp;
 					file->ReadArray(pIns.waveName, 32); pIns.waveName[31]=0;
 					file->Read(pIns.waveVolume);
@@ -332,6 +333,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 
 	for(i = 0; i < 128; ++i) {
 		int32_t x, y, type;
+        x = y = type = 0;
 		if(_machineActive[i]) {
 			//progress.emit(4,8192+i*(4096/128),"");
 			file->Read(x);

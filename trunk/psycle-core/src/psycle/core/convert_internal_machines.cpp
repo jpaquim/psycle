@@ -47,7 +47,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 			case asynth21:
 			{
 				Plugin & plug = *((Plugin*)pointer_to_machine);
-				int numParameters;
+				int numParameters = 0;
 				riff.Read(numParameters);
 				if(plug.proxy()()) {
 					int32_t * Vals = new int32_t[numParameters];
@@ -113,7 +113,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 		riff.Skip(96); // ConnectionPoints, 12*8bytes
 		riff.Read(machine._connectedInputs);
 		riff.Read(machine._connectedOutputs);
-		int32_t panning;
+		int32_t panning = 0;
 		riff.Read(panning);
 		machine.SetPan(panning);
 		riff.Skip(40); // skips shiatz

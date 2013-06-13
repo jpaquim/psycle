@@ -147,7 +147,8 @@ namespace psycle { namespace core {
 				{
 					if (_voices[i]._envelope._stage != ENV_OFF) {
 						double speeddouble = static_cast<double>(_voices[i]._wave._speed)/4294967296.0f;
-						_voices[i].resampler_data = resampler_.GetResamplerData(speeddouble);
+                        _voices[i].resampler_data = resampler_.GetResamplerData();
+                        resampler_.UpdateSpeed(_voices[i].resampler_data, speeddouble);
 					}
 				}
 			}

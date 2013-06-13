@@ -510,10 +510,10 @@ bool Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
 			}
 			if(size > 3*sizeof(uint32_t ))
 			{
-				uint32_t internalversion;
+                uint32_t internalversion = 0;
 				pFile->Read(internalversion);
 				if (internalversion >= SAMPLERVERSION) {
-					bool defaultC4;
+                    bool defaultC4 = false;
 					pFile->Read(defaultC4); // correct A4 frequency.
 					DefaultC4(defaultC4);
 				}
@@ -637,11 +637,12 @@ int Sampler::VoiceTick( int voice, const PatternEvent & entry )
 			float const finetune = (float)pIns->waveFinetune/256.f;
 			speeddouble = pow(2.0f, (pEntry.note()+pIns->waveTune-baseC +finetune)/12.0f)*4294967296.0f*(44100.0f/timeInfo.sampleRate());
 		}
-		pVoice->_wave._speed = (int64_t)(speeddouble*4294967296.0f);
+        pVoice->_wave._speed = speeddouble;
 
 		if (pVoice->resampler_data != NULL) resampler_.DisposeResamplerData(pVoice->resampler_data);
-		pVoice->resampler_data = resampler_.GetResamplerData(speeddouble);
-		
+        pVoice->resampler_data = resampler_.GetResamplerData();
+        resampler_.UpdateSpeed(pVoice->resampler_data, speeddouble);
+
 
 		// Handle wave_start_offset cmd
 		//

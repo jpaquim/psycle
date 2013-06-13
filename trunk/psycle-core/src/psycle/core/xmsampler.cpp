@@ -351,7 +351,8 @@ void XMSampler::Voice::DisposeResampleData(helpers::dsp::resampler& resampler)
 void XMSampler::Voice::RecreateResampleData(helpers::dsp::resampler& resampler)
 {
 	if (IsPlaying()) {
-		resampler_data = resampler.GetResamplerData(static_cast<double>(rWave().Speed())/ 4294967296.0);
+        resampler_data = resampler.GetResamplerData();
+        resampler.UpdateSpeed(resampler_data,static_cast<double>(rWave.Speed())/4294967296.0);
 	}
 }
 
@@ -626,7 +627,8 @@ void XMSampler::Voice::NoteOn(const uint8_t note,const int16_t playvol,bool rese
 		m_pSampler->Resampler().DisposeResamplerData(resampler_data);
 		resampler_data = NULL;
 	}
-	resampler_data = m_pSampler->Resampler().GetResamplerData(1.0);
+    m_pSampler->Resampler().UpdateSpeed(resampler_data,1.0);
+	resampler_data = m_pSampler->Resampler().GetResamplerData();
 
 	ResetVolAndPan(playvol,reset);
 

@@ -141,7 +141,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 	pFile->Read(ENV_F_CO);
 	pFile->Read(ENV_F_RQ);
 	pFile->Read(ENV_F_EA);
-	{ int val; pFile->Read(val); ENV_F_TP = static_cast<helpers::dsp::FilterType>(val); }
+    { int val = 0; pFile->Read(val); ENV_F_TP = static_cast<helpers::dsp::FilterType>(val); }
 
 	pFile->Read(_pan);
 	pFile->Read(_RPAN);
@@ -152,7 +152,7 @@ void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
 
 	// now we have to read waves
 
-	int32_t numwaves;
+    int32_t numwaves = 0;
 	pFile->Read(numwaves);
 	for (int i = 0; i < numwaves; i++)
 	{

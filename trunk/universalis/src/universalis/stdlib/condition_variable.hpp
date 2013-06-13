@@ -43,7 +43,7 @@
 								microseconds(ns / 1000)
 							#endif
 						, p
-					) ? cv_status::not_timeout : cv_status::timeout;
+					) ? cv_status::no_timeout : cv_status::timeout;
 				}
 
 				template<typename Clock, typename Duration>
