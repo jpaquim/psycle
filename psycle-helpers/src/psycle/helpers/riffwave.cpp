@@ -11,7 +11,7 @@ namespace psycle { namespace helpers {
 	template<typename long_type, typename short_type>
 	RiffWaveFmtChunk<long_type, short_type>::RiffWaveFmtChunk(const WaveFormat_Data& config)
 	{
-		ulength.changeValue(16);
+		this->ulength.changeValue(16);
 		wFormatTag.changeValue(config.isfloat ? FORMAT_FLOAT : FORMAT_PCM);
 		wChannels.changeValue(config.nChannels);
 		dwSamplesPerSec.changeValue(config.nSamplesPerSec);

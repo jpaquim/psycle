@@ -272,6 +272,7 @@ bool CoreSong::IffAlloc(Instrument::id_type instrument,const char * str) {
 	}
 	if(file.matchFourCC(hd.id, "VHDR")) {
 		uint32_t Datalen, ls, le;
+		Datalen = ls = le = -1;
 		file.ReadBE(Datalen);
 		file.ReadBE(ls);
 		file.ReadBE(le);

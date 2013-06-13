@@ -490,7 +490,7 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 	if(index < MAX_MACHINES) {
 		Machine::id_type const id(index);
 		// assume version 0 for now
-		int32_t type;
+		int32_t type = -1;
 		Machine* mac=0;
 		char sDllName[256];
 		file->Read(type);
@@ -566,7 +566,7 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, ui
 	size_t begins=file->GetPos();
 	size_t filepos=file->GetPos();
 	file->Read(numInstruments);
-	int idx;
+	int idx = -1;
 	for(int i = 0;i < numInstruments && filepos < begins+size;i++)
 	{
 		file->Read(idx);

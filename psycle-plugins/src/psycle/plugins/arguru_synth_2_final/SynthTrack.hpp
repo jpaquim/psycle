@@ -206,14 +206,14 @@ inline float CSynthTrack::GetSample()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize)*OSC1Vol;
+                output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize,resampler.GetResamplerData())*OSC1Vol;
 			}
 			if ( syntp->wave2noise) {
 				//This assumes MAX_RAND is 0x7fff
 				output += (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output += resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize)*OSC2Vol;
+                output += resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize,resampler.GetResamplerData())*OSC2Vol;
 			}
 		}
 		else
@@ -278,7 +278,7 @@ inline float CSynthTrack::GetSampleOsc1()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize)*OSC1Vol;
+                output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize,resampler.GetResamplerData())*OSC1Vol;
 			}
 		}
 		else
@@ -320,7 +320,7 @@ inline float CSynthTrack::GetSampleOsc2()
 				output = (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output = resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize)*OSC2Vol;
+                output = resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize,resampler.GetResamplerData())*OSC2Vol;
 			}
 		}
 		else
