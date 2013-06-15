@@ -36,7 +36,7 @@ enum {
 
 #define VDPLUGINNAME "vd's allpass filter"
 #define VDSHORTNAME  "AllPass"
-#define VDAUTHOR     "V. Demasi (Built on "__DATE__")"
+#define VDAUTHOR     "V. Demasi (Built on " __DATE__ ")"
 #define VDCOMMAND    "License"
 int const VDVERSION = 0x110;
 

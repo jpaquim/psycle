@@ -37,7 +37,7 @@ enum {
 
 #define VDPLUGINNAME "vd's noise gate filter"
 #define VDSHORTNAME  "NoiseGate"
-#define VDAUTHOR     "V. Demasi (Built on "__DATE__")"
+#define VDAUTHOR     "V. Demasi (Built on " __DATE__ ")"
 #define VDCOMMAND    "License"
 
 #define MIN_THRESHOLD      0
