@@ -939,6 +939,7 @@
 #define IDC_SLIDER_FRES                 2129
 #define IDC_COMBOFILTER                 2130
 #define IDC_FINELABEL                   2131
+#define IDC_ENV_CARRY                   2132
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1111,7 +1112,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        321
 #define _APS_NEXT_COMMAND_VALUE         34292
-#define _APS_NEXT_CONTROL_VALUE         2132
+#define _APS_NEXT_CONTROL_VALUE         2133
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

@@ -429,38 +429,25 @@ namespace psycle
 
 		/// NoteOn EnvelopeStage
 		// Explanation:
-		//	First, the stage is set to off. Then, if the envelope is enabled and there are points, 
-		//  we check if it has sustain or normal loop points, enabling the corresponding flags in m_Stage
-		//  Second, if there are more points in the envelope, let's enable the joy!
+		//	First, the stage is set to off. Then, if the envelope has points, we check if it has 
+		//  sustain or normal loop points, enabling the corresponding flags in m_Stage.
+		//  Second, if the envelope is enabled and there are more points, let's enable the joy!
 		void XMSampler::EnvelopeController::NoteOn()
 		{
 			m_Samples = -1;
-			m_PositionIndex = -1;
+			m_PositionIndex = 0;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
 			RecalcDeviation();
-
+			m_ModulationAmount = defaultValue;
 			// if there are no points, there is nothing to do.
-			if ( m_pEnvelope->NumOfPoints() > 0 && m_pEnvelope->IsEnabled())
+			if ( m_pEnvelope->NumOfPoints() > 0 )
 			{
-				m_ModulationAmount = m_pEnvelope->GetValue(0);
-				if ( m_pEnvelope->SustainBegin() != XMInstrument::Envelope::INVALID )
-				{
-					m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::HASSUSTAIN);
-				}
-				if (m_pEnvelope->LoopStart() != XMInstrument::Envelope::INVALID )
-				{
-					m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::HASLOOP);
-				}
-
-				if(m_pEnvelope->GetTime(1) != XMInstrument::Envelope::INVALID )
+				if(m_pEnvelope->IsEnabled() && m_pEnvelope->GetTime(1) != XMInstrument::Envelope::INVALID)
 				{ 
-					// Since we do not make a CalcStep, m_NextEventSample=0 and the first "Work()" call enters
-					// the check of what to do, forcing a new decision.
-					m_Stage = EnvelopeStage::Type((m_Stage & (~(EnvelopeStage::PAUSED|EnvelopeStage::RELEASE))) | EnvelopeStage::DOSTEP );
+					Start();
 				}
-			} else { m_ModulationAmount = 1.0f; }
-
+			}
 		}
 
 		/// NoteOff EnvelopeStage
@@ -470,33 +457,14 @@ namespace psycle
 		// we reenable it. The next work call, it will recheck the status and decide what does it need to do.
 		void XMSampler::EnvelopeController::NoteOff()
 		{
-			if ( m_Stage != EnvelopeStage::OFF && !(m_Stage&EnvelopeStage::RELEASE))
+			m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::RELEASED);
+			// If we are paused, check why
+			if ((m_Stage&EnvelopeStage::PAUSED) && m_pEnvelope->SustainBegin() == m_PositionIndex
+				&& !(m_pEnvelope->LoopStart() == m_PositionIndex && m_pEnvelope->LoopEnd() == m_PositionIndex))
 			{
-				m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::RELEASE);
-
-				// If we are paused, check why
-				if (m_Stage & EnvelopeStage::PAUSED)
-				{
-					if ( m_Stage&EnvelopeStage::HASSUSTAIN)
-					{
-						Continue();
-						m_Samples=m_NextEventSample-1;  // this forces a recalc when entering Work().
-						m_PositionIndex--;
-					}
-				}
+				Continue();
 			}
 		}
-
-		void XMSampler::EnvelopeController::Pause()
-		{
-			m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::PAUSED);
-		}
-		void XMSampler::EnvelopeController::Continue()
-		{
-			//disable pause and start it if it is stopped (CHRIS31B, bass).
-			m_Stage = EnvelopeStage::Type((m_Stage& (~EnvelopeStage::PAUSED)) | EnvelopeStage::DOSTEP );
-		}
-
 
 		void XMSampler::EnvelopeController::RecalcDeviation()
 		{
@@ -523,27 +491,23 @@ namespace psycle
 			int i=0;
 			while (m_pEnvelope->GetTime(i) != XMInstrument::Envelope::INVALID)
 			{
-				if (m_pEnvelope->GetTime(i)* SRateDeviation() > samplePos ) break;
+				if (static_cast<int>(m_pEnvelope->GetTime(i)* SRateDeviation()) > samplePos ) break;
 				i++;
 			}
-			if ( i==0 ) return; //Invalid Envelope. GetTime(0) is either zero or INVALID, and samplePos is positive.
+			if ( i==0 ) return; //Invalid Envelope. either GetTime(0) is INVALID, or samplePos is negative.
 			else if (m_pEnvelope->GetTime(i) == XMInstrument::Envelope::INVALID) {
-				//Point is invalid and i > 0. We've moved to past the envelope. In this case, fasttracker stops it at the last point.
-				Pause();
-				m_PositionIndex=i-1;
-				CalcStep(m_PositionIndex,m_PositionIndex);
+				//Destination point is invalid or is exactly the last one.
+				i--;
+				m_Stage = EnvelopeStage::OFF;
+				m_PositionIndex = m_pEnvelope->NumOfPoints();
+				m_ModulationAmount=m_pEnvelope->GetValue(i);
 			}
 			else {
-				m_PositionIndex=i-2;
-				Continue();
-				m_Stage = EnvelopeStage::Type(m_Stage& (~EnvelopeStage::RELEASE));
-				m_Samples=m_NextEventSample-1; // This forces a recalc when calling work()
-				Work();
-				m_Samples=samplePos;//and this sets the real position, once all vars are setup.
-	//			TRACE("ModAmount Before:%f.",m_ModulationAmount);
-				m_ModulationAmount+= m_Step*(samplePos-m_pEnvelope->GetTime(m_PositionIndex)* SRateDeviation());
-	//			TRACE("Set pos to:%d, i=%d,t=%f .ModAmount After:%f\n",samplePos,i,m_pEnvelope->GetTime(i)* SRateDeviation(),m_ModulationAmount);
-	//			TRACE("SET: Idx:=%d, Step:%f .Amount:%f, smp:%d,psmp:%d\n",m_PositionIndex,m_Step,m_ModulationAmount,samplePos,m_pEnvelope->GetTime(m_PositionIndex));
+				i--;
+				m_PositionIndex=i;
+				NewStep();
+				m_Samples=samplePos-static_cast<int>(m_pEnvelope->GetTime(i)* SRateDeviation())-1;//samplePos minus one because else this sample is skipped.
+				m_ModulationAmount+= m_Step*m_Samples;
 			}
 		}
 
@@ -738,13 +702,16 @@ namespace psycle
 					if(m_AmplitudeEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP)
 					{
 						m_AmplitudeEnvelope.Work();
-						volume *= m_AmplitudeEnvelope.ModulationAmount();
 						if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF)
 						{
 							if ( m_AmplitudeEnvelope.ModulationAmount() <= 0.0f){ IsPlaying(false); return; }
-							else if (m_VolumeFadeSpeed == 0.0f) NoteFadeout();
+							else if (m_VolumeFadeSpeed <= 0.0f && m_pInstrument->VolumeFadeSpeed() > 0.f) NoteFadeout();
+							//else the voice continues playing until notecut (ECX in psycle, since there isn't an explicit notecut)
+							//or the sample reaches the end.
 						}
 					}
+					//Volume is outside of the if, because commands EE7/EE8 can start/stop the envelope, but volume is still active.
+					volume *= m_AmplitudeEnvelope.ModulationAmount();
 					// Volume Fade Out
 					if(m_VolumeFadeSpeed > 0.0f)
 					{
@@ -775,9 +742,9 @@ namespace psycle
 						
 						if(m_PanEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP){
 							m_PanEnvelope.Work();
-							// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
-							rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 						}
+						// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
+						rvol += (m_PanEnvelope.ModulationAmount()*PanRange());
 
 						if ( m_pSampler->PanningMode()== PanningMode::Linear) {
 							lvol = (1.0f - rvol);
@@ -822,13 +789,13 @@ namespace psycle
 					{
 						if(m_FilterEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP){
 							m_FilterEnvelope.Work();
+						}
+						if ( m_pSampler->UseFilters() )
+						{
 							int tmpCO = int(m_CutOff * m_FilterEnvelope.ModulationAmount());
 							if (tmpCO < 0) { tmpCO = 0; }
 							else if (tmpCO > 127) { tmpCO = 127; }
 							m_Filter->Cutoff(tmpCO);
-						}
-						if ( m_pSampler->UseFilters() )
-						{
 							if (m_WaveDataController.IsStereo())
 							{
 								m_Filter->WorkStereo(left_output, right_output);
@@ -958,28 +925,20 @@ namespace psycle
 			}
 			PanFactor(fpan);
 
-			if(m_AmplitudeEnvelope.Envelope().IsEnabled()){
-				m_AmplitudeEnvelope.NoteOn();
-				if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset) {
-					m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
-				}
+			m_AmplitudeEnvelope.NoteOn();
+			if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset) {
+				m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
 			}
-			if(m_PanEnvelope.Envelope().IsEnabled()){
-				m_PanEnvelope.NoteOn();
-				if (m_PanEnvelope.Envelope().IsCarry() || !reset) {
-					m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
-				}
+			m_PanEnvelope.NoteOn();
+			if (m_PanEnvelope.Envelope().IsCarry() || !reset) {
+				m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
 			}
-			if(m_FilterEnvelope.Envelope().IsEnabled()){
-				m_FilterEnvelope.NoteOn();
-				if (m_FilterEnvelope.Envelope().IsCarry() || !reset)
-					m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
-			}
-			if(m_PitchEnvelope.Envelope().IsEnabled()){
-				m_PitchEnvelope.NoteOn();
-				if (m_PitchEnvelope.Envelope().IsCarry() || !reset)
-					m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
-			}
+			m_FilterEnvelope.NoteOn();
+			if (m_FilterEnvelope.Envelope().IsCarry() || !reset)
+				m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
+			m_PitchEnvelope.NoteOn();
+			if (m_PitchEnvelope.Envelope().IsCarry() || !reset)
+				m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
 			//If a new note, let's start from volume zero. Else it's a glide.
 			if (!IsPlaying()) {
 				m_lVolCurr=0.f;
@@ -993,11 +952,11 @@ namespace psycle
 				return;
 			}
 			IsStopping(true);
-			if(m_AmplitudeEnvelope.Envelope().IsEnabled())
+			if(m_AmplitudeEnvelope.Stage() != EnvelopeController::EnvelopeStage::OFF)
 			{
 				m_AmplitudeEnvelope.NoteOff();
 				// IT Type envelopes only do a fadeout() when it reaches the end of the envelope, except if it is looped.
-				if ( m_AmplitudeEnvelope.Stage() & EnvelopeController::EnvelopeStage::HASLOOP)
+				if ( m_AmplitudeEnvelope.Envelope().LoopStart() != XMInstrument::Envelope::INVALID)
 				{
 					NoteFadeout();
 				}
@@ -1667,22 +1626,22 @@ namespace psycle
 							voice->NNA(XMInstrument::NewNoteAction::FADEOUT);
 							break;
 						case CMD_EE::EE_VOLENVOFF:
-							voice->AmplitudeEnvelope().Pause();
+							voice->AmplitudeEnvelope().Stop();
 							break;
 						case CMD_EE::EE_VOLENVON:
-							voice->AmplitudeEnvelope().Continue();
+							voice->AmplitudeEnvelope().Start();
 							break;
 						case CMD_EE::EE_PANENVOFF:
-							voice->PanEnvelope().Pause();
+							voice->PanEnvelope().Stop();
 							break;
 						case CMD_EE::EE_PANENVON:
-							voice->PanEnvelope().Continue();
+							voice->PanEnvelope().Start();
 							break;
 						case CMD_EE::EE_PITCHENVON:
-							voice->PitchEnvelope().Pause();
+							voice->PitchEnvelope().Stop();
 							break;
 						case CMD_EE::EE_PITCHENVOFF:
-							voice->PitchEnvelope().Continue();
+							voice->PitchEnvelope().Start();
 							break;
 						}
 						break;
@@ -2545,22 +2504,21 @@ namespace psycle
 								thisChannel.LastVoiceVolume(currentVoice->Volume());
 
 								const XMInstrument::Envelope &envAmp = currentVoice->AmplitudeEnvelope().Envelope();
-								if (envAmp.IsEnabled() && envAmp.IsCarry())
+								if (envAmp.IsEnabled() && envAmp.IsCarry() )
 									thisChannel.LastAmpEnvelopePosInSamples(currentVoice->AmplitudeEnvelope().GetPositionInSamples());
 								else thisChannel.LastAmpEnvelopePosInSamples(0);
 								const XMInstrument::Envelope &panAmp = currentVoice->PanEnvelope().Envelope();
-								if (panAmp.IsEnabled() && panAmp.IsCarry())
+								if (panAmp.IsEnabled() && panAmp.IsCarry() )
 									thisChannel.LastPanEnvelopePosInSamples(currentVoice->PanEnvelope().GetPositionInSamples());
 								else thisChannel.LastPanEnvelopePosInSamples(0);
 								const XMInstrument::Envelope &filAmp = currentVoice->FilterEnvelope().Envelope();
-								if (filAmp.IsEnabled() && filAmp.IsCarry())
+								if (filAmp.IsEnabled() && filAmp.IsCarry() )
 									thisChannel.LastFilterEnvelopePosInSamples(currentVoice->FilterEnvelope().GetPositionInSamples());
 								else thisChannel.LastFilterEnvelopePosInSamples(0);
 								const XMInstrument::Envelope &pitAmp = currentVoice->PitchEnvelope().Envelope();
-								if (pitAmp.IsEnabled() && pitAmp.IsCarry())
+								if (pitAmp.IsEnabled() && pitAmp.IsCarry() )
 									thisChannel.LastPitchEnvelopePosInSamples(currentVoice->PitchEnvelope().GetPositionInSamples());
 								else thisChannel.LastPitchEnvelopePosInSamples(0);
-
 							}
 							int vol = -1;
 							int offset = 0;

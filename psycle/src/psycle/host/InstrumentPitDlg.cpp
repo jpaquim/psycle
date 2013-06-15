@@ -70,6 +70,7 @@ void CInstrumentPitDlg::AssignPitchValues(XMInstrument& inst)
 	SliderGlide(&m_SlSwing1Glide);
 
 	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.PitchEnvelope().IsEnabled());
+	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.PitchEnvelope().IsCarry());
 	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.PitchEnvelope());
 }
 

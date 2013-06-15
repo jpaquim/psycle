@@ -238,7 +238,8 @@ namespace psycle { namespace host {
 
 		class Envelope {
 		public:
-			/// Invalid point. Used to indicate that sustain/normal loop is disabled.
+			/// Invalid point. Used to indicate that sustain/normal loop is disabled, or an out of range point.
+			/// BEWARE!!! UNSIGNED INT, not minus one.
 			static const unsigned int INVALID = 0xFFFFFFFF;
 			
 			/// ValueType is a float value from  0 to 1.0  (or -1.0 1.0, or whatever else) which can be used as a multiplier.
@@ -278,26 +279,26 @@ namespace psycle { namespace host {
 			/// Gets the time at which the pointIndex point is located.
 			inline int GetTime(const unsigned int pointIndex) const 
 			{	
-				if(pointIndex >= 0 && pointIndex <NumOfPoints()) return m_Points[pointIndex].first;
+				if(pointIndex <NumOfPoints()) return m_Points[pointIndex].first;
 				return INVALID;
 			}
 			/// Sets a new time for an existing pointIndex point.
 			inline int SetTime(const unsigned int pointIndex,const int pointTime)
 			{ 
-				ASSERT(pointIndex >= 0 && pointIndex < NumOfPoints());
+				ASSERT(pointIndex < NumOfPoints());
 				m_Points[pointIndex].first = pointTime;
 				return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
 			}
 			/// Gets the value of the pointIndex point.
 			inline ValueType GetValue(const unsigned int pointIndex) const 
 			{ 
-				ASSERT(pointIndex >= 0 && pointIndex < NumOfPoints());
+				ASSERT(pointIndex < NumOfPoints());
 				return m_Points[pointIndex].second;
 			}
 			/// Sets the value pointVal to pointIndex point.
 			inline void SetValue(const unsigned int pointIndex,const ValueType pointVal)
 			{
-				ASSERT(pointIndex >= 0 && pointIndex < NumOfPoints());
+				ASSERT(pointIndex < NumOfPoints());
 				m_Points[pointIndex].second = pointVal;
 			}
 			/// Appends a new point at the end of the array.
