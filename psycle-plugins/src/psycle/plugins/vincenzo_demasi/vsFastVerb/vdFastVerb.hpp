@@ -36,7 +36,7 @@ enum {
 
 #define VDPLUGINNAME "vd's fastverb filter"
 #define VDSHORTNAME  "FastVerb"
-#define VDAUTHOR     "V. Demasi (Built on "__DATE__")"
+#define VDAUTHOR     "V. Demasi (Built on " __DATE__ ")"
 #define VDCOMMAND    "License"
 int const VDVERSION = 0x110;
 
