@@ -100,6 +100,7 @@ Extended Commands:\r\n\t\
 7x: Tremolo Wave\r\n\t\
 Waves: 0:Sinus, 1:Square\r\n\t\
 2:Ramp Up, 3:Ramp Down, 4: Random\r\n\t\
+8x: Panning\r\n\t\
 90: Surround Off\r\n\t\
 91: Surround On\r\n\t\
 9E: Play Forward\r\n\t\

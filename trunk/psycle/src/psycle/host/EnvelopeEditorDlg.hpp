@@ -27,6 +27,7 @@ protected:
 	afx_msg void OnBnClickedEnvadsr();
 	afx_msg void OnBnClickedEnvfreeform();
 	afx_msg void OnBnClickedEnvcheck();
+	afx_msg void OnBnClickedCarrycheck();
 	afx_msg void OnBnClickedSusBegin();
 	afx_msg void OnBnClickedSusEnd();
 	afx_msg void OnBnClickedLoopStart();
@@ -37,6 +38,7 @@ public:
 	CEnvelopeEditor m_EnvelopeEditor;
 
 	CButton m_EnvEnabled;
+	CButton m_CarryEnabled;
 private:
 	void SliderBase(CSliderCtrl* slid);
 	void SliderMod(CSliderCtrl* slid);

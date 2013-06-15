@@ -19,6 +19,7 @@ void CEnvelopeEditorDlg::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_INS_ENVELOPE, m_EnvelopeEditor);
 	DDX_Control(pDX, IDC_ENVCHECK, m_EnvEnabled);
+	DDX_Control(pDX, IDC_ENV_CARRY, m_CarryEnabled);
 	DDX_Control(pDX, IDC_ADSRBASE, m_SlADSRBase);
 	DDX_Control(pDX, IDC_ADSRMOD, m_SlADSRMod);
 	DDX_Control(pDX, IDC_ADSRATT, m_SlADSRAttack);
@@ -28,6 +29,7 @@ void CEnvelopeEditorDlg::DoDataExchange(CDataExchange* pDX)
 }
 BEGIN_MESSAGE_MAP(CEnvelopeEditorDlg, CDialog)
 	ON_BN_CLICKED(IDC_ENVCHECK, OnBnClickedEnvcheck)
+	ON_BN_CLICKED(IDC_ENV_CARRY, OnBnClickedCarrycheck)
 	ON_BN_CLICKED(IDC_ENVADSR, OnBnClickedEnvadsr)
 	ON_BN_CLICKED(IDC_ENVFREEFORM, OnBnClickedEnvfreeform)
 	ON_BN_CLICKED(IDC_ENV_SUSBEGIN, OnBnClickedSusBegin)
@@ -105,6 +107,10 @@ void CEnvelopeEditorDlg::RefreshButtons()
 void CEnvelopeEditorDlg::OnBnClickedEnvcheck()
 {
 	m_EnvelopeEditor.envelope().IsEnabled(m_EnvEnabled.GetCheck()!=0);
+}
+void CEnvelopeEditorDlg::OnBnClickedCarrycheck()
+{
+	m_EnvelopeEditor.envelope().IsCarry(m_CarryEnabled.GetCheck()!=0);
 }
 
 void CEnvelopeEditorDlg::OnBnClickedEnvadsr()

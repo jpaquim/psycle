@@ -298,15 +298,14 @@ XMSampler::Channel::PerformFX().
 	public:
 		struct EnvelopeStage {
 			enum Type {
-				OFF		= 0,
-				DOSTEP	= 1, // normal operation, follow the steps.
-				HASLOOP	= 2, // Indicates that the envelope *has* a (normal) loop (not that it is playing it)
-				HASSUSTAIN	= 4, // This indicates that the envelope *has* a sustain (not that it is playing it)
-				RELEASE = 8,  // Indicates that a Note-Off has been issued.
-				PAUSED = 16 // Indicates that it is either paused by user ( EE commands) or by loop
+				OFF		= 0, // Indicates that it is not active (isEnabled() false, 
+				DOSTEP	= 1, // Indicates that the envelope is enabled (either isEnabled() or used sent EE8 command).
+				RELEASED = 2,  // Indicates that a Note-Off has been issued.
+				PAUSED = 4 // Indicates that it is paused by loop.
 			};
 		};
-		EnvelopeController(Voice& invoice):voice(invoice){};
+		EnvelopeController(Voice& invoice, XMInstrument::Envelope::ValueType defValue)
+			:voice(invoice), defaultValue(defValue){};
 		virtual ~EnvelopeController(){};
 
 		void Init();
@@ -317,8 +316,22 @@ XMSampler::Channel::PerformFX().
 
 		void NoteOn();
 		void NoteOff();
-		void Pause();
-		void Continue();
+
+		void Stop() { m_Stage = EnvelopeStage::Type(m_Stage& (~EnvelopeStage::DOSTEP)); }
+		void Start(){
+			if (m_PositionIndex < m_pEnvelope->NumOfPoints()) {
+				m_Stage = EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP);
+				if (m_Samples == -1) {
+					//envelope is stopped. Le'ts do the first calc.
+					NewStep();
+				}
+			}
+		};
+
+		void Pause() { m_Stage = EnvelopeStage::Type(m_Stage| EnvelopeStage::PAUSED); }
+		void Continue(){
+			 m_Stage = EnvelopeStage::Type(m_Stage& (~EnvelopeStage::PAUSED));
+		};
 
 		inline void Work()
 		{
@@ -327,43 +340,7 @@ XMSampler::Channel::PerformFX().
 				if(++m_Samples >= m_NextEventSample) // m_NextEventSample is updated inside CalcStep()
 				{
 					m_PositionIndex++;
-					if (m_Stage&EnvelopeStage::HASSUSTAIN && !(m_Stage&EnvelopeStage::RELEASE))
-					{
-						if (m_PositionIndex == m_pEnvelope->SustainEnd())
-						{
-							// if the begin==end, pause the envelope.
-							if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
-							{
-								m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::PAUSED);
-							}
-							else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
-						}
-					}
-					else if (m_Stage&EnvelopeStage::HASLOOP)
-					{
-						if ( m_PositionIndex >= m_pEnvelope->LoopEnd())
-						{
-							// if the begin==end, pause the envelope.
-							if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
-							{
-								m_Stage = EnvelopeStage::Type(m_Stage | EnvelopeStage::PAUSED);
-							}
-							else { m_PositionIndex = m_pEnvelope->LoopStart(); }
-						}
-					}
-					if (!(m_Stage&EnvelopeStage::PAUSED)) 
-					{
-						if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
-						{
-							m_Stage = EnvelopeStage::OFF;
-							//This ensures that the envelope is really inplace.
-							m_PositionIndex = m_pEnvelope->NumOfPoints() - 1;
-							CalcStep(m_PositionIndex,m_PositionIndex);
-						}
-						//TODO: Fix saga_musix_arrival.it, pattern 0F (position 0E).
-						else CalcStep(m_PositionIndex,m_PositionIndex + 1);
-					}
-					else CalcStep(m_PositionIndex,m_PositionIndex);
+					NewStep();
 				}
 				else 
 				{
@@ -371,14 +348,51 @@ XMSampler::Channel::PerformFX().
 				}
 			}
 		}
+		inline void NewStep() {
+			if ( m_pEnvelope->SustainBegin() != XMInstrument::Envelope::INVALID 
+				&& !(m_Stage&EnvelopeStage::RELEASED))
+			{
+				if (m_PositionIndex == m_pEnvelope->SustainEnd())
+				{
+					// if begin==end, pause the envelope.
+					if ( m_pEnvelope->SustainBegin() == m_pEnvelope->SustainEnd() )
+					{
+						Pause();
+					}
+					else { m_PositionIndex = m_pEnvelope->SustainBegin(); }
+				}
+			}
+			else if (m_pEnvelope->LoopStart() != XMInstrument::Envelope::INVALID)
+			{
+				if ( m_PositionIndex >= m_pEnvelope->LoopEnd())
+				{
+					// if begin==end, pause the envelope.
+					if ( m_pEnvelope->LoopStart() == m_pEnvelope->LoopEnd() )
+					{
+						Pause();
+					}
+					else { m_PositionIndex = m_pEnvelope->LoopStart(); }
+				}
+			}
+			if( m_pEnvelope->GetTime(m_PositionIndex+1) == XMInstrument::Envelope::INVALID )
+			{
+				if (m_Stage&EnvelopeStage::PAUSED) {
+					CalcStep(m_PositionIndex,m_PositionIndex);
+				}
+				else {
+					m_Stage = EnvelopeStage::OFF;
+					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
+					m_PositionIndex = m_pEnvelope->NumOfPoints();
+				}
+			}
+			else CalcStep(m_PositionIndex,m_PositionIndex + 1);
+		}
 
 		/// 
 		void CalcStep(const int start,const int  end);
 		void SetPositionInSamples(const int samplePos);
 		inline int GetPositionInSamples() const {
-			//TRACE("Requested Pos:%d. Idx:%d, Current Amount:%f\n",m_Samples,m_PositionIndex,m_ModulationAmount);
-			//TRACE("-GET-Idx:%d, Step:%f, Current Amount:%f\n",m_PositionIndex,m_Step,m_ModulationAmount);
-			return m_Samples;
+			return m_Samples+(m_PositionIndex*SRateDeviation());
 		}
 		void RecalcDeviation();
 		inline XMInstrument::Envelope::ValueType ModulationAmount() const { return m_ModulationAmount; }
@@ -387,9 +401,9 @@ XMSampler::Channel::PerformFX().
 		inline EnvelopeStage::Type Stage() const {return m_Stage;}
 		void Stage(const EnvelopeStage::Type value){m_Stage = value;}
 		void SetPosition(const int posi) { 
-			m_PositionIndex=posi-1; 
-			Continue();
-			m_Samples= m_NextEventSample-1;  // this forces a recalc when entering Work().
+			m_PositionIndex=posi; 
+			Start();
+			NewStep();
 		}
 		inline int GetPosition(void) const { return m_PositionIndex; }
 	private:
@@ -400,6 +414,7 @@ XMSampler::Channel::PerformFX().
 		int m_PositionIndex;
 		int m_NextEventSample;
 		EnvelopeStage::Type m_Stage;
+		XMInstrument::Envelope::ValueType defaultValue;
 
 		const XMInstrument::Envelope* m_pEnvelope;
 
@@ -420,7 +435,7 @@ XMSampler::Channel::PerformFX().
 		///
 		friend class XMSampler::Channel;
 
-		Voice():m_AmplitudeEnvelope(*this), m_PanEnvelope(*this), m_PitchEnvelope(*this),m_FilterEnvelope(*this) {
+		Voice():m_AmplitudeEnvelope(*this,1.0f), m_PanEnvelope(*this,0.0f), m_PitchEnvelope(*this,0.0f),m_FilterEnvelope(*this,1.0f) {
 			Reset();
 		}
 		virtual ~Voice();

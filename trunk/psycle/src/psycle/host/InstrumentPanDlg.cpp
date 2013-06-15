@@ -82,6 +82,7 @@ void CInstrumentPanDlg::AssignPanningValues(XMInstrument& inst)
 	SliderMod(&m_SlNoteMod);
 
 	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.PanEnvelope().IsEnabled());
+	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.PanEnvelope().IsCarry());
 	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.PanEnvelope());
 
 }

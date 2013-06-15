@@ -83,6 +83,7 @@ void CInstrumentAmpDlg::AssignAmplitudeValues(XMInstrument& inst)
 	//SliderMod(&m_SlNoteMod);
 
 	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.AmpEnvelope().IsEnabled());
+	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.AmpEnvelope().IsCarry());
 	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.AmpEnvelope());
 }
 
