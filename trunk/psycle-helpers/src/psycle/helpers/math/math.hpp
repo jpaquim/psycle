@@ -51,7 +51,7 @@ namespace psycle { namespace helpers { namespace math {
 #if DIVERSALIS__STDLIB__MATH >= 199901L
 	using std::asinh;
 #else
-	template<typename Real> UNIVERSALIS__COMPILER__CONST
+	template<typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 	Real inline asinh(Real x) throw() {
 		return
 			x > 0 ?
@@ -62,7 +62,7 @@ namespace psycle { namespace helpers { namespace math {
 
 
 /// compares two floating point numbers for rough equality (difference less than epsilon by default).
-template<typename Real> UNIVERSALIS__COMPILER__CONST
+template<typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 bool inline roughly_equals(Real a, Real b, Real tolerance = std::numeric_limits<Real>::epsilon()) {
 	return std::abs(a - b) < tolerance;
 }
@@ -76,13 +76,13 @@ struct compile_time_factorial {
 ///\internal template specialisation for compile-time factorial of 0.
 template<> struct compile_time_factorial<0u> { unsigned int const static value = 1; };
 
-template<typename Real> UNIVERSALIS__COMPILER__CONST
+template<typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 Real inline deci_bell_to_linear(Real deci_bell) {
 	///\todo merge with psycle::helpers::dsp::dB2Amp
 	return std::pow(10u, deci_bell / Real(20));
 }
 
-template<typename Real> UNIVERSALIS__COMPILER__CONST
+template<typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 Real inline linear_to_deci_bell(Real linear) {
 	///\todo merge with psycle::helpers::dsp::dB
 	return Real(20) * std::log10(linear);

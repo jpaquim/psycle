@@ -20,7 +20,7 @@ using namespace universalis::stdlib;
 
 	/// linear -> deciBell
 	/// amplitude normalized to 1.0f.
-	float inline UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
 	dB(float amplitude)
 	{
 		///\todo merge with psycle::helpers::math::linear_to_deci_bell
@@ -28,7 +28,7 @@ using namespace universalis::stdlib;
 	}
 
 	/// deciBell -> linear
-	float inline UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
 	dB2Amp(float db)
 	{
 		///\todo merge with psycle::helpers::math::deci_bell_to_linear
@@ -36,25 +36,25 @@ using namespace universalis::stdlib;
 	}
 	/// linear -> deciBell
 	/// power normalized to 1.0f.
-	float inline UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
 	powerdB(float power)
 	{
 		return 10.0f * std::log10(power);
 	}
 
 	/// deciBell -> linear
-	float inline UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
 	dB2power(float db)
 	{
 		return std::pow(10.0f, db / 10.0f);
 	}
 	//These two are used for UI in some places, so that sliders get 0dB in the middle.
-	float inline UNIVERSALIS__COMPILER__CONST
+	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
 	SliderToAmount(int nPos) {
 		return ((1024-nPos)*(1024-nPos))/(16384.f*4.f*4.f);
 	}
 
-	int inline UNIVERSALIS__COMPILER__CONST
+	int inline UNIVERSALIS__COMPILER__CONST_FUNCTION
 	AmountToSlider(float amount) {
 		int t = (int)std::sqrt(amount*16384.f*4.f*4.f);
 		return 1024-t;

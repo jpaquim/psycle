@@ -30,7 +30,7 @@ namespace psycle { namespace helpers { namespace math {
 /// WARNING!!!!! This does not work for a sinc(). The 2nd degree is completely out of the question (makes like a top-cut triangle), 
 /// and the 4th degree pushes the top of the sinc down. (rebounds). 
 ///	In this case, the problematic range is 	-0.46 .. 0.46, and only for that first lob.
-template<unsigned int Polynomial_Degree, typename Real> UNIVERSALIS__COMPILER__CONST
+template<unsigned int Polynomial_Degree, typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 Real inline fast_sin(Real radians) {
 	//assert(-pi <= radians && radians <= pi);
 	// we solve:
