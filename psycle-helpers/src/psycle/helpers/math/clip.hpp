@@ -14,7 +14,7 @@
 namespace psycle { namespace helpers { namespace math {
 
 /// ensures a value stays between two bounds
-template<typename X> UNIVERSALIS__COMPILER__CONST
+template<typename X> UNIVERSALIS__COMPILER__CONST_FUNCTION
 X inline clipped(X minimum, X value, X maximum) {
 	// it looks a bit dumb to write a function to do that code,
 	// but maybe someone will find an optimised way to do this.
@@ -22,19 +22,19 @@ X inline clipped(X minimum, X value, X maximum) {
 }
 
 /// combines float to signed integer conversion with clipping.
-template<typename SignedIntegralResult, const unsigned int bits, typename Real> UNIVERSALIS__COMPILER__CONST
+template<typename SignedIntegralResult, const unsigned int bits, typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 SignedIntegralResult inline clipped_lrint(Real x) {
-	// check that Result is signed
+	// check that the Result type is a signed integral number
 	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_signed));
 	BOOST_STATIC_ASSERT((std::numeric_limits<SignedIntegralResult>::is_integer));
 
-	int const max(int((1u << (bits - 1u)) - 1u)); // The compiler is able to compute this statically.
-	int const min(-max - 1);
+	int UNIVERSALIS__COMPILER__CONSTEXPR max(int((1u << (bits - 1u)) - 1u));
+	int UNIVERSALIS__COMPILER__CONSTEXPR min(-max - 1);
 	return lrint<SignedIntegralResult>(clipped(Real(min), x, Real(max)));
 }
 
 /// combines float to signed integer conversion with clipping.
-template<typename SignedIntegralResult, typename Real> UNIVERSALIS__COMPILER__CONST
+template<typename SignedIntegralResult, typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
 SignedIntegralResult inline clipped_lrint(Real x) {
 	return clipped_lrint<SignedIntegralResult, (sizeof(SignedIntegralResult) << 3)>(x);
 }
@@ -75,41 +75,41 @@ inline void clip16_lrint(const float in[], int16_t out[], int amount) {
 		END:
 		}
 	#else
-		int const max((1u << (16 - 1)) - 1); // The compiler is able to compute this statically.
-		int const min(-max - 1);
+		float UNIVERSALIS__COMPILER__CONSTEXPR max = float((1u << (16 - 1)) - 1);
+		float UNIVERSALIS__COMPILER__CONSTEXPR min = float(-max - 1);
 		do {
-			*out++ = lrint<int16_t>(clipped(float(min), *in++, float(max)));
+			*out++ = lrint<int16_t>(clipped(min, *in++, max));
 		} while(--amount);
 
 	#endif
 }
 
 	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
+	inline int UNIVERSALIS__COMPILER__CONST_FUNCTION
 	f2iclip16(float f) { 
 		return clipped_lrint<int, 16, float>(f);
 	}
 
 	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
+	inline int UNIVERSALIS__COMPILER__CONST_FUNCTION
 	f2iclip18(float f) { 
 		return clipped_lrint<int, 18, float>(f);
 	}
 
 	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
+	inline int UNIVERSALIS__COMPILER__CONST_FUNCTION
 	f2iclip20(float f) { 
 		return clipped_lrint<int, 20, float>(f);
 	}
 
 	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
+	inline int UNIVERSALIS__COMPILER__CONST_FUNCTION
 	f2iclip24(float f) { 
 		return clipped_lrint<int, 24, float>(f);
 	}
 
 	/// clipping.
-	inline int  UNIVERSALIS__COMPILER__CONST
+	inline int UNIVERSALIS__COMPILER__CONST_FUNCTION
 	f2iclip32(float f) { 
 		return clipped_lrint<int, 32, float>(f);
 	}

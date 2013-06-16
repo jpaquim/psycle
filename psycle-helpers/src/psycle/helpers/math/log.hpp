@@ -29,7 +29,7 @@ using universalis::stdlib::uint8_t;
 /// less than 10% for input values between 0 and 0.6,
 /// maximum 60% for input values between 0.6 and 1.7,
 /// less than 10% for input values above 1.7.
-float inline UNIVERSALIS__COMPILER__CONST fast_log2(float f) {
+float inline UNIVERSALIS__COMPILER__CONST_FUNCTION fast_log2(float f) {
 	#if defined DIVERSALIS__CPU__X86 // we should verify the code for other architectures.
 		BOOST_STATIC_ASSERT((sizeof f == 4));
 		//assert(f > 0); 

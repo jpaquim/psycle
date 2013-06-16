@@ -98,6 +98,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\diversalis\src\diversalis.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\compiler.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\cpu.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\os.hpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="..\diversalis\src\diversalis\detail\config.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\detail\project.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\detail\stringize.hpp" />
+    <ClInclude Include="src\universalis.hpp" />
     <ClInclude Include="src\universalis\exception.hpp" />
     <ClInclude Include="src\universalis\detail\config.hpp" />
     <ClInclude Include="src\universalis\detail\config.private.hpp" />
@@ -117,6 +119,7 @@
     <ClInclude Include="src\universalis\compiler\calling_convention.hpp" />
     <ClInclude Include="src\universalis\compiler\concat.hpp" />
     <ClInclude Include="src\universalis\compiler\const_function.hpp" />
+    <ClInclude Include="src\universalis\compiler\pure_function.hpp" />
     <ClInclude Include="src\universalis\compiler\deprecated.hpp" />
     <ClInclude Include="src\universalis\compiler\dyn_link.hpp" />
     <ClInclude Include="src\universalis\compiler\exception.hpp" />
@@ -124,6 +127,7 @@
     <ClInclude Include="src\universalis\compiler\numeric.hpp" />
     <ClInclude Include="src\universalis\compiler\pack.hpp" />
     <ClInclude Include="src\universalis\compiler\pragma.hpp" />
+    <ClInclude Include="src\universalis\compiler\constexpr.hpp" />
     <ClInclude Include="src\universalis\compiler\restrict.hpp" />
     <ClInclude Include="src\universalis\compiler\setup_feature_test_macros.hpp" />
     <ClInclude Include="src\universalis\compiler\setup_optimizations.hpp" />
@@ -159,8 +163,6 @@
     <ClInclude Include="src\universalis\stdlib\thread.hpp" />
     <ClInclude Include="src\universalis\stdlib\detail\chrono\duration_and_time_point.hpp" />
     <ClInclude Include="src\universalis\stdlib\detail\chrono\measure_clock.hpp" />
-    <ClInclude Include="..\diversalis\src\diversalis.hpp" />
-    <ClInclude Include="src\universalis.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\universalis\exception.cpp" />
