@@ -3,10 +3,10 @@
 // copyright ????-???? Bjorn Roche, XO Audio, LLC
 // copyright 2008-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 //
-// This source code is partially base on Apache Harmony.
+// This source code is partially based on Apache Harmony.
 // see apache harmony barrier http://svn.apache.org/viewvc/harmony/enhanced/drlvm/trunk/vm/port/include/port_barriers.h
 //
-// This source code partially based on the pa_memorybarrier.h header of PortAudio (Portable Audio I/O Library).
+// This source code is partially based on the pa_memorybarrier.h header of PortAudio (Portable Audio I/O Library).
 // See portaudio memory barrier http://portaudio.com/trac/browser/portaudio/trunk/src/common/pa_memorybarrier.h
 // For more information on PortAudio, see http://www.portaudio.com
 // The PortAudio community makes the following non-binding requests:
