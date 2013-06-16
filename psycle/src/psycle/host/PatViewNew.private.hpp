@@ -22,12 +22,12 @@ namespace psycle { namespace host {
 			const int plines = _pSong.patternLines[_pSong.playOrder[editPosition]];
 			if ( editcur.track >= snt ) // This should only happen when changing the song tracks.
 			{							// Else, there is a problem.
-				TRACE("editcur.track out of range in PreparePatternRefresh");
+				TRACE("editcur.track out of range in PreparePatternRefresh\n");
 				editcur.track = snt-1;
 			}
 			if ( editcur.line >= plines ) // This should only happen when changing the pattern lines
 			{							  // or changing to a pattern with less lines.
-				TRACE("editcur.line out of range in PreparePatternRefresh");
+				TRACE("editcur.line out of range in PreparePatternRefresh\n");
 				editcur.line = plines-1;
 			}
 			//////////////////////////////////////////////////////////////////////

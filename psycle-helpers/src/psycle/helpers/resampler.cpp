@@ -9,11 +9,11 @@ namespace psycle { namespace helpers { namespace math {
 		#define USE_SSE2
 		#include <psycle/helpers/math/sse_mathfun.h>
 		#undef USE_SSE2
-		typedef ALIGN16_BEG union {
+		typedef UNIVERSALIS__COMPILER__DOALIGN(16, union {
 		  float f[4];
 		  int i[4];
 		  v4sf  v;
-		} ALIGN16_END V4SF;
+		} ) V4SF;
 }}}
 	#endif
 #endif

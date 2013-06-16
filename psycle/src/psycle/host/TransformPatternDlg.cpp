@@ -97,7 +97,7 @@ namespace psycle { namespace host {
 			if (areplacemac[0] != '\0')
 				replacemac = hexstring_to_integer(areplacemac);
 
-			TRACE("filterins is %i", filterins);
+			TRACE("filterins is %i\n", filterins);
 
 			if ((filterins != -1) | (filtermac != -1))
 			{

@@ -185,17 +185,13 @@ XMSampler::Channel::PerformFX().
 		inline void WorkMono(float *pLeftw,float *pRightw)
 		{
 			*pLeftw = resampler_work(m_pL, m_Position.LowPart, resampler_data);
-			/* *pLeftw = resampler_work(m_pL, m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
-			if ((m_Position.HighPart >= 14  && m_Position.HighPart <= 16)|| (m_Position.HighPart >= 491 && m_Position.HighPart <=493)) {
-				TRACE("Pos: %d [%d,%d,%d,%d]: %f\n",m_Position.HighPart, *(m_pL-1),*(m_pL),*(m_pL+1),*(m_pL+2), *pLeftw);
-			}*/
 			const std::ptrdiff_t old = m_Position.HighPart;
 			m_Position.QuadPart+=m_SpeedInternal;
 			const std::ptrdiff_t diff = static_cast<std::ptrdiff_t>(m_Position.HighPart)-old;
 			m_pL+=diff;
 #ifndef NDEBUG
 			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				int i=0;
+				TRACE("198: highpart> loopEnd+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -217,7 +213,7 @@ XMSampler::Channel::PerformFX().
 			m_pR+=diff;
 #ifndef NDEBUG
 			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				int i=0;
+				TRACE("220: highpart > loopend+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -321,7 +317,7 @@ XMSampler::Channel::PerformFX().
 		void Start(){
 			if (m_PositionIndex < m_pEnvelope->NumOfPoints()) {
 				m_Stage = EnvelopeStage::Type(m_Stage|EnvelopeStage::DOSTEP);
-				if (m_Samples == -1) {
+				if (m_Samples == 0) {
 					//envelope is stopped. Le'ts do the first calc.
 					NewStep();
 				}
@@ -391,9 +387,7 @@ XMSampler::Channel::PerformFX().
 		/// 
 		void CalcStep(const int start,const int  end);
 		void SetPositionInSamples(const int samplePos);
-		inline int GetPositionInSamples() const {
-			return m_Samples+(m_PositionIndex*SRateDeviation());
-		}
+		inline int GetPositionInSamples() const { return m_Samples; }
 		void RecalcDeviation();
 		inline XMInstrument::Envelope::ValueType ModulationAmount() const { return m_ModulationAmount; }
 
@@ -523,13 +517,9 @@ XMSampler::Channel::PerformFX().
 			{
 				if ( rChannel().ForegroundVoice() == this) 
 				{
+					rChannel().ForegroundVoice(NULL);
 					rChannel().LastVoicePanFactor(m_PanFactor);
 					rChannel().LastVoiceVolume(m_Volume);
-					rChannel().LastAmpEnvelopePosInSamples(0);
-					rChannel().LastPanEnvelopePosInSamples(0);
-					rChannel().LastFilterEnvelopePosInSamples(0);
-					rChannel().LastPitchEnvelopePosInSamples(0);
-					rChannel().ForegroundVoice(NULL);
 				}
 			}
 			m_bPlay = value;
@@ -782,7 +772,7 @@ XMSampler::Channel::PerformFX().
 
 		XMSampler::Voice* ForegroundVoice() { return m_pForegroundVoice; }
 		const XMSampler::Voice* ForegroundVoice() const { return m_pForegroundVoice; }
-		void ForegroundVoice(XMSampler::Voice* pVoice) {m_pForegroundVoice = pVoice;}
+		void ForegroundVoice(XMSampler::Voice* pVoice);
 
 		int Note() const { return m_Note;}
 		void Note(const int note)

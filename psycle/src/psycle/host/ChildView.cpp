@@ -600,7 +600,7 @@ namespace psycle { namespace host {
 			
 			if ( bmpDC != NULL ) // remove old buffer to force recreating it with new size
 			{
-				TRACE("CChildView::OnResize(). Deleted bmpDC");
+				TRACE("CChildView::OnResize(). Deleted bmpDC\n");
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
@@ -2305,13 +2305,13 @@ namespace psycle { namespace host {
 			if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
 				SRCAND))
 			{
-				TRACE("Transparent Blit failure SRCAND");
+				TRACE("Transparent Blit failure SRCAND\n");
 			}
 			// Also note the use of SRCPAINT rather than SRCCOPY.
 			if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
 				SRCPAINT))
 			{
-				TRACE("Transparent Blit failure SRCPAINT");
+				TRACE("Transparent Blit failure SRCPAINT\n");
 			}
 			// Now, clean up.
 			hdcMem.SelectObject(hbmT);

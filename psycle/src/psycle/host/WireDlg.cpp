@@ -281,6 +281,7 @@ namespace psycle { namespace host {
 				case 0: // vu-meter
 					{
 						float maxL, maxR;
+						int rmsL,rmsR;
 						const float multleft= invol*mult *srcMachine._lVol;
 						const float multright= invol*mult *srcMachine._rVol;
 
@@ -294,14 +295,32 @@ namespace psycle { namespace host {
 							maxL = std::max(maxL,psycle::helpers::dsp::GetMaxVol(pSamplesL,index));
 							maxR = psycle::helpers::dsp::GetMaxVol(pSamplesR+SCOPE_BUF_SIZE-remaining,remaining);
 							maxR = std::max(maxR,psycle::helpers::dsp::GetMaxVol(pSamplesR,index));
+	#if PSYCLE__CONFIGURATION__RMS_VUS
+							if (srcMachine.Bypass())
+	#endif
+							{
+								psycle::helpers::dsp::GetRMSVol(srcMachine.rms, pSamplesL+SCOPE_BUF_SIZE-remaining, 
+									pSamplesR+SCOPE_BUF_SIZE-remaining, remaining);
+								psycle::helpers::dsp::GetRMSVol(srcMachine.rms, pSamplesL, pSamplesR, index);
+							}
 						}
 						else {
 							if (index == 0) {index=SCOPE_BUF_SIZE; }
 							maxL = psycle::helpers::dsp::GetMaxVol(pSamplesL+index-scopesamples,scopesamples);
 							maxR = psycle::helpers::dsp::GetMaxVol(pSamplesR+index-scopesamples,scopesamples);
+	#if PSYCLE__CONFIGURATION__RMS_VUS
+							if (srcMachine.Bypass())
+	#endif
+							{
+								psycle::helpers::dsp::GetRMSVol(srcMachine.rms,pSamplesL+index-scopesamples, 
+									pSamplesR+index-scopesamples, scopesamples);
+							}
+
 						}
 						maxL= 36 - helpers::dsp::dB(maxL*multleft+0.0000001f) * 3;
 						maxR= 36 - helpers::dsp::dB(maxR*multright+0.0000001f) * 3;
+						rmsL= 36 - helpers::dsp::dB(srcMachine.rms.previousLeft*multleft+0.0000001f) * 3;
+						rmsR= 36 - helpers::dsp::dB(srcMachine.rms.previousRight*multright+0.0000001f) * 3;
 
 						if (maxL<peakL) //  it is a cardinal value, so smaller means higher peak.
 						{
@@ -316,13 +335,6 @@ namespace psycle { namespace host {
 						}
 
 						// now draw our scope
-#if PSYCLE__CONFIGURATION__RMS_VUS
-						int rmsL = 36 - helpers::dsp::dB(srcMachine.rms.previousLeft*multleft+0.0000001f) * 3;
-						int rmsR = 36 - helpers::dsp::dB(srcMachine.rms.previousRight*multright+0.0000001f) * 3;
-#else
-						int rmsL = maxL;
-						int rmsR = maxR;
-#endif
 						// LEFT CHANNEL
 						RECT rect;
 						rect.left = 128-60;

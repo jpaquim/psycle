@@ -8,9 +8,11 @@
 #if defined DIVERSALIS__COMPILER__GNU
 	#define UNIVERSALIS__COMPILER__ALIGN(bytes) UNIVERSALIS__COMPILER__ATTRIBUTE(aligned(bytes))
 	// note: a bit field is packed to 1 bit, not one byte.
+	#define UNIVERSALIS__COMPILER__DOALIGN(bytes, what) what UNIVERSALIS__COMPILER__ATTRIBUTE(aligned(bytes))
 #elif defined DIVERSALIS__COMPILER__MICROSOFT
 	#define UNIVERSALIS__COMPILER__ALIGN(bytes) UNIVERSALIS__COMPILER__ATTRIBUTE(align(bytes))
 	// see also: #pragma pack(x) in the optimization section
+	#define UNIVERSALIS__COMPILER__DOALIGN(bytes, what) UNIVERSALIS__COMPILER__ATTRIBUTE(align(bytes)) what
 #else
 	/// memory alignment.
 	///\see packed

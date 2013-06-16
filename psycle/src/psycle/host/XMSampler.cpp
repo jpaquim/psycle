@@ -306,7 +306,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("max<0 bug triggered!");
+					TRACE("309: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = 0;
@@ -331,7 +331,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("max<0 bug triggered!");
+					TRACE("334: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = m_Position.LowPart;
@@ -434,7 +434,7 @@ namespace psycle
 		//  Second, if the envelope is enabled and there are more points, let's enable the joy!
 		void XMSampler::EnvelopeController::NoteOn()
 		{
-			m_Samples = -1;
+			m_Samples = 0;
 			m_PositionIndex = 0;
 			m_NextEventSample = 0;
 			m_Stage = EnvelopeStage::OFF;
@@ -504,10 +504,13 @@ namespace psycle
 			}
 			else {
 				i--;
-				m_PositionIndex=i;
-				NewStep();
-				m_Samples=samplePos-static_cast<int>(m_pEnvelope->GetTime(i)* SRateDeviation())-1;//samplePos minus one because else this sample is skipped.
-				m_ModulationAmount+= m_Step*m_Samples;
+				if (m_PositionIndex != i ) {
+					m_PositionIndex=i;
+					NewStep();
+				}
+				m_Samples=samplePos;
+				int samplesThisIndex = m_Samples-static_cast<int>(m_pEnvelope->GetTime(i)* SRateDeviation());
+				m_ModulationAmount+= m_Step*samplesThisIndex;
 			}
 		}
 
@@ -683,7 +686,7 @@ namespace psycle
 				numSamples-=nextsamples;
 #ifndef NDEBUG
 				if (numSamples > 256 || numSamples < 0) {
-					int i=0;
+					TRACE("numSamples invalid bug triggered!\n");
 				}
 #endif
 				while (nextsamples)
@@ -1386,6 +1389,38 @@ namespace psycle
 			m_Ressonance = m_DefaultRessonance;
 			m_FilterType = m_DefaultFilterType;
 			m_DelayedNote.clear();
+		}
+		void XMSampler::Channel::ForegroundVoice(XMSampler::Voice* pVoice)
+		{
+			if (m_pForegroundVoice)
+			{
+				LastVoicePanFactor(m_pForegroundVoice->PanFactor());
+				LastVoiceVolume(m_pForegroundVoice->Volume());
+
+				const XMInstrument::Envelope &envAmp = m_pForegroundVoice->AmplitudeEnvelope().Envelope();
+				if (envAmp.IsEnabled() && envAmp.IsCarry())
+					LastAmpEnvelopePosInSamples(m_pForegroundVoice->AmplitudeEnvelope().GetPositionInSamples());
+				else LastAmpEnvelopePosInSamples(0);
+				const XMInstrument::Envelope &panAmp = m_pForegroundVoice->PanEnvelope().Envelope();
+				if (panAmp.IsEnabled() && panAmp.IsCarry())
+					LastPanEnvelopePosInSamples(m_pForegroundVoice->PanEnvelope().GetPositionInSamples());
+				else LastPanEnvelopePosInSamples(0);
+				const XMInstrument::Envelope &filAmp = m_pForegroundVoice->FilterEnvelope().Envelope();
+				if (filAmp.IsEnabled() && filAmp.IsCarry())
+					LastFilterEnvelopePosInSamples(m_pForegroundVoice->FilterEnvelope().GetPositionInSamples());
+				else LastFilterEnvelopePosInSamples(0);
+				const XMInstrument::Envelope &pitAmp = m_pForegroundVoice->PitchEnvelope().Envelope();
+				if (pitAmp.IsEnabled() && pitAmp.IsCarry())
+					LastPitchEnvelopePosInSamples(m_pForegroundVoice->PitchEnvelope().GetPositionInSamples());
+				else LastPitchEnvelopePosInSamples(0);
+			}
+			else {
+				LastAmpEnvelopePosInSamples(0);
+				LastPanEnvelopePosInSamples(0);
+				LastFilterEnvelopePosInSamples(0);
+				LastPitchEnvelopePosInSamples(0);
+			}
+			m_pForegroundVoice = pVoice;
 		}
 		void XMSampler::Channel::SetEffect(Voice* voice,int volcmd,int cmd,int parameter)
 		{
@@ -2498,28 +2533,6 @@ namespace psycle
 							int twlength = wave.WaveLength();
 							newVoice->VoiceInit(_inst, channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
-							if (currentVoice)
-							{
-								thisChannel.LastVoicePanFactor(currentVoice->PanFactor());
-								thisChannel.LastVoiceVolume(currentVoice->Volume());
-
-								const XMInstrument::Envelope &envAmp = currentVoice->AmplitudeEnvelope().Envelope();
-								if (envAmp.IsEnabled() && envAmp.IsCarry() )
-									thisChannel.LastAmpEnvelopePosInSamples(currentVoice->AmplitudeEnvelope().GetPositionInSamples());
-								else thisChannel.LastAmpEnvelopePosInSamples(0);
-								const XMInstrument::Envelope &panAmp = currentVoice->PanEnvelope().Envelope();
-								if (panAmp.IsEnabled() && panAmp.IsCarry() )
-									thisChannel.LastPanEnvelopePosInSamples(currentVoice->PanEnvelope().GetPositionInSamples());
-								else thisChannel.LastPanEnvelopePosInSamples(0);
-								const XMInstrument::Envelope &filAmp = currentVoice->FilterEnvelope().Envelope();
-								if (filAmp.IsEnabled() && filAmp.IsCarry() )
-									thisChannel.LastFilterEnvelopePosInSamples(currentVoice->FilterEnvelope().GetPositionInSamples());
-								else thisChannel.LastFilterEnvelopePosInSamples(0);
-								const XMInstrument::Envelope &pitAmp = currentVoice->PitchEnvelope().Envelope();
-								if (pitAmp.IsEnabled() && pitAmp.IsCarry() )
-									thisChannel.LastPitchEnvelopePosInSamples(currentVoice->PitchEnvelope().GetPositionInSamples());
-								else thisChannel.LastPitchEnvelopePosInSamples(0);
-							}
 							int vol = -1;
 							int offset = 0;
 							for (std::vector<PatternEntry>::const_iterator ite = multicmdMem.begin(); ite != multicmdMem.end(); ++ite) {
