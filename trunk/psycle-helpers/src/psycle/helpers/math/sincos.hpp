@@ -62,7 +62,7 @@ void inline sincos(
 		template<typename Real>
 		void sincos_test_template() {
 			Real const tolerance = Real(1e-7);
-			Real const input_values[] = { 0, pi / 4, pi / 3, pi / 2, pi };
+			Real const input_values[] = { 0, Real(pi) / 4, Real(pi) / 3, Real(pi) / 2, Real(pi) };
 			for(unsigned int i(0); i < sizeof input_values / sizeof *input_values; ++i) {
 				Real const x(input_values[i]);
 				Real s, c;
