@@ -10,7 +10,7 @@
 #include <cassert>
 #include <algorithm>
 #if __cplusplus >= 201103L
-	#include <cstdatomic>
+	#include <atomic>
 #endif
 namespace psycle { namespace helpers { namespace ring_buffers {
 
@@ -237,6 +237,7 @@ class ring_buffer_with_compiler_volatile {
 	#include <thread>
 	#include <utility>
 	#include <random>
+	#include <functional>
 	#include <chrono>
 	#include <sstream>
 	namespace psycle { namespace helpers { namespace ring_buffers { namespace test {
@@ -293,11 +294,12 @@ class ring_buffer_with_compiler_volatile {
 				100 * 1000 * 1000;
 			std::size_t buf[size];
 			Ring_Buffer ring_buffer(size);
-			typedef std::variate_generator<std::mt19937, std::uniform_int<std::size_t>> rand_gen_type;
-			rand_gen_type::result_type const rand_gen_dist_lower = ring_buffer.size() / 4;
-			rand_gen_type::result_type const rand_gen_dist_upper = ring_buffer.size() / 2;
-			rand_gen_type writer_rand_gen { rand_gen_type::engine_type(reader_rand_gen_seed), rand_gen_type::distribution_type(rand_gen_dist_lower, rand_gen_dist_upper) };
-			rand_gen_type reader_rand_gen { rand_gen_type::engine_type(writer_rand_gen_seed), rand_gen_type::distribution_type(rand_gen_dist_lower, rand_gen_dist_upper) };
+			typedef std::mt19937 rand_gen_engine;
+			typedef std::uniform_int_distribution<std::size_t> rand_gen_distrib;
+			std::size_t const rand_gen_dist_lower = ring_buffer.size() / 4;
+			std::size_t const rand_gen_dist_upper = ring_buffer.size() / 2;
+			auto writer_rand_gen = std::bind(rand_gen_distrib(rand_gen_dist_lower, rand_gen_dist_upper), rand_gen_engine(reader_rand_gen_seed));
+			auto reader_rand_gen = std::bind(rand_gen_distrib(rand_gen_dist_lower, rand_gen_dist_upper), rand_gen_engine(writer_rand_gen_seed));
 			{
 				std::ostringstream s;
 				s <<
@@ -306,8 +308,9 @@ class ring_buffer_with_compiler_volatile {
 					"ring buffer size: " << size << "\n"
 					"number of cpu avail: " << cpu_avail << "\n"
 					"elements to process: " << double(elements_to_process) << "\n"
-					"rand gen typename: " << universalis::compiler::typenameof<rand_gen_type>() << "\n"
-					"rand gen dist range: " << rand_gen_dist_lower << ' ' << rand_gen_dist_upper << "\n"
+					"rand gen distrib range: " << rand_gen_dist_lower << ' ' << rand_gen_dist_upper << "\n"
+					"writer rand gen typename: " << universalis::compiler::typenameof<decltype(writer_rand_gen)>() << "\n"
+					"reader rand gen typename: " << universalis::compiler::typenameof<decltype(reader_rand_gen)>() << "\n"
 					"writer rand gen seed: " << writer_rand_gen_seed << "\n"
 					"reader rand gen seed: " << reader_rand_gen_seed;
 				BOOST_MESSAGE(s.str());
@@ -315,8 +318,8 @@ class ring_buffer_with_compiler_volatile {
 			BOOST_MESSAGE("running ... ");
 			typedef std::chrono::high_resolution_clock clock;
 			auto const t0 = clock::now();
-			std::thread writer_thread(writer_loop<Ring_Buffer, rand_gen_type>, buf, std::ref(ring_buffer), std::ref(writer_rand_gen), elements_to_process);
-			std::thread reader_thread(reader_loop<Ring_Buffer, rand_gen_type>, buf, std::ref(ring_buffer), std::ref(reader_rand_gen), elements_to_process);
+			std::thread writer_thread(writer_loop<Ring_Buffer, decltype(writer_rand_gen)>, buf, std::ref(ring_buffer), std::ref(writer_rand_gen), elements_to_process);
+			std::thread reader_thread(reader_loop<Ring_Buffer, decltype(reader_rand_gen)>, buf, std::ref(ring_buffer), std::ref(reader_rand_gen), elements_to_process);
 			writer_thread.join();
 			reader_thread.join();
 			auto const t1 = clock::now();
