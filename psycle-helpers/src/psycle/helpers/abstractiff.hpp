@@ -8,6 +8,17 @@
 #include <string>
 #include <fstream>
 
+
+// ************************* FIXME ***************************
+// GCC emits a flood of warnings here due to inline functions lacking a definition in the header.
+// Probably MSVC doesn't show this.
+#ifdef DIVERSALIS__COMPILER__MICROSOFT
+	#define FIXME_inline inline
+#else
+	#define FIXME_inline
+#endif
+// ***********************************************************
+
 namespace psycle { namespace helpers {
 
 using namespace universalis::stdlib;
@@ -33,10 +44,10 @@ using namespace universalis::stdlib;
 			Long64BE();
 			Long64BE(const uint64_t);
 			Long64BE(const int64_t);
-			inline void changeValue(const uint64_t);
-			inline void changeValue(const int64_t);
-			inline uint64_t unsignedValue() const;
-			inline int64_t signedValue() const;
+			FIXME_inline void changeValue(const uint64_t);
+			FIXME_inline void changeValue(const int64_t);
+			FIXME_inline uint64_t unsignedValue() const;
+			FIXME_inline int64_t signedValue() const;
 		};
 
 		/// big-endian 32-bit integer.
@@ -55,10 +66,10 @@ using namespace universalis::stdlib;
 			LongBE();
 			LongBE(const uint32_t);
 			LongBE(const int32_t);
-			inline void changeValue(const uint32_t);
-			inline void changeValue(const int32_t);
-			inline uint32_t unsignedValue() const;
-			inline int32_t signedValue() const;
+			FIXME_inline void changeValue(const uint32_t);
+			FIXME_inline void changeValue(const int32_t);
+			FIXME_inline uint32_t unsignedValue() const;
+			FIXME_inline int32_t signedValue() const;
 		};
 		/// big-endian 24-bit intenger.
 		class Long24LE;
@@ -73,10 +84,10 @@ using namespace universalis::stdlib;
 			Long24BE();
 			Long24BE(const uint32_t);
 			Long24BE(const int32_t);
-			inline void changeValue(const uint32_t);
-			inline void changeValue(const int32_t);
-			inline uint32_t unsignedValue() const;
-			inline int32_t signedValue() const;
+			FIXME_inline void changeValue(const uint32_t);
+			FIXME_inline void changeValue(const int32_t);
+			FIXME_inline uint32_t unsignedValue() const;
+			FIXME_inline int32_t signedValue() const;
 		};
 		/// big-endian 16-bit integer.
 		class ShortBE
@@ -92,10 +103,10 @@ using namespace universalis::stdlib;
 			ShortBE();
 			ShortBE(const uint16_t);
 			ShortBE(const int16_t);
-			inline void changeValue(const uint16_t);
-			inline void changeValue(const int16_t);
-			inline uint16_t unsignedValue() const;
-			inline int16_t signedValue() const;
+			FIXME_inline void changeValue(const uint16_t);
+			FIXME_inline void changeValue(const int16_t);
+			FIXME_inline uint16_t unsignedValue() const;
+			FIXME_inline int16_t signedValue() const;
 		};
 
 		// big-endian 32-bit fixed point value. (16.16)
@@ -118,8 +129,8 @@ using namespace universalis::stdlib;
 			}decimal;
 			FixedPointBE();
 			FixedPointBE(const float);
-			inline void changeValue(const float);
-			inline float value() const;
+			FIXME_inline void changeValue(const float);
+			FIXME_inline float value() const;
 		};
 		/// big-endian 32-bit float.
 		class FloatBE
@@ -136,8 +147,8 @@ using namespace universalis::stdlib;
 			}d;
 			FloatBE();
 			FloatBE(const float);
-			inline void changeValue(const float);
-			inline float Value() const;
+			FIXME_inline void changeValue(const float);
+			FIXME_inline float Value() const;
 		};
 		/// big-endian 64-bit float.
 		class DoubleBE
@@ -158,8 +169,8 @@ using namespace universalis::stdlib;
 			}d;
 			DoubleBE();
 			DoubleBE(const double);
-			inline void changeValue(const double);
-			inline double Value() const;
+			FIXME_inline void changeValue(const double);
+			FIXME_inline double Value() const;
 		};
 
 		/// little-endian 64-bit integer.
@@ -182,10 +193,10 @@ using namespace universalis::stdlib;
 			Long64LE();
 			Long64LE(const uint64_t);
 			Long64LE(const int64_t);
-			inline void changeValue(const uint64_t);
-			inline void changeValue(const int64_t);
-			inline uint64_t unsignedValue() const;
-			inline int64_t signedValue() const;
+			FIXME_inline void changeValue(const uint64_t);
+			FIXME_inline void changeValue(const int64_t);
+			FIXME_inline uint64_t unsignedValue() const;
+			FIXME_inline int64_t signedValue() const;
 		};
 
 		/// little-endian 32-bit integer.
@@ -204,10 +215,10 @@ using namespace universalis::stdlib;
 			LongLE();
 			LongLE(const uint32_t);
 			LongLE(const int32_t);
-			inline void changeValue(const uint32_t);
-			inline void changeValue(const int32_t);
-			inline uint32_t unsignedValue() const;
-			inline int32_t signedValue() const;
+			FIXME_inline void changeValue(const uint32_t);
+			FIXME_inline void changeValue(const int32_t);
+			FIXME_inline uint32_t unsignedValue() const;
+			FIXME_inline int32_t signedValue() const;
 		};
 
 		/// little-endian 24-bit integer.
@@ -222,10 +233,10 @@ using namespace universalis::stdlib;
 			Long24LE();
 			Long24LE(const uint32_t);
 			Long24LE(const int32_t);
-			inline void changeValue(const uint32_t);
-			inline void changeValue(const int32_t);
-			inline uint32_t unsignedValue() const;
-			inline int32_t signedValue() const;
+			FIXME_inline void changeValue(const uint32_t);
+			FIXME_inline void changeValue(const int32_t);
+			FIXME_inline uint32_t unsignedValue() const;
+			FIXME_inline int32_t signedValue() const;
 		};
 
 		/// little-endian 16-bit integer.
@@ -242,10 +253,10 @@ using namespace universalis::stdlib;
 			ShortLE();
 			ShortLE(const uint16_t);
 			ShortLE(const int16_t);
-			inline void changeValue(const uint16_t);
-			inline void changeValue(const int16_t);
-			inline uint16_t unsignedValue() const;
-			inline int16_t signedValue() const;
+			FIXME_inline void changeValue(const uint16_t);
+			FIXME_inline void changeValue(const int16_t);
+			FIXME_inline uint16_t unsignedValue() const;
+			FIXME_inline int16_t signedValue() const;
 		};
 		/// little-endian 32-bit float.
 		class FloatLE
@@ -262,8 +273,8 @@ using namespace universalis::stdlib;
 			}d;
 			FloatLE();
 			FloatLE(const float);
-			inline void changeValue(const float);
-			inline float Value() const;
+			FIXME_inline void changeValue(const float);
+			FIXME_inline float Value() const;
 		};
 		/// little-endian 64-bit float.
 		class DoubleLE
@@ -284,8 +295,8 @@ using namespace universalis::stdlib;
 			}d;
 			DoubleLE();
 			DoubleLE(const double);
-			inline void changeValue(const double);
-			inline double Value() const;
+			FIXME_inline void changeValue(const double);
+			FIXME_inline double Value() const;
 		};
 
 		/******* Data Structures *******/
@@ -318,7 +329,7 @@ using namespace universalis::stdlib;
 			virtual void Create(const std::string& fname, const bool overwrite);
 			virtual void close();
 			virtual bool Eof() const;
-			std::string const inline & file_name() const throw();
+			std::string const FIXME_inline & file_name() const throw();
 			std::streamsize fileSize();
 
 			virtual void addNewChunk(const BaseChunkHeader& header) = 0;
@@ -330,41 +341,42 @@ using namespace universalis::stdlib;
 			void ReadString(std::string &);
 			void ReadString(char *, std::size_t const max_length);
 			void ReadSizedString(char *, std::size_t const read_length);
+			
 			template<typename T>
-				void ReadArray(T* thearray, std::size_t n);
+			void ReadArray(T* thearray, std::size_t n);
 
-			inline void Read(uint8_t & x);
-			inline void Read(int8_t & x);
+			FIXME_inline void Read(uint8_t & x);
+			FIXME_inline void Read(int8_t & x);
 			virtual void Read(uint16_t & x)=0;
 			virtual void Read(int16_t & x)=0;
 			virtual void Read(uint32_t & x)=0;
 			virtual void Read(int32_t & x)=0;
 			virtual void Read(float & x)=0;
 			virtual void Read(double & x)=0;
-			inline void Read(char & x);
-			inline void Read(bool & x);
-			inline void Read(IffChunkId & id);
-			inline void Read(Long64BE & val);
-			inline void Read(Long64LE & val);
-			inline void Read(LongBE & val);
-			inline void Read(LongLE & val);
-			inline void Read(Long24BE & val);
-			inline void Read(Long24LE & val);
-			inline void Read(ShortBE & val);
-			inline void Read(ShortLE & val);
-			inline void Read(FloatBE & val);
-			inline void Read(FloatLE & val);
-			inline void Read(DoubleBE & val);
-			inline void Read(DoubleLE & val);
+			FIXME_inline void Read(char & x);
+			FIXME_inline void Read(bool & x);
+			FIXME_inline void Read(IffChunkId & id);
+			FIXME_inline void Read(Long64BE & val);
+			FIXME_inline void Read(Long64LE & val);
+			FIXME_inline void Read(LongBE & val);
+			FIXME_inline void Read(LongLE & val);
+			FIXME_inline void Read(Long24BE & val);
+			FIXME_inline void Read(Long24LE & val);
+			FIXME_inline void Read(ShortBE & val);
+			FIXME_inline void Read(ShortLE & val);
+			FIXME_inline void Read(FloatBE & val);
+			FIXME_inline void Read(FloatLE & val);
+			FIXME_inline void Read(DoubleBE & val);
+			FIXME_inline void Read(DoubleLE & val);
 
-			inline void WriteString(const std::string &string);
-			inline void WriteString(const char * const data);
-			inline void WriteSizedString(const char * const data, std::size_t const length);
+			FIXME_inline void WriteString(const std::string &string);
+			FIXME_inline void WriteString(const char * const data);
+			FIXME_inline void WriteSizedString(const char * const data, std::size_t const length);
 			template<typename T>
-				inline void WriteArray(T const* thearray, std::size_t n);
+				FIXME_inline void WriteArray(T const* thearray, std::size_t n);
 
-			inline void Write(const uint8_t x);
-			inline void Write(const int8_t x);
+			FIXME_inline void Write(const uint8_t x);
+			FIXME_inline void Write(const int8_t x);
 			virtual void Write(const uint16_t x)=0;
 			virtual void Write(const int16_t x)=0;
 			virtual void Write(const uint32_t x)=0;
@@ -373,55 +385,55 @@ using namespace universalis::stdlib;
 			virtual void Write(const int64_t x)=0;
 			virtual void Write(const float x)=0;
 			virtual void Write(const double x)=0;
-			inline void Write(const char x);
-			inline void Write(const bool x);
-			inline void Write(const IffChunkId& id);
-			inline void Write(const Long64BE& val);
-			inline void Write(const Long64LE& val);
-			inline void Write(const LongBE& val);
-			inline void Write(const LongLE& val);
-			inline void Write(const Long24BE& val);
-			inline void Write(const Long24LE& val);
-			inline void Write(const ShortBE& val);
-			inline void Write(const ShortLE& val);
-			inline void Write(const FloatBE& val);
-			inline void Write(const FloatLE& val);
-			inline void Write(const DoubleBE& val);
-			inline void Write(const DoubleLE& val);
+			FIXME_inline void Write(const char x);
+			FIXME_inline void Write(const bool x);
+			FIXME_inline void Write(const IffChunkId& id);
+			FIXME_inline void Write(const Long64BE& val);
+			FIXME_inline void Write(const Long64LE& val);
+			FIXME_inline void Write(const LongBE& val);
+			FIXME_inline void Write(const LongLE& val);
+			FIXME_inline void Write(const Long24BE& val);
+			FIXME_inline void Write(const Long24LE& val);
+			FIXME_inline void Write(const ShortBE& val);
+			FIXME_inline void Write(const ShortLE& val);
+			FIXME_inline void Write(const FloatBE& val);
+			FIXME_inline void Write(const FloatLE& val);
+			FIXME_inline void Write(const DoubleBE& val);
+			FIXME_inline void Write(const DoubleLE& val);
 		protected:
-			inline bool isWriteMode() const {return write_mode;}
+			FIXME_inline bool isWriteMode() const {return write_mode;}
 			std::streampos GetPos(void);
 			std::streampos Seek(std::streampos const bytes);
 			std::streampos Skip(std::streampos const bytes);
 
-			inline void ReadBE(uint32_t & x);
-			inline void ReadBE(int32_t & x);
-			inline void ReadBE(uint16_t & x);
-			inline void ReadBE(int16_t & x);
-			inline void ReadBE(float & x);
-			inline void ReadBE(double & x);
-			inline void ReadLE(uint32_t & x);
-			inline void ReadLE(int32_t & x);
-			inline void ReadLE(uint16_t & x);
-			inline void ReadLE(int16_t & x);
-			inline void ReadLE(float & x);
-			inline void ReadLE(double & x);
+			FIXME_inline void ReadBE(uint32_t & x);
+			FIXME_inline void ReadBE(int32_t & x);
+			FIXME_inline void ReadBE(uint16_t & x);
+			FIXME_inline void ReadBE(int16_t & x);
+			FIXME_inline void ReadBE(float & x);
+			FIXME_inline void ReadBE(double & x);
+			FIXME_inline void ReadLE(uint32_t & x);
+			FIXME_inline void ReadLE(int32_t & x);
+			FIXME_inline void ReadLE(uint16_t & x);
+			FIXME_inline void ReadLE(int16_t & x);
+			FIXME_inline void ReadLE(float & x);
+			FIXME_inline void ReadLE(double & x);
 
-			inline void WriteBE(const uint32_t x);
-			inline void WriteBE(const int32_t x);
-			inline void WriteBE(const uint16_t x);
-			inline void WriteBE(const int16_t x);
-			inline void WriteBE(const float x);
-			inline void WriteBE(const double x);
-			inline void WriteLE(const uint32_t x);
-			inline void WriteLE(const int32_t x);
-			inline void WriteLE(const uint16_t x);
-			inline void WriteLE(const int16_t x);
-			inline void WriteLE(const float x);
-			inline void WriteLE(const double x);
+			FIXME_inline void WriteBE(const uint32_t x);
+			FIXME_inline void WriteBE(const int32_t x);
+			FIXME_inline void WriteBE(const uint16_t x);
+			FIXME_inline void WriteBE(const int16_t x);
+			FIXME_inline void WriteBE(const float x);
+			FIXME_inline void WriteBE(const double x);
+			FIXME_inline void WriteLE(const uint32_t x);
+			FIXME_inline void WriteLE(const int32_t x);
+			FIXME_inline void WriteLE(const uint16_t x);
+			FIXME_inline void WriteLE(const int16_t x);
+			FIXME_inline void WriteLE(const float x);
+			FIXME_inline void WriteLE(const double x);
 
-			inline void ReadRaw (void * data, std::size_t const bytes);
-			inline void WriteRaw(const void * const data, std::size_t const bytes);
+			FIXME_inline void ReadRaw (void * data, std::size_t const bytes);
+			FIXME_inline void WriteRaw(const void * const data, std::size_t const bytes);
 			bool Expect(const IffChunkId& id);
 			bool Expect(const void * const data, std::size_t const bytes);
 			void UpdateFormSize(std::streamoff headerposition, uint32_t numBytes);
@@ -431,4 +443,10 @@ using namespace universalis::stdlib;
 			std::string file_name_;
 			std::fstream _stream;
 		};
+		
+		template<typename T>
+		void AbstractIff::ReadArray(T* thearray, std::size_t n) {
+			for(std::size_t i=0;i<n;i++) Read(thearray[i]);
+		}
+		
 }}

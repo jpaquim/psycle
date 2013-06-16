@@ -1,6 +1,7 @@
 #pragma once
 #include "msriff.hpp"
 namespace psycle { namespace helpers {
+
 	class WaveFormat_Data;
 
 	/// the riff WAVE/fmt chunk.
@@ -8,9 +9,10 @@ namespace psycle { namespace helpers {
 	class RiffWaveFmtChunk  : public RiffChunkHeader<long_type>
 	{
 	public:
-		static const uint16_t FORMAT_PCM=1;
-		static const uint16_t FORMAT_FLOAT=3;
-		static const uint16_t FORMAT_EXTENSIBLE=0xFFFEU;
+		static const uint16_t FORMAT_PCM;
+		static const uint16_t FORMAT_FLOAT;
+		static const uint16_t FORMAT_EXTENSIBLE;
+
 		short_type wFormatTag;
 		/// Number of channels (mono=1, stereo=2)
 		short_type wChannels;
@@ -23,10 +25,10 @@ namespace psycle { namespace helpers {
 		/// bits per sample (i.e. bits of one frame for a single channel)
 		short_type wBitsPerSample;
 	public:
-		RiffWaveFmtChunk();
+		RiffWaveFmtChunk() {}
 		RiffWaveFmtChunk(const WaveFormat_Data& config);
-		virtual ~RiffWaveFmtChunk();
-		virtual uint32_t length() const;
+		virtual inline ~RiffWaveFmtChunk() {};
+		virtual uint32_t length() const { throw 0; } // TODO check this
 	};
 
 	//todo: WAVEFORMAT_EXTENSIBLE
@@ -68,11 +70,30 @@ namespace psycle { namespace helpers {
 			nChannels = NewNumChannels;
 			nBitsPerSample = NewBitsPerSample;
 		}
+
 		template<typename long_type, typename short_type>
 		void Config(const RiffWaveFmtChunk<long_type,short_type>& chunk);
 
 	};
 
+	template<typename long_type, typename short_type>
+	RiffWaveFmtChunk<long_type, short_type>::RiffWaveFmtChunk(const WaveFormat_Data& config)
+	{
+		this->ulength.changeValue(16);
+		wFormatTag.changeValue(config.isfloat ? FORMAT_FLOAT : FORMAT_PCM);
+		wChannels.changeValue(config.nChannels);
+		dwSamplesPerSec.changeValue(config.nSamplesPerSec);
+		wBitsPerSample.changeValue(config.nBitsPerSample);
+		dwAvgBytesPerSec.changeValue(config.nChannels * config.nSamplesPerSec * config.nBitsPerSample / 8);
+		wBlockAlign.changeValue(static_cast<uint16_t>(config.nChannels * config.nBitsPerSample / 8));
+	}
+
+	template<typename long_type, typename short_type>
+	void WaveFormat_Data::Config(const RiffWaveFmtChunk<long_type,short_type>& chunk) {
+		Config(chunk.dwSamplesPerSec.unsignedValue(),chunk.wBitsPerSample.unsignedValue(),
+			chunk.wChannels.unsignedValue(),chunk.wFormatTag.unsignedValue() == RiffWaveFmtChunk<long_type,short_type>::FORMAT_FLOAT);
+	}
+	
 /// usage: integerconverter<Long24BE,Long24LE,assignconverter<Long24BE, Long24LE>(bla,bla2,10);
 template<typename in_type, typename out_type>
 inline out_type assign24converter(in_type a) { out_type b(a.unsignedValue()); return b; }

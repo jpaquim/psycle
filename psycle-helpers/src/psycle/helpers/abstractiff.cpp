@@ -525,10 +525,6 @@ namespace psycle { namespace helpers {
 			data[read_length-1]='\0';
 		}
 
-		template<typename T>
-		void AbstractIff::ReadArray(T* thearray, std::size_t n) {
-			for(std::size_t i=0;i<n;i++) Read(thearray[i]);
-		}
 		void AbstractIff::Read(uint8_t & x) {
 			ReadRaw(&x,1);
 		}
