@@ -17,6 +17,7 @@
 	#include "universalis/compiler/setup_warnings.hpp"
 	#include "universalis/compiler/setup_optimizations.hpp"
 
+	#include "universalis/compiler/constexpr.hpp"
 	#include "universalis/compiler/restrict.hpp"
 	#include "universalis/compiler/pragma.hpp"
 	#include "universalis/compiler/attribute.hpp"
