@@ -2,7 +2,7 @@
 // copyright 2004-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 ///\file
-/// the restrict keyword has been introduced in the iso 1999 standard.
+/// the restrict keyword has been introduced in the ISO C 1999 standard.
 /// it is a hint for the compiler telling it several references or pointers will *always* holds different memory addresses.
 /// hence it can optimize more, knowing that writting to memory via one reference cannot alias another.
 /// example:
