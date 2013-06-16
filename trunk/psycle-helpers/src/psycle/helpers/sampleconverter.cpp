@@ -14,7 +14,7 @@ namespace psycle
 			return static_cast<uint8_t>((static_cast<uint32_t>(val) + 2147483648U) >> 24);
 		}
 		uint8_t floattouint8(float val, double multi) {
-			return math::lrint<uint8_t,float>(std::floor(val*multi));
+			return math::rint<uint8_t,float>(std::floor(val*multi));
 		}
 		int16_t uint8toint16(uint8_t val) {
 			return static_cast<int16_t>((static_cast<int16_t>(val) << 8) - 32768);
@@ -26,7 +26,7 @@ namespace psycle
 			return static_cast<int16_t>(val >> 16);
 		}
 		int16_t floattoint16(float val, double multi) {
-			return math::lrint<uint16_t,float>(std::floor(val*multi));
+			return math::rint<uint16_t,float>(std::floor(val*multi));
 		}
 		int32_t uint8toint24(uint8_t val) {
 			return (static_cast<int32_t>(val) << 16) - 8388608;
@@ -38,7 +38,7 @@ namespace psycle
 			return val >> 8;
 		}
 		int32_t floattoint24(float val, double multi) {
-			return math::lrint<uint32_t,float>(std::floor(val*multi));
+			return math::rint<uint32_t,float>(std::floor(val*multi));
 		}
 		int32_t uint8toint32(uint8_t val) {
 			return (static_cast<int32_t>(val) << 24) - 2147483648;
@@ -50,7 +50,7 @@ namespace psycle
 			return val << 8;
 		}
 		int32_t floattoint32(float val, double multi) {
-			return math::lrint<uint32_t,float>(std::floor(val*multi));
+			return math::rint<uint32_t,float>(std::floor(val*multi));
 		}
 		float uint8tofloat(uint8_t val, double multi) {
 			return val*multi-1.f;

@@ -8,26 +8,24 @@ namespace psycle { namespace helpers {
 	const IffChunkId RiffWave::fmt = {'f','m','t',' '};
 	const IffChunkId RiffWave::data = {'d','a','t','a'};
 
-	template<typename long_type, typename short_type>
-	RiffWaveFmtChunk<long_type, short_type>::RiffWaveFmtChunk(const WaveFormat_Data& config)
-	{
-		this->ulength.changeValue(16);
-		wFormatTag.changeValue(config.isfloat ? FORMAT_FLOAT : FORMAT_PCM);
-		wChannels.changeValue(config.nChannels);
-		dwSamplesPerSec.changeValue(config.nSamplesPerSec);
-		wBitsPerSample.changeValue(config.nBitsPerSample);
-		dwAvgBytesPerSec.changeValue(config.nChannels * config.nSamplesPerSec * config.nBitsPerSample / 8);
-		wBlockAlign.changeValue(static_cast<uint16_t>(config.nChannels * config.nBitsPerSample / 8));
+
+	// TODO No idea how to do this in a nicer way with the gnu toolchain
+	namespace {
+		UNIVERSALIS__COMPILER__CONSTEXPR uint16_t FORMAT_PCM = 1;
+		UNIVERSALIS__COMPILER__CONSTEXPR uint16_t FORMAT_FLOAT = 3;
+		UNIVERSALIS__COMPILER__CONSTEXPR uint16_t FORMAT_EXTENSIBLE = 0xFFFEU;
 	}
+	template class RiffWaveFmtChunk<LongBE, ShortBE>;
+	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_PCM = FORMAT_PCM;
+	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_FLOAT = FORMAT_FLOAT;
+	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
+	template class RiffWaveFmtChunk<LongLE, ShortLE>;
+	template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_PCM = FORMAT_PCM;
+	template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_FLOAT = FORMAT_FLOAT;
+	template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
 
-	template<typename long_type, typename short_type>
-	void WaveFormat_Data::Config(const RiffWaveFmtChunk<long_type,short_type>& chunk) {
-		Config(chunk.dwSamplesPerSec.unsignedValue(),chunk.wBitsPerSample.unsignedValue(),
-			chunk.wChannels.unsignedValue(),chunk.wFormatTag.unsignedValue() == RiffWaveFmtChunk<long_type,short_type>::FORMAT_FLOAT);
-	}
+	//////////////////////////////////////////////
 
-
-//////////////////////////////////////////////
 	RiffWave::RiffWave() : ds64_pos(0),pcmdata_pos(0),numsamples(0) {
 	}
 
