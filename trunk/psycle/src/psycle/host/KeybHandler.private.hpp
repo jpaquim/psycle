@@ -1179,7 +1179,7 @@ namespace psycle { namespace host {
 			
 			if ( blockSelected )
 			{
-				TRACE("%i,%i",blockSel.end.line,blockSel.start.line);
+				TRACE("%i,%i\n",blockSel.end.line,blockSel.start.line);
 				if(blockSel.end.line<blockSel.start.line)
 				{
 					int tmp = blockSel.start.line;
@@ -1188,7 +1188,7 @@ namespace psycle { namespace host {
 		//			blockSel.end.line=blockSel.start.line;
 				}
 				
-				TRACE("%i,%i",blockSel.end.track,blockSel.start.track);
+				TRACE("%i,%i\n",blockSel.end.track,blockSel.start.track);
 				if(blockSel.end.track<blockSel.start.track)
 				{
 					int tmp = blockSel.start.track;

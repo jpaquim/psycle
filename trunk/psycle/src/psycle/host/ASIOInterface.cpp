@@ -202,7 +202,7 @@ namespace psycle
 					if (ASIOInit(&driverInfo) == ASE_OK)
 					{
 						DriverEnum driver(szNameBuf[i]);
-						TRACE(szNameBuf[i]);
+						TRACE("%s\n",szNameBuf[i]);
 						long in,out;
 						if(ASIOGetChannels(&in,&out) == ASE_OK)
 						{

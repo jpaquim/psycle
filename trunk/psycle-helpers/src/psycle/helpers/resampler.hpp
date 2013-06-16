@@ -150,21 +150,21 @@ using namespace universalis::stdlib;
 
 		private:
 			//table of linear interpolation
-			static float l_table_[CUBIC_RESOLUTION];
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float l_table_[CUBIC_RESOLUTION]);
 
 			//tables of cubic interpolation
-			static float cubic_table_[CUBIC_RESOLUTION*4];
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float cubic_table_[CUBIC_RESOLUTION*4]);
 
 			/// Table of the windowed sinc function. 
 			//If using the optimized path, it is reordered for better performance.
-			static float sinc_table_[SINC_TABLESIZE];
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_table_[SINC_TABLESIZE]);
 #if USE_SINC_DELTA
 			/// Table of the deltas between sinc values.
 			/// used to improve sinc when the sinc_table is small
-			static float sinc_delta_[SINC_TABLESIZE];
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_delta_[SINC_TABLESIZE]);
 #endif
 			//Table to use in the filter-aware sinc resampling.
-			static float sinc_pre_table_[SINC_TABLESIZE];
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_pre_table_[SINC_TABLESIZE]);
 			static bool initialized;
 	};
 

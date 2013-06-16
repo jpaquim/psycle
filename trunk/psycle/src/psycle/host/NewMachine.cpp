@@ -197,7 +197,7 @@ namespace psycle { namespace host {
 			{
 				hNodes[0] = m_browser.InsertItem("Sound generators (Instruments)",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Sound Effects (DSP)",1,1,TVI_ROOT,TVI_LAST);
-				hNodes[2] = m_browser.InsertItem("Non-working or not a machine",6,6,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("Non-working or not a machine",8,8,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[1];
 				//nodeindex=2;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
