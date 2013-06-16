@@ -729,7 +729,7 @@ namespace psycle
 						int l;
 						for(l = 1 ; l < lines; ++l)
 						{
-							std::memcpy(toffset + l * MULTIPLY, toffset + helpers::math::lround<int,float>(l * step) * MULTIPLY,EVENT_SIZE);
+							std::memcpy(toffset + l * MULTIPLY, toffset + helpers::math::round<int,float>(l * step) * MULTIPLY,EVENT_SIZE);
 						}
 						while(l < patternLines[pattern])
 						{
@@ -749,8 +749,8 @@ namespace psycle
 						toffset=_ptrack(pattern,t);
 						for(int l=nl-1;l>0;l--)
 						{
-							std::memcpy(toffset + helpers::math::lround<int,float>(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
-							int tz(helpers::math::lround<int,float>(l * step) - 1);
+							std::memcpy(toffset + helpers::math::round<int,float>(l * step) * MULTIPLY, toffset + l * MULTIPLY,EVENT_SIZE);
+							int tz(helpers::math::round<int,float>(l * step) - 1);
 							while (tz > (l - 1) * step)
 							{
 								std::memcpy(toffset + tz * MULTIPLY, &blank, EVENT_SIZE);
@@ -1252,7 +1252,7 @@ namespace psycle
 				Reset(); //added by sampler mainly to reset current pattern showed.
 				while(pFile->Read(&Header, 4) && chunkcount)
 				{
-					progress.m_Progress.SetPos(helpers::math::lround<int,float>((pFile->GetPos()*16384.0f)/filesize));
+					progress.m_Progress.SetPos(helpers::math::round<int,float>((pFile->GetPos()*16384.0f)/filesize));
 					::Sleep(1); ///< Allow screen refresh.
 					// we should use the size to update the index, but for now we will skip it
 					if(std::strcmp(Header,"INFO") == 0)

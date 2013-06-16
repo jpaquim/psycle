@@ -233,13 +233,13 @@ void XMInstrument::WaveData::Amplify(int ampStart, int ampEnd, float vol)
 
 	if (m_WaveStereo) {
 		for(int i(ampStart);i<ampEnd;++i) {
-			m_pWaveDataL[i] = math::clipped_lrint<int16_t>(m_pWaveDataL[i] * vol);
-			m_pWaveDataR[i] = math::clipped_lrint<int16_t>(m_pWaveDataR[i] * vol);
+			m_pWaveDataL[i] = math::rint_clip<int16_t>(m_pWaveDataL[i] * vol);
+			m_pWaveDataR[i] = math::rint_clip<int16_t>(m_pWaveDataR[i] * vol);
 		}
 	}
 	else { 
 		for(int i(ampStart);i<ampEnd;++i) {
-			m_pWaveDataL[i] = math::clipped_lrint<int16_t>(m_pWaveDataL[i] * vol);
+			m_pWaveDataL[i] = math::rint_clip<int16_t>(m_pWaveDataL[i] * vol);
 		}
 	}
 }

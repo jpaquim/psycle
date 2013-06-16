@@ -801,7 +801,7 @@ Exit:
 										{	
 											int minval, maxval;
 											Global::song()._pMachine[busMachine]->GetParamRange(inst, minval, maxval);
-											int value = minval + helpers::math::lround<int, float>( data2 * (maxval-minval) / 127.f);
+											int value = minval + helpers::math::round<int, float>( data2 * (maxval-minval) / 127.f);
 											cmd = value / 256;
 											parameter = value % 256;
 										}

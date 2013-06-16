@@ -15,7 +15,7 @@
 namespace psycle { namespace helpers { namespace math {
 
 /// optimised sine computation when dealing with constant phase increment.
-template<bool Clipped>
+template<bool Clip>
 class sinseq {
 	public:
 		/// use 64-bit floating point numbers or else accuracy is not sufficient
@@ -36,7 +36,7 @@ class sinseq {
 		real operator()() {
 			int const swapped_index(index_ ^ 1);
 			real sin;
-			if(Clipped) sin = clipped<real>(-1, sequence_[index_] * step_ - sequence_[swapped_index], +1);
+			if(Clip) sin = clip(real(-1), sequence_[index_] * step_ - sequence_[swapped_index], real(+1));
 			else sin = sequence_[index_] * step_ - sequence_[swapped_index];
 			index_ = swapped_index;
 			return sequence_[swapped_index] = sin;
@@ -50,10 +50,10 @@ class sinseq {
 /******************************************************************************************/
 #ifdef BOOST_AUTO_TEST_CASE
 	namespace test {
-		template<bool Clipped>
+		template<bool Clip>
 		void sinseq_test_template() {
-			typedef typename sinseq<Clipped>::real real;
-			sinseq<Clipped> sin;
+			typedef typename sinseq<Clip>::real real;
+			sinseq<Clip> sin;
 			{ // speed test
 				typedef universalis::os::clocks::hires_thread_or_fallback clock;
 				int const iterations(1000000);
@@ -70,7 +70,7 @@ class sinseq {
 				}
 				clock::time_point const t3(clock::now());
 				{
-					std::ostringstream s; s << "sinseq<Clipped = " << Clipped << ">: " << f1;
+					std::ostringstream s; s << "sinseq<Clip = " << Clip << ">: " << f1;
 					BOOST_MESSAGE(s.str());
 				}
 				{
@@ -99,10 +99,10 @@ class sinseq {
 				}
 				{
 					std::ostringstream s;
-					s << "sinseq<Clipped = " << Clipped << ">: min + 1: " << min + 1 << ", max - 1: " << max - 1;
+					s << "sinseq<Clip = " << Clip << ">: min + 1: " << min + 1 << ", max - 1: " << max - 1;
 					BOOST_MESSAGE(s.str());
 				}
-				if(Clipped) BOOST_CHECK(-1 <= min && max <= 1);
+				if(Clip) BOOST_CHECK(-1 <= min && max <= 1);
 			}
 		}
 		BOOST_AUTO_TEST_CASE(sinseq_test) {

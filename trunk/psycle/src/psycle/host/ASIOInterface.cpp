@@ -899,8 +899,8 @@ namespace psycle
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = clipped_lrint<int16_t>(*pBuf++);
-					*outr++ = clipped_lrint<int16_t>(*pBuf++);
+					*outl++ = rint_clip<int16_t>(*pBuf++);
+					*outr++ = rint_clip<int16_t>(*pBuf++);
 					}
 				}
 				break;
@@ -913,12 +913,12 @@ namespace psycle
 					int t;
 					char* pt = (char*)&t;
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
+					t = rint_clip<int, 24>((*pBuf++) * 256.0f);
 						*outl++ = pt[0];
 						*outl++ = pt[1];
 						*outl++ = pt[2];
 
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
+					t = rint_clip<int, 24>((*pBuf++) * 256.0f);
 						*outr++ = pt[0];
 						*outr++ = pt[1];
 						*outr++ = pt[2];
@@ -936,10 +936,10 @@ namespace psycle
 				int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
 				int const min(-max - 1);
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
-					*outr++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
-					//*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
-					//*outr++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
+					*outl++ = psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pBuf++) * 65536.0f, float(max)));
+					*outr++ = psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pBuf++) * 65536.0f, float(max)));
+					//*outl++ = rint_clip<int32_t>((*pBuf++) * 65536.0f);
+					//*outr++ = rint_clip<int32_t>((*pBuf++) * 65536.0f);
 					}
 				}
 				break;
@@ -976,8 +976,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = clipped_lrint<int32_t, 16>(*pBuf++);
-					*outr++ = clipped_lrint<int32_t, 16>(*pBuf++);
+					*outl++ = rint_clip<int32_t, 16>(*pBuf++);
+					*outr++ = rint_clip<int32_t, 16>(*pBuf++);
 					}
 				}
 				break;
@@ -988,8 +988,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
-					*outr++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
+					*outl++ = rint_clip<int32_t, 18>((*pBuf++) * 4.0f);
+					*outr++ = rint_clip<int32_t, 18>((*pBuf++) * 4.0f);
 					}
 				}
 				break;
@@ -1000,8 +1000,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
-					*outr++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
+					*outl++ = rint_clip<int32_t, 20>((*pBuf++) * 16.0f);
+					*outr++ = rint_clip<int32_t, 20>((*pBuf++) * 16.0f);
 					}
 				}
 				break;
@@ -1012,8 +1012,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
-					*outr++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
+					*outl++ = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
+					*outr++ = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
 					}
 				}
 				break;
@@ -1024,8 +1024,8 @@ namespace psycle
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
-					*outr++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
+					*outl++ = SwapShort(rint_clip<int16_t>(*pBuf++));
+					*outr++ = SwapShort(rint_clip<int16_t>(*pBuf++));
 					}
 				}
 				break;
@@ -1038,12 +1038,12 @@ namespace psycle
 					int t;
 					char* pt = (char*)&t;
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
+					t = rint_clip<int, 24>((*pBuf++) * 256.0f);
 						*outl++ = pt[2];
 						*outl++ = pt[1];
 						*outl++ = pt[0];
 
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
+					t = rint_clip<int, 24>((*pBuf++) * 256.0f);
 						*outr++ = pt[2];
 						*outr++ = pt[1];
 						*outr++ = pt[0];
@@ -1060,10 +1060,10 @@ namespace psycle
 					//See the LSB case above.
 					int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
 					int const min(-max - 1);
-					*outl++ = SwapLong(psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max))));
-					*outr++ = SwapLong(psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max))));
-					//*outl++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
-					//*outr++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
+					*outl++ = SwapLong(psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pBuf++) * 65536.0f, float(max))));
+					*outr++ = SwapLong(psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pBuf++) * 65536.0f, float(max))));
+					//*outl++ = SwapLong(rint_clip<int32_t>((*pBuf++) * 65536.0f));
+					//*outr++ = SwapLong(rint_clip<int32_t>((*pBuf++) * 65536.0f));
 					}
 				}
 				break;
@@ -1074,8 +1074,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
-					*outr++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
+					*outl++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
+					*outr++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
 					}
 				}
 				break;
@@ -1086,8 +1086,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
-					*outr++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
+					*outl++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
+					*outr++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
 					}
 				}
 				break;
@@ -1098,8 +1098,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
-					*outr++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
+					*outl++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
+					*outr++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
 					}
 				}
 				break;
@@ -1110,8 +1110,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
-					*outr++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
+					*outl++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
+					*outr++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
 					}
 				}
 				break;

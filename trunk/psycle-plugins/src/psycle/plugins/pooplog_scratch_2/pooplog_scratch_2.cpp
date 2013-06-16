@@ -60,7 +60,7 @@ using namespace psycle::helpers::math;
 
 #define FILTER_CALC_TIME				32
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-rint<int>(x))+(rint<int>(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
@@ -560,11 +560,11 @@ inline void mi::FilterTick()
 		speedlfophase += ((speedlfospeed-MAXSYNCMODES)*(speedlfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(speedlfophase);
-	Vals[e_paraSPEEDlfophase] = lrint<int>(speedlfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraSPEEDlfophase] = rint<int>(speedlfophase/(SAMPLE_LENGTH*2/65536.0f));
 
 	if (speedlfoamplitude)
 	{
-		float speedmod = (float(pspeedlfowave[lrint<int>(speedlfophase)])*speedlfoamplitude);
+		float speedmod = (float(pspeedlfowave[rint<int>(speedlfophase)])*speedlfoamplitude);
 		rdelta += (((ddelta*runbal)+(ddelta*runbal*speedmod) - rdelta)*rdrag);
 		ldelta += (((ddelta*lunbal)+(ddelta*lunbal*speedmod) - ldelta)*ldrag);
 	}
@@ -583,10 +583,10 @@ inline void mi::FilterTick()
 		mixlfophase += ((mixlfospeed-MAXSYNCMODES)*(mixlfospeed-MAXSYNCMODES))*(0.000030517f*44100.0f/song_freq);
 	}
 	WRAP_AROUND(mixlfophase);
-	Vals[e_paraMIXlfophase] = lrint<int>(mixlfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraMIXlfophase] = rint<int>(mixlfophase/(SAMPLE_LENGTH*2/65536.0f));
 	if (mixlfoamplitude)
 	{
-		wmix = Vals[e_paraMix]/256.0f+(float(pmixlfowave[lrint<int>(mixlfophase)])*mixlfoamplitude);
+		wmix = Vals[e_paraMix]/256.0f+(float(pmixlfowave[rint<int>(mixlfophase)])*mixlfoamplitude);
 		dmix = 1.0f-wmix;
 	}
 	else
@@ -610,7 +610,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 		if (pBufferL)
 		{
-			int i = lrint<int>(rlindex);
+			int i = rint<int>(rlindex);
 			if (i < (bufsize-1))
 			{
 				sol = (pBufferL[i]*(1.0f-(rlindex-i)))+(pBufferL[i+1]*(rlindex-i))+denormal;
@@ -623,7 +623,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (pBufferR)
 		{
-			int i = lrint<int>(rrindex);
+			int i = rint<int>(rrindex);
 			if (i < (bufsize-1))
 			{
 				sor = (pBufferR[i]*(1.0f-(rrindex-i)))+(pBufferR[i+1]*(rrindex-i))+denormal;

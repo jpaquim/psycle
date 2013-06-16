@@ -95,7 +95,7 @@ namespace psycle { namespace host {
 			{
 				delete[] params; params = new int[num];
 				numPars=num;
-				for(int x=0;x<num;x++) params[x]= helpers::math::lround<int,float>(parameters[x]*65535.0f);
+				for(int x=0;x<num;x++) params[x]= helpers::math::round<int,float>(parameters[x]*65535.0f);
 			}
 			else
 			{

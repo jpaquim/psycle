@@ -700,7 +700,7 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 					case PatternCmd::JUMP_TO_ORDER:
 						if ( pEntry->_parameter < song.playLength) {
 							if (pEntry->_parameter <= playPos && !allowLoop){
-								return lround<int>(songLength*1000.0f);
+								return round<int>(songLength*1000.0f);
 							}
 							patternJump=pEntry->_parameter;
 							lineJump=0;
@@ -714,13 +714,13 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 									patternJump=0;
 								}
 								else {
-									return lround<int>(songLength*1000.0f);
+									return round<int>(songLength*1000.0f);
 								}
 							}
 							else patternJump=playPos+1;
 						}
 						else if (patternJump == playPos && pEntry->_parameter <= playLine && !allowLoop) {
-							return lround<int>(songLength*1000.0f);
+							return round<int>(songLength*1000.0f);
 						}
 						//No need to check limits. That is done by the loop.
 						lineJump= pEntry->_parameter;
@@ -732,11 +732,11 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 			songLength += lineSeconds;
 			if ( seektime_ms > -1 && seektime <= songLength) {
 				Start(playPos,playLine);
-				return lround<int>(songLength*1000.0f);
+				return round<int>(songLength*1000.0f);
 			}
 			else if (seqPos >=0 && seqPos <= playPos &&
 				(patLine == -1 || patLine <= playLine)) {
-				return lround<int>(songLength*1000.0f);
+				return round<int>(songLength*1000.0f);
 			}
 			if ( resetLineSec ) { lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f)); resetLineSec = false; }
 			if ( patternJump!=-1 ) {
@@ -758,7 +758,7 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 			playPos++;
 		}
 	}
-	return lround<int>(songLength*1000.0f);
+	return round<int>(songLength*1000.0f);
 }
 
 void Player::thread_function(std::size_t thread_number) {

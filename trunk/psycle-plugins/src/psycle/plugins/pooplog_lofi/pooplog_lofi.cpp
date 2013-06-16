@@ -307,7 +307,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		// do bits
 		if (fabs(sl) < 16384)
 		{
-			i = abs(lrint<int>(sl*65536*2));
+			i = abs(rint<int>(sl*65536*2));
 		}
 		else
 		{
@@ -323,7 +323,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (fabs(sr) < 16384)
 		{
-			i = abs(lrint<int>(sr*65536*2));
+			i = abs(rint<int>(sr*65536*2));
 		}
 		else
 		{

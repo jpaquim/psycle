@@ -373,67 +373,67 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 				case MACH_VST:
 				case MACH_VSTFX:
 					{
-				#if defined DIVERSALIS__OS__MICROSOFT
-						char sError[128];
-						bool berror=false;
-						vst::plugin* pVstPlugin;
-						vst::plugin* pTempMac = static_cast<vst::plugin*>(factory.CreateMachine(InternalKeys::wrapperVst,i));
-						// The trick: We need to load the information from the file in order to know the "instance" number
-						// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
-						// the newly created plugin.
-						unsigned char program;
-						int instance;
-						pTempMac->PreLoadPsy2FileFormat(file,program,instance);
-						assert(instance < PSY2_MAX_PLUGINS);
-
-						MachineKey* key = new MachineKey(Hosts::VST,MachineKey::preprocessName(vstL[instance].dllName),0);
-						if( !vstL[instance].valid || !factory.getFinder().hasKey(*key))
-						{
-							berror=true;
-							sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
-						}
-						else try {
-							pMac[i] = factory.CreateMachine(*key,i);
-
-							if (pMac[i])
-							{
-								pVstPlugin = static_cast<vst::plugin*>(pMac[i]);
-								pVstPlugin->LoadFromMac(pTempMac, program, vstL[instance].numpars, vstL[instance].pars);
-							}
-						}
-						catch(...)
-						{
-							berror=true;
-							sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",key->dllName());
-						}
-						if (berror)
-						{
-							//MessageBox(NULL,sError, "Loading Error", MB_OK);
+						#ifndef DIVERSALIS__OS__MICROSOFT
+							#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+								#warning VST plugin is currently only implemented on Microsoft Windows operating system.
+							#endif
 							Dummy* dummy;
 							pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(InternalKeys::dummy,i));
-							dummy->CopyFrom(pTempMac);
-							delete pTempMac;
 							if (type == MACH_VST ) dummy->setGenerator(true);
 							else dummy->setGenerator(false);
-						}
-						delete key;
-				#else
-					#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning ################ Temporary hack for songs with VSTs ################
-					#endif
-					Dummy* dummy;
-					pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(InternalKeys::dummy,i));
-					if (type == MACH_VST ) dummy->setGenerator(true);
-					else dummy->setGenerator(false);
-					pMac[i]->LoadPsy2FileFormat(file);
-					bool old;
-					int instance;
-					file->Read(old); // old format
-					file->Read(instance); // ovst.instance
-					char mch;
-					file->Read(mch);
-					std::cout << "replaced VST with dummy: " << vstL[instance].dllName << std::endl;
-				#endif
+							pMac[i]->LoadPsy2FileFormat(file);
+							bool old;
+							int instance;
+							file->Read(old); // old format
+							file->Read(instance); // ovst.instance
+							char mch;
+							file->Read(mch);
+							std::cout << "replaced VST with dummy: " << vstL[instance].dllName << std::endl;
+						#else
+							char sError[128];
+							bool berror=false;
+							vst::plugin* pVstPlugin;
+							vst::plugin* pTempMac = static_cast<vst::plugin*>(factory.CreateMachine(InternalKeys::wrapperVst,i));
+							// The trick: We need to load the information from the file in order to know the "instance" number
+							// and be able to create a plugin from the corresponding dll. Later, we will set the loaded settings to
+							// the newly created plugin.
+							unsigned char program;
+							int instance;
+							pTempMac->PreLoadPsy2FileFormat(file,program,instance);
+							assert(instance < PSY2_MAX_PLUGINS);
+
+							MachineKey* key = new MachineKey(Hosts::VST,MachineKey::preprocessName(vstL[instance].dllName),0);
+							if( !vstL[instance].valid || !factory.getFinder().hasKey(*key))
+							{
+								berror=true;
+								sprintf(sError,"VST plug-in missing, or erroneous data in song file \"%s\"",vstL[instance].dllName);
+							}
+							else try {
+								pMac[i] = factory.CreateMachine(*key,i);
+
+								if (pMac[i])
+								{
+									pVstPlugin = static_cast<vst::plugin*>(pMac[i]);
+									pVstPlugin->LoadFromMac(pTempMac, program, vstL[instance].numpars, vstL[instance].pars);
+								}
+							}
+							catch(...)
+							{
+								berror=true;
+								sprintf(sError,"Missing or Corrupted VST plug-in \"%s\" - replacing with Dummy.",key->dllName());
+							}
+							if (berror)
+							{
+								//MessageBox(NULL,sError, "Loading Error", MB_OK);
+								Dummy* dummy;
+								pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(InternalKeys::dummy,i));
+								dummy->CopyFrom(pTempMac);
+								delete pTempMac;
+								if (type == MACH_VST ) dummy->setGenerator(true);
+								else dummy->setGenerator(false);
+							}
+							delete key;
+						#endif
 					}
 					break;
 				default: {

@@ -308,7 +308,7 @@ void Sampler::VoiceWork(int startSample, int numsamples, int voice )
 			if (pVoice->_filter.Type() < dsp::F_NONE)
 			{
 				TickFilterEnvelope( voice );
-				int newcutoff = pVoice->_cutoff + lround<int>(pVoice->_filterEnv._value*pVoice->_coModify);
+				int newcutoff = pVoice->_cutoff + round<int>(pVoice->_filterEnv._value*pVoice->_coModify);
 				if (newcutoff < 0) { newcutoff = 0; }
 				else if (newcutoff > 127) { newcutoff = 127; }
 				pVoice->_filter.Cutoff(newcutoff);

@@ -352,7 +352,7 @@ void XMSampler::Voice::RecreateResampleData(helpers::dsp::resampler& resampler)
 {
 	if (IsPlaying()) {
         resampler_data = resampler.GetResamplerData();
-        resampler.UpdateSpeed(resampler_data,static_cast<double>(rWave.Speed())/4294967296.0);
+        resampler.UpdateSpeed(resampler_data,static_cast<double>(m_WaveDataController.Speed())/4294967296.0);
 	}
 }
 

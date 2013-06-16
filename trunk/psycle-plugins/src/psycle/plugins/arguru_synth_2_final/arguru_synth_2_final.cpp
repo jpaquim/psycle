@@ -657,7 +657,7 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 //the OSC speed.
 void mi::InitWaveTableSR(bool delArray) {
 	//Ensure the value is even, we need to divide it by two.
-	const uint32_t amount = lround<uint32_t>((float)currentSR / 13.75f) & 0xFFFFFFFE;
+	const uint32_t amount = round<uint32_t>((float)currentSR / 13.75f) & 0xFFFFFFFE;
 	const uint32_t half = amount >> 1;
 	const uint32_t thirtytwo = amount*32/2048;
 
@@ -675,7 +675,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	}
 	for(uint32_t c=0;c<half;c++) {
 		double sval=(double)c*sinFraction;
-		WaveTable[0][c]=math::lrint<short int,double>(sin(sval)*16384.0);
+		WaveTable[0][c]=math::rint<short int,double>(sin(sval)*16384.0);
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=-16384;
 		WaveTable[3][c]=(c*increase2)-16384;
@@ -683,7 +683,7 @@ void mi::InitWaveTableSR(bool delArray) {
 	}
 	for(uint32_t c=half;c<amount;c++) {
 		double sval=(double)c*sinFraction;
-		WaveTable[0][c]=math::lrint<short int,double>(sin(sval)*16384.0);
+		WaveTable[0][c]=math::rint<short int,double>(sin(sval)*16384.0);
 		WaveTable[1][c]=(c*increase)-16384;
 		WaveTable[2][c]=16384;
 		WaveTable[3][c]=16384-((c-half)*increase2);

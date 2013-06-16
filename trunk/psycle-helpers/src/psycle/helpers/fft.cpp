@@ -604,7 +604,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			float afloat = fftLog[h];
 			if (afloat +1.0f > fftLog[h+1]) {
 				j = resampler.work_float(calculatedfftIn,afloat,outputSize, NULL);
-				a = math::lround<int,float>(afloat);
+				a = math::round<int,float>(afloat);
 			}
 			else {
 				j = calculatedfftIn[a];

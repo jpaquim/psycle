@@ -5,14 +5,15 @@
 
 #include "./303/303_voice.h"
 #include "./lib/chorus.h"
+#include <psycle/plugin_interface.hpp>
+#include <psycle/helpers/math/clip.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <vector>
-#include <psycle/plugin_interface.hpp>
-#include <psycle/helpers/math/clip.hpp>
 
 using namespace psycle::plugin_interface;
+using namespace universalis::stdlib;
 
 CMachineParameter const paraCoarse = {"Coarse", "Coarse", -24, 24, MPF_STATE, 0};
 CMachineParameter const paraFine = {"Fine", "Fine", -100, 100, MPF_STATE, 0};
@@ -254,8 +255,8 @@ void mi::Command()
 // Work... where all is cooked 
 void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tracks)
 {
-	double const range=0.0000152587890625; // change range from 32bits to 16bits.
-	float const dist=(float)Vals[5]*0.005f;
+	double const range = 0.0000152587890625; // change range from 32bits to 16bits (TODO ?)
+	float const dist = (float) Vals[5] * 0.005f;
 	for(int c=0;c<tracks;c++)
 	{
 		TB303_Voice *ptrack=&track[c];
@@ -265,18 +266,18 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples,int tra
 		}
 	}
 	if(Vals[5]>0) {
-		float *xpsamplesleft=psamplesleft;
-		float *xpsamplesright=psamplesright;
+		float *xpsamplesleft = psamplesleft;
+		float *xpsamplesright = psamplesright;
 		--xpsamplesleft;
 		--xpsamplesright;
-		for(int k=0;k<numsamples;k++)
+		for(int k = 0; k < numsamples; ++k)
 		{
 			const float fl = *++xpsamplesleft;
-			const double il = fl*dist;
-			*xpsamplesleft=psycle::helpers::math::f2iclip16(fl-range*(il*il-il*il*il));
+			const double il = fl * dist;
+			*xpsamplesleft = psycle::helpers::math::clip<16>(fl - range * (il * il - il * il * il));
 			const float fr = *++xpsamplesright;
-			const double ir = fr*dist;
-			*xpsamplesright=psycle::helpers::math::f2iclip16(fr-range*(ir*ir-ir*ir*ir));
+			const double ir = fr * dist;
+			*xpsamplesright = psycle::helpers::math::clip<16>(fr - range * (ir * ir - ir * ir * ir));
 		}
 	}
 

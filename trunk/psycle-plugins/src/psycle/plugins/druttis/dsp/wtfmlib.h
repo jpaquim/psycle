@@ -40,12 +40,12 @@ inline void AnimateAFloat(afloat& p) {
 
 /// Get wavetable sample
 inline float GetWTSample(float *wavetable, float phase) {
-	return wavetable[lrint<int>(phase) & WAVEMASK];
+	return wavetable[rint<int>(phase) & WAVEMASK];
 }
 
 /// Get wavetable sample with linear interpolation
 inline float GetWTSampleLinear(float *wavetable, float phase) {
-	int const pos = lrint<int>(phase);
+	int const pos = rint<int>(phase);
 	float const fraction = phase - (float) pos;
 	float const out = wavetable[pos & WAVEMASK];
 	return out + fraction * (wavetable[(pos + 1) & WAVEMASK] - out);

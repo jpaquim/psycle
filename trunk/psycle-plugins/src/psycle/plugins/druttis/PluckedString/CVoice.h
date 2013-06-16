@@ -153,7 +153,7 @@ inline void CVoice::VoiceTick()
 		}
 		vib_out *= globals->vib_amount * (float) sin(vib_phase * PI2);
 		vib_phase += globals->vib_speed;
-		vib_phase -= (float) psycle::helpers::math::lrint<int>(vib_phase);								// Mod! :)
+		vib_phase -= (float) psycle::helpers::math::rint<int>(vib_phase);								// Mod! :)
 		float loopFilterDelay = 0.5f;
 		float freq = currentFreq + vib_out * currentFreq;
 		float length = (globals->srate / freq);

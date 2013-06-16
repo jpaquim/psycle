@@ -8,7 +8,7 @@
 
 namespace psycle { namespace audiodrivers {
 
-using helpers::math::clipped_lrint;
+using namespace helpers::math;
 
 // note: asio drivers will tell us their preferred settings with : ASIOGetBufferSize
 #define ALLOW_NON_ASIO
@@ -402,6 +402,7 @@ void ASIOInterface::ControlPanel(int driverID) {
 	}
 }
 
+#warning big-endianess assumed or is this portable ?
 #define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
 #define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
 
@@ -663,8 +664,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = clipped_lrint<int16_t>(*pBuf++);
-					*outr++ = clipped_lrint<int16_t>(*pBuf++);
+					*outl++ = rint_clip<int16_t>(*pBuf++);
+					*outr++ = rint_clip<int16_t>(*pBuf++);
 				}
 			}
 			break;
@@ -674,18 +675,23 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				char* outr;
 				outl = (char*)ASIObuffers[counter].pleft[index];
 				outr = (char*)ASIObuffers[counter].pright[index];
-				int t;
-				char* pt = (char*)&t;
+				// TODO packed 24-bit integers ... ouch! Does anyone use this?
+				union u {
+					int32_t i;
+					char c[3];
+				} t;
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
-					*outl++ = pt[0];
-					*outl++ = pt[1];
-					*outl++ = pt[2];
+					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
+					#warning big-endianess assumed ?
+					*outl++ = t.c[0];
+					*outl++ = t.c[1];
+					*outl++ = t.c[2];
 
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
-					*outr++ = pt[0];
-					*outr++ = pt[1];
-					*outr++ = pt[2];
+					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
+					#warning big-endianess assumed ?
+					*outr++ = t.c[0];
+					*outr++ = t.c[1];
+					*outr++ = t.c[2];
 				}
 			}
 
@@ -696,14 +702,14 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				int32_t* outr;
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
+				// TODO Don't really know why, but the -100 is what made the clipping work correctly.
+				float UNIVERSALIS__COMPILER__CONSTEXPR max = float((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+				float UNIVERSALIS__COMPILER__CONSTEXPR min = float(-max - 1);
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					// Don't really know why, but the -100 is what made the clipping work correctly.
-					int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
-					int const min(-max - 1);
-					*outl++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
-					*outr++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pBuf++) * 65536.0f, float(max)));
-					//*outl++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
-					//*outr++ = clipped_lrint<int32_t>((*pBuf++) * 65536.0f);
+					*outl++ = rint<int32_t>(clip(min, (*pBuf++) * 65536.0f, max));
+					*outr++ = rint<int32_t>(clip(min, (*pBuf++) * 65536.0f, max));
+					//*outl++ = rint_clip<int32_t>((*pBuf++) * 65536.0f);
+					//*outr++ = rint_clip<int32_t>((*pBuf++) * 65536.0f);
 				}
 			}
 			break;
@@ -740,8 +746,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = clipped_lrint<int32_t, 16>(*pBuf++);
-					*outr++ = clipped_lrint<int32_t, 16>(*pBuf++);
+					*outl++ = rint_clip<int32_t, 16>(*pBuf++);
+					*outr++ = rint_clip<int32_t, 16>(*pBuf++);
 				}
 			}
 			break;
@@ -752,8 +758,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
-					*outr++ = clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f);
+					*outl++ = rint_clip<int32_t, 18>((*pBuf++) * 4.0f);
+					*outr++ = rint_clip<int32_t, 18>((*pBuf++) * 4.0f);
 				}
 			}
 			break;
@@ -764,8 +770,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
-					*outr++ = clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f);
+					*outl++ = rint_clip<int32_t, 20>((*pBuf++) * 16.0f);
+					*outr++ = rint_clip<int32_t, 20>((*pBuf++) * 16.0f);
 				}
 			}
 			break;
@@ -776,8 +782,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
-					*outr++ = clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f);
+					*outl++ = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
+					*outr++ = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
 				}
 			}
 			break;
@@ -788,8 +794,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int16_t*)ASIObuffers[counter].pleft[index];
 				outr = (int16_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; i++) {
-					*outl++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
-					*outr++ = SwapShort(clipped_lrint<int16_t>(*pBuf++));
+					*outl++ = SwapShort(rint_clip<int16_t>(*pBuf++));
+					*outr++ = SwapShort(rint_clip<int16_t>(*pBuf++));
 				}
 			}
 			break;
@@ -799,18 +805,23 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				char* outr;
 				outl = (char*)ASIObuffers[counter].pleft[index];
 				outr = (char*)ASIObuffers[counter].pright[index];
-				int t;
-				char* pt = (char*)&t;
+				// TODO packed 24-bit integers ... ouch! Does anyone use this?
+				union u {
+					int32_t i;
+					char c[3];
+				} t;
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
-					*outl++ = pt[2];
-					*outl++ = pt[1];
-					*outl++ = pt[0];
+					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
+					#warning big-endianess assumed ?
+					*outl++ = t.c[2];
+					*outl++ = t.c[1];
+					*outl++ = t.c[0];
 
-					t = clipped_lrint<int, 24>((*pBuf++) * 256.0f);
-					*outr++ = pt[2];
-					*outr++ = pt[1];
-					*outr++ = pt[0];
+					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
+					#warning big-endianess assumed ?
+					*outr++ = t.c[2];
+					*outr++ = t.c[1];
+					*outr++ = t.c[0];
 				}
 			}
 			break;
@@ -821,8 +832,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
-					*outr++ = SwapLong(clipped_lrint<int32_t>((*pBuf++) * 65536.0f));
+					*outl++ = SwapLong(rint_clip<int32_t>((*pBuf++) * 65536.0f));
+					*outr++ = SwapLong(rint_clip<int32_t>((*pBuf++) * 65536.0f));
 				}
 			}
 			break;
@@ -833,8 +844,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
-					*outr++ = SwapLong( (clipped_lrint<int32_t, 16>(*pBuf++)) );
+					*outl++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
+					*outr++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
 				}
 			}
 			break;
@@ -845,8 +856,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
-					*outr++ = SwapLong((clipped_lrint<int32_t, 18>((*pBuf++) * 4.0f)));
+					*outl++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
+					*outr++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
 				}
 			}
 			break;
@@ -857,8 +868,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
-					*outr++ = SwapLong((clipped_lrint<int32_t, 20>((*pBuf++) * 16.0f)));
+					*outl++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
+					*outr++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
 				}
 			}
 			break;
@@ -869,18 +880,18 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
-					*outr++ = SwapLong((clipped_lrint<int32_t, 24>((*pBuf++) * 256.0f)));
+					*outl++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
+					*outr++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
 				}
 			}
 			break;
 		case ASIOSTFloat32MSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
-			memset (ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 4);
-			memset (ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 4);
+			std::memset(ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 4);
+			sdt::memset(ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 4);
 			break;
 		case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
-			memset (ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 8);
-			memset (ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 8);
+			std::memset(ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 8);
+			std::memset(ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 8);
 			break;
 	}
 	// finally if the driver supports the ASIOOutputReady() optimization, do it here, all data are in place

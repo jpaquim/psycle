@@ -250,16 +250,16 @@ namespace psycle { namespace host {
 
 				if (nv < minval) {
 					nv = minval;
-					tweakbase = helpers::math::lround<int,float>(nv);
+					tweakbase = helpers::math::round<int,float>(nv);
 					sourcepoint=point.y;
 				}
 				if (nv > maxval) {
 					nv = maxval;
-					tweakbase = helpers::math::lround<int,float>(nv);
+					tweakbase = helpers::math::round<int,float>(nv);
 					sourcepoint=point.y;
 				}
 				visualtweakvalue = nv;
-				prevval=helpers::math::lround<int,float>(nv);
+				prevval=helpers::math::round<int,float>(nv);
 				_pMachine->SetParameter(tweakpar,prevval);
 				parentFrame->Automate(tweakpar, prevval, false);
 				Invalidate(false);

@@ -400,7 +400,7 @@ namespace psycle { namespace host {
 		bool CVstEffectWnd::SetParameterAutomated(long index, float value)
 		{
 			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
-			int newval= helpers::math::lround<int,float>(value * vst::Host::quantizationVal());
+			int newval= helpers::math::round<int,float>(value * vst::Host::quantizationVal());
 			if(index>= 0 || index < vstmachine().GetNumParams())
 			{
 				Automate(index, newval, false);

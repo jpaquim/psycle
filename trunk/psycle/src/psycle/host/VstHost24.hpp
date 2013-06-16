@@ -5,7 +5,6 @@
 #include "Global.hpp"
 #include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
-#include <psycle/helpers/math/lround.hpp>
 #include <cstring>
 /*
 *<@JosepMa> Psycle's seib-VstHost is a reimplementation of HermannSeib's vsthost composed of two classes:
@@ -213,7 +212,7 @@ namespace psycle
 					try
 					{
 						if(numparam < numParams())
-							return helpers::math::lround<int, float>(GetParameter(numparam) * Host::quantizationVal());
+							return helpers::math::round<int, float>(GetParameter(numparam) * Host::quantizationVal());
 					}catch(...){}
 					return 0;
 				}

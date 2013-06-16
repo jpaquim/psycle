@@ -108,8 +108,8 @@
     <ClInclude Include="src\psycle\helpers\math\erase_all_nans_infinities_and_denormals.hpp" />
     <ClInclude Include="src\psycle\helpers\math\erase_denormals.hpp" />
     <ClInclude Include="src\psycle\helpers\math\log.hpp" />
-    <ClInclude Include="src\psycle\helpers\math\lrint.hpp" />
-    <ClInclude Include="src\psycle\helpers\math\lround.hpp" />
+    <ClInclude Include="src\psycle\helpers\math\rint.hpp" />
+    <ClInclude Include="src\psycle\helpers\math\round.hpp" />
     <ClInclude Include="src\psycle\helpers\math\math.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sin.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sincos.hpp" />

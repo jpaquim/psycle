@@ -172,7 +172,7 @@
 			try
 			{
 				if(numparam < numParams())
-					return lround<int>(GetParameter(numparam) * CVSTHost::GetQuantization());
+					return round<int>(GetParameter(numparam) * CVSTHost::GetQuantization());
 			}catch(...){}
 			return 0;
 		}

@@ -1443,7 +1443,7 @@ namespace host{
 			return count2-1+36;
 		}
 		else {
-			int note = lround<int,double>(152.89760383681376337437517761588 /*48 + 12*log2(1.0/428.0)*/
+			int note = round<int,double>(152.89760383681376337437517761588 /*48 + 12*log2(1.0/428.0)*/
 				-log10(static_cast<double>(period)) * 39.863137138648348174443833153873) /*12/log10(2)*/;
 			return static_cast<unsigned char>(note);
 		}
