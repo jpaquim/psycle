@@ -8,7 +8,7 @@
 namespace psycle { namespace audiodrivers {
 
 namespace loggers = universalis::os::loggers;
-using namespace psycle::helpers::math;
+using namespace helpers::math;
 
 /// number of samples that the dummy driver reads at a time
 int const DUMMYDRIVERWORKFN_MAX_BUFFER_LENGTH = 8192;
@@ -124,25 +124,23 @@ double AudioDriver::frand() {
 	return static_cast<double>(stat) * (1.0 / 0x7fffffff);
 }
 
-using helpers::math::clipped_lrint;
-
-///\todo: all these methods assume a stereo signal. It's allright for now, but...
+///\TODO all these methods assume a stereo signal. It's alright for now, but...
 void AudioDriver::Quantize16WithDither(float const * pin, int16_t * piout, int c) {
 	do {
-		*piout++ = clipped_lrint<int16_t>(pin[0] + frand());
-		*piout++ = clipped_lrint<int16_t>(pin[1] + frand());
+		*piout++ = rint_clip<int16_t>(pin[0] + frand());
+		*piout++ = rint_clip<int16_t>(pin[1] + frand());
 		pin += 2;
 	} while(--c);
 }
 
 void AudioDriver::Quantize16(float const * pin, int16_t * piout, int c) {
-	clip16_lrint(pin, piout, c*2);
+	rint_clip_array(pin, piout, c * 2);
 }
 
 void AudioDriver::Quantize16AndDeinterlace(float const * pin, int16_t * poleft, int strideleft, int16_t * poright, int strideright, int c) {
 	do {
-		*poleft = clipped_lrint<int16_t>(pin[0]);
-		*poright = clipped_lrint<int16_t>(pin[1]);
+		*poleft = rint_clip<int16_t>(pin[0]);
+		*poright = rint_clip<int16_t>(pin[1]);
 		poleft += strideleft;
 		poright += strideright;
 		pin += 2;
@@ -159,56 +157,67 @@ void AudioDriver::DeQuantize16AndDeinterlace(int const * pin, float * poutleft, 
 
 void AudioDriver::Quantize24WithDither(float const * pin, int32_t * piout, int c) {
 	do {
-		*piout++ = clipped_lrint<int32_t, 24>(pin[0] + frand());
-		*piout++ = clipped_lrint<int32_t, 24>(pin[1] + frand());
+		*piout++ = rint_clip<int32_t, 24>(pin[0] + frand());
+		*piout++ = rint_clip<int32_t, 24>(pin[1] + frand());
 		pin += 2;
 	} while(--c);
 }
 
 void AudioDriver::Quantize24(float const * pin, int32_t * piout, int c) {
 	do {
-		*piout++ = clipped_lrint<int32_t, 24>(pin[0]);
-		*piout++ = clipped_lrint<int32_t, 24>(pin[1]);
+		*piout++ = rint_clip<int32_t, 24>(pin[0]);
+		*piout++ = rint_clip<int32_t, 24>(pin[1]);
 		pin += 2;
 	} while(--c);
 }
 
-///\todo: not verified. copied from ASIO implementation
+///\TODO not verified. copied from ASIO implementation
 void AudioDriver::Quantize24AndDeinterlace(float const * pin, int32_t * pileft, int32_t * piright, int c) {
 	char* outl = (char*)pileft;
 	char* outr = (char*)piright;
-	int t;
-	char* pt = (char*)&t;
+	// TODO packed 24-bit integers ... ouch! Does anyone use this?
+	union u {
+		int32_t i;
+		char c[3];
+	} t;
 	do {
-		t = clipped_lrint<int, 24>((*pin++) * 256.0f);
-		*outl++ = pt[0];
-		*outl++ = pt[1];
-		*outl++ = pt[2];
+		t.i = rint_clip<int32_t, 24>((*pin++) * 256.0f);
+		#warning big-endianess assumed ?
+		*outl++ = t.c[0];
+		*outl++ = t.c[1];
+		*outl++ = t.c[2];
 
-		t = clipped_lrint<int, 24>((*pin++) * 256.0f);
-		*outr++ = pt[0];
-		*outr++ = pt[1];
-		*outr++ = pt[2];
+		t.i = rint_clip<int32_t, 24>((*pin++) * 256.0f);
+		#warning big-endianess assumed ?
+		*outr++ = t.c[0];
+		*outr++ = t.c[1];
+		*outr++ = t.c[2];
 	} while(--c);
 }
-///\todo: not verified. copied from ASIO implementation
+
+///\TODO not verified. copied from ASIO implementation
 void AudioDriver::DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c) {
 	char* inl;
 	char* inr;
 	inl = (char*)poutleft;
 	inr = (char*)poutright;
-	int t;
-	char* pt = (char*)&t;
+	// TODO packed 24-bit integers ... ouch! Does anyone use this?
+	union u {
+		int32_t i;
+		char c[3];
+	} t;
 	do {
-		pt[0] = *inl++;
-		pt[1] = *inl++;
-		pt[2] = *inl++;
-		*(poutleft++) = t >> 8;
+		#warning big-endianess assumed ?
+		t.c[0] = *inl++;
+		t.c[1] = *inl++;
+		t.c[2] = *inl++;
+		*(poutleft++) = t.i >> 8;
 
-		pt[0] = *inr++;
-		pt[1] = *inr++;
-		pt[2] = *inr++;
-		*(poutright++) = t >> 8;
+		#warning big-endianess assumed ?
+		t.c[0] = *inr++;
+		t.c[1] = *inr++;
+		t.c[2] = *inr++;
+		*(poutright++) = t.i >> 8;
 
 	} while(--c);
 }

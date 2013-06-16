@@ -406,7 +406,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 
 		if (pBufferL)
 		{
-			int i = lrint<int>(rlindex);
+			int i = rint<int>(rlindex);
 			if (i < (bufsize-1))
 			{
 				sol = (pBufferL[i]*(1.0f-(rlindex-i)))+(pBufferL[i+1]*(rlindex-i))+denormal;
@@ -419,7 +419,7 @@ void mi::Work(float *psamplesleft, float *psamplesright , int numsamples, int tr
 		}
 		if (pBufferR)
 		{
-			int i = lrint<int>(rrindex);
+			int i = rint<int>(rrindex);
 			if (i < (bufsize-1))
 			{
 				sor = (pBufferR[i]*(1.0f-(rrindex-i)))+(pBufferR[i+1]*(rrindex-i))+denormal;

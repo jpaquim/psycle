@@ -202,5 +202,5 @@ int input_psycle::CalcSongLength(psycle::host::Song& pSong)
 		}
 	}
 	
-	return lround<int>(songLength*1000.0f);
+	return round<int>(songLength*1000.0f);
 }

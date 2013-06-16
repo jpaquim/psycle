@@ -5,7 +5,7 @@
 
 #ifndef DIVERSALIS__OS__MICROSOFT
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning ################# UNIMPLEMENTED #################
+		#warning VST plugin is currently only implemented on Microsoft Windows operating system.
 	#endif
 #else
 	#include "vstplugin.h"

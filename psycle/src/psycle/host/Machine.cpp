@@ -857,7 +857,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 
 			_volumeCounter = helpers::dsp::GetRMSVol(rms,pSamplesL,pSamplesR,numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(helpers::math::round<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > 0)
@@ -888,7 +888,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 #else
 			_volumeCounter = helpers::dsp::GetMaxVol(pSamplesL, pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(helpers::math::round<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;
@@ -1437,13 +1437,13 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = helpers::math::lround<int,float>((float)_outDry * 32767.0f / (*pSamples));
+						_outDry = helpers::math::round<int,float>((float)_outDry * 32767.0f / (*pSamples));
 						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesL = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = helpers::math::lround<int,float>((float)_outDry * -32767.0f / (*pSamples));
+						_outDry = helpers::math::round<int,float>((float)_outDry * -32767.0f / (*pSamples));
 						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesL = -32767.0f; 
 					}
@@ -1456,13 +1456,13 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					}
 					if(*pSamples > 32767.0f)
 					{
-						_outDry = helpers::math::lround<int,float>((float)_outDry * 32767.0f / (*pSamples));
+						_outDry = helpers::math::round<int,float>((float)_outDry * 32767.0f / (*pSamples));
 						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesR = 32767.0f; 
 					}
 					else if (*pSamples < -32767.0f)
 					{
-						_outDry = helpers::math::lround<int,float>((float)_outDry * -32767.0f / (*pSamples));
+						_outDry = helpers::math::round<int,float>((float)_outDry * -32767.0f / (*pSamples));
 						mv = helpers::value_mapper::map_256_1(_outDry);
 						*pSamples = *pSamplesR = -32767.0f; 
 					}
@@ -1517,7 +1517,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			float volumeLeft = rms.previousLeft*(1.f/GetAudioRange());
 			float volumeRight = rms.previousRight*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::lround<int,float>((50.0f * log10f(volumeLeft)+100.0f)));
+			int temp(helpers::math::round<int,float>((50.0f * log10f(volumeLeft)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > 0)
@@ -1526,7 +1526,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			}
 			else if (volumeDisplayLeft>1 ) volumeDisplayLeft -=2;
 			else {volumeDisplayLeft = 0;}
-			temp = helpers::math::lround<int,float>((50.0f * log10f(volumeRight)+100.0f));
+			temp = helpers::math::round<int,float>((50.0f * log10f(volumeRight)+100.0f));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > 0)
@@ -1539,7 +1539,7 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 #else
 			_volumeCounter = helpers::dsp::GetMaxVol(_pSamplesL, _pSamplesR, numSamples)*(1.f/GetAudioRange());
 			//Transpose scale from -40dbs...0dbs to 0 to 97pix. (actually 100px)
-			int temp(helpers::math::lround<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
+			int temp(helpers::math::round<int,float>((50.0f * log10f(_volumeCounter)+100.0f)));
 			// clip values
 			if(temp > 97) temp = 97;
 			if(temp > _volumeDisplay) _volumeDisplay = temp;

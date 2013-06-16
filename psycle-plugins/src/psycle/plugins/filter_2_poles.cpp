@@ -157,7 +157,7 @@ inline void Filter_2_Poles::update_coefficients(Real coefficients[poles + 1], co
 
 	const Real minimum(Real(1e-2));
 	const Real maximum(1 - minimum);
-	coefficients[0] = clipped(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
+	coefficients[0] = clip(minimum, static_cast<Real>(cutoff_sin_ + (*this)(modulation_amplitude) * std::sin(modulation_phase_ + modulation_stereo_dephase)), maximum);
 	coefficients[1] = 1 - coefficients[0];
 	coefficients[2] = (*this)(resonance) * (1 + 1 / coefficients[1]);
 	erase_all_nans_infinities_and_denormals(coefficients, poles + 1);

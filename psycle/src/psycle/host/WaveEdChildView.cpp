@@ -155,17 +155,17 @@ namespace psycle { namespace host {
 				oldbmp = memDC.SelectObject(bmpBuffer);
 				memDC.SetWindowOrg(invalidRect.left, invalidRect.top);
 				
-				int const nHeadHeight=helpers::math::lround<int,float>(rect.Height()*0.1f);
+				int const nHeadHeight=helpers::math::round<int,float>(rect.Height()*0.1f);
 				int const nWidth=rect.Width();
 				int const nHeight=rect.Height()-cyHScroll-nHeadHeight;
 
-				int const my =		helpers::math::lround<int,float>(nHeight*0.5f);
-				int const myHead =	helpers::math::lround<int,float>(nHeadHeight*0.5f);
+				int const my =		helpers::math::round<int,float>(nHeight*0.5f);
+				int const myHead =	helpers::math::round<int,float>(nHeadHeight*0.5f);
 
 				if(wdStereo)
 				{
-					wrHeight =		helpers::math::lround<int,float>(my*0.5f);
-					wrHeadHeight =	helpers::math::lround<int,float>(myHead*0.5f);
+					wrHeight =		helpers::math::round<int,float>(my*0.5f);
+					wrHeadHeight =	helpers::math::round<int,float>(myHead*0.5f);
 				}
 				else 
 				{
@@ -246,7 +246,7 @@ namespace psycle { namespace host {
 					memDC.SelectObject(&cpen_lo);
 					if ( wdLoopS >= diStart && wdLoopS < diStart+diLength)
 					{
-						int ls = helpers::math::lround<int,float>((wdLoopS-diStart)*dispRatio);
+						int ls = helpers::math::round<int,float>((wdLoopS-diStart)*dispRatio);
 						memDC.MoveTo(ls,nHeadHeight);
 						memDC.LineTo(ls,nHeight+nHeadHeight);
 						CSize textsize = memDC.GetTextExtent("Start");
@@ -254,7 +254,7 @@ namespace psycle { namespace host {
 					}
 					if ( wdLoopE >= diStart && wdLoopE < diStart+diLength)
 					{
-						int le = helpers::math::lround<int,float>((wdLoopE-diStart)*dispRatio);
+						int le = helpers::math::round<int,float>((wdLoopE-diStart)*dispRatio);
 						memDC.MoveTo(le,nHeadHeight);
 						memDC.LineTo(le,nHeight+nHeadHeight);
 						CSize textsize = memDC.GetTextExtent("End");
@@ -262,8 +262,8 @@ namespace psycle { namespace host {
 					}
 
 					//draw loop points in header
-					int ls = helpers::math::lround<int,float>(wdLoopS * headDispRatio);
-					int le = helpers::math::lround<int,float>(wdLoopE * headDispRatio);
+					int ls = helpers::math::round<int,float>(wdLoopS * headDispRatio);
+					int le = helpers::math::round<int,float>(wdLoopE * headDispRatio);
 
 					memDC.MoveTo(ls, 0);
 					memDC.LineTo(ls, nHeadHeight);
@@ -275,8 +275,8 @@ namespace psycle { namespace host {
 
 				//draw screen size on header
 				memDC.SelectObject(&cpen_white);
-				int screenx  = helpers::math::lround<int,float>( diStart           * headDispRatio);
-				int screenx2 = helpers::math::lround<int,float>((diStart+diLength) * headDispRatio);
+				int screenx  = helpers::math::round<int,float>( diStart           * headDispRatio);
+				int screenx2 = helpers::math::round<int,float>((diStart+diLength) * headDispRatio);
 				memDC.MoveTo(screenx, 0);
 				memDC.LineTo(screenx, nHeadHeight-1);
 				memDC.LineTo(screenx2,nHeadHeight-1);
@@ -289,12 +289,12 @@ namespace psycle { namespace host {
 
 				if(cursorBlink	&&	cursorPos >= diStart	&&	cursorPos <= diStart+diLength)
 				{
-					int cursorX = helpers::math::lround<int,float>((cursorPos-diStart)*dispRatio);
+					int cursorX = helpers::math::round<int,float>((cursorPos-diStart)*dispRatio);
 					memDC.MoveTo(cursorX, nHeadHeight);
 					memDC.LineTo(cursorX, nHeadHeight+nHeight);
 				}
 				if(_pSong->wavprev.IsEnabled()) {
-					int cursorX = helpers::math::lround<int,float>((_pSong->wavprev.GetPosition()-diStart)*dispRatio);
+					int cursorX = helpers::math::round<int,float>((_pSong->wavprev.GetPosition()-diStart)*dispRatio);
 					memDC.MoveTo(cursorX, nHeadHeight);
 					memDC.LineTo(cursorX, nHeadHeight+nHeight);
 				}
@@ -302,8 +302,8 @@ namespace psycle { namespace host {
 				selx =blStart;
 				selx2=blStart+blLength;
 
-				int HeadSelX = helpers::math::lround<int,float>(selx * headDispRatio);
-				int HeadSelX2= helpers::math::lround<int,float>(selx2* headDispRatio);
+				int HeadSelX = helpers::math::round<int,float>(selx * headDispRatio);
+				int HeadSelX2= helpers::math::round<int,float>(selx2* headDispRatio);
 				memDC.Rectangle(HeadSelX,0,		HeadSelX2,nHeadHeight);
 
 				if(selx<diStart) selx=diStart;
@@ -311,8 +311,8 @@ namespace psycle { namespace host {
 				//if the selected block is entirely off the screen, the above statements will flip the order
 				if(selx<selx2)					//if not, it will just clip the drawing
 				{
-					selx = helpers::math::lround<int,float>((selx -diStart)*dispRatio) ;
-					selx2= helpers::math::lround<int,float>((selx2-diStart)*dispRatio) ;
+					selx = helpers::math::round<int,float>((selx -diStart)*dispRatio) ;
+					selx2= helpers::math::round<int,float>((selx2-diStart)*dispRatio) ;
 					memDC.Rectangle(selx,nHeadHeight,selx2,nHeight+nHeadHeight);
 				}
 
@@ -596,7 +596,7 @@ namespace psycle { namespace host {
 				memDC.SelectObject( &blueBrush );
 				memDC.Rectangle(	rc.left+7,
 								rc.top+2,
-								rc.left+7+helpers::math::lround<int,float>( vol*(rc.right-rc.left-14) ),
+								rc.left+7+helpers::math::round<int,float>( vol*(rc.right-rc.left-14) ),
 								rc.bottom-2);
 				
 				memDC.SelectStockObject(BLACK_BRUSH);
@@ -922,24 +922,24 @@ namespace psycle { namespace host {
 					{
 						float dispRatio = nWidth/float(diLength);
 						if		( blSelection	&&
-								abs(x - helpers::math::lround<int,float>((blStart-diStart)			* dispRatio )) < 10 )	//mouse down on block start
+								abs(x - helpers::math::round<int,float>((blStart-diStart)			* dispRatio )) < 10 )	//mouse down on block start
 						{
 							SelStart = blStart+blLength;				//set SelStart to the end we're -not- moving
 							cursorPos=blStart;
 						}
 						else if ( blSelection	&&
-								abs(x - helpers::math::lround<int,float>((blStart+blLength-diStart)	* dispRatio )) < 10 )	//mouse down on block end
+								abs(x - helpers::math::round<int,float>((blStart+blLength-diStart)	* dispRatio )) < 10 )	//mouse down on block end
 						{
 							SelStart=blStart;							//set SelStart to the end we're -not- moving
 							cursorPos=blStart+blLength;
 						}
 						else if ( wdLoop		&&
-								abs(x - helpers::math::lround<int,float>((wdLoopS-diStart)			* dispRatio )) < 10 )	//mouse down on loop start
+								abs(x - helpers::math::round<int,float>((wdLoopS-diStart)			* dispRatio )) < 10 )	//mouse down on loop start
 						{
 							bDragLoopStart=true;
 						}
 						else if ( wdLoop		&&
-								abs(x - helpers::math::lround<int,float>((wdLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
+								abs(x - helpers::math::round<int,float>((wdLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
 						{
 							bDragLoopEnd=true;
 						}
@@ -958,12 +958,12 @@ namespace psycle { namespace host {
 					{
 						float headDispRatio = nWidth/float(wdLength);
 						if		( blSelection		&&
-								abs( x - helpers::math::lround<int,float>( blStart				* headDispRatio ) ) < 10 )	//mouse down on block start
+								abs( x - helpers::math::round<int,float>( blStart				* headDispRatio ) ) < 10 )	//mouse down on block start
 						{
 							SelStart = blStart+blLength;
 						}
 						else if ( blSelection		&&
-								abs( x - helpers::math::lround<int,float>((blStart+blLength)	* headDispRatio ) ) < 10 )	//mouse down on block end
+								abs( x - helpers::math::round<int,float>((blStart+blLength)	* headDispRatio ) ) < 10 )	//mouse down on block end
 						{
 							SelStart = blStart;
 						}
@@ -971,7 +971,7 @@ namespace psycle { namespace host {
 						{
 							blSelection=false;
 							
-							blStart = helpers::math::lround<int,float>(double((x*wdLength)/nWidth));
+							blStart = helpers::math::round<int,float>(double((x*wdLength)/nWidth));
 							blLength=0;
 							SelStart = blStart;
 
@@ -1010,7 +1010,7 @@ namespace psycle { namespace host {
 				{
 					float diRatio = (float) diLength/nWidth;
 					unsigned long newpos =  (x*diRatio+diStart > 0? x*diRatio+diStart: 0);
-					int headX = helpers::math::lround<int,float>((diStart+x*diRatio)*nWidth/float(wdLength));
+					int headX = helpers::math::round<int,float>((diStart+x*diRatio)*nWidth/float(wdLength));
 					if(bDragLoopStart)
 					{
 						if(newpos > wdLoopE)		wdLoopS = wdLoopE;
@@ -1080,7 +1080,7 @@ namespace psycle { namespace host {
 						blLength = SelStart-blStart;
 					}
 					//set invalid rects
-					int bodyX = helpers::math::lround<int,float>(double( (x*wdLength - diStart*nWidth)/diLength ));
+					int bodyX = helpers::math::round<int,float>(double( (x*wdLength - diStart*nWidth)/diLength ));
 					if(bodyX<0 || bodyX>nWidth)
 						invBody.SetRectEmpty();
 					else
@@ -1104,11 +1104,11 @@ namespace psycle { namespace host {
 				{
 					float dispRatio = nWidth/(float)diLength;
 					if	(		blSelection		&&
-							(	abs ( x - helpers::math::lround<int,float>((  blStart-diStart )			* dispRatio ))  < 10		||
-								abs ( x - helpers::math::lround<int,float>((  blStart+blLength-diStart)	* dispRatio ))  < 10	)	||
+							(	abs ( x - helpers::math::round<int,float>((  blStart-diStart )			* dispRatio ))  < 10		||
+								abs ( x - helpers::math::round<int,float>((  blStart+blLength-diStart)	* dispRatio ))  < 10	)	||
 							(	wdLoop &&
-							(	abs ( x - helpers::math::lround<int,float>((  wdLoopS-diStart )			* dispRatio ))  < 10		||
-								abs ( x - helpers::math::lround<int,float>((  wdLoopE-diStart )			* dispRatio ))  < 10) )
+							(	abs ( x - helpers::math::round<int,float>((  wdLoopS-diStart )			* dispRatio ))  < 10		||
+								abs ( x - helpers::math::round<int,float>((  wdLoopE-diStart )			* dispRatio ))  < 10) )
 						)
 						::SetCursor(hResizeLR);
 					else
@@ -1119,8 +1119,8 @@ namespace psycle { namespace host {
 					
 					float dispRatio = nWidth/(float)wdLength;
 					if (		blSelection		&&
-							(	abs ( x - helpers::math::lround<int,float>(   blStart			* dispRatio ))	< 10 ||
-								abs ( x - helpers::math::lround<int,float>((  blStart+blLength)	* dispRatio ))	< 10 )
+							(	abs ( x - helpers::math::round<int,float>(   blStart			* dispRatio ))	< 10 ||
+								abs ( x - helpers::math::round<int,float>((  blStart+blLength)	* dispRatio ))	< 10 )
 						)
 						::SetCursor(hResizeLR);
 					else
@@ -2348,7 +2348,7 @@ namespace psycle { namespace host {
 
 					float maxzoom = log10(float(wdLength/8.0f))/log10(zoomBase);	// wdLength/(b^n)>=8    <==>   n <= log<b>(wdLength/8)
 					// log<10>(x)/log<10>(b) == log<b>(x)
-					int slidermax = helpers::math::lround<int,float>(floor(maxzoom));
+					int slidermax = helpers::math::round<int,float>(floor(maxzoom));
 					if(slidermax<0) slidermax=0;			//possible for waves with less than 8 samples (!)
 					zoomSlider->SetRange(0, slidermax);
 				}
@@ -2358,7 +2358,7 @@ namespace psycle { namespace host {
 					//this is the same concept, except this is to give us some idea of where to draw the slider based on the existing zoom
 					//so, instead of wdLength/8 (the max zoom), we're doing wdLength/diLength (the current zoom)
 					float zoomfactor = log10(wdLength/(float)diLength)/log10(zoomBase);
-					int newpos = helpers::math::lround<int,float>(zoomfactor+0.5f);
+					int newpos = helpers::math::round<int,float>(zoomfactor+0.5f);
 					if(newpos<0)	newpos=0;		//i'm not sure how this would happen, but just in case
 					zoomSlider->SetPos(newpos);
 				}

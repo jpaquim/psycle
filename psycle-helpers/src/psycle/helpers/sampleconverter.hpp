@@ -1,6 +1,16 @@
 #pragma once
 #include <universalis.hpp>
 
+// ************************* FIXME ***************************
+// GCC emits warnings here due to inline functions lacking a definition in the header.
+// Probably MSVC doesn't show this.
+#ifdef DIVERSALIS__COMPILER__MICROSOFT
+	#define FIXME_inline inline
+#else
+	#define FIXME_inline
+#endif
+// ***********************************************************
+
 namespace psycle
 {
 	namespace helpers
@@ -11,10 +21,10 @@ namespace psycle
 		inline uint8_t int24touint8(int32_t);
 		inline uint8_t int32touint8(int32_t);
 		inline uint8_t floattouint8(float val, double multi=127.f); // 7bits
-		inline int16_t uint8toint16(uint8_t);
-		inline int16_t int24toint16(int32_t);
-		inline int16_t int32toint16(int32_t);
-		inline int16_t floattoint16(float val, double multi=32767.f); // 15bits
+		FIXME_inline int16_t uint8toint16(uint8_t);
+		FIXME_inline int16_t int24toint16(int32_t);
+		FIXME_inline int16_t int32toint16(int32_t);
+		FIXME_inline int16_t floattoint16(float val, double multi=32767.f); // 15bits
 		inline int32_t uint8toint24(uint8_t);
 		inline int32_t int16toint24(int16_t);
 		inline int32_t int32toint24(int32_t);
@@ -29,7 +39,7 @@ namespace psycle
 		inline float int32tofloat(int32_t val, double multi=0.0000000004656612873077392578125); // 1/2147483648
 
 		//unpack 4 int24 values (in 12bytes, out 16bytes).
-		inline void unpackint24(int32_t *in, int32_t *out);
+		FIXME_inline void unpackint24(int32_t *in, int32_t *out);
 		//pack 4 int24 values (in 16bytes, out 12bytes).
 		inline void packint24(int32_t *in, int32_t *out);
 

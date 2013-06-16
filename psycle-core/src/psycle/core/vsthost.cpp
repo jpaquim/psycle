@@ -4,7 +4,11 @@
 #include <psycle/core/detail/project.private.hpp>
 #include "vsthost.h"
 
-#if defined DIVERSALIS__OS__MICROSOFT
+#ifndef DIVERSALIS__OS__MICROSOFT
+	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
+		#warning VST host is currently only implemented on Microsoft Windows operating system.
+	#endif
+#else
 	#include <psycle/core/pluginfinder.h>
 	#include <psycle/core/vstplugin.h>
 	#include <psycle/core/playertimeinfo.h>

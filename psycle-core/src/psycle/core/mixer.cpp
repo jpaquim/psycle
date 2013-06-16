@@ -914,7 +914,7 @@ float Mixer::VuChan(Wire::id_type idx) const
 		float vol;
 		GetWireVolume(idx,vol);
 		vol*=Channel(idx).Volume();
-		int temp(lround<int>(50.0f * std::log10(vol)));
+		int temp(round<int>(50.0f * std::log10(vol)));
 		return (callbacks->song().machine(_inputMachines[idx])->_volumeDisplay+temp)/97.0f;
 	}
 	return 0.0f;
@@ -929,7 +929,7 @@ float Mixer::VuSend(Wire::id_type idx) const
 		float vol;
 		GetWireVolume(idx+MAX_CONNECTIONS,vol);
 		vol *= Return(idx).Volume();
-		int temp(lround<int>(50.0f * std::log10(vol)));
+		int temp(round<int>(50.0f * std::log10(vol)));
 		return (callbacks->song().machine(Return(idx).Wire().machine_)->_volumeDisplay+temp)/97.0f;
 	}
 	return 0.0f;

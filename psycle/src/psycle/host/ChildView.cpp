@@ -1605,7 +1605,7 @@ namespace psycle { namespace host {
 						
 						PatternEntry *entry = reinterpret_cast<PatternEntry*>(offset);
 						entry->_cmd = 0xff;
-						int val = helpers::math::lround<int,float>(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
+						int val = helpers::math::round<int,float>(((sinf(index)*var*st)+st)+dcoffs);//-0x20; // ***** proposed change to ffxx command to allow more useable range since the tempo bar only uses this range anyway...
 						if (val < 1)
 						{
 							val = 1;

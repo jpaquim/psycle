@@ -1615,7 +1615,7 @@ namespace psycle
 				float vol;
 				GetWireVolume(idx,vol);
 				vol*=Channel(idx).Volume();
-				int temp(lround<int>(50.0f * std::log10f(vol)));
+				int temp(round<int>(50.0f * std::log10f(vol)));
 				return (inWires[idx].GetSrcMachine()._volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;
@@ -1630,7 +1630,7 @@ namespace psycle
 				float vol;
 				GetWireVolume(idx+MAX_CONNECTIONS,vol);
 				vol *= Return(idx).Volume();
-				int temp(lround<int>(50.0f * std::log10(vol)));
+				int temp(round<int>(50.0f * std::log10(vol)));
 				return (Send(idx).GetDstMachine()._volumeDisplay+temp)/97.0f;
 			}
 			return 0.0f;

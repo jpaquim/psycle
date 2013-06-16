@@ -22,7 +22,7 @@
 
 #ifndef DIVERSALIS__OS__MICROSOFT
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning ################# VST HOST UNIMPLEMENTED ON NON-WINDOWS SYSTEMS #################
+		#warning VST host is currently only implemented on Microsoft Windows operating system.
 	#endif
 	namespace psycle { namespace core { namespace vst {
 		class host;

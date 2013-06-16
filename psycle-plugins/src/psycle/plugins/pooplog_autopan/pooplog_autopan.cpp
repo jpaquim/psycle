@@ -51,7 +51,7 @@ using namespace psycle::helpers::math;
 #define MAXENVTYPE 2
 #define MAX_RATE								8192
 #define MAXWAVE 17
-#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-lrint<int>(x))+(lrint<int>(x)&((SAMPLE_LENGTH*2)-1));
+#define WRAP_AROUND(x) if ((x < 0) || (x >= SAMPLE_LENGTH*2)) x = (x-rint<int>(x))+(rint<int>(x)&((SAMPLE_LENGTH*2)-1));
 #define PI 3.14159265358979323846
 
 float SyncAdd[MAXSYNCMODES+1];
@@ -232,14 +232,14 @@ inline void mi::FilterTick()
 		vcflfophase += ((vcflfospeed-MAXSYNCMODES)*(vcflfospeed-MAXSYNCMODES))*0.000030517f*44100.f/song_freq;
 	}
 	WRAP_AROUND(vcflfophase);
-	Vals[e_paraVCFlfophase] = lrint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
+	Vals[e_paraVCFlfophase] = rint<int>(vcflfophase/(SAMPLE_LENGTH*2/65536.0f));
 	// vcf
 	int newpan = pan;
 
 	if (panlfoamplitude)
 	{
 		oldpan = pan;
-		newpan += lrint<int>((pvcflfowave[lrint<int>(vcflfophase)])*(panlfoamplitude));
+		newpan += rint<int>((pvcflfowave[rint<int>(vcflfophase)])*(panlfoamplitude));
 
 		if (newpan < 0)
 		{
@@ -390,7 +390,7 @@ void mi::UpdateInertia()
 			}
 			else 
 			{
-				*pI->source = lrint<int>(pI->current);
+				*pI->source = rint<int>(pI->current);
 				pI = pI->next;
 			}
 		}

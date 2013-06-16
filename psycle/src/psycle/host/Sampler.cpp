@@ -714,7 +714,7 @@ namespace psycle
 					if (pVoice->_filter.Type() != dsp::F_NONE)
 					{
 						TickFilterEnvelope(voice);
-						int newcutoff = pVoice->_cutoff + helpers::math::lround<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
+						int newcutoff = pVoice->_cutoff + helpers::math::round<int, float>(pVoice->_filterEnv._value*pVoice->_coModify);
 						if (newcutoff < 0) {
 							newcutoff = 0;
 						}

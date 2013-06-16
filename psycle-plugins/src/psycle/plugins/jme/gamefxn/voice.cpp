@@ -262,7 +262,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<oversampleAmt; i++){
 						OSCPosition+=ROSCSpeed;
 						if(OSCPosition>=waveTableSize) OSCPosition-=waveTableSize;
-						pos = math::lrint<int32_t>(OSCPosition-0.5f);
+						pos = math::rint<int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos+cur_pw];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][pos+cur_pw+1] - sample) * (OSCPosition - (float)pos) + sample);
 					}
@@ -278,7 +278,7 @@ float CSynthTrack::GetSample()
 					for (int i = 0; i<oversampleAmt; i++){
 						OSCPosition+=ROSCSpeed;
 						if(OSCPosition>=waveTableSize) OSCPosition-=waveTableSize;
-						pos = math::lrint<int32_t>(OSCPosition-0.5f);
+						pos = math::rint<int32_t>(OSCPosition-0.5f);
 						sample=vpar->Wavetable[cur_waveform][pos];
 						output+=aaf1.process((vpar->Wavetable[cur_waveform][pos+1] - sample) * (OSCPosition - (float)pos) + sample);
 					}

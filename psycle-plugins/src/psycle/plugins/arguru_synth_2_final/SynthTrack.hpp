@@ -222,14 +222,14 @@ inline float CSynthTrack::GetSample()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol;
+				output=syntp->pWave[math::rint<int,float>(OSC1Position)]*OSC1Vol;
 			}
 			if ( syntp->wave2noise) {
 				//This assumes MAX_RAND is 0x7fff
 				output += (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output += syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
+				output += syntp->pWave2[math::rint<int,float>(OSC2Position)]*OSC2Vol;
 			}
 		}
 
@@ -287,7 +287,7 @@ inline float CSynthTrack::GetSampleOsc1()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-				output=syntp->pWave[math::lrint<int,float>(OSC1Position)]*OSC1Vol;
+				output=syntp->pWave[math::rint<int,float>(OSC1Position)]*OSC1Vol;
 			}
 		}
 
@@ -330,7 +330,7 @@ inline float CSynthTrack::GetSampleOsc2()
 				output = (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-				output = syntp->pWave2[math::lrint<int,float>(OSC2Position)]*OSC2Vol;
+				output = syntp->pWave2[math::rint<int,float>(OSC2Position)]*OSC2Vol;
 			}
 		}
 

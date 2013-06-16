@@ -34,7 +34,7 @@ class Waveform {
 
 		/// Returns a linear interpolated sample by phase (NO BANDLIMIT)
 		inline float GetSample(float phase) {
-			register int offset = lrint<int>(phase);
+			register int offset = rint<int>(phase);
 			const float frac = phase - (float) offset;
 			const float out = m_wave.pdata[offset & WAVEMASK];
 			return out + (m_wave.pdata[++offset & WAVEMASK] - out) * frac;
@@ -43,7 +43,7 @@ class Waveform {
 		/// Returns a linear interpolated sample by phase and index
 		inline float GetSample(float phase, int frequency) {
 			const float *pdata = &m_wave.pdata[m_wave.preverse[frequency] << WAVESIBI];
-			register int offset = lrint<int>(phase);
+			register int offset = rint<int>(phase);
 			const float frac = phase - (float) offset;
 			const float out = pdata[offset & WAVEMASK];
 			return out + (pdata[++offset & WAVEMASK] - out) * frac;
@@ -51,6 +51,6 @@ class Waveform {
 
 		/// Returns a linear interpolated sample by phase and incr
 		inline float GetSample(float phase, float freq_incr) {
-			return GetSample(phase, lrint<int>(freq_incr * incr2freq) & 0xffff);
+			return GetSample(phase, rint<int>(freq_incr * incr2freq) & 0xffff);
 		}
 };

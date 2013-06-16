@@ -134,7 +134,7 @@ namespace psycle
 		{
 			do
 			{
-				int r = helpers::math::lround<int,float>(pin[1]);
+				int r = helpers::math::round<int,float>(pin[1]);
 				if (r < SHORT_MIN)
 				{
 					r = SHORT_MIN;
@@ -144,7 +144,7 @@ namespace psycle
 					r = SHORT_MAX;
 				}
 
-				int l = helpers::math::lround<int,float>(pin[0]);
+				int l = helpers::math::round<int,float>(pin[0]);
 				if (l < SHORT_MIN)
 				{
 					l = SHORT_MIN;
@@ -161,30 +161,30 @@ namespace psycle
 
 		void AudioDriver::Quantize24in32Bit(float *pin, int *piout, int c)
 		{
-			// Don't really know why, but the -100 is what made the clipping work correctly.
+			// TODO Don't really know why, but the -100 is what made the clipping work correctly.
 			int const max((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
 			int const min(-max - 1);
 			for(int i = 0; i < c; ++i) {
-				*piout++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 65536.0f, float(max)));
-				*piout++ = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 65536.0f, float(max)));
+				*piout++ = psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pin++) * 65536.0f, float(max)));
+				*piout++ = psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pin++) * 65536.0f, float(max)));
 			}
 		}
 
 		void AudioDriver::Quantize24(float *pin, int *piout, int c)
 		{
-			int const max((1u << 23) - 1);
-			int const min(-max - 1);
-            unsigned char *cptr = (unsigned char *) piout;
+            		unsigned char *cptr = (unsigned char *) piout;
 			for(int i = 0; i < c; ++i) {
-				int outval = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 256.0f, float(max)));
-                *cptr++ = (unsigned char) (outval & 0xFF);
-                *cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
-                *cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
+				int outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
+				#warning big-endianess assumed ?
+				*cptr++ = (unsigned char) (outval & 0xFF);
+				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
+				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 
-				outval = psycle::helpers::math::lrint<int32_t>(psycle::helpers::math::clipped(float(min), (*pin++) * 256.0f, float(max)));
-                *cptr++ = (unsigned char) (outval & 0xFF);
-                *cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
-                *cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
+				outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
+				#warning big-endianess assumed ?
+				*cptr++ = (unsigned char) (outval & 0xFF);
+				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
+				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 			}
 		}
 

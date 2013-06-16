@@ -718,52 +718,52 @@ namespace psycle { namespace host {
 						CPen* oldpen = bufDC.SelectObject(&linepenbL);
 						float quarterpi = helpers::math::pi_f*0.25f;
 
-						x=helpers::math::lround<int,float>(sinf(-quarterpi-(o_mvdpl*quarterpi))*o_mvpl*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf(-quarterpi-(o_mvdpl*quarterpi))*o_mvpl*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf(-quarterpi-(o_mvdpl*quarterpi))*o_mvpl*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf(-quarterpi-(o_mvdpl*quarterpi))*o_mvpl*128.0f) + 128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-//						bufDC.LineTo(128,128-helpers::math::lround<int,float>(o_mvpc*128.0f));
+//						bufDC.LineTo(128,128-helpers::math::round<int,float>(o_mvpc*128.0f));
 //						bufDC.MoveTo(128,128);
-						x=helpers::math::lround<int,float>(sinf(quarterpi+(o_mvdpr*quarterpi))*o_mvpr*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf(quarterpi+(o_mvdpr*quarterpi))*o_mvpr*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf(quarterpi+(o_mvdpr*quarterpi))*o_mvpr*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf(quarterpi+(o_mvdpr*quarterpi))*o_mvpr*128.0f) + 128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenbR);
 
-						x=helpers::math::lround<int,float>(sinf(-(o_mvdl*quarterpi))*o_mvl*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf(-(o_mvdl*quarterpi))*o_mvl*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf(-(o_mvdl*quarterpi))*o_mvl*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf(-(o_mvdl*quarterpi))*o_mvl*128.0f) + 128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-//						bufDC.LineTo(128,128-helpers::math::lround<int,float>(o_mvc*128.0f));
+//						bufDC.LineTo(128,128-helpers::math::round<int,float>(o_mvc*128.0f));
 //						bufDC.MoveTo(128,128);
-						x=helpers::math::lround<int,float>(sinf((o_mvdr*quarterpi))*o_mvr*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf((o_mvdr*quarterpi))*o_mvr*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf((o_mvdr*quarterpi))*o_mvr*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf((o_mvdr*quarterpi))*o_mvr*128.0f) + 128;
 						bufDC.LineTo(x,y);
 
 						bufDC.SelectObject(&linepenL);
 
-						x=helpers::math::lround<int,float>(sinf(-quarterpi-(mvdpl*quarterpi))*mvpl*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf(-quarterpi-(mvdpl*quarterpi))*mvpl*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf(-quarterpi-(mvdpl*quarterpi))*mvpl*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf(-quarterpi-(mvdpl*quarterpi))*mvpl*128.0f) + 128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-//						bufDC.LineTo(128,128-helpers::math::lround<int,float>(mvpc*128.0f));
+//						bufDC.LineTo(128,128-helpers::math::round<int,float>(mvpc*128.0f));
 //						bufDC.MoveTo(128,128);
-						x=helpers::math::lround<int,float>(sinf(quarterpi+(mvdpr*quarterpi))*mvpr*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf(quarterpi+(mvdpr*quarterpi))*mvpr*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf(quarterpi+(mvdpr*quarterpi))*mvpr*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf(quarterpi+(mvdpr*quarterpi))*mvpr*128.0f) + 128;
 						bufDC.LineTo(x,y);
 										
 						// panning data
 						bufDC.SelectObject(&linepenR);
 
-						x=helpers::math::lround<int,float>(sinf(-(mvdl*quarterpi))*mvl*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf(-(mvdl*quarterpi))*mvl*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf(-(mvdl*quarterpi))*mvl*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf(-(mvdl*quarterpi))*mvl*128.0f) + 128;
 						bufDC.MoveTo(x,y);
 						bufDC.LineTo(128,128);
-//						bufDC.LineTo(128,128-helpers::math::lround<int,float>(mvc*128.0f));
+//						bufDC.LineTo(128,128-helpers::math::round<int,float>(mvc*128.0f));
 //						bufDC.MoveTo(128,128);
-						x=helpers::math::lround<int,float>(sinf((mvdr*quarterpi))*mvr*128.0f) + 128;
-						y=helpers::math::lround<int,float>(-cosf((mvdr*quarterpi))*mvr*128.0f) + 128;
+						x=helpers::math::round<int,float>(sinf((mvdr*quarterpi))*mvr*128.0f) + 128;
+						y=helpers::math::round<int,float>(-cosf((mvdr*quarterpi))*mvr*128.0f) + 128;
 						bufDC.LineTo(x,y);
 
 						if (!hold)
