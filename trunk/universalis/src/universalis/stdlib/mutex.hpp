@@ -24,7 +24,9 @@
 	#include <boost/thread/mutex.hpp>
 	#include <boost/thread/recursive_mutex.hpp>
 	#include <boost/thread/once.hpp>
-	#include <boost/thread/lock_guard.hpp>
+	#if BOOST_VERSION >= 105300
+		#include <boost/thread/lock_guard.hpp>
+	#endif
 	namespace universalis { namespace stdlib {
 		namespace detail {
 			template<typename Timed_Mutex>
