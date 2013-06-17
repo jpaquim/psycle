@@ -2,7 +2,8 @@
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
-#include <universalis/detail/project.hpp>
+// don't include this of this breaks pch: #include <universalis/detail/project.hpp>
+#include <diversalis.hpp>
 
 #if defined DIVERSALIS__COMPILER__GNU
 

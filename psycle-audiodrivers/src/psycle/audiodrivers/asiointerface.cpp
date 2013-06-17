@@ -844,8 +844,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
-					*outr++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
+					*outl++ = SwapLong((rint_clip<int32_t, 16>(*pBuf++)));
+					*outr++ = SwapLong((rint_clip<int32_t, 16>(*pBuf++)));
 				}
 			}
 			break;
@@ -856,8 +856,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
-					*outr++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
+					*outl++ = SwapLong((rint_clip<int32_t, 18>((*pBuf++) * 4.0f)));
+					*outr++ = SwapLong((rint_clip<int32_t, 18>((*pBuf++) * 4.0f)));
 				}
 			}
 			break;
@@ -868,8 +868,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
-					*outr++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
+					*outl++ = SwapLong((rint_clip<int32_t, 20>((*pBuf++) * 16.0f)));
+					*outr++ = SwapLong((rint_clip<int32_t, 20>((*pBuf++) * 16.0f)));
 				}
 			}
 			break;
@@ -880,14 +880,14 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSize; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
-					*outr++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
+					*outl++ = SwapLong((rint_clip<int32_t, 24>((*pBuf++) * 256.0f)));
+					*outr++ = SwapLong((rint_clip<int32_t, 24>((*pBuf++) * 256.0f)));
 				}
 			}
 			break;
 		case ASIOSTFloat32MSB: // IEEE 754 32 bit float, as found on Intel x86 architecture
 			std::memset(ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 4);
-			sdt::memset(ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 4);
+			std::memset(ASIObuffers[counter].pright[index], 0, _ASIObufferSize * 4);
 			break;
 		case ASIOSTFloat64MSB: // IEEE 754 64 bit double float, as found on Intel x86 architecture
 			std::memset(ASIObuffers[counter].pleft[index], 0, _ASIObufferSize * 8);
