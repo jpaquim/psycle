@@ -1074,8 +1074,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
-					*outr++ = SwapLong(rint_clip<int32_t, 16>(*pBuf++));
+					*outl++ = SwapLong((rint_clip<int32_t, 16>(*pBuf++)));
+					*outr++ = SwapLong((rint_clip<int32_t, 16>(*pBuf++)));
 					}
 				}
 				break;
@@ -1086,8 +1086,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
-					*outr++ = SwapLong(rint_clip<int32_t, 18>((*pBuf++) * 4.0f));
+					*outl++ = SwapLong((rint_clip<int32_t, 18>((*pBuf++) * 4.0f)));
+					*outr++ = SwapLong((rint_clip<int32_t, 18>((*pBuf++) * 4.0f)));
 					}
 				}
 				break;
@@ -1098,8 +1098,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
-					*outr++ = SwapLong(rint_clip<int32_t, 20>((*pBuf++) * 16.0f));
+					*outl++ = SwapLong((rint_clip<int32_t, 20>((*pBuf++) * 16.0f)));
+					*outr++ = SwapLong((rint_clip<int32_t, 20>((*pBuf++) * 16.0f)));
 					}
 				}
 				break;
@@ -1110,8 +1110,8 @@ namespace psycle
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				for(int i = 0; i < _ASIObufferSamples; ++i) {
-					*outl++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
-					*outr++ = SwapLong(rint_clip<int32_t, 24>((*pBuf++) * 256.0f));
+					*outl++ = SwapLong((rint_clip<int32_t, 24>((*pBuf++) * 256.0f)));
+					*outr++ = SwapLong((rint_clip<int32_t, 24>((*pBuf++) * 256.0f)));
 					}
 				}
 				break;
