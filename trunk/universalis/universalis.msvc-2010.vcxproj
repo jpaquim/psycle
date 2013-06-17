@@ -120,6 +120,7 @@
     <ClInclude Include="src\universalis\compiler\concat.hpp" />
     <ClInclude Include="src\universalis\compiler\const_function.hpp" />
     <ClInclude Include="src\universalis\compiler\pure_function.hpp" />
+    <ClInclude Include="src\universalis\compiler\message.hpp" />
     <ClInclude Include="src\universalis\compiler\deprecated.hpp" />
     <ClInclude Include="src\universalis\compiler\dyn_link.hpp" />
     <ClInclude Include="src\universalis\compiler\exception.hpp" />

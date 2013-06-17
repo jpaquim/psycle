@@ -25,6 +25,7 @@
 	#include "universalis/compiler/pure_function.hpp"
 	#include "universalis/compiler/align.hpp"
 	#include "universalis/compiler/pack.hpp"
+	#include "universalis/compiler/message.hpp"
 	#include "universalis/compiler/deprecated.hpp"
 	#include "universalis/compiler/virtual.hpp"
 	#include "universalis/compiler/thread_local_storage.hpp"

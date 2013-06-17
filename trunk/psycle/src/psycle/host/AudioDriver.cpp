@@ -175,13 +175,13 @@ namespace psycle
             		unsigned char *cptr = (unsigned char *) piout;
 			for(int i = 0; i < c; ++i) {
 				int outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
-				#warning big-endianess assumed ?
+				UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 				*cptr++ = (unsigned char) (outval & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 
 				outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
-				#warning big-endianess assumed ?
+				UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 				*cptr++ = (unsigned char) (outval & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);

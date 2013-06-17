@@ -402,7 +402,7 @@ void ASIOInterface::ControlPanel(int driverID) {
 	}
 }
 
-#warning big-endianess assumed or is this portable ?
+UNIVERSALIS__COMPILER__WARNING("big-endianess assumed or is this portable ?")
 #define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) ;   
 #define SwapShort(v) ((((v)>>8)&0xFF)|(((v)&0xFF)<<8)) ;        
 
@@ -682,13 +682,13 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				} t;
 				for(int i = 0; i < _ASIObufferSize; ++i) {
 					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
-					#warning big-endianess assumed ?
+					UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 					*outl++ = t.c[0];
 					*outl++ = t.c[1];
 					*outl++ = t.c[2];
 
 					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
-					#warning big-endianess assumed ?
+					UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 					*outr++ = t.c[0];
 					*outr++ = t.c[1];
 					*outr++ = t.c[2];
@@ -812,13 +812,13 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				} t;
 				for(int i = 0; i < _ASIObufferSize; ++i) {
 					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
-					#warning big-endianess assumed ?
+					UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 					*outl++ = t.c[2];
 					*outl++ = t.c[1];
 					*outl++ = t.c[0];
 
 					t.i = rint_clip<int32_t, 24>((*pBuf++) * 256.0f);
-					#warning big-endianess assumed ?
+					UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 					*outr++ = t.c[2];
 					*outr++ = t.c[1];
 					*outr++ = t.c[0];
