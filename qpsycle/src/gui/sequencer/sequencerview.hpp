@@ -53,7 +53,7 @@ public:
 
 	bool gridSnap();
 
-public slots:
+public Q_SLOTS:
 	void zoomIn();
 	void zoomOut();
 	

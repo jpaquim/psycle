@@ -32,6 +32,7 @@
 #include <iostream>
 #include <iomanip>
 #include <memory> // auto_ptr
+#include <stdint.h>
 
 #include <QKeyEvent>
 #include <QFontMetrics>
@@ -166,23 +167,23 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 {
 	if ( pattern() ) {
 		// find start iterator
-		psycle::core::Pattern::iterator it = pattern()->find_lower_nearest(startLine);
+        psycle::core::Pattern::iterator it = pattern()->lower_bound(startLine);
 		psycle::core::TimeSignature signature;
 
 		int lastLinenum = -1;
-		psycle::core::PatternLine* line;
-		psycle::core::PatternLine emptyLine;
+        psycle::core::PatternEvent* line;
+        psycle::core::PatternEvent emptyLine;
 
 		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
 			if ( it != pattern()->end() ) {
 				//FIXME: This is not perfect. Some data will not be drawn if there's data in another track at a previous
 				// time, within the limits of the current line, because only the first line inside the limits is used.
-				int liney = (int)(it->first * beatZoom());
+                int liney = (int)(it->first /** beatZoom()*/);
 				while (liney < curLinenum )
 				{
 					it++;
-					liney = (int)(it->first * beatZoom());
+                    liney = (int)(it->first /** beatZoom()*/);
 				}
 				if (liney == curLinenum ) {
 					line = &it->second;
@@ -196,7 +197,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 				bool onBeat = false;
 				//bool onBar = false;
-				if ( !(curLinenum % beatZoom())) {
+                if ( !(curLinenum /*% beatZoom()*/)) {
 					if (  it != pattern()->end() && pattern()->barStart(it->first, signature) ) {
 						tColor = QColor( barColor() );
 					} else {
@@ -217,13 +218,13 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 				QColor stdColor = tColor;
 
-				std::map<int, psycle::core::PatternEvent>::iterator eventIt = line->notes().lower_bound(startTrack);
+                psycle::core::Pattern::iterator eventIt = pattern()->lower_bound(startTrack);
 				psycle::core::PatternEvent emptyEvent;
 				psycle::core::PatternEvent* event;
 
 				for ( int curTracknum = startTrack; curTracknum <= endTrack; curTracknum++ ) 
 				{
-					if ( eventIt != line->notes().end() && eventIt->first <= endTrack ) {
+                    if ( eventIt != pattern()->end() && eventIt->first <= endTrack ) {
 						int trackx = eventIt->first;
 						if ( curTracknum == trackx ) {
 							event = &eventIt->second;
@@ -562,22 +563,22 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 		if ( !shiftArrowForSelect() ) unmarkBlock();
 		break;
 	case commands::block_copy: 
-		copyBlock( false );
+//		copyBlock( false );
 		break;
 	case commands::block_cut: 
-		copyBlock( true );
+//		copyBlock( true );
 		break;
 	case commands::block_paste: 
-		pasteBlock( cursor().track(), cursor().line(), false );
+//		pasteBlock( cursor().track(), cursor().line(), false );
 		break;
 	case commands::block_delete: 
 		deleteBlock();
 		break;
 	case commands::row_insert:
-		insertRow();
+//		insertRow();
 		break;
 	case commands::row_delete:
-		deleteRow();
+//		deleteRow();
 		break;
 	case commands::transpose_block_inc:
 		transposeBlock( 1 );
@@ -613,10 +614,17 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 		int currentLine = cursor().line();
 		int currentTrack = cursor().track();
 
-		psycle::core::PatternEvent currentEvent = pattern()->event( currentLine, currentTrack );
+        psycle::core::Pattern::iterator eventItr= pattern()->upper_bound( currentLine );
+        while (eventItr->first == currentLine){
+            if(eventItr->second.track() == currentTrack)
+                break;
+            eventItr++;
+        }
+        if(eventItr->first != currentLine) return;
+        psycle::core::PatternEvent currentEvent = eventItr->second;
 
-		std::uint8_t machine = currentEvent.machine();
-		std::uint8_t inst = currentEvent.instrument();
+        uint8_t machine = currentEvent.machine();
+        uint8_t inst = currentEvent.instrument();
 
 		if ( machine < psycle::core::MAX_BUSES*2 ) { // check that it's a generator. ///\ todo check better.
 			///\ todo update machines combo box.
@@ -693,10 +701,11 @@ void PatternGrid::trackNext()
 void PatternGrid::doInstrumentEvent( int keyChar )
 {
 	// Add the new data.
-	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+    psycle::core::PatternEvent patEvent;
 	unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.instrument(), cursor().col() );
 	patEvent.setInstrument( newByte );
-	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+    patEvent.set_track(cursor().track());
+    pattern()->insert( cursor().line(), patEvent );
 
 	// Move the cursor.
 	if ( cursor().col() == 0 ) {
@@ -709,10 +718,11 @@ void PatternGrid::doInstrumentEvent( int keyChar )
 
 void PatternGrid::doMachineSelectionEvent( int keyChar )
 {
-	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+    psycle::core::PatternEvent patEvent = pattern()->getPatternEvent( cursor().line(), cursor().track() );
 	unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.machine(), cursor().col() );
 	patEvent.setMachine( newByte );
-	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+    patEvent.set_track(cursor().track());
+    pattern()->insert( cursor().line(), patEvent );
 	if ( cursor().col() == 0 ) {
 		moveCursor(1,0);
 	} else {
@@ -723,10 +733,10 @@ void PatternGrid::doMachineSelectionEvent( int keyChar )
 
 void PatternGrid::doVolumeEvent( int keyChar )
 {
-	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+    psycle::core::PatternEvent patEvent = pattern()->getPatternEvent( cursor().line(), cursor().track() );
 	unsigned char newByte = convertDigit( 0xFF, keyChar, patEvent.volume(), cursor().col() );
 	patEvent.setVolume( newByte );
-	pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+    pattern()->insert( cursor().line(), patEvent );
 	if (cursor().col() == 0) {
 		moveCursor(1,0);
 	} else {
@@ -738,7 +748,7 @@ void PatternGrid::doVolumeEvent( int keyChar )
 void PatternGrid::doCommandOrParameterEvent( int keyChar )
 {
 	// comand or parameter
-	psycle::core::PatternEvent patEvent = pattern()->event( cursor().line(), cursor().track() );
+    psycle::core::PatternEvent patEvent = pattern()->getPatternEvent( cursor().line(), cursor().track() );
 	if (cursor().col() < 2 ) {
 		int cmdValue;
 		if (cursor().eventNr() == 4) {
@@ -754,7 +764,7 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 			psycle::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
 			pc.first = newByte;
 		}
-		pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+        pattern()->insert( cursor().line(), patEvent );
 		moveCursor(1,0);
 	} else {
 		int paraValue;
@@ -771,7 +781,7 @@ void PatternGrid::doCommandOrParameterEvent( int keyChar )
 			psycle::core::PatternEvent::PcmType & pc = patEvent.paraCmdList()[cursor().eventNr() - 5];
 			pc.second = newByte;
 		}
-		pattern()->setEvent( cursor().line(), cursor().track(), patEvent );
+        pattern()->insert( cursor().line(), patEvent );
 		if (cursor().col() < 3) {
 			moveCursor(1,0);
 		} else {
@@ -1087,9 +1097,9 @@ int PatternGrid::visibleEvents( int track ) const
 const QFont & PatternGrid::font() const { return font_; }
 void PatternGrid::setFont( QFont font ) { font_ = font; };
 
-int PatternGrid::beatZoom() const {
-	return patDraw_->patternView()->beatZoom();
-}
+//int PatternGrid::beatZoom() const {
+//	return patDraw_->patternView()->beatZoom();
+//}
 
 void PatternGrid::setSeparatorColor( const QColor & color ) {
 	separatorColor_ = color;
@@ -1273,7 +1283,7 @@ Selection PatternGrid::selection() const
 bool PatternGrid::lineAlreadySelected( int lineNumber ) 
 {
 	if ( lineNumber > selection_.top() && lineNumber <= selection_.bottom() ) {
-		return true;
+        return true;
 	} else {
 		return false;
 	}
@@ -1288,117 +1298,117 @@ bool PatternGrid::trackAlreadySelected( int trackNumber )
 	}
 }
 
-void PatternGrid::copyBlock( bool cutit )
-{  
-	isBlockCopied_=true;
-	pasteBuffer.clear();
-	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
+//void PatternGrid::copyBlock( bool cutit )
+//{
+//	isBlockCopied_=true;
+//	pasteBuffer.Clear();
+//	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 ));
 
-	float start = selection().top()    / static_cast<float>( pattern()->beatZoom() );
-	float end   = ( selection().bottom()+1 ) / static_cast<float>( pattern()->beatZoom() );
+//	float start = selection().top()    / static_cast<float>( pattern()->beatZoom() );
+//	float end   = ( selection().bottom()+1 ) / static_cast<float>( pattern()->beatZoom() );
 
-	std::string xml = "<patsel beats='" + QString::number( end - start ).toStdString(); 
-	xml += "' tracks='"+ QString::number( selection().right()+1 - selection().left() ).toStdString();
-	xml += "'>"; 
-	xml += copyPattern->toXml();
-	xml += "</patsel>";
+//	std::string xml = "<patsel beats='" + QString::number( end - start ).toStdString();
+//	xml += "' tracks='"+ QString::number( selection().right()+1 - selection().left() ).toStdString();
+//	xml += "'>";
+//	xml += copyPattern->toXml();
+//	xml += "</patsel>";
 
-	QApplication::clipboard()->setText( QString::fromStdString( xml ) );
+//	QApplication::clipboard()->setText( QString::fromStdString( xml ) );
 
-	if (cutit) {
-		pattern()->deleteBlock( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 );
-		update( boundingRect() ); // FIXME: just update the selection.
-	}
-}
+//	if (cutit) {
+//		pattern()->deleteBlock( selection().left(), selection().right()+1, selection().top(), selection().bottom()+1 );
+//		update( boundingRect() ); // FIXME: just update the selection.
+//	}
+//}
 
-void PatternGrid::pasteBlock( int tx, int lx, bool mix )
-{
-	// If the clipboard isn't empty...
-	if ( QApplication::clipboard()->text() != "" ) 
-	{
-		// Make a parser.
-		QDomDocument *doc = new QDomDocument();
-		doc->setContent( QApplication::clipboard()->text() );
+//void PatternGrid::pasteBlock( int tx, int lx, bool mix )
+//{
+//	// If the clipboard isn't empty...
+//	if ( QApplication::clipboard()->text() != "" )
+//	{
+//		// Make a parser.
+//		QDomDocument *doc = new QDomDocument();
+//		doc->setContent( QApplication::clipboard()->text() );
 
-		lastXmlLineBeatPos = 0.0;
-		xmlTracks = 0;
-		xmlBeats = 0;
+//		lastXmlLineBeatPos = 0.0;
+//		xmlTracks = 0;
+//		xmlBeats = 0;
 
-		// Parse the clipboard text...
-		QDomElement patselEl = doc->firstChildElement( "patsel" );
-		xmlTracks = patselEl.attribute("tracks").toInt();
-		xmlBeats = patselEl.attribute("beats").toFloat();
+//		// Parse the clipboard text...
+//		QDomElement patselEl = doc->firstChildElement( "patsel" );
+//		xmlTracks = patselEl.attribute("tracks").toInt();
+//		xmlBeats = patselEl.attribute("beats").toFloat();
 
-		QDomNodeList patlines = patselEl.elementsByTagName( "patline" );
-		for ( int i = 0; i < patlines.count(); i++ )
-		{
-			QDomElement patLineElm = patlines.item( i ).toElement();
-			lastXmlLineBeatPos = patLineElm.attribute("pos").toFloat();     
+//		QDomNodeList patlines = patselEl.elementsByTagName( "patline" );
+//		for ( int i = 0; i < patlines.count(); i++ )
+//		{
+//			QDomElement patLineElm = patlines.item( i ).toElement();
+//			lastXmlLineBeatPos = patLineElm.attribute("pos").toFloat();
 
-			QDomNodeList patEvents = patLineElm.elementsByTagName( "patevent" );
-			for ( int j = 0; j < patEvents.count(); j++ )
-			{
-				QDomElement patEventElm = patEvents.item( j ).toElement();
-				int trackNumber = str_hex<int> ( patEventElm.attribute("track").toStdString() );
+//			QDomNodeList patEvents = patLineElm.elementsByTagName( "patevent" );
+//			for ( int j = 0; j < patEvents.count(); j++ )
+//			{
+//				QDomElement patEventElm = patEvents.item( j ).toElement();
+//				int trackNumber = str_hex<int> ( patEventElm.attribute("track").toStdString() );
 
-				psycle::core::PatternEvent data;
-				data.setMachine( str_hex<int> (patEventElm.attribute("mac").toStdString() ) );
-				data.setInstrument( str_hex<int> (patEventElm.attribute("inst").toStdString() ) );
-				data.setNote( str_hex<int> (patEventElm.attribute("note").toStdString() ) );
-				data.setParameter( str_hex<int> (patEventElm.attribute("param").toStdString() ) );
-				data.setParameter( str_hex<int> (patEventElm.attribute("cmd").toStdString() ) );
+//				psycle::core::PatternEvent data;
+//				data.setMachine( str_hex<int> (patEventElm.attribute("mac").toStdString() ) );
+//				data.setInstrument( str_hex<int> (patEventElm.attribute("inst").toStdString() ) );
+//				data.setNote( str_hex<int> (patEventElm.attribute("note").toStdString() ) );
+//				data.setParameter( str_hex<int> (patEventElm.attribute("param").toStdString() ) );
+//				data.setParameter( str_hex<int> (patEventElm.attribute("cmd").toStdString() ) );
 
-				pasteBuffer[lastXmlLineBeatPos].notes()[trackNumber]=data;
-			}
-		}
+//				pasteBuffer[lastXmlLineBeatPos].notes()[trackNumber]=data;
+//			}
+//		}
 
-		if (!mix)
-			pattern()->copyBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
-		else
-			pattern()->mixBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
-	}
+//		if (!mix)
+//			pattern()->copyBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
+//		else
+//			pattern()->mixBlock(tx,lx,pasteBuffer,xmlTracks,xmlBeats);
+//	}
 	
-	moveCursor( 0, xmlBeats*beatZoom() );
-	update( boundingRect() ); // FIXME: inefficient, be more specific.
-}
+//	moveCursor( 0, xmlBeats*beatZoom() );
+//	update( boundingRect() ); // FIXME: inefficient, be more specific.
+//}
 
 void PatternGrid::deleteBlock( )
 {
-	int right = selection().right();
-	int left = selection().left();
-	double top = selection().top() / (double) beatZoom();
-	double bottom = selection().bottom() / (double) beatZoom();
+    int right = selection().right();
+    int left = selection().left();
+    double top = selection().top()/* / (double) beatZoom()*/;
+    double bottom = selection().bottom() /*/ (double) beatZoom()*/;
 
-	pattern()->deleteBlock(left, right, top, bottom);
-	update( boundingRect() ); // FIXME: be more specific.
+    pattern()->erase(top,bottom,left,right);
+    update( boundingRect() ); // FIXME: be more specific.
 }
 
-void PatternGrid::insertRow() 
-{
-	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+//void PatternGrid::insertRow()
+//{
+//	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
 
-	float start = cursor().line() / static_cast<float>( pattern()->beatZoom() );
-	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
-	float beats = end - start;
+//	float start = cursor().line() / static_cast<float>( pattern()->beatZoom() );
+//	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
+//	float beats = end - start;
 
-	pattern()->deleteBlock( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() );
-	pattern()->copyBlock( cursor().track(), cursor().line()+1, *copyPattern, 1, beats );
-	update( boundingRect() );
-}
+//	pattern()->deleteBlock( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() );
+//	pattern()->copyBlock( cursor().track(), cursor().line()+1, *copyPattern, 1, beats );
+//	update( boundingRect() );
+//}
 
-void PatternGrid::deleteRow() 
-{
-	std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
+//void PatternGrid::deleteRow()
+//{
+//    std::auto_ptr<psycle::core::Pattern> copyPattern(pattern()->block( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() ));
 
-	float start = cursor().line()    / static_cast<float>( pattern()->beatZoom() );
-	float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
-	float beats = end - start;
+//    float start = cursor().line()    / static_cast<float>( pattern()->beatZoom() );
+//    float end   = ( numberOfLines() ) / static_cast<float>( pattern()->beatZoom() );
+//    float beats = end - start;
 
-	pattern()->deleteBlock( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() );
-	pattern()->copyBlock( cursor().track(), std::max(0,cursor().line()-1), *copyPattern, 1, beats );
-	moveCursor( 0, -1 );
-	update( boundingRect() );
-}
+//    pattern()->earase( cursor().track(), cursor().track()+1, cursor().line(), numberOfLines() );
+//    pattern()->copyBlock( cursor().track(), std::max(0,cursor().line()-1), *copyPattern, 1, beats );
+//    moveCursor( 0, -1 );
+//    update( boundingRect() );
+//}
 
 QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, int endTrack) const 
 {
@@ -1740,41 +1750,40 @@ void PatternGrid::unmarkBlock()
 
 void PatternGrid::transposeBlock( int transposeAmount )
 {
-	int left =  selection().left();
-	int right = selection().right() + 1;
-	double top = selection().top() / static_cast<double>( beatZoom() );
-	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
+    int left =  selection().left();
+    int right = selection().right() + 1;
+    double top = selection().top() ;
+    double bottom = selection().bottom()+1 ;
 
-	pattern()->transposeBlock( left, right, top, bottom, transposeAmount );
+    pattern()->Transpose(transposeAmount, top, bottom, left, right);
 
-	update( boundingRect() ); ///\todo just update the changed parts.
+    update( boundingRect() ); ///\todo just update the changed parts.
 }
 
 void PatternGrid::blockSetInstrument()
 {
-	int left =  selection().left();
-	int right = selection().right() + 1;
-	double top = selection().top() / static_cast<double>( beatZoom() );
-	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
+    int left =  selection().left();
+    int right = selection().right() + 1;
+    double top = selection().top() ;
+    double bottom = selection().bottom()+1 ;
 
-	pattern()->blockSetInstrument( left, right, top, bottom, patDraw_->patternView()->song()->instSelected() );
-
-	update( boundingRect() ); ///\todo just update the changed parts.
+    pattern()->ChangeInst(patDraw_->patternView()->song()->instSelected(),top,bottom,left,right);
+    update( boundingRect() ); ///\todo just update the changed parts.
 }
 
 void PatternGrid::blockSetMachine()
 {
-	int left =  selection().left();
-	int right = selection().right() + 1;
-	double top = selection().top() / static_cast<double>( beatZoom() );
-	double bottom = ( selection().bottom()+1 ) / static_cast<double>( beatZoom() );
+    int left =  selection().left();
+    int right = selection().right() + 1;
+    double top = selection().top();
+    double bottom = selection().bottom()+1 ;
 
-	psycle::core::Machine* currentMac = patDraw_->patternView()->song()->machine( patDraw_->patternView()->song()->seqBus );
-	if ( currentMac != 0 ) {
-		std::uint8_t currentMacId = currentMac->id();
-		pattern()->blockSetMachine( left, right, top, bottom, currentMacId );
-		update( boundingRect() ); ///\todo just update the changed parts.
-	}
+    psycle::core::Machine* currentMac = patDraw_->patternView()->song()->machine( patDraw_->patternView()->song()->seqBus );
+    if ( currentMac != 0 ) {
+        uint8_t currentMacId = currentMac->id();
+        pattern()->ChangeMac(currentMacId,top,bottom,left,right);
+        update( boundingRect() ); ///\todo just update the changed parts.
+    }
 }
 
 

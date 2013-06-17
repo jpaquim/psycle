@@ -42,11 +42,11 @@ public:
 				QWidget *parent = 0 );
 	~SampleBrowser();
 
-public slots:
+public Q_SLOTS:
 	void onAddToLoadedSamples();
 	void onClearInstrument();
 
-signals:
+Q_SIGNALS:
 	void sampleAdded();
 
 private:

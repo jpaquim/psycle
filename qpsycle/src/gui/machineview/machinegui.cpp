@@ -18,7 +18,6 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <psycle/core/signalslib.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 #include <psycle/core/constants.h>
@@ -165,12 +164,12 @@ void MachineGui::onRenameMachineActionTriggered()
 		mac()->SetEditName( text.toStdString() );
 		updateName();
 	}
-	emit renamed();
+    Q_EMIT renamed();
 }
 
 void MachineGui::onDeleteMachineActionTriggered()
 {
-	emit deleteRequest( this );
+    Q_EMIT deleteRequest( this );
 }
 
 /// Mute/unmute in the CoreSong and update the GUI.
@@ -225,7 +224,7 @@ void MachineGui::onToggleSoloActionTriggered()
 
 void MachineGui::onCloneMachineActionTriggered()
 {
-	emit cloneRequest( this );
+    Q_EMIT cloneRequest( this );
 }
 
 /// Called when the item changes in some way (we're interested in when it moves.)
@@ -262,7 +261,7 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		event->buttons() == Qt::LeftButton && event->modifiers() == Qt::ShiftModifier ||
 		event->buttons() == Qt::RightButton ||
 		m_macView->isCreatingWire()
-	) emit startNewConnection(this, event);
+    ) Q_EMIT startNewConnection(this, event);
 	else // Default Qt implementation can take care of moving the MacGui.
 		QGraphicsItem::mouseMoveEvent(event);
 }
@@ -271,7 +270,7 @@ void MachineGui::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MachineGui::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
 	if ( m_macView->isCreatingWire() ) {
-		emit closeNewConnection(this, event);
+        Q_EMIT closeNewConnection(this, event);
 	} 
 	else { // business as usual
 		QGraphicsItem::mouseReleaseEvent(event);

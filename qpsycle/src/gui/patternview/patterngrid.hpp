@@ -161,7 +161,7 @@ public:
 	int endTrackNumber() const;
 	int numberOfLines() const;
 	int endLineNumber() const;
-	int beatZoom() const;
+//	int beatZoom() const;
 	int patternStep(); 
 	int navStep();
 	bool ignorePatStepForNav();
@@ -236,8 +236,8 @@ public:
 	void endBlock( const PatCursor & cursor );
 	void unmarkBlock();
 
-	void copyBlock( bool cutit );
-	void pasteBlock( int tx,int lx,bool mix );
+//	void copyBlock( bool cutit );
+//	void pasteBlock( int tx,int lx,bool mix );
 	void deleteBlock( );
 
 	void transposeBlock( int transposeAmount );
@@ -245,8 +245,8 @@ public:
 	void blockSetMachine();
 	void selectMachineUnderCursor();
 
-	void insertRow();
-	void deleteRow();
+//	void insertRow();
+//	void deleteRow();
 
 	void selectUp();
 	void selectDown();

@@ -58,7 +58,7 @@ Q_OBJECT
 public:
 	MixerTweakDlg( MachineGui *macGui, QWidget *parent );
 
-public slots: 
+public Q_SLOTS: 
 	virtual void onKnobGroupChanged( KnobGroup *kGroup );
 
 private:

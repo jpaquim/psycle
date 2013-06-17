@@ -346,7 +346,7 @@ QPainterPath WireGui::shape () const
 
 void WireGui::deleteConnectionRequest()
 {
-	emit deleteConnectionRequest(this);
+    Q_EMIT deleteConnectionRequest(this);
 }
 
 } // namespace qpsycle

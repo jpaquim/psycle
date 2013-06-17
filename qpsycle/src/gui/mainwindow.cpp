@@ -597,8 +597,8 @@ namespace qpsycle {
 		psycle::core::Pattern* pattern0 = new psycle::core::Pattern();
 		pattern0->setCategory("New Category");
 
-		psycle::core::SequenceLine *seqLine = blankSong->sequence().createNewLine();
-		seqLine->createEntry( pattern0, 0 );
+        psycle::core::SequenceLine *seqLine = &blankSong->sequence().createNewLine();
+        seqLine->createEntry( *pattern0, 0 );
 
 		return blankSong;
 	}
@@ -1052,9 +1052,9 @@ namespace qpsycle {
 		if ( returnStatus == QDialog::Accepted ) 
 		{
 			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-			song_->setName( songNameEdit.text().toStdString() );
-			song_->setAuthor( artistNameEdit.text().toStdString() );
-			song_->setComment( songNotesEdit.toPlainText().toStdString() );
+            song_->name( songNameEdit.text().toStdString() );
+            song_->author( artistNameEdit.text().toStdString() );
+            song_->comment( songNotesEdit.toPlainText().toStdString() );
 
 			statusBar()->showMessage( "Song properties updated." );
 		} 
@@ -1071,7 +1071,7 @@ namespace qpsycle {
 			visiblePattern = patView_->pattern();
 			if ( visiblePattern ) {
 				double entryStart = 0;
-				bool isPlayPattern = song_->sequence().getPlayInfo( visiblePattern, psycle::core::Player::singleton().playPos() , 4 , entryStart );
+                bool isPlayPattern = song_->sequence().getPlayInfo( *visiblePattern, psycle::core::Player::singleton().playPos() , 4 , entryStart );
 
 				if ( isPlayPattern )
 					patView_->onTick( psycle::core::Player::singleton().playPos() - entryStart ) ;

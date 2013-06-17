@@ -46,7 +46,7 @@ namespace qpsycle {
 
 	QRectF SequencerItem::boundingRect() const
 	{
-		return QRectF( 0, 0, sequenceEntry_->pattern()->beats()*seqDraw_->beatPxLength(), parentItem()->boundingRect().height() );
+        return QRectF( 0, 0, sequenceEntry_->pattern().beats()*seqDraw_->beatPxLength(), parentItem()->boundingRect().height() );
 	}
 
 	void SequencerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
@@ -57,11 +57,11 @@ namespace qpsycle {
 		} else {
 			painter->setPen( Qt::white ); 
 		}
-		QColor col = QColorFromLongColor( sequenceEntry_->pattern()->category()->color() );
+        QColor col = QColorFromLongColor( 78 );
 		painter->setBrush(col);
 		painter->drawRect( boundingRect() ); // FIXME: need to take border width into account.
 		painter->setPen( Qt::white ); 
-		painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern()->name() ) );
+        painter->drawText( boundingRect(), Qt::AlignCenter, QString::fromStdString( sequenceEntry_->pattern().name() ) );
 	}
 
 	const QColor SequencerItem::QColorFromLongColor( long longCol ) const
@@ -89,7 +89,7 @@ namespace qpsycle {
 		{
 			QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
 			QPointF diff = newPos - pos();
-			emit moved( this, diff ); 
+            Q_EMIT moved( this, diff );
 			// <nmather> MoveEvent handling put in SequencerDraw -- seems more sensible
 			// as we may be moving groups of selected items (which this item shouldn't
 			// really know about).
@@ -98,7 +98,7 @@ namespace qpsycle {
 		{
 			QPointF newPos( mapToParent(event->pos()) - matrix().map( event->buttonDownPos(Qt::LeftButton) ) );
 			QPointF diff = newPos - pos();
-			emit moved( this, diff ); 
+            Q_EMIT moved( this, diff );
 
 			SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine*>( parentItem() );
 			SequencerLine *lineUnderCursor = 0;
@@ -110,9 +110,9 @@ namespace qpsycle {
 			}
 			if ( parentLine != lineUnderCursor && lineUnderCursor != 0 ) {
 				if ( diff.y() < 0 ) 
-					emit changedLine( this, 0 );
+                    Q_EMIT changedLine( this, 0 );
 				if ( diff.y() > 0 ) 
-					emit changedLine( this, 1 );
+                    Q_EMIT changedLine( this, 1 );
 			}
 		}
 	}
@@ -123,7 +123,7 @@ namespace qpsycle {
 		qDebug( "parentLine %p\n", qgraphicsitem_cast<SequencerLine*>(parentItem()) );
 		qDebug( "tickPos %f\n", sequenceEntry()->tickPosition() );
 
-		emit clicked(this);
+        Q_EMIT clicked(this);
 	}
 
 	void SequencerItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
@@ -131,15 +131,15 @@ namespace qpsycle {
 		QMenu menu;
 
 		replaceWithCloneAction_ = new QAction( "Replace with clone", this );
-		if ( psycle::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
+        if ( /*psycle::core::Player::singleton().loopSequenceEntry() == sequenceEntry()*/ false ) {
 			loopEntryAction_ = new QAction( "Unloop Entry", this );
 		} else {
 			loopEntryAction_ = new QAction( "Loop Entry", this );
 		}
 		deleteEntryAction_ = new QAction( "Delete Entry", this );
 
-		connect( replaceWithCloneAction_, SIGNAL( triggered() ), this, SLOT( onReplaceWithCloneActionTriggered() ) );
-		connect( loopEntryAction_, SIGNAL( triggered() ), this, SLOT( onLoopEntryActionTriggered() ) );
+//		connect( replaceWithCloneAction_, SIGNAL( triggered() ), this, SLOT( onReplaceWithCloneActionTriggered() ) );
+//		connect( loopEntryAction_, SIGNAL( triggered() ), this, SLOT( onLoopEntryActionTriggered() ) );
 		connect( deleteEntryAction_, SIGNAL( triggered() ), this, SLOT( onDeleteEntryActionTriggered() ) );
 
 		menu.addAction( replaceWithCloneAction_ );
@@ -148,36 +148,36 @@ namespace qpsycle {
 		menu.exec( event->screenPos() );
 	}
 
-	void SequencerItem::onReplaceWithCloneActionTriggered()
-	{
-		psycle::core::Pattern* pattern = sequenceEntry()->pattern();
-		std::string clonedPatName = pattern->name()+" Clone";
+//	void SequencerItem::onReplaceWithCloneActionTriggered()
+//	{
+//        psycle::core::Pattern* pattern = &sequenceEntry()->pattern();
+//		std::string clonedPatName = pattern->name()+" Clone";
 
-		// Clone the pattern in the song.
-		psycle::core::Pattern* clonedPat = pattern->category()->clonePattern( *pattern, clonedPatName );
-		setNewPattern( clonedPat );
-		update();
+//		// Clone the pattern in the song.
+//        psycle::core::Pattern* clonedPat = &pattern->category().clonePattern( *pattern, clonedPatName );
+//		setNewPattern( clonedPat );
+//		update();
 
-		emit newPatternCreated( clonedPat );
-	}
+//        Q_EMIT newPatternCreated( clonedPat );
+//	}
 
 	void SequencerItem::setNewPattern( psycle::core::Pattern *newPattern )
 	{
-		sequenceEntry_->setPattern( newPattern );
+        sequenceEntry_->setPattern( *newPattern );
 	}
 
-	void SequencerItem::onLoopEntryActionTriggered()
-	{
-		if ( psycle::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
-			psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
-		} else {
-			psycle::core::Player::singleton().setLoopSequenceEntry( sequenceEntry() );
-		}
-	}
+//	void SequencerItem::onLoopEntryActionTriggered()
+//	{
+//		if ( psycle::core::Player::singleton().loopSequenceEntry() == sequenceEntry() ) {
+//			psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
+//		} else {
+//			psycle::core::Player::singleton().setLoopSequenceEntry( sequenceEntry() );
+//		}
+//	}
 
 	void SequencerItem::onDeleteEntryActionTriggered()
 	{
-		emit deleteRequest( this );
+        Q_EMIT deleteRequest( this );
 	}
 
 	void SequencerItem::keyPressEvent( QKeyEvent *event )
@@ -187,48 +187,48 @@ namespace qpsycle {
 		case Qt::Key_Left:
 		{
 			QPointF diff( -seqDraw_->beatPxLength(), 0 );
-			emit moved( this, diff );
+            Q_EMIT moved( this, diff );
 		}
 		break;
 		case Qt::Key_Right :
 		{
 			QPointF diff( seqDraw_->beatPxLength(), 0 );
-			emit moved( this, diff );
+            Q_EMIT moved( this, diff );
 		}
 		break;
 		case Qt::Key_Up:
-			emit changedLine( this, 0 ); 
+            Q_EMIT changedLine( this, 0 );
 			break;
 		case Qt::Key_Down:
-			emit changedLine( this, 1 );
+            Q_EMIT changedLine( this, 1 );
 			break;
 		default: event->ignore();
 		}
 	}
 
-	QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &value)
-	{
-		if ( change == ItemPositionChange ) 
-		{
-			QPointF newPos = value.toPointF();
-			QPointF originalPos = pos();
+    QVariant SequencerItem::itemChange(GraphicsItemChange change, const QVariant &value)
+    {
+        if ( change == ItemPositionChange )
+        {
+            QPointF newPos = value.toPointF();
+            QPointF originalPos = pos();
 
-			int beatPxLength = seqDraw_->beatPxLength();
+            int beatPxLength = seqDraw_->beatPxLength();
 
-			if ( seqDraw_->gridSnap() )
-			{
-				int newX = newPos.x();
-				if ( newX % beatPxLength != 0 ) {
-					newX = newX + ( beatPxLength - ( newX % beatPxLength ) );
-				}
-				sequenceEntry()->track()->MoveEntry( sequenceEntry(), newX / beatPxLength );
+            if ( seqDraw_->gridSnap() )
+            {
+                int newX = newPos.x();
+                if ( newX % beatPxLength != 0 ) {
+                    newX = newX + ( beatPxLength - ( newX % beatPxLength ) );
+                }
+                sequenceEntry()->sequenceLine().MoveEntry(*sequenceEntry(), newX/beatPxLength);
 
-				return QPointF( newX, originalPos.y() );
-			}
-			sequenceEntry()->track()->MoveEntry( sequenceEntry(), newPos.x() / beatPxLength );
-			return QPointF( newPos.x(), originalPos.y() ); // Constrains an item to present y pos.
-		}
-		return QGraphicsItem::itemChange( change, value );
-	}
+                return QPointF( newX, originalPos.y() );
+            }
+            sequenceEntry()->sequenceLine().MoveEntry( *sequenceEntry(), newPos.x() / beatPxLength );
+            return QPointF( newPos.x(), originalPos.y() ); // Constrains an item to present y pos.
+        }
+        return QGraphicsItem::itemChange( change, value );
+    }
 
 } // namespace qpsycle

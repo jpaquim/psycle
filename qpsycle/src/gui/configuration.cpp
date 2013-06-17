@@ -62,7 +62,7 @@ namespace qpsycle {
 		_pSilentDriver = driver;
 		addAudioDriver(driver);
 
-		setDriverByName("silent");
+		setDriverByName("dummy");
 		enableSound_ = false;
 
 		addAudioDriver(new psycle::audiodrivers::WaveFileOut);
@@ -126,17 +126,17 @@ namespace qpsycle {
 			_pOutputDriver = it->second;
 			std::cout << "psycle: configuration: audio driver set to: " << driverName << "\n";
 		} else {
-			std::cerr << "psycle: configuration: audio driver not found: " << driverName << ", setting fallback: " << _pOutputDriver->info().name() << "\n";
-			// driver not found,  set silent default driver
 			_pOutputDriver = _pSilentDriver;
+            std::cerr << "psycle: configuration: audio driver not found: " << driverName << ", setting fallback: " << _pOutputDriver->info().name() << "\n";
+			// driver not found,  set silent default driver
 		}
 	}
 
 	void Configuration::loadConfig() {
-		std::string path = psycle::core::File::replaceTilde("~" + psycle::core::File::slash() + ".xpsycle.xml");
+		std::string path =  ".xpsycle.xml";
 		if(path.length()) {
 			try {
-				loadConfig(psycle::core::File::replaceTilde("~" + psycle::core::File::slash() + ".xpsycle.xml"));
+				loadConfig(".xpsycle.xml");
 			} catch(std::exception const & e) {
 				std::cerr << "psycle: configuration: error: " << e.what() << std::endl;
 			}
@@ -184,7 +184,7 @@ namespace qpsycle {
 					if(enableStr != "") enable = QString::fromStdString(enableStr).toInt();
 					enableSound_ = enable;
 					if(enable == 0) {
-						setDriverByName("silent");
+						setDriverByName("dummy");
 						doEnableSound = false;
 					} else doEnableSound = true;
 				}

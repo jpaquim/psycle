@@ -80,7 +80,7 @@ public:
 	}
 	void resize();
 
-public slots:
+public Q_SLOTS:
 	void resetInstrument();
 
 private:

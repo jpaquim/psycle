@@ -21,8 +21,6 @@
 #ifndef WIREGUI_H
 #define WIREGUI_H
 
-#include <psycle/core/signalslib.h>
-
 #include <QGraphicsItem>
 #include <QAction>
 #include <QColor>
@@ -57,10 +55,10 @@ public:
 
 	void adjust();
 
-signals:
+Q_SIGNALS:
 	void deleteConnectionRequest( WireGui *wireGui );
 
-public slots:
+public Q_SLOTS:
 	void deleteConnectionRequest();
 	void onVolumeChanged(float newval);
 

@@ -46,7 +46,7 @@ namespace qpsycle {
 	protected:
 		void contextMenuEvent( QContextMenuEvent *ev );
 
-	public slots:
+    public Q_SLOTS:
 		void onEditPatternNameActionTriggered();
 		void onEditCategoryNameActionTriggered();
 
@@ -91,7 +91,7 @@ namespace qpsycle {
 		psycle::core::Song* song() const { return song_; }
 		psycle::core::Pattern* currentPattern() const { return currentPattern_; }
 
-	public slots:
+    public Q_SLOTS:
 		void currentItemChanged( QTreeWidgetItem *currItem, QTreeWidgetItem *prevItem );
 		void onItemEdited( QTreeWidgetItem *item );
 		void newCategory();
@@ -106,7 +106,7 @@ namespace qpsycle {
 	protected:
 		bool event( QEvent *event );
 
-	signals:
+    Q_SIGNALS:
 		void patternSelectedInPatternBox( psycle::core::Pattern *selectedPattern );
 		void patternDeleted();
 		void addPatternToSequencerRequest( psycle::core::Pattern *selectedPattern );

@@ -43,7 +43,7 @@ namespace psycle { namespace core {
 			const std::string& name() const;
 
 			void setCategory(const std::string& category);
-			const std::string& category() const { return category_; };
+            const std::string& category() const { return category_; }
 
 			void Clear();
 
@@ -78,6 +78,8 @@ namespace psycle { namespace core {
 				return lines_.insert(std::pair<double, PatternEvent>(pos, ev));
 			}
 			void insert(const Pattern& srcPattern, double to, int to_track=0);
+
+            psycle::core::PatternEvent& getPatternEvent(int line, int track);
 
 			iterator erase(iterator pos) {
 				iterator temp = pos;

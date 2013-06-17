@@ -112,12 +112,12 @@ public:
 	Knob *knob() const;
 	QSize sizeHint() const;
 
-public slots:
+public Q_SLOTS:
 	void onKnobChanged();
 	void onKnobPressed();
 	void onKnobReleased();
 
-signals:
+Q_SIGNALS:
 	void changed( KnobGroup *kGroup );
 
 private:
@@ -153,9 +153,7 @@ Q_OBJECT
 public:
 	PresetsDialog( MachineGui *macGui, QWidget *parent = 0 );
 
-	bool loadPresets();
-
-public slots:
+public Q_SLOTS:
 	void usePreset();
 	void onCompletionActivated( const QString &text );
 	void onItemClicked( QListWidgetItem *item );
@@ -163,7 +161,6 @@ public slots:
 
 private:
 	std::map< QListWidgetItem*, psycle::core::Preset > presetMap;
-	psycle::core::Preset m_selectedPreset;
 	QGridLayout *lay;
 	QLabel *label;
 	QLineEdit *lineEdit;
@@ -184,7 +181,6 @@ private:
 
 	int const static MAX_PRESETS = 256;
 
-	psycle::core::Preset iniPreset;
 };
 
 
@@ -204,14 +200,14 @@ protected:
 	void keyReleaseEvent( QKeyEvent *event );
 
 
-public slots: 
+public Q_SLOTS: 
 	virtual void onKnobGroupChanged( KnobGroup *kGroup );
 	void randomiseParameters();
 	void resetParameters();
 	void showAboutDialog();
 	void showPresetsDialog();
 
-signals:
+Q_SIGNALS:
 	void notePress( int note, psycle::core::Machine *mac );
 	void noteRelease( int note, psycle::core::Machine *mac );
 

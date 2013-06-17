@@ -34,7 +34,7 @@ class WaveAmp : public QDialog
 public:
 	WaveAmp();
 	
-public slots:
+public Q_SLOTS:
 	//void SliderChanges(int value);
 
 private:

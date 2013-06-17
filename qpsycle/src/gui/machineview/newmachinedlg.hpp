@@ -43,7 +43,7 @@ namespace qpsycle {
 	protected:
 		void keyPressEvent( QKeyEvent *event );
 
-	public slots:
+    public Q_SLOTS:
 		void itemSelectionChanged( );
 		void tryAccept( );
 

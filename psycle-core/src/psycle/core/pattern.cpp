@@ -270,6 +270,22 @@ void Pattern::insert(const Pattern& src_pattern, double to, int to_track) {
 		++it;
 	}
 }
+psycle::core::PatternEvent& Pattern::getPatternEvent(int line, int track){
+    iterator eventItr= upper_bound( line );
+    while (eventItr->first == line){
+        if(eventItr->second.track() == track)
+            break;
+        eventItr++;
+    }
+    if(eventItr->first != line){
+        psycle::core::PatternEvent patEvent;
+        patEvent.set_track(track);
+        return insert(line, patEvent)->second;
+    } else
+    return eventItr->second;
+}
+
+
 
 void Pattern::erase(double from, double to, int start_track, int end_track) {
 	Pattern::iterator it(lower_bound(from));

@@ -21,6 +21,7 @@ namespace psycle {
 		class PSYCLE__CORE__DECL Preset {
 			public:
 				Preset(int numpars, int dataSize);
+                Preset(Preset& rhs);
 
 				bool read(helpers::BinRead& prsIn);
 

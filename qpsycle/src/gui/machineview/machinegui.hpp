@@ -61,7 +61,7 @@ public:
 
 	std::vector<WireGui *> wireGuiList_;  ///\todo Oops!  A public data member?
 
-public slots:
+public Q_SLOTS:
 	void onDeleteMachineActionTriggered();
 	void onRenameMachineActionTriggered();
 	void onToggleMuteActionTriggered();
@@ -91,7 +91,7 @@ protected:
 
 	QColor backgroundColor_;
 
-signals:
+Q_SIGNALS:
 	void startNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
 	void closeNewConnection( MachineGui *macGui, QGraphicsSceneMouseEvent *event );
 	void chosen( MachineGui *macGui );

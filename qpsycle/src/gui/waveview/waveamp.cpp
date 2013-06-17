@@ -27,7 +27,7 @@ WaveAmp::WaveAmp()
 {
 	setWindowTitle("Amplify");
 	QGridLayout *layout = new QGridLayout(this);
-	gain = new QLabel("Gain", this);
+    gain = new QLabel("Gain", this);
 	gainSli = new QSlider( Qt::Horizontal, this);
 	percent = new QLabel ("0%", this);
 	ok = new QPushButton("Ok", this);

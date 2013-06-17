@@ -103,7 +103,7 @@ namespace qpsycle {
 		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
 		{
-			emit selectedInstrumentChanged(instrIndex);
+            Q_EMIT selectedInstrumentChanged(instrIndex);
 
 			// Let interested views know that something happenened.
 			dataChanged( index( instrIndex ), index( instrIndex ) );
@@ -155,7 +155,7 @@ namespace qpsycle {
 		song_->instSelected( newIndex );
 		song_->auxcolSelected = newIndex;
 
-		emit selectedInstrumentChanged(newIndex);
+        Q_EMIT selectedInstrumentChanged(newIndex);
 	}
 
 	// Find out if a particular slot is free in the CoreSong.

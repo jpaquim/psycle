@@ -160,7 +160,7 @@ class PSYCLE__CORE__DECL CoreSong {
 	
 		//thread synchronisation
 		typedef class lock_guard<mutex> scoped_lock;
-		operator mutex& () const { return mutex_; }
+        operator mutex& () const { return mutex_; }
 
 		// instrument actions
 		// todo: The loading code should not be inside the song class, only the assignation of the loaded one

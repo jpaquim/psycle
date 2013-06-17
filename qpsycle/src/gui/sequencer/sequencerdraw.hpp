@@ -26,8 +26,6 @@ namespace psycle { namespace core {
 	class Pattern;
 }}
 
-#include <psycle/core/signalslib.h>
-
 #include <QtGui/QGraphicsView>
 #include <QtGui/QGraphicsRectItem>
 
@@ -43,7 +41,7 @@ class PlayLine;
 class BeatRuler;
 
 
-class SequencerDraw : public QGraphicsView, public boost::signalslib::trackable
+class SequencerDraw : public QGraphicsView
 {
 	Q_OBJECT
 
@@ -64,7 +62,7 @@ public:
 	void setSelectedLine( SequencerLine *line );
 	std::vector<SequencerLine*> lines() const;
 
-public slots:
+public Q_SLOTS:
 	void insertTrack();
 	void deleteTrack();
 	void moveUpTrack();
@@ -72,13 +70,13 @@ public slots:
 	void onCollapseButtonCliked();
 	void onExpandButtonCliked();
 	void onSequencerLineClick( SequencerLine *line );
-	void onSequencerItemDeleteRequest( SequencerItem *item );
+//	void onSequencerItemDeleteRequest( SequencerItem *item );
 	void onPlayLineMoved( double newXPos );
 	void onItemMoved( SequencerItem* item, QPointF diff );
 	void onItemChangedLine( SequencerItem *item, int direction );
 	void onNewPatternCreated( psycle::core::Pattern *newPattern );
 
-signals:
+Q_SIGNALS:
 	void newPatternCreated( psycle::core::Pattern * );
 
 protected:
@@ -125,7 +123,7 @@ protected:
 	void mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-signals:
+Q_SIGNALS:
 	void playLineMoved( double );
 
 private:

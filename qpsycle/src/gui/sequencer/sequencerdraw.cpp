@@ -71,10 +71,10 @@ namespace qpsycle {
 		if(!lines_.empty()) {
 			setSelectedLine(lines_[0]);
 
-			sequence.newLineCreated.connect
-				(boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
-			sequence.newLineInserted.connect
-				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
+//            sequence.newLineCreated.connect
+//                (boost::bind(&SequencerDraw::onNewLineCreated,this,_1));
+//			sequence.newLineInserted.connect
+//				(boost::bind(&SequencerDraw::onNewLineInserted,this,_1,_2));
 			#if 0
 				/*
 					Does not work because of a boost bug in boost 1.33
@@ -86,8 +86,8 @@ namespace qpsycle {
 				sequence.lineRemoved.connect
 				(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 			#endif
-			sequence.linesSwapped.connect
-				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
+//			sequence.linesSwapped.connect
+//				(boost::bind(&SequencerDraw::onLinesSwapped,this,_1,_2));
 		}
 
 		pLine_ = new PlayLine( this );
@@ -112,27 +112,27 @@ namespace qpsycle {
 			//    addSequencerLine();
 		} else if ( selectedLine() ) {
 			// will cause onNewLineInserted to be fired:
-			seqView_->song()->sequence().insertNewLine( selectedLine()->sequenceLine() );
+            seqView_->song()->sequence().insertNewLine( *selectedLine()->sequenceLine());
 		}
 	}
 
 	void SequencerDraw::deleteTrack() {
 		if(selectedLine()) {
 			// will trigger onLineRemoved
-			seqView_->song()->sequence().removeLine(selectedLine()->sequenceLine());
+            seqView_->song()->sequence().removeLine( *selectedLine()->sequenceLine());
 		}
 	}
 
 	void SequencerDraw::moveDownTrack() {
 		if(selectedLine()) {
 			// will trigger onLinesSwapped
-			seqView_->song()->sequence().moveDownLine(selectedLine()->sequenceLine());
+            seqView_->song()->sequence().moveDownLine( *selectedLine()->sequenceLine());
 		}
 	}
 	void SequencerDraw::moveUpTrack() {
 		if(selectedLine()) {
 			// will trigger onLinesSwapped
-			seqView_->song()->sequence().moveUpLine(selectedLine()->sequenceLine());
+            seqView_->song()->sequence().moveUpLine( *selectedLine()->sequenceLine());
 		}
 	}
 
@@ -153,7 +153,7 @@ namespace qpsycle {
 		line->setParentItem( seqArea_ );
 		connect( line, SIGNAL( clicked( SequencerLine* ) ), this, SLOT( onSequencerLineClick( SequencerLine* ) ) );
 
-		seqLine->wasDeleted.connect(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
+//		seqLine->wasDeleted.connect(boost::bind(&SequencerDraw::onLineRemoved,this,_1));
 		return line;
 	}
 
@@ -168,16 +168,16 @@ namespace qpsycle {
 		scene()->update( newLineRect );
 	}
 
-	void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
-	{
-		psycle::core::SequenceEntry *entry = item->sequenceEntry();
-		if ( psycle::core::Player::singleton().loopSequenceEntry() == entry ) {
-			psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
-		}
-		entry->track()->removeEntry(entry); // Remove from the core song's pattern sequence.
-		// Note: Removing the entry from the core song triggers a (boost) signal in the core,
-		// which, when caught by the host, removes the SequencerItem's GUI from the host.
-	}
+//	void SequencerDraw::onSequencerItemDeleteRequest( SequencerItem *item )
+//	{
+//		psycle::core::SequenceEntry *entry = item->sequenceEntry();
+////		if ( psycle::core::Player::singleton().setLoopSequenceEntry( == entry ) {
+//			psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
+////		}
+//		entry->pattern().erase(entry->pattern().// Remove from the core song's pattern sequence.
+//		// Note: Removing the entry from the core song triggers a (boost) signal in the core,
+//		// which, when caught by the host, removes the SequencerItem's GUI from the host.
+//	}
 
 	void SequencerDraw::onNewLineCreated(psycle::core::SequenceLine* seqLine)
 	{
@@ -265,7 +265,7 @@ namespace qpsycle {
 		QList<QGraphicsItem *> selectedItems = scene()->selectedItems();
 
 		int leftMostX = 10000; // Of all selected items, find the left most x pos.
-		foreach ( QGraphicsItem *uncastItem, selectedItems )
+        Q_FOREACH ( QGraphicsItem* uncastItem, selectedItems )
 		{
 			if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
 			{
@@ -281,7 +281,7 @@ namespace qpsycle {
 		}
 
 		// Move each selected item.
-		foreach ( QGraphicsItem *uncastItem, selectedItems )
+        Q_FOREACH ( QGraphicsItem *uncastItem, selectedItems )
 		{
 			if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
 			{
@@ -300,7 +300,7 @@ namespace qpsycle {
 
 		// Check that the item (or group) doesn't touch the top or bottom.
 		bool allowMove = true;
-		foreach ( QGraphicsItem *uncastItem, selectedItems )
+        Q_FOREACH ( QGraphicsItem *uncastItem, selectedItems )
 		{
 			if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
 			{
@@ -316,12 +316,12 @@ namespace qpsycle {
 
 		if ( allowMove )
 		{
-			foreach ( QGraphicsItem *uncastItem, selectedItems )
+            Q_FOREACH ( QGraphicsItem *uncastItem, selectedItems )
 			{
 				if ( SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem ) ) 
 				{
 					SequencerLine *parentLine = qgraphicsitem_cast<SequencerLine *>( someItem->parentItem() );  
-					int parentPos;
+                    int parentPos = -1;
 					for ( unsigned int i = 0; i < lines_.size(); i++ ) {
 						if ( lines_[i] == parentLine ) {
 							parentPos = i;
@@ -341,7 +341,7 @@ namespace qpsycle {
 
 	void SequencerDraw::onNewPatternCreated( psycle::core::Pattern *newPattern )
 	{
-		emit newPatternCreated( newPattern );
+        Q_EMIT newPatternCreated( newPattern );
 	}
 
 	bool SequencerDraw::gridSnap() const 
@@ -405,7 +405,7 @@ namespace qpsycle {
 		for ( lines_iterator it = lines_.begin(); it != lines_.end(); it++ ) 
 		{
 			QList<QGraphicsItem*> children = (*it)->children();
-			foreach ( QGraphicsItem *child, children )
+            Q_FOREACH ( QGraphicsItem *child, children )
 			{
 				SequencerItem *seqItem = qgraphicsitem_cast<SequencerItem*>( child );
 				psycle::core::SequenceEntry *entry = seqItem->sequenceEntry();
@@ -422,7 +422,7 @@ namespace qpsycle {
 			copyBuffer_.clear();
 			QList<QGraphicsItem*> selectedItems = scene()->selectedItems();
 
-			foreach ( QGraphicsItem *uncastItem, selectedItems )
+            Q_FOREACH ( QGraphicsItem *uncastItem, selectedItems )
 			{
 				SequencerItem *someItem = qgraphicsitem_cast<SequencerItem *>( uncastItem );
 				if ( someItem != 0 )
@@ -437,10 +437,10 @@ namespace qpsycle {
 		{
 			if ( !copyBuffer_.empty() )
 			{
-				foreach ( SequencerItem *item, copyBuffer_ )
+                Q_FOREACH ( SequencerItem *item, copyBuffer_ )
 				{
 					SequencerLine *line = qgraphicsitem_cast<SequencerLine*>( item->parentItem() );
-					line->addItem( item->sequenceEntry()->pattern() );
+                    line->addItem( &item->sequenceEntry()->pattern() );
 				}
 			}
 		}
@@ -470,7 +470,7 @@ namespace qpsycle {
 	void PlayLine::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 	{
 		QGraphicsItem::mouseReleaseEvent( event );
-		emit playLineMoved( pos().x() );
+        Q_EMIT playLineMoved( pos().x() );
 	}
 
 	QRectF PlayLine::boundingRect() const
