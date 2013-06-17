@@ -182,13 +182,13 @@ void AudioDriver::Quantize24AndDeinterlace(float const * pin, int32_t * pileft, 
 	} t;
 	do {
 		t.i = rint_clip<int32_t, 24>((*pin++) * 256.0f);
-		#warning big-endianess assumed ?
+		UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 		*outl++ = t.c[0];
 		*outl++ = t.c[1];
 		*outl++ = t.c[2];
 
 		t.i = rint_clip<int32_t, 24>((*pin++) * 256.0f);
-		#warning big-endianess assumed ?
+		UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 		*outr++ = t.c[0];
 		*outr++ = t.c[1];
 		*outr++ = t.c[2];
@@ -207,13 +207,13 @@ void AudioDriver::DeQuantize24AndDeinterlace(int const * pin, float * poutleft, 
 		char c[3];
 	} t;
 	do {
-		#warning big-endianess assumed ?
+		UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 		t.c[0] = *inl++;
 		t.c[1] = *inl++;
 		t.c[2] = *inl++;
 		*(poutleft++) = t.i >> 8;
 
-		#warning big-endianess assumed ?
+		UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 		t.c[0] = *inr++;
 		t.c[1] = *inr++;
 		t.c[2] = *inr++;
