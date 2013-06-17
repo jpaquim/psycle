@@ -2,6 +2,7 @@
 // copyright 1999-2013 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
+#include <universalis/detail/project.hpp>
 
 // http://www.gnu.org/s/hello/manual/libc/Feature-Test-Macros.html
 

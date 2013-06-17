@@ -2,10 +2,9 @@
 // copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #pragma once
-
 #include <universalis/detail/config.hpp>
-
 #include <diversalis.hpp>
+
 #ifndef DIVERSALIS__COMPILER__RESOURCE
 	#include <universalis/compiler/setup_feature_test_macros.hpp>
 	#include <universalis/compiler/setup_warnings.hpp>
