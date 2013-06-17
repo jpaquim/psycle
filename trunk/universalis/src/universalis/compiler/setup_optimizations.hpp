@@ -2,7 +2,9 @@
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
-// don't include this of this breaks pch: #include <universalis/detail/project.hpp>
+#if 0 // Don't include this or this breaks pre-compilation.
+	#include <universalis/detail/project.hpp>
+#endif
 #include <diversalis.hpp>
 
 // consistency check
