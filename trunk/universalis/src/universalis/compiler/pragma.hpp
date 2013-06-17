@@ -4,5 +4,13 @@
 #pragma once
 #include <universalis/detail/project.hpp>
 
-/// ISO C-1999 _Pragma operator
-#define UNIVERSALIS__COMPILER__PRAGMA(x) _Pragma(#x)
+#ifdef DIVERSALIS__COMPILER__MICROSOFT
+	#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 15
+		#define UNIVERSALIS__COMPILER__PRAGMA(x) __pragma(x)
+	#else
+		#define UNIVERSALIS__COMPILER__PRAGMA(x)
+	#endif
+#else
+	/// ISO C-1999 _Pragma operator
+	#define UNIVERSALIS__COMPILER__PRAGMA(x) _Pragma(x)
+#endif
