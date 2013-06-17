@@ -17,6 +17,12 @@ Preset::Preset(int numpars, int dataSize) :
 	data_(dataSize)
 {}
 
+Preset::Preset(Preset &rhs):
+    name_(rhs.name_),
+    params_(rhs.params_),
+    data_(rhs.data_)
+{}
+
 bool Preset::read(BinRead & prsIn) {
 	// read the preset name     
 	char cbuf[32];

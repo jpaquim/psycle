@@ -75,7 +75,7 @@ public:
 	int numberOfTracks() const;
 	int selectedMachineIndex() const;
 	int playPos() { return playPos_; }
-	int beatZoom() const;
+//	int beatZoom() const;
 	int patternStep() const;
 	int octave() const;
 
@@ -89,10 +89,10 @@ public:
 	// GUI events.
 	void keyPressEvent( QKeyEvent *event );
 
-public slots:
+public Q_SLOTS:
 	void onPatternStepComboBoxIndexChanged( int newIndex );
 	void onTracksComboBoxIndexChanged( int index );
-	void onZoomComboBoxIndexChanged( int );
+//	void onZoomComboBoxIndexChanged( int );
 protected:
 	void showEvent( QShowEvent * event );
 

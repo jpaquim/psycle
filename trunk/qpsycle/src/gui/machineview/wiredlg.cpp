@@ -92,7 +92,7 @@ void WireDlg::sliderMoved(int newval)
 		///\todo undo code
 		//m_pParent->AddMacViewUndo();
 		m_destMac->SetWireVolume( m_wireId, newvol );
-		emit volumeChanged(newvol);
+        Q_EMIT volumeChanged(newvol);
 	}
 
 	std::ostringstream oss;

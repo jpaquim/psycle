@@ -42,10 +42,10 @@ public:
 	WireDlg(WireGui *wire, QWidget *parent, QPoint where);
 	void wireChanged();
 
-public slots:
+public Q_SLOTS:
 	void sliderMoved(int newval);
 
-signals:
+Q_SIGNALS:
 	void volumeChanged(float newval);
 
 private:

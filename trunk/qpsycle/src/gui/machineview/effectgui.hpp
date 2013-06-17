@@ -36,7 +36,7 @@ public:
 	~EffectGui();
 	void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
 
-public slots:
+public Q_SLOTS:
 	void showMacTweakDlg();
 	void onToggleBypassActionTriggered(); // FIXME: this should be in EffectGui,
 

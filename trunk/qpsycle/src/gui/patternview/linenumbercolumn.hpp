@@ -20,8 +20,6 @@
 #ifndef LINENUMBERCOLUMN_H
 #define LINENUMBERCOLUMN_H
 
-#include <psycle/core/signalslib.h>
-
 #include <QWidget>
 
 namespace qpsycle {

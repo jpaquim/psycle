@@ -20,7 +20,7 @@
 #include <QApplication>
 #include <QIcon>
 #include <QSettings>
-
+#include <stdio.h>
 
 #include "gui/mainwindow.hpp"
 

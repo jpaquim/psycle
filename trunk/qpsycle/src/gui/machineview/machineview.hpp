@@ -61,7 +61,7 @@ class MachineView : public QGraphicsView {
 		void playNote( int note, int velocity, bool bTranspose, psycle::core::Machine*pMachine);
 		void stopNote( int note, bool bTranspose=true, psycle::core::Machine* pMachine=NULL);
 
-	public slots:
+	public Q_SLOTS:
 		void onNotePress( int note, psycle::core::Machine* mac );
 		void onNoteRelease( int note, psycle::core::Machine* mac );
 
@@ -81,7 +81,7 @@ class MachineView : public QGraphicsView {
 		void keyPressEvent(QKeyEvent *event);
 		void scaleView(qreal scaleFactor);
 
-	public slots:
+	public Q_SLOTS:
 		void startNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
 		void closeNewConnection(MachineGui *srcMacGui, QGraphicsSceneMouseEvent *event);
 		void deleteConnection( WireGui *wireGui );
@@ -90,7 +90,7 @@ class MachineView : public QGraphicsView {
 		void onMachineRenamed();
 		void onCloneMachine( MachineGui *macGui );
 
-	signals:
+	Q_SIGNALS:
 		void machineChosen( MachineGui *macGui );
 		void machineDeleted( int macIndex );
 		void machineRenamed();
@@ -131,9 +131,9 @@ class QPortButton : public QPushButton {
 		void setIndex(int index) { myindex = index; }
 		int getIndex() { return myindex; }
 
-	public slots:
-		void iamclicked() { emit myclicked(myindex); }
-	signals:
+	public Q_SLOTS:
+		void iamclicked() { Q_EMIT myclicked(myindex); }
+	Q_SIGNALS:
 		void myclicked(int index);
 	protected:
 		int myindex;
@@ -147,7 +147,7 @@ class QPortsDialog : public QDialog {
 		psycle::core::InPort::id_type GetInPort(psycle::core::Machine* mac);
 		psycle::core::OutPort::id_type GetOutPort(psycle::core::Machine* mac);
 
-	public slots:
+	public Q_SLOTS:
 		void buttonClicked(int portidx);
 	private:
 		void addNewButton(std::string message,int portidx);

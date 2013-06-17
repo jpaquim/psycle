@@ -26,7 +26,6 @@ namespace psycle { namespace core {
 	class Pattern;
 }}
 
-#include <psycle/core/signalslib.h>
 #include <QGraphicsItem>
 
 
@@ -35,7 +34,7 @@ namespace qpsycle {
 	class SequencerDraw;
 	class SequencerItem;
 
-	class SequencerLine : public QObject, public QGraphicsItem, public boost::signalslib::trackable {
+    class SequencerLine : public QObject, public QGraphicsItem {
 		Q_OBJECT
 		public:
 		SequencerLine( SequencerDraw *sDraw );
@@ -65,10 +64,10 @@ namespace qpsycle {
 	protected:
 		void mousePressEvent( QGraphicsSceneMouseEvent *event );
 
-	signals:
+    Q_SIGNALS:
 		void clicked( SequencerLine* );
 
-	private slots:
+    private Q_SLOTS:
 		void onItemClicked(SequencerItem*);
 
 	private:

@@ -267,7 +267,7 @@ void MachineTweakDlg::keyPressEvent( QKeyEvent *event )
 			int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 			int note = commands::noteFromCommand( command );
 			if (note != -1) {
-				emit notePress( note, pMachine_ );   
+                Q_EMIT notePress( note, pMachine_ );
 			}
 		}
 	}
@@ -279,7 +279,7 @@ void MachineTweakDlg::keyReleaseEvent( QKeyEvent *event )
 		int command = Global::configuration().inputHandler().getEnumCodeByKey( Key( event->modifiers(), event->key() ) );
 		int note = commands::noteFromCommand( command );
 		if (note != -1) {
-			emit noteRelease( note, pMachine_ );
+            Q_EMIT noteRelease( note, pMachine_ );
 		}
 	}
 }
@@ -403,7 +403,7 @@ void KnobGroup::setValueText( const QString & text )
 
 void KnobGroup::onKnobChanged()
 {
-	emit changed( this );
+    Q_EMIT changed( this );
 }
 
 void KnobGroup::onKnobPressed()
@@ -508,7 +508,7 @@ void Knob::mousePressEvent( QMouseEvent *ev )
 			m_ultraFineTweak = true;
 		}
 
-		emit sliderPressed();
+        Q_EMIT sliderPressed();
 	}
 }
 
@@ -608,7 +608,7 @@ void Knob::mouseMoveEvent( QMouseEvent *ev )
 	}
 	setValue(newValue);
 	update();
-	emit sliderMoved(value());
+    Q_EMIT sliderMoved(value());
 }
 
 void Knob::mouseReleaseEvent( QMouseEvent *ev )
@@ -618,7 +618,7 @@ void Knob::mouseReleaseEvent( QMouseEvent *ev )
 	} else if (m_bMousePressed) {
 		m_bMousePressed = false;
 		setCursor( Qt::ArrowCursor );
-		emit sliderReleased();
+        Q_EMIT sliderReleased();
 	}
 }
 
@@ -729,8 +729,6 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	connect( clsBtn, SIGNAL( pressed() ),
 			this, SLOT( reject() ) );
 
-	loadPresets();
-
 	QCompleter *completer = new QCompleter( prsList->model(), this );
 	completer->setCaseSensitivity(Qt::CaseInsensitive);
 	completer->setCompletionMode( QCompleter::PopupCompletion );
@@ -740,69 +738,6 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 	);
 	//<nmather>says: it might be better to use QCompleter::activated( QModelIndex)
 	//but I had some trouble getting it to work.
-}
-
-bool PresetsDialog::loadPresets()
-{
-	std::string filename( m_macGui->mac()->GetDllName() );
-
-	std::string::size_type pos = filename.find('.')  ;
-	if ( pos == std::string::npos ) {
-		filename  = filename + '.' + "prs";
-	} else {
-		filename = filename.substr(0,pos)+".prs";
-	}
-
-	QSettings settings;
-	QString presetsDir = settings.value( "paths/presetsPath" ).toString();
-	QString presetPath = presetsDir + QString::fromStdString( filename );
-
-	std::ifstream prsIn(  presetPath.toStdString().c_str() );
-	if ( !prsIn.is_open() ) {
-		return false; 
-	}
-
-	psycle::helpers::BinRead binIn( prsIn );
-
-	int numpresets = binIn.readInt4LE();
-	int filenumpars = binIn.readInt4LE();
-
-	if (numpresets >= 0) {
-		// old file format .. do not support so far ..
-	} else {
-		// new file format
-		if ( filenumpars == 1 ) 
-		{
-			int filepresetsize;
-			// new preset format version 1
-			// new preset format version 1
-
-			int numParameters = ((psycle::core::Plugin*) m_macGui->mac())->GetInfo().numParameters;
-			int sizeDataStruct = ((psycle::core::Plugin *) m_macGui->mac())->proxy().GetDataSize();
-
-			int numpresets = binIn.readInt4LE();
-			filenumpars = binIn.readInt4LE();
-			filepresetsize = binIn.readInt4LE();
-
-			if (( filenumpars != numParameters )  || (filepresetsize != sizeDataStruct)) {
-				return false;
-			}
-
-			while ( !prsIn.eof() ) 
-			{
-				psycle::core::Preset newPreset(numParameters, sizeDataStruct);
-				if (newPreset.read( binIn )) 
-				{
-					QListWidgetItem *prsItm = new QListWidgetItem( QString::fromStdString( newPreset.name() ) );
-					
-					prsList->addItem( prsItm );
-					presetMap[prsItm] = newPreset;
-				}
-			}
-		}
-	}
-
-	return true;
 }
 
 void PresetsDialog::usePreset()

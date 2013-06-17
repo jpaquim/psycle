@@ -18,6 +18,7 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 #include <psycle/core/pattern.h>
+#include <psycle/core/sequence.h>
 
 #include "sequencerview.hpp"
 #include "sequencerdraw.hpp"
@@ -44,7 +45,7 @@ SequencerLine::~SequencerLine() {
 
 QRectF SequencerLine::boundingRect() const 
 {
-	int width = std::max( sDraw_->width(), (int)sDraw_->scene()->width() );
+	int width = sDraw_->width();
 	return QRectF( 0, 0, width, sDraw_->lineHeight() );
 }
 
@@ -83,7 +84,7 @@ psycle::core::SequenceLine *SequencerLine::sequenceLine() const
 	
 	SequencerItem *item = new SequencerItem( sDraw_ );
 	psycle::core::SequenceEntry* entry =
-		sequenceLine()->createEntry(pattern, endTick);
+        &sequenceLine()->createEntry(*pattern, endTick);
 	addEntry(entry);
 }
 
@@ -105,7 +106,7 @@ void SequencerLine::addEntry( psycle::core::SequenceEntry* entry )
 
 	item->setPos( entry->tickPosition() * sDraw_->beatPxLength(), 0 );
 
-	entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
+//	entry->wasDeleted.connect(boost::bind(&SequencerLine::removeEntry,this,_1));
 	assert(scene());
 // scene()->addItem( item );
 	scene()->update();
@@ -128,7 +129,7 @@ void SequencerLine::moveItemToNewLine( SequencerItem *item, SequencerLine *newLi
 	for( items_iterator i=items_.begin(); i!=items_.end(); ++i ) {
 		assert(*i);
 		if( (*i) == item ) {
-			item->sequenceEntry()->setSequenceLine( newLine->sequenceLine() );
+            item->sequenceEntry()->setSequenceLine( *newLine->sequenceLine() );
 			newLine->insertItem( item );
 			items_.erase(i);
 			scene()->update();
@@ -154,12 +155,12 @@ void SequencerLine::removeEntry(psycle::core::SequenceEntry* entry) {
 }
 
 void SequencerLine::onItemClicked(SequencerItem* item) {
-	emit clicked ( this );
+    Q_EMIT clicked ( this );
 }
 
 void SequencerLine::mousePressEvent( QGraphicsSceneMouseEvent *event )
 {
-	emit clicked( this );
+    Q_EMIT clicked( this );
 }
 
 } // namespace qpsycle

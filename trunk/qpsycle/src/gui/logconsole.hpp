@@ -44,7 +44,7 @@ public:
 	void AddErrorText(QString text);
 	void CreateToolbar();
 
-public slots:
+public Q_SLOTS:
 	void Clear();
 	void SaveToFile();
 	

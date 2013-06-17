@@ -46,7 +46,7 @@ public:
 	WaveView( InstrumentsModel *instrumentsModel_,
 			QWidget *parent = 0);
 
-public slots:
+public Q_SLOTS:
 	void indexSpinChanged(int newidx);
 	void reset();
 

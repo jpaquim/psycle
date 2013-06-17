@@ -63,12 +63,12 @@ namespace qpsycle {
 		void keyPressEvent( QKeyEvent *event );
 		QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
-	private slots:
-		void onReplaceWithCloneActionTriggered();
-		void onLoopEntryActionTriggered();
+    private Q_SLOTS :
+//		void onReplaceWithCloneActionTriggered();
+//		void onLoopEntryActionTriggered();
 		void onDeleteEntryActionTriggered();
 
-	signals:
+    Q_SIGNALS:
 		void clicked(SequencerItem*);
 		void deleteRequest( SequencerItem* );
 		void moved( SequencerItem*, QPointF diff );

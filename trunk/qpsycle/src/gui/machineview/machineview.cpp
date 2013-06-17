@@ -255,7 +255,7 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui ) {
 	int id = macGui->mac()->id();
 	song()->DeleteMachine( macGui->mac() );
 
-	emit machineDeleted( id ); 
+    Q_EMIT machineDeleted( id );
 }
 
 /**
@@ -263,7 +263,7 @@ void MachineView::onDeleteMachineRequest( MachineGui *macGui ) {
 	directly, or a machine gets deleted and its connections have to go too.
 */
 void MachineView::deleteConnection( WireGui *wireGui ) {
-	psycle::core::Song::scoped_lock lock(song_->Mutex());
+    psycle::core::Song::scoped_lock lock(*song_ );
 
 	psycle::core::Machine *srcMac = wireGui->sourceMacGui()->mac();
 	psycle::core::Machine *dstMac = wireGui->destMacGui()->mac();
@@ -298,7 +298,7 @@ void MachineView::deleteConnection( WireGui *wireGui ) {
 	the MachineView altogether.
 */
 void MachineView::onMachineRenamed() {
-	emit machineRenamed();
+    Q_EMIT machineRenamed();
 }
 
 
@@ -328,7 +328,7 @@ void MachineView::addNewMachineGui( psycle::core::Machine *mac ) {
 		//setChosenMachine( macGui );
 		//song()->seqBus = song()->FindBusFromIndex( macGui->mac()->id() );
 	//}
-	emit newMachineCreated( mac );
+    Q_EMIT newMachineCreated( mac );
 
 	scene()->update( scene()->itemsBoundingRect() );
 }
@@ -343,7 +343,7 @@ void MachineView::onMachineChosen( MachineGui *macGui ) {
 	setChosenMachine( macGui );
 	scene()->update( scene()->itemsBoundingRect() );
 
-	emit machineChosen( macGui );
+    Q_EMIT machineChosen( macGui );
 }
 
 

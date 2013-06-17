@@ -148,7 +148,7 @@ void SampleBrowser::onAddToLoadedSamples()
 			}
 		}
 	}
-	emit sampleAdded();
+    Q_EMIT sampleAdded();
 }
 
 // Clear an instrument out of the CoreSong.
@@ -156,7 +156,7 @@ void SampleBrowser::onClearInstrument()
 {
 	int curInstrIndex = instrumentsList_->currentIndex().row();
 	instrumentsModel_->clearInstrument( curInstrIndex );
-	emit sampleAdded();
+    Q_EMIT sampleAdded();
 }
 
 }

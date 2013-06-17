@@ -38,8 +38,8 @@ SequencerArea::SequencerArea( SequencerDraw *seqDrawIn )
 
 QRectF SequencerArea::boundingRect() const 
 {
-	int width = std::max( seqDraw_->width(), (int)childrenBoundingRect().width() );
-	int height = std::max( seqDraw_->height(), (int)childrenBoundingRect().height() );
+	int width = seqDraw_->width();
+	int height = std::max( seqDraw_->height(), (childItems().size()>0)?(int)childrenBoundingRect().height():0 );
 	return QRectF( 0, 0, width, height );
 }
 

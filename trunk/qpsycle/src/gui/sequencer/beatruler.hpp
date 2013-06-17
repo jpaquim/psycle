@@ -21,8 +21,6 @@
 #ifndef BEATRULER_H
 #define BEATRULER_H
 
-#include <psycle/core/signalslib.h>
-
 #include <QWidget>
 class QPaintEvent;
 

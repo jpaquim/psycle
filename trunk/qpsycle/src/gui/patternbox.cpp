@@ -81,9 +81,9 @@ namespace qpsycle {
 
 		bool isFirst = true;
 
-		psycle::core::Sequence::patterniterator it = song_->sequence().patternbegin();
+        psycle::core::Sequence::patterns_type::iterator it = song_->sequence().patterns_begin();
 		std::map<std::string, CategoryItem *> categoryMap;
-		for ( ; it < song_->sequence().patternend(); ++it) {
+        for ( ; it < song_->sequence().patterns_end(); ++it) {
 		  psycle::core::Pattern *pattern = *it;
 		  const std::string& categoryName = pattern->category();
 		  CategoryItem *categoryItem = categoryMap[categoryName];
@@ -235,8 +235,8 @@ when the pattern selected changes.
 				psycle::core::Pattern* pattern = patItr->second;
 				patternMap.erase( patItr );
 
-				song()->sequence().removePattern( pattern );
-				emit patternDeleted();
+                song()->sequence().removePattern( *pattern );
+                Q_EMIT patternDeleted();
 
 				CategoryItem* parentCatItem = (CategoryItem*)patItem->parent();
 				int indexOfChild = parentCatItem->indexOfChild( patItem );
@@ -257,7 +257,7 @@ when the pattern selected changes.
 			std::map<PatternItem*, psycle::core::Pattern*>::iterator itr = patternMap.find( (PatternItem*)item );
 			if ( itr!=patternMap.end() ) {
 				psycle::core::Pattern *pattern = itr->second;
-				emit addPatternToSequencerRequest( pattern );
+                Q_EMIT addPatternToSequencerRequest( pattern );
 			}
 		}
 	}
@@ -300,7 +300,7 @@ when the pattern selected changes.
 					psycle::core::Pattern *pattern = patItr->second;
 					currentPattern_ = pattern;
 					// emit a signal for main window to tell pat view.
-					emit patternSelectedInPatternBox( pattern );
+                    Q_EMIT patternSelectedInPatternBox( pattern );
 				}
 				else {
 					std::cerr << "Warning: " << __FILE__ << ": internal error on line" << __LINE__ << ": An unknown pattern item was selected." << std::endl;
@@ -325,7 +325,7 @@ when the pattern selected changes.
 		    psycle::core::Pattern *pattern = itr->second;
 		    item->setText( 0, newText );
 		    pattern->setName( newText.toStdString() );
-		    emit patternNameChanged();
+            Q_EMIT patternNameChanged();
 		    return;
 		  }
 		}
@@ -382,7 +382,7 @@ when the pattern selected changes.
 			if( itr!=patternMap.end() ) {
 				psycle::core::Pattern *pattern = itr->second;
 				pattern->setName( item->text( 0 ).toStdString() );
-				emit patternNameChanged();
+                Q_EMIT patternNameChanged();
 				return;
 			}
 		}
@@ -478,7 +478,7 @@ when the pattern selected changes.
 			}
 			*/
 			item->setBackground( 0, QBrush( color ) );
-			emit categoryColorChanged();
+            Q_EMIT categoryColorChanged();
 		}
 	}
 

@@ -58,7 +58,7 @@ public:
 
 	bool slotIsEmpty( int instrIndex ) const;
 
-signals:
+Q_SIGNALS:
 	void selectedInstrumentChanged(int);
 
 private:

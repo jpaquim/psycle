@@ -18,7 +18,6 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#include <psycle/core/signalslib.h>
 #include <psycle/core/machine.h>
 #include <psycle/core/song.h>
 
@@ -126,7 +125,7 @@ void GeneratorGui::mousePressEvent( QGraphicsSceneMouseEvent *event )
 			startPanPos = event->pos().toPoint().x();
 			startPan = mac()->Pan();
 		} else
-			emit chosen( this );
+            Q_EMIT chosen( this );
 	}
 	MachineGui::mousePressEvent( event );
 }
