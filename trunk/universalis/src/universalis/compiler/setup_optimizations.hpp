@@ -21,9 +21,9 @@
 #elif defined NDEBUG && !defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE && \
 	/* optimisation is currently only detected on gcc */ defined DIVERSALIS__COMPILER__GNU
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning assertions are off and optimisations are on. Is this intended?
+		#warning both assertions and optimisations are off. Is this intended?
 	#else
-		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are off and optimisations are on. Is this intended?")
+		#pragma message(__FILE__ "(" __LINE__ ") : warning: both assertions and optimisations are off. Is this intended?")
 	#endif
 #elif !defined NDEBUG && defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE
 	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
