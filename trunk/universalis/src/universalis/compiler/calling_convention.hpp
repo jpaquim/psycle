@@ -1,6 +1,9 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
+#pragma once
+#include "attribute.hpp"
+
 // see http://www.programmersheaven.com/2/Calling-conventions (or http://www.angelcode.com/dev/callconv/callconv.html)
 
 // calling convention | modifier keyword | parameters stack push            | parameters stack pop | extern "C" symbol name mangling                   | extern "C++" symbol name mangling
@@ -15,8 +18,6 @@
 // note: on microsoft's compiler, with cdecl, there's is no special decoration for extern "C" declarations, i.e., no '_' prepended.
 // member functions defaults to thiscall
 // non-member functions defaults to cdecl
-
-#include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
 	#define UNIVERSALIS__COMPILER__CALLING_CONVENTION__C

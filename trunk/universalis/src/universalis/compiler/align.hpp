@@ -2,7 +2,6 @@
 // copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #pragma once
-
 #include "attribute.hpp"
 
 #if defined DIVERSALIS__COMPILER__GNU
@@ -17,4 +16,5 @@
 	/// memory alignment.
 	///\see packed
 	#define UNIVERSALIS__COMPILER__ALIGN(bytes)
+	#define UNIVERSALIS__COMPILER__DOALIGN(bytes, what)
 #endif

@@ -2,7 +2,7 @@
 // copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
-#include <diversalis.hpp>
+#include <universalis/detail/project.hpp>
 
 #if defined DIVERSALIS__COMPILER__GNU
 
