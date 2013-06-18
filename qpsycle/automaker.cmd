@@ -15,7 +15,7 @@ echo Running QMake
 qmake -recursive CONFIG+=debug CONFIG-=release
 echo QMake Complete
 echo Compiling Debug Version
-mingw32-make debug
+mingw32-make -j%NUMBER_OF_PROCESSORS% debug
 echo Make Complete
 pause
 
@@ -24,14 +24,14 @@ echo Running QMake
 qmake -recursive CONFIG+=release CONFIG-=debug
 echo QMake Complete
 echo Compiling Release Version
-mingw32-make release
+mingw32-make -j%NUMBER_OF_PROCESSORS% release
 echo Make Complete
 pause
 
 
 :CLEAN
 echo Cleaning the hood!
-mingw32-make clean
+mingw32-make -j%NUMBER_OF_PROCESSORS% clean
 echo Cleaning Complete
 pause
 
