@@ -10,7 +10,7 @@
 #
 #
 
-	QMAKE=qmake
+QMAKE=qmake
 
 echo "---"
 echo "Welcome to Automaker"
@@ -55,7 +55,7 @@ else
 fi
 
 echo "---"
-  $MAKE_BINARY
+  $MAKE_BINARY -j$(getconf _NPROCESSORS_ONLN || nproc)
 MAKE_RETVAL="$?"
 echo "---"
 
