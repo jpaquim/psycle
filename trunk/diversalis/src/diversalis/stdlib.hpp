@@ -8,7 +8,6 @@
 #include "os.hpp"
 
 #if __cplusplus >= 201103L || __STDC__VERSION__ >= 199901L
-
 	#define DIVERSALIS__STDLIB__MATH 199901L
 #endif
 

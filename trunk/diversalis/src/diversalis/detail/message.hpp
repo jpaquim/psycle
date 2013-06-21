@@ -2,21 +2,22 @@
 // copyright 2013-2013 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
+#include <diversalis/compiler.hpp>
 #include "stringize.hpp"
 
 // see http://stackoverflow.com/questions/471935/user-warnings-on-msvc-and-gcc
 
 #ifdef DIVERSALIS__COMPILER__MICROSOFT
 	#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 15
-		#define DIVERSALIS__DETAIL__MESSAGE(str) \
-			__pragma(message(__FILE__ "(" DIVERSALIS__DETAIL__STRINGIZE(__LINE__) ") : " str))
+		#define DIVERSALIS__MESSAGE(str) \
+			__pragma(message(__FILE__ "(" DIVERSALIS__STRINGIZE(__LINE__) ") : " str))
 	#else
-		#define DIVERSALIS__DETAIL__MESSAGE(str)
+		#define DIVERSALIS__MESSAGE(str)
 	#endif
 #else
 	/// ISO C-1999 _Pragma operator
-	#define DIVERSALIS__DETAIL__MESSAGE(str) \
-		_Pragma(DIVERSALIS__DETAIL__STRINGIZE(message str))
+	#define DIVERSALIS__MESSAGE(str) \
+		_Pragma(DIVERSALIS__STRINGIZE(message str))
 #endif
 
-#define DIVERSALIS__DETAIL__WARNING(str) DIVERSALIS__DETAIL__MESSAGE("warning: " str)
+#define DIVERSALIS__WARNING(str) DIVERSALIS__MESSAGE("warning: " str)
