@@ -5,10 +5,9 @@
 
 /// Interprets argument as a string litteral.
 /// The indirection in the call to # lets the macro expansion on the argument be done first.
-#define DIVERSALIS__STRINGIZE(tokens) DIVERSALIS__STRINGIZE__DETAIL__NO_EXPANSION(tokens)
+#define DIVERSALIS__DETAIL__STRINGIZE(tokens) DIVERSALIS__DETAIL__STRINGIZE__DETAIL__NO_EXPANSION(tokens)
 
 ///\internal
-/// Don't call this macro directly ; call DIVERSALIS__STRINGIZE, which calls this macro after macro expansion is done on the argument.
-///\relates DIVERSALIS__STRINGIZE
-#define DIVERSALIS__STRINGIZE__DETAIL__NO_EXPANSION(tokens) #tokens
-
+/// Don't call this macro directly ; call DIVERSALIS__DETAIL__STRINGIZE, which calls this macro after macro expansion is done on the argument.
+///\relates DIVERSALIS__DETAIL__STRINGIZE
+#define DIVERSALIS__DETAIL__STRINGIZE__DETAIL__NO_EXPANSION(tokens) #tokens
