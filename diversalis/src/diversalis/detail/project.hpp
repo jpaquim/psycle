@@ -2,7 +2,4 @@
 // copyright 1999-2013 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 #pragma once
-
 #include <diversalis/detail/config.hpp>
-#include "stringize.hpp"
-#include "message.hpp"

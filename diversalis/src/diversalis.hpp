@@ -11,3 +11,5 @@
 	#include "diversalis/cpu.hpp"
 	#include "diversalis/stdlib.hpp"
 #endif
+#include "diversalis/detail/message.hpp"
+#include "diversalis/detail/stringize.hpp"
