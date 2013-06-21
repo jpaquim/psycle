@@ -107,10 +107,10 @@
     <ClInclude Include="src\psycle\helpers\math\log.hpp">
       <Filter>psycle\helpers\math</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\helpers\math\lrint.hpp">
+    <ClInclude Include="src\psycle\helpers\math\rint.hpp">
       <Filter>psycle\helpers\math</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\helpers\math\lround.hpp">
+    <ClInclude Include="src\psycle\helpers\math\round.hpp">
       <Filter>psycle\helpers\math</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\helpers\math\math.hpp">

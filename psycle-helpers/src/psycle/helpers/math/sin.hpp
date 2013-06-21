@@ -37,8 +37,8 @@ Real inline fast_sin(Real radians) {
 	// y(x) = a + b x + c x^2
 	// with the constraints: y(0) = 0, y(pi / 2) = 1, y(pi) = 0
 	// this gives, a = 0, b = 4 / pi, c = -4 / pi^2
-	Real static UNIVERSALIS__COMPILER__CONSTEXPR b(4 / pi);
-	Real static UNIVERSALIS__COMPILER__CONSTEXPR c(-b / pi); // pi^2 = 9.86960440108935861883449099987615114
+	Real static constexpr b(4 / pi);
+	Real static constexpr c(-b / pi); // pi^2 = 9.86960440108935861883449099987615114
 	// we use absolute values to mirror the parabola around the orign 
 	Real y(b * radians + c * radians * std::abs(radians));
 	if(Polynomial_Degree > 2) {
@@ -47,10 +47,10 @@ Real inline fast_sin(Real radians) {
 		// q = 0.782, p = 0.218 for minimal relative error
 		// q = ?, p = ? for minimal THD error
 		#if 1
-			Real static UNIVERSALIS__COMPILER__CONSTEXPR p(Real(0.224008178776));
+			Real static constexpr p(Real(0.224008178776));
 			y = p * (y * std::abs(y) - y) + y;
 		#else
-			Real static UNIVERSALIS__COMPILER__CONSTEXPR q(Real(0.775991821224));
+			Real static constexpr q(Real(0.775991821224));
 			y = q * y + p * y * std::abs(y);
 		#endif
 	}

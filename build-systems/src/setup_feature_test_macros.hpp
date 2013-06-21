@@ -2,9 +2,6 @@
 // copyright 1999-2013 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
-#if 0 // Don't include this or this breaks pre-compilation.
-	#include <universalis/detail/project.hpp>
-#endif
 
 // http://www.gnu.org/s/hello/manual/libc/Feature-Test-Macros.html
 

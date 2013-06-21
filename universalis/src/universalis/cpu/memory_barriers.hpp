@@ -148,7 +148,7 @@
 #endif
 
 #if !defined universalis__cpu__memory_barriers__defined
-	#warning Memory barriers are not defined for this system. Will use compare_and_swap to emulate.
+	UNIVERSALIS__COMPILER__WARNING("Memory barriers are not defined for this system. Will use compare_and_swap to emulate.")
 	#include "atomic_compare_and_swap.hpp"
 	namespace universalis { namespace cpu { namespace memory_barriers {
 		void inline  full() { static int dummy = 0; atomic_compare_and_swap(&dummy, 0, 0); }

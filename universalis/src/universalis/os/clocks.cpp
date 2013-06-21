@@ -5,7 +5,7 @@
 #include "clocks.hpp"
 #include "detail/clocks.hpp"
 #include "exception.hpp"
-#include <universalis/compiler/thread_local_storage.hpp>
+#include <universalis/compiler/thread_local.hpp>
 #ifdef DIVERSALIS__COMPILER__FEATURE__OPEN_MP
 	#include <omp.h>
 #endif
@@ -52,51 +52,51 @@ namespace detail {
 
 				/// TIMERS
 				#if !_POSIX_TIMERS
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("will use posix sysconf at runtime to determine whether this OS supports timers: !_POSIX_TIMERS")
 					#endif
 				#elif _POSIX_TIMERS == -1
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning this OS does not support posix timers: _POSIX_TIMERS == -1
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("this OS does not support posix timers: _POSIX_TIMERS == -1")
 					#endif
 					clock_gettime_supported = clock_getres_supported = false;
 				#elif _POSIX_TIMERS > 0
 					clock_gettime_supported = clock_getres_supported = true;
 				#endif
 				#if !defined _SC_TIMERS
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning cannot use posix sysconf at runtime to determine whether this OS supports timers: !defined _SC_TIMERS
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("cannot use posix sysconf at runtime to determine whether this OS supports timers: !defined _SC_TIMERS")
 					#endif
 					clock_gettime_supported = clock_getres_supported = false;
 				#else
 					clock_gettime_supported = clock_getres_supported = supported(_SC_TIMERS);
 					// beware: cygwin has clock_gettime, but it doesn't have clock_getres.
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__OS__CYGWIN && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning \
+					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__OS__CYGWIN
+						UNIVERSALIS__COMPILER__WARNING("\
 							Operating system is Cygwin. Cygwin has _POSIX_TIMERS > 0, \
 							but only partially implements this posix option: it supports ::clock_gettime, but not ::clock_getres. \
 							This might be the reason ::sysconf(_SC_TIMERS) returns 0, but this condradicts _POSIX_TIMERS > 0. \
-							We assume that ::clock_gettime is supported.
+							We assume that ::clock_gettime is supported.")
 							if(!clock_gettime_supported) clock_gettime_supported = true;
 					#endif
 				#endif
 
 				// MONOTONIC_CLOCK
 				#if !_POSIX_MONOTONIC_CLOCK
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("will use posix sysconf at runtime to determine whether this OS supports monotonic clock: !_POSIX_MONOTONIC_CLOCK")
 					#endif
 				#elif _POSIX_MONOTONIC_CLOCK == -1
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("this OS does not support posix monotonic clock: _POSIX_MONOTONIC_CLOCK == -1")
 					#endif
 					monotonic_clock_supported = false;
 				#elif _POSIX_MONOTONIC_CLOCK > 0
 					monotonic_clock_supported = true;
 				#endif
 				#if !defined _SC_MONOTONIC_CLOCK
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning cannot use posix sysconf at runtime to determine whether this OS supports monotonic clock: !defined _SC_MONOTONIC_CLOCK
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("cannot use posix sysconf at runtime to determine whether this OS supports monotonic clock: !defined _SC_MONOTONIC_CLOCK")
 					#endif
 					monotonic_clock_supported = false;
 				#else
@@ -106,20 +106,20 @@ namespace detail {
 
 				// PROCESS_CPUTIME
 				#if !_POSIX_CPUTIME
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning will use posix sysconf at runtime to determine whether this OS supports process cpu time: !_POSIX_CPUTIME
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("will use posix sysconf at runtime to determine whether this OS supports process cpu time: !_POSIX_CPUTIME")
 					#endif
 				#elif _POSIX_CPUTIME == -1
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning this OS does not support posix process cpu time: _POSIX_CPUTIME == -1
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("this OS does not support posix process cpu time: _POSIX_CPUTIME == -1")
 					#endif
 					process_cputime_supported = false;
 				#elif _POSIX_CPUTIME > 0
 					process_cpu_time_supported = true;
 				#endif
 				#if !defined _SC_CPUTIME
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning cannot use posix sysconf at runtime to determine whether this OS supports process cpu time: !defined _SC_CPUTIME
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("cannot use posix sysconf at runtime to determine whether this OS supports process cpu time: !defined _SC_CPUTIME")
 					#endif
 					process_cpu_time_supported = false;
 				#else
@@ -129,20 +129,20 @@ namespace detail {
 
 				// THREAD_CPUTIME
 				#if !_POSIX_THREAD_CPUTIME
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning will use posix sysconf at runtime to determine whether this OS supports thread cpu time: !_POSIX_THREAD_CPUTIME
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("will use posix sysconf at runtime to determine whether this OS supports thread cpu time: !_POSIX_THREAD_CPUTIME")
 					#endif
 				#elif _POSIX_THREAD_CPUTIME == -1
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning this OS does not support posix thread cpu time: _POSIX_THREAD_CPUTIME == -1
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("this OS does not support posix thread cpu time: _POSIX_THREAD_CPUTIME == -1")
 					#endif
 					thread_cpu_time_supported = false;
 				#elif _POSIX_THREAD_CPUTIME > 0
 					thread_cpu_time_supported = true;
 				#endif
 				#if !defined _SC_THREAD_CPUTIME
-					#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-						#warning cannot use posix sysconf at runtime to determine whether this OS supports thread cpu time: !defined _SC_THREAD_CPUTIME
+					#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+						UNIVERSALIS__COMPILER__WARNING("cannot use posix sysconf at runtime to determine whether this OS supports thread cpu time: !defined _SC_THREAD_CPUTIME")
 					#endif
 					thread_cpu_time_supported = false;
 				#else
@@ -155,8 +155,8 @@ namespace detail {
 					if(process_cpu_time_supported || thread_cpu_time_supported) {
 						::clockid_t clock_id;
 						if(clock_getcpuclockid(0, &clock_id) == ENOENT) {
-							#if defined UNIVERSALIS__OS__CLOCKS__DIAGNOSE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-								#warning this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent
+							#ifdef UNIVERSALIS__OS__CLOCKS__DIAGNOSE
+								UNIVERSALIS__COMPILER__WARNING("this SMP system makes CLOCK_PROCESS_CPUTIME_ID and CLOCK_THREAD_CPUTIME_ID inconsistent")
 							#endif
 							process_cpu_time_supported = thread_cpu_time_supported = false;
 						}

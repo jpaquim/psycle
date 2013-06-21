@@ -66,10 +66,6 @@
 		#define DIVERSALIS__COMPILER__FEATURE__AUTO_LINK
 		#undef DIVERSALIS__COMPILER__FEATURE__AUTO_LINK // was just defined to insert documentation.
 
-		/// indicates the compiler supports the #warning preprocessor directive.
-		#define DIVERSALIS__COMPILER__FEATURE__WARNING
-		#undef DIVERSALIS__COMPILER__FEATURE__WARNING // was just defined to insert documentation.
-
 		/// indicates the compiler has optimisations enabled.
 		#define DIVERSALIS__COMPILER__FEATURE__OPTIMIZE
 		#undef DIVERSALIS__COMPILER__FEATURE__OPTIMIZE // was just defined to insert documentation.
@@ -208,8 +204,6 @@
 	#define DIVERSALIS__COMPILER__VERSION__MINOR __GNUC_MINOR__
 	#define DIVERSALIS__COMPILER__VERSION__PATCH __GNUC_PATCHLEVEL__
 	#define DIVERSALIS__COMPILER__VERSION__ABI __GXX_ABI_VERSION
-
-	#define DIVERSALIS__COMPILER__FEATURE__WARNING
 
 	#define DIVERSALIS__COMPILER__FEATURE__ASSEMBLER
 	#define DIVERSALIS__COMPILER__ASSEMBLER__ATT ///\todo needs autodetection since gcc also supports intel asm
@@ -358,5 +352,5 @@
 #endif
 	
 #if !defined __cplusplus && !defined DIVERSALIS__COMPILER__RESOURCE
-	#error "Not a c++ compiler. For the gnu compiler, please invoke gcc with the language option set to c++ (or invoke gcc via the g++ driver)."
+	#error "Not a c++ compiler. For the gnu compiler, please invoke gcc with the -x language option set to c++ (or invoke gcc via the g++ driver)."
 #endif

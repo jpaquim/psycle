@@ -11,9 +11,9 @@ namespace psycle { namespace helpers {
 
 	// TODO No idea how to do this in a nicer way with the gnu toolchain
 	namespace {
-		UNIVERSALIS__COMPILER__CONSTEXPR uint16_t FORMAT_PCM = 1;
-		UNIVERSALIS__COMPILER__CONSTEXPR uint16_t FORMAT_FLOAT = 3;
-		UNIVERSALIS__COMPILER__CONSTEXPR uint16_t FORMAT_EXTENSIBLE = 0xFFFEU;
+		constexpr uint16_t FORMAT_PCM = 1;
+		constexpr uint16_t FORMAT_FLOAT = 3;
+		constexpr uint16_t FORMAT_EXTENSIBLE = 0xFFFEU;
 	}
 	template class RiffWaveFmtChunk<LongBE, ShortBE>;
 	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_PCM = FORMAT_PCM;

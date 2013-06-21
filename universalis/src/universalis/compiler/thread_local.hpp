@@ -31,7 +31,7 @@
 	/// variable stored in a per thread local storage.
 	#define thread_local
 
-	#if !defined DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE && defined DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning "Cannot generate thread-safe code for this compiler ; please add support for thread-local storage for your compiler in the file where this warning is triggered."
+	#ifndef DIVERSALIS__COMPILER__FEATURE__NOT_CONCRETE
+		UNIVERSALIS__COMPILER__WARNING("Cannot generate thread-safe code for this compiler ; please add support for thread-local storage for your compiler in the file where this warning is triggered.")
 	#endif
 #endif

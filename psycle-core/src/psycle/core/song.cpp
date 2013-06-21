@@ -27,7 +27,7 @@ CoreSong::CoreSong()
 {
 	for(unsigned int i(0); i < MAX_MACHINES; ++i) machines_[i] = 0;
 	for(unsigned int i(0); i < MAX_INSTRUMENTS; ++i) _pInstrument[i] = new Instrument;
-	clear(); // Warning! Due to C++ semantics, CoreSong::clear() will be called, even in a derived class that implements clear().
+	clear(); UNIVERSALIS__COMPILER__WARNING("Due to C++ semantics, CoreSong::clear() will be called, even in a derived class that implements clear().")
 }
 
 CoreSong::~CoreSong() {
@@ -457,9 +457,7 @@ bool CoreSong::WavAlloc(Instrument::id_type instrument,const char * pathToWav) {
 
 ///\todo mfc+winapi->std
 bool CoreSong::CloneIns(Instrument::id_type /*src*/, Instrument::id_type /*dst*/) {
-	#if defined DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning ################### UNIMPLEMENTED ###################
-	#endif
+	UNIVERSALIS__COMPILER__WARNING("Instrument cloning is not implemented.")
 	// src has to be occupied and dst must be empty
 	#if 0
 		if(!Gloxxxxxxxxxxxxxxbal::song()._pInstrument[src]->Empty() && !Gloxxxxxxxxxxxxxxxbal::song()._pInstrument[dst]->Empty())

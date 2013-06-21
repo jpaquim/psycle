@@ -374,9 +374,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 				case MACH_VSTFX:
 					{
 						#ifndef DIVERSALIS__OS__MICROSOFT
-							#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-								#warning VST plugin is currently only implemented on Microsoft Windows operating system.
-							#endif
+							UNIVERSALIS__COMPILER__WARNING("VST plugin is currently only implemented on Microsoft Windows operating system.")
 							Dummy* dummy;
 							pMac[i] = dummy = static_cast<Dummy*>(factory.CreateMachine(InternalKeys::dummy,i));
 							if (type == MACH_VST ) dummy->setGenerator(true);
