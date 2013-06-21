@@ -7,11 +7,6 @@
 
 // QT libraries
 #include <qglobal.h>
-#ifdef Q_WS_WIN
-# define _POSIX_
-# include <limits.h> ///\todo doc what's that hack for?
-# undef _POSIX_
-#endif
 #include <qcoreapplication.h>
 #include <qlist.h>
 #include <qvariant.h>  // All moc genereated code has this include
