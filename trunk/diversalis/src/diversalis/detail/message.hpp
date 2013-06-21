@@ -8,15 +8,15 @@
 
 #ifdef DIVERSALIS__COMPILER__MICROSOFT
 	#if DIVERSALIS__COMPILER__VERSION__MAJOR >= 15
-		#define DIVERSALIS__COMPILER__MESSAGE(str) \
-			__pragma(message(__FILE__ "(" DIVERSALIS__COMPILER__STRINGIZE(__LINE__) ") : " str))
+		#define DIVERSALIS__DETAIL__MESSAGE(str) \
+			__pragma(message(__FILE__ "(" DIVERSALIS__DETAIL__STRINGIZE(__LINE__) ") : " str))
 	#else
-		#define DIVERSALIS__COMPILER__MESSAGE(str)
+		#define DIVERSALIS__DETAIL__MESSAGE(str)
 	#endif
 #else
 	/// ISO C-1999 _Pragma operator
-	#define DIVERSALIS__COMPILER__MESSAGE(str) \
-		_Pragma(DIVERSALIS__COMPILER__STRINGIZE(message str))
+	#define DIVERSALIS__DETAIL__MESSAGE(str) \
+		_Pragma(DIVERSALIS__DETAIL__STRINGIZE(message str))
 #endif
 
-#define DIVERSALIS__COMPILER__WARNING(str) DIVERSALIS__COMPILER__MESSAGE("warning: " str)
+#define DIVERSALIS__DETAIL__WARNING(str) DIVERSALIS__DETAIL__MESSAGE("warning: " str)
