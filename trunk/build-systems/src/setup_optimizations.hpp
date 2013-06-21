@@ -1,45 +1,26 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 1999-2011 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
+// copyright 1999-2013 members of the psycle project http://psycle.pastnotecut.org ; johan boule <bohan@jabber.org>
 
 #pragma once
-#if 0 // Don't include this or this breaks pre-compilation.
-	#include <universalis/detail/project.hpp>
-#endif
 #include <diversalis.hpp>
 
 // consistency check
 #if defined NDEBUG && defined DIVERSALIS__STDLIB__RUNTIME__DEBUG
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning assertions are off and we are using a debug runtime. Is this intended?
-	#else
-		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are off and we are using a debug runtime. Is this intended?")
-	#endif
+	DIVERSALIS__COMPILER__WARNING("Assertions are off and we are using a debug runtime. Is this intended?")
 #elif !defined NDEBUG && !defined DIVERSALIS__STDLIB__RUNTIME__DEBUG && \
 	/* debug runtime is currently only detected on msvc */ defined DIVERSALIS__COMPILER__MICROSOFT
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning assertions are on and we are not using a debug runtime. Is this intended?
-	#else
-		#pragma message(__FILE__ "(" __LINE__ ") : warning: assertions are on and we are not using a debug runtime. Is this intended?")
-	#endif
+	DIVERSALIS__COMPILER__WARNING("Assertions are on and we are not using a debug runtime. Is this intended?")
 #elif defined NDEBUG && !defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE && \
 	/* optimisation is currently only detected on gcc */ defined DIVERSALIS__COMPILER__GNU
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning both assertions and optimisations are off. Is this intended?
-	#else
-		#pragma message(__FILE__ "(" __LINE__ ") : warning: both assertions and optimisations are off. Is this intended?")
-	#endif
+	DIVERSALIS__COMPILER__WARNING("Both assertions and optimisations are off. Is this intended?")
 #elif !defined NDEBUG && defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning both assertions and optimisations are on. Is this intended?
-	#else
-		#pragma message(__FILE__ "(" __LINE__ ") : warning: both assertions and optimisations are on. Is this intended?")
-	#endif
+	DIVERSALIS__COMPILER__WARNING("Both assertions and optimisations are on. Is this intended?")
 #endif
 
 #if defined DIVERSALIS__COMPILER__FEATURE__OPTIMIZE || defined NDEBUG
 	#ifdef DIVERSALIS__COMPILER__MICROSOFT
 		#if defined UNIVERSALIS__COMPILER__VERBOSE
-			#pragma message(__FILE__ "(" __LINE__ ") : universalis::compiler:: setting optimizations on")
+			DIVERSALIS__COMPILER__MESSAGE("Setting optimizations on")
 		#endif
 
 		#pragma runtime_checks("c", off) // reports when a value is assigned to a smaller data type that results in a data loss
@@ -70,14 +51,16 @@
 		//#pragma inline_recursion(on)
 		//#define inline __forceinline
 		
-		#if 1 // would be good, but requires to rebuild boost; see https://svn.boost.org/trac/boost/ticket/1917
-			#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-				#warning Compiling with _SECURE_SCL 0 and _HAS_ITERATOR_DEBUGGING. Remember to build Boost libs this way too
-			#else
-				#pragma message(__FILE__ " : Compiling with _SECURE_SCL 0 and _HAS_ITERATOR_DEBUGGING 0. Remember to build Boost libs this way too")
-			#endif
-			#define _SECURE_SCL 0 // disable checked iterators. see http://msdn.microsoft.com/en-us/library/aa985896.aspx
-			#define _HAS_ITERATOR_DEBUGGING 0 // see http://msdn.microsoft.com/en-us/library/aa985939.aspx
+		#define _SECURE_SCL 0 // disable checked iterators. see http://msdn.microsoft.com/en-us/library/aa985896.aspx
+		#define _HAS_ITERATOR_DEBUGGING 0 // see http://msdn.microsoft.com/en-us/library/aa985939.aspx
+		
+		#if !_SECURE_SCL
+			// see https://svn.boost.org/trac/boost/ticket/1917
+			DIVERSALIS__COMPILER__WARNING("Compiling with _SECURE_SCL = 0. Remember to build Boost libs this way too.")
+		#endif
+		#if !_HAS_ITERATOR_DEBUGGING
+			// see https://svn.boost.org/trac/boost/ticket/1917
+			DIVERSALIS__COMPILER__WARNING("Compiling with _HAS_ITERATOR_DEBUGGING = 0. Remember to build Boost libs this way too.")
 		#endif
 	#endif
 #endif

@@ -25,8 +25,8 @@ X inline clip(X minimum, X value, X maximum) {
 /// clips with min and max values inferred from bits
 template<const unsigned int bits, typename X> UNIVERSALIS__COMPILER__CONST_FUNCTION
 X inline clip(X value) {
-	int UNIVERSALIS__COMPILER__CONSTEXPR max(int((1u << (bits - 1u)) - 1u));
-	int UNIVERSALIS__COMPILER__CONSTEXPR min(-max - 1);
+	int constexpr max(int((1u << (bits - 1u)) - 1u));
+	int constexpr min(-max - 1);
 	return clip(X(min), value, X(max));
 }
 

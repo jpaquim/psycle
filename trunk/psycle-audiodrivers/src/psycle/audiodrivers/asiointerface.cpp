@@ -703,8 +703,8 @@ ASIOTime *ASIOInterface::bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, AS
 				outl = (int32_t*)ASIObuffers[counter].pleft[index];
 				outr = (int32_t*)ASIObuffers[counter].pright[index];
 				// TODO Don't really know why, but the -100 is what made the clipping work correctly.
-				float UNIVERSALIS__COMPILER__CONSTEXPR max = float((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
-				float UNIVERSALIS__COMPILER__CONSTEXPR min = float(-max - 1);
+				float constexpr max = float((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
+				float constexpr min = float(-max - 1);
 				for(int i = 0; i < _ASIObufferSize; ++i) {
 					*outl++ = rint<int32_t>(clip(min, (*pBuf++) * 65536.0f, max));
 					*outr++ = rint<int32_t>(clip(min, (*pBuf++) * 65536.0f, max));

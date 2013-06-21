@@ -7,7 +7,7 @@
 #include "exception.hpp"
 #include <universalis/os/loggers.hpp>
 #include <universalis/os/thread_name.hpp>
-#include <universalis/compiler/thread_local_storage.hpp>
+#include <universalis/compiler/thread_local.hpp>
 #if defined DIVERSALIS__OS__MICROSOFT
 	#include <universalis/os/include_windows_without_crap.hpp>
 #endif

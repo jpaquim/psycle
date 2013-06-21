@@ -392,9 +392,9 @@ void mi::PutData(void* pData) {
 		pCB->MessBox("WARNING!\nThis fileversion does not match current plugin's fileversion.\nYour settings are probably fucked.","FluidSynth",0);
 		return;
 	}
-	#if defined DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning "TODO ENDIANESS ISSUES HERE"
-	#endif
+
+	UNIVERSALIS__COMPILER__WARNING("Reading/writting structured data as a raw bunch of bytes leads to endianess issues!")
+
 	size_t readsize = sizeof SYNPAR;
 	if (loadingVersion == 2) {
 		readsize -= sizeof(globalpar.gain);

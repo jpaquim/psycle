@@ -106,6 +106,7 @@
     <ClInclude Include="..\diversalis\src\diversalis\detail\config.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\detail\project.hpp" />
     <ClInclude Include="..\diversalis\src\diversalis\detail\stringize.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\detail\message.hpp" />
     <ClInclude Include="src\universalis.hpp" />
     <ClInclude Include="src\universalis\exception.hpp" />
     <ClInclude Include="src\universalis\detail\config.hpp" />
@@ -130,11 +131,8 @@
     <ClInclude Include="src\universalis\compiler\pragma.hpp" />
     <ClInclude Include="src\universalis\compiler\constexpr.hpp" />
     <ClInclude Include="src\universalis\compiler\restrict.hpp" />
-    <ClInclude Include="src\universalis\compiler\setup_feature_test_macros.hpp" />
-    <ClInclude Include="src\universalis\compiler\setup_optimizations.hpp" />
-    <ClInclude Include="src\universalis\compiler\setup_warnings.hpp" />
     <ClInclude Include="src\universalis\compiler\stringize.hpp" />
-    <ClInclude Include="src\universalis\compiler\thread_local_storage.hpp" />
+    <ClInclude Include="src\universalis\compiler\thread_local.hpp" />
     <ClInclude Include="src\universalis\compiler\token.hpp" />
     <ClInclude Include="src\universalis\compiler\typenameof.hpp" />
     <ClInclude Include="src\universalis\compiler\virtual.hpp" />

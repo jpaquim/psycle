@@ -5,8 +5,7 @@
 #include <universalis/detail/project.hpp>
 
 #if __cplusplus >= 201103L
-	#define UNIVERSALIS__COMPILER__CONSTEXPR constexpr
+	// constexpr is a keyword
 #else
-	#define UNIVERSALIS__COMPILER__CONSTEXPR const
+	#define constexpr const
 #endif
-

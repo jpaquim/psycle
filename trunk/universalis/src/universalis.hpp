@@ -12,11 +12,6 @@
 
 #ifndef DIVERSALIS__COMPILER__RESOURCE
 
-	// includes with side-effects on compiler must come first
-	#include "universalis/compiler/setup_feature_test_macros.hpp"
-	#include "universalis/compiler/setup_warnings.hpp"
-	#include "universalis/compiler/setup_optimizations.hpp"
-
 	#include "universalis/compiler/constexpr.hpp"
 	#include "universalis/compiler/restrict.hpp"
 	#include "universalis/compiler/pragma.hpp"
@@ -28,12 +23,13 @@
 	#include "universalis/compiler/message.hpp"
 	#include "universalis/compiler/deprecated.hpp"
 	#include "universalis/compiler/virtual.hpp"
-	#include "universalis/compiler/thread_local_storage.hpp"
+	#include "universalis/compiler/thread_local.hpp"
 	#include "universalis/compiler/weak.hpp"
 	#include "universalis/compiler/calling_convention.hpp"
 	#include "universalis/compiler/asm.hpp"
 	#include "universalis/compiler/dyn_link.hpp"
 	#include "universalis/compiler/auto_link.hpp"
+	#include "universalis/compiler/typenameof.hpp"
 	#include "universalis/compiler/location.hpp"
 	#include "universalis/compiler/exception.hpp"
 
@@ -45,6 +41,7 @@
 
 	#include "universalis/cpu/exception.hpp"
 
+	// TODO remove these
 	#include <boost/preprocessor/stringize.hpp>
 	#include <boost/static_assert.hpp>
 	#include <cassert>

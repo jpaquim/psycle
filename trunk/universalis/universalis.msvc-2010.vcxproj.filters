@@ -57,6 +57,9 @@
     <ClInclude Include="..\diversalis\src\diversalis\detail\stringize.hpp">
       <Filter>diversalis\detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\detail\message.hpp">
+      <Filter>diversalis\detail</Filter>
+    </ClInclude>
     <ClInclude Include="src\universalis\exception.hpp">
       <Filter>universalis</Filter>
     </ClInclude>
@@ -93,7 +96,13 @@
     <ClInclude Include="src\universalis\compiler\const_function.hpp">
       <Filter>universalis\compiler</Filter>
     </ClInclude>
+    <ClInclude Include="src\universalis\compiler\pure_function.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
     <ClInclude Include="src\universalis\compiler\deprecated.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\message.hpp">
       <Filter>universalis\compiler</Filter>
     </ClInclude>
     <ClInclude Include="src\universalis\compiler\dyn_link.hpp">
@@ -117,19 +126,10 @@
     <ClInclude Include="src\universalis\compiler\restrict.hpp">
       <Filter>universalis\compiler</Filter>
     </ClInclude>
-    <ClInclude Include="src\universalis\compiler\setup_feature_test_macros.hpp">
-      <Filter>universalis\compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universalis\compiler\setup_optimizations.hpp">
-      <Filter>universalis\compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="src\universalis\compiler\setup_warnings.hpp">
-      <Filter>universalis\compiler</Filter>
-    </ClInclude>
     <ClInclude Include="src\universalis\compiler\stringize.hpp">
       <Filter>universalis\compiler</Filter>
     </ClInclude>
-    <ClInclude Include="src\universalis\compiler\thread_local_storage.hpp">
+    <ClInclude Include="src\universalis\compiler\thread_local.hpp">
       <Filter>universalis\compiler</Filter>
     </ClInclude>
     <ClInclude Include="src\universalis\compiler\token.hpp">

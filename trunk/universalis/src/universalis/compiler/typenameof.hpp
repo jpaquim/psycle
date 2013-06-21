@@ -28,6 +28,7 @@ namespace detail {
 	std::string UNIVERSALIS__DECL demangle(std::string const & mangled_symbol);
 }
 
+/// template specialisation for std::type_info
 template<>
 std::string inline typenameof<std::type_info>(std::type_info const & type_info) {
 	return detail::demangle(std::string(type_info.name()));

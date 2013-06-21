@@ -15,11 +15,6 @@ using namespace psycle::helpers::math;
 // floor2int : fast floor thing
 UNIVERSALIS__COMPILER__DEPRECATED("portability: someone come back and centralise this")
 inline int floor2i(float x) {
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning "portability: someone come back and centralise this"
-	#else
-		#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZE(__LINE__) ") : warning: portability: someone come back and centralise this")
-	#endif
 	#if defined _MSC_VER && defined _M_IX86 && _MSC_VER < 1400 ///\todo [bohan] i'm disabling this on msvc 8 because all of druttis plugins have shown weird behavior when built with this compiler
 		__asm
 		{

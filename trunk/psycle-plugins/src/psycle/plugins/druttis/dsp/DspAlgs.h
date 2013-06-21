@@ -42,11 +42,6 @@ inline int v2m(int v)
 #include <universalis.hpp>
 UNIVERSALIS__COMPILER__DEPRECATED("portability: someone come back and centralise this")
 inline int f2i(float x) { 
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning "portability: someone come back and centralise this"
-	#else
-		#pragma message(__FILE__ "(" DIVERSALIS__STRINGIZE(__LINE__) ") : warning: portability: someone come back and centralise this")
-	#endif
 	#if defined _MSC_VER && defined _M_IX86
 		__asm {
 			FLD								DWORD PTR [x]

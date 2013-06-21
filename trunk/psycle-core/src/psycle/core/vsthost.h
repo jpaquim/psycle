@@ -21,9 +21,7 @@
 #include <psycle/core/detail/project.hpp>
 
 #ifndef DIVERSALIS__OS__MICROSOFT
-	#ifdef DIVERSALIS__COMPILER__FEATURE__WARNING
-		#warning VST host is currently only implemented on Microsoft Windows operating system.
-	#endif
+	UNIVERSALIS__COMPILER__WARNING("VST host is currently only implemented on Microsoft Windows operating system.")
 	namespace psycle { namespace core { namespace vst {
 		class host;
 		class AudioMaster;
