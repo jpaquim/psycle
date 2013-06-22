@@ -873,6 +873,30 @@ namespace psycle
 			//\todo : add pInstrument().LinesMode
 
 			ResetVolAndPan(playvol,reset);
+			//Envelopes are not reset with instrument set
+			if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF) {
+				m_AmplitudeEnvelope.NoteOn();
+				if (m_AmplitudeEnvelope.Envelope().IsCarry()) {
+					m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
+				}
+			}
+			
+			if (m_PanEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF) {
+				m_PanEnvelope.NoteOn();
+				if (m_PanEnvelope.Envelope().IsCarry()) {
+					m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
+				}
+			}
+			if (m_FilterEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF) {
+				m_FilterEnvelope.NoteOn();
+				if (m_FilterEnvelope.Envelope().IsCarry())
+					m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
+			}
+			if (m_PitchEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF) {
+				m_PitchEnvelope.NoteOn();
+				if (m_PitchEnvelope.Envelope().IsCarry())
+					m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
+			}
 
 			if ( rWave().Wave().IsAutoVibrato())
 			{
@@ -880,7 +904,7 @@ namespace psycle
 				m_AutoVibratoDepth=0;
 				AutoVibrato();
 			}
-			//Important, put it after m_PitchEnvelope.NoteOn(); (currently done inside ResetVolAndPan)
+			//Important, put it after m_PitchEnvelope.NoteOn();
 			UpdateSpeed();
 
 			m_WaveDataController.Playing(true);
@@ -928,20 +952,6 @@ namespace psycle
 			}
 			PanFactor(fpan);
 
-			m_AmplitudeEnvelope.NoteOn();
-			if (m_AmplitudeEnvelope.Envelope().IsCarry() || !reset) {
-				m_AmplitudeEnvelope.SetPositionInSamples(rChannel().LastAmpEnvelopePosInSamples());
-			}
-			m_PanEnvelope.NoteOn();
-			if (m_PanEnvelope.Envelope().IsCarry() || !reset) {
-				m_PanEnvelope.SetPositionInSamples(rChannel().LastPanEnvelopePosInSamples());
-			}
-			m_FilterEnvelope.NoteOn();
-			if (m_FilterEnvelope.Envelope().IsCarry() || !reset)
-				m_FilterEnvelope.SetPositionInSamples(rChannel().LastFilterEnvelopePosInSamples());
-			m_PitchEnvelope.NoteOn();
-			if (m_PitchEnvelope.Envelope().IsCarry() || !reset)
-				m_PitchEnvelope.SetPositionInSamples(rChannel().LastPitchEnvelopePosInSamples());
 			//If a new note, let's start from volume zero. Else it's a glide.
 			if (!IsPlaying()) {
 				m_lVolCurr=0.f;
@@ -1155,8 +1165,8 @@ namespace psycle
 			if ( pSampler()->CurrentTick()%m_RetrigTicks == 0 ) 
 			{
 				NoteOn(m_Note,-1,false);
-				}
 			}
+		}
 
 		int XMSampler::Voice::GetDelta(int wavetype,int wavepos) const
 		{
@@ -1413,6 +1423,9 @@ namespace psycle
 				if (pitAmp.IsEnabled() && pitAmp.IsCarry())
 					LastPitchEnvelopePosInSamples(m_pForegroundVoice->PitchEnvelope().GetPositionInSamples());
 				else LastPitchEnvelopePosInSamples(0);
+				if (m_pForegroundVoice != pVoice) {
+					m_pForegroundVoice->IsBackground(true);
+				}
 			}
 			else {
 				LastAmpEnvelopePosInSamples(0);
@@ -2399,83 +2412,88 @@ namespace psycle
 			Voice* currentVoice = NULL;
 			Voice* newVoice = NULL;
 			XMSampler::Channel& thisChannel = rChannel(channelNum);
-			if(bInstrumentSet)
-			{
-				//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, differently in ST2/ST3 
-				// (in st2, note is retriggered always, and in st3 it changes the instrument but continues from where it was) and not by FT2/XMPlay.
-				//Concretely if an instrument comes without a note, the last note is retriggered.
-				//Also note that if the instrument is the same, it is only retriggered if it has stopped (See below).
-				if(thisChannel.InstrumentNo() != pData->_inst && !bNoteOn && thisChannel.Note() !=0)
-				{
-					bNoteOn=true;
-				}
-				thisChannel.InstrumentNo(pData->_inst); // Instrument is always set, even if no new note comes.
-			}
-
 			// STEP A: Look for an existing (foreground) playing voice in the current channel.
 			currentVoice = GetCurrentVoice(channelNum);
 			if ( currentVoice )
 			{
-				// Is a new note coming? Then apply the NNA to the playing one.
-				if (bNoteOn)
+				//This forces Last volume/pan/envelope values to be up-to-date.
+				thisChannel.ForegroundVoice(currentVoice);
+				if ( bPorta2Note ) 
 				{
-					switch (currentVoice->rInstrument().DCT())
+					//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed and the position reset to 0.
+					thisChannel.Note(pData->_note);
+					// If there current voice is stopping, the porta makes the note active again and restarts the envelope, without restarting the sample.
+					if (currentVoice->IsStopping()) {
+						currentVoice->IsStopping(false);
+						currentVoice->AmplitudeEnvelope().NoteOn();
+						currentVoice->PanEnvelope().NoteOn();
+						currentVoice->FilterEnvelope().NoteOn();
+						currentVoice->PitchEnvelope().NoteOn();
+					}
+				}
+				else {
+					if(bInstrumentSet)
 					{
-					case XMInstrument::DupeCheck::INSTRUMENT:
-						if ( pData->_inst == thisChannel.InstrumentNo())
-						{
-							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
+						//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, differently/buggy in ST2/ST3 
+						// (in st2, note is triggered always, and in st3 it changes the instrument but continues from where it was) and not by FT2/XMPlay.
+						//Concretely if an instrument comes without a note, it is different than the one that is playing, and is not stopping (no noteoff received),
+						//then, the new instrument is triggered with the last note played.
+						//Note that if the instrument is the same, it is only retriggered if it has stopped (See below).
+						if ( !bNoteOn && thisChannel.InstrumentNo() != pData->_inst && thisChannel.Note() != notecommands::release) {
+							bNoteOn = true;
 						}
-						break;
-					case XMInstrument::DupeCheck::SAMPLE:
+					}
+					// Is a new note coming? Then apply the NNA to the playing one.
+					if (bNoteOn)
+					{
+						switch (currentVoice->rInstrument().DCT())
 						{
-							const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
-							int _layer = _inst.NoteToSample(thisChannel.Note()).second;
-							if ( _layer == thisChannel.ForegroundVoice()->rWave().Layer())
+						case XMInstrument::DupeCheck::INSTRUMENT:
+							if ( pData->_inst == thisChannel.InstrumentNo())
 							{
 								if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
 							}
+							break;
+						case XMInstrument::DupeCheck::SAMPLE:
+							{
+								const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
+								int _layer = _inst.NoteToSample(thisChannel.Note()).second;
+								if ( _layer == thisChannel.ForegroundVoice()->rWave().Layer())
+								{
+									if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
+								}
+							}
+							break;
+						case XMInstrument::DupeCheck::NOTE:
+							if ( pData->_note == thisChannel.Note() && pData->_inst == thisChannel.InstrumentNo())
+							{
+								if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
+							}
+							break;
+						default:
+							break;
 						}
-						break;
-					case XMInstrument::DupeCheck::NOTE:
-						if ( pData->_note == thisChannel.Note() && pData->_inst == thisChannel.InstrumentNo())
+					
+						switch (currentVoice->NNA())
 						{
-							if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
+						case XMInstrument::NewNoteAction::STOP: 
+							currentVoice->NoteOffFast();
+							break;
+						case XMInstrument::NewNoteAction::NOTEOFF:
+							currentVoice->NoteOff();
+							break;
+						case XMInstrument::NewNoteAction::FADEOUT:
+							currentVoice->NoteFadeout();
+							break;
+						default:
+							break;
 						}
-						break;
-					default:
-						break;
+						//This is necessary for the notedelay command (Because it will enter twice in this method).
+						//Else, the call to channel->ForegroundVoice() below would be enough.
+						currentVoice->IsBackground(true);
 					}
-				
-					switch (currentVoice->NNA())
-					{
-					case XMInstrument::NewNoteAction::STOP: 
-						currentVoice->NoteOffFast();
-						break;
-					case XMInstrument::NewNoteAction::NOTEOFF:
+					else if(pData->_note == notecommands::release ){
 						currentVoice->NoteOff();
-						break;
-					case XMInstrument::NewNoteAction::FADEOUT:
-						currentVoice->NoteFadeout();
-						break;
-					default:
-						break;
-					}
-					currentVoice->IsBackground(true);
-				} else if(pData->_note == notecommands::release ){
-					currentVoice->NoteOff();
-				}
-				else 
-				{
-					if (bInstrumentSet)
-					{
-						//\todo: Fix: Set the wave and instrument to the one in the entry.
-						currentVoice->ResetVolAndPan(-1);
-					}
-					if ( bPorta2Note ) 
-					{
-						//\todo : portamento to note, if the note corresponds to a new sample, the sample gets changed
-						//		  and the position reset to 0.
 						thisChannel.Note(pData->_note);
 					}
 				}
@@ -2487,15 +2505,24 @@ namespace psycle
 			}
 			else {
 				//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, but not in ST3/FT2/XMPlay
-				//Concretely if a sample has been played, has stopped, and the instrument comes again without a note, that last note is
-				//retriggered.
-				if(bInstrumentSet && !bNoteOn && thisChannel.Note() !=0)
+				//Concretely if a sample has been played, has stopped (by reaching the end, not by noteoff/notecut), and an instrument 
+				// comes again without a note (be it the same or another), the (new) instrument is played with the previous note of the channel.
+				if(bInstrumentSet && !bNoteOn && thisChannel.Note() != notecommands::release)
 				{
 					bNoteOn=true;
 				}
 			}
-			
-			// STEP B: Get a Voice to work with, and initialize it if needed.
+			if(bInstrumentSet) {
+				// Instrument is always set, even if no new note comes, or no voice playing.
+				//\todo: Fix: Set the wave and instrument to the one in the entry. Only if not portatonote.
+				thisChannel.InstrumentNo(pData->_inst);
+				if (currentVoice != NULL && !bNoteOn) {
+					//Whenever an instrument appears alone in a channel, the values are reset.
+					//todo: It should be reset to the values of the instrument set.
+					currentVoice->ResetVolAndPan(-1,true);
+				}
+			}
+			// STEP B: Get a new Voice to work with, and initialize it if needed.
 			if(bNoteOn)
 			{
 				bool delayed=false;
@@ -2513,6 +2540,7 @@ namespace psycle
 				if (delayed ) {
 					for (std::vector<PatternEntry>::iterator ite = multicmdMem.begin(); ite != multicmdMem.end(); ++ite) {
 						if(ite->_inst == channelNum) {
+							//Include also the mcm commands to the delay.
 							thisChannel.DelayedNote(*ite);
 						}
 					}
