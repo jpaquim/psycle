@@ -14,10 +14,10 @@ namespace psycle { namespace host {
 // array wrapper (shared : float*, created: vector<float>}
 class PSArray {
 public:
-	PSArray() : ptr_(0), len_(0), shared_(0) {}
+	PSArray() : ptr_(0), len_(0), cap_(0), shared_(0) {}
 	PSArray(int len, float v);
 	PSArray(double start, double stop, double step);
-	PSArray(float* ptr, int len) : ptr_(ptr), len_(len), shared_(1) {}	
+	PSArray(float* ptr, int len) : ptr_(ptr), cap_(0), len_(len), shared_(1) {}	
 	PSArray(PSArray& a1, PSArray& a2);
 	~PSArray() {
 	  if (!shared_) {
@@ -30,16 +30,18 @@ public:
 	void set_len(int len) {len_ = len; }
 	int len() const { return len_; }
 	int copyfrom(PSArray& src);
+	int copyfrom(PSArray& src, int pos);
 	void resize(int newsize);
 	std::string tostring() const;
-	
+	void fillzero();
+	void fill(float val);
 	float* data() { return ptr_; }
-
 	template<class T>
 	void do_op(T&);
 	
 private:	
 	float* ptr_;
+	int cap_;
 	int len_;
 	int shared_;
 };
@@ -89,9 +91,10 @@ private:
 	static int array_index(lua_State *L);
 	static int array_new_index(lua_State *L);
 	static int array_new(lua_State *L);
+	static int array_new_from_table(lua_State *L);
 	static int array_new_from_sampleV(lua_State *L);
 	static int array_arange(lua_State *L);	
-	static int array_copyto(lua_State* L);
+	static int array_copy(lua_State* L);
 	static int array_tostring(lua_State *L);
 	static int array_gc(lua_State* L);	
 	static int delay_new(lua_State *L);
@@ -103,12 +106,17 @@ private:
 	static int array_size(lua_State* L);
 	static int array_resize(lua_State* L);
 	static int array_concat(lua_State* L);
+	static int array_fillzero(lua_State* L);
+	static int array_method_fill(lua_State* L);
+	static int array_method_add(lua_State* L);
+	static int array_method_mul(lua_State* L);
+	static int array_method_rsum(lua_State* L); // x(n)=x(0)+..+x(n-1)
 	// ops
 	static int array_add(lua_State* L);
 	static int array_sub(lua_State* L);
 	static int array_mul(lua_State* L);
 	static int array_sum(lua_State* L);
-	static int array_rsum(lua_State* L); // x(n)=E(n-p), p=0..N-1
+	static int array_rsum(lua_State* L); // x(n)=x(0)+..+x(n-1)
 	// funcs
 	static int array_sin(lua_State* L);
 	static int array_cos(lua_State* L);

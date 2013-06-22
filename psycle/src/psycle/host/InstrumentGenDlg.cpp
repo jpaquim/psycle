@@ -175,7 +175,7 @@ void CInstrumentGenDlg::OnBtnSetSample()
 {
 	TCHAR sample_number[5];
 	m_SampleNumber.GetWindowText(sample_number,4);
-	int sample =_ttoi(sample_number);
+	int sample = hexstring_to_integer(sample_number);
 	for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
 		XMInstrument::NotePair pair = m_instr->NoteToSample(i);
 		pair.second = sample;

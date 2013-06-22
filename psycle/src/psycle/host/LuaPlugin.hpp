@@ -14,7 +14,7 @@ namespace psycle { namespace host {
 class LuaPlugin : public Machine
 {
 public:
-	LuaPlugin(lua_State* state, int index);
+	LuaPlugin(lua_State* state, int index, bool full=true);
 	virtual ~LuaPlugin();
 	void Free();
 
@@ -24,6 +24,7 @@ public:
 	// todo
 	virtual bool LoadSpecificChunk(RiffFile* pFile, int version);
 	virtual void SaveSpecificChunk(RiffFile * pFile);
+	// todo testing
 	virtual const char * const GetDllName() const throw() { return dll_path_.c_str(); }
 	//PluginInfo
 	virtual const std::string GetAuthor() { return proxy_.info().vendor; }
@@ -31,13 +32,14 @@ public:
 	virtual const std::uint32_t GetPlugVersion() { return atoi(proxy_.info().version.c_str()); }
 	bool IsSynth() const throw() { return (proxy_.info().mode == MACHMODE_GENERATOR); }
 
-	//TODO: implement
-	virtual void NewLine() { Machine::NewLine(); } // compatibility to psy core ?
+	//TODO: implement  or not ? compatibility to psy core ?
+	virtual void NewLine() { Machine::NewLine(); }
+	//TODO testing
 	virtual void Tick(int track, PatternEntry * pData);
 	virtual void Stop();
 
 	//TODO: testing
-	virtual void GetParamRange(int numparam,int &minval, int &maxval) {minval=0; maxval=0xFFFF;}
+	virtual void GetParamRange(int numparam,int &minval, int &maxval) { proxy_.get_parameter_range(numparam, minval, maxval); }
 	virtual int GetNumParams() { return proxy_.num_parameter(); }
 	virtual int GetParamType(int numparam) { return 2; }
 	virtual void GetParamName(int numparam, char * parval);
@@ -45,6 +47,8 @@ public:
 	virtual int GetParamValue(int numparam);
 	virtual bool SetParameter(int numparam, int value); //{ return false;}
 	virtual bool DescribeValue(int parameter, char * psTxt);
+
+	PluginInfo CallPluginInfo() { return proxy_.call_info(); }
 
 	void ReloadScript();
 

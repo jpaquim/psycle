@@ -168,14 +168,18 @@ namespace psycle
 				}
 				else {
 					//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-					InitializeSamplesVector(std::max(numInputs() + numOutputs(),2));
+					VstInt32 maxval = std::max(std::max(numInputs(),numOutputs()),2);
+					//Note: Since in GenerateAudioInTicks we will swap the buffers, we need
+					//to have the same amount on both sides. That's the reason of the *2 and using
+					//themax as the size.
+					InitializeSamplesVector(maxval*2);
 					VstInt32 i=0;
-					inputs.resize(numInputs());
-					for(;i<numInputs();i++)	{
+					inputs.resize(maxval);
+					for(;i<maxval;i++)	{
 						inputs[i]=samplesV[i];
 					}
-					outputs.resize(numOutputs());
-					for(VstInt32 j(0);j<numOutputs();j++, i++) {
+					outputs.resize(maxval);
+					for(VstInt32 j(0);j<maxval;j++, i++) {
 						outputs[j]=samplesV[i];
 					}
 				}
@@ -240,14 +244,19 @@ namespace psycle
 			}
 
 			void Plugin::change_buffer(std::vector<float*>& buf) {
-				Machine::change_buffer(buf);
-				for(VstInt32 i(0);i<numInputs();i++)	{
+				if(WillProcessReplace()) {
+					Machine::change_buffer(buf);
+					for(VstInt32 i(0);i<numInputs();i++)	{
 						inputs[i]=samplesV[i];
+					}
+					outputs.resize(numOutputs());
+					for(VstInt32 i(0);i<numOutputs();i++) {
+						outputs[i]=samplesV[i];
+					}				
 				}
-				outputs.resize(numOutputs());
-				for(VstInt32 i(0);i<numOutputs();i++) {
-					outputs[i]=samplesV[i];
-				}				
+				else {
+					UNIVERSALIS__COMPILER__WARNING("NOT IMPLEMENTED FOR PROCESS_ACCUMULATE");
+				}
 			}
 
 			bool Plugin::OnIOChanged() {
@@ -280,15 +289,18 @@ namespace psycle
 					}
 					else {
 						//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
-						InitializeSamplesVector(std::max(numIns + numOuts,2));
-						VstInt32 i=0;
-						inputs.resize(numIns);
-						for(;i<numIns;i++)	{
+						VstInt32 maxval = std::max(std::max(numIns,numOuts),2);
+						//Note: Since in GenerateAudioInTicks we will swap the buffers, we need
+						//to have the same amount on both sides. That's the reason of the *2 and using
+						//maxval as the size in both vectors.
+						InitializeSamplesVector(maxval*2);
+						inputs.resize(maxval);
+						for(VstInt32 i=0;i<maxval;i++)	{
 							inputs[i]=samplesV[i];
 						}
-						outputs.resize(numOuts);
-						for(VstInt32 j(0);j<numOuts;j++, i++) {
-							outputs[j]=samplesV[i];
+						outputs.resize(maxval);
+						for(VstInt32 i(0);i<maxval;i++) {
+							outputs[i]=samplesV[i+maxval];
 						}
 					}
 					//validate pin mappings of wires already connected
@@ -1089,14 +1101,14 @@ namespace psycle
 						}
 						if (!WillProcessReplace())
 						{
-							// We need the output in _pSamples, so we invert the
-							// pointers to avoid copying _pOutSamples into _pSamples
-							
-							int j=numInputs();
-							for(int i=0; i<numOutputs();i++, j++) {
-								float* const tempSamples = samplesV[i];
-								samplesV[i] = outputs[i];
-								samplesV[j] = tempSamples;
+							// We need the output in samplesV, so we invert the
+							// pointers to avoid copying the content of outputs into inputs.
+							VstInt32 maxval = std::max(std::max(numInputs(),numOutputs()),2);
+							VstInt32 out=maxval;
+							for(VstInt32 in=0; in<maxval;in++, out++) {
+								float* const tempSamples = samplesV[in];
+								samplesV[in] = (inputs[in] = samplesV[out]); 
+								samplesV[out] = (outputs[in] = tempSamples);
 							}
 						}
 						UpdateVuAndStanbyFlag(numSamples);

@@ -2092,6 +2092,37 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
 END
 
+IDD_PLOTTER DIALOGEX 0, 0, 317, 183
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Plotter"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_TRANSFORMPATTERN DIALOGEX 0, 0, 126, 171
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Search Replace"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Search Pattern",IDC_STATIC,10,3,109,45
+    LTEXT           "  note   ins   mac   cmd",IDC_STATIC,22,15,78,10
+    EDITTEXT        IDC_FILTERNOTE,21,25,21,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FILTERINS,43,25,16,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FILTERMAC,59,25,16,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FILTERCMD,75,25,24,12,ES_AUTOHSCROLL
+    GROUPBOX        "Replace With",IDC_STATIC,10,51,109,45
+    LTEXT           "  note   ins   mac   cmd",IDC_STATIC,22,64,78,10
+    EDITTEXT        IDC_REPLACENOTE,22,74,21,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_REPLACEINS,44,74,16,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_REPLACEMAC,60,74,16,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_REPLACECMD,76,74,24,12,ES_AUTOHSCROLL
+    CONTROL         "Apply to entire song",IDC_APPLYTOSONG,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,101,112,13
+    CONTROL         "Apply to current pattern",IDC_APPLYTOPATTERN,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,7,115,112,13
+    CONTROL         "Apply current selection",IDC_APPLYTOBLOCK,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,7,129,112,13
+    DEFPUSHBUTTON   "Apply",IDAPPLY,7,150,50,14
+    PUSHBUTTON      "Close",IDCANCEL,69,150,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2508,6 +2539,22 @@ BEGIN
         RIGHTMARGIN, 368
         TOPMARGIN, 7
         BOTTOMMARGIN, 182
+    END
+
+    IDD_PLOTTER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 310
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
+    END
+
+    IDD_TRANSFORMPATTERN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 119
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 164
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -3218,67 +3265,6 @@ BEGIN
 END
 
 #endif    // Neutral (Default) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (U.K.) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-#ifdef _WIN32
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_TRANSFORMPATTERN DIALOGEX 0, 0, 126, 171
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Search Replace"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    GROUPBOX        "Search Pattern",IDC_STATIC,10,3,109,45
-    LTEXT           "  note   ins   mac   cmd",IDC_STATIC,22,15,78,10
-    EDITTEXT        IDC_FILTERNOTE,21,25,21,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FILTERINS,43,25,16,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FILTERMAC,59,25,16,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_FILTERCMD,75,25,24,12,ES_AUTOHSCROLL
-    GROUPBOX        "Replace With",IDC_STATIC,10,51,109,45
-    LTEXT           "  note   ins   mac   cmd",IDC_STATIC,22,64,78,10
-    EDITTEXT        IDC_REPLACENOTE,22,74,21,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_REPLACEINS,44,74,16,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_REPLACEMAC,60,74,16,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_REPLACECMD,76,74,24,12,ES_AUTOHSCROLL
-    CONTROL         "Apply to entire song",IDC_APPLYTOSONG,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,7,101,112,13
-    CONTROL         "Apply to current pattern",IDC_APPLYTOPATTERN,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,7,115,112,13
-    CONTROL         "Apply current selection",IDC_APPLYTOBLOCK,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,7,129,112,13
-    DEFPUSHBUTTON   "Apply",IDAPPLY,7,150,50,14
-    PUSHBUTTON      "Close",IDCANCEL,69,150,50,14
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_TRANSFORMPATTERN, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 119
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 164
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

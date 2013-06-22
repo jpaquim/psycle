@@ -274,6 +274,9 @@
     <ClInclude Include="src\psycle\host\WaveInMacDlg.hpp">
       <Filter>psycle\mfc\machine</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\PlotterDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\host\GearTracker.hpp">
       <Filter>psycle\mfc\machine\sampler</Filter>
     </ClInclude>
@@ -631,6 +634,9 @@
       <Filter>psycle\mfc\machine</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\WaveInMacDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PlotterDlg.cpp">
       <Filter>psycle\mfc\machine</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\GearTracker.cpp">

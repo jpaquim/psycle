@@ -4,6 +4,11 @@
 #include "LuaArray.hpp"
 
 struct lua_State;
+struct luaL_Reg;
+
+namespace universalis { namespace os {
+	struct terminal;
+}}
 
 namespace psycle { namespace host {
 
@@ -39,15 +44,18 @@ public:
 	LuaProxy(LuaPlugin* plug, lua_State* state);
 	~LuaProxy();
 
-	float get_parameter(int numparam);
-	const char* get_parameter_name(int numparam);
-	const char* get_parameter_display(int numparam);
-	const char* get_parameter_label(int numparam);
+	double get_parameter_value(int numparam);
+	std::string get_parameter_name(int numparam);
+	std::string get_parameter_display(int numparam);
+	std::string get_parameter_label(int numparam);
+	void get_parameter_range(int numparam,int &minval, int &maxval);
 	
-	void run_call_init(std::vector<float*>& sample_buf);
+	void call_run(std::vector<float*>& sample_buf);
+	void call_init();
+	PluginInfo call_info();
 	void call_seqtick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/);
 	void call_work(int num) throw (...);
-    void call_parameter(int numparameter, float val);
+    void call_parameter(int numparameter, double val);
 	void call_stop();
 
 	const PluginInfo& info() const { return info_; }
@@ -58,10 +66,18 @@ public:
 
 	void lock() const;
     void unlock() const;
+
+	void reload();
+
 private:
-	static int set_machine_info(lua_State* L);
+	static int set_parameters(lua_State* L);
 	static int set_parameter(lua_State* L);
 	static int message(lua_State* L);
+
+	static int plotter_new(lua_State* L);
+	static int plotter_gc(lua_State* L);
+	static int plotter_stem(lua_State* L);
+
 	static int plugin_new(lua_State* L);
 	static int plugin_work(lua_State* L);
 	static int plugin_channel(lua_State* L);
@@ -74,10 +90,17 @@ private:
 	static int plugin_gc(lua_State* L);	
 	static int plugin_setbuffer(lua_State* L);
 
-	void export_c_funcs();
+	static int terminal_output(lua_State* L);
 
+	static int dummy(lua_State*L) {return 0;}
+
+	void export_c_funcs();
 	// some call helper 
 	int GetRawParameter(const char* field, int index);
+	void register_userdata(const luaL_Reg* funcs,
+	                       const luaL_Reg* methods,
+	                       const char* metaname,
+						   const char* userdataname);	
 	const char* GetString();
 	void push_proxy();
 
@@ -87,12 +110,14 @@ private:
 	lua_State* L;
     LuaArrayBind array_bind_;
 	mutable CRITICAL_SECTION cs;
+	static universalis::os::terminal * terminal;	
 };
 
 
 struct LuaHost {
    static lua_State* load_script(const char * sName);
-   static LuaPlugin* LoadPlugin(const char * sName, int macIdx);	
+   static LuaPlugin* LoadPlugin(const char * sName, int macIdx);
+   static PluginInfo LoadInfo(const char * sName);
 };
 
 }
