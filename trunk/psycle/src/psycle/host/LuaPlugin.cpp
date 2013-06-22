@@ -20,7 +20,7 @@ namespace psycle { namespace host {
 		//////////////////////////////////////////////////////////////////////////
 		// Lua
 
-		LuaPlugin::LuaPlugin(lua_State* state, int index)
+		LuaPlugin::LuaPlugin(lua_State* state, int index, bool full)
 			: proxy_(this, state)
 		{		
 			_macIndex = index;
@@ -29,7 +29,10 @@ namespace psycle { namespace host {
 			std::sprintf(_editName, "native plugin");		
 			InitializeSamplesVector();
 			try {
-			  proxy_.run_call_init(samplesV);		
+			  proxy_.call_run(samplesV);
+			  if (full) {
+			    proxy_.call_init();
+			  }
 			} catch(std::exception &e) {} //do nothing.
 		}
 
@@ -45,16 +48,7 @@ namespace psycle { namespace host {
 
 		void LuaPlugin::ReloadScript()
 		{
-  		    try {
-			  lua_State* L = LuaHost::load_script(GetDllName());
-			  proxy_.free_state();
-			  proxy_.set_state(L);			
-			  proxy_.run_call_init(samplesV);			  
-			}
-			catch(std::exception &e) {			
-				std::string s = std::string("SCRIPT ERROR! OLD SCRIPT STILL RUNNING!\n") + e.what();
-				AfxMessageBox(s.c_str());
-			}
+			proxy_.reload();
 		}
 
 		int LuaPlugin::GenerateAudioInTicks(int /*startSample*/, int numSamples) throw(psycle::host::exception)
@@ -97,7 +91,9 @@ namespace psycle { namespace host {
 				return false;
 			}
 			try {
-  			  int quantization = 0xFFFF;
+			  int minval; int maxval;
+			  proxy_.get_parameter_range(numparam, minval, maxval);
+			  int quantization = (maxval-minval);
 			  proxy_.call_parameter(numparam,float(value)/float(quantization));
 			  return true;
 			} catch(std::exception &e) {} //do nothing.
@@ -110,8 +106,8 @@ namespace psycle { namespace host {
 			}
 			try {
 			  if( numparam < GetNumParams() ) {
-				const char* name = proxy_.get_parameter_name(numparam);
-				std::strcpy(parval, name);
+				std::string name = proxy_.get_parameter_name(numparam);
+				std::strcpy(parval, name.c_str());
 			  } else std::strcpy(parval, "Out of Range");
 			}catch(std::exception &e) { std::strcpy(parval, ""); }
 		}
@@ -121,9 +117,11 @@ namespace psycle { namespace host {
 				return 0;
 			}
 			if(numparam < GetNumParams()) {
-			  int quantization = 0xFFFF;
+			  int minval; int maxval;			  
 			  try {
-				return proxy_.get_parameter(numparam)*quantization;
+				proxy_.get_parameter_range(numparam, minval, maxval);
+			    int quantization = (maxval-minval);
+				return proxy_.get_parameter_value(numparam)*quantization;
   			  } catch(std::exception &e) {} //do nothing.
 			} else {
 				// out of range
@@ -138,11 +136,15 @@ namespace psycle { namespace host {
 
 				if(numparam >= 0 && numparam < GetNumParams()) {
 					try {
-					  const char* par_display = proxy_.get_parameter_display(numparam);										
-					  const char* par_label = proxy_.get_parameter_label(numparam);
-					  std::sprintf(psTxt, "%s(%s)", par_display, par_label);
+					  std::string par_display = proxy_.get_parameter_display(numparam);
+					  std::string par_label = proxy_.get_parameter_label(numparam);
+					  std::sprintf(psTxt, "%s(%s)", par_display.c_str(), par_label.c_str());
 					  return true;
-					} catch(std::exception &e) {} //do nothing.
+					} catch(std::exception &e) {
+                      std::string par_display("Out of range");
+  				      std::sprintf(psTxt, "%s", par_display);
+					  return true;
+					} //do nothing.
 				}
 			return false;
 		}

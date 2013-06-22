@@ -29,11 +29,19 @@
 
 #include <HtmlHelp.h>
 
+#include "PlotterDlg.hpp"
+#include "LuaArray.hpp"
+#include <universalis/os/terminal.hpp>
+
 namespace psycle { namespace host {
 
 	extern CPsycleApp theApp;
 
 		#define WM_SETMESSAGESTRING 0x0362
+	    #define WM_NEWPLOTTER 0x0500
+	    #define WM_GCPLOTTER 0x0501
+		#define WM_STEMPLOTTER 0x0502
+		#define WM_TERMINAL 0x0503
 
 		IMPLEMENT_DYNAMIC(CMainFrame, CFrameWnd)
 
@@ -55,6 +63,7 @@ namespace psycle { namespace host {
 			:m_wndInst(NULL)
 			,_pSong(NULL)
 			,pGearRackDialog(NULL)
+			,terminal(NULL)
 		{
 			PsycleGlobal::inputHandler().SetMainFrame(this);
 			for(int c=0;c<MAX_MACHINES;c++) m_pWndMac[c]=NULL;
@@ -67,6 +76,10 @@ namespace psycle { namespace host {
 
 		BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 			ON_MESSAGE (WM_SETMESSAGESTRING, OnSetMessageString)
+			ON_MESSAGE(WM_NEWPLOTTER, OnNewPlotter)
+			ON_MESSAGE(WM_GCPLOTTER, OnGCPlotter)
+			ON_MESSAGE(WM_STEMPLOTTER, OnStemPlotter)
+			ON_MESSAGE(WM_TERMINAL, OnTerminalMessage)
 			ON_WM_CREATE()
 			ON_WM_SETFOCUS()
 			ON_WM_CLOSE()
@@ -627,11 +640,11 @@ namespace psycle { namespace host {
 							CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
 						}
 						break;
+					case MACH_LUA:
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:
                     case MACH_DUPLICATOR2:
 					case MACH_MIXER:
-					case MACH_LUA:
 						{
 							CFrameMachine* newwin;
 							m_pWndMac[tmac] = newwin = new CFrameMachine(ma, &m_wndView, &m_pWndMac[tmac]);
@@ -776,6 +789,7 @@ namespace psycle { namespace host {
 					case MACH_MIXER:
 					case MACH_PLUGIN:
 					case MACH_VST:
+					case MACH_LUA:
 					case MACH_VSTFX:
 						if (m_pWndMac[mac])
 						{
@@ -968,6 +982,45 @@ namespace psycle { namespace host {
 			}
 			return CFrameWnd::OnSetMessageString (wParam, lParam);
 
+		}
+
+     	LRESULT CMainFrame::OnTerminalMessage(WPARAM wParam, LPARAM lParam)
+		{
+			if (terminal == 0) {
+			  terminal = new universalis::os::terminal();
+			}
+		    terminal->output(universalis::os::loggers::levels::trace, (const char*)wParam);			
+			return 0;
+		}
+
+		LRESULT CMainFrame::OnNewPlotter(WPARAM wParam, LPARAM lParam)
+		{
+			CPlotterDlg* plotter = new CPlotterDlg(this);
+			plotter->ShowWindow(SW_SHOW);
+			CPlotterDlg ** udata = (CPlotterDlg **) wParam;
+			*udata = plotter;
+			return 0;
+		}
+
+		LRESULT CMainFrame::OnGCPlotter(WPARAM wParam, LPARAM lParam)
+		{
+			CPlotterDlg* plotter = (CPlotterDlg*) wParam;
+			if (plotter) {
+			  plotter->DestroyWindow();
+			}
+			return 0;
+		}
+
+		LRESULT CMainFrame::OnStemPlotter(WPARAM wParam, LPARAM lParam)
+		{
+			CPlotterDlg* plotter = (CPlotterDlg*) wParam;
+			if (plotter) {
+			  float* data = ((PSArray*) lParam)->data();
+			  int len = ((PSArray*) lParam)->len();
+			  plotter->set_data(data, len);
+			  plotter->UpdateWindow();			  
+			}
+			return 0;
 		}
 
 		void CMainFrame::StatusBarIdle()

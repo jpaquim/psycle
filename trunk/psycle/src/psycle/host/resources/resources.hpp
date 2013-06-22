@@ -116,6 +116,7 @@
 #define IDD_INST_SAMPULSE_INSTPIT       319
 #define IDD_INST_SAMPULSE_ENVDLG        320
 #define IDD_INST_SAMPLER_INST           321
+#define IDD_PLOTTER                     322
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1110,7 +1111,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        321
+#define _APS_NEXT_RESOURCE_VALUE        323
 #define _APS_NEXT_COMMAND_VALUE         34292
 #define _APS_NEXT_CONTROL_VALUE         2133
 #define _APS_NEXT_SYMED_VALUE           64

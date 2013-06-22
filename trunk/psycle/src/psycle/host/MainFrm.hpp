@@ -11,6 +11,11 @@
 #include "InstrumentEditorUI.hpp"
 #include "MidiMonitorDlg.hpp"
 
+
+namespace universalis { namespace os {
+	struct terminal;
+}}
+
 namespace psycle { namespace host {
 
 		class Song;
@@ -94,6 +99,7 @@ namespace psycle { namespace host {
 			CGearRackDlg* pGearRackDialog;
 			InstrumentEditorUI* m_wndInst;
 			CWaveEdFrame*	m_pWndWed;
+			universalis::os::terminal * terminal;
 
 			// Attributes
 		public:
@@ -105,6 +111,10 @@ namespace psycle { namespace host {
 		protected:
 			DECLARE_MESSAGE_MAP()
 			afx_msg LRESULT OnSetMessageString (WPARAM wParam, LPARAM lParam);
+			afx_msg LRESULT OnNewPlotter(WPARAM wParam, LPARAM lParam);
+			afx_msg LRESULT OnStemPlotter(WPARAM wParam, LPARAM lParam);
+			afx_msg LRESULT OnGCPlotter(WPARAM wParam, LPARAM lParam);
+			afx_msg LRESULT OnTerminalMessage(WPARAM wParam, LPARAM lParam);
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnSetFocus(CWnd *pOldWnd);
 			afx_msg void OnClose();

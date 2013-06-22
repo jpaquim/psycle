@@ -265,6 +265,7 @@
     <ClInclude Include="src\psycle\host\Sampler.hpp" />
     <ClInclude Include="src\psycle\host\XMInstrument.hpp" />
     <ClInclude Include="src\psycle\host\XMSampler.hpp" />
+    <ClInclude Include="src\psycle\host\PlotterDlg.hpp" />
     <ClInclude Include="src\psycle\host\detail\config.hpp" />
     <ClInclude Include="src\psycle\host\detail\config.private.hpp" />
     <ClInclude Include="src\psycle\host\detail\project.hpp" />
@@ -383,6 +384,7 @@
     <ClCompile Include="src\psycle\host\Sampler.cpp" />
     <ClCompile Include="src\psycle\host\XMInstrument.cpp" />
     <ClCompile Include="src\psycle\host\XMSampler.cpp" />
+    <ClCompile Include="src\psycle\host\PlotterDlg.cpp" />
     <ClCompile Include="src\Seib-vsthost\CVSTHost.Seib.cpp" />
     <ClCompile Include="src\Seib-vsthost\CVSTPreset.cpp" />
     <ClCompile Include="src\Seib-vsthost\EffectWnd.cpp" />

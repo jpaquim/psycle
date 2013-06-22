@@ -205,14 +205,14 @@ namespace psycle
 			class populate_plugin_list
 			{
 			public:
-				populate_plugin_list(std::vector<std::string> & result, std::string directory)
+				populate_plugin_list(std::vector<std::string> & result, std::string directory, bool recursive = true)
 				{
 					::CFileFind finder;
 					int loop = finder.FindFile(::CString((directory + "\\*").c_str()));
 					while(loop)
 					{
 						loop = finder.FindNextFile();
-						if(finder.IsDirectory()) {
+						if(recursive && finder.IsDirectory()) {
 							if(!finder.IsDots())
 							{
 								std::string sfilePath = finder.GetFilePath();
@@ -277,7 +277,7 @@ namespace psycle
 				populate_plugin_list(vstPlugs,Global::configuration().GetAbsoluteVst64Dir());
 			}
 #endif
-			populate_plugin_list(luaPlugs,Global::configuration().GetAbsoluteLuaDir());
+			populate_plugin_list(luaPlugs,Global::configuration().GetAbsoluteLuaDir(), false);
 
 			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size() + luaPlugs.size());
 
@@ -697,26 +697,21 @@ namespace psycle
 					}
 					else if(type == MACH_LUA)
 					{
-						pInfo->type = MACH_LUA;
-						LuaPlugin *plug = NULL;
-						try
-						{
-							plug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(fileName.c_str(),0));
+						PluginInfo info;
+						try {
+							info = LuaHost::LoadInfo(fileName.c_str());
 						}
-						catch(const std::exception & e)
-						{
+						catch(const std::exception & e) {
 							std::ostringstream s; s << typeid(e).name() << std::endl;
 							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
 							pInfo->error = s.str();
 						}
-						catch(...)
-						{
+						catch(...) {
 							std::ostringstream s; s
 								<< "Type of exception is unknown, cannot display any further information." << std::endl;
 							pInfo->error = s.str();
 						}
-						if(!pInfo->error.empty())
-						{
+						if(!pInfo->error.empty()) {
 							out << "### ERRONEOUS ###" << std::endl;
 							out.flush();
 							out << pInfo->error;
@@ -732,66 +727,14 @@ namespace psycle
 							pInfo->version = "???";
 							pInfo->APIversion = 0;
 							++currentBadPlugsCount;
-						}
-						else
-						{
-							pInfo->allow = true;
-							pInfo->name = plug->GetName();
-							pInfo->identifier = 0;
-							pInfo->vendor = plug->GetAuthor();
-							if(plug->IsSynth()) pInfo->mode = MACHMODE_GENERATOR;
-							else pInfo->mode = MACHMODE_FX;
-							{
-								std::ostringstream s; s << (plug->IsSynth() ? "Lua instrument" : "Lua effect") << " by " << plug->GetAuthor();
-								pInfo->desc = s.str();
-							}
-							pInfo->APIversion = plug->GetAPIVersion();
-							{
-								std::ostringstream s; s << std::setfill('0') << std::setw(3) << std::hex << plug->GetPlugVersion();
-								pInfo->version = s.str();
-							}
-							out << plug->GetName() << " - successfully instanciated";
+						} else {
+							*pInfo = info;	
+							pInfo->dllname = fileName;
+							pInfo->FileTime = time;
+							out << info.name << " - successfully instanciated";
 							out.flush();
 						}
 						learnDllName(fileName,type);
-						try
-						{
-							if (plug) { 
-								plug->Free();
-								delete plug;
-							}
-						}
-						catch(const std::exception & e)
-						{
-							std::stringstream s; s
-								<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
-								<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
-								<< typeid(e).name() << std::endl;
-							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
-							out
-								<< std::endl
-								<< "### ERRONEOUS ###" << std::endl
-								<< s.str().c_str();
-							out.flush();
-							std::stringstream title; title
-								<< "Machine crashed: " << fileName;
-							loggers::exception()(title.str() + '\n' + s.str());
-						}
-						catch(...)
-						{
-							std::stringstream s; s
-								<< "Exception occured while trying to free the temporary instance of the plugin." << std::endl
-								<< "This plugin will not be disabled, but you might consider it unstable." << std::endl
-								<< "Type of exception is unknown, no further information available.";
-							out
-								<< std::endl
-								<< "### ERRONEOUS ###" << std::endl
-								<< s.str().c_str();
-							out.flush();
-							std::stringstream title; title
-								<< "Machine crashed: " << fileName;
-							loggers::exception()(title.str() + '\n' + s.str());
-						}
 					}
 					++currentPlugsCount;
 				}
