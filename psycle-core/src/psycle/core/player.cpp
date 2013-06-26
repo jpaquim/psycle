@@ -238,7 +238,8 @@ void Player::process(int samples) {
 		master._pMasterSamples += amount * 2;
 		remaining_samples -= amount;
 		// increase the timeInfo playBeatPos by the number of beats corresponding to the amount of samples we processed
-		timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
+        if(playing_)
+        timeInfo_.setPlayBeatPos(timeInfo_.playBeatPos() + amount / timeInfo_.samplesPerBeat());
 		timeInfo_.setSamplePos(master.sampleCount);
 	}
 	cpu_time_clock::time_point const t1(cpu_time_clock::now());
@@ -499,7 +500,7 @@ float * Player::Work(int numSamples) {
 
 		if(!playing_) {
 			///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
-			process(numSamples);
+            process(numSamples);
 			//playPos += beatLength;
 			//if(playPos > "signumerator") playPos -= signumerator;
 		} else {
