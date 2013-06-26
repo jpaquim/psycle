@@ -240,7 +240,7 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 		inline int numreturns() const { return static_cast<int>(returns_.size()); }
 		inline int numsends() const { return static_cast<int>(sends_.size()); }
 		inline bool ChannelValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numinputs() && _inputCon[i]); }
-		inline bool ReturnValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
+        inline bool ReturnValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
 		inline bool SendValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numsends() && sends_[i].IsValid()); }
 
 		void InsertChannel(int idx,InputChannel*input=0);
