@@ -147,7 +147,6 @@ void XMInstrument::WaveData::DeleteAt(uint32_t deletePos, uint32_t length)
 }
 void XMInstrument::WaveData::Mix(const WaveData& waveIn, float buf1Vol, float buf2Vol)
 {
-	if (m_WaveLength<=0 || waveIn.WaveLength()<0) return;
 	int16_t* oldLeft = m_pWaveDataL;
 	int16_t* oldRight = m_pWaveDataR;
 	bool increased=false;
@@ -165,23 +164,23 @@ void XMInstrument::WaveData::Mix(const WaveData& waveIn, float buf1Vol, float bu
 	}
 
 	if (m_WaveStereo) {
-		for( int i(0); i<waveIn.WaveLength(); i++ )
+        for( unsigned int i(0); i<waveIn.WaveLength(); i++ )
 		{
 			m_pWaveDataL[i] = m_pWaveDataL[i] * buf1Vol + waveIn.pWaveDataL()[i] * buf2Vol;
 			m_pWaveDataR[i] = m_pWaveDataR[i] * buf1Vol + waveIn.pWaveDataR()[i] * buf2Vol;
 		}
-		for( int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
+        for( unsigned int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
 		{
 			m_pWaveDataL[i] *= buf1Vol;
 			m_pWaveDataR[i] *= buf1Vol;
 		}
 	}
 	else {
-		for( int i(0); i<waveIn.WaveLength(); i++ )
+        for( unsigned int i(0); i<waveIn.WaveLength(); i++ )
 		{
 			m_pWaveDataL[i] = m_pWaveDataL[i] * buf1Vol + waveIn.pWaveDataL()[i] * buf2Vol;
 		}
-		for( int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
+        for( unsigned int i(waveIn.WaveLength()); i<m_WaveLength; ++i )
 		{
 			m_pWaveDataL[i] *= buf1Vol;
 		}
@@ -191,9 +190,8 @@ void XMInstrument::WaveData::Mix(const WaveData& waveIn, float buf1Vol, float bu
 		delete[] oldRight;
 	}
 }
-void XMInstrument::WaveData::Silence(int silStart, int silEnd) 
+void XMInstrument::WaveData::Silence(unsigned int silStart, int unsigned silEnd)
 {
-	if(silStart<0) silStart=0;
 	if(silEnd<=0) silEnd=m_WaveLength;
 	if(silStart>=m_WaveLength||silEnd>m_WaveLength||silStart==silEnd) return;
 	std::memset(&m_pWaveDataL[silStart], 0, silEnd-silStart);
@@ -203,21 +201,20 @@ void XMInstrument::WaveData::Silence(int silStart, int silEnd)
 }
 
 //Fade - fades an audio buffer from one volume level to another.
-void XMInstrument::WaveData::Fade(int fadeStart, int fadeEnd, float startVol, float endVol)
+void XMInstrument::WaveData::Fade(unsigned int fadeStart, int unsigned fadeEnd, float startVol, float endVol)
 {
-	if(fadeStart<0) fadeStart=0;
 	if(fadeEnd<=0) fadeEnd=m_WaveLength;
 	if(fadeStart>=m_WaveLength||fadeEnd>m_WaveLength||fadeStart==fadeEnd) return;
 
 	float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
 	if (m_WaveStereo) {
-		for(int i(fadeStart);i<fadeEnd;++i) {
+        for(unsigned int i(fadeStart);i<fadeEnd;++i) {
 			m_pWaveDataL[i] *= startVol+i*slope;
 			m_pWaveDataR[i] *= startVol+i*slope;
 		}
 	}
 	else {
-		for(int i(fadeStart);i<fadeEnd;++i) {
+        for(unsigned int i(fadeStart);i<fadeEnd;++i) {
 			m_pWaveDataL[i] *= startVol+i*slope;
 		}
 	}
@@ -225,20 +222,19 @@ void XMInstrument::WaveData::Fade(int fadeStart, int fadeEnd, float startVol, fl
 
 //Amplify - multiplies an audio buffer by a given factor.  buffer can be inverted by passing
 //	a negative value for vol.
-void XMInstrument::WaveData::Amplify(int ampStart, int ampEnd, float vol)
+void XMInstrument::WaveData::Amplify(unsigned int ampStart, unsigned int ampEnd, float vol)
 {
-	if(ampStart<0) ampStart=0;
 	if(ampEnd<=0) ampEnd=m_WaveLength;
 	if(ampStart>=m_WaveLength||ampEnd>m_WaveLength||ampStart==ampEnd) return;
 
 	if (m_WaveStereo) {
-		for(int i(ampStart);i<ampEnd;++i) {
+        for(unsigned int i(ampStart);i<ampEnd;++i) {
 			m_pWaveDataL[i] = math::rint_clip<int16_t>(m_pWaveDataL[i] * vol);
 			m_pWaveDataR[i] = math::rint_clip<int16_t>(m_pWaveDataR[i] * vol);
 		}
 	}
 	else { 
-		for(int i(ampStart);i<ampEnd;++i) {
+        for(unsigned int i(ampStart);i<ampEnd;++i) {
 			m_pWaveDataL[i] = math::rint_clip<int16_t>(m_pWaveDataL[i] * vol);
 		}
 	}
@@ -403,12 +399,12 @@ void XMInstrument::Envelope::Init()
 * @param value		: Desired point Value.
 * @return			: New point index.
 */
-int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal)
+int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const unsigned int pointTime,const ValueType pointVal)
 {
 	assert(pointIndex < m_Points.size());
 	if(pointIndex < m_Points.size())
 	{
-		int prevtime,nextime;
+        unsigned int prevtime,nextime;
 		m_Points[pointIndex].first = pointTime;
 		m_Points[pointIndex].second = pointVal;
 
@@ -519,10 +515,10 @@ int XMInstrument::Envelope::SetTimeAndValue(const unsigned int pointIndex,const 
 * @param value		: Point Value.
 * @return			: New point index.
 */
-unsigned int XMInstrument::Envelope::Insert(const int pointTime,const ValueType pointVal)
+unsigned int XMInstrument::Envelope::Insert(const unsigned int pointTime,const ValueType pointVal)
 {
 	unsigned int _new_index;
-	for(_new_index = 0;_new_index < (int)m_Points.size();_new_index++)
+    for(_new_index = 0;_new_index < m_Points.size();_new_index++)
 	{
 		if(pointTime < m_Points[_new_index].first)
 		{
@@ -606,7 +602,7 @@ void XMInstrument::Envelope::Delete(const unsigned int pointIndex)
 }
 
 /// Loading Procedure
-void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t version)
+void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t /*version*/)
 {
 	riffFile.Read(m_Enabled);
 	riffFile.Read(m_Carry);
@@ -629,7 +625,7 @@ void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t version)
 }
 
 /// Saving Procedure
-void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version) const
+void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t /*version*/) const
 {
 	// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 	riffFile.Write(m_Enabled);

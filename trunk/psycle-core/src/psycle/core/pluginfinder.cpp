@@ -15,7 +15,7 @@ PluginFinder::PluginFinder(bool delayedScan) {
 PluginFinder::~PluginFinder() {
 }
 
-void PluginFinder::Initialize(bool clear) {
+void PluginFinder::Initialize(bool /*clear*/) {
 }
 
 void PluginFinder::addHost(Hosts::type type) {

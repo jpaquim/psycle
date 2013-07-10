@@ -9,7 +9,6 @@ PatternViewPattern::PatternViewPattern(psycle::core::Pattern *pattern, QGraphics
     QGraphicsItem(parent)
 {
     this->pattern = pattern;
-    this->setFlag(QGraphicsItem::ItemIsMovable, true);
     TimeSignature timesig = pattern->timeSignatures()[0];
     float lines = pattern->beats();
     lines *=timesig.numerator();
@@ -38,7 +37,7 @@ QRectF PatternViewPattern::boundingRect() const {
     return childrenBoundingRect();
 }
 
-void PatternViewPattern::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
+void PatternViewPattern::paint(QPainter */*painter*/, const QStyleOptionGraphicsItem */*option*/, QWidget */*widget*/){
 }
 
 }

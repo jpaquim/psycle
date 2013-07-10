@@ -19,12 +19,12 @@ Pattern::Pattern()
 }
 
 // Explicit copy constructor needed because boost::signal is noncopyable
-Pattern::Pattern(Pattern const& other)
-	: id_(-1),  
+Pattern::Pattern(Pattern const& other):   
 	name_(other.name_),
 	category_(other.category_),
 	timeSignatures_(other.timeSignatures_),
-	zeroTime(other.zeroTime)
+    zeroTime(other.zeroTime),
+    id_(-1)
 {
 	lines_ = other.lines_;
 }
@@ -64,7 +64,7 @@ void Pattern::addBar( const TimeSignature & signature ) {
 			timeSignatures_.push_back(signature);
 }
 
-void Pattern::removeBar( float pos ) {
+void Pattern::removeBar( float /*pos*/ ) {
 #if 0 ///\todo
 	float searchPos = 0;
 	std::vector<TimeSignature>::iterator it = timeSignatures_.begin();
@@ -158,7 +158,7 @@ void Pattern::setCategory(const std::string& category)
 	category_ = category;
 }
 
-void Pattern::scaleBlock(int left, int right, double top, double bottom, float factor) {
+void Pattern::scaleBlock(int /*left*/, int /*right*/, double /*top*/, double /*bottom*/, float /*factor*/) {
 #if 0 ///\todo
 	double length = bottom - top;
 	

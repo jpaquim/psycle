@@ -599,7 +599,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		helpers::math::erase_all_nans_infinities_and_denormals(calculatedfftIn,outputSize);
 		float j=0.0f;
 		const float dbinvSamples = psycle::helpers::dsp::dB(1.0f/(bufferSize>>2));
-		for (int h=0, a=0;h<bands;h++) 
+        for (unsigned int h=0, a=0;h<bands;h++)
 		{
 			float afloat = fftLog[h];
 			if (afloat +1.0f > fftLog[h+1]) {

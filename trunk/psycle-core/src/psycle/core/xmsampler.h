@@ -212,7 +212,7 @@ XMSampler::Channel::PerformFX().
 				}
 			} else {
 				m_Position-=Speed();
-				const int curIntPos = m_Position >>32;
+                const unsigned int curIntPos = m_Position >>32;
 				switch(m_CurrentLoopType)
 				{
 				case XMInstrument::WaveData::LoopType::NORMAL:
@@ -271,9 +271,9 @@ XMSampler::Channel::PerformFX().
 		virtual bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
 		// pointer to Start of Left sample
-		virtual short* const pLeft() const {return m_pL;}
+        virtual const short* pLeft() const {return m_pL;}
 		// pointer to Start of Right sample
-		virtual short* const pRight() const {return m_pR;}
+        virtual const short* pRight() const {return m_pR;}
 
 
 	protected:
@@ -284,8 +284,8 @@ XMSampler::Channel::PerformFX().
 		bool m_Playing;
 
 		int m_CurrentLoopType;
-		int m_CurrentLoopEnd;
-		int m_CurrentLoopStart;
+        uint64_t m_CurrentLoopEnd;
+        uint64_t m_CurrentLoopStart;
 
 		bool _stereo;
 		int _length;
@@ -417,11 +417,11 @@ XMSampler::Channel::PerformFX().
 	private:
 		inline float SRateDeviation() const { return m_sRateDeviation; }
 
-		int m_Samples;
+        unsigned int m_Samples;
 		float m_sRateDeviation;
 		EnvelopeMode::Type m_Mode;
-		int m_PositionIndex;
-		int m_NextEventSample;
+        unsigned int m_PositionIndex;
+        unsigned int m_NextEventSample;
 		const MachineCallbacks * m_pCallbacks;
 		EnvelopeStage::Type m_Stage;
 
@@ -504,13 +504,13 @@ XMSampler::Channel::PerformFX().
 
 		int ChannelNum() const { return m_ChannelNum;}
 		void ChannelNum(const int value){ m_ChannelNum = value;}
-		void pChannel(XMSampler::Channel * const p){m_pChannel = p;};
+        void pChannel(XMSampler::Channel * const p){m_pChannel = p;}
 		XMSampler::Channel& rChannel() {return *m_pChannel;}
 		const XMSampler::Channel& rChannel() const {return *m_pChannel;}
 
 		void pSampler(XMSampler * const p){m_pSampler = p;}
-		XMSampler* const pSampler() { return m_pSampler; }
-		const XMSampler * const pSampler() const { return m_pSampler; }
+        XMSampler* pSampler() { return m_pSampler; }
+        const XMSampler * pSampler() const { return m_pSampler; }
 
 		const XMSampler::EnvelopeController& AmplitudeEnvelope() const {return m_AmplitudeEnvelope;}
 		const XMSampler::EnvelopeController& FilterEnvelope() const {return m_FilterEnvelope;}
@@ -1027,7 +1027,7 @@ XMSampler::Channel::PerformFX().
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);
 	virtual void SaveSpecificChunk(RiffFile* riffFile) const;
 
-	MachineCallbacks* const pCallbacks() const { return callbacks; }
+    const MachineCallbacks* pCallbacks() const { return callbacks; }
 
 	const Voice* GetCurrentVoice(const int channelNum) const
 	{

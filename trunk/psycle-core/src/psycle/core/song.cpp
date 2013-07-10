@@ -148,7 +148,7 @@ Machine::id_type CoreSong::FindBusFromIndex(Machine::id_type smac) {
 bool CoreSong::ValidateMixerSendCandidate(Machine & mac, bool rewiring) {
 	// Basically, we dissallow a send comming from a generator as well as multiple-outs for sends.
 	if(!mac.acceptsConnections()) return false;
-	if(mac._connectedOutputs > 1 || mac._connectedOutputs > 0 && !rewiring) return false;
+    if( ( mac._connectedOutputs > 1 || mac._connectedOutputs > 0) && !rewiring) return false;
 	for(int i(0); i < MAX_CONNECTIONS; ++i)
 		if(mac._inputCon[i] && !ValidateMixerSendCandidate(*machine(mac._inputMachines[i]), false))
 			return false;
@@ -628,7 +628,7 @@ void Song::clear() {
 	
 }*/
 
-void SetDefaultPatternLines(int defaultPatLines)
+void SetDefaultPatternLines(int /*defaultPatLines*/)
 {
 	//todo
 }

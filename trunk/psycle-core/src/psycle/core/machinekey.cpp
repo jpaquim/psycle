@@ -91,7 +91,7 @@ namespace psycle { namespace core {
 		const std::string & MachineKey::dllName() const {
 			return dllName_;
 		}
-		const Hosts::type MachineKey::host() const { 
+        Hosts::type MachineKey::host() const {
 			return host_;
 		}
 		uint32_t MachineKey::index() const {

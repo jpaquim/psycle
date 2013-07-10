@@ -196,7 +196,7 @@ void AudioDriver::Quantize24AndDeinterlace(float const * pin, int32_t * pileft, 
 }
 
 ///\TODO not verified. copied from ASIO implementation
-void AudioDriver::DeQuantize24AndDeinterlace(int const * pin, float * poutleft, float * poutright, int c) {
+void AudioDriver::DeQuantize24AndDeinterlace(int const * /*pin*/, float * poutleft, float * poutright, int c) {
 	char* inl;
 	char* inr;
 	inl = (char*)poutleft;

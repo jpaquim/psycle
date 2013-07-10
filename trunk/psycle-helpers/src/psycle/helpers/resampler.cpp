@@ -234,7 +234,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	float cubic_resampler::linear_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
 		uint32_t res = (offset - foffset) * CUBIC_RESOLUTION;
-		const int ioffset = foffset;
+        const unsigned int ioffset = foffset;
 		data+=ioffset;
 		float y0 = *data;
 		float y1 = (ioffset == length-1) ? 0 : *(data + 1);
@@ -277,7 +277,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 	float cubic_resampler::spline_float(float const * data, float offset, uint64_t length, void* /*resampler_data*/) {
 		const float foffset = std::floor(offset);
-		const int ioffset = static_cast<int>(foffset);
+        const unsigned int ioffset = static_cast<unsigned int>(foffset);
 		uint32_t res = (offset - foffset) * CUBIC_RESOLUTION;
 		res <<=2;//Since we have four floats in the table, the position is 16byte aligned.
 		data+=ioffset;
@@ -637,7 +637,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		float w = double(res) * resampler_data->fcpidivperiodsize;
 		const float fcpi = resampler_data->fcpi;
 		//Small helper table to avoid doing an if.
-		static const float ANDTB[] = {0.f,2.f * math::pi_f};
+//		static const float ANDTB[] = {0.f,2.f * math::pi_f};
 		while (leftExtent > 3) {
 			math::V4SF vals;
 #if defined OPTIMIZED_SIN
@@ -789,7 +789,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 #endif
 
-	float cubic_resampler::soxr(int16_t const * dataIn, uint64_t offset, uint32_t res, uint64_t length, void* /*resampler_data*/) {
+    float cubic_resampler::soxr(int16_t const * /*dataIn*/, uint64_t /*offset*/, uint32_t /*res*/, uint64_t /*length*/, void* /*resampler_data*/) {
 		return 0.f;
 	}
 	/*

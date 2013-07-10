@@ -85,9 +85,9 @@ namespace psycle { namespace helpers {
 		inline void Read(DoubleBE & val){ AbstractIff::Read(val); }
 		inline void Read(DoubleLE & val){ AbstractIff::Read(val); }
 
-		inline void Write(const uint8_t & x) { AbstractIff::Write(x); }
-		inline void Write(const int8_t & x) { AbstractIff::Write(x); }
-		inline void Write(const uint16_t& x) { if (isLittleEndian) {WriteLE(x);} else {WriteBE(x);} }
+        inline void Write(const uint8_t & x) { AbstractIff::Write(x); }
+        inline void Write(const int8_t & x) { AbstractIff::Write(x); }
+        inline void Write(const uint16_t& x) { if (isLittleEndian) {WriteLE(x);} else {WriteBE(x);} }
 		inline void Write(const int16_t& x) { if (isLittleEndian) {WriteLE(x);} else {WriteBE(x);} }
 		inline void Write(const uint32_t& x) { if (isLittleEndian) {WriteLE(x);} else {WriteBE(x);} }
 		inline void Write(const int32_t& x) { if (isLittleEndian) {WriteLE(x);} else {WriteBE(x);} }

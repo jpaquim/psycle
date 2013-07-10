@@ -52,7 +52,7 @@ int Dummy::GenerateAudio(int numSamples) {
 // Since Dummy is used by the loader to load broken/missing plugins, 
 // its "LoadSpecificChunk" skips the data of the chunk so that the
 // song loader can continue the sequence.
-bool Dummy::LoadSpecificChunk(RiffFile* pFile, int version) {
+bool Dummy::LoadSpecificChunk(RiffFile* pFile, int /*version*/) {
 	uint32_t size=0;
 	pFile->Read(size); // size of this part params to load
 	pFile->Skip(size);
@@ -536,7 +536,7 @@ int AudioRecorder::GenerateAudio(int numSamples)
 	return numSamples;
 }
 
-bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int version)
+bool AudioRecorder::LoadSpecificChunk(RiffFile * pFile, int /*version*/)
 {
 	uint32_t size;
 	pFile->Read(size); // size of this part params to load
@@ -940,11 +940,7 @@ void LFO::ParamStart( int which )
 		&& destParam != -1 && destParam < callbacks->song().machine(destMac)->GetNumParams())
 	{
 		int minVal, maxVal;
-		float curLFO, lfoAmt;
-
 		callbacks->song().machine(destMac)->GetParamRange(destParam, minVal, maxVal);
-		curLFO = waveTable[int(lfoPos+phase[which]+(MAX_PHASE/2.0f)) % LFO_SIZE];
-		lfoAmt = (level[which]-MAX_DEPTH)/(float)MAX_DEPTH;
 
 		//bad! bad!
 		//prevVal[which] = Gloxxxxxxxxxxxxxxxxxbal::callbacks->song().machine(macOutput[which])->GetParamValue(paramOutput[which]);

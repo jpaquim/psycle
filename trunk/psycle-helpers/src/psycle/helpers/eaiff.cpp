@@ -42,15 +42,15 @@ namespace psycle { namespace helpers {
 			BaseChunkHeader::copyId(header.id, currentHeader.id);
 			currentHeader.setLength(header.length());
 		}
-		void EaIff::addFormChunk(const IffChunkId& id) {
+        void EaIff::addFormChunk(const IffChunkId& /*id*/) {
 		}
-		void EaIff::addListChunk(const IffChunkId& id, bool endprevious) {
+        void EaIff::addListChunk(const IffChunkId& /*id*/, bool /*endprevious*/) {
 		}
-		void EaIff::addCatChunk(const IffChunkId& id, bool endprevious) {
+        void EaIff::addCatChunk(const IffChunkId& /*id*/, bool /*endprevious*/) {
 		}
-		void EaIff::addListProperty(const IffChunkId& contentId, const IffChunkId& propId) {
+        void EaIff::addListProperty(const IffChunkId& /*contentId*/, const IffChunkId& /*propId*/) {
 		}
-		void EaIff::addListProperty(const IffChunkId& contentId, const IffChunkId& propId, void const *data, uint32_t dataSize) {
+        void EaIff::addListProperty(const IffChunkId& /*contentId*/, const IffChunkId& /*propId*/, void const */*data*/, uint32_t /*dataSize*/) {
 		}
 
 		const IffChunkHeader& EaIff::readHeader() {

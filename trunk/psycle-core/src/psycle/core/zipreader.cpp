@@ -78,7 +78,7 @@ static void _zr_fix_name(char **fn)
 		else break;
 	}
 }
-static zipreader *_zr_step2(int fd, unsigned int a, long int b, unsigned int y)
+static zipreader *_zr_step2(int fd, unsigned int /*a*/, long int b, unsigned int y)
 {
 	unsigned int i;
 	unsigned char head1[30];
@@ -240,7 +240,7 @@ zipreader *zipreader_open(int fd)
 	pos = lseek(fd, 0, SEEK_END);
 	/* search backwards */
 	//FIXME: Is the loop really necessary? The table is always at the end! (AFAIK)
-	while (pos >= sizeof(buf)) {
+    while ((uint) pos >= sizeof(buf)) {
 		pos -= sizeof(buf);
 		if (lseek(fd, pos, SEEK_SET) != pos) return 0;
 		if (!_load(fd, buf, sizeof(buf))) return 0;
@@ -296,7 +296,7 @@ void zipreader_close(zipreader *z)
 	free(z);
 }
 
-static int _zm_write(zipreader_file *f, unsigned int *xcrc32, int outfd, void *buf, size_t len, void *extra)
+static int _zm_write(zipreader_file */*f*/, unsigned int *xcrc32, int outfd, void *buf, size_t len, void */*extra*/)
 {
 	int r;
 	*xcrc32 = crc32(*xcrc32, (Bytef*)buf, len);

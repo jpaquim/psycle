@@ -613,7 +613,7 @@ void XMSampler::Voice::NewLine()
 void XMSampler::Voice::NoteOn(const uint8_t note,const int16_t playvol,bool reset)
 {
 	XMInstrument::NotePair pair = rInstrument().NoteToSample(note);
-	SampleList & samples = pSampler()->pCallbacks()->song().m_rWaveLayers;
+    const SampleList & samples = pSampler()->pCallbacks()->song().m_rWaveLayers;
 	int wavelayer = pair.second;
 	if ( samples.IsEnabled(wavelayer) == false ) return;
 
@@ -1943,6 +1943,8 @@ void XMSampler::Channel::StopBackgroundNotes(XMInstrument::NewNoteAction::Type a
 			case XMInstrument::NewNoteAction::STOP:
 				m_pSampler->rVoice(current).NoteOffFast();
 				break;
+            case XMInstrument::NewNoteAction::CONTINUE:
+                break;
 			}
 		}
 	}
@@ -2265,7 +2267,7 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 								vol = ite->parameter()<<1;
 							}
 							else if ((ite->command()&0xF0) == CMD::OFFSET) {
-								offset = ((ite->command()&0x0F) << 16) +ite->parameter()<<8;
+                                offset = (((ite->command()&0x0F) << 16) +ite->parameter())<<8;
 								if (offset == 0) offset = thisChannel.OffsetMem();
 							}
 						}
@@ -2280,7 +2282,7 @@ void XMSampler::Tick(int channelNum, const PatternEvent & event)
 					// An offset is a good candidate, but a volume is not (volume can apply to an existing note)
 					if ((event.command()&0xF0) == CMD::OFFSET)
 					{
-						offset = ((event.command()&0x0F) << 16) +event.parameter()<<8;
+                        offset = (((event.command()&0x0F) << 16) +event.parameter())<<8;
 						if (offset == 0) offset = thisChannel.OffsetMem();
 					}
 					if ( offset != 0 ) {
@@ -2556,7 +2558,7 @@ int XMSampler::CalcLPBFromSpeed(int trackerspeed, int &outextraticks)
 	 return lpb;
 }
 
-bool XMSampler::LoadPsy2FileFormat(RiffFile* riffFile)
+bool XMSampler::LoadPsy2FileFormat(RiffFile* /*riffFile*/)
 {
 	assert(false);
 	//The function "Load()" is used for Songs made with Psycle earlier than 1.7
@@ -2642,7 +2644,7 @@ void XMSampler::SaveSpecificChunk(RiffFile* riffFile) const
 
 }//void SaveSpecificChunk(RiffFile& riffFile)
 
-bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int version)
+bool XMSampler::LoadSpecificChunk(RiffFile* riffFile, int /*version*/)
 {
 	int temp;
 	bool wrongState=false;

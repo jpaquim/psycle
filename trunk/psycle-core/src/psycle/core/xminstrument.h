@@ -106,9 +106,9 @@ public:
 			void ModifyAt(uint32_t modifyPos, const WaveData& wave);
 			void DeleteAt(uint32_t deletePos, uint32_t length);
 			void Mix(const WaveData& waveIn, float buf1Vol=1.0f, float buf2Vol=1.0f);
-			void Fade(int fadeStart, int fadeEnd, float startVol, float endVol);
-			void Amplify(int ampStart, int ampEnd, float vol);
-			void Silence(int silStart, int silEnd);
+            void Fade(unsigned int fadeStart, unsigned int fadeEnd, float startVol, float endVol);
+            void Amplify(unsigned int ampStart, unsigned int ampEnd, float vol);
+            void Silence(unsigned int silStart, unsigned int silEnd);
 
 		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile) const;
@@ -204,8 +204,8 @@ public:
 
 		bool IsAutoVibrato() const {return m_VibratoDepth && m_VibratoSpeed;}
 
-		int16_t * const pWaveDataL() const { return m_pWaveDataL;}
-		int16_t * const pWaveDataR() const { return m_pWaveDataR;}
+        const int16_t * pWaveDataL() const { return m_pWaveDataL;}
+        const int16_t * pWaveDataR() const { return m_pWaveDataR;}
 
 	private:
 
@@ -254,7 +254,7 @@ public:
 		typedef float ValueType;
 
 		/// The meaning of the first value (int), is time, and the unit depends on the context.
-		typedef std::pair<int,ValueType> PointValue;
+        typedef std::pair<unsigned int,ValueType> PointValue;
 
 		/// ?
 		typedef std::vector< PointValue > Points;
@@ -275,28 +275,28 @@ public:
 			void Init();
 
 		/// Gets the time at which the pointIndex point is located.
-		inline int GetTime(const unsigned int pointIndex) const
+        inline unsigned int GetTime(const unsigned int pointIndex) const
 		{
-			if(pointIndex >= 0 && pointIndex < NumOfPoints()) return m_Points[pointIndex].first;
+            if(pointIndex < NumOfPoints()) return m_Points[pointIndex].first;
 			return INVALID;
 		}
 		/// Sets a new time for an existing pointIndex point.
 		inline int SetTime(const unsigned int pointIndex,const int pointTime)
 		{
-			assert(pointIndex >= 0 && pointIndex < NumOfPoints());
+            assert(pointIndex < NumOfPoints());
 			m_Points[pointIndex].first = pointTime;
 			return SetTimeAndValue(pointIndex,pointTime,m_Points[pointIndex].second);
 		}
 		/// Gets the value of the pointIndex point.
 		inline ValueType GetValue(const unsigned int pointIndex) const
 		{
-			assert(pointIndex >= 0 && pointIndex < NumOfPoints());
+            assert(pointIndex < NumOfPoints());
 			return m_Points[pointIndex].second;
 		}
 		/// Sets the value pointVal to pointIndex point.
 		inline void SetValue(const unsigned int pointIndex,const ValueType pointVal)
 		{
-			assert(pointIndex >= 0 && pointIndex < NumOfPoints());
+            assert(pointIndex < NumOfPoints());
 			m_Points[pointIndex].second = pointVal;
 		}
 		/// Appends a new point at the end of the array.
@@ -310,10 +310,10 @@ public:
 		}
 
 		/// Helper to set a new time for an existing index.
-		int SetTimeAndValue(const unsigned int pointIndex,const int pointTime,const ValueType pointVal);
+        int SetTimeAndValue(const unsigned int pointIndex,const unsigned int pointTime,const ValueType pointVal);
 
 		/// Inserts a new point to the points Array.
-		unsigned int Insert(const int pointIndex,const ValueType pointVal);
+        unsigned int Insert(const unsigned int pointIndex, const ValueType pointVal);
 
 		/// Removes a point from the points Array.
 		void Delete(const unsigned int pointIndex);
@@ -344,19 +344,19 @@ public:
 
 		// Properties
 		/// Set or Get the point Index for Sustain and Loop.
-		inline int SustainBegin() const { return m_SustainBegin;}
+        inline unsigned int SustainBegin() const { return m_SustainBegin;}
 		/// value has to be an existing point!
 		inline void SustainBegin(const unsigned int value){m_SustainBegin = value;}
 
-		inline int SustainEnd() const { return m_SustainEnd;}
+        inline unsigned int SustainEnd() const { return m_SustainEnd;}
 		/// value has to be an existing point!
 		inline void SustainEnd(const unsigned int value){m_SustainEnd = value;}
 
-		inline int LoopStart() const {return m_LoopStart;}
+        inline unsigned int LoopStart() const {return m_LoopStart;}
 		/// value has to be an existing point!
 		inline void LoopStart(const unsigned int value){m_LoopStart = value;}
 
-		inline int LoopEnd() const {return m_LoopEnd;}
+        inline unsigned int LoopEnd() const {return m_LoopEnd;}
 		/// value has to be an existing point!
 		inline void LoopEnd(const unsigned int value){m_LoopEnd = value;}
 
@@ -381,13 +381,13 @@ public:
 		/// second : 0 .. 1.0f . (or -1.0 1.0 or whatever else) Use it as a multiplier.
 		Points m_Points;
 		/// Loop Start Point
-		int m_LoopStart;
+        unsigned int m_LoopStart;
 		/// Loop End Point
-		int m_LoopEnd;
+        unsigned int m_LoopEnd;
 		/// Sustain Start Point
-		int m_SustainBegin;
+        unsigned int m_SustainBegin;
 		/// Sustain End Point
-		int m_SustainEnd;
+        unsigned int m_SustainEnd;
 	};// class Envelope
 
 
@@ -590,7 +590,7 @@ class PSYCLE__CORE__DECL SampleList{
 			m_waves.push_back(wavecopy);
 			return size()-1;
 		}
-		inline void SetSample(const XMInstrument::WaveData &wave,int pos)
+        inline void SetSample(const XMInstrument::WaveData &wave,unsigned int pos)
 		{
 			XMInstrument::WaveData* wavecopy = new XMInstrument::WaveData(wave);
 			if (pos>=m_waves.size()) {
@@ -603,23 +603,23 @@ class PSYCLE__CORE__DECL SampleList{
 			else if(m_waves[pos] != NULL) { delete m_waves[pos]; }
 			m_waves[pos]=wavecopy;
 		}
-		inline const XMInstrument::WaveData &operator[](int pos) const
+        inline const XMInstrument::WaveData &operator[](unsigned int pos) const
 		{
 			assert(pos<m_waves.size());
 			assert(m_waves[pos]!=NULL);
 			return *m_waves[pos];
 		}
-		inline XMInstrument::WaveData &get(int pos)
+        inline XMInstrument::WaveData &get(unsigned int pos)
 		{
 			assert(pos<m_waves.size());
 			assert(m_waves[pos]!=NULL);
 			return *m_waves[pos];
 		}
-		inline void RemoveAt(int pos)
+        inline void RemoveAt(unsigned int pos)
 		{
 			if(pos < m_waves.size()) {
 				if(m_waves[pos] != NULL) {delete m_waves[pos]; m_waves[pos]=NULL;}
-				for(size_t i=m_waves.size()-1;i>=0&&m_waves[i]==NULL;i--){
+                for(size_t i=m_waves.size()-1 ; m_waves[i]==NULL ; i--){
 					m_waves.pop_back();
 				}
 			}
@@ -631,7 +631,7 @@ class PSYCLE__CORE__DECL SampleList{
 			m_waves[pos2]=wave;
 		}
 
-		inline bool IsEnabled(int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0; }
+        inline bool IsEnabled(unsigned int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0; }
 		unsigned int size() const { return static_cast<unsigned int>(m_waves.size()); }
 		void Clear() {
 			const size_t val = m_waves.size();
@@ -657,7 +657,7 @@ class PSYCLE__CORE__DECL InstrumentList {
 			m_inst.push_back(inscopy);
 			return size()-1;
 		}
-		inline void SetInst(const XMInstrument &inst,int pos)
+        inline void SetInst(const XMInstrument &inst,unsigned int pos)
 		{
 			XMInstrument* inscopy = new XMInstrument(inst);
 			if (pos>=m_inst.size()) {
@@ -670,21 +670,21 @@ class PSYCLE__CORE__DECL InstrumentList {
 			else if(m_inst[pos] != NULL) { delete m_inst[pos]; }
 			m_inst[pos]=inscopy;
 		}
-		inline const XMInstrument &operator[](int pos) const {
+        inline const XMInstrument &operator[](unsigned int pos) const {
 			assert(pos<m_inst.size());
 			assert(m_inst[pos]!=NULL);
 			return *m_inst[pos];
 		}
-		inline XMInstrument &get(int pos) {
+        inline XMInstrument &get(unsigned int pos) {
 			assert(pos<m_inst.size());
 			assert(m_inst[pos]!=NULL);
 			return *m_inst[pos];
 		}
-		inline void RemoveAt(int pos)
+        inline void RemoveAt(unsigned int pos)
 		{
 			if(pos < m_inst.size()) {
 				if(m_inst[pos] != NULL) {delete m_inst[pos]; m_inst[pos]=NULL;}
-				for(size_t i=m_inst.size()-1;i>=0&&m_inst[i]==NULL;i--){
+                for(size_t i=m_inst.size()-1;m_inst[i]==NULL;i--){
 					m_inst.pop_back();
 				}
 			}
@@ -695,11 +695,11 @@ class PSYCLE__CORE__DECL InstrumentList {
 			m_inst[pos1]=m_inst[pos2];
 			m_inst[pos2]=instr;
 		}
-		inline bool IsEnabled(int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
+        inline bool IsEnabled(unsigned int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
 		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
 		void Clear() { 
 			const size_t val = m_inst.size();
-			for (int i=0;i<val;i++) {
+            for (unsigned int i=0;i<val;i++) {
 				if (m_inst[i] != NULL) {
 					delete m_inst[i];
 					m_inst[i]=NULL;

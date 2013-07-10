@@ -223,7 +223,7 @@ Machine & Converter::redirect(MachineFactory & factory, int index, int type, Rif
 	}
 }
 
-void Converter::retweak(CoreSong & song) const {
+void Converter::retweak(CoreSong & /*song*/) const {
 #if 0 ///\todo
 	// Get the first category (there's only one with imported psy's) and...
 	std::vector<PatternCategory*>::iterator cit  = song.sequence().patternPool()->begin();

@@ -282,8 +282,8 @@ namespace symbols {
 	const char get_info_function_name[] =
 		PSYCLE__PLUGIN__DETAIL__STRINGIZED(PSYCLE__PLUGIN__SYMBOL_NAME__GET_INFO);
 	typedef
-		psycle::plugin_interface::CMachineInfo const * const
-		(PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
+        psycle::plugin_interface::CMachineInfo *
+        (PSYCLE__PLUGIN__CALLING_CONVENTION * get_info_function)
 		();
 	
 	const char create_machine_function_name[] =

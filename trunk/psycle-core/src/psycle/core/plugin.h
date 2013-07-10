@@ -56,7 +56,7 @@ class Proxy {
 			// (*this)(0); 
 		}
 		
-		const bool operator()() const throw();
+        bool operator()() const throw();
 		void operator()(psycle::plugin_interface::CMachineInterface * plugin) throw(); //exceptions::function_error);
 		void Init() throw(); //std::exceptions::function_error);
 		void SequencerTick() throw(); //exceptions::function_error);
@@ -72,8 +72,8 @@ class Proxy {
 		//todo:
 		//bool HostEvent(const int wave, const int note, const float volume) throw(); //exceptions::function_error);
 		void SeqTick(int channel, int note, int ins, int cmd, int val) throw(); //exceptions::function_error);
-		int const * const Vals() const throw(); //exceptions::function_error);
-		int * const Vals() throw(); //exceptions::function_error);
+        int const * Vals() const throw(); //exceptions::function_error);
+        int * Vals() throw(); //exceptions::function_error);
 		void callback() throw(); //exceptions::function_error);
 };
 
@@ -137,7 +137,7 @@ inline void Proxy::ParameterTweak(int par, int val) throw() { assert((*this)());
 inline Plugin & Proxy::host() throw() { return host_; }
 inline Plugin const & Proxy::host() const throw() { return host_; }
 inline void Proxy::callback() throw() { assert((*this)()); plugin().pCB = host().GetCallback(); }
-inline const bool Proxy::operator()() const throw() { return !!plugin_; }
+inline bool Proxy::operator()() const throw() { return !!plugin_; }
 inline void Proxy::operator()(psycle::plugin_interface::CMachineInterface * plugin) throw()//exceptions::function_error)
 {
 	if (this->plugin_) {
@@ -153,8 +153,8 @@ inline void Proxy::operator()(psycle::plugin_interface::CMachineInterface * plug
 }
 inline void Proxy::SeqTick(int channel, int note, int ins, int cmd, int val) throw() { assert((*this)()); plugin().SeqTick(channel, note, ins, cmd, val); }
 inline void Proxy::Work(float * psamplesleft, float * psamplesright , int numsamples, int tracks) throw() { assert((*this)()); plugin().Work(psamplesleft, psamplesright, numsamples, tracks);  }
-inline int * const Proxy::Vals() throw() { assert((*this)()); return plugin().Vals; }
-inline int const * const Proxy::Vals() const throw() { assert((*this)()); return plugin().Vals; }
+inline const int * Proxy::Vals() const throw() { assert((*this)()); return plugin().Vals; }
+inline int *Proxy::Vals() throw() { assert((*this)()); return plugin().Vals; }
 inline void Proxy::Stop() throw() { assert((*this)()); plugin().Stop();  }
 inline bool Proxy::DescribeValue(char * txt, const int param, const int value) const throw() { assert((*this)()); return const_cast<Proxy*>(this)->plugin().DescribeValue(txt, param, value); }
 inline void Proxy::PutData(void * pData) throw() { assert((*this)()); plugin().PutData(pData);  }
