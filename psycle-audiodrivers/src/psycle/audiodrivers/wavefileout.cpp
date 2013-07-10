@@ -44,26 +44,26 @@ void WaveFileOut::Write(float* data, unsigned int frames)
 	}
 	switch(playbackSettings().channelMode()) {
 		case 0: // mono mix
-			for(int i(0); i < frames; ++i)
+            for(unsigned int i(0); i < frames; ++i)
 				//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
 				if(wav_file_.WriteMonoSample((left[i] + right[i]) / 2) != DDC_SUCCESS) {
 					set_opened(false);
 				}
 			break;
 		case 1: // mono L
-			for(int i(0); i < frames; ++i)
+            for(unsigned int i(0); i < frames; ++i)
 				if(wav_file_.WriteMonoSample(left[i]) != DDC_SUCCESS) {
 					set_opened(false);
 				}
 			break;
 		case 2: // mono R
-			for(int i(0); i < frames; ++i)
+            for(unsigned int i(0); i < frames; ++i)
 				if(wav_file_.WriteMonoSample(right[i]) != DDC_SUCCESS) {
 					set_opened(false);
 				}
 			break;
 		default: // stereo
-			for(int i(0); i < frames; ++i)
+            for(unsigned int i(0); i < frames; ++i)
 				if(wav_file_.WriteStereoSample(left[i], right[i]) != DDC_SUCCESS) {
 					set_opened(false);
 				}

@@ -120,7 +120,7 @@ bool Instrument::Empty()
 	return !waveLength;
 }
 
-void Instrument::LoadFileChunk(RiffFile* pFile,int version,bool fullopen)
+void Instrument::LoadFileChunk(RiffFile* pFile,int /*version*/,bool fullopen)
 {
 	Reset();
 	// assume version 0 for now
@@ -411,9 +411,7 @@ std::cout << "loopStart" << waveLoopStart << std::endl;
 			size2 = DataCompression::SoundSquash(waveDataR,&pData2,waveLength);
 		}
 		
-		uint32_t index = 0; ///\todo unused?
 		xml << "<wave name='" << waveName << "' bin='";
-		uint32_t version = CURRENT_FILE_VERSION_WAVE; ///\todo unused?
 		
 		xml << toHex(waveLength);
 		xml << toHex(waveVolume);

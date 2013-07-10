@@ -92,7 +92,7 @@ void Mixer::FxSend(int numSamples, bool recurse)
 {
 	//const PlayerTimeInfo & timeInfo = callbacks->timeInfo();
 
-	for (int i=0; i<numsends(); i++)
+    for (unsigned int i=0; i<numsends(); i++)
 	{
 		if (sends_[i].IsValid())
 		{
@@ -119,7 +119,7 @@ void Mixer::FxSend(int numSamples, bool recurse)
 							}
 						}
 					}
-					else for (int j=0; j<numinputs(); j++)
+                    else for (unsigned int j=0; j<numinputs(); j++)
 					{
 						if (_inputCon[j] && !Channel(j).Mute() && !Channel(j).DryOnly() && (_sendvolpl[j][i] != 0.0f || _sendvolpr[j][i] != 0.0f ))
 						{
@@ -133,7 +133,7 @@ void Mixer::FxSend(int numSamples, bool recurse)
 							}
 						}
 					}
-					for (int j=0; j<i; j++)
+                    for (unsigned int j=0; j<i; j++)
 					{
 						if (Return(j).IsValid() && Return(j).Send(i) && !Return(j).Mute() && (mixvolretpl[j][i] != 0.0f || mixvolretpr[j][i] != 0.0f ))
 						{
@@ -182,7 +182,7 @@ void Mixer::Mix(int numSamples)
 				}
 			}
 		}
-		else for (int i=0; i<numreturns(); i++)
+        else for (unsigned int i=0; i<numreturns(); i++)
 		{
 			if (Return(i).IsValid() && !Return(i).Mute() && Return(i).MasterSend() && (mixvolretpl[i][MAX_CONNECTIONS] != 0.0f || mixvolretpr[i][MAX_CONNECTIONS] != 0.0f ))
 			{
@@ -212,7 +212,7 @@ void Mixer::Mix(int numSamples)
 				}
 			}
 		}
-		else for (int i=0; i<numinputs(); i++)
+        else for (unsigned int i=0; i<numinputs(); i++)
 		{
 			if (_inputCon[i] && !Channel(i).Mute() && !Channel(i).WetOnly() && (mixvolpl[i] != 0.0f || mixvolpr[i] != 0.0f ))
 			{
@@ -248,7 +248,7 @@ void Mixer::sched_inputs(sched_deps & result) const {
 void Mixer::sched_outputs(sched_deps & result) const {
 	if(!mixed) {
 		// step 1: send signal to fx
-		for (int i=0; i<numsends(); i++) if (Send(i).IsValid()) {
+        for (unsigned int i=0; i<numsends(); i++) if (Send(i).IsValid()) {
 			Machine & input(*callbacks->song().machine(Send(i).machine_));
 			result.push_back(&input);
 		}
@@ -295,7 +295,7 @@ void Mixer::InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_ty
 		}
 		Machine::InsertInputWire(srcMac,dstWire,dstType,initialVol);
 		RecalcChannel(dstWire);
-		for (int i(0);i<numsends();++i)
+        for (unsigned int i(0);i<numsends();++i)
 		{
 			RecalcSend(dstWire,i);
 		}
@@ -321,7 +321,7 @@ void Mixer::InsertInputWire(Machine& srcMac, Wire::id_type dstWire,InPort::id_ty
 		sends_[dstWire].volume_ = 1.0f;
 		sends_[dstWire].normalize_ = 1.0f/(srcMac.GetAudioRange()/GetAudioRange());
 		RecalcReturn(dstWire);
-		for(int c(0) ; c < numinputs() ; ++c)
+        for(unsigned int c(0) ; c < numinputs() ; ++c)
 		{
 			RecalcSend(c,dstWire);
 		}
@@ -368,7 +368,7 @@ Wire::id_type Mixer::FindInputWire(Machine::id_type macIndex) const
 	int ret=Machine::FindInputWire(macIndex);
 	if ( ret == -1)
 	{
-		for (int c=0; c<numreturns(); c++)
+        for (unsigned int c=0; c<numreturns(); c++)
 		{
 			if (Return(c).Wire().machine_ == macIndex)
 			{
@@ -425,7 +425,7 @@ void Mixer::NotifyNewSendtoMixer(Machine &caller, Machine& sender)
 			{
 				sends_[i].machine_ = sender.id();
 				sends_[i].normalize_ = GetAudioRange()/sender.GetAudioRange();
-				for (int ch(0);ch<numinputs();ch++)
+                for (unsigned int ch(0);ch<numinputs();ch++)
 				{
 					RecalcSend(ch,i);
 				}
@@ -439,7 +439,7 @@ void Mixer::DeleteWires(CoreSong &song)
 {
 	Machine::DeleteWires(song);
 	Machine *iMac;
-	for(int w=0; w<numreturns(); w++)
+    for(unsigned int w=0; w<numreturns(); w++)
 	{
 		// Checking send/return Wires
 		if(Return(w).IsValid())
@@ -652,7 +652,7 @@ int Mixer::GetParamValue(int numparam) const
 		{
 			int val(0);
 			if (Return(param-1).Mute()) val|=1;
-			for (int i(0);i<numreturns();i++)
+            for (unsigned int i(0);i<numreturns();i++)
 			{
 				if (Return(param-1).Send(i)) val|=(2<<i);
 			}
@@ -867,7 +867,7 @@ bool Mixer::SetParameter(int numparam, int value)
 		else
 		{
 			Return(param-1).Mute() = (value&1)?true:false;
-			for (int i(param);i<numreturns();i++)
+            for (unsigned int i(param);i<numreturns();i++)
 			{
 				Return(param-1).Send(i,(value&(2<<i))?true:false);
 			}
@@ -934,12 +934,12 @@ float Mixer::VuSend(Wire::id_type idx) const
 	}
 	return 0.0f;
 }
-void Mixer::InsertChannel(int idx,InputChannel*input)
+void Mixer::InsertChannel(unsigned int idx,InputChannel*input)
 {
 	assert(idx<MAX_CONNECTIONS);
 	if ( idx >= numinputs())
 	{
-		for(int i=numinputs(); i<idx; ++i)
+        for(unsigned int i=numinputs(); i<idx; ++i)
 		{
 			inputs_.push_back(InputChannel(numsends()));
 		}
@@ -949,22 +949,22 @@ void Mixer::InsertChannel(int idx,InputChannel*input)
 	else if (input) inputs_[idx]=*input;
 	else { inputs_[idx].Init(); inputs_[idx].ResizeTo(numsends()); }
 }
-void Mixer::InsertReturn(int idx,ReturnChannel* retchan)
+void Mixer::InsertReturn(unsigned int idx,ReturnChannel* retchan)
 {
 	assert(idx<MAX_CONNECTIONS);
 	if ( idx >= numreturns())
 	{
-		for(int i=numreturns(); i<idx; ++i)
+        for(unsigned int i=numreturns(); i<idx; ++i)
 		{
 			returns_.push_back(ReturnChannel(numsends()));
 		}
 		if (retchan) returns_.push_back(*retchan);
 		else returns_.push_back(ReturnChannel(numsends()));
-		for(int i=0; i<numinputs(); ++i)
+        for(unsigned int i=0; i<numinputs(); ++i)
 		{
 			Channel(i).ResizeTo(numsends());
 		}
-		for(int i=0; i<numreturns(); ++i)
+        for(unsigned int i=0; i<numreturns(); ++i)
 		{
 			Return(i).ResizeTo(numsends());
 		}
@@ -973,28 +973,28 @@ void Mixer::InsertReturn(int idx,ReturnChannel* retchan)
 	else { returns_[idx].Init(); returns_[idx].ResizeTo(numsends());}
 }
 
-void Mixer::InsertSend(int idx,MixerWire swire)
+void Mixer::InsertSend(unsigned int idx,MixerWire swire)
 {
 	assert(idx<MAX_CONNECTIONS);
 	if ( idx >= numsends())
 	{
-		for(int i=numsends(); i<idx; ++i)
+        for(unsigned int i=numsends(); i<idx; ++i)
 		{
 			sends_.push_back(MixerWire());
 		}
 		sends_.push_back(swire);
 	}
 	else sends_[idx]=swire;
-	for(int i=0; i<numinputs(); ++i)
+    for(unsigned int i=0; i<numinputs(); ++i)
 	{
 		Channel(i).ResizeTo(numsends());
 	}
-	for(int i=0; i<numreturns(); ++i)
+    for(unsigned int i=0; i<numreturns(); ++i)
 	{
 		Return(i).ResizeTo(numsends());
 	}
 }
-void Mixer::DiscardChannel(int idx)
+void Mixer::DiscardChannel(unsigned int idx)
 {
 	assert(idx<MAX_CONNECTIONS);
 	if (idx!=numinputs()-1) return;
@@ -1006,19 +1006,19 @@ void Mixer::DiscardChannel(int idx)
 	}
 	inputs_.resize(i+1);
 }
-void Mixer::DiscardReturn(int idx)
+void Mixer::DiscardReturn(unsigned int idx)
 {
 	assert(idx<MAX_CONNECTIONS);
 	if (idx!=numreturns()-1) return;
-	int i;
-	for (i = idx; i >= 0; i--)
+    unsigned int i;
+    for (i = idx; ; i--)
 	{
 		if (Return(i).IsValid())
 			break;
 	}
 	returns_.resize(i+1);
 }
-void Mixer::DiscardSend(int idx)
+void Mixer::DiscardSend(unsigned int idx)
 {
 	assert(idx<MAX_CONNECTIONS);
 	if (idx!=numsends()-1) return;
@@ -1060,13 +1060,13 @@ void Mixer::ExchangeSends(int send1,int send2)
 	MixerWire tmp = sends_[send1];
 	sends_[send1] = sends_[send2];
 	sends_[send2] = tmp;
-	for (int i(0); i < numinputs(); ++i)
+    for (unsigned int i = 0; i < numinputs(); ++i)
 	{
 		Channel(i).ExchangeSends(send1,send2);
 		RecalcSend(i,send1);
 		RecalcSend(i,send2);
 	}
-	for (int i(0); i < numreturns(); ++i)
+    for (unsigned int i = 0; i < numreturns(); ++i)
 	{
 		Return(i).ExchangeSends(send1,send2);
 	}
@@ -1076,22 +1076,22 @@ void Mixer::ResizeTo(int inputs, int sends)
 	inputs_.resize(inputs);
 	returns_.resize(sends);
 	sends_.resize(sends);
-	for(int i=0; i<numinputs(); ++i)
+    for(unsigned int i=0; i<numinputs(); ++i)
 	{
 		Channel(i).ResizeTo(numsends());
 	}
-	for(int i=0; i<numreturns(); ++i)
+    for(unsigned int i=0; i<numreturns(); ++i)
 	{
 		Return(i).ResizeTo(numsends());
 	}
 }
 void Mixer::RecalcMaster()
 {
-	for (int i(0);i<numinputs();i++)
+    for (unsigned int i = 0;i<numinputs();i++)
 	{
 		if (_inputCon[i]) RecalcChannel(i);
 	}
-	for (int i(0);i<numreturns();i++)
+    for (unsigned int i = 0;i<numreturns();i++)
 	{
 		if (Return(i).IsValid()) RecalcReturn(i);
 	}
@@ -1102,7 +1102,7 @@ void Mixer::RecalcReturn(int idx)
 	float val;
 	GetWireVolume(idx,val);
 
-	for(int send=0; send < numsends(); ++send)
+    for(unsigned int send=0; send < numsends(); ++send)
 	{
 		if (Return(idx).Send(send))
 		{
@@ -1145,7 +1145,7 @@ void Mixer::RecalcChannel(int idx)
 		mixvolpl[idx] *= (1.0f-Channel(idx).Panning())*2.0f;
 	}
 	else mixvolpr[idx] *= (Channel(idx).Panning())*2.0f;
-	for (int i(0);i<numsends();i++) RecalcSend(idx,i);
+    for (unsigned int i(0);i<numsends();i++) RecalcSend(idx,i);
 }
 void Mixer::RecalcSend(int chan,int send)
 {
@@ -1177,9 +1177,9 @@ bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 	if ( numins >0 ) InsertChannel(numins-1);
 	if ( numrets >0 ) InsertReturn(numrets-1);
 	if ( numrets >0 ) InsertSend(numrets-1,MixerWire());
-	for (int i(0);i<numinputs();i++)
+    for (unsigned int i(0);i<numinputs();i++)
 	{
-		for (int j(0);j<numsends();j++)
+        for (unsigned int j(0);j<numsends();j++)
 		{
 			float send(0.0f);
 			pFile->Read(send);
@@ -1192,7 +1192,7 @@ bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 		pFile->Read(Channel(i).DryOnly());
 		pFile->Read(Channel(i).WetOnly());
 	}
-	for (int i(0);i<numreturns();i++)
+    for (unsigned int i(0);i<numreturns();i++)
 	{
 		pFile->Read(Return(i).Wire().machine_);
 		pFile->Read(Return(i).Wire().volume_);
@@ -1200,7 +1200,7 @@ bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 		pFile->Read(sends_[i].machine_);
 		pFile->Read(sends_[i].volume_);
 		pFile->Read(sends_[i].normalize_);
-		for (int j(0);j<numsends();j++)
+        for (unsigned int j(0);j<numsends();j++)
 		{
 			bool send(false);
 			pFile->Read(send);
@@ -1212,8 +1212,8 @@ bool Mixer::LoadSpecificChunk(RiffFile* pFile, int /*version*/)
 		pFile->Read(Return(i).Mute());
 	}
 	RecalcMaster();
-	for (int i(0);i<numinputs();i++)
-		for(int j(0);j<numsends();j++)
+    for (unsigned int i(0);i<numinputs();i++)
+        for(unsigned int j(0);j<numsends();j++)
 			RecalcSend(i,j);
 	return true;
 }
@@ -1235,9 +1235,9 @@ void Mixer::SaveSpecificChunk(RiffFile* pFile) const
 	const int numrets = numreturns();
 	pFile->Write(numins);
 	pFile->Write(numrets);
-	for (int i(0);i<numinputs();i++)
+    for (unsigned int i(0);i<numinputs();i++)
 	{
-		for (int j(0);j<numsends();j++)
+        for (unsigned int j(0);j<numsends();j++)
 		{
 			pFile->Write(Channel(i).Send(j));
 		}
@@ -1248,7 +1248,7 @@ void Mixer::SaveSpecificChunk(RiffFile* pFile) const
 		pFile->Write(Channel(i).DryOnly());
 		pFile->Write(Channel(i).WetOnly());
 	}
-	for (int i(0);i<numreturns();i++)
+    for (unsigned int i(0);i<numreturns();i++)
 	{
 		pFile->Write(Return(i).Wire().machine_);
 		pFile->Write(Return(i).Wire().volume_);
@@ -1256,7 +1256,7 @@ void Mixer::SaveSpecificChunk(RiffFile* pFile) const
 		pFile->Write(sends_[i].machine_);
 		pFile->Write(sends_[i].volume_);
 		pFile->Write(sends_[i].normalize_);
-		for (int j(0);j<numsends();j++)
+        for (unsigned int j(0);j<numsends();j++)
 		{
 			bool send(Return(i).Send(j));
 			pFile->Write(send);

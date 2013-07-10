@@ -601,7 +601,7 @@ bool Psy3Filter::LoadEINSv1(RiffFile* file, CoreSong& song, int minorversion, ui
 void Psy3Filter::RestoreMixerSendFlags(CoreSong& song) {
 	for(int i(0);i < MAX_MACHINES; ++i) if(song.machine(i) && song.machine(i)->getMachineKey() == InternalKeys::mixer) {
 		Mixer & mac = static_cast<Mixer&>(*song.machine(i));
-		for(int j(0); j < mac.numreturns(); ++j) if(mac.Return(j).IsValid())
+        for(unsigned int j(0); j < mac.numreturns(); ++j) if(mac.Return(j).IsValid())
 			song.machine(mac.Return(j).Wire().machine_)->SetMixerSendFlag(&song);
 	}
 }

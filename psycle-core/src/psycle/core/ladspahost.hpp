@@ -22,7 +22,7 @@ public:
 
 	virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type);
 
-	virtual const Hosts::type hostCode() const { return Hosts::LADSPA; }
+    virtual Hosts::type hostCode() const { return Hosts::LADSPA; }
 	virtual const std::string hostName() const { return "Ladspa"; }
 	virtual std::string const & getPluginPath(int) const { return plugin_path_; }
 	virtual int getNumPluginPaths() const { return 1; }

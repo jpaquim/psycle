@@ -49,7 +49,7 @@ const std::vector<int>& Preset::parameter() const {
 	return params_;
 }
 
-void Preset::tweakMachine( Machine & mac ) {
+void Preset::tweakMachine( Machine & /*mac*/ ) {
 	//FIXME: Implement with polymorphism
 	#if 0
 	if( mac.type() == MACH_PLUGIN ) {

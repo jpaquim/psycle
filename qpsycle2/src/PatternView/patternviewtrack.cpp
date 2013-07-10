@@ -23,7 +23,7 @@ PatternViewTrack::~PatternViewTrack(){
     }
 }
 
-void PatternViewTrack::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
+void PatternViewTrack::paint(QPainter */*painter*/, const QStyleOptionGraphicsItem */*option*/, QWidget */*widget*/){
 }
 
 void PatternViewTrack::updateString(int line){

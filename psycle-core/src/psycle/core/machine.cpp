@@ -853,7 +853,6 @@ int Machine::GenerateAudio(int numsamples) {
 	assert(nextLineInSamples >= 0);
 	// next event, initialized to "out of scope".
 	int nextevent = numsamples + 1;
-	int previousline = nextLineInSamples;
 	std::map<int /* track */, int /* channel */>::iterator colsIt;
 
 	// check for next event.
@@ -870,7 +869,6 @@ int Machine::GenerateAudio(int numsamples) {
 	for(; processedsamples < numsamples; processedsamples += samplestoprocess) {
 		if(processedsamples == nextLineInSamples) {
 			Tick();
-			previousline = nextLineInSamples;
 			nextLineInSamples += static_cast<int>(timeInfo.samplesPerTick());
 			doPostTick = true;
 		}

@@ -94,7 +94,7 @@ int JackOut::fillBuffer( jack_nframes_t nframes ) {
 	jack_default_audio_sample_t *out_1 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_1, nframes);
 	jack_default_audio_sample_t *out_2 = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port_2, nframes);
 	float const * input(callback(nframes));
-	int count = 0;
+    unsigned int count = 0;
 	while(count < nframes) {
 		out_1[count] = *input++  / 32768.0f;
 		out_2[count] = *input++  / 32768.0f;

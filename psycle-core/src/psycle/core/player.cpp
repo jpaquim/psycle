@@ -45,9 +45,10 @@ Player::Player()
 	song_(),
 	recording_(),
 	recording_with_dither_(),
-	playing_(),
-	autoStopMachines_(),
-	autostop_(true) {
+    playing_(),
+    autostop_(true),
+    autoStopMachines_()
+     {
 	driver_ = default_driver_ = new DummyDriver();
 	universalis::os::aligned_memory_alloc(16, buffer_, MAX_SAMPLES_WORKFN);
 	for(int i(0); i < MAX_TRACKS; ++i) prev_machines_[i] = 255;

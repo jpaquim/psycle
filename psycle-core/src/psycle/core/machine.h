@@ -126,7 +126,7 @@ class PSYCLE__CORE__DECL AudioPort {
 
 class PSYCLE__CORE__DECL InPort : public AudioPort {
 	public:
-		typedef int32_t id_type;
+        typedef uint32_t id_type;
 		InPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 		virtual ~InPort(){};
 		virtual void CollectData(int numSamples);
@@ -134,7 +134,7 @@ class PSYCLE__CORE__DECL InPort : public AudioPort {
 
 class PSYCLE__CORE__DECL OutPort : public AudioPort {
 	public:
-		typedef int32_t id_type;
+        typedef uint32_t id_type;
 		OutPort(Machine & parent, int arrangement, std::string const & name) : AudioPort(parent, arrangement, name) {}
 		virtual ~OutPort() {}
 		virtual void CollectData(int numSamples);
@@ -484,8 +484,8 @@ public: void reset_time_measurement() throw() { accumulated_processing_time_ = *
 			virtual bool IsGenerator() const;
 
 		protected:
-			int numInPorts;
-			int numOutPorts;
+            uint numInPorts;
+            uint numOutPorts;
 			InPort *inports;
 			OutPort *outports;
 			/// this machine is used by a send/return mixer. (Some things cannot be done on these machines)

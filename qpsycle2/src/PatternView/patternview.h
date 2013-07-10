@@ -20,7 +20,7 @@ public Q_SLOTS:
     void reload();
 
 private:
-    QList<PatternViewPattern*> patternList;
+    QVector<PatternViewPattern*> patternList;
     psycle::core::Song *song;
 };
 

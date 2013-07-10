@@ -49,8 +49,8 @@ float * PluginFxCallback::unused1(int, int) { return 0; }
 Plugin::Plugin(MachineCallbacks* callbacks, MachineKey key,Machine::id_type id, void* libHandle, CMachineInfo* info, CMachineInterface* macIface )
 :
 	Machine(callbacks, id),
-	libHandle_(libHandle),
-	key_(key),
+    key_(key),
+    libHandle_(libHandle),
 	info_(info),
 	proxy_(*this,macIface)
 {

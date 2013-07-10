@@ -289,7 +289,7 @@ class PSYCLE__CORE__DECL Song : public CoreSong {
 			int _trackSoloed;
 
 			// Compatibility with older psycle::host
-			void SetDefaultPatternLines(int defaultPatLines) {}
+            void SetDefaultPatternLines(int /*defaultPatLines*/) {}
 
 			int GetHighestInstrumentIndex() {
 				int i;

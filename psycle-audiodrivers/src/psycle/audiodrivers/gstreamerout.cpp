@@ -288,12 +288,12 @@ void GStreamerOut::do_start() throw(std::exception) {
 }
 
 /// this is called from within gstreamer's processing thread.
-void GStreamerOut::handoff_static(::GstElement * source, ::GstBuffer * buffer, ::GstPad * pad, GStreamerOut * instance) {
+void GStreamerOut::handoff_static(::GstElement * /*source*/, ::GstBuffer * buffer, ::GstPad * pad, GStreamerOut * instance) {
 	instance->handoff(*buffer, *pad);
 }
 
 /// this is called from within gstreamer's processing thread.
-void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & pad) {
+void GStreamerOut::handoff(::GstBuffer & buffer, ::GstPad & /*pad*/) {
 	if(false && loggers::trace()) loggers::trace()("handoff", UNIVERSALIS__COMPILER__LOCATION);
 	output_sample_type * const out = reinterpret_cast<output_sample_type * const>(GST_BUFFER_DATA(&buffer));
 	std::size_t const frames = GST_BUFFER_SIZE(&buffer) / sizeof(output_sample_type) / playbackSettings().numChannels();

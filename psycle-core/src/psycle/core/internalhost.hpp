@@ -20,7 +20,7 @@ class PSYCLE__CORE__DECL InternalHost : public MachineHost {
 		virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type);
 		virtual void FillFinderData(PluginFinder&, bool clearfirst=false);
 
-		virtual const Hosts::type hostCode() const { return Hosts::INTERNAL; }
+        virtual Hosts::type hostCode() const { return Hosts::INTERNAL; }
 		virtual const std::string hostName() const { return "Internal"; }
 	protected:
 		virtual void FillPluginInfo(const std::string&, const std::string&, PluginFinder& ) {}

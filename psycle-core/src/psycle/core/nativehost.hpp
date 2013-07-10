@@ -25,7 +25,7 @@ class PSYCLE__CORE__DECL NativeHost : public MachineHost {
 
 		virtual Machine* CreateMachine(PluginFinder&, const MachineKey &, Machine::id_type);
 
-		virtual const Hosts::type hostCode() const { return Hosts::NATIVE; }
+        virtual Hosts::type hostCode() const { return Hosts::NATIVE; }
 		virtual const std::string hostName() const { return "Native"; }
 		virtual std::string const & getPluginPath(int) const { return plugin_path_; }
 		virtual int getNumPluginPaths() const { return 1; }

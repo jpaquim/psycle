@@ -120,7 +120,7 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 					mute_ = in.mute_;
 				}
 				inline void Send(int i,bool value) { sends_[i]= value; }
-				inline const bool Send(int i) const { return sends_[i]; }
+                inline bool Send(int i) const { return sends_[i]; }
 				inline bool &MasterSend() { return mastersend_; }
 				inline const bool &MasterSend() const{ return mastersend_; }
 				inline float &Volume() { return volume_; }
@@ -236,24 +236,24 @@ class PSYCLE__CORE__DECL Mixer : public Machine {
 		inline MixerWire & Send(int i) { return sends_[i]; }
 		inline const MixerWire & Send(int i) const { return sends_[i]; }
 		inline MasterChannel & Master() { return master_; }
-		inline int numinputs() const { return static_cast<int>(inputs_.size()); }
-		inline int numreturns() const { return static_cast<int>(returns_.size()); }
-		inline int numsends() const { return static_cast<int>(sends_.size()); }
-		inline bool ChannelValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numinputs() && _inputCon[i]); }
-        inline bool ReturnValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
-		inline bool SendValid(int i) const { assert (i<MAX_CONNECTIONS); return (i<numsends() && sends_[i].IsValid()); }
+        inline unsigned int numinputs() const { return inputs_.size(); }
+        inline unsigned int numreturns() const { return returns_.size(); }
+        inline unsigned int numsends() const { return sends_.size(); }
+        inline bool ChannelValid(unsigned int i) const { assert (i<MAX_CONNECTIONS); return (i<numinputs() && _inputCon[i]); }
+        inline bool ReturnValid(unsigned int i) const { assert (i<MAX_CONNECTIONS); return (i<numreturns() && Return(i).IsValid()); }
+        inline bool SendValid(unsigned int i) const { assert (i<MAX_CONNECTIONS); return (i<numsends() && sends_[i].IsValid()); }
 
-		void InsertChannel(int idx,InputChannel*input=0);
-		void InsertReturn(int idx,ReturnChannel* retchan=0);
-		void InsertReturn(int idx,MixerWire rwire)
+        void InsertChannel(unsigned int idx, InputChannel*input=0);
+        void InsertReturn(unsigned int idx,ReturnChannel* retchan=0);
+        void InsertReturn(unsigned int idx,MixerWire rwire)
 		{
 			InsertReturn(idx);
 			Return(idx).Wire()=rwire;
 		}
-		void InsertSend(int idx,MixerWire swire);
-		void DiscardChannel(int idx);
-		void DiscardReturn(int idx);
-		void DiscardSend(int idx);
+        void InsertSend(unsigned int idx, MixerWire swire);
+        void DiscardChannel(unsigned int idx);
+        void DiscardReturn(unsigned int idx);
+        void DiscardSend(unsigned int idx);
 
 		void ExchangeChans(int chann1,int chann2);
 		void ExchangeReturns(int chann1,int chann2);

@@ -301,11 +301,11 @@ void Sequence::GetEventsInRange(double start, double length, std::vector<Pattern
 		// and iterate backwards to include any other that is inside the range [start,start+length)
 		// (The UI won't allow more than one pattern for the same range in the same timeline, but 
 		// this was left open in the player code)
-		bool worked = false;
+//		bool worked = false;
 		for(; lineIt != line.rend() && lineIt->first + lineIt->second->patternBeats() >= start; ++lineIt) {
 			// take the pattern,
 			Pattern & pat = lineIt->second->pattern();
-			worked = true;
+//			worked = true;
 			double entryStart = lineIt->first;
 			double entryStartOffset  = lineIt->second->startPos();
 			double entryEndOffset  = lineIt->second->endPos();
@@ -376,7 +376,7 @@ SequenceEntry* Sequence::GetEntryOnPosition(SequenceLine & line, double pos) {
 	return 0;
 }
 
-int Sequence::priority(const PatternEvent& cmd, int count) const {
+int Sequence::priority(const PatternEvent& cmd, int /*count*/) const {
 	int p = 8;
 	if(cmd.IsGlobal()) p = 0;
 	else if(cmd.note() == notetypes::tweak_slide) p = 1;
@@ -413,7 +413,7 @@ void Sequence::GetOrderedEvents(std::vector<PatternEvent*> & ordered_events) {
 	}
 }
 
-bool Sequence::getPlayInfo(Pattern & pattern, double start, double length, double& entryStart) const {
+bool Sequence::getPlayInfo(Pattern & /*pattern*/, double /*start*/, double /*length*/, double& /*entryStart*/) const {
 	#if 0 ///\todo
 		entryStart = 0;
 		PatternLine* searchLine = 0;

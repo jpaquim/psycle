@@ -10,19 +10,19 @@ namespace psycle { namespace helpers {
 
 
 	// TODO No idea how to do this in a nicer way with the gnu toolchain
-	namespace {
+    namespace {
 		constexpr uint16_t FORMAT_PCM = 1;
 		constexpr uint16_t FORMAT_FLOAT = 3;
 		constexpr uint16_t FORMAT_EXTENSIBLE = 0xFFFEU;
-	}
-	template class RiffWaveFmtChunk<LongBE, ShortBE>;
-	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_PCM = FORMAT_PCM;
-	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_FLOAT = FORMAT_FLOAT;
-	template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
-	template class RiffWaveFmtChunk<LongLE, ShortLE>;
-	template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_PCM = FORMAT_PCM;
-	template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_FLOAT = FORMAT_FLOAT;
-	template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
+    }
+    template class RiffWaveFmtChunk<LongBE, ShortBE>;
+    template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_PCM = FORMAT_PCM;
+    template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_FLOAT = FORMAT_FLOAT;
+    template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
+    template class RiffWaveFmtChunk<LongLE, ShortLE>;
+    template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_PCM = FORMAT_PCM;
+    template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_FLOAT = FORMAT_FLOAT;
+    template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
 
 	//////////////////////////////////////////////
 
@@ -62,7 +62,7 @@ namespace psycle { namespace helpers {
 			}
 		}
 	}
-	void RiffWave::Create(const std::string& fname, bool const  overwrite, bool const littleEndian) {
+    void RiffWave::Create(const std::string& fname, bool const  overwrite, bool const /*littleEndian*/) {
 		MsRiff::Create(fname, overwrite);
 		Write(WAVE);
 		ds64_pos = 0; pcmdata_pos = 0; numsamples = 0;
@@ -417,7 +417,7 @@ namespace psycle { namespace helpers {
 	}
 
 
-	void RiffWave::writeFromInterleavedSamples(void* pSamps, uint32_t maxSamples, WaveFormat_Data* convertFrom)
+    void RiffWave::writeFromInterleavedSamples(void* /*pSamps*/, uint32_t /*maxSamples*/, WaveFormat_Data* /*convertFrom*/)
 	{
 		if (!currentHeader.matches(data)) {
 			pcmdata_pos = GetPos();
@@ -431,7 +431,7 @@ namespace psycle { namespace helpers {
 			}
 		}
 	}
-	void RiffWave::writeFromDeInterleavedSamples(void** pSamps, uint32_t maxSamples, WaveFormat_Data* convertFrom)
+    void RiffWave::writeFromDeInterleavedSamples(void** /*pSamps*/, uint32_t /*maxSamples*/, WaveFormat_Data* /*convertFrom*/)
 	{
 		if (!currentHeader.matches(data)) {
 			pcmdata_pos = GetPos();
@@ -448,11 +448,11 @@ namespace psycle { namespace helpers {
 
 
 
-	void RiffWave::writeMonoSamples(void* pSamp, uint32_t samples) {
+    void RiffWave::writeMonoSamples(void* /*pSamp*/, uint32_t /*samples*/) {
 	}
-	void RiffWave::writeMonoConvertFrom16(int16_t* pSamp, uint32_t samples) {
+    void RiffWave::writeMonoConvertFrom16(int16_t* /*pSamp*/, uint32_t /*samples*/) {
 	}
-	void RiffWave::writeDeintConvertFrom16(int16_t** pSampL, void* pSampR, uint32_t samples) {
+    void RiffWave::writeDeintConvertFrom16(int16_t** /*pSampL*/, void* /*pSampR*/, uint32_t /*samples*/) {
 	}
 
 

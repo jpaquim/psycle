@@ -182,7 +182,7 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			bool playing() const { return playing_; }
 			/// maybe autostop should be always used ?
 			void set_auto_stop(bool on) { autostop_ = on; }
-			bool autostop(bool on) const { return autostop_; }
+            bool autostop(bool /*on*/) const { return autostop_; }
 		private:
 			bool playing_;
 			bool autostop_;

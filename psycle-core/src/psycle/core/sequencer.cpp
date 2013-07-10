@@ -46,7 +46,7 @@ void Sequencer::Work(unsigned int nframes) {
 }
 
 void Sequencer::process_global_event(const PatternEvent& event) {
-	Machine::id_type mac_id;
+//	Machine::id_type mac_id;
 	switch(event.command()) {
 		case commandtypes::BPM_CHANGE:
 			loggers::warning()("psycle: core: unimplemented global event: bpm change");

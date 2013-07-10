@@ -16,7 +16,7 @@ bool EventDriver::Open() {
 	return false;
 }
 
-bool EventDriver::Sync(int sampleoffset, int buffersize) {
+bool EventDriver::Sync(int /*sampleoffset*/, int /*buffersize*/) {
 	return false;
 }
 

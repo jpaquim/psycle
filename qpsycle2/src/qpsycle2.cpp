@@ -35,6 +35,7 @@ qpsycle2::qpsycle2(QWidget *parent)
     tabs->addTab(patternView, "Pattern View");
     Statics::setMachineView(mach);
     Statics::setPatternView(pattern);
+    patternView->centerOn(0,0);
     this->setCentralWidget(tabs);
     machineView->adjustSize();
     this->setWindowTitle("QPsycle");
