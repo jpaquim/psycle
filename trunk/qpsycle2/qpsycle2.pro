@@ -384,17 +384,16 @@ DEPENDPATH += . \
               ../psycle-helpers/src/psycle/helpers/math
 
 
- LIBS += -lz -ldl -lrt -lboost_filesystem -lboost_system -lboost_signals -lboost_thread
+ LIBS += -lz -ldl -lrt -lboost_filesystem -lboost_system -lboost_signals -lboost_thread -lgomp
 
 OTHER_FILES +=
 
-CONFIG      += no_keywords\
-            link_pkgconfig\
+CONFIG      += link_pkgconfig\
 
  PKGCONFIG += glib-2.0 gstreamer-0.10 gstreamer-plugins-base-0.10 alsa jack soxr
 
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -fopenmp
 
 QMAKE_CFLAGS_DEBUG += -O0
 

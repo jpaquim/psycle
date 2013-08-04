@@ -7,7 +7,7 @@
 
 #include <psycle/core/detail/project.hpp>
 
-#include <boost/signals.hpp>
+#include <boost/signals2.hpp>
 #include <string>
 
 namespace psycle { namespace core {
