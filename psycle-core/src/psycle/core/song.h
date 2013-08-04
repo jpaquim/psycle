@@ -44,8 +44,8 @@ class PSYCLE__CORE__DECL CoreSong {
 		// serialization
 		bool load(const std::string& filename);
 		bool save(const std::string& filename, int version = 4);
-		boost::signal<void (const std::string&, const std::string&)> report;
-		boost::signal<void (int, int, const std::string&)> progress;
+        boost::signals2::signal<void (const std::string&, const std::string&)> report;
+        boost::signals2::signal<void (int, int, const std::string&)> progress;
 		
 		/// the file name this song was loaded from
 		const std::string& filename() const { return filename_; }

@@ -59,7 +59,7 @@ namespace psycle { namespace core {
 			SequenceLine(Sequence & sequence) : sequence_(&sequence) {}
 			~SequenceLine();
 
-			boost::signal<void (SequenceLine&)> wasDeleted;
+            boost::signals2::signal<void (SequenceLine&)> wasDeleted;
 
 			SequenceEntry & createEntry(Pattern &, double position);
 			void insertEntry(SequenceEntry &);
@@ -155,12 +155,12 @@ namespace psycle { namespace core {
 			typedef GlobalMap::iterator GlobalIter;
 
 			SequenceLine & createNewLine();
-			boost::signal<void (SequenceLine&)> newLineCreated;
+            boost::signals2::signal<void (SequenceLine&)> newLineCreated;
 			SequenceLine & insertNewLine(SequenceLine & selectedLine);
-			boost::signal<void (SequenceLine&, SequenceLine&)> newLineInserted; // new line, line it is inserted before
+            boost::signals2::signal<void (SequenceLine&, SequenceLine&)> newLineInserted; // new line, line it is inserted before
 			
 			void removeLine(SequenceLine & line);
-			boost::signal<void (SequenceLine&)> lineRemoved;
+            boost::signals2::signal<void (SequenceLine&)> lineRemoved;
 			void removeAll();
 
 			// heart of patternsequence
@@ -177,7 +177,7 @@ namespace psycle { namespace core {
 			double tickLength() const;
 			void moveDownLine(SequenceLine &);
 			void moveUpLine(SequenceLine &);
-			boost::signal<void (SequenceLine&, SequenceLine&)> linesSwapped;
+            boost::signals2::signal<void (SequenceLine&, SequenceLine&)> linesSwapped;
 			int numTracks() const { return numTracks_; }
 			void setNumTracks(int newtracks) {
 				///\todo: might be necessary to initialize mutedTrack and armedTrack after this.

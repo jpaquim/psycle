@@ -7,7 +7,7 @@
 
 #include "patternevent.h"
 #include "timesignature.h"
-#include <boost/signals.hpp>
+#include <boost/signals2.hpp>
 
 namespace psycle { namespace core {
 
@@ -24,7 +24,7 @@ namespace psycle { namespace core {
 			virtual ~Pattern();
 
 			Pattern& operator=(const Pattern& rhs);
-			boost::signal<void (Pattern*)> wasDeleted;
+            boost::signals2::signal<void (Pattern*)> wasDeleted;
 			
 			void setID(int id) { id_ = id; }
 			int id() const { return id_; }
