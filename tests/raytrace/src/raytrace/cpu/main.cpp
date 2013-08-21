@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2009-2010 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2009-2013 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #include "main.hpp"
 #include "render.hpp"
@@ -9,6 +9,7 @@
 #include <gtkmm/main.h>
 #include <boost/bind.hpp>
 #include <universalis/stdlib/thread.hpp>
+#include <universalis/stdlib/chrono.hpp>
 #include <limits>
 
 namespace raytrace {
