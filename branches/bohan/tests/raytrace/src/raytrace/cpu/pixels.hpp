@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2009-2010 psycledelics http://psycle.pastnotecut.org : johan boule
+// copyright 2009-2013 psycledelics http://psycle.pastnotecut.org : johan boule
 
 #ifndef RAYTRACE__PIXELS
 #define RAYTRACE__PIXELS
@@ -45,10 +45,10 @@ pixels::rgba pixels::quantize(color c, uint8_t a) {
 		uint8_t bytes[sizeof(rgba)];
 		rgba word;
 	} datum;
-	using psycle::helpers::math::lrint;
-	datum.bytes[0] = lrint<uint8_t>(0xff * c.x);
-	datum.bytes[1] = lrint<uint8_t>(0xff * c.y);
-	datum.bytes[2] = lrint<uint8_t>(0xff * c.z);
+	using psycle::helpers::math::rint;
+	datum.bytes[0] = rint<uint8_t>(0xff * c.x);
+	datum.bytes[1] = rint<uint8_t>(0xff * c.y);
+	datum.bytes[2] = rint<uint8_t>(0xff * c.z);
 	datum.bytes[3] = a;
 	return datum.word;
 }
