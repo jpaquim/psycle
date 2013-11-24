@@ -136,7 +136,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 					}
 				}
 			}
-			if ( rWave().WaveLoopType() != XMInstrument::WaveData::LoopType::DO_NOT )
+			if ( rWave().WaveLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT )
 			{
 				dc.SelectObject(&cpen_lo);
 				int ls = (rWave().WaveLoopStart()* nWidth) /rWave().WaveLength();
@@ -149,7 +149,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 				dc.TextOut(le-18,nHeight-24,"End");
 
 			}
-			if ( rWave().WaveSusLoopType() != XMInstrument::WaveData::LoopType::DO_NOT )
+			if ( rWave().WaveSusLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT )
 			{
 				dc.SelectObject(&cpen_sus);
 				int ls = (rWave().WaveSusLoopStart()* nWidth)/rWave().WaveLength();

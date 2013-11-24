@@ -354,7 +354,6 @@ namespace psycle
 			  samplesV.clear();
 			}
 		}
-	
 		void Machine::InitializeSamplesVector(int numChans)
 		{
 			for(int i(0);i<samplesV.size();i++){
@@ -639,6 +638,7 @@ namespace psycle
 		}
 		void Machine::Tweak(CPreset const & preset)
 		{
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 			int num=preset.GetNumPars();
 			for(int i(0) ; i < num ; ++i)
 			{

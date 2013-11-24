@@ -74,7 +74,7 @@ namespace psycle {
 					gaussian
 				};
 			};
-
+#pragma pack(push, 1)
 			struct fullheader
 			{
 				std::uint32_t	head;
@@ -86,6 +86,7 @@ namespace psycle {
 				std::uint32_t datahead;
 				std::uint32_t datasize;
 			} clipboardwavheader;
+#pragma pack(pop)
 
 			std::vector<char*> clipboardmem;
 

@@ -47,6 +47,7 @@ private:
 	void SetInstrumentData(const int instno);
 public:
 	void FillInstrumentList();
+	void SetActivePage(int index);
 private:
 	bool m_bInitialized;
 	int		m_iCurrentSelected;

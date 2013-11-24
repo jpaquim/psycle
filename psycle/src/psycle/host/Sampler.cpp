@@ -286,7 +286,7 @@ namespace psycle
 			{
 				pVoice->_triggerNoteOff=0;
 				pVoice->_instrument = pEntry->_inst;
-				const XMInstrument::WaveData& wave = Global::song().samples[pVoice->_instrument];
+				const XMInstrument::WaveData<>& wave = Global::song().samples[pVoice->_instrument];
 				
 				pVoice->_cutoff = (pins->_RCUT) ? alteRand(pins->ENV_F_CO) : pins->ENV_F_CO;
 				pVoice->_filter.Ressonance((pins->_RRES) ? alteRand(pins->ENV_F_RQ) : pins->ENV_F_RQ);
@@ -310,7 +310,7 @@ namespace psycle
 				pVoice->_wave._length = twlength;
 				
 				// Init loop
-				if (wave.WaveLoopType() == XMInstrument::WaveData::LoopType::NORMAL)
+				if (wave.WaveLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL)
 				{
 					pVoice->_wave._loop = true;
 					pVoice->_wave._loopStart = wave.WaveLoopStart();

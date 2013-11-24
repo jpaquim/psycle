@@ -202,6 +202,7 @@ namespace psycle { namespace host {
 				{
 					if(i == sel) {
 						_pMachine->Tweak(*preset);
+						presetChanged = true;
 						break;
 					}
 				}
@@ -221,7 +222,6 @@ namespace psycle { namespace host {
 			{
 				if(i == sel) {
 					_pMachine->Tweak(*preset);
-					presetChanged = true;
 					break;
 				}
 			}

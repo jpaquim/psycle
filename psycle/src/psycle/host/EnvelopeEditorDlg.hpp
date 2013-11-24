@@ -32,7 +32,7 @@ protected:
 	afx_msg void OnBnClickedSusEnd();
 	afx_msg void OnBnClickedLoopStart();
 	afx_msg void OnBnClickedLoopEnd();
-	afx_msg void OnEnvelopeChanged(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnEnvelopeChanged();
 	afx_msg void OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult);
 public:
 	CEnvelopeEditor m_EnvelopeEditor;

@@ -12,19 +12,19 @@ struct lua_State;
 namespace psycle { namespace host {
 
 // array wrapper (shared : float*, created: vector<float>}
+
 class PSArray {
 public:
-	PSArray() : ptr_(0), len_(0), cap_(0), shared_(0) {}
+	PSArray() : ptr_(0), base_(0), len_(0), baselen_(0), cap_(0), shared_(0) {}
 	PSArray(int len, float v);
 	PSArray(double start, double stop, double step);
-	PSArray(float* ptr, int len) : ptr_(ptr), cap_(0), len_(len), shared_(1) {}	
+	PSArray(float* ptr, int len) : ptr_(ptr), base_(ptr), cap_(0), len_(len), baselen_(len), shared_(1) {}	
 	PSArray(PSArray& a1, PSArray& a2);
 	~PSArray() {
-	  if (!shared_) {
-		 universalis::os::aligned_memory_dealloc(ptr_);
+	  if (!shared_ && base_) {		 
+		 universalis::os::aligned_memory_dealloc(base_);
 	  }
 	}
-
 	void set_val(int i, float val) { ptr_[i] = val; }
 	float get_val(int i) const { return ptr_[i]; }
 	void set_len(int len) {len_ = len; }
@@ -33,83 +33,59 @@ public:
 	int copyfrom(PSArray& src, int pos);
 	void resize(int newsize);
 	std::string tostring() const;
-	void fillzero();
+	void fillzero(int pos = 0);
 	void fill(float val);
+	void fill(float val, int pos);
 	float* data() { return ptr_; }
 	template<class T>
-	void do_op(T&);
-	
+	void do_op(T&);	
+	void rsum(double lv);
+	void margin(int start, int end) {
+		ptr_ = base_ + start;
+		assert(end >= start && start >= 0 && end <=baselen_);
+		len_ = end-start;
+	}
+	void clearmargin() { 
+		ptr_ = base_;
+		len_ = baselen_;
+	}
 private:	
-	float* ptr_;
+	float* ptr_, *base_;
 	int cap_;
 	int len_;
+    int baselen_;
 	int shared_;
-};
-
-class PSDelay {
-public:
-  PSDelay(int k) : mem(k,0) {}
-  PSArray mem;  
-  void work(PSArray& x, PSArray& y);
+	int startoffset, endoffset;
 };
 
 typedef std::vector<PSArray> psybuffer;
 
-class LuaArrayBind {
-public:    
-	LuaArrayBind(lua_State* state) {	  
-		set_state(state);
-	}
-	~LuaArrayBind() {
-		map_.erase(map_.find(L));
-	}
-
-	void build_buffer(std::vector<float*>& buf, int num) {
-		std::vector<float*>::iterator it = buf.begin();
-		for ( ; it != buf.end(); ++it) {
-  		  sampleV_.push_back(PSArray(*it, num));
-		}
-	}
-
-	void update_num_samples(int num) {
-		psybuffer::iterator it = sampleV_.begin();
-		for ( ; it != sampleV_.end(); ++it) {
-			(*it).set_len(num);
-		}
-	}
-
-	void set_state(lua_State* state) { 		
-		L = state;		
-		map_[L] = this;
-		export_c_funcs(L);
-	}
-
-private:
+struct LuaArrayBind {
+	static void register_module(lua_State* L);
 	// helper
+	static int open_array(lua_State* L);
 	static PSArray* create_copy_array(lua_State* L, int idx=1);
 
 	static int array_index(lua_State *L);
 	static int array_new_index(lua_State *L);
 	static int array_new(lua_State *L);
 	static int array_new_from_table(lua_State *L);
-	static int array_new_from_sampleV(lua_State *L);
 	static int array_arange(lua_State *L);	
 	static int array_copy(lua_State* L);
 	static int array_tostring(lua_State *L);
 	static int array_gc(lua_State* L);	
-	static int delay_new(lua_State *L);
-	// delay methods
-	static int delay_work(lua_State* L);
-	static int delay_tostring(lua_State* L);
-	static int delay_gc(lua_State* L);
+	
 	// array methods
 	static int array_size(lua_State* L);
 	static int array_resize(lua_State* L);
+	static int array_margin(lua_State* L);
+	static int array_clearmargin(lua_State* L);
 	static int array_concat(lua_State* L);
 	static int array_fillzero(lua_State* L);
 	static int array_method_fill(lua_State* L);
 	static int array_method_add(lua_State* L);
 	static int array_method_mul(lua_State* L);
+	static int array_method_div(lua_State* L);
 	static int array_method_rsum(lua_State* L); // x(n)=x(0)+..+x(n-1)
 	// ops
 	static int array_add(lua_State* L);
@@ -124,14 +100,6 @@ private:
 	static int array_sqrt(lua_State* L);
 	static int array_random(lua_State* L);
 	static int array_pow(lua_State* L);
-
-	void export_c_funcs(lua_State* L);
-
-	lua_State* L;
-	psybuffer sampleV_;
-    // bind array to luascript,needed only for array creation to get the Lua State
-    // else we get a userdata psarray pointer
-	static std::map<lua_State*, LuaArrayBind*> map_;
 };
 
 }  // namespace

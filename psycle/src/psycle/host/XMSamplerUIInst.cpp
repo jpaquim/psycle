@@ -62,11 +62,11 @@ BOOL XMSamplerUIInst::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	CRect rect, rect2;
-	m_tabMain.InsertItem(0,_T("General"));
-	m_tabMain.InsertItem(1,_T("Amplitude"));
-	m_tabMain.InsertItem(2,_T("Pan"));
-	m_tabMain.InsertItem(3,_T("Filter"));
-	m_tabMain.InsertItem(4,_T("Pitch"));
+	m_tabMain.InsertItem(0,_T("(4)General"));
+	m_tabMain.InsertItem(1,_T("(5)Amplitude"));
+	m_tabMain.InsertItem(2,_T("(6)Pan"));
+	m_tabMain.InsertItem(3,_T("(7)Filter"));
+	m_tabMain.InsertItem(4,_T("(8)Pitch"));
 	m_genTab.Create(IDD_INST_SAMPULSE_INSTGEN,&m_tabMain);
 	m_ampTab.Create(IDD_INST_SAMPULSE_INSTAMP,&m_tabMain);
 	m_panTab.Create(IDD_INST_SAMPULSE_INSTPAN,&m_tabMain);
@@ -122,7 +122,6 @@ BOOL XMSamplerUIInst::OnSetActive()
 
 	return CPropertyPage::OnSetActive();
 }
-
 void XMSamplerUIInst::FillInstrumentList() {
 	int i = m_InstrumentList.GetCurSel();
 	m_InstrumentList.ResetContent();
@@ -157,6 +156,23 @@ void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 		CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 		win->ChangeIns(m_InstrumentList.GetCurSel());
 		m_bInitialized = true;
+	}
+}
+void XMSamplerUIInst::SetActivePage(int index) {
+	m_tabMain.SetCurSel(index);
+	m_genTab.ShowWindow(index==0?SW_SHOW:SW_HIDE);
+	m_ampTab.ShowWindow(index==1?SW_SHOW:SW_HIDE);
+	m_panTab.ShowWindow(index==2?SW_SHOW:SW_HIDE);
+	m_filTab.ShowWindow(index==3?SW_SHOW:SW_HIDE);
+	m_pitTab.ShowWindow(index==4?SW_SHOW:SW_HIDE);
+	switch(index) 
+	{
+		case 0: m_genTab.SetFocus(); break;
+		case 1: m_ampTab.SetFocus(); break;
+		case 2: m_panTab.SetFocus(); break;
+		case 3: m_filTab.SetFocus(); break;
+		case 4: m_pitTab.SetFocus(); break;
+		default: break;
 	}
 }
 void XMSamplerUIInst::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)

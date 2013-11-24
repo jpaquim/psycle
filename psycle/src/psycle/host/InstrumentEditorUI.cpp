@@ -16,6 +16,7 @@ InstrumentEditorUI::InstrumentEditorUI(UINT nIDCaption, CWnd* pParentWnd, UINT i
 , init(false)
 , windowVar_(NULL)
 {
+	m_hAccelTable = LoadAccelerators(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_INSTRUMENTEDIT));
 }
 
 InstrumentEditorUI::InstrumentEditorUI(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
@@ -23,12 +24,21 @@ InstrumentEditorUI::InstrumentEditorUI(LPCTSTR pszCaption, CWnd* pParentWnd, UIN
 , init(false)
 , windowVar_(NULL)
 {
+	m_hAccelTable = LoadAccelerators(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_INSTRUMENTEDIT));
 }
 InstrumentEditorUI::~InstrumentEditorUI()
 {
 }
 
 BEGIN_MESSAGE_MAP(InstrumentEditorUI, CPropertySheet)
+	ON_COMMAND(ID_ACCEL_SAMPLER, OnShowSampler)
+	ON_COMMAND(ID_ACCEL_SAMPULSE, OnShowSampulse)
+	ON_COMMAND(ID_ACCEL_WAVE, OnShowWaveBank)
+	ON_COMMAND(ID_ACCEL_GEN, OnShowGen)
+	ON_COMMAND(ID_ACCEL_VOL, OnShowVol)
+	ON_COMMAND(ID_ACCEL_PAN, OnShowPan)
+	ON_COMMAND(ID_ACCEL_FILTER, OnShowFilter)
+	ON_COMMAND(ID_ACCEL_PITCH, OnShowPitch)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -45,6 +55,11 @@ void InstrumentEditorUI::PostNcDestroy()
 }
 BOOL InstrumentEditorUI::PreTranslateChildMessage(MSG* pMsg, HWND focusWin)
 {
+	if (m_hAccelTable) {
+      if (::TranslateAccelerator(m_hWnd, m_hAccelTable, pMsg)) {
+         return(TRUE);
+      }
+    }
 	if (pMsg->message == WM_KEYDOWN)
 	{
 		/*	DWORD dwID = GetDlgCtrlID(focusWin);
@@ -112,5 +127,36 @@ void InstrumentEditorUI::UpdateUI(void)
 	if (GetActivePage() == &m_InstrBasic ) m_InstrBasic.WaveUpdate();
 	//TODO: Refresh other tabs too.
 }
+
+void InstrumentEditorUI::OnShowSampler() {
+	SetActivePage(0);
+}
+void InstrumentEditorUI::OnShowSampulse() {
+	SetActivePage(1);
+}
+void InstrumentEditorUI::OnShowWaveBank() {
+	SetActivePage(2);
+}
+void InstrumentEditorUI::OnShowGen() {
+	SetActivePage(1);
+	m_InstrSampulse.SetActivePage(0);
+}
+void InstrumentEditorUI::OnShowVol() {
+	SetActivePage(1);
+	m_InstrSampulse.SetActivePage(1);
+}
+void InstrumentEditorUI::OnShowPan() {
+	SetActivePage(1);
+	m_InstrSampulse.SetActivePage(2);
+}
+void InstrumentEditorUI::OnShowFilter() {
+	SetActivePage(1);
+	m_InstrSampulse.SetActivePage(3);
+}
+void InstrumentEditorUI::OnShowPitch() {
+	SetActivePage(1);
+	m_InstrSampulse.SetActivePage(4);
+}
+
 
 }}

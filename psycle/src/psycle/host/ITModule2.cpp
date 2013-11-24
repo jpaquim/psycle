@@ -99,7 +99,7 @@ namespace psycle
 			for (unsigned int i(0); i<inshead.noS; i++)
 			{
 				while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
-				XMInstrument::WaveData wave;
+				XMInstrument::WaveData<> wave;
 				itSampleHeader curH;
 				Read(&curH,sizeof(curH));
 				std::size_t curpos = GetPos();
@@ -344,7 +344,7 @@ Special:  Bit 0: On = song message attached.
 			for (i=0;i<itFileH.sampNum;i++)
 			{
 				Seek(pointerss[i]);
-				XMInstrument::WaveData wave;
+				XMInstrument::WaveData<> wave;
 				itSampleHeader curH;
 				Read(&curH,sizeof(curH));
 				bool created = LoadITSample(curH,wave,i);
@@ -585,7 +585,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData& _wave,int iSampleIdx)
+		bool ITModule2::LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData<>& _wave,int iSampleIdx)
 		{
 			char renamed[26];
 			for(int i=0;i<25;i++){
@@ -620,11 +620,11 @@ Special:  Bit 0: On = song message attached.
 				if(bLoop) {
 					if (curH.flg&SampleFlags::ISLOOPPINPONG)
 					{
-						_wave.WaveLoopType(XMInstrument::WaveData::LoopType::BIDI);
+						_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
 					}
-					else _wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+					else _wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 				} else {
-					_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
+					_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
 				}
 				_wave.WaveSusLoopStart(curH.sustainB);
 				_wave.WaveSusLoopEnd(curH.sustainE);
@@ -632,11 +632,11 @@ Special:  Bit 0: On = song message attached.
 				{
 					if (curH.flg&SampleFlags::ISSUSTAINPINPONG)
 					{
-						_wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::BIDI);
+						_wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
 					}
-					else _wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+					else _wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 				} else {
-					_wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
+					_wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
 				}
 
 				_wave.WaveVolume(curH.vol *2);
@@ -648,10 +648,10 @@ Special:  Bit 0: On = song message attached.
 //				double maintune = floor(tune*12);
 //				double finetune = floor(((tune*12)-maintune)*100);
 
-				int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
-					XMInstrument::WaveData::WaveForms::SAWDOWN,
-					XMInstrument::WaveData::WaveForms::SQUARE,
-					XMInstrument::WaveData::WaveForms::RANDOM
+				int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+					XMInstrument::WaveData<>::WaveForms::SAWDOWN,
+					XMInstrument::WaveData<>::WaveForms::SQUARE,
+					XMInstrument::WaveData<>::WaveForms::RANDOM
 				};
 //				_wave.WaveTune(maintune);
 //				_wave.WaveFineTune(finetune);
@@ -675,7 +675,7 @@ Special:  Bit 0: On = song message attached.
 			return false;
 		}
 
-		bool ITModule2::LoadITSampleData(XMInstrument::WaveData& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
+		bool ITModule2::LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
 			signed short wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
@@ -722,7 +722,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert)
+		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
 			std::uint32_t topsize, val,j;
@@ -1000,10 +1000,10 @@ Special:  Bit 0: On = song message attached.
 
 		void ITModule2::ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel)
 		{
-			int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
-				XMInstrument::WaveData::WaveForms::SAWDOWN,
-				XMInstrument::WaveData::WaveForms::SQUARE,
-				XMInstrument::WaveData::WaveForms::RANDOM
+			int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+				XMInstrument::WaveData<>::WaveForms::SAWDOWN,
+				XMInstrument::WaveData<>::WaveForms::SQUARE,
+				XMInstrument::WaveData<>::WaveForms::RANDOM
 			};
 			switch(command){
 				case ITModule2::CMD::SET_SPEED:
@@ -1315,7 +1315,7 @@ Special:  Bit 0: On = song message attached.
 			if ( curH.type == 1) 
 			{
 				xins.IsEnabled(true);
-				XMInstrument::WaveData wave;
+				XMInstrument::WaveData<> wave;
 				bool result = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,iInstIdx);
 				song.samples.SetSample(wave,iInstIdx);
 				return result;
@@ -1364,7 +1364,7 @@ OFFSET              Count TYPE   Description
 			return false;
 		}
 
-		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx)
+		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx)
 		{
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
@@ -1375,9 +1375,9 @@ OFFSET              Count TYPE   Description
 			_wave.WaveLoopStart(currHeader->loopb);
 			_wave.WaveLoopEnd(currHeader->loope);
 			if(bLoop) {
-				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+				_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			} else {
-				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
+				_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
 			}
 
 			_wave.WaveVolume(currHeader->vol * 2);
@@ -1401,7 +1401,7 @@ OFFSET              Count TYPE   Description
 			return true;
 		}
 
-		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
+		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{

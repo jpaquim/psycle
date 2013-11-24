@@ -284,7 +284,12 @@ void XMSamplerMixerPage::ClickMute(int offset)
 	{
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		rChan.DefaultIsMute(mute->GetCheck());
+		if (m_bShowChan.GetCheck())
+		{
+			rChan.DefaultIsMute(mute->GetCheck());
+		} else if(rChan.ForegroundVoice()) {
+			rChan.IsMute(mute->GetCheck());
+		}
 	}
 }
 void XMSamplerMixerPage::SliderVolume(CSliderCtrl* slid, int offset)

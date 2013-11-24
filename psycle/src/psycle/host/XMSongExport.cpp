@@ -8,6 +8,7 @@
 #include "XMSongExport.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
+#include "Sampler.hpp"
 
 namespace psycle{
 namespace host{
@@ -35,17 +36,18 @@ namespace host{
 	void XMSongExport::writeSongHeader(const Song &song)
 	{
 		//We find the last index of machine, to use as first index of instruments
-		lastMachine=63;
-		while (lastMachine >= 0 && song._pMachine[lastMachine] == 0) lastMachine--;
+		lastMachine=MAX_BUSES-1;
+		while (lastMachine >= 0 && song._pMachine[lastMachine] == NULL) lastMachine--;
 		lastMachine++;
 
 		for (int i=0; i<lastMachine; i++) {
-			if (song._pMachine[i] != 0 && 
-				song._pMachine[i]->_type == MACH_SAMPLER ) {
-					isSampler[i] = 1;
+			if (song._pMachine[i] != NULL) {
+				isSampler[i] = (song._pMachine[i]->_type == MACH_SAMPLER);
+				isSampulse[i] = (song._pMachine[i]->_type == MACH_XMSAMPLER);
 			}
 			else {
-				isSampler[i] = 0;
+				isSampler[i] = false;
+				isSampulse[i] = false;
 			}
 		}
 
@@ -62,7 +64,7 @@ namespace host{
 		m_Header.size = sizeof(m_Header);
 		m_Header.norder = song.playLength;
 		m_Header.restartpos = 0;
-		m_Header.channels = song.SONGTRACKS;
+		m_Header.channels = std::min(song.SONGTRACKS,32);
 		m_Header.patterns = song.GetHighestPatternIndexInSequence()+1;
 		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
 		m_Header.flags = 0x0001; //Linear frequency.
@@ -115,28 +117,25 @@ namespace host{
 		Write(&ptHeader,sizeof(ptHeader));
 		std::size_t currentpos = GetPos();
 
-
+		int maxtracks = std::min(song.SONGTRACKS,32);
 		// check every pattern for validity
 		if (song.IsPatternUsed(patIdx))
 		{
-			for (int j = 0; j < ptHeader.rows && j < 256; j++) {
-				for (int i = 0; i < song.SONGTRACKS; i++) {
+			for (int j = 0; j < ptHeader.rows; j++) {
+				for (int i = 0; i < maxtracks; i++) {
 					
 					const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx,i,j));
 					
 					
 					unsigned char note;
-					if (pData->_note <= notecommands::b9) {
-						if (pData->_note >= 12 && pData->_note < 108 ) {
-							if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != 0 
-								&& isSampler[pData->_mach] != 0)
-							{ // The sampler machine uses C-4 as middle C.
-								note = pData->_note +1;
-							} else {
-								note = pData->_note - 11;
-							}
+					if (pData->_note >= 12 && pData->_note < 108 ) {
+						if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != NULL 
+							&& isSampler[pData->_mach]
+							&& ((Sampler*)song._pMachine[pData->_mach])->isDefaultC4() == false )
+						{
+							note = pData->_note +1;
 						} else {
-							note = 0x00;
+							note = pData->_note - 11;
 						}
 					}
 					else if (pData->_note == notecommands::release) {
@@ -149,7 +148,8 @@ namespace host{
 					
 					//Very simple method for now:
 					if (pData->_mach < MAX_MACHINES) {
-						if ( song._pMachine[pData->_mach] != 0 && isSampler[pData->_mach] != 0)
+						if ( song._pMachine[pData->_mach] != NULL 
+							&& (isSampler[pData->_mach] || isSampulse[pData->_mach]))
 						{
 							if (pData->_inst != 0xFF) instr = lastMachine +  pData->_inst +1;
 						}
@@ -224,7 +224,7 @@ namespace host{
 						}
 					}
 
-					if ((foundEffect == false) & (pData->_cmd > 0)) {
+					if ((foundEffect == false) && (pData->_cmd > 0)) {
 						type = XMCMD::ARPEGGIO;
 						param = pData->_cmd;
 					}
@@ -306,7 +306,7 @@ namespace host{
 
 	void XMSongExport::SaveSampleHeader(const Song& song, int instIdx)
 	{
-		const XMInstrument::WaveData& wave = song.samples[instIdx];
+		const XMInstrument::WaveData<>& wave = song.samples[instIdx];
 
 		XMSAMPLESTRUCT stheader;
 		memset(&stheader,0,sizeof(stheader));
@@ -331,7 +331,7 @@ namespace host{
 		stheader.vol = std::min(64,wave.WaveVolume()*64);
 		stheader.relnote = tune;
 		stheader.finetune = finetune;
-		stheader.type = ((wave.WaveLoopType()==XMInstrument::WaveData::LoopType::NORMAL)?1:0) + 0x10; // 0x10 -> 16bits
+		stheader.type = ((wave.WaveLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL)?1:0) + 0x10; // 0x10 -> 16bits
 		stheader.pan = int(wave.PanFactor()*256)&0xFF;
 
 		Write(&stheader,sizeof(stheader));
@@ -339,7 +339,7 @@ namespace host{
 	
 	void XMSongExport::SaveSampleData(const Song& song,const int instrIdx)
 	{
-		const XMInstrument::WaveData& wave = song.samples[instrIdx];
+		const XMInstrument::WaveData<>& wave = song.samples[instrIdx];
 		// pack sample data
 		short* samples = wave.pWaveDataL();
 		int length = wave.WaveLength();

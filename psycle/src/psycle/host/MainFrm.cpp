@@ -72,6 +72,9 @@ namespace psycle { namespace host {
 		CMainFrame::~CMainFrame()
 		{
 			PsycleGlobal::inputHandler().SetMainFrame(NULL);
+			if (terminal != NULL) {
+				delete terminal;
+			}
 		}
 
 		BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)

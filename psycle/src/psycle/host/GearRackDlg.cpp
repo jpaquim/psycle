@@ -172,6 +172,7 @@ namespace psycle { namespace host {
 			{
 			case 1:
 				tmac += MAX_BUSES;
+				//fallthrough
 			case 0:
 				Global::song().seqBus = tmac;
 				mainFrame->UpdateComboGen();

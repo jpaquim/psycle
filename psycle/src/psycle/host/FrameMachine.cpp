@@ -469,11 +469,21 @@ namespace psycle { namespace host {
 					// o_O`
 				}
 			}
+			if ( _machine->_type == MACH_LUA) {
+				try
+				{
+					MessageBox(((LuaPlugin*)_machine)->help().c_str());
+				}
+				catch(const std::exception &)
+				{
+					// o_O`
+				}
+			}
 		}
 
 		void CFrameMachine::OnUpdateParametersCommand(CCmdUI *pCmdUI)
 		{
-			if ( _machine->_type == MACH_PLUGIN)
+			if ( _machine->_type == MACH_PLUGIN or _machine->_type == MACH_LUA)
 			{
 				pCmdUI->Enable(true);
 			}
@@ -486,7 +496,7 @@ namespace psycle { namespace host {
 		{
 			if ( _machine->_type == MACH_LUA)
 			{
-				dynamic_cast<LuaPlugin*>(_machine)->ReloadScript();
+				_machine->reload();
 			}
 		}
 		void CFrameMachine::OnUpdateMachineReloadScript(CCmdUI *pCmdUI)
@@ -500,7 +510,13 @@ namespace psycle { namespace host {
 			}
 		}
 		void CFrameMachine::OnMachineAboutthismachine() 
-		{
+		{			
+			if ( _machine->_type == MACH_LUA) {
+				PluginInfo info = ((LuaPlugin*)_machine)->CallPluginInfo();
+				MessageBox(CString("Authors: ") + CString(info.vendor.c_str()),
+					 CString("About ") + CString(info.name.c_str()));
+
+			} else
 			if ( _machine->_type == MACH_PLUGIN)
 			{
 				MessageBox(CString("Authors: ") + CString(((Plugin*)_machine)->GetInfo()->Author),

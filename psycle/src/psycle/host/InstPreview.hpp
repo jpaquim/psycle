@@ -3,50 +3,54 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
-#include "XMInstrument.hpp"
+#include "XMSampler.hpp"
 namespace psycle {
 	namespace host {
 
-		class Instrument;
-
-		//plays a sample/instrument-- used for wav preview, wav-ed play function
+		//plays a sample/instrument-- used for wav preview, wave bank tweaking and wav-editor play function
 		class InstPreview
 		{
 		public:
-			InstPreview() : m_vol(0.5f), m_bPlaying(false) {}
+			InstPreview() : m_vol(1.0f), m_pwave(&m_prevwave) { resampler.quality(dsp::resampler::quality::spline); }
 			virtual ~InstPreview() {}
 			//process data for output
 			void Work(float *pInSamplesL, float *pInSamplesR, int numSamples);
 			//begin playing
-			void Play(unsigned long startPos=0);
+			void Play(int note=60,unsigned long startPos=0);
 			//stop playback
-			void Stop();
-			//disable looping if enabled
+			void Stop(bool deallocate=false);
+			//disable looping if enabled  (sustain loop!)
 			void Release();
 			//whether or not we're already playing
-			bool IsEnabled() {return m_bPlaying; }
-			//whether or not we're looping
-			bool IsLooping() {return m_bLoop;	}
+			bool IsEnabled() const { return controller.Playing(); }
+			//whether or not we're looping (sustain loop!)
+			bool IsLooping() const { return m_bLoop; }
 
-			//get Instrument to preview
-			XMInstrument::WaveData& GetWave() { return m_pwave; }
+			//set Instrument to preview
+			void UseWave(XMInstrument::WaveData<>*  wave) {
+				m_pwave = wave; 
+				if(wave != NULL) {m_vol = wave->WaveGlobVolume();}
+			}
+			XMInstrument::WaveData<> & UsePreviewWave() {
+				m_pwave = &m_prevwave;
+				return m_prevwave;
+			}
 
 			//get playback volume
-			float	GetVolume()			{ return m_vol; }
+			float	GetVolume()		const	{ return m_vol; }
 			//set playback volume
-			void	SetVolume(float vol)	{ m_vol = vol;}
+			void	SetVolume(float vol)	{ m_vol= vol;}
 			//get current playback position
-			unsigned long GetPosition()		{return m_pos;}
+			unsigned long GetPosition()	const	{return controller.Position();}
 		private:
-			//pointer to the instrument associated with the preview
-			XMInstrument::WaveData m_pwave;
-			//current playback position in samples
-			unsigned long m_pos;
-			//whether we're currently playing
-			bool m_bPlaying;
+			double NoteToSpeed(int note);
+			psycle::helpers::dsp::cubic_resampler resampler;
+			XMSampler::WaveDataController<> controller;
+			//(copy of) the instrument associated with the preview
+			XMInstrument::WaveData<> * m_pwave;
+			XMInstrument::WaveData<> m_prevwave;
 			//whether we're currently looping
 			bool m_bLoop;
-			//playback volume
 			float m_vol;
 		};
 

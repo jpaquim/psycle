@@ -14,6 +14,14 @@
 
 namespace psycle { namespace host {
 
+    namespace detail {
+		struct LoopDirection {
+			enum Type {
+				FORWARD = 0,
+				BACKWARD
+			};
+		};
+	}
 class XMSampler : public Machine
 {
 public:
@@ -161,37 +169,38 @@ XMSampler::Channel::PerformFX().
 //  XMSampler::WaveDataController Declaration
 	//\todo: WaveDateController Needs to update the speed if sampleRate changes (but... would the samplerate change while
 	//       there's a voice playing?)
+
+	template <class T = std::int16_t>
 	class WaveDataController
 	{
 	public:
 		typedef void (*WorkFunction)(WaveDataController& contr, float *pLeftw,float *pRightw);
-		struct LoopDirection {
-			enum Type {
-				FORWARD = 0,
-				BACKWARD
-			};
-		};
-		WaveDataController():resampler_data(NULL){};
-		virtual ~WaveDataController(){};
+		typedef detail::LoopDirection LoopDirection;
 
-		virtual void Init(const XMInstrument::WaveData* const wave, int layer, const helpers::dsp::resampler & resampler);
+		WaveDataController():resampler_data(NULL), m_pWave(NULL), m_Playing(false){};
+		virtual ~WaveDataController(){};
+		virtual void Init(const XMInstrument::WaveData<T>* const wave, int layer, const helpers::dsp::resampler & resampler);
 		virtual void DisposeResampleData(const helpers::dsp::resampler& resampler);
 		virtual void RecreateResampleData(const helpers::dsp::resampler& resampler);
 		virtual void RefillBuffers();
-		virtual void RefillBuffer(std::int16_t buffer[192], const std::int16_t* data);
+		virtual void RefillBuffer(T buffer[192], const T* data);
 		virtual void NoteOff(void);
 		virtual int PreWork(int numSamples, WorkFunction* pWork);
 		static void WorkMonoStatic(WaveDataController& contr,float *pLeftw,float *pRightw) { contr.WorkMono(pLeftw, pRightw);}
+		// fork types
+		inline float rwork(int16_t const * data, uint32_t res, void* resampler_data) { return resampler_work(data, res, resampler_data); }		
+		inline float rwork(float const * data, uint32_t res, void* resampler_data) { return resampler_work_float(data, res, resampler_data); } // todo
+
 		inline void WorkMono(float *pLeftw,float *pRightw)
 		{
-			*pLeftw = resampler_work(m_pL, m_Position.LowPart, resampler_data);
+			*pLeftw = rwork(m_pL, m_Position.LowPart, resampler_data);
 			const std::ptrdiff_t old = m_Position.HighPart;
 			m_Position.QuadPart+=m_SpeedInternal;
 			const std::ptrdiff_t diff = static_cast<std::ptrdiff_t>(m_Position.HighPart)-old;
 			m_pL+=diff;
 #ifndef NDEBUG
 			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("198: highpart> loopEnd+17 bug triggered!\n");
+				TRACE("203: highpart> loopEnd+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -200,8 +209,8 @@ XMSampler::Channel::PerformFX().
 		{
 			//Process sample
 			//todo: sinc resampling would benefit from having a stereo version of resampler_work
-			*pLeftw  = resampler_work(m_pL, m_Position.LowPart, resampler_data);
-			*pRightw = resampler_work(m_pR, m_Position.LowPart, resampler_data);
+			*pLeftw  = rwork(m_pL, m_Position.LowPart, resampler_data);
+			*pRightw = rwork(m_pR, m_Position.LowPart, resampler_data);
 			/*
 			*pLeftw  = resampler_work(m_pL, m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
 			*pRightw = resampler_work(m_pR, m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
@@ -213,7 +222,7 @@ XMSampler::Channel::PerformFX().
 			m_pR+=diff;
 #ifndef NDEBUG
 			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("220: highpart > loopend+17 bug triggered!\n");
+				TRACE("225: highpart > loopend+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -221,7 +230,7 @@ XMSampler::Channel::PerformFX().
 
 		// Properties
 		inline int Layer() const { return m_Layer;}
-		virtual const XMInstrument::WaveData &Wave() const { return *m_pWave; }
+		virtual const XMInstrument::WaveData<T> &Wave() const { return *m_pWave; }
 
 		inline bool Playing() const { return m_Playing;}
 		virtual void Playing(bool play){ m_Playing=play; }
@@ -229,7 +238,29 @@ XMSampler::Channel::PerformFX().
 		// Current sample position 
 		inline int  Position() const { return m_Position.HighPart;}
 		virtual void Position(const	int value){ 
-			if ( value < Length()) m_Position.HighPart = value;
+			if ( LoopType()==XMInstrument::WaveData<>::LoopType::NORMAL ) {
+				int val = value;
+				while (val >= LoopEnd()) {
+					val-= LoopEnd()-LoopStart();
+				}
+				m_Position.HighPart = val;
+			}
+			else if ( LoopType()==XMInstrument::WaveData<>::LoopType::BIDI ) {
+				int loopsize = LoopEnd()-LoopStart();
+				bool forward=false;
+				int val = value;
+				while (val >= LoopEnd()) {
+					if (val >= LoopEnd()+loopsize || forward) {
+						val-= loopsize;
+					}
+					else  {
+						val= LoopEnd()-(value-LoopEnd());
+					}
+					forward=!forward;
+				}
+				m_Position.HighPart = val;
+			}
+			else if ( value < Length()) m_Position.HighPart = value;
 			else m_Position.HighPart = Length()-1;
 		}
 		
@@ -244,11 +275,11 @@ XMSampler::Channel::PerformFX().
 		inline LoopDirection::Type CurrentLoopDirection() const {return m_CurrentLoopDirection;}
 		virtual void CurrentLoopDirection(const LoopDirection::Type dir){m_CurrentLoopDirection = dir;}
 
-		inline XMInstrument::WaveData::LoopType::Type LoopType() const {return m_pWave->WaveLoopType();}
+		inline XMInstrument::WaveData<>::LoopType::Type LoopType() const {return m_pWave->WaveLoopType();}
 		inline std::uint32_t LoopStart() const {return m_pWave->WaveLoopStart();}
 		inline std::uint32_t LoopEnd() const { return m_pWave->WaveLoopEnd();}
 
-		inline XMInstrument::WaveData::LoopType::Type SustainLoopType() const {return m_pWave->WaveSusLoopType();}
+		inline XMInstrument::WaveData<>::LoopType::Type SustainLoopType() const {return m_pWave->WaveSusLoopType();}
 		inline std::uint32_t SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
 		inline std::uint32_t SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
 
@@ -257,32 +288,32 @@ XMSampler::Channel::PerformFX().
 		inline bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
 		// pointer to Start of Left sample
-		virtual const std::int16_t* pLeft() const {return m_pL;}
+		virtual const T* pLeft() const {return m_pL;}
 		// pointer to Start of Right sample
-		virtual const std::int16_t* pRight() const {return m_pR;}
+		virtual const T* pRight() const {return m_pR;}
 
 
 	protected:
 		int m_Layer;
-		const XMInstrument::WaveData *m_pWave;
+		const XMInstrument::WaveData<T> *m_pWave;
 		ULARGE_INTEGER m_Position;
 		std::int64_t m_Speed;
 		std::int64_t m_SpeedInternal;
 		bool m_Playing;
 
-		XMInstrument::WaveData::LoopType::Type m_CurrentLoopType;
+		XMInstrument::WaveData<>::LoopType::Type m_CurrentLoopType;
 		int m_CurrentLoopEnd;
 		int m_CurrentLoopStart;
 		LoopDirection::Type m_CurrentLoopDirection;
 
-		const std::int16_t* m_pL;
-		const std::int16_t* m_pR;
+		const T* m_pL;
+		const T* m_pR;
 
 		helpers::dsp::resampler::work_unchecked_func_type resampler_work;
+        helpers::dsp::resampler::work_float_unchecked_func_type resampler_work_float;
 		void* resampler_data;
-
-		std::int16_t lBuffer[64*3];
-		std::int16_t rBuffer[64*3];
+		T lBuffer[64*3];
+		T rBuffer[64*3];
 		//int requiredpre;  //Currently assumed to be the highest one, i.e. SINC sizes.
 		//int requiredpost;
 	};
@@ -505,10 +536,10 @@ XMSampler::Channel::PerformFX().
 		XMSampler::EnvelopeController& PitchEnvelope(){return m_PitchEnvelope;}
 		XMSampler::EnvelopeController& PanEnvelope(){return m_PanEnvelope;}
 
-		WaveDataController& rWave() {return m_WaveDataController;}
-		const WaveDataController& rWave() const {return m_WaveDataController;}
-		void DisposeResampleData(helpers::dsp::resampler& resampler);
-		void RecreateResampleData(helpers::dsp::resampler& resampler);
+		WaveDataController<>& rWave() {return m_WaveDataController;}
+		const WaveDataController<>& rWave() const {return m_WaveDataController;}
+		void DisposeResampleData(const helpers::dsp::resampler& resampler);
+		void RecreateResampleData(const helpers::dsp::resampler& resampler);
 
 		bool IsPlaying() const { return m_bPlay;}
 		void IsPlaying(const bool value)
@@ -611,7 +642,7 @@ XMSampler::Channel::PerformFX().
 		EnvelopeController m_PitchEnvelope;
 		EnvelopeController m_FilterEnvelope;
 
-		WaveDataController m_WaveDataController;
+		WaveDataController<> m_WaveDataController;
 
 		dsp::ITFilter m_FilterIT;
 		dsp::Filter m_FilterClassic;

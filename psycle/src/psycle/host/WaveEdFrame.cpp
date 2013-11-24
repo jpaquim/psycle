@@ -242,9 +242,7 @@ namespace psycle { namespace host {
 				return;
 
 			OnStop();
-			//todo: do this only on instrument change! else it copies data every time
-			_pSong->wavprev.GetWave() = _pSong->samples[wsInstrument];
-			_pSong->wavprev.Play(startPos);
+			_pSong->wavprev.Play(60, startPos);
 			wavview.SetTimer(ID_TIMER_WAVED_PLAYING, 33, 0);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)

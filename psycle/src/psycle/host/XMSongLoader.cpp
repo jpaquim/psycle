@@ -79,10 +79,10 @@ namespace host{
 
 		XMSAMPLEFILEHEADER _insheader;
 		Read(&_insheader,sizeof(XMSAMPLEFILEHEADER));
-		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
-			XMInstrument::WaveData::WaveForms::SQUARE,
-			XMInstrument::WaveData::WaveForms::SAWDOWN,
-			XMInstrument::WaveData::WaveForms::SAWUP
+		int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+			XMInstrument::WaveData<>::WaveForms::SQUARE,
+			XMInstrument::WaveData<>::WaveForms::SAWDOWN,
+			XMInstrument::WaveData<>::WaveForms::SAWUP
 		};
 		
 		XMSAMPLEHEADER _insheaderb;
@@ -106,7 +106,7 @@ namespace host{
 		for(i=0;i<iSampleCount;i++)
 		{
 			while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
-			XMInstrument::WaveData wave;
+			XMInstrument::WaveData<> wave;
 			LoadSampleHeader(wave,GetPos(),idx,curSample);
 			// Only get REAL samples.
 			if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {
@@ -122,7 +122,7 @@ namespace host{
 			if ( sRemap[i] < MAX_INSTRUMENTS-1)
 			{
 				instr.IsEnabled(true);
-				XMInstrument::WaveData& _wave = song.samples.get(sRemap[i]);
+				XMInstrument::WaveData<>& _wave = song.samples.get(sRemap[i]);
 				LoadSampleData(_wave,GetPos(),idx,sRemap[i]);
 				_wave.VibratoAttack(_insheader.vibsweep==0?0:256-_insheader.vibsweep);
 				_wave.VibratoDepth(_insheader.vibdepth);
@@ -407,9 +407,9 @@ namespace host{
 						}
 					}
 					e._parameter = param;
-					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
-						XMInstrument::WaveData::WaveForms::SAWDOWN,
-						XMInstrument::WaveData::WaveForms::SQUARE
+					int exchwave[3]={XMInstrument::WaveData<>::WaveForms::SINUS,
+						XMInstrument::WaveData<>::WaveForms::SAWDOWN,
+						XMInstrument::WaveData<>::WaveForms::SQUARE
 					};
 					switch(type){
 						case XMCMD::ARPEGGIO:
@@ -792,10 +792,10 @@ namespace host{
 		std::memset(&_samph, 0, sizeof _samph);
 		Read(&_samph,sizeof(XMSAMPLEHEADER));
 		
-		int exchwave[4]={XMInstrument::WaveData::WaveForms::SINUS,
-			XMInstrument::WaveData::WaveForms::SQUARE,
-			XMInstrument::WaveData::WaveForms::SAWDOWN,
-			XMInstrument::WaveData::WaveForms::SAWUP
+		int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+			XMInstrument::WaveData<>::WaveForms::SQUARE,
+			XMInstrument::WaveData<>::WaveForms::SAWDOWN,
+			XMInstrument::WaveData<>::WaveForms::SAWUP
 		};		
 
 		SetEnvelopes(instr,_samph);
@@ -805,7 +805,7 @@ namespace host{
 		// read instrument data	
 		for(i=0;i<iSampleCount;i++)
 		{
-			XMInstrument::WaveData wave;
+			XMInstrument::WaveData<> wave;
 			iStart = LoadSampleHeader(wave,iStart,idx,curSample);
 			 // Only get REAL samples.
 			if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {	
@@ -820,7 +820,7 @@ namespace host{
 			if ( sRemap[i] < MAX_INSTRUMENTS-1)
 			{
 				instr.IsEnabled(true);
-				XMInstrument::WaveData& _wave = song.samples.get(sRemap[i]);
+				XMInstrument::WaveData<>& _wave = song.samples.get(sRemap[i]);
 				iStart = LoadSampleData(_wave,iStart,idx,sRemap[i]);
 				_wave.VibratoAttack(_samph.vibsweep==0?0:256-_samph.vibsweep);
 				_wave.VibratoDepth(_samph.vibdepth);
@@ -850,7 +850,7 @@ namespace host{
 		return iStart;
 	}
 
-	size_t XMSongLoader::LoadSampleHeader(XMInstrument::WaveData& _wave, size_t iStart, int iInstrIdx, int iSampleIdx)
+	size_t XMSongLoader::LoadSampleHeader(XMInstrument::WaveData<>& _wave, size_t iStart, int iInstrIdx, int iSampleIdx)
 	{
 		// get sample header
 		Seek(iStart);
@@ -891,9 +891,9 @@ namespace host{
 		if(bLoop)
 		{
 			if(bPingPong){
-				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::BIDI);
+				_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
 			}else {
-				_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+				_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			}
 		
 			if(b16Bit)
@@ -910,7 +910,7 @@ namespace host{
 //			TRACE2("l:%x s:%x e:%x \n",_wave.WaveLength(),_wave.WaveLoopStart(),_wave.WaveLoopEnd()); 
 
 		} else {
-			_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
+			_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
 		}
 
 		_wave.WaveSampleRate(8363);
@@ -928,7 +928,7 @@ namespace host{
 
 	}
 
-	size_t XMSongLoader::LoadSampleData(XMInstrument::WaveData& _wave, size_t iStart, int iInstrIdx, int iSampleIdx)
+	size_t XMSongLoader::LoadSampleData(XMInstrument::WaveData<>& _wave, size_t iStart, int iInstrIdx, int iSampleIdx)
 	{
 		// parse
 		
@@ -1122,7 +1122,7 @@ namespace host{
 		// get data
 		Seek(20);
 		for (int i=0;i<31;i++) {
-			XMInstrument::WaveData wave;
+			XMInstrument::WaveData<> wave;
 			LoadSampleHeader(wave,i);
 			song.samples.SetSample(wave,i);
 		}
@@ -1268,9 +1268,9 @@ namespace host{
 					e._mach = 0;
 					e._parameter = param;
 
-					int exchwave[3]={XMInstrument::WaveData::WaveForms::SINUS,
-						XMInstrument::WaveData::WaveForms::SAWDOWN,
-						XMInstrument::WaveData::WaveForms::SQUARE
+					int exchwave[3]={XMInstrument::WaveData<>::WaveForms::SINUS,
+						XMInstrument::WaveData<>::WaveForms::SAWDOWN,
+						XMInstrument::WaveData<>::WaveForms::SQUARE
 					};
 
 					switch(type){
@@ -1484,7 +1484,7 @@ namespace host{
 		song.xminstruments.SetInst(instr,idx);
 	}
 
-	void MODSongLoader::LoadSampleHeader(XMInstrument::WaveData& _wave, int iInstrIdx)
+	void MODSongLoader::LoadSampleHeader(XMInstrument::WaveData<>& _wave, int iInstrIdx)
 	{
 		Read(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
 
@@ -1506,14 +1506,14 @@ namespace host{
 
 		if(bLoop)
 		{
-			_wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+			_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			_wave.WaveLoopStart(m_Samples[iInstrIdx].loopStart);
 			if ( m_Samples[iInstrIdx].loopStart+m_Samples[iInstrIdx].loopLength > smpLen[iInstrIdx]) 
 			{
 					_wave.WaveLoopEnd(smpLen[iInstrIdx]);
 			} else 	_wave.WaveLoopEnd(m_Samples[iInstrIdx].loopStart+m_Samples[iInstrIdx].loopLength);
 		} else {
-			_wave.WaveLoopType(XMInstrument::WaveData::LoopType::DO_NOT);
+			_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
 		}
 
 		_wave.WaveVolume(m_Samples[iInstrIdx].volume * 2);
@@ -1526,7 +1526,7 @@ namespace host{
 
 	}
 
-	void MODSongLoader::LoadSampleData(XMInstrument::WaveData& _wave, int iInstrIdx)
+	void MODSongLoader::LoadSampleData(XMInstrument::WaveData<>& _wave, int iInstrIdx)
 	{
 		// parse
 		short wNew=0;

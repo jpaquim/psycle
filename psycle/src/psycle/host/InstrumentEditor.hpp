@@ -53,7 +53,7 @@ namespace psycle { namespace host {
 			afx_msg void OnInsDecnote();
 			afx_msg void OnInsIncnote();
 			afx_msg void OnInsIncoctave();
-			afx_msg void OnEnvelopeChanged(WPARAM wParam, LPARAM lParam);
+			afx_msg LRESULT OnEnvelopeChanged(WPARAM wParam, LPARAM lParam);
 
 
 		protected:
@@ -111,7 +111,7 @@ namespace psycle { namespace host {
 			CEnvelopeEditor m_ampframe;
 			CEnvelopeEditor m_filframe;
 
-			//These to are just for the CEnvelopeEditor.
+			//These two are just for the CEnvelopeEditor.
 			XMInstrument::Envelope m_ampEnv;
 			XMInstrument::Envelope m_filEnv;
 		};

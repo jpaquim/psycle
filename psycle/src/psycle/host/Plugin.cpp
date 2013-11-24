@@ -377,12 +377,6 @@ namespace psycle
 			{
 				UINT count;
 				pFile->Read(&count,sizeof(count));  // size of vars
-				/*
-				if (count)
-				{
-					pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-				}
-				*/
 				for (UINT i = 0; i < count; i++)
 				{
 					int temp;
@@ -393,7 +387,7 @@ namespace psycle
 				if(size)
 				{
 					byte* pData = new byte[size];
-					pFile->Read(pData, size); // Number of parameters
+					pFile->Read(pData, size); // Read internal data.
 					try
 					{
 						proxy().PutData(pData); // Internal load
@@ -436,7 +430,6 @@ namespace psycle
 			UINT size = size2 + sizeof(count) + sizeof(int)*count;
 			pFile->Write(&size,sizeof(size));
 			pFile->Write(&count,sizeof(count));
-			//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
 			for (UINT i = 0; i < count; i++)
 			{
 				int temp = GetParamValue(i);
@@ -1055,7 +1048,7 @@ namespace psycle
 			try
 			{
 				int dataSizeStruct = proxy().GetDataSize();
-				if(dataSizeStruct > 0) //Can only happen for native plugins.
+				if(dataSizeStruct > 0)
 				{
 					pData = new char[dataSizeStruct];
 					proxy().GetData(pData); // Internal Save
@@ -1083,6 +1076,7 @@ namespace psycle
 		void Plugin::Tweak(CPreset const & preset)
 		{
 			Machine::Tweak(preset);
+			CExclusiveLock lock(&Global::song().semaphore, 2, true);
 			if(preset.GetData())
 			{
 				try

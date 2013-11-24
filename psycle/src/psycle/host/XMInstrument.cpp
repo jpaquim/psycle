@@ -17,7 +17,8 @@ namespace psycle
 	{
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Implementation.
-		void XMInstrument::WaveData::Init(){
+		template <class T> 
+		void XMInstrument::WaveData<T>::Init(){
 			DeleteWaveData();
 			m_WaveName= "";
 			m_WaveLength = 0;
@@ -41,7 +42,10 @@ namespace psycle
 			m_VibratoDepth = 0;
 			m_VibratoType = 0;
 		}
-		void XMInstrument::WaveData::DeleteWaveData(){
+        template void XMInstrument::WaveData<short>::Init();
+
+		template <class T> 
+		void XMInstrument::WaveData<T>::DeleteWaveData(){
 			if ( m_pWaveDataL)
 			{
 				delete[] m_pWaveDataL;
@@ -55,16 +59,18 @@ namespace psycle
 			m_WaveLength = 0;
 		}
 
-		void XMInstrument::WaveData::AllocWaveData(const int iLen,const bool bStereo)
+		template <class T> 
+		void XMInstrument::WaveData<T>::AllocWaveData(const int iLen,const bool bStereo)
 		{
 			DeleteWaveData();
-			m_pWaveDataL = new std::int16_t[iLen];
-			m_pWaveDataR = bStereo?new std::int16_t[iLen]:NULL;
+			m_pWaveDataL = new T[iLen];
+			m_pWaveDataR = bStereo?new T[iLen]:NULL;
 			m_WaveStereo = bStereo;
 			m_WaveLength  = iLen;
 		}
 
-		void XMInstrument::WaveData::ConvertToMono()
+		template <class T> 
+		void XMInstrument::WaveData<T>::ConvertToMono()
 		{
 			if (!m_WaveStereo) return;
 			for (std::uint32_t c = 0; c < m_WaveLength; c++)
@@ -76,10 +82,11 @@ namespace psycle
 			m_pWaveDataR=0;
 		}
 
-		void XMInstrument::WaveData::ConvertToStereo()
+		template <class T> 
+		void XMInstrument::WaveData<T>::ConvertToStereo()
 		{
 			if (m_WaveStereo) return;
-			m_pWaveDataR = new short[m_WaveLength];
+			m_pWaveDataR = new T[m_WaveLength];
 			for (std::uint32_t c = 0; c < m_WaveLength; c++)
 			{
 				m_pWaveDataR[c] = m_pWaveDataL[c];
@@ -87,11 +94,12 @@ namespace psycle
 			m_WaveStereo = true;
 		}
 
-		void XMInstrument::WaveData::InsertAt(std::uint32_t insertPos, const WaveData& wave)
+		template <class T> 
+		void XMInstrument::WaveData<T>::InsertAt(std::uint32_t insertPos, const WaveData& wave)
 		{
-			std::int16_t* oldLeft = m_pWaveDataL;
-			std::int16_t* oldRight = NULL;
-			m_pWaveDataL = new std::int16_t[m_WaveLength+wave.WaveLength()];
+			T* oldLeft = m_pWaveDataL;
+			T* oldRight = NULL;
+			m_pWaveDataL = new T[m_WaveLength+wave.WaveLength()];
 
 			std::memcpy(m_pWaveDataL, oldLeft, insertPos*sizeof(short));
 			std::memcpy(&m_pWaveDataL[insertPos], wave.pWaveDataL(), wave.WaveLength()*sizeof(short));
@@ -102,7 +110,7 @@ namespace psycle
 			if(m_WaveStereo)
 			{
 				oldRight = m_pWaveDataR;
-				m_pWaveDataR = new std::int16_t[m_WaveLength+wave.WaveLength()];
+				m_pWaveDataR = new T[m_WaveLength+wave.WaveLength()];
 				std::memcpy(m_pWaveDataR, oldRight, insertPos*sizeof(short));
 				std::memcpy(&m_pWaveDataR[insertPos], wave.pWaveDataR(), wave.WaveLength()*sizeof(short));
 				std::memcpy(&m_pWaveDataR[insertPos+wave.WaveLength()], 
@@ -114,7 +122,8 @@ namespace psycle
 			delete[] oldRight;
 		}
 
-		void XMInstrument::WaveData::ModifyAt(std::uint32_t modifyPos, const WaveData& wave)
+		template <class T> 
+		void XMInstrument::WaveData<T>::ModifyAt(std::uint32_t modifyPos, const WaveData& wave)
 		{
 			std::memcpy(&m_pWaveDataL[modifyPos], wave.pWaveDataL(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
 			if(m_WaveStereo)
@@ -122,11 +131,13 @@ namespace psycle
 				std::memcpy(&m_pWaveDataR[modifyPos], wave.pWaveDataR(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
 			}
 		}
-		void XMInstrument::WaveData::DeleteAt(std::uint32_t deletePos, std::uint32_t length)
+
+		template <class T> 
+		void XMInstrument::WaveData<T>::DeleteAt(std::uint32_t deletePos, std::uint32_t length)
 		{
-			std::int16_t* oldLeft = m_pWaveDataL;
-			std::int16_t* oldRight = NULL;
-			m_pWaveDataL = new std::int16_t[m_WaveLength-length];
+			T* oldLeft = m_pWaveDataL;
+			T* oldRight = NULL;
+			m_pWaveDataL = new T[m_WaveLength-length];
 
 			std::memcpy(m_pWaveDataL, oldLeft, deletePos*sizeof(short));
 			std::memcpy(&m_pWaveDataL[deletePos], &oldLeft[deletePos+length], 
@@ -135,7 +146,7 @@ namespace psycle
 			if(m_WaveStereo)
 			{
 				oldRight = m_pWaveDataR;
-				m_pWaveDataR = new std::int16_t[m_WaveLength-length];
+				m_pWaveDataR = new T[m_WaveLength-length];
 				std::memcpy(m_pWaveDataR, oldRight, deletePos*sizeof(short));
 				std::memcpy(&m_pWaveDataR[deletePos], &oldRight[deletePos+length], 
 					(m_WaveLength - deletePos - length)*sizeof(short));
@@ -144,19 +155,21 @@ namespace psycle
 			delete[] oldLeft;
 			delete[] oldRight;
 		}
-		void XMInstrument::WaveData::Mix(const WaveData& waveIn, float buf1Vol, float buf2Vol)
+
+		template <class T> 
+		void XMInstrument::WaveData<T>::Mix(const WaveData& waveIn, float buf1Vol, float buf2Vol)
 		{
 			if (m_WaveLength<=0 || waveIn.WaveLength()<0) return;
-			std::int16_t* oldLeft = m_pWaveDataL;
-			std::int16_t* oldRight = m_pWaveDataR;
+			T* oldLeft = m_pWaveDataL;
+			T* oldRight = m_pWaveDataR;
 			bool increased=false;
 
 			if (waveIn.WaveLength() > m_WaveLength) {
-				m_pWaveDataL = new std::int16_t[waveIn.WaveLength()];
+				m_pWaveDataL = new T[waveIn.WaveLength()];
 				std::memcpy(m_pWaveDataL,oldLeft,m_WaveLength);
 				if(m_WaveStereo)
 				{
-					m_pWaveDataR = new std::int16_t[waveIn.WaveLength()];
+					m_pWaveDataR = new T[waveIn.WaveLength()];
 					std::memcpy(m_pWaveDataR,oldRight,m_WaveLength);
 				}
 				m_WaveLength = waveIn.WaveLength();
@@ -190,7 +203,9 @@ namespace psycle
 				delete[] oldRight;
 			}
 		}
-		void XMInstrument::WaveData::Silence(int silStart, int silEnd) 
+
+		template <class T> 
+		void XMInstrument::WaveData<T>::Silence(int silStart, int silEnd) 
 		{
 			if(silStart<0) silStart=0;
 			if(silEnd<=0) silEnd=m_WaveLength;
@@ -202,7 +217,8 @@ namespace psycle
 		}
 
 		//Fade - fades an audio buffer from one volume level to another.
-		void XMInstrument::WaveData::Fade(int fadeStart, int fadeEnd, float startVol, float endVol)
+		template <class T> 
+		void XMInstrument::WaveData<T>::Fade(int fadeStart, int fadeEnd, float startVol, float endVol)
 		{
 			if(fadeStart<0) fadeStart=0;
 			if(fadeEnd<=0) fadeEnd=m_WaveLength;
@@ -210,26 +226,27 @@ namespace psycle
 
 			float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
 			if (m_WaveStereo) {
-				for(int i(fadeStart),j(0);i<fadeEnd;++i,++j) {
-					m_pWaveDataL[i] *= startVol+j*slope;
-					m_pWaveDataR[i] *= startVol+j*slope;
+				for(int i(fadeStart);i<fadeEnd;++i) {
+					m_pWaveDataL[i] *= startVol+i*slope;
+					m_pWaveDataR[i] *= startVol+i*slope;
 				}
 			}
 			else {
-				for(int i(fadeStart),j(0);i<fadeEnd;++i,++j) {
-					m_pWaveDataL[i] *= startVol+j*slope;
+				for(int i(fadeStart);i<fadeEnd;++i) {
+					m_pWaveDataL[i] *= startVol+i*slope;
 				}
 			}
 		}
 
 		//Amplify - multiplies an audio buffer by a given factor.  buffer can be inverted by passing
 		//	a negative value for vol.
-		void XMInstrument::WaveData::Amplify(int ampStart, int ampEnd, float vol)
+		template <class T> 
+		void XMInstrument::WaveData<T>::Amplify(int ampStart, int ampEnd, float vol)
 		{
 			if(ampStart<0) ampStart=0;
 			if(ampEnd<=0) ampEnd=m_WaveLength;
 			if(ampStart>=m_WaveLength||ampEnd>m_WaveLength||ampStart==ampEnd) return;
-
+			//Todo: Templatize
 			if (m_WaveStereo) {
 				for(int i(ampStart);i<ampEnd;++i) {
 					m_pWaveDataL[i] = math::rint_clip<std::int16_t>(m_pWaveDataL[i] * vol);
@@ -243,11 +260,13 @@ namespace psycle
 			}
 		}
 
-		void XMInstrument::WaveData::WaveSampleRate(const std::uint32_t value){
+		template <class T> 
+		void XMInstrument::WaveData<T>::WaveSampleRate(const std::uint32_t value){
 			m_WaveSampleRate = value;
 		}
 
-		int XMInstrument::WaveData::Load(RiffFile& riffFile)
+		template <class T> 
+		int XMInstrument::WaveData<T>::Load(RiffFile& riffFile)
 		{	
 			std::uint32_t size1,size2;
 			
@@ -308,7 +327,7 @@ namespace psycle
 			riffFile.Read(size1);
 			unsigned char * pData = new unsigned char[size1];
 			riffFile.Read((void*)pData,size1);
-			DataCompression::SoundDesquash(pData, &m_pWaveDataL);
+			SoundDesquash(pData, &m_pWaveDataL);
 			delete[] pData;
 			
 			if (m_WaveStereo)
@@ -316,22 +335,45 @@ namespace psycle
 				riffFile.Read(size2);
 				pData = new unsigned char[size2];
 				riffFile.Read(pData,size2);
-				DataCompression::SoundDesquash(pData, &m_pWaveDataR);
+				SoundDesquash(pData, &m_pWaveDataR);
 				delete[] pData;
 			}
 			return size+8;
 		}
 
-		void XMInstrument::WaveData::Save(RiffFile& riffFile) const
+		template <class T> 
+		bool XMInstrument::WaveData<T>::SoundDesquash(uint8_t const * pSourcePos, int16_t ** pDestination) {
+			return DataCompression::SoundDesquash( pSourcePos, pDestination);
+		}
+
+		template <class T> 
+        bool XMInstrument::WaveData<T>::SoundDesquash(uint8_t const * pSourcePos, float ** pDestination) {
+			assert(0); // not implemented yet
+			return false;
+		}
+		
+		template <class T> 
+		std::size_t XMInstrument::WaveData<T>::SoundSquash(int16_t const * pSource, uint8_t ** pDestination, std::size_t size) const {
+			return DataCompression::SoundSquash( pSource, pDestination, size);
+		}
+
+		template <class T> 
+        std::size_t XMInstrument::WaveData<T>::SoundSquash(float const * pSource, uint8_t ** pDestination, std::size_t size) const {
+			assert(0); // not implemented yet
+			return 0;
+		}
+
+		template <class T> 
+		void XMInstrument::WaveData<T>::Save(RiffFile& riffFile) const
 		{
 			unsigned char * pData1(0);
 			unsigned char * pData2(0);
-			std::uint32_t size1= DataCompression::SoundSquash(m_pWaveDataL,&pData1,m_WaveLength);
+			std::uint32_t size1= static_cast<uint32_t>(SoundSquash(m_pWaveDataL,&pData1,m_WaveLength));
 			std::uint32_t size2(0);
 
 			if (m_WaveStereo)
 			{
-				size2 = DataCompression::SoundSquash(m_pWaveDataR,&pData2,m_WaveLength);
+				size2 = static_cast<uint32_t>(SoundSquash(m_pWaveDataR,&pData2,m_WaveLength));
 			}
 
 			CT2A _wave_name(m_WaveName.c_str());
@@ -386,6 +428,9 @@ namespace psycle
 			riffFile.Seek(endpos);
 		}
 
+
+	template class XMInstrument::WaveData<std::int16_t>;
+	template class XMInstrument::WaveData<float>;
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::Envelope Implementation.

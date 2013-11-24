@@ -146,11 +146,15 @@ namespace psycle { namespace host {
 			unsigned long wdLoopS;
 			unsigned long wdLoopE;
 			bool wdLoop;
+			unsigned long wdSusLoopS;
+			unsigned long wdSusLoopE;
+			bool wdSusLoop;
 
 			// Painting pens
 			CPen cpen_lo;
 			CPen cpen_me;
 			CPen cpen_hi;
+			CPen cpen_sus;
 			CPen cpen_white;
 
 			HCURSOR hResizeLR;		//left/right arrows cursor for sizing selection
@@ -174,7 +178,9 @@ namespace psycle { namespace host {
 
 			bool bSnapToZero;
 			bool bDragLoopStart, bDragLoopEnd;	//indicates that the user is dragging the loop start/end
+			bool bDragSusLoopStart, bDragSusLoopEnd;	//indicates that the user is dragging the loop start/end
 			unsigned long SelStart;		//the end of the selection -not- being moved 
+			bool contextmenu;
 
 			helpers::dsp::cubic_resampler resampler;
 			void* resampler_data;

@@ -13,13 +13,13 @@ public:
 	CWaveScopeCtrl();
 	virtual ~CWaveScopeCtrl();
 
-	void SetWave(XMInstrument::WaveData *pWave) { m_pWave = pWave; }
-	XMInstrument::WaveData& rWave() { return *m_pWave; }
+	void SetWave(XMInstrument::WaveData<> *pWave) { m_pWave = pWave; }
+	XMInstrument::WaveData<>& rWave() { return *m_pWave; }
 
 	virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
 
 protected:
-	XMInstrument::WaveData* m_pWave;
+	XMInstrument::WaveData<>* m_pWave;
 	helpers::dsp::cubic_resampler resampler;
 	CPen cpen_lo;
 	CPen cpen_med;

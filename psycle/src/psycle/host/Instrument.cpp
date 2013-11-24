@@ -114,7 +114,7 @@ namespace psycle
 						}
 						else
 						{
-							XMInstrument::WaveData wave;
+							XMInstrument::WaveData<> wave;
 							wave.PanFactor(pan/256.f);
 							wave.WaveSampleRate(44100);
 							UINT index;
@@ -135,7 +135,7 @@ namespace psycle
 							wave.WaveFineTune(tmp);
 							bool doloop = false;;
 							pFile->Read(doloop);
-							wave.WaveLoopType(doloop?XMInstrument::WaveData::LoopType::NORMAL:XMInstrument::WaveData::LoopType::DO_NOT);
+							wave.WaveLoopType(doloop?XMInstrument::WaveData<>::LoopType::NORMAL:XMInstrument::WaveData<>::LoopType::DO_NOT);
 							pFile->Read(wave.m_WaveStereo);
 							char dummy[32];
 							//Old sample name, never used.
@@ -240,7 +240,7 @@ namespace psycle
 			pFile->Write(numwaves);
 			if (numwaves > 0)
 			{
-				const XMInstrument::WaveData& wave = samples[sampleIdx];
+				const XMInstrument::WaveData<>& wave = samples[sampleIdx];
 				byte * pData1(0);
 				byte * pData2(0);
 				std::uint32_t size1=0,size2=0;
@@ -281,7 +281,7 @@ namespace psycle
 				//Current sample uses 100 cents. Older used +-256
 				tmp = static_cast<int>((float)wave.WaveFineTune()*2.56);
 				pFile->Write(tmp);
-				bool doloop = wave.m_WaveLoopType == XMInstrument::WaveData::LoopType::NORMAL;
+				bool doloop = wave.m_WaveLoopType == XMInstrument::WaveData<>::LoopType::NORMAL;
 				pFile->Write(doloop);
 				pFile->Write(wave.m_WaveStereo);
 

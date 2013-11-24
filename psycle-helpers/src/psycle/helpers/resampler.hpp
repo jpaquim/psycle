@@ -41,6 +41,7 @@ using namespace universalis::stdlib;
 			/// interpolator work function type
 			typedef float (*work_func_type)(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
 			typedef float (*work_unchecked_func_type)(int16_t const * data, uint32_t res, void* resampler_data);
+			typedef float (*work_float_unchecked_func_type)(float const * data, uint32_t res, void* resampler_data);
 			typedef float (*work_float_func_type)(float const * data, float offset, uint64_t length, void* resampler_data);
 			
 	/// sample interpolator kinds.
@@ -69,6 +70,7 @@ using namespace universalis::stdlib;
 			/// work function corresponding to the selected kind.
 			work_func_type work;
 			work_unchecked_func_type work_unchecked;
+			work_float_unchecked_func_type work_float_unchecked;
 			work_float_func_type work_float;
 			
 		protected:
@@ -88,6 +90,9 @@ using namespace universalis::stdlib;
 			}
 			//Version without checks in data limits. Use only when you guarantee that data has enough samples for the resampling algorithm.
 			static float zoh_unchecked(int16_t const * data, uint32_t /*res*/, void* /*resampler_data*/) {
+				return *data;
+			}
+			static float zoh_float_unchecked(float const * data, uint32_t /*res*/, void* /*resampler_data*/) {
 				return *data;
 			}
 			// data = input signal to be resampled (pointing at the start of data)
@@ -131,18 +136,23 @@ using namespace universalis::stdlib;
 			/// interpolation work function which does linear interpolation.
 			static float linear(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
 			static float linear_unchecked(int16_t const * data, uint32_t res, void* resampler_data);
+			static float linear_float_unchecked(float const * data, uint32_t res, void* resampler_data);
 			static float linear_float(float const * data, float offset, uint64_t length, void* resampler_data);
 
 			/// interpolation work function which does spline interpolation.
 			static float spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
 			static float spline_unchecked(int16_t const * data, uint32_t res, void* resampler_data);
+			static float spline_float_unchecked(float const * data, uint32_t res, void* resampler_data);
 			static float spline_float(float const * data, float offset, uint64_t length, void* resampler_data);
 
 			/// Interpolation work function using a windowed sinc.
 			static float sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
 			static float sinc_unchecked(int16_t const * data, uint32_t res, void* resampler_data);
+			static float sinc_float_unchecked(float const * data, uint32_t res, void* resampler_data);
 			inline static float sinc_filtered(int16_t const * data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data);
+			inline static float sinc_float_filtered(float const * data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data);
 			inline static float sinc_internal(int16_t const * data, uint32_t res, int leftExtent, int rightExtent);
+			inline static float sinc_float_internal(float const * data, uint32_t res, int leftExtent, int rightExtent);
 			static float sinc_float(float const * data, float offset, uint64_t length, void* resampler_data);
 
 			/// Interpolation using SOXR variable rate resampling.

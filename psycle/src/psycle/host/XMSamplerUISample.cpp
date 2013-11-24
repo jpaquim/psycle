@@ -108,7 +108,7 @@ void XMSamplerUISample::RefreshSampleList()
 	{
 		char line[48];
 		if (list.Exists(i)) {
-			const XMInstrument::WaveData& wave = list[i];
+			const XMInstrument::WaveData<>& wave = list[i];
 			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
 		}
@@ -137,14 +137,14 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 	m_Init=false;
 	int i= m_SampleList.GetCurSel();
 	if (Global::song().samples.Exists(i) == false) {
-		XMInstrument::WaveData wave;
+		XMInstrument::WaveData<> wave;
 		wave.Init();
 		Global::song().samples.SetSample(wave,i);
 	}
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 	win->ChangeIns(i);
 
-	XMInstrument::WaveData& wave = Global::song().samples.get(i);
+	XMInstrument::WaveData<>& wave = Global::song().samples.get(i);
 	pWave(&wave);
 	RefreshSampleData();
 	m_Init=true;
@@ -153,7 +153,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 void XMSamplerUISample::RefreshSampleData()
 {
 	char tmp[40];
-	XMInstrument::WaveData& wave = rWave();
+	XMInstrument::WaveData<>& wave = rWave();
 	strcpy(tmp,wave.WaveName().c_str());
 	((CEdit*)GetDlgItem(IDC_WAVENAME))->SetWindowText(tmp);
 	sprintf(tmp,"%.0d",wave.WaveSampleRate());
@@ -197,7 +197,7 @@ void XMSamplerUISample::OnBnClickedLoad()
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 	win->ChangeIns(m_SampleList.GetCurSel());
 	win->SendMessage(WM_COMMAND,IDC_LOADWAVE);
-	XMInstrument::WaveData& wave = Global::song().samples.get(m_SampleList.GetCurSel());
+	XMInstrument::WaveData<>& wave = Global::song().samples.get(m_SampleList.GetCurSel());
 	pWave(&wave);
 	RefreshSampleList();
 	RefreshSampleData();
@@ -456,20 +456,20 @@ void XMSamplerUISample::OnBnClickedOpenwaveeditor()
 void XMSamplerUISample::OnCbnSelendokVibratotype()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_VIBRATOTYPE);
-	rWave().VibratoType((XMInstrument::WaveData::WaveForms::Type)cbox->GetCurSel());
+	rWave().VibratoType((XMInstrument::WaveData<>::WaveForms::Type)cbox->GetCurSel());
 }
 
 void XMSamplerUISample::OnCbnSelendokLoop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_LOOP);
-	rWave().WaveLoopType((XMInstrument::WaveData::LoopType::Type)cbox->GetCurSel());
+	rWave().WaveLoopType((XMInstrument::WaveData<>::LoopType::Type)cbox->GetCurSel());
 	DrawScope();
 }
 
 void XMSamplerUISample::OnCbnSelendokSustainloop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_SUSTAINLOOP);
-	rWave().WaveSusLoopType((XMInstrument::WaveData::LoopType::Type)cbox->GetCurSel());
+	rWave().WaveSusLoopType((XMInstrument::WaveData<>::LoopType::Type)cbox->GetCurSel());
 	DrawScope();
 }
 

@@ -22,6 +22,7 @@ class CEnvelopeEditor : public CStatic
 		XMInstrument::Envelope& envelope() { return *m_pEnvelope; }
 		bool freeform() { return m_bFreeform; }
 		void freeform(bool freeform) { m_bFreeform=freeform; }
+		void ConvertToADSR(bool allowgain=false);
 		bool negative() { return m_bnegative; }
 		void negative(bool negative) { m_bnegative=negative; }
 		bool canSustain() { return m_bCanSustain; }
@@ -31,15 +32,17 @@ class CEnvelopeEditor : public CStatic
 		void envelopeIdx(int idx) { m_envelopeIdx=idx; }
 		int envelopeIdx() { return m_envelopeIdx; }
 		int editPoint() { return m_EditPoint; }
+		void TimeFormulaTicks(int ticksperbeat=24) { m_samplesPerPoint=0; m_ticksPerBeat=ticksperbeat; }
+		void TimeFormulaSamples(int samplesperpoint=256) { m_ticksPerBeat=0; m_samplesPerPoint=samplesperpoint; }
 
 		// Only meaningful when freeform is false
-		void AttackTime(int time);
+		void AttackTime(int time, bool rezoom=true);
 		int AttackTime() { return m_pEnvelope->GetTime(1)-m_pEnvelope->GetTime(0); }
-		void DecayTime(int time);
+		void DecayTime(int time, bool rezoom=true);
 		int DecayTime() { return m_pEnvelope->GetTime(2)-m_pEnvelope->GetTime(1); }
 		void SustainValue(XMInstrument::Envelope::ValueType value) { m_pEnvelope->SetValue(2,value); }
 		XMInstrument::Envelope::ValueType SustainValue() { return m_pEnvelope->GetValue(2); }
-		void ReleaseTime(int time);
+		void ReleaseTime(int time, bool rezoom=true);
 		int ReleaseTime() { return m_pEnvelope->GetTime(3)-m_pEnvelope->GetTime(2); }
 
 	protected:
@@ -89,6 +92,8 @@ class CEnvelopeEditor : public CStatic
 		bool m_bnegative;
 		int m_envelopeIdx;
 		float m_Zoom;///< Zoom
+		int m_samplesPerPoint;
+		int m_ticksPerBeat;
 		int m_WindowHeight;
 		int m_WindowWidth;
 		bool m_bCanSustain;
@@ -98,6 +103,7 @@ class CEnvelopeEditor : public CStatic
 		int m_EditPoint;///< ***** Envelope Point Index
 		int m_EditPointX;///< Envelope Point
 		int m_EditPointY;///< Envelope Point
+		bool m_bCanMoveUpDown;
 
 		CPen _line_pen;
 		CPen _gridpen;

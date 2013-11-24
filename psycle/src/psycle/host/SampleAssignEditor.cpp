@@ -255,13 +255,12 @@ void CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
 void CSampleAssignEditor::OnLButtonDown( UINT nFlags, CPoint point )
 {
 	if (notecommands::empty != m_FocusKeyIndex) {
-		MessageBox("Not done yet");
+		MessageBox("Individual setup of notes not ready yet");
 	}
 }
 void CSampleAssignEditor::OnLButtonUp( UINT nFlags, CPoint point )
 {
 	if (notecommands::empty != m_FocusKeyIndex) {
-		MessageBox("Not done yet");
 	}
 }
 
