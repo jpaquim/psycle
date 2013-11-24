@@ -571,7 +571,7 @@ namespace psycle { namespace host {
 				}
 				//allocate first vector value to store the size of the clipboard memory.
 				int *size = new int[1];
-				memset(size,0,4);
+				memset(size,0,sizeof(int));
 				clipboardmem.push_back(reinterpret_cast<char*>(size));
 				// No name -> record to clipboard.
 				SaveWav("",real_bits[bits],real_rate[rate],channelmode,isFloat);

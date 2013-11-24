@@ -6,6 +6,30 @@
 #include <universalis/stdlib/cstdint.hpp>
 #include <cstring>
 namespace psycle { namespace host {
+
+    namespace detail {
+	/// Wave Loop Types
+			struct LoopType {
+				enum Type {
+				DO_NOT = 0x0, ///< Do Nothing
+				NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
+				BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
+				};
+			};
+
+			/// Wave Form Types
+			struct WaveForms {
+				enum Type {
+				SINUS = 0x0,
+				SQUARE = 0x1,
+				SAWUP = 0x2,
+				SAWDOWN = 0x3,
+				RANDOM = 0x4
+				};
+			};
+	}
+
+
 	class XMInstrument
 	{
 	public:
@@ -50,30 +74,14 @@ namespace psycle { namespace host {
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Class declaration
-
+		template <class T = std::int16_t>
 		class WaveData {
 			friend class Instrument;
 		public:
 			static const std::uint32_t WAVEVERSION = 0x00000001;
-			/// Wave Loop Types
-			struct LoopType {
-				enum Type {
-				DO_NOT = 0x0, ///< Do Nothing
-				NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
-				BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
-				};
-			};
 
-			/// Wave Form Types
-			struct WaveForms {
-				enum Type {
-				SINUS = 0x0,
-				SQUARE = 0x1,
-				SAWUP = 0x2,
-				SAWDOWN = 0x3,
-				RANDOM = 0x4
-				};
-			};
+			typedef detail::LoopType LoopType;
+			typedef detail::WaveForms WaveForms;
 
 			/// Constructor
 			WaveData() : m_pWaveDataL(0), m_pWaveDataR(0),m_WaveLength(0) {Init();}
@@ -194,9 +202,9 @@ namespace psycle { namespace host {
 			void VibratoAttack(const std::uint8_t value){m_VibratoAttack = value ;}
 
 			bool IsAutoVibrato() const {return m_VibratoDepth && m_VibratoSpeed;}
-
-			std::int16_t * const pWaveDataL() const { return m_pWaveDataL;}
-			std::int16_t * const pWaveDataR() const { return m_pWaveDataR;}
+			// WARNING!!!!! The memory is NOT aligned. Do not use with dsp:: methods that require alignment.
+			T * const pWaveDataL() const { return m_pWaveDataL;}
+			T * const pWaveDataR() const { return m_pWaveDataR;}
 			
 		private:
 
@@ -219,8 +227,8 @@ namespace psycle { namespace host {
 			/// [ -100 .. 100] full range = -/+ 1 seminote
 			std::int16_t m_WaveFineTune;
 			bool m_WaveStereo;
-			std::int16_t *m_pWaveDataL;
-			std::int16_t *m_pWaveDataR;
+			T *m_pWaveDataL;
+			T *m_pWaveDataR;
 			bool m_PanEnabled;
 			/// Default position for panning ( 0..1 ) 0left 1 right.
 			float m_PanFactor;
@@ -229,6 +237,11 @@ namespace psycle { namespace host {
 			std::uint8_t m_VibratoSpeed;
 			std::uint8_t m_VibratoDepth;
 			std::uint8_t m_VibratoType;
+
+			bool SoundDesquash(uint8_t const * pSourcePos, int16_t ** pDestination);
+			bool SoundDesquash(uint8_t const * pSourcePos, float ** pDestination);
+			std::size_t SoundSquash(int16_t const * pSource, uint8_t ** pDestination, std::size_t size) const;
+            std::size_t SoundSquash(float const * pSource , uint8_t ** pDestination, std::size_t size) const;
 
 		};// WaveData
 
@@ -591,15 +604,15 @@ namespace psycle { namespace host {
 	public:
 		SampleList(){m_waves.resize(0);}
 		virtual ~SampleList(){Clear();}
-		inline unsigned int AddSample(const XMInstrument::WaveData &wave)
+		inline unsigned int AddSample(const XMInstrument::WaveData<> &wave)
 		{
-			XMInstrument::WaveData* wavecopy = new XMInstrument::WaveData(wave);
+			XMInstrument::WaveData<>* wavecopy = new XMInstrument::WaveData<>(wave);
 			m_waves.push_back(wavecopy);
 			return size()-1;
 		}
-		inline void SetSample(const XMInstrument::WaveData &wave,int pos)
+		inline void SetSample(const XMInstrument::WaveData<> &wave,int pos)
 		{
-			XMInstrument::WaveData* wavecopy = new XMInstrument::WaveData(wave);
+			XMInstrument::WaveData<>* wavecopy = new XMInstrument::WaveData<>(wave);
 			if (pos>=m_waves.size()) {
 				size_t val = m_waves.size();
 				m_waves.resize(pos+1);
@@ -610,13 +623,13 @@ namespace psycle { namespace host {
 			else if(m_waves[pos] != NULL) { delete m_waves[pos]; }
 			m_waves[pos]=wavecopy;
 		}
-		inline const XMInstrument::WaveData &operator[](int pos) const
+		inline const XMInstrument::WaveData<> &operator[](int pos) const
 		{
 			ASSERT(pos<m_waves.size());
 			ASSERT(m_waves[pos]!=NULL);
 			return *m_waves[pos];
 		}
-		inline XMInstrument::WaveData &get(int pos)
+		inline XMInstrument::WaveData<> &get(int pos)
 		{
 			ASSERT(pos<m_waves.size());
 			ASSERT(m_waves[pos]!=NULL);
@@ -633,7 +646,7 @@ namespace psycle { namespace host {
 		}
 		inline void ExchangeSamples(int pos1, int pos2)
 		{
-			XMInstrument::WaveData* wave = m_waves[pos1];
+			XMInstrument::WaveData<>* wave = m_waves[pos1];
 			m_waves[pos1]=m_waves[pos2];
 			m_waves[pos2]=wave;
 		}
@@ -652,7 +665,7 @@ namespace psycle { namespace host {
 			m_waves.clear();
 		}
 	private:
-		std::vector<XMInstrument::WaveData*> m_waves;
+		std::vector<XMInstrument::WaveData<>*> m_waves;
 	};
 
 

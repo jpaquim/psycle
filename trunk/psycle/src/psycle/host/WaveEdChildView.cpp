@@ -27,6 +27,7 @@ namespace psycle { namespace host {
 			resampler.quality(helpers::dsp::resampler::quality::spline);
 			resampler_data =resampler.GetResamplerData();
 			resampler.UpdateSpeed(resampler_data,1.0);
+			contextmenu=false;
 		}
 
 		CWaveEdChildView::~CWaveEdChildView()
@@ -272,6 +273,44 @@ namespace psycle { namespace host {
 					memDC.LineTo(le, nHeadHeight);
 					memDC.SelectObject(oldfont);
 				}
+				//draw sustain loop points
+				if ( wdSusLoop )
+				{
+					HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+					HGDIOBJ oldfont = memDC.SelectObject(hFont);
+					memDC.SelectObject(&cpen_sus);
+					if ( wdSusLoopS >= diStart && wdSusLoopS < diStart+diLength)
+					{
+						int ls = helpers::math::round<int,float>((wdSusLoopS-diStart)*dispRatio);
+						memDC.SetBkColor(0x00000000);
+						memDC.MoveTo(ls,nHeadHeight);
+						memDC.LineTo(ls,nHeight+nHeadHeight);
+						CSize textsize = memDC.GetTextExtent("Start");
+						memDC.SetBkColor(0x00FFFFFF);
+						memDC.TextOut( ls - textsize.cx/2, nHeadHeight, "Start" );
+					}
+					if ( wdSusLoopE >= diStart && wdSusLoopE < diStart+diLength)
+					{
+						int le = helpers::math::round<int,float>((wdSusLoopE-diStart)*dispRatio);
+						memDC.SetBkColor(0x00000000);
+						memDC.MoveTo(le,nHeadHeight);
+						memDC.LineTo(le,nHeight+nHeadHeight);
+						CSize textsize = memDC.GetTextExtent("End");
+						memDC.SetBkColor(0x00FFFFFF);
+						memDC.TextOut( le - textsize.cx/2, nHeight+nHeadHeight-textsize.cy, "End" );
+					}
+
+					//draw loop points in header
+					int ls = helpers::math::round<int,float>(wdSusLoopS * headDispRatio);
+					int le = helpers::math::round<int,float>(wdSusLoopE * headDispRatio);
+
+					memDC.MoveTo(ls, 0);
+					memDC.LineTo(ls, nHeadHeight);
+
+					memDC.MoveTo(le, 0);
+					memDC.LineTo(le, nHeadHeight);
+					memDC.SelectObject(oldfont);
+				}
 
 				//draw screen size on header
 				memDC.SelectObject(&cpen_white);
@@ -363,6 +402,7 @@ namespace psycle { namespace host {
 				return -1;
 
 			cpen_lo.CreatePen(PS_SOLID,0,0xFF0000);
+			cpen_sus.CreatePen(PS_DOT,0,0xFF0000);
 			cpen_me.CreatePen(PS_SOLID,0,0xCCCCCC);
 			cpen_hi.CreatePen(PS_SOLID,0,0x00DD77);
 			cpen_white.CreatePen(PS_SOLID,0,0xEEEEEE);
@@ -374,6 +414,7 @@ namespace psycle { namespace host {
 
 			bSnapToZero=false;
 			bDragLoopStart = bDragLoopEnd = false;
+			bDragSusLoopStart = bDragSusLoopEnd = false;
 			SelStart=0;
 			cursorPos=0;
 			_pSong->wavprev.SetVolume(0.4f);
@@ -390,6 +431,7 @@ namespace psycle { namespace host {
 			StopTimer();
 			zoombar.DestroyWindow();
 			cpen_lo.DeleteObject();
+			cpen_sus.DeleteObject();
 			cpen_me.DeleteObject();
 			cpen_hi.DeleteObject();
 			cpen_white.DeleteObject();
@@ -546,18 +588,20 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnContextMenu(CWnd* pWnd, CPoint point)
 		{
-			CMenu menu;
-			menu.LoadMenu(IDR_WAVED_POPUP);
-			CMenu *popup;
-			popup=menu.GetSubMenu(0);
-			assert(popup);
-			popup->TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, point.x, point.y, GetOwner());
-			menu.DestroyMenu();
+			if (contextmenu) {
+				CMenu menu;
+				menu.LoadMenu(IDR_WAVED_POPUP);
+				CMenu *popup;
+				popup=menu.GetSubMenu(0);
+				assert(popup);
+				popup->TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, point.x, point.y, GetOwner());
+				menu.DestroyMenu();
 
-			CRect rect;
-			GetWindowRect(&rect);
-			rbX = point.x-rect.left;
-			rbY = point.y-rect.top;
+				CRect rect;
+				GetWindowRect(&rect);
+				rbX = point.x-rect.left;
+				rbY = point.y-rect.top;
+			}
 		}
 
 		
@@ -635,15 +679,18 @@ namespace psycle { namespace host {
 			if(wl)
 			{
 				wdWave=true;
-				const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+				const XMInstrument::WaveData<>& wave = _pSong->samples[wsInstrument];
 					
 				wdLength=wl;
 				wdLeft=wave.pWaveDataL();
 				wdRight=wave.pWaveDataR();
 				wdStereo=wave.IsWaveStereo();
-				wdLoop=wave.WaveLoopType()==XMInstrument::WaveData::LoopType::NORMAL;
+				wdLoop=wave.WaveLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL;
 				wdLoopS=wave.WaveLoopStart();
 				wdLoopE=wave.WaveLoopEnd();
+				wdSusLoop=wave.WaveSusLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL;
+				wdSusLoopS=wave.WaveSusLoopStart();
+				wdSusLoopE=wave.WaveSusLoopEnd();
 
 				diStart=0;
 				diLength=wl;
@@ -842,7 +889,7 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 					_pSong->StopInstrument(wsInstrument);
 
 					CRect rect;
@@ -857,19 +904,44 @@ namespace psycle { namespace host {
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+						wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 					}
 					mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 					InvalidateRect(&rect, false);
-
+					contextmenu=false;
 				}
-/*				else
+				else if ( nFlags & MK_SHIFT )
 				{
-					if (blSelection) OnSelectionZoomSel();
-					else OnSelectionZoomOut();
+					PsycleGlobal::inputHandler().AddMacViewUndo();
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+					_pSong->StopInstrument(wsInstrument);
+
+					CRect rect;
+					GetClientRect(&rect);
+					wdSusLoopE = diStart+((x*diLength)/rect.Width());
+					wave.WaveSusLoopEnd(wdSusLoopE);
+					if (wave.WaveSusLoopStart()> wdSusLoopE )
+					{
+						wave.WaveSusLoopStart(wdSusLoopE);
+					}
+					wdSusLoopS = wave.WaveSusLoopStart();
+					if (!wdSusLoop) 
+					{
+						wdSusLoop=true;
+						wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+					}
+					mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
+					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
+					InvalidateRect(&rect, false);
+					contextmenu=false;
 				}
-*/
+				else
+				{
+					contextmenu=true;
+				}
+
 			}
 			CWnd::OnRButtonDown(nFlags, point);
 		}
@@ -887,7 +959,7 @@ namespace psycle { namespace host {
 				{
 					PsycleGlobal::inputHandler().AddMacViewUndo();
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 					_pSong->StopInstrument(wsInstrument);
 
 
@@ -904,7 +976,34 @@ namespace psycle { namespace host {
 					if (!wdLoop) 
 					{
 						wdLoop=true;
-						wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+						wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+					}
+					mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
+					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
+					InvalidateRect(&rect, false);
+				}
+				else if ( nFlags & MK_SHIFT )
+				{
+					PsycleGlobal::inputHandler().AddMacViewUndo();
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+					_pSong->StopInstrument(wsInstrument);
+
+
+					CRect rect;
+					GetClientRect(&rect);
+					wdSusLoopS = diStart+((x*diLength)/rect.Width());
+					wave.WaveSusLoopStart(wdSusLoopS);
+					if (wave.WaveSusLoopEnd() < wdSusLoopS )
+					{
+						wave.WaveSusLoopEnd(wdSusLoopS);
+					}
+					wdSusLoopE = wave.WaveSusLoopEnd();
+
+					if (!wdSusLoop) 
+					{
+						wdSusLoop=true;
+						wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 					}
 					mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -942,6 +1041,16 @@ namespace psycle { namespace host {
 								abs(x - helpers::math::round<int,float>((wdLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
 						{
 							bDragLoopEnd=true;
+						}
+						else if ( wdSusLoop		&&
+								abs(x - helpers::math::round<int,float>((wdSusLoopS-diStart)			* dispRatio )) < 10 )	//mouse down on loop start
+						{
+							bDragSusLoopStart=true;
+						}
+						else if ( wdSusLoop		&&
+								abs(x - helpers::math::round<int,float>((wdSusLoopE-diStart)			* dispRatio )) < 10 )	//mouse down on loop end
+						{
+							bDragSusLoopEnd=true;
 						}
 						else
 						{
@@ -1038,6 +1147,33 @@ namespace psycle { namespace host {
 						else					invHead.SetRect(prevHeadLoopE-20,0,			headX+20, nHeadHeight);
 						prevBodyLoopE=x;	prevHeadLoopE=headX;
 					}
+					else if(bDragSusLoopStart)
+					{
+						if(newpos > wdSusLoopE)		wdSusLoopS = wdSusLoopE;
+						else						wdSusLoopS = newpos;
+
+						//set invalid rects
+						float sampWidth = nWidth/(float)diLength+20;
+						if(x<prevBodyLoopS)	invBody.SetRect(x-sampWidth, nHeadHeight,				prevBodyLoopS+sampWidth,	rect.Height());
+						else				invBody.SetRect(prevBodyLoopS-sampWidth, nHeadHeight,	x+sampWidth,	rect.Height());
+						if(headX<prevHeadLoopS)	invHead.SetRect(headX-20, 0,				prevHeadLoopS+20,	nHeadHeight);
+						else					invHead.SetRect(prevHeadLoopS-20,0,			headX+20, nHeadHeight);
+						prevBodyLoopS=x;	prevHeadLoopS=headX;
+					}
+					else if(bDragSusLoopEnd)
+					{
+						if(newpos >= wdLength)		wdSusLoopE = wdLength-1;
+						else if(newpos >= wdSusLoopS)	wdSusLoopE = newpos;
+						else						wdSusLoopE = wdSusLoopS;
+
+						//set invalid rects
+						float sampWidth = nWidth/(float)diLength + 20;
+						if(x<prevBodyLoopE)	invBody.SetRect(x-sampWidth, nHeadHeight,				prevBodyLoopE+sampWidth,	rect.Height());
+						else				invBody.SetRect(prevBodyLoopE-sampWidth, nHeadHeight,	x+sampWidth,	rect.Height());
+						if(headX<prevHeadLoopE)	invHead.SetRect(headX-20, 0,				prevHeadLoopE+20,	nHeadHeight);
+						else					invHead.SetRect(prevHeadLoopE-20,0,			headX+20, nHeadHeight);
+						prevBodyLoopE=x;	prevHeadLoopE=headX;
+					}
 					else
 					{
 						if (newpos >= SelStart)
@@ -1108,7 +1244,10 @@ namespace psycle { namespace host {
 								abs ( x - helpers::math::round<int,float>((  blStart+blLength-diStart)	* dispRatio ))  < 10	)	||
 							(	wdLoop &&
 							(	abs ( x - helpers::math::round<int,float>((  wdLoopS-diStart )			* dispRatio ))  < 10		||
-								abs ( x - helpers::math::round<int,float>((  wdLoopE-diStart )			* dispRatio ))  < 10) )
+								abs ( x - helpers::math::round<int,float>((  wdLoopE-diStart )			* dispRatio ))  < 10) )		||
+							(	wdSusLoop &&
+							(	abs ( x - helpers::math::round<int,float>((  wdSusLoopS-diStart )			* dispRatio ))  < 10		||
+								abs ( x - helpers::math::round<int,float>((  wdSusLoopE-diStart )			* dispRatio ))  < 10) )
 						)
 						::SetCursor(hResizeLR);
 					else
@@ -1151,12 +1290,15 @@ namespace psycle { namespace host {
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
 			_pSong->StopInstrument(wsInstrument);
 			if(wdWave) {
-				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 				wave.WaveLoopStart(wdLoopS);
 				wave.WaveLoopEnd(wdLoopE);
+				wave.WaveSusLoopStart(wdSusLoopS);
+				wave.WaveSusLoopEnd(wdSusLoopE);
 				mainFrame->UpdateInstrumentEditor();
 			}
 			bDragLoopEnd = bDragLoopStart = false;
+			bDragSusLoopEnd = bDragSusLoopStart = false;
 			CRect rect;
 			GetClientRect(&rect);
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -1178,7 +1320,7 @@ namespace psycle { namespace host {
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 				wave.Fade(startPoint, startPoint+length, 0.f, 1.f);
 
 				RefreshDisplayData(true);
@@ -1195,7 +1337,7 @@ namespace psycle { namespace host {
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 				wave.Fade(startPoint, startPoint+length, 1.f, 0.f);
 
 				RefreshDisplayData(true);
@@ -1225,7 +1367,7 @@ namespace psycle { namespace host {
 				
 				if (ratio != 1)
 				{
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 					wave.Amplify(startPoint, startPoint+length, ratio);
 				}
 
@@ -1313,7 +1455,7 @@ namespace psycle { namespace host {
 				if (pos != AMP_DIALOG_CANCEL)
 				{
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 					ratio = pow(10.0, (double) pos / (double) 2000.0);
 
 					wave.Amplify(startPoint, startPoint+length, ratio);
@@ -1380,7 +1522,7 @@ namespace psycle { namespace host {
 				else
 				{
 					unsigned long insertPos;
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 
 					switch(SilenceDlg.insertPos)
 					{
@@ -1397,7 +1539,7 @@ namespace psycle { namespace host {
 						MessageBox("Invalid option");
 						return;
 					}
-					XMInstrument::WaveData wavewithS;
+					XMInstrument::WaveData<> wavewithS;
 					wavewithS.AllocWaveData(timeInSamps, wave.IsWaveStereo());
 					std::memset(wavewithS.pWaveDataL(), 0, timeInSamps*sizeof(short));					//insert silence
 					wave.InsertAt(insertPos, wavewithS);
@@ -1420,6 +1562,20 @@ namespace psycle { namespace host {
 						}
 						mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					}
+					if(wdSusLoop)		//update loop points if necessary
+					{
+						if(insertPos<wdSusLoopS)
+						{
+							wdSusLoopS += timeInSamps;
+							wave.WaveSusLoopStart(wdSusLoopS);
+						}
+						if(insertPos<wdSusLoopE)
+						{
+							wdSusLoopE += timeInSamps;
+							wave.WaveSusLoopEnd(wdSusLoopE);
+						}
+						mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
+					}
 				}
 
 				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
@@ -1435,7 +1591,7 @@ namespace psycle { namespace host {
 			{
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 				wave.ConvertToMono();
 				wdStereo = false;
 				RefreshDisplayData(true);
@@ -1636,7 +1792,7 @@ namespace psycle { namespace host {
 				long datalen = (wdLength - length);
 				if (datalen)
 				{
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 					wave.DeleteAt(blStart, length);
 					wdLeft = wave.pWaveDataL();
 					wdRight = wave.pWaveDataR();
@@ -1653,6 +1809,19 @@ namespace psycle { namespace host {
 						{
 							wdLoopE -= length;
 							wave.WaveLoopEnd(wdLoopE);
+						}
+					}
+					if(wdSusLoop)
+					{
+						if(blStart+length<wdSusLoopS)
+						{
+							wdSusLoopS -= length;
+							wave.WaveSusLoopStart(wdSusLoopS);
+						}
+						if(blStart+length<wdSusLoopE)
+						{
+							wdSusLoopE -= length;
+							wave.WaveSusLoopEnd(wdSusLoopE);
 						}
 					}
 
@@ -1706,7 +1875,7 @@ namespace psycle { namespace host {
 			OpenClipboard();
 			EmptyClipboard();
 			hClipboardData = GlobalAlloc(GMEM_MOVEABLE, ( wdStereo ? length*4 + sizeof(fullheader) : length*2 + sizeof(fullheader)));
-			const XMInstrument::WaveData& wave = _pSong->samples[wsInstrument];
+			const XMInstrument::WaveData<>& wave = _pSong->samples[wsInstrument];
 			
 			wavheader.head = FourCC("RIFF");
 			wavheader.size = wdStereo ? (length*4 + sizeof(fullheader) - 8) : (length*2 + sizeof(fullheader) - 8);
@@ -1801,7 +1970,7 @@ namespace psycle { namespace host {
 				if (pFmt->wBitsPerSample == 16)
 				{
 					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 					wdLength = lDataSamps;
 					wdLeft  = wave.pWaveDataL();
 					if (pFmt->nChannels == 1)
@@ -1827,14 +1996,14 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
 				{
 					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
 						 ((pFmt->nChannels == 2) && (wdStereo == false)) )
 						 return;
 
-					XMInstrument::WaveData waveToPaste;
+					XMInstrument::WaveData<> waveToPaste;
 					waveToPaste.AllocWaveData(lDataSamps, wdStereo);
 					//prepare left channel
 					for (c = 0; c < lDataSamps; c++) {
@@ -1868,6 +2037,19 @@ namespace psycle { namespace host {
 						{
 							wdLoopE += lDataSamps;
 							wave.WaveLoopEnd(wdLoopE);
+						}
+					}
+					if(wdSusLoop)
+					{
+						if(cursorPos<wdSusLoopS)
+						{
+							wdSusLoopS += lDataSamps;
+							wave.WaveSusLoopStart(wdSusLoopS);
+						}
+						if(cursorPos<wdSusLoopE)
+						{
+							wdSusLoopE += lDataSamps;
+							wave.WaveSusLoopEnd(wdSusLoopE);
 						}
 					}
 				}
@@ -1939,7 +2121,7 @@ namespace psycle { namespace host {
 					startPoint=cursorPos;
 				}
 
-				XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 				//do left channel
 				for (c = 0; c < lDataSamps; c++)
 					wave.pWaveDataL()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign);
@@ -1997,7 +2179,7 @@ namespace psycle { namespace host {
 					unsigned long startPoint;
 					unsigned long fadeInSamps(0), fadeOutSamps(0);
 					unsigned long destFadeIn(0);	
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -2024,7 +2206,7 @@ namespace psycle { namespace host {
 					fadeOutSamps = std::min(fadeOutSamps,lDataSamps);
 					destFadeIn = std::min(fadeInSamps,wdLength-startPoint);
 
-					XMInstrument::WaveData waveClip;
+					XMInstrument::WaveData<> waveClip;
 					waveClip.AllocWaveData(newLength,wdStereo);
 					waveClip.Silence(0,newLength);
 					if (wdStereo) {
@@ -2104,7 +2286,7 @@ namespace psycle { namespace host {
 						||(pFmt->nChannels == 2 && wdStereo == true)))
 				{
 					unsigned long startPoint, endPoint;
-					XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -2127,7 +2309,7 @@ namespace psycle { namespace host {
 
 					unsigned long newLength = std::max(startPoint+lDataSamps, wdLength);
 
-					XMInstrument::WaveData waveClip;
+					XMInstrument::WaveData<> waveClip;
 					waveClip.AllocWaveData(newLength,wdStereo);
 					waveClip.Silence(0,newLength);
 					if (wdStereo) {
@@ -2196,7 +2378,7 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+			XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
@@ -2211,7 +2393,7 @@ namespace psycle { namespace host {
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+				wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			}
 			mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2221,7 +2403,7 @@ namespace psycle { namespace host {
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+			XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 			_pSong->StopInstrument(wsInstrument);
 			CRect rect;
 			GetClientRect(&rect);
@@ -2236,7 +2418,7 @@ namespace psycle { namespace host {
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+				wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			}
 			mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
@@ -2247,7 +2429,7 @@ namespace psycle { namespace host {
 		{
 			if(!blSelection) return;
 			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			XMInstrument::WaveData& wave = _pSong->samples.get(wsInstrument);
+			XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 			_pSong->StopInstrument(wsInstrument);
 
 			wdLoopS = blStart;
@@ -2257,7 +2439,7 @@ namespace psycle { namespace host {
 			if (!wdLoop) 
 			{
 				wdLoop=true;
-				wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+				wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			}
 
 			mainFrame->UpdateInstrumentEditor();

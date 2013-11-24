@@ -20,8 +20,8 @@
 #include "XMSampler.hpp"
 #include "Plugin.hpp"
 #include "VstHost24.hpp"
-#include "LuaHost.hpp"
 #include "LuaPlugin.hpp"
+#include "LuaHost.hpp"
 
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/math.hpp>
@@ -905,6 +905,20 @@ namespace psycle
 			return -1; 
 		}
 
+		void Song::SetWavPreview(XMInstrument::WaveData<> * wave) {
+			CExclusiveLock lock(&semaphore, 2, true);
+			wavprev.UseWave(wave);
+		}
+		void Song::SetWavPreview(int newinst)
+		{
+			CExclusiveLock lock(&semaphore, 2, true);
+			if(samples.Exists(instSelected)) {
+				wavprev.UseWave(&samples.get(instSelected));
+			}
+			else {
+				wavprev.UseWave(NULL);
+			}
+		}
 		// IFF structure ripped by krokpitr
 		// Current Code Extremely modified by [JAZ] ( RIFF based )
 		// Advise: IFF files use Big Endian byte ordering. That's why I use
@@ -977,7 +991,7 @@ namespace psycle
 			{
 				return 0;
 			}
-			XMInstrument::WaveData wave;
+			XMInstrument::WaveData<> wave;
 			unsigned int Datalen=0;
 			file.Read(&data,4);
 			if( data == file.FourCC("16SV")) bits = 16;
@@ -1010,7 +1024,7 @@ namespace psycle
 				{
 					wave.WaveLoopStart(ls);
 					wave.WaveLoopEnd(ls + le);
-					wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+					wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 				}
 				unsigned short srbe, sr;
 				file.Read(&srbe,sizeof srbe);
@@ -1048,7 +1062,8 @@ namespace psycle
 				samples.SetSample(wave,instrument);
 			}
 			else {
-				wavprev.GetWave() = wave;
+				XMInstrument::WaveData<> &prevwave = wavprev.UsePreviewWave();
+				prevwave = wave;
 			}
 			file.Close();
 			return 1;
@@ -1058,13 +1073,14 @@ namespace psycle
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< FIXME: Since in some places, signed values are used, we cannot use the whole range.
 			if (iInstr < PREV_WAV_INS ) {
-				XMInstrument::WaveData wave;
+				XMInstrument::WaveData<> wave;
 				wave.AllocWaveData(iSamplesPerChan,bStereo);
 				wave.WaveName(sName);
 				samples.SetSample(wave,iInstr);
 			}
 			else {
-				wavprev.GetWave().AllocWaveData(iSamplesPerChan,bStereo);
+				XMInstrument::WaveData<> &wave = wavprev.UsePreviewWave();
+				wave.AllocWaveData(iSamplesPerChan,bStereo);
 			}
 			return true;
 		}
@@ -1097,7 +1113,7 @@ namespace psycle
 			// Reading of Wave data.
 			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
-			XMInstrument::WaveData& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.GetWave();
+			XMInstrument::WaveData<>& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.UsePreviewWave();
 			wave.WaveSampleRate(file.SamplingRate());
 			std::int16_t * sampL = wave.pWaveDataL();
 
@@ -1192,7 +1208,7 @@ namespace psycle
 						if (ls >= 0 && ls <= le && le < Datalen){
 							wave.WaveLoopStart(ls);
 							wave.WaveLoopEnd(le);
-							wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+							wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 						}
 					}
 					file.Skip(9);
@@ -1509,7 +1525,7 @@ namespace psycle
 							{
 								pFile->Read(idx);
 								filepos=pFile->GetPos();
-								XMInstrument::WaveData wave;
+								XMInstrument::WaveData<> wave;
 								int sizeSamp = wave.Load(*pFile);
 								samples.SetSample(wave, idx);
 								if ((version&0xFFFF) > 0) {
@@ -1714,7 +1730,7 @@ namespace psycle
 						{
 							if ( w == 0 )
 							{
-								XMInstrument::WaveData wave;
+								XMInstrument::WaveData<> wave;
 								short tmpFineTune;
 								char dummy[33];
 								unsigned short volume = 0;
@@ -1738,7 +1754,7 @@ namespace psycle
 								pFile->Read(loop);
 								wave.WaveLoopEnd(loop);
 								pFile->Read(doloop);
-								wave.WaveLoopType(doloop?XMInstrument::WaveData::LoopType::NORMAL:XMInstrument::WaveData::LoopType::DO_NOT);
+								wave.WaveLoopType(doloop?XMInstrument::WaveData<>::LoopType::NORMAL:XMInstrument::WaveData<>::LoopType::DO_NOT);
 								pFile->Read(stereo);
 								wave.AllocWaveData(wltemp,stereo);
 								std::int16_t* data = wave.pWaveDataL();

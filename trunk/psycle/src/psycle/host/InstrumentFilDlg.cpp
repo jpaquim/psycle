@@ -39,7 +39,9 @@ END_MESSAGE_MAP()
 
 BOOL CInstrumentFilDlg::PreTranslateMessage(MSG* pMsg)
 {
-	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent()->GetParent());
+	CWnd *tabCtl = GetParent();
+	CWnd *UIInst = tabCtl->GetParent();
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(UIInst->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;

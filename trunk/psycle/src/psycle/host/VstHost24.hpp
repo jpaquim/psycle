@@ -132,7 +132,7 @@ namespace psycle
 					_type=MACH_VST;
 					InitializeSamplesVector();
 				}
-				virtual ~Plugin();
+				virtual ~Plugin() { Free(); }
 				void Free() throw(::std::exception) { if  (ploader)	Unload(); };
 
 				// Machine overloaded functions

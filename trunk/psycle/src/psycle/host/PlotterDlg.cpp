@@ -7,6 +7,10 @@
 #include "DPI.hpp"
 #include <psycle/helpers/dsp.hpp>
 #include <cmath>
+#include "lua.hpp"
+#include "LuaArray.hpp"
+#include "LuaInternals.hpp"
+
 
 namespace psycle { namespace host {
 
@@ -32,6 +36,39 @@ namespace psycle { namespace host {
 		CPlotterDlg::~CPlotterDlg() {
 		}
 
+
+		void CPlotterDlg::do_script() {
+			lua_State* L = luaL_newstate();
+            luaL_openlibs(L);
+			std::string path = Global::configuration().GetAbsoluteLuaDir() + "/plotblit.lua";
+			int status = luaL_loadfile(L, path.c_str());
+			if (status) {
+              CString msg(lua_tostring(L, -1));
+	          AfxMessageBox(msg);
+			  lua_close (L);
+			  return;
+            }
+//            LuaArrayBind::register_module(L);             
+//			LuaWaveOscBind::register_module(L);             
+			status = lua_pcall(L, 0, LUA_MULTRET, 0);
+			if (status) {
+              CString msg(lua_tostring(L, -1));
+	          AfxMessageBox(msg);
+            }  else {
+			  lua_getglobal(L, "work");
+			  status = lua_pcall(L, 0, 1, 0);
+			  if (status) {
+                CString msg(lua_tostring(L, -1));
+	            AfxMessageBox(msg);
+              }  else {
+			    PSArray* x = *(PSArray **)luaL_checkudata(L, -1, "array_meta");			
+			    assert(x);
+			    this->set_data(x->data(), x->len());
+			  }
+			}
+			lua_close (L);
+		}
+
 		void CPlotterDlg::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
@@ -51,12 +88,15 @@ namespace psycle { namespace host {
 
 		void CPlotterDlg::OnCancel()
 		{
-			// DestroyWindow();
+			// DestroyWindow();			
 		}
 
 		void CPlotterDlg::OnClose()
 		{
-			CDialog::OnClose();			
+			CDialog::OnClose();	
+			do_script();
+			Invalidate(); 
+			UpdateWindow();
 			//DestroyWindow();
 		}
 

@@ -43,7 +43,10 @@ END_MESSAGE_MAP()
 
 BOOL CEnvelopeEditorDlg::PreTranslateMessage(MSG* pMsg) 
 {
-	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent()->GetParent()->GetParent());
+	CWnd *insAmp = GetParent();
+	CWnd *tabCtl = insAmp->GetParent();
+	CWnd *UIInst = tabCtl->GetParent();
+	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(UIInst->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;
@@ -121,23 +124,10 @@ void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 	m_SlADSRDecay.EnableWindow(TRUE);
 	m_SlADSRSustain.EnableWindow(TRUE);
 	m_SlADSRRelease.EnableWindow(TRUE);
+	m_EnvelopeEditor.ConvertToADSR(true);
 	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
-	while(env.NumOfPoints()< 4) {
-		env.Insert(env.NumOfPoints(),0.0f);
-	}
-	while(env.NumOfPoints()>4) {
-		env.Delete(env.NumOfPoints()-1);
-	}
-	float min=1.0f;
-	float max=0.0f;
-	for(int i=0;i<env.NumOfPoints();i++){
-		min=std::min(min,env.GetValue(i));
-		max=std::max(max,env.GetValue(i));
-	}
-	if(max==min) {min=0.0f; max = 1.0f;}
-	env.SetValue(0,min);
-	env.SetValue(1,max);
-	env.SetValue(3,min);
+	float min=env.GetValue(0);
+	float max=env.GetValue(1);
 	m_SlADSRBase.SetPos(min*100);
 	if(max!=min) {
 		m_SlADSRMod.SetPos((max-min)*100.f);
@@ -148,7 +138,6 @@ void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 	m_SlADSRSustain.SetPos(m_EnvelopeEditor.SustainValue()*100.f);
 	m_SlADSRRelease.SetPos(m_EnvelopeEditor.ReleaseTime());
 
-	m_EnvelopeEditor.freeform(false);
 	m_EnvelopeEditor.Invalidate();
 }
 		
@@ -307,9 +296,20 @@ void CEnvelopeEditorDlg::OnBnClickedLoopEnd()
 	}
 }
 
-void CEnvelopeEditorDlg::OnEnvelopeChanged(WPARAM wParam, LPARAM lParam)
+void CEnvelopeEditorDlg::OnEnvelopeChanged()
 {
 	RefreshButtons();
+	if (!m_EnvelopeEditor.freeform()) {
+		XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
+
+		m_SlADSRAttack.SetPos(m_EnvelopeEditor.AttackTime());
+		m_SlADSRDecay.SetPos(m_EnvelopeEditor.DecayTime());
+		m_SlADSRRelease.SetPos(m_EnvelopeEditor.ReleaseTime());
+
+		float diff = std::min(100-m_SlADSRBase.GetPos(),m_SlADSRMod.GetPos()) * 0.01f;
+		float base = m_SlADSRBase.GetPos()*0.01f;
+		m_SlADSRSustain.SetPos((m_EnvelopeEditor.SustainValue()-base)*100/diff);
+	}
 }
 
 }}

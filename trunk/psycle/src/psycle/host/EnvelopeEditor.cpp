@@ -18,6 +18,8 @@ CEnvelopeEditor::CEnvelopeEditor()
 , m_bPointEditing(false)
 , m_envelopeIdx(0)
 , m_EditPoint(0)
+, m_samplesPerPoint(0)
+, m_ticksPerBeat(24)
 {
 	_line_pen.CreatePen(PS_SOLID,0,RGB(0,0,255));
 	_gridpen.CreatePen(PS_SOLID,0,RGB(192,192,255));
@@ -62,8 +64,33 @@ void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope)
 
 	m_bInitialized = true;
 	Invalidate();
-			
 }
+void CEnvelopeEditor::ConvertToADSR(bool allowgain) {
+	XMInstrument::Envelope &env = envelope();
+	while(env.NumOfPoints()< 4) {
+		env.Insert(env.NumOfPoints(),0.0f);
+	}
+	while(env.NumOfPoints()>4) {
+		env.Delete(env.NumOfPoints()-1);
+	}
+	float min=1.0f;
+	float max=0.0f;
+	for(int i=0;i<env.NumOfPoints();i++){
+		min=std::min(min,env.GetValue(i));
+		max=std::max(max,env.GetValue(i));
+	}
+	if(max==min || !allowgain) {min=0.0f; max = 1.0f;}
+	env.SetValue(0,min);
+	env.SetValue(1,max);
+	env.SetValue(3,min);
+	env.SustainBegin(2);
+	env.SustainEnd(2);
+
+	m_EditPoint = env.NumOfPoints();
+	freeform(false);
+	FitZoom();
+}
+
 void CEnvelopeEditor::FitZoom()
 {
 	m_Zoom = 8.0f;
@@ -76,8 +103,9 @@ void CEnvelopeEditor::FitZoom()
 			m_Zoom= m_Zoom/2.0f;
 		}
 	}
+	//could do SetCursorPoint() if wanting to zoom while moving.
 }
-void CEnvelopeEditor::AttackTime(int time)
+void CEnvelopeEditor::AttackTime(int time, bool rezoom)
 {
 	if (time <= 0) time=1; //prevent point swapping.
 	int prevAttack = m_pEnvelope->GetTime(1);
@@ -94,9 +122,9 @@ void CEnvelopeEditor::AttackTime(int time)
 		m_pEnvelope->SetTime(2, m_pEnvelope->GetTime(2)+diff);
 		m_pEnvelope->SetTime(3, m_pEnvelope->GetTime(3)+diff);
 	}
-	FitZoom();
+	if (rezoom)	FitZoom();
 }
-void CEnvelopeEditor::DecayTime(int time)
+void CEnvelopeEditor::DecayTime(int time, bool rezoom)
 {
 	if (time <= 0) time=1; //prevent point swapping.
 	time = m_pEnvelope->GetTime(1)+time;
@@ -112,13 +140,13 @@ void CEnvelopeEditor::DecayTime(int time)
 		m_pEnvelope->SetTime(2, m_pEnvelope->GetTime(2)+diff);
 		m_pEnvelope->SetTime(3, m_pEnvelope->GetTime(3)+diff);
 	}
-	FitZoom();
+	if (rezoom)	FitZoom();
 }
-void CEnvelopeEditor::ReleaseTime(int time)
+void CEnvelopeEditor::ReleaseTime(int time, bool rezoom)
 {
 	if (time <= 0) time=1; //prevent point swapping.
 	m_pEnvelope->SetTime(3, m_pEnvelope->GetTime(2)+time);
-	FitZoom();
+	if (rezoom)	FitZoom();
 }
 
 
@@ -159,7 +187,13 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			const int _points =  m_pEnvelope->NumOfPoints();
 
 			int _mod = 0.0f;
-			float tenthsec = m_Zoom*0.04*Global::player().bpm;
+			float tenthsec;
+			if (m_ticksPerBeat > 0 ) {
+				tenthsec = m_Zoom*(m_ticksPerBeat/600.0)*Global::player().bpm;
+			}
+			else {
+				tenthsec = m_Zoom*Global::player().SampleRate()*0.1/m_samplesPerPoint;
+			}
 			int _sec = 0;
 
 			for(float i = 0; i < m_WindowWidth; i+=tenthsec)
@@ -286,7 +320,8 @@ void CEnvelopeEditor::OnLButtonDown( UINT nFlags, CPoint point )
 		const int _points =  m_pEnvelope->NumOfPoints();
 
 		int _edit_point = GetEnvelopePointIndexAtPoint(point.x,point.y);
-		if(_edit_point != _points) {
+		if(_edit_point != _points && (m_bFreeform || _edit_point > 0)) {
+			m_bCanMoveUpDown=(m_bFreeform || _edit_point == 2);
 			m_bPointEditing = true;
 			SetCapture();
 			m_EditPoint = _edit_point;
@@ -358,14 +393,39 @@ void CEnvelopeEditor::OnMouseMove( UINT nFlags, CPoint point )
 			point.x=0;
 		}
 		m_EditPointX = point.x;
-		m_EditPointY = point.y;
-		if (m_bnegative) {
-			m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
-				(1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight));
+		if (m_bCanMoveUpDown) { m_EditPointY = point.y; }
+		else {
+			if (m_bnegative) {
+				m_EditPointY = (1 - m_pEnvelope->GetValue(m_EditPoint))*(float)m_WindowHeight/2.0f;
+			}
+			else {
+				m_EditPointY = (1 - m_pEnvelope->GetValue(m_EditPoint))*(float)m_WindowHeight;
+			}
+		}
+		if (m_bFreeform) {
+			if (m_bnegative) {
+				m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+					(1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight));
+			}
+			else {
+				m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+					(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
+			}
 		}
 		else {
-			m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
-				(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
+			float val;
+			if (m_bnegative) {
+				val = (1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight);
+			}
+			else {
+				val = (1.0f - (float)m_EditPointY / (float)m_WindowHeight);
+			}
+			switch(m_EditPoint) {
+				case 1: AttackTime((int)((float)m_EditPointX / m_Zoom), false); break;
+				case 2: m_pEnvelope->SetValue(2, val); DecayTime((int)((float)m_EditPointX / m_Zoom), false); break;
+				case 3: ReleaseTime((int)((float)m_EditPointX / m_Zoom), false); break;
+				default:break;
+			}
 		}
 		Invalidate();
 	}

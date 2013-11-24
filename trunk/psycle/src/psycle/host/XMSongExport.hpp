@@ -13,7 +13,7 @@ namespace psycle { namespace host {
 	public:
 		XMSongExport();
 		virtual ~XMSongExport();
-		/// RIFF 
+
 		virtual void exportsong(const Song& song);
 	private:
 		void writeSongHeader(const Song &song);
@@ -29,6 +29,7 @@ namespace psycle { namespace host {
 		
 		XMFILEHEADER m_Header;
 		int lastMachine;
-		std::map<int,int> isSampler;
+		bool isSampler[MAX_BUSES];
+		bool isSampulse[MAX_BUSES];
 	};
 }}

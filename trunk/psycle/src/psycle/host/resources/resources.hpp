@@ -12,7 +12,6 @@
 #define ID_INDICATOR_TWEAKS             59
 #define ID_INDICATOR_OCTAVE             60
 #define IDC_SEQEDITBOX                  61
-#define PSYC_ENVELOPE_CHANGED           62
 #define IDR_MAINFRAME                   101
 #define IDD_SONGBAR                     102
 #define IDD_WAVED_ZOOMBAR               103
@@ -117,6 +116,7 @@
 #define IDD_INST_SAMPULSE_ENVDLG        320
 #define IDD_INST_SAMPLER_INST           321
 #define IDD_PLOTTER                     322
+#define IDR_INSTRUMENTEDIT              324
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -941,6 +941,7 @@
 #define IDC_COMBOFILTER                 2130
 #define IDC_FINELABEL                   2131
 #define IDC_ENV_CARRY                   2132
+#define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -952,7 +953,6 @@
 #define ID_FILE_RECENT_NONE             32784
 #define ID_MACHINEVIEW                  32786
 #define ID_PATTERNVIEW                  32787
-#define ID_SHOWPSEQ                     32788
 #define ID_NEWMACHINE                   32789
 #define ID_VIEW_INSTRUMENTEDITOR        32790
 #define ID_CONFIGURATION_FREEAUDIO      32792
@@ -1104,6 +1104,14 @@
 #define ID_VISUALREPRESENTATION_SAMPLEHOLD 34289
 #define ID_VISUALREPRESENTATION_SPLINE  34290
 #define ID_VISUALREPRESENTATION_SINC    34291
+#define ID_ACCEL_SAMPLER                34295
+#define ID_ACCEL_SAMPULSE               34296
+#define ID_ACCEL_WAVE                   34297
+#define ID_ACCEL_GEN                    34298
+#define ID_ACCEL_VOL                    34299
+#define ID_ACCEL_PAN                    34300
+#define ID_ACCEL_FILTER                 34301
+#define ID_ACCEL_PITCH                  34302
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1111,8 +1119,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        323
-#define _APS_NEXT_COMMAND_VALUE         34292
+#define _APS_NEXT_RESOURCE_VALUE        325
+#define _APS_NEXT_COMMAND_VALUE         34304
 #define _APS_NEXT_CONTROL_VALUE         2133
 #define _APS_NEXT_SYMED_VALUE           64
 #endif

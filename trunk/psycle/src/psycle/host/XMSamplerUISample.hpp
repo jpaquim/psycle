@@ -27,8 +27,8 @@ protected:
 
 
 public:
-	void pWave(XMInstrument::WaveData *const p){m_pWave = p;};
-	XMInstrument::WaveData& rWave(){return *m_pWave;};
+	void pWave(XMInstrument::WaveData<> *const p){m_pWave = p;};
+	XMInstrument::WaveData<>& rWave(){return *m_pWave;};
 	void DrawScope(void);
 
 protected:
@@ -67,7 +67,7 @@ protected:
 	void RefreshSampleList();
 	void RefreshSampleData();
 
-	XMInstrument::WaveData *m_pWave;
+	XMInstrument::WaveData<> *m_pWave;
 	bool m_Init;
 
 protected:

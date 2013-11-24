@@ -107,6 +107,10 @@ namespace psycle
 			int WavAlloc(int iInstr,bool bStereo,std::uint32_t iSamplesPerChan,const char * sName);
 			/// ???
 			int IffAlloc(int instrument,const char * str);
+			/// wave preview allocation.  (thread safe)
+			void SetWavPreview(XMInstrument::WaveData<> * wave);
+			/// wave preview allocation.  (thread safe)
+			void SetWavPreview(int newinst);
 			///\}
 			/// Initializes the song to an empty one. (thread safe)
 			void New();

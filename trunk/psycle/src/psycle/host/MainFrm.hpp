@@ -13,7 +13,7 @@
 
 
 namespace universalis { namespace os {
-	struct terminal;
+	class terminal;
 }}
 
 namespace psycle { namespace host {

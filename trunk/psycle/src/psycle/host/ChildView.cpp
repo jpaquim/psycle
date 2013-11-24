@@ -247,7 +247,6 @@ namespace psycle { namespace host {
 			//Show Wave editor is the command IDC_WAVEBUT of the machine bar (in mainfrm)
 			ON_UPDATE_COMMAND_UI(ID_MACHINEVIEW, OnUpdateMachineview)
 			ON_UPDATE_COMMAND_UI(ID_PATTERNVIEW, OnUpdatePatternView)
-			ON_UPDATE_COMMAND_UI(ID_SHOWPSEQ, OnUpdatePatternSeq)
 			ON_COMMAND(ID_CONFIGURATION_SETTINGS, OnConfigurationSettings)
 			ON_COMMAND(ID_CONFIGURATION_ENABLEAUDIO, OnEnableAudio)
 			ON_UPDATE_COMMAND_UI(ID_CONFIGURATION_ENABLEAUDIO, OnUpdateEnableAudio)

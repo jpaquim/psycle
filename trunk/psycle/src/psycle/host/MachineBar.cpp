@@ -414,7 +414,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 						m_inscombo.AddString(buffer);
 					}
 				}
-				if (updatelist) 
+				else
 				{
 					m_inscombo.AddString("No Machine");
 				}
@@ -433,6 +433,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			m_pSong->auxcolSelected = 0;
 		}
 		m_inscombo.SetCurSel(m_pSong->auxcolSelected);
+		m_pSong->SetWavPreview(m_pSong->instSelected);
 	}
 
 	void MachineBar::OnSelchangeBarComboins() 
@@ -440,6 +441,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if ( m_auxcombo.GetCurSel() == AUX_INSTRUMENT ) 
 		{
 			m_pSong->instSelected=m_inscombo.GetCurSel();
+			m_pSong->SetWavPreview(m_pSong->instSelected);
 			m_pParentMain->WaveEditorBackUpdate();
 			m_pParentMain->UpdateInstrumentEditor();
 			m_pParentMain->RedrawGearRackList();
@@ -472,6 +474,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			{
 				m_pSong->instSelected=i;
 				m_pSong->auxcolSelected=i;
+				m_pSong->SetWavPreview(i);
 				m_pParentMain->WaveEditorBackUpdate();
 				m_pParentMain->UpdateInstrumentEditor();
 				m_pParentMain->RedrawGearRackList();
@@ -514,6 +517,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
+		bool update=false;
 		if (dlg.DoModal() == IDOK)
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -528,28 +532,20 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			//end of added by sampler
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
-
 			CString CurrExt=dlg.GetFileExt();
 			CurrExt.MakeLower();
 			if ( CurrExt == "wav" )
 			{
 				if (m_pSong->WavAlloc(si,dlg.GetPathName()))
 				{
-					UpdateComboIns();
-					m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
-					m_pParentMain->WaveEditorBackUpdate();
-					m_pParentMain->UpdateInstrumentEditor();
+					update=true;
 				}
 			}
 			else if ( CurrExt == "iff" )
 			{
 				if (m_pSong->IffAlloc(si,dlg.GetPathName()))
 				{
-					UpdateComboIns();
-					m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
-					m_pParentMain->WaveEditorBackUpdate();
-					m_pParentMain->UpdateInstrumentEditor();
-					m_pParentMain->RedrawGearRackList();
+					update=true;
 				}
 			}
 			CString str = dlg.m_ofn.lpstrFile;
@@ -559,13 +555,17 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 			}
 		}
-		if ( m_pSong->wavprev.GetWave().WaveLength() > 0)
 		{
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			// Stopping wavepreview if not stopped.
-			m_pSong->wavprev.Stop();
-			//Delete it.
-			m_pSong->wavprev.GetWave().DeleteWaveData();
+			m_pSong->wavprev.Stop(true);
+		}
+		if (update){
+			UpdateComboIns();
+			m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
+			m_pParentMain->WaveEditorBackUpdate();
+			m_pParentMain->UpdateInstrumentEditor();
+			m_pParentMain->RedrawGearRackList();
 		}
 		((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
@@ -578,7 +578,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
 		{
-			const XMInstrument::WaveData & wave = m_pSong->samples[m_pSong->instSelected];
+			const XMInstrument::WaveData<> & wave = m_pSong->samples[m_pSong->instSelected];
 			CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
 			if (dlg.DoModal() == IDOK)
 			{

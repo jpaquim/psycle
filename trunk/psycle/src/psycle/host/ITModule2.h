@@ -382,9 +382,9 @@ namespace psycle { namespace host {
 			bool LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins,int iInstIdx);
 			bool LoadITInst(const itInsHeader2x& curH,XMInstrument &xins,int iInstIdx);
 			void LoadInstrumentFromFile(Song& song, const int idx);
-			bool LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData& _wave,int iSampleIdx);
-			bool LoadITSampleData(XMInstrument::WaveData& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
-			bool LoadITCompressedData(XMInstrument::WaveData& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert);
+			bool LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData<>& _wave,int iSampleIdx);
+			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
+			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans);
 			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:
@@ -509,8 +509,8 @@ namespace psycle { namespace host {
 		public:
 			bool LoadS3MModuleX(Song& song);
 			bool LoadS3MInstX(Song& song, XMInstrument &xins,std::uint16_t iInstIdx);
-			bool LoadS3MSampleX(XMInstrument::WaveData& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx);
-			bool LoadS3MSampleDataX(XMInstrument::WaveData& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
+			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx);
+			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
 			bool LoadS3MPatternX(std::uint16_t patIdx);
 		private:
 			s3mHeader  s3mFileH;

@@ -12,30 +12,32 @@
 namespace psycle { namespace host {
 
 // for psycle samples
-
-PSArray::PSArray(int len, float v) : len_(len), cap_(len), shared_(0) {  
+PSArray::PSArray(int len, float v) : len_(len), baselen_(len_), cap_(len), shared_(0) {  
   universalis::os::aligned_memory_alloc(16, ptr_, len);
   if (v == 0) {
      psycle::helpers::dsp::Clear(ptr_, len_);
   } else {		
 	for (int i=0; i < len; ++i) ptr_[i] = v;
   }
+  base_ = ptr_;
 }
 
 PSArray::PSArray(double start, double stop, double step) 
 	:  shared_(0) {
-		len_ = (stop-start+0.5)/step;
+		baselen_ = len_ = (stop-start+0.5)/step;
 		cap_ = len_;
 	    universalis::os::aligned_memory_alloc(16, ptr_, len_); // reserve		
+		base_ = ptr_;
         int count = 0;
 		for (double i=start; i < stop; i+=step, ++count)
 			ptr_[count] = i;
 }   
 
 PSArray::PSArray(PSArray& a1, PSArray& a2) : shared_(0) {
-	len_ = a1.len() + a2.len();
+	baselen_ = len_ = a1.len() + a2.len();
 	cap_ = len_;
 	universalis::os::aligned_memory_alloc(16, ptr_, len_); // reserve
+    base_ = ptr_;
 	for (int i=0; i < a1.len_; ++i) ptr_[i] = a1.ptr_[i];
 	for (int i=0; i < a2.len_; ++i) ptr_[i+a1.len_] = a2.ptr_[i];	
 }
@@ -43,11 +45,12 @@ PSArray::PSArray(PSArray& a1, PSArray& a2) : shared_(0) {
 void PSArray::resize(int newsize) {
   if (!shared_ && cap_ < newsize) {	    
      //ptr_ = (float*) _aligned_realloc(ptr_, newsize, 16);
-	 universalis::os::aligned_memory_dealloc(ptr_);
+	 universalis::os::aligned_memory_dealloc(base_);
 	 universalis::os::aligned_memory_alloc(16, ptr_, newsize);
+	 base_ = ptr_;
 	 cap_ = newsize;
   }
-  len_ = newsize;
+  baselen_ = len_ = newsize;
 }
 
 int PSArray::copyfrom(PSArray& src) {
@@ -58,8 +61,9 @@ int PSArray::copyfrom(PSArray& src) {
 	return 1;
 }
 
-void PSArray::fillzero() {
-   psycle::helpers::dsp::Clear(ptr_, len_);
+void PSArray::fillzero(int pos) {
+	//Cannot use dsp::Clear. pos is not guaranteed to be aligned
+   fill(0,pos);
 }
 
 void PSArray::fill(float val) {
@@ -68,9 +72,24 @@ void PSArray::fill(float val) {
    }
 }
 
-int PSArray::copyfrom(PSArray& src, int pos) {
-    //if ( src.len() + pos > len_)
-	//	return 0;
+void PSArray::fill(float val, int pos) {
+   int num = len_ - pos;
+   for (int i = pos; i < num; ++i) {
+	  ptr_[i] = val;
+   }
+}
+
+void PSArray::rsum(double lv) {
+  double sum = lv;
+  for (int i = 0; i < len(); ++i) {
+	  sum = sum + get_val(i);
+	  set_val(i, sum);
+   }
+}
+
+int PSArray::copyfrom(PSArray& src, int pos) {	
+    if (pos < 0)
+	  return 0;
     for (int i = 0; i < src.len() && i+pos < len_; ++i) {
 		ptr_[i+pos] = src.get_val(i);
 	}
@@ -94,42 +113,23 @@ void PSArray::do_op(T& func) {
 	}
 }
 
-// delay
-void PSDelay::work(PSArray& x, PSArray& y) {
-	int n = x.len();
-	int k = mem.len();
-    float* mp = mem.data();
-	float* xp = x.data();
-	float* yp = y.data();
-	if (k <= n) {
-	  for (int i = 0; i < k; i++, ++yp) *yp = (*mp++);
-	  for (int i = 0; i < n-k; i++, ++yp) *yp = (*xp++);
-	  mp = mem.data();
-	  for (int i = 0; i < k; i++, ++mp) *mp = (*xp++);
-	} else {
-	  for (int i = 0; i < n; i++, ++yp) *yp = (*mp++);
-	  mp = mem.data();
-	  for (int i = n; i < k; i++, ++mp) *mp = mp[i];
-	  for (int i = 0; i < n; i++, ++mp) *mp = (*xp++);
-	}  
-  }
-
-
-std::map<lua_State*, LuaArrayBind*> LuaArrayBind::map_;
+void LuaArrayBind::register_module(lua_State* L) {
+  luaL_requiref(L, "psycle.array", open_array, 1);
+  lua_pop(L, 1);
+}
 
 int LuaArrayBind::array_new(lua_State *L) {
-	// PSArray* v = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
 	int n = lua_gettop(L);
 	PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
 	luaL_setmetatable(L, "array_meta");
 	int size;
 	double val;
 	switch (n) {
-	  case 1 :
+	  case 0 :
 		  *udata = new PSArray();
 		  break;
-	  case 2 : {
-		  if (lua_istable(L, 2)) {
+	  case 1 : {
+		  if (lua_istable(L, 1)) {
 			 std::vector<float> v;
 	         for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
   	            v.push_back(luaL_checknumber(L, -1));
@@ -137,51 +137,23 @@ int LuaArrayBind::array_new(lua_State *L) {
 			 *udata = new PSArray(v.size(), 0);
 			 std::memcpy((*udata)->data(), &v[0], v.size());
 		  } else {
-		    size = luaL_checknumber (L, 2);
+		    size = luaL_checknumber (L, 1);
 		    *udata = new PSArray(size, 0);
 		  }
 		  }
 		  break;
-	  case 3:
-		  size = luaL_checknumber (L, 2);
-		  val = luaL_checknumber (L, 3);
+	  case 2:
+		  size = luaL_checknumber (L, 1);
+		  val = luaL_checknumber (L, 2);
 		  *udata = new PSArray(size, val);
 		  break;
-      default:;
+      default:
+		  luaL_error(L, "Got %d arguments expected max 2 (none, size, size+val)", n);
+	  ;
     }
 	return 1;
 }
 
-int LuaArrayBind::delay_new(lua_State *L) {
-   int k = luaL_checknumber (L, 1);
-   luaL_argcheck(L, k >= 0, 2, "index is negativ");
-   PSDelay ** ud = (PSDelay **)lua_newuserdata(L, sizeof(PSDelay *));
-   *ud = new PSDelay(k);
-   luaL_getmetatable(L, "delay_meta");
-   lua_setmetatable(L, -2);
-   return 1;
-}
-
-int LuaArrayBind::delay_work(lua_State* L) {
-   PSDelay* ud = *(PSDelay **)luaL_checkudata(L, 1, "delay_meta");
-   PSArray* x = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
-   PSArray** y = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
-   *y = new PSArray(x->len(), 0);
-   luaL_setmetatable(L, "array_meta");
-   ud->work(*x, **y);
-   return 1;
-}
-
-int LuaArrayBind::array_new_from_sampleV(lua_State* L) {
-	int idx = luaL_checknumber (L, 1);
-	PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
-	std::map<lua_State*, LuaArrayBind*>::iterator it;
-	LuaArrayBind* binder = map_.find(L)->second;
-	*udata = new PSArray(binder->sampleV_[idx].data(), binder->sampleV_[idx].len());
-	luaL_getmetatable(L, "array_meta");
-	lua_setmetatable(L, -2);
-	return 1;
-}
 
 int LuaArrayBind::array_copy(lua_State* L) {  
 	int n = lua_gettop(L);
@@ -200,9 +172,9 @@ int LuaArrayBind::array_copy(lua_State* L) {
 }
 
 int LuaArrayBind::array_arange(lua_State* L) {	
-    float start = luaL_checknumber (L, 2);
-	float stop = luaL_checknumber (L, 3);
-	float step = luaL_checknumber (L, 4);
+    float start = luaL_checknumber (L, 1);
+	float stop = luaL_checknumber (L, 2);
+	float step = luaL_checknumber (L, 3);
 	PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
 	*udata = new PSArray(start, stop, step);
 	luaL_setmetatable(L, "array_meta");	
@@ -223,12 +195,7 @@ int LuaArrayBind::array_random(lua_State* L) {
 
 int LuaArrayBind::array_gc (lua_State *L) {
 	PSArray* ptr = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
-	delete ptr;	
-	return 0;
-}
-
-int LuaArrayBind::delay_gc (lua_State *L) {
-	PSDelay* ptr = *(PSDelay **)luaL_checkudata(L, 1, "delay_meta");
+	assert(ptr);
 	delete ptr;	
 	return 0;
 }
@@ -270,6 +237,24 @@ int LuaArrayBind::array_method_mul(lua_State* L) {
 	 struct {float* p; double c; float operator()(int y) {return p[y]*c;}} f;
 	 f.c = luaL_checknumber (L, 2);
 	 rv->do_op(f);
+	 lua_pushvalue(L, 1);
+   }
+   return 1;
+}
+
+int LuaArrayBind::array_method_div(lua_State* L) {
+   PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   if (lua_isuserdata(L, 2)) {
+     PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+     luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+     struct {float* p; float* v; float operator()(int y) {return p[y]/v[y];}} f;
+     f.v = v->data();
+     rv->do_op(f);
+   } else {
+	 struct {float* p; double c; float operator()(int y) {return p[y]/c;}} f;
+	 f.c = luaL_checknumber (L, 2);
+	 rv->do_op(f);
+	 lua_pushvalue(L, 1);
    }
    return 1;
 }
@@ -363,7 +348,11 @@ int LuaArrayBind::array_rsum(lua_State* L) {
 
 int LuaArrayBind::array_method_rsum(lua_State* L) {
    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");   
+   int n = lua_gettop(L);   
    double sum = 0;
+   if (n==2) {
+	   sum = luaL_checknumber(L, 2);
+   }
    for (int i = 0; i < rv->len(); ++i) {
 	  sum = sum + rv->get_val(i);
 	  rv->set_val(i, sum);
@@ -466,6 +455,21 @@ int LuaArrayBind::array_method_fill(lua_State* L) {
   return 0;
 }
 
+int LuaArrayBind::array_margin(lua_State* L) {
+  PSArray** ud = (PSArray**) luaL_checkudata(L, 1, "array_meta");
+  // todo range checks
+  int start = luaL_checknumber(L, 2);
+  int stop = luaL_checknumber(L, 3);
+  (*ud)->margin(start, stop);
+  return 0;
+}
+
+int LuaArrayBind::array_clearmargin(lua_State* L) {
+  PSArray** ud = (PSArray**) luaL_checkudata(L, 1, "array_meta");
+  (*ud)->clearmargin();
+  return 0;
+}
+
 int LuaArrayBind::array_concat(lua_State* L) {
   PSArray* v1 = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
   PSArray* v2 = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
@@ -478,12 +482,6 @@ int LuaArrayBind::array_concat(lua_State* L) {
 int LuaArrayBind::array_tostring(lua_State *L) {
 	PSArray** ud = (PSArray**) luaL_checkudata(L, 1, "array_meta");   
 	lua_pushfstring(L, (*ud)->tostring().c_str());
-	return 1;
-}
-
-int LuaArrayBind::delay_tostring(lua_State *L) {
-	PSDelay** ud = (PSDelay**) luaL_checkudata(L, 1, "delay_meta");   
-	lua_pushfstring(L, "test");
 	return 1;
 }
 
@@ -525,8 +523,8 @@ int LuaArrayBind::array_index(lua_State *L) {
 	} else {
 	  size_t len;
 	  PSArray** ud = (PSArray**) luaL_checkudata(L, 1, "array_meta");
-	  const char* key = luaL_checklstring(L, 2, &len);	
-	  lua_getglobal(L, "array_methods");
+	  const char* key = luaL_checklstring(L, 2, &len);
+	  lua_getmetatable(L, 1);
 	  for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
 	     const char* method = luaL_checklstring(L, -2, &len);
 	     int result = strcmp(key, method);
@@ -551,70 +549,56 @@ int LuaArrayBind::array_new_index(lua_State *L) {
 	  return 0;
 	} else {
 	  //error
+	  lua_error(L);
+	  return 0;
 	}
 }
 
-void LuaArrayBind::export_c_funcs(lua_State* L) {
+int LuaArrayBind::open_array(lua_State* L) {
 	static const luaL_Reg pm_lib[] = {
-		{ "delay", &LuaArrayBind::delay_new },
-		{ "new", &LuaArrayBind::array_new },
-		{ "channel", &array_new_from_sampleV},
-		{ "arange", &LuaArrayBind::array_arange },
-		{ "random", &LuaArrayBind::array_random },
-		{ "sin", &LuaArrayBind::array_sin },
-		{ "cos", &LuaArrayBind::array_cos },
-		{ "tan", &LuaArrayBind::array_tan },
-		{ "sqrt", &LuaArrayBind::array_sqrt },
-		{ "sum", &LuaArrayBind::array_sum },
-		{ "rsum", &LuaArrayBind::array_rsum },
-		{ "pow", &LuaArrayBind::array_pow },
+		{ "new", array_new },
+		{ "arange", array_arange },
+		{ "random", array_random },
+		{ "sin", array_sin },
+		{ "cos", array_cos },
+		{ "tan", array_tan },
+		{ "sqrt", array_sqrt },
+		{ "sum", array_sum },
+		{ "rsum", array_rsum },
+		{ "pow", array_pow },
 		{ NULL, NULL }
 	};
-	static const luaL_Reg pm_methods[] = {
-		{ "add", &LuaArrayBind::array_method_add},
-		{ "mul", &LuaArrayBind::array_method_mul},
-		{ "rsum", &LuaArrayBind::array_method_rsum},
-		{ "size", &LuaArrayBind::array_size},
-		{ "resize", &LuaArrayBind::array_resize},
-		{ "copy", &LuaArrayBind::array_copy},
-		{ "fillzero", &LuaArrayBind::array_fillzero},
-		{ "fill", &LuaArrayBind::array_method_fill},
-		{ "tostring", &LuaArrayBind::array_tostring },
-		{ NULL, NULL }
-	}; 
-	static const luaL_Reg delay_meta[] = {
-		{ "work", &LuaArrayBind::delay_work},
-		{ "__tostring", &LuaArrayBind::delay_tostring },
-		{ "__gc", &LuaArrayBind::delay_gc },
-		{ NULL, NULL }
-	}; 
 	static const luaL_Reg pm_meta[] = {
-		{ "__index", &LuaArrayBind::array_index },
-		{ "__newindex", &LuaArrayBind::array_new_index },
-		{ "__index", &LuaArrayBind::array_index },
-		{ "__gc", &LuaArrayBind::array_gc },
-		{ "__tostring", &LuaArrayBind::array_tostring },
-		{ "__add", &LuaArrayBind::array_add },
-		{ "__sub", &LuaArrayBind::array_sub },
-		{ "__mul", &LuaArrayBind::array_mul },
-		{ "__concat", &LuaArrayBind::array_concat },		
+		{ "add", array_method_add},
+		{ "mul", array_method_mul},
+		{ "div", array_method_div},
+		{ "rsum", array_method_rsum},
+		{ "size", array_size},
+		{ "resize", array_resize},
+		{ "copy", array_copy},
+		{ "fillzero", array_fillzero},
+		{ "fill", array_method_fill},
+		{ "tostring", array_tostring },
+		{ "margin", array_margin},
+		{ "clearmargin", array_clearmargin },
+		{ "__index", array_index },
+		{ "__newindex", array_new_index },
+		{ "__index", array_index },
+		{ "__gc", array_gc },
+		{ "__tostring", array_tostring },
+		{ "__add", array_add },
+		{ "__sub", array_sub },
+		{ "__mul", array_mul },
+		{ "__concat", array_concat },		
 		{ NULL, NULL }
 	};
-	luaL_newlib(L, pm_lib);
-	lua_setglobal(L, "psynum");
-	luaL_newlib(L, pm_methods);
-	lua_setglobal(L, "array_methods");
 	luaL_newmetatable(L, "array_meta");
 	luaL_setfuncs(L, pm_meta, 0);    
 	lua_pop(L,1);
-	luaL_newmetatable(L, "delay_meta");
-	lua_pushstring(L, "__index");
-    lua_pushvalue(L, -2);
-    lua_settable(L, -3); // metatable.__index = metatable
-    luaL_setfuncs(L, delay_meta, 0);
-	lua_pop(L,1);
+    luaL_newlib(L, pm_lib);	
+	return 1;
 }
 
 
-}
-}
+}  // namespace
+}  // namespace

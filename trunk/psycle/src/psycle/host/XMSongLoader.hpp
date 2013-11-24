@@ -24,8 +24,8 @@ namespace psycle { namespace host {
 		size_t LoadSinglePattern(Song& song, size_t start, int patIdx, int iTracks);	
 		bool LoadInstruments(Song& song, size_t iInstrStart);
 		size_t LoadInstrument(Song& song, XMInstrument& instr, size_t iStart, int idx,int& curSample);
-		size_t LoadSampleHeader(XMInstrument::WaveData& sample, size_t iStart, int InstrIdx, int SampleIdx);
-		size_t LoadSampleData(XMInstrument::WaveData& sample, size_t iStart, int InstrIdx, int SampleIdx);
+		size_t LoadSampleHeader(XMInstrument::WaveData<>& sample, size_t iStart, int InstrIdx, int SampleIdx);
+		size_t LoadSampleData(XMInstrument::WaveData<>& sample, size_t iStart, int InstrIdx, int SampleIdx);
 		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
 		void SetEnvelopes(XMInstrument& inst,const XMSAMPLEHEADER & sampleHeader);		
 		char * AllocReadStr(int size, size_t start=-1);
@@ -118,8 +118,8 @@ namespace psycle { namespace host {
 		void LoadSinglePattern(Song & song, int patIdx, int iTracks);	
 		unsigned char ConvertPeriodtoNote(unsigned short period);
 		void LoadInstrument(Song & song, int idx);
-		void LoadSampleHeader(XMInstrument::WaveData& _wave, int InstrIdx);
-		void LoadSampleData(XMInstrument::WaveData& _wave, int InstrIdx);
+		void LoadSampleHeader(XMInstrument::WaveData<>& _wave, int InstrIdx);
+		void LoadSampleData(XMInstrument::WaveData<>& _wave, int InstrIdx);
 		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
 		char * AllocReadStr(std::int32_t size, size_t start=-1);
 

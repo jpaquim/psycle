@@ -239,9 +239,6 @@ namespace psycle
 				_editName[sizeof(_editName)-1]='\0';
 			}
 
-			Plugin::~Plugin()
-			{
-			}
 
 			void Plugin::change_buffer(std::vector<float*>& buf) {
 				if(WillProcessReplace()) {

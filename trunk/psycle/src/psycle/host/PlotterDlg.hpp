@@ -4,6 +4,8 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 
+struct lua_State;
+
 namespace psycle {
 namespace host {
 
@@ -21,10 +23,13 @@ public:
 			virtual void PostNcDestroy();
 
 			void set_data(float* data, int len) { 
-				data_ = data; len_ = len; parse_peak();
+				data_ = std::vector<float>(data, data + len);
+				len_ = len; parse_peak();
 			}
 
 			static int plotter_count;
+
+			void do_script();
 
 protected:
 			DECLARE_MESSAGE_MAP()
@@ -35,11 +40,11 @@ protected:
 
 			enum { IDD = IDD_PLOTTER };
 			CWnd* mainView;
-			float* data_;
+			std::vector<float> data_;
 			int len_;
 			float minpeak_, maxpeak_;
 			// float testdata[6]; testcase
-			void parse_peak();
+			void parse_peak();		
 		};
 
 	}   // namespace host

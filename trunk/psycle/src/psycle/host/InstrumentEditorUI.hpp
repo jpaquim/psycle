@@ -22,6 +22,7 @@ class InstrumentEditorUI : public CPropertySheet
 		enum { IDD = IDD_INSTRUMENTUI };
 
 	private:
+		HACCEL  m_hAccelTable;
 		InstrumentEditorUI** windowVar_;
 		CInstrumentEditor m_InstrBasic;
 		XMSamplerUIInst m_InstrSampulse;
@@ -37,6 +38,14 @@ class InstrumentEditorUI : public CPropertySheet
 	protected:
 		DECLARE_MESSAGE_MAP()
 		afx_msg void OnClose();
+		afx_msg void OnShowSampler();
+		afx_msg void OnShowSampulse();
+		afx_msg void OnShowWaveBank();
+		afx_msg void OnShowGen();
+		afx_msg void OnShowVol();
+		afx_msg void OnShowPan();
+		afx_msg void OnShowFilter();
+		afx_msg void OnShowPitch();
 };
 
 }}

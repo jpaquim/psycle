@@ -126,7 +126,9 @@ namespace psycle
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
-		void XMSampler::WaveDataController::Init(const XMInstrument::WaveData* const wave, const int layer, const helpers::dsp::resampler & resampler)
+
+		template <class T>
+		void XMSampler::WaveDataController<T>::Init(const XMInstrument::WaveData<T>* const wave, const int layer, const helpers::dsp::resampler & resampler)
 		{
 			m_Layer = layer;
 			m_pWave = wave;
@@ -134,19 +136,19 @@ namespace psycle
 			m_Speed=0;
 			m_Playing=false;
 
-			if ( SustainLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
+			if ( SustainLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT)
 			{
 				m_CurrentLoopType = SustainLoopType();
 				m_CurrentLoopStart = SustainLoopStart();
 				m_CurrentLoopEnd = SustainLoopEnd();
 
-			} else if (LoopType() != XMInstrument::WaveData::LoopType::DO_NOT) {
+			} else if (LoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
 				m_CurrentLoopType = LoopType();
 				m_CurrentLoopStart = LoopStart();
 				m_CurrentLoopEnd = LoopEnd();
 			} else { // No loop is considered a loop that stops at the end.
 				//This way, it is not needed to check if a loop is enabled when checking if end loop is reached.
-				m_CurrentLoopType = XMInstrument::WaveData::LoopType::DO_NOT;
+				m_CurrentLoopType = XMInstrument::WaveData<>::LoopType::DO_NOT;
 				m_CurrentLoopStart = 0;
 				m_CurrentLoopEnd = Length();
 			}
@@ -158,29 +160,37 @@ namespace psycle
 			RefillBuffers();
 		}
 
-		void XMSampler::WaveDataController::DisposeResampleData(const helpers::dsp::resampler& resampler)
+		template <class T>
+		void XMSampler::WaveDataController<T>::DisposeResampleData(const helpers::dsp::resampler& resampler)
 		{
 			if (resampler_data != NULL ) {
 				resampler.DisposeResamplerData(resampler_data);
 				resampler_data = NULL;
 			}
 		}
-		void XMSampler::WaveDataController::RecreateResampleData(const helpers::dsp::resampler& resampler)
+
+		template <class T>
+		void XMSampler::WaveDataController<T>::RecreateResampleData(const helpers::dsp::resampler& resampler)
 		{
 			resampler_work = resampler.work_unchecked;
+			resampler_work_float = resampler.work_float_unchecked;
 			resampler_data = resampler.GetResamplerData();
 			if (Speed() != 0) {
 				resampler.UpdateSpeed(resampler_data,static_cast<double>(Speed())/ 4294967296.0);
 			}
 		}
-		void XMSampler::WaveDataController::RefillBuffers()
+
+		template <class T>
+		void XMSampler::WaveDataController<T>::RefillBuffers()
 		{
 			RefillBuffer(lBuffer,m_pWave->pWaveDataL());
 			if (IsStereo()) {
 				RefillBuffer(rBuffer,m_pWave->pWaveDataR());
 			}
 		}
-		void XMSampler::WaveDataController::RefillBuffer(std::int16_t buffer[192], const std::int16_t* data)
+
+		template <class T>
+		void XMSampler::WaveDataController<T>::RefillBuffer(T buffer[192], const T* data)
 		{
 			//These values are for the max size of resampler (which suits the rest).
 			const std::uint32_t presamples=15;
@@ -190,19 +200,19 @@ namespace psycle
 			const std::uint32_t thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
 			//Begin
 			memset(buffer,0,sizeof(lBuffer));
-			memcpy(buffer+presamples,data, std::min(Length(),totalsamples)*sizeof(std::int16_t));
-			if (LoopType()==XMInstrument::WaveData::LoopType::DO_NOT) {
+			memcpy(buffer+presamples,data, std::min(Length(),totalsamples)*sizeof(T));
+			if (LoopType()==XMInstrument::WaveData<>::LoopType::DO_NOT) {
 				//End
 				if (Length() < totalsamples) {
-					memcpy(buffer+secbegin+totalsamples-Length(),data, Length()*sizeof(std::int16_t));
+					memcpy(buffer+secbegin+totalsamples-Length(),data, Length()*sizeof(T));
 					memset(buffer+secbegin+totalsamples,0,postsamples);
 				}
 				else {
-					memcpy(buffer+secbegin,data+Length()-totalsamples, totalsamples*sizeof(std::int16_t));
+					memcpy(buffer+secbegin,data+Length()-totalsamples, totalsamples*sizeof(T));
 					memset(buffer+secbegin+totalsamples,0,postsamples);
 				}
 			}
-			else if (LoopType()==XMInstrument::WaveData::LoopType::NORMAL) {
+			else if (LoopType()==XMInstrument::WaveData<>::LoopType::NORMAL) {
 				//Forward only loop.
 				if (LoopEnd()-LoopStart() < totalsamples) {
 					int startpos=LoopStart();
@@ -219,11 +229,11 @@ namespace psycle
 					}
 				}
 				else {
-					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
-					memcpy(buffer+secbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(std::int16_t));
+					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(T));
+					memcpy(buffer+secbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(T));
 				}
 			}
-			else if (LoopType()==XMInstrument::WaveData::LoopType::BIDI) {
+			else if (LoopType()==XMInstrument::WaveData<>::LoopType::BIDI) {
 				if (LoopEnd()-LoopStart() < totalsamples) {
 					//Ping pong loop (end and start).
 					int pos=LoopEnd();
@@ -249,8 +259,8 @@ namespace psycle
 				}
 				else {
 					//Ping pong loop (end and start).
-					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(std::int16_t));
-					memcpy(buffer+thirdbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(std::int16_t));
+					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(T));
+					memcpy(buffer+thirdbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(T));
 					for (int i=0;i<totalsamples;i++) {
 						buffer[secbegin+totalsamples+i]=data[LoopEnd()-i-1];
 						buffer[thirdbegin+i]=data[LoopStart()+totalsamples-i];
@@ -259,7 +269,8 @@ namespace psycle
 			}
 		}
 
-		int XMSampler::WaveDataController::PreWork(int numSamples, WorkFunction* pWork) {
+		template <class T>
+		int XMSampler::WaveDataController<T>::PreWork(int numSamples, WorkFunction* pWork) {
 			*pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
 
 			//These values are for the max size of resampler (which suits the rest).
@@ -285,7 +296,7 @@ namespace psycle
 				else if (pos+postsamples >= m_CurrentLoopEnd && pos< m_CurrentLoopEnd+postsamples) {
 					m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
 					m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
-					if(LoopType() == XMInstrument::WaveData::LoopType::DO_NOT) {
+					if(LoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT) {
 						max=m_CurrentLoopEnd-pos;
 						//TRACE("End buffer at pos %d for samples %d\n", secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 					}
@@ -295,8 +306,8 @@ namespace psycle
 					}
 				}
 				else {
-					m_pL = const_cast<std::int16_t *>(m_pWave->pWaveDataL()+pos);
-					m_pR = const_cast<std::int16_t *>(m_pWave->pWaveDataR()+pos);
+					m_pL = const_cast<T *>(m_pWave->pWaveDataL()+pos);
+					m_pR = const_cast<T *>(m_pWave->pWaveDataR()+pos);
 					if (static_cast<std::int32_t>(amount.HighPart)+postsamples<m_CurrentLoopEnd) {
 						return numSamples;
 					}
@@ -306,7 +317,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("309: max<0 bug triggered!\n");
+					TRACE("320: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = 0;
@@ -320,8 +331,8 @@ namespace psycle
 					//TRACE("backward-loop buffer at pos %d for samples %d\n" ,thirdbegin+(pos+totalsamples-m_CurrentLoopStart) , max);
 				}
 				else {
-					m_pL = const_cast<std::int16_t *>(m_pWave->pWaveDataL()+pos);
-					m_pR = const_cast<std::int16_t *>(m_pWave->pWaveDataR()+pos);
+					m_pL = const_cast<T *>(m_pWave->pWaveDataL()+pos);
+					m_pR = const_cast<T *>(m_pWave->pWaveDataR()+pos);
 					if (static_cast<std::int32_t>(amount.HighPart)-presamples>= m_CurrentLoopStart) {
 						return numSamples;
 					}
@@ -331,7 +342,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("334: max<0 bug triggered!\n");
+					TRACE("345: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = m_Position.LowPart;
@@ -345,21 +356,22 @@ namespace psycle
 			return amount.LowPart+1;
 		}
 
-		void XMSampler::WaveDataController::PostWork()
+		template <class T>
+		void XMSampler::WaveDataController<T>::PostWork()
 		{
 			std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
 			if( CurrentLoopDirection() == LoopDirection::FORWARD && newIntPos >= m_CurrentLoopEnd)
 			{
 				switch(m_CurrentLoopType)
 				{
-				case XMInstrument::WaveData::LoopType::NORMAL:
+				case XMInstrument::WaveData<>::LoopType::NORMAL:
 					do {
 						m_Position.HighPart = m_CurrentLoopStart+(newIntPos-m_CurrentLoopEnd);
 						newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
 						//For very small loops, the while is necessary
 					} while (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
 					break;
-				case XMInstrument::WaveData::LoopType::BIDI:
+				case XMInstrument::WaveData<>::LoopType::BIDI:
 					do {
 						m_Position.HighPart = m_CurrentLoopEnd-(newIntPos-m_CurrentLoopEnd);
 						newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
@@ -369,7 +381,7 @@ namespace psycle
 					m_CurrentLoopDirection = LoopDirection::BACKWARD;
 					m_SpeedInternal = -1*m_Speed;
 					break;
-				case XMInstrument::WaveData::LoopType::DO_NOT://fallthrough
+				case XMInstrument::WaveData<>::LoopType::DO_NOT://fallthrough
 				default:
 					Playing(false);
 					break;
@@ -379,8 +391,8 @@ namespace psycle
 			{
 				switch(m_CurrentLoopType)
 				{
-				case XMInstrument::WaveData::LoopType::NORMAL://fallthrough
-				case XMInstrument::WaveData::LoopType::BIDI:
+				case XMInstrument::WaveData<>::LoopType::NORMAL://fallthrough
+				case XMInstrument::WaveData<>::LoopType::BIDI:
 					do {
 						std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
 						m_Position.HighPart = m_CurrentLoopStart+(m_CurrentLoopStart-newIntPos);
@@ -390,28 +402,32 @@ namespace psycle
 					m_CurrentLoopDirection = LoopDirection::FORWARD;
 					m_SpeedInternal = m_Speed;
 				break;
-				case XMInstrument::WaveData::LoopType::DO_NOT://fallthrough
+				case XMInstrument::WaveData<>::LoopType::DO_NOT://fallthrough
 				default:
 					Playing(false);
 					break;
 				}
 			}
 		}
-		void XMSampler::WaveDataController::NoteOff(void)
+		template <class T>
+		void XMSampler::WaveDataController<T>::NoteOff(void)
 		{
-			if ( SustainLoopType() != XMInstrument::WaveData::LoopType::DO_NOT)
+			if ( SustainLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT)
 			{
-				if (LoopType() != XMInstrument::WaveData::LoopType::DO_NOT) {
+				if (LoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
 					m_CurrentLoopType = LoopType();
 					m_CurrentLoopStart = LoopStart();
 					m_CurrentLoopEnd = LoopEnd();
 				} else {
-					m_CurrentLoopType = XMInstrument::WaveData::LoopType::DO_NOT;
+					m_CurrentLoopType = XMInstrument::WaveData<>::LoopType::DO_NOT;
 					m_CurrentLoopStart = 0;
 					m_CurrentLoopEnd = Length()-1;
 				}
 			}
 		}
+
+		template class XMSampler::WaveDataController<std::int16_t>;
+		template class XMSampler::WaveDataController<float>;
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -560,11 +576,11 @@ namespace psycle
 
 			ResetEffects();
 		}
-		void XMSampler::Voice::DisposeResampleData(helpers::dsp::resampler& resampler) 
+		void XMSampler::Voice::DisposeResampleData(const helpers::dsp::resampler& resampler) 
 		{
 			m_WaveDataController.DisposeResampleData(resampler);
 		}
-		void XMSampler::Voice::RecreateResampleData(helpers::dsp::resampler& resampler)
+		void XMSampler::Voice::RecreateResampleData(const helpers::dsp::resampler& resampler)
 		{
 			if (IsPlaying()) {
 				m_WaveDataController.RecreateResampleData(resampler);
@@ -681,12 +697,12 @@ namespace psycle
 			}
 			float voldelta = 1000.0f/(3.f*SampleRate()); // 3 milliseconds of samples.
 			while(numSamples) {
-				WaveDataController::WorkFunction pWork;
+				WaveDataController<>::WorkFunction pWork;
 				int nextsamples = std::min(m_WaveDataController.PreWork(numSamples, &pWork), numSamples);
 				numSamples-=nextsamples;
 #ifndef NDEBUG
 				if (numSamples > 256 || numSamples < 0) {
-					TRACE("numSamples invalid bug triggered!\n");
+					TRACE("705: numSamples invalid bug triggered!\n");
 				}
 #endif
 				while (nextsamples)
@@ -787,6 +803,13 @@ namespace psycle
 							m_rVolCurr=m_rVolDest;
 					}
 
+					if(!m_WaveDataController.IsStereo()){
+					// Monoaural output‚ copy left to right output.
+						right_output = left_output;
+					}
+
+					left_output*=m_lVolCurr;
+					right_output*=m_rVolCurr;
 					// Filter section
 					if (m_Filter->Type() != dsp::F_NONE)
 					{
@@ -799,14 +822,7 @@ namespace psycle
 							if (tmpCO < 0) { tmpCO = 0; }
 							else if (tmpCO > 127) { tmpCO = 127; }
 							m_Filter->Cutoff(tmpCO);
-							if (m_WaveDataController.IsStereo())
-							{
-								m_Filter->WorkStereo(left_output, right_output);
-							}
-							else
-							{
-								left_output = m_Filter->Work(left_output);
-							}
+							m_Filter->WorkStereo(left_output, right_output);
 						}
 					}
 
@@ -818,13 +834,6 @@ namespace psycle
 					
 				//////////////////////////////////////////////////////////////////////////
 				//  Step 3: Add the processed data to the sampler's buffer.
-					if(!m_WaveDataController.IsStereo()){
-					// Monoaural output‚ copy left to right output.
-						right_output = left_output;
-					}
-					//cannot apply volume before filter, due to mono-mode filter and volcur having panning information.
-					left_output*=m_lVolCurr;
-					right_output*=m_rVolCurr;
 
 					if (m_pChannel->IsMute()) {
 						pSamplesL++;
@@ -865,7 +874,7 @@ namespace psycle
 			int wavelayer = pair.second;
 			if ( Global::song().samples.IsEnabled(wavelayer) == false ) return;
 
-			const XMInstrument::WaveData& wave = Global::song().samples[wavelayer];
+			const XMInstrument::WaveData<>& wave = Global::song().samples[wavelayer];
 			m_WaveDataController.Init(&wave,wavelayer, m_pSampler->Resampler());
 			m_Note = note;
 			m_Period=NoteToPeriod(pair.first,false);
@@ -1129,7 +1138,7 @@ namespace psycle
 
 			vdelta = vdelta * m_PanbrelloDepth;
 			m_PanbrelloAmount = vdelta / 2048.0f; // 64*16*2
-			if (rChannel().PanbrelloType() != XMInstrument::WaveData::WaveForms::RANDOM) 
+			if (rChannel().PanbrelloType() != XMInstrument::WaveData<>::WaveForms::RANDOM) 
 			{
 			m_PanbrelloPos = (m_PanbrelloPos + m_PanbrelloSpeed) & 0xFF;
 			}
@@ -1172,15 +1181,15 @@ namespace psycle
 		{
 			switch (wavetype)
 			{
-			case XMInstrument::WaveData::WaveForms::SAWDOWN:
+			case XMInstrument::WaveData<>::WaveForms::SAWDOWN:
 				return m_FineRampDownData[wavepos];
-			case XMInstrument::WaveData::WaveForms::SAWUP:
+			case XMInstrument::WaveData<>::WaveForms::SAWUP:
 				return m_FineRampDownData[0xFF - wavepos];
-			case XMInstrument::WaveData::WaveForms::SQUARE:
+			case XMInstrument::WaveData<>::WaveForms::SQUARE:
 				return m_FineSquareTable[wavepos];
-			case XMInstrument::WaveData::WaveForms::RANDOM:
+			case XMInstrument::WaveData<>::WaveForms::RANDOM:
 				return m_RandomTable[wavepos];
-			case XMInstrument::WaveData::WaveForms::SINUS:
+			case XMInstrument::WaveData<>::WaveForms::SINUS:
 			default:
 				return m_FineSineData[wavepos];
 			}
@@ -1240,7 +1249,7 @@ namespace psycle
 
 		double XMSampler::Voice::NoteToPeriod(const int noteIn, bool correctNote) const
 		{
-			const XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
+			const XMInstrument::WaveData<>& _wave = m_WaveDataController.Wave();
 			int note = (correctNote)? rInstrument().NoteToSample(noteIn).first : noteIn;
 
 			if(m_pSampler->IsAmigaSlides())
@@ -1257,7 +1266,7 @@ namespace psycle
 
 		int XMSampler::Voice::PeriodToNote(const double period) const
 		{
-			const XMInstrument::WaveData& _wave = m_WaveDataController.Wave();
+			const XMInstrument::WaveData<>& _wave = m_WaveDataController.Wave();
 
 			if(m_pSampler->IsAmigaSlides()){
 				// period_t (table) = pow(2.0,5.0-note/12.0) * 1712.0;
@@ -1306,9 +1315,9 @@ namespace psycle
 			m_LastPitchEnvelopePosInSamples=0;
 
 			m_bGrissando = false;
-			m_VibratoType = XMInstrument::WaveData::WaveForms::SINUS;
-			m_TremoloType = XMInstrument::WaveData::WaveForms::SINUS;
-			m_PanbrelloType = XMInstrument::WaveData::WaveForms::SINUS;
+			m_VibratoType = XMInstrument::WaveData<>::WaveForms::SINUS;
+			m_TremoloType = XMInstrument::WaveData<>::WaveForms::SINUS;
+			m_PanbrelloType = XMInstrument::WaveData<>::WaveForms::SINUS;
 
 			m_PanSlideMem = 0;
 			m_ChanVolSlideMem = 0;
@@ -1647,14 +1656,14 @@ namespace psycle
 						switch(parameter&0x0F)
 						{
 						case CMD_E9::E9_PLAY_FORWARD:
-							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::FORWARD);
+							voice->rWave().CurrentLoopDirection(WaveDataController<>::LoopDirection::FORWARD);
 							break;
 						case CMD_E9::E9_PLAY_BACKWARD:
 							if (voice->rWave().Position() == 0)
 							{
 								voice->rWave().Position(voice->rWave().Length()-1);
 							}
-							voice->rWave().CurrentLoopDirection(WaveDataController::LoopDirection::BACKWARD);
+							voice->rWave().CurrentLoopDirection(WaveDataController<>::LoopDirection::BACKWARD);
 							break;
 						}
 						break;
@@ -2557,7 +2566,7 @@ namespace psycle
 						int _layer = _inst.NoteToSample(thisChannel.Note()).second;
 						if(Global::song().samples.IsEnabled(_layer))
 						{
-							const XMInstrument::WaveData& wave = Global::song().samples[_layer];
+							const XMInstrument::WaveData<>& wave = Global::song().samples[_layer];
 							int twlength = wave.WaveLength();
 							newVoice->VoiceInit(_inst, channelNum,thisChannel.InstrumentNo());
 							thisChannel.ForegroundVoice(newVoice);
