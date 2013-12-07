@@ -693,7 +693,10 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			m_sequence.SelItemRange(false,0,m_sequence.GetCount()-1);
 			for (int i=0; i<MAX_SONG_POSITIONS;i++)
 			{
-				if ( m_pSong->playOrderSel[i]) m_sequence.SetSel(i,true);
+				if (m_pSong->playOrderSel[i]) {
+					m_sequence.SetSel(i,true);
+					if (i < top) top = i;
+				}
 			}
 		}
 		m_sequence.SetTopIndex(top);
@@ -740,7 +743,10 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 			m_sequence.SelItemRange(false,0,m_sequence.GetCount()-1);
 			for (int i=0;i<MAX_SONG_POSITIONS;i++ )
 			{
-				if (m_pSong->playOrderSel[i]) m_sequence.SetSel(i,true);
+				if (m_pSong->playOrderSel[i]) {
+					m_sequence.SetSel(i,true);
+					if (i < top) top = i;
+				}
 			}
 			m_sequence.SetTopIndex(top);
 		}

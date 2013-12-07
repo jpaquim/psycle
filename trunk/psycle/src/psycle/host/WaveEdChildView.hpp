@@ -33,6 +33,8 @@ namespace psycle { namespace host {
 			unsigned long GetWaveLength();
 			unsigned long GetSelectionLength();			//returns length of current selected block
 			unsigned long GetCursorPos();				//returns cursor's position
+			float GetVolume();						//returns the volume
+
 			void SetCursorPos(unsigned long newpos);	//sets cursor's position
 			bool IsStereo();
 			void StartTimer();

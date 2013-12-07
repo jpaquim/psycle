@@ -108,15 +108,14 @@
 #define IDB_SWITCHMINI_OFF              312
 #define IDB_SWITCHMINI_ON               313
 #define IDD_WIRE_CHANMAP                314
-#define IDD_INST_SAMPULSE_INSTGEN       315
 #define IDD_INST_SAMPULSE_INSTAMP       316
 #define IDD_INST_SAMPULSE_INSTPAN       317
 #define IDD_INST_SAMPULSE_INSTFIL       318
-#define IDD_INST_SAMPULSE_INSTPIT       319
 #define IDD_INST_SAMPULSE_ENVDLG        320
 #define IDD_INST_SAMPLER_INST           321
 #define IDD_PLOTTER                     322
 #define IDR_INSTRUMENTEDIT              324
+#define IDD_NOTEMAP_INDIVIDUAL          326
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -342,6 +341,7 @@
 #define IDF_EMULATED_SYNC_STOP          1259
 #define IDD_INSTRUMENTUI                1259
 #define IDF_SYNC_TICK                   1260
+#define IDD_INST_SAMPULSE_INSTPIT_NEW   1260
 #define IDC_MIDI_VERSION                1261
 #define IDC_CHANNEL_MAP                 1262
 #define IDC_CH1                         1263
@@ -791,7 +791,6 @@
 #define IDC_STATIC16                    1704
 #define IDC_STATIC17                    1705
 #define IDC_INS_NAME                    1706
-#define IDC_FRAMENNA                    1707
 #define IDC_LADSRBASE                   1709
 #define IDC_LADSRMOD                    1710
 #define IDC_LADSRATT                    1711
@@ -920,7 +919,9 @@
 #define IDC_DECREASEOCT                 2109
 #define IDC_SETDEFAULT                  2110
 #define IDC_INST_ADDTEN                 2111
+#define IDC_DECREASENOTE                2111
 #define IDC_INST_ADDONE                 2112
+#define IDC_INCREASENOTE                2112
 #define IDC_INST_DECONE                 2113
 #define IDC_INST_DECTEN                 2114
 #define IDC_INSTRUMENT_LABEL            2115
@@ -941,6 +942,12 @@
 #define IDC_COMBOFILTER                 2130
 #define IDC_FINELABEL                   2131
 #define IDC_ENV_CARRY                   2132
+#define IDC_EDITMAPPING                 2133
+#define IDC_SCROLLBAR1                  2134
+#define IDC_INS_SHIFTMOVE               2135
+#define IDC_COMBO2                      2136
+#define IDC_INDIV_NOTE                  2136
+#define IDC_INDIV_SAMPLE                2137
 #define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1112,6 +1119,9 @@
 #define ID_ACCEL_PAN                    34300
 #define ID_ACCEL_FILTER                 34301
 #define ID_ACCEL_PITCH                  34302
+#define ID_WAVEED_WAVEMIN               34305
+#define ID_WAVEED_WAVEPLUS              34306
+#define ID_WAVEEDIT_COMBO_WAV           34307
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1119,9 +1129,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        325
-#define _APS_NEXT_COMMAND_VALUE         34304
-#define _APS_NEXT_CONTROL_VALUE         2133
+#define _APS_NEXT_RESOURCE_VALUE        327
+#define _APS_NEXT_COMMAND_VALUE         34308
+#define _APS_NEXT_CONTROL_VALUE         2138
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

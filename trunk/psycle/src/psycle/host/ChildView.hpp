@@ -200,9 +200,6 @@ namespace host {
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
 		public:
-			static char* notes_tab_a440[256];
-			static char* notes_tab_a220[256];
-			static char* hex_tab[16];
 			//RECENT!!!//
 			HMENU hRecentMenu;
 
@@ -249,6 +246,7 @@ namespace host {
 			int VISLINES;
 			int COLX[10];
 			char szBlankParam[2];
+			static char* hex_tab[16];
 			char** note_tab_selected;
 			bool _outputActive;	// This variable indicates if the output (audio or midi) is active or not.
 								// Its function is to prevent audio (and midi) operations while it is not

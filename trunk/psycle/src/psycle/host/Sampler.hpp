@@ -122,10 +122,10 @@ namespace psycle
 
 			void StopInstrument(int insIdx);
 			void DefaultC4(bool correct) {
-				baseC = correct? 60 : 48;
+				baseC = correct? notecommands::middleC : 48;
 			}
 			bool isDefaultC4() {
-				return baseC == 60;
+				return baseC == notecommands::middleC;
 			}
 			void ChangeResamplerQuality(helpers::dsp::resampler::quality::type quality) {
 				for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)

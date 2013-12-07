@@ -398,6 +398,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 				win->ChangeIns(si-10);
+				win->ChangeWave(si-10);
 			}
 		}
 
@@ -408,6 +409,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 				win->ChangeIns(si-1);
+				win->ChangeWave(si-1);
 			}
 		}
 
@@ -418,6 +420,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 				win->ChangeIns(si+1);
+				win->ChangeWave(si+1);
 			}
 		}
 		void CInstrumentEditor::OnNextTenInstrument() 
@@ -427,6 +430,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 				win->ChangeIns(si+10);
+				win->ChangeWave(si+10);
 			}
 		}
 		
@@ -655,7 +659,6 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				int label = 0;
 				CSliderCtrl* slider = reinterpret_cast<CSliderCtrl*>(GetDlgItem(pNMHDR->idFrom));
 				int si=Global::song().instSelected;
-				Instrument *pins = Global::song()._pInstrument[si];
 				int nPos = slider->GetPos();
 				if (pNMHDR->idFrom == IDC_SLIDER_FCUT) {
 					sprintf(buffer,"%.0f",2333.0*pow(6.0,nPos/127.0));

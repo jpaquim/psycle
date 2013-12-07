@@ -206,6 +206,9 @@ namespace psycle
 			class PatternView
 			{
 			public:
+				static char* notes_tab_a440[256];
+				static char* notes_tab_a220[256];
+
 				PatternView();
 				virtual ~PatternView();
 				void SetDefaultSettings(bool include_others=true);

@@ -240,7 +240,7 @@ XMSampler::Channel::PerformFX().
 		virtual void Position(const	int value){ 
 			if ( LoopType()==XMInstrument::WaveData<>::LoopType::NORMAL ) {
 				int val = value;
-				while (val >= LoopEnd()) {
+				while (val >= LoopEnd() && LoopEnd() != LoopStart()) {
 					val-= LoopEnd()-LoopStart();
 				}
 				m_Position.HighPart = val;
@@ -249,7 +249,7 @@ XMSampler::Channel::PerformFX().
 				int loopsize = LoopEnd()-LoopStart();
 				bool forward=false;
 				int val = value;
-				while (val >= LoopEnd()) {
+				while (val >= LoopEnd() && loopsize != 0) {
 					if (val >= LoopEnd()+loopsize || forward) {
 						val-= loopsize;
 					}
@@ -575,7 +575,7 @@ XMSampler::Channel::PerformFX().
 		void PanFactor(float pan)
 		{
 			m_PanFactor = pan;
-			m_PanRange = 2.f * (0.5-std::abs(pan-0.5));
+			m_PanRange = (0.5-std::abs(pan-0.5));
 		}
 		float PanFactor() const { return m_PanFactor; }
 		void IsSurround(bool surround) { m_Surround = surround; }

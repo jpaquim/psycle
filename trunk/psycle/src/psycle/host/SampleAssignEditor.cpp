@@ -1,5 +1,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "SampleAssignEditor.hpp"
+#include "PsycleConfig.hpp"
+#include "InstrIndividualMap.hpp"
 #include <psycle/host/XMInstrument.hpp>
 
 namespace psycle { namespace host {
@@ -26,7 +28,7 @@ const int CSampleAssignEditor::c_SharpKey_index[] = {1,3,6,8,10};
 
 CSampleAssignEditor::CSampleAssignEditor()
 : m_bInitialized(false)
-, m_Octave(3)
+, m_Octave(4)
 , bmpDC(NULL)
 {
 	m_NaturalKey.LoadBitmap(IDB_KEYS_NORMAL);
@@ -77,6 +79,8 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 	if(m_bInitialized){
 		if (lpDrawItemStruct->itemAction == ODA_DRAWENTIRE)
 		{
+			const PsycleConfig::PatternView & patView = PsycleGlobal::conf().patView();
+			char **notetable = (patView.showA440) ? patView.notes_tab_a440 : patView.notes_tab_a220;
 			CDC dc, memDC, keyDC;
 			CRect _rect;
 			GetClientRect(&_rect);
@@ -105,7 +109,7 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			int _index = 0,_octave = m_Octave;
 			for(int i = 0;i < _rect.Width() && _octave<10;i+=head_width)
 			{
-				_tmp_str.Format("%s%d",c_NaturalKey_name[_index],_octave);
+				_tmp_str.Format("%s%d",c_NaturalKey_name[_index],patView.showA440?_octave-1:_octave);
 				memDC.BitBlt(i,0, 	head_width,head_height, 	&keyDC, 0,0,	SRCCOPY);
 				if (m_FocusKeyRect.left>=i && m_FocusKeyRect.left<i+head_width && m_FocusKeyRect.left!=m_FocusKeyRect.right){
 					memDC.SetTextColor(RGB(255,255,0));
@@ -132,11 +136,10 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			for(int i = 0; i < _rect.Width() && _octave<10;i+=m_naturalkey_width )
 			{
 				XMInstrument::NotePair noteToSample = m_pInst->NoteToSample(_octave*c_KeysPerOctave+c_NaturalKey_index[_index]);
-				_tmp_str.Format("%s-%d" ,c_Key_name[noteToSample.first%c_KeysPerOctave]  ,noteToSample.first/c_KeysPerOctave);
 				memDC.BitBlt(i,head_height,   m_naturalkey_width,m_naturalkey_height,   &keyDC, 0,0,	SRCCOPY);
 				if (i == m_FocusKeyRect.left){
-					TXT(&memDC,_tmp_str,i+text_xOffset,text_yOffset,m_naturalkey_width-4,12);
-				} else{ memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str); }
+					TXT(&memDC,notetable[noteToSample.first],i+text_xOffset,text_yOffset,m_naturalkey_width-4,12);
+				} else{ memDC.TextOut(i+text_xOffset,text_yOffset,notetable[noteToSample.first]); }
 
 				int _sample = noteToSample.second;
 				if ( _sample == 255 ) _tmp_str="--";
@@ -161,12 +164,11 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			for(int i = c_SharpKey_Xpos[0];i < _rect.Width() && _octave<10;i = octavebmpoffset + c_SharpKey_Xpos[_index])
 			{
 				XMInstrument::NotePair noteToSample = m_pInst->NoteToSample(_octave*c_KeysPerOctave+c_SharpKey_index[_index]);
-				_tmp_str.Format("%s%d" ,c_Key_name[noteToSample.first%c_KeysPerOctave]	,noteToSample.first/c_KeysPerOctave);
 
 				memDC.BitBlt(i,head_height, m_sharpkey_width,m_sharpkey_height, 	&keyDC,		0,0,	SRCCOPY);
 				if (i == m_FocusKeyRect.left){
-					TXT(&memDC,_tmp_str,i+text_xOffset,text_yOffset,m_naturalkey_width-4,12);
-				} else { memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str); }
+					TXT(&memDC,notetable[noteToSample.first],i+text_xOffset,text_yOffset,m_naturalkey_width-4,12);
+				} else { memDC.TextOut(i+text_xOffset,text_yOffset,notetable[noteToSample.first]); }
 				
 				int _sample=noteToSample.second;
 				if ( _sample == 255 ) _tmp_str="--";
@@ -254,13 +256,15 @@ void CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
 }
 void CSampleAssignEditor::OnLButtonDown( UINT nFlags, CPoint point )
 {
-	if (notecommands::empty != m_FocusKeyIndex) {
-		MessageBox("Individual setup of notes not ready yet");
-	}
 }
 void CSampleAssignEditor::OnLButtonUp( UINT nFlags, CPoint point )
 {
 	if (notecommands::empty != m_FocusKeyIndex) {
+		CInstrIndividualMap indDlg;
+		indDlg.editPos = m_FocusKeyIndex;
+		indDlg.xins = m_pInst;
+		indDlg.DoModal();
+		Invalidate();
 	}
 }
 

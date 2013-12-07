@@ -27,6 +27,7 @@ int const MAX_BUFFER_LENGTH = 256;
 ///\{
 	/// value of B-8. NOTE: C minus 1 is note 0 and C-0 is note 12!
 	int const NOTE_MAX = 119;
+	int const NOTE_MIDDLEC = 60; // Middle C.
 	int const NOTE_A4 = 69; // Note tuned at 440Hz.
 	/// value of the "off" (release) note.
 	int const NOTE_NOTEOFF = 120;

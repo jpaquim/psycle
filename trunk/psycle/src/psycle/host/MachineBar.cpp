@@ -433,15 +433,14 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			m_pSong->auxcolSelected = 0;
 		}
 		m_inscombo.SetCurSel(m_pSong->auxcolSelected);
-		m_pSong->SetWavPreview(m_pSong->instSelected);
 	}
 
 	void MachineBar::OnSelchangeBarComboins() 
 	{
-		if ( m_auxcombo.GetCurSel() == AUX_INSTRUMENT ) 
-		{
+		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
+			m_pSong->paramSelected=m_inscombo.GetCurSel();
+		} else {
 			m_pSong->instSelected=m_inscombo.GetCurSel();
-			m_pSong->SetWavPreview(m_pSong->instSelected);
 			m_pParentMain->WaveEditorBackUpdate();
 			m_pParentMain->UpdateInstrumentEditor();
 			m_pParentMain->RedrawGearRackList();
@@ -454,32 +453,26 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		m_pWndView->SetFocus();
 	}
-
-	void MachineBar::ChangeIns(int i)	// User Called (Hotkey)
+	void MachineBar::ChangeWave(int i)
+	{
+		if ( m_pSong->waveSelected == i) return;
+		if (i<0 || i >= MAX_INSTRUMENTS) return;
+		m_pSong->waveSelected=i;
+		m_pParentMain->WaveEditorBackUpdate();
+	}
+	void MachineBar::ChangeIns(int i)	// User Called (Hotkey, button or list change)
 	{
 		if ( m_inscombo.GetCurSel() == i) return;
+		if (i<0 || i >= m_inscombo.GetCount()) return;
 
-		if ( m_auxcombo.GetCurSel() == AUX_PARAMS )
-		{
-			if (i>=0 && i < m_inscombo.GetCount() )
-			{
-				m_pSong->auxcolSelected=i;
-				m_pSong->paramSelected=i;
-			}
+		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
+			m_pSong->paramSelected=i;
+		} else {
+			m_pSong->instSelected=i;
+			m_pParentMain->UpdateInstrumentEditor();
+			m_pParentMain->RedrawGearRackList();
 		}
-		else
-		{
-			//TODO: This will need improvement for proper dynamic auxCol selection
-			if(i>=0 && i <m_inscombo.GetCount())
-			{
-				m_pSong->instSelected=i;
-				m_pSong->auxcolSelected=i;
-				m_pSong->SetWavPreview(i);
-				m_pParentMain->WaveEditorBackUpdate();
-				m_pParentMain->UpdateInstrumentEditor();
-				m_pParentMain->RedrawGearRackList();
-			}
-		}
+		m_pSong->auxcolSelected=i;
 		m_inscombo.SetCurSel(m_pSong->auxcolSelected);
 	}
 
@@ -491,7 +484,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if (!tmac || (tmac->_type != MACH_SAMPLER
 						&& tmac->_type != MACH_XMSAMPLER)) {
 			for(int i=0;i<MAX_MACHINES;i++) {
-				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
+						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
 					m_pSong->seqBus = i;
 					m_pParentMain->UpdateComboGen();
 					m_pWndView->Repaint();
@@ -558,7 +552,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			// Stopping wavepreview if not stopped.
-			m_pSong->wavprev.Stop(true);
+			m_pSong->wavprev.Stop();
 		}
 		if (update){
 			UpdateComboIns();
@@ -611,7 +605,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if (!tmac || (tmac->_type != MACH_SAMPLER
 						&& tmac->_type != MACH_XMSAMPLER)) {
 			for(int i=0;i<MAX_MACHINES;i++) {
-				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
+						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
 					m_pSong->seqBus = i;
 					m_pParentMain->UpdateComboGen();
 					m_pWndView->Repaint();
@@ -642,7 +637,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if (!tmac || (tmac->_type != MACH_SAMPLER
 						&& tmac->_type != MACH_XMSAMPLER)) {
 			for(int i=0;i<MAX_MACHINES;i++) {
-				if (m_pSong->_pMachine[i] && m_pSong->_pMachine[i]->_type == MACH_SAMPLER) {
+				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
+						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
 					m_pSong->seqBus = i;
 					m_pParentMain->UpdateComboGen();
 					m_pWndView->Repaint();

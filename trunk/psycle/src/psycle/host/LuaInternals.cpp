@@ -610,7 +610,7 @@ void WaveOscTables::set_samplerate(int sr) {
 	  cleartbl(sqr_tbl);
 	  cleartbl(saw_tbl);
 	}
-	double f_lo = 440*std::pow(2.0, (0-69)/12.0);
+	double f_lo = 440*std::pow(2.0, (0-notecommands::middleA)/12.0);
 	for (int i = 0; i < 10; ++i) {
 		double f_hi = 2 * f_lo;
 		if (i==0) {
@@ -877,7 +877,7 @@ int LuaDspMathHelper::open(lua_State *L) {
 int LuaDspMathHelper::notetofreq(lua_State* L) {
    double note = luaL_checknumber(L, 1);
    int n = lua_gettop(L);
-   int base = 69;
+   int base = notecommands::middleA;
    if (n==2) {
 	  base = luaL_checknumber(L, 2);
    }
@@ -888,7 +888,7 @@ int LuaDspMathHelper::notetofreq(lua_State* L) {
 int LuaDspMathHelper::freqtonote(lua_State* L) {
    double f = luaL_checknumber(L, 1);
    int n = lua_gettop(L);
-   int base = 69;
+   int base = notecommands::middleA;
    if (n==2) {
 	  base = luaL_checknumber(L, 2);
    }
@@ -1214,7 +1214,7 @@ void ResamplerWrap<T, VOL>::Start(double phase) {
   if (wave_it != waves_.end()) {
     wavectrl.Init(last_wave, 0, resampler);
     wavectrl.Position(phase*last_wave->WaveLength());
-    basef = 440 *std::pow(2.0, (60-last_wave->WaveTune()-last_wave->WaveFineTune()/100.0-69)/12.0) * last_wave->WaveSampleRate() / (double) Global::player().SampleRate();
+	basef = 440 *std::pow(2.0, (notecommands::middleC-last_wave->WaveTune()-last_wave->WaveFineTune()/100.0-notecommands::middleA)/12.0) * last_wave->WaveSampleRate() / (double) Global::player().SampleRate();
     speed_ = f_/basef;   
     wavectrl.Speed(resampler, speed_);
     wavectrl.Playing(true);
@@ -1312,7 +1312,7 @@ void ResamplerWrap<T, VOL>::check_wave(double f) {
       if (last_wave!=wave) {
 	    int oldpos = wavectrl.Position();
 	    wavectrl.Init(wave, 0, resampler);
-	    basef = 440 *std::pow(2.0, (60-wave->WaveTune()-wave->WaveFineTune()/100-69)/12.0) * wave->WaveSampleRate() / Global::player().SampleRate();
+		basef = 440 *std::pow(2.0, (notecommands::middleC-wave->WaveTune()-wave->WaveFineTune()/100-notecommands::middleA)/12.0) * wave->WaveSampleRate() / Global::player().SampleRate();
 	    wavectrl.Speed(resampler, f/basef);
 	    wavectrl.Playing(true);
 	    double phase = oldpos / (double) last_wave->WaveLength();

@@ -67,6 +67,9 @@ namespace psycle
 			m_pWaveDataR = bStereo?new T[iLen]:NULL;
 			m_WaveStereo = bStereo;
 			m_WaveLength  = iLen;
+			// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
+			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
+			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
 		}
 
 		template <class T> 
@@ -152,6 +155,10 @@ namespace psycle
 					(m_WaveLength - deletePos - length)*sizeof(short));
 			}
 			m_WaveLength -= length;
+			// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
+			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
+			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
+
 			delete[] oldLeft;
 			delete[] oldRight;
 		}
@@ -298,6 +305,9 @@ namespace psycle
 			riffFile.Read(m_WaveSusLoopStart);
 			riffFile.Read(m_WaveSusLoopEnd);
 			{ std::uint32_t i(0); riffFile.Read(i); m_WaveSusLoopType = static_cast<LoopType::Type>(i); }
+			// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
+			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
+			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
 
 			if(filevers == 1) {
 				riffFile.Read(m_WaveSampleRate);
@@ -729,7 +739,7 @@ namespace psycle
 			m_PanEnabled=false;
 			m_InitPan = 0.5f;
 			m_Surround = false;
-			m_NoteModPanCenter = 60;
+			m_NoteModPanCenter = notecommands::middleC;
 			m_NoteModPanSep = 0;
 
 			m_FilterCutoff = 127;

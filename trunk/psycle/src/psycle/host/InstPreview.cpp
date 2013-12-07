@@ -19,6 +19,21 @@ namespace psycle {
 			
 			float left_output = 0.0f;
 			float right_output = 0.0f;
+			//TODO: A way for the user to use the different methods
+			//Assuming Linear Panning.
+			float lvol=0.5f;
+			float rvol=0.5f;
+			if (m_pwave->PanEnabled()) {
+				if(m_pwave->IsSurround()){
+					rvol *= -1.0f;
+				}
+				else {
+					rvol = m_pwave->PanFactor();
+					lvol = (1.0f - rvol);
+				}
+			}
+			lvol *= m_vol;
+			rvol *= m_vol;
 			
 			while(numSamples) {
 				XMSampler::WaveDataController<>::WorkFunction pWork;
@@ -36,12 +51,12 @@ namespace psycle {
 
 					pWork(controller,&left_output, &right_output);
 
-					*(++pSamplesL)+=left_output*m_vol;
+					*(++pSamplesL)+=left_output*lvol;
 					if(m_pwave->IsWaveStereo()) {
-						*(++pSamplesR)+=right_output*m_vol;
+						*(++pSamplesR)+=right_output*rvol;
 					}
 					else {
-						*(++pSamplesR)+=left_output*m_vol;
+						*(++pSamplesR)+=left_output*rvol;
 					}
 					nextsamples--;
 				}
@@ -52,7 +67,7 @@ namespace psycle {
 			}
 		}
 
-		void InstPreview::Play(int note/*=64*/, unsigned long startPos/*=0*/)
+		void InstPreview::Play(int note/*=notecommands::middleC*/, unsigned long startPos/*=0*/)
 		{
 			if(m_pwave == NULL || m_pwave->WaveLength() == 0) return;
 
@@ -67,10 +82,10 @@ namespace psycle {
 			}
 		}
 
-		void InstPreview::Stop(bool deallocate/*=false*/)
+		void InstPreview::Stop()
 		{
 			controller.Playing(false);
-			if (deallocate && &m_prevwave == m_pwave) {
+			if (&m_prevwave == m_pwave) {
 				m_prevwave.DeleteWaveData();
 			}
 		}
@@ -86,8 +101,7 @@ namespace psycle {
 			int period = 9216 - ((double)(note + m_pwave->WaveTune()) * 64.0)
 					- ((double)(m_pwave->WaveFineTune()) * 0.64);
 			return pow(2.0,
-						((5376 - period) /768.0)
-					)
+						((5376 - period) /768.0))
 					* m_pwave->WaveSampleRate() / (double)Global::player().SampleRate();
 		}
 

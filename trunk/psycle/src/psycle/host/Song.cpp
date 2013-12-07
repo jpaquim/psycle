@@ -394,6 +394,7 @@ namespace psycle
 		{
 			for(int i=0; i< MAX_MACHINES; i++) {
 				Machine* mac = _pMachine[i];
+				//TODO: also for sampulse
 				if(mac && mac->_type == MACH_SAMPLER) {
 					Sampler& sam = *((Sampler*)mac);
 					sam.StopInstrument(instrumentIdx);
@@ -496,6 +497,7 @@ namespace psycle
 			DeleteAllPatterns();
 			// Clear sequence
 			Reset();
+			waveSelected = 0;
 			instSelected = 0;
 			paramSelected = 0;
 			auxcolSelected = 0;
@@ -912,8 +914,8 @@ namespace psycle
 		void Song::SetWavPreview(int newinst)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
-			if(samples.Exists(instSelected)) {
-				wavprev.UseWave(&samples.get(instSelected));
+			if(samples.Exists(newinst)) {
+				wavprev.UseWave(&samples.get(newinst));
 			}
 			else {
 				wavprev.UseWave(NULL);
@@ -1080,6 +1082,7 @@ namespace psycle
 			}
 			else {
 				XMInstrument::WaveData<> &wave = wavprev.UsePreviewWave();
+				wave.Init();
 				wave.AllocWaveData(iSamplesPerChan,bStereo);
 			}
 			return true;

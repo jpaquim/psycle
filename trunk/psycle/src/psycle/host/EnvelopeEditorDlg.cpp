@@ -300,7 +300,6 @@ void CEnvelopeEditorDlg::OnEnvelopeChanged()
 {
 	RefreshButtons();
 	if (!m_EnvelopeEditor.freeform()) {
-		XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
 
 		m_SlADSRAttack.SetPos(m_EnvelopeEditor.AttackTime());
 		m_SlADSRDecay.SetPos(m_EnvelopeEditor.DecayTime());
