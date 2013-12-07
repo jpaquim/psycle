@@ -408,6 +408,10 @@ namespace psycle { namespace host {
 			cpen_white.CreatePen(PS_SOLID,0,0xEEEEEE);
 
 			zoombar.Create(this, IDD_WAVED_ZOOMBAR, CBRS_BOTTOM | WS_CHILD, AFX_IDW_DIALOGBAR);
+			//set volume slider
+			CSliderCtrl* volSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_VOLSLIDER));
+			volSlider->SetRange(0, 100);
+			volSlider->SetPos(100);
 
 			hResizeLR = AfxGetApp()->LoadStandardCursor(IDC_SIZEWE);
 			hIBeam = AfxGetApp()->LoadStandardCursor(IDC_IBEAM);
@@ -417,7 +421,6 @@ namespace psycle { namespace host {
 			bDragSusLoopStart = bDragSusLoopEnd = false;
 			SelStart=0;
 			cursorPos=0;
-			_pSong->wavprev.SetVolume(0.4f);
 			wdWave=false;
 			wsInstrument=-1;
 			prevHeadLoopS = prevBodyLoopS = prevHeadLoopE = prevBodyLoopE = 0;
@@ -505,7 +508,6 @@ namespace psycle { namespace host {
 			}
 			else if((CSliderCtrl*)pScrollBar == volSlider)
 			{
-				_pSong->wavprev.SetVolume( volSlider->GetPos()/100.0f );
 				volSlider->Invalidate(false);
 				this->SetFocus();
 			}
@@ -611,7 +613,8 @@ namespace psycle { namespace host {
 
 			if ( nmcd.dwDrawStage == CDDS_PREPAINT )
 			{
-				float vol = _pSong->wavprev.GetVolume();
+				CSliderCtrl* volSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_VOLSLIDER));
+				float vol = volSlider->GetPos()/100.f;
 				CDC* pDC = CDC::FromHandle( nmcd.hdc );
 				CDC memDC;
 				memDC.CreateCompatibleDC(pDC);
@@ -711,6 +714,7 @@ namespace psycle { namespace host {
 				Invalidate(true);
 			}
 
+			_pSong->SetWavPreview(wsInstrument);
 			blSelection=false;
 		}
 
@@ -2476,6 +2480,11 @@ namespace psycle { namespace host {
 			else
 				return 0;
 		}
+		float CWaveEdChildView::GetVolume() 
+		{
+			CSliderCtrl* volSlider = static_cast<CSliderCtrl*>(zoombar.GetDlgItem(IDC_VOLSLIDER));
+			return volSlider->GetPos()/100.f;
+		}
 		unsigned long CWaveEdChildView::GetCursorPos()
 		{
 			if(wdWave)
@@ -2544,6 +2553,7 @@ namespace psycle { namespace host {
 					if(newpos<0)	newpos=0;		//i'm not sure how this would happen, but just in case
 					zoomSlider->SetPos(newpos);
 				}
+				volSlider->SetPos(_pSong->wavprev.GetVolume()*100);
 			}
 			else
 			{
@@ -2559,11 +2569,10 @@ namespace psycle { namespace host {
 				//disabled zoombar
 				zoomSlider->SetRange(0, 0);
 				zoomSlider->SetPos(0);
+				volSlider->SetPos(100);
 			}
 
 			//set volume slider
-			volSlider->SetRange(0, 100);
-			volSlider->SetPos( _pSong->wavprev.GetVolume() );
 			volSlider->Invalidate(false);
 		}
 

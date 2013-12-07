@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "XMSampler.hpp"
+#include "SongStructs.hpp"
 namespace psycle {
 	namespace host {
 
@@ -11,14 +12,14 @@ namespace psycle {
 		class InstPreview
 		{
 		public:
-			InstPreview() : m_vol(1.0f), m_pwave(&m_prevwave) { resampler.quality(dsp::resampler::quality::spline); }
+			InstPreview() : m_vol(1.0f), m_pwave(&m_prevwave) { resampler.quality(dsp::resampler::quality::sinc); }
 			virtual ~InstPreview() {}
 			//process data for output
 			void Work(float *pInSamplesL, float *pInSamplesR, int numSamples);
 			//begin playing
-			void Play(int note=60,unsigned long startPos=0);
+			void Play(int note=notecommands::middleC,unsigned long startPos=0);
 			//stop playback
-			void Stop(bool deallocate=false);
+			void Stop();
 			//disable looping if enabled  (sustain loop!)
 			void Release();
 			//whether or not we're already playing
@@ -29,7 +30,7 @@ namespace psycle {
 			//set Instrument to preview
 			void UseWave(XMInstrument::WaveData<>*  wave) {
 				m_pwave = wave; 
-				if(wave != NULL) {m_vol = wave->WaveGlobVolume();}
+				if(wave != NULL) {m_vol = wave->WaveGlobVolume() * (wave->WaveVolume()/128.f);}
 			}
 			XMInstrument::WaveData<> & UsePreviewWave() {
 				m_pwave = &m_prevwave;

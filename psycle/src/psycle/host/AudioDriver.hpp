@@ -177,7 +177,8 @@ namespace psycle
 			static void Quantize16(float *pin, int *piout, int c);
 			static void Quantize16WithDither(float *pin, int *piout, int c);
 			static void Quantize24in32Bit(float *pin, int *piout, int c);
-			static void Quantize24(float *pin, int *piout, int c);
+			static void Quantize24BE(float *pin, int *piout, int c);
+			static void Quantize24LE(float *pin, int *piout, int c);
 			static void DeQuantize16AndDeinterlace(short int *pin, float *poutleft,float *poutright,int c);
 			static void DeQuantize32AndDeinterlace(int *pin, float *poutleft,float *poutright,int c);
 			static void DeinterlaceFloat(float *pin, float *poutleft,float *poutright,int c);

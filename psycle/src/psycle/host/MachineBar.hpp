@@ -18,6 +18,7 @@ namespace psycle { namespace host {
 		virtual ~MachineBar(void);
 
 		void InitializeValues(CMainFrame* frame, CChildView* view, Song& song);
+		void ChangeWave(int i);
 		void ChangeIns(int i);
 		void ChangeGen(int i);
 		void UpdateComboIns(bool updatelist=true);

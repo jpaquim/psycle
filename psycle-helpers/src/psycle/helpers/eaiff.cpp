@@ -50,7 +50,7 @@ namespace psycle { namespace helpers {
 		}
         void EaIff::addListProperty(const IffChunkId& /*contentId*/, const IffChunkId& /*propId*/) {
 		}
-        void EaIff::addListProperty(const IffChunkId& /*contentId*/, const IffChunkId& /*propId*/, void const */*data*/, uint32_t /*dataSize*/) {
+        void EaIff::addListProperty(const IffChunkId& /*contentId*/, const IffChunkId& /*propId*/, void const * /*data*/, uint32_t /*dataSize*/) {
 		}
 
 		const IffChunkHeader& EaIff::readHeader() {

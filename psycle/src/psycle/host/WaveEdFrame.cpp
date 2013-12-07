@@ -26,12 +26,17 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI ( ID_WAVED_RELEASE,OnUpdateReleaseButton		)
 			ON_UPDATE_COMMAND_UI ( ID_WAVED_FASTFORWARD, OnUpdateFFandRWButtons )
 			ON_UPDATE_COMMAND_UI ( ID_WAVED_REWIND, OnUpdateFFandRWButtons )
+			ON_UPDATE_COMMAND_UI ( ID_WAVEED_WAVEMIN, OnUpdateWaveMinus )
+			ON_UPDATE_COMMAND_UI ( ID_WAVEED_WAVEPLUS, OnUpdateWavePlus )
+			ON_COMMAND ( ID_WAVEED_WAVEMIN, OnWaveMinus )
+			ON_COMMAND ( ID_WAVEED_WAVEPLUS, OnWavePlus )
 			ON_COMMAND ( ID_WAVED_PLAY, OnPlay )
 			ON_COMMAND ( ID_WAVED_PLAYFROMSTART, OnPlayFromStart )
 			ON_COMMAND ( ID_WAVED_STOP, OnStop )
 			ON_COMMAND ( ID_WAVED_RELEASE, OnRelease)
 			ON_COMMAND ( ID_WAVED_FASTFORWARD, OnFastForward )
 			ON_COMMAND ( ID_WAVED_REWIND, OnRewind )
+			ON_CBN_CLOSEUP(ID_WAVEEDIT_COMBO_WAV, OnCloseupCmbWave)
 			ON_WM_DESTROY()
 		END_MESSAGE_MAP()
 
@@ -43,10 +48,10 @@ namespace psycle { namespace host {
 			ID_INDICATOR_MODE
 		};
 
-		CWaveEdFrame::CWaveEdFrame()
+		CWaveEdFrame::CWaveEdFrame(): wsInstrument(0)
 		{
 		}
-		CWaveEdFrame::CWaveEdFrame(Song& _sng, CMainFrame* pframe)
+		CWaveEdFrame::CWaveEdFrame(Song& _sng, CMainFrame* pframe): wsInstrument(0)
 		{
 			this->_pSong = &_sng;
 			wavview.SetSong(_sng);
@@ -74,7 +79,7 @@ namespace psycle { namespace host {
 		{
 			if (wavview.OnCmdMsg(nID, nCode, pExtra, pHandlerInfo))
 			{
-				this->AdjustStatusBar(_pSong->instSelected);
+				this->AdjustStatusBar(wsInstrument);
 				return true;	
 			}
 			return CFrameWnd::OnCmdMsg(nID, nCode, pExtra, pHandlerInfo);
@@ -99,6 +104,22 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
+			CRect rect;
+			int nIndex = ToolBar.GetToolBarCtrl().CommandToIndex(ID_WAVEEDIT_COMBO_WAV);
+			ToolBar.SetButtonInfo(nIndex, ID_WAVEEDIT_COMBO_WAV, TBBS_SEPARATOR, 160);
+			ToolBar.GetToolBarCtrl().GetItemRect(nIndex, &rect);
+			rect.top = 1;
+			rect.bottom = rect.top + 400; //drop height
+			if(!comboWav.Create( WS_CHILD |  CBS_DROPDOWNLIST | WS_VISIBLE | CBS_AUTOHSCROLL 
+				 | WS_VSCROLL, rect, &ToolBar, ID_WAVEEDIT_COMBO_WAV))
+			{
+				TRACE0("Failed to create combobox\n");
+				return -1;      // fail to create
+			}
+			HGDIOBJ hFont = GetStockObject( DEFAULT_GUI_FONT );
+			CFont font;
+			font.Attach( hFont );
+			comboWav.SetFont(&font);
 
 			// Status bar
 			if (!statusbar.Create(this) ||
@@ -146,9 +167,28 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::GenerateView() 
 		{	
+			if (_pSong->samples.size() == 0) {
+				_pSong->samples.SetSample(*new XMInstrument::WaveData<>(),0);
+			}
+			FillWaveCombobox();
 			this->wavview.GenerateAndShow(); 
 		}
-
+		void CWaveEdFrame::FillWaveCombobox() 
+		{
+			comboWav.ResetContent();
+			char buffer[64];
+			for (int i(0); i<_pSong->samples.size(); i++)
+			{
+				if (_pSong->samples.Exists(i)) {
+					sprintf(buffer, "%.2X: %s", i, _pSong->samples[i].WaveName().c_str());
+				}
+				else {
+					sprintf(buffer, "%02X:", i);
+				}
+				comboWav.AddString(buffer);
+			}
+			comboWav.SetCurSel(_pSong->waveSelected);
+		}
 		void CWaveEdFrame::OnUpdateStatusBar(CCmdUI *pCmdUI)  
 		{     
 			pCmdUI->Enable();  
@@ -175,7 +215,7 @@ namespace psycle { namespace host {
 
 			char buff[48];
 			int sl=wavview.GetSelectionLength();
-			if(sl==0 || _pSong->_pInstrument[_pSong->instSelected]==NULL)
+			if(sl==0 || _pSong->_pInstrument[wsInstrument]==NULL)
 				sprintf(buff, "No Data in Selection.");
 			else
 			{
@@ -218,9 +258,10 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::Notify(void)
 		{
-			wavview.SetViewData(_pSong->instSelected);
-			AdjustStatusBar(_pSong->instSelected);
-			wsInstrument = _pSong->instSelected;
+			FillWaveCombobox();
+			wsInstrument = _pSong->waveSelected;
+			wavview.SetViewData(wsInstrument);
+			AdjustStatusBar(wsInstrument);
 		}
 
 		void CWaveEdFrame::OnPlay() {PlayFrom(wavview.GetCursorPos());}
@@ -242,7 +283,8 @@ namespace psycle { namespace host {
 				return;
 
 			OnStop();
-			_pSong->wavprev.Play(60, startPos);
+			_pSong->wavprev.SetVolume(wavview.GetVolume());
+			_pSong->wavprev.Play(notecommands::middleC, startPos);
 			wavview.SetTimer(ID_TIMER_WAVED_PLAYING, 33, 0);
 		}
 		void CWaveEdFrame::OnUpdateFFandRWButtons(CCmdUI* pCmdUI)
@@ -259,6 +301,44 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::OnRewind()
 		{
 			wavview.SetCursorPos( 0 );
+		}
+
+		void CWaveEdFrame::OnUpdateWaveMinus(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong->waveSelected>0);
+		}
+		void CWaveEdFrame::OnUpdateWavePlus(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong->waveSelected<MAX_INSTRUMENTS);
+		}
+		void CWaveEdFrame::OnCloseupCmbWave()
+		{
+			_pSong->waveSelected = comboWav.GetCurSel();
+			wsInstrument = _pSong->waveSelected;
+			wavview.SetViewData(wsInstrument);
+			AdjustStatusBar(wsInstrument);
+		}
+		void CWaveEdFrame::OnWaveMinus()
+		{
+			_pSong->waveSelected--;
+			wsInstrument = _pSong->waveSelected;
+			comboWav.SetCurSel(wsInstrument);
+			wavview.SetViewData(wsInstrument);
+			AdjustStatusBar(wsInstrument);
+		}
+		void CWaveEdFrame::OnWavePlus()
+		{
+			_pSong->waveSelected++;
+			wsInstrument = _pSong->waveSelected;
+			if (_pSong->samples.size()<=wsInstrument) {
+				_pSong->samples.SetSample(*new XMInstrument::WaveData<>(),wsInstrument);
+				FillWaveCombobox();
+			}
+			else {
+				comboWav.SetCurSel(wsInstrument);
+			}
+			wavview.SetViewData(wsInstrument);
+			AdjustStatusBar(wsInstrument);
 		}
 
 	}   // namespace

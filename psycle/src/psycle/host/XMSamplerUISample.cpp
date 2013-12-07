@@ -5,6 +5,7 @@
 #include <psycle/host/PsycleConfig.hpp>
 #include "InstrumentEditorUI.hpp"
 #include "MainFrm.hpp"
+#include "InputHandler.hpp"
 
 namespace psycle { namespace host {
 
@@ -57,6 +58,54 @@ END_MESSAGE_MAP()
 
 BOOL XMSamplerUISample::PreTranslateMessage(MSG* pMsg) 
 {
+	HWND focusWin = GetFocus()->GetSafeHwnd();
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		/*	DWORD dwID = GetDlgCtrlID(focusWin);
+		if (dwID == IDD_SOMETHING)*/
+		TCHAR out[256];
+		GetClassName(focusWin,out,256);
+		bool editbox=(strncmp(out,"Edit",5) == 0);
+		if (pMsg->wParam != VK_ESCAPE
+			&& pMsg->wParam != VK_UP && pMsg->wParam != VK_DOWN && pMsg->wParam != VK_LEFT 
+			&& pMsg->wParam != VK_RIGHT && pMsg->wParam != VK_TAB && pMsg->wParam != VK_NEXT 
+			&& pMsg->wParam != VK_PRIOR && pMsg->wParam != VK_HOME && pMsg->wParam != VK_END
+			&& !editbox) {
+			// get command
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,pMsg->lParam>>16);
+			const BOOL bRepeat = (pMsg->lParam>>16)&0x4000;
+			if(cmd.IsValid() && cmd.GetType() == CT_Note && !bRepeat)
+			{
+				int note = cmd.GetNote();
+				note+=Global::song().currentOctave*12;
+				if (note > notecommands::b9) 
+					note = notecommands::b9;
+
+				Global::song().wavprev.Play(note);
+				return TRUE;
+			}
+		}
+	}
+	else if (pMsg->message == WM_KEYUP)
+	{
+		TCHAR out[256];
+		GetClassName(focusWin,out,256);
+		bool editbox=(strncmp(out,"Edit",5) == 0);
+		if (pMsg->wParam != VK_ESCAPE
+			&& pMsg->wParam != VK_UP && pMsg->wParam != VK_DOWN && pMsg->wParam != VK_LEFT 
+			&& pMsg->wParam != VK_RIGHT && pMsg->wParam != VK_TAB && pMsg->wParam != VK_NEXT 
+			&& pMsg->wParam != VK_PRIOR && pMsg->wParam != VK_HOME && pMsg->wParam != VK_END
+			&& !editbox) {
+			// get command
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,pMsg->lParam>>16);
+			if(cmd.IsValid() && cmd.GetType() == CT_Note)
+			{
+				Global::song().wavprev.Stop();
+				return TRUE;
+			}
+		}
+	}
+
 	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
 	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
@@ -142,7 +191,7 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 		Global::song().samples.SetSample(wave,i);
 	}
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-	win->ChangeIns(i);
+	win->ChangeWave(i);
 
 	XMInstrument::WaveData<>& wave = Global::song().samples.get(i);
 	pWave(&wave);
@@ -167,6 +216,7 @@ void XMSamplerUISample::RefreshSampleData()
 
 	const int panpos=wave.PanFactor()*128.0f;
 	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
+	((CSliderCtrl*)GetDlgItem(IDC_PAN))->EnableWindow((wave.PanEnabled()&& !wave.IsSurround())?1:0);
 	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
 	FillPanDescription(panpos);
 
@@ -187,6 +237,10 @@ void XMSamplerUISample::RefreshSampleData()
 	((CEdit*)GetDlgItem(IDC_LOOPSTART))->SetWindowText(tmp);
 	sprintf(tmp,"%d",wave.WaveLoopEnd());
 	((CEdit*)GetDlgItem(IDC_LOOPEND))->SetWindowText(tmp);
+	GetDlgItem(IDC_LOOPSTART)->EnableWindow(wave.WaveLoopType()!=XMInstrument::WaveData<>::LoopType::DO_NOT);
+	GetDlgItem(IDC_LOOPEND)->EnableWindow(wave.WaveLoopType()!=XMInstrument::WaveData<>::LoopType::DO_NOT);
+	GetDlgItem(IDC_SUSTAINSTART)->EnableWindow(wave.WaveSusLoopType()!=XMInstrument::WaveData<>::LoopType::DO_NOT);
+	GetDlgItem(IDC_SUSTAINEND)->EnableWindow(wave.WaveSusLoopType()!=XMInstrument::WaveData<>::LoopType::DO_NOT);
 
     //
 	m_WaveScope.SetWave(&wave);
@@ -348,7 +402,7 @@ void XMSamplerUISample::OnBnClickedPanenabled()
 		rWave().PanEnabled(check->GetCheck() > 0);
 		rWave().IsSurround(check->GetCheck() == 2);
 	}
-
+	((CSliderCtrl*)GetDlgItem(IDC_PAN))->EnableWindow((rWave().PanEnabled() && !rWave().IsSurround())?1:0);
 	FillPanDescription(static_cast<int>(rWave().PanFactor()*128));
 }
 
@@ -463,6 +517,8 @@ void XMSamplerUISample::OnCbnSelendokLoop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_LOOP);
 	rWave().WaveLoopType((XMInstrument::WaveData<>::LoopType::Type)cbox->GetCurSel());
+	GetDlgItem(IDC_LOOPSTART)->EnableWindow(cbox->GetCurSel()>0);
+	GetDlgItem(IDC_LOOPEND)->EnableWindow(cbox->GetCurSel()>0);
 	DrawScope();
 }
 
@@ -470,6 +526,8 @@ void XMSamplerUISample::OnCbnSelendokSustainloop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_SUSTAINLOOP);
 	rWave().WaveSusLoopType((XMInstrument::WaveData<>::LoopType::Type)cbox->GetCurSel());
+	GetDlgItem(IDC_SUSTAINSTART)->EnableWindow(cbox->GetCurSel()>0);
+	GetDlgItem(IDC_SUSTAINEND)->EnableWindow(cbox->GetCurSel()>0);
 	DrawScope();
 }
 

@@ -76,6 +76,7 @@ namespace psycle { namespace host {
 			void UpdateVumeters();
 
 			void ChangeIns(int i);
+			void ChangeWave(int i);
 			void ChangeGen(int i);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);

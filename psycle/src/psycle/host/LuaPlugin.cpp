@@ -101,7 +101,6 @@ namespace psycle { namespace host {
 				std::map<std::string, int> ids;
 				for (UINT i = 0; i < count; i++)
 				{
-					int temp;
 					std::string id;
 					bool res = pFile->ReadString(id); // (&temp,sizeof(temp));
 					ids[id] = i;

@@ -571,7 +571,7 @@ namespace psycle
 
 
 			m_PanFactor=0.5f;
-			m_PanRange=1;
+			m_PanRange=0.5f;
 			m_Surround=false;
 
 			ResetEffects();
@@ -1275,7 +1275,7 @@ namespace psycle
 				// final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)*pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0) = pow(2.0,5.0-note/12.0)
 				// log2(final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)) + log2(pow(2.0,(_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0)) = 5.0-note/12.0
 				// note = 60 - 12*log2(final_period * _wave.WaveSampleRate()/(1712.0 *8363.0)) + (_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0
-				int _note = 60 -12*(log10(period * _wave.WaveSampleRate()) * 3.3219280948873623478703194294894 /*1/log10(2)*/ 
+				int _note = notecommands::middleC -12*(log10(period * _wave.WaveSampleRate()) * 3.3219280948873623478703194294894 /*1/log10(2)*/ 
 							-23.77127183403184445503933415201/*log2(1.0/(1712.0 *8363.0))*/) + (_wave.WaveTune()+(_wave.WaveFineTune()*0.01))/12.0;
 				return _note+12;
 			} else {

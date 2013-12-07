@@ -171,14 +171,22 @@ namespace psycle { namespace host {
 			std::uint32_t WaveLoopStart() const { return m_WaveLoopStart;}
 			void WaveLoopStart(const std::uint32_t value){m_WaveLoopStart = value;}
 			std::uint32_t WaveLoopEnd() const { return m_WaveLoopEnd;}
-			void WaveLoopEnd(const std::uint32_t value){m_WaveLoopEnd = value;}
+			void WaveLoopEnd(const std::uint32_t value){ 
+				// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
+				if(m_WaveLength > 0 && value > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;} 
+				else {m_WaveLoopEnd = value;}
+			}
 			LoopType::Type WaveLoopType() const { return m_WaveLoopType;}
 			void WaveLoopType(const LoopType::Type value){ m_WaveLoopType = value;}
 
 			std::uint32_t WaveSusLoopStart() const { return m_WaveSusLoopStart;}
 			void WaveSusLoopStart(const std::uint32_t value){m_WaveSusLoopStart = value;}
 			std::uint32_t WaveSusLoopEnd() const { return m_WaveSusLoopEnd;}
-			void WaveSusLoopEnd(const std::uint32_t value){m_WaveSusLoopEnd = value;}
+			void WaveSusLoopEnd(const std::uint32_t value){
+				// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
+				if(m_WaveLength > 0 && value > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
+				else {m_WaveSusLoopEnd = value;}
+			}
 			LoopType::Type WaveSusLoopType() const { return m_WaveSusLoopType;}
 			void WaveSusLoopType(const LoopType::Type value){ m_WaveSusLoopType = value;}
 
@@ -215,7 +223,7 @@ namespace psycle { namespace host {
 			/// the volume if no volume is specified in the pattern, while globVolume is
 			/// an attenuator for all notes of this sample.
 			float m_WaveGlobVolume; // range ( 0..1 ) 
-			std::uint16_t m_WaveDefVolume;
+			std::uint16_t m_WaveDefVolume; // range (0..80 hex)
 			std::uint32_t m_WaveLoopStart;
 			std::uint32_t m_WaveLoopEnd;
 			LoopType::Type m_WaveLoopType;

@@ -6,7 +6,6 @@
 #include "InstrumentAmpDlg.hpp"
 #include "InstrumentPanDlg.hpp"
 #include "InstrumentFilDlg.hpp"
-#include "InstrumentPitDlg.hpp"
 
 namespace psycle { namespace host {
 
@@ -60,7 +59,6 @@ protected:
 	CInstrumentAmpDlg m_ampTab;
 	CInstrumentPanDlg m_panTab;
 	CInstrumentFilDlg m_filTab;
-	CInstrumentPitDlg m_pitTab;
 };
 
 }}

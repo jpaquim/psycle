@@ -170,18 +170,31 @@ namespace psycle
 			}
 		}
 
-		void AudioDriver::Quantize24(float *pin, int *piout, int c)
+		void AudioDriver::Quantize24BE(float *pin, int *piout, int c)
 		{
-            		unsigned char *cptr = (unsigned char *) piout;
+            unsigned char *cptr = (unsigned char *) piout;
 			for(int i = 0; i < c; ++i) {
 				int outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
-				UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
+				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
+				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
+				*cptr++ = (unsigned char) (outval & 0xFF);
+
+				outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
+				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
+				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
+				*cptr++ = (unsigned char) (outval & 0xFF);
+			}
+		}
+		void AudioDriver::Quantize24LE(float *pin, int *piout, int c)
+		{
+            unsigned char *cptr = (unsigned char *) piout;
+			for(int i = 0; i < c; ++i) {
+				int outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
 				*cptr++ = (unsigned char) (outval & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 
 				outval = psycle::helpers::math::rint_clip<int32_t, 24>((*pin++) * 256.0f);
-				UNIVERSALIS__COMPILER__WARNING("big-endianess assumed ?")
 				*cptr++ = (unsigned char) (outval & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 8) & 0xFF);
 				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);

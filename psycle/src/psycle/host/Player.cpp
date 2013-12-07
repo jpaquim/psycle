@@ -201,6 +201,7 @@ void Player::start_threads(int thread_count) {
 			for(int i=0;i<MAX_TRACKS;i++) {
 				playTrack[i]=false;
 			}
+			Global::song().wavprev.Stop();
 			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
 			if (!_recording) {
 				SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());

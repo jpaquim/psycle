@@ -852,6 +852,7 @@ namespace psycle { namespace host {
 		void CMainFrame::OnSavewave() { m_machineBar.OnSavewave(); }
 		void CMainFrame::OnEditwave() { m_machineBar.OnEditwave(); }
 		void CMainFrame::OnWavebut() { m_machineBar.OnWavebut(); }
+		void CMainFrame::ChangeWave(int i) { m_machineBar.ChangeWave(i); }
 		void CMainFrame::ChangeIns(int i) { m_machineBar.ChangeIns(i); }
 		void CMainFrame::ChangeGen(int i) { m_machineBar.ChangeGen(i); }
 		void CMainFrame::UpdateComboIns(bool updatelist) { m_machineBar.UpdateComboIns(updatelist); }

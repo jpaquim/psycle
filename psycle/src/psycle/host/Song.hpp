@@ -68,6 +68,7 @@ namespace psycle
 			///\{
 			///
 			int instSelected;
+			int waveSelected;
 			///
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
 			SampleList samples;

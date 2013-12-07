@@ -62,16 +62,14 @@ BOOL XMSamplerUIInst::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	CRect rect, rect2;
-	m_tabMain.InsertItem(0,_T("(4)General"));
+	m_tabMain.InsertItem(0,_T("(4)Pitch"));
 	m_tabMain.InsertItem(1,_T("(5)Amplitude"));
 	m_tabMain.InsertItem(2,_T("(6)Pan"));
 	m_tabMain.InsertItem(3,_T("(7)Filter"));
-	m_tabMain.InsertItem(4,_T("(8)Pitch"));
-	m_genTab.Create(IDD_INST_SAMPULSE_INSTGEN,&m_tabMain);
+	m_genTab.Create(IDD_INST_SAMPULSE_INSTPIT_NEW,&m_tabMain);
 	m_ampTab.Create(IDD_INST_SAMPULSE_INSTAMP,&m_tabMain);
 	m_panTab.Create(IDD_INST_SAMPULSE_INSTPAN,&m_tabMain);
 	m_filTab.Create(IDD_INST_SAMPULSE_INSTFIL,&m_tabMain);
-	m_pitTab.Create(IDD_INST_SAMPULSE_INSTPIT,&m_tabMain);
 
 	m_tabMain.GetWindowRect(rect);
 	rect2.CopyRect(rect);
@@ -81,7 +79,6 @@ BOOL XMSamplerUIInst::OnInitDialog()
 	m_ampTab.SetWindowPos(&m_tabMain,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOZORDER|SWP_NOREDRAW);
 	m_panTab.SetWindowPos(&m_tabMain,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOZORDER|SWP_NOREDRAW);
 	m_filTab.SetWindowPos(&m_tabMain,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOZORDER|SWP_NOREDRAW);
-	m_pitTab.SetWindowPos(&m_tabMain,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,SWP_NOZORDER|SWP_NOREDRAW);
 
 	m_tabMain.SetCurSel(0);
 	m_genTab.ShowWindow(SW_SHOW);
@@ -106,7 +103,6 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 	m_ampTab.AssignAmplitudeValues(inst);
 	m_panTab.AssignPanningValues(inst);
 	m_filTab.AssignFilterValues(inst);
-	m_pitTab.AssignPitchValues(inst);
 }
 
 
@@ -164,14 +160,12 @@ void XMSamplerUIInst::SetActivePage(int index) {
 	m_ampTab.ShowWindow(index==1?SW_SHOW:SW_HIDE);
 	m_panTab.ShowWindow(index==2?SW_SHOW:SW_HIDE);
 	m_filTab.ShowWindow(index==3?SW_SHOW:SW_HIDE);
-	m_pitTab.ShowWindow(index==4?SW_SHOW:SW_HIDE);
 	switch(index) 
 	{
 		case 0: m_genTab.SetFocus(); break;
 		case 1: m_ampTab.SetFocus(); break;
 		case 2: m_panTab.SetFocus(); break;
 		case 3: m_filTab.SetFocus(); break;
-		case 4: m_pitTab.SetFocus(); break;
 		default: break;
 	}
 }
@@ -183,7 +177,6 @@ void XMSamplerUIInst::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	m_ampTab.ShowWindow(iSel==1?SW_SHOW:SW_HIDE);
 	m_panTab.ShowWindow(iSel==2?SW_SHOW:SW_HIDE);
 	m_filTab.ShowWindow(iSel==3?SW_SHOW:SW_HIDE);
-	m_pitTab.ShowWindow(iSel==4?SW_SHOW:SW_HIDE);
 
 	*pResult = 0;
 }

@@ -22,6 +22,7 @@ namespace psycle { namespace host {
 		public:
 		//	SetWave(signed short *pleft,signed short *pright,int numsamples, bool stereo);
 			void GenerateView();
+			void FillWaveCombobox();
 			void Notify(void);
 			Song* _pSong;
 			CMainFrame *_pFrame;
@@ -34,6 +35,7 @@ namespace psycle { namespace host {
 			void PlayFrom(unsigned long startpos);
 			CStatusBar statusbar;
 			CToolBar ToolBar;
+			CComboBox comboWav;
 
 			CWaveEdChildView wavview;
 
@@ -48,6 +50,11 @@ namespace psycle { namespace host {
 			afx_msg void OnUpdateStopButton(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateReleaseButton(CCmdUI *pCmdUI);
 			afx_msg void OnUpdateFFandRWButtons(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateWaveMinus(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateWavePlus(CCmdUI* pCmdUI);
+			afx_msg void OnCloseupCmbWave();
+			afx_msg void OnWaveMinus();
+			afx_msg void OnWavePlus();
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 			afx_msg void OnDestroy();
 			afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);

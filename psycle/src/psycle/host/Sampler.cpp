@@ -33,7 +33,7 @@ namespace psycle
 			_editName[sizeof(_editName)-1]='\0';
 			InitializeSamplesVector();
 			
-			baseC = 60;
+			baseC = notecommands::middleC;
 			_resampler.quality(helpers::dsp::resampler::quality::spline);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 			{
