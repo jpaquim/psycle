@@ -41,12 +41,11 @@ protected:
 	afx_msg void OnBnClickedDupeins();
 	afx_msg void OnBnClickedDeleteins();
 
-private:
-
-	void SetInstrumentData(const int instno);
 public:
-	void FillInstrumentList();
+	void SetInstrumentData(const int instno);
+	void FillInstrumentList(int sample=-1);
 	void SetActivePage(int index);
+	void UpdateTabNames();
 private:
 	bool m_bInitialized;
 	int		m_iCurrentSelected;
@@ -59,6 +58,10 @@ protected:
 	CInstrumentAmpDlg m_ampTab;
 	CInstrumentPanDlg m_panTab;
 	CInstrumentFilDlg m_filTab;
+	char genTabName[24];
+	char ampTabName[24];
+	char panTabName[24];
+	char filTabName[24];
 };
 
 }}

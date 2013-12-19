@@ -46,6 +46,7 @@ private:
 	void SetNewNoteAction(const int nna,const int dct,const int dca);
 	void MoveMapping(int amount);
 	void TuneNotes(int amount);
+	void ValidateEnabled();
 
 	CSampleAssignEditor m_SampleAssign;
 

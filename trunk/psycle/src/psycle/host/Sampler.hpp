@@ -149,7 +149,7 @@ namespace psycle
 				return (x*rand())/32768;
 			}
 			void PerformFx(int voice);
-			void VoiceWork(int numsamples, int voice);
+			void VoiceWork(int numsamples, int voice, int offset);
 			void NoteOff(int voice);
 			void NoteOffFast(int voice);
 			int VoiceTick(int channel, PatternEntry* pData);

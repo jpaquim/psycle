@@ -1582,7 +1582,8 @@ namespace psycle { namespace host {
 					}
 				}
 
-				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->UpdateInstrumentEditor();
+				mainFrame->WaveEditorBackUpdate();
 				ResetScrollBars(true);
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1601,6 +1602,8 @@ namespace psycle { namespace host {
 				RefreshDisplayData(true);
 				Invalidate(true);
 			}
+			mainFrame->UpdateInstrumentEditor();
+			mainFrame->WaveEditorBackUpdate();
 		}
 
 
@@ -1852,7 +1855,8 @@ namespace psycle { namespace host {
 				blLength  = 0;
 				blStart   = 0;
 
-				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->UpdateInstrumentEditor();
+				mainFrame->WaveEditorBackUpdate();
 				ResetScrollBars(true);
 				RefreshDisplayData(true);
 				Invalidate(true);
@@ -1965,100 +1969,101 @@ namespace psycle { namespace host {
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
 			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			_pSong->StopInstrument(wsInstrument);
-
-			if (!wdWave)
 			{
-				//\todo: support different bitdepths
-				if (pFmt->wBitsPerSample == 16)
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
+				_pSong->StopInstrument(wsInstrument);
+
+				if (!wdWave)
 				{
-					_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
+					//\todo: support different bitdepths
+					if (pFmt->wBitsPerSample == 16)
+					{
+						_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
+						XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+						wdLength = lDataSamps;
+						wdLeft  = wave.pWaveDataL();
+						if (pFmt->nChannels == 1)
+						{
+							memcpy(wave.pWaveDataL(), pData, lData);
+							wdStereo = false;
+						}
+						else if (pFmt->nChannels == 2)
+						{
+							for (c = 0; c < lDataSamps; ++c)
+							{
+								*(wave.pWaveDataL() + c) = *(signed short*)(pData + c*pFmt->nBlockAlign);
+								*(wave.pWaveDataR() + c) = *(signed short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
+							}
+							wdRight = wave.pWaveDataR();
+							wdStereo = true;
+						}
+						wdWave = true;
+						ResetScrollBars(true);
+						OnSelectionShowall();
+						wave.WaveSampleRate(pFmt->nSamplesPerSec);
+					}
+				}
+				else
+				{
 					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
-					wdLength = lDataSamps;
-					wdLeft  = wave.pWaveDataL();
-					if (pFmt->nChannels == 1)
+					if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
 					{
-						memcpy(wave.pWaveDataL(), pData, lData);
-						wdStereo = false;
-					}
-					else if (pFmt->nChannels == 2)
-					{
-						for (c = 0; c < lDataSamps; ++c)
-						{
-							*(wave.pWaveDataL() + c) = *(signed short*)(pData + c*pFmt->nBlockAlign);
-							*(wave.pWaveDataR() + c) = *(signed short*)(pData + c*pFmt->nBlockAlign + (int)(pFmt->nBlockAlign/2));
+						if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
+							 ((pFmt->nChannels == 2) && (wdStereo == false)) )
+							 return;
+
+						XMInstrument::WaveData<> waveToPaste;
+						waveToPaste.AllocWaveData(lDataSamps, wdStereo);
+						//prepare left channel
+						for (c = 0; c < lDataSamps; c++) {
+							waveToPaste.pWaveDataL()[c] = *(short*)(pData + c*pFmt->nBlockAlign);
 						}
+
+						if(wdStereo)	//if stereo, prepare right channel
+						{
+							int align = (int)(pFmt->nBlockAlign/2);
+							for (c = 0; c < lDataSamps; c++)
+								waveToPaste.pWaveDataR()[c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
+						}
+
+						//Insert
+						wave.InsertAt(cursorPos,waveToPaste);
+						wdLeft = wave.pWaveDataL();
 						wdRight = wave.pWaveDataR();
-						wdStereo = true;
-					}
-					wdWave = true;
-					ResetScrollBars(true);
-					OnSelectionShowall();
-					wave.WaveSampleRate(pFmt->nSamplesPerSec);
-				}
-			}
-			else
-			{
-				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
-				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
-				{
-					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
-						 ((pFmt->nChannels == 2) && (wdStereo == false)) )
-						 return;
 
-					XMInstrument::WaveData<> waveToPaste;
-					waveToPaste.AllocWaveData(lDataSamps, wdStereo);
-					//prepare left channel
-					for (c = 0; c < lDataSamps; c++) {
-						waveToPaste.pWaveDataL()[c] = *(short*)(pData + c*pFmt->nBlockAlign);
-					}
+						//update length
+						wdLength = wave.WaveLength();
 
-					if(wdStereo)	//if stereo, prepare right channel
-					{
-						int align = (int)(pFmt->nBlockAlign/2);
-						for (c = 0; c < lDataSamps; c++)
-							waveToPaste.pWaveDataR()[c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
-					}
-
-					//Insert
-					wave.InsertAt(cursorPos,waveToPaste);
-					wdLeft = wave.pWaveDataL();
-					wdRight = wave.pWaveDataR();
-
-					//update length
-					wdLength = wave.WaveLength();
-
-					//	adjust loop points if necessary
-					if(wdLoop)
-					{
-						if(cursorPos<wdLoopS)
+						//	adjust loop points if necessary
+						if(wdLoop)
 						{
-							wdLoopS += lDataSamps;
-							wave.WaveLoopStart(wdLoopS);
+							if(cursorPos<wdLoopS)
+							{
+								wdLoopS += lDataSamps;
+								wave.WaveLoopStart(wdLoopS);
+							}
+							if(cursorPos<wdLoopE)
+							{
+								wdLoopE += lDataSamps;
+								wave.WaveLoopEnd(wdLoopE);
+							}
 						}
-						if(cursorPos<wdLoopE)
+						if(wdSusLoop)
 						{
-							wdLoopE += lDataSamps;
-							wave.WaveLoopEnd(wdLoopE);
-						}
-					}
-					if(wdSusLoop)
-					{
-						if(cursorPos<wdSusLoopS)
-						{
-							wdSusLoopS += lDataSamps;
-							wave.WaveSusLoopStart(wdSusLoopS);
-						}
-						if(cursorPos<wdSusLoopE)
-						{
-							wdSusLoopE += lDataSamps;
-							wave.WaveSusLoopEnd(wdSusLoopE);
+							if(cursorPos<wdSusLoopS)
+							{
+								wdSusLoopS += lDataSamps;
+								wave.WaveSusLoopStart(wdSusLoopS);
+							}
+							if(cursorPos<wdSusLoopE)
+							{
+								wdSusLoopE += lDataSamps;
+								wave.WaveSusLoopEnd(wdSusLoopE);
+							}
 						}
 					}
 				}
 			}
-
 			GlobalUnlock(hPasteData);
 			CloseClipboard();
 			//OnSelectionShowall();
@@ -2066,7 +2071,8 @@ namespace psycle { namespace host {
 			ResetScrollBars(true);
 			RefreshDisplayData(true);
 
-			mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+			mainFrame->UpdateInstrumentEditor();
+			mainFrame->WaveEditorBackUpdate();
 			Invalidate(true);
 		}
 
@@ -2094,49 +2100,50 @@ namespace psycle { namespace host {
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
 			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
-
-			CExclusiveLock lock(&_pSong->semaphore, 2, true);
-			_pSong->StopInstrument(wsInstrument);
-			if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
 			{
-				if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
-						((pFmt->nChannels == 2) && (wdStereo == false)) )
-						return;
-				unsigned long c;
+				CExclusiveLock lock(&_pSong->semaphore, 2, true);
+				_pSong->StopInstrument(wsInstrument);
+				if (pFmt->wBitsPerSample == 16 && (pFmt->nChannels==1 || pFmt->nChannels==2))
+				{
+					if ( ((pFmt->nChannels == 1) && (wdStereo == true)) ||		//todo: deal with this better.. i.e. dialog box offering to convert clipboard data
+							((pFmt->nChannels == 2) && (wdStereo == false)) )
+							return;
+					unsigned long c;
 
-				if(blSelection)	//overwrite selected block
-				{
-					//if clipboard data is longer than selection, truncate it
-					if(lDataSamps>blLength+1)
+					if(blSelection)	//overwrite selected block
 					{
-						lData=(blLength+1)*pFmt->nBlockAlign; 
-						lDataSamps=blLength+1;
+						//if clipboard data is longer than selection, truncate it
+						if(lDataSamps>blLength+1)
+						{
+							lData=(blLength+1)*pFmt->nBlockAlign; 
+							lDataSamps=blLength+1;
+						}
+						startPoint=blStart;
 					}
-					startPoint=blStart;
-				}
-				else		//overwrite at cursor
-				{
-					//truncate to current wave size	(should we be extending in this case??)
-					if(lDataSamps>(wdLength-cursorPos))
+					else		//overwrite at cursor
 					{
-						lData=(wdLength-cursorPos)*pFmt->nBlockAlign;
-						lDataSamps=wdLength-cursorPos;
+						//truncate to current wave size	(should we be extending in this case??)
+						if(lDataSamps>(wdLength-cursorPos))
+						{
+							lData=(wdLength-cursorPos)*pFmt->nBlockAlign;
+							lDataSamps=wdLength-cursorPos;
+						}
+						startPoint=cursorPos;
 					}
-					startPoint=cursorPos;
-				}
 
-				XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
-				//do left channel
-				for (c = 0; c < lDataSamps; c++)
-					wave.pWaveDataL()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign);
-				
-				if(wdStereo)	//do right channel if stereo
-				{
-					int align = (int)(pFmt->nBlockAlign/2);
+					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+					//do left channel
 					for (c = 0; c < lDataSamps; c++)
-						wave.pWaveDataR()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
+						wave.pWaveDataL()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign);
+					
+					if(wdStereo)	//do right channel if stereo
+					{
+						int align = (int)(pFmt->nBlockAlign/2);
+						for (c = 0; c < lDataSamps; c++)
+							wave.pWaveDataR()[startPoint + c] = *(short*)(pData + c*pFmt->nBlockAlign + align);
+					}
+					wave.WaveSampleRate(pFmt->nSamplesPerSec);
 				}
-				wave.WaveSampleRate(pFmt->nSamplesPerSec);
 			}
 			GlobalUnlock(hPasteData);
 			CloseClipboard();
@@ -2145,7 +2152,8 @@ namespace psycle { namespace host {
 			ResetScrollBars();
 			RefreshDisplayData(true);
 
-			mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+			mainFrame->UpdateInstrumentEditor();
+			mainFrame->WaveEditorBackUpdate();
 			Invalidate(true);
 
 		}
@@ -2251,7 +2259,8 @@ namespace psycle { namespace host {
 				ResetScrollBars(true);
 				RefreshDisplayData(true);
 
-				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->UpdateInstrumentEditor();
+				mainFrame->WaveEditorBackUpdate();
 				Invalidate(true);
 			}
 
@@ -2344,7 +2353,8 @@ namespace psycle { namespace host {
 				ResetScrollBars(true);
 				RefreshDisplayData(true);
 
-				mainFrame->ChangeIns(wsInstrument); // This causes an update of the Instrument Editor.
+				mainFrame->UpdateInstrumentEditor();
+				mainFrame->WaveEditorBackUpdate();
 				Invalidate(true);
 			}
 

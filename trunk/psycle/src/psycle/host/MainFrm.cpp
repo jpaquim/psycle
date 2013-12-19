@@ -536,13 +536,16 @@ namespace psycle { namespace host {
 			UpdateComboIns();
 
 			PsycleGlobal::inputHandler().AddMacViewUndo();
-
+			bool isSampulse = (_pSong->_pMachine[_pSong->seqBus] != NULL && _pSong->_pMachine[_pSong->seqBus]->_type == MACH_XMSAMPLER);
 			if (m_wndInst == NULL) {
 				m_wndInst = new InstrumentEditorUI("Instrument Window",this);
 				m_wndInst->Init(&m_wndInst);
+				if (isSampulse) m_wndInst->ShowSampulse();
 				m_wndInst->Create(this);
 			}
 			else {
+				if (isSampulse) m_wndInst->ShowSampulse();
+				else m_wndInst->ShowSampler();
 				m_wndInst->ShowWindow(SW_SHOW);
 				m_wndInst->SetActiveWindow();
 			}

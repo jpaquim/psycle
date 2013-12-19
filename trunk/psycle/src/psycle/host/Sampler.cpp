@@ -500,6 +500,7 @@ namespace psycle
 					PerformFx(voice);
 				}
 				int ns = numSamples;
+				int us = 0;
 				while (ns)
 				{
 					int nextevent = ns+1;
@@ -525,7 +526,7 @@ namespace psycle
 						}
 						for (int voice=0; voice<_numVoices; voice++)
 						{
-							VoiceWork(ns, voice);
+							VoiceWork(ns, voice, us);
 						}
 						ns = 0;
 					}
@@ -536,8 +537,9 @@ namespace psycle
 							ns -= nextevent;
 							for (int voice=0; voice<_numVoices; voice++)
 							{
-								VoiceWork(nextevent, voice);
+								VoiceWork(nextevent, voice, us);
 							}
+							us += nextevent;
 						}
 						for (int i=0; i < Global::song().SONGTRACKS; i++)
 						{
@@ -604,12 +606,12 @@ namespace psycle
 			return numSamples;
 		}
 
-		void Sampler::VoiceWork(int numsamples, int voice)
+		void Sampler::VoiceWork(int numsamples, int voice, int offset)
 		{
 			helpers::dsp::resampler::work_func_type pResamplerWork;
 			Voice* pVoice = &_voices[voice];
-			float* pSamplesL = samplesV[0];
-			float* pSamplesR = samplesV[1];
+			float* pSamplesL = samplesV[0]+offset;
+			float* pSamplesR = samplesV[1]+offset;
 			float left_output;
 			float right_output;
 

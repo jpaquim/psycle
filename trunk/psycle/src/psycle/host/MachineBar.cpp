@@ -458,6 +458,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if ( m_pSong->waveSelected == i) return;
 		if (i<0 || i >= MAX_INSTRUMENTS) return;
 		m_pSong->waveSelected=i;
+		m_pParentMain->UpdateInstrumentEditor();
 		m_pParentMain->WaveEditorBackUpdate();
 	}
 	void MachineBar::ChangeIns(int i)	// User Called (Hotkey, button or list change)

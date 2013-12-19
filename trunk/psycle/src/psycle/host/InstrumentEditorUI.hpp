@@ -32,6 +32,8 @@ class InstrumentEditorUI : public CPropertySheet
 	public:
 		virtual void PostNcDestroy();
 		void Init(InstrumentEditorUI** windowVar);
+		void ShowSampler();
+		void ShowSampulse();
 		void UpdateUI(void);
 		BOOL PreTranslateChildMessage(MSG* pMsg, HWND focusWin);
 

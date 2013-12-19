@@ -132,27 +132,27 @@ void CInstrumentGenDlg::OnEnChangeInsName()
 		m_instr->Name(_buf);
 		m_instr->IsEnabled(true);
 		XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
-		win->FillInstrumentList();
+		win->FillInstrumentList(-2);
 	}
 }
 
 void CInstrumentGenDlg::OnCbnSelendokInsNnacombo()
 {
 	m_instr->NNA((XMInstrument::NewNoteAction::Type)m_NNA.GetCurSel());
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 	
 void CInstrumentGenDlg::OnCbnSelendokInsDctcombo()
 {
 	m_instr->DCT((XMInstrument::DupeCheck::Type)m_DCT.GetCurSel());
 	m_DCA.EnableWindow(m_DCT.GetCurSel() != 0);
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 
 void CInstrumentGenDlg::OnCbnSelendokInsDcacombo()
 {
 	m_instr->DCA((XMInstrument::NewNoteAction::Type)m_DCA.GetCurSel());
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 
 void CInstrumentGenDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -161,22 +161,22 @@ void CInstrumentGenDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 	switch(nSBCode)
 	{
 		case SB_TOP:
-			m_Octave=0;
-			break;
-		case SB_BOTTOM:
 			m_Octave=8;
 			break;
-		case SB_LINERIGHT:
-		case SB_PAGERIGHT:
-			if ( m_Octave < 8) { m_Octave++; }
+		case SB_BOTTOM:
+			m_Octave=0;
 			break;
-		case SB_LINELEFT:
-		case SB_PAGELEFT:
+		case SB_LINEDOWN:
+		case SB_PAGEDOWN:
 			if ( m_Octave>0 ) { m_Octave--; }
+			break;
+		case SB_LINEUP:
+		case SB_PAGEUP:
+			if ( m_Octave < 8) { m_Octave++; }
 			break;
 		case SB_THUMBPOSITION:
 		case SB_THUMBTRACK:
-			m_Octave=(int)std::max(0,std::min((int)nPos,8));
+			m_Octave=std::max(0,std::min(8-(int)nPos,8));
 			break;
 		default: 
 			break;
@@ -193,7 +193,7 @@ void CInstrumentGenDlg::OnBtnSetDefaults()
 {
 	m_instr->SetDefaultNoteMap();
 	m_SampleAssign.Invalidate();
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnSetSample()
 {
@@ -206,9 +206,7 @@ void CInstrumentGenDlg::OnBtnSetSample()
 		m_instr->NoteToSample(i, pair);
 	}
 	m_SampleAssign.Invalidate();
-	m_instr->IsEnabled(true);
-	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
-	win->FillInstrumentList();
+	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnEditMapping()
 {
@@ -225,7 +223,7 @@ void CInstrumentGenDlg::OnBtnIncreaseOct()
 		MoveMapping(12);
 	}
 	m_SampleAssign.Invalidate();
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnDecreaseOct()
 {
@@ -236,7 +234,7 @@ void CInstrumentGenDlg::OnBtnDecreaseOct()
 		MoveMapping(-12);
 	}
 	m_SampleAssign.Invalidate();
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnIncreaseNote()
 {
@@ -247,7 +245,7 @@ void CInstrumentGenDlg::OnBtnIncreaseNote()
 		MoveMapping(1);
 	}
 	m_SampleAssign.Invalidate();
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnDecreaseNote()
 {
@@ -258,7 +256,7 @@ void CInstrumentGenDlg::OnBtnDecreaseNote()
 		MoveMapping(-1);
 	}
 	m_SampleAssign.Invalidate();
-	m_instr->IsEnabled(true);
+	ValidateEnabled();
 }
 
 void CInstrumentGenDlg::MoveMapping(int amount)
@@ -284,5 +282,14 @@ void CInstrumentGenDlg::TuneNotes(int amount)
 		pair.first = std::max((int)notecommands::c0,std::min((int)pair.first+amount,(int)notecommands::b9));
 		m_instr->NoteToSample(i, pair);
 	}
+}
+
+
+void CInstrumentGenDlg::ValidateEnabled() {
+	if (m_instr->IsEnabled()) return;
+
+	m_instr->IsEnabled(true);
+	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
+	win->FillInstrumentList(-2);
 }
 }}

@@ -2,6 +2,7 @@
 #include "EnvelopeEditorDlg.hpp"
 #include <psycle/host/Player.hpp>
 #include "InstrumentEditorUI.hpp"
+#include "XMSamplerUIInst.hpp"
 
 namespace psycle { namespace host {
 
@@ -43,8 +44,8 @@ END_MESSAGE_MAP()
 
 BOOL CEnvelopeEditorDlg::PreTranslateMessage(MSG* pMsg) 
 {
-	CWnd *insAmp = GetParent();
-	CWnd *tabCtl = insAmp->GetParent();
+	CWnd *insDataDlg = GetParent();
+	CWnd *tabCtl = insDataDlg->GetParent();
 	CWnd *UIInst = tabCtl->GetParent();
 	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(UIInst->GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
@@ -110,6 +111,10 @@ void CEnvelopeEditorDlg::RefreshButtons()
 void CEnvelopeEditorDlg::OnBnClickedEnvcheck()
 {
 	m_EnvelopeEditor.envelope().IsEnabled(m_EnvEnabled.GetCheck()!=0);
+	CWnd *insDataDlg = GetParent();
+	CWnd *tabCtl = insDataDlg->GetParent();
+	XMSamplerUIInst* UIInst = (XMSamplerUIInst*)tabCtl->GetParent();
+	UIInst->UpdateTabNames();
 }
 void CEnvelopeEditorDlg::OnBnClickedCarrycheck()
 {

@@ -1432,7 +1432,7 @@ BEGIN
     GROUPBOX        "Output",IDC_STATIC,7,3,243,139
     CONTROL         "Output to file",IDC_OUTPUTFILE,"Button",BS_AUTORADIOBUTTON | WS_GROUP,15,16,56,10
     CONTROL         "Output to clipboard",IDC_OUTPUTCLIPBOARD,"Button",BS_AUTORADIOBUTTON,15,111,229,10
-    CONTROL         "Output to next free sample slot (not implemented for now)",IDC_OUTPUTSAMPLE,
+    CONTROL         "Output to next free sample slot",IDC_OUTPUTSAMPLE,
                     "Button",BS_AUTORADIOBUTTON,15,126,229,10
     EDITTEXT        IDC_FILENAME,74,15,127,13,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse",IDC_FILEBROWSE,208,15,34,13

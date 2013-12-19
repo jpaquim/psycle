@@ -74,14 +74,16 @@ BOOL XMSamplerUISample::PreTranslateMessage(MSG* pMsg)
 			// get command
 			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,pMsg->lParam>>16);
 			const BOOL bRepeat = (pMsg->lParam>>16)&0x4000;
-			if(cmd.IsValid() && cmd.GetType() == CT_Note && !bRepeat)
+			if(cmd.IsValid() && cmd.GetType() == CT_Note)
 			{
-				int note = cmd.GetNote();
-				note+=Global::song().currentOctave*12;
-				if (note > notecommands::b9) 
-					note = notecommands::b9;
+				if (!bRepeat) {
+					int note = cmd.GetNote();
+					note+=Global::song().currentOctave*12;
+					if (note > notecommands::b9) 
+						note = notecommands::b9;
 
-				Global::song().wavprev.Play(note);
+					Global::song().wavprev.Play(note);
+				}
 				return TRUE;
 			}
 		}
@@ -148,57 +150,80 @@ BOOL XMSamplerUISample::OnInitDialog()
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void XMSamplerUISample::RefreshSampleList()
+void XMSamplerUISample::RefreshSampleList(int sample/*=-1*/)
 {
-	int i = m_SampleList.GetCurSel();
-	m_SampleList.ResetContent();
+	char line[48];
 	SampleList& list = Global::song().samples;
-	for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
-	{
-		char line[48];
-		if (list.Exists(i)) {
-			const XMInstrument::WaveData<>& wave = list[i];
-			sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
+	if (sample == -1) {
+		int i = m_SampleList.GetCurSel();
+		m_SampleList.ResetContent();
+		for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
+		{
+			if (list.Exists(i)) {
+				const XMInstrument::WaveData<>& wave = list[i];
+				sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
+				strcat(line,wave.WaveName().c_str());
+			}
+			else {
+				sprintf(line,"%02X : ",i);
+			}
+			m_SampleList.AddString(line);
+		}
+		if (i !=  LB_ERR) {
+			m_SampleList.SetCurSel(i);
+		}
+	}
+	else {
+		if (list.Exists(sample)) {
+			const XMInstrument::WaveData<>& wave = list[sample];
+			sprintf(line,"%02X%s: ",sample,wave.WaveLength()>0?"*":" ");
 			strcat(line,wave.WaveName().c_str());
 		}
 		else {
-			sprintf(line,"%02X : ",i);
+			sprintf(line,"%02X : ",sample);
 		}
-		m_SampleList.AddString(line);
-	}
-	if (i !=  LB_ERR) {
-		m_SampleList.SetCurSel(i);
+		m_SampleList.DeleteString(sample);
+		m_SampleList.InsertString(sample, line);
+		m_SampleList.SetCurSel(sample);
 	}
 }
 BOOL XMSamplerUISample::OnSetActive()
 {
-	if ( m_SampleList.GetCurSel() == LB_ERR ) {
-		m_SampleList.SetCurSel(0);
-	}
-	OnLbnSelchangeSamplelist();
+	int i= Global::song().waveSelected;
+	m_SampleList.SetCurSel(i);
+	SetSample(i);
 	m_Init=true;
 
 	return CPropertyPage::OnSetActive();
 }
-
+void XMSamplerUISample::WaveUpdate() 
+{
+	RefreshSampleList(Global::song().waveSelected);
+	SetSample(Global::song().waveSelected);
+	RefreshSampleData();
+}
 void XMSamplerUISample::OnLbnSelchangeSamplelist()
 {
 	m_Init=false;
 	int i= m_SampleList.GetCurSel();
-	if (Global::song().samples.Exists(i) == false) {
-		XMInstrument::WaveData<> wave;
-		wave.Init();
-		Global::song().samples.SetSample(wave,i);
-	}
+	SetSample(i);
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 	win->ChangeWave(i);
-
-	XMInstrument::WaveData<>& wave = Global::song().samples.get(i);
-	pWave(&wave);
-	RefreshSampleData();
 	m_Init=true;
 }
 
+void XMSamplerUISample::SetSample(int sample)
+{
+	if (Global::song().samples.Exists(sample) == false) {
+		XMInstrument::WaveData<> wave;
+		wave.Init();
+		Global::song().samples.SetSample(wave,sample);
+	}
+
+	XMInstrument::WaveData<>& wave = Global::song().samples.get(sample);
+	pWave(&wave);
+	RefreshSampleData();
+}
 void XMSamplerUISample::RefreshSampleData()
 {
 	char tmp[40];
@@ -249,11 +274,12 @@ void XMSamplerUISample::RefreshSampleData()
 void XMSamplerUISample::OnBnClickedLoad()
 {
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	int selsample = m_SampleList.GetCurSel();
 	win->ChangeIns(m_SampleList.GetCurSel());
 	win->SendMessage(WM_COMMAND,IDC_LOADWAVE);
-	XMInstrument::WaveData<>& wave = Global::song().samples.get(m_SampleList.GetCurSel());
+	XMInstrument::WaveData<>& wave = Global::song().samples.get(selsample);
 	pWave(&wave);
-	RefreshSampleList();
+	RefreshSampleList(selsample);
 	RefreshSampleData();
 }
 
@@ -271,7 +297,7 @@ void XMSamplerUISample::OnBnClickedDupe()
 		if (Global::song().samples.Exists(j) == false ) 
 		{
 			Global::song().samples.SetSample(rWave(),j);
-			RefreshSampleList();
+			RefreshSampleList(j);
 			return;
 		}
 	}
@@ -281,7 +307,7 @@ void XMSamplerUISample::OnBnClickedDupe()
 void XMSamplerUISample::OnBnClickedDelete()
 {
 	rWave().Init();
-	RefreshSampleList();
+	RefreshSampleList(m_SampleList.GetCurSel());
 	RefreshSampleData();
 	//\todo: Do a search for instruments using this sample and remove it from them.
 }
@@ -294,7 +320,7 @@ void XMSamplerUISample::OnEnChangeWavename()
 		CEdit* cedit = (CEdit*)GetDlgItem(IDC_WAVENAME);
 		cedit->GetWindowText(tmp,40);
 		rWave().WaveName(tmp);
-		RefreshSampleList();
+		RefreshSampleList(m_SampleList.GetCurSel());
 	}
 }
 

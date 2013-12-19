@@ -249,28 +249,33 @@ namespace psycle { namespace host {
 			m_savegens.EnableWindow(true);
 			m_filename.EnableWindow(true);
 			m_browse.EnableWindow(true);
+			m_bits.EnableWindow(true);
 		}
 
 		void CSaveWavDlg::OnOutputclipboard()
 		{
-//			m_savewave.EnableWindow(false);
+			m_savewave.EnableWindow(true);
 			m_outputtype=1;
 			m_savewires.EnableWindow(false);
 			m_savetracks.EnableWindow(false);
 			m_savegens.EnableWindow(false);
 			m_filename.EnableWindow(false);
 			m_browse.EnableWindow(false);
+			m_bits.EnableWindow(true);
 		}
 		
 		void CSaveWavDlg::OnOutputsample()
 		{
-			m_savewave.EnableWindow(false);
+			m_savewave.EnableWindow(true);
 			m_outputtype=2;
 			m_savewires.EnableWindow(false);
 			m_savetracks.EnableWindow(false);
 			m_savegens.EnableWindow(false);
 			m_filename.EnableWindow(false);
 			m_browse.EnableWindow(false);
+			m_bits.EnableWindow(false);
+			m_bits.SetCurSel(1);
+			OnSelchangeComboBits();
 		}
 
 		void CSaveWavDlg::OnFilebrowse() 
@@ -366,6 +371,7 @@ namespace psycle { namespace host {
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
 			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
+			GetDlgItem(IDC_RECBLOCK)->EnableWindow(true);
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
 
 			m_filename.EnableWindow(false);
@@ -748,19 +754,70 @@ namespace psycle { namespace host {
 
 			else if ( m_outputtype == 2)
 			{
-				// todo : copy clipboardmem to the current selected instrument.
-				#if 0
-					int length = *reinterpret_cast<int*>(clipboardmem[0]);
+				const int real_rate[]={8000,11025,16000,22050,32000,44100,48000,88200,96000};
+				Song& thesong = Global::song();
+				int length = *reinterpret_cast<int*>(clipboardmem[0]);
+				XMInstrument::WaveData<> wave;
+				bool isStereo = (channelmode == stereo || channelmode == no_mode);
+				wave.AllocWaveData(isStereo?length/4:length/2, isStereo);
+				wave.WaveName("Recorded");
+				wave.WaveSampleRate(real_rate[rate]);
+				if (isStereo) {
+					//If it is stereo, we need to deinterlace it.
+					int copiedsize=0;
+					int i=1;
+					uint16_t samps[32768];
+					// 1000000 bytes = 250000 stereo 16bit samples.
+					length >>= 2;
+					uint32_t amount=0;
+					while (copiedsize+250000<=length)
+					{
+						int b=copiedsize;
+						for(uint32_t io = 0 ; io < 250000 ; io+=amount)
+						{
+							//amount in bytes required to be copied (1 stereo 16bit sample = 4 bytes)
+							amount = std::min(32768U/2U,250000-io);
+							CopyMemory(samps, clipboardmem[i]+(io*4), amount*4);
+							uint16_t* psamps = samps;
+							for (int a=0; a < amount; a++,b++) {
+								wave.pWaveDataL()[b]=*psamps;
+								psamps++;
+								wave.pWaveDataR()[b]=*psamps;
+								psamps++;
+							}
+						}
+						i++;
+						copiedsize+=250000;
+					}
+					int b=copiedsize;
+					uint32_t remaining=static_cast<uint32_t>(length-copiedsize);
+					// 1000000 bytes = 250000 stereo 16bit samples.
+					for(uint32_t io = 0 ; io < remaining ; io+=amount)
+					{
+						//amount in samples required to be copied (1 stereo 16bit sample = 4 bytes)
+						amount = std::min(32768U/2U,(remaining-io));
+						CopyMemory(samps, clipboardmem[i]+(io*4), amount*4);
+						uint16_t* psamps = samps;
+						for (int a=0; a < amount; a++,b++) {
+							wave.pWaveDataL()[b]=*psamps;
+							psamps++;
+							wave.pWaveDataR()[b]=*psamps;
+							psamps++;
+						}
+					}
+				}
+				else {
 					int copiedsize=0;
 					int i=1;
 					while (copiedsize+1000000<=length)
 					{
-						CopyMemory(pClipboardData +copiedsize,clipboardmem[i], 1000000);
+						CopyMemory(wave.pWaveDataL()+copiedsize,clipboardmem[i], 1000000);
 						i++;
 						copiedsize+=1000000;
 					}
-					CopyMemory(pClipboardData +copiedsize,clipboardmem[i], length-copiedsize);
-				#endif
+					CopyMemory(wave.pWaveDataL()+copiedsize,clipboardmem[i], length-copiedsize);
+				}
+				thesong.samples.AddSample(wave);
 				for (unsigned int i=0;i<clipboardmem.size();i++)
 				{
 					delete[] clipboardmem[i];
@@ -900,32 +957,39 @@ namespace psycle { namespace host {
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(true);
 
 			m_filename.EnableWindow(true);
-			m_savetracks.EnableWindow(true);
-			m_savegens.EnableWindow(true);
-			m_savewires.EnableWindow(true);
 			m_rate.EnableWindow(true);
-			m_bits.EnableWindow(true);
 			m_channelmode.EnableWindow(true);
-			m_pdf.EnableWindow(m_dither.GetCheck());
-			m_noiseshaping.EnableWindow(m_dither.GetCheck());
-			m_dither.EnableWindow(true);
+			if (bits < 3 ) {
+				m_pdf.EnableWindow(m_dither.GetCheck());
+				m_noiseshaping.EnableWindow(m_dither.GetCheck());
+				m_dither.EnableWindow(true);
+			}
+			m_savetracks.EnableWindow(false);
+			m_savegens.EnableWindow(false);
+			m_savewires.EnableWindow(false);
 
 			switch (m_recmode)
 			{
 			case 0:
+				m_savetracks.EnableWindow(true);
+				m_savegens.EnableWindow(true);
+				m_savewires.EnableWindow(true);
 				m_rangeend.EnableWindow(false);
 				m_rangestart.EnableWindow(false);
 				m_patnumber.EnableWindow(false);
+				m_bits.EnableWindow(true);
 				break;
 			case 1:
 				m_rangeend.EnableWindow(false);
 				m_rangestart.EnableWindow(false);
 				m_patnumber.EnableWindow(true);
+				m_bits.EnableWindow(true);
 				break;
 			case 2:
 				m_rangeend.EnableWindow(true);
 				m_rangestart.EnableWindow(true);
 				m_patnumber.EnableWindow(false);
+				m_bits.EnableWindow(false);
 				break;
 			}
 
@@ -1020,7 +1084,7 @@ namespace psycle { namespace host {
 		void CSaveWavDlg::OnSelchangeComboBits() 
 		{
 			bits = m_bits.GetCurSel();
-			if (bits == 3 )
+			if (bits >= 3 )
 			{
 				m_dither.EnableWindow(false);
 				m_pdf.EnableWindow(false);

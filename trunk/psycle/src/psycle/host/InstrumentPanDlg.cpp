@@ -2,6 +2,7 @@
 #include "InstrumentPanDlg.hpp"
 #include "InstrumentEditorUI.hpp"
 #include "PsycleConfig.hpp"
+#include "XMSamplerUIInst.hpp"
 
 namespace psycle { namespace host {
 
@@ -155,6 +156,11 @@ void CInstrumentPanDlg::SliderMod(CSliderCtrl* slid)
 	m_instr->NoteModPanSep(slid->GetPos());
 	sprintf(tmp,"%.02f%%",(slid->GetPos()/2.56f));
 	((CStatic*)GetDlgItem(IDC_LNOTEMOD))->SetWindowText(tmp);
+
+	CWnd *tabCtl = GetParent();
+	XMSamplerUIInst* UIInst = (XMSamplerUIInst*)tabCtl->GetParent();
+	UIInst->UpdateTabNames();
+
 }
 
 }}

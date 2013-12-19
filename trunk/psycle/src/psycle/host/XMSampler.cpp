@@ -181,16 +181,16 @@ namespace psycle
 		}
 
 		template <class T>
-		void XMSampler::WaveDataController<T>::RefillBuffers()
+		void XMSampler::WaveDataController<T>::RefillBuffers(bool released/*=false*/)
 		{
-			RefillBuffer(lBuffer,m_pWave->pWaveDataL());
+			RefillBuffer(lBuffer,m_pWave->pWaveDataL(), released);
 			if (IsStereo()) {
-				RefillBuffer(rBuffer,m_pWave->pWaveDataR());
+				RefillBuffer(rBuffer,m_pWave->pWaveDataR(), released);
 			}
 		}
 
 		template <class T>
-		void XMSampler::WaveDataController<T>::RefillBuffer(T buffer[192], const T* data)
+		void XMSampler::WaveDataController<T>::RefillBuffer(T buffer[192], const T* data,bool released)
 		{
 			//These values are for the max size of resampler (which suits the rest).
 			const std::uint32_t presamples=15;
@@ -198,10 +198,25 @@ namespace psycle
 			const std::uint32_t totalsamples=presamples+postsamples+1; //pre+post+current
 			const std::uint32_t secbegin=64;	// start of second window = totalsamples*2
 			const std::uint32_t thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
+			
+			XMInstrument::WaveData<>::LoopType::Type looptype;
+			uint32_t loopstart;
+			uint32_t loopend;
+
+			if (!released && SustainLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+				looptype = SustainLoopType();
+				loopstart = SustainLoopStart();
+				loopend = SustainLoopEnd();
+			}
+			else {
+				looptype = LoopType();
+				loopstart = LoopStart();
+				loopend = LoopEnd();
+			}
 			//Begin
 			memset(buffer,0,sizeof(lBuffer));
 			memcpy(buffer+presamples,data, std::min(Length(),totalsamples)*sizeof(T));
-			if (LoopType()==XMInstrument::WaveData<>::LoopType::DO_NOT) {
+			if (looptype==XMInstrument::WaveData<>::LoopType::DO_NOT) {
 				//End
 				if (Length() < totalsamples) {
 					memcpy(buffer+secbegin+totalsamples-Length(),data, Length()*sizeof(T));
@@ -212,46 +227,46 @@ namespace psycle
 					memset(buffer+secbegin+totalsamples,0,postsamples);
 				}
 			}
-			else if (LoopType()==XMInstrument::WaveData<>::LoopType::NORMAL) {
+			else if (looptype==XMInstrument::WaveData<>::LoopType::NORMAL) {
 				//Forward only loop.
-				if (LoopEnd()-LoopStart() < totalsamples) {
-					int startpos=LoopStart();
-					int endpos=LoopEnd();
+				if (loopend-loopstart < totalsamples) {
+					int startpos=loopstart;
+					int endpos=loopend;
 					for (int i=0;i<totalsamples;i++) {
 						buffer[secbegin+totalsamples-i]=data[endpos];
 						buffer[secbegin+totalsamples+i]=data[startpos];
 						endpos--;
 						startpos++;
-						if (endpos < LoopStart()) {
-							endpos=LoopEnd();
-							startpos=LoopStart();
+						if (endpos < loopstart) {
+							endpos=loopend;
+							startpos=loopstart;
 						}
 					}
 				}
 				else {
-					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(T));
-					memcpy(buffer+secbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(T));
+					memcpy(buffer+secbegin,data+loopend-totalsamples, totalsamples*sizeof(T));
+					memcpy(buffer+secbegin+totalsamples,data+loopstart,totalsamples*sizeof(T));
 				}
 			}
-			else if (LoopType()==XMInstrument::WaveData<>::LoopType::BIDI) {
-				if (LoopEnd()-LoopStart() < totalsamples) {
+			else if (looptype==XMInstrument::WaveData<>::LoopType::BIDI) {
+				if (loopend-loopstart < totalsamples) {
 					//Ping pong loop (end and start).
-					int pos=LoopEnd();
+					int pos=loopend;
 					bool forward=false;
 					for (int i=0;i<totalsamples;i++) {
 						buffer[secbegin+totalsamples-i]=data[pos];
 						buffer[secbegin+totalsamples+i]=data[pos];
 						if (forward) {
 							pos++;
-							if (pos > LoopEnd()) {
-								pos=LoopEnd()-1;
+							if (pos > loopend) {
+								pos=loopend-1;
 								forward=false;
 							}
 						}
 						else {
 							pos--;
-							if (pos < LoopStart()) {
-								pos=LoopStart()+1;
+							if (pos < loopstart) {
+								pos=loopstart+1;
 								forward=true;
 							}
 						}
@@ -259,11 +274,11 @@ namespace psycle
 				}
 				else {
 					//Ping pong loop (end and start).
-					memcpy(buffer+secbegin,data+LoopEnd()-totalsamples, totalsamples*sizeof(T));
-					memcpy(buffer+thirdbegin+totalsamples,data+LoopStart(),totalsamples*sizeof(T));
+					memcpy(buffer+secbegin,data+loopend-totalsamples, totalsamples*sizeof(T));
+					memcpy(buffer+thirdbegin+totalsamples,data+loopstart,totalsamples*sizeof(T));
 					for (int i=0;i<totalsamples;i++) {
-						buffer[secbegin+totalsamples+i]=data[LoopEnd()-i-1];
-						buffer[thirdbegin+i]=data[LoopStart()+totalsamples-i];
+						buffer[secbegin+totalsamples+i]=data[loopend-i-1];
+						buffer[thirdbegin+i]=data[loopstart+totalsamples-i];
 					}
 				}
 			}
@@ -317,7 +332,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("320: max<0 bug triggered!\n");
+					TRACE("335: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = 0;
@@ -342,7 +357,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("345: max<0 bug triggered!\n");
+					TRACE("359: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = m_Position.LowPart;
@@ -423,6 +438,7 @@ namespace psycle
 					m_CurrentLoopStart = 0;
 					m_CurrentLoopEnd = Length()-1;
 				}
+				RefillBuffers(true);
 			}
 		}
 
@@ -702,7 +718,7 @@ namespace psycle
 				numSamples-=nextsamples;
 #ifndef NDEBUG
 				if (numSamples > 256 || numSamples < 0) {
-					TRACE("705: numSamples invalid bug triggered!\n");
+					TRACE("721: numSamples invalid bug triggered!\n");
 				}
 #endif
 				while (nextsamples)
@@ -2525,7 +2541,7 @@ namespace psycle
 				// Instrument is always set, even if no new note comes, or no voice playing.
 				//\todo: Fix: Set the wave and instrument to the one in the entry. Only if not portatonote.
 				thisChannel.InstrumentNo(pData->_inst);
-				if (currentVoice != NULL && !bNoteOn) {
+				if (currentVoice != NULL && !bNoteOn && pData->_note != notecommands::release ) {
 					//Whenever an instrument appears alone in a channel, the values are reset.
 					//todo: It should be reset to the values of the instrument set.
 					currentVoice->ResetVolAndPan(-1,true);
@@ -2660,6 +2676,7 @@ namespace psycle
 				Standby(false);
 				int _songtracks = Global::song().SongTracks();
 				int ns = numSamples;
+				int us = 0;
 				int nextevent;
 
 				while (ns)
@@ -2687,7 +2704,7 @@ namespace psycle
 								TriggerDelayCounter[i] -= ns;
 							}
 						}
-						WorkVoices(ns);
+						WorkVoices(ns, us);
 						ns = 0;
 					}
 					else
@@ -2695,42 +2712,29 @@ namespace psycle
 						if (nextevent)
 						{
 							ns -= nextevent;
-							WorkVoices(nextevent);
+							WorkVoices(nextevent, us);
+							us += nextevent;
 						}
 
 						for (i = 0; i < _songtracks; i++)
 						{
 							// come back to this
-							if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+							if (TriggerDelayCounter[i] == nextevent)
 							{
-								if (TriggerDelayCounter[i] == nextevent)
+								// do event
+								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
 								{
-									// do event
 									Tick(i,&TriggerDelay[i]);
 									TriggerDelay[i]._cmd = 0;
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
+								else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
 									TriggerDelayCounter[i] 
-									= (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
+										= (RetriggerRate[i] * Global::player().SamplesPerRow()) / 256;
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
+								else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
 								{
 									// do event
 									Tick(i,&TriggerDelay[i]);
@@ -2749,14 +2753,7 @@ namespace psycle
 										}
 									}
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
-							}
-							else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
-							{
-								if (TriggerDelayCounter[i] == nextevent)
+								else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
 								{
 									PatternEntry entry =TriggerDelay[i];
 									switch(ArpeggioCount[i])
@@ -2778,10 +2775,10 @@ namespace psycle
 									}
 									TriggerDelayCounter[i] = Global::player().SamplesPerTick();
 								}
-								else
-								{
-									TriggerDelayCounter[i] -= nextevent;
-								}
+							}
+							else if (TriggerDelay[i]._cmd != 0)
+							{
+								TriggerDelayCounter[i] -= nextevent;
 							}
 						}
 					}
@@ -2789,15 +2786,15 @@ namespace psycle
 
 				UpdateVuAndStanbyFlag(numSamples);
 			}
-
 			else Standby(true);
+
 			return numSamples;
 		}// XMSampler::Work()
 
-		void XMSampler::WorkVoices(int numsamples)
+		void XMSampler::WorkVoices(int numsamples, int offset)
 		{
-			float* psamL = samplesV[0];
-			float* psamR = samplesV[1];
+			float* psamL = samplesV[0]+offset;
+			float* psamR = samplesV[1]+offset;
 			int tmpsamples = numsamples;
 			//////////////////////////////////////////////////////////////////////////
 			//  If there is a tick change in this "numsamples" period, process it.

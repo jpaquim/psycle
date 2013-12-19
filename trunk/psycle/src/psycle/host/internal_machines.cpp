@@ -1740,21 +1740,14 @@ namespace psycle
 		{
 			//Since the exchange of input wires implies copying,
 			//the pointers in outWires need to be swapped too.
-			Wire* dummy = NULL;
-			Wire** wirefirst = &dummy;
-			Wire** wiresecond = &dummy;
-
 			if (Return(chann1).GetWire().Enabled()) {
 				int idx = Return(chann1).GetWire().GetSrcWireIndex();
-				wirefirst = &Return(chann1).GetWire().GetSrcMachine().outWires[idx];
+				Return(chann1).GetWire().GetSrcMachine().outWires[idx] = sends_[chann2];
 			}
 			if (Return(chann2).GetWire().Enabled()) {
 				int idx = Return(chann2).GetWire().GetSrcWireIndex();
-				wiresecond = &Return(chann2).GetWire().GetSrcMachine().outWires[idx];
+				Return(chann2).GetWire().GetSrcMachine().outWires[idx] = sends_[chann1];
 			}
-			Wire* wiretmp = *wirefirst;
-			*wirefirst = *wiresecond;
-			*wiresecond = wiretmp;
 
 			ReturnChannel tmp(returns_[chann1]);
 			returns_[chann1] = returns_[chann2];
