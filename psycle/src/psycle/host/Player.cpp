@@ -358,7 +358,7 @@ void Player::clear_plan() {
 								m_extraTicks = memextra;
 								_SPRChanged=true;
 							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_PAT_DELAY )
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_FINE_PAT_DELAY )
 							{
 								m_extraTicks = pEntry->_parameter&0x0F;
 								RecalcSPR();
@@ -613,6 +613,7 @@ void Player::clear_plan() {
 				{
 					_playing = false;
 					_playBlock = false;
+					_lineStop = -1;
 					StopRecording();
 				}
 			}
@@ -672,7 +673,7 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (pEntry->_parameter&0x0F));
 								resetLineSec=true;
 							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_PAT_DELAY)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_FINE_PAT_DELAY)
 							{
 								extratick_calc=pEntry->_parameter&0x0F;
 								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));

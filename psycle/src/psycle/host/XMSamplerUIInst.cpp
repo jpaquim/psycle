@@ -20,12 +20,21 @@
 
 namespace psycle { namespace host {
 
+	const char GENTAB_NAME[] = "(4)Pitch";
+	const char AMPTAB_NAME[] = "(5)Amplitude";
+	const char PANTAB_NAME[] = "(6)Pan";
+	const char FILTAB_NAME[] = "(7)Filter";
+
 IMPLEMENT_DYNAMIC(XMSamplerUIInst, CPropertyPage)
 XMSamplerUIInst::XMSamplerUIInst()
 : CPropertyPage(XMSamplerUIInst::IDD)
 , m_bInitialized(false)
 , m_iCurrentSelected(0)
 {
+	strcpy(genTabName,GENTAB_NAME);
+	strcpy(ampTabName,AMPTAB_NAME);
+	strcpy(panTabName,PANTAB_NAME);
+	strcpy(filTabName,FILTAB_NAME);
 }
 
 XMSamplerUIInst::~XMSamplerUIInst()
@@ -62,10 +71,10 @@ BOOL XMSamplerUIInst::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	CRect rect, rect2;
-	m_tabMain.InsertItem(0,_T("(4)Pitch"));
-	m_tabMain.InsertItem(1,_T("(5)Amplitude"));
-	m_tabMain.InsertItem(2,_T("(6)Pan"));
-	m_tabMain.InsertItem(3,_T("(7)Filter"));
+	m_tabMain.InsertItem(0,genTabName);
+	m_tabMain.InsertItem(1,ampTabName);
+	m_tabMain.InsertItem(2,panTabName);
+	m_tabMain.InsertItem(3,filTabName);
 	m_genTab.Create(IDD_INST_SAMPULSE_INSTPIT_NEW,&m_tabMain);
 	m_ampTab.Create(IDD_INST_SAMPULSE_INSTAMP,&m_tabMain);
 	m_panTab.Create(IDD_INST_SAMPULSE_INSTPAN,&m_tabMain);
@@ -103,6 +112,9 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 	m_ampTab.AssignAmplitudeValues(inst);
 	m_panTab.AssignPanningValues(inst);
 	m_filTab.AssignFilterValues(inst);
+	m_InstrumentList.SetCurSel(instno);
+
+	UpdateTabNames();
 }
 
 
@@ -112,19 +124,45 @@ BOOL XMSamplerUIInst::OnSetActive()
 	if ( m_bInitialized == false )
 	{
 		FillInstrumentList();
-		SetInstrumentData(0);
+		SetInstrumentData(Global::song().instSelected);
 		m_bInitialized = true;
+	}
+	else {
+		SetInstrumentData(Global::song().instSelected);
 	}
 
 	return CPropertyPage::OnSetActive();
 }
-void XMSamplerUIInst::FillInstrumentList() {
-	int i = m_InstrumentList.GetCurSel();
-	m_InstrumentList.ResetContent();
+void XMSamplerUIInst::FillInstrumentList(int sample/*=-1*/) {
+	char line[48];
 	InstrumentList& list = Global::song().xminstruments;
-	for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
-	{
-		char line[48];
+	if (sample == -1) {
+		int i = m_InstrumentList.GetCurSel();
+		m_InstrumentList.ResetContent();
+		for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
+		{
+			if (list.Exists(i)) {
+				const XMInstrument& inst = list[i];
+				sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
+				strcat(line,inst.Name().c_str());
+			}
+			else {
+				sprintf(line,"%02X : ",i);
+			}
+			m_InstrumentList.AddString(line);
+		}
+		if (i !=  LB_ERR) {
+			m_InstrumentList.SetCurSel(i);
+		}
+		else {
+			m_InstrumentList.SetCurSel(0);
+		}
+	}
+	else {
+		int i=sample;
+		if (sample == -2) {
+			i = m_InstrumentList.GetCurSel();
+		}
 		if (list.Exists(i)) {
 			const XMInstrument& inst = list[i];
 			sprintf(line,"%02X%s: ",i,inst.IsEnabled()?"*":" ");
@@ -133,16 +171,40 @@ void XMSamplerUIInst::FillInstrumentList() {
 		else {
 			sprintf(line,"%02X : ",i);
 		}
-		m_InstrumentList.AddString(line);
-	}
-	if (i !=  LB_ERR) {
+		m_InstrumentList.DeleteString(i);
+		m_InstrumentList.InsertString(i, line);
 		m_InstrumentList.SetCurSel(i);
 	}
-	else {
-		m_InstrumentList.SetCurSel(0);
-	}
 }
-	
+void XMSamplerUIInst::UpdateTabNames()
+{
+	XMInstrument& inst = Global::song().xminstruments.get(m_iCurrentSelected);
+
+	strcpy(genTabName,GENTAB_NAME); 
+	strcpy(ampTabName,AMPTAB_NAME);
+	strcpy(panTabName,PANTAB_NAME);
+	strcpy(filTabName,FILTAB_NAME);
+	if (inst.PitchEnvelope().IsEnabled()) { strcat(genTabName," (e)"); }
+	if (inst.AmpEnvelope().IsEnabled()) { strcat(ampTabName," (e)"); }
+	if (inst.PanEnvelope().IsEnabled() && inst.NoteModPanSep() != 0) { strcat(panTabName," (e,n)"); }
+	else if (inst.PanEnvelope().IsEnabled() ) { strcat(panTabName," (e)"); }
+	else if (inst.NoteModPanSep() != 0 ) { strcat(panTabName," (n)"); }
+	if (inst.FilterEnvelope().IsEnabled() && inst.FilterType() != dsp::F_NONE) { strcat(filTabName," (e,f)"); }
+	else if (inst.FilterEnvelope().IsEnabled()) { strcat(filTabName," (e)"); }
+	else if (inst.FilterType() != dsp::F_NONE) { strcat(filTabName," (f)"); }
+
+	TCITEM tab;
+	//TODO: Find the correct mask name
+	tab.mask = 0x00000001;
+	tab.pszText = genTabName;
+	m_tabMain.SetItem(0,&tab);
+	tab.pszText = ampTabName;
+	m_tabMain.SetItem(1,&tab);
+	tab.pszText = panTabName;
+	m_tabMain.SetItem(2,&tab);
+	tab.pszText = filTabName;
+	m_tabMain.SetItem(3,&tab);
+}
 void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 {
 	if(m_bInitialized)
@@ -257,18 +319,18 @@ void XMSamplerUIInst::OnBnClickedDupeins()
 		{
 			const XMInstrument& inst = Global::song().xminstruments[m_iCurrentSelected];
 			Global::song().xminstruments.SetInst(inst,j);
-			FillInstrumentList();
+			FillInstrumentList(j);
 			return;
 		}
 	}
-	MessageBox("Couldn't find an appropiate instrument slot to copy to.","Error While Duplicating!");
+	MessageBox(_T("Couldn't find an appropiate instrument slot to copy to."),_T("Error While Duplicating!"));
 }
 
 void XMSamplerUIInst::OnBnClickedDeleteins()
 {
 	XMInstrument& inst = Global::song().xminstruments.get(m_iCurrentSelected);
 	inst.Init();
-	FillInstrumentList();
+	FillInstrumentList(-2);
 	SetInstrumentData(m_iCurrentSelected);
 }
 			

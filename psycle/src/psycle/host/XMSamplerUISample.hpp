@@ -27,9 +27,7 @@ protected:
 
 
 public:
-	void pWave(XMInstrument::WaveData<> *const p){m_pWave = p;};
-	XMInstrument::WaveData<>& rWave(){return *m_pWave;};
-	void DrawScope(void);
+	void WaveUpdate();
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -64,8 +62,13 @@ protected:
 	void SliderSamplenote(CSliderCtrl* slid);
 	void SliderFinetune(CSliderCtrl* slid);
 	void FillPanDescription(int val);
-	void RefreshSampleList();
+	void SetSample(int sample);
+	void RefreshSampleList(int sample=-1);
 	void RefreshSampleData();
+	void DrawScope(void);
+
+	void pWave(XMInstrument::WaveData<> *const p){m_pWave = p;};
+	XMInstrument::WaveData<>& rWave(){return *m_pWave;};
 
 	XMInstrument::WaveData<> *m_pWave;
 	bool m_Init;

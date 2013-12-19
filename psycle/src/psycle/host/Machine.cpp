@@ -578,21 +578,14 @@ namespace psycle
 		{
 			//Since the exchange of input wires implies copying,
 			//the pointers in outWires need to be swapped too.
-			Wire* dummy = NULL;
-			Wire** wirefirst = &dummy;
-			Wire** wiresecond = &dummy;
-
 			if (inWires[first].Enabled()) {
 				int idx = inWires[first].GetSrcWireIndex();
-				wirefirst = &inWires[first].GetSrcMachine().outWires[idx];
+				inWires[first].GetSrcMachine().outWires[idx] = &inWires[second];
 			}
 			if (inWires[second].Enabled()) {
 				int idx = inWires[second].GetSrcWireIndex();
-				wiresecond = &inWires[second].GetSrcMachine().outWires[idx];
+				inWires[second].GetSrcMachine().outWires[idx] = &inWires[first];
 			}
-			Wire* wiretmp = *wirefirst;
-			*wirefirst = *wiresecond;
-			*wiresecond = wiretmp;
 			Wire inWire = inWires[first];
 			inWires[first] = inWires[second];
 			inWires[second] = inWire;

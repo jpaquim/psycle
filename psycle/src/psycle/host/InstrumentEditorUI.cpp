@@ -2,6 +2,7 @@
 #include "InstrumentEditorUI.hpp"
 #include "MainFrm.hpp"
 #include "InputHandler.hpp"
+#include <psycle/host/Song.hpp>
 
 /////////////////////////////////////////////////////////////////////////////
 // InstrumentEditorUI dialog
@@ -125,7 +126,15 @@ void InstrumentEditorUI::UpdateUI(void)
 {
 	if ( !init ) return;
 	if (GetActivePage() == &m_InstrBasic ) m_InstrBasic.WaveUpdate();
-	//TODO: Refresh other tabs too.
+	if (GetActivePage() == &m_InstrSampulse ) m_InstrSampulse.SetInstrumentData(Global::song().instSelected);
+	if (GetActivePage() == &m_SampleBank ) m_SampleBank.WaveUpdate();
+}
+
+void InstrumentEditorUI::ShowSampler() {
+	SetActivePage(0);
+}
+void InstrumentEditorUI::ShowSampulse() {
+	SetActivePage(1);
 }
 
 void InstrumentEditorUI::OnShowSampler() {
@@ -154,8 +163,9 @@ void InstrumentEditorUI::OnShowFilter() {
 	m_InstrSampulse.SetActivePage(3);
 }
 void InstrumentEditorUI::OnShowPitch() {
-	SetActivePage(1);
+/*	SetActivePage(1);
 	m_InstrSampulse.SetActivePage(4);
+*/
 }
 
 

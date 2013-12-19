@@ -25,7 +25,7 @@ namespace psycle { namespace host {
 			void FillWaveCombobox();
 			void Notify(void);
 			Song* _pSong;
-			CMainFrame *_pFrame;
+			CMainFrame *mainFrame;
 		public:
 			virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 		protected:

@@ -615,8 +615,18 @@ namespace psycle { namespace host {
 		inline unsigned int AddSample(const XMInstrument::WaveData<> &wave)
 		{
 			XMInstrument::WaveData<>* wavecopy = new XMInstrument::WaveData<>(wave);
-			m_waves.push_back(wavecopy);
-			return size()-1;
+			int pos = size()-1;
+			for (;pos>=0;pos--) {
+				if (m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0) break;
+			}
+			pos++;
+			if (pos == size()) {
+				m_waves.push_back(wavecopy);
+			}
+			else {
+				SetSample(wave,pos);
+			}
+			return pos;
 		}
 		inline void SetSample(const XMInstrument::WaveData<> &wave,int pos)
 		{

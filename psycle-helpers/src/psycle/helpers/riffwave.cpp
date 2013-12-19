@@ -503,10 +503,10 @@ if(hd.ckID == FourCC("smpl"))
 	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
 	void RiffWave::integerconverter(out_type* out, uint32_t samples)
 	{
-		in_type samps[1024];
+		in_type samps[32768];
 		std::size_t amount=0;
 		for(std::size_t io = 0; io < samples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(1024U),samples-io);
+			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
 			ReadArray(samps,amount);
 			in_type* psamps = samps;
 			for(std::size_t b = 0 ; b < amount; ++b) {
@@ -521,12 +521,12 @@ if(hd.ckID == FourCC("smpl"))
 	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
 	void RiffWave::multichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples)
 	{
-		in_type samps[1024];
+		in_type samps[32768];
 		uint32_t amount=0;
 		for(uint32_t io = 0 ; io < samples ; io+=amount)
 		{
 			//truncate 1024 to amount of chans.
-			amount = std::min(1024U/chans,samples-io);
+			amount = std::min(32768U/chans,samples-io);
 			ReadArray(samps, amount*chans);
 			in_type* psamps = samps;
 			for (int a=0; a < amount; a++) {

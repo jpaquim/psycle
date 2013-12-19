@@ -51,7 +51,7 @@ namespace psycle { namespace host {
 		CWaveEdFrame::CWaveEdFrame(): wsInstrument(0)
 		{
 		}
-		CWaveEdFrame::CWaveEdFrame(Song& _sng, CMainFrame* pframe): wsInstrument(0)
+		CWaveEdFrame::CWaveEdFrame(Song& _sng, CMainFrame* pframe): mainFrame(pframe), wsInstrument(0)
 		{
 			this->_pSong = &_sng;
 			wavview.SetSong(_sng);
@@ -316,6 +316,7 @@ namespace psycle { namespace host {
 			_pSong->waveSelected = comboWav.GetCurSel();
 			wsInstrument = _pSong->waveSelected;
 			wavview.SetViewData(wsInstrument);
+			mainFrame->UpdateInstrumentEditor();
 			AdjustStatusBar(wsInstrument);
 		}
 		void CWaveEdFrame::OnWaveMinus()
@@ -324,6 +325,7 @@ namespace psycle { namespace host {
 			wsInstrument = _pSong->waveSelected;
 			comboWav.SetCurSel(wsInstrument);
 			wavview.SetViewData(wsInstrument);
+			mainFrame->UpdateInstrumentEditor();
 			AdjustStatusBar(wsInstrument);
 		}
 		void CWaveEdFrame::OnWavePlus()
@@ -338,6 +340,7 @@ namespace psycle { namespace host {
 				comboWav.SetCurSel(wsInstrument);
 			}
 			wavview.SetViewData(wsInstrument);
+			mainFrame->UpdateInstrumentEditor();
 			AdjustStatusBar(wsInstrument);
 		}
 

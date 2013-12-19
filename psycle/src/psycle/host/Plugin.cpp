@@ -578,9 +578,9 @@ namespace psycle
 							for (int i=0; i < Global::song().SONGTRACKS; i++)
 							{
 								// come back to this
-								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+								if (TriggerDelayCounter[i] == nextevent)
 								{
-									if (TriggerDelayCounter[i] == nextevent)
+									if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
 									{
 										// do event
 										try
@@ -599,14 +599,7 @@ namespace psycle
 										}
 										TriggerDelay[i]._cmd = 0;
 									}
-									else
-									{
-										TriggerDelayCounter[i] -= nextevent;
-									}
-								}
-								else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
-								{
-									if (TriggerDelayCounter[i] == nextevent)
+									else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
 									{
 										// do event
 										try
@@ -625,14 +618,7 @@ namespace psycle
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 									}
-									else
-									{
-										TriggerDelayCounter[i] -= nextevent;
-									}
-								}
-								else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
-								{
-									if (TriggerDelayCounter[i] == nextevent)
+									else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
 									{
 										// do event
 										try
@@ -664,14 +650,7 @@ namespace psycle
 											}
 										}
 									}
-									else
-									{
-										TriggerDelayCounter[i] -= nextevent;
-									}
-								}
-								else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
-								{
-									if (TriggerDelayCounter[i] == nextevent)
+									else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
 									{
 										PatternEntry entry =TriggerDelay[i];
 										switch(ArpeggioCount[i])
@@ -732,10 +711,10 @@ namespace psycle
 										}
 										TriggerDelayCounter[i] = Global::player().SamplesPerTick();
 									}
-									else
-									{
-										TriggerDelayCounter[i] -= nextevent;
-									}
+								}
+								else if (TriggerDelay[i]._cmd != 0)
+								{
+									TriggerDelayCounter[i] -= nextevent;
 								}
 							}
 						}
@@ -744,6 +723,7 @@ namespace psycle
 				}
 			}
 			else Standby(true);
+
 			return numSamples;
 		}
 

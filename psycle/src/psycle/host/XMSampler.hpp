@@ -182,8 +182,8 @@ XMSampler::Channel::PerformFX().
 		virtual void Init(const XMInstrument::WaveData<T>* const wave, int layer, const helpers::dsp::resampler & resampler);
 		virtual void DisposeResampleData(const helpers::dsp::resampler& resampler);
 		virtual void RecreateResampleData(const helpers::dsp::resampler& resampler);
-		virtual void RefillBuffers();
-		virtual void RefillBuffer(T buffer[192], const T* data);
+		virtual void RefillBuffers(bool released=false);
+		virtual void RefillBuffer(T buffer[192], const T* data, bool released);
 		virtual void NoteOff(void);
 		virtual int PreWork(int numSamples, WorkFunction* pWork);
 		static void WorkMonoStatic(WaveDataController& contr,float *pLeftw,float *pRightw) { contr.WorkMono(pLeftw, pRightw);}
@@ -1177,7 +1177,7 @@ protected:
 	psycle::helpers::dsp::cubic_resampler _resampler;
 	ZxxMacro zxxMap[128];
 
-	void WorkVoices(int numsamples);
+	void WorkVoices(int numsamples, int offset);
 
 private:
 

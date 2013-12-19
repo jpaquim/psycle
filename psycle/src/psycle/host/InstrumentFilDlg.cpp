@@ -111,8 +111,10 @@ void CInstrumentFilDlg::AssignFilterValues(XMInstrument& inst)
 
 void CInstrumentFilDlg::OnCbnSelendokFiltertype()
 {
-
 	m_instr->FilterType((dsp::FilterType)m_FilterType.GetCurSel());
+	CWnd *tabCtl = GetParent();
+	XMSamplerUIInst* UIInst = (XMSamplerUIInst*)tabCtl->GetParent();
+	UIInst->UpdateTabNames();
 }
 
 void CInstrumentFilDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)

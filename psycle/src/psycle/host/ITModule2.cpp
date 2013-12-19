@@ -1017,7 +1017,7 @@ Special:  Bit 0: On = song message attached.
 							pData->_inst = 255;
 							pData->_mach = pent._mach;
 							pData->_cmd = PatternCmd::EXTENDED;
-							pData->_parameter = PatternCmd::MEMORY_PAT_DELAY | extraticks;
+							pData->_parameter = PatternCmd::MEMORY_FINE_PAT_DELAY | extraticks;
 							m_extracolumn++;
 						}
 					}

@@ -562,7 +562,7 @@ namespace host{
 								int extraticks=0;
 								e._parameter = XMSampler::CalcLPBFromSpeed(param,extraticks);
 								if (extraticks != 0) {
-									PatternEntry entry(notecommands::empty,255,255,PatternCmd::EXTENDED,PatternCmd::MEMORY_PAT_DELAY | extraticks);
+									PatternEntry entry(notecommands::empty,255,255,PatternCmd::EXTENDED,PatternCmd::MEMORY_FINE_PAT_DELAY | extraticks);
 									WritePatternEntry(song,patIdx,row,m_extracolumn,entry);	
 									m_extracolumn++;
 								}
@@ -1392,7 +1392,7 @@ namespace host{
 									speedpatch=true;
 									PatternEntry entry(notecommands::empty,0xFF,0xFF,0,0);
 									entry._cmd = PatternCmd::EXTENDED;
-									entry._parameter = PatternCmd::MEMORY_PAT_DELAY | extraticks;
+									entry._parameter = PatternCmd::MEMORY_FINE_PAT_DELAY | extraticks;
 									WritePatternEntry(song,patIdx,row,song.SONGTRACKS,entry);	
 								}
 							}
