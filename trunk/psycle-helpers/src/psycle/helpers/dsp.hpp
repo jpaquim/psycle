@@ -50,16 +50,26 @@ using namespace universalis::stdlib;
 	}
 	//These two are used for UI in some places, so that sliders get 0dB in the middle.
 	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
-	SliderToAmount(int nPos) {
+	SliderToAmountVert(int nPos) {
 		return ((1024-nPos)*(1024-nPos))/(16384.f*4.f*4.f);
 	}
 
 	int inline UNIVERSALIS__COMPILER__CONST_FUNCTION
-	AmountToSlider(float amount) {
+	AmountToSliderVert(float amount) {
 		int t = (int)std::sqrt(amount*16384.f*4.f*4.f);
 		return 1024-t;
 	}
+	//These two are used for UI in some places, so that sliders get 0dB in the middle.
+	float inline UNIVERSALIS__COMPILER__CONST_FUNCTION
+	SliderToAmountHoriz(int nPos) {
+		return (nPos*nPos)/(16384.f*4.f*4.f);
+	}
 
+	int inline UNIVERSALIS__COMPILER__CONST_FUNCTION
+	AmountToSliderHoriz(float amount) {
+		int t = (int)std::sqrt(amount*16384.f*4.f*4.f);
+		return t;
+	}
 	/// undenormalize (renormalize) samples in a signal buffer.
 	///\todo make a template version that accept both float and doubles
 	inline void Undenormalize(float * UNIVERSALIS__COMPILER__RESTRICT pSamplesL,float * UNIVERSALIS__COMPILER__RESTRICT pSamplesR, int numsamples)

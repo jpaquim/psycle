@@ -84,9 +84,7 @@ void CInstrumentPanDlg::AssignPanningValues(XMInstrument& inst)
 	SliderModNote(&m_SlNoteModNote);
 	SliderMod(&m_SlNoteMod);
 
-	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.PanEnvelope().IsEnabled());
-	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.PanEnvelope().IsCarry());
-	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.PanEnvelope());
+	m_EnvelopeEditorDlg.ChangeEnvelope(inst.PanEnvelope());
 
 }
 void CInstrumentPanDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)

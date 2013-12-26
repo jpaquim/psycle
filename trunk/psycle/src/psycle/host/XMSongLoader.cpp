@@ -978,6 +978,7 @@ namespace host{
 	{
 		// volume envelope
 		inst.AmpEnvelope().Init();
+		inst.AmpEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 		if(sampleHeader.vtype & 1){// enable volume envelope
 			inst.AmpEnvelope().IsEnabled(true);
 			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
@@ -1038,6 +1039,7 @@ namespace host{
 
 		// pan envelope
 		inst.PanEnvelope().Init();
+		inst.PanEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 		if(sampleHeader.ptype & 1){// enable volume envelope
 			
 			inst.PanEnvelope().IsEnabled(true);

@@ -56,7 +56,7 @@ namespace psycle
 			Init();
 			
 			if ((version & 0xFF00) == 0)
-			{ // Version 0
+			{ // Major Version 0
 
 				pFile->Read(_loop);
 				pFile->Read(_lines);
@@ -195,7 +195,7 @@ namespace psycle
 			}
 		}
 
-		void Instrument::SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx)
+		void Instrument::SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx, bool savesamples)
 		{
 			pFile->Write(_loop);
 			pFile->Write(_lines);
@@ -216,13 +216,13 @@ namespace psycle
 			pFile->Write(ENV_F_EA);
 			pFile->Write(ENV_F_TP);
 
-			int numwaves = (samples.IsEnabled(sampleIdx))?1:0; // The sampler has never supported more than one sample per instrument, even when the GUI did.
+			 // The sampler has never supported more than one sample per instrument, even when the GUI did.
+			int numwaves = savesamples?((samples.IsEnabled(sampleIdx))?1:0):0;
 			int pan = 128;
 			if (numwaves > 0 ) {
 				pan = samples[sampleIdx].PanFactor()*256;
-				pFile->Write(pan);
 			}
-			else { pFile->Write(pan); }
+			pFile->Write(pan);
 
 			pFile->Write(_RPAN);
 			pFile->Write(_RCUT);

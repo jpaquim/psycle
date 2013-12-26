@@ -1501,7 +1501,7 @@ namespace psycle
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
 						size_t filepos=pFile->GetPos();
-						//Version zero was the development version. Version one is the published one.
+						//Version zero was the development version (no format freeze). Version one is the published one.
 						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{
 							// Instrument Data Load
@@ -2553,6 +2553,8 @@ namespace psycle
 			===================
 			id = "INSD"; 
 			*/
+			///When not saving extended instruments (EINS), allow the samples to be saved in INSD. Else, they will be saved in EINS.
+			bool saveEINS = (numInstruments > 0);
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
 				if (samples.IsEnabled(i))
@@ -2566,8 +2568,7 @@ namespace psycle
 
 					index = i; // index
 					pFile->Write(&index,sizeof(index));
-					///TODO: When saving both, INSD and EINS, the samples don't need to be saved twice
-					_pInstrument[i]->SaveFileChunk(pFile, samples, i);
+					_pInstrument[i]->SaveFileChunk(pFile, samples, i, !saveEINS);
 
 					size_t pos2 = pFile->GetPos(); 
 					size = (UINT)(pos2-pos-sizeof(size));
@@ -2591,7 +2592,7 @@ namespace psycle
 			*/
 
 			// Instrument Data Save
-			if (numInstruments >0)
+			if (saveEINS)
 			{
 				pFile->Write("EINS",4);
 				version = XMSampler::VERSION;
@@ -2610,7 +2611,7 @@ namespace psycle
 				}
 
 				// Sample Data Save
-				int numSamples = 0;	
+				int numSamples = 0;
 				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(samples.IsEnabled(i)){
 						numSamples++;
@@ -2622,7 +2623,6 @@ namespace psycle
 				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(samples.IsEnabled(i)){
 						pFile->Write(i);
-						///TODO: When saving both, INSD and EINS, the wavedata doesn't need to be saved twice
 						samples[i].Save(*pFile);
 					}
 				}
@@ -2903,7 +2903,7 @@ namespace psycle
 			int index = dst; // index
 			file.Write(&index,sizeof(index));
 
-			_pInstrument[src]->SaveFileChunk(&file, samples, src);
+			_pInstrument[src]->SaveFileChunk(&file, samples, src, true);
 
 			size_t pos2 = file.GetPos(); 
 			size = (UINT)(pos2-pos-sizeof(size));

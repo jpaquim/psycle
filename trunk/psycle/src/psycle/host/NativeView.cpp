@@ -46,6 +46,9 @@ namespace psycle { namespace host {
 		,minval(0)
 		,maxval(0)
 		,sourcepoint(0)
+		,sourcex(0)
+		,positioning(false)
+		,allowmove(false)
 		,prevval(0)
 		{
 			SelectMachine(effect);
@@ -174,6 +177,18 @@ namespace psycle { namespace host {
 			bufferDC.SelectObject(oldbmp);
 			bufferDC.SelectObject(oldfont);
 			bufferDC.DeleteDC();
+
+			if(istweak  && !allowmove) {
+				//Reposition the cursor, so that it doesn't move out of the window.
+				//This solves the problem where the cursor cannot move more because it reaches the top or bottom of the screen.
+				CPoint point;
+				point.x = sourcex;
+				point.y = sourcepoint;
+				tweakbase = helpers::math::round<int,float>(visualtweakvalue);
+				ClientToScreen(&point);
+				positioning=true;
+				SetCursorPos(point.x,point.y);
+			}
 		}
 
 		void CNativeView::OnLButtonDown(UINT nFlags, CPoint point) 
@@ -182,6 +197,7 @@ namespace psycle { namespace host {
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
 				sourcepoint = point.y;
+				sourcex = point.x;
 				tweakbase = _pMachine->GetParamValue(tweakpar);
 				prevval = tweakbase;
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
@@ -189,6 +205,7 @@ namespace psycle { namespace host {
 				visualtweakvalue= tweakbase;
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 				SetCapture();
+				ShowCursor(FALSE);
 			}
 			else
 			{
@@ -214,7 +231,7 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnMouseMove(UINT nFlags, CPoint point) 
 		{
-			if (istweak)
+			if (istweak && !positioning)
 			{
 				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
 				///       It should be interesting to know what is "somewhere else".
@@ -227,14 +244,12 @@ namespace psycle { namespace host {
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
 					tweakbase = _pMachine->GetParamValue(tweakpar);
-					sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
 				}
 				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
 					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
 				{
 					tweakbase = _pMachine->GetParamValue(tweakpar);
-					sourcepoint=point.y;
 					finetweak=!finetweak;
 				}
 
@@ -248,15 +263,14 @@ namespace psycle { namespace host {
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase;
 
+				allowmove = (prevval==helpers::math::round<int,float>(nv));
 				if (nv < minval) {
 					nv = minval;
-					tweakbase = helpers::math::round<int,float>(nv);
-					sourcepoint=point.y;
+					allowmove = false;
 				}
 				if (nv > maxval) {
 					nv = maxval;
-					tweakbase = helpers::math::round<int,float>(nv);
-					sourcepoint=point.y;
+					allowmove = false;
 				}
 				visualtweakvalue = nv;
 				prevval=helpers::math::round<int,float>(nv);
@@ -264,6 +278,7 @@ namespace psycle { namespace host {
 				parentFrame->Automate(tweakpar, prevval, false);
 				Invalidate(false);
 			}
+			positioning=false;
 			CWnd::OnMouseMove(nFlags, point);
 		}
 
@@ -271,6 +286,7 @@ namespace psycle { namespace host {
 		{
 			istweak = false;
 			Invalidate(false);	
+			ShowCursor(TRUE);
 			ReleaseCapture();
 			CWnd::OnLButtonUp(nFlags, point);
 		}

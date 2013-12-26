@@ -86,7 +86,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL) {
 			 val =((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry/256.f;
 		}
-		int nPos = helpers::dsp::AmountToSlider(val);
+		int nPos = helpers::dsp::AmountToSliderHoriz(val);
 		m_masterslider.SetPos(nPos);
 		m_masterslider.SetTicFreq(64);
 		m_masterslider.SetPageSize(64);
@@ -221,7 +221,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	}
 	void SongBar::UpdateMasterValue(int newvalue)
 	{
-		int value = 1024-helpers::dsp::AmountToSlider(newvalue/256.f);
+		int value = helpers::dsp::AmountToSliderHoriz(newvalue/256.f);
 		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL)
 		{
 			if (m_masterslider.GetPos() != value) {
@@ -240,13 +240,13 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		case TB_LINEUP: //fallthrough
 		case TB_PAGEUP: //fallthrough
 			if (  the_slider == &m_masterslider) {
-				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256 * helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos());
+				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256 * helpers::dsp::SliderToAmountHoriz(m_masterslider.GetPos());
 			}
 			break;
 		case TB_THUMBPOSITION: //fallthrough
 		case TB_THUMBTRACK:
 			if ( m_pSong->_pMachine[MASTER_INDEX] != NULL && the_slider == &m_masterslider) {
-				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256.f* helpers::dsp::SliderToAmount(1024-nPos);
+				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256.f* helpers::dsp::SliderToAmountHoriz(nPos);
 			}
 			break;
 		case TB_ENDTRACK:
@@ -340,7 +340,7 @@ BOOL SongBar::OnToolTipNotify( UINT unId, NMHDR *pstNMHDR, LRESULT *pstResult )
 			sprintf(pstTTT->szText, "-inf");
 		}
 		else {
-			sprintf(pstTTT->szText, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmount(1024-m_masterslider.GetPos())));
+			sprintf(pstTTT->szText, "%.02f dB", helpers::dsp::dB(helpers::dsp::SliderToAmountHoriz(m_masterslider.GetPos())));
 		}
 		pstTTT->hinst = AfxGetResourceHandle();
 		return(TRUE);

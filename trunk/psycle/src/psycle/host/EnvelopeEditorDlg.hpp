@@ -21,9 +21,12 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	void ChangeEnvelope(XMInstrument::Envelope& env);
 protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnBnClickedEnvmillis();
+	afx_msg void OnBnClickedEnvticks();
 	afx_msg void OnBnClickedEnvadsr();
 	afx_msg void OnBnClickedEnvfreeform();
 	afx_msg void OnBnClickedEnvcheck();
@@ -47,6 +50,8 @@ private:
 	void SliderSustain(CSliderCtrl* slid);
 	void SliderRelease(CSliderCtrl* slid);
 	void RefreshButtons();
+	void SetADSRMode();
+	void SetFreeformMode();
 
 	CSliderCtrl m_SlADSRBase;
 	CSliderCtrl m_SlADSRMod;
@@ -54,6 +59,7 @@ private:
 	CSliderCtrl m_SlADSRDecay;
 	CSliderCtrl m_SlADSRSustain;
 	CSliderCtrl m_SlADSRRelease;
+	float sliderMultiplier;
 };
 
 }}

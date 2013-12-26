@@ -16,12 +16,10 @@ class CEnvelopeEditor : public CStatic
 		CEnvelopeEditor();
 		virtual ~CEnvelopeEditor();
 
-		void Initialize(XMInstrument::Envelope& pEnvelope);
+		void Initialize(XMInstrument::Envelope& pEnvelope,int tpb=24, int millis=1);
 		virtual void DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct );
 
 		XMInstrument::Envelope& envelope() { return *m_pEnvelope; }
-		bool freeform() { return m_bFreeform; }
-		void freeform(bool freeform) { m_bFreeform=freeform; }
 		void ConvertToADSR(bool allowgain=false);
 		bool negative() { return m_bnegative; }
 		void negative(bool negative) { m_bnegative=negative; }
@@ -32,8 +30,8 @@ class CEnvelopeEditor : public CStatic
 		void envelopeIdx(int idx) { m_envelopeIdx=idx; }
 		int envelopeIdx() { return m_envelopeIdx; }
 		int editPoint() { return m_EditPoint; }
-		void TimeFormulaTicks(int ticksperbeat=24) { m_samplesPerPoint=0; m_ticksPerBeat=ticksperbeat; }
-		void TimeFormulaSamples(int samplesperpoint=256) { m_ticksPerBeat=0; m_samplesPerPoint=samplesperpoint; }
+		void TimeFormulaTicks(int ticksperbeat=24);
+		void TimeFormulaMillis(int millisperpoint=1);
 
 		// Only meaningful when freeform is false
 		void AttackTime(int time, bool rezoom=true);
@@ -88,11 +86,10 @@ class CEnvelopeEditor : public CStatic
 
 		XMInstrument::Envelope* m_pEnvelope;
 		bool m_bInitialized;
-		bool m_bFreeform;
 		bool m_bnegative;
 		int m_envelopeIdx;
 		float m_Zoom;///< Zoom
-		int m_samplesPerPoint;
+		int m_millisPerPoint;
 		int m_ticksPerBeat;
 		int m_WindowHeight;
 		int m_WindowWidth;

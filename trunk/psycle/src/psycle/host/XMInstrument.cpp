@@ -9,6 +9,7 @@
 #include <psycle/helpers/filter.hpp>
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/math/clip.hpp>
+#include <psycle/helpers/math/round.hpp>
 #include "FileIO.hpp"
 #include <cassert>
 namespace psycle
@@ -285,6 +286,7 @@ namespace psycle
 			if (strcmp(temp,"SMPD")) return size+8;
 
 			riffFile.Read(filevers);
+			//fileversion 0 was not stored, so if fileversion is null or a character, seek back.
 			if (filevers == 0 || filevers > 0x1F) {
 				riffFile.Seek(riffFile.GetPos()-sizeof(filevers));
 				filevers = 0;
@@ -309,11 +311,16 @@ namespace psycle
 			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
 			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
 
-			if(filevers == 1) {
-				riffFile.Read(m_WaveSampleRate);
+			if(filevers == 0) {
+				m_WaveSampleRate=8363;
 			}
 			else {
-				m_WaveSampleRate=8363;
+				if (filevers==2) {
+					//Placeholder for future bitsize
+					std::uint32_t bits;
+					riffFile.Read(bits);
+				}
+				riffFile.Read(m_WaveSampleRate);
 			}
 			riffFile.Read(m_WaveTune);
 			riffFile.Read(m_WaveFineTune);
@@ -408,6 +415,8 @@ namespace psycle
 			riffFile.Write(m_WaveSusLoopEnd);
 			{ std::uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
 
+			//Placeholder for future bitsize. for filevesion 2.
+			//{ std::uint32_t bits = 16; riffFile.Write(bits); }
 			riffFile.Write(m_WaveSampleRate);
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
@@ -452,9 +461,52 @@ namespace psycle
 			m_SustainEnd = INVALID;
 			m_LoopStart = INVALID;
 			m_LoopEnd = INVALID;
-			m_Mode = Mode::TICK;
+			m_Mode = Mode::MILIS;
+			m_Adsr = false;
 			m_Points.clear();
 		}
+		void XMInstrument::Envelope::Mode(const Mode::Type _mode, const int bpm, const int tpb, const int onemilli)
+		{
+			if (_mode != m_Mode ) {
+				float multiplier=1.f;
+				float tickspersec = (tpb * bpm)/60.f;
+				float millispersec = 1000.0f/onemilli;
+				if (_mode == Mode::TICK) {
+					multiplier = tickspersec/millispersec;
+				}
+				else if ( _mode == XMInstrument::Envelope::Mode::MILIS ) {
+					multiplier = millispersec/tickspersec;
+				}
+				for (size_t i=0; i < m_Points.size(); i++) {
+					m_Points[i].first = math::round<int, float>(m_Points[i].first*multiplier);
+				}
+			}
+			m_Mode=_mode;
+		}
+		void XMInstrument::Envelope::SetAdsr(bool enable, bool reset) {
+			if (enable) {
+				while(NumOfPoints()< 4) {
+					Insert(NumOfPoints(),0.0f);
+				}
+				while(NumOfPoints()>4) {
+					Delete(NumOfPoints()-1);
+				}
+				float min=1.0f;
+				float max=0.0f;
+				for(int i=0;i<NumOfPoints();i++){
+					min=std::min(min,GetValue(i));
+					max=std::max(max,GetValue(i));
+				}
+				if(reset || max==min) {min=0.0f; max = 1.0f;}
+				SetValue(0,min);
+				SetValue(1,max);
+				SetValue(3,min);
+				SustainBegin(2);
+				SustainEnd(2);
+			}
+			m_Adsr = enable;
+		}
+
 		/** 
 		* @param pointIndex : Current point index.
 		* @param pointTime  : Desired point Time.
@@ -666,6 +718,8 @@ namespace psycle
 		/// Loading Procedure
 		void XMInstrument::Envelope::Load(RiffFile& riffFile,const std::uint32_t version)
 		{
+			//When adding or modifying fields, change version in xminstrument
+
 			riffFile.Read(m_Enabled);
 			riffFile.Read(m_Carry);
 			{
@@ -684,13 +738,21 @@ namespace psycle
 					m_Points.push_back(value);
 				}
 			}
-			//TODO: Update version to add mode
+			if (version == 0) {
+				m_Mode = Mode::TICK;
+				m_Adsr = false;
+			}
+			else {
+				{std::uint32_t read; riffFile.Read(read); m_Mode=(Mode::Type)read; }
+				riffFile.Read(m_Adsr);
+			}
 		}
 
 		/// Saving Procedure
 		void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t version) const
 		{
 			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
+			//When adding or modifying fields, change version in xminstrument
 			riffFile.Write(m_Enabled);
 			riffFile.Write(m_Carry);
 			{
@@ -707,7 +769,8 @@ namespace psycle
 				riffFile.Write(m_Points[i].first); // point
 				riffFile.Write(m_Points[i].second); // value
 			}
-			//TODO: Update version to add mode
+			{ std::uint32_t write = m_Mode; riffFile.Write(write); }
+			riffFile.Write(m_Adsr);
 		}
 
 
@@ -731,7 +794,7 @@ namespace psycle
 
 			m_Name = "";
 
-			m_Lines = 16;
+			m_Lines = 0;
 
 			m_GlobVol = 1.0f;
 			m_VolumeFadeSpeed = 0;
@@ -778,14 +841,21 @@ namespace psycle
 		{
 			char temp[8];
 			int size=0;
+			std::uint32_t version;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
 			if (strcmp(temp,"INST")) return size+8;
 
-			//\todo: add version
-			//riffFile.Read(version);
-
-			m_bEnabled = true;
+			riffFile.Read(version);
+			//fileversion 0 was not stored, so if fileversion is null or a character, seek back.
+			if (version == 0 || version > 0x1F) {
+				riffFile.Seek(riffFile.GetPos()-sizeof(version));
+				version = 0;
+				m_bEnabled = true;
+			}
+			else {
+				riffFile.Read(m_bEnabled);
+			}
 			CT2A _name("");
 			riffFile.ReadStringA2T(_name,32);
 			m_Name=_name;
@@ -797,7 +867,13 @@ namespace psycle
 
 			riffFile.Read(m_InitPan);
 			riffFile.Read(m_PanEnabled);
-			//TODO: ADD surround
+			if (version == 0) {
+				m_Surround=false;
+			}
+			else {
+				riffFile.Read(m_Surround);
+			}
+
 			riffFile.Read(m_NoteModPanCenter);
 			riffFile.Read(m_NoteModPanSep);
 
@@ -825,7 +901,6 @@ namespace psycle
 				NoteToSample(i,npair);
 			}
 
-			int version = 0;
 			m_AmpEnvelope.Load(riffFile,version);
 			m_PanEnvelope.Load(riffFile,version);
 			m_FilterEnvelope.Load(riffFile,version);
@@ -843,12 +918,11 @@ namespace psycle
 			riffFile.Write("INST",4);
 			riffFile.Write(size);
 			size_t filepos = riffFile.GetPos();
-			//\todo : add version.
+			riffFile.Write(XMINSVERSION);
+			riffFile.Write(m_bEnabled);
 
 			CT2A _name(m_Name.c_str());
 			riffFile.Write(_name,strlen(_name) + 1);
-
-//			riffFile.Write(m_bEnabled);
 
 			riffFile.Write(m_Lines);
 
@@ -857,7 +931,7 @@ namespace psycle
 
 			riffFile.Write(m_InitPan);
 			riffFile.Write(m_PanEnabled);
-			//TODO: ADD surround
+			riffFile.Write(m_Surround);
 			riffFile.Write(m_NoteModPanCenter);
 			riffFile.Write(m_NoteModPanSep);
 
@@ -885,11 +959,10 @@ namespace psycle
 				riffFile.Write(npair.second);
 			}
 
-			int version = 0;
-			m_AmpEnvelope.Save(riffFile,version);
-			m_PanEnvelope.Save(riffFile,version);
-			m_FilterEnvelope.Save(riffFile,version);
-			m_PitchEnvelope.Save(riffFile,version);
+			m_AmpEnvelope.Save(riffFile,XMINSVERSION);
+			m_PanEnvelope.Save(riffFile,XMINSVERSION);
+			m_FilterEnvelope.Save(riffFile,XMINSVERSION);
+			m_PitchEnvelope.Save(riffFile,XMINSVERSION);
 			size_t endpos = riffFile.GetPos();
 			riffFile.Seek(filepos-4);
 			{ std::uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }

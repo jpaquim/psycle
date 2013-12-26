@@ -117,7 +117,8 @@ BOOL XMSamplerUISample::PreTranslateMessage(MSG* pMsg)
 BOOL XMSamplerUISample::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
-	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(128);
+	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetRangeMax(256*4);
+	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetTicFreq(16*4);
 	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetRangeMax(128);
 	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetRangeMax(128);
 	((CSliderCtrl*)GetDlgItem(IDC_SAMPLENOTE))->SetRange(-60, 59);
@@ -235,8 +236,9 @@ void XMSamplerUISample::RefreshSampleData()
 	((CStatic*)GetDlgItem(IDC_WAVESTEREO))->SetWindowText(wave.IsWaveStereo()?"Stereo":"Mono");
 	sprintf(tmp,"%d",wave.WaveLength());
 	((CStatic*)GetDlgItem(IDC_WAVELENGTH))->SetWindowText(tmp);
-
-	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetPos(int(wave.WaveGlobVolume()*128.0f));
+	
+	int volpos = helpers::dsp::AmountToSliderHoriz(wave.WaveGlobVolume());
+	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetPos(volpos);
 	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetPos(wave.WaveVolume());
 
 	const int panpos=wave.PanFactor()*128.0f;
@@ -389,7 +391,8 @@ void XMSamplerUISample::SliderDefvolume(CSliderCtrl* slid)
 }
 void XMSamplerUISample:: SliderGlobvolume(CSliderCtrl* slid)
 {
-	rWave().WaveGlobVolume(slid->GetPos()/128.0f);
+	float invol = helpers::dsp::SliderToAmountHoriz(slid->GetPos());
+	rWave().WaveGlobVolume(invol);
 }
 void XMSamplerUISample::SliderPan(CSliderCtrl* slid)
 {
@@ -471,8 +474,8 @@ void XMSamplerUISample::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pR
 				temp<<"-inf. dB";
 			else
 			{
-				float vol = float(slider->GetPos())/1.28f;
-				float db = 20 * log10(vol/100.0f);
+				float invol = helpers::dsp::SliderToAmountHoriz(slider->GetPos());
+				float db = 20 * log10(invol);
 				temp<<std::setprecision(1)<<db<<"dB";
 			}
 			strcpy(tmp,temp.str().c_str());

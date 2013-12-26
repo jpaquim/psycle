@@ -28,6 +28,7 @@ public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
 	static const std::uint32_t VERSION = 0x00010001;
+	//Version zero was the development version (no format freeze). Version one is the published one.
 	static const std::uint32_t VERSION_ONE = 0x00010000;
 
 /*
@@ -996,7 +997,7 @@ XMSampler::Channel::PerformFX().
 		int m_ArpeggioMem;
 		int m_RetrigMem;
 		int m_OffsetMem;
-
+		//TODO: some way to let the user know the value set to this.
 		int m_MIDI_Set;
 		int m_Cutoff;
 		int m_Ressonance;

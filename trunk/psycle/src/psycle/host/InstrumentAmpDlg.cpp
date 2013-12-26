@@ -84,9 +84,7 @@ void CInstrumentAmpDlg::AssignAmplitudeValues(XMInstrument& inst)
 	//SliderModNote(&m_SlNoteModNote);
 	//SliderMod(&m_SlNoteMod);
 
-	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.AmpEnvelope().IsEnabled());
-	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.AmpEnvelope().IsCarry());
-	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.AmpEnvelope());
+	m_EnvelopeEditorDlg.ChangeEnvelope(inst.AmpEnvelope());
 }
 
 void CInstrumentAmpDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -117,8 +115,18 @@ void CInstrumentAmpDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 void CInstrumentAmpDlg::SliderVolume(CSliderCtrl* slid)
 {
 	char tmp[64];
-	sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
-	m_instr->GlobVol(m_SlVolCutoffPan.GetPos()/128.0f);
+	std::ostringstream temp;
+	temp.setf(std::ios::fixed);
+	if(slid->GetPos()==0)
+		temp<<"-inf. dB";
+	else
+	{
+		float vol = slid->GetPos()/128.f;
+		float db = 20 * log10(vol);
+		temp<<std::setprecision(1)<<db<<"dB";
+	}
+	strcpy(tmp,temp.str().c_str());
+	m_instr->GlobVol(slid->GetPos()/128.0f);
 	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->SetWindowText(tmp);
 }
 
