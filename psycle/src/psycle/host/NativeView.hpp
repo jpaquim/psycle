@@ -55,6 +55,9 @@ namespace host {
 			int minval;
 			int maxval;
 			int sourcepoint;
+			int sourcex;
+			bool positioning;
+			bool allowmove;
 			int prevval;
 
 		};

@@ -311,6 +311,18 @@ namespace psycle { namespace host {
 			bufferDC.SelectObject(oldbmp);
 			bufferDC.SelectObject(oldfont);
 			bufferDC.DeleteDC();
+
+			if(istweak  && !allowmove) {
+				//Reposition the cursor, so that it doesn't move out of the window.
+				//This solves the problem where the cursor cannot move more because it reaches the top or bottom of the screen.
+				CPoint point;
+				point.x = sourcex;
+				point.y = sourcepoint;
+				tweakbase = helpers::math::round<int,float>(visualtweakvalue);
+				ClientToScreen(&point);
+				positioning=true;
+				SetCursorPos(point.x,point.y);
+			}
 		}
 
 		void MixerFrameView::OnLButtonDown(UINT nFlags, CPoint point) 
@@ -409,6 +421,7 @@ namespace psycle { namespace host {
 			if (istweak)
 			{
 				SetCapture();
+				sourcex=point.x;
 				sourcepoint=point.y;
 				tweakpar=GetParamFromPos(col,row); 
 				_pMachine->GetParamRange(tweakpar,minval,maxval);
@@ -433,7 +446,12 @@ namespace psycle { namespace host {
 						parentFrame->Automate(tweakpar,tweakbase,true);
 					}
 				}
+				else if (_swapstart == -1) {
+					ShowCursor(FALSE);
+				}
+				allowmove =  isslider || _swapstart > -1;
 				prevval = tweakbase;
+				visualtweakvalue= tweakbase;
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 			}
 			CWnd::OnLButtonDown(nFlags, point);
@@ -447,14 +465,14 @@ namespace psycle { namespace host {
 					( !ultrafinetweak && (nFlags & MK_SHIFT))) //shift-key has just been pressed
 				{
 					tweakbase = _pMachine->GetParamValue(tweakpar);
-					sourcepoint=point.y;
+					if (isslider) sourcepoint=point.y;
 					ultrafinetweak=!ultrafinetweak;
 				}
 				else if (( finetweak && !(nFlags & MK_CONTROL )) || //control-key has been left.
 					( !finetweak && (nFlags & MK_CONTROL))) //control-key has just been pressed
 				{
 					tweakbase = _pMachine->GetParamValue(tweakpar);
-					sourcepoint=point.y;
+					if (isslider) sourcepoint=point.y;
 					finetweak=!finetweak;
 				}
 
@@ -463,11 +481,15 @@ namespace psycle { namespace host {
 				if (finetweak) freak/=4;
 
 				double nv = (double)(sourcepoint - point.y)*freak + (double)tweakbase; // +0.375 to compensate for the visual range.
-
-				if (nv < minval) nv = minval;
-				if (nv > maxval) nv = maxval;
-				_pMachine->SetParameter(tweakpar,(int) (nv+0.5f)); // +0.5f to round correctly, not like "floor".
-				prevval=(int)(nv+0.5f);
+				
+				if (nv < minval) {
+					nv = minval;
+				}
+				if (nv > maxval) {
+					nv = maxval;
+				}
+				prevval=helpers::math::round<int,float>(nv);
+				_pMachine->SetParameter(tweakpar,prevval);
 				parentFrame->Automate(tweakpar,prevval,false);
 
 				Invalidate(false);
@@ -500,6 +522,7 @@ namespace psycle { namespace host {
 					mixer().ExchangeReturns(_swapstart,_swapend);
 				}
 			}
+			if (istweak && !isslider && _swapstart == -1) ShowCursor(TRUE);
 			refreshheaders=true;
 			_swapstart = -1;
 			_swapend = -1;

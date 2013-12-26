@@ -104,9 +104,7 @@ void CInstrumentFilDlg::AssignFilterValues(XMInstrument& inst)
 //	SliderModNote(&m_SlNoteModNote);
 //	SliderMod(&m_SlNoteMod);
 
-	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.FilterEnvelope().IsEnabled());
-	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.FilterEnvelope().IsCarry());
-	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.FilterEnvelope());
+	m_EnvelopeEditorDlg.ChangeEnvelope(inst.FilterEnvelope());
 }
 
 void CInstrumentFilDlg::OnCbnSelendokFiltertype()

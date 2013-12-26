@@ -2265,8 +2265,8 @@ namespace psycle
 			riffFile.Read(size);
 			if (strcmp(temp,"CHAN")) return false;
 
-			riffFile.Read(m_ChannelDefVolume);
-			riffFile.Read(m_DefaultPanFactor);
+			riffFile.Read(m_ChannelDefVolume);///< (0..200)   &0x100 = Mute.
+			riffFile.Read(m_DefaultPanFactor);//<  0..200 .  &0x100 = Surround.
 			riffFile.Read(m_DefaultCutoff);
 			riffFile.Read(m_DefaultRessonance);
 			{ uint32_t i(0); riffFile.Read(i); m_DefaultFilterType = static_cast<dsp::FilterType>(i); }
@@ -2917,42 +2917,6 @@ namespace psycle
 				m_Channel[i].Save(*riffFile);
 			}
 
-			#if 0
-				// Instrument Data Save
-				int numInstruments = 0;	
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(m_Instruments[i].IsEnabled()){
-						numInstruments++;
-					}
-				}
-
-				riffFile->Write(numInstruments);
-
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(m_Instruments[i].IsEnabled()){
-						riffFile->Write(i);
-						m_Instruments[i].Save(*riffFile);
-					}
-				}
-
-				// Sample Data Save
-				int numSamples = 0;	
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(m_rWaveLayer[i].WaveLength() != 0){
-						numSamples++;
-					}
-				}
-
-				riffFile->Write(numSamples);
-
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(m_rWaveLayer[i].WaveLength() != 0){
-						riffFile->Write(i);
-						m_rWaveLayer[i].Save(*riffFile);
-					}
-				}
-			#endif
-			
 			size_t endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
 			size = static_cast<std::uint32_t>(endpos - filepos -sizeof(size));
@@ -2999,29 +2963,6 @@ namespace psycle
 				riffFile->Read(m_PanningMode);
 
 				for(int i = 0;i < MAX_TRACKS;i++) m_Channel[i].Load(*riffFile);
-			#if 0
-				// Instrument Data Load
-				int numInstruments;
-				riffFile->Read(numInstruments);
-				int idx;
-				for(int i = 0;i < numInstruments;i++)
-				{
-					riffFile->Read(idx);
-					if (!m_Instruments[idx].Load(*riffFile)) { wrongState=true; break; }
-					//m_Instruments[idx].IsEnabled(true); // done in the loader.
-				}
-				if (!wrongState)
-				{
-					int numSamples;
-					riffFile->Read(numSamples);
-					int idx;
-					for(int i = 0;i < numSamples;i++)
-					{
-						riffFile->Read(idx);
-						if (!m_rWaveLayer[idx].Load(*riffFile)) { wrongState=true; break; }
-					}
-				}
-			#endif
 			}
 			else wrongState = true;
 

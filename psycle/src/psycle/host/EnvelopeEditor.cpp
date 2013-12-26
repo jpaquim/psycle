@@ -11,14 +11,13 @@ namespace psycle { namespace host {
 CEnvelopeEditor::CEnvelopeEditor()
 : m_pEnvelope(NULL)
 , m_bInitialized(false)
-, m_bFreeform(true)
 , m_bnegative(false)
 , m_bCanSustain(true)
 , m_bCanLoop(true)
 , m_bPointEditing(false)
 , m_envelopeIdx(0)
 , m_EditPoint(0)
-, m_samplesPerPoint(0)
+, m_millisPerPoint(0)
 , m_ticksPerBeat(24)
 {
 	_line_pen.CreatePen(PS_SOLID,0,RGB(0,0,255));
@@ -50,7 +49,7 @@ BEGIN_MESSAGE_MAP(CEnvelopeEditor, CStatic)
 END_MESSAGE_MAP()
 			
 			
-void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope)
+void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope, int tpb, int millis)
 {
 	m_pEnvelope = &pEnvelope;
 			
@@ -60,6 +59,12 @@ void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope)
 	m_WindowWidth = _rect.Width();
 			
 	m_EditPoint = m_pEnvelope->NumOfPoints();
+	if (pEnvelope.Mode() == XMInstrument::Envelope::Mode::MILIS) {
+		m_millisPerPoint=millis; m_ticksPerBeat=0; 
+	}
+	else {
+		m_millisPerPoint=0; m_ticksPerBeat=tpb; 
+	}
 	FitZoom();
 
 	m_bInitialized = true;
@@ -67,33 +72,33 @@ void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope)
 }
 void CEnvelopeEditor::ConvertToADSR(bool allowgain) {
 	XMInstrument::Envelope &env = envelope();
-	while(env.NumOfPoints()< 4) {
-		env.Insert(env.NumOfPoints(),0.0f);
-	}
-	while(env.NumOfPoints()>4) {
-		env.Delete(env.NumOfPoints()-1);
-	}
-	float min=1.0f;
-	float max=0.0f;
-	for(int i=0;i<env.NumOfPoints();i++){
-		min=std::min(min,env.GetValue(i));
-		max=std::max(max,env.GetValue(i));
-	}
-	if(max==min || !allowgain) {min=0.0f; max = 1.0f;}
-	env.SetValue(0,min);
-	env.SetValue(1,max);
-	env.SetValue(3,min);
-	env.SustainBegin(2);
-	env.SustainEnd(2);
-
+	env.SetAdsr(true, !allowgain);
 	m_EditPoint = env.NumOfPoints();
-	freeform(false);
+	FitZoom();
+}
+void CEnvelopeEditor::TimeFormulaTicks(int ticksperbeat) {
+	if (m_millisPerPoint > 0 ) {
+		m_pEnvelope->Mode(XMInstrument::Envelope::Mode::TICK, Global::player().bpm, ticksperbeat, m_millisPerPoint);
+	}
+	m_millisPerPoint=0; m_ticksPerBeat=ticksperbeat; 
+	FitZoom();
+}
+void CEnvelopeEditor::TimeFormulaMillis(int millisperpoint) { 
+	if (m_ticksPerBeat>0) {
+		m_pEnvelope->Mode(XMInstrument::Envelope::Mode::MILIS, Global::player().bpm, m_ticksPerBeat,millisperpoint);
+	}
+	m_ticksPerBeat=0; m_millisPerPoint=millisperpoint;
 	FitZoom();
 }
 
 void CEnvelopeEditor::FitZoom()
 {
-	m_Zoom = 8.0f;
+	if (m_ticksPerBeat>0) {
+		m_Zoom = 8.0f;
+	}
+	else {
+		m_Zoom = 0.4f*m_millisPerPoint;
+	}
 	const int _points =  m_pEnvelope->NumOfPoints();
 
 	if (_points > 0 )
@@ -163,7 +168,6 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			CRect _rect;
 			GetClientRect(&_rect);
 
-//			dc.FillRect(&_rect,&brush);
 			dc.FillSolidRect(&_rect,RGB(255,255,255));
 			dc.SetBkMode(TRANSPARENT);
 			
@@ -192,7 +196,7 @@ void CEnvelopeEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 				tenthsec = m_Zoom*(m_ticksPerBeat/600.0)*Global::player().bpm;
 			}
 			else {
-				tenthsec = m_Zoom*Global::player().SampleRate()*0.1/m_samplesPerPoint;
+				tenthsec = m_Zoom*100/m_millisPerPoint;
 			}
 			int _sec = 0;
 
@@ -320,8 +324,9 @@ void CEnvelopeEditor::OnLButtonDown( UINT nFlags, CPoint point )
 		const int _points =  m_pEnvelope->NumOfPoints();
 
 		int _edit_point = GetEnvelopePointIndexAtPoint(point.x,point.y);
-		if(_edit_point != _points && (m_bFreeform || _edit_point > 0)) {
-			m_bCanMoveUpDown=(m_bFreeform || _edit_point == 2);
+		bool freeform = !m_pEnvelope->IsAdsr();
+		if(_edit_point != _points && (freeform || _edit_point > 0)) {
+			m_bCanMoveUpDown=(freeform || _edit_point == 2);
 			m_bPointEditing = true;
 			SetCapture();
 			m_EditPoint = _edit_point;
@@ -340,28 +345,7 @@ void CEnvelopeEditor::OnLButtonUp( UINT nFlags, CPoint point )
 				
 		if (point.x > m_WindowWidth ) m_Zoom = m_Zoom /2.0f;
 		else if ( m_pEnvelope->GetTime(m_pEnvelope->NumOfPoints()-1)*m_Zoom < m_WindowWidth/2 && m_Zoom < 8.0f) m_Zoom = m_Zoom *2.0f;
-			
-		/*
-		//\todo: verify the necessity of this code, when it is already present in MouseMove.
-		int _new_point = (int)((float)point.x / m_Zoom);
-		float _new_value = (1.0f - (float)point.y / (float)m_WindowHeight);
-			
-			if(_new_value > 1.0f)
-			{
-				_new_value = 1.0f;
-			}
 
-			if(_new_value < 0.0f)
-			{
-				_new_value = 0.0f;
-			}
-
-			if( _new_point < 0)
-			{
-				_new_point = 0;
-			}
-		m_pEnvelope->SetTimeAndValue(m_EditPoint,_new_point,_new_value);
-		*/
 		this->GetParent()->SendMessage(PSYC_ENVELOPE_CHANGED, m_envelopeIdx);
 		Invalidate();
 	}
@@ -402,17 +386,7 @@ void CEnvelopeEditor::OnMouseMove( UINT nFlags, CPoint point )
 				m_EditPointY = (1 - m_pEnvelope->GetValue(m_EditPoint))*(float)m_WindowHeight;
 			}
 		}
-		if (m_bFreeform) {
-			if (m_bnegative) {
-				m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
-					(1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight));
-			}
-			else {
-				m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
-					(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
-			}
-		}
-		else {
+		if (m_pEnvelope->IsAdsr()) {
 			float val;
 			if (m_bnegative) {
 				val = (1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight);
@@ -427,13 +401,23 @@ void CEnvelopeEditor::OnMouseMove( UINT nFlags, CPoint point )
 				default:break;
 			}
 		}
+		else {
+			if (m_bnegative) {
+				m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+					(1.0f - 2.0f*m_EditPointY / (float)m_WindowHeight));
+			}
+			else {
+				m_EditPoint = m_pEnvelope->SetTimeAndValue(m_EditPoint,(int)((float)m_EditPointX / m_Zoom),
+					(1.0f - (float)m_EditPointY / (float)m_WindowHeight));
+			}
+		}
 		Invalidate();
 	}
 }
 			
 void CEnvelopeEditor::OnContextMenu(CWnd* pWnd, CPoint point) 
 {
-	if (!m_bFreeform) {
+	if (m_pEnvelope->IsAdsr()) {
 		return;
 	}
 	CPoint tmp;

@@ -481,6 +481,7 @@ Special:  Bit 0: On = song message attached.
 
 			// volume envelope
 			xins.AmpEnvelope().Init();
+			xins.AmpEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 			xins.AmpEnvelope().IsEnabled(curH.volEnv.flg & EnvFlags::USE_ENVELOPE);
 			if(curH.volEnv.flg& EnvFlags::ENABLE_CARRY) xins.AmpEnvelope().IsCarry(true);
 			if(curH.volEnv.flg& EnvFlags::USE_SUSTAIN){
@@ -505,7 +506,7 @@ Special:  Bit 0: On = song message attached.
 
 			// Pan envelope
 			xins.PanEnvelope().Init();
-
+			xins.PanEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 			xins.PanEnvelope().IsEnabled(curH.panEnv.flg & EnvFlags::USE_ENVELOPE);
 			if(curH.panEnv.flg& EnvFlags::ENABLE_CARRY) xins.PanEnvelope().IsCarry(true);
 			if(curH.panEnv.flg& EnvFlags::USE_SUSTAIN){
@@ -530,7 +531,9 @@ Special:  Bit 0: On = song message attached.
 
 			// Pitch/Filter envelope
 			xins.PitchEnvelope().Init();
+			xins.PitchEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 			xins.FilterEnvelope().Init();
+			xins.FilterEnvelope().Mode(XMInstrument::Envelope::Mode::TICK);
 
 			envelope_point_num = curH.pitchEnv.numP;
 			if(envelope_point_num > 25){ // Max number of envelope points in Impulse format is 25.

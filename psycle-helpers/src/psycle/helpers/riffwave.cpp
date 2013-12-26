@@ -526,7 +526,7 @@ if(hd.ckID == FourCC("smpl"))
 		for(uint32_t io = 0 ; io < samples ; io+=amount)
 		{
 			//truncate 1024 to amount of chans.
-			amount = std::min(32768U/chans,samples-io);
+			amount = static_cast<uint32_t>(std::min(32768U/chans,samples-io));
 			ReadArray(samps, amount*chans);
 			in_type* psamps = samps;
 			for (int a=0; a < amount; a++) {

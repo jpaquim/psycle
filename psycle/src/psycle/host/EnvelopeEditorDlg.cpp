@@ -8,6 +8,7 @@ namespace psycle { namespace host {
 
 CEnvelopeEditorDlg::CEnvelopeEditorDlg()
 : CDialog(CEnvelopeEditorDlg::IDD)
+, sliderMultiplier(1)
 {
 }
 
@@ -31,6 +32,8 @@ void CEnvelopeEditorDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CEnvelopeEditorDlg, CDialog)
 	ON_BN_CLICKED(IDC_ENVCHECK, OnBnClickedEnvcheck)
 	ON_BN_CLICKED(IDC_ENV_CARRY, OnBnClickedCarrycheck)
+	ON_BN_CLICKED(IDC_ENVMILLIS, OnBnClickedEnvmillis)
+	ON_BN_CLICKED(IDC_ENVTICKS, OnBnClickedEnvticks)
 	ON_BN_CLICKED(IDC_ENVADSR, OnBnClickedEnvadsr)
 	ON_BN_CLICKED(IDC_ENVFREEFORM, OnBnClickedEnvfreeform)
 	ON_BN_CLICKED(IDC_ENV_SUSBEGIN, OnBnClickedSusBegin)
@@ -59,15 +62,35 @@ BOOL CEnvelopeEditorDlg::OnInitDialog()
 	
 	m_SlADSRBase.SetRangeMax(100);
 	m_SlADSRMod.SetRangeMax(100);
-	m_SlADSRAttack.SetRangeMax(256);
-	m_SlADSRDecay.SetRangeMax(256);
+	m_SlADSRAttack.SetRangeMax(250);
+	m_SlADSRDecay.SetRangeMax(250);
 	m_SlADSRSustain.SetRangeMax(100);
-	m_SlADSRRelease.SetRangeMax(512);
-	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->SetCheck(TRUE);
-	OnBnClickedEnvfreeform();
+	m_SlADSRRelease.SetRangeMax(500);
 	return TRUE;
 	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
+}
+void CEnvelopeEditorDlg::ChangeEnvelope(XMInstrument::Envelope &env) {
+
+	m_EnvEnabled.SetCheck(env.IsEnabled());
+	m_CarryEnabled.SetCheck(env.IsCarry());
+	((CButton*)GetDlgItem(IDC_ENVMILLIS))->SetCheck(env.Mode() == XMInstrument::Envelope::Mode::MILIS);
+	((CButton*)GetDlgItem(IDC_ENVTICKS))->SetCheck(env.Mode() == XMInstrument::Envelope::Mode::TICK);
+	m_EnvelopeEditor.Initialize(env);
+	if (env.Mode() == XMInstrument::Envelope::Mode::MILIS) {
+		m_SlADSRAttack.SetRangeMax(5000);
+		m_SlADSRDecay.SetRangeMax(5000);
+		m_SlADSRRelease.SetRangeMax(10000);
+		sliderMultiplier = 1;
+	}
+	else {
+		m_SlADSRAttack.SetRangeMax(250);
+		m_SlADSRDecay.SetRangeMax(250);
+		m_SlADSRRelease.SetRangeMax(500);
+		sliderMultiplier = 2500.f / Global::player().bpm;
+	}
+	if (env.IsAdsr()) {	SetADSRMode(); }
+	else { SetFreeformMode(); }
 }
 
 void CEnvelopeEditorDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -121,15 +144,56 @@ void CEnvelopeEditorDlg::OnBnClickedCarrycheck()
 	m_EnvelopeEditor.envelope().IsCarry(m_CarryEnabled.GetCheck()!=0);
 }
 
+void CEnvelopeEditorDlg::OnBnClickedEnvmillis()
+{
+	m_EnvelopeEditor.TimeFormulaMillis();
+	m_EnvelopeEditor.Invalidate();
+	if (m_EnvelopeEditor.envelope().Mode() == XMInstrument::Envelope::Mode::MILIS) {
+		m_SlADSRAttack.SetRangeMax(5000);
+		m_SlADSRDecay.SetRangeMax(5000);
+		m_SlADSRRelease.SetRangeMax(10000);
+		sliderMultiplier = 1;
+	}
+	else {
+		m_SlADSRAttack.SetRangeMax(250);
+		m_SlADSRDecay.SetRangeMax(250);
+		m_SlADSRRelease.SetRangeMax(500);
+		sliderMultiplier = 2500.f / Global::player().bpm;
+	}
+}
+void CEnvelopeEditorDlg::OnBnClickedEnvticks()
+{
+	m_EnvelopeEditor.TimeFormulaTicks();
+	m_EnvelopeEditor.Invalidate();
+	if (m_EnvelopeEditor.envelope().Mode() == XMInstrument::Envelope::Mode::MILIS) {
+		m_SlADSRAttack.SetRangeMax(5000);
+		m_SlADSRDecay.SetRangeMax(5000);
+		m_SlADSRRelease.SetRangeMax(10000);
+		sliderMultiplier = 1;
+	}
+	else {
+		m_SlADSRAttack.SetRangeMax(250);
+		m_SlADSRDecay.SetRangeMax(250);
+		m_SlADSRRelease.SetRangeMax(500);
+		sliderMultiplier = 2500.f / Global::player().bpm;
+	}
+}
+
 void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 {
+	m_EnvelopeEditor.ConvertToADSR(true);
+	SetADSRMode();
+}
+void CEnvelopeEditorDlg::SetADSRMode()
+{
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->SetCheck(FALSE);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->SetCheck(TRUE);
 	m_SlADSRBase.EnableWindow(TRUE);
 	m_SlADSRMod.EnableWindow(TRUE);
 	m_SlADSRAttack.EnableWindow(TRUE);
 	m_SlADSRDecay.EnableWindow(TRUE);
 	m_SlADSRSustain.EnableWindow(TRUE);
 	m_SlADSRRelease.EnableWindow(TRUE);
-	m_EnvelopeEditor.ConvertToADSR(true);
 	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
 	float min=env.GetValue(0);
 	float max=env.GetValue(1);
@@ -148,13 +212,18 @@ void CEnvelopeEditorDlg::OnBnClickedEnvadsr()
 		
 void CEnvelopeEditorDlg::OnBnClickedEnvfreeform()
 {
+	m_EnvelopeEditor.envelope().SetAdsr(false);
+	SetFreeformMode();
+}
+void CEnvelopeEditorDlg::SetFreeformMode() {
+	((CButton*)GetDlgItem(IDC_ENVFREEFORM))->SetCheck(TRUE);
+	((CButton*)GetDlgItem(IDC_ENVADSR))->SetCheck(FALSE);
 	m_SlADSRBase.EnableWindow(FALSE);
 	m_SlADSRMod.EnableWindow(FALSE);
 	m_SlADSRAttack.EnableWindow(FALSE);
 	m_SlADSRDecay.EnableWindow(FALSE);
 	m_SlADSRSustain.EnableWindow(FALSE);
 	m_SlADSRRelease.EnableWindow(FALSE);
-	m_EnvelopeEditor.freeform(true);
 }
 
 void CEnvelopeEditorDlg::SliderBase(CSliderCtrl* slid)
@@ -221,15 +290,15 @@ void CEnvelopeEditorDlg::OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* p
 			label = IDC_LADSRSUS;
 		}
 		else if (pNMHDR->idFrom == IDC_ADSRATT) {
-			sprintf(tmp,"%.0fms",slider->GetPos()*2500.f / Global::player().bpm );
+			sprintf(tmp,"%.0fms",slider->GetPos()*sliderMultiplier);
 			label = IDC_LADSRATT;
 		}
 		else if (pNMHDR->idFrom == IDC_ADSRDEC) {
-			sprintf(tmp,"%.0fms",slider->GetPos()*2500.f / Global::player().bpm );
+			sprintf(tmp,"%.0fms",slider->GetPos()*sliderMultiplier);
 			label = IDC_LADSRDEC;
 		}
 		else if (pNMHDR->idFrom == IDC_ADSRREL) {
-			sprintf(tmp,"%.0fms",slider->GetPos()*2500.f / Global::player().bpm );
+			sprintf(tmp,"%.0fms",slider->GetPos()*sliderMultiplier);
 			label = IDC_LADSRREL;
 		}
 		if (label != 0) {
@@ -304,7 +373,7 @@ void CEnvelopeEditorDlg::OnBnClickedLoopEnd()
 void CEnvelopeEditorDlg::OnEnvelopeChanged()
 {
 	RefreshButtons();
-	if (!m_EnvelopeEditor.freeform()) {
+	if (m_EnvelopeEditor.envelope().IsAdsr()) {
 
 		m_SlADSRAttack.SetPos(m_EnvelopeEditor.AttackTime());
 		m_SlADSRDecay.SetPos(m_EnvelopeEditor.DecayTime());

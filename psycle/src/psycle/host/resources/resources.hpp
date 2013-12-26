@@ -116,6 +116,13 @@
 #define IDD_PLOTTER                     322
 #define IDR_INSTRUMENTEDIT              324
 #define IDD_NOTEMAP_INDIVIDUAL          326
+#define IDI_ICON1                       328
+#define IDI_ICON2014                    328
+#define IDR_MAINFRAME1                  329
+#define IDI_ICON2000                    329
+#define IDB_PNG1                        330
+#define IDB_BITMAP1                     331
+#define IDB_SPLASH2014                  331
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -762,8 +769,10 @@
 #define IDC_MACHINEGUI_TOPFONTC2        1666
 #define IDC_ENVFREEFORM                 1666
 #define IDC_MACHINEGUI_TOPC2            1667
+#define IDC_ENVMILLIS                   1667
 #define IDC_MACHINEGUI_BOTTOMC2         1668
 #define IDC_CUTOFFPAN                   1668
+#define IDC_ENVTICKS                    1668
 #define IDC_MACHINEGUI_BOTTOMFONTC2     1669
 #define IDC_MOVECURSORPASTE             1670
 #define IDC_LVOLCUTOFFPAN               1673
@@ -945,7 +954,6 @@
 #define IDC_EDITMAPPING                 2133
 #define IDC_SCROLLBAR1                  2134
 #define IDC_INS_SHIFTMOVE               2135
-#define IDC_COMBO2                      2136
 #define IDC_INDIV_NOTE                  2136
 #define IDC_INDIV_SAMPLE                2137
 #define PSYC_ENVELOPE_CHANGED           4096
@@ -1129,7 +1137,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        327
+#define _APS_NEXT_RESOURCE_VALUE        332
 #define _APS_NEXT_COMMAND_VALUE         34308
 #define _APS_NEXT_CONTROL_VALUE         2138
 #define _APS_NEXT_SYMED_VALUE           64

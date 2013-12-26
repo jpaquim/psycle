@@ -916,7 +916,7 @@ namespace psycle
 				{
 					std::uint32_t internalversion;
 					pFile->Read(internalversion);
-					if (internalversion >= SAMPLERVERSION) {
+					if (internalversion >= 1) {
 						bool defaultC4;
 						pFile->Read(&defaultC4, sizeof(bool)); // correct A4 frequency.
 						DefaultC4(defaultC4);

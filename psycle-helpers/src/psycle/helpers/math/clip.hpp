@@ -63,8 +63,8 @@ inline void rint_clip_array(const float in[], int16_t out[], int amount) {
 	#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
 		__asm
 		{
-			mov esi, pSrcSamples
-			mov edi, pDstSamples
+			mov esi, in
+			mov edi, out
 			mov eax, [amount]
 		LOOPSTART:
 			CVTTPS2DQ xmm0, [esi]

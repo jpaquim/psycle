@@ -273,7 +273,7 @@ namespace psycle { namespace host {
 
 			// Sets Icon
 			HICON tIcon;
-			tIcon=theApp.LoadIcon(IDR_MAINFRAME);
+			tIcon=theApp.LoadIcon(IDI_ICON2014);
 			SetIcon(tIcon, true);
 			SetIcon(tIcon, false);
 

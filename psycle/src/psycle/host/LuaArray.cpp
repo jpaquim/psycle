@@ -14,11 +14,12 @@ namespace psycle { namespace host {
 // for psycle samples
 PSArray::PSArray(int len, float v) : len_(len), baselen_(len_), cap_(len), shared_(0) {  
   universalis::os::aligned_memory_alloc(16, ptr_, len);
-  if (v == 0) {
-     psycle::helpers::dsp::Clear(ptr_, len_);
-  } else {		
+// TODO: sse optimizations don't work! probably because it requires len to be multiple of 4 too.
+//  if (v == 0) {
+//     psycle::helpers::dsp::Clear(ptr_, len_);
+//  } else {		
 	for (int i=0; i < len; ++i) ptr_[i] = v;
-  }
+//  }
   base_ = ptr_;
 }
 
@@ -57,7 +58,11 @@ int PSArray::copyfrom(PSArray& src) {
     if (src.len() != len_) {
 		return 0;
 	}
-	psycle::helpers::dsp::Mov(src.data(), ptr_, len_);
+	// TODO: sse optimizations don't work! probably because it requires len to be multiple of 4 too.
+	//psycle::helpers::dsp::Mov(src.data(), ptr_, len_);
+	for (int i=0; i < len_; ++i) {
+		  ptr_[i] = src.ptr_[i];
+	}
 	return 1;
 }
 

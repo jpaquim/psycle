@@ -362,6 +362,7 @@ namespace psycle { namespace host {
 				m_LoopEnd = other.m_LoopEnd;
 				m_SustainBegin = other.m_SustainBegin;
 				m_SustainEnd = other.m_SustainEnd;
+				m_Adsr = other.m_Adsr;
 
 				return *this;
 			}
@@ -395,8 +396,12 @@ namespace psycle { namespace host {
 			inline void IsCarry(const bool value){ m_Carry = value;}
 
 			inline Mode::Type Mode() const { return m_Mode; }
-			inline void Mode(const Mode::Type _mode){ m_Mode=_mode; }
+			//The extra parameters are used to convert the existing points from one unit to the other.
+			void Mode(const Mode::Type _mode, const int bpm=125, const int tpb=24, const int onemilli=1);
 
+			inline bool IsAdsr() const { return m_Adsr; }
+			void SetAdsr(bool enable, bool reset=false);
+		
 		private:
 			/// Envelope is enabled or disabled
 			bool m_Enabled;
@@ -416,11 +421,14 @@ namespace psycle { namespace host {
 			int m_SustainEnd;
 			/// Envelope mode (meaning of the time value)
 			Mode::Type m_Mode;
+			/// Indicates that this envelope is operated as an ADSR (it is just a visual option).
+			bool m_Adsr;
 		};// class Envelope
 
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument Class declaration
+		static const std::uint32_t XMINSVERSION = 0x00000001;
 		XMInstrument();
 		virtual ~XMInstrument();
 
@@ -546,7 +554,8 @@ namespace psycle { namespace host {
 
 		std::string m_Name;
 
-		/// If m_Lines > 0 use samplelen/(tickduration*m_Lines) to determine the wave speed instead of the note.
+		/// If m_Lines > 0 use samplelen/(lineduration*m_Lines) to determine the wave speed instead of the note.
+		// Currently unimplemented.
 		std::uint16_t m_Lines;
 
 		/// envelope range = [0.0f..1.0f]

@@ -78,31 +78,24 @@ namespace psycle { namespace host {
 
 		bool LuaPlugin::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			UINT size;
-			pFile->Read(&size,sizeof(size)); // size of whole structure
+			std::uint32_t size;
+			pFile->Read(size); // size of whole structure
 			if(size)
 			{
-				UINT count;
-				pFile->Read(&count,sizeof(count));  // size of vars
-				/*
-				if (count)
-				{
-					pFile->Read(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-				}
-				*/
+				std::uint32_t count;
+				pFile->Read(count);  // size of vars
+				//Read vals and names to do SetParameter.
+				//It is done this way to allow parameters to change without disrupting the loader.
 				std::vector<int> vals;
-				for (UINT i = 0; i < count; i++)
-				{
-					int temp;
-					pFile->Read(&temp,sizeof(temp));
-					vals.push_back(temp);
-					//SetParameter(i, temp);
-				}
 				std::map<std::string, int> ids;
-				for (UINT i = 0; i < count; i++)
-				{
+				for (std::uint32_t i = 0; i < count; i++) {
+					int temp;
+					pFile->Read(temp);
+					vals.push_back(temp);
+				}
+				for (std::uint32_t i = 0; i < count; i++) {
 					std::string id;
-					bool res = pFile->ReadString(id); // (&temp,sizeof(temp));
+					bool res = pFile->ReadString(id);
 					ids[id] = i;
 				}
 				int num = GetNumParams();
@@ -116,16 +109,16 @@ namespace psycle { namespace host {
 					  // parameter not found
 				  }
 				}
-
-				size = 0;
-				//size -= sizeof(count) + sizeof(int)*count;
-				if(size)
+				std::uint32_t size2=0;
+				pFile->Read(size2);
+				if(size2)
 				{
-					byte* pData = new byte[size];
-					pFile->Read(pData, size); // Number of parameters
+					byte* pData = new byte[size2];
+					pFile->Read(pData, size2); // Number of parameters
 					try
 					{
-						// proxy().PutData(pData); // Internal load
+						// proxy().PutData(pData, size2); // Internal load
+						delete[] pData;
 					}
 					catch(const std::exception &e)
 					{
@@ -139,8 +132,6 @@ namespace psycle { namespace host {
 						return false;
 #endif
 					}
-					delete[] pData;
-					return true;
 				}
 			}
 			return true;
@@ -148,39 +139,42 @@ namespace psycle { namespace host {
 
 		void LuaPlugin::SaveSpecificChunk(RiffFile * pFile)
 		{
-			UINT count = GetNumParams();
-			UINT size2(0);
+			std::uint32_t count = GetNumParams();
+			std::uint32_t size2(0);
 			try
 			{
 				// size2 = proxy().GetDataSize();
 			}
 			catch(const std::exception &e)
 			{
-				e;
 #ifndef NDEBUG 
-					throw e;
+				throw e;
+#else
+				e;
 #endif
 				// data won't be saved
 			}
-			UINT size = size2 + sizeof(count) + sizeof(int)*count;
+			std::uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
 			std::vector<std::string> ids;
 			for (UINT i = 0; i < count; i++) {
 			  std::string id = proxy_.get_parameter_id(i);
 			  ids.push_back(id);
 			  size += id.length()+1;
 			}
-			pFile->Write(&size,sizeof(size));
-			pFile->Write(&count,sizeof(count));
-			//pFile->Write(_pInterface->Vals,sizeof(_pInterface->Vals[0])*count);
-			for (UINT i = 0; i < count; i++)
+			pFile->Write(size);
+			pFile->Write(count);
+
+			for (std::uint32_t i = 0; i < count; i++)
 			{
 				int temp = GetParamValue(i);
-				pFile->Write(&temp,sizeof temp);
+				pFile->Write(temp);
 			}
 			// ids
-			for (UINT i = 0; i < count; i++) {
+			for (std::uint32_t i = 0; i < count; i++) {
 			  pFile->WriteString(ids[i]);
 			}
+	
+			pFile->Write(size2);
 			if(size2)
 			{
 				byte * pData = new byte[size2];
@@ -211,7 +205,7 @@ namespace psycle { namespace host {
 			  int minval; int maxval;
 			  proxy_.get_parameter_range(numparam, minval, maxval);
 			  int quantization = (maxval-minval);
-			  proxy_.call_parameter(numparam,float(value)/float(quantization));
+			  proxy_.call_parameter(numparam,double(value)/double(quantization));
 			  return true;
 			} catch(std::exception &e) {} //do nothing.
 			return false;

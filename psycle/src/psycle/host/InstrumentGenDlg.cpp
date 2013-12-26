@@ -109,9 +109,7 @@ void CInstrumentGenDlg::AssignGeneralValues(XMInstrument& inst)
 	m_InstrumentName.SetWindowText(inst.Name().c_str());
 	SetNewNoteAction(inst.NNA(),inst.DCT(),inst.DCA());
 	m_SampleAssign.Initialize(inst);
-	m_EnvelopeEditorDlg.m_EnvEnabled.SetCheck(inst.PitchEnvelope().IsEnabled());
-	m_EnvelopeEditorDlg.m_CarryEnabled.SetCheck(inst.PitchEnvelope().IsCarry());
-	m_EnvelopeEditorDlg.m_EnvelopeEditor.Initialize(inst.PitchEnvelope());
+	m_EnvelopeEditorDlg.ChangeEnvelope(inst.PitchEnvelope());
 	m_bInitialized=true;
 }
 

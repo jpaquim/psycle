@@ -99,7 +99,7 @@ namespace psycle { namespace host {
 			float val = wire.GetVolume();
 			invol = val;
 			UpdateVolPerDb();
-			m_volslider.SetPos(helpers::dsp::AmountToSlider(val));
+			m_volslider.SetPos(helpers::dsp::AmountToSliderVert(val));
 			mult = 1.0f / srcMachine.GetAudioRange();
 
 			char buf[128];
@@ -866,7 +866,7 @@ namespace psycle { namespace host {
 
 		void CWireDlg::OnChangeSliderVol(UINT nPos) 
 		{
-			invol = helpers::dsp::SliderToAmount(nPos);
+			invol = helpers::dsp::SliderToAmountVert(nPos);
 
 			UpdateVolPerDb();
 			float f = wire.GetVolume();
@@ -997,7 +997,7 @@ namespace psycle { namespace host {
 			dlg.edit_type = 0;
 			if (dlg.DoModal() == IDOK)
 			{
-				int volpos = helpers::dsp::AmountToSlider(dlg.volume);
+				int volpos = helpers::dsp::AmountToSliderVert(dlg.volume);
 				m_volslider.SetPos(volpos);
 				OnChangeSliderVol(volpos);
 			}
@@ -1016,7 +1016,7 @@ namespace psycle { namespace host {
 			dlg.edit_type = 1;
 			if (dlg.DoModal() == IDOK)
 			{
-				int volpos = helpers::dsp::AmountToSlider(dlg.volume);
+				int volpos = helpers::dsp::AmountToSliderVert(dlg.volume);
 				m_volslider.SetPos(volpos);
 				OnChangeSliderVol(volpos);
 			}

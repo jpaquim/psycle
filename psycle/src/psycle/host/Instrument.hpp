@@ -18,7 +18,7 @@ namespace psycle
 			virtual ~Instrument();
 			void Init();
 			void LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen=true);
-			void SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx);
+			void SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx, bool savesamples);
 
 			///\name Loop stuff
 			///\{
