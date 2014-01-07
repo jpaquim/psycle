@@ -67,13 +67,6 @@ void MachineViewLine::paint(QPainter *painter, const QStyleOptionGraphicsItem */
 
     painter->drawPath(shape());
     scene()->update();
-
-
-//    QGraphicsLineItem::paint(painter,option,widget);
-
-//    painter->setBrush(Qt::black);
-//    painter->drawPolygon(triangle);
-
 }
 
 void MachineViewLine::mouseDoubleClickEvent(QGraphicsSceneMouseEvent */*event*/){

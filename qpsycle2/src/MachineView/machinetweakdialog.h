@@ -40,7 +40,7 @@ private:
     QLabel* valueLabel;
     int max,min = 0;
 
-public Q_SLOTS:
+public slots:
     void update();
 };
 

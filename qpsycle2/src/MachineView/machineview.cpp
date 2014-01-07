@@ -63,7 +63,7 @@ void MachineView::setup()
 
     //draw in the connections.
     MachineViewLine* line;
-    Q_FOREACH(psycle::core::Machine* mac, items.keys()){
+    foreach(psycle::core::Machine* mac, items.keys()){
         for ( int w=0; w < psycle::core::MAX_CONNECTIONS; w++ ) {
                 if (mac->_connection[w]) { // a connection exists
                     GuiMachineElement* srcMacGui = items.value(mac);  //find the gui for the generating machine

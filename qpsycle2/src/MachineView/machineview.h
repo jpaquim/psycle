@@ -23,7 +23,7 @@ Q_OBJECT
 public:
     MachineView();
 
-public Q_SLOTS:
+public slots:
     void setup();
 
 protected:

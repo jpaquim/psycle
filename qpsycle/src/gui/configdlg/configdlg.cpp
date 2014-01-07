@@ -24,6 +24,10 @@
 #include "dirspage.hpp"
 
 #include <QtGui>
+#include <QListWidget>
+#include <QStackedWidget>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 namespace qpsycle {
 

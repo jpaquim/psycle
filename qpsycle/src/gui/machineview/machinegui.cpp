@@ -160,7 +160,6 @@ void MachineGui::onRenameMachineActionTriggered()
 							"Name: ", QLineEdit::Normal,
 							QString::fromStdString( mac()->GetEditName() ), &ok);
 	if ( ok && !text.isEmpty() ) {
-		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		mac()->SetEditName( text.toStdString() );
 		updateName();
 	}

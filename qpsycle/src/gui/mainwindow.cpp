@@ -553,7 +553,6 @@ namespace qpsycle {
 			{
 				psycle::core::Player::singleton().stop();
 				psycle::core::Song *song = new psycle::core::Song();
-				QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 				if ( song->load( fileName.toStdString() ) )
 				{
 					loadSong( song );
@@ -605,8 +604,6 @@ namespace qpsycle {
 
 	bool MainWindow::saveSong( const QString & fileName ) {
 		qDebug( "Saving song." );
-
-		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		bool success = song_->save( fileName.toStdString() );
@@ -698,7 +695,6 @@ namespace qpsycle {
 				if(!fileName.isEmpty()) {
 					psycle::core::Player::singleton().stop();
 					psycle::core::Song *song = new psycle::core::Song();
-					QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 					if(song->load(fileName.toStdString())) {
 						loadSong( song );
 						setCurrentFile( fileName );
@@ -1051,7 +1047,6 @@ namespace qpsycle {
 
 		if ( returnStatus == QDialog::Accepted ) 
 		{
-			QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
             song_->name( songNameEdit.text().toStdString() );
             song_->author( artistNameEdit.text().toStdString() );
             song_->comment( songNotesEdit.toPlainText().toStdString() );

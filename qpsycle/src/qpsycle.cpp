@@ -20,6 +20,7 @@
 #include <QApplication>
 #include <QIcon>
 #include <QSettings>
+#include <qlogging.h>
 #include <stdio.h>
 
 #include "gui/mainwindow.hpp"
@@ -47,7 +48,7 @@ void customMessageHandler( QtMsgType type, const char *msg )
 
 int main(int argc, char *argv[])
 {
-	qInstallMsgHandler( customMessageHandler );
+    //qInstallMessageHandler( customMessageHandler );
 
 	QApplication *app = new QApplication(argc, argv);
 	QCoreApplication::setOrganizationName( "Psycledelics" );

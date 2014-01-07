@@ -15,7 +15,7 @@ public:
     NewMachineDialog();
     psycle::core::MachineKey getSelection();
 
-public Q_SLOTS:
+public slots:
     void listItemSelected(QListWidgetItem* listItem);
     void tryAccept();
 

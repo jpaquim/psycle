@@ -12,7 +12,7 @@ Q_OBJECT
 public:
     MenuSignalHandler(qpsycle2* window);
 
-public Q_SLOTS:
+public slots:
     void newProject();
     void save();
     void open();
@@ -32,7 +32,7 @@ public Q_SLOTS:
     void play();
     void stop();
 
-Q_SIGNALS:
+signals:
     void sigReload();
 
 private:
