@@ -492,7 +492,7 @@ void PatternGrid::keyPressEvent( QKeyEvent *event )
 		checkDownScroll( cursor() );
 	}
 	else if ( isHex( event ) ) {
-		int keyChar = QChar( event->text().at(0) ).toAscii();
+        int keyChar = QChar( event->text().at(0) ).toLatin1();
 		if ( cursor().eventNr() == 1 ) {
 			doInstrumentEvent( keyChar );
 		} else if ( cursor().eventNr() == 2 ) {

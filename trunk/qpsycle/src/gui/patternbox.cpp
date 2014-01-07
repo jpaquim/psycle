@@ -317,7 +317,6 @@ when the pattern selected changes.
 	void PatternBox::onPatternNameEdited( const QString & newText )
 	{
 		QTreeWidgetItem *item = patternTree_->currentItem();
-		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		// If current item is a pattern...
 		if (item->type() == PatternItem::Type) {
 		  std::map<PatternItem*, psycle::core::Pattern*>::iterator itr = patternMap.find( (PatternItem*)item );

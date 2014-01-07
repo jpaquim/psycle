@@ -14,7 +14,7 @@ MenuSignalHandler::MenuSignalHandler(qpsycle2* window)
 void MenuSignalHandler::newProject(){
     Statics::song()->clear();
     std::cerr<<"cleared";
-    Q_EMIT sigReload();
+    emit sigReload();
 }
 
 void MenuSignalHandler::save(){
@@ -27,7 +27,7 @@ void MenuSignalHandler::open(){
     Statics::player()->stop();
     Statics::song()->load(str.toStdString());
     lastfile = str;
-    Q_EMIT sigReload();
+    emit sigReload();
     std::cerr<<"loaded "<<str.toStdString()<<std::endl;
 }
 

@@ -72,10 +72,11 @@ void WaveDisplay::ZoomOut()
 }
 
 WaveItem::WaveItem( WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsScene *scene )
-	: QGraphicsRectItem( 0, scene )
+    : QGraphicsRectItem( 0,0,0,0 )
 	, instrumentsModel_( instModel )
 	, disp_( disp )
 {
+    scene->addItem(this);
 	connect (
 		instModel, SIGNAL(selectedInstrumentChanged(int)),
 		this, SLOT( resetInstrument() )
@@ -86,7 +87,7 @@ WaveItem::WaveItem( WaveDisplay *disp, InstrumentsModel *instModel, QGraphicsSce
 	);
 
 
-	nodata_ = new QGraphicsTextItem( tr("No wave data."), this, this->scene() );
+    nodata_ = new QGraphicsTextItem( tr("No wave data."), this );
 	nodata_->setDefaultTextColor( Qt::white );
 	nodata_->setFont( QFont("verdana", 10) );
 

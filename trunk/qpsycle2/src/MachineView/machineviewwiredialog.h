@@ -13,7 +13,7 @@ class MachineViewWireDialog : public QDialog
 public:
     MachineViewWireDialog(MachineViewLine* line);
 
-public Q_SLOTS:
+public slots:
     void updateVolume(int i);
     void deleteWire();
 

@@ -170,6 +170,7 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 							size = static_cast<uint32_t>(file.GetPos() - fileposition);
 					}
 				#else
+                mac = mac;//unused warning.
 					///\todo
 				#endif
 			}

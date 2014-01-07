@@ -16,7 +16,7 @@ namespace qpsycle{
 class Statics
 {
 public:
-    Statics(){};
+    Statics(){}
     static void Setup();
     static psycle::core::Song* song();
     static void newSong();

@@ -97,7 +97,7 @@ void GuiMachineElement::addInLine(MachineViewLine* line){
 }
 
 GuiMachineElement::~GuiMachineElement(){
-  Q_FOREACH (MachineViewLine* line, outlines){
+  foreach (MachineViewLine* line, outlines){
     delete line;
   }
 }

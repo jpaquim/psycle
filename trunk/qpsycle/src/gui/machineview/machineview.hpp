@@ -33,11 +33,11 @@ namespace psycle { namespace core {
 #include <vector>
 
 #include <QDialog>
-#include <QtGui/QGraphicsView>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsSceneMouseEvent>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMouseEvent>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
+#include <QKeyEvent>
+#include <QMouseEvent>
 #include <QPushButton>
 
 namespace qpsycle {

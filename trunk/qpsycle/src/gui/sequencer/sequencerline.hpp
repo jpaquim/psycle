@@ -53,7 +53,7 @@ namespace qpsycle {
 		void moveItemToNewLine( SequencerItem *item, SequencerLine *newLine );
 
 		// To resolve ambiguity between QObject::children() and QGraphicsItem::children().
-		QList<QGraphicsItem*> children() const { return QGraphicsItem::children(); }
+        QList<QGraphicsItem*> children() const { return QGraphicsItem::childItems(); }
 
 		SequencerDraw *sDraw_; ///\todo Hrm, why is this public?
 

@@ -10,7 +10,7 @@
 #include <alsa/asoundlib.h>
 #include <psycle/core/eventdriver.h>
 
-class AlsaSeqIn : public EventDriver
+class AlsaSeqIn : public psycle::core::EventDriver
 {
 	public:
 		AlsaSeqIn();

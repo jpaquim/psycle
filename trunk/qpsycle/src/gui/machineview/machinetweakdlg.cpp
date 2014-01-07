@@ -742,13 +742,13 @@ PresetsDialog::PresetsDialog( MachineGui *macGui, QWidget *parent )
 
 void PresetsDialog::usePreset()
 {
-	if ( QListWidgetItem *selItem = prsList->currentItem() ) {
-		std::map<QListWidgetItem*,psycle::core::Preset>::iterator itr;
-		if ( ( itr = presetMap.find( selItem ) ) != presetMap.end() ) {
-			if ( m_macGui->mac() ) itr->second.tweakMachine( *m_macGui->mac() );
-		}
-		accept();
-	}
+//    if ( QListWidgetItem *selItem = prsList->currentItem() ) {
+//        QMap<QListWidgetItem*,psycle::core::Preset>::iterator itr;
+//        if ( ( itr = presetMap.find( selItem ) ) != presetMap.end() ) {
+//            if ( m_macGui->mac() ) itr.value().tweakMachine( *m_macGui->mac() );
+//        }
+//        accept();
+//    }
 }
 	
 

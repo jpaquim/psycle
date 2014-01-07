@@ -16,9 +16,18 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
+public slots:
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
 private:
     QVector<PatternViewTrack*> tracks;
     psycle::core::Pattern* pattern;
+    QFont* font;
+    int charHeight;
+    int charWidth;
+    int columnSpacerSize;
+    int trackSpacerSize;
+
 };
 
 }

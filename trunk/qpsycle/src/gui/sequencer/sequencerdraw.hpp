@@ -26,8 +26,8 @@ namespace psycle { namespace core {
 	class Pattern;
 }}
 
-#include <QtGui/QGraphicsView>
-#include <QtGui/QGraphicsRectItem>
+#include <QGraphicsView>
+#include <QGraphicsRectItem>
 
 class QGraphicsSceneMouseEvent;
 

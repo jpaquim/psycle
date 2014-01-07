@@ -36,7 +36,7 @@ namespace psycle { namespace core {
 
 #include "../configuration.hpp"
 
-#include <map>
+#include <QMap>
 
 #include <QDialog>
 #include <QDial>
@@ -160,7 +160,7 @@ public Q_SLOTS:
 	void onSavePreset();
 
 private:
-	std::map< QListWidgetItem*, psycle::core::Preset > presetMap;
+    QMap< QListWidgetItem*, psycle::core::Preset > presetMap;
 	QGridLayout *lay;
 	QLabel *label;
 	QLineEdit *lineEdit;

@@ -7,10 +7,12 @@ PatternView::PatternView(QObject *parent):
     QGraphicsScene(parent)
 {
     reload();
+    QBrush backgroundBrush(Qt::black);
+    setBackgroundBrush(backgroundBrush);
 }
 
 void PatternView::reload(){
-    Q_FOREACH(PatternViewPattern* pattern,patternList){
+    foreach(PatternViewPattern* pattern,patternList){
         delete pattern;
     }
     patternList.clear();
@@ -18,10 +20,11 @@ void PatternView::reload(){
     this->song = Statics::song();
     psycle::core::Sequence::patterns_type::iterator pattern = ++song->sequence().patterns_begin();
     psycle::core::Sequence::patterns_type::iterator patternsEnd = song->sequence().patterns_end();
-//    for(;pattern!=patternsEnd;pattern++){
+    for(;pattern!=patternsEnd;pattern++){
         patternList.push_back(new PatternViewPattern(*pattern));
-//    }
-    this->addItem(patternList[0]);
+        this->addItem(patternList.last());
+    }
+
     setSceneRect(itemsBoundingRect());
 }
 

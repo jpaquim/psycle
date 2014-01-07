@@ -27,7 +27,7 @@ namespace psycle { namespace core {
 	class Pattern;
 }}
 
-#include <QtGui/QVBoxLayout>
+#include <QVBoxLayout>
 class QToolBar;
 class QCheckBox;
 

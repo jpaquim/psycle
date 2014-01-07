@@ -86,7 +86,6 @@ namespace qpsycle {
 			return;
 
 		psycle::core::Instrument *inst = song_->_pInstrument[instrIndex];
-		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		inst->setName( newname.toStdString() );
 
 		// Let interested views know that something happenened.
@@ -100,7 +99,6 @@ namespace qpsycle {
 	bool InstrumentsModel::loadInstrument( int instrIndex, QString pathToWavfile )
 	{
 		// WavAlloc tries to load the wav into the CoreSong.
-		QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
 		if ( song_->WavAlloc( instrIndex, pathToWavfile.toStdString().c_str() ) )
 		{
             Q_EMIT selectedInstrumentChanged(instrIndex);

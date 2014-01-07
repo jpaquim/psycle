@@ -138,12 +138,12 @@ namespace qpsycle {
 
 	void SequencerDraw::onCollapseButtonCliked()
 	{
-		selectedLine()->scale(1.0f, 0.5f);
+//        selectedLine()->scale(1.0f, 0.5f);
 	}
 
 	void SequencerDraw::onExpandButtonCliked()
 	{
-		selectedLine()->scale(1.0f, 2.0f);
+//        selectedLine()->scale(1.0f, 2.0f);
 	}
 
 	SequencerLine* SequencerDraw::makeSequencerLine( psycle::core::SequenceLine* seqLine ) {
@@ -404,7 +404,7 @@ namespace qpsycle {
 		// the new beatpxlength.
 		for ( lines_iterator it = lines_.begin(); it != lines_.end(); it++ ) 
 		{
-			QList<QGraphicsItem*> children = (*it)->children();
+            QList<QGraphicsItem*> children = (*it)->children();
             Q_FOREACH ( QGraphicsItem *child, children )
 			{
 				SequencerItem *seqItem = qgraphicsitem_cast<SequencerItem*>( child );

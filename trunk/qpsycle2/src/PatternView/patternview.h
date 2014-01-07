@@ -16,12 +16,12 @@ Q_OBJECT
 public:
     PatternView(QObject *parent = 0);
 
-public Q_SLOTS:
+public slots:
     void reload();
 
 private:
-    QVector<PatternViewPattern*> patternList;
-    psycle::core::Song *song;
+    QList<PatternViewPattern*> patternList;
+    psycle::core::Song *song;    
 };
 
 }

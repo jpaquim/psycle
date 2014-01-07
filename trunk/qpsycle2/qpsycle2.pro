@@ -200,7 +200,6 @@ HEADERS  += src/qpsycle2.h \
            ../psycle-helpers/src/psycle/helpers/riff.hpp \
            ../psycle-helpers/src/psycle/helpers/riffwave.hpp \
            ../psycle-helpers/src/psycle/helpers/ring_buffer.hpp \
-           ../psycle-helpers/src/psycle/helpers/sampleconverter.hpp \
            ../psycle-helpers/src/psycle/helpers/scale.hpp \
            ../psycle-helpers/src/psycle/helpers/value_mapper.hpp \
            ../psycle-helpers/src/psycle/helpers/math/clip.hpp \
@@ -335,7 +334,6 @@ SOURCES += src/main.cpp\
            ../psycle-helpers/src/psycle/helpers/resampler.cpp \
            ../psycle-helpers/src/psycle/helpers/riff.cpp \
            ../psycle-helpers/src/psycle/helpers/riffwave.cpp \
-           ../psycle-helpers/src/psycle/helpers/sampleconverter.cpp
 
 
 

@@ -9,9 +9,9 @@ class PatternViewTrackHeader : public QGraphicsObject
 public:
     explicit PatternViewTrackHeader(QGraphicsItem *parent = 0);
     
-Q_SIGNALS:
+signals:
     
-public Q_SLOTS:
+public slots:
     
 };
 
