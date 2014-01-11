@@ -436,6 +436,7 @@ namespace psycle
 
 		void Song::Reset()
 		{
+			srand(time(NULL));
 			// Cleaning pattern allocation info
 			samples.Clear();
 			xminstruments.Clear();

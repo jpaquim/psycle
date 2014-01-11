@@ -27,9 +27,6 @@ void CInstrumentFilDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SLNOTEMODNOTE, m_SlNoteModNote);
 	DDX_Control(pDX, IDC_NOTEMOD, m_SlNoteMod);
 	
-	DDX_Control(pDX, IDC_CUTOFFPAN, m_cutoffPan);
-	DDX_Control(pDX, IDC_RESSONANCE, m_Ressonance);
-
 }
 
 BEGIN_MESSAGE_MAP(CInstrumentFilDlg, CDialog)
@@ -86,13 +83,8 @@ void CInstrumentFilDlg::AssignFilterValues(XMInstrument& inst)
 
 	m_FilterType.SetCurSel((int)inst.FilterType());
 
-	m_SlVolCutoffPan.SetPos(inst.FilterCutoff()&0x7F);
-	if (inst.FilterCutoff()) m_cutoffPan.SetCheck(!(inst.FilterCutoff()&0x80));
-	else m_cutoffPan.SetCheck(0);
-
-	m_SlFadeoutRes.SetPos(inst.FilterResonance()&0x7F);
-	if (inst.FilterResonance()) m_Ressonance.SetCheck(!(inst.FilterResonance()&0x80));
-	else m_Ressonance.SetCheck(0);
+	m_SlVolCutoffPan.SetPos(inst.FilterCutoff());
+	m_SlFadeoutRes.SetPos(inst.FilterResonance());
 	m_SlSwing1Glide.SetPos(inst.RandomCutoff()*100.0f);
 	m_SlSwing2.SetPos(inst.RandomResonance()*100.0f);
 //	m_SlNoteModNote.SetPos(inst.NoteModFilterCenter());
@@ -141,24 +133,6 @@ void CInstrumentFilDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 	}
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
-void CInstrumentFilDlg::OnBnEnableCutoff()
-{
-	if (m_cutoffPan.GetCheck()!=0) {
-		m_instr->FilterCutoff(m_instr->FilterCutoff() & (0x80));
-	}
-	else {
-		m_instr->FilterCutoff(m_instr->FilterCutoff() | (~0x80));
-	}
-}
-void CInstrumentFilDlg::OnBnEnableRessonance()
-{
-	if (m_Ressonance.GetCheck()!=0) {
-		m_instr->FilterResonance(m_instr->FilterResonance() & (0x80));
-	}
-	else {
-		m_instr->FilterResonance(m_instr->FilterResonance() | (~0x80));
-	}
-}
 
 void CInstrumentFilDlg::SliderCutoff(CSliderCtrl* slid)
 {
@@ -177,21 +151,15 @@ void CInstrumentFilDlg::SliderRessonance(CSliderCtrl* slid)
 void CInstrumentFilDlg::SliderGlideCut(CSliderCtrl* slid)
 {
 	char tmp[64];
-	sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
+	sprintf(tmp,"%d%%",m_SlSwing1Glide.GetPos());
 	m_instr->RandomCutoff(m_SlSwing1Glide.GetPos()/100.0f);
 	((CStatic*)GetDlgItem(IDC_LSWING))->SetWindowText(tmp);
 }
 void CInstrumentFilDlg::SliderGlideRes(CSliderCtrl* slid)
 {
 	char tmp[64];
-	if (((CButton*)GetDlgItem(IDC_RESSONANCE))->GetCheck())
-	{
-		sprintf(tmp,"%d%",m_SlSwing2.GetPos());
-		m_instr->RandomResonance(m_SlSwing2.GetPos()/100.0f);
-	}
-	else {
-		strcpy(tmp,"off");
-	}
+	sprintf(tmp,"%d%%",m_SlSwing2.GetPos());
+	m_instr->RandomResonance(m_SlSwing2.GetPos()/100.0f);
 
 	((CStatic*)GetDlgItem(IDC_LSWING2))->SetWindowText(tmp);
 }

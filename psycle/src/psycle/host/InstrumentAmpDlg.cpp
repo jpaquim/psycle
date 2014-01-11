@@ -148,7 +148,7 @@ void CInstrumentAmpDlg::SliderFadeout(CSliderCtrl* slid)
 void CInstrumentAmpDlg::SliderGlideVol(CSliderCtrl* slid)
 {
 	char tmp[64];
-	sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
+	sprintf(tmp,"%d%%",m_SlSwing1Glide.GetPos());
 	m_instr->RandomVolume(m_SlSwing1Glide.GetPos()/100.0f);
 	((CStatic*)GetDlgItem(IDC_LSWING))->SetWindowText(tmp);
 }

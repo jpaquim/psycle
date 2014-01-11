@@ -568,8 +568,11 @@ XMSampler::Channel::PerformFX().
 		void Volume(const std::uint16_t vol)
 		{
 			m_Volume = vol;
-			m_RealVolume = rWave().Wave().WaveGlobVolume() * rInstrument().GlobVol() * (vol/128.0f);
-				//\todo :  rInstrument().RandomVolume() / 100.0f;
+			//Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
+			//This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
+			float tmp_rand = rInstrument().GlobVol() * m_CurrRandVol * rWave().Wave().WaveGlobVolume();
+			if (tmp_rand > rWave().Wave().WaveGlobVolume()) tmp_rand = rWave().Wave().WaveGlobVolume();
+			m_RealVolume = (vol/128.0f) * tmp_rand;
 		}
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 		float RealVolume() const { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; }
@@ -659,6 +662,7 @@ XMSampler::Channel::PerformFX().
 		int m_Period;
 		int m_Volume;
 		float m_RealVolume;
+		float m_CurrRandVol;
 		//Volume ramping 
 		float m_lVolCurr;
 		float m_lVolDest;
@@ -667,6 +671,7 @@ XMSampler::Channel::PerformFX().
 
 
 		float m_PanFactor;
+		float m_CurRandPan;
 		float m_PanRange;
 		bool m_Surround;
 

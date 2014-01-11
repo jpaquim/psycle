@@ -27,8 +27,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnCbnSelendokFiltertype();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnBnEnableCutoff();
-	afx_msg void OnBnEnableRessonance();
 private:
 	void SliderCutoff(CSliderCtrl* slid);
 	void SliderGlideCut(CSliderCtrl* slid);
@@ -40,9 +38,7 @@ private:
 	CEnvelopeEditorDlg m_EnvelopeEditorDlg;
 	CComboBox m_FilterType;
 	CSliderCtrl m_SlVolCutoffPan;
-	CButton m_cutoffPan;
 	CSliderCtrl m_SlSwing1Glide;
-	CButton m_Ressonance;
 	CSliderCtrl m_SlFadeoutRes;
 	CSliderCtrl m_SlSwing2;
 	CSliderCtrl m_SlNoteModNote;

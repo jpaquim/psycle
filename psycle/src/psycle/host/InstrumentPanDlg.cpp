@@ -135,7 +135,7 @@ void CInstrumentPanDlg::SliderGlide(CSliderCtrl* slid)
 {
 	char tmp[64];
 	m_instr->RandomPanning(m_SlSwing1Glide.GetPos()/100.0f);
-	sprintf(tmp,"%d%",m_SlSwing1Glide.GetPos());
+	sprintf(tmp,"%d%%",m_SlSwing1Glide.GetPos());
 	((CStatic*)GetDlgItem(IDC_LSWING))->SetWindowText(tmp);
 }
 void CInstrumentPanDlg::SliderModNote(CSliderCtrl* slid)
