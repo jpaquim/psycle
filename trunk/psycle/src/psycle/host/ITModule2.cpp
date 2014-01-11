@@ -456,13 +456,12 @@ Special:  Bit 0: On = song message attached.
 			xins.NoteModPanSep(curH.pPanSep);
 			xins.GlobVol(curH.gVol/127.0f);
 			xins.VolumeFadeSpeed(curH.fadeout/1024.0f);
-			xins.RandomVolume(curH.randVol);
-			xins.RandomPanning(curH.randPan);
+			xins.RandomVolume(curH.randVol/100.f);
+			xins.RandomPanning(curH.randPan/64.f);
 			if ( (curH.inFC&0x80) != 0)
 			{
 				xins.FilterType(dsp::F_ITLOWPASS);
-				int fc = curH.inFC&0x7F;
-				xins.FilterCutoff(fc);
+				xins.FilterCutoff(curH.inFC&0x7F);
 			}
 			if ((curH.inFR&0x80) != 0)
 			{
@@ -560,10 +559,6 @@ Special:  Bit 0: On = song message attached.
 					short pitchtmp = curH.pitchEnv.nodes[i].secondlo | (curH.pitchEnv.nodes[i].secondhi <<8);
 					xins.FilterEnvelope().Append(pitchtmp,(float)(curH.pitchEnv.nodes[i].first+32)/ 64.0f);
 				}
-				if ( xins.FilterCutoff() < 127 )
-				{
-					xins.FilterEnvAmount((-1)*xins.FilterCutoff());
-				} else { xins.FilterEnvAmount(-128); }
 			} else {
 				xins.PitchEnvelope().IsEnabled(curH.pitchEnv.flg & EnvFlags::USE_ENVELOPE);
 				xins.FilterEnvelope().IsEnabled(false);

@@ -807,7 +807,6 @@ namespace psycle
 
 			m_FilterCutoff = 127;
 			m_FilterResonance = 0;
-			m_FilterEnvAmount = 0;
 			m_FilterType = dsp::F_NONE;
 
 			m_RandomVolume = 0;
@@ -879,7 +878,7 @@ namespace psycle
 
 			riffFile.Read(m_FilterCutoff);
 			riffFile.Read(m_FilterResonance);
-			riffFile.Read(m_FilterEnvAmount);
+			{ std::uint16_t unused(0); riffFile.Read(unused); }
 			{ std::uint32_t i(0); riffFile.Read(i); m_FilterType = static_cast<dsp::FilterType>(i); }
 
 			riffFile.Read(m_RandomVolume);
@@ -937,7 +936,7 @@ namespace psycle
 
 			riffFile.Write(m_FilterCutoff);
 			riffFile.Write(m_FilterResonance);
-			riffFile.Write(m_FilterEnvAmount);
+			{ std::uint16_t unused(0); riffFile.Write(unused); }
 			{ std::uint32_t i = m_FilterType; riffFile.Write(i); }
 
 			riffFile.Write(m_RandomVolume);

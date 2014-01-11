@@ -222,7 +222,7 @@ namespace psycle { namespace host {
 			/// Difference between Glob volume and defVolume is that defVolume determines
 			/// the volume if no volume is specified in the pattern, while globVolume is
 			/// an attenuator for all notes of this sample.
-			float m_WaveGlobVolume; // range ( 0..1 ) 
+			float m_WaveGlobVolume; // range ( 0..4 ) (-inf to +12dB)
 			std::uint16_t m_WaveDefVolume; // range (0..80 hex)
 			std::uint32_t m_WaveLoopStart;
 			std::uint32_t m_WaveLoopEnd;
@@ -464,7 +464,6 @@ namespace psycle { namespace host {
 			m_FilterEnvelope = other.m_FilterEnvelope;
 			m_FilterCutoff = other.m_FilterCutoff;
 			m_FilterResonance = other.m_FilterResonance;
-			m_FilterEnvAmount = other.m_FilterEnvAmount;
 			m_FilterType = other.m_FilterType;
 
 			m_RandomVolume = other.m_RandomVolume;
@@ -525,8 +524,6 @@ namespace psycle { namespace host {
 		void FilterCutoff(const std::uint8_t value){m_FilterCutoff = value;}
 		const std::uint8_t FilterResonance() const { return m_FilterResonance;}
 		void FilterResonance(const std::uint8_t value){m_FilterResonance = value;}
-		const std::int16_t FilterEnvAmount() const { return m_FilterEnvAmount;}
-		void FilterEnvAmount(const std::int16_t value){ m_FilterEnvAmount = value;}
 		const dsp::FilterType FilterType() const { return m_FilterType;}
 		void FilterType(const dsp::FilterType value){ m_FilterType = value;}
 
@@ -587,8 +584,6 @@ namespace psycle { namespace host {
 		std::uint8_t m_FilterCutoff;
 		/// Resonance [0..127]
 		std::uint8_t m_FilterResonance;
-		/// EnvAmount [-128..128]
-		std::int16_t m_FilterEnvAmount;
 		/// Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
 		dsp::FilterType m_FilterType;
 

@@ -648,7 +648,6 @@ namespace psycle
 		{
 			IsBackground(false);
 			IsStopping(false);
-			srand(0);
 			m_ChannelNum = channelNum;
 			pChannel(&pSampler()->rChannel(channelNum));
 			InstrumentNum(instrumentNum);
@@ -666,12 +665,12 @@ namespace psycle
 			{
 				FilterType(_inst.FilterType());
 				//\todo: add the missing  Random options
-	/*			if (_inst.RandomCutoff()) {
+	/*			if (_inst.RandomCutoff() > 0.f) {
 					CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
 				} else */ {
 					CutOff(_inst.FilterCutoff());
 				}
-	/*			if (_inst.RandomResonance()) {
+	/*			if (_inst.RandomResonance() > 0.f) {
 					Ressonance(_inst.FilterResonance() * (float)rand()* _inst.RandomResonance() / 3276800.f);
 				}
 				else */ {
@@ -893,9 +892,9 @@ namespace psycle
 			const XMInstrument::WaveData<>& wave = Global::song().samples[wavelayer];
 			m_WaveDataController.Init(&wave,wavelayer, m_pSampler->Resampler());
 			m_Note = note;
+			//\todo : add pInstrument().LinesMode
 			m_Period=NoteToPeriod(pair.first,false);
 			m_NNA = rInstrument().NNA();
-			//\todo : add pInstrument().LinesMode
 
 			ResetVolAndPan(playvol,reset);
 			//Envelopes are not reset with instrument set
@@ -941,6 +940,8 @@ namespace psycle
 			float fpan=0.5f;
 			if ( reset)
 			{
+				int therand = rand();
+				m_CurrRandVol = 1.0f + (1.f - 2.f*((float)therand/(float)RAND_MAX)) * rInstrument().RandomVolume();
 				if ( playvol != -1)
 				{
 					Volume(playvol);
@@ -964,7 +965,7 @@ namespace psycle
 				else fpan = m_pChannel->PanFactor();
 				//NoteModPansep is in the range -32..32, being 8=one step (0..64) each seminote.
 				fpan += (m_Note-rInstrument().NoteModPanCenter())*rInstrument().NoteModPanSep()/512.0f;
-				fpan += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 1638400.0f;
+				fpan += (float)(rand()-16384.0f) * rInstrument().RandomPanning() / 16384.0f;
 
 				if ( fpan > 1.0f ) fpan = 1.0f;
 				else if ( fpan < 0.0f ) fpan = 0.0f;
