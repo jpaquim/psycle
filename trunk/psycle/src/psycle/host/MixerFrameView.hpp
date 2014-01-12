@@ -49,7 +49,7 @@ namespace host {
 			inline Machine& machine(){ return *_pMachine; }
 			virtual int ConvertXYtoParam(int x, int y);
 			bool UpdateSendsandChans();
-			void GenerateBackground(CDC &bufferDC, CDC &SliderbackDC, CDC& VuOffDC);
+			void GenerateBackground(CDC &bufferDC, CDC &mixerBmpDC);
 			int GetColumn(int x,int &xoffset);
 			int GetRow(int x,int y,int &yoffset);
 			int GetParamFromPos(int col,int row);

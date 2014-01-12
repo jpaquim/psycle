@@ -18,6 +18,7 @@ namespace psycle { namespace host {
 			static void SaveTheme(const char* szFile, PsycleConfig::MachineView& macView, PsycleConfig::MachineParam& macParam, PsycleConfig::PatternView& patView);
 			static void LoadMachineSkin(const char* szFile, SMachineCoords& coords);
 			static void LoadPatternSkin(const char* szFile, SPatternHeaderCoords& coords);
+			static void LoadControlsSkin(const char* szFile, SParamsCoords& coords);
 			static bool LocateSkinDir(CString findDir, CString findName, const char ext[], std::string& result);
 			static void LocateSkins(CString findDir, std::list<std::string>& pattern_skins, std::list<std::string>& machine_skins);
 

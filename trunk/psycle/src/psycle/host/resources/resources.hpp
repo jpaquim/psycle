@@ -26,15 +26,12 @@
 #define IDD_CONFIG_SKIN                 127
 #define IDD_CONFIG_OUTPUT               128
 #define IDD_CONFIG_WAVEOUT              129
-#define IDB_SPEAKER                     130
 #define IDD_CONFIG_DSOUND               131
-#define IDB_DIRECTX                     132
 #define IDD_CONFIG_MIDI_INPUT           134
 #define IDD_INFO                        136
 #define IDB_CPU                         137
 #define IDD_MIDI_MONITOR                139
 #define IDD_ABOUTBOX                    141
-#define IDB_SPLASH                      142
 #define IDD_GREETS                      144
 #define IDR_WAVEFRAME                   146
 #define IDD_WAVED_AMPLIFY               147
@@ -52,7 +49,6 @@
 #define IDD_PRESETS                     181
 #define IDD_SWINGFILL                   187
 #define IDD_CONFIG_ASIO                 188
-#define IDB_MASTERNUMBERS               191
 #define IDB_PATTERN_HEADER_SKIN         194
 #define IDB_MACHINE_SKIN                195
 #define IDB_ASIO                        198
@@ -70,12 +66,6 @@
 #define IDB_KEYS_SHARP                  232
 #define IDB_KEYS_BACK                   234
 #define IDD_INTERPOLATE_CURVE           240
-#define IDB_VUMETEROFF                  243
-#define IDB_VUMETERON                   244
-#define IDB_SLIDERKNOBV                 249
-#define IDB_SLIDERBACKV                 250
-#define IDB_SLIDERKNOBH                 251
-#define IDB_SLIDERBACKH                 252
 #define IDD_WAVED_MIX                   255
 #define IDD_WAVED_INSERTSILENCE         257
 #define IDD_WAVED_CROSSFADE             258
@@ -84,8 +74,6 @@
 #define IDR_WAVED_POPUP                 260
 #define IDD_SPECIALKEYS                 264
 #define IDD_GEAR_WAVEIN                 271
-#define IDB_SWITCHON                    274
-#define IDB_SWITCHOFF                   275
 #define IDD_TRANSFORMPATTERN            277
 #define IDD_CONFIG_MIDI_REMAP           278
 #define IDD_CONFIG_WASAPI               280
@@ -99,14 +87,6 @@
 #define IDI_LOWER                       294
 #define IDI_GREATER                     296
 #define IDR_POPUP_MACHINE               297
-#define IDB_MASTER_BGND                 299
-#define IDB_MASTERKNOB                  300
-#define IDB_MASTER_VUOFF_LEFT           307
-#define IDB_MASTER_VUOFF_RIGHT          308
-#define IDB_MASTER_VUON_LEFT            309
-#define IDB_MASTER_VUON_RIGHT           311
-#define IDB_SWITCHMINI_OFF              312
-#define IDB_SWITCHMINI_ON               313
 #define IDD_WIRE_CHANMAP                314
 #define IDD_INST_SAMPULSE_INSTAMP       316
 #define IDD_INST_SAMPULSE_INSTPAN       317
@@ -123,6 +103,8 @@
 #define IDB_PNG1                        330
 #define IDB_BITMAP1                     331
 #define IDB_SPLASH2014                  331
+#define IDB_MASTER_SKIN                 332
+#define IDB_MIXER_SKIN                  333
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -1137,7 +1119,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        332
+#define _APS_NEXT_RESOURCE_VALUE        334
 #define _APS_NEXT_COMMAND_VALUE         34308
 #define _APS_NEXT_CONTROL_VALUE         2138
 #define _APS_NEXT_SYMED_VALUE           64

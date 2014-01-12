@@ -363,14 +363,10 @@ IDI_ICON2000            ICON                    "./Psycle.ico"
 //
 
 IDB_SAMPLER             BITMAP                  "./bmp00003.bmp"
-IDB_SPEAKER             BITMAP                  "./bmp00004.bmp"
 IDB_CPU                 BITMAP                  "./bmp00005.bmp"
 IDB_KNOB                BITMAP                  "./TbMainKnob.bmp"
-IDB_SPLASH              BITMAP                  "./splash copia.bmp"
 IDB_MACHINETYPE         BITMAP                  "./bmp00002.bmp"
 IDR_MAINFRAME           BITMAP                  "Toolbar.bmp"
-IDB_DIRECTX             BITMAP                  "./bmp00009.bmp"
-IDB_MASTERNUMBERS       BITMAP                  "./MasterMachine/numbers.bmp"
 IDB_PATTERN_HEADER_SKIN BITMAP                  "./pattern_header_skin.bmp"
 IDB_MACHINE_SKIN        BITMAP                  "./machine_skin.bmp"
 IDB_ASIO                BITMAP                  "./AsioLogo.bmp"
@@ -378,26 +374,12 @@ IDB_SAMPULSE            BITMAP                  "sampulse.bmp"
 IDB_KEYS_SHARP          BITMAP                  "sharpkey.bmp"
 IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
 IDB_KEYS_BACK           BITMAP                  "keys_bac.bmp"
-IDB_VUMETEROFF          BITMAP                  "Slider\\VuOff.bmp"
-IDB_VUMETERON           BITMAP                  "Slider\\VuOn.bmp"
-IDB_SLIDERKNOBV         BITMAP                  "Slider\\sliderB.bmp"
-IDB_SLIDERBACKV         BITMAP                  "Slider\\sliderP.bmp"
-IDB_SLIDERKNOBH         BITMAP                  "Slider\\sliderBh.bmp"
-IDB_SLIDERBACKH         BITMAP                  "Slider\\sliderPh.bmp"
 IDR_WAVEDFRAME          BITMAP                  "toolbar1.bmp"
 IDR_FRAMEMACHINE        BITMAP                  "./bmp00001.bmp"
-IDB_SWITCHON            BITMAP                  "Slider\\imgOn.bmp"
-IDB_SWITCHOFF           BITMAP                  "Slider\\imgOff.bmp"
 IDR_MAINFRAME32         BITMAP                  "Toolbar32.bmp"
-IDB_MASTER_BGND         BITMAP                  "MasterMachine\\Master-Mixer.bmp"
-IDB_MASTERKNOB          BITMAP                  "MasterMachine\\Slide.bmp"
-IDB_MASTER_VUOFF_LEFT   BITMAP                  "MasterMachine\\ledOff-left.bmp"
-IDB_MASTER_VUOFF_RIGHT  BITMAP                  "MasterMachine\\ledOff-right.bmp"
-IDB_MASTER_VUON_LEFT    BITMAP                  "MasterMachine\\ledOn-left.bmp"
-IDB_MASTER_VUON_RIGHT   BITMAP                  "MasterMachine\\ledOn-right.bmp"
-IDB_SWITCHMINI_OFF      BITMAP                  "Slider\\imgMiniOff.bmp"
-IDB_SWITCHMINI_ON       BITMAP                  "Slider\\imgMiniOn.bmp"
 IDB_SPLASH2014          BITMAP                  "splash_screen.bmp"
+IDB_MASTER_SKIN         BITMAP                  "master_skin.bmp"
+IDB_MIXER_SKIN          BITMAP                  "mixer_skin.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1100,7 +1082,6 @@ BEGIN
     RTEXT           "Samplerate:",IDC_STATIC,10,53,51,8,SS_CENTERIMAGE
     COMBOBOX        IDC_DSOUND_SAMPLERATE_COMBO,64,51,65,77,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_DSOUND_BITDEPTH,138,51,56,77,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    CONTROL         132,IDC_STATIC,"Static",SS_BITMAP,244,44,21,20,WS_EX_TRANSPARENT
     RTEXT           "Buffer Samples:",IDC_STATIC,10,70,51,8,SS_CENTERIMAGE
     EDITTEXT        IDC_DSOUND_BUFNUM_EDIT,65,68,31,12,ES_AUTOHSCROLL
     CONTROL         "Spin1",IDC_DSOUND_BUFNUM_SPIN,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_NOTHOUSANDS,86,68,11,12
@@ -1905,28 +1886,28 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 EXSTYLE WS_EX_TRANSPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    RTEXT           "Filter Type",IDC_STATIC1,44,9,75,8
+    RTEXT           "Filter type",IDC_STATIC1,44,9,75,8
     COMBOBOX        IDC_FILTERTYPE,124,7,100,57,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Filter Cutoff",IDC_CUTOFFPAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,44,24,75,8
     CONTROL         "",IDC_VOLCUTOFFPAN,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,122,24,104,11
     CTEXT           "Estático",IDC_LVOLCUTOFFPAN,230,22,31,12,SS_CENTERIMAGE | SS_SUNKEN
-    RTEXT           "Swing (Randomize)",IDC_STATIC2,44,39,75,8
-    CONTROL         "",IDC_SWING1,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,122,39,104,11
-    CTEXT           "Estático",IDC_LSWING,230,37,31,12,SS_CENTERIMAGE | SS_SUNKEN
-    CONTROL         "Filter Ressonance",IDC_RESSONANCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,44,54,75,8
+    RTEXT           "Swing (randomize)",IDC_STATIC2,44,39,75,8,NOT WS_VISIBLE
+    CONTROL         "",IDC_SWING1,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | NOT WS_VISIBLE | WS_TABSTOP,122,39,104,11
+    CTEXT           "Estático",IDC_LSWING,230,37,31,12,SS_CENTERIMAGE | SS_SUNKEN | NOT WS_VISIBLE
     CONTROL         "",IDC_FADEOUTRES,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,122,54,104,11
     CTEXT           "Estático",IDC_LFADEOUTRES,230,52,31,12,SS_CENTERIMAGE | SS_SUNKEN
-    RTEXT           "Swing (Randomize)",IDC_STATIC18,44,69,75,8
-    CONTROL         "",IDC_SWING2,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,122,69,104,11
-    CTEXT           "Estático",IDC_LSWING2,230,67,31,12,SS_CENTERIMAGE | SS_SUNKEN
-    RTEXT           "Note Mod Center Note",IDC_STATIC3,44,84,75,8,NOT WS_VISIBLE
+    RTEXT           "Swing (randomize)",IDC_STATIC18,44,69,75,8,NOT WS_VISIBLE
+    CONTROL         "",IDC_SWING2,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | NOT WS_VISIBLE | WS_TABSTOP,122,69,104,11
+    CTEXT           "Estático",IDC_LSWING2,230,67,31,12,SS_CENTERIMAGE | SS_SUNKEN | NOT WS_VISIBLE
+    RTEXT           "Note mod. center note",IDC_STATIC3,44,84,75,8,NOT WS_VISIBLE
     CONTROL         "",IDC_SLNOTEMODNOTE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | NOT WS_VISIBLE | WS_TABSTOP,122,84,104,11
     CTEXT           "Estático",IDC_LNOTEMODNOTE,230,82,31,12,SS_CENTERIMAGE | SS_SUNKEN | NOT WS_VISIBLE
-    RTEXT           "Note Mod Amount",IDC_STATIC5,44,99,75,8,NOT WS_VISIBLE
+    RTEXT           "Note modulation amount",IDC_STATIC5,28,99,91,8,NOT WS_VISIBLE
     CONTROL         "",IDC_NOTEMOD,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | NOT WS_VISIBLE | WS_TABSTOP,122,99,104,11
     CTEXT           "Estático",IDC_LNOTEMOD,230,97,31,12,SS_CENTERIMAGE | SS_SUNKEN | NOT WS_VISIBLE
     GROUPBOX        "",IDC_STATIC,7,0,332,118
     GROUPBOX        "",IDC_GROUP_ENV,7,119,332,151
+    LTEXT           "Filter ressonance",IDC_STATIC,63,54,56,8
+    LTEXT           "Filter cutoff",IDC_STATIC,81,25,38,8
 END
 
 IDD_INST_SAMPULSE_ENVDLG DIALOGEX 0, 0, 318, 139
@@ -1936,6 +1917,8 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         " Envelope Enabled",IDC_ENVCHECK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,2,0,71,10
     CONTROL         "Carry (continue)",IDC_ENV_CARRY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,83,0,71,10
+    CONTROL         "Millisecs",IDC_ENVMILLIS,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | WS_GROUP,156,0,40,12
+    CONTROL         "Ticks",IDC_ENVTICKS,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,195,0,40,12
     CONTROL         "ADSR",IDC_ENVADSR,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | WS_GROUP,237,0,40,12
     CONTROL         "Freeform",IDC_ENVFREEFORM,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,277,0,40,12
     CONTROL         "",IDC_INS_ENVELOPE,"Static",SS_OWNERDRAW | SS_NOTIFY | WS_TABSTOP,1,12,314,70,WS_EX_STATICEDGE
@@ -1961,8 +1944,6 @@ BEGIN
     RTEXT           "Release Time",IDC_STATIC11,166,128,44,8
     CONTROL         "",IDC_ADSRREL,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,212,128,70,11
     CTEXT           "Estático",IDC_LADSRREL,284,126,31,12,SS_CENTERIMAGE | SS_SUNKEN
-    CONTROL         "Millisecs",IDC_ENVMILLIS,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | WS_GROUP,156,0,40,12
-    CONTROL         "Ticks",IDC_ENVTICKS,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,195,0,40,12
 END
 
 IDD_INST_SAMPLER_INST DIALOGEX 0, 0, 524, 304
@@ -3319,7 +3300,6 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
-
 
 #endif    // Catalan resources
 /////////////////////////////////////////////////////////////////////////////

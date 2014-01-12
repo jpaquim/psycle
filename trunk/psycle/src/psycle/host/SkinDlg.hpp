@@ -128,7 +128,7 @@ namespace psycle { namespace host {
 			void SetFontNames();
 			void ChangeFont(std::string& face, int& point, UINT& flags);
 			void ChangeColour(UINT id, COLORREF& colour);
-			void ChangeBitmap(std::string& filename);
+			void ChangeBitmap(std::string& filename, bool isDial=false);
 
 			///\todo: Implement a copy of it, instead of a reference.
 			PsycleConfig::PatternView& patConfig;

@@ -11,6 +11,7 @@ namespace psycle { namespace host {
 	PsycleConfig::MachineParam* SwitchButton::uiSetting = NULL;
 	PsycleConfig::MachineParam* CheckedButton::uiSetting = NULL;
 	PsycleConfig::MachineParam* VuMeter::uiSetting = NULL;
+	PsycleConfig::MachineParam* MasterUI::uiSetting = NULL;
 
 	int InfoLabel::xoffset(3);
 	int GraphSlider::xoffset(6);

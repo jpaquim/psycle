@@ -82,6 +82,36 @@ namespace psycle
 			bool bHasTransparency;
 			COLORREF cTransparency;
 		};
+		class SParamsCoords
+		{
+		public:
+			//statically defined
+			SSkinSource sMixerSlider;
+			SSkinSource sMixerKnob;
+			SSkinSource sMixerVuOff;
+			SSkinDest   sMixerVuOn;
+			SSkinSource sMixerSwitchOff;
+			SSkinDest   sMixerSwitchOn;
+			SSkinSource sMixerCheckOff;
+			SSkinDest   sMixerCheckOn;
+			SSkinSource sMasterVuLeftOff;
+			SSkinDest   sMasterVuLeftOn;
+			SSkinDest   sMasterVuRightOff;
+			SSkinDest   sMasterVuRightOn;
+			SSkinSource sMasterKnob;
+			//Dynamically defined in .psc
+			std::string dialBmp;
+			std::string sendMixerBmp;
+			std::string masterBmp;
+			COLORREF masterFontBackColour;
+			COLORREF masterFontForeColour;
+			std::string szMasterFont;
+			int masterFontPoint;
+			int masterFontFlags;
+			SSkinSource dMasterNames;
+			SSkinDest dMasterMasterNumbers;
+			SSkinDest dMasterChannelNumbers;
+		};
 		
 		/// configuration.
 		class PsycleConfig : public Configuration
@@ -95,6 +125,7 @@ namespace psycle
 				void SetDefaultSettings(bool include_others=true);
 				void SetDefaultColours();
 				void SetDefaultSkin();
+				bool RefreshBitmaps();
 				void Load(ConfigStorage &,std::string mainSkinDir, std::string machine_skin);
 				void Save(ConfigStorage &);
 				void RefreshSettings();
@@ -113,39 +144,20 @@ namespace psycle
 				COLORREF titleColor;
 				CFont	font;
 				CFont	font_bold;
+				CFont   masterNamesFont;
 				CRect	deskrect;
 				std::string szBmpControlsFilename;
 				CBitmap dial;
+				CBitmap mixerSkin;
+				CBitmap masterSkin;
 				HBITMAP hbmMachineDial;
+				HBITMAP hbmMixerSkin;
+				HBITMAP hbmMasterSkin;
 				int dialwidth;
 				int dialheight;
 				int dialframes;
-				CBitmap sliderBack;
-				CBitmap sliderKnob;
-				//HBITMAP hbmsliderBack;
-				//HBITMAP hbmsliderKnob;
-				int sliderwidth;
-				int sliderheight;
-				int sliderknobwidth;
-				int sliderknobheight;
-				CBitmap vuOn;
-				CBitmap vuOff;
-				//HBITMAP hbmvuOn;
-				//HBITMAP hbmvuOff;
-				int vuwidth;
-				int vuheight;
-				CBitmap switchOn;
-				CBitmap switchOff;
-				//HBITMAP hbmswitchOn;
-				//HBITMAP hbmswitchOff;
-				int switchwidth;
-				int switchheight;
-				CBitmap checkedOn;
-				CBitmap checkedOff;
-				//HBITMAP hbmcheckedOn;
-				//HBITMAP hbmcheckedOff;
-				int checkedwidth;
-				int checkedheight;
+				bool masterRefresh;
+				SParamsCoords coords;
 			};
 
 			class MachineView
