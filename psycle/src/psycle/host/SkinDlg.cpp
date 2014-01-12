@@ -465,7 +465,7 @@ namespace psycle { namespace host {
 
 		void CSkinDlg::OnBnClickedMachineguiBitmap()
 		{
-			ChangeBitmap(paramConfig.szBmpControlsFilename);
+			ChangeBitmap(paramConfig.szBmpControlsFilename, true);
 			if (paramConfig.szBmpControlsFilename.empty())
 			{
 				m_machine_GUI_bitmap.SetWindowText("Default Dial Bitmap");
@@ -473,6 +473,9 @@ namespace psycle { namespace host {
 			else
 			{
 				std::string str1 = paramConfig.szBmpControlsFilename;
+				if (str1.find(".psc") != std::string::npos) {
+					SkinIO::LoadControlsSkin(str1.c_str(), paramConfig.coords);
+				}
 				m_machine_GUI_bitmap.SetWindowText(str1.substr(str1.rfind('\\')+1).c_str());
 			}
 		}
@@ -738,7 +741,7 @@ namespace psycle { namespace host {
 			return fontDesc;
 		}
 
-		void CSkinDlg::ChangeBitmap(std::string& filename)
+		void CSkinDlg::ChangeBitmap(std::string& filename, bool isDial/*=false*/)
 		{
 			OPENFILENAME ofn; // common dialog box structure
 			char szFile[_MAX_PATH]; // buffer for file name
@@ -762,7 +765,12 @@ namespace psycle { namespace host {
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Bitmaps (*.bmp)\0*.bmp\0";
+			if (isDial) {
+					ofn.lpstrFilter = "Control Skins (*.psc)\0*.psc\0Bitmaps (*.bmp)\0*.bmp\0";
+			}
+			else {
+				ofn.lpstrFilter = "Bitmaps (*.bmp)\0*.bmp\0";
+			}
 			ofn.nFilterIndex = 0;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;

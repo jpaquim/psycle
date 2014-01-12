@@ -204,7 +204,7 @@ namespace psycle { namespace host {
 			macView.bBmpBkg = false;
 			if(it != props.end() && !it->second.empty()) {
 				macView.szBmpBkgFilename = it->second;
-				if(macView.szBmpBkgFilename.rfind('\\') == -1)
+				if(macView.szBmpBkgFilename.substr(1,1) != ":")
 				{
 					macView.szBmpBkgFilename = skin_dir + '\\' + macView.szBmpBkgFilename;
 				}
@@ -231,16 +231,23 @@ namespace psycle { namespace host {
 			hexstring_to_integer(props["machineGUITitleColor"], macParam.titleColor);
 			hexstring_to_integer(props["machineGUITitleFontColor"], macParam.fonttitleColor);
 
+			//Set default so that any missing parameter will have the default value.
+			macParam.SetDefaultSkin();
 			it = props.find("machine_GUI_bitmap");
 			if(it != props.end() && !it->second.empty()) {
 				macParam.szBmpControlsFilename = it->second;
-				if(macParam.szBmpControlsFilename.rfind('\\') == -1)
+				std::string str1 = macParam.szBmpControlsFilename;
+				if (str1.find(".psc") != std::string::npos) {
+					str1 = str1.substr(str1.rfind('\\')+1);
+					std::string current_skin_dir = skin_dir;
+					SkinIO::LocateSkinDir(current_skin_dir.c_str(), str1.substr(0,str1.find(".psc")).c_str(), ".psc", current_skin_dir);
+					SkinIO::LoadControlsSkin((current_skin_dir + "\\" + str1).c_str(), macParam.coords);
+					macParam.szBmpControlsFilename = current_skin_dir + '\\' + str1;
+				}
+				else if(macParam.szBmpControlsFilename.substr(1,1) != ":")
 				{
 					macParam.szBmpControlsFilename = skin_dir + '\\' + macParam.szBmpControlsFilename;
 				}
-			}
-			else {
-				macParam.szBmpControlsFilename = "";
 			}
 
 			//
@@ -281,6 +288,9 @@ namespace psycle { namespace host {
 					"File Save Error", MB_ICONERROR | MB_OK);
 				return;
 			}
+			std::string str1 = szFile;
+			std::string skin_dir = str1.substr(0, str1.rfind('\\')).c_str();
+
 			std::fprintf(hfile,"[Psycle Display Presets v1.0]\n\n");
 			std::fprintf(hfile,"\"pattern_fontface\"=\"%s\"\n", patView.font_name.c_str());
 			std::fprintf(hfile,"\"pattern_font_point\"=dword:%.8X\n", patView.font_point);
@@ -349,8 +359,30 @@ namespace psycle { namespace host {
 			std::fprintf(hfile,"\"mv_effect_fontcolour\"=dword:%.8X\n", macView.effect_fontcolour);
 			std::fprintf(hfile,"\"mv_wirewidth\"=dword:%.8X\n", macView.wirewidth);
 			std::fprintf(hfile,"\"mv_wireaa\"=hex:%.2X\n", macView.wireaa);
-			std::fprintf(hfile,"\"machine_background\"=\"%s\"\n", macView.szBmpBkgFilename.c_str());
-			std::fprintf(hfile,"\"machine_GUI_bitmap\"=\"%s\"\n", macParam.szBmpControlsFilename.c_str());
+			if(macView.szBmpBkgFilename.empty())
+			{
+				std::fprintf(hfile,"\"machine_background\"=\"%s\"\n", "");
+			}
+			else
+			{
+				std::string str1 = macView.szBmpBkgFilename;
+				if (str1.find(skin_dir) != std::string::npos) {
+					str1 = str1.substr(skin_dir.length());
+				}
+				std::fprintf(hfile,"\"machine_background\"=\"%s\"\n", str1.c_str());
+			}
+			if(macParam.szBmpControlsFilename.empty())
+			{
+				std::fprintf(hfile,"\"machine_GUI_bitmap\"=\"%s\"\n", "");
+			}
+			else
+			{
+				std::string str1 = macParam.szBmpControlsFilename;
+				if (str1.find(skin_dir) != std::string::npos) {
+					str1 = str1.substr(skin_dir.length());
+				}
+				std::fprintf(hfile,"\"machine_GUI_bitmap\"=\"%s\"\n", str1.c_str());
+			}
 			std::fprintf(hfile,"\"mv_triangle_size\"=hex:%.2X\n", macView.triangle_size);
 			std::fprintf(hfile,"\"machineGUITopColor\"=dword:%.8X\n", macParam.topColor);
 			std::fprintf(hfile,"\"machineGUIFontTopColor\"=dword:%.8X\n", macParam.fontTopColor);
@@ -463,6 +495,31 @@ namespace psycle { namespace host {
 			std::fclose(hfile);
 		}
 
+		void SkinIO::LoadControlsSkin(const char* szFile, SParamsCoords& coords)
+		{
+			std::FILE * hfile;
+			if(!(hfile=std::fopen(szFile,"r")))
+			{
+				::MessageBox(0, "Couldn't open File for Reading. Operation Aborted",
+					"File Open Error", MB_ICONERROR | MB_OK);
+				return;
+			}
+			std::map<std::string,std::string> props;
+			LoadProperties(hfile, props);
+			
+			coords.dialBmp = props["machinedial_bmp"];
+			coords.sendMixerBmp = props["send_return_bmp"];
+			coords.masterBmp = props["master_bmp"];
+
+			hexstring_to_integer(props["master_text_backcolour"], coords.masterFontBackColour );
+			hexstring_to_integer(props["master_text_forecolour"], coords.masterFontForeColour );
+			coords.szMasterFont = props["master_text_font_name"];
+			hexstring_to_integer(props["master_text_font_point"], coords.masterFontPoint );
+			hexstring_to_integer(props["master_text_font_flags"], coords.masterFontFlags );
+			SetSkinSource(props["master_text_names_dest"], coords.dMasterNames );
+			SetSkinDest(props["master_text_numbers_master_dest"], coords.dMasterMasterNumbers );
+			SetSkinDest(props["master_text_numbers_channels_dest"], coords.dMasterChannelNumbers );
+		}
 		void SkinIO::LoadProperties(std::FILE* hfile, std::map<std::string,std::string> & props)
 		{
 			char buf[1 << 10];

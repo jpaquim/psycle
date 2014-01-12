@@ -86,21 +86,24 @@ namespace psycle { namespace host {
 			SwitchButton::uiSetting = this;
 			CheckedButton::uiSetting = this;
 			VuMeter::uiSetting = this;
+			MasterUI::uiSetting = this;
+			masterRefresh = false;
+			hbmMachineDial = NULL;
+			hbmMixerSkin = NULL;
+			hbmMasterSkin = NULL;
 			SetDefaultSettings();
 		}
 		PsycleConfig::MachineParam::~MachineParam()
 		{
 			font.DeleteObject();
 			font_bold.DeleteObject();
+			masterNamesFont.DeleteObject();
 			dial.DeleteObject();
-			if (hbmMachineDial) DeleteObject(hbmMachineDial);
-			hbmMachineDial=NULL;
-			sliderBack.DeleteObject();
-			sliderKnob.DeleteObject();
-			vuOn.DeleteObject();
-			vuOff.DeleteObject();
-			switchOn.DeleteObject();
-			switchOff.DeleteObject();
+			mixerSkin.DeleteObject();
+			masterSkin.DeleteObject();
+			if (hbmMachineDial) { DeleteObject(hbmMachineDial); hbmMachineDial=NULL; }
+			if (hbmMixerSkin) { DeleteObject(hbmMixerSkin); hbmMixerSkin=NULL; }
+			if (hbmMasterSkin) { DeleteObject(hbmMasterSkin); hbmMasterSkin=NULL; }
 			CNativeView::uiSetting = NULL;
 			Knob::uiSetting = NULL;
 			InfoLabel::uiSetting = NULL;
@@ -109,10 +112,9 @@ namespace psycle { namespace host {
 			CheckedButton::uiSetting = NULL;
 			VuMeter::uiSetting = NULL;
 		}
-		void PsycleConfig::MachineParam::SetDefaultSettings(bool include_others)
+		void PsycleConfig::MachineParam::SetDefaultSettings(bool include_others/*=true*/)
 		{
 			toolbarOnMachineParams = true;
-			hbmMachineDial = NULL;
 
 			if(include_others) {
 				SetDefaultColours();
@@ -143,19 +145,63 @@ namespace psycle { namespace host {
 			dialheight = 28;
 			dialframes = 64;
 
-			sliderheight = 182;
-			sliderwidth = 28;
-			sliderknobheight = 10;
-			sliderknobwidth = 22;
+			coords.sMixerSlider.x = 0;
+			coords.sMixerSlider.y = 0;
+			coords.sMixerSlider.width = 30;
+			coords.sMixerSlider.height = 182;
+			coords.sMixerKnob.x = 0;
+			coords.sMixerKnob.y = 182;
+			coords.sMixerKnob.width = 22;
+			coords.sMixerKnob.height = 10;
 
-			vuheight = 97;
-			vuwidth = 16;
+			coords.sMixerVuOff.x = 30;
+			coords.sMixerVuOff.y = 0;
+			coords.sMixerVuOff.width = 16;
+			coords.sMixerVuOff.height = 90; //97;
+			coords.sMixerVuOn.x = 46;
+			coords.sMixerVuOn.y = 0;
 
-			switchheight = 28;
-			switchwidth = 28;
+			coords.sMixerSwitchOff.x = 30;
+			coords.sMixerSwitchOff.y = 90;
+			coords.sMixerSwitchOff.width = 28;
+			coords.sMixerSwitchOff.height = 28;
+			coords.sMixerSwitchOn.x = 30;
+			coords.sMixerSwitchOn.y = 118;
 
-			checkedheight = 14;
-			checkedwidth = 16;
+			coords.sMixerCheckOff.x = 30;
+			coords.sMixerCheckOff.y = 146;
+			coords.sMixerCheckOff.width = 13; //16;
+			coords.sMixerCheckOff.height = 13; //14;
+			coords.sMixerCheckOn.x = 30;
+			coords.sMixerCheckOn.y = 159;
+
+			coords.szMasterFont ="Tahoma";
+			coords.masterFontPoint = 80;
+			coords.masterFontFlags = 0;
+			coords.masterFontBackColour = 0x00000000;
+			coords.masterFontForeColour = 0x00FFFFFF;
+			coords.dMasterNames.x = 427;
+			coords.dMasterNames.y = 32;
+			coords.dMasterNames.width = 75;
+			coords.dMasterNames.height = 12;
+			coords.dMasterMasterNumbers.x = 22;
+			coords.dMasterChannelNumbers.x = 118;
+			coords.dMasterChannelNumbers.y = 186;
+
+			coords.sMasterVuLeftOff.x = 516;
+			coords.sMasterVuLeftOff.y = 0;
+			coords.sMasterVuLeftOff.width = 18;
+			coords.sMasterVuLeftOff.height = 159;
+			coords.sMasterVuLeftOn.x = 534;
+			coords.sMasterVuLeftOn.y = 0;
+			coords.sMasterVuRightOff.x = 552;
+			coords.sMasterVuRightOff.y = 0;
+			coords.sMasterVuRightOn.x = 570;
+			coords.sMasterVuRightOn.y = 0;
+			coords.sMasterKnob.x = 516;
+			coords.sMasterKnob.y = 159;
+			coords.sMasterKnob.width = 22;
+			coords.sMasterKnob.height = 10;
 		}
 
 		void PsycleConfig::MachineParam::Load(ConfigStorage & store,std::string mainSkinDir, std::string machine_skin)
@@ -183,13 +229,26 @@ namespace psycle { namespace host {
 			if(szBmpControlsFilename.empty() || szBmpControlsFilename == PSYCLE__PATH__DEFAULT_DIAL_SKIN) {
 				SetDefaultSkin();
 			}
-			else if(szBmpControlsFilename.rfind('\\') == -1) {
-				if(machine_skin.empty()) {
-					szBmpControlsFilename = mainSkinDir + "\\" + szBmpControlsFilename;
+			else {
+				// Setting the default skin parameters also when loading so that if something is missing, the defaults remain.
+				std::string filename = szBmpControlsFilename;
+				SetDefaultSkin();
+				szBmpControlsFilename = filename;
+				if (szBmpControlsFilename.find(".psc") != std::string::npos) {
+					std::string str1 = szBmpControlsFilename.substr(szBmpControlsFilename.rfind('\\')+1);
+					std::string current_skin_dir = mainSkinDir;
+					SkinIO::LocateSkinDir(current_skin_dir.c_str(), str1.substr(0,str1.find(".psc")).c_str(), ".psc", current_skin_dir);
+					SkinIO::LoadControlsSkin((current_skin_dir + "\\" + str1).c_str(), coords);
+					szBmpControlsFilename = current_skin_dir + "\\" +  str1;
 				}
-				else {
-					std::string skin_dir = machine_skin.substr(0,machine_skin.rfind('\\'));
-					szBmpControlsFilename = skin_dir + "\\" + szBmpControlsFilename;
+				else if(szBmpControlsFilename.rfind('\\') == -1) {
+					if(machine_skin.empty()) {
+						szBmpControlsFilename = mainSkinDir + "\\" + szBmpControlsFilename;
+					}
+					else {
+						std::string skin_dir = machine_skin.substr(0,machine_skin.rfind('\\'));
+						szBmpControlsFilename = skin_dir + "\\" + szBmpControlsFilename;
+					}
 				}
 			}
 		}
@@ -219,56 +278,99 @@ namespace psycle { namespace host {
 			HWND hwndDesk = ::GetDesktopWindow();
 			::GetWindowRect(hwndDesk, &deskrect); 
 
+			bool bold = coords.masterFontFlags &1;
+			bool italics = coords.masterFontFlags &2;
+			if(!PsycleConfig::CreatePsyFont(masterNamesFont,coords.szMasterFont,coords.masterFontPoint,bold,italics))
+			{
+				Error("Could not find this font! " + coords.szMasterFont);
+				if(!PsycleConfig::CreatePsyFont(masterNamesFont,"Tahoma",coords.masterFontPoint,bold,false))
+					PsycleConfig::CreatePsyFont(masterNamesFont,"Arial",80,false,false);
+			}
+
 			RefreshSkin();
-			GraphSlider::xoffset = ((sliderwidth-sliderknobwidth)/2);
 		}
 		void PsycleConfig::MachineParam::RefreshSkin()
 		{
 			dial.DeleteObject();
-			if (hbmMachineDial) DeleteObject(hbmMachineDial);
-			hbmMachineDial=NULL;
-			sliderBack.DeleteObject();
-			sliderKnob.DeleteObject();
-			vuOn.DeleteObject();
-			vuOff.DeleteObject();
-			switchOn.DeleteObject();
-			switchOff.DeleteObject();
-			checkedOn.DeleteObject();
-			checkedOff.DeleteObject();
+			mixerSkin.DeleteObject();
+			masterSkin.DeleteObject();
+			if (hbmMachineDial) { DeleteObject(hbmMachineDial); hbmMachineDial=NULL; }
+			if (hbmMixerSkin) { DeleteObject(hbmMixerSkin); hbmMixerSkin=NULL; }
+			if (hbmMasterSkin) { DeleteObject(hbmMasterSkin); hbmMasterSkin=NULL; }
 
-			bool bBmpControls=false;
-			if (!szBmpControlsFilename.empty())
+			if (szBmpControlsFilename.empty())
 			{
-				hbmMachineDial = (HBITMAP)LoadImage(NULL, szBmpControlsFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineDial && dial.Attach(hbmMachineDial))
-				{	
-					BITMAP bm;
-					GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
+				dial.LoadBitmap(IDB_KNOB);
+				mixerSkin.LoadBitmap(IDB_MIXER_SKIN);
+				masterSkin.LoadBitmap(IDB_MASTER_SKIN);
+			}
+			else if(!RefreshBitmaps())
+			{
+				PsycleConfig::Error("The controls skin specified cannot be loaded. Wrong name?");
+				SetDefaultSkin();
+				dial.LoadBitmap(IDB_KNOB);
+				mixerSkin.LoadBitmap(IDB_MIXER_SKIN);
+				masterSkin.LoadBitmap(IDB_MASTER_SKIN);
+			}
+			masterRefresh = true;
 
-					if ((bm.bmWidth == 1792) && (bm.bmHeight == 28))
-					{
-						bBmpControls=true;
-					}
+			GraphSlider::xoffset = ((coords.sMixerSlider.width-coords.sMixerKnob.width)/2);
+		}
+		bool PsycleConfig::MachineParam::RefreshBitmaps()
+		{
+			bool bDialSkinned=false;
+			bool bMixerSkinned=false;
+			bool bMasterSkinned=false;
+			std::string dialFile;
+			std::string dir = szBmpControlsFilename.substr(0,szBmpControlsFilename.rfind('\\')+1);
+			if (szBmpControlsFilename.find(".psc") != std::string::npos) 
+			{
+				dialFile = (dir + coords.dialBmp);
+				hbmMixerSkin = (HBITMAP)LoadImage(NULL, (dir + coords.sendMixerBmp).c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+				if (hbmMixerSkin) {	bMixerSkinned = mixerSkin.Attach(hbmMixerSkin);}
+
+				hbmMasterSkin = (HBITMAP)LoadImage(NULL, (dir + coords.masterBmp).c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+				if (hbmMasterSkin) { bMasterSkinned = masterSkin.Attach(hbmMasterSkin); }
+				if (!bMixerSkinned || !bMasterSkinned) {
+					mixerSkin.DeleteObject();
+					masterSkin.DeleteObject();
+					if (hbmMixerSkin) { DeleteObject(hbmMixerSkin); hbmMixerSkin=NULL; }
+					if (hbmMasterSkin) { DeleteObject(hbmMasterSkin); hbmMasterSkin=NULL; }
+					return false;
 				}
 			}
-			if(!bBmpControls) {
-				szBmpControlsFilename="";
-				dial.LoadBitmap(IDB_KNOB);
+			else {
+				dialFile = szBmpControlsFilename;
+				SetDefaultSkin();
+				szBmpControlsFilename = dialFile;
+				mixerSkin.LoadBitmap(IDB_MIXER_SKIN);
+				masterSkin.LoadBitmap(IDB_MASTER_SKIN);
 			}
 
-			///\todo: We do not support changing these yet.
-			sliderBack.LoadBitmap(IDB_SLIDERBACKV);
-			sliderKnob.LoadBitmap(IDB_SLIDERKNOBV);
-			vuOn.LoadBitmap(IDB_VUMETERON);
-			vuOff.LoadBitmap(IDB_VUMETEROFF);
-			switchOn.LoadBitmap(IDB_SWITCHON);
-			switchOff.LoadBitmap(IDB_SWITCHOFF);
-			checkedOn.LoadBitmap(IDB_SWITCHMINI_ON);
-			checkedOff.LoadBitmap(IDB_SWITCHMINI_OFF);
+			hbmMachineDial = (HBITMAP)LoadImage(NULL, dialFile.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
+			if (hbmMachineDial && dial.Attach(hbmMachineDial)) {
+				BITMAP bm;
+				GetObject(hbmMachineDial,sizeof(BITMAP),&bm);
+				bDialSkinned = (bm.bmWidth == 1792 && bm.bmHeight == 28);
+			}
+			if (bDialSkinned) {
+				return true;
+			}
+			else {
+				dial.DeleteObject();
+				mixerSkin.DeleteObject();
+				masterSkin.DeleteObject();
+				if (hbmMachineDial) { DeleteObject(hbmMachineDial); hbmMachineDial=NULL; }
+				if (hbmMixerSkin) { DeleteObject(hbmMixerSkin); hbmMixerSkin=NULL; }
+				if (hbmMasterSkin) { DeleteObject(hbmMasterSkin); hbmMasterSkin=NULL; }
+				return false;
+			}
 		}
 		////////////////////////////////////
 		PsycleConfig::MachineView::MachineView()
 		{
+			hbmMachineSkin = NULL;
+			hbmMachineBkg = NULL;
 			SetDefaultSettings();
 		}
 		PsycleConfig::MachineView::~MachineView()
@@ -287,8 +389,6 @@ namespace psycle { namespace host {
 		{
 			draw_mac_index = true;
 			draw_vus = true;
-			hbmMachineSkin = NULL;
-			hbmMachineBkg = NULL;
 
 			if(include_others) {
 				SetDefaultColours();
@@ -561,46 +661,49 @@ namespace psycle { namespace host {
 		bool PsycleConfig::MachineView::RefreshBitmaps()
 		{
 			hbmMachineSkin = (HBITMAP)LoadImage(NULL, (machine_skin+ ".bmp").c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-			if (hbmMachineSkin && machineskin.Attach(hbmMachineSkin))
+			if (hbmMachineSkin)
 			{	
-				return true;
+				 if (machineskin.Attach(hbmMachineSkin)) return true;
+				 else DeleteObject(hbmMachineSkin);
 			}
 			return false;
 		}
 		void PsycleConfig::MachineView::RefreshBackground()
 		{
 			machinebkg.DeleteObject();
-			if ( hbmMachineBkg) DeleteObject(hbmMachineBkg);
+			if ( hbmMachineBkg) { DeleteObject(hbmMachineBkg); hbmMachineBkg = NULL; }
 			hbmMachineBkg=NULL;
 			bBmpBkg=false;
 			if (!szBmpBkgFilename.empty())
 			{
 				hbmMachineBkg = (HBITMAP)LoadImage(NULL, szBmpBkgFilename.c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-				if (hbmMachineBkg)
-				{
-					if (machinebkg.Attach(hbmMachineBkg))
-					{	
-						BITMAP bm;
-						GetObject(hbmMachineBkg,sizeof(BITMAP),&bm);
+				if (hbmMachineBkg && machinebkg.Attach(hbmMachineBkg))
+				{	
+					BITMAP bm;
+					GetObject(hbmMachineBkg,sizeof(BITMAP),&bm);
 
-						bkgx=bm.bmWidth;
-						bkgy=bm.bmHeight;
+					bkgx=bm.bmWidth;
+					bkgy=bm.bmHeight;
 
-						if ((bkgx > 0) && (bkgy > 0))
-						{
-							bBmpBkg=true;
-						}
+					if ((bkgx > 0) && (bkgy > 0))
+					{
+						bBmpBkg=true;
+					}
+					else {
+						machinebkg.DeleteObject();
 					}
 				}
 			}
 			if(!bBmpBkg) {
 				szBmpBkgFilename="";
+				if ( hbmMachineBkg) { DeleteObject(hbmMachineBkg); hbmMachineBkg = NULL; }
 			}
 		}
 
 		///////////////////////////////////////////////
 		PsycleConfig::PatternView::PatternView()
 		{
+			hbmPatHeader = NULL;
 			SetDefaultSettings();
 		}
 		PsycleConfig::PatternView::~PatternView()
@@ -663,7 +766,6 @@ namespace psycle { namespace host {
 		void PsycleConfig::PatternView::SetDefaultSkin()
 		{
 			header_skin = "";
-			hbmPatHeader = NULL;
 
 			PatHeaderCoords.sBackground.x=0;
 			PatHeaderCoords.sBackground.y=0;
@@ -858,9 +960,10 @@ namespace psycle { namespace host {
 		bool PsycleConfig::PatternView::RefreshBitmaps()
 		{
 			hbmPatHeader = (HBITMAP)LoadImage(NULL, (header_skin+ ".bmp").c_str(), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE | LR_LOADFROMFILE);
-			if (hbmPatHeader && patternheader.Attach(hbmPatHeader))
+			if (hbmPatHeader)
 			{	
-				return true;
+				 if (patternheader.Attach(hbmPatHeader)) return true;
+				 else DeleteObject(hbmPatHeader);
 			}
 			return false;
 		}

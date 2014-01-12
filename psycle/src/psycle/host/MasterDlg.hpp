@@ -3,6 +3,7 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include "PsycleConfig.hpp"
 
 namespace psycle {
 namespace host {
@@ -26,26 +27,26 @@ namespace host {
 			CMasterVu();
 			virtual ~CMasterVu();
 
-			void LoadBitmap(UINT IDControlOn, UINT IDControlOff);
-			CBitmap m_vuOn;
-			CBitmap m_vuOff;
-			static int vuImgH;
-			static int vuImgW;
+			void SetOffset(int offset);
 
 			DECLARE_MESSAGE_MAP()
 			afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 			afx_msg void OnPaint();
 
+		private:
+			int offsetX;
 		};
 
 		/// master machine window.
 		class CMasterDlg : public CDialog
 		{
 		public:
+
 			CMasterDlg(CWnd* m_wndView, Master& new_master, CMasterDlg** windowVar);
 			virtual ~CMasterDlg();
 
 			void UpdateUI(void);
+			void RefreshSkin();
 
 			///\todo should be private
 			char macname[MAX_CONNECTIONS][32];
@@ -80,22 +81,24 @@ protected:
 			CMasterVu m_vuLeft;
 			CMasterVu m_vuRight;
 			CButton	m_autodec;
-			CBitmap m_sliderknob;
-			CBitmap m_back;
-			int m_nBmpWidth;
-			int m_nBmpHeight;
-
-			static int numbersMasterX;
-			static int numbersX;
-			static int numbersY;
+			
+			static int masterWidth;
+			static int masterHeight;
 			static int numbersAddX;
-			static int textX;
-			static int textY;
 			static int textYAdd;
-			static int textW;
-			static int textH;
+			// "sc" for scaled values.
+			int scmasterWidth;
+			int scmasterHeight;
+			int scnumbersAddX;
+			int sctextYAdd;
+			int scnumbersMasterX;
+			int scnumbersX;
+			int scnumbersY;
+			int sctextX;
+			int sctextY;
+			int sctextW;
+			int sctextH;
 	
-			CFont namesFont;
 			Master& machine;
 			CMasterDlg** windowVar_;
 			CWnd* mainView;

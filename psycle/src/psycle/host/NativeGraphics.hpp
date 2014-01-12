@@ -35,8 +35,8 @@ namespace host {
 	class GraphSlider
 	{
 	public:
-		inline static void Draw(CDC& dc,CDC& backDC, int x, int y);
-		inline static void DrawKnob(CDC& dc,CDC& knobDC, int x, int y, float value);
+		inline static void Draw(CDC& dc,CDC& mixerskin, int x, int y);
+		inline static void DrawKnob(CDC& dc,CDC& mixerskin, int x, int y, float value);
 		inline static bool LButtonDown(UINT nFlags, int x, int y);
 /*		inline static void MouseMove(UINT nFlags, int x, int y);
 		inline static bool LButtonUp(UINT nFlags,int x, int y);
@@ -48,22 +48,28 @@ namespace host {
 	class SwitchButton
 	{
 	public:
-		inline static void Draw(CDC& dc,CDC& SwitchDC, int x, int y);
+		inline static void Draw(CDC& dc,CDC& mixerskin, bool checked, int x, int y);
 		static PsycleConfig::MachineParam* uiSetting;
 	};
 
 	class CheckedButton
 	{
 	public:
-		inline static void Draw(CDC& dc,CDC& switchDC, int x, int y,const char* text);
+		inline static void Draw(CDC& dc,CDC& mixerskin, bool checked, int x, int y,const char* text);
 		static PsycleConfig::MachineParam* uiSetting;
 	};
 
 	class VuMeter
 	{
 	public:
-		inline static void DrawBack(CDC& dc, CDC& VuOff, int x, int y);
-		inline static void Draw(CDC& dc, CDC& VuOn, int x, int y, float value);
+		inline static void DrawBack(CDC& dc, CDC& mixerskin, int x, int y);
+		inline static void Draw(CDC& dc, CDC& mixerskin, int x, int y, float value);
+		static PsycleConfig::MachineParam* uiSetting;
+	};
+	
+	class MasterUI
+	{
+	public:
 		static PsycleConfig::MachineParam* uiSetting;
 	};
 
@@ -163,64 +169,80 @@ namespace host {
 	}
 	//////////////////////////////////////////////////////////////////////////
 	// GraphSlider class
-	void GraphSlider::Draw(CDC& dc, CDC& backDC, int x, int y)
+	void GraphSlider::Draw(CDC& dc, CDC& mixerskin, int x, int y)
 	{
-		const int width = uiSetting->sliderwidth;
-		const int height = uiSetting->sliderheight;
-		dc.BitBlt(x,y,width,height,&backDC,0,0,SRCCOPY);
+		SSkinSource& sld = uiSetting->coords.sMixerSlider;
+		dc.BitBlt(x,y,sld.width,sld.height,&mixerskin,sld.x,sld.y,SRCCOPY);
 	}
-	void GraphSlider::DrawKnob(CDC& dc, CDC& knobDC, int x, int y, float value)
+	void GraphSlider::DrawKnob(CDC& dc, CDC& mixerskin, int x, int y, float value)
 	{
-		const int height = uiSetting->sliderheight;
-		const int knobheight = uiSetting->sliderknobheight;
-		const int knobwidth = uiSetting->sliderknobwidth;
+		const int height = uiSetting->coords.sMixerSlider.height;
+		SSkinSource& knb = uiSetting->coords.sMixerKnob;
+		const int knobheight = knb.height;
+		const int knobwidth = knb.width;
+
 		int ypos(0);
 		if ( value < 0.375 ) ypos = (height-knobheight);
 		else if ( value < 0.999) ypos = (((value-0.375f)*1.6f)-1.0f)*-1.0f*(height-knobheight);
-		dc.BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&knobDC,0,0,SRCCOPY);
+		dc.BitBlt(x+xoffset,y+ypos,knobwidth,knobheight,&mixerskin,knb.x,knb.y,SRCCOPY);
 	}
 	bool GraphSlider::LButtonDown( UINT nFlags,int x,int y)
 	{
-		if ( x< uiSetting->sliderwidth
-			&& y < uiSetting->sliderheight) return true;
+		if ( x< uiSetting->coords.sMixerSlider.width
+			&& y < uiSetting->coords.sMixerSlider.height) return true;
 		return false;
 	}
 
 	//////////////////////////////////////////////////////////////////////////
 	// SwitchButton class
-	void SwitchButton::Draw(CDC& dc, CDC& switchDC, int x, int y)
+	void SwitchButton::Draw(CDC& dc, CDC& mixerskin, bool switched, int x, int y)
 	{
-		int height = uiSetting->switchheight;
-		int width = uiSetting->switchwidth;
-		dc.BitBlt(x,y,width,height,&switchDC,0,0,SRCCOPY);
+		SSkinSource& swt = uiSetting->coords.sMixerSwitchOff;
+		int swtx, swty;
+		if (switched) {
+			swtx = uiSetting->coords.sMixerSwitchOn.x;
+			swty = uiSetting->coords.sMixerSwitchOn.y;
+		} else {
+			swtx = uiSetting->coords.sMixerSwitchOff.x;
+			swty = uiSetting->coords.sMixerSwitchOff.y;
+		}
+		dc.BitBlt(x,y,swt.width,swt.height,&mixerskin,swtx,swty,SRCCOPY);
 	}
 
-	void CheckedButton::Draw(CDC& dc, CDC& switchDC, int x, int y,const char* text)
+	void CheckedButton::Draw(CDC& dc, CDC& mixerskin, bool switched, int x, int y,const char* text)
 	{
-		const int height = uiSetting->checkedheight;
-		const int width = uiSetting->checkedwidth;
-
-		dc.BitBlt(x,y+1,width,height,&switchDC,0,0,SRCCOPY);
+		SSkinSource& chk = uiSetting->coords.sMixerCheckOff;
+		int width =  chk.width;
+		int chkx, chky;
+		if (switched) {
+			chkx = uiSetting->coords.sMixerCheckOn.x;
+			chky = uiSetting->coords.sMixerCheckOn.y;
+		} else {
+			chkx = uiSetting->coords.sMixerCheckOff.x;
+			chky = uiSetting->coords.sMixerCheckOff.y;
+		}
+		dc.BitBlt(x,y+1,width,chk.height,&mixerskin,chkx,chky,SRCCOPY);
 		CFont *oldfont =dc.SelectObject(&uiSetting->font_bold);
-		dc.ExtTextOut(x+width+1, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x+width, y, x+width+width-1, y+height), CString(text), 0);
+		dc.ExtTextOut(x+width+1, y, ETO_OPAQUE | ETO_CLIPPED, CRect(x+width, y, x+width+width-1, y+chk.height), CString(text), 0);
 		dc.SelectObject(oldfont);
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////
 	// Vumeter class
-	void VuMeter::DrawBack(CDC& dc, CDC& vuOff, int x, int y)
+	void VuMeter::DrawBack(CDC& dc, CDC& mixerskin, int x, int y)
 	{
-		int height = uiSetting->vuheight;
-		int width = uiSetting->vuwidth;
-		dc.BitBlt(x,y,width,height,&vuOff,0,0,SRCCOPY);
+		SSkinSource& vuoff = uiSetting->coords.sMixerVuOff;
+		dc.BitBlt(x,y,vuoff.width,vuoff.height,&mixerskin,vuoff.x,vuoff.y,SRCCOPY);
 	}
-	void VuMeter::Draw(CDC& dc, CDC& vuOn, int x, int y, float value)
+	void VuMeter::Draw(CDC& dc, CDC& mixerskin, int x, int y, float value)
 	{
-		int height = uiSetting->vuheight;
-		int width = uiSetting->vuwidth;
-		int ypos = (1.f-value)*height;
-		dc.BitBlt(x,y+ypos,width,height,&vuOn,0,ypos,SRCCOPY);
+		SSkinSource& vuoff = uiSetting->coords.sMixerVuOff;
+		SSkinDest& vuon = uiSetting->coords.sMixerVuOn;
+		if (value < 0.f) value = 0.f;
+		if (value > 1.f) value = 1.f;
+		int ypos = (1.f-value)*vuoff.height;
+		dc.BitBlt(x,y+ypos,vuoff.width,vuoff.height-ypos,&mixerskin,vuon.x,vuon.y+ypos,SRCCOPY);
 	}
 
 	}   // namespace host
