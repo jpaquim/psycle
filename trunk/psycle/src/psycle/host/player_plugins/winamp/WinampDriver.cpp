@@ -206,7 +206,7 @@ namespace psycle
 							Quantize24in32Bit(float_buffer, stream_buffer, plug_stream_size);
 						}
 						else if(_sampleValidBits == 24) {
-							Quantize24(float_buffer, stream_buffer, plug_stream_size);
+							Quantize24LE(float_buffer, stream_buffer, plug_stream_size);
 						}
 						else if (_sampleValidBits == 16) {
 							if(settings.dither()) Quantize16WithDither(float_buffer, stream_buffer, plug_stream_size);
