@@ -421,6 +421,7 @@ int LuaPlayerBind::samplerate(lua_State* L) {
 ///////////////////////////////////////////////////////////////////////////////
 // PlotterBind
 ///////////////////////////////////////////////////////////////////////////////
+#if !defined WINAMP_PLUGIN
 int LuaPlotterBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
 	 {"new", create},
@@ -466,7 +467,7 @@ int LuaPlotterBind::stem(lua_State* L) {
      }
 	return 0;
 }
-
+#endif // !defined WINAMP_PLUGIN
 ///////////////////////////////////////////////////////////////////////////////
 // Delay
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,7 +555,7 @@ void WaveOscTables::saw(float* data, int num, int maxharmonic)  {
     double amplitude = gain / h;
 	double to_angle = 2* psycle::helpers::math::pi / num * h;
 	for (int i = 0; i < num; ++i) {
-	  data[i] += ::sin(pow(-1.0,h+1)*i*to_angle)*amplitude*0.7;
+	  data[i] += ::sin(pow(-1.0,h+1)*i*to_angle)*amplitude;
     }  
   }
 }
@@ -565,7 +566,7 @@ void WaveOscTables::sqr(float* data, int num, int maxharmonic)  {
     double amplitude = gain / h;
 	double to_angle = 2* psycle::helpers::math::pi / num * h;
 	for (int i = 0; i < num; ++i) {
-	  data[i] += ::sin(i*to_angle)*amplitude*0.7;
+	  data[i] += ::sin(i*to_angle)*amplitude;
     }  
   }
 }
@@ -573,11 +574,10 @@ void WaveOscTables::sqr(float* data, int num, int maxharmonic)  {
 void WaveOscTables::tri(float* data, int num, int maxharmonic)  {
   double gain = 0.5 / 0.777;
   for (int h = 1; h <= maxharmonic; h=h+2) {
-    //double amplitude = gain / h;
 	double to_angle = 2*psycle::helpers::math::pi/num*h;
 	for (int i = 0; i < num; ++i) {
 		 // 
-	  data[i] += pow(-1.0,(h-1)/2.0)/(h*h)*::sin(i*to_angle); // *amplitude*0.7;
+	  data[i] += pow(-1.0,(h-1)/2.0)/(h*h)*::sin(i*to_angle);
     }  
   }  
 }

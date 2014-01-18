@@ -40,8 +40,10 @@ void LuaProxy::set_state(lua_State* state) {
   LuaArrayBind::register_module(L);  
   luaL_requiref(L, "psycle.dsp.filter", LuaDspFilterBind::open, 1);
   lua_pop(L, 1);
+#if !defined WINAMP_PLUGIN
   luaL_requiref(L, "psycle.plotter", LuaPlotterBind::open, 1);
   lua_pop(L, 1);
+#endif //!defined WINAMP_PLUGIN
   luaL_requiref(L, "psycle.delay", LuaDelayBind::open, 1);
   lua_pop(L, 1);
   luaL_requiref(L, "psycle.machine", LuaMachineBind::open, 1);

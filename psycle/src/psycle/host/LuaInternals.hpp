@@ -188,6 +188,7 @@ private:
 	static WaveList<float>::Type check_wavelist(lua_State* L);
 };
 
+#if !defined WINAMP_PLUGIN
 struct LuaPlotterBind {
 	static int open(lua_State *L);
 private:
@@ -195,6 +196,7 @@ private:
 	static int gc(lua_State* L);
 	static int stem(lua_State* L);	
 };
+#endif // #if !defined WINAMP_PLUGIN
 
 struct PSDelay {
   PSDelay(int k) : mem(k,0) {}
