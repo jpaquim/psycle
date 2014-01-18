@@ -3,26 +3,41 @@ A quick doc on skinning psycle
 
 1) Preface, What's skinnable?
 
-	There are two things skinnable right now, the Machine boxes, and the Pattern headers.
-	At a later time we will probably allow skinning of knobs (native machines' parameters)
+	There are three things skinnable right now, the Machine boxes in the machine view, 
+	the Pattern headers in the pattern editor, and the controls in the parameters view of 
+	native plugins, including the mixer and the master.
 
 	These parts support different sizes and also transparency.
 
 2) What do I need in order to skin?
 
-	You need to make four files, two for graphics, and two for image information.
+	You need to make eight files, five for graphics, and three for image information.
+	(Older versions used five files)
 	These files are the folowing:
 
 		your_machine_graphics_name.bmp
+		your_knob_graphics_name.bmp
+		your_mixer_graphics_name.bmp
+		your_master_graphics_name.bmp
 		your_header_graphics_name.bmp
 		your_machine_graphics_info_.psm
+		your_controls_graphics_info_.psc
 		your_header_graphics_info.psh
 
-	You can put them in subdirectories if you like, but they have NOT to contain dots "."
-	(this limitation might be removed at a later time).
-
-	Also, note that the .psm and the .psh files need to be on the same directory than the 
-	.bmp's. If you put them separated, they won't be loaded.
+	Usually, they are packed inside a directory.
+	
+	There is a requirement about file placement and file names. They have to be in the
+	same directory, and names of .bmp files need to be the same (except extension) than
+	the info files.
+	Example:
+		PsycleSkinMachine.bmp
+		PsycleSkinMachine.psm
+		PsycleSkinHeader.bmp
+		PsycleSkinHeader.psh
+		PsycleSkinControls.bmp
+		PsycleSkinControls.psc
+		PsycleSkinMixer.psc
+		PsycleSkinMaster.bmp
 
 3) How do I make the files?
 
@@ -95,8 +110,11 @@ A quick doc on skinning psycle
 	"record_on_source"=70,16,9,9   <---- hihlighted record on button
 	"mute_on_source"=79,16,9,9     <---- highlighted mute
 	"solo_on_source"=88,16,9,9     <---- highlighted solo
+	"playing_on_source"=0,40,8,17  <---- highlighted playing
+
 
 	If you do not want any track numbers then make the height of the numbers 0.
+	If you don't want playing indicator, do not add the playing_on_source line.
 
 	The following values tell psycle how has to draw the different objects.
 	Here, the coords are relative to the top left corner of the source graphic.
@@ -108,8 +126,66 @@ A quick doc on skinning psycle
 	"record_on_dest"=40,4		<---- position for the record button
 	"mute_on_dest"=63,4		<---- position for the mute button
 	"solo_on_dest"=85,4		<---- position for the solo button
+	"playing_on_dest"=8,3   <---- position for the playing indicator.
 
 	"transparency"=0000ff00  <---- 00BBGGRR . Colour that is to be used as transparency.
 	                                Note: It is important that you put the number next to the equal sign!
 					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
 
+	controls.psc (controls info)
+	-----------------------
+	Originally, the controls of Psycle were not skinnable. In version 1.8, the ability to change the settings and skin the knob
+	control was added.
+	And finally, in version 1.11, the ability to skin the master machine window and the send return mixer controls was added.
+	
+	Controls.psc is the file used for version 1.11 and above.
+	Coords are top, left, width height
+
+	// WARNING!!! Use the same name than the .psc file for one of the three bmp files! The loader requires this.
+	"machinedial_bmp"="PsycleSkinKnob.bmp"
+	"send_return_bmp"="PsycleSkinMixer.bmp"
+	"master_bmp"="PsycleSkinMaster.bmp"
+
+	//Font used for the parameters and mixer windows.
+	"params_text_font_name"="Tahoma"
+	"params_text_font_point"=dword:00000050
+	"params_text_font_flags"=dword:00000000
+	"params_text_font_bold_name"="Tahoma"
+	"params_text_font_bold_point"=dword:00000050
+	"params_text_font_bold_flags"=dword:00000001
+
+	// Note: Colours are written in the form "00BGR" (i.e. opposite of RGB)
+	"master_text_backcolour"=dword:00292929
+	"master_text_forecolour"=dword:00E7BD18
+	"master_text_font_name"="Tahoma"
+	"master_text_font_point"=dword:00000046
+	"master_text_font_flags"=dword:00000000
+	// names are rendered on the y axis 15 pixels apart. 
+	"master_text_names_dest"=427,33,75,12
+	"master_text_numbers_master_dest"=22,187
+	// slider dBs are rendered on the x axis 24 pixels apart. height is master_text_names_dest height.
+	"master_text_numbers_channels_dest"=118,187
+
+	// These are the constants used for the graphics. They are not user-modifiable because
+	// it affects some internal objects and calculations.
+	// rotating knob graphic
+	// knob (x,y,w,h) 0,0,28,28
+	// number of knobs :  64  (middle position is knob number 32)
+
+	// Mixer graphic positions and widths are:
+	// mixer slider (x,y,w,h) 0,0,30,182
+	// mixer slider knob (x,y,w,h) 0,182,22,10
+	// mixer vu off (x,y,w,h) 30,0,16,90
+	// mixer vu on (x,y) 46,0
+	// mixer switch off (x,y,w,h) 30,90,28,28
+	// mixer switch on (x,y) 30,118
+	// mixer check off (x,y,w,h) 30,146,13,13
+	// mixer check on (x,y) 30,159
+
+	// Master graphic positions and widths are:
+	// background (x,y,w,h) 0,0,516,225
+	// Vu Left off (x,y,w,h) 516,0,18,159
+	// Vu Left on (x,y) 534,0
+	// Vu Right off (x,y) 552,0
+	// Vu Right on (x,y) 570,0
+	// slider knob (x,y,w,h) 516,159,22,10

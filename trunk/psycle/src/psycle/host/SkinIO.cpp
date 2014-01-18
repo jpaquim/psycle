@@ -511,6 +511,13 @@ namespace psycle { namespace host {
 			coords.sendMixerBmp = props["send_return_bmp"];
 			coords.masterBmp = props["master_bmp"];
 
+			coords.szMasterFont = props["params_text_font_name"];
+			hexstring_to_integer(props["params_text_font_point"], coords.paramsFontPoint );
+			hexstring_to_integer(props["params_text_font_flags"], coords.paramsFontFlags );
+			coords.szMasterFont = props["params_text_font_bold_name"];
+			hexstring_to_integer(props["params_text_font_bold_point"], coords.paramsBoldFontPoint );
+			hexstring_to_integer(props["params_text_font_bold_flags"], coords.paramsBoldFontFlags );
+
 			hexstring_to_integer(props["master_text_backcolour"], coords.masterFontBackColour );
 			hexstring_to_integer(props["master_text_forecolour"], coords.masterFontForeColour );
 			coords.szMasterFont = props["master_text_font_name"];
@@ -519,6 +526,7 @@ namespace psycle { namespace host {
 			SetSkinSource(props["master_text_names_dest"], coords.dMasterNames );
 			SetSkinDest(props["master_text_numbers_master_dest"], coords.dMasterMasterNumbers );
 			SetSkinDest(props["master_text_numbers_channels_dest"], coords.dMasterChannelNumbers );
+
 		}
 		void SkinIO::LoadProperties(std::FILE* hfile, std::map<std::string,std::string> & props)
 		{

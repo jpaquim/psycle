@@ -68,7 +68,6 @@ kSh
 
 
 +++ in the wire dialog display what value the current vol is in terms of FCxx, also wire vols cannot be changed past 0.0 via tweaks
-++ <pooplog> vus in wire dialogs should display peak values (and if you really want to be smart, rms)
 
 ++ undos for wave edit? 
 
@@ -92,10 +91,6 @@ kSh
 + I agree that final output should be limited
 	[ it is when you have the decrease flag set ]
 
-+ i was wondering if it is possible to make a header skin that indicates when a track creates an output?? (like those small vu meters at the headers in mp-tracker, or something)
-
-?+ Recording to clipboard: a checkbox in the save file dialog - something like 'save to clipboard' which will copy to windows clipboard the file thats just been saved
-	[50MB to clipboard? ehem...]
 
 
 ##################################################################################
@@ -137,12 +132,9 @@ Sampulse Machine
 Wave Editor
 ===========
 
-!	alk: escape to close wave ed
-		[JAZ : It's a window, not a dialog]
 +	ALK waveed: remove silence from start and end of wave
 +	Mystic - import .mp3 format for samples
 +	Easier way to load Samples.
-+	better way to set loop points. (+ ping-pong loops)
 
 
 =============
@@ -359,7 +351,7 @@ File Format
 
 +	should save wire dialog settings
 		[ are you sure? ]
-+++FF	new file format: (vst multi-out, volume column, direct x stuff, etc.)
++++FF	new file format: (volume column, direct x stuff, etc.)
 
 
 ########################################################################################

@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
+1.11.1  | 2014 | beta                        | [JAZ] & Stefan & Budislav.
 1.10.1  | 2012 | release                     | [JAZ] with collaboration from others
 1.10.0  | 2011 | release					 | [JAZ] & bohan.
 1.8.8   | 2010 | beta, RC					 | [JAZ] & bohan.
@@ -27,7 +28,7 @@ Version | Date | Type of release             | Authors
 1.5     | 2001 | alpha, beta, stable         | [JAZ] & Mark
 1.1/11  | 2000 | bugfix                      | Mats
 1.0/01  | 2000 | bugfix                      | arguru
-0.x     |      | alpha, beta                 | arguru
+0.x     | 2000 | alpha, beta                 | arguru
 ----------------------------------------------------------------------------------------------------
 
 Versions are composed this way since 1.7.24:
@@ -44,30 +45,36 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.10.2
+v1.11.1 (beta) (2014-01-19)
 --------
-+ New plugin host: Lua script based.
-* Wave editor now shows the wave interpolated/reconstructed (spline/sinc). Top (smaller version) still shows raw points.
++ New plugin host: Lua script based. The API provides many operations, as well as the possibility of using other Psycle plugins (including VST). It also can be debugged with ZeroBraneStudio. See the API documentation and examples.
++ New artwork for Psycle (splash, icon, installer and skin). Psycle 1.10 skin included as a loadable skin.
++ Record to wav: Record to sample implemented.
+* Sampulse: The first "ready to use" version (Fileformat freeze).
+* Sampulse/Sampler: New Instrument editor combining Sampler and Sampulse with many usability improvements, including play notes from it (instrument tabs use the machine and in sample bank it outputs directly to master).
+* Sampulse/Sampler: .XI and .ITI loaders, samplerate support. Sample bank is now shared by both machines
+* Sampulse/Sampler: Much improved sinc resampling mode (correct windowing, filter when downsample, increased from 8 to 32 taps and increased from 512 to 16384points the sinc period). The rest of the resampling modes are faster now.
+* Sampulse: Filter algorithm changed again. Now based on SchismTracker's one.
 * Sampulse: Correct support for mcm command (commands applied at the same time, instead of one after another).
 * Sampulse: Improved loaders of module formats to support mcm and better support for the speed command. (See FEEx command)
-* Sampulse: Filter algorithm changed again. Now based on SchismTracker's one.
-* Sampulse/Sampler: Combined classic Sampler and Sampulse samples. Also, new Instrument window with both instrument settings included. As such, now the wave editor can show sampulse samples
-* Sampulse/Sampler: Improvements in the dialogs of both machines. Also fixed loaders of .xi and .iti instruments.
-* Sampulse/Sampler: Samplerate can now be set and is used. Also in XMSongExport.
-* Sampulse/Sampler: Much improved sinc resampling mode (correct windowing, filter when downsample, increased from 8 to 32 taps and increased from 512 to 16384points the sinc period). The rest of the resampling modes are faster now.
-* Improvements in ASIODriver and MidiInput.
+* Sampulse: Volume ramped playback to prevent some clickings on volume change.
 * Changes in the display of Wire dialog: RMS and Peak VU, better Oscilloscope, New Power spectrum and improved phase bars.
-* (source-code) Improvements on data casting, type usage and array sizes.
-! Sampulse: Fixes in filter commands, voice allocations and several other pattern commands, better playback of looped samples, volume/panning ramped.
-! ASIO: Ensure driver is stopped when refreshing port names.
-! Fixed machine exchange (crash restoring wires)
-! Touches in m3 to try, once more, to avoid crashes.
-! do not crash if trying to copy names and no pattern selected.
-! wave amplify not working sometimes.
-! Fix Export to wav was using the settings from the audiodriver instead of the ones indicated
-! Fix Wave editor now correctly uses windows clipboard (can now copy&paste into other applications. Note: Audacity does not use windows clipboard)
+* Wave editor now has an option to show the sample interpolated/reconstructed (spline/sinc). Top (smaller version) still shows raw points.
+* Wave editor improvements: Support for playback and editing sustain loop, sample droplist to select (since now it is independent from instrument list).
+* Changes in knob tweaking. The mouse doesn't move now, so it avoids the problem of reaching the top or bottom of the screen.
+* Other miscellaneous source code changes (updated to boost 1.50.0, data casting, type usage,array sizes, compiler warnings,...)
+! Improvements in ASIODriver and MidiInput.
+! Fix in loading and "playing" the "Wave In" machine.
+! Sampulse: Fixes in filter commands, voice allocations and several other pattern commands, better playback of looped samples, envelope carry, autovibrato, random volume and panning...
+! Fixed machine exchange (crash restoring wires) and Mixer channel exchange when one channel had been deleted.
+! Version 1.10.x had a broken implementation for VST plugins that use the (old) "process accumulate" mode.
+! Fix on druttis slicit (was skipping first line at start, since the addition of sampling rate aware plugins).
+! Record to wav was using the settings from the audiodriver instead of the ones in the dialog.
+! Record to wav: "to clipboard" wasn't working properly. "Record lines" wasn't being reset and next "play" would still remember the number of lines.
+! Wave editor now correctly uses windows clipboard (can now copy&paste into other applications. Note: Audacity does not use windows clipboard)
+! Wave Editor: wave amplify not working sometimes.
 
-v1.10.1 
+v1.10.1 (2012-04-23)
 --------
 + New release of Winamp plugin with support for winamp localization languages, 24 and 32bit integer output, saves configuration in winamp instead of registry and all the features of Psycle 1.10.
 + Number of audio threads configurable in the settings dialog. Value of 0 detects it automatically.
@@ -98,7 +105,7 @@ v1.10.1
 ! Compatibility improvements for older songs made with arguru synth/bass plugins.
 ! Other smaller fixes and changes.
 
-v1.10.0 (1.8.8 was renamed 1.10 before release)
+v1.10.0 (1.8.8 was renamed 1.10 before release) (2011-10-24)
 --------
 + New default option to show note A4 in patterns as standard A4 (440Hz). Unchecking it keeps the old A5 = 440Hz.
 + add a new track on cursor position for the current pattern or all patterns.
@@ -114,7 +121,7 @@ v1.10.0 (1.8.8 was renamed 1.10 before release)
 ! Prevent crash on savewav dialog if path does not exist
 ! RC1 bugfixes (recent menu was not keeping the correct entries. Feature of saving pattern track names was not reading them back, Mixer can be muted and bypassed again, Render wav added looped audio at the end, undo in pattern crashing Psycle, MIDI driver not getting selected, problem loading skins and more).
 
-v1.8.8 RC1
+v1.8.8 RC1 (2011-08-21)
 ------------
 + Pattern tracks can be named now. Find the new settings on the pattern properties dialog.
 + New Machine and pattern skin and default colours thanks to Angelus.
@@ -127,7 +134,7 @@ v1.8.8 RC1
 * There are two presets files now, one in the same directory as the plugin, and a new one on the presets directory. This second one is called "User presets" in the banks menu and is editable from the presets dialog.
 ! beta 3 bugfixes (wasapi not restoring setting, wasapi problems in Vista, deadlock due to SetSampleRate, WireDlg malfunctioning, stk reverbs and stk shakers crashing/malfunctioning, jbridge integration now works )
 
-v1.8.8 beta3
+v1.8.8 beta3 (2011-02-22)
 ------------
 + Added ability to send midi commands to native machines. Yannis Midi and fluidsynth now support it.
 + Finished WASAPI audio driver for Windows Vista and 7. Supports both, shared and exclusive mode.
@@ -144,7 +151,7 @@ In Sequenced mode, improved the synchronization code and now works with all the 
 ! Fixes in audio sample rate change, audio output selection change and midi input selection change.
 ! beta 2 bugfixes
 
-v1.8.8 beta2
+v1.8.8 beta2 (2010-10-06)
 ------------
 + Added range to the Interpolate curve dialog, and autodetect range if tweak or command found in selection.
 + In Vista and 7, there's a preliminary WASAPI exclusive mode driver replacing the MME driver. Configuration will come for final release.
@@ -154,7 +161,7 @@ v1.8.8 beta2
 * A greatly improved legasynth tb303, and upgraded fluidsynth sf2 to version 1.1.2. The rest of generators will get revised before final release.
 
 
-v1.8.8 beta1
+v1.8.8 beta1 (2010-08-22)
 ------------
 + x86 and x64 builds.
 + Multithreaded audio engine (better performance in multi-core CPUs)
@@ -164,13 +171,13 @@ v1.8.8 beta1
 ! Multiple fixes in the native plugins (better support of other sampling rates than 44Khz). Better UIs in some of them. (Not all native plugins revised yet).
 ! Small fixes.
 
-v1.8.6.1
+v1.8.6.1 (2009-11-02)
 --------
 ! Fixed psy loader (songs made with the previous version were showing an error on loading)
 ! Fixed native plugins not showing the description of their parameters in the parameters window.
 
 
-v1.8.6
+v1.8.6 (2009-10-12)
 ------
 (post 7502)
 * New implementation of the power spectrum in the wire dialog. (Nicer, more precise)
@@ -198,7 +205,7 @@ v1.8.6
 ! Fix a selection problem with ASIO driver.
 
 
-v1.8.5 RC
+v1.8.5 RC (2007-10-07)
 ---------
 * Finished the reimplementation of the VSTHost. (Internal and UI).
 * Extended and finished the Mixer machine. 12ins 12sends/returns, with routing abilities.
@@ -217,7 +224,7 @@ v1.8.5 RC
 ! bugfixes and other smaller additions.
 
 
-v1.8.3 beta2/beta3
+v1.8.3 beta2/beta3 (2007-07-22)
 ------------------
 ! fixed some problems when connecting machines which appeared after moving a wire.
 + Port of Wave Renderer from Psycle 1.9, with support for dithering.
@@ -240,7 +247,7 @@ v1.8.3 beta1
 ! some miscellaneous small changes
 
 
-v1.8.2
+v1.8.2 (2006-02-26)
 ------
 ! Fix for the Message window appearing in the background sometimes. (It seemed that psycle hung up)
 + Added Extended commands for machine mute and bypass
@@ -252,7 +259,7 @@ v1.8.2
 ! Fixed a quite rare bug where Psycle would crash loading a sample from a song.
 + Updates to several plugins (blitz, gamefx, all of druttis, and some others)
 
-v1.8.0
+v1.8.0 
 ------
 + added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
 + added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)

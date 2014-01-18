@@ -173,6 +173,7 @@ namespace psycle { namespace host {
 			m_vuRight.SetOffset(MasterUI::uiSetting->coords.sMasterVuRightOff.x);
 
 			scnumbersMasterX = g_metrics.ScaleX(MasterUI::uiSetting->coords.dMasterMasterNumbers.x);
+			scnumbersMasterY = g_metrics.ScaleY(MasterUI::uiSetting->coords.dMasterMasterNumbers.y);
 			scnumbersX = g_metrics.ScaleX(MasterUI::uiSetting->coords.dMasterChannelNumbers.x);
 			scnumbersY = g_metrics.ScaleY(MasterUI::uiSetting->coords.dMasterChannelNumbers.y);
 			sctextX = g_metrics.ScaleX(MasterUI::uiSetting->coords.dMasterNames.x);
@@ -308,9 +309,9 @@ namespace psycle { namespace host {
 			CPaintDC dc(this); // device context for painting
 	
 			RECT& rect = dc.m_ps.rcPaint;
-			if ( rect.bottom >= scnumbersY && rect.top <= scnumbersY+sctextH)
+			if ( rect.bottom >= std::min(scnumbersMasterY,scnumbersY) && rect.top <= std::max(scnumbersMasterY,scnumbersY)+sctextH)
 			{
-				PaintNumbersDC(&dc,((832-m_slidermaster.GetPos())/16.0f)-40.0f,scnumbersMasterX,scnumbersY);
+				PaintNumbersDC(&dc,((832-m_slidermaster.GetPos())/16.0f)-40.0f,scnumbersMasterX,scnumbersMasterY);
 				std::vector<CVolumeCtrl*>::iterator it = sliders_.begin();
 				for ( int i= 0; it != sliders_.end(); ++it, ++i) {
 					CVolumeCtrl* slider = *it;
@@ -357,7 +358,7 @@ namespace psycle { namespace host {
 			{
 				float db = ((832-m_slidermaster.GetPos())/16.0f)-40.0f;
 				CClientDC dc(this);
-				PaintNumbersDC(&dc,db,scnumbersMasterX,scnumbersY);
+				PaintNumbersDC(&dc,db,scnumbersMasterX,scnumbersMasterY);
 				*pResult = CDRF_DODEFAULT;
 			}
 			else {

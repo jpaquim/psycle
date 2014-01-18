@@ -21,6 +21,7 @@ namespace psycle { namespace host {
 			, _isPsycleBridged(false)
 			, _skinPathChanged(false)
 			, _presetPathChanged(false)
+			, _luaPathChanged(false)
 		{
 		}
 
@@ -44,6 +45,7 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_PSYCLEVSTBRIDGE, m_PsycleVstBridge);
 			DDX_Control(pDX, IDC_SKINEDIT, m_skinEdit);
 			DDX_Control(pDX, IDC_USERPRESETS_EDIT, m_presetEdit);
+			DDX_Control(pDX, IDC_LUASCRIPTS_EDIT, m_luaEdit);
 		}
 
 		BEGIN_MESSAGE_MAP(CDirectoryDlg, CPropertyPage)
@@ -67,6 +69,8 @@ namespace psycle { namespace host {
 			ON_EN_CHANGE(IDC_SKINEDIT, OnChangeSkinedit)
 			ON_BN_CLICKED(IDC_BROWSE_USERPRESET, OnBrowsePresets)
 			ON_EN_CHANGE(IDC_USERPRESETS_EDIT, OnChangePresetsedit)
+			ON_BN_CLICKED(IDC_BROWSE_LUASCRIPTS, OnBrowseLua)
+			ON_EN_CHANGE(IDC_LUASCRIPTS_EDIT, OnChangeLuaedit)
 		END_MESSAGE_MAP()
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -88,6 +92,7 @@ namespace psycle { namespace host {
 			_isPsycleBridged = config.UsesPsycleVstBridge();
 			_skinPathBuf    = config.GetSkinDir();
 			_presetPathBuf  = config.GetPresetsDir();
+			_luaPathBuf  = config.GetLuaDir();
 
 			m_songEdit.SetWindowText(_songPathBuf.c_str());
 			m_waveRec.SetWindowText(_waveRecPathBuf.c_str());
@@ -97,6 +102,7 @@ namespace psycle { namespace host {
 			m_vst64Edit.SetWindowText(_vstPath64Buf.c_str());
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			m_presetEdit.SetWindowText(_presetPathBuf.c_str());
+			m_luaEdit.SetWindowText(_luaPathBuf.c_str());
 
 			if(config.IsRecInPSYDir()) {
 				m_waveInPsyDir.SetCheck(TRUE);
@@ -149,6 +155,7 @@ namespace psycle { namespace host {
 			                         config.UsePsycleVstBridge(_isPsycleBridged);
 			if (_skinPathChanged)    config.SetSkinDir(_skinPathBuf);
 			if (_presetPathChanged)  config.SetPresetsDir(_presetPathBuf);
+			if (_luaPathChanged)     config.SetLuaDir(_luaPathBuf);
 		}
 		void CDirectoryDlg::OnBrowseSong() 
 		{
@@ -331,7 +338,24 @@ namespace psycle { namespace host {
 				_presetPathBuf=temp;
 			}
 		}
-
+		void CDirectoryDlg::OnBrowseLua() 
+		{
+			if (CPsycleApp::BrowseForFolder(m_hWnd, _T("Select the Lua Scripts Directory"), _luaPathBuf))
+			{
+				_luaPathChanged = true;
+				m_luaEdit.SetWindowText(_luaPathBuf.c_str());
+			}
+		}
+		void CDirectoryDlg::OnChangeLuaedit() 
+		{
+			if (!initializingDlg)
+			{
+				_luaPathChanged = true;
+				CString temp;
+				m_luaEdit.GetWindowText(temp);
+				_luaPathBuf=temp;
+			}
+		}
 		void CDirectoryDlg::EnableSupportedBridges() {
 			bool bridging = PsycleGlobal::conf().SupportsJBridge();
 			m_jBridge.EnableWindow(bridging);

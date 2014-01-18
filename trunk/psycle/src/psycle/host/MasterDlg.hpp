@@ -92,6 +92,7 @@ protected:
 			int scnumbersAddX;
 			int sctextYAdd;
 			int scnumbersMasterX;
+			int scnumbersMasterY;
 			int scnumbersX;
 			int scnumbersY;
 			int sctextX;

@@ -3,8 +3,8 @@
 // numbers must be fixed height and width
 
 // WARNING!!! Use the same name than the .psc file for one of the three bmp files! The loader requires this.
-"machinedial_bmp"="Psycle_110_knobs.bmp"
-"send_return_bmp"="Psycle_110_mixer_skin.bmp"
+"machinedial_bmp"="Psycle_110_knobs_black.bmp"
+"send_return_bmp"="Psycle_110_mixer_skin_black.bmp"
 "master_bmp"="Psycle_110_master_skin.bmp"
 
 // Note: Colours are written in the form "00BGR" (i.e. opposite of RGB)
