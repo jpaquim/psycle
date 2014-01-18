@@ -7,27 +7,34 @@ Q)	I need to talk to the developers!
 
 A)	Via E-mail:
 	* Write to the mailing list: psycle-devel@lists.sourceforge.net
-	* You can also contact with the developers using the e-mails listed here
-	http://sourceforge.net/project/memberlist.php?group_id=10384
-	DO NOT WRITE to those with "No Specific Role". They are Retired.
-	Most probably, you want to talk to JosepMa/jaz, or johan_boule/bohan
+	* You can also contact with the developers adding a ticket to sourceforge
+	site https://sourceforge.net/p/psycle/bugs/
 
-	Via IRC:
-	* Use an IRC client to connect to *EFnet* network, and there, to the #psycle channel.
-	* use the web based interfaces at: http://psycle.free.fr/irc
+	Via social networks:
+	* Psycledelics forums: http://psycle.pastnotecut.org
+	* Google+ site: https://plus.google.com/u/0/103492491563788867312
+	* Twitter account: https://twitter.com/psycledelics
+	
+	User communities:
+	* Facebook community site: https://www.facebook.com/groups/121474730283/
+	* Google+ community site: https://plus.google.com/u/0/communities/106016339032092323576
+	* Soundcloud community site: https://soundcloud.com/groups/psyclers
+	
+	The IRC channel #psycle in EFnet still exists, but it is not actively used by
+	developers right now.
 
 
 Q)	Is it possible to import/load MOD/S3M/XM/IT files into Psycle?
 
-A)	Latest 1.7.x alphas and all 1.8 versions include "Sampulse" and its importing routines.
-	Those should allow you to import them with ease.
-	Warnings:
-	
-	* Sampulse as a machine is unfinished. You might preffer replacing it by other native/VST
-	machines after having imported the patterns/sequence.
-	* Also, note that Psycle has an important limitation : It does not have a volume column, so 
-	all the volume changes are converted to a volume command, making it impossible to have 
-	a volume set and a command at the same line.
+A)	The ability to import has existed since version 1.8, but with an incomplete Sampulse machine.
+	Since version 1.11.1 beta, the Sampulse machine is considered ready and can be used
+	without fear for making songs.
+
+	* Note that Psycle has a limitation : It does not have a volume column. To compensate
+	for this, the mcm command in conjunction with the 1Exx command can be used to have both
+	an effect command and a volume command.
+	Also note that songs that use speed 5 will not play at the correct speed.
+	(Use the FEE1 command at the start of the first pattern)
 
 Q)	What is this 'dummy' machine?
 
@@ -37,7 +44,8 @@ A)	Dummy internal machine? It is mainly used to replace missing plugin machines 
 
 Q)	I have problems playing a song in Winamp!
 
-A)	The winamp plugin hasn't been updated yet to 1.8.8. The latest version is up to 1.8.6.
+A)	The last update of the plugin was for version 1.10.2. Also, remember that the plugin uses 
+    its own plugin cache, which you'll have to regenerate from the UI.
 	
 
 - Samples and the Sampler Machine -
@@ -59,8 +67,9 @@ Q)	When I load a sample and enter a note, it's really fast and high-pitched...
 
 A)	The way trackers change pitch of a sample is by speeding up or slowing down the rate at which
 	the individual sample points are played back. The result is similar to playing a 33 1/3 RPM
-	record at 45, or vice versa. This depends on the note you press, and for the Sampler, the
-	"standard" note is C-4, not C-5 like with most other plugins. Also, you can adjust the base
+	record at 45, or vice versa. This depends on the note you press, the sample rate specified in the 
+	sampler (see the instruments editor window) and one setting in the Sampler machine changes between
+	C-4 or C-5 for the default speed note. Also, you can adjust the base
 	note to another value, via the Edit instruments screen (Edit button in the toolbar, or F10 key) 
 
 
@@ -71,6 +80,7 @@ Q)	I've put my xxx VST plugin in the "plugins" dir and Psycle doesn't show it!
 A)	Psycle uses a different paths for Native plugins and VST plugins. By default, Native Plugins go
 	under "Plugins\" and VST's go under "Vst\". If you want to change it, go to Configure-Settings,
 	select the "Directories" tab, and select your VST plugins' dir.
+	Also, see next point:
 
 	
 Q)	What is the difference between the 32bits and 64bits builds, and what implications
@@ -152,7 +162,7 @@ A)	An old SDK exists in the download section of Psycle in Sourceforge, but it is
 	M3 Would be your start point, since it is partially documented.
 
 Q)	I would like to contribute to the project. What can I do?
-A)	Psycle evolves continuously, and sometimes it is thanks small contributions from
+A)	Psycle evolves continuously, and sometimes it is thanks to small contributions from
 	people not involved directly with it.
 	You can contact the developers (See first Question of this FAQ) and ask what could
 	you do. Or either tell us what you'd like to do, DSP, plugins, help files, graphics,

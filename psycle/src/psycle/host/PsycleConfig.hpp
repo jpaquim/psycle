@@ -103,6 +103,12 @@ namespace psycle
 			std::string dialBmp;
 			std::string sendMixerBmp;
 			std::string masterBmp;
+			std::string szParamsFont;
+			int paramsFontPoint;
+			int paramsFontFlags;
+			std::string szParamsBoldFont;
+			int paramsBoldFontPoint;
+			int paramsBoldFontFlags;
 			COLORREF masterFontBackColour;
 			COLORREF masterFontForeColour;
 			std::string szMasterFont;

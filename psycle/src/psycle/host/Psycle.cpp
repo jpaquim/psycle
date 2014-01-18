@@ -343,7 +343,7 @@ namespace psycle { namespace host {
 				"Hermann Seib\t\t\tBase code of the new VST Host in 1.8.5\r\n"
 				"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
 				"Patrick Haworth [TranceMyriad]\tAuthor of the Help File" "\r\n"
-				"Budislav Stepanov\t\t\tNew artwork for version 1.12\r\n"
+				"Budislav Stepanov\t\t\tNew artwork for version 1.11\r\n"
 				"Angelus\t\t\t\tNew Skin for 1.10, example songs, beta tester" "\r\n"
 				"ikkkle\t\t\t\tNew toolbar graphics for 1.10.0" "\r\n"
 				"Hamarr Heylen\t\t\tInitial Graphics" "\r\n"

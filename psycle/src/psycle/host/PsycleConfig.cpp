@@ -123,19 +123,19 @@ namespace psycle { namespace host {
 		}
 		void PsycleConfig::MachineParam::SetDefaultColours()
 		{
-			topColor = 0x00783C33;		
-			fontTopColor = 0x00D7C8C4; 
-			bottomColor = 0x009D7B71;
-			fontBottomColor = 0x00EAE1DF; 
+			topColor = 0x00555555;		
+			fontTopColor = 0x00CDCDCD; 
+			bottomColor = 0x00444444;
+			fontBottomColor = 0x00E7BD18; 
 			
 			//highlighted param colours
-			hTopColor = 0x00783C33;
-			fonthTopColor = 0x00FFFFFF; 
-			hBottomColor = 0x00D7C8C4;
-			fonthBottomColor = 0x004F3E39; 
+			hTopColor = 0x00555555;
+			fonthTopColor = 0x00CDCDCD; 
+			hBottomColor = 0x00292929;
+			fonthBottomColor = 0x00E7BD18; 
 
-			titleColor = 0x00000000;
-			fonttitleColor = 0x00FFFFFF;
+			titleColor = 0x00292929;
+			fonttitleColor = 0x00B4B4B4;
 		}
 		void PsycleConfig::MachineParam::SetDefaultSkin()
 		{
@@ -175,18 +175,25 @@ namespace psycle { namespace host {
 			coords.sMixerCheckOn.x = 30;
 			coords.sMixerCheckOn.y = 159;
 
+			coords.szParamsFont ="Tahoma";
+			coords.paramsFontPoint = 80;
+			coords.paramsFontFlags = 0;
+			coords.szParamsBoldFont ="Tahoma";
+			coords.paramsBoldFontPoint = 80;
+			coords.paramsBoldFontFlags = 1;
 			coords.szMasterFont ="Tahoma";
-			coords.masterFontPoint = 80;
+			coords.masterFontPoint = 70;
 			coords.masterFontFlags = 0;
-			coords.masterFontBackColour = 0x00000000;
-			coords.masterFontForeColour = 0x00FFFFFF;
+			coords.masterFontBackColour = 0x00292929;
+			coords.masterFontForeColour = 0x00E7BD18;
 			coords.dMasterNames.x = 427;
-			coords.dMasterNames.y = 32;
+			coords.dMasterNames.y = 33;
 			coords.dMasterNames.width = 75;
 			coords.dMasterNames.height = 12;
 			coords.dMasterMasterNumbers.x = 22;
+			coords.dMasterMasterNumbers.y = 187;
 			coords.dMasterChannelNumbers.x = 118;
-			coords.dMasterChannelNumbers.y = 186;
+			coords.dMasterChannelNumbers.y = 187;
 
 			coords.sMasterVuLeftOff.x = 516;
 			coords.sMasterVuLeftOff.y = 0;
@@ -272,14 +279,27 @@ namespace psycle { namespace host {
 
 		void PsycleConfig::MachineParam::RefreshSettings()
 		{
-			///\todo: Configurable font
-			PsycleConfig::CreatePsyFont(font,"Tahoma",80,false,false);
-			PsycleConfig::CreatePsyFont(font_bold,"Tahoma",80,true,false);
 			HWND hwndDesk = ::GetDesktopWindow();
 			::GetWindowRect(hwndDesk, &deskrect); 
 
-			bool bold = coords.masterFontFlags &1;
-			bool italics = coords.masterFontFlags &2;
+			bool bold = coords.paramsFontFlags &1;
+			bool italics = coords.paramsFontFlags &2;
+			if(!PsycleConfig::CreatePsyFont(font,coords.szParamsFont,coords.paramsFontPoint,bold,italics))
+			{
+				Error("Could not find this font! " + coords.szParamsFont);
+				if(!PsycleConfig::CreatePsyFont(font,"Tahoma",coords.paramsFontPoint,bold,false))
+					PsycleConfig::CreatePsyFont(font,"Arial",80,false,false);
+			}
+			bold = coords.paramsBoldFontFlags &1;
+			italics = coords.paramsBoldFontFlags &2;
+			if(!PsycleConfig::CreatePsyFont(font_bold,coords.szParamsBoldFont,coords.paramsBoldFontPoint,bold,italics))
+			{
+				Error("Could not find this font! " + coords.szParamsBoldFont);
+				if(!PsycleConfig::CreatePsyFont(font_bold,"Tahoma",coords.paramsBoldFontPoint,bold,false))
+					PsycleConfig::CreatePsyFont(font_bold,"Arial",80,false,false);
+			}
+			bold = coords.masterFontFlags &1;
+			italics = coords.masterFontFlags &2;
 			if(!PsycleConfig::CreatePsyFont(masterNamesFont,coords.szMasterFont,coords.masterFontPoint,bold,italics))
 			{
 				Error("Could not find this font! " + coords.szMasterFont);
@@ -398,25 +418,22 @@ namespace psycle { namespace host {
 		}
 		void PsycleConfig::MachineView::SetDefaultColours()
 		{
-			//colour =	0x009D7B71;
-			//polycolour =	0x00D1D1D1;
-			//wirecolour =	0x00C0C0C0;
-			colour =	0x009D7B71;
-			polycolour =	0x00B1978D;
-			wirecolour =	0x00634D47;
-			triangle_size = 12;
+			colour =	0x00232323;
+			polycolour =	0x005F5F5F;
+			wirecolour =	0x005F5F5F;
+			triangle_size = 10;
 			wirewidth = 1;
-			wireaa = 1;
+			wireaa = 0;
 
-			vu1 = 0x0000FF00;
-			vu2 = 0x009D7B71;
-			vu3 = 0x000000FF;
+			vu1 = 0x004DFFA6;
+			vu2 = 0x00282828;
+			vu3 = 0x004D4DFF;
 
-			generator_fontcolour = 0x00EBEBEB;
+			generator_fontcolour = 0x00B1C8B0;
 			generator_fontface = "Arial";
 			generator_font_point = 80;
 			generator_font_flags = 0;
-			effect_fontcolour = 0x00EBEBEB;
+			effect_fontcolour = 0x00D1C5B6;
 			effect_fontface = "Arial";
 			effect_font_point = 80;
 			effect_font_flags = 0;
@@ -426,90 +443,90 @@ namespace psycle { namespace host {
 			machine_skin = "";
 
 			MachineCoords.sMaster.x = 0;
-			MachineCoords.sMaster.y = 0;
-			MachineCoords.sMaster.width = 148;
-			MachineCoords.sMaster.height = 48;
+			MachineCoords.sMaster.y = 52;
+			MachineCoords.sMaster.width = 138;
+			MachineCoords.sMaster.height = 35;
 
 			MachineCoords.sGenerator.x = 0;
-			MachineCoords.sGenerator.y = 48;
-			MachineCoords.sGenerator.width = 148;
-			MachineCoords.sGenerator.height = 48;
-			MachineCoords.sGeneratorVu0.x = 10;
-			MachineCoords.sGeneratorVu0.y = 113;
-			MachineCoords.sGeneratorVu0.width = 1;
-			MachineCoords.sGeneratorVu0.height = 13;
-			MachineCoords.sGeneratorVuPeak.x = 0;
-			MachineCoords.sGeneratorVuPeak.y = 0;
-			MachineCoords.sGeneratorVuPeak.width = 0;
-			MachineCoords.sGeneratorVuPeak.height = 0;
-			MachineCoords.sGeneratorPan.x = 91;
-			MachineCoords.sGeneratorPan.y = 128;
-			MachineCoords.sGeneratorPan.width = 10;
-			MachineCoords.sGeneratorPan.height = 10;
-			MachineCoords.sGeneratorMute.x = 114;
-			MachineCoords.sGeneratorMute.y = 98;
-			MachineCoords.sGeneratorMute.width = 25;
-			MachineCoords.sGeneratorMute.height = 16;
-			MachineCoords.sGeneratorSolo.x = 89;
-			MachineCoords.sGeneratorSolo.y = 98;
-			MachineCoords.sGeneratorSolo.width = 25;
-			MachineCoords.sGeneratorSolo.height = 16;
+			MachineCoords.sGenerator.y = 87;
+			MachineCoords.sGenerator.width = 138;
+			MachineCoords.sGenerator.height = 52;
+			MachineCoords.sGeneratorVu0.x = 0;
+			MachineCoords.sGeneratorVu0.y = 156;
+			MachineCoords.sGeneratorVu0.width = 0;
+			MachineCoords.sGeneratorVu0.height = 7;
+			MachineCoords.sGeneratorVuPeak.x = 108;
+			MachineCoords.sGeneratorVuPeak.y = 156;
+			MachineCoords.sGeneratorVuPeak.width = 1;
+			MachineCoords.sGeneratorVuPeak.height = 7;
+			MachineCoords.sGeneratorPan.x = 0;
+			MachineCoords.sGeneratorPan.y = 139;
+			MachineCoords.sGeneratorPan.width = 6;
+			MachineCoords.sGeneratorPan.height = 13;
+			MachineCoords.sGeneratorMute.x = 23;
+			MachineCoords.sGeneratorMute.y = 139;
+			MachineCoords.sGeneratorMute.width = 17;
+			MachineCoords.sGeneratorMute.height = 17;
+			MachineCoords.sGeneratorSolo.x = 6;
+			MachineCoords.sGeneratorSolo.y = 139;
+			MachineCoords.sGeneratorSolo.width = 17;
+			MachineCoords.sGeneratorSolo.height = 17;
 
 			MachineCoords.sEffect.x = 0;
-			MachineCoords.sEffect.y = 144;
-			MachineCoords.sEffect.width = 148;
-			MachineCoords.sEffect.height = 48;
-			MachineCoords.sEffectVu0.x = 10;
-			MachineCoords.sEffectVu0.y = 209;
-			MachineCoords.sEffectVu0.width = 1;
-			MachineCoords.sEffectVu0.height = 13;
-			MachineCoords.sEffectVuPeak.x = 0;
-			MachineCoords.sEffectVuPeak.y = 0;
-			MachineCoords.sEffectVuPeak.width = 0;
-			MachineCoords.sEffectVuPeak.height = 0;
-			MachineCoords.sEffectPan.x = 91;
-			MachineCoords.sEffectPan.y = 224;
-			MachineCoords.sEffectPan.width = 10;
-			MachineCoords.sEffectPan.height = 10;
-			MachineCoords.sEffectMute.x = 114;
-			MachineCoords.sEffectMute.y = 194;
-			MachineCoords.sEffectMute.width = 25;
-			MachineCoords.sEffectMute.height = 16;
-			MachineCoords.sEffectBypass.x = 89;
-			MachineCoords.sEffectBypass.y = 194;
-			MachineCoords.sEffectBypass.width = 25;
-			MachineCoords.sEffectBypass.height = 16;
+			MachineCoords.sEffect.y = 0;
+			MachineCoords.sEffect.width = 138;
+			MachineCoords.sEffect.height = 52;
+			MachineCoords.sEffectVu0.x = 0;
+			MachineCoords.sEffectVu0.y = 163;
+			MachineCoords.sEffectVu0.width = 0;
+			MachineCoords.sEffectVu0.height = 7;
+			MachineCoords.sEffectVuPeak.x = 108;
+			MachineCoords.sEffectVuPeak.y = 156;
+			MachineCoords.sEffectVuPeak.width = 1;
+			MachineCoords.sEffectVuPeak.height = 7;
+			MachineCoords.sEffectPan.x = 57;
+			MachineCoords.sEffectPan.y = 139;
+			MachineCoords.sEffectPan.width = 6;
+			MachineCoords.sEffectPan.height = 13;
+			MachineCoords.sEffectMute.x = 23;
+			MachineCoords.sEffectMute.y = 139;
+			MachineCoords.sEffectMute.width = 17;
+			MachineCoords.sEffectMute.height = 17;
+			MachineCoords.sEffectBypass.x = 40;
+			MachineCoords.sEffectBypass.y = 139;
+			MachineCoords.sEffectBypass.width = 17;
+			MachineCoords.sEffectBypass.height = 17;
 
-			MachineCoords.dGeneratorVu.x = 10;
-			MachineCoords.dGeneratorVu.y = 17;
-			MachineCoords.dGeneratorVu.width = 128;
+			MachineCoords.dGeneratorVu.x = 4;
+			MachineCoords.dGeneratorVu.y = 20;
+			MachineCoords.dGeneratorVu.width = 129;
 			MachineCoords.dGeneratorVu.height = 0;
-			MachineCoords.dGeneratorPan.x = 21;
-			MachineCoords.dGeneratorPan.y = 32;
-			MachineCoords.dGeneratorPan.width = 95;
+			MachineCoords.dGeneratorPan.x = 6;
+			MachineCoords.dGeneratorPan.y = 33;
+			MachineCoords.dGeneratorPan.width = 82;
 			MachineCoords.dGeneratorPan.height = 0;
-			MachineCoords.dGeneratorMute.x = 114;
-			MachineCoords.dGeneratorMute.y = 2;
-			MachineCoords.dGeneratorSolo.x = 89;
-			MachineCoords.dGeneratorSolo.y = 2;
-			MachineCoords.dGeneratorName.x = 10;
-			MachineCoords.dGeneratorName.y = 46;
+			MachineCoords.dGeneratorMute.x = 117;
+			MachineCoords.dGeneratorMute.y = 31;
+			MachineCoords.dGeneratorSolo.x = 98;
+			MachineCoords.dGeneratorSolo.y = 31;
+			MachineCoords.dGeneratorName.x = 20;
+			MachineCoords.dGeneratorName.y = 3;
 
-			MachineCoords.dEffectVu.x = 10;
-			MachineCoords.dEffectVu.y = 17;
-			MachineCoords.dEffectVu.width = 128;
+			MachineCoords.dEffectVu.x = 4;
+			MachineCoords.dEffectVu.y = 20;
+			MachineCoords.dEffectVu.width = 129;
 			MachineCoords.dEffectVu.height = 0;
-			MachineCoords.dEffectPan.x = 21;
-			MachineCoords.dEffectPan.y = 32;
-			MachineCoords.dEffectPan.width = 95;
+			MachineCoords.dEffectPan.x = 6;
+			MachineCoords.dEffectPan.y = 33;
+			MachineCoords.dEffectPan.width = 82;
 			MachineCoords.dEffectPan.height = 0;
-			MachineCoords.dEffectMute.x = 114;
-			MachineCoords.dEffectMute.y = 2;
-			MachineCoords.dEffectBypass.x = 89;
-			MachineCoords.dEffectBypass.y = 2;
-			MachineCoords.dEffectName.x = 10;
-			MachineCoords.dEffectName.y = 46;
-			MachineCoords.bHasTransparency = true;
+			MachineCoords.dEffectMute.x = 117;
+			MachineCoords.dEffectMute.y = 31;
+			MachineCoords.dEffectBypass.x = 98;
+			MachineCoords.dEffectBypass.y = 31;
+			MachineCoords.dEffectName.x = 20;
+			MachineCoords.dEffectName.y = 3;
+			MachineCoords.bHasTransparency = false;
 			MachineCoords.cTransparency = 0x0000FF00;
 		}
 		void PsycleConfig::MachineView::SetDefaultBackground()
@@ -732,30 +749,30 @@ namespace psycle { namespace host {
 		}
 		void PsycleConfig::PatternView::SetDefaultColours()
 		{
-			separator  = 0x00000000;
-			separator2  = 0x00C0C0C0;
-			background  = 0x00C0C0C0;
-			background2  = 0x00C0C0C0;
-			row4beat  = 0x00C8C8C8;
-			row4beat2 = 0x00C8C8C8;
-			rowbeat  = 0x00E4E4E4;
-			rowbeat2 = 0x00E4E4E4;
-			row  = 0x00FFFFFF;
-			row2 = 0x00FFFFFF;
-			font  = 0x00000000;
-			font2  = 0x00000000;
-			fontPlay  = 0x00ffffff;
-			fontPlay2  = 0x00ffffff;
-			fontCur  = 0x00ffffff;
-			fontCur2  = 0x00ffffff;
-			fontSel  = 0x00ffffff;
-			fontSel2  = 0x00ffffff;
-			selection  = 0x00FFC800;
-			selection2 = 0x00C06C50;
-			playbar  = 0x00C06C50;
-			playbar2 = 0x00C06C50;
-			cursor  = 0x00C06C50;
-			cursor2 = 0x00C06C50;
+			separator  = 0x00292929;
+			separator2  = 0x00292929;
+			background  = 0x00292929;
+			background2  = 0x00292929;
+			row4beat  = 0x00595959;
+			row4beat2 = 0x00595959;
+			rowbeat  = 0x00363636;
+			rowbeat2 = 0x00363636;
+			row  = 0x003E3E3E;
+			row2 = 0x003E3E3E;
+			font  = 0x00CACACA;
+			font2  = 0x00CACACA;
+			fontPlay  = 0x00FFFFFF;
+			fontPlay2  = 0x00FFFFFF;
+			fontCur  = 0x00FFFFFF;
+			fontCur2  = 0x00FFFFFF;
+			fontSel  = 0x00FFFFFF;
+			fontSel2  = 0x00FFFFFF;
+			selection  = 0x009B7800;
+			selection2 = 0x009B7800;
+			playbar  = 0x009F7B00;
+			playbar2 = 0x009F7B00;
+			cursor  = 0x009F7B00;
+			cursor2 = 0x009F7B00;
 
 			font_name = "Verdana";
 			font_flags = 1;
@@ -772,40 +789,40 @@ namespace psycle { namespace host {
 			PatHeaderCoords.sBackground.width=113;
 			PatHeaderCoords.sBackground.height=23;
 			PatHeaderCoords.sNumber0.x = 0;
-			PatHeaderCoords.sNumber0.y = 44;
-			PatHeaderCoords.sNumber0.width = 7;
-			PatHeaderCoords.sNumber0.height = 12;
-			PatHeaderCoords.sRecordOn.x = 59;
-			PatHeaderCoords.sRecordOn.y = 24;
-			PatHeaderCoords.sRecordOn.width = 18;
-			PatHeaderCoords.sRecordOn.height = 18;
-			PatHeaderCoords.sMuteOn.x = 95;
-			PatHeaderCoords.sMuteOn.y = 24;
-			PatHeaderCoords.sMuteOn.width = 18;
-			PatHeaderCoords.sMuteOn.height = 18;
-			PatHeaderCoords.sSoloOn.x = 77;
-			PatHeaderCoords.sSoloOn.y = 24;
-			PatHeaderCoords.sSoloOn.width = 18;
-			PatHeaderCoords.sSoloOn.height = 18;
-			PatHeaderCoords.sPlayOn.x = 4;
-			PatHeaderCoords.sPlayOn.y = 24;
-			PatHeaderCoords.sPlayOn.width = 18;
-			PatHeaderCoords.sPlayOn.height = 18;
-			PatHeaderCoords.dDigitX0.x = 31;
-			PatHeaderCoords.dDigitX0.y = 5;
-			PatHeaderCoords.dDigit0X.x = 40;
-			PatHeaderCoords.dDigit0X.y = 5;
-			PatHeaderCoords.dRecordOn.x = 59;
-			PatHeaderCoords.dRecordOn.y = 2;
-			PatHeaderCoords.dMuteOn.x = 95;
-			PatHeaderCoords.dMuteOn.y = 2;
-			PatHeaderCoords.dSoloOn.x = 77;
-			PatHeaderCoords.dSoloOn.y = 2;
-			PatHeaderCoords.dPlayOn.x = 4;
-			PatHeaderCoords.dPlayOn.y = 2;
-			PatHeaderCoords.bHasTransparency = false;
+			PatHeaderCoords.sNumber0.y = 23;
+			PatHeaderCoords.sNumber0.width = 9;
+			PatHeaderCoords.sNumber0.height = 17;
+			PatHeaderCoords.sRecordOn.x = 42;
+			PatHeaderCoords.sRecordOn.y = 40;
+			PatHeaderCoords.sRecordOn.width = 17;
+			PatHeaderCoords.sRecordOn.height = 17;
+			PatHeaderCoords.sMuteOn.x = 25;
+			PatHeaderCoords.sMuteOn.y = 40;
+			PatHeaderCoords.sMuteOn.width = 17;
+			PatHeaderCoords.sMuteOn.height = 17;
+			PatHeaderCoords.sSoloOn.x = 8;
+			PatHeaderCoords.sSoloOn.y = 40;
+			PatHeaderCoords.sSoloOn.width = 17;
+			PatHeaderCoords.sSoloOn.height = 17;
+			PatHeaderCoords.sPlayOn.x = 0;
+			PatHeaderCoords.sPlayOn.y = 40;
+			PatHeaderCoords.sPlayOn.width = 8;
+			PatHeaderCoords.sPlayOn.height = 17;
+			PatHeaderCoords.dDigitX0.x = 18;
+			PatHeaderCoords.dDigitX0.y = 3;
+			PatHeaderCoords.dDigit0X.x = 25;
+			PatHeaderCoords.dDigit0X.y = 3;
+			PatHeaderCoords.dRecordOn.x = 88;
+			PatHeaderCoords.dRecordOn.y = 3;
+			PatHeaderCoords.dMuteOn.x = 69;
+			PatHeaderCoords.dMuteOn.y = 3;
+			PatHeaderCoords.dSoloOn.x = 50;
+			PatHeaderCoords.dSoloOn.y = 3;
+			PatHeaderCoords.dPlayOn.x = 8;
+			PatHeaderCoords.dPlayOn.y = 3;
+			PatHeaderCoords.bHasTransparency = true;
 			PatHeaderCoords.bHasPlaying = true;
-			PatHeaderCoords.cTransparency = 0x0000FF00;	
+			PatHeaderCoords.cTransparency = 0x00FFFFFF;	
 		}
 		void PsycleConfig::PatternView::Load(ConfigStorage &store, std::string mainSkinDir)
 		{

@@ -62,16 +62,20 @@ The original goal was only to add a couple more features to the 1.8.5/1.8.6 bran
 
 In april 2012, version 1.10.1 was released. This version had two main features: multi-io support for VSTs (Pin connections. There is no speaker setup) and an up-to-date winamp plugin (both, the engine used, and the plugin itself), as well as many small and not so small bugfixes.
 
+The rest of the 2012 was relatively quiet on the development side. Some bugs were fixed, and an attempt to make QPsycle build again started.
+
+During 2013, two big changes were made: A new plugin Host was made which allows to use lua scripting for creating generators and effects, and the Sampulse machine was completed. It also contained new artwork, including a new Skin nicer for Windows 8. This was done by JosepMa/JAZ, Stefan and Budislav. 1.11.1 (beta) was released in January 2014.
+
 Roadmap
 =======
 There is no plan for the future. There is still no strong leader behind Psycle.
 Said that, these are the things that could be done:
 
-    QPsycle: QPsycle was made uncompilable during the integration of psycle-core into Psyclemfc during 2009. No real effort has been done to fix that.
+    QPsycle: QPsycle has been retaken by baneofshadow, who has made it compile again with current QT version, and is slowly adding features back.
     
 	psycle-core: The psycle-core engine needs a rethinking on what should it be. There are two ways to go from here on, take psycle-mfc engine and convert it into a library like psycle-core using parts of psycle-core where possible, or take psycle-core, remove the parts that are more problematic, and base that on current psycle-mfc or new designs.
     
-	Psycle 1.10: This release most probably will see bugfixes.
-    
-	Psycle 1.11/2.0: The evolution of Psycle implies necessarily to componentize it. Also, new user interfaces are possible nowadays that weren't possible some years ago, as such, Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIs being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
+   	Psycle 1.11/1.12: The first beta has just been released and provides two new features to play with, as well as a new look.
+	
+	Psycle 2.0: The evolution of Psycle implies necessarily to rethink it. New user interfaces are possible nowadays that weren't possible some years ago, so Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIs being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
 
