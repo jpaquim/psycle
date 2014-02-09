@@ -310,6 +310,7 @@ namespace psycle
 
 				void InputMapping(Wire::Mapping const &mapping, bool enabled);
 				void OutputMapping(Wire::Mapping const &mapping, bool enabled);
+				virtual void change_buffer(std::vector<float*>& buf);
 
 				// CEffect overloaded functions
 				//////////////////////////////////////////////////////////////////////////
@@ -324,14 +325,7 @@ namespace psycle
 				virtual VstSpeakerArrangement* OnHostOutputSpeakerArrangement();
 				// AEffect informs of changed IO. verify numins/outs, speakerarrangement and the likes.
 				virtual bool OnIOChanged();
-/*
-				virtual void SetEditWnd(CEffectWnd* wnd)
-				{
-					CEffect::SetEditWnd(wnd);
-					editorWindow = static_cast<CVstEffectWnd*>(wnd);
-				}
-*/
-				virtual void change_buffer(std::vector<float*>& buf);
+
 			};
 		}
 	}

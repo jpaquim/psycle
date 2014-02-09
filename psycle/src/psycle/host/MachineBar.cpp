@@ -508,7 +508,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
 		
-		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
 		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
@@ -574,7 +574,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
 		{
 			const XMInstrument::WaveData<> & wave = m_pSong->samples[m_pSong->instSelected];
-			CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, szFilter);
+			CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
 			if (dlg.DoModal() == IDOK)
 			{
 				output.OpenForWrite(dlg.GetPathName(), 44100, 16, (wave.IsWaveStereo()) ? 2 : 1 );
@@ -594,8 +594,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			}
 		}
 		else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
-		((CButton*)GetDlgItem(IDC_SAVEWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->SetFocus();
 	}
 
 	void MachineBar::OnEditwave() 

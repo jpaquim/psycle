@@ -122,6 +122,11 @@ namespace psycle { namespace helpers { namespace dsp {
 		void CalculateSpectrum(float samplesIn[], float samplesOut[]);
 		//This tries to reduce the calculated fft to represent the amount of bands indicated in setup
 		void FillBandsFromFFT(float calculatedfftIn[], float banddBOut[]);
+		inline int getDCBars() { 
+			//This was intended as a DC bar, but it isn't only DC.
+			//int DCBar=0; while(fftLog[DCBar] < 1.f) {DCBar++;} return --DCBar; 
+			return -1;
+		}
 	protected:
 		void Reset();
 		void FillRectangularWindow(float window[], const std::size_t size, const float scale);

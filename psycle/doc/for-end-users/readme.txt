@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.10.1 ---------
+				------------------------------- 1.11.1 ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -94,18 +94,16 @@ community grows instead of being divided.
 Source code is stored via SVN at SourceForge site. Point your SVN client to
 this link to get the latest source code:
 
-	https://psycle.svn.sourceforge.net/svnroot/psycle/trunk
+	https://sourceforge.net/p/psycle/code/
 	
 	
 There are Forums and Bug trackers in SourceForge site and in Psycledelics site
 where you can contact us.  We check the Psycledelics site often.
 
 If you need to contact specifically the developers, you can do it via the
-sourceforge member list: 
+sourceforge psycle page: 
 
-	http://sourceforge.net/project/memberlist.php?group_id=10834
-	
-	(ignore the "No Specific Role" ones. They are retired.)
+	http://sourceforge.net/project/psycle
 	
 
 You are allowed to develop psycle Machines without any restriction, although if you
@@ -134,15 +132,15 @@ Oatmeal by Fuzzpilz  	( http://bicycle-for-slugs.org/ )
 3. Development:
 ---------------
 Psycle:
-	Psycle 1.10: This release most probably will see bugfixes.
-    
-	Psycle 1.11/2.0: The evolution of Psycle implies necessarily to componentize it. Also, new user interfaces are possible nowadays that weren't possible some years ago, as such, Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIS being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
+   	Psycle 1.11/1.12: The first beta has just been released and provides two new features to play with, as well as a new look.
+	
+	Psycle 2.0: The evolution of Psycle implies necessarily to rethink it. New user interfaces are possible nowadays that weren't possible some years ago, so Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIs being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
 
 
 QPsycle:
-	QPsycle was made uncompilable during the integration of psycle-core into Psyclemfc during 2009. No real effort has been done to fix that.
+    QPsycle: QPsycle has been retaken by baneofshadow, who has made it compile again with current QT version, and is slowly adding features back.
     
-	psycle-core: The psycle-core engine needs a rethinking on what should it be. There are two ways to go from here on, take psycle-mfc engine and convert it into a library like psycle-core using part of psycle-core where possible, or take psycle-core, remove the parts that are more problematic, and base that on current psycle-mfc or new designs.
+	psycle-core: The psycle-core engine needs a rethinking on what should it be. There are two ways to go from here on, take psycle-mfc engine and convert it into a library like psycle-core using parts of psycle-core where possible, or take psycle-core, remove the parts that are more problematic, and base that on current psycle-mfc or new designs.
 
 
 For up to date information, don't forget to visit the Developement forums on
@@ -153,22 +151,28 @@ Psycledelics site.
 4. User Resources and Links:
 ----------------------------
 
-* Psycledelics' Community:
+* Psycledelics' Community and other communities:
 
-This is the site of Psycle users. It contains several forums, documents and 
+Psycledelics is the site of Psycle users. It contains several forums, documents and 
 how-to's, download links and also a song section where that you can share
 your compositions with others.
 It is a relatively small community, and quite helpful.
 
 		http://psycle.pastnotecut.org/
 
+Other communities include:
+	* Google+ site: https://plus.google.com/u/0/103492491563788867312
+	* Twitter account: https://twitter.com/psycledelics
+	* Facebook community site: https://www.facebook.com/groups/121474730283/
+	* Google+ community site: https://plus.google.com/u/0/communities/106016339032092323576
+	* Soundcloud community site: https://soundcloud.com/groups/psyclers
+		
 * Psycle's wiki:
 
 There is an user contribute-able wiki site hosted in sourceforge which is worth
 checking. There are several tutorials, news, and some how-to's. Take a visit any
 day for information.
 
-		http://psycle.sourceforge.net/wiki
 		http://psycle.wikia.com/
 
 * Psycle's site at sourceforge:
@@ -179,5 +183,5 @@ files. You can also get the source code from the SVN repository:
 
 	project page: http://sourceforge.net/projects/psycle
 	development webpage : http://psycle.sourceforge.net/
-	SVN repository : https://psycle.svn.sourceforge.net/svnroot/psycle/trunk
+	SVN repository : http://sourceforge.net/p/psycle/code
 

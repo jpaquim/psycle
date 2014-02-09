@@ -818,12 +818,12 @@ namespace psycle { namespace host {
 		//
 		void CMainFrame::OnSelchangeTrackcombo() { m_songBar.OnSelchangeTrackcombo(); }
 		void CMainFrame::OnCloseupTrackcombo() { m_songBar.OnCloseupTrackcombo(); }
-		void CMainFrame::OnBpmAddOne() { m_songBar.OnBpmAddOne(); }
-		void CMainFrame::OnBpmAddTen() { m_songBar.OnBpmAddTen(); }
-		void CMainFrame::OnBpmDecOne() { m_songBar.OnBpmDecOne(); }
-		void CMainFrame::OnBpmDecTen() { m_songBar.OnBpmDecTen(); }
-		void CMainFrame::OnDecTPB() { m_songBar.OnDecTPB(); }
-		void CMainFrame::OnIncTPB() { m_songBar.OnIncTPB(); }
+		void CMainFrame::OnBpmAddOne() { m_songBar.OnBpmAddOne(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnBpmAddTen() { m_songBar.OnBpmAddTen(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnBpmDecOne() { m_songBar.OnBpmDecOne(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnBpmDecTen() { m_songBar.OnBpmDecTen(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnDecTPB() { m_songBar.OnDecTPB(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnIncTPB() { m_songBar.OnIncTPB(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnCloseupCombooctave() { m_songBar.OnCloseupCombooctave(); }
 		void CMainFrame::OnSelchangeCombooctave() { m_songBar.OnSelchangeCombooctave(); }
 		void CMainFrame::OnClipbut() { m_songBar.OnClipbut(); }

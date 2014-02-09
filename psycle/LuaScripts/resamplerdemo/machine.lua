@@ -26,27 +26,27 @@ function machine.saw(num, maxharmonic)
   return data
 end
 
-function machine.cwave(fh)
+function machine.cwave(fh, sr)
    local f = 261.6255653005986346778499935233; -- C4
-   local num = math.floor(44100/f + 0.5)         
-   local hmax = math.floor(44100/2/fh)
+   local num = math.floor(sr/f + 0.5)         
+   local hmax = math.floor(sr/2/fh)
    local data = machine.saw(num, hmax);
    wave = require("psycle.dsp.wavedata"):new()
    wave:copy(data)
-   wave:setwavesamplerate(44100)
-   wave:setloop(0,num)   
+   wave:setwavesamplerate(sr)
+   wave:setloop(0, num)
    return wave
 end
 
-function machine:init()  
+function machine:init(samplerate)  
    wavetable = {}   
    local flo = require("psycle.dsp.math").notetofreq(0)
    for i= 0, 10 do   
-	 local fhi = flo * 2
+	 local fhi = flo*2
 	 if i==0 then
 	    flo = 0
 	 end
-	 local w = machine.cwave(fhi)
+	 local w = machine.cwave(fhi, samplerate)
      wavetable[#wavetable+1] = {w, flo, fhi}
 	 flo = fhi
    end   
@@ -64,6 +64,11 @@ function machine:work(num)
    end
 end
 
+function machine:stop()
+  resampler:noteoff()
+  noteon = false
+end
+
 function machine:seqtick(channel, note, ins, cmd, val)    
    if note < 119 then      
       noteon = true
@@ -77,9 +82,20 @@ function machine:seqtick(channel, note, ins, cmd, val)
    end	  
 end
 
-function machine:stop()
-  resampler:noteoff()
-  noteon = false
+function machine:onsrchanged(rate)  
+  self:init(rate)
 end
 
 return machine
+
+
+-- todo
+-- To eliminate these problems, we can gradually taper off the higher order partials by multiplying them by a raised cosine window. The raised cosine can be calculated as follows:
+-- This can be calculated once for each table
+-- double kGibbs = PI / (2 * numPartials);
+-- This is calculated once for each partial in each table
+-- double temp = cos((partial-1)*kGibbs);
+-- double raisedCosine = temp * temp;; // Square it
+-- Calculate windowed amplitude for Nth partial
+-- ampl = raisedCosine / partial; 
+-- aus dem buch audio anecdotes 2

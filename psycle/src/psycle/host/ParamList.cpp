@@ -203,7 +203,7 @@ namespace psycle { namespace host {
 				_quantizedvalue = nVal;
 				machine.SetParameter(m_parlist.GetCurSel(), nVal);
 				UpdateText(nVal);
-				parentFrame->Automate(m_parlist.GetCurSel(), nVal, false);
+				parentFrame->Automate(m_parlist.GetCurSel(), nVal, false, min_v);
 			}
 		}
 

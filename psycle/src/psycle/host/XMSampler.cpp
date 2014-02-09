@@ -2475,6 +2475,7 @@ namespace psycle
 						switch (currentVoice->rInstrument().DCT())
 						{
 						case XMInstrument::DupeCheck::INSTRUMENT:
+							//todo: if no instrument specified... should we consider the previous instrument?
 							if ( pData->_inst == thisChannel.InstrumentNo())
 							{
 								if ( currentVoice->rInstrument().DCA() < currentVoice->NNA() ) currentVoice->NNA(currentVoice->rInstrument().DCA());
@@ -2482,6 +2483,7 @@ namespace psycle
 							break;
 						case XMInstrument::DupeCheck::SAMPLE:
 							{
+								//todo: if no instrument specified... should we consider the previous instrument?
 								const XMInstrument & _inst = Global::song().xminstruments[thisChannel.InstrumentNo()];
 								int _layer = _inst.NoteToSample(thisChannel.Note()).second;
 								if ( _layer == thisChannel.ForegroundVoice()->rWave().Layer())

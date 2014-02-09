@@ -64,7 +64,7 @@ In april 2012, version 1.10.1 was released. This version had two main features: 
 
 The rest of the 2012 was relatively quiet on the development side. Some bugs were fixed, and an attempt to make QPsycle build again started.
 
-During 2013, two big changes were made: A new plugin Host was made which allows to use lua scripting for creating generators and effects, and the Sampulse machine was completed. It also contained new artwork, including a new Skin nicer for Windows 8. This was done by JosepMa/JAZ, Stefan and Budislav. 1.11.1 (beta) was released in January 2014.
+During 2013, two big changes were made: A new plugin Host was developed which allows to use lua scripting for creating generators and effects, and the Sampulse machine was completed. It also contained new artwork, including a new Skin nicer for Windows 8. This was done by JosepMa/JAZ, Stefan and Budislav. 1.11.1/2 (betas) were released between January and Frebruary of 2014.
 
 Roadmap
 =======

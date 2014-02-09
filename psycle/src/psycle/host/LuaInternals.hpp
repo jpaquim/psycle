@@ -221,7 +221,7 @@ struct WaveOscTables {
 	  TRI = 4
    };
 private:
-   WaveOscTables() { set_samplerate(44100); }  // Lazy Creation
+	WaveOscTables();
    ~WaveOscTables() {  //  AtExit ctor (invoked at application ending)
 	  cleartbl(sin_tbl);
 	  cleartbl(tri_tbl);
@@ -271,15 +271,19 @@ struct WaveOsc {
   void set_gain(float gain) { resampler->set_gain(gain); }
   float gain() const { return resampler->gain(); }
   void set_shape(WaveOscTables::Shape shape);
+  WaveOscTables::Shape shape() const { return shape_; }
   void set_quality(helpers::dsp::resampler::quality::type quality) { resampler->set_quality(quality); }  
   helpers::dsp::resampler::quality::type quality() const { return resampler->quality(); }  
   
 private:    
   RWInterface* resampler;
+  WaveOscTables::Shape shape_;
 };
 
 struct LuaWaveOscBind {
 	static int open(lua_State *L);
+	static std::map<WaveOsc*,  WaveOsc*> oscs;   // store map for samplerate change
+    static void setsamplerate(double sr);
 private:
 	static int create(lua_State *L);
 	static int work(lua_State* L);
@@ -306,6 +310,8 @@ private:
 
 struct LuaDspFilterBind {
    static int open(lua_State *L);
+   static std::map<psycle::helpers::dsp::Filter*, psycle::helpers::dsp::Filter*> filters;   // store map for samplerate change
+   static void setsamplerate(double sr);
 private:
    static int create(lua_State *L);
    static int setcutoff(lua_State* L);

@@ -198,7 +198,7 @@ namespace psycle { namespace host {
 		}
 
 		bool LuaPlugin::SetParameter(int numparam, int value) {
-			if (crashed()) {
+			if (crashed() || numparam < 0) {
 				return false;
 			}
 			try {
@@ -212,7 +212,7 @@ namespace psycle { namespace host {
 		}
 
 		void LuaPlugin::GetParamRange(int numparam,int &minval, int &maxval) { 
-			if (crashed()) {
+			if (crashed() || numparam < 0) {
 			  minval = 0; maxval = 0xFFFF;
 			  return;
 			}
@@ -224,7 +224,7 @@ namespace psycle { namespace host {
 		}
 
 		int LuaPlugin::GetParamType(int numparam) { 
-			if (crashed()) {			  
+			if (crashed() || numparam < 0) {			  
 			  return 0;
 			}
             int mpf = 0 ;
@@ -237,7 +237,7 @@ namespace psycle { namespace host {
 		}
 
 		void LuaPlugin::GetParamName(int numparam, char * parval) {
-			if (crashed()) {
+			if (crashed() || numparam < 0) {
 				std::strcpy(parval, "");
 				return;
 			}
@@ -250,7 +250,7 @@ namespace psycle { namespace host {
 		}
 
 		int LuaPlugin::GetParamValue(int numparam){
-			if (crashed()) {
+			if (crashed() || numparam < 0) {
 				return 0;
 			}
 			if(numparam < GetNumParams()) {
@@ -267,7 +267,9 @@ namespace psycle { namespace host {
 		}
 
 		bool LuaPlugin::DescribeValue(int numparam, char * psTxt){			
-			if (crashed()) {
+			if (crashed() || numparam < 0) {
+				std::string par_display("Out of range or Crashed");
+  				std::sprintf(psTxt, "%s", par_display);
 				return false;
 			}
 
@@ -287,7 +289,8 @@ namespace psycle { namespace host {
 		}
 
 		void LuaPlugin::GetParamValue(int numparam, char * parval) {
-			if (crashed()) {
+			if (crashed() || numparam < 0) {
+				std::strcpy(parval, "Out of Range or Crashed");
 				return;
 			}
 			if(numparam < GetNumParams()) {

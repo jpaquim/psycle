@@ -43,7 +43,7 @@ namespace host {
 		public:
 			inline Machine& machine(){ return *_machine; }
 		protected:
-			void Automate(int param, int value, bool undo);
+			void Automate(int param, int value, bool undo, int min=0);
 			void ChangeProgram(int program);
 			void LocatePresets();
 			void FillBankPopup(CMenu* pPopupMenu);

@@ -72,6 +72,7 @@ p.resampler = param:newknob("Resampler", "", 1, 3, 2, 2)
 local resamplertypes = {"zerohold", "linear", "sinc"}
 function p.resampler:display() return resamplertypes[self:val()] end
 voice.params = p  -- used in machine::init
+voice.samplerate = 44100
 
 function voice:new()
   local v = {}      
@@ -91,7 +92,7 @@ function voice:new()
   v.vibrato = osc:new(osc.SIN, 4)
   v.oscs = {}
   v.arp = {}
-  v.arp.period = (44100 * 60)/(125*4) - 1323;
+  v.arp.period = (voice.samplerate * 60)/(125*4) - (0.03*voice.samplerate);
   v.arp.playing = false  
   v.basenote = 60
   for i=1, 3 do   
@@ -188,7 +189,7 @@ function voice:work(samples)
 	  else
 	    self:faststop()
 		self.arp.reset = true
-		self.arp.next = self.arp.next + 1323  -- 0.03 sec
+		self.arp.next = self.arp.next + (voice.samplerate*0.03)  -- 0.03 sec faststop
 	  end
       i = math.floor(self.arp.next) - self.arp.sc 	  
 	end
@@ -290,7 +291,7 @@ function voice:ontweaked(param)
     self.envf:setpeak(1, param:val())
   elseif param==p.arpspeed then
      local bpm = param:val()
-     self.arp.period = (44100 * 60)/(bpm*4) - 1323;  
+     self.arp.period = (voice.samplerate * 60)/(bpm*4) - (voice.samplerate*0.03);
   elseif param==p.resampler then
      for i=1, 3 do        
 	   self.oscs[i]:setquality(param:val())

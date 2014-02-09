@@ -7,6 +7,14 @@
 "send_return_bmp"="Psycle_110_mixer_skin_black.bmp"
 "master_bmp"="Psycle_110_master_skin.bmp"
 
+//Font used for the parameters and mixer windows.
+"params_text_font_name"="Tahoma"
+"params_text_font_point"=dword:00000050
+"params_text_font_flags"=dword:00000000
+"params_text_font_bold_name"="Tahoma"
+"params_text_font_bold_point"=dword:00000050
+"params_text_font_bold_flags"=dword:00000001
+
 // Note: Colours are written in the form "00BGR" (i.e. opposite of RGB)
 "master_text_backcolour"=dword:00000000
 "master_text_forecolour"=dword:00FFFFFF

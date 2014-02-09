@@ -1,6 +1,6 @@
 --[[
-  psycl lua synthdemo
-  file : synthdemo.lua
+  psycle lua synthdemo
+  file : machine.lua
 ]]
 
 --require('mobdebug').start()
@@ -22,7 +22,6 @@ function machine:info()
 end
 
 function machine:help()
-  print("hi")
   return "01xx : slide up\n"..
          "02xx : slide down\n"..
 		 "04xy : vibrato(frq,gain)\n"..
@@ -34,6 +33,7 @@ local filtertypes = {"LowPass", "HighPass", "BandPass", "BandReject", "None", "I
 
 -- plugin constructor
 function machine:init(samplerate)         
+  voice.samplerate = samplerate        
   filter = require("psycle.dsp.filter")
   filtercurr = filter:new(filter.LOWPASS)
   -- setup voice independent parameters
@@ -41,7 +41,7 @@ function machine:init(samplerate)
   p.mlb = param:newlabel("Master")
   p.vol = param:newknob("vol", "", 0, 1, 100, 0.5)
   p.flb = param:newlabel("Filter")
-  p.ft = param:newknob("FilterType","",0,5,5,0):addlistener(self)
+  p.ft = param:newknob("FilterType","",0,5,5,1):addlistener(self)
   function p.ft:display()
     return filtertypes[self:val()+1]
   end
@@ -51,7 +51,7 @@ function machine:init(samplerate)
   self:addparameters(p)
   self:addparameters(voice.params)
   self:setnumcols(2)  
-  -- create 6 polyphonic voices
+  -- create 3 polyphonic voices
   self.currvoice = 1 
   for i=1, 3 do voices[#voices+1] = voice:new()	end
   for i=0, 64 do channels[i] = 0 end  
@@ -133,7 +133,7 @@ function machine:ontweaked(param)
 end
 
 function machine:onsrchanged(rate)
-  print("sr changed"..rate)
+  voice.samplerate = rate
 end
 
 return machine

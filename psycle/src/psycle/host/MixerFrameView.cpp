@@ -400,7 +400,7 @@ namespace psycle { namespace host {
 					}
 				}
 				else if (_swapstart == -1) {
-					ShowCursor(FALSE);
+					while (ShowCursor(FALSE) >= 0);
 				}
 				allowmove =  isslider || _swapstart > -1;
 				prevval = tweakbase;
@@ -475,14 +475,14 @@ namespace psycle { namespace host {
 					mixer().ExchangeReturns(_swapstart,_swapend);
 				}
 			}
-			if (istweak && !isslider && _swapstart == -1) ShowCursor(TRUE);
+			ReleaseCapture();
+			if (istweak && !isslider && _swapstart == -1) while (ShowCursor(TRUE) < 0);
 			refreshheaders=true;
 			_swapstart = -1;
 			_swapend = -1;
 			isslider = false;
 			istweak=false;
 			Invalidate();
-			ReleaseCapture();
 			CWnd::OnLButtonUp(nFlags, point);
 		}
 

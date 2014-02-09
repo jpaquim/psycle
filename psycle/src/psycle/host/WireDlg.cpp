@@ -12,9 +12,6 @@
 #include "Player.hpp"
 #include "Song.hpp"
 
-//Included for Dummy's "wasVST". Should be possible to do it in another way
-#include "internal_machines.hpp"
-
 //Included for AddNewEffectHere
 #include "MainFrm.hpp"
 
@@ -426,30 +423,46 @@ namespace psycle { namespace host {
 						const float add = (float(Global::player().SampleRate())/float(freq))/256.0f;
 						const float multleft= invol*mult *srcMachine._lVol;
 						const float multright= invol*mult *srcMachine._rVol;
-
-						CPen *oldpen = bufDC.SelectObject(&linepenL);
+						RECT rect = {0,0,1,0};
 						float n=nOrig;
-						bufDC.MoveTo(256,GetY(resampler.work_float(pSamplesL,n,SCOPE_BUF_SIZE, NULL), multleft));
-						for (int x = 256; x >= 0; x--)
-						{
+						for (int x = 256; x >= 0; x--, rect.left++, rect.right++) {
 							n -= add;
 							if (n < 0.f) { n+=SCOPE_BUF_SIZE; }
-							bufDC.LineTo(x,GetY(resampler.work_float(pSamplesL,n,SCOPE_BUF_SIZE, NULL),multleft));
-							bufDC.LineTo(x,GetY(0,multleft));
-						}
+							
+							int aml = GetY(resampler.work_float(pSamplesL,n,SCOPE_BUF_SIZE, NULL,pSamplesL, pSamplesL+SCOPE_BUF_SIZE-1),multleft);
+							int amr = GetY(resampler.work_float(pSamplesR,n,SCOPE_BUF_SIZE, NULL,pSamplesR, pSamplesR+SCOPE_BUF_SIZE-1),multright);
 
-						bufDC.SelectObject(&linepenR);
-						n=nOrig;
-						bufDC.MoveTo(256,GetY(resampler.work_float(pSamplesR,n,SCOPE_BUF_SIZE, NULL),multright));
-						for (int x = 256; x >= 0; x--)
-						{
-							n -= add;
-							if (n < 0.f) { n+=SCOPE_BUF_SIZE; }
-							bufDC.LineTo(x,GetY(resampler.work_float(pSamplesR,n,SCOPE_BUF_SIZE, NULL),multright));
-							bufDC.LineTo(x,GetY(0,multleft));
-						}
-						bufDC.SelectObject(oldpen);
+							int smaller, bigger, halfbottom, bottompeak;
+							COLORREF colourtop, colourbottom;
+							if (aml < amr) { smaller=aml; bigger=amr; colourtop=CLLEFT; colourbottom=CLRIGHT; }
+							else {			smaller=amr; bigger=aml; colourtop=CLRIGHT; colourbottom=CLLEFT; }
+							if (smaller < 64 ){
+								rect.top=smaller;
+								if (bigger < 64) {
+									rect.bottom=bigger;
+									halfbottom=bottompeak=64;
+								}
+								else {
+									rect.bottom=halfbottom=64;
+									bottompeak=bigger;
+								}
+							}
+							else {
+								rect.top=rect.bottom=64;
+								halfbottom=smaller;
+								bottompeak=bigger;
+							}
+							bufDC.FillSolidRect(&rect,colourtop);
 
+							rect.top = rect.bottom;
+							rect.bottom = halfbottom;
+							bufDC.FillSolidRect(&rect,CLBOTH);
+
+							rect.top = rect.bottom;
+							rect.bottom = bottompeak;
+							bufDC.FillSolidRect(&rect,colourbottom);
+
+						}
 						// red line if last frame was clipping
 						if (clip)
 						{
@@ -554,6 +567,7 @@ namespace psycle { namespace host {
 						}
 #endif
 						// draw our bands
+						int DCBar = fftSpec.getDCBars();
 						RECT rect = {0,0,SCOPE_BARS_WIDTH,0};
 						for (int i = 0; i < SCOPE_SPEC_BANDS; 
 							i++, rect.left+=SCOPE_BARS_WIDTH, rect.right+=SCOPE_BARS_WIDTH)
@@ -567,7 +581,12 @@ namespace psycle { namespace host {
 							//int amr = - db_right[i];
 							aml = (aml < 0) ? 0 : (aml > 128) ? 128 : aml;
 							amr = (amr < 0)? 0 : (amr > 128) ? 128 : amr;
-							if (aml < amr) {
+							if (i<= DCBar) {
+								curpeak=std::min(aml,amr);
+								halfpeak=128;
+								colour=CLBARDC;
+							}
+							else if (aml < amr) {
 								curpeak=aml;
 								halfpeak=amr;
 								colour=CLLEFT;

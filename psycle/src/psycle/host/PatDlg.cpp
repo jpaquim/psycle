@@ -94,15 +94,9 @@ namespace psycle { namespace host {
 			buffer[31]='\0';
 			strcpy(patName,buffer);
 
-			PsycleGlobal::conf().patView().showTrackNames_= (m_shownames != 0);
-
 			CString text;
 			m_trackedit.GetWindowText(text);
 			tracknames[prevsel] = static_cast<LPCTSTR>(text);
-			m_song.shareTrackNames = (m_independentnames == 0);
-			for(int i(0); i< m_song.SONGTRACKS; i++) {
-				m_song.ChangeTrackName(patIdx,i,tracknames[i]);
-			}
 
 			CDialog::OnOK();
 		}

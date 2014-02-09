@@ -11,10 +11,12 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 extern "C" {
 #include <luasocket/luasocket.h>
 #include <luasocket/mime.h>
 }
+#endif //defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 
 namespace psycle { namespace host {
 
@@ -54,10 +56,12 @@ void LuaProxy::set_state(lua_State* state) {
   lua_pop(L, 1);
   luaL_requiref(L, "psycle.envelope", LuaEnvelopeBind::open, 1);
   lua_pop(L, 1);
-  luaL_requiref(L, "socket", luaopen_socket_core, 1);
-  lua_pop(L, 1);
-  luaL_requiref(L, "mime", luaopen_mime_core, 1);
-  lua_pop(L, 1);
+#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
+	luaL_requiref(L, "socket", luaopen_socket_core, 1);
+	lua_pop(L, 1);
+    luaL_requiref(L, "mime", luaopen_mime_core, 1);
+    lua_pop(L, 1);
+#endif  //LUASOCKET_SUPPORT
   info_.mode = MACHMODE_FX;  
 }
 
@@ -421,6 +425,8 @@ void LuaProxy::call_sr_changed(int rate) {
   lock();
   try {	
 	WaveOscTables::getInstance()->set_samplerate(rate);
+	LuaDspFilterBind::setsamplerate(rate);
+	LuaWaveOscBind::setsamplerate(rate);
     if (!get_method_optional(L, "onsrchanged")) {
 		unlock();
 		return;
@@ -679,6 +685,7 @@ LuaPlugin* LuaHost::LoadPlugin(const std::string& dllpath, int macIdx) {
 	plug->dll_path_ = dllpath;
 	PluginInfo info = plug->CallPluginInfo();
 	plug->_mode = info.mode;
+	strncpy(plug->_editName, info.name.c_str(),sizeof(plug->_editName)-1);
 	return plug;
 }
 

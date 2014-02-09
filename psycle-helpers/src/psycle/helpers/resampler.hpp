@@ -38,11 +38,31 @@ using namespace universalis::stdlib;
 	/// sample interpolator.
 	class resampler {
 		public:
-			/// interpolator work function type
+			/// interpolator work function types
+
+			// data = input signal to be resampled already pointing at the offset indicated by offset.
+			// offset = sample offset (integer) [info to avoid go out of bounds on sample reading ]
+			// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
+			// length = sample length [info to avoid go out of bounds on sample reading ]
+			// resampler_data = resampler specific data. Needed for sinc and sox resamplers. 
+			// Obtain it by calling at GetResamplerData(speed), and call at UpdateSpeed(speed) when the same sample changes speed.
+			// when done with the sample, call DispodeResamplerData(resampler_data)
 			typedef float (*work_func_type)(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
+			//Version without checks in data limits. Use only when you guarantee that data has enough samples for the resampling algorithm.
+			// data = input signal to be resampled already pointing at the integer offset.
+			// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
 			typedef float (*work_unchecked_func_type)(int16_t const * data, uint32_t res, void* resampler_data);
+			//Float version without checks in data limits. Use only when you guarantee that data has enough samples for the resampling algorithm.
+			// data = input signal to be resampled already pointing at the integer offset.
+			// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
 			typedef float (*work_float_unchecked_func_type)(float const * data, uint32_t res, void* resampler_data);
-			typedef float (*work_float_func_type)(float const * data, float offset, uint64_t length, void* resampler_data);
+			//Float version with limits
+			// data = input signal to be resampled (pointing at the start of data)
+			// offset = exact sample offset including decimal part of the offset (between point y0 and y1) to get (i.e. 3.41).
+			// length = sample length [info to avoid go out of bounds on sample reading ]
+			// loopBeg pointer to the start of the loop (if no loop, use same pointer than data)
+			// loopEnd pointer to the end of the loop ( i.e. if 10 positions, then (array+9)) (if no loop use data[length-1])
+			typedef float (*work_float_func_type)(float const * data, float offset, uint64_t length, void* resampler_data, float const * loopBeg, float const * loopEnd);
 			
 	/// sample interpolator kinds.
 			struct quality { enum type {
@@ -78,13 +98,6 @@ using namespace universalis::stdlib;
 			quality::type quality_;
 			
 			/// interpolation work function which does nothing. Also known as Zero order hold interpolation
-			// data = input signal to be resampled already pointing at the offset indicated by offset.
-			// offset = sample offset (integer) [info to avoid go out of bounds on sample reading ]
-			// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
-			// length = sample length [info to avoid go out of bounds on sample reading ]
-			// resampler_data = resampler specific data. Needed for sinc and sox resamplers. 
-			// Obtain it by calling at GetResamplerData(speed), and call at UpdateSpeed(speed) when the same sample changes speed.
-			// when done with the sample, call DispodeResamplerData(resampler_data)
 			static float zoh(int16_t const * data, uint64_t /*offset*/, uint32_t /*res*/, uint64_t /*length*/, void* /*resampler_data*/) {
 				return *data;
 			}
@@ -95,11 +108,8 @@ using namespace universalis::stdlib;
 			static float zoh_float_unchecked(float const * data, uint32_t /*res*/, void* /*resampler_data*/) {
 				return *data;
 			}
-			// data = input signal to be resampled (pointing at the start of data)
-			// offset = exact sample offset including decimal part of the offset (between point y0 and y1) to get.
-			// length = sample length [info to avoid go out of bounds on sample reading ]
-			// resampler_data = resampler specific data. Needed for sinc and sox resamplers
-			static float zoh_float(float const * data, float offset, uint64_t /*length*/, void* /*resampler_data*/) {
+			//float version
+			static float zoh_float(float const * data, float offset, uint64_t /*length*/, void* /*resampler_data*/, float const * /*loopBeg*/, float const * /*loopEnd*/) {
 				int iOsc = std::floor(offset);
 				return data[iOsc];
 			}
@@ -137,13 +147,13 @@ using namespace universalis::stdlib;
 			static float linear(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
 			static float linear_unchecked(int16_t const * data, uint32_t res, void* resampler_data);
 			static float linear_float_unchecked(float const * data, uint32_t res, void* resampler_data);
-			static float linear_float(float const * data, float offset, uint64_t length, void* resampler_data);
+			static float linear_float(float const * data, float offset, uint64_t length, void* resampler_data, float const * loopBeg, float const * loopEnd);
 
 			/// interpolation work function which does spline interpolation.
 			static float spline(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
 			static float spline_unchecked(int16_t const * data, uint32_t res, void* resampler_data);
 			static float spline_float_unchecked(float const * data, uint32_t res, void* resampler_data);
-			static float spline_float(float const * data, float offset, uint64_t length, void* resampler_data);
+			static float spline_float(float const * data, float offset, uint64_t length, void* resampler_data, float const * loopBeg, float const * loopEnd);
 
 			/// Interpolation work function using a windowed sinc.
 			static float sinc(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);
@@ -153,7 +163,7 @@ using namespace universalis::stdlib;
 			inline static float sinc_float_filtered(float const * data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data);
 			inline static float sinc_internal(int16_t const * data, uint32_t res, int leftExtent, int rightExtent);
 			inline static float sinc_float_internal(float const * data, uint32_t res, int leftExtent, int rightExtent);
-			static float sinc_float(float const * data, float offset, uint64_t length, void* resampler_data);
+			static float sinc_float(float const * data, float offset, uint64_t length, void* resampler_data, float const * loopBeg, float const * loopEnd);
 
 			/// Interpolation using SOXR variable rate resampling.
 			static float soxr(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);

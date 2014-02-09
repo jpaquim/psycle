@@ -45,9 +45,9 @@ namespace psycle {
 			virtual void ResizeWindow(int width, int height);
 			virtual void ResizeWindow(CRect* pRect);
 			virtual void RefreshUI();
-			virtual bool BeginAutomating(long index){ return false; }
-			virtual bool SetParameterAutomated(long index, float value);
-			virtual bool EndAutomating(long index) { return false; }
+			virtual bool BeginAutomating(VstInt32 index){ return false; }
+			virtual bool SetParameterAutomated(VstInt32 index, float value);
+			virtual bool EndAutomating(VstInt32 index) { return false; }
 			virtual bool OpenFileSelector (VstFileSelect *ptr);
 			virtual bool CloseFileSelector (VstFileSelect *ptr);
 			virtual void* OpenSecondaryWnd(VstWindow& window);

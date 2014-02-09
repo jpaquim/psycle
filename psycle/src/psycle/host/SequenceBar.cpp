@@ -441,7 +441,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 				// clear pattern data
 				m_pSong->DeleteAllPatterns();
 				// init a pattern for #0
-				m_pSong->_ppattern(0);
+				m_pSong->AllocNewPattern(0,"",PsycleGlobal::conf().GetDefaultPatLines(),false);	
 
 				m_pWndView->editPosition=0;
 				m_pSong->playLength=1;

@@ -209,6 +209,9 @@
 	  	FE3x	Set Mute (0 off, else on)
 	  	FEBx	Set Pattern Loop ( FEB0 set loop start, FEBx number of loops)
 	  	FEDx	Set Pattern Delay. ( x = number of lines+1 )
+		FEEx    Set Pattern Fine delay memory ( x = number of ticks to add to each beat. )
+                Used in conjunction with LPB (FExx), can emulate the speed command of classic trackers.
+				(I.e. FE06 FEE1 =  speed 5 )
 	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/24) )
 	  	
 	  FDxx  -	Delay Trigger (xx/256 ticks) (works with noteoffs too)
@@ -275,7 +278,7 @@
 				7: *1/2		F: *2
 	
 
-	* Argury Synth 2f ( Also other (old) Arguru Synths) :
+	* Arguru Synth 2f ( Also other (old) Arguru Synths) :
 
 	  01xx	-	Pitch slide-up
 	  02xx	-	Pitch slide-down
