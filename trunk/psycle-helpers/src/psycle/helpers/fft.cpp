@@ -602,8 +602,12 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
         for (unsigned int h=0, a=0;h<bands;h++)
 		{
 			float afloat = fftLog[h];
-			if (afloat +1.0f > fftLog[h+1]) {
-				j = resampler.work_float(calculatedfftIn,afloat,outputSize, NULL);
+			/*if (afloat < 1.f) {
+				//This was intended as a DC bar, but it isn't only DC.
+				j = calculatedfftIn[a];
+			}
+			else*/ if (afloat +1.0f > fftLog[h+1]) {
+				j = resampler.work_float(calculatedfftIn,afloat,outputSize, NULL, calculatedfftIn, calculatedfftIn+outputSize-1);
 				a = math::round<int,float>(afloat);
 			}
 			else {
@@ -618,7 +622,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	}
 	float FFTClass::resample(float const * data, float offset, uint64_t length)
 	{
-		return resampler.work_float(data, offset, length, NULL);
+		return resampler.work_float(data, offset, length, NULL, data, data+length-1);
 	}
 }}}
 

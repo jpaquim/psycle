@@ -171,7 +171,7 @@ namespace psycle { namespace host {
 			{
 				if (!Global::song().CloneMac(src,dst))
 				{
-					MessageBox("Cloning failed","Cloning failed");
+					MessageBox("Cloning failed. Is your song directory correctly configured?","Cloning failed");
 				}
 				if ( m_view != NULL )
 				{

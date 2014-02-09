@@ -263,14 +263,18 @@ namespace psycle
 			if (mac1 && mac2)
 			{
 				std::vector<Wire> inWire1;
+				std::vector<int> inSrcWireIdx1;
 				std::vector<Wire> inWire2;
+				std::vector<int> inSrcWireIdx2;
 				std::vector<Wire*> outWire1;
 				std::vector<Wire*> outWire2;
 				Wire unused(mac1);
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					inWire1.push_back(mac1->inWires[i]);
+					inSrcWireIdx1.push_back(mac1->inWires[i].GetSrcWireIndex());
 					inWire2.push_back(mac2->inWires[i]);
+					inSrcWireIdx2.push_back(mac2->inWires[i].GetSrcWireIndex());
 					mac1->inWires[i].Disconnect();
 					mac2->inWires[i].Disconnect();
 					if (mac1->outWires[i]) {
@@ -293,41 +297,69 @@ namespace psycle
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					if (inWire1[i].Enabled()) {
-						if (inWire1[i].GetSrcMachine()._macIndex != mac2->_macIndex) {
-							mac2->inWires[i].ConnectSource(inWire1[i].GetSrcMachine(), 0
-								,inWire1[i].GetSrcWireIndex()
-								,&inWire1[i].GetMapping());
-							mac2->inWires[i].SetVolume(inWire1[i].GetVolume());
+						if (inWire1[i].GetSrcMachine()._macIndex == mac2->_macIndex) {
+							// in this case, we cannot guarantee the correct wire index. we need
+							// to check that it's one not included in inSrcWireIdx2
+							int candidate=-1;
+							for(int i=0; i< MAX_CONNECTIONS && candidate==-1; i++) {
+								for(int j=0; j< MAX_CONNECTIONS; j++) {
+									if (inSrcWireIdx2[j]==i) {
+										break;
+									}
+									else if (j+1==MAX_CONNECTIONS) {
+										candidate=i;
+									}
+								}
+							}
+							if (candidate!=-1) {
+								mac2->inWires[i].ConnectSource(*mac1,0
+									,candidate
+									,&inWire1[i].GetMapping());
+							}
 						}
 						else {
-							mac1->inWires[i].ConnectSource(*mac2,0
-								,inWire1[i].GetSrcWireIndex()
+							mac2->inWires[i].ConnectSource(inWire1[i].GetSrcMachine(), 0
+								,inSrcWireIdx1[i]
 								,&inWire1[i].GetMapping());
 						}
+						mac2->inWires[i].SetVolume(inWire1[i].GetVolume());
 					}
 					if (inWire2[i].Enabled()) {
-						if (inWire2[i].GetSrcMachine()._macIndex != mac1->_macIndex) {
-							mac1->inWires[i].ConnectSource(inWire2[i].GetSrcMachine(), 0
-								,inWire2[i].GetSrcWireIndex()
-								,&inWire2[i].GetMapping());
-							mac1->inWires[i].SetVolume(inWire2[i].GetVolume());
+						if (inWire2[i].GetSrcMachine()._macIndex == mac1->_macIndex) {
+							// in this case, we cannot guarantee the correct wire index. we need
+							// to check that it's one not included in inSrcWireIdx1
+							int candidate=-1;
+							for(int i=0; i< MAX_CONNECTIONS && candidate==-1; i++) {
+								for(int j=0; j< MAX_CONNECTIONS; j++) {
+									if (inSrcWireIdx1[j]==i) {
+										break;
+									}
+									else if (j+1==MAX_CONNECTIONS) {
+										candidate=i;
+									}
+								}
+							}
+							if (candidate!=-1) {
+								mac1->inWires[i].ConnectSource(*mac2,0
+									,candidate
+									,&inWire2[i].GetMapping());
+							}
 						}
 						else {
-							mac2->inWires[i].ConnectSource(*mac1,0
-								,inWire2[i].GetSrcWireIndex()
+							mac1->inWires[i].ConnectSource(inWire2[i].GetSrcMachine(), 0
+								,inSrcWireIdx2[i]
 								,&inWire2[i].GetMapping());
 						}
+						mac1->inWires[i].SetVolume(inWire2[i].GetVolume());
 					}
 					if (outWire1[i] != &unused) {
 						if (outWire1[i]->GetDstMachine()._macIndex != mac2->_macIndex) {
-							outWire1[i]->ConnectSource(*mac2, 0, i, &outWire1[i]->GetMapping());
-							outWire1[i]->SetVolume(outWire1[i]->GetVolume());
+							outWire1[i]->ChangeSource(*mac2, 0, i, &outWire1[i]->GetMapping());
 						}
 					}
 					if (outWire2[i] != &unused) {
 						if (outWire2[i]->GetDstMachine()._macIndex != mac1->_macIndex) {
-							outWire2[i]->ConnectSource(*mac1, 0, i, &outWire2[i]->GetMapping());
-							outWire2[i]->SetVolume(outWire2[i]->GetVolume());
+							outWire2[i]->ChangeSource(*mac1, 0, i, &outWire2[i]->GetMapping());
 						}
 					}
 				}
@@ -713,6 +745,7 @@ namespace psycle
 				memcpy(pData,&blank,EVENT_SIZE);
 				pData+= EVENT_SIZE;
 			}
+
 			return ppPatternData[ps];
 		}
 
@@ -847,14 +880,12 @@ namespace psycle
 			return used;
 		}
 
-		int Song::GetBlankPatternUnused(int rval) const
+		int Song::GetBlankPatternUnused(int rval)
 		{
-			//Check for one unexistant pattern.
-			for(int i(0) ; i < MAX_PATTERNS; ++i) if(!IsPatternUsed(i)) return i;
-			//if none found, try to find an empty used pattern.
+			//try to find an empty pattern.
 			PatternEntry blank;
 			bool bTryAgain(true);
-			while(bTryAgain && rval < MAX_PATTERNS - 1)
+			while(bTryAgain && rval < MAX_PATTERNS)
 			{
 				for(int c(0) ; c < playLength ; ++c)
 				{
@@ -866,9 +897,13 @@ namespace psycle
 				}
 				// now test to see if data is really blank
 				bTryAgain = false;
-				if(rval < MAX_PATTERNS - 1)
+				if(rval < MAX_PATTERNS)
 				{
 					unsigned char *offset_source(ppPatternData[rval]);
+					if (offset_source == NULL) {
+						AllocNewPattern(rval,"",defaultPatLines,false);	
+						break;
+					}
 					for(int t(0) ; t < MULTIPLY2 ; t += EVENT_SIZE)
 					{
 						if(memcmp(offset_source+t,&blank,EVENT_SIZE) != 0 )
@@ -880,7 +915,8 @@ namespace psycle
 					}
 				}
 			}
-			if(rval > MAX_PATTERNS - 1)
+			//if none found, get one not in the sequence
+			if(rval >= MAX_PATTERNS)
 			{
 				rval = 0;
 				for(int c(0) ; c < playLength ; ++c)
@@ -891,7 +927,8 @@ namespace psycle
 						c = -1;
 					}
 				}
-				if(rval > MAX_PATTERNS - 1) rval = MAX_PATTERNS - 1;
+				if(rval >= MAX_PATTERNS) rval = MAX_PATTERNS - 1;
+				AllocNewPattern(rval,"",defaultPatLines,false);	
 			}
 			return rval;
 		}

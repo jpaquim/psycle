@@ -283,7 +283,7 @@ namespace psycle { namespace host {
 			static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 			CString direct;
 			m_filename.GetWindowText(direct);
-			CFileDialog dlg(false,"wav",direct,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+			CFileDialog dlg(false,"wav",direct,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
 			if ( dlg.DoModal() == IDOK ) 
 			{
 				CString str = dlg.GetPathName();

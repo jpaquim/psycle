@@ -433,12 +433,8 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnUpdateViewsParameterlist(CCmdUI *pCmdUI)
 		{
-			if ( pParamGui )
-			{
-				pCmdUI->SetCheck(true);
-			}
-			else
-				pCmdUI->SetCheck(false);
+			pCmdUI->SetCheck(pParamGui!= NULL);
+			pCmdUI->Enable(machine().GetNumParams() > 0);
 		}
 
 		void CFrameMachine::OnViewsShowtoolbar()
@@ -957,9 +953,9 @@ namespace psycle { namespace host {
 				pParamGui->SelectProgram(numProgram);
 			}
 		}
-		void CFrameMachine::Automate(int param, int value, bool undo)
+		void CFrameMachine::Automate(int param, int value, bool undo, int min)
 		{
-			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value, undo);
+			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value-min, undo);
 			if(pParamGui)
 				pParamGui->UpdateNew(param, value);
 		}

@@ -1790,71 +1790,71 @@ namespace psycle { namespace host {
 			if (wdWave && blSelection)
 			{
 				PsycleGlobal::inputHandler().AddMacViewUndo();
-
-				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				_pSong->StopInstrument(wsInstrument);
-
-				unsigned long length = blLength+1;
-
-				long datalen = (wdLength - length);
-				if (datalen)
 				{
-					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
-					wave.DeleteAt(blStart, length);
-					wdLeft = wave.pWaveDataL();
-					wdRight = wave.pWaveDataR();
-					wdLength = wave.WaveLength();
-					//	adjust loop points if necessary
-					if(wdLoop)
+					CExclusiveLock lock(&_pSong->semaphore, 2, true);
+					_pSong->StopInstrument(wsInstrument);
+
+					unsigned long length = blLength+1;
+
+					long datalen = (wdLength - length);
+					if (datalen)
 					{
-						if(blStart+length<wdLoopS)
+						XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+						wave.DeleteAt(blStart, length);
+						wdLeft = wave.pWaveDataL();
+						wdRight = wave.pWaveDataR();
+						wdLength = wave.WaveLength();
+						//	adjust loop points if necessary
+						if(wdLoop)
 						{
-							wdLoopS -= length;
-							wave.WaveLoopStart(wdLoopS);
+							if(blStart+length<wdLoopS)
+							{
+								wdLoopS -= length;
+								wave.WaveLoopStart(wdLoopS);
+							}
+							if(blStart+length<wdLoopE)
+							{
+								wdLoopE -= length;
+								wave.WaveLoopEnd(wdLoopE);
+							}
 						}
-						if(blStart+length<wdLoopE)
+						if(wdSusLoop)
 						{
-							wdLoopE -= length;
-							wave.WaveLoopEnd(wdLoopE);
+							if(blStart+length<wdSusLoopS)
+							{
+								wdSusLoopS -= length;
+								wave.WaveSusLoopStart(wdSusLoopS);
+							}
+							if(blStart+length<wdSusLoopE)
+							{
+								wdSusLoopE -= length;
+								wave.WaveSusLoopEnd(wdSusLoopE);
+							}
 						}
-					}
-					if(wdSusLoop)
-					{
-						if(blStart+length<wdSusLoopS)
-						{
-							wdSusLoopS -= length;
-							wave.WaveSusLoopStart(wdSusLoopS);
-						}
-						if(blStart+length<wdSusLoopE)
-						{
-							wdSusLoopE -= length;
-							wave.WaveSusLoopEnd(wdSusLoopE);
-						}
-					}
 
-				}
-				else
-				{
-					_pSong->samples.RemoveAt(wsInstrument);
-					wdLength = 0;
-					wdWave   = false;
-				}
-			
-				//Validate display
-				if ( (diStart + diLength) > wdLength )
-				{
-					long newlen = wdLength - diLength;
-
-					if ( newlen < 0 )
-						this->OnSelectionShowall();
+					}
 					else
-						diStart = (unsigned)newlen;
-				}
+					{
+						_pSong->samples.RemoveAt(wsInstrument);
+						wdLength = 0;
+						wdWave   = false;
+					}
 				
-				blSelection = false;
-				blLength  = 0;
-				blStart   = 0;
+					//Validate display
+					if ( (diStart + diLength) > wdLength )
+					{
+						long newlen = wdLength - diLength;
 
+						if ( newlen < 0 )
+							this->OnSelectionShowall();
+						else
+							diStart = (unsigned)newlen;
+					}
+					
+					blSelection = false;
+					blLength  = 0;
+					blStart   = 0;
+				}
 				mainFrame->UpdateInstrumentEditor();
 				mainFrame->WaveEditorBackUpdate();
 				ResetScrollBars(true);

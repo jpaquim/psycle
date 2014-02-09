@@ -206,14 +206,14 @@ inline float CSynthTrack::GetSample()
 				//This assumes MAX_RAND is 0x7fff
 				output = (std::rand() - 16384)*OSC1Vol;
 			} else {
-                output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize,resampler.GetResamplerData())*OSC1Vol;
+                output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize,NULL, syntp->pWave, syntp->pWave+iwaveTableSize-1)*OSC1Vol;
 			}
 			if ( syntp->wave2noise) {
 				//This assumes MAX_RAND is 0x7fff
 				output += (std::rand() - 16384)*OSC2Vol;
 			}
 			else {
-                output += resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize,resampler.GetResamplerData())*OSC2Vol;
+                output += resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize,NULL, syntp->pWave2, syntp->pWave2+iwaveTableSize-1)*OSC2Vol;
 			}
 		}
 		else
@@ -272,24 +272,14 @@ inline float CSynthTrack::GetSampleOsc1()
 	{
 		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
 	
-		if ( syntp->interpolate)  // helper's interpolation method
-		{
-			if ( syntp->wave1noise) {
-				//This assumes MAX_RAND is 0x7fff
-				output = (std::rand() - 16384)*OSC1Vol;
-			} else {
-                output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize,resampler.GetResamplerData())*OSC1Vol;
-			}
+		if ( syntp->wave1noise) {
+			//This assumes MAX_RAND is 0x7fff
+			output = (std::rand() - 16384)*OSC1Vol;
+		} 
+		else  if ( syntp->interpolate) { // helper's interpolation method
+            output = resampler.work_float(syntp->pWave, OSC1Position, iwaveTableSize,NULL, syntp->pWave, syntp->pWave+iwaveTableSize-1)*OSC1Vol;
 		}
-		else
-		{
-			if ( syntp->wave1noise) {
-				//This assumes MAX_RAND is 0x7fff
-				output = (std::rand() - 16384)*OSC1Vol;
-			} else {
-				output=syntp->pWave[math::rint<int,float>(OSC1Position)]*OSC1Vol;
-			}
-		}
+		else { output=syntp->pWave[math::rint<int,float>(OSC1Position)]*OSC1Vol; }
 
 		if(vibrato) OSC1Position+=ROSC1Speed+OSCvib;
 		else        OSC1Position+=ROSC1Speed;
@@ -313,26 +303,14 @@ inline float CSynthTrack::GetSampleOsc2()
 	{
 		if ((ArpMode>0) && (++Arp_tickcounter>Arp_samplespertick)) ArpTick();
 	
-		if ( syntp->interpolate)  // helper's interpolation method
-		{
-			if ( syntp->wave2noise) {
-				//This assumes MAX_RAND is 0x7fff
-				output = (std::rand() - 16384)*OSC2Vol;
-			}
-			else {
-                output = resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize,resampler.GetResamplerData())*OSC2Vol;
-			}
+		if ( syntp->wave2noise) {
+			//This assumes MAX_RAND is 0x7fff
+			output = (std::rand() - 16384)*OSC2Vol;
 		}
-		else
-		{
-			if ( syntp->wave2noise) {
-				//This assumes MAX_RAND is 0x7fff
-				output = (std::rand() - 16384)*OSC2Vol;
-			}
-			else {
-				output = syntp->pWave2[math::rint<int,float>(OSC2Position)]*OSC2Vol;
-			}
+		else if ( syntp->interpolate) { // helper's interpolation method
+           output = resampler.work_float(syntp->pWave2, OSC2Position, iwaveTableSize,NULL, syntp->pWave2, syntp->pWave2+iwaveTableSize-1)*OSC2Vol;
 		}
+		else { output = syntp->pWave2[math::rint<int,float>(OSC2Position)]*OSC2Vol; }
 
 		if(vibrato) OSC2Position+=ROSC2Speed+OSCvib;
 		else        OSC2Position+=ROSC2Speed;

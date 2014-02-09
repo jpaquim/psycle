@@ -1352,7 +1352,7 @@ namespace psycle
 					count++;
 				}
 			}
-			pNew.dataSize = MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2;
+			pNew.dataSize = MAX_SONG_POSITIONS*sizeof(char)+sizeof(count)+count*sizeof(short)*MULTIPLY2;
 			pNew.pData = new unsigned char[pNew.dataSize];
 			unsigned char *pWrite=pNew.pData;
 			memcpy(pWrite, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));
@@ -1414,7 +1414,7 @@ namespace psycle
 					count++;
 				}
 			}
-			pNew.dataSize = MAX_SONG_POSITIONS+sizeof(count)+MAX_PATTERNS+count*MULTIPLY2;
+			pNew.dataSize = MAX_SONG_POSITIONS*sizeof(char)+sizeof(count)+count*sizeof(short)*MULTIPLY2;
 			pNew.pData = new unsigned char[pNew.dataSize];
 			unsigned char *pWrite=pNew.pData;
 			memcpy(pWrite, song.playOrder, MAX_SONG_POSITIONS*sizeof(char));

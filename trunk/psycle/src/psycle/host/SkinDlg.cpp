@@ -241,7 +241,7 @@ namespace psycle { namespace host {
 			ChangeColour(IDC_FONTPLAY_CAN2,patConfig.fontPlay2);
 		}
 		void CSkinDlg::OnFontSelc() {
-			ChangeColour(IDC_FONTSEL_CAN,patConfig.fontPlay2);
+			ChangeColour(IDC_FONTSEL_CAN,patConfig.fontSel);
 		}
 		void CSkinDlg::OnFontSelc2() {
 			ChangeColour(IDC_FONTSEL_CAN2,patConfig.fontSel2);

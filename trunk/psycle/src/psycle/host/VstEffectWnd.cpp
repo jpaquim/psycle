@@ -91,9 +91,10 @@ namespace psycle { namespace host {
 			}
 			CFileDialog dlg(TRUE,
 				"fxb",
-				tmp,
-				OFN_ENABLESIZING | OFN_NOCHANGEDIR,
+				NULL,
+				OFN_HIDEREADONLY | OFN_FILEMUSTEXIST|OFN_DONTADDTORECENT,
 				"Effect Bank Files (.fxb)|*.fxb|Effect Program Files (.fxp)|*.fxp|All Files|*.*||");
+			dlg.m_ofn.lpstrInitialDir = tmp;
 
 			if (dlg.DoModal() != IDOK)
 				return;
@@ -126,11 +127,12 @@ namespace psycle { namespace host {
 			}
 			CFileDialog dlg(FALSE,
 				"fxb",
-				tmp,
-				OFN_CREATEPROMPT | OFN_ENABLESIZING |
-				OFN_NOCHANGEDIR | OFN_NOREADONLYRETURN |
+				NULL,
+				OFN_HIDEREADONLY | OFN_NOCHANGEDIR | OFN_NOREADONLYRETURN |
 				OFN_OVERWRITEPROMPT,
 				"Effect Bank Files (.fxb)|*.fxb|Effect Program Files (.fxp)|*.fxp|All Files|*.*||");
+			dlg.m_ofn.lpstrInitialDir = tmp;
+
 			if (dlg.DoModal() == IDOK)
 			{
 				if ( dlg.GetFileExt() == "fxb")
@@ -397,9 +399,8 @@ namespace psycle { namespace host {
 			return true;
 		}
 
-		bool CVstEffectWnd::SetParameterAutomated(long index, float value)
+		bool CVstEffectWnd::SetParameterAutomated(VstInt32 index, float value)
 		{
-			///\todo: This should go away. Find a way to do the Mouse Tweakings. Maybe via sending commands to player? Inputhandler?
 			int newval= helpers::math::round<int,float>(value * vst::Host::quantizationVal());
 			if(index>= 0 || index < vstmachine().GetNumParams())
 			{

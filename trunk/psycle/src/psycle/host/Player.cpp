@@ -139,14 +139,7 @@ void Player::start_threads(int thread_count) {
 			_playPosition= pos;
 			_playPattern = Global::song().playOrder[_playPosition];
 			if(pos != 0 || line != 0) {
-				int songLength = 0;
-				for (int i=0; i <Global::song().playLength; i++)
-				{
-					int pattern = Global::song().playOrder[i];
-					// this should parse each line for ffxx commands if you want it to be truly accurate
-					songLength += (Global::song().patternLines[pattern] * 60/(lpb * bpm));
-				}
-
+				int songLength = CalcOrSeek(Global::song(),pos,line);
 				sampleCount=songLength*m_SampleRate;
 			}
 			else sampleCount=0;

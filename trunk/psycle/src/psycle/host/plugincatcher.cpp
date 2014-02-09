@@ -34,7 +34,9 @@ namespace psycle
 		{
 			std::string tmp = name;
 			std::string extension = name.substr(name.length()-4,4);
-			if ( extension != 
+			std::string extlower = extension;
+			std::transform(extlower.begin(), extlower.end(), extlower.begin(), std::tolower);
+			if ( extlower != 
 				#if defined DIVERSALIS__OS__MICROSOFT
 					".dll"
 				#elif defined DIVERSALIS__OS__APPLE
@@ -42,7 +44,7 @@ namespace psycle
 				#else
 					".so"
 				#endif
-				&& extension != ".lua")
+				&& extlower != ".lua")
 			{
 				shellidx =  extension[0] + extension[1]*256 + extension[2]*65536 + extension[3]*16777216;
 				tmp = name.substr(0,name.length()-4);
@@ -954,7 +956,9 @@ namespace psycle
 
 		std::string PluginCatcher::preprocessName(const std::string& dllNameOrig) {
 			std::string dllName = dllNameOrig;
-			{ // 1) remove extension
+			// 1) ensure lower case
+			std::transform(dllName.begin(),dllName.end(),dllName.begin(),std::tolower);
+			{ // 2) remove extension
 			#if defined DIVERSALIS__OS__MICROSOFT
 				std::string::size_type const pos(dllName.find(".dll"));
 			#elif defined DIVERSALIS__OS__APPLE
@@ -966,9 +970,6 @@ namespace psycle
 				std::string::size_type const pos2(dllName.find(".lua"));
 				if(pos2 != std::string::npos) dllName = dllName.substr(0, pos2);
 			}
-
-			// 2) ensure lower case
-			std::transform(dllName.begin(),dllName.end(),dllName.begin(),std::tolower);
 
 			// 3) replace spaces and underscores with dash.
 			std::replace(dllName.begin(),dllName.end(),' ','-');

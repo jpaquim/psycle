@@ -17,6 +17,7 @@ namespace psycle {
 		const int SCOPE_BARS_WIDTH = 256/SCOPE_SPEC_BANDS;
 		const int SCOPE_BUF_SIZE_LOG = 13;
 		const int SCOPE_BUF_SIZE = 1 << SCOPE_BUF_SIZE_LOG;
+		const COLORREF CLBARDC =   0x1010DC;
 		const COLORREF CLBARPEAK = 0xC0C0C0;
 		const COLORREF CLLEFT =    0xC06060;
 		const COLORREF CLRIGHT =   0x60C060;

@@ -186,8 +186,8 @@ namespace psycle
 			int GetFreeFxBus() const;
 			/// Returns the Bus index out of a pMachine index. (Legacy code. Used for validation purposes now)
 			int FindBusFromIndex(int smac) const;
-			/// Returns the first unused pattern in the pPatternData[] Array.
-			int GetBlankPatternUnused(int rval = 0) const;
+			/// Returns the first unused and empty pattern in the pPatternData[] Array. If none found, initializes to empty one not used in the sequence
+			int GetBlankPatternUnused(int rval = 0);
 			/// creates a new pattern.
 			bool AllocNewPattern(int pattern,char *name,int lines,bool adaptsize);
 			/// Adds an empty track at the index indicated. If pattern is -1, it does it for all patterns.

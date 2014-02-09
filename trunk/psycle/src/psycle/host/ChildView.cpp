@@ -1166,7 +1166,7 @@ namespace psycle { namespace host {
 			{
 				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 				
-				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,szFilter);
+				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
 				{
 					Global::player().StartRecording(static_cast<LPCTSTR>(dlg.GetPathName()));
@@ -1266,10 +1266,14 @@ namespace psycle { namespace host {
 			dlg.m_shownames = PsycleGlobal::conf().patView().showTrackNames_?1:0;
 			dlg.m_independentnames = _pSong.shareTrackNames?0:1;
 
-			pParentMain->UpdateSequencer();
-			
 			if (dlg.DoModal() == IDOK)
 			{
+				PsycleGlobal::conf().patView().showTrackNames_= (dlg.m_shownames != 0);
+				_pSong.shareTrackNames = (dlg.m_independentnames == 0);
+				for(int i(0); i< _pSong.SONGTRACKS; i++) {
+					_pSong.ChangeTrackName(patNum,i,dlg.tracknames[i]);
+				}
+
 				if ( nlines != dlg.patLines )
 				{
 					PsycleGlobal::inputHandler().AddUndo(patNum,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
@@ -1278,6 +1282,7 @@ namespace psycle { namespace host {
 					if ( strcmp(name,dlg.patName) != 0 )
 					{
 						strcpy(_pSong.patternName[patNum],dlg.patName);
+						pParentMain->UpdateSequencer();
 						pParentMain->StatusBarIdle();
 					}
 					Repaint();
@@ -1287,7 +1292,6 @@ namespace psycle { namespace host {
 					strcpy(_pSong.patternName[patNum],dlg.patName);
 					pParentMain->UpdateSequencer();
 					pParentMain->StatusBarIdle();
-					//Repaint(draw_modes::patternHeader);
 				}
 			}
 		}

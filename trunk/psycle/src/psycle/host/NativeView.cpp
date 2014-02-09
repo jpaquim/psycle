@@ -204,8 +204,8 @@ namespace psycle { namespace host {
 				istweak = true;
 				visualtweakvalue= tweakbase;
 				PsycleGlobal::inputHandler().AddMacViewUndo();
+				while (ShowCursor(FALSE) >= 0);
 				SetCapture();
-				ShowCursor(FALSE);
 			}
 			else
 			{
@@ -275,7 +275,7 @@ namespace psycle { namespace host {
 				visualtweakvalue = nv;
 				prevval=helpers::math::round<int,float>(nv);
 				_pMachine->SetParameter(tweakpar,prevval);
-				parentFrame->Automate(tweakpar, prevval, false);
+				parentFrame->Automate(tweakpar, prevval, false, minval);
 				Invalidate(false);
 			}
 			positioning=false;
@@ -285,9 +285,9 @@ namespace psycle { namespace host {
 		void CNativeView::OnLButtonUp(UINT nFlags, CPoint point) 
 		{
 			istweak = false;
-			Invalidate(false);	
-			ShowCursor(TRUE);
 			ReleaseCapture();
+			while (ShowCursor(TRUE) < 0);
+			Invalidate();	
 			CWnd::OnLButtonUp(nFlags, point);
 		}
 
@@ -332,7 +332,7 @@ namespace psycle { namespace host {
 					{
 						PsycleGlobal::inputHandler().AddMacViewUndo();
 						_pMachine->SetParameter(tweakpar,(int)dlg.m_Value);
-						parentFrame->Automate(tweakpar,(int)dlg.m_Value,false);
+						parentFrame->Automate(tweakpar,(int)dlg.m_Value,false, min_v);
 					}
 					Invalidate(false);
 				}

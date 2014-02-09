@@ -549,6 +549,11 @@ int LuaDelayBind::tostring(lua_State *L) {
 ///////////////////////////////////////////////////////////////////////////////
 // WaveOsc
 ///////////////////////////////////////////////////////////////////////////////
+
+WaveOscTables::WaveOscTables() { 
+   set_samplerate(Global::player().SampleRate()); // Lazy Creation
+}
+
 void WaveOscTables::saw(float* data, int num, int maxharmonic)  {
   double gain = 0.5 / 0.777;
   for  (int h = 1; h <= maxharmonic; ++h) {
@@ -650,6 +655,7 @@ WaveOsc::WaveOsc(WaveOscTables::Shape shape) {
 }
 
 void WaveOsc::set_shape(WaveOscTables::Shape shape) {
+   shape_ = shape;
    WaveList<float>::Type tbl = WaveOscTables::getInstance()->tbl(shape);
    resampler->SetData(tbl);
 }
@@ -657,6 +663,8 @@ void WaveOsc::set_shape(WaveOscTables::Shape shape) {
 ///////////////////////////////////////////////////////////////////////////////
 // WaveOscBind
 ///////////////////////////////////////////////////////////////////////////////
+std::map<WaveOsc*, WaveOsc*> LuaWaveOscBind::oscs;   // store map for samplerate change
+
 int LuaWaveOscBind::open(lua_State *L) {
   static const luaL_Reg delay_methods[] = {
 	  {"new", create},
@@ -704,11 +712,19 @@ int LuaWaveOscBind::create(lua_State *L) {
   int type = luaL_checknumber (L, 2);
   // luaL_argcheck(L, f >= 0, 2, "negative frequency is not allowed");
   WaveOsc* osc = LuaHelper::new_userdata<WaveOsc>(L, "psyoscmeta", new WaveOsc((WaveOscTables::Shape)type));
+  oscs[osc] = osc;
   if (n==3) {
 	double f = luaL_checknumber (L, 3);
     osc->set_frequency(f);
   }
   return 1;  
+}
+
+void LuaWaveOscBind::setsamplerate(double sr) {
+   std::map<WaveOsc*, WaveOsc*>::iterator it = oscs.begin();
+   for ( ; it != oscs.end(); ++it) {
+	   it->second->set_shape(it->second->shape());  // reset data because of the wavtable change
+   }
 }
 
 int LuaWaveOscBind::set_gain(lua_State* L) {
@@ -829,6 +845,9 @@ int LuaWaveOscBind::work(lua_State* L) {
 
 int LuaWaveOscBind::gc(lua_State *L) {
 	WaveOsc* ptr = *(WaveOsc **)luaL_checkudata(L, 1, "psyoscmeta");
+	std::map<WaveOsc*, WaveOsc*>::iterator it = oscs.find(ptr);
+	assert(it != oscs.end());
+	oscs.erase(it);	
 	delete ptr;	
 	return 0;
 }
@@ -900,6 +919,9 @@ int LuaDspMathHelper::freqtonote(lua_State* L) {
 ///////////////////////////////////////////////////////////////////////////////
 // DspFilterBind
 ///////////////////////////////////////////////////////////////////////////////
+
+std::map<psycle::helpers::dsp::Filter*, psycle::helpers::dsp::Filter*> LuaDspFilterBind::filters;   // store map for samplerate change
+
 int LuaDspFilterBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
 	  {"new", create},
@@ -936,10 +958,18 @@ int LuaDspFilterBind::create(lua_State *L) {
   }
   int type = luaL_checknumber (L, 2);
   psycle::helpers::dsp::Filter* ud = new psycle::helpers::dsp::Filter();
-  ud->SampleRate(44100);
+  ud->SampleRate(Global::player().SampleRate());
   ud->Type(static_cast<psycle::helpers::dsp::FilterType>(type));
   LuaHelper::new_userdata<psycle::helpers::dsp::Filter>(L, "psydspfiltermeta", ud);  
+  filters[ud] = ud;
   return 1;
+}
+
+void LuaDspFilterBind::setsamplerate(double sr) {
+   std::map<psycle::helpers::dsp::Filter*, psycle::helpers::dsp::Filter*>::iterator it = filters.begin();
+   for ( ; it != filters.end(); ++it) {
+	   it->second->SampleRate(sr);
+   }
 }
 
 int LuaDspFilterBind::work(lua_State* L) {
@@ -1043,7 +1073,10 @@ int LuaDspFilterBind::setfiltertype(lua_State* L) {
 }
 
 int LuaDspFilterBind::gc (lua_State *L) {
-	psycle::helpers::dsp::Filter* ptr = *(psycle::helpers::dsp::Filter **)luaL_checkudata(L, 1, "psydspfiltermeta");
+    psycle::helpers::dsp::Filter* ptr = *(psycle::helpers::dsp::Filter **)luaL_checkudata(L, 1, "psydspfiltermeta");
+	std::map<psycle::helpers::dsp::Filter*, psycle::helpers::dsp::Filter*>::iterator it = filters.find(ptr);
+	assert(it != filters.end());
+	filters.erase(it);
 	delete ptr;	
 	return 0;
 }
@@ -1214,7 +1247,8 @@ void ResamplerWrap<T, VOL>::Start(double phase) {
   if (wave_it != waves_.end()) {
     wavectrl.Init(last_wave, 0, resampler);
     wavectrl.Position(phase*last_wave->WaveLength());
-	basef = 440 *std::pow(2.0, (notecommands::middleC-last_wave->WaveTune()-last_wave->WaveFineTune()/100.0-notecommands::middleA)/12.0) * last_wave->WaveSampleRate() / (double) Global::player().SampleRate();
+	double sr = Global::player().SampleRate();
+	basef = 440 *std::pow(2.0, (notecommands::middleC-last_wave->WaveTune()-last_wave->WaveFineTune()/100.0-notecommands::middleA)/12.0) * last_wave->WaveSampleRate() / sr;
     speed_ = f_/basef;   
     wavectrl.Speed(resampler, speed_);
     wavectrl.Playing(true);
