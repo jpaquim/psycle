@@ -1,0 +1,469 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug|Win32">
+      <Configuration>debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug|x64">
+      <Configuration>debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|Win32">
+      <Configuration>release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|x64">
+      <Configuration>release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Template|Win32">
+      <Configuration>Template</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Template|x64">
+      <Configuration>Template</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>psycle</ProjectName>
+    <ProjectGuid>{C6292BF4-9E87-4176-9101-A3D29D074B35}</ProjectGuid>
+    <RootNamespace>psycle</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CLRSupport>false</CLRSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\release.props" />
+    <Import Project="..\build-systems\msvc\properties\use_pre_compiled_header_with_mfc.props" />
+    <Import Project="..\build-systems\msvc\properties\program.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_win32.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\debug.props" />
+    <Import Project="..\build-systems\msvc\properties\use_pre_compiled_header_with_mfc.props" />
+    <Import Project="..\build-systems\msvc\properties\program.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_win32.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\release.props" />
+    <Import Project="..\build-systems\msvc\properties\use_pre_compiled_header_with_mfc.props" />
+    <Import Project="..\build-systems\msvc\properties\program.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_x64.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\debug.props" />
+    <Import Project="..\build-systems\msvc\properties\use_pre_compiled_header_with_mfc.props" />
+    <Import Project="..\build-systems\msvc\properties\program.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_x64.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='release|x64'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Link>
+      <AdditionalDependencies>htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>src\psycle\host\resources\DeclareDPIAware.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>src\psycle\host\resources\DeclareDPIAware.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+    <Link>
+      <AdditionalDependencies>htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>src\psycle\host\resources\DeclareDPIAware.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+    <Link>
+      <AdditionalDependencies>htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>src\psycle\host\resources\DeclareDPIAware.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\psycle\host\Constants.hpp" />
+    <ClInclude Include="src\psycle\host\Global.hpp" />
+    <ClInclude Include="src\psycle\host\InputHandler.hpp" />
+    <ClInclude Include="src\psycle\host\version.hpp" />
+    <ClInclude Include="src\psycle\host\ASIOInterface.hpp" />
+    <ClInclude Include="src\psycle\host\AudioDriver.hpp" />
+    <ClInclude Include="src\psycle\host\DirectSound.hpp" />
+    <ClInclude Include="src\psycle\host\WasapiDriver.hpp" />
+    <ClInclude Include="src\psycle\host\WaveOut.hpp" />
+    <ClInclude Include="src\psycle\host\MidiInput.hpp" />
+    <ClInclude Include="src\psycle\host\resources\resources.hpp" />
+    <ClInclude Include="src\psycle\host\FileIO.hpp" />
+    <ClInclude Include="src\psycle\host\ITModule2.h" />
+    <ClInclude Include="src\psycle\host\KeyPresetIO.hpp" />
+    <ClInclude Include="src\psycle\host\PresetIO.hpp" />
+    <ClInclude Include="src\psycle\host\SkinIO.hpp" />
+    <ClInclude Include="src\psycle\host\XMFile.hpp" />
+    <ClInclude Include="src\psycle\host\XMSongExport.hpp" />
+    <ClInclude Include="src\psycle\host\XMSongLoader.hpp" />
+    <ClInclude Include="src\psycle\host\CmdDef.hpp" />
+    <ClInclude Include="src\psycle\host\ConfigStorage.hpp" />
+    <ClInclude Include="src\psycle\host\Configuration.hpp" />
+    <ClInclude Include="src\psycle\host\Registry.hpp" />
+    <ClInclude Include="src\psycle\host\WinIniFile.hpp" />
+    <ClInclude Include="src\psycle\host\Bitmap.hpp" />
+    <ClInclude Include="src\psycle\host\ChildView.hpp" />
+    <ClInclude Include="src\psycle\host\ExclusiveLock.hpp" />
+    <ClInclude Include="src\psycle\host\GreetDialog.hpp" />
+    <ClInclude Include="src\psycle\host\keybhandler.private.hpp" />
+    <ClInclude Include="src\psycle\host\machineview.private.hpp" />
+    <ClInclude Include="src\psycle\host\MainFrm.hpp" />
+    <ClInclude Include="src\psycle\host\mouseHandler.private.hpp" />
+    <ClInclude Include="src\psycle\host\patviewnew.private.hpp" />
+    <ClInclude Include="src\psycle\host\psycle.hpp" />
+    <ClInclude Include="src\psycle\host\PsycleGlobal.hpp" />
+    <ClInclude Include="src\psycle\host\SaveWavDlg.hpp" />
+    <ClInclude Include="src\psycle\host\seqview.private.hpp" />
+    <ClInclude Include="src\psycle\host\sinstance.h" />
+    <ClInclude Include="src\psycle\host\SongpDlg.hpp" />
+    <ClInclude Include="src\psycle\host\ConfigDlg.hpp" />
+    <ClInclude Include="src\psycle\host\DirectoryDlg.hpp" />
+    <ClInclude Include="src\psycle\host\KeyConfigDlg.hpp" />
+    <ClInclude Include="src\psycle\host\PsycleConfig.hpp" />
+    <ClInclude Include="src\psycle\host\SkinDlg.hpp" />
+    <ClInclude Include="src\psycle\host\SpecialKeys.hpp" />
+    <ClInclude Include="src\psycle\host\MidiInputDlg.hpp" />
+    <ClInclude Include="src\psycle\host\OutputDlg.hpp" />
+    <ClInclude Include="src\psycle\host\ASIOConfig.hpp" />
+    <ClInclude Include="src\psycle\host\DSoundConfig.hpp" />
+    <ClInclude Include="src\psycle\host\WasapiConfig.hpp" />
+    <ClInclude Include="src\psycle\host\WaveOutDialog.hpp" />
+    <ClInclude Include="src\psycle\host\BaseParamView.hpp" />
+    <ClInclude Include="src\psycle\host\FrameMachine.hpp" />
+    <ClInclude Include="src\psycle\host\GearRackDlg.hpp" />
+    <ClInclude Include="src\psycle\host\MacProp.hpp" />
+    <ClInclude Include="src\psycle\host\MasterDlg.hpp" />
+    <ClInclude Include="src\psycle\host\MixerFrameView.hpp" />
+    <ClInclude Include="src\psycle\host\NativeGraphics.hpp" />
+    <ClInclude Include="src\psycle\host\NativeView.hpp" />
+    <ClInclude Include="src\psycle\host\NewMachine.hpp" />
+    <ClInclude Include="src\psycle\host\NewVal.hpp" />
+    <ClInclude Include="src\psycle\host\ParamList.hpp" />
+    <ClInclude Include="src\psycle\host\PresetsDlg.hpp" />
+    <ClInclude Include="src\psycle\host\WaveInMacDlg.hpp" />
+    <ClInclude Include="src\psycle\host\GearTracker.hpp" />
+    <ClInclude Include="src\psycle\host\InstrumentEditor.hpp" />
+    <ClInclude Include="src\psycle\host\WavFileDlg.hpp" />
+    <ClInclude Include="src\psycle\host\ScrollableDlgBar.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdAmplifyDialog.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdChildView.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdCrossfadeDialog.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdFrame.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdInsertSilenceDialog.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdMixDialog.hpp" />
+    <ClInclude Include="src\psycle\host\VstEffectWnd.hpp" />
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp"/>
+	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp"/>
+	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp"/>
+	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp"/>
+	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp"/>
+	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp"/>
+	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.hpp"/>
+	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp"/>
+	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp"/>
+    <ClInclude Include="src\psycle\host\XMSamplerMixerPage.hpp" />
+    <ClInclude Include="src\psycle\host\XMSamplerUI.hpp" />
+    <ClInclude Include="src\psycle\host\XMSamplerUIGeneral.hpp" />
+    <ClInclude Include="src\psycle\host\XMSamplerUIInst.hpp" />
+    <ClInclude Include="src\psycle\host\XMSamplerUISample.hpp" />
+    <ClInclude Include="src\psycle\host\InterpolateCurveDlg.hpp" />
+    <ClInclude Include="src\psycle\host\PatDlg.hpp" />
+    <ClInclude Include="src\psycle\host\SwingFillDlg.hpp" />
+    <ClInclude Include="src\psycle\host\TransformPatternDlg.hpp" />
+	<ClInclude Include="src\psycle\host\ChannelMappingDlg.hpp" />
+    <ClInclude Include="src\psycle\host\InfoDlg.hpp" />
+    <ClInclude Include="src\psycle\host\MidiMonitorDlg.hpp" />
+    <ClInclude Include="src\psycle\host\ProgressDialog.hpp" />
+    <ClInclude Include="src\psycle\host\VolumeDlg.hpp" />
+    <ClInclude Include="src\psycle\host\WireDlg.hpp" />
+    <ClInclude Include="src\psycle\host\MachineBar.hpp" />
+    <ClInclude Include="src\psycle\host\SequenceBar.hpp" />
+    <ClInclude Include="src\psycle\host\SongBar.hpp" />
+    <ClInclude Include="src\psycle\host\DPI.hpp" />
+    <ClInclude Include="src\psycle\host\ExListBox.h" />
+    <ClInclude Include="src\psycle\host\cpu_time_clock.hpp" />
+    <ClInclude Include="src\psycle\host\InstPreview.hpp" />
+    <ClInclude Include="src\psycle\host\machineloader.hpp" />
+    <ClInclude Include="src\psycle\host\Player.hpp" />
+    <ClInclude Include="src\psycle\host\plugincatcher.hpp" />
+    <ClInclude Include="src\psycle\host\plugininfo.hpp" />
+    <ClInclude Include="src\psycle\host\Preset.hpp" />
+    <ClInclude Include="src\psycle\host\Song.hpp" />
+    <ClInclude Include="src\psycle\host\SongStructs.hpp" />
+    <ClInclude Include="src\psycle\host\convert_internal_machines.private.hpp" />
+    <ClInclude Include="src\psycle\host\internal_machines.hpp" />
+    <ClInclude Include="src\psycle\host\Machine.hpp" />
+    <ClInclude Include="src\psycle\host\Plugin.hpp" />
+    <ClInclude Include="..\psycle-plugins\src\psycle\plugin_interface.hpp" />
+    <ClInclude Include="src\psycle\host\LuaArray.hpp" />
+    <ClInclude Include="src\psycle\host\LuaHost.hpp" />
+    <ClInclude Include="src\psycle\host\LuaPlugin.hpp" />
+    <ClInclude Include="src\psycle\host\vsthost24.hpp" />
+    <ClInclude Include="src\psycle\host\Instrument.hpp" />
+    <ClInclude Include="src\psycle\host\Sampler.hpp" />
+    <ClInclude Include="src\psycle\host\XMInstrument.hpp" />
+    <ClInclude Include="src\psycle\host\XMSampler.hpp" />
+    <ClInclude Include="src\psycle\host\PlotterDlg.hpp" />
+    <ClInclude Include="src\psycle\host\detail\config.hpp" />
+    <ClInclude Include="src\psycle\host\detail\config.private.hpp" />
+    <ClInclude Include="src\psycle\host\detail\project.hpp" />
+    <ClInclude Include="src\psycle\host\detail\project.private.hpp" />
+    <ClInclude Include="src\Seib-vsthost\CVSTHost.Seib.hpp" />
+    <ClInclude Include="src\Seib-vsthost\CVSTPreset.hpp" />
+    <ClInclude Include="src\Seib-vsthost\EffectWnd.hpp" />
+    <ClInclude Include="src\Seib-vsthost\JBridgeEnabler.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\psycle\host\Global.cpp" />
+    <ClCompile Include="src\psycle\host\InputHandler.cpp" />
+    <ClCompile Include="src\psycle\host\ASIOInterface.cpp" />
+    <ClCompile Include="src\psycle\host\AudioDriver.cpp" />
+    <ClCompile Include="src\psycle\host\DirectSound.cpp" />
+    <ClCompile Include="src\psycle\host\WasapiDriver.cpp" />
+    <ClCompile Include="src\psycle\host\WaveOut.cpp" />
+    <ClCompile Include="src\psycle\host\MidiInput.cpp" />
+    <ClCompile Include="src\psycle\host\FileIO.cpp" />
+    <ClCompile Include="src\psycle\host\ITModule2.cpp" />
+    <ClCompile Include="src\psycle\host\KeyPresetIO.cpp" />
+    <ClCompile Include="src\psycle\host\PresetIO.cpp" />
+    <ClCompile Include="src\psycle\host\SkinIO.cpp" />
+    <ClCompile Include="src\psycle\host\XMSongExport.cpp" />
+    <ClCompile Include="src\psycle\host\XMSongLoader.cpp" />
+    <ClCompile Include="src\psycle\host\Configuration.cpp" />
+    <ClCompile Include="src\psycle\host\Registry.cpp" />
+    <ClCompile Include="src\psycle\host\WinIniFile.cpp" />
+    <ClCompile Include="src\psycle\host\ChildView.cpp" />
+    <ClCompile Include="src\psycle\host\ExclusiveLock.cpp" />
+    <ClCompile Include="src\psycle\host\GreetDialog.cpp" />
+    <ClCompile Include="src\psycle\host\MainFrm.cpp" />
+    <ClCompile Include="src\psycle\host\Psycle.cpp" />
+    <ClCompile Include="src\psycle\host\PsycleGlobal.cpp" />
+    <ClCompile Include="src\psycle\host\SaveWavDlg.cpp" />
+    <ClCompile Include="src\psycle\host\sinstance.cpp" />
+    <ClCompile Include="src\psycle\host\SongpDlg.cpp" />
+    <ClCompile Include="src\psycle\host\ConfigDlg.cpp" />
+    <ClCompile Include="src\psycle\host\DirectoryDlg.cpp" />
+    <ClCompile Include="src\psycle\host\KeyConfigDlg.cpp" />
+    <ClCompile Include="src\psycle\host\PsycleConfig.cpp" />
+    <ClCompile Include="src\psycle\host\SkinDlg.cpp" />
+    <ClCompile Include="src\psycle\host\SpecialKeys.cpp" />
+    <ClCompile Include="src\psycle\host\MidiInputDlg.cpp" />
+    <ClCompile Include="src\psycle\host\OutputDlg.cpp" />
+    <ClCompile Include="src\psycle\host\ASIOConfig.cpp" />
+    <ClCompile Include="src\psycle\host\DSoundConfig.cpp" />
+    <ClCompile Include="src\psycle\host\WasapiConfig.cpp" />
+    <ClCompile Include="src\psycle\host\WaveOutDialog.cpp" />
+    <ClCompile Include="src\psycle\host\FrameMachine.cpp" />
+    <ClCompile Include="src\psycle\host\GearRackDlg.cpp" />
+    <ClCompile Include="src\psycle\host\MacProp.cpp" />
+    <ClCompile Include="src\psycle\host\MasterDlg.cpp" />
+    <ClCompile Include="src\psycle\host\MixerFrameView.cpp" />
+    <ClCompile Include="src\psycle\host\NativeGraphics.cpp" />
+    <ClCompile Include="src\psycle\host\NativeView.cpp" />
+    <ClCompile Include="src\psycle\host\NewMachine.cpp" />
+    <ClCompile Include="src\psycle\host\NewVal.cpp" />
+    <ClCompile Include="src\psycle\host\ParamList.cpp" />
+    <ClCompile Include="src\psycle\host\PresetsDlg.cpp" />
+    <ClCompile Include="src\psycle\host\WaveInMacDlg.cpp" />
+    <ClCompile Include="src\psycle\host\GearTracker.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentEditor.cpp" />
+    <ClCompile Include="src\psycle\host\wavfiledlg.cpp" />
+    <ClCompile Include="src\psycle\host\ScrollableDlgBar.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdAmplifyDialog.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdChildView.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdCrossfadeDialog.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdFrame.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp" />
+    <ClCompile Include="src\psycle\host\VstEffectWnd.cpp" />
+	<ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp" />
+	<ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp"/>
+    <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp" />
+	<ClCompile Include="src\psycle\host\EnvelopeEditor.cpp"/>
+	<ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp"/>
+	<ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp"/>
+	<ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp"/>
+	<ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp"/>
+	<ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp"/>
+	<ClCompile Include="src\psycle\host\InstrumentPitDlg.cpp"/>
+	<ClCompile Include="src\psycle\host\SampleAssignEditor.cpp"/>
+    <ClCompile Include="src\psycle\host\XMSamplerMixerPage.cpp" />
+    <ClCompile Include="src\psycle\host\XMSamplerUI.cpp" />
+    <ClCompile Include="src\psycle\host\XMSamplerUIGeneral.cpp" />
+    <ClCompile Include="src\psycle\host\XMSamplerUIInst.cpp" />
+    <ClCompile Include="src\psycle\host\XMSamplerUISample.cpp" />
+    <ClCompile Include="src\psycle\host\InterpolateCurveDlg.cpp" />
+    <ClCompile Include="src\psycle\host\PatDlg.cpp" />
+    <ClCompile Include="src\psycle\host\SwingFillDlg.cpp" />
+    <ClCompile Include="src\psycle\host\TransformPatternDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InfoDlg.cpp" />
+    <ClCompile Include="src\psycle\host\MidiMonitorDlg.cpp" />
+    <ClCompile Include="src\psycle\host\ProgressDialog.cpp" />
+    <ClCompile Include="src\psycle\host\VolumeDlg.cpp" />
+    <ClCompile Include="src\psycle\host\WireDlg.cpp" />
+    <ClCompile Include="src\psycle\host\MachineBar.cpp" />
+    <ClCompile Include="src\psycle\host\SequenceBar.cpp" />
+    <ClCompile Include="src\psycle\host\SongBar.cpp" />
+    <ClCompile Include="src\psycle\host\ExListBox.cpp" />
+    <ClCompile Include="src\psycle\host\InstPreview.cpp" />
+    <ClCompile Include="src\psycle\host\Player.cpp" />
+    <ClCompile Include="src\psycle\host\plugincatcher.cpp" />
+    <ClCompile Include="src\psycle\host\plugininfo.cpp" />
+    <ClCompile Include="src\psycle\host\Preset.cpp" />
+    <ClCompile Include="src\psycle\host\Song.cpp" />
+    <ClCompile Include="src\psycle\host\internal_machines.cpp" />
+    <ClCompile Include="src\psycle\host\Machine.cpp" />
+    <ClCompile Include="src\psycle\host\Plugin.cpp" />
+    <ClCompile Include="src\psycle\host\LuaArray.cpp" />
+    <ClCompile Include="src\psycle\host\LuaHost.cpp" />
+    <ClCompile Include="src\psycle\host\LuaPlugin.cpp" />
+    <ClCompile Include="src\psycle\host\vsthost24.cpp" />
+    <ClCompile Include="src\psycle\host\Instrument.cpp" />
+    <ClCompile Include="src\psycle\host\Sampler.cpp" />
+    <ClCompile Include="src\psycle\host\XMInstrument.cpp" />
+    <ClCompile Include="src\psycle\host\XMSampler.cpp" />
+    <ClCompile Include="src\psycle\host\PlotterDlg.cpp" />
+    <ClCompile Include="src\Seib-vsthost\CVSTHost.Seib.cpp" />
+    <ClCompile Include="src\Seib-vsthost\CVSTPreset.cpp" />
+    <ClCompile Include="src\Seib-vsthost\EffectWnd.cpp" />
+    <ClCompile Include="src\Seib-vsthost\JBridgeEnabler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\psycle\host\resources\AsioLogo.bmp" />
+    <None Include="src\psycle\host\resources\bmp00001.bmp" />
+    <None Include="src\psycle\host\resources\bmp00002.bmp" />
+    <None Include="src\psycle\host\resources\bmp00003.bmp" />
+    <None Include="src\psycle\host\resources\bmp00004.bmp" />
+    <None Include="src\psycle\host\resources\bmp00005.bmp" />
+    <None Include="src\psycle\host\resources\bmp00009.bmp" />
+    <None Include="src\psycle\host\resources\greater.ico" />
+    <None Include="src\psycle\host\resources\idr_vstf.ico" />
+    <None Include="src\psycle\host\resources\Slider\imgMiniOff.bmp" />
+    <None Include="src\psycle\host\resources\Slider\imgMiniOn.bmp" />
+    <None Include="src\psycle\host\resources\Slider\imgOff.bmp" />
+    <None Include="src\psycle\host\resources\Slider\imgOn.bmp" />
+    <None Include="src\psycle\host\resources\keys_bac.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\ledOff-left.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\ledOff-right.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\ledOn-left.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\ledOn-right.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\LedOn.bmp" />
+    <None Include="src\psycle\host\resources\less.ico" />
+    <None Include="src\psycle\host\resources\lessless.ico" />
+    <None Include="src\psycle\host\resources\lower.ico" />
+    <None Include="src\psycle\host\resources\machine_skin.bmp" />
+    <None Include="src\psycle\host\resources\macparam.ico" />
+    <None Include="src\psycle\host\resources\MasterMachine\Master-Mixer.bmp" />
+    <None Include="src\psycle\host\resources\minus.ico" />
+    <None Include="src\psycle\host\resources\more.ico" />
+    <None Include="src\psycle\host\resources\moremore.ico" />
+    <None Include="src\psycle\host\resources\notekey.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\numbers.bmp" />
+    <None Include="src\psycle\host\resources\pattern_header_skin.bmp" />
+    <None Include="src\psycle\host\resources\plus.ico" />
+    <None Include="src\psycle\host\resources\Psycle.ico" />
+    <None Include="src\psycle\host\resources\resources.rc2" />
+    <None Include="src\psycle\host\resources\sampulse.bmp" />
+    <None Include="src\psycle\host\resources\sharpkey.bmp" />
+    <None Include="src\psycle\host\resources\MasterMachine\Slide.bmp" />
+    <None Include="src\psycle\host\resources\Slider\sliderB.bmp" />
+    <None Include="src\psycle\host\resources\Slider\sliderBh.bmp" />
+    <None Include="src\psycle\host\resources\Slider\sliderP.bmp" />
+    <None Include="src\psycle\host\resources\Slider\sliderPh.bmp" />
+    <None Include="src\psycle\host\resources\splash copia.bmp" />
+    <None Include="src\psycle\host\resources\TbMainKnob.bmp" />
+    <None Include="src\psycle\host\resources\Toolbar.bmp" />
+    <None Include="src\psycle\host\resources\toolbar1.bmp" />
+    <None Include="src\psycle\host\resources\Toolbar32.bmp" />
+    <None Include="src\psycle\host\resources\Slider\VuOff.bmp" />
+    <None Include="src\psycle\host\resources\Slider\VuOn.bmp" />
+    <None Include="src\psycle\host\resources\wavedit.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="src\psycle\host\resources\DeclareDPIAware.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\psycle\host\resources\resources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\build-systems\msvc\projects\direct-sound\direct-sound.msvc-2010.vcxproj">
+      <Project>{69c0acbe-ea31-4f5e-9b41-b2dd73c29df1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\psycle-helpers\psycle-helpers.msvc-2010.vcxproj">
+      <Project>{16f2deb9-8f35-45c9-b460-732615f0c8d5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\universalis\universalis.msvc-2010.vcxproj">
+      <Project>{b78dfe59-051a-43fd-b489-775a4982581c}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="src\psycle\host\resources\resources.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

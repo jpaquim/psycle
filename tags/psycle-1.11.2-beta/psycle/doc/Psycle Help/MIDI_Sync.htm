@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td align="left"><a href="MIDI_Setup.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="MIDI_OtherFeat.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Clock synchronized setup</p>
+<p>
+To control Psycle from a MIDI sequencer is fairly easy once you understand the concept behind.<br/>
+You will need to setup what is known as a Virtual MIDI port. This is a software emulated MIDI input/output port (yes, a port which does both!).<br/>
+You will need software such as LoopBe or MIDI Yoke to create this virtual port. If using Vista or Windows 7, I recommend using LoopBe, since it is more up-to-date. MIDI Yoke should work fine in Windows XP and offers more ports for free.<br/>
+Once you have setup this virtual MIDI port you simply select this port as the output of your MIDI sequencer and also select this port as the input into Psycle (find this in the <a href="Config_IO.htm">Input/output tab</a>). Depending on the software you use, it can have several ports. It is important to use the same index for input and output.<br/>
+Note: Psycle does not autorefresh the list, so when you connect an USB MIDI device, you will need to reopen the configuration Dialog and select it again to start it.
+</p>
+<p><code>
+[MIDI Sequencer Out] -&gt; [Virtual MIDI Output Port]</code><br/>
+ and<br/>
+<code>
+[Virtual MIDI Input Port] -&gt; [Psycle MIDI In]
+</code></p>
+
+Select the main input device from one of those available in the Input device listbox. It should match the output MIDI device of your MIDI sequencer.
+Then, select the input method Synchronized with MIDI clock.<br/>
+If you are using a separate device for MIDI Sync then you can select this from the Sync Device listbox, although if you plan to send a MIDI sync clock through the same device as the main input device then you can leave this as Same as Input device.<br/>
+If you wish to alter the MIDI headroom available for MIDI input (see later for details) then you can do so by entering a value directly or by using the spin buttons to quickly increment/decrement the current value.
+<p>
+Finally, don't forget to setup the way to select the generator and instrument (find this in the <a href="Config_MIDI.htm">
+controller's tab</a>) 
+</p>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td align="left"><a href="MIDI_Setup.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="MIDI_OtherFeat.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+</body>
+</html>

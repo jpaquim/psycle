@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_WaveEditor.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_Properties.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Using the Sampler in Patterns</p>
+
+For the internal sampler, the note format is as follows:
+<p />
+<center><code>C-4 01 00 0C23<br />
+</code> 1 &nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; 4</center>
+<p />
+<table border="0">
+	<col width="25" />
+	<tr valign="top">
+		<td><b>1. </b></td>
+		<td>Note name (for more detail, see <a href="PatternEd_Notes.htm">Entering
+		Notes</a>).</td>
+	</tr>
+	<tr valign="top">
+		<td><b>2.</b></td>
+		<td><a href="Sampler_Instruments.htm">Instrument</a> number</td>
+	</tr>
+	<tr valign="top">
+		<td><b>3.</b></td>
+		<td>Machine number (in hexadecimal)</td>
+	</tr>
+	<tr valign="top">
+		<td><b>4.</b></td>
+		<td>Sampler Parameters (see below).</td>
+	</tr>
+</table>
+<p class="head3">Sampler Parameters</p>
+<table border="0">
+	<col width="25" />
+	<tr valign="bottom">
+		<td><code>01xx</code></td>
+		<td>&nbsp;&nbsp; Portamento Up</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>02xx</code></td>
+		<td>&nbsp;&nbsp; Portamento Down</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>08xx</code></td>
+		<td>&nbsp;&nbsp; Set panning position</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>09xx</code></td>
+		<td>&nbsp;&nbsp; Set sampler offset</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Cxx</code></td>
+		<td>&nbsp;&nbsp; Set volume</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0ECx</code></td>
+		<td>&nbsp;&nbsp; Note cut in x frames</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0EDx</code></td>
+		<td>&nbsp;&nbsp; Note delay in x frames</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>15xy</code></td>
+		<td>&nbsp;&nbsp; Retrig Command.</td>
+	</tr>
+	<tr valign="bottom">
+		<td />
+		<td><code>y</code> = Number of retrigs, starting at 1<br />
+		<code>x</code> changes the volume in the following way:
+		<p />
+		<table border="0">
+			<col width="25" />
+			<col width="100" />
+			<col width="25" />
+			<col width="100" />
+
+			<tr valign="bottom">
+				<td><code>0:</code></td>
+				<td>No change</td>
+				<td><code>8:</code></td>
+				<td>No change</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>1:</code></td>
+				<td>+1</td>
+				<td><code>9:</code></td>
+				<td>-1</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>2:</code></td>
+				<td>+2</td>
+				<td><code>A:</code></td>
+				<td>-2</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>3:</code></td>
+				<td>+4</td>
+				<td><code>B:</code></td>
+				<td>-4</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>4:</code></td>
+				<td>+8</td>
+				<td><code>C:</code></td>
+				<td>-8</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>5:</code></td>
+				<td>+16</td>
+				<td><code>D:</code></td>
+				<td>-16</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>6:</code></td>
+				<td>x 2/3</td>
+				<td><code>E:</code></td>
+				<td>x 3/2</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>7:</code></td>
+				<td>x 1/2</td>
+				<td><code>F:</code></td>
+				<td>x 2</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+</table>
+<p />
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_WaveEditor.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_Properties.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+</body>
+</html>
