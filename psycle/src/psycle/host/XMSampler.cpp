@@ -135,6 +135,7 @@ namespace psycle
 			m_Position.QuadPart=0;
 			m_Speed=0;
 			m_Playing=false;
+			m_looped=false;
 
 			if ( SustainLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT)
 			{
@@ -302,13 +303,13 @@ namespace psycle
 
 			//TRACE("RealPos %d\n",pos);
 			if (CurrentLoopDirection() == LoopDirection::FORWARD) {
-				if (pos < presamples) {
+				if (pos < presamples && !m_looped) {
 					m_pL = &lBuffer[presamples+pos];
 					m_pR = &rBuffer[presamples+pos];
 					max=presamples-pos;
 					//TRACE("Begin buffer at pos %d for samples %d\n" ,pos+presamples , max);
 				}
-				else if (pos+postsamples >= m_CurrentLoopEnd && pos< m_CurrentLoopEnd+postsamples) {
+				else if (pos+postsamples >= m_CurrentLoopEnd && pos< m_CurrentLoopEnd+presamples) {
 					m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
 					m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
 					if(LoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT) {
@@ -319,6 +320,12 @@ namespace psycle
 						max=presamples+m_CurrentLoopEnd-pos;
 						//TRACE("forward-loop buffer at pos %d for samples %d\n" , secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 					}
+				}
+				else if (m_looped && pos+postsamples>= m_CurrentLoopStart && pos <m_CurrentLoopStart+presamples) {
+					m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					max=presamples+m_CurrentLoopStart-pos;
+					//TRACE("forward-loop buffer at pos %d for samples %d\n" , secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 				}
 				else {
 					m_pL = const_cast<T *>(m_pWave->pWaveDataL()+pos);
@@ -377,6 +384,7 @@ namespace psycle
 			std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
 			if( CurrentLoopDirection() == LoopDirection::FORWARD && newIntPos >= m_CurrentLoopEnd)
 			{
+				m_looped=true;
 				switch(m_CurrentLoopType)
 				{
 				case XMInstrument::WaveData<>::LoopType::NORMAL:
@@ -580,10 +588,8 @@ namespace psycle
 			m_Note = notecommands::empty;
 			m_Volume = 128;
 			m_RealVolume = 1.0f;
-			m_lVolCurr=0.f;
-			m_lVolDest=0.f;
-			m_rVolCurr=0.f;
-			m_rVolDest=0.f;
+			m_rampL.ResetTo(0.f);
+			m_rampR.ResetTo(0.f);
 
 
 			m_PanFactor=0.5f;
@@ -642,7 +648,6 @@ namespace psycle
 			m_AutoVibratoDepth = 0; 
 
 			m_RetrigTicks=0;
-
 		}
 		void XMSampler::Voice::VoiceInit(const XMInstrument & _inst, int channelNum, int instrumentNum)
 		{
@@ -710,7 +715,7 @@ namespace psycle
 				IsPlaying(false);
 				return;
 			}
-			float voldelta = 1000.0f/(3.f*SampleRate()); // 3 milliseconds of samples.
+
 			while(numSamples) {
 				WaveDataController<>::WorkFunction pWork;
 				int nextsamples = std::min(m_WaveDataController.PreWork(numSamples, &pWork), numSamples);
@@ -754,20 +759,22 @@ namespace psycle
 						volume *= m_VolumeFadeAmount;
 					}
 					
+					float lVolDest=0.f;
+					float rVolDest=0.f;
 					if(IsSurround()){
 						if ( m_pSampler->PanningMode()== PanningMode::Linear) {
-							m_lVolDest = 0.5f*volume;
-							m_rVolDest = -0.5f*volume;
+							lVolDest = 0.5f*volume;
+							rVolDest = -0.5f*volume;
 						}
 						else if ( m_pSampler->PanningMode()== PanningMode::TwoWay) {
-							m_lVolDest = volume;
-							m_rVolDest = -1.f*volume;
+							lVolDest = volume;
+							rVolDest = -1.f*volume;
 						}
 						else if ( m_pSampler->PanningMode()== PanningMode::EqualPower) {
-							m_lVolDest = 0.705f*volume;
-							m_rVolDest = -0.705f*volume;
+							lVolDest = 0.705f*volume;
+							rVolDest = -0.705f*volume;
 						}
-					} else if (!m_pChannel->IsMute()){
+					} else {
 						// Panning Envelope 
 						// (actually, the correct word for panning is panoramization. "panning" comes from the diminutive "pan")
 						// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
@@ -792,39 +799,18 @@ namespace psycle
 							//rvol = powf(rvol, 0.5f);// This is the commonly used one
 							rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
 						}
-						m_lVolDest = lvol*volume;
-						m_rVolDest = rvol*volume;
+						lVolDest = lvol*volume;
+						rVolDest = rvol*volume;
 					}
 					//Volume Ramping.
-					if(m_lVolCurr>m_lVolDest) {
-						m_lVolCurr-=voldelta;
-						if(m_lVolCurr<m_lVolDest)
-							m_lVolCurr=m_lVolDest;
-					}
-					else if(m_lVolCurr<m_lVolDest) {
-						m_lVolCurr+=voldelta;
-						if(m_lVolCurr>m_lVolDest)
-							m_lVolCurr=m_lVolDest;
-					}
-					if(m_rVolCurr>m_rVolDest) {
-						m_rVolCurr-=voldelta;
-						if(m_rVolCurr<m_rVolDest)
-							m_rVolCurr=m_rVolDest;
-
-					}
-					else if(m_rVolCurr<m_rVolDest) {
-						m_rVolCurr+=voldelta;
-						if(m_rVolCurr>m_rVolDest)
-							m_rVolCurr=m_rVolDest;
-					}
+					m_rampL.SetTarget(lVolDest);
+					m_rampR.SetTarget(rVolDest);
 
 					if(!m_WaveDataController.IsStereo()){
 					// Monoaural output‚ copy left to right output.
 						right_output = left_output;
 					}
 
-					left_output*=m_lVolCurr;
-					right_output*=m_rVolCurr;
 					// Filter section
 					if (m_Filter->Type() != dsp::F_NONE)
 					{
@@ -840,6 +826,10 @@ namespace psycle
 							m_Filter->WorkStereo(left_output, right_output);
 						}
 					}
+					//Volume after the filter, like schism/IT.
+					//If placed before the filter, 303.IT sounds bad (uncontrolled ressonance, replicable in schism if removing the volume changes).
+					left_output*=m_rampL.GetNext();
+					right_output*=m_rampR.GetNext();
 
 					// Pitch Envelope. Currently, the pitch envelope Amount is only updated on NewLine().
 					if(m_PitchEnvelope.Stage()&EnvelopeController::EnvelopeStage::DOSTEP){
@@ -980,8 +970,8 @@ namespace psycle
 
 			//If a new note, let's start from volume zero. Else it's a glide.
 			if (!IsPlaying()) {
-				m_lVolCurr=0.f;
-				m_rVolCurr=0.f;
+				m_rampL.ResetTo(0.f);
+				m_rampR.ResetTo(0.f);
 			}
 		}
 
@@ -1317,7 +1307,7 @@ namespace psycle
 			m_Period = 0;
 
 			m_Volume = 1.0f;
-			m_ChannelDefVolume = 200;//
+			m_ChannelDefVolume = 200;// 0..200 , &0x100 = Mute.
 			m_LastVoiceVolume = 0;
 			m_bMute = false;
 
@@ -1398,11 +1388,10 @@ namespace psycle
 		}
 		void XMSampler::Channel::Restore()
 		{
-			m_Volume = (m_ChannelDefVolume&0xFF)/200.0f;
-			if ((m_ChannelDefVolume&0x100)) m_bMute = true;
+			m_Volume = DefaultVolumeFloat();
 
-			m_PanFactor = (m_DefaultPanFactor&0xFF)/200.0f;
-			if ((m_DefaultPanFactor&0x100)) m_bSurround = true;
+			m_PanFactor = DefaultPanFactorFloat();
+			if (DefaultIsSurround()) m_bSurround = true;
 
 			m_PanSlideMem = 0;
 			m_ChanVolSlideMem = 0;

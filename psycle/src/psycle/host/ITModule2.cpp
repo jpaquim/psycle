@@ -206,12 +206,13 @@ Special:  Bit 0: On = song message attached.
 				else{
 					sampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
 				}
-				sampler->rChannel(i).DefaultVolumeFloat(itFileH.chanVol[i]/64.0f,true);
+				sampler->rChannel(i).DefaultVolumeFloat(itFileH.chanVol[i]/64.0f);
 				if ( (itFileH.chanPan[i]&ChanFlags::IS_DISABLED) ) 
 				{
 					sampler->rChannel(i).DefaultIsMute(true);
 				}
 				else {
+					sampler->rChannel(i).DefaultIsMute(false);
 					m_maxextracolumn=i;
 				}
 				sampler->rChannel(i).DefaultFilterType(dsp::F_ITLOWPASS);

@@ -58,6 +58,11 @@ v1.11.2 (beta) (2014-02-xx)
 ! Fixed rare bug with VSTs (if the dll extension was uppercase, it didn't reload from a song. CM-505.DLL is an example).
 ! Fixed crash on sequence clear or sort if the song had used more than 128 patterns. (Error in the undo/redo code).
 ! Fixed new or clone pattern not giving a clean pattern when all positions have previously been used, even if not present in the sequence.
+! Fixed crash on showing parameter list with machines with zero parameters. Now the menu option is disabled.
+! Workaround for one audio engine deadlock
+! Sampulse: Fix filtering. volume is applied after the filter. (fixes 303.it, but broke my 64mania.s3m.psy, which prompted the next fix)
+! Sampulse: volume ramping reimplemented. Also, looped samples improvement  (would select incorrect one when position is after loopstart and new work call enters)
+! Sampulse UI: Mixer view, playback mode now takes envelopes into account, other fixes in surround and mute checkboxes.
 
 v1.11.1 (beta) (2014-01-19)
 --------

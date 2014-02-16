@@ -301,6 +301,7 @@ namespace psycle
 			, _pScopeBufferR(0)
 			, _scopeBufferIndex(0)
 			, _scopePrevNumSamples(0)
+			, _sharedBuf(false)
 		{
 			strcpy(_editName,mac->_editName);
 

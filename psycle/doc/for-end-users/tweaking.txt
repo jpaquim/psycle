@@ -277,17 +277,88 @@
 				6: *2/3		E: *3/2
 				7: *1/2		F: *2
 	
+	* Sampulse Commands:  (They are also shown in the Miscellaneus and help tab of the machine)
+			Track Commands:
+				01xx: Portamento Up ( Fx: fine, Ex: Extra fine)
+				02xx: Portamento Down (Fx: fine, Ex: Extra fine)
+				03xx: Tone Portamento
+				04xy: Vibrato with speed y and depth x
+				05xx: Continue Portamento and Volume Slide with speed xx
+				06xx: Continue Vibrato and Volume Slide with speed xx
+				07xx: Tremolo
+				08xx: Pan. 0800 Left 08FF right
+				09xx: Panning slide x0 Left, 0x Right
+				0Axx: Channel Volume, 00 = Min, 40 = Max
+				0Bxx: Channel VolSlide x0 Up (xF fine), 0x Down (Fx Fine)
+				0Cxx: Volume (0C80 : 100%)
+				0Dxx: Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)
+				0Exy: Extended (see below).
+				0Fxx: Filter.
+				10xy: Arpeggio with note, note+x and note+y
+				11xy: Retrig note after y ticks
+				14xx: Fine Vibrato with speed y and depth x
+				17xy: Tremor Effect ( ontime x, offtime y )
+				18xx: Panbrello
+				19xx: Set Envelope position (in ticks)
+				1Cxx: Global Volume, 00 = Min, 80 = Max
+				1Dxx: Global Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)
+				1Exx: Send xx to volume colum (see below)
+				9xxx: Sample Offset x*256
 
-	* Arguru Synth 2f ( Also other (old) Arguru Synths) :
+			Extended Commands:
+				30/1: Glissando mode Off/on
+				4x: Vibrato Wave
+				5x: Panbrello Wave
+				7x: Tremolo Wave
+						Waves: 0:Sinus, 1:Square
+						2:Ramp Up, 3:Ramp Down, 4: Random
+				8x: Panning
+				90: Surround Off
+				91: Surround On
+				9E: Play Forward
+				9F: Play Backward
+				Cx: Delay NoteCut by x ticks
+				Dx: Delay New Note by x ticks
+				E0: Notecut background notes
+				E1: Noteoff background notes
+				E2: NoteFade background notes
+				E3: Set NNA NoteCut for this voice
+				E4: Set NNA NoteContinue for this voice
+				E5: Set NNA Noteoff for this voice
+				E6: Set NNA NoteFade for this channel
+				E7/8: Disable/Enable Volume Envelope
+				E9/A: Disable/Enable Pan Envelope
+				EB/C: Disable/Enable Pitch/Filter Envelope
+				Fx : Set Filter Mode.
+
+			Volume Column:
+				00..3F: Set volume to x*2
+				4x: Volume slide up
+				5x: Volume slide down
+				6x: Fine Volslide up
+				7x: Fine Volslide down
+				8x: Panning (0:Left, F:Right)
+				9x: PanSlide Left
+				Ax: PanSlide Right
+				Bx: Vibrato
+				Cx: TonePorta
+				Dx: Pitch slide up
+				Ex: Pitch slide down
+	* Arguru Synth 2.5:
 
 	  01xx	-	Pitch slide-up
 	  02xx	-	Pitch slide-down
 	  03xx	-	Pitch glide
 	  04xx	-	Vibrato [x=depth, y=speed]
+	  06xy  -   Change vca sustain
 	  07xx	-	Change VCF ENV modulation [00=-128,FF=128]
 	  08xx	-	Change VCF Cutoff frequency
 	  09xx	-	Change VCF Resonance amount
+	  0Axx  -   Synth volume
+	  0Bxx  -   Change vca attack (*22 millis)
+	  0Cxx  -   Note volume
 	  0Exx	-	Note Cut in x frames (Only AS2.xx)
+	  0Fxx  -  Change Glide
 	  11xx	-	VCF Cutoff slide-up
 	  12xx	-	VCF Cutoff slide-down
 

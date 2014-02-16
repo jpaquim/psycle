@@ -49,7 +49,7 @@ namespace psycle
 			_loop_line=0;
 			_playPosition=0;
 			measure_cpu_usage_=false;
-			m_SampleRate=44100;
+			m_SampleRate=1;
 			m_extraTicks=0;
 			SetBPM(125,4);
 			for(int i=0;i<MAX_TRACKS;i++) {
@@ -220,6 +220,7 @@ void Player::start_threads(int thread_count) {
 				{
 					if(Global::song()._pMachine[i]) Global::song()._pMachine[i]->SetSampleRate(sampleRate);
 				}
+				dsp::Slider::SetLength(0.003f*SampleRate()); // 3 milliseconds of samples.
 			}
 		}
 		void Player::SetBPM(int _bpm,int _lpb)
@@ -1061,7 +1062,7 @@ void Player::stop_threads() {
 						condition_.notify_all(); // notify all threads that we added nodes to the queue
 						// wait until all nodes have been processed
 						{ scoped_lock lock(mutex_);
-							while(processed_node_count_ != graph_size_) main_condition_.wait(lock);
+							while(processed_node_count_ < graph_size_) main_condition_.wait(lock);
 						}
 					}
 					sampleCount += amount;
