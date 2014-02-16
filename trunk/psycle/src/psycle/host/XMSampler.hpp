@@ -8,6 +8,7 @@
 
 #include <psycle/helpers/filter.hpp>
 #include <psycle/helpers/resampler.hpp>
+#include <psycle/helpers/dspslide.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <cstddef> // for std::ptrdiff_t
@@ -178,7 +179,7 @@ XMSampler::Channel::PerformFX().
 		typedef void (*WorkFunction)(WaveDataController& contr, float *pLeftw,float *pRightw);
 		typedef detail::LoopDirection LoopDirection;
 
-		WaveDataController():resampler_data(NULL), m_pWave(NULL), m_Playing(false){};
+		WaveDataController():resampler_data(NULL), m_pWave(NULL), m_Playing(false), m_looped(false){};
 		virtual ~WaveDataController(){};
 		virtual void Init(const XMInstrument::WaveData<T>* const wave, int layer, const helpers::dsp::resampler & resampler);
 		virtual void DisposeResampleData(const helpers::dsp::resampler& resampler);
@@ -190,7 +191,7 @@ XMSampler::Channel::PerformFX().
 		static void WorkMonoStatic(WaveDataController& contr,float *pLeftw,float *pRightw) { contr.WorkMono(pLeftw, pRightw);}
 		// fork types
 		inline float rwork(int16_t const * data, uint32_t res, void* resampler_data) { return resampler_work(data, res, resampler_data); }		
-		inline float rwork(float const * data, uint32_t res, void* resampler_data) { return resampler_work_float(data, res, resampler_data); } // todo
+		inline float rwork(float const * data, uint32_t res, void* resampler_data) { return resampler_work_float(data, res, resampler_data); }
 
 		inline void WorkMono(float *pLeftw,float *pRightw)
 		{
@@ -201,7 +202,7 @@ XMSampler::Channel::PerformFX().
 			m_pL+=diff;
 #ifndef NDEBUG
 			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("203: highpart> loopEnd+17 bug triggered!\n");
+				TRACE("204: highpart> loopEnd+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -223,7 +224,7 @@ XMSampler::Channel::PerformFX().
 			m_pR+=diff;
 #ifndef NDEBUG
 			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("225: highpart > loopend+17 bug triggered!\n");
+				TRACE("226: highpart > loopend+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -239,10 +240,12 @@ XMSampler::Channel::PerformFX().
 		// Current sample position 
 		inline int  Position() const { return m_Position.HighPart;}
 		virtual void Position(const	int value){ 
+			m_looped=false;
 			if ( LoopType()==XMInstrument::WaveData<>::LoopType::NORMAL ) {
 				int val = value;
 				while (val >= LoopEnd() && LoopEnd() != LoopStart()) {
 					val-= LoopEnd()-LoopStart();
+					m_looped=true;
 				}
 				m_Position.HighPart = val;
 			}
@@ -258,6 +261,7 @@ XMSampler::Channel::PerformFX().
 						val= LoopEnd()-(value-LoopEnd());
 					}
 					forward=!forward;
+					m_looped=true;
 				}
 				m_Position.HighPart = val;
 			}
@@ -301,6 +305,7 @@ XMSampler::Channel::PerformFX().
 		std::int64_t m_Speed;
 		std::int64_t m_SpeedInternal;
 		bool m_Playing;
+		bool m_looped; //Indicates if the playback has already looped. This is necessary for properly identifying which buffer to use.
 
 		XMInstrument::WaveData<>::LoopType::Type m_CurrentLoopType;
 		int m_CurrentLoopEnd;
@@ -576,16 +581,20 @@ XMSampler::Channel::PerformFX().
 		}
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 		float RealVolume() const { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; }
+		float ActiveVolume() const { return RealVolume() * rChannel().Volume() * m_AmplitudeEnvelope.ModulationAmount() * m_VolumeFadeAmount; }
+
 		void PanFactor(float pan)
 		{
 			m_PanFactor = pan;
 			m_PanRange = (0.5-std::abs(pan-0.5));
 		}
 		float PanFactor() const { return m_PanFactor; }
+		float ActivePan() const { return PanFactor() + m_PanbrelloAmount + (m_PanEnvelope.ModulationAmount()*PanRange()); }
 		void IsSurround(bool surround) { m_Surround = surround; }
 		bool IsSurround() const { return m_Surround; }
 
 
+		int ActiveCutoff() const { return m_Filter->Cutoff(); }
 		int CutOff() const { return m_CutOff; }
 		void CutOff(int co)
 		{
@@ -594,6 +603,7 @@ XMSampler::Channel::PerformFX().
 			m_FilterClassic.Cutoff(co);
 		}
 		
+		int ActiveRessonance() const { return m_Filter->Ressonance(); }
 		int Ressonance() const { return m_Ressonance; }
 		void Ressonance(int res)
 		{
@@ -663,11 +673,9 @@ XMSampler::Channel::PerformFX().
 		int m_Volume;
 		float m_RealVolume;
 		float m_CurrRandVol;
-		//Volume ramping 
-		float m_lVolCurr;
-		float m_lVolDest;
-		float m_rVolCurr;
-		float m_rVolDest;
+		//Volume/Panning ramping 
+		helpers::dsp::Slider m_rampL;
+		helpers::dsp::Slider m_rampR;
 
 
 		float m_PanFactor;
@@ -822,35 +830,38 @@ XMSampler::Channel::PerformFX().
 		void Period(const double value){m_Period = value;}
 
 		float Volume() const {return m_Volume;}
-		void Volume(const float value){m_Volume = value;}
-		inline int DefaultVolume() const {return m_ChannelDefVolume;}
-		void DefaultVolume(const int value){
-			m_ChannelDefVolume = value; 
-			if (DefaultIsMute() ) IsMute(true);
-			Volume(DefaultVolumeFloat());
+		void Volume(float value){m_Volume = value;}
+		inline int DefaultVolume() const {return m_ChannelDefVolume&0xFF;}
+		void DefaultVolume(int value, bool updatecurrent=true)
+		{
+			if ( DefaultIsMute()) m_ChannelDefVolume = value | 0x100;
+			else m_ChannelDefVolume = value;
+			if (updatecurrent) Volume(DefaultVolumeFloat());
 		}
 		inline float DefaultVolumeFloat() const { return (m_ChannelDefVolume&0xFF)/200.0f; }
-		void DefaultVolumeFloat(float value,bool ignoremute=false)
+		void DefaultVolumeFloat(float value, bool updatecurrent=true)
 		{
-			if ( DefaultIsMute() && !ignoremute ) m_ChannelDefVolume = int(value*200) | 0x100;
+			if ( DefaultIsMute()) m_ChannelDefVolume = int(value*200) | 0x100;
 			else m_ChannelDefVolume = int(value*200);
+			if (updatecurrent) Volume(value);
 		}
 		inline bool DefaultIsMute() const { return m_ChannelDefVolume&0x100; }
 		void DefaultIsMute(bool mute)
 		{
 			if (mute) m_ChannelDefVolume |= 0x100;
 			else m_ChannelDefVolume &=0xFF;
+			m_bMute=mute;
 		}
 		int LastVoiceVolume() const {return m_LastVoiceVolume;}
-		void LastVoiceVolume(const int value){m_LastVoiceVolume = value;}
+		void LastVoiceVolume(int value){m_LastVoiceVolume = value;}
 
 		float PanFactor() const {return 	m_PanFactor;}
-		void PanFactor(const float value){
+		void PanFactor(float value){
 			m_PanFactor = value;
 			if ( ForegroundVoice()) ForegroundVoice()->PanFactor(value);
 		}
 		inline int DefaultPanFactor() const { return m_DefaultPanFactor; }
-		void DefaultPanFactor(const int value){
+		void DefaultPanFactor(int value){
 			m_DefaultPanFactor = value;
 			PanFactor(DefaultPanFactorFloat());
 			if (DefaultIsSurround() ) IsSurround(true);
@@ -893,9 +904,6 @@ XMSampler::Channel::PerformFX().
 			if ( ForegroundVoice()) ForegroundVoice()->IsSurround(value);
 		}
 		bool IsMute() const { return m_bMute;}
-		void IsMute(const bool value){
-			m_bMute = value;
-		}
 
 		int Cutoff() const { return m_Cutoff;}
 		void Cutoff(const int cut) { m_Cutoff =cut;  if ( ForegroundVoice() ) ForegroundVoice()->CutOff(cut); }
@@ -934,15 +942,15 @@ XMSampler::Channel::PerformFX().
 		int m_Note;
 		double m_Period;
 
-		float m_Volume;///<  (0 - 1.0f)
-		int m_ChannelDefVolume;///< (0..200)   &0x100 = Mute.
-		int m_LastVoiceVolume;
-		bool m_bMute;
+		float m_Volume;///<  (0..1.0f) value used for Playback (channel volume)
+		int m_ChannelDefVolume;///< (0..200)   &0x100 = Mute. // value used for Storage and reset
+		int m_LastVoiceVolume; // memory of note volume of last voice played.
+		bool m_bMute; // value used for playback.
 
-		float m_PanFactor;// value used for Playback
-		int m_DefaultPanFactor;  // value used for Storage //  0..200 .  &0x100 == Surround.
+		float m_PanFactor;// (0..1.0f) value used for Playback
+		int m_DefaultPanFactor;  //  0..200 .  &0x100 == Surround. // value used for Storage and reset
 		float m_LastVoicePanFactor;
-		bool m_bSurround;
+		bool m_bSurround;// value used for playback (is channel set to surround?)
 
 		int m_LastAmpEnvelopePosInSamples;
 		int m_LastPanEnvelopePosInSamples;

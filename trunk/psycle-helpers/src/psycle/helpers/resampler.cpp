@@ -52,12 +52,12 @@ namespace psycle { namespace helpers { namespace dsp {
 		for(int i = 0; i < CUBIC_RESOLUTION; ++i) {
 			double x = (double)i * resdouble;
 			//Cubic resolution is made of four table, but I've put them all in one table to optimize memory access.
-			cubic_table_[i*4] = float(-0.5 * x * x * x +       x * x - 0.5 * x);
-			cubic_table_[i*4+1] = float( 1.5 * x * x * x - 2.5 * x * x           + 1.0);
-			cubic_table_[i*4+2] = float(-1.5 * x * x * x + 2.0 * x * x + 0.5 * x);
-			cubic_table_[i*4+3] = float( 0.5 * x * x * x - 0.5 * x * x);
+			cubic_table_[i*4]   = static_cast<float>(-0.5 * x * x * x +       x * x - 0.5 * x);
+			cubic_table_[i*4+1] = static_cast<float>( 1.5 * x * x * x - 2.5 * x * x           + 1.0);
+			cubic_table_[i*4+2] = static_cast<float>(-1.5 * x * x * x + 2.0 * x * x + 0.5 * x);
+			cubic_table_[i*4+3] = static_cast<float>( 0.5 * x * x * x - 0.5 * x * x);
 
-			l_table_[i] = x;
+			l_table_[i] = static_cast<float>(x);
 		}
 	// }
 
@@ -114,7 +114,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	{
 		quality_ = quality;
 		switch(quality) {
-			case quality::zero_order:
+		case quality::zero_order:
 			work = zoh;
 			work_unchecked = zoh_unchecked;
 			work_float = zoh_float;

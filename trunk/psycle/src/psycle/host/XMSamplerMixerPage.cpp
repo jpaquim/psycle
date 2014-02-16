@@ -144,24 +144,13 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
 		sld->SetPos(volumeRange-(rChan.DefaultVolumeFloat()*volumeRange));
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[index]);
-		if ( rChan.DefaultIsMute() )
-		{
-			mute->SetCheck(true);
-		}
-		else
-		{
-			mute->SetCheck(false);
-		}
+		mute->SetCheck(rChan.DefaultIsMute());
+
 		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
 		int defpos = rChan.DefaultPanFactorFloat()*panningRange;
 		sld->SetPos(defpos);
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
-		if ( rChan.DefaultIsSurround())
-		{
-			surr->SetCheck(true);
-		} else {
-			surr->SetCheck(false);
-		}
+		surr->SetCheck(rChan.DefaultIsSurround());
 
 		sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
 		sld->SetPos(rChan.DefaultRessonance());
@@ -172,6 +161,7 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 	{
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
 		int defpos;
+		bool surround;
 		if ( !voice )
 		{
 			sprintf(chname,"(%d)",index+m_ChannelOffset);
@@ -182,27 +172,29 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			sld->SetPos(rChan.Ressonance());
 			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
 			sld->SetPos(rChan.Cutoff());
+			surround = rChan.IsSurround();
 		} else {
 			std::string tmpstr = voice->rInstrument().Name();
 			sprintf(chname,"%02X:%s",voice->InstrumentNum(),tmpstr.c_str());
 			name->SetWindowText(chname);
-			sld->SetPos(volumeRange-(voice->RealVolume()*volumeRange));
-			defpos = int(voice->PanFactor()*panningRange);
+			sld->SetPos(volumeRange-(voice->ActiveVolume()*volumeRange));
+			defpos = int(voice->ActivePan()*panningRange);
 			sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
-			sld->SetPos(voice->Ressonance());
+			sld->SetPos(voice->ActiveRessonance());
 			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
-			sld->SetPos(voice->CutOff()); 
+			sld->SetPos(voice->ActiveCutoff()); 
+			surround =  voice->IsSurround();
 		}
 
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
-		if ( rChan.IsSurround() )
-		{
+		if ( surround )	{
 			surr->SetCheck(true);
+			defpos=0.5f*panningRange;
 		} else {
-			sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
-			sld->SetPos(defpos);
 			surr->SetCheck(false);
 		}
+		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
+		sld->SetPos(defpos);
 	}
 }
 
@@ -284,12 +276,7 @@ void XMSamplerMixerPage::ClickMute(int offset)
 	{
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
 		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
-		if (m_bShowChan.GetCheck())
-		{
-			rChan.DefaultIsMute(mute->GetCheck());
-		} else if(rChan.ForegroundVoice()) {
-			rChan.IsMute(mute->GetCheck());
-		}
+		rChan.DefaultIsMute(mute->GetCheck());
 	}
 }
 void XMSamplerMixerPage::SliderVolume(CSliderCtrl* slid, int offset)

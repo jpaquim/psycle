@@ -52,7 +52,9 @@ class Filter {
 		void Reset(void);//Same as init, without samplerate
 
 		void Cutoff(int iCutoff) { if ( _cutoff != iCutoff) { _cutoff = iCutoff; Update(); }}
+		int Cutoff() const { return _cutoff; }
 		void Ressonance(int iRes) { if ( _q != iRes ) { _q = iRes; Update(); }}
+		int Ressonance() const { return _q; }
 		void SampleRate(int iSampleRate) {
 			if ( FilterCoeff::singleton.getSampleRate() != iSampleRate) {
 				FilterCoeff::singleton.setSampleRate(iSampleRate);
