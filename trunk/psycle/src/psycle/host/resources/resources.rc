@@ -2120,6 +2120,19 @@ BEGIN
     GROUPBOX        "",IDC_GROUP_ENV,7,118,332,151
 END
 
+IDD_NOTEMAP_INDIVIDUAL DIALOGEX 0, 0, 187, 67
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,79,46,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,130,46,50,14
+    COMBOBOX        IDC_INDIV_SAMPLE,48,28,130,197,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_INDIV_NOTE,48,11,54,186,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Note ",IDC_STATIC,13,14,18,8
+    LTEXT           "Sample",IDC_STATIC,14,30,24,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2546,6 +2559,14 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 339
+    END
+
+    IDD_NOTEMAP_INDIVIDUAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 180
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 60
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -3236,64 +3257,6 @@ BEGIN
 END
 
 #endif    // Neutral (Default) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// Catalan resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CAT)
-#ifdef _WIN32
-LANGUAGE LANG_CATALAN, SUBLANG_DEFAULT
-#pragma code_page(1252)
-#endif //_WIN32
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_NOTEMAP_INDIVIDUAL DIALOGEX 0, 0, 187, 67
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Dialog"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,79,46,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,130,46,50,14
-    COMBOBOX        IDC_INDIV_SAMPLE,48,28,130,197,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_INDIV_NOTE,48,11,54,186,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Note ",IDC_STATIC,13,14,18,8
-    LTEXT           "Sample",IDC_STATIC,14,30,24,8
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_NOTEMAP_INDIVIDUAL, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 180
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 60
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// PNG
-//
-
-IDB_PNG1                PNG                     "E:\\programacio\\psycleSVN\\psycle\\src\\psycle\\host\\resources\\ToolbarNew.png"
-IDB_PNG2                PNG                     "ToolbarNew.png"
-#endif    // Catalan resources
 /////////////////////////////////////////////////////////////////////////////
 
 
