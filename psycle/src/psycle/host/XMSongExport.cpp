@@ -55,7 +55,7 @@ namespace host{
 		std::string name = "PE:" + song.name.substr(0,17);
 		Write(name.c_str(), 20);//Module name
 		uint16_t temp = 0x1A;
-		Write(&temp, 1);							
+		Write(&temp, 1);
 		Write("FastTracker v2.00   ", 20);//Tracker name
 		temp = 0x0104;
 		Write(&temp, 2);//Version number

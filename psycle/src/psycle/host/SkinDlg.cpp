@@ -508,6 +508,7 @@ namespace psycle { namespace host {
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
+			std::string dir = PsycleGlobal::conf().GetAbsoluteSkinDir();
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
 			ofn.hwndOwner = GetParent()->m_hWnd;
@@ -518,7 +519,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = 0;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			ofn.lpstrInitialDir = PsycleGlobal::conf().GetAbsoluteSkinDir().c_str();
+			ofn.lpstrInitialDir = dir.c_str();
 			// Display the Open dialog box. 
 			if(::GetOpenFileName(&ofn))
 			{
@@ -532,6 +533,7 @@ namespace psycle { namespace host {
 			OPENFILENAME ofn = OPENFILENAME(); // common dialog box structure
 			char szFile[MAX_PATH]; // buffer for file name
 			szFile[0]='\0';
+			std::string dir = PsycleGlobal::conf().GetAbsoluteSkinDir();
 			// Initialize OPENFILENAME
 			ofn.lStructSize = sizeof ofn;
 			ofn.hwndOwner = GetParent()->m_hWnd;
@@ -542,7 +544,7 @@ namespace psycle { namespace host {
 			ofn.lpstrFileTitle = 0;
 			ofn.nMaxFileTitle = 0;
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
-			ofn.lpstrInitialDir = PsycleGlobal::conf().GetAbsoluteSkinDir().c_str();
+			ofn.lpstrInitialDir = dir.c_str();
 			if(::GetSaveFileName(&ofn))
 			{
 				SkinIO::SaveTheme(szFile, macConfig, paramConfig, patConfig);

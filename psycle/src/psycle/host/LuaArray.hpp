@@ -33,7 +33,8 @@ public:
 	int copyfrom(PSArray& src, int pos);
 	void resize(int newsize);
 	std::string tostring() const;
-	void fillzero(int pos = 0);
+	void fillzero();
+	void fillzero(int pos);
 	void fill(float val);
 	void fill(float val, int pos);
 	float* data() { return ptr_; }
@@ -45,6 +46,10 @@ public:
 		assert(end >= start && start >= 0 && end <=baselen_);
 		len_ = end-start;
 	}
+	void offset(int offset) {
+		base_ += offset;
+		ptr_ += offset;
+	}
 	void clearmargin() { 
 		ptr_ = base_;
 		len_ = baselen_;
@@ -55,7 +60,6 @@ private:
 	int len_;
     int baselen_;
 	int shared_;
-	int startoffset, endoffset;
 };
 
 typedef std::vector<PSArray> psybuffer;
@@ -87,6 +91,12 @@ struct LuaArrayBind {
 	static int array_method_mul(lua_State* L);
 	static int array_method_div(lua_State* L);
 	static int array_method_rsum(lua_State* L); // x(n)=x(0)+..+x(n-1)
+	static int array_method_and(lua_State* L); // binary and
+	static int array_method_or(lua_State* L); // binary or
+	static int array_method_xor(lua_State* L); // binary or
+	static int array_method_sleft(lua_State* L); // binary shift left
+	static int array_method_sright(lua_State* L); // binary shift right
+	static int array_method_bnot(lua_State* L); // bitwise not
 	// ops
 	static int array_add(lua_State* L);
 	static int array_sub(lua_State* L);

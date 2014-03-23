@@ -22,6 +22,7 @@ public:
 	void set_mac(Machine* mac) { mac_ = mac; shared_=true; }
 	PSArray* channel(int idx) { return &sampleV_[idx]; }
 	void update_num_samples(int num);
+	void offset(int offset);
 	void build_buffer(std::vector<float*>& buf, int num);
 	void set_buffer(std::vector<float*>& buf);
 	psybuffer& samples() { return sampleV_; }
@@ -87,6 +88,11 @@ struct left_of_range : public std::binary_function<range<T>, range<T>, bool> {
     }
 };
 
+struct SingleWorkInterface {
+  virtual ~SingleWorkInterface() {}
+  virtual PSArray* work(int numSamples, int val) { return 0; }
+};
+
 template<class T>
 struct WaveList {
   typedef std::map<range<double>, const XMInstrument::WaveData<T>*, left_of_range<double> > Type;  
@@ -94,7 +100,7 @@ struct WaveList {
 
 struct RWInterface {
   virtual ~RWInterface() {}
-  virtual int work(int numSamples, float* pSamplesL, float* pSamplesR, float* fm, float* env) = 0 { return 0; }
+  virtual int work(int numSamples, float* pSamplesL, float* pSamplesR, float* fm, float* env,  SingleWorkInterface* master) = 0 { return 0; }
   virtual bool Playing() const { return false; }
   virtual void NoteOff() {}
   virtual void Start(double phase=0) {}
@@ -106,6 +112,9 @@ struct RWInterface {
   virtual void SetData(WaveList<float>::Type& data) {}  
   virtual void set_gain(float gain) { }
   virtual float gain() const { return 1.0; }
+  virtual double phase() const { return 0; }
+  virtual void setphase(double phase) {}
+  virtual void set_sync_fadeout_size(int size) {}
 };
 
 template <class T, int VOL>
@@ -119,7 +128,12 @@ public:
 	f_(261.63),
 	basef(440),	
 	last_wave(0),
-	gain_(1.0) {	
+	gain_(1.0),
+	last_sgn(1),
+	startfadeout(false),
+	fadeout_sc(0),
+	fsize(32),
+	oldtrigger(0) {	
 	resampler.quality(helpers::dsp::resampler::quality::linear);
     set_frequency(f_);
     wavectrl.Playing(false);
@@ -127,7 +141,7 @@ public:
 	last_wave = wave_it != waves_.end() ? wave_it->second : 0;
   }
   void Start(double phase=0);
-  int work(int numSamples, float* pSamplesL, float* pSamplesR, float* fm, float* env);  
+  int work(int numSamples, float* pSamplesL, float* pSamplesR, float* fm, float* env, SingleWorkInterface* master);  
   bool Playing() const { return wavectrl.Playing();  }
   void Stop(double phase) {	
 	if (wave_it != waves_.end()) {
@@ -148,14 +162,29 @@ public:
   void set_quality(helpers::dsp::resampler::quality::type quality) { resampler.quality(quality); }  
   helpers::dsp::resampler::quality::type quality() const { return resampler.quality(); }  
   virtual void SetData(WaveList<float>::Type& data) { 
-    assert(sizeof(T)!=sizeof(std::int16_t));
+    assert(sizeof(T)!=sizeof(int16_t));
     waves_ = reinterpret_cast<typename WaveList<T>::Type&>(data);
 	wave_it = waves_.find(range<double>(f_));
   }
   void set_gain(float gain) { gain_ = gain; }
   float gain() const { return gain_; }  
+  void set_sync_fadeout_size(int size) { fsize = size; }
+  virtual double phase() const {
+	 if (wave_it != waves_.end()) {
+	   return wavectrl.Position() / (double) wave_it->second->WaveLength();
+	 }
+	 return 0;
+  }
+  virtual void setphase(double phase) { 
+	 if (wave_it != waves_.end()) {
+	    wavectrl.Position((int) (phase * wave_it->second->WaveLength()));
+	 }
+  }
 private:
   void check_wave(double f);
+  int next_trigger(int numSamples, float* trigger);
+  int work_trigger(int numSamples, float* pSamplesL, float* pSamplesR, float* fm, float* env, SingleWorkInterface* master);  
+  int work_samples(int numSamples, float* pSamplesL, float* pSamplesR, float* fm, float* env);  
   psycle::helpers::dsp::cubic_resampler resampler;
   float adjust_vol;
   ULARGE_INTEGER m_Position;
@@ -169,6 +198,20 @@ private:
   double dostop_;
   double stopphase_;
   float gain_;
+  int last_sgn;
+  bool startfadeout;
+  int fadeout_sc; 
+  int fsize; 
+  float* oldtrigger;
+  int n;
+};
+
+struct LuaSingleWorker : public SingleWorkInterface {
+	LuaSingleWorker(lua_State *s) : L(s) {}
+	~LuaSingleWorker() {}	
+	virtual PSArray* work(int numSamples, int val);
+private:
+	lua_State *L;
 };
 
 struct LuaResamplerBind {
@@ -181,14 +224,20 @@ private:
 	static int noteoff(lua_State* L);
 	static int isplaying(lua_State* L);
 	static int start(lua_State* L);
+	static int stop(lua_State* L);
 	static int set_frequency(lua_State* L);
+	static int frequency(lua_State* L);
 	static int set_wave_data(lua_State* L);
 	static int set_quality(lua_State* L);
 	static int quality(lua_State*);
+	static int set_sync(lua_State*);
+	static int set_sync_fadeout(lua_State*);
+	static int phase(lua_State*);
+	static int setphase(lua_State*);
 	static WaveList<float>::Type check_wavelist(lua_State* L);
 };
 
-#if !defined WINAMP_PLUGIN
+#if !defined WINAMP_PLUGIN && 0
 struct LuaPlotterBind {
 	static int open(lua_State *L);
 private:
@@ -252,31 +301,34 @@ private:
    static void sqr(float* data, int num, int maxharmonic);
    static void sin(float* data, int num, int maxharmonic);
    static void tri(float* data, int num, int maxharmonic);
-   static void cwave(double fh,  XMInstrument::WaveData<float>& wave, void (*func)(float*, int, int), int sr); 
+   static void ConstructWave(double fh,  XMInstrument::WaveData<float>& wave,
+	                         void (*func)(float*, int, int),
+							 int sr); 
    static void cleartbl(WaveList<float>::Type&);
    WaveList<float>::Type sin_tbl, saw_tbl, sqr_tbl, tri_tbl;  
 };
 
 struct WaveOsc {
    WaveOsc(WaveOscTables::Shape shape);
-  ~WaveOsc() { delete resampler; }
-  void work(int num, float* data, float* fm, float* env) { 
-	 resampler->work(num, data, 0, fm, env);
+  ~WaveOsc() { delete resampler_; }
+  void work(int num, float* data, float* fm, float* env, SingleWorkInterface* master) { 
+	 resampler_->work(num, data, 0, fm, env, master);
   }
-  float base_frequency() const { return resampler->frequency(); }  
-  void set_frequency(float f) { resampler->set_frequency(f); }
-  void Start(double phase) { resampler->Start(phase); }
-  void Stop(double phase) { resampler->Stop(phase); }
-  bool IsPlaying() const { return resampler->Playing(); }
-  void set_gain(float gain) { resampler->set_gain(gain); }
-  float gain() const { return resampler->gain(); }
+  float base_frequency() const { return resampler_->frequency(); }  
+  void set_frequency(float f) { resampler_->set_frequency(f); }
+  void Start(double phase) { resampler_->Start(phase); }
+  void Stop(double phase) { resampler_->Stop(phase); }
+  bool IsPlaying() const { return resampler_->Playing(); }
+  void set_gain(float gain) { resampler_->set_gain(gain); }
+  float gain() const { return resampler_->gain(); }
   void set_shape(WaveOscTables::Shape shape);
   WaveOscTables::Shape shape() const { return shape_; }
-  void set_quality(helpers::dsp::resampler::quality::type quality) { resampler->set_quality(quality); }  
-  helpers::dsp::resampler::quality::type quality() const { return resampler->quality(); }  
+  void set_quality(helpers::dsp::resampler::quality::type quality) { resampler_->set_quality(quality); }  
+  helpers::dsp::resampler::quality::type quality() const { return resampler_->quality(); }  
+  RWInterface* resampler() { return resampler_; }
   
 private:    
-  RWInterface* resampler;
+  RWInterface* resampler_;
   WaveOscTables::Shape shape_;
 };
 
@@ -299,6 +351,10 @@ private:
 	static int set_shape(lua_State* L);
 	static int set_quality(lua_State* L);
     static int quality(lua_State*);
+	static int set_sync(lua_State*);
+	static int set_sync_fadeout(lua_State*);
+	static int phase(lua_State*);
+	static int setphase(lua_State*);
 };
 
 struct LuaDspMathHelper {
@@ -340,6 +396,7 @@ private:
 struct LEnvelope {
 	LEnvelope(const std::vector<double>& times,
 		      const std::vector<double>& peaks,
+			  const std::vector<int>& types,
 		      int suspos,
 			  double startpeak,
 			  int samplerate) 
@@ -348,8 +405,9 @@ struct LEnvelope {
 		  sus_(suspos),
 		  startpeak_(startpeak),
 	      times_(times),
-		  peaks_(peaks) {       
-       start();
+		  peaks_(peaks),
+	      types_(types),
+	      stage_(peaks.size()) {       
 	}
 	~LEnvelope() {};
 	void setstagetime(int stage, double t) { times_[stage]=t; }
@@ -362,14 +420,17 @@ struct LEnvelope {
 	void start() { 
 		lv_ = startpeak_;
 		stage_ = 0;
-		calcstage(0, startpeak_);
+		calcstage(startpeak_, peaks_[0], times_[0]);
 		susdone_ = false;
 	}
-	bool is_playing() const { return !(stage_ > peaks_.size()-1); }
+	bool is_playing() const {
+	  return !(stage_ > peaks_.size()-1);
+	}
 	PSArray& out() {return out_; }
 	void set_samplerate(int sr) {
 		int newsc = sc_ * static_cast<int>(sr/(double)fs_);
-		calcstage(stage_, stage_ == 0 ? startpeak_ : peaks_[stage_-1]);		
+		calcstage(stage_ == 0 ? startpeak_ : peaks_[stage_-1], peaks_[stage_],
+		   times_[stage_]);		
 		sc_ = newsc;
 		fs_ = sr;		
 	}
@@ -380,11 +441,16 @@ private:
 	double m_, lv_, startpeak_;
 	bool susdone_;
 	std::vector<double> times_, peaks_;
-	void calcstage(int stage, double peak2) {	  
-	  double newtime = times_[stage]*fs_;
-	  m_ = (peaks_[stage]-peak2)/newtime;
-	  nexttime_ = newtime;
+	std::vector<int> types_;
+	void calcstage(double peakStart, double peakEnd, double time, int type=0) {
+	  nexttime_ = time*fs_;
+	  lv_ = peakStart;
 	  sc_ = 0;
+	  if (type==1)  {
+		m_ = 1.0 + (log(peakEnd) - log(peakStart)) / (nexttime_);
+	  } else {
+	    m_ = (peakEnd-peakStart)/nexttime_;		  
+	  }
 	}
 };
 

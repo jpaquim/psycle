@@ -75,6 +75,10 @@ namespace psycle { namespace host {
 			if (terminal != NULL) {
 				delete terminal;
 			}
+			HGDIOBJ obj = m_tbBm.Detach();
+			::DeleteObject(obj);
+			obj = m_tbBm2.Detach();
+			::DeleteObject(obj);
 		}
 
 		BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
@@ -190,15 +194,30 @@ namespace psycle { namespace host {
 			}
 			m_wndView.ValidateParent();
 			// Create Toolbars.
-			//m_rebar.Create(this);
-			//m_rebar.SetBarStyle(m_rebar.GetBarStyle() | CBRS_FLYBY);
 			if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!m_wndToolBar.LoadToolBar(IDR_MAINFRAME))
 			{
 				TRACE0("Failed to create toolbar\n");
 				return -1;      // fail to create
 			}
+			//Replace the 4bit image with the 24 bit one.
+			HBITMAP hBitmap = (HBITMAP) ::LoadImage(AfxGetInstanceHandle(),
+				MAKEINTRESOURCE(IDB_MAINTOOLBAR24), IMAGE_BITMAP,
+				0,0, LR_CREATEDIBSECTION );
+			m_tbBm.Attach(hBitmap);
+			HBITMAP hBitmap2 = (HBITMAP) ::LoadImage(AfxGetInstanceHandle(),
+				MAKEINTRESOURCE(IDB_MAINTOOLBAR24MASK), IMAGE_BITMAP,
+				0,0, LR_CREATEDIBSECTION);
+			m_tbBm2.Attach(hBitmap2);
+			//16x16 widthxheight of the toolbar icons. Same as the 4bit one.
+			m_tbImagelist.Create(16, 16, ILC_COLOR32|ILC_MASK, 4, 4);
+			m_tbImagelist.Add(&m_tbBm, &m_tbBm2);
+			m_tbImagelist.SetBkColor(CLR_NONE);
+
+			
+			m_wndToolBar.GetToolBarCtrl().SetImageList(&m_tbImagelist);
 			m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() | CBRS_FLYBY | CBRS_GRIPPER|CBRS_SIZE_DYNAMIC|CCS_ADJUSTABLE);
+
 
 			m_songBar.InitializeValues(this, &m_wndView, *_pSong);
 			if (!m_songBar.Create(this, IDD_SONGBAR, CBRS_TOP|CBRS_FLYBY|CBRS_GRIPPER, IDD_SONGBAR))
@@ -348,18 +367,20 @@ namespace psycle { namespace host {
 					szFileName,	// buffer for returned filename
 					MAX_PATH); 	// size of buffer for filename
 
-				// check for .bmp files only
-
-				if (szExtension = strrchr(szFileName, 46)) // point to everything past last "."
+				if (szExtension = strrchr(szFileName, '.')) // point to everything past last "."
 				{
-					if (!strcmpi(szExtension, ".psy")) // compare to ".psy"
+					if (!strcmpi(szExtension, ".psy") || !strcmpi(szExtension, ".xm") || !strcmpi(szExtension, ".it")
+						|| !strcmpi(szExtension, ".s3m") || !strcmpi(szExtension, ".mod"))
 					{
 						SetForegroundWindow();
-						m_wndView.OnFileLoadsongNamed(szFileName, 1);
-						DragFinish((HDROP)  hDropInfo);	// handle of structure for dropped files
-						return;
+						m_wndView.FileLoadsongNamed(szFileName);
 					}
-					// add psb, psv?
+					else if (!strcmpi(szExtension, ".psb")) // compare to ".psb"
+					{
+						SetForegroundWindow();
+						m_wndView.ImportPatternBlock(szFileName,iNumFiles>1);
+					}
+					// add psv?
 					// load waves and crap here
 				}
 			}

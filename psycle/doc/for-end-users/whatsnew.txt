@@ -45,7 +45,7 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.11.2 (beta) (2014-02-xx)
+v1.11.2 (beta) (2014-02-16)
 --------
 ! LUA Host fixes related to sampling rate awareness, crash on parameter list if it has zero parameters and name on machine creation.
 ! Wave editor crash on cut/copy and crash on deleting sample from samples bank.
@@ -54,7 +54,7 @@ v1.11.2 (beta) (2014-02-xx)
 ! Fix on knob tweaking (the cursor was supposed to be hidden while tweaking)
 ! VST tweaking from its UI wasn't working in beta1
 ! native plugin tweaks with negative range wasn't recording the correct values.
-! Fixed chash when doing Exchange machines with effects with input wires.
+! Fixed crash when doing Exchange machines with effects with input wires.
 ! Fixed rare bug with VSTs (if the dll extension was uppercase, it didn't reload from a song. CM-505.DLL is an example).
 ! Fixed crash on sequence clear or sort if the song had used more than 128 patterns. (Error in the undo/redo code).
 ! Fixed new or clone pattern not giving a clean pattern when all positions have previously been used, even if not present in the sequence.

@@ -110,6 +110,8 @@ namespace psycle { namespace host {
 			}
 			if ( _machine->_type == MACH_PLUGIN )
 			{
+				((Plugin*)_machine)->GetCallback()->hWnd = m_hWnd;
+
 				GetMenu()->GetSubMenu(1)->ModifyMenu(5, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
 					((Plugin*)_machine)->GetInfo()->Command);
 			}
@@ -187,6 +189,10 @@ namespace psycle { namespace host {
 			comboProgram.DestroyWindow();
 			if (pView != NULL) { pView->DestroyWindow(); delete pView; }
 			if (pParamGui) pParamGui->SendMessage(WM_CLOSE);
+			if ( _machine->_type == MACH_PLUGIN)
+			{
+				((Plugin*)_machine)->GetCallback()->hWnd = NULL;
+			}
 			SaveBarState(_T("VstParamToolbar"));
 		}
 		void CFrameMachine::PostNcDestroy() 
@@ -455,7 +461,6 @@ namespace psycle { namespace host {
 		{
 			if ( _machine->_type == MACH_PLUGIN)
 			{
-				((Plugin*)_machine)->GetCallback()->hWnd = m_hWnd;
 				try
 				{
 					((Plugin*)_machine)->proxy().Command();

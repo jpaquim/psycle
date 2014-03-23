@@ -26,6 +26,7 @@ namespace psycle
 				inline virtual int GetBPM() const { return Global::player().bpm; }
 				inline virtual int GetTPB() const { return Global::player().lpb; }
 				virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/);
+				virtual bool FileBox(bool openMode, char* filter, char inoutName[]);
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 				inline virtual float * unused0(int, int) { return NULL;};
 				/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.

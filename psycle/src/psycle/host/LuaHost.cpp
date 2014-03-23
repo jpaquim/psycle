@@ -1,22 +1,24 @@
 #include <psycle/host/detail/project.hpp>
-#include "plugincatcher.hpp"
-#include "Player.hpp"
-#include "Song.hpp"
 #include "LuaHost.hpp"
-#include "LuaPlugin.hpp"
 #include "LuaInternals.hpp"
-#include <universalis/os/terminal.hpp>
+#include "LuaPlugin.hpp"
+#include "Player.hpp"
+#include "plugincatcher.hpp"
+#include "Song.hpp"
 #include <boost/filesystem.hpp>
 #include <lua.hpp>
-#include <sstream>
-#include <iostream>
-#include <algorithm>
+
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 extern "C" {
-  #include <luasocket/luasocket.h>
-  #include <luasocket/mime.h>
+#include <luasocket/luasocket.h>
+#include <luasocket/mime.h>
 }
 #endif //defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
+
+#include <universalis/os/terminal.hpp>
+#include <algorithm>
+#include <iostream>
+#include <sstream>
 
 namespace psycle { namespace host {
 
@@ -42,7 +44,7 @@ void LuaProxy::set_state(lua_State* state) {
   LuaArrayBind::register_module(L);  
   luaL_requiref(L, "psycle.dsp.filter", LuaDspFilterBind::open, 1);
   lua_pop(L, 1);
-#if !defined WINAMP_PLUGIN
+#if !defined WINAMP_PLUGIN && 0
   luaL_requiref(L, "psycle.plotter", LuaPlotterBind::open, 1);
   lua_pop(L, 1);
 #endif //!defined WINAMP_PLUGIN
@@ -55,6 +57,8 @@ void LuaProxy::set_state(lua_State* state) {
   luaL_requiref(L, "psycle.dsp.wavedata", LuaWaveDataBind::open, 1);  
   lua_pop(L, 1);
   luaL_requiref(L, "psycle.envelope", LuaEnvelopeBind::open, 1);
+  lua_pop(L, 1);
+  luaL_requiref(L, "psycle.player", LuaPlayerBind::open, 1);
   lua_pop(L, 1);
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 	luaL_requiref(L, "socket", luaopen_socket_core, 1);
@@ -73,55 +77,35 @@ void LuaProxy::free_state() {
 }
 
 void LuaProxy::lock() const {
-  //lua_gc(L, LUA_GCSTOP, 0);
   ::EnterCriticalSection(&cs);
 }
 
 void LuaProxy::unlock() const {
   ::LeaveCriticalSection(&cs);
-  //lua_gc(L, LUA_GCRESTART, 0);
 }
 
 void LuaProxy::reload() {
 	lock();
+	lua_State* old_state = L;	
+	lua_State* new_state = 0;
 	try {
-		lua_State* L = LuaHost::load_script(plug_->GetDllName());
-		free_state();
-		set_state(L);				
+		new_state = LuaHost::load_script(plug_->GetDllName());
+		set_state(new_state);				
 		call_run();
 		call_init();
+		if (old_state) {
+		  lua_close(old_state);
+		}
+	} catch(std::exception &e) {
+		if (new_state) {
+		  lua_close(new_state);
 	}
-	catch(std::exception &e) {
-		std::string s = std::string("RELOAD ERROR! OLD SCRIPT STILL RUNNING!\n") + e.what();
+		L = old_state;
+		std::string s = std::string("Reload Error, old script still running!\n") + e.what();
 		AfxMessageBox(s.c_str());
 	}
 	unlock();
 }
-
-static void stackDump (lua_State *L) {
-      int i;
-      int top = lua_gettop(L);
-      for (i = 1; i <= top; i++) {  /* repeat for each level */
-        int t = lua_type(L, i);
-        switch (t) {    
-          case LUA_TSTRING:  /* strings */
-			  OutputDebugString(lua_tostring(L, i));
-            //printf("`%s'", lua_tostring(L, i));
-            break;    
-          case LUA_TBOOLEAN:  /* booleans */
-            OutputDebugString(lua_toboolean(L, i) ? "true" : "false");
-            break;    
-          case LUA_TNUMBER:  /* numbers */
-            OutputDebugString("number"); // %g", lua_tonumber(L, i));
-            break;    
-          default:  /* other values */
-            OutputDebugString(lua_typename(L, t));
-            break;    
-        }
-        OutputDebugString("  ");  /* put a separator */
-      }
-      OutputDebugString("\n");  /* end the listing */
-    }
 
 int LuaProxy::message(lua_State* L) {
 	size_t len;
@@ -133,7 +117,13 @@ int LuaProxy::message(lua_State* L) {
 
 int LuaProxy::terminal_output(lua_State* L) {	
 	size_t len = 0;
-	const char* out = luaL_checklstring(L, 1, &len);	
+	const char* out = 0;
+	if (lua_isboolean(L, 1)) {
+		int v = lua_toboolean(L, 1);
+		if (v==1) out = "true"; else out = "false";
+	} else {
+	   out = luaL_checklstring(L, 1, &len);	
+	}
 	if (terminal == 0) {
 	  terminal = new universalis::os::terminal();
 	}
@@ -286,6 +276,10 @@ PluginInfo LuaProxy::call_info() {
 		 if (strcmp(key, "api") == 0) {
 			 int v = atoi(value);
 			 info.APIversion = v;
+		 } else
+		 if (strcmp(key, "noteon") == 0) {
+			 int v = atoi(value);
+			 info.flags = v;
 		 }
 	  } 
   }
@@ -299,18 +293,17 @@ void LuaProxy::call_run() {
   int status = lua_pcall(L, 0, LUA_MULTRET, 0);
   if (status) {
       CString msg(lua_tostring(L, -1));
-	  AfxMessageBox(msg);
+	  throw std::runtime_error(msg.GetString());
   }  
 }
 
 void LuaProxy::call_init() {
-  // call script, so it can do some init stuff
   get_method_strict(L, "init");
   lua_pushnumber(L, Global::player().SampleRate());
-  int status = lua_pcall(L, 2, 0 ,0);  // call pc:init()
+  int status = lua_pcall(L, 2, 0 ,0);
   if (status) {
       CString msg(lua_tostring(L, -1));
-	  AfxMessageBox(msg);
+	  throw std::runtime_error(msg.GetString());
   }
 }
 // call events
@@ -343,7 +336,85 @@ void LuaProxy::call_seqtick(int channel, int note, int ins, int cmd, int val) {
 	lua_pushnumber( L, ins);
 	lua_pushnumber( L, cmd);
 	lua_pushnumber( L, val);
-    int status = lua_pcall(L, 6, 0 ,0);    // pc:seqtick(channel, note, ins, cmd, val)
+    int status = lua_pcall(L, 6, 0, 0); // seqtick(channel, note, ins, cmd, val)
+    if (status) {
+      CString msg(lua_tostring(L, -1));
+	  unlock();
+	  throw std::runtime_error(msg.GetString());
+    }
+  } CATCH_WRAP_AND_RETHROW(*plug_)
+  unlock();
+}
+
+void LuaProxy::call_command(int lastnote, int inst, int cmd, int val) {
+  lock();
+  try {	
+    if (!get_method_optional(L, "command")) {
+		unlock();
+		return;
+	}    
+	if (lastnote != notecommands::empty) {
+	  lua_pushnumber(L, lastnote);
+	} else {
+	  lua_pushnil(L);
+	}
+    lua_pushnumber(L, inst);
+	lua_pushnumber(L, cmd);
+	lua_pushnumber(L, val);
+    int status = lua_pcall(L, 5, 0 ,0);  // command
+    if (status) {
+      CString msg(lua_tostring(L, -1));
+	  unlock();
+	  throw std::runtime_error(msg.GetString());
+    }
+  } CATCH_WRAP_AND_RETHROW(*plug_)
+  unlock();
+}
+
+
+void LuaProxy::call_noteon(int note, int lastnote, int inst, int cmd, int val) {
+  lock();
+  try {	
+    if (!get_method_optional(L, "noteon")) {
+		unlock();
+		return;
+	}
+	lua_pushnumber(L, note);
+	if (lastnote != notecommands::empty) {
+		lua_pushnumber(L, lastnote);
+	} else {
+	  lua_pushnil(L);
+	}
+	lua_pushnumber(L, inst);
+	lua_pushnumber(L, cmd);
+	lua_pushnumber(L, val);
+    int status = lua_pcall(L, 6, 0 ,0); // noteon
+    if (status) {
+      CString msg(lua_tostring(L, -1));
+	  unlock();
+	  throw std::runtime_error(msg.GetString());
+    }
+  } CATCH_WRAP_AND_RETHROW(*plug_)
+  unlock();
+}
+
+void LuaProxy::call_noteoff(int note, int lastnote, int inst, int cmd, int val) {
+  lock();
+  try {	
+    if (!get_method_optional(L, "noteoff")) {
+		unlock();
+		return;
+	}
+	lua_pushnumber(L, note);
+	if (lastnote != notecommands::empty) {
+		lua_pushnumber(L, lastnote);
+	} else {
+	  lua_pushnil(L);
+	}
+	lua_pushnumber(L, inst);
+	lua_pushnumber(L, cmd);
+	lua_pushnumber(L, val);
+    int status = lua_pcall(L, 6, 0 ,0); // noteoff
     if (status) {
       CString msg(lua_tostring(L, -1));
 	  unlock();
@@ -380,16 +451,22 @@ std::string LuaProxy::call_help() {
   return "no help found";
 }
 
-void LuaProxy::call_work(int numSamples) throw(psycle::host::exception) {	
+void LuaProxy::call_work(int numSamples, int offset) {	
 	if (numSamples > 0) {
 	  lock();	  
-      update_num_samples(numSamples);
+  	  if (offset >0) {
+		plugimport_->offset(offset);
+	  }
+	  plugimport_->update_num_samples(numSamples);
 	  if (!get_method_optional(L, "work")) {
 		unlock();
 		return;
 	  }	  
       lua_pushnumber(L, numSamples);
       int status = lua_pcall(L, 2, 0 ,0);
+   	  if (offset >0) {
+		plugimport_->offset(-offset);
+	  }
 	  if (status) {
 		 int n = lua_gettop(L);
 		 std::ostringstream o;
@@ -442,6 +519,8 @@ void LuaProxy::call_sr_changed(int rate) {
   unlock();
 }
 
+
+// Parameter tweak range is [0..1]
 void LuaProxy::call_parameter(int numparameter, double val) {  
   lock();
   if (!get_param(L, numparameter, "setnorm")) {
@@ -685,6 +764,7 @@ LuaPlugin* LuaHost::LoadPlugin(const std::string& dllpath, int macIdx) {
 	plug->dll_path_ = dllpath;
 	PluginInfo info = plug->CallPluginInfo();
 	plug->_mode = info.mode;
+	plug->usenoteon_ = info.flags;
 	strncpy(plug->_editName, info.name.c_str(),sizeof(plug->_editName)-1);
 	return plug;
 }

@@ -175,8 +175,8 @@ namespace host {
 			void SwitchBlock(int tx, int lx);
 			void DeleteBlock();
 			void BlockUnmark(void);
-			void SaveBlock(FILE* file);
-			void LoadBlock(FILE* file);
+			void SaveBlock(FILE* file, int pattern=-1);
+			void LoadBlock(FILE* file, int pattern=-1);
 
 			void DecCurPattern();
 			void IncCurPattern();
@@ -195,8 +195,10 @@ namespace host {
 			void KeyUp( UINT nChar, UINT nRepCnt, UINT nFlags );
 			void NewMachine(int x = -1, int y = -1, int mac = -1);
 			void DoMacPropDialog(int propMac);
-			void FileLoadsongNamed(std::string fName);
-			void OnFileLoadsongNamed(std::string fName, int fType);
+			void FileLoadsongNamed(const std::string& fName);
+			void ImportPatternBlock(const std::string& fName, bool newpattern=false);
+			void ExportPatternBlock(const std::string& fname);
+
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
 		public:
@@ -432,9 +434,9 @@ namespace host {
 			afx_msg void OnTimer( UINT_PTR nIDEvent );
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 			afx_msg void OnFileNew();
-			afx_msg BOOL OnExport(UINT id);
-			afx_msg BOOL OnFileSave(UINT id);
-			afx_msg BOOL OnFileSaveAs(UINT id);
+			afx_msg void OnExportModule();
+			afx_msg void OnFileSave();
+			afx_msg void OnFileSaveAs();
 			afx_msg void OnFileLoadsong();
 			afx_msg void OnFileRevert();
 			afx_msg void OnHelpSaludos();
@@ -479,7 +481,12 @@ namespace host {
 			afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 			afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 			afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-			afx_msg void OnFileImportModulefile();
+			afx_msg void OnFileImportPatterns();
+			afx_msg void OnFileImportInstruments();
+			afx_msg void OnFileImportMachines();
+			afx_msg void OnFileExportPatterns();
+			afx_msg void OnFileExportInstruments();
+			afx_msg void OnFileExportModule();
 			afx_msg void OnFileRecent_01();
 			afx_msg void OnFileRecent_02();
 			afx_msg void OnFileRecent_03();
@@ -499,6 +506,7 @@ namespace host {
 			afx_msg void OnHelpReadme();
 			afx_msg void OnHelpTweaking();
 			afx_msg void OnHelpWhatsnew();
+			afx_msg void OnHelpLuaScript();
 			afx_msg void OnConfigurationLoopplayback();
 			afx_msg void OnUpdateConfigurationLoopplayback(CCmdUI* pCmdUI);
 			afx_msg void OnShowPatternSeq();

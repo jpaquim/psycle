@@ -10,6 +10,7 @@ namespace psycle { namespace host {
 			: mode(MACHMODE_UNDEFINED)
 			, type(MACH_UNDEFINED)
 			, allow(true)
+			, flags(0)
 		{
 			std::memset(&FileTime, 0, sizeof FileTime);
 		}

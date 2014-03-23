@@ -200,11 +200,8 @@ XMSampler::Channel::PerformFX().
 			m_Position.QuadPart+=m_SpeedInternal;
 			const std::ptrdiff_t diff = static_cast<std::ptrdiff_t>(m_Position.HighPart)-old;
 			m_pL+=diff;
-#ifndef NDEBUG
-			if (static_cast<int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("204: highpart> loopEnd+17 bug triggered!\n");
-			}
-#endif
+			//Note: m_pL might be poiting at an erroneous place here. (like in looped samples).
+			//Postwork takes care of this.
 		}
 		static void WorkStereoStatic(WaveDataController& contr,float *pLeftw,float *pRightw) { contr.WorkStereo(pLeftw, pRightw);}
 		inline void WorkStereo(float *pLeftw,float *pRightw)
@@ -213,20 +210,14 @@ XMSampler::Channel::PerformFX().
 			//todo: sinc resampling would benefit from having a stereo version of resampler_work
 			*pLeftw  = rwork(m_pL, m_Position.LowPart, resampler_data);
 			*pRightw = rwork(m_pR, m_Position.LowPart, resampler_data);
-			/*
-			*pLeftw  = resampler_work(m_pL, m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
-			*pRightw = resampler_work(m_pR, m_Position.HighPart, m_Position.LowPart, Length(), resampler_data);
-			*/
+
 			const std::ptrdiff_t old = m_Position.HighPart;
 			m_Position.QuadPart+=m_SpeedInternal;
 			const std::ptrdiff_t diff = static_cast<std::ptrdiff_t>(m_Position.HighPart)-old;
 			m_pL+=diff;
 			m_pR+=diff;
-#ifndef NDEBUG
-			if (static_cast<int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("226: highpart > loopend+17 bug triggered!\n");
-			}
-#endif
+			//Note: m_pL/m_pR might be poiting at an erroneous place here. (like in looped samples).
+			//Postwork takes care of this.
 		}
 		virtual void PostWork();
 

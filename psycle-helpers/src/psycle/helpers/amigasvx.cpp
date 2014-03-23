@@ -80,9 +80,9 @@ namespace psycle
 
 			if(hd._id == file.FourCC("BODY"))
 			{
-				std::int16_t * csamples;
+				int16_t * csamples;
 				wave.AllocWaveData(Datalen,false);
-				csamples = const_cast<std::int16_t*>(wave.pWaveDataL());
+				csamples = const_cast<int16_t*>(wave.pWaveDataL());
 				if(bits == 16)
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)

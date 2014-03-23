@@ -134,11 +134,21 @@ BEGIN
     POPUP "&File"
     BEGIN
         MENUITEM "&New",                        ID_FILE_NEW
-        MENUITEM "&Open\tCTRL+O",               ID_FILE_LOADSONG
-        MENUITEM "I&mport module",              ID_FILE_IMPORT_XMFILE
+        MENUITEM "&Open...\tCTRL+O",            ID_FILE_LOADSONG
         MENUITEM "&Save\tCTRL+S",               ID_FILE_SAVE
         MENUITEM "Save &as...",                 ID_FILE_SAVE_AS
-        MENUITEM "E&xport XM",                  ID_EXPORT
+        POPUP "I&mport"
+        BEGIN
+            MENUITEM "Patterns...",                 ID_IMPORT_PATTERNS
+            MENUITEM "Instruments...",              ID_IMPORT_INSTRUMENTS
+            MENUITEM "Machines...",                 ID_IMPORT_MACHINES
+        END
+        POPUP "E&xport"
+        BEGIN
+            MENUITEM "Patterns...",                 ID_EXPORT_PATTERNS
+            MENUITEM "Instruments...",              ID_EXPORT_INSTRUMENTS
+            MENUITEM "Module...",                   ID_EXPORT_MODULE
+        END
         MENUITEM "Render as &Wav...",           ID_FILE_SAVEAUDIO
         MENUITEM SEPARATOR
         MENUITEM "Song &properties",            ID_FILE_SONGPROPERTIES
@@ -219,8 +229,8 @@ BEGIN
     END
     POPUP "&Monitor"
     BEGIN
-        MENUITEM "&CPU monitor...",             ID_CPUPERFORMANCE
-        MENUITEM "&MIDI monitor...",            ID_MIDI_MONITOR
+        MENUITEM "&CPU monitor",                ID_CPUPERFORMANCE
+        MENUITEM "&MIDI monitor",               ID_MIDI_MONITOR
     END
     POPUP "&Help"
     BEGIN
@@ -230,8 +240,9 @@ BEGIN
         MENUITEM "./docs/&keys.txt",            ID_HELP_KEYBTXT
         MENUITEM "./docs/&tweaking.txt",        ID_HELP_TWEAKING
         MENUITEM "./docs/&whatsnew.txt",        ID_HELP_WHATSNEW
+        MENUITEM "./docs/LuaScriptingManual.pdf", ID_HELP_LUASCRIPT
         MENUITEM SEPARATOR
-        MENUITEM "&About Psycle...",            ID_APP_ABOUT
+        MENUITEM "&About Psycle",               ID_APP_ABOUT
         MENUITEM "&Greetings",                  ID_HELP_SALUDOS
     END
 END
@@ -376,10 +387,11 @@ IDB_KEYS_NORMAL         BITMAP                  "notekey.bmp"
 IDB_KEYS_BACK           BITMAP                  "keys_bac.bmp"
 IDR_WAVEDFRAME          BITMAP                  "toolbar1.bmp"
 IDR_FRAMEMACHINE        BITMAP                  "./bmp00001.bmp"
-IDR_MAINFRAME32         BITMAP                  "Toolbar32.bmp"
 IDB_SPLASH2014          BITMAP                  "splash_screen.bmp"
 IDB_MASTER_SKIN         BITMAP                  "master_skin.bmp"
 IDB_MIXER_SKIN          BITMAP                  "mixer_skin.bmp"
+IDB_MAINTOOLBAR24       BITMAP                  "Toolbar24New.bmp"
+IDB_MAINTOOLBAR24MASK   BITMAP                  "Toolbar24Mask.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -610,9 +622,8 @@ BEGIN
     CTEXT           "4",IDC_TRACKLABEL2,180,24,28,12,SS_CENTERIMAGE | SS_SUNKEN
     LTEXT           "Resampling Method",IDC_STATIC,9,43,65,12,SS_CENTERIMAGE
     COMBOBOX        IDC_COMBO1,76,43,132,60,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CTEXT           "Psycle Sampler",IDC_STATIC,217,17,60,8,SS_CENTERIMAGE
-    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,216,28,61,16
-    CTEXT           "- Professional -",IDC_STATIC,217,49,60,8,SS_CENTERIMAGE
+    CTEXT           "Psycle Sampler",IDC_STATIC,217,31,60,8,SS_CENTERIMAGE
+    CONTROL         164,IDC_STATIC,"Static",SS_BITMAP,216,42,61,16
     CONTROL         "C4 plays the default speed (Otherwise, C3 does it)",IDC_DEFAULTC4,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,62,179,10
 END
@@ -2856,7 +2867,7 @@ END
 // Toolbar
 //
 
-IDR_MAINFRAME TOOLBAR  16, 15
+IDR_MAINFRAME TOOLBAR  16, 16
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_LOADSONG
@@ -2910,36 +2921,6 @@ BEGIN
     SEPARATOR
     BUTTON      ID_PROGRAMLESS
     BUTTON      ID_PROGRAMMORE
-END
-
-IDR_MAINFRAME32 TOOLBAR  32, 32
-BEGIN
-    BUTTON      ID_FILE_NEW
-    BUTTON      ID_FILE_LOADSONG
-    BUTTON      ID_FILE_SAVE
-    BUTTON      ID_FILE_SAVEAUDIO
-    SEPARATOR
-    BUTTON      ID_RECORDB
-    SEPARATOR
-    BUTTON      ID_EDIT_UNDO
-    BUTTON      ID_EDIT_REDO
-    BUTTON      ID_BARREC
-    SEPARATOR
-    BUTTON      ID_BARPLAYFROMSTART
-    BUTTON      ID_BARPLAY
-    BUTTON      ID_BUTTONPLAYSEQBLOCK
-    BUTTON      ID_BARSTOP
-    BUTTON      ID_AUTOSTOP
-    SEPARATOR
-    BUTTON      ID_MACHINEVIEW
-    BUTTON      ID_PATTERNVIEW
-    SEPARATOR
-    BUTTON      ID_NEWMACHINE
-    BUTTON      ID_VIEW_INSTRUMENTEDITOR
-    SEPARATOR
-    BUTTON      ID_APP_ABOUT
-    SEPARATOR
-    BUTTON      ID_PSYHELP
 END
 
 
@@ -3304,6 +3285,14 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// PNG
+//
+
+IDB_PNG1                PNG                     "E:\\programacio\\psycleSVN\\psycle\\src\\psycle\\host\\resources\\ToolbarNew.png"
+IDB_PNG2                PNG                     "ToolbarNew.png"
 #endif    // Catalan resources
 /////////////////////////////////////////////////////////////////////////////
 

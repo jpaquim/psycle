@@ -1609,6 +1609,7 @@ namespace psycle
 				}
 				
 				if(chunkcount) return false;
+				_saved=true;
 				return true;
 			}
 			else if(std::strcmp(Header, "PSY2SONG") == 0)
@@ -2275,6 +2276,7 @@ namespace psycle
 						zapObject(vstL[i].pars);
 					}
 				}
+				_saved=true;
 				return true;
 			}
 
@@ -2677,6 +2679,7 @@ namespace psycle
 				progress.m_Progress.SetPos(chunkcount);
 				::Sleep(1);
 			}
+			_saved=true;
 			return true;
 		}
 		void Song::DoPreviews(int amount)

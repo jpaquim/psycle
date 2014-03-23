@@ -8,6 +8,7 @@
 namespace psycle { namespace host {
 	class Song;
 	class XMSampler;
+	class CProgressDialog;
 
 	class XMSongLoader : public OldPsyFile
 	{
@@ -15,7 +16,7 @@ namespace psycle { namespace host {
 		XMSongLoader(void);
 		virtual ~XMSongLoader(void);
 		/// RIFF 
-		virtual void Load(Song& song,const bool fullopen = true);
+		virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
 		void LoadInstrumentFromFile(Song& song, const int idx);
 	private:
 		bool IsValid();
@@ -110,7 +111,7 @@ namespace psycle { namespace host {
 		MODSongLoader();
 		virtual ~MODSongLoader();
 		/// RIFF 
-		virtual void Load(Song& song,const bool fullopen = true);
+		virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
 	private:
 		bool IsValid();
 

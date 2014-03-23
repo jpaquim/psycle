@@ -43,6 +43,33 @@ namespace psycle
 			return false;
 		}
 
+		bool PluginFxCallback::FileBox(bool openMode, char* filter, char inoutName[]) { 
+			int modes=OFN_HIDEREADONLY|OFN_EXPLORER|OFN_ENABLESIZING;
+			if (openMode) {	modes |= OFN_FILEMUSTEXIST|OFN_DONTADDTORECENT; }
+			else { modes |= OFN_NOREADONLYRETURN|OFN_OVERWRITEPROMPT|OFN_PATHMUSTEXIST; }
+			std::string ext = filter;
+			int pos = ext.find("|*.");
+			if (pos >= 0) {
+				ext = ext.substr(pos+3,ext.find("|",pos+3)-(pos+3));
+			}
+			CFileDialog fileDlg (openMode, ext.c_str(), NULL, modes, filter);
+			std::string dir;
+			if (inoutName[0] != '\0') {
+				std::string dir2 = inoutName;
+				dir = dir2.substr(0,dir2.rfind('\\')+1);
+			}
+			if (dir.length() == 0 ) {
+				dir =  Global::configuration().GetAbsolutePluginDir();
+			}
+			fileDlg.m_ofn.lpstrInitialDir = dir.c_str();
+			if(fileDlg.DoModal () == IDOK) {
+				strncpy(inoutName,(LPCSTR)fileDlg.GetPathName(),1024);
+				inoutName[1023]='\0';
+				return true;
+			}
+			return false;
+		}
+
 		#pragma warning(push)
 			#pragma warning(disable:4355) // 'this' : used in base member initializer list
 			Plugin::Plugin(int index)

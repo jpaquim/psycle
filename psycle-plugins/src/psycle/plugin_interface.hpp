@@ -15,7 +15,7 @@ namespace psycle { namespace plugin_interface {
 #endif
 
 /// machine interface version.
-unsigned short const MI_VERSION = 0x0012;
+unsigned short const MI_VERSION = 0x0013;
 
 /// max number of pattern tracks
 int const MAX_TRACKS = 64;
@@ -154,6 +154,13 @@ class CFxCallback {
 		virtual int GetTPB() const = 0;
 		/// do not move this destructor from here. Since this is an interface, the position matters.
 		virtual ~CFxCallback() throw() {}
+		/// Open a load (openMode=true) or save (openMode=false) dialog.
+		/// filter is in MFC format: description|*.ext|description2|*ext2|| 
+		/// if you indicate a directory in inoutName, it will be used. Else, you need to provide
+		/// an empty string ([0]='\0') and the plugin dir will be used instead.
+		/// returns true if the user pressed open/save, else return false.
+		/// filter can be any size you want. inoutname has to be 1024 chars.
+		virtual bool FileBox(bool openMode, char filter[], char inoutName[]) = 0;
 };
 
 /*////////////////////////////////////////////////////////////////////////*/

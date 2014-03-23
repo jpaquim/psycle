@@ -57,9 +57,33 @@ public:
 	virtual void OnReload();
 
 	std::string dll_path_;
+	bool usenoteon_;
 
 protected:
 	LuaProxy proxy_;
+
+private:
+	// additions if noteon mode is used
+	struct note { 
+		unsigned char key;
+	    unsigned char midichan;
+	};
+	note trackNote[MAX_TRACKS];
+	void SendNoteOn(unsigned char channel,
+				    unsigned char key,
+					unsigned char inst,
+					unsigned char cmd,
+					unsigned char val);
+	void SendNoteOff(unsigned char channel,
+					 unsigned char key,
+					 unsigned char lastkey,
+					 unsigned char inst,
+					 unsigned char cmd,
+					 unsigned char val);
+	void SendCommand(unsigned char channel,
+		             unsigned char inst,
+		             unsigned char cmd,
+					 unsigned char val);
 };
 
 

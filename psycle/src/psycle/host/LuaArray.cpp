@@ -1,18 +1,21 @@
 #include <psycle/host/detail/project.hpp>
-#include "lua.hpp"
 #include "LuaArray.hpp"
 
 #include <lua.hpp>
-#include <string>
-#include <sstream>
-#include <iostream>
+
 #include <cmath>
 #include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <string>
+
 
 namespace psycle { namespace host {
 
-// for psycle samples
-PSArray::PSArray(int len, float v) : len_(len), baselen_(len_), cap_(len), shared_(0) {  
+PSArray::PSArray(int len, float v) : len_(len),
+	                                 baselen_(len_),
+									 cap_(len),
+									 shared_(0) {  
   universalis::os::aligned_memory_alloc(16, ptr_, len);
 // TODO: sse optimizations don't work! probably because it requires len to be multiple of 4 too.
 //  if (v == 0) {
@@ -46,8 +49,10 @@ PSArray::PSArray(PSArray& a1, PSArray& a2) : shared_(0) {
 void PSArray::resize(int newsize) {
   if (!shared_ && cap_ < newsize) {	    
      //ptr_ = (float*) _aligned_realloc(ptr_, newsize, 16);
+	 std::vector<float> buf(base_, base_+baselen_);
 	 universalis::os::aligned_memory_dealloc(base_);
 	 universalis::os::aligned_memory_alloc(16, ptr_, newsize);
+	 for (int i = 0; i < baselen_; ++i) ptr_[i]=buf[i];
 	 base_ = ptr_;
 	 cap_ = newsize;
   }
@@ -58,16 +63,27 @@ int PSArray::copyfrom(PSArray& src) {
     if (src.len() != len_) {
 		return 0;
 	}
-	// TODO: sse optimizations don't work! probably because it requires len to be multiple of 4 too.
-	//psycle::helpers::dsp::Mov(src.data(), ptr_, len_);
 	for (int i=0; i < len_; ++i) {
 		  ptr_[i] = src.ptr_[i];
 	}
+	// TODO: sse optimizations don't work! probably because it requires len to be multiple of 4 too.
+	//psycle::helpers::dsp::Mov(src.data(), ptr_, len_);
 	return 1;
+}
+
+
+void PSArray::fillzero() {
+//   if (base_ == ptr_ && (len_ & 3 == 0)) {
+	   // try sse2
+//	   psycle::helpers::dsp::Clear(ptr_, len_);
+//   } else {
+      fill(0, 0);
+//   }
 }
 
 void PSArray::fillzero(int pos) {
 	//Cannot use dsp::Clear. pos is not guaranteed to be aligned
+   //psycle::helpers::dsp::Clear(ptr_+pos, len_-pos);
    fill(0,pos);
 }
 
@@ -222,10 +238,12 @@ int LuaArrayBind::array_method_add(lua_State* L) {
      struct {float* p; float* v; float operator()(int y) {return p[y]+v[y];}} f;
      f.v = v->data();
      rv->do_op(f);
+	 lua_pushvalue(L, 1);
    } else {
 	 struct {float* p; double c; float operator()(int y) {return p[y]+c;}} f;
 	 f.c = luaL_checknumber (L, 2);
 	 rv->do_op(f);
+	 lua_pushvalue(L, 1);
    }
    return 1;
 }
@@ -242,8 +260,8 @@ int LuaArrayBind::array_method_mul(lua_State* L) {
 	 struct {float* p; double c; float operator()(int y) {return p[y]*c;}} f;
 	 f.c = luaL_checknumber (L, 2);
 	 rv->do_op(f);
-	 lua_pushvalue(L, 1);
    }
+   lua_pushvalue(L, 1);
    return 1;
 }
 
@@ -259,8 +277,123 @@ int LuaArrayBind::array_method_div(lua_State* L) {
 	 struct {float* p; double c; float operator()(int y) {return p[y]/c;}} f;
 	 f.c = luaL_checknumber (L, 2);
 	 rv->do_op(f);
-	 lua_pushvalue(L, 1);
    }
+   lua_pushvalue(L, 1);
+   return 1;
+}
+
+int LuaArrayBind::array_method_and(lua_State* L) {
+   PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   if (lua_isuserdata(L, 2)) {
+     PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+     luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+     struct {float* p; float* v; float operator()(int y) {
+		 return static_cast<int>(p[y]) & (int)v[y];}
+	 } f;
+     f.v = v->data();
+     rv->do_op(f);
+   } else {
+	 struct {float* p; int c; float operator()(int y) {
+		 return static_cast<int>(p[y]) & c;}
+	 } f;
+	 f.c = (int) luaL_checknumber (L, 2);
+	 rv->do_op(f);
+   }
+   lua_pushvalue(L, 1);
+   return 1;
+   }
+
+
+int LuaArrayBind::array_method_or(lua_State* L) {
+   PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   if (lua_isuserdata(L, 2)) {
+     PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+     luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+     struct {float* p; float* v; float operator()(int y) {
+		 return static_cast<int>(p[y]) | (int)v[y];}
+	 } f;
+     f.v = v->data();
+     rv->do_op(f);	
+   } else {
+	 struct {float* p; int c; float operator()(int y) {
+		 return static_cast<int>(p[y]) | c;}
+	 } f;
+	 f.c = (int) luaL_checknumber (L, 2);
+	 rv->do_op(f);
+   }
+   lua_pushvalue(L, 1);
+   return 1;
+}
+
+int LuaArrayBind::array_method_xor(lua_State* L) {
+    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   if (lua_isuserdata(L, 2)) {
+     PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+     luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+     struct {float* p; float* v; float operator()(int y) {
+		 return static_cast<int>(p[y]) ^ (int)v[y];}
+	 } f;
+     f.v = v->data();
+     rv->do_op(f);
+   } else {
+	 struct {float* p; int c; float operator()(int y) {
+		 return static_cast<int>(p[y]) ^ c;}
+	 } f;
+	 f.c = (int) luaL_checknumber (L, 2);
+	 rv->do_op(f);
+   }
+   lua_pushvalue(L, 1);
+   return 1;
+}
+
+int LuaArrayBind::array_method_sleft(lua_State* L) {
+    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   if (lua_isuserdata(L, 2)) {
+     PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+     luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+     struct {float* p; float* v; float operator()(int y) {
+		 return static_cast<int>(p[y]) << (int)v[y];}
+	 } f;
+     f.v = v->data();
+     rv->do_op(f);
+   } else {
+	 struct {float* p; int c; float operator()(int y) {
+		 return static_cast<int>(p[y]) << c;}
+	 } f;
+	 f.c = (int) luaL_checknumber (L, 2);
+	 rv->do_op(f);
+   }
+   lua_pushvalue(L, 1);
+   return 1;
+}
+
+int LuaArrayBind::array_method_sright(lua_State* L) {
+    PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   if (lua_isuserdata(L, 2)) {
+     PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+     luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+     struct {float* p; float* v; float operator()(int y) {
+		 return static_cast<int>(p[y]) >> (int)v[y];}
+	 } f;
+     f.v = v->data();
+     rv->do_op(f);
+   } else {
+	 struct {float* p; int c; float operator()(int y) {
+		 return static_cast<int>(p[y]) >> c;}
+	 } f;
+	 f.c = (int) luaL_checknumber (L, 2);
+	 rv->do_op(f);
+   }
+   lua_pushvalue(L, 1);
+   return 1;
+}
+
+int LuaArrayBind::array_method_bnot(lua_State* L) {
+   PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, "array_meta");
+   struct {float* p; float operator()(int y) {
+	 return ~static_cast<unsigned int>(p[y]);}
+   } f;
+   rv->do_op(f);
    return 1;
 }
 
@@ -578,6 +711,12 @@ int LuaArrayBind::open_array(lua_State* L) {
 		{ "mul", array_method_mul},
 		{ "div", array_method_div},
 		{ "rsum", array_method_rsum},
+		{ "band", array_method_and},
+		{ "bor", array_method_or},
+		{ "bxor", array_method_xor},
+		{ "bleft", array_method_sleft},
+		{ "bright", array_method_sright},
+		{ "bnot", array_method_bnot},
 		{ "size", array_size},
 		{ "resize", array_resize},
 		{ "copy", array_copy},

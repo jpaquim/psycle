@@ -1502,10 +1502,10 @@ namespace psycle { namespace host {
 		}
 
 
-		void CChildView::SaveBlock(FILE* file)
+		void CChildView::SaveBlock(FILE* file, int pattern/*=-1*/)
 		{
-
-			int ps = _ps();
+			
+			int ps = (pattern!=-1)? pattern: _ps();
 			int nlines = _pSong.patternLines[ps];
 
 			fwrite(&_pSong.SONGTRACKS, sizeof(int), 1, file);
@@ -1522,16 +1522,17 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CChildView::LoadBlock(FILE* file)
+		void CChildView::LoadBlock(FILE* file, int pattern/*=-1*/)
 		{
 			int nt, nl;
+			int ps = -1;
 			fread(&nt,sizeof(int),1,file);
 			fread(&nl,sizeof(int),1,file);
 
 			if ((nt > 0) && (nl > 0))
 			{
+				ps = (pattern!=-1) ? pattern : _ps();
 
-				int ps = _ps();
 				int nlines = _pSong.patternLines[ps];
 				PsycleGlobal::inputHandler().AddUndo(ps,0,0,MAX_TRACKS,nlines,editcur.track,editcur.line,editcur.col,editPosition);
 				if (nlines != nl)

@@ -70,7 +70,6 @@
 #define IDD_WAVED_INSERTSILENCE         257
 #define IDD_WAVED_CROSSFADE             258
 #define IDR_WAVEDFRAME                  258
-#define IDR_MAINFRAME32                 259
 #define IDR_WAVED_POPUP                 260
 #define IDD_SPECIALKEYS                 264
 #define IDD_GEAR_WAVEIN                 271
@@ -96,15 +95,16 @@
 #define IDD_PLOTTER                     322
 #define IDR_INSTRUMENTEDIT              324
 #define IDD_NOTEMAP_INDIVIDUAL          326
-#define IDI_ICON1                       328
 #define IDI_ICON2014                    328
-#define IDR_MAINFRAME1                  329
 #define IDI_ICON2000                    329
-#define IDB_PNG1                        330
-#define IDB_BITMAP1                     331
 #define IDB_SPLASH2014                  331
 #define IDB_MASTER_SKIN                 332
 #define IDB_MIXER_SKIN                  333
+#define IDB_PNG1                        337
+#define IDB_PNG2                        341
+#define IDB_MAINTOOLBAR24               342
+#define IDB_BITMAP2                     343
+#define IDB_MAINTOOLBAR24MASK           343
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -198,7 +198,6 @@
 #define IDC_AUTODEC                     1085
 #define IDC_LABELQ                      1085
 #define IDC_STATIC1                     1086
-#define IDC_F_R_LABEL2                  1086
 #define IDC_STATIC2                     1087
 #define IDC_STATIC3                     1088
 #define IDC_LNOTEMODNOTE                1089
@@ -884,7 +883,6 @@
 #define IDC_CONTRIBUTORS                1820
 #define IDC_USERPRESETS_EDIT            1821
 #define IDC_TEXT_CLOCKDEVICE            1822
-#define IDC_LUASCRIPTS_EDIT2            1822
 #define IDC_LUASCRIPTS_EDIT             1822
 #define IDC_TEXT_HEADROOM               1823
 #define IDC_SAVESETTINGS_ON             1824
@@ -1115,6 +1113,19 @@
 #define ID_WAVEED_WAVEMIN               34305
 #define ID_WAVEED_WAVEPLUS              34306
 #define ID_WAVEEDIT_COMBO_WAV           34307
+#define ID_IMPORTMODULE_PATTERNS        34308
+#define ID_IMPORTMODULE_INSTRUMENTS     34309
+#define ID_EXPORTXM_PATTERNS            34310
+#define ID_EXPORTXM_INSTRUMENTS         34311
+#define ID_EXPORTXM_MODULE              34312
+#define ID_IMPORT_MACHINES              34313
+#define ID_HELP_                        34314
+#define ID_EXPORT_PATTERNS              34315
+#define ID_EXPORT_INSTRUMENTS           34316
+#define ID_EXPORT_MODULE                34317
+#define ID_IMPORT_PATTERNS              34318
+#define ID_IMPORT_INSTRUMENTS           34319
+#define ID_HELP_LUASCRIPT               34320
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1122,8 +1133,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        334
-#define _APS_NEXT_COMMAND_VALUE         34308
+#define _APS_NEXT_RESOURCE_VALUE        344
+#define _APS_NEXT_COMMAND_VALUE         34321
 #define _APS_NEXT_CONTROL_VALUE         2138
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
