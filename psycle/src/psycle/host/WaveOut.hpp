@@ -104,10 +104,10 @@ namespace psycle
 			virtual bool RemoveCapturePort(int idx);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
 
-			virtual std::uint32_t GetInputLatencySamples() const { return settings().blockCount() * settings().blockFrames(); }
-			virtual std::uint32_t GetOutputLatencySamples() const { return settings().blockCount() * settings().blockFrames(); }
-			virtual std::uint32_t GetWritePosInSamples() const;
-			virtual std::uint32_t GetPlayPosInSamples();
+			virtual uint32_t GetInputLatencySamples() const { return settings().blockCount() * settings().blockFrames(); }
+			virtual uint32_t GetOutputLatencySamples() const { return settings().blockCount() * settings().blockFrames(); }
+			virtual uint32_t GetWritePosInSamples() const;
+			virtual uint32_t GetPlayPosInSamples();
 
 			bool CreateCapturePort(PortCapt &port);
 			static void PollerThread(void *pWaveOut);
@@ -131,7 +131,7 @@ namespace psycle
 
 			HWAVEOUT _handle;
 			int _currentBlock;
-			std::uint32_t _writePos;
+			uint32_t _writePos;
 			/// number of "wraparounds" to compensate the WaveOutGetPosition() call.
 			int m_readPosWraps;
 			/// helper variable to detect the previous wraps.

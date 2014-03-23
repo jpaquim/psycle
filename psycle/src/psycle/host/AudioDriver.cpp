@@ -124,7 +124,7 @@ namespace psycle
 				{
 					l = SHORT_MAX;
 				}
-				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
+				*piout++ = (r << 16) | static_cast<uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);
@@ -153,7 +153,7 @@ namespace psycle
 				{
 					l = SHORT_MAX;
 				}
-				*piout++ = (r << 16) | static_cast<std::uint16_t>(l);
+				*piout++ = (r << 16) | static_cast<uint16_t>(l);
 				pin += 2;
 			}
 			while(--c);

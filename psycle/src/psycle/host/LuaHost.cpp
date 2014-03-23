@@ -11,11 +11,11 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
-#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
-extern "C" {
+// #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
+//extern "C" {
 #include <luasocket/luasocket.h>
 #include <luasocket/mime.h>
-}
+//}
 #endif //defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 
 namespace psycle { namespace host {

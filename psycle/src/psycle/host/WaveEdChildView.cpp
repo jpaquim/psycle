@@ -1870,14 +1870,14 @@ namespace psycle { namespace host {
 				
 			struct fullheader
 			{
-				std::uint32_t	head;
-				std::uint32_t	size;
-				std::uint32_t	head2;
-				std::uint32_t	fmthead;
-				std::uint32_t	fmtsize;
+				uint32_t	head;
+				uint32_t	size;
+				uint32_t	head2;
+				uint32_t	fmthead;
+				uint32_t	fmtsize;
 				WAVEFORMATEX	fmtcontent;
-				std::uint32_t datahead;
-				std::uint32_t datasize;
+				uint32_t datahead;
+				uint32_t datasize;
 			} wavheader;
 
 			OpenClipboard();
@@ -1952,7 +1952,7 @@ namespace psycle { namespace host {
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			char *pData;
-			std::uint32_t lFmt, lData;
+			uint32_t lFmt, lData;
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
@@ -1961,11 +1961,11 @@ namespace psycle { namespace host {
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
-			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
+			if ((*(uint32_t*)pPasteData != FourCC("RIFF")) && (*((uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
+			lFmt= *(uint32_t*)((char*)pPasteData + 16);
 			pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
-			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
+			lData = *(uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
 			unsigned long lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
@@ -2083,7 +2083,7 @@ namespace psycle { namespace host {
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			char *pData;
-			std::uint32_t lFmt, lData;
+			uint32_t lFmt, lData;
 			
 			WAVEFORMATEX* pFmt;
 			short* pPasteData;
@@ -2092,11 +2092,11 @@ namespace psycle { namespace host {
 			hPasteData = GetClipboardData(CF_WAVE);
 			pPasteData = (short*)GlobalLock(hPasteData);
 
-			if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
-			lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
+			if ((*(uint32_t*)pPasteData != FourCC("RIFF")) && (*((uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
+			lFmt= *(uint32_t*)((char*)pPasteData + 16);
 			pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
-			lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
+			lData = *(uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 			pData = (char*)pPasteData + 20 + lFmt + 8;
 
 			unsigned long lDataSamps = (int)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
@@ -2167,18 +2167,18 @@ namespace psycle { namespace host {
 				WAVEFORMATEX* pFmt;
 				unsigned long lDataSamps;
 				{
-					std::uint32_t lFmt, lData;
+					uint32_t lFmt, lData;
 					short* pPasteData;
 
 					OpenClipboard();
 					hPasteData = GetClipboardData(CF_WAVE);
 					pPasteData = (short*)GlobalLock(hPasteData);
 
-					if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
-					lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
+					if ((*(uint32_t*)pPasteData != FourCC("RIFF")) && (*((uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
+					lFmt= *(uint32_t*)((char*)pPasteData + 16);
 					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
-					lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
+					lData = *(uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 					pData = (char*)pPasteData + 20 + lFmt + 8;
 
 					lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample
@@ -2277,18 +2277,18 @@ namespace psycle { namespace host {
 				WAVEFORMATEX* pFmt;
 				unsigned long lDataSamps;
 				{
-					std::uint32_t lFmt, lData;
+					uint32_t lFmt, lData;
 					short* pPasteData;
 
 					OpenClipboard();
 					hPasteData = GetClipboardData(CF_WAVE);
 					pPasteData = (short*)GlobalLock(hPasteData);
 
-					if ((*(std::uint32_t*)pPasteData != FourCC("RIFF")) && (*((std::uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
-					lFmt= *(std::uint32_t*)((char*)pPasteData + 16);
+					if ((*(uint32_t*)pPasteData != FourCC("RIFF")) && (*((uint32_t*)pPasteData + 2)!=FourCC("WAVE"))) return;
+					lFmt= *(uint32_t*)((char*)pPasteData + 16);
 					pFmt = reinterpret_cast<WAVEFORMATEX*>((char*)pPasteData + 20); //"RIFF"+ len. +"WAVE" + "fmt " + len. = 20 bytes.
 
-					lData = *(std::uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
+					lData = *(uint32_t*)((char*)pPasteData + 20 + lFmt + 4);
 					pData = (char*)pPasteData + 20 + lFmt + 8;
 
 					lDataSamps = (unsigned long)(lData/pFmt->nBlockAlign);	//data length in bytes divided by number of bytes per sample

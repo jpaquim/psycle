@@ -79,10 +79,10 @@ namespace psycle
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-			virtual std::uint32_t GetInputLatencySamples() const { return _dsBufferSize/GetSampleSizeBytes(); }
-			virtual std::uint32_t GetOutputLatencySamples() const { return _dsBufferSize/GetSampleSizeBytes(); }
-			virtual std::uint32_t GetWritePosInSamples() const;
-			virtual std::uint32_t GetPlayPosInSamples();
+			virtual uint32_t GetInputLatencySamples() const { return _dsBufferSize/GetSampleSizeBytes(); }
+			virtual uint32_t GetOutputLatencySamples() const { return _dsBufferSize/GetSampleSizeBytes(); }
+			virtual uint32_t GetWritePosInSamples() const;
+			virtual uint32_t GetPlayPosInSamples();
 
 			bool CreateCapturePort(PortCapt &port);
 			static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
@@ -92,7 +92,7 @@ namespace psycle
 			bool Start();
 			bool Stop();
 
-			std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) const;
+			uint32_t DirectSound::GetIdxFromDevice(GUID* device) const;
 			static DWORD WINAPI NotifyThread(void* pDirectSound);
 			static DWORD WINAPI PollerThread(void* pDirectSound);
 			void DoBlocks();
@@ -115,9 +115,9 @@ namespace psycle
 			static AudioDriverEvent _event;
 			CCriticalSection _lock;
 
-			std::uint32_t _dsBufferSize;
-			std::uint32_t _lowMark;
-			std::uint32_t _highMark;
+			uint32_t _dsBufferSize;
+			uint32_t _lowMark;
+			uint32_t _highMark;
 			/// number of "wraparounds" to compensate the GetCurrentPosition() call.
 			int m_readPosWraps;
 

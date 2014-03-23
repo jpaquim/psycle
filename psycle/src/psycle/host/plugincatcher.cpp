@@ -30,7 +30,7 @@ namespace psycle
 			DestroyPluginInfo();
 		}
 
-		bool PluginCatcher::lookupDllName(const std::string& name, std::string & result, MachineType type, std::int32_t& shellidx)
+		bool PluginCatcher::lookupDllName(const std::string& name, std::string & result, MachineType type, int32_t& shellidx)
 		{
 			std::string tmp = name;
 			std::string extension = name.substr(name.length()-4,4);
@@ -135,7 +135,7 @@ namespace psycle
 			return 0;
 		}
 
-		bool PluginCatcher::TestFilename(const std::string & name, const std::int32_t shellIdx)
+		bool PluginCatcher::TestFilename(const std::string & name, const int32_t shellIdx)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
 			{

@@ -22,7 +22,7 @@ namespace psycle { namespace host {
 			void GetParsArray(int* destarray) const { if(numPars>0) std::memcpy(destarray, params, numPars * sizeof *params); }
 			void GetDataArray(void* destarray) const {if(dataSize>0) std::memcpy(destarray, data, dataSize); }
 			void* GetData() const {return data;}
-			std::int32_t GetDataSize() const {return dataSize;}
+			int32_t GetDataSize() const {return dataSize;}
 			void SetName(const char *setname) { std::strcpy(name,setname); }
 			void GetName(char *nname) const { std::strcpy(nname,name); }
 			int GetParam(const int n) const;
@@ -30,7 +30,7 @@ namespace psycle { namespace host {
 		private:
 			int numPars;
 			int* params;
-			std::int32_t dataSize;
+			int32_t dataSize;
 			unsigned char * data;
 			char name[32];
 		};

@@ -32,9 +32,9 @@ namespace psycle
 #error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 #if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t volume, std::uint8_t cmd, std::uint8_t param, std::uint8_t machine)
+				inline PatternEntry(uint8_t note, uint8_t inst, uint8_t volume, uint8_t cmd, uint8_t param, uint8_t machine)
 #else
-				inline PatternEntry(std::uint8_t note, std::uint8_t inst, std::uint8_t machine, std::uint8_t cmd, std::uint8_t param)
+				inline PatternEntry(uint8_t note, uint8_t inst, uint8_t machine, uint8_t cmd, uint8_t param)
 #endif
 #endif
 				:
@@ -52,20 +52,20 @@ namespace psycle
 					_parameter(param)
 				{
 				}
-				std::uint8_t _note;
-				std::uint8_t _inst;
+				uint8_t _note;
+				uint8_t _inst;
 #if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
 	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
 #else
 	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				std::uint8_t _volume;
-				std::uint8_t _cmd;
-				std::uint8_t _parameter;
-				std::uint8_t _mach;
+				uint8_t _volume;
+				uint8_t _cmd;
+				uint8_t _parameter;
+				uint8_t _mach;
 	#else
-				std::uint8_t _mach;
-				std::uint8_t _cmd;
-				std::uint8_t _parameter;
+				uint8_t _mach;
+				uint8_t _cmd;
+				uint8_t _parameter;
 	#endif
 #endif
 		};

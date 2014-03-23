@@ -77,14 +77,14 @@ namespace psycle {
 #pragma pack(push, 1)
 			struct fullheader
 			{
-				std::uint32_t	head;
-				std::uint32_t	size;
-				std::uint32_t	head2;
-				std::uint32_t	fmthead;
-				std::uint32_t	fmtsize;
+				uint32_t	head;
+				uint32_t	size;
+				uint32_t	head2;
+				uint32_t	fmthead;
+				uint32_t	fmtsize;
 				WAVEFORMATEX	fmtcontent;
-				std::uint32_t datahead;
-				std::uint32_t datasize;
+				uint32_t datahead;
+				uint32_t datasize;
 			} clipboardwavheader;
 #pragma pack(pop)
 

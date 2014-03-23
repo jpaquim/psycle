@@ -37,11 +37,11 @@ namespace psycle
 			// clear down buffers
 			std::memset( m_midiBuffer, 0, sizeof( MIDI_BUFFER ) * MIDI_BUFFER_SIZE );
 			std::memset( m_channelSetting, -1, sizeof( int ) * MAX_MIDI_CHANNELS );
-			std::memset( m_channelInstMap, 0, sizeof( std::uint32_t ) * MAX_MACHINES );
-			std::memset( m_channelGeneratorMap, -1, sizeof( std::uint32_t ) * MAX_MIDI_CHANNELS );
+			std::memset( m_channelInstMap, 0, sizeof( uint32_t ) * MAX_MACHINES );
+			std::memset( m_channelGeneratorMap, -1, sizeof( uint32_t ) * MAX_MIDI_CHANNELS );
 			std::memset( m_channelNoteOff, true, sizeof( bool ) * MAX_MIDI_CHANNELS );	
 			std::memset( m_channelController, -1, sizeof( int ) * MAX_MIDI_CHANNELS * MAX_CONTROLLERS );	
-			std::memset( m_devId, -1, sizeof( std::uint32_t ) * MAX_DRIVERS );
+			std::memset( m_devId, -1, sizeof( uint32_t ) * MAX_DRIVERS );
 			std::memset( m_midiInHandle, 0, sizeof( HMIDIIN ) * MAX_DRIVERS );
 			std::memset( notetrack, notecommands::release, sizeof( unsigned char ) * MAX_TRACKS );
 			std::memset( instrtrack, -1, sizeof( unsigned char ) * MAX_TRACKS );
@@ -80,7 +80,7 @@ namespace psycle
 		//
 		// DESCRIPTION	  : Set the MIDI device identifier without opening it
 		// PARAMETERS     : int driver - driver identifier
-		//                : std::uint32_t devId - device identifier
+		//                : uint32_t devId - device identifier
 		// RETURNS		  : <void>
 
 		void CMidiInput::SetDeviceId( unsigned int driver, int devId )
@@ -239,13 +239,13 @@ Exit:
 		int CMidiInput::FindDevByName( CString nameString )
 		{
 			MIDIINCAPS mic;
-			std::uint32_t numDevs;
+			uint32_t numDevs;
 
 			// get the number of MIDI input devices
 			numDevs = midiInGetNumDevs();
 
 			// scan for text-id match
-			for( std::uint32_t idx = 0; idx < numDevs; idx++ )
+			for( uint32_t idx = 0; idx < numDevs; idx++ )
 			{
 				// get info about the next device
 				if( !midiInGetDevCaps( idx, &mic, sizeof(MIDIINCAPS) ) )
@@ -402,13 +402,13 @@ Exit:
 		//
 		// DESCRIPTION	  : The MIDI input callback function for our opened device <linker>
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
-		//                : std::uint32_t uMsg - message identifier
+		//                : uint32_t uMsg - message identifier
 		//                : DWORD_PTR dwInstance - user instance data (not used)
 		//                : DWORD_PTR dwParam1 - various midi message info
 		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallbackStatic( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			CMidiInput& midiInput = PsycleGlobal::midi();
 
@@ -443,13 +443,13 @@ Exit:
 		//
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
-		//                : std::uint32_t uMsg - message identifier
+		//                : uint32_t uMsg - message identifier
 		//                : DWORD_PTR dwInstance - user instance data (not used)
 		//                : DWORD_PTR dwParam1 - various midi message info
 		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Inject( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// branch on type of midi message
 			switch( uMsg )
@@ -924,13 +924,13 @@ Exit:
 		//
 		// DESCRIPTION	  : The MIDI input callback function for our opened device
 		// PARAMETERS     : HMIDIIN handle - midi input handle identifier
-		//                : std::uint32_t uMsg - message identifier
+		//                : uint32_t uMsg - message identifier
 		//                : DWORD_PTR dwInstance - user instance data (not used)
 		//                : DWORD_PTR dwParam1 - various midi message info
 		//                : DWORD_PTR dwParam2 - various midi message info
 		// RETURNS		  : <void>
 
-		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
+		void CALLBACK CMidiInput::fnMidiCallback_Step( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 )
 		{
 			// pipe MIDI note on messages into the pattern entry window
 

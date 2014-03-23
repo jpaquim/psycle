@@ -80,7 +80,7 @@ namespace psycle
 			/// tracker pattern info struct
 			PatternEntry entry;
 			/// MIDI input device's timestamp
-			std::uint32_t timeStamp;
+			uint32_t timeStamp;
 			/// MIDI channel
 			int channel;
 			/// tracker track
@@ -116,7 +116,7 @@ namespace psycle
 			/// strobe for the channel map list
 			bool channelMapUpdate;
 			/// 32 bits of boolean info (see FLAGS, CLEAR AFTER READ)
-			std::uint32_t flags;
+			uint32_t flags;
 		};
 
 		enum MODES
@@ -190,11 +190,11 @@ namespace psycle
 
 		private:
 			/// the midi callback functions (just a static linker to the instance one)
-			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, std::uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
@@ -213,9 +213,9 @@ namespace psycle
 			bool m_midiInHandlesTried;	
 
 			/// channel->instrument map
-			std::uint32_t m_channelInstMap[ MAX_MACHINES ];				
+			uint32_t m_channelInstMap[ MAX_MACHINES ];				
 			/// channel->generator map
-			std::uint32_t m_channelGeneratorMap[ MAX_MIDI_CHANNELS ];	
+			uint32_t m_channelGeneratorMap[ MAX_MIDI_CHANNELS ];	
 			/// channel, note off setting
 			bool m_channelNoteOff[ MAX_MIDI_CHANNELS ];			
 			/// channel->controller->parameter map
@@ -234,25 +234,25 @@ namespace psycle
 			///\{
 				/// Time (in millis) at which the MIDI port was started (can be used for own clock. Currently unused)
 				///\todo use std::chrono
-				std::uint32_t m_pc_clock_base;
+				uint32_t m_pc_clock_base;
 				/// Time (in millis) at last resync (used to calculate the MIDI IN Clock deviation)
 				///\todo use std::chrono
-				std::uint32_t m_resyncClockBase;
+				uint32_t m_resyncClockBase;
 				/// MIDI In clock (in millis) at the time of Resync. Used to verify clock deviation between MIDI IN clock calls
 				///\todo use std::chrono
-				std::uint32_t m_resyncMidiStampTime;
+				uint32_t m_resyncMidiStampTime;
 				/// play position (Sample being played), at the time of Resync. Used to verify clock deviation between MIDI IN clock calls
 				int m_resyncPlayPos;	
 				/// difference in samples between the clock position that we should be and the one we are
 				int m_fixOffset;
 				/// Adjusted MIDI In clock (in millis) at the time of Resync for the next event to be written into the audio buffer
 				///\todo use std::chrono
-				std::uint32_t m_resyncAdjStampTime;
+				uint32_t m_resyncAdjStampTime;
 				/// Accumulator (in samples) since last resync.
-				std::uint32_t m_timingAccumulator;
+				uint32_t m_timingAccumulator;
 				/// Accumulator (in millis) since last resync. (Used to know which events to process for this injectMIDI call).
 				///\todo use std::chrono
-				std::uint32_t m_timingCounter;
+				uint32_t m_timingCounter;
 			///\}
 
 			/// configuration information

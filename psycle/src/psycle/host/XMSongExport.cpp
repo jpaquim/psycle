@@ -54,7 +54,7 @@ namespace host{
 		Write(XM_HEADER, 17);//ID text
 		std::string name = "PE:" + song.name.substr(0,17);
 		Write(name.c_str(), 20);//Module name
-		std::uint16_t temp = 0x1A;
+		uint16_t temp = 0x1A;
 		Write(&temp, 1);							
 		Write("FastTracker v2.00   ", 20);//Tracker name
 		temp = 0x0104;
@@ -247,7 +247,7 @@ namespace host{
 					
 				}
 			}
-			ptHeader.packedsize = static_cast<std::uint16_t>((GetPos() - currentpos) & 0xFFFF);
+			ptHeader.packedsize = static_cast<uint16_t>((GetPos() - currentpos) & 0xFFFF);
 			Seek(currentpos-sizeof(ptHeader));
 			Write(&ptHeader,sizeof(ptHeader));
 			Skip(ptHeader.packedsize);

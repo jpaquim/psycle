@@ -628,7 +628,7 @@ namespace psycle
 				if(_lowMark >= _dsBufferSize) {
 					_lowMark -= _dsBufferSize;
 					m_readPosWraps++;
-					if((std::uint64_t)m_readPosWraps * (std::uint64_t)_dsBufferSize >= 0x100000000LL)
+					if((uint64_t)m_readPosWraps * (uint64_t)_dsBufferSize >= 0x100000000LL)
 					{
 						m_readPosWraps = 0;
 						PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
@@ -678,7 +678,7 @@ namespace psycle
 			Enable(true);
 		}
 
-		std::uint32_t DirectSound::GetIdxFromDevice(GUID* device) const {
+		uint32_t DirectSound::GetIdxFromDevice(GUID* device) const {
 			for(int i = 0; i < _playEnums.size() ; ++i)
 			{
 				if(memcmp(device,_playEnums[i].guid,sizeof(GUID)) == 0)
@@ -689,7 +689,7 @@ namespace psycle
 			return 0;
 		}
 
-		std::uint32_t DirectSound::GetPlayPosInSamples()
+		uint32_t DirectSound::GetPlayPosInSamples()
 		{
 			//http://msdn.microsoft.com/en-us/library/ee418744%28v=VS.85%29.aspx
 			//When a buffer is created, the play cursor is set to 0. As the buffer is played,
@@ -710,7 +710,7 @@ namespace psycle
 			}
 		}
 
-		std::uint32_t DirectSound::GetWritePosInSamples() const
+		uint32_t DirectSound::GetWritePosInSamples() const
 		{
 			//http://msdn.microsoft.com/en-us/library/ee418744%28v=VS.85%29.aspx
 			//The write cursor is the point after which it is safe to write data into the buffer.

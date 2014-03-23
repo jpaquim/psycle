@@ -42,7 +42,7 @@ namespace psycle
 		public:
 			bool valid;
 			char dllName[128];
-			std::int32_t numpars;
+			int32_t numpars;
 			float * pars;
 		};
 
@@ -50,7 +50,7 @@ namespace psycle
 		{
 			defaultPatLines = lines;
 		}
-		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,std::int32_t shellIdx)
+		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx)
 		{
 			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx);
 			if (pMachine) {
@@ -64,7 +64,7 @@ namespace psycle
 				return false;
 			}
 		}
-		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,std::int32_t shellIdx)
+		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx)
 		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
@@ -213,7 +213,7 @@ namespace psycle
 			DeleteAllPatterns();
 		}
 
-		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,std::int32_t shellIdx)
+		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
 			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
@@ -1076,9 +1076,9 @@ namespace psycle
 
 			if(hd._id == file.FourCC("BODY"))
 			{
-				std::int16_t * csamples;
+				int16_t * csamples;
 				wave.AllocWaveData(Datalen,false);
-				csamples = const_cast<std::int16_t*>(wave.pWaveDataL());
+				csamples = const_cast<int16_t*>(wave.pWaveDataL());
 				if(bits == 16)
 				{
 					for(unsigned int smp(0) ; smp < Datalen; ++smp)
@@ -1109,7 +1109,7 @@ namespace psycle
 			return 1;
 		}
 
-		int Song::WavAlloc(int iInstr, bool bStereo, std::uint32_t iSamplesPerChan, const char * sName)
+		int Song::WavAlloc(int iInstr, bool bStereo, uint32_t iSamplesPerChan, const char * sName)
 		{
 			assert(iSamplesPerChan<(1<<30)); ///< FIXME: Since in some places, signed values are used, we cannot use the whole range.
 			if (iInstr < PREV_WAV_INS ) {
@@ -1141,7 +1141,7 @@ namespace psycle
 			// sample type	
 			int st_type(file.NumChannels());
 			int bits(file.BitsPerSample());
-			std::uint32_t Datalen(file.NumSamples());
+			uint32_t Datalen(file.NumSamples());
 			// Initializes the layer.
 			char* filename = const_cast<char*>(strrchr(wavfile,'\\'));
 			if (filename == NULL) {
@@ -1156,7 +1156,7 @@ namespace psycle
 			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
 			XMInstrument::WaveData<>& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.UsePreviewWave();
 			wave.WaveSampleRate(file.SamplingRate());
-			std::int16_t * sampL = wave.pWaveDataL();
+			int16_t * sampL = wave.pWaveDataL();
 
 			///\todo use template code for all this semi-repetitive code.
 
@@ -1167,7 +1167,7 @@ namespace psycle
 				switch(bits)
 				{
 					case 8:
-						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
+						for(uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							*sampL = (smp8 << 8) - 32768;
@@ -1178,7 +1178,7 @@ namespace psycle
 							file.ReadData(sampL, Datalen);
 						break;
 					case 24:
-						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
+						for(uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							file.ReadData(sampL, 1);
@@ -1192,12 +1192,12 @@ namespace psycle
 			// stereo
 			else
 			{
-				std::int16_t * sampR = wave.pWaveDataR();
+				int16_t * sampR = wave.pWaveDataR();
 				UINT8 smp8;
 				switch(bits)
 				{
 					case 8:
-						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
+						for(uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							*sampL = (smp8 << 8) - 32768;
@@ -1208,7 +1208,7 @@ namespace psycle
 						}
 						break;
 					case 16:
-						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
+						for(uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(sampL, 1);
 							file.ReadData(sampR, 1);
@@ -1217,7 +1217,7 @@ namespace psycle
 						}
 						break;
 					case 24:
-						for(std::uint32_t io = 0 ; io < Datalen ; ++io)
+						for(uint32_t io = 0 ; io < Datalen ; ++io)
 						{
 							file.ReadData(&smp8, 1);
 							file.ReadData(sampL, 1);
@@ -1242,8 +1242,8 @@ namespace psycle
 					if(pl == 1)
 					{
 						file.Skip(15);
-						std::uint32_t ls(0);
-						std::uint32_t le(0);
+						uint32_t ls(0);
+						uint32_t le(0);
 						file.Read(static_cast<void*>(&ls), 4);
 						file.Read(static_cast<void*>(&le), 4);
 						if (ls >= 0 && ls <= le && le < Datalen){
@@ -1351,7 +1351,7 @@ namespace psycle
 							SONGTRACKS = temp;
 							// bpm
 							{///\todo: This was a hack added in 1.9alpha to allow decimal BPM values
-								std::int16_t temp16(0);
+								int16_t temp16(0);
 								pFile->Read(&temp16, sizeof temp16);
 								int BPMCoarse = temp16;
 								pFile->Read(&temp16, sizeof temp16);
@@ -1390,7 +1390,7 @@ namespace psycle
 							}
 							// fix for a bug existing in the song saver in the 1.7.x series
 							if(version == 0) {
-								size = (11 * sizeof(std::uint32_t)) + (SONGTRACKS * 2 * sizeof(bool));
+								size = (11 * sizeof(uint32_t)) + (SONGTRACKS * 2 * sizeof(bool));
 							}
 							else if(version > 0) {
 								pFile->Read(shareTrackNames);
@@ -1798,7 +1798,7 @@ namespace psycle
 								wave.WaveLoopType(doloop?XMInstrument::WaveData<>::LoopType::NORMAL:XMInstrument::WaveData<>::LoopType::DO_NOT);
 								pFile->Read(stereo);
 								wave.AllocWaveData(wltemp,stereo);
-								std::int16_t* data = wave.pWaveDataL();
+								int16_t* data = wave.pWaveDataL();
 								pFile->Read(data, wltemp*sizeof(short));
 								if (stereo)
 								{
@@ -1832,7 +1832,7 @@ namespace psycle
 					{
 						pFile->Read(vstL[i].dllName,sizeof(vstL[i].dllName));
 						_strlwr(vstL[i].dllName);
-						pFile->Read(&(vstL[i].numpars), sizeof(std::int32_t));
+						pFile->Read(&(vstL[i].numpars), sizeof(int32_t));
 						vstL[i].pars = new float[vstL[i].numpars];
 
 						for (int c=0; c<vstL[i].numpars; c++)
@@ -1933,7 +1933,7 @@ namespace psycle
 								// the newly created plugin.
 								pTempMac->PreLoad(pFile,program,instance);
 								assert(instance < OLD_MAX_PLUGINS);
-								std::int32_t shellIdx=0;
+								int32_t shellIdx=0;
 								if((!vstL[instance].valid) || (!Global::machineload().lookupDllName(vstL[instance].dllName,temp,MACH_VST,shellIdx)))
 								{
 									berror=true;

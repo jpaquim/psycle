@@ -12,8 +12,7 @@
 
 namespace psycle { namespace helpers { namespace math {
 
-using universalis::stdlib::uint32_t;
-using universalis::stdlib::uint64_t;
+using namespace universalis::stdlib;
 
 /// Cure for malicious samples
 /// Type : Filters Denormals, NaNs, Infinities

@@ -28,9 +28,9 @@ class XMSampler : public Machine
 public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
-	static const std::uint32_t VERSION = 0x00010001;
+	static const uint32_t VERSION = 0x00010001;
 	//Version zero was the development version (no format freeze). Version one is the published one.
-	static const std::uint32_t VERSION_ONE = 0x00010000;
+	static const uint32_t VERSION_ONE = 0x00010000;
 
 /*
 * = remembers its last value when called with param 00.
@@ -172,7 +172,7 @@ XMSampler::Channel::PerformFX().
 	//\todo: WaveDateController Needs to update the speed if sampleRate changes (but... would the samplerate change while
 	//       there's a voice playing?)
 
-	template <class T = std::int16_t>
+	template <class T = int16_t>
 	class WaveDataController
 	{
 	public:
@@ -201,7 +201,7 @@ XMSampler::Channel::PerformFX().
 			const std::ptrdiff_t diff = static_cast<std::ptrdiff_t>(m_Position.HighPart)-old;
 			m_pL+=diff;
 #ifndef NDEBUG
-			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
+			if (static_cast<int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
 				TRACE("204: highpart> loopEnd+17 bug triggered!\n");
 			}
 #endif
@@ -223,7 +223,7 @@ XMSampler::Channel::PerformFX().
 			m_pL+=diff;
 			m_pR+=diff;
 #ifndef NDEBUG
-			if (static_cast<std::int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
+			if (static_cast<int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
 				TRACE("226: highpart > loopend+17 bug triggered!\n");
 			}
 #endif
@@ -270,9 +270,9 @@ XMSampler::Channel::PerformFX().
 		}
 		
 		// Current sample Speed
-		inline std::int64_t Speed() const {return m_Speed;}
+		inline int64_t Speed() const {return m_Speed;}
 		virtual void Speed(const helpers::dsp::resampler & resampler, const double value){
-			m_Speed = static_cast<std::int64_t>(value * 4294967296.0); // 4294967296 is a left shift of 32bits
+			m_Speed = static_cast<int64_t>(value * 4294967296.0); // 4294967296 is a left shift of 32bits
 			resampler.UpdateSpeed(resampler_data, value);
 			m_SpeedInternal = (CurrentLoopDirection() == LoopDirection::FORWARD) ? m_Speed : -1*m_Speed;
 		}
@@ -281,14 +281,14 @@ XMSampler::Channel::PerformFX().
 		virtual void CurrentLoopDirection(const LoopDirection::Type dir){m_CurrentLoopDirection = dir;}
 
 		inline XMInstrument::WaveData<>::LoopType::Type LoopType() const {return m_pWave->WaveLoopType();}
-		inline std::uint32_t LoopStart() const {return m_pWave->WaveLoopStart();}
-		inline std::uint32_t LoopEnd() const { return m_pWave->WaveLoopEnd();}
+		inline uint32_t LoopStart() const {return m_pWave->WaveLoopStart();}
+		inline uint32_t LoopEnd() const { return m_pWave->WaveLoopEnd();}
 
 		inline XMInstrument::WaveData<>::LoopType::Type SustainLoopType() const {return m_pWave->WaveSusLoopType();}
-		inline std::uint32_t SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
-		inline std::uint32_t SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
+		inline uint32_t SustainLoopStart() const {return m_pWave->WaveSusLoopStart();}
+		inline uint32_t SustainLoopEnd() const { return m_pWave->WaveSusLoopEnd();}
 
-		inline std::uint32_t Length() const {return m_pWave->WaveLength();}
+		inline uint32_t Length() const {return m_pWave->WaveLength();}
 
 		inline bool IsStereo() const { return m_pWave->IsWaveStereo();}
 
@@ -302,8 +302,8 @@ XMSampler::Channel::PerformFX().
 		int m_Layer;
 		const XMInstrument::WaveData<T> *m_pWave;
 		ULARGE_INTEGER m_Position;
-		std::int64_t m_Speed;
-		std::int64_t m_SpeedInternal;
+		int64_t m_Speed;
+		int64_t m_SpeedInternal;
 		bool m_Playing;
 		bool m_looped; //Indicates if the playback has already looped. This is necessary for properly identifying which buffer to use.
 
@@ -483,7 +483,7 @@ XMSampler::Channel::PerformFX().
 		// This one is Psycle's "NewLine"
 		void NewLine();
 
-		void NoteOn(const std::uint8_t note,const std::int16_t playvol=-1,bool reset=true);
+		void NoteOn(const uint8_t note,const int16_t playvol=-1,bool reset=true);
 		void NoteOff();
 		void NoteOffFast();
 		void NoteFadeout();
@@ -491,7 +491,7 @@ XMSampler::Channel::PerformFX().
 		XMInstrument::NewNoteAction::Type NNA() const { return m_NNA;}
 		void NNA(const XMInstrument::NewNoteAction::Type value){ m_NNA = value;}
 		
-		void ResetVolAndPan(std::int16_t playvol,bool reset=true);
+		void ResetVolAndPan(int16_t playvol,bool reset=true);
 		void UpdateSpeed();
 		double PeriodToSpeed(int period) const;
 
@@ -569,8 +569,8 @@ XMSampler::Channel::PerformFX().
 		void IsStopping(const bool stop) { m_Stopping = stop; }
 
 		// Volume of the current note.
-		std::uint16_t Volume() const { return m_Volume; }
-		void Volume(const std::uint16_t vol)
+		uint16_t Volume() const { return m_Volume; }
+		void Volume(const uint16_t vol)
 		{
 			m_Volume = vol;
 			//Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.

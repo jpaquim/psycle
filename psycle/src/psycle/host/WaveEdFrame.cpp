@@ -277,7 +277,7 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::PlayFrom(unsigned long startPos)
 		{
-			std::uint32_t wl=0;
+			uint32_t wl=0;
 			if (_pSong->samples.IsEnabled(wsInstrument)) { wl = _pSong->samples[wsInstrument].WaveLength();}
 			if( startPos >= wl )
 				return;
@@ -294,7 +294,7 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::OnFastForward()
 		{
-			std::uint32_t wl=0;
+			uint32_t wl=0;
 			if (_pSong->samples.IsEnabled(wsInstrument)) { wl = _pSong->samples[wsInstrument].WaveLength();}
 			wavview.SetCursorPos( wl-1 );
 		}

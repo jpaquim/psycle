@@ -92,18 +92,18 @@ namespace psycle
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual	void RefreshAvailablePorts();
-			virtual std::uint32_t GetWritePosInSamples() const;
-			virtual std::uint32_t GetPlayPosInSamples();
-			virtual std::uint32_t GetInputLatencyMs() const;
-			virtual std::uint32_t GetOutputLatencyMs() const;
-			virtual std::uint32_t GetInputLatencySamples() const;
-			virtual std::uint32_t GetOutputLatencySamples() const;
+			virtual uint32_t GetWritePosInSamples() const;
+			virtual uint32_t GetPlayPosInSamples();
+			virtual uint32_t GetInputLatencyMs() const;
+			virtual uint32_t GetOutputLatencyMs() const;
+			virtual uint32_t GetInputLatencySamples() const;
+			virtual uint32_t GetOutputLatencySamples() const;
 		private:
 			static void Error(const TCHAR msg[]);
 			static const char* GetError(HRESULT hr);
 			void RefreshPorts(IMMDeviceEnumerator *pEnumerator);
 			void FillPortList(std::vector<PortEnum>& portList, IMMDeviceCollection *pCollection, LPWSTR defaultID);
-			std::uint32_t GetIdxFromDevice(WCHAR* szDeviceID) const;
+			uint32_t GetIdxFromDevice(WCHAR* szDeviceID) const;
 			bool Start();
 			bool Stop();
 			static DWORD WINAPI EventAudioThread(void* pWasapi);
@@ -129,7 +129,7 @@ namespace psycle
 			PaWasapiSubStream out;
 			IAudioClock* pAudioClock;
 			UINT64 audioClockFreq;
-			std::uint32_t writeMark;
+			uint32_t writeMark;
 
 			// must be volatile to avoid race condition on user query while
 			// thread is being started

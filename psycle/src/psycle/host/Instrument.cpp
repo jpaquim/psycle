@@ -243,7 +243,7 @@ namespace psycle
 				const XMInstrument::WaveData<>& wave = samples[sampleIdx];
 				byte * pData1(0);
 				byte * pData2(0);
-				std::uint32_t size1=0,size2=0;
+				uint32_t size1=0,size2=0;
 				size1 = DataCompression::SoundSquash(wave.m_pWaveDataL,&pData1,wave.m_WaveLength);
 				if (wave.m_WaveStereo)
 				{

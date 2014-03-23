@@ -194,11 +194,11 @@ namespace psycle
 		void XMSampler::WaveDataController<T>::RefillBuffer(T buffer[192], const T* data,bool released)
 		{
 			//These values are for the max size of resampler (which suits the rest).
-			const std::uint32_t presamples=15;
-			const std::uint32_t postsamples=16;
-			const std::uint32_t totalsamples=presamples+postsamples+1; //pre+post+current
-			const std::uint32_t secbegin=64;	// start of second window = totalsamples*2
-			const std::uint32_t thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
+			const uint32_t presamples=15;
+			const uint32_t postsamples=16;
+			const uint32_t totalsamples=presamples+postsamples+1; //pre+post+current
+			const uint32_t secbegin=64;	// start of second window = totalsamples*2
+			const uint32_t thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
 			
 			XMInstrument::WaveData<>::LoopType::Type looptype;
 			uint32_t loopstart;
@@ -296,10 +296,10 @@ namespace psycle
 			const int secbegin=64;	// start of second window = totalsamples*2
 			const int thirdbegin=128; // start of third window = secbegin+(totalsamples*2)
 
-			std::int32_t max;
+			int32_t max;
 			ULARGE_INTEGER amount;
 			amount.QuadPart = m_Position.QuadPart + m_SpeedInternal*numSamples;
-			std::int32_t pos = m_Position.HighPart;
+			int32_t pos = m_Position.HighPart;
 
 			//TRACE("RealPos %d\n",pos);
 			if (CurrentLoopDirection() == LoopDirection::FORWARD) {
@@ -330,10 +330,10 @@ namespace psycle
 				else {
 					m_pL = const_cast<T *>(m_pWave->pWaveDataL()+pos);
 					m_pR = const_cast<T *>(m_pWave->pWaveDataR()+pos);
-					if (static_cast<std::int32_t>(amount.HighPart)+postsamples<m_CurrentLoopEnd) {
+					if (static_cast<int32_t>(amount.HighPart)+postsamples<m_CurrentLoopEnd) {
 						return numSamples;
 					}
-					max = m_CurrentLoopEnd-static_cast<std::int32_t>(m_Position.HighPart)-postsamples;
+					max = m_CurrentLoopEnd-static_cast<int32_t>(m_Position.HighPart)-postsamples;
 					//TRACE("sample buffer at pos %d for samples %d\n" , pos , max);
 				}
 				if(max<0) {
@@ -355,10 +355,10 @@ namespace psycle
 				else {
 					m_pL = const_cast<T *>(m_pWave->pWaveDataL()+pos);
 					m_pR = const_cast<T *>(m_pWave->pWaveDataR()+pos);
-					if (static_cast<std::int32_t>(amount.HighPart)-presamples>= m_CurrentLoopStart) {
+					if (static_cast<int32_t>(amount.HighPart)-presamples>= m_CurrentLoopStart) {
 						return numSamples;
 					}
-					max = static_cast<std::int32_t>(m_Position.HighPart)-m_CurrentLoopStart-postsamples;
+					max = static_cast<int32_t>(m_Position.HighPart)-m_CurrentLoopStart-postsamples;
 					//TRACE("sample buffer (backwards) at pos %d for samples %d\n",  pos , max);
 				}
 				if(max<0) {
@@ -381,7 +381,7 @@ namespace psycle
 		template <class T>
 		void XMSampler::WaveDataController<T>::PostWork()
 		{
-			std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+			int32_t newIntPos = static_cast<int32_t>(m_Position.HighPart);
 			if( CurrentLoopDirection() == LoopDirection::FORWARD && newIntPos >= m_CurrentLoopEnd)
 			{
 				m_looped=true;
@@ -390,16 +390,16 @@ namespace psycle
 				case XMInstrument::WaveData<>::LoopType::NORMAL:
 					do {
 						m_Position.HighPart = m_CurrentLoopStart+(newIntPos-m_CurrentLoopEnd);
-						newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+						newIntPos = static_cast<int32_t>(m_Position.HighPart);
 						//For very small loops, the while is necessary
-					} while (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
+					} while (static_cast<int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
 					break;
 				case XMInstrument::WaveData<>::LoopType::BIDI:
 					do {
 						m_Position.HighPart = m_CurrentLoopEnd-(newIntPos-m_CurrentLoopEnd);
-						newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+						newIntPos = static_cast<int32_t>(m_Position.HighPart);
 						//For very small loops, the while is necessary
-					} while (static_cast<std::int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
+					} while (static_cast<int32_t>(m_Position.HighPart) > m_CurrentLoopEnd);
 					m_Position.LowPart = 4294967295 -m_Position.LowPart;
 					m_CurrentLoopDirection = LoopDirection::BACKWARD;
 					m_SpeedInternal = -1*m_Speed;
@@ -417,10 +417,10 @@ namespace psycle
 				case XMInstrument::WaveData<>::LoopType::NORMAL://fallthrough
 				case XMInstrument::WaveData<>::LoopType::BIDI:
 					do {
-						std::int32_t newIntPos = static_cast<std::int32_t>(m_Position.HighPart);
+						int32_t newIntPos = static_cast<int32_t>(m_Position.HighPart);
 						m_Position.HighPart = m_CurrentLoopStart+(m_CurrentLoopStart-newIntPos);
 						//For very small loops, the while is necessary
-					} while (static_cast<std::int32_t>(m_Position.HighPart) < m_CurrentLoopStart);
+					} while (static_cast<int32_t>(m_Position.HighPart) < m_CurrentLoopStart);
 					m_Position.LowPart = 4294967295 -m_Position.LowPart;
 					m_CurrentLoopDirection = LoopDirection::FORWARD;
 					m_SpeedInternal = m_Speed;
@@ -450,7 +450,7 @@ namespace psycle
 			}
 		}
 
-		template class XMSampler::WaveDataController<std::int16_t>;
+		template class XMSampler::WaveDataController<int16_t>;
 		template class XMSampler::WaveDataController<float>;
 
 
@@ -873,7 +873,7 @@ namespace psycle
 			m_FilterEnvelope.RecalcDeviation();
 		}
 
-		void XMSampler::Voice::NoteOn(const std::uint8_t note,const std::int16_t playvol,bool reset)
+		void XMSampler::Voice::NoteOn(const uint8_t note,const int16_t playvol,bool reset)
 		{	
 			XMInstrument::NotePair pair = rInstrument().NoteToSample(note);
 			int wavelayer = pair.second;
@@ -925,7 +925,7 @@ namespace psycle
 			IsPlaying(true);
 		}
 
-		void XMSampler::Voice::ResetVolAndPan(std::int16_t playvol,bool reset)
+		void XMSampler::Voice::ResetVolAndPan(int16_t playvol,bool reset)
 		{
 			float fpan=0.5f;
 			if ( reset)
@@ -2880,7 +2880,7 @@ namespace psycle
 			int temp;
 			// we cannot calculate the size previous to save, so we write a placeholder
 			// and seek back to write the correct value.
-			std::uint32_t size = 0;
+			uint32_t size = 0;
 			size_t filepos = riffFile->GetPos();
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Write(VERSION);
@@ -2911,7 +2911,7 @@ namespace psycle
 
 			size_t endpos = riffFile->GetPos();
 			riffFile->Seek(filepos);
-			size = static_cast<std::uint32_t>(endpos - filepos -sizeof(size));
+			size = static_cast<uint32_t>(endpos - filepos -sizeof(size));
 			riffFile->Write(&size,sizeof(size));
 			riffFile->Seek(endpos);
 
@@ -2921,9 +2921,9 @@ namespace psycle
 		{
 			int temp;
 			bool wrongState=false;
-			std::uint32_t filevers;
+			uint32_t filevers;
 			size_t filepos;
-			std::uint32_t size=0;
+			uint32_t size=0;
 			riffFile->Read(&size,sizeof(size));
 			filepos=riffFile->GetPos();
 			riffFile->Read(filevers);

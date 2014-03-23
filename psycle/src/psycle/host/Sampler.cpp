@@ -250,7 +250,7 @@ namespace psycle
 
 			Voice* pVoice = &_voices[voice];
 			int triggered = 0;
-			std::uint64_t w_offset = 0;
+			uint64_t w_offset = 0;
 
 			pVoice->_sampleCounter=0;
 			pVoice->effCmd=pEntry->_cmd;
@@ -331,7 +331,7 @@ namespace psycle
 					float const finetune = (float)wave.WaveFineTune()*0.01f;
 					speeddouble = pow(2.0f, (pEntry->_note+wave.WaveTune()-baseC +finetune)/12.0f)*((float)wave.WaveSampleRate()/Global::player().SampleRate());
 				}
-				pVoice->_wave._speed = static_cast<std::int64_t>(speeddouble*4294967296.0f);
+				pVoice->_wave._speed = static_cast<int64_t>(speeddouble*4294967296.0f);
 
 				if (pVoice->resampler_data != NULL) _resampler.DisposeResamplerData(pVoice->resampler_data);
 				pVoice->resampler_data = _resampler.GetResamplerData();
@@ -867,7 +867,7 @@ namespace psycle
 		{
 			// 4294967 stands for (2^30/250), meaning that
 			//value 250 = (inc)decreases the speed in in 1/4th of the original (wave) speed each PerformFx call.
-			std::int64_t shift;
+			int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up
@@ -894,7 +894,7 @@ namespace psycle
 		{
 			//Old version had default C4 as false
 			DefaultC4(false);
-			std::uint32_t size=0;
+			uint32_t size=0;
 			pFile->Read(&size,sizeof(size));
 			if (size)
 			{
@@ -912,9 +912,9 @@ namespace psycle
 					case 1:
 					default: _resampler.quality(helpers::dsp::resampler::quality::linear);
 				}
-				if(size > 3*sizeof(std::uint32_t))
+				if(size > 3*sizeof(uint32_t))
 				{
-					std::uint32_t internalversion;
+					uint32_t internalversion;
 					pFile->Read(internalversion);
 					if (internalversion >= 1) {
 						bool defaultC4;
@@ -928,8 +928,8 @@ namespace psycle
 
 		void Sampler::SaveSpecificChunk(RiffFile* pFile) 
 		{
-			std::uint32_t temp;
-			std::uint32_t size = 3*sizeof(temp) + 1*sizeof(bool);
+			uint32_t temp;
+			uint32_t size = 3*sizeof(temp) + 1*sizeof(bool);
 			pFile->Write(&size,sizeof(size));
 			temp = _numVoices;
 			pFile->Write(&temp, sizeof(temp)); // numSubtracks

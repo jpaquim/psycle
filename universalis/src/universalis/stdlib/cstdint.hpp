@@ -62,10 +62,12 @@
 		// don't let boost use 'long int'
 		// TODO come back to this.. it's too ugly!
 		#if defined DIVERSALIS__OS__MICROSOFT && UINT_MAX == 0xffffffffu && ULLONG_MAX == 0xffffffffffffffffull
+		  #if ! defined _STDINT
 			typedef signed int int32_t;
 			typedef unsigned int uint32_t;
 			typedef signed long long int int64_t;
 			typedef unsigned long long int uint64_t;
+          #endif
 		#else
 			using boost::int32_t;
 			using boost::uint32_t;

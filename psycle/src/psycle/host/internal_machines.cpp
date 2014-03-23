@@ -233,7 +233,7 @@ namespace psycle
 				int note = pData._note+noteOffset[i];
 				if ( note>=notecommands::release) note=119;
 				else if (note<0 ) note=0;				
-				pData._note = static_cast<std::uint8_t>(note);
+				pData._note = static_cast<uint8_t>(note);
 			}
 		}
 		bool DuplicatorMac::playsTrack(const int track) const
@@ -390,7 +390,7 @@ namespace psycle
 				int note = pData._note+noteOffset[i];
 				if ( note>=notecommands::release) note=119;
 				else if (note<0 ) note=0;				
-				pData._note = static_cast<std::uint8_t>(note);
+				pData._note = static_cast<uint8_t>(note);
 			}
 		}
 
@@ -1901,7 +1901,7 @@ namespace psycle
 
 		bool Mixer::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t filesize;
+			uint32_t filesize;
 			pFile->Read(&filesize,sizeof(filesize));
 
 			pFile->Read(&solocolumn_,sizeof(solocolumn_));
@@ -1968,7 +1968,7 @@ namespace psycle
 
 		void Mixer::SaveSpecificChunk(RiffFile* pFile)
 		{
-			std::uint32_t size(sizeof(solocolumn_)+sizeof(master_)+2*sizeof(int));
+			uint32_t size(sizeof(solocolumn_)+sizeof(master_)+2*sizeof(int));
 			size+=(3*sizeof(float)+3*sizeof(bool)+numsends()*sizeof(float))*numinputs();
 			size+=(2*sizeof(float)+2*sizeof(bool)+numsends()*sizeof(bool)+2*sizeof(float)+sizeof(int))*numreturns();
 			size+=(2*sizeof(float)+sizeof(int))*numsends();

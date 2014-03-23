@@ -33,9 +33,9 @@ namespace psycle
 {
 	namespace host
 	{
-		std::uint32_t RiffFile::FourCC(char const * null_terminated_string)
+		uint32_t RiffFile::FourCC(char const * null_terminated_string)
 		{
-			std::uint32_t result(0x20202020); // four spaces (padding)
+			uint32_t result(0x20202020); // four spaces (padding)
 			char * chars(reinterpret_cast<char *>(&result));
 			for(int i(0) ; i < 4 && null_terminated_string[i] ; ++i) *chars++ = null_terminated_string[i];
 			return result;

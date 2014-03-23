@@ -48,8 +48,8 @@ namespace psycle
 		class RiffChunkHeader
 		{
 		public:
-			std::uint32_t _id;
-			std::uint32_t _size; // This one should be ULONGINV (it is, at least, in the files I([JAZ]) have tested)
+			uint32_t _id;
+			uint32_t _size; // This one should be ULONGINV (it is, at least, in the files I([JAZ]) have tested)
 		};
 
 		/// riff file format.
@@ -90,12 +90,12 @@ namespace psycle
 
 			const double        ReadDouble() { double        t; Read(t); return t; }
 			const float         ReadFloat()  { float         t; Read(t); return t; }
-			const std:: int32_t ReadInt32()  { std:: int32_t t; Read(t); return t; }
-			const std::uint32_t ReadUInt32() { std::uint32_t t; Read(t); return t; }
-			const std:: int16_t ReadInt16()  { std:: int16_t t; Read(t); return t; }
-			const std::uint16_t ReadUInt16() { std::uint16_t t; Read(t); return t; }
-			const std::  int8_t ReadInt8()   { std::  int8_t t; Read(t); return t; }
-			const std:: uint8_t ReadUInt8()  { std:: uint8_t t; Read(t); return t; }
+			const int32_t ReadInt32()  { int32_t t; Read(t); return t; }
+			const uint32_t ReadUInt32() { uint32_t t; Read(t); return t; }
+			const int16_t ReadInt16()  { int16_t t; Read(t); return t; }
+			const uint16_t ReadUInt16() { uint16_t t; Read(t); return t; }
+			const int8_t ReadInt8()   {  int8_t t; Read(t); return t; }
+			const uint8_t ReadUInt8()  { uint8_t t; Read(t); return t; }
 			///\todo MSWINDOWS-SPEFOIHEZOFIHDSLKHGSIFIC CODE!!!!!!!!!
 			const TCHAR * RiffFile::ReadStringA2T(TCHAR* pData, const std::size_t maxLength);
 
@@ -312,7 +312,7 @@ namespace psycle
 			std::string szName;
 			///\todo private
 			RiffChunkHeader _header;
-			static std::uint32_t FourCC(char const * null_terminated_string);
+			static uint32_t FourCC(char const * null_terminated_string);
 		};
 
 		class OldPsyFile : public RiffFile

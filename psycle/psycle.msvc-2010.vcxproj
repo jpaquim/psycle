@@ -142,6 +142,8 @@
     <ClInclude Include="src\psycle\host\Constants.hpp" />
     <ClInclude Include="src\psycle\host\Global.hpp" />
     <ClInclude Include="src\psycle\host\InputHandler.hpp" />
+    <ClInclude Include="src\psycle\host\InstrIndividualMap.hpp" />
+    <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
     <ClInclude Include="src\psycle\host\version.hpp" />
     <ClInclude Include="src\psycle\host\ASIOInterface.hpp" />
     <ClInclude Include="src\psycle\host\AudioDriver.hpp" />
@@ -214,15 +216,14 @@
     <ClInclude Include="src\psycle\host\WaveEdInsertSilenceDialog.hpp" />
     <ClInclude Include="src\psycle\host\WaveEdMixDialog.hpp" />
     <ClInclude Include="src\psycle\host\VstEffectWnd.hpp" />
-	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp"/>
-	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp"/>
-	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp"/>
-	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp"/>
-	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp"/>
-	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp"/>
-	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.hpp"/>
-	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp"/>
-	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp"/>
+    <ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp" />
+    <ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp" />
+    <ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp" />
     <ClInclude Include="src\psycle\host\XMSamplerMixerPage.hpp" />
     <ClInclude Include="src\psycle\host\XMSamplerUI.hpp" />
     <ClInclude Include="src\psycle\host\XMSamplerUIGeneral.hpp" />
@@ -232,7 +233,7 @@
     <ClInclude Include="src\psycle\host\PatDlg.hpp" />
     <ClInclude Include="src\psycle\host\SwingFillDlg.hpp" />
     <ClInclude Include="src\psycle\host\TransformPatternDlg.hpp" />
-	<ClInclude Include="src\psycle\host\ChannelMappingDlg.hpp" />
+    <ClInclude Include="src\psycle\host\ChannelMappingDlg.hpp" />
     <ClInclude Include="src\psycle\host\InfoDlg.hpp" />
     <ClInclude Include="src\psycle\host\MidiMonitorDlg.hpp" />
     <ClInclude Include="src\psycle\host\ProgressDialog.hpp" />
@@ -281,6 +282,8 @@
     <ClCompile Include="src\psycle\host\ASIOInterface.cpp" />
     <ClCompile Include="src\psycle\host\AudioDriver.cpp" />
     <ClCompile Include="src\psycle\host\DirectSound.cpp" />
+    <ClCompile Include="src\psycle\host\InstrIndividualMap.cpp" />
+    <ClCompile Include="src\psycle\host\LuaInternals.cpp" />
     <ClCompile Include="src\psycle\host\WasapiDriver.cpp" />
     <ClCompile Include="src\psycle\host\WaveOut.cpp" />
     <ClCompile Include="src\psycle\host\MidiInput.cpp" />
@@ -338,17 +341,16 @@
     <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp" />
     <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp" />
     <ClCompile Include="src\psycle\host\VstEffectWnd.cpp" />
-	<ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp" />
-	<ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp"/>
+    <ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp" />
+    <ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp" />
     <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp" />
-	<ClCompile Include="src\psycle\host\EnvelopeEditor.cpp"/>
-	<ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp"/>
-	<ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp"/>
-	<ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp"/>
-	<ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp"/>
-	<ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp"/>
-	<ClCompile Include="src\psycle\host\InstrumentPitDlg.cpp"/>
-	<ClCompile Include="src\psycle\host\SampleAssignEditor.cpp"/>
+    <ClCompile Include="src\psycle\host\EnvelopeEditor.cpp" />
+    <ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp" />
+    <ClCompile Include="src\psycle\host\SampleAssignEditor.cpp" />
     <ClCompile Include="src\psycle\host\XMSamplerMixerPage.cpp" />
     <ClCompile Include="src\psycle\host\XMSamplerUI.cpp" />
     <ClCompile Include="src\psycle\host\XMSamplerUIGeneral.cpp" />
@@ -450,6 +452,9 @@
   <ItemGroup>
     <ProjectReference Include="..\build-systems\msvc\projects\direct-sound\direct-sound.msvc-2010.vcxproj">
       <Project>{69c0acbe-ea31-4f5e-9b41-b2dd73c29df1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\build-systems\msvc\projects\lualib\lualib.vcxproj">
+      <Project>{fee2d9f8-bad2-d34c-95b9-fb03657990dd}</Project>
     </ProjectReference>
     <ProjectReference Include="..\psycle-helpers\psycle-helpers.msvc-2010.vcxproj">
       <Project>{16f2deb9-8f35-45c9-b460-732615f0c8d5}</Project>
