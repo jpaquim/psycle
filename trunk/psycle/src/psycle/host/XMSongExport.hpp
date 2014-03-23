@@ -25,7 +25,7 @@ namespace psycle { namespace host {
 		void SaveInstrument(const Song& song, int instIdx);
 		void SaveSampleHeader(const Song & song, const int instrIdx);
 		void SaveSampleData(const Song & song, const int instrIdx);
-		void SetEnvelopes(const Song & song, int instIdx, const XMSAMPLEHEADER & sampleHeader);		
+		void SetEnvelopes(const Song & song, int instIdx, const XMSAMPLEHEADER & sampleHeader);
 		
 		XMFILEHEADER m_Header;
 		int lastMachine;

@@ -205,7 +205,7 @@ namespace psycle { namespace host {
 					char tmpName [MAX_PATH];
 					std::strncpy(tmpName, m_lpCmdLine+1, MAX_PATH-1 );
 					tmpName[std::strlen(m_lpCmdLine+1) -1 ] = 0;
-					static_cast<CMainFrame*>(m_pMainWnd)->m_wndView.OnFileLoadsongNamed(tmpName, 1);
+					static_cast<CMainFrame*>(m_pMainWnd)->m_wndView.FileLoadsongNamed(tmpName);
 				}
 			}
 		}

@@ -156,10 +156,14 @@ namespace psycle { namespace host {
 //Main menu and toolbar (A few entries are in MainFrm)
 			ON_COMMAND(ID_FILE_NEW, OnFileNew)
 			ON_COMMAND(ID_FILE_LOADSONG, OnFileLoadsong)
-			ON_COMMAND(ID_FILE_IMPORT_XMFILE, OnFileImportModulefile)
-			ON_COMMAND_EX(ID_FILE_SAVE, OnFileSave)
-			ON_COMMAND_EX(ID_FILE_SAVE_AS, OnFileSaveAs)
-			ON_COMMAND_EX(ID_EXPORT, OnExport)
+			ON_COMMAND(ID_FILE_SAVE, OnFileSave)
+			ON_COMMAND(ID_FILE_SAVE_AS, OnFileSaveAs)
+			ON_COMMAND(ID_IMPORT_PATTERNS, OnFileImportPatterns)
+			ON_COMMAND(ID_IMPORT_INSTRUMENTS, OnFileImportInstruments)
+			ON_COMMAND(ID_IMPORT_MACHINES, OnFileImportMachines)
+			ON_COMMAND(ID_EXPORT_PATTERNS, OnFileExportPatterns)
+			ON_COMMAND(ID_EXPORT_INSTRUMENTS, OnFileExportInstruments)
+			ON_COMMAND(ID_EXPORT_MODULE, OnExportModule)
 			ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
 			ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 			ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
@@ -217,6 +221,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_HELP_TWEAKING, OnHelpTweaking)
 			ON_COMMAND(ID_HELP_WHATSNEW, OnHelpWhatsnew)
 			ON_COMMAND(ID_HELP_SALUDOS, OnHelpSaludos)
+			ON_COMMAND(ID_HELP_LUASCRIPT, OnHelpLuaScript)
 //Pattern Popup
 			ON_COMMAND(ID_POP_CUT, OnPopCut)
 			ON_COMMAND(ID_POP_COPY, OnPopCopy)
@@ -570,16 +575,15 @@ namespace psycle { namespace host {
 		}
 
 		/// "Save Song" Function
-		BOOL CChildView::OnExport(UINT id) 
+		void CChildView::OnExportModule() 
 		{
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::song().fileName.substr(0,Global::song().fileName.length()-4) + ".xm";
-			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
+			std::string ifile = Global::song().fileName.substr(0,Global::song().fileName.length()-4)  + ".xm";
 			
 			char szFile[_MAX_PATH];
 
 			szFile[_MAX_PATH-1]=0;
-			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
+			strncpy(szFile,ifile.c_str(),_MAX_PATH-1);
 			
 			// Initialize OPENFILENAME
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -594,7 +598,6 @@ namespace psycle { namespace host {
 			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
 			
 			// Display the Open dialog box. 
 			if (GetSaveFileName(&ofn) == TRUE)
@@ -603,35 +606,27 @@ namespace psycle { namespace host {
 
 				CString str2 = str.Right(3);
 				if ( str2.CompareNoCase(".xm") != 0 ) str.Insert(str.GetLength(),".xm");
-				int index = str.ReverseFind('\\');
-				XMSongExport file;
 
+				int index = str.ReverseFind('\\');
 				if (index != -1)
 				{
 					PsycleGlobal::conf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
 				}
 				
+				XMSongExport file;
 				if (!file.Create(static_cast<LPCTSTR>(str), true))
 				{
 					MessageBox("Error creating file!", "Error!", MB_OK);
-					return FALSE;
+					return;
 				}
 				file.exportsong(Global::song());
 				file.Close();
 			}
-			else
-			{
-				return FALSE;
-			}
-			return bResult;
 		}
 
 		/// "Save Song" Function
-		BOOL CChildView::OnFileSave(UINT id) 
+		void CChildView::OnFileSave() 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
-			BOOL bResult = TRUE;
 			if ( Global::song()._saved )
 			{
 				if (MessageBox("Proceed with Saving?","Song Save",MB_YESNO) == IDYES)
@@ -645,18 +640,16 @@ namespace psycle { namespace host {
 					if (!file.Create((char*)filepath.c_str(), true))
 					{
 						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
+						return;
 					}
 					progress.SetWindowText("Saving...");
 					progress.ShowWindow(SW_SHOW);
 					if (!_pSong.Save(&file, progress))
 					{
 						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
 					}
 					else 
 					{
-						_pSong._saved=true;
 						PsycleGlobal::inputHandler().SafePoint();
 					}
 					progress.SendMessage(WM_CLOSE);
@@ -667,33 +660,25 @@ namespace psycle { namespace host {
 						MessageBox(s.str().c_str(),"File Error!!!",0);
 					}
 				}
-				else 
-				{
-					return FALSE;
-				}
 			}
 			else 
 			{
-				return OnFileSaveAs(0);
+				OnFileSaveAs();
 			}
-			return bResult;
 		}
 
 		//////////////////////////////////////////////////////////////////////
 		// "Save Song As" Function
 
-		BOOL CChildView::OnFileSaveAs(UINT id) 
+		void CChildView::OnFileSaveAs() 
 		{
-			//MessageBox("Saving Disabled");
-			//return false;
 			OPENFILENAME ofn; // common dialog box structure
 			std::string ifile = Global::song().fileName;
-			std::string if2 = ifile.substr(0,ifile.find_first_of("\\/:*\"<>|"));
 			
 			char szFile[_MAX_PATH];
 
 			szFile[_MAX_PATH-1]=0;
-			strncpy(szFile,if2.c_str(),_MAX_PATH-1);
+			strncpy(szFile,ifile.c_str(),_MAX_PATH-1);
 			
 			// Initialize OPENFILENAME
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -701,81 +686,60 @@ namespace psycle { namespace host {
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0";
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
 			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
 			ofn.lpstrInitialDir = tmpstr.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
-			BOOL bResult = TRUE;
 			
 			// Display the Open dialog box. 
 			if (GetSaveFileName(&ofn) == TRUE)
 			{
 				CString str = ofn.lpstrFile;
-				if ( ofn.nFilterIndex == 2 ) 
+				OldPsyFile file;
+				CProgressDialog progress;
+				CString str2 = str.Right(4);
+				if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
+				int index = str.ReverseFind('\\');
+				if (index != -1)
 				{
-					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psb") != 0 ) str.Insert(str.GetLength(),".psb");
-					sprintf(szFile,str);
-					FILE* hFile=fopen(szFile,"wb");
-					SaveBlock(hFile);
-					fflush(hFile);
-					fclose(hFile);
+					PsycleGlobal::conf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
+					Global::song().fileName = str.Mid(index+1);
+				}
+				else
+				{
+					Global::song().fileName = str;
+				}
+				
+				if (!file.Create(static_cast<LPCTSTR>(str), true))
+				{
+					MessageBox("Error creating file!", "Error!", MB_OK);
+					return;
+				}
+
+				progress.SetWindowText("Saving...");
+				progress.ShowWindow(SW_SHOW);
+				if (!_pSong.Save(&file,progress))
+				{
+					MessageBox("Error saving file!", "Error!", MB_OK);
 				}
 				else 
-				{ 
-					CString str2 = str.Right(4);
-					if ( str2.CompareNoCase(".psy") != 0 ) str.Insert(str.GetLength(),".psy");
-					int index = str.ReverseFind('\\');
-					OldPsyFile file;
-					CProgressDialog progress;
-					if (index != -1)
-					{
-						PsycleGlobal::conf().SetCurrentSongDir(static_cast<char const *>(str.Left(index)));
-						Global::song().fileName = str.Mid(index+1);
-					}
-					else
-					{
-						Global::song().fileName = str;
-					}
+				{
+					std::string recent = static_cast<LPCTSTR>(str);
+					AppendToRecent(recent);
 					
-					if (!file.Create(static_cast<LPCTSTR>(str), true))
-					{
-						MessageBox("Error creating file!", "Error!", MB_OK);
-						return FALSE;
-					}
-
-					progress.SetWindowText("Saving...");
-					progress.ShowWindow(SW_SHOW);
-					if (!_pSong.Save(&file,progress))
-					{
-						MessageBox("Error saving file!", "Error!", MB_OK);
-						bResult = FALSE;
-					}
-					else 
-					{
-						_pSong._saved=true;
-						std::string recent = static_cast<LPCTSTR>(str);
-						AppendToRecent(recent);
-						
-						PsycleGlobal::inputHandler().SafePoint();
-					}
-					progress.SendMessage(WM_CLOSE);
-					if (!file.Close())
-					{
-						std::ostringstream s;
-						s << "Error writing to file '" << file.szName << "'" << std::endl;
-						MessageBox(s.str().c_str(),"File Error!!!",0);
-					}
+					PsycleGlobal::inputHandler().SafePoint();
+				}
+				progress.SendMessage(WM_CLOSE);
+				if (!file.Close())
+				{
+					std::ostringstream s;
+					s << "Error writing to file '" << file.szName << "'" << std::endl;
+					MessageBox(s.str().c_str(),"File Error!!!",0);
 				}
 			}
-			else
-			{
-				return FALSE;
-			}
-			return bResult;
 		}
 
 		#include <cderr.h>
@@ -792,7 +756,12 @@ namespace psycle { namespace host {
 			ofn.hwndOwner = GetParent()->m_hWnd;
 			ofn.lpstrFile = szFile;
 			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter = "Songs (*.psy)\0*.psy\0Psycle Pattern (*.psb)\0*.psb\0All (*.*)\0*.*\0";
+			ofn.lpstrFilter = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
+				"Songs (*.psy)"				        "\0*.psy\0"
+				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
+				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
+				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
+				"Original Mod Format Songs (*.mod)" "\0*.mod\0";;
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
@@ -803,7 +772,7 @@ namespace psycle { namespace host {
 			// Display the Open dialog box. 
 			if(::GetOpenFileName(&ofn)==TRUE)
 			{
-				OnFileLoadsongNamed(szFile, ofn.nFilterIndex);
+				FileLoadsongNamed(szFile);
 			}
 			else
 			{
@@ -863,14 +832,12 @@ namespace psycle { namespace host {
 				pParentMain->CloseAllMacGuis();
 				Global::player().Stop();
 
-				Global::song().New();
-				Global::song()._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
-				Global::song()._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
+				_pSong.New();
+				_pSong._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
+				_pSong._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 
 				Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-				SetTitleBarText();
 				editPosition=0;
-				Global::song().seqBus=0;
 				pParentMain->PsybarsUpdate(); // Updates all values of the bars
 				pParentMain->WaveEditorBackUpdate();
 				pParentMain->UpdateInstrumentEditor();
@@ -880,11 +847,91 @@ namespace psycle { namespace host {
 				//pParentMain->UpdateComboIns(); PsybarsUpdate calls UpdateComboGen that always call updatecomboins
 				RecalculateColourGrid();
 				Repaint();
+				SetTitleBarText();
 			}
 			pParentMain->StatusBarIdle();
 		}
 
+		void CChildView::OnFileImportPatterns()
+		{
+			OPENFILENAME ofn; // common dialog box structure
+			char szFile[16*_MAX_PATH]; // buffer for file name
+			
+			szFile[0]='\0';
+			// Initialize OPENFILENAME
+			ZeroMemory(&ofn, sizeof(OPENFILENAME));
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = GetParent()->m_hWnd;
+			ofn.lpstrFile = szFile;
+			ofn.nMaxFile = sizeof(szFile);
+			ofn.lpstrFilter = "Psycle Pattern (*.psb)\0*.psb\0";
+			ofn.nFilterIndex = 1;
+			ofn.lpstrFileTitle = NULL;
+			ofn.nMaxFileTitle = 0;
+			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_EXPLORER | OFN_ALLOWMULTISELECT | OFN_DONTADDTORECENT;
+			
+			// Display the Open dialog box. 
+			if(::GetOpenFileName(&ofn)==TRUE)
+			{
+				if (ofn.nFileOffset > 0 && ofn.lpstrFile[ofn.nFileOffset-1]== NULL) {
+					std::string dir = ofn.lpstrFile;
+					int i= ofn.nFileOffset;
+					while ( i < 16*_MAX_PATH && ofn.lpstrFile[i]!= NULL) {
+						std::string file = (ofn.lpstrFile+i);
+						ImportPatternBlock(dir+'\\'+file, true);
+						i+=file.length()+1;
+					}
+				}
+				else {
+					ImportPatternBlock(szFile);
+				}
+			}
+			pParentMain->StatusBarIdle();
+		}
+		void CChildView::OnFileImportInstruments()
+		{
+			MessageBox("This option will allow to import instruments from other .psy files or module files. Currently unimplemented");
+		}
+		void CChildView::OnFileImportMachines()
+		{
+			MessageBox("This option will allow to import machines from other .psy files. Currently unimplemented");
+		}
+		void CChildView::OnFileExportPatterns()
+		{
+			OPENFILENAME ofn; // common dialog box structure
+			std::ostringstream asdf;
+			asdf << _pSong.fileName.substr(0,_pSong.fileName.length()-4) <<"-" << std::hex << static_cast<uint32_t>(_pSong.playOrder[editPosition]);
+			char szFile[_MAX_PATH];
 
+			szFile[_MAX_PATH-1]=0;
+			strncpy(szFile,asdf.str().c_str(),_MAX_PATH-1);
+			
+			// Initialize OPENFILENAME
+			ZeroMemory(&ofn, sizeof(OPENFILENAME));
+			ofn.lStructSize = sizeof(OPENFILENAME);
+			ofn.hwndOwner = GetParent()->m_hWnd;
+			ofn.lpstrFile = szFile;
+			ofn.nMaxFile = sizeof(szFile);
+			ofn.lpstrFilter = "Psycle Pattern (*.psb)\0*.psb\0";
+			ofn.lpstrDefExt = "psb";
+			ofn.nFilterIndex = 1;
+			ofn.lpstrFileTitle = NULL;
+			ofn.nMaxFileTitle = 0;
+			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
+			ofn.lpstrInitialDir = tmpstr.c_str();
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+			
+			// Display the Open dialog box. 
+			if (GetSaveFileName(&ofn) == TRUE)
+			{
+				ExportPatternBlock(ofn.lpstrFile);
+			}
+		}
+		void CChildView::OnFileExportInstruments()
+		{
+		}
 		void CChildView::OnFileSaveaudio() 
 		{
 			OnBarstop();
@@ -909,8 +956,7 @@ namespace psycle { namespace host {
 				OldPsyFile file;
 				CProgressDialog progress;
 				std::ostringstream szText;
-				szText << "Save changes to \"" << Global::song().fileName
-					<< "\"?";
+				szText << "Save changes to \"" << Global::song().fileName << "\"?";
 				int result = MessageBox(szText.str().c_str(),szTitle.c_str(),MB_YESNOCANCEL | MB_ICONEXCLAMATION);
 				switch (result)
 				{
@@ -952,8 +998,8 @@ namespace psycle { namespace host {
 				if (Global::song()._saved)
 				{
 					std::ostringstream fullpath;
-					fullpath << PsycleGlobal::conf().GetCurrentSongDir().c_str()
-						<< '\\' << Global::song().fileName.c_str();
+					fullpath << PsycleGlobal::conf().GetCurrentSongDir()
+						<< '\\' << Global::song().fileName;
 					FileLoadsongNamed(fullpath.str());
 				}
 			}
@@ -1489,9 +1535,6 @@ namespace psycle { namespace host {
 			dlg.DoModal();
 		}
 
-		///\todo extemely toxic pollution
-		#define TWOPI_F (2.0f*3.141592665f)
-
 		void CChildView::ShowSwingFillDlg(bool bTrackMode)
 		{
 			int st = Global::song().BeatsPerMin();
@@ -1505,7 +1548,7 @@ namespace psycle { namespace host {
 			dlg.variance = sv;
 			dlg.phase = sp;
 			dlg.offset = true;
-
+		
 			dlg.DoModal();
 			if (dlg.bGo)
 			{
@@ -1515,12 +1558,12 @@ namespace psycle { namespace host {
 				sp = dlg.phase;
 				of = dlg.offset;
 				float var = (sv/100.0f);
-
+				const float twopi = 2.0f*helpers::math::pi_f;
 				// time to do our fill
 				// first some math
 				// our range has to go from spd+var to spd-var and back in width+1 lines
-				float step = TWOPI_F/(sw);
-				float index = sp*TWOPI_F/360;
+				float step = twopi/(sw);
+				float index = sp*twopi/360;
 
 				int l;
 				int x;
@@ -1760,140 +1803,6 @@ namespace psycle { namespace host {
 			else pCmdUI->Enable(FALSE);
 		}
 
-		void CChildView::OnFileImportModulefile() 
-		{
-			OPENFILENAME ofn; // common dialog box structure
-			char szFile[_MAX_PATH]; // buffer for file name
-			szFile[0]='\0';
-			// Initialize OPENFILENAME
-			ZeroMemory(&ofn, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = GetParent()->m_hWnd;
-			ofn.lpstrFile = szFile;
-			ofn.nMaxFile = sizeof(szFile);
-			ofn.lpstrFilter =
-				"All Module Songs (*.xm *.it *.s3m *.mod)" "\0" "*.xm;*.it;*.s3m;*.mod" "\0"
-				"FastTracker II Songs (*.xm)"              "\0" "*.xm"                  "\0"
-				"Impulse Tracker Songs (*.it)"             "\0" "*.it"                  "\0"
-				"Scream Tracker Songs (*.s3m)"             "\0" "*.s3m"                 "\0"
-				"Original Mod Format Songs (*.mod)"        "\0" "*.mod"                 "\0"
-				"All (*)"                                  "\0" "*"                     "\0"
-				;
-			ofn.nFilterIndex = 1;
-			ofn.lpstrFileTitle = NULL;
-			ofn.nMaxFileTitle = 0;
-			std::string tmpstr = PsycleGlobal::conf().GetCurrentSongDir();
-			ofn.lpstrInitialDir = tmpstr.c_str();
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-			// Display the Open dialog box. 
-			if (GetOpenFileName(&ofn)==TRUE)
-			{
-				PsycleGlobal::inputHandler().KillUndo();
-				PsycleGlobal::inputHandler().KillRedo();
-				pParentMain->CloseAllMacGuis();
-				Global::player().Stop();
-
-				CString str = ofn.lpstrFile;
-				int index = str.ReverseFind('.');
-				if (index != -1)
-				{
-					CString ext = str.Mid(index+1);
-					if (ext.CompareNoCase("XM") == 0)
-					{
-						XMSongLoader xmfile;
-						xmfile.Open(ofn.lpstrFile);
-						Global::song().New();
-						editPosition=0;
-						xmfile.Load(_pSong);
-						xmfile.Close();
-						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
-						{
-							CSongpDlg dlg(Global::song());
-							dlg.SetReadOnly();
-							dlg.DoModal();
-						}
-					} else if (ext.CompareNoCase("IT") == 0)
-					{
-						ITModule2 it;
-						it.Open(ofn.lpstrFile);
-						Global::song().New();
-						editPosition=0;
-						if(!it.LoadITModule(_pSong))
-						{			
-							MessageBox("Load failed");
-							Global::song().New();
-							it.Close();
-							return;
-						}
-						it.Close();
-						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
-						{
-							CSongpDlg dlg(Global::song());
-							dlg.SetReadOnly();
-							dlg.DoModal();
-						}
-					} else if (ext.CompareNoCase("S3M") == 0)
-					{
-						ITModule2 s3m;
-						s3m.Open(ofn.lpstrFile);
-						Global::song().New();
-						editPosition=0;
-						if(!s3m.LoadS3MModuleX(_pSong))
-						{			
-							MessageBox("Load failed");
-							Global::song().New();
-							s3m.Close();
-							return;
-						}
-						s3m.Close();
-						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
-						{
-							CSongpDlg dlg(Global::song());
-							dlg.SetReadOnly();
-							dlg.DoModal();
-						}
-					} else if (ext.CompareNoCase("MOD") == 0)
-					{
-						MODSongLoader modfile;
-						modfile.Open(ofn.lpstrFile);
-						Global::song().New();
-						editPosition=0;
-						modfile.Load(_pSong);
-						modfile.Close();
-						if (PsycleGlobal::conf().bShowSongInfoOnLoad)
-						{
-							CSongpDlg dlg(Global::song());
-							dlg.SetReadOnly();
-							dlg.DoModal();
-						}
-					}
-				}
-
-				str = ofn.lpstrFile;
-				index = str.ReverseFind('\\');
-				if (index != -1)
-				{
-					PsycleGlobal::conf().SetCurrentSongDir((LPCSTR)str.Left(index));
-					Global::song().fileName = str.Mid(index+1)+".psy";
-				}
-				else
-				{
-					Global::song().fileName = str+".psy";
-				}
-				Global::song()._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
-				Global::song()._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
-				pParentMain->PsybarsUpdate();
-				pParentMain->WaveEditorBackUpdate();
-				pParentMain->UpdateInstrumentEditor();
-				pParentMain->RedrawGearRackList();
-				pParentMain->UpdateSequencer();
-				pParentMain->UpdatePlayOrder(false);
-				RecalculateColourGrid();
-				Repaint();
-			}
-			SetTitleBarText();
-		}
-
 		void CChildView::AppendToRecent(std::string const& fName)
 		{
 			int iCount;
@@ -1973,76 +1882,129 @@ namespace psycle { namespace host {
 			}
 		}
 
-		void CChildView::OnFileRecent_01()
-		{
-			CallOpenRecent(0);
-		}
+		void CChildView::OnFileRecent_01() { CallOpenRecent(0); }
+		void CChildView::OnFileRecent_02() { CallOpenRecent(1); }
+		void CChildView::OnFileRecent_03() { CallOpenRecent(2); }
+		void CChildView::OnFileRecent_04() { CallOpenRecent(3); }
 
-		void CChildView::OnFileRecent_02()
+		void CChildView::ImportPatternBlock(const std::string& fName, bool newpattern/*=false*/)
 		{
-			CallOpenRecent(1);
-		}
-
-		void CChildView::OnFileRecent_03()
-		{
-			CallOpenRecent(2);
-		}
-
-		void CChildView::OnFileRecent_04()
-		{
-			CallOpenRecent(3);
-		}
-
-		void CChildView::OnFileLoadsongNamed(std::string fName, int fType)
-		{
-			if( fType == 2 )
+			if (newpattern && _pSong.playLength<(MAX_SONG_POSITIONS-1))
 			{
+				FILE* hFile=fopen(fName.c_str(),"rb");
+				PsycleGlobal::inputHandler().AddUndoSequence(_pSong.playLength,editcur.track,editcur.line,editcur.col,editPosition);
+				++_pSong.playLength;
+
+				editPosition++;
+				int const pop=editPosition;
+				for(int c=(_pSong.playLength-1);c>=pop;c--)
+				{
+					_pSong.playOrder[c]=_pSong.playOrder[c-1];
+				}
+				_pSong.playOrder[editPosition]=_pSong.GetBlankPatternUnused();
+				
+				if ( _pSong.playOrder[editPosition]>= MAX_PATTERNS )
+				{
+					_pSong.playOrder[editPosition]=MAX_PATTERNS-1;
+				}
+
+				_pSong.AllocNewPattern(_pSong.playOrder[editPosition],"",
+					Global::configuration().GetDefaultPatLines(),FALSE);
+
+				LoadBlock(hFile,_pSong.playOrder[editPosition]);
+				fclose(hFile);
+
+			}
+			else {
 				FILE* hFile=fopen(fName.c_str(),"rb");
 				LoadBlock(hFile);
 				fclose(hFile);
 			}
-			else
-			{
-				if (CheckUnsavedSong("Load Song"))
-				{
-					FileLoadsongNamed(fName);
-				}
-			}
+			pParentMain->UpdatePlayOrder(true);
+			pParentMain->UpdateSequencer(editPosition);
+
+			Repaint(draw_modes::pattern);
+
 		}
 
-		void CChildView::FileLoadsongNamed(std::string fName)
+		void CChildView::ExportPatternBlock(const std::string& name) 
 		{
+			FILE* hFile=fopen(name.c_str(),"wb");
+			SaveBlock(hFile);
+			fflush(hFile);
+			fclose(hFile);
+		}
+		void CChildView::FileLoadsongNamed(const std::string& fName)
+		{
+			PsycleGlobal::inputHandler().KillUndo();
+			PsycleGlobal::inputHandler().KillRedo();
 			pParentMain->CloseAllMacGuis();
 			Global::player().Stop();
 			
-			OldPsyFile file;
-			if (!file.Open(fName.c_str()))
-			{
-				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+			OldPsyFile* file;
+			const char* szExtension = strrchr(fName.c_str(), '.');
+			if (szExtension == NULL) {
+				MessageBox("Could not Open file. Check that it uses a supported extension/format.", "Loading Error", MB_OK);
 				return;
 			}
-			editPosition = 0;
+			else {
+				if (!strcmpi(szExtension, ".psy")) {
+					file = new OldPsyFile();
+				}
+				else if (!strcmpi(szExtension, ".xm")) {
+					file = new XMSongLoader();
+				}
+				else if (!strcmpi(szExtension, ".it")) {
+					file = new ITModule2();
+				}
+				else if (!strcmpi(szExtension, ".s3m")) {
+					file = new ITModule2();
+				}
+				else if (!strcmpi(szExtension, ".mod")) {
+					file = new MODSongLoader();
+				}
+				else {
+					MessageBox("Could not Open file. Check that it uses a supported extension/format.", "Loading Error", MB_OK);
+					return;
+				}
+			}
+			if (!file->Open(fName.c_str())) {
+				MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+				delete file;
+				return;
+			}
 			CProgressDialog progress;
 			progress.ShowWindow(SW_SHOW);
-			if(!_pSong.Load(&file,progress) || !file.Close())
+			_pSong.New();
+			_pSong._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
+			_pSong._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
+			if(!file->Load(_pSong,progress) || !file->Close())
 			{
+				progress.SendMessage(WM_CLOSE);
 				std::ostringstream s;
-				s << "Error reading from file '" << file.szName << "'" << std::endl;
+				s << "Error reading from file '" << file->szName << "'" << std::endl;
 				MessageBox(s.str().c_str(), "File Error!!!", 0);
+				_pSong.New();
+				_pSong._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
+				_pSong._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 			}
-			progress.SendMessage(WM_CLOSE);
-			_pSong._saved=true;
-			AppendToRecent(fName);
-			std::string::size_type index = fName.rfind('\\');
-			if (index != std::string::npos)
-			{
-				PsycleGlobal::conf().SetCurrentSongDir(fName.substr(0,index));
-				Global::song().fileName = fName.substr(index+1);
+			else {
+				progress.SendMessage(WM_CLOSE);
+				AppendToRecent(fName);
+				std::string::size_type index = fName.rfind('\\');
+				if (index != std::string::npos) {
+					PsycleGlobal::conf().SetCurrentSongDir(fName.substr(0,index));
+					_pSong.fileName = fName.substr(index+1);
+				}
+				else {
+					_pSong.fileName = fName;
+				}
+				if (_pSong.fileName.rfind(".psy") == std::string::npos) {
+					_pSong.fileName += ".psy";
+				}
 			}
-			else
-			{
-				Global::song().fileName = fName;
-			}
+
+			editPosition = 0;
 			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
 			EnforceAllMachinesOnView();
 			pParentMain->PsybarsUpdate();
@@ -2054,8 +2016,6 @@ namespace psycle { namespace host {
 			//pParentMain->UpdateComboIns(); PsyBarsUpdate calls UpdateComboGen that also calls UpdatecomboIns
 			RecalculateColourGrid();
 			Repaint();
-			PsycleGlobal::inputHandler().KillUndo();
-			PsycleGlobal::inputHandler().KillRedo();
 			SetTitleBarText();
 			if (PsycleGlobal::conf().bShowSongInfoOnLoad)
 			{
@@ -2063,7 +2023,9 @@ namespace psycle { namespace host {
 				dlg.SetReadOnly();
 				dlg.DoModal();
 			}
+			delete file;
 		}
+
 
 		void CChildView::CallOpenRecent(int pos)
 		{
@@ -2071,7 +2033,7 @@ namespace psycle { namespace host {
 			nameSize = GetMenuString(hRecentMenu, pos, 0, 0, MF_BYPOSITION) + 1;
 			char* nameBuff = new char[nameSize];
 			GetMenuString(hRecentMenu, pos, nameBuff, nameSize, MF_BYPOSITION);
-			OnFileLoadsongNamed(nameBuff, 1);
+			FileLoadsongNamed(nameBuff);
 			delete[] nameBuff; nameBuff = 0;
 		}
 
@@ -2115,6 +2077,13 @@ namespace psycle { namespace host {
 			sprintf(path,"%sdocs\\whatsnew.txt",PsycleGlobal::conf().appPath().c_str());
 			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
 		}
+		void CChildView::OnHelpLuaScript()
+		{
+			char path[MAX_PATH];
+			sprintf(path,"%sdocs\\LuaScriptingManual.pdf",PsycleGlobal::conf().appPath().c_str());
+			ShellExecute(pParentMain->m_hWnd,"open",path,NULL,"",SW_SHOW);
+		}
+
 
 		void CChildView::EnforceAllMachinesOnView()
 		{

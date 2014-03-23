@@ -2,18 +2,19 @@
 ///\brief implementation file for psycle::host::CSkinDlg.
 
 #include <psycle/host/detail/project.private.hpp>
-#include "luaplugin.hpp"
-#include "lua.hpp"
-#include <sstream>
-#include <boost/algorithm/string.hpp>
-#include <psycle/helpers/math.hpp>
-#include "PsycleConfig.hpp"
-#include "Configuration.hpp"
-#include "PsycleGlobal.hpp"
-#include <algorithm>
+#include <psycle/host/LuaPlugin.hpp>
+
+#include <psycle/host/Global.hpp>
+#include <psycle/host/Configuration.hpp>
 #include <psycle/host/Song.hpp>
+#include <psycle/host/Player.hpp>
+#include <psycle/helpers/math.hpp>
 #include "Zap.hpp"
 
+#include <lua.hpp>
+#include <boost/algorithm/string.hpp>
+#include <algorithm>
+#include <sstream>
 
 
 namespace psycle { namespace host {
@@ -27,8 +28,13 @@ namespace psycle { namespace host {
 			_macIndex = index;
 			_type = MACH_LUA;
 			_mode = MACHMODE_FX;
+			usenoteon_ = false;
 			std::sprintf(_editName, "native plugin");		
 			InitializeSamplesVector();
+			for(int i(0) ; i < MAX_TRACKS; ++i) {
+			  trackNote[i].key = 255; // No Note.
+			  trackNote[i].midichan = 0;
+			}
 			try {
 			  proxy_.call_run();
 			  if (full) {
@@ -62,13 +68,286 @@ namespace psycle { namespace host {
 			if(_mode == MACHMODE_GENERATOR) {
 				Standby(false);
 			}
+
 			if (!_mute) 
 			{
 				if ((_mode == MACHMODE_GENERATOR) || (!Bypass() && !Standby()))
 				{										
-					try {
-					   proxy_.call_work(numSamples);					
-					}catch(std::exception &e) {} //do nothing.
+					int ns = numSamples;
+					int us = 0;
+					while (ns)
+					{
+						int nextevent = (TWSActive)?TWSSamples:ns+1;
+						for (int i=0; i < Global::song().SONGTRACKS; i++)
+						{
+							if (TriggerDelay[i]._cmd)
+							{
+								if (TriggerDelayCounter[i] < nextevent)
+								{
+									nextevent = TriggerDelayCounter[i];
+								}
+							}
+						}
+						if (nextevent > ns)
+						{
+							if (TWSActive)
+							{
+								TWSSamples -= ns;
+							}
+							for (int i=0; i < Global::song().SONGTRACKS; i++)
+							{
+								// come back to this
+								if (TriggerDelay[i]._cmd)
+								{
+									TriggerDelayCounter[i] -= ns;
+								}
+							}
+							try
+							{								
+								//proxy().Work(samplesV[0]+us, samplesV[1]+us, ns, Global::song().SONGTRACKS);
+								 proxy_.call_work(ns, us);
+							}
+							catch(const std::exception & e)
+							{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+							}
+							ns = 0;
+						}
+						else
+						{
+							if(nextevent)
+							{
+								ns -= nextevent;
+								try
+								{
+									//todo: this should change if we implement multi-io for native plugins (complicated right now. needs new API calls)
+									//proxy().Work(samplesV[0]+us, samplesV[1]+us, nextevent, Global::song().SONGTRACKS);
+									 proxy_.call_work(nextevent, us);
+								}
+								catch(const std::exception &e)
+								{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+								}
+								us += nextevent;
+							}
+							if (TWSActive)
+							{
+								if (TWSSamples == nextevent)
+								{
+									int activecount = 0;
+									TWSSamples = TWEAK_SLIDE_SAMPLES;
+									for (int i = 0; i < MAX_TWS; i++)
+									{
+										if (TWSDelta[i] != 0)
+										{
+											TWSCurrent[i] += TWSDelta[i];
+
+											if (((TWSDelta[i] > 0) && (TWSCurrent[i] >= TWSDestination[i]))
+												|| ((TWSDelta[i] < 0) && (TWSCurrent[i] <= TWSDestination[i])))
+											{
+												TWSCurrent[i] = TWSDestination[i];
+												TWSDelta[i] = 0;
+											}
+											else
+											{
+												activecount++;
+											}
+											try
+											{
+												proxy_.call_parameter(TWSInst[i], int(TWSCurrent[i])/(double)0xFFFF);
+											}
+											catch(const std::exception &e)
+											{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+											}
+										}
+									}
+									if(!activecount) TWSActive = false;
+								}
+							}
+							for (int i=0; i < Global::song().SONGTRACKS; i++)
+							{
+								// come back to this
+								if (TriggerDelay[i]._cmd == PatternCmd::NOTE_DELAY)
+								{
+									if (TriggerDelayCounter[i] == nextevent)
+									{
+										// do event
+										try
+										{
+											proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);											
+										}
+										catch(const std::exception &e)
+										{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+										}
+										TriggerDelay[i]._cmd = 0;
+									}
+									else
+									{
+										TriggerDelayCounter[i] -= nextevent;
+									}
+								}
+								else if (TriggerDelay[i]._cmd == PatternCmd::RETRIGGER)
+								{
+									if (TriggerDelayCounter[i] == nextevent)
+									{
+										// do event
+										try
+										{
+											proxy_.call_seqtick(i, TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										}
+										catch(const std::exception &e)
+										{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+										}
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
+									}
+									else
+									{
+										TriggerDelayCounter[i] -= nextevent;
+									}
+								}
+								else if (TriggerDelay[i]._cmd == PatternCmd::RETR_CONT)
+								{
+									if (TriggerDelayCounter[i] == nextevent)
+									{
+										// do event
+										try
+										{
+											proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+										}
+										catch(const std::exception &e)
+										{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+										}
+										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
+										int parameter = TriggerDelay[i]._parameter&0x0f;
+										if (parameter < 9)
+										{
+											RetriggerRate[i]+= 4*parameter;
+										}
+										else
+										{
+											RetriggerRate[i]-= 2*(16-parameter);
+											if (RetriggerRate[i] < 16)
+											{
+												RetriggerRate[i] = 16;
+											}
+										}
+									}
+									else
+									{
+										TriggerDelayCounter[i] -= nextevent;
+									}
+								}
+								else if (TriggerDelay[i]._cmd == PatternCmd::ARPEGGIO)
+								{
+									if (TriggerDelayCounter[i] == nextevent)
+									{
+										PatternEntry entry =TriggerDelay[i];
+										switch(ArpeggioCount[i])
+										{
+										case 0: 
+											try
+											{
+												proxy_.call_seqtick(i ,TriggerDelay[i]._note, TriggerDelay[i]._inst, 0, 0);
+											}
+											catch(const std::exception &e)
+											{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+											}
+											ArpeggioCount[i]++;
+											break;
+										case 1:
+											entry._note+=((TriggerDelay[i]._parameter&0xF0)>>4);
+											try
+											{
+												proxy_.call_seqtick(i ,entry._note, entry._inst, 0, 0);
+											}
+											catch(const std::exception &e)
+											{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+											}
+											ArpeggioCount[i]++;
+											break;
+										case 2:
+											entry._note+=(TriggerDelay[i]._parameter&0x0F);
+											try
+											{
+												proxy_.call_seqtick(i ,entry._note, entry._inst, 0, 0);
+											}
+											catch(const std::exception &e)
+											{
+#ifndef NDEBUG 
+					throw e;
+					return 0;
+#else
+					e;
+					return 0;
+#endif
+											}
+											ArpeggioCount[i]=0;
+											break;
+										}
+										TriggerDelayCounter[i] = Global::player().SamplesPerTick();
+									}
+									else
+									{
+										TriggerDelayCounter[i] -= nextevent;
+									}
+								}
+							}
+						}
+					}
 					UpdateVuAndStanbyFlag(numSamples);
 				}
 			}
@@ -331,12 +610,140 @@ namespace psycle { namespace host {
 			} catch(const std::exception &e) {}
 		}
 
-		void LuaPlugin::Tick(int track, PatternEntry * pData){
+		void LuaPlugin::Tick(int channel, PatternEntry * pData){
 			if (crashed()) {
 				return;
 			}
+			if(pData->_note == notecommands::tweak || pData->_note == notecommands::tweakeffect)
+			{
+				if(pData->_inst < proxy_.num_parameter())
+				{
+					int nv = (pData->_cmd<<8)+pData->_parameter;
+					int const min = 0; // always range 0 .. FFFF like vst tweak
+					int const max = 0xFFFF;
+					nv += min;
+					if(nv > max) nv = max;
+					try
+					{
+						proxy_.call_parameter(pData->_inst, nv/(double)0xFFFF);
+					}
+					catch(const std::exception &e)
+					{
+#ifndef NDEBUG 
+					throw e;
+					return;
+#else
+					e;
+					return;
+#endif
+					}
+				}
+			} else if(pData->_note == notecommands::tweakslide)
+			{
+				if(pData->_inst < proxy_.num_parameter())
+				{
+					int i;
+					if(TWSActive)
+					{
+						// see if a tweak slide for this parameter is already happening
+						for(i = 0; i < MAX_TWS; i++)
+						{
+							if((TWSInst[i] == pData->_inst) && (TWSDelta[i] != 0))
+							{
+								// yes
+								break;
+							}
+						}
+						if(i == MAX_TWS)
+						{
+							// nope, find an empty slot
+							for (i = 0; i < MAX_TWS; i++)
+							{
+								if (TWSDelta[i] == 0)
+								{
+									break;
+								}
+							}
+						}
+					}
+					else
+					{
+						// wipe our array for safety
+						for (i = MAX_TWS-1; i > 0; i--)
+						{
+							TWSDelta[i] = 0;
+						}
+					}
+					if (i < MAX_TWS)
+					{
+						TWSDestination[i] = float(pData->_cmd<<8)+pData->_parameter;
+						float min = 0; // float(_pInfo->Parameters[pData->_inst]->MinValue);
+						float max = 0xFFFF; //float(_pInfo->Parameters[pData->_inst]->MaxValue);
+						TWSDestination[i] += min;
+						if (TWSDestination[i] > max)
+						{
+							TWSDestination[i] = max;
+						}
+						TWSInst[i] = pData->_inst;
+						try
+						{
+							TWSCurrent[i] = proxy_.get_parameter_value(TWSInst[i])*0xFFFF;
+						}
+						catch(const std::exception &e)
+						{
+#ifndef NDEBUG 
+					throw e;
+					return;
+#else
+					e;
+					return;
+#endif
+						}
+						TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::player().SamplesPerRow();
+						TWSSamples = 0;
+						TWSActive = TRUE;
+					}
+					else
+					{
+						// we have used all our slots, just send a twk
+						int nv = (pData->_cmd<<8)+pData->_parameter;
+						int const min = 0; //_pInfo->Parameters[pData->_inst]->MinValue;
+						int const max = 0xFFFF; //_pInfo->Parameters[pData->_inst]->MaxValue;
+						nv += min;
+						if (nv > max) nv = max;
+						try
+						{
+							proxy_.call_parameter(pData->_inst, nv/(double)0xFFFF);
+						}
+						catch(const std::exception &e)
+						{
+#ifndef NDEBUG 
+					throw e;
+					return;
+#else
+					e;
+					return;
+#endif
+						}
+					}
+				}
+			} else
 			try {
-		      proxy_.call_seqtick(track, pData->_note, pData->_inst, pData->_cmd, pData->_parameter);
+			  const int note = pData->_note;
+			  if (usenoteon_==0) {
+		         proxy_.call_seqtick(channel, pData->_note, pData->_inst, pData->_cmd,
+									 pData->_parameter);
+			  } else {
+				// noteon modus				
+				if (note < notecommands::release)  { // Note on
+				  SendNoteOn(channel, note, pData->_inst, pData->_cmd, pData->_parameter);
+				} else if (note == notecommands::release) { // Note Off. 				
+				  SendNoteOff(channel, note, notecommands::empty, pData->_inst,
+					          pData->_cmd, pData->_parameter);
+				} else {
+				  SendCommand(channel, pData->_inst, pData->_cmd, pData->_parameter);
+				}
+			  }
 			} catch(const std::exception &e) {}
 		}
 
@@ -344,10 +751,59 @@ namespace psycle { namespace host {
 			if (crashed()) {
 				return;
 			}
-			try { proxy_.call_stop(); } catch(const std::exception &e) {}
+			try {			  
+			  proxy_.call_stop();
+			  if (usenoteon_!=0) {
+			    for(int i(0) ; i < MAX_TRACKS; ++i) {
+			      trackNote[i].key = 255; // No Note.
+			      trackNote[i].midichan = 0;
+			    }
+			  }
+			} catch(const std::exception &e) {}
 		}
 	  
-		
+		// additions if noteon mode is used
+		void LuaPlugin::SendCommand(unsigned char channel,
+									unsigned char inst,
+									unsigned char cmd,
+									unsigned char val) {
+			int oldnote = notecommands::empty;
+			if(trackNote[channel].key != notecommands::empty) {
+			   oldnote = trackNote[channel].key;
+			}
+			proxy_.call_command(oldnote, inst, cmd, val);
+		}
+
+		void LuaPlugin::SendNoteOn(unsigned char channel,
+			                       unsigned char key,
+								   unsigned char inst,
+								   unsigned char cmd,
+								   unsigned char val) {
+		   int oldnote = notecommands::empty;
+		   if(trackNote[channel].key != notecommands::empty) {
+			 oldnote = trackNote[channel].key;
+			 SendNoteOff(channel, trackNote[channel].key, oldnote, inst, cmd, val);
+		   }
+		   note thisnote;
+		   thisnote.key = key;
+		   thisnote.midichan = 0;
+		   trackNote[channel] = thisnote;
+		   proxy_.call_noteon(key, oldnote, inst, cmd, val);
+		}
+
+		void LuaPlugin::SendNoteOff(unsigned char channel,
+								    unsigned char key,
+									unsigned char lastkey,
+					                unsigned char inst,
+					                unsigned char cmd,
+					                unsigned char val) {
+			if (trackNote[channel].key == notecommands::empty)
+			  return;
+			note thenote = trackNote[channel];
+			proxy_.call_noteoff(thenote.key, lastkey, inst, cmd, val);
+			trackNote[channel].key = 255;
+			trackNote[channel].midichan = 0;
+		}
 		
 
 }   // namespace

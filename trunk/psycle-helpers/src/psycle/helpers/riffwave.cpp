@@ -467,8 +467,8 @@ if(hd.ckID == FourCC("smpl"))
 					if(pl == 1)
 					{
 						file.Skip(15);
-						std::uint32_t ls(0);
-						std::uint32_t le(0);
+						uint32_t ls(0);
+						uint32_t le(0);
 						file.Read(static_cast<void*>(&ls), 4);
 						file.Read(static_cast<void*>(&le), 4);
 						if (ls >= 0 && ls <= le && le < Datalen){

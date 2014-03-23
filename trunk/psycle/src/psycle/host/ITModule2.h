@@ -7,6 +7,7 @@
 namespace psycle { namespace host {
 		class Song;
 		class XMSampler;
+		class CProgressDialog;
 
 		class ITModule2 : public OldPsyFile
 		{
@@ -378,6 +379,7 @@ namespace psycle { namespace host {
 				};
 			};
 		public:
+			virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
 			bool LoadITModule(Song& song);
 			bool LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins,int iInstIdx);
 			bool LoadITInst(const itInsHeader2x& curH,XMInstrument &xins,int iInstIdx);

@@ -626,42 +626,43 @@ namespace psycle
 
 			bool Plugin::AddNoteOff(unsigned char channel, bool addatStart, unsigned int sampleoffset)
 			{
-				if(trackNote[channel].key == notecommands::empty)
+				if(trackNote[channel].key == notecommands::empty) {
 					return false;
-					VstMidiEvent * pevent;
-					if( addatStart)
-					{
-						// PATCH:
-						// When a new note enters, it adds a note-off for the previous note playing in
-						// the track (this is ok). But if you have like: A-4 C-5 and in the next line
-						// C-5 E-5 , you will only hear E-5.
-						// Solution: Move the NoteOffs at the beginning.
-						pevent = reserveVstMidiEventAtFront();
-					}
-					else 
-					{
-						pevent = reserveVstMidiEvent();
-					}
-					if(!pevent)
-						return false;
-					note thenote = trackNote[channel];
-					pevent->type = kVstMidiType;
-					pevent->byteSize = 24;
-					pevent->deltaFrames = sampleoffset;
-					pevent->flags = 0;
-					pevent->detune = 0;
-					pevent->noteLength = 0;
-					pevent->noteOffset = 0;
-					pevent->reserved1 = 0;
-					pevent->reserved2 = 0;
-					pevent->noteOffVelocity = 0;
-					pevent->midiData[0] = 0x80 | thenote.midichan; //midichannel; // Midi Off
-					pevent->midiData[1] = thenote.key;
-					pevent->midiData[2] = 0;
-					pevent->midiData[3] = 0;
+				}
+				VstMidiEvent * pevent;
+				if( addatStart)
+				{
+					// PATCH:
+					// When a new note enters, it adds a note-off for the previous note playing in
+					// the track (this is ok). But if you have like: A-4 C-5 and in the next line
+					// C-5 E-5 , you will only hear E-5.
+					// Solution: Move the NoteOffs at the beginning.
+					pevent = reserveVstMidiEventAtFront();
+				}
+				else 
+				{
+					pevent = reserveVstMidiEvent();
+				}
+				if(!pevent)
+					return false;
+				note thenote = trackNote[channel];
+				pevent->type = kVstMidiType;
+				pevent->byteSize = 24;
+				pevent->deltaFrames = sampleoffset;
+				pevent->flags = 0;
+				pevent->detune = 0;
+				pevent->noteLength = 0;
+				pevent->noteOffset = 0;
+				pevent->reserved1 = 0;
+				pevent->reserved2 = 0;
+				pevent->noteOffVelocity = 0;
+				pevent->midiData[0] = 0x80 | thenote.midichan; //midichannel; // Midi Off
+				pevent->midiData[1] = thenote.key;
+				pevent->midiData[2] = 0;
+				pevent->midiData[3] = 0;
 
-					trackNote[channel].key = 255;
-					trackNote[channel].midichan = 0;
+				trackNote[channel].key = 255;
+				trackNote[channel].midichan = 0;
 				return true;
 			}
 			void Plugin::SendMidi()

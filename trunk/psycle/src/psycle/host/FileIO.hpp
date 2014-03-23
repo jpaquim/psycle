@@ -35,6 +35,8 @@ namespace psycle
 {
 	namespace host
 	{
+		class Song;
+		class CProgressDialog;
 		/// big-endian 32-bit unsigned integer.
 		class ULONGINV
 		{
@@ -318,6 +320,7 @@ namespace psycle
 		class OldPsyFile : public RiffFile
 		{
 		public:
+			virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
 			bool Read(void* pData, std::size_t numBytes);
 			bool Write(const void* pData, std::size_t numBytes);
 

@@ -29,6 +29,13 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "FileIO.hpp"
+#include "Song.hpp"
+#if !defined WINAMP_PLUGIN
+	#include "ProgressDialog.hpp"
+#else
+	#include "player_plugins/winamp/fake_progressDialog.hpp"
+#endif //!defined WINAMP_PLUGIN
+
 namespace psycle
 {
 	namespace host
@@ -206,7 +213,10 @@ namespace psycle
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// OldPsyFile
 
-
+		bool OldPsyFile::Load(Song &song,CProgressDialog& progress, bool fullopen/*=true*/)
+		{
+			return song.Load(this, progress, fullopen);
+		}
 
 		bool OldPsyFile::Open(std::string const & FileName)
 		{

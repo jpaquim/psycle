@@ -123,6 +123,7 @@ namespace psycle { namespace host {
 
 			OPENFILENAME ofn; // common dialog box structure
 			// Initialize OPENFILENAME
+			std::string dir = PsycleGlobal::conf().GetAbsolutePluginDir();
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
 			ofn.lStructSize = sizeof(OPENFILENAME);
 			ofn.hwndOwner = GetParent()->m_hWnd;
@@ -132,7 +133,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::configuration().GetAbsolutePluginDir().c_str();
+			ofn.lpstrInitialDir = dir.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 			// Display the Open dialog box. 
 			if(GetOpenFileName(&ofn) == TRUE)
@@ -162,6 +163,7 @@ namespace psycle { namespace host {
 			}
 			char szFile[MAX_PATH];       // buffer for file name
 			szFile[0]='\0';
+			std::string dir = PsycleGlobal::conf().GetAbsolutePluginDir();
 			OPENFILENAME ofn;       // common dialog box structure
 			// Initialize OPENFILENAME
 			ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -173,7 +175,7 @@ namespace psycle { namespace host {
 			ofn.nFilterIndex = 1;
 			ofn.lpstrFileTitle = NULL;
 			ofn.nMaxFileTitle = 0;
-			ofn.lpstrInitialDir = Global::configuration().GetAbsolutePluginDir().c_str();
+			ofn.lpstrInitialDir = dir.c_str();
 			ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;	
 
 			// Display the Open dialog box. 

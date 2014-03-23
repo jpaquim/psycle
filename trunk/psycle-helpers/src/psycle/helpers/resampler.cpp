@@ -69,20 +69,25 @@ namespace psycle { namespace helpers { namespace dsp {
 		static const double ONEDIVSINC_TBSIZEMINONE = 1.0/ (static_cast<double>(SINC_TABLESIZE) -1.0);
 		static const double ONEDIVSINC_RESOLUTION = 1.0/static_cast<double>(SINC_RESOLUTION);
 		for(int i(1); i < SINC_TABLESIZE; ++i) {
-			///\todo decide which window we like best.
-			///\todo kaiser windows might be our best option, but i have no clue how to calculate one :)
-
 			// we only apply half window (from pi..2pi instead of 0..2pi) because we only have half sinc.
 			double tempval;
-			#if 1
-				// blackman window
-			tempval = 0.42659 - 0.49656 * std::cos(math::pi+ math::pi * i *ONEDIVSINC_TBSIZEMINONE) + 0.076849 * std::cos(2.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE);
+			//Higher bandwidths means longer stopgap (bad), but also faster sidelobe attenuation (good).
+			#if 0
+				// nuttal window. Bandwidth = 2.0212
+				tempval = 0.355768 - 0.487396 * std::cos(math::pi+ math::pi * i *ONEDIVSINC_TBSIZEMINONE) + 0.144232 * std::cos(2.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE) - 0.012604 * std::cos(math::pi+ 3.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE);
+			#elif 1
+				// blackman window. Bandwidth = 1.73
+				tempval = 0.42659 - 0.49656 * std::cos(math::pi+ math::pi * i *ONEDIVSINC_TBSIZEMINONE) + 0.076849 * std::cos(2.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE);
 			#elif 0
-				// hann(ing) window
-				tempval = .5f * (1.f - std::cos(math::pi + math::pi * i / ((float)SINC_TABLESIZE -1.f)));
+				// hann(ing) window. Bandwidth = 1.5
+				tempval = .5f * (1.f - std::cos(math::pi + math::pi * i *ONEDIVSINC_TBSIZEMINONE));
 			#elif 0
-				// hamming window
-				tempval = 0.53836f - 0.46164f * std::cos(math::pi +  math::pi * i / ((float)SINC_TABLESIZE -1.f));
+				// hamming window. Bandwidth = 1.37
+				tempval = 0.53836f - 0.46164f * std::cos(math::pi +  math::pi * i *ONEDIVSINC_TBSIZEMINONE);
+			#elif 0 
+				//lanczos (sinc) window. Bandwidth = 1.30
+				double valx=math::pi * static_cast<double>(i) * ONEDIVSINC_TBSIZEMINONE;
+				tempval = std::sin(valx)/valx;
 			#endif
 
 			#if USE_SINC_DELTA && !(DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS)

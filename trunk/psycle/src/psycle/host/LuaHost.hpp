@@ -35,8 +35,12 @@ public:
 	void call_init();
 	PluginInfo call_info();
 	void call_seqtick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/);
+	// calls if noteon modus used
+	void call_command(int lastnote, int inst, int cmd, int val);
+	void call_noteon(int note, int lastnote, int inst, int cmd, int val);
+	void call_noteoff(int note, int lastnote, int inst, int cmd, int val);
 	void call_newline();
-	void call_work(int num) throw (...);
+	void call_work(int num, int offset=0);
     void call_parameter(int numparameter, double val);
 	void call_stop();
 	void call_sr_changed(int rate);
@@ -44,9 +48,7 @@ public:
 	void free_state();
 	void set_state(lua_State* state);
 	void reload();
-	// buffers
-	void update_num_samples(int num) { plugimport_->update_num_samples(num); }
-
+	
 private:
 	void export_c_funcs();
 	// script callbacks

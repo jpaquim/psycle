@@ -89,6 +89,9 @@ namespace psycle { namespace host {
 			CChildView  m_wndView;
 			//CRebar      m_rebar;
 			CToolBar    m_wndToolBar;
+			CBitmap     m_tbBm;
+			CBitmap     m_tbBm2;
+			CImageList  m_tbImagelist;
 			SongBar		m_songBar;
 			MachineBar	m_machineBar;
 			SequenceBar  m_seqBar;

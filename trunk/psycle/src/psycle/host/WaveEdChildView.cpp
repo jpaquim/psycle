@@ -1300,6 +1300,9 @@ namespace psycle { namespace host {
 				wave.WaveSusLoopStart(wdSusLoopS);
 				wave.WaveSusLoopEnd(wdSusLoopE);
 				mainFrame->UpdateInstrumentEditor();
+				if(_pSong->wavprev.IsEnabled()) {
+					_pSong->wavprev.Play(notecommands::middleC,_pSong->wavprev.GetPosition());
+				}
 			}
 			bDragLoopEnd = bDragLoopStart = false;
 			bDragSusLoopEnd = bDragSusLoopStart = false;
@@ -1507,11 +1510,11 @@ namespace psycle { namespace host {
 
 		void CWaveEdChildView::OnSelectionInsertSilence()
 		{
-			CWaveEdInsertSilenceDialog SilenceDlg(GetOwner());
-			if(SilenceDlg.DoModal()==IDOK)
+			CWaveEdInsertSilenceDialog silenceDlg(GetOwner());
+			if(silenceDlg.DoModal()==IDOK)
 			{
 				CExclusiveLock lock(&_pSong->semaphore, 2, true);
-				unsigned long timeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * SilenceDlg.timeInSecs;
+				unsigned long timeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * silenceDlg.timeInSecs;
 				if(!wdWave)
 				{
 					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
@@ -1528,7 +1531,7 @@ namespace psycle { namespace host {
 					unsigned long insertPos;
 					XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
 
-					switch(SilenceDlg.insertPos)
+					switch(silenceDlg.insertPos)
 					{
 					case CWaveEdInsertSilenceDialog::at_start:
 						insertPos = 0;
@@ -1564,7 +1567,6 @@ namespace psycle { namespace host {
 							wdLoopE += timeInSamps;
 							wave.WaveLoopEnd(wdLoopE);
 						}
-						mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					}
 					if(wdSusLoop)		//update loop points if necessary
 					{
@@ -1578,7 +1580,6 @@ namespace psycle { namespace host {
 							wdSusLoopE += timeInSamps;
 							wave.WaveSusLoopEnd(wdSusLoopE);
 						}
-						mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
 					}
 				}
 
@@ -2410,6 +2411,9 @@ namespace psycle { namespace host {
 				wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			}
 			mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
+			if(_pSong->wavprev.IsEnabled()) {
+				_pSong->wavprev.Play(notecommands::middleC,_pSong->wavprev.GetPosition());
+			}
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
@@ -2435,6 +2439,9 @@ namespace psycle { namespace host {
 				wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 			}
 			mainFrame->UpdateInstrumentEditor();// This causes an update of the Instrument Editor.
+			if(_pSong->wavprev.IsEnabled()) {
+				_pSong->wavprev.Play(notecommands::middleC,_pSong->wavprev.GetPosition());
+			}
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
@@ -2457,6 +2464,10 @@ namespace psycle { namespace host {
 			}
 
 			mainFrame->UpdateInstrumentEditor();
+			if(_pSong->wavprev.IsEnabled()) {
+				_pSong->wavprev.Play(notecommands::middleC,_pSong->wavprev.GetPosition());
+			}
+
 			CRect rect;
 			GetClientRect(&rect);
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);

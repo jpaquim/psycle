@@ -31,6 +31,7 @@ namespace psycle { namespace host {
 			uint32_t APIversion;
 			FILETIME FileTime;
 			bool allow;
+			uint32_t flags;
 		};
 }}
 

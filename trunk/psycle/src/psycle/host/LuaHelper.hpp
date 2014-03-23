@@ -13,15 +13,6 @@ namespace psycle { namespace host {
 			return *ud;      
 		}
 		template <class UserDataType>
-		UserDataType** check2(lua_State* L, int index, const std::string& meta) {
-			luaL_checktype(L, index, LUA_TTABLE); 
-			lua_getfield(L, index, "__self");	
-			UserDataType** ud = (UserDataType**) luaL_checkudata(L, -1, meta.c_str());
-			luaL_argcheck(L, (*ud) != 0, 1, (meta+" expected").c_str());
-			lua_pop(L, 1);
-			return ud;      
-		}
-		template <class UserDataType>
 		static UserDataType* new_userdata(lua_State* L, const std::string& meta, UserDataType* ud, int self=1) {
 			lua_pushvalue(L, self);
 			int n = lua_gettop(L);

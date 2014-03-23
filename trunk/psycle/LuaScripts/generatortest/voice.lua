@@ -1,3 +1,4 @@
+-- includes
 local param = require("psycle.parameter")
 local env = require("psycle.envelope")
 local osc = require("psycle.osc");
@@ -5,38 +6,21 @@ local dspmath = require("psycle.dsp.math")
 local array = require("psycle.array")
 
 local voice = {}
-local osctypes = {"sin", "saw", "square", "tri"}
 
--- aguru synth 2 final arpnotes
-local arpnotes = {
-	{0,  3,  7, 12, 15, 19, 24, 27, 31, 36, 39, 43, 48, 51, 55, 60},
-	{0,  4,  7, 12, 16, 19, 24, 28, 31, 36, 40, 43, 48, 52, 55, 60},
-	{0,  3,  7, 10, 12, 15, 19, 22, 24, 27, 31, 34, 36, 39, 43, 46},
-	{0,  4,  7, 10, 12, 16, 19, 22, 24, 28, 31, 34, 36, 40, 43, 46},
-	{0, 12,  0,-12, 12,  0, 12,  0,  0, 12,-12,  0, 12,  0, 12,-12},
-	{0, 12, 24,  0, 12, 24, 12,  0, 24, 12,  0,  0, 12,  0,  0, 24},
-	{0, 12, 19,  0,  0,  7,  0,  7,  0, 12, 19,  0, 12, 19,  0,-12},
-	{0,  3,  7, 12, 15, 19, 24, 27, 31, 27, 24, 19, 15, 12,  7,  3},
-	{0,  4,  7, 12, 16, 19, 24, 28, 31, 28, 24, 19, 16, 12,  7,  4},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-	{0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
-};
+local osctypes = {"sin", "saw", "square", "tri"}
+local osctypesoff = {"sin", "saw", "square", "tri", "off"}
 
 -- setup voice parameters
 local p = require("orderedtable").new()
 -- osc params
 p.osclb = param:newlabel("Oscs")
 for i=1, 3 do
-  p["osc"..i] = param:newknob("oscshape"..i, "", 1, 4, 3, 1)
-  p["osc"..i].display = function(self) return osctypes[self:val()] end
+  p["osc"..i] = param:newknob("oscshape"..i, "", 1, 5, 4, 1)
+  p["osc"..i].display = function(self) return osctypesoff[self:val()] end
   p["oscsemi"..i] = param:newknob("oscsemi"..i,"",-60,60,120,0)
   p["osccent"..i] = param:newknob("osccent"..i,"",-100,100,200,0)  
 end
+p.sync = param:newknob("Sync Osc1","",0,2000,2000,0)  
 -- vca params
 p.vcalb = param:newlabel("Vol Env")
 p.vcaa = param:newknob("A", "s", 0.01, 5.01, 500, 1)
@@ -61,25 +45,20 @@ p.pm2p = param:newknob("P2", "Hz", -1, 1, 100, -0.2)
 p.pm3p = param:newknob("P3", "Hz", -1, 1, 100, 0.5)
 p.pm4p = param:newknob("P4", "Hz", -1, 1, 100, 0)
 p.pmg = param:newknob("Gain", "", 0, 100, 100, 0)
--- arp params
-p.arplb = param:newlabel("Arp")
-p.arpmode = param:newknob("Arp Mode", "", 0, 16, 16, 0)
-p.arpspeed = param:newknob("Arp Speed", "bpm", 1, 1000, 999, 125)
-p.arpsteps = param:newknob("Arp Steps", "", 1, 16, 15, 4)
 -- resampler params
 p.resamplerlb = param:newlabel("Resampler")
 p.resampler = param:newknob("Resampler", "", 1, 3, 2, 2)
 local resamplertypes = {"zerohold", "linear", "sinc"}
 function p.resampler:display() return resamplertypes[self:val()] end
 voice.params = p  -- used in machine::init
-voice.samplerate = 44100
 
 function voice:new()
   local v = {}      
   setmetatable(v, self)
   self.__index = self  
-  v.env = env:newahdsr(p.vcaa:val(), p.vcah:val(), p.vcad:val(), p.vcas:norm(),
-					   p.vcar:val())
+  ahdsr = require("psycle.ahdsr");
+  v.ahdsr = ahdsr:new(p.vcaa:val(), p.vcah:val(), p.vcad:val(), p.vcas:norm(),
+	  			    p.vcar:val())
   v.envf = env:new({{p.pm1t:val(), p.pm1p:val()},
                     {p.pm2t:val(), p.pm2p:val()},
 					{p.pm3t:val(), p.pm3p:val()},
@@ -90,15 +69,14 @@ function voice:new()
   v.lfo = osc:new(p.flfos:val(), p.flfof:val()) 
   v.lfo:setgain(p.flfog:val())  
   v.vibrato = osc:new(osc.SIN, 4)
-  v.oscs = {}
-  v.arp = {}
-  v.arp.period = (voice.samplerate * 60)/(125*4) - (0.03*voice.samplerate);
-  v.arp.playing = false  
+  v.oscs = {}  
   v.basenote = 60
+  v.master = osc:new(osc.SQR, 263.1)
   for i=1, 3 do   
     local f = dspmath.notetofreq(v.basenote + p["oscsemi"..i]:val()+p["osccent"..i]:val()/100)
     v.oscs[i] = osc:new(p["osc"..i]:val(), f)
 	v.oscs[i]:setgain(0.3)
+	v.oscs[i].active = true
   end  
   for i,k in p:opairs() do
     k:addlistener(v)
@@ -109,32 +87,29 @@ end
 
 function voice:noteon(note)
   self.basenote = note
-  self:reset(note)
-  self.arp.sc = 0 -- sample count
-  self.arp.nc = 1 -- note count (1..16)
-  self.arp.next = 0 -- nextarp
-  self.arp.reset = true
-  self.arp.playing = p.arpmode:val() ~= 0
-end
-
-function voice:reset(note)
   for i=1, 3 do   
     local f = dspmath.notetofreq(note + p["oscsemi"..i]:val()+p["osccent"..i]:val()/100)
-    self.oscs[i]:setfrequency(f)
+	if (self.oscs[i].sync == nil) then
+      self.oscs[i]:setfrequency(f)
+	else
+	  self.master:setfrequency(f)
+	end
 	self.oscs[i]:start(0)
   end
-  self.isplaying = true
-  self.env:settime(4, p.vcar:val())
-  self.env:start()
+  self.master:start(0)
+  self.ahdsr:start()
   self.envf:start()
   self.lfo:start(0)
   self.envglide = nil
 end
 
 function voice:noteoff()
-  self.env:release()
+  self.ahdsr:release()
   self.envf:release()
-  self.arp.playing = false
+end
+
+function voice:faststop()
+  self.ahdsr:fastrelease()
 end
 
 function voice:initcmd(note, cmd, val)
@@ -165,98 +140,79 @@ function voice:initcmd(note, cmd, val)
    end
 end
 
-function voice:work(samples)  
-  if p.arpmode:val() == 0 or not self.arp.playing then
-    self:process(samples)
-  else
-    local num = samples:size()
-	local k = 0
-    local i = math.floor(self.arp.next) - self.arp.sc
-    while (i < num) do
-	  if (i-k) > 0 then	    
-	    samples:margin(k, i)
-	    self:process(samples)	     
-	    k = i
-	  end
-      if self.arp.reset then
-		self:reset(self.basenote+arpnotes[p.arpmode:val()][self.arp.nc])
-	    self.arp.nc = self.arp.nc + 1
-	    if self.arp.nc > p.arpsteps:val() then
-	      self.arp.nc = 1
-	    end
-	    self.arp.next = self.arp.next + self.arp.period
-		self.arp.reset = false
-	  else
-	    self:faststop()
-		self.arp.reset = true
-		self.arp.next = self.arp.next + (voice.samplerate*0.03)  -- 0.03 sec faststop
-	  end
-      i = math.floor(self.arp.next) - self.arp.sc 	  
-	end
-    samples:margin(k, num)
-	self:process(samples)
-	samples:clearmargin()
-	self.arp.sc = self.arp.sc + num
-  end
-end
-
-function voice:process(samples)  
-  local num = samples:size() 
-  -- process pitch envelope
-  local fm = self.envf:work(num)
-  fm:mul(p.pmg:val())  
-  -- process pitch lfo 
-  self.lfo:work(fm)
-  -- process glide
-  if self.envglide~= nil then
-    fm:add(self.envglide:work(num))
-  end
-  -- process vibrato
-  if self.vibrato:isplaying() then    
-    self.vibrato:work(fm)
-  end
-  -- process ahdsr  
-  e = self.env:work(num)
-  self.isplaying = self.env:isplaying()  
-  for i=1, #self.oscs do  
-    self.oscs[i]:work(samples, fm, e)
-  end
-  -- check glide end
-  if self.envglide~= nil and not self.envglide:isplaying() then
+function voice:work(samplelist)  
+  local samples = samplelist[1]
+  if self.ahdsr:isplaying() then
+    local num = samples:size() 
+    -- process pitch envelope
+    local fm = self.envf:work(num)
+    fm:mul(p.pmg:val())  
+    -- process pitch lfo 
+    self.lfo:work(fm)
+    -- process glide
+    if self.envglide~= nil then
+      fm:add(self.envglide:work(num))
+    end
+    -- process vibrato
+    if self.vibrato:isplaying() then    
+      self.vibrato:work(fm)
+    end  
+	-- process ahdsr  
+    e = self.ahdsr:work(num) 
     for i=1, #self.oscs do  
-	  local f = dspmath.notetofreq(self.glidenote + p["oscsemi"..i]:val()+p["osccent"..i]:val()/100)
-      self.oscs[i]:setfrequency(f)
-	end
-	self.basenote = self.glidenote;
-	self.envglide = nil
-  end 
-  samples:mul(self.oscvol)
+      if (self.oscs[i].active == true) then
+        self.oscs[i]:work(samples, fm, e)
+	  end
+    end
+    -- check glide end
+    if self.envglide~= nil and not self.envglide:isplaying() then
+      for i=1, #self.oscs do  	  
+	    local f = dspmath.notetofreq(self.glidenote + p["oscsemi"..i]:val()+p["osccent"..i]:val()/100)
+        self.oscs[i]:setfrequency(f)	  
+	  end
+	  self.basenote = self.glidenote;
+	  self.envglide = nil
+    end 
+    samples:mul(self.oscvol)
+  end
 end
 
 function voice:glideto(note, t)
   local f = dspmath.notetofreq(note);
   local currf = f - self.oscs[1]:frequency()  
-  self.envglide = env:new({{t, currf}},2);  
+  self.envglide = env:new({{t, currf}}, 2);  
+  self.envglide:start()
   self.glidenote = note
 end
 
 function voice:glide(val)
-   self.envglide = env:new({{0.5, val}},2);
+   self.envglide = env:new({{0.5, val}}, 2);
+   self.envglide:start()
    self.glidenote = self.basenote
-end
-
-function voice:faststop()
-  self.env:settime(4, 0.03)
-  self.env:release();
 end
 
 function voice:ontweaked(param)
   if param==p["osc1"] then
-    self.oscs[1]:setshape(param:val())
+    if (param:val() ~= 5) then
+      self.oscs[1]:setshape(param:val())
+	  self.oscs[1].active =  true
+	else
+	  self.oscs[1].active = false
+	end
   elseif param==p["osc2"] then
-    self.oscs[2]:setshape(param:val())
+    if (param:val() ~= 5) then
+      self.oscs[2]:setshape(param:val())
+	  self.oscs[2].active =  true
+	else
+	  self.oscs[2].active = false
+	end
   elseif param==p["osc3"] then
-    self.oscs[3]:setshape(param:val())
+    if (param:val() ~= 5) then
+      self.oscs[3]:setshape(param:val())
+	  self.oscs[3].active =  true
+	else
+	  self.oscs[3].active = false
+	end
   elseif param==p.flfof then
     self.lfo:setfrequency(param:val())
   elseif param==p.flfog then    
@@ -264,15 +220,15 @@ function voice:ontweaked(param)
   elseif param==p.flfos then
     self.lfo:setshape(param:val())
   elseif param==p.vcaa then
-	self.env:settime(1, param:val())
+	self.ahdsr:setattack(param:val())
   elseif param==p.vcah then
-    self.env:settime(2, param:val())
+    self.ahdsr:sethold(param:val())
   elseif param==p.vcad then
-	self.env:settime(3, param:val())
+	self.ahdsr:setdecay(param:val())
   elseif param==p.vcas then
-    self.env:setpeak(3, param:norm())
+    self.ahdsr:setsustain(param:norm())
   elseif param==p.vcar then
-    self.env:settime(4, param:val())
+    self.ahdsr:setrelease(param:val())
   elseif param==p.pm1t then
 	self.envf:settime(1, param:val())
   elseif param==p.pm2t then
@@ -289,13 +245,19 @@ function voice:ontweaked(param)
     self.envf:setpeak(1, param:val())
   elseif param==p.pm4p then
     self.envf:setpeak(1, param:val())
-  elseif param==p.arpspeed then
-     local bpm = param:val()
-     self.arp.period = (voice.samplerate * 60)/(bpm*4) - (voice.samplerate*0.03);
   elseif param==p.resampler then
      for i=1, 3 do        
 	   self.oscs[i]:setquality(param:val())
      end
+  elseif param==p.sync then
+    if param:val() == 0 then
+	   self.oscs[1]:setsync(nil)
+	else
+	   if (self.oscs[1].sync == nil) then
+	      self.oscs[1]:setsync(self.master)
+       end	   
+	   self.oscs[1]:setfrequency(param:val())
+	end
   end
 end
 

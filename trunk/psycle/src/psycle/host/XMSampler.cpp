@@ -108,21 +108,7 @@ namespace psycle
 			214.000f,	201.989f,	190.652f,	179.952f,	169.852f,	160.319f,	151.321f,	142.828f,	134.812f,	127.245f,	120.103f,	113.363f, //Oct 8
 			107.000f,	100.995f,	95.3262f,	89.9759f,	84.9259f,	80.1594f,	75.6604f,	71.4139f,	67.4058f,	63.6226f,	60.0517f,	56.6813f //Oct 9
 		};
-		// The original table, which takes the lower octave values and multiplies them by two,  
-		// failing to take care of the roundings of the values.
-/*		const int XMSampler::AmigaPeriod[XMInstrument::NOTE_MAP_SIZE] = {
-			54784,	51712,	48768,	46080,	43392,	40960,	38656,	36480,	34432,	32512,	30720,	29008,
-			27392,	25856,	24384,	23040,	21696,	20480,	19328,	18240,	17216,	16256,	15360,	14504,
-			13696,	12928,	12192,	11520,	10848,	10240,	9664,	9120,	8608,	8128,	7680,	7252,
-			6848,	6464,	6096,	5760,	5424,	5120,	4832,	4560,	4304,	4064,	3840,	3626,
-			3424,	3232,	3048,	2880,	2712,	2560,	2416,	2280,	2152,	2032,	1920,	1813,
-			1712,	1616,	1524,	1440,	1356,	1280,	1208,	1140,	1076,	1016,	960,	906,
-			856,	808,	762,	720,	678,	640,	604,	570,	538,	508,	480,	453,
-			428,	404,	381,	360,	339,	320,	302,	285,	269,	254,	240,	226,
-			214,	202,	190,	180,	170,	160,	151,	143,	135,	127,	120,	113,
-			107,	101,	95,		90,		85,		80,		75,		71,		67,		63,		60,		56 
-		};
-*/
+
 
 //////////////////////////////////////////////////////////////////////////
 //	XMSampler::WaveDataController Implementation
@@ -193,7 +179,7 @@ namespace psycle
 		template <class T>
 		void XMSampler::WaveDataController<T>::RefillBuffer(T buffer[192], const T* data,bool released)
 		{
-			//These values are for the max size of resampler (which suits the rest).
+			//These values are for the max size of sinc resampler (which suits the rest).
 			const uint32_t presamples=15;
 			const uint32_t postsamples=16;
 			const uint32_t totalsamples=presamples+postsamples+1; //pre+post+current
@@ -220,8 +206,8 @@ namespace psycle
 			if (looptype==XMInstrument::WaveData<>::LoopType::DO_NOT) {
 				//End
 				if (Length() < totalsamples) {
+					memset(buffer+secbegin,0,totalsamples+postsamples);
 					memcpy(buffer+secbegin+totalsamples-Length(),data, Length()*sizeof(T));
-					memset(buffer+secbegin+totalsamples,0,postsamples);
 				}
 				else {
 					memcpy(buffer+secbegin,data+Length()-totalsamples, totalsamples*sizeof(T));
@@ -289,7 +275,7 @@ namespace psycle
 		int XMSampler::WaveDataController<T>::PreWork(int numSamples, WorkFunction* pWork) {
 			*pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
 
-			//These values are for the max size of resampler (which suits the rest).
+			//These values are for the max size of the sinc resampler (which suits the rest).
 			const int presamples=15;
 			const int postsamples=16;
 			const int totalsamples=presamples+postsamples+1; //pre+post+current
@@ -322,8 +308,14 @@ namespace psycle
 					}
 				}
 				else if (m_looped && pos+postsamples>= m_CurrentLoopStart && pos <m_CurrentLoopStart+presamples) {
-					m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
-					m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					if ( m_pWave->WaveLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL) {
+						m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
+						m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					}
+					else {
+						m_pL = &lBuffer[thirdbegin+(totalsamples+pos-m_CurrentLoopStart)];
+						m_pR = &rBuffer[thirdbegin+(totalsamples+pos-m_CurrentLoopStart)];
+					}
 					max=presamples+m_CurrentLoopStart-pos;
 					//TRACE("forward-loop buffer at pos %d for samples %d\n" , secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 				}
@@ -339,7 +331,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("335: max<0 bug triggered!\n");
+					TRACE("342: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = 0;
@@ -364,14 +356,14 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("359: max<0 bug triggered!\n");
+					TRACE("366: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = m_Position.LowPart;
 			}
 #ifndef NDEBUG
 			if (*m_pL!=*(m_pWave->pWaveDataL()+pos) && pos < Length()) {
-				TRACE("ERROR. Samples differ! %d - %d\n", *m_pL , *(m_pWave->pWaveDataL()+pos));
+				TRACE("373 ERROR. Samples differ! %d - %d (%d,%d)\n", *m_pL , *(m_pWave->pWaveDataL()+pos), (m_pL-lBuffer), pos);
 			}
 #endif
 			amount.QuadPart/=Speed();
@@ -431,6 +423,11 @@ namespace psycle
 					break;
 				}
 			}
+#ifndef NDEBUG
+			if (static_cast<int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
+				TRACE("436: highpart > loopend+17 bug triggered!\n");
+			}
+#endif
 		}
 		template <class T>
 		void XMSampler::WaveDataController<T>::NoteOff(void)
@@ -722,7 +719,7 @@ namespace psycle
 				numSamples-=nextsamples;
 #ifndef NDEBUG
 				if (numSamples > 256 || numSamples < 0) {
-					TRACE("721: numSamples invalid bug triggered!\n");
+					TRACE("725: numSamples invalid bug triggered!\n");
 				}
 #endif
 				while (nextsamples)
@@ -1976,15 +1973,16 @@ namespace psycle
 				speed = m_PitchSlideMem;
 			}
 			else m_PitchSlideMem = speed &0xff;
-
 			if ( speed < 0xE0 || note !=notecommands::empty)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
 			{									// Porta to note does not have Fine.
 				speed<<=2;
 				if ( ForegroundVoice()) { ForegroundVoice()->m_PitchSlideSpeed= bUp?-speed:speed; }
 				if ( note != notecommands::empty ) 
 				{
-					if ( ForegroundVoice())	{ ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
-					m_EffectFlags |= EffectFlag::SLIDE2NOTE;
+					if (note != notecommands::release) {
+						if ( ForegroundVoice())	{ ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
+						m_EffectFlags |= EffectFlag::SLIDE2NOTE;
+					}
 				}
 				else m_EffectFlags |= EffectFlag::PITCHSLIDE;
 			} else if ( speed < 0xF0) {

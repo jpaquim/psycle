@@ -6,13 +6,17 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSongLoader.hpp"
-#include "ProgressDialog.hpp"
 #include "Song.hpp"
 #include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "XMInstrument.hpp"
 #include "XMSampler.hpp"
 #include "Player.hpp"
 #include <psycle/helpers/math.hpp>
+#if !defined WINAMP_PLUGIN
+	#include "ProgressDialog.hpp"
+#else
+	#include "player_plugins/winamp/fake_progressDialog.hpp"
+#endif //!defined WINAMP_PLUGIN
 
 #include <algorithm>
 #include <cstring>
@@ -152,12 +156,12 @@ namespace host{
 		delete[] sRemap;
 	}
 
-	void XMSongLoader::Load(Song& song, bool fullopen)
+	bool XMSongLoader::Load(Song& song,CProgressDialog& /*progress*/, bool /*fullopen*/)
 	{
 		CExclusiveLock lock(&song.semaphore, 2, true);
 		// check validity
 		if(!IsValid()){
-			return;
+			return false;
 		}
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); //-9dB
@@ -169,7 +173,7 @@ namespace host{
 		char * pSongName = AllocReadStr(20,17);
 
 		if(pSongName==NULL)
-			return;
+			return false;
 
 		song.name = pSongName;
 		song.author = "";
@@ -179,7 +183,7 @@ namespace host{
 
 		size_t iInstrStart = LoadPatterns(song);
 		LoadInstruments(song,iInstrStart);
-
+		return true;
 	}
 
 	bool XMSongLoader::IsValid()
@@ -1097,12 +1101,12 @@ namespace host{
 
 	}
 
-	void MODSongLoader::Load(Song& song,const bool fullopen)
+	bool MODSongLoader::Load(Song& song,CProgressDialog& /*progress*/, bool /*fullopen*/)
 	{
 		CExclusiveLock lock(&song.semaphore, 2, true);
 		// check validity
 		if(!IsValid()){
-			return;
+			return false;
 		}
 		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 //		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); // This is done later, when determining the number of channels.
@@ -1113,7 +1117,7 @@ namespace host{
 
 		char * pSongName = AllocReadStr(20,0);
 		if(pSongName==NULL)
-			return;
+			return false;
 
 		song.name = pSongName;
 		song.author = "";
@@ -1161,6 +1165,7 @@ namespace host{
 		for(int i = 0;i < 31;i++){
 			LoadInstrument(song,i);
 		}
+		return true;
 	}
 
 	bool MODSongLoader::IsValid()

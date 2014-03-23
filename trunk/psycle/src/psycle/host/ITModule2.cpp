@@ -5,6 +5,11 @@
 #include "Player.hpp"
 #include "Song.hpp"
 #include "XMSampler.hpp"
+#if !defined WINAMP_PLUGIN
+	#include "ProgressDialog.hpp"
+#else
+	#include "player_plugins/winamp/fake_progressDialog.hpp"
+#endif //!defined WINAMP_PLUGIN
 
 #include <algorithm>
 namespace psycle
@@ -120,6 +125,20 @@ namespace psycle
 				instr.NoteToSample(i,npair);
 			}
 			song.xminstruments.SetInst(instr,idx);
+		}
+		bool ITModule2::Load(Song &song,CProgressDialog& /*progress*/, bool /*fullopen*/)
+		{
+			int read = Read(&itFileH,sizeof(itFileH));
+			this->Seek(0);
+			if (read>0 && itFileH.tag == IMPM_ID ) {
+				return LoadITModule(song);
+			}
+			read = Read(&s3mFileH,sizeof(s3mFileH));
+			this->Seek(0);
+			if (read >0 && s3mFileH.tag == SCRM_ID && s3mFileH.type == 0x10 ) {
+				return LoadS3MModuleX(song);
+			}
+			return false;
 		}
 		bool ITModule2::LoadITModule(Song& song)
 		{
@@ -1420,56 +1439,37 @@ OFFSET              Count TYPE   Description
 
 				//+2=stereo (after Length bytes for LEFT channel, another Length bytes for RIGHT channel)
                 //+4=16-bit sample (intel LO-HI byteorder) (+2/+4 not supported by ST3.01)
+				_wave.AllocWaveData(iLen,bstereo);
 				if(b16Bit) {
 					int out=0;
+					for(unsigned int j=0;j<iLen*2;j+=2)
+					{
+						wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
+						*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
+						out++;
+					}
 					if (bstereo) {
-						_wave.AllocWaveData(iLen,true);
-						unsigned int j;
-						for(j=0;j<iLen*2;j+=2)
-						{
-							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
-						}
 						out=0;
 						Read(smpbuf,iLen*2);
-						for(j=0;j<iLen*2;j+=2)
+						for(unsigned int j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
 							*(const_cast<int16_t*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
-					} else {
-						_wave.AllocWaveData(iLen,false);
-						unsigned int j;
-						for(j=0;j<iLen*2;j+=2)
-						{
-							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
-							out++;
-						}
 					}
 				} else {// 8 bit sample
+					for(unsigned int j=0;j<iLen;j++)
+					{			
+						wNew = (smpbuf[j]<<8)+offset;
+						*(const_cast<int16_t*>(_wave.pWaveDataL()) + j) = wNew;
+					}
 					if (bstereo) {
-						_wave.AllocWaveData(iLen,true);
-						unsigned int j;
-						for(j=0;j<iLen;j++)
-						{			
-							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
-						}
 						Read(smpbuf,iLen);
-						for(j=0;j<iLen;j++)
+						for(unsigned int j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<int16_t*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
-						}
-					} else {
-						_wave.AllocWaveData(iLen,false);
-						unsigned int j;
-						for(j=0;j<iLen;j++)
-						{			
-							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<int16_t*>(_wave.pWaveDataR()) + j) = wNew;
 						}
 					}
 				}
