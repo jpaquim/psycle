@@ -134,10 +134,10 @@ namespace psycle
 			virtual bool AddCapturePort(int idx);
 			virtual bool RemoveCapturePort(int idx);
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples);
-			virtual std::uint32_t GetWritePosInSamples() const;
-			virtual std::uint32_t GetPlayPosInSamples();
-			inline virtual std::uint32_t GetInputLatencySamples() const { return _inlatency; }
-			inline virtual std::uint32_t GetOutputLatencySamples() const { return _outlatency; }
+			virtual uint32_t GetWritePosInSamples() const;
+			virtual uint32_t GetPlayPosInSamples();
+			inline virtual uint32_t GetInputLatencySamples() const { return _inlatency; }
+			inline virtual uint32_t GetOutputLatencySamples() const { return _outlatency; }
 
 			DriverEnum GetDriverFromidx(int driverID) const;
 			PortOut GetOutPortFromidx(int driverID);
@@ -177,8 +177,8 @@ namespace psycle
 			static AsioStereoBuffer *ASIObuffers;
 			static bool _firstrun;
 			static bool _supportsOutputReady;
-			static std::uint32_t writePos;
-			static std::uint32_t m_wrapControl;
+			static uint32_t writePos;
+			static uint32_t m_wrapControl;
 		};
 	}
 }

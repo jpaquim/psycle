@@ -31,8 +31,8 @@ namespace psycle
 		public:
 			PluginCatcher();
 			virtual ~PluginCatcher();
-			/*override*/ bool lookupDllName(const std::string& name, std::string & result, MachineType tye,std::int32_t& shellIdx);
-			/*override*/ bool TestFilename(const std::string & name,const std::int32_t shellIdx);
+			/*override*/ bool lookupDllName(const std::string& name, std::string & result, MachineType tye,int32_t& shellIdx);
+			/*override*/ bool TestFilename(const std::string & name,const int32_t shellIdx);
 			/*override*/ void LoadPluginInfo(bool verify=true);
 			/*override*/ void ReScan(bool regenerate=true);
 			/*override*/ bool IsLoaded(){ return _numPlugins>0; }

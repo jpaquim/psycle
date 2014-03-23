@@ -78,22 +78,22 @@ namespace psycle { namespace host {
 
 		bool LuaPlugin::LoadSpecificChunk(RiffFile* pFile, int version)
 		{
-			std::uint32_t size;
+			uint32_t size;
 			pFile->Read(size); // size of whole structure
 			if(size)
 			{
-				std::uint32_t count;
+				uint32_t count;
 				pFile->Read(count);  // size of vars
 				//Read vals and names to do SetParameter.
 				//It is done this way to allow parameters to change without disrupting the loader.
 				std::vector<int> vals;
 				std::map<std::string, int> ids;
-				for (std::uint32_t i = 0; i < count; i++) {
+				for (uint32_t i = 0; i < count; i++) {
 					int temp;
 					pFile->Read(temp);
 					vals.push_back(temp);
 				}
-				for (std::uint32_t i = 0; i < count; i++) {
+				for (uint32_t i = 0; i < count; i++) {
 					std::string id;
 					bool res = pFile->ReadString(id);
 					ids[id] = i;
@@ -109,7 +109,7 @@ namespace psycle { namespace host {
 					  // parameter not found
 				  }
 				}
-				std::uint32_t size2=0;
+				uint32_t size2=0;
 				pFile->Read(size2);
 				if(size2)
 				{
@@ -139,8 +139,8 @@ namespace psycle { namespace host {
 
 		void LuaPlugin::SaveSpecificChunk(RiffFile * pFile)
 		{
-			std::uint32_t count = GetNumParams();
-			std::uint32_t size2(0);
+			uint32_t count = GetNumParams();
+			uint32_t size2(0);
 			try
 			{
 				// size2 = proxy().GetDataSize();
@@ -154,7 +154,7 @@ namespace psycle { namespace host {
 #endif
 				// data won't be saved
 			}
-			std::uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
+			uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
 			std::vector<std::string> ids;
 			for (UINT i = 0; i < count; i++) {
 			  std::string id = proxy_.get_parameter_id(i);
@@ -164,13 +164,13 @@ namespace psycle { namespace host {
 			pFile->Write(size);
 			pFile->Write(count);
 
-			for (std::uint32_t i = 0; i < count; i++)
+			for (uint32_t i = 0; i < count; i++)
 			{
 				int temp = GetParamValue(i);
 				pFile->Write(temp);
 			}
 			// ids
-			for (std::uint32_t i = 0; i < count; i++) {
+			for (uint32_t i = 0; i < count; i++) {
 			  pFile->WriteString(ids[i]);
 			}
 	

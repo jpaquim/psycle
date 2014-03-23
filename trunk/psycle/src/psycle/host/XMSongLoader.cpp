@@ -90,8 +90,8 @@ namespace host{
 		memcpy(_pinsheaderb,&_insheader,sizeof(XMSAMPLEFILEHEADER)-2);
 		SetEnvelopes(instr,_insheaderb);
 
-		std::uint32_t iSampleCount(0);
-		for (std::uint32_t i=0; i<96; i++)
+		uint32_t iSampleCount(0);
+		for (uint32_t i=0; i<96; i++)
 		{
 			if (_insheader.snum[i] > iSampleCount) iSampleCount = _insheader.snum[i];
 		}
@@ -270,7 +270,7 @@ namespace host{
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(std::int32_t size, size_t start)
+	char * XMSongLoader::AllocReadStr(int32_t size, size_t start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];
@@ -1207,7 +1207,7 @@ namespace host{
 		}
 	}
 
-	char * MODSongLoader::AllocReadStr(std::int32_t size, size_t start)
+	char * MODSongLoader::AllocReadStr(int32_t size, size_t start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];

@@ -41,12 +41,12 @@ namespace psycle
 		class WaveData
 		{
 		public:
-			const std::int16_t* _pL;
-			const std::int16_t* _pR;
+			const int16_t* _pL;
+			const int16_t* _pR;
 			bool _stereo;
 			int _samplerate;
 			ULARGE_INTEGER _pos;
-			std::int64_t _speed;
+			int64_t _speed;
 			bool _loop;
 			ULONG _loopStart;
 			ULONG _loopEnd;

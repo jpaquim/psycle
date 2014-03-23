@@ -24,7 +24,7 @@ namespace psycle
 		bool ITModule2::BitsBlock::ReadBlock(OldPsyFile *pFile)
 		{
 			// block layout : uint16 size, <size> bytes data
-			std::uint16_t size;
+			uint16_t size;
 			pFile->Read(&size,2);
 			pdata = new unsigned char[size];
 			if (!pdata) return false;
@@ -39,9 +39,9 @@ namespace psycle
 			return true;
 		}
 
-		std::uint32_t ITModule2::BitsBlock::ReadBits(unsigned char bitwidth)
+		uint32_t ITModule2::BitsBlock::ReadBits(unsigned char bitwidth)
 		{
-			std::uint32_t val = 0;
+			uint32_t val = 0;
 			int b = 0;
 
 			// If reached the end of the buffer, exit.
@@ -240,12 +240,12 @@ Special:  Bit 0: On = song message attached.
 				song.playOrder[0]=0;
 			}
 
-			std::uint32_t *pointersi = new std::uint32_t[itFileH.insNum];
-			Read(pointersi,itFileH.insNum*sizeof(std::uint32_t));
-			std::uint32_t * pointerss = new std::uint32_t[itFileH.sampNum];
-			Read(pointerss,itFileH.sampNum*sizeof(std::uint32_t));
-			std::uint32_t * pointersp = new std::uint32_t[itFileH.patNum];
-			Read(pointersp,itFileH.patNum*sizeof(std::uint32_t));
+			uint32_t *pointersi = new uint32_t[itFileH.insNum];
+			Read(pointersi,itFileH.insNum*sizeof(uint32_t));
+			uint32_t * pointerss = new uint32_t[itFileH.sampNum];
+			Read(pointerss,itFileH.sampNum*sizeof(uint32_t));
+			uint32_t * pointersp = new uint32_t[itFileH.patNum];
+			Read(pointersp,itFileH.patNum*sizeof(uint32_t));
 
 			if ( itFileH.special&SpecialFlags::MIDIEMBEDDED)
 			{
@@ -423,8 +423,8 @@ Special:  Bit 0: On = song message attached.
 					xins.AmpEnvelope().LoopEnd(curH.loopE);
 				}
 				for(int i = 0; i < 25;i++){
-					std::uint8_t tick = curH.nodepair[i].first;
-					std::uint8_t value = curH.nodepair[i].second;
+					uint8_t tick = curH.nodepair[i].first;
+					uint8_t value = curH.nodepair[i].second;
 					if (value == 0xFF || tick == 0xFF) break;
 
 					xins.AmpEnvelope().Append(tick,(float)value/ 64.0f);
@@ -674,13 +674,13 @@ Special:  Bit 0: On = song message attached.
 			return false;
 		}
 
-		bool ITModule2::LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
+		bool ITModule2::LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
 			signed short wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
 			int lobit=(convert & SampleConvert::IS_MOTOROLA)?8:0;
 			int hibit=8-lobit;
-			std::uint32_t j,out;
+			uint32_t j,out;
 
 			if (b16Bit) iLen*=2;
 			unsigned char * smpbuf = new unsigned char[iLen];
@@ -721,10 +721,10 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert)
+		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
-			std::uint32_t topsize, val,j;
+			uint32_t topsize, val,j;
 			short d1, d2,wNew;
 			char d18,d28;
 
@@ -743,8 +743,8 @@ Special:  Bit 0: On = song message attached.
 				if (!block.ReadBlock(this)) return false;
 
 				// Size of the block of data to process, in blocks of max size=0x8000bytes ( 0x4000 samples if 16bits)
-				std::uint32_t blocksize=(iLen-j<topsize)?iLen-j:topsize;
-				std::uint32_t blockpos=0;
+				uint32_t blocksize=(iLen-j<topsize)?iLen-j:topsize;
+				uint32_t blockpos=0;
 
 				bitwidth = maxbitsize+1;
 				d1 = d2 = 0;
@@ -845,7 +845,7 @@ Special:  Bit 0: On = song message attached.
 			PatternEntry pent=pempty;
 
 			Skip(2); // packedSize
-			std::int16_t rowCount=ReadInt16();
+			int16_t rowCount=ReadInt16();
 			Skip(4); // unused
 			if (rowCount > MAX_LINES ) rowCount=MAX_LINES;
 			else if (rowCount < 0 ) rowCount = 0;
@@ -937,11 +937,11 @@ Special:  Bit 0: On = song message attached.
 							volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
 						}
 					}
-					std::uint8_t param=6;
+					uint8_t param=6;
 					if(mask[channel]&8)
 					{
 						pent._mach=0;
-						std::uint8_t command=ReadUInt8();
+						uint8_t command=ReadUInt8();
 						param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,patIdx,row,command,param,channel);
@@ -1214,7 +1214,7 @@ Special:  Bit 0: On = song message attached.
 			sampler->IsAmigaSlides(true);
 			sampler->GlobalVolume((s3mFileH.gVol&0x7F)*2);
 			
-			std::uint16_t j,i=0;
+			uint16_t j,i=0;
 			for (j=0;j<s3mFileH.ordNum;j++)
 			{
 				song.playOrder[i]=ReadUInt8(); // 254 = ++ (skip), 255 = --- (end of tune).
@@ -1295,7 +1295,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,std::uint16_t iInstIdx)
+		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,uint16_t iInstIdx)
 		{
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
@@ -1363,7 +1363,7 @@ OFFSET              Count TYPE   Description
 			return false;
 		}
 
-		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx)
+		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,uint16_t iInstIdx,uint16_t iSampleIdx)
 		{
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
@@ -1400,7 +1400,7 @@ OFFSET              Count TYPE   Description
 			return true;
 		}
 
-		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
+		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint16_t iInstIdx,uint16_t iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{
@@ -1413,8 +1413,8 @@ OFFSET              Count TYPE   Description
 					smpbuf = new char[iLen];
 					Read(smpbuf,iLen);
 				}
-				std::int16_t wNew;
-				std::int16_t offset;
+				int16_t wNew;
+				int16_t offset;
 				if ( s3mFileH.trackerInf==1) offset=0; // 1=[VERY OLD] signed samples, 2=unsigned samples
 				else offset=-32768;
 
@@ -1428,14 +1428,14 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 						}
 						out=0;
 						Read(smpbuf,iLen*2);
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + out) = wNew;
+							*(const_cast<int16_t*>(_wave.pWaveDataR()) + out) = wNew;
 							out++;
 						}   
 					} else {
@@ -1444,7 +1444,7 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen*2;j+=2)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + out) = wNew;
+							*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
 							out++;
 						}
 					}
@@ -1455,13 +1455,13 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 						Read(smpbuf,iLen);
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<int16_t*>(_wave.pWaveDataR()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					} else {
 						_wave.AllocWaveData(iLen,false);
@@ -1469,7 +1469,7 @@ OFFSET              Count TYPE   Description
 						for(j=0;j<iLen;j++)
 						{			
 							wNew = (smpbuf[j]<<8)+offset;
-							*(const_cast<std::int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
+							*(const_cast<int16_t*>(_wave.pWaveDataL()) + j) = wNew; //| char(rand()); // Add dither;
 						}
 					}
 				}
@@ -1481,9 +1481,9 @@ OFFSET              Count TYPE   Description
 			return false;
 		}
 
-		bool ITModule2::LoadS3MPatternX(std::uint16_t patIdx)
+		bool ITModule2::LoadS3MPatternX(uint16_t patIdx)
 		{
-			std::uint8_t newEntry;
+			uint8_t newEntry;
 			PatternEntry pempty;
 			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
@@ -1498,11 +1498,11 @@ OFFSET              Count TYPE   Description
 				Read(&newEntry,1);
 				while ( newEntry )
 				{
-					std::uint8_t channel=newEntry&31;
-					std::uint8_t volume=255;
+					uint8_t channel=newEntry&31;
+					uint8_t volume=255;
 					if(newEntry&32)
 					{
-						std::uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
+						uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
 						if (note==254) pent._note = notecommands::release;
 						else if (note==255) pent._note=255;
 						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psycle's C-5
@@ -1511,15 +1511,15 @@ OFFSET              Count TYPE   Description
 					}
 					if(newEntry&64)
 					{
-						std::uint8_t tmp=ReadUInt8();
+						uint8_t tmp=ReadUInt8();
 						pent._mach =0;
 						volume = (tmp<64)?tmp:63;
 					}
 					if(newEntry&128)
 					{
 						pent._mach=0;
-						std::uint8_t command=ReadUInt8();
-						std::uint8_t param=ReadUInt8();
+						uint8_t command=ReadUInt8();
+						uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,patIdx,row,command,param,channel);
 						if ( pent._cmd == PatternCmd::BREAK_TO_LINE )

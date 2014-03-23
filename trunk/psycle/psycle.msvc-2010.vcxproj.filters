@@ -80,6 +80,9 @@
     <Filter Include="Seib-Vsthost">
       <UniqueIdentifier>{627d616a-b0e0-41eb-af43-73474a5410d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="psycle\engine\machine\lua">
+      <UniqueIdentifier>{58939c0f-a85b-4aa2-a252-b1f13ac6ad41}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\psycle\host\Constants.hpp">
@@ -280,62 +283,11 @@
     <ClInclude Include="src\psycle\host\GearTracker.hpp">
       <Filter>psycle\mfc\machine\sampler</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\host\InstrumentEditor.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="src\psycle\host\WavFileDlg.hpp">
       <Filter>psycle\mfc\machine\sampler</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\host\ScrollableDlgBar.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\WaveEdAmplifyDialog.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\WaveEdChildView.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\WaveEdCrossfadeDialog.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\WaveEdFrame.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\WaveEdInsertSilenceDialog.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\psycle\host\WaveEdMixDialog.hpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClInclude>
     <ClInclude Include="src\psycle\host\VstEffectWnd.hpp">
       <Filter>psycle\mfc\machine\vst</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\InstrumentPitDlg.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\host\XMSamplerMixerPage.hpp">
       <Filter>psycle\mfc\machine\XMSampler</Filter>
@@ -363,9 +315,6 @@
     </ClInclude>
     <ClInclude Include="src\psycle\host\TransformPatternDlg.hpp">
       <Filter>psycle\mfc\pattern</Filter>
-    </ClInclude>
-	<ClInclude Include=".\src\psycle\host\ChannelMappingDlg.hpp">
-      <Filter>psycle\mfc\monitors</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\host\InfoDlg.hpp">
       <Filter>psycle\mfc\monitors</Filter>
@@ -442,9 +391,6 @@
     <ClInclude Include="src\psycle\host\vsthost24.hpp">
       <Filter>psycle\engine\machine</Filter>
     </ClInclude>
-    <ClInclude Include="src\psycle\host\LuaHost.hpp">
-      <Filter>psycle\engine\machine</Filter>
-    </ClInclude>
     <ClInclude Include="src\psycle\host\Instrument.hpp">
       <Filter>psycle\engine\machine\sampler</Filter>
     </ClInclude>
@@ -480,6 +426,38 @@
     </ClInclude>
     <ClInclude Include="src\Seib-vsthost\JBridgeEnabler.hpp">
       <Filter>Seib-Vsthost</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InstrumentEditor.hpp" />
+    <ClInclude Include="src\psycle\host\ScrollableDlgBar.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdAmplifyDialog.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdChildView.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdCrossfadeDialog.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdFrame.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdInsertSilenceDialog.hpp" />
+    <ClInclude Include="src\psycle\host\WaveEdMixDialog.hpp" />
+    <ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp" />
+    <ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp" />
+    <ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp" />
+    <ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp" />
+    <ClInclude Include="src\psycle\host\ChannelMappingDlg.hpp" />
+    <ClInclude Include="src\psycle\host\InstrIndividualMap.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaArray.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaInternals.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaPlugin.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaHost.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -642,62 +620,11 @@
     <ClCompile Include="src\psycle\host\GearTracker.cpp">
       <Filter>psycle\mfc\machine\sampler</Filter>
     </ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentEditor.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="src\psycle\host\wavfiledlg.cpp">
       <Filter>psycle\mfc\machine\sampler</Filter>
     </ClCompile>
-    <ClCompile Include="src\psycle\host\ScrollableDlgBar.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdAmplifyDialog.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdChildView.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdCrossfadeDialog.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdFrame.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp">
-      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
-    </ClCompile>
     <ClCompile Include="src\psycle\host\VstEffectWnd.cpp">
       <Filter>psycle\mfc\machine\vst</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\EnvelopeEditor.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\EnvelopeEditorDlg.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\InstrumentAmpDlg.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\InstrumentFilDlg.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\InstrumentGenDlg.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\InstrumentPanDlg.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\InstrumentPitDlg.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\SampleAssignEditor.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\WaveScopeCtrl.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\XMSamplerMixerPage.cpp">
       <Filter>psycle\mfc\machine\XMSampler</Filter>
@@ -707,12 +634,6 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\XMSamplerUIGeneral.cpp">
       <Filter>psycle\mfc\machine\XMSampler</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\XMSamplerUIInst.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="src\psycle\host\XMSamplerUISample.cpp">
-      <Filter>psycle\mfc\machine\instrument</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\InterpolateCurveDlg.cpp">
       <Filter>psycle\mfc\pattern</Filter>
@@ -725,9 +646,6 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\TransformPatternDlg.cpp">
       <Filter>psycle\mfc\pattern</Filter>
-    </ClCompile>
-	<ClCompile Include=".\src\psycle\host\ChannelMappingDlg.cpp">
-      <Filter>psycle\mfc\monitors</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\InfoDlg.cpp">
       <Filter>psycle\mfc\monitors</Filter>
@@ -786,9 +704,6 @@
     <ClCompile Include="src\psycle\host\vsthost24.cpp">
       <Filter>psycle\engine\machine</Filter>
     </ClCompile>
-    <ClCompile Include="src\psycle\host\LuaHost.cpp">
-      <Filter>psycle\engine\machine</Filter>
-    </ClCompile>
     <ClCompile Include="src\psycle\host\Instrument.cpp">
       <Filter>psycle\engine\machine\sampler</Filter>
     </ClCompile>
@@ -812,6 +727,41 @@
     </ClCompile>
     <ClCompile Include="src\Seib-vsthost\JBridgeEnabler.cpp">
       <Filter>Seib-Vsthost</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentEditor.cpp" />
+    <ClCompile Include="src\psycle\host\ScrollableDlgBar.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdAmplifyDialog.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdChildView.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdCrossfadeDialog.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdFrame.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp" />
+    <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp" />
+    <ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp" />
+    <ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp" />
+    <ClCompile Include="src\psycle\host\EnvelopeEditor.cpp" />
+    <ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp" />
+    <ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp" />
+    <ClCompile Include="src\psycle\host\SampleAssignEditor.cpp" />
+    <ClCompile Include="src\psycle\host\XMSamplerUIInst.cpp" />
+    <ClCompile Include="src\psycle\host\XMSamplerUISample.cpp" />
+    <ClCompile Include="src\psycle\host\InstrIndividualMap.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaArray.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaInternals.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaPlugin.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaHost.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

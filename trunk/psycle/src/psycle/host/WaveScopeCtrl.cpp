@@ -62,7 +62,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 
 			if ( OffsetStep >1.f)
 			{
-				const std::int16_t * const pData = rWave().pWaveDataL();
+				const int16_t * const pData = rWave().pWaveDataL();
 				// Increasing by one can be slow on big ( 100.000+ ) samples
 				int offsetInc = ( OffsetStep > 4.f) ? (OffsetStep/4) : 1;
 				long offsetEnd=0;
@@ -101,7 +101,7 @@ void CWaveScopeCtrl::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			{
 				if ( OffsetStep >1.f)
 				{
-					const std::int16_t * const pData = rWave().pWaveDataR();
+					const int16_t * const pData = rWave().pWaveDataR();
 					// Increasing by one can be slow on big ( 100.000+ ) samples
 					int offsetInc = ( OffsetStep > 4.f) ? (OffsetStep/4) : 1;
 					long offsetEnd=0;

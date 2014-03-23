@@ -83,7 +83,7 @@ namespace psycle
 					void inline unused0(const int i)                                                           throw(exceptions::function_error);
 					bool inline unused1(const int i)                                                           throw(exceptions::function_error);
 					void inline MidiEvent(const int channel, const int value, const int velocity)              throw(exceptions::function_error);
-					void inline unused2(std::uint32_t const data)                                              throw(exceptions::function_error);
+					void inline unused2(uint32_t const data)                                              throw(exceptions::function_error);
 					bool inline DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error);
 					bool inline HostEvent(const int wave, const int note, const float volume)                  throw(exceptions::function_error);
 					void inline SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error);
@@ -158,8 +158,8 @@ namespace psycle
 				}
 				virtual int NumAuxColumnIndexes() { return 16;}
 
-				virtual const std::uint32_t GetAPIVersion() { try {return GetInfo()->APIVersion; }catch(...){return 0;} }
-				virtual const std::uint32_t GetPlugVersion() { try { return GetInfo()->PlugVersion; }catch(...){return 0;}}
+				virtual const uint32_t GetAPIVersion() { try {return GetInfo()->APIVersion; }catch(...){return 0;} }
+				virtual const uint32_t GetPlugVersion() { try { return GetInfo()->PlugVersion; }catch(...){return 0;}}
 
 			///\}
 
@@ -271,7 +271,7 @@ namespace psycle
 		void inline proxy:: unused0(const int i)                                                           throw(exceptions::function_error) { try { plugin().unused0(i);                                                    } CATCH_WRAP_AND_RETHROW(host()) }
 		bool inline proxy:: unused1(const int i)                                                           throw(exceptions::function_error) { try { return const_cast<const psycle::plugin_interface::CMachineInterface &>(plugin()).unused1(i);      } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }
 		void inline proxy:: MidiEvent(const int channel, const int value, const int velocity)              throw(exceptions::function_error) { try { plugin().MidiEvent(channel, value, velocity);                           } CATCH_WRAP_AND_RETHROW(host()) }
-		void inline proxy:: unused2(std::uint32_t const data)                                              throw(exceptions::function_error) { try { plugin().unused2(data);                                                 } CATCH_WRAP_AND_RETHROW(host()) }
+		void inline proxy:: unused2(uint32_t const data)                                              throw(exceptions::function_error) { try { plugin().unused2(data);                                                 } CATCH_WRAP_AND_RETHROW(host()) }
 		bool inline proxy:: DescribeValue(char * txt, const int param, const int value)                    throw(exceptions::function_error) { try { return plugin().DescribeValue(txt, param, value);                       } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }
 		bool inline proxy:: HostEvent(const int eventNr, const int val1, const float val2)                 throw(exceptions::function_error) { try { return plugin().HostEvent(eventNr, val1, val2);                         } CATCH_WRAP_AND_RETHROW_WITH_FAKE_RETURN(host()) }
 		void inline proxy:: SeqTick(int channel, int note, int ins, int cmd, int val)                      throw(exceptions::function_error) { try { plugin().SeqTick(channel, note, ins, cmd, val);                         } CATCH_WRAP_AND_RETHROW(host()) }

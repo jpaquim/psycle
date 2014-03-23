@@ -29,8 +29,8 @@ namespace psycle
 		bool ASIOInterface::_supportsOutputReady(false);
 		ASIOInterface::PortOut ASIOInterface::_selectedout;
 		std::vector<ASIOInterface::PortCapt> ASIOInterface::_selectedins;
-		std::uint32_t ASIOInterface::writePos(0);
-		std::uint32_t ASIOInterface::m_wrapControl(0);
+		uint32_t ASIOInterface::writePos(0);
+		uint32_t ASIOInterface::m_wrapControl(0);
 
 		AUDIODRIVERWORKFN ASIOInterface::_pCallback(0);
 		void* ASIOInterface::_pCallbackContext(0);
@@ -525,13 +525,13 @@ namespace psycle
 			return e ? Start() : Stop();
 		}
 
-		std::uint32_t ASIOInterface::GetPlayPosInSamples()
+		uint32_t ASIOInterface::GetPlayPosInSamples()
 		{
 			if(!_running) return 0;
 			return writePos - GetOutputLatencySamples();
 		}
 
-		std::uint32_t ASIOInterface::GetWritePosInSamples() const
+		uint32_t ASIOInterface::GetWritePosInSamples() const
 		{
 			if(!_running) return 0;
 			return writePos;

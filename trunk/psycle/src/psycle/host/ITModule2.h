@@ -24,7 +24,7 @@ namespace psycle { namespace host {
 				BitsBlock() : pdata(0), rpos(0), rend(0), rembits(0) {}
 				~BitsBlock() throw() { delete[] pdata; }
 				bool ReadBlock(OldPsyFile* pFile);
-				std::uint32_t ReadBits(unsigned char bitwidth);
+				uint32_t ReadBits(unsigned char bitwidth);
 			private:
 				/// pointer to data
 				unsigned char * pdata;
@@ -203,26 +203,26 @@ namespace psycle { namespace host {
 
 			// little-endian values.
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE
-			static const std::uint32_t IMPM_ID=0x4D504D49;
-			static const std::uint32_t IMPI_ID=0x49504D49;
-			static const std::uint32_t IMPS_ID=0x53504D49;
+			static const uint32_t IMPM_ID=0x4D504D49;
+			static const uint32_t IMPI_ID=0x49504D49;
+			static const uint32_t IMPS_ID=0x53504D49;
 #else
-			static const std::uint32_t IMPM_ID=0x494D504D;
-			static const std::uint32_t IMPI_ID=0x494D5049;
-			static const std::uint32_t IMPS_ID=0x494D5053;
+			static const uint32_t IMPM_ID=0x494D504D;
+			static const uint32_t IMPI_ID=0x494D5049;
+			static const uint32_t IMPS_ID=0x494D5053;
 #endif
 
 #pragma pack(push, 1)
 
 			struct itHeader
 			{
-				std::uint32_t tag;
+				uint32_t tag;
 				char songName[26];
-				std::uint16_t pHiligt,ordNum,insNum,sampNum,patNum,trackerV,ffv,flags,special;
-				std::uint8_t gVol,mVol,iSpeed,iTempo,panSep,PWD;
-				std::uint16_t msgLen;
-				std::uint32_t msgOffset,reserved;
-				std::uint8_t chanPan[64],chanVol[64];
+				uint16_t pHiligt,ordNum,insNum,sampNum,patNum,trackerV,ffv,flags,special;
+				uint8_t gVol,mVol,iSpeed,iTempo,panSep,PWD;
+				uint16_t msgLen;
+				uint32_t msgOffset,reserved;
+				uint8_t chanPan[64],chanVol[64];
 			};
 			struct Flags
 			{
@@ -271,49 +271,49 @@ namespace psycle { namespace host {
 				char Zxx[128][32];
 			};
 
-			struct ITNotePair { std::uint8_t first; std::uint8_t second; };
-			struct ITNodePair1x { std::uint8_t first; std::uint8_t second; };
-			struct ITNodePair { std::int8_t first; std::uint8_t secondlo; std::uint8_t secondhi; };
+			struct ITNotePair { uint8_t first; uint8_t second; };
+			struct ITNodePair1x { uint8_t first; uint8_t second; };
+			struct ITNodePair { int8_t first; uint8_t secondlo; uint8_t secondhi; };
 
 			struct itInsHeader1x
 			{
-				std::uint32_t tag;
+				uint32_t tag;
 				char fileName[13];
-				std::uint8_t flg,loopS,loopE,sustainS,sustainE;
-				std::uint8_t unused1[2];
-				std::uint16_t fadeout;
-				std::uint8_t NNA,DNC;
-				std::uint16_t trackerV;
-				std::uint8_t noS;
-				std::uint8_t unused2;
+				uint8_t flg,loopS,loopE,sustainS,sustainE;
+				uint8_t unused1[2];
+				uint16_t fadeout;
+				uint8_t NNA,DNC;
+				uint16_t trackerV;
+				uint8_t noS;
+				uint8_t unused2;
 				char sName[26];
-				std::uint8_t unused[6];
+				uint8_t unused[6];
 				ITNotePair notes[120];
 				/// value of the volume for each tick. (Seems it was probably an internal IT thing to represent the envelope)
-				std::uint8_t volEnv[200];
+				uint8_t volEnv[200];
 				/// Each of the defined nodes (tick index, value). value ranges from 0 to 64 (decimal). 0xFF is end of envelope.
 				ITNodePair1x nodepair[25];
 			};
 
 			struct ITEnvStruct
 			{
-				std::uint8_t flg,numP,loopS,loopE,sustainS,sustainE;
+				uint8_t flg,numP,loopS,loopE,sustainS,sustainE;
 				ITNodePair nodes[25];
-				std::uint8_t unused;
+				uint8_t unused;
 			};
 
 			struct itInsHeader2x
 			{
-				std::uint32_t tag;
+				uint32_t tag;
 				char fileName[13];
-				std::uint8_t NNA,DCT,DCA;
-				std::uint16_t fadeout;
-				std::uint8_t pPanSep,pPanCenter,gVol,defPan,randVol,randPan;
-				std::uint16_t trackerV;
-				std::uint8_t noS,unused;
+				uint8_t NNA,DCT,DCA;
+				uint16_t fadeout;
+				uint8_t pPanSep,pPanCenter,gVol,defPan,randVol,randPan;
+				uint16_t trackerV;
+				uint8_t noS,unused;
 				char sName[26];
-				std::uint8_t inFC,inFR,mChn,mPrg;
-				std::uint16_t mBnk;
+				uint8_t inFC,inFR,mChn,mPrg;
+				uint16_t mBnk;
 				ITNotePair notes[120];
 				ITEnvStruct volEnv;
 				ITEnvStruct panEnv;
@@ -341,13 +341,13 @@ namespace psycle { namespace host {
 
 			struct itSampleHeader
 			{
-				std::uint32_t tag;
+				uint32_t tag;
 				char fileName[13];
-				std::uint8_t gVol,flg,vol;
+				uint8_t gVol,flg,vol;
 				char sName[26];
-				std::uint8_t cvt,dfp;
-				std::uint32_t length,loopB,loopE,c5Speed,sustainB,sustainE,smpData;
-				std::uint8_t vibS,vibD,vibR,vibT;
+				uint8_t cvt,dfp;
+				uint32_t length,loopB,loopE,c5Speed,sustainB,sustainE,smpData;
+				uint8_t vibS,vibD,vibR,vibT;
 			};
 #pragma pack(pop)
 			struct SampleFlags
@@ -383,12 +383,12 @@ namespace psycle { namespace host {
 			bool LoadITInst(const itInsHeader2x& curH,XMInstrument &xins,int iInstIdx);
 			void LoadInstrumentFromFile(Song& song, const int idx);
 			bool LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData<>& _wave,int iSampleIdx);
-			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
-			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,std::uint32_t iLen,bool b16Bit,unsigned char convert);
+			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
+			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans);
 			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:
-			std::uint8_t highOffset[64];
+			uint8_t highOffset[64];
 			EmbeddedMIDIData* embeddedData;
 			itHeader itFileH;
 			short m_extracolumn;
@@ -404,27 +404,27 @@ namespace psycle { namespace host {
 		public:
 			// little-endian
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE
-			static const std::uint32_t SCRM_ID = 0x4D524353;
-			static const std::uint32_t SCRS_ID = 0x53524353;
-			static const std::uint32_t SCRI_ID = 0x49524353;
+			static const uint32_t SCRM_ID = 0x4D524353;
+			static const uint32_t SCRS_ID = 0x53524353;
+			static const uint32_t SCRI_ID = 0x49524353;
 #else
-			static const std::uint32_t SCRM_ID = 0x5343524D;
-			static const std::uint32_t SCRS_ID = 0x53435253;
-			static const std::uint32_t SCRI_ID = 0x53435249;
+			static const uint32_t SCRM_ID = 0x5343524D;
+			static const uint32_t SCRS_ID = 0x53435253;
+			static const uint32_t SCRI_ID = 0x53435249;
 #endif
 
 #pragma pack(push, 1)
 			struct s3mHeader
 			{
 				char songName[28];
-				std::uint8_t end,type;
-				std::uint8_t unused1[2];
-				std::uint16_t ordNum,insNum,patNum,flags,trackerV,trackerInf;
-				std::uint32_t tag; // SCRM
-				std::uint8_t gVol,iSpeed,iTempo,mVol,uClick,defPan;
-				std::uint8_t unused2[8];
-				std::uint16_t pSpecial;
-				std::uint8_t chanSet[32];
+				uint8_t end,type;
+				uint8_t unused1[2];
+				uint16_t ordNum,insNum,patNum,flags,trackerV,trackerInf;
+				uint32_t tag; // SCRM
+				uint8_t gVol,iSpeed,iTempo,mVol,uClick,defPan;
+				uint8_t unused2[8];
+				uint16_t pSpecial;
+				uint8_t chanSet[32];
 			};
 
 			struct S3MFlags
@@ -457,28 +457,28 @@ namespace psycle { namespace host {
 			/*Generic header. casted to one of the other two depending on "type" (or "tag") value*/
 			struct s3mInstHeader
 			{
-				std::uint8_t type;
+				uint8_t type;
 				char fileName[12];
-				std::uint8_t data[35];
+				uint8_t data[35];
 				char sName[28];
-				std::uint32_t tag;
+				uint32_t tag;
 			};
 
 			struct s3mSampleHeader
 			{
-				std::uint8_t type;
+				uint8_t type;
 				char filename[12];
-				std::uint8_t hiMemSeg;
-				std::uint16_t lomemSeg;
-				std::uint32_t length,loopb,loope;
-				std::uint8_t vol;
-				std::uint8_t unused;
-				std::uint8_t packed,flags; //[P]ack   0=unpacked, 1=DP30ADPCM packing (not used by ST3.01)
-				std::uint32_t c2speed;
-				std::uint32_t unused2,internal1,internal2;
+				uint8_t hiMemSeg;
+				uint16_t lomemSeg;
+				uint32_t length,loopb,loope;
+				uint8_t vol;
+				uint8_t unused;
+				uint8_t packed,flags; //[P]ack   0=unpacked, 1=DP30ADPCM packing (not used by ST3.01)
+				uint32_t c2speed;
+				uint32_t unused2,internal1,internal2;
 				char sName[28];
 				/// SCRS
-				std::uint32_t tag;
+				uint32_t tag;
 			};
 
 			struct S3MSampleFlags
@@ -493,25 +493,25 @@ namespace psycle { namespace host {
 
 			struct s3madlibheader
 			{
-				std::uint8_t type;
+				uint8_t type;
 				char filename[12];
-				std::uint8_t unused[3];
-				std::uint8_t D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D0A,D0B,vol;
-				std::uint8_t unused2[3];
-				std::uint32_t c2speed;
-				std::uint8_t unused3[12];
+				uint8_t unused[3];
+				uint8_t D00,D01,D02,D03,D04,D05,D06,D07,D08,D09,D0A,D0B,vol;
+				uint8_t unused2[3];
+				uint32_t c2speed;
+				uint8_t unused3[12];
 				char sName[28];
 				/// SCRI
-				std::uint32_t tag;
+				uint32_t tag;
 			};
 #pragma pack(pop)
 
 		public:
 			bool LoadS3MModuleX(Song& song);
-			bool LoadS3MInstX(Song& song, XMInstrument &xins,std::uint16_t iInstIdx);
-			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,std::uint16_t iInstIdx,std::uint16_t iSampleIdx);
-			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,std::uint16_t iInstIdx,std::uint16_t iSampleIdx,std::uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
-			bool LoadS3MPatternX(std::uint16_t patIdx);
+			bool LoadS3MInstX(Song& song, XMInstrument &xins,uint16_t iInstIdx);
+			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,uint16_t iInstIdx,uint16_t iSampleIdx);
+			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint16_t iInstIdx,uint16_t iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
+			bool LoadS3MPatternX(uint16_t patIdx);
 		private:
 			s3mHeader  s3mFileH;
 		};

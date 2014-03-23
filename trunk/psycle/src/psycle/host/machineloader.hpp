@@ -11,8 +11,8 @@ namespace psycle { namespace host {
 	public:
 		MachineLoader(){};
 		virtual ~MachineLoader(){};
-		virtual bool lookupDllName(const std::string & name, std::string & result, MachineType type, std::int32_t& shellIdx) = 0;
-		virtual bool TestFilename(const std::string & name,const std::int32_t shellIdx) = 0;
+		virtual bool lookupDllName(const std::string & name, std::string & result, MachineType type, int32_t& shellIdx) = 0;
+		virtual bool TestFilename(const std::string & name,const int32_t shellIdx) = 0;
 
 		virtual void LoadPluginInfo(bool verify=true) = 0;
 		virtual void ReScan(bool regenerate=true) = 0;

@@ -153,8 +153,8 @@ namespace psycle { namespace helpers { namespace dsp {
 			return t;
 		}
 		else if (quality() == quality::soxr) {
-			soxr_t thesoxr = new_soxr();
-			return thesoxr;
+//			soxr_t thesoxr = new_soxr();
+//			return  thesoxr;
 		}
 		return NULL;
 	}
@@ -172,7 +172,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		}
 		else if (quality() == quality::soxr) {
 			/* Set the initial resampling ratio (N.B. 3rd parameter = 0): */
-			soxr_set_io_ratio(static_cast<soxr_t>(resampler_data), speed, 0);
+//			soxr_set_io_ratio(static_cast<soxr_t>(resampler_data), speed, 0);
 		}
 	}
 	void cubic_resampler::DisposeResamplerData(void * resampler_data) const {
@@ -180,7 +180,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			delete static_cast<sinc_data_t*>(resampler_data);
 		}
 		else if (quality() == quality::soxr) {
-			soxr_delete(static_cast<soxr_t>(resampler_data));
+//			soxr_delete(static_cast<soxr_t>(resampler_data));
 		}
 	}
 	int cubic_resampler::requiredPresamples() const {
@@ -205,20 +205,20 @@ namespace psycle { namespace helpers { namespace dsp {
 	}
 
 
-	soxr_t cubic_resampler::new_soxr() {
+/*	soxr_t cubic_resampler::new_soxr() {
 	  soxr_error_t error;
 	  soxr_t thesoxr;
 	  /* When creating a var-rate resampler, q_spec must be set as follows: */
-	  soxr_quality_spec_t q_spec = soxr_quality_spec(SOXR_HQ, SOXR_VR);
+	  //soxr_quality_spec_t q_spec = soxr_quality_spec(SOXR_HQ, SOXR_VR);
 
 	  /* The ratio of the given input rate and output rates must equate to the
 	   * maximum I/O ratio that will be used: */
 	  //Note: 32 = 5 octaves, but think that the sample rate of the sample and the 
 	  //samplerate of the audio output also add to the ratio.
 	  //I.e. playing a 8363Hz sample at C-4 with a 96Khz sampling rate is already a ratio of 11.
-	  thesoxr = soxr_create(32, 1, 1, &error, NULL, &q_spec, NULL);
-	  return (error)? NULL : thesoxr;
-	}
+//	  thesoxr = soxr_create(32, 1, 1, &error, NULL, &q_spec, NULL);
+//	  return (error)? NULL : thesoxr;
+//	}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

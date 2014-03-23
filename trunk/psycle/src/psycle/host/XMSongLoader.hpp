@@ -121,43 +121,43 @@ namespace psycle { namespace host {
 		void LoadSampleHeader(XMInstrument::WaveData<>& _wave, int InstrIdx);
 		void LoadSampleData(XMInstrument::WaveData<>& _wave, int InstrIdx);
 		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
-		char * AllocReadStr(std::int32_t size, size_t start=-1);
+		char * AllocReadStr(int32_t size, size_t start=-1);
 
 		// inlines
 		inline unsigned char ReadUInt1()
 		{	
-			std::uint8_t i(0);
+			uint8_t i(0);
 			return Read(&i,1)?i:0;
 		}
 
 		inline unsigned short ReadUInt2()
 		{
-			std::uint16_t i(0);
+			uint16_t i(0);
 			return Read(&i,2)?i:0;
 		}
 
 		inline unsigned int ReadUInt4()
 		{
-			std::uint32_t i(0);
+			uint32_t i(0);
 			return Read(&i,4)?i:0;
 		}
-		inline unsigned char ReadUInt1(const std::int32_t start)
+		inline unsigned char ReadUInt1(const int32_t start)
 		{	
-			std::uint8_t i(0);
+			uint8_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
-		inline unsigned short ReadUInt2(const std::int32_t start)
+		inline unsigned short ReadUInt2(const int32_t start)
 		{
-			std::uint16_t i(0);
+			uint16_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
-		inline unsigned int ReadUInt4(const std::int32_t start)
+		inline unsigned int ReadUInt4(const int32_t start)
 		{
-			std::uint32_t i(0);
+			uint32_t i(0);
 			if(start>=0) Seek(start);
 			return Read(&i,4)?i:0;
 		}

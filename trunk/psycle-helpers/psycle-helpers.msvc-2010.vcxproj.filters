@@ -42,9 +42,6 @@
     <ClCompile Include="src\psycle\helpers\resampler.cpp">
       <Filter>psycle\helpers\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="src\psycle\helpers\sampleconverter.cpp">
-      <Filter>psycle\helpers\dsp</Filter>
-    </ClCompile>
     <ClCompile Include="src\psycle\helpers\abstractiff.cpp">
       <Filter>psycle\helpers\file</Filter>
     </ClCompile>
@@ -71,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="src\psycle\helpers\riffwave.cpp">
       <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\helpers\dspslide.cpp">
+      <Filter>psycle\helpers\dsp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -175,6 +175,9 @@
     </ClInclude>
     <ClInclude Include="src\psycle\helpers\riffwave.hpp">
       <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\dspslide.hpp">
+      <Filter>psycle\helpers\dsp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

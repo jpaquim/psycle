@@ -77,7 +77,7 @@ namespace psycle
 		void XMInstrument::WaveData<T>::ConvertToMono()
 		{
 			if (!m_WaveStereo) return;
-			for (std::uint32_t c = 0; c < m_WaveLength; c++)
+			for (uint32_t c = 0; c < m_WaveLength; c++)
 			{
 				m_pWaveDataL[c] = ( m_pWaveDataL[c] + m_pWaveDataR[c] ) / 2;
 			}
@@ -91,7 +91,7 @@ namespace psycle
 		{
 			if (m_WaveStereo) return;
 			m_pWaveDataR = new T[m_WaveLength];
-			for (std::uint32_t c = 0; c < m_WaveLength; c++)
+			for (uint32_t c = 0; c < m_WaveLength; c++)
 			{
 				m_pWaveDataR[c] = m_pWaveDataL[c];
 			}
@@ -99,7 +99,7 @@ namespace psycle
 		}
 
 		template <class T> 
-		void XMInstrument::WaveData<T>::InsertAt(std::uint32_t insertPos, const WaveData& wave)
+		void XMInstrument::WaveData<T>::InsertAt(uint32_t insertPos, const WaveData& wave)
 		{
 			T* oldLeft = m_pWaveDataL;
 			T* oldRight = NULL;
@@ -127,7 +127,7 @@ namespace psycle
 		}
 
 		template <class T> 
-		void XMInstrument::WaveData<T>::ModifyAt(std::uint32_t modifyPos, const WaveData& wave)
+		void XMInstrument::WaveData<T>::ModifyAt(uint32_t modifyPos, const WaveData& wave)
 		{
 			std::memcpy(&m_pWaveDataL[modifyPos], wave.pWaveDataL(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
 			if(m_WaveStereo)
@@ -137,7 +137,7 @@ namespace psycle
 		}
 
 		template <class T> 
-		void XMInstrument::WaveData<T>::DeleteAt(std::uint32_t deletePos, std::uint32_t length)
+		void XMInstrument::WaveData<T>::DeleteAt(uint32_t deletePos, uint32_t length)
 		{
 			T* oldLeft = m_pWaveDataL;
 			T* oldRight = NULL;
@@ -257,29 +257,29 @@ namespace psycle
 			//Todo: Templatize
 			if (m_WaveStereo) {
 				for(int i(ampStart);i<ampEnd;++i) {
-					m_pWaveDataL[i] = math::rint_clip<std::int16_t>(m_pWaveDataL[i] * vol);
-					m_pWaveDataR[i] = math::rint_clip<std::int16_t>(m_pWaveDataR[i] * vol);
+					m_pWaveDataL[i] = math::rint_clip<int16_t>(m_pWaveDataL[i] * vol);
+					m_pWaveDataR[i] = math::rint_clip<int16_t>(m_pWaveDataR[i] * vol);
 				}
 			}
 			else { 
 				for(int i(ampStart);i<ampEnd;++i) {
-					m_pWaveDataL[i] = math::rint_clip<std::int16_t>(m_pWaveDataL[i] * vol);
+					m_pWaveDataL[i] = math::rint_clip<int16_t>(m_pWaveDataL[i] * vol);
 				}
 			}
 		}
 
 		template <class T> 
-		void XMInstrument::WaveData<T>::WaveSampleRate(const std::uint32_t value){
+		void XMInstrument::WaveData<T>::WaveSampleRate(const uint32_t value){
 			m_WaveSampleRate = value;
 		}
 
 		template <class T> 
 		int XMInstrument::WaveData<T>::Load(RiffFile& riffFile)
 		{	
-			std::uint32_t size1,size2;
+			uint32_t size1,size2;
 			
 			char temp[8];
-			std::uint32_t filevers;
+			uint32_t filevers;
 			int size=0;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
@@ -302,11 +302,11 @@ namespace psycle
 
 			riffFile.Read(m_WaveLoopStart);
 			riffFile.Read(m_WaveLoopEnd);
-			{ std::uint32_t i(0); riffFile.Read(i); m_WaveLoopType = static_cast<LoopType::Type>(i); }
+			{ uint32_t i(0); riffFile.Read(i); m_WaveLoopType = static_cast<LoopType::Type>(i); }
 
 			riffFile.Read(m_WaveSusLoopStart);
 			riffFile.Read(m_WaveSusLoopEnd);
-			{ std::uint32_t i(0); riffFile.Read(i); m_WaveSusLoopType = static_cast<LoopType::Type>(i); }
+			{ uint32_t i(0); riffFile.Read(i); m_WaveSusLoopType = static_cast<LoopType::Type>(i); }
 			// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
 			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
 			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
@@ -317,7 +317,7 @@ namespace psycle
 			else {
 				if (filevers==2) {
 					//Placeholder for future bitsize
-					std::uint32_t bits;
+					uint32_t bits;
 					riffFile.Read(bits);
 				}
 				riffFile.Read(m_WaveSampleRate);
@@ -385,8 +385,8 @@ namespace psycle
 		{
 			unsigned char * pData1(0);
 			unsigned char * pData2(0);
-			std::uint32_t size1= static_cast<uint32_t>(SoundSquash(m_pWaveDataL,&pData1,m_WaveLength));
-			std::uint32_t size2(0);
+			uint32_t size1= static_cast<uint32_t>(SoundSquash(m_pWaveDataL,&pData1,m_WaveLength));
+			uint32_t size2(0);
 
 			if (m_WaveStereo)
 			{
@@ -409,14 +409,14 @@ namespace psycle
 
 			riffFile.Write(m_WaveLoopStart);
 			riffFile.Write(m_WaveLoopEnd);
-			{ std::uint32_t i = m_WaveLoopType; riffFile.Write(i); }
+			{ uint32_t i = m_WaveLoopType; riffFile.Write(i); }
 
 			riffFile.Write(m_WaveSusLoopStart);
 			riffFile.Write(m_WaveSusLoopEnd);
-			{ std::uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
+			{ uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
 
 			//Placeholder for future bitsize. for filevesion 2.
-			//{ std::uint32_t bits = 16; riffFile.Write(bits); }
+			//{ uint32_t bits = 16; riffFile.Write(bits); }
 			riffFile.Write(m_WaveSampleRate);
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
@@ -443,12 +443,12 @@ namespace psycle
 			}
 			size_t endpos = riffFile.GetPos();
 			riffFile.Seek(filepos-4);
-			{ std::uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
+			{ uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
 			riffFile.Seek(endpos);
 		}
 
 
-	template class XMInstrument::WaveData<std::int16_t>;
+	template class XMInstrument::WaveData<int16_t>;
 	template class XMInstrument::WaveData<float>;
 
 //////////////////////////////////////////////////////////////////////////
@@ -716,14 +716,14 @@ namespace psycle
 		}
 	
 		/// Loading Procedure
-		void XMInstrument::Envelope::Load(RiffFile& riffFile,const std::uint32_t version)
+		void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t version)
 		{
 			//When adding or modifying fields, change version in xminstrument
 
 			riffFile.Read(m_Enabled);
 			riffFile.Read(m_Carry);
 			{
-				std::int32_t i32(0);
+				int32_t i32(0);
 				riffFile.Read(i32); m_LoopStart = i32;
 				riffFile.Read(i32); m_LoopEnd = i32;
 				riffFile.Read(i32); m_SustainBegin = i32;
@@ -743,13 +743,13 @@ namespace psycle
 				m_Adsr = false;
 			}
 			else {
-				{std::uint32_t read; riffFile.Read(read); m_Mode=(Mode::Type)read; }
+				{uint32_t read; riffFile.Read(read); m_Mode=(Mode::Type)read; }
 				riffFile.Read(m_Adsr);
 			}
 		}
 
 		/// Saving Procedure
-		void XMInstrument::Envelope::Save(RiffFile& riffFile, const std::uint32_t version) const
+		void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version) const
 		{
 			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
 			//When adding or modifying fields, change version in xminstrument
@@ -769,7 +769,7 @@ namespace psycle
 				riffFile.Write(m_Points[i].first); // point
 				riffFile.Write(m_Points[i].second); // value
 			}
-			{ std::uint32_t write = m_Mode; riffFile.Write(write); }
+			{ uint32_t write = m_Mode; riffFile.Write(write); }
 			riffFile.Write(m_Adsr);
 		}
 
@@ -840,7 +840,7 @@ namespace psycle
 		{
 			char temp[8];
 			int size=0;
-			std::uint32_t version;
+			uint32_t version;
 			riffFile.Read(temp,4); temp[4]='\0';
 			riffFile.Read(size);
 			if (strcmp(temp,"INST")) return size+8;
@@ -878,8 +878,8 @@ namespace psycle
 
 			riffFile.Read(m_FilterCutoff);
 			riffFile.Read(m_FilterResonance);
-			{ std::uint16_t unused(0); riffFile.Read(unused); }
-			{ std::uint32_t i(0); riffFile.Read(i); m_FilterType = static_cast<dsp::FilterType>(i); }
+			{ uint16_t unused(0); riffFile.Read(unused); }
+			{ uint32_t i(0); riffFile.Read(i); m_FilterType = static_cast<dsp::FilterType>(i); }
 
 			riffFile.Read(m_RandomVolume);
 			riffFile.Read(m_RandomPanning);
@@ -887,7 +887,7 @@ namespace psycle
 			riffFile.Read(m_RandomResonance);
 
 			{
-				std::uint32_t i(0);
+				uint32_t i(0);
 				riffFile.Read(i); m_NNA = static_cast<NewNoteAction::Type>(i);
 				riffFile.Read(i); m_DCT = static_cast<DupeCheck::Type>(i);
 				riffFile.Read(i); m_DCA = static_cast<NewNoteAction::Type>(i);
@@ -936,15 +936,15 @@ namespace psycle
 
 			riffFile.Write(m_FilterCutoff);
 			riffFile.Write(m_FilterResonance);
-			{ std::uint16_t unused(0); riffFile.Write(unused); }
-			{ std::uint32_t i = m_FilterType; riffFile.Write(i); }
+			{ uint16_t unused(0); riffFile.Write(unused); }
+			{ uint32_t i = m_FilterType; riffFile.Write(i); }
 
 			riffFile.Write(m_RandomVolume);
 			riffFile.Write(m_RandomPanning);
 			riffFile.Write(m_RandomCutoff);
 			riffFile.Write(m_RandomResonance);
 			{
-				std::uint32_t i;
+				uint32_t i;
 				i = m_NNA; riffFile.Write(i);
 				i = m_DCT; riffFile.Write(i);
 				i = m_DCA; riffFile.Write(i);
@@ -964,7 +964,7 @@ namespace psycle
 			m_PitchEnvelope.Save(riffFile,XMINSVERSION);
 			size_t endpos = riffFile.GetPos();
 			riffFile.Seek(filepos-4);
-			{ std::uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
+			{ uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
 			riffFile.Seek(endpos);
 		}
 

@@ -29,8 +29,8 @@ public:
 	virtual const char * const GetDllName() const throw() { return dll_path_.c_str(); }
 	//PluginInfo
 	virtual const std::string GetAuthor() { return proxy_.info().vendor; }
-	virtual const std::uint32_t GetAPIVersion() { return proxy_.info().APIversion; }
-	virtual const std::uint32_t GetPlugVersion() { return atoi(proxy_.info().version.c_str()); }
+	virtual const uint32_t GetAPIVersion() { return proxy_.info().APIversion; }
+	virtual const uint32_t GetPlugVersion() { return atoi(proxy_.info().version.c_str()); }
 	bool IsSynth() const throw() { return (proxy_.info().mode == MACHMODE_GENERATOR); }
 
 	//TODO: testing

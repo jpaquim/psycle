@@ -282,8 +282,8 @@ namespace psycle
 						} else accumulated_processing_time_ += d;
 					}
 
-				public:    std::uint64_t processing_count() const throw() { return processing_count_; }
-				protected: std::uint64_t processing_count_;
+				public:    uint64_t processing_count() const throw() { return processing_count_; }
+				protected: uint64_t processing_count_;
 			///\}
 
 #if 0 // v1.9

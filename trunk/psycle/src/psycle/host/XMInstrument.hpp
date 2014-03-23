@@ -74,11 +74,11 @@ namespace psycle { namespace host {
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument::WaveData Class declaration
-		template <class T = std::int16_t>
+		template <class T = int16_t>
 		class WaveData {
 			friend class Instrument;
 		public:
-			static const std::uint32_t WAVEVERSION = 0x00000001;
+			static const uint32_t WAVEVERSION = 0x00000001;
 
 			typedef detail::LoopType LoopType;
 			typedef detail::WaveForms WaveForms;
@@ -102,9 +102,9 @@ namespace psycle { namespace host {
 			void AllocWaveData(const int iLen,const bool bStereo);
 			void ConvertToMono();
 			void ConvertToStereo();
-			void InsertAt(std::uint32_t insertPos, const WaveData& wave);
-			void ModifyAt(std::uint32_t modifyPos, const WaveData& wave);
-			void DeleteAt(std::uint32_t deletePos, std::uint32_t length);
+			void InsertAt(uint32_t insertPos, const WaveData& wave);
+			void ModifyAt(uint32_t modifyPos, const WaveData& wave);
+			void DeleteAt(uint32_t deletePos, uint32_t length);
 			void Mix(const WaveData& waveIn, float buf1Vol=1.0f, float buf2Vol=1.0f);
 			void Fade(int fadeStart, int fadeEnd, float startVol, float endVol);
 			void Amplify(int ampStart, int ampEnd, float vol);
@@ -153,12 +153,12 @@ namespace psycle { namespace host {
 			const std::string & WaveName() const { return m_WaveName;}
 			void WaveName(const std::string& newname){ m_WaveName = newname;}
 
-			std::uint32_t WaveLength() const { return m_WaveLength;}
+			uint32_t WaveLength() const { return m_WaveLength;}
 
 			float WaveGlobVolume()const{ return m_WaveGlobVolume;}
 			void WaveGlobVolume(const float value){m_WaveGlobVolume = value;}
-			std::uint16_t WaveVolume() const { return m_WaveDefVolume;}
-			void WaveVolume(const std::uint16_t value){m_WaveDefVolume = value;}
+			uint16_t WaveVolume() const { return m_WaveDefVolume;}
+			void WaveVolume(const uint16_t value){m_WaveDefVolume = value;}
 
 			/// Default position for panning ( 0..1 ) 0left 1 right.
 			float PanFactor() const { return m_PanFactor;}
@@ -168,10 +168,10 @@ namespace psycle { namespace host {
 			bool IsSurround() const { return m_Surround;}
 			void IsSurround(const bool surround){ m_Surround=surround;}
 
-			std::uint32_t WaveLoopStart() const { return m_WaveLoopStart;}
-			void WaveLoopStart(const std::uint32_t value){m_WaveLoopStart = value;}
-			std::uint32_t WaveLoopEnd() const { return m_WaveLoopEnd;}
-			void WaveLoopEnd(const std::uint32_t value){ 
+			uint32_t WaveLoopStart() const { return m_WaveLoopStart;}
+			void WaveLoopStart(const uint32_t value){m_WaveLoopStart = value;}
+			uint32_t WaveLoopEnd() const { return m_WaveLoopEnd;}
+			void WaveLoopEnd(const uint32_t value){ 
 				// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
 				if(m_WaveLength > 0 && value > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;} 
 				else {m_WaveLoopEnd = value;}
@@ -179,10 +179,10 @@ namespace psycle { namespace host {
 			LoopType::Type WaveLoopType() const { return m_WaveLoopType;}
 			void WaveLoopType(const LoopType::Type value){ m_WaveLoopType = value;}
 
-			std::uint32_t WaveSusLoopStart() const { return m_WaveSusLoopStart;}
-			void WaveSusLoopStart(const std::uint32_t value){m_WaveSusLoopStart = value;}
-			std::uint32_t WaveSusLoopEnd() const { return m_WaveSusLoopEnd;}
-			void WaveSusLoopEnd(const std::uint32_t value){
+			uint32_t WaveSusLoopStart() const { return m_WaveSusLoopStart;}
+			void WaveSusLoopStart(const uint32_t value){m_WaveSusLoopStart = value;}
+			uint32_t WaveSusLoopEnd() const { return m_WaveSusLoopEnd;}
+			void WaveSusLoopEnd(const uint32_t value){
 				// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
 				if(m_WaveLength > 0 && value > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
 				else {m_WaveSusLoopEnd = value;}
@@ -190,24 +190,24 @@ namespace psycle { namespace host {
 			LoopType::Type WaveSusLoopType() const { return m_WaveSusLoopType;}
 			void WaveSusLoopType(const LoopType::Type value){ m_WaveSusLoopType = value;}
 
-			std::int16_t WaveTune() const {return m_WaveTune;}
-			void WaveTune(const std::int16_t value){m_WaveTune = value;}
-			std::int16_t WaveFineTune() const {return m_WaveFineTune;}
-			void WaveFineTune(const std::int16_t value){m_WaveFineTune = value;}
-			std::uint32_t WaveSampleRate() const {return m_WaveSampleRate;}
-			void WaveSampleRate(const std::uint32_t value);
+			int16_t WaveTune() const {return m_WaveTune;}
+			void WaveTune(const int16_t value){m_WaveTune = value;}
+			int16_t WaveFineTune() const {return m_WaveFineTune;}
+			void WaveFineTune(const int16_t value){m_WaveFineTune = value;}
+			uint32_t WaveSampleRate() const {return m_WaveSampleRate;}
+			void WaveSampleRate(const uint32_t value);
 
 			bool IsWaveStereo() const { return m_WaveStereo;}
 
-			std::uint8_t VibratoType() const {return m_VibratoType;}
-			std::uint8_t VibratoSpeed() const {return m_VibratoSpeed;}
-			std::uint8_t VibratoDepth() const {return m_VibratoDepth;}
-			std::uint8_t VibratoAttack() const {return m_VibratoAttack;}
+			uint8_t VibratoType() const {return m_VibratoType;}
+			uint8_t VibratoSpeed() const {return m_VibratoSpeed;}
+			uint8_t VibratoDepth() const {return m_VibratoDepth;}
+			uint8_t VibratoAttack() const {return m_VibratoAttack;}
 
-			void VibratoType(const std::uint8_t value){m_VibratoType = value ;}
-			void VibratoSpeed(const std::uint8_t value){m_VibratoSpeed = value ;}
-			void VibratoDepth(const std::uint8_t value){m_VibratoDepth = value ;}
-			void VibratoAttack(const std::uint8_t value){m_VibratoAttack = value ;}
+			void VibratoType(const uint8_t value){m_VibratoType = value ;}
+			void VibratoSpeed(const uint8_t value){m_VibratoSpeed = value ;}
+			void VibratoDepth(const uint8_t value){m_VibratoDepth = value ;}
+			void VibratoAttack(const uint8_t value){m_VibratoAttack = value ;}
 
 			bool IsAutoVibrato() const {return m_VibratoDepth && m_VibratoSpeed;}
 			// WARNING!!!!! The memory is NOT aligned. Do not use with dsp:: methods that require alignment.
@@ -218,22 +218,22 @@ namespace psycle { namespace host {
 
 			std::string m_WaveName;
 			/// Wave length in Samples.
-			std::uint32_t m_WaveLength;
+			uint32_t m_WaveLength;
 			/// Difference between Glob volume and defVolume is that defVolume determines
 			/// the volume if no volume is specified in the pattern, while globVolume is
 			/// an attenuator for all notes of this sample.
 			float m_WaveGlobVolume; // range ( 0..4 ) (-inf to +12dB)
-			std::uint16_t m_WaveDefVolume; // range (0..80 hex)
-			std::uint32_t m_WaveLoopStart;
-			std::uint32_t m_WaveLoopEnd;
+			uint16_t m_WaveDefVolume; // range (0..80 hex)
+			uint32_t m_WaveLoopStart;
+			uint32_t m_WaveLoopEnd;
 			LoopType::Type m_WaveLoopType;
-			std::uint32_t m_WaveSusLoopStart;
-			std::uint32_t m_WaveSusLoopEnd;
+			uint32_t m_WaveSusLoopStart;
+			uint32_t m_WaveSusLoopEnd;
 			LoopType::Type m_WaveSusLoopType;
-			std::uint32_t m_WaveSampleRate;
-			std::int16_t m_WaveTune;
+			uint32_t m_WaveSampleRate;
+			int16_t m_WaveTune;
 			/// [ -100 .. 100] full range = -/+ 1 seminote
-			std::int16_t m_WaveFineTune;
+			int16_t m_WaveFineTune;
 			bool m_WaveStereo;
 			T *m_pWaveDataL;
 			T *m_pWaveDataR;
@@ -241,10 +241,10 @@ namespace psycle { namespace host {
 			/// Default position for panning ( 0..1 ) 0left 1 right.
 			float m_PanFactor;
 			bool m_Surround;
-			std::uint8_t m_VibratoAttack;
-			std::uint8_t m_VibratoSpeed;
-			std::uint8_t m_VibratoDepth;
-			std::uint8_t m_VibratoType;
+			uint8_t m_VibratoAttack;
+			uint8_t m_VibratoSpeed;
+			uint8_t m_VibratoDepth;
+			uint8_t m_VibratoType;
 
 			bool SoundDesquash(uint8_t const * pSourcePos, int16_t ** pDestination);
 			bool SoundDesquash(uint8_t const * pSourcePos, float ** pDestination);
@@ -344,8 +344,8 @@ namespace psycle { namespace host {
 			/// Clears the points Array
 			void Clear() { m_Points.clear(); }
 
-			void Load(RiffFile& riffFile,const std::uint32_t version);
-			void Save(RiffFile& riffFile,const std::uint32_t version) const;
+			void Load(RiffFile& riffFile,const uint32_t version);
+			void Save(RiffFile& riffFile,const uint32_t version) const;
 
 			/// overloaded copy function
 			Envelope& operator=(const Envelope& other)
@@ -428,7 +428,7 @@ namespace psycle { namespace host {
 
 //////////////////////////////////////////////////////////////////////////
 //  XMInstrument Class declaration
-		static const std::uint32_t XMINSVERSION = 0x00000001;
+		static const uint32_t XMINSVERSION = 0x00000001;
 		XMInstrument();
 		virtual ~XMInstrument();
 
@@ -490,8 +490,8 @@ namespace psycle { namespace host {
 		const std::string& Name() const {return m_Name;}
 		void Name(const std::string& name) { m_Name= name; }
 
-		std::uint16_t Lines() const { return m_Lines;}
-		void Lines(const std::uint16_t value){ m_Lines = value;}
+		uint16_t Lines() const { return m_Lines;}
+		void Lines(const uint16_t value){ m_Lines = value;}
 
 		Envelope& AmpEnvelope() { return m_AmpEnvelope;}
 		Envelope& PanEnvelope() {return m_PanEnvelope;}
@@ -515,15 +515,15 @@ namespace psycle { namespace host {
 		void PanEnabled(const bool pan) { m_PanEnabled = pan;}
 		bool IsSurround() const { return m_Surround;}
 		void IsSurround(const bool surround) { m_Surround = surround;}
-		std::uint8_t NoteModPanCenter() const { return m_NoteModPanCenter;}
-		void NoteModPanCenter(const std::uint8_t pan) { m_NoteModPanCenter = pan;}
-		std::int8_t NoteModPanSep() const { return m_NoteModPanSep;}
-		void NoteModPanSep(const std::int8_t pan) { m_NoteModPanSep = pan;}
+		uint8_t NoteModPanCenter() const { return m_NoteModPanCenter;}
+		void NoteModPanCenter(const uint8_t pan) { m_NoteModPanCenter = pan;}
+		int8_t NoteModPanSep() const { return m_NoteModPanSep;}
+		void NoteModPanSep(const int8_t pan) { m_NoteModPanSep = pan;}
 
-		std::uint8_t FilterCutoff() const { return m_FilterCutoff;}
-		void FilterCutoff(const std::uint8_t value){m_FilterCutoff = value;}
-		const std::uint8_t FilterResonance() const { return m_FilterResonance;}
-		void FilterResonance(const std::uint8_t value){m_FilterResonance = value;}
+		uint8_t FilterCutoff() const { return m_FilterCutoff;}
+		void FilterCutoff(const uint8_t value){m_FilterCutoff = value;}
+		const uint8_t FilterResonance() const { return m_FilterResonance;}
+		void FilterResonance(const uint8_t value){m_FilterResonance = value;}
 		const dsp::FilterType FilterType() const { return m_FilterType;}
 		void FilterType(const dsp::FilterType value){ m_FilterType = value;}
 
@@ -553,7 +553,7 @@ namespace psycle { namespace host {
 
 		/// If m_Lines > 0 use samplelen/(lineduration*m_Lines) to determine the wave speed instead of the note.
 		// Currently unimplemented.
-		std::uint16_t m_Lines;
+		uint16_t m_Lines;
 
 		/// envelope range = [0.0f..1.0f]
 		Envelope m_AmpEnvelope;
@@ -576,14 +576,14 @@ namespace psycle { namespace host {
 		float m_InitPan;
 		bool m_Surround;
 		/// Note number for center pan position
-		std::uint8_t m_NoteModPanCenter;
+		uint8_t m_NoteModPanCenter;
 		/// -32..32. 1/256th of panFactor change per seminote.
-		std::int8_t m_NoteModPanSep;
+		int8_t m_NoteModPanSep;
 
 		/// Cutoff Frequency [0..127]
-		std::uint8_t m_FilterCutoff;
+		uint8_t m_FilterCutoff;
 		/// Resonance [0..127]
-		std::uint8_t m_FilterResonance;
+		uint8_t m_FilterResonance;
 		/// Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
 		dsp::FilterType m_FilterType;
 

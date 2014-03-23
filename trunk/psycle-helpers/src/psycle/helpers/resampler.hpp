@@ -3,7 +3,7 @@
 #pragma once
 #include "math/erase_all_nans_infinities_and_denormals.hpp"
 #include <cmath>
-#include <soxr.h>
+// #include <soxr.h>
 
 #if defined BOOST_AUTO_TEST_CASE
 	#include <universalis/os/aligned_alloc.hpp>
@@ -141,7 +141,7 @@ using namespace universalis::stdlib;
 
 			void initTables();
 
-			static soxr_t new_soxr();
+			// static soxr_t new_soxr();
 
 			/// interpolation work function which does linear interpolation.
 			static float linear(int16_t const * data, uint64_t offset, uint32_t res, uint64_t length, void* resampler_data);

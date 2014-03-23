@@ -562,7 +562,7 @@ namespace psycle
 			Enable(true);
 		}
 
-		std::uint32_t WaveOut::GetPlayPosInSamples()
+		uint32_t WaveOut::GetPlayPosInSamples()
 		{
 			// WARNING! waveOutGetPosition in TIME_SAMPLES has max of 0x7FFFFF for 16bit stereo signals.
 			if(!_stopPolling) return 0;
@@ -577,7 +577,7 @@ namespace psycle
 				Error("waveOutGetPosition() doesn't support TIME_SAMPLES");
 			}
 			
-			std::uint32_t retval = time.u.sample;
+			uint32_t retval = time.u.sample;
 			// sample counter wrap around?
 			if( m_lastPlayPos > retval)
 			{
@@ -591,7 +591,7 @@ namespace psycle
 			return retval + (m_readPosWraps*0x800000);
 		}
 
-		std::uint32_t WaveOut::GetWritePosInSamples() const
+		uint32_t WaveOut::GetWritePosInSamples() const
 		{
 			if(!_stopPolling) return 0;
 			return _writePos;

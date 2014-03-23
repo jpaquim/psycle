@@ -151,12 +151,12 @@ namespace psycle
 			virtual void GetReadBuffers(int idx, float **pleft, float **pright,int numsamples) { pleft=0; pright=0; return; }
 			virtual bool AddCapturePort(int idx){ return false; };
 			virtual bool RemoveCapturePort(int idx){ return false; }
-			virtual std::uint32_t GetWritePosInSamples() const { return 0; }
-			virtual std::uint32_t GetPlayPosInSamples() { return 0; }/*cannot be const, because of the way the directsound method is implemented*/
-			virtual std::uint32_t GetInputLatencyMs() const { return GetInputLatencySamples()*1000 / settings().samplesPerSec(); }
-			virtual std::uint32_t GetInputLatencySamples() const = 0;
-			virtual std::uint32_t GetOutputLatencyMs() const { return GetOutputLatencySamples()*1000 / settings().samplesPerSec(); }
-			virtual std::uint32_t GetOutputLatencySamples() const = 0;
+			virtual uint32_t GetWritePosInSamples() const { return 0; }
+			virtual uint32_t GetPlayPosInSamples() { return 0; }/*cannot be const, because of the way the directsound method is implemented*/
+			virtual uint32_t GetInputLatencyMs() const { return GetInputLatencySamples()*1000 / settings().samplesPerSec(); }
+			virtual uint32_t GetInputLatencySamples() const = 0;
+			virtual uint32_t GetOutputLatencyMs() const { return GetOutputLatencySamples()*1000 / settings().samplesPerSec(); }
+			virtual uint32_t GetOutputLatencySamples() const = 0;
 
 			//amount of buffers.
 			int GetNumBuffers() const { return settings().blockCount(); }
@@ -203,8 +203,8 @@ namespace psycle
 		public:
 			SilentDriver(SilentSettings* settings):settings_(settings) {}
 			virtual AudioDriverSettings& settings() const { return *settings_; };
-			virtual std::uint32_t GetInputLatencySamples() const { return 0; }
-			virtual std::uint32_t GetOutputLatencySamples() const { return 0; }
+			virtual uint32_t GetInputLatencySamples() const { return 0; }
+			virtual uint32_t GetOutputLatencySamples() const { return 0; }
 		protected:
 			SilentSettings* settings_;
 		};
