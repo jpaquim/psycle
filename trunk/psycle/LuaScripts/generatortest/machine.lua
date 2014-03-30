@@ -45,7 +45,7 @@ function machine:init(samplerate)
   p.mlb = param:newlabel("Master")
   p.vol = param:newknob("vol", "", 0, 1, 100, 0.5)
   p.flb = param:newlabel("Filter")
-  p.ft = param:newknob("FilterType","",0,5,5,1):addlistener(self)
+  p.ft = param:newknob("FilterType","",0,5,5, 0):addlistener(self)
   function p.ft:display()
     return filtertypes[self:val()+1]
   end
