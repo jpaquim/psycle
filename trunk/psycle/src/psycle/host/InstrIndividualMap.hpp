@@ -12,7 +12,7 @@ public:
 	virtual ~CInstrIndividualMap();
 
 	/// Dialog ID
-	enum { IDD = IDD_NOTEMAP_INDIVIDUAL };
+	enum { IDD = IDD_INST_NOTEMAP_INDIV };
 
 public:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

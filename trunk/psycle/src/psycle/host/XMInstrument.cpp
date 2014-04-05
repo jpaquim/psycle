@@ -105,21 +105,21 @@ namespace psycle
 			T* oldRight = NULL;
 			m_pWaveDataL = new T[m_WaveLength+wave.WaveLength()];
 
-			std::memcpy(m_pWaveDataL, oldLeft, insertPos*sizeof(short));
-			std::memcpy(&m_pWaveDataL[insertPos], wave.pWaveDataL(), wave.WaveLength()*sizeof(short));
+			std::memcpy(m_pWaveDataL, oldLeft, insertPos*sizeof(T));
+			std::memcpy(&m_pWaveDataL[insertPos], wave.pWaveDataL(), wave.WaveLength()*sizeof(T));
 			std::memcpy(&m_pWaveDataL[insertPos+wave.WaveLength()], 
 				&oldLeft[insertPos], 
-				(m_WaveLength - insertPos)*sizeof(short));
+				(m_WaveLength - insertPos)*sizeof(T));
 
 			if(m_WaveStereo)
 			{
 				oldRight = m_pWaveDataR;
 				m_pWaveDataR = new T[m_WaveLength+wave.WaveLength()];
-				std::memcpy(m_pWaveDataR, oldRight, insertPos*sizeof(short));
-				std::memcpy(&m_pWaveDataR[insertPos], wave.pWaveDataR(), wave.WaveLength()*sizeof(short));
+				std::memcpy(m_pWaveDataR, oldRight, insertPos*sizeof(T));
+				std::memcpy(&m_pWaveDataR[insertPos], wave.pWaveDataR(), wave.WaveLength()*sizeof(T));
 				std::memcpy(&m_pWaveDataR[insertPos+wave.WaveLength()], 
 					&oldRight[insertPos], 
-					(m_WaveLength - insertPos)*sizeof(short));
+					(m_WaveLength - insertPos)*sizeof(T));
 			}
 			m_WaveLength += wave.WaveLength();
 			delete[] oldLeft;
@@ -129,10 +129,10 @@ namespace psycle
 		template <class T> 
 		void XMInstrument::WaveData<T>::ModifyAt(uint32_t modifyPos, const WaveData& wave)
 		{
-			std::memcpy(&m_pWaveDataL[modifyPos], wave.pWaveDataL(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
+			std::memcpy(&m_pWaveDataL[modifyPos], wave.pWaveDataL(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(T));
 			if(m_WaveStereo)
 			{
-				std::memcpy(&m_pWaveDataR[modifyPos], wave.pWaveDataR(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(short));
+				std::memcpy(&m_pWaveDataR[modifyPos], wave.pWaveDataR(), std::min(wave.WaveLength(), m_WaveLength)*sizeof(T));
 			}
 		}
 
@@ -143,17 +143,17 @@ namespace psycle
 			T* oldRight = NULL;
 			m_pWaveDataL = new T[m_WaveLength-length];
 
-			std::memcpy(m_pWaveDataL, oldLeft, deletePos*sizeof(short));
+			std::memcpy(m_pWaveDataL, oldLeft, deletePos*sizeof(T));
 			std::memcpy(&m_pWaveDataL[deletePos], &oldLeft[deletePos+length], 
-				(m_WaveLength - deletePos - length)*sizeof(short));
+				(m_WaveLength - deletePos - length)*sizeof(T));
 
 			if(m_WaveStereo)
 			{
 				oldRight = m_pWaveDataR;
 				m_pWaveDataR = new T[m_WaveLength-length];
-				std::memcpy(m_pWaveDataR, oldRight, deletePos*sizeof(short));
+				std::memcpy(m_pWaveDataR, oldRight, deletePos*sizeof(T));
 				std::memcpy(&m_pWaveDataR[deletePos], &oldRight[deletePos+length], 
-					(m_WaveLength - deletePos - length)*sizeof(short));
+					(m_WaveLength - deletePos - length)*sizeof(T));
 			}
 			m_WaveLength -= length;
 			// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
@@ -234,14 +234,14 @@ namespace psycle
 
 			float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
 			if (m_WaveStereo) {
-				for(int i(fadeStart);i<fadeEnd;++i) {
-					m_pWaveDataL[i] *= startVol+i*slope;
-					m_pWaveDataR[i] *= startVol+i*slope;
+				for(int i(fadeStart),j=0;i<fadeEnd;++i,++j) {
+					m_pWaveDataL[i] *= startVol+j*slope;
+					m_pWaveDataR[i] *= startVol+j*slope;
 				}
 			}
 			else {
-				for(int i(fadeStart);i<fadeEnd;++i) {
-					m_pWaveDataL[i] *= startVol+i*slope;
+				for(int i(fadeStart),j=0;i<fadeEnd;++i,++j) {
+					m_pWaveDataL[i] *= startVol+j*slope;
 				}
 			}
 		}
@@ -833,6 +833,18 @@ namespace psycle
 				npair.first=i;
 				m_AssignNoteToSample[i] = npair;
 			}
+		}
+
+		std::set<int> XMInstrument::GetWavesUsed() const
+		{
+			std::set<int> sampNums;
+			for (int i=0; i < NOTE_MAP_SIZE; i++) {
+				const NotePair& pair = NoteToSample(i);
+				if (pair.second != 255) {
+					sampNums.insert(pair.second);
+				}
+			}
+			return sampNums;
 		}
 
 		/// load XMInstrument

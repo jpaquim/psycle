@@ -130,7 +130,7 @@ namespace psycle { namespace host {
 			else kftwk = -1;
 
 			for (int i=0;i< numLines;i++) kfresult[i]=kf[i].value;
-			OnOK();		
+			CDialog::OnOK();		
 		}
 
 		//These two methods wouldn't be needed if this graphic was implemented with a custom control.

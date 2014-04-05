@@ -129,9 +129,7 @@ namespace psycle { namespace host {
 			afx_msg void OnSelchangeTrackcombo();
 			afx_msg void OnCloseupTrackcombo();
 			afx_msg void OnBpmAddOne();
-			afx_msg void OnBpmAddTen();
 			afx_msg void OnBpmDecOne();
-			afx_msg void OnBpmDecTen();
 			afx_msg void OnDecTPB();
 			afx_msg void OnIncTPB();
 			afx_msg void OnCloseupCombooctave();

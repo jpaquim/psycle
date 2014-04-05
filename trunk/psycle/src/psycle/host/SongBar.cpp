@@ -40,7 +40,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		DDX_Control(pDX, IDC_COMBOOCTAVE, m_octavecombo);
 		DDX_Control(pDX, IDC_MASTERSLIDER, m_masterslider);
 		DDX_Control(pDX, IDC_BPMLABEL, m_bpmlabel);
-		DDX_Control(pDX, IDC_TPBLABEL, m_tpblabel);
+		DDX_Control(pDX, IDC_TPBLABEL, m_lpblabel);
 	}
 
 	//Message Maps are defined in SongBar, since this isn't a window, but a DialogBar.
@@ -59,14 +59,10 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		   TRACE0("Warning: UpdateData failed during dialog init.\n");
 		}
 
-		((CButton*)GetDlgItem(IDC_BPM_DECTEN))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESSLESS),IMAGE_ICON,16,16,0));
 		((CButton*)GetDlgItem(IDC_BPM_DECONE))->SetIcon((HICON)
 				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
 		((CButton*)GetDlgItem(IDC_BPM_ADDONE))->SetIcon((HICON)
 				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_BPM_ADDTEN))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MOREMORE),IMAGE_ICON,16,16,0));
 		((CButton*)GetDlgItem(IDC_DEC_TPB))->SetIcon((HICON)
 				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
 		((CButton*)GetDlgItem(IDC_INC_TPB))->SetIcon((HICON)
@@ -113,29 +109,17 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 
 	void SongBar::OnBpmAddOne()
 	{
-		SetAppSongBpm(1);
+		if ( GetKeyState(VK_CONTROL)<0) SetAppSongBpm(10);
+		else SetAppSongBpm(1);
 		((CButton*)GetDlgItem(IDC_BPM_ADDONE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->SetFocus();	
-	}
-
-	void SongBar::OnBpmAddTen() 
-	{
-		SetAppSongBpm(10);
-		((CButton*)GetDlgItem(IDC_BPM_ADDTEN))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();	
 	}
 
 	void SongBar::OnBpmDecOne() 
 	{
-		SetAppSongBpm(-1);
+		if ( GetKeyState(VK_CONTROL)<0) SetAppSongBpm(-10);
+		else SetAppSongBpm(-1);
 		((CButton*)GetDlgItem(IDC_BPM_DECONE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->SetFocus();	
-	}
-
-	void SongBar::OnBpmDecTen() 
-	{
-		SetAppSongBpm(-10);
-		((CButton*)GetDlgItem(IDC_BPM_DECTEN))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();	
 	}
 
@@ -160,20 +144,35 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		char buffer[16];
 		if ( x != 0 )
 		{
-			if (Global::player()._playing ) 
-			{
+			if (Global::player()._playing ) {
 				Global::song().BeatsPerMin(Global::player().bpm+x);
-			}
-			else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
-			Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
-			sprintf(buffer,"%d",Global::song().BeatsPerMin());
+			} else Global::song().BeatsPerMin(Global::song().BeatsPerMin()+x);
+
+			Global::player().SetBPM(Global::song().BeatsPerMin());
 			m_pParentMain->UpdatePlayOrder(false);
 		}
-		else {
-			int realbpm = Global::player().bpm * (1.f - (Global::player().lpb*Global::player().ExtraTicks())/24.f);
-			sprintf(buffer,"%d",realbpm);
+		if (Global::player()._playing ) {
+			if (Global::player().ExtraTicks() != 0) {
+				sprintf(buffer,"%d (%d)",Global::player().bpm,Global::player().RealBPM());
+			}
+			else {
+				sprintf(buffer,"%d",Global::player().bpm);
+			}
 		}
-		
+		else {
+			if (Global::song().ExtraTicksPerLine() != 0) {
+				int bpm,tpb,extra,lpb;
+				bpm=Global::song().BeatsPerMin();
+				tpb=Global::song().TicksPerBeat();
+				lpb=Global::song().LinesPerBeat();
+				extra=Global::song().ExtraTicksPerLine();
+				int realbpm = (bpm*tpb)/static_cast<float>(extra*lpb+tpb);
+				sprintf(buffer,"%d (%d)",Global::song().BeatsPerMin(),realbpm);
+			}
+			else {
+				sprintf(buffer,"%d",Global::song().BeatsPerMin());
+			}
+		}
 		m_bpmlabel.SetWindowText(buffer);
 	}
 
@@ -182,17 +181,31 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		char buffer[16];
 		if ( x != 0)
 		{
-			if (Global::player()._playing ) 
-			{
+			if (Global::player()._playing ) {
 				Global::song().LinesPerBeat(Global::player().lpb+x);
-			}
-			else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
-			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
-			sprintf(buffer,"%d",Global::song().LinesPerBeat());
+			} else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
+
+			Global::player().SetBPM(0, Global::song().LinesPerBeat(), Global::song().ExtraTicksPerLine());
+			m_pParentMain->UpdatePlayOrder(false);
 		}
-		else sprintf(buffer, "%d", Global::player().lpb);
+		if (Global::player()._playing )  {
+			if (Global::player().ExtraTicks() != 0) {
+				sprintf(buffer,"%d (+%d)",Global::player().lpb,Global::player().ExtraTicks());
+			}
+			else {
+				sprintf(buffer,"%d",Global::player().lpb);
+			}
+		}
+		else {
+			if (Global::song().ExtraTicksPerLine() != 0) {
+				sprintf(buffer,"%d (+%d)",Global::song().LinesPerBeat(),Global::song().ExtraTicksPerLine());
+			}
+			else {
+				sprintf(buffer,"%d",Global::song().LinesPerBeat());
+			}
+		}
 		
-		m_tpblabel.SetWindowText(buffer);
+		m_lpblabel.SetWindowText(buffer);
 	}
 
 	void SongBar::OnCloseupCombooctave() 

@@ -50,10 +50,12 @@ namespace psycle { namespace host {
 			CDialog::OnInitDialog();
 			m_patname.SetLimitText(30);
 			m_spinlines.SetRange(1,MAX_LINES);
-			UDACCEL acc;
-			acc.nSec = 4;
-			acc.nInc = 16;
-			m_spinlines.SetAccel(1, &acc);
+			UDACCEL acc[2];
+			acc[0].nSec = 0;
+			acc[0].nInc = 4;
+			acc[1].nSec = 1;
+			acc[1].nInc = 16;
+			m_spinlines.SetAccel(2, acc);
 
 			m_patname.SetWindowText(patName);
 			itoa(patLines,buffer,10);

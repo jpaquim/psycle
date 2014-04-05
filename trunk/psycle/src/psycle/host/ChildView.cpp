@@ -163,7 +163,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_IMPORT_MACHINES, OnFileImportMachines)
 			ON_COMMAND(ID_EXPORT_PATTERNS, OnFileExportPatterns)
 			ON_COMMAND(ID_EXPORT_INSTRUMENTS, OnFileExportInstruments)
-			ON_COMMAND(ID_EXPORT_MODULE, OnExportModule)
+			ON_COMMAND(ID_EXPORT_MODULE, OnFileExportModule)
 			ON_COMMAND(ID_FILE_SAVEAUDIO, OnFileSaveaudio)
 			ON_COMMAND(ID_FILE_SONGPROPERTIES, OnFileSongproperties)
 			ON_COMMAND(ID_FILE_REVERT, OnFileRevert)
@@ -575,7 +575,7 @@ namespace psycle { namespace host {
 		}
 
 		/// "Save Song" Function
-		void CChildView::OnExportModule() 
+		void CChildView::OnFileExportModule() 
 		{
 			OPENFILENAME ofn; // common dialog box structure
 			std::string ifile = Global::song().fileName.substr(0,Global::song().fileName.length()-4)  + ".xm";
@@ -836,7 +836,7 @@ namespace psycle { namespace host {
 				_pSong._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
 				_pSong._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 
-				Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+				Global::player().SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat(),Global::song().ExtraTicksPerLine());
 				editPosition=0;
 				pParentMain->PsybarsUpdate(); // Updates all values of the bars
 				pParentMain->WaveEditorBackUpdate();
@@ -1264,8 +1264,11 @@ namespace psycle { namespace host {
 		}
 
 		void CChildView::OnFileSongproperties() 
-		{	CSongpDlg dlg(Global::song());
+		{	
+			CSongpDlg dlg(Global::song());
 			dlg.DoModal();
+			pParentMain->PsybarsUpdate();
+			pParentMain->UpdatePlayOrder(false);
 			pParentMain->StatusBarIdle();
 			//Repaint();
 		}
@@ -2005,7 +2008,7 @@ namespace psycle { namespace host {
 			}
 
 			editPosition = 0;
-			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat());
+			Global::player().SetBPM(Global::song().BeatsPerMin(), Global::song().LinesPerBeat(),Global::song().ExtraTicksPerLine());
 			EnforceAllMachinesOnView();
 			pParentMain->PsybarsUpdate();
 			pParentMain->WaveEditorBackUpdate();

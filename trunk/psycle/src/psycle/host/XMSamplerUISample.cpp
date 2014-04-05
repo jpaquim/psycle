@@ -30,6 +30,7 @@ void XMSamplerUISample::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_SAMPLELIST, m_SampleList);
 	DDX_Control(pDX, IDC_WAVESCOPE, m_WaveScope);
+	DDX_Control(pDX, IDC_SAMPLIST_INSTR, m_SampleInstList);
 }
 
 
@@ -188,6 +189,30 @@ void XMSamplerUISample::RefreshSampleList(int sample/*=-1*/)
 		m_SampleList.SetCurSel(sample);
 	}
 }
+
+void XMSamplerUISample::UpdateSampleInstrs()
+{
+	char line[48];
+	int cursel = m_SampleList.GetCurSel();
+	const InstrumentList& list = Global::song().xminstruments;
+	m_SampleInstList.ResetContent();
+	for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
+	{
+		if (list.Exists(i)) {
+			const XMInstrument& inst = list[i];
+			for (int j=0;j<XMInstrument::NOTE_MAP_SIZE;j++) {
+				const XMInstrument::NotePair& pair = inst.NoteToSample(j);
+				if (pair.second == cursel) {
+					sprintf(line,"%02X%s: %s",i,inst.IsEnabled()?"*":" ",inst.Name().c_str());
+					m_SampleInstList.AddString(line);
+					break;
+				}
+			}
+		}
+	}
+}
+
+
 BOOL XMSamplerUISample::OnSetActive()
 {
 	int i= Global::song().waveSelected;
@@ -224,6 +249,7 @@ void XMSamplerUISample::SetSample(int sample)
 	XMInstrument::WaveData<>& wave = Global::song().samples.get(sample);
 	pWave(&wave);
 	RefreshSampleData();
+	UpdateSampleInstrs();
 }
 void XMSamplerUISample::RefreshSampleData()
 {

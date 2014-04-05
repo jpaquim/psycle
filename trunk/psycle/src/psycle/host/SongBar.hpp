@@ -19,7 +19,7 @@ namespace psycle { namespace host {
 		CComboBox       m_octavecombo;
 		CSliderCtrl		m_masterslider;
 		CStatic			m_bpmlabel;
-		CStatic			m_tpblabel;
+		CStatic			m_lpblabel;
 
 
 		void InitializeValues(CMainFrame* frame, CChildView* view, Song& song);
@@ -37,9 +37,7 @@ namespace psycle { namespace host {
 		afx_msg void OnSelchangeTrackcombo();
 		afx_msg void OnCloseupTrackcombo();
 		afx_msg void OnBpmAddOne();
-		afx_msg void OnBpmAddTen();
 		afx_msg void OnBpmDecOne();
-		afx_msg void OnBpmDecTen();
 		afx_msg void OnDecTPB();
 		afx_msg void OnIncTPB();
 		afx_msg void OnCloseupCombooctave();

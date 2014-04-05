@@ -9,7 +9,7 @@ namespace psycle { namespace host {
 		class CSwingFillDlg : public CDialog
 		{
 		public:
-			CSwingFillDlg(CWnd* pParent = 0);
+			CSwingFillDlg();
 			BOOL bGo;
 			int tempo;
 			int width;

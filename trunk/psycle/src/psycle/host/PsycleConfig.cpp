@@ -511,6 +511,8 @@ namespace psycle { namespace host {
 			MachineCoords.dGeneratorSolo.y = 31;
 			MachineCoords.dGeneratorName.x = 20;
 			MachineCoords.dGeneratorName.y = 3;
+			MachineCoords.dGeneratorNameClip.x = 117;
+			MachineCoords.dGeneratorNameClip.y = 15;
 
 			MachineCoords.dEffectVu.x = 4;
 			MachineCoords.dEffectVu.y = 20;
@@ -526,6 +528,9 @@ namespace psycle { namespace host {
 			MachineCoords.dEffectBypass.y = 31;
 			MachineCoords.dEffectName.x = 20;
 			MachineCoords.dEffectName.y = 3;
+			MachineCoords.dEffectNameClip.x = 117;
+			MachineCoords.dEffectNameClip.y = 15;
+
 			MachineCoords.bHasTransparency = false;
 			MachineCoords.cTransparency = 0x0000FF00;
 		}
@@ -1218,7 +1223,7 @@ namespace psycle { namespace host {
 			if(!store.GetVersion().empty()) {
 				char buffer[64];
 				std::map<CmdSet,std::pair<int,int>>::const_iterator it;
-				for(it = setMap.begin(); it != setMap.end(); it++)
+				for(it = setMap.begin(); it != setMap.end(); ++it)
 				{
 					sprintf(buffer, "CmdSet:%04d", it->first);
 
@@ -1253,7 +1258,7 @@ namespace psycle { namespace host {
 
 			char buffer[64];
 			std::map<CmdSet,std::pair<int,int>>::const_iterator it;
-			for(it = setMap.begin(); it != setMap.end(); it++)
+			for(it = setMap.begin(); it != setMap.end(); ++it)
 			{
 				sprintf(buffer, "CmdSet:%04d", it->first);
 
@@ -1466,6 +1471,10 @@ namespace psycle { namespace host {
 		PsycleConfig::PsycleConfig() : Configuration()
 			, audioSettings(5)
 		{
+			if(!PsycleConfig::CreatePsyFont(fixedFont,"Consolas",80,false,false)) {
+				PsycleConfig::CreatePsyFont(fixedFont,"Courier New",80,false,false);
+			}
+
 			// soundcard output device
 			{
 				bool vista = Is_Vista_or_Later();
@@ -1490,6 +1499,7 @@ namespace psycle { namespace host {
 
 		PsycleConfig::~PsycleConfig() throw()
 		{
+			fixedFont.DeleteObject();
 			if(_numOutputDrivers)
 			{
 				for (int i(0);i<_numOutputDrivers;++i)
@@ -2032,7 +2042,7 @@ namespace psycle { namespace host {
 		}
 
 
-		bool PsycleConfig::CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic)
+		bool PsycleConfig::CreatePsyFont(CFont & f, std::string const & sFontFace, int const HeightPx, bool const bBold, bool const bItalic)
 		{
 			f.DeleteObject();
 			CString sFace(sFontFace.c_str());

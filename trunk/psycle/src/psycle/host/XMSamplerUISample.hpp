@@ -65,6 +65,7 @@ protected:
 	void SetSample(int sample);
 	void RefreshSampleList(int sample=-1);
 	void RefreshSampleData();
+	void UpdateSampleInstrs();
 	void DrawScope(void);
 
 	void pWave(XMInstrument::WaveData<> *const p){m_pWave = p;};
@@ -75,6 +76,7 @@ protected:
 
 protected:
 	CListBox m_SampleList;
+	CListBox m_SampleInstList;
 	CWaveScopeCtrl m_WaveScope;
 };
 

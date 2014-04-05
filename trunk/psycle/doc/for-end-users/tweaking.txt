@@ -204,15 +204,15 @@
 	  FFxx	-	Change BPM
 	  FExx	-	Extended command:
 	  	FE0x
-	  	FE1x 	Change Tick Per Beat
+	  	FE1x 	Change Lines Per Beat. Resets Song Extraticks (FEEx)
 	  	FE2x	Set Bypass ( 0 off, else on)
 	  	FE3x	Set Mute (0 off, else on)
 	  	FEBx	Set Pattern Loop ( FEB0 set loop start, FEBx number of loops)
-	  	FEDx	Set Pattern Delay. ( x = number of lines+1 )
-		FEEx    Set Pattern Fine delay memory ( x = number of ticks to add to each beat. )
+	  	FEDx	Set Pattern Delay. ( x = number of lines+1 ). It is added upon song extraticks.
+		FEEx    Set Song ExtraTicks per line ( x = number of ticks to add to each line. )
                 Used in conjunction with LPB (FExx), can emulate the speed command of classic trackers.
 				(I.e. FE06 FEE1 =  speed 5 )
-	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/24) )
+	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/ticksperbeat) ).  It is added upon song extraticks.
 	  	
 	  FDxx  -	Delay Trigger (xx/256 ticks) (works with noteoffs too)
 	  FCxx	-	Change Global/Wire Volume
@@ -262,7 +262,7 @@
 	  01xx	-	Portamento Up
 	  02xx	-	Portamento Down
 	  08xx	-	Set panning position
-	  09xx	-	Set sampler offset
+	  09xx	-	Set sample offset
 	  0Cxx	-	Set volume
 	  0ECx	-	Note cut in x frames
 	  0EDx	-	Note delay in x frames

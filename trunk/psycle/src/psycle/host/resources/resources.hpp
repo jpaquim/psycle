@@ -94,7 +94,7 @@
 #define IDD_INST_SAMPLER_INST           321
 #define IDD_PLOTTER                     322
 #define IDR_INSTRUMENTEDIT              324
-#define IDD_NOTEMAP_INDIVIDUAL          326
+#define IDD_INST_NOTEMAP_INDIV          326
 #define IDI_ICON2014                    328
 #define IDI_ICON2000                    329
 #define IDB_SPLASH2014                  331
@@ -105,6 +105,7 @@
 #define IDB_MAINTOOLBAR24               342
 #define IDB_BITMAP2                     343
 #define IDB_MAINTOOLBAR24MASK           343
+#define IDD_INST_NOTEMAP                344
 #define IDC_DRIVER                      1000
 #define IDC_CONFIG                      1001
 #define IDC_MIDI_DRIVER                 1002
@@ -217,7 +218,9 @@
 #define IDC_EDIT1                       1109
 #define IDC_EDIT2                       1110
 #define IDC_EDIT3                       1111
+#define IDC_EDIT_AUTHOR                 1111
 #define IDC_EDIT4                       1112
+#define IDC_EDIT_COMMENTS               1112
 #define IDC_CHECK1                      1113
 #define IDC_REPLACEINS                  1113
 #define IDC_BROWSER                     1114
@@ -939,6 +942,27 @@
 #define IDC_INS_SHIFTMOVE               2135
 #define IDC_INDIV_NOTE                  2136
 #define IDC_INDIV_SAMPLE                2137
+#define IDC_INSTLIST_SAMPLES            2138
+#define IDC_LIST2                       2139
+#define IDC_SAMPLESLIST                 2139
+#define IDC_LIST3                       2140
+#define IDC_NOTELIST                    2140
+#define IDC_NOTEMAP_LIST                2141
+#define IDC_RADIO_EDIT                  2142
+#define IDC_RADIO_SHOW                  2143
+#define IDC_SAMPLIST_INSTR              2144
+#define IDC_SPINTEMPO                   2145
+#define IDC_SPIN_TEMPO                  2145
+#define IDC_EDIT_TEMPO                  2146
+#define IDC_SPIN_LPB                    2147
+#define IDC_EDIT_LPB                    2148
+#define IDC_SPIN_TPB                    2149
+#define IDC_EDIT_TPB                    2150
+#define IDC_EDIT_EXTRATICK              2151
+#define IDC_SPIN_EXTRATICK              2152
+#define IDC_EDIT_REALTPB                2153
+#define IDC_EDIT_REALTEMPO              2154
+#define IDC_EDIT_TITLE                  2155
 #define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1133,9 +1157,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        344
+#define _APS_NEXT_RESOURCE_VALUE        346
 #define _APS_NEXT_COMMAND_VALUE         34321
-#define _APS_NEXT_CONTROL_VALUE         2138
+#define _APS_NEXT_CONTROL_VALUE         2156
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

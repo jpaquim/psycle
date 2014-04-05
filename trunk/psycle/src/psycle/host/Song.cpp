@@ -520,6 +520,8 @@ namespace psycle
 			// General properties
 			m_BeatsPerMin=125;
 			m_LinesPerBeat=4;
+			m_TicksPerBeat=24;
+			m_ExtraTicksPerLine=0;
 //			LineCounter=0;
 //			LineChanged=false;
 			// Clean up allocated machines.
@@ -852,6 +854,10 @@ namespace psycle
 		int Song::GetHighestInstrumentIndex() const
 		{
 			return samples.size()-1;
+		}
+		int Song::GetHighestXMInstrumentIndex() const
+		{
+			return xminstruments.size()-1;
 		}
 		int Song::GetNumInstruments() const
 		{
@@ -1388,6 +1394,8 @@ namespace psycle
 								pFile->Read(&_trackArmed[i],sizeof(_trackArmed[i]));
 								if(_trackArmed[i]) ++_trackArmedCount;
 							}
+							m_TicksPerBeat=24;
+							m_ExtraTicksPerLine=0;
 							// fix for a bug existing in the song saver in the 1.7.x series
 							if(version == 0) {
 								size = (11 * sizeof(uint32_t)) + (SONGTRACKS * 2 * sizeof(bool));
@@ -1401,13 +1409,19 @@ namespace psycle
 										ChangeTrackName(0,t,name);
 									}
 								}
+								if (version > 1) {
+									pFile->Read(&temp, sizeof temp);
+									m_TicksPerBeat = temp;
+									pFile->Read(&temp, sizeof temp);
+									m_ExtraTicksPerLine = temp;
+								}
 							}
 							if (fullopen)
 							{
 								///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
 								/// It should be coded in some way to get this information from the loading song, since doing it here
 								/// is bad for the Winamp plugin (or any other multi-document situation).
-								Global::player().SetBPM(BeatsPerMin(), LinesPerBeat());
+								Global::player().SetBPM(BeatsPerMin(), LinesPerBeat(), ExtraTicksPerLine());
 							}
 						}
 						pFile->Seek(begins + size);
@@ -1638,16 +1652,15 @@ namespace psycle
 				}
 				// The old format assumes we output at 44100 samples/sec, so...
 				else m_LinesPerBeat = 44100 * 60 / (sampR * m_BeatsPerMin);
+				m_TicksPerBeat= 24;
+				m_ExtraTicksPerLine= 0;
 
 				if (fullopen)
 				{
 					///\todo: Warning! This is done here, because the plugins, when loading, need an up-to-date information.
 					/// It should be coded in some way to get this information from the loading song, since doing it here
 					/// is bad for the Winamp plugin (or any other multi-document situation).
-					Global::player().SetBPM(BeatsPerMin(), LinesPerBeat());
-	//				Global::player().bpm = m_BeatsPerMin;
-	//				Global::player().lpb = m_LinesPerBeat;
-	//				Global::player().SamplesPerRow(sampR * Global::configuration()._pOutputDriver->_samplesPerSec / 44100);
+					Global::player().SetBPM(BeatsPerMin(), LinesPerBeat(), ExtraTicksPerLine());
 				}
 				pFile->Read(&currentOctave, sizeof(char));
 				pFile->Read(busMachine, 64);
@@ -2444,6 +2457,11 @@ namespace psycle
 					pFile->WriteString(_trackNames[0][t]);
 				}
 			}
+			
+			temp = m_TicksPerBeat;
+			pFile->Write(&temp,sizeof(temp));
+			temp = m_ExtraTicksPerLine;
+			pFile->Write(&temp,sizeof(temp));
 
 
 			if ( !autosave ) 

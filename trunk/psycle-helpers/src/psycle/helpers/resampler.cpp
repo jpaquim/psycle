@@ -33,11 +33,11 @@ namespace psycle { namespace helpers { namespace dsp {
 	float cubic_resampler::cubic_table_[CUBIC_RESOLUTION*4];
 	float cubic_resampler::l_table_[CUBIC_RESOLUTION];
 
-	float cubic_resampler::sinc_table_[SINC_TABLESIZE];
+	float cubic_resampler::sinc_windowed_table[SINC_TABLESIZE];
 #if USE_SINC_DELTA
 	float cubic_resampler::sinc_delta_[SINC_TABLESIZE];
 #endif
-	float cubic_resampler::sinc_pre_table_[SINC_TABLESIZE];
+	float cubic_resampler::window_div_x[SINC_TABLESIZE];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,31 +62,36 @@ namespace psycle { namespace helpers { namespace dsp {
 	// }
 
 	// Windowed Sinc Resampling {
-
+		// http://en.wikipedia.org/wiki/Window_function
 		// one-sided-- the function is symmetrical, one wing of the sinc will be sufficient.
-		sinc_table_[0] = 1.f; // save the trouble of evaluating 0/0.
-		sinc_pre_table_[0] = 1.f;
-		static const double ONEDIVSINC_TBSIZEMINONE = 1.0/ (static_cast<double>(SINC_TABLESIZE) -1.0);
+		// we only apply half window (from pi..2pi instead of 0..2pi) because we only have half sinc.
+		// The functions are adapted to this fact!!
+		sinc_windowed_table[0] = 1.f; // save the trouble of evaluating 0/0.
+		window_div_x[0] = 1.f;
+		static const double ONEDIVSINC_TBSIZEMINONE = 1.0/static_cast<double>(SINC_TABLESIZE);
 		static const double ONEDIVSINC_RESOLUTION = 1.0/static_cast<double>(SINC_RESOLUTION);
 		for(int i(1); i < SINC_TABLESIZE; ++i) {
-			// we only apply half window (from pi..2pi instead of 0..2pi) because we only have half sinc.
+			double valx=math::pi * static_cast<double>(i) * ONEDIVSINC_TBSIZEMINONE;
 			double tempval;
 			//Higher bandwidths means longer stopgap (bad), but also faster sidelobe attenuation (good).
 			#if 0
 				// nuttal window. Bandwidth = 2.0212
-				tempval = 0.355768 - 0.487396 * std::cos(math::pi+ math::pi * i *ONEDIVSINC_TBSIZEMINONE) + 0.144232 * std::cos(2.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE) - 0.012604 * std::cos(math::pi+ 3.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE);
+				tempval = 0.355768 - 0.487396 * std::cos(math::pi+ valx) + 0.144232 * std::cos(2.0 * valx) - 0.012604 * std::cos(math::pi+ 3.0 * valx);
+				// 0.3635819 , 0.4891775 , 0.1365995 , 0.0106411
 			#elif 1
 				// blackman window. Bandwidth = 1.73
-				tempval = 0.42659 - 0.49656 * std::cos(math::pi+ math::pi * i *ONEDIVSINC_TBSIZEMINONE) + 0.076849 * std::cos(2.0 * math::pi * i *ONEDIVSINC_TBSIZEMINONE);
+				tempval = 0.42659 - 0.49656 * std::cos(math::pi+ valx) + 0.076849 * std::cos(2.0 * valx);
+			#elif 0
+				// C.H.Helmrich on Hydrogenaudio: http://www.hydrogenaudio.org/forums/index.php?showtopic=105090
+				tempval = 0.79445 * std::cos(0.5*valx) + 0.20555 * std::cos(1.5 * valx);
 			#elif 0
 				// hann(ing) window. Bandwidth = 1.5
-				tempval = .5f * (1.f - std::cos(math::pi + math::pi * i *ONEDIVSINC_TBSIZEMINONE));
+				tempval = 0.5 * (1.0 - std::cos(math::pi + valx));
 			#elif 0
 				// hamming window. Bandwidth = 1.37
-				tempval = 0.53836f - 0.46164f * std::cos(math::pi +  math::pi * i *ONEDIVSINC_TBSIZEMINONE);
+				tempval = 0.53836 - 0.46164 * std::cos(math::pi +  valx);
 			#elif 0 
 				//lanczos (sinc) window. Bandwidth = 1.30
-				double valx=math::pi * static_cast<double>(i) * ONEDIVSINC_TBSIZEMINONE;
 				tempval = std::sin(valx)/valx;
 			#endif
 
@@ -99,17 +104,17 @@ namespace psycle { namespace helpers { namespace dsp {
 			#endif
 
 			tempval /= static_cast<double>(i) * math::pi *ONEDIVSINC_RESOLUTION;
-			sinc_pre_table_[write_pos] = tempval;
+			window_div_x[write_pos] = tempval;
 			//sinc runs at half speed of SINC_RESOLUTION (i.e. two zero crossing points per period).
 			//This means filter cutoff is at 0.5 (half of samplerate, full bandwidth)
-			sinc_table_[write_pos] = std::sin(i * math::pi *ONEDIVSINC_RESOLUTION) * tempval;
+			sinc_windowed_table[write_pos] = std::sin(static_cast<double>(i) * math::pi *ONEDIVSINC_RESOLUTION) * tempval;
 		}
-		helpers::math::erase_all_nans_infinities_and_denormals(sinc_table_,SINC_TABLESIZE);
+		helpers::math::erase_all_nans_infinities_and_denormals(sinc_windowed_table,SINC_TABLESIZE);
 #if USE_SINC_DELTA
 		for(int i(0); i < SINC_TABLESIZE - 1; ++i) {
-			sinc_delta_[i] = sinc_table_[i + 1] - sinc_table_[i];
+			sinc_delta_[i] = sinc_windowed_table[i + 1] - sinc_windowed_table[i];
 		}
-		sinc_delta_[SINC_TABLESIZE - 1] = 0 - sinc_table_[SINC_TABLESIZE - 1];
+		sinc_delta_[SINC_TABLESIZE - 1] = 0 - sinc_windowed_table[SINC_TABLESIZE - 1];
 		helpers::math::erase_all_nans_infinities_and_denormals(sinc_delta_,SINC_TABLESIZE);
 #endif //USE_SINC_DELTA
 	// }
@@ -430,7 +435,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		register __m128 result =  _mm_setzero_ps();
 		int16_t const * pdata = data;
 
-		float *psinc = &sinc_table_[res];
+		float *psinc = &sinc_windowed_table[res];
 		while (leftExtent > 3) {
 			register __m128i data128 = _mm_set_epi32(pdata[-3],pdata[-2],pdata[-1],pdata[0]);
 			register __m128 datafloat = _mm_cvtepi32_ps(data128);
@@ -451,7 +456,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			leftExtent--;
 		}
 		pdata = data+1;
-		psinc = &sinc_table_[SINC_TABLESIZE-res];
+		psinc = &sinc_windowed_table[SINC_TABLESIZE-res];
 		while (rightExtent > 3) {
 			register __m128i data128 = _mm_set_epi32(pdata[3],pdata[2],pdata[1],pdata[0]);
 			register __m128 datafloat = _mm_cvtepi32_ps(data128);
@@ -494,7 +499,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		register __m128 result =  _mm_setzero_ps();
 		float const * pdata = data;
 
-		float *psinc = &sinc_table_[res];
+		float *psinc = &sinc_windowed_table[res];
 		while (leftExtent > 3) {
 			register __m128 datafloat = _mm_set_ps(pdata[-3],pdata[-2],pdata[-1],pdata[0]);
 	#if OPTIMIZED_RES_SHIFT > 1
@@ -514,7 +519,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			leftExtent--;
 		}
 		pdata = data+1;
-		psinc = &sinc_table_[SINC_TABLESIZE-res];
+		psinc = &sinc_windowed_table[SINC_TABLESIZE-res];
 		while (rightExtent > 3) {
 			register __m128 datafloat = _mm_loadu_ps(pdata);
 	#if OPTIMIZED_RES_SHIFT > 1
@@ -549,17 +554,17 @@ namespace psycle { namespace helpers { namespace dsp {
 		res >>= (32-SINC_RESOLUTION_LOG);
 
 		//"Now" point. (would go on the left side of the sinc, but since we use a mirrored one, so we increase from zero)
-		float newval = (sinc_table_[res] + sinc_delta_[res] * weight) * *data;
+		float newval = (sinc_windowed_table[res] + sinc_delta_[res] * weight) * *data;
 
 		//Past points (would go on the left side of the sinc, but since we use a mirrored one, so we increase from SINC_RESOLUTION)
 		int sincIndex = SINC_RESOLUTION + res;
 		for(int i(1); i < leftExtent; ++i, sincIndex += SINC_RESOLUTION)
-			newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data - i);
+			newval += (sinc_windowed_table[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data - i);
 
 		//Future points, we decrease from SINC_RESOLUTION, since they are approaching the "Now" point
 		sincIndex = SINC_RESOLUTION - res;
 		for(int i(0); i < rightExtent; ++i, sincIndex += SINC_RESOLUTION)
-			newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data + i);
+			newval += (sinc_windowed_table[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data + i);
 
 		return newval;
 	}
@@ -569,17 +574,17 @@ namespace psycle { namespace helpers { namespace dsp {
 		res >>= (32-SINC_RESOLUTION_LOG);
 
 		//"Now" point. (would go on the left side of the sinc, but since we use a mirrored one, so we increase from zero)
-		float newval = (sinc_table_[res] + sinc_delta_[res] * weight) * *data;
+		float newval = (sinc_windowed_table[res] + sinc_delta_[res] * weight) * *data;
 
 		//Past points (would go on the left side of the sinc, but since we use a mirrored one, so we increase from SINC_RESOLUTION)
 		int sincIndex = SINC_RESOLUTION + res;
 		for(int i(1); i < leftExtent; ++i, sincIndex += SINC_RESOLUTION)
-			newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data - i);
+			newval += (sinc_windowed_table[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data - i);
 
 		//Future points, we decrease from SINC_RESOLUTION, since they are approaching the "Now" point
 		sincIndex = SINC_RESOLUTION - res;
 		for(int i(0); i < rightExtent; ++i, sincIndex += SINC_RESOLUTION)
-			newval += (sinc_table_[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data + i);
+			newval += (sinc_windowed_table[sincIndex] + sinc_delta_[sincIndex] * weight) * *(data + i);
 
 		return newval;
 	}
@@ -597,7 +602,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		if (res == 0) return *data;
 
 		int16_t const * pdata = data;
-		float *psinc = &sinc_table_[res];
+		float *psinc = &sinc_windowed_table[res];
 		float newval = 0.0f;
 
 		//Current and Past points (would go on the left side of the sinc, but we use a mirrored one)
@@ -609,7 +614,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Future points, they are approaching the "Now" point
 		// future points decrease from SINC_RESOLUTION since they are reaching us.
 		pdata = data+1;
-		psinc = &sinc_table_[SINC_TABLESIZE-res];
+		psinc = &sinc_windowed_table[SINC_TABLESIZE-res];
 		for(int i(0); i < rightExtent; ++i) {
 			newval += *psinc * *pdata;
 			pdata++;
@@ -630,7 +635,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		if (res == 0) return *data;
 
 		float const * pdata = data;
-		float *psinc = &sinc_table_[res];
+		float *psinc = &sinc_windowed_table[res];
 		float newval = 0.0f;
 
 		//Current and Past points (would go on the left side of the sinc, but we use a mirrored one)
@@ -642,7 +647,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Future points, they are approaching the "Now" point
 		// future points decrease from SINC_RESOLUTION since they are reaching us.
 		pdata = data+1;
-		psinc = &sinc_table_[SINC_TABLESIZE-res];
+		psinc = &sinc_windowed_table[SINC_TABLESIZE-res];
 		for(int i(0); i < rightExtent; ++i) {
 			newval += *psinc * *pdata;
 			pdata++;
@@ -667,9 +672,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Current and Past points. They increase from 0 because they are leaving us.
 		// (they would decrease from zero if it wasn't a mirrored sinc)
 	#if defined OPTIMIZED_RES_SHIFT
-		float *ppretab = &sinc_pre_table_[res << OPTIMIZED_RES_SHIFT];
+		float *ppretab = &window_div_x[res << OPTIMIZED_RES_SHIFT];
 	#else
-		float *ppretab = &sinc_pre_table_[res *SINC_ZEROS];
+		float *ppretab = &window_div_x[res *SINC_ZEROS];
 	#endif
 		float w = double(res) * resampler_data->fcpidivperiodsize;
 		const float fcpi = resampler_data->fcpi;
@@ -724,9 +729,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		}
 		//Future points. They decrease from SINC_RESOLUTION since they are reaching the "Now" point.
 	#if defined OPTIMIZED_RES_SHIFT
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
 	#else
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res *SINC_ZEROS)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res *SINC_ZEROS)];
 	#endif
 		w = double(SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
@@ -796,9 +801,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Current and Past points. They increase from 0 because they are leaving us.
 		// (they would decrease from zero if it wasn't a mirrored sinc)
 	#if defined OPTIMIZED_RES_SHIFT
-		float *ppretab = &sinc_pre_table_[res << OPTIMIZED_RES_SHIFT];
+		float *ppretab = &window_div_x[res << OPTIMIZED_RES_SHIFT];
 	#else
-		float *ppretab = &sinc_pre_table_[res *SINC_ZEROS];
+		float *ppretab = &window_div_x[res *SINC_ZEROS];
 	#endif
 		double w = res * resampler_data->fcpidivperiodsize;
 		const double fcpi = resampler_data->fcpi;
@@ -811,9 +816,9 @@ namespace psycle { namespace helpers { namespace dsp {
 
 		//Future points. They decrease from SINC_RESOLUTION since they are reaching the "Now" point.
 	#if defined OPTIMIZED_RES_SHIFT
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
 	#else
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res *SINC_ZEROS)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res *SINC_ZEROS)];
 	#endif
 		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
@@ -839,9 +844,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Current and Past points. They increase from 0 because they are leaving us.
 		// (they would decrease from zero if it wasn't a mirrored sinc)
 	#if defined OPTIMIZED_RES_SHIFT
-		float *ppretab = &sinc_pre_table_[res << OPTIMIZED_RES_SHIFT];
+		float *ppretab = &window_div_x[res << OPTIMIZED_RES_SHIFT];
 	#else
-		float *ppretab = &sinc_pre_table_[res *SINC_ZEROS];
+		float *ppretab = &window_div_x[res *SINC_ZEROS];
 	#endif
 		double w = res * resampler_data->fcpidivperiodsize;
 		const double fcpi = resampler_data->fcpi;
@@ -854,9 +859,9 @@ namespace psycle { namespace helpers { namespace dsp {
 
 		//Future points. They decrease from SINC_RESOLUTION since they are reaching the "Now" point.
 	#if defined OPTIMIZED_RES_SHIFT
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
 	#else
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res *SINC_ZEROS)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res *SINC_ZEROS)];
 	#endif
 		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;
@@ -881,9 +886,9 @@ namespace psycle { namespace helpers { namespace dsp {
 		//Current and Past points. They increase from 0 because they are leaving us.
 		// (they would decrease from zero if it wasn't a mirrored sinc)
 	#if defined OPTIMIZED_RES_SHIFT
-		float *ppretab = &sinc_pre_table_[res << OPTIMIZED_RES_SHIFT];
+		float *ppretab = &window_div_x[res << OPTIMIZED_RES_SHIFT];
 	#else
-		float *ppretab = &sinc_pre_table_[res *SINC_ZEROS];
+		float *ppretab = &window_div_x[res *SINC_ZEROS];
 	#endif
 		double w = res * resampler_data->fcpidivperiodsize;
 		const double fcpi = resampler_data->fcpi;
@@ -896,9 +901,9 @@ namespace psycle { namespace helpers { namespace dsp {
 
 		//Future points. They decrease from SINC_RESOLUTION since they are reaching the "Now" point.
 	#if defined OPTIMIZED_RES_SHIFT
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res << OPTIMIZED_RES_SHIFT)];
 	#else
-		ppretab = &sinc_pre_table_[SINC_TABLESIZE - (res *SINC_ZEROS)];
+		ppretab = &window_div_x[SINC_TABLESIZE - (res *SINC_ZEROS)];
 	#endif
 		w = (SINC_RESOLUTION - res) * resampler_data->fcpidivperiodsize;
 		pdata = data+1;

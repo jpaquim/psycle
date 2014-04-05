@@ -259,8 +259,8 @@ namespace psycle
 
 		bool OldPsyFile::Write(void const * pData, std::size_t numBytes)
 		{
-			std::fflush(_file); ///\todo why flushing?
 			std::size_t bytesWritten = std::fwrite(pData, sizeof(char), numBytes, _file);
+			if (numBytes > 1024) std::fflush(_file);
 			return bytesWritten == numBytes;
 		}
 

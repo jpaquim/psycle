@@ -1,6 +1,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "EnvelopeEditorDlg.hpp"
 #include <psycle/host/Player.hpp>
+#include <psycle/host/Song.hpp>
 #include "InstrumentEditorUI.hpp"
 #include "XMSamplerUIInst.hpp"
 
@@ -76,7 +77,7 @@ void CEnvelopeEditorDlg::ChangeEnvelope(XMInstrument::Envelope &env) {
 	m_CarryEnabled.SetCheck(env.IsCarry());
 	((CButton*)GetDlgItem(IDC_ENVMILLIS))->SetCheck(env.Mode() == XMInstrument::Envelope::Mode::MILIS);
 	((CButton*)GetDlgItem(IDC_ENVTICKS))->SetCheck(env.Mode() == XMInstrument::Envelope::Mode::TICK);
-	m_EnvelopeEditor.Initialize(env);
+	m_EnvelopeEditor.Initialize(env,Global::song().TicksPerBeat());
 	if (env.Mode() == XMInstrument::Envelope::Mode::MILIS) {
 		m_SlADSRAttack.SetRangeMax(5000);
 		m_SlADSRDecay.SetRangeMax(5000);
@@ -163,7 +164,7 @@ void CEnvelopeEditorDlg::OnBnClickedEnvmillis()
 }
 void CEnvelopeEditorDlg::OnBnClickedEnvticks()
 {
-	m_EnvelopeEditor.TimeFormulaTicks();
+	m_EnvelopeEditor.TimeFormulaTicks(Global::song().TicksPerBeat());
 	m_EnvelopeEditor.Invalidate();
 	if (m_EnvelopeEditor.envelope().Mode() == XMInstrument::Envelope::Mode::MILIS) {
 		m_SlADSRAttack.SetRangeMax(5000);

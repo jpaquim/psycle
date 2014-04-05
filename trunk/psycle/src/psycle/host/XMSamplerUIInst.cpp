@@ -46,6 +46,7 @@ void XMSamplerUIInst::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_INSTRUMENTLIST, m_InstrumentList);
+	DDX_Control(pDX, IDC_INSTLIST_SAMPLES, m_InstListSamples);
 	DDX_Control(pDX, IDC_XMINST_TAB, m_tabMain);
 }
 
@@ -115,6 +116,7 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 	m_InstrumentList.SetCurSel(instno);
 
 	UpdateTabNames();
+	UpdateInstrSamples();
 }
 
 
@@ -133,10 +135,10 @@ BOOL XMSamplerUIInst::OnSetActive()
 
 	return CPropertyPage::OnSetActive();
 }
-void XMSamplerUIInst::FillInstrumentList(int sample/*=-1*/) {
+void XMSamplerUIInst::FillInstrumentList(int instNo/*=-1*/) {
 	char line[48];
 	InstrumentList& list = Global::song().xminstruments;
-	if (sample == -1) {
+	if (instNo == -1) {
 		int i = m_InstrumentList.GetCurSel();
 		m_InstrumentList.ResetContent();
 		for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
@@ -159,8 +161,8 @@ void XMSamplerUIInst::FillInstrumentList(int sample/*=-1*/) {
 		}
 	}
 	else {
-		int i=sample;
-		if (sample == -2) {
+		int i=instNo;
+		if (instNo == -2) {
 			i = m_InstrumentList.GetCurSel();
 		}
 		if (list.Exists(i)) {
@@ -204,6 +206,26 @@ void XMSamplerUIInst::UpdateTabNames()
 	m_tabMain.SetItem(2,&tab);
 	tab.pszText = filTabName;
 	m_tabMain.SetItem(3,&tab);
+}
+void XMSamplerUIInst::UpdateInstrSamples()
+{
+	char line[48];
+	const SampleList &samplist =  Global::song().samples;
+	const XMInstrument & inst = Global::song().xminstruments[m_InstrumentList.GetCurSel()];
+	m_InstListSamples.ResetContent();
+	if (inst.IsEnabled()) {
+		std::set<int> sampNums =  inst.GetWavesUsed();
+		for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end(); ++it) {
+			if ( samplist.Exists(*it) ) {
+				const XMInstrument::WaveData<> &wave = samplist[*it];
+				sprintf(line,"%02X%s: %s",*it,samplist.IsEnabled(*it)?"*":" ", wave.WaveName().c_str());
+			}
+			else {
+				sprintf(line,"%02X : ",*it);
+			}
+			m_InstListSamples.AddString(line);
+		}
+	}
 }
 void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 {
@@ -302,6 +324,7 @@ void XMSamplerUIInst::OnBnClickedLoadins()
 			strcat(line,inst.Name().c_str());
 			m_InstrumentList.DeleteString(m_iCurrentSelected);
 			m_InstrumentList.InsertString(m_iCurrentSelected,line);
+			//TODO: Needs to do XMSamplerUISample.WaveUpdate();
 		}
 	}
 }
@@ -328,10 +351,32 @@ void XMSamplerUIInst::OnBnClickedDupeins()
 
 void XMSamplerUIInst::OnBnClickedDeleteins()
 {
-	XMInstrument& inst = Global::song().xminstruments.get(m_iCurrentSelected);
-	inst.Init();
-	FillInstrumentList(-2);
-	SetInstrumentData(m_iCurrentSelected);
+	XMInstrument & inst = Global::song().xminstruments.get(m_InstrumentList.GetCurSel());
+	m_InstListSamples.ResetContent();
+	if (inst.IsEnabled()) {
+		std::set<int> sampNums =  inst.GetWavesUsed();
+		if (sampNums.size() > 0) {
+			std::ostringstream os;
+			os << "This instrument uses the following samples: " << std::hex;
+			for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
+				os << *it << ',';
+			}
+			os << std::endl <<"Do you want to ALSO delete the samples?";
+			int result = MessageBox(os.str().c_str(),"Deleting Instrument",MB_YESNOCANCEL | MB_ICONQUESTION);
+			if (result == IDYES) {
+				for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
+					Global::song().samples.RemoveAt(*it);
+				}
+				//TODO: Needs to do XMSamplerUISample.WaveUpdate();
+			}
+			else if (result == IDCANCEL) {
+				return;
+			}
+		}
+		inst.Init();
+		FillInstrumentList(-2);
+		SetInstrumentData(m_iCurrentSelected);
+	}
 }
-			
+
 }}

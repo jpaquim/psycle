@@ -191,7 +191,7 @@ namespace psycle
 		{
 			PsycleConfig::InputHandler& settings = PsycleGlobal::conf().inputHandler();
 			std::map<CmdSet,std::pair<int,int>>::const_iterator it;
-			for(it = settings.setMap.begin(); it != settings.setMap.end(); it++)
+			for(it = settings.setMap.begin(); it != settings.setMap.end(); ++it)
 			{
 				CmdDef ret(it->first);
 				if(!strcmp(ret.GetName(),str))

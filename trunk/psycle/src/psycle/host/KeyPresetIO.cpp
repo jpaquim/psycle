@@ -79,7 +79,7 @@ namespace psycle { namespace host {
 			std::fprintf(hfile,"[Psycle Keymap Presets v1.0]\n\n");
 
 			std::map<std::pair<int,int>,CmdDef>::const_iterator it;
-			for(it = settings.keyMap.begin(); it != settings.keyMap.end(); it++)
+			for(it = settings.keyMap.begin(); it != settings.keyMap.end(); ++it)
 			{
 				if (it->second.IsValid()) {
 					std::fprintf(hfile,"Key[%d]%03d=%03d     ; cmd = '%s'\n",
@@ -133,7 +133,7 @@ namespace psycle { namespace host {
 				sect = "Keys2"; // 1.8 onward
 				settings.keyMap.clear();
 				std::map<CmdSet,std::pair<int,int>>::const_iterator it;
-				for(it = settings.setMap.begin(); it != settings.setMap.end(); it++)
+				for(it = settings.setMap.begin(); it != settings.setMap.end(); ++it)
 				{
 					CmdDef cmd(it->first);
 					if(cmd.IsValid())

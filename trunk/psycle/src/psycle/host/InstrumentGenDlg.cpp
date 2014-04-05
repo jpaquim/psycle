@@ -3,6 +3,7 @@
 #include "XMInstrument.hpp"
 #include "InstrumentEditorUI.hpp"
 #include "XMSamplerUIInst.hpp"
+#include "InstrNoteMap.hpp"
 
 namespace psycle { namespace host {
 
@@ -155,33 +156,33 @@ void CInstrumentGenDlg::OnCbnSelendokInsDcacombo()
 
 void CInstrumentGenDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
-	int m_Octave = m_SampleAssign.Octave();
+	int m_Octave = 8-m_SampleAssign.Octave();
 	switch(nSBCode)
 	{
 		case SB_TOP:
-			m_Octave=8;
+			m_Octave=0;
 			break;
 		case SB_BOTTOM:
-			m_Octave=0;
+			m_Octave=8;
 			break;
 		case SB_LINEDOWN:
 		case SB_PAGEDOWN:
-			if ( m_Octave>0 ) { m_Octave--; }
+			if ( m_Octave < 8) { m_Octave++; }
 			break;
 		case SB_LINEUP:
 		case SB_PAGEUP:
-			if ( m_Octave < 8) { m_Octave++; }
+			if ( m_Octave>0 ) { m_Octave--; }
 			break;
 		case SB_THUMBPOSITION:
 		case SB_THUMBTRACK:
-			m_Octave=std::max(0,std::min(8-(int)nPos,8));
+			m_Octave=std::max(0,std::min((int)nPos,8));
 			break;
 		default: 
 			break;
 	}
 	if (m_Octave != m_SampleAssign.Octave()) {
 		m_scBar.SetScrollPos(m_Octave);
-		m_SampleAssign.Octave(m_Octave);
+		m_SampleAssign.Octave(8-m_Octave);
 		m_SampleAssign.Invalidate();
 	}
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
@@ -208,7 +209,14 @@ void CInstrumentGenDlg::OnBtnSetSample()
 }
 void CInstrumentGenDlg::OnBtnEditMapping()
 {
-	MessageBox("Global setup of notes and instruments not ready yet.\nYou can set a sample globally, or setup each note and sample individually by clicking the corresponding note.");
+	CInstrNoteMap map;
+	map.m_instr = m_instr;
+	if (map.DoModal() == IDOK) {
+		XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
+		win->FillInstrumentList(-2);
+		m_SampleAssign.Invalidate();
+		ValidateEnabled();
+	}
 }
 
 
@@ -290,4 +298,5 @@ void CInstrumentGenDlg::ValidateEnabled() {
 	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
 	win->FillInstrumentList(-2);
 }
+//void CInstrumentGenDlg
 }}

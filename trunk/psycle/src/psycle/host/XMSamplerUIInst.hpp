@@ -43,15 +43,17 @@ protected:
 
 public:
 	void SetInstrumentData(const int instno);
-	void FillInstrumentList(int sample=-1);
+	void FillInstrumentList(int instNo=-1);
 	void SetActivePage(int index);
 	void UpdateTabNames();
+	void UpdateInstrSamples();
 private:
 	bool m_bInitialized;
 	int		m_iCurrentSelected;
 
 protected:
 	CListBox m_InstrumentList;
+	CListBox m_InstListSamples;
 
 	CTabCtrl m_tabMain;
 	CInstrumentGenDlg m_genTab;

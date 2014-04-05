@@ -44,9 +44,14 @@ namespace psycle
 			/// the initial beats per minute (BPM) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int m_BeatsPerMin;
-			/// the initial ticks per beat (TPB) when the song is started playing.
+			/// the initial lines per beat (LPB) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int m_LinesPerBeat;
+			/// The song Ticks per beat (ticks as 24 ticks per beat). Set it from the song properties.
+			int m_TicksPerBeat;
+			/// The initial extraticks per line when the song is started playing.
+			/// This can be changed in patterns using a command, but this value will not be affected.
+			int m_ExtraTicksPerLine;
 			/// \todo This is a GUI thing... should not be here.
 			char currentOctave;
 			/// Array of Pattern data.
@@ -139,8 +144,10 @@ namespace psycle
 			void DestroyAllMachines();
 			/// Tells all the samplers of this song, that if they play this sample, stop playing it. (I know this isn't exactly a thing to do for a Song Class)
 			void StopInstrument(int instrumentIdx);
-			// the highest index of the instruments used
+			// the highest index of the samples (sampler instruments) used
 			int GetHighestInstrumentIndex() const;
+			// the highest index of the sampulse instruments
+			int GetHighestXMInstrumentIndex() const;
 			// the highest index of the patterns used
 			int GetHighestPatternIndexInSequence() const;
 			// the number of instruments used.
@@ -256,10 +263,10 @@ namespace psycle
 			void RemovePattern(int ps);
 
 			
-			const int SongTracks() const {return SONGTRACKS;}
+			int SongTracks() const {return SONGTRACKS;}
 			void SongTracks(const int value){ SONGTRACKS = value;}
 
-			const int BeatsPerMin() const {return m_BeatsPerMin;}
+			int BeatsPerMin() const {return m_BeatsPerMin;}
 			void BeatsPerMin(const int value)
 			{ 
 				if ( value < 32 ) m_BeatsPerMin = 32;
@@ -267,14 +274,26 @@ namespace psycle
 				else m_BeatsPerMin = value;
 			}
 
-			const int LinesPerBeat() const {return m_LinesPerBeat;}
+			int LinesPerBeat() const {return m_LinesPerBeat;}
 			void LinesPerBeat(const int value)
 			{
-				if ( value < 1 )m_LinesPerBeat = 1;
+				if ( value < 1 ) m_LinesPerBeat = 1;
 				else if ( value > 31 ) m_LinesPerBeat = 31;
 				else m_LinesPerBeat = value;
 			}
-
+			int TicksPerBeat() const {return m_TicksPerBeat;}
+			void TicksPerBeat(const int value)
+			{
+				if ( value < 1 ) m_TicksPerBeat = 1;
+				else m_TicksPerBeat = value;
+			}
+			int ExtraTicksPerLine() const {return m_ExtraTicksPerLine;}
+			void ExtraTicksPerLine(const int value)
+			{
+				if ( value < 1 ) m_ExtraTicksPerLine = 1;
+				else if ( value > 31 ) m_ExtraTicksPerLine = 31;
+				else m_ExtraTicksPerLine = value;
+			}
 			/// The file name this song was loaded from.
 			std::string fileName;
 			/// The index of the machine which plays in solo.

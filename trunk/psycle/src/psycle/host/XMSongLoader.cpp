@@ -228,10 +228,11 @@ namespace host{
 		song.SONGTRACKS = std::max((int)m_Header.channels, 4);
 		m_iInstrCnt = m_Header.instruments;
 		song.BeatsPerMin(m_Header.tempo);
+		song.TicksPerBeat(24);
 		int extraticks=0;
 		song.LinesPerBeat(XMSampler::CalcLPBFromSpeed(m_Header.speed,extraticks));
 		if (extraticks != 0) {
-			//\todo: setup something...
+			song.ExtraTicksPerLine(extraticks);
 		}
 
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.norder;i++)
@@ -566,7 +567,7 @@ namespace host{
 								int extraticks=0;
 								e._parameter = XMSampler::CalcLPBFromSpeed(param,extraticks);
 								if (extraticks != 0) {
-									PatternEntry entry(notecommands::empty,255,255,PatternCmd::EXTENDED,PatternCmd::MEMORY_FINE_PAT_DELAY | extraticks);
+									PatternEntry entry(notecommands::empty,255,255,PatternCmd::EXTENDED,PatternCmd::ROW_EXTRATICKS | extraticks);
 									WritePatternEntry(song,patIdx,row,m_extracolumn,entry);	
 									m_extracolumn++;
 								}
@@ -1075,8 +1076,6 @@ namespace host{
 		} else {
 			inst.PanEnvelope().IsEnabled(false);
 		}
-		//inst.
-
 	}	
 
 
@@ -1146,6 +1145,8 @@ namespace host{
 		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f);}//-9dB
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
+		song.TicksPerBeat(24);
+		song.ExtraTicksPerLine(0);
 
 		if (song.SONGTRACKS<=8) {
 			for (int i = 0; i< song.SONGTRACKS ; i++ )
@@ -1399,7 +1400,7 @@ namespace host{
 									speedpatch=true;
 									PatternEntry entry(notecommands::empty,0xFF,0xFF,0,0);
 									entry._cmd = PatternCmd::EXTENDED;
-									entry._parameter = PatternCmd::MEMORY_FINE_PAT_DELAY | extraticks;
+									entry._parameter = PatternCmd::ROW_EXTRATICKS | extraticks;
 									WritePatternEntry(song,patIdx,row,song.SONGTRACKS,entry);	
 								}
 							}

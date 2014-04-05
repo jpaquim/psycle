@@ -45,6 +45,20 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.11.3 (beta) (2014-xx-xx)
+--------
++ Option to clip machine names in the machine view for skin creators. See generator_name_clip_coords and effect_name_clip_coords in how-to-skin-psycle.txt.
++ Sampulse Editor: Implemented the sampulse note mapping editor. Everything is point and click. Multiple selection is possible. (like setting a whole octave by selecting the 12 notemaps, and then the 12 notes with mouse and shift)
++ Sampulse Editor: Selecting an instrument shows which samples it has associated. Selecting a sample shows which instruments use it.
++ Sampulse Editor: Deleting an instrument asks if it should delete its associated samples.
++ Recording or playing the song with looping disabled will now stop when break to line, or jump to sequence go to an earlier position.
++ Full Implementation of extraticks and ticksperbeat: Changes in song properties dialog, song toolbar and part of code.
+* Do not stretch master VU graphics in Windows XP. It will not resize correctly on different dpi sizes, but will paint correctly at 96dpi which is what most people use.
+* Improved the xm song exporter. Fixed sample pitch and exported envelopes. Also exported sampulse instruments now.
+! Sampler: Fixes in pitch slide command (it became broken when adding samplerate support)
+! Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample)
+! Gear rack: exchanging instruments to an unused position crashed the application.
+
 v1.11.2 (beta) (2014-02-16)
 --------
 ! LUA Host fixes related to sampling rate awareness, crash on parameter list if it has zero parameters and name on machine creation.
