@@ -64,7 +64,7 @@ namespace psycle
 		//Version for the metadata information (author, comments..)
 		#define CURRENT_FILE_VERSION_INFO	0x0000
 		//Version for the song data information (BPM, number of tracks..)
-		#define CURRENT_FILE_VERSION_SNGI	0x0001
+		#define CURRENT_FILE_VERSION_SNGI	0x0002
 		//Version for the sequence data (playback order)
 		#define CURRENT_FILE_VERSION_SEQD	0x0000
 		//Version for the pattern data

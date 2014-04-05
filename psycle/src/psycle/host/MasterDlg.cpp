@@ -22,6 +22,7 @@ namespace psycle { namespace host {
 	CMasterVu::CMasterVu():CProgressCtrl()
 	{
 		offsetX=0;
+		doStretch = Is_Vista_or_Later();
 	}
 	CMasterVu::~CMasterVu()
 	{
@@ -38,20 +39,26 @@ namespace psycle { namespace host {
 	{
 		const int vuImgW = MasterUI::uiSetting->coords.sMasterVuLeftOff.width;
 		const int vuImgH = MasterUI::uiSetting->coords.sMasterVuLeftOff.height;
-		CPaintDC dc(this);
-		dc.SetStretchBltMode(HALFTONE);
 		CRect crect, wrect;
 		GetClientRect(&crect);
 		CBitmap* oldbmp;
-		CDC memDC;
-		memDC.CreateCompatibleDC(&dc);
-		oldbmp=memDC.SelectObject(&MasterUI::uiSetting->masterSkin);
 		int vol = vuImgH - GetPos()*vuImgH/100;
 		int volRel = crect.Height() - GetPos()*crect.Height()/100;
-		dc.StretchBlt(0,volRel,crect.Width(),crect.Height(),&memDC,offsetX+vuImgW,vol,vuImgW,vuImgH,SRCCOPY);
-		//dc.BitBlt(0, vol, crect.Width(), crect.Height(), &memDC, offsetX+vuImgW, vol, SRCCOPY);
-		dc.StretchBlt(0,0,crect.Width(),volRel,&memDC,offsetX,0,vuImgW,vol,SRCCOPY);
-		//dc.BitBlt(0, 0, crect.Width(), vol, &memDC, offsetX, 0, SRCCOPY);
+		CPaintDC dc(this);
+		CDC memDC;
+		if (doStretch) {
+			dc.SetStretchBltMode(HALFTONE);
+			memDC.CreateCompatibleDC(&dc);
+			oldbmp=memDC.SelectObject(&MasterUI::uiSetting->masterSkin);
+			dc.StretchBlt(0,volRel,crect.Width(),crect.Height(),&memDC,offsetX+vuImgW,vol,vuImgW,vuImgH,SRCCOPY);
+			dc.StretchBlt(0,0,crect.Width(),volRel,&memDC,offsetX,0,vuImgW,vol,SRCCOPY);
+		}
+		else { // In Windows XP, it looks ugly, because the stretching makes the vumeter move its placement by one pixel depending on the position.
+			memDC.CreateCompatibleDC(&dc);
+			oldbmp=memDC.SelectObject(&MasterUI::uiSetting->masterSkin);
+			dc.BitBlt(0, vol, crect.Width(), crect.Height(), &memDC, offsetX+vuImgW, vol, SRCCOPY);
+			dc.BitBlt(0, 0, crect.Width(), vol, &memDC, offsetX, 0, SRCCOPY);
+		}
 		memDC.SelectObject(oldbmp);
 	}
 
@@ -62,6 +69,7 @@ namespace psycle { namespace host {
 			, machine(new_master), m_slidermaster(-1)
 			, mainView(wndView)
 		{
+			doStretch = Is_Vista_or_Later();
 			memset(macname,0,sizeof(macname));
 			for (int i = 0; i < 12; ++i) {
 				CVolumeCtrl* slider = new CVolumeCtrl(i);

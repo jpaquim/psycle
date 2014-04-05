@@ -872,14 +872,14 @@ namespace psycle
 			{
 				// 0x01 : Pitch Up
 				case 0x01:
-					shift=_voices[voice].effVal*4294967 * _voices[voice]._wave._samplerate/Global::player().SampleRate();
+					shift=static_cast<int64_t>(_voices[voice].effVal)*4294967ll * static_cast<float>(_voices[voice]._wave._samplerate)/Global::player().SampleRate();
 					_voices[voice]._wave._speed+=shift;
 					_resampler.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 				break;
 
 				// 0x02 : Pitch Down
 				case 0x02:
-					shift=_voices[voice].effVal*4294967 * _voices[voice]._wave._samplerate/Global::player().SampleRate();
+					shift=static_cast<int64_t>(_voices[voice].effVal)*4294967ll * static_cast<float>(_voices[voice]._wave._samplerate)/Global::player().SampleRate();
 					_voices[voice]._wave._speed-=shift;
 					if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
 					_resampler.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);

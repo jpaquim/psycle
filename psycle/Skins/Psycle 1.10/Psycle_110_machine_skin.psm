@@ -31,11 +31,16 @@
 "generator_mute_dest"=114,2
 "generator_solo_dest"=89,2
 "generator_name_dest"=10,46
+// Clip the name when drawing it. 0,0 means do not clip. Else means the maximum width and height
+"generator_name_clip_coords"=0,0
 
 "effect_vu_dest"=10,17,128
 "effect_pan_dest"=21,32,95
 "effect_mute_dest"=114,2
 "effect_bypass_dest"=89,2
 "effect_name_dest"=10,46
+// Clip the name when drawing it. 0,0 means do not clip. Else means the maximum width and height
+"effect_name_clip_coords"=0,0
 
 "transparency"=dword:0000ff00
+

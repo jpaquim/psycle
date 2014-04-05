@@ -506,7 +506,7 @@ namespace psycle
 		void XMSampler::EnvelopeController::RecalcDeviation()
 		{
 			if ( m_pEnvelope->Mode() == XMInstrument::Envelope::Mode::TICK )	{
-				m_sRateDeviation = (voice.SampleRate() *60) / (24 * Global::player().bpm);
+				m_sRateDeviation = (voice.SampleRate() *60) / (Global::player().bpm * Global::song().TicksPerBeat());
 			} else if ( m_pEnvelope->Mode() == XMInstrument::Envelope::Mode::MILIS ) {
 				m_sRateDeviation = voice.SampleRate() / 1000.0f;
 			}
@@ -2841,7 +2841,7 @@ namespace psycle
 			}
 
 		}// XMSampler::Stop(void)
-
+		/*This is intended only for mods and used when loading. That's why it doesn't care about the real song ticksperbeat*/
 		int XMSampler::CalcLPBFromSpeed(int trackerspeed, int &outextraticks)
 		{
 			 int lpb;

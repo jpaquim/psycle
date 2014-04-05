@@ -51,7 +51,7 @@ namespace psycle
 			measure_cpu_usage_=false;
 			m_SampleRate=1;
 			m_extraTicks=0;
-			SetBPM(125,4);
+			SetBPM(125,4,0);
 			for(int i=0;i<MAX_TRACKS;i++) {
 				prevMachines[i]=255;
 				prevInstrument[i]=255;
@@ -153,7 +153,7 @@ void Player::start_threads(int thread_count) {
 			_loop_line = 0;
 			if (initialize)
 			{
-				SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+				SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat(), Global::song().ExtraTicksPerLine());
 				if (!_recording) {
 					SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 				}
@@ -195,7 +195,7 @@ void Player::start_threads(int thread_count) {
 				playTrack[i]=false;
 			}
 			Global::song().wavprev.Stop();
-			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat());
+			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat(), Global::song().ExtraTicksPerLine());
 			if (!_recording) {
 				SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 			}
@@ -223,15 +223,30 @@ void Player::start_threads(int thread_count) {
 				dsp::Slider::SetLength(0.003f*SampleRate()); // 3 milliseconds of samples.
 			}
 		}
-		void Player::SetBPM(int _bpm,int _lpb)
+		void Player::SetBPM(int _bpm,int _lpb, int _extraticks)
 		{
-			if ( _lpb != 0) { lpb=_lpb; m_extraTicks = 0;}
 			if ( _bpm != 0) { bpm=_bpm; }
+			if ( _lpb != 0) { lpb=_lpb; m_extraTicks=0; }
+			if ( _extraticks != 0) { m_extraTicks=_extraticks; }
 			RecalcSPR();
 			CVSTHost::vstTimeInfo.tempo = bpm;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
 			CVSTHost::vstTimeInfo.flags |= kVstTempoValid;
 		}
+		void Player::RecalcSPR(int extraSamples) {
+			int tpb = Global::song().TicksPerBeat();
+			m_SamplesPerTick = (m_SampleRate*60)/(bpm*tpb);
+			SamplesPerRow(m_SamplesPerTick*(m_extraTicks+(static_cast<float>(tpb)/lpb))+extraSamples);
+		}
+		int Player::RealBPM() const { 
+			int tpb = Global::song().TicksPerBeat();
+			return (bpm*tpb)/static_cast<float>(m_extraTicks*lpb+tpb);
+		}
+
+		int Player::RealTPB() const {
+			return Global::song().TicksPerBeat()+(m_extraTicks*lpb);
+		}
+
 
 //This method should be called from an exclusively locked thread (since changing the plan in the middle
 //of work can cause unexpected problems (this is especially true with the send_return mixer.
@@ -346,23 +361,16 @@ void Player::clear_plan() {
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-								int memextra = m_extraTicks;
-								m_extraTicks = 24/lpb * (pEntry->_parameter&0x0F);
-								RecalcSPR();
-								m_extraTicks = memextra;
+								RecalcSPR(SamplesPerRow()*(pEntry->_parameter&0x0F));
 								_SPRChanged=true;
 							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_FINE_PAT_DELAY )
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::ROW_EXTRATICKS )
 							{
-								m_extraTicks = pEntry->_parameter&0x0F;
-								RecalcSPR();
+								SetBPM(0,0,pEntry->_parameter&0x0F);
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
-								int memextra = m_extraTicks;
-								m_extraTicks = pEntry->_parameter&0x0F;
-								RecalcSPR();
-								m_extraTicks = memextra;
+								RecalcSPR(SamplesPerTick()*(pEntry->_parameter&0x0F));
 								_SPRChanged=true;
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
@@ -539,7 +547,7 @@ void Player::clear_plan() {
 										memcpy(&pMachine->TriggerDelay[track], &entry, sizeof(PatternEntry));
 										pMachine->ArpeggioCount[track] = 1;
 									}
-									pMachine->RetriggerRate[track] = SamplesPerRow()*lpb/24;
+									pMachine->RetriggerRate[track] = SamplesPerTick();
 								}
 								else 
 								{
@@ -571,6 +579,7 @@ void Player::clear_plan() {
 		void Player::AdvancePosition()
 		{
 			Song& song = Global::song();
+			int prevpattern = _playPosition;
 			if ( _patternjump!=-1 ) _playPosition= _patternjump;
 			if ( _SPRChanged ) { RecalcSPR(); _SPRChanged = false; }
 			if ( _linejump!=-1 ) _lineCounter=_linejump;
@@ -611,6 +620,12 @@ void Player::clear_plan() {
 					StopRecording();
 				}
 			}
+			if ( prevpattern > _playPosition && !_loopSong) {
+				_playing = false;
+				_playBlock = false;
+				_lineStop = -1;
+				StopRecording();
+			}
 			// this is outside the if, so that _patternjump works
 			_playPattern = song.playOrder[_playPosition];
 			_lineChanged = true;
@@ -622,8 +637,9 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 	float seektime = seektime_ms/1000.f;
 	int bpm_calc = song.BeatsPerMin();
 	int lpb_calc = song.LinesPerBeat();
-	int extratick_calc = 0;
-	float lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
+	int extratick_calc = song.ExtraTicksPerLine();
+	float secsPerTick = 60.f/(bpm_calc*song.TicksPerBeat());
+	float lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
 	int playPos=0;
 	while(playPos <song.playLength)
 	{
@@ -650,7 +666,8 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 						if(pEntry->_parameter != 0)
 						{
 							bpm_calc=pEntry->_parameter;
-							lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
+							secsPerTick = 60.f/(bpm_calc*song.TicksPerBeat());
+							lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
 						}
 						break;
 					case PatternCmd::EXTENDED:
@@ -660,21 +677,22 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 							{
 								lpb_calc=pEntry->_parameter;
 								extratick_calc=0;
-								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
+								lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
 							{
-								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (pEntry->_parameter&0x0F));
+								lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
+								lineSeconds += lineSeconds*(pEntry->_parameter&0x0F);
 								resetLineSec=true;
 							}
-							else if ( (pEntry->_parameter&0xF0) == PatternCmd::MEMORY_FINE_PAT_DELAY)
+							else if ( (pEntry->_parameter&0xF0) == PatternCmd::ROW_EXTRATICKS)
 							{
 								extratick_calc=pEntry->_parameter&0x0F;
-								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f));
+								lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{
-								lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + ((pEntry->_parameter&0x0F)/24.f));
+								lineSeconds = secsPerTick*(extratick_calc+ (pEntry->_parameter&0x0F)+(static_cast<float>(song.TicksPerBeat())/lpb_calc));
 								resetLineSec=true;
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_LOOP)
@@ -734,7 +752,10 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 				(patLine == -1 || patLine <= playLine)) {
 				return round<int>(songLength*1000.0f);
 			}
-			if ( resetLineSec ) { lineSeconds = (60.f/bpm_calc)*((1.f/lpb_calc) + (extratick_calc/24.f)); resetLineSec = false; }
+			if ( resetLineSec ) { 
+				lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
+				resetLineSec = false;
+			}
 			if ( patternJump!=-1 ) {
 				playPos= patternJump;
 				playLine=lineJump;

@@ -7,7 +7,6 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSongExport.hpp"
 #include "Song.hpp"
-#include "Machine.hpp" // It wouldn't be needed, since it is already included in "song.h"
 #include "Sampler.hpp"
 
 namespace psycle{
@@ -35,22 +34,26 @@ namespace host{
 
 	void XMSongExport::writeSongHeader(const Song &song)
 	{
-		//We find the last index of machine, to use as first index of instruments
-		lastMachine=MAX_BUSES-1;
-		while (lastMachine >= 0 && song._pMachine[lastMachine] == NULL) lastMachine--;
-		lastMachine++;
-
-		for (int i=0; i<lastMachine; i++) {
+		macInstruments=0;
+		bool hasSampler=false;
+		for (int i=0; i<MAX_BUSES; i++) {
 			if (song._pMachine[i] != NULL) {
-				isSampler[i] = (song._pMachine[i]->_type == MACH_SAMPLER);
+				isSampler[i] = hasSampler = (song._pMachine[i]->_type == MACH_SAMPLER);
 				isSampulse[i] = (song._pMachine[i]->_type == MACH_XMSAMPLER);
+				if ( ! (isSampler[i] || isSampulse[i])) { macInstruments++; }
 			}
 			else {
 				isSampler[i] = false;
 				isSampulse[i] = false;
 			}
 		}
-
+		//If the xminstrument 0 is not used, do not increase the instrument number (the loader does this so exporting a loaded song adds a new empty slot)
+		correctionIndex = (song.xminstruments.IsEnabled(0))?1:0;
+		xmInstruments = song.GetHighestXMInstrumentIndex()+1;
+		if (xmInstruments > 1 && correctionIndex==0) xmInstruments--;
+		//If there is a sampler machine, we have to take the samples into account.
+		int samInstruments = (hasSampler) ? song.GetHighestInstrumentIndex()+1: 0;
+		
 		Write(XM_HEADER, 17);//ID text
 		std::string name = "PE:" + song.name.substr(0,17);
 		Write(name.c_str(), 20);//Module name
@@ -66,9 +69,9 @@ namespace host{
 		m_Header.restartpos = 0;
 		m_Header.channels = std::min(song.SONGTRACKS,32);
 		m_Header.patterns = song.GetHighestPatternIndexInSequence()+1;
-		m_Header.instruments = std::min(128,lastMachine + song.GetHighestInstrumentIndex()+1);
+		m_Header.instruments = std::min(128,macInstruments + xmInstruments + samInstruments);
 		m_Header.flags = 0x0001; //Linear frequency.
-		m_Header.speed = 24/song.LinesPerBeat();
+		m_Header.speed = floor(24.f/song.LinesPerBeat()) + song.ExtraTicksPerLine();
 		m_Header.tempo =  song.BeatsPerMin();
 
 		//Pattern order table
@@ -89,17 +92,28 @@ namespace host{
 	// Load instruments
 	void XMSongExport::SaveInstruments(const Song& song)
 	{
-		for (int i = 0; i < lastMachine ; i++ ) {
-			if ( song._pMachine[i] != 0 ) {
+		for (int i=0; i<MAX_BUSES; i++) {
+			if (song._pMachine[i] != NULL && song._pMachine[i]->_type != MACH_SAMPLER
+					&& song._pMachine[i]->_type != MACH_XMSAMPLER) {
 				SaveEmptyInstrument(song._pMachine[i]->_editName);
 			}
+		}
+		for (int j=0, i=(correctionIndex==0)?1:0 ; j < xmInstruments; j++, i++) {
+			if (song.xminstruments.IsEnabled(i)) {
+				SaveSampulseInstrument(song,i);
+			}
 			else {
-				SaveEmptyInstrument("");
+				SaveEmptyInstrument(song.xminstruments.Exists(i) ? song.xminstruments[i].Name() : "");
 			}
 		}
-		int remaining = m_Header.instruments - lastMachine;
+		int remaining = m_Header.instruments - macInstruments - xmInstruments;
 		for (int i = 0 ; i < remaining; i++ ){
-			SaveInstrument(song,i);
+			if (song.samples.IsEnabled(i)) {
+				SaveSamplerInstrument(song,i);
+			}
+			else {
+				SaveEmptyInstrument(song.samples.Exists(i) ? song.samples[i].WaveName() : "");
+			}
 		}
 	}
 
@@ -126,11 +140,15 @@ namespace host{
 					
 					const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx,i,j));
 					
+					if (pData->_note == notecommands::tweak || pData->_note == notecommands::tweakslide || 
+						(pData->_mach >= MAX_BUSES && pData->_mach < MAX_MACHINES)) {
+						continue;
+					}
+
 					
 					unsigned char note;
-					if (pData->_note >= 12 && pData->_note < 108 ) {
-						if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != NULL 
-							&& isSampler[pData->_mach]
+					if (pData->_note >= 12 && pData->_note < 108 && pData->_mach < MAX_MACHINES) {
+						if ( song._pMachine[pData->_mach] != NULL && isSampler[pData->_mach]
 							&& ((Sampler*)song._pMachine[pData->_mach])->isDefaultC4() == false )
 						{
 							note = pData->_note +1;
@@ -146,13 +164,9 @@ namespace host{
 					
 					unsigned char instr=0;
 					
-					//Very simple method for now:
-					if (pData->_mach < MAX_MACHINES) {
-						if ( song._pMachine[pData->_mach] != NULL 
-							&& (isSampler[pData->_mach] || isSampulse[pData->_mach]))
-						{
-							if (pData->_inst != 0xFF) instr = lastMachine +  pData->_inst +1;
-						}
+					if (pData->_mach < MAX_MACHINES && song._pMachine[pData->_mach] != NULL) {
+						if (isSampler[pData->_mach] && pData->_inst != 0xFF) instr = macInstruments + xmInstruments + pData->_inst +1;
+						else if (isSampulse[pData->_mach] && pData->_inst != 0xFF) instr = macInstruments + pData->_inst +correctionIndex;
 						else instr = pData->_mach + 1;
 					}
 
@@ -238,7 +252,7 @@ namespace host{
 					char compressed = 0x80 + bWriteNote + (bWriteInstr << 1) + (bWriteVol << 2)
 										+ (bWriteType << 3) + ( bWriteParam << 4);
 
-					if (compressed !=  0x9F ) Write(&compressed,1); // 0x9F means to write everything.
+					if (compressed != 0x9F) Write(&compressed,1); // 0x9F means to write everything.
 					if (bWriteNote) Write(&note,1);
 					if (bWriteInstr) Write(&instr,1);
 					if (bWriteVol) Write(&vol,1);
@@ -266,42 +280,78 @@ namespace host{
 		//insHeader.samples = 0; Implicit by memset
 		Write(&insHeader,sizeof(insHeader));
 	}
+	void XMSongExport::SaveSampulseInstrument(const Song& song, int instIdx)
+	{
+		const XMInstrument &inst = song.xminstruments[instIdx];
+		XMINSTRUMENTHEADER insHeader;
+		memset(&insHeader,0,sizeof(insHeader));
+		strncpy(insHeader.name,inst.Name().c_str(),21);
+		//insHeader.type = 0; Implicit by memset
+		XMSAMPLEHEADER samphead;
+		std::memset(&samphead, 0, sizeof(samphead));
+
+		std::set<int> sampidxs;
+		for ( int i=0; i < XMInstrument::NOTE_MAP_SIZE; i++) {
+			const XMInstrument::NotePair &pair = inst.NoteToSample(i);
+			if (pair.second != 255 ) {
+				sampidxs.insert(pair.second);
+				samphead.snum[i] = pair.second;
+			}
+		}
+
+		//If no samples for this instrument, write it and exit.
+		if (sampidxs.size() == 0) {
+			insHeader.size = sizeof(insHeader);
+			//insHeader.samples = 0; Implicit by memset
+			Write(&insHeader,sizeof(insHeader));
+		}
+		else {
+			insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
+			insHeader.samples = sampidxs.size();
+			Write(&insHeader,sizeof(insHeader));
+
+			SetSampulseEnvelopes(song, instIdx,samphead);
+			samphead.volfade = static_cast<uint16_t>(floor(inst.VolumeFadeSpeed()*32768.0f));
+			samphead.shsize = sizeof(XMSAMPLESTRUCT);
+			Write(&samphead,sizeof(samphead));
+
+			for (std::set<int>::iterator ite = sampidxs.begin(); ite != sampidxs.end(); ++ite) {
+				SaveSampleHeader(song, *ite);
+				SaveSampleData(song, *ite);
+			}
+		}
+	}
 
 
-	void XMSongExport::SaveInstrument(const Song& song, int instIdx)
+
+	void XMSongExport::SaveSamplerInstrument(const Song& song, int instIdx)
 	{
 		XMINSTRUMENTHEADER insHeader;
 		memset(&insHeader,0,sizeof(insHeader));
 		strncpy(insHeader.name,song.samples[instIdx].WaveName().c_str(),21);
 		//insHeader.type = 0; Implicit by memset
 
-		//If no samples for this instrument, write it and exit.
-		if (!song.samples.IsEnabled(instIdx)) {
+		//If it has samples, add the whole header.
+		if (song.samples.IsEnabled(instIdx)) {
+			insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
+			insHeader.samples = 1;
+			Write(&insHeader,sizeof(insHeader));
+
+			XMSAMPLEHEADER _samph;
+			std::memset(&_samph, 0, sizeof(_samph));
+			SetSamplerEnvelopes(song,instIdx,_samph);
+			_samph.volfade=0x400;
+			_samph.shsize = sizeof(XMSAMPLESTRUCT);
+			Write(&_samph,sizeof(_samph));
+
+			SaveSampleHeader(song, instIdx);
+			SaveSampleData(song, instIdx);
+		}
+		else {
 			insHeader.size = sizeof(insHeader);
 			//insHeader.samples = 0; Implicit by memset
 			Write(&insHeader,sizeof(insHeader));
-			return;
 		}
-		
-		insHeader.size = sizeof(insHeader) + sizeof(XMSAMPLEHEADER);
-		// TODO: Implement multisample.
-		insHeader.samples = 1;
-		Write(&insHeader,sizeof(insHeader));
-
-		XMSAMPLEHEADER _samph;
-		std::memset(&_samph, 0, sizeof(_samph));
-		//For now, everything zeroed. Later on we can convert the ADSR curves to envelopes.
-		//SetEnvelopes(instIdx,_samph);
-		_samph.volfade=0x400;
-		//size_t filepos = GetPos();
-		_samph.shsize = sizeof(XMSAMPLESTRUCT);
-		Write(&_samph,sizeof(_samph));
-
-		SaveSampleHeader(song, instIdx);
-
-
-		SaveSampleData(song, instIdx);
-
 	}
 
 	void XMSongExport::SaveSampleHeader(const Song& song, int instIdx)
@@ -317,10 +367,10 @@ namespace host{
 		int finetune = static_cast<int>((float)wave.WaveFineTune()*1.28);
 		if (wave.WaveSampleRate() != 8363) {
 			//correct the tuning
-			double newtune = log10(double(wave.WaveSampleRate())/8363.0)/0.301029995f; /*log10(2)*/
+			double newtune = log10(double(wave.WaveSampleRate())/8363.0)/log10(2.0);
 			double floortune = floor(newtune*12.0);
 			tune += static_cast<int>(floortune);
-			finetune += static_cast<int>(floor(((tune*12)-floortune)*127));
+			finetune += static_cast<int>(floor(((newtune*12.0)-floortune)*128.0));
 			if (finetune > 127) { tune--; finetune -=127; }
 		}
 
@@ -331,7 +381,12 @@ namespace host{
 		stheader.vol = std::min(64,wave.WaveVolume()*64);
 		stheader.relnote = tune;
 		stheader.finetune = finetune;
-		stheader.type = ((wave.WaveLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL)?1:0) + 0x10; // 0x10 -> 16bits
+
+		uint8_t type = 0;
+		if (wave.WaveLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL) type = 1;
+		else if (wave.WaveLoopType()==XMInstrument::WaveData<>::LoopType::BIDI) type = 2;
+		type += 0x10; // 0x10 -> 16bits
+		stheader.type = type;
 		stheader.pan = int(wave.PanFactor()*256)&0xFF;
 
 		Write(&stheader,sizeof(stheader));
@@ -347,112 +402,102 @@ namespace host{
 		for(int j=0;j<length;j++)
 		{
 			short delta =  samples[j] - prev;
+			//This is expected to be in little endian.
 			Write(&delta,sizeof(short));
 			prev = samples[j];
 		} 
 	}
 
 	
-	void XMSongExport::SetEnvelopes(const Song& song, int instrIdx, const XMSAMPLEHEADER & sampleHeader)
+	void XMSongExport::SetSampulseEnvelopes(const Song& song, int instrIdx, XMSAMPLEHEADER & sampleHeader)
 	{
-/*
-		// volume envelope
-		inst.AmpEnvelope()->Init();
-		if(sampleHeader.vtype & 1){// enable volume envelope
-			inst.AmpEnvelope()->IsEnabled(true);
-			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
-			// volumefadespeed in this case, so that a check during playback time is not needed.
-			inst.VolumeFadeSpeed((float)sampleHeader.volfade / 32768.0f);
-			
-			int envelope_point_num = sampleHeader.vnum;
-			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.
-				envelope_point_num = 12;
-			}
+		sampleHeader.vtype = 0;
+		const XMInstrument &inst = song.xminstruments[instrIdx];
 
+		if ( inst.AmpEnvelope().IsEnabled() ) {
+			sampleHeader.vtype = 1;
+			const XMInstrument::Envelope & env = inst.AmpEnvelope();
+
+			 // Max number of envelope points in Fasttracker format is 12.
+			sampleHeader.vnum = std::min(12u, env.NumOfPoints());
+			float convert = 1.f;
+			if (env.Mode() == XMInstrument::Envelope::Mode::MILIS) {
+				convert = (24.f*static_cast<float>(song.BeatsPerMin()))/60000.f;
+			}
 			// Format of FastTracker points is :
 			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
 			// Value : 0..64. , divide by 64 to use it as a multiplier.
-			inst.AmpEnvelope()->Append((int)sampleHeader.venv[0] ,(float)sampleHeader.venv[1] / 64.0f);
-			for(int i = 1; i < envelope_point_num;i++){
-				if ( sampleHeader.venv[i*2] > sampleHeader.venv[(i-1)*2] )// Some rare modules have erroneous points. This tries to solve that.
-					inst.AmpEnvelope()->Append((int)sampleHeader.venv[i * 2] ,(float)sampleHeader.venv[i * 2 + 1] / 64.0f);
+			int idx=0;
+			for ( unsigned int i; i < env.NumOfPoints() && i < 24;i++) {
+				sampleHeader.venv[idx]=static_cast<uint16_t>(env.GetTime(i)*convert); idx++;
+				sampleHeader.venv[idx]=static_cast<uint16_t>(env.GetValue(i)*64.f); idx++;
 			}
 
-			if(sampleHeader.vtype & 2){
-				inst.AmpEnvelope()->SustainBegin(sampleHeader.vsustain);
-				inst.AmpEnvelope()->SustainEnd(sampleHeader.vsustain);
+			if (env.SustainBegin() != XMInstrument::Envelope::INVALID) {
+				sampleHeader.vtype &= 2;
+				sampleHeader.vsustain = static_cast<uint16_t>(env.SustainBegin());
 			}
-			else
-			{
-				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
-				// IT also sets the Sustain points to the end of the envelope, but i can't see a reason for this to be needed.
-//				inst.AmpEnvelope()->SustainBegin(inst.AmpEnvelope()->NumOfPoints()-1);
-//				inst.AmpEnvelope()->SustainEnd(inst.AmpEnvelope()->NumOfPoints()-1);
+			if (env.LoopStart() != XMInstrument::Envelope::INVALID) {
+				sampleHeader.vtype &= 4;
+				sampleHeader.vloops = static_cast<uint16_t>(env.LoopStart());
+				sampleHeader.vloope = static_cast<uint16_t>(env.LoopEnd());
 			}
-
-			
-			if(sampleHeader.vtype & 4){
-				if(sampleHeader.vloops < sampleHeader.vloope){
-					inst.AmpEnvelope()->LoopStart(sampleHeader.vloops);
-					inst.AmpEnvelope()->LoopEnd(sampleHeader.vloope);
-				}
-				// if loopstart >= loopend, Fasttracker ignores the loop!.
-				// We can't ignore them because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
-				else {
-//					inst.AmpEnvelope()->LoopStart(XMInstrument::Envelope::INVALID);
-//					inst.AmpEnvelope()->LoopEnd(XMInstrument::Envelope::INVALID);
-					inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
-					inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
-				}
-			}
-			else
-			{
-				// We can't ignore the loop because IT Envelopes do a fadeout when the envelope end is reached and FT does not.
-				inst.AmpEnvelope()->LoopStart(inst.AmpEnvelope()->NumOfPoints()-1);
-				inst.AmpEnvelope()->LoopEnd(inst.AmpEnvelope()->NumOfPoints()-1);
-			}
-
-		} else {
-			inst.AmpEnvelope()->IsEnabled(false);
 		}
+		if ( inst.PanEnvelope().IsEnabled() ) {
+			sampleHeader.ptype = 1;
+			const XMInstrument::Envelope & env = inst.PanEnvelope();
 
-		// pan envelope
-		inst.PanEnvelope()->Init();
-		if(sampleHeader.ptype & 1){// enable volume envelope
-			
-			inst.PanEnvelope()->IsEnabled(true);
-			
-			if(sampleHeader.ptype & 2){
-				inst.PanEnvelope()->SustainBegin(sampleHeader.psustain);
-				inst.PanEnvelope()->SustainEnd(sampleHeader.psustain);
+			 // Max number of envelope points in Fasttracker format is 12.
+			sampleHeader.pnum = std::min(12u, env.NumOfPoints());
+			float convert = 1.f;
+			if (env.Mode() == XMInstrument::Envelope::Mode::MILIS) {
+				convert = (24.f*static_cast<float>(song.BeatsPerMin()))/60000.f;
+			}
+			// Format of FastTracker points is :
+			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
+			// Value : 0..64. , divide by 64 to use it as a multiplier.
+			int idx=0;
+			for ( unsigned int i; i < env.NumOfPoints() && i < 24;i++) {
+				sampleHeader.penv[idx]=static_cast<uint16_t>(env.GetTime(i)*convert); idx++;
+				sampleHeader.penv[idx]=static_cast<uint16_t>(env.GetValue(i)*64.f); idx++;
 			}
 
-			
-			if(sampleHeader.ptype & 4){
-				if(sampleHeader.ploops < sampleHeader.ploope){
-					inst.PanEnvelope()->LoopStart(sampleHeader.ploops);
-					inst.PanEnvelope()->LoopEnd(sampleHeader.ploope);
-				} else {
-					inst.PanEnvelope()->LoopStart(sampleHeader.ploope);
-					inst.PanEnvelope()->LoopEnd(sampleHeader.ploops);
-				}
+			if (env.SustainBegin() != XMInstrument::Envelope::INVALID) {
+				sampleHeader.ptype &= 2;
+				sampleHeader.psustain = static_cast<uint16_t>(env.SustainBegin());
 			}
-			int envelope_point_num = sampleHeader.pnum;
-			if(envelope_point_num > 12){
-				envelope_point_num = 12;
+			if (env.LoopStart() != XMInstrument::Envelope::INVALID) {
+				sampleHeader.ptype &= 4;
+				sampleHeader.ploops = static_cast<uint16_t>(env.LoopStart());
+				sampleHeader.ploope = static_cast<uint16_t>(env.LoopEnd());
 			}
-
-			for(int i = 0; i < envelope_point_num;i++){
-				inst.PanEnvelope()->Append((int)sampleHeader.penv[i * 2] ,(float)(sampleHeader.penv[i * 2 + 1]-32.0f) / 32.0f);
-			}
-
-		} else {
-			inst.PanEnvelope()->IsEnabled(false);
 		}
-		//inst.
-*/
 	}	
+	void XMSongExport::SetSamplerEnvelopes(const Song& song, int instrIdx, XMSAMPLEHEADER & sampleHeader)
+	{
+		sampleHeader.vtype = 0;
+		Instrument *inst = song._pInstrument[instrIdx];
 
+		if (inst->ENV_AT != 1 || inst->ENV_DT != 1 || inst->ENV_SL != 100 || inst->ENV_RT != 16) {
+			sampleHeader.vtype = 3;
+			sampleHeader.vsustain = 1;
+
+			sampleHeader.vnum = 4;
+			float convert = 60.f/(44100*24.f*static_cast<float>(song.BeatsPerMin()));
+			// Format of FastTracker points is :
+			// Point : frame number. ( 1 frame= line*(24/TPB), samplepos= frame*(samplesperrow*TPB/24))
+			// Value : 0..64. , divide by 64 to use it as a multiplier.
+			int idx=0;
+			sampleHeader.venv[idx]=0; idx++;
+			sampleHeader.venv[idx]=0; idx++;
+			sampleHeader.venv[idx]=static_cast<uint16_t>(inst->ENV_AT*convert); idx++;
+			sampleHeader.venv[idx]=64; idx++;
+			sampleHeader.venv[idx]=static_cast<uint16_t>((inst->ENV_AT+inst->ENV_DT)*convert); idx++;
+			sampleHeader.venv[idx]=static_cast<uint16_t>(inst->ENV_SL*0.64f); idx++;
+			sampleHeader.venv[idx]=static_cast<uint16_t>((inst->ENV_AT+inst->ENV_DT+inst->ENV_RT)*convert); idx++;
+			sampleHeader.venv[idx]=0; idx++;
+		}
+	}
 
 
 }

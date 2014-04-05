@@ -1795,7 +1795,7 @@ namespace psycle { namespace host {
 					CExclusiveLock lock(&_pSong->semaphore, 2, true);
 					_pSong->StopInstrument(wsInstrument);
 
-					unsigned long length = blLength+1;
+					unsigned long length = blLength;
 
 					long datalen = (wdLength - length);
 					if (datalen)
@@ -1868,7 +1868,9 @@ namespace psycle { namespace host {
 		{
 			unsigned long c = 0;
 			unsigned long length = blLength+1;
-				
+
+///Needs to be packed, else the compiler aligns it.
+#pragma pack(push, 1) 
 			struct fullheader
 			{
 				uint32_t	head;
@@ -1880,6 +1882,7 @@ namespace psycle { namespace host {
 				uint32_t datahead;
 				uint32_t datasize;
 			} wavheader;
+#pragma pack(pop)
 
 			OpenClipboard();
 			EmptyClipboard();
@@ -2864,6 +2867,7 @@ namespace psycle { namespace host {
 						}
 						if(wdStereo)
 						{
+							rHeadDisplay.resize(nWidth);
 							for(int c(0); c < nWidth; c++)
 							{
 								long d = floorf(c * HeaderStep);

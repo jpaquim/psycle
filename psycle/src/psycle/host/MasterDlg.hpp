@@ -35,6 +35,7 @@ namespace host {
 
 		private:
 			int offsetX;
+			bool doStretch;
 		};
 
 		/// master machine window.
@@ -103,6 +104,7 @@ protected:
 			Master& machine;
 			CMasterDlg** windowVar_;
 			CWnd* mainView;
+			bool doStretch;
 		};
 
 	}   // namespace host

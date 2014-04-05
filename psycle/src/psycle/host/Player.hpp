@@ -95,7 +95,7 @@ namespace psycle
 			static float * Work(void* context, int nsamples);
 			float * Work(int numSamples);
 			
-			void SetBPM(int _bpm,int _lpb=0);
+			void SetBPM(int _bpm,int _lpb=0, int _extraticks=0);
 
 			//Change the samplerate (Thread safe)
 			void SetSampleRate(const int sampleRate);
@@ -104,10 +104,7 @@ namespace psycle
 			void SampleRate(const int sampleRate);
 		public:
 			int SampleRate() const { return m_SampleRate; }
-			void RecalcSPR() { 
-				m_SamplesPerTick = (m_SampleRate*60)/(bpm*24);
-				SamplesPerRow(m_SamplesPerTick*(m_extraTicks+(24.f/lpb)));
-			};
+			void RecalcSPR(int extraSamples=0);
 
 			/// Sets the number of samples that it takes for each row of the pattern to be played
 			void SamplesPerRow(const int samplePerRow) {m_SamplesPerRow = samplePerRow;}
@@ -115,6 +112,8 @@ namespace psycle
 			/// Samples per (tracker) tick.
 			int SamplesPerTick() const { return m_SamplesPerTick; }
 			int ExtraTicks() const { return m_extraTicks; }
+			int RealBPM() const;
+			int RealTPB() const;
 
 			///\name secondary output device, write to a file
 			///\{

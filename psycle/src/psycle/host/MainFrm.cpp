@@ -97,11 +97,13 @@ namespace psycle { namespace host {
 			ON_CBN_SELCHANGE(IDC_TRACKCOMBO, OnSelchangeTrackcombo)
 			ON_CBN_CLOSEUP(IDC_TRACKCOMBO, OnCloseupTrackcombo)
 			ON_BN_CLICKED(IDC_BPM_ADDONE, OnBpmAddOne)
-			ON_BN_CLICKED(IDC_BPM_ADDTEN, OnBpmAddTen)
 			ON_BN_CLICKED(IDC_BPM_DECONE, OnBpmDecOne)
-			ON_BN_CLICKED(IDC_BPM_DECTEN, OnBpmDecTen)
 			ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
 			ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
+			ON_BN_DOUBLECLICKED(IDC_BPM_ADDONE, OnBpmAddOne)
+			ON_BN_DOUBLECLICKED(IDC_BPM_DECONE, OnBpmDecOne)
+			ON_BN_DOUBLECLICKED(IDC_DEC_TPB, OnDecTPB)
+			ON_BN_DOUBLECLICKED(IDC_INC_TPB, OnIncTPB)
 			ON_CBN_CLOSEUP(IDC_COMBOOCTAVE, OnCloseupCombooctave)
 			ON_CBN_SELCHANGE(IDC_COMBOOCTAVE, OnSelchangeCombooctave)
 			ON_BN_CLICKED(IDC_CLIPBUT, OnClipbut)
@@ -840,9 +842,7 @@ namespace psycle { namespace host {
 		void CMainFrame::OnSelchangeTrackcombo() { m_songBar.OnSelchangeTrackcombo(); }
 		void CMainFrame::OnCloseupTrackcombo() { m_songBar.OnCloseupTrackcombo(); }
 		void CMainFrame::OnBpmAddOne() { m_songBar.OnBpmAddOne(); m_seqBar.UpdatePlayOrder(false);}
-		void CMainFrame::OnBpmAddTen() { m_songBar.OnBpmAddTen(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnBpmDecOne() { m_songBar.OnBpmDecOne(); m_seqBar.UpdatePlayOrder(false);}
-		void CMainFrame::OnBpmDecTen() { m_songBar.OnBpmDecTen(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnDecTPB() { m_songBar.OnDecTPB(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnIncTPB() { m_songBar.OnIncTPB(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnCloseupCombooctave() { m_songBar.OnCloseupCombooctave(); }

@@ -87,12 +87,14 @@ A quick doc on skinning psycle
 	"generator_mute_dest"=51,68 <---- top, left coords of the mute button
 	"generator_solo_dest"=11,62 <----top,left coords of the solo button
 	"generator_name_dest"=16,20 <---- top,left cords of the machine text
+	"generator_name_clip_coords"=0,0 <----- width and height of the clipping area for the name. 0,0 means do not clip.
 
 	"effect_vu_dest"=18,9,40    <---- top, left and width coords of the whole vumeter
 	"effect_pan_dest"=117,20,71 <---- top, left and width coords of the pan. subtract the width of the pan graphic from the total width.
 	"effect_mute_dest"=173,5    <---- top, left coords of the mute button
 	"effect_bypass_dest"=197,5  <----top,left coords of the bypass button
 	"effect_name_dest"=62,4     <---- top,left cords of the machine text
+	"effect_name_clip_coords"=0,0 <----- width and height of the clipping area for the name. 0,0 means do not clip.
 
 	"transparency"=0000ff00  <---- RGB value of the colour that is to be used as transparency.
 					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer

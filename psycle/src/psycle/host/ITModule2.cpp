@@ -158,10 +158,11 @@ namespace psycle
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
 			song.BeatsPerMin(itFileH.iTempo);
+			song.TicksPerBeat(24);
 			int extraticks=0;
 			song.LinesPerBeat(XMSampler::CalcLPBFromSpeed(itFileH.iSpeed,extraticks));
 			if (extraticks != 0) {
-				//\todo: setup something...
+				song.ExtraTicksPerLine(extraticks);
 			}
 
 			sampler->IsAmigaSlides(itFileH.flags&Flags::LINEARSLIDES?false:true);
@@ -1035,7 +1036,7 @@ Special:  Bit 0: On = song message attached.
 							pData->_inst = 255;
 							pData->_mach = pent._mach;
 							pData->_cmd = PatternCmd::EXTENDED;
-							pData->_parameter = PatternCmd::MEMORY_FINE_PAT_DELAY | extraticks;
+							pData->_parameter = PatternCmd::ROW_EXTRATICKS | extraticks;
 							m_extracolumn++;
 						}
 					}
@@ -1224,10 +1225,11 @@ Special:  Bit 0: On = song message attached.
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
 			song.BeatsPerMin(s3mFileH.iTempo);
+			song.TicksPerBeat(24);
 			int extraticks=0;
 			song.LinesPerBeat(XMSampler::CalcLPBFromSpeed(s3mFileH.iSpeed,extraticks));
 			if (extraticks != 0) {
-				//\todo: setup something...
+				song.ExtraTicksPerLine(extraticks);
 			}
 
 			sampler->IsAmigaSlides(true);

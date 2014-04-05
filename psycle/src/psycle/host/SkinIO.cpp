@@ -445,6 +445,22 @@ namespace psycle { namespace host {
 			else {
 				coords.bHasTransparency = false;
 			}
+			it = props.find("generator_name_clip_coords");
+			if (it != props.end()) {
+				SetSkinDest(it->second, coords.dGeneratorNameClip);
+			}
+			else {
+				coords.dGeneratorNameClip.x=0;
+				coords.dGeneratorNameClip.y=0;
+			}
+			it = props.find("effect_name_clip_coords");
+			if (it != props.end()) {
+				SetSkinDest(it->second, coords.dEffectNameClip);
+			}
+			else {
+				coords.dEffectNameClip.x=0;
+				coords.dEffectNameClip.y=0;
+			}
 			std::fclose(hfile);
 		}
 

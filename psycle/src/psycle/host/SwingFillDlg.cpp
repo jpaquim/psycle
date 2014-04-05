@@ -5,7 +5,7 @@
 
 namespace psycle { namespace host {
 
-		CSwingFillDlg::CSwingFillDlg(CWnd* pParent) : CDialog(CSwingFillDlg::IDD, pParent)
+		CSwingFillDlg::CSwingFillDlg() : CDialog(CSwingFillDlg::IDD)
 		{
 			//{{AFX_DATA_INIT(CSwingFillDlg)
 				// NOTE: the ClassWizard will add member initialization here
@@ -55,7 +55,7 @@ namespace psycle { namespace host {
 
 			m_Offset.SetCheck(offset?1:0);
 
-			return FALSE;
+			return TRUE;
 		}
 
 		void CSwingFillDlg::OnOK() 

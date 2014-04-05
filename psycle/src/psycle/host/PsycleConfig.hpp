@@ -79,6 +79,8 @@ namespace psycle
 			SSkinDest dEffectMute;
 			SSkinDest dEffectBypass;
 			SSkinDest dEffectName;
+			SSkinDest dGeneratorNameClip;
+			SSkinDest dEffectNameClip;
 			bool bHasTransparency;
 			COLORREF cTransparency;
 		};
@@ -515,13 +517,14 @@ namespace psycle
 			//On SequencerBar
 			bool _bShowPatternNames;
 			bool _followSong;
+			CFont fixedFont;
 
 			//On OutputDlg
 			std::vector<AudioDriverSettings*> audioSettings;
 
 		protected:
 			static void Error(std::string const &);
-			static bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const & HeightPx, bool const & bBold, bool const & bItalic);
+			static bool CreatePsyFont(CFont & f, std::string const & sFontFace, int const HeightPx, bool const bBold, bool const bItalic);
 			static void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
 		private:
 			//On OutputDlg

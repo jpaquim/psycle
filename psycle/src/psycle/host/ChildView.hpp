@@ -434,7 +434,6 @@ namespace host {
 			afx_msg void OnTimer( UINT_PTR nIDEvent );
 			afx_msg void OnUpdateRecordWav(CCmdUI* pCmdUI);
 			afx_msg void OnFileNew();
-			afx_msg void OnExportModule();
 			afx_msg void OnFileSave();
 			afx_msg void OnFileSaveAs();
 			afx_msg void OnFileLoadsong();

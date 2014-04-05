@@ -177,14 +177,14 @@ using namespace universalis::stdlib;
 
 			/// Table of the windowed sinc function. 
 			//If using the optimized path, it is reordered for better performance.
-			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_table_[SINC_TABLESIZE]);
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_windowed_table[SINC_TABLESIZE]);
 #if USE_SINC_DELTA
 			/// Table of the deltas between sinc values.
 			/// used to improve sinc when the sinc_table is small
 			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_delta_[SINC_TABLESIZE]);
 #endif
 			//Table to use in the filter-aware sinc resampling.
-			static UNIVERSALIS__COMPILER__DOALIGN(16,float sinc_pre_table_[SINC_TABLESIZE]);
+			static UNIVERSALIS__COMPILER__DOALIGN(16,float window_div_x[SINC_TABLESIZE]);
 			static bool initialized;
 	};
 

@@ -545,6 +545,7 @@ namespace psycle { namespace host {
 
 		const NotePair& NoteToSample(const int note) const {return m_AssignNoteToSample[note];}
 		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;}
+		std::set<int> GetWavesUsed() const;
 
 	private:
 		bool m_bEnabled;
@@ -668,6 +669,20 @@ namespace psycle { namespace host {
 		}
 		inline void ExchangeSamples(int pos1, int pos2)
 		{
+			if (pos1 >= size()) {
+				size_t val = m_waves.size();
+				m_waves.resize(pos1);
+				for (size_t i=val;i<=pos1;i++) {
+					m_waves[i]=NULL;
+				}
+			}
+			if (pos2 >= size()) {
+				size_t val = m_waves.size();
+				m_waves.resize(pos2);
+				for (size_t i=val;i<=pos2;i++) {
+					m_waves[i]=NULL;
+				}
+			}
 			XMInstrument::WaveData<>* wave = m_waves[pos1];
 			m_waves[pos1]=m_waves[pos2];
 			m_waves[pos2]=wave;

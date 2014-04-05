@@ -22,13 +22,17 @@ namespace psycle { namespace host {
 		
 		void SaveInstruments(const Song & song);
 		void SaveEmptyInstrument(const std::string& name);
-		void SaveInstrument(const Song& song, int instIdx);
+		void SaveSamplerInstrument(const Song& song, int instIdx);
+		void SaveSampulseInstrument(const Song& song, int instIdx);
 		void SaveSampleHeader(const Song & song, const int instrIdx);
 		void SaveSampleData(const Song & song, const int instrIdx);
-		void SetEnvelopes(const Song & song, int instIdx, const XMSAMPLEHEADER & sampleHeader);
+		void SetSampulseEnvelopes(const Song & song, int instIdx, XMSAMPLEHEADER & sampleHeader);
+		void SetSamplerEnvelopes(const Song & song, int instIdx, XMSAMPLEHEADER & sampleHeader);
 		
 		XMFILEHEADER m_Header;
-		int lastMachine;
+		int macInstruments;
+		int xmInstruments;
+		int correctionIndex;
 		bool isSampler[MAX_BUSES];
 		bool isSampulse[MAX_BUSES];
 	};

@@ -1000,17 +1000,19 @@ namespace psycle { namespace host {
 						CFont* oldFont= devc->SelectObject(&macView->generatorFont);
 						devc->SetBkMode(TRANSPARENT);
 						devc->SetTextColor(macView->generator_fontcolour);
-						if (macView->draw_mac_index)
-						{
-							char name[sizeof(mac->_editName)+6+3];
+						char name[sizeof(mac->_editName)+6+3];
+						int boxx=x+MachineCoords->dGeneratorName.x;
+						int boxy=y+MachineCoords->dGeneratorName.y;
+						if (macView->draw_mac_index) {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-//							devc->ExtTextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y,
-//								ETO_OPAQUE, CRect(x,y,x+68,y+13), CString(macname[i]), 0);
-							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, name);
+						} else { sprintf(name,"%s",mac->_macIndex,mac->_editName); }
+						if (MachineCoords->dGeneratorNameClip.x > 0 ) {
+							devc->ExtTextOut(boxx, boxy, ETO_CLIPPED , 
+								CRect(boxx,boxy,boxx+MachineCoords->dGeneratorNameClip.x, boxy+MachineCoords->dGeneratorNameClip.y), 
+								name, 0);
 						}
-						else
-						{
-							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, mac->_editName);
+						else {
+							devc->TextOut(boxx, boxy, name);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1078,15 +1080,19 @@ namespace psycle { namespace host {
 						CFont* oldFont= devc->SelectObject(&macView->effectFont);
 						devc->SetBkMode(TRANSPARENT);
 						devc->SetTextColor(macView->effect_fontcolour);
-						if (macView->draw_mac_index)
-						{
-							char name[sizeof(mac->_editName)+6+3];
+						char name[sizeof(mac->_editName)+6+3];
+						int boxx=x+MachineCoords->dEffectName.x;
+						int boxy=y+MachineCoords->dEffectName.y;
+						if (macView->draw_mac_index) {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, name);
+						} else { sprintf(name,"%s",mac->_macIndex,mac->_editName); }
+						if (MachineCoords->dEffectNameClip.x > 0 ) {
+							devc->ExtTextOut(boxx, boxy, ETO_CLIPPED , 
+								CRect(boxx,boxy,boxx+MachineCoords->dEffectNameClip.x, boxy+MachineCoords->dEffectNameClip.y), 
+								name, 0);
 						}
-						else
-						{
-							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, mac->_editName);
+						else {
+							devc->TextOut(boxx, boxy, name);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1159,15 +1165,19 @@ namespace psycle { namespace host {
 						CFont* oldFont= devc->SelectObject(&macView->generatorFont);
 						devc->SetBkMode(TRANSPARENT);
 						devc->SetTextColor(macView->generator_fontcolour);
-						if (macView->draw_mac_index)
-						{
-							char name[sizeof(mac->_editName)+6+3];
+						char name[sizeof(mac->_editName)+6+3];
+						int boxx=x+MachineCoords->dGeneratorName.x;
+						int boxy=y+MachineCoords->dGeneratorName.y;
+						if (macView->draw_mac_index) {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, name);
+						} else { sprintf(name,"%s",mac->_macIndex,mac->_editName); }
+						if (MachineCoords->dGeneratorNameClip.x > 0 ) {
+							devc->ExtTextOut(boxx, boxy, ETO_CLIPPED , 
+								CRect(boxx,boxy,boxx+MachineCoords->dGeneratorNameClip.x, boxy+MachineCoords->dGeneratorNameClip.y), 
+								name, 0);
 						}
-						else
-						{
-							devc->TextOut(x+MachineCoords->dGeneratorName.x, y+MachineCoords->dGeneratorName.y, mac->_editName);
+						else {
+							devc->TextOut(boxx, boxy, name);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
@@ -1222,15 +1232,19 @@ namespace psycle { namespace host {
 						CFont* oldFont= devc->SelectObject(&macView->effectFont);
 						devc->SetBkMode(TRANSPARENT);
 						devc->SetTextColor(macView->effect_fontcolour);
-						if (macView->draw_mac_index)
-						{
-							char name[sizeof(mac->_editName)+6+3];
+						char name[sizeof(mac->_editName)+6+3];
+						int boxx=x+MachineCoords->dEffectName.x;
+						int boxy=y+MachineCoords->dEffectName.y;
+						if (macView->draw_mac_index) {
 							sprintf(name,"%.2X:%s",mac->_macIndex,mac->_editName);
-							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, name);
+						} else { sprintf(name,"%s",mac->_macIndex,mac->_editName); }
+						if (MachineCoords->dEffectNameClip.x > 0 ) {
+							devc->ExtTextOut(boxx, boxy, ETO_CLIPPED , 
+								CRect(boxx,boxy,boxx+MachineCoords->dEffectNameClip.x, boxy+MachineCoords->dEffectNameClip.y), 
+								name, 0);
 						}
-						else
-						{
-							devc->TextOut(x+MachineCoords->dEffectName.x, y+MachineCoords->dEffectName.y, mac->_editName);
+						else {
+							devc->TextOut(boxx, boxy, name);
 						}
 						devc->SetBkMode(OPAQUE);
 						devc->SelectObject(oldFont);
