@@ -73,10 +73,8 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		m_notesToEffects.SetCheck(PsycleGlobal::conf().inputHandler()._notesToEffects?1:0);
 		m_follow.SetCheck(PsycleGlobal::conf()._followSong?1:0);
 
-		((CButton*)GetDlgItem(IDC_INCSHORT))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_PLUS),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_DECSHORT))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MINUS),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_INCSHORT))->SetIcon(PsycleGlobal::conf().iconplus);
+		((CButton*)GetDlgItem(IDC_DECSHORT))->SetIcon(PsycleGlobal::conf().iconminus);
 
 		UpdatePlayOrder(true);
 		UpdateSequencer();
@@ -741,11 +739,17 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		{
 			int top = m_sequence.GetTopIndex();
 			m_sequence.SelItemRange(false,0,m_sequence.GetCount()-1);
-			for (int i=0;i<MAX_SONG_POSITIONS;i++ )
-			{
-				if (m_pSong->playOrderSel[i]) {
-					m_sequence.SetSel(i,true);
-					if (i < top) top = i;
+			if (Global::player()._playing) {
+				m_sequence.SetSel(Global::player()._playPosition,true);
+				if (Global::player()._playPosition < top) top = Global::player()._playPosition;
+			}
+			else {
+				for (int i=0;i<MAX_SONG_POSITIONS;i++ )
+				{
+					if (m_pSong->playOrderSel[i]) {
+						m_sequence.SetSel(i,true);
+						if (i < top) top = i;
+					}
 				}
 			}
 			m_sequence.SetTopIndex(top);

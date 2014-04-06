@@ -33,6 +33,7 @@
 #define IDD_MIDI_MONITOR                139
 #define IDD_ABOUTBOX                    141
 #define IDD_GREETS                      144
+#define IDD_ABOUT_GREETS                144
 #define IDR_WAVEFRAME                   146
 #define IDD_WAVED_AMPLIFY               147
 #define IDD_PATDLG                      154
@@ -100,10 +101,7 @@
 #define IDB_SPLASH2014                  331
 #define IDB_MASTER_SKIN                 332
 #define IDB_MIXER_SKIN                  333
-#define IDB_PNG1                        337
-#define IDB_PNG2                        341
 #define IDB_MAINTOOLBAR24               342
-#define IDB_BITMAP2                     343
 #define IDB_MAINTOOLBAR24MASK           343
 #define IDD_INST_NOTEMAP                344
 #define IDC_DRIVER                      1000
@@ -211,15 +209,12 @@
 #define IDC_BUTTON4                     1094
 #define IDC_INS_DECOCTAVE               1094
 #define IDC_BPM_DECONE                  1095
-#define IDC_BPM_DECTEN                  1096
 #define IDC_OPENWAVEEDITOR              1099
 #define IDC_BPM_ADDONE                  1099
 #define IDC_KILL_INSTRUMENT             1105
 #define IDC_EDIT1                       1109
 #define IDC_EDIT2                       1110
-#define IDC_EDIT3                       1111
 #define IDC_EDIT_AUTHOR                 1111
-#define IDC_EDIT4                       1112
 #define IDC_EDIT_COMMENTS               1112
 #define IDC_CHECK1                      1113
 #define IDC_REPLACEINS                  1113
@@ -238,7 +233,7 @@
 #define IDC_BYCLASS                     1122
 #define IDC_SPIN1                       1123
 #define IDC_APIVERSIONLABEL             1123
-#define IDC_LIST1                       1124
+#define IDC_GREETSLIST                  1124
 #define IDC_TEXT                        1125
 #define IDC_LOOPSTART                   1128
 #define IDC_LOOPEND                     1129
@@ -734,7 +729,6 @@
 #define IDC_COMMANDINFO                 1644
 #define IDC_INS_NOTEMAP                 1645
 #define IDC_INS_ENVELOPE                1646
-#define IDC_RESSONANCE                  1651
 #define IDC_LDEFVOL                     1653
 #define IDC_LGLOBVOL                    1654
 #define IDC_LPAN                        1655
@@ -879,7 +873,6 @@
 #define IDC_WASAPI_SAMPLERATE_COMBO     1813
 #define IDC_WASAPI_BUFFERSIZE_COMBO     1814
 #define IDC_WASAPI_LATENCY              1815
-#define IDC_BPM_ADDTEN                  1816
 #define IDC_MAC_NAME                    1817
 #define IDC_SCAN_NEW                    1818
 #define IDC_HOLD                        1819
@@ -908,7 +901,6 @@
 #define IDC_NUMBER_THREADS              2103
 #define IDC_XMINST_TAB                  2104
 #define IDC_GROUP_ENV                   2105
-#define IDC_SAMPLE_NUMBER               2106
 #define IDC_SET_ALL_SAMPLE              2107
 #define IDC_INCREASEOCT                 2108
 #define IDC_DECREASEOCT                 2109
@@ -938,20 +930,16 @@
 #define IDC_FINELABEL                   2131
 #define IDC_ENV_CARRY                   2132
 #define IDC_EDITMAPPING                 2133
-#define IDC_SCROLLBAR1                  2134
 #define IDC_INS_SHIFTMOVE               2135
 #define IDC_INDIV_NOTE                  2136
 #define IDC_INDIV_SAMPLE                2137
 #define IDC_INSTLIST_SAMPLES            2138
-#define IDC_LIST2                       2139
 #define IDC_SAMPLESLIST                 2139
-#define IDC_LIST3                       2140
 #define IDC_NOTELIST                    2140
 #define IDC_NOTEMAP_LIST                2141
 #define IDC_RADIO_EDIT                  2142
 #define IDC_RADIO_SHOW                  2143
 #define IDC_SAMPLIST_INSTR              2144
-#define IDC_SPINTEMPO                   2145
 #define IDC_SPIN_TEMPO                  2145
 #define IDC_EDIT_TEMPO                  2146
 #define IDC_SPIN_LPB                    2147
@@ -963,6 +951,12 @@
 #define IDC_EDIT_REALTPB                2153
 #define IDC_EDIT_REALTEMPO              2154
 #define IDC_EDIT_TITLE                  2155
+#define IDC_MAP_SELECT_ALL              2156
+#define IDC_MAP_SELECT_NONE             2157
+#define IDC_MAP_SELECT_OCTAVE           2158
+#define IDC_PAT_NUMLINES                2159
+#define IDC_INSTR_SETSAMPLES_0          2160
+#define IDC_INSTR_SETSAMPLES_255        2415
 #define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1092,7 +1086,6 @@
 #define ID_PROGRAMS_OPENPRESET          33077
 #define ID_PROGRAMS_SAVEPRESET          33078
 #define ID_ABOUT_ABOUTMAC               33080
-#define ID_COMBO_BANK                   33082
 #define ID_SELECTBANK_0                 33100
 #define ID_SELECTPROGRAM_0              33200
 #define ID_PROGRAMMORE                  34200
@@ -1110,19 +1103,12 @@
 #define ID_CONNECTTO_MACHINEN           34246
 #define ID_CONTEXTMENU_UNDO             34256
 #define ID_CONTEXTMENU_REDO             34257
-#define ID_CONTEXTMENU_BLOCKCUT         34258
-#define ID_CONTEXTMENU_BLOCKCOPY        34259
 #define ID_PROGRAMS_RESETDEFAULT        34268
 #define ID_CONFIGURATION_ENABLEAUDIO    34276
-#define ID_CONTEXTMENU_ADDNEWTRACKONCURSOR 34279
-#define ID_CONTEXTMENU_NOTETRANSPOSITION 34280
 #define ID_POP_ADDNEWTRACK              34281
-#define ID_Menu                         34282
 #define IDC_FULL_SCREEN                 34283
 #define ID_CONFIGURATION_REGENERATEPLUGINCACHE 34284
-#define ID_VIEWS_RELOAD                 34285
 #define ID_PARAMETERS_VIEWS_RELOAD      34286
-#define ID_VIEW_RESAMPLERMETHOD         34288
 #define ID_VISUALREPRESENTATION_SAMPLEHOLD 34289
 #define ID_VISUALREPRESENTATION_SPLINE  34290
 #define ID_VISUALREPRESENTATION_SINC    34291
@@ -1133,17 +1119,10 @@
 #define ID_ACCEL_VOL                    34299
 #define ID_ACCEL_PAN                    34300
 #define ID_ACCEL_FILTER                 34301
-#define ID_ACCEL_PITCH                  34302
 #define ID_WAVEED_WAVEMIN               34305
 #define ID_WAVEED_WAVEPLUS              34306
 #define ID_WAVEEDIT_COMBO_WAV           34307
-#define ID_IMPORTMODULE_PATTERNS        34308
-#define ID_IMPORTMODULE_INSTRUMENTS     34309
-#define ID_EXPORTXM_PATTERNS            34310
-#define ID_EXPORTXM_INSTRUMENTS         34311
-#define ID_EXPORTXM_MODULE              34312
 #define ID_IMPORT_MACHINES              34313
-#define ID_HELP_                        34314
 #define ID_EXPORT_PATTERNS              34315
 #define ID_EXPORT_INSTRUMENTS           34316
 #define ID_EXPORT_MODULE                34317
@@ -1159,7 +1138,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
 #define _APS_NEXT_COMMAND_VALUE         34321
-#define _APS_NEXT_CONTROL_VALUE         2156
+#define _APS_NEXT_CONTROL_VALUE         2416
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

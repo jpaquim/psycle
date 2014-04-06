@@ -1,15 +1,20 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "InstrumentGenDlg.hpp"
-#include "XMInstrument.hpp"
 #include "InstrumentEditorUI.hpp"
 #include "XMSamplerUIInst.hpp"
 #include "InstrNoteMap.hpp"
+#include "PsycleConfig.hpp"
+#include <psycle/host/Song.hpp>
+#include <psycle/host/XMInstrument.hpp>
 
 namespace psycle { namespace host {
+
+	extern CPsycleApp theApp;
 
 CInstrumentGenDlg::CInstrumentGenDlg()
 : CDialog(CInstrumentGenDlg::IDD)
 , m_bInitialized(false)
+, m_instIdx(0)
 {
 }
 
@@ -25,7 +30,6 @@ void CInstrumentGenDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_INS_NNACOMBO, m_NNA);
 	DDX_Control(pDX, IDC_INS_DCTCOMBO, m_DCT);
 	DDX_Control(pDX, IDC_INS_DCACOMBO, m_DCA);
-	DDX_Control(pDX, IDC_SAMPLE_NUMBER, m_SampleNumber);
 	DDX_Control(pDX, IDC_INS_SHIFTMOVE, m_ShiftMove);
 
 	DDX_Control(pDX, IDC_INS_NOTEMAP, m_SampleAssign);
@@ -40,7 +44,8 @@ BEGIN_MESSAGE_MAP(CInstrumentGenDlg, CDialog)
 	ON_CBN_SELENDOK(IDC_INS_DCACOMBO, OnCbnSelendokInsDcacombo)
 	ON_BN_CLICKED(IDC_SETDEFAULT,OnBtnSetDefaults)
 	ON_BN_CLICKED(IDC_EDITMAPPING,OnBtnEditMapping)
-	ON_BN_CLICKED(IDC_SET_ALL_SAMPLE,OnBtnSetSample)
+	ON_BN_CLICKED(IDC_SET_ALL_SAMPLE,OnBtnPopupSetSample)
+	ON_COMMAND_RANGE(IDC_INSTR_SETSAMPLES_0, IDC_INSTR_SETSAMPLES_255, OnSetSample)
 	ON_BN_CLICKED(IDC_INCREASEOCT,OnBtnIncreaseOct)
 	ON_BN_CLICKED(IDC_DECREASEOCT,OnBtnDecreaseOct)
 	ON_BN_CLICKED(IDC_INCREASENOTE,OnBtnIncreaseNote)
@@ -61,7 +66,11 @@ BOOL CInstrumentGenDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	m_InstrumentName.SetLimitText(31);
-	m_SampleNumber.SetLimitText(2);
+
+	((CButton*)GetDlgItem(IDC_DECREASENOTE))->SetIcon(PsycleGlobal::conf().iconless);
+	((CButton*)GetDlgItem(IDC_INCREASENOTE))->SetIcon(PsycleGlobal::conf().iconmore);
+	((CButton*)GetDlgItem(IDC_DECREASEOCT))->SetIcon(PsycleGlobal::conf().iconlessless);
+	((CButton*)GetDlgItem(IDC_INCREASEOCT))->SetIcon(PsycleGlobal::conf().iconmoremore);
 
 	m_NNA.AddString(_T("Note Cut"));
 	m_NNA.AddString(_T("Note Continue"));
@@ -78,8 +87,10 @@ BOOL CInstrumentGenDlg::OnInitDialog()
 	m_DCA.AddString(_T("Note Off"));
 	m_DCA.AddString(_T("Note Fadeout"));
 
-	m_ShiftMove.AddString(_T("Tune"));
-	m_ShiftMove.AddString(_T("Move"));
+	m_ShiftMove.AddString(_T("Change tune"));
+	m_ShiftMove.AddString(_T("Move all"));
+	m_ShiftMove.AddString(_T("Move notes"));
+	m_ShiftMove.AddString(_T("Move samples"));
 	m_ShiftMove.SetCurSel(0);
 
 	SCROLLINFO info;
@@ -103,10 +114,11 @@ BOOL CInstrumentGenDlg::OnInitDialog()
 	// return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }
-void CInstrumentGenDlg::AssignGeneralValues(XMInstrument& inst)
+void CInstrumentGenDlg::AssignGeneralValues(XMInstrument& inst, int instno)
 {
 	m_bInitialized=false;
 	m_instr = &inst;
+	m_instIdx = instno;
 	m_InstrumentName.SetWindowText(inst.Name().c_str());
 	SetNewNoteAction(inst.NNA(),inst.DCT(),inst.DCA());
 	m_SampleAssign.Initialize(inst);
@@ -188,17 +200,49 @@ void CInstrumentGenDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
+
+
 void CInstrumentGenDlg::OnBtnSetDefaults()
 {
-	m_instr->SetDefaultNoteMap();
+	m_instr->SetDefaultNoteMap(m_instIdx);
 	m_SampleAssign.Invalidate();
 	ValidateEnabled();
 }
-void CInstrumentGenDlg::OnBtnSetSample()
+void CInstrumentGenDlg::OnBtnPopupSetSample()
 {
-	TCHAR sample_number[5];
-	m_SampleNumber.GetWindowText(sample_number,4);
-	int sample = hexstring_to_integer(sample_number);
+	RECT tmp;
+	((CButton*)GetDlgItem(IDC_SET_ALL_SAMPLE))->GetWindowRect(&tmp);
+//	ClientToScreen(&tmp);
+
+	CMenu menu;
+	menu.CreatePopupMenu();
+
+	SampleList & list = Global::song().samples;
+	for (int i = 0; i <list.size() && i < 256 ; i += 16)
+	{
+		CMenu popup;
+		popup.CreatePopupMenu();
+		for(int j = i; (j < i + 16) && j < list.size(); j++)
+		{
+			char s1[64]={'\0'};
+			std::sprintf(s1,"%02X%s: %s",j,list.IsEnabled(j)?"*":" "
+				,list.Exists(j)?list[j].WaveName().c_str():"");
+			popup.AppendMenu(MF_STRING, IDC_INSTR_SETSAMPLES_0 + j, s1);
+		}
+		char szSub[256] = "";;
+		std::sprintf(szSub,"Samples %d-%d",i,i+15);
+		menu.AppendMenu(MF_POPUP | MF_STRING,
+			(UINT_PTR)popup.Detach(),
+			szSub);
+	}
+	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, tmp.left, tmp.top, this);
+	menu.DestroyMenu();
+
+}
+
+void CInstrumentGenDlg::OnSetSample(UINT nID)
+{
+	int sample = nID - IDC_INSTR_SETSAMPLES_0;
 	for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
 		XMInstrument::NotePair pair = m_instr->NoteToSample(i);
 		pair.second = sample;
@@ -207,10 +251,13 @@ void CInstrumentGenDlg::OnBtnSetSample()
 	m_SampleAssign.Invalidate();
 	ValidateEnabled();
 }
+
+
 void CInstrumentGenDlg::OnBtnEditMapping()
 {
 	CInstrNoteMap map;
 	map.m_instr = m_instr;
+	map.m_instIdx = m_instIdx;
 	if (map.DoModal() == IDOK) {
 		XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
 		win->FillInstrumentList(-2);
@@ -222,72 +269,39 @@ void CInstrumentGenDlg::OnBtnEditMapping()
 
 void CInstrumentGenDlg::OnBtnIncreaseOct()
 {
-	if (m_ShiftMove.GetCurSel()==0) {
-		TuneNotes(12);
-	}
-	else {
-		MoveMapping(12);
-	}
+	if (m_ShiftMove.GetCurSel()==0) { m_instr->TuneNotes(12); }
+	else if (m_ShiftMove.GetCurSel()==1) { m_instr->MoveMapping(12); }
+	else if (m_ShiftMove.GetCurSel()==2) { m_instr->MoveOnlyNotes(12); }
+	else { m_instr->MoveOnlySamples(12); }
 	m_SampleAssign.Invalidate();
 	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnDecreaseOct()
 {
-	if (m_ShiftMove.GetCurSel()==0) {
-		TuneNotes(-12);
-	}
-	else {
-		MoveMapping(-12);
-	}
+	if (m_ShiftMove.GetCurSel()==0) { m_instr->TuneNotes(-12); }
+	else if (m_ShiftMove.GetCurSel()==1) { m_instr->MoveMapping(-12); }
+	else if (m_ShiftMove.GetCurSel()==2) { m_instr->MoveOnlyNotes(-12); }
+	else { m_instr->MoveOnlySamples(-12); }
 	m_SampleAssign.Invalidate();
 	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnIncreaseNote()
 {
-	if (m_ShiftMove.GetCurSel()==0) {
-		TuneNotes(1);
-	}
-	else {
-		MoveMapping(1);
-	}
+	if (m_ShiftMove.GetCurSel()==0) { m_instr->TuneNotes(1); }
+	else if (m_ShiftMove.GetCurSel()==1) { m_instr->MoveMapping(1); }
+	else if (m_ShiftMove.GetCurSel()==2) { m_instr->MoveOnlyNotes(1); }
+	else { m_instr->MoveOnlySamples(1); }
 	m_SampleAssign.Invalidate();
 	ValidateEnabled();
 }
 void CInstrumentGenDlg::OnBtnDecreaseNote()
 {
-	if (m_ShiftMove.GetCurSel()==0) {
-		TuneNotes(-1);
-	}
-	else {
-		MoveMapping(-1);
-	}
+	if (m_ShiftMove.GetCurSel()==0) { m_instr->TuneNotes(-1); }
+	else if (m_ShiftMove.GetCurSel()==1) { m_instr->MoveMapping(-1); }
+	else if (m_ShiftMove.GetCurSel()==2) { m_instr->MoveOnlyNotes(-1); }
+	else { m_instr->MoveOnlySamples(-1); }
 	m_SampleAssign.Invalidate();
 	ValidateEnabled();
-}
-
-void CInstrumentGenDlg::MoveMapping(int amount)
-{
-	if (amount < 0 ) {
-		for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
-			XMInstrument::NotePair pair = m_instr->NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
-			m_instr->NoteToSample(i, pair);
-		}
-	}
-	else {
-		for(int i=XMInstrument::NOTE_MAP_SIZE-1; i>=0; i--) {
-			XMInstrument::NotePair pair = m_instr->NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
-			m_instr->NoteToSample(i, pair);
-		}
-	}
-}
-
-void CInstrumentGenDlg::TuneNotes(int amount)
-{
-	for(int i=0;i< XMInstrument::NOTE_MAP_SIZE; i++) {
-		XMInstrument::NotePair pair = m_instr->NoteToSample(i);
-		pair.first = std::max((int)notecommands::c0,std::min((int)pair.first+amount,(int)notecommands::b9));
-		m_instr->NoteToSample(i, pair);
-	}
 }
 
 

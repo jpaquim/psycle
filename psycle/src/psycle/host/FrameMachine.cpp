@@ -835,11 +835,11 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::FillPopupFromPresets(CMenu* popPrg, std::list<CPreset> const & presets )
 		{
+			std::list<CPreset>::const_iterator preset = presets.begin();
 			for (int i = 0; i <presets.size() && i < 980 ; i += 16)
 			{
 				CMenu popup;
 				popup.CreatePopupMenu();
-				std::list<CPreset>::const_iterator preset = presets.begin();
 				for(int j = i; (j < i + 16) && (preset != presets.end()); j++, preset++)
 				{
 					char s1[38];

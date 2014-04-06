@@ -47,7 +47,6 @@ class InstrumentEditorUI : public CPropertySheet
 		afx_msg void OnShowVol();
 		afx_msg void OnShowPan();
 		afx_msg void OnShowFilter();
-		afx_msg void OnShowPitch();
 };
 
 }}

@@ -596,7 +596,7 @@ namespace psycle { namespace host {
 				CMenu *popup;
 				popup=menu.GetSubMenu(0);
 				assert(popup);
-				popup->TrackPopupMenu(TPM_LEFTALIGN|TPM_LEFTBUTTON, point.x, point.y, GetOwner());
+				popup->TrackPopupMenu(TPM_LEFTALIGN|TPM_RIGHTBUTTON, point.x, point.y, GetOwner());
 				menu.DestroyMenu();
 
 				CRect rect;

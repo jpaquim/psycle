@@ -824,11 +824,75 @@ namespace psycle
 			m_PanEnvelope.Init();
 			m_PitchEnvelope.Init();
 			m_FilterEnvelope.Init();
-
 		}
-		void XMInstrument::SetDefaultNoteMap() {
+
+		void XMInstrument::MoveMapping(int amount)
+		{
+			if (amount < 0 ) {
+				for(int i=0;i< NOTE_MAP_SIZE; i++) {
+					const NotePair & pair = NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
+					NoteToSample(i, pair);
+				}
+			}
+			else {
+				for(int i=NOTE_MAP_SIZE-1; i>=0; i--) {
+					const NotePair & pair = NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
+					NoteToSample(i, pair);
+				}
+			}
+		}
+
+		void XMInstrument::TuneNotes(int amount)
+		{
+			for(int i=0;i< NOTE_MAP_SIZE; i++) {
+				NotePair pair = NoteToSample(i);
+				pair.first = std::max((int)notecommands::c0,std::min((int)pair.first+amount,(int)notecommands::b9));
+				NoteToSample(i, pair);
+			}
+		}
+
+		void XMInstrument::MoveOnlyNotes(int amount)
+		{
+			if (amount < 0 ) {
+				for(int i=0;i< NOTE_MAP_SIZE; i++) {
+					const NotePair & pairvalue = NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
+					NotePair pairtarget = NoteToSample(std::max((int)notecommands::c0,std::min(i,(int)notecommands::b9)));
+					pairtarget.first = pairvalue.first;
+					NoteToSample(i, pairtarget);
+				}
+			}
+			else {
+				for(int i=NOTE_MAP_SIZE-1; i>=0; i--) {
+					const NotePair & pairvalue = NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
+					NotePair pairtarget = NoteToSample(std::max((int)notecommands::c0,std::min(i,(int)notecommands::b9)));
+					pairtarget.first = pairvalue.first;
+					NoteToSample(i, pairtarget);
+				}
+			}
+		}
+		void XMInstrument::MoveOnlySamples(int amount)
+		{
+			if (amount < 0 ) {
+				for(int i=0;i< NOTE_MAP_SIZE; i++) {
+					const NotePair & pairvalue = NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
+					NotePair pairtarget = NoteToSample(std::max((int)notecommands::c0,std::min(i,(int)notecommands::b9)));
+					pairtarget.second = pairvalue.second;
+					NoteToSample(i, pairtarget);
+				}
+			}
+			else {
+				for(int i=NOTE_MAP_SIZE-1; i>=0; i--) {
+					const NotePair & pairvalue = NoteToSample(std::max((int)notecommands::c0,std::min(i-amount,(int)notecommands::b9)));
+					NotePair pairtarget = NoteToSample(std::max((int)notecommands::c0,std::min(i,(int)notecommands::b9)));
+					pairtarget.second = pairvalue.second;
+					NoteToSample(i, pairtarget);
+				}
+			}
+		}
+
+		void XMInstrument::SetDefaultNoteMap(int sample/*=255*/) {
 			NotePair npair;
-			npair.second=255;
+			npair.second=sample;
 			for(int i = 0;i < NOTE_MAP_SIZE;i++){
 				npair.first=i;
 				m_AssignNoteToSample[i] = npair;

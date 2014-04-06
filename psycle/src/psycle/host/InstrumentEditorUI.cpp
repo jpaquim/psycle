@@ -39,7 +39,6 @@ BEGIN_MESSAGE_MAP(InstrumentEditorUI, CPropertySheet)
 	ON_COMMAND(ID_ACCEL_VOL, OnShowVol)
 	ON_COMMAND(ID_ACCEL_PAN, OnShowPan)
 	ON_COMMAND(ID_ACCEL_FILTER, OnShowFilter)
-	ON_COMMAND(ID_ACCEL_PITCH, OnShowPitch)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -161,11 +160,6 @@ void InstrumentEditorUI::OnShowPan() {
 void InstrumentEditorUI::OnShowFilter() {
 	SetActivePage(1);
 	m_InstrSampulse.SetActivePage(3);
-}
-void InstrumentEditorUI::OnShowPitch() {
-/*	SetActivePage(1);
-	m_InstrSampulse.SetActivePage(4);
-*/
 }
 
 

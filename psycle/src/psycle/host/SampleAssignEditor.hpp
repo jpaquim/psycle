@@ -42,6 +42,7 @@ class CSampleAssignEditor : public CStatic
 		afx_msg void OnLButtonDown( UINT nFlags, CPoint point );
 		afx_msg void OnLButtonUp( UINT nFlags, CPoint point );
 		afx_msg void OnMouseMove( UINT nFlags, CPoint point );
+		afx_msg void OnMouseLeave();
 
 	protected:
 		int GetKeyIndexAtPoint(const int x,const int y,CRect& keyRect);
@@ -61,6 +62,7 @@ class CSampleAssignEditor : public CStatic
 		int m_sharpkey_height;
 		int m_octave_width;
 		bool	m_bInitialized;
+		bool    m_tracking;
 		int		m_Octave;
 		int m_FocusKeyIndex;///< 
 		CRect m_FocusKeyRect;///<

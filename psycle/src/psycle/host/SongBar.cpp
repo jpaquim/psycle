@@ -59,14 +59,10 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		   TRACE0("Warning: UpdateData failed during dialog init.\n");
 		}
 
-		((CButton*)GetDlgItem(IDC_BPM_DECONE))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_BPM_ADDONE))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_DEC_TPB))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_INC_TPB))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_BPM_DECONE))->SetIcon(PsycleGlobal::conf().iconless);
+		((CButton*)GetDlgItem(IDC_BPM_ADDONE))->SetIcon(PsycleGlobal::conf().iconmore);
+		((CButton*)GetDlgItem(IDC_DEC_TPB))->SetIcon(PsycleGlobal::conf().iconless);
+		((CButton*)GetDlgItem(IDC_INC_TPB))->SetIcon(PsycleGlobal::conf().iconmore);
 
 		for(int i=4;i<=MAX_TRACKS;i++)
 		{

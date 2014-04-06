@@ -33,19 +33,18 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnBtnSetDefaults();
 	afx_msg void OnBtnEditMapping();
-	afx_msg void OnBtnSetSample();
+	afx_msg void OnBtnPopupSetSample();
+	afx_msg void OnSetSample(UINT nID);
 	afx_msg void OnBtnIncreaseOct();
 	afx_msg void OnBtnDecreaseOct();
 	afx_msg void OnBtnIncreaseNote();
 	afx_msg void OnBtnDecreaseNote();
 
 public:
-	void AssignGeneralValues(XMInstrument& inst);
+	void AssignGeneralValues(XMInstrument& inst, int instno);
 
 private:
 	void SetNewNoteAction(const int nna,const int dct,const int dca);
-	void MoveMapping(int amount);
-	void TuneNotes(int amount);
 	void ValidateEnabled();
 
 	CSampleAssignEditor m_SampleAssign;
@@ -54,7 +53,6 @@ private:
 	CComboBox m_NNA;
 	CComboBox m_DCT;
 	CComboBox m_DCA;
-	CEdit m_SampleNumber;
 	CScrollBar m_scBar;
 	CComboBox m_ShiftMove;
 	CEnvelopeEditorDlg m_EnvelopeEditorDlg;
@@ -62,6 +60,7 @@ private:
 	bool m_bInitialized;
 
 	XMInstrument *m_instr;
+	int m_instIdx;
 
 };
 
