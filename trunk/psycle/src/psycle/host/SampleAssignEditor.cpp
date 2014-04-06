@@ -26,8 +26,21 @@ const int CSampleAssignEditor::c_SharpKey_index[] = {1,3,6,8,10};
 //////////////////////////////////////////////////////////////////////////////
 
 
+BEGIN_MESSAGE_MAP(CSampleAssignEditor, CStatic)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_WM_MOUSELEAVE()
+	ON_WM_HSCROLL()
+END_MESSAGE_MAP()
+/*
+	ON_WM_CONTEXTMENU()
+*/
+
+
 CSampleAssignEditor::CSampleAssignEditor()
 : m_bInitialized(false)
+, m_tracking(false)
 , m_Octave(4)
 , bmpDC(NULL)
 {
@@ -57,16 +70,6 @@ CSampleAssignEditor::~CSampleAssignEditor()
 	}
 }
 
-BEGIN_MESSAGE_MAP(CSampleAssignEditor, CStatic)
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_WM_HSCROLL()
-END_MESSAGE_MAP()
-/*
-	ON_WM_CONTEXTMENU()
-*/
-	
 void CSampleAssignEditor::Initialize(XMInstrument & pInstrument)
 {
 	m_pInst = &pInstrument;
@@ -100,7 +103,7 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			CBitmap* oldKeyBmp = keyDC.SelectObject(&m_BackKey);
 			memDC.FillSolidRect(&_rect,RGB(0,0,0));
 			memDC.SetBkMode(TRANSPARENT);
-			memDC.SetTextColor(RGB(255,255,255));
+			memDC.SetTextColor(RGB(0xCC,0xCC,0xCC));
 			const int head_width = 26;
 			const int head_height = 20;
 			int text_xOffset = 5;
@@ -112,9 +115,9 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 				_tmp_str.Format("%s%d",c_NaturalKey_name[_index],patView.showA440?_octave-1:_octave);
 				memDC.BitBlt(i,0, 	head_width,head_height, 	&keyDC, 0,0,	SRCCOPY);
 				if (m_FocusKeyRect.left>=i && m_FocusKeyRect.left<i+head_width && m_FocusKeyRect.left!=m_FocusKeyRect.right){
-					memDC.SetTextColor(RGB(255,255,0));
+					memDC.SetTextColor(RGB(0x55,0xAA,0xFF));
 					memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str);
-					memDC.SetTextColor(RGB(255,255,255));
+					memDC.SetTextColor(RGB(0xCC,0xCC,0xCC));
 				}
 				else { memDC.TextOut(i+text_xOffset,text_yOffset,_tmp_str); }
 				
@@ -128,7 +131,8 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			//Draw natural keys
 			keyDC.SelectObject(&m_NaturalKey);
 			memDC.SetBkMode(TRANSPARENT);
-			memDC.SetTextColor(RGB(160,128,48));
+			//memDC.SetTextColor(RGB(160,128,48));
+			memDC.SetTextColor(RGB(0x00,0x6C,0xD8));
 			memDC.SetBkColor(RGB(255,255,255));
 			text_xOffset=2;
 			text_yOffset=head_height+m_sharpkey_height;
@@ -158,6 +162,7 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			//Draw sharp keys
 			keyDC.SelectObject(&m_SharpKey);
 			//text_xOffset-=c_SharpKey_Xpos[0];
+			memDC.SetTextColor(RGB(0x55,0xAA,0xFF));
 			text_yOffset=head_height+4;
 			int octavebmpoffset = 0;
 			_index = 0,_octave = m_Octave;
@@ -252,7 +257,19 @@ void CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
 {
 	int tmp = m_FocusKeyIndex;
 	m_FocusKeyIndex=GetKeyIndexAtPoint(point.x,point.y,m_FocusKeyRect);
-	if  ( tmp != m_FocusKeyIndex) Invalidate();
+	if  ( tmp != m_FocusKeyIndex) {
+		Invalidate();
+	}
+	if (!m_tracking){
+		TRACKMOUSEEVENT tme;
+		tme.cbSize=sizeof(TRACKMOUSEEVENT);
+		tme.dwFlags=TME_LEAVE;
+		tme.hwndTrack=GetSafeHwnd();
+		tme.dwHoverTime=HOVER_DEFAULT;
+		BOOL result =TrackMouseEvent(&tme);
+		m_tracking=true;
+	}
+
 }
 void CSampleAssignEditor::OnLButtonDown( UINT nFlags, CPoint point )
 {
@@ -266,6 +283,12 @@ void CSampleAssignEditor::OnLButtonUp( UINT nFlags, CPoint point )
 		indDlg.DoModal();
 		Invalidate();
 	}
+}
+void CSampleAssignEditor::OnMouseLeave() {
+	m_FocusKeyIndex = -1;
+	m_FocusKeyRect.left =-1;
+	m_tracking=false;
+	Invalidate();
 }
 
 }}

@@ -19,7 +19,7 @@ namespace psycle { namespace host {
 		{
 			CDialog::DoDataExchange(pDX);
 			DDX_Control(pDX, IDC_CHECK1, m_adaptsizeCheck);
-			DDX_Control(pDX, IDC_EDIT2, m_numlines);
+			DDX_Control(pDX, IDC_PAT_NUMLINES, m_numlines);
 			DDX_Control(pDX, IDC_EDIT1, m_patname);
 			DDX_Control(pDX, IDC_SPIN1, m_spinlines);
 			DDX_Control(pDX, IDC_TEXT, m_text);
@@ -39,7 +39,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_NAMES_INDIVIDUAL, OnNotShareNames)
 			ON_BN_CLICKED(IDC_NAMES_SHARE, OnShareNames)
 			ON_BN_CLICKED(IDC_COPY_BUTTON, OnCopyNames)
-			ON_EN_CHANGE(IDC_EDIT2, OnChangeNumLines)
+			ON_EN_CHANGE(IDC_PAT_NUMLINES, OnChangeNumLines)
 			ON_EN_CHANGE(IDC_TRACKEDIT, OnChangeTrackEdit)
 			ON_LBN_SELCHANGE(IDC_TRACKLIST, OnSelchangeTracklist)
 		END_MESSAGE_MAP()

@@ -518,6 +518,12 @@ namespace psycle
 			bool _bShowPatternNames;
 			bool _followSong;
 			CFont fixedFont;
+			HICON iconless;
+			HICON iconlessless;
+			HICON iconmore;
+			HICON iconmoremore;
+			HICON iconplus;
+			HICON iconminus;
 
 			//On OutputDlg
 			std::vector<AudioDriverSettings*> audioSettings;

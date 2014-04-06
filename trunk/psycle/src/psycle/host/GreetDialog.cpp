@@ -14,14 +14,10 @@ namespace psycle { namespace host {
 		void CGreetDialog::DoDataExchange(CDataExchange* pDX)
 		{
 			CDialog::DoDataExchange(pDX);
-			//{{AFX_DATA_MAP(CGreetDialog)
-			DDX_Control(pDX, IDC_LIST1, m_greetz);
-			//}}AFX_DATA_MAP
+			DDX_Control(pDX, IDC_GREETSLIST, m_greetz);
 		}
 
 		BEGIN_MESSAGE_MAP(CGreetDialog, CDialog)
-			//{{AFX_MSG_MAP(CGreetDialog)
-			//}}AFX_MSG_MAP
 		END_MESSAGE_MAP()
 
 		BOOL CGreetDialog::OnInitDialog() 
@@ -82,7 +78,7 @@ namespace psycle { namespace host {
 			m_greetz.AddString("Pikari");
 			m_greetz.AddString("pooplog [Machines + Coding]");
 			m_greetz.AddString("sampler");
-			m_greetz.AddString("[SAS] SOLARiS [project-psy WebMaster]");
+			m_greetz.AddString("[SAS] SOLARiS");
 			m_greetz.AddString("hugo Vinagre [Extreme testing]");
 			m_greetz.AddString("TAo-AAS");
 			m_greetz.AddString("TimEr [Site Graphics and more]");

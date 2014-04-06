@@ -61,14 +61,10 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 		macComboInitialized = false;
 
-		((CButton*)GetDlgItem(IDC_B_DECGEN))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_B_INCGEN))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_B_DECWAV))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0));
-		((CButton*)GetDlgItem(IDC_B_INCWAV))->SetIcon((HICON)
-				::LoadImage(theApp.m_hInstance, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0));
+		((CButton*)GetDlgItem(IDC_B_DECGEN))->SetIcon(PsycleGlobal::conf().iconless);
+		((CButton*)GetDlgItem(IDC_B_INCGEN))->SetIcon(PsycleGlobal::conf().iconmore);
+		((CButton*)GetDlgItem(IDC_B_DECWAV))->SetIcon(PsycleGlobal::conf().iconless);
+		((CButton*)GetDlgItem(IDC_B_INCWAV))->SetIcon(PsycleGlobal::conf().iconmore);
 
 	//	for(int i=0;i<=16;i++)
 	//	{

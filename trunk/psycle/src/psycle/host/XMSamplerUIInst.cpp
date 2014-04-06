@@ -109,7 +109,7 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 	XMInstrument& inst = Global::song().xminstruments.get(instno);
 	m_iCurrentSelected=instno;
 
-	m_genTab.AssignGeneralValues(inst);
+	m_genTab.AssignGeneralValues(inst, instno);
 	m_ampTab.AssignAmplitudeValues(inst);
 	m_panTab.AssignPanningValues(inst);
 	m_filTab.AssignFilterValues(inst);
@@ -352,22 +352,17 @@ void XMSamplerUIInst::OnBnClickedDupeins()
 void XMSamplerUIInst::OnBnClickedDeleteins()
 {
 	XMInstrument & inst = Global::song().xminstruments.get(m_InstrumentList.GetCurSel());
-	m_InstListSamples.ResetContent();
 	if (inst.IsEnabled()) {
 		std::set<int> sampNums =  inst.GetWavesUsed();
 		if (sampNums.size() > 0) {
-			std::ostringstream os;
-			os << "This instrument uses the following samples: " << std::hex;
-			for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
-				os << *it << ',';
-			}
-			os << std::endl <<"Do you want to ALSO delete the samples?";
-			int result = MessageBox(os.str().c_str(),"Deleting Instrument",MB_YESNOCANCEL | MB_ICONQUESTION);
+			int result = MessageBox(_T("This instrument uses one or more samples. Do you want to ALSO delete the samples?"),
+				_T("Deleting Instrument"),MB_YESNOCANCEL | MB_ICONQUESTION);
 			if (result == IDYES) {
 				for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
 					Global::song().samples.RemoveAt(*it);
 				}
-				//TODO: Needs to do XMSamplerUISample.WaveUpdate();
+				InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
+				parent->UpdateUI();
 			}
 			else if (result == IDCANCEL) {
 				return;

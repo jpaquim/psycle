@@ -433,7 +433,11 @@ namespace psycle { namespace host {
 		virtual ~XMInstrument();
 
 		void Init();
-		void SetDefaultNoteMap();
+		void SetDefaultNoteMap(int sample=255);
+		void MoveMapping(int amount);
+		void MoveOnlyNotes(int amount);
+		void MoveOnlySamples(int amount);
+		void TuneNotes(int amount);
 
 		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile) const;
@@ -544,7 +548,7 @@ namespace psycle { namespace host {
 		void DCA(const NewNoteAction::Type value){ m_DCA = value;}
 
 		const NotePair& NoteToSample(const int note) const {return m_AssignNoteToSample[note];}
-		void NoteToSample(const int note,const NotePair npair){m_AssignNoteToSample[note] = npair;}
+		void NoteToSample(const int note,const NotePair & npair){m_AssignNoteToSample[note] = npair;}
 		std::set<int> GetWavesUsed() const;
 
 	private:

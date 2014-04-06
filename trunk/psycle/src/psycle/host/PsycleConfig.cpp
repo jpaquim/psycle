@@ -1474,6 +1474,13 @@ namespace psycle { namespace host {
 			if(!PsycleConfig::CreatePsyFont(fixedFont,"Consolas",80,false,false)) {
 				PsycleConfig::CreatePsyFont(fixedFont,"Courier New",80,false,false);
 			}
+			HINSTANCE hinst = GetModuleHandle(NULL);
+			iconless = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0);
+			iconlessless = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_LESSLESS),IMAGE_ICON,16,16,0);
+			iconmore = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_MORE),IMAGE_ICON,16,16,0);
+			iconmoremore = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_MOREMORE),IMAGE_ICON,16,16,0);
+			iconplus = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_PLUS),IMAGE_ICON,16,16,0);
+			iconminus = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_MINUS),IMAGE_ICON,16,16,0);
 
 			// soundcard output device
 			{
@@ -1500,6 +1507,14 @@ namespace psycle { namespace host {
 		PsycleConfig::~PsycleConfig() throw()
 		{
 			fixedFont.DeleteObject();
+			::DestroyIcon(iconless);
+			::DestroyIcon(iconlessless);
+			::DestroyIcon(iconmore);
+			::DestroyIcon(iconmoremore);
+			::DestroyIcon(iconplus);
+			::DestroyIcon(iconminus);
+
+
 			if(_numOutputDrivers)
 			{
 				for (int i(0);i<_numOutputDrivers;++i)

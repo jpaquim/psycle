@@ -26,6 +26,14 @@ protected:
 	afx_msg void OnSelchangeNoteMapList();
 	afx_msg void OnRadioEdit();
 	afx_msg void OnRadioShow();
+	afx_msg void OnBtnSetDefaults();
+	afx_msg void OnBtnIncreaseOct();
+	afx_msg void OnBtnDecreaseOct();
+	afx_msg void OnBtnIncreaseNote();
+	afx_msg void OnBtnDecreaseNote();
+	afx_msg void OnBtnSelectAll();
+	afx_msg void OnBtnNone();
+	afx_msg void OnBtnOctave();
 
 private:
 	void RefreshSampleList(int sample);
@@ -38,13 +46,12 @@ private:
 	CListBox m_NoteList;
 	CListBox m_NoteMapList;
 	CButton	m_radio_edit;
+	CComboBox m_ShiftMove;
 
-	/// Table of mapped notes to samples
-	/// (note number=first, sample number=second)
-	///\todo Could it be interesting to map other things like volume,panning, cutoff...?
-	XMInstrument::NotePair m_AssignNoteToSample[XMInstrument::NOTE_MAP_SIZE];
+	XMInstrument copyInstr;
 public:
 	XMInstrument *m_instr;
+	int m_instIdx;
 };
 
 }}
