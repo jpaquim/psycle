@@ -19,6 +19,7 @@ namespace psycle { namespace host {
 		void writeSongHeader(const Song &song);
 		void SavePatterns(const Song & song);
 		void SaveSinglePattern(const Song & song, const int patIdx);
+		void GetCommand(const Song& song, int i, const PatternEntry *entry, unsigned char &vol, unsigned char &type, unsigned char &param);
 		
 		void SaveInstruments(const Song & song);
 		void SaveEmptyInstrument(const std::string& name);
@@ -35,5 +36,9 @@ namespace psycle { namespace host {
 		int correctionIndex;
 		bool isSampler[MAX_BUSES];
 		bool isSampulse[MAX_BUSES];
+		bool isBlitzorVst[256];
+		int lastInstr[32];
+		const PatternEntry* extraEntry[32];
+		int addTicks;
 	};
 }}

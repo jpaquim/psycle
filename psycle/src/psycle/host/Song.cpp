@@ -2409,7 +2409,7 @@ namespace psycle
 
 			pFile->Write("SNGI",4);
 			version = CURRENT_FILE_VERSION_SNGI;
-			size = (11*sizeof(temp)) + (SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])))
+			size = (13*sizeof(temp)) + (SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])))
 				+ sizeof(bool); 
 			if( shareTrackNames) {
 				for(int t(0); t < SONGTRACKS; t++) {

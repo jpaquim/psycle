@@ -106,7 +106,7 @@ namespace psycle { namespace host {
 			void ModifyAt(uint32_t modifyPos, const WaveData& wave);
 			void DeleteAt(uint32_t deletePos, uint32_t length);
 			void Mix(const WaveData& waveIn, float buf1Vol=1.0f, float buf2Vol=1.0f);
-			void Fade(int fadeStart, int fadeEnd, float startVol, float endVol);
+			void Fade(int fadeStart, int fadeEndPlus1, float startVol, float endVol);
 			void Amplify(int ampStart, int ampEnd, float vol);
 			void Silence(int silStart, int silEnd);
 

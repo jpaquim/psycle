@@ -367,7 +367,7 @@ namespace psycle { namespace host {
 			{
 				std::string str1 = macView.szBmpBkgFilename;
 				if (str1.find(skin_dir) != std::string::npos) {
-					str1 = str1.substr(skin_dir.length());
+					str1 = str1.substr(skin_dir.length()+1);
 				}
 				std::fprintf(hfile,"\"machine_background\"=\"%s\"\n", str1.c_str());
 			}
@@ -379,7 +379,7 @@ namespace psycle { namespace host {
 			{
 				std::string str1 = macParam.szBmpControlsFilename;
 				if (str1.find(skin_dir) != std::string::npos) {
-					str1 = str1.substr(skin_dir.length());
+					str1 = str1.substr(skin_dir.length()+1);
 				}
 				std::fprintf(hfile,"\"machine_GUI_bitmap\"=\"%s\"\n", str1.c_str());
 			}

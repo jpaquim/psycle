@@ -391,11 +391,11 @@ namespace host{
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDELEFT:
 							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-							volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|(((vol&0x0F) > 4)?1:(vol&0x0F)>>2);
+							volume = XMSampler::CMD_VOL::VOL_PANSLIDELEFT|(((vol&0x0F) < 4)?1:(vol&0x0F)>>2);
 							break;
 						case XMVOL_CMD::XMV_PANNINGSLIDERIGHT:
 							// Panning in FT2 has 256 values, so we convert to the 64values used in Sampulse.
-							volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|(((vol&0x0F) > 4)?1:(vol&0x0F)>>2);
+							volume = XMSampler::CMD_VOL::VOL_PANSLIDERIGHT|(((vol&0x0F) < 4)?1:(vol&0x0F)>>2);
 							break;
 // Ignoring this command for now.
 //						case XMVOL_CMD::XMV_VIBRATOSPEED:
@@ -836,15 +836,15 @@ namespace host{
 
 		XMInstrument::NotePair npair;
 		if ( _samph.snum[0] < iSampleCount) npair.second=sRemap[_samph.snum[0]];
-		else npair.second=0;
+		else npair.second=255;
 		for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 			npair.first=i;
 			if (i< 12){
 				//npair.second=_samph.snum[0]; implicit.
 				instr.NoteToSample(i,npair);
 			} else if(i < 108){
-				if ( _samph.snum[i] < iSampleCount) npair.second=sRemap[_samph.snum[i-12]];
-				else npair.second=curSample-1;
+				if ( _samph.snum[i-12] < iSampleCount) npair.second=sRemap[_samph.snum[i-12]];
+				else npair.second=255;
 				instr.NoteToSample(i,npair);
 			} else {
 				//npair.second=_samph.snum[95]; implicit.
@@ -955,7 +955,7 @@ namespace host{
 			int out=0;
 			for(int j=0;j<sampleCnt;j+=2)
 			{
-				wNew += 0xFF & smpbuf[j] | smpbuf[j+1]<<8;				
+				wNew += (smpbuf[j]&0xFF) | (smpbuf[j+1]<<8);
 				*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
 				out++;
 			}   
@@ -965,7 +965,7 @@ namespace host{
 			// 8 bit mono sample
 			for(int j=0;j<sampleCnt;j++)
 			{			
-				wNew += (smpbuf[j]<<8);// | char(rand())); // scale + dither
+				wNew += static_cast<signed short>(smpbuf[j]<<8);
 				*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew;
 			}
 		}
@@ -1332,62 +1332,62 @@ namespace host{
 							break;
 						case XMCMD::EXTENDED:
 							switch(param & 0xf0){
-						case XMCMD_E::E_FINE_PORTA_UP:
-							e._cmd = XMSampler::CMD::PORTAMENTO_UP;
-							e._parameter= 0xF0+(param&0x0F);
-							break;
-						case XMCMD_E::E_FINE_PORTA_DOWN:
-							e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
-							e._parameter= 0xF0+(param&0x0F);
-							break;
-						case XMCMD_E::E_GLISSANDO_STATUS:
-							e._cmd = XMSampler::CMD::EXTENDED;
-							e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | ((param==0)?0:1);
-							break;
-						case XMCMD_E::E_VIBRATO_WAVE:
-							e._cmd = XMSampler::CMD::EXTENDED;
-							e._parameter =XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[param & 0x3];
-							break;
-						case XMCMD_E::E_FINETUNE:
-							e._cmd = XMSampler::CMD::NONE;
-							e._parameter = 0;
-							break;
-						case XMCMD_E::E_PATTERN_LOOP:
-							e._cmd = PatternCmd::EXTENDED;
-							e._parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
-							break;
-						case XMCMD_E::E_TREMOLO_WAVE:
-							e._cmd = XMSampler::CMD::EXTENDED;
-							e._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[param & 0x3];
-							break;
-						case XMCMD_E::E_MOD_RETRIG:
-							e._cmd = XMSampler::CMD::RETRIG;
-							e._parameter = param & 0xf;
-							break;
-						case XMCMD_E::E_FINE_VOLUME_UP:
-							e._cmd = XMSampler::CMD::VOLUMESLIDE;
-							e._parameter = 0x0f + ((param & 0xf)<<4);
-							break;
-						case XMCMD_E::E_FINE_VOLUME_DOWN:
-							e._cmd = XMSampler::CMD::VOLUMESLIDE;
-							e._parameter = 0xf0 + (param & 0xf);
-							break;
-						case XMCMD_E::E_DELAYED_NOTECUT:
-							e._cmd = XMSampler::CMD::EXTENDED;
-							e._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT | (param & 0xf);
-							break;
-						case XMCMD_E::E_NOTE_DELAY:
-							e._cmd = XMSampler::CMD::EXTENDED;
-							e._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
-							break;
-						case XMCMD_E::E_PATTERN_DELAY:
-							e._cmd = PatternCmd::EXTENDED;
-							e._parameter =  PatternCmd::PATTERN_DELAY | (param & 0xf);
-							break;
-						default:
-							e._cmd = XMSampler::CMD::NONE;
-							e._parameter = 0;
-							break;
+							case XMCMD_E::E_FINE_PORTA_UP:
+								e._cmd = XMSampler::CMD::PORTAMENTO_UP;
+								e._parameter= 0xF0+(param&0x0F);
+								break;
+							case XMCMD_E::E_FINE_PORTA_DOWN:
+								e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
+								e._parameter= 0xF0+(param&0x0F);
+								break;
+							case XMCMD_E::E_GLISSANDO_STATUS:
+								e._cmd = XMSampler::CMD::EXTENDED;
+								e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | ((param==0)?0:1);
+								break;
+							case XMCMD_E::E_VIBRATO_WAVE:
+								e._cmd = XMSampler::CMD::EXTENDED;
+								e._parameter =XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[param & 0x3];
+								break;
+							case XMCMD_E::E_FINETUNE:
+								e._cmd = XMSampler::CMD::NONE;
+								e._parameter = 0;
+								break;
+							case XMCMD_E::E_PATTERN_LOOP:
+								e._cmd = PatternCmd::EXTENDED;
+								e._parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
+								break;
+							case XMCMD_E::E_TREMOLO_WAVE:
+								e._cmd = XMSampler::CMD::EXTENDED;
+								e._parameter = XMSampler::CMD_E::E_TREMOLO_WAVE | exchwave[param & 0x3];
+								break;
+							case XMCMD_E::E_MOD_RETRIG:
+								e._cmd = XMSampler::CMD::RETRIG;
+								e._parameter = param & 0xf;
+								break;
+							case XMCMD_E::E_FINE_VOLUME_UP:
+								e._cmd = XMSampler::CMD::VOLUMESLIDE;
+								e._parameter = 0x0f + ((param & 0xf)<<4);
+								break;
+							case XMCMD_E::E_FINE_VOLUME_DOWN:
+								e._cmd = XMSampler::CMD::VOLUMESLIDE;
+								e._parameter = 0xf0 + (param & 0xf);
+								break;
+							case XMCMD_E::E_DELAYED_NOTECUT:
+								e._cmd = XMSampler::CMD::EXTENDED;
+								e._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT | (param & 0xf);
+								break;
+							case XMCMD_E::E_NOTE_DELAY:
+								e._cmd = XMSampler::CMD::EXTENDED;
+								e._parameter = XMSampler::CMD_E::E_NOTE_DELAY | ( param & 0xf);
+								break;
+							case XMCMD_E::E_PATTERN_DELAY:
+								e._cmd = PatternCmd::EXTENDED;
+								e._parameter =  PatternCmd::PATTERN_DELAY | (param & 0xf);
+								break;
+							default:
+								e._cmd = XMSampler::CMD::NONE;
+								e._parameter = 0;
+								break;
 							}
 							break;
 						case XMCMD::SETSPEED:

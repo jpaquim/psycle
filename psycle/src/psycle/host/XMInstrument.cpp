@@ -226,21 +226,21 @@ namespace psycle
 
 		//Fade - fades an audio buffer from one volume level to another.
 		template <class T> 
-		void XMInstrument::WaveData<T>::Fade(int fadeStart, int fadeEnd, float startVol, float endVol)
+		void XMInstrument::WaveData<T>::Fade(int fadeStart, int fadeEndPlus1, float startVol, float endVol)
 		{
 			if(fadeStart<0) fadeStart=0;
-			if(fadeEnd<=0) fadeEnd=m_WaveLength;
-			if(fadeStart>=m_WaveLength||fadeEnd>m_WaveLength||fadeStart==fadeEnd) return;
+			if(fadeEndPlus1<=0) fadeEndPlus1=m_WaveLength;
+			if(fadeStart>=m_WaveLength||fadeEndPlus1>m_WaveLength||fadeStart==fadeEndPlus1) return;
 
-			float slope = (endVol-startVol)/(float)(fadeEnd-fadeStart);
+			float slope = (endVol-startVol)/(float)(fadeEndPlus1-fadeStart);
 			if (m_WaveStereo) {
-				for(int i(fadeStart),j=0;i<fadeEnd;++i,++j) {
+				for(int i(fadeStart),j=0;i<fadeEndPlus1;++i,++j) {
 					m_pWaveDataL[i] *= startVol+j*slope;
 					m_pWaveDataR[i] *= startVol+j*slope;
 				}
 			}
 			else {
-				for(int i(fadeStart),j=0;i<fadeEnd;++i,++j) {
+				for(int i(fadeStart),j=0;i<fadeEndPlus1;++i,++j) {
 					m_pWaveDataL[i] *= startVol+j*slope;
 				}
 			}

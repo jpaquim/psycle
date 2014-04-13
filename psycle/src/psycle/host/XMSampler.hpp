@@ -220,6 +220,8 @@ XMSampler::Channel::PerformFX().
 			//Postwork takes care of this.
 		}
 		virtual void PostWork();
+		virtual void ChangeLoopDirection(const LoopDirection::Type dir);
+
 
 		// Properties
 		inline int Layer() const { return m_Layer;}
@@ -269,8 +271,10 @@ XMSampler::Channel::PerformFX().
 		}
 
 		inline LoopDirection::Type CurrentLoopDirection() const {return m_CurrentLoopDirection;}
+	protected:
+		//Use ChangeLoopDirection from other classes
 		virtual void CurrentLoopDirection(const LoopDirection::Type dir){m_CurrentLoopDirection = dir;}
-
+	public:
 		inline XMInstrument::WaveData<>::LoopType::Type LoopType() const {return m_pWave->WaveLoopType();}
 		inline uint32_t LoopStart() const {return m_pWave->WaveLoopStart();}
 		inline uint32_t LoopEnd() const { return m_pWave->WaveLoopEnd();}

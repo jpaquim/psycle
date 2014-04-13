@@ -95,7 +95,7 @@ namespace psycle { namespace host {
 				{
 					if (wiresource == propMac) // Is the mouse at the same place than when we did OnRButtonDown?
 					{
-						DoMacPropDialog(propMac);
+						//DoMacPropDialog(propMac);
 					}
 					else if (wiresource != -1) // Did we RButtonDown over a machine?
 					{
@@ -205,40 +205,48 @@ namespace psycle { namespace host {
 		}
 		void CChildView::OnContextMenu(CWnd* pWnd, CPoint point) 
 		{
-			/* ///\todo: finish
 			if (viewMode == view_modes::machine && allowcontextmenu)
 			{
-				CMenu menu;
-				VERIFY(menu.LoadMenu(IDR_POPUP_MACHINE));
-				CMenu* pPopup = menu.GetSubMenu(0);
-				ASSERT(pPopup != NULL);
-				CPoint mypoint = point;
-				if(mypoint.x < 0 || mypoint.y < 0){ // Context menu button pressed
+				popupmacidx=-1;
+				CPoint mypoint;
+				if(point.x < 0 || point.y < 0){ // Context menu button pressed
 					if(_pSong._pMachine[_pSong.seqBus]) {
 						mypoint.x = _pSong._pMachine[_pSong.seqBus]->_x;
 						mypoint.y = _pSong._pMachine[_pSong.seqBus]->_y;
-						//\todo: needs to add the clientoffset too
+						ClientToScreen(&mypoint);
+						popupmacidx = _pSong.seqBus;
 					}
 				}
 				else {  // Right click mouse button
+					mypoint = point;
+					ScreenToClient(&mypoint);
+					popupmacidx = GetMachine(mypoint);
+					mypoint = point;
 				}
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
-				menu.DestroyMenu();
+				if (popupmacidx != -1 ) {
+					CMenu menu;
+					VERIFY(menu.LoadMenu(IDR_POPUP_MACHINE));
+					CMenu* pPopup = menu.GetSubMenu(0);
+					ASSERT(pPopup != NULL);
+					 ///\todo: finish connection submenus
+					pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
+					menu.DestroyMenu();
+				}
 			}
-			else*/ if (viewMode == view_modes::pattern)
+			else if (viewMode == view_modes::pattern)
 			{
-				CMenu menu;
-				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
-				CMenu* pPopup = menu.GetSubMenu(0);
-				ASSERT(pPopup != NULL);
 				CPoint mypoint = point;
 				if(mypoint.x < 0 || mypoint.y < 0){ // Context menu button pressed
 					mypoint.x = XOFFSET+editcur.track*ROWWIDTH;
 					mypoint.y = YOFFSET+editcur.line*ROWHEIGHT;
-					//\todo: needs to add the clientoffset too
+					ClientToScreen(&mypoint);
 				}
 				else {  // Right click mouse button
 				}
+				CMenu menu;
+				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
+				CMenu* pPopup = menu.GetSubMenu(0);
+				ASSERT(pPopup != NULL);
 				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
 				menu.DestroyMenu();
 			}
@@ -1374,6 +1382,69 @@ namespace psycle { namespace host {
 			}
 
 			CWnd ::OnHScroll(nSBCode, nPos, pScrollBar);
+		}
+
+
+		void CChildView::OnPopMacOpenParams()
+		{
+			DoMacPropDialog(popupmacidx);
+		}
+		void CChildView::OnPopMacOpenProperties()
+		{
+		}
+		void CChildView::OnPopMacConnecTo(UINT nID)
+		{
+		}
+		void CChildView::OnPopMacShowWire(UINT nID)
+		{
+		}
+		void CChildView::OnPopMacReplaceMac()
+		{
+		}
+		void CChildView::OnPopMacCloneMac()
+		{
+		}
+		void CChildView::OnPopMacInsertBefore()
+		{
+		}
+		void CChildView::OnPopMacInsertAfter()
+		{
+		}
+		void CChildView::OnPopMacDeleteMachine()
+		{
+		}
+		void CChildView::OnPopMacMute()
+		{
+			Machine *pmac = _pSong._pMachine[popupmacidx];
+			pmac->_mute = (!pmac->_mute);
+			pmac->_volumeCounter=0.0f;
+			pmac->_volumeDisplay = 0;
+			updatePar=popupmacidx;
+			Repaint(draw_modes::machine);
+		}
+		void CChildView::OnPopMacSolo()
+		{
+		}
+		void CChildView::OnPopMacBypass()
+		{
+			Machine *pmac = _pSong._pMachine[popupmacidx];
+			pmac->Bypass(!pmac->Bypass());
+			updatePar=popupmacidx;
+			Repaint(draw_modes::machine);
+		}
+		void CChildView::OnUpdateMacMute(CCmdUI* pCmdUI)
+		{
+			pCmdUI->SetCheck(_pSong._pMachine[popupmacidx]->_mute);
+		}
+		void CChildView::OnUpdateMacSolo(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode == MACHMODE_GENERATOR );
+			pCmdUI->SetCheck(_pSong.machineSoloed == wiresource);
+		}
+		void CChildView::OnUpdateMacBypass(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode == MACHMODE_FX );
+			pCmdUI->SetCheck(_pSong._pMachine[popupmacidx]->Bypass());
 		}
 
 }}
