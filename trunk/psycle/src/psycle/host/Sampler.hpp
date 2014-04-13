@@ -18,14 +18,14 @@ namespace psycle
 		#define SAMPLER_CMD_NONE			0x00
 		#define SAMPLER_CMD_PORTAUP			0x01
 		#define SAMPLER_CMD_PORTADOWN		0x02
-		#define SAMPLER_CMD_PORTA2NOTE		0x03
+		//#define SAMPLER_CMD_PORTA2NOTE		0x03 Not implemented
 		#define SAMPLER_CMD_PANNING			0x08
 		#define SAMPLER_CMD_OFFSET			0x09
-		#define SAMPLER_CMD_VOLUME			0x0c
+		#define SAMPLER_CMD_VOLUME			0x0C
 		#define SAMPLER_CMD_RETRIG			0x15
-		#define SAMPLER_CMD_EXTENDED		0x0e
-		#define SAMPLER_CMD_EXT_NOTEOFF		0xc0
-		#define SAMPLER_CMD_EXT_NOTEDELAY	0xd0
+		#define SAMPLER_CMD_EXTENDED		0x0E
+		#define SAMPLER_CMD_EXT_NOTEOFF		0xC0
+		#define SAMPLER_CMD_EXT_NOTEDELAY	0xD0
 
 		typedef enum
 		{

@@ -447,6 +447,20 @@ namespace psycle
 			}
 		}
 
+		template <class T>
+		void XMSampler::WaveDataController<T>::ChangeLoopDirection(const LoopDirection::Type dir)
+		{
+			if (dir == m_CurrentLoopDirection) {
+				return;
+			}
+
+			m_CurrentLoopDirection = dir;
+			m_SpeedInternal = m_Speed;
+			if (dir == LoopDirection::BACKWARD) {
+				m_SpeedInternal *= -1;
+			}
+		}
+
 		template class XMSampler::WaveDataController<int16_t>;
 		template class XMSampler::WaveDataController<float>;
 
@@ -1659,14 +1673,14 @@ namespace psycle
 						switch(parameter&0x0F)
 						{
 						case CMD_E9::E9_PLAY_FORWARD:
-							voice->rWave().CurrentLoopDirection(WaveDataController<>::LoopDirection::FORWARD);
+							voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::FORWARD);
 							break;
 						case CMD_E9::E9_PLAY_BACKWARD:
 							if (voice->rWave().Position() == 0)
 							{
 								voice->rWave().Position(voice->rWave().Length()-1);
 							}
-							voice->rWave().CurrentLoopDirection(WaveDataController<>::LoopDirection::BACKWARD);
+							voice->rWave().ChangeLoopDirection(WaveDataController<>::LoopDirection::BACKWARD);
 							break;
 						}
 						break;

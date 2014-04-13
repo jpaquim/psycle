@@ -134,7 +134,7 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			//memDC.SetTextColor(RGB(160,128,48));
 			memDC.SetTextColor(RGB(0x00,0x6C,0xD8));
 			memDC.SetBkColor(RGB(255,255,255));
-			text_xOffset=2;
+			text_xOffset=3;
 			text_yOffset=head_height+m_sharpkey_height;
 			_index = 0,_octave = m_Octave;
 			for(int i = 0; i < _rect.Width() && _octave<10;i+=m_naturalkey_width )
@@ -163,6 +163,7 @@ void CSampleAssignEditor::DrawItem( LPDRAWITEMSTRUCT lpDrawItemStruct )
 			keyDC.SelectObject(&m_SharpKey);
 			//text_xOffset-=c_SharpKey_Xpos[0];
 			memDC.SetTextColor(RGB(0x55,0xAA,0xFF));
+			text_xOffset=3;
 			text_yOffset=head_height+4;
 			int octavebmpoffset = 0;
 			_index = 0,_octave = m_Octave;

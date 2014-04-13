@@ -95,7 +95,7 @@ namespace psycle
 			static float * Work(void* context, int nsamples);
 			float * Work(int numSamples);
 			
-			void SetBPM(int _bpm,int _lpb=0, int _extraticks=0);
+			void SetBPM(int _bpm,int _lpb=-1, int _extraticks=-1);
 
 			//Change the samplerate (Thread safe)
 			void SetSampleRate(const int sampleRate);

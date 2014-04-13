@@ -225,9 +225,9 @@ void Player::start_threads(int thread_count) {
 		}
 		void Player::SetBPM(int _bpm,int _lpb, int _extraticks)
 		{
-			if ( _bpm != 0) { bpm=_bpm; }
-			if ( _lpb != 0) { lpb=_lpb; m_extraTicks=0; }
-			if ( _extraticks != 0) { m_extraTicks=_extraticks; }
+			if ( _bpm != -1) { bpm=_bpm; }
+			if ( _lpb != -1) { lpb=_lpb; m_extraTicks=0; }
+			if ( _extraticks != -1) { m_extraTicks=_extraticks; }
 			RecalcSPR();
 			CVSTHost::vstTimeInfo.tempo = bpm;
 			CVSTHost::vstTimeInfo.flags |= kVstTransportChanged;
@@ -334,7 +334,7 @@ void Player::clear_plan() {
 						{
 							if ( (pEntry->_parameter&0xE0) == 0 ) // range from 0 to 1F for LinesPerBeat.
 							{
-								SetBPM(0,pEntry->_parameter);
+								SetBPM(-1,pEntry->_parameter);
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_BYPASS )
 							{
@@ -366,7 +366,7 @@ void Player::clear_plan() {
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::ROW_EXTRATICKS )
 							{
-								SetBPM(0,0,pEntry->_parameter&0x0F);
+								SetBPM(-1,-1,pEntry->_parameter&0x0F);
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::FINE_PATTERN_DELAY)
 							{

@@ -356,6 +356,7 @@ namespace host {
 			int wireDX;
 			int wireDY;
 			bool allowcontextmenu;
+			int popupmacidx;
 
 			int maxt;		// num of tracks shown
 			int maxl;		// num of lines shown
@@ -466,6 +467,21 @@ namespace host {
 			afx_msg void OnPopTranspose12();
 			afx_msg void OnPopTranspose_1();
 			afx_msg void OnPopTranspose_12();
+			afx_msg void OnPopMacOpenParams();
+			afx_msg void OnPopMacOpenProperties();
+			afx_msg void OnPopMacConnecTo(UINT nID);
+			afx_msg void OnPopMacShowWire(UINT nID);
+			afx_msg void OnPopMacReplaceMac();
+			afx_msg void OnPopMacCloneMac();
+			afx_msg void OnPopMacInsertBefore();
+			afx_msg void OnPopMacInsertAfter();
+			afx_msg void OnPopMacDeleteMachine();
+			afx_msg void OnPopMacMute();
+			afx_msg void OnPopMacSolo();
+			afx_msg void OnPopMacBypass();
+			afx_msg void OnUpdateMacMute(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacSolo(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacBypass(CCmdUI* pCmdUI);
 			afx_msg void OnAutostop();
 			afx_msg void OnUpdateAutostop(CCmdUI* pCmdUI);
 			afx_msg void OnPopTransformpattern();

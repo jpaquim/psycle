@@ -45,7 +45,7 @@ namespace psycle{ namespace host{
 			TREMOR              = 0x1D, ///< Tremor
 			EXTEND_XM_EFFECTS   = 0x21, ///< Extend XM Effects	
 			PANBRELLO           = 0x22, ///< Panbrello
-			MIDI_MACRO          = 0x23 ///< Panbrello
+			MIDI_MACRO          = 0x23  ///< MIDI_MACRO
 		};
 	};
 

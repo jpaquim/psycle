@@ -181,7 +181,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 				Global::song().LinesPerBeat(Global::player().lpb+x);
 			} else Global::song().LinesPerBeat(Global::song().LinesPerBeat()+x);
 
-			Global::player().SetBPM(0, Global::song().LinesPerBeat(), Global::song().ExtraTicksPerLine());
+			Global::player().SetBPM(-1, Global::song().LinesPerBeat(), Global::song().ExtraTicksPerLine());
 			m_pParentMain->UpdatePlayOrder(false);
 		}
 		if (Global::player()._playing )  {

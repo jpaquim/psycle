@@ -260,6 +260,7 @@ namespace psycle
 				case SAMPLER_CMD_EXTENDED:
 					if ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF)
 					{
+						//Todo:This means there is always 6 ticks per row whatever number of rows.
 						pVoice->_triggerNoteOff = (Global::player().SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
 					}
 					else if (((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY) && ((pEntry->_parameter & 0x0f) == 0 ))
@@ -393,6 +394,7 @@ namespace psycle
 				pVoice->_envelope._sustain = (float)pins->ENV_SL*0.01f;
 				if (( pEntry->_cmd == SAMPLER_CMD_EXTENDED) && ((pEntry->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY))
 				{
+					//Todo:This means there is always 6 ticks per row whatever number of rows.
 					pVoice->_triggerNoteDelay = (Global::player().SamplesPerRow()/6)*(pEntry->_parameter & 0x0f);
 					pVoice->_envelope._stage = ENV_OFF;
 				}
@@ -866,25 +868,25 @@ namespace psycle
 		void Sampler::PerformFx(int voice)
 		{
 			// 4294967 stands for (2^30/250), meaning that
-			//value 250 = (inc)decreases the speed in in 1/4th of the original (wave) speed each PerformFx call.
+			//value 250 = (inc)decreases the speed in 1/4th of the original (wave) speed each PerformFx call.
 			int64_t shift;
 			switch(_voices[voice].effCmd)
 			{
 				// 0x01 : Pitch Up
-				case 0x01:
+				case SAMPLER_CMD_PORTAUP:
 					shift=static_cast<int64_t>(_voices[voice].effVal)*4294967ll * static_cast<float>(_voices[voice]._wave._samplerate)/Global::player().SampleRate();
 					_voices[voice]._wave._speed+=shift;
 					_resampler.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 				break;
 
 				// 0x02 : Pitch Down
-				case 0x02:
+				case SAMPLER_CMD_PORTADOWN:
 					shift=static_cast<int64_t>(_voices[voice].effVal)*4294967ll * static_cast<float>(_voices[voice]._wave._samplerate)/Global::player().SampleRate();
 					_voices[voice]._wave._speed-=shift;
 					if ( _voices[voice]._wave._speed < 0 ) _voices[voice]._wave._speed=0;
 					_resampler.UpdateSpeed(_voices[voice].resampler_data,_voices[voice]._wave._speed);
 				break;
-				
+			
 				default:
 				break;
 			}
