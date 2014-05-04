@@ -323,27 +323,27 @@ IDR_POPUP_MACHINE MENU
 BEGIN
     POPUP "Popup Mac"
     BEGIN
-        MENUITEM "Open parameters",             ID_POPUPMAC_OPENPARAMETERS
-        MENUITEM "Open properties",             ID_POPUPMAC_OPENPROPERTIES
+        MENUITEM "Open &parameters",            ID_POPUPMAC_OPENPARAMETERS
+        MENUITEM "&Open properties",            ID_POPUPMAC_OPENPROPERTIES
         MENUITEM SEPARATOR
-        POPUP "Connect to"
+        POPUP "Connect &to"
         BEGIN
             MENUITEM "MachineN",                    ID_CONNECTTO_MACHINE0
         END
-        POPUP "Connections"
+        POPUP "&Connections"
         BEGIN
             MENUITEM "ConnectionN",                 ID_CONNECTIONS_CONNECTION0
         END
         MENUITEM SEPARATOR
-        MENUITEM "Replace machine",             ID_POPUPMAC_REPLACEMACHINE
-        MENUITEM "Clone machine",               ID_POPUPMAC_CLONEMACHINE
-        MENUITEM "Insert effect before",        ID_POPUPMAC_INSERTEFFECTBEFORE
-        MENUITEM "Insert effect after",         ID_POPUPMAC_INSERTEFFECTAFTER
-        MENUITEM "Delete machine",              ID_POPUPMAC_DELETEMACHINE
+        MENUITEM "&Replace machine",            ID_POPUPMAC_REPLACEMACHINE
+        MENUITEM "&Clone machine",              ID_POPUPMAC_CLONEMACHINE
+        MENUITEM "Insert effect &before",       ID_POPUPMAC_INSERTEFFECTBEFORE
+        MENUITEM "Insert effect &after",        ID_POPUPMAC_INSERTEFFECTAFTER
+        MENUITEM "&Delete machine",             ID_POPUPMAC_DELETEMACHINE
         MENUITEM SEPARATOR
-        MENUITEM "Mute",                        ID_POPUPMAC_MUTE
-        MENUITEM "Solo",                        ID_POPUPMAC_SOLO
-        MENUITEM "Bypass",                      ID_POPUPMAC_BYPASS
+        MENUITEM "&Mute",                       ID_POPUPMAC_MUTE
+        MENUITEM "&Solo",                       ID_POPUPMAC_SOLO
+        MENUITEM "&Bypass",                     ID_POPUPMAC_BYPASS
     END
 END
 
@@ -1432,9 +1432,10 @@ BEGIN
     PUSHBUTTON      "Exchange",IDC_EXCHANGE,195,93,55,15
     PUSHBUTTON      "Clone",IDC_CLONEMACHINE,195,113,55,15
     PUSHBUTTON      "Show master",IDC_SHOW_MASTER,195,134,55,15
-    CONTROL         "Generators",IDC_RADIO_GEN,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | WS_GROUP | WS_TABSTOP,11,257,76,15
-    CONTROL         "Effects",IDC_RADIO_EFX,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,93,257,76,15
-    CONTROL         "Instruments",IDC_RADIO_INS,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,175,257,76,15
+    CONTROL         "Generators",IDC_RADIO_GEN,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE | WS_GROUP | WS_TABSTOP,11,257,56,15
+    CONTROL         "Effects",IDC_RADIO_EFX,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,72,257,56,15
+    CONTROL         "Instruments",IDC_RADIO_INS,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,131,257,56,15
+    CONTROL         "Waves",IDC_RADIO_WAVES,"Button",BS_AUTORADIOBUTTON | BS_PUSHLIKE,191,257,56,15
 END
 
 IDD_SAVEWAVDLG DIALOGEX 0, 0, 257, 357
@@ -1982,11 +1983,8 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
 CAPTION "(1)Sampler Instruments"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "<<",IDC_INST_DECTEN,13,6,16,12,BS_ICON | BS_NOTIFY | BS_FLAT
-    PUSHBUTTON      "<",IDC_INST_DECONE,30,6,16,12,BS_ICON | BS_NOTIFY | BS_FLAT
-    LTEXT           "",IDC_INSTRUMENT_LABEL,49,6,88,12,SS_CENTERIMAGE | SS_SUNKEN | NOT WS_GROUP
-    PUSHBUTTON      ">",IDC_INST_ADDONE,140,6,16,12,BS_ICON | BS_NOTIFY | BS_FLAT
-    PUSHBUTTON      ">>",IDC_INST_ADDTEN,157,6,16,12,BS_ICON | BS_NOTIFY | BS_FLAT
+    PUSHBUTTON      "<",IDC_INST_DECONE,145,6,16,12,BS_ICON | BS_NOTIFY | BS_FLAT
+    PUSHBUTTON      ">",IDC_INST_ADDONE,162,6,16,12,BS_ICON | BS_NOTIFY | BS_FLAT
     PUSHBUTTON      "Delete",IDC_KILL_INSTRUMENT,188,6,36,12
     GROUPBOX        "Instrument Properties",IDC_STATIC,7,20,218,263
     CONTROL         "Always play this instrument with the sampler(Hex)",IDC_LOCKINST,
@@ -2068,6 +2066,7 @@ BEGIN
     RTEXT           "Mod. Amount",IDC_STATIC,238,267,46,12,SS_CENTERIMAGE
     CONTROL         "",IDC_SLIDER_FILAMT,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,285,267,184,12
     LTEXT           "Static",IDC_F_AMOUNTLABEL,473,266,37,12,SS_CENTERIMAGE
+    COMBOBOX        IDC_SAMPINST_CMB,18,6,123,14,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_INSTRUMENTUI DIALOGEX 0, 0, 375, 189
@@ -2976,6 +2975,8 @@ BEGIN
     BUTTON      ID_WAVED_REWIND
     BUTTON      ID_WAVED_FASTFORWARD
     SEPARATOR
+    BUTTON      ID_WAVEED_LOAD
+    BUTTON      ID_WAVEED_SAVE
     BUTTON      ID_WAVEEDIT_COMBO_WAV
     SEPARATOR
     BUTTON      ID_WAVEED_WAVEMIN

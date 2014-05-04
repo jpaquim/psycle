@@ -352,7 +352,7 @@ namespace psycle { namespace host {
 
 				int dif = (maxran-minran);
 
-				float randsem = (float)rand()*0.000030517578125f;
+				float randsem = value_mapper::map_32768_1(rand());
 
 				float roffset = randsem*(float)dif;
 

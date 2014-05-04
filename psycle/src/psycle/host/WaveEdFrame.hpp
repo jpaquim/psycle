@@ -52,6 +52,7 @@ namespace psycle { namespace host {
 			afx_msg void OnUpdateFFandRWButtons(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateWaveMinus(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateWavePlus(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateFileSave(CCmdUI* pCmdUI);
 			afx_msg void OnCloseupCmbWave();
 			afx_msg void OnWaveMinus();
 			afx_msg void OnWavePlus();
@@ -65,6 +66,8 @@ namespace psycle { namespace host {
 			afx_msg void OnStop();
 			afx_msg void OnFastForward();
 			afx_msg void OnRewind();
+			afx_msg void OnFileLoad();
+			afx_msg void OnFileSave();
 		};
 
 	}   // namespace

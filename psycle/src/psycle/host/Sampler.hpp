@@ -117,7 +117,7 @@ namespace psycle
 			virtual void SetSampleRate(int sr);
 			virtual bool NeedsAuxColumn() { return true; }
 			virtual const char* AuxColumnName(int idx) const;
-			virtual int NumAuxColumnIndexes() { return MAX_INSTRUMENTS-1; } // last instrument is the preview instrument
+			virtual int NumAuxColumnIndexes();
 			virtual bool playsTrack(const int track) const;
 
 			void StopInstrument(int insIdx);

@@ -21,12 +21,14 @@ namespace psycle { namespace helpers { namespace dsp {
 	Slider::Slider()
 		:m_source(0.0f)
 		,m_target(0.f)
+		,m_diff(0.f)
 		,m_position(0)
 	{
 	}
 	void Slider::ResetTo(float target)
 	{
 		m_source=m_target=target;
+		m_diff=0.f;
 		m_position=0;
 	}
 	void Slider::SetTarget(float target)
@@ -37,6 +39,7 @@ namespace psycle { namespace helpers { namespace dsp {
 				m_source=m_target;
 			}
 			m_target=target;
+			m_diff=m_target-m_source;
 		}
 	}
 }}}

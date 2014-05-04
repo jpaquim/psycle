@@ -470,6 +470,8 @@ namespace psycle
 				public:///\todo private:
 					///\todo this was a std::string in v1.9
 					char _editName[32];
+				protected:
+					int _auxIndex;
 
 				public:
 					virtual const char* const GetName(void) const = 0;
@@ -480,6 +482,8 @@ namespace psycle
 					virtual bool NeedsAuxColumn() { return false; }
 					virtual const char* AuxColumnName(int idx) const {return ""; }
 					virtual int NumAuxColumnIndexes() { return 0;}
+					virtual int AuxColumnIndex() { return _auxIndex;}
+					virtual void AuxColumnIndex(int index) { _auxIndex=index; }
 			///\}
 
 			///\name parameters

@@ -53,7 +53,7 @@ void XMSamplerUIInst::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(XMSamplerUIInst, CPropertyPage)
 	ON_LBN_SELCHANGE(IDC_INSTRUMENTLIST, OnLbnSelchangeInstrumentlist)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_XMINST_TAB, &OnTcnSelchangeTab1)
-	ON_NOTIFY(TCN_SELCHANGING, IDC_XMINST_TAB, &OnTcnSelchangingTab1)
+//	ON_NOTIFY(TCN_SELCHANGING, IDC_XMINST_TAB, &OnTcnSelchangingTab1)
 	ON_BN_CLICKED(IDC_LOADINS, OnBnClickedLoadins)
 	ON_BN_CLICKED(IDC_SAVEINS, OnBnClickedSaveins)
 	ON_BN_CLICKED(IDC_DUPEINS, OnBnClickedDupeins)
@@ -232,9 +232,12 @@ void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 	if(m_bInitialized)
 	{
 		m_bInitialized = false;
+		int prevsize=Global::song().xminstruments.size();
 		SetInstrumentData(m_InstrumentList.GetCurSel());
 		CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+		Global::song().auxcolSelected = m_InstrumentList.GetCurSel();
 		win->ChangeIns(m_InstrumentList.GetCurSel());
+		win->UpdateComboIns(prevsize!=Global::song().xminstruments.size());
 		m_bInitialized = true;
 	}
 }
@@ -264,74 +267,37 @@ void XMSamplerUIInst::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	*pResult = 0;
 }
-
+/*
 void XMSamplerUIInst::OnTcnSelchangingTab1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: Add your control notification handler code here
 	*pResult = 0;
 }
-
+*/
 			
 void XMSamplerUIInst::OnBnClickedLoadins()
 {
-	OPENFILENAME ofn; // common dialog box structure
-	char szFile[_MAX_PATH]; // buffer for file name
-	szFile[0]='\0';
-	// Initialize OPENFILENAME
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = this->m_hWnd;
-	ofn.lpstrFile = szFile;
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter =
-		"All Instrument types (*.xi *.iti" "\0" "*.xi;*.iti;" "\0"
-		"FastTracker II Instruments (*.xi)"              "\0" "*.xi"                  "\0"
-		"Impulse Tracker Instruments (*.iti)"             "\0" "*.iti"                  "\0"
-		"All (*)"                                  "\0" "*"                     "\0"
-		;
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
-	ofn.lpstrInitialDir = tmpstr.c_str();
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-	// Display the Open dialog box. 
-	if (GetOpenFileName(&ofn)==TRUE)
-	{
-		CString str = ofn.lpstrFile;
-		int index = str.ReverseFind('.');
-		if (index != -1)
-		{
-			CString ext = str.Mid(index+1);
-			if (ext.CompareNoCase("XI") == 0)
-			{
-				XMSongLoader xmsong;
-				xmsong.Open(ofn.lpstrFile);
-				xmsong.LoadInstrumentFromFile(Global::song(),m_iCurrentSelected);
-				xmsong.Close();
-			}
-			else if (ext.CompareNoCase("ITI") == 0)
-			{
-				ITModule2 itsong;
-				itsong.Open(ofn.lpstrFile);
-				itsong.LoadInstrumentFromFile(Global::song(),m_iCurrentSelected);
-				itsong.Close();
-			}
-			SetInstrumentData(m_iCurrentSelected);
-			char line[48];
-			const XMInstrument& inst = Global::song().xminstruments[m_iCurrentSelected];
-			sprintf(line,"%02X%s: ",m_iCurrentSelected,inst.IsEnabled()?"*":" ");
-			strcat(line,inst.Name().c_str());
-			m_InstrumentList.DeleteString(m_iCurrentSelected);
-			m_InstrumentList.InsertString(m_iCurrentSelected,line);
-			//TODO: Needs to do XMSamplerUISample.WaveUpdate();
-		}
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	bool loaded = win->LoadInst(m_iCurrentSelected);
+
+	if (loaded) {
+		SetInstrumentData(m_iCurrentSelected);
+		char line[48];
+		const XMInstrument& inst = Global::song().xminstruments[m_iCurrentSelected];
+		sprintf(line,"%02X%s: ",m_iCurrentSelected,inst.IsEnabled()?"*":" ");
+		strcat(line,inst.Name().c_str());
+		m_InstrumentList.DeleteString(m_iCurrentSelected);
+		m_InstrumentList.InsertString(m_iCurrentSelected,line);
+		win->UpdateComboIns();
+		win->WaveEditorBackUpdate();
+		win->RedrawGearRackList();
 	}
 }
 
 void XMSamplerUIInst::OnBnClickedSaveins()
 {
-	///\todo Agregue aquí su código de controlador de notificación de control
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	win->SaveInst(m_iCurrentSelected);
 }
 
 void XMSamplerUIInst::OnBnClickedDupeins()
@@ -353,6 +319,7 @@ void XMSamplerUIInst::OnBnClickedDeleteins()
 {
 	XMInstrument & inst = Global::song().xminstruments.get(m_InstrumentList.GetCurSel());
 	if (inst.IsEnabled()) {
+		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		std::set<int> sampNums =  inst.GetWavesUsed();
 		if (sampNums.size() > 0) {
 			int result = MessageBox(_T("This instrument uses one or more samples. Do you want to ALSO delete the samples?"),
@@ -361,8 +328,6 @@ void XMSamplerUIInst::OnBnClickedDeleteins()
 				for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
 					Global::song().samples.RemoveAt(*it);
 				}
-				InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
-				parent->UpdateUI();
 			}
 			else if (result == IDCANCEL) {
 				return;

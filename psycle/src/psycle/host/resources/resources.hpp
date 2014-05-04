@@ -617,6 +617,8 @@
 #define IDC_RADIO_INS                   1524
 #define IDC_PROGRESS1                   1524
 #define IDC_CLONE                       1525
+#define IDC_RADIO_INS2                  1525
+#define IDC_RADIO_WAVES                 1525
 #define IDC_CHECK_ALLOW                 1526
 #define IDC_COMBO_RATE                  1528
 #define IDC_CONTROL_PANEL               1529
@@ -911,7 +913,6 @@
 #define IDC_INCREASENOTE                2112
 #define IDC_INST_DECONE                 2113
 #define IDC_INST_DECTEN                 2114
-#define IDC_INSTRUMENT_LABEL            2115
 #define IDC_SLIDERVOL                   2116
 #define IDC_PANSLIDER                   2117
 #define IDC_SLIDERFINE                  2118
@@ -957,6 +958,7 @@
 #define IDC_PAT_NUMLINES                2159
 #define IDC_INSTR_SETSAMPLES_0          2160
 #define IDC_INSTR_SETSAMPLES_255        2415
+#define IDC_SAMPINST_CMB                2416
 #define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1153,7 +1155,9 @@
 #define ID_CONNECTTO_MACHINE0           34342
 #define ID_CONNECTTO_MACHINE64          34406
 #define ID_CONNECTIONS_CONNECTION0      34407
-#define ID_CONNECTIONS_CONNECTION12     34419
+#define ID_CONNECTIONS_CONNECTION24     34431
+#define ID_WAVEED_LOAD                  34433
+#define ID_WAVEED_SAVE                  34434
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1162,8 +1166,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         34420
-#define _APS_NEXT_CONTROL_VALUE         2416
+#define _APS_NEXT_COMMAND_VALUE         34435
+#define _APS_NEXT_CONTROL_VALUE         2417
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

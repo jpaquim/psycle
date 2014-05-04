@@ -988,7 +988,7 @@ namespace host{
 			inst.AmpEnvelope().IsEnabled(true);
 			// In FastTracker, the volume fade only works if the envelope is activated, so we only calculate
 			// volumefadespeed in this case, so that a check during playback time is not needed.
-			inst.VolumeFadeSpeed((float)sampleHeader.volfade / 32768.0f);
+			inst.VolumeFadeSpeed(value_mapper::map_32768_1(sampleHeader.volfade));
 			
 			int envelope_point_num = sampleHeader.vnum;
 			if(envelope_point_num > 12){ // Max number of envelope points in Fasttracker format is 12.

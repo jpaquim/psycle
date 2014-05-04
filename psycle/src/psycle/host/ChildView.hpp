@@ -240,8 +240,6 @@ namespace host {
 			int TEXTWIDTH;
 			int TEXTHEIGHT;
 			int HEADER_INDENT;
-			int HEADER_HEIGHT;
-			int HEADER_ROWWIDTH;
 			int CH;
 			int CW;
 			int VISTRACKS;
@@ -279,6 +277,7 @@ namespace host {
 			void PreparePatternRefresh(int drawMode);
 			void SetPatternScrollBars(int snt, int plines);
 			void DrawPatEditor(CDC *devc);
+			void DrawPatternHeader(CDC *devc,int xOffsetIni,int iFirstIni, int iLastIni);
 			void DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
 		//	void DrawMultiPatternData(CDC *devc,int tstart,int tend, int lstart, int lend);
 			inline void OutNote(CDC *devc,int x,int y,int note);
@@ -286,6 +285,7 @@ namespace host {
 			inline void OutData4(CDC *devc,int x,int y,unsigned char data,bool trflag);
 			inline void TXT(CDC *devc,char const *txt, int x,int y,int w,int h);
 			inline void TXTFLAT(CDC *devc,char const *txt, int x,int y,int w,int h);
+			inline void TXTTRANS(CDC *devc,char const *txt, int x,int y,int w,int h);
 			void DrawMachineVol(int c, CDC *devc);
 			void DrawMachineVumeters(int c, CDC *devc);	
 			void DrawAllMachineVumeters(CDC *devc);	
@@ -301,10 +301,28 @@ namespace host {
 			void NewPatternDraw(int drawTrackStart, int drawTrackEnd, int drawLineStart, int drawLineEnd);
 			void RecalculateColour(COLORREF* pDest, COLORREF source1, COLORREF source2);
 			COLORREF ColourDiffAdd(COLORREF base, COLORREF adjust, COLORREF add);
+			void ShowTrackNames(bool show);
 			void FindPatternHeaderSkin(CString findDir, CString findName, BOOL *result);
 			void FindMachineSkin(CString findDir, CString findName, BOOL *result);
 			void PrepareMask(CBitmap* pBmpSource, CBitmap* pBmpMask, COLORREF clrTrans);
-			void TransparentBlt(CDC* pDC, int xStart,  int yStart, int wWidth,  int wHeight, CDC* pTmpDC, CBitmap* bmpMask, int xSource = 0, int ySource = 0);
+			void TransparentBlt(CDC* pDC, int xDest,  int yDest, int wWidth,  int wHeight, CDC* pSkinDC, CBitmap* bmpMask, int xSrcOff = 0, int ySrcOff = 0);
+			inline void TransparentBltSkin(CDC* pDC, SSkinSource ssource, CDC* pSkinDC, CBitmap* bmpMask, int xSrcOff=0, int ySrcOff=0, int xDstOff=0, int yDstOff=0) 
+			{
+				TransparentBlt(pDC,xDstOff, yDstOff, ssource.width, ssource.height, pSkinDC, bmpMask, ssource.x+xSrcOff, ssource.y+ySrcOff);
+			}
+			inline void TransparentBltSkin(CDC* pDC, SSkinSource ssource, SSkinDest sdest, CDC* pSkinDC, CBitmap* bmpMask, int xSrcOff=0, int ySrcOff=0, int xDstOff=0, int yDstOff=0) 
+			{
+				TransparentBlt(pDC,sdest.x+xDstOff, sdest.y+yDstOff, ssource.width, ssource.height, pSkinDC, bmpMask, ssource.x+xSrcOff, ssource.y+ySrcOff);
+			}
+			inline void BitBltSkin(CDC* pDC, SSkinSource ssource, CDC* pSkinDC, int xSrcOff=0, int ySrcOff=0, int xDstOff=0, int yDstOff=0) 
+			{
+				pDC->BitBlt(xDstOff, yDstOff, ssource.width, ssource.height, pSkinDC, ssource.x+xSrcOff, ssource.y+ySrcOff, SRCCOPY);
+			}
+			inline void BitBltSkin(CDC* pDC, SSkinSource ssource, SSkinDest sdest, CDC* pSkinDC, int xSrcOff=0, int ySrcOff=0, int xDstOff=0, int yDstOff=0) 
+			{
+				pDC->BitBlt(sdest.x+xDstOff, sdest.y+yDstOff, ssource.width, ssource.height, pSkinDC, ssource.x+xSrcOff, ssource.y+ySrcOff, SRCCOPY);
+			}
+
 			void DrawSeqEditor(CDC *devc);
 
 			int _ps();
@@ -357,6 +375,7 @@ namespace host {
 			int wireDY;
 			bool allowcontextmenu;
 			int popupmacidx;
+			CPoint trackingpoint;
 
 			int maxt;		// num of tracks shown
 			int maxl;		// num of lines shown
@@ -367,6 +386,9 @@ namespace host {
 			int scrollDelay; //Used to slow down the scroll.
 			int rntOff;
 			int rnlOff;
+			int trackingMuteTrack;
+			int trackingRecordTrack;
+			int trackingSoloTrack;
 
 			CCursor iniSelec;
 			CSelection blockSel;
@@ -479,9 +501,18 @@ namespace host {
 			afx_msg void OnPopMacMute();
 			afx_msg void OnPopMacSolo();
 			afx_msg void OnPopMacBypass();
+			afx_msg void OnUpdateMacOpenParams(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacReplace(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacClone(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacInsertBefore(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacInsertAfter(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacDelete(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMacMute(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMacSolo(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMacBypass(CCmdUI* pCmdUI);
+			afx_msg void FillConnectToPopup(CMenu* pPopup);
+			afx_msg void FillConnectionsPopup(CMenu* pPopupMenu);
+			afx_msg bool DeleteSubmenu(CMenu* popMenu);
 			afx_msg void OnAutostop();
 			afx_msg void OnUpdateAutostop(CCmdUI* pCmdUI);
 			afx_msg void OnPopTransformpattern();
@@ -585,6 +616,15 @@ namespace host {
 			Rect.right=x+w;
 			Rect.bottom=y+h;
 			devc->ExtTextOut(x+textLeftEdge,y,ETO_OPAQUE | ETO_CLIPPED ,Rect,txt,NULL);
+		}
+		inline void CChildView::TXTTRANS(CDC *devc,char const *txt, int x,int y,int w,int h)
+		{
+			CRect Rect;
+			Rect.left=x;
+			Rect.top=y;
+			Rect.right=x+w;
+			Rect.bottom=y+h;
+			devc->ExtTextOut(x+textLeftEdge,y, ETO_CLIPPED ,Rect,txt,NULL);
 		}
 
 		// song data

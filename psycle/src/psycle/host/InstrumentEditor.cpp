@@ -31,13 +31,13 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			DDX_Control(pDX, IDC_RPAN, m_rpan_check);
 			DDX_Control(pDX, IDC_RCUT, m_rcut_check);
 			DDX_Control(pDX, IDC_NNA_COMBO, m_nna_combo);			
+			DDX_Control(pDX, IDC_SAMPINST_CMB, m_sampins_combo);			
 			DDX_Control(pDX, IDC_LOCKINSTNUMBER, m_lockinstnumber);
 			DDX_Control(pDX, IDC_SLIDERVOL, m_volumebar);
 			DDX_Control(pDX, IDC_WAVELENGTH, m_wlen);
 			DDX_Control(pDX, IDC_LOOPSTART, m_loopstart);
 			DDX_Control(pDX, IDC_LOOPEND, m_loopend);
 			DDX_Control(pDX, IDC_LOOPTYPE, m_looptype);
-			DDX_Control(pDX, IDC_INSTRUMENT_LABEL, m_instlabel);
 			DDX_Control(pDX, IDC_COMBOFILTER, m_filtercombo);
 			DDX_Control(pDX, IDC_SLIDER_FRES, m_q_slider);
 			DDX_Control(pDX, IDC_SLIDER_FCUT, m_cutoff_slider);
@@ -61,10 +61,11 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			ON_EN_CHANGE(IDC_LOCKINSTNUMBER, OnChangeLockInst)
 			ON_EN_CHANGE(IDC_SAMPLERATE, OnEnChangeSamplerate)
 			ON_CBN_SELCHANGE(IDC_NNA_COMBO, OnSelchangeNnaCombo)
-			ON_BN_CLICKED(IDC_INST_DECTEN, OnPrevTenInstrument)
+			ON_CBN_SELENDOK(IDC_SAMPINST_CMB, OnCbnSelendokInstrument)
 			ON_BN_CLICKED(IDC_INST_DECONE, OnPrevInstrument)
 			ON_BN_CLICKED(IDC_INST_ADDONE, OnNextInstrument)
-			ON_BN_CLICKED(IDC_INST_ADDTEN, OnNextTenInstrument)
+			ON_BN_DOUBLECLICKED(IDC_INST_DECONE, OnPrevInstrument)
+			ON_BN_DOUBLECLICKED(IDC_INST_ADDONE, OnNextInstrument)
 			ON_BN_CLICKED(IDC_LOCKINST, OnLockinst)
 			ON_BN_CLICKED(IDC_RPAN, OnRpan)
 			ON_BN_CLICKED(IDC_RCUT, OnRcut)
@@ -94,6 +95,9 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			CPropertyPage::OnInitDialog();
 		
+			((CButton*)GetDlgItem(IDC_INST_DECONE))->SetIcon(PsycleGlobal::conf().iconless);
+			((CButton*)GetDlgItem(IDC_INST_ADDONE))->SetIcon(PsycleGlobal::conf().iconmore);
+
 			m_nna_combo.AddString("Note Cut");
 			m_nna_combo.AddString("Note Release");
 			m_nna_combo.AddString("None");
@@ -157,23 +161,19 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		}
 		void CInstrumentEditor::WaveUpdate()
 		{
-			const int si = Global::song().instSelected;
+			const int si = Global::song().waveSelected;
 			Instrument *pins = Global::song()._pInstrument[si];
 			XMInstrument::WaveData<> wavetmp;
 			bool enabled = Global::song().samples.IsEnabled(si);
 			const XMInstrument::WaveData<>& wave = (enabled) ? Global::song().samples[si] : wavetmp;
 
-			char buffer[64];
-			// Set instrument current selected label
-			sprintf(buffer, enabled?"%.2X*:%s":"%.2X :%s", si, wave.WaveName().c_str());
-			m_instlabel.SetWindowText(buffer);
 
-			char buffer2[64];
+			char buffer[64];
 			if (pins->_lock_instrument_to_machine < 0) {
 				m_lockinstnumber.SetWindowText("");
 			} else {
-				sprintf(buffer2, "%.2X", pins->_lock_instrument_to_machine);
-				m_lockinstnumber.SetWindowText(buffer2);
+				sprintf(buffer, "%.2X", pins->_lock_instrument_to_machine);
+				m_lockinstnumber.SetWindowText(buffer);
 			}
 
 			if (pins->_LOCKINST) {
@@ -183,7 +183,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				m_lockinst.SetCheck(BST_UNCHECKED);
 				m_lockinstnumber.EnableWindow(false);
 			}
-
+			UpdateWavesCombo();
 
 			UpdateComboNNA();
 
@@ -237,9 +237,28 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			RefreshEnvelopes();
 		}
 
+		void CInstrumentEditor::UpdateWavesCombo()
+		{
+			char line[48];
+			const SampleList& list = Global::song().samples;
+			m_sampins_combo.ResetContent();
+			for (int i=0;i<list.size();i++)
+			{
+				if (list.Exists(i)) {
+					const XMInstrument::WaveData<>& wave = list[i];
+					sprintf(line,"%02X%s: ",i,wave.WaveLength()>0?"*":" ");
+					strncat(line,wave.WaveName().c_str(),40);
+				}
+				else {
+					sprintf(line,"%02X : ",i);
+				}
+				m_sampins_combo.AddString(line);
+			}
+			m_sampins_combo.SetCurSel(Global::song().waveSelected);
+		}
 		void CInstrumentEditor::RefreshEnvelopes()
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			// Update sliders (envelope graphic is updated from the oncustomdrawslider event).
 			m_a_attack_slider.SetPos(pins->ENV_AT/220.5);//Reduced original range from samples to 5 milliseconds
 			m_a_decay_slider.SetPos(pins->ENV_DT/220.5);//Reduced original range from samples to 5 milliseconds
@@ -257,7 +276,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		LRESULT CInstrumentEditor::OnEnvelopeChanged(WPARAM wParam, LPARAM lParam)
 		{
 		    UNREFERENCED_PARAMETER(lParam);
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			int envIdx = wParam;
 			if (envIdx == 0) { //amp
 				pins->ENV_AT = m_ampframe.AttackTime()*220.5;
@@ -268,7 +287,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			else { //filter
 				pins->ENV_F_AT = m_filframe.AttackTime()*220.5;
 				pins->ENV_F_DT = m_filframe.DecayTime()*220.5;
-				pins->ENV_F_SL = m_filframe.SustainValue()*128.f;
+				pins->ENV_F_SL = value_mapper::map_1_128<int>(m_filframe.SustainValue());
 				pins->ENV_F_RT = m_filframe.ReleaseTime()*220.5;
 			}
 			RefreshEnvelopes();
@@ -315,17 +334,17 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::SliderFilterCut(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_CO = the_slider.GetPos();
 		}
 		void CInstrumentEditor::SliderFilterRes(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_RQ = the_slider.GetPos();
 		}
 		void CInstrumentEditor::SliderVolume(CSliderCtrl& the_slider)
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				float invol = helpers::dsp::SliderToAmountHoriz(the_slider.GetPos());
 				Global::song().samples.get(si).WaveGlobVolume(invol);
@@ -333,107 +352,109 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		}
 		void CInstrumentEditor::SliderPan(CSliderCtrl& the_slider)
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
-				 Global::song().samples.get(si).PanFactor(the_slider.GetPos()/128.f);
+				 Global::song().samples.get(si).PanFactor(value_mapper::map_128_1(the_slider.GetPos()));
 			}
 		}
 		void CInstrumentEditor::SliderFinetune(CSliderCtrl& the_slider)
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				 Global::song().samples.get(si).WaveFineTune(the_slider.GetPos());
 			}
 		}
 		void CInstrumentEditor::SliderAmpAtt(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_AT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderAmpDec(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_DT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderAmpSus(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_SL = the_slider.GetPos();
 		}
 		void CInstrumentEditor::SliderAmpRel(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_RT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderFilterAtt(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_AT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderFilterDec(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_DT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderFilterSus(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_SL = the_slider.GetPos();
 		}
 		void CInstrumentEditor::SliderFilterRel(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_RT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
 		}
 		void CInstrumentEditor::SliderFilterMod(CSliderCtrl& the_slider)
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_EA = the_slider.GetPos();
 		}
 
-
 		//////////////////////////////////////////////////////////////////////
 		// GUI Handlers
-		void CInstrumentEditor::OnPrevTenInstrument() 
+		void CInstrumentEditor::OnCbnSelendokInstrument()
 		{
-			const int si=Global::song().instSelected;
-			if(si>9)
-			{
+			const int si=m_sampins_combo.GetCurSel();
+			if (si != Global::song().waveSelected) {
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-				win->ChangeIns(si-10);
-				win->ChangeWave(si-10);
+				win->ChangeWave(si);
+				Global::song().auxcolSelected=si;
+				win->UpdateComboIns(false);
 			}
 		}
 
 		void CInstrumentEditor::OnPrevInstrument() 
 		{
-			const int si=Global::song().instSelected;
+			const int si=Global::song().waveSelected;
 			if(si>0)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-				win->ChangeIns(si-1);
 				win->ChangeWave(si-1);
+				Global::song().auxcolSelected=si-1;
+				win->UpdateComboIns(false);
 			}
 		}
 
 		void CInstrumentEditor::OnNextInstrument() 
 		{
-			const int si=Global::song().instSelected;
-			if(si<254)
+			const int si=Global::song().waveSelected;
+			if(si<MAX_INSTRUMENTS)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-				win->ChangeIns(si+1);
-				win->ChangeWave(si+1);
-			}
-		}
-		void CInstrumentEditor::OnNextTenInstrument() 
-		{
-			const int si=Global::song().instSelected;
-			if(si<245)
-			{
-				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-				win->ChangeIns(si+10);
-				win->ChangeWave(si+10);
+				if (Global::song().samples.size() <= si+1) {
+					XMInstrument::WaveData<> wave;
+					wave.Init();
+					Global::song().samples.SetSample(wave,si+1);
+					UpdateWavesCombo();
+					Global::song().auxcolSelected=si+1;
+					win->ChangeWave(si+1);
+					win->UpdateComboIns(true);
+				}
+				else {
+					Global::song().auxcolSelected=si+1;
+					win->ChangeWave(si+1);
+					win->UpdateComboIns(false);
+				}
 			}
 		}
 		
@@ -441,7 +462,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			{
 				CExclusiveLock lock(&Global::song().semaphore, 2, true);
-				Global::song().DeleteInstrument(Global::song().instSelected);
+				Global::song().DeleteInstrument(Global::song().waveSelected);
 			}
 			CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 			win->UpdateComboIns();
@@ -453,13 +474,13 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnLockinst()
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			Global::song()._pInstrument[si]->_LOCKINST = static_cast<bool>(m_lockinst.GetCheck());
 			m_lockinstnumber.EnableWindow(Global::song()._pInstrument[si]->_LOCKINST);
 		}
 		void CInstrumentEditor::OnChangeLockInst()
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			char buffer[32];
 			sprintf(buffer,"\0");
 			m_lockinstnumber.GetWindowText(buffer, 16);
@@ -479,12 +500,12 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnSelchangeNnaCombo() 
 		{
-			Global::song()._pInstrument[Global::song().instSelected]->_NNA = m_nna_combo.GetCurSel();	
+			Global::song()._pInstrument[Global::song().waveSelected]->_NNA = m_nna_combo.GetCurSel();	
 		}
 
 		void CInstrumentEditor::OnLoopCheck() 
 		{
-			int si=Global::song().instSelected;
+			int si=Global::song().waveSelected;
 			bool looped = static_cast<bool>(m_loopcheck.GetCheck());
 			Global::song()._pInstrument[si]->_loop = looped;
 			m_loopedit.EnableWindow(looped);
@@ -492,7 +513,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnChangeLoopedit() 
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			CString buffer;
 			m_loopedit.GetWindowText(buffer);
 			Global::song()._pInstrument[si]->_lines = atoi(buffer);
@@ -504,19 +525,19 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnRpan() 
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			Global::song()._pInstrument[si]->_RPAN = static_cast<bool>(m_rpan_check.GetCheck());
 		}
 
 		void CInstrumentEditor::OnRcut() 
 		{
-			int si=Global::song().instSelected;
+			int si=Global::song().waveSelected;
 			Global::song()._pInstrument[si]->_RCUT = static_cast<bool>(m_rcut_check.GetCheck());
 		}
 
 		void CInstrumentEditor::OnRres() 
 		{
-			int si=Global::song().instSelected;
+			int si=Global::song().waveSelected;
 			
 			Global::song()._pInstrument[si]->_RRES = static_cast<bool>(m_rres_check.GetCheck());
 		}
@@ -524,13 +545,13 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnSelchangeFilterType() 
 		{
-			Instrument* pins = Global::song()._pInstrument[Global::song().instSelected];
+			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_TP = static_cast<dsp::FilterType>(m_filtercombo.GetCurSel());
 		}
 
 		void CInstrumentEditor::OnInsDecoctave() 
 		{
-			const int si=Global::song().instSelected;
+			const int si=Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
 
@@ -543,7 +564,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnInsDecnote() 
 		{
-			const int si=Global::song().instSelected;
+			const int si=Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
 				if ( wave.WaveTune()>-47)
@@ -555,7 +576,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnInsIncnote() 
 		{
-			const int si=Global::song().instSelected;
+			const int si=Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
 				if ( wave.WaveTune()<70)
@@ -567,7 +588,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnInsIncoctave() 
 		{
-			const int si=Global::song().instSelected;
+			const int si=Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
 				if ( wave.WaveTune()<60)
@@ -579,7 +600,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnLoopoff() 
 		{
-			int si = Global::song().instSelected;
+			int si = Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
 				if(wave.WaveLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL)
@@ -592,7 +613,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnLoopforward() 
 		{
-			int si=Global::song().instSelected;
+			int si=Global::song().waveSelected;
 			if (Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
 				if(wave.WaveLoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT)
@@ -604,7 +625,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		}
 		void CInstrumentEditor::OnEnChangeSamplerate()
 		{
-			int si=Global::song().instSelected;
+			int si=Global::song().waveSelected;
 			char tmp[40];
 			if ( !initializingDialog  && Global::song().samples.Exists(si)) {
 				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
@@ -618,7 +639,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		
 		void CInstrumentEditor::UpdateComboNNA() 
 		{
-			switch(Global::song()._pInstrument[Global::song().instSelected]->_NNA)
+			switch(Global::song()._pInstrument[Global::song().waveSelected]->_NNA)
 			{
 			case 0:m_nna_combo.SelectString(0,"Note Cut");break;
 			case 1:m_nna_combo.SelectString(0,"Note Release");break;
@@ -628,7 +649,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::UpdateNoteLabel()
 		{
-			const int si = Global::song().instSelected;
+			const int si = Global::song().waveSelected;
 			char buffer[64];
 			if (Global::song().samples.Exists(si)) {
 				const XMInstrument::WaveData<>& wave = Global::song().samples[si];
@@ -661,7 +682,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				char buffer[64];
 				int label = 0;
 				CSliderCtrl* slider = reinterpret_cast<CSliderCtrl*>(GetDlgItem(pNMHDR->idFrom));
-				int si=Global::song().instSelected;
+				int si=Global::song().waveSelected;
 				int nPos = slider->GetPos();
 				if (pNMHDR->idFrom == IDC_SLIDER_FCUT) {
 					sprintf(buffer,"%.0f",2333.0*pow(6.0,nPos/127.0));
@@ -747,7 +768,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 					label = IDC_F_D_LABEL;
 				}
 				else if (pNMHDR->idFrom == IDC_SLIDER_FILSUS) {
-					m_filframe.SustainValue((float)nPos*0.0078125f);
+					m_filframe.SustainValue(value_mapper::map_128_1(nPos));
 					m_filframe.Invalidate();
 					sprintf(buffer,"%d%%",nPos);
 					label = IDC_F_S_LABEL;

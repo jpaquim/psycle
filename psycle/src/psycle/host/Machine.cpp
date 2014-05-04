@@ -201,11 +201,13 @@ namespace psycle
 			_mode=mode;
 			_macIndex=id;
 			_sharedBuf=false;
+			_auxIndex = 0;
 		}
 
 		Machine::Machine()
 			: crashed_()
 			, _macIndex(0)
+			, _auxIndex(0)
 			, _type(MACH_UNDEFINED)
 			, _mode(MACHMODE_UNDEFINED)
 			, _bypass(false)
@@ -274,6 +276,7 @@ namespace psycle
 		Machine::Machine(Machine* mac)
 			: crashed_()
 			, _macIndex(mac->_macIndex)
+			, _auxIndex(mac->_auxIndex)
 			, _type(mac->_type)
 			, _mode(mac->_mode)
 			, _bypass(mac->_bypass)

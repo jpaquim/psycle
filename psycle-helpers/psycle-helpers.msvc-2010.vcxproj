@@ -123,6 +123,7 @@
     <ClInclude Include="src\psycle\helpers\mersennetwister.hpp" />
     <ClInclude Include="src\psycle\helpers\resampler.hpp" />
     <ClInclude Include="src\psycle\helpers\sampleconverter.hpp" />
+	<ClInclude Include="src\psycle\helpers\endiantypes.hpp" />
     <ClInclude Include="src\psycle\helpers\abstractiff.hpp" />
     <ClInclude Include="src\psycle\helpers\amigasvx.hpp" />
     <ClInclude Include="src\psycle\helpers\appleaiff.hpp" />

@@ -35,7 +35,7 @@ protected:
 
 	afx_msg void OnLbnSelchangeInstrumentlist();
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnTcnSelchangingTab1(NMHDR *pNMHDR, LRESULT *pResult);
+//	afx_msg void OnTcnSelchangingTab1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedLoadins();
 	afx_msg void OnBnClickedSaveins();
 	afx_msg void OnBnClickedDupeins();

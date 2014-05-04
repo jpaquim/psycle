@@ -224,12 +224,14 @@ namespace psycle { namespace host {
 					mypoint = point;
 				}
 				if (popupmacidx != -1 ) {
+					trackingpoint = point;
 					CMenu menu;
 					VERIFY(menu.LoadMenu(IDR_POPUP_MACHINE));
 					CMenu* pPopup = menu.GetSubMenu(0);
 					ASSERT(pPopup != NULL);
-					 ///\todo: finish connection submenus
-					pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
+					FillConnectToPopup(pPopup->GetSubMenu(3));
+					FillConnectionsPopup(pPopup->GetSubMenu(4));
+					pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, GetOwner());
 					menu.DestroyMenu();
 				}
 			}
@@ -243,11 +245,12 @@ namespace psycle { namespace host {
 				}
 				else {  // Right click mouse button
 				}
+				trackingpoint= point;
 				CMenu menu;
 				VERIFY(menu.LoadMenu(IDR_POPUPMENU));
 				CMenu* pPopup = menu.GetSubMenu(0);
 				ASSERT(pPopup != NULL);
-				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, this);
+				pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, GetOwner());
 				menu.DestroyMenu();
 			}
 			CWnd::OnContextMenu(pWnd,point);
@@ -477,10 +480,9 @@ namespace psycle { namespace host {
 					int pointpos= ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
 					if (point.x < XOFFSET) // Mouse is in the "Line" column
 					{
-						PsycleGlobal::conf().patView().showTrackNames_ = !PsycleGlobal::conf().patView().showTrackNames_;
-						Repaint();
+						ShowTrackNames(!PsycleGlobal::conf().patView().showTrackNames_);
 					}
-					if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOn,PatHeaderCoords->sRecordOn))
+					if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOnTrack,PatHeaderCoords->sRecordOnTracking))
 					{
 						_pSong._trackArmed[ttm] = !_pSong._trackArmed[ttm];
 						_pSong._trackArmedCount = 0;
@@ -492,11 +494,11 @@ namespace psycle { namespace host {
 							}
 						}
 					}
-					else if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOn,PatHeaderCoords->sMuteOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOnTrack,PatHeaderCoords->sMuteOnTracking))
 					{
 						_pSong._trackMuted[ttm] = !_pSong._trackMuted[ttm];
 					}
-					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOn,PatHeaderCoords->sSoloOn))
+					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOnTrack,PatHeaderCoords->sSoloOnTracking))
 					{
 						if (Global::song()._trackSoloed != ttm )
 						{
@@ -998,6 +1000,34 @@ namespace psycle { namespace host {
 						MBStart.x += delta*ROWWIDTH;
 					}
 				}
+				else if (point.y >= 0 && point.y < YOFFSET ) // Mouse is in Track Header.
+				{	
+					int pointpos = ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
+					int trackpos = ((point.x-XOFFSET)/ROWWIDTH);
+					if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOnTrack,PatHeaderCoords->sMuteOnTracking)){
+						trackingMuteTrack=trackpos;
+						trackingRecordTrack=trackingSoloTrack=-1;
+						Repaint(draw_modes::track_header);
+					}
+					else if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOnTrack,PatHeaderCoords->sRecordOnTracking)){
+						trackingRecordTrack=trackpos;
+						trackingMuteTrack=trackingSoloTrack=-1;
+						Repaint(draw_modes::track_header);
+					}
+					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOnTrack,PatHeaderCoords->sSoloOnTracking)){
+						trackingSoloTrack=trackpos;
+						trackingMuteTrack=trackingRecordTrack=-1;
+						Repaint(draw_modes::track_header);
+					}
+					else if (trackingMuteTrack||trackingRecordTrack||trackingSoloTrack) {
+						trackingMuteTrack=trackingRecordTrack=trackingSoloTrack=-1;
+						Repaint(draw_modes::track_header);
+					}
+				}
+				else if (trackingMuteTrack||trackingRecordTrack||trackingSoloTrack) {
+					trackingMuteTrack=trackingRecordTrack=trackingSoloTrack=-1;
+					Repaint(draw_modes::track_header);
+				}
 			}//<-- End LBUTTONPRESING/VIEWMODE switch statement
 			CWnd::OnMouseMove(nFlags,point);
 		}
@@ -1391,27 +1421,157 @@ namespace psycle { namespace host {
 		}
 		void CChildView::OnPopMacOpenProperties()
 		{
+			pParentMain->ShowMachineGui(popupmacidx, trackingpoint);
 		}
 		void CChildView::OnPopMacConnecTo(UINT nID)
 		{
+			Machine *tmac = _pSong._pMachine[popupmacidx];
+			Machine *dmac = _pSong._pMachine[MAX_BUSES+nID-ID_CONNECTTO_MACHINE0];
+			int dsttype=0;
+			///\todo: for multi-io.
+			//if ( tmac->GetOutputSlotTypes() > 1 ) ask user and get index
+			///\todo: hardcoded for the Mixer machine. This needs to be extended with multi-io.
+			if ( tmac->_mode== MACHMODE_FX && dmac->GetInputSlotTypes() > 1 )
+			{
+				if (MessageBox("Should I connect this to a send/return input?","Mixer Connection",MB_YESNO) == IDYES )
+				{
+					dsttype=1;
+				}
+			}
+			if (_pSong.InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
+			{
+				MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+			}
+			Repaint();
 		}
 		void CChildView::OnPopMacShowWire(UINT nID)
 		{
+			int wireIdx = nID-ID_CONNECTIONS_CONNECTION0;
+			Machine &tmac = *_pSong._pMachine[popupmacidx];
+			Wire* w = (wireIdx < MAX_CONNECTIONS) ? &tmac.inWires[wireIdx] : tmac.outWires[wireIdx-MAX_CONNECTIONS];
+			Machine &dmac = w->GetDstMachine();
+			int free=-1;
+			for (int i = 0; i < MAX_WIRE_DIALOGS; i++)
+			{
+				if (WireDialog[i])
+				{
+					if ((WireDialog[i]->srcMachine._macIndex == tmac._macIndex) &&
+						(WireDialog[i]->dstMachine._macIndex == dmac._macIndex))  // If this is true, the dialog is already open
+					{
+						WireDialog[i]->SetFocus();
+						return;
+					}
+				}
+				else free = i;
+			}
+			if (free != -1) //If there is any dialog slot open
+			{
+				CWireDlg* wdlg = WireDialog[free] = new CWireDlg(this, &WireDialog[free], free, *w);
+				pParentMain->CenterWindowOnPoint(wdlg, trackingpoint);
+				wdlg->ShowWindow(SW_SHOW);
+				wiresource = -1;
+				return;
+			}
+			else
+			{
+				MessageBox("Cannot show the wire dialog. Too many of them opened!","Error!", MB_ICONERROR);
+			}
 		}
 		void CChildView::OnPopMacReplaceMac()
 		{
+			Machine* pMachine = _pSong._pMachine[popupmacidx];
+			NewMachine(pMachine->_x,pMachine->_y,popupmacidx);
+
+			Machine* newMac = _pSong._pMachine[popupmacidx];
+			if(newMac) {
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				Repaint();
+			}
 		}
 		void CChildView::OnPopMacCloneMac()
 		{
+			int src = popupmacidx;
+			int dst = -1;
+
+			if ((src < MAX_BUSES) && (src >=0)) {
+				dst = _pSong.GetFreeBus();
+			}
+			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES)) {
+				dst = _pSong.GetFreeFxBus();
+			}
+			if (dst >= 0)
+			{
+				if (!_pSong.CloneMac(src,dst))
+				{
+					MessageBox("Cloning failed. Is your song directory correctly configured?","Cloning failed");
+				}
+				pParentMain->UpdateComboGen(true);
+				Repaint();
+			}
 		}
 		void CChildView::OnPopMacInsertBefore()
 		{
+			int newMacidx = _pSong.GetFreeFxBus();
+			Machine* pMachine = _pSong._pMachine[popupmacidx];
+			NewMachine(pMachine->_x-16,pMachine->_y-16,newMacidx);
+
+			Machine* newMac = _pSong._pMachine[newMacidx];
+			if(newMac) {
+				CExclusiveLock lock(&_pSong.semaphore, 2, true);
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					if(pMachine->inWires[i].Enabled()) {
+						Machine& srcMac = pMachine->inWires[i].GetSrcMachine();
+						int wiresrc = srcMac.FindOutputWire(pMachine->_macIndex);
+						_pSong.ChangeWireDestMacNonBlocking(&srcMac,newMac,wiresrc,newMac->GetFreeInputWire(0));
+					}
+				}
+				_pSong.InsertConnectionNonBlocking(newMac, pMachine);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				Repaint();
+			}
 		}
 		void CChildView::OnPopMacInsertAfter()
 		{
+			int newMacidx = _pSong.GetFreeFxBus();
+			Machine* pMachine = _pSong._pMachine[popupmacidx];
+			NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
+
+			Machine* newMac = _pSong._pMachine[newMacidx];
+			if(newMac) {
+				CExclusiveLock lock(&_pSong.semaphore, 2, true);
+				for(int i = 0; i < MAX_CONNECTIONS; i++) {
+					Wire* wire = pMachine->outWires[i];
+					if(wire && wire->Enabled()) {
+						Machine& dstMac = wire->GetDstMachine();
+						int wiredst = wire->GetDstWireIndex();
+						_pSong.ChangeWireSourceMacNonBlocking(newMac,&dstMac,newMac->GetFreeOutputWire(0),wiredst);
+					}
+				}
+				_pSong.InsertConnectionNonBlocking(pMachine, newMac);
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				Repaint();
+			}
 		}
 		void CChildView::OnPopMacDeleteMachine()
 		{
+			if (MessageBox("Are you sure?","Delete Machine", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+			{
+				pParentMain->CloseMacGui(popupmacidx);
+				{
+					CExclusiveLock lock(&_pSong.semaphore, 2, true);
+					_pSong.DeleteMachineRewiring(popupmacidx);
+				}
+
+				pParentMain->UpdateEnvInfo();
+				pParentMain->UpdateComboGen();
+				if (pParentMain->pGearRackDialog)
+				{
+					pParentMain->RedrawGearRackList();
+				}
+			}
 		}
 		void CChildView::OnPopMacMute()
 		{
@@ -1424,6 +1584,13 @@ namespace psycle { namespace host {
 		}
 		void CChildView::OnPopMacSolo()
 		{
+			if (_pSong.machineSoloed == popupmacidx) {
+				_pSong.SoloMachine(-1);
+			}
+			else {
+				_pSong.SoloMachine(popupmacidx);
+			}
+			Repaint(draw_modes::all_machines);
 		}
 		void CChildView::OnPopMacBypass()
 		{
@@ -1432,6 +1599,30 @@ namespace psycle { namespace host {
 			updatePar=popupmacidx;
 			Repaint(draw_modes::machine);
 		}
+		void CChildView::OnUpdateMacOpenParams(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_MASTER );
+		}
+		void CChildView::OnUpdateMacReplace(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_MASTER );
+		}
+		void CChildView::OnUpdateMacClone(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_MASTER );
+		}
+		void CChildView::OnUpdateMacInsertBefore(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_GENERATOR );
+		}
+		void CChildView::OnUpdateMacInsertAfter(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_MASTER );
+		}
+		void CChildView::OnUpdateMacDelete(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_MASTER );
+		}
 		void CChildView::OnUpdateMacMute(CCmdUI* pCmdUI)
 		{
 			pCmdUI->SetCheck(_pSong._pMachine[popupmacidx]->_mute);
@@ -1439,7 +1630,7 @@ namespace psycle { namespace host {
 		void CChildView::OnUpdateMacSolo(CCmdUI* pCmdUI)
 		{
 			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode == MACHMODE_GENERATOR );
-			pCmdUI->SetCheck(_pSong.machineSoloed == wiresource);
+			pCmdUI->SetCheck(_pSong.machineSoloed == popupmacidx);
 		}
 		void CChildView::OnUpdateMacBypass(CCmdUI* pCmdUI)
 		{
@@ -1447,4 +1638,69 @@ namespace psycle { namespace host {
 			pCmdUI->SetCheck(_pSong._pMachine[popupmacidx]->Bypass());
 		}
 
+
+		void CChildView::FillConnectToPopup(CMenu* pPopup)
+		{
+			DeleteSubmenu(pPopup);
+			if (_pSong._pMachine[popupmacidx]->_type == MACH_MASTER)
+			{
+				return;
+			}
+
+			char s1[64];
+			for (int j=MAX_BUSES; j < 2*MAX_BUSES; ++j)
+			{
+				if (j != popupmacidx && _pSong._pMachine[j] != NULL
+						&& _pSong._pMachine[popupmacidx]->FindOutputWire(_pSong._pMachine[j]->_macIndex) == -1
+						&& _pSong._pMachine[j]->FindOutputWire(popupmacidx) == -1) {
+					std::sprintf(s1,"%02X: %s",_pSong._pMachine[j]->_macIndex,_pSong._pMachine[j]->GetEditName());
+					pPopup->AppendMenu(MF_STRING, ID_CONNECTTO_MACHINE0 + j - MAX_BUSES, s1);
+				}
+			}
+			if ( _pSong._pMachine[popupmacidx]->FindOutputWire(MASTER_INDEX) == -1) {
+				std::sprintf(s1,"%02X: %s", MASTER_INDEX,_pSong._pMachine[MASTER_INDEX]->GetName());
+				pPopup->AppendMenu(MF_STRING, ID_CONNECTTO_MACHINE64, s1);
+			}
+		}
+
+		void CChildView::FillConnectionsPopup(CMenu* pPopup)
+		{
+			DeleteSubmenu(pPopup);
+			char s1[64];
+			int j=0;
+			std::vector<Wire> & wiresin = _pSong._pMachine[popupmacidx]->inWires;
+			for (std::vector<Wire>::const_iterator ite = wiresin.begin(); ite != wiresin.end(); ++ite)
+			{
+				if (ite->Enabled()) {
+					std::sprintf(s1,"%02X: %s",ite->GetSrcMachine()._macIndex,ite->GetSrcMachine().GetEditName());
+					pPopup->AppendMenu(MF_STRING, ID_CONNECTIONS_CONNECTION0 + j, s1);
+				}
+				j++;
+			}
+			j=12;
+			pPopup->AppendMenu(MF_SEPARATOR, ID_CONNECTIONS_CONNECTION0 + j, s1);
+			std::vector<Wire*> & wiresout = _pSong._pMachine[popupmacidx]->outWires;
+			for (std::vector<Wire*>::const_iterator ite = wiresout.begin(); ite != wiresout.end(); ++ite)
+			{
+				if (*ite != NULL && (*ite)->Enabled()) {
+					std::sprintf(s1,"%02X: %s",(*ite)->GetDstMachine()._macIndex,(*ite)->GetDstMachine().GetEditName());
+					pPopup->AppendMenu(MF_STRING, ID_CONNECTIONS_CONNECTION0 + j, s1);
+				}
+				j++;
+			}
+		}
+
+		bool CChildView::DeleteSubmenu(CMenu* popMenu)
+		{
+			CMenu* secMenu=0;
+			while (popMenu->GetMenuItemCount() > 0)
+			{
+				if ((secMenu=popMenu->GetSubMenu(0)))
+				{
+					DeleteSubmenu(secMenu);
+				}
+				popMenu->DeleteMenu(0,MF_BYPOSITION);
+			}
+			return true;
+		}
 }}

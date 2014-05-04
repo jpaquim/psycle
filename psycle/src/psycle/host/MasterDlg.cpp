@@ -239,7 +239,7 @@ namespace psycle { namespace host {
 			float val;
 			float db;
 			if(machine._outDry>0) {
-				db = helpers::dsp::dB(machine._outDry/256.0f);
+				db = helpers::dsp::dB(value_mapper::map_256_1(machine._outDry));
 			}
 			else {
 				db = -99.f;
@@ -303,7 +303,7 @@ namespace psycle { namespace host {
 		void CMasterDlg::OnChangeSliderMaster(int pos)
 		{
 			float db = ((832-pos)/16.0f)-40.0f;
-			machine._outDry = int(helpers::dsp::dB2Amp(db)*256.0f);
+			machine._outDry = value_mapper::map_1_256<int>(helpers::dsp::dB2Amp(db));
 		}
 
 		void CMasterDlg::OnChangeSliderMacs(CVolumeCtrl* slider)

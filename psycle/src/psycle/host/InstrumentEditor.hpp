@@ -37,10 +37,9 @@ namespace psycle { namespace host {
 			afx_msg void OnChangeLockInst();
 			afx_msg void OnEnChangeSamplerate();
 			afx_msg void OnSelchangeNnaCombo();
-			afx_msg void OnPrevTenInstrument();
+			afx_msg void OnCbnSelendokInstrument();
 			afx_msg void OnPrevInstrument();
 			afx_msg void OnNextInstrument();
-			afx_msg void OnNextTenInstrument();
 			afx_msg void OnLockinst();
 			afx_msg void OnSelchangeFilterType();
 			afx_msg void OnRpan();
@@ -60,6 +59,7 @@ namespace psycle { namespace host {
 			void RefreshEnvelopes();
 			void UpdateNoteLabel();
 			void UpdateComboNNA();
+			void UpdateWavesCombo();
 
 			void SliderVolume(CSliderCtrl& the_slider);
 			void SliderFinetune(CSliderCtrl& the_slider);
@@ -78,10 +78,10 @@ namespace psycle { namespace host {
 
 			bool initializingDialog;
 
-			CStatic	m_instlabel;
 			CButton m_lockinst;
 			CEdit m_lockinstnumber;
 			CComboBox m_nna_combo;
+			CComboBox m_sampins_combo;
 			CButton	m_loopcheck;
 			CEdit	m_loopedit;
 			CButton	m_rpan_check;

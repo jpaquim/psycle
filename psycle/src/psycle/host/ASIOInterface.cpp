@@ -630,10 +630,10 @@ namespace psycle
 						short* inr;
 						inl = (short*)ASIObuffers[counter].pleft[index];
 						inr = (short*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++);
-							_selectedins[counter].pright[i] = (*inr++);
+							_selectedins[counter].pleft[i] = *inl;
+							_selectedins[counter].pright[i] = *inr;
 						}
 					}
 					break;
@@ -666,10 +666,10 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++)*0.0000152587890625;
-							_selectedins[counter].pright[i] = (*inr++)*0.0000152587890625;
+							_selectedins[counter].pleft[i] = (*inl)*0.0000152587890625;
+							_selectedins[counter].pright[i] = (*inr)*0.0000152587890625;
 						}
 					}
 					break;
@@ -685,10 +685,10 @@ namespace psycle
 						double* inr;
 						inl = (double*)ASIObuffers[counter].pleft[index];
 						inr = (double*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++)*32768.0;
-							_selectedins[counter].pright[i] = (*inr++)*32768.0;
+							_selectedins[counter].pleft[i] = (*inl)*32768.0;
+							_selectedins[counter].pright[i] = (*inr)*32768.0;
 						}
 					}
 					break;
@@ -700,10 +700,10 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++);
-							_selectedins[counter].pright[i] = (*inr++);
+							_selectedins[counter].pleft[i] = *inl;
+							_selectedins[counter].pright[i] = *inr;
 						}
 					}
 					break;
@@ -713,10 +713,10 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++)*0.25f;
-							_selectedins[counter].pright[i] = (*inr++)*0.25f;
+							_selectedins[counter].pleft[i] = (*inl)*0.25f;
+							_selectedins[counter].pright[i] = (*inr)*0.25f;
 						}
 					}
 					break;
@@ -726,10 +726,10 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++)*0.0625f;
-							_selectedins[counter].pright[i] = (*inr++)*0.0625f;
+							_selectedins[counter].pleft[i] = (*inl)*0.0625f;
+							_selectedins[counter].pright[i] = (*inr)*0.0625f;
 						}
 					}
 					break;
@@ -739,10 +739,10 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = (*inl++)*0.00390625f;
-							_selectedins[counter].pright[i] = (*inr++)*0.00390625f;
+							_selectedins[counter].pleft[i] = (*inl)*0.00390625f;
+							_selectedins[counter].pright[i] = (*inr)*0.00390625f;
 						}
 					}
 					break;
@@ -752,12 +752,10 @@ namespace psycle
 						short* inr;
 						inl = (short*)ASIObuffers[counter].pleft[index];
 						inr = (short*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							short val=SwapShort(*inl++);
-							_selectedins[counter].pleft[i] = val;
-							val =SwapShort(*inr++);
-							_selectedins[counter].pright[i] = val;
+							_selectedins[counter].pleft[i] = SwapShort(*inl);
+							_selectedins[counter].pright[i] = SwapShort(*inr);
 						}
 					}
 					break;
@@ -790,7 +788,7 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
 							long val = SwapLong(*inl++);
 							_selectedins[counter].pleft[i] = val *0.0000152587890625;
@@ -805,10 +803,10 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = SwapLong(*inl++);
-							_selectedins[counter].pright[i] = SwapLong(*inr++);
+							_selectedins[counter].pleft[i] = SwapLong(*inl);
+							_selectedins[counter].pright[i] = SwapLong(*inr);
 						}
 					}
 					break;
@@ -818,11 +816,11 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							long val = SwapLong(*inl++);
+							long val = SwapLong(*inl);
 							_selectedins[counter].pleft[i] = val*0.25f;
-							val = SwapLong(*inr++);
+							val = SwapLong(*inr);
 							_selectedins[counter].pright[i] = val*0.25f;
 						}
 					}
@@ -833,11 +831,11 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							long val = SwapLong(*inl++);
+							long val = SwapLong(*inl);
 							_selectedins[counter].pleft[i] = val*0.0625f;
-							val = SwapLong(*inr++);
+							val = SwapLong(*inr);
 							_selectedins[counter].pright[i] = val*0.0625f;
 						}
 					}
@@ -848,11 +846,11 @@ namespace psycle
 						long* inr;
 						inl = (long*)ASIObuffers[counter].pleft[index];
 						inr = (long*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							long val = SwapLong(*inl++);
+							long val = SwapLong(*inl);
 							_selectedins[counter].pleft[i] = val*0.00390625f;
-							val = SwapLong(*inr++);
+							val = SwapLong(*inr);
 							_selectedins[counter].pright[i] = val*0.00390625f;
 						}
 					}
@@ -863,10 +861,10 @@ namespace psycle
 						float* inr;
 						inl = (float*)ASIObuffers[counter].pleft[index];
 						inr = (float*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = SwapFloat(*inl++);
-							_selectedins[counter].pright[i] = SwapFloat(*inr++);
+							_selectedins[counter].pleft[i] = SwapFloat(*inl);
+							_selectedins[counter].pright[i] = SwapFloat(*inr);
 						}
 					}
 					break;
@@ -876,10 +874,10 @@ namespace psycle
 						double* inr;
 						inl = (double*)ASIObuffers[counter].pleft[index];
 						inr = (double*)ASIObuffers[counter].pright[index];
-						for (i = 0; i < _ASIObufferSamples; i++)
+						for (i = 0; i < _ASIObufferSamples; i++,inl++,inr++)
 						{
-							_selectedins[counter].pleft[i] = SwapDouble(*inl++);
-							_selectedins[counter].pright[i] = SwapDouble(*inr++);
+							_selectedins[counter].pleft[i] = SwapDouble(*inl);
+							_selectedins[counter].pright[i] = SwapDouble(*inr);
 						}
 					}
 					break;

@@ -30,7 +30,7 @@ namespace psycle {
 			//set Instrument to preview
 			void UseWave(XMInstrument::WaveData<>*  wave) {
 				m_pwave = wave; 
-				if(wave != NULL) {m_vol = wave->WaveGlobVolume() * (wave->WaveVolume()/128.f);}
+				if(wave != NULL) {m_vol = wave->WaveGlobVolume() * value_mapper::map_128_1(wave->WaveVolume());}
 			}
 			XMInstrument::WaveData<> & UsePreviewWave() {
 				m_pwave = &m_prevwave;

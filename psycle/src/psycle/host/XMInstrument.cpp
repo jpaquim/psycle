@@ -986,8 +986,12 @@ namespace psycle
 		// save XMInstrument
 		void XMInstrument::Save(RiffFile& riffFile) const
 		{
-			if ( ! m_bEnabled ) return;
+			Save(riffFile, NULL);
+		}
 
+		void XMInstrument::Save(RiffFile& riffFile, std::map<unsigned char,unsigned char>* alternateMap) const
+		{
+			if ( ! m_bEnabled ) return;
 			int i;
 			int size = 0;
 			riffFile.Write("INST",4);
@@ -1026,14 +1030,24 @@ namespace psycle
 				i = m_DCA; riffFile.Write(i);
 			}
 
-
+			
 			NotePair npair;
-			for(i = 0;i < NOTE_MAP_SIZE;i++){
-				npair = NoteToSample(i);
-				riffFile.Write(npair.first);
-				riffFile.Write(npair.second);
-			}
+			if (alternateMap != NULL) {
+				//In single file mode, we need to remap the sample index
 
+				for(i = 0;i < NOTE_MAP_SIZE;i++){
+					npair = NoteToSample(i);
+					riffFile.Write(npair.first);
+					riffFile.Write((*alternateMap)[npair.second]);
+				}
+			}
+			else {
+				for(i = 0;i < NOTE_MAP_SIZE;i++){
+					npair = NoteToSample(i);
+					riffFile.Write(npair.first);
+					riffFile.Write(npair.second);
+				}
+			}
 			m_AmpEnvelope.Save(riffFile,XMINSVERSION);
 			m_PanEnvelope.Save(riffFile,XMINSVERSION);
 			m_FilterEnvelope.Save(riffFile,XMINSVERSION);

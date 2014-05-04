@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::CSkinDlg.
+///\brief implementation file for psycle::host::SkinIO.
 
 #include <psycle/host/detail/project.private.hpp>
 #include "SkinIO.hpp"
@@ -477,18 +477,19 @@ namespace psycle { namespace host {
 			LoadProperties(hfile, props);
 
 			memset(&coords,0,sizeof(SPatternHeaderCoords));
-			SetSkinSource(props["background_source"], coords.sBackground);
-			SetSkinSource(props["number_0_source"], coords.sNumber0);
-			SetSkinSource(props["record_on_source"], coords.sRecordOn);
-			SetSkinSource(props["mute_on_source"], coords.sMuteOn);
-			SetSkinSource(props["solo_on_source"], coords.sSoloOn);
+			SetSkinSource(props["background_source"], coords.sBackgroundClassic);
+			SetSkinSource(props["number_0_source"], coords.sNumber0Classic);
+			SetSkinSource(props["record_on_source"], coords.sRecordOnClassic);
+			SetSkinSource(props["mute_on_source"], coords.sMuteOnClassic);
+			SetSkinSource(props["solo_on_source"], coords.sSoloOnClassic);
 
-			SetSkinDest(props["digit_x0_dest"], coords.dDigitX0);
-			SetSkinDest(props["digit_0x_dest"], coords.dDigit0X);
-			SetSkinDest(props["record_on_dest"], coords.dRecordOn);
-			SetSkinDest(props["mute_on_dest"], coords.dMuteOn);
-			SetSkinDest(props["solo_on_dest"], coords.dSoloOn);
+			SetSkinDest(props["digit_x0_dest"], coords.dDigitX0Classic);
+			SetSkinDest(props["digit_0x_dest"], coords.dDigit0XClassic);
+			SetSkinDest(props["record_on_dest"], coords.dRecordOnClassic);
+			SetSkinDest(props["mute_on_dest"], coords.dMuteOnClassic);
+			SetSkinDest(props["solo_on_dest"], coords.dSoloOnClassic);
 
+			//Transparency extension
 			std::map<std::string,std::string>::iterator it = props.find("transparency");
 			if (it != props.end()) {
 				int val;
@@ -499,14 +500,74 @@ namespace psycle { namespace host {
 			else {
 				coords.bHasTransparency = false;
 			}
+			//Playing indicator extension
 			std::map<std::string,std::string>::iterator it2 = props.find("playing_on_source");
 			if (it2 != props.end()) {
-				SetSkinSource(it2->second, coords.sPlayOn);
-				SetSkinDest(props["playing_on_dest"], coords.dPlayOn);
+				SetSkinSource(it2->second, coords.sPlayOnClassic);
+				SetSkinDest(props["playing_on_dest"], coords.dPlayOnClassic);
 				coords.bHasPlaying = true;
 			}
 			else {
 				coords.bHasPlaying = false;
+			}
+			//track names background extension + tracking extension
+			std::map<std::string,std::string>::iterator it3 = props.find("text_background_source");
+			if (it3 != props.end()) {
+				coords.bHasTextSkin = true;
+				SetSkinSource(it3->second, coords.sBackgroundText);
+				SetSkinSource(props["text_number_0_source"], coords.sNumber0Text);
+				SetSkinSource(props["text_record_on_source"], coords.sRecordOnText);
+				SetSkinSource(props["text_mute_on_source"], coords.sMuteOnText);
+				SetSkinSource(props["text_solo_on_source"], coords.sSoloOnText);
+				SetSkinSource(props["text_playing_on_source"], coords.sPlayOnText);
+				SetSkinSource(props["text_crop_rectangle"], coords.sTextCrop);
+				SetSkinDest(props["text_digit_x0_dest"], coords.dDigitX0Text);
+				SetSkinDest(props["text_digit_0x_dest"], coords.dDigit0XText);
+				SetSkinDest(props["text_record_on_dest"], coords.dRecordOnText);
+				SetSkinDest(props["text_mute_on_dest"], coords.dMuteOnText);
+				SetSkinDest(props["text_solo_on_dest"], coords.dSoloOnText);
+				SetSkinDest(props["text_playing_on_dest"], coords.dPlayOnText);
+				
+				SetSkinSource(props["record_tracking_source"], coords.sRecordOnTrackingClassic);
+				SetSkinSource(props["mute_tracking_source"], coords.sMuteOnTrackingClassic);
+				SetSkinSource(props["solo_tracking_source"], coords.sSoloOnTrackingClassic);
+				SetSkinDest(props["record_tracking_dest"], coords.dRecordOnTrackClassic);
+				SetSkinDest(props["mute_tracking_dest"], coords.dMuteOnTrackClassic);
+				SetSkinDest(props["solo_tracking_dest"], coords.dSoloOnTrackClassic);
+
+				SetSkinSource(props["text_record_tracking_source"], coords.sRecordOnTrackingText);
+				SetSkinSource(props["text_mute_tracking_source"], coords.sMuteOnTrackingText);
+				SetSkinSource(props["text_solo_tracking_source"], coords.sSoloOnTrackingText);
+				SetSkinDest(props["text_record_tracking_dest"], coords.dRecordOnTrackText);
+				SetSkinDest(props["text_mute_tracking_dest"], coords.dMuteOnTrackText);
+				SetSkinDest(props["text_solo_tracking_dest"], coords.dSoloOnTrackText);
+				int val=0;
+				helpers::hexstring_to_integer(props["text_colour"], val);
+				coords.cTextFontColour = val;
+				coords.szTextFont = props["text_font_name"];
+				hexstring_to_integer(props["text_font_point"], coords.textFontPoint );
+				hexstring_to_integer(props["text_font_flags"], coords.textFontFlags );
+			}
+			else {
+				SSkinSource emptySource;
+				SSkinDest emptyDest;
+				emptySource.x=0; emptySource.y=0;emptySource.width=0; emptySource.height=0;
+				emptyDest.x=0; emptyDest.y=0;
+
+				coords.sBackgroundText = emptySource;
+				coords.sNumber0Text = emptySource;
+				coords.sRecordOnText = emptySource;
+				coords.sMuteOnText = emptySource;
+				coords.sSoloOnText = emptySource;
+				coords.sPlayOnText = emptySource;
+				coords.dDigitX0Text = emptyDest;
+				coords.dDigit0XText = emptyDest;
+				coords.dRecordOnText = emptyDest;
+				coords.dMuteOnText = emptyDest;
+				coords.dSoloOnText = emptyDest;
+				coords.dPlayOnText = emptyDest;
+
+				coords.bHasTextSkin = false;
 			}
 			std::fclose(hfile);
 		}

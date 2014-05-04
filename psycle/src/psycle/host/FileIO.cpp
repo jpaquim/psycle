@@ -136,7 +136,12 @@ namespace psycle
 
 		bool RiffFile::Eof()
 		{
-			return false;
+			DWORD bytesRead=0;
+			unsigned char c;
+			std::size_t pos = GetPos();
+			ReadFile(_handle, &c, 1, &bytesRead, 0);
+			Seek(pos);
+			return(bytesRead==0);
 		}
 
 		std::size_t RiffFile::GetPos()

@@ -71,7 +71,7 @@ void CInstrumentAmpDlg::AssignAmplitudeValues(XMInstrument& inst)
 {
 	m_instr = &inst;
 
-	m_SlVolCutoffPan.SetPos(inst.GlobVol()*128.0f);
+	m_SlVolCutoffPan.SetPos(value_mapper::map_1_128<int>(inst.GlobVol()));
 	m_SlFadeoutRes.SetPos(inst.VolumeFadeSpeed()*1024.0f);
 	m_SlSwing1Glide.SetPos(inst.RandomVolume()*100.0f);
 
@@ -121,12 +121,12 @@ void CInstrumentAmpDlg::SliderVolume(CSliderCtrl* slid)
 		temp<<"-inf. dB";
 	else
 	{
-		float vol = slid->GetPos()/128.f;
+		float vol = value_mapper::map_128_1(slid->GetPos());
 		float db = 20 * log10(vol);
 		temp<<std::setprecision(1)<<db<<"dB";
 	}
 	strcpy(tmp,temp.str().c_str());
-	m_instr->GlobVol(slid->GetPos()/128.0f);
+	m_instr->GlobVol(value_mapper::map_128_1(slid->GetPos()));
 	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->SetWindowText(tmp);
 }
 

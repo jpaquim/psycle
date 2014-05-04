@@ -1,7 +1,7 @@
 A quick doc on skinning psycle
 ------------------------------
 
-1) Preface, What's skinnable?
+1) Preface, What is skinnable?
 
 	There are three things skinnable right now, the Machine boxes in the machine view, 
 	the Pattern headers in the pattern editor, and the controls in the parameters view of 
@@ -13,7 +13,7 @@ A quick doc on skinning psycle
 
 	You need to make eight files, five for graphics, and three for image information.
 	(Older versions used five files)
-	These files are the folowing:
+	These files are as follows:
 
 		your_machine_graphics_name.bmp
 		your_knob_graphics_name.bmp
@@ -36,8 +36,8 @@ A quick doc on skinning psycle
 		PsycleSkinHeader.psh
 		PsycleSkinControls.bmp
 		PsycleSkinControls.psc
-		PsycleSkinMixer.psc
-		PsycleSkinMaster.bmp
+		PsycleSkinMixer.bmp  (configured inside PsycleSkinControls.psc)
+		PsycleSkinMaster.bmp (configured inside PsycleSkinControls.psc)
 
 3) How do I make the files?
 
@@ -48,6 +48,7 @@ A quick doc on skinning psycle
 
 		You can make them the way you want, with the bitdepth appropiated. Support for other
 		fileformats than .bmp are not planned (they would require specific loaders).
+		On Mixer and master, only the graphics can be changed, not the sizes. The knobs also have a fixed size.
 
 	Notes for info files:
 
@@ -75,9 +76,10 @@ A quick doc on skinning psycle
 	"effect_bypass_source"=221,51,21,10 <----- the bypass highlighted graphic
 
 	If you do not want a vu on either machine you may set the height of the vu0_source to 0.
+	If you do not want vu peak indicator on either machine, you may set the width of the vu_peak_source to 0.
 
 
-	The following values tell psycle how has it to draw the different objects.
+	The following values tell psycle how should it draw the different objects.
 	Here, the coords are relative to the top left corner of the source graphic.
  	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)
 
@@ -104,24 +106,34 @@ A quick doc on skinning psycle
 	-----------------------
 
 	The following values tell psycle how your bitmap file is formatted (this is, where are the 
-	graphics and which size do they have.
+	graphics and which size do they have).
+	Since Psycle 1.11.3, there are two headers. One with track names, and the other without.
 	Coords are top, left, width height
 
+	== Header without track names
+	
 	"background_source"=0,0,106,16 <---- Background graphic for the header.
 	"number_0_source"=0,16,7,12    <---- graphic for the number 0. The others have to follow as "123456789" and have the same size.
-	"record_on_source"=70,16,9,9   <---- hihlighted record on button
-	"mute_on_source"=79,16,9,9     <---- highlighted mute
-	"solo_on_source"=88,16,9,9     <---- highlighted solo
-	"playing_on_source"=0,40,8,17  <---- highlighted playing
+	"record_on_source"=70,16,9,9   <---- Enabled record button
+	"mute_on_source"=79,16,9,9     <---- Enabled mute button
+	"solo_on_source"=88,16,9,9     <---- Enabled solo button
+	"playing_on_source"=0,40,8,17  <---- Highlighted playing indicator
 
+	If you do not want any track numbers then make the width of the numbers 0.
+	If you don't want playing indicator, comment or do not add the playing_on_source line.
 
-	If you do not want any track numbers then make the height of the numbers 0.
-	If you don't want playing indicator, do not add the playing_on_source line.
+	The following is one of the four new blocks of data for mouse tracking. 
+	This first group indicate the graphics location for the classic header highlight
+	Width and height coupled with destination tracking designate the clickable area
+	"record_tracking_source"=59,24,18,18	<---- Position of the record tracking image (can be the same than record_on_source)
+	"mute_tracking_source"=95,24,18,18		<---- Position of the mute tracking image (can be the same than mute_on_source)
+	"solo_tracking_source"=77,24,18,18		<---- Position of the solo tracking image (can be the same than solo_on_source)
 
+	
+	
 	The following values tell psycle how has to draw the different objects.
 	Here, the coords are relative to the top left corner of the source graphic.
  	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of head.bmp)
-
 
 	"digit_x0_dest"=10,2		<---- Position for the left digit
 	"digit_0x_dest"=17,2		<---- position for the right digit
@@ -130,6 +142,52 @@ A quick doc on skinning psycle
 	"solo_on_dest"=85,4		<---- position for the solo button
 	"playing_on_dest"=8,3   <---- position for the playing indicator.
 
+	Second group of mouse tracking extension. These designate the placement on the classic header for the hightlights.
+	source Width and height coupled with destination designate the clickable area
+	"record_tracking_dest"=59,2		<---- Destination of the record tracking image (can be the same than record_on_dest)
+	"mute_tracking_dest"=95,2		<---- Destination of the mute tracking image (can be the same than mute_on_dest)
+	"solo_tracking_dest"=77,2		<---- Destination of the solo tracking image (can be the same than solo_on_dest)
+	
+
+	== Header with track names. An alternate header for showing the track names.
+
+	"text_background_source"=0,60,113,23	<---- Background graphic for the track names header.
+	"text_number_0_source"=0,44,7,12		<---- graphic for the number 0. The others have to follow as "123456789" and have the same size.
+	"text_record_on_source"=0,93,17,10		<---- Enabled record button
+	"text_mute_on_source"=96,93,17,10		<---- Enabled Mute button
+	"text_solo_on_source"=96,83,17,10		<---- Enabled Solo button
+	"text_playing_on_source"=0,83,17,10		<---- Highlighted playing indicator
+
+	This third group indicate the graphics location for the track names header highlight
+	//Width and height coupled with destination tracking designate the clickable area
+	"text_record_tracking_source"=3,115,54,8   <---- Position of the record tracking image (can be the same than text_record_on_source)
+	"text_mute_tracking_source"=57,115,54,8    <---- Position of the mute tracking image (can be the same than text_mute_on_source)
+	"text_solo_tracking_source"=57,106,54,8    <---- Position of the solo tracking image (can be the same than text_solo_on_source)
+
+	// destination coords to be rendered to
+	// destinations use 0,0 as top left of background
+	"text_digit_x0_dest"=10,6			<---- Position for the left digit
+	"text_digit_0x_dest"=17,6			<---- position for the right digit
+	"text_record_on_dest"=0,11			<---- position for the record button
+	"text_mute_on_dest"=96,11			<---- position for the mute button
+	"text_solo_on_dest"=96,0			<---- position for the solo button
+	"text_playing_on_dest"=0,0			<---- position for the playing indicator.
+	"text_crop_rectangle"=24,7,80,10	<---- Rectangle where the track name will be written. Width and height are used to cut the text (crop).
+
+	Fourth group of mouse tracking extension. These designate the placement on the track names header for the hightlights.
+	Width and height coupled with destination tracking designate the clickable area
+	//source Width and height coupled with destination designate the clickable area
+	"text_record_tracking_dest"=0,12   <---- Destination of the record tracking image (can be the same than text_record_on_dest)
+	"text_mute_tracking_dest"=57,12    <---- Destination of the mute tracking image (can be the same than text_mute_on_dest)
+	"text_solo_tracking_dest"=57,0     <---- Destination of the solo tracking image (can be the same than text_solo_on_dest)
+
+	//Track names font information.
+	"text_colour"= 0x00F0F0F0;	<--- Font colour for the track names header text.
+	"text_font_name"=Arial		<--- Font face for the track names header text.
+	"text_font_point"=40    	<--- Font size for the track names header text. Note: The number is in hexadecimal format.
+	"text_font_flags"=0			<--- Font flag for the track names header text. 0=normal, 1=bold, 2=italic, 3=bold+italic.
+	
+	
 	"transparency"=0000ff00  <---- 00BBGGRR . Colour that is to be used as transparency.
 	                                Note: It is important that you put the number next to the equal sign!
 					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer

@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::CSkinDlg.
+///\brief implementation file for psycle::host::PresetIO.
 
 #include <psycle/host/detail/project.private.hpp>
 #include "PresetIO.hpp"

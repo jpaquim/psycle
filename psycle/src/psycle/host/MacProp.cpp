@@ -48,7 +48,7 @@ namespace psycle { namespace host {
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",Global::song().FindBusFromIndex(thisMac),pMachine->_editName);
+			sprintf(buffer,"%.2X : %s Properties",thesong.FindBusFromIndex(thisMac),pMachine->_editName);
 			SetWindowText(buffer);
 
 			m_macname.SetWindowText(pMachine->_editName);
@@ -120,32 +120,12 @@ namespace psycle { namespace host {
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 			if (m_soloCheck.GetCheck() == 1)
 			{
-				for ( int i=0;i<MAX_MACHINES;i++ )
-				{
-					if (thesong._pMachine[i])
-					{
-						if ( thesong._pMachine[i]->_mode == MACHMODE_GENERATOR )
-						{
-							thesong._pMachine[i]->_mute = true;
-							thesong._pMachine[i]->_volumeCounter=0.0f;
-							thesong._pMachine[i]->_volumeDisplay =0;
-						}
-					}
-				}
-				pMachine->_mute = false;
+				thesong.SoloMachine(thisMac);
 				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
-				thesong.machineSoloed = thisMac;
 			}
 			else
 			{
-				thesong.machineSoloed = -1;
-				for ( int i=0;i<MAX_BUSES;i++ )
-				{
-					if (thesong._pMachine[i])
-					{
-						thesong._pMachine[i]->_mute = false;
-					}
-				}
+				thesong.SoloMachine(-1);
 				if ( m_muteCheck.GetCheck() ) m_muteCheck.SetCheck(0);
 			}
 			if ( m_view != NULL )
@@ -161,15 +141,15 @@ namespace psycle { namespace host {
 
 			if ((src < MAX_BUSES) && (src >=0))
 			{
-				dst = Global::song().GetFreeBus();
+				dst = thesong.GetFreeBus();
 			}
 			else if ((src < MAX_BUSES*2) && (src >= MAX_BUSES))
 			{
-				dst = Global::song().GetFreeFxBus();
+				dst = thesong.GetFreeFxBus();
 			}
 			if (dst >= 0)
 			{
-				if (!Global::song().CloneMac(src,dst))
+				if (!thesong.CloneMac(src,dst))
 				{
 					MessageBox("Cloning failed. Is your song directory correctly configured?","Cloning failed");
 				}
@@ -186,20 +166,20 @@ namespace psycle { namespace host {
 		}
 		void CMacProp::OnAddNewBefore()
 		{
-			int newMacidx = Global::song().GetFreeFxBus();
+			int newMacidx = thesong.GetFreeFxBus();
 			m_view->NewMachine(pMachine->_x-16,pMachine->_y-16,newMacidx);
 
-			Machine* newMac = Global::song()._pMachine[newMacidx];
+			Machine* newMac = thesong._pMachine[newMacidx];
 			if(newMac) {
-				CExclusiveLock lock(&Global::song().semaphore, 2, true);
+				CExclusiveLock lock(&thesong.semaphore, 2, true);
 				for(int i = 0; i < MAX_CONNECTIONS; i++) {
 					if(pMachine->inWires[i].Enabled()) {
 						Machine& srcMac = pMachine->inWires[i].GetSrcMachine();
 						int wiresrc = srcMac.FindOutputWire(pMachine->_macIndex);
-						Global::song().ChangeWireDestMacNonBlocking(&srcMac,newMac,wiresrc,newMac->GetFreeInputWire(0));
+						thesong.ChangeWireDestMacNonBlocking(&srcMac,newMac,wiresrc,newMac->GetFreeInputWire(0));
 					}
 				}
-				Global::song().InsertConnectionNonBlocking(newMac, pMachine);
+				thesong.InsertConnectionNonBlocking(newMac, pMachine);
 				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
@@ -212,21 +192,21 @@ namespace psycle { namespace host {
 		}
 		void CMacProp::OnAddNewAfter()
 		{
-			int newMacidx = Global::song().GetFreeFxBus();
+			int newMacidx = thesong.GetFreeFxBus();
 			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
 
-			Machine* newMac = Global::song()._pMachine[newMacidx];
+			Machine* newMac = thesong._pMachine[newMacidx];
 			if(newMac) {
-				CExclusiveLock lock(&Global::song().semaphore, 2, true);
+				CExclusiveLock lock(&thesong.semaphore, 2, true);
 				for(int i = 0; i < MAX_CONNECTIONS; i++) {
 					Wire* wire = pMachine->outWires[i];
 					if(wire && wire->Enabled()) {
 						Machine& dstMac = wire->GetDstMachine();
 						int wiredst = wire->GetDstWireIndex();
-						Global::song().ChangeWireSourceMacNonBlocking(newMac,&dstMac,newMac->GetFreeOutputWire(0),wiredst);
+						thesong.ChangeWireSourceMacNonBlocking(newMac,&dstMac,newMac->GetFreeOutputWire(0),wiredst);
 					}
 				}
-				Global::song().InsertConnectionNonBlocking(pMachine, newMac);
+				thesong.InsertConnectionNonBlocking(pMachine, newMac);
 				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
 				pParentMain->UpdateEnvInfo();
 				pParentMain->UpdateComboGen();
@@ -243,7 +223,7 @@ namespace psycle { namespace host {
 			int index = pMachine->_macIndex;
 			m_view->NewMachine(pMachine->_x,pMachine->_y,index);
 
-			Machine* newMac = Global::song()._pMachine[index];
+			Machine* newMac = thesong._pMachine[index];
 			if(newMac) {
 				CMainFrame* pParentMain = ((CMainFrame *)theApp.m_pMainWnd);
 				pParentMain->UpdateEnvInfo();

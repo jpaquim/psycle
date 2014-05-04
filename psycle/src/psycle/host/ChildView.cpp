@@ -90,6 +90,9 @@ namespace psycle { namespace host {
 			,scrollDelay(0)
 			,rntOff(0)
 			,rnlOff(0)
+			,trackingMuteTrack(-1)
+			,trackingRecordTrack(-1)
+			,trackingSoloTrack(-1)
 			,isBlockCopied(false)
 			,blockNTracks(0)
 			,blockNLines(0)
@@ -260,7 +263,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POPUPMAC_OPENPARAMETERS, OnPopMacOpenParams)
 			ON_COMMAND(ID_POPUPMAC_OPENPROPERTIES, OnPopMacOpenProperties)
 			ON_COMMAND_RANGE(ID_CONNECTTO_MACHINE0, ID_CONNECTTO_MACHINE64, OnPopMacConnecTo)
-			ON_COMMAND_RANGE(ID_CONNECTIONS_CONNECTION0, ID_CONNECTIONS_CONNECTION12, OnPopMacShowWire)
+			ON_COMMAND_RANGE(ID_CONNECTIONS_CONNECTION0, ID_CONNECTIONS_CONNECTION24, OnPopMacShowWire)
 			ON_COMMAND(ID_POPUPMAC_REPLACEMACHINE, OnPopMacReplaceMac)
 			ON_COMMAND(ID_POPUPMAC_CLONEMACHINE, OnPopMacCloneMac)
 			ON_COMMAND(ID_POPUPMAC_INSERTEFFECTBEFORE, OnPopMacInsertBefore)
@@ -270,6 +273,12 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POPUPMAC_SOLO, OnPopMacSolo)
 			ON_COMMAND(ID_POPUPMAC_BYPASS, OnPopMacBypass)
 
+			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_OPENPARAMETERS, OnUpdateMacOpenParams)
+			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_REPLACEMACHINE, OnUpdateMacReplace)
+			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_CLONEMACHINE, OnUpdateMacClone)
+			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_INSERTEFFECTBEFORE, OnUpdateMacInsertBefore)
+			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_INSERTEFFECTAFTER, OnUpdateMacInsertAfter)
+			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_DELETEMACHINE, OnUpdateMacDelete)
 			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_MUTE, OnUpdateMacMute)
 			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_SOLO, OnUpdateMacSolo)
 			ON_UPDATE_COMMAND_UI(ID_POPUPMAC_BYPASS, OnUpdateMacBypass)
@@ -1336,10 +1345,12 @@ namespace psycle { namespace host {
 
 			if (dlg.DoModal() == IDOK)
 			{
-				PsycleGlobal::conf().patView().showTrackNames_= (dlg.m_shownames != 0);
 				_pSong.shareTrackNames = (dlg.m_independentnames == 0);
 				for(int i(0); i< _pSong.SONGTRACKS; i++) {
 					_pSong.ChangeTrackName(patNum,i,dlg.tracknames[i]);
+				}
+				if (PsycleGlobal::conf().patView().showTrackNames_ != (dlg.m_shownames != 0)) {
+					ShowTrackNames((dlg.m_shownames != 0));
 				}
 
 				if ( nlines != dlg.patLines )
@@ -2190,8 +2201,9 @@ namespace psycle { namespace host {
 			COLX[8] = COLX[7]+TEXTWIDTH;
 			COLX[9] = COLX[8]+TEXTWIDTH+1;
 			ROWWIDTH = COLX[9];
-			HEADER_ROWWIDTH = PatHeaderCoords->sBackground.width+1;
-			HEADER_HEIGHT = PatHeaderCoords->sBackground.height+2;
+			int HEADER_HEIGHT = PatHeaderCoords->sBackground.height+2;
+			int HEADER_ROWWIDTH  = PatHeaderCoords->sBackground.width+1;
+
 			if (ROWWIDTH < HEADER_ROWWIDTH)
 			{
 				int temp = (HEADER_ROWWIDTH-ROWWIDTH)/2;
@@ -2206,8 +2218,7 @@ namespace psycle { namespace host {
 			{
 				XOFFSET = (4*TEXTWIDTH);
 				YOFFSET = TEXTHEIGHT+2;
-				if (YOFFSET < HEADER_HEIGHT)
-				{
+				if (YOFFSET < HEADER_HEIGHT) {
 					YOFFSET = HEADER_HEIGHT;
 				}
 			}
@@ -2237,9 +2248,9 @@ namespace psycle { namespace host {
 		void CChildView::TransparentBlt
 			(
 				CDC* pDC,
-				int xStart,  int yStart,
+				int xDest,  int yDest,
 				int wWidth,  int wHeight,
-				CDC* pTmpDC,
+				CDC* pSkinDC,
 				CBitmap* bmpMask,
 				int xSource, // = 0
 				int ySource // = 0
@@ -2255,13 +2266,13 @@ namespace psycle { namespace host {
 			CBitmap* hbmT = hdcMem.SelectObject(bmpMask);
 			pDC->SetTextColor(RGB(0,0,0));
 			pDC->SetBkColor(RGB(255,255,255));
-			if (!pDC->BitBlt( xStart, yStart, wWidth, wHeight, &hdcMem, xSource, ySource, 
+			if (!pDC->BitBlt(xDest, yDest, wWidth, wHeight, &hdcMem, xSource, ySource, 
 				SRCAND))
 			{
 				TRACE("Transparent Blit failure SRCAND\n");
 			}
 			// Also note the use of SRCPAINT rather than SRCCOPY.
-			if (!pDC->BitBlt(xStart, yStart, wWidth, wHeight, pTmpDC, xSource, ySource,
+			if (!pDC->BitBlt(xDest, yDest, wWidth, wHeight, pSkinDC, xSource, ySource,
 				SRCPAINT))
 			{
 				TRACE("Transparent Blit failure SRCPAINT\n");

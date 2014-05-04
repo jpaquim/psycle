@@ -3,6 +3,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "WavFileDlg.hpp"
 #include "Song.hpp"
+
 namespace psycle { namespace host {
 
 IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
@@ -33,26 +34,52 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			m_pSong->wavprev.Stop();
-			if (CurrExt=="wav" && _lastFile != GetPathName())
+			
+			if (_lastFile != GetPathName() && !GetPathName().IsEmpty())
 			{
-				_lastFile=GetPathName();
-				
-				if (m_pSong->WavAlloc(PREV_WAV_INS, _lastFile) == 1)
+				if (CurrExt=="wav" || GetOFN().nFilterIndex == 1 )
 				{
-					m_pSong->wavprev.Play();
-					
+					_lastFile=GetPathName();
+					try {
+						if (m_pSong->WavAlloc(PREV_WAV_INS, _lastFile.GetString()) == 1)
+						{
+							m_pSong->wavprev.Play();
+							
+						}
+						else {
+							//Would like to show the message, but sometimes, the dialog becomes frozen, so i only do it on load
+							//MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+						}
+					}
+					catch(const std::runtime_error & e) {
+						//Would like to show the message, but sometimes, the dialog becomes frozen, so i only do it on load
+						//std::ostringstream os;
+						//os <<"Could not finish the operation: " << e.what();
+						//MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
+					}
 				}
-			}
-			else if (CurrExt=="iff" && _lastFile != GetPathName())
-			{
-				_lastFile=GetPathName();
-				
-				if (m_pSong->IffAlloc(PREV_WAV_INS, _lastFile) == 1)
+				else if (CurrExt=="iff" || GetOFN().nFilterIndex == 2 )
 				{
-					m_pSong->wavprev.Play();
-				}
-			}
+					_lastFile=GetPathName();
+					try {
 
+						if (m_pSong->IffAlloc(PREV_WAV_INS, _lastFile.GetString()) == 1)
+						{
+							m_pSong->wavprev.Play();
+						}
+						else {
+							//Would like to show the message, but sometimes, the dialog becomes frozen, so i only do it on load
+							//MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+						}
+					}
+					catch(const std::runtime_error & e) {
+						//Would like to show the message, but sometimes, the dialog becomes frozen, so i only do it on load
+						//std::ostringstream os;
+						//os <<"Could not finish the operation: " << e.what();
+						//MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
+					}
+				}
+			}
 			CFileDialog::OnFileNameChange();
 		}
 		void CWavFileDlg::OnClose()

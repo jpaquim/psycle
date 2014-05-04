@@ -114,7 +114,7 @@ void CInstrNoteMap::RefreshSampleList(int sample){
 			}
 			m_SampleList.AddString(line);
 		}
-		m_SampleList.AddString(" -- : No instrument");
+		m_SampleList.AddString(" -- : No sample");
 		if (i !=  LB_ERR) {
 			m_SampleList.SetCurSel(i);
 		}

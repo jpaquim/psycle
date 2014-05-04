@@ -98,6 +98,9 @@ namespace psycle
 				}
 			}
 		}
+		int Sampler::NumAuxColumnIndexes() {
+			return Global::song().samples.size();
+		}
 		const char* Sampler::AuxColumnName(int idx) const {
 			SampleList &m_Samples = Global::song().samples;
 			return m_Samples.Exists(idx)?m_Samples[idx].WaveName().c_str():"";
@@ -293,7 +296,7 @@ namespace psycle
 				pVoice->_filter.Ressonance((pins->_RRES) ? alteRand(pins->ENV_F_RQ) : pins->ENV_F_RQ);
 				pVoice->_filter.Type(pins->ENV_F_TP);
 				pVoice->_coModify = (float)pins->ENV_F_EA;
-				pVoice->_filterEnv._sustain = (float)pins->ENV_F_SL*0.0078125f;
+				pVoice->_filterEnv._sustain = value_mapper::map_128_1(pins->ENV_F_SL);
 
 				if (( pEntry->_cmd != SAMPLER_CMD_EXTENDED) || ((pEntry->_parameter & 0xF0) != SAMPLER_CMD_EXT_NOTEDELAY))
 				{
@@ -362,7 +365,7 @@ namespace psycle
 				
 				if (pins->_RPAN)
 				{
-					panFactor = (float)rand()*0.000030517578125f;
+					panFactor = value_mapper::map_32768_1(rand());
 				}
 				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
 				{
@@ -456,7 +459,7 @@ namespace psycle
 				
 				if (pins->_RPAN)
 				{
-					panFactor = (float)rand()*0.000030517578125f;
+					panFactor = value_mapper::map_32768_1(rand());
 				}
 				else if ( pEntry->_cmd == SAMPLER_CMD_PANNING )
 				{

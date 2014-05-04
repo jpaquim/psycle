@@ -120,8 +120,8 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_B_DECGEN, OnBDecgen)
 			ON_BN_CLICKED(IDC_B_INCGEN, OnBIncgen)
 			ON_BN_CLICKED(IDC_GEAR_RACK, OnGearRack)
-			ON_BN_CLICKED(IDC_B_DECWAV, OnBDecwav)
-			ON_BN_CLICKED(IDC_B_INCWAV, OnBIncwav)
+			ON_BN_CLICKED(IDC_B_DECWAV, OnBDecAux)
+			ON_BN_CLICKED(IDC_B_INCWAV, OnBIncAux)
 			ON_BN_CLICKED(IDC_LOADWAVE, OnLoadwave)
 			ON_BN_CLICKED(IDC_SAVEWAVE, OnSavewave)
 			ON_BN_CLICKED(IDC_EDITWAVE, OnEditwave)
@@ -555,7 +555,11 @@ namespace psycle { namespace host {
 		{
 			CComboBox *cc2=(CComboBox *)m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			cc2->SetCurSel(AUX_INSTRUMENT);
-			_pSong->auxcolSelected=_pSong->instSelected;
+			Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
+			if (tmac && tmac->_type == MACH_XMSAMPLER) {
+				_pSong->auxcolSelected=_pSong->instSelected;
+			}
+			else { _pSong->auxcolSelected=_pSong->waveSelected; }
 			UpdateComboIns();
 
 			PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -870,18 +874,25 @@ namespace psycle { namespace host {
 		void CMainFrame::OnBDecgen() { m_machineBar.OnBDecgen(); }
 		void CMainFrame::OnBIncgen() { m_machineBar.OnBIncgen(); }
 		void CMainFrame::OnGearRack() { m_machineBar.OnGearRack(); }
-		void CMainFrame::OnBDecwav() { m_machineBar.OnBDecwav(); }
-		void CMainFrame::OnBIncwav() { m_machineBar.OnBIncwav(); }
+		void CMainFrame::OnBDecAux() { m_machineBar.OnBDecAux(); }
+		void CMainFrame::OnBIncAux() { m_machineBar.OnBIncAux(); }
 		void CMainFrame::OnLoadwave() { m_machineBar.OnLoadwave(); }
 		void CMainFrame::OnSavewave() { m_machineBar.OnSavewave(); }
 		void CMainFrame::OnEditwave() { m_machineBar.OnEditwave(); }
 		void CMainFrame::OnWavebut() { m_machineBar.OnWavebut(); }
+		void CMainFrame::ChangeAux(int i) { m_machineBar.ChangeAux(i); }
+		void CMainFrame::ChangeGen(int i) { m_machineBar.ChangeGen(i); }
+		//Only use ChangeWave/ChangeIns when you specifically want to change instSelected/waveSelected. Else use ChangeAux
 		void CMainFrame::ChangeWave(int i) { m_machineBar.ChangeWave(i); }
 		void CMainFrame::ChangeIns(int i) { m_machineBar.ChangeIns(i); }
-		void CMainFrame::ChangeGen(int i) { m_machineBar.ChangeGen(i); }
 		void CMainFrame::UpdateComboIns(bool updatelist) { m_machineBar.UpdateComboIns(updatelist); }
 		void CMainFrame::UpdateComboGen(bool updatelist) { m_machineBar.UpdateComboGen(updatelist); }
 		void CMainFrame::EditQuantizeChange(int diff) { m_machineBar.EditQuantizeChange(diff); }
+		bool CMainFrame::LoadWave(int idx) { return m_machineBar.LoadWave(idx); }
+		void CMainFrame::SaveWave(int idx) { m_machineBar.SaveWave(idx); }
+		bool CMainFrame::LoadInst(int idx) { return m_machineBar.LoadInstrument(idx); }
+		void CMainFrame::SaveInst(int idx) { m_machineBar.SaveInstrument(idx); }
+
 		void CMainFrame::RedrawGearRackList()
 		{
 			if (pGearRackDialog)

@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::CSkinDlg.
+///\brief implementation file for psycle::host::LuaPlugin.
 
 #include <psycle/host/detail/project.private.hpp>
 #include <psycle/host/LuaPlugin.hpp>
