@@ -5,6 +5,7 @@
 #include "Instrument.hpp"
 #include "XMInstrument.hpp"
 #include <psycle/helpers/datacompression.hpp>
+#include <psycle/helpers/value_mapper.hpp>
 #include "Zap.hpp"
 namespace psycle
 {
@@ -115,7 +116,7 @@ namespace psycle
 						else
 						{
 							XMInstrument::WaveData<> wave;
-							wave.PanFactor(pan/256.f);
+							wave.PanFactor(value_mapper::map_256_1(pan));
 							wave.WaveSampleRate(44100);
 							UINT index;
 							pFile->Read(&index,sizeof(index));

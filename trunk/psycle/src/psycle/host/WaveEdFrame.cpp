@@ -28,6 +28,9 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI ( ID_WAVED_REWIND, OnUpdateFFandRWButtons )
 			ON_UPDATE_COMMAND_UI ( ID_WAVEED_WAVEMIN, OnUpdateWaveMinus )
 			ON_UPDATE_COMMAND_UI ( ID_WAVEED_WAVEPLUS, OnUpdateWavePlus )
+			ON_UPDATE_COMMAND_UI ( ID_WAVEED_SAVE,  OnUpdateFileSave )
+			ON_COMMAND ( ID_WAVEED_LOAD, OnFileLoad )
+			ON_COMMAND ( ID_WAVEED_SAVE, OnFileSave )
 			ON_COMMAND ( ID_WAVEED_WAVEMIN, OnWaveMinus )
 			ON_COMMAND ( ID_WAVEED_WAVEPLUS, OnWavePlus )
 			ON_COMMAND ( ID_WAVED_PLAY, OnPlay )
@@ -263,6 +266,22 @@ namespace psycle { namespace host {
 			wavview.SetViewData(wsInstrument);
 			AdjustStatusBar(wsInstrument);
 		}
+		void CWaveEdFrame::OnUpdateFileSave(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(_pSong->samples.IsEnabled(wsInstrument));
+		}
+		void CWaveEdFrame::OnFileLoad()
+		{
+			mainFrame->LoadWave(wsInstrument);
+			wavview.SetViewData(wsInstrument);
+			mainFrame->UpdateInstrumentEditor();
+			AdjustStatusBar(wsInstrument);
+		}
+		void CWaveEdFrame::OnFileSave()
+		{
+			mainFrame->SaveWave(wsInstrument);
+		}
+
 
 		void CWaveEdFrame::OnPlay() {PlayFrom(wavview.GetCursorPos());}
 		void CWaveEdFrame::OnPlayFromStart() {PlayFrom(0);}
@@ -313,35 +332,31 @@ namespace psycle { namespace host {
 		}
 		void CWaveEdFrame::OnCloseupCmbWave()
 		{
-			_pSong->waveSelected = comboWav.GetCurSel();
-			wsInstrument = _pSong->waveSelected;
-			wavview.SetViewData(wsInstrument);
-			mainFrame->UpdateInstrumentEditor();
-			AdjustStatusBar(wsInstrument);
+			mainFrame->ChangeWave(comboWav.GetCurSel());
+			wsInstrument = _pSong->auxcolSelected = _pSong->waveSelected;
+			mainFrame->UpdateComboIns(false);
 		}
 		void CWaveEdFrame::OnWaveMinus()
 		{
-			_pSong->waveSelected--;
-			wsInstrument = _pSong->waveSelected;
-			comboWav.SetCurSel(wsInstrument);
-			wavview.SetViewData(wsInstrument);
-			mainFrame->UpdateInstrumentEditor();
-			AdjustStatusBar(wsInstrument);
+			mainFrame->ChangeWave(_pSong->waveSelected-1);
+			wsInstrument = _pSong->auxcolSelected = _pSong->waveSelected;
+			mainFrame->UpdateComboIns(false);
 		}
 		void CWaveEdFrame::OnWavePlus()
 		{
-			_pSong->waveSelected++;
-			wsInstrument = _pSong->waveSelected;
+			bool update=false;
+			wsInstrument = _pSong->waveSelected+1;
 			if (_pSong->samples.size()<=wsInstrument) {
 				_pSong->samples.SetSample(*new XMInstrument::WaveData<>(),wsInstrument);
+				update=true;
 				FillWaveCombobox();
 			}
 			else {
 				comboWav.SetCurSel(wsInstrument);
 			}
-			wavview.SetViewData(wsInstrument);
-			mainFrame->UpdateInstrumentEditor();
-			AdjustStatusBar(wsInstrument);
+			mainFrame->ChangeWave(wsInstrument);
+			_pSong->auxcolSelected = _pSong->waveSelected;
+			mainFrame->UpdateComboIns(update);
 		}
 
 	}   // namespace

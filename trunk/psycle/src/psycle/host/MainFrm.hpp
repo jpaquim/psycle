@@ -75,12 +75,18 @@ namespace psycle { namespace host {
 			void UpdateMasterValue(int newvalue);
 			void UpdateVumeters();
 
+			void ChangeAux(int i);
+			void ChangeGen(int i);
+			//Only use ChangeWave/ChangeIns when you specifically want to change instSelected/waveSelected. Else use ChangeAux
 			void ChangeIns(int i);
 			void ChangeWave(int i);
-			void ChangeGen(int i);
 			void UpdateComboIns(bool updatelist=true);
 			void UpdateComboGen(bool updatelist=true);
 			void EditQuantizeChange(int diff);
+			bool LoadWave(int idx);
+			void SaveWave(int idx);
+			bool LoadInst(int idx);
+			void SaveInst(int idx);
 
 			bool ToggleFollowSong();
 			void UpdatePlayOrder(bool mode);
@@ -149,11 +155,9 @@ namespace psycle { namespace host {
 			afx_msg void OnBDecgen();
 			afx_msg void OnBIncgen();
 			afx_msg void OnGearRack();
-			afx_msg void OnBDecwav();
-			afx_msg void OnBIncwav();
-		public:
+			afx_msg void OnBDecAux();
+			afx_msg void OnBIncAux();
 			afx_msg void OnLoadwave();
-		protected:
 			afx_msg void OnSavewave();
 			afx_msg void OnEditwave();
 			afx_msg void OnWavebut();

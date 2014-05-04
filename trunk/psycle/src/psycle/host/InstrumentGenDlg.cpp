@@ -2,6 +2,7 @@
 #include "InstrumentGenDlg.hpp"
 #include "InstrumentEditorUI.hpp"
 #include "XMSamplerUIInst.hpp"
+#include "MainFrm.hpp"
 #include "InstrNoteMap.hpp"
 #include "PsycleConfig.hpp"
 #include <psycle/host/Song.hpp>
@@ -141,7 +142,7 @@ void CInstrumentGenDlg::OnEnChangeInsName()
 		TCHAR _buf[256];
 		m_InstrumentName.GetWindowText(_buf,sizeof(_buf));
 		m_instr->Name(_buf);
-		m_instr->IsEnabled(true);
+		ValidateEnabled();
 		XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
 		win->FillInstrumentList(-2);
 	}
@@ -311,6 +312,8 @@ void CInstrumentGenDlg::ValidateEnabled() {
 	m_instr->IsEnabled(true);
 	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
 	win->FillInstrumentList(-2);
+	CMainFrame* winMain = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	winMain->UpdateComboIns(true);
 }
 //void CInstrumentGenDlg
 }}

@@ -441,6 +441,7 @@ namespace psycle { namespace host {
 
 		int Load(RiffFile& riffFile);
 		void Save(RiffFile& riffFile) const;
+		void Save(RiffFile& riffFile, std::map<unsigned char,unsigned char>* alternateMap) const;
 
 		XMInstrument & operator= (const XMInstrument & other)
 		{

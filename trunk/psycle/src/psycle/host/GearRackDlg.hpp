@@ -17,6 +17,7 @@ namespace psycle { namespace host {
 		// Dialog Data
 			enum { IDD = IDD_GEARRACK };
 			CButton	m_props;
+			CButton m_radio_wave;
 			CButton	m_radio_ins;
 			CButton	m_radio_gen;
 			CButton	m_radio_efx;
@@ -49,6 +50,7 @@ namespace psycle { namespace host {
 			afx_msg void OnRadioEfx();
 			afx_msg void OnRadioGen();
 			afx_msg void OnRadioIns();
+			afx_msg void OnRadioWaves();
 			afx_msg void OnExchange();
 			afx_msg void OnClonemachine();
 		};

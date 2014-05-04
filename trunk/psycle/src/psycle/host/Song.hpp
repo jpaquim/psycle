@@ -72,7 +72,9 @@ namespace psycle
 			///\name instrument
 			///\{
 			///
+			/// From now on, instSelected means "xminstruments" selected (only sampulse machines)
 			int instSelected;
+			/// From now on, waveSelected means "samples" and _pInstrument selected (for classic sampler and wave editor)
 			int waveSelected;
 			///
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
@@ -108,11 +110,13 @@ namespace psycle
 			///\name wavetable
 			///\{
 			/// ???
-			int WavAlloc(int iInstr,const char * str);
+			int WavAlloc(int iInstr,const std::string & sName);
 			/// ???
-			int WavAlloc(int iInstr,bool bStereo,uint32_t iSamplesPerChan,const char * sName);
+			int WavAlloc(int iInstr,bool bStereo,uint32_t iSamplesPerChan,const std::string & sFileName);
 			/// ???
-			int IffAlloc(int instrument,const char * str);
+			int IffAlloc(int instrument,const std::string & sFileName);
+			void SavePsyInstrument(const std::string& filename, int instIdx) const;
+			void LoadPsyInstrument(const std::string& filename, int instIdx);
 			/// wave preview allocation.  (thread safe)
 			void SetWavPreview(XMInstrument::WaveData<> * wave);
 			/// wave preview allocation.  (thread safe)
@@ -290,10 +294,12 @@ namespace psycle
 			int ExtraTicksPerLine() const {return m_ExtraTicksPerLine;}
 			void ExtraTicksPerLine(const int value)
 			{
-				if ( value < 1 ) m_ExtraTicksPerLine = 1;
+				if ( value < 0 ) m_ExtraTicksPerLine = 0;
 				else if ( value > 31 ) m_ExtraTicksPerLine = 31;
 				else m_ExtraTicksPerLine = value;
 			}
+			/*Solo/unsolo machine. Use -1 to unset*/
+			void SoloMachine(int macIdx);
 			/// The file name this song was loaded from.
 			std::string fileName;
 			/// The index of the machine which plays in solo.

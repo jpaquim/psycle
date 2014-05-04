@@ -10,6 +10,8 @@
 	#include "ProgressDialog.hpp"
 	#include "InputHandler.hpp"
 	#include <psycle/helpers/riff.hpp> // for Wave file loading.
+	#include <psycle/helpers/amigasvx.hpp> // for Wave file loading.
+	#include <psycle/helpers/riffwave.hpp> // for Wave file loading.
 #else
 	#include "Configuration.hpp"
 	#include "player_plugins/winamp/fake_progressDialog.hpp"
@@ -25,6 +27,7 @@
 
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/math.hpp>
+#include <universalis/os/fs.hpp>
 namespace loggers = universalis::os::loggers;
 #include "convert_internal_machines.private.hpp"
 
@@ -724,7 +727,31 @@ namespace psycle
 				}catch(...){};
 			}
 		}
-
+		void Song::SoloMachine(int macIdx)
+		{
+			if (macIdx >= 0 && macIdx < MAX_MACHINES && _pMachine[macIdx] != NULL 
+				&& _pMachine[macIdx]->_mode == MACHMODE_GENERATOR)
+			{
+				for ( int i=0;i<MAX_BUSES;i++ )
+				{
+					if (_pMachine[i]) {
+						_pMachine[i]->_mute = true;
+						_pMachine[i]->_volumeCounter=0.0f;
+						_pMachine[i]->_volumeDisplay =0;
+					}
+				}
+				_pMachine[macIdx]->_mute = false;
+				machineSoloed = macIdx;
+			}
+			else
+			{
+				machineSoloed = -1;
+				for ( int i=0;i<MAX_BUSES;i++ )
+				{
+					if (_pMachine[i]) {	_pMachine[i]->_mute = false; }
+				}
+			}
+		}
 		void Song::DeleteAllPatterns()
 		{
 			SONGTRACKS = 16;
@@ -965,280 +992,129 @@ namespace psycle
 				wavprev.UseWave(NULL);
 			}
 		}
-		// IFF structure ripped by krokpitr
-		// Current Code Extremely modified by [JAZ] ( RIFF based )
-		// Advise: IFF files use Big Endian byte ordering. That's why I use
-		// the following structure.
-		//
-		// typedef struct {
-		//   unsigned char hihi;
-		//   unsigned char hilo;
-		//   unsigned char lohi;
-		//   unsigned char lolo;
-		// } ULONGINV;
-		// 
-		//
-		/*
-		** IFF Riff Header
-		** ----------------
 
-		char Id[4]			// "FORM"
-		ULONGINV hlength	// of the data contained in the file (except Id and length)
-		char type[4]		// "16SV" == 16bit . 8SVX == 8bit
-
-		char name_Id[4]		// "NAME"
-		ULONGINV hlength	// of the data contained in the header "NAME". It is 22 bytes
-		char name[22]		// name of the sample.
-
-		char vhdr_Id[4]		// "VHDR"
-		ULONGINV hlength	// of the data contained in the header "VHDR". it is 20 bytes
-		ULONGINV Samplength	// length of the sample. It is in bytes, not in Samples.
-		ULONGINV loopstart	// Start point for the loop. It is in bytes, not in Samples.
-		ULONGINV loopLength	// Length of the loop (so loopEnd = loopstart+looplength) In bytes.
-		unsigned char sampRateHiByte; samples per second.  (Unsigned 16-bit quantity.)
-		unsigned char sampRateLoByte;
-		unsigned char numOctaves; //number of octaves of waveforms in sample. (Multisample?)
-		unsigned char compressMode; // data compression (0=none, 1=Fibonacci-delta encoding).
-		unsigned char volumeHiByte;
-		unsigned char volumeLoByte;
-		unsigned char volumeHiBytePoint;
-		unsigned char volumeLoBytePoint; (FIXED) = volume.  (The number 65536 means 1.0 or full volume.)
-
-		//A Voice holds waveform data for one or more octaves. 
-		//The one-shot part is played once and the repeat part is looped.
-		//The sum of oneShotHiSamples and repeatHiSamples is the full length
-		// of the highest octave waveform. Each following octave waveform is twice
-		// as long as the previous one. 
-
-
-		char body_Id[4]		// "BODY"
-		ULONGINV hlength	// of the data contained in the file. It is the sample length as well (in bytes)
-		char *data			// the sample.
-
-		*/
-
-		int Song::IffAlloc(int instrument,const char * str)
+		int Song::IffAlloc(int sampleIdx,const std::string & sFileName)
 		{
-			//In big endian:
-			typedef struct
-			{	unsigned int	oneShotHiSamples, repeatHiSamples, samplesPerHiCycle ;
-				unsigned short	samplesPerSec ;
-				unsigned char	octave, compression ;
-				unsigned int	volume ;
-			} VHDR_CHUNK ;
+#if !defined WINAMP_PLUGIN
+			AmigaSvx file;
+			file.Open(sFileName);
+			if (!file.isValidFile()) { return 0; }
+			std::string name = file.GetName();
+			if (name.empty()) {
+				boost::filesystem::path path(sFileName);
+				name = path.filename().string();
+			}
+			if (name.length() > 32) {
+				name = name.substr(0,32);
+			}
 
-			RiffFile file;
-			RiffChunkHeader hd;
-			ULONG data;
-			ULONGINV tmp;
-			int bits = 0;
-			// opens the file and reads the "FORM" header.
-			if(!file.Open(const_cast<char*>(str)))
-			{
-				return 0;
-			}
-			XMInstrument::WaveData<> wave;
-			unsigned int Datalen=0;
-			file.Read(&data,4);
-			if( data == file.FourCC("16SV")) bits = 16;
-			else if(data == file.FourCC("8SVX")) bits = 8;
-			file.Read(&hd,sizeof hd);
-			if(hd._id == file.FourCC("NAME"))
-			{
-				char tmp[23];
-				file.Read(tmp, 22); ///\todo should be hd._size instead of "22", but it is in big endian and we read in litle endian.
-				tmp[22]='\0';
-				wave.WaveName(tmp);
-				file.Read(&hd,sizeof hd);
-			}
-			if ( hd._id == file.FourCC("VHDR"))
-			{
-				unsigned int ls, le;
-				file.Read(&tmp,sizeof tmp);
-				Datalen = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				file.Read(&tmp,sizeof tmp);
-				ls = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				file.Read(&tmp,sizeof tmp);
-				le = (tmp.hihi << 24) + (tmp.hilo << 16) + (tmp.lohi << 8) + tmp.lolo;
-				if(bits == 16)
-				{
-					Datalen >>= 1;
-					ls >>= 1;
-					le >>= 1;
+			uint32_t datalen= file.getLength(1);
+			WavAlloc(sampleIdx,file.stereo(),datalen,name);
+			//For the preview wav, we play a single sample, so we skip until the last octave (better sound).
+			int startidx=(sampleIdx == PREV_WAV_INS)?file.getformat().numOctaves:1;
+			for (int octave=startidx;octave<=file.getformat().numOctaves;octave++) {
+				XMInstrument::WaveData<>& wave = (sampleIdx == PREV_WAV_INS)? wavprev.UsePreviewWave() : samples.get(sampleIdx);
+				wave.WaveSampleRate(file.getformat().samplesPerSec.unsignedValue());
+				wave.WaveGlobVolume(file.getformat().volume.value());
+				if (file.getPan() < 0.5f || file.getPan() > 0.5f) {
+					wave.PanEnabled(true);
+					wave.PanFactor(file.getPan());
 				}
-				if(ls != le)
-				{
-					wave.WaveLoopStart(ls);
-					wave.WaveLoopEnd(ls + le);
+				if ( file.getformat().repeatHiSamples.unsignedValue() > 0) {
+					wave.WaveLoopStart(file.getLoopStart());
+					wave.WaveLoopEnd(file.getLoopEnd());
 					wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 				}
-				unsigned short srbe, sr;
-				file.Read(&srbe,sizeof srbe);
-				sr = (srbe&0xFF)<<8 | ((srbe&0xFF00) >> 8);
-				wave.WaveSampleRate(sr);
- 				file.Skip(6); // Skipping octave, compression and volume
-				file.Read(&hd,sizeof hd);
-			}
-
-			if(hd._id == file.FourCC("BODY"))
-			{
-				int16_t * csamples;
-				wave.AllocWaveData(Datalen,false);
-				csamples = const_cast<int16_t*>(wave.pWaveDataL());
-				if(bits == 16)
-				{
-					for(unsigned int smp(0) ; smp < Datalen; ++smp)
-					{
-						file.Read(&tmp, 2);
-						*csamples = tmp.hilo * 256 + tmp.hihi;
-						++csamples;
+				wave.WaveTune(file.getNoteOffsetFor(octave));
+				std::list<helpers::EGPoint> volEnv = file.getVolumeEnvelope();
+				if (volEnv.size() > 1) {
+					// Adapting the point based volume envelope, to the ADSR based one in sampler instrument.
+					float max=0.f, last=1.f;
+					int maxpos=0, runpos=0;
+					for (std::list<helpers::EGPoint>::const_iterator ite = volEnv.begin(); ite != volEnv.end(); ++ite) {
+						if (ite->duration.signedValue() == -1) { //Sustain point.
+							_pInstrument[sampleIdx]->ENV_AT = maxpos*44.1f;
+							_pInstrument[sampleIdx]->ENV_DT = (runpos-maxpos)*44.1f;
+							_pInstrument[sampleIdx]->ENV_SL = last*100;
+							maxpos=-1;
+							runpos=0;
+						}
+						else if (maxpos >=0) { //Attack
+							runpos += ite->duration.unsignedValue();
+							last = ite->dest.value();
+							if (last > max) { max = last; maxpos=runpos; }
+						}
+						else { //Release
+							runpos += ite->duration.unsignedValue();
+						}
 					}
+					_pInstrument[sampleIdx]->ENV_RT=runpos*44.1f;
 				}
-				else
-				{
-					for(unsigned int smp(0) ; smp < Datalen; ++smp)
-					{
-						file.Read(&tmp, 1);
-						*csamples = tmp.hihi * 256 + tmp.hihi;
-						++csamples;
-					}
+				int16_t * csamples = const_cast<int16_t*>(wave.pWaveDataL());
+				if (file.stereo()) {
+					int16_t * rsamples = const_cast<int16_t*>(wave.pWaveDataR());
+					file.readStereoConvertTo16(csamples,rsamples,datalen, octave);
 				}
-			}
-			if (instrument < PREV_WAV_INS) {
-				samples.SetSample(wave,instrument);
-			}
-			else {
-				XMInstrument::WaveData<> &prevwave = wavprev.UsePreviewWave();
-				prevwave = wave;
+				else {
+					file.readMonoConvertTo16(csamples,datalen, octave);
+				}
+				if (octave<file.getformat().numOctaves) {
+					datalen= file.getLength(octave+1);
+					sampleIdx = WavAlloc(-1,file.stereo(),datalen,name);
+				}
 			}
 			file.Close();
+#endif
 			return 1;
 		}
 
-		int Song::WavAlloc(int iInstr, bool bStereo, uint32_t iSamplesPerChan, const char * sName)
+		int Song::WavAlloc(int iInstr, bool bStereo, uint32_t iSamplesPerChan, const std::string & sName)
 		{
+			int instout=iInstr;
 			assert(iSamplesPerChan<(1<<30)); ///< FIXME: Since in some places, signed values are used, we cannot use the whole range.
 			if (iInstr < PREV_WAV_INS ) {
 				XMInstrument::WaveData<> wave;
 				wave.AllocWaveData(iSamplesPerChan,bStereo);
 				wave.WaveName(sName);
-				samples.SetSample(wave,iInstr);
+				if (iInstr < 0) {
+					instout = samples.AddSample(wave);
+				}
+				else {
+					samples.SetSample(wave,iInstr);
+				}
 			}
 			else {
 				XMInstrument::WaveData<> &wave = wavprev.UsePreviewWave();
 				wave.Init();
 				wave.AllocWaveData(iSamplesPerChan,bStereo);
 			}
-			return true;
+			return instout;
 		}
 
-		int Song::WavAlloc(int instrument,const char * wavfile)
+		int Song::WavAlloc(int instrument, const std::string & sFileName)
 		{ 
 #if !defined WINAMP_PLUGIN
-			assert(wavfile != 0);
-			WaveFile file;
-			ExtRiffChunkHeader hd;
-			// opens the file and read the format Header.
-			DDCRET retcode(file.OpenForRead((char*)wavfile));
-			if(retcode != DDC_SUCCESS) 
-			{
-				return 0; 
-			}
-			// sample type	
-			int st_type(file.NumChannels());
-			int bits(file.BitsPerSample());
-			uint32_t Datalen(file.NumSamples());
+			RiffWave file;
+			file.Open(sFileName);
+			if (!file.isValidFile()) { return 0; }
+
 			// Initializes the layer.
-			char* filename = const_cast<char*>(strrchr(wavfile,'\\'));
-			if (filename == NULL) {
-				filename = const_cast<char*>(strrchr(wavfile,'//'));
-				if (filename == NULL) {
-					filename = const_cast<char*>(wavfile);
-				} else {filename++;}
-			} else { filename++;}
-			WavAlloc(instrument, st_type == 2, Datalen, filename);
-			// Reading of Wave data.
-			// We don't use the WaveFile "ReadSamples" functions, because there are two main differences:
-			// We need to convert 8bits to 16bits, and stereo channels are in different arrays.
+			boost::filesystem::path path(sFileName);
+			name = path.filename().string();
+			if (name.length() > 32) {
+				name = name.substr(0,32);
+			}
+			uint16_t st_type =std::min(static_cast<uint16_t>(2U),file.format().nChannels);
+			uint32_t Datalen(file.numSamples());
+			WavAlloc(instrument, st_type == 2U, Datalen, name);
+
 			XMInstrument::WaveData<>& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.UsePreviewWave();
-			wave.WaveSampleRate(file.SamplingRate());
-			int16_t * sampL = wave.pWaveDataL();
-
-			///\todo use template code for all this semi-repetitive code.
-
-			// mono
-			if(st_type == 1)
-			{
-				UINT8 smp8;
-				switch(bits)
-				{
-					case 8:
-						for(uint32_t io = 0 ; io < Datalen ; ++io)
-						{
-							file.ReadData(&smp8, 1);
-							*sampL = (smp8 << 8) - 32768;
-							++sampL;
-						}
-						break;
-					case 16:
-							file.ReadData(sampL, Datalen);
-						break;
-					case 24:
-						for(uint32_t io = 0 ; io < Datalen ; ++io)
-						{
-							file.ReadData(&smp8, 1);
-							file.ReadData(sampL, 1);
-							++sampL;
-						}
-						break;
-					default:
-						break;
-				}
-			}
-			// stereo
-			else
-			{
-				int16_t * sampR = wave.pWaveDataR();
-				UINT8 smp8;
-				switch(bits)
-				{
-					case 8:
-						for(uint32_t io = 0 ; io < Datalen ; ++io)
-						{
-							file.ReadData(&smp8, 1);
-							*sampL = (smp8 << 8) - 32768;
-							++sampL;
-							file.ReadData(&smp8, 1);
-							*sampR = (smp8 << 8) - 32768;
-							++sampR;
-						}
-						break;
-					case 16:
-						for(uint32_t io = 0 ; io < Datalen ; ++io)
-						{
-							file.ReadData(sampL, 1);
-							file.ReadData(sampR, 1);
-							++sampL;
-							++sampR;
-						}
-						break;
-					case 24:
-						for(uint32_t io = 0 ; io < Datalen ; ++io)
-						{
-							file.ReadData(&smp8, 1);
-							file.ReadData(sampL, 1);
-							++sampL;
-							file.ReadData(&smp8, 1);
-							file.ReadData(sampR, 1);
-							++sampR;
-						}
-						break;
-					default:
-						break; ///< \todo should throw an exception
-				}
-			}
-			retcode = file.Read(static_cast<void*>(&hd), 8);
-			while(retcode == DDC_SUCCESS)
+			wave.WaveSampleRate(file.format().nSamplesPerSec);
+			int16_t* samps[]={wave.pWaveDataL(), wave.pWaveDataR()};
+			WaveFormat_Data convert16(file.format().nSamplesPerSec,16,st_type,false);
+			file.readDeInterleavedSamples(reinterpret_cast<void**>(samps),Datalen,&convert16);
+			//TODO:
+			/*
 			{
 				if(hd.ckID == FourCC("smpl"))
 				{
@@ -1266,7 +1142,8 @@ namespace psycle
 					file.Skip(1);
 				retcode = file.Read(static_cast<void*>(&hd), 8);
 			}
-			file.Close();
+			*/
+			file.close();
 #endif //!defined WINAMP_PLUGIN
 			return 1;
 		}
@@ -1557,10 +1434,10 @@ namespace psycle
 						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
 						{
 							// Instrument Data Load
-							int numInstruments;
+							uint32_t numInstruments;
 							pFile->Read(numInstruments);
 							int idx;
-							for(int i = 0;i < numInstruments && filepos < begins+size;i++)
+							for(uint32_t  i = 0;i < numInstruments && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
 								filepos=pFile->GetPos();
@@ -1574,9 +1451,9 @@ namespace psycle
 									filepos=pFile->GetPos();
 								}
 							}
-							int numSamples;
+							uint32_t  numSamples;
 							pFile->Read(numSamples);
-							for(int i = 0;i < numSamples && filepos < begins+size;i++)
+							for(uint32_t  i = 0;i < numSamples && filepos < begins+size;i++)
 							{
 								pFile->Read(idx);
 								filepos=pFile->GetPos();
@@ -1794,7 +1671,7 @@ namespace psycle
 								unsigned int loop;
 								//Old format assumed 44Khz
 								wave.WaveSampleRate(44100);
-								wave.PanFactor(pans[i]/256.f);
+								wave.PanFactor(value_mapper::map_256_1(pans[i]));
 								//Old wavename, not really used anyway.
 								pFile->Read(dummy, 32);
 								wave.WaveName(names[i]);
@@ -1802,7 +1679,7 @@ namespace psycle
 								wave.WaveGlobVolume(volume*0.01f);
 								pFile->Read(&tmpFineTune, sizeof(short));
 								//Current sample uses 100 cents. Older used +-256
-								tmpFineTune = static_cast<int>((float)tmpFineTune/2.56f);
+								tmpFineTune = static_cast<int>(value_mapper::map_256_100(tmpFineTune));
 								wave.WaveFineTune(tmpFineTune);
 								pFile->Read(loop);
 								wave.WaveLoopStart(loop);
@@ -2333,7 +2210,7 @@ namespace psycle
 				}
 			}
 			// Instrument Data Save
-			int numInstruments = 0;	
+			uint32_t numInstruments = 0;	
 			for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 				if(xminstruments.IsEnabled(i)){
 					numInstruments++;
@@ -2669,7 +2546,7 @@ namespace psycle
 				}
 
 				// Sample Data Save
-				int numSamples = 0;
+				uint32_t numSamples = 0;
 				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
 					if(samples.IsEnabled(i)){
 						numSamples++;
@@ -3020,6 +2897,90 @@ namespace psycle
 			DeleteFile(filepath);
 #endif //!defined WINAMP_PLUGIN
 			return true;
+		}
+		
+		void Song::SavePsyInstrument(const std::string& filename, int instIdx) const
+		{
+			if (!xminstruments.IsEnabled(instIdx)) return;
+			const XMInstrument & instr = xminstruments[instIdx];
+
+			std::set<int> sampidxs = instr.GetWavesUsed();
+			std::map<unsigned char, unsigned char> sampMap;
+			std::list<int> indexlist;
+			const unsigned char n255 = 255u;
+			unsigned char i=0;
+			for (std::set<int>::const_iterator ite = sampidxs.begin(); ite != sampidxs.end(); ++ite, ++i) {
+				if (samples.IsEnabled(*ite)) {
+					sampMap[static_cast<unsigned char>(*ite)] = i;
+					indexlist.push_back(*ite);
+				}
+				else { sampMap[*ite]= n255; }
+			}
+			sampMap[n255]=n255;
+
+			RiffFile file;
+			file.Create(filename,true);
+			file.Write("PSYI",4);
+			file.Write("EINS",4);
+			size_t pos = file.GetPos();
+			uint32_t size = 0;
+			file.Write(size);
+			//Always 1. The song saver uses the same structure.
+			uint32_t numberof=1;
+			file.Write(numberof);//instruments
+			instr.Save(file, &sampMap);
+			numberof=static_cast<uint32_t>(indexlist.size());
+			file.Write(numberof);//samples
+			for (std::list<int>::const_iterator ite = indexlist.begin(); ite != indexlist.end(); ++ite) {
+				samples[*ite].Save(file);
+			}
+			size_t pos2 = file.GetPos(); 
+			size = (UINT)(pos2-pos-sizeof(size));
+			file.Seek(pos);
+			file.Write(&size,sizeof(size));
+			file.Close();
+		}
+		void Song::LoadPsyInstrument(const std::string& filename, int instIdx)
+		{
+			std::map<int, int> sampMap;
+			if ( !xminstruments.Exists(instIdx) ) {
+				XMInstrument instr;
+				xminstruments.SetInst(instr,instIdx);
+			}
+			XMInstrument& instr = xminstruments.get(instIdx);
+
+			RiffFile file;
+			file.Open(filename);
+			if (!file.Expect("PSYI",4)) return;
+			if (!file.Expect("EINS",4)) return;
+			uint32_t size;
+			file.Read(size);
+			uint32_t numIns;
+			file.Read(numIns);
+			//This loader only supports one instrument.
+			if (numIns!= 1) return;
+			instr.Load(file);
+			uint32_t numSamps;
+			file.Read(numSamps);
+			for(uint32_t i=0; i < numSamps && !file.Eof(); i++) {
+				XMInstrument::WaveData<> wavetmp;
+				int idx=samples.AddSample(wavetmp);
+				XMInstrument::WaveData<> & wave = samples.get(idx);
+				wave.Load(file);
+				sampMap[i]=idx;
+			}
+			//Remap 
+			for (int j=0; j<XMInstrument::NOTE_MAP_SIZE;j++) {
+				XMInstrument::NotePair pair = instr.NoteToSample(j);
+				if (pair.second != 255) {
+					if (sampMap.find(pair.second) != sampMap.end()) {
+						pair.second = sampMap[pair.second];
+					}
+					else { pair.second = 255; }
+					instr.NoteToSample(j,pair);
+				}
+			}
+			file.Close();
 		}
 
 		bool Song::IsPatternUsed(int i) const

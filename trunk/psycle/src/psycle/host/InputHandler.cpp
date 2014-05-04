@@ -764,11 +764,11 @@ namespace psycle
 				break;
 
 			case cdefInstrInc:
-				pMainFrame->OnBIncwav();
+				pMainFrame->OnBIncAux();
 				break;
 
 			case cdefInstrDec:
-				pMainFrame->OnBDecwav();
+				pMainFrame->OnBDecAux();
 				break;
 
 			case cdefInfoPattern:

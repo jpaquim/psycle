@@ -9,6 +9,7 @@
 #include <psycle/helpers/filter.hpp>
 #include <psycle/helpers/resampler.hpp>
 #include <psycle/helpers/dspslide.hpp>
+#include <psycle/helpers/value_mapper.hpp>
 #include <universalis/stdlib/mutex.hpp>
 #include <universalis/stdlib/cstdint.hpp>
 #include <cstddef> // for std::ptrdiff_t
@@ -572,7 +573,7 @@ XMSampler::Channel::PerformFX().
 			//This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
 			float tmp_rand = rInstrument().GlobVol() * m_CurrRandVol * rWave().Wave().WaveGlobVolume();
 			if (tmp_rand > rWave().Wave().WaveGlobVolume()) tmp_rand = rWave().Wave().WaveGlobVolume();
-			m_RealVolume = (vol/128.0f) * tmp_rand;
+			m_RealVolume = value_mapper::map_128_1(vol) * tmp_rand;
 		}
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 		float RealVolume() const { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; }
@@ -1050,7 +1051,7 @@ XMSampler::Channel::PerformFX().
 	int SampleRate() const { return m_sampleRate; }
 	virtual bool NeedsAuxColumn() { return true; }
 	virtual const char* AuxColumnName(int idx) const;
-	virtual int NumAuxColumnIndexes() { return XMInstrument::MAX_INSTRUMENT;}
+	virtual int NumAuxColumnIndexes();
 
 	virtual bool Load(RiffFile* riffFile); // Old fileformat
 	virtual bool LoadSpecificChunk(RiffFile* riffFile, int version);

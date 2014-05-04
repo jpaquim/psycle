@@ -96,7 +96,7 @@ namespace psycle
 				}
 			}
 		}
-
+		//In -> -32768.0..32768.0 , out -32768..32767
 		void AudioDriver::Quantize16WithDither(float *pin, int *piout, int c)
 		{
 			double const d2i = (1.5 * (1 << 26) * (1 << 26));
@@ -129,7 +129,7 @@ namespace psycle
 			}
 			while(--c);
 		}
-
+		//In -> -32768.0..32768.0 , out -32768..32767
 		void AudioDriver::Quantize16(float *pin, int *piout, int c)
 		{
 			do
@@ -158,7 +158,7 @@ namespace psycle
 			}
 			while(--c);
 		}
-
+		//In -> -8388608.0..8388608.0, out  -2147483648.0 to 2147483648.0
 		void AudioDriver::Quantize24in32Bit(float *pin, int *piout, int c)
 		{
 			// TODO Don't really know why, but the -100 is what made the clipping work correctly.
@@ -169,7 +169,7 @@ namespace psycle
 				*piout++ = psycle::helpers::math::rint<int32_t>(psycle::helpers::math::clip(float(min), (*pin++) * 65536.0f, float(max)));
 			}
 		}
-
+		//In -> -8388608.0..8388608.0 in 4 bytes, out -8388608..8388608, aligned to 3 bytes, Big endian
 		void AudioDriver::Quantize24BE(float *pin, int *piout, int c)
 		{
             unsigned char *cptr = (unsigned char *) piout;
@@ -185,6 +185,7 @@ namespace psycle
 				*cptr++ = (unsigned char) (outval & 0xFF);
 			}
 		}
+		//In -> -8388608.0..8388608.0 in 4 bytes, out -8388608..8388608, aligned to 3 bytes, little endian
 		void AudioDriver::Quantize24LE(float *pin, int *piout, int c)
 		{
             unsigned char *cptr = (unsigned char *) piout;
@@ -200,7 +201,7 @@ namespace psycle
 				*cptr++ = (unsigned char) ((outval >> 16) & 0xFF);
 			}
 		}
-
+		//In -> -32768..32767 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 		void AudioDriver::DeQuantize16AndDeinterlace(short int *pin, float *poutleft,float *poutright,int c)
 		{
 			do
@@ -210,7 +211,7 @@ namespace psycle
 			}
 			while(--c);
 		}
-
+		//In -> -2147483648..2147483647 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 		void AudioDriver::DeQuantize32AndDeinterlace(int *pin, float *poutleft,float *poutright,int c)
 		{
 			do
@@ -220,6 +221,7 @@ namespace psycle
 			}
 			while(--c);
 		}
+		//In -> -1.0..1.0 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 		void AudioDriver::DeinterlaceFloat(float *pin, float *poutleft,float *poutright,int c)
 		{
 			do

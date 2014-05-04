@@ -153,7 +153,7 @@ namespace psycle
 			song.comments.append(szName);
 
 			song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(itFileH.mVol>128?128:itFileH.mVol)/128.0f);
+			song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,value_mapper::map_128_1(itFileH.mVol>128?128:itFileH.mVol));
 			song.seqBus=0;
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
@@ -1220,7 +1220,7 @@ Special:  Bit 0: On = song message attached.
 			song.comments.append(szName);
 
 			song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
-			int connectionIdx = song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,(s3mFileH.mVol&0x7F)/128.0f);
+			int connectionIdx = song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,value_mapper::map_128_1(s3mFileH.mVol&0x7F));
 			song.seqBus=0;
 			XMSampler* sampler = ((XMSampler*)song._pMachine[0]);
 
@@ -1261,7 +1261,7 @@ Special:  Bit 0: On = song message attached.
 			if (stereo) {
 				// Note that in stereo, the mastermul is internally multiplied by 11/8 inside the player since
 				// there is generally more room in the output stream
-				sampler->SetDestWireVolume(connectionIdx,((s3mFileH.mVol&0x7F)/128.0f)*(11.f/8.f));
+				sampler->SetDestWireVolume(connectionIdx,(value_mapper::map_128_1(s3mFileH.mVol&0x7F))*(11.f/8.f));
 			}
 			int numchans=0;
 			for (i=0;i<32;i++)

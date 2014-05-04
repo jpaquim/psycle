@@ -27,6 +27,7 @@ namespace psycle { namespace host {
 		{
 			CDialog::DoDataExchange(pDX);
 			DDX_Control(pDX, IDC_PROPERTIES, m_props);
+			DDX_Control(pDX, IDC_RADIO_WAVES, m_radio_wave);
 			DDX_Control(pDX, IDC_RADIO_INS, m_radio_ins);
 			DDX_Control(pDX, IDC_RADIO_GEN, m_radio_gen);
 			DDX_Control(pDX, IDC_RADIO_EFX, m_radio_efx);
@@ -46,6 +47,7 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_RADIO_EFX, OnRadioEfx)
 			ON_BN_CLICKED(IDC_RADIO_GEN, OnRadioGen)
 			ON_BN_CLICKED(IDC_RADIO_INS, OnRadioIns)
+			ON_BN_CLICKED(IDC_RADIO_WAVES, OnRadioWaves)
 			ON_BN_CLICKED(IDC_EXCHANGE, OnExchange)
 			ON_BN_CLICKED(IDC_CLONEMACHINE, OnClonemachine)
 		END_MESSAGE_MAP()
@@ -96,6 +98,7 @@ namespace psycle { namespace host {
 			int selected=0;
 			int b;
 
+			CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			switch (DisplayMode)
 			{
 			case 0:
@@ -104,6 +107,7 @@ namespace psycle { namespace host {
 				m_radio_gen.SetCheck(1);
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(0);
+				m_radio_wave.SetCheck(0);
 
 				selected = Global::song().seqBus;
 				if (selected >= MAX_BUSES)
@@ -122,6 +126,7 @@ namespace psycle { namespace host {
 				m_radio_gen.SetCheck(0);
 				m_radio_efx.SetCheck(1);
 				m_radio_ins.SetCheck(0);
+				m_radio_wave.SetCheck(0);
 
 				selected = Global::song().seqBus;
 				if (selected < MAX_BUSES)
@@ -139,25 +144,44 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				m_text.SetWindowText("Sampled instruments");
+				m_text.SetWindowText("Sampulse instruments");
 				m_props.SetWindowText("Wave Editor");
 				m_radio_gen.SetCheck(0);
 				m_radio_efx.SetCheck(0);
 				m_radio_ins.SetCheck(1);
+				m_radio_wave.SetCheck(0);
 
-				char buffer[64];
-				for (int b=0;b<PREV_WAV_INS;b++)
+				for (int b=0;b<XMInstrument::MAX_INSTRUMENT;b++)
 				{
-					sprintf(buffer, "%.2X: %s", b, Global::song().samples.IsEnabled(b) ? Global::song().samples[b].WaveName().c_str(): "empty");
+					sprintf(buffer, "%.2X: %s", b, Global::song().xminstruments.IsEnabled(b) ? Global::song().xminstruments[b].Name().c_str(): "empty");
 					m_list.AddString(buffer);
 				}
-				CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 				if (cc->GetCurSel() != AUX_INSTRUMENT)
 				{
 					cc->SetCurSel(AUX_INSTRUMENT);
 					mainFrame->UpdateComboIns(true);
 				}
 				selected = Global::song().instSelected;
+				break;
+			case 3:
+				m_text.SetWindowText("Sampled sounds");
+				m_props.SetWindowText("Wave Editor");
+				m_radio_gen.SetCheck(0);
+				m_radio_efx.SetCheck(0);
+				m_radio_ins.SetCheck(0);
+				m_radio_wave.SetCheck(1);
+
+				for (int b=0;b<PREV_WAV_INS;b++)
+				{
+					sprintf(buffer, "%.2X: %s", b, Global::song().samples.IsEnabled(b) ? Global::song().samples[b].WaveName().c_str(): "empty");
+					m_list.AddString(buffer);
+				}
+				if (cc->GetCurSel() != AUX_INSTRUMENT)
+				{
+					cc->SetCurSel(AUX_INSTRUMENT);
+					mainFrame->UpdateComboIns(true);
+				}
+				selected = Global::song().waveSelected;
 				break;
 			}
 			m_list.ShowWindow(SW_SHOW);
@@ -178,17 +202,21 @@ namespace psycle { namespace host {
 				mainFrame->UpdateComboGen();
 				break;
 			case 2:
+				//fallthrough
+			case 3:
 				{
-					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-					if (cc->GetCurSel() == AUX_INSTRUMENT)
-					{
+					if (DisplayMode==2) {
 						Global::song().instSelected = Global::song().auxcolSelected=tmac;
+					}
+					else {
+						Global::song().waveSelected = Global::song().auxcolSelected=tmac;
+					}
+					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
+					if (cc->GetCurSel() == AUX_INSTRUMENT) {
 						mainFrame->UpdateComboIns(false);
 					}
-					else
-					{
+					else {
 						cc->SetCurSel(AUX_INSTRUMENT);
-						Global::song().instSelected = Global::song().auxcolSelected=tmac;
 						mainFrame->UpdateComboIns(true);
 					}
 					mainFrame->UpdateInstrumentEditor();
@@ -200,10 +228,12 @@ namespace psycle { namespace host {
 		void CGearRackDlg::OnCreate() 
 		{
 			int tmac = m_list.GetCurSel();
+			CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			switch (DisplayMode)
 			{
 			case 1:
 				tmac += MAX_BUSES;
+				//fallthrough
 			case 0:
 				{
 					mainView->NewMachine(-1,-1,tmac);
@@ -218,14 +248,19 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				{
-					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_INSTRUMENT);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
-					mainFrame->UpdateComboIns(true);
-					mainFrame->UpdateInstrumentEditor();
-				}
-				mainFrame->OnLoadwave();
+				Global::song().instSelected = Global::song().auxcolSelected=tmac;
+				cc->SetCurSel(AUX_INSTRUMENT);
+				mainFrame->LoadInst(tmac);
 				mainFrame->UpdateComboIns(true);
+				mainFrame->UpdateInstrumentEditor();
+				break;
+			}
+			case 3:
+				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
+				cc->SetCurSel(AUX_INSTRUMENT);
+				mainFrame->LoadWave(tmac);
+				mainFrame->UpdateComboIns(true);
+				mainFrame->UpdateInstrumentEditor();
 				break;
 			}
 			RedrawList();
@@ -260,11 +295,35 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				if (MessageBox("Are you sure?","Delete Instruments", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+				if (Global::song().xminstruments.Exists(Global::song().instSelected)
+					&& MessageBox("Are you sure?","Delete Samples", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
+				{
+					XMInstrument & inst = Global::song().xminstruments.get(Global::song().instSelected);
+					std::set<int> sampNums =  inst.GetWavesUsed();
+					if (sampNums.size() > 0) {
+						int result = MessageBox(_T("This instrument uses one or more samples. Do you want to ALSO delete the samples?"),
+							_T("Deleting Instrument"),MB_YESNOCANCEL | MB_ICONQUESTION);
+						if (result == IDYES) {
+							CExclusiveLock lock(&Global::song().semaphore, 2, true);
+							for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
+								Global::song().samples.RemoveAt(*it);
+							}
+						}
+						else if (result == IDCANCEL) {
+							return;
+						}
+					}
+					inst.Init();
+					mainFrame->UpdateComboIns(true);
+					mainFrame->UpdateInstrumentEditor();
+				}
+				break;
+			case 3:
+				if (MessageBox("Are you sure?","Delete Samples", MB_YESNO|MB_ICONEXCLAMATION) == IDYES)
 				{
 					{
 						CExclusiveLock lock(&Global::song().semaphore, 2, true);
-						Global::song().DeleteInstrument(Global::song().instSelected);
+						Global::song().DeleteInstrument(Global::song().waveSelected);
 					}
 					mainFrame->UpdateComboIns(true);
 					mainFrame->UpdateInstrumentEditor();
@@ -283,6 +342,7 @@ namespace psycle { namespace host {
 		void CGearRackDlg::OnProperties() 
 		{
 			int tmac = m_list.GetCurSel();
+			CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			switch (DisplayMode)
 			{
 			case 0:
@@ -310,14 +370,18 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				{
-					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_INSTRUMENT);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
-					mainFrame->UpdateComboIns(true);
-					mainFrame->UpdateInstrumentEditor();
-				}
-
+				cc->SetCurSel(AUX_INSTRUMENT);
+				Global::song().instSelected = Global::song().auxcolSelected=tmac;
+				mainFrame->UpdateComboIns(true);
+				mainFrame->UpdateInstrumentEditor();
+				mainFrame->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
+				mainFrame->m_pWndWed->SetActiveWindow();
+				break;
+			case 3:
+				cc->SetCurSel(AUX_INSTRUMENT);
+				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
+				mainFrame->UpdateComboIns(true);
+				mainFrame->UpdateInstrumentEditor();
 				mainFrame->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
 				mainFrame->m_pWndWed->SetActiveWindow();
 				break;
@@ -330,6 +394,7 @@ namespace psycle { namespace host {
 			POINT point;
 			GetCursorPos(&point);
 			int tmac = m_list.GetCurSel();
+			CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			switch (DisplayMode)
 			{
 			case 0:
@@ -345,13 +410,18 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				{
-					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-					cc->SetCurSel(AUX_INSTRUMENT);
-					Global::song().instSelected = Global::song().auxcolSelected=tmac;
-					mainFrame->UpdateComboIns(true);
-					mainFrame->UpdateInstrumentEditor();
-				}
+				cc->SetCurSel(AUX_INSTRUMENT);
+				Global::song().instSelected = Global::song().auxcolSelected=tmac;
+				mainFrame->UpdateComboIns(true);
+				mainFrame->UpdateInstrumentEditor();
+				mainFrame->ShowInstrumentEditor();
+				mainFrame->UpdateComboIns(true);
+				break;
+			case 3:
+				cc->SetCurSel(AUX_INSTRUMENT);
+				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
+				mainFrame->UpdateComboIns(true);
+				mainFrame->UpdateInstrumentEditor();
 				mainFrame->ShowInstrumentEditor();
 				mainFrame->UpdateComboIns(true);
 				break;
@@ -370,19 +440,20 @@ namespace psycle { namespace host {
 			DisplayMode = 0;
 			RedrawList();
 		}
-
 		void CGearRackDlg::OnRadioEfx() 
 		{
 			DisplayMode = 1;
 			RedrawList();
-			
 		}
-
 		void CGearRackDlg::OnRadioIns() 
 		{
 			DisplayMode = 2;
 			RedrawList();
-			
+		}
+		void CGearRackDlg::OnRadioWaves() 
+		{
+			DisplayMode = 3;
+			RedrawList();
 		}
 
 		void CGearRackDlg::OnExchange() 
@@ -416,6 +487,10 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
+				//TODO: finish
+				MessageBox("Unfinished");
+				break;
+			case 3:
 				PsycleGlobal::inputHandler().AddMacViewUndo();
 				Global::song().ExchangeInstruments(sel[0],sel[1]);
 				
@@ -496,6 +571,10 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
+				//TODO: finish
+				MessageBox("Unfinished");
+				break;
+			case 3:
 				if (tmac2 < 0)
 				{
 					for (int i = 0; i < MAX_INSTRUMENTS; i++)

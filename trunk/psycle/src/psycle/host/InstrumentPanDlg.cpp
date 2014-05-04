@@ -73,7 +73,7 @@ void CInstrumentPanDlg::AssignPanningValues(XMInstrument& inst)
 	m_instr = &inst;
 
 	m_cutoffPan.SetCheck(inst.PanEnabled());
-	m_SlVolCutoffPan.SetPos((inst.Pan()*128.0f));
+	m_SlVolCutoffPan.SetPos(value_mapper::map_1_128<int>(inst.Pan()));
 	//FIXME: This is not showing the correct value. Should check if randompanning
 	//is erroneous or is not the value to check.
 	m_SlSwing1Glide.SetPos(inst.RandomPanning()*100.0f);
@@ -120,7 +120,7 @@ void CInstrumentPanDlg::SliderPan(CSliderCtrl* slid)
 {
 	char buffer[64];
 	int nPos = slid->GetPos();
-	m_instr->Pan(nPos/128.0f);
+	m_instr->Pan(value_mapper::map_128_1(nPos));
 
 	if ( nPos == 0) sprintf(buffer,"||%02d  ",nPos);
 	else if ( nPos < 32) sprintf(buffer,"<<%02d  ",nPos);

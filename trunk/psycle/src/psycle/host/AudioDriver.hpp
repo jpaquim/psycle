@@ -174,13 +174,21 @@ namespace psycle
 			channel_mode GetChannelMode() const { return settings().channelMode(); }
 
 			static void PrepareWaveFormat(WAVEFORMATEXTENSIBLE& wf, int channels, int sampleRate, int bits, int validBits);
+			//In -> -32768.0..32768.0 , out -32768..32767
 			static void Quantize16(float *pin, int *piout, int c);
+			//In -> -32768.0..32768.0 , out -32768..32767
 			static void Quantize16WithDither(float *pin, int *piout, int c);
+			//In -> -8388608.0..8388608.0, out  -2147483648.0 to 2147483648.0
 			static void Quantize24in32Bit(float *pin, int *piout, int c);
+			//In -> -8388608.0..8388608.0 in 4 bytes, out -8388608..8388608, aligned to 3 bytes, Big endian
 			static void Quantize24BE(float *pin, int *piout, int c);
+			//In -> -8388608.0..8388608.0 in 4 bytes, out -8388608..8388608, aligned to 3 bytes, little endian
 			static void Quantize24LE(float *pin, int *piout, int c);
+			//In -> -32768..32767 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 			static void DeQuantize16AndDeinterlace(short int *pin, float *poutleft,float *poutright,int c);
+			//In -> -2147483648..2147483647 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 			static void DeQuantize32AndDeinterlace(int *pin, float *poutleft,float *poutright,int c);
+			//In -> -1.0..1.0 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 			static void DeinterlaceFloat(float *pin, float *poutleft,float *poutright,int c);
 		};
 

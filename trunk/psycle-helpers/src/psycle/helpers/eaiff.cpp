@@ -9,25 +9,29 @@
 namespace psycle { namespace helpers {
 
 		const IffChunkId EaIff::grabbag = {' ',' ',' ',' '};
+		const IffChunkId EaIff::FORM = {'F','O','R','M'};
+		const IffChunkId EaIff::LIST = {'L','I','S','T'};
+		const IffChunkId EaIff::CAT = {'C','A','T',' '};
+		//sizeof(IffChunkHeader) does not give 8.
+		const std::size_t IffChunkHeader::SIZEOF = 8;
 
-		IffChunkHeader::IffChunkHeader(){}
-		IffChunkHeader::~IffChunkHeader(){}
-		void IffChunkHeader::setLength(uint32_t newlength) {
-			ulength.changeValue(newlength);
-		}
-		uint32_t IffChunkHeader::length() const {
-			return ulength.unsignedValue();
-		}
 
 ///////////////////////////////////////////////////////
-		bool EaIff::isValidFile() const { return false;}
+		bool EaIff::isValidFile() const { return isValid;}
 
-		void EaIff::Open(const std::string& fname) { AbstractIff::Open(fname); }
+		void EaIff::Open(const std::string& fname) {
+			isValid=false;
+			AbstractIff::Open(fname);
+			readHeader();
+			if (currentHeader.matches(FORM)) {
+				isValid=true;
+			}
+		}
 		void EaIff::Create(const std::string& fname, const bool overwrite) { AbstractIff::Create(fname, overwrite); }
 		void EaIff::close() { 
 			if (isWriteMode()) {
 				std::streamsize size = fileSize();
-				UpdateFormSize(0,size-sizeof(currentHeader));
+				UpdateFormSize(0,size-IffChunkHeader::SIZEOF);
 			}
 			AbstractIff::close(); 
 		}
@@ -61,21 +65,27 @@ namespace psycle { namespace helpers {
 			return currentHeader;
 		}
 		const IffChunkHeader& EaIff::findChunk(const IffChunkId& id, bool allowWrap) {
-			do {
+			while(!Eof()) {
 				const IffChunkHeader& header = readHeader();
 				if (header.matches(id)) return header;
 				Skip(header.length());
 				if (header.length()%2)Skip(1);
-			}while(!Eof());
+			};
 			if (allowWrap && Eof()) {
-				Seek(8);//Skip RIFF/RIFX chunk
+				Seek(12);//Skip FORM chunk
 				return findChunk(id,false);
 			}
-			throw std::runtime_error(std::string("couldn't find chunk ") + id);
+			IffChunkHeader head(id,0);
+			throw std::runtime_error(std::string("couldn't find chunk ") + head.id);
 		}
 		void EaIff::skipThisChunk() {
-			Seek(headerPosition + static_cast<std::streamoff>(sizeof(currentHeader) + currentHeader.length()));
-			if (GetPos() % 2 > 0) Skip(1);
+			if (headerPosition+static_cast<std::streampos>(IffChunkHeader::SIZEOF+currentHeader.length()) >= GuessedFilesize()) {
+				Seek(GuessedFilesize());//Seek to end (so we can have EOF)
+			}
+			else {
+				Seek(headerPosition + static_cast<std::streamoff>(IffChunkHeader::SIZEOF + currentHeader.length()));
+				if (GetPos() % 2 > 0) Skip(1);
+			}
 		}
 
 		void EaIff::WriteHeader(const IffChunkHeader& header) {
@@ -89,7 +99,7 @@ namespace psycle { namespace helpers {
 		void EaIff::UpdateCurrentChunkSize()
 		{
 			std::streampos chunksize = GetPos();
-			chunksize-=headerPosition+static_cast<std::streamoff>(sizeof(currentHeader));
+			chunksize-=headerPosition+static_cast<std::streamoff>(IffChunkHeader::SIZEOF);
 			UpdateFormSize(headerPosition, chunksize);
 		}
 

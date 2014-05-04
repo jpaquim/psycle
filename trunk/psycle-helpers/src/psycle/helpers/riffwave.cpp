@@ -5,37 +5,80 @@ namespace psycle { namespace helpers {
 	const IffChunkId RiffWave::RF64 = {'R','F','6','4'};
 	const IffChunkId RiffWave::WAVE = {'W','A','V','E'};
 	const IffChunkId RiffWave::ds64 = {'d','s','6','4'};
-	const IffChunkId RiffWave::fmt = {'f','m','t',' '};
 	const IffChunkId RiffWave::data = {'d','a','t','a'};
+	const IffChunkId RiffWave::fact = {'f','a','c','t'};
 
-
-	// TODO No idea how to do this in a nicer way with the gnu toolchain
-    namespace {
-		constexpr uint16_t FORMAT_PCM = 1;
-		constexpr uint16_t FORMAT_FLOAT = 3;
-		constexpr uint16_t FORMAT_EXTENSIBLE = 0xFFFEU;
-    }
-    template class RiffWaveFmtChunk<LongBE, ShortBE>;
-    template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_PCM = FORMAT_PCM;
-    template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_FLOAT = FORMAT_FLOAT;
-    template<> const uint16_t RiffWaveFmtChunk<LongBE, ShortBE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
-    template class RiffWaveFmtChunk<LongLE, ShortLE>;
-    template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_PCM = FORMAT_PCM;
-    template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_FLOAT = FORMAT_FLOAT;
-    template<> const uint16_t RiffWaveFmtChunk<LongLE, ShortLE>::FORMAT_EXTENSIBLE = FORMAT_EXTENSIBLE;
+	const IffChunkId RiffWaveFmtChunk::fmt = {'f','m','t',' '};
+    const uint16_t RiffWaveFmtChunk::FORMAT_PCM = 1;
+    const uint16_t RiffWaveFmtChunk::FORMAT_FLOAT = 3;
+    const uint16_t RiffWaveFmtChunk::FORMAT_EXTENSIBLE = 0xFFFEU;
+	const std::size_t RiffWaveFmtChunk::SIZEOF = 16;
+	const std::size_t RiffWaveFmtChunkExtensible::SIZEOF = 22;
 
 	//////////////////////////////////////////////
 
-	RiffWave::RiffWave() : ds64_pos(0),pcmdata_pos(0),numsamples(0) {
+	RiffWaveFmtChunk::RiffWaveFmtChunk() {}
+	RiffWaveFmtChunk::RiffWaveFmtChunk(const WaveFormat_Data& config)
+	{
+		wFormatTag = config.isfloat ? FORMAT_FLOAT : FORMAT_PCM;
+		wChannels = config.nChannels;
+		dwSamplesPerSec = config.nSamplesPerSec;
+		wBitsPerSample = config.nBitsPerSample;
+		dwAvgBytesPerSec = config.nChannels * config.nSamplesPerSec * config.nBitsPerSample / 8;
+		wBlockAlign = static_cast<uint16_t>(config.nChannels * config.nBitsPerSample / 8);
+	}
+
+	RiffWaveFmtChunkExtensible::RiffWaveFmtChunkExtensible() {}
+	RiffWaveFmtChunkExtensible::RiffWaveFmtChunkExtensible(const RiffWaveFmtChunk& copy)
+		:RiffWaveFmtChunk(copy)
+		, extensionSize(SIZEOF)
+		, numberOfValidBits(0)
+		, speakerPositionMask(0)
+	{
+		subFormatTag.data1=0;
+		subFormatTag.data2=0;
+		subFormatTag.data3=0;
+		subFormatTag.data4[0]='\0';
+	}
+	RiffWaveFmtChunkExtensible::RiffWaveFmtChunkExtensible(const WaveFormat_Data& config)
+		: RiffWaveFmtChunk(config)
+	{
+	}
+
+	void WaveFormat_Data::Config(uint32_t NewSamplingRate, uint16_t NewBitsPerSample, uint16_t NewNumChannels, bool useFloat)
+	{
+		isfloat = useFloat;
+		nSamplesPerSec = NewSamplingRate;
+		nChannels = NewNumChannels;
+		nUsableBitsPerSample = nBitsPerSample = NewBitsPerSample;
+	}
+	void WaveFormat_Data::Config(const RiffWaveFmtChunk& chunk) 
+	{
+		Config(chunk.dwSamplesPerSec,chunk.wBitsPerSample, chunk.wChannels,
+			chunk.wFormatTag == RiffWaveFmtChunk::FORMAT_FLOAT);
+	}
+	void WaveFormat_Data::Config(const RiffWaveFmtChunkExtensible& chunk)
+	{
+		const RiffWaveFmtChunkExtensible& chunkExt = reinterpret_cast<const RiffWaveFmtChunkExtensible&>(chunk);
+		//TODO: finish WAVEFORMATEXTENSIBLE
+		Config(chunk.dwSamplesPerSec,chunk.wBitsPerSample, chunk.wChannels,
+			false /*chunkExt.subFormatTag*/);
+		nUsableBitsPerSample = chunkExt.numberOfValidBits;
+	}
+
+	//////////////////////////////////////////////
+	RiffWave::RiffWave() : ds64_pos(0),pcmdata_pos(0),numsamples(0)
+	{
 	}
 
 	RiffWave::~RiffWave() {
 	}
-	void RiffWave::Open(const std::string& fname) {
+
+	void RiffWave::Open(const std::string& fname)
+	{
 		MsRiff::Open(fname);
 		if (isValid) {
 			if (Expect(WAVE)) {
-				isValid=true;
 				ReadFormat();
 			}
 			else {
@@ -43,148 +86,145 @@ namespace psycle { namespace helpers {
 			}
 		}
 		else {
+			//Not a RIFF or RIFX. Let's try RF64.
 			MsRiff::close();
 			AbstractIff::Open(fname);
+			isLittleEndian=true;
+			currentHeader=&currentHeaderLE;
 			const BaseChunkHeader& header = readHeader();
-			if (header.matches(RF64)) {
-				isLittleEndian=true;
-				if (Expect(WAVE)) {
-					isValid=true;
-					findChunk(ds64);
-					ds64_pos = headerPosition;
-					Skip(16); // skip riff and data sizes
-					Long64LE sample;
-					Read(sample);
-					numsamples=sample.unsignedValue();
-					skipThisChunk();
-					ReadFormat();
-				}
+			if (header.matches(RF64) && Expect(WAVE)) {
+				isValid=true;
+				findChunk(ds64);
+				ds64_pos = headerPosition;
+				Skip(16); // skip riff and data sizes
+				Long64LE sample;
+				Read(sample);
+				numsamples=static_cast<uint32_t>(sample.unsignedValue());
+				skipThisChunk();
+				ReadFormat();
 			}
 		}
 	}
-    void RiffWave::Create(const std::string& fname, bool const  overwrite, bool const /*littleEndian*/) {
-		MsRiff::Create(fname, overwrite);
+    void RiffWave::Create(const std::string& fname, bool const  overwrite, bool const littleEndian)
+	{
+		MsRiff::Create(fname, overwrite, littleEndian);
 		Write(WAVE);
 		ds64_pos = 0; pcmdata_pos = 0; numsamples = 0;
 	}
 	void RiffWave::close() { 
 		if (isWriteMode()) {
-			std::streamsize size;
-			if (currentHeader.matches(data)) {
-				size = GetPos() - headerPosition;
-			}
-			else {
-				//TODO: would need a mechanism to find the chunk and determine where the next one is.
-				size=0;
-			}
-			UpdateFormSize(0,size-sizeof(currentHeader));
+			std::streamsize size = GetPos() - static_cast<std::streampos>(RiffChunkHeader::SIZEOF);
+			UpdateFormSize(headerPosition,size - headerPosition);
+			UpdateFormSize(0,size);
 		}
 		MsRiff::close();
 	}
 
-#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
-	const RiffChunkHeader<LongLE>& RiffWave::findChunk(const IffChunkId& id, bool allowWrap)
-#elif defined DIVERSALIS__CPU__ENDIAN__BIG
-	const RiffChunkHeader<LongBE>& RiffWave::findChunk(const IffChunkId& id, bool allowWrap)
-#endif
+	const BaseChunkHeader& RiffWave::findChunk(const IffChunkId& id, bool allowWrap)
 	{
-		do {
+		while(!Eof()) {
+			//TODO: Handle better the LIST form and subchunks
 			readHeader();
-			if (currentHeader.matches(data)) {
-				pcmdata_pos = headerPosition;
-				if (ds64_pos == std::streampos(0) ) {
-					numsamples = calcSamplesFromBytes(currentHeader.length());
-				}
+			if (currentHeader->matches(id)) {
+				return *currentHeader;
 			}
-			if (currentHeader.matches(id)) {
-				return currentHeader;
+			else if (tryPaddingFix) {
+				Seek(headerPosition-static_cast<std::streampos>(1));
+				continue;
 			}
-			Skip(currentHeader.length());
-			if (currentHeader.length()%2)Skip(1);
-		}while(!Eof());
+			else if (currentHeader->length() > 0) {
+				Skip(currentHeader->length());
+			}
+			else {
+				throw std::runtime_error(std::string("Couldn't read the file. found 0 byte header ") + currentHeader->idString());
+			}
+		};
 		if (allowWrap && Eof()) {
 			Seek(12);//Skip RIFF/WAVE header.
 			return findChunk(id,false);
 		}
-		throw std::runtime_error(std::string("couldn't find chunk ") + id);
+		RiffChunkHeader head(id,0);
+		throw std::runtime_error(std::string("couldn't find chunk ") + head.idString());
 	}
 
 	void RiffWave::ReadFormat()
 	{
-		findChunk(fmt);
-		if (isLittleEndian) {
-			RiffWaveFmtChunk<LongLE,ShortLE> chunk;
-			ReadRaw(&chunk,sizeof(RiffWaveFmtChunk<LongLE,ShortLE>));
-			formatdata.Config(chunk);
-			skipThisChunk();
+		findChunk(RiffWaveFmtChunk::fmt);
+		RiffWaveFmtChunk chunk;
+		Read(chunk.wFormatTag);
+		Read(chunk.wChannels);
+		Read(chunk.dwSamplesPerSec);
+		Read(chunk.dwAvgBytesPerSec);
+		Read(chunk.wBlockAlign);
+		Read(chunk.wBitsPerSample);
+		if (chunk.wFormatTag == RiffWaveFmtChunk::FORMAT_EXTENSIBLE) {
+			RiffWaveFmtChunkExtensible chunkExt(chunk);
+			if (currentHeader->length() < RiffWaveFmtChunk::SIZEOF + sizeof(chunkExt.extensionSize) ) {
+				throw std::runtime_error(std::string("invalid format header length"));
+			}
+			Read(chunkExt.extensionSize);
+			if (chunkExt.extensionSize < RiffWaveFmtChunkExtensible::SIZEOF) {
+				throw std::runtime_error(std::string("invalid format header length"));
+			}
+			Read(chunkExt.numberOfValidBits);
+			Read(chunkExt.speakerPositionMask);
+			Read(chunkExt.subFormatTag.data1);
+			Read(chunkExt.subFormatTag.data2);
+			Read(chunkExt.subFormatTag.data3);
+			ReadSizedString(chunkExt.subFormatTag.data4,sizeof(chunkExt.subFormatTag.data4));
+			formatdata.Config(chunkExt);
 		}
 		else {
-			RiffWaveFmtChunk<LongBE,ShortBE> chunk;
-			ReadRaw(&chunk,sizeof(RiffWaveFmtChunk<LongBE,ShortBE>));
 			formatdata.Config(chunk);
-			skipThisChunk();
 		}
-		//TODO: waveformat_Extensible
-		/*
- if (wav->formatTag == WAVE_FORMAT_EXTENSIBLE)
-    {
-      uint16_t extensionSize;
-      uint16_t numberOfValidBits;
-      uint32_t speakerPositionMask;
-      uint16_t subFormatTag;
-      uint8_t dummyByte;
-      int i;
-
-      if (wFmtSize < 18)
-      {
-        lsx_fail_errno(ft,SOX_EHDR,"WAVE file fmt chunk is too short");
-        return SOX_EOF;
-      }
-      lsx_readw(ft, &extensionSize);
-      len -= 2;
-      if (extensionSize < 22)
-      {
-        lsx_fail_errno(ft,SOX_EHDR,"WAVE file fmt chunk is too short");
-        return SOX_EOF;
-      }
-      lsx_readw(ft, &numberOfValidBits);
-      lsx_readdw(ft, &speakerPositionMask);
-      lsx_readw(ft, &subFormatTag);
-      for (i = 0; i < 14; ++i) lsx_readb(ft, &dummyByte);
-      len -= 22;
-      if (numberOfValidBits != wBitsPerSample)
-      {
-        lsx_fail_errno(ft,SOX_EHDR,"WAVE file fmt with padded samples is not supported yet");
-        return SOX_EOF;
-      }
-      wav->formatTag = subFormatTag;
-      lsx_report("EXTENSIBLE");
-    }
-		*/
+		skipThisChunk();
+		if ( numsamples == 0 && chunk.wFormatTag != RiffWaveFmtChunk::FORMAT_PCM) {
+			try {
+				findChunk(fact,true);
+				Read(numsamples);
+				skipThisChunk();
+			}
+			catch(const std::runtime_error & /*e*/) {
+			}
+		}
+		if ( numsamples == 0 ) {
+			try {
+				findChunk(data,true);
+				if (headerPosition+static_cast<std::streampos>(RiffChunkHeader::SIZEOF+currentHeader->length()) >= GuessedFilesize()) {
+					numsamples = calcSamplesFromBytes(GuessedFilesize()-headerPosition-RiffChunkHeader::SIZEOF);
+				}
+				else {
+					numsamples = calcSamplesFromBytes(currentHeader->length());
+				}
+				skipThisChunk();
+			}
+			catch(const std::runtime_error & /*e*/) {
+			}
+		}
+		//Put it back on start, it is better for problematic files...
+		Seek(12);//Skip RIFF/WAVE header.
 	}
 	void RiffWave::addFormat(uint32_t SamplingRate, uint16_t BitsPerSample, uint16_t NumChannels, bool isFloat)
 	{
 		formatdata.Config(SamplingRate, BitsPerSample, NumChannels, isFloat);
 		pcmdata_pos = GetPos();
-		if (isLittleEndian) {
-			RiffChunkHeader<LongLE> header(fmt,sizeof(RiffWaveFmtChunk<LongLE,ShortLE>));
-			addNewChunk(header);
-			RiffWaveFmtChunk<LongLE,ShortLE> chunk(formatdata);
-			WriteRaw(&chunk,sizeof(RiffWaveFmtChunk<LongLE,ShortLE>));
-		}
-		else {
-			RiffChunkHeader<LongBE> header(fmt,sizeof(RiffWaveFmtChunk<LongBE,ShortBE>));
-			addNewChunk(header);
-			RiffWaveFmtChunk<LongBE,ShortBE> chunk(formatdata);
-			WriteRaw(&chunk,sizeof(RiffWaveFmtChunk<LongBE,ShortBE>));
-		}
+		RiffChunkHeader	header(RiffWaveFmtChunk::fmt,RiffWaveFmtChunk::SIZEOF);
+		addNewChunk(header);
+		//TODO WAVEFORMATEXTENSIBLE
+		RiffWaveFmtChunk chunk(formatdata);
+		Write(chunk.wFormatTag);
+		Write(chunk.wChannels);
+		Write(chunk.dwSamplesPerSec);
+		Write(chunk.dwAvgBytesPerSec);
+		Write(chunk.wBlockAlign);
+		Write(chunk.wBitsPerSample);
 	}
 
 	void RiffWave::SeekToSample(uint32_t sampleIndex)
 	{
 		if (sampleIndex < numsamples ) {
 			std::streampos size = formatdata.nChannels * ((formatdata.nBitsPerSample + 7) / 8);
-			Seek(pcmdata_pos + std::streamoff(sizeof(currentHeader) + size * sampleIndex));
+			Seek(pcmdata_pos + std::streamoff(RiffChunkHeader::SIZEOF + size * sampleIndex));
 		}
 	}
 	uint32_t RiffWave::calcSamplesFromBytes(uint32_t length)
@@ -192,44 +232,41 @@ namespace psycle { namespace helpers {
 		return length/( formatdata.nChannels* ((formatdata.nBitsPerSample + 7) / 8));
 	}
 
-
+	//Psycle only uses 16bit samples, so this implementation is fully functional for Psycle's intentions.
+	//It would fail to load multichannel (i.e. more than two) samples.
 	void RiffWave::readInterleavedSamples(void* pSamps, uint32_t maxSamples, WaveFormat_Data* convertTo)
 	{
-		if (!currentHeader.matches(data)) {
-			skipThisChunk();
-			findChunk(data, true);
-		}
-		//TODO: max take into account the offset into data chunk.
+		findChunk(data, true);
 		uint32_t max = (maxSamples>0) ? maxSamples : numsamples;
 		if (convertTo == NULL || *convertTo == formatdata)
 		{
 			readMonoSamples(pSamps, max*formatdata.nChannels);
 		}
 		else if (convertTo->nChannels == formatdata.nChannels) {
-			//TODO
+			//Finish for other destination bitdepths
 			switch(convertTo->nBitsPerSample) 
 			{
-			case 8:break;
-			case 16:readMonoConvertTo16(static_cast<int16_t*>(pSamps),max*formatdata.nChannels);break;
+			case 8:readMonoConvertToInteger<uint8_t,assignconverter<uint8_t,uint8_t>,int16touint8,int24touint8,int32touint8,floattouint8,doubletouint8>
+					(reinterpret_cast<uint8_t*>(pSamps),max*formatdata.nChannels,127.0);break;
+			case 16:readMonoConvertToInteger<int16_t,uint8toint16,assignconverter<int16_t,int16_t>,int24toint16,int32toint16,floattoint16,doubletoint16>
+					(reinterpret_cast<int16_t*>(pSamps),max*formatdata.nChannels,32767.0);break;
 			case 24:break;
 			case 32:break;
 			default:break;
 			}
 		}
 		else if (convertTo->nChannels == 1) {
-			//TODO
+			//Finish for multichannel (more than two)
 		}
 		else {
-			//TODO
+			//Finish for multichannel (more than two)
 		}
 	}
+	//Psycle only uses 16bit samples, so this implementation is fully functional for Psycle's intentions.
+	//It would fail to load multichannel (i.e. more than two) samples.
 	void RiffWave::readDeInterleavedSamples(void** pSamps, uint32_t maxSamples, WaveFormat_Data* convertTo)
 	{
-		if (!currentHeader.matches(data)) {
-			skipThisChunk();
-			findChunk(data, true);
-		}
-		//TODO: max take into account the offset into data chunk.
+		findChunk(data, true);
 		uint32_t max = (maxSamples>0) ? maxSamples : numsamples;
 		if (convertTo == NULL || *convertTo == formatdata)
 		{
@@ -241,21 +278,41 @@ namespace psycle { namespace helpers {
 			}
 		}
 		else if (convertTo->nChannels == formatdata.nChannels) {
-			//TODO
+			//Finish for other destination bitdepths
 			switch(convertTo->nBitsPerSample) 
 			{
-			case 8:break;
-			case 16:readDeintMultichanConvertTo16(reinterpret_cast<int16_t**>(pSamps),max);break;
+			case 8: {
+				if (formatdata.nChannels ==1) {
+					readMonoConvertToInteger<uint8_t,assignconverter<uint8_t,uint8_t>,int16touint8,int24touint8,int32touint8,floattouint8,doubletouint8>
+					(reinterpret_cast<uint8_t*>(pSamps[0]),max,127.0);
+				}
+				else {
+					readDeintMultichanConvertToInteger<uint8_t,assignconverter<uint8_t,uint8_t>,int16touint8,int24touint8,int32touint8,floattouint8,doubletouint8>
+					(reinterpret_cast<uint8_t**>(pSamps),max,127.0);
+				}
+				break;
+			}
+			case 16: {
+				if (formatdata.nChannels ==1) {
+					readMonoConvertToInteger<int16_t,uint8toint16,assignconverter<int16_t,int16_t>,int24toint16,int32toint16,floattoint16,doubletoint16>
+					(reinterpret_cast<int16_t*>(pSamps[0]),max,32767.0);
+				}
+				else {
+					readDeintMultichanConvertToInteger<int16_t,uint8toint16,assignconverter<int16_t,int16_t>,int24toint16,int32toint16,floattoint16,doubletoint16>
+					(reinterpret_cast<int16_t**>(pSamps),max,32767.0);
+				}
+				break;
+			}
 			case 24:break;
 			case 32:break;
 			default:break;
 			}
 		}
 		else if (convertTo->nChannels == 1) {
-			//TODO
+			//Finish for multichannel (more than two)
 		}
 		else {
-			//TODO
+			//Finish for multichannel (more than two)
 		}
 	}
 
@@ -281,14 +338,13 @@ namespace psycle { namespace helpers {
 					ReadArray(samps,samples);
 #elif defined DIVERSALIS__CPU__ENDIAN__BIG
 					Long24BE* samps = static_cast<Long24BE*>(pSamp);
-					integerconverter<Long24LE,Long24BE,assign24converter<Long24LE,Long24BE> >(samps, samples);
+					ReadWithintegerconverter<Long24LE,Long24BE,endianessconverter<Long24LE,Long24BE> >(samps, samples);
 #endif
 				}
 				else {
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE
 					Long24LE* samps = static_cast<Long24LE*>(pSamp);
-					//There's no need to use the integer24converter here because we can use the operator=().
-					integerconverter<Long24BE,Long24LE,assign24converter<Long24BE,Long24LE> >(samps, samples);
+					ReadWithintegerconverter<Long24BE,Long24LE,endianessconverter<Long24BE,Long24LE> >(samps, samples);
 #elif defined DIVERSALIS__CPU__ENDIAN__BIG
 					Long24BE* samps = static_cast<Long24BE*>(pSamp);
 					ReadArray(samps,samples);
@@ -297,7 +353,6 @@ namespace psycle { namespace helpers {
 				break;
 			}
 			case 32: {
-				//TODO: WAVERFORMAT_EXTENSIBLE for 24bit samples
 				if (formatdata.isfloat) {
 					float* smp32 = static_cast<float*>(pSamp);
 					ReadArray(smp32, samples);
@@ -318,47 +373,6 @@ namespace psycle { namespace helpers {
 		}
 	}
 
-	void RiffWave::readMonoConvertTo16(int16_t* pSamp, uint32_t samples)
-	{
-		switch(formatdata.nBitsPerSample)
-		{
-			case 8: integerconverter<uint8_t,int16_t,uint8toint16>(pSamp, samples);break;
-			case 16: ReadArray(pSamp, samples); break;
-			case 24: {
-				if (isLittleEndian) {
-#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
-					integer24converterA<Long24LE, int16_t, int24toint16>(pSamp,samples);
-#elif defined DIVERSALIS__CPU__ENDIAN__BIG
-					integer24converterB<Long24LE, int16_t, int24toint16>(pSamp,samples);
-#endif
-				}
-				else {
-#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
-					integer24converterB<Long24BE, int16_t, int24toint16>(pSamp,samples);
-#elif defined DIVERSALIS__CPU__ENDIAN__LITTLE
-					integer24converterA<Long24BE, int16_t, int24toint16>(pSamp,samples);
-#endif
-				}
-				break;
-				}
-			case 32: {
-				//TODO: WAVERFORMAT_EXTENSIBLE for 24bit samples
-				if (formatdata.isfloat) {
-					//TODO: float range
-					floatconverter<float,int16_t,floattoint16>(pSamp, samples, 1.f);
-				}
-				else {
-					integerconverter<int32_t,int16_t,int32toint16>(pSamp, samples);
-				}
-				break;
-			}
-			case 64: //TODO:
-				break;
-			default:
-				break;
-		}
-	}
-
 	void RiffWave::readDeintMultichanSamples(void** pSamps, uint32_t samples)
 	{
 		switch (formatdata.nBitsPerSample) {
@@ -366,15 +380,22 @@ namespace psycle { namespace helpers {
 			case 16: readDeinterleaveSamples<int16_t>(pSamps,formatdata.nChannels, samples);break;
 			case 24: {
 				if (isLittleEndian) {
-					readDeinterleaveSamples24<Long24LE>(pSamps,formatdata.nChannels, samples);
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+					readDeinterleaveSamples<Long24LE>(pSamps,formatdata.nChannels, samples);
+#elif defined DIVERSALIS__CPU__ENDIAN__BIG
+					readDeinterleaveSamplesendian<Long24LE, Long24BE>(pSamps,formatdata.nChannels, samples);
+#endif
 				}
 				else {
-					readDeinterleaveSamples24<Long24BE>(pSamps,formatdata.nChannels, samples);
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+					readDeinterleaveSamplesendian<Long24BE,Long24LE>(pSamps,formatdata.nChannels, samples);
+#elif defined DIVERSALIS__CPU__ENDIAN__BIG
+					readDeinterleaveSamples<Long24BE>(pSamps,formatdata.nChannels, samples);
+#endif
 				}
 				break;
 			}
 			case 32: {
-				//TODO: WAVEFORMAT_EXTENSIBLE
 				if (formatdata.isfloat) {
 					readDeinterleaveSamples<float>(pSamps,formatdata.nChannels, samples);
 				}
@@ -383,224 +404,229 @@ namespace psycle { namespace helpers {
 				}
 				break;
 			}
+			case 64: readDeinterleaveSamples<double>(pSamps,formatdata.nChannels, samples);break;
+			default: break; ///< \todo should throw an exception
 		}
 	}
-	void RiffWave::readDeintMultichanConvertTo16(int16_t** pSamps, uint32_t samples)
-	{
-		switch(formatdata.nBitsPerSample)
-		{
-			case 8:
-				multichanintegerconverter<uint8_t,int16_t,uint8toint16>(pSamps, formatdata.nChannels, samples);
-				break;
-			case 16:
-				readDeinterleaveSamples<int16_t>(reinterpret_cast<void**>(pSamps),formatdata.nChannels, samples);
-				break;
-			case 24:
-				//TODO
-				if (isLittleEndian) {
-				}
-				else {
-				}
-				break;
-			case 32: {
-				//TODO: WAVEFORMAT_EXTENSIBLE
-				if (formatdata.isfloat) {
-				}
-				else {
-					multichanintegerconverter<int32_t,int16_t,int32toint16>(pSamps, formatdata.nChannels, samples);
-				}
-				break;
-			}
-			default:
-				break; ///< \todo should throw an exception
-		}
-	}
+
 
 
     void RiffWave::writeFromInterleavedSamples(void* /*pSamps*/, uint32_t /*maxSamples*/, WaveFormat_Data* /*convertFrom*/)
 	{
-		if (!currentHeader.matches(data)) {
+		if (!currentHeader->matches(data)) {
 			pcmdata_pos = GetPos();
-			if (isLittleEndian) {
-				RiffChunkHeader<LongLE> header(data,0);
-				addNewChunk(header);
-			}
-			else {
-				RiffChunkHeader<LongBE> header(data,0);
-				addNewChunk(header);
-			}
+			RiffChunkHeader header(data,0);
+			addNewChunk(header);
 		}
 	}
-    void RiffWave::writeFromDeInterleavedSamples(void** /*pSamps*/, uint32_t /*maxSamples*/, WaveFormat_Data* /*convertFrom*/)
+    void RiffWave::writeFromDeInterleavedSamples(void** pSamps, uint32_t samples, WaveFormat_Data* convertFrom)
 	{
-		if (!currentHeader.matches(data)) {
+		if (!currentHeader->matches(data)) {
 			pcmdata_pos = GetPos();
-			if (isLittleEndian) {
-				RiffChunkHeader<LongLE> header(data,0);
-				addNewChunk(header);
+			RiffChunkHeader header(data,0);
+			addNewChunk(header);
+		}
+		if (convertFrom == NULL || *convertFrom == formatdata)
+		{
+			if (formatdata.nChannels==1) {
+				writeMonoSamples(pSamps[0],samples);
 			}
 			else {
-				RiffChunkHeader<LongBE> header(data,0);
-				addNewChunk(header);
+				writeDeintMultichanSamples(pSamps, samples);
 			}
 		}
+		else if (convertFrom->nChannels == formatdata.nChannels) {
+			//Finish for other destination bitdepths
+			switch(convertFrom->nBitsPerSample) 
+			{
+			case 8:break;
+			case 16: break;
+			case 24:break;
+			case 32: {
+				if (formatdata.isfloat) {
+				}
+				else {
+				}
+				break;
+			 }
+			default:break;
+			}
+		}
+		else if (convertFrom->nChannels == 1) {
+			//Finish for multichannel (more than two)
+		}
+		else {
+			//Finish for multichannel (more than two)
+		}
+
 	}
 
+	void RiffWave::writeMonoSamples(void* /*pSamp*/, uint32_t /*samples*/)
+	{
+	}
+	void RiffWave::writeDeintMultichanSamples(void** /*pSamps*/, uint32_t /*samples*/)
+	{
+	}
 
-
-    void RiffWave::writeMonoSamples(void* /*pSamp*/, uint32_t /*samples*/) {
-	}
-    void RiffWave::writeMonoConvertFrom16(int16_t* /*pSamp*/, uint32_t /*samples*/) {
-	}
-    void RiffWave::writeDeintConvertFrom16(int16_t** /*pSampL*/, void* /*pSampR*/, uint32_t /*samples*/) {
-	}
 
 
 #if 0
 
+http://www.sonicspot.com/guide/wavefiles.html#smpl
+
+	0x00 	4 	Chunk ID 	"smpl" (0x736D706C)
+	0x04 	4 	Chunk Data Size 	36 + (Num Sample Loops * 24) + Sampler Data
+	0x08 	4 	Manufacturer 	0 - 0xFFFFFFFF
+	0x0C 	4 	Product 	0 - 0xFFFFFFFF
+	0x10 	4 	Sample Period 	0 - 0xFFFFFFFF
+	0x14 	4 	MIDI Unity Note 	0 - 127
+	0x18 	4 	MIDI Pitch Fraction 	0 - 0xFFFFFFFF
+	0x1C 	4 	SMPTE Format 	0, 24, 25, 29, 30
+	0x20 	4 	SMPTE Offset 	0 - 0xFFFFFFFF
+	0x24 	4 	Num Sample Loops 	0 - 0xFFFFFFFF
+	0x28 	4 	Sampler Data 	0 - 0xFFFFFFFF
+	0x2C 	
+	List of Sample Loops
+
+Sample Period
+The sample period specifies the duration of time that passes during the playback of one sample in nanoseconds (normally equal to 1 / Samplers Per Second, where Samples Per Second is the value found in the format chunk).
+
+MIDI Unity Note
+Specifies the MIDI note which will replay the sample at original pitch. This
+value ranges from 0 to 127 (a value of 60 represents Middle C as defined
+by the MMA).
+The MIDI unity note value has the same meaning as the instrument chunk's MIDI Unshifted Note field which specifies the musical note at which the sample will be played at it's original sample rate (the sample rate specified in the format chunk).
+
+MIDI Pitch Fraction
+The MIDI pitch fraction specifies the fraction of a semitone up from the specified MIDI unity note field. A value of 0x80000000 means 1/2 semitone (50 cents) and a value of 0x00000000 means no fine tuning between semitones. 
+
+Sample Loops
+The sample loops field specifies the number Sample Loop definitions in the following list. This value may be set to 0 meaning that no sample loops follow.
+
+Sampler Data
+The sampler data value specifies the number of bytes that will follow this chunk (including the entire sample loop list). This value is greater than 0 when an application needs to save additional information. This value is reflected in this chunks data size value.
+
+List of Sample Loops
+A list of sample loops is simply a set of consecutive loop descriptions that follow the format described below. The sample loops do not have to be in any particular order because each sample loop associated cue point position is used to determine the play order. The sampler chunk is optional.
+
+Offset 	Size 	Description 	Value
+0x00 	4 	Cue Point ID 	0 - 0xFFFFFFFF
+0x04 	4 	Type 	0 - 0xFFFFFFFF
+0x08 	4 	Start 	0 - 0xFFFFFFFF
+0x0C 	4 	End 	0 - 0xFFFFFFFF
+0x10 	4 	Fraction 	0 - 0xFFFFFFFF
+0x14 	4 	Play Count 	0 - 0xFFFFFFFF
+Sample Loop Format 	
+	
+Type
+The type field defines how the waveform samples will be looped.
+
+Value 	Loop Type
+0 	Loop forward (normal)
+1 	Alternating loop (forward/backward, also known as Ping Pong)
+2 	Loop backward (reverse)
+3 - 31 	Reserved for future standard types
+32 - 0xFFFFFFFF 	Sampler specific types (defined by manufacturer)	
+	
+
+From the official RIFF specifications by Microsoft (RIFFNEW.pdf):
+dwStart: Specifies the startpoint of the loop in samples.
+dwEnd: Specifies the endpoint of the loop in samples (this sample will also be
+played).
+
+
 	{
 if(hd.ckID == FourCC("smpl"))
 				{
-					char pl(0);
-					file.Skip(28);
-					file.Read(static_cast<void*>(&pl), 1);
-					if(pl == 1)
+					uint32_t pl(0);
+					uint32_t total;
+					uint32_t midinote;
+					uint32_t midifinenote;
+					file.Skip(12); //Skip product
+					file.Read(static_cast<void*>(&midinote), 4);
+					file.Read(static_cast<void*>(&midifinenote), 4);
+					midifinenote>>24;
+					midifinenote/=2.56;
+					file.Skip(8); //Skip smpte
+					file.Read(static_cast<void*>(&pl), 4);
+					file.Read(static_cast<void*>(&total), 4);
+					if(pl > 0)
 					{
-						file.Skip(15);
 						uint32_t ls(0);
 						uint32_t le(0);
+						uint32_t co(0);
+						file.Skip(4);
+						file.Read(static_cast<void*>(&pl), 4);
 						file.Read(static_cast<void*>(&ls), 4);
 						file.Read(static_cast<void*>(&le), 4);
+						file.Skip(4);
+						file.Read(static_cast<void*>(&co), 4);
 						if (ls >= 0 && ls <= le && le < Datalen){
-							wave.WaveLoopStart(ls);
-							wave.WaveLoopEnd(le);
-							wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+							if (co==0) {
+								wave.WaveLoopStart(ls);
+								wave.WaveLoopEnd(le);
+								if (pl==1) {
+									wave.WaveLoopType(XMInstrument::WaveData::LoopType::BIDI);
+								}
+								else {
+									wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+								}
+							}
+							else {
+								wave.WaveSusLoopStart(ls);
+								wave.WaveSusLoopEnd(le);
+								if (pl==1) {
+									wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::BIDI);
+								}
+								else {
+									wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::NORMAL);
+								}
+							}
 						}
+						//TODO: the microsoft docs don't really say this includes the point. Might really need
+						// to skip based on chunk size, not this.
+						file.Skip(total-16);
 					}
-					file.Skip(9);
+					else {
+						//TODO: the microsoft docs don't really say this includes the point. Might really need
+						// to skip based on chunk size, not this.
+						file.Skip(total);
+					}
 	}
+
+
+
+Instrument Chunk - "inst"
+The instrument chunk is used to describe how the waveform should be played as an instrument sound. This information is useful for communicating musical information between sample-based music programs, such as trackers or software wavetables. This chunk is optional and no more than 1 may appear in a WAVE file.
+
+Offset 	Size 	Description 	Value
+0x00 	4 	Chunk ID 	"ltxt" (0x6C747874)
+0x04 	4 	Chunk Data Size 	7
+0x08 	1 	Unshifted Note 	0 - 127
+0x09 	1 	Fine Tune (dB) 	-50 - +50
+0x0A 	1 	Gain 	-64 - +64
+0x0B 	1 	Low Note 	0 - 127
+0x0C 	1 	High Note 	0 - 127
+0x0D 	1 	Low Velocity 	1 - 127
+0x0E 	1 	High Velocity 	1 - 127
+Instrument Chunk Format
+
+Unshifted Note
+The unshifted note field has the same meaning as the sampler chunk's MIDI Unity Note which specifies the musical note at which the sample will be played at it's original sample rate (the sample rate specified in the format chunk).
+
+Fine Tune
+The fine tune value specifies how much the sample's pitch should be altered when the sound is played back in cents (1/100 of a semitone). A negative value means that the pitch should be played lower and a positive value means that it should be played at a higher pitch.
+
+Gain
+The gain value specifies the number of decibels to adjust the output when it is played. A value of 0dB means no change, 6dB means double the amplitude of each sample and -6dB means to halve the amplitude of each sample. Every additional +/-6dB will double or halve the amplitude again.
+
+Low Note and High Note
+The note fields specify the MIDI note range for which the waveform should be played when receiving MIDI note events (from software or triggered by a MIDI controller). This range does not need to include the Unshifted Note value.
+
+Low Velocity and High Velocity
+The velocity fields specify the range of MIDI velocities that should cause the waveform to be played. 1 being the lightest amount and 127 being the hardest. 
 #endif
 
-
-		//Templates to use with RiffWave class.
-
-	template<typename sample_type>
-	inline void RiffWave::readDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples) {
-		sample_type** samps = reinterpret_cast<sample_type**>(pSamps);
-		multichanintegerconverter<sample_type, sample_type,assignconverter<sample_type,sample_type> >(samps, chans, samples);
-	}
-	template<typename sample_type>
-	inline void RiffWave::readDeinterleaveSamples24(void** pSamps, uint16_t chans, uint32_t samples) {
-#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
-		Long24LE** samps = reinterpret_cast<Long24LE**>(pSamps);
-		multichanintegerconverter<sample_type, Long24LE,assign24converter<sample_type,Long24LE> >(samps, chans, samples);
-#elif defined DIVERSALIS__CPU__ENDIAN__BIG
-		Long24BE** samps = reinterpret_cast<Long24BE**>(pSamps);
-		multichanintegerconverter<sample_type, Long24BE,assign24converter<sample_type,Long24BE> >(samps, chans, samples);
-#endif
-	}
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
-	void RiffWave::integerconverter(out_type* out, uint32_t samples)
-	{
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < samples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
-			ReadArray(samps,amount);
-			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
-				*out=converter_func(*psamps);
-				out++;
-				psamps++;
-			}
-		}
-	}
-	//Same as above, for multichan
-	//Same as above, for multichan, deinterlaced
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
-	void RiffWave::multichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples)
-	{
-		in_type samps[32768];
-		uint32_t amount=0;
-		for(uint32_t io = 0 ; io < samples ; io+=amount)
-		{
-			//truncate 1024 to amount of chans.
-			amount = static_cast<uint32_t>(std::min(32768U/chans,samples-io));
-			ReadArray(samps, amount*chans);
-			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
-					out[b][a]=converter_func(*psamps);
-					psamps++;
-				}
-			}
-		}
-	}
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
-	void RiffWave::integer24converterA(out_type* out, uint32_t samples)
-	{
-		in_type bufpacked[4];
-		int32_t bufunpacked[4];
-		uint32_t io = 0;
-		for(; io+4 < samples; io+=4)
-		{
-			ReadArray(bufpacked,4);
-			unpackint24(reinterpret_cast<int32_t*>(bufpacked),bufunpacked);
-			out[0]=converter_func(bufunpacked[0]);
-			out[1]=converter_func(bufunpacked[1]);
-			out[2]=converter_func(bufunpacked[2]);
-			out[3]=converter_func(bufunpacked[3]);
-			out+=4;
-		}
-		if (io < samples) {
-			ReadArray(bufpacked,samples-io);
-			unpackint24(reinterpret_cast<int32_t*>(bufpacked),bufunpacked);
-			for(int i=0; io < samples; i++, io++) {
-				out[i]=converter_func(bufunpacked[i]);
-			}
-		}
-	}
-	//Same as above, but requiring endiannes conversion.
-	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
-	void RiffWave::integer24converterB(out_type* out, uint32_t samples)
-	{
-		in_type bufpacked[4];
-		uint32_t io = 0;
-		for(; io+4 < samples; io+=4)
-		{
-			ReadArray(bufpacked,4);
-			out[0]=converter_func(bufpacked[0].signedValue());
-			out[1]=converter_func(bufpacked[1].signedValue());
-			out[2]=converter_func(bufpacked[2].signedValue());
-			out[3]=converter_func(bufpacked[3].signedValue());
-			out+=4;
-		}
-		if (io < samples) {
-			ReadArray(bufpacked,(samples-io));
-			for(int i=0; io < samples; i++, io++) {
-				out[i]=converter_func(bufpacked[i].signedValue());
-			}
-		}
-	}
-
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
-	void RiffWave::floatconverter(out_type* out, uint32_t numsamples, double multi) {
-		in_type samps[1024];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < numsamples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(1024U),numsamples-io);
-			ReadArray(samps,amount);
-			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
-				*out=converter_func(*psamps, multi);
-				out++;
-				psamps++;
-			}
-		}
-	}
 
 
 }}

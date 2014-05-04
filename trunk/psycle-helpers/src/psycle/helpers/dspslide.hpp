@@ -21,7 +21,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		void ResetTo(float target);
 		inline float GetNext() {
 			if (m_position < m_length) {
-				const float m_lastVal = m_source + (m_target - m_source) * l_table_[m_position];
+				const float m_lastVal = m_source + m_diff * l_table_[m_position];
 				m_position++;
 				return m_lastVal;
 			}
@@ -32,6 +32,7 @@ namespace psycle { namespace helpers { namespace dsp {
 	private:
 		float m_source;
 		float m_target;
+		float m_diff;
 		std::size_t m_position;
 		static std::size_t m_length;
 		static float l_table_[2048];

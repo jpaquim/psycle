@@ -2835,7 +2835,7 @@ namespace psycle
 				}
 			}
 			// Apply the global volume to the final mix.
-			float multip = m_GlobalVolume/128.0f;
+			float multip = value_mapper::map_128_1(m_GlobalVolume);
 			helpers::dsp::Mul(samplesV[0],tmpsamples,multip);
 			helpers::dsp::Mul(samplesV[1],tmpsamples,multip);
 			_sampleCounter+=numsamples;
@@ -2872,7 +2872,9 @@ namespace psycle
 			 outextraticks = trackerspeed - 24/lpb;
 			 return lpb;
 		}
-	
+		int XMSampler::NumAuxColumnIndexes() {
+			return Global::song().xminstruments.size();
+		}
 		const char* XMSampler::AuxColumnName(int idx) const {
 			InstrumentList &m_Instruments = Global::song().xminstruments;
 			return m_Instruments.Exists(idx)?m_Instruments[idx].Name().c_str():"";

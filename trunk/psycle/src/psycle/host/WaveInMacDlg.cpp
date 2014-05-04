@@ -116,7 +116,7 @@ void CWaveInMacDlg::OnCbnSelendokCombo1()
 void CWaveInMacDlg::OnChangeSlider()
 {
 	char label[30];
-	recorder._gainvol = m_volslider.GetPos()*0.00390625f;
+	recorder._gainvol = value_mapper::map_256_1(m_volslider.GetPos());
 	sprintf(label,"%.01fdB", helpers::dsp::dB(recorder._gainvol));
 	m_vollabel.SetWindowText(label);
 }

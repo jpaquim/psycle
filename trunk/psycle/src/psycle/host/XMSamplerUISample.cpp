@@ -232,9 +232,12 @@ void XMSamplerUISample::OnLbnSelchangeSamplelist()
 {
 	m_Init=false;
 	int i= m_SampleList.GetCurSel();
+	int prevsize=Global::song().samples.size();
 	SetSample(i);
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	Global::song().auxcolSelected=i;
 	win->ChangeWave(i);
+	win->UpdateComboIns(prevsize!=Global::song().samples.size());
 	m_Init=true;
 }
 
@@ -267,7 +270,7 @@ void XMSamplerUISample::RefreshSampleData()
 	((CSliderCtrl*)GetDlgItem(IDC_GLOBVOLUME))->SetPos(volpos);
 	((CSliderCtrl*)GetDlgItem(IDC_DEFVOLUME))->SetPos(wave.WaveVolume());
 
-	const int panpos=wave.PanFactor()*128.0f;
+	const int panpos=value_mapper::map_1_128<int>(wave.PanFactor());
 	((CButton*)GetDlgItem(IDC_PANENABLED))->SetCheck(wave.PanEnabled()?1:0);
 	((CSliderCtrl*)GetDlgItem(IDC_PAN))->EnableWindow((wave.PanEnabled()&& !wave.IsSurround())?1:0);
 	((CSliderCtrl*)GetDlgItem(IDC_PAN))->SetPos(panpos);
@@ -303,19 +306,22 @@ void XMSamplerUISample::OnBnClickedLoad()
 {
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 	int selsample = m_SampleList.GetCurSel();
-	win->ChangeIns(m_SampleList.GetCurSel());
-	win->SendMessage(WM_COMMAND,IDC_LOADWAVE);
+	win->LoadWave(selsample);
 	XMInstrument::WaveData<>& wave = Global::song().samples.get(selsample);
 	pWave(&wave);
 	RefreshSampleList(selsample);
 	RefreshSampleData();
+	win->UpdateComboIns();
+	win->WaveEditorBackUpdate();
+	WaveUpdate();
+	win->RedrawGearRackList();
 }
 
 void XMSamplerUISample::OnBnClickedSave()
 {
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-	win->ChangeIns(m_SampleList.GetCurSel());
-	win->SendMessage(WM_COMMAND,IDC_SAVEWAVE);
+	int selsample = m_SampleList.GetCurSel();
+	win->SaveWave(selsample);
 }
 
 void XMSamplerUISample::OnBnClickedDupe()
@@ -349,6 +355,8 @@ void XMSamplerUISample::OnEnChangeWavename()
 		cedit->GetWindowText(tmp,40);
 		rWave().WaveName(tmp);
 		RefreshSampleList(m_SampleList.GetCurSel());
+		CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+		win->UpdateComboIns(true);
 	}
 }
 
@@ -425,7 +433,7 @@ void XMSamplerUISample::SliderPan(CSliderCtrl* slid)
 	CButton* check = (CButton*)GetDlgItem(IDC_PANENABLED);
 	if ( check->GetCheck() != 2 ) // 2 == SurrounD
 	{
-		rWave().PanFactor(slid->GetPos()/128.0f);
+		rWave().PanFactor(value_mapper::map_128_1(slid->GetPos()));
 	}
 }
 void XMSamplerUISample::SliderVibratoAttack(CSliderCtrl* slid)

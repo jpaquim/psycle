@@ -1188,7 +1188,7 @@ void Player::stop_threads() {
 			switch( m_recording_depth)
 			{
 			case 8:
-				d = int(sample/256.0f);
+				d = static_cast<int>(sample/256.0f);
 				d += 128;
 				(*pClipboardmem)[clipbufferindex][pos++]=static_cast<char>(d&0xFF);
 				*length+=1;
@@ -1200,7 +1200,7 @@ void Player::stop_threads() {
 				*length+=2;
 				break;
 			case 24:
-				d = int(sample * 256.0f);
+				d = static_cast<int>(sample * 256.0f);
 				if ( pos+3 < 1000000 )
 				{
 					(*pClipboardmem)[clipbufferindex][pos++]=static_cast<char>(d&0xFF);
@@ -1211,7 +1211,7 @@ void Player::stop_threads() {
 				else { pos+=3; } //Delay operation after buffer creation.
 				break;
 			case 32:
-				d = int(sample * 65536.0f);
+				d = static_cast<int>(sample * 65536.0f);
 				(*pClipboardmem)[clipbufferindex][pos]=static_cast<char>(d&0xFF);
 				(*pClipboardmem)[clipbufferindex][pos+1]=*(reinterpret_cast<char*>(&d)+1);
 				(*pClipboardmem)[clipbufferindex][pos+2]=*(reinterpret_cast<char*>(&d)+2);

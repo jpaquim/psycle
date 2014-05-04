@@ -36,6 +36,49 @@ namespace psycle
 		class SPatternHeaderCoords
 		{
 		public:
+			void SwitchToClassic();
+			void SwitchToText();
+
+			//Classic header without name
+			SSkinSource sBackgroundClassic;
+			SSkinSource sNumber0Classic;
+			SSkinSource sRecordOnClassic;
+			SSkinSource sMuteOnClassic;
+			SSkinSource sSoloOnClassic;
+			SSkinSource sPlayOnClassic;
+			SSkinDest dDigitX0Classic;
+			SSkinDest dDigit0XClassic;
+			SSkinDest dRecordOnClassic;
+			SSkinDest dMuteOnClassic;
+			SSkinDest dSoloOnClassic;
+			SSkinDest dPlayOnClassic;
+			SSkinSource sMuteOnTrackingClassic;
+			SSkinSource sSoloOnTrackingClassic;
+			SSkinSource sRecordOnTrackingClassic;
+			SSkinDest dMuteOnTrackClassic;
+			SSkinDest dSoloOnTrackClassic;
+			SSkinDest dRecordOnTrackClassic;
+			// Header with track name.
+			SSkinSource sBackgroundText;
+			SSkinSource sTextCrop;
+			SSkinSource sNumber0Text;
+			SSkinSource sRecordOnText;
+			SSkinSource sMuteOnText;
+			SSkinSource sSoloOnText;
+			SSkinSource sPlayOnText;
+			SSkinDest dDigitX0Text;
+			SSkinDest dDigit0XText;
+			SSkinDest dRecordOnText;
+			SSkinDest dMuteOnText;
+			SSkinDest dSoloOnText;
+			SSkinDest dPlayOnText;
+			SSkinSource sMuteOnTrackingText;
+			SSkinSource sSoloOnTrackingText;
+			SSkinSource sRecordOnTrackingText;
+			SSkinDest dMuteOnTrackText;
+			SSkinDest dSoloOnTrackText;
+			SSkinDest dRecordOnTrackText;
+			// Skin being used
 			SSkinSource sBackground;
 			SSkinSource sNumber0;
 			SSkinSource sRecordOn;
@@ -48,9 +91,20 @@ namespace psycle
 			SSkinDest dMuteOn;
 			SSkinDest dSoloOn;
 			SSkinDest dPlayOn;
+			SSkinSource sMuteOnTracking;
+			SSkinSource sSoloOnTracking;
+			SSkinSource sRecordOnTracking;
+			SSkinDest dMuteOnTrack;
+			SSkinDest dSoloOnTrack;
+			SSkinDest dRecordOnTrack;
 			bool bHasTransparency;
 			bool bHasPlaying;
+			bool bHasTextSkin;
 			COLORREF cTransparency;
+			COLORREF cTextFontColour;
+			std::string szTextFont;
+			int textFontPoint;
+			int textFontFlags;
 		};
 
 		class SMachineCoords
@@ -272,6 +326,7 @@ namespace psycle
 				HBITMAP hbmPatHeader;
 
 				CFont pattern_font;
+				CFont pattern_tracknames_font;
 				std::string font_name;
 				UINT font_flags;
 				int font_point;

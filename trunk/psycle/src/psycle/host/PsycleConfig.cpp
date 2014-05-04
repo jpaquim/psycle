@@ -76,6 +76,75 @@ namespace psycle { namespace host {
 			"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 		};
 
+		void SPatternHeaderCoords::SwitchToClassic()
+		{
+			sBackground = sBackgroundClassic;
+			sNumber0 = sNumber0Classic;
+			sRecordOn = sRecordOnClassic;
+			sMuteOn = sMuteOnClassic;
+			sSoloOn = sSoloOnClassic;
+			sPlayOn = sPlayOnClassic;
+			dDigitX0 = dDigitX0Classic;
+			dDigit0X = dDigit0XClassic;
+			dRecordOn = dRecordOnClassic;
+			dMuteOn = dMuteOnClassic;
+			dSoloOn = dSoloOnClassic;
+			dPlayOn = dPlayOnClassic;
+			if (bHasTextSkin) {
+				sMuteOnTracking = sMuteOnTrackingClassic;
+				sSoloOnTracking = sSoloOnTrackingClassic;
+				sRecordOnTracking = sRecordOnTrackingClassic;
+				dMuteOnTrack = dMuteOnTrackClassic;
+				dSoloOnTrack = dSoloOnTrackClassic;
+				dRecordOnTrack = dRecordOnTrackClassic;
+			}
+			else {
+				sMuteOnTracking = sMuteOnClassic;
+				sSoloOnTracking = sSoloOnClassic;
+				sRecordOnTracking = sRecordOnClassic;
+				dMuteOnTrack = dMuteOnClassic;
+				dSoloOnTrack = dSoloOnClassic;
+				dRecordOnTrack = dRecordOnClassic;
+			}
+		}
+		void SPatternHeaderCoords::SwitchToText()
+		{
+			sBackground = sBackgroundText;
+			sNumber0 = sNumber0Text;
+			sRecordOn = sRecordOnText;
+			sMuteOn = sMuteOnText;
+			sSoloOn = sSoloOnText;
+			sPlayOn = sPlayOnText;
+			dDigitX0 = dDigitX0Text;
+			dDigit0X = dDigit0XText;
+			dRecordOn = dRecordOnText;
+			dMuteOn = dMuteOnText;
+			dSoloOn = dSoloOnText;
+			dPlayOn = dPlayOnText;
+			if (bHasTextSkin) {
+				sMuteOnTracking = sMuteOnTrackingText;
+				sSoloOnTracking = sSoloOnTrackingText;
+				sRecordOnTracking = sRecordOnTrackingText;
+				dMuteOnTrack = dMuteOnTrackText;
+				dSoloOnTrack = dSoloOnTrackText;
+				dRecordOnTrack = dRecordOnTrackText;
+			}
+			else {
+				//setting also background to maintain the header sizes
+				sBackground = sBackgroundClassic;
+				sMuteOnTracking = sMuteOnClassic;
+				sSoloOnTracking = sSoloOnClassic;
+				sRecordOnTracking = sRecordOnClassic;
+				dMuteOnTrack = dMuteOnClassic;
+				dSoloOnTrack = dSoloOnClassic;
+				dRecordOnTrack = dRecordOnClassic;
+				sTextCrop.x = 0;
+				sTextCrop.y = 1;
+				sTextCrop.width = sBackgroundClassic.width-1;
+				sTextCrop.height = sBackgroundClassic.height;
+			}
+		}
+
 
 		PsycleConfig::MachineParam::MachineParam()
 		{
@@ -731,6 +800,9 @@ namespace psycle { namespace host {
 		PsycleConfig::PatternView::~PatternView()
 		{
 			pattern_font.DeleteObject();
+			if (PatHeaderCoords.bHasTextSkin) {
+				pattern_tracknames_font.DeleteObject();
+			}
 			patternheader.DeleteObject();
 			DeleteObject(hbmPatHeader);
 			hbmPatHeader=NULL;
@@ -789,45 +861,128 @@ namespace psycle { namespace host {
 		{
 			header_skin = "";
 
-			PatHeaderCoords.sBackground.x=0;
-			PatHeaderCoords.sBackground.y=0;
-			PatHeaderCoords.sBackground.width=113;
-			PatHeaderCoords.sBackground.height=23;
-			PatHeaderCoords.sNumber0.x = 0;
-			PatHeaderCoords.sNumber0.y = 23;
-			PatHeaderCoords.sNumber0.width = 9;
-			PatHeaderCoords.sNumber0.height = 17;
-			PatHeaderCoords.sRecordOn.x = 42;
-			PatHeaderCoords.sRecordOn.y = 40;
-			PatHeaderCoords.sRecordOn.width = 17;
-			PatHeaderCoords.sRecordOn.height = 17;
-			PatHeaderCoords.sMuteOn.x = 25;
-			PatHeaderCoords.sMuteOn.y = 40;
-			PatHeaderCoords.sMuteOn.width = 17;
-			PatHeaderCoords.sMuteOn.height = 17;
-			PatHeaderCoords.sSoloOn.x = 8;
-			PatHeaderCoords.sSoloOn.y = 40;
-			PatHeaderCoords.sSoloOn.width = 17;
-			PatHeaderCoords.sSoloOn.height = 17;
-			PatHeaderCoords.sPlayOn.x = 0;
-			PatHeaderCoords.sPlayOn.y = 40;
-			PatHeaderCoords.sPlayOn.width = 8;
-			PatHeaderCoords.sPlayOn.height = 17;
-			PatHeaderCoords.dDigitX0.x = 18;
-			PatHeaderCoords.dDigitX0.y = 3;
-			PatHeaderCoords.dDigit0X.x = 25;
-			PatHeaderCoords.dDigit0X.y = 3;
-			PatHeaderCoords.dRecordOn.x = 88;
-			PatHeaderCoords.dRecordOn.y = 3;
-			PatHeaderCoords.dMuteOn.x = 69;
-			PatHeaderCoords.dMuteOn.y = 3;
-			PatHeaderCoords.dSoloOn.x = 50;
-			PatHeaderCoords.dSoloOn.y = 3;
-			PatHeaderCoords.dPlayOn.x = 8;
-			PatHeaderCoords.dPlayOn.y = 3;
+			PatHeaderCoords.sBackgroundClassic.x=0;
+			PatHeaderCoords.sBackgroundClassic.y=0;
+			PatHeaderCoords.sBackgroundClassic.width=107;
+			PatHeaderCoords.sBackgroundClassic.height=23;
+			PatHeaderCoords.sNumber0Classic.x = 0;
+			PatHeaderCoords.sNumber0Classic.y = 23;
+			PatHeaderCoords.sNumber0Classic.width = 9;
+			PatHeaderCoords.sNumber0Classic.height = 17;
+			PatHeaderCoords.sRecordOnClassic.x = 42;
+			PatHeaderCoords.sRecordOnClassic.y = 40;
+			PatHeaderCoords.sRecordOnClassic.width = 17;
+			PatHeaderCoords.sRecordOnClassic.height = 17;
+			PatHeaderCoords.sMuteOnClassic.x = 25;
+			PatHeaderCoords.sMuteOnClassic.y = 40;
+			PatHeaderCoords.sMuteOnClassic.width = 17;
+			PatHeaderCoords.sMuteOnClassic.height = 17;
+			PatHeaderCoords.sSoloOnClassic.x = 8;
+			PatHeaderCoords.sSoloOnClassic.y = 40;
+			PatHeaderCoords.sSoloOnClassic.width = 17;
+			PatHeaderCoords.sSoloOnClassic.height = 17;
+			PatHeaderCoords.sPlayOnClassic.x = 0;
+			PatHeaderCoords.sPlayOnClassic.y = 40;
+			PatHeaderCoords.sPlayOnClassic.width = 8;
+			PatHeaderCoords.sPlayOnClassic.height = 17;
+			PatHeaderCoords.dDigitX0Classic.x = 15;
+			PatHeaderCoords.dDigitX0Classic.y = 3;
+			PatHeaderCoords.dDigit0XClassic.x = 22;
+			PatHeaderCoords.dDigit0XClassic.y = 3;
+			PatHeaderCoords.dRecordOnClassic.x = 85;
+			PatHeaderCoords.dRecordOnClassic.y = 3;
+			PatHeaderCoords.dMuteOnClassic.x = 66;
+			PatHeaderCoords.dMuteOnClassic.y = 3;
+			PatHeaderCoords.dSoloOnClassic.x = 47;
+			PatHeaderCoords.dSoloOnClassic.y = 3;
+			PatHeaderCoords.dPlayOnClassic.x = 5;
+			PatHeaderCoords.dPlayOnClassic.y = 3;
+			PatHeaderCoords.sMuteOnTrackingClassic.x = 79;
+			PatHeaderCoords.sMuteOnTrackingClassic.y = 40;
+			PatHeaderCoords.sMuteOnTrackingClassic.width = 17;
+			PatHeaderCoords.sMuteOnTrackingClassic.height = 17;
+			PatHeaderCoords.sSoloOnTrackingClassic.x = 62;
+			PatHeaderCoords.sSoloOnTrackingClassic.y = 40;
+			PatHeaderCoords.sSoloOnTrackingClassic.width = 17;
+			PatHeaderCoords.sSoloOnTrackingClassic.height = 17;
+			PatHeaderCoords.sRecordOnTrackingClassic.x = 96;
+			PatHeaderCoords.sRecordOnTrackingClassic.y = 40;
+			PatHeaderCoords.sRecordOnTrackingClassic.width = 17;
+			PatHeaderCoords.sRecordOnTrackingClassic.height = 17;
+			PatHeaderCoords.dRecordOnTrackClassic.x = 85;
+			PatHeaderCoords.dRecordOnTrackClassic.y = 3;
+			PatHeaderCoords.dMuteOnTrackClassic.x = 66;
+			PatHeaderCoords.dMuteOnTrackClassic.y = 3;
+			PatHeaderCoords.dSoloOnTrackClassic.x = 47;
+			PatHeaderCoords.dSoloOnTrackClassic.y = 3;
+
+			PatHeaderCoords.sBackgroundText.x=0;
+			PatHeaderCoords.sBackgroundText.y=57;
+			PatHeaderCoords.sBackgroundText.width=107;
+			PatHeaderCoords.sBackgroundText.height=23;
+			PatHeaderCoords.sNumber0Text.x = 0;
+			PatHeaderCoords.sNumber0Text.y = 80;
+			PatHeaderCoords.sNumber0Text.width = 6;
+			PatHeaderCoords.sNumber0Text.height = 12;
+			PatHeaderCoords.sRecordOnText.x = 46;
+			PatHeaderCoords.sRecordOnText.y = 92;
+			PatHeaderCoords.sRecordOnText.width = 17;
+			PatHeaderCoords.sRecordOnText.height = 4;
+			PatHeaderCoords.sMuteOnText.x = 29;
+			PatHeaderCoords.sMuteOnText.y = 92;
+			PatHeaderCoords.sMuteOnText.width = 17;
+			PatHeaderCoords.sMuteOnText.height = 4;
+			PatHeaderCoords.sSoloOnText.x = 12;
+			PatHeaderCoords.sSoloOnText.y = 92;
+			PatHeaderCoords.sSoloOnText.width = 17;
+			PatHeaderCoords.sSoloOnText.height = 4;
+			PatHeaderCoords.sPlayOnText.x = 0;
+			PatHeaderCoords.sPlayOnText.y = 92;
+			PatHeaderCoords.sPlayOnText.width = 12;
+			PatHeaderCoords.sPlayOnText.height = 4;
+			PatHeaderCoords.dDigitX0Text.x = 5;
+			PatHeaderCoords.dDigitX0Text.y = 8;
+			PatHeaderCoords.dDigit0XText.x = 11;
+			PatHeaderCoords.dDigit0XText.y = 8;
+			PatHeaderCoords.dRecordOnText.x = 85;
+			PatHeaderCoords.dRecordOnText.y = 3;
+			PatHeaderCoords.dMuteOnText.x = 66;
+			PatHeaderCoords.dMuteOnText.y = 3;
+			PatHeaderCoords.dSoloOnText.x = 47;
+			PatHeaderCoords.dSoloOnText.y = 3;
+			PatHeaderCoords.dPlayOnText.x = 5;
+			PatHeaderCoords.dPlayOnText.y = 3;
+			PatHeaderCoords.sMuteOnTrackingText.x = 79;
+			PatHeaderCoords.sMuteOnTrackingText.y = 40;
+			PatHeaderCoords.sMuteOnTrackingText.width = 17;
+			PatHeaderCoords.sMuteOnTrackingText.height = 17;
+			PatHeaderCoords.sSoloOnTrackingText.x = 62;
+			PatHeaderCoords.sSoloOnTrackingText.y = 40;
+			PatHeaderCoords.sSoloOnTrackingText.width = 17;
+			PatHeaderCoords.sSoloOnTrackingText.height = 17;
+			PatHeaderCoords.sRecordOnTrackingText.x = 96;
+			PatHeaderCoords.sRecordOnTrackingText.y = 40;
+			PatHeaderCoords.sRecordOnTrackingText.width = 17;
+			PatHeaderCoords.sRecordOnTrackingText.height = 17;
+			PatHeaderCoords.dRecordOnTrackText.x = 85;
+			PatHeaderCoords.dRecordOnTrackText.y = 3;
+			PatHeaderCoords.dMuteOnTrackText.x = 66;
+			PatHeaderCoords.dMuteOnTrackText.y = 3;
+			PatHeaderCoords.dSoloOnTrackText.x = 47;
+			PatHeaderCoords.dSoloOnTrackText.y = 3;
+			PatHeaderCoords.sTextCrop.x = 18;
+			PatHeaderCoords.sTextCrop.y = 8;
+			PatHeaderCoords.sTextCrop.width = 84;
+			PatHeaderCoords.sTextCrop.height = 13;
+
 			PatHeaderCoords.bHasTransparency = true;
 			PatHeaderCoords.bHasPlaying = true;
+			PatHeaderCoords.bHasTextSkin = true;
 			PatHeaderCoords.cTransparency = 0x00FFFFFF;	
+			PatHeaderCoords.cTextFontColour = 0x00F0F0F0;
+			PatHeaderCoords.szTextFont ="Arial";
+			PatHeaderCoords.textFontPoint = 80;
+			PatHeaderCoords.textFontFlags = 0;
 		}
 		void PsycleConfig::PatternView::Load(ConfigStorage &store, std::string mainSkinDir)
 		{
@@ -978,6 +1133,17 @@ namespace psycle { namespace host {
 			{
 				PrepareMask(&patternheader,&patternheadermask,PatHeaderCoords.cTransparency);
 			}
+			if (PatHeaderCoords.bHasTextSkin) {
+				bool bBold = PatHeaderCoords.textFontFlags & 1;
+				bool bItalic = PatHeaderCoords.textFontFlags & 2;
+				if(!CreatePsyFont(pattern_tracknames_font,PatHeaderCoords.szTextFont,PatHeaderCoords.textFontPoint,bBold,bItalic))
+				{
+					if(!CreatePsyFont(pattern_font,"Tahoma",font_point,bBold,bItalic))
+						CreatePsyFont(pattern_font,"Arial",10,false,false);
+				}
+			}
+			if(showTrackNames_) { PatHeaderCoords.SwitchToText(); }
+			else { PatHeaderCoords.SwitchToClassic(); }
 		}
 		bool PsycleConfig::PatternView::RefreshBitmaps()
 		{

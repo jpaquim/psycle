@@ -47,17 +47,27 @@ Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
 v1.11.3 (beta) (2014-xx-xx)
 --------
-+ Option to clip machine names in the machine view for skin creators. See generator_name_clip_coords and effect_name_clip_coords in how-to-skin-psycle.txt.
++ Popup menu on machine view, for machines. It doesn't add new functionality that couldn't be done with mouse before, but it is now also possible with keyboard.
 + Sampulse Editor: Implemented the sampulse note mapping editor. Everything is point and click. Multiple selection is possible. (like setting a whole octave by selecting the 12 notemaps, and then the 12 notes with mouse and shift)
 + Sampulse Editor: Selecting an instrument shows which samples it has associated. Selecting a sample shows which instruments use it.
 + Sampulse Editor: Deleting an instrument asks if it should delete its associated samples.
++ Sampulse Editor: Able to load and save single instruments to a file (including its associated samples).
++ Wave Editor: Load and save sample from the wave editor.
 + Recording or playing the song with looping disabled will now stop when break to line, or jump to sequence go to an earlier position.
 + Full Implementation of extraticks and ticksperbeat: Changes in song properties dialog, song toolbar and part of code.
++ Skinnable header with track names, plus highlighting for mute/solo/record buttons to show something different when mouse over. Other fixes on skins.
++ Option to clip machine names in the machine view for skin creators. See generator_name_clip_coords and effect_name_clip_coords in how-to-skin-psycle.txt.
 * Do not stretch master VU graphics in Windows XP. It will not resize correctly on different dpi sizes, but will paint correctly at 96dpi which is what most people use.
-* Improved the xm song exporter. Fixed sample pitch and exported envelopes. Also exported sampulse instruments now.
+* Improved the xm song exporter. Fixed sample pitch and exported envelopes. Also exports sampulse instruments now.
+* Changes in the load and save instrument buttons (now they work on samples or instruments depending on sampulse machine being selected). Several other changes related to how the tracker remembers and shows the instruments.
+* Much improved the IFF/SVX loader (ok, probaby useless, but now it has a correct loop code, supports multioctave instruments, Big endian 16bits, Stereo and pan).
+* Use the new wave loader implementation. Better format support.
+* Gear Rack: now it has a different list for sampulse instruments or samples.
 ! Sampler: Fixes in pitch slide command (it became broken when adding samplerate support)
-! Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample)
+! Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample and several other selection size discrepancies)
 ! Gear rack: exchanging instruments to an unused position crashed the application.
+! Sampulse : Fixed play backwards command 0E9F
+
 
 v1.11.2 (beta) (2014-02-16)
 --------

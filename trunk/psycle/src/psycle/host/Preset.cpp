@@ -1,5 +1,5 @@
 ///\file
-///\brief implementation file for psycle::host::CSkinDlg.
+///\brief implementation file for psycle::host::Preset.
 
 #include <psycle/host/detail/project.private.hpp>
 #include "Preset.hpp"

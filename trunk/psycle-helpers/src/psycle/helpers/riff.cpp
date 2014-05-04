@@ -375,7 +375,6 @@ DDCRET WaveFile::WriteStereoSample(float LeftSample, float RightSample) {
 	case 3: // IEEE float PCM
 		if( wave_format.data.nBitsPerSample == 32)
 		{
-			pcm_data.ckSize += 4;
 			f = LeftSample * 0.000030517578125f;
 			retcode = Write ( &f, 4 );
 			if(retcode == DDC_SUCCESS)

@@ -379,49 +379,17 @@ namespace psycle { namespace host {
 					}
 					else 
 					{
-		//				if (blockSel.start.line <= blockSel.end.line)
-		//				{
-							newselpos.top=blockSel.start.line;
-							newselpos.bottom=blockSel.end.line+1;
-		//				}
-		//				else
-		//				{
-		//					newselpos.top=blockSel.end.line;
-		//					newselpos.bottom=blockSel.start.line+1;
-		//				}
-
-		//				if (blockSel.start.track <= blockSel.end.track)
-		//				{
-							newselpos.left=blockSel.start.track;
-							newselpos.right=blockSel.end.track+1;
-		//				}
-		//				else
-		//				{
-		//					newselpos.right=blockSel.start.track;
-		//					newselpos.left=blockSel.end.track+1;
-		//				}
+						newselpos.top=blockSel.start.line;
+						newselpos.bottom=blockSel.end.line+1;
+						newselpos.left=blockSel.start.track;
+						newselpos.right=blockSel.end.track+1;
 
 						if (selpos.bottom == 0)
 						{
-							//if(blockSel.start.track<rntOff) 
-							//	rect.left=XOFFSET;
-							//else 
-								rect.left=XOFFSET+(blockSel.start.track-rntOff)*ROWWIDTH;
-							
-							//if(blockSel.start.line<=rnlOff) 
-							//	rect.top=YOFFSET;
-							//else 
-								rect.top=YOFFSET+(blockSel.start.line-rnlOff)*ROWHEIGHT;
-							
-							//if(blockSel.end.track>=rntOff+VISTRACKS) 
-							//	rect.right=CW;
-							//else 
-								rect.right=XOFFSET+(blockSel.end.track-rntOff+1)*ROWWIDTH;
-
-							//if(blockSel.end.line>=rnlOff+VISLINES ) 
-							//	rect.bottom=CH;
-							//else 
-								rect.bottom=YOFFSET+(blockSel.end.line-rnlOff+1)*ROWHEIGHT;
+							rect.left=XOFFSET+(blockSel.start.track-rntOff)*ROWWIDTH;
+							rect.top=YOFFSET+(blockSel.start.line-rnlOff)*ROWHEIGHT;
+							rect.right=XOFFSET+(blockSel.end.track-rntOff+1)*ROWWIDTH;
+							rect.bottom=YOFFSET+(blockSel.end.line-rnlOff+1)*ROWHEIGHT;
 							
 							NewPatternDraw(blockSel.start.track, blockSel.end.track, blockSel.start.line, blockSel.end.line);
 							updatePar |= DRAW_DATA;
@@ -429,326 +397,42 @@ namespace psycle { namespace host {
 						}
 						else if (newselpos != selpos)
 						{
-							if (newselpos.left < selpos.left)
-							{
-								rect.left = newselpos.left;
-								if (newselpos.right > selpos.right)
-								{
-									rect.right = newselpos.right;
+							rect.left = (newselpos.left < selpos.left) ? newselpos.left : selpos.left;
+							rect.right = (newselpos.right > selpos.right) ? newselpos.right : selpos.right;
+							rect.top = (newselpos.top < selpos.top) ? newselpos.top : selpos.top;
+							rect.bottom = (newselpos.bottom > selpos.bottom) ? newselpos.bottom : selpos.bottom;
+						
+							//optimizations when only one side changes.
+							if (tOff != rntOff && lOff != rnlOff) {
+								if (newselpos.right == selpos.right && newselpos.top == selpos.top && newselpos.bottom == selpos.bottom) {
+									rect.right = (newselpos.left < selpos.left) ? selpos.left : newselpos.left;
 								}
-								else if (newselpos.right < selpos.right)
-								{
-									rect.right = selpos.right;
+								else if (newselpos.left < selpos.left && newselpos.top == selpos.top && newselpos.bottom == selpos.bottom) {
+									rect.left = (newselpos.right > selpos.right) ? selpos.right : newselpos.right;
 								}
-								else 
-								{
-									rect.right = selpos.left;
+								else if (newselpos.left < selpos.left && newselpos.right == selpos.right && newselpos.bottom == selpos.bottom) {
+									rect.bottom = (newselpos.top < selpos.top) ? selpos.top : newselpos.top;
 								}
-
-								if (newselpos.top <= selpos.top)
-								{
-									rect.top = newselpos.top;
+								else if (newselpos.left < selpos.left && newselpos.right == selpos.right && newselpos.top == selpos.top ) {
+									rect.top = (newselpos.bottom > selpos.bottom)? selpos.bottom : newselpos.bottom;
 								}
-								else 
-								{
-									rect.top = selpos.top;
-								}
-
-								if (newselpos.bottom >= selpos.bottom)
-								{
-									rect.bottom = newselpos.bottom;
-								}
-								else 
-								{
-									rect.bottom = selpos.bottom;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
 							}
-							else if (newselpos.left > selpos.left)
-							{
-								rect.left = selpos.left;
-								if (newselpos.right > selpos.right)
-								{
-									rect.right = newselpos.right;
-								}
-								else if (newselpos.right < selpos.right)
-								{
-									rect.right = selpos.right;
-								}
-								else 
-								{
-									rect.right = newselpos.left;
-								}
-
-								if (newselpos.top <= selpos.top)
-								{
-									rect.top = newselpos.top;
-								}
-								else 
-								{
-									rect.top = selpos.top;
-								}
-
-								if (newselpos.bottom >= selpos.bottom)
-								{
-									rect.bottom = newselpos.bottom;
-								}
-								else 
-								{
-									rect.bottom = selpos.bottom;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-
-							if (newselpos.right < selpos.right)
-							{
-								rect.left = newselpos.right;
-								rect.right = selpos.right;
-
-								if (newselpos.top <= selpos.top)
-								{
-									rect.top = newselpos.top;
-								}
-								else 
-								{
-									rect.top = selpos.top;
-								}
-
-								if (newselpos.bottom >= selpos.bottom)
-								{
-									rect.bottom = newselpos.bottom;
-								}
-								else 
-								{
-									rect.bottom = selpos.bottom;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-							else if (newselpos.right > selpos.right)
-							{
-								rect.left = selpos.right;
-								rect.right = newselpos.right;
-
-								if (newselpos.top <= selpos.top)
-								{
-									rect.top = newselpos.top;
-								}
-								else 
-								{
-									rect.top = selpos.top;
-								}
-
-								if (newselpos.bottom >= selpos.bottom)
-								{
-									rect.bottom = newselpos.bottom;
-								}
-								else 
-								{
-									rect.bottom = selpos.bottom;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-
-							if (newselpos.top < selpos.top)
-							{
-								rect.top = newselpos.top;
-								if (newselpos.bottom > selpos.bottom)
-								{
-									rect.bottom = newselpos.bottom;
-								}
-								else if (newselpos.bottom < selpos.bottom)
-								{
-									rect.bottom = selpos.bottom;
-								}
-								else 
-								{
-									rect.bottom = selpos.top;
-								}
-
-								if (newselpos.left <= selpos.left)
-								{
-									rect.left = newselpos.left;
-								}
-								else 
-								{
-									rect.left = selpos.left;
-								}
-
-								if (newselpos.right >= selpos.right)
-								{
-									rect.right = newselpos.right;
-								}
-								else 
-								{
-									rect.right = selpos.right;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-							else if (newselpos.top > selpos.top)
-							{
-								rect.top = selpos.top;
-								if (newselpos.bottom > selpos.bottom)
-								{
-									rect.bottom = newselpos.bottom;
-								}
-								else if (newselpos.bottom < selpos.bottom)
-								{
-									rect.bottom = selpos.bottom;
-								}
-								else 
-								{
-									rect.bottom = newselpos.top;
-								}
-
-								if (newselpos.left <= selpos.left)
-								{
-									rect.left = newselpos.left;
-								}
-								else 
-								{
-									rect.left = selpos.left;
-								}
-
-								if (newselpos.right >= selpos.right)
-								{
-									rect.right = newselpos.right;
-								}
-								else 
-								{
-									rect.right = selpos.right;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-
-							if (newselpos.bottom < selpos.bottom)
-							{
-								rect.top = newselpos.bottom;
-								rect.bottom = selpos.bottom;
-
-								if (newselpos.left <= selpos.left)
-								{
-									rect.left = newselpos.left;
-								}
-								else 
-								{
-									rect.left = selpos.left;
-								}
-
-								if (newselpos.right >= selpos.right)
-								{
-									rect.right = newselpos.right;
-								}
-								else 
-								{
-									rect.right = selpos.right;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-							else if (newselpos.bottom > selpos.bottom)
-							{
-								rect.top = selpos.bottom;
-								rect.bottom = newselpos.bottom;
-
-								if (newselpos.left <= selpos.left)
-								{
-									rect.left = newselpos.left;
-								}
-								else 
-								{
-									rect.left = selpos.left;
-								}
-
-								if (newselpos.right >= selpos.right)
-								{
-									rect.right = newselpos.right;
-								}
-								else 
-								{
-									rect.right = selpos.right;
-								}
-							
-								NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
-								updatePar |= DRAW_DATA;
-								rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
-								rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
-								rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
-								rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
-								InvalidateRect(rect,false);
-							}
-
-						}
+							NewPatternDraw(rect.left, rect.right, rect.top, rect.bottom);
+							updatePar |= DRAW_DATA;
+							rect.left = XOFFSET+(rect.left-rntOff)*ROWWIDTH;
+							rect.right = XOFFSET+(rect.right-rntOff)*ROWWIDTH;
+							rect.top=YOFFSET+(rect.top-rnlOff)*ROWHEIGHT;
+							rect.bottom=YOFFSET+(rect.bottom-rnlOff)*ROWHEIGHT;
+							InvalidateRect(rect,false);
+						}						
 					}
 				}
 				else if ( selpos.bottom != 0)
 				{
-					//if(selpos.left<rntOff) 
-					//	rect.left=XOFFSET;
-					//else 
-						rect.left=XOFFSET+(selpos.left-rntOff)*ROWWIDTH;
-					
-					//if(selpos.top<=rnlOff) 
-					//	rect.top=YOFFSET;
-					//else 
-						rect.top=YOFFSET+(selpos.top-rnlOff)*ROWHEIGHT;
-					
-					//if(selpos.right>=rntOff+VISTRACKS) 
-					//	rect.right=CW;
-					//else 
-						rect.right=XOFFSET+(selpos.right-rntOff)*ROWWIDTH;
-
-					//if(selpos.bottom>=rnlOff+VISLINES ) 
-					//	rect.bottom=CH;
-					//else 
-						rect.bottom=YOFFSET+(selpos.bottom-rnlOff)*ROWHEIGHT;
+					rect.left=XOFFSET+(selpos.left-rntOff)*ROWWIDTH;
+					rect.top=YOFFSET+(selpos.top-rnlOff)*ROWHEIGHT;
+					rect.right=XOFFSET+(selpos.right-rntOff)*ROWWIDTH;
+					rect.bottom=YOFFSET+(selpos.bottom-rnlOff)*ROWHEIGHT;
 					
 					NewPatternDraw(selpos.left, selpos.right, selpos.top, selpos.bottom);
 					updatePar |= DRAW_DATA;
@@ -892,210 +576,21 @@ namespace psycle { namespace host {
 					devc->SetTextColor(patView->font);
 					TXT(devc,"Line",1,1,XOFFSET-2,YOFFSET-2);
 				}
-				CDC memDC;
-				CBitmap *oldbmp;
-				memDC.CreateCompatibleDC(devc);
-				oldbmp = memDC.SelectObject(&patView->patternheader);
+
 				int xOffset = XOFFSET-1;
-
-				if(patView->showTrackNames_)
+				int iFirstIni = tOff;
+				int iLastIni = tOff+maxt;
+				for (int i = iFirstIni; i < iLastIni; i++,xOffset += ROWWIDTH)
 				{
-					char buffer[256];
-					for(int i=tOff;i<tOff+maxt;i++)
-					{
-						rect.left = xOffset;
-						rect.right = xOffset+1;
-						devc->FillSolidRect(&rect,pvc_separator[i+1]);
-						rect.left++;
-						rect.right+= ROWWIDTH-1;
-						devc->FillSolidRect(&rect,pvc_background[i+1]);
-						sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
-						TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
-						xOffset += ROWWIDTH;
-					}
+					rect.left = xOffset;
+					rect.right = xOffset+1;
+					devc->FillSolidRect(&rect, pvc_separator[i+1]);
+					rect.left++;
+					rect.right+= ROWWIDTH-1;
+					devc->FillSolidRect(&rect,pvc_background[i+1]);
 				}
-				else if (PatHeaderCoords->bHasTransparency)
-				{
-					for(int i=tOff;i<tOff+maxt;i++)
-					{
-						rect.left = xOffset;
-						rect.right = xOffset+1;
-						devc->FillSolidRect(&rect,pvc_separator[i+1]);
-						rect.left++;
-						rect.right+= ROWWIDTH-1;
-						devc->FillSolidRect(&rect,pvc_background[i+1]);
 
-						const int trackx0 = i/10;
-						const int track0x = i%10;
-
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						TransparentBlt(devc,
-							xOffset+1+HEADER_INDENT,
-							1,
-							PatHeaderCoords->sBackground.width, 
-							PatHeaderCoords->sBackground.height,
-							&memDC, 
-							&patView->patternheadermask,
-							PatHeaderCoords->sBackground.x,
-							PatHeaderCoords->sBackground.y);
-						TransparentBlt(devc,
-							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-							1+PatHeaderCoords->dDigitX0.y, 
-							PatHeaderCoords->sNumber0.width,	 
-							PatHeaderCoords->sNumber0.height, 
-							&memDC, 
-							&patView->patternheadermask,
-							PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-							PatHeaderCoords->sNumber0.y);
-						TransparentBlt(devc,
-							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-							1+PatHeaderCoords->dDigit0X.y, 
-							PatHeaderCoords->sNumber0.width,	 
-							PatHeaderCoords->sNumber0.height, 
-							&memDC, 
-							&patView->patternheadermask,
-							PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-							PatHeaderCoords->sNumber0.y);
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::song()._trackMuted[i])
-							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-								1+PatHeaderCoords->dMuteOn.y, 
-								PatHeaderCoords->sMuteOn.width, 
-								PatHeaderCoords->sMuteOn.height, 
-								&memDC, 
-								&patView->patternheadermask,
-								PatHeaderCoords->sMuteOn.x, 
-								PatHeaderCoords->sMuteOn.y);
-
-						if (Global::song()._trackArmed[i])
-							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-								1+PatHeaderCoords->dRecordOn.y, 
-								PatHeaderCoords->sRecordOn.width, 
-								PatHeaderCoords->sRecordOn.height, 
-								&memDC, 
-								&patView->patternheadermask,
-								PatHeaderCoords->sRecordOn.x, 
-								PatHeaderCoords->sRecordOn.y);
-
-						if (Global::song()._trackSoloed == i )
-							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-								1+PatHeaderCoords->dSoloOn.y, 
-								PatHeaderCoords->sSoloOn.width, 
-								PatHeaderCoords->sSoloOn.height, 
-								&memDC, 
-								&patView->patternheadermask,
-								PatHeaderCoords->sSoloOn.x, 
-								PatHeaderCoords->sSoloOn.y);
-						if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
-							TransparentBlt(devc,
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
-								1+PatHeaderCoords->dPlayOn.y, 
-								PatHeaderCoords->sPlayOn.width, 
-								PatHeaderCoords->sPlayOn.height, 
-								&memDC, 
-								&patView->patternheadermask,
-								PatHeaderCoords->sPlayOn.x, 
-								PatHeaderCoords->sPlayOn.y);
-
-						xOffset += ROWWIDTH;
-					}
-				}
-				else
-				{
-					for(int i=tOff;i<tOff+maxt;i++)
-					{
-						rect.left = xOffset;
-						rect.right = xOffset+1;
-						devc->FillSolidRect(&rect,pvc_separator[i+1]);
-						rect.left++;
-						rect.right+= ROWWIDTH-1;
-						devc->FillSolidRect(&rect,pvc_background[i+1]);
-
-						const int trackx0 = i/10;
-						const int track0x = i%10;
-
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT,
-							1,
-							PatHeaderCoords->sBackground.width, 
-							PatHeaderCoords->sBackground.height,
-							&memDC, 
-							PatHeaderCoords->sBackground.x,
-							PatHeaderCoords->sBackground.y, 
-							SRCCOPY);
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-							1+PatHeaderCoords->dDigitX0.y, 
-							PatHeaderCoords->sNumber0.width,	 
-							PatHeaderCoords->sNumber0.height, 
-							&memDC, 
-							PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-							PatHeaderCoords->sNumber0.y, 
-							SRCCOPY);
-						devc->BitBlt(
-							xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-							1+PatHeaderCoords->dDigit0X.y, 
-							PatHeaderCoords->sNumber0.width,	 
-							PatHeaderCoords->sNumber0.height, 
-							&memDC, 
-							PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-							PatHeaderCoords->sNumber0.y, 
-							SRCCOPY);
-
-						// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-						if (Global::song()._trackMuted[i])
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-								1+PatHeaderCoords->dMuteOn.y, 
-								PatHeaderCoords->sMuteOn.width, 
-								PatHeaderCoords->sMuteOn.height, 
-								&memDC, 
-								PatHeaderCoords->sMuteOn.x, 
-								PatHeaderCoords->sMuteOn.y, 
-								SRCCOPY);
-
-						if (Global::song()._trackArmed[i])
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-								1+PatHeaderCoords->dRecordOn.y, 
-								PatHeaderCoords->sRecordOn.width, 
-								PatHeaderCoords->sRecordOn.height, 
-								&memDC, 
-								PatHeaderCoords->sRecordOn.x, 
-								PatHeaderCoords->sRecordOn.y, 
-								SRCCOPY);
-
-						if (Global::song()._trackSoloed == i )
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-								1+PatHeaderCoords->dSoloOn.y, 
-								PatHeaderCoords->sSoloOn.width, 
-								PatHeaderCoords->sSoloOn.height, 
-								&memDC, 
-								PatHeaderCoords->sSoloOn.x, 
-								PatHeaderCoords->sSoloOn.y, 
-								SRCCOPY);
-
-						if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
-							devc->BitBlt(
-								xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
-								1+PatHeaderCoords->dPlayOn.y, 
-								PatHeaderCoords->sPlayOn.width, 
-								PatHeaderCoords->sPlayOn.height, 
-								&memDC, 
-								PatHeaderCoords->sPlayOn.x, 
-								PatHeaderCoords->sPlayOn.y, 
-								SRCCOPY);
-				
-						xOffset += ROWWIDTH;
-					}
-				}
-				memDC.SelectObject(oldbmp);
-				memDC.DeleteDC();
+				DrawPatternHeader(devc,XOFFSET-1, iFirstIni, iLastIni);
 			}
 
 			// 2 if there is a redraw all, we do that then exit
@@ -1175,620 +670,195 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				if (scrollT && scrollL)
+				//There is no (scrollT && scrollL) case because it is don in the if above.
+				// h scroll - remember to check the header when scrolling H so no double blits
+				//			  add to draw list uncovered area
+				if (scrollT)
 				{
-				}
-				else // not scrollT + scrollL
-				{
-					// h scroll - remember to check the header when scrolling H so no double blits
-					//			  add to draw list uncovered area
-					if (scrollT)
+					CRgn rgn;
+					int xOffsetIni,iFirstIni,iLastIni,drawStart,drawEnd;
+					if (scrollT > 0) {	//Scrolling to the left
+						xOffsetIni = XOFFSET-1;
+						iFirstIni = tOff;
+						iLastIni = tOff+scrollT;
+						drawStart = 0;
+						drawEnd = scrollT;
+					}
+					else {	//Scrolling to the right
+						xOffsetIni = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
+						iFirstIni = tOff+maxt+scrollT-1;
+						iLastIni = tOff+maxt;
+						drawStart = VISTRACKS+scrollT;
+						drawEnd = VISTRACKS+1;
+					}
+
+					if (updatePar & DRAW_TRHEADER)
 					{
-						CRgn rgn;
-						if (updatePar & DRAW_TRHEADER)
+						 // In this case, we have alredy drawn the whole header above so we only need toscroll and paint the text.
+	#ifdef _DEBUG_PATVIEW
+							TRACE("DRAW_HSCROLL+\n");
+	#endif
+						const RECT patR = {XOFFSET,YOFFSET , CW, CH};
+						devc->ScrollDC(scrollT*ROWWIDTH,NULL,&patR,&patR,&rgn,&rect);
+
+						rect.top = YOFFSET;
+						rect.bottom = CH;
+						int xOffset = xOffsetIni;
+						for (int i = iFirstIni; i < iLastIni; i++,xOffset += ROWWIDTH)
 						{
-							const RECT patR = {XOFFSET,YOFFSET , CW, CH};
-							devc->ScrollDC(scrollT*ROWWIDTH,0,&patR,&patR,&rgn,&rect);
-							if ( scrollT > 0 )
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HSCROLL+\n");
-		#endif
-								rect.top = YOFFSET;
-								rect.bottom = CH;
-
-								int xOffset = XOFFSET-1;
-								for (int i = 0; i < scrollT; i++)
-								{
-								rect.left = xOffset;
-								rect.right = xOffset+1;
-									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-									rect.left++;
-									rect.right+= ROWWIDTH-1;
-									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-									xOffset += ROWWIDTH;
-								}
-								DrawPatternData(devc,0, scrollT, 0, VISLINES+1);
-							}
-							else 
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HSCROLL-\n");
-		#endif
-								rect.top = YOFFSET;
-								rect.bottom = CH;
-								int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
-								for (int i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
-								{
-									rect.left = xOffset;
-									rect.right = xOffset+1;
-									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-									rect.left++;
-									rect.right+= ROWWIDTH-1;
-									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-									xOffset += ROWWIDTH;
-								}
-								DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
-							}
+							rect.left = xOffset;
+							rect.right = xOffset+1;
+							devc->FillSolidRect(&rect, pvc_separator[i+1]);
+							rect.left++;
+							rect.right+= ROWWIDTH-1;
+							devc->FillSolidRect(&rect,pvc_background[i+1]);
 						}
-						else
+						DrawPatternData(devc,drawStart, drawEnd, 0, VISLINES+1);
+					}
+					else
+					{
+#ifdef _DEBUG_PATVIEW
+						TRACE("DRAW_HSCROLL+\n");
+#endif
+						// scroll header too
+						const RECT trkR = {XOFFSET, 0, CW, CH};
+						devc->ScrollDC(scrollT*ROWWIDTH,NULL,&trkR,&trkR,&rgn,&rect);
+
+						rect.top = 0;
+						rect.bottom = CH;
+						int xOffset = xOffsetIni;
+						for (int i = iFirstIni; i < iLastIni; i++, xOffset += ROWWIDTH)
 						{
-							// scroll header too
-							const RECT trkR = {XOFFSET, 0, CW, CH};
-							devc->ScrollDC(scrollT*ROWWIDTH,0,&trkR,&trkR,&rgn,&rect);
-							if (scrollT > 0)
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HSCROLL+\n");
-		#endif
-								rect.top = 0;
-								rect.bottom = CH;
-								int xOffset = XOFFSET-1;
-								for (int i = 0; i < scrollT; i++)
-								{
-									rect.left = xOffset;
-									rect.right = xOffset+1;
-									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-									rect.left++;
-									rect.right+= ROWWIDTH-1;
-									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-									xOffset += ROWWIDTH;
-								}
-								DrawPatternData(devc,0, scrollT, 0, VISLINES+1);
-
-								CDC memDC;
-								CBitmap *oldbmp;
-								memDC.CreateCompatibleDC(devc);
-								oldbmp = memDC.SelectObject(&patView->patternheader);
-								xOffset = XOFFSET-1;
-
-								if(patView->showTrackNames_)
-								{
-									char buffer[256];
-									rect.top = 0;
-									rect.bottom = YOFFSET;
-									for(int i=tOff;i<tOff+scrollT;i++)
-									{
-										rect.left = xOffset;
-										rect.right = xOffset+1;
-										devc->FillSolidRect(&rect,pvc_separator[i+1]);
-										rect.left++;
-										rect.right+= ROWWIDTH-1;
-										devc->FillSolidRect(&rect,pvc_background[i+1]);
-										sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
-										TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
-										xOffset += ROWWIDTH;
-									}
-								}
-								else if (PatHeaderCoords->bHasTransparency)
-								{
-									for(int i=tOff;i<tOff+scrollT;i++)
-									{
-										const int trackx0 = i/10;
-										const int track0x = i%10;
-
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT,
-											1,
-											PatHeaderCoords->sBackground.width, 
-											PatHeaderCoords->sBackground.height,
-											&memDC, 
-											&patView->patternheadermask,
-											PatHeaderCoords->sBackground.x,
-											PatHeaderCoords->sBackground.y);
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-											1+PatHeaderCoords->dDigitX0.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											&patView->patternheadermask,
-											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y);
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-											1+PatHeaderCoords->dDigit0X.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											&patView->patternheadermask,
-											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y);
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::song()._trackMuted[i])
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-												1+PatHeaderCoords->dMuteOn.y, 
-												PatHeaderCoords->sMuteOn.width, 
-												PatHeaderCoords->sMuteOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sMuteOn.x, 
-												PatHeaderCoords->sMuteOn.y);
-
-										if (Global::song()._trackArmed[i])
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-												1+PatHeaderCoords->dRecordOn.y, 
-												PatHeaderCoords->sRecordOn.width, 
-												PatHeaderCoords->sRecordOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sRecordOn.x, 
-												PatHeaderCoords->sRecordOn.y);
-
-										if (Global::song()._trackSoloed == i )
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-												1+PatHeaderCoords->dSoloOn.y, 
-												PatHeaderCoords->sSoloOn.width, 
-												PatHeaderCoords->sSoloOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sSoloOn.x, 
-												PatHeaderCoords->sSoloOn.y);
-
-										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
-												1+PatHeaderCoords->dPlayOn.y, 
-												PatHeaderCoords->sPlayOn.width, 
-												PatHeaderCoords->sPlayOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sPlayOn.x, 
-												PatHeaderCoords->sPlayOn.y);
-
-										xOffset += ROWWIDTH;
-									}
-								}
-								else
-								{
-									for(int i=tOff;i<tOff+scrollT;i++)
-									{
-										const int trackx0 = i/10;
-										const int track0x = i%10;
-
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT,
-											1,
-											PatHeaderCoords->sBackground.width, 
-											PatHeaderCoords->sBackground.height,
-											&memDC, 
-											PatHeaderCoords->sBackground.x,
-											PatHeaderCoords->sBackground.y, 
-											SRCCOPY);
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-											1+PatHeaderCoords->dDigitX0.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y, 
-											SRCCOPY);
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-											1+PatHeaderCoords->dDigit0X.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y, 
-											SRCCOPY);
-
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::song()._trackMuted[i])
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-												1+PatHeaderCoords->dMuteOn.y, 
-												PatHeaderCoords->sMuteOn.width, 
-												PatHeaderCoords->sMuteOn.height, 
-												&memDC, 
-												PatHeaderCoords->sMuteOn.x, 
-												PatHeaderCoords->sMuteOn.y, 
-												SRCCOPY);
-
-										if (Global::song()._trackArmed[i])
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-												1+PatHeaderCoords->dRecordOn.y, 
-												PatHeaderCoords->sRecordOn.width, 
-												PatHeaderCoords->sRecordOn.height, 
-												&memDC, 
-												PatHeaderCoords->sRecordOn.x, 
-												PatHeaderCoords->sRecordOn.y, 
-												SRCCOPY);
-
-										if (Global::song()._trackSoloed == i )
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-												1+PatHeaderCoords->dSoloOn.y, 
-												PatHeaderCoords->sSoloOn.width, 
-												PatHeaderCoords->sSoloOn.height, 
-												&memDC, 
-												PatHeaderCoords->sSoloOn.x, 
-												PatHeaderCoords->sSoloOn.y, 
-												SRCCOPY);
-
-										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
-												1+PatHeaderCoords->dPlayOn.y, 
-												PatHeaderCoords->sPlayOn.width, 
-												PatHeaderCoords->sPlayOn.height, 
-												&memDC, 
-												PatHeaderCoords->sPlayOn.x, 
-												PatHeaderCoords->sPlayOn.y, 
-												SRCCOPY);
-
-										xOffset += ROWWIDTH;
-									}
-								}
-								memDC.SelectObject(oldbmp);
-								memDC.DeleteDC();
-							}
-							else 
-							{	
-		#ifdef _DEBUG_PATVIEW
-								TRACE("DRAW_HSCROLL-\n");
-		#endif
-								rect.top = 0;
-								rect.bottom = CH;
-								int xOffset = XOFFSET-1+((VISTRACKS+scrollT)*ROWWIDTH);
-								for (int i = VISTRACKS+scrollT; i < VISTRACKS+1; i++)
-								{
-									rect.left = xOffset;
-									rect.right = xOffset+1;
-									devc->FillSolidRect(&rect, pvc_separator[i+tOff+1]);
-									rect.left++;
-									rect.right+= ROWWIDTH-1;
-									devc->FillSolidRect(&rect,pvc_background[i+tOff+1]);
-
-									xOffset += ROWWIDTH;
-								}
-								DrawPatternData(devc,VISTRACKS+scrollT, VISTRACKS+1, 0, VISLINES+1);
-
-								CDC memDC;
-								CBitmap *oldbmp;
-								memDC.CreateCompatibleDC(devc);
-								oldbmp = memDC.SelectObject(&patView->patternheader);
-								xOffset = XOFFSET-1+((maxt+scrollT-1)*ROWWIDTH);
-
-								if(patView->showTrackNames_)
-								{
-									char buffer[256];
-									rect.top = 0;
-									rect.bottom = YOFFSET;
-									for(int i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
-									{
-										rect.left = xOffset;
-										rect.right = xOffset+1;
-										devc->FillSolidRect(&rect,pvc_separator[i+1]);
-										rect.left++;
-										rect.right+= ROWWIDTH-1;
-										devc->FillSolidRect(&rect,pvc_background[i+1]);
-										sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
-										TXT(devc,buffer,rect.left+COLX[0],1,ROWWIDTH-2,YOFFSET-2);
-										xOffset += ROWWIDTH;
-									}
-								}
-								else if (PatHeaderCoords->bHasTransparency)
-								{
-									for(int i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
-									{
-										const int trackx0 = i/10;
-										const int track0x = i%10;
-
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT,
-											1,
-											PatHeaderCoords->sBackground.width, 
-											PatHeaderCoords->sBackground.height,
-											&memDC, 
-											&patView->patternheadermask,
-											PatHeaderCoords->sBackground.x,
-											PatHeaderCoords->sBackground.y);
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-											1+PatHeaderCoords->dDigitX0.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											&patView->patternheadermask,
-											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y);
-										TransparentBlt(devc,
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-											1+PatHeaderCoords->dDigit0X.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											&patView->patternheadermask,
-											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y);
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::song()._trackMuted[i])
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-												1+PatHeaderCoords->dMuteOn.y, 
-												PatHeaderCoords->sMuteOn.width, 
-												PatHeaderCoords->sMuteOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sMuteOn.x, 
-												PatHeaderCoords->sMuteOn.y);
-
-										if (Global::song()._trackArmed[i])
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-												1+PatHeaderCoords->dRecordOn.y, 
-												PatHeaderCoords->sRecordOn.width, 
-												PatHeaderCoords->sRecordOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sRecordOn.x, 
-												PatHeaderCoords->sRecordOn.y);
-
-										if (Global::song()._trackSoloed == i )
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-												1+PatHeaderCoords->dSoloOn.y, 
-												PatHeaderCoords->sSoloOn.width, 
-												PatHeaderCoords->sSoloOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sSoloOn.x, 
-												PatHeaderCoords->sSoloOn.y);
-
-										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
-											TransparentBlt(devc,
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
-												1+PatHeaderCoords->dPlayOn.y, 
-												PatHeaderCoords->sPlayOn.width, 
-												PatHeaderCoords->sPlayOn.height, 
-												&memDC, 
-												&patView->patternheadermask,
-												PatHeaderCoords->sPlayOn.x, 
-												PatHeaderCoords->sPlayOn.y);
-
-										xOffset += ROWWIDTH;
-									}
-								}
-								else
-								{
-									for(int i=tOff+maxt+scrollT-1;i<tOff+maxt;i++)
-									{
-										const int trackx0 = i/10;
-										const int track0x = i%10;
-
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT,
-											1,
-											PatHeaderCoords->sBackground.width, 
-											PatHeaderCoords->sBackground.height,
-											&memDC, 
-											PatHeaderCoords->sBackground.x,
-											PatHeaderCoords->sBackground.y, 
-											SRCCOPY);
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigitX0.x, 
-											1+PatHeaderCoords->dDigitX0.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											PatHeaderCoords->sNumber0.x+(trackx0*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y, 
-											SRCCOPY);
-										devc->BitBlt(
-											xOffset+1+HEADER_INDENT+PatHeaderCoords->dDigit0X.x, 
-											1+PatHeaderCoords->dDigit0X.y, 
-											PatHeaderCoords->sNumber0.width,	 
-											PatHeaderCoords->sNumber0.height, 
-											&memDC, 
-											PatHeaderCoords->sNumber0.x+(track0x*PatHeaderCoords->sNumber0.width), 
-											PatHeaderCoords->sNumber0.y, 
-											SRCCOPY);
-
-										// BLIT [DESTX,DESTY,SIZEX,SIZEY,source,BMPX,BMPY,mode]
-										if (Global::song()._trackMuted[i])
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dMuteOn.x, 
-												1+PatHeaderCoords->dMuteOn.y, 
-												PatHeaderCoords->sMuteOn.width, 
-												PatHeaderCoords->sMuteOn.height, 
-												&memDC, 
-												PatHeaderCoords->sMuteOn.x, 
-												PatHeaderCoords->sMuteOn.y, 
-												SRCCOPY);
-
-										if (Global::song()._trackArmed[i])
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dRecordOn.x, 
-												1+PatHeaderCoords->dRecordOn.y, 
-												PatHeaderCoords->sRecordOn.width, 
-												PatHeaderCoords->sRecordOn.height, 
-												&memDC, 
-												PatHeaderCoords->sRecordOn.x, 
-												PatHeaderCoords->sRecordOn.y, 
-												SRCCOPY);
-
-										if (Global::song()._trackSoloed == i )
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dSoloOn.x, 
-												1+PatHeaderCoords->dSoloOn.y, 
-												PatHeaderCoords->sSoloOn.width, 
-												PatHeaderCoords->sSoloOn.height, 
-												&memDC, 
-												PatHeaderCoords->sSoloOn.x, 
-												PatHeaderCoords->sSoloOn.y, 
-												SRCCOPY);
-
-										if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying)
-											devc->BitBlt(
-												xOffset+1+HEADER_INDENT+PatHeaderCoords->dPlayOn.x, 
-												1+PatHeaderCoords->dPlayOn.y, 
-												PatHeaderCoords->sPlayOn.width, 
-												PatHeaderCoords->sPlayOn.height, 
-												&memDC, 
-												PatHeaderCoords->sPlayOn.x, 
-												PatHeaderCoords->sPlayOn.y, 
-												SRCCOPY);
-
-										xOffset += ROWWIDTH;
-									}
-								}
-								memDC.SelectObject(oldbmp);
-								memDC.DeleteDC();
-							}
+							rect.left = xOffset;
+							rect.right = xOffset+1;
+							devc->FillSolidRect(&rect, pvc_separator[i+1]);
+							rect.left++;
+							rect.right+= ROWWIDTH-1;
+							devc->FillSolidRect(&rect,pvc_background[i+1]);
 						}
-						// Fill Bottom Space with Background colour if needed
-						if (maxl < VISLINES+1)
+						DrawPatternHeader(devc,xOffsetIni, iFirstIni, iLastIni);
+
+						DrawPatternData(devc,drawStart, drawEnd, 0, VISLINES+1);
+					}
+					// Fill Bottom Space with Background colour if needed
+					if (maxl < VISLINES+1)
+					{
+						int xOffset = XOFFSET;
+						CRect rect;
+						rect.top=YOFFSET+(maxl*ROWHEIGHT); 
+						rect.bottom=CH;
+						for(int i=tOff;i<tOff+maxt;i++)
 						{
-							int xOffset = XOFFSET;
+							rect.left=xOffset; 
+							rect.right=xOffset+ROWWIDTH; 
+							devc->FillSolidRect(&rect, pvc_separator[i+1]);
+							xOffset += ROWWIDTH;
+						}
+					}
+					// Fill Right Space with Background colour if needed
+					if (maxt < VISTRACKS+1)
+					{
+	#ifdef _DEBUG_PATVIEW
+						TRACE("DRAW_RIGHT\n");
+	#endif
+						CRect rect;
+						rect.top=0; 
+						rect.bottom=CH;  
+						rect.right=CW;
+						rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
+						devc->FillSolidRect(&rect,patView->separator2);
+					}
+				}
+
+				// v scroll - 
+				//			  add to draw list uncovered area
+				else if (scrollL)
+				{
+					const RECT linR = {0, YOFFSET, CW, CH};
+
+					CRgn rgn;
+					devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect);
+					// add visible part to 
+					if (scrollL > 0)	//Scrolling to the top
+					{	
+	#ifdef _DEBUG_PATVIEW
+						TRACE("DRAW_VSCROLL+\n");
+	#endif
+						//if(editcur.line!=0)
+						DrawPatternData(devc, 0, VISTRACKS+1, 0,scrollL);
+					}
+					else 	//Scrolling to the bottom
+					{	
+	#ifdef _DEBUG_PATVIEW
+						TRACE("DRAW_VSCROLL-\n");
+	#endif
+						DrawPatternData(devc, 0, VISTRACKS+1,VISLINES+scrollL,VISLINES+1);
+					}
+					// Fill Bottom Space with Background colour if needed
+					if (maxl < VISLINES+1)
+					{
+	#ifdef _DEBUG_PATVIEW
+						TRACE("DRAW_BOTTOM\n");
+	#endif
+						if (XOFFSET!=1)
+						{
 							CRect rect;
+							rect.left=0; 
+							rect.right=XOFFSET; 
 							rect.top=YOFFSET+(maxl*ROWHEIGHT); 
 							rect.bottom=CH;
-							for(int i=tOff;i<tOff+maxt;i++)
-							{
-								rect.left=xOffset; 
-								rect.right=xOffset+ROWWIDTH; 
-								devc->FillSolidRect(&rect, pvc_separator[i+1]);
-								xOffset += ROWWIDTH;
-							}
+							devc->FillSolidRect(&rect, pvc_separator[0]);
 						}
-						// Fill Right Space with Background colour if needed
-						if (maxt < VISTRACKS+1)
+
+						int xOffset = XOFFSET;
+
+						CRect rect;
+						rect.top=YOFFSET+(maxl*ROWHEIGHT); 
+						rect.bottom=CH;
+						for(int i=tOff;i<tOff+maxt;i++)
 						{
-		#ifdef _DEBUG_PATVIEW
-							TRACE("DRAW_RIGHT\n");
-		#endif
-							CRect rect;
-							rect.top=0; 
-							rect.bottom=CH;  
-							rect.right=CW;
-							rect.left=XOFFSET+(maxt*ROWWIDTH)-1;
-							devc->FillSolidRect(&rect,patView->separator2);
-						}
-					}
-
-					// v scroll - 
-					//			  add to draw list uncovered area
-					else if (scrollL)
-					{
-						const RECT linR = {0, YOFFSET, CW, CH};
-
-						CRgn rgn;
-						devc->ScrollDC(0,scrollL*ROWHEIGHT,&linR,&linR,&rgn,&rect);
-						// add visible part to 
-						if (scrollL > 0)
-						{	
-		#ifdef _DEBUG_PATVIEW
-							TRACE("DRAW_VSCROLL+\n");
-		#endif
-							//if(editcur.line!=0)
-							DrawPatternData(devc, 0, VISTRACKS+1, 0,scrollL);
-						}
-						else 
-						{	
-		#ifdef _DEBUG_PATVIEW
-							TRACE("DRAW_VSCROLL-\n");
-		#endif
-							DrawPatternData(devc, 0, VISTRACKS+1,VISLINES+scrollL,VISLINES+1);
-						}
-						// Fill Bottom Space with Background colour if needed
-						if (maxl < VISLINES+1)
-						{
-		#ifdef _DEBUG_PATVIEW
-							TRACE("DRAW_BOTTOM\n");
-		#endif
-							if (XOFFSET!=1)
-							{
-								CRect rect;
-								rect.left=0; 
-								rect.right=XOFFSET; 
-								rect.top=YOFFSET+(maxl*ROWHEIGHT); 
-								rect.bottom=CH;
-								devc->FillSolidRect(&rect, pvc_separator[0]);
-							}
-
-							int xOffset = XOFFSET;
-
-							CRect rect;
-							rect.top=YOFFSET+(maxl*ROWHEIGHT); 
-							rect.bottom=CH;
-							for(int i=tOff;i<tOff+maxt;i++)
-							{
-								rect.left=xOffset; 
-								rect.right=xOffset+ROWWIDTH; 
-								devc->FillSolidRect(&rect, pvc_separator[i+1]);
-								xOffset += ROWWIDTH;
-							}
+							rect.left=xOffset; 
+							rect.right=xOffset+ROWWIDTH; 
+							devc->FillSolidRect(&rect, pvc_separator[i+1]);
+							xOffset += ROWWIDTH;
 						}
 					}
 				}
+			}
 
-				// then we draw any data that needs to be drawn
-				// each time we draw data check for playbar or cursor, not fast but...
-				// better idea is to have an array of flags, so never draw twice
-				////////////////////////////////////////////////////////////
-				////////////////////////////////////////////////////////////
-				// Draw Pattern data.
-				if (updatePar & DRAW_DATA)
+			// then we draw any data that needs to be drawn
+			// each time we draw data check for playbar or cursor, not fast but...
+			// better idea is to have an array of flags, so never draw twice
+			////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////
+			// Draw Pattern data.
+			if (updatePar & DRAW_DATA)
+			{
+	#ifdef _DEBUG_PATVIEW
+				TRACE("DRAW_DATA\n");
+	#endif
+				////////////////////////////////////////////////
+				// Draw Data Changed (draw_modes::dataChange)
+				for (int i = 0; i < numPatternDraw; i++)
 				{
-		#ifdef _DEBUG_PATVIEW
-					TRACE("DRAW_DATA\n");
-		#endif
-					////////////////////////////////////////////////
-					// Draw Data Changed (draw_modes::dataChange)
-					for (int i = 0; i < numPatternDraw; i++)
-					{
 
-						int ts = pPatternDraw[i].drawTrackStart-tOff;
-						if ( ts < 0 ) 
-							ts = 0;
-						int te = pPatternDraw[i].drawTrackEnd -(tOff-1);
-						if ( te > maxt ) 
-							te = maxt;
+					int ts = pPatternDraw[i].drawTrackStart-tOff;
+					if ( ts < 0 ) 
+						ts = 0;
+					int te = pPatternDraw[i].drawTrackEnd -(tOff-1);
+					if ( te > maxt ) 
+						te = maxt;
 
-						int ls = pPatternDraw[i].drawLineStart-lOff;
-						if ( ls < 0 ) 
-							ls = 0;
-						int le = pPatternDraw[i].drawLineEnd-(lOff-1);
-						if ( le > maxl ) 
-							le = maxl;
+					int ls = pPatternDraw[i].drawLineStart-lOff;
+					if ( ls < 0 ) 
+						ls = 0;
+					int le = pPatternDraw[i].drawLineEnd-(lOff-1);
+					if ( le > maxl ) 
+						le = maxl;
 
-						DrawPatternData(devc,ts,te,ls,le);
-					}
-					numPatternDraw = 0;
+					DrawPatternData(devc,ts,te,ls,le);
 				}
+				numPatternDraw = 0;
 			}
 
 			playpos=newplaypos;
@@ -1801,6 +871,160 @@ namespace psycle { namespace host {
 			updatePar = 0;
 		}
 
+		void CChildView::DrawPatternHeader(CDC *devc,int xOffsetIni,int iFirstIni, int iLastIni)
+		{
+			char buffer[256];
+			CDC memDC;
+			CBitmap *oldbmp;
+			memDC.CreateCompatibleDC(devc);
+			oldbmp = memDC.SelectObject(&patView->patternheader);
+			int xOffset = xOffsetIni;
+
+			if (!patView->showTrackNames_ || PatHeaderCoords->bHasTextSkin) 
+			{
+				if (PatHeaderCoords->bHasTransparency)
+				{
+					for(int i=iFirstIni;i<iLastIni;i++, xOffset += ROWWIDTH)
+					{
+						const int trackx0 = i/10;
+						const int track0x = i%10;
+						const int realxOff = xOffset+1+HEADER_INDENT;
+
+						TransparentBltSkin(devc, PatHeaderCoords->sBackground, &memDC,
+							&patView->patternheadermask, 0, 0, realxOff, 1);
+
+						if (_pSong._trackMuted[i]) {
+							TransparentBltSkin(devc, PatHeaderCoords->sMuteOn, PatHeaderCoords->dMuteOn, &memDC,
+								&patView->patternheadermask, 0, 0, realxOff, 1);
+						}
+						if (_pSong._trackArmed[i]) {
+							TransparentBltSkin(devc, PatHeaderCoords->sRecordOn, PatHeaderCoords->dRecordOn, &memDC,
+								&patView->patternheadermask, 0, 0, realxOff, 1);
+						}
+						if (_pSong._trackSoloed == i ) {
+							TransparentBltSkin(devc, PatHeaderCoords->sSoloOn, PatHeaderCoords->dSoloOn, &memDC,
+								&patView->patternheadermask, 0, 0, realxOff, 1);
+						}
+						if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying) {
+							TransparentBltSkin(devc, PatHeaderCoords->sPlayOn, PatHeaderCoords->dPlayOn, &memDC,
+								&patView->patternheadermask, 0, 0, realxOff, 1);
+						}
+						if (PatHeaderCoords->sNumber0.width > 0 ) {
+							TransparentBltSkin(devc, PatHeaderCoords->sNumber0, PatHeaderCoords->dDigitX0, &memDC,
+								&patView->patternheadermask, trackx0*PatHeaderCoords->sNumber0.width, 0, realxOff, 1);
+
+							TransparentBltSkin(devc, PatHeaderCoords->sNumber0, PatHeaderCoords->dDigit0X, &memDC,
+								&patView->patternheadermask, track0x*PatHeaderCoords->sNumber0.width, 0, realxOff, 1);
+						}
+					}
+				}
+				else
+				{
+					for(int i=iFirstIni;i<iLastIni;i++,xOffset += ROWWIDTH)
+					{
+						const int trackx0 = i/10;
+						const int track0x = i%10;
+						const int realxOff = xOffset+1+HEADER_INDENT;
+
+						BitBltSkin(devc, PatHeaderCoords->sBackground, &memDC,0,0,realxOff,1);
+						if (_pSong._trackMuted[i]) {
+							BitBltSkin(devc, PatHeaderCoords->sMuteOn, PatHeaderCoords->dMuteOn,&memDC, 0,0,realxOff,1);
+						}
+						if (_pSong._trackArmed[i]) {
+							BitBltSkin(devc, PatHeaderCoords->sRecordOn, PatHeaderCoords->dRecordOn,&memDC,0,0,realxOff,1);
+						}
+						if (_pSong._trackSoloed == i ) {
+							BitBltSkin(devc, PatHeaderCoords->sSoloOn, PatHeaderCoords->dSoloOn,&memDC,0,0,realxOff,1);
+						}
+						if (Global::player().trackPlaying(i) && PatHeaderCoords->bHasPlaying) {
+							BitBltSkin(devc, PatHeaderCoords->sPlayOn, PatHeaderCoords->dPlayOn,&memDC,0,0,realxOff,1);
+						}
+						if (PatHeaderCoords->sNumber0.width > 0 ) {
+							BitBltSkin(devc, PatHeaderCoords->sNumber0, PatHeaderCoords->dDigitX0, &memDC,
+								trackx0*PatHeaderCoords->sNumber0.width,0,realxOff,1);
+							BitBltSkin(devc, PatHeaderCoords->sNumber0, PatHeaderCoords->dDigit0X, &memDC,
+								track0x*PatHeaderCoords->sNumber0.width,0,realxOff,1);
+						}
+					}
+				}
+			}
+			xOffset = xOffsetIni;
+			if (patView->showTrackNames_) {
+				CFont * oldFont = NULL;
+				if (PatHeaderCoords->bHasTextSkin) {
+					oldFont= devc->SelectObject(&patView->pattern_tracknames_font);
+					devc->SetTextColor(PatHeaderCoords->cTextFontColour);
+					devc->SetBkMode(TRANSPARENT);
+				}
+				if (PatHeaderCoords->sNumber0.width > 0 ) {
+					for(int i=iFirstIni;i<iLastIni;i++, xOffset += ROWWIDTH)
+					{
+						sprintf(buffer,"%s",_pSong._trackNames[_ps()][i].c_str());
+						TXTTRANS(devc,buffer,xOffset+PatHeaderCoords->sTextCrop.x,PatHeaderCoords->sTextCrop.y,
+							PatHeaderCoords->sTextCrop.width,PatHeaderCoords->sTextCrop.height);
+					}
+				}
+				else {
+					for(int i=iFirstIni;i<iLastIni;i++, xOffset += ROWWIDTH)
+					{
+						if (_pSong._trackMuted[i]) {
+							sprintf(buffer,"%.2d_%s",i,_pSong._trackNames[_ps()][i].c_str());
+						}
+						else if (_pSong._trackSoloed == i ) {
+							sprintf(buffer,"%.2d*%s",i,_pSong._trackNames[_ps()][i].c_str());
+						}
+						else {
+							sprintf(buffer,"%.2d:%s",i,_pSong._trackNames[_ps()][i].c_str());
+						}
+						TXT(devc,buffer,xOffset+PatHeaderCoords->sTextCrop.x,PatHeaderCoords->sTextCrop.y,
+							PatHeaderCoords->sTextCrop.width,PatHeaderCoords->sTextCrop.height);
+					}
+				}
+				if (PatHeaderCoords->bHasTextSkin) {
+					devc->SelectObject(oldFont);
+					devc->SetBkMode(OPAQUE);
+				}
+			}
+			xOffset = xOffsetIni;
+			if (PatHeaderCoords->bHasTransparency)
+			{
+				for(int i=iFirstIni;i<iLastIni;i++, xOffset += ROWWIDTH)
+				{
+					const int realxOff = xOffset+1+HEADER_INDENT;
+					if (trackingMuteTrack == i) {
+						TransparentBltSkin(devc, PatHeaderCoords->sMuteOnTracking, PatHeaderCoords->dMuteOnTrack, &memDC,
+							&patView->patternheadermask, 0, 0, realxOff, 1);
+					}
+					if (trackingRecordTrack == i) {
+						TransparentBltSkin(devc, PatHeaderCoords->sRecordOnTracking, PatHeaderCoords->dRecordOnTrack, &memDC,
+							&patView->patternheadermask, 0, 0, realxOff, 1);
+					}
+					if (trackingSoloTrack == i) {
+						TransparentBltSkin(devc, PatHeaderCoords->sSoloOnTracking, PatHeaderCoords->dSoloOnTrack, &memDC,
+							&patView->patternheadermask, 0, 0, realxOff, 1);
+					}
+				}
+			}
+			else
+			{
+				for(int i=iFirstIni;i<iLastIni;i++, xOffset += ROWWIDTH)
+				{
+					const int realxOff = xOffset+1+HEADER_INDENT;
+					if (trackingMuteTrack==i) {
+						BitBltSkin(devc, PatHeaderCoords->sMuteOnTracking, PatHeaderCoords->dMuteOnTrack,&memDC,0,0,realxOff,1);
+					}
+					if (trackingRecordTrack==i) {
+						BitBltSkin(devc, PatHeaderCoords->sRecordOnTracking, PatHeaderCoords->dRecordOnTrack,&memDC,0,0,realxOff,1);
+					}
+					if (trackingSoloTrack==i) {
+						BitBltSkin(devc, PatHeaderCoords->sSoloOnTracking, PatHeaderCoords->dSoloOnTrack,&memDC,0,0,realxOff,1);
+					}
+				}
+			}
+
+			memDC.SelectObject(oldbmp);
+			memDC.DeleteDC();
+		}
 
 		// ADVISE! [lOff+lstart..lOff+lend] and [tOff+tstart..tOff+tend] HAVE TO be valid!
 		void CChildView::DrawPatternData(CDC *devc,int tstart,int tend, int lstart, int lend)
@@ -2186,5 +1410,17 @@ namespace psycle { namespace host {
 			{	
 				ShowScrollBar(SB_VERT,FALSE); 
 			}
+		}
+
+		void CChildView::ShowTrackNames(bool show)
+		{
+			if(show) { PatHeaderCoords->SwitchToText(); }
+			else { PatHeaderCoords->SwitchToClassic(); }
+			if (!PatHeaderCoords->bHasTextSkin) {
+				PatHeaderCoords->sTextCrop.x = COLX[0];
+			}
+			patView->showTrackNames_ = show;
+			RecalcMetrics();
+			Repaint();
 		}
 }}

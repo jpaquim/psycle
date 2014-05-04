@@ -1,5 +1,5 @@
 ///\file
-///\brief interface file for psycle::host::CSkinDlg.
+///\brief interface file for psycle::host::KeyPresetIO.
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"

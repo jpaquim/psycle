@@ -76,7 +76,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		m_masterslider.SetTipSide(TBTS_TOP);
 		float val = 1.0f;
 		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL) {
-			 val =((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry/256.f;
+			 val =value_mapper::map_256_1(((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry);
 		}
 		int nPos = helpers::dsp::AmountToSliderHoriz(val);
 		m_masterslider.SetPos(nPos);
@@ -230,7 +230,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	}
 	void SongBar::UpdateMasterValue(int newvalue)
 	{
-		int value = helpers::dsp::AmountToSliderHoriz(newvalue/256.f);
+		int value = helpers::dsp::AmountToSliderHoriz(value_mapper::map_256_1(newvalue));
 		if ( m_pSong->_pMachine[MASTER_INDEX] != NULL)
 		{
 			if (m_masterslider.GetPos() != value) {
@@ -255,7 +255,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 		case TB_THUMBPOSITION: //fallthrough
 		case TB_THUMBTRACK:
 			if ( m_pSong->_pMachine[MASTER_INDEX] != NULL && the_slider == &m_masterslider) {
-				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = 256.f* helpers::dsp::SliderToAmountHoriz(nPos);
+				((Master*)m_pSong->_pMachine[MASTER_INDEX])->_outDry = value_mapper::map_1_256<int>(helpers::dsp::SliderToAmountHoriz(nPos));
 			}
 			break;
 		case TB_ENDTRACK:

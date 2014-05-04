@@ -11,6 +11,8 @@
 #include "Song.hpp"
 #include "Machine.hpp"
 #include "Plugin.hpp"
+#include "XMSongLoader.hpp"
+#include "ITModule2.h"
 #include "WavFileDlg.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
@@ -66,26 +68,9 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		((CButton*)GetDlgItem(IDC_B_DECWAV))->SetIcon(PsycleGlobal::conf().iconless);
 		((CButton*)GetDlgItem(IDC_B_INCWAV))->SetIcon(PsycleGlobal::conf().iconmore);
 
-	//	for(int i=0;i<=16;i++)
-	//	{
-	//		char s[4];
-	//		_snprintf(s,4,"%i",i);
-	//		m_stepcombo.AddString(s);
-	//	}
-	//	m_stepcombo.SetCurSel(1);
-		
-	//  m_gencombo.SetCurSel(0);
-		
-	//	m_auxcombo.AddString("MIDI");
-	//	m_auxcombo.AddString("Params");
-	//	m_auxcombo.AddString("Waves");
-		
-	//	UpdateComboGen(); // Initializes Gen and Ins combobox.
-
 		m_stepcombo.SetCurSel(m_pWndView->patStep);
 
 		m_auxcombo.SetCurSel(AUX_PARAMS);
-			
 
 		return bRet;
 	}
@@ -231,30 +216,30 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			if (m_pSong->_pMachine[m_pSong->seqBus])
 			{
-				if ( m_pSong->seqBus < MAX_BUSES ) // it's a Generator
+				if ( m_pSong->seqBus < MAX_BUSES && m_pSong->_pMachine[m_pSong->seqBus]->NeedsAuxColumn())
 				{
-					if (m_pSong->_pMachine[m_pSong->seqBus]->NeedsAuxColumn())
-					{
-						m_auxcombo.SetCurSel(AUX_INSTRUMENT);
+					m_auxcombo.SetCurSel(AUX_INSTRUMENT);
+					if (m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_XMSAMPLER) {
 						m_pSong->auxcolSelected = m_pSong->instSelected;
 					}
-					else
-					{
-						m_auxcombo.SetCurSel(AUX_PARAMS);
-						m_pSong->auxcolSelected = 0;
+					else if (m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_SAMPLER) {
+						m_pSong->auxcolSelected = m_pSong->waveSelected;
+					}
+					else {
+						m_pSong->auxcolSelected = m_pSong->_pMachine[m_pSong->seqBus]->AuxColumnIndex();
 					}
 				}
 				else
 				{
 					m_auxcombo.SetCurSel(AUX_PARAMS);
-					m_pSong->auxcolSelected = 0;
+					m_pSong->auxcolSelected = std::min(m_pSong->paramSelected,m_pSong->_pMachine[m_pSong->seqBus]->GetNumParams());
 				}
 			}
 		}
 		else
 		{
 			m_auxcombo.SetCurSel(AUX_INSTRUMENT); // WAVES
-			m_pSong->auxcolSelected = m_pSong->instSelected;
+			m_pSong->auxcolSelected = m_pSong->waveSelected;
 		}
 		UpdateComboIns();
 		macComboInitialized = true;
@@ -329,16 +314,35 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		}
 		UpdateComboIns();
 	}
-	void MachineBar::OnBDecwav() 
+	void MachineBar::OnBDecAux() 
 	{
-		ChangeIns(m_pSong->auxcolSelected-1);
+		ChangeAux(m_pSong->auxcolSelected-1);
 		((CButton*)GetDlgItem(IDC_B_DECWAV))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
 
-	void MachineBar::OnBIncwav() 
+	void MachineBar::OnBIncAux() 
 	{
-		ChangeIns(m_pSong->auxcolSelected+1);
+		Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
+		if (tmac) {
+			if (tmac->_type == MACH_XMSAMPLER) {
+				if (Global::song().xminstruments.size() <= m_pSong->auxcolSelected+1) {
+					XMInstrument inst;
+					inst.Init();
+					Global::song().xminstruments.SetInst(inst,m_pSong->auxcolSelected+1);
+					UpdateComboIns(true);
+				}
+			}
+			else if (tmac->_type == MACH_SAMPLER) {
+				if (Global::song().samples.size() <= m_pSong->auxcolSelected+1) {
+					XMInstrument::WaveData<> wave;
+					wave.Init();
+					Global::song().samples.SetSample(wave,m_pSong->auxcolSelected+1);
+					UpdateComboIns(true);
+				}
+			}
+		}
+		ChangeAux(m_pSong->auxcolSelected+1);
 		((CButton*)GetDlgItem(IDC_B_INCWAV))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
@@ -419,10 +423,6 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			{
 				listlen = m_inscombo.GetCount();
 			}
-	//		m_pSong->instSelected=m_pSong->auxcolSelected;
-	//		WaveEditorBackUpdate();
-	//		m_pParentMain->UpdateInstrumentEditor();
-	//		RedrawGearRackList();
 		}
 		if (m_pSong->auxcolSelected >= listlen)
 		{
@@ -456,8 +456,17 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		m_pSong->waveSelected=i;
 		m_pParentMain->UpdateInstrumentEditor();
 		m_pParentMain->WaveEditorBackUpdate();
+		m_pParentMain->RedrawGearRackList();
 	}
-	void MachineBar::ChangeIns(int i)	// User Called (Hotkey, button or list change)
+	void MachineBar::ChangeIns(int i)
+	{
+		if ( m_pSong->instSelected == i) return;
+		if (i<0 || i >= MAX_INSTRUMENTS) return;
+		m_pSong->instSelected=i;
+		m_pParentMain->UpdateInstrumentEditor();
+		m_pParentMain->RedrawGearRackList();
+	}
+	void MachineBar::ChangeAux(int i)	// User Called (Hotkey, button or list change)
 	{
 		if ( m_inscombo.GetCurSel() == i) return;
 		if (i<0 || i >= m_inscombo.GetCount()) return;
@@ -465,8 +474,21 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
 			m_pSong->paramSelected=i;
 		} else {
-			m_pSong->instSelected=i;
+			Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
+			if (tmac) {
+				if (tmac->_type == MACH_XMSAMPLER) {
+					m_pSong->instSelected=i;
+				}
+				else if (tmac->_type == MACH_SAMPLER) {
+					m_pSong->waveSelected=i;
+				}
+				else {
+					tmac->AuxColumnIndex(i);
+				}
+			}
+			else { m_pSong->waveSelected=i; }
 			m_pParentMain->UpdateInstrumentEditor();
+			m_pParentMain->WaveEditorBackUpdate();
 			m_pParentMain->RedrawGearRackList();
 		}
 		m_pSong->auxcolSelected=i;
@@ -475,11 +497,11 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::OnLoadwave() 
 	{
+		bool update=false;
 		int nmac = m_pSong->seqBus;
 		Machine *tmac = m_pSong->_pMachine[nmac];
 		bool found=false;
-		if (!tmac || (tmac->_type != MACH_SAMPLER
-						&& tmac->_type != MACH_XMSAMPLER)) {
+		if (!tmac || (tmac->_type != MACH_SAMPLER && tmac->_type != MACH_XMSAMPLER)) {
 			for(int i=0;i<MAX_MACHINES;i++) {
 				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
 						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
@@ -501,9 +523,82 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			m_pParentMain->UpdateComboGen();
 			m_pWndView->Repaint();
 		}
+		tmac = m_pSong->_pMachine[m_pSong->seqBus];
+		if (tmac && tmac->_type == MACH_XMSAMPLER) {
+			int si = m_pSong->instSelected;
+			if (m_pSong->xminstruments.IsEnabled(si)) {
+				if (MessageBox("An instrument already exists in this slot. If you continue, it will be ovewritten. Continue?"
+				,"Sample Loading",MB_YESNO|MB_ICONWARNING) == IDNO)  return;
+			}
+			update=LoadInstrument(si);
 
-		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|IFF Samples (*.iff)|*.iff|All Files (*.*)|*.*||";
+		}
+		else {
+			int si = m_pSong->waveSelected;
+			if (m_pSong->samples.IsEnabled(si)) {
+				if (MessageBox("A sample already exists in this slot. If you continue, it will be ovewritten. Continue?"
+					,"Sample Loading",MB_YESNO|MB_ICONWARNING) == IDNO)  return;
+			}
+			update=LoadWave(si);
+		}
 		
+		if (update){
+			UpdateComboIns();
+			m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
+			m_pParentMain->WaveEditorBackUpdate();
+			m_pParentMain->UpdateInstrumentEditor();
+			m_pParentMain->RedrawGearRackList();
+		}
+		((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
+		m_pWndView->SetFocus();
+	}
+
+	void MachineBar::OnSavewave()
+	{
+		Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
+		if (tmac && tmac->_type == MACH_XMSAMPLER) {
+			if (m_pSong->xminstruments.IsEnabled(m_pSong->instSelected)) {
+				SaveInstrument(m_pSong->instSelected);
+			}
+			else MessageBox("Nothing to save...\nSelect nonempty instrument first.", "Error", MB_ICONERROR);
+		}
+		else 
+		{
+			if (m_pSong->samples.IsEnabled(m_pSong->waveSelected)) {
+				SaveWave(m_pSong->waveSelected);
+			}
+			else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
+		}
+	}
+
+	void MachineBar::OnEditwave() 
+	{
+		bool found=false;
+		for(int i=0;i<MAX_MACHINES;i++) {
+			if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
+					m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
+				found=true;
+				break;
+			}
+		}
+		if(!found) {
+			MessageBox(_T("Warning: To use samples, it is required to have a Sampler or a Sampulse Internal machine"),
+				_T("Instrument editor"),MB_ICONWARNING);
+		}
+		m_pParentMain->ShowInstrumentEditor();
+		((CButton*)GetDlgItem(IDC_EDITWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
+	}
+
+	void MachineBar::OnWavebut() 
+	{
+		m_pParentMain->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
+		m_pParentMain->m_pWndWed->SetActiveWindow();
+		((CButton*)GetDlgItem(IDC_WAVEBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
+	}
+
+	bool MachineBar::LoadWave(int waveIdx)
+	{
+		static char BASED_CODE szFilter[] = "Wav (PCM) Files (*.wav)|*.wav|Amiga IFF/SVX Samples (*.*)|*.*||";//TODO: its, s3i, aiff..
 		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
 		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
@@ -513,30 +608,41 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
-			int si = m_pSong->instSelected;
-			
-			//added by sampler
-			if ( m_pSong->samples.IsEnabled(si))
-			{
-				if (MessageBox("Overwrite current sample on the slot?","A sample is already loaded here",MB_YESNO) == IDNO)  return;					
-			}
-			//end of added by sampler
-
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			CString CurrExt=dlg.GetFileExt();
 			CurrExt.MakeLower();
-			if ( CurrExt == "wav" )
+			if ( CurrExt == "wav" || dlg.GetOFN().nFilterIndex == 1 )
 			{
-				if (m_pSong->WavAlloc(si,dlg.GetPathName()))
-				{
-					update=true;
+				try {
+					if (m_pSong->WavAlloc(waveIdx,dlg.GetPathName().GetString()))
+					{
+						update=true;
+					}
+					else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
+				catch(const std::runtime_error & e) {
+					std::ostringstream os;
+					os <<"Could not finish the operation: " << e.what();
+					MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
 				}
 			}
-			else if ( CurrExt == "iff" )
+			else if ( CurrExt == "iff" || dlg.GetOFN().nFilterIndex == 2  )
 			{
-				if (m_pSong->IffAlloc(si,dlg.GetPathName()))
-				{
-					update=true;
+				try {
+					if (m_pSong->IffAlloc(waveIdx,dlg.GetPathName().GetString()))
+					{
+						update=true;
+					}
+					else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
+				catch(const std::runtime_error & e) {
+					std::ostringstream os;
+					os <<"Could not finish the operation: " << e.what();
+					MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
 				}
 			}
 			CString str = dlg.m_ofn.lpstrFile;
@@ -551,114 +657,96 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			// Stopping wavepreview if not stopped.
 			m_pSong->wavprev.Stop();
 		}
-		if (update){
-			UpdateComboIns();
-			m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
-			m_pParentMain->WaveEditorBackUpdate();
-			m_pParentMain->UpdateInstrumentEditor();
-			m_pParentMain->RedrawGearRackList();
-		}
-		((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
-		m_pWndView->SetFocus();
+		return update;
 	}
 
-	void MachineBar::OnSavewave()
+	void MachineBar::SaveWave(int waveIdx)
 	{
 		WaveFile output;
 		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 
-		if (m_pSong->samples.IsEnabled(m_pSong->instSelected))
+		const XMInstrument::WaveData<> & wave = m_pSong->samples[waveIdx];
+		CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
+		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
+		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
+		if (dlg.DoModal() == IDOK)
 		{
-			const XMInstrument::WaveData<> & wave = m_pSong->samples[m_pSong->instSelected];
-			CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
-			if (dlg.DoModal() == IDOK)
-			{
-				output.OpenForWrite(dlg.GetPathName(), 44100, 16, (wave.IsWaveStereo()) ? 2 : 1 );
-				if (wave.IsWaveStereo())
+			output.OpenForWrite(dlg.GetPathName(), wave.WaveSampleRate(), 16, (wave.IsWaveStereo()) ? 2 : 1 );
+			if (wave.IsWaveStereo()) {
+				for ( unsigned int c=0; c < wave.WaveLength(); c++)
 				{
-					for ( unsigned int c=0; c < wave.WaveLength(); c++)
-					{
-						output.WriteStereoSample( *(wave.pWaveDataL() + c), *(wave.pWaveDataR() + c) );
-					}
+					output.WriteStereoSample( *(wave.pWaveDataL() + c), *(wave.pWaveDataR() + c) );
 				}
-				else
-				{
-					output.WriteData(wave.pWaveDataL(), wave.WaveLength());
-				}
-
-				output.Close();
+			} else {
+				output.WriteData(wave.pWaveDataL(), wave.WaveLength());
 			}
+			output.Close();
 		}
-		else MessageBox("Nothing to save...\nSelect nonempty wave first.", "Error", MB_ICONERROR);
 	}
 
-	void MachineBar::OnEditwave() 
+	bool MachineBar::LoadInstrument(int instIdx)
 	{
-		int nmac = m_pSong->seqBus;
-		Machine *tmac = m_pSong->_pMachine[nmac];
-		bool found=false;
-		if (!tmac || (tmac->_type != MACH_SAMPLER
-						&& tmac->_type != MACH_XMSAMPLER)) {
-			for(int i=0;i<MAX_MACHINES;i++) {
-				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
-						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
-					m_pSong->seqBus = i;
-					m_pParentMain->UpdateComboGen();
-					m_pWndView->Repaint();
-					found=true;
-					break;
-				}
+		static char BASED_CODE szFilter[] = "Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti||";
+
+		CFileDialog dlg(true,"psins", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
+		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
+		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
+		bool update=false;
+		if (dlg.DoModal() == IDOK)
+		{
+			PsycleGlobal::inputHandler().AddMacViewUndo();
+
+			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
+			CString CurrExt=dlg.GetFileExt();
+			CurrExt.MakeLower();
+			if ( CurrExt == "psins" ) {
+				m_pSong->LoadPsyInstrument(dlg.GetPathName().GetString(),instIdx);
+				update=true;
+			}
+			else if (CurrExt == "xi") {
+				XMSongLoader xmsong;
+				xmsong.Open(dlg.GetPathName().GetString());
+				xmsong.LoadInstrumentFromFile(*m_pSong,instIdx);
+				xmsong.Close();
+				update=true;
+			}
+			else if (CurrExt == "iti") {
+				ITModule2 itsong;
+				itsong.Open(dlg.GetPathName().GetString());
+				itsong.LoadInstrumentFromFile(*m_pSong,instIdx);
+				itsong.Close();
+				update=true;
+			}
+
+			CString str = dlg.m_ofn.lpstrFile;
+			int index = str.ReverseFind('\\');
+			if (index != -1) {
+				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 			}
 		}
-		else {
-			found = true;
-		}
-		if(!found) {
-			int i = m_pSong->GetFreeMachine();
-			m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
-			m_pSong->seqBus = i;
-			m_pParentMain->UpdateComboGen();
-			m_pWndView->Repaint();
-		}
-		m_pParentMain->ShowInstrumentEditor();
-		((CButton*)GetDlgItem(IDC_EDITWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
+		return update;
 	}
-
-	void MachineBar::OnWavebut() 
+	void MachineBar::SaveInstrument(int instIdx)
 	{
-		int nmac = m_pSong->seqBus;
-		Machine *tmac = m_pSong->_pMachine[nmac];
-		bool found=false;
-		if (!tmac || (tmac->_type != MACH_SAMPLER
-						&& tmac->_type != MACH_XMSAMPLER)) {
-			for(int i=0;i<MAX_MACHINES;i++) {
-				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
-						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
-					m_pSong->seqBus = i;
-					m_pParentMain->UpdateComboGen();
-					m_pWndView->Repaint();
-					found=true;
-					break;
-				}
+		static char BASED_CODE szFilter[] = "Psycle Instrument (*.psins)|*.psins||";//TODO: XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti||";
+
+		const XMInstrument instr = m_pSong->xminstruments[instIdx];
+		CFileDialog dlg(FALSE, "psins", instr.Name().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
+		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
+		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
+		if (dlg.DoModal() == IDOK)
+		{
+			CString CurrExt=dlg.GetFileExt();
+			CurrExt.MakeLower();
+			if ( CurrExt == "psins" ) {
+				m_pSong->SavePsyInstrument(dlg.GetPathName().GetString(),instIdx);
+			}
+			else if (CurrExt == "xi") {
+			}
+			else if (CurrExt == "iti") {
 			}
 		}
-		else {
-			found = true;
-		}
-		if(!found) {
-			int i = m_pSong->GetFreeMachine();
-			m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
-			m_pSong->seqBus = i;
-			m_pParentMain->UpdateComboGen();
-			m_pWndView->Repaint();
-		}
-		m_pParentMain->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
-		m_pParentMain->m_pWndWed->SetActiveWindow();
-		((CButton*)GetDlgItem(IDC_WAVEBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 	}
-
-
-	
 
 	int MachineBar::GetNumFromCombo(CComboBox *cb)
 	{
