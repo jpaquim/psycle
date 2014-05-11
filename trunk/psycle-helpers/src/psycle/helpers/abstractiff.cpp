@@ -53,7 +53,7 @@ namespace psycle { namespace helpers {
 		_stream.open(file_name_.c_str (), std::ios_base::out | std::ios_base::trunc |std::ios_base::binary);
 	}
 
-	void AbstractIff::close() {
+	void AbstractIff::Close() {
 		_stream.close();
 	}
 
@@ -98,7 +98,15 @@ namespace psycle { namespace helpers {
 		ReadRaw(data,read_length);
 	}
 
-
+	void AbstractIff::ReadPString(std::string &result) {
+		uint8_t size;
+		char temp[257];
+		Read(size);
+		ReadSizedString(temp,size);
+		if(GetPos()%2 > 0) Skip(1);
+		temp[size]='\0';
+		result=temp;
+	}
 
 
 	void AbstractIff::WriteString(const std::string &string) {
@@ -174,5 +182,6 @@ namespace psycle { namespace helpers {
 		Write(numBytes);
 		Seek(currentPos);
 	}
+
 
 }}

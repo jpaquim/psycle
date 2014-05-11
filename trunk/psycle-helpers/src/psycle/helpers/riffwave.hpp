@@ -1,7 +1,9 @@
 #pragma once
 #include "msriff.hpp"
 namespace psycle { namespace helpers {
-
+/* Some info from http://www.sonicspot.com/guide/wavefiles.html#smpl
+Other from Microsoft RIFFNEW.pdf 
+*/
 	class WaveFormat_Data;
 
 	/// the riff WAVE/fmt chunk.
@@ -57,6 +59,101 @@ namespace psycle { namespace helpers {
 		SubFormatTag_t subFormatTag;
 	};
 
+
+	//RiffWaveSmplChunk.numLoop amount of RiffWaveSmplLoopChunk are attached at the end of RiffWaveSmplChunk.
+	class RiffWaveSmplLoopChunk
+	{
+	public:
+		uint32_t cueId; // 0 - 0xFFFFFFFF
+		uint32_t type;	// 0 - 0xFFFFFFFF
+		uint32_t start;	// 0 - 0xFFFFFFFF
+		uint32_t end;	// 0 - 0xFFFFFFFF
+		uint32_t fraction;// 0 - 0xFFFFFFFF
+		uint32_t playCount;// 0 - 0xFFFFFFFF
+	};
+/*
+Type
+The type field defines how the waveform samples will be looped.
+
+Value 	Loop Type
+0 	Loop forward (normal)
+1 	Alternating loop (forward/backward, also known as Ping Pong)
+2 	Loop backward (reverse)
+3 - 31 	Reserved for future standard types
+32 - 0xFFFFFFFF 	Sampler specific types (defined by manufacturer)	
+	
+
+From the official RIFF specifications by Microsoft (RIFFNEW.pdf):
+dwStart: Specifies the startpoint of the loop in samples.
+dwEnd: Specifies the endpoint of the loop in samples (this sample will also be
+played).
+*/
+	class RiffWaveSmplChunk
+	{
+	public:
+		uint32_t manufacturer;  // 0 - 0xFFFFFFFF
+		uint32_t product;		// 0 - 0xFFFFFFFF
+		uint32_t samplePeriod;	// 0 - 0xFFFFFFFF
+		uint32_t midiNote;		// 0 - 127
+		uint32_t midiPitchFr;	// 0 - 0xFFFFFFFF
+		uint32_t smpteFormat;	// 0, 24, 25, 29, 30
+		uint32_t smpteOffset;	// 0 - 0xFFFFFFFF
+		uint32_t numLoops;		// 0 - 0xFFFFFFFF
+		uint32_t extraDataSize;	// 0 - 0xFFFFFFFF
+		RiffWaveSmplLoopChunk* loops;
+		
+		RiffWaveSmplChunk():loops(NULL){};
+		virtual ~RiffWaveSmplChunk() { if (loops) delete[] loops; }
+	};
+/*
+Sample Period
+The sample period specifies the duration of time that passes during the playback of one sample in nanoseconds (normally equal to 1 / Samplers Per Second, where Samples Per Second is the value found in the format chunk).
+
+MIDI Unity Note
+Specifies the MIDI note which will replay the sample at original pitch. This
+value ranges from 0 to 127 (a value of 60 represents Middle C as defined
+by the MMA).
+The MIDI unity note value has the same meaning as the instrument chunk's MIDI Unshifted Note field which specifies the musical note at which the sample will be played at it's original sample rate (the sample rate specified in the format chunk).
+
+MIDI Pitch Fraction
+The MIDI pitch fraction specifies the fraction of a semitone up from the specified MIDI unity note field. A value of 0x80000000 means 1/2 semitone (50 cents) and a value of 0x00000000 means no fine tuning between semitones. 
+
+Sample Loops
+The sample loops field specifies the number Sample Loop definitions in the following list. This value may be set to 0 meaning that no sample loops follow.
+
+Sampler Data
+The sampler data value specifies the number of bytes that will follow this chunk (including the entire sample loop list). This value is greater than 0 when an application needs to save additional information. This value is reflected in this chunks data size value.
+
+*/
+
+	class RiffWaveInstChunk
+	{
+	public:
+		uint8_t midiNote;	// 1 - 127
+		int8_t midiCents;	// -50 - +50
+		int8_t gaindB;		// -64 - +64
+		uint8_t lowNote;	// 1 - 127
+		uint8_t highNote;	// 1 - 127
+		uint8_t lowVelocity; // 1 - 127
+		uint8_t highVelocity; // 1 - 127
+	};
+/*
+Unshifted Note
+The unshifted note field has the same meaning as the sampler chunk's MIDI Unity Note which specifies the musical note at which the sample will be played at it's original sample rate (the sample rate specified in the format chunk).
+
+Fine Tune
+The fine tune value specifies how much the sample's pitch should be altered when the sound is played back in cents (1/100 of a semitone). A negative value means that the pitch should be played lower and a positive value means that it should be played at a higher pitch.
+
+Gain
+The gain value specifies the number of decibels to adjust the output when it is played. A value of 0dB means no change, 6dB means double the amplitude of each sample and -6dB means to halve the amplitude of each sample. Every additional +/-6dB will double or halve the amplitude again.
+
+Low Note and High Note
+The note fields specify the MIDI note range for which the waveform should be played when receiving MIDI note events (from software or triggered by a MIDI controller). This range does not need to include the Unshifted Note value.
+
+Low Velocity and High Velocity
+The velocity fields specify the range of MIDI velocities that should cause the waveform to be played. 1 being the lightest amount and 127 being the hardest. 
+*/
+
 	class WaveFormat_Data {
 	public:
 		bool isfloat;
@@ -104,7 +201,7 @@ public:
 		bool littleEndian=false
 #endif
 		);
-	virtual void close();
+	virtual void Close();
 	virtual const BaseChunkHeader& findChunk(const IffChunkId& id, bool allowWrap=false);
 
 	const WaveFormat_Data& format() const {return formatdata; }
@@ -119,12 +216,19 @@ public:
 	void writeFromInterleavedSamples(void* pSamps, uint32_t samples, WaveFormat_Data* convertFrom=NULL);
 	void writeFromDeInterleavedSamples(void** pSamps, uint32_t samples, WaveFormat_Data* convertFrom=NULL);
 	
+	bool GetSmplChunk(RiffWaveSmplChunk& smpl);
+	bool GetInstChunk(RiffWaveInstChunk& inst);
+
 	static const IffChunkId RF64;
 	static const IffChunkId WAVE;
 	static const IffChunkId ds64;
 	static const IffChunkId data;
 	static const IffChunkId fact;
+	static const IffChunkId smpl;
+	static const IffChunkId inst;
 protected:
+	uint32_t calcSamplesFromBytes(uint32_t length);
+
 	void ReadFormat();
 	void readMonoSamples(void* pSamp, uint32_t samples);
 	void readDeintMultichanSamples(void** pSamps, uint32_t samples);
@@ -137,37 +241,10 @@ protected:
 		, out_type (*int32conv)(int32_t), out_type (*floatconv)(float, double), out_type (*doubleconv)(double, double)>
 	void readDeintMultichanConvertToInteger(out_type** pSamps, uint32_t samples, double multi);
 
-
 	void writeMonoSamples(void* pSamp, uint32_t samples);
 	void writeDeintMultichanSamples(void** pSamps, uint32_t samples);
 
-	uint32_t calcSamplesFromBytes(uint32_t length);
 
-
-
-	template<typename sample_type>
-	inline void readDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples);
-	template<typename file_type, typename platform_type>
-	inline void readDeinterleaveSamplesendian(void** pSamps, uint16_t chans, uint32_t samples);
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
-	void ReadWithintegerconverter(out_type* out, uint32_t samples);
-	//Same as above, for multichan
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
-	void ReadWithmultichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples);
-	//Same as above, but for endiantypes.
-	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
-	void ReadWithinteger24converter(out_type* out, uint32_t samples);
-	//Same as above, for multichan
-	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
-	void ReadWithmultichaninteger24converter(out_type** out, uint16_t chans, uint32_t samples);
-
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
-	void ReadWithfloatconverter(out_type* out, uint32_t numsamples, double multi);
-	//Same as above, for multichan
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
-	void ReadWithmultichanfloatconverter(out_type** out, uint16_t chans, uint32_t numsamples, double multi);
 
 
 	WaveFormat_Data formatdata;
@@ -247,126 +324,5 @@ protected:
 		}
 	}
 
-
-
-	template<typename sample_type>
-	inline void RiffWave::readDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples) {
-		sample_type** samps = reinterpret_cast<sample_type**>(pSamps);
-		ReadWithmultichanintegerconverter<sample_type, sample_type,assignconverter<sample_type,sample_type> >(samps, chans, samples);
-	}
-	template<typename file_type, typename platform_type>
-	inline void RiffWave::readDeinterleaveSamplesendian(void** pSamps, uint16_t chans, uint32_t samples) {
-		platform_type** samps = reinterpret_cast<platform_type**>(pSamps);
-		ReadWithmultichanintegerconverter<file_type, platform_type,endianessconverter<file_type,platform_type> >(samps, chans, samples);
-	}
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
-	void RiffWave::ReadWithintegerconverter(out_type* out, uint32_t samples)
-	{
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < samples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
-			ReadArray(samps,amount);
-			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
-				*out=converter_func(*psamps);
-				out++;
-				psamps++;
-			}
-		}
-	}
-	//Same as above, for multichan, deinterlaced
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
-	void RiffWave::ReadWithmultichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples)
-	{
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(uint32_t io = 0 ; io < samples ; io+=amount)
-		{
-			amount = std::min(static_cast<std::size_t>(32768U)/chans,samples-io);
-			ReadArray(samps, amount*chans);
-			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
-					out[b][io+a]=converter_func(*psamps);
-					psamps++;
-				}
-			}
-		}
-	}
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
-	void RiffWave::ReadWithinteger24converter(out_type* out, uint32_t samples)
-	{
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(uint32_t io = 0 ; io < samples ; io+=amount)
-		{
-			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
-			ReadArray(samps, amount);
-			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
-				*out=converter_func(psamps->signedValue());
-				out++;
-				psamps++;
-			}
-		}
-	}
-
-	//Same as above, but for multichan, deinterlaced
-	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
-	void RiffWave::ReadWithmultichaninteger24converter(out_type** out, uint16_t chans, uint32_t samples)
-	{
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(uint32_t io = 0 ; io < samples ; io+=amount)
-		{
-			amount = std::min(static_cast<std::size_t>(32768U)/chans,samples-io);
-			ReadArray(samps, amount*chans);
-			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
-					out[b][io+a]=converter_func(psamps->signedValue());
-					psamps++;
-				}
-			}
-		}
-	}
-
-
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
-	void RiffWave::ReadWithfloatconverter(out_type* out, uint32_t numsamples, double multi) {
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < numsamples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U),numsamples-io);
-			ReadArray(samps,amount);
-			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
-				*out=converter_func(*psamps, multi);
-				out++;
-				psamps++;
-			}
-		}
-	}
-
-	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
-	void RiffWave::ReadWithmultichanfloatconverter(out_type** out, uint16_t chans, uint32_t numsamples, double multi) {
-		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < numsamples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U)/chans,numsamples-io);
-			ReadArray(samps,amount*chans);
-			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
-					out[b][io+a]=converter_func(*psamps, multi);
-					psamps++;
-				}
-			}
-		}
-	}
 
 }}

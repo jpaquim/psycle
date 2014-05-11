@@ -1463,7 +1463,7 @@ int ResamplerWrap<T, VOL>::work_samples(int numSamples, float* pSamplesL, float*
      XMSampler::WaveDataController<T>::WorkFunction pWork;
 	 int pos = wavectrl.Position();
 	 if (wave_it != waves_.end() && speed_ > 0) {
-		 int nextsamples = std::min(wavectrl.PreWork(numSamples, &pWork), numSamples);
+		 int nextsamples = std::min(wavectrl.PreWork(numSamples, &pWork, false), numSamples);
 		 numSamples-=nextsamples;
 		 while (nextsamples) {
 			 ++pos;

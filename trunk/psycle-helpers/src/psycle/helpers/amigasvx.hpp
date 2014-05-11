@@ -105,7 +105,7 @@ namespace psycle
 			virtual ~AmigaSvx();
 
 			virtual void Open(const std::string& fname);
-			virtual void Close() {EaIff::close(); }
+			virtual void Close() {EaIff::Close(); }
 			virtual bool Eof() const {return EaIff::Eof();}
 			
 			const VHeader & getformat() { return format; }

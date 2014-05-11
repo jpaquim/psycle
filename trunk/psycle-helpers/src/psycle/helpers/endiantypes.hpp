@@ -159,6 +159,16 @@ using namespace universalis::stdlib;
 			inline void changeValue(const double);
 			inline double value() const;
 		};
+		/// big-endian 80-bit IEEE float.
+		class Extended
+		{
+		public:
+			char bytes[10];
+			Extended() { changeValue(0.0); }
+			Extended(const double val) { changeValue(val); }
+			inline void changeValue(const double);
+			inline double value() const;
+		};
 
 		/// little-endian 64-bit integer.
 		class Long64LE
@@ -426,7 +436,7 @@ void FixedPointBE::changeValue(const float val) {
 			return d.originalValue;
 #endif
 		}
-void DoubleBE::changeValue(const double vald) {
+		void DoubleBE::changeValue(const double vald) {
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE
 			const uint64_t val = *reinterpret_cast<const uint64_t*>(&vald);
 			d.byte.hihihi=  val >> 56;
@@ -451,6 +461,91 @@ void DoubleBE::changeValue(const double vald) {
 			return d.originalValue;
 #endif
 		}
+
+		void Extended::changeValue(double num) {
+			// http://www.onicos.com/staff/iz/formats/ieee.c  (c) Apple 
+			int sign;
+			int expon;
+			double fMant, fsMant;
+			unsigned long hiMant, loMant;
+
+			if (num < 0) {
+				sign = 0x8000;
+				num *= -1;
+			} else {
+				sign = 0;
+			}
+
+			if (num == 0) {
+				expon = 0; hiMant = 0; loMant = 0;
+			}
+			else {
+				fMant = frexp(num, &expon);
+				if ((expon > 16384) || !(fMant < 1)) {    /* Infinity or NaN */
+					expon = sign|0x7FFF; hiMant = 0; loMant = 0; /* infinity */
+				}
+				else {    /* Finite */
+					expon += 16382;
+					if (expon < 0) {    /* denormalized */
+						fMant = ldexp(fMant, expon);
+						expon = 0;
+					}
+					expon |= sign;
+					fMant = ldexp(fMant, 32);          
+					fsMant = floor(fMant); 
+					hiMant = static_cast<unsigned long>(fsMant);
+					fMant = ldexp(fMant - fsMant, 32); 
+					fsMant = floor(fMant); 
+					loMant = static_cast<unsigned long>(fsMant);
+				}
+			}
+		    
+			bytes[0] = expon >> 8;
+			bytes[1] = expon;
+			bytes[2] = hiMant >> 24;
+			bytes[3] = hiMant >> 16;
+			bytes[4] = hiMant >> 8;
+			bytes[5] = hiMant;
+			bytes[6] = loMant >> 24;
+			bytes[7] = loMant >> 16;
+			bytes[8] = loMant >> 8;
+			bytes[9] = loMant;
+		}
+
+		double Extended::value() const {
+			// http://www.onicos.com/staff/iz/formats/ieee.c  (c) Apple 
+			double    f;
+			int    expon;
+			unsigned long hiMant, loMant;
+		    
+			expon   = ((bytes[0] & 0x7F) << 8) | (bytes[1] & 0xFF);
+			hiMant  =    ((unsigned long)(bytes[2] & 0xFF) << 24)
+					|    ((unsigned long)(bytes[3] & 0xFF) << 16)
+					|    ((unsigned long)(bytes[4] & 0xFF) << 8)
+					|    ((unsigned long)(bytes[5] & 0xFF));
+			loMant  =    ((unsigned long)(bytes[6] & 0xFF) << 24)
+					|    ((unsigned long)(bytes[7] & 0xFF) << 16)
+					|    ((unsigned long)(bytes[8] & 0xFF) << 8)
+					|    ((unsigned long)(bytes[9] & 0xFF));
+
+			if (expon == 0 && hiMant == 0 && loMant == 0) {
+				f = 0;
+			}
+			else if (expon == 0x7FFF) {    /* Infinity or NaN */
+				f = HUGE_VAL;
+			}
+			else {
+				expon -= 16383;
+				f  = ldexp(static_cast<float>(hiMant), expon-=31);
+				f += ldexp(static_cast<float>(loMant), expon-=32);
+			}
+
+			if (bytes[0] & 0x80)
+				return -f;
+			else
+				return f;
+		}
+
 
 		void Long64LE::changeValue(const uint64_t val) {
 #if defined DIVERSALIS__CPU__ENDIAN__LITTLE

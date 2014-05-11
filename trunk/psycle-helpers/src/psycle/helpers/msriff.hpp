@@ -67,7 +67,7 @@ namespace psycle { namespace helpers {
 			bool littleEndian=false
 #endif
 		);
-		virtual void close();
+		virtual void Close();
 		virtual bool Eof() const;
 
 		virtual void addNewChunk(const BaseChunkHeader& header);

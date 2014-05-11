@@ -381,12 +381,12 @@ namespace psycle { namespace host {
 		public:
 			virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
 			bool LoadITModule(Song& song);
-			bool LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins,int iInstIdx);
-			bool LoadITInst(const itInsHeader2x& curH,XMInstrument &xins,int iInstIdx);
-			void LoadInstrumentFromFile(Song& song, const int idx);
-			bool LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData<>& _wave,int iSampleIdx);
-			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
-			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool b16Bit,unsigned char convert);
+			bool LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins);
+			bool LoadITInst(const itInsHeader2x& curH,XMInstrument &xins);
+			void LoadInstrumentFromFile(Song& song, const int iInstrIdx);
+			bool LoadITSample(XMInstrument::WaveData<>& _wave);
+			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
+			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans);
 			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:
@@ -506,13 +506,51 @@ namespace psycle { namespace host {
 				/// SCRI
 				uint32_t tag;
 			};
+/*
+OFFSET              Count TYPE   Description
+0000h                   1 byte   Instrument type
+									2 - melodic instrument
+									3 - bass drum
+									4 - snare drum
+									5 - tom tom
+									6 - cymbal
+									7 - hihat
+0001h                  12 char   DOS file name
+000Dh                   3 byte   reserved
+0010h                   1 byte   Modulator description (bitmapped)
+									0-3 - frequency multiplier
+									4 - scale envelope
+									5 - sustain
+									6 - pitch vibrato
+									7 - volume vibrato
+0011h                   1 byte   Carrier description (same as modulator)
+0012h                   1 byte   Modulator miscellaneous (bitmapped)
+									0-5 - 63-volume
+									6 - MSB of levelscale
+									7 - LSB of levelscale
+0013h                   1 byte   Carrier description (same as modulator)
+0014h                   1 byte   Modulator attack / decay byte (bitmapped)
+									0-3 - Decay
+									4-7 - Attack
+0015h                   1 byte   Carrier description (same as modulator)
+0016h                   1 byte   Modulator sustain / release byte (bitmapped)
+									0-3 - Release count
+									4-7 - 15-Sustain
+0017h                   1 byte   Carrier description (same as modulator)
+0018h                   1 byte   Modulator wave select
+0019h                   1 byte   Carrier wave select
+001Ah                   1 byte   Modulator feedback byte (bitmapped)
+									0 - additive synthesis on/off
+									1-7 - modulation feedback
+ */
 #pragma pack(pop)
 
 		public:
 			bool LoadS3MModuleX(Song& song);
-			bool LoadS3MInstX(Song& song, XMInstrument &xins,uint16_t iInstIdx);
-			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,uint16_t iInstIdx,uint16_t iSampleIdx);
-			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint16_t iInstIdx,uint16_t iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
+			//Note: This is also used to load s3i (st3 standalone samples/instruments).
+			bool LoadS3MInstX(Song& song, XMInstrument &xins, uint16_t iSampleIdx);
+			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader);
+			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
 			bool LoadS3MPatternX(uint16_t patIdx);
 		private:
 			s3mHeader  s3mFileH;

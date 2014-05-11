@@ -188,7 +188,7 @@ XMSampler::Channel::PerformFX().
 		virtual void RefillBuffers(bool released=false);
 		virtual void RefillBuffer(T buffer[192], const T* data, bool released);
 		virtual void NoteOff(void);
-		virtual int PreWork(int numSamples, WorkFunction* pWork);
+		virtual int PreWork(int numSamples, WorkFunction* pWork, bool released);
 		static void WorkMonoStatic(WaveDataController& contr,float *pLeftw,float *pRightw) { contr.WorkMono(pLeftw, pRightw);}
 		// fork types
 		inline float rwork(int16_t const * data, uint32_t res, void* resampler_data) { return resampler_work(data, res, resampler_data); }		

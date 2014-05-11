@@ -11,6 +11,7 @@
 	#include "InputHandler.hpp"
 	#include <psycle/helpers/riff.hpp> // for Wave file loading.
 	#include <psycle/helpers/amigasvx.hpp> // for Wave file loading.
+	#include <psycle/helpers/appleaiff.hpp> // for Wave file loading.
 	#include <psycle/helpers/riffwave.hpp> // for Wave file loading.
 #else
 	#include "Configuration.hpp"
@@ -504,6 +505,16 @@ namespace psycle
 				playOrderSel[i]=false;
 			}
 			playOrderSel[0]=true;
+			//Guarantee some defaults (Player needs at least m_TicksPerBeat before Song::New())
+			currentOctave=4;
+			m_BeatsPerMin=125;
+			m_LinesPerBeat=4;
+			m_TicksPerBeat=24;
+			m_ExtraTicksPerLine=0;
+			waveSelected = 0;
+			instSelected = 0;
+			paramSelected = 0;
+			auxcolSelected = 0;
 		}
 
 		void Song::New()
@@ -525,8 +536,6 @@ namespace psycle
 			m_LinesPerBeat=4;
 			m_TicksPerBeat=24;
 			m_ExtraTicksPerLine=0;
-//			LineCounter=0;
-//			LineChanged=false;
 			// Clean up allocated machines.
 			DestroyAllMachines();
 			// Cleaning instruments
@@ -993,6 +1002,53 @@ namespace psycle
 			}
 		}
 
+		int Song::AIffAlloc(int sampleIdx,const std::string & sFileName)
+		{
+#if !defined WINAMP_PLUGIN
+			AppleAIFF file;
+			file.Open(sFileName);
+			if (!file.isValidFile()) { return 0; }
+			boost::filesystem::path path(sFileName);
+			name = path.filename().string();
+			if (name.length() > 32) {
+				name = name.substr(0,32);
+			}
+
+			uint32_t datalen= file.commchunk.numSampleFrames.unsignedValue();
+			WavAlloc(sampleIdx,file.commchunk.numChannels.signedValue()==2,datalen,name);
+			XMInstrument::WaveData<>& wave = (sampleIdx == PREV_WAV_INS)? wavprev.UsePreviewWave() : samples.get(sampleIdx);
+			wave.WaveSampleRate(static_cast<uint32_t>(file.commchunk.sampleRate.value()));
+			Loop loop = file.instchunk.sustainLoop;
+			if ( loop.playMode.signedValue() > 0) {
+				wave.WaveLoopStart(file.markers.Markers[loop.beginLoop.signedValue()].position.unsignedValue());
+				wave.WaveLoopEnd(file.markers.Markers[loop.endLoop.signedValue()].position.unsignedValue());
+				wave.WaveLoopType(loop.playMode.signedValue() == 1 ?
+					XMInstrument::WaveData<>::LoopType::NORMAL :
+					XMInstrument::WaveData<>::LoopType::BIDI);
+			}
+			loop = file.instchunk.releaseLoop;
+			if ( loop.playMode.signedValue() > 0) {
+				wave.WaveSusLoopStart(file.markers.Markers[loop.beginLoop.signedValue()].position.unsignedValue());
+				wave.WaveSusLoopEnd(file.markers.Markers[loop.endLoop.signedValue()].position.unsignedValue());
+				wave.WaveSusLoopType(loop.playMode.signedValue() == 1 ?
+					XMInstrument::WaveData<>::LoopType::NORMAL :
+					XMInstrument::WaveData<>::LoopType::BIDI);
+			}
+			if (file.instchunk.baseNote != 0) {
+				wave.WaveTune(60-file.instchunk.baseNote);
+				wave.WaveFineTune(file.instchunk.detune);
+				wave.WaveGlobVolume(helpers::dsp::dB2Amp(file.instchunk.gain));
+			}
+			int16_t* samps[]={wave.pWaveDataL(), wave.pWaveDataR()};
+			CommonChunk convert16;
+			convert16.numChannels.changeValue(wave.IsWaveStereo()?static_cast<uint16_t>(2):static_cast<uint16_t>(1));
+			convert16.sampleSize.changeValue(static_cast<uint16_t>(16));
+			file.readDeInterleavedSamples(reinterpret_cast<void**>(samps),datalen,&convert16);
+			file.Close();
+#endif
+			return 1;
+		}
+
 		int Song::IffAlloc(int sampleIdx,const std::string & sFileName)
 		{
 #if !defined WINAMP_PLUGIN
@@ -1113,37 +1169,47 @@ namespace psycle
 			int16_t* samps[]={wave.pWaveDataL(), wave.pWaveDataR()};
 			WaveFormat_Data convert16(file.format().nSamplesPerSec,16,st_type,false);
 			file.readDeInterleavedSamples(reinterpret_cast<void**>(samps),Datalen,&convert16);
-			//TODO:
-			/*
-			{
-				if(hd.ckID == FourCC("smpl"))
-				{
-					char pl(0);
-					file.Skip(28);
-					file.Read(static_cast<void*>(&pl), 1);
-					if(pl == 1)
-					{
-						file.Skip(15);
-						uint32_t ls(0);
-						uint32_t le(0);
-						file.Read(static_cast<void*>(&ls), 4);
-						file.Read(static_cast<void*>(&le), 4);
-						if (ls >= 0 && ls <= le && le < Datalen){
-							wave.WaveLoopStart(ls);
-							wave.WaveLoopEnd(le);
+
+			RiffWaveInstChunk instchunk;
+			if (file.GetInstChunk(instchunk)) {
+				//Midi note: note sampled, waveTune: offset for note entered. 60 = middle C
+				wave.WaveTune(60-instchunk.midiNote);
+				wave.WaveFineTune(instchunk.midiCents);
+				wave.WaveGlobVolume(helpers::dsp::dB2Amp(instchunk.gaindB));
+			}
+
+			RiffWaveSmplChunk smplchunk;
+			if (file.GetSmplChunk(smplchunk)) {
+				//Midi note: note sampled, waveTune: offset for note entered. 60 = middle C
+				wave.WaveTune(60-smplchunk.midiNote);
+				int16_t fine = static_cast<int16_t>(smplchunk.midiPitchFr >>24) / 2.56; //Convert to cents.
+				wave.WaveFineTune(fine);
+				if (smplchunk.numLoops > 0 && smplchunk.loops[0].start >= 0 
+						&& smplchunk.loops[0].start < smplchunk.loops[0].end && smplchunk.loops[0].end <= Datalen) {
+					if (smplchunk.loops[0].playCount==0 || smplchunk.loops[0].playCount > 256) {
+						wave.WaveLoopStart(smplchunk.loops[0].start);
+						wave.WaveLoopEnd(smplchunk.loops[0].end);
+						if (smplchunk.loops[0].type==1) {
+							wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
+						}
+						else if (smplchunk.loops[0].type==0 || smplchunk.loops[0].type==2) {
 							wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 						}
 					}
-					file.Skip(9);
+					else {
+						wave.WaveSusLoopStart(smplchunk.loops[0].start);
+						wave.WaveSusLoopEnd(smplchunk.loops[0].end);
+						if (smplchunk.loops[0].type==1) {
+							wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
+						}
+						else if (smplchunk.loops[0].type==0 || smplchunk.loops[0].type==2) {
+							wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+						}
+					}
 				}
-				else if(hd.ckSize > 0)
-					file.Skip(hd.ckSize);
-				else
-					file.Skip(1);
-				retcode = file.Read(static_cast<void*>(&hd), 8);
 			}
-			*/
-			file.close();
+
+			file.Close();
 #endif //!defined WINAMP_PLUGIN
 			return 1;
 		}
@@ -2850,53 +2916,33 @@ namespace psycle
 
 			// now load it
 
-			if (!file.Open(static_cast<LPCTSTR>(filepath)))
+			bool result=false;
+			if (file.Open(static_cast<LPCTSTR>(filepath)))
 			{
-				DeleteFile(filepath);
-				return false;
-			}
-			char Header[5];
-			file.Read(&Header, 4);
-			Header[4] = 0;
-
-			if (strcmp(Header,"INSD")==0)
-			{
-				file.Read(&version,sizeof(version));
-				file.Read(&size,sizeof(size));
-				if (version > CURRENT_FILE_VERSION_INSD)
+				char Header[5];
+				file.Read(&Header, 4);
+				Header[4] = 0;
+				if (strcmp(Header,"INSD")==0)
 				{
-					// there is an error, this file is newer than this build of psycle
-					file.Close();
-					DeleteFile(filepath);
-					return false;
-				}
-				else
-				{
-					file.Read(&index,sizeof(index));
-					index = dst;
-					if (index < MAX_INSTRUMENTS)
+					file.Read(&version,sizeof(version));
+					file.Read(&size,sizeof(size));
+					if (version <= CURRENT_FILE_VERSION_INSD)
 					{
-						// we had better load it
-						_pInstrument[index]->LoadFileChunk(&file,version, samples, index);
-					}
-					else
-					{
-						file.Close();
-						DeleteFile(filepath);
-						return false;
+						file.Read(&index,sizeof(index));
+						index = dst;
+						if (index < MAX_INSTRUMENTS)
+						{
+							// we had better load it
+							_pInstrument[index]->LoadFileChunk(&file,version, samples, index);
+							result=true;
+						}
 					}
 				}
-			}
-			else
-			{
 				file.Close();
-				DeleteFile(filepath);
-				return false;
 			}
-			file.Close();
 			DeleteFile(filepath);
 #endif //!defined WINAMP_PLUGIN
-			return true;
+			return result;
 		}
 		
 		void Song::SavePsyInstrument(const std::string& filename, int instIdx) const

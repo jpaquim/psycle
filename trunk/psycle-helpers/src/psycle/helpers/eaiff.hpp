@@ -39,7 +39,7 @@ using namespace universalis::stdlib;
 
 		virtual void Open(const std::string& fname);
 		virtual void Create(const std::string& fname, const bool overwrite);
-		virtual void close();
+		virtual void Close();
 		virtual bool Eof() const;
 
 		virtual void addNewChunk(const BaseChunkHeader& header);

@@ -109,12 +109,14 @@ namespace psycle
 			int seqBus;
 			///\name wavetable
 			///\{
-			/// ???
+			/// Wave Loader
 			int WavAlloc(int iInstr,const std::string & sName);
-			/// ???
+			/// Wave allocator
 			int WavAlloc(int iInstr,bool bStereo,uint32_t iSamplesPerChan,const std::string & sFileName);
-			/// ???
+			/// SVX Loader
 			int IffAlloc(int instrument,const std::string & sFileName);
+			/// AIFF loader
+			int AIffAlloc(int sampleIdx,const std::string & sFileName);
 			void SavePsyInstrument(const std::string& filename, int instIdx) const;
 			void LoadPsyInstrument(const std::string& filename, int instIdx);
 			/// wave preview allocation.  (thread safe)

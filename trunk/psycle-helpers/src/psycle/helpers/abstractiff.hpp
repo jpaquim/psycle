@@ -48,7 +48,7 @@ using namespace universalis::stdlib;
 
 		virtual void Open(const std::string& fname);
 		virtual void Create(const std::string& fname, const bool overwrite);
-		virtual void close();
+		virtual void Close();
 		virtual bool Eof() const;
 		std::string const inline & file_name() const throw();
 		std::streamsize fileSize();
@@ -62,6 +62,7 @@ using namespace universalis::stdlib;
 		void ReadString(std::string &);
 		void ReadString(char *, std::size_t const max_length);
 		void ReadSizedString(char *, std::size_t const read_length);
+		void ReadPString(std::string &);
 
 		inline void ReadArray(uint8_t* thearray, std::size_t n);
 		inline void ReadArray(int8_t* thearray, std::size_t n);
@@ -218,6 +219,32 @@ using namespace universalis::stdlib;
 		bool Expect(const IffChunkId& id);
 		bool Expect(const void * const data, std::size_t const bytes);
 		void UpdateFormSize(std::streamoff headerposition, uint32_t numBytes);
+
+		//For audio reading and conversion
+		template<typename sample_type>
+		inline void readDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples);
+		template<typename file_type, typename platform_type>
+		inline void readDeinterleaveSamplesendian(void** pSamps, uint16_t chans, uint32_t samples);
+
+		template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+		void ReadWithintegerconverter(out_type* out, uint32_t samples);
+		//Same as above, for multichan
+		template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+		void ReadWithmultichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples);
+		//Same as above, but for endiantypes.
+		template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
+		void ReadWithinteger24converter(out_type* out, uint32_t samples);
+		//Same as above, for multichan
+		template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
+		void ReadWithmultichaninteger24converter(out_type** out, uint16_t chans, uint32_t samples);
+
+
+		template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
+		void ReadWithfloatconverter(out_type* out, uint32_t numsamples, double multi);
+		//Same as above, for multichan
+		template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
+		void ReadWithmultichanfloatconverter(out_type** out, uint16_t chans, uint32_t numsamples, double multi);
+
 
 	private:
 		bool write_mode;
@@ -635,5 +662,132 @@ using namespace universalis::stdlib;
 	void AbstractIff::WriteArray(T const* thearray, std::size_t n) {
 		for(std::size_t i=0;i<n;i++) Write(thearray[i]);
 	}
+
+
+
+	//Templates to use with Audio subclasses.
+	///////////////////////////////////////
+
+
+	template<typename sample_type>
+	inline void AbstractIff::readDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples) {
+		sample_type** samps = reinterpret_cast<sample_type**>(pSamps);
+		ReadWithmultichanintegerconverter<sample_type, sample_type,assignconverter<sample_type,sample_type> >(samps, chans, samples);
+	}
+	template<typename file_type, typename platform_type>
+	inline void AbstractIff::readDeinterleaveSamplesendian(void** pSamps, uint16_t chans, uint32_t samples) {
+		platform_type** samps = reinterpret_cast<platform_type**>(pSamps);
+		ReadWithmultichanintegerconverter<file_type, platform_type,endianessconverter<file_type,platform_type> >(samps, chans, samples);
+	}
+
+	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+	void AbstractIff::ReadWithintegerconverter(out_type* out, uint32_t samples)
+	{
+		in_type samps[32768];
+		std::size_t amount=0;
+		for(std::size_t io = 0; io < samples; io+=amount) {
+			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
+			ReadArray(samps,amount);
+			in_type* psamps = samps;
+			for(std::size_t b = 0 ; b < amount; ++b) {
+				*out=converter_func(*psamps);
+				out++;
+				psamps++;
+			}
+		}
+	}
+	//Same as above, for multichan, deinterlaced
+	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+	void AbstractIff::ReadWithmultichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples)
+	{
+		in_type samps[32768];
+		std::size_t amount=0;
+		for(uint32_t io = 0 ; io < samples ; io+=amount)
+		{
+			amount = std::min(static_cast<std::size_t>(32768U)/chans,samples-io);
+			ReadArray(samps, amount*chans);
+			in_type* psamps = samps;
+			for (int a=0; a < amount; a++) {
+				for (int b=0; b < chans; b++) {
+					out[b][io+a]=converter_func(*psamps);
+					psamps++;
+				}
+			}
+		}
+	}
+
+	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
+	void AbstractIff::ReadWithinteger24converter(out_type* out, uint32_t samples)
+	{
+		in_type samps[32768];
+		std::size_t amount=0;
+		for(uint32_t io = 0 ; io < samples ; io+=amount)
+		{
+			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
+			ReadArray(samps, amount);
+			in_type* psamps = samps;
+			for(std::size_t b = 0 ; b < amount; ++b) {
+				*out=converter_func(psamps->signedValue());
+				out++;
+				psamps++;
+			}
+		}
+	}
+
+	//Same as above, but for multichan, deinterlaced
+	template<typename in_type, typename out_type, out_type (*converter_func)(int32_t)>
+	void AbstractIff::ReadWithmultichaninteger24converter(out_type** out, uint16_t chans, uint32_t samples)
+	{
+		in_type samps[32768];
+		std::size_t amount=0;
+		for(uint32_t io = 0 ; io < samples ; io+=amount)
+		{
+			amount = std::min(static_cast<std::size_t>(32768U)/chans,samples-io);
+			ReadArray(samps, amount*chans);
+			in_type* psamps = samps;
+			for (int a=0; a < amount; a++) {
+				for (int b=0; b < chans; b++) {
+					out[b][io+a]=converter_func(psamps->signedValue());
+					psamps++;
+				}
+			}
+		}
+	}
+
+
+
+	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
+	void AbstractIff::ReadWithfloatconverter(out_type* out, uint32_t numsamples, double multi) {
+		in_type samps[32768];
+		std::size_t amount=0;
+		for(std::size_t io = 0; io < numsamples; io+=amount) {
+			amount = std::min(static_cast<std::size_t>(32768U),numsamples-io);
+			ReadArray(samps,amount);
+			in_type* psamps = samps;
+			for(std::size_t b = 0 ; b < amount; ++b) {
+				*out=converter_func(*psamps, multi);
+				out++;
+				psamps++;
+			}
+		}
+	}
+
+	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
+	void AbstractIff::ReadWithmultichanfloatconverter(out_type** out, uint16_t chans, uint32_t numsamples, double multi) {
+		in_type samps[32768];
+		std::size_t amount=0;
+		for(std::size_t io = 0; io < numsamples; io+=amount) {
+			amount = std::min(static_cast<std::size_t>(32768U)/chans,numsamples-io);
+			ReadArray(samps,amount*chans);
+			in_type* psamps = samps;
+			for (int a=0; a < amount; a++) {
+				for (int b=0; b < chans; b++) {
+					out[b][io+a]=converter_func(*psamps, multi);
+					psamps++;
+				}
+			}
+		}
+	}
+
 
 }}

@@ -51,6 +51,9 @@
     <ClCompile Include="src\psycle\helpers\appleaiff.cpp">
       <Filter>psycle\helpers\file</Filter>
     </ClCompile>
+    <ClCompile Include="src\psycle\helpers\filetypedetector.cpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClCompile>
     <ClCompile Include="src\psycle\helpers\binread.cpp">
       <Filter>psycle\helpers\file</Filter>
     </ClCompile>
@@ -159,6 +162,9 @@
       <Filter>psycle\helpers\file</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\helpers\appleaiff.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\helpers\filetypedetector.hpp">
       <Filter>psycle\helpers\file</Filter>
     </ClInclude>
     <ClInclude Include="src\psycle\helpers\binread.hpp">

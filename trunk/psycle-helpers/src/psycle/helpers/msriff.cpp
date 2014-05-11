@@ -52,12 +52,12 @@ namespace psycle { namespace helpers {
 				currentHeader=&currentHeaderBE;
 			}
 		}
-		void MsRiff::close() { 
+		void MsRiff::Close() { 
 			if (isWriteMode()) {
 				std::streamsize size = fileSize();
 				UpdateFormSize(0,size-RiffChunkHeader::SIZEOF);
 			}
-			AbstractIff::close(); 
+			AbstractIff::Close(); 
 		}
 		bool MsRiff::Eof() const { return AbstractIff::Eof(); }
 

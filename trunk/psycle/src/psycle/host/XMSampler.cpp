@@ -139,6 +139,7 @@ namespace psycle
 				m_CurrentLoopStart = 0;
 				m_CurrentLoopEnd = Length();
 			}
+			if (m_CurrentLoopStart >= m_CurrentLoopEnd) { m_CurrentLoopStart = m_CurrentLoopEnd-1; }
 			m_CurrentLoopDirection = LoopDirection::FORWARD;
 			m_SpeedInternal = m_Speed;
 
@@ -272,7 +273,7 @@ namespace psycle
 		}
 
 		template <class T>
-		int XMSampler::WaveDataController<T>::PreWork(int numSamples, WorkFunction* pWork) {
+		int XMSampler::WaveDataController<T>::PreWork(int numSamples, WorkFunction* pWork, bool released) {
 			*pWork = (IsStereo()) ? WorkStereoStatic : WorkMonoStatic;
 
 			//These values are for the max size of the sinc resampler (which suits the rest).
@@ -298,7 +299,8 @@ namespace psycle
 				else if (pos+postsamples >= m_CurrentLoopEnd && pos< m_CurrentLoopEnd+presamples) {
 					m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
 					m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopEnd)];
-					if(LoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT) {
+					if((released || SustainLoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT)  
+							&& LoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT) {
 						max=m_CurrentLoopEnd-pos;
 						//TRACE("End buffer at pos %d for samples %d\n", secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 					}
@@ -308,7 +310,8 @@ namespace psycle
 					}
 				}
 				else if (m_looped && pos+postsamples>= m_CurrentLoopStart && pos <m_CurrentLoopStart+presamples) {
-					if ( m_pWave->WaveLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL) {
+					if ((!released && SustainLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL)
+						|| (SustainLoopType() == XMInstrument::WaveData<>::LoopType::DO_NOT && m_pWave->WaveLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL)) {
 						m_pL = &lBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
 						m_pR = &rBuffer[secbegin+(totalsamples+pos-m_CurrentLoopStart)];
 					}
@@ -331,7 +334,7 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("342: max<0 bug triggered!\n");
+					TRACE("336: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = 0;
@@ -356,14 +359,14 @@ namespace psycle
 				if(max<0) {
 					//Disallow negative values. (Generally, it indicates a bug in calculations)
 					max=1;
-					TRACE("366: max<0 bug triggered!\n");
+					TRACE("361: max<0 bug triggered!\n");
 				}
 				amount.HighPart = static_cast<DWORD>(max);
 				amount.LowPart = m_Position.LowPart;
 			}
 #ifndef NDEBUG
 			if (*m_pL!=*(m_pWave->pWaveDataL()+pos) && pos < Length()) {
-				TRACE("373 ERROR. Samples differ! %d - %d (%d,%d)\n", *m_pL , *(m_pWave->pWaveDataL()+pos), (m_pL-lBuffer), pos);
+				TRACE("368 ERROR. Samples differ! %d - %d (%d,%d)\n", *m_pL , *(m_pWave->pWaveDataL()+pos), (m_pL-lBuffer), pos);
 			}
 #endif
 			amount.QuadPart/=Speed();
@@ -425,7 +428,7 @@ namespace psycle
 			}
 #ifndef NDEBUG
 			if (static_cast<int32_t>(m_Position.HighPart) >= m_CurrentLoopEnd+17) {
-				TRACE("436: highpart > loopend+17 bug triggered!\n");
+				TRACE("430: highpart > loopend+17 bug triggered!\n");
 			}
 #endif
 		}
@@ -443,6 +446,7 @@ namespace psycle
 					m_CurrentLoopStart = 0;
 					m_CurrentLoopEnd = Length()-1;
 				}
+				if (m_CurrentLoopStart >= m_CurrentLoopEnd) { m_CurrentLoopStart = m_CurrentLoopEnd-1; }
 				RefillBuffers(true);
 			}
 		}
@@ -729,11 +733,11 @@ namespace psycle
 
 			while(numSamples) {
 				WaveDataController<>::WorkFunction pWork;
-				int nextsamples = std::min(m_WaveDataController.PreWork(numSamples, &pWork), numSamples);
+				int nextsamples = std::min(m_WaveDataController.PreWork(numSamples, &pWork, IsStopping()), numSamples);
 				numSamples-=nextsamples;
 #ifndef NDEBUG
 				if (numSamples > 256 || numSamples < 0) {
-					TRACE("725: numSamples invalid bug triggered!\n");
+					TRACE("738: numSamples invalid bug triggered!\n");
 				}
 #endif
 				while (nextsamples)
@@ -1044,6 +1048,9 @@ namespace psycle
 			if ( RealVolume() * rChannel().Volume() == 0.0f ) IsPlaying(false);
 			//The following is incorrect, at least with looped envelopes that also have sustain loops.
 			//else if ( m_AmplitudeEnvelope.Envelope().IsEnabled() && m_AmplitudeEnvelope.ModulationAmount() == 0.0f) IsPlaying(false);
+			
+			//This might not be correct, but since we are saying "IsStopping(true"), then the controller needs to recalculate the buffers.
+			m_WaveDataController.NoteOff();
 		}
 		void XMSampler::Voice::UpdateFadeout()
 		{
