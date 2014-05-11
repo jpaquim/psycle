@@ -7,6 +7,8 @@ namespace psycle { namespace helpers {
 	const IffChunkId RiffWave::ds64 = {'d','s','6','4'};
 	const IffChunkId RiffWave::data = {'d','a','t','a'};
 	const IffChunkId RiffWave::fact = {'f','a','c','t'};
+	const IffChunkId RiffWave::smpl = {'s','m','p','l'};
+	const IffChunkId RiffWave::inst = {'i','n','s','t'};
 
 	const IffChunkId RiffWaveFmtChunk::fmt = {'f','m','t',' '};
     const uint16_t RiffWaveFmtChunk::FORMAT_PCM = 1;
@@ -56,6 +58,11 @@ namespace psycle { namespace helpers {
 	{
 		Config(chunk.dwSamplesPerSec,chunk.wBitsPerSample, chunk.wChannels,
 			chunk.wFormatTag == RiffWaveFmtChunk::FORMAT_FLOAT);
+
+		if (chunk.wFormatTag != RiffWaveFmtChunk::FORMAT_PCM &&
+			chunk.wFormatTag != RiffWaveFmtChunk::FORMAT_FLOAT) {
+				nSamplesPerSec=0; //Indicator of bad format
+		}
 	}
 	void WaveFormat_Data::Config(const RiffWaveFmtChunkExtensible& chunk)
 	{
@@ -64,6 +71,12 @@ namespace psycle { namespace helpers {
 		Config(chunk.dwSamplesPerSec,chunk.wBitsPerSample, chunk.wChannels,
 			false /*chunkExt.subFormatTag*/);
 		nUsableBitsPerSample = chunkExt.numberOfValidBits;
+/*
+		if (chunkExt.subFormatTag != RiffWaveFmtChunk::FORMAT_PCM &&
+			chunk.wFormatTag != RiffWaveFmtChunk::FORMAT_FLOAT) {
+				nSamplesPerSec=0; //Indicator of bad format
+		}
+*/
 	}
 
 	//////////////////////////////////////////////
@@ -80,6 +93,9 @@ namespace psycle { namespace helpers {
 		if (isValid) {
 			if (Expect(WAVE)) {
 				ReadFormat();
+				if (formatdata.nSamplesPerSec==0) {
+					isValid=false;
+				}
 			}
 			else {
 				isValid=false;
@@ -87,7 +103,7 @@ namespace psycle { namespace helpers {
 		}
 		else {
 			//Not a RIFF or RIFX. Let's try RF64.
-			MsRiff::close();
+			MsRiff::Close();
 			AbstractIff::Open(fname);
 			isLittleEndian=true;
 			currentHeader=&currentHeaderLE;
@@ -102,6 +118,9 @@ namespace psycle { namespace helpers {
 				numsamples=static_cast<uint32_t>(sample.unsignedValue());
 				skipThisChunk();
 				ReadFormat();
+				if (formatdata.nSamplesPerSec==0) {
+					isValid=false;
+				}
 			}
 		}
 	}
@@ -111,15 +130,17 @@ namespace psycle { namespace helpers {
 		Write(WAVE);
 		ds64_pos = 0; pcmdata_pos = 0; numsamples = 0;
 	}
-	void RiffWave::close() { 
+	void RiffWave::Close() { 
 		if (isWriteMode()) {
 			std::streamsize size = GetPos() - static_cast<std::streampos>(RiffChunkHeader::SIZEOF);
 			UpdateFormSize(headerPosition,size - headerPosition);
 			UpdateFormSize(0,size);
 		}
-		MsRiff::close();
+		MsRiff::Close();
 	}
 
+	//TODO: Improvement map of chunk ids and positions, so that allowWrap is only used to seek back too
+	// an already found chunk, not to read the whole file again.
 	const BaseChunkHeader& RiffWave::findChunk(const IffChunkId& id, bool allowWrap)
 	{
 		while(!Eof()) {
@@ -261,6 +282,7 @@ namespace psycle { namespace helpers {
 		else {
 			//Finish for multichannel (more than two)
 		}
+		skipThisChunk();
 	}
 	//Psycle only uses 16bit samples, so this implementation is fully functional for Psycle's intentions.
 	//It would fail to load multichannel (i.e. more than two) samples.
@@ -314,6 +336,62 @@ namespace psycle { namespace helpers {
 		else {
 			//Finish for multichannel (more than two)
 		}
+		skipThisChunk();
+	}
+
+	//TODO: Improve readability when the smpl chunk is inside a LIST instead of inside the RIFF form.
+	bool RiffWave::GetSmplChunk(RiffWaveSmplChunk& smplchunk)
+	{
+		try {
+			findChunk(smpl,true);
+		}
+		catch(const std::runtime_error& e)
+		{
+			return false;
+		}
+		Read(smplchunk.manufacturer);
+		Read(smplchunk.product);
+		Read(smplchunk.samplePeriod);
+		Read(smplchunk.midiNote);
+		Read(smplchunk.midiPitchFr);
+		Read(smplchunk.smpteFormat);
+		Read(smplchunk.smpteOffset);
+		Read(smplchunk.numLoops);
+		Read(smplchunk.extraDataSize);
+		if (smplchunk.numLoops>0){
+			smplchunk.loops = new RiffWaveSmplLoopChunk[smplchunk.numLoops];
+			for (int i=0; i < smplchunk.numLoops;i++) {
+				Read(smplchunk.loops[i].cueId);
+				Read(smplchunk.loops[i].type);
+				Read(smplchunk.loops[i].start);
+				Read(smplchunk.loops[i].end);
+				Read(smplchunk.loops[i].fraction);
+				Read(smplchunk.loops[i].playCount);
+			}
+		}
+		skipThisChunk();
+		return true;
+	}
+
+
+	bool RiffWave::GetInstChunk(RiffWaveInstChunk& instchunk)
+	{
+		try {
+			findChunk(inst,true);
+		}
+		catch(const std::runtime_error& e)
+		{
+			return false;
+		}
+		Read(instchunk.midiNote);	// 1 - 127
+		Read(instchunk.midiCents);	// -50 - +50
+		Read(instchunk.gaindB);		// -64 - +64
+		Read(instchunk.lowNote);		// 1 - 127
+		Read(instchunk.highNote);	// 1 - 127
+		Read(instchunk.lowVelocity); // 1 - 127
+		Read(instchunk.highVelocity); // 1 - 127
+		skipThisChunk();
+		return true;
 	}
 
 
@@ -467,165 +545,6 @@ namespace psycle { namespace helpers {
 	void RiffWave::writeDeintMultichanSamples(void** /*pSamps*/, uint32_t /*samples*/)
 	{
 	}
-
-
-
-#if 0
-
-http://www.sonicspot.com/guide/wavefiles.html#smpl
-
-	0x00 	4 	Chunk ID 	"smpl" (0x736D706C)
-	0x04 	4 	Chunk Data Size 	36 + (Num Sample Loops * 24) + Sampler Data
-	0x08 	4 	Manufacturer 	0 - 0xFFFFFFFF
-	0x0C 	4 	Product 	0 - 0xFFFFFFFF
-	0x10 	4 	Sample Period 	0 - 0xFFFFFFFF
-	0x14 	4 	MIDI Unity Note 	0 - 127
-	0x18 	4 	MIDI Pitch Fraction 	0 - 0xFFFFFFFF
-	0x1C 	4 	SMPTE Format 	0, 24, 25, 29, 30
-	0x20 	4 	SMPTE Offset 	0 - 0xFFFFFFFF
-	0x24 	4 	Num Sample Loops 	0 - 0xFFFFFFFF
-	0x28 	4 	Sampler Data 	0 - 0xFFFFFFFF
-	0x2C 	
-	List of Sample Loops
-
-Sample Period
-The sample period specifies the duration of time that passes during the playback of one sample in nanoseconds (normally equal to 1 / Samplers Per Second, where Samples Per Second is the value found in the format chunk).
-
-MIDI Unity Note
-Specifies the MIDI note which will replay the sample at original pitch. This
-value ranges from 0 to 127 (a value of 60 represents Middle C as defined
-by the MMA).
-The MIDI unity note value has the same meaning as the instrument chunk's MIDI Unshifted Note field which specifies the musical note at which the sample will be played at it's original sample rate (the sample rate specified in the format chunk).
-
-MIDI Pitch Fraction
-The MIDI pitch fraction specifies the fraction of a semitone up from the specified MIDI unity note field. A value of 0x80000000 means 1/2 semitone (50 cents) and a value of 0x00000000 means no fine tuning between semitones. 
-
-Sample Loops
-The sample loops field specifies the number Sample Loop definitions in the following list. This value may be set to 0 meaning that no sample loops follow.
-
-Sampler Data
-The sampler data value specifies the number of bytes that will follow this chunk (including the entire sample loop list). This value is greater than 0 when an application needs to save additional information. This value is reflected in this chunks data size value.
-
-List of Sample Loops
-A list of sample loops is simply a set of consecutive loop descriptions that follow the format described below. The sample loops do not have to be in any particular order because each sample loop associated cue point position is used to determine the play order. The sampler chunk is optional.
-
-Offset 	Size 	Description 	Value
-0x00 	4 	Cue Point ID 	0 - 0xFFFFFFFF
-0x04 	4 	Type 	0 - 0xFFFFFFFF
-0x08 	4 	Start 	0 - 0xFFFFFFFF
-0x0C 	4 	End 	0 - 0xFFFFFFFF
-0x10 	4 	Fraction 	0 - 0xFFFFFFFF
-0x14 	4 	Play Count 	0 - 0xFFFFFFFF
-Sample Loop Format 	
-	
-Type
-The type field defines how the waveform samples will be looped.
-
-Value 	Loop Type
-0 	Loop forward (normal)
-1 	Alternating loop (forward/backward, also known as Ping Pong)
-2 	Loop backward (reverse)
-3 - 31 	Reserved for future standard types
-32 - 0xFFFFFFFF 	Sampler specific types (defined by manufacturer)	
-	
-
-From the official RIFF specifications by Microsoft (RIFFNEW.pdf):
-dwStart: Specifies the startpoint of the loop in samples.
-dwEnd: Specifies the endpoint of the loop in samples (this sample will also be
-played).
-
-
-	{
-if(hd.ckID == FourCC("smpl"))
-				{
-					uint32_t pl(0);
-					uint32_t total;
-					uint32_t midinote;
-					uint32_t midifinenote;
-					file.Skip(12); //Skip product
-					file.Read(static_cast<void*>(&midinote), 4);
-					file.Read(static_cast<void*>(&midifinenote), 4);
-					midifinenote>>24;
-					midifinenote/=2.56;
-					file.Skip(8); //Skip smpte
-					file.Read(static_cast<void*>(&pl), 4);
-					file.Read(static_cast<void*>(&total), 4);
-					if(pl > 0)
-					{
-						uint32_t ls(0);
-						uint32_t le(0);
-						uint32_t co(0);
-						file.Skip(4);
-						file.Read(static_cast<void*>(&pl), 4);
-						file.Read(static_cast<void*>(&ls), 4);
-						file.Read(static_cast<void*>(&le), 4);
-						file.Skip(4);
-						file.Read(static_cast<void*>(&co), 4);
-						if (ls >= 0 && ls <= le && le < Datalen){
-							if (co==0) {
-								wave.WaveLoopStart(ls);
-								wave.WaveLoopEnd(le);
-								if (pl==1) {
-									wave.WaveLoopType(XMInstrument::WaveData::LoopType::BIDI);
-								}
-								else {
-									wave.WaveLoopType(XMInstrument::WaveData::LoopType::NORMAL);
-								}
-							}
-							else {
-								wave.WaveSusLoopStart(ls);
-								wave.WaveSusLoopEnd(le);
-								if (pl==1) {
-									wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::BIDI);
-								}
-								else {
-									wave.WaveSusLoopType(XMInstrument::WaveData::LoopType::NORMAL);
-								}
-							}
-						}
-						//TODO: the microsoft docs don't really say this includes the point. Might really need
-						// to skip based on chunk size, not this.
-						file.Skip(total-16);
-					}
-					else {
-						//TODO: the microsoft docs don't really say this includes the point. Might really need
-						// to skip based on chunk size, not this.
-						file.Skip(total);
-					}
-	}
-
-
-
-Instrument Chunk - "inst"
-The instrument chunk is used to describe how the waveform should be played as an instrument sound. This information is useful for communicating musical information between sample-based music programs, such as trackers or software wavetables. This chunk is optional and no more than 1 may appear in a WAVE file.
-
-Offset 	Size 	Description 	Value
-0x00 	4 	Chunk ID 	"ltxt" (0x6C747874)
-0x04 	4 	Chunk Data Size 	7
-0x08 	1 	Unshifted Note 	0 - 127
-0x09 	1 	Fine Tune (dB) 	-50 - +50
-0x0A 	1 	Gain 	-64 - +64
-0x0B 	1 	Low Note 	0 - 127
-0x0C 	1 	High Note 	0 - 127
-0x0D 	1 	Low Velocity 	1 - 127
-0x0E 	1 	High Velocity 	1 - 127
-Instrument Chunk Format
-
-Unshifted Note
-The unshifted note field has the same meaning as the sampler chunk's MIDI Unity Note which specifies the musical note at which the sample will be played at it's original sample rate (the sample rate specified in the format chunk).
-
-Fine Tune
-The fine tune value specifies how much the sample's pitch should be altered when the sound is played back in cents (1/100 of a semitone). A negative value means that the pitch should be played lower and a positive value means that it should be played at a higher pitch.
-
-Gain
-The gain value specifies the number of decibels to adjust the output when it is played. A value of 0dB means no change, 6dB means double the amplitude of each sample and -6dB means to halve the amplitude of each sample. Every additional +/-6dB will double or halve the amplitude again.
-
-Low Note and High Note
-The note fields specify the MIDI note range for which the waveform should be played when receiving MIDI note events (from software or triggered by a MIDI controller). This range does not need to include the Unshifted Note value.
-
-Low Velocity and High Velocity
-The velocity fields specify the range of MIDI velocities that should cause the waveform to be played. 1 being the lightest amount and 127 being the hardest. 
-#endif
 
 
 

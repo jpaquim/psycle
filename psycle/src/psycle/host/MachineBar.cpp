@@ -16,6 +16,7 @@
 #include "WavFileDlg.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
+#include <psycle/helpers/filetypedetector.hpp>
 
 namespace psycle{ namespace host{
 	extern CPsycleApp theApp;
@@ -598,53 +599,72 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	bool MachineBar::LoadWave(int waveIdx)
 	{
-		static char BASED_CODE szFilter[] = "Wav (PCM) Files (*.wav)|*.wav|Amiga IFF/SVX Samples (*.*)|*.*||";//TODO: its, s3i, aiff..
+		static const char szFilter[] = "Autodetect Format|*.*|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff||";
+		static uint32_t szDetect[] = {helpers::FormatDetector::WAVE_ID,helpers::FormatDetector::AIFF_ID,helpers::FormatDetector::SCRS_ID,helpers::FormatDetector::IMPS_ID,helpers::FormatDetector::SVX8_ID};
 		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
 		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
+		dlg.m_ofn.lCustData = reinterpret_cast<LPARAM>(szDetect);
+
 		bool update=false;
 		if (dlg.DoModal() == IDOK)
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
-			CString CurrExt=dlg.GetFileExt();
-			CurrExt.MakeLower();
-			if ( CurrExt == "wav" || dlg.GetOFN().nFilterIndex == 1 )
-			{
-				try {
-					if (m_pSong->WavAlloc(waveIdx,dlg.GetPathName().GetString()))
-					{
+			uint32_t selCode;
+
+			if (dlg.GetOFN().nFilterIndex == 1) {
+				helpers::FormatDetector detect;
+				selCode = detect.AutoDetect(dlg.GetPathName().GetString());
+			}
+			else selCode = szDetect[dlg.GetOFN().nFilterIndex-2];
+
+			try {
+				if (selCode == helpers::FormatDetector::WAVE_ID) {
+					if (m_pSong->WavAlloc(waveIdx,dlg.GetPathName().GetString())) {
 						update=true;
-					}
-					else {
+					} else {
 						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
 					}
 				}
-				catch(const std::runtime_error & e) {
-					std::ostringstream os;
-					os <<"Could not finish the operation: " << e.what();
-					MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
+				else if (selCode == helpers::FormatDetector::SCRS_ID) {
+					ITModule2 itsong;
+					itsong.Open(dlg.GetPathName().GetString());
+					XMInstrument dummy;
+					update = itsong.LoadS3MInstX(*m_pSong, dummy, waveIdx);
+					itsong.Close();
 				}
-			}
-			else if ( CurrExt == "iff" || dlg.GetOFN().nFilterIndex == 2  )
-			{
-				try {
-					if (m_pSong->IffAlloc(waveIdx,dlg.GetPathName().GetString()))
-					{
+				else if (selCode == helpers::FormatDetector::IMPS_ID) {
+					XMInstrument::WaveData<> wave;
+					ITModule2 itsong;
+					itsong.Open(dlg.GetPathName().GetString());
+					update = itsong.LoadITSample(wave);
+					itsong.Close();
+					m_pSong->samples.SetSample(wave,waveIdx);
+				}
+				else if (selCode == helpers::FormatDetector::AIFF_ID) {
+					if (m_pSong->AIffAlloc(waveIdx, dlg.GetPathName().GetString())) {
 						update=true;
-					}
-					else {
+					} else {
 						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
 					}
 				}
-				catch(const std::runtime_error & e) {
-					std::ostringstream os;
-					os <<"Could not finish the operation: " << e.what();
-					MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
+				else if (selCode == helpers::FormatDetector::SVX8_ID) {
+					if (m_pSong->IffAlloc(waveIdx,dlg.GetPathName().GetString())) {
+						update=true;
+					} else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
 				}
 			}
+			catch(const std::runtime_error & e) {
+				std::ostringstream os;
+				os <<"Could not finish the operation: " << e.what();
+				MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
+			}
+
 			CString str = dlg.m_ofn.lpstrFile;
 			int index = str.ReverseFind('\\');
 			if (index != -1)
@@ -663,7 +683,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	void MachineBar::SaveWave(int waveIdx)
 	{
 		WaveFile output;
-		static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
+		static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 
 		const XMInstrument::WaveData<> & wave = m_pSong->samples[waveIdx];
 		CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
@@ -686,7 +706,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	bool MachineBar::LoadInstrument(int instIdx)
 	{
-		static char BASED_CODE szFilter[] = "Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti||";
+		static const char szFilter[] = "Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|ST3 Samples (*.s3i)|(*.s3i)||";
 
 		CFileDialog dlg(true,"psins", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
@@ -717,6 +737,15 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				itsong.Close();
 				update=true;
 			}
+			else if (CurrExt == "s3i") {
+				ITModule2 itsong;
+				itsong.Open(dlg.GetPathName().GetString());
+				XMInstrument instr;
+				itsong.LoadS3MInstX(*m_pSong, instr,65535);
+				m_pSong->xminstruments.SetInst(instr,instIdx);
+				itsong.Close();
+				update=true;
+			}
 
 			CString str = dlg.m_ofn.lpstrFile;
 			int index = str.ReverseFind('\\');
@@ -728,7 +757,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	}
 	void MachineBar::SaveInstrument(int instIdx)
 	{
-		static char BASED_CODE szFilter[] = "Psycle Instrument (*.psins)|*.psins||";//TODO: XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti||";
+		static const char szFilter[] = "Psycle Instrument (*.psins)|*.psins||";//TODO: XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti||";
 
 		const XMInstrument instr = m_pSong->xminstruments[instIdx];
 		CFileDialog dlg(FALSE, "psins", instr.Name().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);

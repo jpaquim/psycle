@@ -89,6 +89,7 @@
     <ClCompile Include="src\psycle\helpers\abstractiff.cpp" />
     <ClCompile Include="src\psycle\helpers\amigasvx.cpp" />
     <ClCompile Include="src\psycle\helpers\appleaiff.cpp" />
+	<ClCompile Include="src\psycle\helpers\filetypedetector.cpp" />
     <ClCompile Include="src\psycle\helpers\binread.cpp" />
     <ClCompile Include="src\psycle\helpers\datacompression.cpp" />
     <ClCompile Include="src\psycle\helpers\eaiff.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="src\psycle\helpers\abstractiff.hpp" />
     <ClInclude Include="src\psycle\helpers\amigasvx.hpp" />
     <ClInclude Include="src\psycle\helpers\appleaiff.hpp" />
+	<ClInclude Include="src\psycle\helpers\filetypedetector.hpp" />
     <ClInclude Include="src\psycle\helpers\binread.hpp" />
     <ClInclude Include="src\psycle\helpers\datacompression.hpp" />
     <ClInclude Include="src\psycle\helpers\eaiff.hpp" />

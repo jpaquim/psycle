@@ -53,6 +53,8 @@ v1.11.3 (beta) (2014-xx-xx)
 + Sampulse Editor: Deleting an instrument asks if it should delete its associated samples.
 + Sampulse Editor: Able to load and save single instruments to a file (including its associated samples).
 + Wave Editor: Load and save sample from the wave editor.
++ Implemented AIFF loader, Scream tracker 3 sample (S3I) loader and impulse tracker sample (ITS) loader.
++ Autodetect sample type for sample preview.
 + Recording or playing the song with looping disabled will now stop when break to line, or jump to sequence go to an earlier position.
 + Full Implementation of extraticks and ticksperbeat: Changes in song properties dialog, song toolbar and part of code.
 + Skinnable header with track names, plus highlighting for mute/solo/record buttons to show something different when mouse over. Other fixes on skins.
@@ -60,8 +62,8 @@ v1.11.3 (beta) (2014-xx-xx)
 * Do not stretch master VU graphics in Windows XP. It will not resize correctly on different dpi sizes, but will paint correctly at 96dpi which is what most people use.
 * Improved the xm song exporter. Fixed sample pitch and exported envelopes. Also exports sampulse instruments now.
 * Changes in the load and save instrument buttons (now they work on samples or instruments depending on sampulse machine being selected). Several other changes related to how the tracker remembers and shows the instruments.
-* Much improved the IFF/SVX loader (ok, probaby useless, but now it has a correct loop code, supports multioctave instruments, Big endian 16bits, Stereo and pan).
-* Use the new wave loader implementation. Better format support.
+* New Wave Loader implementation. Better format support.
+* New Amiga IFF/SVX loader (ok, probaby useless, but now it has correct loop code, supports multioctave instruments, Big and little endian 16bits, Stereo and pan. Also volume envelope, if there is any file that uses it).
 * Gear Rack: now it has a different list for sampulse instruments or samples.
 ! Sampler: Fixes in pitch slide command (it became broken when adding samplerate support)
 ! Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample and several other selection size discrepancies)

@@ -12,6 +12,7 @@
 namespace psycle{ namespace host{
 
 	static const char XM_HEADER [] = "Extended Module: ";
+	static const char XI_HEADER[] = "Extended Instrument: ";
 
 	struct XMCMD
 	{

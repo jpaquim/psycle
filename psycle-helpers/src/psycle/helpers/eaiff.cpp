@@ -28,12 +28,12 @@ namespace psycle { namespace helpers {
 			}
 		}
 		void EaIff::Create(const std::string& fname, const bool overwrite) { AbstractIff::Create(fname, overwrite); }
-		void EaIff::close() { 
+		void EaIff::Close() { 
 			if (isWriteMode()) {
 				std::streamsize size = fileSize();
 				UpdateFormSize(0,size-IffChunkHeader::SIZEOF);
 			}
-			AbstractIff::close(); 
+			AbstractIff::Close(); 
 		}
 		bool EaIff::Eof() const { return AbstractIff::Eof(); }
 

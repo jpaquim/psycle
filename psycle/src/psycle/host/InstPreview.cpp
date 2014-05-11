@@ -37,7 +37,7 @@ namespace psycle {
 			
 			while(numSamples) {
 				XMSampler::WaveDataController<>::WorkFunction pWork;
-				int nextsamples = std::min(controller.PreWork(numSamples, &pWork), numSamples);
+				int nextsamples = std::min(controller.PreWork(numSamples, &pWork, false), numSamples);
 				numSamples-=nextsamples;
 	#ifndef NDEBUG
 				if (numSamples > 256 || numSamples < 0) {

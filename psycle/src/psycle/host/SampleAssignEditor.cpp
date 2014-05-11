@@ -267,7 +267,7 @@ void CSampleAssignEditor::OnMouseMove( UINT nFlags, CPoint point )
 		tme.dwFlags=TME_LEAVE;
 		tme.hwndTrack=GetSafeHwnd();
 		tme.dwHoverTime=HOVER_DEFAULT;
-		BOOL result =TrackMouseEvent(&tme);
+		/*BOOL result =*/TrackMouseEvent(&tme);
 		m_tracking=true;
 	}
 

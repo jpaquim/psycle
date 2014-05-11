@@ -82,10 +82,10 @@ namespace psycle
 			XMInstrument instr;
 			instr.Init();
 			if (inshead.trackerV < 0x200 ) {
-				LoadOldITInst(inshead,instr,idx);
+				LoadOldITInst(inshead,instr);
 			}
 			else {
-				LoadITInst(*reinterpret_cast<itInsHeader2x*>(&inshead),instr,idx);
+				LoadITInst(*reinterpret_cast<itInsHeader2x*>(&inshead),instr);
 				//From ITTECH: Total length of an instrument is 547 bytes, but 554 bytes are
 				//written, just to simplify the loading of the old format.
 			}
@@ -105,11 +105,9 @@ namespace psycle
 			{
 				while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
 				XMInstrument::WaveData<> wave;
-				itSampleHeader curH;
-				Read(&curH,sizeof(curH));
 				std::size_t curpos = GetPos();
-				LoadITSample(curH,wave,curSample);
-				Seek(curpos);
+				LoadITSample(wave);
+				Seek(curpos+sizeof(itSampleHeader));
 				// Only get REAL samples.
 				if ( wave.WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {
 					song.samples.SetSample(wave, curSample);
@@ -246,13 +244,7 @@ Special:  Bit 0: On = song message attached.
 				if (song.playOrder[i]!= 254 &&song.playOrder[i] != 255 ) i++;
 			}
 			Skip(itFileH.ordNum-j);
-/*
-			while (j<itFileH.ordNum)
-			{
-				char tmp=ReadInt(1);
-				j++;
-			}
-*/
+
 			song.playLength=i;
 			if ( song.playLength == 0) // Add at least one pattern to the sequence.
 			{
@@ -353,12 +345,12 @@ Special:  Bit 0: On = song message attached.
 				if (itFileH.ffv < 0x200 ) {
 					itInsHeader1x curH;
 					Read(&curH,sizeof(curH));
-					LoadOldITInst(curH,instr,i);
+					LoadOldITInst(curH,instr);
 				}
 				else {
 					itInsHeader2x curH;
 					Read(&curH,sizeof(curH));
-					LoadITInst(curH, instr,i);
+					LoadITInst(curH, instr);
 				}
 				song.xminstruments.SetInst(instr,i);
 			}
@@ -366,9 +358,7 @@ Special:  Bit 0: On = song message attached.
 			{
 				Seek(pointerss[i]);
 				XMInstrument::WaveData<> wave;
-				itSampleHeader curH;
-				Read(&curH,sizeof(curH));
-				bool created = LoadITSample(curH,wave,i);
+				bool created = LoadITSample(wave);
 				// If this MOD doesn't use Instruments, we need to map the notes manually.
 				if (created && !(itFileH.flags & Flags::USEINSTR)) 
 				{
@@ -409,7 +399,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins,int iInstIdx)
+		bool ITModule2::LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins)
 		{
 			std::string itname(curH.sName);
 			xins.Name(itname);
@@ -456,7 +446,7 @@ Special:  Bit 0: On = song message attached.
 			xins.IsEnabled(true);
 			return true;
 		}
-		bool ITModule2::LoadITInst(const itInsHeader2x& curH, XMInstrument &xins,int iInstIdx)
+		bool ITModule2::LoadITInst(const itInsHeader2x& curH, XMInstrument &xins)
 		{
 			std::string itname(curH.sName);
 			xins.Name(itname);
@@ -604,8 +594,10 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITSample(const itSampleHeader& curH, XMInstrument::WaveData<>& _wave,int iSampleIdx)
+		bool ITModule2::LoadITSample(XMInstrument::WaveData<>& _wave)
 		{
+			itSampleHeader curH;
+			Read(&curH,sizeof(curH));
 			char renamed[26];
 			for(int i=0;i<25;i++){
 				if(curH.sName[i]=='\0') renamed[i]=' ';
@@ -685,8 +677,8 @@ Special:  Bit 0: On = song message attached.
 
 				if (curH.length > 0) {
 					Seek(curH.smpData);
-					if (bcompressed) LoadITCompressedData(_wave,iSampleIdx,curH.length,b16Bit,curH.cvt);
-					else LoadITSampleData(_wave,iSampleIdx,curH.length,bstereo,b16Bit,curH.cvt);
+					if (bcompressed) LoadITCompressedData(_wave,curH.length,b16Bit,curH.cvt);
+					else LoadITSampleData(_wave,curH.length,bstereo,b16Bit,curH.cvt);
 				}
 				return true;
 			}
@@ -694,7 +686,7 @@ Special:  Bit 0: On = song message attached.
 			return false;
 		}
 
-		bool ITModule2::LoadITSampleData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
+		bool ITModule2::LoadITSampleData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert)
 		{
 			signed short wNew,wTmp;
 			int offset=(convert & SampleConvert::IS_SIGNED)?0:-32768;
@@ -741,7 +733,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData<>& _wave,int iSampleIdx,uint32_t iLen,bool b16Bit,unsigned char convert)
+		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
 			uint32_t topsize, val,j;
@@ -1316,75 +1308,44 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,uint16_t iInstIdx)
+		//Note: This is also used to load s3i (st3 standalone samples/instruments).
+		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,uint16_t iSampleIdx)
 		{
+			bool result = false;
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
 
 			xins.Init();
 			xins.Name(curH.sName);
 
-			int i;
-			XMInstrument::NotePair npair;
-			npair.second=iInstIdx;
-			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-				npair.first=i;
-				xins.NoteToSample(i,npair);
-			}
-			
-			if ( curH.type == 1) 
+			if (curH.tag == SCRS_ID && curH.type == 1) 
 			{
 				xins.IsEnabled(true);
-				XMInstrument::WaveData<> wave;
-				bool result = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH),iInstIdx,iInstIdx);
-				song.samples.SetSample(wave,iInstIdx);
-				return result;
+				if (iSampleIdx < PREV_WAV_INS ) {
+					XMInstrument::WaveData<> wave;
+					if (iSampleIdx != 65535) {
+						song.samples.SetSample(wave,iSampleIdx);
+					}
+					else { iSampleIdx = song.samples.AddSample(wave); }
+				}
+				XMInstrument::WaveData<>& wave = (iSampleIdx < PREV_WAV_INS )?song.samples.get(iSampleIdx):song.wavprev.UsePreviewWave();
+				result = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH));
+
+				XMInstrument::NotePair npair;
+				npair.second=static_cast<uint8_t>(iSampleIdx);
+				for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+					npair.first=i;
+					xins.NoteToSample(i,npair);
+				}
 			}
-			else if ( curH.type != 0)
+			else if (curH.tag == SCRI_ID && curH.type != 0)
 			{
-/*					reinterpret_cast<s3madlibheader*>(&curH)
-*
-OFFSET              Count TYPE   Description
-0000h                   1 byte   Instrument type
-									2 - melodic instrument
-									3 - bass drum
-									4 - snare drum
-									5 - tom tom
-									6 - cymbal
-									7 - hihat
-0001h                  12 char   DOS file name
-000Dh                   3 byte   reserved
-0010h                   1 byte   Modulator description (bitmapped)
-									0-3 - frequency multiplier
-									4 - scale envelope
-									5 - sustain
-									6 - pitch vibrato
-									7 - volume vibrato
-0011h                   1 byte   Carrier description (same as modulator)
-0012h                   1 byte   Modulator miscellaneous (bitmapped)
-									0-5 - 63-volume
-									6 - MSB of levelscale
-									7 - LSB of levelscale
-0013h                   1 byte   Carrier description (same as modulator)
-0014h                   1 byte   Modulator attack / decay byte (bitmapped)
-									0-3 - Decay
-									4-7 - Attack
-0015h                   1 byte   Carrier description (same as modulator)
-0016h                   1 byte   Modulator sustain / release byte (bitmapped)
-									0-3 - Release count
-									4-7 - 15-Sustain
-0017h                   1 byte   Carrier description (same as modulator)
-0018h                   1 byte   Modulator wave select
-0019h                   1 byte   Carrier wave select
-001Ah                   1 byte   Modulator feedback byte (bitmapped)
-									0 - additive synthesis on/off
-									1-7 - modulation feedback
- */
+				//reinterpret_cast<s3madlibheader*>(&curH)
 			}
-			return false;
+			return result;
 		}
 
-		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader,uint16_t iInstIdx,uint16_t iSampleIdx)
+		bool ITModule2::LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader)
 		{
 			bool bLoop=currHeader->flags&S3MSampleFlags::LOOP;
 			bool bstereo=currHeader->flags&S3MSampleFlags::STEREO;
@@ -1402,13 +1363,6 @@ OFFSET              Count TYPE   Description
 
 			_wave.WaveVolume(currHeader->vol * 2);
 
-//			Older method. conversion from speed to tune. Replaced by using the samplerate directly
-//			double tune = log10(double(currHeader->c2speed)/8363.0f)/log10(2.0);
-//			double maintune = floor(tune*12);
-//			double finetune = floor(((tune*12)-maintune)*100);
-
-//			_wave.WaveTune(maintune);
-//			_wave.WaveFineTune(finetune);
 			_wave.WaveSampleRate(currHeader->c2speed);
 
 			std::string sName = currHeader->sName;
@@ -1416,12 +1370,12 @@ OFFSET              Count TYPE   Description
 
 			int newpos=((currHeader->hiMemSeg<<16)+currHeader->lomemSeg)<<4;
 			Seek(newpos);
-			LoadS3MSampleDataX(_wave,iInstIdx,iSampleIdx,currHeader->length,bstereo,b16Bit,currHeader->packed);
+			LoadS3MSampleDataX(_wave,currHeader->length,bstereo,b16Bit,currHeader->packed);
 
 			return true;
 		}
 
-		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint16_t iInstIdx,uint16_t iSampleIdx,uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
+		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit,bool packed)
 		{
 			if (!packed) // Looks like the packed format never existed.
 			{
@@ -1444,20 +1398,18 @@ OFFSET              Count TYPE   Description
 				_wave.AllocWaveData(iLen,bstereo);
 				if(b16Bit) {
 					int out=0;
-					for(unsigned int j=0;j<iLen*2;j+=2)
+					for(unsigned int j=0;j<iLen*2;j+=2,out++)
 					{
 						wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8)+offset;
 						*(const_cast<int16_t*>(_wave.pWaveDataL()) + out) = wNew;
-						out++;
 					}
 					if (bstereo) {
 						out=0;
 						Read(smpbuf,iLen*2);
-						for(unsigned int j=0;j<iLen*2;j+=2)
+						for(unsigned int j=0;j<iLen*2;j+=2,out++)
 						{
 							wNew = (0xFF & smpbuf[j] | smpbuf[j+1]<<8) +offset;
 							*(const_cast<int16_t*>(_wave.pWaveDataR()) + out) = wNew;
-							out++;
 						}   
 					}
 				} else {// 8 bit sample
@@ -1490,8 +1442,8 @@ OFFSET              Count TYPE   Description
 			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
 
-			Skip(2);//int packedSize=ReadInt(2);
 			_pSong->AllocNewPattern(patIdx,"unnamed",64,false);
+			Skip(2);//int packedSize=ReadInt(2);
 //			char* packedpattern = new char[packedsize];
 //			Read(packedpattern,packedsize);
 			for (int row=0;row<64;row++)
@@ -1507,7 +1459,7 @@ OFFSET              Count TYPE   Description
 						uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
 						if (note==254) pent._note = notecommands::release;
 						else if (note==255) pent._note=255;
-						else pent._note = ((note/16)*12+(note%16)+12);  // +12 since ST3 C-4 is Psycle's C-5
+						else pent._note = ((note>>4)*12+(note&0xF)+12);  // +12 since ST3 C-4 is Psycle's C-5
 						pent._inst=ReadUInt8()-1;
 						pent._mach=0;
 					}
