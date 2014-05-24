@@ -413,7 +413,10 @@ namespace psycle
 				size -= sizeof(count) + sizeof(int)*count;
 				if(size)
 				{
-					byte* pData = new byte[size];
+					UINT size2=0;
+					try	{ size2 = proxy().GetDataSize();} catch(...) {}
+					//This way we guarantee that the plugin will have enough bytes, even if it does not fit what it reads.
+					byte* pData = new byte[std::max(size,size2)];
 					pFile->Read(pData, size); // Read internal data.
 					try
 					{
@@ -479,7 +482,7 @@ namespace psycle
 #endif
 
 				}
-				pFile->Write(pData, size2); // Number of parameters
+				pFile->Write(pData, size2); //data chunk
 				zapArray(pData);
 			}
 		}

@@ -684,12 +684,12 @@ using namespace universalis::stdlib;
 	void AbstractIff::ReadWithintegerconverter(out_type* out, uint32_t samples)
 	{
 		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < samples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
+		uint32_t amount=0;
+		for(uint32_t io = 0; io < samples; io+=amount) {
+			amount = std::min(static_cast<uint32_t>(32768U),samples-io);
 			ReadArray(samps,amount);
 			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
+			for(uint32_t b = 0 ; b < amount; ++b) {
 				*out=converter_func(*psamps);
 				out++;
 				psamps++;
@@ -701,14 +701,14 @@ using namespace universalis::stdlib;
 	void AbstractIff::ReadWithmultichanintegerconverter(out_type** out, uint16_t chans, uint32_t samples)
 	{
 		in_type samps[32768];
-		std::size_t amount=0;
+		uint32_t amount=0;
 		for(uint32_t io = 0 ; io < samples ; io+=amount)
 		{
-			amount = std::min(static_cast<std::size_t>(32768U)/chans,samples-io);
+			amount = std::min(static_cast<uint32_t>(32768U)/chans,samples-io);
 			ReadArray(samps, amount*chans);
 			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
+			for (uint32_t a=0; a < amount; a++) {
+				for (uint16_t b=0; b < chans; b++) {
 					out[b][io+a]=converter_func(*psamps);
 					psamps++;
 				}
@@ -720,13 +720,13 @@ using namespace universalis::stdlib;
 	void AbstractIff::ReadWithinteger24converter(out_type* out, uint32_t samples)
 	{
 		in_type samps[32768];
-		std::size_t amount=0;
+		uint32_t amount=0;
 		for(uint32_t io = 0 ; io < samples ; io+=amount)
 		{
-			amount = std::min(static_cast<std::size_t>(32768U),samples-io);
+			amount = std::min(static_cast<uint32_t>(32768U),samples-io);
 			ReadArray(samps, amount);
 			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
+			for(uint32_t b = 0 ; b < amount; ++b) {
 				*out=converter_func(psamps->signedValue());
 				out++;
 				psamps++;
@@ -739,14 +739,14 @@ using namespace universalis::stdlib;
 	void AbstractIff::ReadWithmultichaninteger24converter(out_type** out, uint16_t chans, uint32_t samples)
 	{
 		in_type samps[32768];
-		std::size_t amount=0;
+		uint32_t amount=0;
 		for(uint32_t io = 0 ; io < samples ; io+=amount)
 		{
-			amount = std::min(static_cast<std::size_t>(32768U)/chans,samples-io);
+			amount = std::min(static_cast<uint32_t>(32768U)/chans,samples-io);
 			ReadArray(samps, amount*chans);
 			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
+			for (uint32_t a=0; a < amount; a++) {
+				for (uint16_t b=0; b < chans; b++) {
 					out[b][io+a]=converter_func(psamps->signedValue());
 					psamps++;
 				}
@@ -759,12 +759,12 @@ using namespace universalis::stdlib;
 	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
 	void AbstractIff::ReadWithfloatconverter(out_type* out, uint32_t numsamples, double multi) {
 		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < numsamples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U),numsamples-io);
+		uint32_t amount=0;
+		for(uint32_t io = 0; io < numsamples; io+=amount) {
+			amount = std::min(static_cast<uint32_t>(32768U),numsamples-io);
 			ReadArray(samps,amount);
 			in_type* psamps = samps;
-			for(std::size_t b = 0 ; b < amount; ++b) {
+			for(uint32_t b = 0 ; b < amount; ++b) {
 				*out=converter_func(*psamps, multi);
 				out++;
 				psamps++;
@@ -775,13 +775,13 @@ using namespace universalis::stdlib;
 	template<typename in_type, typename out_type, out_type (*converter_func)(in_type, double)>
 	void AbstractIff::ReadWithmultichanfloatconverter(out_type** out, uint16_t chans, uint32_t numsamples, double multi) {
 		in_type samps[32768];
-		std::size_t amount=0;
-		for(std::size_t io = 0; io < numsamples; io+=amount) {
-			amount = std::min(static_cast<std::size_t>(32768U)/chans,numsamples-io);
+		uint32_t amount=0;
+		for(uint32_t io = 0; io < numsamples; io+=amount) {
+			amount = std::min(static_cast<uint32_t>(32768U)/chans,numsamples-io);
 			ReadArray(samps,amount*chans);
 			in_type* psamps = samps;
-			for (int a=0; a < amount; a++) {
-				for (int b=0; b < chans; b++) {
+			for (uint32_t a=0; a < amount; a++) {
+				for (uint16_t b=0; b < chans; b++) {
 					out[b][io+a]=converter_func(*psamps, multi);
 					psamps++;
 				}

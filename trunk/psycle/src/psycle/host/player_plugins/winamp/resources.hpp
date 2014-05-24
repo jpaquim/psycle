@@ -39,8 +39,8 @@
 #define IDC_DLG_FILENAME                4012
 #define IDC_CACHEVALID                  4013
 #define IDC_CKBRIDGING                  4014
-#define IDC_NUMBER_THREADS              4015
-#define IDC_RUNNING_THREADS             4016
+#define IDC_WA_NUMBER_THREADS           4015
+#define IDC_WA_RUNNING_THREADS          4016
 #define HASH                            65535
 
 // Next default values for new objects
