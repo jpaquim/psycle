@@ -75,7 +75,7 @@ namespace host{
 		XMINSTRUMENTFILEHEADER fileheader;
 
 		Read(&fileheader,sizeof(XMINSTRUMENTFILEHEADER));
-		if ( !strcmp(fileheader.name,"Extended Instrument")) return;
+		if ( !strncmp(fileheader.name,XI_HEADER,sizeof(fileheader.extxi))) return;
 		XMInstrument instr;
 		instr.Init();
 		fileheader.name[22] = 0;
@@ -206,8 +206,8 @@ namespace host{
 		TRACE(_T("Fileformat Version %i.%i\n"),int(pTrackerVer[1]),int(pTrackerVer[0]));
 
 		// check header
-		bIsValid = (!stricmp(pID,XM_HEADER));
-
+		bIsValid = (!strncmp(pID,XM_HEADER,sizeof(XM_HEADER)-1));
+		
 
 		// cleanup
 		delete[] pID;
@@ -1139,10 +1139,10 @@ namespace host{
 		
 		
 		m_pSampler->IsAmigaSlides(true);
-		if ( !stricmp(pID,"M.K.")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
-		else if ( !stricmp(pID,"M!K!")) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
-		else if ( !stricmp(pID+1,"CHN")) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); } //-9dB
-		else if ( !stricmp(pID+2,"CH")) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f);}//-9dB
+		if ( !strncmp(pID,"M.K.",4)) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
+		else if ( !strncmp(pID,"M!K!",4)) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
+		else if ( !strncmp(pID+1,"CHN",4)) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); } //-9dB
+		else if ( !strncmp(pID+2,"CH",4)) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f);}//-9dB
 		song.BeatsPerMin(125);
 		song.LinesPerBeat(4);
 		song.TicksPerBeat(24);
@@ -1174,10 +1174,10 @@ namespace host{
 		bool bIsValid = false;
 		char *pID = AllocReadStr(4,1080);
 
-		bIsValid = !stricmp(pID,"M.K.");
-		if ( !bIsValid ) bIsValid = !stricmp(pID,"M!K!");
-		if ( !bIsValid ) bIsValid = !stricmp(pID+1,"CHN");
-		if ( !bIsValid ) bIsValid = !stricmp(pID+2,"CH");
+		bIsValid = !strncmp(pID,"M.K.",4);
+		if ( !bIsValid ) bIsValid = !strncmp(pID,"M!K!",4);
+		if ( !bIsValid ) bIsValid = !strncmp(pID+1,"CHN",4);
+		if ( !bIsValid ) bIsValid = !strncmp(pID+2,"CH",4);
 
 		delete[] pID;
 		return bIsValid;

@@ -1738,20 +1738,24 @@ namespace psycle
 		}
 		void Mixer::ExchangeReturns(int chann1,int chann2)
 		{
-			//Since the exchange of input wires implies copying,
-			//the pointers in outWires need to be swapped too.
-			if (Return(chann1).GetWire().Enabled()) {
-				int idx = Return(chann1).GetWire().GetSrcWireIndex();
-				Return(chann1).GetWire().GetSrcMachine().outWires[idx] = sends_[chann2];
+			//We have to exchange the outWire pointers of the source machine, since we will copy the wire contents from one index to the other.
+			//it is done in two steps because getSrcWireIndex() navigates in order to know the index.
+			Wire & wire1 = Return(chann1).GetWire();
+			Wire & wire2 = Return(chann2).GetWire();
+			int idx1 = (wire1.Enabled()) ? wire1.GetSrcWireIndex() : 0;
+			int idx2 = (wire2.Enabled()) ? wire2.GetSrcWireIndex() : 0;
+			if (wire1.Enabled()) {
+				wire1.GetSrcMachine().outWires[idx1] = &wire2;
 			}
-			if (Return(chann2).GetWire().Enabled()) {
-				int idx = Return(chann2).GetWire().GetSrcWireIndex();
-				Return(chann2).GetWire().GetSrcMachine().outWires[idx] = sends_[chann1];
+			if (wire2.Enabled()) {
+				wire2.GetSrcMachine().outWires[idx2] = &wire1;
 			}
-
+			//copy data from one channel to the other, including wire information
 			ReturnChannel tmp(returns_[chann1]);
 			returns_[chann1] = returns_[chann2];
 			returns_[chann2] = tmp;
+			//Exchange the sends too. There is no need to exchange the inwires of the dest machine since the outwire
+			//index is not stored in the wire and the rest of the information remains equal.
 			Wire* tmp2 = sends_[chann1];
 			sends_[chann1] = sends_[chann2];
 			sends_[chann2] = tmp2;
@@ -1764,7 +1768,7 @@ namespace psycle
 			}
 			for (int i(0); i < numreturns(); ++i)
 			{
-				//exchange sendsTo
+				//exchange sendsTo (boolean)
 				Return(i).ExchangeSends(chann1,chann2);
 			}
 			//Recalculating all because of the return-to-send which can apply to other returns

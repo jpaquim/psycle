@@ -64,6 +64,12 @@ BOOL XMSamplerUIInst::PreTranslateMessage(MSG* pMsg)
 {
 	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
 	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	if (res == FALSE && (pMsg->message == WM_KEYDOWN || pMsg->message == WM_KEYUP)) {
+		DWORD dwID = GetFocus()->GetDlgCtrlID();
+		if (dwID == IDC_INSTRUMENTLIST && (pMsg->wParam == 'A' || pMsg->wParam == 'F')) {
+			res = TRUE;
+		}
+	}
 	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
 	return res;
 }

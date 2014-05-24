@@ -11,7 +11,7 @@
 //				Filter coeffs
 //
 //////////////////////////////////////////////////////////////////////
-double Formant::m_coeff[5][11] =
+double const Formant::m_coeff[5][11] =
 {
 	//				A
 	{

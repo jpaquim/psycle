@@ -112,26 +112,23 @@ void Inertia::Fill(float *pout, int nsamples)
 	{
 		amt = Clip(nsamples);
 		nsamples -= amt;
-		if (amt > 0)
+		while (amt > 1)
 		{
-			while (amt > 1)
-			{
-				*++pout = Next();
-				*++pout = Next();
-				amt -= 2;
-			}
-			if (amt)
-			{
-				*++pout = Next();
-			}
+			*++pout = Next();
+			*++pout = Next();
+			amt -= 2;
 		}
-		else Fill(pout,0.0f,nsamples);
+		if (amt)
+		{
+			*++pout = Next();
+		}
 	}
 	while (nsamples);
 }
 //////////////////////////////////////////////////////////////////
 //
-//				Fill
+//				Fill & Mult. Warning. do not mix with dsp.h Fill(),
+//           which has the same signature, but different meaning
 //
 //////////////////////////////////////////////////////////////////
 void Inertia::Fill(float *pbuf, float mul, int nsamples)
@@ -142,17 +139,13 @@ void Inertia::Fill(float *pbuf, float mul, int nsamples)
 	{
 		amt = Clip(nsamples);
 		nsamples -= amt;
-		if (amt > 2)
+		while (amt > 1)
 		{
-			do
-			{
-				*++pbuf = Next() * mul;
-				*++pbuf = Next() * mul;
-				amt -= 2;
-			}
-			while (amt > 2);
+			*++pbuf = Next() * mul;
+			*++pbuf = Next() * mul;
+			amt -= 2;
 		}
-		while (amt--)
+		if (amt)
 		{
 			*++pbuf = Next() * mul;
 		}

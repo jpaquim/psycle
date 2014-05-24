@@ -284,7 +284,7 @@ float dwfilter::Process(const float xn, const int chan)
 #if 0
 	bool dwfilter::isdenormal(float num)								
 	{
-		if(  (   ( *(std::uint32_t*) & num) & 0x7f800000) == 0)
+		if(  (   ( *(uint32_t*) & num) & 0x7f800000) == 0)
 			return true;
 		return false;
 	}

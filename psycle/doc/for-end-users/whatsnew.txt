@@ -69,6 +69,7 @@ v1.11.3 (beta) (2014-xx-xx)
 ! Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample and several other selection size discrepancies)
 ! Gear rack: exchanging instruments to an unused position crashed the application.
 ! Sampulse : Fixed play backwards command 0E9F
+! Send-Return mixer: Moving a send/return to another index (dragging in the mixer dialog the header of a return to another one) was broken in the betas. Fixed.
 
 
 v1.11.2 (beta) (2014-02-16)

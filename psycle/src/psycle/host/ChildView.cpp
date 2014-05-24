@@ -1238,7 +1238,7 @@ namespace psycle { namespace host {
 		{
 			if (!Global::player()._recording)
 			{
-				static char BASED_CODE szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
+				static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 				
 				CFileDialog dlg(false,"wav",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
 				if ( dlg.DoModal() == IDOK ) 
@@ -1975,25 +1975,25 @@ namespace psycle { namespace host {
 			Global::player().Stop();
 			
 			OldPsyFile* file;
-			const char* szExtension = strrchr(fName.c_str(), '.');
+			const char* szExtension = strrchr(fName.c_str(), '.')+1;
 			if (szExtension == NULL) {
 				MessageBox("Could not Open file. Check that it uses a supported extension/format.", "Loading Error", MB_OK);
 				return;
 			}
 			else {
-				if (!strcmpi(szExtension, ".psy")) {
+				if (!_strnicmp(szExtension, "psy",3)) {
 					file = new OldPsyFile();
 				}
-				else if (!strcmpi(szExtension, ".xm")) {
+				else if (!_strnicmp(szExtension, "xm",2)) {
 					file = new XMSongLoader();
 				}
-				else if (!strcmpi(szExtension, ".it")) {
+				else if (!_strnicmp(szExtension, "it",2)) {
 					file = new ITModule2();
 				}
-				else if (!strcmpi(szExtension, ".s3m")) {
+				else if (!_strnicmp(szExtension, "s3m",3)) {
 					file = new ITModule2();
 				}
-				else if (!strcmpi(szExtension, ".mod")) {
+				else if (!_strnicmp(szExtension, "mod",3)) {
 					file = new MODSongLoader();
 				}
 				else {

@@ -427,6 +427,7 @@ void XMSamplerUISample:: SliderGlobvolume(CSliderCtrl* slid)
 {
 	float invol = helpers::dsp::SliderToAmountHoriz(slid->GetPos());
 	rWave().WaveGlobVolume(invol);
+	Global::song().wavprev.SetVolume(invol);
 }
 void XMSamplerUISample::SliderPan(CSliderCtrl* slid)
 {
