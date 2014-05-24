@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="fluidsynth">
+      <UniqueIdentifier>{be28dfd0-8765-4c14-8ae8-8507a6e35145}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{fcaa62f7-cdfb-4250-a3e1-76daf4b77b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\rvoice">
+      <UniqueIdentifier>{ce8ec036-ad0e-489a-a5dc-b9e9b7cdaf53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\synth">
+      <UniqueIdentifier>{a7ce0a9e-4b4f-4675-b447-92bd033d0e0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\sfloader">
+      <UniqueIdentifier>{b10242b3-4e70-4c66-a4e4-5b61e5b20caa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utils">
+      <UniqueIdentifier>{35430b70-f538-493f-ad26-ac8ab7809332}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\midi">
+      <UniqueIdentifier>{19f0fb1e-2823-4efb-bece-82b35bfc19b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\event.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\gen.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\log.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\midi.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\misc.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\mod.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\ramsfont.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\settings.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\sfont.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\synth.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\types.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\version.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\voice.h">
+      <Filter>fluidsynth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\config_win32.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\fake_glib.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_adsr_env.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_chorus.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_iir_filter.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_lfo.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_phase.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rev.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice_event.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice_mixer.h">
+      <Filter>src\rvoice</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_chan.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_event_priv.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_event_queue.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_gen.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_mod.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_synth.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_tuning.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\synth\fluid_voice.h">
+      <Filter>src\synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\sfloader\fluid_defsfont.h">
+      <Filter>src\sfloader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\sfloader\fluid_ramsfont.h">
+      <Filter>src\sfloader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\sfloader\fluid_sfont.h">
+      <Filter>src\sfloader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluid_conv.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluid_hash.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluid_list.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluid_ringbuffer.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluid_settings.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluid_sys.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\utils\fluidsynth_priv.h">
+      <Filter>src\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\src\midi\fluid_midi.h">
+      <Filter>src\midi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\fake_glib.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_adsr_env.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_chorus.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_iir_filter.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_lfo.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rev.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice_dsp.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice_event.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\rvoice\fluid_rvoice_mixer.c">
+      <Filter>src\rvoice</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_chan.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_event.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_gen.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_mod.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_synth.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_tuning.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\synth\fluid_voice.c">
+      <Filter>src\synth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\sfloader\fluid_defsfont.c">
+      <Filter>src\sfloader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\sfloader\fluid_ramsfont.c">
+      <Filter>src\sfloader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\utils\fluid_conv.c">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\utils\fluid_hash.c">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\utils\fluid_list.c">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\utils\fluid_ringbuffer.c">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\utils\fluid_settings.c">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\utils\fluid_sys.c">
+      <Filter>src\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external-packages\fluidsynth\src\midi\fluid_midi.c">
+      <Filter>src\midi</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,187 @@
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$.........
+$             $$      $$$      $$$     $.........
+$$    $$       $        $     $$.$   $$..........
+.$    $$$     $$       $$     $.$   $$...........
+.$    $.$     $       $$$$    $.$  $$ $..........
+.$    $.$     $  $    $$$$    $$$  $$$ $$........
+.$    $$$     $  $$$$  $$      $         $$......
+.$    $$$$$$$$$    $$$$$$$$$              $......
+.$    $....$$              $$     $$$    $.......
+.$     $$...$$$$$$$$       $$$$ $$$     $........
+.$$     $$..$$   $$$      $$..$$$$    $$.........
+$$$$     $$$$             $$..$$$    $$..........
+$$      $$$$              $..$$     $$...........
+.$$    $$..$$$          $$...$       $...........
+..$$$$$$.....$$$$$$$$$$$$....$      $$...........
+..$$$$$$$$...................$$    $$............
+..$$     $$$$$$$$$$$$$$$ $$$$$$$$$$$$$$$$$$$.....
+...$        $$         $$     $$$$         $$....
+...$       $$$         $$     $$.$$         $$...
+..$$      $$ $          $     $$.$$  $       $$..
+..$       $  $      $   $     $$$$   $$$$     $..
+.$$       $  $      $$  $$$     $$    $.$$     $.
+.$       $$$  $$$    $$   $$     $$   $$$$     $$
+.$       $.$   $$    $$$  $$      $$   $$   $$$$.
+.$       $.$$   $$   $$$$$$$       $$   $$$$$....
+.$       $..$    $    $.$$.$       $$    $$......
+.$       $$$$  $$     $$...$     $$$     $$......
+.$       $..$ $$       $...$    $$      $$.......
+.$$$$$$$$$..$$ $$$$$$$$$...$$$$$$      $$........
+................................$$$$$$$..........
+( Thanks _Tao_ )
+
+\/ Description
+---------------
+
+	This Plugin allows you to play .psy files containing Psycle Songs with
+	winamp, or any player compatible with winamp plugins (like XMPlay)
+
+	This release is based on the source code of Psycle 1.10.1
+	Newer releases will be based on psycle-core.
+
+
+\/ Installation
+---------------
+
+	The package contains several files. This is the exact place where they should go:
+	
+	Winamp's directory (The directory where winamp.exe is located, generally 
+	C:\Program Files\Winamp)
+	
+	- boost_date_time-vc90-mt-1_41.dll
+	- boost_filesystem-vc90-mt-1_41.dll
+	- boost_system-vc90-mt-1_41.dll
+	- boost_thread-vc90-mt-1_41.dll
+	- universalis.dll
+	- winamp-psycle-plugin.txt
+	
+	Note:
+	If you have a file namde blwtbl.dll in your winamp's directory, delete it. The older
+	plugin needed that file to be there, but the new one doesn't, and if it finds it,
+	Druttis sublime won't work.
+	
+	Winamp's plugin directory (The directory of its plugins, generally C:\Program Files\
+	Winamp\Plugins)
+	
+	- in_psycle.dll
+	
+	If you use the Spanish translation of winamp, then you can also use the spanish
+	translation for the in_psycle plugin located in Lang\es-US.
+	It goes in the language dir (Concretely, C:\Program Files\Winamp\Lang\es-US\)
+	
+	- in_psycle.lng
+	
+	In the root directory of the .zip file, there is another "in_psycle.lng" file. This 
+	one is the english one, that you can use to create your own translation.
+	Modify it with a resource editor and copy it to Winamp\Lang\yourlang\.
+	Some resource editors:
+		ResEdit (free) (http://www.resedit.net/)
+		XN Resource Editor (free) (http://www.wilsonc.demon.co.uk/d10resourceeditor.htm)
+		Resource Editor (free) (http://melander.dk/reseditor/) 
+	
+
+\/ Limitations
+---------------
+
+	This version of the plugin has the following limitations:
+
+	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
+	· Cannot save the info.
+
+
+\/ Version Revision
+--------------------
+1.10 (23-04-2012)
+-----------------
+. Engine update to 1.10.1
+. Update of the plugin to support Winamp 5.5 translations. Compatibility maintained with 2.x compatible players
+. Support to specify audio bit depth and audio threads.
+. Support to save the configuration/cache on winamp's config dir (allows also portable use).
+
+
+1.3 (12-10-2009)
+----------------
+· Engine update to 1.8.6.
+
+
+1.2 (19-10-2007)
+----------------
+· Engine update to 1.8.5. This is an important update, which leverages the plugin again
+ with the tracker.
+ · The info and configuration dialgos have been redone partially. 
+
+
+1.1 (15-07-2003)
+----------------
+· Engine update to 1.7.4. This allows the playback of old and new fileformat,
+  as well as the many improvements made to the host in this period of time.
+
+
+1.0 RC 2 (29-12-2002)
+---------------------
+·Fixed bug where the plugin didn't close all files (when checking
+if it was a .psy file or not) which made those files uneditable until
+Winamp was closed.
+
+
+1.0 RC 1 (25-12-2002)
+--------------------
+·Fixed some problems with playing some songs.
+·Some small changes in the info dialog.
+
+
+Beta 6 (10-12-2002)
+--------------------
+·Engine Update to Psycle 1.7
+·Added configuration Dialog
+·Added Info dialog
+·Fixed the "winamp refreshing always" problem.
+·Linked to MFC statically (hence the increase of size). Should
+ add for stability. Most of the code doesn't need it so it might
+ be possible in the future to remove MFC completely.
+
+
+Beta 5 (??-09-2002)
+--------------------
+·Engine Update to Psycle 1.66
+
+
+Beta 4 (30-03-2002)
+--------------------
+·Engine Update to Psycle 1.6Plus
+
+
+Beta 4 (20-03-2002)
+--------------------
+·Engine Update to Psycle 1.6Final
+·Source Code shared between the Plugin and the Tracker.
+
+
+Beta 3 (12-12-2001)
+--------------------
+·Engine Update to Psycle 1.6 RC1
+·Now it unloads the song when it finishes (frees memory)
+
+Beta 2 (13-06-2001)
+--------------------
+·Engine Update to Psycle 1.5 b3 R5
+
+Beta 1 (30-05-2001)
+--------------------
+·Initial Release
+
+
+\/ Ending
+----------
+
+	Plugin Created by Josep Mª [JAZ] on 13-June-2001
+
+	For any questions, suggestions or bugreports, use the boards on psycledelics:
+
+		http://psycle.pastnotecut.org/
+
+	or Contact me at jaz@pastnotecut.org
+
+	Source Code is avaiable on Psycle's SourceForge site:
+
+		http://sourceforge.net/projects/psycle/

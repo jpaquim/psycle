@@ -1,0 +1,251 @@
+A quick doc on skinning psycle
+------------------------------
+
+1) Preface, What is skinnable?
+
+	There are three things skinnable right now, the Machine boxes in the machine view, 
+	the Pattern headers in the pattern editor, and the controls in the parameters view of 
+	native plugins, including the mixer and the master.
+
+	These parts support different sizes and also transparency.
+
+2) What do I need in order to skin?
+
+	You need to make eight files, five for graphics, and three for image information.
+	(Older versions used five files)
+	These files are as follows:
+
+		your_machine_graphics_name.bmp
+		your_knob_graphics_name.bmp
+		your_mixer_graphics_name.bmp
+		your_master_graphics_name.bmp
+		your_header_graphics_name.bmp
+		your_machine_graphics_info_.psm
+		your_controls_graphics_info_.psc
+		your_header_graphics_info.psh
+
+	Usually, they are packed inside a directory.
+	
+	There is a requirement about file placement and file names. They have to be in the
+	same directory, and names of .bmp files need to be the same (except extension) than
+	the info files.
+	Example:
+		PsycleSkinMachine.bmp
+		PsycleSkinMachine.psm
+		PsycleSkinHeader.bmp
+		PsycleSkinHeader.psh
+		PsycleSkinControls.bmp
+		PsycleSkinControls.psc
+		PsycleSkinMixer.bmp  (configured inside PsycleSkinControls.psc)
+		PsycleSkinMaster.bmp (configured inside PsycleSkinControls.psc)
+
+3) How do I make the files?
+
+	The best way to start is getting one skin and modifying it. Once you understand
+	how everything works, you might be confident on starting from your own work.
+
+	Notes for graphics:
+
+		You can make them the way you want, with the bitdepth appropiated. Support for other
+		fileformats than .bmp are not planned (they would require specific loaders).
+		On Mixer and master, only the graphics can be changed, not the sizes. The knobs also have a fixed size.
+
+	Notes for info files:
+
+	mach.psm (machines info)
+	------------------------
+
+	The following values tell psycle how your bitmap file is formatted (this is, where are the 
+	graphics and which size do they have.
+	Coords are top, left, width height
+
+
+	"master_source"=0,153,189,22         <---- GraphicBox for master.
+	"generator_source"=0,6,195,112       <---- GraphicBox for the Generator machines
+	"generator_vu0_source"=0,0,4,6       <---- the highlighted vu graphic, the Width also tells the VU's block size.
+	"generator_vu_peak_source"=157,0,4,6 <---- the "peak" vu graphic (which is left when the vu goes down)
+	"generator_pan_source"=196,39,8,9    <---- the pan handle graphic 
+	"generator_mute_source"=233,0,28,27  <---- the mute highlighted graphic 
+	"generator_solo_source"=195,0,37,38  <---- the solo highlighted graphic 
+
+	"effect_source"=0,118,227,32        <----- GraphicBox for Effect machines
+	"effect_vu0_source"=0,150,2,3       <----- the highlighted vu graphic, the Width also tells the VU's block size.
+	"effect_vu_peak_source"=41,150,2,3  <----- the chunk of the vu that is left when the vu goes down
+	"effect_pan_source"=196,39,8,9      <----- the pan handle graphic
+	"effect_mute_source"=197,51,19,11   <----- the mute highlighted graphic
+	"effect_bypass_source"=221,51,21,10 <----- the bypass highlighted graphic
+
+	If you do not want a vu on either machine you may set the height of the vu0_source to 0.
+	If you do not want vu peak indicator on either machine, you may set the width of the vu_peak_source to 0.
+
+
+	The following values tell psycle how should it draw the different objects.
+	Here, the coords are relative to the top left corner of the source graphic.
+ 	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of mach.bmp)
+
+
+	"generator_vu_dest"=19,44,156 <---- top, left, width coords of the whole vumeter.
+	"generator_pan_dest"=90,67,76 <---- top, left, width coords of the pan. subtract the width of the pan graphic from the total width.
+	"generator_mute_dest"=51,68 <---- top, left coords of the mute button
+	"generator_solo_dest"=11,62 <----top,left coords of the solo button
+	"generator_name_dest"=16,20 <---- top,left cords of the machine text
+	"generator_name_clip_coords"=0,0 <----- width and height of the clipping area for the name. 0,0 means do not clip.
+
+	"effect_vu_dest"=18,9,40    <---- top, left and width coords of the whole vumeter
+	"effect_pan_dest"=117,20,71 <---- top, left and width coords of the pan. subtract the width of the pan graphic from the total width.
+	"effect_mute_dest"=173,5    <---- top, left coords of the mute button
+	"effect_bypass_dest"=197,5  <----top,left coords of the bypass button
+	"effect_name_dest"=62,4     <---- top,left cords of the machine text
+	"effect_name_clip_coords"=0,0 <----- width and height of the clipping area for the name. 0,0 means do not clip.
+
+	"transparency"=0000ff00  <---- RGB value of the colour that is to be used as transparency.
+					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
+
+
+	head.psh (headers info)
+	-----------------------
+
+	The following values tell psycle how your bitmap file is formatted (this is, where are the 
+	graphics and which size do they have).
+	Since Psycle 1.11.3, there are two headers. One with track names, and the other without.
+	Coords are top, left, width height
+
+	== Header without track names
+	
+	"background_source"=0,0,106,16 <---- Background graphic for the header.
+	"number_0_source"=0,16,7,12    <---- graphic for the number 0. The others have to follow as "123456789" and have the same size.
+	"record_on_source"=70,16,9,9   <---- Enabled record button
+	"mute_on_source"=79,16,9,9     <---- Enabled mute button
+	"solo_on_source"=88,16,9,9     <---- Enabled solo button
+	"playing_on_source"=0,40,8,17  <---- Highlighted playing indicator
+
+	If you do not want any track numbers then make the width of the numbers 0.
+	If you don't want playing indicator, comment or do not add the playing_on_source line.
+
+	The following is one of the four new blocks of data for mouse tracking. 
+	This first group indicate the graphics location for the classic header highlight
+	Width and height coupled with destination tracking designate the clickable area
+	"record_tracking_source"=59,24,18,18	<---- Position of the record tracking image (can be the same than record_on_source)
+	"mute_tracking_source"=95,24,18,18		<---- Position of the mute tracking image (can be the same than mute_on_source)
+	"solo_tracking_source"=77,24,18,18		<---- Position of the solo tracking image (can be the same than solo_on_source)
+
+	
+	
+	The following values tell psycle how has to draw the different objects.
+	Here, the coords are relative to the top left corner of the source graphic.
+ 	(i.e. the top left of the gen/fx graphic is 0,0 .. *not* the top left of head.bmp)
+
+	"digit_x0_dest"=10,2		<---- Position for the left digit
+	"digit_0x_dest"=17,2		<---- position for the right digit
+	"record_on_dest"=40,4		<---- position for the record button
+	"mute_on_dest"=63,4		<---- position for the mute button
+	"solo_on_dest"=85,4		<---- position for the solo button
+	"playing_on_dest"=8,3   <---- position for the playing indicator.
+
+	Second group of mouse tracking extension. These designate the placement on the classic header for the hightlights.
+	source Width and height coupled with destination designate the clickable area
+	"record_tracking_dest"=59,2		<---- Destination of the record tracking image (can be the same than record_on_dest)
+	"mute_tracking_dest"=95,2		<---- Destination of the mute tracking image (can be the same than mute_on_dest)
+	"solo_tracking_dest"=77,2		<---- Destination of the solo tracking image (can be the same than solo_on_dest)
+	
+
+	== Header with track names. An alternate header for showing the track names.
+
+	"text_background_source"=0,60,113,23	<---- Background graphic for the track names header.
+	"text_number_0_source"=0,44,7,12		<---- graphic for the number 0. The others have to follow as "123456789" and have the same size.
+	"text_record_on_source"=0,93,17,10		<---- Enabled record button
+	"text_mute_on_source"=96,93,17,10		<---- Enabled Mute button
+	"text_solo_on_source"=96,83,17,10		<---- Enabled Solo button
+	"text_playing_on_source"=0,83,17,10		<---- Highlighted playing indicator
+
+	This third group indicate the graphics location for the track names header highlight
+	//Width and height coupled with destination tracking designate the clickable area
+	"text_record_tracking_source"=3,115,54,8   <---- Position of the record tracking image (can be the same than text_record_on_source)
+	"text_mute_tracking_source"=57,115,54,8    <---- Position of the mute tracking image (can be the same than text_mute_on_source)
+	"text_solo_tracking_source"=57,106,54,8    <---- Position of the solo tracking image (can be the same than text_solo_on_source)
+
+	// destination coords to be rendered to
+	// destinations use 0,0 as top left of background
+	"text_digit_x0_dest"=10,6			<---- Position for the left digit
+	"text_digit_0x_dest"=17,6			<---- position for the right digit
+	"text_record_on_dest"=0,11			<---- position for the record button
+	"text_mute_on_dest"=96,11			<---- position for the mute button
+	"text_solo_on_dest"=96,0			<---- position for the solo button
+	"text_playing_on_dest"=0,0			<---- position for the playing indicator.
+	"text_crop_rectangle"=24,7,80,10	<---- Rectangle where the track name will be written. Width and height are used to cut the text (crop).
+
+	Fourth group of mouse tracking extension. These designate the placement on the track names header for the hightlights.
+	Width and height coupled with destination tracking designate the clickable area
+	//source Width and height coupled with destination designate the clickable area
+	"text_record_tracking_dest"=0,12   <---- Destination of the record tracking image (can be the same than text_record_on_dest)
+	"text_mute_tracking_dest"=57,12    <---- Destination of the mute tracking image (can be the same than text_mute_on_dest)
+	"text_solo_tracking_dest"=57,0     <---- Destination of the solo tracking image (can be the same than text_solo_on_dest)
+
+	//Track names font information.
+	"text_colour"= 0x00F0F0F0;	<--- Font colour for the track names header text.
+	"text_font_name"=Arial		<--- Font face for the track names header text.
+	"text_font_point"=40    	<--- Font size for the track names header text. Note: The number is in hexadecimal format.
+	"text_font_flags"=0			<--- Font flag for the track names header text. 0=normal, 1=bold, 2=italic, 3=bold+italic.
+	
+	
+	"transparency"=0000ff00  <---- 00BBGGRR . Colour that is to be used as transparency.
+	                                Note: It is important that you put the number next to the equal sign!
+					Leave this value out if your skin has no tranparency so that psycle can use the faster opaque mode renderer
+
+	controls.psc (controls info)
+	-----------------------
+	Originally, the controls of Psycle were not skinnable. In version 1.8, the ability to change the settings and skin the knob
+	control was added.
+	And finally, in version 1.11, the ability to skin the master machine window and the send return mixer controls was added.
+	
+	Controls.psc is the file used for version 1.11 and above.
+	Coords are top, left, width height
+
+	// WARNING!!! Use the same name than the .psc file for one of the three bmp files! The loader requires this.
+	"machinedial_bmp"="PsycleSkinKnob.bmp"
+	"send_return_bmp"="PsycleSkinMixer.bmp"
+	"master_bmp"="PsycleSkinMaster.bmp"
+
+	//Font used for the parameters and mixer windows.
+	"params_text_font_name"="Tahoma"
+	"params_text_font_point"=dword:00000050
+	"params_text_font_flags"=dword:00000000
+	"params_text_font_bold_name"="Tahoma"
+	"params_text_font_bold_point"=dword:00000050
+	"params_text_font_bold_flags"=dword:00000001
+
+	// Note: Colours are written in the form "00BGR" (i.e. opposite of RGB)
+	"master_text_backcolour"=dword:00292929
+	"master_text_forecolour"=dword:00E7BD18
+	"master_text_font_name"="Tahoma"
+	"master_text_font_point"=dword:00000046
+	"master_text_font_flags"=dword:00000000
+	// names are rendered on the y axis 15 pixels apart. 
+	"master_text_names_dest"=427,33,75,12
+	"master_text_numbers_master_dest"=22,187
+	// slider dBs are rendered on the x axis 24 pixels apart. height is master_text_names_dest height.
+	"master_text_numbers_channels_dest"=118,187
+
+	// These are the constants used for the graphics. They are not user-modifiable because
+	// it affects some internal objects and calculations.
+	// rotating knob graphic
+	// knob (x,y,w,h) 0,0,28,28
+	// number of knobs :  64  (middle position is knob number 32)
+
+	// Mixer graphic positions and widths are:
+	// mixer slider (x,y,w,h) 0,0,30,182
+	// mixer slider knob (x,y,w,h) 0,182,22,10
+	// mixer vu off (x,y,w,h) 30,0,16,90
+	// mixer vu on (x,y) 46,0
+	// mixer switch off (x,y,w,h) 30,90,28,28
+	// mixer switch on (x,y) 30,118
+	// mixer check off (x,y,w,h) 30,146,13,13
+	// mixer check on (x,y) 30,159
+
+	// Master graphic positions and widths are:
+	// background (x,y,w,h) 0,0,516,225
+	// Vu Left off (x,y,w,h) 516,0,18,159
+	// Vu Left on (x,y) 534,0
+	// Vu Right off (x,y) 552,0
+	// Vu Right on (x,y) 570,0
+	// slider knob (x,y,w,h) 516,159,22,10

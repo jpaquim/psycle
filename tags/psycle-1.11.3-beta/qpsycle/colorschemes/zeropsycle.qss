@@ -1,0 +1,124 @@
+* { 
+    background-color: #556655; 
+    color: #BBFFBB; 
+    font-family: "verdana"; 
+    font-size: 10pt; 
+}
+ 
+QScrollBar:horizontal {
+    border: 1px solid #33FF33;
+    height: 15px;
+    margin: 0px 20px 0 20px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #AADDAA;
+    min-width: 20px;
+    border: 1px solid #33FF33;
+}
+
+QScrollBar::add-line:horizontal {
+    border: 2px solid #33FF33;
+    width: 20px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+    border: 2px solid #33FF33;
+    width: 20px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+
+QScrollBar:vertical {
+    border: 1px solid #33FF33;
+    width: 15px;
+    margin: 20px 0 20px 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #33FF33;
+    min-height: 20px;
+    border: 1px solid #333333;
+}
+
+QScrollBar::add-line:vertical {
+    border: 2px solid #33FF33;
+    height: 20px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+    border: 2px solid #33FF33;
+    height: 20px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+
+QTabWidget::pane { /* The tab widget frame */
+}
+
+QTabWidget::tab-bar {
+}
+
+     /* Style the tab using the tab sub-control. Note that
+         it reads QTabBar _not_ QTabWidget */
+QTabBar::tab {
+    border: 2px solid ##33DD33;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    min-width: 8ex;
+    padding: 2px;
+}
+
+QTabBar::tab:selected, QTabBar::tab:hover {
+    background: ##33FF33;
+}
+
+QTabBar::tab:selected {
+    color: #EEFFEE;
+    border-color: #33FF33;
+    border-bottom-color: #556655; /* same as pane color */
+}
+
+QTabBar::tab:!selected {
+    margin-top: 2px; /* make non-selected tabs look smaller */
+    color: #88CC88;
+}
+
+QToolButton { 
+    border-radius: 6px;
+}
+
+QToolButton:hover {
+    border: 1px solid #33FF33;
+    background-color: #556655;
+}
+
+QToolTip {
+    background-color: black;
+    color: white;
+}
+
+QToolBar::handle {
+    background: #393939;
+    width: 2px;
+}
+
+QTreeView, QListView {
+    background-color: #333333;
+}
+
+QLineEdit, QTextEdit {
+    background-color: #333333;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #33FF33;
+    margin-left: 5px;
+    margin-right: 5px;
+}
