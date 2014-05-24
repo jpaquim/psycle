@@ -20,6 +20,7 @@
 #include "resources.hpp"
 #include <psycle/helpers/math.hpp>
 
+namespace winamp {
 #include <Winamp/in2.h>	// Winamp Input plugin header file
 #include <Winamp/wa_ipc.h>
 #include <api/service/api_service.h>
@@ -28,7 +29,7 @@ extern api_service *serviceManager;
 
 #include <api/service/waServiceFactory.h>
 #include <Agave/Language/api_language.h>
-
+}
 
 #define WA_PLUGIN_VERSION "1.10"
 
@@ -48,8 +49,8 @@ static const GUID in_psycle_GUID =
 { 0x131996c0, 0x65e2, 0x4721, { 0xa5, 0xe7, 0xc, 0x83, 0x9f, 0x7e, 0xc4, 0x72 } };
 
 // Wasabi based services for localisation support
-api_service *WASABI_API_SVC = 0;
-api_language *WASABI_API_LNG = 0;
+winamp::api_service *WASABI_API_SVC = 0;
+winamp::api_language *WASABI_API_LNG = 0;
 // these two must be declared as they're used by the language api's
 // when the system is comparing/loading the different resources
 HINSTANCE WASABI_API_LNG_HINST = 0,
@@ -174,14 +175,14 @@ void init()
 	{
 		// this is our first stage and will attempt to load the base of the wasabi services
 		// so we can the get and load other services like the localisation service api
-		WASABI_API_SVC = (api_service*)SendMessage(mod.hMainWindow, WM_WA_IPC, 0, IPC_GET_API_SERVICE);
-		if (WASABI_API_SVC == (api_service*)1) WASABI_API_SVC = NULL;
+		WASABI_API_SVC = (winamp::api_service*)SendMessage(mod.hMainWindow, WM_WA_IPC, 0, IPC_GET_API_SERVICE);
+		if (WASABI_API_SVC == (winamp::api_service*)1) WASABI_API_SVC = NULL;
 		if(WASABI_API_SVC != NULL)
 		{
 			// now that we've got an instance of the base service api, we load the language
 			// api service using it's guid to get it as shown
-			waServiceFactory *sf = WASABI_API_SVC->service_getServiceByGuid(languageApiGUID);
-			if (sf) WASABI_API_LNG = reinterpret_cast<api_language*>(sf->getInterface());
+			winamp::waServiceFactory *sf = WASABI_API_SVC->service_getServiceByGuid(winamp::languageApiGUID);
+			if (sf) WASABI_API_LNG = reinterpret_cast<winamp::api_language*>(sf->getInterface());
 
 			// now we attempt to load the localisation api to load our lng file by passing the
 			// current hinstance of the plugin and it's associated guid
@@ -605,12 +606,12 @@ INT_PTR CALLBACK ConfigProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 		{
 			std::ostringstream s;
 			s <<global_.conf().GetNumThreads();
-			SetDlgItemText(hwndDlg,IDC_NUMBER_THREADS,s.str().c_str());
+			SetDlgItemText(hwndDlg,IDC_WA_NUMBER_THREADS,s.str().c_str());
 		}
 		{
 			std::ostringstream s;
 			s <<global_.player().num_threads();
-			SetDlgItemText(hwndDlg,IDC_RUNNING_THREADS,s.str().c_str());
+			SetDlgItemText(hwndDlg,IDC_WA_RUNNING_THREADS,s.str().c_str());
 		}
 		
 		// Directories.

@@ -2885,8 +2885,9 @@ namespace psycle
 
 		bool Song::CloneIns(int src,int dst)
 		{
-#if !defined WINAMP_PLUGIN
-
+#if defined WINAMP_PLUGIN
+			return false;
+#else
 			CExclusiveLock lock(&semaphore, 2, true);
 			// src has to be occupied and dst must be empty
 			if (samples.IsEnabled(src) && samples.IsEnabled(dst))
@@ -2965,8 +2966,8 @@ namespace psycle
 				file.Close();
 			}
 			DeleteFile(filepath);
-#endif //!defined WINAMP_PLUGIN
 			return result;
+#endif //!defined WINAMP_PLUGIN
 		}
 		
 		void Song::SavePsyInstrument(const std::string& filename, int instIdx) const

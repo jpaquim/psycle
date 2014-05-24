@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.11.2 ---------
+				------------------------------- 1.11.3 ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -37,8 +37,9 @@ Here some features of Psycle:
 - 256 sequence positions.
 - Multi-channel audio Routing (machine) view to interconnect the virtual machines in order to
   apply different effects.
-- Internal Stereo Sampler unit which supports .wav and .iff files of any
-  sampling rate, 8/16 and 24bits, mono or stereo.
+- Internal Stereo Sampler unit which supports .wav, .aiff, .iff/svx, .s3i, .its and any
+  sampling rate, 8/16 and 24bits, mono or stereo, with volume and filter envelopes.
+- Modern tracker Sampler (Sampulse, with Impulse Tracker like features, including filter).
 - 70+ Native Plugins (generators & effects), most of them open-source and with 
   an easy to use API to create new ones.
 - Multithreaded audio engine.

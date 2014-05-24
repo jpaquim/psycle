@@ -45,7 +45,7 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.11.3 (beta) (2014-xx-xx)
+v1.11.3 (beta) (2014-05-25)
 --------
 + Popup menu on machine view, for machines. It doesn't add new functionality that couldn't be done with mouse before, but it is now also possible with keyboard.
 + Sampulse Editor: Implemented the sampulse note mapping editor. Everything is point and click. Multiple selection is possible. (like setting a whole octave by selecting the 12 notemaps, and then the 12 notes with mouse and shift)
@@ -65,6 +65,7 @@ v1.11.3 (beta) (2014-xx-xx)
 * New Wave Loader implementation. Better format support.
 * New Amiga IFF/SVX loader (ok, probaby useless, but now it has correct loop code, supports multioctave instruments, Big and little endian 16bits, Stereo and pan. Also volume envelope, if there is any file that uses it).
 * Gear Rack: now it has a different list for sampulse instruments or samples.
+* Moved to boost 1.55.
 ! Sampler: Fixes in pitch slide command (it became broken when adding samplerate support)
 ! Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample and several other selection size discrepancies)
 ! Gear rack: exchanging instruments to an unused position crashed the application.

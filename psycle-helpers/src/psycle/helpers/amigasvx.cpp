@@ -136,7 +136,7 @@ namespace psycle
 				memset(sampname,0,sizeof(sampname));
 				return sampname;
 			}
-			ReadSizedString(sampname,std::min(sizeof(sampname)-1,currentHeader.length()));
+			ReadSizedString(sampname,std::min(static_cast<uint32_t>(sizeof(sampname))-1,currentHeader.length()));
 			skipThisChunk();
 			return sampname;
 		}

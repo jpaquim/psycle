@@ -20,23 +20,6 @@ namespace psycle
 		} CommonChunk;
 
 		typedef struct {
-		  LongBE   offset;
-		  LongBE   blockSize;
-		  uint8_t*  WaveformData;
-		}  SoundDataChunk;
-
-		typedef struct {
-		  MarkerId     id;
-		  LongBE       position;
-		  std::string  markerName;
-		} Marker;
-
-		typedef  struct {
-		  ShortBE  numMarkers;
-		  std::map<int16_t,Marker>   Markers;
-		} MarkerChunk;
-
-		typedef struct {
 		  ShortBE   playMode;
 		  MarkerId  beginLoop;
 		  MarkerId  endLoop;
@@ -55,6 +38,24 @@ namespace psycle
 		} InstrumentChunk;
 
 #pragma pack(pop)
+
+		typedef struct {
+		  LongBE   offset;
+		  LongBE   blockSize;
+		  uint8_t*  WaveformData;
+		}  SoundDataChunk;
+
+		typedef struct {
+		  MarkerId     id;
+		  LongBE       position;
+		  std::string  markerName;
+		} Marker;
+
+		typedef  struct {
+		  ShortBE  numMarkers;
+		  std::map<int16_t,Marker>   Markers;
+		} MarkerChunk;
+
 
 		/*********  IFF file reader comforming to Apple Audio IFF specifications ****/
 		class AppleAIFF : public EaIff {

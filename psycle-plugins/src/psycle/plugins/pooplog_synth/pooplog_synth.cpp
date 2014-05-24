@@ -176,7 +176,6 @@ TODO LIST
 */
 
 #include <psycle/plugin_interface.hpp>
-	
 #include "SynthTrack.h"
 #include <cstring>
 #include <cstdio>
@@ -830,7 +829,14 @@ public:
 	virtual void PutData(void * pData);
 	virtual void GetData(void * pData);
 
-	virtual int GetDataSize() { return sizeof(SYNPAR); }
+	virtual int GetDataSize() {
+		int size = sizeof(SYNPAR);
+		//Fix for 64bit architecture. It should not report 8byte pointers, because pointers are *skipped* with size 4. See PutData and GetData.
+#if defined _WIN64 || defined __LP64__ || defined __LLP64__
+		size -= SYNPARSKIPSIZE+OSCPARSKIPSIZE+VCFPARSKIPSIZE;
+#endif // POINTER SIZE
+		return size;
+	}
 
 	SYNPAR globalpar;
 	int inertia;
@@ -839,7 +845,6 @@ public:
 private:
 	float * WaveTable[MAXWAVE+1];
 	CSynthTrack track[MAX_TRACKS];
-	
 
 };
 
@@ -1044,8 +1049,8 @@ void mi::PutData(void * pData) {
 			"Your settings are probably fucked.", "Pooplog FM Laboratory", 0);
 		return;
 	}
+	cdata += SYNPARSKIPSIZE; // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 	#if defined SYNTH_ULTRALIGHT
-		cdata += 8; // skip junk
 		globalpar.curOsc = read<int32_t>(cdata);
 		globalpar.curVcf = read<uint32_t>(cdata);
 		globalpar.vcfmixmode = read<uint32_t>(cdata);
@@ -1066,7 +1071,7 @@ void mi::PutData(void * pData) {
 		globalpar.song_sync = read<int32_t>(cdata);
 		globalpar.overdrivegain = read<int32_t>(cdata);
 		for(int i = 0; i < MAXOSC; ++i) {
-			cdata += 4; // skip junk
+			cdata += OSCPARSKIPSIZE; // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 			globalpar.gOscp[i].Wave = read<int32_t>(cdata);
 			globalpar.gOscp[i].oscfinetune = read<int32_t>(cdata);
 			globalpar.gOscp[i].osctune = read<int32_t>(cdata);
@@ -1075,7 +1080,6 @@ void mi::PutData(void * pData) {
 			globalpar.gOscp[i].oscmixtype = read<int32_t>(cdata);
 		}
 	#elif defined SYNTH_LIGHT
-		cdata += 8; // skip junk
 		globalpar.curOsc = read<int32_t>(cdata);
 		globalpar.curVcf = read<uint32_t>(cdata);
 		globalpar.vcfmixmode = read<uint32_t>(cdata);
@@ -1105,7 +1109,7 @@ void mi::PutData(void * pData) {
 		globalpar.song_sync = read<int32_t>(cdata);
 		globalpar.overdrivegain = read<int32_t>(cdata);
 		for(int i = 0; i < MAXOSC; ++i) {
-			cdata += 8; // skip junk
+			cdata += OSCPARSKIPSIZE; // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 			globalpar.gOscp[i].Wave[0] = read<int32_t>(cdata);
 			globalpar.gOscp[i].Wave[1] = read<uint32_t>(cdata);
 			globalpar.gOscp[i].oscwidth = read<int32_t>(cdata);
@@ -1117,7 +1121,6 @@ void mi::PutData(void * pData) {
 			globalpar.gOscp[i].oscmixtype = read<int32_t>(cdata);
 		}
 	#else
-		cdata += 12; // skip junk
 		globalpar.curOsc = read<int32_t>(cdata);
 		globalpar.curVcf = read<uint32_t>(cdata);
 		globalpar.vcfmixmode = read<uint32_t>(cdata);
@@ -1153,7 +1156,7 @@ void mi::PutData(void * pData) {
 		globalpar.song_sync = read<int32_t>(cdata);
 		globalpar.overdrivegain = read<int32_t>(cdata);
 		for(int i = 0; i < MAXOSC; ++i) {
-			cdata += 20; // skip junk
+			cdata += OSCPARSKIPSIZE; // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 			globalpar.gOscp[i].Wave[0] = read<int32_t>(cdata);
 			globalpar.gOscp[i].Wave[1] = read<int32_t>(cdata);
 			globalpar.gOscp[i].oscplfowave = read<int32_t>(cdata);
@@ -1198,7 +1201,7 @@ void mi::PutData(void * pData) {
 		}
 	#endif
 	for(int i = 0; i < MAXVCF; ++i) {
-		cdata += 4; // skip junk
+		cdata += VCFPARSKIPSIZE; // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 		globalpar.gVcfp[i].vcflfowave = read<int32_t>(cdata);
 		globalpar.gVcfp[i].vcfenvdelay = read<int32_t>(cdata);
 		globalpar.gVcfp[i].vcfenvattack = read<int32_t>(cdata);
@@ -1315,8 +1318,8 @@ void mi::GetData(void * pData) {
 	if(pData) {
 		char * cdata = reinterpret_cast<char* >(pData);
 		write<int32_t>(cdata, globalpar.version);
+		cdata += SYNPARSKIPSIZE;  // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 		#if defined SYNTH_ULTRALIGHT
-			cdata += 8; // skip junk
 			write<int32_t>(cdata, globalpar.curOsc);
 			write<uint32_t>(cdata, globalpar.curVcf);
 			write<uint32_t>(cdata, globalpar.vcfmixmode);
@@ -1337,7 +1340,7 @@ void mi::GetData(void * pData) {
 			write<int32_t>(cdata, globalpar.song_sync);
 			write<int32_t>(cdata, globalpar.overdrivegain);
 			for(int i = 0; i < MAXOSC; ++i) {
-				cdata += 4; // skip junk
+				cdata += OSCPARSKIPSIZE;  // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 				write<int32_t>(cdata, globalpar.gOscp[i].Wave);
 				write<int32_t>(cdata, globalpar.gOscp[i].oscfinetune);
 				write<int32_t>(cdata, globalpar.gOscp[i].osctune);
@@ -1346,7 +1349,6 @@ void mi::GetData(void * pData) {
 				write<int32_t>(cdata, globalpar.gOscp[i].oscmixtype);
 			}
 		#elif defined SYNTH_LIGHT
-			cdata += 8; // skip junk
 			write<int32_t>(cdata, globalpar.curOsc);
 			write<uint32_t>(cdata, globalpar.curVcf);
 			write<uint32_t>(cdata, globalpar.vcfmixmode);
@@ -1376,7 +1378,7 @@ void mi::GetData(void * pData) {
 			write<int32_t>(cdata, globalpar.song_sync);
 			write<int32_t>(cdata, globalpar.overdrivegain);
 			for(int i = 0; i < MAXOSC; ++i) {
-				cdata += 8; // skip junk
+				cdata += OSCPARSKIPSIZE;  // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 				write<int32_t>(cdata, globalpar.gOscp[i].Wave[0]);
 				write<uint32_t>(cdata, globalpar.gOscp[i].Wave[1]);
 				write<int32_t>(cdata, globalpar.gOscp[i].oscwidth);
@@ -1388,7 +1390,6 @@ void mi::GetData(void * pData) {
 				write<int32_t>(cdata, globalpar.gOscp[i].oscmixtype);
 			}
 		#else
-			cdata += 12; // skip junk
 			write<int32_t>(cdata, globalpar.curOsc);
 			write<uint32_t>(cdata, globalpar.curVcf);
 			write<uint32_t>(cdata, globalpar.vcfmixmode);
@@ -1424,7 +1425,7 @@ void mi::GetData(void * pData) {
 			write<int32_t>(cdata, globalpar.song_sync);
 			write<int32_t>(cdata, globalpar.overdrivegain);
 			for(int i = 0; i < MAXOSC; ++i) {
-				cdata += 20; // skip junk
+				cdata += OSCPARSKIPSIZE;  // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 				write<int32_t>(cdata, globalpar.gOscp[i].Wave[0]);
 				write<int32_t>(cdata, globalpar.gOscp[i].Wave[1]);
 				write<int32_t>(cdata, globalpar.gOscp[i].oscplfowave);
@@ -1469,7 +1470,7 @@ void mi::GetData(void * pData) {
 			}
 		#endif
 		for(int i = 0; i < MAXVCF; ++i) {
-			cdata += 4; // skip junk
+			cdata += VCFPARSKIPSIZE;  // skip the pointers. (They are not saved or loaded anyway). Always assume 32bits!
 			write<int32_t>(cdata, globalpar.gVcfp[i].vcflfowave);
 			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvdelay);
 			write<int32_t>(cdata, globalpar.gVcfp[i].vcfenvattack);

@@ -316,6 +316,7 @@ const signed char ArpNote[MAXARP][16] = {
 };
 #endif
 
+#define VCFPARSKIPSIZE 4
 struct VCFPAR
 {
 	float *pvcflfowave;
@@ -347,6 +348,7 @@ struct VCFVALS
 };
 
 #ifdef SYNTH_ULTRALIGHT
+#define OSCPARSKIPSIZE 4
 // ultralight synth
 struct OSCPAR
 {
@@ -368,6 +370,7 @@ struct OSCVALS
 	int rand;
 };
 
+#define SYNPARSKIPSIZE 8
 struct SYNPAR
 {
 	int version;
@@ -398,9 +401,9 @@ struct SYNPAR
 #else
 #ifndef SYNTH_LIGHT
 // normal synth
+#define OSCPARSKIPSIZE 20
 struct OSCPAR
 {
-	//FIXME:  64bit portability!!!! This causes a difference in size in CMachineInterface.GetDataSize()!!!
 	float *pWave[2];
 	float *poscplfowave;
 	float *poscwlfowave;
@@ -476,10 +479,10 @@ struct OSCVALS
 	int oscwidth;
 };
 
+#define SYNPARSKIPSIZE 12
 struct SYNPAR
 {
 	int version;
-	//FIXME:  64bit portability!!!! This causes a difference in size in CMachineInterface.GetDataSize()!!!
 	float *ptremolo_wave;
 	float *pvibrato_wave;
 	float *pgain_lfo_wave;
@@ -522,6 +525,7 @@ struct SYNPAR
 };
 #else
 // light synth
+#define OSCPARSKIPSIZE 8
 struct OSCPAR
 {
 	float *pWave[2];
@@ -544,7 +548,7 @@ struct OSCVALS
 	unsigned int oscdir;
 	int oscphase;
 };
-
+#define SYNPARSKIPSIZE 8
 struct SYNPAR
 {
 	int version;
