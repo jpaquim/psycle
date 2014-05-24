@@ -220,24 +220,48 @@ namespace psycle
 		bool Song::ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
-			///\todo: This has been copied from GearRack code. It needs to be converted (with multi-io and the mixer, this doesn't work at all)
 			assert(origmac);
 
 			Machine* newmac = CreateMachine(type,psPluginDll,songIdx,shellIdx);
 			// replace all the connection info
 			if (newmac)
 			{
-				// Finally, Rewire.
+				// Rewire standard inputs/outputs.
 				for (int i = 0; i < MAX_CONNECTIONS; i++)
 				{
 					if (origmac->inWires[i].Enabled()) {
 						origmac->inWires[i].ChangeDest(newmac->inWires[i]);
 					}
 					if (origmac->outWires[i] && origmac->outWires[i]->Enabled()) {
-						origmac->outWires[i]->ChangeSource(*newmac, 0, i
-							, &origmac->outWires[i]->GetMapping());
+						Machine* dstMac = &origmac->outWires[i]->GetDstMachine();
+						int wiredest = origmac->outWires[i]->GetDstWireIndex();
+						if ( dstMac->_type == MACH_MIXER && wiredest >= MAX_CONNECTIONS)
+						{
+							if (((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
+							{
+								Wire & oldwire = ((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).GetWire();
+								oldwire.ChangeSource(*newmac,0,i, &oldwire.GetMapping());
+							}
+						}
+						else {
+							origmac->outWires[i]->ChangeSource(*newmac,0,i,	&origmac->outWires[i]->GetMapping());
+						}
 					}
 				}
+				//In case of mixer, rewire send/returns too
+				if (type == MACH_MIXER) {
+					for (int i = 0; i < MAX_CONNECTIONS; i++)
+					{
+						if (((Mixer*)origmac)->ReturnValid(i))
+						{
+							Mixer &mixer = *static_cast<Mixer*>(newmac);
+							mixer.InsertReturn(i);
+							Wire & oldwire = ((Mixer*)origmac)->Return(i).GetWire();
+							oldwire.ChangeDest(mixer.Return(i).GetWire());
+						}
+					}
+				}
+
 				if(_pMachine[songIdx]) DestroyMachine(songIdx);
 				_pMachine[songIdx] = newmac;
 				newmac->_x = x;
@@ -709,8 +733,8 @@ namespace psycle
 			{
 				if (((Mixer*)dstMac)->ReturnValid(wiredest-MAX_CONNECTIONS))
 				{
-					((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).GetWire()
-						.ChangeSource(*newsrcMac,0,newwiresrc, &dstMac->inWires[wiredest].GetMapping());
+					Wire & oldwire = ((Mixer*)dstMac)->Return(wiredest-MAX_CONNECTIONS).GetWire();
+					oldwire.ChangeSource(*newsrcMac,0,newwiresrc, &oldwire.GetMapping());
 					return true;
 				}
 			}

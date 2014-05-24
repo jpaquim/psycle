@@ -93,11 +93,11 @@ namespace psycle { namespace host {
 
 				if (propMac != -1) // Is the mouse pointer over a machine?
 				{
-					if (wiresource == propMac) // Is the mouse at the same place than when we did OnRButtonDown?
+					if (wiresource == propMac) // Is the mouse over the same machine than when we did OnRButtonDown?
 					{
 						//DoMacPropDialog(propMac);
 					}
-					else if (wiresource != -1) // Did we RButtonDown over a machine?
+					else if (wiresource != -1) // Did we RButtonDown over a wire (moving dest) or a machine?
 					{
 						Machine *tmac = _pSong._pMachine[wiresource];
 						Machine *dmac = _pSong._pMachine[propMac];
@@ -121,7 +121,7 @@ namespace psycle { namespace host {
 							}
 							allowcontextmenu=false;
 						}
-						else
+						else //Create a new connection
 						{
 							int dsttype=0;
 							///\todo: for multi-io.
@@ -141,7 +141,7 @@ namespace psycle { namespace host {
 							allowcontextmenu=false;
 						}
 					}
-					else if ( wiremove != -1) //were we moving a wire then?
+					else if ( wiremove != -1) //were we moving a wire (source)?
 					{
 						Machine *tmac = _pSong._pMachine[propMac];
 						Machine *dmac = _pSong._pMachine[wiredest];
@@ -1005,17 +1005,17 @@ namespace psycle { namespace host {
 					int pointpos = ((point.x-XOFFSET)%ROWWIDTH) - HEADER_INDENT;
 					int trackpos = ((point.x-XOFFSET)/ROWWIDTH);
 					if (InRect(pointpos,point.y,PatHeaderCoords->dMuteOnTrack,PatHeaderCoords->sMuteOnTracking)){
-						trackingMuteTrack=trackpos;
+						trackingMuteTrack=ntOff+trackpos;
 						trackingRecordTrack=trackingSoloTrack=-1;
 						Repaint(draw_modes::track_header);
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords->dRecordOnTrack,PatHeaderCoords->sRecordOnTracking)){
-						trackingRecordTrack=trackpos;
+						trackingRecordTrack=ntOff+trackpos;
 						trackingMuteTrack=trackingSoloTrack=-1;
 						Repaint(draw_modes::track_header);
 					}
 					else if (InRect(pointpos,point.y,PatHeaderCoords->dSoloOnTrack,PatHeaderCoords->sSoloOnTracking)){
-						trackingSoloTrack=trackpos;
+						trackingSoloTrack=ntOff+trackpos;
 						trackingMuteTrack=trackingRecordTrack=-1;
 						Repaint(draw_modes::track_header);
 					}

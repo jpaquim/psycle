@@ -688,10 +688,10 @@ namespace psycle { namespace host {
 				wdLeft=wave.pWaveDataL();
 				wdRight=wave.pWaveDataR();
 				wdStereo=wave.IsWaveStereo();
-				wdLoop=wave.WaveLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL;
+				wdLoop=wave.WaveLoopType()!=XMInstrument::WaveData<>::LoopType::DO_NOT;
 				wdLoopS=wave.WaveLoopStart();
 				wdLoopE=wave.WaveLoopEnd();
-				wdSusLoop=wave.WaveSusLoopType()==XMInstrument::WaveData<>::LoopType::NORMAL;
+				wdSusLoop=wave.WaveSusLoopType()!=XMInstrument::WaveData<>::LoopType::DO_NOT;
 				wdSusLoopS=wave.WaveSusLoopStart();
 				wdSusLoopE=wave.WaveSusLoopEnd();
 

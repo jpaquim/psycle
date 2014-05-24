@@ -7,6 +7,7 @@
 #include "internal_machines.hpp"
 #include "FrameMachine.hpp"
 #include "InputHandler.hpp"
+#include "ExclusiveLock.hpp"
 
 namespace psycle { namespace host {
 
@@ -464,6 +465,7 @@ namespace psycle { namespace host {
 		{
 			if ( _swapstart >= chan1 && _swapend >= chan1 && _swapstart != _swapend)
 			{
+				CExclusiveLock lock(&Global::song().semaphore, 2, true);
 				if ( _swapstart < chanmax)
 				{
 					_swapstart -=chan1; _swapend -= chan1; 

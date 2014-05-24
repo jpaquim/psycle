@@ -5,12 +5,6 @@
 #include <psycle/plugin_interface.hpp>
 
 #include <diversalis.hpp>
-#if !defined DIVERSALIS__OS__MICROSOFT || !defined DIVERSALIS__COMPILER__MICROSOFT
-	#error sorry, this code uses mfc!
-#else
-	#include <universalis/os/include_windows_without_crap.hpp>
-#endif
-
 #include <fluidsynth.h>
 
 #include <string>
@@ -213,7 +207,7 @@ enum {
 
 CMachineInfo const MacInfo (
 	MI_VERSION,
-	0x0100,
+	0x0101,
 	GENERATOR,
 	sizeof pParameters / sizeof *pParameters,
 	pParameters,
@@ -235,6 +229,7 @@ CMachineInfo const MacInfo (
 		"\t\t0Cxx - (optional) volume at note on (00-7F)\n"
 		"\n"
 		"off 02 03\t\tnote-off (the instrument preset is required!)\n"
+		"mcm command is supported\n"
 		"\n"
 		"ported by Sartorius",
 	"Load SoundFont",
@@ -393,9 +388,9 @@ void mi::PutData(void* pData) {
 		return;
 	}
 
-	UNIVERSALIS__COMPILER__WARNING("Reading/writting structured data as a raw bunch of bytes leads to endianess issues!")
+	DIVERSALIS__WARNING("Reading/writting structured data as a raw bunch of bytes leads to endianess issues!");
 
-	size_t readsize = sizeof SYNPAR;
+	size_t readsize = GetDataSize();
 	if (loadingVersion == 2) {
 		readsize -= sizeof(globalpar.gain);
 		globalpar.gain = 25;
@@ -453,7 +448,7 @@ void mi::PutData(void* pData) {
 }
 
 void mi::GetData(void* pData) {
-	if(pData) std::memcpy(pData, &globalpar, sizeof SYNPAR);
+	if(pData) std::memcpy(pData, &globalpar, GetDataSize());
 }
 
 void mi::Stop() {
@@ -735,91 +730,80 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val) {
 }
 
 void mi::Command() {
-	char szFilters[]="SF2 (*.sf2)|*.sf2|All Files (*.*)|*.*||";
-
-	CFileDialog fileDlg (TRUE, "SF2", "*.sf2", OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, NULL);
-	if(fileDlg.DoModal () == IDOK) {
-		std::string sfPathName = fileDlg.GetPathName().GetBuffer(12);
-		const char * sffile = sfPathName.c_str();
-		LoadSF(sffile);
+	char name[1024];
+	name[0]='\0';
+	bool open=pCB->FileBox(true,"SF2 (*.sf2)|*.sf2|All Files (*.*)|*.*||",name);
+	if (open) {
+		LoadSF(name);
 	}
 }
 
 bool mi::LoadSF(const char * sf_file) {
 	std::string loadfile = sf_file;
 	if(!fluid_is_soundfont(sf_file)) {
-		char txt[1024];
-		std::sprintf(txt, "It's not a SoundFont file or file %s not found! Please, locate it.", sf_file);
-		pCB->MessBox(txt, "SF2 Loader",0);
-
-		char szFilters[]="SF2 (*.sf2)|*.sf2|All Files (*.*)|*.*||";
-		CFileDialog fileDlg (TRUE, "SF2", "*.sf2", OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, NULL);
-		if(fileDlg.DoModal () == IDOK) {
-			std::string sfPathName = fileDlg.GetPathName().GetBuffer(12);
-			loadfile = sfPathName;
-		}
-		else {
+		char buffer[1024];
+		std::sprintf(buffer, "It's not a SoundFont file or file %s not found! Please, locate it.", sf_file);
+		pCB->MessBox(buffer, "SF2 Loader",0);
+		buffer[0]='\0';
+		bool open=pCB->FileBox(true,"SF2 (*.sf2)|*.sf2|All Files (*.*)|*.*||",buffer);
+		if (!open || !fluid_is_soundfont(buffer)) {
 			return false;
+		}
+		loadfile = buffer;
+	}
+	if(sf_id) {
+		Stop();
+		fluid_synth_sfunload(synth,sf_id, 1);
+	}
+	sf_id = fluid_synth_sfload(synth, loadfile.c_str(), 1);
+	if(sf_id == -1) {
+		pCB->MessBox("Error loading!","SF2 Loader",0);
+		sf_id = 0;
+		return false;
+	}
+
+	fluid_synth_system_reset(synth);
+
+	int cur_bank(-1);
+
+	max_bank_index = -1;
+
+	for(int i = 0; i < 129; ++i) {
+		banks[i] = 0;
+		progs[i] = 0;
+	}
+	
+	const int midi_chan = fluid_synth_count_midi_channels(synth);
+	for(int i = 0; i < midi_chan; ++i) {
+		preset = fluid_synth_get_channel_preset(synth, i);
+		if(preset != NULL) {
+			if(cur_bank != (*(preset)->get_banknum)(preset)) {
+				cur_bank = (*(preset)->get_banknum)(preset);
+				++max_bank_index;
+				banks[max_bank_index] = cur_bank;
+				progs[cur_bank] = (*(preset)->get_num)(preset);
+				if(new_sf) {
+					globalpar.instr[i].bank = banks[max_bank_index];
+					globalpar.instr[i].prog = progs[banks[max_bank_index]];
+				}
+			}
 		}
 	}
-	if(fluid_is_soundfont(loadfile.c_str())) {
-		if(sf_id) {
-			Stop();
-			fluid_synth_sfunload(synth,sf_id, 1);
-		}
-		sf_id = fluid_synth_sfload(synth, loadfile.c_str(), 1);
-		if(sf_id == -1) {
-			pCB->MessBox("Error loading!","SF2 Loader",0);
-			sf_id = 0;
-			return false;
-		}
-
-		fluid_synth_system_reset(synth);
-
-		int cur_bank(-1);
-
-		max_bank_index = -1;
-
-		for(int i = 0; i < 129; ++i) {
-			banks[i] = 0;
-			progs[i] = 0;
-		}
-		
-		const int midi_chan = fluid_synth_count_midi_channels(synth);
+	// set channel to the first available instrument
+	if(new_sf)
 		for(int i = 0; i < midi_chan; ++i) {
 			preset = fluid_synth_get_channel_preset(synth, i);
 			if(preset != NULL) {
-				if(cur_bank != (*(preset)->get_banknum)(preset)) {
-					cur_bank = (*(preset)->get_banknum)(preset);
-					++max_bank_index;
-					banks[max_bank_index] = cur_bank;
-					progs[cur_bank] = (*(preset)->get_num)(preset);
-					if(new_sf) {
-						globalpar.instr[i].bank = banks[max_bank_index];
-						globalpar.instr[i].prog = progs[banks[max_bank_index]];
-					}
-				}
+				Vals[e_paraChannel] = globalpar.curChannel = i;
+				Vals[e_paraBank] = globalpar.instr[globalpar.curChannel].bank;
+				Vals[e_paraProgram] = globalpar.instr[globalpar.curChannel].prog;
+				break;
 			}
 		}
-		// set channel to the first available instrument
-		if(new_sf)
-			for(int i = 0; i < midi_chan; ++i) {
-				preset = fluid_synth_get_channel_preset(synth, i);
-				if(preset != NULL) {
-					Vals[e_paraChannel] = globalpar.curChannel = i;
-					Vals[e_paraBank] = globalpar.instr[globalpar.curChannel].bank;
-					Vals[e_paraProgram] = globalpar.instr[globalpar.curChannel].prog;
-					break;
-				}
-			}
 
-		std::sprintf(globalpar.SFPathName, loadfile.c_str());
+	std::sprintf(globalpar.SFPathName, loadfile.c_str());
 
-		return true;
-	}
-	else{
-		return false;
-	}
+	return true;
 }
 void mi::MidiEvent(int channel, int midievent, int value) {
 	switch(midievent) {
