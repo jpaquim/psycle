@@ -4,10 +4,11 @@
 */
 #pragma once
 
+#include "endiantypes.hpp"
+#include "sampleconverter.hpp"
 #include <universalis.hpp>
 #include <string>
 #include <fstream>
-#include "endiantypes.hpp"
 
 namespace psycle { namespace helpers {
 

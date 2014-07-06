@@ -33,6 +33,7 @@ class PluginFxCallback : public psycle::plugin_interface::CFxCallback {
 		/* implement */ int CallbackFunc(int, int, int, void*);
 		/* implement */ float * unused0(int, int);
 		/* implement */ float * unused1(int, int);
+		/* implement */ bool FileBox(bool openMode, char filter[], char inoutName[]);
 };
 
 class Plugin; // forward declaration

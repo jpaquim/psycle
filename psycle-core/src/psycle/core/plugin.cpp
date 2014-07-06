@@ -42,6 +42,7 @@ int PluginFxCallback::GetTPB() const { return Player::singleton().timeInfo().tic
 int PluginFxCallback::CallbackFunc(int, int, int, void*) { return 0; }
 float * PluginFxCallback::unused0(int, int) { return 0; }
 float * PluginFxCallback::unused1(int, int) { return 0; }
+bool PluginFxCallback::FileBox(bool openMode, char filter[], char inoutName[]) { return false; }
 
 /**************************************************************************/
 // Plugin
