@@ -333,7 +333,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 
 	for(i = 0; i < 128; ++i) {
 		int32_t x, y, type;
-        x = y = type = 0;
+		x = y = type = 0;
 		if(_machineActive[i]) {
 			//progress.emit(4,8192+i*(4096/128),"");
 			file->Read(x);
@@ -349,7 +349,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 					file->ReadArray(sDllName,256); // Plugin dll name
 					sDllName[255]='\0';
 	
-					std::string dllName = MachineKey::preprocessName(sDllName);
+					std::string dllName = MachineKey::preprocessName(sDllName, true);
 					if(dllName == "arguru-bass")
 						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::abass, *file);
 					else if(dllName == "arguru-synth")
@@ -359,7 +359,7 @@ bool Psy2Filter::LoadMACD(RiffFile * file, CoreSong & song, convert_internal_mac
 					else if(dllName == "synth21")
 						pMac[i] = &converter.redirect(factory,i, convert_internal_machines::Converter::asynth21, *file);
 					else {
-						pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName,0),i);
+						pMac[i] = factory.CreateMachine(MachineKey(Hosts::NATIVE, dllName, 0, true), i);
 						if(pMac[i] == 0) {
 							Plugin *p = ((Plugin*)factory.CreateMachine(InternalKeys::failednative,i));
 							p->LoadPsy2FileFormat(file);

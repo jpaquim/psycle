@@ -65,7 +65,7 @@ void MachineFactory::FillHosts() {
 
 }
 
-Machine* MachineFactory::CreateMachine(const MachineKey &key,Machine::id_type id) {
+Machine* MachineFactory::CreateMachine(const MachineKey & key, Machine::id_type id) {
 
 	assert(key.host() >= 0 && key.host() < Hosts::NUM_HOSTS);
 

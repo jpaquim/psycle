@@ -2,7 +2,7 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/detail/project.private.hpp>
-#include "plugincatcher.h"
+#include "plugincache.h"
 #include "fileio.h"
 #include <universalis/os/fs.hpp>
 #include <boost/filesystem/operations.hpp>

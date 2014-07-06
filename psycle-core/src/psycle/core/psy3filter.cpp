@@ -525,7 +525,7 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 				break;
 			case MACH_PLUGIN:
 			{
-				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, sDllName, 0), id);
+				mac = factory.CreateMachine(MachineKey(Hosts::NATIVE, sDllName, 0, true), id);
 				break;
 			}
 			case MACH_VST:
@@ -539,10 +539,10 @@ Machine* Psy3Filter::LoadMACDv0(RiffFile * file, CoreSong & song, int minorversi
 		if(!mac) {
 			if(loggers::warning()) {
 				std::ostringstream s;
-				s << "Problem loading machine!\ntype: " << type << ", dllName: " << sDllName;
+				s << "Problem loading machine! type: " << type << ", dllName: " << sDllName;
 				loggers::warning()(s.str());
 			}
-			mac = factory.CreateMachine(InternalKeys::dummy,id);
+			mac = factory.CreateMachine(InternalKeys::dummy, id);
 			failedLoad = true;
 		}
 		song.AddMachine(mac);
