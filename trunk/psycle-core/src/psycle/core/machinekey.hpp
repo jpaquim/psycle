@@ -33,14 +33,14 @@ class PSYCLE__CORE__DECL MachineKey
 {
 	public:
 		MachineKey();
-		MachineKey(const Hosts::type host, const std::string & dllName, const uint32_t index = 0 );
+		MachineKey(const Hosts::type host, const std::string & dllName, const uint32_t index = 0, bool load = false);
 		MachineKey(const MachineKey& key);
 		~MachineKey();
 
-		static const std::string preprocessName(std::string dllName);
+		static const std::string preprocessName(std::string dllName, bool load = false);
 
 		const std::string & dllName() const;
-        Hosts::type host() const;
+		Hosts::type host() const;
 		uint32_t index() const;
 
 		bool operator<( const MachineKey & key) const;

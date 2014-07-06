@@ -14,35 +14,35 @@ namespace psycle { namespace core {
 		};
 
 
-		MachineKey::MachineKey( )
+		MachineKey::MachineKey()
 		:
 			dllName_(),
 			host_(Hosts::INTERNAL),
 			index_(uint32_t(-1))
 		{}
-		MachineKey::MachineKey( const MachineKey & key)
+		MachineKey::MachineKey(const MachineKey & key)
 		:
 			dllName_(key.dllName()),
 			host_(key.host()),
 			index_(key.index())
 		{}
 
-		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, uint32_t index )
+		MachineKey::MachineKey(const Hosts::type host, const std::string & dllName, uint32_t index, bool load)
 		:
 			host_(host),
 			index_(index)
 		{
-			if(!dllName.empty()) dllName_ = preprocessName(dllName);
+			if(!dllName.empty()) dllName_ = preprocessName(dllName, load);
 		}
 
 		MachineKey::~MachineKey() {
 		}
 
-
-		const std::string MachineKey::preprocessName(std::string dllName) {
+		const std::string MachineKey::preprocessName(std::string dllName, bool load) {
 			#if 0
 			std::cout << "preprocess in: " << dllName << std::endl;
 			#endif
+			
 			{ // 1) remove extension
 				std::string::size_type pos(dllName.find(".so"));
 				if(pos != std::string::npos) dllName = dllName.substr(0, pos);
@@ -63,9 +63,16 @@ namespace psycle { namespace core {
 				std::string::size_type const pos(dllName.find(prefix));
 				if(pos == 0) dllName.erase(pos, prefix.length());
 			}
+
+			if(load) {
+				if(dllName == "blitz") dllName = "blitz12";
+				else if(dllName == "gamefx") dllName = "gamefx13";
+			}
+
 			#if 0
 			std::cout << "preprocess out: " << dllName << std::endl;
 			#endif
+			
 			return dllName;
 		}
 
@@ -91,9 +98,11 @@ namespace psycle { namespace core {
 		const std::string & MachineKey::dllName() const {
 			return dllName_;
 		}
-        Hosts::type MachineKey::host() const {
+		
+		Hosts::type MachineKey::host() const {
 			return host_;
 		}
+		
 		uint32_t MachineKey::index() const {
 			return index_;
 		}

@@ -716,7 +716,7 @@ bool Psy4Filter::loadMACDv1( RiffFile * file, CoreSong& song, int minorversion )
 	file->Read(host);
 	file->ReadString(sDllName,256);
 	file->Read(keyindex);
-	MachineKey key(Hosts::type(host),sDllName,keyindex);
+	MachineKey key(Hosts::type(host), sDllName, keyindex, true);
 	Machine* mac = factory.CreateMachine(key,index);
 	if (mac) {
 		song.AddMachine(mac);
