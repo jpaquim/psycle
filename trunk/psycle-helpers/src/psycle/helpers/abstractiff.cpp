@@ -2,7 +2,6 @@
 	\file
 	implementation file for psycle::helpers::abstractIff
 */
-#include <forced-include.private.hpp>
 #include "abstractiff.hpp"
 #include <stdexcept>
 #include <cstdio>

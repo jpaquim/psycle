@@ -110,7 +110,7 @@ namespace psycle
 			
 			const VHeader & getformat() { return format; }
 			const bool stereo() { return isStereo; }
-			std::string AmigaSvx::GetName();
+			std::string GetName();
 			uint32_t getLength(int octave=1);
 			uint32_t getLoopStart(int octave=1);
 			uint32_t getLoopEnd(int octave=1);
