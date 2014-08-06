@@ -6,7 +6,6 @@
 #include "SInstance.h"
 #include "ConfigDlg.hpp"
 #include "MainFrm.hpp"
-#include "PlotterDlg.hpp"
 
 #include "AudioDriver.hpp"
 #include "MidiInput.hpp"
@@ -19,7 +18,6 @@
 #include <diversalis/compiler.hpp>
 
 #include <universalis/os/terminal.hpp>
-#include "PlotterDlg.hpp"
 
 // #include <vld.h>
 
@@ -141,12 +139,6 @@ namespace psycle { namespace host {
 				}
 				pFrame->CheckForAutosave();
 			}
-#if 0
-			// plotter test
-            CPlotterDlg* wnd = new CPlotterDlg(pFrame);
-			wnd->do_script();
-			wnd->ShowWindow(SW_SHOW);
-#endif
 
 			return TRUE;
 		}

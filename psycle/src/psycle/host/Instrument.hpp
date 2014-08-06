@@ -18,7 +18,8 @@ namespace psycle
 			virtual ~Instrument();
 			void Init();
 			void LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen=true);
-			void SaveFileChunk(RiffFile* pFile,const SampleList& samples, int sampleIdx, bool savesamples);
+			void LoadWaveSubChunk(RiffFile* pFile,SampleList& samples, int instrIdx, int pan, char * instrum_name, bool fullopen, int loadIdx);
+			void SaveFileChunk(RiffFile* pFile);
 
 			///\name Loop stuff
 			///\{
@@ -34,10 +35,10 @@ namespace psycle
 			/// 2 = Note Continue [No NNA]
 			///\endverbatim
 			unsigned char _NNA;
-			
-			int _lock_instrument_to_machine; //-1 means not locked
-			bool _LOCKINST;
 
+
+			int sampler_to_use; // Sampler machine index for lockinst.
+			bool _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
 
 			///\name Amplitude Envelope overview:
 			///\{

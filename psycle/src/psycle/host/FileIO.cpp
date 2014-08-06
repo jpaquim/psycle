@@ -210,8 +210,27 @@ namespace psycle
 		bool RiffFile::WriteString(const std::string & result)
 		{
 			Write(result.c_str(),result.length());
-			return Write('\0');
+			return Write('\0'); // NULL terminator
 		}
+
+		std::size_t RiffFile::WriteHeader(const char* pData, uint32_t version, uint32_t size/*=0*/)
+		{
+			Write(pData,4);
+			Write(version);
+			size_t pos = GetPos();
+			Write(size);
+			return pos;
+		}
+		uint32_t RiffFile::UpdateSize(std::size_t startpos)
+		{
+			size_t pos2 = GetPos(); 
+			uint32_t size = static_cast<uint32_t>(pos2-startpos-sizeof(uint32_t));
+			Seek(startpos);
+			Write(size);
+			Seek(pos2);
+			return size;
+		}
+
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -58,8 +58,9 @@ namespace psycle { namespace host {
 			m_spinlines.SetAccel(2, acc);
 
 			m_patname.SetWindowText(patName);
-			itoa(patLines,buffer,10);
-			m_numlines.SetWindowText(buffer);
+			std::ostringstream os;
+			os << patLines;
+			m_numlines.SetWindowText(os.str().c_str());
 			sprintf(buffer,"HEX: %x",patLines);
 			m_text.SetWindowText(buffer);
 

@@ -510,11 +510,29 @@ namespace psycle { namespace host {
 			else {
 				coords.bHasPlaying = false;
 			}
-			//track names background extension + tracking extension
-			std::map<std::string,std::string>::iterator it3 = props.find("text_background_source");
+			//Tracking extension on classic header
+			std::map<std::string,std::string>::iterator it3 = props.find("record_tracking_source");
 			if (it3 != props.end()) {
+				SetSkinSource(it3->second, coords.sRecordOnTrackingClassic);
+				SetSkinSource(props["mute_tracking_source"], coords.sMuteOnTrackingClassic);
+				SetSkinSource(props["solo_tracking_source"], coords.sSoloOnTrackingClassic);
+				SetSkinDest(props["record_tracking_dest"], coords.dRecordOnTrackClassic);
+				SetSkinDest(props["mute_tracking_dest"], coords.dMuteOnTrackClassic);
+				SetSkinDest(props["solo_tracking_dest"], coords.dSoloOnTrackClassic);
+			}
+			else {
+				coords.sMuteOnTrackingClassic = coords.sMuteOnClassic;
+				coords.sSoloOnTrackingClassic = coords.sSoloOnClassic;
+				coords.sRecordOnTrackingClassic = coords.sRecordOnClassic;
+				coords.dMuteOnTrackClassic = coords.dMuteOnClassic;
+				coords.dSoloOnTrackClassic = coords.dSoloOnClassic;
+				coords.dRecordOnTrackClassic = coords.dRecordOnClassic;
+			}
+			//track names background extension + tracking extension
+			std::map<std::string,std::string>::iterator it4 = props.find("text_background_source");
+			if (it4 != props.end()) {
 				coords.bHasTextSkin = true;
-				SetSkinSource(it3->second, coords.sBackgroundText);
+				SetSkinSource(it4->second, coords.sBackgroundText);
 				SetSkinSource(props["text_number_0_source"], coords.sNumber0Text);
 				SetSkinSource(props["text_record_on_source"], coords.sRecordOnText);
 				SetSkinSource(props["text_mute_on_source"], coords.sMuteOnText);
@@ -528,13 +546,6 @@ namespace psycle { namespace host {
 				SetSkinDest(props["text_solo_on_dest"], coords.dSoloOnText);
 				SetSkinDest(props["text_playing_on_dest"], coords.dPlayOnText);
 				
-				SetSkinSource(props["record_tracking_source"], coords.sRecordOnTrackingClassic);
-				SetSkinSource(props["mute_tracking_source"], coords.sMuteOnTrackingClassic);
-				SetSkinSource(props["solo_tracking_source"], coords.sSoloOnTrackingClassic);
-				SetSkinDest(props["record_tracking_dest"], coords.dRecordOnTrackClassic);
-				SetSkinDest(props["mute_tracking_dest"], coords.dMuteOnTrackClassic);
-				SetSkinDest(props["solo_tracking_dest"], coords.dSoloOnTrackClassic);
-
 				SetSkinSource(props["text_record_tracking_source"], coords.sRecordOnTrackingText);
 				SetSkinSource(props["text_mute_tracking_source"], coords.sMuteOnTrackingText);
 				SetSkinSource(props["text_solo_tracking_source"], coords.sSoloOnTrackingText);

@@ -739,7 +739,7 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 		{
 			int top = m_sequence.GetTopIndex();
 			m_sequence.SelItemRange(false,0,m_sequence.GetCount()-1);
-			if (Global::player()._playing) {
+			if (Global::player()._playing && PsycleGlobal::conf()._followSong) {
 				m_sequence.SetSel(Global::player()._playPosition,true);
 				if (Global::player()._playPosition < top) top = Global::player()._playPosition;
 			}

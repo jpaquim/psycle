@@ -2197,7 +2197,7 @@ namespace psycle { namespace host {
         void PsycleConfig::AddRecentFile(std::string const &f)
 		{
 			bool found = false;
-			std::size_t initial = recent_files_.size()-1;
+			signed int initial = static_cast<signed int>(recent_files_.size())-1;
 			for(std::size_t i = 0; i < recent_files_.size(); ++i) 
 			{
 				if( f == recent_files_[i]) {

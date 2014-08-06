@@ -47,10 +47,12 @@ namespace psycle
 			/// the initial lines per beat (LPB) when the song is started playing.
 			/// This can be changed in patterns using a command, but this value will not be affected.
 			int m_LinesPerBeat;
-			/// The song Ticks per beat (ticks as 24 ticks per beat). Set it from the song properties.
+			/// The song Ticks per beat (ticks as 24 ticks per beat). Changing this does not change the real bpm, but changes the amount of ticks that sampulse sees. 
+			/// Used in some commands, like the slide commands. In the future, this setting might also affect other effects and slides.
 			int m_TicksPerBeat;
-			/// The initial extraticks per line when the song is started playing.
+			/// The initial extraticks per line when the song is started playing. Changing this affects the real bpm. Each like will increase its length by the amount of ticks.
 			/// This can be changed in patterns using a command, but this value will not be affected.
+			/// It is intended to emulate correctly the classic trackers "speed" command. I.e speed 5 = 6 lpb + 1 extratick.
 			int m_ExtraTicksPerLine;
 			/// \todo This is a GUI thing... should not be here.
 			char currentOctave;
@@ -80,6 +82,34 @@ namespace psycle
 			Instrument * _pInstrument[MAX_INSTRUMENTS];
 			SampleList samples;
 			InstrumentList xminstruments;
+
+			//Maps for virtual instruments.
+			typedef std::pair<int, int> macinstpair;
+			typedef std::pair<int, bool> instsampulsepair;
+			std::map<int,macinstpair> virtualInst;
+			std::map<instsampulsepair,int> virtualInstInv;
+
+			void DeleteVirtualInstrument(int virtidx);
+			void DeleteVirtualOfInstrument(int inst, bool sampulse);
+			void DeleteVirtualsOfMachine(int macidx);
+
+			void SetVirtualInstrument(int virtidx, int macidx, int targetins);
+			inline macinstpair VirtualInstrument(int virtidx) const {
+				std::map<int,macinstpair>::const_iterator it = virtualInst.find(virtidx);
+				if(it != virtualInst.end()) {
+					return it->second;
+				}
+				return macinstpair(-1,-1);
+			}
+			inline int VirtualInstrumentInverted(int targetins, bool sampulse) const {
+				std::map<instsampulsepair,int>::const_iterator it = virtualInstInv.find(instsampulsepair(targetins,sampulse));
+				if(it != virtualInstInv.end()) {
+					return it->second;
+				}
+				return -1;
+			}
+
+
 			///\}
 			/// The index of the selected MIDI program for note entering
 			/// \todo This is a gui thing... should not be here.
@@ -193,12 +223,15 @@ namespace psycle
 			/// Verifies that the new connection doesn't conflict with the mixer machine.
 			bool ValidateMixerSendCandidate(Machine& mac,bool rewiring=false);
 			void RestoreMixerSendsReturns();
+			Machine* GetSamplerIfExists();
+			Machine* GetSampulseIfExists();
+			// This method is added because of virtual instruments, that are not machines, but represent a machine.
+			Machine* GetMachineOfBus(int bus, int& alternateinst) const;
+			std::string GetVirtualMachineName(Machine* mac, int alternateins) const;
 			/// Gets the first free slot in the Machines' bus (slots 0 to MAX_BUSES-1)
 			int GetFreeBus() const;
 			/// Gets the first free slot in the Effects' bus (slots MAX_BUSES  to 2*MAX_BUSES-1)
 			int GetFreeFxBus() const;
-			/// Returns the Bus index out of a pMachine index. (Legacy code. Used for validation purposes now)
-			int FindBusFromIndex(int smac) const;
 			/// Returns the first unused and empty pattern in the pPatternData[] Array. If none found, initializes to empty one not used in the sequence
 			int GetBlankPatternUnused(int rval = 0);
 			/// creates a new pattern.

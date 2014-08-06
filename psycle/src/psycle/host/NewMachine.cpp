@@ -289,7 +289,7 @@ namespace psycle { namespace host {
 				m_nameLabel.SetWindowText("Sampler");
 				m_descLabel.SetWindowText("Stereo Sampler Unit. Inserts new sampler.");
 				m_dllnameLabel.SetWindowText("Internal Machine");
-				m_versionLabel.SetWindowText("V0.5b");
+				m_versionLabel.SetWindowText("V1.0");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_SAMPLER;
 				selectedClass = internal;
@@ -315,7 +315,7 @@ namespace psycle { namespace host {
 				m_nameLabel.SetWindowText("Sampulse Sampler V2");
 				m_descLabel.SetWindowText("Sampler with the essence of FastTracker II and Impulse Tracker 2");
 				m_dllnameLabel.SetWindowText("Internal Machine");
-				m_versionLabel.SetWindowText("V0.9b");
+				m_versionLabel.SetWindowText("V1.1");
 				m_APIversionLabel.SetWindowText("Internal");
 				Outputmachine = MACH_XMSAMPLER;
 				selectedClass = internal;

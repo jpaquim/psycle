@@ -8,93 +8,131 @@ namespace psycle { namespace host {
 		{
 			// undo code not required, enter note handles it
 			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);	
-			if (cmd.GetType() == CT_Note)
+			PsycleConfig& config = PsycleGlobal::conf();
+			if(viewMode == view_modes::pattern && bEditMode)
 			{
-				const int outnote = cmd.GetNote();
-				if(viewMode == view_modes::pattern && bEditMode && Global::player()._playing && PsycleGlobal::conf()._followSong && PsycleGlobal::conf().inputHandler()._RecordNoteoff)
-				{ 
-					EnterNote(outnote,255,0,true);	// note end
-				}
-				else
+				if (cmd.GetType() == CT_Note && cmd.GetNote() < notecommands::release)
 				{
-					PsycleGlobal::inputHandler().StopNote(outnote);
+					if (Global::player()._playing && config._followSong && config.inputHandler()._RecordNoteoff)
+					{ 
+						int note = cmd.GetNote() + _pSong.currentOctave*12;
+						if (note > notecommands::b9) { note = notecommands::b9; }
+
+						PatternEntry entry = PsycleGlobal::inputHandler().BuildNote(cmd.GetNote(),255,0);
+						int line=0;
+						int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(note,
+							entry._mach, entry._inst, true, GetKeyState(VK_SHIFT)<0, line);
+						if (track == -1) track = editcur.track;
+						EnterData(&entry, track, line, false);
+						PsycleGlobal::inputHandler().PlayNote(&entry, track); 
+					}
+					else if (editcur.col == 0) {
+						PsycleGlobal::inputHandler().StopNote(cmd.GetNote()); 
+					}
+				}
+				else if ((nChar == 16) && ((nFlags & 0xC000) == 0xC000) && ChordModeOffs)
+				{
+					// shift is up, abort chord mode
+					editcur.line = ChordModeLine;
+					editcur.track = ChordModeTrack;
+					ChordModeOffs = 0;
+					AdvanceLine(patStep,config.inputHandler()._wrapAround,true);
+			//		pParentMain->StatusBarIdle();
+			//		Repaint(draw_modes::cursor);
 				}
 			}
-			else if ((nChar == 16) && ((nFlags & 0xC000) == 0xC000) && ChordModeOffs)
+			/*else if (){ }*/
+			else if (cmd.GetType() == CT_Note && cmd.GetNote() < notecommands::release)
 			{
-				// shift is up, abort chord mode
-				editcur.line = ChordModeLine;
-				editcur.track = ChordModeTrack;
-				ChordModeOffs = 0;
-				AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,true);
-		//		pParentMain->StatusBarIdle();
-		//		Repaint(draw_modes::cursor);
+				PsycleGlobal::inputHandler().StopNote(cmd.GetNote()); 
 			}
 		}
 
 		void CChildView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-			// undo code not required, enter note handles it
 			KeyUp(nChar, nRepCnt, nFlags);
 			CWnd::OnKeyUp(nChar, nRepCnt, nFlags);
 		}
 
 		void CChildView::KeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
 		{
+			PsycleConfig& config = PsycleGlobal::conf();
 			// undo code not required, enternote and msbput handle it
 			BOOL bRepeat = nFlags&0x4000;
+			// get command
+			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);
 
+			bool success = false;
+			//If editing in the pattern
 			if(viewMode == view_modes::pattern && bEditMode)
 			{
-				if (!(Global::player()._playing && PsycleGlobal::conf()._followSong && bRepeat))
+				if (Global::player()._playing && config._followSong && cmd.GetType() == CT_Note)
 				{
-					bool success;
-					// add data
-					success = PsycleGlobal::inputHandler().EnterData(nChar,nFlags);
-
-					if ( success )
+					// if it is a keyrepeat on a note while recording, ignore it
+					if (!bRepeat)
 					{
-						CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-						return;
+						PatternEntry entry = PsycleGlobal::inputHandler().BuildNote(cmd.GetNote());
+						int line=0;
+						int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(entry._note,
+							entry._mach, entry._inst, false, GetKeyState(VK_SHIFT)<0, line);
+						if (track == -1) track = editcur.track;
+
+//TODO:
+//If the FT2 recording behaviour is not selected and track -1, do not record but play the note.
+//	PsycleGlobal::conf().inputHandler()._RecordUnarmed
+
+						EnterData(&entry, track, line, true);
+						PsycleGlobal::inputHandler().PlayNote(&entry, track); 
+						success = true;
 					}
+				}
+				else if ( editcur.col == 0 )
+				{
+					if ( cmd.GetType() == CT_Note)
+					{
+						PatternEntry entry = PsycleGlobal::inputHandler().BuildNote(cmd.GetNote());
+						int line=0;
+						int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(entry._note,
+							entry._mach, entry._inst, false, GetKeyState(VK_SHIFT)<0, line);
+						if (track == -1) track = editcur.track;
+						EnterData(&entry, track, line, true);
+						PsycleGlobal::inputHandler().PlayNote(&entry, track); 
+						success = true;
+					}
+				}
+				else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
+				{
+					success = MSBPut(nChar);
 				}
 			}
 			/*else if (viewMode == view_modes::sequence && bEditMode)
 			{
 				bool success;
 				// add data
-				success = PsycleGlobal::inputHandler().EnterDataSeq(nChar,nFlags);
-				if ( success )
-				{
-					CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
-					return;
-				}
+				success = EnterDataSeq(nChar,nFlags);
 			}*/
-			else
-			{
-				ChordModeOffs = 0;
+
+			if ( success ) {
+				return;
 			}
 
-			// get command
-			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags);
-
+			//If we reach this point, the key hasn't been handled, so let's do it.
 			if(cmd.IsValid())
 			{
 				if((cmd.GetType() == CT_Immediate) ||
-				(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
+					(cmd.GetType() == CT_Editor && viewMode == view_modes::pattern) ) 
 				{			
 					PsycleGlobal::inputHandler().PerformCmd(cmd,bRepeat);
 				}
-				else if (cmd.GetType() == CT_Note && viewMode != view_modes::sequence)
+				else if (cmd.GetType() == CT_Note && !bRepeat)
 				{
-					if(!bRepeat) 
-					{	
-						const int outnote = cmd.GetNote();
-						// play note
-						PsycleGlobal::inputHandler().PlayNote(outnote); 
-					}
+					// play note
+					PsycleGlobal::inputHandler().PlayNote(cmd.GetNote()); 
 				}
 			}
+
+			//Just a safety measure, the keyUp code for this should be enough but it can be cheated in some situations.
+			ChordModeOffs = 0;
 		}
 
 		void CChildView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags )
@@ -103,539 +141,90 @@ namespace psycle { namespace host {
 			CWnd::OnKeyDown(nChar, nRepCnt, nFlags);	
 		}
 
-		void CChildView::MidiPatternCommand(int busMachine, int command, int value)
+
+		void CChildView::EnterData(PatternEntry *newentry, int track, int line, bool force/*=true*/)
 		{
-			// UNDO CODE MIDI PATTERN
-			if (value < 0) value = 0;
-			if (value > 0xffff) value = 0xffff;
-
-			// build entry
-			PatternEntry entry;
-			entry._mach = busMachine;
-			entry._inst = _pSong.auxcolSelected;
-			entry._cmd = command;
-			entry._parameter = value;
-			entry._note = notecommands::empty;
-
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
-				// write effect
-				const int ps = _ps();
-				int line = Global::player()._lineCounter;
-				unsigned char * toffset; 
-
-				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
-				{
-					if(_pSong._trackArmedCount)
-					{
-						SelectNextTrack();
-					}
-					else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
-					{		
-						Machine* pMachine = _pSong._pMachine[busMachine];
-
-						if (pMachine)
-						{
-							// play
-							pMachine->Tick(editcur.track,&entry);
-						}
-						return;
-					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
-				}
-				else
-				{
-					line = editcur.line;
-					toffset = _ptrackline(ps);
-				}
+				unsigned char * toffset = _ptrackline(_ps(), track , line);
 
 				// build entry
-				PatternEntry *pentry = reinterpret_cast<PatternEntry*>(toffset);
-				if ((pentry->_mach != entry._mach) 
-					|| (pentry->_inst != entry._inst) 
-					|| (pentry->_cmd != entry._cmd) 
-					|| (pentry->_parameter != entry._parameter))
+				PatternEntry *destentry = reinterpret_cast<PatternEntry*>(toffset);
+				if (force || destentry->_note >= notecommands::release || newentry->_note < notecommands::release )
 				{
-					PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-					pentry->_mach = entry._mach;
-					pentry->_cmd = entry._cmd;
-					pentry->_parameter = entry._parameter;
-					pentry->_inst = entry._inst;
-
-					NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-					Repaint(draw_modes::data);
-				}
-			}
-		//	else
-			{
-				// play it
-				Machine* pMachine = _pSong._pMachine[busMachine];
-
-				if (pMachine)
-				{
-					// play
-					pMachine->Tick(editcur.track,&entry);
-				}
-			}
-		}
-
-		void CChildView::MidiPatternMidiCommand(int busMachine, int command, int value)
-		{
-			// UNDO CODE MIDI PATTERN TWEAK
-			PatternEntry entry;
-			entry._mach = busMachine;
-			entry._cmd = (value&0xFF00)>>8;
-			entry._parameter = value&0xFF;
-			entry._inst = command;
-			entry._note = notecommands::midicc;
-
-			if(viewMode == view_modes::pattern && bEditMode)
-			{ 
-				// write effect
-				const int ps = _ps();
-				int line = Global::player()._lineCounter;
-				unsigned char * toffset; 
-
-				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
-				{
-					if(_pSong._trackArmedCount)
+					if ((destentry->_mach != newentry->_mach) || (destentry->_cmd != newentry->_cmd) 
+						|| (destentry->_parameter != newentry->_parameter) || (destentry->_inst != newentry->_inst)
+						|| (destentry->_note != newentry->_note))
 					{
-						SelectNextTrack();
-					}
-					else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
-					{		
-						Machine* pMachine = _pSong._pMachine[busMachine];
+						PsycleGlobal::inputHandler().AddUndo(_ps(),track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
+						destentry->_mach = newentry->_mach;
+						destentry->_inst = newentry->_inst;
+						destentry->_note = newentry->_note;
+						destentry->_cmd = newentry->_cmd;
+						destentry->_parameter = newentry->_parameter;
 
-						if (pMachine)
-						{
-							// play
-							pMachine->Tick(editcur.track,&entry);
-						}
-						return;
-					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
-				}
-				else
-				{
-					line = editcur.line;
-					toffset = _ptrackline(ps);
-				}
-
-				// build entry
-				PatternEntry *pentry = reinterpret_cast<PatternEntry*>(toffset);
-				if (pentry->_note >= notecommands::release)
-				{
-					if ((pentry->_mach != entry._mach) 
-						|| (pentry->_cmd != entry._cmd) 
-						|| (pentry->_parameter != entry._parameter) 
-						|| (pentry->_inst != entry._inst) 
-						|| (pentry->_note != notecommands::midicc))
-					{
-						PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						pentry->_mach = entry._mach;
-						pentry->_cmd = entry._cmd;
-						pentry->_parameter = entry._parameter;
-						pentry->_inst = entry._inst;
-						pentry->_note = entry._note;
-
-						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
+						NewPatternDraw(track,track,line,line);
 						Repaint(draw_modes::data);
 					}
 				}
-			}
-		//	else
-			{
-				Machine* pMachine = _pSong._pMachine[busMachine];
-
-				if (pMachine)
+				if (!(Global::player()._playing&&PsycleGlobal::conf()._followSong))
 				{
-					// play
-					pMachine->Tick(editcur.track,&entry);
-				}
-			}
-		}
-		void CChildView::MousePatternTweak(int machine, int command, int value, bool slide)
-		{
-			if (value < 0) value = 0;
-			if (value > 0xffff) value = 0xffff;
-
-			if(viewMode == view_modes::pattern && bEditMode)
-			{ 
-				// write effect
-				const int ps = _ps();
-				int line = Global::player()._lineCounter;
-				unsigned char * toffset;
-				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
-				{
-					if(_pSong._trackArmedCount)
+					if (ChordModeOffs)
 					{
-						SelectNextTrack();
-					}
-					else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
-					{	
-						return;
-					}
-					toffset = _ptrack(ps)+(line*MULTIPLY);
-				}
-				else
-				{
-					toffset = _ptrackline(ps);
-					line = editcur.line;
-				}
-
-				// build entry
-				PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
-				if (entry->_note >= notecommands::release)
-				{
-					if ((entry->_mach != machine) || (entry->_cmd != ((value>>8)&255)) || (entry->_parameter != (value&255)) || (entry->_inst != command) || ((entry->_note != notecommands::tweak) && (entry->_note != notecommands::tweakeffect) && (entry->_note != notecommands::tweakslide)))
-					{
-						PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-						entry->_mach = machine;
-						entry->_cmd = (value>>8)&255;
-						entry->_parameter = value&255;
-						entry->_inst = command;
-						entry->_note = (slide)?notecommands::tweakslide : notecommands::tweak;
-
-						NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-						Repaint(draw_modes::data);
-					}
-				}
-			}
-		}
-
-		// note:  note to insert or stop. If it is notecommands::release it means that 
-		//		the noteoff key has been pressed.
-		// instr: value for aux column. if instr = 255 then use the auxcolselected.
-		// velocity: volume to use. If velocity is zero, then do a noteoff.
-		// bTranspose: transpose the note with the currentOctave.
-		void CChildView::EnterNote(int note, int instr, int velocity, bool bTranspose, Machine* mac)
-		{
-			int line;
-			const int ps = _ps();
-			unsigned char * toffset;
-
-			int macIdx;
-			if (mac) macIdx = mac->_macIndex;
-			else macIdx = _pSong.seqBus;
-
-			int instNo;
-			if (instr < 255) instNo = instr;
-			else instNo = _pSong.auxcolSelected;
-			
-			if (note < 0 || note >= notecommands::invalid ) return;
-
-			// octave offset
-			if(note<notecommands::release)
-			{
-				if(bTranspose)
-					note+=_pSong.currentOctave*12;
-
-				if (note > 119) 
-					note = 119;
-			}
-			
-			// realtime note entering
-			if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
-			{
-				// If there is at least one track selected for recording, select the proper track
-				if(_pSong._trackArmedCount)
-				{
-					if (velocity == 0)
-					{
-						int i;
-						for (i = 0; i < _pSong.SONGTRACKS; i++)
-						{
-							if (_pSong._trackArmed[i])
-							{
-								if (PsycleGlobal::inputHandler().notetrack[i] == note && PsycleGlobal::inputHandler().instrtrack[i] == instNo)
-								{
-									editcur.track = i;
-									break;
-								}
-							}
-						}
-						/// if not found, stop and leave
-						if (i == _pSong.SONGTRACKS)
-						{
-							PsycleGlobal::inputHandler().StopNote(note,instNo,false, mac);
-							return;
-						}
+						AdvanceLine(-1,PsycleGlobal::conf().inputHandler()._wrapAround,false); //Advance track?
 					}
 					else
 					{
-						SelectNextTrack();
-					}
-				}
-				//If the FT2 recording behaviour is not selected, do not record, but play the note.
-				else if (!PsycleGlobal::conf().inputHandler()._RecordUnarmed)
-				{
-					// build entry
-					PatternEntry entry;
-					entry._note = note;
-					entry._mach = macIdx;
-					if (velocity==0)
-						note = notecommands::release;
-
-					if ( macIdx < MAX_MACHINES && _pSong._pMachine[macIdx] != 0 ) 
-					{
-						// if the current machine is a sampler, check 
-						// if current sample is locked to a machine.
-						// if so, switch entry._mach to that machine number
-						if (((Machine*)_pSong._pMachine[macIdx])->_type == MACH_SAMPLER)
-						{
-							if ((_pSong._pInstrument[instNo]->_lock_instrument_to_machine != -1)
-								&& (_pSong._pInstrument[instNo]->_LOCKINST == true))
-							{
-								entry._mach = _pSong._pInstrument[instNo]->_lock_instrument_to_machine;
-							}
-						}
-					}
-
-					if ( note < notecommands::release && PsycleGlobal::conf().inputHandler()._RecordTweaks && velocity < 127)
-					{
-						if (PsycleGlobal::conf().midi().raw())
-						{
-							entry._cmd = 0x0c;
-							entry._parameter = velocity*2;
-						}
-						else if (PsycleGlobal::conf().midi().velocity().record())
-						{
-							// command
-							entry._cmd = PsycleGlobal::conf().midi().velocity().command();
-							int par = PsycleGlobal::conf().midi().velocity().from() + (PsycleGlobal::conf().midi().velocity().to() - PsycleGlobal::conf().midi().velocity().from()) * velocity / 127;
-							if (par > 255) 
-							{
-								par = 255;
-							}
-							else if (par < 0) 
-							{
-								par = 0;
-							}
-							entry._parameter = par;
-						}
-					}
-
-					Machine *tmac = _pSong._pMachine[entry._mach];
-					if (tmac)
-					{
-						// if the current machine is a sampler, check 
-						// if current sample is locked to a machine.
-						// if so, switch entry._mach to that machine number
-						if (tmac->_type == MACH_SAMPLER)
-						{
-							if ((_pSong._pInstrument[instNo]->_lock_instrument_to_machine != -1)
-								&& (_pSong._pInstrument[instNo]->_LOCKINST == true))
-							{
-								entry._mach = _pSong._pInstrument[instNo]->_lock_instrument_to_machine;
-								tmac = _pSong._pMachine[entry._mach];
-								if (!tmac) return;
-							}
-						}
-						if (note > notecommands::release || tmac->NeedsAuxColumn())
-						{
-							entry._inst = instNo;
-						}
-
-						if ( note <= notecommands::release)
-						{
-							tmac->Tick(editcur.track, &entry);
-						}
-					}
-					PsycleGlobal::inputHandler().notetrack[editcur.track]=note;
-					PsycleGlobal::inputHandler().instrtrack[editcur.track]=instNo;
-					return;
-				}
-				line = Global::player()._lineCounter;
-				toffset = _ptrack(ps)+(line*MULTIPLY);
-				ChordModeOffs = 0;
-			}
-			else 
-			{
-				if ((GetKeyState(VK_SHIFT)<0) && (note != notecommands::tweak) && (note != notecommands::tweakeffect) && (note != notecommands::tweakslide) && (note != notecommands::midicc))
-				{
-					if (ChordModeOffs == 0)
-					{
-						ChordModeLine = editcur.line;
-						ChordModeTrack = editcur.track;
-					}
-					editcur.track = (ChordModeTrack+ChordModeOffs)%_pSong.SONGTRACKS;
-					editcur.line = line = ChordModeLine;
-					toffset = _ptrackline(ps, editcur.track, line);
-					ChordModeOffs++;
-				}
-				else
-				{
-					if (ChordModeOffs) // this should never happen because the shift check should catch it... but..
-					{					// ok pooplog, now it REALLY shouldn't happen (now that the shift check works)
-						editcur.line = ChordModeLine;
-						editcur.track = ChordModeTrack;
-						ChordModeOffs = 0;
 						AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 					}
-					line = editcur.line;
-					toffset = _ptrackline(ps);
-				}
-			}
-
-			// build the entry to add it to the pattern
-			PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
-			if (velocity==0)
-			{
-				//This prevents writing a noteoff over its own noteon.
-				if (entry->_note == note && entry->_inst == instNo)
-				{
-					PsycleGlobal::inputHandler().StopNote(note,instNo,false, mac);
-					return;
-				}
-				note = notecommands::release;
-			}
-			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,line,1,1,editcur.track,line,editcur.col,editPosition);
-			entry->_note = note;
-			entry->_mach = macIdx;
-
-			if (note>notecommands::release)
-			{
-				entry->_inst = _pSong.auxcolSelected;
-			}
-			else
-			{
-				if ( macIdx < MAX_MACHINES && _pSong._pMachine[macIdx] != 0 ) 
-				{
-					// if the current machine is a sampler, check 
-					// if current sample is locked to a machine.
-					// if so, switch entry._mach to that machine number
-					if (((Machine*)_pSong._pMachine[macIdx])->_type == MACH_SAMPLER)
-					{
-						if ((_pSong._pInstrument[instNo]->_lock_instrument_to_machine != -1)
-							&& (_pSong._pInstrument[instNo]->_LOCKINST == true))
-						{
-							entry->_mach = _pSong._pInstrument[instNo]->_lock_instrument_to_machine;
-						}
-					}
 				}
 
-				if ( note < notecommands::release && PsycleGlobal::conf().inputHandler()._RecordTweaks && velocity < 127)
-				{
-					if (PsycleGlobal::conf().midi().raw())
-					{
-						entry->_cmd = 0x0c;
-						entry->_parameter = velocity * 2;
-					}
-					else if (PsycleGlobal::conf().midi().velocity().record())
-					{
-						// command
-						entry->_cmd = PsycleGlobal::conf().midi().velocity().command();
-						int par = PsycleGlobal::conf().midi().velocity().from() + (PsycleGlobal::conf().midi().velocity().to() - PsycleGlobal::conf().midi().velocity().from()) * velocity / 127;
-						if (par > 255) 
-						{
-							par = 255;
-						}
-						else if (par < 0) 
-						{
-							par = 0;
-						}
-						entry->_parameter = par;
-					}
-				}
-				Machine *tmac = _pSong._pMachine[entry->_mach];
-				if (tmac)
-				{
-					if (tmac->NeedsAuxColumn())
-					{
-						entry->_inst = instNo;
-					}
-					tmac->Tick(editcur.track, entry);
-				}
-			}
+				bScrollDetatch=false;
+				PsycleGlobal::inputHandler().bDoingSelection = false;
+				Repaint(draw_modes::data);
 
-			PsycleGlobal::inputHandler().notetrack[editcur.track]=note;
-			PsycleGlobal::inputHandler().instrtrack[editcur.track]=instNo;
-			NewPatternDraw(editcur.track,editcur.track,line,line);
-			if (!(Global::player()._playing&&PsycleGlobal::conf()._followSong))
-			{
-				if (ChordModeOffs)
-				{
-					AdvanceLine(-1,PsycleGlobal::conf().inputHandler()._wrapAround,false); //Advance track?
-				}
-				else
-				{
-					AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
-				}
 			}
-
-			bScrollDetatch=false;
-			PsycleGlobal::inputHandler().bDoingSelection = false;
-			Repaint(draw_modes::data);
 		}
 
 		void CChildView::EnterNoteoffAny()
 		{
 			if (viewMode == view_modes::pattern)
 			{
-				const int ps = _ps();
-				unsigned char * toffset;
-				
-				// realtime note entering
-				if (Global::player()._playing&&PsycleGlobal::conf()._followSong)
-				{
-					toffset = _ptrack(ps)+(Global::player()._lineCounter*MULTIPLY);
-				}
-				else
-				{
-					toffset = _ptrackline(ps);
-				}
-
-				// build entry
-				PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
-				PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-				entry->_note = notecommands::release;
-
-				PsycleGlobal::inputHandler().notetrack[editcur.track]=notecommands::release;
-				PsycleGlobal::inputHandler().instrtrack[editcur.track]=255;
-
-				NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
-
-				if (!(Global::player()._playing&&PsycleGlobal::conf()._followSong))
-				{
-					AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
-				}
-
-				bScrollDetatch=false;
-				PsycleGlobal::inputHandler().bDoingSelection = false;
-				Repaint(draw_modes::data);
+				PatternEntry entry(notecommands::release,255,255,0,0);
+				int line=0;
+				int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(entry._note,
+					entry._mach, entry._inst, false, GetKeyState(VK_SHIFT)<0, line);
+				EnterData(&entry, track, line, true);
 			}
 		}
 
 		bool CChildView::MSBPut(int nChar)
 		{
-			// UNDO CODE MSB PUT
 			// init
-			const int ps = _ps();
-			unsigned char * toffset = _ptrackline(ps) + (editcur.col+1)/2;
-
-			int oldValue = *toffset;	
 			int sValue = -1;
-
 			if	(	nChar>='0'		&&	nChar<='9')			{ sValue = nChar - '0'; }
 			else if(nChar>=VK_NUMPAD0&&nChar<=VK_NUMPAD9)	{ sValue = nChar - VK_NUMPAD0; }
 			else if(nChar>='A'		&&	nChar<='F')			{ sValue = nChar - 'A' + 10; }
 			else											{ return false; }
 
+			const int ps = _ps();
+			unsigned char * toffset = _ptrackline(ps) + (editcur.col+1)/2;
+			int oldValue = *toffset;	
 			if (editcur.col < 5 && oldValue == 255)	{ oldValue = 0; }
 
+			// UNDO CODE MSB PUT
 			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
-
+			//Modify
 			switch ((editcur.col+1)%2)
 			{
 			case 0:	
 				*toffset = (oldValue&0xF)+(sValue<<4); 
 				break;
-			
 			case 1:	
 				*toffset = (oldValue&0xF0)+(sValue); 
 				break;
 			}
-
+			// Move
 			if (PsycleGlobal::conf().inputHandler()._cursorAlwaysDown)
 			{
 				AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
@@ -664,6 +253,7 @@ namespace psycle { namespace host {
 					break;
 				}
 			}
+			//Update graphics
 			bScrollDetatch=false;
 			PsycleGlobal::inputHandler().bDoingSelection = false;
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,editcur.line);
@@ -675,7 +265,6 @@ namespace psycle { namespace host {
 		{
 			// UNDO CODE CLEAR
 			const int ps = _ps();
-			unsigned char * offset = _ptrack(ps);
 			unsigned char * toffset = _ptrackline(ps);
 
 			PsycleGlobal::inputHandler().AddUndo(ps,editcur.track,editcur.line,1,1,editcur.track,editcur.line,editcur.col,editPosition);
@@ -683,8 +272,8 @@ namespace psycle { namespace host {
 			// &&&&& hardcoded # of bytes per event
 			if ( editcur.col == 0 )
 			{
-				memset(offset+(editcur.line*MULTIPLY),255,3*sizeof(char));
-				memset(offset+(editcur.line*MULTIPLY)+3,0,2*sizeof(char));
+				PatternEntry blank;
+				memcpy(toffset,&blank,EVENT_SIZE);
 			}
 			else if (editcur.col < 5 )	{	*(toffset+(editcur.col+1)/2)= 255; }
 			else						{	*(toffset+(editcur.col+1)/2)= 0; }
@@ -744,7 +333,7 @@ namespace psycle { namespace host {
 				memcpy(offset+(i*MULTIPLY), offset+((i-1)*MULTIPLY), EVENT_SIZE);
 
 			PatternEntry blank;
-			memcpy(offset+(i*MULTIPLY),&blank,EVENT_SIZE);
+			memcpy(offset+(editcur.line*MULTIPLY),&blank,EVENT_SIZE);
 
 			NewPatternDraw(editcur.track,editcur.track,editcur.line,patlines-1);
 
@@ -771,14 +360,7 @@ namespace psycle { namespace host {
 			{
 				if (pEntry->_mach < MAX_MACHINES && !_pSong._trackMuted[i])
 				{
-					Machine *pMachine = _pSong._pMachine[pEntry->_mach];
-					if (pMachine)
-					{
-						if ( !pMachine->_mute)	
-						{
-							pMachine->Tick(i, pEntry);
-						}
-					}
+					PsycleGlobal::inputHandler().PlayNote(pEntry, i );
 				}
 				pEntry++;
 			}
@@ -790,19 +372,7 @@ namespace psycle { namespace host {
 			{
 				bScrollDetatch=false;
 			}
-
-			PatternEntry* pEntry = (PatternEntry*)_ptrackline();
-			if (pEntry->_mach < MAX_MACHINES)
-			{
-				Machine *pMachine = _pSong._pMachine[pEntry->_mach];
-				if (pMachine)
-				{
-					if ( !pMachine->_mute)	
-					{
-						pMachine->Tick(editcur.track, pEntry);
-					}
-				}
-			}
+			PsycleGlobal::inputHandler().PlayNote((PatternEntry*)_ptrackline(), editcur.track);
 		}
 
 
@@ -953,7 +523,6 @@ namespace psycle { namespace host {
 			pParentMain->StatusBarIdle();
 			if (updateDisplay) Repaint(draw_modes::cursor);
 		}
-
 
 		//////////////////////////////////////////////////////////////////////
 		// Pattern Modifier functions ( Copy&paste , Transpose, ... )
@@ -1708,7 +1277,7 @@ namespace psycle { namespace host {
 						{
 							gen=x;
 							if(gen<0)gen=0;
-							if(gen>=MAX_MACHINES)gen=MAX_MACHINES-1;
+							if(gen>=MAX_VIRTUALINSTS)gen=MAX_VIRTUALINSTS-1;
 							*toffset=gen;
 						}
 					}
@@ -1720,11 +1289,11 @@ namespace psycle { namespace host {
 
 		void CChildView::BlockInsChange(int x)
 		{
-			// UNDO CODE BLOCK INS CHANGE
 			if ( blockSelected == true ) 
 			{
 				const int ps=_ps();
 
+				// UNDO CODE BLOCK INS CHANGE
 				PsycleGlobal::inputHandler().AddUndo(ps,blockSel.start.track,blockSel.start.line,blockSel.end.track-blockSel.start.track+1,blockSel.end.line-blockSel.start.line+1,editcur.track,editcur.line,editcur.col,editPosition);
 
 				for (int t=blockSel.start.track;t<blockSel.end.track+1;t++)
@@ -1739,7 +1308,7 @@ namespace psycle { namespace host {
 						{
 							ins=x;
 							if(ins<0)ins=0;
-							if(ins>255)ins=255;
+							if(ins>=255)ins=254;
 							*(toffset+1)=ins;
 						}
 					}
@@ -1848,15 +1417,8 @@ namespace psycle { namespace host {
 			}
 			else
 			{
-				if(editPosition>0)
-				{
-					--editPosition;
-				}
-				else
-				{
-		//			editPosition = _pSong.playLength-1;
-					editPosition = 0;
-				}
+				if (editPosition > 0) { --editPosition; }
+				else { editPosition = 0; }
 				
 				memset(_pSong.playOrderSel,0,MAX_SONG_POSITIONS*sizeof(bool));
 				_pSong.playOrderSel[editPosition]=true;
@@ -1932,11 +1494,10 @@ namespace psycle { namespace host {
 
 			PatternEntry *entry = reinterpret_cast<PatternEntry*>(toffset);
 
-			if ( entry->_mach < MAX_BUSES*2 ) _pSong.seqBus = entry->_mach;
+			if ( entry->_mach < MAX_VIRTUALINSTS ) _pSong.seqBus = entry->_mach;
 			pParentMain->ChangeGen(_pSong.seqBus);
 			if ( entry->_inst != 255 ) _pSong.auxcolSelected = entry->_inst;
 			pParentMain->ChangeAux(_pSong.auxcolSelected);
-
 		}
 
 
@@ -2181,41 +1742,6 @@ namespace psycle { namespace host {
 				}
 				SetTitleBarText();
 			}
-		}
-
-		void CChildView::SelectNextTrack()
-		{
-			int i;
-			for (i = editcur.track+1; i < _pSong.SONGTRACKS; i++)
-			{
-				if (_pSong._trackArmed[i])
-				{
-					if (PsycleGlobal::inputHandler().notetrack[i] == notecommands::release)
-					{
-						break;
-					}
-				}
-			}
-			if (i >= _pSong.SONGTRACKS)
-			{
-				for (i = 0; i <= editcur.track; i++)
-				{
-					if (_pSong._trackArmed[i])
-					{
-						if (PsycleGlobal::inputHandler().notetrack[i] == notecommands::release)
-						{
-							break;
-						}
-					}
-				}
-			}
-			editcur.track = i;
-			while(_pSong._trackArmed[editcur.track] == 0)
-			{
-				if(++editcur.track >= _pSong.SONGTRACKS)
-					editcur.track=0;
-			}
-			editcur.col = 0;
 		}
 
 }}

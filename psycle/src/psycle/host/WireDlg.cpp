@@ -935,8 +935,8 @@ namespace psycle { namespace host {
 			int newMacidx = Global::song().GetFreeFxBus();
 			mainView->NewMachine((srcMachine._x+dstMachine._x)/2,(srcMachine._y+dstMachine._y)/2,newMacidx);
 
-			Machine* newMac = Global::song()._pMachine[newMacidx];
-			if(newMac) {
+			if(newMacidx != -1 && Global::song()._pMachine[newMacidx]) {
+				Machine* newMac = Global::song()._pMachine[newMacidx];
 				Global::song().ChangeWireSourceMacBlocking(newMac,&dstMachine,newMac->GetFreeOutputWire(0),wire.GetDstWireIndex());
 				{
 					CExclusiveLock lock(&Global::song().semaphore, 2, true);

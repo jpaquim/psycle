@@ -48,9 +48,9 @@ protected:
 	std::vector<short> noteOffset;
 	bool bisTicking;
 	// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
-	int allocatedchans[MAX_TRACKS][MAX_MACHINES];
+	int allocatedchans[MAX_TRACKS][MAX_VIRTUALINSTS]; //Not Using MAX_MACHINES because now there are the Virtual instruments
 	// indicates if the channel of the specified machine is in use or not
-	bool availablechans[MAX_MACHINES][MAX_TRACKS];
+	bool availablechans[MAX_VIRTUALINSTS][MAX_TRACKS];//Not Using MAX_MACHINES because now there are the Virtual instruments
 };
 
 class DuplicatorMac : public MultiMachine

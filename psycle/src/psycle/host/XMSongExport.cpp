@@ -135,13 +135,16 @@ namespace host{
 	// return address of next pattern, 0 for invalid
 	void XMSongExport::SaveSinglePattern(const Song & song, const int patIdx)
 	{
+		//Temp entries for volume on virtual generators.
+		PatternEntry volumeEntries[32];
+
 		XMPATTERNHEADER ptHeader;
 		memset(&ptHeader,0,sizeof(ptHeader));
 		ptHeader.size = sizeof(ptHeader);
 		//ptHeader.packingtype = 0; implicit from memset.
 		ptHeader.rows = std::min(256,song.patternLines[patIdx]);
 		//ptHeader.packedsize = 0; implicit from memset.
-
+		
 		Write(&ptHeader,sizeof(ptHeader));
 		std::size_t currentpos = GetPos();
 		
@@ -194,10 +197,41 @@ namespace host{
 						continue;
 					}
 					
+					Machine* mac = NULL;
+					unsigned char instr=0;
+					int instrint=0xFF;
+					if (pData->_mach < MAX_BUSES) {
+						mac = song._pMachine[pData->_mach];
+						instrint = pData->_inst;
+					}
+					else if (pData->_mach >= MAX_MACHINES && pData->_mach < MAX_VIRTUALINSTS) {
+						mac = song.GetMachineOfBus(pData->_mach, instrint);
+						if (instrint == -1 ) instrint = 0xFF;
+						if (mac != NULL && pData->_inst != 255) {
+							volumeEntries[i]._cmd = (mac->_type == MACH_SAMPLER) ? SAMPLER_CMD_VOLUME : XMSampler::CMD::SENDTOVOLUME;
+							volumeEntries[i]._parameter=pData->_inst;
+							extraEntry[i]=&volumeEntries[i];
+						}
+					}
+					if (mac != NULL) {
+						if (mac->_type == MACH_SAMPLER) {
+							if (instrint != 0xFF) instr = static_cast<unsigned char>(macInstruments + xmInstruments + instrint +1);
+						}
+						else if (mac->_type == MACH_XMSAMPLER) {
+							if(instrint != 0xFF && 
+								(pData->_note != notecommands::empty || pData->_mach < MAX_BUSES)) {
+								instr = static_cast<unsigned char>(macInstruments + instrint +correctionIndex);
+							}
+						}
+						else {
+							instr = static_cast<unsigned char>(pData->_mach + 1);
+						}
+						if (instr != 0 ) lastInstr[i]=instr;
+					}
+
 					unsigned char note;
-					if (pData->_note >= 12 && pData->_note < 108 && pData->_mach < MAX_BUSES) {
-						if ( song._pMachine[pData->_mach] != NULL && isSampler[pData->_mach]
-							&& ((Sampler*)song._pMachine[pData->_mach])->isDefaultC4() == false )
+					if (pData->_note >= 12 && pData->_note < 108) {
+						if ( mac != NULL && mac->_type == MACH_SAMPLER && ((Sampler*)mac)->isDefaultC4() == false )
 						{
 							note = pData->_note +1;
 						} else {
@@ -210,20 +244,6 @@ namespace host{
 						note = 0x00;
 					}
 					
-					unsigned char instr=0;
-					if (pData->_mach < MAX_BUSES && song._pMachine[pData->_mach] != NULL) {
-						if (isSampler[pData->_mach]) {
-							if (pData->_inst != 0xFF) instr = static_cast<unsigned char>(macInstruments + xmInstruments + pData->_inst +1);
-						}
-						else if (isSampulse[pData->_mach]) {
-							if(pData->_inst != 0xFF) instr = static_cast<unsigned char>(macInstruments + pData->_inst +correctionIndex);
-						}
-						else {
-							instr = static_cast<unsigned char>(pData->_mach + 1);
-						}
-						if (instr != 0 ) lastInstr[i]=instr;
-					}
-
 					unsigned char vol=0;
 					unsigned char type=0;
 					unsigned char param=0;
@@ -246,7 +266,6 @@ namespace host{
 					if (bWriteVol) Write(&vol,1);
 					if (bWriteType) Write(&type,1);
 					if (bWriteParam) Write(&param,1);
-					
 				}
 			}
 			ptHeader.packedsize = static_cast<uint16_t>((GetPos() - currentpos) & 0xFFFF);
@@ -296,7 +315,7 @@ namespace host{
 					break;
 				case PatternCmd::BREAK_TO_LINE:
 					type = XMCMD::PATTERN_BREAK;
-					param = (pData->_parameter/10)<<4 + (pData->_parameter%10);
+					param = ((pData->_parameter/10)<<4) + (pData->_parameter%10);
 					break;
 				case PatternCmd::SET_VOLUME:
 					if (pData->_inst == 255) {
@@ -412,11 +431,11 @@ namespace host{
 					param = pData->_parameter;
 					break;
 				case XMSampler::CMD::VOLUMESLIDE:
-					if (pData->_parameter &0xF == 0xF) {
+					if ((pData->_parameter &0xF) == 0xF) {
 						type = XMCMD::EXTENDED;
 						param = XMCMD_E::E_FINE_VOLUME_UP | ((pData->_parameter&0xF0) >> 4);
 					}
-					else if (pData->_parameter&0xF0 == 0xF0) {
+					else if ((pData->_parameter&0xF0) == 0xF0) {
 						type = XMCMD::EXTENDED;
 						param = XMCMD_E::E_FINE_VOLUME_DOWN | (pData->_parameter&0xF);
 					}
@@ -451,7 +470,7 @@ namespace host{
 					param = XMCMD_E::E_MOD_RETRIG | (pData->_parameter&0xF);
 					break;
 				case XMSampler::CMD::SENDTOVOLUME:
-					if (pData->_parameter < 40) {
+					if (pData->_parameter < 0x40) {
 						vol = 0x10 + ((pData->_parameter < 0x40) ? pData->_parameter : 0x40);
 					}
 					else if ((pData->_parameter&0xF0) == XMSampler::CMD_VOL::VOL_VOLSLIDEUP) {
@@ -657,7 +676,7 @@ namespace host{
 		stheader.samplen = wave.WaveLength() *2;
 		stheader.loopstart = wave.WaveLoopStart() * 2;
 		stheader.looplen = (wave.WaveLoopEnd() - wave.WaveLoopStart()) * 2;
-		stheader.vol = std::min(64,wave.WaveVolume()*64);
+		stheader.vol = wave.WaveVolume()>>1;
 		stheader.relnote = tune;
 		stheader.finetune = finetune;
 
@@ -757,7 +776,7 @@ namespace host{
 		sampleHeader.vtype = 0;
 		Instrument *inst = song._pInstrument[instrIdx];
 
-		if (inst->ENV_AT != 1 || inst->ENV_DT != 1 || inst->ENV_SL != 100 || inst->ENV_RT != 16) {
+		if (inst->ENV_AT != 1 || inst->ENV_DT != 1 || inst->ENV_SL != 100 || inst->ENV_RT != 220) {
 			sampleHeader.vtype = 3;
 			sampleHeader.vsustain = 1;
 

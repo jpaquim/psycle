@@ -3,6 +3,7 @@
 #include "InstrumentEditorUI.hpp"
 #include "PsycleConfig.hpp"
 #include "XMSamplerUIInst.hpp"
+#include <psycle/host/Song.hpp>
 
 namespace psycle { namespace host {
 
@@ -37,8 +38,9 @@ BOOL CInstrumentPanDlg::PreTranslateMessage(MSG* pMsg)
 {
 	CWnd *tabCtl = GetParent();
 	CWnd *UIInst = tabCtl->GetParent();
+	Machine *tmac = Global::song().GetSampulseIfExists();
 	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(UIInst->GetParent());
-	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd(), tmac);
 	if (res == FALSE ) return CDialog::PreTranslateMessage(pMsg);
 	return res;
 }

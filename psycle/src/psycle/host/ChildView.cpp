@@ -16,6 +16,7 @@
 #include "XMSamplerUI.hpp"
 #include "WireDlg.hpp"
 #include "MacProp.hpp"
+#include "PresetsDlg.hpp" // For bank Manager popup option
 #include "NewMachine.hpp"
 #include "TransformPatternDlg.hpp"
 #include "PatDlg.hpp"
@@ -262,6 +263,7 @@ namespace psycle { namespace host {
 /// Machine popup
 			ON_COMMAND(ID_POPUPMAC_OPENPARAMETERS, OnPopMacOpenParams)
 			ON_COMMAND(ID_POPUPMAC_OPENPROPERTIES, OnPopMacOpenProperties)
+			ON_COMMAND(ID_POPUPMAC_OPENBANKMANAGER, OnPopMacOpenBankManager)
 			ON_COMMAND_RANGE(ID_CONNECTTO_MACHINE0, ID_CONNECTTO_MACHINE64, OnPopMacConnecTo)
 			ON_COMMAND_RANGE(ID_CONNECTIONS_CONNECTION0, ID_CONNECTIONS_CONNECTION24, OnPopMacShowWire)
 			ON_COMMAND(ID_POPUPMAC_REPLACEMACHINE, OnPopMacReplaceMac)
@@ -1043,8 +1045,10 @@ namespace psycle { namespace host {
 				ShowScrollBar(SB_BOTH,FALSE);
 
 				// set midi input mode to real-time or Step
-				if(PsycleGlobal::conf().midi()._midiMachineViewSeqMode)
+				if(PsycleGlobal::conf().midi()._midiMachineViewSeqMode) {
 					PsycleGlobal::midi().m_midiMode = MODE_REALTIME;
+					PsycleGlobal::midi().ReSync();
+				}
 				else
 					PsycleGlobal::midi().m_midiMode = MODE_STEP;
 
@@ -1438,36 +1442,6 @@ namespace psycle { namespace host {
 						return;
 					}
 				}
-				// Get info of old machine and close any open gui.
-				if (Global::song()._pMachine[fb])
-				{
-					x = Global::song()._pMachine[fb]->_x;
-					y = Global::song()._pMachine[fb]->_y;
-					pParentMain->CloseMacGui(fb);
-				}
-				else if ((x < 0) || (y < 0))
-				{
-					 // random position
-					bool bCovered = TRUE;
-					while (bCovered)
-					{
-						x = (rand())%(CW-xs);
-						y = (rand())%(CH-ys);
-						bCovered = FALSE;
-						for (int i=0; i < MAX_MACHINES; i++)
-						{
-							if (Global::song()._pMachine[i])
-							{
-								if ((abs(Global::song()._pMachine[i]->_x - x) < 32) &&
-									(abs(Global::song()._pMachine[i]->_y - y) < 32))
-								{
-									bCovered = TRUE;
-									i = MAX_MACHINES;
-								}
-							}
-						}
-					}
-				}
 
 				if ( fb == -1)
 				{
@@ -1475,6 +1449,37 @@ namespace psycle { namespace host {
 				}
 				else
 				{
+					// Get info of old machine and close any open gui.
+					if (Global::song()._pMachine[fb])
+					{
+						x = Global::song()._pMachine[fb]->_x;
+						y = Global::song()._pMachine[fb]->_y;
+						pParentMain->CloseMacGui(fb);
+					}
+					else if ((x < 0) || (y < 0))
+					{
+						 // random position
+						bool bCovered = TRUE;
+						while (bCovered)
+						{
+							x = (rand())%(CW-xs);
+							y = (rand())%(CH-ys);
+							bCovered = FALSE;
+							for (int i=0; i < MAX_MACHINES; i++)
+							{
+								if (Global::song()._pMachine[i])
+								{
+									if ((abs(Global::song()._pMachine[i]->_x - x) < 32) &&
+										(abs(Global::song()._pMachine[i]->_y - y) < 32))
+									{
+										bCovered = TRUE;
+										i = MAX_MACHINES;
+									}
+								}
+							}
+						}
+					}
+
 					bool created=false;
 					if (Global::song()._pMachine[fb] )
 					{
@@ -1729,7 +1734,7 @@ namespace psycle { namespace host {
 			}
 			if ( notecommand == notecommands::tweak ) {
 				int min=0, max=0xFFFF;
-				if(_pSong._pMachine[targetmac] != NULL) {
+				if(targetmac < MAX_MACHINES && _pSong._pMachine[targetmac] != NULL) {
 					_pSong._pMachine[targetmac]->GetParamRange(targettwk,min,max);
 				}
 				//If the parameter uses negative number, the values are shifted up.
@@ -1740,7 +1745,7 @@ namespace psycle { namespace host {
 			}
 			else if ( notecommand == notecommands::tweakslide ) {
 				int min=0, max=0xFFFF;
-				if(_pSong._pMachine[targetmac] != NULL) {
+				if(targetmac < MAX_MACHINES && _pSong._pMachine[targetmac] != NULL) {
 					_pSong._pMachine[targetmac]->GetParamRange(targettwk,min,max);
 				}
 				//If the parameter uses negative number, the values are shifted up.

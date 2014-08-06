@@ -9,6 +9,9 @@
 #include "Machine.hpp"
 #include "Player.hpp"
 
+// For SAMPLER_CMD_VOLUME
+#include "Sampler.hpp"
+
 namespace psycle
 {
 	namespace host
@@ -779,14 +782,15 @@ namespace psycle
 				break;
 
 			case cdefInfoMachine:
-				if (Global::song().seqBus < MAX_MACHINES)
 				{
-					if (Global::song()._pMachine[Global::song().seqBus])
+					int inst=-1;
+					Machine* pMac = Global::song().GetMachineOfBus(Global::song().seqBus, inst);
+					if (pMac)
 					{
 						CPoint point;
-						point.x = Global::song()._pMachine[Global::song().seqBus]->_x;
-						point.y = Global::song()._pMachine[Global::song().seqBus]->_y;
-						pMainFrame->ShowMachineGui(Global::song().seqBus, point);//, Global::song().seqBus);
+						point.x = pMac->_x;
+						point.y = pMac->_y;
+						pMainFrame->ShowMachineGui(pMac->_macIndex, point);//, Global::song().seqBus);
 					}
 				}
 				break;
@@ -864,191 +868,305 @@ namespace psycle
 			pMainFrame->StatusBarIdle();
 		}
 
-		void InputHandler::StopNote(int note, int instr, bool bTranspose,Machine*pMachine)
+
+		int InputHandler::GetTrackToPlay(int note, int macNo, int instNo, bool noteoff)
 		{
-			assert(note>=0 && note < 128);
+			scoped_lock lock(mutex_);
+			const Song &song = Global::song();
+			const PsycleConfig& config = PsycleGlobal::conf();
 
-			int instNo;
-			if (instr < 255) instNo = instr;
-			else instNo = Global::song().auxcolSelected;
-
-			// octave offset 
-			if(note<notecommands::release)
+			int targettrack=-1;
+			if (noteoff)
 			{
-				if(bTranspose)
-					note+=Global::song().currentOctave*12;
-
-				if (note > notecommands::b9) 
-					note = notecommands::b9;
-			}
-
-			if(pMachine==NULL)
-			{
-				int mgn = Global::song().seqBus;
-
-				if (mgn < MAX_MACHINES)
+				int i;
+				for (i = 0; i < song.SONGTRACKS; i++)
 				{
-					pMachine = Global::song()._pMachine[mgn];
+					if (notetrack[i] == note && instrtrack[i] == instNo && mactrack[i] == macNo) {
+						break;
+					}
 				}
-				if(!pMachine) return;
+				targettrack = (i < song.SONGTRACKS) ? i : -1;
 			}
-
-			// build entry
-			PatternEntry entry;
-			entry._note = 120;
-			entry._mach = pMachine->_macIndex;
-			entry._cmd = 0;
-			entry._parameter = 0;	
-
-			for(int i=0;i<Global::song().SONGTRACKS;i++)
+			else if(config.inputHandler().bMultiKey)
 			{
-				if(notetrack[i]==note && instrtrack[i]==instNo)
+				int i = outtrack+1;
+				while ( notetrack[i] != notecommands::release && i < song.SONGTRACKS) i++;
+				if (i >= song.SONGTRACKS)
 				{
-					notetrack[i]=notecommands::release;
-					instrtrack[i]=255;
-					entry._inst = instNo;
-
-					// play it
-					pMachine->Tick(i,&entry);
+					i = 0;
+					while ( notetrack[i] != notecommands::release && i <= outtrack) i++;
+					if (i >= song.SONGTRACKS) i = -1;
 				}
-			}
-		}
-
-		// velocity range 0 -> 127
-		void InputHandler::PlayNote(int note,int instr, int velocity,bool bTranspose,Machine*pMachine)
-		{
-			PsycleConfig& config = PsycleGlobal::conf();
-
-			// stop any (stuck) notes with the same value
-			StopNote(note,instr,bTranspose,pMachine);
-
-			int instNo;
-			if (instr < 255) instNo = instr;
-			else instNo = Global::song().auxcolSelected;
-
-			if(note<0)
-				return;
-
-			// octave offset
-			if(note<120)
-			{
-				if(bTranspose)
-					note+=Global::song().currentOctave*12;
-
-				if (note > notecommands::b9) 
-					note = notecommands::b9;
-			}
-
-			// build entry
-			PatternEntry entry;
-			entry._note = note;
-			entry._inst = instNo;
-			entry._mach = Global::song().seqBus;
-
-			if(velocity != 127 && config.midi().velocity().record())
-			{
-				int par = config.midi().velocity().from() + (config.midi().velocity().to() - config.midi().velocity().from()) * velocity / 127;
-				if (par > 255) par = 255; else if (par < 0) par = 0;
-				entry._cmd = config.midi().velocity().command();
-				entry._parameter = par;
+				outtrack = i;
+				targettrack = outtrack;
 			}
 			else
 			{
-				entry._cmd=0;
-				entry._parameter=0;
+				targettrack = pChildView->editcur.track;
 			}
+			return targettrack;
+		}
 
-			// play it
-			if(pMachine==NULL)
-			{
-				if (entry._mach < MAX_MACHINES)
-				{
-					pMachine = Global::song()._pMachine[entry._mach];
-				}
-			}	
+		int InputHandler::GetTrackAndLineToEdit(int note, int macNo, int instNo, bool noteoff, bool bchord, int& outline)
+		{
+			scoped_lock lock(mutex_);
+			const Song &song = Global::song();
+			const PsycleConfig& config = PsycleGlobal::conf();
 
-			if (pMachine)
+			int targettrack=-1;
+			int targetline;
+			// If there is at least one track selected for recording, select the proper track
+			if (Global::player()._playing && config._followSong)
 			{
-				// if the current machine is a sampler, check 
-				// if current sample is locked to a machine.
-				// if so, switch entry._mach to that machine number
-				if (pMachine->_type == MACH_SAMPLER)
+				if (song._trackArmedCount)
 				{
-					if ((Global::song()._pInstrument[instNo]->_lock_instrument_to_machine != -1)
-						&& (Global::song()._pInstrument[instNo]->_LOCKINST == true))
+					if (noteoff)
 					{
-						entry._mach = Global::song()._pInstrument[instNo]->_lock_instrument_to_machine;
-						pMachine = Global::song()._pMachine[entry._mach];
-						if ( !pMachine) return;
-					}
-				}
-				// pick a track to play it on	
-				if(config.inputHandler().bMultiKey)
-				{
-					int i;
-					for (i = outtrack+1; i < Global::song().SONGTRACKS; i++)
-					{
-						if (notetrack[i] == notecommands::release)
+						int i;
+						for (i = 0; i < song.SONGTRACKS; i++)
 						{
-							break;
-						}
-					}
-					if (i >= Global::song().SONGTRACKS)
-					{
-						for (i = 0; i <= outtrack; i++)
-						{
-							if (notetrack[i] == notecommands::release)
-							{
+							if (notetrack[i] == note && instrtrack[i] == instNo && mactrack[i] == macNo) {
 								break;
 							}
 						}
+						if (i < song.SONGTRACKS) {
+							targettrack = i;
+						}
 					}
-					outtrack = i;
+					else {
+						int next=-1;
+						int i;
+						for (i = pChildView->editcur.track+1; i < song.SONGTRACKS; i++)
+						{
+							if (song._trackArmed[i]) {
+								if (next == -1) next = i;
+								if (notetrack[i] == notecommands::release) {
+									break;
+								}
+							}
+						}
+						if (i >= song.SONGTRACKS)
+						{
+							for (i = 0; i <= pChildView->editcur.track; i++)
+							{
+								if (song._trackArmed[i]) {
+									if (next == -1) next = i;
+									if (notetrack[i] == notecommands::release) {
+										break;
+									}
+								}
+							}
+							if (i >= pChildView->editcur.track) i = next;
+						}
+						targettrack = i;
+					}
 				}
-				else 
-				{
-					outtrack=0;
-				}
-				// this should check to see if a note is playing on that track
-				if (notetrack[outtrack] < notecommands::release)
-				{
-					StopNote(notetrack[outtrack], instrtrack[outtrack], bTranspose, pMachine);
-				}
-
-				// play
-				notetrack[outtrack]=note;
-				instrtrack[outtrack]=instNo;
-				pMachine->Tick(outtrack,&entry);
+				targetline = Global::player()._lineCounter;
 			}
+			else if (bchord && note <= notecommands::release)
+			{
+				if (pChildView->ChordModeOffs == 0)
+				{
+					pChildView->ChordModeLine = pChildView->editcur.line;
+					pChildView->ChordModeTrack = pChildView->editcur.track;
+				}
+				targettrack = (pChildView->ChordModeTrack+pChildView->ChordModeOffs)%song.SONGTRACKS;
+				targetline = pChildView->ChordModeLine;
+				pChildView->ChordModeOffs++;
+			}
+			else
+			{
+				if (pChildView->ChordModeOffs) // this should never happen because the shift check should catch it... but..
+				{					// ok pooplog, now it REALLY shouldn't happen (now that the shift check works)
+					pChildView->editcur.line = pChildView->ChordModeLine;
+					pChildView->editcur.track = pChildView->ChordModeTrack;
+					pChildView->ChordModeOffs = 0;
+					pChildView->AdvanceLine(pChildView->patStep,config.inputHandler()._wrapAround,false);
+				}
+				targettrack = pChildView->editcur.track;
+				targetline = pChildView->editcur.line;
+			}
+			if (targettrack != -1) {
+				pChildView->editcur.track = targettrack;
+				pChildView->editcur.line = targetline;
+			}
+			outline=targetline;
+			return targettrack;
 		}
 
-
-
-		bool InputHandler::EnterData(UINT nChar,UINT nFlags)
+		void InputHandler::PlayNote(PatternEntry* pEntry, int trackIn)
 		{
-			if ( pChildView->editcur.col == 0 )
+			int track = (trackIn == -1) ? pChildView->editcur.track : trackIn;
+			int inst=-1;
+			Machine* pMachine = Global::song().GetMachineOfBus(pEntry->_mach,inst);
+			if (pMachine && !pMachine->_mute)	
 			{
-				// get command
-				CmdDef cmd = KeyToCmd(nChar,nFlags);
-
-		//		BOOL bRepeat = nFlags&0x4000;
-				if ( cmd.GetType() == CT_Note )
-				{
-		//			if ((!bRepeat) || (cmd.GetNote() == notecommands::tweak) || (cmd.GetNote() == notecommands::tweakslide) || (cmd.GetNote() == notecommands::midicc))
-		//			{
-						pChildView->EnterNote(cmd.GetNote());
-						return true;
-		//			}
+				//if not a virtual instrument, or a tweak/mcm command, send it directly
+				if (inst == -1 || pEntry->_note > notecommands::release) {
+					pMachine->Tick(track, pEntry);
 				}
-				return false;
+				else {
+					//If aux column is used, send it.
+					if (pEntry->_inst != 255 ) {
+						PatternEntry entry;
+						entry._note = notecommands::midicc;
+						entry._inst = track;
+						entry._cmd = (pMachine->_type == MACH_XMSAMPLER) ? XMSampler::CMD::SENDTOVOLUME : SAMPLER_CMD_VOLUME;
+						entry._parameter = pEntry->_inst;
+						pMachine->Tick(track, &entry);
+					}
+					//finally send the note with the correct instrument
+					PatternEntry entry(*pEntry);
+					entry._inst = inst;
+					pMachine->Tick(track, &entry);
+				}
+				if (pEntry->_note <= notecommands::release ) {
+					notetrack[track]=pEntry->_note;
+					instrtrack[track]=pEntry->_inst;
+					mactrack[track]=pEntry->_mach;
+				}
 			}
-			else if ( GetKeyState(VK_CONTROL)>=0 && GetKeyState(VK_SHIFT)>=0 )
-			{
-				return pChildView->MSBPut(nChar);
-			}
-			return false;
 		}
 
+
+		void InputHandler::StopNote(int note, int instr/*=255*/, bool bTranspose/*=true*/,Machine* pMachine/*=NULL*/)
+		{
+			assert(note>=0 && note < notecommands::invalid);
+			PatternEntry entry = BuildNote(note,instr,0,bTranspose,pMachine);
+			// octave offset
+			if ( note <= notecommands::b9 && bTranspose) {
+				note += Global::song().currentOctave*12;
+				if (note > notecommands::b9) { note = notecommands::b9; }
+			}
+
+			int track = GetTrackToPlay(note,entry._mach,entry._inst,true);
+			PlayNote(&entry,track);
+		}
+
+		// velocity range 0 -> 127
+		void InputHandler::PlayNote(int note,int instr/*=255*/, int velocity/*=127*/,bool bTranspose/*=true*/,Machine* pMachine/*=NULL*/)
+		{
+			assert(note>=0 && note < notecommands::invalid);
+			int noteoffsetted;
+
+			// stop any (stuck) notes with the same value
+			int mactmp = (pMachine == NULL) ? Global::song().seqBus : pMachine->_macIndex;
+			// octave offset
+			if ( note <= notecommands::b9 && bTranspose) {
+				noteoffsetted = note + Global::song().currentOctave*12;
+				if (noteoffsetted > notecommands::b9) { noteoffsetted = notecommands::b9; }
+			}
+			else {
+				noteoffsetted = note;
+			}
+			int tracktmp = GetTrackToPlay(noteoffsetted,mactmp,instr,true);
+			if (tracktmp != -1) {
+				PatternEntry entry = BuildNote(noteoffsetted,instr,0,false,pMachine);
+				PlayNote(&entry,tracktmp);
+			}
+
+			PatternEntry entry = BuildNote(noteoffsetted,instr,velocity,false,pMachine);
+			int track = GetTrackToPlay(entry._note,entry._mach,entry._inst,false);
+			if (track == -1) track = pChildView->editcur.track;
+
+			// this checks to see if a note is playing on that track already
+			if (notetrack[track] < notecommands::release)
+			{
+				if (mactmp != mactrack[track] ) {
+					int dummy=-1;
+					Machine* mac2 = Global::song().GetMachineOfBus(mactrack[track],dummy);
+					StopNote(notetrack[track], instrtrack[track], false, mac2);
+				}
+				else {
+					StopNote(notetrack[track], instrtrack[track], false, pMachine);
+				}
+			}
+			PlayNote(&entry,track);
+		}
+
+
+
+
+		PatternEntry InputHandler::BuildNote(int note, int instr/*=255*/, int velocity/*=127*/, bool bTranspose/*=true*/, Machine* mac/*=NULL*/, bool forcevolume/*=false*/)
+		{
+			const PsycleConfig::Midi &midiconf = PsycleGlobal::conf().midi();
+			const Song &song = Global::song();
+			PatternEntry entry;
+
+			if (note < 0 || note >= notecommands::invalid ) return entry;
+
+			int macIdx;
+			if (mac) macIdx = mac->_macIndex;
+			else macIdx = song.seqBus;
+
+			int instNo;
+			if (instr < 255) instNo = instr;
+			else instNo = song.auxcolSelected;
+			
+			// octave offset
+			if ( note <= notecommands::b9 && bTranspose) {
+				note += song.currentOctave*12;
+				if (note > notecommands::b9) { note = notecommands::b9; }
+			}
+
+			entry._note = (velocity==0) ? notecommands::release : note;
+			entry._mach = macIdx;
+
+			if (note > notecommands::release) {
+				 // this should only happen when entering manually a twk/tws or mcm command in the pattern.
+				entry._inst = instNo;
+			}
+			else
+			{
+				int alternateins=-1;
+				Machine *tmac = (mac != NULL) ? mac : song.GetMachineOfBus(macIdx, alternateins);
+				if (tmac)
+				{
+					//Add if the machine needs aux column, but do not do it on virtual instruments
+					if (tmac->NeedsAuxColumn() && alternateins == -1) {
+						entry._inst = instNo;
+					}
+					// if the current machine is a sampler, check if current sample is locked to a machine.
+					// if so, switch entry._mach to that machine number
+					if (tmac->_type == MACH_SAMPLER && song._pInstrument[instNo]->_LOCKINST == true)
+					{
+						entry._mach = song._pInstrument[instNo]->sampler_to_use;
+					}
+				}
+
+				if ( velocity < 127 && entry._note < notecommands::release && (forcevolume || PsycleGlobal::conf().inputHandler()._RecordTweaks))
+				{
+					if (midiconf.raw())
+					{
+						entry._cmd = 0x0C;
+						entry._parameter = velocity * 2;
+					}
+					else if (midiconf.velocity().record())
+					{
+						int par = midiconf.velocity().from() + (midiconf.velocity().to() - midiconf.velocity().from()) * velocity / 127;
+						if (par > 255) { par = 255; }
+						else if (par < 0) { par = 0; }
+
+						entry._cmd = midiconf.velocity().command();
+						entry._parameter = par;
+					}
+				}
+			}
+			return entry;
+		}
+
+		PatternEntry InputHandler::BuildTweak(int machine, int tweakidx, int value, bool slide)
+		{
+			if (value < 0) value = 0;
+			if (value > 0xffff) value = 0xffff;
+			PatternEntry newentry;
+			newentry._cmd = (value>>8)&0xFF;
+			newentry._parameter = value&0xFF;
+			newentry._inst = tweakidx;
+			newentry._mach = machine;
+			newentry._note = (slide)?notecommands::tweakslide : notecommands::tweak;
+			return newentry;
+		}
 
 		///////////////////////////////////////////////////////////////////////////////////////////////////
 		// MidiPatternNote
@@ -1066,58 +1184,54 @@ namespace psycle
 			{
 				mac = Global::song()._pMachine[macidx];
 			}
-			// undo code not required, enter note handles it
+			int track=0;
+			PatternEntry entry;
 			if(pChildView->viewMode == view_modes::pattern && pChildView->bEditMode)
 			{ 
 				// add note
 				if(velocity > 0 || 
-					(settings._RecordNoteoff && Global::player()._playing && config._followSong))
+					(Global::player()._playing && config._followSong && settings._RecordNoteoff))
 				{
-					pChildView->EnterNote(outnote, channel,velocity,false, mac);
+					entry = BuildNote(outnote, channel,velocity,false, mac);
+					int line=0;
+					track = GetTrackAndLineToEdit(outnote,
+						entry._mach, entry._inst, velocity==0, false, line);
+					pChildView->EnterData(&entry, track, line, velocity > 0);
 				}
-				else
-				{
-					StopNote(outnote,channel,false, mac);	// note end
-				}			
+				else {
+					entry = BuildNote(outnote, channel,velocity,false, mac, true);
+					track= GetTrackToPlay(outnote,entry._mach, entry._inst, velocity==0);
+				}
 			}
-			else 
-			{
-				// play note
-				if(velocity>0)
-					PlayNote(outnote,channel,velocity,false,mac);
-				else
-					StopNote(outnote,channel,false,mac);
+			else {
+				entry = BuildNote(outnote, channel,velocity,false, mac, true);
+				track= GetTrackToPlay(outnote,entry._mach, entry._inst, velocity==0);
 			}
-
+			PlayNote(&entry,track);
 		}
 
-		void InputHandler::MidiPatternTweak(int busMachine, int command, int value, bool slide) {
-			pChildView->MousePatternTweak(busMachine, command, value, slide);
-
-			Song& song = Global::song();
-			// play it
-			Machine* pMachine = song._pMachine[busMachine];
-			if (pMachine)
-			{
-				// build entry
-				PatternEntry entry;
-				entry._mach = busMachine;
-				entry._cmd = (value>>8)&255;
-				entry._parameter = value&255;
-				entry._inst = command;
-				entry._note = (slide)?notecommands::tweakslide : notecommands::tweak;
-				// play
-				pMachine->Tick(pChildView->editcur.track,&entry);
-			}
+		void InputHandler::MidiPatternTweak(int busMachine, int tweakidx, int value, bool slide) {
+			PatternEntry entry = BuildTweak(busMachine, tweakidx, value, slide);
+			int line=0;
+			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
+			pChildView->EnterData(&entry,  track, line, true);
+			PlayNote(&entry, track);
 		}
 
-		//These are just redirections right now.
 		void InputHandler::MidiPatternCommand(int busMachine, int command, int value){
-			pChildView->MidiPatternCommand(busMachine, command, value);
+			PatternEntry entry(notecommands::empty,255,busMachine,command&0xFF,value&0xFF);
+			int line=0;
+			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
+			pChildView->EnterData(&entry,  track, line, false);
+			PlayNote(&entry, track);
 		}
 
-		void InputHandler::MidiPatternMidiCommand(int busMachine, int command, int value){
-			pChildView->MidiPatternMidiCommand(busMachine, command, value);
+		void InputHandler::MidiPatternMidiCommand(int busMachine, int controlCode, int value){
+			PatternEntry entry(notecommands::midicc,controlCode,busMachine,(value&0xFF00)>>8,value&0xFF);
+			int line=0;
+			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
+			pChildView->EnterData(&entry,  track, line, true);
+			PlayNote(&entry, track);
 		}
 
 		void InputHandler::Automate(int macIdx, int param, int value, bool undo)
@@ -1130,10 +1244,10 @@ namespace psycle
 
 			if(settings._RecordTweaks)
 			{
-				if(settings._RecordMouseTweaksSmooth)
-					pChildView->MousePatternTweak(macIdx, param, value,true);
-				else
-					pChildView->MousePatternTweak(macIdx, param, value );
+				PatternEntry entry = BuildTweak(macIdx, param, value, settings._RecordMouseTweaksSmooth);
+				int line=0;
+				int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
+				pChildView->EnterData(&entry,  track, line, true);
 			}
 		}
 		////////////////////////////////////////////////////////////////////////////////////////////////////////

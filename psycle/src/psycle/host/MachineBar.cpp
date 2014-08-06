@@ -199,6 +199,47 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				filled = true;
 			}
 		}
+		if ( updatelist) 
+		{
+			m_gencombo.AddString("----------------------------------------------------");
+			m_gencombo.SetItemData(m_gencombo.GetCount()-1,65535);
+		}
+		if (!found) 
+		{
+			selected++;
+			line = selected;
+		}
+
+		for (int b=MAX_MACHINES; b<MAX_VIRTUALINSTS; b++) // Write Virtual Instruments names.
+		{
+			Song::macinstpair inspair = m_pSong->VirtualInstrument(b);
+			if(inspair.first != -1)
+			{
+				int mac = inspair.first;
+				int inst = inspair.second;
+				if (updatelist)
+				{
+					if (m_pSong->_pMachine[mac]) {
+						sprintf(buffer,"%.2X: %s", b, m_pSong->GetVirtualMachineName(m_pSong->_pMachine[mac],inst).c_str());
+					}
+					else {
+						sprintf(buffer,"%.2X: ", b);
+					}
+					m_gencombo.AddString(buffer);
+					m_gencombo.SetItemData(m_gencombo.GetCount()-1,b);
+				}
+				if (!found) 
+				{
+					selected++;
+				}
+				if (m_pSong->seqBus == b) 
+				{
+					found = true;
+				}
+				filled = true;
+			}
+		}
+		
 		if (!filled)
 		{
 			m_gencombo.ResetContent();
@@ -215,26 +256,28 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		// Select the appropiate Option in Aux Combobox.
 		if (found) // If found (which also means, if it exists)
 		{
-			if (m_pSong->_pMachine[m_pSong->seqBus])
+			if ( m_pSong->seqBus < MAX_BUSES && m_pSong->_pMachine[m_pSong->seqBus]->NeedsAuxColumn())
 			{
-				if ( m_pSong->seqBus < MAX_BUSES && m_pSong->_pMachine[m_pSong->seqBus]->NeedsAuxColumn())
-				{
-					m_auxcombo.SetCurSel(AUX_INSTRUMENT);
-					if (m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_XMSAMPLER) {
-						m_pSong->auxcolSelected = m_pSong->instSelected;
-					}
-					else if (m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_SAMPLER) {
-						m_pSong->auxcolSelected = m_pSong->waveSelected;
-					}
-					else {
-						m_pSong->auxcolSelected = m_pSong->_pMachine[m_pSong->seqBus]->AuxColumnIndex();
-					}
+				// Generator that uses aux column.
+				m_auxcombo.SetCurSel(AUX_INSTRUMENT);
+				if (m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_XMSAMPLER) {
+					m_pSong->auxcolSelected = m_pSong->instSelected;
 				}
-				else
-				{
-					m_auxcombo.SetCurSel(AUX_PARAMS);
-					m_pSong->auxcolSelected = std::min(m_pSong->paramSelected,m_pSong->_pMachine[m_pSong->seqBus]->GetNumParams());
+				else if (m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_SAMPLER) {
+					m_pSong->auxcolSelected = m_pSong->waveSelected;
 				}
+				else {
+					m_pSong->auxcolSelected = m_pSong->_pMachine[m_pSong->seqBus]->AuxColumnIndex();
+				}
+			}
+			else if (m_pSong->seqBus >= MAX_MACHINES) {
+				//Virtual generator
+				m_auxcombo.SetCurSel(AUX_PARAMS);
+			}
+			else 
+			{	//the rest.
+				m_auxcombo.SetCurSel(AUX_PARAMS);
+				m_pSong->auxcolSelected = std::min(m_pSong->paramSelected,m_pSong->_pMachine[m_pSong->seqBus]->GetNumParams());
 			}
 		}
 		else
@@ -273,18 +316,10 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::ChangeGen(int i)	// Used to set an specific seqBus (used in "CChildView::SelectMachineUnderCursor")
 	{
-		if(i>=0 && i <(MAX_BUSES*2))
+		if(i>=0 && i <MAX_VIRTUALINSTS && i != MASTER_INDEX)
 		{
-			if ( (m_pSong->seqBus & MAX_BUSES) == (i & MAX_BUSES))
-			{
-				m_pSong->seqBus=i;
-				UpdateComboGen(false);
-			}
-			else
-			{
-				m_pSong->seqBus=i;
-				UpdateComboGen(true);
-			}
+			m_pSong->seqBus=i;
+			UpdateComboGen(false);
 		}
 	}
 
@@ -324,26 +359,28 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::OnBIncAux() 
 	{
-		Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
-		if (tmac) {
-			if (tmac->_type == MACH_XMSAMPLER) {
-				if (Global::song().xminstruments.size() <= m_pSong->auxcolSelected+1) {
-					XMInstrument inst;
-					inst.Init();
-					Global::song().xminstruments.SetInst(inst,m_pSong->auxcolSelected+1);
-					UpdateComboIns(true);
+		if (m_pSong->seqBus < MAX_MACHINES) {
+			Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
+			if (tmac) {
+				if (tmac->_type == MACH_XMSAMPLER) {
+					if (Global::song().xminstruments.size() <= m_pSong->auxcolSelected+1) {
+						XMInstrument inst;
+						inst.Init();
+						Global::song().xminstruments.SetInst(inst,m_pSong->auxcolSelected+1);
+						UpdateComboIns(true);
+					}
+				}
+				else if (tmac->_type == MACH_SAMPLER) {
+					if (Global::song().samples.size() <= m_pSong->auxcolSelected+1) {
+						XMInstrument::WaveData<> wave;
+						wave.Init();
+						Global::song().samples.SetSample(wave,m_pSong->auxcolSelected+1);
+						UpdateComboIns(true);
+					}
 				}
 			}
-			else if (tmac->_type == MACH_SAMPLER) {
-				if (Global::song().samples.size() <= m_pSong->auxcolSelected+1) {
-					XMInstrument::WaveData<> wave;
-					wave.Init();
-					Global::song().samples.SetSample(wave,m_pSong->auxcolSelected+1);
-					UpdateComboIns(true);
-				}
-			}
+			ChangeAux(m_pSong->auxcolSelected+1);
 		}
-		ChangeAux(m_pSong->auxcolSelected+1);
 		((CButton*)GetDlgItem(IDC_B_INCWAV))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
@@ -357,7 +394,14 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			m_inscombo.ResetContent();
 		}
 
-		if ( m_auxcombo.GetCurSel() == AUX_PARAMS)	// Params
+		if ( m_pSong->seqBus >= MAX_MACHINES ) { // virtual generators
+			if (updatelist) 
+			{
+				m_inscombo.AddString("No parameters");
+			}
+			listlen = 1;
+		}
+		else if ( m_auxcombo.GetCurSel() == AUX_PARAMS)	// Params
 		{
 			int nmac = m_pSong->seqBus;
 			Machine *tmac = m_pSong->_pMachine[nmac];
@@ -475,8 +519,12 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
 			m_pSong->paramSelected=i;
 		} else {
-			Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
-			if (tmac) {
+			int dummy=-1;
+			Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, dummy);
+			if (dummy != -1) {
+				//virtual generators should have AUX_PARAMS selected, so this would be an exceptional case
+			}
+			else if (tmac) {
 				if (tmac->_type == MACH_XMSAMPLER) {
 					m_pSong->instSelected=i;
 				}
@@ -499,14 +547,15 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	void MachineBar::OnLoadwave() 
 	{
 		bool update=false;
-		int nmac = m_pSong->seqBus;
-		Machine *tmac = m_pSong->_pMachine[nmac];
+		int aux=-1;
+		Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, aux);
 		bool found=false;
 		if (!tmac || (tmac->_type != MACH_SAMPLER && tmac->_type != MACH_XMSAMPLER)) {
 			for(int i=0;i<MAX_MACHINES;i++) {
 				if (m_pSong->_pMachine[i] && (m_pSong->_pMachine[i]->_type == MACH_SAMPLER ||
 						m_pSong->_pMachine[i]->_type == MACH_XMSAMPLER)	) {
 					m_pSong->seqBus = i;
+					tmac = m_pSong->_pMachine[m_pSong->seqBus];
 					m_pParentMain->UpdateComboGen();
 					m_pWndView->Repaint();
 					found=true;
@@ -519,20 +568,22 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		}
 		if(!found) {
 			int i = m_pSong->GetFreeMachine();
-			m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
-			m_pSong->seqBus = i;
-			m_pParentMain->UpdateComboGen();
-			m_pWndView->Repaint();
+			if (i != -1) {
+				m_pSong->CreateMachine(MACH_SAMPLER,16,16,NULL, i);
+				m_pSong->seqBus = i;
+				m_pParentMain->UpdateComboGen();
+				m_pWndView->Repaint();
+				tmac = m_pSong->_pMachine[m_pSong->seqBus];
+			}
 		}
-		tmac = m_pSong->_pMachine[m_pSong->seqBus];
+		
 		if (tmac && tmac->_type == MACH_XMSAMPLER) {
 			int si = m_pSong->instSelected;
 			if (m_pSong->xminstruments.IsEnabled(si)) {
-				if (MessageBox("An instrument already exists in this slot. If you continue, it will be ovewritten. Continue?"
+				if (MessageBox("An instrument already exists in this slot. If you continue, it will be ovewritten INCLUDING the samples it has associated. Continue?"
 				,"Sample Loading",MB_YESNO|MB_ICONWARNING) == IDNO)  return;
 			}
 			update=LoadInstrument(si);
-
 		}
 		else {
 			int si = m_pSong->waveSelected;
@@ -556,7 +607,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::OnSavewave()
 	{
-		Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
+		int aux=-1;
+		Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, aux);
 		if (tmac && tmac->_type == MACH_XMSAMPLER) {
 			if (m_pSong->xminstruments.IsEnabled(m_pSong->instSelected)) {
 				SaveInstrument(m_pSong->instSelected);
@@ -586,12 +638,28 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			MessageBox(_T("Warning: To use samples, it is required to have a Sampler or a Sampulse Internal machine"),
 				_T("Instrument editor"),MB_ICONWARNING);
 		}
+		int aux=-1;
+		Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, aux);
+		if (aux != -1 && tmac->_type == MACH_XMSAMPLER) {
+			m_pSong->instSelected = aux;
+		}
+		else if (aux != -1 && tmac->_type == MACH_SAMPLER) {
+			m_pSong->waveSelected = aux;
+		}
 		m_pParentMain->ShowInstrumentEditor();
 		((CButton*)GetDlgItem(IDC_EDITWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 	}
 
 	void MachineBar::OnWavebut() 
 	{
+		int aux=-1;
+		Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, aux);
+		if (aux != -1 && tmac->_type == MACH_XMSAMPLER) {
+			m_pSong->instSelected = aux;
+		}
+		else if (aux != -1 && tmac->_type == MACH_SAMPLER) {
+			m_pSong->waveSelected = aux;
+		}
 		m_pParentMain->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
 		m_pParentMain->m_pWndWed->SetActiveWindow();
 		((CButton*)GetDlgItem(IDC_WAVEBUT))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
@@ -706,7 +774,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	bool MachineBar::LoadInstrument(int instIdx)
 	{
-		static const char szFilter[] = "Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|ST3 Samples (*.s3i)|(*.s3i)||";
+		static const char szFilter[] = "All Instruments (*.psins,*.xi,*.iti,*.s3i)|*.psins;*.xi;*.iti;*.s3i|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|ST3 Samples (*.s3i)|(*.s3i)||";
 
 		CFileDialog dlg(true,"psins", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
@@ -717,6 +785,15 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
+			if (m_pSong->xminstruments.IsEnabled(instIdx)) {
+				XMInstrument & inst = m_pSong->xminstruments.get(instIdx);
+				std::set<int> sampNums =  inst.GetWavesUsed();
+				for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
+					m_pSong->samples.RemoveAt(*it);
+				}
+				inst.Init();
+				Global::song().DeleteVirtualOfInstrument(instIdx,true);
+			}
 			CString CurrExt=dlg.GetFileExt();
 			CurrExt.MakeLower();
 			if ( CurrExt == "psins" ) {

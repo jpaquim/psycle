@@ -4,8 +4,9 @@
 #include "InstrumentEditor.hpp"
 #include "XMInstrument.hpp"
 #include "MainFrm.hpp"
-#include "Song.hpp"
+#include <psycle/host/Song.hpp>
 namespace psycle { namespace host {
+
 
 IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
@@ -27,12 +28,14 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			DDX_Control(pDX, IDC_CHECK4, m_loopcheck);
 			DDX_Control(pDX, IDC_RRES, m_rres_check);
 			DDX_Control(pDX, IDC_PANSLIDER, m_panslider);			
-			DDX_Control(pDX, IDC_LOCKINST, m_lockinst);
 			DDX_Control(pDX, IDC_RPAN, m_rpan_check);
 			DDX_Control(pDX, IDC_RCUT, m_rcut_check);
 			DDX_Control(pDX, IDC_NNA_COMBO, m_nna_combo);			
 			DDX_Control(pDX, IDC_SAMPINST_CMB, m_sampins_combo);			
-			DDX_Control(pDX, IDC_LOCKINSTNUMBER, m_lockinstnumber);
+			DDX_Control(pDX, IDC_LOCKINST, m_lockinst);
+			DDX_Control(pDX, IDC_LOCKINSTCMB, m_lockinst_combo);
+			DDX_Control(pDX, IDC_VIRTINST, m_virtinst);
+			DDX_Control(pDX, IDC_VIRTINSTCMB, m_virtinst_combo);
 			DDX_Control(pDX, IDC_SLIDERVOL, m_volumebar);
 			DDX_Control(pDX, IDC_WAVELENGTH, m_wlen);
 			DDX_Control(pDX, IDC_LOOPSTART, m_loopstart);
@@ -58,15 +61,16 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			ON_WM_HSCROLL()
 			ON_BN_CLICKED(IDC_LOOPOFF, OnLoopoff)
 			ON_BN_CLICKED(IDC_LOOPFORWARD, OnLoopforward)
-			ON_EN_CHANGE(IDC_LOCKINSTNUMBER, OnChangeLockInst)
-			ON_EN_CHANGE(IDC_SAMPLERATE, OnEnChangeSamplerate)
+			ON_BN_CLICKED(IDC_LOCKINST, OnLockinst)
+			ON_CBN_SELCHANGE(IDC_LOCKINSTCMB, OnSelchangeLockInstCombo)
+			ON_BN_CLICKED(IDC_VIRTINST, OnVirtualinst)
+			ON_CBN_SELCHANGE(IDC_VIRTINSTCMB, OnSelchangeVirtInstCombo)
 			ON_CBN_SELCHANGE(IDC_NNA_COMBO, OnSelchangeNnaCombo)
 			ON_CBN_SELENDOK(IDC_SAMPINST_CMB, OnCbnSelendokInstrument)
 			ON_BN_CLICKED(IDC_INST_DECONE, OnPrevInstrument)
 			ON_BN_CLICKED(IDC_INST_ADDONE, OnNextInstrument)
 			ON_BN_DOUBLECLICKED(IDC_INST_DECONE, OnPrevInstrument)
 			ON_BN_DOUBLECLICKED(IDC_INST_ADDONE, OnNextInstrument)
-			ON_BN_CLICKED(IDC_LOCKINST, OnLockinst)
 			ON_BN_CLICKED(IDC_RPAN, OnRpan)
 			ON_BN_CLICKED(IDC_RCUT, OnRcut)
 			ON_BN_CLICKED(IDC_RRES, OnRres)
@@ -85,8 +89,9 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		
 		BOOL CInstrumentEditor::PreTranslateMessage(MSG* pMsg) 
 		{
+			Machine *tmac = Global::song().GetSamplerIfExists();
 			InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
-			BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+			BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd(), tmac);
 			if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
 			return res;
 		}
@@ -98,6 +103,12 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			((CButton*)GetDlgItem(IDC_INST_DECONE))->SetIcon(PsycleGlobal::conf().iconless);
 			((CButton*)GetDlgItem(IDC_INST_ADDONE))->SetIcon(PsycleGlobal::conf().iconmore);
 
+			for (int i=MAX_MACHINES;i<MAX_VIRTUALINSTS;i++) {
+				std::ostringstream os;
+				os << std::hex << std::uppercase << i;
+				int idx = m_virtinst_combo.AddString(os.str().c_str());
+				m_virtinst_combo.SetItemData(idx, i);
+			}
 			m_nna_combo.AddString("Note Cut");
 			m_nna_combo.AddString("Note Release");
 			m_nna_combo.AddString("None");
@@ -161,28 +172,26 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		}
 		void CInstrumentEditor::WaveUpdate()
 		{
+			char buffer[64];
 			const int si = Global::song().waveSelected;
 			Instrument *pins = Global::song()._pInstrument[si];
 			XMInstrument::WaveData<> wavetmp;
 			bool enabled = Global::song().samples.IsEnabled(si);
 			const XMInstrument::WaveData<>& wave = (enabled) ? Global::song().samples[si] : wavetmp;
-
-
-			char buffer[64];
-			if (pins->_lock_instrument_to_machine < 0) {
-				m_lockinstnumber.SetWindowText("");
-			} else {
-				sprintf(buffer, "%.2X", pins->_lock_instrument_to_machine);
-				m_lockinstnumber.SetWindowText(buffer);
+			Song &song = Global::song();
+			m_lockinst_combo.ResetContent();
+			for (int i=0;i<MAX_BUSES;i++) {
+				if (song._pMachine[i] != NULL && song._pMachine[i]->_type == MACH_SAMPLER) {
+					std::ostringstream os;
+					os << std::hex << std::uppercase << i << std::nouppercase << ": "<< song._pMachine[i]->_editName;
+					int idx = m_lockinst_combo.AddString(os.str().c_str());
+					m_lockinst_combo.SetItemData(idx, i);
+				}
 			}
 
-			if (pins->_LOCKINST) {
-				m_lockinst.SetCheck(BST_CHECKED);
-				m_lockinstnumber.EnableWindow(true);
-			} else {
-				m_lockinst.SetCheck(BST_UNCHECKED);
-				m_lockinstnumber.EnableWindow(false);
-			}
+
+			UpdateVirtInstOptions();
+
 			UpdateWavesCombo();
 
 			UpdateComboNNA();
@@ -226,17 +235,40 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			sprintf(buffer,"%d",wave.WaveLength());
 			m_wlen.SetWindowText(buffer);
 
-
-			initializingDialog=true;
-			CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
-			sprintf(buffer,"%d",wave.WaveSampleRate());
-			cedit->SetWindowText(buffer);
-			initializingDialog=false;
-
-
 			RefreshEnvelopes();
 		}
 
+		void CInstrumentEditor::UpdateVirtInstOptions()
+		{
+			const int si = Global::song().waveSelected;
+			Instrument *pins = Global::song()._pInstrument[si];
+			int virtualIndex = Global::song().VirtualInstrumentInverted(si,false);
+			if (virtualIndex != -1) {
+				m_virtinst.SetCheck(BST_CHECKED);
+				m_lockinst.SetCheck(BST_UNCHECKED);
+				m_virtinst_combo.EnableWindow(true);
+				m_lockinst_combo.EnableWindow(true);
+
+				Song::macinstpair pair = Global::song().VirtualInstrument(virtualIndex);
+				SelectByData(m_virtinst_combo,virtualIndex);
+				SelectByData(m_lockinst_combo,pair.first);
+			}
+			else if (pins->_LOCKINST) {
+				m_lockinst.SetCheck(BST_CHECKED);
+				m_lockinst_combo.EnableWindow(true);
+				m_virtinst_combo.EnableWindow(false);
+				SelectByData(m_lockinst_combo,pins->sampler_to_use);
+				m_virtinst_combo.SetCurSel(-1);
+			}
+			else {
+				m_virtinst.SetCheck(BST_UNCHECKED);
+				m_lockinst.SetCheck(BST_UNCHECKED);
+				m_lockinst_combo.EnableWindow(false);
+				m_virtinst_combo.EnableWindow(false);
+				m_lockinst_combo.SetCurSel(-1);
+				m_virtinst_combo.SetCurSel(-1);
+			}
+		}
 		void CInstrumentEditor::UpdateWavesCombo()
 		{
 			char line[48];
@@ -283,12 +315,20 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				pins->ENV_DT = m_ampframe.DecayTime()*220.5;
 				pins->ENV_SL = m_ampframe.SustainValue()*100.f;
 				pins->ENV_RT = m_ampframe.ReleaseTime()*220.5;
+				// Ensure values different than zero (it is used in a division)
+				if (pins->ENV_AT == 0 ) pins->ENV_AT = 1;
+				if (pins->ENV_DT == 0 ) pins->ENV_DT = 1;
+				if (pins->ENV_RT == 0 ) pins->ENV_RT = 1;
 			}
 			else { //filter
 				pins->ENV_F_AT = m_filframe.AttackTime()*220.5;
 				pins->ENV_F_DT = m_filframe.DecayTime()*220.5;
 				pins->ENV_F_SL = value_mapper::map_1_128<int>(m_filframe.SustainValue());
 				pins->ENV_F_RT = m_filframe.ReleaseTime()*220.5;
+				// Ensure values different than zero (it is used in a division)
+				if (pins->ENV_F_AT == 0 ) pins->ENV_F_AT = 1;
+				if (pins->ENV_F_DT == 0 ) pins->ENV_F_DT = 1;
+				if (pins->ENV_F_RT == 0 ) pins->ENV_F_RT = 1;
 			}
 			RefreshEnvelopes();
 
@@ -368,11 +408,15 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_AT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
+			// Ensure values different than zero (it is used in a division)
+			if (pins->ENV_AT == 0 ) pins->ENV_AT = 1;
 		}
 		void CInstrumentEditor::SliderAmpDec(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_DT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
+			// Ensure values different than zero (it is used in a division)
+			if (pins->ENV_DT == 0 ) pins->ENV_DT = 1;
 		}
 		void CInstrumentEditor::SliderAmpSus(CSliderCtrl& the_slider)
 		{
@@ -383,16 +427,22 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_RT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
+			// Ensure values different than zero (it is used in a division)
+			if (pins->ENV_RT == 0 ) pins->ENV_RT = 1;
 		}
 		void CInstrumentEditor::SliderFilterAtt(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_AT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
+			// Ensure values different than zero (it is used in a division)
+			if (pins->ENV_F_AT == 0 ) pins->ENV_F_AT = 1;
 		}
 		void CInstrumentEditor::SliderFilterDec(CSliderCtrl& the_slider)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_DT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
+			// Ensure values different than zero (it is used in a division)
+			if (pins->ENV_F_DT == 0 ) pins->ENV_F_DT = 1;
 		}
 		void CInstrumentEditor::SliderFilterSus(CSliderCtrl& the_slider)
 		{
@@ -403,6 +453,8 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_RT = the_slider.GetPos()*220.5;//Reduced original range from samples to 5 milliseconds
+			// Ensure values different than zero (it is used in a division)
+			if (pins->ENV_F_RT == 0 ) pins->ENV_F_RT = 1;
 		}
 		void CInstrumentEditor::SliderFilterMod(CSliderCtrl& the_slider)
 		{
@@ -474,29 +526,100 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		void CInstrumentEditor::OnLockinst()
 		{
+			bool lockselected = static_cast<bool>(m_lockinst.GetCheck());
+			bool virtselected = static_cast<bool>(m_virtinst.GetCheck());
 			int si = Global::song().waveSelected;
-			Global::song()._pInstrument[si]->_LOCKINST = static_cast<bool>(m_lockinst.GetCheck());
-			m_lockinstnumber.EnableWindow(Global::song()._pInstrument[si]->_LOCKINST);
-		}
-		void CInstrumentEditor::OnChangeLockInst()
-		{
-			int si = Global::song().waveSelected;
-			char buffer[32];
-			sprintf(buffer,"\0");
-			m_lockinstnumber.GetWindowText(buffer, 16);
-			if (buffer[0] == '\0') {
-				Global::song()._pInstrument[si]->_lock_instrument_to_machine = -1;
-			} else {
-				int macNum = helpers::hexstring_to_integer(buffer);
-				if (macNum >= MAX_BUSES)
-					macNum = MAX_BUSES-1;
-				else if (macNum < 0)
-					macNum = 0;
-				if ( ! Global::song()._pMachine[macNum] )
-					macNum = -1;
-				Global::song()._pInstrument[si]->_lock_instrument_to_machine = macNum;
+			m_lockinst_combo.EnableWindow(lockselected);
+			Global::song()._pInstrument[si]->_LOCKINST = lockselected;
+
+			if (virtselected) {
+				m_virtinst.SetCheck(BST_UNCHECKED);
+				m_virtinst_combo.EnableWindow(false);
+				m_virtinst_combo.SetCurSel(-1);
+				int virtualIndex = Global::song().VirtualInstrumentInverted(si,false);
+				Global::song().DeleteVirtualInstrument(virtualIndex);
+				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+				win->UpdateComboGen(true);
+			}
+			if (!lockselected) {
+				m_lockinst_combo.SetCurSel(-1);
+				Global::song()._pInstrument[si]->sampler_to_use=-1;
 			}
 		}
+		void CInstrumentEditor::OnVirtualinst()
+		{
+			bool lockselected = static_cast<bool>(m_lockinst.GetCheck());
+			bool virtselected = static_cast<bool>(m_virtinst.GetCheck());
+			int si = Global::song().waveSelected;
+			m_lockinst_combo.EnableWindow(virtselected);
+			m_virtinst_combo.EnableWindow(virtselected);
+
+			if (lockselected) {
+				m_lockinst.SetCheck(BST_UNCHECKED);
+			}
+			if (!virtselected) {
+				int virtualIndex = Global::song().VirtualInstrumentInverted(si,false);
+				m_lockinst_combo.SetCurSel(-1);
+				m_virtinst_combo.SetCurSel(-1);
+				Global::song().DeleteVirtualInstrument(virtualIndex);
+			}
+			CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+			win->UpdateComboGen(true);
+		}
+
+		void CInstrumentEditor::OnSelchangeLockInstCombo()
+		{
+			bool lockselected = static_cast<bool>(m_lockinst.GetCheck());
+			bool virtselected = static_cast<bool>(m_virtinst.GetCheck());
+			int si = Global::song().waveSelected;
+			DWORD_PTR macIdx = m_lockinst_combo.GetItemData(m_lockinst_combo.GetCurSel());
+			if (macIdx != CB_ERR)
+			{
+				if (lockselected) {
+					Global::song()._pInstrument[si]->sampler_to_use = macIdx;
+				}
+				else if (virtselected) {
+					DWORD_PTR instIdx = m_virtinst_combo.GetItemData(m_virtinst_combo.GetCurSel());
+					if (instIdx != CB_ERR ) {
+						Global::song().SetVirtualInstrument(instIdx,macIdx,si);
+					}
+				}
+			}
+			else {
+				int virtualIndex = Global::song().VirtualInstrumentInverted(si,false);
+				m_lockinst_combo.SetCurSel(-1);
+				m_virtinst_combo.SetCurSel(-1);
+				Global::song().DeleteVirtualInstrument(virtualIndex);
+			}
+			CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+			win->UpdateComboGen(true);
+		}
+		void CInstrumentEditor::OnSelchangeVirtInstCombo()
+		{
+			int si = Global::song().waveSelected;
+			DWORD_PTR instIdx = m_virtinst_combo.GetItemData(m_virtinst_combo.GetCurSel());
+			if (instIdx != CB_ERR) {
+				Song::macinstpair pairinst = Global::song().VirtualInstrument(instIdx);
+				if (pairinst.first != -1 ) {
+					int result = MessageBox("Warning! This virtual instrument is already used. If you confirm, the previous association will be lost","Set virtual instrument",MB_YESNO | MB_ICONEXCLAMATION);
+					if ( result == IDNO) {
+						m_virtinst_combo.SetCurSel(-1);
+						return;
+					}
+				}
+				DWORD_PTR macIdx = m_lockinst_combo.GetItemData(m_lockinst_combo.GetCurSel());
+				if ( macIdx != CB_ERR ) {
+					Global::song().SetVirtualInstrument(instIdx,macIdx,si);
+				}
+			}
+			else {
+				int virtualIndex = Global::song().VirtualInstrumentInverted(si,false);
+				m_lockinst_combo.SetCurSel(-1);
+				m_virtinst_combo.SetCurSel(-1);
+				Global::song().DeleteVirtualInstrument(virtualIndex);
+			}
+		}
+
 
 		void CInstrumentEditor::OnSelchangeNnaCombo() 
 		{
@@ -623,19 +746,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				}
 			}
 		}
-		void CInstrumentEditor::OnEnChangeSamplerate()
-		{
-			int si=Global::song().waveSelected;
-			char tmp[40];
-			if ( !initializingDialog  && Global::song().samples.Exists(si)) {
-				XMInstrument::WaveData<>& wave = Global::song().samples.get(si);
-				CEdit* cedit = (CEdit*)GetDlgItem(IDC_SAMPLERATE);
-				cedit->GetWindowText(tmp,40);
-				int i = atoi(tmp);
-				if (i==0) i=44100;
-				wave.WaveSampleRate(i);
-			}
-		}
+
 		
 		void CInstrumentEditor::UpdateComboNNA() 
 		{
@@ -795,5 +906,16 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				*pResult = CDRF_DODEFAULT;
 			}
 		}
+
+		void CInstrumentEditor::SelectByData(CComboBox& combo,DWORD_PTR data) 
+		{
+			for (int i=0; i < combo.GetCount(); i++) {
+				if (combo.GetItemData(i) == data) {
+					combo.SetCurSel(i);
+					break;
+				}
+			}
+		}
+
 	}   // namespace
 }   // namespace

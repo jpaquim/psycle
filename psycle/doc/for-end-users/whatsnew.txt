@@ -10,7 +10,7 @@ Version | Date | Type of release             | Authors
 1.8.5	| 2007 | RC, release                 | [JAZ] & alk & bohan. Past contributors of 1.9 alpha
 1.8.3	| 2007 | beta                        | [JAZ]
 1.8.2	| 2006 | bugfix                      | [JAZ] & bohan & jme
-1.9     | 2005 | alpha                       | psycledelics combined effort
+1.9.x   | 2005 | alpha                       | psycledelics combined effort
 1.8.1   | 2005 | bugfix                      | bohan & plugin developers
 1.8     | 2005 | stable                      | psycledelics combined effort :-)
 1.7.x   | 2005 | alpha, beta                 | alk & bohan & magnus & [JAZ] & logywang & sampler
@@ -45,6 +45,23 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.11.4 (beta) (2014-xx-xx)
+-------
++ Virtual generators. Sampled instruments can be mapped to a machine number (from 81 to FE in hexadecimal) and be used without the need to specify which machine they play on.
+  This has a side effect of leaving the aux column free, which can be used in these virtual generators as a volume column ( commands 0Cxx in Sampler and 1Exx in Sampulse)
+  Modules imported now make use of virtual generators, which also helps in replacing the instruments with other generators, or even adding more sampulse machines to route sounds differently without the need to modify the pattern data.
++ Sampler : Porta to note.
+* Playing notes in Instrument editor and Sampulse machine now do not write into the pattern editor (so now they behave like the rest of the plugins).
+* Pattern skins that have text header and tracking, but which miss classic header tracking are understood now as "use the button positions as tracking zone".
+* Change to the fileformat, and completed the file-format description.txt documentation. The change affects to how samples are saved and adds the new virtual generators feature.
+! delete sampulse instrument with the option to delete the samples did crash the application.
+! Moving mouse on pattern editor used more cpu than needed (was redrawing the header innecessarily).
+! Several screen updating problems (sample lists)
+! Fixed bug on the sampler option to play an instrument from a concrete sampler. Note off note would go to the wrong machine.
+! Fixed crash on Sampulse instruments with a sutain loop at the amplitude envelope's end.
+! Fixed bug in loading the note mapping of .XI instruments.
+! Fixed bug with waveout driver and synchornized MIDI mode.
+
 v1.11.3 (beta) (2014-05-25)
 --------
 + Popup menu on machine view, for machines. It doesn't add new functionality that couldn't be done with mouse before, but it is now also possible with keyboard.
@@ -147,7 +164,7 @@ v1.10.1 (2012-04-23)
 ! Fix crash after opening and closing a vst machine and receiving an Automation (f.ex: with FreeAmp 2.5) (thanks 
 ! Fix on plucked string where two instances caused wrong sound. (thanks angelus)
 ! Fix where settings could be loaded from one place, and saved to a different one.
-! Fix in sking (theme) loading and saving. (thanks angelus)
+! Fix in skin (theme) loading and saving. (thanks angelus)
 ! Fix in the plugin cache (now keeps the lettercase of the plugin dll). This fixes FabFilter plugins. (thanks jme for making us aware of this)
 ! Compatibility improvements for older songs made with arguru synth/bass plugins.
 ! Other smaller fixes and changes.
@@ -306,7 +323,7 @@ v1.8.2 (2006-02-26)
 ! Fixed a quite rare bug where Psycle would crash loading a sample from a song.
 + Updates to several plugins (blitz, gamefx, all of druttis, and some others)
 
-v1.8.0 
+v1.8.0 ( 2005-07-31)
 ------
 + added an option to make pattern navigation (cursors by default) doesn't be affected by Pattern Step, jumping always 1 row (sampler)
 + added a shortcut (ALT+S) for Psycle Settings Dialog (sampler)
@@ -382,7 +399,7 @@ bugfixes:
 	* comments about unfinished features (jaz)
 
 
-v1.7.6.2
+v1.7.6.2 (2004-05-27)
 --------
 
 !fixed bug in the flanger's optimized sine sequence generator: 32-bit floating point numbers were not accurate enough, now it's 64-bit (bohan)
@@ -426,7 +443,7 @@ v1.7.5
 ! vst window layout for machines with way too many parameters and using the default gui (pooplog)
 
 
-v1.7.4
+v1.7.4 (2003-07-17)
 ------
 
 + Added seminote tunning to sample instruments.
@@ -448,7 +465,7 @@ v1.7.4
 + wave writer can write separate waves per generator now (pooplog)
 
 
-v1.7.3 RC2
+v1.7.3 RC2 (2003-06-15)
 ----------
 
 ! whoops - fixed the dsound config dialog (pooplog)
@@ -462,7 +479,7 @@ v1.7.3 RC2
 * All-new high-performance ASIO implementation - MSB float mode not done yet (pooplog)
 
 
-v1.7.3 RC1
+v1.7.3 RC1  (2003-06-10)
 ----------
 
 + double clicking on pattern highlights that track (pooplog)
@@ -501,13 +518,13 @@ v1.7.3 RC1
 ! Sample loading routine is now more flexible.This allows to load files that previously didn't. [JAZ]
 
 
-v1.7.2
+v1.7.2 (2003-03-10)
 ------
 
 ! bug where the sampler didn't stop the notes sometimes.
 
 
-v1.7.1
+v1.7.1 (2003-02-06)
 ------
 
 + Added option (not) to loop the Song/block at the end.
@@ -519,7 +536,7 @@ v1.7.1
 ! Fixed Saving to wav. options "save pattern" and "save sequence position" didn't ever stop.
 
 
-v1.7RC6 (Official 1.7)
+v1.7RC6 (Official 1.7)  (2002-12-27)
 -------
 
 + Tweak Slide command. Slides a Tweak to make it smoother. (pooplog)
@@ -533,7 +550,7 @@ v1.7RC6 (Official 1.7)
 ! Fixed Length (in time) counter error when FFxx or FExx values were present for Tweaks or mcm's
 
 
-v1.7RC1
+v1.7RC1 (2002-12-13)
 -------
 + added ASIO support through "PortAudio" library (in its version 18). (LegoStar)
 + revert to saved option (pooplog) [alk]
@@ -602,7 +619,7 @@ v1.7RC1
 ! millions of other tiny bugfixes (pooplog & JAZ)
 
 
-v1.66
+v1.66 (2002-09-04)
 -----
 
 + Added elapsed playtime (by KooPer)
@@ -647,7 +664,7 @@ v1.66
 ! Fixed : Rightclicking the mouse (to show the popup menu) moved the cursor. Fixed. (Why did I move it?)
 
 
-V1.6plus
+V1.6plus (2002-04-03)
 --------
 + Added: Enter Key now Selects the Machine and Instrument under the cursor.
 + Added: Loop Setting in wave Editor. Ctrl+Left Click = Start . Ctrl+Rigth Click = End.
@@ -671,7 +688,7 @@ V1.6plus
 ! bug: Sequence selection was not correcly updated when stopping sometimes.
 ! bug: Note entering with MIDI keyboards didn't enter the velocity as previous versions did.
 
-V1.6
+V1.6 (2002-03-22)
 ----
 + Added Song Autosave. Each 10 minutes, a file named "autosave.psy" is saved with your current data.
 + Added a confirmation dialog when pressing the Save Button. (As it seems, some people press it by mistake)
@@ -981,7 +998,7 @@ Thanks to Dan (our newest coder) for most of this:
 ! When two machines were overlapped, trying to move the topmost, moved the bottommost.
 
 
-V1.5b3r5
+V1.5b3r5 (2001-06-12)
 --------
 + Added "Random Parameters" to VST's as a request of an user.
 + Added Command 0Cxx to VST's (Set volume). Only works in noteon right now.
@@ -1014,7 +1031,7 @@ V1.5b3+
   had no presets. This error wouldn't have to be reported.
 
 
-V1.5b3
+V1.5b3 
 ------
 * MIDI Improved in many ways:
   + Added Sync codes so that you can use Psycle in conjuntion with other Soft/Hardware Synths
@@ -1213,7 +1230,7 @@ Note2:Yes, the interface is still quite slow...
 
 
 
-V1.1b2
+V1.1b2 (2000-11-14)
 ------
 *Reimplemented WAV recording (it automatically stops when song loops
  and doesn't start until 'play' is clicked)
@@ -1230,7 +1247,7 @@ V1.1b2
 *Fixed New Machine refresh bug
 
 
-V1.1b1
+V1.1b1 
 ------
 
 *Machine muting now works, a muted machine is indicated by the red light
@@ -1252,7 +1269,7 @@ V1.1b1
  (yet)
 *MASSIVE internal recoding
 
-V1.02
+V1.02 (2000-09-28)
 -----
 
 *Added DirectX (DirectSound) output driver

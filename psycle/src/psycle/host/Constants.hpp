@@ -14,6 +14,8 @@ namespace psycle
 		#define MAX_BUSES				64
 		/// Max number of machines+1 (master)
 		#define MAX_MACHINES			129
+		/// Max number of machines+ virtual instruments ( sampled instrument used as a generator). 255 is not usable because it is the empty value.
+		#define MAX_VIRTUALINSTS		255
 		/// Index of MasterMachine
 		#define MASTER_INDEX			128
 		/// Max number of instruments.
@@ -32,16 +34,8 @@ namespace psycle
 		#define MAX_SONG_POSITIONS		256
 		/// Max input connections and output connections a machine can have. (\todo: should be replaced by a dynamic array)
 		#define MAX_CONNECTIONS		12
-		/// Size in bytes of an event (note-aux-mac-effect). Increment if you add columns to a track. (like panning). Modify this, CURRENT_FILE_VERSION_PATD and add the apropiated load and save code.
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-		#define EVENT_SIZE				6
-	#else
+		/// Size in bytes of an event (note-aux-mac-effect). It is better to have an alternate structure for additional columns in the event.
 		#define EVENT_SIZE				5
-	#endif
-#endif
 		/// PSY2-fileformat Constants
 		#define OLD_MAX_TRACKS			32
 		#define OLD_MAX_WAVES			16
@@ -60,25 +54,34 @@ namespace psycle
 		/// Maximum size of the audio block to be passed to the Work() function.
 		/*unsigned*/ int const STREAM_SIZE = plugin_interface::MAX_BUFFER_LENGTH;
 
-		/// Current version of the Song file chunks. 0xAABB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, the loader skips the extra info.
+		/// Current version of the Song file chunks. 0xAAAABBBB  A= Major version (can't be loaded, skip the whole chunk), B=minor version. It can be loaded with the existing loader, the loader skips the extra info.
 		//Version for the metadata information (author, comments..)
-		#define CURRENT_FILE_VERSION_INFO	0x0000
+		#define CURRENT_FILE_VERSION_INFO	0x00000000
 		//Version for the song data information (BPM, number of tracks..)
-		#define CURRENT_FILE_VERSION_SNGI	0x0002
+		#define CURRENT_FILE_VERSION_SNGI	0x00000002
 		//Version for the sequence data (playback order)
-		#define CURRENT_FILE_VERSION_SEQD	0x0000
+		#define CURRENT_FILE_VERSION_SEQD	0x00000000
 		//Version for the pattern data
-		#define CURRENT_FILE_VERSION_PATD	0x0001
+		#define CURRENT_FILE_VERSION_PATD	0x00000001
 		//Version for the machine data
-		#define CURRENT_FILE_VERSION_MACD	0x0001
-		//Version for the instrument (Old sampler) data
-		#define CURRENT_FILE_VERSION_INSD	0x0001
-		//Version for the wave (old sampler) data
-		#define CURRENT_FILE_VERSION_WAVE	0x0000
+		#define CURRENT_FILE_VERSION_MACD	0x00000001
+		//Version for the instrument (classic sampler) data
+		#define CURRENT_FILE_VERSION_INSD	0x00000002
+		//Version for the wave (classic sampler) data subchunk (legacy)
+		#define CURRENT_FILE_VERSION_WAVE	0x00000000
+		//Version for the instrument (sampulse sampler) data  (legacy)
+		#define CURRENT_FILE_VERSION_EINS	0x00010001
+		//Version for the instrument (sampulse sampler) data
+		#define CURRENT_FILE_VERSION_SMID	0x00000001
+		//Version for the wave sample bank data
+		#define CURRENT_FILE_VERSION_SMSB	0x00000001
+		//Version for the wave sample bank data
+		#define CURRENT_FILE_VERSION_VIRG	0x00000000
 		//Combined value for the fileformat.
-		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_WAVE
+		#define CURRENT_FILE_VERSION CURRENT_FILE_VERSION_INFO+CURRENT_FILE_VERSION_SNGI+CURRENT_FILE_VERSION_SEQD+CURRENT_FILE_VERSION_PATD+CURRENT_FILE_VERSION_MACD+CURRENT_FILE_VERSION_INSD+CURRENT_FILE_VERSION_SMID+CURRENT_FILE_VERSION_SMSB
 
-		unsigned const int VERSION_MAJOR_ZERO = 0;
+		unsigned const int VERSION_MAJOR_ZERO = 0x00000000;
+		unsigned const int VERSION_MAJOR_ONE  = 0x00010000;
 
 		#define CURRENT_CACHE_MAP_VERSION	0x0002
 	}

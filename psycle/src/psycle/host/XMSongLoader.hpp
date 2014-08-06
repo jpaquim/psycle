@@ -21,15 +21,15 @@ namespace psycle { namespace host {
 	private:
 		bool IsValid();
 
-		size_t LoadPatterns(Song& song);
-		size_t LoadSinglePattern(Song& song, size_t start, int patIdx, int iTracks);	
-		bool LoadInstruments(Song& song, size_t iInstrStart);
+		size_t LoadPatterns(Song& song, std::map<int,int>& xmtovirtual);
+		size_t LoadSinglePattern(Song& song, size_t start, int patIdx, int iTracks, std::map<int,int>& xmtovirtual);	
+		bool LoadInstruments(Song& song, size_t iInstrStart, std::map<int,int>& xmtovirtual);
 		size_t LoadInstrument(Song& song, XMInstrument& instr, size_t iStart, int idx,int& curSample);
 		size_t LoadSampleHeader(XMInstrument::WaveData<>& sample, size_t iStart, int InstrIdx, int SampleIdx);
 		size_t LoadSampleData(XMInstrument::WaveData<>& sample, size_t iStart, int InstrIdx, int SampleIdx);
 		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
 		void SetEnvelopes(XMInstrument& inst,const XMSAMPLEHEADER & sampleHeader);		
-		char * AllocReadStr(int size, size_t start=-1);
+		char * AllocReadStr(int size, signed int start=-1);
 
 		// inlines
 		inline char ReadInt1()
@@ -49,21 +49,21 @@ namespace psycle { namespace host {
 			int i;
 			return Read(&i,4)?i:0;
 		}
-		inline char ReadInt1(const size_t start)
+		inline char ReadInt1(const signed int start)
 		{	
 			char i;
 			if(start>=0) Seek(start);
 			return Read(&i,1)?i:0;
 		}
 
-		inline short ReadInt2(const size_t start)
+		inline short ReadInt2(const signed int start)
 		{
 			short i;
 			if(start>=0) Seek(start);
 			return Read(&i,2)?i:0;
 		}
 
-		inline int ReadInt4(const size_t start)
+		inline int ReadInt4(const signed int start)
 		{
 			int i;
 			if(start>=0) Seek(start);
@@ -115,14 +115,14 @@ namespace psycle { namespace host {
 	private:
 		bool IsValid();
 
-		void LoadPatterns(Song & song);
-		void LoadSinglePattern(Song & song, int patIdx, int iTracks);	
+		void LoadPatterns(Song & song, std::map<int,int>& modtovirtual);
+		void LoadSinglePattern(Song & song, int patIdx, int iTracks, std::map<int,int>& modtovirtual);	
 		unsigned char ConvertPeriodtoNote(unsigned short period);
 		void LoadInstrument(Song & song, int idx);
 		void LoadSampleHeader(XMInstrument::WaveData<>& _wave, int InstrIdx);
 		void LoadSampleData(XMInstrument::WaveData<>& _wave, int InstrIdx);
 		BOOL WritePatternEntry(Song& song,int patIdx,int row, int col, PatternEntry & e);
-		char * AllocReadStr(int32_t size, size_t start=-1);
+		char * AllocReadStr(int32_t size, signed int start=-1);
 
 		// inlines
 		inline unsigned char ReadUInt1()

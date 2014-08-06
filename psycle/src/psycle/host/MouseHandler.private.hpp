@@ -210,11 +210,13 @@ namespace psycle { namespace host {
 				popupmacidx=-1;
 				CPoint mypoint;
 				if(point.x < 0 || point.y < 0){ // Context menu button pressed
-					if(_pSong._pMachine[_pSong.seqBus]) {
-						mypoint.x = _pSong._pMachine[_pSong.seqBus]->_x;
-						mypoint.y = _pSong._pMachine[_pSong.seqBus]->_y;
+					int inst=-1;
+					Machine * pmac = _pSong.GetMachineOfBus(_pSong.seqBus, inst);
+					if(pmac) {
+						mypoint.x = pmac->_x;
+						mypoint.y = pmac->_y;
 						ClientToScreen(&mypoint);
-						popupmacidx = _pSong.seqBus;
+						popupmacidx = pmac->_macIndex;
 					}
 				}
 				else {  // Right click mouse button
@@ -229,8 +231,8 @@ namespace psycle { namespace host {
 					VERIFY(menu.LoadMenu(IDR_POPUP_MACHINE));
 					CMenu* pPopup = menu.GetSubMenu(0);
 					ASSERT(pPopup != NULL);
-					FillConnectToPopup(pPopup->GetSubMenu(3));
-					FillConnectionsPopup(pPopup->GetSubMenu(4));
+					FillConnectToPopup(pPopup->GetSubMenu(4));
+					FillConnectionsPopup(pPopup->GetSubMenu(5));
 					pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, mypoint.x, mypoint.y, GetOwner());
 					menu.DestroyMenu();
 				}
@@ -278,7 +280,7 @@ namespace psycle { namespace host {
 						case MACHMODE_FX:
 							mcd_x = point.x - _pSong._pMachine[smac]->_x;
 							mcd_y = point.y - _pSong._pMachine[smac]->_y;
-							_pSong.seqBus = _pSong.FindBusFromIndex(smac);
+							_pSong.seqBus = smac;
 							pParentMain->UpdateComboGen();
 							Repaint();	
 							break;
@@ -372,7 +374,7 @@ namespace psycle { namespace host {
 						case MACHMODE_GENERATOR:
 							
 							// Since this is a generator, select it.
-							_pSong.seqBus = _pSong.FindBusFromIndex(smac);
+							_pSong.seqBus = smac;
 							pParentMain->UpdateComboGen();
 							
 							panning = tmac->GetPan()*MachineCoords->dGeneratorPan.width;
@@ -1019,12 +1021,12 @@ namespace psycle { namespace host {
 						trackingMuteTrack=trackingRecordTrack=-1;
 						Repaint(draw_modes::track_header);
 					}
-					else if (trackingMuteTrack||trackingRecordTrack||trackingSoloTrack) {
+					else if ((trackingMuteTrack&trackingRecordTrack&trackingSoloTrack) != -1) {
 						trackingMuteTrack=trackingRecordTrack=trackingSoloTrack=-1;
 						Repaint(draw_modes::track_header);
 					}
 				}
-				else if (trackingMuteTrack||trackingRecordTrack||trackingSoloTrack) {
+				else if ((trackingMuteTrack&trackingRecordTrack&trackingSoloTrack) != -1) {
 					trackingMuteTrack=trackingRecordTrack=trackingSoloTrack=-1;
 					Repaint(draw_modes::track_header);
 				}
@@ -1417,11 +1419,17 @@ namespace psycle { namespace host {
 
 		void CChildView::OnPopMacOpenParams()
 		{
-			DoMacPropDialog(popupmacidx);
+			pParentMain->ShowMachineGui(popupmacidx, trackingpoint);
 		}
 		void CChildView::OnPopMacOpenProperties()
 		{
-			pParentMain->ShowMachineGui(popupmacidx, trackingpoint);
+			DoMacPropDialog(popupmacidx);
+		}
+		void CChildView::OnPopMacOpenBankManager()
+		{
+			CPresetsDlg dlg(this);
+			dlg._pMachine=_pSong._pMachine[popupmacidx];
+			dlg.DoModal();
 		}
 		void CChildView::OnPopMacConnecTo(UINT nID)
 		{

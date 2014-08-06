@@ -48,7 +48,7 @@ namespace psycle { namespace host {
 
 			m_macname.SetLimitText(31);
 			char buffer[64];
-			sprintf(buffer,"%.2X : %s Properties",thesong.FindBusFromIndex(thisMac),pMachine->_editName);
+			sprintf(buffer,"%.2X : %s Properties",thisMac,pMachine->_editName);
 			SetWindowText(buffer);
 
 			m_macname.SetWindowText(pMachine->_editName);
@@ -169,8 +169,8 @@ namespace psycle { namespace host {
 			int newMacidx = thesong.GetFreeFxBus();
 			m_view->NewMachine(pMachine->_x-16,pMachine->_y-16,newMacidx);
 
-			Machine* newMac = thesong._pMachine[newMacidx];
-			if(newMac) {
+			if( newMacidx != -1 && thesong._pMachine[newMacidx]) {
+				Machine* newMac = thesong._pMachine[newMacidx];
 				CExclusiveLock lock(&thesong.semaphore, 2, true);
 				for(int i = 0; i < MAX_CONNECTIONS; i++) {
 					if(pMachine->inWires[i].Enabled()) {
@@ -195,8 +195,8 @@ namespace psycle { namespace host {
 			int newMacidx = thesong.GetFreeFxBus();
 			m_view->NewMachine(pMachine->_x+16,pMachine->_y+16,newMacidx);
 
-			Machine* newMac = thesong._pMachine[newMacidx];
-			if(newMac) {
+			if( newMacidx != -1 && thesong._pMachine[newMacidx]) {
+				Machine* newMac = thesong._pMachine[newMacidx];
 				CExclusiveLock lock(&thesong.semaphore, 2, true);
 				for(int i = 0; i < MAX_CONNECTIONS; i++) {
 					Wire* wire = pMachine->outWires[i];

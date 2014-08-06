@@ -34,13 +34,14 @@ namespace psycle { namespace host {
 			afx_msg void OnCustomdrawSliderm(UINT idx, NMHDR* pNMHDR, LRESULT* pResult);
 			afx_msg void OnLoopoff();
 			afx_msg void OnLoopforward();
-			afx_msg void OnChangeLockInst();
-			afx_msg void OnEnChangeSamplerate();
 			afx_msg void OnSelchangeNnaCombo();
 			afx_msg void OnCbnSelendokInstrument();
 			afx_msg void OnPrevInstrument();
 			afx_msg void OnNextInstrument();
 			afx_msg void OnLockinst();
+			afx_msg void OnSelchangeLockInstCombo();
+			afx_msg void OnVirtualinst();
+			afx_msg void OnSelchangeVirtInstCombo();
 			afx_msg void OnSelchangeFilterType();
 			afx_msg void OnRpan();
 			afx_msg void OnRcut();
@@ -59,7 +60,10 @@ namespace psycle { namespace host {
 			void RefreshEnvelopes();
 			void UpdateNoteLabel();
 			void UpdateComboNNA();
+			void UpdateVirtInstOptions();
 			void UpdateWavesCombo();
+			void UpdateSamplersCombo();
+			void UpdateVirtualInstCombo();
 
 			void SliderVolume(CSliderCtrl& the_slider);
 			void SliderFinetune(CSliderCtrl& the_slider);
@@ -76,10 +80,14 @@ namespace psycle { namespace host {
 			void SliderFilterDec(CSliderCtrl& the_slider);
 			void SliderFilterAtt(CSliderCtrl& the_slider);
 
+			void SelectByData(CComboBox& combo,DWORD_PTR data);
+
 			bool initializingDialog;
 
 			CButton m_lockinst;
-			CEdit m_lockinstnumber;
+			CComboBox m_lockinst_combo;
+			CButton m_virtinst;
+			CComboBox m_virtinst_combo;
 			CComboBox m_nna_combo;
 			CComboBox m_sampins_combo;
 			CButton	m_loopcheck;
