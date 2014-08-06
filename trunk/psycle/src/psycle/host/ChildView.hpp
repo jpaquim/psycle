@@ -136,10 +136,7 @@ namespace host {
 			void BlockGenChange(int x);
 			void ShowSwingFillDlg(bool bTrackMode);
 
-			void MidiPatternCommand(int busMachine, int command, int value); // called by midi to insert pattern commands
-			void MidiPatternMidiCommand(int busMachine, int command, int value); // called by midi to insert midi pattern commands
-			void MousePatternTweak(int machine, int command, int value, bool slide=false);
-			void EnterNote(int note, int instr=255, int velocity=127, bool bTranspose=true, Machine* mac=NULL);
+			void EnterData(PatternEntry *newentry, int track, int line, bool force/*=true*/);
 			void EnterNoteoffAny();
 			bool MSBPut(int nChar);
 			void PrevTrack(int x,bool wrap,bool updateDisplay=true);
@@ -183,7 +180,6 @@ namespace host {
 			void IncPosition(bool bRepeat=false);
 			void DecPosition();
 
-			void SelectNextTrack();  // for armed tracks recording
 			void SetTitleBarText();
 			void RecalculateColourGrid();
 			void RecalcMetrics();
@@ -491,6 +487,7 @@ namespace host {
 			afx_msg void OnPopTranspose_12();
 			afx_msg void OnPopMacOpenParams();
 			afx_msg void OnPopMacOpenProperties();
+			afx_msg void OnPopMacOpenBankManager();
 			afx_msg void OnPopMacConnecTo(UINT nID);
 			afx_msg void OnPopMacShowWire(UINT nID);
 			afx_msg void OnPopMacReplaceMac();

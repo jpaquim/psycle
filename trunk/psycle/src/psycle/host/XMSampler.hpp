@@ -29,6 +29,7 @@ class XMSampler : public Machine
 public:
 
 	static const int MAX_POLYPHONY = 64;///< max polyphony 
+	//Version for the sampler machine data. The instruments and sample bank versions are saved with the song chunk versioning
 	static const uint32_t VERSION = 0x00010001;
 	//Version zero was the development version (no format freeze). Version one is the published one.
 	static const uint32_t VERSION_ONE = 0x00010000;
@@ -410,8 +411,8 @@ XMSampler::Channel::PerformFX().
 				}
 				else {
 					m_Stage = EnvelopeStage::OFF;
-					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex);
 					m_PositionIndex = m_pEnvelope->NumOfPoints();
+					m_ModulationAmount = m_pEnvelope->GetValue(m_PositionIndex-1);
 				}
 			}
 			else CalcStep(m_PositionIndex,m_PositionIndex + 1);
@@ -553,6 +554,7 @@ XMSampler::Channel::PerformFX().
 					rChannel().ForegroundVoice(NULL);
 					rChannel().LastVoicePanFactor(m_PanFactor);
 					rChannel().LastVoiceVolume(m_Volume);
+					rChannel().LastVoiceRandVol(m_CurrRandVol);
 				}
 			}
 			m_bPlay = value;
@@ -578,6 +580,8 @@ XMSampler::Channel::PerformFX().
 		// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
 		float RealVolume() const { return (!m_bTremorMute)?(m_RealVolume+m_TremoloAmount):0; }
 		float ActiveVolume() const { return RealVolume() * rChannel().Volume() * m_AmplitudeEnvelope.ModulationAmount() * m_VolumeFadeAmount; }
+
+		float CurrRandVol() { return m_CurrRandVol; }
 
 		void PanFactor(float pan)
 		{
@@ -630,7 +634,7 @@ XMSampler::Channel::PerformFX().
 		inline int SampleRate() const { return m_pSampler->SampleRate(); }
 	protected:
 		// Gets the delta between the points of the wavetables for tremolo/panbrello/vibrato
-		int GetDelta(int wavetype,int wavepos) const;
+		int GetDelta(XMInstrument::WaveData<>::WaveForms::Type wavetype,int wavepos) const;
 		float PanRange() const { return m_PanRange; }
 		bool IsTremorMute() const {return m_bTremorMute;}
 		void IsTremorMute(const bool value){m_bTremorMute = value;}
@@ -675,7 +679,7 @@ XMSampler::Channel::PerformFX().
 
 
 		float m_PanFactor;
-		float m_CurRandPan;
+		//float m_CurRandPan;
 		float m_PanRange;
 		bool m_Surround;
 
@@ -850,6 +854,8 @@ XMSampler::Channel::PerformFX().
 		}
 		int LastVoiceVolume() const {return m_LastVoiceVolume;}
 		void LastVoiceVolume(int value){m_LastVoiceVolume = value;}
+		int LastVoiceRandVol() { return m_LastVoiceRandVol;}
+		void LastVoiceRandVol(float value) { m_LastVoiceRandVol = value; }
 
 		float PanFactor() const {return 	m_PanFactor;}
 		void PanFactor(float value){
@@ -916,18 +922,19 @@ XMSampler::Channel::PerformFX().
 
 		bool IsGrissando() const {return m_bGrissando;}
 		void IsGrissando(const bool value){m_bGrissando = value;}
-		void VibratoType(const int value){	m_VibratoType = value;}
-		int VibratoType() const {return m_VibratoType;}
-		void TremoloType(const int type){m_TremoloType = type;}
-		int TremoloType() const {return m_TremoloType;}
-		void PanbrelloType(const int type){m_PanbrelloType = type;}
-		int PanbrelloType() const {return m_PanbrelloType;}
+		void VibratoType(const XMInstrument::WaveData<>::WaveForms::Type value){	m_VibratoType = value;}
+		XMInstrument::WaveData<>::WaveForms::Type VibratoType() const {return m_VibratoType;}
+		void TremoloType(const XMInstrument::WaveData<>::WaveForms::Type type){m_TremoloType = type;}
+		XMInstrument::WaveData<>::WaveForms::Type TremoloType() const {return m_TremoloType;}
+		void PanbrelloType(const XMInstrument::WaveData<>::WaveForms::Type type){m_PanbrelloType = type;}
+		XMInstrument::WaveData<>::WaveForms::Type PanbrelloType() const {return m_PanbrelloType;}
 
 		bool IsArpeggio() const { return ((m_EffectFlags & EffectFlag::ARPEGGIO) != 0); }
 		bool IsVibrato() const {return (m_EffectFlags & EffectFlag::VIBRATO) != 0;}
 /*		void VibratoAmount(const double value){m_VibratoAmount = value;}
 		double VibratoAmount() const {return m_VibratoAmount;}
 */
+		bool isDelayed() const { return m_DelayedNote.size()>0; };
 
 	private:
 		int m_Index;// Channel Index.
@@ -941,6 +948,7 @@ XMSampler::Channel::PerformFX().
 		float m_Volume;///<  (0..1.0f) value used for Playback (channel volume)
 		int m_ChannelDefVolume;///< (0..200)   &0x100 = Mute. // value used for Storage and reset
 		int m_LastVoiceVolume; // memory of note volume of last voice played.
+		float m_LastVoiceRandVol; // memory of note volume of last voice played.
 		bool m_bMute; // value used for playback.
 
 		float m_PanFactor;// (0..1.0f) value used for Playback
@@ -954,9 +962,9 @@ XMSampler::Channel::PerformFX().
 		int m_LastPitchEnvelopePosInSamples;
 
 		bool m_bGrissando;
-		int m_VibratoType;///< vibrato type 
-		int m_TremoloType;
-		int m_PanbrelloType;
+		XMInstrument::WaveData<>::WaveForms::Type m_VibratoType;///< vibrato type 
+		XMInstrument::WaveData<>::WaveForms::Type m_TremoloType;
+		XMInstrument::WaveData<>::WaveForms::Type m_PanbrelloType;
 
 
 		int m_EffectFlags;

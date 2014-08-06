@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "PsycleConfig.hpp"
+#include <universalis/stdlib/mutex.hpp>
 
 namespace psycle
 {
@@ -71,9 +72,10 @@ namespace psycle
 			///\name commands
 			///\{
 			/// .
-			bool EnterData(UINT nChar,UINT nFlags);
-			/// .
+			PatternEntry BuildNote(int note, int instr=255, int velocity=127, bool bTranspose=true, Machine* mac=NULL, bool forcevolume=false);
+			PatternEntry BuildTweak(int machine, int tweakidx, int value, bool slide);
 			void PlayNote(int note,int instr=255, int velocity=127,bool bTranspose=true,Machine*pMachine=NULL);
+			void PlayNote(PatternEntry * entry, int track);
 			/// .
 			void StopNote(int note,int instr=255, bool bTranspose=true,Machine*pMachine=NULL);
 			///\}
@@ -81,6 +83,9 @@ namespace psycle
 			void Stop();
 			void PlaySong();
 			void PlayFromCur();
+
+			int GetTrackToPlay(int note, int macNo, int instNo, bool noteoff);
+			int GetTrackAndLineToEdit(int note, int macNo, int instNo, bool noteoff, bool bchord, int& outline);
 
 			void MidiPatternNote(int outnote , int macidx, int channel, int velocity);	// called by the MIDI input to insert pattern notes
 			void MidiPatternCommand(int busMachine, int command, int value); // called by midi to insert pattern commands
@@ -115,6 +120,9 @@ namespace psycle
 				//todo: detection of alt? (simple alt is captured by windows. alt-gr could be captured)
 				return idx;
 			}
+			typedef class std::unique_lock<std::mutex> scoped_lock;
+			std::mutex mutable mutex_;
+
 		public:	
 			/// Indicates that Shift+Arrow is Selection.
 			bool bDoingSelection;		

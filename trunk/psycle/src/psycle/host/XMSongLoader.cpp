@@ -83,7 +83,7 @@ namespace host{
 
 		XMSAMPLEFILEHEADER _insheader;
 		Read(&_insheader,sizeof(XMSAMPLEFILEHEADER));
-		int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+		XMInstrument::WaveData<>::WaveForms::Type exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
 			XMInstrument::WaveData<>::WaveForms::SQUARE,
 			XMInstrument::WaveData<>::WaveForms::SAWDOWN,
 			XMInstrument::WaveData<>::WaveForms::SAWUP
@@ -125,7 +125,6 @@ namespace host{
 		{
 			if ( sRemap[i] < MAX_INSTRUMENTS-1)
 			{
-				instr.IsEnabled(true);
 				XMInstrument::WaveData<>& _wave = song.samples.get(sRemap[i]);
 				LoadSampleData(_wave,GetPos(),idx,sRemap[i]);
 				_wave.VibratoAttack(_insheader.vibsweep==0?0:256-_insheader.vibsweep);
@@ -137,21 +136,22 @@ namespace host{
 
 		XMInstrument::NotePair npair;
 		if ( _insheader.snum[0] < iSampleCount) npair.second=sRemap[_insheader.snum[0]];
-		else npair.second=0;
+		else npair.second=255;
 		for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
 			npair.first=i;
 			if (i< 12){
 				//npair.second=_samph.snum[0]; implicit.
 				instr.NoteToSample(i,npair);
 			} else if(i < 108){
-				if ( _insheader.snum[i] < iSampleCount) npair.second=sRemap[_insheader.snum[i-12]];
-				else npair.second=curSample-1;
+				if ( _insheader.snum[i-12] < iSampleCount) npair.second=sRemap[_insheader.snum[i-12]];
+				else npair.second=255;
 				instr.NoteToSample(i,npair);
 			} else {
 				//npair.second=_samph.snum[95]; implicit.
 				instr.NoteToSample(i,npair);
 			}
 		}
+		instr.ValidateEnabled();
 		song.xminstruments.SetInst(instr,idx);
 		delete[] sRemap;
 	}
@@ -180,9 +180,10 @@ namespace host{
 		song.comments = "Imported from FastTracker II Module: ";
 		song.comments.append(szName);
 		delete[] pSongName; pSongName = 0;
-
-		size_t iInstrStart = LoadPatterns(song);
-		LoadInstruments(song,iInstrStart);
+		
+		std::map<int, int> xmtovirtual;
+		size_t iInstrStart = LoadPatterns(song, xmtovirtual);
+		LoadInstruments(song,iInstrStart, xmtovirtual);
 		return true;
 	}
 
@@ -217,7 +218,7 @@ namespace host{
 		return bIsValid;
 	}
 
-	size_t XMSongLoader::LoadPatterns(Song & song)
+	size_t XMSongLoader::LoadPatterns(Song & song, std::map<int,int>& xmtovirtual)
 	{
 		// get data
 		Seek(60);
@@ -251,10 +252,18 @@ namespace host{
 		}
 
 		m_maxextracolumn = song.SONGTRACKS;
+
+		//Since in XM we load first the patterns, we initialize the map linearly. Later, on the instruments,
+		//we will only create the virtual instruments of existing sampled instruments
+		int xmidx=1;
+		for (int i=MAX_MACHINES;i<MAX_VIRTUALINSTS && xmidx <= m_iInstrCnt;i++, xmidx++) {
+			xmtovirtual[xmidx]=i;
+		}
+
 		// get pattern data
 		size_t nextPatStart = m_Header.size + 60;
 		for(int j = 0;j < m_Header.patterns && nextPatStart > 0;j++){
-			nextPatStart = LoadSinglePattern(song,nextPatStart,j,m_Header.channels);
+			nextPatStart = LoadSinglePattern(song,nextPatStart,j,m_Header.channels, xmtovirtual);
 		}
 		song.SONGTRACKS = m_maxextracolumn;
 		
@@ -262,7 +271,7 @@ namespace host{
 	}
 
 	// Load instruments
-	bool XMSongLoader::LoadInstruments(Song& song, size_t iInstrStart)
+	bool XMSongLoader::LoadInstruments(Song& song, size_t iInstrStart, std::map<int,int>& xmtovirtual)
 	{	
 		int currentSample=0;
 		for(int i = 1;i <= m_iInstrCnt;i++){
@@ -270,12 +279,15 @@ namespace host{
 			iInstrStart = LoadInstrument(song,instr,iInstrStart,i,currentSample);
 			TRACE2("%d %s\n",i,instr.Name().c_str());
 			song.xminstruments.SetInst(instr,i);
+			if (song.xminstruments.IsEnabled(i)) {
+				song.SetVirtualInstrument(xmtovirtual[i],0,i);
+			}
 		}
 
 		return true;
 	}
 
-	char * XMSongLoader::AllocReadStr(int32_t size, size_t start)
+	char * XMSongLoader::AllocReadStr(int32_t size, signed int start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];
@@ -302,13 +314,15 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	size_t XMSongLoader::LoadSinglePattern(Song & song, size_t start, int patIdx, int iTracks)
+	size_t XMSongLoader::LoadSinglePattern(Song & song, size_t start, int patIdx, int iTracks, std::map<int,int>& xmtovirtual)
 	{
 
 		int iHeaderLen = ReadInt4(start);
 		Skip(1); //char iPackingType = ReadInt1();
 		short iNumRows = ReadInt2();
 		short iPackedSize = ReadInt2();
+		unsigned char lastmach[64];
+		std::memset(lastmach,255,sizeof(char)*64);
 
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
 
@@ -361,9 +375,6 @@ namespace host{
 						param = ReadInt1();				
 					}								
 
-					// translate
-					e._inst = instr;	
-					e._mach = 0;
 					unsigned char volume = 255;
 
 					// volume/command
@@ -710,42 +721,72 @@ namespace host{
 							break;	// transpose
 					}
 
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					e._volume = volume;
-					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255) && (e._volume == 255))
-					{
+					// If empty, do not inform machine
+					if (e._note == notecommands::empty && instr == 255 && volume == 255 && e._cmd == 00 && e._parameter == 00) {
 						e._mach = 255;
+						e._inst = 255;
 					}
-					WritePatternEntry(song,patIdx,row,col,e);	
-#else
-					if(e._cmd != 0 || e._parameter != 0) {
-						if(volume!=255) {
-							PatternEntry entry(notecommands::midicc,col,e._mach,0,0);
-							entry._cmd = XMSampler::CMD::SENDTOVOLUME;
-							entry._parameter = volume;
-							WritePatternEntry(song,patIdx,row,m_extracolumn,entry);
-							m_extracolumn++;
+					// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
+					else if (( e._note == notecommands::empty && instr != 255 ) || ( e._note < notecommands::release && instr == 255)) {
+						e._mach = 0;
+						e._inst = instr;
+						if (e._inst != 255) {
+							//We cannot use the virtual instrument, but we should remember which it is.
+							std::map<int,int>::const_iterator it = xmtovirtual.find(e._inst);
+							if (it != xmtovirtual.end()) {
+								lastmach[col]=it->second;
+							}
 						}
 					}
-					else if(volume < 0x40) {
-						e._cmd = XMSampler::CMD::VOLUME;
-						e._parameter = volume*2;
+					//default behaviour, let's find the virtual instrument.
+					else {
+						e._inst = instr;
+						std::map<int,int>::const_iterator it = xmtovirtual.find(e._inst);
+						if (it == xmtovirtual.end()) {
+							if (e._inst != 255) {
+								e._mach = 0;
+								lastmach[col] = e._mach;
+							}
+							else if (lastmach[col] != 255) {
+								e._mach = lastmach[col];
+							}
+							else if (volume != 255) {
+								e._mach = 0;
+							}
+							else {
+								e._mach = 255;
+							}
+						}
+						else {
+							e._mach=it->second;
+							e._inst=255;
+							lastmach[col]=e._mach;
+						}
 					}
-					else if(volume!=255) {
-						e._cmd = XMSampler::CMD::SENDTOVOLUME;
-						e._parameter = volume;
+					if (e._mach == 0) { // fallback to the old behaviour. This will happen only if an unused instrument is present in the pattern.
+						if(e._cmd != 0 || e._parameter != 0) {
+							if(volume!=255) {
+								PatternEntry entry(notecommands::midicc,col,e._mach,0,0);
+								entry._cmd = XMSampler::CMD::SENDTOVOLUME;
+								entry._parameter = volume;
+								WritePatternEntry(song,patIdx,row,m_extracolumn,entry);
+								m_extracolumn++;
+							}
+						}
+						else if(volume < 0x40) {
+							e._cmd = XMSampler::CMD::VOLUME;
+							e._parameter = volume*2;
+						}
+						else if(volume!=255) {
+							e._cmd = XMSampler::CMD::SENDTOVOLUME;
+							e._parameter = volume;
+						}
+					}
+					else {
+						e._inst = volume;
 					}
 
-					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
-					{
-						e._mach = 255;
-					}
 					WritePatternEntry(song,patIdx,row,col,e);
-	#endif
-#endif
 				}
 				m_maxextracolumn = std::max(m_maxextracolumn,m_extracolumn);
 			}
@@ -797,7 +838,7 @@ namespace host{
 		std::memset(&_samph, 0, sizeof _samph);
 		Read(&_samph,sizeof(XMSAMPLEHEADER));
 		
-		int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+		XMInstrument::WaveData<>::WaveForms::Type exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
 			XMInstrument::WaveData<>::WaveForms::SQUARE,
 			XMInstrument::WaveData<>::WaveForms::SAWDOWN,
 			XMInstrument::WaveData<>::WaveForms::SAWUP
@@ -824,7 +865,6 @@ namespace host{
 		{
 			if ( sRemap[i] < MAX_INSTRUMENTS-1)
 			{
-				instr.IsEnabled(true);
 				XMInstrument::WaveData<>& _wave = song.samples.get(sRemap[i]);
 				iStart = LoadSampleData(_wave,iStart,idx,sRemap[i]);
 				_wave.VibratoAttack(_samph.vibsweep==0?0:256-_samph.vibsweep);
@@ -851,6 +891,7 @@ namespace host{
 				instr.NoteToSample(i,npair);
 			}
 		}
+		instr.ValidateEnabled();
 		delete[] sRemap;
 		return iStart;
 	}
@@ -1161,10 +1202,20 @@ namespace host{
 				m_pSampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
 			}
 		}
-
-		LoadPatterns(song);
+		std::map<int,int> modtovirtual;
+		int virtidx=MAX_MACHINES;
+		for (int i=0; i < 31;i++) {
+			if (m_Samples[i].sampleLength > 0 ) {
+				modtovirtual[i]=virtidx;
+				virtidx++;
+			}
+		}
+		LoadPatterns(song, modtovirtual);
 		for(int i = 0;i < 31;i++){
 			LoadInstrument(song,i);
+			if (song.xminstruments.IsEnabled(i)) {
+				song.SetVirtualInstrument(modtovirtual[i],0,i);
+			}
 		}
 		return true;
 	}
@@ -1183,7 +1234,7 @@ namespace host{
 		return bIsValid;
 	}
 
-	void MODSongLoader::LoadPatterns(Song & song)
+	void MODSongLoader::LoadPatterns(Song & song, std::map<int,int>& modtovirtual)
 	{
 		int npatterns=0;
 		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.songlength;i++)
@@ -1206,14 +1257,14 @@ namespace host{
 		// get pattern data
 		Seek(1084);
 		for(int j = 0;j < npatterns ;j++){
-			LoadSinglePattern(song,j,song.SONGTRACKS );
+			LoadSinglePattern(song,j,song.SONGTRACKS, modtovirtual );
 		}
 		if(speedpatch) {
 			song.SONGTRACKS++;
 		}
 	}
 
-	char * MODSongLoader::AllocReadStr(int32_t size, size_t start)
+	char * MODSongLoader::AllocReadStr(int32_t size, signed int start)
 	{
 		// allocate space
 		char *pData = new char[size + 1];
@@ -1240,12 +1291,15 @@ namespace host{
 
 
 	// return address of next pattern, 0 for invalid
-	void MODSongLoader::LoadSinglePattern(Song & song,int patIdx,int iTracks)
+	void MODSongLoader::LoadSinglePattern(Song & song,int patIdx,int iTracks, std::map<int,int>& modtovirtual)
 	{
 
 		short iNumRows = 64;
 
 		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
+
+		unsigned char lastmach[64];
+		std::memset(lastmach,255,sizeof(char)*64);
 
 		PatternEntry e;
 		unsigned char mentry[4];
@@ -1271,9 +1325,6 @@ namespace host{
 					note = ConvertPeriodtoNote(period);
 
 					// translate
-					if ( instr != 0 ) e._inst = instr-1;
-					else e._inst = 255;
-					e._mach = 0;
 					e._parameter = param;
 
 					int exchwave[3]={XMInstrument::WaveData<>::WaveForms::SINUS,
@@ -1416,11 +1467,45 @@ namespace host{
 					// instrument/note
 					if ( note != 255 ) e._note  = note+12;
 					else e._note  = note;
+					if ( instr != 0 ) e._inst = instr-1;
+					else e._inst = 255;
 
-					if ((e._note == notecommands::empty) && (e._cmd == 00) && (e._parameter == 00) && (e._inst == 255))
-					{
+					// If empty, do not inform machine
+					if (e._note == notecommands::empty && e._inst == 255 && e._cmd == 00 && e._parameter == 00) {
 						e._mach = 255;
 					}
+					// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
+					else if (( e._note == notecommands::empty && e._inst != 255 ) || ( e._note < notecommands::release && e._inst == 255)) {
+						e._mach = 0;
+						if (e._inst != 255) {
+							//We cannot use the virtual instrument, but we should remember which it is.
+							std::map<int,int>::const_iterator it = modtovirtual.find(e._inst);
+							if (it != modtovirtual.end()) {
+								lastmach[col]=it->second;
+							}
+						}
+					}
+					//default behaviour, let's find the virtual instrument.
+					else {
+						std::map<int,int>::const_iterator it = modtovirtual.find(e._inst);
+						if (it == modtovirtual.end()) {
+							if (e._inst != 255) {
+								e._mach = 0;
+								lastmach[col] = e._mach;
+							}
+							else if (lastmach[col] != 255) {
+								e._mach = lastmach[col];
+							}
+							else {
+								e._mach = 255;
+							}
+						}
+						else {
+							e._mach=it->second;
+							e._inst=255;
+						}
+					}
+
 					WritePatternEntry(song,patIdx,row,col,e);	
 				}
 			}
@@ -1475,10 +1560,11 @@ namespace host{
 		XMInstrument instr;
 		instr.Init();
 		instr.Name(m_Samples[idx].sampleName);
+		bool isused=false;
 
 		if (m_Samples[idx].sampleLength > 0 ) 
 		{
-			instr.IsEnabled(true);
+			isused = true;
 			LoadSampleData(song.samples.get(idx),idx);
 		}
 
@@ -1489,6 +1575,7 @@ namespace host{
 			npair.first=i;
 			instr.NoteToSample(i,npair);
 		}
+		instr.ValidateEnabled();
 		song.xminstruments.SetInst(instr,idx);
 	}
 

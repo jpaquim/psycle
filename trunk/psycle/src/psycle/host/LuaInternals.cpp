@@ -7,9 +7,9 @@
 #include "LuaPlugin.hpp"
 #include "Player.hpp"
 
-#if !defined WINAMP_PLUGIN && 0
+#if !defined WINAMP_PLUGIN
 #include "PlotterDlg.hpp"
-#endif //!defined WINAMP_PLUGIN && 0
+#endif //!defined WINAMP_PLUGIN
 
 #include "plugincatcher.hpp"
 #include "Song.hpp"
@@ -119,7 +119,7 @@ int LuaMachineBind::create(lua_State* L) {
 	  new LuaMachine()); 
   if (lua_isnumber(L, 2)) {
 	 int idx = luaL_checknumber(L, 2);
-	 if (Global::song()._pMachine[idx] == 0) {
+	 if (idx < 0 || idx > MAX_VIRTUALINSTS || Global::song()._pMachine[idx] == NULL) {
 	   luaL_error(L, "no machine at index %d", n);
 	 }
 	 Machine* mac = Global::song()._pMachine[idx];
@@ -431,7 +431,7 @@ int LuaPlayerBind::samplerate(lua_State* L) {
 ///////////////////////////////////////////////////////////////////////////////
 // PlotterBind
 ///////////////////////////////////////////////////////////////////////////////
-#if !defined WINAMP_PLUGIN && 0
+#if !defined WINAMP_PLUGIN
 int LuaPlotterBind::open(lua_State *L) {
   static const luaL_Reg methods[] = {
 	 {"new", create},
@@ -2077,6 +2077,19 @@ int LuaEnvelopeBind::tostring(lua_State *L) {
 	return 1;
 }
 
-
+/*
+TODO: 
+3>.\src\psycle\host\LuaInternals.cpp(132) : warning C4101: 'e' : unreferenced local variable
+3>.\src\psycle\host\LuaInternals.cpp(384) : warning C4189: 'key' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(556) : warning C4189: 'ud' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(592) : warning C4189: 'gain' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(909) : warning C4189: 'ud' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(936) : warning C4189: 'plugin' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(1164) : warning C4189: 'ud' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(1568) : warning C4189: 'num' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(1671) : warning C4189: 'plugin' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(1707) : warning C4189: 'trigger' : local variable is initialized but not referenced
+3>.\src\psycle\host\LuaInternals.cpp(2075) : warning C4189: 'env' : local variable is initialized but not referenced
+*/
 } // namespace
 } // namespace

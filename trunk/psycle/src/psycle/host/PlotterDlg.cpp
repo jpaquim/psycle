@@ -117,7 +117,6 @@ namespace psycle { namespace host {
 				int yident = 20;
 				int height = drawing_area.Height() - 2*yident;
 				int width = drawing_area.Width() - xident;
-				int h2 = drawing_area.Height() / 2;
 				double range = maxpeak_-minpeak_;
 				double step_height = height / (range);
 			    double step_width = width / (double)len_;
@@ -125,7 +124,6 @@ namespace psycle { namespace host {
 				int stop = maxpeak_;
 				int fonth2 = 5;
 				CPen * oldPen;
-				CBrush * oldBrush;
 				oldPen = (CPen *) dc.SelectStockObject(WHITE_PEN);
 				COLORREF backcolor = RGB(255,255,255);
 				CBrush brush(backcolor); 

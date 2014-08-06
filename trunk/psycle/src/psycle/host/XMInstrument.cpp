@@ -41,7 +41,7 @@ namespace psycle
 			m_VibratoAttack = 0;
 			m_VibratoSpeed = 0;
 			m_VibratoDepth = 0;
-			m_VibratoType = 0;
+			m_VibratoType = WaveForms::SINUS;
 		}
         template void XMInstrument::WaveData<short>::Init();
 
@@ -50,11 +50,11 @@ namespace psycle
 			if ( m_pWaveDataL)
 			{
 				delete[] m_pWaveDataL;
-				m_pWaveDataL=0;
+				m_pWaveDataL=NULL;
 				if (m_WaveStereo)
 				{
 					delete[] m_pWaveDataR;
-					m_pWaveDataR=0;
+					m_pWaveDataR=NULL;
 				}
 			}
 			m_WaveLength = 0;
@@ -64,13 +64,15 @@ namespace psycle
 		void XMInstrument::WaveData<T>::AllocWaveData(const int iLen,const bool bStereo)
 		{
 			DeleteWaveData();
-			m_pWaveDataL = new T[iLen];
-			m_pWaveDataR = bStereo?new T[iLen]:NULL;
-			m_WaveStereo = bStereo;
-			m_WaveLength  = iLen;
-			// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
-			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
-			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
+			if (iLen > 0 ) {
+				m_pWaveDataL = new T[iLen];
+				m_pWaveDataR = bStereo?new T[iLen]:NULL;
+				m_WaveStereo = bStereo;
+				m_WaveLength  = iLen;
+				// "bigger than" insted of "bigger or equal", because that means interpolate between loopend and loopstart
+				if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
+				if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
+			}
 		}
 
 		template <class T> 
@@ -274,24 +276,10 @@ namespace psycle
 		}
 
 		template <class T> 
-		int XMInstrument::WaveData<T>::Load(RiffFile& riffFile)
+		void XMInstrument::WaveData<T>::Load(RiffFile& riffFile, int version, bool isLegacy/*=false*/)
 		{	
 			uint32_t size1,size2;
 			
-			char temp[8];
-			uint32_t filevers;
-			int size=0;
-			riffFile.Read(temp,4); temp[4]='\0';
-			riffFile.Read(size);
-			if (strcmp(temp,"SMPD")) return size+8;
-
-			riffFile.Read(filevers);
-			//fileversion 0 was not stored, so if fileversion is null or a character, seek back.
-			if (filevers == 0 || filevers > 0x1F) {
-				riffFile.Seek(riffFile.GetPos()-sizeof(filevers));
-				filevers = 0;
-			}
-
 			CT2A _wave_name("");
 			riffFile.ReadStringA2T(_wave_name,32);
 			m_WaveName=_wave_name;
@@ -311,15 +299,10 @@ namespace psycle
 			if(m_WaveLoopEnd > m_WaveLength) {m_WaveLoopEnd=m_WaveLength;}
 			if(m_WaveSusLoopEnd > m_WaveLength) {m_WaveSusLoopEnd=m_WaveLength;} 
 
-			if(filevers == 0) {
+			if(version == 0) {
 				m_WaveSampleRate=8363;
 			}
 			else {
-				if (filevers==2) {
-					//Placeholder for future bitsize
-					uint32_t bits;
-					riffFile.Read(bits);
-				}
 				riffFile.Read(m_WaveSampleRate);
 			}
 			riffFile.Read(m_WaveTune);
@@ -328,7 +311,7 @@ namespace psycle
 			riffFile.Read(m_WaveStereo);
 			riffFile.Read(m_PanEnabled);
 			riffFile.Read(m_PanFactor);
-			if(filevers == 1) {
+			if(version == 1) {
 				riffFile.Read(m_Surround);
 			}
 			else if (m_PanFactor > 1.0f) {
@@ -337,9 +320,15 @@ namespace psycle
 			} else { m_Surround = false; }
 
 			riffFile.Read(m_VibratoAttack);
-			riffFile.Read(m_VibratoAttack);
+			riffFile.Read(m_VibratoSpeed);
 			riffFile.Read(m_VibratoDepth);
-			riffFile.Read(m_VibratoType);
+			{
+				uint8_t i;  riffFile.Read(i); 
+				if (i <= WaveData<>::WaveForms::RANDOM) {
+					m_VibratoType = static_cast<WaveData<>::WaveForms::Type>(i);
+				}
+				else { m_VibratoType = WaveData<>::WaveForms::SINUS; }
+			}
 
 			riffFile.Read(size1);
 			unsigned char * pData = new unsigned char[size1];
@@ -355,7 +344,6 @@ namespace psycle
 				SoundDesquash(pData, &m_pWaveDataR);
 				delete[] pData;
 			}
-			return size+8;
 		}
 
 		template <class T> 
@@ -395,12 +383,6 @@ namespace psycle
 
 			CT2A _wave_name(m_WaveName.c_str());
 
-			int size = 0;
-			riffFile.Write("SMPD",4);
-			riffFile.Write(size);
-			size_t filepos = riffFile.GetPos();
-			riffFile.Write(WAVEVERSION);
-
 			riffFile.Write(_wave_name, std::strlen(_wave_name) + 1);
 
 			riffFile.Write(m_WaveLength);
@@ -415,8 +397,6 @@ namespace psycle
 			riffFile.Write(m_WaveSusLoopEnd);
 			{ uint32_t i = m_WaveSusLoopType; riffFile.Write(i); }
 
-			//Placeholder for future bitsize. for filevesion 2.
-			//{ uint32_t bits = 16; riffFile.Write(bits); }
 			riffFile.Write(m_WaveSampleRate);
 			riffFile.Write(m_WaveTune);
 			riffFile.Write(m_WaveFineTune);
@@ -429,7 +409,7 @@ namespace psycle
 			riffFile.Write(m_VibratoAttack);
 			riffFile.Write(m_VibratoSpeed);
 			riffFile.Write(m_VibratoDepth);
-			riffFile.Write(m_VibratoType);
+			{ uint8_t i = m_VibratoType; riffFile.Write(i); }
 
 			riffFile.Write(size1);
 			riffFile.Write((void*)pData1,size1);
@@ -441,10 +421,6 @@ namespace psycle
 				riffFile.Write((void*)pData2,size2);
 				delete[] pData2;
 			}
-			size_t endpos = riffFile.GetPos();
-			riffFile.Seek(filepos-4);
-			{ uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
-			riffFile.Seek(endpos);
 		}
 
 
@@ -716,14 +692,32 @@ namespace psycle
 		}
 	
 		/// Loading Procedure
-		void XMInstrument::Envelope::Load(RiffFile& riffFile,const uint32_t version)
+		void XMInstrument::Envelope::Load(RiffFile& riffFile,bool legacy/*=false*/, uint32_t legacyversion/*=0*/)
 		{
-			//When adding or modifying fields, change version in xminstrument
+			char temp[8];
+			uint32_t version=0;
+			uint32_t size=0;
+			size_t filepos=0;
+			if (!legacy) {
+				riffFile.Read(temp,4); temp[4]='\0';
+				riffFile.Read(version);
+				riffFile.Read(size);
+				filepos = riffFile.GetPos();
+				if(strcmp("SMIE", temp)!=0) {
+					riffFile.Skip(size);
+					return;
+				}
+			}
+			else {
+				version = legacyversion;
+			}
+
+			// Information starts here
 
 			riffFile.Read(m_Enabled);
 			riffFile.Read(m_Carry);
 			{
-				int32_t i32(0);
+				uint32_t i32(0);
 				riffFile.Read(i32); m_LoopStart = i32;
 				riffFile.Read(i32); m_LoopEnd = i32;
 				riffFile.Read(i32); m_SustainBegin = i32;
@@ -731,10 +725,10 @@ namespace psycle
 			}
 			{
 				uint32_t num_of_points = 0; riffFile.Read(num_of_points);
-				for(int i = 0; i < num_of_points; i++){
+				for(uint32_t i = 0; i < num_of_points; i++){
 					PointValue value;
-					riffFile.Read(value.first); // point
-					riffFile.Read(value.second); // value
+					riffFile.Read(value.first); // The time in which this point is placed. The unit depends on the mode.
+					riffFile.Read(value.second); // The value that this point has. Depending on the type of envelope, this can range between 0.0 and 1.0 or between -1.0 and 1.0
 					m_Points.push_back(value);
 				}
 			}
@@ -746,13 +740,18 @@ namespace psycle
 				{uint32_t read; riffFile.Read(read); m_Mode=(Mode::Type)read; }
 				riffFile.Read(m_Adsr);
 			}
+
+			// Information ends here
+			if (!legacy) {
+				riffFile.Seek(filepos+size);
+			}
 		}
 
 		/// Saving Procedure
 		void XMInstrument::Envelope::Save(RiffFile& riffFile, const uint32_t version) const
 		{
-			// Envelopes don't neeed ID and/or version. they are part of the instrument chunk.
-			//When adding or modifying fields, change version in xminstrument
+			std::size_t pos = riffFile.WriteHeader("SMIE", version);
+
 			riffFile.Write(m_Enabled);
 			riffFile.Write(m_Carry);
 			{
@@ -771,6 +770,8 @@ namespace psycle
 			}
 			{ uint32_t write = m_Mode; riffFile.Write(write); }
 			riffFile.Write(m_Adsr);
+
+			riffFile.UpdateSize(pos);
 		}
 
 
@@ -890,7 +891,14 @@ namespace psycle
 			}
 		}
 
-		void XMInstrument::SetDefaultNoteMap(int sample/*=255*/) {
+		void XMInstrument::ValidateEnabled() 
+		{
+			// Currently, enabled only if has some wave mapped or has a name.
+			// The former as a requirement to play, the latter as a requirement for save.
+			IsEnabled(GetWavesUsed().size() > 0 || m_Name.length() > 0);
+		}
+		void XMInstrument::SetDefaultNoteMap(int sample/*=255*/)
+		{
 			NotePair npair;
 			npair.second=sample;
 			for(int i = 0;i < NOTE_MAP_SIZE;i++){
@@ -912,30 +920,14 @@ namespace psycle
 		}
 
 		/// load XMInstrument
-		int XMInstrument::Load(RiffFile& riffFile)
+		void XMInstrument::Load(RiffFile& riffFile, int version, bool islegacy/*=false*/, int legacyeins/*=0*/)
 		{
-			char temp[8];
-			int size=0;
-			uint32_t version;
-			riffFile.Read(temp,4); temp[4]='\0';
-			riffFile.Read(size);
-			if (strcmp(temp,"INST")) return size+8;
+			// SMID chunk
 
-			riffFile.Read(version);
-			//fileversion 0 was not stored, so if fileversion is null or a character, seek back.
-			if (version == 0 || version > 0x1F) {
-				riffFile.Seek(riffFile.GetPos()-sizeof(version));
-				version = 0;
-				m_bEnabled = true;
-			}
-			else {
-				riffFile.Read(m_bEnabled);
-			}
-			CT2A _name("");
-			riffFile.ReadStringA2T(_name,32);
-			m_Name=_name;
-
+			riffFile.ReadString(m_Name);
+			
 			riffFile.Read(m_Lines);
+			if (islegacy) m_Lines = 0;
 
 			riffFile.Read(m_GlobVol);
 			riffFile.Read(m_VolumeFadeSpeed);
@@ -976,32 +968,34 @@ namespace psycle
 				NoteToSample(i,npair);
 			}
 
-			m_AmpEnvelope.Load(riffFile,version);
-			m_PanEnvelope.Load(riffFile,version);
-			m_FilterEnvelope.Load(riffFile,version);
-			m_PitchEnvelope.Load(riffFile,version);
-			return size+8;//Size of the whole data, including chunk header.
+			m_AmpEnvelope.Load(riffFile,islegacy, version);
+
+			if (islegacy && legacyeins==0) {
+				//Workaround for a bug in that version
+				m_FilterEnvelope.Load(riffFile,islegacy, version);
+				m_PanEnvelope.Load(riffFile,islegacy, version);
+			}
+			else {
+				m_PanEnvelope.Load(riffFile,islegacy, version);
+				m_FilterEnvelope.Load(riffFile,islegacy, version);
+			}
+			m_PitchEnvelope.Load(riffFile,islegacy, version);
+
+			ValidateEnabled();
+
 		}
 
 		// save XMInstrument
-		void XMInstrument::Save(RiffFile& riffFile) const
+		void XMInstrument::Save(RiffFile& riffFile, int version) const
 		{
-			Save(riffFile, NULL);
+			Save(riffFile, NULL, version);
 		}
 
-		void XMInstrument::Save(RiffFile& riffFile, std::map<unsigned char,unsigned char>* alternateMap) const
+		void XMInstrument::Save(RiffFile& riffFile, std::map<unsigned char,unsigned char>* alternateMap, int version) const
 		{
 			if ( ! m_bEnabled ) return;
-			int i;
-			int size = 0;
-			riffFile.Write("INST",4);
-			riffFile.Write(size);
-			size_t filepos = riffFile.GetPos();
-			riffFile.Write(XMINSVERSION);
-			riffFile.Write(m_bEnabled);
 
-			CT2A _name(m_Name.c_str());
-			riffFile.Write(_name,strlen(_name) + 1);
+			riffFile.WriteString(m_Name);
 
 			riffFile.Write(m_Lines);
 
@@ -1034,28 +1028,23 @@ namespace psycle
 			NotePair npair;
 			if (alternateMap != NULL) {
 				//In single file mode, we need to remap the sample index
-
-				for(i = 0;i < NOTE_MAP_SIZE;i++){
+				for(int i = 0;i < NOTE_MAP_SIZE;i++){
 					npair = NoteToSample(i);
 					riffFile.Write(npair.first);
 					riffFile.Write((*alternateMap)[npair.second]);
 				}
 			}
 			else {
-				for(i = 0;i < NOTE_MAP_SIZE;i++){
+				for(int i = 0;i < NOTE_MAP_SIZE;i++){
 					npair = NoteToSample(i);
 					riffFile.Write(npair.first);
 					riffFile.Write(npair.second);
 				}
 			}
-			m_AmpEnvelope.Save(riffFile,XMINSVERSION);
-			m_PanEnvelope.Save(riffFile,XMINSVERSION);
-			m_FilterEnvelope.Save(riffFile,XMINSVERSION);
-			m_PitchEnvelope.Save(riffFile,XMINSVERSION);
-			size_t endpos = riffFile.GetPos();
-			riffFile.Seek(filepos-4);
-			{ uint32_t i = static_cast<uint32_t>(endpos - filepos); riffFile.Write(i); }
-			riffFile.Seek(endpos);
+			m_AmpEnvelope.Save(riffFile,version);
+			m_PanEnvelope.Save(riffFile,version);
+			m_FilterEnvelope.Save(riffFile,version);
+			m_PitchEnvelope.Save(riffFile,version);
 		}
 
 	} //namespace host

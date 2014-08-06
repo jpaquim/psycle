@@ -110,7 +110,7 @@ BOOL XMSamplerUISample::PreTranslateMessage(MSG* pMsg)
 	}
 
 	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
-	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd(), NULL);
 	if (res == FALSE ) return CPropertyPage::PreTranslateMessage(pMsg);
 	return res;
 }
@@ -215,8 +215,8 @@ void XMSamplerUISample::UpdateSampleInstrs()
 
 BOOL XMSamplerUISample::OnSetActive()
 {
+	RefreshSampleList();
 	int i= Global::song().waveSelected;
-	m_SampleList.SetCurSel(i);
 	SetSample(i);
 	m_Init=true;
 
@@ -282,13 +282,13 @@ void XMSamplerUISample::RefreshSampleData()
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOATTACK))->SetPos(wave.VibratoAttack());
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATOSPEED))->SetPos(wave.VibratoSpeed());
 	((CSliderCtrl*)GetDlgItem(IDC_VIBRATODEPTH))->SetPos(wave.VibratoDepth());
-	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->SetCurSel((int)wave.VibratoType());
-	((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP))->SetCurSel((int)wave.WaveSusLoopType());
+	((CComboBox*)GetDlgItem(IDC_VIBRATOTYPE))->SetCurSel(wave.VibratoType());
+	((CComboBox*)GetDlgItem(IDC_SUSTAINLOOP))->SetCurSel(wave.WaveSusLoopType());
 	sprintf(tmp,"%d",wave.WaveSusLoopStart());
 	((CEdit*)GetDlgItem(IDC_SUSTAINSTART))->SetWindowText(tmp);
 	sprintf(tmp,"%d",wave.WaveSusLoopEnd());
 	((CEdit*)GetDlgItem(IDC_SUSTAINEND))->SetWindowText(tmp);
-	((CComboBox*)GetDlgItem(IDC_LOOP))->SetCurSel((int)wave.WaveLoopType());
+	((CComboBox*)GetDlgItem(IDC_LOOP))->SetCurSel(wave.WaveLoopType());
 	sprintf(tmp,"%d",wave.WaveLoopStart());
 	((CEdit*)GetDlgItem(IDC_LOOPSTART))->SetWindowText(tmp);
 	sprintf(tmp,"%d",wave.WaveLoopEnd());
@@ -574,13 +574,13 @@ void XMSamplerUISample::OnBnClickedOpenwaveeditor()
 void XMSamplerUISample::OnCbnSelendokVibratotype()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_VIBRATOTYPE);
-	rWave().VibratoType((XMInstrument::WaveData<>::WaveForms::Type)cbox->GetCurSel());
+	rWave().VibratoType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(cbox->GetCurSel()));
 }
 
 void XMSamplerUISample::OnCbnSelendokLoop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_LOOP);
-	rWave().WaveLoopType((XMInstrument::WaveData<>::LoopType::Type)cbox->GetCurSel());
+	rWave().WaveLoopType(static_cast<XMInstrument::WaveData<>::LoopType::Type>(cbox->GetCurSel()));
 	GetDlgItem(IDC_LOOPSTART)->EnableWindow(cbox->GetCurSel()>0);
 	GetDlgItem(IDC_LOOPEND)->EnableWindow(cbox->GetCurSel()>0);
 	DrawScope();
@@ -589,7 +589,7 @@ void XMSamplerUISample::OnCbnSelendokLoop()
 void XMSamplerUISample::OnCbnSelendokSustainloop()
 {
 	CComboBox* cbox = (CComboBox*)GetDlgItem(IDC_SUSTAINLOOP);
-	rWave().WaveSusLoopType((XMInstrument::WaveData<>::LoopType::Type)cbox->GetCurSel());
+	rWave().WaveSusLoopType(static_cast<XMInstrument::WaveData<>::LoopType::Type>(cbox->GetCurSel()));
 	GetDlgItem(IDC_SUSTAINSTART)->EnableWindow(cbox->GetCurSel()>0);
 	GetDlgItem(IDC_SUSTAINEND)->EnableWindow(cbox->GetCurSel()>0);
 	DrawScope();

@@ -53,7 +53,7 @@ void InstrumentEditorUI::PostNcDestroy()
 	if(windowVar_!= NULL) *windowVar_ = NULL;
 	delete this;
 }
-BOOL InstrumentEditorUI::PreTranslateChildMessage(MSG* pMsg, HWND focusWin)
+BOOL InstrumentEditorUI::PreTranslateChildMessage(MSG* pMsg, HWND focusWin, Machine* mac)
 {
 	if (m_hAccelTable) {
       if (::TranslateAccelerator(m_hWnd, m_hAccelTable, pMsg)) {
@@ -73,15 +73,39 @@ BOOL InstrumentEditorUI::PreTranslateChildMessage(MSG* pMsg, HWND focusWin)
 		} else if (pMsg->wParam == VK_UP ||pMsg->wParam == VK_DOWN ||pMsg->wParam == VK_LEFT 
 			|| pMsg->wParam == VK_RIGHT ||pMsg->wParam == VK_TAB || pMsg->wParam == VK_NEXT 
 			||pMsg->wParam == VK_PRIOR || pMsg->wParam == VK_HOME|| pMsg->wParam == VK_END) {
+			//default action.
 			return FALSE;
 		} else if (!editbox) {
 			// get command
 			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,pMsg->lParam>>16);
-			if(cmd.IsValid() && (cmd.GetType() == CT_Note || cmd.GetType() == CT_Immediate ))
-			{
+			if(cmd.IsValid()) {
+				const BOOL bRepeat = (pMsg->lParam>>16)&0x4000;
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-				win->m_wndView.SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-				return TRUE;
+				switch(cmd.GetType())
+				{
+				case CT_Note:
+					{
+						if (!bRepeat) {
+							PsycleGlobal::inputHandler().PlayNote(cmd.GetNote(),255,127,true,mac);
+						}
+						return TRUE;
+					}
+					break;
+				case CT_Editor:
+					if (win->m_wndView.viewMode == view_modes::pattern)
+					{
+						PsycleGlobal::inputHandler().PerformCmd(cmd,bRepeat);
+						return TRUE;
+					}
+					break;
+				case CT_Immediate:
+					{
+						PsycleGlobal::inputHandler().PerformCmd(cmd,bRepeat);
+						return TRUE;
+					}
+					break;
+				default: break;
+				}
 			}
 		}
 	}
@@ -100,11 +124,33 @@ BOOL InstrumentEditorUI::PreTranslateChildMessage(MSG* pMsg, HWND focusWin)
 		} else if (!editbox) {
 			// get command
 			CmdDef cmd = PsycleGlobal::inputHandler().KeyToCmd(pMsg->wParam,pMsg->lParam>>16);
-			if(cmd.IsValid() && (cmd.GetType() == CT_Note || cmd.GetType() == CT_Immediate ))
-			{
+			if(cmd.IsValid()) {
+				const BOOL bRepeat = (pMsg->lParam>>16)&0x4000;
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-				win->m_wndView.SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
-				return TRUE;
+				switch(cmd.GetType())
+				{
+				case CT_Note:
+					{
+						PsycleGlobal::inputHandler().StopNote(cmd.GetNote(),255,true,mac);
+						return TRUE;
+					}
+					break;
+				case CT_Editor:
+					if (win->m_wndView.viewMode == view_modes::pattern)
+					{
+						PsycleGlobal::inputHandler().PerformCmd(cmd,bRepeat);
+						return TRUE;
+					}
+					break;
+				case CT_Immediate:
+					{
+						CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+						win->m_wndView.SendMessage(pMsg->message,pMsg->wParam,pMsg->lParam);
+						return TRUE;
+					}
+					break;
+				default: break;
+				}
 			}
 		}
 	}

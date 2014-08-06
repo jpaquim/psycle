@@ -78,7 +78,7 @@ namespace psycle
 					allocatedchans[j][i] = -1;
 				}
 			}
-			for (int i=0;i<MAX_MACHINES;i++)
+			for (int i=0;i<MAX_VIRTUALINSTS;i++)
 			{
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
@@ -103,7 +103,7 @@ namespace psycle
 					allocatedchans[j][i] = -1;
 				}
 			}
-			for (int i=0;i<MAX_MACHINES;i++)
+			for (int i=0;i<MAX_VIRTUALINSTS;i++)
 			{
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
@@ -120,7 +120,7 @@ namespace psycle
 					allocatedchans[j][i] = -1;
 				}
 			}
-			for (int i=0;i<MAX_MACHINES;i++)
+			for (int i=0;i<MAX_VIRTUALINSTS;i++)
 			{
 				for (int j=0;j<MAX_TRACKS;j++)
 				{
@@ -135,26 +135,30 @@ namespace psycle
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
-				Machine** machines = Global::song()._pMachine;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
+					if (macOutput[i] != -1)
 					{
-						AllocateVoice(channel,i);
-						PatternEntry pTemp = *pData;
-						CustomTick(channel,i, pTemp);
-						// this can happen if the parameter is the machine itself.
-						if (machines[macOutput[i]] != this) 
+						int alternateinst=-1;
+						Machine * pmac = Global::song().GetMachineOfBus(macOutput[i], alternateinst);
+						if (pmac != NULL )
 						{
-							machines[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
-							if (pTemp._note >= notecommands::release )
+							AllocateVoice(channel,i);
+							PatternEntry pTemp = *pData;
+							CustomTick(channel,i, pTemp);
+							// this can happen if the parameter is the machine itself.
+							if (pmac != this) 
+							{
+								pmac->Tick(allocatedchans[channel][i],&pTemp);
+								if (pTemp._note >= notecommands::release )
+								{
+									DeallocateVoice(channel,i);
+								}
+							}
+							else
 							{
 								DeallocateVoice(channel,i);
 							}
-						}
-						else
-						{
-							DeallocateVoice(channel,i);
 						}
 					}
 				}
@@ -216,7 +220,6 @@ namespace psycle
 			MultiMachine::Init();
 			for (int i=0;i<NUMMACHINES;i++)
 			{
-
 				noteOffset[i]=0;
 			}
 		}
@@ -238,15 +241,14 @@ namespace psycle
 		}
 		bool DuplicatorMac::playsTrack(const int track) const
 		{
-			Machine** machines = Global::song()._pMachine;
 			for (int i=0;i<NUMMACHINES;i++)
 			{
-				if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
+				if (macOutput[i] != -1 && allocatedchans[track][i])
 				{
-					if(allocatedchans[track][i] != -1 &&
-						machines[macOutput[i]]->playsTrack(allocatedchans[track][i]))
-					{
-							return true;
+					int alternateinst=-1;
+					Machine * pmac = Global::song().GetMachineOfBus(macOutput[i], alternateinst);
+					if (pmac != NULL) {
+						return pmac->playsTrack(allocatedchans[track][i]);
 					}
 				}
 			}
@@ -265,7 +267,7 @@ namespace psycle
 		}
 		void DuplicatorMac::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if ( numparam < NUMMACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			if ( numparam < NUMMACHINES) { minval = -1; maxval = MAX_VIRTUALINSTS-1;}
 			else if ( numparam < NUMMACHINES*2) { minval = -48; maxval = 48; }
 		}
 		int DuplicatorMac::GetParamValue(int numparam)
@@ -280,13 +282,19 @@ namespace psycle
 		}
 		void DuplicatorMac::GetParamValue(int numparam, char *parVal)
 		{
-			Machine** machines = Global::song()._pMachine;
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( machines[macOutput[numparam]] != NULL))
-				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],machines[macOutput[numparam]]->_editName);
-				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
+				int alternateinst=-1;
+				Machine * pmac = Global::song().GetMachineOfBus(macOutput[numparam], alternateinst);
+				if (pmac != NULL) {
+					if (alternateinst == -1) {
+						sprintf(parVal,"%X -%s",macOutput[numparam],pmac->_editName);
+					}
+					else {
+						sprintf(parVal,"%X -%s",macOutput[numparam], Global::song().GetVirtualMachineName(pmac,alternateinst).c_str());
+					}
+				}
+				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
 			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
@@ -319,6 +327,7 @@ namespace psycle
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
+			//TODO: endianess
 			pFile->Read(&macOutput[0],NUMMACHINES*sizeof(short));
 			pFile->Read(&noteOffset[0],NUMMACHINES*sizeof(short));
 			return true;
@@ -328,6 +337,7 @@ namespace psycle
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset;
 			pFile->Write(&size, sizeof size); // size of this part params to save
+			//TODO: endianess
 			pFile->Write(&macOutput[0],NUMMACHINES*sizeof(short));
 			pFile->Write(&noteOffset[0],NUMMACHINES*sizeof(short));
 		}
@@ -351,11 +361,11 @@ namespace psycle
 			if ( !_mute && !bisTicking) // Prevent possible loops of MultiMachines.
 			{
 				bisTicking=true;
-				Machine** machines = Global::song()._pMachine;
 				for (int i=0;i<NUMMACHINES;i++)
 				{
-					if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
-					{	
+					int alternateinst=-1;
+					Machine * pmac = Global::song().GetMachineOfBus(macOutput[i], alternateinst);
+					if (pmac != NULL) {
 						PatternEntry pTemp = *pData;						
 						int note = pData->_note;
 						if (note>=lowKey[i]  && note<=highKey[i])
@@ -364,10 +374,10 @@ namespace psycle
 							CustomTick(channel,i, pTemp);
 						}
 						// this can happen if the parameter is the machine itself.
-						if (machines[macOutput[i]] != this) 
+						if (pmac != this) 
 						{
 							if ((note>=lowKey[i]  && note<=highKey[i]) || (pTemp._note >= notecommands::release && allocatedchans[channel][i]!=-1)) {
-								machines[macOutput[i]]->Tick(allocatedchans[channel][i],&pTemp);
+								pmac->Tick(allocatedchans[channel][i],&pTemp);
 							}
 							if (pTemp._note >= notecommands::release)
 							{
@@ -396,15 +406,14 @@ namespace psycle
 
 		bool DuplicatorMac2::playsTrack(const int track) const
 		{
-			Machine** machines = Global::song()._pMachine;
 			for (int i=0;i<NUMMACHINES;i++)
 			{
-				if (macOutput[i] != -1 && machines[macOutput[i]] != NULL )
+				if (macOutput[i] != -1 && allocatedchans[track][i])
 				{
-					if(allocatedchans[track][i] != -1 &&
-						machines[macOutput[i]]->playsTrack(allocatedchans[track][i]))
-					{
-							return true;
+					int alternateinst=-1;
+					Machine * pmac = Global::song().GetMachineOfBus(macOutput[i], alternateinst);
+					if (pmac != NULL) {
+						return pmac->playsTrack(allocatedchans[track][i]);
 					}
 				}
 			}
@@ -428,9 +437,9 @@ namespace psycle
 
 		void DuplicatorMac2::GetParamRange(int numparam,int &minval,int &maxval)
 		{
-			if ( numparam < NUMMACHINES) { minval = -1; maxval = (MAX_BUSES*2)-1;}
+			if ( numparam < NUMMACHINES) { minval = -1; maxval = MAX_VIRTUALINSTS-1;}
 			else if ( numparam < NUMMACHINES*2) { minval = -48; maxval = 48; }
-			else { minval = 0; maxval = 119; }
+			else { minval = notecommands::c0; maxval = notecommands::b9; }
 		}
 
 		int DuplicatorMac2::GetParamValue(int numparam)
@@ -452,14 +461,20 @@ namespace psycle
 		void DuplicatorMac2::GetParamValue(int numparam, char *parVal)
 		{
 #if !defined WINAMP_PLUGIN
-			Machine** machines = Global::song()._pMachine;
 			int a440 = (PsycleGlobal::conf().patView().showA440) ? -12 : 0;
 			if (numparam >=0 && numparam <NUMMACHINES)
 			{
-				if ((macOutput[numparam] != -1 ) &&( machines[macOutput[numparam]] != NULL))
-				{
-					sprintf(parVal,"%X -%s",macOutput[numparam],machines[macOutput[numparam]]->_editName);
-				}else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
+				int alternateinst=-1;
+				Machine * pmac = Global::song().GetMachineOfBus(macOutput[numparam], alternateinst);
+				if (pmac != NULL) {
+					if (alternateinst == -1) {
+						sprintf(parVal,"%X -%s",macOutput[numparam],pmac->_editName);
+					}
+					else {
+						sprintf(parVal,"%X -%s",macOutput[numparam], Global::song().GetVirtualMachineName(pmac,alternateinst).c_str());
+					}
+				}
+				else if (macOutput[numparam] != -1) sprintf(parVal,"%X (none)",macOutput[numparam]);
 				else sprintf(parVal,"(disabled)");
 
 			} else if (numparam >= NUMMACHINES && numparam <NUMMACHINES*2) {
@@ -507,6 +522,7 @@ namespace psycle
 		{
 			UINT size;
 			pFile->Read(&size, sizeof size); // size of this part params to load
+			//TODO: endianess
 			pFile->Read(&macOutput[0],NUMMACHINES*sizeof(short));
 			pFile->Read(&noteOffset[0],NUMMACHINES*sizeof(short));
 			pFile->Read(&lowKey[0],NUMMACHINES*sizeof(short));
@@ -518,6 +534,7 @@ namespace psycle
 		{
 			UINT size = sizeof macOutput+ sizeof noteOffset + sizeof lowKey + sizeof highKey;
 			pFile->Write(&size, sizeof size); // size of this part params to save
+			//TODO: endianess
 			pFile->Write(&macOutput[0],NUMMACHINES*sizeof(short));
 			pFile->Write(&noteOffset[0],NUMMACHINES*sizeof(short));
 			pFile->Write(&lowKey[0],NUMMACHINES*sizeof(short));

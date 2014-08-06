@@ -371,13 +371,14 @@ namespace psycle { namespace host {
 
 				if (szExtension = strrchr(szFileName, '.')) // point to everything past last "."
 				{
-					if (!strcmpi(szExtension, ".psy") || !strcmpi(szExtension, ".xm") || !strcmpi(szExtension, ".it")
-						|| !strcmpi(szExtension, ".s3m") || !strcmpi(szExtension, ".mod"))
+					std::string n1(szExtension);
+					std::transform(n1.begin(),n1.end(),n1.begin(),std::tolower);
+					if (!n1.compare(".psy") || !n1.compare(".xm") || !n1.compare(".it") || !n1.compare(".s3m") || !n1.compare(".mod"))
 					{
 						SetForegroundWindow();
 						m_wndView.FileLoadsongNamed(szFileName);
 					}
-					else if (!strcmpi(szExtension, ".psb")) // compare to ".psb"
+					else if (!n1.compare(".psb")) // compare to ".psb"
 					{
 						SetForegroundWindow();
 						m_wndView.ImportPatternBlock(szFileName,iNumFiles>1);
@@ -555,15 +556,19 @@ namespace psycle { namespace host {
 		{
 			CComboBox *cc2=(CComboBox *)m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			cc2->SetCurSel(AUX_INSTRUMENT);
-			Machine *tmac = _pSong->_pMachine[_pSong->seqBus];
+			int inst=-1;
+			Machine *tmac = _pSong->GetMachineOfBus(_pSong->seqBus,inst);
 			if (tmac && tmac->_type == MACH_XMSAMPLER) {
 				_pSong->auxcolSelected=_pSong->instSelected;
 			}
 			else { _pSong->auxcolSelected=_pSong->waveSelected; }
+			if (inst != -1) {
+				_pSong->auxcolSelected=inst;
+			}
 			UpdateComboIns();
 
 			PsycleGlobal::inputHandler().AddMacViewUndo();
-			bool isSampulse = (_pSong->_pMachine[_pSong->seqBus] != NULL && _pSong->_pMachine[_pSong->seqBus]->_type == MACH_XMSAMPLER);
+			bool isSampulse = (tmac != NULL && tmac->_type == MACH_XMSAMPLER);
 			if (m_wndInst == NULL) {
 				m_wndInst = new InstrumentEditorUI("Instrument Window",this);
 				m_wndInst->Init(&m_wndInst);
@@ -685,7 +690,7 @@ namespace psycle { namespace host {
 							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;
-							winname << _pSong->FindBusFromIndex(tmac) << " : " << ma->_editName;
+							winname << tmac << " : " << ma->_editName;
 							newwin->SetWindowText(winname.str().c_str());
 							newwin->ShowWindow(SW_SHOWNORMAL);
 							newwin->PostOpenWnd();
@@ -700,7 +705,7 @@ namespace psycle { namespace host {
 							newwin->LoadFrame(IDR_FRAMEMACHINE, WS_POPUPWINDOW | WS_CAPTION, this);
 							std::ostringstream winname;
 							winname<<std::setfill('0') << std::setw(2) << std::hex;
-							winname << _pSong->FindBusFromIndex(tmac) << " : " << ma->_editName;
+							winname << tmac << " : " << ma->_editName;
 							newwin->SetTitleText(winname.str().c_str());
 							// C_Tuner.dll crashes if asking size before opening.
 //							newwin->ResizeWindow(0);
@@ -821,8 +826,8 @@ namespace psycle { namespace host {
 //					case MACH_AUTOMATOR:
 					case MACH_MIXER:
 					case MACH_PLUGIN:
-					case MACH_VST:
 					case MACH_LUA:
+					case MACH_VST:
 					case MACH_VSTFX:
 						if (m_pWndMac[mac])
 						{
@@ -1082,20 +1087,32 @@ namespace psycle { namespace host {
 				{
 					unsigned char *toffset=_pSong->_ptrackline(m_wndView.editPosition,m_wndView.editcur.track,m_wndView.editcur.line);
 					int machine = toffset[2];
-					if (machine<MAX_MACHINES && _pSong->_pMachine[machine])
+					int alternateins=-1;
+					Machine *pmac = _pSong->GetMachineOfBus(machine, alternateins);
+					if (pmac)
 					{
-						Machine* mac = _pSong->_pMachine[machine];
-						oss << " - " << mac->_editName;
-						if(mac->NeedsAuxColumn() && 
-							toffset[0] <= notecommands::b9 && toffset[1] != notecommands::empty)
+						if (alternateins != -1) {
+							std::string result = _pSong->GetVirtualMachineName(pmac, alternateins);
+							if (result.length() > 0) {
+								oss << " - " << result;
+							}
+							else {
+								oss << " - Machine Out of Range";
+							}
+						}
+						if (alternateins != -1 && toffset[1] != 255) {
+								oss <<  " - Volume command ";
+						}
+						else if(pmac->NeedsAuxColumn() && 
+							toffset[0] <= notecommands::b9 && toffset[1] != 255)
 						{
-							oss <<  " - " << mac->AuxColumnName(toffset[1]);
+							oss <<  " - " << pmac->AuxColumnName(toffset[1]);
 						}
 						else if (toffset[0] == notecommands::tweak ||toffset[0] == notecommands::tweakslide)
 						{
 							char buf[64];
 							buf[0]=0;
-							mac->GetParamName(toffset[1],buf);
+							pmac->GetParamName(toffset[1],buf);
 							if(buf[0])
 								oss <<  " - " << buf;
 						}
@@ -1111,7 +1128,7 @@ namespace psycle { namespace host {
 							}
 						}
 					}
-					else if (machine != notecommands::empty)
+					else if (machine != 255)
 					{
 						oss << " - Machine Out of Range";
 					}

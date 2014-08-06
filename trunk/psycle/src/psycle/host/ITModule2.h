@@ -387,7 +387,7 @@ namespace psycle { namespace host {
 			bool LoadITSample(XMInstrument::WaveData<>& _wave);
 			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
 			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool b16Bit,unsigned char convert);
-			bool LoadITPattern(int patIdx,int &numchans);
+			bool LoadITPattern(int patIdx,int &numchans, std::map<int,int>& ittovirtual);
 			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:
 			uint8_t highOffset[64];
@@ -551,7 +551,7 @@ OFFSET              Count TYPE   Description
 			bool LoadS3MInstX(Song& song, XMInstrument &xins, uint16_t iSampleIdx);
 			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader);
 			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
-			bool LoadS3MPatternX(uint16_t patIdx);
+			bool LoadS3MPatternX(uint16_t patIdx, std::map<int,int>& s3mtovirtual);
 		private:
 			s3mHeader  s3mFileH;
 		};

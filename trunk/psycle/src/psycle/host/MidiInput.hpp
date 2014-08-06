@@ -76,15 +76,15 @@ namespace psycle
 		class MIDI_BUFFER
 		{
 		public:
-			MIDI_BUFFER() : timeStamp(0), channel(0) {};
+			MIDI_BUFFER() : timeStamp(0), channel(0), orignote(255) {};
 			/// tracker pattern info struct
 			PatternEntry entry;
 			/// MIDI input device's timestamp
 			uint32_t timeStamp;
 			/// MIDI channel
 			int channel;
-			/// tracker track
-			int track;
+			/// original note, if this is a noteoff
+			int orignote;
 		};
 
 		class MIDI_CONFIG
@@ -192,9 +192,9 @@ namespace psycle
 			/// the midi callback functions (just a static linker to the instance one)
 			static void CALLBACK fnMidiCallbackStatic( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			void CALLBACK fnMidiCallback_Inject( HMIDIIN handle, DWORD_PTR dwInstance, int p1HiWordLB, int p1LowWordHB, int p1LowWordLB, DWORD_PTR dwTime);
 			/// the real callbacks
-			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, uint32_t uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2 );
+			void CALLBACK fnMidiCallback_Step( HMIDIIN handle, DWORD_PTR dwInstance, int p1HiWordLB, int p1LowWordHB, int p1LowWordLB, DWORD_PTR dwTime);
 
 			/// return the current device handle
 			HMIDIIN GetHandle(unsigned int driver) { assert(driver < MAX_DRIVERS); return m_midiInHandle[driver]; }
@@ -203,7 +203,6 @@ namespace psycle
 			void InternalReSync( DWORD_PTR dwParam2 );
 			/// We've received a clock message
 			void InternalClock( DWORD_PTR dwParam2 );
-			int GetTrackToPlay(int note, int velocity, int instNo);
 
 			/// midi device identifiers
 			int m_devId[ MAX_DRIVERS ];		
@@ -271,9 +270,6 @@ namespace psycle
 				/// Amount of valid events in the buffer, starting in m_bufReadIdx
 				int m_bufCount;
 
-				unsigned char notetrack[MAX_TRACKS];
-				unsigned char instrtrack[MAX_TRACKS];
-				int currenttrack;
 			///\}
 		};
 	}

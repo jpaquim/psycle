@@ -374,7 +374,7 @@ namespace psycle { namespace host {
 				}
 				for (uint32_t i = 0; i < count; i++) {
 					std::string id;
-					bool res = pFile->ReadString(id);
+					pFile->ReadString(id);
 					ids[id] = i;
 				}
 				int num = GetNumParams();

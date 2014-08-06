@@ -205,8 +205,8 @@
 	  FExx	-	Extended command:
 	  	FE0x
 	  	FE1x 	Change Lines Per Beat. Resets Song Extraticks (FEEx)
-	  	FE2x	Set Bypass ( 0 off, else on)
-	  	FE3x	Set Mute (0 off, else on)
+	  	FE2x	Set Bypass ( 0 off, else on).
+	  	FE3x	Set Mute (0 off, else on).
 	  	FEBx	Set Pattern Loop ( FEB0 set loop start, FEBx number of loops)
 	  	FEDx	Set Pattern Delay. ( x = number of lines+1 ). It is added upon song extraticks.
 		FEEx    Set Song ExtraTicks per line ( x = number of ticks to add to each line. )
@@ -215,7 +215,7 @@
 	  	FEFx	Set Pattern Fine delay in ticks ( lines = 1+((ticks*linesperbeat)/ticksperbeat) ).  It is added upon song extraticks.
 	  	
 	  FDxx  -	Delay Trigger (xx/256 row duration) (works with noteoffs too)
-	  FCxx	-	Change Global/Wire Volume
+	  FCxx	-	Change Global/Wire Volume.
 			Examples:
 			--- .. .. FC80	Sets Global Volume to the half.
 			--- 01 05 FC40	Sets Wire 1 of GENERATOR 5 to volume 40 (1/4th)
@@ -230,9 +230,9 @@
 				f is the slowest negative acceleration, 1 is slowest 
 				positive acceleration) * does not trigger on new line, rather
 				continues from previous retrigger position
-	  F8xx	-	Sets the indicated Machine's Panning
+	  F8xx	-	Sets the indicated Machine's Panning.
 			Example:
-			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle)
+			--- .. 05 F880 Sets the panning of Generator 5 to 80 (Middle) .
 	  F3xx 	-	Jump to sequence order number xx (in hex).
 	  F2xx	-	Jump to next sequence order, and to the line xx (in hex).
 
@@ -259,14 +259,20 @@
 	  		
 	* Sampler Commands:
 
-	  01xx	-	Portamento Up
-	  02xx	-	Portamento Down
-	  08xx	-	Set panning position
-	  09xx	-	Set sample offset
-	  0Cxx	-	Set volume
-	  0ECx	-	Note cut in x frames
-	  0EDx	-	Note delay in x frames
-	  15xy	-	Retrig Command. y = Number of retrigs (1 = do one retrig)
+	  01xx	-	Portamento Up  	value FA = increases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz). 
+				Command does not have memory (no special meaning for 00)
+	  02xx	-	Portamento Down  value FA = decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz).
+				Command does not have memory (no special meaning for 00)
+	  03xx	-	Portamento to note.  value FA = increases or decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 
+				5ms at 44Khz), until the corresponding note speed is reached. Command does not have memory (no special meaning for 00)
+				All three portamento commands aren't really song samplerate aware, since at higher song samplerates, it will slide faster.
+	  08xx	-	Set panning position  0 full left, FF full right. 80 center
+	  09xx	-	Set sample offset  x = 1/256th of the sample length.
+	  0Cxx	-	Set volume  0 = silent. FF = max volume.
+				If using virtual instruments, the aux column can be used for the set volume command.
+	  0ECx	-	Note cut in x frames  (fixed 6 frames per line)
+	  0EDx	-	Note delay in x frames  (fixed 6 frames per line)
+	  15xy	-	Retrig Command. y = Number of retrigs to do in one line (1 = do one retrig).
 			-	x changes the volume in the following way:
 				0 or 8 : No change
 				1: +1		9:  -1
@@ -276,6 +282,7 @@
 				5: +16		D: -16
 				6: *2/3		E: *3/2
 				7: *1/2		F: *2
+				Note: Due to the way it is implemented, the last retrig happens almost at the next line.
 	
 	* Sampulse Commands:  (They are also shown in the Miscellaneus and help tab of the machine)
 			Track Commands:
@@ -340,7 +347,7 @@
 				EB/C: Disable/Enable Pitch/Filter Envelope
 				Fx : Set Filter Mode.
 
-			Volume Column:
+			Volume Column  (Used with the 1Exx command, or in the aux column, when using virtual instruments):
 				00..3F: Set volume to x*2
 				4x: Volume slide up
 				5x: Volume slide down
@@ -353,6 +360,17 @@
 				Cx: TonePorta
 				Dx: Pitch slide up
 				Ex: Pitch slide down
+		
+		Note: With Sampulse machine, indicating or not the instrument in the pattern has a special meaning, like it does in classic trackers, so these four entries have four different meanings (in fact, five)
+			C-4 01 00   -> Play note with this instrument, and reset panning and volume (and reapply random volume if needed)
+			C-4 .. 00   -> Play note with the previously indicated sample, but do not reset panning and volume.
+			... 01 00   -> If the note is stopped, play it again with the previously indicated note. If the note is playing, reset panning and volume.
+			... .. 00	-> Do nothing.
+			When using virtual instruments, the instrument index will only be sent with a note. I.e. A virtual instrument can only do:
+			C-4 .. 80  ->  C-4 01 00
+			... .. 80  ->  ... .. 00
+			... .. ..  ->  ... .. ..
+		
 	* Arguru Synth 2.5:
 
 	  01xx	-	Pitch slide-up

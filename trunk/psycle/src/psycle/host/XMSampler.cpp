@@ -1,3 +1,4 @@
+
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSampler.hpp"
 #include "Player.hpp"
@@ -977,6 +978,7 @@ namespace psycle
 			}
 			else
 			{
+				m_CurrRandVol = rChannel().LastVoiceRandVol();
 				Volume(rChannel().LastVoiceVolume());
 				fpan = rChannel().LastVoicePanFactor();
 				IsSurround(rChannel().IsSurround());
@@ -1202,7 +1204,7 @@ namespace psycle
 			}
 		}
 
-		int XMSampler::Voice::GetDelta(int wavetype,int wavepos) const
+		int XMSampler::Voice::GetDelta(XMInstrument::WaveData<>::WaveForms::Type wavetype,int wavepos) const
 		{
 			switch (wavetype)
 			{
@@ -1324,43 +1326,21 @@ namespace psycle
 			m_Note = notecommands::empty;
 			m_Period = 0;
 
-			m_Volume = 1.0f;
 			m_ChannelDefVolume = 200;// 0..200 , &0x100 = Mute.
-			m_LastVoiceVolume = 0;
 			m_bMute = false;
 
-			m_PanFactor = 0.5f;
 			m_DefaultPanFactor = 100;
-			m_LastVoicePanFactor = 0.0f;
-			m_bSurround = false;
 
-			m_LastAmpEnvelopePosInSamples=0;
-			m_LastPanEnvelopePosInSamples=0;
-			m_LastFilterEnvelopePosInSamples=0;
-			m_LastPitchEnvelopePosInSamples=0;
+			m_DefaultCutoff= 127;
+			m_DefaultRessonance =0;
+			m_DefaultFilterType = dsp::F_NONE;
 
-			m_bGrissando = false;
-			m_VibratoType = XMInstrument::WaveData<>::WaveForms::SINUS;
-			m_TremoloType = XMInstrument::WaveData<>::WaveForms::SINUS;
-			m_PanbrelloType = XMInstrument::WaveData<>::WaveForms::SINUS;
+			Restore();
+		}
 
-			m_PanSlideMem = 0;
-			m_ChanVolSlideMem = 0;
-			m_PitchSlideMem = 0;
-			m_TremorMem = 0;
-			m_TremorOnTime = 0;
-			m_TremorOffTime = 0;
-			m_VibratoDepthMem = 0;
-			m_VibratoSpeedMem = 0;
-			m_TremoloDepthMem = 0;
-			m_TremoloSpeedMem = 0;
-			m_PanbrelloDepthMem = 0;
-			m_PanbrelloSpeedMem = 0;
-			m_VolumeSlideMem = 0;
-			m_ArpeggioMem = 0;
-			m_RetrigMem = 0;
-			m_OffsetMem = 0;
-
+		void XMSampler::Channel::EffectInit()
+		{
+			//Effects
 			m_EffectFlags = 0;
 
 			m_PitchSlideSpeed = 0;
@@ -1379,6 +1359,14 @@ namespace psycle
 			m_PanbrelloDelta = 0;
 			m_PanbrelloPos = 0;
 
+			m_bGrissando = false;
+			m_VibratoType = XMInstrument::WaveData<>::WaveForms::SINUS;
+			m_TremoloType = XMInstrument::WaveData<>::WaveForms::SINUS;
+			m_PanbrelloType = XMInstrument::WaveData<>::WaveForms::SINUS;
+
+			m_TremorOnTime = 0;
+			m_TremorOffTime = 0;
+
 			m_RetrigOperation = 0;
 			m_RetrigVol = 0;
 
@@ -1388,35 +1376,12 @@ namespace psycle
 			m_NoteCutTick = 0;
 
 			m_MIDI_Set = 0;
-			m_DefaultCutoff= 127;
-			m_DefaultRessonance =0;
-			m_DefaultFilterType = dsp::F_NONE;
 
-		}
-
-		void XMSampler::Channel::EffectInit()
-		{
-/*			m_VibratoPos = 0;
-			m_TremoloPos = 0;
-			m_TremoloDepth = 0;
-			m_VibratoAmount = 0;
-			m_AutoVibratoAmount = 0.0;
-			m_PanbrelloPos = 0;
-*/
-		}
-		void XMSampler::Channel::Restore()
-		{
-			m_Volume = DefaultVolumeFloat();
-
-			m_PanFactor = DefaultPanFactorFloat();
-			if (DefaultIsSurround()) m_bSurround = true;
-
+			//Memory
 			m_PanSlideMem = 0;
 			m_ChanVolSlideMem = 0;
 			m_PitchSlideMem = 0;
 			m_TremorMem = 0;
-			m_TremorOnTime = 0;
-			m_TremorOffTime = 0;
 			m_VibratoDepthMem = 0;
 			m_VibratoSpeedMem = 0;
 			m_TremoloDepthMem = 0;
@@ -1425,9 +1390,30 @@ namespace psycle
 			m_PanbrelloSpeedMem = 0;
 			m_VolumeSlideMem = 0;
 			m_ArpeggioMem = 0;
-			m_GlobalVolSlideMem = 0;
 			m_RetrigMem = 0;
 			m_OffsetMem = 0;
+			m_GlobalVolSlideMem = 0;
+
+		}
+		void XMSampler::Channel::Restore()
+		{
+			m_InstrumentNo = 255;
+			m_pForegroundVoice = NULL;
+
+			m_LastVoiceVolume = 0;
+			m_LastVoiceRandVol = 1.0f;
+			m_LastVoicePanFactor = 0.0f;
+			m_LastAmpEnvelopePosInSamples=0;
+			m_LastPanEnvelopePosInSamples=0;
+			m_LastFilterEnvelopePosInSamples=0;
+			m_LastPitchEnvelopePosInSamples=0;
+
+			m_Volume = DefaultVolumeFloat();
+
+			m_PanFactor = DefaultPanFactorFloat();
+			m_bSurround = DefaultIsSurround();
+
+			EffectInit();
 			m_Cutoff = m_DefaultCutoff;
 			m_Ressonance = m_DefaultRessonance;
 			m_FilterType = m_DefaultFilterType;
@@ -1439,6 +1425,7 @@ namespace psycle
 			{
 				LastVoicePanFactor(m_pForegroundVoice->PanFactor());
 				LastVoiceVolume(m_pForegroundVoice->Volume());
+				LastVoiceRandVol(m_pForegroundVoice->CurrRandVol());
 
 				const XMInstrument::Envelope &envAmp = m_pForegroundVoice->AmplitudeEnvelope().Envelope();
 				if (envAmp.IsEnabled() && envAmp.IsCarry())
@@ -1551,13 +1538,22 @@ namespace psycle
 					IsGrissando(parameter != 0);
 					break;
 				case CMD_E::E_VIBRATO_WAVE:
-					VibratoType(parameter);
+					if (parameter <= XMInstrument::WaveData<>::WaveForms::RANDOM) {
+						VibratoType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(parameter));
+					}
+					else { VibratoType(XMInstrument::WaveData<>::WaveForms::SINUS); }
 					break;
 				case CMD_E::E_PANBRELLO_WAVE:
-					PanbrelloType(parameter);
+					if (parameter <= XMInstrument::WaveData<>::WaveForms::RANDOM) {
+						PanbrelloType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(parameter));
+					}
+					else { PanbrelloType(XMInstrument::WaveData<>::WaveForms::SINUS); }
 					break;
 				case CMD_E::E_TREMOLO_WAVE:
-					TremoloType(parameter);
+					if (parameter <= XMInstrument::WaveData<>::WaveForms::RANDOM) {
+						TremoloType(static_cast<XMInstrument::WaveData<>::WaveForms::Type>(parameter));
+					}
+					else { TremoloType(XMInstrument::WaveData<>::WaveForms::SINUS); }
 					break;
 				default:
 					break;
@@ -2383,7 +2379,7 @@ namespace psycle
 		
 		bool XMSampler::playsTrack(const int track) const
 		{
-			return (TriggerDelayCounter[track] > 0 || GetCurrentVoice(track) != NULL);
+			return (TriggerDelayCounter[track] > 0 || GetCurrentVoice(track) != NULL || rChannel(track).isDelayed());
 		}
 		void XMSampler::NewLine()
 		{
@@ -2411,11 +2407,14 @@ namespace psycle
 		{
 			if(pData->_note == notecommands::midicc && pData->_inst < MAX_TRACKS)
 			{
-				multicmdMem.push_back(*pData);
+				//TODO: This has one problem, it requires a non-mcm command to trigger the memory.
+				PatternEntry entry(*pData);
+				entry._inst = channelNum;
+				multicmdMem.push_back(entry);
 				return;
 			}
 			 // don't process twk , twf of Mcm Commands
-			else if ( pData->_note > notecommands::release && pData->_note < notecommands::empty) {
+			else if ( pData->_note > notecommands::release && pData->_note != notecommands::empty) {
 				return;
 			}
 
@@ -2426,19 +2425,9 @@ namespace psycle
 				if(ite->_inst == channelNum) {
 					bPortaEffect |= (ite->_cmd == CMD::PORTA2NOTE) 	
 						|| (ite->_cmd == CMD::SENDTOVOLUME && (ite->_parameter&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO);
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					bPortaEffect |= (pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO);
-#endif
 				}
 			}
 			bPortaEffect |= (pData->_cmd == CMD::PORTA2NOTE) || (pData->_cmd == CMD::SENDTOVOLUME && (pData->_parameter&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO);
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
-			bPortaEffect |=  (pData->_volume&0xF0) == CMD_VOL::VOL_TONEPORTAMENTO);
-#endif
 			bool bPorta2Note = (pData->_note <= notecommands::b9) && bPortaEffect;
 			bool bNoteOn = (pData->_note <= notecommands::b9) && !bPorta2Note;
 
@@ -2473,7 +2462,7 @@ namespace psycle
 						//Concretely if an instrument comes without a note, it is different than the one that is playing, and is not stopping (no noteoff received),
 						//then, the new instrument is triggered with the last note played.
 						//Note that if the instrument is the same, it is only retriggered if it has stopped (See below).
-						if ( !bNoteOn && thisChannel.InstrumentNo() != pData->_inst && thisChannel.Note() != notecommands::release) {
+						if ( !bNoteOn && pData->_note != notecommands::release && thisChannel.InstrumentNo() != pData->_inst && thisChannel.Note() != notecommands::release) {
 							bNoteOn = true;
 						}
 					}
@@ -2543,12 +2532,12 @@ namespace psycle
 				//This is present in some "MOD" format files, and is supported by Impulse Tracker/Modplug/Schism, but not in ST3/FT2/XMPlay
 				//Concretely if a sample has been played, has stopped (by reaching the end, not by noteoff/notecut), and an instrument 
 				// comes again without a note (be it the same or another), the (new) instrument is played with the previous note of the channel.
-				if(bInstrumentSet && !bNoteOn && thisChannel.Note() != notecommands::release)
+				if(bInstrumentSet && !bNoteOn && thisChannel.Note() != notecommands::release && pData->_note == notecommands::empty)
 				{
 					bNoteOn=true;
 				}
 			}
-			if(bInstrumentSet) {
+			if(bInstrumentSet && pData->_note != notecommands::release ) {
 				// Instrument is always set, even if no new note comes, or no voice playing.
 				//\todo: Fix: Set the wave and instrument to the one in the entry. Only if not portatonote.
 				thisChannel.InstrumentNo(pData->_inst);
@@ -2610,11 +2599,7 @@ namespace psycle
 									}
 								}
 							}
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
-							if (pData->_volume<0x40) vol = pData->_volume<<1;
-#endif
+
 							if (pData->_cmd == CMD::VOLUME) vol = pData->_parameter;
 							else if (pData->_cmd == CMD::SENDTOVOLUME && (pData->_parameter&0xF0) <= CMD_VOL::VOL_VOLUME3) vol = pData->_parameter<<1;
 							newVoice->NoteOn(thisChannel.Note(),vol,bInstrumentSet);
@@ -2668,13 +2653,7 @@ namespace psycle
 				thisChannel.SetEffect(newVoice,pData->_parameter,0,0);
 			}
 			else {
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#elif PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				thisChannel.SetEffect(newVoice,pData->_volume,pData->_cmd,pData->_parameter);
-#else
 				thisChannel.SetEffect(newVoice,255,pData->_cmd,pData->_parameter);
-#endif
 			}
 		}
 

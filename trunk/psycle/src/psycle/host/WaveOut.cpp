@@ -565,7 +565,7 @@ namespace psycle
 		uint32_t WaveOut::GetPlayPosInSamples()
 		{
 			// WARNING! waveOutGetPosition in TIME_SAMPLES has max of 0x7FFFFF for 16bit stereo signals.
-			if(!_stopPolling) return 0;
+			if(_stopPolling) return 0;
 			MMTIME time;
 			time.wType = TIME_SAMPLES;
 			if(::waveOutGetPosition(_handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
@@ -593,7 +593,7 @@ namespace psycle
 
 		uint32_t WaveOut::GetWritePosInSamples() const
 		{
-			if(!_stopPolling) return 0;
+			if(_stopPolling) return 0;
 			return _writePos;
 		}
 

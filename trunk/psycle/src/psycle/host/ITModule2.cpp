@@ -81,6 +81,7 @@ namespace psycle
 			Read(&inshead,sizeof(itInsHeader1x));
 			XMInstrument instr;
 			instr.Init();
+			song.DeleteVirtualOfInstrument(idx,true);
 			if (inshead.trackerV < 0x200 ) {
 				LoadOldITInst(inshead,instr);
 			}
@@ -337,7 +338,8 @@ Special:  Bit 0: On = song message attached.
 #endif
 			}
 
-
+			int virtualInst = MAX_MACHINES;
+			std::map<int,int> ittovirtual;
 			for (i=0;i<itFileH.insNum;i++)
 			{
 				Seek(pointersi[i]);
@@ -353,13 +355,17 @@ Special:  Bit 0: On = song message attached.
 					LoadITInst(curH, instr);
 				}
 				song.xminstruments.SetInst(instr,i);
+				if (song.xminstruments.IsEnabled(i)) {
+					ittovirtual[i]=virtualInst;
+					song.SetVirtualInstrument(virtualInst++,0,i);
+				}
 			}
 			for (i=0;i<itFileH.sampNum;i++)
 			{
 				Seek(pointerss[i]);
 				XMInstrument::WaveData<> wave;
 				bool created = LoadITSample(wave);
-				// If this MOD doesn't use Instruments, we need to map the notes manually.
+				// If this IT file doesn't use Instruments, we need to map the notes manually.
 				if (created && !(itFileH.flags & Flags::USEINSTR)) 
 				{
 					if (song.xminstruments.IsEnabled(i) ==false) {
@@ -374,7 +380,9 @@ Special:  Bit 0: On = song message attached.
 						npair.first=j;
 						instrument.NoteToSample(j,npair);
 					}
-					instrument.IsEnabled(true);
+					instrument.ValidateEnabled();
+					ittovirtual[i]=virtualInst;
+					song.SetVirtualInstrument(virtualInst++,0,i);
 				}
 				song.samples.SetSample(wave,i);
 			}
@@ -387,7 +395,7 @@ Special:  Bit 0: On = song message attached.
 					song.AllocNewPattern(i,"unnamed",64,false);
 				} else {
 					Seek(pointersp[i]);
-					LoadITPattern(i,numchans);
+					LoadITPattern(i,numchans, ittovirtual);
 				}
 			}
 			song.SONGTRACKS = std::max(numchans+1,(int)m_maxextracolumn);
@@ -415,8 +423,8 @@ Special:  Bit 0: On = song message attached.
 			XMInstrument::NotePair npair;
 			int i;
 			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-				npair.first=short(curH.notes[i].first);
-				npair.second=short(curH.notes[i].second)-1;
+				npair.first=curH.notes[i].first;
+				npair.second=curH.notes[i].second-1;
 				xins.NoteToSample(i,npair);
 			}
 			xins.AmpEnvelope().Init();
@@ -443,7 +451,7 @@ Special:  Bit 0: On = song message attached.
 			xins.PanEnvelope().Init();
 			xins.PitchEnvelope().Init();
 			xins.FilterEnvelope().Init();
-			xins.IsEnabled(true);
+			xins.ValidateEnabled();
 			return true;
 		}
 		bool ITModule2::LoadITInst(const itInsHeader2x& curH, XMInstrument &xins)
@@ -590,7 +598,7 @@ Special:  Bit 0: On = song message attached.
 				}
 			}
 
-			xins.IsEnabled(true);
+			xins.ValidateEnabled();
 			return true;
 		}
 
@@ -659,7 +667,7 @@ Special:  Bit 0: On = song message attached.
 //				double maintune = floor(tune*12);
 //				double finetune = floor(((tune*12)-maintune)*100);
 
-				int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+				XMInstrument::WaveData<>::WaveForms::Type exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
 					XMInstrument::WaveData<>::WaveForms::SAWDOWN,
 					XMInstrument::WaveData<>::WaveForms::SQUARE,
 					XMInstrument::WaveData<>::WaveForms::RANDOM
@@ -836,17 +844,19 @@ Special:  Bit 0: On = song message attached.
 			return false;
 		}
 
-		bool ITModule2::LoadITPattern(int patIdx, int &numchans)
+		bool ITModule2::LoadITPattern(int patIdx, int &numchans, std::map<int,int>& ittovirtual)
 		{
 			unsigned char newEntry;
 			unsigned char lastnote[64];
 			unsigned char lastinst[64];
+			unsigned char lastmach[64];
 			unsigned char lastvol[64];
 			unsigned char lastcom[64];
 			unsigned char lasteff[64];
 			unsigned char mask[64];
 			std::memset(lastnote,255,sizeof(char)*64);
 			std::memset(lastinst,255,sizeof(char)*64);
+			std::memset(lastmach,255,sizeof(char)*64);
 			std::memset(lastvol,255,sizeof(char)*64);
 			std::memset(lastcom,255,sizeof(char)*64);
 			std::memset(lasteff,255,sizeof(char)*64);
@@ -880,22 +890,20 @@ Special:  Bit 0: On = song message attached.
 						if (note==255) pent._note = notecommands::release;
 						else if (note==254) pent._note=notecommands::release; //\todo: Attention ! Psycle doesn't have a note-cut note.
 						else pent._note = note;
-						pent._mach=0;
 						lastnote[channel]=pent._note;
 					}
-					if (mask[channel]&2)
-					{
-						pent._inst=ReadUInt8()-1;
-						pent._mach=0;
-						lastinst[channel]=pent._inst;
+					else if (mask[channel]&0x10) { 
+						pent._note=lastnote[channel]; 
 					}
-					if (mask[channel]&4 || mask[channel]&0x40)
+					if (mask[channel]&2) {
+						pent._inst=ReadUInt8()-1;
+					}
+					else if (mask[channel]&0x20) { 
+						pent._inst=lastinst[channel];
+					}
+					if (mask[channel]&4)
 					{
-						unsigned char tmp;
-						pent._mach=0;
-						if (mask[channel]&0x40 ) tmp=lastvol[channel];
-						else tmp=ReadUInt8();
-						lastvol[channel]=tmp;
+						unsigned char tmp=ReadUInt8();
 						// Volume ranges from 0->64
 						// Panning ranges from 0->64, mapped onto 128->192
 						// Prepare for the following also:
@@ -907,95 +915,126 @@ Special:  Bit 0: On = song message attached.
 						//  115->124 = Pitch Slide up
 						//  193->202 = Portamento to
 						//  203->212 = Vibrato
-						if ( tmp<65)
-						{
+						if ( tmp<65) {
 							volume=tmp<64?tmp:63;
 						}
-						else if (tmp<75)
-						{
+						else if (tmp<75) {
 							volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEUP | (tmp-65);
 						}
-						else if (tmp<85)
-						{
+						else if (tmp<85) {
 							volume=XMSampler::CMD_VOL::VOL_FINEVOLSLIDEDOWN | (tmp-75);
 						}
-						else if (tmp<95)
-						{
+						else if (tmp<95) {
 							volume=XMSampler::CMD_VOL::VOL_VOLSLIDEUP | (tmp-85);
 						}
-						else if (tmp<105)
-						{
+						else if (tmp<105) {
 							volume=XMSampler::CMD_VOL::VOL_VOLSLIDEDOWN | (tmp-95);
 						}
-						else if (tmp<115)
-						{
+						else if (tmp<115) {
 							volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_DOWN | (tmp-105);
 						}
-						else if (tmp<125)
-						{
+						else if (tmp<125) {
 							volume=XMSampler::CMD_VOL::VOL_PITCH_SLIDE_UP | (tmp-115);
 						}
-						else if (tmp<193)
-						{
+						else if (tmp<193) {
 							tmp= (tmp==192)?15:(tmp-128)/4;
 							volume=XMSampler::CMD_VOL::VOL_PANNING | tmp;
 						}
-						else if (tmp<203)
-						{
+						else if (tmp<203) {
 							volume=XMSampler::CMD_VOL::VOL_TONEPORTAMENTO | (tmp-193);
 						}
-						else if (tmp<213)
-						{
+						else if (tmp<213) {
 							volume=XMSampler::CMD_VOL::VOL_VIBRATO | ( tmp-203 );
 						}
+						else {
+							volume = 255;
+						}
+						lastvol[channel]=volume;
 					}
-					uint8_t param=6;
+					else if (mask[channel]&0x40 ) {
+						volume=lastvol[channel];
+					}
 					if(mask[channel]&8)
 					{
-						pent._mach=0;
-						uint8_t command=ReadUInt8();
-						param=ReadUInt8();
+						unsigned char command=ReadUInt8();
+						unsigned char param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
 						ParseEffect(pent,patIdx,row,command,param,channel);
 						lastcom[channel]=pent._cmd;
 						lasteff[channel]=pent._parameter;
-
 					}
-					if (mask[channel]&0x10) { pent._note=lastnote[channel]; pent._mach=0; }
-					if (mask[channel]&0x20) { pent._inst=lastinst[channel]; pent._mach=0; }
-					if ( mask[channel]&0x80 )
+					else if ( mask[channel]&0x80 )
 					{
 						pent._cmd = lastcom[channel];
 						pent._parameter = lasteff[channel];
 					}
 
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					pent._volume = volume;
-#else
-					if(pent._cmd != 0 || pent._parameter != 0) {
-						if(volume!=255 && m_extracolumn < MAX_TRACKS) {
-							PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
-							pData->_note = notecommands::midicc;
-							pData->_inst = channel;
-							pData->_mach = pent._mach;
-							pData->_cmd = XMSampler::CMD::SENDTOVOLUME;
-							pData->_parameter = volume;
-							m_extracolumn++;
+					// If empty, do not inform machine
+					if (pent._note == notecommands::empty && pent._inst == 255 && volume == 255 && pent._cmd == 00 && pent._parameter == 00) {
+						pent._mach = 255;
+					}
+					// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
+					else if (( pent._note == notecommands::empty && pent._inst != 255 ) || ( pent._note < notecommands::release && pent._inst == 255)) {
+						pent._mach = 0;
+						if (pent._inst != 255) {
+							lastinst[channel]=pent._inst;
+							//We cannot use the virtual instrument, but we should remember which instrument it is.
+							std::map<int,int>::const_iterator it = ittovirtual.find(pent._inst);
+							if (it != ittovirtual.end()) {
+								lastmach[channel]=it->second;
+							}
 						}
 					}
-					else if(volume < 0x40) {
-						pent._cmd = XMSampler::CMD::VOLUME;
-						pent._parameter = volume*2;
+					//default behaviour, let's find the virtual instrument.
+					else {
+						std::map<int,int>::const_iterator it = ittovirtual.find(pent._inst);
+						if (it == ittovirtual.end()) {
+							if (pent._inst != 255) {
+								pent._mach = 0;
+								lastmach[channel]=pent._mach;
+								lastinst[channel]=pent._inst;
+							}
+							else if (lastmach[channel] != 255) {
+								pent._mach = lastmach[channel];
+							}
+							else if (volume != 255) {
+								pent._mach = 0;
+							}
+							else {
+								pent._mach = 255;
+							}
+						}
+						else {
+							lastinst[channel]=pent._inst;
+							pent._mach=it->second;
+							pent._inst=255;
+							lastmach[channel]=pent._mach;
+						}
 					}
-					else if(volume!=255) {
-						pent._cmd = XMSampler::CMD::SENDTOVOLUME;
-						pent._parameter = volume;
+					if (pent._mach == 0) { // fallback to the old behaviour. This will happen only if an unused instrument is present in the pattern.
+						if (pent._cmd != 0 || pent._parameter != 0) {
+							if(volume!=255 && m_extracolumn < MAX_TRACKS) {
+								PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
+								pData->_note = notecommands::midicc;
+								pData->_inst = channel;
+								pData->_mach = pent._mach;
+								pData->_cmd = XMSampler::CMD::SENDTOVOLUME;
+								pData->_parameter = volume;
+								m_extracolumn++;
+							}
+						}
+						else if(volume < 0x40) {
+							pent._cmd = XMSampler::CMD::VOLUME;
+							pent._parameter = volume*2;
+						}
+						else if(volume!=255) {
+							pent._cmd = XMSampler::CMD::SENDTOVOLUME;
+							pent._parameter = volume;
+						}
 					}
-	#endif
-#endif
+					else {
+						pent._inst = volume;
+					}
 					PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,channel,row));
 					*pData = pent;
 					pent=pempty;
@@ -1011,7 +1050,7 @@ Special:  Bit 0: On = song message attached.
 
 		void ITModule2::ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel)
 		{
-			int exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+			XMInstrument::WaveData<>::WaveForms::Type exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
 				XMInstrument::WaveData<>::WaveForms::SAWDOWN,
 				XMInstrument::WaveData<>::WaveForms::SQUARE,
 				XMInstrument::WaveData<>::WaveForms::RANDOM
@@ -1288,18 +1327,24 @@ Special:  Bit 0: On = song message attached.
 			}
 			song.SONGTRACKS=std::max(numchans,4);
 
+			int virtualInst = MAX_MACHINES;
+			std::map<int,int> s3mtovirtual;
 			for (i=0;i<s3mFileH.insNum;i++)
 			{
 				Seek(pointersi[i]<<4);
 				XMInstrument instr;
 				LoadS3MInstX(song, instr,i);
 				song.xminstruments.SetInst(instr,i);
+				if (song.xminstruments.IsEnabled(i)) {
+					s3mtovirtual[i]=virtualInst;
+					song.SetVirtualInstrument(virtualInst++,0,i);
+				}
 			}
 			m_maxextracolumn=song.SONGTRACKS;
 			for (i=0;i<s3mFileH.patNum;i++)
 			{
 				Seek(pointersp[i]<<4);
-				LoadS3MPatternX(i);
+				LoadS3MPatternX(i, s3mtovirtual);
 			}
 			song.SONGTRACKS=m_maxextracolumn;
 			delete[] pointersi; pointersi = 0;
@@ -1320,7 +1365,6 @@ Special:  Bit 0: On = song message attached.
 
 			if (curH.tag == SCRS_ID && curH.type == 1) 
 			{
-				xins.IsEnabled(true);
 				if (iSampleIdx < PREV_WAV_INS ) {
 					XMInstrument::WaveData<> wave;
 					if (iSampleIdx != 65535) {
@@ -1337,6 +1381,7 @@ Special:  Bit 0: On = song message attached.
 					npair.first=i;
 					xins.NoteToSample(i,npair);
 				}
+				xins.ValidateEnabled();
 			}
 			else if (curH.tag == SCRI_ID && curH.type != 0)
 			{
@@ -1435,12 +1480,14 @@ Special:  Bit 0: On = song message attached.
 			return false;
 		}
 
-		bool ITModule2::LoadS3MPatternX(uint16_t patIdx)
+		bool ITModule2::LoadS3MPatternX(uint16_t patIdx, std::map<int,int>& s3mtovirtual)
 		{
+			unsigned char lastmach[64];
 			uint8_t newEntry;
 			PatternEntry pempty;
 			pempty._note=notecommands::empty; pempty._mach=255;pempty._inst=255;pempty._cmd=0;pempty._parameter=0;
 			PatternEntry pent=pempty;
+			std::memset(lastmach,255,sizeof(char)*64);
 
 			_pSong->AllocNewPattern(patIdx,"unnamed",64,false);
 			Skip(2);//int packedSize=ReadInt(2);
@@ -1458,20 +1505,17 @@ Special:  Bit 0: On = song message attached.
 					{
 						uint8_t note=ReadUInt8();  // hi=oct, lo=note, 255=empty note,	254=key off
 						if (note==254) pent._note = notecommands::release;
-						else if (note==255) pent._note=255;
+						else if (note==255) pent._note = notecommands::empty;
 						else pent._note = ((note>>4)*12+(note&0xF)+12);  // +12 since ST3 C-4 is Psycle's C-5
 						pent._inst=ReadUInt8()-1;
-						pent._mach=0;
 					}
 					if(newEntry&64)
 					{
 						uint8_t tmp=ReadUInt8();
-						pent._mach =0;
 						volume = (tmp<64)?tmp:63;
 					}
 					if(newEntry&128)
 					{
-						pent._mach=0;
 						uint8_t command=ReadUInt8();
 						uint8_t param=ReadUInt8();
 						if ( command != 0 ) pent._parameter = param;
@@ -1495,33 +1539,70 @@ Special:  Bit 0: On = song message attached.
 							}
 						}
 					}
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					pent._volume = volume;
-#else
-					if(pent._cmd != 0 || pent._parameter != 0) {
-						if(volume!=255) {
-							PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
-							pData->_note = notecommands::midicc;
-							pData->_inst = channel;
-							pData->_mach = pent._mach;
-							pData->_cmd = XMSampler::CMD::SENDTOVOLUME;
-							pData->_parameter = volume;
-							m_extracolumn++;
+					// If empty, do not inform machine
+					if (pent._note == notecommands::empty && pent._inst == 255 && volume == 255 && pent._cmd == 00 && pent._parameter == 00) {
+						pent._mach = 255;
+					}
+					// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
+					else if (( pent._note == notecommands::empty && pent._inst != 255 ) || ( pent._note < notecommands::release && pent._inst == 255)) {
+						pent._mach = 0;
+						if (pent._inst != 255) {
+							//We cannot use the virtual instrument, but we should remember which it is.
+							std::map<int,int>::const_iterator it = s3mtovirtual.find(pent._inst);
+							if (it != s3mtovirtual.end()) {
+								lastmach[channel]=it->second;
+							}
 						}
 					}
-					else if(volume < 0x40) {
-						pent._cmd = XMSampler::CMD::VOLUME;
-						pent._parameter = volume*2;
+					//default behaviour, let's find the virtual instrument.
+					else {
+						std::map<int,int>::const_iterator it = s3mtovirtual.find(pent._inst);
+						if (it == s3mtovirtual.end()) {
+							if (pent._inst != 255) {
+								pent._mach = 0;
+								lastmach[channel] = pent._mach;
+							}
+							else if (lastmach[channel] != 255) {
+								pent._mach = lastmach[channel];
+							}
+							else if (volume != 255) {
+								pent._mach = 0;
+							}
+							else {
+								pent._mach = 255;
+							}
+						}
+						else {
+							pent._mach=it->second;
+							pent._inst=255;
+							lastmach[channel]=pent._mach;
+						}
 					}
-					else if(volume!=255) {
-						pent._cmd = XMSampler::CMD::SENDTOVOLUME;
-						pent._parameter = volume;
+
+					if (pent._mach == 0) { // fallback to the old behaviour. This will happen only if an unused instrument is present in the pattern.
+						if(pent._cmd != 0 || pent._parameter != 0) {
+							if(volume!=255) {
+								PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,m_extracolumn,row));
+								pData->_note = notecommands::midicc;
+								pData->_inst = channel;
+								pData->_mach = pent._mach;
+								pData->_cmd = XMSampler::CMD::SENDTOVOLUME;
+								pData->_parameter = volume;
+								m_extracolumn++;
+							}
+						}
+						else if(volume < 0x40) {
+							pent._cmd = XMSampler::CMD::VOLUME;
+							pent._parameter = volume*2;
+						}
+						else if(volume!=255) {
+							pent._cmd = XMSampler::CMD::SENDTOVOLUME;
+							pent._parameter = volume;
+						}
 					}
-	#endif
-#endif
+					else {
+						pent._inst = volume;
+					}
 					if (channel < _pSong->SONGTRACKS) {
 						PatternEntry* pData = reinterpret_cast<PatternEntry*>(_pSong->_ptrackline(patIdx,channel,row));
 						*pData = pent;

@@ -88,7 +88,7 @@ namespace psycle { namespace host {
 				machine._numVoices = m_polyslider.GetPos();
 				for(int c=machine._numVoices; c<SAMPLER_MAX_POLYPHONY; c++)
 				{
-					machine.NoteOffFast(c);
+					machine._voices[c].NoteOffFast();
 				}
 			}
 			CDialog::OnHScroll(nSBCode, nPos, pScrollBar);

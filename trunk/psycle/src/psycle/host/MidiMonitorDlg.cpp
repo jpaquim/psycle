@@ -385,38 +385,39 @@ namespace psycle { namespace host {
 				{
 				case PsycleConfig::Midi::MS_USE_SELECTED:
 					selIdx = Global::song().seqBus;
-					pMachine = Global::song()._pMachine[ selIdx ];
 					break;
 				case PsycleConfig::Midi::MS_BANK:
 				case PsycleConfig::Midi::MS_PROGRAM:
 					 selIdx = midiInput.GetGenMap( ch );
-					if( selIdx >= 0 && selIdx < MAX_MACHINES)
-					{
-						pMachine = Global::song()._pMachine[ selIdx ];
-					}
 					break;
 				case PsycleConfig::Midi::MS_MIDI_CHAN:
 					selIdx = ch;
-					pMachine = Global::song()._pMachine[ selIdx ];
 					break;
 				}
+				int inst=-1;
+				pMachine = Global::song().GetMachineOfBus(selIdx, inst);
 				if (pMachine == NULL) strcpy( txtBuffer, "-");
 				else sprintf( txtBuffer, "%02d: %s", selIdx, pMachine->_editName );
 				m_channelMap.SetItem( ch, 1, LVIF_TEXT, txtBuffer, 0, 0, 0, NULL );
 
 				//instrument selection
-				switch(PsycleGlobal::conf().midi().inst_select_with())
-				{
-				case PsycleConfig::Midi::MS_USE_SELECTED:
-					selIdx = Global::song().auxcolSelected;
-					break;
-				case PsycleConfig::Midi::MS_BANK:
-				case PsycleConfig::Midi::MS_PROGRAM:
-					selIdx = midiInput.GetInstMap( ch );
-					break;
-				case PsycleConfig::Midi::MS_MIDI_CHAN:
-					selIdx = ch;
-					break;
+				if (inst == -1) {
+					switch(PsycleGlobal::conf().midi().inst_select_with())
+					{
+					case PsycleConfig::Midi::MS_USE_SELECTED:
+						selIdx = Global::song().auxcolSelected;
+						break;
+					case PsycleConfig::Midi::MS_BANK:
+					case PsycleConfig::Midi::MS_PROGRAM:
+						selIdx = midiInput.GetInstMap( ch );
+						break;
+					case PsycleConfig::Midi::MS_MIDI_CHAN:
+						selIdx = ch;
+						break;
+					}
+				}
+				else {
+					selIdx = inst;
 				}
 				if( pMachine && pMachine->NeedsAuxColumn() && selIdx >= 0 && selIdx < pMachine->NumAuxColumnIndexes())
 				{

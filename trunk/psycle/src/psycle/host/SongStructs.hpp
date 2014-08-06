@@ -12,62 +12,27 @@ namespace psycle
 		{
 			public:
 				inline PatternEntry()
-				:
-					_note(255),
-					_inst(255),
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					_volume(255),
-	#endif
-#endif
-					_mach(255),
-					_cmd(0),
-					_parameter(0)
+				: _note(255)
+				, _inst(255)
+				, _mach(255)
+				, _cmd(0)
+				, _parameter(0)
 				{
 				}
 
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				inline PatternEntry(uint8_t note, uint8_t inst, uint8_t volume, uint8_t cmd, uint8_t param, uint8_t machine)
-#else
 				inline PatternEntry(uint8_t note, uint8_t inst, uint8_t machine, uint8_t cmd, uint8_t param)
-#endif
-#endif
-				:
-				_note(note),
-				_inst(inst),
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-					_volume(volume),
-#endif
-#endif
-					_mach(machine),
-					_cmd(cmd),
-					_parameter(param)
+				: _note(note)
+				, _inst(inst)
+				, _mach(machine)
+				, _cmd(cmd)
+				, _parameter(param)
 				{
 				}
 				uint8_t _note;
 				uint8_t _inst;
-#if !defined PSYCLE__CONFIGURATION__VOLUME_COLUMN
-	#error PSYCLE__CONFIGURATION__VOLUME_COLUMN isn't defined! Check the code where this error is triggered.
-#else
-	#if PSYCLE__CONFIGURATION__VOLUME_COLUMN
-				uint8_t _volume;
-				uint8_t _cmd;
-				uint8_t _parameter;
-				uint8_t _mach;
-	#else
 				uint8_t _mach;
 				uint8_t _cmd;
 				uint8_t _parameter;
-	#endif
-#endif
 		};
 
 		// Patterns are organized in rows.
@@ -152,7 +117,7 @@ namespace psycle
 				tweakeffect, //old. for compatibility only.
 				midicc,
 				tweakslide,
-				//Place whatever it can be written in the pattern above invalid, and anything else below it
+				//Place whatever that can be written in the pattern above invalid, and anything else below it
 				invalid,
 				midi_sync = 254,
 				empty = 255

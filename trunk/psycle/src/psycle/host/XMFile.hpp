@@ -7,7 +7,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 namespace psycle{ namespace host{
 
@@ -198,4 +198,4 @@ namespace psycle{ namespace host{
 		char name[22];
 	};
 }}
-#pragma pack()
+#pragma pack(pop)

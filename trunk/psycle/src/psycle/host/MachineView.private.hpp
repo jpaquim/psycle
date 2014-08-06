@@ -824,13 +824,19 @@ namespace psycle { namespace host {
 			CPen linepen( PS_SOLID, macView->wirewidth, macView->wirecolour); 
 			CPen *oldpen = devc->SelectObject(&linepen);
 
+			int inst=-1;
+			int selbus;
+			Machine * selmac = _pSong.GetMachineOfBus(_pSong.seqBus, inst);
+			if ( selmac != NULL ) { selbus = selmac->_macIndex; }
+			else { selbus = _pSong.seqBus; }
+
 			int hlength = 9; //the length of the selected machine highlight
 			int hdistance = 5; //the distance of the highlight from the machine
 
 			switch (mac->_mode) 
 			{
 			case MACHMODE_GENERATOR:
-				if (macnum == _pSong.seqBus) {	
+				if (macnum == selbus) {	
 
 					pol[0].x = x - hdistance;
 					pol[0].y = y - hdistance + hlength;
@@ -871,7 +877,7 @@ namespace psycle { namespace host {
 				}
 				break;
 			case MACHMODE_FX:
-				if (macnum == _pSong.seqBus) {
+				if (macnum == selbus) {
 
 					pol[0].x = x - hdistance;
 					pol[0].y = y - hdistance + hlength;

@@ -82,7 +82,7 @@ namespace psycle { namespace helpers { namespace dsp {
 				// blackman window. Bandwidth = 1.73
 				tempval = 0.42659 - 0.49656 * std::cos(math::pi+ valx) + 0.076849 * std::cos(2.0 * valx);
 			#elif 0
-				// C.H.Helmrich on Hydrogenaudio: http://www.hydrogenaudio.org/forums/index.php?showtopic=105090
+				// C.H.Helmrich on Hydrogenaudio: http://www.hydrogenaud.io/forums/index.php?showtopic=105090
 				tempval = 0.79445 * std::cos(0.5*valx) + 0.20555 * std::cos(1.5 * valx);
 			#elif 0
 				// hann(ing) window. Bandwidth = 1.5

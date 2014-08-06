@@ -27,6 +27,9 @@ public:
 protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnEnChangeInsName();
+	afx_msg void OnCheckVirtual();
+	afx_msg void OnCbnSelendokVirtInstcombo();
+	afx_msg void OnCbnSelendokVirtMaccombo();
 	afx_msg void OnCbnSelendokInsNnacombo();
 	afx_msg void OnCbnSelendokInsDctcombo();
 	afx_msg void OnCbnSelendokInsDcacombo();
@@ -35,10 +38,6 @@ protected:
 	afx_msg void OnBtnEditMapping();
 	afx_msg void OnBtnPopupSetSample();
 	afx_msg void OnSetSample(UINT nID);
-	afx_msg void OnBtnIncreaseOct();
-	afx_msg void OnBtnDecreaseOct();
-	afx_msg void OnBtnIncreaseNote();
-	afx_msg void OnBtnDecreaseNote();
 
 public:
 	void AssignGeneralValues(XMInstrument& inst, int instno);
@@ -46,15 +45,19 @@ public:
 private:
 	void SetNewNoteAction(const int nna,const int dct,const int dca);
 	void ValidateEnabled();
+	void UpdateVirtInstOptions();
+	void SelectByData(CComboBox& combo,DWORD_PTR data);
 
 	CSampleAssignEditor m_SampleAssign;
 
 	CEdit m_InstrumentName;
+	CButton m_virtual;
+	CComboBox m_virtinstcombo;
+	CComboBox m_virtmaccombo;
 	CComboBox m_NNA;
 	CComboBox m_DCT;
 	CComboBox m_DCA;
 	CScrollBar m_scBar;
-	CComboBox m_ShiftMove;
 	CEnvelopeEditorDlg m_EnvelopeEditorDlg;
 
 	bool m_bInitialized;

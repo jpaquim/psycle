@@ -15,6 +15,10 @@
 	#include "InputHandler.hpp"
 #endif //!defined WINAMP_PLUGIN
 
+//For the commands. Probably those could go to a separate file.
+#include "XMSampler.hpp"
+#include "Sampler.hpp"
+
 #include "cpu_time_clock.hpp"
 #include <universalis/os/thread_name.hpp>
 #include <universalis/os/sched.hpp>
@@ -177,6 +181,7 @@ void Player::start_threads(int thread_count) {
 		}
 		void Player::DoStop(void)
 		{
+			Song& song = Global::song();
 			if (_playing == true)
 				_lineStop = -1;
 
@@ -185,17 +190,18 @@ void Player::start_threads(int thread_count) {
 			_playBlock = false;			
 			for(int i=0; i<MAX_MACHINES; i++)
 			{
-				if(Global::song()._pMachine[i])
+				Machine* mac = song._pMachine[i];
+				if(mac)
 				{
-					Global::song()._pMachine[i]->Stop();
-					for(int c = 0; c < MAX_TRACKS; c++) Global::song()._pMachine[i]->TriggerDelay[c]._cmd = 0;
+					mac->Stop();
+					for(int c = 0; c < MAX_TRACKS; c++) mac->TriggerDelay[c]._cmd = 0;
 				}
 			}
 			for(int i=0;i<MAX_TRACKS;i++) {
 				playTrack[i]=false;
 			}
-			Global::song().wavprev.Stop();
-			SetBPM(Global::song().BeatsPerMin(),Global::song().LinesPerBeat(), Global::song().ExtraTicksPerLine());
+			song.wavprev.Stop();
+			SetBPM(song.BeatsPerMin(),song.LinesPerBeat(), song.ExtraTicksPerLine());
 			if (!_recording) {
 				SampleRate(Global::configuration()._pOutputDriver->GetSamplesPerSec());
 			}
@@ -307,15 +313,18 @@ void Player::clear_plan() {
 			Song& song = Global::song();
 			_patternjump = -1;
 			_linejump = -1;
-			int mIndex = 0;
 			unsigned char* const plineOffset = song._ptrackline(_playPattern,0,_lineCounter);
 
 			for(int track=0; track<song.SONGTRACKS; track++)
 			{
 				PatternEntry* pEntry = reinterpret_cast<PatternEntry*>(plineOffset + track*EVENT_SIZE);
+				bool ignoreinst=false;
 				// If This isn't a tweak (twk/tws/mcm) then do
 				if(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty)
 				{
+					if(pEntry->_mach < MAX_VIRTUALINSTS) prevMachines[track] = pEntry->_mach;
+					int alternateins=-1;
+					Machine * pmac = song.GetMachineOfBus(prevMachines[track],alternateins);
 					switch(pEntry->_cmd)
 					{
 					case PatternCmd::SET_TEMPO:
@@ -338,25 +347,16 @@ void Player::clear_plan() {
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_BYPASS )
 							{
-								mIndex = pEntry->_mach;
-								if ( mIndex < MAX_MACHINES && song._pMachine[mIndex] && song._pMachine[mIndex]->_mode == MACHMODE_FX )
+								if ( pmac != NULL && pmac->_mode == MACHMODE_FX )
 								{
-									if ( pEntry->_parameter&0x0F )
-										song._pMachine[mIndex]->Bypass(true);
-									else
-										song._pMachine[mIndex]->Bypass(false);
+									pmac->Bypass(pEntry->_parameter&0x0F);
 								}
 							}
-
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::SET_MUTE )
 							{
-								mIndex = pEntry->_mach;
-								if ( mIndex < MAX_MACHINES && song._pMachine[mIndex] && song._pMachine[mIndex]->_mode != MACHMODE_MASTER )
+								if ( pmac != NULL && pmac->_mode == MACHMODE_FX )
 								{
-									if ( pEntry->_parameter&0x0F )
-										song._pMachine[mIndex]->_mute = true;
-									else
-										song._pMachine[mIndex]->_mute = false;
+									pmac->_mute = pEntry->_parameter&0x0F;
 								}
 							}
 							else if ( (pEntry->_parameter&0xF0) == PatternCmd::PATTERN_DELAY )
@@ -415,65 +415,82 @@ void Player::clear_plan() {
 							static_cast<Master*>(song._pMachine[MASTER_INDEX])->_outDry = pEntry->_parameter;
 						}
 						else {
-							int mIndex = pEntry->_mach;
-							if(mIndex < MAX_MACHINES && song._pMachine[mIndex]) {
-								song._pMachine[mIndex]->SetDestWireVolume(pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
+							if(pmac != NULL) {
+								pmac->SetDestWireVolume(pEntry->_inst, helpers::value_mapper::map_256_1(pEntry->_parameter));
+								ignoreinst=true;
 							}
 						}
 						break;
 					case  PatternCmd::SET_PANNING:
-						mIndex = pEntry->_mach;
-						if(mIndex < MAX_MACHINES && song._pMachine[mIndex]) {
-							song._pMachine[mIndex]->SetPan(pEntry->_parameter>>1);
+						if(pmac != NULL) {
+							pmac->SetPan(pEntry->_parameter>>1);
 						}
 						break;
+					default:
+						break;
+					}
+
+					//Virtual instrument volume
+					if (pmac != NULL && alternateins != -1 && pEntry->_inst != 255 && !ignoreinst && !song._trackMuted[track]) {
+						// Virtual instrument that uses the aux column. Send it.
+						PatternEntry entry;
+						entry._note = notecommands::midicc;
+						entry._inst = track;
+						entry._mach = prevMachines[track];
+						entry._cmd = (pmac->_type == MACH_XMSAMPLER) ? XMSampler::CMD::SENDTOVOLUME : SAMPLER_CMD_VOLUME;
+						entry._parameter = pEntry->_inst;
+						pmac->Tick(track, &entry);
 					}
 				}
 				// Check For Tweak or MIDI CC
 				else if(!song._trackMuted[track])
 				{
-					if(pEntry->_mach < MAX_MACHINES) prevMachines[track] = pEntry->_mach;
-
-					int mac = prevMachines[track];
-					if(mac < MAX_MACHINES && song._pMachine[mac]) {
+					if(pEntry->_mach < MAX_VIRTUALINSTS) prevMachines[track] = pEntry->_mach;
+					int alternateins=-1;
+					Machine * pmac = song.GetMachineOfBus(prevMachines[track],alternateins);
+					if (pmac != NULL) {
+						// Send to another channel
 						if(pEntry->_note == notecommands::midicc && (pEntry->_inst < MAX_TRACKS || pEntry->_inst == 0xFF))
 						{
 							int voice(pEntry->_inst);
-							// make a copy of the pattern entry, because we're going to modify it.
-							PatternEntry entry(*pEntry);
 							// check for out of range voice values.
 							if(voice < song.SONGTRACKS)
 							{
-								song._pMachine[mac]->Tick(voice, &entry);
+								PatternEntry entry(*pEntry);
+								pmac->Tick(voice, &entry);
 							}
 							else if(voice == 0xFF)
 							{
-								entry._inst = 0x00;
 								// special voice value which means we want to send the same command to all voices
 								for(int voice(0) ; voice < song.SONGTRACKS ; ++voice)
 								{
-									song._pMachine[mac]->Tick(voice, &entry);
+									// make a copy of the pattern entry, because we're going to modify it.
+									PatternEntry entry(*pEntry);
+									entry._inst = voice;
+									pmac->Tick(voice, &entry);
 								}
 							}
 						}
+						//simple tweak or midiCC.
 						else {
-							song._pMachine[mac]->Tick(track, pEntry);
+							pmac->Tick(track, pEntry);
 						}
 					}
 				}
 			}
 		}
 
-			// Notify all machines that a new Line comes.
+		// Notify all machines that a new Line comes.
 		void Player::NotifyNewLine(void)
 		{
-			Song& song = Global::song();
+			const Song& song = Global::song();
 			for(int tc=0; tc<MAX_MACHINES; tc++)
 			{
-				if(song._pMachine[tc])
+				Machine* mac = song._pMachine[tc];
+				if(mac) 
 				{
-					song._pMachine[tc]->NewLine();
-					for(int c = 0; c < MAX_TRACKS; c++) song._pMachine[tc]->TriggerDelay[c]._cmd = 0;
+					mac->NewLine();
+					for(int c = 0; c < MAX_TRACKS; c++) mac->TriggerDelay[c]._cmd = 0;
 				}
 			}
 
@@ -493,18 +510,26 @@ void Player::clear_plan() {
 					(pEntry->_note < notecommands::tweak || pEntry->_note == notecommands::empty)) // Is it not muted and is a note or command?
 				{
 					int mac = pEntry->_mach;
-					if(mac < MAX_MACHINES) prevMachines[track] = mac;
+					if(mac < MAX_VIRTUALINSTS) prevMachines[track] = mac;
 					else mac = prevMachines[track];
 					if( mac != 255 && (pEntry->_inst != 255 || pEntry->_note != 255 || pEntry->_cmd != 0 || pEntry->_parameter != 0) ) // is there a machine number and it is either a note or a command?
 					{
-						if(mac < MAX_MACHINES && song._pMachine[mac] != NULL) //looks like a valid machine index?
+						int alternateins=-1;
+						Machine *pMachine = song.GetMachineOfBus(mac, alternateins);
+						if(pMachine != NULL) //looks like a valid machine index?
 						{
-							Machine *pMachine = song._pMachine[mac];
-							//XMSampler maintains this, and also has special meanings when no instrument is set.
-							int ins = pEntry->_inst;
-							if(pMachine->_type != MACH_XMSAMPLER) {
-								if(pEntry->_inst != 255) prevInstrument[track] = pEntry->_inst;
-								else ins = prevInstrument[track];
+							int ins;
+							if (alternateins != -1) {
+								if (pEntry->_note == notecommands::empty) ins = 255;
+								else ins = alternateins;
+							}
+							else {
+								ins = pEntry->_inst;
+								//XMSampler maintains this, and also has special meanings when no instrument is set, or when is set without a note.
+								if(pMachine->_type != MACH_XMSAMPLER) {
+									if(ins != 255) prevInstrument[track] = ins;
+									else ins = prevInstrument[track];
+								}
 							}
 							if(pEntry->_note == notecommands::release
 								 && pMachine->_type != MACH_SAMPLER && pMachine->_type != MACH_XMSAMPLER) {
@@ -563,15 +588,14 @@ void Player::clear_plan() {
 			}
 		}	
 
-			// Notify all machines that a new Line comes.
+		// Notify all machines that a new Line comes.
 		void Player::NotifyPostNewLine(void)
 		{
-			Song& song = Global::song();
 			for(int tc=0; tc<MAX_MACHINES; tc++)
 			{
-				if(song._pMachine[tc])
-				{
-					song._pMachine[tc]->PostNewLine();
+				Machine* mac = Global::song()._pMachine[tc];
+				if(mac)	{
+					mac->PostNewLine();
 				}
 			}
 		}
@@ -630,6 +654,9 @@ void Player::clear_plan() {
 			_playPattern = song.playOrder[_playPosition];
 			_lineChanged = true;
 		}
+
+
+
 
 int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool allowLoop)
 {
@@ -978,13 +1005,13 @@ void Player::stop_threads() {
 		{
 			Song& song = Global::song();
 			for(int track=0; track < song.SONGTRACKS; track++) {
-				if(playTrack[track] && prevMachines[track] < MAX_MACHINES 
-						&& song._pMachine[prevMachines[track]]) {
-					Machine& mac = *song._pMachine[prevMachines[track]];
-					playTrack[track] = mac.playsTrack(track);
-				}
-				else {
-					playTrack[track] = false;
+				if(playTrack[track]) {
+					int inst=-1;
+					Machine* pmac = song.GetMachineOfBus(prevMachines[track], inst);
+					if (pmac != NULL) {
+						playTrack[track] = pmac->playsTrack(track);
+					}
+					else { playTrack[track] = false; }
 				}
 			}
 			return playTrack[track];
@@ -1031,12 +1058,12 @@ void Player::stop_threads() {
 				// Song play
 				if((_samplesRemaining <=0))
 				{
-					//this double "if" is meant to prevent new line to play if song looping is disabled.
 					if(_playing) 
 					{
 						// Advance position in the sequencer
 						AdvancePosition();
 					}
+					//this double "if" is meant to prevent new line to play if song looping is disabled.
 					if (_playing)
 					{
 						ExecuteLine();

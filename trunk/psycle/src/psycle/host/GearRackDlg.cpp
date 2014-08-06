@@ -129,7 +129,7 @@ namespace psycle { namespace host {
 				m_radio_wave.SetCheck(0);
 
 				selected = Global::song().seqBus;
-				if (selected < MAX_BUSES)
+				if (selected < MAX_BUSES || selected >= MAX_BUSES*2)
 				{
 					selected = 0;
 				}
@@ -314,6 +314,7 @@ namespace psycle { namespace host {
 						}
 					}
 					inst.Init();
+					Global::song().DeleteVirtualOfInstrument(Global::song().instSelected,true);
 					mainFrame->UpdateComboIns(true);
 					mainFrame->UpdateInstrumentEditor();
 				}

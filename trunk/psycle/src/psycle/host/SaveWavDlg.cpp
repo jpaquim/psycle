@@ -437,30 +437,12 @@ namespace psycle { namespace host {
 									thesong._trackMuted[j] = false;
 								}
 							}
-	/*
-	similar conversions;
-	\operating_system\exception.h(43)
-	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
-	\include\string(603):
-	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
-	with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
-	[found using argument-dependent lookup];
-	while trying to match the argument list
-	'(std::ostringstream, std::string)'
-	*/
 							// now save the song
 							std::ostringstream filename;
 							filename << rootname;
 							filename << "-track "
 								<< std::setprecision(2) << (unsigned)i;
 							SaveWav(filename.str().c_str(),real_bits[bits],real_rate[rate],channelmode,isFloat);
-	/*
-	'std::ostringstream &operator <<(std::ostringstream &,const operating_system::exception &)'
-	'std::basic_ostream<_Elem,_Traits> &std::operator <<<char,std::char_traits<char>,std::allocator<_Ty>>(std::basic_ostream<_Elem,_Traits> &,const std::basic_string<_Elem,_Traits,_Ax> &)
-	with [_Elem=char,_Traits=std::char_traits<char>,_Ty=char,_Ax=std::allocator<char>]'
-	[found using argument-dependent lookup]; while trying to match the argument list
-	'(std::ostringstream, std::string)'
-	*/
 							return;
 						}
 					}
@@ -605,6 +587,12 @@ namespace psycle { namespace host {
 
 			theplayer.StartRecording(file,bits,rate,channelmode,isFloat,
 									m_dither.GetCheck()==BST_CHECKED && bits!=32, ditherpdf, noiseshape,&clipboardmem);
+
+			if (!theplayer._recording) {
+				//if startrecording fails, it calls stoprecording with an error that shows a message. Probably the correct place would
+				//be here, so that player doesn't have ui specific code.
+				return;
+			}
 
 			int tmp;
 			int cont;

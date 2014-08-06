@@ -193,6 +193,9 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		} else {
 			surr->SetCheck(false);
 		}
+		CButton* mute = (CButton*)GetDlgItem(dlgMute[index]);
+		mute->SetCheck(rChan.DefaultIsMute());
+
 		sld = (CSliderCtrl*)GetDlgItem(dlgPan[index]);
 		sld->SetPos(defpos);
 	}

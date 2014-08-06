@@ -9,6 +9,7 @@ namespace psycle { namespace host {
 
 /////////////////////////////////////////////////////////////////////////////
 // InstrumentEditorUI dialog
+class Machine;
 
 class InstrumentEditorUI : public CPropertySheet
 {
@@ -35,7 +36,7 @@ class InstrumentEditorUI : public CPropertySheet
 		void ShowSampler();
 		void ShowSampulse();
 		void UpdateUI(void);
-		BOOL PreTranslateChildMessage(MSG* pMsg, HWND focusWin);
+		BOOL PreTranslateChildMessage(MSG* pMsg, HWND focusWin, Machine* mac);
 
 	protected:
 		DECLARE_MESSAGE_MAP()

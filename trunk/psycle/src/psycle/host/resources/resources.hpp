@@ -959,6 +959,12 @@
 #define IDC_INSTR_SETSAMPLES_0          2160
 #define IDC_INSTR_SETSAMPLES_255        2415
 #define IDC_SAMPINST_CMB                2416
+#define IDC_VIRTINSTCMB                 2417
+#define IDC_LOCKINSTCMB                 2418
+#define IDC_COMBO2                      2419
+#define IDC_VIRTMACCOMBO                2419
+#define IDC_VIRTINST                    2420
+#define IDC_VIRTINSCOMBO                2421
 #define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1158,6 +1164,7 @@
 #define ID_CONNECTIONS_CONNECTION24     34431
 #define ID_WAVEED_LOAD                  34433
 #define ID_WAVEED_SAVE                  34434
+#define ID_POPUPMAC_OPENBANKMANAGER     34435
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1166,8 +1173,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         34435
-#define _APS_NEXT_CONTROL_VALUE         2417
+#define _APS_NEXT_COMMAND_VALUE         34436
+#define _APS_NEXT_CONTROL_VALUE         2422
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

@@ -229,7 +229,7 @@ DDCRET WaveFile::OpenForWrite(const char * Filename, uint32_t SamplingRate, uint
 DDCRET WaveFile::Close() {
 	DDCRET rc = DDC_SUCCESS;
 	if(fmode == RFM_WRITE) rc = Backpatch(pcm_data_offset, &pcm_data, sizeof pcm_data);
-	if(rc == DDC_SUCCESS) rc = ExtRiffFile::Close();
+	if(rc == DDC_SUCCESS && fmode != RFM_UNKNOWN) rc = ExtRiffFile::Close();
 	return rc;
 }
 

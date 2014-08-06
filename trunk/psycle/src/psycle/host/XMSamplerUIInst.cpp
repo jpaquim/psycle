@@ -6,17 +6,17 @@
  */
 #include <psycle/host/detail/project.private.hpp>
 #include "XMSamplerUIInst.hpp"
+#include "InstrumentEditorUI.hpp"
 
 #include "PsycleConfig.hpp"
+#include "MainFrm.hpp"
 
 #include "XMSongLoader.hpp"
 #include "ITModule2.h"
 
-#include "Player.hpp"
-#include "Song.hpp"
-#include "XMInstrument.hpp"
-#include "InstrumentEditorUI.hpp"
-#include "MainFrm.hpp"
+#include <psycle/host/Player.hpp>
+#include <psycle/host/Song.hpp>
+#include <psycle/host/XMInstrument.hpp>
 
 namespace psycle { namespace host {
 
@@ -62,10 +62,12 @@ END_MESSAGE_MAP()
 
 BOOL XMSamplerUIInst::PreTranslateMessage(MSG* pMsg) 
 {
+	Machine *tmac = Global::song().GetSampulseIfExists();
 	InstrumentEditorUI* parent = dynamic_cast<InstrumentEditorUI*>(GetParent());
-	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd());
+	BOOL res = parent->PreTranslateChildMessage(pMsg, GetFocus()->GetSafeHwnd(), tmac);
 	if (res == FALSE && (pMsg->message == WM_KEYDOWN || pMsg->message == WM_KEYUP)) {
 		DWORD dwID = GetFocus()->GetDlgCtrlID();
+		//Do not listen to A and F in instrument list, so that they can be used to play notes.
 		if (dwID == IDC_INSTRUMENTLIST && (pMsg->wParam == 'A' || pMsg->wParam == 'F')) {
 			res = TRUE;
 		}
@@ -340,6 +342,7 @@ void XMSamplerUIInst::OnBnClickedDeleteins()
 			}
 		}
 		inst.Init();
+		Global::song().DeleteVirtualOfInstrument(m_InstrumentList.GetCurSel(),true);
 		FillInstrumentList(-2);
 		SetInstrumentData(m_iCurrentSelected);
 	}

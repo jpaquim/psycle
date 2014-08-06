@@ -194,12 +194,6 @@ namespace psycle
 		}
 
 
-		int Song::FindBusFromIndex(int smac) const
-		{
-			if(!_pMachine[smac])  return 255;
-			return smac;
-		}
-
 		Song::Song()
 			:semaphore(2,2,NULL,NULL)
 		{
@@ -492,6 +486,7 @@ namespace psycle
 			if (samples.IsEnabled(i)){
 				samples.get(i).Init();
 			}
+			DeleteVirtualOfInstrument(i,false);
 		}
 
 		void Song::Reset()
@@ -500,6 +495,8 @@ namespace psycle
 			// Cleaning pattern allocation info
 			samples.Clear();
 			xminstruments.Clear();
+			virtualInst.clear();
+			virtualInstInv.clear();
 			for(int i(0) ; i < MAX_MACHINES ; ++i)
 			{
 				zapObject(_pMachine[i]);
@@ -752,6 +749,7 @@ namespace psycle
 			if(iMac)
 			{
 				iMac->DeleteWires();
+				DeleteVirtualsOfMachine(mac);
 				if(mac == machineSoloed) machineSoloed = -1;
 				// If it's a (Vst)Plugin, the destructor calls to release the underlying library
 				try
@@ -1010,6 +1008,130 @@ namespace psycle
 			for(int c(MAX_BUSES) ; c < MAX_BUSES * 2 ; ++c) if(!_pMachine[c]) return c;
 			return -1; 
 		}
+		Machine* Song::GetSamplerIfExists()
+		{
+			int inst=-1;
+			Machine *tmac = GetMachineOfBus(seqBus, inst);
+			if (tmac && tmac->_type != MACH_SAMPLER) {
+				tmac=NULL;
+				for (int i=0; i< MAX_BUSES; i++) {
+					Machine *tmac2 = _pMachine[i];
+					if (tmac2 != NULL && tmac2->_type == MACH_SAMPLER) {
+						tmac = tmac2;
+						break;
+					}
+				}
+			}
+			return tmac;
+		}
+		Machine* Song::GetSampulseIfExists()
+		{
+			int inst=-1;
+			Machine *tmac = GetMachineOfBus(seqBus, inst);
+			if (tmac && tmac->_type != MACH_XMSAMPLER) {
+				tmac=NULL;
+				for (int i=0; i< MAX_BUSES; i++) {
+					Machine *tmac2 = _pMachine[i];
+					if (tmac2 != NULL && tmac2->_type == MACH_XMSAMPLER) {
+						tmac = tmac2;
+						break;
+					}
+				}
+			}
+			return tmac;
+		}
+		Machine* Song::GetMachineOfBus(int bus, int& alternateinst) const
+		{
+			Machine * pmac = NULL;
+			alternateinst = -1;
+			if (bus < 0 ) { return NULL; }
+			else if (bus < MAX_MACHINES) {
+				pmac = _pMachine[bus];
+			}
+			else if (bus < MAX_VIRTUALINSTS){ 
+				macinstpair instpair = VirtualInstrument(bus);
+				if (instpair.first != -1) {
+					pmac = _pMachine[instpair.first];
+					alternateinst = instpair.second;
+				}
+			}
+			return pmac;
+		}
+
+		std::string Song::GetVirtualMachineName(Machine* mac, int alternateins) const
+		{
+			std::string result;
+			if (mac->_type == MACH_SAMPLER && samples.IsEnabled(alternateins)) {
+				result = samples[alternateins].WaveName();
+			}
+			else if (mac->_type == MACH_XMSAMPLER && xminstruments.IsEnabled(alternateins)) {
+				result = xminstruments[alternateins].Name();
+			}
+			return result;
+		}
+
+		void Song::SetVirtualInstrument(int virtidx, int macidx, int targetins) {
+			//If this virtual instrument was already mapped, remove the association
+			DeleteVirtualInstrument(virtidx);
+
+			int dummy=-1;
+			Machine * mac = GetMachineOfBus(macidx, dummy);
+			if (mac == NULL || (mac->_type != MACH_SAMPLER && mac->_type != MACH_XMSAMPLER)) {
+				return;
+			}
+			bool sampulse = (mac->_type == MACH_XMSAMPLER);
+
+			//check if this targetins was already associated with another virtidx
+			DeleteVirtualOfInstrument(targetins,sampulse);
+
+			virtualInst[virtidx]=macinstpair(macidx,targetins);
+			virtualInstInv[instsampulsepair(targetins,sampulse)]=virtidx;
+		}
+		void Song::DeleteVirtualInstrument(int virtidx)
+		{
+			std::map<int, macinstpair>::iterator it = virtualInst.find(virtidx);
+			if(it != virtualInst.end()) {
+				// Not checking the machine type directly to ensure correct behaviour even when the machine
+				// has been deleted.
+				int othervirt = VirtualInstrumentInverted(it->second.second,true);
+				if (virtidx == othervirt)  {
+					virtualInstInv.erase(instsampulsepair(it->second.second,true));
+				}
+				othervirt = VirtualInstrumentInverted(it->second.second,false);
+				if (virtidx == othervirt)  {
+					virtualInstInv.erase(instsampulsepair(it->second.second,false));
+				}
+				virtualInst.erase(it);
+			}
+		}
+		void Song::DeleteVirtualOfInstrument(int inst, bool sampulse)
+		{
+			std::map<instsampulsepair,int>::const_iterator it = virtualInstInv.find(instsampulsepair(inst,sampulse));
+			if(it != virtualInstInv.end()) {
+				virtualInst.erase(it->second);
+				virtualInstInv.erase(it);
+			}
+		}
+		void Song::DeleteVirtualsOfMachine(int macidx)
+		{
+			for (std::map<int, macinstpair>::const_iterator it = virtualInst.begin(); it != virtualInst.end() ; )
+			{
+				if (it->second.first == macidx) {
+					int othervirt = VirtualInstrumentInverted(it->second.second,true);
+					if (it->first == othervirt)  {
+						virtualInstInv.erase(instsampulsepair(it->second.second,true));
+					}
+					othervirt = VirtualInstrumentInverted(it->second.second,false);
+					if (it->first == othervirt)  {
+						virtualInstInv.erase(instsampulsepair(it->second.second,false));
+					}
+					virtualInst.erase(it++);
+				}
+				else {
+					++it;
+				}
+			}
+		}
 
 		void Song::SetWavPreview(XMInstrument::WaveData<> * wave) {
 			CExclusiveLock lock(&semaphore, 2, true);
@@ -1110,11 +1232,17 @@ namespace psycle
 				if (volEnv.size() > 1) {
 					// Adapting the point based volume envelope, to the ADSR based one in sampler instrument.
 					float max=0.f, last=1.f;
-					int maxpos=0, runpos=0;
+					int maxpos=0, runpos=0, tmp=0;
 					for (std::list<helpers::EGPoint>::const_iterator ite = volEnv.begin(); ite != volEnv.end(); ++ite) {
 						if (ite->duration.signedValue() == -1) { //Sustain point.
-							_pInstrument[sampleIdx]->ENV_AT = maxpos*44.1f;
-							_pInstrument[sampleIdx]->ENV_DT = (runpos-maxpos)*44.1f;
+							//Truncate to 220 samples boundaries, and ensure it is not zero.
+							tmp = (runpos*44.1f);
+							tmp = (tmp/220)*220; if (tmp <=0) tmp=1; 
+							_pInstrument[sampleIdx]->ENV_AT = tmp;
+							//Truncate to 220 samples boundaries, and ensure it is not zero.
+							tmp = (runpos-maxpos)*44.1f;
+							tmp = (tmp/220)*220; if (tmp <=0) tmp=1; 
+							_pInstrument[sampleIdx]->ENV_DT = tmp;
 							_pInstrument[sampleIdx]->ENV_SL = last*100;
 							maxpos=-1;
 							runpos=0;
@@ -1128,7 +1256,10 @@ namespace psycle
 							runpos += ite->duration.unsignedValue();
 						}
 					}
-					_pInstrument[sampleIdx]->ENV_RT=runpos*44.1f;
+					//Truncate to 220 samples boundaries, and ensure it is not zero.
+					tmp = (runpos*44.1f);
+					tmp = (tmp/220)*220; if (tmp <=0) tmp=1; 
+					_pInstrument[sampleIdx]->ENV_RT=tmp;
 				}
 				int16_t * csamples = const_cast<int16_t*>(wave.pWaveDataL());
 				if (file.stereo()) {
@@ -1241,7 +1372,7 @@ namespace psycle
 		bool Song::Load(RiffFile* pFile, CProgressDialog& progress, bool fullopen)
 		{
 			CExclusiveLock lock(&semaphore, 2, true);
-			char Header[9];
+			char Header[16]; // 9 is enough, but using 16 to better align the code
 			pFile->Read(&Header, 8);
 			Header[8]=0;
 
@@ -1264,15 +1395,13 @@ namespace psycle
 					MessageBox(0,"This file is from a newer version of Psycle! This process will try to load it anyway.", "Load Warning", MB_OK | MB_ICONERROR);
 #endif //!defined WINAMP_PLUGIN
 				}
+				std::string trackername;
+				std::string trackervers;
 				pFile->Read(&chunkcount,sizeof(chunkcount));
-				int bytesread = 4;
-				if (size > 4) 
-				{
-					// This is left here if someday, extra data is added to the file version chunk.
-					// update "bytesread" accordingly.
-
-					//file->Read(chunkversion);
-					//if((chunkversion&0xFF00) ) == x) {} else if(...) {}
+				if (version >= 8) {
+					pFile->ReadString(trackername);
+					pFile->ReadString(trackervers);
+					int bytesread = 4 + trackername.length()+trackervers.length()+2;
 					pFile->Skip(size - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
 				}
 
@@ -1291,7 +1420,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 						{
 							char name_[129]; char author_[65]; char comments_[65536];
 							pFile->ReadString(name_, sizeof name_);
@@ -1313,7 +1442,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 						{
 							// why all these temps?  to make sure if someone changes the defs of
 							// any of these members, the rest of the file reads ok.  assume 
@@ -1363,11 +1492,11 @@ namespace psycle
 							}
 							m_TicksPerBeat=24;
 							m_ExtraTicksPerLine=0;
-							// fix for a bug existing in the song saver in the 1.7.x series
 							if(version == 0) {
+								// fix for a bug existing in the song saver in the 1.7.x series
 								size = (11 * sizeof(uint32_t)) + (SONGTRACKS * 2 * sizeof(bool));
 							}
-							else if(version > 0) {
+							if(version >= 1) {
 								pFile->Read(shareTrackNames);
 								if( shareTrackNames) {
 									for(int t(0); t < SONGTRACKS; t++) {
@@ -1376,12 +1505,12 @@ namespace psycle
 										ChangeTrackName(0,t,name);
 									}
 								}
-								if (version > 1) {
-									pFile->Read(&temp, sizeof temp);
-									m_TicksPerBeat = temp;
-									pFile->Read(&temp, sizeof temp);
-									m_ExtraTicksPerLine = temp;
-								}
+							}
+							if (version >= 2) {
+								pFile->Read(&temp, sizeof temp);
+								m_TicksPerBeat = temp;
+								pFile->Read(&temp, sizeof temp);
+								m_ExtraTicksPerLine = temp;
 							}
 							if (fullopen)
 							{
@@ -1399,7 +1528,7 @@ namespace psycle
 						pFile->Read(&version,sizeof version);
 						pFile->Read(&size,sizeof size);
 						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 						{
 							// index, for multipattern - for now always 0
 							pFile->Read(&index, sizeof index);
@@ -1426,7 +1555,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 						{
 							// index
 							pFile->Read(&index, sizeof index);
@@ -1475,7 +1604,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 						{
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_MACHINES)
@@ -1503,7 +1632,7 @@ namespace psycle
 						pFile->Read(&version, sizeof version);
 						pFile->Read(&size, sizeof size);
 						size_t begins = pFile->GetPos();
-						if((version&0xFF00) == VERSION_MAJOR_ZERO)
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 						{
 							pFile->Read(&index, sizeof index);
 							if(index < MAX_INSTRUMENTS)
@@ -1513,31 +1642,50 @@ namespace psycle
 						}
 						pFile->Seek(begins + size);
 					}
-					else if(std::strcmp(Header,"EINS") == 0)
-					{
+					else if(std::strcmp(Header,"EINS") == 0) 
+					{ // Legacy for sampulse previous to Psycle 1.12
 						--chunkcount;
-						pFile->Read(&version, sizeof version);
-						pFile->Read(&size, sizeof size);
+						pFile->Read(version);
+						pFile->Read(size);
 						size_t begins = pFile->GetPos();
 						size_t filepos=pFile->GetPos();
-						//Version zero was the development version (no format freeze). Version one is the published one.
-						if((version&0xFFFF0000) == XMSampler::VERSION_ONE)
+						//Version zero was the development version (1.7 alphas, psycle-core). Version one is the published one (1.8.5 onwards).
+						if((version&0xFFFF0000) == VERSION_MAJOR_ONE)
 						{
+							char temp[8];
+							uint32_t lowversion = (version&0xFFFF); // lowversion 0 is 1.8.5, lowversion 1 is 1.8.6
 							// Instrument Data Load
 							uint32_t numInstruments;
 							pFile->Read(numInstruments);
 							int idx;
 							for(uint32_t  i = 0;i < numInstruments && filepos < begins+size;i++)
 							{
+								uint32_t sizeINST=0;
+
 								pFile->Read(idx);
+								pFile->Read(temp,4); temp[4]='\0';
+								pFile->Read(sizeINST);
 								filepos=pFile->GetPos();
-								XMInstrument inst;
-								int sizeIns = inst.Load(*pFile);
-								xminstruments.SetInst(inst,idx);
-								if ((version&0xFFFF) > 0) {
+								if (strcmp(temp,"INST")== 0) {
+									uint32_t versionINST;
+									pFile->Read(versionINST);
+									if (versionINST == 1) {
+										bool legacyenabled;
+										pFile->Read(legacyenabled);
+									}
+									else {
+										//versionINST 0 was not stored, so seek back.
+										pFile->Seek(filepos);
+										versionINST = 0;
+									}
+									XMInstrument inst;
+									inst.Load(*pFile, versionINST, true, lowversion);
+									xminstruments.SetInst(inst,idx);
+								}
+								if (lowversion > 0) {
 									//Version 0 doesn't write the chunk size correctly
 									//so we cannot correct it in case of error
-									pFile->Seek(filepos+sizeIns);
+									pFile->Seek(filepos+sizeINST);
 									filepos=pFile->GetPos();
 								}
 							}
@@ -1545,17 +1693,99 @@ namespace psycle
 							pFile->Read(numSamples);
 							for(uint32_t  i = 0;i < numSamples && filepos < begins+size;i++)
 							{
+								char temp[8];
+								uint32_t versionSMPD;
+								uint32_t sizeSMPD=0;
+
 								pFile->Read(idx);
+								pFile->Read(temp,4); temp[4]='\0';
+								pFile->Read(sizeSMPD);
 								filepos=pFile->GetPos();
-								XMInstrument::WaveData<> wave;
-								int sizeSamp = wave.Load(*pFile);
-								samples.SetSample(wave, idx);
-								if ((version&0xFFFF) > 0) {
+								if (strcmp(temp,"SMPD")== 0)
+								{
+									pFile->Read(versionSMPD);
+									//versionSMPD 0 was not stored, so seek back.
+									if (versionSMPD != 1) {
+										pFile->Seek(filepos);
+										versionSMPD = 0;
+									}
+									XMInstrument::WaveData<> wave;
+									wave.Load(*pFile, versionSMPD, true);
+									samples.SetSample(wave, idx);
+								}
+								if (lowversion > 0) {
 									//Version 0 doesn't write the chunk size correctly
 									//so we cannot correct it in case of error
-									pFile->Seek(filepos+sizeSamp);
+									pFile->Seek(filepos+sizeSMPD);
 									filepos=pFile->GetPos();
 								}
+							}
+						}
+						pFile->Seek(begins+size);
+					}
+					else if(std::strcmp(Header,"SMID") == 0)
+					{
+						--chunkcount;
+						pFile->Read(version);
+						pFile->Read(size);
+						size_t begins = pFile->GetPos();
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
+						{
+							uint32_t instidx;
+							pFile->Read(instidx);
+							if (instidx < XMInstrument::MAX_INSTRUMENT) {
+								if ( !xminstruments.Exists(instidx) ) {
+									XMInstrument instrtmp;
+									xminstruments.SetInst(instrtmp,instidx);
+								}
+								XMInstrument& instr = xminstruments.get(instidx);
+								instr.Init();
+								instr.Load(*pFile, version&0xFFFF);
+							}
+						}
+						pFile->Seek(begins+size);
+					}
+					else if(std::strcmp(Header,"SMSB") == 0)
+					{
+						--chunkcount;
+						pFile->Read(version);
+						pFile->Read(size);
+						size_t begins = pFile->GetPos();
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
+						{
+							uint32_t sampleidx;
+							pFile->Read(sampleidx);
+							if (sampleidx < XMInstrument::MAX_INSTRUMENT) {
+								if ( !samples.Exists(sampleidx) ) {
+									XMInstrument::WaveData<> wavetmp;
+									samples.SetSample(wavetmp,sampleidx);
+								}
+								XMInstrument::WaveData<> & wave = samples.get(sampleidx);
+								wave.Init();
+								wave.Load(*pFile, version&0xFFFF);
+							}
+						}
+						pFile->Seek(begins+size);
+					}
+					else if(std::strcmp(Header,"VIRG") == 0)
+					{
+						--chunkcount;
+						pFile->Read(&version, sizeof version);
+						pFile->Read(&size, sizeof size);
+						size_t begins = pFile->GetPos();
+						if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
+						{
+							int virtual_inst;
+							int mac_idx;
+							int inst_idx;
+							pFile->Read(virtual_inst);
+							pFile->Read(mac_idx);
+							pFile->Read(inst_idx);
+							Machine* mac = (mac_idx < MAX_BUSES) ? _pMachine[mac_idx] : NULL;
+							if (virtual_inst >= MAX_MACHINES && virtual_inst < MAX_VIRTUALINSTS
+								&& mac != NULL && (mac->_type == MACH_SAMPLER ||mac->_type == MACH_XMSAMPLER))
+							{
+								SetVirtualInstrument(virtual_inst,mac_idx,inst_idx);
 							}
 						}
 						pFile->Seek(begins+size);
@@ -1568,6 +1798,7 @@ namespace psycle
 						pFile->Seek(pFile->GetPos()-3);
 					}
 				}
+
 				// now that we have loaded all the modules, time to prepare them.
 				progress.m_Progress.SetPos(16384);
 				::Sleep(1);
@@ -1672,35 +1903,60 @@ namespace psycle
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_AT, sizeof(_pInstrument[0]->ENV_AT));
+					int tmp;
+					pFile->Read(tmp);
+					//Truncate to 220 samples boundaries, and ensure it is not zero.
+					tmp = (tmp/220)*220; if (tmp <=0) tmp=1;
+					_pInstrument[i]->ENV_AT = tmp;
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_DT, sizeof(_pInstrument[0]->ENV_DT));
+					int tmp;
+					pFile->Read(tmp);
+					//Truncate to 220 samples boundaries, and ensure it is not zero.
+					tmp = (tmp/220)*220; if (tmp <=0) tmp=1;
+					_pInstrument[i]->ENV_DT = tmp;
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_SL, sizeof(_pInstrument[0]->ENV_SL));
+					pFile->Read(_pInstrument[i]->ENV_SL);
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_RT, sizeof(_pInstrument[0]->ENV_RT));
+					int tmp;
+					pFile->Read(tmp);
+					//Truncate to 220 samples boundaries, and ensure it is not zero. (also change default value)
+					if (tmp == 16) tmp = 220;
+					else { tmp = (tmp/220)*220; if (tmp <=0) tmp=1; }
+					_pInstrument[i]->ENV_RT = tmp;
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_AT, sizeof(_pInstrument[0]->ENV_F_AT));
+					int tmp;
+					pFile->Read(tmp);
+					//Truncate to 220 samples boundaries, and ensure it is not zero.
+					tmp = (tmp/220)*220; if (tmp <=0) tmp=1;
+					_pInstrument[i]->ENV_F_AT = tmp;
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_DT, sizeof(_pInstrument[0]->ENV_F_DT));
+					int tmp;
+					pFile->Read(tmp);
+					//Truncate to 220 samples boundaries, and ensure it is not zero.
+					tmp = (tmp/220)*220; if (tmp <=0) tmp=1;
+					_pInstrument[i]->ENV_F_DT = tmp;
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_SL, sizeof(_pInstrument[0]->ENV_F_SL));
+					pFile->Read(_pInstrument[i]->ENV_F_SL);
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
-					pFile->Read(&_pInstrument[i]->ENV_F_RT, sizeof(_pInstrument[0]->ENV_F_RT));
+					int tmp;
+					pFile->Read(tmp);
+					//Truncate to 220 samples boundaries, and ensure it is not zero.
+					tmp = (tmp/220)*220; if (tmp <=0) tmp=1;
+					_pInstrument[i]->ENV_F_RT = tmp;
 				}
 				for (int i=0; i<OLD_MAX_INSTRUMENTS; i++)
 				{
@@ -2130,8 +2386,7 @@ namespace psycle
 								MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
 							}
 						}
-						else if (( pMac[i]->_type == MACH_VST ) || 
-							( pMac[i]->_type == MACH_VSTFX))
+						else if (( pMac[i]->_type == MACH_VST ) || ( pMac[i]->_type == MACH_VSTFX))
 						{
 							bool chunkread = false;
 							try
@@ -2271,9 +2526,8 @@ namespace psycle
 			// this is much more flexible, making maintenance a breeze compared to that old hell.
 			// now you can just update one module without breaking the whole thing.
 
-			// header, this has to be at the top of the file
-
-			int chunkcount = 3; // 3 chunks plus:
+			int chunkcount = 3; // 3 chunks (INFO, SNGI, SEQD. SONG is not counted as a chunk) plus:
+			//PATD
 			for (int i = 0; i < MAX_PATTERNS; i++)
 			{
 				// check every pattern for validity
@@ -2282,7 +2536,7 @@ namespace psycle
 					chunkcount++;
 				}
 			}
-
+			//MACD
 			for (int i = 0; i < MAX_MACHINES; i++)
 			{
 				// check every pattern for validity
@@ -2291,24 +2545,30 @@ namespace psycle
 					chunkcount++;
 				}
 			}
-
+			//INSD
+			uint32_t numSamples = 0;	
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
 				if (samples.IsEnabled(i))
 				{
+					numSamples++;
+				}
+			}
+			chunkcount+=numSamples;
+			// SMID
+			for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
+				if(xminstruments.IsEnabled(i)){
 					chunkcount++;
 				}
 			}
-			// Instrument Data Save
-			uint32_t numInstruments = 0;	
-			for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-				if(xminstruments.IsEnabled(i)){
-					numInstruments++;
+			// SMSB
+			chunkcount+=numSamples;
+			// VIRG
+			for (int i=MAX_MACHINES; i < MAX_VIRTUALINSTS; i++) {
+				macinstpair instpair = VirtualInstrument(i);
+				if (instpair.first != -1) {
+					chunkcount++;
 				}
-			}
-			if (numInstruments >0)
-			{
-				chunkcount++;
 			}
 
 			if ( !autosave ) 
@@ -2317,24 +2577,25 @@ namespace psycle
 				progress.m_Progress.SetStep(1);
 			}
 
+			//Used to keep the correct data size on the fields.
+			UINT index = 0;
+			int temp;
+
 			/*
 			===================
 			FILE HEADER
 			===================
-			id = "PSY3SONG"; // PSY2 was 1.66
+			id = "PSY3SONG"; // PSY2 was 0.96 to 1.7.2
 			*/
+			pFile->Write("PSY3",4);
+			std::size_t pos = pFile->WriteHeader("SONG", CURRENT_FILE_VERSION);
 
-			pFile->Write("PSY3SONG", 8);
+			pFile->Write(chunkcount);
+			pFile->WriteString(PSYCLE__TITLE);
+			pFile->WriteString(PSYCLE__VERSION);
 
-			UINT version = CURRENT_FILE_VERSION;
-			UINT size = sizeof(chunkcount);
-			UINT index = 0;
-			int temp;
-
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
-			pFile->Write(&chunkcount,sizeof(chunkcount));
-
+			pFile->UpdateSize(pos);
+						
 			if ( !autosave ) 
 			{
 				progress.m_Progress.StepIt();
@@ -2349,17 +2610,13 @@ namespace psycle
 			===================
 			id = "INFO"; 
 			*/
+			std::size_t sizepos = pFile->WriteHeader("INFO", CURRENT_FILE_VERSION_INFO);
 
-			pFile->Write("INFO",4);
-			version = CURRENT_FILE_VERSION_INFO;
-			size = (UINT)(name.length() + author.length() + comments.length() + 3); // +3 for \0
+			pFile->WriteString(name);
+			pFile->WriteString(author);
+			pFile->WriteString(comments);
 
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
-
-			pFile->Write(name.c_str(),name.length()+1);
-			pFile->Write(author.c_str(),author.length()+1);
-			pFile->Write(comments.c_str(),comments.length()+1);
+			pFile->UpdateSize(sizepos);
 
 			if ( !autosave ) 
 			{
@@ -2373,49 +2630,38 @@ namespace psycle
 			===================
 			id = "SNGI"; 
 			*/
-
-			pFile->Write("SNGI",4);
-			version = CURRENT_FILE_VERSION_SNGI;
-			size = (13*sizeof(temp)) + (SONGTRACKS*(sizeof(_trackMuted[0])+sizeof(_trackArmed[0])))
-				+ sizeof(bool); 
-			if( shareTrackNames) {
-				for(int t(0); t < SONGTRACKS; t++) {
-					size+=_trackNames[0][t].length()+1; // +1 because of the \0 terminator.
-				}
-			}
-			pFile->Write(&version,sizeof(version));
-			pFile->Write(&size,sizeof(size));
+			sizepos = pFile->WriteHeader("SNGI",CURRENT_FILE_VERSION_SNGI);
 
 			temp = SONGTRACKS;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = m_BeatsPerMin;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = m_LinesPerBeat;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = currentOctave;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = machineSoloed;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = _trackSoloed;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 
 			temp = seqBus;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 
 			temp = paramSelected;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = auxcolSelected;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = instSelected;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 
 			temp = 1; // sequence width
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 
 			for (int i = 0; i < SONGTRACKS; i++)
 			{
-				pFile->Write(&_trackMuted[i],sizeof(_trackMuted[i]));
-				pFile->Write(&_trackArmed[i],sizeof(_trackArmed[i])); // remember to count them
+				pFile->Write(&_trackMuted[i],sizeof(bool));
+				pFile->Write(&_trackArmed[i],sizeof(bool)); // remember to count them
 			}
 
 			pFile->Write(shareTrackNames);
@@ -2426,10 +2672,11 @@ namespace psycle
 			}
 			
 			temp = m_TicksPerBeat;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 			temp = m_ExtraTicksPerLine;
-			pFile->Write(&temp,sizeof(temp));
+			pFile->Write(temp);
 
+			pFile->UpdateSize(sizepos);
 
 			if ( !autosave ) 
 			{
@@ -2443,28 +2690,24 @@ namespace psycle
 			===================
 			id = "SEQD"; 
 			*/
-			index = 0; // index
 			for (index=0;index<MAX_SEQUENCES;index++)
 			{
-				char* pSequenceName = "seq0\0"; // This needs to be replaced when converting to Multisequence.
+				std::string sequenceName = "seq0"; // This needs to be replaced when converting to Multisequence.
 
-				pFile->Write("SEQD",4);
-				version = CURRENT_FILE_VERSION_SEQD;
-				size = (UINT)(((playLength+2)*sizeof(temp))+strlen(pSequenceName)+1);
-				pFile->Write(&version,sizeof(version));
-				pFile->Write(&size,sizeof(size));
+				sizepos = pFile->WriteHeader("SEQD", CURRENT_FILE_VERSION_SEQD);
 				
-				pFile->Write(&index,sizeof(index)); // Sequence Track number
+				pFile->Write(index); // Sequence Track number
 				temp = playLength;
-				pFile->Write(&temp,sizeof(temp)); // Sequence length
+				pFile->Write(temp); // Sequence length
 
-				pFile->Write(pSequenceName,strlen(pSequenceName)+1); // Sequence Name
+				pFile->WriteString(sequenceName); // Sequence Name
 
 				for (int i = 0; i < playLength; i++)
 				{
 					temp = playOrder[i];
-					pFile->Write(&temp,sizeof(temp));	// Sequence data.
+					pFile->Write(temp);	// Sequence data.
 				}
+				pFile->UpdateSize(sizepos);
 			}
 			if ( !autosave ) 
 			{
@@ -2498,36 +2741,29 @@ namespace psycle
 					int sizez77 = DataCompression::BEERZ77Comp2(pSource, &pCopy, SONGTRACKS*patternLines[i]*EVENT_SIZE);
 					zapArray(pSource);
 
-					pFile->Write("PATD",4);
-					version = CURRENT_FILE_VERSION_PATD;
-
-					pFile->Write(&version,sizeof(version));
-					size = (UINT)(sizez77+(4*sizeof(int))+strlen(patternName[i])+1);
-					if( !shareTrackNames) {
-						for(int t(0); t < SONGTRACKS; t++) {
-							size+=_trackNames[index][t].length()+1; // +1 because of the \0 terminator.
-						}
-					}
-					pFile->Write(&size,sizeof(size));
+					sizepos = pFile->WriteHeader("PATD", CURRENT_FILE_VERSION_PATD);
 
 					index = i; // index
-					pFile->Write(&index,sizeof(index));
+					pFile->Write(index);
 					temp = patternLines[i];
-					pFile->Write(&temp,sizeof(temp));
+					pFile->Write(temp);
 					temp = SONGTRACKS; // eventually this may be variable per pattern
-					pFile->Write(&temp,sizeof(temp));
+					pFile->Write(temp);
 
-					pFile->Write(&patternName[i],strlen(patternName[i])+1);
+					pFile->WriteString(patternName[i]);
 
-					pFile->Write(&sizez77,sizeof(sizez77));
+					pFile->Write(sizez77);
 					pFile->Write(pCopy,sizez77);
 					zapArray(pCopy);
 					
 					if( !shareTrackNames) {
 						for(int t(0); t < SONGTRACKS; t++) {
-							pFile->WriteString(_trackNames[index][t]);
+							pFile->WriteString(_trackNames[i][t]);
 						}
 					}
+
+					pFile->UpdateSize(sizepos);
+
 					if ( !autosave ) 
 					{
 						progress.m_Progress.StepIt();
@@ -2547,23 +2783,14 @@ namespace psycle
 			{
 				if (_pMachine[i])
 				{
-					pFile->Write("MACD",4);
-					version = CURRENT_FILE_VERSION_MACD;
-					pFile->Write(&version,sizeof(version));
-					size_t pos = pFile->GetPos();
-					size = 0;
-					pFile->Write(&size,sizeof(size));
+					sizepos = pFile->WriteHeader("MACD", CURRENT_FILE_VERSION_MACD);
 
 					index = i; // index
-					pFile->Write(&index,sizeof(index));
+					pFile->Write(index);
 
 					_pMachine[i]->SaveFileChunk(pFile);
-
-					size_t pos2 = pFile->GetPos(); 
-					size = (UINT)(pos2-pos-sizeof(size));
-					pFile->Seek(pos);
-					pFile->Write(&size,sizeof(size));
-					pFile->Seek(pos2);
+					
+					pFile->UpdateSize(sizepos);
 
 					if ( !autosave ) 
 					{
@@ -2578,28 +2805,17 @@ namespace psycle
 			===================
 			id = "INSD"; 
 			*/
-			///When not saving extended instruments (EINS), allow the samples to be saved in INSD. Else, they will be saved in EINS.
-			bool saveEINS = (numInstruments > 0);
 			for (int i = 0; i < MAX_INSTRUMENTS; i++)
 			{
 				if (samples.IsEnabled(i))
 				{
-					pFile->Write("INSD",4);
-					version = CURRENT_FILE_VERSION_INSD;
-					pFile->Write(&version,sizeof(version));
-					size_t pos = pFile->GetPos();
-					size = 0;
-					pFile->Write(&size,sizeof(size));
+					sizepos = pFile->WriteHeader("INSD",CURRENT_FILE_VERSION_INSD);
 
 					index = i; // index
-					pFile->Write(&index,sizeof(index));
-					_pInstrument[i]->SaveFileChunk(pFile, samples, i, !saveEINS);
+					pFile->Write(index);
+					_pInstrument[i]->SaveFileChunk(pFile);
 
-					size_t pos2 = pFile->GetPos(); 
-					size = (UINT)(pos2-pos-sizeof(size));
-					pFile->Seek(pos);
-					pFile->Write(&size,sizeof(size));
-					pFile->Seek(pos2);
+					pFile->UpdateSize(sizepos);
 
 					if ( !autosave ) 
 					{
@@ -2610,52 +2826,68 @@ namespace psycle
 			}
 
 			/*
-			===================================
-			Extended Instrument DATA (Sampulse)
-			===================================
-			id = "EINS"; 
+			===================
+			Sampulse Instrument data
+			===================
+			id = "SMID"; 
 			*/
+			for (int i=0; i < XMInstrument::MAX_INSTRUMENT; i++) {
+				if (xminstruments.IsEnabled(i)) {
+					sizepos = pFile->WriteHeader("SMID", CURRENT_FILE_VERSION_SMID);
 
-			// Instrument Data Save
-			if (saveEINS)
-			{
-				pFile->Write("EINS",4);
-				version = XMSampler::VERSION;
-				pFile->Write(&version,sizeof(version));
-				size_t pos = pFile->GetPos();
-				size = 0;
-				pFile->Write(&size,sizeof(size));
-
-				pFile->Write(numInstruments);
-
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(xminstruments.IsEnabled(i)){
-						pFile->Write(i);
-						xminstruments[i].Save(*pFile);
+					index = i; // index
+					pFile->Write(index);
+					xminstruments[i].Save(*pFile, CURRENT_FILE_VERSION_SMID);
+					
+					pFile->UpdateSize(sizepos);
+					if ( !autosave ) 
+					{
+						progress.m_Progress.StepIt();
+						::Sleep(1);
 					}
 				}
+			}
+			/*
+			===================
+			Sampulse Instrument data
+			===================
+			id = "SMSB"; 
+			*/
+			for (int i=0; i < XMInstrument::MAX_INSTRUMENT; i++) {
+				if (samples.IsEnabled(i)) {
+					sizepos = pFile->WriteHeader("SMSB",CURRENT_FILE_VERSION_SMSB);
 
-				// Sample Data Save
-				uint32_t numSamples = 0;
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(samples.IsEnabled(i)){
-						numSamples++;
+					index = i; // index
+					pFile->Write(index);
+					samples[i].Save(*pFile);
+
+					pFile->UpdateSize(sizepos);
+					if ( !autosave ) 
+					{
+						progress.m_Progress.StepIt();
+						::Sleep(1);
 					}
 				}
+			}
 
-				pFile->Write(numSamples);
+			/*
+			===================
+			Virtual Instrument (Generator)
+			===================
+			id = "VIRG"; 
+			*/
+			for (int i=MAX_MACHINES; i < MAX_VIRTUALINSTS; i++) {
+				macinstpair instpair = VirtualInstrument(i);
+				if (instpair.first != -1) {
+					sizepos = pFile->WriteHeader("VIRG",CURRENT_FILE_VERSION_VIRG);
 
-				for(int i = 0;i < XMInstrument::MAX_INSTRUMENT;i++){
-					if(samples.IsEnabled(i)){
-						pFile->Write(i);
-						samples[i].Save(*pFile);
-					}
+					index = i; // index
+					pFile->Write(index);
+					pFile->Write(instpair.first);
+					pFile->Write(instpair.second);
+
+					pFile->UpdateSize(sizepos);
 				}
-				size_t pos2 = pFile->GetPos(); 
-				size = (UINT)(pos2-pos-sizeof(size));
-				pFile->Seek(pos);
-				pFile->Write(&size,sizeof(size));
-				pFile->Seek(pos2);
 			}
 
 
@@ -2914,29 +3146,25 @@ namespace psycle
 			CString filepath = PsycleGlobal::conf().GetAbsoluteSongDir().c_str();
 			filepath += "\\psycle.tmp";
 			::DeleteFile(filepath);
-			OldPsyFile file;
+			RiffFile file;
 			if (!file.Create(static_cast<LPCTSTR>(filepath), true))
 			{
 				return false;
 			}
 
-			file.Write("INSD",4);
-			UINT version = CURRENT_FILE_VERSION_INSD;
-			file.Write(&version,sizeof(version));
-			size_t pos = file.GetPos();
-			UINT size = 0;
-			file.Write(&size,sizeof(size));
+			size_t pos = file.WriteHeader("INSD",CURRENT_FILE_VERSION_INSD);
+			uint32_t dummyindex = dst; // index
+			file.Write(dummyindex);
+			_pInstrument[src]->SaveFileChunk(&file);
+			file.UpdateSize(pos);
 
-			int index = dst; // index
-			file.Write(&index,sizeof(index));
+			if (samples.IsEnabled(src)) {
+				pos = file.WriteHeader("SMSB",CURRENT_FILE_VERSION_SMSB);
+				file.Write(dummyindex);
+				samples.get(src).Save(file);
 
-			_pInstrument[src]->SaveFileChunk(&file, samples, src, true);
-
-			size_t pos2 = file.GetPos(); 
-			size = (UINT)(pos2-pos-sizeof(size));
-			file.Seek(pos);
-			file.Write(&size,sizeof(size));
-
+				file.UpdateSize(pos);
+			}
 			file.Close();
 
 			// now load it
@@ -2945,6 +3173,8 @@ namespace psycle
 			if (file.Open(static_cast<LPCTSTR>(filepath)))
 			{
 				char Header[5];
+				uint32_t version=0;
+				uint32_t size;
 				file.Read(&Header, 4);
 				Header[4] = 0;
 				if (strcmp(Header,"INSD")==0)
@@ -2953,14 +3183,30 @@ namespace psycle
 					file.Read(&size,sizeof(size));
 					if (version <= CURRENT_FILE_VERSION_INSD)
 					{
-						file.Read(&index,sizeof(index));
-						index = dst;
-						if (index < MAX_INSTRUMENTS)
-						{
-							// we had better load it
-							_pInstrument[index]->LoadFileChunk(&file,version, samples, index);
-							result=true;
+						file.Read(dummyindex);
+						// we had better load it
+						_pInstrument[dst]->LoadFileChunk(&file,version, samples, dst);
+						if (!file.Eof()) {
+							file.Read(&Header, 4);
+							Header[4] = 0;
+							if (strcmp(Header,"SMSB")==0)
+							{
+								file.Read(&version,sizeof(version));
+								file.Read(&size,sizeof(size));
+								if (version <= CURRENT_FILE_VERSION_SMSB)
+								{
+									file.Read(dummyindex);
+									if ( !samples.Exists(dst) ) {
+										XMInstrument::WaveData<> wavetmp;
+										samples.SetSample(wavetmp,dst);
+									}
+									XMInstrument::WaveData<> & wave = samples.get(dst);
+									wave.Init();
+									wave.Load(file, version&0xFFFF);
+								}
+							}
 						}
+						result=true;
 					}
 				}
 				file.Close();
@@ -2980,10 +3226,11 @@ namespace psycle
 			std::list<int> indexlist;
 			const unsigned char n255 = 255u;
 			unsigned char i=0;
-			for (std::set<int>::const_iterator ite = sampidxs.begin(); ite != sampidxs.end(); ++ite, ++i) {
+			for (std::set<int>::const_iterator ite = sampidxs.begin(); ite != sampidxs.end(); ++ite) {
 				if (samples.IsEnabled(*ite)) {
 					sampMap[static_cast<unsigned char>(*ite)] = i;
 					indexlist.push_back(*ite);
+					i++;
 				}
 				else { sampMap[*ite]= n255; }
 			}
@@ -2992,53 +3239,107 @@ namespace psycle
 			RiffFile file;
 			file.Create(filename,true);
 			file.Write("PSYI",4);
-			file.Write("EINS",4);
-			size_t pos = file.GetPos();
-			uint32_t size = 0;
-			file.Write(size);
-			//Always 1. The song saver uses the same structure.
-			uint32_t numberof=1;
-			file.Write(numberof);//instruments
-			instr.Save(file, &sampMap);
-			numberof=static_cast<uint32_t>(indexlist.size());
-			file.Write(numberof);//samples
-			for (std::list<int>::const_iterator ite = indexlist.begin(); ite != indexlist.end(); ++ite) {
+			size_t pos = file.WriteHeader("SMID", CURRENT_FILE_VERSION_SMID);
+
+			uint32_t index = 0; // index
+			file.Write(index);
+			instr.Save(file, &sampMap, CURRENT_FILE_VERSION_SMID);
+
+			file.UpdateSize(pos);
+			for (std::list<int>::const_iterator ite = indexlist.begin(); ite != indexlist.end(); ++ite, index++) {
+				size_t pos = file.WriteHeader("SMSB",CURRENT_FILE_VERSION_SMSB);
+
+				file.Write(index);
 				samples[*ite].Save(file);
+
+				file.UpdateSize(pos);
 			}
-			size_t pos2 = file.GetPos(); 
-			size = (UINT)(pos2-pos-sizeof(size));
-			file.Seek(pos);
-			file.Write(&size,sizeof(size));
 			file.Close();
 		}
 		void Song::LoadPsyInstrument(const std::string& filename, int instIdx)
 		{
+			char id[5];
+			uint32_t size;
+			uint32_t version;
+			RiffFile file;
+
 			std::map<int, int> sampMap;
 			if ( !xminstruments.Exists(instIdx) ) {
 				XMInstrument instr;
 				xminstruments.SetInst(instr,instIdx);
 			}
 			XMInstrument& instr = xminstruments.get(instIdx);
+			instr.Init();
+			DeleteVirtualOfInstrument(instIdx,true);
 
-			RiffFile file;
 			file.Open(filename);
-			if (!file.Expect("PSYI",4)) return;
-			if (!file.Expect("EINS",4)) return;
-			uint32_t size;
-			file.Read(size);
-			uint32_t numIns;
-			file.Read(numIns);
-			//This loader only supports one instrument.
-			if (numIns!= 1) return;
-			instr.Load(file);
-			uint32_t numSamps;
-			file.Read(numSamps);
-			for(uint32_t i=0; i < numSamps && !file.Eof(); i++) {
-				XMInstrument::WaveData<> wavetmp;
-				int idx=samples.AddSample(wavetmp);
-				XMInstrument::WaveData<> & wave = samples.get(idx);
-				wave.Load(file);
-				sampMap[i]=idx;
+			file.Expect("PSYI",4);
+			file.Read(id,4);	id[4]='\0';
+			if (strncmp(id,"EINS",4) == 0) {
+				file.Read(size);
+				uint32_t numIns;
+				file.Read(numIns);
+				//This loader only supports one instrument.
+				if (numIns== 1)
+				{
+					uint32_t sizeINST=0;
+					file.Read(id,4); id[4]='\0';
+					file.Read(sizeINST);
+					if (strncmp(id,"INST",4)== 0) {
+						uint32_t versionINST;
+						file.Read(versionINST);
+						instr.Load(file, versionINST, true, 0x1);
+					}
+					uint32_t numSamps;
+					file.Read(numSamps);
+					for(uint32_t i=0; i < numSamps && !file.Eof(); i++) {
+						uint32_t sizeSMPD=0;
+						file.Read(id,4); id[4]='\0';
+						file.Read(sizeSMPD);
+						if (strcmp(id,"SMPD")== 0)
+						{
+							uint32_t versionSMPD=0;
+							file.Read(versionSMPD);
+							XMInstrument::WaveData<> wavetmp;
+							int idx=samples.AddSample(wavetmp);
+							XMInstrument::WaveData<> & wave = samples.get(idx);
+							wave.Load(file, versionSMPD, true);
+							sampMap[i]=idx;
+						}
+					}
+				}
+			}
+			else if (strncmp(id,"SMID",4) == 0) {
+				file.Read(version);
+				file.Read(size);
+				size_t begins = file.GetPos();
+				if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
+				{
+					uint32_t instidx; // Unused
+					file.Read(instidx);
+					instr.Load(file, version&0xFFFF);
+				}
+				file.Seek(begins+size);
+				while(!file.Eof()) {
+					file.Read(id,4);	id[4]='\0';
+					if (strncmp(id,"SMSB",4) != 0) break;
+					file.Read(version);
+					file.Read(size);
+					begins = file.GetPos();
+					if((version&0xFFFF0000) == VERSION_MAJOR_ZERO)
+					{
+						uint32_t sampleidx;
+						file.Read(sampleidx);
+						if (sampleidx < XMInstrument::MAX_INSTRUMENT) {
+							XMInstrument::WaveData<> wavetmp;
+							int idx=samples.AddSample(wavetmp);
+							XMInstrument::WaveData<> & wave = samples.get(idx);
+							wave.Load(file, version&0xFFFF);
+							sampMap[sampleidx]=idx;
+						}
+					}
+					file.Seek(begins+size);
+				}
 			}
 			//Remap 
 			for (int j=0; j<XMInstrument::NOTE_MAP_SIZE;j++) {

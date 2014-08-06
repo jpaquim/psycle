@@ -237,7 +237,7 @@ private:
 	static WaveList<float>::Type check_wavelist(lua_State* L);
 };
 
-#if !defined WINAMP_PLUGIN && 0
+#if !defined WINAMP_PLUGIN
 struct LuaPlotterBind {
 	static int open(lua_State *L);
 private:

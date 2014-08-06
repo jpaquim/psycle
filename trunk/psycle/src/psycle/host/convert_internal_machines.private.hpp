@@ -230,7 +230,7 @@ namespace psycle
 									event._mach += 0x40;
 									event._note = notecommands::tweak;
 								}
-								if(event._note == notecommands::tweak)
+								if(event._note == notecommands::tweak && event._mach < MAX_MACHINES)
 								{
 									std::map<Machine * const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 									if(i != machine_converted_from.end())
@@ -242,7 +242,7 @@ namespace psycle
 										event._cmd = value >> 8; event._parameter = 0xff & value;
 									}
 								}
-								else if (event._cmd == 0x0E) {
+								else if (event._cmd == 0x0E  && event._mach < MAX_MACHINES) {
 									std::map<Machine * const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
 									if(i != machine_converted_from.end())
 									{
