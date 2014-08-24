@@ -41,9 +41,6 @@
 	}}
 #else
 	#include <boost/cstdint.hpp>
-	#ifdef DIVERSALIS__OS__MICROSOFT
-		#include <climits> // for UINT_MAX and ULLONG_MAX (see TODO note below)
-	#endif
 	namespace universalis { namespace stdlib {
 		using boost::int8_t;
 		using boost::int_least8_t;
@@ -58,22 +55,11 @@
 		using boost::uint16_t;
 		using boost::uint_least16_t;
 		using boost::uint_fast16_t;
-
-		// don't let boost use 'long int'
-		// TODO come back to this.. it's too ugly!
-		#if defined DIVERSALIS__OS__MICROSOFT && UINT_MAX == 0xffffffffu && ULLONG_MAX == 0xffffffffffffffffull
-		  #if ! defined _STDINT
-			typedef signed int int32_t;
-			typedef unsigned int uint32_t;
-			typedef signed long long int int64_t;
-			typedef unsigned long long int uint64_t;
-          #endif
-		#else
-			using boost::int32_t;
-			using boost::uint32_t;
-			using boost::int64_t;
-			using boost::uint64_t;
-		#endif
+		
+		using boost::int32_t;
+		using boost::uint32_t;
+		using boost::int64_t;
+		using boost::uint64_t;
 
 		using boost::int_least32_t;
 		using boost::int_fast32_t;
