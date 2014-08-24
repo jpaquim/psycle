@@ -89,7 +89,7 @@
     <ClCompile Include="src\psycle\helpers\abstractiff.cpp" />
     <ClCompile Include="src\psycle\helpers\amigasvx.cpp" />
     <ClCompile Include="src\psycle\helpers\appleaiff.cpp" />
-	<ClCompile Include="src\psycle\helpers\filetypedetector.cpp" />
+    <ClCompile Include="src\psycle\helpers\filetypedetector.cpp" />
     <ClCompile Include="src\psycle\helpers\binread.cpp" />
     <ClCompile Include="src\psycle\helpers\datacompression.cpp" />
     <ClCompile Include="src\psycle\helpers\eaiff.cpp" />
@@ -110,11 +110,8 @@
     <ClInclude Include="src\psycle\helpers\math\erase_all_nans_infinities_and_denormals.hpp" />
     <ClInclude Include="src\psycle\helpers\math\erase_denormals.hpp" />
     <ClInclude Include="src\psycle\helpers\math\log.hpp" />
-    <ClInclude Include="src\psycle\helpers\math\rint.hpp" />
-    <ClInclude Include="src\psycle\helpers\math\round.hpp" />
     <ClInclude Include="src\psycle\helpers\math\math.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sin.hpp" />
-    <ClInclude Include="src\psycle\helpers\math\sincos.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sinseq.hpp" />
     <ClInclude Include="src\psycle\helpers\math\sse_mathfun.h" />
     <ClInclude Include="src\psycle\helpers\dither.hpp" />
@@ -124,11 +121,11 @@
     <ClInclude Include="src\psycle\helpers\mersennetwister.hpp" />
     <ClInclude Include="src\psycle\helpers\resampler.hpp" />
     <ClInclude Include="src\psycle\helpers\sampleconverter.hpp" />
-	<ClInclude Include="src\psycle\helpers\endiantypes.hpp" />
+    <ClInclude Include="src\psycle\helpers\endiantypes.hpp" />
     <ClInclude Include="src\psycle\helpers\abstractiff.hpp" />
     <ClInclude Include="src\psycle\helpers\amigasvx.hpp" />
     <ClInclude Include="src\psycle\helpers\appleaiff.hpp" />
-	<ClInclude Include="src\psycle\helpers\filetypedetector.hpp" />
+    <ClInclude Include="src\psycle\helpers\filetypedetector.hpp" />
     <ClInclude Include="src\psycle\helpers\binread.hpp" />
     <ClInclude Include="src\psycle\helpers\datacompression.hpp" />
     <ClInclude Include="src\psycle\helpers\eaiff.hpp" />
