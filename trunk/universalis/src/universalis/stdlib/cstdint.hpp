@@ -7,71 +7,45 @@
 #include <universalis/detail/project.hpp>
 #if __cplusplus >= 201103L
 	#include <cstdint>
-	namespace universalis { namespace stdlib {
-		using std::int8_t;
-		using std::int_least8_t;
-		using std::int_fast8_t;
-		using std::uint8_t;
-		using std::uint_least8_t;
-		using std::uint_fast8_t;
-
-		using std::int16_t;
-		using std::int_least16_t;
-		using std::int_fast16_t;
-		using std::uint16_t;
-		using std::uint_least16_t;
-		using std::uint_fast16_t;
-
-		using std::int32_t;
-		using std::int_least32_t;
-		using std::int_fast32_t;
-		using std::uint32_t;
-		using std::uint_least32_t;
-		using std::uint_fast32_t;
-
-		using std::int64_t;
-		using std::int_least64_t;
-		using std::int_fast64_t;
-		using std::uint64_t;
-		using std::uint_least64_t;
-		using std::uint_fast64_t;
-
-		using std::intmax_t;
-		using std::uintmax_t;
-	}}
+	namespace universalis { namespace stdlib { namespace detail {
+		namespace cstdint_impl = std;
+	}}}
 #else
 	#include <boost/cstdint.hpp>
-	namespace universalis { namespace stdlib {
-		using boost::int8_t;
-		using boost::int_least8_t;
-		using boost::int_fast8_t;
-		using boost::uint8_t;
-		using boost::uint_least8_t;
-		using boost::uint_fast8_t;
-
-		using boost::int16_t;
-		using boost::int_least16_t;
-		using boost::int_fast16_t;
-		using boost::uint16_t;
-		using boost::uint_least16_t;
-		using boost::uint_fast16_t;
-		
-		using boost::int32_t;
-		using boost::uint32_t;
-		using boost::int64_t;
-		using boost::uint64_t;
-
-		using boost::int_least32_t;
-		using boost::int_fast32_t;
-		using boost::uint_least32_t;
-		using boost::uint_fast32_t;
-
-		using boost::int_least64_t;
-		using boost::int_fast64_t;
-		using boost::uint_least64_t;
-		using boost::uint_fast64_t;
-
-		using boost::intmax_t;
-		using boost::uintmax_t;
-	}}
+	namespace universalis { namespace stdlib { namespace detail {
+		namespace cstdint_impl = boost;
+	}}}
 #endif
+
+namespace universalis { namespace stdlib {
+	using detail::cstdint_impl::int8_t;
+	using detail::cstdint_impl::int_least8_t;
+	using detail::cstdint_impl::int_fast8_t;
+	using detail::cstdint_impl::uint8_t;
+	using detail::cstdint_impl::uint_least8_t;
+	using detail::cstdint_impl::uint_fast8_t;
+
+	using detail::cstdint_impl::int16_t;
+	using detail::cstdint_impl::int_least16_t;
+	using detail::cstdint_impl::int_fast16_t;
+	using detail::cstdint_impl::uint16_t;
+	using detail::cstdint_impl::uint_least16_t;
+	using detail::cstdint_impl::uint_fast16_t;
+
+	using detail::cstdint_impl::int32_t;
+	using detail::cstdint_impl::int_least32_t;
+	using detail::cstdint_impl::int_fast32_t;
+	using detail::cstdint_impl::uint32_t;
+	using detail::cstdint_impl::uint_least32_t;
+	using detail::cstdint_impl::uint_fast32_t;
+
+	using detail::cstdint_impl::int64_t;
+	using detail::cstdint_impl::int_least64_t;
+	using detail::cstdint_impl::int_fast64_t;
+	using detail::cstdint_impl::uint64_t;
+	using detail::cstdint_impl::uint_least64_t;
+	using detail::cstdint_impl::uint_fast64_t;
+
+	using detail::cstdint_impl::intmax_t;
+	using detail::cstdint_impl::uintmax_t;
+}}
