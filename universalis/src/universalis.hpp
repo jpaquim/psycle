@@ -13,6 +13,7 @@
 #ifndef DIVERSALIS__COMPILER__RESOURCE
 
 	#include "universalis/compiler/constexpr.hpp"
+	#include "universalis/compiler/noexcept.hpp"
 	#include "universalis/compiler/restrict.hpp"
 	#include "universalis/compiler/pragma.hpp"
 	#include "universalis/compiler/attribute.hpp"
