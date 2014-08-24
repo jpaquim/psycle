@@ -6,9 +6,6 @@
 #pragma once
 
 #include <universalis.hpp>
-#if 0 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
-	//#include <xmmintrin.h>
-#endif
 
 namespace psycle { namespace helpers { namespace math {
 
@@ -19,7 +16,7 @@ using namespace universalis::stdlib;
 /// References : Posted by urs[AT]u-he[DOT]com
 void inline erase_all_nans_infinities_and_denormals(float & sample) {
 	#if !defined DIVERSALIS__CPU__X86
-		// just do nothing.. not crucial for other archs
+		// just do nothing.. not crucial for other archs ?
 	#else
 		union {
 			float sample;
@@ -44,7 +41,7 @@ void inline erase_all_nans_infinities_and_denormals(float & sample) {
 ///\todo This works, but uses too much CPU probably. (at least on 32bit processors)
 void inline erase_all_nans_infinities_and_denormals(double & sample) {
 	#if !defined DIVERSALIS__CPU__X86
-		// just do nothing.. not crucial for other archs
+		// just do nothing.. not crucial for other archs ?
 	#else
 		union {
 			double sample;

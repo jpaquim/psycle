@@ -5,16 +5,20 @@
 #define PSYCLE__HELPERS__MATH__CLIP__INCLUDED
 #pragma once
 
-#include "rint.hpp"
+#include <universalis.hpp>
+#include <universalis/stdlib/cmath.hpp>
+#include <limits>
+
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS 
 	#include <xmmintrin.h>
 	#include <emmintrin.h>
 #endif
-#include <limits>
 
 namespace psycle { namespace helpers { namespace math {
 
-/// ensures a value stays between two bounds
+using universalis::stdlib::rint;
+
+/// ensures a value stays between two bounds by clamping it
 template<typename X> UNIVERSALIS__COMPILER__CONST_FUNCTION
 X inline clip(X minimum, X value, X maximum) {
 	// it looks a bit dumb to write a function to do that code,

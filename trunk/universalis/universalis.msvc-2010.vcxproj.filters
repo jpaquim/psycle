@@ -213,6 +213,9 @@
     <ClInclude Include="src\universalis\stdlib\thread.hpp">
       <Filter>universalis\stdlib</Filter>
     </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\cmath.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
     <ClInclude Include="src\universalis\stdlib\detail\chrono\duration_and_time_point.hpp">
       <Filter>universalis\stdlib\detail\chrono</Filter>
     </ClInclude>

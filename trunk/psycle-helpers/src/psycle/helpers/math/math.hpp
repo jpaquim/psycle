@@ -8,58 +8,19 @@
 #include "constants.hpp"
 #include "log.hpp"
 #include "sin.hpp"
-#include "sincos.hpp"
 #include "sinseq.hpp"
-#include "rint.hpp"
-#include "round.hpp"
 #include "clip.hpp"
 #include "erase_all_nans_infinities_and_denormals.hpp"
 #include "erase_denormals.hpp"
 #include <universalis.hpp>
-#include <cmath>
-
-/*************************************************************************************************
-
-Summary of some of the C99 functions that do floating point rounding and conversions to integers:
-
-"(int)" means it returns an integral number.
-"(float)" means it returns a floating point number.
-
-round to integer, using the current rounding direction (fesetround FE_TONEAREST, FE_TOWARDZERO, FE_DOWNWARD, FE_UPWARD):
-	(float) rint, rintf, rintl - raise the inexact exception when the result differs in value from the argument
-	(float) nearbyint, nearbyintf, nearbyintl - don't raise the inexact exception
-	(int) lrint, lrintf, lrintl, llrint, llrintf, llrintl
-round to nearest integer, away from zero for halfway cases (fesetround FE_TONEAREST):
-	(float) round, roundf, roundl
-	(int) lround, lroundf, lroundl, llround, llroundf, llroundl
-round to integer, towards zero (fesetround FE_TOWARDZERO):
-	(float) trunc, truncf, truncl
-	(int) static_cast, c-style cast, constructor-style cast
-round to integer, towards -inf (fesetround FE_DOWNWARD):
-	(float) floor, floorf, floorl
-round to integer, towards +inf (fesetround FE_UPWARD):
-	(float) ceil, ceilf, ceill
-remainder/modulo:
-	(float) fmod, fmodf, fmodl - quotient rounded towards zero to an integer
-	(float) remainder, remainderf, remainderl - quotient rounded to the nearest integer.
-
-*************************************************************************************************/
+#include <universalis/stdlib/cmath.hpp>
 
 namespace psycle { namespace helpers { namespace math {
 
-/// asinh
-#if DIVERSALIS__STDLIB__MATH >= 199901L
-	using std::asinh;
-#else
-	template<typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION
-	Real inline asinh(Real x) throw() {
-		return
-			x > 0 ?
-			+std::log(+x + std::sqrt(Real(1) + x * x)) :
-			-std::log(-x + std::sqrt(Real(1) + x * x));
-	}
-#endif
-
+using universalis::stdlib::asinh;
+using universalis::stdlib::sincos;
+using universalis::stdlib::rint;
+using universalis::stdlib::round;
 
 /// compares two floating point numbers for rough equality (difference less than epsilon by default).
 template<typename Real> UNIVERSALIS__COMPILER__CONST_FUNCTION

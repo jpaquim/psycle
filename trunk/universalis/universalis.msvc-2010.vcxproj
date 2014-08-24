@@ -160,6 +160,7 @@
     <ClInclude Include="src\universalis\stdlib\ratio.hpp" />
     <ClInclude Include="src\universalis\stdlib\stdc_secure_lib.hpp" />
     <ClInclude Include="src\universalis\stdlib\thread.hpp" />
+    <ClInclude Include="src\universalis\stdlib\cmath.hpp" />
     <ClInclude Include="src\universalis\stdlib\detail\chrono\duration_and_time_point.hpp" />
     <ClInclude Include="src\universalis\stdlib\detail\chrono\measure_clock.hpp" />
   </ItemGroup>
