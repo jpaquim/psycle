@@ -99,9 +99,14 @@ namespace psycle { namespace host {
 			afx_msg void OnUpdatePasteMix(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateSetLoopStart(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateSetLoopEnd(CCmdUI* pCmdUI);
-			afx_msg void OnPopupSetLoopStart();
-			afx_msg void OnPopupSetLoopEnd();
 			afx_msg void OnPopupSelectionToLoop();
+			afx_msg void OnPopupSelectionSustain();
+			afx_msg void OnPopupUnsetLoop();
+			afx_msg void OnPopupUnsetSustain();
+			afx_msg void OnUpdateSelectionToLoop(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateSelectionSustain(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateUnsetLoop(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateUnsetSustain(CCmdUI* pCmdUI);
 			afx_msg void OnPopupZoomIn();
 			afx_msg void OnPopupZoomOut();
 			afx_msg void OnViewSampleHold();

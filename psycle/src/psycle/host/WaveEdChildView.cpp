@@ -101,9 +101,14 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_PASTE_MIX, OnUpdatePasteMix)
 			ON_UPDATE_COMMAND_UI(ID_POPUP_SETLOOPSTART, OnUpdateSetLoopStart)
 			ON_UPDATE_COMMAND_UI(ID_POPUP_SETLOOPEND, OnUpdateSetLoopEnd)
-			ON_COMMAND(ID_POPUP_SETLOOPSTART, OnPopupSetLoopStart)
-			ON_COMMAND(ID_POPUP_SETLOOPEND, OnPopupSetLoopEnd)
+			ON_UPDATE_COMMAND_UI(ID_POPUP_SELECTIONTOLOOP, OnUpdateSelectionToLoop)
+			ON_UPDATE_COMMAND_UI(ID__SETSUSTANTOSELECTION, OnUpdateSelectionSustain)
+			ON_UPDATE_COMMAND_UI(ID__UNSETLOOP, OnUpdateUnsetLoop)
+			ON_UPDATE_COMMAND_UI(ID__UNSETSUSTAINLOOP, OnUpdateUnsetSustain)
 			ON_COMMAND(ID_POPUP_SELECTIONTOLOOP, OnPopupSelectionToLoop)
+			ON_COMMAND(ID__SETSUSTANTOSELECTION, OnPopupSelectionSustain)
+			ON_COMMAND(ID__UNSETLOOP, OnPopupUnsetLoop)
+			ON_COMMAND(ID__UNSETSUSTAINLOOP, OnPopupUnsetSustain)
 			ON_COMMAND(ID_POPUP_ZOOMIN, OnPopupZoomIn)
 			ON_COMMAND(ID_POPUP_ZOOMOUT, OnPopupZoomOut)
 			ON_COMMAND(ID_VISUALREPRESENTATION_SAMPLEHOLD, OnViewSampleHold)
@@ -2435,7 +2440,7 @@ namespace psycle { namespace host {
 			bSnapToZero=!bSnapToZero;
 		}
 
-
+/*
 		void CWaveEdChildView::OnPopupSetLoopStart()
 		{
 			PsycleGlobal::inputHandler().AddMacViewUndo();
@@ -2492,6 +2497,7 @@ namespace psycle { namespace host {
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
+*/
 
 		void CWaveEdChildView::OnPopupSelectionToLoop()
 		{
@@ -2520,6 +2526,86 @@ namespace psycle { namespace host {
 			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
 			InvalidateRect(&rect, false);
 		}
+		void CWaveEdChildView::OnPopupSelectionSustain()
+		{
+			if(!blSelection) return;
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+			_pSong->StopInstrument(wsInstrument);
+
+			wdSusLoopS = blStart;
+			wdSusLoopE = blStart+blLength;
+			wave.WaveSusLoopStart(wdSusLoopS);
+			wave.WaveSusLoopEnd(wdSusLoopE);
+			if (!wdSusLoop) 
+			{
+				wdSusLoop=true;
+				wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+			}
+
+			mainFrame->UpdateInstrumentEditor();
+			if(_pSong->wavprev.IsEnabled()) {
+				_pSong->wavprev.Play(notecommands::middleC,_pSong->wavprev.GetPosition());
+			}
+
+			CRect rect;
+			GetClientRect(&rect);
+			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
+			InvalidateRect(&rect, false);
+		}
+		void CWaveEdChildView::OnPopupUnsetLoop()
+		{
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+
+			wdLoop=false;
+			wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
+
+			mainFrame->UpdateInstrumentEditor();
+			if(_pSong->wavprev.IsEnabled()) {
+				_pSong->wavprev.Stop();
+			}
+
+			CRect rect;
+			GetClientRect(&rect);
+			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
+			InvalidateRect(&rect, false);
+		}
+		void CWaveEdChildView::OnPopupUnsetSustain()
+		{
+			CExclusiveLock lock(&_pSong->semaphore, 2, true);
+			XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+
+			wdSusLoop=false;
+			wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
+
+			mainFrame->UpdateInstrumentEditor();
+			if(_pSong->wavprev.IsEnabled()) {
+				_pSong->wavprev.Stop();
+			}
+
+			CRect rect;
+			GetClientRect(&rect);
+			rect.bottom -= GetSystemMetrics(SM_CYHSCROLL);
+			InvalidateRect(&rect, false);
+		}
+		void CWaveEdChildView::OnUpdateSelectionToLoop(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(wdWave && blSelection);	
+		}
+		void CWaveEdChildView::OnUpdateSelectionSustain(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(wdWave && blSelection);	
+		}
+		void CWaveEdChildView::OnUpdateUnsetLoop(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(wdWave && wdLoop);	
+		}
+		void CWaveEdChildView::OnUpdateUnsetSustain(CCmdUI* pCmdUI)
+		{
+			pCmdUI->Enable(wdWave && wdSusLoop);	
+		}
+
 
 
 		void CWaveEdChildView::SetSong(Song& _sng)

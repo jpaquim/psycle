@@ -45,12 +45,24 @@ namespace psycle
 					markers.Markers[mark.id.signedValue()]=mark;
 				}
 			}
-			catch(const std::runtime_error & e){}
+			catch(const std::runtime_error & e){
+				markers.numMarkers.changeValue(static_cast<uint16_t>(0));
+			}
 			try {
 				findChunk(InstrumentID, true);
 				ReadRaw(&instchunk,sizeof(InstrumentChunk));
 			}
-			catch(const std::runtime_error & e){}
+			catch(const std::runtime_error & e){
+				instchunk.baseNote=0;
+				instchunk.detune=0;
+				instchunk.gain=0;
+				instchunk.highNote=127;
+				instchunk.highvelocity=127;
+				instchunk.lowNote=0;
+				instchunk.lowvelocity=0;
+				instchunk.releaseLoop.playMode.changeValue(static_cast<uint16_t>(0));
+				instchunk.sustainLoop.playMode.changeValue(static_cast<uint16_t>(0));
+			}
 		}
 
 		//Psycle only uses 16bit samples, so this implementation is fully functional for Psycle's intentions.

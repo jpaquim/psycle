@@ -97,6 +97,7 @@ namespace psycle
 			multicmdMem.resize(0);
 			_numVoices = SAMPLER_DEFAULT_POLYPHONY;
 			for (int i=0; i<_numVoices; i++) { _voices[i].Init(); }
+			SetSampleRate(Global::player().SampleRate());
 		}
 
 		void Sampler::Stop(void)
@@ -409,7 +410,7 @@ namespace psycle
 
 				// Init Amplitude Envelope
 				//
-				_envelope._sustain = (float)inst->ENV_SL*0.01f;
+				_envelope._sustain = static_cast<float>(inst->ENV_SL)*0.01f;
 				_envelope._step = (1.0f/inst->ENV_AT)*(44100.0f/Global::player().SampleRate());
 				_envelope._value = 0.0f;
 				controller._lVolCurr = controller._lVolDest;
@@ -430,7 +431,7 @@ namespace psycle
 				_cutoff = (inst->_RCUT) ? alteRand(inst->ENV_F_CO) : inst->ENV_F_CO;
 				_filter.Ressonance((inst->_RRES) ? alteRand(inst->ENV_F_RQ) : inst->ENV_F_RQ);
 				_filter.Type(inst->ENV_F_TP);
-				_coModify = (float)inst->ENV_F_EA;
+				_coModify = static_cast<float>(inst->ENV_F_EA);
 				_filterEnv._sustain = value_mapper::map_128_1(inst->ENV_F_SL);
 				_filterEnv._step = (1.0f/inst->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
 				_filterEnv._value = 0;

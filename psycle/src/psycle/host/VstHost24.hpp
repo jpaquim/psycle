@@ -5,7 +5,7 @@
 #include "Global.hpp"
 #include "Machine.hpp"
 #include <seib-vsthost/CVSTHost.Seib.hpp>
-#include <psycle/helpers/math/round.hpp>
+#include <psycle/helpers/math/math.hpp>
 #include <cstring>
 /*
 *<@JosepMa> Psycle's seib-VstHost is a reimplementation of HermannSeib's vsthost composed of two classes:

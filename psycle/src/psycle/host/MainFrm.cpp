@@ -8,6 +8,7 @@
 
 #include "GearRackDlg.hpp"
 #include "KeyConfigDlg.hpp"
+#include "SongpDlg.hpp"
 
 #include "MasterDlg.hpp"
 #include "GearTracker.hpp"
@@ -100,6 +101,8 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_BPM_DECONE, OnBpmDecOne)
 			ON_BN_CLICKED(IDC_DEC_TPB, OnDecTPB)
 			ON_BN_CLICKED(IDC_INC_TPB, OnIncTPB)
+			ON_STN_CLICKED(IDC_BPMLABEL, OnClickBPM)
+			ON_STN_CLICKED(IDC_TPBLABEL, OnClickTPB)
 			ON_BN_DOUBLECLICKED(IDC_BPM_ADDONE, OnBpmAddOne)
 			ON_BN_DOUBLECLICKED(IDC_BPM_DECONE, OnBpmDecOne)
 			ON_BN_DOUBLECLICKED(IDC_DEC_TPB, OnDecTPB)
@@ -822,6 +825,7 @@ namespace psycle { namespace host {
 						if (m_wndView.WaveInMachineDialog) m_wndView.WaveInMachineDialog->SendMessage(WM_CLOSE);
 						break;
 					case MACH_DUPLICATOR:
+					case MACH_DUPLICATOR2:
 //					case MACH_LFO:
 //					case MACH_AUTOMATOR:
 					case MACH_MIXER:
@@ -854,6 +858,16 @@ namespace psycle { namespace host {
 		void CMainFrame::OnBpmDecOne() { m_songBar.OnBpmDecOne(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnDecTPB() { m_songBar.OnDecTPB(); m_seqBar.UpdatePlayOrder(false);}
 		void CMainFrame::OnIncTPB() { m_songBar.OnIncTPB(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnClickBPM() {
+			CSongpDlg dlg(Global::song());
+			dlg.DoModal();
+			PsybarsUpdate();
+			UpdatePlayOrder(false);
+			StatusBarIdle();
+		}
+		void CMainFrame::OnClickTPB() {
+			OnClickBPM();
+		}
 		void CMainFrame::OnCloseupCombooctave() { m_songBar.OnCloseupCombooctave(); }
 		void CMainFrame::OnSelchangeCombooctave() { m_songBar.OnSelchangeCombooctave(); }
 		void CMainFrame::OnClipbut() { m_songBar.OnClipbut(); }

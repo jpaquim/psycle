@@ -22,8 +22,9 @@ namespace psycle { namespace host {
 						int line=0;
 						int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(note,
 							entry._mach, entry._inst, true, GetKeyState(VK_SHIFT)<0, line);
+						bool write = (track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
 						if (track == -1) track = editcur.track;
-						EnterData(&entry, track, line, false);
+						if (write) EnterData(&entry, track, line, false, false);
 						PsycleGlobal::inputHandler().PlayNote(&entry, track); 
 					}
 					else if (editcur.col == 0) {
@@ -75,13 +76,10 @@ namespace psycle { namespace host {
 						int line=0;
 						int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(entry._note,
 							entry._mach, entry._inst, false, GetKeyState(VK_SHIFT)<0, line);
+
+						bool write = (track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
 						if (track == -1) track = editcur.track;
-
-//TODO:
-//If the FT2 recording behaviour is not selected and track -1, do not record but play the note.
-//	PsycleGlobal::conf().inputHandler()._RecordUnarmed
-
-						EnterData(&entry, track, line, true);
+						if (write) EnterData(&entry, track, line, true, false);
 						PsycleGlobal::inputHandler().PlayNote(&entry, track); 
 						success = true;
 					}
@@ -95,7 +93,7 @@ namespace psycle { namespace host {
 						int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(entry._note,
 							entry._mach, entry._inst, false, GetKeyState(VK_SHIFT)<0, line);
 						if (track == -1) track = editcur.track;
-						EnterData(&entry, track, line, true);
+						EnterData(&entry, track, line);
 						PsycleGlobal::inputHandler().PlayNote(&entry, track); 
 						success = true;
 					}
@@ -142,7 +140,7 @@ namespace psycle { namespace host {
 		}
 
 
-		void CChildView::EnterData(PatternEntry *newentry, int track, int line, bool force/*=true*/)
+		void CChildView::EnterData(PatternEntry *newentry, int track, int line, bool force/*=true*/, bool advanceline/*=true*/)
 		{
 			if(viewMode == view_modes::pattern && bEditMode)
 			{ 
@@ -164,17 +162,14 @@ namespace psycle { namespace host {
 						destentry->_parameter = newentry->_parameter;
 
 						NewPatternDraw(track,track,line,line);
-						Repaint(draw_modes::data);
 					}
 				}
-				if (!(Global::player()._playing&&PsycleGlobal::conf()._followSong))
+				if (advanceline)
 				{
-					if (ChordModeOffs)
-					{
+					if (ChordModeOffs) {
 						AdvanceLine(-1,PsycleGlobal::conf().inputHandler()._wrapAround,false); //Advance track?
 					}
-					else
-					{
+					else {
 						AdvanceLine(patStep,PsycleGlobal::conf().inputHandler()._wrapAround,false);
 					}
 				}
@@ -194,7 +189,8 @@ namespace psycle { namespace host {
 				int line=0;
 				int track = PsycleGlobal::inputHandler().GetTrackAndLineToEdit(entry._note,
 					entry._mach, entry._inst, false, GetKeyState(VK_SHIFT)<0, line);
-				EnterData(&entry, track, line, true);
+				if (track==-1) track = editcur.track;
+				EnterData(&entry, track, line);
 			}
 		}
 
@@ -1343,7 +1339,7 @@ namespace psycle { namespace host {
 					unsigned char note = (twktype != notecommands::empty)?twktype:toffset[firstrow];
 					unsigned char aux = (twktype != notecommands::empty)?Global::song().auxcolSelected:toffset[firstrow+1];
 					unsigned char mac = (twktype != notecommands::empty)?Global::song().seqBus:toffset[firstrow+2];
-					for (int l=blockSel.start.line;l<=blockSel.end.line;l++)
+					for	(int l=blockSel.start.line;l<=blockSel.end.line;l++)
 					{
 						toffset[displace]=note;
 						toffset[displace+1]=aux;
@@ -1373,6 +1369,115 @@ namespace psycle { namespace host {
 			}
 		}
 
+		CSearchReplaceMode CChildView::SetupSearchReplaceMode(int searchnote, int searchinst, int searchmach, int replnote, int replinst, int replmach)
+		{
+			CSearchReplaceMode mode;
+			mode.notereference = static_cast<uint8_t>(searchnote&0xFF);
+			mode.instreference = static_cast<uint8_t>(searchinst&0xFF);
+			mode.machreference = static_cast<uint8_t>(searchmach&0xFF);
+			mode.notereplace = static_cast<uint8_t>(replnote&0xFF);
+			mode.instreplace = static_cast<uint8_t>(replinst&0xFF);
+			mode.machreplace = static_cast<uint8_t>(replmach&0xFF);
+
+			// In search: 1001 empty, 1002 non-empty, 1003 all, other -> exact match
+			switch(searchnote) {
+				case 1001: mode.notematcher = CSearchReplaceMode::MatchesEmpty; break;
+				case 1002: mode.notematcher = CSearchReplaceMode::MatchesNonEmpty; break;
+				case 1003: mode.notematcher = CSearchReplaceMode::MatchesAll; break;
+				default: mode.notematcher = CSearchReplaceMode::MatchesEqual; break;
+			}
+			switch(searchinst) {
+				case 1001: mode.instmatcher = CSearchReplaceMode::MatchesEmpty; break;
+				case 1002: mode.instmatcher = CSearchReplaceMode::MatchesNonEmpty; break;
+				case 1003: mode.instmatcher = CSearchReplaceMode::MatchesAll; break;
+				default: mode.instmatcher = CSearchReplaceMode::MatchesEqual; break;
+			}
+			switch(searchmach) {
+				case 1001: mode.machmatcher = CSearchReplaceMode::MatchesEmpty; break;
+				case 1002: mode.machmatcher = CSearchReplaceMode::MatchesNonEmpty; break;
+				case 1003: mode.machmatcher = CSearchReplaceMode::MatchesAll; break;
+				default: mode.machmatcher = CSearchReplaceMode::MatchesEqual; break;
+			}
+			// In replace: 1001 set empty, 1002 -> keep existing, other -> replace value
+			switch(replnote) {
+				case 1001: mode.notereplacer = CSearchReplaceMode::ReplaceWithEmpty; break;
+				case 1002: mode.notereplacer = CSearchReplaceMode::ReplaceWithCurrent; break;
+				default: mode.notereplacer = CSearchReplaceMode::ReplaceWithNewVal; break;
+			}
+			switch(replinst) {
+				case 1001: mode.instreplacer = CSearchReplaceMode::ReplaceWithEmpty; break;
+				case 1002: mode.instreplacer = CSearchReplaceMode::ReplaceWithCurrent; break;
+				default: mode.instreplacer = CSearchReplaceMode::ReplaceWithNewVal; break;
+			}
+			switch(replmach) {
+				case 1001: mode.machreplacer = CSearchReplaceMode::ReplaceWithEmpty; break;
+				case 1002: mode.machreplacer = CSearchReplaceMode::ReplaceWithCurrent; break;
+				default: mode.machreplacer = CSearchReplaceMode::ReplaceWithNewVal; break;
+			}
+			return mode;
+		}
+		CCursor CChildView::SearchInPattern(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode)
+		{
+			PatternEntry* pattern = reinterpret_cast<PatternEntry*>(_ppattern(patternIdx));
+			CCursor cursor;
+			cursor.line = -1;
+
+			const CSearchReplaceMode::matches_func notematcher = mode.notematcher;
+			const CSearchReplaceMode::matches_func instmatcher = mode.instmatcher;
+			const CSearchReplaceMode::matches_func machmatcher = mode.machmatcher;
+			const uint8_t notereference = mode.notereference;
+			const uint8_t instreference = mode.instreference;
+			const uint8_t machreference = mode.machreference;
+			for (int currentLine = selection.start.line; currentLine < selection.end.line; currentLine++)
+			{
+				for (int currentTrack = selection.start.track; currentTrack < selection.end.track; currentTrack++)
+				{
+					PatternEntry& entry = pattern[(currentLine*MAX_TRACKS)+currentTrack];
+
+					if (notematcher(entry._note, notereference)
+						&& instmatcher(entry._inst, instreference)
+						&& machmatcher(entry._mach, machreference))
+					{
+						cursor.line = currentLine;
+						cursor.col = 0;
+						cursor.track = currentTrack;
+						return cursor;
+					}
+				}
+			}
+			return cursor;
+		}
+		bool CChildView::SearchReplace(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode)
+		{
+			bool replaced=false;
+			PatternEntry* pattern = reinterpret_cast<PatternEntry*>(_ppattern(patternIdx));
+
+			const CSearchReplaceMode::matches_func notematcher = mode.notematcher;
+			const CSearchReplaceMode::matches_func instmatcher = mode.instmatcher;
+			const CSearchReplaceMode::matches_func machmatcher = mode.machmatcher;
+			const uint8_t notereference = mode.notereference;
+			const uint8_t instreference = mode.instreference;
+			const uint8_t machreference = mode.machreference;
+
+			for (int currentLine = selection.start.line; currentLine < selection.end.line; currentLine++)
+			{
+				for (int currentTrack = selection.start.track; currentTrack < selection.end.track; currentTrack++)
+				{
+					PatternEntry& entry = pattern[(currentLine*MAX_TRACKS)+currentTrack];
+
+					if (notematcher(entry._note, notereference)
+						&& instmatcher(entry._inst, instreference)
+						&& machmatcher(entry._mach, machreference))
+					{
+						entry._note = mode.notereplacer(entry._note, mode.notereplace);
+						entry._inst = mode.instreplacer(entry._inst, mode.instreplace);
+						entry._mach = mode.machreplacer(entry._mach, mode.machreplace);
+						replaced=true;
+					}
+				}
+			}
+			return replaced;
+		}
 
 		void CChildView::IncCurPattern()
 		{

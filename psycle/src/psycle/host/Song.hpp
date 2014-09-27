@@ -258,7 +258,7 @@ namespace psycle
 			/// saves this song to a file.
 			bool Save(RiffFile* pFile,CProgressDialog& progress,bool autosave=false);
 			/// Used to detect if an especific pattern index is used in the sequence.
-			bool IsPatternUsed(int i) const;
+			bool IsPatternUsed(int i, bool onlyInSequence=false) const;
 			//Used to check the contents of the pattern.
 			bool IsPatternEmpty(int i) const;
 			///\name wave file previewing

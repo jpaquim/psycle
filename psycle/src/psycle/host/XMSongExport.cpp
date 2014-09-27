@@ -669,7 +669,7 @@ namespace host{
 			double floortune = floor(newtune*12.0);
 			tune += static_cast<int>(floortune);
 			finetune += static_cast<int>(floor(((newtune*12.0)-floortune)*128.0));
-			if (finetune > 127) { tune--; finetune -=127; }
+			if (finetune > 127) { tune++; finetune -=127; }
 		}
 
 		//All samples are 16bits in Psycle.

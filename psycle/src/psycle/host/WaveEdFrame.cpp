@@ -313,13 +313,55 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::OnFastForward()
 		{
-			uint32_t wl=0;
-			if (_pSong->samples.IsEnabled(wsInstrument)) { wl = _pSong->samples[wsInstrument].WaveLength();}
-			wavview.SetCursorPos( wl-1 );
+			uint32_t curpos = wavview.GetCursorPos();
+			if (_pSong->samples.IsEnabled(wsInstrument)) {
+				const XMInstrument::WaveData<> & wave = _pSong->samples[wsInstrument];
+				uint32_t targetpos = wave.WaveLength()-1;
+				if (wave.WaveLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+					if (wave.WaveLoopStart() > curpos) {
+						targetpos = std::min(targetpos, wave.WaveLoopStart());
+					}
+					else if (wave.WaveLoopEnd() > curpos) {
+						targetpos = std::min(targetpos, wave.WaveLoopEnd());
+					}
+				}
+				if (wave.WaveSusLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+					if (wave.WaveSusLoopStart() > curpos) {
+						targetpos = std::min(targetpos, wave.WaveSusLoopStart());
+					}
+					else if (wave.WaveSusLoopEnd() > curpos) {
+						targetpos = std::min(targetpos, wave.WaveSusLoopEnd());
+					}
+				}
+				curpos = targetpos;
+			}
+			wavview.SetCursorPos( curpos );
 		}
 		void CWaveEdFrame::OnRewind()
 		{
-			wavview.SetCursorPos( 0 );
+			uint32_t curpos = wavview.GetCursorPos();
+			if (_pSong->samples.IsEnabled(wsInstrument)) {
+				const XMInstrument::WaveData<> & wave = _pSong->samples[wsInstrument];
+				uint32_t targetpos = 0;
+				if (wave.WaveLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+					if (wave.WaveLoopEnd() < curpos) {
+						targetpos = std::max(targetpos, wave.WaveLoopEnd());
+					}
+					else if (wave.WaveLoopStart() < curpos) {
+						targetpos = std::max(targetpos, wave.WaveLoopStart());
+					}
+				}
+				if (wave.WaveSusLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+					if (wave.WaveSusLoopEnd() < curpos) {
+						targetpos = std::max(targetpos, wave.WaveSusLoopEnd());
+					}
+					else if (wave.WaveSusLoopStart() < curpos) {
+						targetpos = std::max(targetpos, wave.WaveSusLoopStart());
+					}
+				}
+				curpos = targetpos;
+			}
+			wavview.SetCursorPos( curpos );
 		}
 
 		void CWaveEdFrame::OnUpdateWaveMinus(CCmdUI* pCmdUI)

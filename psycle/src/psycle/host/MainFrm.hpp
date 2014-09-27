@@ -138,6 +138,8 @@ namespace psycle { namespace host {
 			afx_msg void OnBpmDecOne();
 			afx_msg void OnDecTPB();
 			afx_msg void OnIncTPB();
+			afx_msg void OnClickBPM();
+			afx_msg void OnClickTPB();
 			afx_msg void OnCloseupCombooctave();
 			afx_msg void OnSelchangeCombooctave();
 			afx_msg void OnClipbut();

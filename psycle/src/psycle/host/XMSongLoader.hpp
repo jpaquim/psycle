@@ -112,9 +112,9 @@ namespace psycle { namespace host {
 		virtual ~MODSongLoader();
 		/// RIFF 
 		virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
-	private:
 		bool IsValid();
 
+	private:
 		void LoadPatterns(Song & song, std::map<int,int>& modtovirtual);
 		void LoadSinglePattern(Song & song, int patIdx, int iTracks, std::map<int,int>& modtovirtual);	
 		unsigned char ConvertPeriodtoNote(unsigned short period);
