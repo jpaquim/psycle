@@ -299,7 +299,8 @@ namespace psycle
 							dopan=true;
 						} break;
 						case SAMPLER_CMD_OFFSET : {
-							w_offset = (ite->_parameter*controller.wave->WaveLength()) << 24;
+							const XMInstrument::WaveData<>& wave = Global::song().samples[_instrument];
+							w_offset = static_cast<uint64_t>(ite->_parameter*wave.WaveLength()) << 24;
 							dooffset=true;
 						} break;
 						case SAMPLER_CMD_VOLUME : {
@@ -436,7 +437,7 @@ namespace psycle
 				_filterEnv._step = (1.0f/inst->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
 				_filterEnv._value = 0;
 
-				if (w_offset == 0) {
+				if (_triggerNoteDelay == 0) {
 					_envelope._stage = ENV_ATTACK;
 					_filterEnv._stage = ENV_ATTACK;
 				}
