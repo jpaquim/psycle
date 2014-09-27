@@ -120,6 +120,29 @@ namespace seib {
 			{
 			#if defined _WIN64 || defined _WIN32
 				module = LoadLibrary (fileName);
+			#if defined DEBUG || !defined NDEBUG
+				if (module == NULL) {
+					LPVOID lpMsgBuf;
+					FormatMessage( 
+						FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+						FORMAT_MESSAGE_FROM_SYSTEM | 
+						FORMAT_MESSAGE_IGNORE_INSERTS,
+						NULL,
+						GetLastError(),
+						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+						(LPTSTR) &lpMsgBuf,
+						0,
+						NULL 
+					);
+					// Process any inserts in lpMsgBuf.
+					// ...
+					// Display the string.
+					MessageBox( NULL, (LPCTSTR)lpMsgBuf, "Error", MB_OK | MB_ICONINFORMATION );
+					// Free the buffer.
+					LocalFree( lpMsgBuf );
+				}
+			#endif // DEBUG
+
 				sFileName = new char[strlen(fileName) + 1];
 				if (sFileName)
 					strcpy((char*)sFileName, fileName);

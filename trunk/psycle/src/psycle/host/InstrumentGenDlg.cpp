@@ -205,6 +205,7 @@ void CInstrumentGenDlg::OnCbnSelendokVirtMaccombo()
 		if (instIdx != CB_ERR ) {
 			Global::song().SetVirtualInstrument(instIdx,macIdx,m_instIdx);
 		}
+		((CMainFrame *)theApp.m_pMainWnd)->UpdateComboGen(true);
 	}
 }
 

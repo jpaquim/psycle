@@ -3355,7 +3355,7 @@ namespace psycle
 			file.Close();
 		}
 
-		bool Song::IsPatternUsed(int i) const
+		bool Song::IsPatternUsed(int i, bool onlyInSequence/*=false*/) const
 		{
 			bool bUsed = false;
 			if (ppPatternData[i])
@@ -3365,12 +3365,12 @@ namespace psycle
 				{
 					if (playOrder[j] == i)
 					{
-						bUsed = TRUE;
+						bUsed = true;
 						break;
 					}
 				}
 
-				if (!bUsed)
+				if (!bUsed && !onlyInSequence)
 				{
 					bUsed = !IsPatternEmpty(i);
 				}

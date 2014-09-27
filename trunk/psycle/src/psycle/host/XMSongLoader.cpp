@@ -1515,7 +1515,7 @@ namespace host{
 		if (period==0) {
 			return 255;
 		}
-		else if (period <= BIGMODPERIODTABLE[0] && period >= BIGMODPERIODTABLE[295]) {
+		else if (BIGMODPERIODTABLE[295] <= period && period <= BIGMODPERIODTABLE[0]) {
 			int count2=0;
 			for (;count2<37; count2++)
 			{
@@ -1523,10 +1523,8 @@ namespace host{
 					break;
 				}
 				else if (period > BIGMODPERIODTABLE[count2*8]) {
-					for (int i=0;i<4;i--) {
-						if (period < BIGMODPERIODTABLE[i*8]) {
-							break;
-						}
+					if (period < BIGMODPERIODTABLE[(count2*8)-4]) {
+						break;
 					}
 					count2--;
 					break;
@@ -1560,21 +1558,20 @@ namespace host{
 		XMInstrument instr;
 		instr.Init();
 		instr.Name(m_Samples[idx].sampleName);
-		bool isused=false;
 
 		if (m_Samples[idx].sampleLength > 0 ) 
 		{
-			isused = true;
 			LoadSampleData(song.samples.get(idx),idx);
+
+			int i;
+			XMInstrument::NotePair npair;
+			npair.second=idx;
+			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+				npair.first=i;
+				instr.NoteToSample(i,npair);
+			}
 		}
 
-		int i;
-		XMInstrument::NotePair npair;
-		npair.second=idx;
-		for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-			npair.first=i;
-			instr.NoteToSample(i,npair);
-		}
 		instr.ValidateEnabled();
 		song.xminstruments.SetInst(instr,idx);
 	}
@@ -1635,8 +1632,7 @@ namespace host{
 		// 8 bit mono sample
 		for(int j=0;j<sampleCnt;j++)
 		{
-//			if ( smpbuf[j] < 128 ) wNew = (smpbuf[j]<<8);
-//			else wNew = ((256-smpbuf[j])<<8);
+			//In mods, samples are signed integer, so we can simply left shift
 			wNew = (smpbuf[j]<<8);
 			*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew;
 		}

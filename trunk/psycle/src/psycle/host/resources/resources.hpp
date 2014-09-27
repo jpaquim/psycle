@@ -245,6 +245,7 @@
 #define IDC_COMBO1                      1137
 #define IDC_PANLABEL                    1138
 #define IDC_PAGEUPSTEPS                 1138
+#define IDC_REPLNOTECOMB                1138
 #define IDC_NNA_COMBO                   1139
 #define IDC_RPAN                        1140
 #define IDC_RCUT                        1141
@@ -848,7 +849,6 @@
 #define IDC_NEWMACAFTER                 1789
 #define IDC_OUTPUTFILE                  1790
 #define IDC_OUTPUTCLIPBOARD             1791
-#define IDC_APPLYTOPATTERN              1791
 #define IDC_PSYCLEVSTBRIDGE             1791
 #define IDC_ACCESS_EXCLUSIVE            1791
 #define IDC_MIDI_KEYBOARD               1791
@@ -861,9 +861,13 @@
 #define IDC_FILTERMAC                   1797
 #define IDC_FILTERCMD                   1798
 #define IDAPPLY                         1800
+#define ID_REPLACE                      1800
+#define IDD_REPLACE                     1800
 #define IDC_APPLYTOSONG                 1801
-#define IDC_APPLYTOBLOCK                1802
+#define IDC_APPLYTOPATTERN              1802
 #define IDC_LOCKINST                    1802
+#define IDC_APPLYTOBLOCK                1803
+#define IDD_SEARCH                      1804
 #define IDC_JBRIDGE                     1805
 #define IDC_ENABLEBRIDGE                1806
 #define IDC_CPU_PERF                    1808
@@ -961,10 +965,15 @@
 #define IDC_SAMPINST_CMB                2416
 #define IDC_VIRTINSTCMB                 2417
 #define IDC_LOCKINSTCMB                 2418
-#define IDC_COMBO2                      2419
 #define IDC_VIRTMACCOMBO                2419
 #define IDC_VIRTINST                    2420
 #define IDC_VIRTINSCOMBO                2421
+#define IDC_SEARCHINSTCOMB              2422
+#define IDC_SEARCHMACHCOMB              2423
+#define IDC_REPLINSTCOMB                2424
+#define IDC_REPLMACHCOMB                2425
+#define IDC_SEARCHNOTECOMB              2426
+#define IDC_CH_INCLUDEPAT               2427
 #define PSYC_ENVELOPE_CHANGED           4096
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
@@ -1165,6 +1174,12 @@
 #define ID_WAVEED_LOAD                  34433
 #define ID_WAVEED_SAVE                  34434
 #define ID_POPUPMAC_OPENBANKMANAGER     34435
+#define ID_EDIT_SEARCHANDREPLACE        34436
+#define ID__UNSETLOOP                   34437
+#define ID__UNSETSUSTAINLOOP            34438
+#define ID__SETSUSTAINSTART             34439
+#define ID__SETSUSTAINEND               34440
+#define ID__SETSUSTANTOSELECTION        34441
 #define ID_TEXT                         65535
 
 // Next default values for new objects
@@ -1173,8 +1188,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
-#define _APS_NEXT_COMMAND_VALUE         34436
-#define _APS_NEXT_CONTROL_VALUE         2422
+#define _APS_NEXT_COMMAND_VALUE         34443
+#define _APS_NEXT_CONTROL_VALUE         2428
 #define _APS_NEXT_SYMED_VALUE           64
 #endif
 #endif

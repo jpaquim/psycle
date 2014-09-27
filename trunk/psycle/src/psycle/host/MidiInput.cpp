@@ -341,7 +341,7 @@ Exit:
 		void CMidiInput::SetGenMap( int channel, int generator )
 		{
 			assert( channel < MAX_MIDI_CHANNELS );
-			assert( generator < MAX_MACHINES );
+			assert( generator < MAX_VIRTUALINSTS );
 			if(generator != m_channelGeneratorMap[ channel ])
 			{
 				m_channelGeneratorMap[ channel ] = generator;
@@ -699,7 +699,7 @@ Exit:
 								if(mac && inst < mac->GetNumParams())
 								{	
 									int minval, maxval;
-									machines[busMachine]->GetParamRange(inst, minval, maxval);
+									mac->GetParamRange(inst, minval, maxval);
 									int value = minval + helpers::math::round<int, float>( data2 * (maxval-minval) / 127.f);
 									cmd = value / 256;
 									parameter = value % 256;
@@ -983,7 +983,7 @@ Exit:
 					// switch on controller ID
 					switch( data1 )
 					{
-						// BANK SELECT (controller 0)
+						// BANK SELECT (controller 0) MSB
 						case 0:
 						{
 							// banks select -> map generator to channel
@@ -1010,6 +1010,10 @@ Exit:
 							}
 						}
 						break;
+						//BANK SELECT (controller 32) LSB
+						case 0x20: 
+							//TODO: For virtual instruments.
+							break;
 						case 0x78:
 							//fallthrough
 						case 0x7B:

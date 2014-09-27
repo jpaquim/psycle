@@ -139,7 +139,7 @@ namespace psycle { namespace helpers {
 		MsRiff::Close();
 	}
 
-	//TODO: Improvement map of chunk ids and positions, so that allowWrap is only used to seek back too
+	//TODO: Improvement map of chunk ids and positions, so that allowWrap is only used to seek back to
 	// an already found chunk, not to read the whole file again.
 	const BaseChunkHeader& RiffWave::findChunk(const IffChunkId& id, bool allowWrap)
 	{

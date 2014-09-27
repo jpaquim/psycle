@@ -63,6 +63,7 @@ BOOL CInstrNoteMap::OnInitDialog()
 	m_NoteList.SetColumnWidth(35);
 	m_NoteList.SetFont(m_font);
 	m_NoteMapList.SetFont(m_font);
+	m_SampleList.SetColumnWidth(150);
 
 	m_ShiftMove.AddString(_T("Change tune"));
 	m_ShiftMove.AddString(_T("Move all"));

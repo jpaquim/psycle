@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.private.hpp>
 #include "SkinDlg.hpp"
 #include "SkinIO.hpp"
+#include <psycle/helpers/pathname_validate.hpp>
 
 namespace psycle { namespace host {
 
@@ -754,7 +755,10 @@ namespace psycle { namespace host {
 				std::strcpy(szPath,PsycleGlobal::conf().GetAbsoluteSkinDir().c_str());
 			}
 			else{
-				CString str1(filename.c_str());
+				std::string nametemp = filename;
+				pathname_validate::validate(nametemp);
+
+				CString str1(nametemp.c_str());
 				int i = str1.ReverseFind('\\')+1;
 				CString str2 = str1.Mid(i);
 				std::strcpy(szFile,str2);

@@ -132,6 +132,7 @@
     <ClInclude Include="src\psycle\helpers\msriff.hpp" />
     <ClInclude Include="src\psycle\helpers\riff.hpp" />
     <ClInclude Include="src\psycle\helpers\riffwave.hpp" />
+	<ClInclude Include="src\psycle\helpers\pathname_validate.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

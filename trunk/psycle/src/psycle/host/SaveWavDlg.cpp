@@ -12,6 +12,8 @@
 #include "Player.hpp"
 #include "Song.hpp"
 
+#include <psycle/helpers/pathname_validate.hpp>
+
 #include <iomanip>
 #include <iostream>
 
@@ -283,7 +285,10 @@ namespace psycle { namespace host {
 			static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 			CString direct;
 			m_filename.GetWindowText(direct);
-			CFileDialog dlg(false,"wav",direct,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
+			std::string nametemp = direct;
+			pathname_validate::validate(nametemp);
+
+			CFileDialog dlg(false,"wav",nametemp.c_str(),OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT,szFilter);
 			if ( dlg.DoModal() == IDOK ) 
 			{
 				CString str = dlg.GetPathName();

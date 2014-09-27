@@ -95,14 +95,14 @@ namespace psycle
 			return b;
 		}
 
-		bool RiffFile::Read(void* pData, std::size_t numBytes)
+		bool RiffFile::ReadInternal(void* pData, std::size_t numBytes)
 		{
 			DWORD bytesRead;
 			if(!ReadFile(_handle, pData, numBytes, &bytesRead, 0)) return false;
 			return bytesRead == numBytes;
 		}
 
-		bool RiffFile::Write(void const * pData, std::size_t numBytes)
+		bool RiffFile::WriteInternal(void const * pData, std::size_t numBytes)
 		{
 			DWORD bytesWritten;
 			if(!WriteFile(_handle, pData, numBytes, &bytesWritten, 0)) return false;
@@ -275,13 +275,13 @@ namespace psycle
 			return true;
 		}
 
-		bool OldPsyFile::Read(void* pData, std::size_t numBytes)
+		bool OldPsyFile::ReadInternal(void* pData, std::size_t numBytes)
 		{
 			std::size_t bytesRead = std::fread(pData, sizeof(char), numBytes, _file);
 			return bytesRead == numBytes;
 		}
 
-		bool OldPsyFile::Write(void const * pData, std::size_t numBytes)
+		bool OldPsyFile::WriteInternal(void const * pData, std::size_t numBytes)
 		{
 			std::size_t bytesWritten = std::fwrite(pData, sizeof(char), numBytes, _file);
 			if (numBytes > 1024) std::fflush(_file);

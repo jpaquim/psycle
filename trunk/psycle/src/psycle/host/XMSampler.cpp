@@ -2519,6 +2519,7 @@ namespace psycle
 					}
 					else if(pData->_note == notecommands::release ){
 						currentVoice->NoteOff();
+						thisChannel.StopBackgroundNotes(XMInstrument::NewNoteAction::NOTEOFF);
 						thisChannel.Note(pData->_note);
 					}
 				}

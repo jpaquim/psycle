@@ -59,9 +59,6 @@ namespace psycle
 		/// that use the Motorola integer byte-ordering format rather than the Intel format.
 		/// A RIFX file is the same as a RIFF file, except that the first four bytes are "RIFX" instead of "RIFF",
 		/// and integer byte ordering is represented in Motorola format.
-		/// <bohan> haha... now the problem is...
-		/// <bohan> " the first four bytes are "RIFX" instead of "RIFF" ",
-		/// <bohan> so, on x86 cpus, should we read "XFIR"?
 		///////////////////////////////////////////////////////////
 		////////////////////// \todo handle endianess
 		///////////////////////////////////////////////////////////
@@ -80,11 +77,13 @@ namespace psycle
 			virtual FILE* GetFile() { return 0; }
 
 		public://private:
-			virtual bool Read(void * pData, std::size_t numBytes);
-			virtual bool Write(void const * pData, std::size_t numBytes);
+			inline bool Read(void * pData, std::size_t numBytes) { return ReadInternal(pData, numBytes); };
+			inline bool Write(void const * pData, std::size_t numBytes) { return WriteInternal(pData, numBytes); }
 		private:
 			template<typename T> void WriteRaw(T const & t) { Write(&t, sizeof t); }
 			template<typename T> void ReadRaw(T & t) { Read(&t, sizeof t); }
+			virtual bool ReadInternal(void * pData, std::size_t numBytes);
+			virtual bool WriteInternal(void const * pData, std::size_t numBytes);
 		public:
 			bool ReadString(std::string & string);
 			bool ReadString(char* pData, std::size_t maxBytes);
@@ -323,21 +322,22 @@ namespace psycle
 		{
 		public:
 			virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
-			bool Read(void* pData, std::size_t numBytes);
-			bool Write(const void* pData, std::size_t numBytes);
 
-			bool Open(std::string const & FileName);
-			bool Create(std::string const & FileName, bool overwrite);
-			bool Close();
-			bool Expect(const void* pData, std::size_t numBytes);
-			int Seek(std::size_t offset);
-			int Skip(std::size_t numBytes);
-			bool Eof();
-			std::size_t FileSize();
-			std::size_t GetPos();
-			FILE* GetFile() { return _file; }
+			virtual bool Open(std::string const & FileName);
+			virtual bool Create(std::string const & FileName, bool overwrite);
+			virtual bool Close();
+			virtual bool Expect(const void* pData, std::size_t numBytes);
+			virtual int Seek(std::size_t offset);
+			virtual int Skip(std::size_t numBytes);
+			virtual bool Eof();
+			virtual std::size_t FileSize();
+			virtual std::size_t GetPos();
+			virtual FILE* GetFile() { return _file; }
 		public:
 			bool Error();
+		private:
+			/*override*/ bool ReadInternal(void* pData, std::size_t numBytes);
+			/*override*/ bool WriteInternal(const void* pData, std::size_t numBytes);
 		protected:
 			FILE* _file;
 		};

@@ -331,8 +331,8 @@ namespace psycle { namespace host {
 				"Mark McCormack\t\t\tMIDI (in) Support in release 1.6" "\r\n"
 				"Mats Höjlund\t\t\tMain Developer until release 1.5" "\r\n" // (Internal Recoding) .. doesn't fit in the small box :/
 				"Juan Antonio Arguelles [Arguru] (RIP)\tOriginal Developer and maintainer until 1.0" "\r\n"
-				"Satoshi Fujiwara\t\t\tBase code of the Sampulse machine\r\n"
-				"Hermann Seib\t\t\tBase code of the new VST Host in 1.8.5\r\n"
+				"Satoshi Fujiwara\t\t\tBase code for the Sampulse machine\r\n"
+				"Hermann Seib\t\t\tBase code for the new VST Host in 1.8.5\r\n"
 				"Martin Etnestad Johansen [lobywang]\tCoding Help" "\r\n"
 				"Patrick Haworth [TranceMyriad]\tAuthor of the Help File" "\r\n"
 				"Budislav Stepanov\t\t\tNew artwork for version 1.11\r\n"

@@ -146,6 +146,7 @@ namespace psycle
 							AllocateVoice(channel,i);
 							PatternEntry pTemp = *pData;
 							CustomTick(channel,i, pTemp);
+							if (pTemp._note < notecommands::release && alternateinst != -1) pTemp._inst = alternateinst;
 							// this can happen if the parameter is the machine itself.
 							if (pmac != this) 
 							{
@@ -372,6 +373,7 @@ namespace psycle
 						{
 							AllocateVoice(channel,i);						
 							CustomTick(channel,i, pTemp);
+							if (alternateinst != -1) pTemp._inst = alternateinst;
 						}
 						// this can happen if the parameter is the machine itself.
 						if (pmac != this) 

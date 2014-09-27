@@ -8,8 +8,7 @@
 #include "XMInstrument.hpp"
 #include <psycle/helpers/filter.hpp>
 #include <psycle/helpers/datacompression.hpp>
-#include <psycle/helpers/math/clip.hpp>
-#include <psycle/helpers/math/round.hpp>
+#include <psycle/helpers/math/math.hpp>
 #include "FileIO.hpp"
 #include <cassert>
 namespace psycle

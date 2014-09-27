@@ -180,6 +180,7 @@ namespace psycle { namespace host {
 			ON_UPDATE_COMMAND_UI(ID_RECORDB, OnUpdateRecordWav)
 			ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 			ON_COMMAND(ID_EDIT_REDO, OnEditRedo)
+			ON_COMMAND(ID_EDIT_SEARCHANDREPLACE, OnEditSearchReplace)
 			ON_COMMAND(ID_EDIT_CUT, patCut)
 			ON_COMMAND(ID_EDIT_COPY, patCopy)
 			ON_COMMAND(ID_EDIT_PASTE, patPaste)
@@ -305,11 +306,11 @@ namespace psycle { namespace host {
 			return TRUE;
 		}
 
-		/// This function gives to the pParentMain the pointer to a CMainFrm
+		/// This function gives to the pParentMain the pointer to a CMainFrame
 		/// object. Call this function from the CMainFrm side object to
-		/// allow CChildView call functions of the CMainFrm parent object
+		/// allow CChildView call functions of the CMainFrame parent object
 		/// Call this function after creating both the CChildView object and
-		/// the CMainFrm object
+		/// the CMainFrame object
 		void CChildView::ValidateParent()
 		{
 			pParentMain=(CMainFrame *)pParentFrame;
@@ -1325,12 +1326,9 @@ namespace psycle { namespace host {
 
 		void CChildView::ShowTransformPatternDlg(void)
 		{
-			CTransformPatternDlg dlg(_pSong);
-
-			if (dlg.DoModal() == IDOK)
-			{
-				///\todo: Implement.
-			}
+			CTransformPatternDlg dlg(_pSong, *this);
+			//\todo: implement as a modeless dialog
+			dlg.DoModal();
 		}
 
 		void CChildView::ShowPatternDlg(void)
@@ -1805,6 +1803,10 @@ namespace psycle { namespace host {
 			ShowSwingFillDlg(TRUE);
 		}
 
+		void CChildView::OnEditSearchReplace()
+		{
+			ShowTransformPatternDlg();			
+		}
 		void CChildView::OnUpdateUndo(CCmdUI* pCmdUI)
 		{
 			if(PsycleGlobal::inputHandler().HasUndo(viewMode))
@@ -2002,8 +2004,19 @@ namespace psycle { namespace host {
 					file = new MODSongLoader();
 				}
 				else {
-					MessageBox("Could not Open file. Check that it uses a supported extension/format.", "Loading Error", MB_OK);
-					return;
+					file = new MODSongLoader();
+					if (!file->Open(fName.c_str())) {
+						MessageBox("Could not Open file. Check that the location is correct.", "Loading Error", MB_OK);
+						delete file;
+						return;
+					}
+					bool valid = dynamic_cast<MODSongLoader*>(file)->IsValid();
+					file->Close();
+					if (!valid) {
+						delete file;
+						MessageBox("Could not Open file. Check that it uses a supported extension/format.", "Loading Error", MB_OK);
+						return;
+					}
 				}
 			}
 			if (!file->Open(fName.c_str())) {

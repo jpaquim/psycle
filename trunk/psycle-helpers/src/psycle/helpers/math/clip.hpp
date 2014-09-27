@@ -52,7 +52,7 @@ SignedIntegralResult inline rint_clip(Real x) {
 
 /// combines float to signed integer conversion with clipping.
 /// Amount has to be a multiple of 8, and both in and out be 16-byte aligned.
-inline void rint_clip_array(const float in[], int16_t out[], int amount) {
+inline void rint_clip_array(const float in[], short out[], int amount) {
 	#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		__m128 *psrc = (__m128*)in;
 		__m128i *pdst = (__m128i*)out;
@@ -87,7 +87,7 @@ inline void rint_clip_array(const float in[], int16_t out[], int amount) {
 		}
 	#else
 		do {
-			*out++ = rint_clip<int16_t>(*in++);
+			*out++ = rint_clip<short>(*in++);
 		} while(--amount);
 
 	#endif

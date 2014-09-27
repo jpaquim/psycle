@@ -18,6 +18,8 @@ namespace host {
 		class SPatternHeaderCoords;
 		class SMachineCoords;
 
+		class CTransformPatternDlg;
+
 		#define MAX_WIRE_DIALOGS 16
 		#define MAX_DRAW_MESSAGES 32
 
@@ -101,6 +103,33 @@ namespace host {
 			CCursor end;	//
 		};
 
+		class CSearchReplaceMode
+		{
+		public:
+			typedef bool (*matches_func)(const uint8_t test, const uint8_t reference);
+			static bool MatchesAll(const uint8_t, const uint8_t ) { return true; };
+			static bool MatchesEmpty(const uint8_t test, const uint8_t ) { return test==0xFF; };
+			static bool MatchesNonEmpty(const uint8_t test, const uint8_t ) { return test!=0xFF; };
+			static bool MatchesEqual(const uint8_t test, const uint8_t reference) { return test==reference; };
+			typedef uint8_t (*replacewith_func)(const uint8_t current, const uint8_t newval);
+			static uint8_t ReplaceWithEmpty(const uint8_t, const uint8_t) { return 0xFF; };
+			static uint8_t ReplaceWithCurrent(const uint8_t current, const uint8_t) { return current; };
+			static uint8_t ReplaceWithNewVal(const uint8_t, const uint8_t newval) { return newval; };
+
+			matches_func notematcher;
+			matches_func instmatcher;
+			matches_func machmatcher;
+			replacewith_func notereplacer;
+			replacewith_func instreplacer;
+			replacewith_func machreplacer;
+			uint8_t notereference;
+			uint8_t instreference;
+			uint8_t machreference;
+			uint8_t notereplace;
+			uint8_t instreplace;
+			uint8_t machreplace;
+		};
+
 		enum {
 			UNDO_PATTERN,
 			UNDO_LENGTH,
@@ -121,6 +150,7 @@ namespace host {
 		class CChildView : public CWnd
 		{
 		public:
+			friend class CTransformPatternDlg;
 			CChildView();
 			virtual ~CChildView();
 
@@ -136,7 +166,7 @@ namespace host {
 			void BlockGenChange(int x);
 			void ShowSwingFillDlg(bool bTrackMode);
 
-			void EnterData(PatternEntry *newentry, int track, int line, bool force/*=true*/);
+			void EnterData(PatternEntry *newentry, int track, int line, bool force=true, bool advanceline=true);
 			void EnterNoteoffAny();
 			bool MSBPut(int nChar);
 			void PrevTrack(int x,bool wrap,bool updateDisplay=true);
@@ -174,6 +204,12 @@ namespace host {
 			void BlockUnmark(void);
 			void SaveBlock(FILE* file, int pattern=-1);
 			void LoadBlock(FILE* file, int pattern=-1);
+			
+			// In search: 1001 empty, 1002 non-empty, 1003 all, other -> exact match
+			// In replace: 1001 set empty, 1002 -> keep existing, other -> replace value
+			CSearchReplaceMode SetupSearchReplaceMode(int searchnote, int searchinst, int searchmach, int replnote=-1, int replinst=-1, int replmach=-1);
+			CCursor SearchInPattern(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode);
+			bool SearchReplace(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode);
 
 			void DecCurPattern();
 			void IncCurPattern();
@@ -538,6 +574,7 @@ namespace host {
 			afx_msg void OnEditUndo();
 			afx_msg void OnEditRedo();
 			protected:
+			afx_msg void OnEditSearchReplace();
 			afx_msg void OnUpdateUndo(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateRedo(CCmdUI* pCmdUI);
 			afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
@@ -706,5 +743,6 @@ namespace host {
 			return (_x >= _offs+_src.x) && (_x < _offs+_src.x+_src2.width) && 
 				(_y >= _src.y) && (_y < _src.y+_src2.height);
 		}
+
 
 }}

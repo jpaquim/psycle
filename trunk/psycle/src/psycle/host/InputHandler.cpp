@@ -1004,6 +1004,11 @@ namespace psycle
 				//if not a virtual instrument, or a tweak/mcm command, send it directly
 				if (inst == -1 || pEntry->_note > notecommands::release) {
 					pMachine->Tick(track, pEntry);
+					if (pEntry->_note <= notecommands::release ) {
+						notetrack[track]=pEntry->_note;
+						instrtrack[track]=pEntry->_inst;
+						mactrack[track]=pEntry->_mach;
+					}
 				}
 				else {
 					//If aux column is used, send it.
@@ -1019,11 +1024,11 @@ namespace psycle
 					PatternEntry entry(*pEntry);
 					entry._inst = inst;
 					pMachine->Tick(track, &entry);
-				}
-				if (pEntry->_note <= notecommands::release ) {
-					notetrack[track]=pEntry->_note;
-					instrtrack[track]=pEntry->_inst;
-					mactrack[track]=pEntry->_mach;
+					if (entry._note <= notecommands::release ) {
+						notetrack[track]=entry._note;
+						instrtrack[track]=entry._inst;
+						mactrack[track]=entry._mach;
+					}
 				}
 			}
 		}
@@ -1119,6 +1124,7 @@ namespace psycle
 			else
 			{
 				int alternateins=-1;
+				bool sampulse=false;
 				Machine *tmac = (mac != NULL) ? mac : song.GetMachineOfBus(macIdx, alternateins);
 				if (tmac)
 				{
@@ -1132,14 +1138,25 @@ namespace psycle
 					{
 						entry._mach = song._pInstrument[instNo]->sampler_to_use;
 					}
+					sampulse= (tmac->_type == MACH_XMSAMPLER);
 				}
 
 				if ( velocity < 127 && entry._note < notecommands::release && (forcevolume || PsycleGlobal::conf().inputHandler()._RecordTweaks))
 				{
 					if (midiconf.raw())
 					{
-						entry._cmd = 0x0C;
-						entry._parameter = velocity * 2;
+						if (alternateins != -1) {
+							if (sampulse) {
+								entry._inst = velocity / 2;
+							}
+							else {
+								entry._inst = velocity * 2;
+							}
+						}
+						else {
+							entry._cmd = 0x0C;
+							entry._parameter = velocity * 2;
+						}
 					}
 					else if (midiconf.velocity().record())
 					{
@@ -1188,15 +1205,17 @@ namespace psycle
 			PatternEntry entry;
 			if(pChildView->viewMode == view_modes::pattern && pChildView->bEditMode)
 			{ 
+				bool recording = Global::player()._playing && config._followSong;
 				// add note
-				if(velocity > 0 || 
-					(Global::player()._playing && config._followSong && settings._RecordNoteoff))
+				if(velocity > 0 || (recording && settings._RecordNoteoff))
 				{
 					entry = BuildNote(outnote, channel,velocity,false, mac);
 					int line=0;
 					track = GetTrackAndLineToEdit(outnote,
 						entry._mach, entry._inst, velocity==0, false, line);
-					pChildView->EnterData(&entry, track, line, velocity > 0);
+					bool write = (!recording || track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
+					if (track == -1) track = pChildView->editcur.track;
+					if (write) pChildView->EnterData(&entry, track, line, velocity > 0, !recording);
 				}
 				else {
 					entry = BuildNote(outnote, channel,velocity,false, mac, true);
@@ -1212,25 +1231,34 @@ namespace psycle
 
 		void InputHandler::MidiPatternTweak(int busMachine, int tweakidx, int value, bool slide) {
 			PatternEntry entry = BuildTweak(busMachine, tweakidx, value, slide);
+			bool recording = Global::player()._playing && PsycleGlobal::conf()._followSong;
 			int line=0;
 			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
-			pChildView->EnterData(&entry,  track, line, true);
+			bool write = (!recording || track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
+			if (track == -1) track = pChildView->editcur.track;
+			if (write) pChildView->EnterData(&entry,  track, line, true, false);
 			PlayNote(&entry, track);
 		}
 
 		void InputHandler::MidiPatternCommand(int busMachine, int command, int value){
 			PatternEntry entry(notecommands::empty,255,busMachine,command&0xFF,value&0xFF);
+			bool recording = Global::player()._playing && PsycleGlobal::conf()._followSong;
 			int line=0;
 			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
-			pChildView->EnterData(&entry,  track, line, false);
+			bool write = (!recording || track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
+			if (track == -1) track = pChildView->editcur.track;
+			if (write) pChildView->EnterData(&entry,  track, line, false, false);
 			PlayNote(&entry, track);
 		}
 
 		void InputHandler::MidiPatternMidiCommand(int busMachine, int controlCode, int value){
 			PatternEntry entry(notecommands::midicc,controlCode,busMachine,(value&0xFF00)>>8,value&0xFF);
+			bool recording = Global::player()._playing && PsycleGlobal::conf()._followSong;
 			int line=0;
 			int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
-			pChildView->EnterData(&entry,  track, line, true);
+			bool write = (!recording || track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
+			if (track == -1) track = pChildView->editcur.track;
+			if (write) pChildView->EnterData(&entry,  track, line, true, false);
 			PlayNote(&entry, track);
 		}
 
@@ -1245,9 +1273,12 @@ namespace psycle
 			if(settings._RecordTweaks)
 			{
 				PatternEntry entry = BuildTweak(macIdx, param, value, settings._RecordMouseTweaksSmooth);
+				bool recording = Global::player()._playing && PsycleGlobal::conf()._followSong;
 				int line=0;
 				int track = GetTrackAndLineToEdit(entry._note, entry._mach, entry._inst, false, false, line);
-				pChildView->EnterData(&entry,  track, line, true);
+				bool write = (!recording || track != -1 || PsycleGlobal::conf().inputHandler()._RecordUnarmed);
+				if (track == -1) track = pChildView->editcur.track;
+				if (write) pChildView->EnterData(&entry,  track, line, true, false);
 			}
 		}
 		////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
 #include <psycle/helpers/filetypedetector.hpp>
+#include <psycle/helpers/pathname_validate.hpp>
 
 namespace psycle{ namespace host{
 	extern CPsycleApp theApp;
@@ -100,12 +101,23 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	void MachineBar::OnBDecgen() // called by Button and Hotkey.
 	{
 		const int val = m_gencombo.GetCurSel();
-		if ( val > 0 ) m_gencombo.SetCurSel(val-1);
-		else m_gencombo.SetCurSel(m_gencombo.GetCount()-1);
+		if ( val > 0 ) {
+			m_gencombo.SetCurSel(m_gencombo.GetCurSel()-1);
+			while( m_gencombo.GetCurSel() > 0 && m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535)
+			{
+				m_gencombo.SetCurSel(m_gencombo.GetCurSel()-1);
+			}
+		}
+		if ( val == 0 || m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535) {
+			m_gencombo.SetCurSel(m_gencombo.GetCount()-1);
+			while( m_gencombo.GetCurSel() > 0 && m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535)
+			{
+				m_gencombo.SetCurSel(m_gencombo.GetCurSel()-1);
+			}
+		}
 		if ( m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535 )
 		{
-			if ( val >1) m_gencombo.SetCurSel(val-2);
-			else m_gencombo.SetCurSel(val);
+			m_gencombo.SetCurSel(val);
 		}
 		OnSelchangeBarCombogen();
 		((CButton*)GetDlgItem(IDC_B_DECGEN))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
@@ -115,12 +127,23 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	void MachineBar::OnBIncgen() // called by Button and Hotkey.
 	{
 		const int val = m_gencombo.GetCurSel();
-		if ( val < m_gencombo.GetCount()-1 ) m_gencombo.SetCurSel(val+1);
-		else m_gencombo.SetCurSel(0);
+		if ( val < m_gencombo.GetCount()-1 ) {
+			m_gencombo.SetCurSel(m_gencombo.GetCurSel()+1);
+			while( m_gencombo.GetCurSel() < m_gencombo.GetCount()-1 && m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535)
+			{
+				m_gencombo.SetCurSel(m_gencombo.GetCurSel()+1);
+			}
+		}
+		if (val == m_gencombo.GetCount()-1 || m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535) {
+			m_gencombo.SetCurSel(0);
+			while( m_gencombo.GetCurSel() < m_gencombo.GetCount()-1 && m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535)
+			{
+				m_gencombo.SetCurSel(m_gencombo.GetCurSel()+1);
+			}
+		}
 		if ( m_gencombo.GetItemData(m_gencombo.GetCurSel()) == 65535 )
 		{
-			if ( val < m_gencombo.GetCount()-2) m_gencombo.SetCurSel(val+2);
-			else m_gencombo.SetCurSel(val);
+			m_gencombo.SetCurSel(val);
 		}
 		OnSelchangeBarCombogen();
 		((CButton*)GetDlgItem(IDC_B_INCGEN))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
@@ -754,7 +777,9 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 
 		const XMInstrument::WaveData<> & wave = m_pSong->samples[waveIdx];
-		CFileDialog dlg(FALSE, "wav", wave.WaveName().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
+		std::string nametemp = wave.WaveName();
+		pathname_validate::validate(nametemp);
+		CFileDialog dlg(FALSE, "wav", nametemp.c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		if (dlg.DoModal() == IDOK)
@@ -837,7 +862,9 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		static const char szFilter[] = "Psycle Instrument (*.psins)|*.psins||";//TODO: XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti||";
 
 		const XMInstrument instr = m_pSong->xminstruments[instIdx];
-		CFileDialog dlg(FALSE, "psins", instr.Name().c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
+		std::string nametemp = instr.Name();
+		pathname_validate::validate(nametemp);
+		CFileDialog dlg(FALSE, "psins", nametemp.c_str(), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_NOREADONLYRETURN | OFN_DONTADDTORECENT, szFilter);
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		if (dlg.DoModal() == IDOK)

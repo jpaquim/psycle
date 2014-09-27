@@ -114,13 +114,13 @@ namespace psycle
 					song.samples.SetSample(wave, curSample);
 					sRemap.push_back(curSample);
 				}
-				else { sRemap.push_back(MAX_INSTRUMENTS-1); }
+				else { sRemap.push_back(255); }
 			}
 
 			for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
 			{
 				XMInstrument::NotePair npair = instr.NoteToSample(i);
-				npair.second=sRemap[(npair.second<inshead.noS)?npair.second:0];
+				npair.second=(npair.second<inshead.noS) ? sRemap[npair.second] : 255;
 				instr.NoteToSample(i,npair);
 			}
 			song.xminstruments.SetInst(instr,idx);

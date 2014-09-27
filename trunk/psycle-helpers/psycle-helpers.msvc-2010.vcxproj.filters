@@ -176,6 +176,9 @@
     <ClInclude Include="src\psycle\helpers\riffwave.hpp">
       <Filter>psycle\helpers\file</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\helpers\pathname_validate.hpp">
+      <Filter>psycle\helpers\file</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\helpers\dspslide.hpp">
       <Filter>psycle\helpers\dsp</Filter>
     </ClInclude>

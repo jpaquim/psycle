@@ -11,7 +11,6 @@ namespace psycle
 	namespace host
 	{
 		class CChildView;
-		class CMainFrm;
 		class Machine;
 
 		class SPatternUndo

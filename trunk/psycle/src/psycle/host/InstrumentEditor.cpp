@@ -133,12 +133,12 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			m_a_attack_slider.SetRange(1,1000);
 			m_a_decay_slider.SetRange(1,1000);
 			m_a_sustain_slider.SetRange(0,100);
-			m_a_release_slider.SetRange(16,2000);
+			m_a_release_slider.SetRange(1,2000);
 
 			m_f_attack_slider.SetRange(1,1000);
 			m_f_decay_slider.SetRange(1,1000);
 			m_f_sustain_slider.SetRange(0,128);
-			m_f_release_slider.SetRange(16,2000);
+			m_f_release_slider.SetRange(1,2000);
 				
 			m_f_amount_slider.SetRange(-128,128);
 			//Hack to fix "0 placed on leftmost on start".
@@ -881,7 +881,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				else if (pNMHDR->idFrom == IDC_SLIDER_FILSUS) {
 					m_filframe.SustainValue(value_mapper::map_128_1(nPos));
 					m_filframe.Invalidate();
-					sprintf(buffer,"%d%%",nPos);
+					sprintf(buffer,"%d%%",nPos*0.78125f);
 					label = IDC_F_S_LABEL;
 				}
 				else if (pNMHDR->idFrom == IDC_SLIDER_FILREL) {
