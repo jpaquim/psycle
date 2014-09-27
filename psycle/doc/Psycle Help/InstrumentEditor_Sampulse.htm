@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="InstrumentEditor_Sampler.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="InstrumentEditor_Waves.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Instrument Editor for Sampulse</p>
+<center><img src="instrument_editor_sampulse.png" border="0" alt="" /></center>
+<p>Use the list on the top left to navigate between the different instruments, and use the tabs to change
+between the different parameter windows. Each one is described in detail below.</p>
+<br />
+The list on the bottom left allows to see which wave samples are used by the selected instrument.<br />
+<p class="head3"><a	name="settings">Instrument List Buttons</a></p>
+<p><img src="sampulse_load.png" align="top" alt="" /> <b>Load</b> &ndash;
+Loads an instrument file from disk into the currently selected instrument
+position.</p>
+<p><img src="sampulse_save.png" align="top" alt="" /> <b>Save</b> &ndash;
+Save the currently selected instrument to disk.</p>
+<p><img src="sampulse_duplicate.png" align="top" alt="" /> <b>Duplicate</b> &ndash;
+Creates a new instrument with a copy of the currently selected one</p>
+<p><img src="sampulse_delete.png" align="top" alt="" /> <b>Delete</b> &ndash;
+Deletes the current instrument. If it has samples, it also asks if
+it should delete them too.</p>
+
+<p class="head2"> <a name="pitchtab">Pitch tab</a></p>
+<p><b>Instrument name</b> &ndash; Changes the name of the instrument.</p>
+<p><b>Virtual generator</b> &ndash; Use the <a href="Sampler_Using_Virtual.htm">Virtual generator for instruments</a>.</p>
+<p><b>Set default mapping</b> &ndash; Sets the default settings of note and sample for the note mapping of this instrument.</p>
+<p><b>Set Sample</b> &ndash; Sets the indicated wave sample (a popup menu appears when clicking on it) as the sample for all the notes of this instrument.</p>
+<p><b>Edit mapping</b> &ndash; Opens the <a href="#notemapping">Note mapping editor</a>. See below</p>
+
+<p><b>New Note Action</b> &ndash; Whether to cut, release, start fading or do nothing (continue)
+when another note from the same machine is triggered while the previous
+note is still playing.<br />
+It is possible to indicate an alternate action in case of the same note, sample or instrument</p>
+<p><b>keyboard</b> &ndash; Offers a visual representation of the mapping, and 
+allows to modify it note by note, when clicking over one.</p>
+
+<p class="head3"><a name="envelopeeditor">Envelope</a></p>
+Sampulse offers a freeform envelope editor, able to define multiple
+points, as well as defining sustain and continuous loops.
+The editor can be edited directly dragging with the mouse. 
+The right click (context) menu allows to add, remove and set the points and loops<br/>
+<center><img src="sampulse_evenlopepopup.png"></center>
+<p><b>Envelope enabled</b> &ndash; Activaes or deactivates the envelope. Note: Envelope can be temporarily de/activated from the pattern with the 0EEx command (See tweakings.txt of the help in Sampulse machine)</p>
+<p><b>Carry (continue)</b> &ndash; An envelope that has carry enabled will not start from the start if a new note comes while the previous note was still active (i.e. not stopped nor doing noteoff).</p>
+<p><b>Millis and Ticks</b> &ndash; Configures the resolution of the envelope. When working in millis, the envelope lasts the same whenver the tempo changes. With ticks, the envelope duration changes when tempo changes.</p>
+<p><b>ADSR and freeform</b> &ndash; Configures the way that the envelope can be edited. ADSR mode defines an Attack-decay-sustain-release envelope, and the six sliders below the envelope can be used to modify it. In freeform mode, the sliders are disabled, and the envelope can be changed and edited with the mouse.</p>
+<p><b>Sustain</b> &ndash; Defines the sustain loop points. A sustain loop loops only until a noteoff is received. The loop begin and loop end can be the same or different points.</p>
+<p><b>Loop</b> &ndash; Defines the continuous loop points. A continuous loop loops until the note stops. The loop begin and loop end can be the same or different points.</p>
+<p><b>Base</b> &ndash; For an ADSR envelope, allows to move up or down the start and end points.</p>
+<p><b>Modulation</b> &ndash; For an ADSR envelope, allows to move up or down the attack and sustain points.</p>
+<p><b>Attack</b> &ndash; For an ADSR envelope, allows set the attack time.</p>
+<p><b>Decay</b> &ndash; For an ADSR envelope, allows set the decay time.</p>
+<p><b>Sustain</b> &ndash; For an ADSR envelope, allows set the sustain amount.</p>
+<p><b>Release</b> &ndash; For an ADSR envelope, allows set the release time.</p>
+
+<p class="head2"> <a name="notemapping">Note mapping editor</a></p>
+<p>Sampulse instruments can use more than one sample at a time, and to do so, they use the
+note mapping, which means that each of the possible notes, will trigger a
+specific note and sample number.<br />
+In the capture, the note F-3 will trigger the sample 0B and play it with the note F-3 as well.
+</p>
+<p>The window is divided in three distinct zones.<br />
+On the left there is the list of maps. First is the note mapped, next the note that will play instead, and the third is the sample number.<br />
+On the top right there is the list of the possible target notes. Click on one of them to change the mapping.<br />
+On the bottom right there is the list of possible samples. Cick on one of them to change the mapping.
+</p>
+<center><img src="sampulse_notemapping.png" border="0" alt="" /></center>
+<p><b>All</b> &ndash; Select all maps</p>
+<p><b>None</b> &ndash; Deselect all maps</p>
+<p><b>Oct</b> &ndash; Select the maps for the current octave</p>
+<p><b>Change Tune/Move</b> &ndash; The arrows and dropdown allow to modify the selected notes, or all notes at the same time.<br />
+Change tune only alter the target note. Move shifts the mapping down or up for note, sample or both.</p>
+<p><b>Edit mapping/show usage</b> &ndash; In edit mode, when clicking on the lists on the right side, the mapping will get altered. If in show mode, instead of editing the mapping, it will show which maps use it.</p>
+<p><b>Set default</b> &ndash; Sets the default settings of note and sample for the note mapping of this instrument.</p>
+
+
+<p class="head2"> <a name="amplitudetab">Amplitude Tab</a></p>
+<center><img src="sampulse_amplitudetab.png" border="0" alt="" /></center>
+<p>The amplitude tab allows to change settings related to the volume. The envelope works just in the same way than the <a href="#envelopeeditor">pitch envelope</a> but it applies to the volume.</p>
+<p><b>Global Volume</b> &ndash; Indicates the global attenuation that will have all the notes played with this instrument.</p>
+<p><b>Swing (Randomize)</b> &ndash; Percentage of randomization of volume on new notes. The higher the swing, the more it can deviate from Global Volume.</p>
+<p><b>Fadeout</b> &ndash; Duration of the fadeout. Fadeout is triggered when a noteoff is called and the envelope doesn't stop, or when the note fadeout NNA is used.</p>
+
+<p class="head2"> <a name="pantab">Pan Tab</a></p>
+<center><img src="sampulse_pantab.png" border="0" alt="" /></center>
+<p>The pan tab allows to change settings related to the stereo pan. The envelope works just in the same way than the <a href="#envelopeeditor">pitch envelope</a> but it applies to the pan.</p>
+<p><b>Instrument pan check</b> &ndash; Indicates if new notes of this instrument will use the specific pan, or will obey the channel pan.</p>
+<p><b>Instrument pan slider</b> &ndash; If enabled, indicates the pan that new notes of this instrument will use.</p>
+<p><b>Swing (randomize)</b> &ndash; Percentage of randomization of pan on new notes. . The higher the swing, the more it can deviate from Instrument pan.</p>
+<p><b>NoteMod center note</b> &ndash; If note mod amount is not zero, this is the note that will have the centered pan.</p>
+<p><b>NoteMod amount</b> &ndash; If it is not zero, new notes will have a pan value depending on the note that is playing, the note mod center note, and this percentage.</p>
+
+<p class="head2"> <a name="filtertab">Filter Tab</a></p>
+<center><img src="sampulse_filtertab.png" border="0" alt="" /></center>
+<p>The filter tab allows to change settings related to the filter. The envelope works just in the same way than the <a href="#envelopeeditor">pitch envelope</a> but it applies to the filter.</p>
+<p><b>Filter type</b> &ndash; This allows you to set the filter
+type. You have a choice of Low Pass (retains only the frequencies below
+the cufoff), High Pass (retains only the freqencies above the cutoff),
+Band Pass (retains only a band of frequencies above and below the
+cutoff) and Notch (rejects only a band of frequencies above and below
+the cutoff). The "Lowpass/IT" filter is also a lowpass, which emulates better the one
+in "Impulse Tracker".<br />
+To ignore any filter settings, set this to "None".</p>
+<p><b>Filter cutoff</b> &ndash; Sets the cutoff point for the filter.</p>
+<p><b>Filter</b> &ndash; Sets the ressonance or bandwidth of the filter.</p>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="InstrumentEditor_Sampler.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="InstrumentEditor_Waves.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+</body>
+</html>

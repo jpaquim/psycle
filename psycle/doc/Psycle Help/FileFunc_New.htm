@@ -22,22 +22,28 @@
 <i>File &gt; New</i>
 ) &ndash; creates a new Psycle file.
 <p><img src="open.jpg" align="middle" /> <b>Open</b> (<i>File &gt; Open</i>) &ndash; opens a
-Psycle File or imports a psycle pattern (see <a href="FileFunc_psb.htm">here</a>).
-</p>
-<p><b>Import Module</b> (<i>File &gt; Import Module</i>) &ndash; Import
-tracker module files (e.g. .xm, .it). All instruments (samples) are
-converted into Psycle instruments, and sequenced with an internal
-sampler.</p>
+Psycle File or imports tracker module files (e.g. .xm, .it). All instruments (samples) are
+converted into Psycle instruments, and sequenced with Sampulse.</p>
 <p />
 <p><img src="save.jpg" align="middle" /> <b>Save</b> (<i>File &gt; Save</i>) &ndash; saves
 the current Psycle file.</p>
 <p><b>Save As</b> (<i>File &gt; Save As...</i>) &ndash; saves the
 Psycle file that is currently open under a new name.</p>
-<p><b>Export XM</b> (<i>File &gt; Export XM</i>) &ndash; Exports the pattern
-data and the wav information (if any) into a FastTracker2 "XM" file. No machines
-or effects will be present on the xm.</p>
+<p><b>Import... Patterns</b> (<i>File &gt; Import &gt; Patterns</i>) &ndash; Allows to import the content of patterns so that they can be reused or altered</p>
+<p><b>Import... Instruments</b> (<i>File &gt; Import &gt; Instruments</i>) &ndash; Allows to import instruments directly from other songs.</p>
+<p><b>Import... Machines</b> (<i>File &gt; Import &gt; Machines</i>) &ndash; Allows to import machines directly from other song.</p>
+<p><b>Export... Patterns</b> (<i>File &gt; Export &gt; Machines</i>) &ndash; Allows to export the content of patterns so that they can be reused or altered</p>
+<p><b>Export... Instruments</b> (<i>File &gt; Export &gt; Machines</i>) &ndash; Allows to export the instruments to more common formats (.xi, .iti). Wav is already available in the samples save button</p>
+<p><b>Export... Modules</b> (<i>File &gt; Export &gt; Machines</i>) &ndash; Exports the song into a Fasttracker 2 "XM" file. Only the patterns and the samples are exported.
+Placeholders for generator machines are also added, but they will produce no sound by themselves. In the future, Impulse tracker IT might also be added to support more format features.</p>
+<p><img src="render.jpg" align="middle" /> <b>Render as Wav...</b> &ndash; Shows the <a href="FileFunc_Render.htm">render to wav dialog</a> to save the song or part of it as uncompressed audio</p>
 <p><b>Song Properties</b> &ndash; Allows you to enter a name for the
 song, the author and commments.</p>
+<p>Since version 1.11, it is also possible to change from here the
+tempo and lines per beat, as well as setting ticks per beat and Extra ticks per line.<br />
+These two are used for Sampulse commands, to emulate properly the ticks that commands such as volume slide use.<br />
+The ticks per beat is the amount of ticks for each beat. The Extra tick is meant to alter this so that speeds like "5" and "7" can be properly emulated.<br />
+Since extra ticks alter the line duration, "Real tempo" and "Real ticks per beat" is also shown.</p>
 <img src="songproperties.png"/>
 <p><b>Revert to Saved</b> &ndash; Reloads the file, rejecting any
 changes made since it was last save. <i>This is IRREVERSIBLE</i>.</p>

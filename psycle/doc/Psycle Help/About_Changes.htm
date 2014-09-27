@@ -181,6 +181,17 @@
 			<td>release</td>
 			<td>[JAZ] with collaboration from others.</td>
 		</tr>
+		<tr>
+			<td>1.11.x</td>
+			<td>2014</td>
+			<td>beta</td>
+			<td>[JAZ] & Stefan & Budislav.</td>
+		</tr>		<tr>
+			<td>1.12.0</td>
+			<td>2014</td>
+			<td>release</td>
+			<td>[JAZ] & Stefan & Budislav.</td>
+		</tr>		
 	</tbody>
 </table>
 <p>Versions are composed this way since 1.7.24, (except 1.8.5, which was a release):</p>
@@ -201,6 +212,108 @@ each CVS update.<br />
 <span class="change">*</span> = change <br />
 <span class="bugfix">!</span> = bugfix</p>
 <br />
+<p class="head3">v1.12.0 </p>
+<p>
+<span class="addition">+</span> Virtual generators. Sampled instruments can be mapped to a machine number (from 81 to FE in hexadecimal) and be used without the need to specify which machine they play on.
+<ul>
+<li> This has a side effect of leaving the aux column free, which can be used in these virtual generators as a volume column ( commands 0Cxx in Sampler and 1Exx in Sampulse)</li>
+<li> Song Modules imported now make use of virtual generators, which also helps in replacing the instruments with other generators, or even adding more sampulse machines to route sounds differently without the need to modify the pattern data manually.</li>
+</ul>
+<span class="addition">+</span> Sampler : Porta to note implemented ( 03xx ). Also mcm "send to column" correctly implemented.<br />
+<span class="addition">+</span> Search and Replace reimplemented. Now you can also search without replacing (finds first ocurrence only for now), as well as searching for "Empty" and "non empty". Note field can now be searched.<br />
+<span class="change">*</span> Wave editor: Forward and backward buttons in wave editor now also step into the loop start and end.<br />
+<span class="change">*</span> Wave editor: Sustain loops can now be set from the popup menu. Also, loops and sustain loops can be unset from the popup menu.<br />
+<span class="change">*</span> Playing notes in Instrument editor and Sampulse machine now do not write into the pattern editor (so now they behave like the rest of the plugins).<br />
+<span class="change">*</span> Pattern skins that have text header and tracking, but which miss classic header tracking are understood now as "use the button positions as tracking zone".<br />
+<span class="change">*</span> Change to the fileformat, and completed the file-format description.txt documentation. The change affects to how samples are saved and adds the new virtual generators feature.<br />
+<span class="bugfix">!</span> delete sampulse instrument with the option to delete the samples did crash the application.<br />
+<span class="bugfix">!</span> Moving mouse on pattern editor used more cpu than needed (was redrawing the header unnecessarily).<br />
+<span class="bugfix">!</span> Several screen updating problems (sample lists)<br />
+<span class="bugfix">!</span> Fixed bug on the sampler option to play an instrument from a concrete sampler. Note off note would go to the wrong machine.<br />
+<span class="bugfix">!</span> Fixed crash on Sampulse instruments with a sutain loop at the amplitude envelope's end.<br />
+<span class="bugfix">!</span> Fixed bugs in loading the note mapping of .XI and .ITI instruments (i.e. in .XI and .ITI files, not in XM or .IT).	<br />
+<span class="bugfix">!</span> Fixed bug with waveout driver and synchornized MIDI mode.<br />
+<span class="bugfix">!</span> Fixes in AIFF loader (some uninitialized variables if INST chunk didn't exist)<br />
+</p>
+
+<p class="head3">v1.11.3 beta </p>
+<p>
+<span class="addition">+</span> Popup menu on machine view, for machines. It doesn't add new functionality that couldn't be done with mouse before, but it is now also possible with keyboard.<br />
+<span class="addition">+</span> Sampulse Editor: Implemented the sampulse note mapping editor. Everything is point and click. Multiple selection is possible. (like setting a whole octave by selecting the 12 notemaps, and then the 12 notes with mouse and shift)<br />
+<span class="addition">+</span> Sampulse Editor: Selecting an instrument shows which samples it has associated. Selecting a sample shows which instruments use it.<br />
+<span class="addition">+</span> Sampulse Editor: Deleting an instrument asks if it should delete its associated samples.<br />
+<span class="addition">+</span> Sampulse Editor: Able to load and save single instruments to a file (including its associated samples).<br />
+<span class="addition">+</span> Wave Editor: Load and save sample from the wave editor.<br />
+<span class="addition">+</span> Implemented AIFF loader, Scream tracker 3 sample (S3I) loader and impulse tracker sample (ITS) loader.<br />
+<span class="addition">+</span> Autodetect sample type for sample preview.<br />
+<span class="addition">+</span> Recording or playing the song with looping disabled will now stop when break to line, or jump to sequence go to an earlier position.<br />
+<span class="addition">+</span> Full Implementation of extraticks and ticksperbeat: Changes in song properties dialog, song toolbar and part of code.<br />
+<span class="addition">+</span> Skinnable header with track names, plus highlighting for mute/solo/record buttons to show something different when mouse over. Other fixes on skins.<br />
+<span class="addition">+</span> Option to clip machine names in the machine view for skin creators. See generator_name_clip_coords and effect_name_clip_coords in how-to-skin-psycle.txt.<br />
+<span class="change">*</span> Do not stretch master VU graphics in Windows XP. It will not resize correctly on different dpi sizes, but will paint correctly at 96dpi which is what most people use.<br />
+<span class="change">*</span> Improved the xm song exporter. Fixed sample pitch and exported envelopes. Also exports sampulse instruments now.<br />
+<span class="change">*</span> Changes in the load and save instrument buttons (now they work on samples or instruments depending on sampulse machine being selected). Several other changes related to how the tracker remembers and shows the instruments.<br />
+<span class="change">*</span> New Wave Loader implementation. Better format support.<br />
+<span class="change">*</span> New Amiga IFF/SVX loader (ok, probaby useless, but now it has correct loop code, supports multioctave instruments, Big and little endian 16bits, Stereo and pan. Also volume envelope, if there is any file that uses it).<br />
+<span class="change">*</span> Gear Rack: now it has a different list for sampulse instruments or samples.<br />
+<span class="change">*</span> Moved to boost 1.55.<br />
+<span class="bugfix">!</span> Sampler: Fixes in pitch slide command (it became broken when adding samplerate support)<br />
+<span class="bugfix">!</span> Wave editor: Fixes from 1.11 betas ( Crop command broken, copy&paste to new slot, fadein/out of parts of the sample and several other selection size discrepancies)<br />
+<span class="bugfix">!</span> Gear rack: exchanging instruments to an unused position crashed the application.<br />
+<span class="bugfix">!</span> Sampulse : Fixed play backwards command 0E9F<br />
+<span class="bugfix">!</span> Send-Return mixer: Moving a send/return to another index (dragging in the mixer dialog the header of a return to another one) was broken in the betas. Fixed.<br />
+</p>
+
+<p class="head3">v1.11.2 beta </p>
+<p>
+<span class="bugfix">!</span> LUA Host fixes related to sampling rate awareness, crash on parameter list if it has zero parameters and name on machine creation.<br />
+<span class="bugfix">!</span> Wave editor crash on cut/copy and crash on deleting sample from samples bank.<br />
+<span class="bugfix">!</span> Fix on opening the load/save presets (.fxb/.fxp) on Windows XP.<br />
+<span class="bugfix">!</span> Fix on changing the "font sel" colour from visual config.<br />
+<span class="bugfix">!</span> Fix on knob tweaking (the mouse cursor was supposed to be hidden while tweaking)<br />
+<span class="bugfix">!</span> VST tweaking from its UI wasn't working in beta1<br />
+<span class="bugfix">!</span> native plugin tweaks with negative range wasn't recording the correct values.<br />
+<span class="bugfix">!</span> Fixed crash when doing Exchange machines with effects with input wires.<br />
+<span class="bugfix">!</span> Fixed rare bug with VSTs (if the dll extension was uppercase, it didn't reload from a song. CM-505.DLL is an example).<br />
+<span class="bugfix">!</span> Fixed crash on sequence clear or sort if the song had used more than 128 patterns. (Error in the undo/redo code).<br />
+<span class="bugfix">!</span> Fixed new or clone pattern not giving a clean pattern when all positions have previously been used, even if not present in the sequence.<br />
+<span class="bugfix">!</span> Fixed crash on showing parameter list with machines with zero parameters. Now the menu option is disabled.<br />
+<span class="bugfix">!</span> Workaround for one audio engine deadlock<br />
+<span class="bugfix">!</span> Sampulse: Fix filtering. volume is applied after the filter. (fixes 303.it, but broke my 64mania.s3m.psy, which prompted the next fix)<br />
+<span class="bugfix">!</span> Sampulse: volume ramping reimplemented. Also, looped samples improvement  (would select incorrect one when position is after loopstart and new work call enters)<br />
+<span class="bugfix">!</span> Sampulse UI: Mixer view, playback mode now takes envelopes into account, other fixes in surround and mute checkboxes.<br />
+</p>
+
+<p class="head3">v1.11.1 beta </p>
+<p>
+<span class="addition">+</span> New plugin host: Lua script based. The API provides many operations, as well as the possibility of using other Psycle plugins (including VST). It also can be debugged with ZeroBraneStudio. See the API documentation and examples.<br />
+<span class="addition">+</span> New artwork for Psycle (splash, icon, installer and skin). Psycle 1.10 skin included as a loadable skin.<br />
+<span class="addition">+</span> Record to wav: Record to sample implemented.<br />
+<span class="change">*</span> Sampulse: The first "ready to use" version (Fileformat freeze).<br />
+<span class="change">*</span> Sampulse/Sampler: New Instrument editor combining Sampler and Sampulse with many usability improvements, including play notes from it (instrument tabs use the machine and in sample bank it outputs directly to master).<br />
+<span class="change">*</span> Sampulse/Sampler: .XI and .ITI loaders, samplerate support. Sample bank is now shared by both machines<br />
+<span class="change">*</span> Sampulse/Sampler: Much improved sinc resampling mode (correct windowing, filter when downsample, increased from 8 to 32 taps and increased from 512 to 16384points the sinc period). The rest of the resampling modes are faster now.<br />
+<span class="change">*</span> Sampulse: Filter algorithm changed again. Now based on SchismTracker's one.<br />
+<span class="change">*</span> Sampulse: Correct support for mcm command (commands applied at the same time, instead of one after another).<br />
+<span class="change">*</span> Sampulse: Improved loaders of module formats to support mcm and better support for the speed command. (See FEEx command)<br />
+<span class="change">*</span> Sampulse: Volume ramped playback to prevent some clickings on volume change.<br />
+<span class="change">*</span> Changes in the display of Wire dialog: RMS and Peak VU, better Oscilloscope, New Power spectrum and improved phase bars.<br />
+<span class="change">*</span> Wave editor now has an option to show the sample interpolated/reconstructed (spline/sinc). Top (smaller version) still shows raw points.<br />
+<span class="change">*</span> Wave editor improvements: Support for playback and editing sustain loop, sample droplist to select (since now it is independent from instrument list).<br />
+<span class="change">*</span> Changes in knob tweaking. The mouse doesn't move now, so it avoids the problem of reaching the top or bottom of the screen.<br />
+<span class="change">*</span> Other miscellaneous source code changes (updated to boost 1.50.0, data casting, type usage,array sizes, compiler warnings,...)<br />
+<span class="bugfix">!</span> Improvements in ASIODriver and MidiInput.<br />
+<span class="bugfix">!</span> Fix in loading and "playing" the "Wave In" machine.<br />
+<span class="bugfix">!</span> Sampulse: Fixes in filter commands, voice allocations and several other pattern commands, better playback of looped samples, envelope carry, autovibrato, random volume and panning...<br />
+<span class="bugfix">!</span> Fixed machine exchange (crash restoring wires) and Mixer channel exchange when one channel had been deleted.<br />
+<span class="bugfix">!</span> Version 1.10.x had a broken implementation for VST plugins that use the (old) "process accumulate" mode.<br />
+<span class="bugfix">!</span> Fix on druttis slicit (was skipping first line at start, since the addition of sampling rate aware plugins).<br />
+<span class="bugfix">!</span> Record to wav was using the settings from the audiodriver instead of the ones in the dialog.<br />
+<span class="bugfix">!</span> Record to wav: "to clipboard" wasn't working properly. "Record lines" wasn't being reset and next "play" would still remember the number of lines.<br />
+<span class="bugfix">!</span> Wave editor now correctly uses windows clipboard (can now copy&paste into other applications. Note: Audacity does not use windows clipboard)<br />
+<span class="bugfix">!</span> Wave Editor: wave amplify not working sometimes.<br />
+</p>
+
 <p class="head3">v1.10.1 </p>
 <p>
 <span class="addition">+</span> New release of Winamp plugin with support for winamp localization languages, 24 and 32bit integer output, saves configuration in winamp instead of registry and all the features of Psycle 1.10.<br />

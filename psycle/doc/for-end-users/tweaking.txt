@@ -292,7 +292,7 @@
 				04xy: Vibrato with speed y and depth x
 				05xx: Continue Portamento and Volume Slide with speed xx
 				06xx: Continue Vibrato and Volume Slide with speed xx
-				07xx: Tremolo
+				07xy: Tremolo with speed y and depth x
 				08xx: Pan. 0800 Left 08FF right
 				09xx: Panning slide x0 Left, 0x Right
 				0Axx: Channel Volume, 00 = Min, 40 = Max
@@ -300,7 +300,7 @@
 				0Cxx: Volume (0C80 : 100%)
 				0Dxx: Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)
 				0Exy: Extended (see below).
-				0Fxx: Filter.
+				0Fxx: Filter. Depends on filter mode. See 0EFx
 				10xy: Arpeggio with note, note+x and note+y
 				11xy: Retrig note after y ticks y = Number of retrigs (1 = do one retrig)
 					-	x changes the volume in the following way:

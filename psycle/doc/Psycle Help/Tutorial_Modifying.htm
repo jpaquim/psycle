@@ -50,7 +50,7 @@ it). Here there are some parameters for Arguru Synth to start you off
 <p><code><b>Filter Envelope</b><br />
 <b>VCF Attack:</b> 5.873ms (259)<br />
 <b>VCF Decay:</b> 59.537ms (2630) <br />
-<b>VCF Sustain:</b> 875Hz (0) <br />
+<b>VCF Sustain:</b> 875Hz (0) - The display in this case depends on VCF Cutoff, so change that value first<br />
 <b>VCF Release:</b> 25.601ms (1129) <br />
 <b>VCF LFO Speed:</b> 9.713Hz (17713) <br />
 <b>VCF LFO Amplitude:</b> 79Hz (6)<br />
@@ -70,21 +70,27 @@ it). Here there are some parameters for Arguru Synth to start you off
 <b>Glide Depth:</b> Off (0)<br />
 <b>Interpolation:</b> On (1)</code></p>
 <p class="head2">Adding Effects</p>
+<p>
 There's one other major type of modification we can make to our sound
-besides changing the parameters of the generator - we can add effects.
-Press F9 again to bring up the "Add Machine" window, and expand the
-"Effects" list. Go down and find "Arguru Reverb", select it and click
+besides changing the parameters of the generator: we can add effects.<br />
+Right click on the grey triangle in the wire between Arguru synth and Master.
+The <a href="Machine_Wires.htm">Wire dialog</a> should appear. In this dialog, click the button that says "Add effect here".
+This will bring up the "Add Machine" window. Expand the
+"Effects" list, go down and find "Arguru Reverb", select it and click
 OK.
 <br />
-To use this effect on our generator, we need to make the sound go
-through it: Right click the white triangle connecting the generator to
-the Master Machine, and drag it over to the effect you've just added.
-You will now see that the wire has moved!
-<br />
-Now, simply right click and drag from the effect to the Master Machine
-to add a new wire, and try playing some notes again. Notice the
-difference?
-<br />
+If you've done it this way, A new box will appear between the Arguru Synth and Master, 
+and all them will be connected with wires.
+<p>
+<p>
+You could also add the effect in the same way than Arguru Synth, but then you will need to rewire them.<br />
+To do so, right click the grey triangle that is connecting Arguru Synth to the Master Machine, and drag it over
+to the effect you've just added. You will now see that the wire has moved!<br  />
+Now, simply right click and drag from the effect to the Master Machine to add a new wire.
+</p>
+<p>
+After this, try playing some notes again. Notice the difference?
+</p>
 <br />
 We can edit the parameters of the effect in the same way as we did for
 the generator, by double clicking the machine.

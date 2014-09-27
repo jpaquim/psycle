@@ -754,7 +754,7 @@ This chunk is no longer used, and has been replaced by the "SMID" and "SMSB"  ch
 
 In order to read an INST subchunk:
 Read the instrument index
-read INST
+read the four letters INST
 read INSTsize.
 then read INSTversion. 
 	If INSTversion is not 1, seek back (INSTversion field does not exist), and assume INSTversion 0.
@@ -763,7 +763,7 @@ Read a SMID block, but do not read the header, nor the instIdx field (i.e. an IN
 
 In order to read an SMPD subchunk:
 Read the wave index
-read SMPD
+read the four letters SMPD
 read SMPDsize
 then read SMPDversion. If SMPDversion is not 1 seek back (SMPDversion field does not exist), and assume SMPDversion 0.
 Read a SMSB block, but do not read the header, nor the waveIdx field (i.e. an SMPD block is compatible with an SMSB block, with the difference in the header and the missing waveIdx field)
@@ -835,7 +835,7 @@ int m_DCT		// Duplicate check type
 				 //SAMPLE,			/// Check that the new sample is the same than the one playing
 				 //INSTRUMENT		/// Check that the new instrument is the same than the one playing
 
-int m_DCA		// Duplicate check action. Uses the same table than New note action, except that CONTINUE doesn't make sense.
+int m_DCA		// Duplicate check action. Uses the same table than New note action, except that CONTINUE has no meaning.
 
 for 120 times do	// Read the note mapping map. A note from the pattern is mapped to a sample and a note.
 					// The map uses Psycle's note indexes, which is like MIDI: Middle C = 60
@@ -898,7 +898,7 @@ bool m_Adsr;			/// Indicates that this envelope is operated as an ADSR (it is an
 DESCRIPTION:
 The subchunk SMIE is used to store data that describes an envelope. An envelope consists of an ordered (by time) list of points that have a value. This value is to be used as a multiplier for the parameter they work with.
 
-Version 0 uses mode TICKS and ADSR false.
+Version 0 uses mode TICKS and m_Adsr false.
 
 
 =====================
@@ -966,6 +966,10 @@ end if
 DESCRIPTION:
 The SMSB chunk contains the parameters and pcm data for one wave sample.
 
+The compression used for waves is a form of delta packing. check the sources for details. (psycle-helpers/src/psycle/helpers/datacompression.cpp/.hpp SoundSquash/SoundDesquash)
+The unpacked data is an array of type short, with values ranging from -32768 to 32767. (i.e. 16bits PCM audio)
+
+
 Notes: 
 If reading an SMPD instead of a SMID, do not read waveIdx as it is not present.
 If reading version 0, do not read m_WaveSampleRate nor m_Surround.
@@ -983,12 +987,12 @@ version = 0
 size = 12
 
 DATA:
-int virtual_inst_idx;		// Number of virtual instrument for this sampled instrument. A virtual instrument is a number that can be used as a generator, ranging from 129 to 254 (or 0x81 to 0xFE).
-int sampler_to_use;			// Number of the real generator (sampler or sampulse) that will play the sample of this virtual instrument.
+int virtual_inst_idx;		// Number of virtual generator for this sampled instrument. A virtual generator is a number that can be used as a generator, ranging from 129 to 254 (or 0x81 to 0xFE).
+int sampler_to_use;			// Number of the real generator (sampler or sampulse) that will play the sample of this virtual generator.
 int inst_index;				// Number of the sampler or sampulse instrument to use.
 
 DESCRIPTION:
 The VIRG chunk contains the mappings of virtual instruments/generators so that sampled instruments can be used in the patterns as a generator, without the need to specify which sampler or sampulse it uses. 
 Virtual instruments also allow to use the aux column as a volume column. If the virtual instrument uses a sampler machine, it maps to the 0Cxx command. If it is a sampulse machine, it maps to its volume column. (See sampulse's help).
 
-There are multiple VIRG chunks, one for each sampulse sample.
+There are multiple VIRG chunks, one for each virtual generator defined.

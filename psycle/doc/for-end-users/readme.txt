@@ -39,7 +39,7 @@ Here some features of Psycle:
   apply different effects.
 - Internal Stereo Sampler unit which supports .wav, .aiff, .iff/svx, .s3i, .its and any
   sampling rate, 8/16 and 24bits, mono or stereo, with volume and filter envelopes.
-- Modern tracker Sampler (Sampulse, with Impulse Tracker like features, including filter).
+- Modern tracker Sampler (Sampulse), with extends sampler support to .xi and .iti, and supports most of the Impulse Tracker like features, including filter.
 - 70+ Native Plugins (generators & effects), most of them open-source and with 
   an easy to use API to create new ones.
 - Multithreaded audio engine.
