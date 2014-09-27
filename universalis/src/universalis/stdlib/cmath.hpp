@@ -10,6 +10,7 @@
 #include <universalis/compiler/noexcept.hpp>
 #include <cmath>
 #include <limits>
+#include "cstdint.hpp"
 
 #ifdef BOOST_AUTO_TEST_CASE
 	#include <universalis/compiler/typenameof.hpp>
