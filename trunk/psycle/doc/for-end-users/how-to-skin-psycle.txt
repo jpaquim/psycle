@@ -49,6 +49,17 @@ A quick doc on skinning psycle
 		You can make them the way you want, with the bitdepth appropiated. Support for other
 		fileformats than .bmp are not planned (they would require specific loaders).
 		On Mixer and master, only the graphics can be changed, not the sizes. The knobs also have a fixed size.
+		
+	The elements required are as follows:
+
+		Master Machine
+		Generator (with unselected mute and solo buttons)
+		Effect (with unselected mute and bypass buttons)
+		VU element (full length - can be different for effects and generators)
+		VU peak (the chunk that remains when the rest of the VU goes down)
+		Pan handle (i.e. the bit you move along the slide)
+		Highlighted solo, bypass and mute buttons (mute buttons for generators and effects can be different)
+
 
 	Notes for info files:
 
@@ -159,7 +170,7 @@ A quick doc on skinning psycle
 	"text_playing_on_source"=0,83,17,10		<---- Highlighted playing indicator
 
 	This third group indicate the graphics location for the track names header highlight
-	//Width and height coupled with destination tracking designate the clickable area
+	Width and height of the source with the top and left destination designate the clickable area
 	"text_record_tracking_source"=3,115,54,8   <---- Position of the record tracking image (can be the same than text_record_on_source)
 	"text_mute_tracking_source"=57,115,54,8    <---- Position of the mute tracking image (can be the same than text_mute_on_source)
 	"text_solo_tracking_source"=57,106,54,8    <---- Position of the solo tracking image (can be the same than text_solo_on_source)
@@ -175,9 +186,7 @@ A quick doc on skinning psycle
 	"text_crop_rectangle"=24,7,80,10	<---- Rectangle where the track name will be written. Width and height are used to cut the text (crop).
 
 	Fourth group of mouse tracking extension. These designate the placement on the track names header for the hightlights.
-	Width and height coupled with destination tracking designate the clickable area
-	//source Width and height coupled with destination designate the clickable area
-	"text_record_tracking_dest"=0,12   <---- Destination of the record tracking image (can be the same than text_record_on_dest)
+	Width and height of the source with the top and left destination designate the clickable area	"text_record_tracking_dest"=0,12   <---- Destination of the record tracking image (can be the same than text_record_on_dest)
 	"text_mute_tracking_dest"=57,12    <---- Destination of the mute tracking image (can be the same than text_mute_on_dest)
 	"text_solo_tracking_dest"=57,0     <---- Destination of the solo tracking image (can be the same than text_solo_on_dest)
 

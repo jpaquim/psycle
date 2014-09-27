@@ -23,7 +23,7 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Amplitude/Filter Envelopes">
 		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Local" value="InstrumentEditor_Sampler.htm#wavelayer">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Arming Tracks">
@@ -153,12 +153,12 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instrument Editor">
 		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm">
+		<param name="Local" value="InstrumentEditor_Sampler.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments">
 		<param name="Name" value="Instruments">
-		<param name="Local" value="Sampler_Instruments.htm">
+		<param name="Local" value="SampledAudio.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, editing">
@@ -167,8 +167,12 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, Filter">
-		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Name" value="The Instrument Editor (Sampler)">
+		<param name="Local" value="InstrumentEditor_Sampler.htm#wavelayer">
+		<param name="Name" value="The Instrument Editor (Sampulse)">
+		<param name="Local" value="InstrumentEditor_Sampulse.htm">
+		<param name="Name" value="Wave data">
+		<param name="Local" value="InstrumentEditor_Waves.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, loading">
@@ -178,7 +182,9 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, looping">
 		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Local" value="InstrumentEditor_Sampler.htm#wavelayer">
+		<param name="Name" value="Wave Data">
+		<param name="Local" value="InstrumentEditor_Waves.htm">
 		<param name="Name" value="The Wave Editor">
 		<param name="Local" value="Sampler_WaveEditor.htm">
 		</OBJECT>
@@ -190,7 +196,11 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, tuning">
 		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Local" value="InstrumentEditor_Sampler.htm#wavelayer">
+		<param name="Name" value="The Instrument Editor (Sampulse)">
+		<param name="Local" value="InstrumentEditor_Sampulse.htm#settings">
+		<param name="Name" value="Wave data">
+		<param name="Local" value="InstrumentEditor_Waves.htm#settings">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, using in patterns">
@@ -199,8 +209,10 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Instruments, volume envelope">
-		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm#wavelayer">
+		<param name="Name" value="The Instrument Editor (Sampler)">
+		<param name="Local" value="InstrumentEditor_Sampler.htm#wavelayer">
+		<param name="Name" value="The Instrument Editor (Sampulse)">
+		<param name="Local" value="InstrumentEditor_Sampulse.htm#wavelayer">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Internal Machines">
@@ -357,13 +369,17 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="New Note Actions">
-		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm">
+		<param name="Name" value="The Instrument Editor (Sampler)">
+		<param name="Local" value="InstrumentEditor_Sampler.htm">
+		<param name="Name" value="The Instrument Editor (Sampulse)">
+		<param name="Local" value="InstrumentEditor_Sampulse.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Note Duplicator">
 		<param name="Name" value="The Note Duplicator">
 		<param name="Local" value="Internal_Duplicator.htm">
+		<param name="Name" value="Split and Dupe">
+		<param name="Local" value="Internal_Duplicator2.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Notes">
@@ -397,7 +413,7 @@
 		<param name="Name" value="Machine Types">
 		<param name="Local" value="Machine_Types.htm">
 		<param name="Name" value="The Instrument Editor">
-		<param name="Local" value="Sampler_InstrumentEditor.htm">
+		<param name="Local" value="InstrumentEditor_Sampler.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Pattern Editor">
@@ -509,6 +525,8 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Sampler">
 		<param name="Name" value="The Internal Sampler">
+		<param name="Local" value="Sampler_Properties.htm">
+		<param name="Name" value="Using Sampled sounds">
 		<param name="Local" value="Sampler.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
@@ -519,12 +537,24 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Sampler, interpolation method">
 		<param name="Name" value="Sampler Properties">
-		<param name="Local" value="Sampler_Properties.htm">
+		<param name="Local" value="Sampler.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Sampler, properties">
 		<param name="Name" value="Sampler Properties">
-		<param name="Local" value="Sampler_Properties.htm">
+		<param name="Local" value="Sampler.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Virtual Generators for sampled data">
+		<param name="Name" value="Sampler Properties">
+		<param name="Local" value="Sampler_Using_Virtual.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Sampulse">
+		<param name="Name" value="The Sampulse Internal Machine">
+		<param name="Local" value="Sampulse.htm">
+		<param name="Name" value="Instrument Editor (Sampulse)">
+		<param name="Local" value="InstrumentEditor_Sampulse.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Save">

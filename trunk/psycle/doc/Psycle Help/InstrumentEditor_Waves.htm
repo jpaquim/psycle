@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="InstrumentEditor_Sampulse.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_WaveEditor.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Samples bank for Instruments</p>
+<center><img src="instrument_editor_waves.png" border="0" alt="" /></center>
+<p>Use the list on the top left to navigate between the different samples.</p>
+<br />
+The list on the bottom left allows to see which instruments use this sample, if any<br />
+<p class="head3"><a	name="settings">Samples bank List Buttons</a></p>
+<p><img src="sampulse_load.png" align="top" alt="" /> <b>Load</b> &ndash;
+Loads a sample file from disk into the currently selected sample position.</p>
+<p><img src="sampulse_save.png" align="top" alt="" /> <b>Save</b> &ndash;
+Save the currently selected sample to disk.</p>
+<p><img src="sampulse_duplicate.png" align="top" alt="" /> <b>Duplicate</b> &ndash;
+Creates a new sample with a copy of the currently selected one</p>
+<p><img src="sampulse_delete.png" align="top" alt="" /> <b>Delete</b> &ndash;
+Deletes the current sample.</p>
+
+
+
+
+<p class="head3"> <a name="properties">Wave Properties</a></p>
+
+<p><b>Wave name</b> &ndash; Edit the sample name</p>
+<p><b>Sample rate</b> &ndash; The sampling rate of this sample.</p>
+<p><b>Default volume</b> &ndash; The volume command used with new notes, if no volume is specified in the pattern.</p>
+<p><b>Global volume</b> &ndash; Gain applied to all notes of this sample. It can amplify if needed, so there's no need to amplify the wave data.</p>
+<p><b>Pan position check</b> &ndash; If enabled, all the notes that use this sample will play it at the specified pan position. Else, instrument pan or channel pan will be used.</p>
+<p><b>Pan position slider</b> &ndash; Pan value to use for this sample if the option is enabled.</p>
+<p><b>Sampled note</b> &ndash; If this is the sound of an instrument, which note was sampled, so that it will play the correct note in the pattern.</p>
+<p><b>Finetune</b> &ndash; Fine tuning in cents needed to set the correct pitch.</p>
+
+<p class="head3"> <a name="properties">Vibrato Properties</a></p>
+<p>Autovibrato options. They only work with waves that are used by Sampulse, not with the classic sampler.</p>
+<p><b>Waveform</b> &ndash; Which waveform will have the oscillator that simulates the vibrato.</p>
+<p><b>Attack</b> &ndash; Delay since note start until the vibrato effect reaches full amplitude.</p>
+<p><b>Speed</b> &ndash; Speed of the vibrato.</p>
+<p><b>Depth</b> &ndash; Amount of the vibrato.</p>
+
+<p class="head3"> <a name="properties">Loop Properties</a></p>
+<p>The bottom right shows a visual representation of the sampled wave, as well as the loop points</p>
+<p><b>Continuous loop</b> &ndash; Disabled, forward or pingpong. Indicates if the continuous loop is enabled, and how will it play. Ping pong means that when reachind the end, it runs backward until start and loops again.</p>
+<p><b>Start point</b> &ndash; Start point for the loop.</p>
+<p><b>End point</b> &ndash; End point for the loop. If the same than sample length, then, the sound is interpolated between that end point and the loop start.</p>
+<p><b>Sustain loop</b> &ndash; Disabled, forward or pingpong. Indicates if the sustain loop is enabled, and how will it play. Ping pong means that when reachind the end, it runs backward until start and loops again. Sustain means that it will stop looping when receiving a note off</p>
+<p><b>Start point</b> &ndash; Start point for the loop.</p>
+<p><b>End point</b> &ndash; End point for the loop. If the same than sample length, then, the sound is interpolated between that end point and the loop start.</p>
+
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="InstrumentEditor_Sampulse.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_WaveEditor.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+</body>
+</html>

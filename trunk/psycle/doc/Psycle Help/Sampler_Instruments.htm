@@ -10,50 +10,61 @@
 	<col width="50%" />
 	<tr>
 		<td />
-		<td align="right"><a href="Sampler_InstrumentEditor.htm"><img
+		<td align="right"><a href="InstrumentEditor_Sampler.htm"><img
 			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
 	</tr>
 </table>
 
 <p class="head2">Instruments</p>
-An instrument is essentially a sound sample (currently in .wav and .iff
-file format) that is used in the internal sampler just like any other
-generator. The current version of the internal sampler allows you to
-modify various properties of the sampler without using other external
-programs, and has its own basic
-<a href="Sampler_WaveEditor.htm">wave editor</a>
-as well.
+An instrument is essentially a <a href="InstrumentEditor_Waves.htm">sound sample</a> that can have some parameters like
+envelopes and loops, and is played by one of the two sampler machines: classic sampler or Sampulse.
+Since the features of the two samplers are different, there is an <a href="InstrumentEditor_Sampler.htm">
+instrument editor for the sampler</a> and a different <a href="InstrumentEditor_Sampulse.htm">Instrument editor
+for Sampulse</a>.<br />
+There is also a basic <a href="Sampler_WaveEditor.htm">wave editor</a>
+</p>
 <p>All of the instrument functions can be accessed from the right
 half of the <a href="Bars_Machine.htm">machine bar</a>. Once you've
-added a sampler using the <a href="Machine_Add.htm">Add Machine</a>
+added a sampler or Sampulse machine using the <a href="Machine_Add.htm">Add Machine</a>
 dialogue window, to work with instruments you should make sure that
-the machine is selected, and that "Instrum" is selected in the third drop-down box.</p>
+the machine is selected, and that "Instrument" is selected in the third drop-down box.</p>
 <p><img src="select_sample.png" width="75" height="26" border="0"
 	alt="" /></p>
 <p>The next drop-down box dispays the instruments that have been
 loaded (which are then stored within your psycle file). They are
 numbered (in Hexadecimal) from 00 to FE (i.e. you can have a maximum of
-255 different samples in your song).</p>
+255 different samples in your song).<br />
+It should be noted that the instrument list shown when selecting a Sampulse machine is different than when selecting
+a sampler machine.</p>
+<p>Since Psycle 1.11, this droplist doesn't show all the positions by default.<br />
+To add a new position, use the right arrow to increase beyond the visible positions.
+</p>
 <img src="selecting_sample.png" border="0" alt="" /> 
 <p class="head3"><a	name="settings">Instrument Settings</a></p>
 <img src="sample_load.png" align="top" alt="" /> <b>Load</b> &ndash;
 Loads a sample file from disk into the currently selected instrument
 position.
-<p><img src="sample_save.png" align="top" alt="" /> <b>Save</b>
-&ndash; Saves the currently selected instrument to disk as a '.wav'
-file.</p>
 <p><img src="sample_editinstr.png" align="top" alt="" /> <b>Edit</b>
-&ndash; Opens the <a href="Sampler_InstrumentEditor.htm">Instrument
-Editor</a> window.</p>
+&ndash; Opens the <a href="InstrumentEditor_Sampler.htm"> Sampler Instrument
+Editor</a> window, or the <a href="InstrumentEditor_Sampulse.htm"> Sampulse Instrument
+Editor</a> window, depending on which machine you have selected.</p>
 <p><img src="sample_waveEd.png" align="top" alt="" /> <b>Wave
-Ed</b> &ndash; Opens the <a href="Sampler_WaveEditor.htm">Wave Editor</a>.</p>
+Editor</b> &ndash; Opens the <a href="Sampler_WaveEditor.htm">Wave Editor</a>.</p>
+
+<p class="head2">Virtual generators for instruments</p>
+Instruments need a sampler or sampulse machine to be used, but this requires
+to specify both in the pattern, and if there are several sampler machines, sometimes
+it can be tedious to select both correctly<br />
+With the idea to simplify this, there is a new feature in Psycle intended
+to use instruments in patterns as if they were a machine.
+Go into the <a href="Sampler_Using_Virtual.htm">chapter about virtual generators</a> to learn how to use it.
 
 
 <table width="100%">
 	<col width="50%" />
 	<tr>
 		<td />
-		<td align="right"><a href="Sampler_InstrumentEditor.htm"><img
+		<td align="right"><a href="InstrumentEditor_Sampler.htm"><img
 			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
 	</tr>
 </table>

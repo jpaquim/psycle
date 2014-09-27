@@ -30,11 +30,11 @@ A)	The ability to import has existed since version 1.8, but with an incomplete S
 	Since version 1.11.1 beta, the Sampulse machine is considered ready and can be used
 	without fear for making songs.
 
-	* Note that Psycle has a limitation : It does not have a volume column. To compensate
-	for this, the mcm command in conjunction with the 1Exx command can be used to have both
+	* 	Note that Psycle has a limitation : It does not have a volume column by default.
+	There are two ways to compensate for this. Use Virtual Generators for the sampled instruments, and then
+	the aux column will be a volume column.
+	Else, use the mcm command in conjunction with the 1Exx command (Sampulse) or 0Cxx command (Sampler) to have both
 	an effect command and a volume command.
-	Also note that songs that use speed 5 will not play at the correct speed.
-	(Use the FEE1 command at the start of the first pattern)
 
 Q)	What is this 'dummy' machine?
 
@@ -45,14 +45,14 @@ A)	Dummy internal machine? It is mainly used to replace missing plugin machines 
 Q)	I have problems playing a song in Winamp!
 
 A)	The last update of the plugin was for version 1.10.2. Also, remember that the plugin uses 
-    its own plugin cache, which you'll have to regenerate from the UI.
+    its own plugin cache, which you'll have to regenerate from its own UI.
 	
 
 - Samples and the Sampler Machine -
 --------------------------------
 Q)	I've loaded a sample but it doesn't make any sound.
 
-A)	To play a sampled sound (.wav or .iff only!) you need to add a sampler machine and connect
+A)	To play a sampled sound (.wav, .aiff, .iff/svx, .s3i or .its) you need to add a sampler machine and connect
 	it to the master or to an effect that goes to the master. You might want to check if other
 	machines make sound, and check your audio settings.
  
@@ -61,8 +61,8 @@ Q)	Can Psycle use OGG?/MP3? files as samples?
 A)	Unfortunately not. This is a common question, because it would be good. Support for lossy
 	compression (MP3?, etc) and lossless compression? (FLAC, etc) formats is on the TODO list.
 
-Q)	When I load a sample and enter a note, it's really fast and high-pitched...
-	...when it plays. I've tried everything from halving the bit rate of the sample to re-installing Psycle.
+Q)	When I load a sample and enter a note, it's really fast and high-pitched when it plays.
+    I've tried everything from halving the bit rate of the sample to re-installing Psycle.
 	What should I do about this?
 
 A)	The way trackers change pitch of a sample is by speeding up or slowing down the rate at which

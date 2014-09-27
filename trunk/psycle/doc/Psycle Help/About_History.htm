@@ -32,7 +32,7 @@ View. Each song position defined in the sequencer was linked to one
 pattern used to enter notes and data for all the machines at the same
 time. This is how it has remained until today.</p>
 <p>When version 1.0 was close, some important features were added
-(such as the "twk" command and .wav rendering) but Psycle was still
+(such as the "twk" command and render to .wav) but Psycle was still
 unfinished. It was usable but lacked ergonomy and power &ndash; there
 was no mouse support, few parameters commands, many plugins were
 unfinished, and the VST support was weak.</p>
@@ -56,15 +56,16 @@ were (i.e. no link to machines).</p>
 nickname of [JAZ] took on the task of continuing the Psycle history.<br />
 [JAZ]'s initial goals were to fix several of the outstanding bugs, and
 add some notably missing features. This took form in versions 1.5 and
-1.6. After that, the idea of a version 2 appeared again, but instead of
+1.6.  It included a MIDI input implementation by Mark McCommark, and other 1.6 changes were made by Dan.<br />
+After that, the idea of a version 2 appeared again, but instead of
 focusing on Mats code, [JAZ] started a new (internal) design codenamed
 Psyclean, which was never completed.</p>
 <p>There existed also a version of Psycle that was temporarily
 called 1.9. This was started by Dan who had to leave it due to work
 commitments. This version had some Data structure changes which aimed to
 give more tracks, a volume column (panning too?), more lines per
-pattern, a new song file format. The work was partly dismissed due to
-the incompatibilities it was generating.</p>
+pattern, a new song file format. The work was partially dismissed due to
+the incompatibilities that it was generating.</p>
 <p>Around Spring/Summer 2002, Dilvie contacted with the Psycle team,
 interested in developing a tracker with similar aims to what Psycle had,
 and expand on his own ideas. To make this a reality, Psycle was branched
@@ -84,8 +85,12 @@ Bohan started it, with his own ideas, and with these two aims:
 portability (multiplatform), and more importantly (and hence the name),
 developed entirely with free tools (from compilers to libraries as well
 as OSes). <br />
-Up to today, it has been a testbed for several parts that have ended
-into the Psycle 1 branch.</p>
+Up to today, it has been a testbed for several parts that have been included
+in the Psycle 1 branch.</p>
+<p>2004 also saw the first third-party fork of Psycle, which was developed by Satoshi Fujiwara. 
+It was a translation to Japanese, plus a change of toolkit (WTL/ATL instead of MFC, and some bits
+ of DirectDraw) and changes in the pattern tracks. It also is the version in where Sampulse (then XMSampler) was started.
+</p>
 <p>Between autumn 2004 and summer 2005 two new versions of Psycle
 appeared. 1.7.6.2, with many contributions from bohan, zealmange and
 others,( which improved the aging source code, made it more C++
@@ -94,6 +99,10 @@ standard, and added project files for Visual studio 2002/2003), and
 stability improved, as well as source code readability. On the user
 side, there were several new native plugins, improvements in the
 VSThost, and some new handy features.</p>
+<p>At this time, one guy also opted to make a fork of Psycle. He added multisequence in the same way
+ that the program Buzz used to have: One sequence column for each generator, and patterns were usable
+ for any column. Money was asked after developing it in order to make the source public. No money was 
+ paid, the fork didn't get traction and eventually, the guy shared the sources.</p>
 <p>During the period between that release, and December 2006, a
 version named 1.9alpha kept being developped, adding Visual Studio 2005
 support, new external packages (newer version of boost), many new
@@ -128,7 +137,8 @@ These all could be built for linux and for windows using MinGW. psycle-core even
 In 2009, an effort to put psycle-core into Psycle started. This implied changes
 to the UI code (all pattern code assumed structures that don't exist in psycle-core), machine view and the interaction between
 the plugin cache and settings. Also, fixes and improvements for 64bit compilation were added.<br/>
-Work advanced until summer, but Psycle was becoming unresponsive and errors/incompatibilities were popping up.<br/>
+Work advanced until summer, but Psycle was becoming unresponsive and errors/incompatibilities were popping up. 
+This version was also called 1.9  (you see the trend, right?)<br/>
 </p>
 <p>
 In august of 2009, JAZ/JosepMa wrote a dimission post at psycle.pastnotecut.org. Two years had passed since last
@@ -151,21 +161,25 @@ of most of the plugins with better parameter window information and samplerate a
 <p>
 In april 2012, version 1.10.1 was released. This version had two main features: multi-io support for VSTs (Pin connections. There is no speaker setup) and an up-to-date winamp plugin (both, the engine used, and the plugin itself), as well as many small and not so small bugfixes.
 </p>
+<p>The rest of the 2012 was relatively quiet on the development side. Some bugs were fixed, and an attempt to make QPsycle build again started.</p>
+<p>During 2013, two big changes were made: A new plugin Host was developed which allows to use lua scripting for creating generators and effects, and the Sampulse machine was completed. It also contained new artwork, including a new Skin nicer for Windows 8. This was done by JosepMa/JAZ, Stefan and Budislav. 1.11.1/2 (betas) were released between January and Frebruary of 2014.<br/>
+This version was the first to include the Virtual Generators option, in which sampled instruments could be used directly in the pattern without the need to specify the sampler or sampulse that plays them.
+</p>
 <p class="head2">Future:</p>
-There is no plan for the future. The still isn't a strong leader behind Psycle.<br />
+There is no long term plan. The project does not have a strong leader.<br />
 Said that, these are the things that could be done: 
 
 <ul>
-	<li>QPsycle: QPsycle was made uncompilable during the integration of psycle-core
-	into Psyclemfc during 2009. No real effort has been done to fix that.</li>
+	<li>QPsycle: QPsycle has been retaken by baneofshadow, who has made it to compile again with current QT version, and is slowly adding features back.
+</li>
 	<li>psycle-core: The psycle-core engine needs a rethinking on what should it be.
 	There are two ways to go from here on, take psycle-mfc engine and convert it into
 	a library like psycle-core using part of psycle-core where possible, or take psycle-core,
 	remove the parts that are more problematic, and base that on current psycle-mfc or new designs.  
 	</li>
-	<li>Psycle 1.10: This release most probably will see bugfixes.</li>
-	<li>Psycle 1.11/2.0: The evolution of Psycle implies necessarily to componentize it.
-	Also, new user interfaces are possible nowadays that weren't possible some years ago, as such, Psycle
+	<li>Psycle 1.11/1.12: The first beta has just been released and provides two new features to play with, as well as a new look.</li>
+	<li>Psycle 2.0: The evolution of Psycle implies necessarily to rethink it.
+	New user interfaces are possible nowadays that weren't possible some years ago, as such, Psycle
 	should try to use tablets and smartphones in some way. HTML5 and new media APIS being added to browsers
 	open also another opportunity for diversification. But all these need a real team of developers.</li>
 </ul>

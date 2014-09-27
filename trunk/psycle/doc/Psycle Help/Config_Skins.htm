@@ -15,13 +15,52 @@
 	</tr>
 </table>
 <p class="head2">Skinning Psycle</p>
-
+<p>
 There are 3 areas of Psycle that can be customized graphically, or
-"skinned": machines (generators, effects and the master machine), track
-headers (the box up at the top) and native machine knobs. To change the
-colours of the machine or pattern view, see the
-<a href="Config_Visual.htm">Visual Configuration</a>
+"skinned": the Machine boxes in the machine view, 
+the Pattern headers in the pattern editor, and the controls in the parameters view of 
+native plugins, including the mixer and the master. These parts support different sizes and also transparency.
+<br /> To change the colours of the machine or pattern view, see the <a href="Config_Visual.htm">Visual Configuration</a>
 section.
+</p>
+<p>	A skin consists of eight files, five for graphics, and three for image information.	(Older versions used five files)<br />
+	These files are as follows:
+	<ul>
+	<li>your_machine_graphics_name.bmp</li>
+	<li>your_knob_graphics_name.bmp</li>
+	<li>your_mixer_graphics_name.bmp</li>
+	<li>your_master_graphics_name.bmp</li>
+	<li>your_header_graphics_name.bmp</li>
+	<li>your_machine_graphics_info_.psm</li>
+	<li>your_controls_graphics_info_.psc</li>
+	<li>your_header_graphics_info.psh</li>
+	</ul>
+	Usually, they are packed inside a directory.<br />
+	<br />
+	There is a requirement about file placement and file names. They have to be in the
+	same directory, and names of .bmp files need to be the same (except extension) than
+	the info files.<br />
+	Example:<br />
+	<ul>
+	<li>PsycleSkinMachine.bmp</li>
+	<li>PsycleSkinMachine.psm</li>
+	<li>PsycleSkinHeader.bmp</li>
+	<li>PsycleSkinHeader.psh</li>
+	<li>PsycleSkinControls.bmp</li>
+	<li>PsycleSkinControls.psc</li>
+	<li>PsycleSkinMixer.bmp  (configured inside PsycleSkinControls.psc)</li>
+	<li>PsycleSkinMaster.bmp (configured inside PsycleSkinControls.psc)</li>
+	</ul>
+<br />
+	The best way to start is getting one skin and modifying it. Once you understand
+	how everything works, you might be confident on starting from your own work.<br/>
+<br/>
+	Notes for graphics:<br/>
+<br/>
+		You can make them the way you want, with the bitdepth appropiated. Support for other
+		fileformats than .bmp are not planned (they would require specific loaders).
+		On Mixer and master, only the graphics can be changed, not the sizes. The knobs also have a fixed size.
+</p>
 <p class="head3"><a name="machines">Machines</a></p>
 To skin machines, you create two files: a bitmap (.bmp) containing all
 the bits and pieces, and a psycle machines (.psm) file e.g.
@@ -118,7 +157,8 @@ co-ordinates of all graphics. Co-ordinates are given as <code>top,left,width,hei
 </table>
 <p><b>Note:</b> The effects sources for the VU meter, pan source etc
 can be different to the generator sources. To avoid having VU meters,
-set the height of <code>vu0_source</code> to zero.</p>
+set the height of <code>vu0_source</code> to zero.<br />
+If you do not want vu peak indicator on either machine, you may set the width of the vu_peak_source to 0.</p>
 <p>The second part of the file specifies the destinations of the
 moving/changing components. Co-ordinates here are given relative to the
 source graphic i.e. the top left of the generator/effect graphic becomes
@@ -161,18 +201,18 @@ source graphic i.e. the top left of the generator/effect graphic becomes
 	</tr>
 	<tr>
 		<td><code>"effect_mute_dest"=3,19</code></td>
-		<td>top, left) Position of mute button.</td>
+		<td>(top, left) Position of mute button.</td>
 	</tr>
 	<tr>
 		<td><code>"effect_bypass_dest"=27,19</code></td>
-		<td>top, left) Position of bypass button.</td>
+		<td>(top, left) Position of bypass button.</td>
 	</tr>
 	<tr>
 		<td><code>"effect_name_dest"=16,4</code></td>
 		<td>(top, left)Position of the generator's name text.</td>
 	</tr>
 	<tr>
-		<td colspan="2">optional entry</td>
+		<td colspan="2">optional entries</td>
 	</tr>
 	<tr>
 		<td><code>"transparency"=0000ff00</code></td>
@@ -180,16 +220,26 @@ source graphic i.e. the top left of the generator/effect graphic becomes
 		<code>00BBGGRR</code>. Leave this value out if not required - it will
 		speed up Psycle's graphics.</td>
 	</tr>
+	<tr>
+		<td><code>"generator_name_clip_coords"=0,0</code></td>
+		<td>(width, height) Size of the clipping area for the name. 0,0 means do not clip.</td>
+	</tr>
+	<tr>
+		<td><code>"effect_name_clip_coords"=0,0</code></td>
+		<td>(width,height) Size of the clipping area for the name. 0,0 means do not clip.</td>
+	</tr>
 </table>
 
 <p class="head3"><a name="headers">Track Headers</a></p>
 Track headers are skinned in exactly the same way as Psycle machines,
 except that .psh (Psycle header files) are used, and the parameters are
-different.
+different.<br />
+Since Psycle 1.11.3, there are two headers. One with track names, and the other without.<br />
+<p>(coordinates are <code>top,left,width,height</code>)</p>
+
+<ul><li>Header without tracknames</li>
 <p><img src="alk-mercury header (TranceMyriad adaptation).png"
 	alt="" /></p>
-<p>(co-ordinates are <code>top,left,width,height</code>)</p>
-
 <table>
 	<tr>
 		<td><b>Line</b></td>
@@ -224,10 +274,29 @@ different.
 		<td>Highlighted playing button.</td>
 	</tr>
 </table>
+<p>If you do not want any track numbers then make the width of the numbers 0.
+	If you don't want the playing indicator, comment or do not add the playing_on_source line.
+</p>
+<p>	The following is one of the four new blocks of data for mouse tracking. 
+	<br />This first group indicate the graphics location for the classic header highlight
+	<br />Width and height coupled with destination tracking designate the clickable area
+	</p>
+<table>
+	<tr>
+		<td><code>"record_tracking_source"=59,24,18,18</code></td>
+		<td>Position of the record tracking image (can be the same than record_on_source).</td>
+	</tr>
+	<tr>
+		<td><code>"mute_tracking_source"=95,24,18,18</code></td>
+		<td>Position of the mute tracking image (can be the same than mute_on_source).</td>
+	</tr>	<tr>
+		<td><code>"solo_tracking_source"=77,24,18,18</code></td>
+		<td>Position of the solo tracking image (can be the same than solo_on_source).</td>
+	</tr>
+</table>
 
-
-<p>(co-ordinates are <code>top,left</code>, relative to the
-background image)</p>
+<p>The second part of the file specifies the destinations of the moving/changing components. 
+Co-ordinates here are given relative to the source graphic i.e. the top left of the header graphic becomes "0,0":</p>
 
 <table>
 	<tr>
@@ -236,23 +305,23 @@ background image)</p>
 	</tr>
 	<tr>
 		<td><code>"digit_x0_dest"=37,7</code></td>
-		<td>Position for the left digit (of the track number).</td>
+		<td>Destination of the left digit (of the track number).</td>
 	</tr>
 	<tr>
 		<td><code>"digit_0x_dest"=46,7</code></td>
-		<td>Position for the right digit (of the track number).</td>
+		<td>Destination of the right digit (of the track number).</td>
 	</tr>
 	<tr>
 		<td><code>"record_on_dest"=88,5</code></td>
-		<td>Position of the record button.</td>
+		<td>Destination of the record button.</td>
 	</tr>
 	<tr>
 		<td><code>"mute_on_dest"=4,5</code></td>
-		<td>Position of the mute button.</td>
+		<td>Destination of the mute button.</td>
 	</tr>
 	<tr>
 		<td><code>"solo_on_dest"=64,5</code></td>
-		<td>Position of the solo button.</td>
+		<td>Destination of the solo button.</td>
 	</tr>
 	<tr>
 		<td colspan="2">optional entries</td>
@@ -266,17 +335,285 @@ background image)</p>
 		<td><code>"playing_on_dest"=0,0</code></td>
 		<td>Highlighted playing button.</td>
 	</tr>
+</table>
+
+<p>Second group of mouse tracking extension. These designate the placement on the classic header for the hightlights.
+	source Width and height coupled with destination designate the clickable area
+	</p>
+<table>
+	<tr>
+		<td><code>"record_tracking_dest"=59,2</code></td>
+		<td>Destination of the record tracking image (can be the same than record_on_dest)</td>
+	</tr>
+	<tr>
+		<td><code>"mute_tracking_dest"=95,2</code></td>
+		<td>Destination of the mute tracking image (can be the same than mute_on_dest)</td>
+	</tr>
+	<tr>
+		<td><code>"solo_tracking_dest"=77,2</code></td>
+		<td>Destination of the solo tracking image (can be the same than solo_on_dest)</td>
+	</tr>
 
 </table>
+<br />
+<li>Header with tracknames</li>
+<p><img src="pattern_header_skin.png"
+	alt="" /><p>
+<p>
+	Psycle 1.11.3 adds a new header that is able to show the track names. <br />
+Instead of being a new graphic, it extends the existing one with new elements and coordinates.<br />
+This is the example image of Psycle 1.11 graphics, and the info file adds the following extra entries:</p>
+<table>
+	<tr>
+		<td><b>Line</b></td>
+		<td><b>Explanation</b></td>
+	</tr>
+	<tr>
+		<td><code>"text_background_source"=0,60,113,23</code></td>
+		<td>Background graphic for the track names header.</td>
+	</tr>
+	<tr>
+		<td><code>"text_number_0_source"=0,44,7,12</code></td>
+		<td>graphic for the number 0. The others have to follow as "123456789" and have the same size.</td>
+	</tr>
+	<tr>
+		<td><code>"text_record_on_source"=0,93,17,10</code></td>
+		<td>Enabled record button</td>
+	</tr>
+	<tr>
+		<td><code>"text_mute_on_source"=96,93,17,10</code></td>
+		<td>Enabled Mute button</td>
+	</tr>
+	<tr>
+		<td><code>"text_solo_on_source"=96,83,17,10</code></td>
+		<td>Enabled Solo button</td>
+	</tr>
+	<tr>
+		<td><code>"text_playing_on_source"=0,83,17,10</code></td>
+		<td>Highlighted playing indicator</td>
+	</tr>
+</table>
+
+<p>This third group indicate the graphics location for the track names header highlight
+	<br />Width and height of the source with the top and left destination designate the clickable area
+</p>
+<table>
+	<tr>
+		<td><code>"text_record_tracking_source"=3,115,54,8</code></td>
+		<td>Position of the record tracking image (can be the same than text_record_on_source).</td>
+	</tr>
+	<tr>
+		<td><code>"text_mute_tracking_source"=57,115,54,8</code></td>
+		<td>Position of the mute tracking image (can be the same than text_mute_on_source)</td>
+	</tr>
+	<tr>
+		<td><code>"text_solo_tracking_source"=57,106,54,8</code></td>
+		<td>Position of the solo tracking image (can be the same than text_solo_on_source)</td>
+	</tr>
+</table>
+
+<p>The next part of the file specifies the destinations of the moving/changing components for the text header. 
+Co-ordinates here are given relative to the source graphic i.e. the top left of the header graphic becomes "0,0":</p>
+<table>
+	<tr>
+		<td><b>Line</b></td>
+		<td><b>Explanation</b></td>
+	</tr>
+	<tr>
+		<td><code>"text_digit_x0_dest"=10,6</code></td>
+		<td>Position for the left digit</td>
+	</tr>
+	<tr>
+		<td><code>"text_digit_0x_dest"=17,6</code></td>
+		<td>Position for the right digit</td>
+	</tr>
+	<tr>
+		<td><code>"text_record_on_dest"=0,11</code></td>
+		<td>Position for the record button</td>
+	</tr>
+	<tr>
+		<td><code>"text_mute_on_dest"=96,11</code></td>
+		<td>Position for the mute button</td>
+	</tr>
+	<tr>
+		<td><code>"text_solo_on_dest"=96,0</code></td>
+		<td>Position for the solo button</td>
+	</tr>
+	<tr>
+		<td><code>"text_playing_on_dest"=0,0</code></td>
+		<td>Position for the playing indicator.</td>
+	</tr>
+	<tr>
+		<td><code>"text_crop_rectangle"=24,7,80,10</code></td>
+		<td>Rectangle where the track name will be written. Width and height are used to cut the text (crop).</td>
+	</tr>
+</table>
+
+<p>Fourth group of mouse tracking extension. These designate the placement on the track names header for the hightlights.
+	<br />Width and height of the source with the top and left destination designate the clickable area
+	</p>
+
+<table>
+	<tr>
+		<td><code>"text_record_tracking_dest"=0,12</code></td>
+		<td>Destination of the record tracking image (can be the same than text_record_on_dest)</td>
+	</tr>
+	<tr>
+		<td><code>"text_mute_tracking_dest"=57,12</code></td>
+		<td>Destination of the mute tracking image (can be the same than text_mute_on_dest)</td>
+	</tr>
+	<tr>
+		<td><code>"text_solo_tracking_dest"=57,0</code></td>
+		<td>Destination of the solo tracking image (can be the same than text_solo_on_dest)</td>
+	</tr>
+</table>
+<p>Track names font information</p>
+<table>
+	<tr>
+		<td><code>"text_colour"=00F0F0F0</code></td>
+		<td>Font colour for the track names header text. 00BBGGRR</td>
+	</tr>
+	<tr>
+		<td><code>"text_font_name"=Arial</code></td>
+		<td>Font face for the track names header text.</td>
+	</tr>
+	<tr>
+		<td><code>"text_font_point"=40</code></td>
+		<td>Font size for the track names header text in cents of points and in hexadecimal notation.</td>
+	</tr>
+	<tr>
+		<td><code>"text_font_flags"=0</code></td>
+		<td>Font flag for the track names header text. 0=normal, 1=bold, 2=italic, 3=bold+italic.</td>
+	</tr>
+</table>
+</ul>
+
 <p><b>Note:</b> It is important that the numbers are placed <i><b>next
 to the equals sign!</b></i></p>
 
-<p class="head3"><a name="knobs">Native Machine Knobs</a></p>
-Skinning the knobs for native machines is straightforward: Create a 28 x
+<p class="head3"><a name="knobs">Native Machine controls</a></p>
+<p>	Originally, the controls of Psycle were not skinnable. 
+In version 1.8, the ability to change the colours and skin the knob
+	control was added to the Visual configuration.<br />
+	And finally, in version 1.11, the ability to skin the master machine window and the send return mixer controls was added,
+	with the help of a new info file and two new graphic images.<p>
+<p>Skinning the knobs for native machines is straightforward: Create a 28 x
 28 knob, with 64 positions, and line them up like this (except with all
-64), going left-to-right from the lowest value to the highest:
+64), going left-to-right from the lowest value to the highest.
+<br /> The center value is the 32nd:
 <p><img src="knobexample.png" alt="" /></p>
-
+<p><img src="master_skin.png" alt="" />&nbsp;&nbsp;&nbsp;
+<img src="mixer_skin.png" alt="" /></p>
+<p>A controls skin is similar to the other two skin files. It uses a .psc file (psycle controls file),
+with the following parameters</p>
+<table>
+	<tr>
+		<td><b>Line</b></td>
+		<td><b>Explanation</b></td>
+	</tr>
+	<tr>
+		<td><code>"machinedial_bmp"="PsycleSkinKnob.bmp"</code></td>
+		<td>Image file for the knobs</td>
+	</tr>
+	<tr>
+		<td><code>"send_return_bmp"="PsycleSkinMixer.bmp"</code></td>
+		<td>Image file for the mixer controls</td>
+	</tr>
+	<tr>
+		<td><code>"master_bmp"="PsycleSkinMaster.bmp"</code></td>
+		<td>Image file for the master machine controls</td>
+	</tr>
+</table>
+<p>Configurable font for the parameter window and mixer window</p>
+<table>	
+	<tr>
+		<td><code>"params_text_font_name"="Tahoma"</code></td>
+		<td>Font name for the font to be used</td>
+	</tr>
+	<tr>
+		<td><code>"params_text_font_point"=dword:00000050</code></td>
+		<td>Size of the font, in cents of points and in hexadecimal notation.</td>
+	</tr>
+	<tr>
+		<td><code>"params_text_font_flags"=dword:00000000</code></td>
+		<td>Font flag. 0=normal, 1=bold, 2=italic, 3=bold+italic.</td>
+	</tr>
+	<tr>
+		<td><code>"params_text_font_bold_name"="Tahoma"</code></td>
+		<td>Font name for the bold font to be used</td>
+	</tr>
+	<tr>
+		<td><code>"params_text_font_bold_point"=dword:00000050</code></td>
+		<td>Size of the bold font, in cents of points and in hexadecimal notation.</td>
+	</tr>
+	<tr>
+		<td><code>"params_text_font_bold_flags"=dword:00000001</code></td>
+		<td>Font flag. 0=normal, 1=bold, 2=italic, 3=bold+italic.</td>
+	</tr>
+</table>
+<p>Parameters for the master window.</p>
+<table>
+	<tr>
+		<td><code>"master_text_backcolour"=dword:00292929</code></td>
+		<td>Background colour for text, in 00BBGGRR</td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_forecolour"=dword:00E7BD18</code></td>
+		<td>colour for text, in 00BBGGRR</td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_font_name"="Tahoma"</code></td>
+		<td>Name of the text font</td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_font_point"=dword:00000046</code></td>
+		<td>Size of the font, in cents of points and in hexadecimal notation.</td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_font_flags"=dword:00000000</code></td>
+		<td>Font flag. 0=normal, 1=bold, 2=italic, 3=bold+italic.</td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_names_dest"=427,33,75,12</code></td>
+		<td>Position of the first name. Names are rendered on the y axis 15 pixels apart. </td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_numbers_master_dest"=22,187</code></td>
+		<td>Top,left of the numbers for master slider. Height is master_text_names_dest height.</td>
+	</tr>	
+	<tr>
+		<td><code>"master_text_numbers_channels_dest"=118,187</code></td>
+		<td>Top,Left for the first channel slider. Slider dBs are rendered on the x axis 24 pixels apart. height is master_text_names_dest height.</td>
+	</tr>	
+</table>
+<p>
+ These are the constants used for the graphics. They are not user-modifiable because
+	 it affects some internal objects and calculations.<br /><br />
+	 rotating knob graphic<br />
+	 knob (x,y,w,h) 0,0,28,28<br />
+	 number of knobs :  64  (middle position is knob number 32)<br />
+<br />
+	 Mixer graphic positions and widths are:<br />
+	 mixer slider (x,y,w,h) 0,0,30,182<br />
+	 mixer slider knob (x,y,w,h) 0,182,22,10<br />
+	 mixer vu off (x,y,w,h) 30,0,16,90<br />
+	 mixer vu on (x,y) 46,0<br />
+	 mixer switch off (x,y,w,h) 30,90,28,28<br />
+	 mixer switch on (x,y) 30,118<br />
+	 mixer check off (x,y,w,h) 30,146,13,13<br />
+	 mixer check on (x,y) 30,159<br />
+<br />
+	 Master graphic positions and widths are:<br />
+	 background (x,y,w,h) 0,0,516,225<br />
+	 Vu Left off (x,y,w,h) 516,0,18,159<br />
+	 Vu Left on (x,y) 534,0<br />
+	 Vu Right off (x,y) 552,0<br />
+	 Vu Right on (x,y) 570,0<br />
+	 slider knob (x,y,w,h) 516,159,22,10<br />
+</p>	
+</table>
+<p> WARNING!!! Use the same name than the .psc file for one of the three bmp files! The loader requires this.
+</p>
 <table width="100%">
 	<col width="50%" />
 	<tr>

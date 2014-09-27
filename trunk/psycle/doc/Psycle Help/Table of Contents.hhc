@@ -10,7 +10,7 @@
 </OBJECT>
 <UL>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Psycle Version 1.10.0">
+		<param name="Name" value="Psycle Version 1.12.0">
 		<param name="Local" value="index.htm">
 		<param name="Local" value="dot.bmp">
 		<param name="ImageNumber" value="11">
@@ -241,8 +241,8 @@
 				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Internal Sampler and Wave Editor">
-			<param name="Local" value="Sampler.htm">
+			<param name="Name" value="Using sampled sounds in Psycle">
+			<param name="Local" value="SampledAudio.htm">
 			</OBJECT>
 		<UL>
 			<LI> <OBJECT type="text/sitemap">
@@ -251,8 +251,18 @@
 				<param name="ImageNumber" value="11">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
-				<param name="Name" value="Instrument Editor">
-				<param name="Local" value="Sampler_InstrumentEditor.htm">
+				<param name="Name" value="Sampler Instrument Editor">
+				<param name="Local" value="InstrumentEditor_Sampler.htm">
+				<param name="ImageNumber" value="11">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Sampulse Instrument Editor">
+				<param name="Local" value="InstrumentEditor_Sampulse.htm">
+				<param name="ImageNumber" value="11">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Wave data">
+				<param name="Local" value="InstrumentEditor_Waves.htm">
 				<param name="ImageNumber" value="11">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
@@ -266,8 +276,18 @@
 				<param name="ImageNumber" value="11">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Using virtual generators">
+				<param name="Local" value="Sampler_Using_Virtual.htm">
+				<param name="ImageNumber" value="11">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Sampler Properties">
-				<param name="Local" value="Sampler_Properties.htm">
+				<param name="Local" value="Sampler.htm">
+				<param name="ImageNumber" value="11">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Sampulse Properties">
+				<param name="Local" value="Sampulse.htm">
 				<param name="ImageNumber" value="11">
 				</OBJECT>
 		</UL>

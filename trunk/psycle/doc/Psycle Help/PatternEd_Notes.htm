@@ -43,24 +43,27 @@ letters of the alphabet as notes.</p>
 	</tr>
 	<tr valign="top">
 		<td><b>2.</b></td>
-		<td>Auxiliary column - This column has two uses, depending on the
-		type of note. If it is a tweak, tweak smooth or MIDI command, it determines
-		the parameter or command to be sent. When it is a note, it depends on the machine.
-		For the Sampler Machine, it indicates which instrument is going to play.<br />
+		<td>Auxiliary column - This column has several uses, depending on the
+		type of note and type of machine.<br />
+		If it is a tweak, tweak smooth or MIDI command, it determines
+		the parameter or command to be sent.<br />
+		When it is a note, it depends on the machine.
+		For the Sampler and Sampulse machines, it indicates which instrument is going to play.<br />
 		With VST's, it can be used (it is not required) to specify the MIDI
 		channel number (from 0 to F). Other machines like fluidsynth or Yannis MIDI can 
-		use this column too to indicate in the same way.</td>
+		use this column too to indicate some internal instrument or channel.<br />
+		Finally, Virtual generators use this column as a volume column.</td>
 	</tr>
 	<tr valign="top">
 		<td><b>3.</b></td>
-		<td>Machine number (in hexadecimal).</td>
+		<td>Machine or Virtual geneator number(in hexadecimal).</td>
 	</tr>
 	<tr valign="top">
 		<td><b>4.</b></td>
 		<td>Note parameters - these will depend on your machine. For
 		VSTs, the <code>0Cxx</code> command sets the volume at note on, where
 		<code>xx</code> is the volume (from 00 to FF). For native machines and
-		the internal sampler, refer to their documentation.</td>
+		the internal sampler, refer to their documentation. (file tweaking.txt, or the help in the machine parameter window)</td>
 	</tr>
 </table>
 <p>When entering notes, make sure the cursor is in the left-hand

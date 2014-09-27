@@ -1,6 +1,7 @@
 ----------------------------------------------------------------------------------------------------
 Version | Date | Type of release             | Authors
 --------|------|-----------------------------|------------------------------------------------------
+1.12.0  | 2014 | release                     | [JAZ] & Stefan & Budislav.
 1.11.x  | 2014 | beta                        | [JAZ] & Stefan & Budislav.
 1.10.1  | 2012 | release                     | [JAZ] with collaboration from others
 1.10.0  | 2011 | release					 | [JAZ] & bohan.
@@ -45,22 +46,26 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
-v1.11.4 (beta) (2014-xx-xx)
+v1.12.0  (2014-09-28)
 -------
 + Virtual generators. Sampled instruments can be mapped to a machine number (from 81 to FE in hexadecimal) and be used without the need to specify which machine they play on.
   This has a side effect of leaving the aux column free, which can be used in these virtual generators as a volume column ( commands 0Cxx in Sampler and 1Exx in Sampulse)
-  Modules imported now make use of virtual generators, which also helps in replacing the instruments with other generators, or even adding more sampulse machines to route sounds differently without the need to modify the pattern data.
-+ Sampler : Porta to note.
+  Song Modules imported now make use of virtual generators, which also helps in replacing the instruments with other generators, or even adding more sampulse machines to route sounds differently without the need to modify the pattern data manually.
++ Sampler : Porta to note implemented ( 03xx ). Also mcm "send to column" correctly implemented.
++ Search and Replace reimplemented. Now you can also search without replacing (finds first ocurrence only for now), as well as searching for "Empty" and "non empty". Note field can now be searched.
+* Wave editor: Forward and backward buttons in wave editor now also step into the loop start and end.
+* Wave editor: Sustain loops can now be set from the popup menu. Also, loops and sustain loops can be unset from the popup menu.
 * Playing notes in Instrument editor and Sampulse machine now do not write into the pattern editor (so now they behave like the rest of the plugins).
 * Pattern skins that have text header and tracking, but which miss classic header tracking are understood now as "use the button positions as tracking zone".
 * Change to the fileformat, and completed the file-format description.txt documentation. The change affects to how samples are saved and adds the new virtual generators feature.
 ! delete sampulse instrument with the option to delete the samples did crash the application.
-! Moving mouse on pattern editor used more cpu than needed (was redrawing the header innecessarily).
+! Moving mouse on pattern editor used more cpu than needed (was redrawing the header unnecessarily).
 ! Several screen updating problems (sample lists)
 ! Fixed bug on the sampler option to play an instrument from a concrete sampler. Note off note would go to the wrong machine.
 ! Fixed crash on Sampulse instruments with a sutain loop at the amplitude envelope's end.
-! Fixed bug in loading the note mapping of .XI instruments.
+! Fixed bugs in loading the note mapping of .XI and .ITI instruments (i.e. in .XI and .ITI files, not in XM or .IT).
 ! Fixed bug with waveout driver and synchornized MIDI mode.
+! Fixes in AIFF loader (some uninitialized variables if INST chunk didn't exist)
 
 v1.11.3 (beta) (2014-05-25)
 --------
@@ -96,7 +101,7 @@ v1.11.2 (beta) (2014-02-16)
 ! Wave editor crash on cut/copy and crash on deleting sample from samples bank.
 ! Fix on opening the load/save presets (.fxb/.fxp) on Windows XP.
 ! Fix on changing the "font sel" colour from visual config.
-! Fix on knob tweaking (the cursor was supposed to be hidden while tweaking)
+! Fix on knob tweaking (the mouse cursor was supposed to be hidden while tweaking)
 ! VST tweaking from its UI wasn't working in beta1
 ! native plugin tweaks with negative range wasn't recording the correct values.
 ! Fixed crash when doing Exchange machines with effects with input wires.

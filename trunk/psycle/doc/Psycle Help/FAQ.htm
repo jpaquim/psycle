@@ -30,45 +30,44 @@
 <p><b>Q)</b> I need to talk to the developers!<br />
 
 <b>A)</b> Via E-mail:<br />
-
-</p>
-
 <ul>
-
-	<li>Write to the mailing list: psycle-devel@lists.sourceforge.net<br />
-
-	</li>
-
-	<li>You can also contact with the developers on the boards of psycledelics
-
-	<a href="http://psycle.pastnotecut.org">http://psycle.pasnotecut.org</a><br />
-	Most probably, you want to talk to JosepMa/[JAZ], or bohan</li>
-
+	<li>Write to the mailing list: psycle-devel@lists.sourceforge.net</li>
+	<li>You can also contact with the developers adding a ticket to sourceforge
+	site <a href="https://sourceforge.net/p/psycle/bugs/">https://sourceforge.net/p/psycle/bugs/</a></li>
 </ul>
+
+<b>B) Via social networks:
+<ul>
+	<li>Psycledelics forums <a href="http://psycle.pastnotecut.org">http://psycle.pasnotecut.org</a><br />
+		Most probably, you want to talk to JosepMa/[JAZ]</li>
+	<li>Google+ site: <a href="https://plus.google.com/u/0/103492491563788867312">https://plus.google.com/u/0/103492491563788867312</a></li>
+	<li>Twitter account: <a href="https://twitter.com/psycledelics">https://twitter.com/psycledelics</a></li>
+</ul>
+
+<b>C)<b/> User communities:
+<ul>
+	<li>Facebook community site: <a href="https://www.facebook.com/groups/121474730283/">https://www.facebook.com/groups/121474730283/</a></li>
+	<li>Google+ community site: <a href="https://plus.google.com/u/0/communities/106016339032092323576">https://plus.google.com/u/0/communities/106016339032092323576</a></li>
+	<li>Soundcloud community site: <a href="https://soundcloud.com/groups/psyclers">https://soundcloud.com/groups/psyclers</a></li>
+</ul>
+
+	The IRC channel #psycle in EFnet still exists, but it is not actively used by
+	developers right now.
+</p>
 
 <p><b>Q)</b>Is it possible to import/load MOD/S3M/XM/IT files into
 Psycle?<br />
 
-<b>A)</b> Latest 1.7.x alphas and all 1.8 versions include "Sampulse"
-and its importing routines. Those should allow you to import them with
-ease.<br />
-
-Warnings:<br />
-
+<b>A)</b> The ability to import has existed since version 1.8, but with an incomplete Sampulse machine.
+	Since version 1.11.1 beta, the Sampulse machine is considered ready and can be used
+	without fear for making songs.<br />
+<br />
+	Note that Psycle has a limitation : It does not have a volume column by default.<br />
+	There are two ways to compensate for this. Use Virtual Generators for the sampled instruments, and then
+	the aux column will be a volume column.<br />
+	Else, use the mcm command in conjunction with the 1Exx command (Sampulse) or 0Cxx command (Sampler) to have both
+	an effect command and a volume command.
 </p>
-
-<ul>
-
-	<li>Sampulse as a machine is unfinished. You might preffer
-	replacing it by other native/VST machines after having imported the
-	patterns/sequence.</li>
-
-	<li>Also, note that Psycle has an important limitation : It does
-	not have a volume column, so all the volume changes are converted to a
-	volume command, making it impossible to have a volume set and a command
-	at the same line.</li>
-
-</ul>
 
 <p><b>Q)</b> What is this 'dummy' machine?<br />
 
@@ -79,9 +78,8 @@ max 12 machines connected to one.</p>
 
 <p><b>Q)</b> I have problems playing a song in Winamp!<br />
 
-<b>A)</b> The winamp plugin hasn't been updated for long, and it lacks
-several changes that have been since then. We no longer recommend using
-it, until we release an up-to-date version.</p>
+<b>A)</b> The last update of the plugin was for version 1.10.2. Also, remember that the plugin uses 
+    its own plugin cache, which you'll have to regenerate from its own UI.</p>
 
 <p><a name="sampler" /></p>
 
@@ -89,8 +87,8 @@ it, until we release an up-to-date version.</p>
 
 <p><b>Q)</b> I've loaded a sample but it doesn't make any sound.<br />
 
-<span style="font-weight: bold;">A)</span> To play a sampled sound (.wav
-or .iff only!) you need to add a sampler machine and connect it to the
+<span style="font-weight: bold;">A)</span> To play a sampled sound (.wav, .aiff, .iff/svx, .s3i or .its)
+ you need to add a sampler machine and connect it to the
 master or to an effect that goes to the master. You might want to check
 if other machines make sound, and check your audio settings.</p>
 
@@ -103,9 +101,7 @@ common question, because it would be good. Support for lossy compression
 list.</p>
 
 <p><span style="font-weight: bold;">Q)</span> When I load a sample
-and enter a note, it's really fast and high-pitched...<br />
-
-...when it plays. I've tried everything from halving the bit rate of the
+and enter a note, it's really fast and high-pitched when it plays. I've tried everything from halving the bit rate of the
 sample to re-installing Psycle. What should I do about this?<br />
 
 <span style="font-weight: bold;">A)</span> The way trackers change pitch
@@ -113,12 +109,12 @@ of a sample is by speeding up or slowing down the rate at which the
 individual sample points are played back. The result is similar to
 playing a 33 1/3 RPM record at 45, or vice versa.<br />
 
-This depends on the note you press, and for the Sampler, the "standard"
-note is C-4, not C-5 like with most other plugins. Also, you can adjust
-the base note to another value, via the Edit instruments screen (Edit
-button in the toolbar, or F10 key)</p>
+This depends on the note you press, the sample rate specified in the 
+sampler (see the instruments editor window) and one setting in the Sampler machine changes between
+C-4 or C-5 for the default speed note. Also, you can adjust the base
+note to another value, via the Edit instruments screen (Edit button in the toolbar, or F10 key) </p>
 
-<p><a name="sampler" /></p>
+<p><a name="usability" /></p>
 
 <p class="head3"><b>Psycle Usage</b></p>
 
