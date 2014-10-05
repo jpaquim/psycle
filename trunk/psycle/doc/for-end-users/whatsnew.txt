@@ -58,6 +58,7 @@ v1.12.0  (2014-09-28)
 * Playing notes in Instrument editor and Sampulse machine now do not write into the pattern editor (so now they behave like the rest of the plugins).
 * Pattern skins that have text header and tracking, but which miss classic header tracking are understood now as "use the button positions as tracking zone".
 * Change to the fileformat, and completed the file-format description.txt documentation. The change affects to how samples are saved and adds the new virtual generators feature.
+* Updated version of the Winamp plugin
 ! delete sampulse instrument with the option to delete the samples did crash the application.
 ! Moving mouse on pattern editor used more cpu than needed (was redrawing the header unnecessarily).
 ! Several screen updating problems (sample lists)

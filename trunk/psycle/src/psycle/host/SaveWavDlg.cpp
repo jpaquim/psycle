@@ -376,7 +376,7 @@ namespace psycle { namespace host {
 			GetDlgItem(IDC_RECSONG)->EnableWindow(false);
 			GetDlgItem(IDC_RECPATTERN)->EnableWindow(false);
 			GetDlgItem(IDC_RECRANGE)->EnableWindow(false);
-			GetDlgItem(IDC_RECBLOCK)->EnableWindow(true);
+			GetDlgItem(IDC_RECBLOCK)->EnableWindow(false);
 			GetDlgItem(IDC_FILEBROWSE)->EnableWindow(false);
 
 			m_filename.EnableWindow(false);
