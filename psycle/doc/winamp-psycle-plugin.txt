@@ -36,7 +36,7 @@ $$      $$$$              $..$$     $$...........
 	This Plugin allows you to play .psy files containing Psycle Songs with
 	winamp, or any player compatible with winamp plugins (like XMPlay)
 
-	This release is based on the source code of Psycle 1.10.1
+	This release is based on the source code of Psycle 1.12.0
 	Newer releases will be based on psycle-core.
 
 
@@ -48,15 +48,16 @@ $$      $$$$              $..$$     $$...........
 	Winamp's directory (The directory where winamp.exe is located, generally 
 	C:\Program Files\Winamp)
 	
-	- boost_date_time-vc90-mt-1_41.dll
-	- boost_filesystem-vc90-mt-1_41.dll
-	- boost_system-vc90-mt-1_41.dll
-	- boost_thread-vc90-mt-1_41.dll
+	- boost_chrono-vc90-mt-1_55.dll
+	- boost_date_time-vc90-mt-1_55.dll
+	- boost_filesystem-vc90-mt-1_55.dll
+	- boost_system-vc90-mt-1_55.dll
+	- boost_thread-vc90-mt-1_55.dll
 	- universalis.dll
 	- winamp-psycle-plugin.txt
 	
 	Note:
-	If you have a file namde blwtbl.dll in your winamp's directory, delete it. The older
+	If you have a file named blwtbl.dll in your winamp's directory, delete it. The older
 	plugin needed that file to be there, but the new one doesn't, and if it finds it,
 	Druttis sublime won't work.
 	
@@ -85,12 +86,17 @@ $$      $$$$              $..$$     $$...........
 
 	This version of the plugin has the following limitations:
 
-	· Not exact duration and/or seeking with songs that use FFxx or FExx commands.
+	· Not exact duration and/or seeking with songs that use FFxx or FExx commands, but better behaviour than older versions.
 	· Cannot save the info.
 
 
 \/ Version Revision
 --------------------
+1.12 (28-09-2014)
+-----------------
+. Engine update to 1.12.0
+
+
 1.10 (23-04-2012)
 -----------------
 . Engine update to 1.10.1

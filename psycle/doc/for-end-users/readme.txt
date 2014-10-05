@@ -1,6 +1,6 @@
 				------------------------------------------------
 				]==-> Psycle Modular Music Creation Studio <-==[
-				------------------------------- 1.11.3 ---------
+				------------------------------- 1.12.0 ---------
 --------------------------------------------------------------------------------
 
 contents:
@@ -133,7 +133,7 @@ Oatmeal by Fuzzpilz  	( http://bicycle-for-slugs.org/ )
 3. Development:
 ---------------
 Psycle:
-   	Psycle 1.11/1.12: The first beta has just been released and provides two new features to play with, as well as a new look.
+   	Psycle 1.12: This version means finising one of the really awaited features, which is the Sampulse machine. It will probably have a bugfix/improvement version.
 	
 	Psycle 2.0: The evolution of Psycle implies necessarily to rethink it. New user interfaces are possible nowadays that weren't possible some years ago, so Psycle should try to use tablets and smartphones in some way. HTML5 and new media APIs being added to browsers open also another opportunity for diversification. But all these need a real team of developers.
 
@@ -155,7 +155,7 @@ Psycledelics site.
 * Psycledelics' Community and other communities:
 
 Psycledelics is the site of Psycle users. It contains several forums, documents and 
-how-to's, download links and also a song section where that you can share
+how-to's, download links and also a song section where you can share
 your compositions with others.
 It is a relatively small community, and quite helpful.
 
