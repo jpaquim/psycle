@@ -1,0 +1,11 @@
+"background_source"=0,0,109,16
+"number_0_source"=0,16,5,9
+"record_on_source"=50,16,14,10
+"mute_on_source"=64,16,14,10
+"solo_on_source"=78,16,14,10
+
+"digit_x0_dest"=19,3
+"digit_0x_dest"=26,3
+"record_on_dest"=48,3
+"mute_on_dest"=67,3
+"solo_on_dest"=86,3

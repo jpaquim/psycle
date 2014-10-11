@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_Instruments.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="InstrumentEditor_Sampulse.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Instrument Editor for the sampler</p>
+<center><img src="instrument_editor_sampler.png" border="0" alt="" /></center>
+<p>Use the arrow buttons or the dropdown to switch between samples, and the "Delete" button to delete them.<br />
+To edit the name, go to the Samples bank.</p>
+<p class="head3"> <a name="properties">Instrument Properties</a></p>
+<p><b>Virtual generator</b> &ndash; Use the <a href="Sampler_Using_Virtual.htm">Virtual generator for instruments</a>.</p>
+<p><b>Switch automatically to this sampler on editing</b> &ndash; Legacy option intended to add the correct sampler machine when
+editing a pattern. Using virtual generators is a better option.</p>
+<p class="head3">Note playback options</p>
+<p><b>New Note Action</b> &ndash; Whether to cut, release or do nothing
+when another note from the same machine is triggered while the previous
+note is still playing.</p>
+<b>Play sample to fit X rows</b> &ndash; Stretches or squashes the
+sample to fit a given number of rows. 
+<p><b>Random Panning</b> &ndash; Randomises the panning each time
+the sample is played.</p>
+<p><b>Random VCF Cutoff</b> &ndash; Randomises the <a href="#filter">filter</a>
+cutoff each time the sample is played.</p>
+<p><b>Random Reso/Bw.</b> &ndash; Randomises the resonance of the
+filter each time the sample is played.</p>
+
+<p class="head3">Filter options</p>
+<p><b>Filter Mode</b> &ndash; This allows you to set the filter
+type. You have a choice of Low Pass (retains only the frequencies below
+the cufoff), High Pass (retains only the freqencies above the cutoff),
+Band Pass (retains only a band of frequencies above and below the
+cutoff) and Notch (rejects only a band of frequencies above and below
+the cutoff). To ignore any filter settings, set this to "None".</p>
+<p><b>Filter cutoff and ressonance</b> &ndash; This allows you to set the
+filter cut-off frequency and the ressonance (Q) or bandwidth (BW).</p>
+
+
+<p class="head3"><a name="wavelayer">Instrument Wave Layer</a></p>
+
+<b>Volume</b> &ndash; Volume of the sample.
+<p><b>Panning</b> &ndash; The left or right channel bias of the
+sample. 64 is the middle.</p>
+<p><b>FineTune</b> &ndash; Finetuning of the pitch of the sample by
+a maximum of +/- one seminote.</p>
+<p><b>Tune</b> &ndash; Sets the base tuning of the note. The
+original pitch of the sample is set to C-4, so if the tuning of a given
+sample were set to C-5, the pitch of the sample is shifted up by one
+octave.</p>
+<p><b>Loop</b> &ndash; To turn on the loop set in the <a href="Instrument_Editor_Waves.htm">wave data editor</a> or in the <a
+	href="Sampler_WaveEditor.htm">wave editor</a>, click "Forward". Click
+the "Off" button to ignore the loop settings.</p>
+<p><b>Loop At</b> &ndash; Displays the loop points that have been
+set in the <a href="Sampler_WaveEditor.htm">wave editor</a>.</p>
+
+<p class="head3">Amplitude/Filter Envelopes</p>
+<p><b>Amplitude</b> &ndash; This modifies the ADSR
+(Attack-Decay-Sustain-Release) envelope for the volume, which is shown
+on a graph. To ignore the envelope settings, set the Attack, Decay and
+Release to the lowest value possible, and set the Sustain to 100%.</p>
+<p><a name="filter"> <b>Filter</b></a> &ndash; This modifies the ADSR
+(Attack-Decay-Sustain-Release) envelope for the filter, which is shown
+on a graph. To ignore the envelope settings, set the modulation amount to 0%, or
+set the filter to none, which will disable filtering.</p>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_Instruments.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="InstrumentEditor_Sampulse.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+</body>
+</html>

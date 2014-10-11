@@ -1,0 +1,1009 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="psycle">
+      <UniqueIdentifier>{4a0cfee7-8364-4650-a770-120e28fd1fb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\devices">
+      <UniqueIdentifier>{6578863e-f5d9-4687-aa63-bcf07b0d87b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\devices\audio">
+      <UniqueIdentifier>{a4b13fed-4f29-433e-9375-769b429011dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\devices\midi">
+      <UniqueIdentifier>{06461ac4-6a4b-42b4-913f-05a2b2d1cb10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\resources">
+      <UniqueIdentifier>{68477a59-366e-4b1f-975f-c794236305d0}</UniqueIdentifier>
+      <Extensions>*.bmp</Extensions>
+    </Filter>
+    <Filter Include="psycle\file">
+      <UniqueIdentifier>{0f57d523-b59f-4c18-bb12-d5681d8f2082}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\configuration">
+      <UniqueIdentifier>{15a10464-8b04-447f-b555-1d981a3b3790}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc">
+      <UniqueIdentifier>{27fa6d75-8b25-4a01-a65f-d88a2bf804e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\configuration">
+      <UniqueIdentifier>{914bac77-f4ed-4b15-9eac-82aa96eb74b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\configuration\devices">
+      <UniqueIdentifier>{e53d9763-9e20-4821-9880-69b5ebb30c50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\configuration\devices\audio">
+      <UniqueIdentifier>{ea36eb8b-f129-4e86-9b4a-817671874c08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\machine">
+      <UniqueIdentifier>{27baa78e-e341-43fa-9ef2-67b2e4ef80b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\machine\sampler">
+      <UniqueIdentifier>{9b58b4fc-c66e-430e-976c-f21deccdca0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\machine\instrument">
+      <UniqueIdentifier>{44e59eb2-c77a-45e1-9838-9999999338ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\machine\instrument\waveform">
+      <UniqueIdentifier>{44e59eb2-c77a-45e1-9838-749d5a9338ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\machine\vst">
+      <UniqueIdentifier>{a0b1b5b5-03ad-4a25-bbe4-26fe65132c39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\machine\XMSampler">
+      <UniqueIdentifier>{1a1fc46c-3fcd-458e-8e31-a886b41ca7bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\pattern">
+      <UniqueIdentifier>{8a2b5097-2292-45fc-b2d2-12beb04cf36f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\monitors">
+      <UniqueIdentifier>{3d870632-280f-4f8c-ab99-94050403db3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\toolbars">
+      <UniqueIdentifier>{95109b2d-36b1-4019-bc0c-264263eb9799}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\mfc\UIControls">
+      <UniqueIdentifier>{4d30fce1-f775-44d8-8c8c-72395862a400}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\engine">
+      <UniqueIdentifier>{da401f36-4df8-4263-9f0e-50a2c2d8af46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\engine\machine">
+      <UniqueIdentifier>{18e6b585-13f0-4343-833c-4fa9b8bafd4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\engine\machine\sampler">
+      <UniqueIdentifier>{b2280693-328f-45c9-a8d1-a171c524e6db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\engine\machine\XMSampler">
+      <UniqueIdentifier>{d0c1c30b-1266-4b36-b15c-c8a95e1517fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\detail">
+      <UniqueIdentifier>{55d90cd8-10e5-4244-90d9-1f5c3d0463d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seib-Vsthost">
+      <UniqueIdentifier>{627d616a-b0e0-41eb-af43-73474a5410d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="psycle\engine\machine\lua">
+      <UniqueIdentifier>{58939c0f-a85b-4aa2-a252-b1f13ac6ad41}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\psycle\host\Constants.hpp">
+      <Filter>psycle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Global.hpp">
+      <Filter>psycle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InputHandler.hpp">
+      <Filter>psycle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\version.hpp">
+      <Filter>psycle</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ASIOInterface.hpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\AudioDriver.hpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\DirectSound.hpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WasapiDriver.hpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveOut.hpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MidiInput.hpp">
+      <Filter>psycle\devices\midi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\resources\resources.hpp">
+      <Filter>psycle\resources</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\FileIO.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ITModule2.h">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\KeyPresetIO.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\PresetIO.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SkinIO.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMFile.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSongExport.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSongLoader.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\CmdDef.hpp">
+      <Filter>psycle\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ConfigStorage.hpp">
+      <Filter>psycle\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Configuration.hpp">
+      <Filter>psycle\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Registry.hpp">
+      <Filter>psycle\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WinIniFile.hpp">
+      <Filter>psycle\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Bitmap.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ChildView.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ExclusiveLock.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\GreetDialog.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\keybhandler.private.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\machineview.private.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MainFrm.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\mouseHandler.private.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\patviewnew.private.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\psycle.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\PsycleGlobal.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SaveWavDlg.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\seqview.private.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\sinstance.h">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SongpDlg.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ConfigDlg.hpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\DirectoryDlg.hpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\KeyConfigDlg.hpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\PsycleConfig.hpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SkinDlg.hpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SpecialKeys.hpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MidiInputDlg.hpp">
+      <Filter>psycle\mfc\configuration\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\OutputDlg.hpp">
+      <Filter>psycle\mfc\configuration\devices</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ASIOConfig.hpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\DSoundConfig.hpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WasapiConfig.hpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveOutDialog.hpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\BaseParamView.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\FrameMachine.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\GearRackDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MacProp.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MasterDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MixerFrameView.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\NativeGraphics.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\NativeView.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\NewMachine.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\NewVal.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ParamList.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\PresetsDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveInMacDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\PlotterDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\GearTracker.hpp">
+      <Filter>psycle\mfc\machine\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WavFileDlg.hpp">
+      <Filter>psycle\mfc\machine\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\VstEffectWnd.hpp">
+      <Filter>psycle\mfc\machine\vst</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSamplerMixerPage.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSamplerUI.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSamplerUIGeneral.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSamplerUIInst.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSamplerUISample.hpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InterpolateCurveDlg.hpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\PatDlg.hpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SwingFillDlg.hpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\TransformPatternDlg.hpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InfoDlg.hpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MidiMonitorDlg.hpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ProgressDialog.hpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\VolumeDlg.hpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WireDlg.hpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\MachineBar.hpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SequenceBar.hpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SongBar.hpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\DPI.hpp">
+      <Filter>psycle\mfc\UIControls</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ExListBox.h">
+      <Filter>psycle\mfc\UIControls</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\cpu_time_clock.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InstPreview.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\machineloader.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Player.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\plugincatcher.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\plugininfo.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Preset.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Song.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\SongStructs.hpp">
+      <Filter>psycle\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\convert_internal_machines.private.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\internal_machines.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Machine.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Plugin.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\psycle-plugins\src\psycle\plugin_interface.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\vsthost24.hpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Instrument.hpp">
+      <Filter>psycle\engine\machine\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Sampler.hpp">
+      <Filter>psycle\engine\machine\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMInstrument.hpp">
+      <Filter>psycle\engine\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\XMSampler.hpp">
+      <Filter>psycle\engine\machine\XMSampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\detail\config.hpp">
+      <Filter>psycle\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\detail\config.private.hpp">
+      <Filter>psycle\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\detail\project.hpp">
+      <Filter>psycle\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\detail\project.private.hpp">
+      <Filter>psycle\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Seib-vsthost\CVSTHost.Seib.hpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Seib-vsthost\CVSTPreset.hpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Seib-vsthost\EffectWnd.hpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Seib-vsthost\JBridgeEnabler.hpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InstrumentEditor.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ScrollableDlgBar.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveEdAmplifyDialog.hpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveEdChildView.hpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveEdCrossfadeDialog.hpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveEdFrame.hpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveEdInsertSilenceDialog.hpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\WaveEdMixDialog.hpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\EnvelopeEditor.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\EnvelopeEditorDlg.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\InstrumentAmpDlg.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\InstrumentFilDlg.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\InstrumentGenDlg.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\InstrumentPanDlg.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\SampleAssignEditor.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include=".\src\psycle\host\WaveScopeCtrl.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ChannelMappingDlg.hpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InstrIndividualMap.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\InstrNoteMap.hpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaArray.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaInternals.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaPlugin.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaHost.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\psycle\host\Global.cpp">
+      <Filter>psycle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InputHandler.cpp">
+      <Filter>psycle</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ASIOInterface.cpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\AudioDriver.cpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\DirectSound.cpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WasapiDriver.cpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveOut.cpp">
+      <Filter>psycle\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MidiInput.cpp">
+      <Filter>psycle\devices\midi</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\FileIO.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ITModule2.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\KeyPresetIO.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PresetIO.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SkinIO.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSongExport.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSongLoader.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Configuration.cpp">
+      <Filter>psycle\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Registry.cpp">
+      <Filter>psycle\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WinIniFile.cpp">
+      <Filter>psycle\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ChildView.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ExclusiveLock.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\GreetDialog.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MainFrm.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Psycle.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PsycleGlobal.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SaveWavDlg.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\sinstance.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SongpDlg.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ConfigDlg.cpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\DirectoryDlg.cpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\KeyConfigDlg.cpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PsycleConfig.cpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SkinDlg.cpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SpecialKeys.cpp">
+      <Filter>psycle\mfc\configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MidiInputDlg.cpp">
+      <Filter>psycle\mfc\configuration\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\OutputDlg.cpp">
+      <Filter>psycle\mfc\configuration\devices</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ASIOConfig.cpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\DSoundConfig.cpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WasapiConfig.cpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveOutDialog.cpp">
+      <Filter>psycle\mfc\configuration\devices\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\FrameMachine.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\GearRackDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MacProp.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MasterDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MixerFrameView.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\NativeGraphics.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\NativeView.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\NewMachine.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\NewVal.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ParamList.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PresetsDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveInMacDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PlotterDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\GearTracker.cpp">
+      <Filter>psycle\mfc\machine\sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\wavfiledlg.cpp">
+      <Filter>psycle\mfc\machine\sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\VstEffectWnd.cpp">
+      <Filter>psycle\mfc\machine\vst</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerMixerPage.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerUI.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerUIGeneral.cpp">
+      <Filter>psycle\mfc\machine\XMSampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InterpolateCurveDlg.cpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\PatDlg.cpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SwingFillDlg.cpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\TransformPatternDlg.cpp">
+      <Filter>psycle\mfc\pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InfoDlg.cpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MidiMonitorDlg.cpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ProgressDialog.cpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\VolumeDlg.cpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WireDlg.cpp">
+      <Filter>psycle\mfc\monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\MachineBar.cpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SequenceBar.cpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SongBar.cpp">
+      <Filter>psycle\mfc\toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ExListBox.cpp">
+      <Filter>psycle\mfc\UIControls</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstPreview.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Player.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\plugincatcher.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\plugininfo.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Preset.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Song.cpp">
+      <Filter>psycle\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\internal_machines.cpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Machine.cpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Plugin.cpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\vsthost24.cpp">
+      <Filter>psycle\engine\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Instrument.cpp">
+      <Filter>psycle\engine\machine\sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Sampler.cpp">
+      <Filter>psycle\engine\machine\sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMInstrument.cpp">
+      <Filter>psycle\engine\machine\XMSampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSampler.cpp">
+      <Filter>psycle\engine\machine\XMSampler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Seib-vsthost\CVSTHost.Seib.cpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Seib-vsthost\CVSTPreset.cpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Seib-vsthost\EffectWnd.cpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Seib-vsthost\JBridgeEnabler.cpp">
+      <Filter>Seib-Vsthost</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentEditor.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\ScrollableDlgBar.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdAmplifyDialog.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdChildView.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdCrossfadeDialog.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdFrame.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp" >
+		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp" >
+		<Filter>psycle\mfc\machine</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\EnvelopeEditor.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\SampleAssignEditor.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerUIInst.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerUISample.cpp" >
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrIndividualMap.cpp">
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrNoteMap.cpp">
+		<Filter>psycle\mfc\machine\instrument</Filter>
+	</ClCompile>
+    <ClCompile Include="src\psycle\host\LuaArray.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaInternals.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaPlugin.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaHost.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\psycle\host\resources\AsioLogo.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\bmp00001.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\bmp00002.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\bmp00003.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\bmp00004.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\bmp00005.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\bmp00009.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\greater.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\idr_vstf.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\imgMiniOff.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\imgMiniOn.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\imgOff.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\imgOn.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\keys_bac.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\ledOff-left.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\ledOff-right.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\ledOn-left.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\ledOn-right.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\LedOn.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\less.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\lessless.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\lower.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\machine_skin.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\macparam.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\Master-Mixer.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\minus.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\more.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\moremore.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\notekey.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\numbers.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\pattern_header_skin.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\plus.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Psycle.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\resources.rc2">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\sampulse.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\sharpkey.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\MasterMachine\Slide.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\sliderB.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\sliderBh.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\sliderP.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\sliderPh.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\splash copia.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\TbMainKnob.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Toolbar.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\toolbar1.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Toolbar32.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\VuOff.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Slider\VuOn.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\wavedit.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="src\psycle\host\resources\DeclareDPIAware.manifest">
+      <Filter>psycle\resources</Filter>
+    </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\psycle\host\resources\resources.rc">
+      <Filter>psycle\resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

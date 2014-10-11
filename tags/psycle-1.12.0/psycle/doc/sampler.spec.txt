@@ -1,0 +1,136 @@
+there will actually be several sampler machines, but they can share format 
+
+1) akai style sampler
+
+2) acid style sampler
+
+3) e-z drum sampler
+
+4) live recording/direct to/from disk reader
+
+
+=================================
+
+Instrument - global params for entire instrument:
+
+-volume
+-global tune
+-global fine tune
+-portamento speed
+-new note action type (note off, cut, continue, crossfade, etc.)
+-pan - main pan
+        - pitch pan amount (%/octave)
+        - pan_pitch center note
+-number of filters (0-4) * could be overkill
+-number of shapers (0-4) * could be overkill
+-number of lfos (0-32)
+-number of envelopes (0-255)
+-number of velocity splits (1-16)
+-number of samples (0-255)
+-lfo data[0->number of lfos]
+-envelope data[0->number of envelopes] * this allows a tracker command to pick envelopes
+-filter data[0->number of filters]
+-shapter data[0->number of shapers]
+-velocity split data [0->number of splits, stored incrementally from lowest split to highest]
+-sample header data [0->number of samples]
+-sample data [0->number of samples]
+
+================================
+
+LFO data
+
+-lfo assignment (off, finetune, tune, vol, pan, cutoff, resonance, , stereo phase offset, offset, both offset, lfo X
+depth, lfo X rate, etc...)
+-waveform (sine, square, saw, triangle, random)
+-rate
+-depth
+
+================================
+
+Filter Data
+
+- type
+- mixing method
+- routing position
+- cutoff
+- resonance
+- cutoff "follow note" amount (ie cutoff = note freq + cutoff param) %/octave
+- cutoff "follow note" center note
+
+================================
+
+Shaper Data
+
+- type
+- routing position
+- gain
+
+================================
+
+Envelope data
+
+-envelope assignment (off, volume, panning, pitch, filter, etc.)
+-number of points (0 if no envelope)
+-loop point
+-loop to point
+-loop mode (off, repeat, sustain) - points can loop to selves, sustain point
+stops looping on noteoff
+-loop type (forward, reverse, pingpong)
+-point data [0->number of points], must be stored sorted by time, first
+point must be at time 0
+
+================================
+
+Envelope Point data
+-amplitude
+-time
+
+================================
+
+Velocity split - global params across velocity split
+-volume (applied across entire split to compensate for velocity)
+-max velocity (for this split)
+-sample keymap (array from c-0 to b-9 of keyinfo)
+
+================================
+
+Keyinfo
+-sample number
+-pitch to map to
+
+================================
+
+Sample Header data
+-volume
+-panning
+-tune
+-finetune
+-number of beats in sample
+-offset (into sample, msec)
+-stereo phase offset (into sample, msec)
+-stretch bpm for sample
+-stretch sample duration (msec)
+-duration stretch mode - (none, use stretch bpm and # beats, use song sync
+and # beats,  use stretch sample duration value, use original sample rate) -
+this is for loops, works like acid, requires a pitch shifter for most modes
+-pitch shift mode - (off, pitch algorithm selections) (only used if duration
+stretch mode is on)
+-sample loop start
+-sample loop end
+-loop mode (off, repeat, sustain) - points can loop to selves, sustain point
+stops looping on noteoff
+-loop type (forward, reverse, pingpong)
+
+===================================
+
+Sample Data
+just use WAV format
+
+===================================
+
+
+re: envelope gui:
+<_sue_> it would be very nice if you could set the size of the "place" where you draw the points.....like you could set it to 64 ticks/lines or something....
+<SCK|> just a though, it would be nice to have an ability to mix several sample streams. do some math operation between them , add sub mul ,
+RX style beatslicer mode
+

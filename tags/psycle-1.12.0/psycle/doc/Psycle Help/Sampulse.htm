@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right" />
+	</tr>
+</table>
+
+<p class="head2">Sampulse Properties</p>
+<p class="under">(Double click the sampulse machine in the <a
+	href="MachineView.htm">Machine View</a>)</p>
+<p>Sampulse is one of the two Psycle internal machines that are able to play <a href="Sampler_Instruments.htm">sampled sounds</a>.<br />
+Sampulse is the more powerful of both, and tries to be as feature packed and compatible with the engines in classic trackers like Fasttracker and Impulse Tracker.</p>
+
+<p class="head3">Channel settings</p>
+<p><center><img src="sampulse_mixer.png"></center></p>
+<p>This window can be used for two different things, depending on the "Show values" setting.<br />
+ "Channel" means to setup the default values for the controls in each channel.<br/>
+ "Playback" shows the changing values that the controls have during playback. Controls can also be changed in this mode, but will only affect to the playing voice, not to the channel setup. </p>
+<p><b>Filter Cutoff</b> &ndash; Filter default cutoff value for the channel. It will apply if the instrument doesn't have filter by itself, or if there isn't any filter command that changes this default. In playback mode, this will show the final cutoff (including instrument filter, as well as the envelope)</p>
+<p><b>Filter Ressonance</b> &ndash; Filter default ressonance value for the channel. It will apply if the instrument doesn't have filter by itself, or if there isn't any filter command that changes this default. In playback mode, this will show the final ressonance (including instrument filter, as well as the envelope)</p>
+<p><b>Panning</b> &ndash; Default pan position value for the channel. It will apply if the instrument or sample doesn't have pan or surround by itself, or if there isn't any pan or surround command that changes this default. In playback mode, this will show the final pan (including instrument and sample pan, as well as the envelope)</p>
+<p><b>Surround</b> &ndash; Indicates if surround for this channel is enabled by default. It will apply if the instrument or sample doesn't have pan or surround by itself, or if there isn't any pan or surround command that changes this default.</p>
+<p><b>Mute</b> &ndash; Indicates if this channel is mute. Muted channels still play, but their audio is not mixed.</p>
+<p><b>Volume</b> &ndash; Indicates the default volume of this channel. Volume is affected by multiple settings, one of them being the channel volume. Channel volume can be changed with the channel volume command.  In playback mode, this will show the final volume (including instrument and sample volume, as well as the envelope)</p>
+<p><b>Channel num/instrument</b> &ndash; Number of the channel or, in playback mode, the instrument that is playing</p>
+<p><b>Slider</b> &ndash; Use the slider to show more channels.</p>
+
+<p class="head3">Playback settings</p>
+<p><center><img src="sampulse_properties.png"></center></p>
+<p><b>Resampling Method</b> &ndash; Select the method that
+the Sampler uses to play sounds at different to the original (by
+speeding up or slowing down the sample).</p>
+<p><b>Max Voices Playing</b>
+&ndash; Set the maximum number of notes that the sampler can play at
+once.</p>
+<p><b>Use Amiga slides</b>
+&ndash; This option is meant for the portamento/pitch slide commands, to indicate
+which method of sliding is desired. The Amiga slide mode, from the original trackers
+slide by period, which means that slides faster at higher notes than at lower notes.<br />
+Modern trackers had an option to slide linearly (i.e. the same amount, no matter which is the current note).</p>
+<p><b>Enable Filters</b>
+&ndash; This option enables or disables the usage of frequency filters. If disabled, filter commands and settings will not have an effect.</p>
+<p><b>Panning mode</b>
+&ndash; When doing stereo pan, there exist several ways to move from full left to full right
+<ul>
+<li>Linear (Cross), is like drawing a cross (X), so while left volume decreases, right volume increases. (Like IT and ST3). This way, center volume means that left and right play at half the volume</li>
+<li>Two Sliders (FT2) is like having two independent sliders, similar to FT2 (or similar to the fader control of a DJ mixer). When panning from left to right, first the right volume is increased until it reaches full volume, and then left decreases. This way, center volume plays both left and right at full volume</li>
+<li>Equal power is similar to Linear, but instead of decreasing linearly, it is decreased logaritmically. This means that center volume is not half (-6dB) but a bit higher (-3dB)</li></ul></p>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right" />
+	</tr>
+</table>
+</body>
+</html>

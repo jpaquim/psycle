@@ -1,0 +1,269 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="diversalis">
+      <UniqueIdentifier>{f0a61d86-ba7c-45bf-9885-631540d4beda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="diversalis\detail">
+      <UniqueIdentifier>{2e57d255-f46d-43ae-a05c-84d66a32cae5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis">
+      <UniqueIdentifier>{41a92252-0e59-43ac-9693-c8ded07c28b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\detail">
+      <UniqueIdentifier>{c160a943-c0c8-437d-92c3-b97e8967a979}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\compiler">
+      <UniqueIdentifier>{c998fbf7-ec56-480e-9915-a739bc865e58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\os">
+      <UniqueIdentifier>{55a4d270-cfd7-4946-844c-219f9ba46fab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\os\detail">
+      <UniqueIdentifier>{70d0c515-d815-4ab9-beaf-bf9bae28fb14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\cpu">
+      <UniqueIdentifier>{5a474147-c472-4caa-b5bf-a60380225b4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\stdlib">
+      <UniqueIdentifier>{61c56fb2-8139-4895-b9f4-aad97a316876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\stdlib\detail">
+      <UniqueIdentifier>{f7aacb5b-4aab-433b-b501-cd8b5c41a6bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="universalis\stdlib\detail\chrono">
+      <UniqueIdentifier>{4f2e5ebd-4a70-4c7b-8921-42314269a35c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\diversalis\src\diversalis\compiler.hpp">
+      <Filter>diversalis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\cpu.hpp">
+      <Filter>diversalis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\os.hpp">
+      <Filter>diversalis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\stdlib.hpp">
+      <Filter>diversalis</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\detail\config.hpp">
+      <Filter>diversalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\detail\project.hpp">
+      <Filter>diversalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\detail\stringize.hpp">
+      <Filter>diversalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis\detail\message.hpp">
+      <Filter>diversalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\exception.hpp">
+      <Filter>universalis</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\detail\config.hpp">
+      <Filter>universalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\detail\config.private.hpp">
+      <Filter>universalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\detail\project.hpp">
+      <Filter>universalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\detail\project.private.hpp">
+      <Filter>universalis\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\align.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\asm.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\attribute.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\auto_link.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\calling_convention.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\concat.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\const_function.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\pure_function.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\deprecated.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\message.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\dyn_link.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\exception.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\location.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\numeric.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\pack.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\pragma.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\restrict.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\stringize.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\thread_local.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\token.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\typenameof.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\virtual.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\compiler\weak.hpp">
+      <Filter>universalis\compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\aligned_alloc.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\clocks.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\dyn_link.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\eol.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\exception.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\fs.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\include_windows_without_crap.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\loggers.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\sched.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\terminal.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\thread_name.hpp">
+      <Filter>universalis\os</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\os\detail\clocks.hpp">
+      <Filter>universalis\os\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\cpu\atomic_compare_and_swap.hpp">
+      <Filter>universalis\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\cpu\exception.hpp">
+      <Filter>universalis\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\cpu\memory_barriers.hpp">
+      <Filter>universalis\cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\chrono.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\condition_variable.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\cstdint.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\exception.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\mutex.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\ratio.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\stdc_secure_lib.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\thread.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\cmath.hpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\detail\chrono\duration_and_time_point.hpp">
+      <Filter>universalis\stdlib\detail\chrono</Filter>
+    </ClInclude>
+    <ClInclude Include="src\universalis\stdlib\detail\chrono\measure_clock.hpp">
+      <Filter>universalis\stdlib\detail\chrono</Filter>
+    </ClInclude>
+    <ClInclude Include="..\diversalis\src\diversalis.hpp" />
+    <ClInclude Include="src\universalis.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\universalis\exception.cpp">
+      <Filter>universalis</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\compiler\exception.compiler.cpp">
+      <Filter>universalis\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\compiler\typenameof.cpp">
+      <Filter>universalis\compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\clocks.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\dyn_link.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\exception.os.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\fs.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\loggers.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\sched.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\terminal.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\os\thread_name.cpp">
+      <Filter>universalis\os</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\cpu\exception.cpu.cpp">
+      <Filter>universalis\cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\universalis\stdlib\exception.stdlib.cpp">
+      <Filter>universalis\stdlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

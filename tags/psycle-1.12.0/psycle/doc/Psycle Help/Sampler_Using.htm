@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_WaveEditor.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_Using_Virtual.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Using the Sampler or Sampulse in Patterns</p>
+
+The note format for both of the sampler machines is as follows:
+<p />
+<center><code>C-4 01 00 0C23<br />
+</code> 1 &nbsp;&nbsp;&nbsp; 2 &nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; 4</center>
+<p />
+<table border="0">
+	<col width="25" />
+	<tr valign="top">
+		<td><b>1. </b></td>
+		<td>Note name (for more detail, see <a href="PatternEd_Notes.htm">Entering
+		Notes</a>).</td>
+	</tr>
+	<tr valign="top">
+		<td><b>2.</b></td>
+		<td><a href="Sampler_Instruments.htm">Instrument</a> number. </td>
+	</tr>
+	<tr valign="top">
+		<td><b>3.</b></td>
+		<td>Machine number (in hexadecimal)</td>
+	</tr>
+	<tr valign="top">
+		<td><b>4.</b></td>
+		<td>Sampler Parameters (see below).</td>
+	</tr>
+</table>
+<br />
+<p>Note: With Sampulse machine, indicating or not the instrument in the pattern has a special meaning, like it does in classic trackers, so these four entries have four different meanings (in fact, five)</p>
+<table>
+<tr><td width="120px"><code>C-4 01 00</code></td><td>Play note with this instrument, and reset panning and volume (and reapply random volume if needed)</td></tr>
+<tr><td><code>C-4 .. 00</code></td><td>Play note with the previously indicated sample, but do not reset panning and volume.</td></tr>
+<tr><td><code>... 01 00</code></td><td>If the note is stopped, play it again with the previously indicated note. If the note is playing, reset panning and volume.</td></tr>
+<tr><td><code>... .. 00</code></td><td>Do nothing.</td></tr>
+</table>
+<p>When using virtual instruments, the instrument index will only be sent with a note. I.e. A <a href="Sampler_Using_Virtual.htm">virtual instrument</a> can only do:</p>
+<table>
+<tr><td width="120px"><code>C-4 .. 80</code></td><td width="120px"><code>C-4 01 00</code></td></tr>
+<tr><td><code>... .. 80</code></td><td><code>... .. 00</code></td></tr>
+<tr><td><code>... .. ..</code></td><td><code>... .. ..</code></td></tr>
+</table>
+
+</p>
+
+<p class="head3">Sampler Parameters</p>
+<table border="0">
+	<col width="50px" />
+	<tr valign="bottom">
+		<td><code>01xx</code></td>
+		<td>Portamento Up. value FA = increases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz). <br />
+				Command does not have memory (no special meaning for 00)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>02xx</code></td>
+		<td>Portamento Down. value FA = decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz).<br />
+				Command does not have memory (no special meaning for 00)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>03xx</code></td>
+		<td>Portamento to note.  value FA = increases or decreases the speed in 1/4th of the original (wave) speed each PerformFx call (256 samples. 5ms at 44Khz),<br />
+				until the corresponding note speed is reached. Command does not have memory (no special meaning for 00)<br />
+				All three portamento commands aren't really song samplerate aware, since at higher song samplerates, it will slide faster.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>08xx</code></td>
+		<td>Set panning position. 0 full left, FF full right. 80 center</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>09xx</code></td>
+		<td>Set sampler offset.  x = 1/256th of the sample length.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Cxx</code></td>
+ 		<td>Set volume.  0 = silent. FF = max volume.<br />
+				If using virtual instruments, the aux column can be used for the set volume command.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0ECx</code></td>
+		<td>Note cut in x frames.(fixed 6 frames per line)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0EDx</code></td>
+		<td>Note delay in x frames. (fixed 6 frames per line)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>15xy</code></td>
+		<td>Retrig Command.</td>
+	</tr>
+	<tr valign="bottom">
+		<td />
+		<td><code>y</code> = Number of retrigs, starting at 1<br />
+		<code>x</code> changes the volume in the following way:
+		<p />
+		<table border="0">
+			<col width="25" />
+			<col width="100" />
+			<col width="25" />
+			<col width="100" />
+
+			<tr valign="bottom">
+				<td><code>0:</code></td>
+				<td>No change</td>
+				<td><code>8:</code></td>
+				<td>No change</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>1:</code></td>
+				<td>+1</td>
+				<td><code>9:</code></td>
+				<td>-1</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>2:</code></td>
+				<td>+2</td>
+				<td><code>A:</code></td>
+				<td>-2</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>3:</code></td>
+				<td>+4</td>
+				<td><code>B:</code></td>
+				<td>-4</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>4:</code></td>
+				<td>+8</td>
+				<td><code>C:</code></td>
+				<td>-8</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>5:</code></td>
+				<td>+16</td>
+				<td><code>D:</code></td>
+				<td>-16</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>6:</code></td>
+				<td>x 2/3</td>
+				<td><code>E:</code></td>
+				<td>x 3/2</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>7:</code></td>
+				<td>x 1/2</td>
+				<td><code>F:</code></td>
+				<td>x 2</td>
+			</tr>
+		</table><br />
+		Note: Due to the way it is implemented, the last retrig happens almost at the next line.
+		</td>
+	</tr>
+</table>
+<p class="head3">Sampulse Commands</p>
+<p>Commands marked with an asterisk have memory. This means that they use the last value when indicating the value 00</p>
+<table border="0">
+	<col width="50px" />
+	<tr valign="bottom">
+		<td><code>01xx</code>*</td>
+		<td>Portamento Up ( Fx: fine, Ex: Extra fine).</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>02xx</code>*</td>
+		<td>Portamento Down ( Fx: fine, Ex: Extra fine).</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>03xx</code>*</td>
+		<td>Tone Portamento.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>04xx</code>*</td>
+		<td>Vibrato with speed y (iy/256th of a period) and depth x (in portamento values per tick).</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>04xy</code>*</td>
+		<td>Vibrato with speed y (y/256th of a period) and depth x (in portamento values per tick).</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>05xx</code>*</td>
+		<td>Continue Portamento and Volume Slide with speed xx.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>06xx</code>*</td>
+		<td>Continue Vibrato and Volume Slide with speed xx.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>07xy</code>*</td>
+		<td>Tremolo (Volume vibration) with speed y(y/256th of a period) and depth x </td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>08xx</code></td>
+		<td>Pan. 0800 Left 08FF right </td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>09xx</code></td>
+		<td>Panning slide x0 Left, 0x Right </td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Axx</code></td>
+		<td>Channel Volume, 00 = Min, 40 = Max</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Bxx</code>*</td>
+		<td>Channel VolSlide x0 Up (xF fine), 0x Down (Fx Fine)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Cxx</code></td>
+		<td>0Cxx: Volume (0C80 : 100%)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Dxx</code>*</td>
+		<td>Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Exy</code></td>
+		<td>Extended (see below).</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>0Fxy</code></td>
+		<td>Filter value. Depends on the filter mode. See 0EFx</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>10xy</code>*</td>
+		<td>Arpeggio with note, note+x and note+y</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>11xy</code>*</td>
+		<td>Retrig note after y ticks y = Number of retrigs (1 = do one retrig)</td>
+	</tr>
+	<tr valign="bottom">
+		<td />
+		<td><code>y</code> = Number of retrigs, starting at 1<br />
+		<code>x</code> changes the volume in the following way:
+		<p />
+		<table border="0">
+			<col width="25" />
+			<col width="100" />
+			<col width="25" />
+			<col width="100" />
+
+			<tr valign="bottom">
+				<td><code>0:</code></td>
+				<td>No change</td>
+				<td><code>8:</code></td>
+				<td>No change</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>1:</code></td>
+				<td>+1</td>
+				<td><code>9:</code></td>
+				<td>-1</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>2:</code></td>
+				<td>+2</td>
+				<td><code>A:</code></td>
+				<td>-2</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>3:</code></td>
+				<td>+4</td>
+				<td><code>B:</code></td>
+				<td>-4</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>4:</code></td>
+				<td>+8</td>
+				<td><code>C:</code></td>
+				<td>-8</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>5:</code></td>
+				<td>+16</td>
+				<td><code>D:</code></td>
+				<td>-16</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>6:</code></td>
+				<td>x 2/3</td>
+				<td><code>E:</code></td>
+				<td>x 3/2</td>
+			</tr>
+			<tr valign="bottom">
+				<td><code>7:</code></td>
+				<td>x 1/2</td>
+				<td><code>F:</code></td>
+				<td>x 2</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>14xx</code>*</td>
+		<td>Fine Vibrato with speed y and depth x</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>17xy</code>*</td>
+		<td>Tremor Effect (Volume Gate)( ontime x, offtime y )</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>18xx</code>*</td>
+		<td>Panbrello (pan vibration) with speed y and depth x</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>19xx</code></td>
+		<td>Set Envelope position (in ticks)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>1Cxx</code></td>
+		<td>Global Volume, 00 = Min, 80 = Max</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>1Dxx</code>*</td>
+		<td>Global Volume Slide x0 Up (xF fine), 0x Down (Fx Fine)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>1Exx</code></td>
+		<td>Send xx to volume colum (see below)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>9xxx</code>*</td>
+		<td>Sample Offset x*256</td>
+	</tr>
+</table>
+<p>Extended Commands:</p>
+<table border="0">
+	<col width="50px" />
+	<tr valign="bottom">
+		<td><code>3x</code></td>
+		<td>Glissando mode Off (30) or on (31). Glissando means to do pitch slides jumping from seminote to seminote. I.e. Like doing it in a piano.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>4x</code></td>
+		<td>Vibrato Wave (See below)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>5x</code></td>
+		<td>Panbrello Wave (See below)</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>7x</code></td>
+		<td>Tremolo Wave<br />
+			Waves: 0:Sinus, 1:Square 2:Ramp Up, 3:Ramp Down, 4: Random</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>8x</code></td>
+		<td>Panning. 80 is full left. 8F is full right. 88 is NOT exactly center.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>90</code></td>
+		<td>Surround mode off.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>91</code></td>
+		<td>Surround mode (right channel inverted polarity) On. Setting pan will disable surround automatically.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>9E</code></td>
+		<td>Play forward. Tell voice to switch playback to forward direction.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>9F</code></td>
+		<td>Play backward. Tell voice to switch playback to backward direction.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Cx</code></td>
+		<td>Do a note cut after x ticks</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Dx</code></td>
+		<td>Delay the note start by x ticks.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E0</code></td>
+		<td>Notecut background notes.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E1</code></td>
+		<td>Noteoff background notes.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E2</code></td>
+		<td>NoteFade background notes.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E3</code></td>
+		<td>Set NNA NoteCut for this voice.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E4</code></td>
+		<td>Set NNA NoteContinue for this voice.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E5</code></td>
+		<td>Set NNA Noteoff for this voice.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E6</code></td>
+		<td>Set NNA NoteFade for this channel.</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E7/8</code></td>
+		<td>Disable/Enable Volume Envelope for this voice. It can also enable an envelope that is not enabled by default</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>E9/A</code></td>
+		<td>Disable/Enable Pan Envelope for this voice. It can also enable an envelope that is not enabled by default</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>EB/C</code></td>
+		<td>Disable/Enable Pitch/filter Envelope for this voice. It can also enable an envelope that is not enabled by default</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Fx</code></td>
+		<td>Set Filter Mode. F0: set lowpass cutoff mode. F1: Set lowpass Q mode.</td>
+	</tr>
+</table>
+<p>Volume Column  (Used with the 1Exx command, or in the aux column, when <a href="Sampler_Using_Virtual.htm">using virtual instruments</a>):</p>
+<table border="0">
+	<col width="50px" />
+	<tr valign="bottom">
+		<td><code>00..3F</code></td>
+		<td>Set volume. 00 Mute, 3F: 100%</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>4x</code></td>
+		<td>Volume slide up</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>5x</code></td>
+		<td>Volume slide down</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>6x</code></td>
+		<td>Fine Volslide up</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>7x</code></td>
+		<td>Fine Volslide down</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>8x</code></td>
+		<td>Panning. 0:Left, F:Right. 8 is NOT exactly center</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>9x</code></td>
+		<td>PanSlide Left</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Ax</code></td>
+		<td>PanSlide Right</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Bx</code></td>
+		<td>Vibrato with depth x</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Cx</code></td>
+		<td>Portamento to note with speed x</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Dx</code></td>
+		<td>Pitch slide up with speed x</td>
+	</tr>
+	<tr valign="bottom">
+		<td><code>Ex</code></td>
+		<td>Pitch slide down with speed x</td>
+	</tr>
+</table>
+	
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_WaveEditor.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_Using_Virtual.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+</body>
+</html>

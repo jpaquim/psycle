@@ -1,0 +1,23 @@
+// source coords in bitmap
+// x, y, width, height
+
+// numbers must be fixed height and width - ie
+// each number has the same dimensions - and they are
+// laid out in the order 0123456789
+
+// on indicators also designate clickable area
+
+"background_source"=0,0,103,14
+"number_0_source"=0,14,4,8
+"record_on_source"=68,14,11,10
+"mute_on_source"=79,14,11,10
+"solo_on_source"=90,14,11,10
+
+// destination coords to be rendered to
+// destinations use 0,0 as top left of background
+
+"digit_x0_dest"=2,3
+"digit_0x_dest"=8,3
+"record_on_dest"=68,2
+"mute_on_dest"=79,2
+"solo_on_dest"=90,2

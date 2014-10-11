@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="debug|Win32">
+      <Configuration>debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="debug|x64">
+      <Configuration>debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|Win32">
+      <Configuration>release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="release|x64">
+      <Configuration>release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>universalis</ProjectName>
+    <ProjectGuid>{B78DFE59-051A-43FD-B489-775A4982581C}</ProjectGuid>
+    <RootNamespace>universalis</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseOfAtl>false</UseOfAtl>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\release.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_win32.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\debug.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_win32.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\release.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_x64.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\build-systems\msvc\properties\debug.props" />
+    <Import Project="..\build-systems\msvc\properties\platform_x64.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='release|x64'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNIVERSALIS__SHARED=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNIVERSALIS__SHARED=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNIVERSALIS__SHARED=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>UNIVERSALIS__SHARED=;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\diversalis\src\diversalis.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\compiler.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\cpu.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\os.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\stdlib.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\detail\config.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\detail\project.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\detail\stringize.hpp" />
+    <ClInclude Include="..\diversalis\src\diversalis\detail\message.hpp" />
+    <ClInclude Include="src\universalis.hpp" />
+    <ClInclude Include="src\universalis\exception.hpp" />
+    <ClInclude Include="src\universalis\detail\config.hpp" />
+    <ClInclude Include="src\universalis\detail\config.private.hpp" />
+    <ClInclude Include="src\universalis\detail\project.hpp" />
+    <ClInclude Include="src\universalis\detail\project.private.hpp" />
+    <ClInclude Include="src\universalis\compiler\align.hpp" />
+    <ClInclude Include="src\universalis\compiler\asm.hpp" />
+    <ClInclude Include="src\universalis\compiler\attribute.hpp" />
+    <ClInclude Include="src\universalis\compiler\auto_link.hpp" />
+    <ClInclude Include="src\universalis\compiler\calling_convention.hpp" />
+    <ClInclude Include="src\universalis\compiler\concat.hpp" />
+    <ClInclude Include="src\universalis\compiler\const_function.hpp" />
+    <ClInclude Include="src\universalis\compiler\pure_function.hpp" />
+    <ClInclude Include="src\universalis\compiler\message.hpp" />
+    <ClInclude Include="src\universalis\compiler\deprecated.hpp" />
+    <ClInclude Include="src\universalis\compiler\dyn_link.hpp" />
+    <ClInclude Include="src\universalis\compiler\exception.hpp" />
+    <ClInclude Include="src\universalis\compiler\location.hpp" />
+    <ClInclude Include="src\universalis\compiler\numeric.hpp" />
+    <ClInclude Include="src\universalis\compiler\pack.hpp" />
+    <ClInclude Include="src\universalis\compiler\pragma.hpp" />
+    <ClInclude Include="src\universalis\compiler\constexpr.hpp" />
+    <ClInclude Include="src\universalis\compiler\restrict.hpp" />
+    <ClInclude Include="src\universalis\compiler\stringize.hpp" />
+    <ClInclude Include="src\universalis\compiler\thread_local.hpp" />
+    <ClInclude Include="src\universalis\compiler\token.hpp" />
+    <ClInclude Include="src\universalis\compiler\typenameof.hpp" />
+    <ClInclude Include="src\universalis\compiler\virtual.hpp" />
+    <ClInclude Include="src\universalis\compiler\weak.hpp" />
+    <ClInclude Include="src\universalis\os\aligned_alloc.hpp" />
+    <ClInclude Include="src\universalis\os\clocks.hpp" />
+    <ClInclude Include="src\universalis\os\dyn_link.hpp" />
+    <ClInclude Include="src\universalis\os\eol.hpp" />
+    <ClInclude Include="src\universalis\os\exception.hpp" />
+    <ClInclude Include="src\universalis\os\fs.hpp" />
+    <ClInclude Include="src\universalis\os\include_windows_without_crap.hpp" />
+    <ClInclude Include="src\universalis\os\loggers.hpp" />
+    <ClInclude Include="src\universalis\os\sched.hpp" />
+    <ClInclude Include="src\universalis\os\terminal.hpp" />
+    <ClInclude Include="src\universalis\os\thread_name.hpp" />
+    <ClInclude Include="src\universalis\os\detail\clocks.hpp" />
+    <ClInclude Include="src\universalis\cpu\atomic_compare_and_swap.hpp" />
+    <ClInclude Include="src\universalis\cpu\exception.hpp" />
+    <ClInclude Include="src\universalis\cpu\memory_barriers.hpp" />
+    <ClInclude Include="src\universalis\stdlib\chrono.hpp" />
+    <ClInclude Include="src\universalis\stdlib\condition_variable.hpp" />
+    <ClInclude Include="src\universalis\stdlib\cstdint.hpp" />
+    <ClInclude Include="src\universalis\stdlib\exception.hpp" />
+    <ClInclude Include="src\universalis\stdlib\mutex.hpp" />
+    <ClInclude Include="src\universalis\stdlib\ratio.hpp" />
+    <ClInclude Include="src\universalis\stdlib\stdc_secure_lib.hpp" />
+    <ClInclude Include="src\universalis\stdlib\thread.hpp" />
+    <ClInclude Include="src\universalis\stdlib\cmath.hpp" />
+    <ClInclude Include="src\universalis\stdlib\detail\chrono\duration_and_time_point.hpp" />
+    <ClInclude Include="src\universalis\stdlib\detail\chrono\measure_clock.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\universalis\exception.cpp" />
+    <ClCompile Include="src\universalis\compiler\exception.compiler.cpp" />
+    <ClCompile Include="src\universalis\compiler\typenameof.cpp" />
+    <ClCompile Include="src\universalis\os\clocks.cpp" />
+    <ClCompile Include="src\universalis\os\dyn_link.cpp" />
+    <ClCompile Include="src\universalis\os\exception.os.cpp" />
+    <ClCompile Include="src\universalis\os\fs.cpp" />
+    <ClCompile Include="src\universalis\os\loggers.cpp" />
+    <ClCompile Include="src\universalis\os\sched.cpp" />
+    <ClCompile Include="src\universalis\os\terminal.cpp" />
+    <ClCompile Include="src\universalis\os\thread_name.cpp" />
+    <ClCompile Include="src\universalis\cpu\exception.cpu.cpp" />
+    <ClCompile Include="src\universalis\stdlib\exception.stdlib.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,998 @@
+
+Fileformat Documentation of .psy Files
+======================================
+
+Psycle Version : 1.12
+Document Version: 2.0
+PSY3 version: 8
+Date:02-August-2014
+
+This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle 1.7.3 and onwards
+It is Riff-like, with independant versioning for each chunk  (major and minor), and a "total" version number for
+the entire file. Each chunk is HEADER followed immediately by DATA
+
+chunk header format:
+
+FOURCC id; // eg "PSY3"
+UINT  version;     // version of this chunk, composed of two 16bit unsigned values identifying a high version and a low version. (see below)
+UINT	size; // size of chunk NOT including header
+
+Versioning is written in two parts.  It can be seen as this: 0xAAAABBBB  (little endian, so the raw stream is BBBBAAAA)
+  A= Major version. If higher than the version that the loader supports, it cannot be loaded, skip the whole chunk.
+  B= minor version. If higher than the version that the loader supports, it can be loaded with it, but it should skip the extra info placed at the end.
+
+
+all data is in Little Endian.
+
+int means signed integer 32bits
+short means signed integer 16 bits
+bool is an unsigned integer 8bit. Should be 0 or 1
+char is a signed integer 8 bit.
+byte is an unsigned integer 8bit, representing the whole range (generally raw data)
+float is 32bit IEEE-754 floatint point.
+
+type name[size]  is an array (consecutive positions) named name of type type and size positions. (size in bytes = byte size of type * positions)
+UINT, ushort and UCHAR mean unsigned int, unsigned short and unsigned char respectively
+
+Hexadecimal notation is represented in C style 0xHHHH
+
+Strings are stored in C style: with a NULL terminator. "this is a sentence" is stored "this is a sentence0"
+  
+
+  
+
+Here are the structures of each chunk:
+
+===================
+FILE HEADER
+===================
+fileid = "PSY3"    // Attention!!! The beginning of a psy file has the "PSY3" identifier, followed immmediately by the SONG chunk. (PSY3SONGverssize)
+
+HEADER:
+id = "SONG"
+version < 8;	
+size = 4;
+
+DATA:
+int chunkcount;		// Number of top-level chunks in the file, not counting the File Header. (i.e., not counting subchunks nor the "SONG" chunk).
+
+
+HEADER:
+id ="SONG"
+version = 8;
+size = 4 + strlen(trackername) + strlen(trackerversion) + 2; // (+2 because of the NULL's ) 
+
+DATA:
+int chunkcount;		// Number of top-level chunks in the file, not counting the File Header. (i.e., not counting subchunks nor the "SONG" chunk).
+char trackername[];	// Null terminated program name used to generate the file.
+char trackerversion[]; //Null terminated program version used to generate the file.
+
+
+DESCRIPTION:
+Data in the "PSY3SONG" chunk describes the file format.
+
+The version field of the SONG chunk is the sum of the version of the chunks known to the program.
+Version 8, described in version 2.0 of this document, is made out of adding:
+CURRENT_FILE_VERSION_INFO	0x00000000
+CURRENT_FILE_VERSION_SNGI	0x00000002
+CURRENT_FILE_VERSION_SEQD	0x00000000
+CURRENT_FILE_VERSION_PATD	0x00000001
+CURRENT_FILE_VERSION_MACD	0x00000001
+CURRENT_FILE_VERSION_INSD	0x00000002
+CURRENT_FILE_VERSION_WAVE	0x00000000
+CURRENT_FILE_VERSION_SMID	0x00000001
+CURRENT_FILE_VERSION_SMSB	0x00000001
+
+Since this header field represents the values of other chunk versions, the rules of high version and low version do not apply.
+Assume that if it is higher than 8, the three fields from version 8 will exist, and if you know the tracker and version, you might know what else is in the chunk.
+
+There is only one (PSY3)SONG chunk in the file, and has to be the first one.
+
+===================
+SONG INFO TEXT
+===================
+HEADER:
+id = "INFO"; 
+version = 0;
+size = strlen(name)+strlen(author)+strlen(comment)+3;   //( +3 because of the NULL's )
+                // Note, some versions of the program saved this wrong. If reading a version 0, assume the end is after reading the comment instead of believing the size field.
+
+DATA:
+char name[]; // null terminated string, so read until you find NULL. Truncated to 128 in Psycle
+char author[]; // null terminated string, so read until you find NULL. Truncated to 64 in Psycle
+char comment[]; // null terminated string, so read until you find NULL. Truncated to 65535 in Psycle
+
+
+DESCRIPTION:
+Data in the INFO chunk can be considered song metadata. I.e. Information related to the song (not the file) which the user wanted to add.
+
+There was a draft version 1 of this chunk, with information of a bitmap. (artwork). It was never implemented. It has been removed so that a future implementation
+is not limited by what the format described.
+
+Only one INFO chunk present in the file.
+
+
+===================
+SONG PROPERTIES 
+===================
+HEADER:
+id = "SNGI"; 
+version = 0;
+size = (11*sizeof(int))+(numTracks*(sizeof(bool)+sizeof(bool))); // Warning! .psy's previous to 1.8 saved this value as 6*sizeof(int)
+
+DATA:
+int numTracks; // Contains the number of tracks that the song has. In multipattern it would be total tracks. Values: from 4 to 64
+int bpm; 			// bpm of song (0-999) // **** See notes in version 2.
+int lpb; 			// lines per beat of song (1-32)
+int currentoctave; // curent octave on keyboard (0-9)
+int machineSoloed; // The 0 based index of the Soloed machine. -1 if none
+int trackSoloed;	 // 0 based index of the Soloed track. -1 if none
+int seqBus;			// 0 based index of the selected machine for editing
+int paramsSelected; // 0 based index of the parameter selected for editing. It is stored separately from auxcol for switching. Previous to 1.10, this used to be the MIDI channel selected.
+int auxcolSelected; // 0 based index of the selected aux data for editing
+int instSelected;  // 0 based index of the instrument selected for editig. It is stored separately from auxcol for switching. In Psycle 1.11, this explicitely means the sampulse instrument. The sampler instrument and sample bank indexes are not saved.
+int sequenceWidth; // number of sequence columns for multipattern. currently 1.
+
+for each of the numTracks do (trackMuted 0,TrackArmed 0,TrackMuted 1,TrackArmed 1,...):
+	bool trackMuted // Array with the value which sets the "mute" state of the tracks. A muted track does not play notes, but should still play Global commands.
+	bool trackArmed // Array with the value which sets the "Record" state of the tracks. Used for editing chords mostly.
+end do
+
+
+HEADER:
+id = "SNGI"; 
+version = 1;
+size = (11*sizeof(int))+(numTracks*(sizeof(bool)+sizeof(bool))) + sizeof(bool)
+if shareTrackNames then 
+	for each of the numTracks do size = size + (strlen(tracknames[track])+1)  // The +1 is for the NULL terminator.
+
+DATA:
+Version 1 has the same fields than version 0, and adds the following fields at the end:
+bool shareTrackNames // Indicates if this song uses a common list of track names, or individual for each pattern.
+
+if shareTrackNames is true then also:
+for each of the numTracks do
+	char trackName[] // null terminated string, so read until you find NULL. Truncated to 30 chars
+end do
+
+
+HEADER:
+id = "SNGI"; 
+version = 2;
+size = (13*sizeof(int))+(numTracks*(sizeof(bool)+sizeof(bool))) + sizeof(bool)
+if shareTrackNames then 
+	 for each of the numTracks  size = size + (strlen(tracknames[track])+1)  // The +1 is for the NULL terminator.
+
+DATA:
+Version 2 has the same fields than version 1, and adds the following fields at the end:
+int ticksPerBeat // The song Ticks per beat (ticks as 24 ticks per beat). Changing this does not change the real bpm, but changes the amount of ticks that sampulse sees. 
+				// Used in some commands, like the slide commands. In the future, this setting might also affect other effects and slides.
+int extraTicksPerLine // The amount of extra ticks that count for a line. Changing this affects the real bpm. Each line will increase its length by the amount of ticks.
+					// It is intended to emulate correctly the classic trackers' "speed" command. I.e speed 5 = 6 lpb + 1 extratick.
+
+It also makes official one change that was implemented in the 1.9 alphas but that is still not used outside of that version:
+"int bpm;"  should now be read as   "short bpm; short decimalbpm;"  (0..100), so the final bpm is:   bpm + (decimalbpm/100); Current version of Psycle does not support setting a decimal BPM.
+
+
+DESCRIPTION:
+Data in the SNGI chunk contains information needed by the program to play or edit the song. There should have been two sections (one for playback and another for edition), but when the format was defined they where put together.
+
+Version 0 sets the track names to empty.
+Version 0 and version 1 set ticksPerBeat to 24 and extraTicksPerLine to 0
+
+Only one SNGI chunk in the file.
+
+
+===================
+SEQUENCE DATA
+===================
+HEADER:
+id = "SEQD"; 
+version = 0;
+size = (length*sizeof(int))+(2*sizeof(int))+(strlen(sequenceColumnName)+1); // +1 for NULL.
+
+DATA:
+int index; // 0 based, incremental, column index of this sequence, for multisequence. Psycle has a single sequence, so index is 0.
+int sequenceLength; // length of the sequence. (1-256 ) // Psycle versions previous to 1.8.3 can only load up to 128 sequences.
+char sequenceColumnName[]; // null terminated sequence name. It will be trucated to 32 chars on load.
+int playorder[sequenceLength]; // Array of positions. Contains the values of the song sequence. "playOrder[3] = 5" means that in 
+	// position 3, it plays the pattern 5th. both indexes are 0 based.
+
+	
+DESCRIPTION:
+Each SEQD chunk describes a song sequence, which is the order in which patterns should be played. Psycle uses right now only one sequence, but newer versions could implement multitrack sequencing.
+
+Multiple SEQD chunks, one for each sequence. Currently in Psycle there's only one chunk, because there's only one sequence.
+
+
+===================
+PATTERN DATA
+===================
+HEADER:
+id = "PATD"; 
+version = 0;
+size = sizez77+(4*sizeof(int))+strlen(patternName)+1; // where sizez77 is the size of the compressed pattern. Warning! versions prior to 1.8 saved one less sizeof(int)
+
+DATA:
+int index; // 0 based index of the pattern being loaded (0-255)
+int numlines; // how many lines in this pattern (1-1024) //  Psycle versions previous to 1.8.3 can only load up to 256 lines.
+int patterntracks; // how many tracks in this pattern. Intended for multipattern. It should be less or equal to SNGI's numTracks.
+char patternName[]; // null terminated string, should be less than 32 chars long, It will be truncated on load.
+unsigned int sizez77;		// size of the compressed data.
+byte z77data[];	// array with the compressed pattern data.
+
+
+*Pattern compression is (conceptually) similar to the LZ77 algorithm. See sources for details. (psycle-helpers/src/psycle/helpers/datacompression.cpp/.hpp BEERZ77Comp2/BEERZ77Decomp2)
+*Patterns are uncompressed to the following structure:
+
+PatternEntry pe[numlines*patterntracks]; //I.e. all the tracks of a line placed one next to the other
+typedef struct PatternEntry
+{
+	UCHAR _note;	// Psycle uses note indexes compatible with MIDI: Middle C = 60.
+					// noteoff is 120
+					// tweak is 121
+					// tweakeffect is 122. This is was present in PSY2 files, not in PSY3
+					// midicc is 123. This can mean a midi command (inst equal or above 0x80) or a send to another channel ( inst below 0x80)
+					// tweakslide 124. Like tweak, but sliding during the duration of the line.
+					// 255 (0xFF) equals empty
+	UCHAR _inst; // Aux column.  Instrument for sampler, parameter for tweaks, etc.. inst 0xFF equals empty
+	UCHAR _mach;	// Zero based. Machine 0xFF equals empty
+	UCHAR _cmd;		// Commands are defined in psycle/src/psycle/doc/for_end_users/tweakings.txt, as well as in the Docs folder in Psycle installer.
+	UCHAR _parameter;
+}
+PatternEntry;
+
+
+HEADER:
+id = "PATD"; 
+version = 1;
+size = sizez77+(4*sizeof(int))+strlen(patternName)+1; // where sizez77 is the size of the compressed pattern. Warning! versions prior to 1.8 saved one less sizeof(int)
+if shareTrackNames then 
+	size = size + (strlen(tracknames[track])+1) for each of the patterntracks  // The +1 is for the NULL terminator.
+
+DATA:
+if shareTrackNames is false then also:
+for each of the patterntracks do
+	char trackName[] // null terminated string, so read until you find NULL. Truncated to 30 chars
+end do;
+
+
+DESCRIPTION:
+Each PATD chunk contains the description of one pattern. A pattern contains the notes,tweaks and effect commands to play.
+Only the patterns that are used (are in the sequence) get saved.
+Multiple PATD chunks in the file, one for each pattern.
+
+Version 0 sets the name as empty.
+
+===================
+MACHINES DATA
+===================
+HEADER:
+id = "MACD"; 
+version = 0;
+size = ...  // depends for each machine.  Might not be correct in some versions
+
+* Types 1,2,4,5,6 and 7 are only valid in old .psy's. They were converted to native Plugins later on, so you shouldn't find them in this fileformat.
+
+enum MachineType
+{
+	MACH_UNDEFINED = -1,
+	MACH_MASTER = 0,
+		MACH_SINE = 1,		// Old (PSY2)
+		MACH_DIST = 2,		// Old (PSY2)
+	MACH_SAMPLER = 3,
+		MACH_DELAY = 4,	// Old (PSY2)
+		MACH_2PFILTER = 5,// Old (PSY2)
+		MACH_GAIN = 6,		// Old (PSY2)
+		MACH_FLANGER = 7,	// Old (PSY2)
+	MACH_PLUGIN = 8,
+	MACH_VST = 9,
+	MACH_VSTFX = 10,
+		MACH_SCOPE = 11,	// Old (PSY2)
+	MACH_XMSAMPLER = 12,	// new in 1.9/ 1.8.5. format freeze in 1.11
+	MACH_DUPLICATOR = 13,	// new in 1.9/ 1.8.5
+	MACH_MIXER	= 14,		// new in 1.9/ 1.8.5
+	MACH_RECORDER = 15,		// new in 1.9/ 1.8.5
+	MACH_DUPLICATOR2 = 16,	// new in 1.10.1
+	MACH_LUA = 17,			// new in 1.11
+	MACH_DUMMY	= 255
+};
+
+DATA:
+int index; 			// which machine we are loading
+int type; 			// The MachineType of the machine being loaded
+char dllname[]&shellIdx; 		// NULL terminated .dll name of the plugin (MACH_PLUGIN, MACH_VST, MACH_VSTFX). NULL in any other case. (truncated to 256)
+				// Since version 1.8.3, shellindex is also saved *inside* the dllname array, in order to allow downward fileformat compatibility.
+				// shellidx is a four-letter identifier of the plugin (which is read as a big-endian int) used in some VST's, allowing one single
+				// .dll to include more than one effect.
+				// Examples:
+				// Common plugin   :  "arguru synth 2f.dll\0"
+				// Shellplugin :  "waveshell-5.0.dllSTHS\0"
+				// So, if the last four letters are not ".dll", they are the shellIdx.
+bool bypass; 		// Indicates if the machine has the bypassed status on. (only valid for effects).
+bool mute; 			// Indicates if the machine has the muted status on.
+int pan; 			// Indicates the value of the panning in the machine box. It affects all output wires.
+						// Values: 0 top left, 64center 128 top right.
+int x; 				// top-left x position of the machine in the machine view
+int y; 				// top-left y position of the machine in the machine view
+int numInputs;		// Number of connected input wires for this machine (only valid for effects).
+int numOutputs;	// Number of connected output wires for this machine.
+
+*for each connection up to MAX_CONNECTIONS do (currently this value is 12)
+	int inputmachine; 	// index of the machine that connects to this input wire. -1 if none.
+	int outputmachine 	// index of the machine that connects to this output wire. -1 if none.
+	float inputConVol; 	// volume value for the current input wire. Range depends on wireMultiplier.
+	float wireMultiplier;  // value to multiply inputConVol to have a 0.0..1.0 range. ( The reason is because natives output at -32768.0f..32768.0f range )
+	bool connection;		// true if this is a valid output wire.
+	bool inputCon;			// true if this is a valid input wire.
+end do
+
+char editname[]; // null terminated string, truncated to 32
+uint datasize; // size of following data, although it could be easily calculated from chunk size, this will make things easier to maintain
+byte MachineSpecificData[datasize]; // data depends on type member. See below:
+
+
+Note that the send-return mixer has also send and return wires, which are stored inside its machine specific data.
+
+
+HEADER:
+id = "MACD"; 
+version = 1;
+size = ...  // depends for each machine.
+
+DATA:
+Version 1 contains the same data than version 0, but adds the wire mapping.
+Wire mapping is stored for each machine, just **after its data** (i.e. MACD and machine specific data).
+Only mappings of valid input wires (as defined by the bool inputCon value) are stored
+
+for each valid input wire (as defined by the bool inputCon value) do
+	int wireIdx; //Index of the input wire to which this mapping corresponds
+				//(Output wires do not have mapping settings. Psycle assumes that an output wire ends in an input wire, and that input wire will have the settings).
+	int numPairs; amount of pin connections stored for this wire. A pin connection has a source (audio) channel index and a destination (audio) channel index.
+	for each numPairs do
+		short sourcechan;   // source channel index for this pin of this wire.
+		short destchan;    // destination channel index for this pin of this wire
+	end do
+end do
+
+A standard mapping for a wire connecting two stereo machines is a pair 0,0 and a pair 1,1 (map output channel 0 to iput channel 0 and output channel 1 to input channel 1)
+This is also the assumed mapping if the file being loaded does not have the wire mapping stored (i.e version 0).
+
+
+If the machine is a MACH_MIXER, then, also the mappings of the sends and returns are stored (only the mappings of the returns are directly accessible currently from Psycle, sends are not)
+
+loop for standard wires
+If mixer
+	loop for *each valid* return wire (as defined by the returnMacIdx being different than -1)
+	loop for *each valid* send wire (as defined by the returnMacIdx being different than -1)
+end if.
+
+	
+DESCRIPTION:
+Each MACD chunk contains information of a machine. A machine is the audio element unit of Psycle, the one that makes or changes the sound. There needs to be one Master (and currently only one)
+Multiple MACD chunks in the file, one for each machine.
+
+Version 0 sets the default wire mapping ( 0,0 and 1,1 )
+
+*===================
+MACHINE SPECIFIC DATA(MACH_MASTER)
+size: sizeof(bool)+sizeof(int);
+*===================
+
+int outDry;		//The volume value for master output. range from 0..1024. 256 equals 0db. 1024 equals +12db.  (gain = outDry/256.f)
+bool decreaseOnClip;	// Indicates if the function that reduces the master volume on clipping ( signal above 0dBFS) is enabled or not.
+
+
+*===================
+MACHINE SPECIFIC DATA(MACH_SAMPLER)
+size = 2*sizeof(int);
+*===================
+
+int numVoices;		// Max number of simultaneous voices that the sampler will allow to play. values from 2 to 16.
+int antialias;		// Resampling model to use.
+					// Values:  0: None (zero order hold), 1: Linear, 2: Cubic Interpolation (4point spline) , 3: 32point SINC resampler. ( Previous to Psycle 1.11, 3 was a 8point sinc, with an erroneous window which made it sound worse than spline in some cases)
+
+*===================
+MACHINE SPECIFIC DATA(MACH_PLUGIN)
+size: sizeof(int) + numParams*sizeof(int) + chunksize;
+*===================
+
+int numParams; // Indicates the number of parameters that are stored for this plugin.
+int parameter[numParams]; // array with the parameters.
+
+*if this plugin has extradata, then this follows:
+byte ExtraData[chunksize]; // extra data chunk
+
+The current version doesn't store the size of the ExtraData, so it has to be guessed
+substracting the size of the already written data. Here's an example:
+
+size -= sizeof(program) + sizeof(numParams) + sizeof(float) * count;
+if(size)
+{
+	char* data=new char[size];
+	readchunkdata(data,size);
+}
+
+a safer method is using 
+	size2 = plugin.GetChunkSize();
+	byte* pData = new byte[std::max(size,size2)];
+	readchunkdata(data,size2);
+
+
+*===================
+MACHINE SPECIFIC DATA(MACH_VST and MACH_VSTFX). MACH_VSTFX is used to identify VST effects, but there is no other distinction.
+size: 2*sizeof(int) + numParams*sizeof(float) + chunksize
+*===================
+
+int program;
+int numParams;
+float parameter[numParams];
+
+*if this plugin has extradata, then this follows:
+byte ExtraData[chunksize]; // extra data chunk
+
+Note 1: The current version doesn't store the size of the ExtraData, so it has to be guessed
+substracting the size of the already written data. Here's an example:
+
+size -= sizeof(program) + sizeof(numParams) + sizeof(float) * count;
+if(size)
+{
+	char* data=new char[size];
+	readchunkdata(data,size);
+}
+
+Note 2: Since psycle 1.8.3beta3, Psycle doesn't store the 
+parameters if there is a chunk. To reflect this, numParams will
+be zero.
+This was done because albino3 didn't like to restore some of
+its parameters via SetParameter().
+
+*===================
+MACHINE SPECIFIC DATA(MACH_XMSAMPLER)
+size =  5*4 + 128*8 + 2*1 + 64*sizeof CHAN subchunk.
+*===================
+
+UINT version;		// Version of this machine specific data. Version 0x8000 is not documented (alpha versions)
+					// Version 0x10000 and 0x10001 are the same (The changes were in the EINS block).
+
+int numVoices;		// Maximum amount of playing voices allowed
+int resampler;		// Resampling mode being used. 
+					// Values:  0: None (zero order hold), 1: Linear, 2: Cubic Interpolation (4point spline) , 3: 32point SINC resampler. ( Previous to Psycle 1.11, 3 was a 8point sinc, with an erroneous window which made it sound worse than spline in some cases)
+
+for 128 maps do		// The Zxx Macro is a macro of 128 positions to remap the 128 higher positions (0x80 to 0xFF) of the filter command ( 0Fxx )
+					// This is currently non-editable from Psycle, but will get filled when loading an Impulse Tracker module.
+					// their default values are for positions 80 to 8F to be filled with mode 1 and a value linearly increased from 0 to 7F.
+	int mode;		// Mode of operation for the values. 0 means lowpass cutoff, 1 means lowpass ressonance. The default mode for 0Fxx command is 0.
+	int value;		// Value to send to the Filter.
+end do;
+
+bool m_bAmigaSlides;	//Use Linear (false) or amiga (true) pitch slides. amiga slides increase slower the higher the frequency.
+bool m_UseFilters;		//Enable the use of filters. if this setting is disabled, sound is not processed by the filters.
+int m_GlobalVolume;		//Global (Mix) volume, range 0..128, where 128 = 0dBFS.
+int m_PanningMode;		//Panning mode. Psycle supports three pan modes, that affect the transition volume between full left and full right.
+						// 0 = Linear mode: This mode is compatible with Impulse Tracker/Scream Tracker. left volume is 1.0-pan and right volume is pan
+						// 1 = Two slides (DJ-like crossfade): This mode is compatible with Fasttracker II. left volume is 1 from full left to middle
+						//   and right volume is 1 from middle to full right. The attenuation is done linearly once the middle point is crossed.
+						//   You might calculate it this way:
+						//   lvol = std::min(1.0f, (1.0f - rvol) * 2);
+						//   rvol = std::min(1.0f, rvol*2.0f);
+						// 2 = constant power: Constant power uses a logarithm calculation to fade the gain:
+						//   lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
+						//   rvol = powf(rvol, 0.5f);// This is the commonly used one
+						//   lvol = log10f(((1.0f - rvol)*9.0f)+1.0f); // This is a faster approximation
+						//   rvol = log10f((rvol*9.0f)+1.0f); // This is a faster approximation.
+
+for 64 chans do
+	read a XMSAMPLER CHAN subchunk;
+end do;
+
+*===================
+MACHINE SPECIFIC DATA(MACH_XMSAMPLER, CHAN subchunk)
+size =  5*sizeof(int);
+*===================
+id = "CHAN"				// The CHAN subchunk does not have version. It is understood that it is the XMSampler's version.
+size =  5*sizeof(int);
+
+int m_ChannelDefVolume; 	///< (0..200)   &0x100 = Mute. 		// value used at playback start. Mute is included ( you can see the value as 0000MuVo)
+int m_DefaultPanFactor;		//  0..200 .  &0x100 == Surround. 	// value used at playback start. surround is included (you can see the value as 0000SuPa)
+int m_DefaultCutoff;		// 0..127 . 0 is the lowest frequency and 127 is the highest. If both cutoff an ressonance are 127, filter is bypassed.
+int m_DefaultRessonance;	// 0..127 . 0 is the lowest ressonance and 127 is the highest. If both cutoff an ressonance are 127, filter is bypassed.
+uint m_DefaultFilterType;	// Filter type
+							// F_LOWPASS12 = 0 // Simple 4 pole lowpass 
+							// F_HIGHPASS12 = 1 // simple 4 pole highpass
+							// F_BANDPASS12 = 2, // simple 4 pole band pass
+							// F_BANDREJECT12 = 3, // simple 4 pole band reject
+							// F_NONE = 4,//This one is kept here because it is used in load/save
+							// F_ITLOWPASS = 5,	// Filter compatible with the one in Impulse Tracker.
+							// See psycle-helpers/src/psycle/helpers/filter.cpp and filter.hpp
+
+*===================
+MACHINE SPECIFIC DATA(MACH_DUPLICATOR)
+size = 2*8*sizeof(short)
+*===================
+
+short macOutput[8]; // Array with the machine index to send events to.
+short noteOffset[8]; // Array of the noteOffsets for the current machine.
+
+*===================
+MACHINE SPECIFIC DATA(MACH_MIXER)
+size = sizeof(int)+ //solocolumn
+       3*sizeof(float) + //master
+	   2*sizeof(int) + //ins and returns
+	   (3*sizeof(float)+3*sizeof(bool)+numsends()*sizeof(float))*numinputs() +  //inputs
+	   (2*sizeof(float)+2*sizeof(bool)+numsends()*sizeof(bool)+2*sizeof(float)+sizeof(int))*numreturns() + //returns
+	   (2*sizeof(float)+sizeof(int))*numsends(); /sends
+*===================
+int solocolumn;  //column index of solo. If 0..11 -> input, if 12..23 -> return.
+float volume;   // master volume
+float drywetmix; // dry/wet knob (0.0 -> full dry, 1.0 -> full wet)
+float gain; // gain applied to output.
+
+int numinputs; //number of input channels stored.
+int numreturns; //number of return channels stored.
+
+A send and a return necesarily go in conjunction, but they refer to different wires. The send wire is the wire from the send's output to the effect's input. (hidden in Psycle, to have less clutter. In Psycle 1.11.3 this is accessible from the machine popup menu)
+The return wire is the wire from the effect's output to the return's input. (Visible in psycle).
+
+for each numinput
+  for each numsend do
+    float sendvol; // volume for this send for this channel.
+  end do
+  float volume; // volume of this input channel
+  float panning; // panning of this input channel 0.0 -> full left, 1.0f -> full right
+  float drymix; // volume of the dry path (i.e. path from input to output, without effects)
+  bool mute;   // mute indicator
+  bool dryonly; // only send the dry signal (do not bypass drymix).
+  bool wetonly; // only send the wet signal (mute the dry path).
+end do
+
+for each numreturn
+  int returnMacIdx;  //Machine index that connects to this return wire. -1 if none.
+  float returnVolume; //volume value for the current return wire. Range 0.0..1.0. (As opposed to the standard wires)
+  float returnVolMulti;  // Ignore and calculate on wire creation (value to divide returnVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
+  int sendMacIdx;	//Machine index that connects this send wire to. -1 if none.
+  float sendVolume;	//volume value for the current send wire. Range 0.0..1.0. (As opposed to the standard wires)
+  float sendVolMulti;  // Ignore and calculate on wire creation. (value to divide sendVolume for work. The reason is because natives output at -32768.0f..32768.0f range )
+  for each numsend do
+    bool sendTo;   //Indicator if this return is redirected to the numsend at the iterated index
+  end do
+  bool masterSend; //Indicator if this return is redirected to master
+  float volume;  // volume of the return
+  float panning; // panning of the return (0.0f full left, 1.0f full right)
+  bool mute;  // indicator of return muted.
+end do
+
+
+*===================
+MACHINE SPECIFIC DATA(MACH_RECORDER)
+size = sizeof(int)+sizeof(float)
+*===================
+int captureidx;	// index of the audio port (soundcard recording port) selected for capturing
+int gainvol; // gain applied to the captured audio
+
+*===================
+MACHINE SPECIFIC DATA(MACH_DUPLICATOR2)
+size = 4*16*sizeof(short)
+*===================
+
+short macOutput[16]; // Array with the machine index to send events to.
+short noteOffset[16]; // Array of the noteOffsets for the current machine.
+short lowKey[16];  // Array of lower note key where this mapping is activated
+short highKey[16]; // Array of upper note key where this mapping is activated
+
+
+*===================
+MACHINE SPECIFIC DATA(MACH_LUA)
+size: sizeof(int) + numParams*sizeof(int) + chunksize;
+  plus for each numParams:  size += length(paramId)+1  // The +1 is for the NULL terminator.
+*===================
+
+int numParams; // Indicates the number of parameters that are stored for this plugin.
+int parametervalues[numParams]; // array with the parameter values.
+char paramIds[numParams]; // Null terminated id of each parameter. Use this id to set the correct parameter. This allows machines to alter parameters without distrupting the loaders.
+
+*if this plugin has extradata, then this follows:
+int chunksize;  		// Size of the extra data	
+byte ExtraData[chunksize]; // extra data chunk
+
+*===================
+MACHINE SPECIFIC DATA(MACH_DUMMY)
+size = 0
+*===================
+// none
+// The default loader for Dummy just does a "Skip(size);", because the loader
+// uses the dummy when it cannot load a plugin from a song.
+
+
+
+===================
+INSTRUMENT DATA
+===================
+HEADER:
+id = "INSD"; 
+version = 0;
+size = variable, depends on the samples.
+
+DATA:
+
+UINT instrumentIdx;  // Index for the (Sampler) instrument and wave that this instrument data refers to.
+
+bool loop;		// Indicates if the loop mode is enabled. Loop Mode plays the wave at a pitch so that its length is the specified number of tracker lines
+int lines;		// Number of lines for the sample to play.
+unsigned char NNA;	// NNA (New Note Action) What to do on new note while previous is playing in the same track.
+					// Type. Values are : 0: NoteCut, 1: NoteOff, 2: Continue (do nothing)
+int envAttack;		// Envelope attack time (in samples calculated at 44.1Khz). Since Psycle 1.11, they are rounded to 220 sample boundaries (5 milliseconds). The minimum value is 1, not zero
+int envDecayTime;	// Envelope decay time (in samples calculated at 44.1Khz). Since Psycle 1.11, they are rounded to 220 sample boundaries (5 milliseconds). The minimum value is 1, not zero
+int envSusLevel;	// Envelope sustain level (0..100)  0 = -inf dBFS, 100 = 0 dBFS
+int envRelTime;	// Envelope release time (in samples calculated at 44.1Khz). Since Psycle 1.11, they are rounded to 220 sample boundaries (5 milliseconds). The minimum value is 1, not zero
+int fenvAttack;	// Filter Envelope attack time (in smaples calculated at 44.1Khz). Since Psycle 1.11, they are rounded to 220 sample boundaries (5 milliseconds). The minimum value is 1, not zero
+int fenvDecayTime;	// Filter Envelope decay time (in samples calculated at 44.1Khz). Since Psycle 1.11, they are rounded to 220 sample boundaries (5 milliseconds). The minimum value is 1, not zero
+int fenvSusLevel;	// Filter Envelope sustain level (0..128) 0 = lowest frequency, 128 highest frequency
+int fenvRelTime;	// Filter Envelope release time (in samples calculated at 44.1Khz). Since Psycle 1.11, they are rounded to 220 sample boundaries (5 milliseconds). The minimum value is 1, not zero
+int fenvCutOff;	// Filter Cutoff ( 0..127 ) 0 = lowest frequency, 127 highest frequency
+int fenvResso;		// Filter Ressonance ( 0..127) 0 = lowest ressonance, 127 highest ressonance
+int fenvAmount;	// Filter amount (  -128..128 ) 0 = no effect, 128 = full effect, negative = apply reversed.
+int fenvType;		// Filter type  0 lowpass 1 highpass, 2 bandpass, 3 notchband, 4 none,
+int panning;		// Pan value. 0 left, 128 centre, 256 right.
+bool randomPan;	// Enables random pan on note on
+bool randomCutOff;// Enables random filter cutoff on note on
+bool randomRes;	// Enables random filter ressonance on note on
+char sName[];		// Null terminated Instrument name. truncated to 32. This is the field that was editable in Psycle
+
+int numwaves;		// Number of waves that this instrument uses. (Psycle sampler has always supported only one)
+					// NOTE! This field can be zero. In that case, the samples are stored in individual SMSB chuks 
+					// ( or, in the 1.11 betas, in SMPD chunks inside the legacy EINS chunk).
+
+for each numwaves do
+	read WAVE subchunk (see below)
+end do
+
+
+HEADER:
+id = "INSD"; 
+version = 1;
+size = variable, depends on the samples.
+
+DATA:
+Version 1 has the same fields than version 0, and adds the following fields at the end (after reading the WAVE subchunk):
+int sampler_to_use;     // If use_lock is enabled, this is the index of the sampler machine to use when selecting this instrument and adding notes to the pattern or playing alive (i.e. it doesn't matter which sampler you have selected, because "sampler_to_use" will be used).	The index present in the pattern will always be used, regardless of this option.
+bool use_lock;           // indicates if instrument locking is enabled or not.
+
+
+HEADER:
+id = "INSD"; 
+version = 2;
+size = 75 + 1 (name null terminator).
+
+DATA:
+Version 2 has the same fields than version 1, but changes some of the constraints:
+It mandates that numwaves be zero, and as a consequence, there is no WAVE chunk. (waves are now stored in SMSB chunks).
+The sName field is always empty ( i.e. just NULL )
+The panning field is also discarded and written by default to 128 (center). (The pan of classic sampler is the pan of the sampler, not of the instrument, and this is already saved in the SMSB chunk)
+
+
+
+DESCRIPTION:
+Each INSD chunk contains a sampled waveform and its parameters. To play this waveform, a Sampler machine is needed.
+Only the instruments that have a corresponding sample are saved.
+In Psycle 1.11, this means the sampler instrument that corresponds to the wave that is located in the same position in the samples bank.
+Since Psycle 1.11, numwaves can be zero, in which case, the wavedata is located in SMBS chunks (or in the 1.11 betas, in the EINS chunk)
+
+Defaults for versions without these fields are: lock_instrument=-1, use_lock=false
+
+Multiple INSD chunks in the file, one for each used instrument.
+
+*=================================
+WAVE subchunk  (Legacy)
+*=================================
+HEADER:
+id = "WAVE";
+version = 0;
+size = 6*sizeof(int) + sizeof(short)+sizeof(bool) + length(wavename)+1 + compressed_left + compressed_right
+
+DATA:
+unsigned int index;			// sample index. (Non-used samples are not stored, so the index lets us know which one we are storing).
+							// This is undestood as the index of the sample for the instrument where this subchunk is located. I.e. In Psycle, it will always be zero since it is the first sample of the instrument.
+unsigned int wavelength;	// sample length, in samples  (frames).
+unsigned short waveVolume;	// sample volume. values from 0 onwards. 100 = 0db Psycle supported up to 512, but has been limited to 400 ( +12dBFS) in 1.11
+unsigned int waveLoopStart;// loop start point (in samples), if enabled.
+unsigned int waveLoopEnd;	// loop end point (in samples), if enabled.
+
+int waveTune;					// Tuning for the center note. values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed with note C-5)
+int waveFinetune;				// Finetuning. range from -256 to 256. 256 = next seminote
+bool waveLoopType;			// Loop type. if enabled forward loop. else, no loop
+bool waveStereo;				// Indicates that this wave is a stereo wave.
+char waveName[];				// Null terminated name for the wave ( filename usually ), truncated to 32. This field was not shown in Psycle.
+
+unsigned int size1;			// Size for the compressed wavedata. (left channel, if stereo)
+byte data1[size1];			// compressed data. 
+
+*now, if the wave is stereo, this data follows:
+unsigned int size2;			// Size of the right channel's compressed wavedata.
+byte data2[size2];			// compressed data
+
+
+*the compression used for waves is a form of delta packing. check the sources for details. (psycle-helpers/src/psycle/helpers/datacompression.cpp/.hpp SoundSquash/SoundDesquash)
+The unpacked data is an array of type short, with values ranging from -32768 to 32767. (i.e. 16bits PCM audio)
+
+DESCRIPTION:
+This chunk is stored inside a INSD chunk and represents a wave sample. It is no longer used after the 1.11 betas.
+
+
+===================================
+Extended Instrument DATA (Legacy)
+===================================
+HEADER:
+id = "EINS"; 
+version = 0x10000  and 0x10001 (major = 1, minor = 0 Psycle 1.8.5, or major = 1 and minor = 1 Psycle 1.8.6 until 1.11)
+size = variable, depends on the instruments and samples . It is known to be incorrect in version 0x10000.
+
+DATA:
+
+int numInstruments;			// Amount of instruments saved in this EINS
+for each numInstrument do
+	int instIdx;  			// Index of the instrument saved. Unused instruments are not saved. Unused depends on several things
+	FOURCC id = "INST";
+	int INSTsize
+	(int INSTversion)			// Possibly, a version number. see below
+	(bool enabled)
+	Read a headerless SMID block       // See below
+end do
+int numSamples;				// amount of waves saved in this EINS
+for each numSamples do
+	int waveIdx;  			// Index of the wave saved. An unused wave is one that has length of zero
+	FOURCC id = "SMPD";
+	int SMPDsize
+	(int version)			// Possibly, a version number. see below
+	Read a headerless SMSB block       // See below
+end do
+
+
+DESCRIPTION:
+The EINS chunk was used originally to contain the Sampulse instruments and the samples bank.
+This chunk is no longer used, and has been replaced by the "SMID" and "SMSB"  chunks described below.
+
+In order to read an INST subchunk:
+Read the instrument index
+read the four letters INST
+read INSTsize.
+then read INSTversion. 
+	If INSTversion is not 1, seek back (INSTversion field does not exist), and assume INSTversion 0.
+	If INSTversion is 1, read "bool enabled" and forget about it. It is supposedly an indicator if the instrument is in use, but it is better to determine that by other factors like if it has a sample mapped.
+Read a SMID block, but do not read the header, nor the instIdx field (i.e. an INST block is compatible with an SMID block, with the difference in the header and the missing instIdx field)
+
+In order to read an SMPD subchunk:
+Read the wave index
+read the four letters SMPD
+read SMPDsize
+then read SMPDversion. If SMPDversion is not 1 seek back (SMPDversion field does not exist), and assume SMPDversion 0.
+Read a SMSB block, but do not read the header, nor the waveIdx field (i.e. an SMPD block is compatible with an SMSB block, with the difference in the header and the missing waveIdx field)
+
+
+There is zero or one EINS chunk. The chunk contains multiple subchunks for the instruments and samples.
+
+This was also used in 1.11.3 beta as the format for the psycle instrument files. Newer versions use SMID and SMSB chunks.
+
+
+=================================
+ Sampulse Instrument data SMID
+=================================
+HEADER:
+id = "SMID";
+version = 1; 	// See comments on how to read version 0, (which only exists in an INST chunk inside an EINS).
+size = variable, depends on the content.
+
+DATA:
+int  instIdx;		// instrument index. If you are reading an "INST" subchunk, skip this field as it is not present inside INST.
+
+char name[];		// NULL terminated Instrument name, truncated to 32 chars.
+
+ushort m_Lines;		// If different than zero, Indicates to play the wave at a pitch so that its length is the specified number of tracker lines. Not implemented in psycle 1.11.
+					// If you are reading an INST chunk, ignore this value. 16 was written in it.
+
+float m_GlobVol;		// [0..1.0f] Global volume affecting all samples of the instrument.
+float m_VolumeFadeSpeed;	// [0..1.0f] Fadeout speed. Decreasing amount for each tracker tick.
+
+float m_InitPan;		//Initial panFactor (if enabled) [-1..1]
+bool m_PanEnabled;		// Should initPan be used?
+
+bool m_Surround; 		// Is surround enabled? 
+						// If reading version 0, skip, and set surround to false
+
+byte m_NoteModPanCenter 		/// Note number for center pan position
+signed byte m_NoteModPanSep		/// -32..32. 1/256th of panFactor change per seminote.
+
+byte m_FilterCutoff			/// Cutoff Frequency [0..127]
+byte m_FilterResonance		/// Resonance [0..127]
+ushort unused				// Undefined and unused. It was meant as a filterEnvelopeAmount setting.
+int m_FilterType			// Type of filter
+							// F_LOWPASS12 = 0 // Simple 4 pole lowpass 
+							// F_HIGHPASS12 = 1 // simple 4 pole highpass
+							// F_BANDPASS12 = 2, // simple 4 pole band pass
+							// F_BANDREJECT12 = 3, // simple 4 pole band reject
+							// F_NONE = 4,//This one is kept here because it is used in load/save
+							// F_ITLOWPASS = 5,	// Filter compatible with the one in Impulse Tracker.
+							// See psycle-helpers/src/psycle/helpers/filter.cpp and filter.hpp
+
+/// Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
+float m_RandomVolume
+/// Random Panning % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
+float m_RandomPanning
+/// Random CutOff % [ 0.0 -> No randomize. 1.0 = randomize full scale.] Not implemented in Psycle 1.11
+float m_RandomCutoff
+/// Random Resonance % [ 0.0 -> No randomize. 1.0 = randomize full scale.] Not implemented in Psycle 1.11
+float m_RandomResonance
+
+int m_NNA		// New note action
+				//STOP = 0x0,		///  [Note Cut previous note]	(This one actually does a very fast fadeout)
+				//CONTINUE = 0x1,	///  [Ignore the previous note]
+				//NOTEOFF = 0x2,	///  [Note off previous note]
+				//FADEOUT = 0x3		///  [Note fade previous note]
+
+int m_DCT		// Duplicate check type
+				 //NONE=0x0,		/// Do not check for duplicates
+				 //NOTE,			/// Check if the new note is the same than the one playing
+				 //SAMPLE,			/// Check that the new sample is the same than the one playing
+				 //INSTRUMENT		/// Check that the new instrument is the same than the one playing
+
+int m_DCA		// Duplicate check action. Uses the same table than New note action, except that CONTINUE has no meaning.
+
+for 120 times do	// Read the note mapping map. A note from the pattern is mapped to a sample and a note.
+					// The map uses Psycle's note indexes, which is like MIDI: Middle C = 60
+	byte note;		// note to use in place of the note that corresponds to this position 
+	byte sample;	// sample index to play when receiving the note that corresponds to this position. sample 255 (0xFF) means not set.
+end do
+
+read a SMIE subchunk for the amplitude Envelope   // If you are reading an INST subchunk, do not read the SMIE header.
+read a SMIE subchunk for the pan Envelope     // If you are reading an INST subchunk, do not read the SMIE header. Also, if you are reading an EINS version 0x10000 instead of 0x10001, this is the filter and not the pan.
+read a SMIE subchunk for the filter Envelope   // If you are reading an INST subchunk, do not read the SMIE header. Also, if you are reading an EINS version 0x10000 instead of 0x10001, this is the pan and not the filter.
+read a SMIE subchunk for the pitch Envelope   // If you are reading an INST subchunk, do not read the SMIE header.
+
+DESCRIPTION:
+
+The SMID chunk contains the information of one Sampulse instrument. A sampulse instrument also contains four envelope subchunks.
+Pan and pitch envelope are "negative" envelopes, which means that have a range of -1.0 to 1.0. Amplitude and filter have a range of 0.0 to 1.0
+
+Notes: 
+If reading an INST instead of a SMID, do not read instIdx and ignore the value read from m_Lines (set it at zero).
+If reading version 0, do not read m_Surround (set it to false)
+
+There are multiple SMID chunks, one for each sampulse instrument.
+
+=====================================
+Sampulse Instrument envelope subchunk
+=====================================
+HEADER:
+id = "SMIE";
+version = 0
+size = 2*1 + 5*4+ num_of_points*8
+
+DATA:
+bool m_Enabled;			//Indicates if this envelope is enabled, and so is executed on playback
+bool m_Carry;			// Indicates if the carry is enabled. Carry does not reset the envelope on new note, if still playing and no noteoff received.
+
+unsigned int m_LoopStart;		// Continuous loop start position, in envelope points. Value 0xFFFFFFFF means not set
+unsigned int m_LoopEnd;			// Continuous loop end position, in envelope points. Value 0xFFFFFFFF means not set
+unsigned int m_SustainBegin;	// Sustained loop start position, in envelope points. Value 0xFFFFFFFF means not set
+unsigned int m_SustainEnd;		// Sustained loop end position, in envelope points. Value 0xFFFFFFFF means not set
+
+unsigned int num_of_points; //number of points used/stored in the envelope
+for each stored point do
+	int point_time;		// The time in which this point is placed. The unit depends on the mode.
+	float pointValue;	// The value that this point has. Depending on the type of envelope, this can range between 0.0 and 1.0 or between -1.0 and 1.0
+end do;
+
+
+HEADER:
+id = "SMIE";
+version = 1
+size = 3*1 + 6*4+ num_of_points*8
+
+DATA:
+Version 1 contains all the fields of this version, and adds the following two fields:
+
+unsigned int mode;		// mode of operation of this envelope. 0 = Time unit is ticks (as in 24 ticks per beat). 1 = Time unit is milliseconds. 
+bool m_Adsr;			/// Indicates that this envelope is operated as an ADSR (it is an option for the visual component).
+
+
+DESCRIPTION:
+The subchunk SMIE is used to store data that describes an envelope. An envelope consists of an ordered (by time) list of points that have a value. This value is to be used as a multiplier for the parameter they work with.
+
+Version 0 uses mode TICKS and m_Adsr false.
+
+
+=====================
+Sampulse Sample Bank 
+=====================
+HEADER:
+id = "SMSB";
+version = 1  	// See comments on how to read version 0 (version 0 only exists on SMPD chunks inside an EINS).
+size = 
+
+DATA:
+int  waveIdx;		// sample index. If you are reading an "SMPD" subchunk, skip this field as it is not present inside SMPD.
+
+char _wave_name[]  // Name of the wave, as it appears in the Sample Bank. Truncated to 32 chars.
+
+unsigned int m_WaveLength;			// Length of the wave in samples (frames).
+float m_WaveGlobVolume;				// Gain for the sample (always applied) , range 0.0 to 4.0  ( -inf dbFS to +12dbFS)
+ushort m_WaveDefVolume;				// Default volume for this sample if the volume command is not used , range 0.. 0x80 ( -inf to 0dbFS)
+
+uint m_WaveLoopStart;				// Continuous loop start position, in samples (frames)
+uint m_WaveLoopEnd;					// Continuous loop end position, in samples (frames)
+uint m_WaveLoopType;				// loop type
+				// DO_NOT = 0x0, ///< Do Nothing
+				// NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
+				// BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
+
+uint m_WaveSusLoopStart;			// Sustained loop start position, in samples (frames)
+uint m_WaveSusLoopEnd;				// Sustained loop start position, in samples (frames)
+uint m_WaveSusLoopType;;			// loop type
+				// DO_NOT = 0x0, ///< Do Nothing
+				// NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
+				// BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
+
+uint m_WaveSampleRate;		// Samplerate of this sample.  If reading version 0, do not read this field
+short m_WaveTune;			// Tuning for the center note. values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed with note C-5)
+short m_WaveFineTune;		/// [ -100 .. 100] full range = -/+ 1 seminote
+
+bool m_WaveStereo;			// indicator of a stereo wave
+bool m_PanEnabled;			// Is the panFactor enabled (and so, in use when playing)
+float m_PanFactor;			/// Default position for panning ( 0.0 to 1.0 ) 0 left 1 right. See note about version 0.
+
+bool m_Surround;			// surround indicator for this sample. If reading version 0, do not read this field.
+
+byte m_VibratoAttack;		// 0..255   0 means autovibrato is disabled. 1 means shortest attack. 255 means longest attack.
+byte m_VibratoSpeed;		// 0..64	0 no vibrato. 64 fastest vibrato
+byte m_VibratoDepth;		// 0..32	0 no pitch change. 32 highest pitch change.
+byte m_VibratoType;			// Vibrato function type:
+						// SINUS = 0x0,
+						// SQUARE = 0x1,
+						// SAWUP = 0x2,
+						// SAWDOWN = 0x3,
+						// RANDOM = 0x4
+
+
+uint sizeleft;				// Size of the compressed data for left (or mono) channel
+byte pData[sizeleft];		// compressed data 
+
+if m_WaveStereo then
+	uint sizeright;			// Size of the compressed data for right channel
+	byte pData[sizeright];	// compressed data 
+end if
+
+
+
+DESCRIPTION:
+The SMSB chunk contains the parameters and pcm data for one wave sample.
+
+The compression used for waves is a form of delta packing. check the sources for details. (psycle-helpers/src/psycle/helpers/datacompression.cpp/.hpp SoundSquash/SoundDesquash)
+The unpacked data is an array of type short, with values ranging from -32768 to 32767. (i.e. 16bits PCM audio)
+
+
+Notes: 
+If reading an SMPD instead of a SMID, do not read waveIdx as it is not present.
+If reading version 0, do not read m_WaveSampleRate nor m_Surround.
+If reading version 0 and panFactor is higher than 1.0, set m_Surround to true and substract 1.0 from panFactor. Else set m_Surround to false.
+
+There are multiple SMSB chunks, one for each sampulse sample.
+
+
+=============================
+Virtual Instrument/Generator
+=============================
+HEADER:
+id = "VIRG";
+version = 0
+size = 12
+
+DATA:
+int virtual_inst_idx;		// Number of virtual generator for this sampled instrument. A virtual generator is a number that can be used as a generator, ranging from 129 to 254 (or 0x81 to 0xFE).
+int sampler_to_use;			// Number of the real generator (sampler or sampulse) that will play the sample of this virtual generator.
+int inst_index;				// Number of the sampler or sampulse instrument to use.
+
+DESCRIPTION:
+The VIRG chunk contains the mappings of virtual instruments/generators so that sampled instruments can be used in the patterns as a generator, without the need to specify which sampler or sampulse it uses. 
+Virtual instruments also allow to use the aux column as a volume column. If the virtual instrument uses a sampler machine, it maps to the 0Cxx command. If it is a sampulse machine, it maps to its volume column. (See sampulse's help).
+
+There are multiple VIRG chunks, one for each virtual generator defined.
