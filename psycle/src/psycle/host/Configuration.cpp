@@ -36,6 +36,7 @@ namespace psycle { namespace host {
 			#endif
 			SetCacheDir(universalis::os::fs::home_app_local(PSYCLE__NAME));
 			SetLuaDir(appPath()+"LuaScripts");
+			SetLadspaDir(appPath()+"LadspaPlugins");
 			SetVst32Dir(appPath()+"VstPlugins");
 			SetVst64Dir(appPath()+"VstPlugins64");
 			UseJBridge(false);
@@ -63,6 +64,7 @@ namespace psycle { namespace host {
 				#endif
 			}
 			store.Read("LuaScripts", lua_dir_);
+			store.Read("LadspaDir", ladspa_dir_);
 			store.Read("VstDir",vst32_dir_);
 			store.Read("VstDir64",vst64_dir_);
 			bool use=false;
@@ -112,6 +114,7 @@ namespace psycle { namespace host {
 					#endif
 			}
 			store.Write("LuaScripts", lua_dir_);
+			store.Write("LadspaDir", ladspa_dir_);
 			store.Write("VstDir",vst32_dir_);
 			store.Write("VstDir64",vst64_dir_);
 
@@ -175,7 +178,10 @@ namespace psycle { namespace host {
 		{
 			return AsAbsolute(lua_dir_);
 		}
-
+		std::string Configuration::GetAbsoluteLadspaDir() const
+		{
+			return AsAbsolute(ladspa_dir_);
+		}
 		std::string Configuration::GetAbsoluteVst32Dir() const
 		{
 			return AsAbsolute(vst32_dir_);

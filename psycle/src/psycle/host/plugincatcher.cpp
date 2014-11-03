@@ -11,6 +11,7 @@
 #include <psycle/host/VstHost24.hpp>
 #include <psycle/host/LuaPlugin.hpp>
 #include <psycle/host/LuaHost.hpp>
+#include <psycle/host/LadspaHost.hpp>
 
 #include <string>
 #include <sstream>
@@ -87,6 +88,17 @@ namespace psycle
 					break;
 				}
 				break;
+			case MACH_LADSPA:
+				{
+					std::map<std::string,std::string>::iterator iterator = LadspaNames.find(tmp);
+					if(iterator != LadspaNames.end())
+					{
+						result=iterator->second;
+						return true;
+					}
+					break;
+				}
+				break;
 			default:
 				break;
 			}
@@ -107,7 +119,12 @@ namespace psycle
 					std::map<std::string,std::string>::iterator iterator = NativeNames.find(name);
 					if(iterator != NativeNames.end()) {
 						result=iterator->second;
-					}
+					} else {
+					  std::map<std::string,std::string>::iterator iterator = LadspaNames.find(name);
+					  if(iterator != LadspaNames.end()) {
+						result=iterator->second;
+					  }				
+				   }
 				}
 			}
 
@@ -248,6 +265,7 @@ namespace psycle
 			std::vector<std::string> nativePlugs;
 			std::vector<std::string> vstPlugs;
 			std::vector<std::string> luaPlugs;
+			std::vector<std::string> ladspaPlugs;
 
 			CProgressDialog progress;
 			{
@@ -260,6 +278,7 @@ namespace psycle
 			loggers::information()("Scanning plugins ... Directory for VSTs (32): " + Global::configuration().GetAbsoluteVst32Dir());
 			loggers::information()("Scanning plugins ... Directory for VSTs (64): " + Global::configuration().GetAbsoluteVst64Dir());
 			loggers::information()("Scanning plugins ... Directory for Luas : " + Global::configuration().GetAbsoluteLuaDir());
+			loggers::information()("Scanning plugins ... Directory for Ladspas : " + Global::configuration().GetAbsoluteLadspaDir());
 			loggers::information()("Scanning plugins ... Listing ...");
 
 			progress.SetWindowText("Scanning plugins ... Listing ...");
@@ -280,6 +299,7 @@ namespace psycle
 			}
 #endif
 			populate_plugin_list(luaPlugs,Global::configuration().GetAbsoluteLuaDir(), false);
+			populate_plugin_list(ladspaPlugs,Global::configuration().GetAbsoluteLadspaDir(), false);
 
 			int plugin_count = (int)(nativePlugs.size() + vstPlugs.size() + luaPlugs.size());
 
@@ -360,6 +380,22 @@ namespace psycle
 				loggers::information()(s.str().c_str());
 				progress.SetWindowText(s.str().c_str());
 			}
+			{
+				std::ostringstream s; s << "Scanning " << plugin_count << " plugins ... Testing LADSPAs ...";
+				progress.SetWindowText(s.str().c_str());
+			}
+
+			loggers::information()("Scanning plugins ... Testing LADSPAs ...");
+			out
+				<< std::endl
+				<< "===================" << std::endl
+				<< "=== LADSPA Plugins ===" << std::endl
+				<< std::endl;
+			out.flush();
+
+			param->theCatcher->FindPlugins(plugsCount, badPlugsCount, ladspaPlugs, MACH_LADSPA, out, &progress);
+
+
 			out.close();
 			param->theCatcher->_numPlugins = plugsCount;
 			progress.m_Progress.SetPos(16384);
@@ -737,8 +773,61 @@ namespace psycle
 							out.flush();
 						}
 						learnDllName(fileName,type);
+					} else if(type == MACH_LADSPA)
+					{
+						std::vector<PluginInfo> infos;
+						try {							
+							infos = LadspaHost::LoadInfo(fileName.c_str());	
+							if (infos.size() == 0) {
+								throw std::exception("empty plugin");
+							}
+						}
+						catch(const std::exception & e) {
+							std::ostringstream s; s << typeid(e).name() << std::endl;
+							if(e.what()) s << e.what(); else s << "no message"; s << std::endl;
+							pInfo->error = s.str();
+						}
+						catch(...) {
+							std::ostringstream s; s
+								<< "Type of exception is unknown, cannot display any further information." << std::endl;
+							pInfo->error = s.str();
+						}
+						if(!pInfo->error.empty()) {
+							out << "### ERRONEOUS ###" << std::endl;
+							out.flush();
+							out << pInfo->error;
+							out.flush();
+							std::stringstream title; title
+								<< "Machine crashed: " << fileName;
+							loggers::exception()(title.str() + '\n' + pInfo->error);
+							pInfo->allow = false;
+							pInfo->name = "???";
+							pInfo->identifier = 0;
+							pInfo->vendor = "???";
+							pInfo->desc = "???";
+							pInfo->version = "???";
+							pInfo->APIversion = 0;
+							++currentBadPlugsCount;
+						} else {											
+							std::vector<PluginInfo>::iterator it = infos.begin();
+							for (int i = 0; it!=infos.end(); ++it, ++i)  {
+						     PluginInfo info = *it;
+							 if (i>0) {
+							   pInfo = _pPlugsInfo[currentPlugsCount]= new PluginInfo();
+							 }
+							*pInfo = info;	
+							pInfo->dllname = fileName;
+							pInfo->FileTime = time;
+							out << info.name << " - successfully instanciated";
+							out.flush();
+						    ++currentPlugsCount;
+							}
+						}
+						learnDllName(fileName,type);
 					}
-					++currentPlugsCount;
+					if (type!=MACH_LADSPA) {
+					  ++currentPlugsCount;
+					}
 				}
 				catch(const std::exception & e)
 				{
@@ -999,6 +1088,8 @@ namespace psycle
 			case MACH_VSTFX: VstNames[str]=fullname;
 				break;
 			case MACH_LUA: LuaNames[str]=fullname;
+				break;
+			case MACH_LADSPA: LadspaNames[str]=fullname;
 				break;
 			default:
 				break;

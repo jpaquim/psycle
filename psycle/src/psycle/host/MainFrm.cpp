@@ -681,6 +681,7 @@ namespace psycle { namespace host {
 							CenterWindowOnPoint(m_wndView.WaveInMachineDialog, point);
 						}
 						break;
+					case MACH_LADSPA:
 					case MACH_LUA:
 					case MACH_PLUGIN:
 					case MACH_DUPLICATOR:

@@ -21,7 +21,8 @@ namespace psycle { namespace host {
 			internal=0,
 			native=1,
 			vstmac=2,
-			luascript=2
+			luascript=2,
+			ladspa=4
 		};
 		enum selectionmodes
 		{
@@ -40,6 +41,7 @@ namespace psycle { namespace host {
 			int Outputmachine;
 			std::string psOutputDll;
 			int32_t shellIdx;
+			int32_t ladspaIdx;
 			static int pluginOrder;
 			static bool pluginName;
 			static int selectedClass;

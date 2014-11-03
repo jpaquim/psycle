@@ -572,7 +572,7 @@ void WaveOscTables::saw(float* data, int num, int maxharmonic)  {
     double amplitude = gain / h;
 	double to_angle = 2* psycle::helpers::math::pi / num * h;
 	for (int i = 0; i < num; ++i) {
-	  data[i] += ::sin(pow(-1.0,h+1)*i*to_angle)*amplitude;
+	  data[i] += ::sin(pow(1.0,h+1)*i*to_angle)*amplitude;
     }  
   }
 }

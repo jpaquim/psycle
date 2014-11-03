@@ -101,7 +101,8 @@ namespace psycle { namespace host {
 				hNodes[1] = m_browser.InsertItem("Psycle Host machines",2,2,TVI_ROOT,TVI_LAST);
 				hNodes[2] = m_browser.InsertItem("VST 2.x Host machines",4,4,TVI_ROOT,TVI_LAST);
 				hNodes[3] = m_browser.InsertItem("Lua script machines",6,6,TVI_ROOT,TVI_LAST);
-				hNodes[4] = m_browser.InsertItem("Non-working or not a machine",8,8,TVI_ROOT,TVI_LAST);
+				hNodes[4] = m_browser.InsertItem("LADSPA Host machines",8,8,TVI_ROOT,TVI_LAST);
+				hNodes[5] = m_browser.InsertItem("Non-working or not a machine",10,10,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[0];
 				//nodeindex = 4;
 				//The following is unfinished. It is for nested branches.
@@ -139,6 +140,10 @@ namespace psycle { namespace host {
 							{ 
 								imgindex = 6; 
 								hitem=hNodes[3]; 
+							} else if ( pInfo->type == MACH_LADSPA) 
+							{ 
+								imgindex = 6; 
+								hitem=hNodes[4]; 
 							}
 							else {
 								imgindex = 4; 
@@ -156,6 +161,10 @@ namespace psycle { namespace host {
 							{ 
 								imgindex = 7; 
 								hitem=hNodes[3]; 
+							} else if ( pInfo->type == MACH_LADSPA) 
+							{ 
+								imgindex = 7; 
+								hitem=hNodes[4]; 
 							}
 							else 
 							{ 
@@ -167,7 +176,7 @@ namespace psycle { namespace host {
 					else
 					{
 						imgindex = 8;
-						hitem=hNodes[4];
+						hitem=hNodes[5];
 					}
 					if(pluginName && pInfo->error.empty())
 						hPlug[i] = m_browser.InsertItem(pInfo->name.c_str(), imgindex, imgindex, hitem, TVI_SORT);
@@ -218,6 +227,10 @@ namespace psycle { namespace host {
 							{ 
 								imgindex = 6; 
 								hitem=hNodes[0]; 
+							} else if ( pInfo->type == MACH_LADSPA) 
+							{ 
+								imgindex = 6; 
+								hitem=hNodes[0]; 
 							}
 							else 
 							{ 
@@ -233,6 +246,10 @@ namespace psycle { namespace host {
 								hitem= hNodes[1]; 
 							}
 							else if ( pInfo->type == MACH_LUA) 
+							{ 
+								imgindex = 7; 
+								hitem=hNodes[1]; 
+							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
 								imgindex = 7; 
 								hitem=hNodes[1]; 
@@ -407,6 +424,10 @@ namespace psycle { namespace host {
 					{
 						m_versionLabel.SetWindowText(pInfo->version.c_str());
 					} 
+					else if(pInfo->type == MACH_LADSPA)					
+					{
+						m_versionLabel.SetWindowText(pInfo->version.c_str());
+					} 
 					else
 					{	// convert integer to string.
 						std::ostringstream s;
@@ -437,6 +458,10 @@ namespace psycle { namespace host {
 					{
 						selectedClass = luascript;
 					}
+					else if ( pInfo->type == MACH_LADSPA )
+					{
+						selectedClass = ladspa;
+					}
 					else
 					{
 						selectedClass = vstmac;
@@ -445,6 +470,7 @@ namespace psycle { namespace host {
 
 					shellIdx = pInfo->identifier;
 					psOutputDll = pInfo->dllname;
+					ladspaIdx = pInfo->flags;
 
 					m_Allow.SetCheck(!pInfo->allow);
 					m_Allow.EnableWindow(TRUE);

@@ -1485,7 +1485,7 @@ namespace psycle { namespace host {
 					}
 					else 
 					{
-						created = Global::song().CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx);
+						created = Global::song().CreateMachine((MachineType)dlg.Outputmachine, x, y, dlg.psOutputDll.c_str(),fb,dlg.shellIdx, dlg.ladspaIdx);
 					}
 					if (created)
 					{
