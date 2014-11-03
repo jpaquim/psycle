@@ -51,6 +51,7 @@ namespace psycle
 			std::map<std::string,std::string> NativeNames;
 			std::map<std::string,std::string> VstNames;
 			std::map<std::string,std::string> LuaNames;
+			std::map<std::string,std::string> LadspaNames;
 
 		public:
 		///\todo: private:

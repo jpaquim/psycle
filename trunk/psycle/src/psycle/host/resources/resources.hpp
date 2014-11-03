@@ -153,6 +153,8 @@
 #define IDC_4BEAT                       1040
 #define IDC_BROWSE_LUASCRIPTS           1040
 #define IDC_PATTERN_FONTFACE            1041
+#define IDC_BROWSE_LUASCRIPTS2          1041
+#define IDC_BROWSE_LADSPA               1041
 #define IDC_FONTC                       1043
 #define IDC_PATTERN_HEADER_SKIN         1044
 #define IDC_VUBAR_COLOUR                1045
@@ -887,6 +889,7 @@
 #define IDC_TEXT_CLOCKDEVICE            1822
 #define IDC_LUASCRIPTS_EDIT             1822
 #define IDC_TEXT_HEADROOM               1823
+#define IDC_LADSPAEDIT                  1823
 #define IDC_SAVESETTINGS_ON             1824
 #define IDC_NAMES_SHARE                 1825
 #define IDC_NAMES_INDIVIDUAL            1826

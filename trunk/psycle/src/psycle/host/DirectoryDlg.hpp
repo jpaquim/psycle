@@ -42,6 +42,8 @@ namespace psycle { namespace host {
 			afx_msg void OnChangePresetsedit();
 			afx_msg void OnBrowseLua();
 			afx_msg void OnChangeLuaedit();
+			afx_msg void OnBrowseLadspa();
+			afx_msg void OnChangeLadspaedit();
 		protected:
 			void EnableSupportedBridges();
 			void DisableAllBridges();
@@ -60,6 +62,7 @@ namespace psycle { namespace host {
 			CEdit	m_skinEdit;
 			CEdit	m_presetEdit;
 			CEdit	m_luaEdit;
+			CEdit	m_ladspaEdit;
 
 			bool initializingDlg;
 			bool _songPathChanged;
@@ -82,6 +85,8 @@ namespace psycle { namespace host {
 			std::string _presetPathBuf;
 			bool _luaPathChanged;
 			std::string _luaPathBuf;
+			bool _ladspaPathChanged;
+			std::string _ladspaPathBuf;
 		};
 	}   // namespace
 }   // namespace

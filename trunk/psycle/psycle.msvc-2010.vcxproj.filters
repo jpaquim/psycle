@@ -86,6 +86,9 @@
     <Filter Include="psycle\engine\machine\lua">
       <UniqueIdentifier>{58939c0f-a85b-4aa2-a252-b1f13ac6ad41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="psycle\engine\machine\ladspa">
+      <UniqueIdentifier>{9435c005-f88b-4d7f-905c-4880a1a27bc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\psycle\host\Constants.hpp">
@@ -499,6 +502,15 @@
     <ClInclude Include="src\psycle\host\LuaHost.hpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\ladspa.h">
+      <Filter>psycle\engine\machine\ladspa</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ladspahost.hpp">
+      <Filter>psycle\engine\machine\ladspa</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\ladspamachine.h">
+      <Filter>psycle\engine\machine\ladspa</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -768,72 +780,72 @@
     <ClCompile Include="src\Seib-vsthost\JBridgeEnabler.cpp">
       <Filter>Seib-Vsthost</Filter>
     </ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentEditor.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\ScrollableDlgBar.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdAmplifyDialog.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdChildView.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdCrossfadeDialog.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdFrame.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp" >
-		<Filter>psycle\mfc\machine\instrument\waveform</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp" >
-		<Filter>psycle\mfc\machine</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\EnvelopeEditor.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\SampleAssignEditor.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\XMSamplerUIInst.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
-    <ClCompile Include="src\psycle\host\XMSamplerUISample.cpp" >
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentEditor.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ScrollableDlgBar.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdAmplifyDialog.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdChildView.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdCrossfadeDialog.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdFrame.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdInsertSilenceDialog.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveEdMixDialog.cpp">
+      <Filter>psycle\mfc\machine\instrument\waveform</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ChannelMappingDlg.cpp">
+      <Filter>psycle\mfc\machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\WaveScopeCtrl.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentEditorUI.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\EnvelopeEditor.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\EnvelopeEditorDlg.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentAmpDlg.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentFilDlg.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentGenDlg.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\InstrumentPanDlg.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\SampleAssignEditor.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerUIInst.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\XMSamplerUISample.cpp">
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
     <ClCompile Include="src\psycle\host\InstrIndividualMap.cpp">
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
     <ClCompile Include="src\psycle\host\InstrNoteMap.cpp">
-		<Filter>psycle\mfc\machine\instrument</Filter>
-	</ClCompile>
+      <Filter>psycle\mfc\machine\instrument</Filter>
+    </ClCompile>
     <ClCompile Include="src\psycle\host\LuaArray.cpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClCompile>
@@ -845,6 +857,12 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\LuaHost.cpp">
       <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ladspahost.cpp">
+      <Filter>psycle\engine\machine\ladspa</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\ladspamachine.cpp">
+      <Filter>psycle\engine\machine\ladspa</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -860,13 +878,7 @@
     <None Include="src\psycle\host\resources\bmp00003.bmp">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\bmp00004.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
     <None Include="src\psycle\host\resources\bmp00005.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\bmp00009.bmp">
       <Filter>psycle\resources</Filter>
     </None>
     <None Include="src\psycle\host\resources\greater.ico">
@@ -875,34 +887,7 @@
     <None Include="src\psycle\host\resources\idr_vstf.ico">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\Slider\imgMiniOff.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\imgMiniOn.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\imgOff.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\imgOn.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
     <None Include="src\psycle\host\resources\keys_bac.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\MasterMachine\ledOff-left.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\MasterMachine\ledOff-right.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\MasterMachine\ledOn-left.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\MasterMachine\ledOn-right.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\MasterMachine\LedOn.bmp">
       <Filter>psycle\resources</Filter>
     </None>
     <None Include="src\psycle\host\resources\less.ico">
@@ -920,9 +905,6 @@
     <None Include="src\psycle\host\resources\macparam.ico">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\MasterMachine\Master-Mixer.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
     <None Include="src\psycle\host\resources\minus.ico">
       <Filter>psycle\resources</Filter>
     </None>
@@ -933,9 +915,6 @@
       <Filter>psycle\resources</Filter>
     </None>
     <None Include="src\psycle\host\resources\notekey.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\MasterMachine\numbers.bmp">
       <Filter>psycle\resources</Filter>
     </None>
     <None Include="src\psycle\host\resources\pattern_header_skin.bmp">
@@ -956,24 +935,6 @@
     <None Include="src\psycle\host\resources\sharpkey.bmp">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\MasterMachine\Slide.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\sliderB.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\sliderBh.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\sliderP.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\sliderPh.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\splash copia.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
     <None Include="src\psycle\host\resources\TbMainKnob.bmp">
       <Filter>psycle\resources</Filter>
     </None>
@@ -983,18 +944,16 @@
     <None Include="src\psycle\host\resources\toolbar1.bmp">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\Toolbar32.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\VuOff.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
-    <None Include="src\psycle\host\resources\Slider\VuOn.bmp">
-      <Filter>psycle\resources</Filter>
-    </None>
     <None Include="src\psycle\host\resources\wavedit.ico">
       <Filter>psycle\resources</Filter>
     </None>
+    <None Include="src\psycle\host\resources\DeclareDPIAware.manifest" />
+    <None Include="src\psycle\host\resources\master_skin.bmp" />
+    <None Include="src\psycle\host\resources\mixer_skin.bmp" />
+    <None Include="src\psycle\host\resources\Project3.ico" />
+    <None Include="src\psycle\host\resources\splash_screen.bmp" />
+    <None Include="src\psycle\host\resources\Toolbar24Mask.bmp" />
+    <None Include="src\psycle\host\resources\Toolbar24New.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="src\psycle\host\resources\DeclareDPIAware.manifest">

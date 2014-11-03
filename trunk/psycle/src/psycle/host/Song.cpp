@@ -25,6 +25,8 @@
 #include "VstHost24.hpp"
 #include "LuaPlugin.hpp"
 #include "LuaHost.hpp"
+#include "ladspahost.hpp"
+#include "ladspamachine.h"
 
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/math.hpp>
@@ -54,9 +56,9 @@ namespace psycle
 		{
 			defaultPatLines = lines;
 		}
-		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx)
+		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx, int32_t ladspaIdx)
 		{
-			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx);
+			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx, ladspaIdx);
 			if (pMachine) {
 				pMachine->_x = x;
 				pMachine->_y = y;
@@ -68,7 +70,7 @@ namespace psycle
 				return false;
 			}
 		}
-		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx)
+		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx, int32_t ladspaIdx)
 		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
@@ -104,6 +106,26 @@ namespace psycle
 						try
 						{
 							pMachine = luaPlug = dynamic_cast<LuaPlugin*>(LuaHost::LoadPlugin(psPluginDll,songIdx));
+						}
+						catch(const std::exception& e)
+						{
+							loggers::exception()(e.what());
+							zapObject(pMachine); 
+						}
+						catch(...)
+						{
+							zapObject(pMachine); 
+						}
+					}
+					break;
+				}
+				case MACH_LADSPA:
+				{
+					if(Global::machineload().TestFilename(psPluginDll,shellIdx))
+					{
+						try
+						{
+							pMachine =  dynamic_cast<LADSPAMachine*>(LadspaHost::LoadPlugin(psPluginDll,songIdx, ladspaIdx));
 						}
 						catch(const std::exception& e)
 						{

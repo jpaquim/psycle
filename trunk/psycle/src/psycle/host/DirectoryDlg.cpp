@@ -46,6 +46,7 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_SKINEDIT, m_skinEdit);
 			DDX_Control(pDX, IDC_USERPRESETS_EDIT, m_presetEdit);
 			DDX_Control(pDX, IDC_LUASCRIPTS_EDIT, m_luaEdit);
+			DDX_Control(pDX, IDC_LADSPAEDIT, m_ladspaEdit);
 		}
 
 		BEGIN_MESSAGE_MAP(CDirectoryDlg, CPropertyPage)
@@ -71,6 +72,10 @@ namespace psycle { namespace host {
 			ON_EN_CHANGE(IDC_USERPRESETS_EDIT, OnChangePresetsedit)
 			ON_BN_CLICKED(IDC_BROWSE_LUASCRIPTS, OnBrowseLua)
 			ON_EN_CHANGE(IDC_LUASCRIPTS_EDIT, OnChangeLuaedit)
+			ON_BN_CLICKED(IDC_BROWSE_LUASCRIPTS, OnBrowseLua)
+			ON_EN_CHANGE(IDC_LUASCRIPTS_EDIT, OnChangeLuaedit)
+			ON_BN_CLICKED(IDC_BROWSE_LADSPA, OnBrowseLadspa)
+			ON_EN_CHANGE(IDC_LADSPAEDIT, OnChangeLadspaedit)
 		END_MESSAGE_MAP()
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -93,6 +98,7 @@ namespace psycle { namespace host {
 			_skinPathBuf    = config.GetSkinDir();
 			_presetPathBuf  = config.GetPresetsDir();
 			_luaPathBuf  = config.GetLuaDir();
+			_ladspaPathBuf  = config.GetLadspaDir();
 
 			m_songEdit.SetWindowText(_songPathBuf.c_str());
 			m_waveRec.SetWindowText(_waveRecPathBuf.c_str());
@@ -103,6 +109,7 @@ namespace psycle { namespace host {
 			m_skinEdit.SetWindowText(_skinPathBuf.c_str());
 			m_presetEdit.SetWindowText(_presetPathBuf.c_str());
 			m_luaEdit.SetWindowText(_luaPathBuf.c_str());
+			m_ladspaEdit.SetWindowText(_ladspaPathBuf.c_str());
 
 			if(config.IsRecInPSYDir()) {
 				m_waveInPsyDir.SetCheck(TRUE);
@@ -156,6 +163,7 @@ namespace psycle { namespace host {
 			if (_skinPathChanged)    config.SetSkinDir(_skinPathBuf);
 			if (_presetPathChanged)  config.SetPresetsDir(_presetPathBuf);
 			if (_luaPathChanged)     config.SetLuaDir(_luaPathBuf);
+			if (_ladspaPathChanged)     config.SetLadspaDir(_ladspaPathBuf);
 		}
 		void CDirectoryDlg::OnBrowseSong() 
 		{
@@ -354,6 +362,24 @@ namespace psycle { namespace host {
 				CString temp;
 				m_luaEdit.GetWindowText(temp);
 				_luaPathBuf=temp;
+			}
+		}
+		void CDirectoryDlg::OnBrowseLadspa() 
+		{
+			if (CPsycleApp::BrowseForFolder(m_hWnd, _T("Select the Ladspa Directory"), _ladspaPathBuf))
+			{
+				_ladspaPathChanged = true;
+				m_ladspaEdit.SetWindowText(_ladspaPathBuf.c_str());
+			}
+		}
+		void CDirectoryDlg::OnChangeLadspaedit() 
+		{
+			if (!initializingDlg)
+			{
+				_ladspaPathChanged = true;
+				CString temp;
+				m_ladspaEdit.GetWindowText(temp);
+				_ladspaPathBuf=temp;
 			}
 		}
 		void CDirectoryDlg::EnableSupportedBridges() {
