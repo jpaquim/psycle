@@ -1245,8 +1245,8 @@ namespace psycle
 					wave.PanFactor(file.getPan());
 				}
 				if ( file.getformat().repeatHiSamples.unsignedValue() > 0) {
-					wave.WaveLoopStart(file.getLoopStart());
-					wave.WaveLoopEnd(file.getLoopEnd());
+					wave.WaveLoopStart(file.getLoopStart(octave));
+					wave.WaveLoopEnd(file.getLoopEnd(octave));
 					wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 				}
 				wave.WaveTune(file.getNoteOffsetFor(octave));

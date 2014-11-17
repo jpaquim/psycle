@@ -88,7 +88,7 @@ function arp:work(channels)
     local i = math.floor(self.next) - self.sc
     while (i < num) do
 	  if (i-k) > 0 then	    
-	    for k=1, #channels do channels[k]:margin(k, i) end
+	    for j=1, #channels do channels[j]:margin(k, i) end
 	    self.voice:work(channels)	     
 	    k = i
 	  end
@@ -101,15 +101,15 @@ function arp:work(channels)
 	    self.next = self.next + self.period
 		self.reset = false
 	  else
-	    self.voice:faststop()
+             self.voice:faststop()
 		self.reset = true
 		self.next = self.next + (sr*0.03)  -- 0.03 sec faststop
 	  end
       i = math.floor(self.next) - self.sc 	  
 	end
-	for k=1, #channels do channels[k]:margin(k, num) end
+	for j=1, #channels do channels[j]:margin(k, num) end
 	self.voice:work(channels)
-	for k=1, #channels do channels[k]:clearmargin() end
+	for j=1, #channels do channels[j]:clearmargin() end
 	self.sc = self.sc + num
   end
 end

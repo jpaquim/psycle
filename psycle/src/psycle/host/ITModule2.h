@@ -386,7 +386,7 @@ namespace psycle { namespace host {
 			void LoadInstrumentFromFile(Song& song, const int iInstrIdx);
 			bool LoadITSample(XMInstrument::WaveData<>& _wave);
 			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
-			bool LoadITCompressedData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool b16Bit,unsigned char convert);
+			bool LoadITCompressedData(int16_t* pWavedata,uint32_t iLen,bool b16Bit,unsigned char convert);
 			bool LoadITPattern(int patIdx,int &numchans, std::map<int,int>& ittovirtual);
 			void ParseEffect(PatternEntry&pent, int patIdx, int row, int command,int param,int channel);
 		private:

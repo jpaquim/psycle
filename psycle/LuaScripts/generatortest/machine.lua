@@ -21,7 +21,7 @@ local param = require("psycle.parameter")
   
 -- plugin info
 function machine:info()
-  return  {vendor="psycle", name="luaris", generator=1, version=0, api=0}   -- noteon = 1
+  return  {vendor="psycle", name="luaris", generator=1, version=0, api=0} -- noteon = 1
 end
 
 -- help text displayed by the host
@@ -109,15 +109,16 @@ function machine:seqtick(channel, note, ins, cmd, val)
     if cmd == 195 and curr~=nil and curr:isplaying() then  -- portamento         
 	  curr.voice:glideto(note, 0.2)
     else	
-      if curr~=nil and (curr:isplaying()) then
-	    curr:faststop()
+      if curr~=nil and (curr:isplaying()) then                  
+	  curr:faststop()
 	  end	    
 	  channels[channel] = self:freevoice()	
 	  curr = arps[self.currvoice];	
-      curr:noteon(note)
+          curr:noteon(note)
     end   
   elseif curr~=nil and note==120 then
      arps[channels[channel]]:noteoff()	 
+     channels[channel]=0
   end
   if curr~=nil then    
     curr.voice:initcmd(note, cmd, val);
@@ -156,6 +157,8 @@ end
 function machine:stop()  
   local num = #arps
   for i = 1, num do arps[i]:faststop() end
+  for i=0, 64 do channels[i] = 0 end
+  self.currvoice = 1
   for i = 0, 119 do notes[i] = nil end    
 end
 

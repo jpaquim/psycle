@@ -346,6 +346,22 @@
 				E9/A: Disable/Enable Pan Envelope
 				EB/C: Disable/Enable Pitch/Filter Envelope
 				Fx : Set Filter Mode.
+					0 - Set cutoff mode (0Fxx controls cutoff)
+					1 - Set Ressonance Mode (0Fxx controls ressonance)
+					2 - Change the Filter mode
+						For filter mode, the following 0Fxx values are supported:
+						00 to 03 = Lowpass/IT
+						04 and 05 = Lowpass (old)
+						06 and 07 = Bandpass (old)
+						08 to 0B = Lowpass/MPT
+						0C and 0D = Lowpass
+						0E and 0F = Bandpass
+						10 to 13 = HighPass/MPT
+						14 and 15 = Highpass (old)
+						16 and 17 = Notchband (old)
+						18 to 1B = Highpass/MPT
+						1C and 1D = Highpass
+						1E and 1F = Notchband
 
 			Volume Column  (Used with the 1Exx command, or in the aux column, when using virtual instruments):
 				00..3F: Set volume to x*2
