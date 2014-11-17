@@ -113,7 +113,9 @@ namespace psycle { namespace host {
 			std::string name = PsycleGlobal::conf().GetCurrentWaveRecDir();
 			name+='\\';
 			name+=thesong.fileName;
-			name = name.substr(0,std::max(std::string::size_type(0),name.length()-4));
+			std::size_t dotpos = thesong.fileName.find_last_of(".");
+			if ( dotpos == std::string::npos ) dotpos = thesong.fileName.length();
+			name+=thesong.fileName.substr(0,dotpos);
 			name+=".wav";
 			m_filename.SetWindowText(name.c_str());
 			
@@ -363,8 +365,9 @@ namespace psycle { namespace host {
 			CString name;
 			m_filename.GetWindowText(name);
 			rootname=name;
-			rootname=rootname.substr(0,
-				std::max(std::string::size_type(0),rootname.length()-4));
+			std::size_t dotpos = rootname.find_last_of(".");
+			if ( dotpos == std::string::npos ) dotpos = rootname.length();
+			rootname=rootname.substr(0,dotpos);
 
 			boost::filesystem::path mypath(name.GetString());
 

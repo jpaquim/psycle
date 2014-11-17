@@ -4,6 +4,7 @@
 #include "InstrumentEditor.hpp"
 #include "XMInstrument.hpp"
 #include "MainFrm.hpp"
+#include <psycle/helpers/filter.hpp>
 #include <psycle/host/Song.hpp>
 namespace psycle { namespace host {
 
@@ -113,11 +114,18 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			m_nna_combo.AddString("Note Release");
 			m_nna_combo.AddString("None");
 
-			m_filtercombo.AddString("LowPass");
-			m_filtercombo.AddString("HiPass");
-			m_filtercombo.AddString("BandPass");
-			m_filtercombo.AddString("NotchBand");
+			m_filtercombo.AddString("LowPass 2p (old)");
+			m_filtercombo.AddString("HighPass 2p (old)");
+			m_filtercombo.AddString("BandPass 2p (old)");
+			m_filtercombo.AddString("NotchBand 2p (old)");
 			m_filtercombo.AddString("None");
+			m_filtercombo.AddString("Unused");
+			m_filtercombo.AddString("Unused");
+			m_filtercombo.AddString("Unused");
+			m_filtercombo.AddString("LowPass 2p");
+			m_filtercombo.AddString("HighPass 2p");
+			m_filtercombo.AddString("BandPass 2p");
+			m_filtercombo.AddString("NotchBand 2p");
 
 			m_cutoff_slider.SetRange(0,127);
 			m_q_slider.SetRange(0,127);
@@ -376,6 +384,10 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_CO = the_slider.GetPos();
+			//Force update of q value.
+			int tmp = m_q_slider.GetPos();
+			m_q_slider.SetPos(127-tmp);
+			m_q_slider.SetPos(tmp);
 		}
 		void CInstrumentEditor::SliderFilterRes(CSliderCtrl& the_slider)
 		{
@@ -670,6 +682,13 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		{
 			Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 			pins->ENV_F_TP = static_cast<dsp::FilterType>(m_filtercombo.GetCurSel());
+			//Force update of freq and q value.
+			int tmp = m_cutoff_slider.GetPos();
+			m_cutoff_slider.SetPos(127-tmp);
+			m_cutoff_slider.SetPos(tmp);
+			tmp = m_q_slider.GetPos();
+			m_q_slider.SetPos(127-tmp);
+			m_q_slider.SetPos(tmp);
 		}
 
 		void CInstrumentEditor::OnInsDecoctave() 
@@ -795,12 +814,14 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				CSliderCtrl* slider = reinterpret_cast<CSliderCtrl*>(GetDlgItem(pNMHDR->idFrom));
 				int si=Global::song().waveSelected;
 				int nPos = slider->GetPos();
+				Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 				if (pNMHDR->idFrom == IDC_SLIDER_FCUT) {
-					sprintf(buffer,"%.0f",2333.0*pow(6.0,nPos/127.0));
+					sprintf(buffer,"%.0fHz",dsp::FilterCoeff::Cutoff(pins->ENV_F_TP, nPos));
 					label = IDC_CUTOFF_LBL;
 				}
 				else if (pNMHDR->idFrom == IDC_SLIDER_FRES) {
-					sprintf(buffer,"%.0f%%",nPos*0.78740);
+					Instrument* pins = Global::song()._pInstrument[si];
+					sprintf(buffer,"%.02fQ",dsp::FilterCoeff::Resonance(pins->ENV_F_TP, m_cutoff_slider.GetPos(),nPos));
 					label = IDC_LABELQ;
 				}
 				else if (pNMHDR->idFrom == IDC_SLIDERVOL) {

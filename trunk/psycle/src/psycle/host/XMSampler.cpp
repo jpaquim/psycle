@@ -682,9 +682,10 @@ namespace psycle
 
 			m_Filter->Init(SampleRate());
 
+			if ( _inst.FilterType() != dsp::F_NONE) FilterType(_inst.FilterType());
+			else FilterType(rChannel().DefaultFilterType());
 			if (_inst.FilterCutoff() < 127 || _inst.FilterResonance() > 0)
 			{
-				FilterType(_inst.FilterType());
 				//\todo: add the missing  Random options
 	/*			if (_inst.RandomCutoff() > 0.f) {
 					CutOff(_inst.FilterCutoff()* (float)rand() * _inst.RandomCutoff() / 3276800.0f);
@@ -700,18 +701,10 @@ namespace psycle
 			}
 			else if ( rChannel().Cutoff() < 127 || rChannel().Ressonance() > 0)
 			{
-				FilterType(rChannel().FilterType());
 				CutOff(rChannel().Cutoff());
 				Ressonance(rChannel().Ressonance());
 			}
-			//TODO: Study this situation for precedence.
-			else if (_inst.FilterEnvelope().IsEnabled())
-			{
-				FilterType(_inst.FilterType());
-				CutOff(127);
-				Ressonance(0);
-			}
-			else 
+			else
 			{
 				CutOff(127);
 				Ressonance(0);
@@ -1416,7 +1409,6 @@ namespace psycle
 			EffectInit();
 			m_Cutoff = m_DefaultCutoff;
 			m_Ressonance = m_DefaultRessonance;
-			m_FilterType = m_DefaultFilterType;
 			m_DelayedNote.clear();
 		}
 		void XMSampler::Channel::ForegroundVoice(XMSampler::Voice* pVoice)
@@ -1531,8 +1523,8 @@ namespace psycle
 					PanFactor(XMSampler::E8VolMap[(parameter&0xf)]/64.0f);
 					break;
 				case CMD_E::E_SET_MIDI_MACRO:
+					//\todo : implement. For now, it maps directly to internal Filter commands
 					m_MIDI_Set = parameter&0x0F;
-					//\todo : implement.
 					break;
 				case CMD_E::E_GLISSANDO_TYPE:
 					IsGrissando(parameter != 0);
@@ -1574,20 +1566,63 @@ namespace psycle
 				{
 				case 0:
 					m_Cutoff=realValue;
-					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_ITLOWPASS;
 					if ( voice) 
 					{
-						voice->FilterType(m_FilterType);
+						if (voice->FilterType() == dsp::F_NONE) voice->FilterType(m_DefaultFilterType);
 						voice->CutOff(m_Cutoff);
 					}
 					break;
 				case 1:
 					m_Ressonance=realValue;
-					if ( m_FilterType == dsp::F_NONE) m_FilterType = dsp::F_ITLOWPASS;
 					if ( voice )
 					{
-						voice->FilterType(m_FilterType);
+						if (voice->FilterType() == dsp::F_NONE) voice->FilterType(m_DefaultFilterType);
 						voice->Ressonance(m_Ressonance);
+					}
+					break;
+				case 2:
+					//Set filter mode. OpenMPT only says 0..F lowpass and 10..1F highpass.
+					// It also has a macro default setup where 0 and 8 set the lowpass and 10 an 18 set the highpass
+					// From there, I adapted the following table for Psycle.
+					if(param < 0x20)
+					{
+						if (param < 4 ) { //0..3
+							m_DefaultFilterType=F_ITLOWPASS;
+						}
+						else if (param < 6 ) { //4..5
+							m_DefaultFilterType=F_LOWPASS12;
+						}
+						else if (param < 8 ) { //6..7
+							m_DefaultFilterType=F_BANDPASS12;
+						}
+						else if (param < 0xC ) { //8..B
+							m_DefaultFilterType=F_MPTLOWPASSE;
+						}
+						else if (param < 0xE ) { //C..D
+							m_DefaultFilterType=F_LOWPASS12E;
+						}
+						else if (param < 0x10 ) { //E..F
+							m_DefaultFilterType=F_BANDPASS12E;
+						}
+						else if (param < 0x14 ) { //10..13
+							m_DefaultFilterType=F_MPTHIGHPASSE;
+						}
+						else if (param < 0x16 ) { //14..15
+							m_DefaultFilterType=F_HIGHPASS12;
+						}
+						else if (param < 0x18 ) { //16..17
+							m_DefaultFilterType=F_BANDREJECT12;
+						}
+						else if (param < 0x1C ) { //18..1B
+							m_DefaultFilterType=F_MPTHIGHPASSE;
+						}
+						else if (param < 0x1E ) { //1C..1D
+							m_DefaultFilterType=F_HIGHPASS12E;
+						}
+						else { // 1E..1F
+							m_DefaultFilterType=F_BANDREJECT12E;
+						}
+						if (voice) { voice->FilterType(m_DefaultFilterType); } 
 					}
 					break;
 				default:

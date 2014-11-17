@@ -34,7 +34,9 @@ namespace psycle
 		bool PluginCatcher::lookupDllName(const std::string& name, std::string & result, MachineType type, int32_t& shellidx)
 		{
 			std::string tmp = name;
-			std::string extension = name.substr(name.length()-4,4);
+			std::size_t dotpos = name.find_last_of(".");
+			if ( dotpos == std::string::npos ) dotpos = 0;
+			std::string extension = name.substr(dotpos,4);
 			std::string extlower = extension;
 			std::transform(extlower.begin(), extlower.end(), extlower.begin(), std::tolower);
 			if ( extlower != 

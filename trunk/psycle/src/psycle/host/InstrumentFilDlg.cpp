@@ -51,12 +51,18 @@ BOOL CInstrumentFilDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	m_FilterType.AddString("LowPass");
-	m_FilterType.AddString("HiPass");
-	m_FilterType.AddString("BandPass");
-	m_FilterType.AddString("NotchBand");
-	m_FilterType.AddString("None");
+	m_FilterType.AddString("LowPass 2p (old)");
+	m_FilterType.AddString("HighPass 2p (old)");
+	m_FilterType.AddString("BandPass 2p (old)");
+	m_FilterType.AddString("NotchBand 2p (old)");
+	m_FilterType.AddString("Channel default");
 	m_FilterType.AddString("LowPass/IT");
+	m_FilterType.AddString("LowPass/MPT (Ext)");
+	m_FilterType.AddString("HighPass/MPT (Ext)");
+	m_FilterType.AddString("LowPass 2p");
+	m_FilterType.AddString("HighPass 2p");
+	m_FilterType.AddString("BandPass 2p");
+	m_FilterType.AddString("NotchBand 2p");
 
 	m_SlVolCutoffPan.SetRange(0, 127);
 	m_SlSwing1Glide.SetRangeMax(100);
@@ -107,6 +113,9 @@ void CInstrumentFilDlg::OnCbnSelendokFiltertype()
 	m_instr->FilterType((dsp::FilterType)m_FilterType.GetCurSel());
 	CWnd *tabCtl = GetParent();
 	XMSamplerUIInst* UIInst = (XMSamplerUIInst*)tabCtl->GetParent();
+	//Force value refresh
+	SliderCutoff(&m_SlVolCutoffPan);
+	SliderRessonance(&m_SlFadeoutRes);
 	UIInst->UpdateTabNames();
 }
 
@@ -140,14 +149,16 @@ void CInstrumentFilDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 void CInstrumentFilDlg::SliderCutoff(CSliderCtrl* slid)
 {
 	char tmp[64];
-	sprintf(tmp,"%d",m_SlVolCutoffPan.GetPos());
+	sprintf(tmp,"%.0fHz",dsp::FilterCoeff::Cutoff(m_instr->FilterType(), m_SlVolCutoffPan.GetPos()));
 	m_instr->FilterCutoff(m_SlVolCutoffPan.GetPos());
+	//Force refresh of ressonance
+	SliderRessonance(&m_SlFadeoutRes);
 	((CStatic*)GetDlgItem(IDC_LVOLCUTOFFPAN))->SetWindowText(tmp);
 }
 void CInstrumentFilDlg::SliderRessonance(CSliderCtrl* slid)
 {
 	char tmp[64];
-	sprintf(tmp,"%d",m_SlFadeoutRes.GetPos());
+	sprintf(tmp,"%.02fQ",dsp::FilterCoeff::Resonance(m_instr->FilterType(), m_SlVolCutoffPan.GetPos(),m_SlFadeoutRes.GetPos()));
 	m_instr->FilterResonance(m_SlFadeoutRes.GetPos());
 	((CStatic*)GetDlgItem(IDC_LFADEOUTRES))->SetWindowText(tmp);
 }

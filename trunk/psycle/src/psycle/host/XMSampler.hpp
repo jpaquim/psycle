@@ -612,8 +612,11 @@ XMSampler::Channel::PerformFX().
 			m_FilterClassic.Ressonance(res);
 		}
 
+		dsp::FilterType FilterType() {
+			return (m_Filter == NULL) ? dsp::F_NONE : m_Filter->Type();
+		}
 		void FilterType(dsp::FilterType ftype) {
-			if (ftype==dsp::F_ITLOWPASS) {
+			if (ftype==dsp::F_ITLOWPASS || ftype==dsp::F_MPTLOWPASSE || ftype==dsp::F_MPTHIGHPASSE) {
 				m_Filter = &m_FilterIT;
 			}
 			else {
@@ -911,14 +914,13 @@ XMSampler::Channel::PerformFX().
 		void Cutoff(const int cut) { m_Cutoff =cut;  if ( ForegroundVoice() ) ForegroundVoice()->CutOff(cut); }
 		int Ressonance() const { return m_Ressonance;}
 		void Ressonance(const int res) { m_Ressonance=res; if ( ForegroundVoice() ) ForegroundVoice()->Ressonance(res);}
-		dsp::FilterType FilterType() const { return m_FilterType;}
 
 		int DefaultCutoff() const {return m_DefaultCutoff;}
 		void DefaultCutoff(const int value){m_DefaultCutoff = value; Cutoff(value);}
 		int DefaultRessonance() const {return m_DefaultRessonance; }
 		void DefaultRessonance(const int value){m_DefaultRessonance = value; Ressonance(value); }
 		dsp::FilterType DefaultFilterType() const {return m_DefaultFilterType;}
-		void DefaultFilterType(const dsp::FilterType value){m_DefaultFilterType = value; m_FilterType = value; }
+		void DefaultFilterType(const dsp::FilterType value){m_DefaultFilterType = value;}
 
 		bool IsGrissando() const {return m_bGrissando;}
 		void IsGrissando(const bool value){m_bGrissando = value;}
@@ -1018,7 +1020,6 @@ XMSampler::Channel::PerformFX().
 		int m_MIDI_Set;
 		int m_Cutoff;
 		int m_Ressonance;
-		dsp::FilterType m_FilterType;
 		int m_DefaultCutoff;
 		int m_DefaultRessonance;
 		dsp::FilterType m_DefaultFilterType;

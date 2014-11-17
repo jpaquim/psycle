@@ -8,11 +8,14 @@
 
 #pragma once
 #include <universalis.hpp>
+#include <psycle/helpers/math.hpp>
 
 namespace psycle { namespace helpers { namespace dsp {
 
 const double TPI = 6.28318530717958647692528676655901;
 
+//warning: If adding more types to "ITFilter", some parts of the code need
+//to be adapted for it, like XMSampler.hpp void FilterType(dsp::FilterType ftype)
 enum FilterType {
 	F_LOWPASS12 = 0,
 	F_HIGHPASS12 = 1,
@@ -20,12 +23,20 @@ enum FilterType {
 	F_BANDREJECT12 = 3,
 	F_NONE = 4,//This one is kept here because it is used in load/save
 	F_ITLOWPASS = 5,
+	F_MPTLOWPASSE = 6,
+	F_MPTHIGHPASSE = 7,
+	F_LOWPASS12E = 8,
+	F_HIGHPASS12E = 9,
+	F_BANDPASS12E = 10,
+	F_BANDREJECT12E = 11,
 	F_NUMFILTERS
 };
 
 class FilterCoeff {
 	public:
 		static FilterCoeff singleton;
+		static float Cutoff(FilterType ft, int v);
+		static float Resonance(FilterType ft, int freq, int r);
 
 		void setSampleRate(float samplerate);
 		float getSampleRate() {return samplerate; };
@@ -33,11 +44,18 @@ class FilterCoeff {
 		float _coeffs[F_NUMFILTERS-1][128][128][5];
 	protected:
 		FilterCoeff();
-		void ComputeCoeffs(int freq, int r, int t);
+		void ComputeCoeffs(FilterType t, int freq, int r);
+		static float CutoffInternal(int v);
+		static float ResonanceInternal(float v);
+		static float BandwidthInternal(int v);
+		static float CutoffInternalExt(int v);
+		static float ResonanceInternalExt(float v);
+		static float BandwidthInternalExt(int v);
+		static double CutoffIT(int v);
+		static double CutoffMPTExt(int v);
+		static double ResonanceIT(int r);
+		static double ResonanceMPT(int resonance);
 
-		static float Cutoff(int v);
-		static float Resonance(float v);
-		static float Bandwidth(int v);
 
 		float samplerate;
 		double _coeff[5];
@@ -112,31 +130,28 @@ inline void Filter::WorkStereo(float& l, float& r) {
 	r = b;
 }
 
-/*Code from Schism Tracker, with small modifications. Note: full scale is 32768*/
-#define CLAMP(N,L,H) (((N)>(H))?(H):(((N)<(L))?(L):(N)))
-#define FILT_CLIP(i) CLAMP(i, -4096.f, 4096.f)
+/*Code from Modplug */
+//This means clip to twice the range (Psycle works in float, but with the -32768 to 32768 range)
+#define ClipFilter(x) math::clip<double>(-65535.0, x, 65535.0)
 inline float ITFilter::Work(float sample) {
-	float y = sample * _coeff0
-		+ _y1 * (_coeff3 + _coeff4)  + FILT_CLIP((_y2-_y1) * _coeff4);
-	_y2 = _y1;   _y1 = y;
-	_x2 = _x1;   _x1 = sample;
-	return y;
+	float y = sample * _coeff0 + ClipFilter(_y1) * _coeff3 + ClipFilter(_y2) * _coeff4;
+	_y2 = _y1;
+	_y1 = y - (sample * _coeff1);
+	return y; 
 }
 inline void ITFilter::WorkStereo(float & left, float & right) {
-	float y = left * _coeff0 
-		+ _y1 * (_coeff3 + _coeff4)  + FILT_CLIP((_y2-_y1) * _coeff4);
-	_y2 = _y1;   _y1 = y;
-	_x2 = _x1;   _x1 = left;
+	float y = left * _coeff0 + ClipFilter(_y1) * _coeff3 + ClipFilter(_y2) * _coeff4;
+	_y2 = _y1;
+	_y1 = y - (left * _coeff1);
 	left = y;
 
-	y = right * _coeff0 
-		+ _b1 * (_coeff3 + _coeff4) + FILT_CLIP((_b2-_b1) * _coeff4);
-	_b2 = _b1;   _b1 = y;
-	_a2 = _a1;   _a1 = right;
+	y = right * _coeff0 + ClipFilter(_b1) * _coeff3 + ClipFilter(_b2) * _coeff4;
+	_b2 = _b1;
+	_b1 = y - (right * _coeff1);
 	right = y;
 }
-#undef CLAMP
-#undef FILT_CLIP
+#undef ClipFilter
+
 
 }}}
 

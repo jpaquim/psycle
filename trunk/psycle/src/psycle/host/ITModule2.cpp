@@ -685,7 +685,10 @@ Special:  Bit 0: On = song message attached.
 
 				if (curH.length > 0) {
 					Seek(curH.smpData);
-					if (bcompressed) LoadITCompressedData(_wave,curH.length,b16Bit,curH.cvt);
+					if (bcompressed) {
+						LoadITCompressedData(_wave.pWaveDataL(),curH.length,b16Bit,curH.cvt);
+						if (bstereo) LoadITCompressedData(_wave.pWaveDataR(),curH.length,b16Bit,curH.cvt);
+					}
 					else LoadITSampleData(_wave,curH.length,bstereo,b16Bit,curH.cvt);
 				}
 				return true;
@@ -741,7 +744,7 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		bool ITModule2::LoadITCompressedData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool b16Bit,unsigned char convert)
+		bool ITModule2::LoadITCompressedData(int16_t* pWavedata,uint32_t iLen,bool b16Bit,unsigned char convert)
 		{
 			unsigned char bitwidth,packsize,maxbitsize;
 			uint32_t topsize, val,j;
@@ -835,7 +838,7 @@ Special:  Bit 0: On = song message attached.
 					}
 
 					//Store the decompressed value to Wave pointer.
-					*(const_cast<signed short*>(_wave.pWaveDataL()+j+blockpos)) = wNew;
+					*(const_cast<signed short*>(pWavedata+j+blockpos)) = wNew;
 					
 					blockpos++;
 				}

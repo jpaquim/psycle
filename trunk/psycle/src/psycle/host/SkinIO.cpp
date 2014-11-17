@@ -73,7 +73,7 @@ namespace psycle { namespace host {
 					char szOpenName[MAX_PATH];
 					sName = finder.GetFileName();
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
-					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
+					char* pExt = const_cast<char*>(strrchr(sName,'.')); // last .
 					pExt[0]=0;
 					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
 					FILE* file;
@@ -97,7 +97,7 @@ namespace psycle { namespace host {
 					char szOpenName[MAX_PATH];
 					sName = finder.GetFileName();
 					///\todo [bohan] const_cast for now, not worth fixing it imo without making something more portable anyway
-					char* pExt = const_cast<char*>(strrchr(sName,46)); // last .
+					char* pExt = const_cast<char*>(strrchr(sName,'.')); // last .
 					pExt[0]=0;
 					std::sprintf(szOpenName,"%s\\%s.bmp",findDir,sName);
 					FILE* file;

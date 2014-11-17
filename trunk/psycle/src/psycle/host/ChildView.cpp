@@ -609,7 +609,10 @@ namespace psycle { namespace host {
 		void CChildView::OnFileExportModule() 
 		{
 			OPENFILENAME ofn; // common dialog box structure
-			std::string ifile = Global::song().fileName.substr(0,Global::song().fileName.length()-4)  + ".xm";
+			std::string name = Global::song().fileName;
+			std::size_t dotpos = name.find_last_of(".");
+			if ( dotpos == std::string::npos ) dotpos = name.length();
+			std::string ifile = name.substr(0,dotpos)  + ".xm";
 			
 			char szFile[_MAX_PATH];
 
@@ -933,7 +936,9 @@ namespace psycle { namespace host {
 		{
 			OPENFILENAME ofn; // common dialog box structure
 			std::ostringstream asdf;
-			asdf << _pSong.fileName.substr(0,_pSong.fileName.length()-4) <<"-" << std::hex << static_cast<uint32_t>(_pSong.playOrder[editPosition]);
+			std::size_t dotpos = _pSong.fileName.find_last_of(".");
+			if ( dotpos == std::string::npos ) dotpos = _pSong.fileName.length();
+			asdf << _pSong.fileName.substr(0,dotpos) <<"-" << std::hex << static_cast<uint32_t>(_pSong.playOrder[editPosition]);
 			char szFile[_MAX_PATH];
 
 			szFile[_MAX_PATH-1]=0;
