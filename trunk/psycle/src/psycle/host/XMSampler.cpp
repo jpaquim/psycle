@@ -1584,43 +1584,43 @@ namespace psycle
 					//Set filter mode. OpenMPT only says 0..F lowpass and 10..1F highpass.
 					// It also has a macro default setup where 0 and 8 set the lowpass and 10 an 18 set the highpass
 					// From there, I adapted the following table for Psycle.
-					if(param < 0x20)
+					if(realValue < 0x20)
 					{
-						if (param < 4 ) { //0..3
-							m_DefaultFilterType=F_ITLOWPASS;
+						if (realValue < 4 ) { //0..3
+							m_DefaultFilterType=dsp::F_ITLOWPASS;
 						}
-						else if (param < 6 ) { //4..5
-							m_DefaultFilterType=F_LOWPASS12;
+						else if (realValue < 6 ) { //4..5
+							m_DefaultFilterType=dsp::F_LOWPASS12;
 						}
-						else if (param < 8 ) { //6..7
-							m_DefaultFilterType=F_BANDPASS12;
+						else if (realValue < 8 ) { //6..7
+							m_DefaultFilterType=dsp::F_BANDPASS12;
 						}
-						else if (param < 0xC ) { //8..B
-							m_DefaultFilterType=F_MPTLOWPASSE;
+						else if (realValue < 0xC ) { //8..B
+							m_DefaultFilterType=dsp::F_MPTLOWPASSE;
 						}
-						else if (param < 0xE ) { //C..D
-							m_DefaultFilterType=F_LOWPASS12E;
+						else if (realValue < 0xE ) { //C..D
+							m_DefaultFilterType=dsp::F_LOWPASS12E;
 						}
-						else if (param < 0x10 ) { //E..F
-							m_DefaultFilterType=F_BANDPASS12E;
+						else if (realValue < 0x10 ) { //E..F
+							m_DefaultFilterType=dsp::F_BANDPASS12E;
 						}
-						else if (param < 0x14 ) { //10..13
-							m_DefaultFilterType=F_MPTHIGHPASSE;
+						else if (realValue < 0x14 ) { //10..13
+							m_DefaultFilterType=dsp::F_MPTHIGHPASSE;
 						}
-						else if (param < 0x16 ) { //14..15
-							m_DefaultFilterType=F_HIGHPASS12;
+						else if (realValue < 0x16 ) { //14..15
+							m_DefaultFilterType=dsp::F_HIGHPASS12;
 						}
-						else if (param < 0x18 ) { //16..17
-							m_DefaultFilterType=F_BANDREJECT12;
+						else if (realValue < 0x18 ) { //16..17
+							m_DefaultFilterType=dsp::F_BANDREJECT12;
 						}
-						else if (param < 0x1C ) { //18..1B
-							m_DefaultFilterType=F_MPTHIGHPASSE;
+						else if (realValue < 0x1C ) { //18..1B
+							m_DefaultFilterType=dsp::F_MPTHIGHPASSE;
 						}
-						else if (param < 0x1E ) { //1C..1D
-							m_DefaultFilterType=F_HIGHPASS12E;
+						else if (realValue < 0x1E ) { //1C..1D
+							m_DefaultFilterType=dsp::F_HIGHPASS12E;
 						}
 						else { // 1E..1F
-							m_DefaultFilterType=F_BANDREJECT12E;
+							m_DefaultFilterType=dsp::F_BANDREJECT12E;
 						}
 						if (voice) { voice->FilterType(m_DefaultFilterType); } 
 					}
