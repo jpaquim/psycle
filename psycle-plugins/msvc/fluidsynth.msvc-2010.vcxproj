@@ -131,6 +131,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
     <ClCompile>
       <AdditionalIncludeDirectories>$(TopSrcDir)/external-packages/fluidsynth/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_USRDLL;FLUIDSYNTH_DLL_EXPORTS;FLUIDSYNTH_SEQ_DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -150,6 +153,13 @@
       </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
+      <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\event.h" />
     <ClInclude Include="..\..\external-packages\fluidsynth\include\fluidsynth\gen.h" />

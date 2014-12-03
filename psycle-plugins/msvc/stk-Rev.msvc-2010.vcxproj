@@ -80,32 +80,28 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2008.vcxproj">
+    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
-      <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Delay.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\JCRev.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\NRev.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\PRCRev.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Stk.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Delay.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\JCRev.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\NRev.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\PRCRev.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Stk.cpp" />
     <ClCompile Include="..\src\psycle\plugins\stk\stk.reverbs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\Delay.h" />
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\Effect.h" />
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\Filter.h" />
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\JCRev.h" />
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\NRev.h" />
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\PRCRev.h" />
-    <ClInclude Include="..\..\external-packages\stk-4.4.2\stk\Stk.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Delay.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Effect.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Filter.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\JCRev.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\NRev.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\PRCRev.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Stk.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
