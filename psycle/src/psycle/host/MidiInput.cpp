@@ -142,11 +142,11 @@ Exit:
 				else if(problem & 0x0A) {
 					messageText = "ERROR: Could not start the ";
 				}
-				if( problem & 0x01 )
+				if( problem & 0x03 )
 				{
 					messageText += "MIDI input device";
 				}
-				if( problem & 0x04 )
+				if( problem & 0x0C )
 				{
 					messageText += "MIDI sync device";
 				}

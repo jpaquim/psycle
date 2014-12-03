@@ -137,12 +137,13 @@ BOOL XMSamplerUI::PreTranslateChildMessage(MSG* pMsg, HWND focusWin)
 }
 
 
-void XMSamplerUI::Init(XMSampler* pMachine,XMSamplerUI** windowVar) 
+void XMSamplerUI::Init(XMSampler* pMachine, Machine** arrayMacs, XMSamplerUI** windowVar) 
 {
 	windowVar_ = windowVar;
 	_pMachine = pMachine;
 	m_General.pMachine(pMachine);
 	m_Mixer.pMachine(pMachine);
+	m_Mixer.pArrayMacs(arrayMacs);
 	AddPage(&m_Mixer);
 	AddPage(&m_General);
 	init = true;

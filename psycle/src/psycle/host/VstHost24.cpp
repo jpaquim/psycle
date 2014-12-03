@@ -218,7 +218,7 @@ namespace psycle
 						ss << temp.substr(0,temp.rfind('.'));
 					}
 					_sProductName= ss.str();
-					// This is a safe measure against some plugins that have noise at its output for some
+					// This is a safety measure against some plugins that have noise at its output for some
 					// unexplained reason ( example : mda piano.dll )
 					GenerateAudioInTicks(0,STREAM_SIZE);
 				}

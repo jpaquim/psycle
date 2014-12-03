@@ -53,7 +53,7 @@ namespace psycle { namespace helpers {
 			}
 		}
 		void MsRiff::Close() { 
-			if (isWriteMode()) {
+			if (isWriteMode() && isValid) {
 				std::streamsize size = fileSize();
 				UpdateFormSize(0,size-RiffChunkHeader::SIZEOF);
 			}

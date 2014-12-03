@@ -31,7 +31,8 @@ LuaProxy::LuaProxy(LuaPlugin* plug, lua_State* state) : plug_(plug) {
   set_state(state);
 }
 
-LuaProxy::~LuaProxy() {
+LuaProxy::~LuaProxy() { 
+  if (terminal) { delete terminal; terminal = NULL; }
   DeleteCriticalSection(&cs);
 }
 

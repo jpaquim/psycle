@@ -69,7 +69,7 @@ namespace psycle
 
 		void ASIODriverSettings::Load(ConfigStorage & store)
 		{
-			int driverID(0);
+			driverID = 0;
 			if(
 				// First, try current path since version 1.8.8
 				store.OpenGroup("devices\\asio") ||

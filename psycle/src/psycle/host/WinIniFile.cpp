@@ -23,6 +23,7 @@ namespace psycle
 		bool WinIniFile::CreateLocation(std::string const & location, bool overwrite)
 		{
 			filename = location;
+			if (overwrite) { DeleteLocation(location); }
 			bool done = WritePrivateProfileString("Version", "ConfigVersion", version_config_.c_str(), filename.c_str()); 
 			current_group.clear();
 			return done;
