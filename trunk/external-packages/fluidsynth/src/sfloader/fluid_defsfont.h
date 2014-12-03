@@ -16,8 +16,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
@@ -113,6 +113,7 @@ typedef struct _SFSample
   unsigned char origpitch;		/* root midi key number */
   signed char pitchadj;		/* pitch correction in cents */
   unsigned short sampletype;		/* 1 mono,2 right,4 left,linked 8,0x8000=ROM */
+  fluid_sample_t *fluid_sample;	/* Imported sample (fixed up in fluid_defsfont_load) */
 }
 SFSample;
 
@@ -322,9 +323,10 @@ SFData *sfload_file (const char * fname);
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * Boston, MA 02110-1301, USA.
  */
 
+//#include <glib.h>
 
 
 /*-----------------------------------util.h----------------------------*/
@@ -419,7 +421,6 @@ int fluid_defsfont_iteration_next(fluid_defsfont_t* sfont, fluid_preset_t* prese
 int fluid_defsfont_load_sampledata(fluid_defsfont_t* sfont);
 int fluid_defsfont_add_sample(fluid_defsfont_t* sfont, fluid_sample_t* sample);
 int fluid_defsfont_add_preset(fluid_defsfont_t* sfont, fluid_defpreset_t* preset);
-fluid_sample_t* fluid_defsfont_get_sample(fluid_defsfont_t* sfont, char *s);
 
 
 /*

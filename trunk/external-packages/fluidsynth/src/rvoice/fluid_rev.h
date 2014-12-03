@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
@@ -54,7 +54,7 @@ typedef struct _fluid_revmodel_presets_t {
 /*
  * reverb
  */
-fluid_revmodel_t* new_fluid_revmodel(int sample_rate);
+fluid_revmodel_t* new_fluid_revmodel(fluid_real_t sample_rate);
 void delete_fluid_revmodel(fluid_revmodel_t* rev);
 
 void fluid_revmodel_processmix(fluid_revmodel_t* rev, fluid_real_t *in,
@@ -68,6 +68,6 @@ void fluid_revmodel_reset(fluid_revmodel_t* rev);
 void fluid_revmodel_set(fluid_revmodel_t* rev, int set, float roomsize,
                         float damping, float width, float level);
 
-void fluid_revmodel_samplerate_change(fluid_revmodel_t* rev, int sample_rate);
+void fluid_revmodel_samplerate_change(fluid_revmodel_t* rev, fluid_real_t sample_rate);
 
 #endif /* _FLUID_REV_H */

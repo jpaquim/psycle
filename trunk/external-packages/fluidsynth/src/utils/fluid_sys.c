@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #include "fluid_sys.h"
@@ -900,7 +900,12 @@ fluid_ostream_printf (fluid_ostream_t out, char* format, ...)
   len = vsnprintf (buf, 4095, format, args);
   va_end (args);
 
-  if (len <= 0)
+  if (len == 0)
+  {
+    return 0;
+  }
+
+  if (len < 0)
   {
     printf("fluid_ostream_printf: buffer overflow");
     return -1;

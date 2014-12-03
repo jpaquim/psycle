@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #include <utils/fluidsynth_priv.h>
@@ -134,35 +134,30 @@ fluid_voice_update_modenv(fluid_voice_t* voice,
 			    coeff, increment, min, max);
 }
 
-/*
- * new_fluid_voice
- */
-fluid_voice_t*
-new_fluid_voice(fluid_real_t output_rate)
+static inline void fluid_sample_null_ptr(fluid_sample_t** sample)
 {
-  fluid_voice_t* voice;
-  voice = FLUID_NEW(fluid_voice_t);
-  if (voice == NULL) {
-    FLUID_LOG(FLUID_ERR, "Out of memory");
-    return NULL;
+  if (*sample != NULL) {
+    fluid_sample_decr_ref(*sample);
+    *sample = NULL;
   }
-  voice->rvoice = FLUID_NEW(fluid_rvoice_t);
-  if (voice->rvoice == NULL) {
-    FLUID_LOG(FLUID_ERR, "Out of memory");
-    FLUID_FREE(voice);
-    return NULL;
-  }
-  FLUID_MEMSET(voice->rvoice, 0, sizeof(fluid_rvoice_t));
-  voice->can_access_rvoice = 1; 
+}
 
-  voice->status = FLUID_VOICE_CLEAN;
-  voice->chan = NO_CHANNEL;
-  voice->key = 0;
-  voice->vel = 0;
-  voice->channel = NULL;
-  voice->sample = NULL;
-  voice->output_rate = output_rate;
-  UPDATE_RVOICE_R1(fluid_rvoice_set_output_rate, output_rate);
+/*
+ * Swaps the current rvoice with the current overflow_rvoice
+ */
+static void fluid_voice_swap_rvoice(fluid_voice_t* voice)
+{
+  fluid_rvoice_t* rtemp = voice->rvoice;
+  int ctemp = voice->can_access_rvoice;
+  voice->rvoice = voice->overflow_rvoice;
+  voice->can_access_rvoice = voice->can_access_overflow_rvoice;
+  voice->overflow_rvoice = rtemp;
+  voice->can_access_overflow_rvoice = ctemp;
+}
+
+static void fluid_voice_initialize_rvoice(fluid_voice_t* voice)
+{
+  FLUID_MEMSET(voice->rvoice, 0, sizeof(fluid_rvoice_t));
 
   /* The 'sustain' and 'finished' segments of the volume / modulation
    * envelope are constant. They are never affected by any modulator
@@ -177,6 +172,44 @@ new_fluid_voice(fluid_real_t output_rate)
                           0xffffffff, 1.0f, 0.0f, -1.0f, 2.0f);
   fluid_voice_update_modenv(voice, FLUID_VOICE_ENVFINISHED, 
                           0xffffffff, 0.0f, 0.0f, -1.0f, 1.0f);
+}
+
+/*
+ * new_fluid_voice
+ */
+fluid_voice_t*
+new_fluid_voice(fluid_real_t output_rate)
+{
+  fluid_voice_t* voice;
+  voice = FLUID_NEW(fluid_voice_t);
+  if (voice == NULL) {
+    FLUID_LOG(FLUID_ERR, "Out of memory");
+    return NULL;
+  }
+  voice->rvoice = FLUID_NEW(fluid_rvoice_t);
+  voice->overflow_rvoice = FLUID_NEW(fluid_rvoice_t);
+  if (voice->rvoice == NULL || voice->overflow_rvoice == NULL) {
+    FLUID_LOG(FLUID_ERR, "Out of memory");
+    FLUID_FREE(voice->rvoice);
+    FLUID_FREE(voice);
+    return NULL;
+  }
+
+  voice->status = FLUID_VOICE_CLEAN;
+  voice->chan = NO_CHANNEL;
+  voice->key = 0;
+  voice->vel = 0;
+  voice->channel = NULL;
+  voice->sample = NULL;
+
+  /* Initialize both the rvoice and overflow_rvoice */
+  voice->can_access_rvoice = 1; 
+  voice->can_access_overflow_rvoice = 1; 
+  fluid_voice_initialize_rvoice(voice);
+  fluid_voice_swap_rvoice(voice);
+  fluid_voice_initialize_rvoice(voice);
+
+  fluid_voice_set_output_rate(voice, output_rate);
 
   return voice;
 }
@@ -190,10 +223,11 @@ delete_fluid_voice(fluid_voice_t* voice)
   if (voice == NULL) {
     return FLUID_OK;
   }
-  if (!voice->can_access_rvoice) {
+  if (!voice->can_access_rvoice || !voice->can_access_overflow_rvoice) {
     /* stop rvoice before deleting voice! */
     return FLUID_FAILED;
   }
+  FLUID_FREE(voice->overflow_rvoice);
   FLUID_FREE(voice->rvoice);
   FLUID_FREE(voice);
   return FLUID_OK;
@@ -214,18 +248,37 @@ fluid_voice_init(fluid_voice_t* voice, fluid_sample_t* sample,
    * of IIR filters, position in sample etc) is initialized. */
   int i;
 
+  if (!voice->can_access_rvoice) {
+    if (voice->can_access_overflow_rvoice) 
+      fluid_voice_swap_rvoice(voice);
+    else {
+      FLUID_LOG(FLUID_ERR, "Internal error: Cannot access an rvoice in fluid_voice_init!");
+      return FLUID_FAILED;
+    }
+  }
+  /* We are now guaranteed to have access to the rvoice */
+
+  if (voice->sample)
+    fluid_voice_off(voice);
+
   voice->id = id;
   voice->chan = fluid_channel_get_num(channel);
   voice->key = (unsigned char) key;
   voice->vel = (unsigned char) vel;
   voice->channel = channel;
   voice->mod_count = 0;
-  voice->sample = sample;
   voice->start_time = start_time;
   voice->debug = 0;
   voice->has_noteoff = 0;
   UPDATE_RVOICE0(fluid_rvoice_reset);
+
+  /* Increment the reference count of the sample to prevent the
+     unloading of the soundfont while this voice is playing,
+     once for us and once for the rvoice. */
+  fluid_sample_incr_ref(sample);
   UPDATE_RVOICE_PTR(fluid_rvoice_set_sample, sample); 
+  fluid_sample_incr_ref(sample);
+  voice->sample = sample;
 
   i = fluid_channel_get_interp_method(channel);
   UPDATE_RVOICE_I1(fluid_rvoice_set_interp_method, i);
@@ -254,10 +307,6 @@ fluid_voice_init(fluid_voice_t* voice, fluid_sample_t* sample,
   UPDATE_RVOICE_BUFFERS2(fluid_rvoice_buffers_set_mapping, 0, i);
   UPDATE_RVOICE_BUFFERS2(fluid_rvoice_buffers_set_mapping, 1, i+1);
 
-  /* Increment the reference count of the sample to prevent the
-     unloading of the soundfont while this voice is playing. */
-  fluid_sample_incr_ref(voice->sample);
-
   return FLUID_OK;
 }
 
@@ -274,6 +323,11 @@ fluid_voice_set_output_rate(fluid_voice_t* voice, fluid_real_t value)
   
   voice->output_rate = value;
   UPDATE_RVOICE_R1(fluid_rvoice_set_output_rate, value);
+  /* Update the other rvoice as well */
+  fluid_voice_swap_rvoice(voice);
+  UPDATE_RVOICE_R1(fluid_rvoice_set_output_rate, value);
+  fluid_voice_swap_rvoice(voice);
+
   return FLUID_FAILED;
 }
 
@@ -406,8 +460,8 @@ void fluid_voice_start(fluid_voice_t* voice)
 
   voice->status = FLUID_VOICE_ON;
 
-  /* Increment voice count atomically, for non-synth thread read access */
-  fluid_atomic_int_add (&voice->channel->synth->active_voice_count, 1);
+  /* Increment voice count */
+  voice->channel->synth->active_voice_count++;
 }
 
 void 
@@ -884,38 +938,38 @@ fluid_voice_update_param(fluid_voice_t* voice, int gen)
   case GEN_STARTADDROFS:              /* SF2.01 section 8.1.3 # 0 */
   case GEN_STARTADDRCOARSEOFS:        /* SF2.01 section 8.1.3 # 4 */
     if (voice->sample != NULL) {
-      x = (voice->sample->start
+      z = (voice->sample->start
 			     + (int) _GEN(voice, GEN_STARTADDROFS)
 			     + 32768 * (int) _GEN(voice, GEN_STARTADDRCOARSEOFS));
-      UPDATE_RVOICE_I1(fluid_rvoice_set_start, x);
+      UPDATE_RVOICE_I1(fluid_rvoice_set_start, z);
     }
     break;
   case GEN_ENDADDROFS:                 /* SF2.01 section 8.1.3 # 1 */
   case GEN_ENDADDRCOARSEOFS:           /* SF2.01 section 8.1.3 # 12 */
     if (voice->sample != NULL) {
-      x = (voice->sample->end
+      z = (voice->sample->end
 			   + (int) _GEN(voice, GEN_ENDADDROFS)
 			   + 32768 * (int) _GEN(voice, GEN_ENDADDRCOARSEOFS));
-      UPDATE_RVOICE_I1(fluid_rvoice_set_end, x);
+      UPDATE_RVOICE_I1(fluid_rvoice_set_end, z);
     }
     break;
   case GEN_STARTLOOPADDROFS:           /* SF2.01 section 8.1.3 # 2 */
   case GEN_STARTLOOPADDRCOARSEOFS:     /* SF2.01 section 8.1.3 # 45 */
     if (voice->sample != NULL) {
-      x = (voice->sample->loopstart
+      z = (voice->sample->loopstart
 				  + (int) _GEN(voice, GEN_STARTLOOPADDROFS)
 				  + 32768 * (int) _GEN(voice, GEN_STARTLOOPADDRCOARSEOFS));
-      UPDATE_RVOICE_I1(fluid_rvoice_set_loopstart, x);
+      UPDATE_RVOICE_I1(fluid_rvoice_set_loopstart, z);
     }
     break;
 
   case GEN_ENDLOOPADDROFS:             /* SF2.01 section 8.1.3 # 3 */
   case GEN_ENDLOOPADDRCOARSEOFS:       /* SF2.01 section 8.1.3 # 50 */
     if (voice->sample != NULL) {
-      x = (voice->sample->loopend
+      z = (voice->sample->loopend
 				+ (int) _GEN(voice, GEN_ENDLOOPADDROFS)
 				+ 32768 * (int) _GEN(voice, GEN_ENDLOOPADDRCOARSEOFS));
-      UPDATE_RVOICE_I1(fluid_rvoice_set_loopend, x);
+      UPDATE_RVOICE_I1(fluid_rvoice_set_loopend, z);
     }
     break;
 
@@ -1189,6 +1243,16 @@ fluid_voice_kill_excl(fluid_voice_t* voice){
 }
 
 /*
+ * Called by fluid_synth when the overflow rvoice can be reclaimed. 
+ */
+void fluid_voice_overflow_rvoice_finished(fluid_voice_t* voice)
+{
+  voice->can_access_overflow_rvoice = 1;
+  fluid_sample_null_ptr(&voice->overflow_rvoice->dsp.sample);
+}
+
+
+/*
  * fluid_voice_off
  *
  * Purpose:
@@ -1203,17 +1267,17 @@ fluid_voice_off(fluid_voice_t* voice)
   voice->chan = NO_CHANNEL;
   UPDATE_RVOICE0(fluid_rvoice_voiceoff);
 
+  if (voice->can_access_rvoice)
+    fluid_sample_null_ptr(&voice->rvoice->dsp.sample);
+
   voice->status = FLUID_VOICE_OFF;
   voice->has_noteoff = 1;
 
   /* Decrement the reference count of the sample. */
-  if (voice->sample) {
-    fluid_sample_decr_ref(voice->sample);
-    voice->sample = NULL;
-  }
+  fluid_sample_null_ptr(&voice->sample);
 
-  /* Decrement voice count atomically, for non-synth thread read access */
-  fluid_atomic_int_add (&voice->channel->synth->active_voice_count, -1);
+  /* Decrement voice count */
+  voice->channel->synth->active_voice_count--;
 
   return FLUID_OK;
 }
@@ -1486,11 +1550,16 @@ fluid_voice_get_overflow_prio(fluid_voice_t* voice,
 {
   fluid_real_t this_voice_prio = 0;
 
+  /* Are we already overflowing? */
+  if (!voice->can_access_overflow_rvoice) {
+    return OVERFLOW_PRIO_CANNOT_KILL;
+  }
+
   /* Is this voice on the drum channel?
    * Then it is very important.
    * Also skip the released and sustained scores.
    */
-  if (voice->chan == 9){
+  if (voice->channel->channel_type == CHANNEL_TYPE_DRUM){
     this_voice_prio += score->percussion;
   } 
   else if (voice->has_noteoff) {

@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #include <utils/fluidsynth_priv.h>
@@ -324,8 +324,7 @@ fluid_settings_tokenize(const char *s, char *buf, char **ptr)
       FLUID_LOG(FLUID_ERR, "Setting variable name exceeded max token count of %d",
 		MAX_SETTINGS_TOKENS);
       return 0;
-    }
-	else
+    } else
 		ptr[n++] = tok;
   }
 

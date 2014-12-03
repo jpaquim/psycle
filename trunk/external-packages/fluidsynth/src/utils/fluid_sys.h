@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
@@ -36,6 +36,7 @@
 #ifndef _FLUID_SYS_H
 #define _FLUID_SYS_H
 
+//#include <glib.h>
 #include <utils/fluidsynth_priv.h>
 
 

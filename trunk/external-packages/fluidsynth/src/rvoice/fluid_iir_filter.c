@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #include "fluid_iir_filter.h"
@@ -56,10 +56,6 @@ fluid_iir_filter_apply(fluid_iir_filter_t* iir_filter,
   fluid_real_t dsp_a2 = iir_filter->a2;
   fluid_real_t dsp_b02 = iir_filter->b02;
   fluid_real_t dsp_b1 = iir_filter->b1;
-  fluid_real_t dsp_a1_incr = iir_filter->a1_incr;
-  fluid_real_t dsp_a2_incr = iir_filter->a2_incr;
-  fluid_real_t dsp_b02_incr = iir_filter->b02_incr;
-  fluid_real_t dsp_b1_incr = iir_filter->b1_incr;
   int dsp_filter_coeff_incr_count = iir_filter->filter_coeff_incr_count;
 
   fluid_real_t dsp_centernode;
@@ -77,6 +73,12 @@ fluid_iir_filter_apply(fluid_iir_filter_t* iir_filter,
 
   if (dsp_filter_coeff_incr_count > 0)
   {
+    fluid_real_t dsp_a1_incr = iir_filter->a1_incr;
+    fluid_real_t dsp_a2_incr = iir_filter->a2_incr;
+    fluid_real_t dsp_b02_incr = iir_filter->b02_incr;
+    fluid_real_t dsp_b1_incr = iir_filter->b1_incr;
+
+
     /* Increment is added to each filter coefficient filter_coeff_incr_count times. */
     for (dsp_i = 0; dsp_i < count; dsp_i++)
     {
@@ -88,10 +90,19 @@ fluid_iir_filter_apply(fluid_iir_filter_t* iir_filter,
 
       if (dsp_filter_coeff_incr_count-- > 0)
       {
+        fluid_real_t old_b02 = dsp_b02;
 	dsp_a1 += dsp_a1_incr;
 	dsp_a2 += dsp_a2_incr;
 	dsp_b02 += dsp_b02_incr;
 	dsp_b1 += dsp_b1_incr;
+
+        /* Compensate history to avoid the filter going havoc with large frequency changes */
+	if (iir_filter->compensate_incr && fabs(dsp_b02) > 0.001) {
+          fluid_real_t compensate = old_b02 / dsp_b02;
+          dsp_centernode *= compensate;
+          dsp_hist1 *= compensate;
+          dsp_hist2 *= compensate;
+        }
       }
     } /* for dsp_i */
   }
@@ -200,6 +211,8 @@ fluid_iir_filter_calculate_coefficients(fluid_iir_filter_t* iir_filter,
    /* both b0 -and- b2 */
   fluid_real_t b02_temp = b1_temp * 0.5f;
 
+  iir_filter->compensate_incr = 0;
+
   if (iir_filter->filter_startup || (transition_samples == 0))
   {
    /* The filter is calculated, because the voice was started up.
@@ -229,6 +242,10 @@ fluid_iir_filter_calculate_coefficients(fluid_iir_filter_t* iir_filter,
     iir_filter->a2_incr = (a2_temp - iir_filter->a2) / transition_samples;
     iir_filter->b02_incr = (b02_temp - iir_filter->b02) / transition_samples;
     iir_filter->b1_incr = (b1_temp - iir_filter->b1) / transition_samples;
+    if (fabs(iir_filter->b02) > 0.0001) {
+      fluid_real_t quota = b02_temp / iir_filter->b02;
+      iir_filter->compensate_incr = quota < 0.5 || quota > 2;
+    }
     /* Have to add the increments filter_coeff_incr_count times. */
     iir_filter->filter_coeff_incr_count = transition_samples;
   }

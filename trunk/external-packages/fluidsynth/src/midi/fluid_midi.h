@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #ifndef _FLUID_MIDI_H
@@ -265,6 +265,19 @@ int fluid_track_send_events(fluid_track_t* track,
 #define fluid_track_eot(track)  ((track)->cur == NULL)
 
 
+/**
+ * fluid_playlist_item
+ * Used as the `data' elements of the fluid_player.playlist.
+ * Represents either a filename or a pre-loaded memory buffer.
+ * Exactly one of `filename' and `buffer' is non-NULL.
+ */
+typedef struct
+{
+    char* filename;     /** Name of file (owned); NULL if data pre-loaded */
+    void* buffer;       /** The MIDI file data (owned); NULL if filename */
+    size_t buffer_len;  /** Number of bytes in buffer; 0 if filename */
+} fluid_playlist_item;
+
 /*
  * fluid_player
  */
@@ -277,7 +290,7 @@ struct _fluid_player_t {
   fluid_sample_timer_t* sample_timer;
 
   int loop; /* -1 = loop infinitely, otherwise times left to loop the playlist */
-  fluid_list_t* playlist; /* List of file names */
+  fluid_list_t* playlist; /* List of fluid_playlist_item* objects */
   fluid_list_t* currentfile; /* points to an item in files, or NULL if not playing */
 
   char send_program_change; /* should we ignore the program changes? */
@@ -291,6 +304,9 @@ struct _fluid_player_t {
   int miditempo;            /* as indicated by MIDI SetTempo: n 24th of a usec per midi-clock. bravo! */
   double deltatime;         /* milliseconds per midi tick. depends on set-tempo */
   unsigned int division;
+
+  handle_midi_event_func_t playback_callback; /* function fired on each midi event as it is played */
+  void* playback_userdata; /* pointer to user-defined data passed to playback_callback function */
 };
 
 int fluid_player_add_track(fluid_player_t* player, fluid_track_t* track);
@@ -298,7 +314,7 @@ int fluid_player_callback(void* data, unsigned int msec);
 int fluid_player_count_tracks(fluid_player_t* player);
 fluid_track_t* fluid_player_get_track(fluid_player_t* player, int i);
 int fluid_player_reset(fluid_player_t* player);
-int fluid_player_load(fluid_player_t* player, char *filename);
+int fluid_player_load(fluid_player_t* player, fluid_playlist_item *item);
 
 void fluid_player_settings(fluid_settings_t* settings);
 
@@ -307,7 +323,10 @@ void fluid_player_settings(fluid_settings_t* settings);
  * fluid_midi_file
  */
 typedef struct {
-  fluid_file fp;
+  const char* buffer;           /* Entire contents of MIDI file (borrowed) */
+  int buf_len;                  /* Length of buffer, in bytes */
+  int buf_pos;                  /* Current read position in contents buffer */
+  int eof;                      /* The "end of file" condition */
   int running_status;
   int c;
   int type;
@@ -325,7 +344,7 @@ typedef struct {
   int dtime;
 } fluid_midi_file;
 
-fluid_midi_file* new_fluid_midi_file(char* filename);
+fluid_midi_file* new_fluid_midi_file(const char* buffer, size_t length);
 void delete_fluid_midi_file(fluid_midi_file* mf);
 int fluid_midi_file_read_mthd(fluid_midi_file* midifile);
 int fluid_midi_file_load_tracks(fluid_midi_file* midifile, fluid_player_t* player);
@@ -336,6 +355,7 @@ int fluid_midi_file_getc(fluid_midi_file* mf);
 int fluid_midi_file_push(fluid_midi_file* mf, int c);
 int fluid_midi_file_read(fluid_midi_file* mf, void* buf, int len);
 int fluid_midi_file_skip(fluid_midi_file* mf, int len);
+int fluid_midi_file_eof(fluid_midi_file* mf);
 int fluid_midi_file_read_tracklen(fluid_midi_file* mf);
 int fluid_midi_file_eot(fluid_midi_file* mf);
 int fluid_midi_file_get_division(fluid_midi_file* midifile);
