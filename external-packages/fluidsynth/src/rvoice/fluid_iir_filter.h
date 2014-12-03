@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #ifndef _FLUID_IIR_FILTER_H
@@ -58,6 +58,7 @@ struct _fluid_iir_filter_t
 	fluid_real_t a1_incr;
 	fluid_real_t a2_incr;
 	int filter_coeff_incr_count;
+	int compensate_incr;		/* Flag: If set, must compensate history */
 	fluid_real_t hist1, hist2;      /* Sample history for the IIR filter */
 	int filter_startup;             /* Flag: If set, the filter will be set directly.
 					   Else it changes smoothly. */

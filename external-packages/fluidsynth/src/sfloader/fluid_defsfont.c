@@ -17,8 +17,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
@@ -107,6 +107,12 @@ int fluid_defsfont_sfont_delete(fluid_sfont_t* sfont)
 char* fluid_defsfont_sfont_get_name(fluid_sfont_t* sfont)
 {
   return fluid_defsfont_get_name((fluid_defsfont_t*) sfont->data);
+}
+
+fluid_sample_t* fluid_defsfont_get_sample(fluid_defsfont_t* sfont, char *s)
+{
+  /* This function is here just to avoid an ABI/SONAME bump, see ticket #98. Should never be used. */
+  return NULL;
 }
 
 fluid_preset_t*
@@ -317,6 +323,9 @@ int fluid_defsfont_load(fluid_defsfont_t* sfont, const char* file)
     if (fluid_sample_import_sfont(sample, sfsample, sfont) != FLUID_OK)
       goto err_exit;
 
+    /* Store reference to FluidSynth sample in SFSample for later IZone fixups */
+    sfsample->fluid_sample = sample;
+
     fluid_defsfont_add_sample(sfont, sample);
     fluid_voice_optimize_sample(sample);
     p = fluid_list_next(p);
@@ -443,26 +452,6 @@ fluid_defsfont_load_sampledata(fluid_defsfont_t* sfont)
     }
   }
   return FLUID_OK;
-}
-
-/*
- * fluid_defsfont_get_sample
- */
-fluid_sample_t* fluid_defsfont_get_sample(fluid_defsfont_t* sfont, char *s)
-{
-  fluid_list_t* list;
-  fluid_sample_t* sample;
-
-  for (list = sfont->sample; list; list = fluid_list_next(list)) {
-
-    sample = (fluid_sample_t*) fluid_list_get(list);
-
-    if (FLUID_STRCMP(sample->name, s) == 0) {
-      return sample;
-    }
-  }
-
-  return NULL;
 }
 
 /*
@@ -1407,13 +1396,9 @@ fluid_inst_zone_import_sfont(fluid_inst_zone_t* zone, SFZone *sfzone, fluid_defs
 /*      FLUID_LOG(FLUID_DBG, "ExclusiveClass=%d\n", (int) zone->gen[GEN_EXCLUSIVECLASS].val); */
 /*    } */
 
-  if ((sfzone->instsamp != NULL) && (sfzone->instsamp->data != NULL)) {
-    zone->sample = fluid_defsfont_get_sample(sfont, ((SFSample *) sfzone->instsamp->data)->name);
-    if (zone->sample == NULL) {
-      FLUID_LOG(FLUID_ERR, "Couldn't find sample name");
-      return FLUID_FAILED;
-    }
-  }
+  /* fixup sample pointer */
+  if ((sfzone->instsamp != NULL) && (sfzone->instsamp->data != NULL))
+    zone->sample = ((SFSample *)(sfzone->instsamp->data))->fluid_sample;
 
   /* Import the modulators (only SF2.1 and higher) */
   for (count = 0, r = sfzone->mod; r != NULL; count++) {
@@ -1752,7 +1737,7 @@ static int chunkid (unsigned int id);
 static int load_body (unsigned int size, SFData * sf, FILE * fd);
 static int read_listchunk (SFChunk * chunk, FILE * fd);
 static int process_info (int size, SFData * sf, FILE * fd);
-static int process_sdta (int size, SFData * sf, FILE * fd);
+static int process_sdta (unsigned int size, SFData * sf, FILE * fd);
 static int pdtahelper (unsigned int expid, unsigned int reclen, SFChunk * chunk,
   int * size, FILE * fd);
 static int process_pdta (int size, SFData * sf, FILE * fd);
@@ -2009,7 +1994,7 @@ process_info (int size, SFData * sf, FILE * fd)
 }
 
 static int
-process_sdta (int size, SFData * sf, FILE * fd)
+process_sdta (unsigned int size, SFData * sf, FILE * fd)
 {
   SFChunk chunk;
 
@@ -2024,7 +2009,10 @@ process_sdta (int size, SFData * sf, FILE * fd)
     return (gerr (ErrCorr,
 	_("Expected SMPL chunk found invalid id instead")));
 
-  if ((size - chunk.size) != 0)
+  /* SDTA chunk may also contain sm24 chunk for 24 bit samples
+   * (not yet supported), only an error if SMPL chunk size is
+   * greater than SDTA. */
+  if (chunk.size > size)
     return (gerr (ErrCorr, _("SDTA chunk size mismatch")));
 
   /* sample data follows */
@@ -2034,7 +2022,7 @@ process_sdta (int size, SFData * sf, FILE * fd)
   sdtachunk_size = chunk.size;
   sf->samplesize = chunk.size;
 
-  FSKIP (chunk.size, fd);
+  FSKIP (size, fd);
 
   return (OK);
 }
@@ -2428,9 +2416,7 @@ load_pgen (int size, SFData * sf, FILE * fd)
 	    }			/* generator loop */
 
 	  if (level == 3)
-		{		
 	   SLADVREM (z->gen, p3);	/* zone has inst? */
-		}
 	  else
 	    {			/* congratulations its a global zone */
 	      if (!gzone)
@@ -2779,9 +2765,8 @@ load_igen (int size, SFData * sf, FILE * fd)
 
 	    }			/* generator loop */
 
-	  if (level == 3) {
+	  if (level == 3)
 	    SLADVREM (z->gen, p3);	/* zone has sample? */
-	  }
 	  else
 	    {			/* its a global zone */
 	      if (!gzone)

@@ -14,13 +14,17 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
 #ifndef _FLUIDSYNTH_PRIV_H
 #define _FLUIDSYNTH_PRIV_H
+
+//#include <glib.h>
+#include <fake_glib.h>
+
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -140,7 +144,6 @@
 #define WITHOUT_SERVER 1
 #endif
 
-#include <fake_glib.h>
 #include <fluidsynth.h>
 
 /***************************************************************

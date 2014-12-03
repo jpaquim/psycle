@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
@@ -56,7 +56,8 @@ struct _fluid_rvoice_eventhandler_t {
 };
 
 fluid_rvoice_eventhandler_t* new_fluid_rvoice_eventhandler(
-  int is_threadsafe, int queuesize, int finished_voices_size, int bufs, int fx_bufs);
+  int is_threadsafe, int queuesize, int finished_voices_size, int bufs, 
+  int fx_bufs, fluid_real_t sample_rate);
 
 void delete_fluid_rvoice_eventhandler(fluid_rvoice_eventhandler_t*);
 

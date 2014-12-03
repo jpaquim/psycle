@@ -14,8 +14,8 @@
  *  
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #ifndef _FLUIDSYNTH_SYNTH_H
@@ -98,6 +98,17 @@ FLUIDSYNTH_API int fluid_synth_get_channel_info (fluid_synth_t *synth, int chan,
                                                  fluid_synth_channel_info_t *info);
 FLUIDSYNTH_API int fluid_synth_program_reset(fluid_synth_t* synth);
 FLUIDSYNTH_API int fluid_synth_system_reset(fluid_synth_t* synth);
+
+FLUIDSYNTH_API int fluid_synth_all_notes_off(fluid_synth_t* synth, int chan);
+FLUIDSYNTH_API int fluid_synth_all_sounds_off(fluid_synth_t* synth, int chan);
+
+enum fluid_midi_channel_type
+{
+  CHANNEL_TYPE_MELODIC = 0,
+  CHANNEL_TYPE_DRUM = 1
+};
+
+int fluid_synth_set_channel_type(fluid_synth_t* synth, int chan, int type);
 
 
 /* Low level access */
@@ -195,7 +206,7 @@ enum fluid_interp {
   FLUID_INTERP_NONE = 0,        /**< No interpolation: Fastest, but questionable audio quality */
   FLUID_INTERP_LINEAR = 1,      /**< Straight-line interpolation: A bit slower, reasonable audio quality */
   FLUID_INTERP_4THORDER = 4,    /**< Fourth-order interpolation, good quality, the default */
-  FLUID_INTERP_7THORDER = 7    /**< Seventh-order interpolation */
+  FLUID_INTERP_7THORDER = 7     /**< Seventh-order interpolation */
 };
 
 #define FLUID_INTERP_DEFAULT    FLUID_INTERP_4THORDER   /**< Default interpolation method from #fluid_interp. */

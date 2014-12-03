@@ -1,23 +1,16 @@
 #pragma once
 #define PACKAGE "fluidsynth"
-#define VERSION "1.1.2"
+#define VERSION "1.1.6"
 
-#define HAVE_ERRNO_H 1
+#define HAVE_STRING_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STDIO_H 1
+#define HAVE_MATH_H 1
+#define HAVE_STDARG_H 1
 #define HAVE_FCNTL_H 1
 #define HAVE_LIMITS_H 1
-#define HAVE_MATH_H 1
-#define HAVE_MEMORY_H 1
-#define HAVE_SIGNAL_H 1
-#define HAVE_STDARG_H 1
-#define HAVE_STDIO_H 1
-#define HAVE_STDLIB_H 1
-#define HAVE_STRING_H 1
-#define HAVE_SYS_STAT_H 1
-#define HAVE_SYS_TYPES_H 1
-#define HAVE_WINDOWS_H 1
-
 #define HAVE_IO_H 1
-
+#define HAVE_WINDOWS_H 1
 
 #define DSOUND_SUPPORT 0
 #define WINMIDI_SUPPORT 0

@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 
@@ -40,7 +40,8 @@ int fluid_rvoice_mixer_render(fluid_rvoice_mixer_t* mixer, int blockcount);
 int fluid_rvoice_mixer_get_bufs(fluid_rvoice_mixer_t* mixer, 
 				  fluid_real_t*** left, fluid_real_t*** right);
 
-fluid_rvoice_mixer_t* new_fluid_rvoice_mixer(int buf_count, int fx_buf_count, int sample_rate);
+fluid_rvoice_mixer_t* new_fluid_rvoice_mixer(int buf_count, int fx_buf_count, 
+					     fluid_real_t sample_rate);
 
 void delete_fluid_rvoice_mixer(fluid_rvoice_mixer_t*);
 

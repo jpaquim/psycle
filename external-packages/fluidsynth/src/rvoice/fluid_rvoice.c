@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #include "fluid_rvoice.h"
@@ -195,8 +195,8 @@ fluid_rvoice_check_sample_sanity(fluid_rvoice_t* voice)
       /* Is the voice loop within the sample loop? */
       if ((int)voice->dsp.loopstart >= (int)voice->dsp.sample->loopstart
 	  && (int)voice->dsp.loopend <= (int)voice->dsp.sample->loopend){
-	/* Is there a valid peak amplitude available for the loop? */
-	if (voice->dsp.sample->amplitude_that_reaches_noise_floor_is_valid){
+	/* Is there a valid peak amplitude available for the loop, and can we use it? */
+	if (voice->dsp.sample->amplitude_that_reaches_noise_floor_is_valid && voice->dsp.samplemode == FLUID_LOOP_DURING_RELEASE){
 	  voice->dsp.amplitude_that_reaches_noise_floor_loop=voice->dsp.sample->amplitude_that_reaches_noise_floor / voice->dsp.synth_gain;
 	} else {
 	  /* Worst case */
@@ -648,13 +648,8 @@ void fluid_rvoice_set_samplemode(fluid_rvoice_t* voice, enum fluid_loop value)
 void 
 fluid_rvoice_set_sample(fluid_rvoice_t* voice, fluid_sample_t* value)
 {
-  if (voice->dsp.sample) {
-    fluid_sample_decr_ref(voice->dsp.sample);
-    voice->dsp.sample = NULL;
-  }
+  voice->dsp.sample = value;
   if (value) {
-    voice->dsp.sample = value;
-    fluid_sample_incr_ref(voice->dsp.sample);
     voice->dsp.check_sample_sanity_flag |= FLUID_SAMPLESANITY_STARTUP;
   }
 }
@@ -664,10 +659,6 @@ fluid_rvoice_voiceoff(fluid_rvoice_t* voice)
 {
   fluid_adsr_env_set_section(&voice->envlfo.volenv, FLUID_VOICE_ENVFINISHED);
   fluid_adsr_env_set_section(&voice->envlfo.modenv, FLUID_VOICE_ENVFINISHED);
-  if (voice->dsp.sample) {
-    fluid_sample_decr_ref(voice->dsp.sample);
-    voice->dsp.sample = NULL;
-  }
 }
 
 

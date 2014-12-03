@@ -82,19 +82,19 @@ CMachineParameter const paraReverbOn = {
 };
 
 CMachineParameter const paraReverbRoom = {
-	"Room", "Room", 0, 100, MPF_STATE, 20
+	"Room", "Room", 0, 100, MPF_STATE, 30
 };
 
 CMachineParameter const paraReverbDamp = {
-	"Damp", "Damp", 0, 100, MPF_STATE, 0
+	"Damp", "Damp", 0, 100, MPF_STATE, 35
 };
 
 CMachineParameter const paraReverbWidth = {
-	"Width", "Width", 0, 100, MPF_STATE, 50
+	"Width", "Width", 0, 100, MPF_STATE, 70
 };
 
 CMachineParameter const paraReverbLevel = {
-	"Level", "Level", 0, 1000, MPF_STATE, 900
+	"Level", "Level", 0, 1000, MPF_STATE, 350
 };
 
 CMachineParameter const paraChorus = {
@@ -110,7 +110,7 @@ CMachineParameter const paraChorusNr = {
 };
 
 CMachineParameter const paraChorusLevel = {
-	"Level", "Level", 1, 10000, MPF_STATE, 2000
+	"Level", "Level", 1, 10000, MPF_STATE, 512
 };
 
 CMachineParameter const paraChorusSpeed = {
@@ -452,9 +452,9 @@ void mi::GetData(void* pData) {
 }
 
 void mi::Stop() {
-	#define ALL_SOUND_OFF 0x78
 	for(int chan = 0; chan < MAX_TRACKS; ++chan) {
-		fluid_synth_cc(synth,chan,ALL_SOUND_OFF,0);
+		fluid_synth_all_notes_off(synth,chan);
+		fluid_synth_all_sounds_off(synth,chan);
 		for(int i = 0; i < MAXINSTR; ++i)
 			lastnote[i][chan] = 255;
 	}

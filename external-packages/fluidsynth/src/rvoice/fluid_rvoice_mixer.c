@@ -14,8 +14,8 @@
  *
  * You should have received a copy of the GNU Library General Public
  * License along with this library; if not, write to the Free
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- * 02111-1307, USA
+ * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
  */
 
 #include "fluid_rvoice_mixer.h"
@@ -28,7 +28,7 @@
 #define SYNTH_REVERB_CHANNEL 0
 #define SYNTH_CHORUS_CHANNEL 1
 
-//#define ENABLE_MIXER_THREADS defined
+//#define ENABLE_MIXER_THREADS 1
 
 // If less than x voices, the thread overhead is larger than the gain,
 // so don't activate the thread(s).
@@ -308,7 +308,7 @@ fluid_mixer_buffers_render_one(fluid_mixer_buffers_t* buffers,
     fluid_finish_rvoice(buffers, voice);
   }
 }
-
+/*
 static int fluid_mixer_buffers_replace_voice(fluid_mixer_buffers_t* buffers, 
 			                      fluid_rvoice_t* voice)
 {
@@ -324,35 +324,35 @@ static int fluid_mixer_buffers_replace_voice(fluid_mixer_buffers_t* buffers,
   fvc = buffers->finished_voice_count;
   return retval;  
 }
+*/
 
 int 
 fluid_rvoice_mixer_add_voice(fluid_rvoice_mixer_t* mixer, fluid_rvoice_t* voice)
 {
-  // Check if this voice is already in array, this can happen in some overflow conditions
-  int i, j=0;
-  for (i=0; i < mixer->active_voices; i++) {
-    if (mixer->rvoices[i] == voice) 
-      j++;
-  }
+  int i;
   
-  if (j > 0) {
-    // It's already present, make sure it won't get deleted right away
-#ifdef ENABLE_MIXER_THREADS  
-    for (i=0; i < mixer->thread_count; i++)
-      fluid_mixer_buffers_replace_voice(&mixer->threads[i], voice);
-#endif
-    fluid_mixer_buffers_replace_voice(&mixer->buffers, voice);
+  if (mixer->active_voices < mixer->polyphony) {
+    mixer->rvoices[mixer->active_voices++] = voice;
     return FLUID_OK;
   }
 
- 
-  if (mixer->active_voices >= mixer->polyphony) {
-    FLUID_LOG(FLUID_WARN, "Trying to exceed polyphony in fluid_rvoice_mixer_add_voice");
+  /* See if any voices just finished, if so, take its place.
+     This can happen in voice overflow conditions. */
+  for (i=0; i < mixer->active_voices; i++) {
+    if (mixer->rvoices[i] == voice) {
+      FLUID_LOG(FLUID_ERR, "Internal error: Trying to replace an existing rvoice in fluid_rvoice_mixer_add_voice?!");
     return FLUID_FAILED;
   }
+    if (mixer->rvoices[i]->envlfo.volenv.section == FLUID_VOICE_ENVFINISHED) {
+      fluid_finish_rvoice(&mixer->buffers, mixer->rvoices[i]);
+      mixer->rvoices[i] = voice;
+      return FLUID_OK;
+    }
+  }
     
-  mixer->rvoices[mixer->active_voices++] = voice;
-  return FLUID_OK;
+  /* This should never happen */
+  FLUID_LOG(FLUID_ERR, "Trying to exceed polyphony in fluid_rvoice_mixer_add_voice");
+  return FLUID_FAILED;
 }
 
 static int 
@@ -530,7 +530,7 @@ fluid_rvoice_mixer_set_samplerate(fluid_rvoice_mixer_t* mixer, fluid_real_t samp
  * @param fx_buf_count number of stereo effect buffers
  */
 fluid_rvoice_mixer_t* 
-new_fluid_rvoice_mixer(int buf_count, int fx_buf_count, int sample_rate)
+new_fluid_rvoice_mixer(int buf_count, int fx_buf_count, fluid_real_t sample_rate)
 {
   fluid_rvoice_mixer_t* mixer = FLUID_NEW(fluid_rvoice_mixer_t);
   if (mixer == NULL) {
