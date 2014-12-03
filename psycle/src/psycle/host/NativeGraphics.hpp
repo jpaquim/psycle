@@ -27,6 +27,7 @@ namespace host {
 		inline static void DrawHLightValue(CDC& dc, int x, int y, int width, const char *parValue);
 		inline static void DrawHeader(CDC& dc, int x, int y,int width, const char *parName);
 		inline static void DrawHeader2(CDC& dc, int x, int y, int width, const char *parName,const char *parValue);
+		inline static void DrawLEDs(CDC& dc, int x, int y, int maxf, int width, const std::vector<int>& value, bool blink);
 
 		static int xoffset;
 		static PsycleConfig::MachineParam* uiSetting;
@@ -108,6 +109,25 @@ namespace host {
 	
 		DrawValue(dc,x,y,width,parValue);
 	}
+
+    void InfoLabel::DrawLEDs(CDC& dc, int x, int y, int width, int maxf, const std::vector<int>& on, bool blink)
+	{			
+		const int height = uiSetting->dialheight;
+		const int half = height/2;
+		const int quarter = height/4;
+		const int eighth = height/8;
+		const int maxw = width/maxf;
+		const int w = std::min((int)maxw, (int)(width/on.size()));
+		const int border = w/5;
+		for (int i=0; i < on.size(); ++i) {
+		  if (on[i] == 1 || (on[i] == 2 && blink)) {
+			dc.FillSolidRect(x+i*w+border, y+half+eighth, w-2*border, quarter,uiSetting->fontBottomColor);
+		  } else {
+	        dc.FillSolidRect(x+i*w+border, y+half+eighth, w-2*border, quarter,uiSetting->topColor);
+		  }
+	   }
+	}
+
 	void InfoLabel::DrawValue(CDC& dc, int x, int y, int width, const char *parValue)
 	{
 		const int height = uiSetting->dialheight;
@@ -154,6 +174,7 @@ namespace host {
 		dc.ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y + quarter, x+width, y+half+quarter), CString(parName), 0);
 		dc.SelectObject(oldfont);
 	}
+	
 	void InfoLabel::DrawHeader2(CDC& dc, int x, int y, int width, const char *parName,const char *parValue)
 	{
 		const int height = uiSetting->dialheight;

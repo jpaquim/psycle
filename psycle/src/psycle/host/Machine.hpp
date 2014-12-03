@@ -497,6 +497,7 @@ namespace psycle
 					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; }
 					virtual int GetParamValue(int numparam) { return 0; }
 					virtual bool SetParameter(int numparam, int value) { return false; }
+                    virtual void AfterTweaked(int idx) {};
 					virtual void SetCurrentProgram(int idx) {};
 					virtual int GetCurrentProgram() {return 0;};
 					virtual void GetCurrentProgramName(char* val) {strcpy(val,"Program 0");};
@@ -510,6 +511,7 @@ namespace psycle
 					virtual int GetNumBanks(){ return 1;};
 					virtual void Tweak(CPreset const & preset);
 					virtual void GetCurrentPreset(CPreset & preset);
+
 				public:///\todo private:
 					int _numPars;
 					int _nCols;

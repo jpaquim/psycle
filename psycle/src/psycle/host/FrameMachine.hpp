@@ -41,7 +41,7 @@ namespace host {
 
 		// Attributes
 		public:
-			inline Machine& machine(){ return *_machine; }
+			inline Machine& machine(){ return *_machine; }			
 		protected:
 			void Automate(int param, int value, bool undo, int min=0);
 			void ChangeProgram(int program);
@@ -70,6 +70,8 @@ namespace host {
 			int refreshcounter;
 			int lastprogram;
 			int lastnumprogrs;
+			std::map<std::uint16_t, std::string> menuIdMap;
+			std::vector<CMenu*> dynmenus;
 
 		protected:
 			DECLARE_MESSAGE_MAP()
@@ -106,6 +108,7 @@ namespace host {
 			afx_msg void OnUpdateProgramLess(CCmdUI *pCmdUI);
 			afx_msg void OnProgramMore();
 			afx_msg void OnUpdateProgramMore(CCmdUI *pCmdUI);
+			afx_msg void OnDynamicMenuItems(UINT nID);
 		};
 
 	}   // namespace

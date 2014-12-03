@@ -50,6 +50,7 @@ namespace psycle { namespace host {
 		,positioning(false)
 		,allowmove(false)
 		,prevval(0)
+		,painttimer(0)
 		{
 			SelectMachine(effect);
 		}
@@ -106,11 +107,83 @@ namespace psycle { namespace host {
 			char parName[64];
 			y_knob = x_knob = knob_c = 0;
 			std::memset(parName,0,64);
-
+			++painttimer;
 			for (int c=0; c<numParameters; c++)
 			{
 				_pMachine->GetParamName(c,parName);
 				int type = _pMachine->GetParamType(c);
+
+				if(type == 5) // ON/OFF Switch
+				{
+				  char buffer[64];					
+				  _pMachine->GetParamValue(c, buffer);
+				  int min_v, max_v;
+				  min_v = max_v = 0;				  
+				  _pMachine->GetParamRange(c,min_v,max_v);
+				  int const amp_v = max_v - min_v;				  
+				  float rel_v = _pMachine->GetParamValue(c) - min_v;				  
+				  int koffset = K_XSIZE2;
+				  int maxf = 5;				  
+				  int oldoffset = InfoLabel::xoffset;
+				  InfoLabel::xoffset += koffset;
+				  InfoLabel::Draw(bufferDC,x_knob,y_knob,colwidth,parName,"");
+				  InfoLabel::xoffset = oldoffset;
+				  std::vector<int> on;
+				  on.push_back(rel_v);
+				  InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
+				} else
+				if(type == 4) // LED
+				{
+				  char buffer[64];					
+				  _pMachine->GetParamValue(c, buffer);
+				  int min_v, max_v;
+				  min_v = max_v = 0;				  
+				  _pMachine->GetParamRange(c,min_v,max_v);
+				  int const amp_v = max_v - min_v;				  
+				  float rel_v = _pMachine->GetParamValue(c) - min_v;				  
+				  if (painttimer % 15 == 0) blink[c] = !blink[c];
+				  int num = amp_v;
+				  std::vector<int> on(amp_v, 0);		
+				  std::string v(buffer);
+				  bool isnumber = false;
+				  bool hasdescr = false;
+		          if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
+			         int i = 0; hasdescr = true;
+			         for (std::string::iterator it = v.begin();
+				     it!=v.end() && i < on.size();
+				     ++it, ++i) {				
+			           if (*it=='*') on[i] = 1; else
+			           if (*it=='b') on[i] = 2;
+			         }
+	              } else {
+					  on[rel_v] = 1; 
+					  if (v[0] != 'K' && v[0] != 'S' && v[0] != 'M') {					   
+						isnumber = true;
+					  }
+				  }
+				  int koffset = 0;
+				  int maxf = 5;
+				  if (!isnumber) {
+					  // check for alignment suffix
+					  int start = (v.size()>amp_v && hasdescr) ? amp_v : 0;
+					  for (int k = start; k < v.size(); ++k) {
+						  if (v[k]=='K') koffset = K_XSIZE2; else
+						  if (v[k]=='S') maxf = 10; else
+						  if (v[k]=='M') maxf = 7;
+					  }
+				  }				  
+				  int oldoffset = InfoLabel::xoffset;
+				  InfoLabel::xoffset += koffset;
+				  InfoLabel::Draw(bufferDC,x_knob,y_knob,colwidth,parName,"");
+				  InfoLabel::xoffset = oldoffset;
+				  InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
+				} else
+				if(type == 3) // INFO unformatted
+				{
+					char buffer[64];					
+					_pMachine->GetParamValue(c, buffer);
+					InfoLabel::Draw(bufferDC,x_knob,y_knob,colwidth,parName,buffer);					
+				} else
 				if(type == 2) // STATE
 				{
 					char buffer[64];
@@ -231,7 +304,7 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnMouseMove(UINT nFlags, CPoint point) 
 		{
-			if (istweak && !positioning)
+			if (istweak && !positioning && _pMachine->GetParamType(tweakpar)!=4)
 			{
 				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
 				///       It should be interesting to know what is "somewhere else".
@@ -285,9 +358,96 @@ namespace psycle { namespace host {
 		void CNativeView::OnLButtonUp(UINT nFlags, CPoint point) 
 		{
 			istweak = false;
-			ReleaseCapture();
+			ReleaseCapture();			
+			if (_pMachine->GetParamType(tweakpar)==5) {
+				const int height = uiSetting->dialheight;
+				const int half = height/2;
+				const int quarter = height/4;
+				const int eighth = height/8;				
+				int realheight = uiSetting->dialheight+1;
+			    int realwidth = colwidth+1;
+				int min_v, max_v;
+				min_v = max_v = 0;				  
+				_pMachine->GetParamRange(tweakpar,min_v,max_v);
+				int const amp_v = max_v - min_v;	
+				int x_knob = (tweakpar / parspercol)*realwidth;
+				int y_knob = (tweakpar % parspercol)*realheight;				
+			    bool found = false;				
+				char buffer[64];					
+				_pMachine->GetParamValue(tweakpar, buffer);
+				std::string v(buffer);				
+				int koffset =uiSetting->dialwidth;				
+				const int maxw = (colwidth-koffset)/5;
+				const int w = std::min(maxw, (colwidth-koffset)/1);
+				const int border = w/5;				
+				for (int i=0; i < 1; ++i) {
+				  CRect r = CRect(koffset+x_knob+i*w+border, y_knob, koffset+x_knob+i*w+border+w-2*border, y_knob+realheight);
+				  if (r.PtInRect(point)) {
+					 found = true;					 
+					 break;
+				  }
+				}
+				if (found) {
+				  _pMachine->SetParameter(tweakpar, !_pMachine->GetParamValue(tweakpar));
+				}
+			} else
+			if (_pMachine->GetParamType(tweakpar)==4) {
+				const int height = uiSetting->dialheight;
+				const int half = height/2;
+				const int quarter = height/4;
+				const int eighth = height/8;				
+				int realheight = uiSetting->dialheight+1;
+			    int realwidth = colwidth+1;
+				int min_v, max_v;
+				min_v = max_v = 0;				  
+				_pMachine->GetParamRange(tweakpar,min_v,max_v);
+				int const amp_v = max_v - min_v;	
+				int x_knob = (tweakpar / parspercol)*realwidth;
+				int y_knob = (tweakpar % parspercol)*realheight;				
+			    bool found = false;
+				int val = -1;
+				char buffer[64];					
+				_pMachine->GetParamValue(tweakpar, buffer);
+				std::string v(buffer);
+				int koffset = 0;				
+				int const K_XSIZE2=uiSetting->dialwidth;
+				bool isnumber = false;
+				bool hasdescr = false;
+		        if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
+			         int i = 0; hasdescr = true;			        
+	              } else {
+					  if (v[0]!='K' && v[0]!='S' && v[0]!='M') {
+						isnumber = true;
+					  }
+				  }				  
+				  int maxf = 5;
+				  if (!isnumber) {
+					  // check for alignment suffix
+					  int start = (v.size()>amp_v && hasdescr) ? amp_v : 0;
+					  for (int k = start; k < v.size(); ++k) {
+						  if (v[k]=='K') koffset = K_XSIZE2; else
+						  if (v[k]=='S') maxf = 10; else
+						  if (v[k]=='M') maxf = 7;
+					  }
+				  }
+				const int maxw = (colwidth-koffset)/maxf;
+				const int w = std::min(maxw, (colwidth-koffset)/amp_v);
+				const int border = w/5;				
+				for (int i=0; i < amp_v; ++i) {
+				  CRect r = CRect(koffset+x_knob+i*w+border, y_knob, koffset+x_knob+i*w+border+w-2*border, y_knob+realheight);
+				  if (r.PtInRect(point)) {
+					 found = true;
+					 val = i;
+					 break;
+				  }
+				}
+				if (found) {
+				  _pMachine->SetParameter(tweakpar,val);
+				}
+			}
 			while (ShowCursor(TRUE) < 0);
-			Invalidate();	
+			Invalidate();
+			_pMachine->AfterTweaked(tweakpar);
 			CWnd::OnLButtonUp(nFlags, point);
 		}
 
@@ -370,6 +530,12 @@ namespace psycle { namespace host {
 			}
 			parspercol = numParameters/ncol;
 			if ( parspercol*ncol < numParameters) parspercol++; // check if all the parameters are visible.
+			if (pMachine->_type == MACH_LUA) {
+			   blink.clear();
+			   for (int i=1; i<numParameters; ++i) {
+				  blink.push_back(0);
+			   }
+			}
 		}
 
 	}   // namespace
