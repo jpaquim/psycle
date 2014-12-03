@@ -977,7 +977,17 @@
 #define IDC_REPLMACHCOMB                2425
 #define IDC_SEARCHNOTECOMB              2426
 #define IDC_CH_INCLUDEPAT               2427
+#define IDC_R_SHOWPLAYALL               2428
+#define IDC_FILTERTYPE1                 2429
+#define IDC_FILTERTYPE2                 2430
+#define IDC_FILTERTYPE3                 2431
+#define IDC_FILTERTYPE4                 2432
+#define IDC_FILTERTYPE5                 2433
+#define IDC_FILTERTYPE6                 2434
+#define IDC_FILTERTYPE7                 2435
+#define IDC_FILTERTYPE8                 2436
 #define PSYC_ENVELOPE_CHANGED           4096
+#define SAVEWAV_RECORDEND               4097
 #define ID_FILE_LOADSONG                32775
 #define ID_FILE_IMPORT_XMFILE           32777
 #define ID_FILE_IMPORT_ITFILE           32778
@@ -1192,7 +1202,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
 #define _APS_NEXT_COMMAND_VALUE         34443
-#define _APS_NEXT_CONTROL_VALUE         2428
-#define _APS_NEXT_SYMED_VALUE           64
+#define _APS_NEXT_CONTROL_VALUE         2430
+#define _APS_NEXT_SYMED_VALUE           65
 #endif
 #endif

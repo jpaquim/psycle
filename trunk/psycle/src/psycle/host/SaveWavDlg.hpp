@@ -25,7 +25,6 @@ namespace psycle {
 			void SaveToClipboard();
 			int kill_thread;
 			int threadopen;
-			CEvent _event;
 			enum { IDD = IDD_SAVEWAVDLG };
 			CButton	m_browse;
 			CButton	m_cancel;

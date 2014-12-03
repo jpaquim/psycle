@@ -1635,7 +1635,7 @@ namespace psycle { namespace host {
 
 		/////////////////////////////////////////////
 		PsycleConfig::PsycleConfig() : Configuration()
-			, audioSettings(5)
+			, audioSettings(5), store_place_(STORE_USER_REGEDIT)
 		{
 			if(!PsycleConfig::CreatePsyFont(fixedFont,"Consolas",80,false,false)) {
 				PsycleConfig::CreatePsyFont(fixedFont,"Courier New",80,false,false);
@@ -1652,8 +1652,6 @@ namespace psycle { namespace host {
 			{
 				bool vista = Is_Vista_or_Later();
 				bool asio = ASIOInterface::SupportsAsio();
-				_numOutputDrivers = vista ? 5 : 4;
-				if(!asio) _numOutputDrivers--;
 
 				int idx = 0;
 				audioSettings[idx++] = new SilentSettings();
@@ -1665,6 +1663,7 @@ namespace psycle { namespace host {
 				if (vista) {
 					audioSettings[idx++] = new WasapiSettings();
 				}
+				_numOutputDrivers=idx;
 			}
 			//All the other constructors already do SetDefaultSettings.
 			SetDefaultSettings(false);
@@ -1886,11 +1885,20 @@ namespace psycle { namespace host {
 			ConfigStorage* store = 0;
 			bool opened = false;
 			boost::filesystem::path cachedir;
+			boost::filesystem::path tempfile;
+			std::string temp;
 			try {
 				switch(store_place_) {
 					case STORE_EXE_DIR: 
 						store = new WinIniFile(PSYCLE__VERSION);
-						opened = store->CreateLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").string());
+						// Writing the .ini file in a temporary dir and then to the destination dir because the current implementation
+						// of WinIniFile uses Microsoft WritePrivateProfile and that method (re)writes the file in each call.
+						// Doing so in a temp file can increase the speed when writing into an USB pen drive.
+						temp = std::getenv("TEMP");
+						if (temp.empty()) temp = std::getenv("TMP");
+						if (temp.empty()) temp = universalis::os::fs::home_app_local(PSYCLE__NAME).string();
+						tempfile = boost::filesystem::path(temp) / PSYCLE__NAME ".ini";
+						opened = store->CreateLocation(tempfile.string());
 						cachedir = boost::filesystem::path(appPath());
 						break;
 					case STORE_USER_DATA: 
@@ -1925,6 +1933,14 @@ namespace psycle { namespace host {
 						opened = false;
 					}
 					store->CloseLocation();
+					if (store_place_ == STORE_EXE_DIR) {
+						// Writing the .ini file in a temporary dir and then to the destination dir because the current implementation
+						// of WinIniFile uses Microsoft WritePrivateProfile and that method (re)writes the file in each call.
+						// Doing so in a temp file can increase the speed if writing into an USB pen drive.
+						boost::filesystem::copy_file(tempfile, boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini", 
+							boost::filesystem::copy_option::overwrite_if_exists);
+						boost::filesystem::remove(tempfile);
+					}
 				}
 				delete store;
 				return opened;

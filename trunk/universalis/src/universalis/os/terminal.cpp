@@ -105,6 +105,7 @@ terminal::terminal()
 							s << "could not allocate a standard output file descriptor at the runtime layer: " << stdlib::exceptions::desc();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					} else {
+						//TODO: where is this handle supposed to be closed?
 						const FILE * const file(::_fdopen(file_descriptor, "w"));
 						if(!file) {
 								std::ostringstream s;
@@ -132,6 +133,7 @@ terminal::terminal()
 							s << "could not allocate a standard error file descriptor at the runtime layer: " << stdlib::exceptions::desc();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
+					//TODO: where is this handle supposed to be closed?
 					const FILE * const file(::_fdopen(file_descriptor, "w"));
 					if(!file) {
 							std::ostringstream s;
@@ -158,6 +160,7 @@ terminal::terminal()
 							s << "could not allocate a standard input file descriptor at the runtime layer: " << stdlib::exceptions::desc();
 							throw exceptions::runtime_error(s.str(), UNIVERSALIS__COMPILER__LOCATION);
 					}
+					//TODO: where is this handle supposed to be closed?
 					const FILE * const file(::_fdopen(file_descriptor, "r"));
 					if(!file) {
 							std::ostringstream s;

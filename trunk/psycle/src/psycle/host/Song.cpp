@@ -1175,7 +1175,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			AppleAIFF file;
 			file.Open(sFileName);
-			if (!file.isValidFile()) { return 0; }
+			if (!file.isValidFile()) { file.Close(); return 0; }
 			boost::filesystem::path path(sFileName);
 			name = path.filename().string();
 			if (name.length() > 32) {
@@ -1222,7 +1222,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			AmigaSvx file;
 			file.Open(sFileName);
-			if (!file.isValidFile()) { return 0; }
+			if (!file.isValidFile()) { file.Close(); return 0; }
 			std::string name = file.GetName();
 			if (name.empty()) {
 				boost::filesystem::path path(sFileName);
@@ -1329,7 +1329,7 @@ namespace psycle
 #if !defined WINAMP_PLUGIN
 			RiffWave file;
 			file.Open(sFileName);
-			if (!file.isValidFile()) { return 0; }
+			if (!file.isValidFile()) { file.Close(); return 0; }
 
 			// Initializes the layer.
 			boost::filesystem::path path(sFileName);

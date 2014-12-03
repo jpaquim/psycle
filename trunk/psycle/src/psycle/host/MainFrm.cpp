@@ -661,7 +661,7 @@ namespace psycle { namespace host {
 							else return;
 						}
 						m_wndView.XMSamplerMachineDialog = new XMSamplerUI(ma->GetEditName(),AfxGetMainWnd());
-						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma, &m_wndView.XMSamplerMachineDialog);
+						m_wndView.XMSamplerMachineDialog->Init((XMSampler*)ma, _pSong->_pMachine, &m_wndView.XMSamplerMachineDialog);
 						m_wndView.XMSamplerMachineDialog->Create(this);
 						CenterWindowOnPoint(m_wndView.XMSamplerMachineDialog, point);
 						}

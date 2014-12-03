@@ -31,8 +31,7 @@ namespace psycle { namespace host {
 		BOOL CSaveWavDlg::savetracks = false;
 		BOOL CSaveWavDlg::savegens = false;
 
-		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent),
-			_event(FALSE,TRUE)
+		CSaveWavDlg::CSaveWavDlg(CChildView* pChildView, CSelection* pBlockSel, CWnd* pParent /* = 0 */) : CDialog(CSaveWavDlg::IDD, pParent)
 		{
 			m_recmode = 0;		
 			m_outputtype = 0;
@@ -90,6 +89,8 @@ namespace psycle { namespace host {
 			ON_BN_CLICKED(IDC_OUTPUTFILE, OnOutputfile)
 			ON_BN_CLICKED(IDC_OUTPUTCLIPBOARD, OnOutputclipboard)
 			ON_BN_CLICKED(IDC_OUTPUTSAMPLE, OnOutputsample)
+			ON_MESSAGE_VOID(SAVEWAV_RECORDEND, SaveEnd)
+
 			//}}AFX_MSG_MAP			
 			
 		END_MESSAGE_MAP()
@@ -708,9 +709,8 @@ namespace psycle { namespace host {
 			}
 			theplayer.Stop();
 			theplayer.StopRecording();
-			dlg.SaveEnd();
 			dlg.threadopen--;
-			dlg._event.SetEvent();
+			dlg.PostMessage(SAVEWAV_RECORDEND);
 			ExitThread(0);
 			//return 0;
 		}

@@ -1,12 +1,11 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include "XMSampler.hpp"
 
 namespace psycle { namespace host {
 
 // Cuadro de diálogo de XMSamplerMixerPage
-
-class XMSampler;
 
 class XMSamplerMixerPage : public CPropertyPage
 {
@@ -28,6 +27,16 @@ public:
 	afx_msg BOOL OnSetActive(void);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+	afx_msg void OnSelEndOkFilter1();
+	afx_msg void OnSelEndOkFilter2();
+	afx_msg void OnSelEndOkFilter3();
+	afx_msg void OnSelEndOkFilter4();
+	afx_msg void OnSelEndOkFilter5();
+	afx_msg void OnSelEndOkFilter6();
+	afx_msg void OnSelEndOkFilter7();
+	afx_msg void OnSelEndOkFilter8();
+	afx_msg void CloseupFilter();
+	afx_msg void DropDownFilter();
 	afx_msg void OnBnClickedChSurr1();
 	afx_msg void OnBnClickedChSurr2();
 	afx_msg void OnBnClickedChSurr3();
@@ -51,11 +60,14 @@ private:
 	void SliderRessonance(CSliderCtrl* slid, int offset);
 	void ClickSurround(int offset);
 	void ClickMute(int offset);
+	void SelEndOkFilter(int offset);
+	XMSampler::Channel& GetChannel(int channel);
 
 	static const int dlgName[8];
 	static const int dlgVol[8];
 	static const int dlgSurr[8];
 	static const int dlgPan[8];
+	static const int dlgFil[8];
 	static const int dlgRes[8];
 	static const int dlgCut[8];
 	static const int dlgMute[8];
@@ -71,20 +83,24 @@ private:
 	CStatic	m_voicesPl;
 	CButton m_bShowChan;
 	CButton m_bShowPlay;
+	CButton m_bShowPlayAll;
 
+	Machine** arrayMacs;
 	XMSampler *sampler;
 	// Indicates the index of the first channel shown (controlled by IDC_SL_CHANNELS)
 	int m_ChannelOffset;
 	bool m_UpdatingGraphics;
+	bool m_comboOpen;
 public:
-	// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS, IDC_LEFTVU and IDC_RIGHTVU
+	// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS
 	void UpdateAllChannels(void);
 	// Refreshes the values of the controls of a specific channel.
 	void UpdateChannel(int index);
-	// Refreshes the values of the controls of the master channel.
+	// Refreshes the values of the controls of the master channel, including vu meter.
 	void UpdateMaster(void);
 
 	void pMachine(XMSampler* mac) { sampler = mac; }
+	void pArrayMacs(Machine* macs[]) { arrayMacs = macs; }
 private:
 };
 

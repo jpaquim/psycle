@@ -9,6 +9,7 @@ namespace psycle { namespace host {
 /////////////////////////////////////////////////////////////////////////////
 // XMSamplerUI dialog
 class XMSampler;
+class Machine;
 
 class XMSamplerUI : public CPropertySheet
 {
@@ -30,7 +31,7 @@ class XMSamplerUI : public CPropertySheet
 
 	public:
 		virtual void PostNcDestroy();
-		void Init(XMSampler* pMachine,XMSamplerUI** windowVar);
+		void Init(XMSampler* pMachine,Machine** arraymacs, XMSamplerUI** windowVar);
 		void UpdateUI(void);
 		XMSampler* GetMachine(){ return _pMachine; }
 		BOOL PreTranslateChildMessage(MSG* pMsg, HWND focusWin);

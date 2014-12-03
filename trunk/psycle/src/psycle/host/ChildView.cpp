@@ -2034,8 +2034,9 @@ namespace psycle { namespace host {
 			_pSong.New();
 			_pSong._pMachine[MASTER_INDEX]->_x = (CW - PsycleGlobal::conf().macView().MachineCoords.sMaster.width) / 2;
 			_pSong._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
-			if(!file->Load(_pSong,progress) || !file->Close())
+			if(!file->Load(_pSong,progress))
 			{
+				file->Close();
 				progress.SendMessage(WM_CLOSE);
 				std::ostringstream s;
 				s << "Error reading from file '" << file->szName << "'" << std::endl;
@@ -2045,6 +2046,7 @@ namespace psycle { namespace host {
 				_pSong._pMachine[MASTER_INDEX]->_y = (CH - PsycleGlobal::conf().macView().MachineCoords.sMaster.height) / 2;
 			}
 			else {
+				file->Close();
 				progress.SendMessage(WM_CLOSE);
 				AppendToRecent(fName);
 				std::string::size_type index = fName.rfind('\\');

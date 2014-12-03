@@ -131,7 +131,7 @@ namespace psycle { namespace helpers {
 		ds64_pos = 0; pcmdata_pos = 0; numsamples = 0;
 	}
 	void RiffWave::Close() { 
-		if (isWriteMode()) {
+		if (isWriteMode() && isValid) {
 			std::streamsize size = GetPos() - static_cast<std::streampos>(RiffChunkHeader::SIZEOF);
 			UpdateFormSize(headerPosition,size - headerPosition);
 			UpdateFormSize(0,size);

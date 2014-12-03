@@ -11,6 +11,10 @@ namespace psycle { namespace host {
 
 // Cuadro de diálogo de XMSamplerMixerPage
 
+const int XMSamplerMixerPage::dlgFil[8] = {
+	IDC_FILTERTYPE1,IDC_FILTERTYPE2,IDC_FILTERTYPE3,IDC_FILTERTYPE4,
+	IDC_FILTERTYPE5,IDC_FILTERTYPE6,IDC_FILTERTYPE7,IDC_FILTERTYPE8
+};
 const int XMSamplerMixerPage::dlgCut[8] = {
 	IDC_SL_CUTOFF1,IDC_SL_CUTOFF2,IDC_SL_CUTOFF3,IDC_SL_CUTOFF4,
 	IDC_SL_CUTOFF5,IDC_SL_CUTOFF6,IDC_SL_CUTOFF7,IDC_SL_CUTOFF8
@@ -51,6 +55,7 @@ XMSamplerMixerPage::XMSamplerMixerPage()
 	: CPropertyPage(XMSamplerMixerPage::IDD)
 	, m_ChannelOffset(0)
 	, m_UpdatingGraphics(true)
+	, m_comboOpen(false)
 {
 }
 
@@ -67,12 +72,37 @@ void XMSamplerMixerPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_VOICESPLAYING, m_voicesPl);
 	DDX_Control(pDX, IDC_R_SHOWCHAN, m_bShowChan);
 	DDX_Control(pDX, IDC_R_SHOWVOICE, m_bShowPlay);
+	DDX_Control(pDX, IDC_R_SHOWPLAYALL, m_bShowPlayAll);
 }
 
 
 BEGIN_MESSAGE_MAP(XMSamplerMixerPage, CPropertyPage)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_CBN_SELENDOK(IDC_FILTERTYPE1,OnSelEndOkFilter1)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE2,OnSelEndOkFilter2)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE3,OnSelEndOkFilter3)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE4,OnSelEndOkFilter4)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE5,OnSelEndOkFilter5)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE6,OnSelEndOkFilter6)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE7,OnSelEndOkFilter7)
+	ON_CBN_SELENDOK(IDC_FILTERTYPE8,OnSelEndOkFilter8)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE1,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE2,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE3,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE4,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE5,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE6,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE7,CloseupFilter)
+	ON_CBN_CLOSEUP(IDC_FILTERTYPE8,CloseupFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE1,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE2,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE3,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE4,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE5,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE6,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE7,DropDownFilter)
+	ON_CBN_DROPDOWN(IDC_FILTERTYPE8,DropDownFilter)
 	ON_BN_CLICKED(IDC_CH_SURR1, OnBnClickedChSurr1)
 	ON_BN_CLICKED(IDC_CH_SURR2, OnBnClickedChSurr2)
 	ON_BN_CLICKED(IDC_CH_SURR3, OnBnClickedChSurr3)
@@ -111,15 +141,31 @@ BOOL XMSamplerMixerPage::OnSetActive()
 		((CSliderCtrl*)GetDlgItem(dlgPan[i]))->SetRangeMax(panningRange);
 		((CSliderCtrl*)GetDlgItem(dlgRes[i]))->SetRangeMax(resRange);
 		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(cutoffRange);
+
+		CComboBox* filter = ((CComboBox*)GetDlgItem(dlgFil[i]));
+		filter->AddString("LP 2P(a)");
+		filter->AddString("HP 2P(a)");
+		filter->AddString("BP 2P(a)");
+		filter->AddString("NB 2P(a)");
+		filter->AddString("None");
+		filter->AddString("LP IT");
+		filter->AddString("LP MPT");
+		filter->AddString("HP MPT");
+		filter->AddString("LP 2P(b)");
+		filter->AddString("HP 2P(b)");
+		filter->AddString("BP 2P(b)");
+		filter->AddString("NB 2P(b)");
+
 		UpdateChannel(i);
 	}
 	m_slMaster.SetRangeMax(128);
 	m_vu.SetRange(0,97);
 	UpdateMaster();
+	m_UpdatingGraphics=false;
 	return CPropertyPage::OnSetActive();
 }
 
-// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS, IDC_LEFTVU
+// Refreshes the values of all the controls of the dialog, except IDC_SL_CHANNELS
 void XMSamplerMixerPage::UpdateAllChannels(void)
 {
 	m_UpdatingGraphics=true;
@@ -133,7 +179,7 @@ void XMSamplerMixerPage::UpdateAllChannels(void)
 // Refreshes the values of the controls of a specific channel.
 void XMSamplerMixerPage::UpdateChannel(int index)
 {
-	XMSampler::Channel &rChan = sampler->rChannel(index+m_ChannelOffset);
+	XMSampler::Channel &rChan = GetChannel(index);
 	XMSampler::Voice *voice = rChan.ForegroundVoice();
 	char chname[32];
 	CStatic* name = (CStatic*)GetDlgItem(dlgName[index]);
@@ -151,13 +197,16 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 		sld->SetPos(defpos);
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
 		surr->SetCheck(rChan.DefaultIsSurround());
-
+		if (!m_comboOpen) {
+			CComboBox* filter = (CComboBox*)GetDlgItem(dlgFil[index]);
+			filter->SetCurSel(rChan.DefaultFilterType());
+		}
 		sld = (CSliderCtrl*)GetDlgItem(dlgRes[index]);
 		sld->SetPos(rChan.DefaultRessonance());
 		sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
 		sld->SetPos(rChan.DefaultCutoff());
 	}
-	else 
+	else
 	{
 		CSliderCtrl* sld = (CSliderCtrl*)GetDlgItem(dlgVol[index]);
 		int defpos;
@@ -173,6 +222,10 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
 			sld->SetPos(rChan.Cutoff());
 			surround = rChan.IsSurround();
+			if (!m_comboOpen) {
+				CComboBox* filter = (CComboBox*)GetDlgItem(dlgFil[index]);
+				filter->SetCurSel(rChan.DefaultFilterType());
+			}
 		} else {
 			std::string tmpstr = voice->rInstrument().Name();
 			sprintf(chname,"%02X:%s",voice->InstrumentNum(),tmpstr.c_str());
@@ -184,6 +237,10 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 			sld = (CSliderCtrl*)GetDlgItem(dlgCut[index]);
 			sld->SetPos(voice->ActiveCutoff()); 
 			surround =  voice->IsSurround();
+			if (!m_comboOpen) {
+				CComboBox* filter = (CComboBox*)GetDlgItem(dlgFil[index]);
+				filter->SetCurSel(voice->FilterType());
+			}
 		}
 
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[index]);
@@ -201,19 +258,34 @@ void XMSamplerMixerPage::UpdateChannel(int index)
 	}
 }
 
-// Refreshes the values of the controls of the master channel.
+// Refreshes the values of the controls of the master channel, including vu meter.
 void XMSamplerMixerPage::UpdateMaster(void)
 {
 	char chvoices[4];
 	m_slMaster.SetPos(128-sampler->GlobalVolume());
-	m_vu.SetPos(sampler->_volumeDisplay);
-	sprintf(chvoices,"%d",sampler->GetPlayingVoices());
+	if (m_bShowPlayAll.GetCheck() > 0) 
+	{
+		int cont=0;
+		int vol=0;
+		for(int i=0; i<MAX_BUSES;i++) {
+			if (arrayMacs[i] && arrayMacs[i]->_type == MACH_XMSAMPLER) {
+				cont += static_cast<XMSampler*>(arrayMacs[i])->GetPlayingVoices();
+				vol = std::max(vol,static_cast<XMSampler*>(arrayMacs[i])->_volumeDisplay);
+			}
+		}
+		sprintf(chvoices,"%d",cont);
+		m_vu.SetPos(vol);
+	}
+	else {
+		sprintf(chvoices,"%d",sampler->GetPlayingVoices());
+		m_vu.SetPos(sampler->_volumeDisplay);
+	}
 	m_voicesPl.SetWindowText(chvoices);
 }
 
 void XMSamplerMixerPage::SliderCutoff(CSliderCtrl* slid, int offset)
 {
-	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	XMSampler::Channel &rChan = GetChannel(offset);
 	if (m_bShowChan.GetCheck())
 	{
 		rChan.DefaultCutoff(slid->GetPos());
@@ -222,7 +294,7 @@ void XMSamplerMixerPage::SliderCutoff(CSliderCtrl* slid, int offset)
 }
 void XMSamplerMixerPage::SliderRessonance(CSliderCtrl* slid, int offset)
 {
-	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	XMSampler::Channel &rChan = GetChannel(offset);
 	if (m_bShowChan.GetCheck())
 	{
 		rChan.DefaultRessonance(slid->GetPos());
@@ -231,7 +303,7 @@ void XMSamplerMixerPage::SliderRessonance(CSliderCtrl* slid, int offset)
 }
 void XMSamplerMixerPage::SliderPanning(CSliderCtrl* slid, int offset)
 {
-	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	XMSampler::Channel &rChan = GetChannel(offset);
 	if (m_bShowChan.GetCheck())
 	{
 		rChan.DefaultPanFactorFloat(slid->GetPos()/(float)panningRange);
@@ -241,6 +313,38 @@ void XMSamplerMixerPage::SliderPanning(CSliderCtrl* slid, int offset)
 	}
 }
 
+void XMSamplerMixerPage::CloseupFilter()
+{
+	m_comboOpen = false;
+}
+void XMSamplerMixerPage::DropDownFilter()
+{
+	m_comboOpen = true;
+}
+
+void XMSamplerMixerPage::OnSelEndOkFilter1() { SelEndOkFilter(0); }
+void XMSamplerMixerPage::OnSelEndOkFilter2() { SelEndOkFilter(1); }
+void XMSamplerMixerPage::OnSelEndOkFilter3() { SelEndOkFilter(2); }
+void XMSamplerMixerPage::OnSelEndOkFilter4() { SelEndOkFilter(3); }
+void XMSamplerMixerPage::OnSelEndOkFilter5() { SelEndOkFilter(4); }
+void XMSamplerMixerPage::OnSelEndOkFilter6() { SelEndOkFilter(5); }
+void XMSamplerMixerPage::OnSelEndOkFilter7() { SelEndOkFilter(6); }
+void XMSamplerMixerPage::OnSelEndOkFilter8() { SelEndOkFilter(7); }
+void XMSamplerMixerPage::SelEndOkFilter(int offset)
+{
+	if ( !m_UpdatingGraphics)
+	{
+		CComboBox* filter = (CComboBox*)GetDlgItem(dlgFil[offset]);
+		XMSampler::Channel &rChan = GetChannel(offset);
+		if (m_bShowChan.GetCheck())
+		{
+			rChan.DefaultFilterType((dsp::FilterType)filter->GetCurSel());
+		}
+		else if (rChan.ForegroundVoice()){
+			rChan.ForegroundVoice()->FilterType((dsp::FilterType)filter->GetCurSel());
+		}
+	}
+}
 void XMSamplerMixerPage::OnBnClickedChSurr1() { ClickSurround(0); }
 void XMSamplerMixerPage::OnBnClickedChSurr2() { ClickSurround(1); }
 void XMSamplerMixerPage::OnBnClickedChSurr3() { ClickSurround(2); }
@@ -254,7 +358,7 @@ void XMSamplerMixerPage::ClickSurround(int offset)
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* surr = (CButton*)GetDlgItem(dlgSurr[offset]);
-		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+		XMSampler::Channel &rChan = GetChannel(offset);
 		if (m_bShowChan.GetCheck())
 		{
 			rChan.DefaultIsSurround(surr->GetCheck());
@@ -278,13 +382,13 @@ void XMSamplerMixerPage::ClickMute(int offset)
 	if ( !m_UpdatingGraphics)
 	{
 		CButton* mute = (CButton*)GetDlgItem(dlgMute[offset]);
-		XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+		XMSampler::Channel &rChan = GetChannel(offset);
 		rChan.DefaultIsMute(mute->GetCheck());
 	}
 }
 void XMSamplerMixerPage::SliderVolume(CSliderCtrl* slid, int offset)
 {
-	XMSampler::Channel &rChan = sampler->rChannel(offset+m_ChannelOffset);
+	XMSampler::Channel &rChan = GetChannel(offset);
 	if (m_bShowChan.GetCheck())
 	{
 		rChan.DefaultVolumeFloat((volumeRange-slid->GetPos())/(float)volumeRange);
@@ -351,6 +455,22 @@ void XMSamplerMixerPage::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollB
 		break;
 	}
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+XMSampler::Channel& XMSamplerMixerPage::GetChannel(int channel)
+{
+	if (m_bShowPlayAll.GetCheck() > 0) 
+	{
+		for(int i=0; i<MAX_BUSES;i++) {
+			if (arrayMacs[i] && arrayMacs[i]->_type == MACH_XMSAMPLER) {
+				XMSampler::Channel& chan = static_cast<XMSampler*>(arrayMacs[i])->rChannel(channel+m_ChannelOffset);
+				if (chan.ForegroundVoice() != NULL) {
+					return chan;
+				}
+			}
+		}
+	}
+	return sampler->rChannel(channel+m_ChannelOffset);
 }
 
 
