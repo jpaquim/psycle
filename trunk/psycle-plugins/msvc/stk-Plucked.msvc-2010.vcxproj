@@ -80,28 +80,24 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2008.vcxproj">
+    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
-      <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\ADSR.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\BiQuad.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Delay.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\DelayA.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\DelayL.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Envelope.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Noise.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\OnePole.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\OneZero.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Plucked.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Stk.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\ADSR.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\BiQuad.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Delay.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\DelayA.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\DelayL.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Envelope.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Noise.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\OnePole.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\OneZero.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Plucked.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Stk.cpp" />
     <ClCompile Include="..\src\psycle\plugins\stk\stk.plucked.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -80,19 +80,15 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2008.vcxproj">
+    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
-      <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Shakers.cpp" />
-    <ClCompile Include="..\..\external-packages\stk-4.4.2\stk\Stk.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Shakers.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Stk.cpp" />
     <ClCompile Include="..\src\psycle\plugins\stk\stk.shakers.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

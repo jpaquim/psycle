@@ -14,8 +14,11 @@
 
 using namespace psycle::plugin_interface;
 
-// Stk recently got a namespace. We (re)declare it for backward compatibility with older stk versions.
-namespace stk {} using namespace stk;
+using namespace stk;
+
+//In shakers 4.5.0, notes where changed
+const int shakers_old_to_new[] = {0,1,2,19,21,5,3,4,8,9,20,6,7,12,13,14,15,16,17,18,10,11,22};
+
 
 CMachineParameter const paraShakeEnergy = {"Shake Energy", "Shake Energy", 0, 128, MPF_STATE, 64};
 CMachineParameter const paraDecay = {"Decay", "Decay", 0, 128, MPF_STATE, 64};
@@ -46,7 +49,7 @@ CMachineInfo const MacInfo (
 	"stk Shakers",
 #endif
 	"Shakers",
-	"Sartorius, bohan and STK 4.4.0 developers",
+	"Sartorius, bohan and STK 4.5.0 developers",
 	"Help",
 	1
 );
@@ -217,11 +220,13 @@ void mi::SeqTick(int channel, int note, int ins, int cmd, int val)
 	// Empty Note Row				== 255
 	// Less than note off value??? == NoteON!
 	
-	if((note>=48) && (note<=71))
+	if((note>=48) && (note< 71))
 	{
-	// 
-		float freq= 220.f*pow(2.0f, ((float)note-41)/12.0f);
-		track[channel].noteOn(freq,32767);
+		// change the instrument index from old indexes to new indexes
+		int notechange = shakers_old_to_new[note-48];
+		//Convert it to frequency, in a way that shakers understand.
+		float freq= 220.f*pow(2.f, ((float)notechange+7.f)/12.f);
+		track[channel].noteOn(freq,10.f);
 		noteonoff[channel]=true;
 	}
 
