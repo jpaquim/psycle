@@ -454,10 +454,10 @@
     <ProjectReference Include="..\build-systems\msvc\projects\direct-sound\direct-sound.msvc-2010.vcxproj">
       <Project>{69c0acbe-ea31-4f5e-9b41-b2dd73c29df1}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build-systems\msvc\projects\lualib\lualib.vcxproj">
+    <ProjectReference Include="..\build-systems\msvc\projects\lualib\lualib.msvc-2010.vcxproj">
       <Project>{fee2d9f8-bad2-d34c-95b9-fb03657990dd}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\build-systems\msvc\projects\luasocket\luasocket.vcxproj">
+    <ProjectReference Include="..\build-systems\msvc\projects\luasocket\luasocket.msvc-2010.vcxproj">
       <Project>{f99ff9ed-d9ea-4ee7-a025-f0a0454c2f40}</Project>
     </ProjectReference>
     <ProjectReference Include="..\psycle-helpers\psycle-helpers.msvc-2010.vcxproj">
