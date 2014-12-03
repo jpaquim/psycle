@@ -59,6 +59,8 @@ namespace host {
 			bool positioning;
 			bool allowmove;
 			int prevval;
+			int painttimer;
+			std::vector<int> blink;
 
 		};
 

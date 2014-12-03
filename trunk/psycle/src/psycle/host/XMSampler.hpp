@@ -263,7 +263,12 @@ XMSampler::Channel::PerformFX().
 			else if ( value < Length()) m_Position.HighPart = value;
 			else m_Position.HighPart = Length()-1;
 		}
-		
+		inline double Position2() const { return m_Position.QuadPart / 4294967296.0;}
+		virtual void Position2(double value){
+			m_Position.QuadPart = static_cast<uint64_t>(value * 4294967296.0);
+			//m_Position.HighPart = value; //;static_cast<uint64_t>(value) >> 32;
+			//m_Position.LowPart = static_cast<uint64_t>(value)&0xFFFFFFFF;
+		}
 		// Current sample Speed
 		inline int64_t Speed() const {return m_Speed;}
 		virtual void Speed(const helpers::dsp::resampler & resampler, const double value){

@@ -511,6 +511,9 @@
     <ClInclude Include="src\psycle\host\ladspamachine.h">
       <Filter>psycle\engine\machine\ladspa</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaHelper.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">

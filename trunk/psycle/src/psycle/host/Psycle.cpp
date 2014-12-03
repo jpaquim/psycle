@@ -32,23 +32,27 @@
 #endif
 
 namespace psycle { namespace host {
+	
 
 		BEGIN_MESSAGE_MAP(CPsycleApp, CWinAppEx)
 			ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
 		END_MESSAGE_MAP()
 
 		CPsycleApp theApp; /// The one and only CPsycleApp object
-
+		
 		CPsycleApp::CPsycleApp() :m_uUserMessage(0)
-		{
+		{			
+		   //	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	
+          //_CrtSetBreakAlloc( 817 );
+			//_CrtDumpMemoryLeaks( );
 		}
 
 		CPsycleApp::~CPsycleApp()
 		{
 		}
 
-		BOOL CPsycleApp::InitInstance()
-		{
+		BOOL CPsycleApp::InitInstance()			
+		{		
 			// InitCommonControlsEx() is required on Windows XP if an application
 			// manifest specifies use of ComCtl32.dll version 6 or later to enable
 			// visual styles.  Otherwise, any window creation will fail.

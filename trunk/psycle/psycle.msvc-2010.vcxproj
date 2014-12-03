@@ -156,6 +156,7 @@
     <ClInclude Include="src\psycle\host\ladspa.h" />
     <ClInclude Include="src\psycle\host\ladspahost.hpp" />
     <ClInclude Include="src\psycle\host\ladspamachine.h" />
+    <ClInclude Include="src\psycle\host\LuaHelper.hpp" />
     <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
     <ClInclude Include="src\psycle\host\version.hpp" />
     <ClInclude Include="src\psycle\host\ASIOInterface.hpp" />

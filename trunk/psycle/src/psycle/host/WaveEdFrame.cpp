@@ -170,8 +170,8 @@ namespace psycle { namespace host {
 
 		void CWaveEdFrame::GenerateView() 
 		{	
-			if (_pSong->samples.size() == 0) {
-				_pSong->samples.SetSample(*new XMInstrument::WaveData<>(),0);
+			if (_pSong->samples.size() == 0) {				
+				_pSong->samples.SetSample(*new XMInstrument::WaveData<>(), 0);				
 			}
 			FillWaveCombobox();
 			this->wavview.GenerateAndShow(); 

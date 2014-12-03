@@ -40,7 +40,7 @@ namespace psycle { namespace host {
 			  if (full) {
 			    proxy_.call_init();
 			  }
-			} catch(std::exception &e) {} //do nothing.
+			} catch(std::exception &e) { e; } //do nothing.
 		}
 
 		LuaPlugin::~LuaPlugin() {
@@ -50,7 +50,7 @@ namespace psycle { namespace host {
 		void LuaPlugin::Free() {
 		  try {
 			proxy_.free_state();
-		  } catch(std::exception &e) {} //do nothing.
+		  } catch(std::exception &e) { e; } //do nothing.
 		}
 
 		void LuaPlugin::OnReload()
@@ -109,13 +109,8 @@ namespace psycle { namespace host {
 							}
 							catch(const std::exception & e)
 							{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+								e;
+								return 0;
 							}
 							ns = 0;
 						}
@@ -132,13 +127,8 @@ namespace psycle { namespace host {
 								}
 								catch(const std::exception &e)
 								{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+									e;
+									return 0;
 								}
 								us += nextevent;
 							}
@@ -170,13 +160,8 @@ namespace psycle { namespace host {
 											}
 											catch(const std::exception &e)
 											{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+												e;
+												return 0;
 											}
 										}
 									}
@@ -197,13 +182,9 @@ namespace psycle { namespace host {
 										}
 										catch(const std::exception &e)
 										{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+											e;
+											return 0;
+
 										}
 										TriggerDelay[i]._cmd = 0;
 									}
@@ -223,13 +204,10 @@ namespace psycle { namespace host {
 										}
 										catch(const std::exception &e)
 										{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+
+										  e;
+										  return 0;
+
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 									}
@@ -249,13 +227,10 @@ namespace psycle { namespace host {
 										}
 										catch(const std::exception &e)
 										{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+
+											e;
+											return 0;
+
 										}
 										TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
 										int parameter = TriggerDelay[i]._parameter&0x0f;
@@ -291,13 +266,10 @@ namespace psycle { namespace host {
 											}
 											catch(const std::exception &e)
 											{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+
+												e;
+												return 0;
+
 											}
 											ArpeggioCount[i]++;
 											break;
@@ -309,13 +281,10 @@ namespace psycle { namespace host {
 											}
 											catch(const std::exception &e)
 											{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+
+												e;
+												return 0;
+
 											}
 											ArpeggioCount[i]++;
 											break;
@@ -327,13 +296,8 @@ namespace psycle { namespace host {
 											}
 											catch(const std::exception &e)
 											{
-#ifndef NDEBUG 
-					throw e;
-					return 0;
-#else
-					e;
-					return 0;
-#endif
+												e;
+												return 0;
 											}
 											ArpeggioCount[i]=0;
 											break;
@@ -396,20 +360,14 @@ namespace psycle { namespace host {
 					pFile->Read(pData, size2); // Number of parameters
 					try
 					{
-						// proxy().PutData(pData, size2); // Internal load
+						proxy_.call_putdata(pData, size2);
 						delete[] pData;
 					}
 					catch(const std::exception &e)
 					{
-#ifndef NDEBUG 
-						delete[] pData;
-						throw e;
-						return false;
-#else
 						e;
 						delete[] pData;
 						return false;
-#endif
 					}
 				}
 			}
@@ -422,15 +380,11 @@ namespace psycle { namespace host {
 			uint32_t size2(0);
 			try
 			{
-				// size2 = proxy().GetDataSize();
+				size2 = proxy_.call_data_size();
 			}
 			catch(const std::exception &e)
 			{
-#ifndef NDEBUG 
-				throw e;
-#else
 				e;
-#endif
 				// data won't be saved
 			}
 			uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
@@ -459,17 +413,14 @@ namespace psycle { namespace host {
 				byte * pData = new byte[size2];
 				try
 				{
-					// proxy().GetData(pData); // Internal save
+					proxy_.call_data(pData); // Internal save
 				}
 				catch(const std::exception &e)
 				{
 					e;
 					// this sucks because we already wrote the size,
 					// so now we have to write the data, even if they are corrupted.
-#ifndef NDEBUG 
 					throw e;
-#endif
-
 				}
 				pFile->Write(pData, size2); // Number of parameters
 				zapArray(pData);
@@ -486,7 +437,7 @@ namespace psycle { namespace host {
 			  int quantization = (maxval-minval);
 			  proxy_.call_parameter(numparam,double(value)/double(quantization));
 			  return true;
-			} catch(std::exception &e) {} //do nothing.
+			} catch(std::exception &e) { e; } //do nothing.
 			return false;
 		}
 
@@ -499,7 +450,7 @@ namespace psycle { namespace host {
 			  if( numparam < GetNumParams() ) {
 			     proxy_.get_parameter_range(numparam, minval, maxval);
 			  }
-			}catch(std::exception &e) {}
+			}catch(std::exception &e) { e; }
 		}
 
 		int LuaPlugin::GetParamType(int numparam) { 
@@ -511,7 +462,7 @@ namespace psycle { namespace host {
 			  if( numparam < GetNumParams() ) {
 			     mpf = proxy_.get_parameter_type(numparam);
 			  }
-			}catch(std::exception &e) {}
+			}catch(std::exception &e) { e; }
 			return mpf;
 		}
 
@@ -525,7 +476,7 @@ namespace psycle { namespace host {
 				std::string name = proxy_.get_parameter_name(numparam);
 				std::strcpy(parval, name.c_str());
 			  } else std::strcpy(parval, "Out of Range");
-			}catch(std::exception &e) { std::strcpy(parval, ""); }
+			}catch(std::exception &e) { e; std::strcpy(parval, ""); }
 		}
 
 		int LuaPlugin::GetParamValue(int numparam){
@@ -538,7 +489,7 @@ namespace psycle { namespace host {
 				proxy_.get_parameter_range(numparam, minval, maxval);
 			    int quantization = (maxval-minval);
 				return proxy_.get_parameter_value(numparam) * quantization;
-  			  } catch(std::exception &e) {} //do nothing.
+  			  } catch(std::exception &e) { e; } //do nothing.
 			} else {
 				// out of range
 			}
@@ -556,9 +507,14 @@ namespace psycle { namespace host {
 					try {
 					  std::string par_display = proxy_.get_parameter_display(numparam);
 					  std::string par_label = proxy_.get_parameter_label(numparam);
-					  std::sprintf(psTxt, "%s(%s)", par_display.c_str(), par_label.c_str());
+					  if (par_label == "")
+					    std::sprintf(psTxt, "%s", par_display.c_str());
+					  else {
+					    std::sprintf(psTxt, "%s(%s)", par_display.c_str(), par_label.c_str());
+					  }
 					  return true;
 					} catch(std::exception &e) {
+					  e;
                       std::string par_display("Out of range");
   				      std::sprintf(psTxt, "%s", par_display);
 					  return true;
@@ -579,13 +535,8 @@ namespace psycle { namespace host {
 					}					
 				}
 				catch(const std::exception &e) {
-#ifndef NDEBUG 
-					throw e;
-					return;
-#else
 					e;
 					return;
-#endif
 				}
 			}
 			else std::strcpy(parval,"Out of Range");
@@ -597,7 +548,7 @@ namespace psycle { namespace host {
 			}		
 			try {
 				return proxy_.call_help();
-			} catch(const std::exception &e) {}
+			} catch(const std::exception &e) { e; }
 			return "";
 		}
 
@@ -607,7 +558,7 @@ namespace psycle { namespace host {
 			}		
 			try {
 				proxy_.call_newline();
-			} catch(const std::exception &e) {}
+			} catch(const std::exception &e) { e; }
 		}
 
 		void LuaPlugin::Tick(int channel, PatternEntry * pData){
@@ -744,7 +695,7 @@ namespace psycle { namespace host {
 				  SendCommand(channel, pData->_inst, pData->_cmd, pData->_parameter);
 				}
 			  }
-			} catch(const std::exception &e) {}
+			} catch(const std::exception &e) { e; }
 		}
 
 		void LuaPlugin::Stop(){
@@ -759,7 +710,7 @@ namespace psycle { namespace host {
 			      trackNote[i].midichan = 0;
 			    }
 			  }
-			} catch(const std::exception &e) {}
+			} catch(const std::exception &e) { e; }
 		}
 	  
 		// additions if noteon mode is used

@@ -6,7 +6,9 @@
 #include "plugincatcher.hpp"
 #include "Song.hpp"
 #include <boost/filesystem.hpp>
+#include <boost/tokenizer.hpp>
 #include <lua.hpp>
+#include "LuaHelper.hpp"
 
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 extern "C" {
@@ -41,6 +43,8 @@ void LuaProxy::set_state(lua_State* state) {
   lua_pop(L, 1);
   luaL_requiref(L, "psycle.dsp.math", LuaDspMathHelper::open, 1);  
   lua_pop(L, 1);
+  luaL_requiref(L, "psycle.midi", LuaMidiHelper::open, 1);  
+  lua_pop(L, 1);
   LuaArrayBind::register_module(L);  
   luaL_requiref(L, "psycle.dsp.filter", LuaDspFilterBind::open, 1);
   lua_pop(L, 1);
@@ -48,6 +52,8 @@ void LuaProxy::set_state(lua_State* state) {
   luaL_requiref(L, "psycle.plotter", LuaPlotterBind::open, 1);
   lua_pop(L, 1);
 #endif //!defined WINAMP_PLUGIN
+  luaL_requiref(L, "psycle.menu", LuaMenuBind::open, 1);
+  lua_pop(L, 1);
   luaL_requiref(L, "psycle.delay", LuaDelayBind::open, 1);
   lua_pop(L, 1);
   luaL_requiref(L, "psycle.machine", LuaMachineBind::open, 1);
@@ -115,20 +121,45 @@ int LuaProxy::message(lua_State* L) {
 	return 0;
 }
 
-int LuaProxy::terminal_output(lua_State* L) {	
+int LuaProxy::terminal_output(lua_State* L) {
+	if (terminal == 0) {
+	  terminal = new universalis::os::terminal();
+	}
 	size_t len = 0;
+	int n = lua_gettop(L);  /* number of arguments */
 	const char* out = 0;
 	if (lua_isboolean(L, 1)) {
 		int v = lua_toboolean(L, 1);
 		if (v==1) out = "true"; else out = "false";
-	} else {
-	   out = luaL_checklstring(L, 1, &len);	
-	}
-	if (terminal == 0) {
-	  terminal = new universalis::os::terminal();
-	}
-    terminal->output(universalis::os::loggers::levels::trace, out);			
+	} else {	
+	  int i;
+	  lua_getglobal(L, "tostring");
+      for (i=1; i<=n; i++) {
+        const char *s;
+        size_t l;
+		lua_pushvalue(L, -1);  /* function to be called */
+		lua_pushvalue(L, i);   /* value to print */
+		lua_call(L, 1, 1);
+		s = lua_tolstring(L, -1, &l);  /* get result */
+		if (s == NULL)
+		  return luaL_error(L,
+			LUA_QL("tostring") " must return a string to " LUA_QL("print"));			
+		lua_pop(L, 1);  /* pop result */
+		terminal->output(universalis::os::loggers::levels::trace, s);			
+	  }  
+	}	    
 	return 0;
+}
+
+int LuaProxy::call_filedialog(lua_State* L) {  
+	//char szFilters[]= "Text Files (*.NC)|*.NC|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
+// Create an Open dialog; the default file name extension is ".my".
+  //CFileDialog* m_pFDlg = new CFileDialog(TRUE, "txt", "*.txt",
+    //  OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());   
+   //m_pFDlg->Create(40000,AfxGetMainWnd());
+   //m_pFDlg->ShowWindow(SW_SHOW);
+  
+  return 0;
 }
 
 int LuaProxy::set_machine(lua_State* L) {
@@ -151,6 +182,7 @@ void LuaProxy::export_c_funcs() {
   static const luaL_Reg methods[] = {
 	  {"output", terminal_output },
 	  {"setmachine", set_machine},
+	  {"filedialog", call_filedialog},
   	  { NULL, NULL }
   };  
   lua_newtable(L); 
@@ -163,17 +195,11 @@ void LuaProxy::export_c_funcs() {
   lua_setglobal(L, "psycle");
 }
 
-
 bool LuaProxy::get_param(lua_State* L, int index, const char* method) {
-  lua_getglobal(L, "psycle");
-  if (lua_isnil(L, -1)) {	 
-	 lua_pop(L, 1);
-	 throw psycle::host::exceptions::library_errors::loading_error("no host found");
-  }
-  lua_getfield(L, -1, "proxy");
-  if (lua_isnil(L, -1)) {	 
-	 lua_pop(L, 1);
-	 throw psycle::host::exceptions::library_errors::loading_error("no proxy found");
+  try {
+    LuaHelper::get_proxy(L);
+  } catch(std::exception &e) {	
+	throw psycle::host::exceptions::library_errors::loading_error(e.what());
   }
   lua_getfield(L, -1, "params");
   if (lua_isnil(L, -1)) {	 
@@ -195,15 +221,10 @@ bool LuaProxy::get_param(lua_State* L, int index, const char* method) {
 }
 
 void LuaProxy::get_method_strict(lua_State* L, const char* method) {
-  lua_getglobal(L, "psycle");
-  if (lua_isnil(L, -1)) {	 
-	 lua_pop(L, 1);
-	 throw psycle::host::exceptions::library_errors::loading_error("no host found");
-  }
-  lua_getfield(L, -1, "proxy");
-  if (lua_isnil(L, -1)) {	 
-	 lua_pop(L, 1);
-	 throw psycle::host::exceptions::library_errors::loading_error("no proxy found");
+  try {
+    LuaHelper::get_proxy(L);
+  } catch(std::exception &e) {	
+	throw psycle::host::exceptions::library_errors::loading_error(e.what());
   }
   lua_getfield(L, -1, method);
   if (lua_isnil(L, -1)) {	  
@@ -216,15 +237,10 @@ void LuaProxy::get_method_strict(lua_State* L, const char* method) {
 }
 
 bool LuaProxy::get_method_optional(lua_State* L, const char* method) {
-  lua_getglobal(L, "psycle");
-  if (lua_isnil(L, -1)) {	 
-	 lua_pop(L, 1);
-	 throw psycle::host::exceptions::library_errors::loading_error("no host found");
-  }
-  lua_getfield(L, -1, "proxy");
-  if (lua_isnil(L, -1)) {	 
-	 lua_pop(L, 1);
-	 throw psycle::host::exceptions::library_errors::loading_error("no proxy found");
+  try {
+    LuaHelper::get_proxy(L);
+  } catch(std::exception &e) {	
+	throw psycle::host::exceptions::library_errors::loading_error(e.what());
   }
   lua_getfield(L, -1, method);
   if (lua_isnil(L, -1)) {	  
@@ -371,7 +387,6 @@ void LuaProxy::call_command(int lastnote, int inst, int cmd, int val) {
   unlock();
 }
 
-
 void LuaProxy::call_noteon(int note, int lastnote, int inst, int cmd, int val) {
   lock();
   try {	
@@ -451,6 +466,84 @@ std::string LuaProxy::call_help() {
   return "no help found";
 }
 
+void LuaProxy::call_data(byte* data) {	
+	lock();
+	std::string str;
+	try {	
+    if (!get_method_optional(L, "data")) {
+		unlock();
+		str = "";
+		return;
+	}
+    int status = lua_pcall(L, 1, 1 ,0);
+    if (status) {
+      CString msg(lua_tostring(L, -1));
+	  unlock();
+	  throw std::runtime_error(msg.GetString());
+    }
+	if (!lua_isstring(L, -1)) {
+	   std::string s("data must return a string");	
+	   lua_pop(L, 1);
+	   unlock();
+       throw std::runtime_error(s);
+    }
+	str = GetString();	
+	std::copy(str.begin(), str.end(), data);
+	unlock();
+	return;
+  } CATCH_WRAP_AND_RETHROW(*plug_)  
+  unlock();
+  return;
+}
+
+uint32_t LuaProxy::call_data_size() {
+	lock();
+	std::string str;
+	try {	
+    if (!get_method_optional(L, "data")) {
+		unlock();
+		str = "";
+		return 0;
+	}
+    int status = lua_pcall(L, 1, 1 ,0);
+    if (status) {
+      CString msg(lua_tostring(L, -1));
+	  unlock();
+	  throw std::runtime_error(msg.GetString());
+    }
+	if (!lua_isstring(L, -1)) {
+	   std::string s("data must return a string");	
+	   lua_pop(L, 1);
+	   unlock();
+       throw std::runtime_error(s);
+    }
+	str = GetString();
+	unlock();
+	return str.size();
+  } CATCH_WRAP_AND_RETHROW(*plug_)  
+  unlock();
+  return 0;
+}
+
+void LuaProxy::call_putdata(byte* data, int size) {
+  lock();
+  try {	
+    if (!get_method_optional(L, "putdata")) {
+		unlock();
+		return;
+	}
+	std::string s(reinterpret_cast<char const*>(data), size);
+	lua_pushstring(L, s.c_str());
+    int status = lua_pcall(L, 2, 0 ,0);
+    if (status) {
+      CString msg(lua_tostring(L, -1));
+	  unlock();
+	  throw std::runtime_error(msg.GetString());
+    }
+  } CATCH_WRAP_AND_RETHROW(*plug_)
+  unlock();
+}
+
 void LuaProxy::call_work(int numSamples, int offset) {	
 	if (numSamples > 0) {
 	  lock();	  
@@ -519,6 +612,27 @@ void LuaProxy::call_sr_changed(int rate) {
   unlock();
 }
 
+void LuaProxy::call_aftertweaked(int numparameter) {
+ lock();
+  if (!get_param(L, numparameter, "afternotify")) {
+	  unlock();
+	  return;
+  }
+  int status = lua_pcall(L, 1, 0 ,0);   			
+  try {
+    if (status) {
+        std::string s(lua_tostring(L, -1));	
+		lua_pop(L,1);
+		unlock();
+		#if !defined WINAMP_PLUGIN
+		ReleaseCapture();
+		while (ShowCursor(TRUE) < 0);
+		#endif // #if !defined WINAMP_PLUGIN
+        throw std::runtime_error(s);
+    }
+  } CATCH_WRAP_AND_RETHROW(*plug_)
+  unlock();
+}
 
 // Parameter tweak range is [0..1]
 void LuaProxy::call_parameter(int numparameter, double val) {  
@@ -534,6 +648,10 @@ void LuaProxy::call_parameter(int numparameter, double val) {
         std::string s(lua_tostring(L, -1));	
 		lua_pop(L,1);
 		unlock();
+		#if !defined WINAMP_PLUGIN
+		ReleaseCapture();
+		while (ShowCursor(TRUE) < 0);
+		#endif // #if !defined WINAMP_PLUGIN
         throw std::runtime_error(s);
     }
   } CATCH_WRAP_AND_RETHROW(*plug_)
@@ -555,7 +673,7 @@ double LuaProxy::get_parameter_value(int numparam) {
        throw std::runtime_error(s);
     }
     if (!lua_isnumber(L, -1)) {
-	   std::string s("function parameter:getvalue must return a number");	
+	   std::string s("function parameter:val must return a number");	
 	   lua_pop(L, 1);
 	   unlock();
        throw std::runtime_error(s);
@@ -728,6 +846,95 @@ std::string LuaProxy::GetString() {
 	std::string name(lua_tostring(L, -1));
 	lua_pop(L, 1);  // pop returned value	
 	return name;
+}
+
+void LuaProxy::build_tree(menu& t) {	
+	luaL_checktype(L, -1, LUA_TTABLE);
+	// t:opairs()
+	lua_getfield(L, -1, "opairs");
+	lua_pushvalue(L, -2);
+	lua_call(L, 1, 2);
+	size_t len;
+	// iter, self (t), nil
+	for(lua_pushnil(L); LuaHelper::luaL_orderednext(L);)
+	{
+		std::string s = luaL_checklstring(L, -2, &len);
+		menu t1;
+		lua_getfield(L, -1, "__self");
+		menuitem* ptr = *(menuitem **)luaL_checkudata(L, -1, "psymenumeta");		
+		t1.object = ptr;
+		t1.object->id = s;		
+		lua_pop(L, 1);
+		lua_getfield(L, -1, "menus");
+		build_tree(t1);		
+        t.nodes.push_back(t1);
+        lua_pop(L, 1);
+		lua_pop(L, 1);
+	}
+	lua_pop(L, 2);
+}
+
+bool LuaProxy::get_menu_tbl() {
+  try {
+    LuaHelper::get_proxy(L);
+  } catch(std::exception &e) {	  
+	unlock();
+	throw psycle::host::exceptions::library_errors::loading_error(e.what());
+  }  
+  lua_getfield(L, -1, "__menus");
+  if (lua_isnil(L, -1)) {	 
+	 lua_pop(L, 1);
+	 unlock();
+	 return false;	 
+  }  
+  return true;
+}
+
+menu LuaProxy::get_menu_tree() {
+  lock(); 
+  menu t;
+  if (!get_menu_tbl()) return t;
+  build_tree(t);
+  lua_pop(L, 3);  
+  unlock();
+  return t;
+}
+
+void LuaProxy::call_menu(const std::string& id) {
+  lock();  
+  if (!get_menu_tbl()) return;
+  typedef boost::tokenizer<boost::char_separator<char> > 
+    tokenizer;
+  boost::char_separator<char> sep(".");
+  tokenizer tokens(id, sep);  
+  std::vector<std::string> fields;
+  for (tokenizer::iterator tok_iter = tokens.begin();
+       tok_iter != tokens.end(); ++tok_iter) {
+		   fields.push_back(*tok_iter);
+  }    
+  int n = 0;
+  for (std::vector<std::string>::iterator it = fields.begin();
+	     it!=fields.end(); ++it) {
+	std::string field = *it;
+	lua_getfield(L, -1, field.c_str());
+	++n;
+	bool is_last = (it != fields.end()) && (it + 1 == fields.end());
+	if (!is_last) {
+	  lua_getfield(L, -1, "menus");
+	  ++n;
+	}
+  }
+  lua_getfield(L, -1, "notify");
+  lua_pushvalue(L, -2); // self	
+  int status = lua_pcall(L, 1, 0, 0);
+  if (status) {
+     std::string s(lua_tostring(L, -1));	
+	 lua_pop(L, 1);
+	 unlock();
+     throw std::runtime_error(s);  
+  }  
+  lua_pop(L, 3+n);  
+  unlock();
 }
 
 // Host

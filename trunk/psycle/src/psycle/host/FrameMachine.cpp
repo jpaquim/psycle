@@ -63,6 +63,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
 			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
+			ON_COMMAND_RANGE(40000, 41000, OnDynamicMenuItems)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
 			ON_COMMAND(ID_PROGRAMS_RESETDEFAULT, OnParametersResetparameters)
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
@@ -108,13 +109,60 @@ namespace psycle { namespace host {
 				TRACE0("Failed to create view window\n");
 				return -1;
 			}
-			if ( _machine->_type == MACH_PLUGIN )
+			if (_machine->_type == MACH_PLUGIN)
 			{
 				((Plugin*)_machine)->GetCallback()->hWnd = m_hWnd;
 
 				GetMenu()->GetSubMenu(1)->ModifyMenu(5, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
 					((Plugin*)_machine)->GetInfo()->Command);
 			}
+
+			if (_machine->_type == MACH_LUA)
+			{								
+				struct func {
+				  func(CMenu* m, CFrameMachine* f) : i(0), start(true), menu(m), fm(f) {}
+				  CMenu* menu; int i; bool start; CFrameMachine* fm;
+				  void operator()(psycle::host::menu& t) { build_menu(t, ""); }
+				  void build_menu(psycle::host::menu& t, std::string id) {			  
+					CMenu* newmenu = 0;					
+					if (!start) {					  
+					  id += ((id!="") ? "." : "")+t.object->id;
+					  newmenu = new CMenu();
+					  fm->dynmenus.push_back(newmenu);
+				      newmenu->CreatePopupMenu();					  
+					  menu->AppendMenu(MF_POPUP, (UINT_PTR)newmenu->m_hMenu, t.object->label.c_str());
+					  t.object->menu = newmenu;
+					} else {
+					  newmenu = menu;
+					  start = false;                      
+					}					
+					for (int k = 0; k < t.nodes.size(); ++k) {
+					  if (t.nodes[k].nodes.size() == 0) {						
+						if (t.nodes[k].object->label == "-") {
+						  newmenu->AppendMenu(MF_SEPARATOR);
+						} else {
+					      newmenu->AppendMenu(MF_STRING, 40000+i, t.nodes[k].object->label.c_str());
+						}
+						std::string sep = (id!="") ? "." : "";
+						fm->menuIdMap[40000+(i)] = id+sep+t.nodes[k].object->id;
+						t.nodes[k].object->menu = newmenu;
+						t.nodes[k].object->mid = 40000+i;
+						if (t.nodes[k].object->check) {
+						  newmenu->CheckMenuItem(40000+i, MF_CHECKED | MF_BYCOMMAND);
+						}
+						++i;
+					  } else {
+                        CMenu* old = menu;
+						menu = newmenu;
+                        build_menu(t.nodes[k], id);
+						menu = old;
+					  }
+					}
+				  }
+	            } myfunctor(GetMenu(), this);												
+				((LuaPlugin*)_machine)->GetMenu(myfunctor);
+			}
+
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
 				!toolBar.LoadToolBar(IDR_FRAMEMACHINE))
 			{
@@ -192,6 +240,10 @@ namespace psycle { namespace host {
 			if ( _machine->_type == MACH_PLUGIN)
 			{
 				((Plugin*)_machine)->GetCallback()->hWnd = NULL;
+			}
+			std::vector<CMenu*>::iterator it = dynmenus.begin();
+			for ( ; it != dynmenus.end(); ++it) {
+				delete *it;
 			}
 			SaveBarState(_T("VstParamToolbar"));
 		}
@@ -483,33 +535,22 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnUpdateParametersCommand(CCmdUI *pCmdUI)
-		{
-			if ( _machine->_type == MACH_PLUGIN or _machine->_type == MACH_LUA)
-			{
-				pCmdUI->Enable(true);
-			}
-			else {
-				pCmdUI->Enable(false);
-			}
+		{						
+		   pCmdUI->Enable(_machine->_type == MACH_PLUGIN or _machine->_type == MACH_LUA);			
 		}
 
 		void CFrameMachine::OnMachineReloadScript()
 		{
-			if ( _machine->_type == MACH_LUA)
+			if (_machine->_type == MACH_LUA)
 			{
 				_machine->reload();
 			}
 		}
 		void CFrameMachine::OnUpdateMachineReloadScript(CCmdUI *pCmdUI)
 		{
-			if ( _machine->_type == MACH_LUA)
-			{
-				pCmdUI->Enable(true);
-			}
-			else {
-				pCmdUI->Enable(false);
-			}
+			pCmdUI->Enable(_machine->_type == MACH_LUA);
 		}
+
 		void CFrameMachine::OnMachineAboutthismachine() 
 		{			
 			if ( _machine->_type == MACH_LUA) {
@@ -963,6 +1004,10 @@ namespace psycle { namespace host {
 			PsycleGlobal::inputHandler().Automate(machine()._macIndex, param, value-min, undo);
 			if(pParamGui)
 				pParamGui->UpdateNew(param, value);
+		}
+
+		void CFrameMachine::OnDynamicMenuItems(UINT nID) {			
+			((LuaPlugin*)_machine)->OnMenu(menuIdMap[nID]);
 		}
 
 	}   // namespace
