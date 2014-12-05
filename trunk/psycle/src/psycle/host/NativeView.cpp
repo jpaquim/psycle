@@ -5,6 +5,8 @@
 #include "NativeGraphics.hpp"
 #include "FrameMachine.hpp"
 #include "Machine.hpp"
+#include "LuaPlugin.hpp"
+#include "Canvas.hpp"
 #include "NewVal.hpp"
 
 #include "Plugin.hpp" // For default parameter value.
@@ -52,7 +54,7 @@ namespace psycle { namespace host {
 		,prevval(0)
 		,painttimer(0)
 		{
-			SelectMachine(effect);
+			SelectMachine(effect);      
 		}
 
 		int CNativeView::OnCreate(LPCREATESTRUCT lpCreateStruct) 
@@ -60,7 +62,7 @@ namespace psycle { namespace host {
 			if (CWnd::OnCreate(lpCreateStruct) == -1)
 			{
 				return -1;
-			}
+			}      
 			return 0;
 		}
 		BOOL CNativeView::PreCreateWindow(CREATESTRUCT& cs)
@@ -81,6 +83,10 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnPaint() 
 		{
+      CRgn pRgn;
+			pRgn.CreateRectRgn(0, 0, 0, 0);
+			GetUpdateRgn(&pRgn, FALSE);
+
 			int realheight = uiSetting->dialheight+1;
 			int realwidth = colwidth+1;
 			int const K_XSIZE2=uiSetting->dialwidth;
@@ -97,6 +103,20 @@ namespace psycle { namespace host {
 			bufferBmp.CreateCompatibleBitmap(&dc,rect.right-rect.left,rect.bottom-rect.top);
 			CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);
 			CFont *oldfont=bufferDC.SelectObject(&uiSetting->font);
+
+      if (_pMachine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _pMachine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          if (user_view->parent() == 0) user_view->SetParent(this);
+          user_view->Draw(&bufferDC, pRgn);
+          dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
+		 	    bufferDC.SelectObject(oldbmp);
+			    bufferDC.SelectObject(oldfont);
+			    bufferDC.DeleteDC();
+          return;
+        }
+      }
 
 			CDC knobDC;
 			CBitmap* oldKnobbmp;
@@ -119,8 +139,7 @@ namespace psycle { namespace host {
 				  _pMachine->GetParamValue(c, buffer);
 				  int min_v, max_v;
 				  min_v = max_v = 0;				  
-				  _pMachine->GetParamRange(c,min_v,max_v);
-				  int const amp_v = max_v - min_v;				  
+				  _pMachine->GetParamRange(c,min_v,max_v);				  				  
 				  float rel_v = _pMachine->GetParamValue(c) - min_v;				  
 				  int koffset = K_XSIZE2;
 				  int maxf = 5;				  
@@ -141,8 +160,7 @@ namespace psycle { namespace host {
 				  _pMachine->GetParamRange(c,min_v,max_v);
 				  int const amp_v = max_v - min_v;				  
 				  float rel_v = _pMachine->GetParamValue(c) - min_v;				  
-				  if (painttimer % 15 == 0) blink[c] = !blink[c];
-				  int num = amp_v;
+				  if (painttimer % 15 == 0) blink[c] = !blink[c];				  
 				  std::vector<int> on(amp_v, 0);		
 				  std::string v(buffer);
 				  bool isnumber = false;
@@ -266,6 +284,21 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
+      if (_pMachine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _pMachine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          canvas::Event ev;
+		      ev.type = canvas::Event::BUTTON_PRESS;
+		      ev.x = point.x;
+		      ev.y = point.y;
+		      ev.button = 1;
+		      ev.shift = nFlags;
+          LuaPlugin* lp = (LuaPlugin*) _pMachine;
+          lp->OnEvent(&ev);
+          return;
+        }		    
+      }
 			tweakpar = ConvertXYtoParam(point.x,point.y);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
@@ -359,17 +392,12 @@ namespace psycle { namespace host {
 		{
 			istweak = false;
 			ReleaseCapture();			
-			if (_pMachine->GetParamType(tweakpar)==5) {
-				const int height = uiSetting->dialheight;
-				const int half = height/2;
-				const int quarter = height/4;
-				const int eighth = height/8;				
+			if (_pMachine->GetParamType(tweakpar)==5) {							
 				int realheight = uiSetting->dialheight+1;
 			    int realwidth = colwidth+1;
 				int min_v, max_v;
 				min_v = max_v = 0;				  
-				_pMachine->GetParamRange(tweakpar,min_v,max_v);
-				int const amp_v = max_v - min_v;	
+				_pMachine->GetParamRange(tweakpar,min_v,max_v);				
 				int x_knob = (tweakpar / parspercol)*realwidth;
 				int y_knob = (tweakpar % parspercol)*realheight;				
 			    bool found = false;				
@@ -391,11 +419,7 @@ namespace psycle { namespace host {
 				  _pMachine->SetParameter(tweakpar, !_pMachine->GetParamValue(tweakpar));
 				}
 			} else
-			if (_pMachine->GetParamType(tweakpar)==4) {
-				const int height = uiSetting->dialheight;
-				const int half = height/2;
-				const int quarter = height/4;
-				const int eighth = height/8;				
+			if (_pMachine->GetParamType(tweakpar)==4) {																
 				int realheight = uiSetting->dialheight+1;
 			    int realwidth = colwidth+1;
 				int min_v, max_v;
@@ -414,7 +438,7 @@ namespace psycle { namespace host {
 				bool isnumber = false;
 				bool hasdescr = false;
 		        if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
-			         int i = 0; hasdescr = true;			        
+			         hasdescr = true;			        
 	              } else {
 					  if (v[0]!='K' && v[0]!='S' && v[0]!='M') {
 						isnumber = true;

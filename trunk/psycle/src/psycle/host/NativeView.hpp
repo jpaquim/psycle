@@ -5,6 +5,7 @@
 #include "Psycle.hpp"
 #include "BaseParamView.hpp"
 #include "PsycleConfig.hpp"
+
 namespace psycle {
 namespace host {
 
@@ -60,8 +61,7 @@ namespace host {
 			bool allowmove;
 			int prevval;
 			int painttimer;
-			std::vector<int> blink;
-
+			std::vector<int> blink;      
 		};
 
 	}   // namespace host
