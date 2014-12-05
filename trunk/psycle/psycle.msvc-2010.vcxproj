@@ -148,6 +148,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\psycle\host\Canvas.hpp" />
     <ClInclude Include="src\psycle\host\Constants.hpp" />
     <ClInclude Include="src\psycle\host\Global.hpp" />
     <ClInclude Include="src\psycle\host\InputHandler.hpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="src\psycle\host\ladspa.h" />
     <ClInclude Include="src\psycle\host\ladspahost.hpp" />
     <ClInclude Include="src\psycle\host\ladspamachine.h" />
+    <ClInclude Include="src\psycle\host\LuaGui.hpp" />
     <ClInclude Include="src\psycle\host\LuaHelper.hpp" />
     <ClInclude Include="src\psycle\host\LuaInternals.hpp" />
     <ClInclude Include="src\psycle\host\version.hpp" />
@@ -291,6 +293,7 @@
     <ClInclude Include="src\Seib-vsthost\JBridgeEnabler.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\psycle\host\Canvas.cpp" />
     <ClCompile Include="src\psycle\host\Global.cpp" />
     <ClCompile Include="src\psycle\host\InputHandler.cpp" />
     <ClCompile Include="src\psycle\host\ASIOInterface.cpp" />
@@ -300,6 +303,7 @@
     <ClCompile Include="src\psycle\host\InstrNoteMap.cpp" />
     <ClCompile Include="src\psycle\host\ladspahost.cpp" />
     <ClCompile Include="src\psycle\host\ladspamachine.cpp" />
+    <ClCompile Include="src\psycle\host\LuaGui.cpp" />
     <ClCompile Include="src\psycle\host\LuaInternals.cpp" />
     <ClCompile Include="src\psycle\host\WasapiDriver.cpp" />
     <ClCompile Include="src\psycle\host\WaveOut.cpp" />
