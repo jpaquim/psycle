@@ -514,6 +514,12 @@
     <ClInclude Include="src\psycle\host\LuaHelper.hpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\Canvas.hpp">
+      <Filter>psycle\mfc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\LuaGui.hpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -866,6 +872,12 @@
     </ClCompile>
     <ClCompile Include="src\psycle\host\ladspamachine.cpp">
       <Filter>psycle\engine\machine\ladspa</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Canvas.cpp">
+      <Filter>psycle\mfc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LuaGui.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
