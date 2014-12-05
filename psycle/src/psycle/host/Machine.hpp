@@ -511,6 +511,7 @@ namespace psycle
 					virtual int GetNumBanks(){ return 1;};
 					virtual void Tweak(CPreset const & preset);
 					virtual void GetCurrentPreset(CPreset & preset);
+          virtual int GetGuiType() const { return 0; }
 
 				public:///\todo private:
 					int _numPars;

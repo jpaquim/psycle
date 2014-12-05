@@ -3,6 +3,7 @@
 #include "plugininfo.hpp"
 #include "LuaArray.hpp"
 #include "LuaInternals.hpp"
+#include "LuaGui.hpp"
 
 struct lua_State;
 struct luaL_Reg;
@@ -10,6 +11,8 @@ struct luaL_Reg;
 namespace universalis { namespace os {
 	class terminal;
 }}
+
+namespace psycle { namespace host { namespace canvas { struct Event; }}}
 
 namespace psycle { namespace host {
 
@@ -40,13 +43,14 @@ public:
 	// calls from proxy to script
 	void call_run();
 	void call_init();
+  canvas::Canvas* call_canvas();
 	PluginInfo call_info();
 	void call_seqtick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/);
 	// calls if noteon modus used
 	void call_command(int lastnote, int inst, int cmd, int val);
 	void call_noteon(int note, int lastnote, int inst, int cmd, int val);
 	void call_noteoff(int note, int lastnote, int inst, int cmd, int val);
-
+  void call_event(canvas::Event* ev);
 	void call_newline();
 	void call_work(int num, int offset=0);
     void call_parameter(int numparameter, double val);
@@ -59,6 +63,7 @@ public:
 	void set_state(lua_State* state);
 	void reload();
 	template<class T> void get_menu(T& func) { func(get_menu_tree()); }
+  int gui_type() const { return plugimport_->gui_type(); }  
 
 private:
 	void export_c_funcs();
@@ -68,7 +73,7 @@ private:
 	static int terminal_output(lua_State* L);
 	static int call_filedialog(lua_State* L);
 	static int set_machine(lua_State* L);
-
+ 
 	void get_method_strict(lua_State* L, const char* method);
 	bool get_method_optional(lua_State* L, const char* method);
 	bool get_param(lua_State* L, int index, const char* method);
@@ -78,7 +83,7 @@ private:
 	void build_tree(menu& t);
 	// mutex
 	void lock() const;
-    void unlock() const;
+  void unlock() const;
 	std::string GetString();
 	PluginInfo info_;
 	LuaPlugin *plug_;
@@ -86,6 +91,7 @@ private:
 	lua_State* L;
 	mutable CRITICAL_SECTION cs;
 	static universalis::os::terminal * terminal;
+  static int gui_type_;
 };
 
 struct LuaHost {

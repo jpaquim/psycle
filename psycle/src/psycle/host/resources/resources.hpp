@@ -1193,6 +1193,8 @@
 #define ID__SETSUSTAINSTART             34439
 #define ID__SETSUSTAINEND               34440
 #define ID__SETSUSTANTOSELECTION        34441
+#define ID_DYNAMIC_MENUS_START          34442
+#define ID_DYNAMIC_MENUS_END            35442
 #define ID_TEXT                         65535
 
 // Next default values for new objects

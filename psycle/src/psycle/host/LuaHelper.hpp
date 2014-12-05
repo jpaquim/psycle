@@ -32,7 +32,27 @@ namespace psycle { namespace host {
 			lua_remove(L, n);		
 			return ud;
 		}
-		// used to iterate over an ordered table (thanks to stackoverflow)
+
+    // new userdata needs to be on the top of the stack
+    template <class UserDataType>
+		static void register_userdata(lua_State* L, UserDataType* ud) {
+       lua_getglobal(L, "psycle");
+       lua_getfield(L, -1, "userdata");
+       lua_pushlightuserdata(L, ud);
+       lua_pushvalue(L, -4);
+       lua_settable(L, -3);
+       lua_pop(L, 2);   
+    }
+
+    // needs to be registered with register_userdata
+    template <class UserDataType>
+		static void find_userdata(lua_State* L, UserDataType* ud) {
+      lua_getglobal(L, "psycle");
+      lua_getfield(L, -1, "userdata");
+      lua_pushlightuserdata(L, ud);
+      lua_gettable(L, -2);
+    }
+
 		static int luaL_orderednext(lua_State *L)
 		{
 		  luaL_checkany(L, -1);                 // previous key

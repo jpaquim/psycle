@@ -63,7 +63,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_PROGRAMS_SAVEPRESET, OnProgramsSavepreset)
 			ON_COMMAND_RANGE(ID_SELECTBANK_0, ID_SELECTBANK_0+99, OnSetBank)
 			ON_COMMAND_RANGE(ID_SELECTPROGRAM_0, ID_SELECTPROGRAM_0+199, OnSetProgram)
-			ON_COMMAND_RANGE(40000, 41000, OnDynamicMenuItems)
+			ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
 			ON_COMMAND(ID_PROGRAMS_RANDOMIZEPROGRAM, OnProgramsRandomizeprogram)
 			ON_COMMAND(ID_PROGRAMS_RESETDEFAULT, OnParametersResetparameters)
 			ON_COMMAND(ID_OPERATIONS_ENABLED, OnOperationsEnabled)
@@ -141,14 +141,14 @@ namespace psycle { namespace host {
 						if (t.nodes[k].object->label == "-") {
 						  newmenu->AppendMenu(MF_SEPARATOR);
 						} else {
-					      newmenu->AppendMenu(MF_STRING, 40000+i, t.nodes[k].object->label.c_str());
+					      newmenu->AppendMenu(MF_STRING, ID_DYNAMIC_MENUS_START+i, t.nodes[k].object->label.c_str());
 						}
 						std::string sep = (id!="") ? "." : "";
-						fm->menuIdMap[40000+(i)] = id+sep+t.nodes[k].object->id;
+						fm->menuIdMap[ID_DYNAMIC_MENUS_START+(i)] = id+sep+t.nodes[k].object->id;
 						t.nodes[k].object->menu = newmenu;
-						t.nodes[k].object->mid = 40000+i;
+						t.nodes[k].object->mid = ID_DYNAMIC_MENUS_START+i;
 						if (t.nodes[k].object->check) {
-						  newmenu->CheckMenuItem(40000+i, MF_CHECKED | MF_BYCOMMAND);
+						  newmenu->CheckMenuItem(ID_DYNAMIC_MENUS_START+i, MF_CHECKED | MF_BYCOMMAND);
 						}
 						++i;
 					  } else {
