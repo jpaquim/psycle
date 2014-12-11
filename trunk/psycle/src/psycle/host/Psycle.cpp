@@ -43,7 +43,7 @@ namespace psycle { namespace host {
 		CPsycleApp::CPsycleApp() :m_uUserMessage(0)
 		{			
 		   //	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	
-          //_CrtSetBreakAlloc( 817 );
+          // _CrtSetBreakAlloc( 129 );
 			//_CrtDumpMemoryLeaks( );
 		}
 

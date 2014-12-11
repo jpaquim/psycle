@@ -544,6 +544,7 @@ namespace psycle { namespace host {
 			if (_machine->_type == MACH_LUA)
 			{
 				_machine->reload();
+        pView->Invalidate(false);
 			}
 		}
 		void CFrameMachine::OnUpdateMachineReloadScript(CCmdUI *pCmdUI)

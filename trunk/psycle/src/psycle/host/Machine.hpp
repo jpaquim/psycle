@@ -259,11 +259,14 @@ namespace psycle
 					bool const inline & crashed() const throw() { return crashed_; }
 					void reload() { 
 						try {
-						  OnReload(); crashed_=false; _standby = false; _bypass=false; } 
+						   OnReload(); crashed_=false; _standby = false; _bypass=false; } 
 						catch(std::exception e) {
 						}
 					}
 					virtual void OnReload() {}
+          void set_crashed(bool on) { crashed_ = on; crashed_ = true;
+			_bypass = true;
+			_mute = true;}
 				private:
 					bool                crashed_;
 			///\}
