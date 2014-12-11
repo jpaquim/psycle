@@ -1,3 +1,6 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #include <psycle/host/detail/project.hpp>
 #include "LuaHost.hpp"
 #include "LuaInternals.hpp"
@@ -30,6 +33,7 @@ namespace psycle { namespace host {
   LuaProxy::LuaProxy(LuaPlugin* plug, lua_State* state) : plug_(plug) {
     InitializeCriticalSection(&cs);
     set_state(state);
+    cscount_ = 0;
   }
 
   LuaProxy::~LuaProxy() {
@@ -79,6 +83,8 @@ namespace psycle { namespace host {
     lua_pop(L, 1);
     luaL_requiref(L, "psycle.canvas.text", LuaTextBind::open, 1);
     lua_pop(L, 1);
+    luaL_requiref(L, "psycle.canvas.pix", LuaPixBind::open, 1);
+    lua_pop(L, 1);
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
     luaL_requiref(L, "socket", luaopen_socket_core, 1);
     lua_pop(L, 1);
@@ -97,31 +103,38 @@ namespace psycle { namespace host {
 
   void LuaProxy::lock() const {
     ::EnterCriticalSection(&cs);
+    cscount_++;
   }
 
   void LuaProxy::unlock() const {
     ::LeaveCriticalSection(&cs);
+    cscount_--;
   }
 
-  void LuaProxy::reload() {
+  void LuaProxy::reload() {        
+    plug_->Mute(true);
     lock();
     lua_State* old_state = L;	
     lua_State* new_state = 0;
     try {
       new_state = LuaHost::load_script(plug_->GetDllName());
-      set_state(new_state);				
-      call_run();
-      call_init();
+      set_state(new_state);				      
+      call_run();      
+      call_init();      
       if (old_state) {
         lua_close(old_state);
       }
-    } catch(std::exception &e) {
+      plug_->Mute(false);
+    } catch(std::exception &e) {      
       if (new_state) {
         lua_close(new_state);
       }
       L = old_state;
       std::string s = std::string("Reload Error, old script still running!\n") + e.what();
-      AfxMessageBox(s.c_str());
+      plug_->set_crashed(true);
+      unlock();      
+      throw std::exception(e);
+  //    AfxMessageBox(s.c_str());      
     }
     unlock();
   }
@@ -206,8 +219,8 @@ namespace psycle { namespace host {
     lua_setfield(L, -2, "__self");    
     lua_setglobal(L, "psycle");    
     lua_getglobal(L, "psycle");    
-    lua_newtable(L);
-    lua_setfield(L, -2, "userdata");    
+    lua_newtable(L);    
+    lua_setfield(L, -2, "userdata");            
     lua_pop(L, 1);    
   }
 

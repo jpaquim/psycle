@@ -1,3 +1,6 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #include <psycle/host/detail/project.hpp>
 #include "LuaArray.hpp"
 
@@ -692,6 +695,31 @@ namespace psycle { namespace host {
     return 1;
   }
 
+   int LuaArrayBind::array_div(lua_State* L) {
+    if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
+      PSArray* rv = create_copy_array(L);
+      PSArray* v = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+      luaL_argcheck(L, rv->len() == v->len(), 2, "size not compatible");
+      struct {float* p; float* v; float operator()(int y) {return p[y]/v[y];}} f;
+      f.v = v->data();
+      rv->do_op(f);
+    } else {
+      float param1 = 0;
+      PSArray* rv = 0;
+      if ((lua_isuserdata(L, 1)) && (lua_isnumber(L, 2))) {
+        param1 = luaL_checknumber (L, 2);
+        rv = create_copy_array(L);
+      } else {
+        param1 = luaL_checknumber (L, 1);
+        rv = create_copy_array(L, 2);
+      }	 
+      struct {float* p; float c; float operator()(int y) {return p[y]/c;}} f;
+      f.c = param1;
+      rv->do_op(f);
+    }
+    return 1;
+  }
+
   int LuaArrayBind::array_sin(lua_State* L) {		
     PSArray* rv = create_copy_array(L);	
     if (rv) {
@@ -917,6 +945,7 @@ namespace psycle { namespace host {
       { "__add", array_add },
       { "__sub", array_sub },
       { "__mul", array_mul },
+      { "__div", array_div },
       { "__concat", array_concat },		
       { NULL, NULL }
     };

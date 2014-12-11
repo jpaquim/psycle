@@ -1,5 +1,10 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 ///\file
 ///\brief interface file for psycle::host::LuaPlugin.
+
+
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
@@ -40,9 +45,9 @@ namespace psycle { namespace host {
     virtual void Tick(int track, PatternEntry * pData);
     virtual void Stop();
     //TODO: testing
-    virtual int GetNumCols() { return proxy_.num_cols(); }
+    virtual int GetNumCols() { return !crashed() ? proxy_.num_cols() : 0; }
     virtual void GetParamRange(int numparam,int &minval, int &maxval);
-    virtual int GetNumParams() { return proxy_.num_parameter(); }
+    virtual int GetNumParams() { return !crashed() ? proxy_.num_parameter() : 0; }
     virtual int GetParamType(int numparam);
     virtual void GetParamName(int numparam, char * parval);
     virtual void GetParamValue(int numparam, char * parval);
@@ -58,8 +63,8 @@ namespace psycle { namespace host {
     std::string help();
     virtual int GetGuiType() const { return proxy_.gui_type(); }
     void OnMenu(const std::string& id) { proxy_.call_menu(id); }
-    canvas::Canvas* GetCanvas() { return proxy_.call_canvas(); }
-    void OnEvent(canvas::Event* ev) { proxy_.call_event(ev); }
+    canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
+    void OnEvent(canvas::Event* ev);    
 
     virtual void OnReload();
 
@@ -90,7 +95,7 @@ namespace psycle { namespace host {
     void SendCommand(unsigned char channel,
       unsigned char inst,
       unsigned char cmd,
-      unsigned char val);
+      unsigned char val);    
   };
 
 

@@ -1,3 +1,6 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include <vector>
@@ -140,6 +143,7 @@ namespace psycle { namespace host {
     static int array_add(lua_State* L);
     static int array_sub(lua_State* L);
     static int array_mul(lua_State* L);
+    static int array_div(lua_State* L);
     static int array_sum(lua_State* L);
     static int array_rsum(lua_State* L); // x(n)=x(0)+..+x(n-1)
     // funcs
