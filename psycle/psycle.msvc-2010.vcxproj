@@ -17,14 +17,6 @@
       <Configuration>release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Template|Win32">
-      <Configuration>Template</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Template|x64">
-      <Configuration>Template</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectName>psycle</ProjectName>
@@ -458,6 +450,22 @@
   <ItemGroup>
     <ProjectReference Include="..\build-systems\msvc\projects\direct-sound\direct-sound.msvc-2010.vcxproj">
       <Project>{69c0acbe-ea31-4f5e-9b41-b2dd73c29df1}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers-with-mfc.msvc-2010.vcxproj">
+      <Project>{e30de414-d82e-475d-9449-3c0e089dea09}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\psycle-audiodrivers\asio.msvc-2010.vcxproj">
+      <Project>{21F6FB1D-B7DB-4EDB-A2B0-DA1B2F04AF01}</Project>
     </ProjectReference>
     <ProjectReference Include="..\build-systems\msvc\projects\lualib\lualib.msvc-2010.vcxproj">
       <Project>{fee2d9f8-bad2-d34c-95b9-fb03657990dd}</Project>
@@ -467,9 +475,6 @@
     </ProjectReference>
     <ProjectReference Include="..\psycle-helpers\psycle-helpers.msvc-2010.vcxproj">
       <Project>{16f2deb9-8f35-45c9-b460-732615f0c8d5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\universalis\universalis.msvc-2010.vcxproj">
-      <Project>{b78dfe59-051a-43fd-b489-775a4982581c}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
