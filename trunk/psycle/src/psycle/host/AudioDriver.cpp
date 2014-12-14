@@ -10,8 +10,12 @@ namespace psycle
 {
 	namespace host
 	{
+#if !defined SHORT_MIN
 		#define SHORT_MIN -32768
+#endif
+#if !defined SHORT_MAX
 		#define SHORT_MAX 32767
+#endif
 
 		AudioDriverInfo SilentSettings::info_("Silent");
 

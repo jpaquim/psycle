@@ -224,6 +224,7 @@
     </ClInclude>
     <ClInclude Include="..\diversalis\src\diversalis.hpp" />
     <ClInclude Include="src\universalis.hpp" />
+    <ClInclude Include="src\universalis\compiler\constexpr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\universalis\exception.cpp">

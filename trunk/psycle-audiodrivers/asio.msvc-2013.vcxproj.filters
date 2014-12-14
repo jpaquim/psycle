@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="asio">
+      <UniqueIdentifier>{3b016df7-fd65-4039-b5e8-99424512e2f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\asio\asio.cpp">
+      <Filter>asio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asio\asiodrivers.cpp">
+      <Filter>asio</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asio\asiolist.cpp">
+      <Filter>asio</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\asio\asio.private.hpp">
+      <Filter>asio</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

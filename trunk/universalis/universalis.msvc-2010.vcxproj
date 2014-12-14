@@ -29,8 +29,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -178,6 +176,11 @@
     <ClCompile Include="src\universalis\os\thread_name.cpp" />
     <ClCompile Include="src\universalis\cpu\exception.cpu.cpp" />
     <ClCompile Include="src\universalis\stdlib\exception.stdlib.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
+      <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,14 @@
 #include "iasiodrv.h"
 #include "asiolist.h"
 
+/*Some source code in the ASIO SDK is not compatible with the Win32 API UNICODE mode
+(The ASIO SDK expects the non-Unicode Win32 API). Therefore you need to make sure your project
+is set to not use Unicode. You do this by setting the project Character Set to
+"Use Multi-Byte Character Set" (NOT "Use Unicode Character Set"). In VS2010 the Character Set option can
+be found at Configuration Properties > General > Character Set. (An alternative to setting the project to
+non-Unicode is to patch asiolist.cpp to work when UNICODE is defined: put #undef UNICODE at the top of the
+file before windows.h is included.)*/
+
 #define ASIODRV_DESC		"description"
 #define INPROC_SERVER		"InprocServer32"
 #define ASIO_PATH			"software\\asio"
