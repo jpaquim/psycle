@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/druttis-sublime</ProjectName>
+    <ProjectName>druttis-sublime</ProjectName>
     <ProjectGuid>{A5BF47C9-76B0-454D-8564-804E42CA3315}</ProjectGuid>
     <RootNamespace>sublime</RootNamespace>
   </PropertyGroup>
@@ -82,8 +82,17 @@
   <ItemGroup>
     <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="blwtbl.msvc-2010.vcxproj">
+      <Project>{984a85ee-ba08-473f-9adb-1c1692dfd77f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="dsp.msvc-2010.vcxproj">
+      <Project>{f46ec0f9-8440-418d-91e7-41176165e294}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

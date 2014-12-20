@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/arguru-synth</ProjectName>
+    <ProjectName>arguru-synth</ProjectName>
     <RootNamespace>arguru-synth-2f</RootNamespace>
     <ProjectGuid>{4F58513B-F7E3-46CD-8196-9B3E4A07AF20}</ProjectGuid>
   </PropertyGroup>
@@ -82,8 +82,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\..\psycle-helpers\psycle-helpers.msvc-2010.vcxproj">
+      <Project>{16f2deb9-8f35-45c9-b460-732615f0c8d5}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
