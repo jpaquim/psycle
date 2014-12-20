@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/stk-reverbs (stk wrapper by sartorius)</ProjectName>
+    <ProjectName>stk-reverbs (stk wrapper by sartorius)</ProjectName>
     <ProjectGuid>{9BD0D570-BD65-4CA6-8D82-F55311A160BD}</ProjectGuid>
     <RootNamespace>stk-rev</RootNamespace>
   </PropertyGroup>
@@ -84,12 +84,20 @@
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\..\build-systems\msvc\projects\stk\stk.msvc-2010.vcxproj">
+      <Project>{29c0acbe-ea30-4f5e-9b41-123456789abc}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Delay.cpp" />
     <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\JCRev.cpp" />
     <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\NRev.cpp" />
+    <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\OnePole.cpp" />
     <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\PRCRev.cpp" />
     <ClCompile Include="..\..\external-packages\stk-4.5.0\stk\Stk.cpp" />
     <ClCompile Include="..\src\psycle\plugins\stk\stk.reverbs.cpp" />
@@ -100,6 +108,7 @@
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Filter.h" />
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\JCRev.h" />
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\NRev.h" />
+    <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\OnePole.h" />
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\PRCRev.h" />
     <ClInclude Include="..\..\external-packages\stk-4.5.0\stk\Stk.h" />
   </ItemGroup>

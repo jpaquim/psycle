@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/druttis-eq3</ProjectName>
+    <ProjectName>druttis-eq3</ProjectName>
     <RootNamespace>eq3</RootNamespace>
     <ProjectGuid>{1C7E86D5-7D35-4C8F-BDF0-6BE89FD0C58F}</ProjectGuid>
   </PropertyGroup>
@@ -82,8 +82,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="dsp.msvc-2010.vcxproj">
+      <Project>{f46ec0f9-8440-418d-91e7-41176165e294}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

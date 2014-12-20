@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/fluidsynth-sf2-player</ProjectName>
+    <ProjectName>fluidsynth-sf2-player</ProjectName>
     <RootNamespace>fs-sf2-player</RootNamespace>
     <ProjectGuid>{E6905023-50A7-49E0-A5DE-5C0D26414B8D}</ProjectGuid>
   </PropertyGroup>
@@ -76,8 +76,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="fluidsynth.msvc-2010.vcxproj">
+      <Project>{923a9cfd-c2b2-4a53-952b-ec9cd8413704}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

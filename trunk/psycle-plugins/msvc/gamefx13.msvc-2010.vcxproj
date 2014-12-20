@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/gamefx13</ProjectName>
+    <ProjectName>gamefx13</ProjectName>
     <ProjectGuid>{7A5C762B-7B12-49C2-88BC-EFD78734B1D4}</ProjectGuid>
     <RootNamespace>gamefx13</RootNamespace>
   </PropertyGroup>
@@ -72,8 +72,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

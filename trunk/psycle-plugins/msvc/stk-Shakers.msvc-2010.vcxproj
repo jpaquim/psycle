@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>psycle-plugins/stk-shakers (stk wrapper by sartorius)</ProjectName>
+    <ProjectName>stk-shakers (stk wrapper by sartorius)</ProjectName>
     <ProjectGuid>{6A82474F-4EF8-4A94-A696-7D0757F11332}</ProjectGuid>
     <RootNamespace>stk-shakers</RootNamespace>
   </PropertyGroup>
@@ -82,8 +82,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
       <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\..\build-systems\msvc\projects\stk\stk.msvc-2010.vcxproj">
+      <Project>{29c0acbe-ea30-4f5e-9b41-123456789abc}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
