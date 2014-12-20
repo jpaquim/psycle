@@ -74,13 +74,8 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers.msvc-2010.vcxproj">
-      <Project>{3d1a7daf-f9a8-48be-affe-9b7f690c4b7f}</Project>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <Private>false</Private>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    <ProjectReference Include="..\..\build-systems\msvc\projects\pre-compiled-headers\pre-compiled-headers-with-mfc.msvc-2010.vcxproj">
+      <Project>{e30de414-d82e-475d-9449-3c0e089dea09}</Project>
     </ProjectReference>
     <ProjectReference Include="fluidsynth.msvc-2010.vcxproj">
       <Project>{923a9cfd-c2b2-4a53-952b-ec9cd8413704}</Project>
