@@ -15,11 +15,39 @@ namespace psycle {namespace host{namespace canvas{class Canvas;}}}
 
 namespace psycle { namespace host {
   
+  struct LuaConfigBind {
+    enum {
+      TOPCOLOR = 1,
+      BOTTOMCOLOR,
+      HTOPCOLOR,
+      HBOTTOMCOLOR,
+      FTOPCOLOR,
+      FBOTTOMCOLOR,
+      HFTOPCOLOR,
+      HFBOTTOMCOLOR,
+      TITLECOLOR,
+    };
+    static int open(lua_State *L);
+    static const char* meta;
+  private:
+    static int create(lua_State* L);  
+    static int get(lua_State* L);
+    static int skinname(lua_State* L);
+    static int gc(lua_State* L);
+    static int plugindir(lua_State* L);
+  };
+
   class Machine;
 
   class LuaMachine {
   public:
-    LuaMachine() : mac_(0), shared_(false), num_parameter_(0), num_cols_(0), gui_type_(0), canvas_(0) {}
+    LuaMachine() 
+        : mac_(0),
+          shared_(false),
+          num_parameter_(0),
+          num_cols_(0),
+          gui_type_(0),
+          canvas_(0) {}
     ~LuaMachine();
     void load(const char* name);
     void work(int samples);	
@@ -45,9 +73,7 @@ namespace psycle { namespace host {
     Machine* mac_;
     psybuffer sampleV_;
     bool shared_;
-    int num_parameter_;
-    int num_cols_;
-    int gui_type_;
+    int num_parameter_, num_cols_, gui_type_;
     canvas::Canvas* canvas_;
   };
 
@@ -74,8 +100,10 @@ namespace psycle { namespace host {
     static int set_numchannels(lua_State* L);
     static int numchannels(lua_State* L);
     static int set_numcols(lua_State* L);
+    static int numcols(lua_State* L);
     static int show_native_gui(lua_State* L);
-    static int show_custom_gui(lua_State* L);    
+    static int show_custom_gui(lua_State* L);
+    static int getparam(lua_State* L);
   };
 
   struct LuaPlayerBind {
@@ -346,7 +374,7 @@ namespace psycle { namespace host {
 #endif // #if !defined WINAMP_PLUGIN
 
   struct PSDelay {
-    PSDelay(int k) : mem(k,0) {}
+    PSDelay(int k) : mem(k, 0) {}
     PSArray mem;  
     void work(PSArray& x, PSArray& y);  
   };

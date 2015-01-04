@@ -9,6 +9,10 @@
 #include "LuaHost.hpp"
 #include "LuaPlugin.hpp"
 #include "Player.hpp"
+#include "Registry.hpp"
+#include "WinIniFile.hpp"
+#include "Configuration.hpp"
+#include "PsycleConfig.hpp"
 
 #if !defined WINAMP_PLUGIN
 #include "PlotterDlg.hpp"
@@ -26,9 +30,117 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "PsycleConfig.hpp"
 
 
 namespace psycle { namespace host {
+  
+  /////////////////////////////////////////////////////////////////////////////
+  // LuaConfigBind
+  /////////////////////////////////////////////////////////////////////////////
+
+  const char* LuaConfigBind::meta = "psyconfigmeta";
+  
+  int LuaConfigBind::open(lua_State *L) {
+    static const luaL_Reg plugin_methods[] = {
+      {"new", create},      
+      {"get", get},
+      {"name", skinname},
+      {"luapath", plugindir},
+      {NULL, NULL}
+    };
+    luaL_newmetatable(L, meta);
+    lua_pushcclosure(L, gc, 0);
+    lua_setfield(L,-2, "__gc");
+    luaL_newlib(L, plugin_methods);
+    // define enum
+    int e = 1;
+    lua_pushnumber(L, e++); 
+    lua_setfield(L, -2, "TOPCOLOR");
+    lua_pushnumber(L, e++); 
+    lua_setfield(L, -2, "BOTTOMCOLOR");
+    lua_pushnumber(L, e++); 
+    lua_setfield(L, -2, "HTOPCOLOR");
+    lua_pushnumber(L, e++); 
+    lua_setfield(L, -2, "HBOTTOMCOLOR");
+    lua_pushnumber(L, e++);     
+    lua_setfield(L, -2, "FTOPCOLOR");
+    lua_pushnumber(L, e++);     
+    lua_setfield(L, -2, "FBOTTOMCOLOR");
+    lua_pushnumber(L, e++);
+    lua_setfield(L, -2, "HFTOPCOLOR");
+    lua_pushnumber(L, e++);     
+    lua_setfield(L, -2, "HFBOTTOMCOLOR");
+    lua_pushnumber(L, e++);
+    lua_setfield(L, -2, "TITLECOLOR");
+    return 1;
+  }
+  
+  int LuaConfigBind::create(lua_State *L) {
+    int n = lua_gettop(L);  // Number of arguments
+    if (n != 1) {
+      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+    }             
+    LuaHelper::new_userdata<PsycleConfig>(L, meta, &PsycleGlobal::conf());          
+    return 1;
+  }
+
+  int LuaConfigBind::skinname(lua_State *L) {
+    int skin = luaL_checknumber(L, 2);
+    luaL_requiref(L, "psycle.config", LuaConfigBind::open, 0);
+    size_t len;    
+    std::string key;    
+    for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
+      key = std::string(luaL_checklstring(L, -2, &len));
+      int t = lua_type(L, -1);
+      if (t == LUA_TNUMBER) {
+        int num = luaL_checknumber(L, -1);                  
+        if (num == skin) {
+         break;
+        }      
+      }
+    }
+    lua_pushstring(L, key.c_str());
+    return 1;
+  }
+
+  int LuaConfigBind::get(lua_State *L) {
+    int n = lua_gettop(L);
+    int rn = 0; // number of arguments returned
+    if (n == 2) {      
+      PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
+      int key = luaL_checknumber(L, 2);      
+      switch (key) {
+        case TOPCOLOR:      rn = LuaHelper::push_cr(L, cfg->macParam().topColor); break;
+        case BOTTOMCOLOR:   rn = LuaHelper::push_cr(L, cfg->macParam().bottomColor); break;
+        case HTOPCOLOR:     rn = LuaHelper::push_cr(L, cfg->macParam().hTopColor); break;
+        case HBOTTOMCOLOR:  rn = LuaHelper::push_cr(L, cfg->macParam().hBottomColor); break;
+        case FTOPCOLOR:     rn = LuaHelper::push_cr(L, cfg->macParam().fontTopColor); break;
+        case FBOTTOMCOLOR:  rn = LuaHelper::push_cr(L, cfg->macParam().fontBottomColor); break;
+        case HFTOPCOLOR:    rn = LuaHelper::push_cr(L, cfg->macParam().fonthTopColor); break;
+        case HFBOTTOMCOLOR: rn = LuaHelper::push_cr(L, cfg->macParam().fonthBottomColor); break;
+        case TITLECOLOR:    rn = LuaHelper::push_cr(L, cfg->macParam().titleColor); break;                
+        default:;
+      }      
+    }  else {
+      luaL_error(L, "Got %d arguments expected 2 (self, key)", n); 
+    }
+    return rn;
+  }
+
+  int LuaConfigBind::plugindir(lua_State* L) {        
+    PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
+    lua_pushstring(L, cfg->GetAbsoluteLuaDir().c_str());    
+    return 1;
+  }
+
+  int LuaConfigBind::gc(lua_State* L) {
+    return 0;
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // LuaMachine+Bind
+  /////////////////////////////////////////////////////////////////////////////
 
   LuaMachine::~LuaMachine() {	
     if (mac_!=0 && !shared_) {
@@ -46,6 +158,7 @@ namespace psycle { namespace host {
       mac_->Init();
       build_buffer(mac_->samplesV, 256);
       shared_ = false;
+      num_cols_ = mac_->GetNumCols();
     } else {
       mac_ = 0;
       throw std::runtime_error("plugin not found error");
@@ -103,9 +216,11 @@ namespace psycle { namespace host {
       {"addparameters", add_parameters},
       {"setparameters", set_parameters},
       {"setmenus", set_menus},
-      {"setnumcols", set_numcols },
+      {"setnumcols", set_numcols},
+      {"numcols", numcols},
       {"shownativegui", show_native_gui},
       {"showcustomgui", show_custom_gui},
+      {"parambyid", getparam},
       {NULL, NULL}
     };
     luaL_newmetatable(L, meta);
@@ -163,7 +278,10 @@ namespace psycle { namespace host {
       lua_pushnumber(L, 10);
       lua_pushnumber(L, 1);
       lua_pushnumber(L, 2); // mpf state
-      lua_pcall(L, 8, 1, 0);  
+      std::string id;
+      udata->mac()->GetParamId(idx, id);
+      lua_pushstring(L, id.c_str());
+      lua_pcall(L, 9, 1, 0);  
       lua_pushcclosure(L, setnorm, 0);  
       lua_setfield(L, -2, "setnorm");
       lua_pushcclosure(L, name, 0);  
@@ -211,7 +329,7 @@ namespace psycle { namespace host {
       PatternEntry data(note, inst, mach, cmd, param);
       plug->mac()->Tick(track, &data);	   
     } else {
-      luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+      luaL_error(L, "Got %d arguments expected 7 (self)", n); 
     }
     return 0;
   }
@@ -321,6 +439,33 @@ namespace psycle { namespace host {
     return 1;
   }
 
+  int LuaMachineBind::getparam(lua_State* L) {
+    int n = lua_gettop(L);
+    if (n == 2) {
+      LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
+      std::string search = luaL_checkstring(L, 2);
+      lua_getfield(L, -2, "params");
+      size_t len = lua_rawlen(L, -1);
+      for (size_t i = 1; i <= len; ++i) {
+        lua_rawgeti(L, 3, i);
+        lua_getfield(L, -1, "id");
+        lua_pushvalue(L, -2);
+        lua_pcall(L, 1, 1, 0);
+        std::string id(luaL_checkstring(L, -1));
+        if (id==search) {
+           lua_pop(L, 1);
+           return 1;
+        }
+        lua_pop(L, 1);
+      }
+      lua_pushnil(L);
+      return 1;
+    }  else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return 0;
+  }
+
   int LuaMachineBind::set_numchannels(lua_State* L) {	
     LuaMachine* plugin = LuaHelper::check<LuaMachine>(L, 1, meta); 
     int num = luaL_checknumber(L, 2);
@@ -329,8 +474,12 @@ namespace psycle { namespace host {
     return 0;
   }
 
+  int LuaMachineBind::numcols(lua_State* L) {	
+    return LuaHelper::getnumber<LuaMachine, int>(L, meta, &LuaMachine::numcols);	     
+  }
+
   int LuaMachineBind::set_numcols(lua_State* L) {	
-    return LuaHelper::callstrict1<LuaMachine, int>(L, meta, &LuaMachine::set_numcols);
+    return LuaHelper::callstrict1<LuaMachine, int>(L, meta, &LuaMachine::set_numcols);     
   }
 
   int LuaMachineBind::numchannels(lua_State* L) {	

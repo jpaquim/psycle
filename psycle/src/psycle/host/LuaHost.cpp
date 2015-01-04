@@ -13,6 +13,8 @@
 #include <lua.hpp>
 #include "LuaHelper.hpp"
 #include "Canvas.hpp"
+#include "NewMachine.hpp"
+#include <algorithm>
 
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
 extern "C" {
@@ -37,7 +39,7 @@ namespace psycle { namespace host {
   }
 
   LuaProxy::~LuaProxy() {
-    if (terminal) { delete terminal; terminal = NULL; }
+    // if (terminal) { delete terminal; terminal = NULL; }
     DeleteCriticalSection(&cs);
   }
 
@@ -72,18 +74,20 @@ namespace psycle { namespace host {
     lua_pop(L, 1);
     luaL_requiref(L, "psycle.player", LuaPlayerBind::open, 1);
     lua_pop(L, 1);
+    luaL_requiref(L, "psycle.config", LuaConfigBind::open, 1);
+    lua_pop(L, 1);
     // canvas binds
-    luaL_requiref(L, "psycle.canvas", LuaCanvasBind::open, 1);
+    luaL_requiref(L, "psycle.ui.canvas", LuaCanvasBind::open, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "psycle.canvas.group", LuaGroupBind::open, 1);
+    luaL_requiref(L, "psycle.ui.canvas.group", LuaGroupBind::open, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "psycle.canvas.rect", LuaRectBind::open, 1);
+    luaL_requiref(L, "psycle.ui.canvas.rect", LuaRectBind::open, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "psycle.canvas.line", LuaLineBind::open, 1);
+    luaL_requiref(L, "psycle.ui.canvas.line", LuaLineBind::open, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "psycle.canvas.text", LuaTextBind::open, 1);
+    luaL_requiref(L, "psycle.ui.canvas.text", LuaTextBind::open, 1);
     lua_pop(L, 1);
-    luaL_requiref(L, "psycle.canvas.pix", LuaPixBind::open, 1);
+    luaL_requiref(L, "psycle.ui.canvas.pix", LuaPixBind::open, 1);
     lua_pop(L, 1);
 #if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
     luaL_requiref(L, "socket", luaopen_socket_core, 1);
@@ -147,7 +151,7 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  int LuaProxy::terminal_output(lua_State* L) {
+  int LuaProxy::terminal_output(lua_State* L) {    
     if (terminal == 0) {
       terminal = new universalis::os::terminal();
     }	
@@ -177,14 +181,37 @@ namespace psycle { namespace host {
   }
 
   int LuaProxy::call_filedialog(lua_State* L) {  
-    //char szFilters[]= "Text Files (*.NC)|*.NC|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
+    char szFilters[]= "Text Files (*.NC)|*.NC|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
     // Create an Open dialog; the default file name extension is ".my".
-    //CFileDialog* m_pFDlg = new CFileDialog(TRUE, "txt", "*.txt",
-    //  OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());   
+    CFileDialog* m_pFDlg = new CFileDialog(TRUE, "txt", "*.txt",
+      OFN_FILEMUSTEXIST| OFN_HIDEREADONLY, szFilters, AfxGetMainWnd());   
+    m_pFDlg->DoModal();
     //m_pFDlg->Create(40000,AfxGetMainWnd());
     //m_pFDlg->ShowWindow(SW_SHOW);
-
+    /*lua_getglobal(L, "psycle");
+    lua_getfield(L, -1, "__self");
+    LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");
+    proxy->test.OnStart();*/
     return 0;
+  }
+
+  int LuaProxy::call_selmachine(lua_State* L) {  
+    CNewMachine dlg(AfxGetMainWnd());
+    dlg.DoModal();
+    if (dlg.Outputmachine >= 0) {
+      std::string filename = dlg.psOutputDll;
+      boost::filesystem::path p(filename);
+      lua_pushstring(L, p.stem().string().c_str());
+    } else {
+       lua_pushnil(L);
+    }
+    //m_pFDlg->Create(40000,AfxGetMainWnd());
+    //m_pFDlg->ShowWindow(SW_SHOW);
+    /*lua_getglobal(L, "psycle");
+    lua_getfield(L, -1, "__self");
+    LuaProxy* proxy = *(LuaProxy**)luaL_checkudata(L, -1, "psyhostmeta");
+    proxy->test.OnStart();*/
+    return 1;
   }
 
   int LuaProxy::set_machine(lua_State* L) {
@@ -207,7 +234,8 @@ namespace psycle { namespace host {
     static const luaL_Reg methods[] = {
       {"output", terminal_output },
       {"setmachine", set_machine},
-      {"filedialog", call_filedialog},
+      {"filedialog", call_filedialog},      
+      {"selmachine", call_selmachine},
       { NULL, NULL }
     };  
     lua_newtable(L); 
@@ -219,12 +247,19 @@ namespace psycle { namespace host {
     lua_setfield(L, -2, "__self");    
     lua_setglobal(L, "psycle");    
     lua_getglobal(L, "psycle");    
-    lua_newtable(L);    
-    lua_setfield(L, -2, "userdata");            
+    lua_newtable(L); // table for canvasdata    
+    lua_setfield(L, -2, "userdata");
+    lua_newtable(L); // table for canvasdata
+    lua_newtable(L); // metatable
+    lua_pushstring(L, "kv");
+    lua_setfield(L, -2, "__mode"); 
+    lua_setmetatable(L, -2);
+    lua_setfield(L, -2, "weakuserdata");
     lua_pop(L, 1);    
   }
 
   bool LuaProxy::get_param(lua_State* L, int index, const char* method) {
+    if (index < 0) return false;
     try {
       LuaHelper::get_proxy(L);
     } catch(std::exception &e) {	
@@ -736,7 +771,7 @@ namespace psycle { namespace host {
           throw std::runtime_error(s);
         }
     } CATCH_WRAP_AND_RETHROW(*plug_) 
-      double st = lua_tonumber(L, -1);
+    double st = lua_tonumber(L, -1);
     minval = 0;
     maxval = st;
     lua_pop(L, 3);  // pop returned value
@@ -967,8 +1002,8 @@ namespace psycle { namespace host {
   }
 
   canvas::Canvas* LuaProxy::call_canvas() {    
-    lock();    
     try {	
+      lock();
       if (!get_method_optional(L, "canvas")) {
         unlock();
         return 0; // no canvas found;
@@ -984,20 +1019,20 @@ namespace psycle { namespace host {
         return 0;
       }
       canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, -1, LuaCanvasBind::meta);
-      lua_pop(L, 1);      
+      lua_pop(L, 1);
       unlock();
       return canvas;
     } CATCH_WRAP_AND_RETHROW(*plug_)
-      unlock();
     return 0;
   }
 
-  void LuaProxy::call_event(canvas::Event* ev) {
+  bool LuaProxy::call_event(canvas::Event* ev) {
     lock();    
-    try {	
+    bool res;
+    try {	      
       if (!get_method_optional(L, "canvas")) {
         unlock();
-        return; // no canvas found;
+        return false; // no canvas found;
       }
       int status = lua_pcall(L, 1, 1 ,0); // machine:canvas()
       if (status) {
@@ -1005,18 +1040,16 @@ namespace psycle { namespace host {
         unlock();
         throw std::runtime_error(msg.GetString());
       }            
-      if (lua_isnumber(L, -1) or lua_isnil(L, -1)) {
+      if (lua_isnumber(L, -1) || lua_isnil(L, -1)) {
         unlock();
-        return;
-      }
-      canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, -1, LuaCanvasBind::meta);
-      canvas->OnEvent(ev);
-      lua_pop(L, 1); 
-      
+        return false;
+      }      
+      canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, -1, LuaCanvasBind::meta);      
+      res = canvas->OnEvent(ev);      
+      lua_pop(L, 1);
       unlock();            
-    } CATCH_WRAP_AND_RETHROW(*plug_)
-      unlock();
-    return;
+    } CATCH_WRAP_AND_RETHROW(*plug_)    
+    return res;
   }
 
   // Host

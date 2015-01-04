@@ -499,6 +499,9 @@ namespace psycle
 					virtual void GetParamRange(int numparam, int &minval, int &maxval) {minval=0; maxval=0; }
 					virtual void GetParamValue(int numparam, char * parval) { parval[0]='\0'; }
 					virtual int GetParamValue(int numparam) { return 0; }
+          virtual void GetParamId(int numparam, std::string& id) {
+            std::ostringstream s; s << numparam; id = s.str();
+          }
 					virtual bool SetParameter(int numparam, int value) { return false; }
                     virtual void AfterTweaked(int idx) {};
 					virtual void SetCurrentProgram(int idx) {};
@@ -510,7 +513,7 @@ namespace psycle
 					virtual void SetCurrentBank(int idx) {};
 					virtual int GetCurrentBank() {return 0;};
 					virtual void GetCurrentBankName(char* val) {strcpy(val,"Internal");};
-					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};
+					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};          
 					virtual int GetNumBanks(){ return 1;};
 					virtual void Tweak(CPreset const & preset);
 					virtual void GetCurrentPreset(CPreset & preset);

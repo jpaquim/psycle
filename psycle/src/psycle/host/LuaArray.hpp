@@ -118,6 +118,7 @@ namespace psycle { namespace host {
     static int array_fillzero(lua_State* L);
     static int array_method_fill(lua_State* L);
     static int array_method_add(lua_State* L);
+    static int array_method_sub(lua_State* L);
     static int array_method_mix(lua_State* L);
     static int array_method_mul(lua_State* L);
     static int array_method_div(lua_State* L);
@@ -139,11 +140,16 @@ namespace psycle { namespace host {
     static int array_method_cos(lua_State* L);
     static int array_method_tan(lua_State* L);
     static int array_method_sqrt(lua_State* L);
+    static int array_method_from_table(lua_State* L);
+    static int array_method_to_table(lua_State* L);
     // ops
     static int array_add(lua_State* L);
     static int array_sub(lua_State* L);
     static int array_mul(lua_State* L);
     static int array_div(lua_State* L);
+    static int array_mod(lua_State* L);
+    static int array_op_pow(lua_State* L);
+    static int array_unm(lua_State* L);
     static int array_sum(lua_State* L);
     static int array_rsum(lua_State* L); // x(n)=x(0)+..+x(n-1)
     // funcs

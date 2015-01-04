@@ -52,6 +52,7 @@ namespace psycle { namespace host {
     virtual void GetParamName(int numparam, char * parval);
     virtual void GetParamValue(int numparam, char * parval);
     virtual int GetParamValue(int numparam);
+    virtual void GetParamId(int numparam, std::string& id);
     virtual bool SetParameter(int numparam, int value); //{ return false;}
     virtual bool DescribeValue(int parameter, char * psTxt);
     virtual int GetNumInputPins() const { return this->IsSynth() ? 0 : samplesV.size(); }
@@ -64,8 +65,7 @@ namespace psycle { namespace host {
     virtual int GetGuiType() const { return proxy_.gui_type(); }
     void OnMenu(const std::string& id) { proxy_.call_menu(id); }
     canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
-    void OnEvent(canvas::Event* ev);    
-
+    bool OnEvent(canvas::Event* ev);    
     virtual void OnReload();
 
     std::string dll_path_;
@@ -95,7 +95,7 @@ namespace psycle { namespace host {
     void SendCommand(unsigned char channel,
       unsigned char inst,
       unsigned char cmd,
-      unsigned char val);    
+      unsigned char val);        
   };
 
 
