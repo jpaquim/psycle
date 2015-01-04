@@ -39,6 +39,35 @@ struct menuitem {
     static int notify(lua_State* L);
   };
 
+/*
+  class CMyDialog : CDialog
+{
+  CString m_value;
+public:  
+  CString GetValue() const {return m_value;}
+  void SetValue(const CString& value) {m_value = value;}
+
+  virtual BOOL OnInitDialog();
+  virtual BOOL DestroyWindow( );
+};
+
+BOOL CMyDialog::OnInitDialog()
+{
+  CDialog::OnInitDialog();
+
+  SetDlgItemText(IDC_EDIT1, m_value);
+
+  return TRUE;
+}
+
+BOOL CMyDialog::DestroyWindow()
+{
+  GetDlgItemText(IDC_EDIT1, m_value);
+
+  return CDialog::DestroyWindow();
+}*/
+
+
   struct LuaCanvas : public canvas::Canvas {
     LuaCanvas(lua_State* state) : canvas::Canvas(), L(state) {}    
     virtual canvas::Item* OnEvent(canvas::Event* ev);
@@ -53,8 +82,17 @@ struct menuitem {
     static int create(lua_State *L);
     static int gc(lua_State* L);
     static int root(lua_State* L);
+    static int size(lua_State* L);
+    static int setpreferredsize(lua_State* L);
+    static int preferredsize(lua_State* L);
     static int setcolor(lua_State* L);
+    static int color(lua_State* L);
     static int generate(lua_State* L);
+    static int setcapture(lua_State* L);
+    static int releasecapture(lua_State* L);
+    static int hidecursor(lua_State* L);
+    static int showcursor(lua_State* L);
+    static int setcursorpos(lua_State* L);
   };
 
   struct LuaGroup : public canvas::Group {
@@ -72,20 +110,32 @@ struct menuitem {
    private:
     static int create(lua_State *L);
     static int setxy(lua_State *L);
-    static int getxy(lua_State *L);
+    static int pos(lua_State *L);
+    static int clientpos(lua_State* L);
     static int getfocus(lua_State *L);
-    static int getitems(lua_State* L);
+    static int getitems(lua_State* L);    
     static int remove(lua_State* L);
+    static int add(lua_State* L);
     static int show(lua_State* L);
-    static int hide(lua_State* L);
-    static int gc(lua_State* L);    
+    static int hide(lua_State* L);    
+    static int enablepointerevents(lua_State* L);
+    static int disablepointerevents(lua_State* L);
+    static int gc(lua_State* L);
+    static int parent(lua_State *L);
+    static int tostring(lua_State* L);
+    static int setzorder(lua_State* L);
+    static int zorder(lua_State* L);
+    static int bounds(lua_State* L);   
+    static int intersect(lua_State* L);
+    static int intersectrect(lua_State* L);
+    static int canvas(lua_State* L);
   };
   
   struct LuaRect : public canvas::Rect {
     LuaRect(lua_State* state) : Rect(), L(state) {}
     LuaRect(lua_State* state, canvas::Group* parent, double x1, double y1, double x2, double y2) :
       canvas::Rect(parent, x1, y1, x2, y2), L(state) {}
-    virtual bool OnEvent(canvas::Event* ev);
+    virtual bool OnEvent(canvas::Event* ev);    
    private:
      lua_State* L;
   };
@@ -99,8 +149,19 @@ struct menuitem {
     static int setcolor(lua_State* L);
     static int setoutlinecolor(lua_State* L);
     static int setxy(lua_State *L);
-    static int getxy(lua_State *L);
+    static int pos(lua_State *L);
+    static int clientpos(lua_State* L);
+    static int color(lua_State* L);
+    static int outlinecolor(lua_State* L);
+    static int parent(lua_State *L);
+    static int remove(lua_State* L);
     static int gc(lua_State* L);
+    static int tostring(lua_State* L);
+    static int skin(lua_State* L);
+    static int setzorder(lua_State* L);
+    static int zorder(lua_State* L);
+    static int setborder(lua_State* L);
+    static int border(lua_State* L);    
   };
 
   struct LuaLine : public canvas::Line {
@@ -119,9 +180,12 @@ struct menuitem {
     static int create(lua_State *L);
     static int setcolor(lua_State* L);
     static int setpoints(lua_State* L);
+    static int setpoint(lua_State* L);
+    static int points(lua_State* L);
+    static int parent(lua_State *L);
     static int gc(lua_State* L);
     static int setxy(lua_State *L);
-    static int getxy(lua_State *L);
+    static int pos(lua_State *L);
   };
 
   struct LuaText : public canvas::Text {
@@ -140,9 +204,14 @@ struct menuitem {
     static int create(lua_State *L);
     static int setxy(lua_State *L);
     static int settext(lua_State* L);
+    static int text(lua_State* L);
     static int setcolor(lua_State* L);
-    static int getxy(lua_State *L);
+    static int color(lua_State* L);
+    static int pos(lua_State *L);
     static int gc(lua_State* L);
+    static int parent(lua_State *L);
+    static int remove(lua_State* L);
+    static int tostring(lua_State* L);
   };
 
   struct LuaPixBind {
@@ -150,10 +219,17 @@ struct menuitem {
     static const char* meta;
    private:
     static int create(lua_State *L);
+    static int parent(lua_State *L);
     static int setxy(lua_State *L);    
     static int setsource(lua_State* L);
     static int setsize(lua_State* L);
-    static int gc(lua_State* L);    
+    static int setpixmap(lua_State* L);
+    static int settransparent(lua_State* L);
+    static int load(lua_State* L);
+    static int gc(lua_State* L);
+    static int pos(lua_State *L);
+    static int setpos(lua_State *L);
+    static int tostring(lua_State* L);
   };
 
   struct LuaBitmap {

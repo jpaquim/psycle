@@ -210,8 +210,11 @@ namespace psycle { namespace host {
 			tIcon=theApp.LoadIcon(IDR_FRAMEMACHINE);
 			SetIcon(tIcon, true);
 			SetIcon(tIcon, false);
-
-			SetTimer(ID_TIMER_PARAM_REFRESH,30,0);
+      if (machine()._type == MACH_LUA) {
+			  SetTimer(ID_TIMER_PARAM_REFRESH,1,0);
+      } else {
+        SetTimer(ID_TIMER_PARAM_REFRESH,30,0);
+      }
 			return 0;
 		}
 
@@ -257,7 +260,17 @@ namespace psycle { namespace host {
 		{
 			if ( nIDEvent == ID_TIMER_PARAM_REFRESH )
 			{
-				pView->WindowIdle();
+        if (machine()._type == MACH_LUA) {
+          LuaPlugin* lp = (LuaPlugin*) (&machine());
+          canvas::Canvas* user_view = lp->GetCanvas();
+          if (user_view !=0 && lp->GetGuiType() == 1) {
+            user_view->InvalidateSave();
+          } else {
+            pView->WindowIdle();            
+          }
+        } else {
+				  pView->WindowIdle();
+        }
 				if (--refreshcounter <= 0) {
 					int tmp = _machine->GetCurrentProgram();
 					if (lastprogram != tmp) {
@@ -284,6 +297,23 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
+      /*if (_machine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _machine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+        canvas::Event ev(0,
+                         canvas::Event::KEY_DOWN, 
+                         0,
+                         0,
+                         1,
+                         nFlags);
+          LuaPlugin* lp = (LuaPlugin*) _machine;
+          if (lp->OnEvent(&ev)) {
+            return;
+          }
+        }		    
+      }*/
+
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
 			CmdDef cmd(PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags));
@@ -318,7 +348,23 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
-		{
+		{      
+      if (_machine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _machine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+        canvas::Event ev(0,
+                         canvas::Event::KEY_UP, 
+                         0,
+                         0,
+                         1,
+                         nFlags);
+          LuaPlugin* lp = (LuaPlugin*) _machine;
+          if (lp->OnEvent(&ev)) {
+            return;
+          }
+        }		    
+      }
 
 			CmdDef cmd(PsycleGlobal::inputHandler().KeyToCmd(nChar,nFlags));
 			const int outnote = cmd.GetNote();
@@ -544,6 +590,7 @@ namespace psycle { namespace host {
 			if (_machine->_type == MACH_LUA)
 			{
 				_machine->reload();
+        ResizeWindow(0);
         pView->Invalidate(false);
 			}
 		}
@@ -692,6 +739,15 @@ namespace psycle { namespace host {
 				rcClient.top = 0; rcClient.left = 0;
 				rcClient.right = pRect->right - pRect->left; rcClient.bottom = pRect->bottom - pRect->top;
 			}
+
+      if (_machine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _machine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          user_view->OnSize(rcClient.right, rcClient.bottom);
+        }
+      }  
+
 			//Add frame border/caption size.
 			CalcWindowRect(rcFrame);
 
@@ -713,7 +769,7 @@ namespace psycle { namespace host {
 			CRect rcEffFrame,rcEffClient,rcTemp,tbRect;
 			GetWindowSize(rcEffFrame, rcEffClient, pRect);
 			SetWindowPos(NULL,0,0,rcEffFrame.right-rcEffFrame.left,rcEffFrame.bottom-rcEffFrame.top,SWP_NOZORDER | SWP_NOMOVE);
-			pView->SetWindowPos(NULL,rcEffClient.left, rcEffClient.top, rcEffClient.right,rcEffClient.bottom,SWP_NOZORDER);
+			pView->SetWindowPos(NULL,rcEffClient.left, rcEffClient.top, rcEffClient.right,rcEffClient.bottom,SWP_NOZORDER);         
 			pView->WindowIdle();
 		}
 

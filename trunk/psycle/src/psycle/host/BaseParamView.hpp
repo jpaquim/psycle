@@ -10,11 +10,13 @@ class CFrameMachine;
 class CBaseParamView : public CWnd {
 	public:
 		CBaseParamView(CFrameMachine* frame) : parentFrame(frame) {};
-		virtual void Open(){};
-		virtual bool GetViewSize(CRect& rect){ return false; }
-		virtual void WindowIdle() { Invalidate(false); }
+		virtual void Open() {};
+		virtual bool GetViewSize(CRect& rect) { return false; }
+		virtual void WindowIdle() {      
+      Invalidate(false);
+    }
 	protected:
-		virtual void* WindowPtr(){ return GetSafeHwnd(); }
+		virtual void* WindowPtr() { return GetSafeHwnd(); }
 		CFrameMachine* parentFrame;
 };
 

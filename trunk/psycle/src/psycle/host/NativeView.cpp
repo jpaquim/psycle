@@ -26,10 +26,13 @@ namespace psycle { namespace host {
 			ON_WM_SETFOCUS()
 			ON_WM_PAINT()
 			ON_WM_LBUTTONDOWN()
+      ON_WM_RBUTTONDOWN()
 			ON_WM_LBUTTONDBLCLK()
 			ON_WM_MOUSEMOVE()
 			ON_WM_LBUTTONUP()
 			ON_WM_RBUTTONUP()
+      ON_WM_KEYDOWN()
+			ON_WM_KEYUP()
 		END_MESSAGE_MAP()
 
 
@@ -109,7 +112,7 @@ namespace psycle { namespace host {
         canvas::Canvas* user_view = lp->GetCanvas();
         if (user_view !=0 && lp->GetGuiType() == 1) {
           if (user_view->parent() == 0) user_view->SetParent(this);
-          user_view->Draw(&bufferDC, pRgn);
+          user_view->DrawFlush(&bufferDC, pRgn);
           dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
 		 	    bufferDC.SelectObject(oldbmp);
 			    bufferDC.SelectObject(oldfont);
@@ -284,21 +287,8 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnLButtonDown(UINT nFlags, CPoint point) 
 		{
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-        canvas::Event ev(0,
-                         canvas::Event::BUTTON_PRESS, 
-                         point.x,
-                         point.y,
-                         1,
-                         nFlags);
-          LuaPlugin* lp = (LuaPlugin*) _pMachine;
-          lp->OnEvent(&ev);
-          return;
-        }		    
-      }
+      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, point))
+        return;      
 			tweakpar = ConvertXYtoParam(point.x,point.y);
 			if ((tweakpar > -1) && (tweakpar < numParameters))
 			{
@@ -320,23 +310,16 @@ namespace psycle { namespace host {
 			CWnd::OnLButtonDown(nFlags, point);
 		}
 
+    void CNativeView::OnRButtonDown(UINT nFlags, CPoint point) 
+		{
+      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, point))
+        return;
+    }
+
 		void CNativeView::OnLButtonDblClk(UINT nFlags, CPoint pt)
 		{
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          canvas::Event ev(0,
-                           canvas::Event::BUTTON_2PRESS, 
-                           pt.x,
-                           pt.y,
-                           1,
-                           nFlags);
-          LuaPlugin* lp = (LuaPlugin*) _pMachine;
-          lp->OnEvent(&ev);
-          return;
-        }		    
-      }
+      if (DelegateLuaEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, pt))
+        return;
 			if( _pMachine->_type == MACH_PLUGIN)
 			{
 				int par = ConvertXYtoParam(pt.x,pt.y);
@@ -352,21 +335,8 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnMouseMove(UINT nFlags, CPoint point) 
 		{
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          canvas::Event ev(0,
-                           canvas::Event::MOTION_NOTIFY, 
-                           point.x,
-                           point.y,
-                           0,
-                           nFlags);
-          LuaPlugin* lp = (LuaPlugin*) _pMachine;
-          lp->OnEvent(&ev);
-          return;
-        }		    
-      }
+      if (DelegateLuaEvent(canvas::Event::MOTION_NOTIFY, 0, nFlags, point))
+        return;
 			if (istweak && !positioning && _pMachine->GetParamType(tweakpar)!=4)
 			{
 				///\todo: This code fools some VST's that have quantized parameters (i.e. tweaking to 0x3579 rounding to 0x3000)
@@ -419,22 +389,9 @@ namespace psycle { namespace host {
 		}
 
 		void CNativeView::OnLButtonUp(UINT nFlags, CPoint point) 
-		{
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          canvas::Event ev(0,
-                           canvas::Event::BUTTON_RELEASE, 
-                           point.x,
-                           point.y,
-                           1,
-                           nFlags);
-          LuaPlugin* lp = (LuaPlugin*) _pMachine;
-          lp->OnEvent(&ev);
-          return;
-        }		    
-      }
+		{      
+      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, point))
+        return;
 			istweak = false;
 			ReleaseCapture();			
 			if (_pMachine->GetParamType(tweakpar)==5) {							
@@ -522,6 +479,8 @@ namespace psycle { namespace host {
 
 		void CNativeView::OnRButtonUp(UINT nFlags, CPoint point) 
 		{
+      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, point))
+        return;
       if (_pMachine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _pMachine;
         canvas::Canvas* user_view = lp->GetCanvas();
@@ -594,6 +553,17 @@ namespace psycle { namespace host {
 
 		bool CNativeView::GetViewSize(CRect& rect)
 		{
+      if (_pMachine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _pMachine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          rect.left= rect.top = 0;
+          double w, h;
+          user_view->preferredsize(w, h);
+          rect.right = w, rect.bottom = h;
+          return true;
+        }
+      }
 			int realheight = uiSetting->dialheight+1;
 			int realwidth = colwidth+1;
 			rect.left= rect.top = 0;
@@ -622,5 +592,25 @@ namespace psycle { namespace host {
 			}
 		}
 
+    bool CNativeView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point) {
+      if (_pMachine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _pMachine;
+        canvas::Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          canvas::Event ev(0,
+                           (canvas::Event::Type)type,
+                           point.x,
+                           point.y,
+                           button,
+                           nFlags);
+          LuaPlugin* lp = (LuaPlugin*) _pMachine;
+          lp->OnEvent(&ev);
+          return true;
+        }		    
+      }
+      return false;
+    }
+
+  
 	}   // namespace
 }   // namespace

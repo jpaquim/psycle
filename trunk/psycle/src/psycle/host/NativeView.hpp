@@ -31,6 +31,7 @@ namespace host {
 			afx_msg void OnSetFocus(CWnd* pOldWnd);
 			afx_msg void OnPaint();
 			afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+      afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonDblClk(UINT nFlags, CPoint pt);
 			afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 			afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -39,6 +40,7 @@ namespace host {
 		public:
 			static PsycleConfig::MachineParam* uiSetting;
 		protected:
+      bool DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point);
 			Machine* _pMachine;
 
 			int ncol;

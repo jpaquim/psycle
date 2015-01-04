@@ -48,8 +48,8 @@ namespace psycle { namespace host {
     e; } //do nothing.
   }
 
-  LuaPlugin::~LuaPlugin() {
-    Free();
+  LuaPlugin::~LuaPlugin() {    
+    Free();    
   }
 
   void LuaPlugin::Free() {
@@ -66,11 +66,13 @@ namespace psycle { namespace host {
     _mode = info.mode;*/
   }
 
-  void  LuaPlugin::OnEvent(canvas::Event* ev) {
-      try {
-        proxy_.call_event(ev); 
-      } catch(std::exception &e) { e; } 
-    }
+  bool LuaPlugin::OnEvent(canvas::Event* ev) {
+    try {
+       return proxy_.call_event(ev); 
+      } catch(std::exception &e) { e;
+       return false;
+    } 
+  }
 
   int LuaPlugin::GenerateAudioInTicks(int /*startSample*/, int numSamples) throw(psycle::host::exception)
   {
@@ -554,6 +556,20 @@ namespace psycle { namespace host {
     else std::strcpy(parval,"Out of Range");
   }
 
+  void LuaPlugin::GetParamId(int numparam, std::string& id) {
+    if (crashed() || numparam < 0) {      
+      return;
+    }
+    if(numparam < GetNumParams()) {
+      try {
+        id = proxy_.get_parameter_id(numparam);
+      } catch(const std::exception &e) {
+        e;
+        return;
+      }
+    }
+  }
+  
   std::string LuaPlugin::help() {
     if (crashed()) {
       return "saucer section missing";
