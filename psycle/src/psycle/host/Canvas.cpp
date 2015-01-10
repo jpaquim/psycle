@@ -8,18 +8,32 @@
 namespace psycle { namespace host  { namespace canvas {
 
   Item::Item() : parent_(0), managed_(0), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
-    rgn_.CreateRectRgn(0, 0, 0, 0);
+    Init();
   }
 
   Item::Item(Group* parent) : parent_(parent), managed_(0), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
-    rgn_.CreateRectRgn(0, 0, 0, 0);
+    Init();
     if (parent) {
       parent->Add(this);
     }
   }
 
+  void Item::Init() {
+    fls_rgn_.CreateRectRgn(0, 0, 0, 0);
+    rgn_.CreateRectRgn(0, 0, 0, 0);
+  }
+
   Item::~Item() {
+    fls_rgn_.DeleteObject();
     rgn_.DeleteObject();
+    checkbuttonpress();
+    if (parent_ && !managed_) {
+      iterator it = find(parent_->begin(), parent_->end(), this);
+      parent_->items_.erase(it);  
+    }
+  }
+
+  void Item::checkbuttonpress() {
     Canvas* c = canvas();
     if (c) {
       Item* bp = c->button_press_item_;
@@ -29,203 +43,188 @@ namespace psycle { namespace host  { namespace canvas {
           break;
         }
         bp = bp->parent();
-      }
-    }
-    if (parent_ && !managed_) {
-      parent_->Erase(this);
+      }      
     }
   }
 
+  double Item::acczoom() const { 
+    double zoom = 1.0;
+    const Group* p = parent();    
+    while (p) {
+      zoom *= p->zoom();
+      p = p->parent();
+    }
+    return zoom;
+  }
+  
   Canvas* Item::canvas() {     
     Group* p = this->parent();
-    if (!p) return this->widget();
+    if (!p) { return this->widget(); }
     while (p->parent()) p = p->parent();
     return p->widget();
   }
 
   void Item::needsupdate() {
     update_ = true;
-    if (parent()) {
-      parent()->needsupdate();
-    }
+    if (parent()) { parent()->needsupdate(); }
   }
 
   void Item::GetFocus() {
     Canvas* c = canvas();
-    if (c) {
-      c->StealFocus(this);
-    }    
+    if (c) { c->StealFocus(this); }    
   }
 
-  void Item::store() {    
-    rgn_.DeleteObject();
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-    rgn_.CopyRgn(&region());
+  void Item::STR() {    
+    fls_rgn_.DeleteObject();
+    fls_rgn_.CreateRectRgn(0, 0, 0, 0);
+    fls_rgn_.CopyRgn(&region());
     has_store_ = true;
   }
 
-  void Item::flush() {
+  void Item::FLS() {
     if (has_store_) {  
       needsupdate();
-      rgn_.CombineRgn(&region(), &rgn_, RGN_OR);
+      fls_rgn_.CombineRgn(&region(), &fls_rgn_, RGN_OR);
       has_store_ = false;
     } else {
-      rgn_.DeleteObject();
-      rgn_.CreateRectRgn(0, 0, 0, 0);
-      rgn_.CopyRgn(&region());
+      fls_rgn_.DeleteObject();
+      fls_rgn_.CreateRectRgn(0, 0, 0, 0);
+      fls_rgn_.CopyRgn(&region());
     }  
-    if (parent()) {
-      rgn_.OffsetRgn(parent()->absx(), parent()->absy());
+    if (parent()) {      
+      fls_rgn_.OffsetRgn(parent()->zoomabsx(), parent()->zoomabsy());
       Canvas* c = this->canvas();
       if (c) {
-        c->Invalidate(rgn_);
+        c->Invalidate(fls_rgn_);
       }
     }    
+  }  
+
+  double Item::zoomabsx() const {    
+    std::vector<const Item*> items;
+    items.push_back(this);
+    const Group* p = parent();    
+    while (p) {      
+      items.push_back(p);
+      p = p->parent();
+    }
+    double x = 0.0;
+    double zoom = 1.0;
+    std::vector<const Item*>::const_reverse_iterator rev_it = items.rbegin();
+    for ( ; rev_it != items.rend(); ++rev_it) {
+      const Item* item = *rev_it;
+      zoom *= item->parent() ? item->parent()->zoom() : 1.0;
+      x += zoom*item->x();
+    }
+    return x;    
+  }
+  double Item::zoomabsy() const {
+    std::vector<const Item*> items;
+    items.push_back(this);
+    const Group* p = parent();    
+    while (p) {      
+      items.push_back(p);
+      p = p->parent();
+    }
+    double y = 0.0;
+    double zoom = 1.0;
+    std::vector<const Item*>::const_reverse_iterator rev_it = items.rbegin();
+    for ( ; rev_it != items.rend(); ++rev_it) {
+      const Item* item = *rev_it;
+      zoom *= item->parent() ? item->parent()->zoom() : 1.0;
+      y += zoom*item->y();
+    }
+    return y;
   }
 
-  void Item::show() {
-    store(); 
-    visible_ = true; 
-    flush();
-  }
+  void PaintItem::Draw(CDC* devc, const CRgn& repaint_rgn, class Canvas* widget) {}
 
-  void Item::hide() {
-    store();
-    visible_ = false;    
-    flush();
-  }
-
-  double Item::absx() const { return (parent() ? parent()->absx() : 0) + x(); }
-  double Item::absy() const { return (parent() ? parent()->absy() : 0) + y(); }
-
-  void PaintItem::Draw(CDC* devc, const CRgn& repaint_rgn, class Canvas* widget) {
-  }
-
-  Group::Group() : widget_(0), x_(0), y_(0), is_root_(false) {
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-    zoom_ =1.0;
-  }
-
-  Group::Group(Canvas* widget) : widget_(widget), x_(0), y_(0), is_root_(false) {
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-    zoom_ = 1.0;
-  }
-
+  Group::Group() : Item(),  widget_(0), x_(0), y_(0), is_root_(false), zoom_(1.0) {}
+  Group::Group(Canvas* widget) : Item(), widget_(widget), x_(0), y_(0), is_root_(false), zoom_(1.0) {}
   Group::Group(Group* parent, double x, double y) :
-  Item(parent),
+    Item(parent),
     widget_(0),
     x_(x),
     y_(y),
-    is_root_(false) {
-      rgn_.CreateRectRgn(0, 0, 0, 0);
+    is_root_(false) {      
       zoom_ = 1.0;
   }
-
-  Group::~Group() {
-    std::vector<Item*>::iterator it = items_.begin();
-    for ( ; it != items_.end(); ++it ) {
+  
+  Group::~Group() {    
+    for (iterator it = items_.begin(); it != items_.end(); ++it ) {
       Item* item = *it;
-      if (item->managed())
+      if (item->managed()) {
         delete item;
+      } else {
+        item->set_parent(0);
+      }
     }
-    rgn_.DeleteObject();
   }
 
   void Group::Clear() {
-    store();
-    std::vector<Item*>::iterator it = items_.begin();
-    for ( ; it != items_.end(); ++it ) {
+    STR();
+    for (iterator it = items_.begin(); it != items_.end(); ++it ) {
       Item* item = *it;
-      if (item->managed())
-        delete item;      
+      if (item->managed()) delete item;      
     }
     items_.clear();    
-    flush();
+    FLS();
   }
-
-  void Group::SetXY(double x, double y) {
-    store();
-    x_ = x;
-    y_ = y;    
-    flush();
-  }
-
-  void Group::Draw(CDC* cr, const CRgn& repaint_rgn, Canvas* canvas) {    
-    std::vector<Item*>::iterator it = items_.begin();
-    for ( ; it != items_.end(); ++it ) {
+  
+  void Group::Draw(CDC* cr, const CRgn& repaint_rgn, Canvas* canvas) {        
+    for (iterator it = items_.begin(); it != items_.end(); ++it ) {
       Item* item = *it;
-      if (!item->visible())
-        continue;
-      if (canvas && !canvas->HasAutomaticDraw()) {
+      if (!item->visible()) continue;      
+      CRgn item_rgn;
+      item_rgn.CreateRectRgn(0, 0, 0, 0);
+      item_rgn.CopyRgn(&item->region());
+      if (parent()) {
+        item_rgn.OffsetRgn(zoomabsx(), zoomabsy());
+      }        
+      CRect rc;
+      item_rgn.GetRgnBox(&rc);	  
+      int erg = item_rgn.CombineRgn(&item_rgn, &repaint_rgn, RGN_AND);
+      if (erg != NULLREGION) {		
         XFORM rXform;
         cr->GetWorldTransform(&rXform);
         XFORM rXform_new = rXform;
-        rXform_new.eDx = x()*zoom();
-        rXform_new.eDy = y()*zoom();
+        rXform_new.eDx = zoomabsx();
+        rXform_new.eDy = zoomabsy();
         cr->SetGraphicsMode(GM_ADVANCED);
         cr->SetWorldTransform(&rXform_new);
         item->Draw(cr, repaint_rgn, canvas);
         cr->SetGraphicsMode(GM_ADVANCED);
         cr->SetWorldTransform(&rXform);
-      } else {
-        CRgn item_rgn;
-        item_rgn.CreateRectRgn(0, 0, 0, 0);
-        item_rgn.CopyRgn(&item->region());
-        if (parent()) {
-          item_rgn.OffsetRgn(absx(), absy());
-        }        
-        CRect rc;
-        item_rgn.GetRgnBox(&rc);	  
-        int erg = item_rgn.CombineRgn(&item_rgn, &repaint_rgn, RGN_AND);
-        if (erg != NULLREGION) {		
-          XFORM rXform;
-          cr->GetWorldTransform(&rXform);
-          XFORM rXform_new = rXform;
-          rXform_new.eDx = absx()*zoom();
-          rXform_new.eDy = absy()*zoom();
-          cr->SetGraphicsMode(GM_ADVANCED);
-          cr->SetWorldTransform(&rXform_new);
-          item->Draw(cr, repaint_rgn, canvas);
-          cr->SetGraphicsMode(GM_ADVANCED);
-          cr->SetWorldTransform(&rXform);
-        }
-        item_rgn.DeleteObject();
       }
+      item_rgn.DeleteObject();      
     }
   }
 
   void Group::Add(Item* item) {
     assert(item);
-    store();
+    STR();
     item->set_parent(this);
     items_.push_back(item);    
-    flush();
+    FLS();
   }
 
   void Group::Insert(iterator it, Item* item) {
     assert(item);
-    store();
+    STR();
     item->set_parent(this);
     items_.insert(it, item);    
-    flush();
+    FLS();
   }
 
   void Group::Erase(Item* item) {
     assert(item);
-    std::vector<Item*>::iterator it = find(items_.begin(), items_.end(), item);
+    iterator it = find(items_.begin(), items_.end(), item);
     assert(it != items_.end());
-    store();
+    STR();
     items_.erase(it);
+    checkbuttonpress();
     Canvas* c = canvas();
     if (c) {       
-      Item* bp = c->button_press_item_;
-      while (bp) {       
-        if (bp == item) {
-          c->button_press_item_ = 0;
-          break;
-        }
-        bp = bp->parent();
-      }
       Item* out = c->out_item_;
       while (out) {       
         if (out == item) {
@@ -236,7 +235,7 @@ namespace psycle { namespace host  { namespace canvas {
       }
     }        
     item->set_parent(0);    
-    flush();
+    FLS();
   }
 
   void Group::RaiseToTop(Item* item) {    
@@ -246,7 +245,7 @@ namespace psycle { namespace host  { namespace canvas {
 
   void Group::GetBounds(double& x1, double& y1, double& x2, double& y2) const {
     CRect rect;
-    if (update_) region();
+    if (update_) { region(); }
     rgn_.GetRgnBox(rect);
     x1 = rect.left;
     y1 = rect.top;
@@ -269,8 +268,7 @@ namespace psycle { namespace host  { namespace canvas {
           }
         }
       }      
-      double zoom = parent() ? parent()->zoom() : 1.0;
-      rgn.OffsetRgn(x_*zoom, y_*zoom);
+      rgn.OffsetRgn(x_*acczoom(), y_*acczoom());
       rgn_.CopyRgn(&rgn);
       rgn.DeleteObject();
       update_ = false;
@@ -278,35 +276,15 @@ namespace psycle { namespace host  { namespace canvas {
     return rgn_;
   }
 
-  double Group::absx() const {
-    double offset = x_;
-    const Group* g = this;
-    while (g->parent()) { 
-      g = g->parent();
-      offset += g->x();
-    }
-    return offset;
-  }
-
-  double Group::absy() const {
-    double offset = y_;
-    const Group* g = this;
-    while (g->parent()) { 
-      g = g->parent();
-      offset += g->y();
-    }
-    return offset;
-  }
-
   void Group::set_zorder(Item* item, int z) {
     assert(item);
     if (z<0 || z>=items_.size()) return;        
-    std::vector<Item*>::iterator it = find(items_.begin(), items_.end(), item);
+    iterator it = find(items_.begin(), items_.end(), item);
     assert(it != items_.end());
-    store();
+    STR();
     items_.erase(it);
     items_.insert(begin()+z, item);    
-    flush();
+    FLS();
   }
 
   int Group::zorder(Item* item) const {
@@ -324,9 +302,9 @@ namespace psycle { namespace host  { namespace canvas {
     Item* found = 0;
     std::vector<Item*>::const_reverse_iterator rev_it = items_.rbegin();
     for ( ; rev_it != items_.rend(); ++rev_it) {
-      Item* item = *rev_it;
-      double zoom = parent() ? parent()->zoom() : 1.0;
-      item = item->visible() ? item->intersect((x-this->x())*zoom, (y-this->y())*zoom) : 0;
+      Item* item = *rev_it;      
+      double zoom = 1;
+      item = item->visible() ? item->intersect(x-this->x()*zoom, (y-this->y()*zoom)) : 0;
       if (item) {
         found = item;
         return item;
@@ -340,10 +318,9 @@ namespace psycle { namespace host  { namespace canvas {
     int size = items.size();
     std::vector<Item*>::const_reverse_iterator rev_it = items_.rbegin();
     for ( ; rev_it != items_.rend(); ++rev_it) {
-      Item* item = *rev_it;
-      double zoom = parent() ? parent()->zoom() : 1.0;
+      Item* item = *rev_it;      
       if (item->visible()) {        
-        item->intersect(items, (x1-x_)*zoom, (y1-y_)*zoom, (x2-x_), (y2-y_));        
+        item->intersect(items, x1-x_, y1-y_, (x2-x_), (y2-y_));        
       }
     }
     if (size!=items.size()) {
@@ -351,18 +328,14 @@ namespace psycle { namespace host  { namespace canvas {
     }
   }
 
-  Rect::Rect() {    
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-    x1_ = y1_ = x2_ = y2_ = bx_ = by_ = skin_ = skin_outline_ = 0;
-    r_ = g_ = b_ = r_outline_ = g_outline_= b_outline_  = 0;    
-    alpha_ = alpha_outline_ = 1;
+  Rect::Rect() : Item() {        
+    x1_ = y1_ = x2_ = y2_ = bx_ = by_ = skin_ = skin_stroke_ = 0;
+    fillcolor_ = strokecolor_ = 0;    
   }
 
-  Rect::Rect(Group* parent) : Item(parent) {    
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-    x1_ = y1_ = x2_ = y2_ = bx_ = by_ = skin_ = skin_outline_ = 0;
-    r_ = g_ = b_ = r_outline_ = g_outline_= b_outline_  = 0;    
-    alpha_ = alpha_outline_ = 1;
+  Rect::Rect(Group* parent) : Item(parent) {        
+    x1_ = y1_ = x2_ = y2_ = bx_ = by_ = skin_ = skin_stroke_ = 0;
+    fillcolor_ = strokecolor_ = 0;
   }
 
   Rect::Rect(Group* parent, double x1, double y1, double x2, double y2) 
@@ -370,98 +343,48 @@ namespace psycle { namespace host  { namespace canvas {
     x1_(x1),
     y1_(y1),
     x2_(x2),
-    y2_(y2) {
-      alpha_ = alpha_outline_ = 1;
-      skin_ = skin_outline_ = 0;
-      r_ = g_ = b_ = r_outline_ = g_outline_= b_outline_  = 0;
+    y2_(y2) {      
+      skin_ = skin_stroke_ = 0;
+      fillcolor_ = strokecolor_ = 0;
       bx_ = by_ = 0;      
-      rgn_.CreateRectRgn(0, 0, 0, 0);
-      SetXY(0, 0);
-  }
-
-  void Rect::SetPos(double x1, double y1, double x2, double y2) {
-    store();
-    x1_ = x1;
-    y1_ = y1;
-    x2_ = x2;
-    y2_ = y2;    
-    flush();
   }
 
   void Rect::SetXY(double x, double y) {
-    store();
+    STR();
     x2_ += x-x1_; 
     y2_ += y-y1_;
     x1_ = x;
     y1_ = y;            
-    flush();
+    FLS();
   }
-
-  void Rect::SetColor(double r, double g, double b, double alpha) {    
-    r_ = r;
-    g_ = g;
-    b_ = b;
-    alpha_ = alpha;
-    skin_ = 0;
-    flush();
-  }
-
-  void Rect::SetColor(int skin) {    
-    Skin::get_color(skin, r_, g_, b_);    
-    alpha_ = 1; // todo
-    skin_ = skin;
-    flush();
-  }
-
-  void Rect::SetOutlineColor(double r, double g, double b, double alpha) {
-    r_outline_ = r;
-    g_outline_ = g;
-    b_outline_ = b;
-    alpha_outline_ = alpha;    
-    flush();
-  }
-
-  void Rect::SetOutlineColor(int skin) {    
-    Skin::get_color(skin, r_outline_, g_outline_, b_outline_);    
-    alpha_outline_ = 1; // todo
-    skin_outline_ = skin;
-    flush();
-  }
-
+  
   void Rect::Draw(CDC* devc, const CRgn& repaint_rgn, class Canvas* widget) {
-    double zoom = parent()->zoom();
-    CRect rect(x1_*zoom, y1_*zoom, x2_*zoom, y2_*zoom);      
+    double z = acczoom();
+    CRect rect(x1_*z, y1_*z, x2_*z, y2_*z);      
     CPen pen;
-    pen.CreatePen(PS_SOLID, 1, RGB(r_outline_, g_outline_, b_outline_));
-    CBrush brush(RGB(r_, g_, b_));    
+    pen.CreatePen(PS_SOLID, 1, ToCOLORREF(strokecolor_));
+    CBrush brush(ToCOLORREF(fillcolor_));    
     CBrush* pOldBrush = devc->SelectObject(&brush);
     CPen* pOldPen = devc->SelectObject(&pen);    
-    if (alpha_ == 1) {
+    double alpha = 1; // (GetAlpha(fillcolor_)) / 255.0;
+    if (alpha == 1) {
       if (bx_!=0 || by_!=0) {
-        CPoint pt(bx_*zoom, by_*zoom);
+        CPoint pt(bx_*z, by_*z);
         devc->RoundRect(rect, pt);
       } else {
         devc->Rectangle(rect);
       }
     } else {
-      this->paintRect(*devc, rect, RGB(r_outline_, g_outline_, b_outline_)
-        , RGB(r_, g_, b_), (alpha_*127));
+      this->paintRect(*devc, rect, ToCOLORREF(strokecolor_),
+        ToCOLORREF(fillcolor_), (alpha*127));
     }
     devc->SelectObject(pOldPen);
     devc->SelectObject(pOldBrush);
   }
 
-  Item* Rect::intersect(double x, double y) {
-    if (update_) { region(); }
-    double zoom = parent() ? parent()->zoom() : 1.0;
-    CPoint pt(x*zoom, y*zoom);
-    return rgn_.PtInRegion(pt) ? this : 0;    
-  }
-
   void Rect::intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {
-    if (update_) { region(); }
-    double zoom = parent() ? parent()->zoom() : 1.0;
-    CRect rect(x1*zoom, y1*zoom, x2*zoom, y2*zoom);
+    if (update_) { region(); }    
+    CRect rect(x1, y1, x2, y2);
     if (rgn_.RectInRegion(rect)) {
       items.push_back(this); 
     }
@@ -482,22 +405,19 @@ namespace psycle { namespace host  { namespace canvas {
     XFORM rXform;
     hdc.GetWorldTransform(&rXform);
     XFORM rXform_new = rXform;
-    rXform_new.eDx = absx();
-    rXform_new.eDy = absy();
+    rXform_new.eDx = zoomabsx();
+    rXform_new.eDy = zoomabsy();
     hdc.SetGraphicsMode(GM_ADVANCED);
     hdc.SetWorldTransform(&rXform_new);                
     dim.right -= dim.left;
     dim.bottom -= dim.top;
     dim.left = dim.top = 0;
-
     HDC tempHdc         = CreateCompatibleDC(hdc);
     BLENDFUNCTION blend = {AC_SRC_OVER, 0, opacity, 0};
-
     HBITMAP hbitmap;       // bitmap handle 
     BITMAPINFO bmi;        // bitmap header 
     // zero the memory for the bitmap info 
     ZeroMemory(&bmi, sizeof(BITMAPINFO));
-
     // setup bitmap info  
     // set the bitmap width and height to 60% of the width and height of each of the three horizontal areas. Later on, the blending will occur in the center of each of the three areas. 
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -507,11 +427,9 @@ namespace psycle { namespace host  { namespace canvas {
     bmi.bmiHeader.biBitCount = 32;         // four 8-bit components 
     bmi.bmiHeader.biCompression = BI_RGB;
     bmi.bmiHeader.biSizeImage = (dim.right-dim.left) * (dim.bottom-dim.top) * 4;
-
     // create our DIB section and select the bitmap into the dc 
     hbitmap = CreateDIBSection(tempHdc, &bmi, DIB_RGB_COLORS, NULL, NULL, 0x0);
     SelectObject(tempHdc, hbitmap);
-
     SetDCPenColor(tempHdc, penCol);
     SetDCBrushColor(tempHdc, brushCol);
     HBRUSH br = CreateSolidBrush(brushCol);
@@ -535,24 +453,13 @@ namespace psycle { namespace host  { namespace canvas {
     return rgn_;
   }
 
-  Line::Line() : alpha_(1) {
-    r_ = g_ = b_ = 0;    
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-  }
-
-  Line::Line(Group* parent) : Item(parent), alpha_(1) {
-    r_ = g_ = b_ = 0;    
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-  }
-
   void Line::Draw(CDC* cr,
     const CRgn& repaint_region,
   class Canvas* widget) {    
     cr->SelectObject(GetStockObject(DC_PEN));
-    cr->SetDCPenColor(RGB(r_, g_, b_));
-    Points::iterator it = pts_.begin();
+    cr->SetDCPenColor(ToCOLORREF(color_));    
     bool first = true;
-    for ( ; it != pts_.end(); ++it ) {
+    for (Points::iterator it = pts_.begin(); it != pts_.end(); ++it ) {
       const std::pair<double, double>& pt = (*it);
       if (first) {        
         cr->MoveTo(pt.first, pt.second);
@@ -565,22 +472,16 @@ namespace psycle { namespace host  { namespace canvas {
 
   Item* Line::intersect(double x, double y) {
     double distance_ = 5;
-    std::pair<double, double>  p1 = PointAt(0);
-    std::pair<double, double>  p2 = PointAt(1);
-
+    Point  p1 = PointAt(0);
+    Point  p2 = PointAt(1);
     double  ankathede    = p1.first - p2.first;
     double  gegenkathede = p1.second - p2.second;
     double  hypetenuse   = sqrt(ankathede*ankathede + gegenkathede*gegenkathede);
-
-    if (hypetenuse == 0)
-      return 0;
-
+    if (hypetenuse == 0) return 0;
     double cos = ankathede    / hypetenuse;
     double sin = gegenkathede / hypetenuse;
-
     int dx = static_cast<int> (-sin*distance_);
     int dy = static_cast<int> (-cos*distance_);
-
     std::vector<CPoint> pts;
     CPoint p;
     p.x = p1.first + dx; p.y = p1.second - dy;
@@ -591,7 +492,6 @@ namespace psycle { namespace host  { namespace canvas {
     pts.push_back(p);
     p.x = p1.first - dx; p.y = p1.second + dy;
     pts.push_back(p);
-
     CRgn rgn;
     rgn.CreatePolygonRgn(&pts[0],pts.size(), WINDING);
     Item* item = rgn.PtInRegion(x,y) ? this : 0;
@@ -599,14 +499,8 @@ namespace psycle { namespace host  { namespace canvas {
     return item;
   }
 
-  void Line::SetPoints(const Points& pts) {
-    store();    
-    pts_ = pts;    
-    flush();
-  }
-
   void Line::SetXY(double x, double y) {     
-    store();
+    STR();
     if (pts_.size() > 0) {
       double delta_x = x - pts_[0].first;
       double delta_y = y - pts_[0].second;
@@ -617,7 +511,7 @@ namespace psycle { namespace host  { namespace canvas {
         pt.second += delta_y;
       } 
     }              
-    flush();
+    FLS();
   }
 
   void Line::GetBounds(double& x1, double& y1, double& x2, double& y2) const {
@@ -647,73 +541,21 @@ namespace psycle { namespace host  { namespace canvas {
     return rgn_;
   }
 
-  Text::Text() : alpha_(1) {
-    x_ = y_ = r_ = g_ = b_ = skin_ = 0;
+  Text::Text(Group* parent) : Item(parent) {
+     Init(parent ? parent->zoom() : 1.0);
+  }
+
+  Text::Text(Group* parent, const std::string& text) : Item(parent), text_(text) {
+    Init(parent ? parent->zoom() : 1.0);
+  }
+
+  void Text::Init(double zoom) {
+    x_ = y_ = color_ = skin_ = 0;
     LOGFONT lfLogFont;
     memset(&lfLogFont, 0, sizeof(lfLogFont));
-    lfLogFont.lfHeight = 12;
+    lfLogFont.lfHeight = 12*zoom;
     strcpy(lfLogFont.lfFaceName, "Arial");
-    font_.CreateFontIndirect(&lfLogFont);
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-  }
-
-  Text::Text(Group* parent) : Item(parent), alpha_(1) {
-    x_ = y_ = r_ = g_ = b_ = skin_ = 0;
-    set_name("text");
-    LOGFONT lfLogFont;
-    memset(&lfLogFont, 0, sizeof(lfLogFont));
-    int h = parent ? 12*parent->zoom() : 12;
-    lfLogFont.lfHeight = h;
-    strcpy(lfLogFont.lfFaceName, "Arial");
-    font_.CreateFontIndirect(&lfLogFont);
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-  }
-
-  Text::Text(Group* parent, const std::string& text)
-    : Item(parent),
-    text_(text),
-    alpha_(1) {
-      x_ = y_ = r_ = g_ = b_ = skin_ = 0;
-      LOGFONT lfLogFont;
-      memset(&lfLogFont, 0, sizeof(lfLogFont));
-      lfLogFont.lfHeight = 12*parent->zoom();
-      strcpy(lfLogFont.lfFaceName, "Arial");
-      font_.CreateFontIndirect(&lfLogFont);
-      rgn_.CreateRectRgn(0, 0, 0, 0);
-  }
-
-  void Text::SetColor(double r, double g, double b, double alpha) {
-    r_ = r;
-    g_ = g;
-    b_ = b;
-    alpha_ = alpha;
-    flush();
-  }
-
-  void Text::SetColor(int skin) {
-    Skin::get_color(skin, r_, g_, b_);    
-    alpha_ = 1; // todo
-    skin_ = skin;
-    flush();
-  }
-
-  void Text::SetXY(double x, double y) {    
-    store();
-    x_ = x;
-    y_ = y;    
-    flush();
-  }
-
-  void Text::SetText(const std::string& text) {    
-    store();
-    text_ = text;    
-    flush();
-  }
-
-  Item* Text::intersect(double x, double y) {
-    if (update_) { region(); }
-    CPoint pt(x, y);
-    return rgn_.PtInRegion(pt) ? this : 0;    
+    font_.CreateFontIndirect(&lfLogFont); 
   }
 
   void Text::intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {
@@ -745,7 +587,7 @@ namespace psycle { namespace host  { namespace canvas {
         SelectObject(dc, old_font);
         ReleaseDC(0, dc);
         text_w = extents.cx;
-        text_h = extents.cy;
+        text_h = extents.cy+10;
         rgn_.DeleteObject();
         double zoom = parent() ? parent()->zoom() : 1.0;
         rgn_.CreateRectRgn(x_*zoom, y_*zoom, x_*zoom + text_w +1, y_*zoom + text_h+1);
@@ -760,26 +602,22 @@ namespace psycle { namespace host  { namespace canvas {
     Canvas* widget) {
       double zoom = parent()->zoom();
       CFont* oldFont= devc->SelectObject(&font_);
-      devc->SetBkMode(TRANSPARENT);
-      COLORREF cref = RGB(r_, g_, b_); 
-      devc->SetTextColor(cref);
+      devc->SetBkMode(TRANSPARENT);      
+      devc->SetTextColor(ToCOLORREF(color_));
       devc->TextOut(x_*zoom, y_*zoom, text_.c_str());
       devc->SetBkMode(OPAQUE);
-      devc->SelectObject(oldFont);
+      devc->SelectObject(oldFont);      
   }
 
   // PixBuf
-  PixBuf::PixBuf() : transparent_(false), shared_(false), pmdone(false) {
+  PixBuf::PixBuf() : Item(), transparent_(false), shared_(false), pmdone(false) {
     image_ = mask_ = 0;
     x_ = y_ = width_ = height_ = xsrc_ = ysrc_ = skin_ = 0;
-    rgn_.CreateRectRgn(0, 0, 0, 0);
-    SetXY(0, 0);
   }
 
   PixBuf::PixBuf(Group* parent) : Item(parent), transparent_(false), shared_(false), pmdone(false) {
     image_ = mask_ = 0;
-    x_ = y_ = width_ = height_ = xsrc_ = ysrc_ = skin_ = 0;
-    rgn_.CreateRectRgn(0, 0, 0, 0);
+    x_ = y_ = width_ = height_ = xsrc_ = ysrc_ = skin_ = 0;    
   }
 
   PixBuf::PixBuf(Group* parent, double x, double y, CBitmap* image)
@@ -794,8 +632,7 @@ namespace psycle { namespace host  { namespace canvas {
       BITMAP bm;
       image->GetBitmap(&bm);
       width_ = bm.bmWidth;
-      height_ = bm.bmHeight;  
-      rgn_.CreateRectRgn(0, 0, 0, 0);      
+      height_ = bm.bmHeight;        
       region();
   }
 
@@ -895,64 +732,42 @@ namespace psycle { namespace host  { namespace canvas {
       AlphaBlend(*devc, x(),  y(), width_, height_, memDC, xsrc_, ysrc_, width_, height_,bf);*/
     }
     memDC.SelectObject(oldbmp);
-    memDC.DeleteDC(); 
+    memDC.DeleteDC();
   }
 
   void PixBuf::GetBounds(double& x1, double& y1, double& x2, double& y2) const {
     x1 = x_;
     y1 = y_;
-    x2 = x_ + width_;
-    y2 = y_ + height_;    
+    x2 = width_ + x1;
+    y2 = height_ + y1;
   }
 
-  void PixBuf::SetXY(double x, double y) {    
-    store();
-    x_ = x;
-    y_ = y;   
-    flush();
-  }
-
-  void PixBuf::SetSize(int width, int height) {
-    store();
-    width_ = width;
-    height_ = height;    
-    flush();
-  }
-
-  void PixBuf::SetSource(int xsrc, int ysrc) {    
-    xsrc_ = xsrc;
-    ysrc_ = ysrc;
-    flush();
+  void PixBuf::GetDim() {
+    BITMAP bm;
+    image_->GetBitmap(&bm);    
+    width_ = bm.bmWidth;
+    height_ = bm.bmHeight;
   }
 
   void PixBuf::SetImage(CBitmap* image) {
-    store();
+    STR();
     image_ = image;
-    BITMAP bm;
-    image_->GetBitmap(&bm);    
-    width_ = bm.bmWidth;
-    height_ = bm.bmHeight;
-    flush();
+    GetDim();
+    FLS();
   }
 
   void PixBuf::SetImage(int skin) {
-    store();
+    STR();
     shared_ = true;
     image_ = Skin::get_bmp(skin);    
-    BITMAP bm;
-    image_->GetBitmap(&bm);    
-    width_ = bm.bmWidth;
-    height_ = bm.bmHeight;
-    flush();
+    GetDim();
+    FLS();
   }
 
   void PixBuf::Load(const std::string& filename) {
-    std::string tmp = filename;
-    std::size_t dotpos = filename.find_last_of(".");
-    if (dotpos == std::string::npos) dotpos = 0;
-    std::string extension = filename.substr(dotpos, 4);
-    std::string extlower = extension;
-    std::transform(extlower.begin(), extlower.end(), extlower.begin(), std::tolower);
+    STR();    
+    std::string extlower = boost::filesystem::path(filename).string();     
+    std::transform(extlower.begin(), extlower.end(), extlower.begin(), std::tolower);    
     if (extlower == "png") {
       CPngImage image;
       image.Load(_T(filename.c_str()));
@@ -965,31 +780,18 @@ namespace psycle { namespace host  { namespace canvas {
       image_->Attach(image.Detach());
     }        
     shared_ = false;            
-    BITMAP bm;
-    image_->GetBitmap(&bm);    
-    width_ = bm.bmWidth;
-    height_ = bm.bmHeight;
-  }
-
-  void PixBuf::SetMask(CBitmap* mask) {
-    mask_ = mask;
+    GetDim();
+    FLS();
   }
 
   const CRgn& PixBuf::region() const {
     if (update_) {
       rgn_.DeleteObject();
       double zoom = parent() ? parent()->zoom() : 1.0;
-      rgn_.CreateRectRgn(x_*zoom, y_*zoom, (x_ + width_)*zoom, (y_ + height_)*zoom);
+      rgn_.CreateRectRgn(x_*zoom, y_*zoom, (x_ + width_)*zoom+1, (y_ + height_)*zoom+1);
       update_ = false;
     }
     return rgn_;
-  }
-
-  Item* PixBuf::intersect(double x, double y) {
-    if (update_) { region(); }
-    double zoom = parent() ? parent()->zoom() : 1.0;
-    CPoint pt(x*zoom, y*zoom);
-    return rgn_.PtInRegion(pt) ? this : 0;
   }
 
   void PixBuf::intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {
@@ -1044,39 +846,24 @@ namespace psycle { namespace host  { namespace canvas {
   }
 
   // Canvas
-  Canvas::Canvas() :
-  parent_(0),
-    steal_focus_(0),
-    bg_image_(0) {
-      save_ = has_draw_ = true;
-      bg_width_ = bg_height_ = 0;    
-      button_press_item_ = out_item_ = 0;
-      r_ = g_ = b_ = alpha_ = skin_= 0;
-      cw_ = pw_ = ch_ = ph_ = 300;      
-      root_ = new Group(this);
-      root_->set_manage(true);
-      save_rgn_.CreateRectRgn(0, 0, 0, 0);
-  }
-
-  Canvas::Canvas(CWnd* parent) :
-  parent_(parent),    
-    steal_focus_(0),
-    bg_image_(0) {
-      save_ = has_draw_ = false;
-      bg_width_ = bg_height_ = 0;
-      button_press_item_ = out_item_ = 0;
-      r_ = g_ = b_ = alpha_ = skin_= 0;
-      cw_ = pw_ = ch_ = ph_ = 200;      
-      root_ = new Group(this);
-      root_->is_root_ = true;
-      root_->set_manage(true);
-      save_rgn_.CreateRectRgn(0, 0, 300, 200);
+  void Canvas::Init() {
+    save_ = true;
+    steal_focus_ = managed_ = false;
+    bg_image_ = 0;
+    button_press_item_ = out_item_ = 0;
+    bg_width_ = bg_height_ = 0;    
+    cw_ = pw_ = ch_ = ph_ = 300;
+    color_ = skin_= 0;
+    save_rgn_.CreateRectRgn(0, 0, 300, 200);
+    root_ = new Group(this);
+    root_->is_root_ = true;
+    root_->set_manage(false);      
   }
 
   Canvas::~Canvas() {
-    if (root_->managed()) {
+    if (managed_) {
       delete root_;
-    } 
+    }
     save_rgn_.DeleteObject();
   }
 
@@ -1107,7 +894,7 @@ namespace psycle { namespace host  { namespace canvas {
     } else {		
       CRect rect;
       rgn.GetRgnBox(&rect);
-      devc->FillSolidRect(&rect, RGB(r_, g_, b_));
+      devc->FillSolidRect(&rect, ToCOLORREF(color_));
     }
     root_->Draw(devc, rgn, this);
   }
@@ -1124,23 +911,14 @@ namespace psycle { namespace host  { namespace canvas {
     } else
       if (ev->type() == Event::MOTION_NOTIFY ) {        
         item = button_press_item_ ? button_press_item_ : root_->intersect(ev->x(), ev->y());
-        // check mouseout
-        if (!button_press_item_ && out_item_ && item!=out_item_) {
-          Group* parent = out_item_->parent();
-          Event event(out_item_, Event::MOTION_OUT,
-            ev->x() - (parent ? parent->absx() : 0),
-            ev->y() - (parent ? parent->absy() : 0),
-            ev->button(),
-            ev->shift());                        
+        if (!button_press_item_ && out_item_ && item!=out_item_) { // mouseout
+          Event event(out_item_, Event::MOTION_OUT, ev->x(), ev->y(),ev->button(), ev->shift());
           DelegateEvent(&event, out_item_);
         }
         out_item_ = item;
       }     
-      if (item) {
-        Group* parent = item->parent();
-        const double x = ev->x(); //  - (parent ? parent->absx() : 0);
-        const double y = ev->y(); // - (parent ? parent->absy() : 0);
-        Event e(item, ev->type(), x, y, ev->button(), ev->shift());
+      if (item) {        
+        Event e(item, ev->type(), ev->x(), ev->y(), ev->button(), ev->shift());
         OutputDebugString("mousemove-2");
         DelegateEvent(&e, item);
         item = e.item();
@@ -1154,8 +932,7 @@ namespace psycle { namespace host  { namespace canvas {
   bool Canvas::DelegateEvent(Event* ev, Item* item) {
     bool erg = item->pointerevents() && item->OnEvent(ev);
     while (!erg && item->parent()) {
-      // redirect event to parent      
-      item = item->parent();
+      item = item->parent();  // redirect event to parent
       if (button_press_item_) {
         button_press_item_ = item;
       }      
@@ -1185,19 +962,5 @@ namespace psycle { namespace host  { namespace canvas {
     save_rgn_.DeleteObject();
     save_rgn_.CreateRectRgn(0, 0, 0, 0);
   }
-
-  void Canvas::SetColor(double r, double g, double b, double alpha) {    
-    r_ = r;
-    g_ = g;
-    b_ = b;
-    alpha_ = alpha;
-    skin_ = 0;    
-  }
-
-  void Canvas::SetColor(int skin) {    
-    Skin::get_color(skin, r_, g_, b_);    
-    alpha_ = 1; // todo
-    skin_ = skin;    
-  }
-
-}}}
+  
+}}}  // end of namespaces

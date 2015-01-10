@@ -106,21 +106,7 @@ namespace psycle { namespace host {
 			bufferBmp.CreateCompatibleBitmap(&dc,rect.right-rect.left,rect.bottom-rect.top);
 			CBitmap* oldbmp = bufferDC.SelectObject(&bufferBmp);
 			CFont *oldfont=bufferDC.SelectObject(&uiSetting->font);
-
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          if (user_view->parent() == 0) user_view->SetParent(this);
-          user_view->DrawFlush(&bufferDC, pRgn);
-          dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
-		 	    bufferDC.SelectObject(oldbmp);
-			    bufferDC.SelectObject(oldfont);
-			    bufferDC.DeleteDC();
-          return;
-        }
-      }
-
+      if (PaintLuaGui(bufferDC, dc, rect, pRgn, oldbmp, oldfont)) return;
 			CDC knobDC;
 			CBitmap* oldKnobbmp;
 			knobDC.CreateCompatibleDC(&bufferDC);
@@ -156,47 +142,13 @@ namespace psycle { namespace host {
 				} else
 				if(type == 4) // LED
 				{
-				  char buffer[64];					
-				  _pMachine->GetParamValue(c, buffer);
-				  int min_v, max_v;
-				  min_v = max_v = 0;				  
-				  _pMachine->GetParamRange(c,min_v,max_v);
-				  int const amp_v = max_v - min_v;				  
-				  float rel_v = _pMachine->GetParamValue(c) - min_v;				  
-				  if (painttimer % 15 == 0) blink[c] = !blink[c];				  
-				  std::vector<int> on(amp_v, 0);		
-				  std::string v(buffer);
-				  bool isnumber = false;
-				  bool hasdescr = false;
-		          if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
-			         int i = 0; hasdescr = true;
-			         for (std::string::iterator it = v.begin();
-				     it!=v.end() && i < on.size();
-				     ++it, ++i) {				
-			           if (*it=='*') on[i] = 1; else
-			           if (*it=='b') on[i] = 2;
-			         }
-	              } else {
-					  on[rel_v] = 1; 
-					  if (v[0] != 'K' && v[0] != 'S' && v[0] != 'M') {					   
-						isnumber = true;
-					  }
-				  }
-				  int koffset = 0;
-				  int maxf = 5;
-				  if (!isnumber) {
-					  // check for alignment suffix
-					  int start = (v.size()>amp_v && hasdescr) ? amp_v : 0;
-					  for (int k = start; k < v.size(); ++k) {
-						  if (v[k]=='K') koffset = K_XSIZE2; else
-						  if (v[k]=='S') maxf = 10; else
-						  if (v[k]=='M') maxf = 7;
-					  }
-				  }				  
-				  int oldoffset = InfoLabel::xoffset;
+          if (painttimer % 15 == 0) blink[c] = !blink[c];			    
+          int maxf, koffset, amp_v, x_knob, y_knob;        
+          std::vector<int> on;
+          ComputeLeds(c, on, maxf, koffset, amp_v, x_knob, y_knob);				  
 				  InfoLabel::xoffset += koffset;
-				  InfoLabel::Draw(bufferDC,x_knob,y_knob,colwidth,parName,"");
-				  InfoLabel::xoffset = oldoffset;
+				  InfoLabel::Draw(bufferDC, x_knob, y_knob, colwidth, parName, "");
+				  InfoLabel::xoffset -= koffset;;
 				  InfoLabel::DrawLEDs(bufferDC,x_knob+koffset,y_knob, colwidth-koffset, maxf, on, blink[c]);
 				} else
 				if(type == 3) // INFO unformatted
@@ -422,43 +374,15 @@ namespace psycle { namespace host {
 				}
 			} else
 			if (_pMachine->GetParamType(tweakpar)==4) {																
-				int realheight = uiSetting->dialheight+1;
-			    int realwidth = colwidth+1;
-				int min_v, max_v;
-				min_v = max_v = 0;				  
-				_pMachine->GetParamRange(tweakpar,min_v,max_v);
-				int const amp_v = max_v - min_v;	
-				int x_knob = (tweakpar / parspercol)*realwidth;
-				int y_knob = (tweakpar % parspercol)*realheight;				
-			    bool found = false;
-				int val = -1;
-				char buffer[64];					
-				_pMachine->GetParamValue(tweakpar, buffer);
-				std::string v(buffer);
-				int koffset = 0;				
-				int const K_XSIZE2=uiSetting->dialwidth;
-				bool isnumber = false;
-				bool hasdescr = false;
-		        if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
-			         hasdescr = true;			        
-	              } else {
-					  if (v[0]!='K' && v[0]!='S' && v[0]!='M') {
-						isnumber = true;
-					  }
-				  }				  
-				  int maxf = 5;
-				  if (!isnumber) {
-					  // check for alignment suffix
-					  int start = (v.size()>amp_v && hasdescr) ? amp_v : 0;
-					  for (int k = start; k < v.size(); ++k) {
-						  if (v[k]=='K') koffset = K_XSIZE2; else
-						  if (v[k]=='S') maxf = 10; else
-						  if (v[k]=='M') maxf = 7;
-					  }
-				  }
+				int realheight = uiSetting->dialheight+1;			  
+        int maxf, koffset, amp_v, x_knob, y_knob;
+        std::vector<int> on;
+        ComputeLeds(tweakpar, on, maxf, koffset, amp_v, x_knob, y_knob);
 				const int maxw = (colwidth-koffset)/maxf;
 				const int w = std::min(maxw, (colwidth-koffset)/amp_v);
 				const int border = w/5;				
+        bool found = false;
+        int val = -1;
 				for (int i=0; i < amp_v; ++i) {
 				  CRect r = CRect(koffset+x_knob+i*w+border, y_knob, koffset+x_knob+i*w+border+w-2*border, y_knob+realheight);
 				  if (r.PtInRect(point)) {
@@ -481,21 +405,6 @@ namespace psycle { namespace host {
 		{
       if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, point))
         return;
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          canvas::Event ev(0,
-                           canvas::Event::BUTTON_RELEASE, 
-                           point.x,
-                           point.y,
-                           2,
-                           nFlags);
-          LuaPlugin* lp = (LuaPlugin*) _pMachine;
-          lp->OnEvent(&ev);
-          return;
-        }		    
-      }
 			tweakpar = ConvertXYtoParam(point.x,point.y);
 
 			if ((tweakpar > -1) && (tweakpar < numParameters))
@@ -592,17 +501,71 @@ namespace psycle { namespace host {
 			}
 		}
 
-    bool CNativeView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point) {
-      if (_pMachine->_type == MACH_LUA) {
+    void CNativeView::ComputeLeds(int tweakpar, std::vector<int>& on, int &maxf, int &koffset, int &amp_v, int &x_knob, int &y_knob) {
+      int realheight = uiSetting->dialheight+1;
+			int realwidth = colwidth+1;
+			int min_v, max_v = 0;						  
+			_pMachine->GetParamRange(tweakpar,min_v,max_v);
+			amp_v = max_v - min_v;
+      on.clear(); for (int i=0; i < amp_v; ++i) on.push_back(0);
+      float rel_v = _pMachine->GetParamValue(tweakpar) - min_v;				  
+			x_knob = (tweakpar / parspercol)*realwidth;
+			y_knob = (tweakpar % parspercol)*realheight;										
+      char buffer[64];		
+			_pMachine->GetParamValue(tweakpar, buffer);
+			std::string v(buffer);
+			int const K_XSIZE2=uiSetting->dialwidth;      
+			bool isnumber, hasdescr = false;			
+		  if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
+        hasdescr = true;        
+        int i = 0;
+        for (std::string::iterator it = v.begin(); it!=v.end() && i < on.size();++it, ++i) {				
+          if (*it=='*') on[i] = 1; else
+			    if (*it=='b') on[i] = 2;
+        }        
+      } else {        
+        on[rel_v] = 1;         
+        if (v[0]!='K' && v[0]!='S' && v[0]!='M') {
+					 isnumber = true;
+        }
+      }				  
+      koffset = 0;
+      maxf = 5;
+      if (!isnumber) {
+			  // check for alignment suffix
+				int start = (v.size()>amp_v && hasdescr) ? amp_v : 0;
+				for (int k = start; k < v.size(); ++k) {
+				  if (v[k]=='K') koffset = K_XSIZE2; else
+				  if (v[k]=='S') maxf = 10; else
+				  if (v[k]=='M') maxf = 7;
+				}
+			}
+    }
+
+    bool CNativeView::PaintLuaGui(CDC &bufferDC, CPaintDC& dc, CRect& rect, CRgn &pRgn, CBitmap* oldbmp, CFont *oldfont) {
+       if (_pMachine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _pMachine;
         canvas::Canvas* user_view = lp->GetCanvas();
         if (user_view !=0 && lp->GetGuiType() == 1) {
-          canvas::Event ev(0,
-                           (canvas::Event::Type)type,
-                           point.x,
-                           point.y,
-                           button,
-                           nFlags);
+          if (user_view->parent() == 0) user_view->SetParent(this);
+          user_view->DrawFlush(&bufferDC, pRgn);
+          dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
+		 	    bufferDC.SelectObject(oldbmp);
+			    bufferDC.SelectObject(oldfont);
+			    bufferDC.DeleteDC();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    bool CNativeView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
+      if (_pMachine->_type == MACH_LUA) {
+        LuaPlugin* lp = (LuaPlugin*) _pMachine;
+        using namespace psycle::host::canvas;
+        Canvas* user_view = lp->GetCanvas();
+        if (user_view !=0 && lp->GetGuiType() == 1) {
+          Event ev(0, (Event::Type)type, pt.x, pt.y, button, nFlags);
           LuaPlugin* lp = (LuaPlugin*) _pMachine;
           lp->OnEvent(&ev);
           return true;
@@ -610,7 +573,6 @@ namespace psycle { namespace host {
       }
       return false;
     }
-
   
 	}   // namespace
 }   // namespace

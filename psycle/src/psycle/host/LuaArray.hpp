@@ -48,7 +48,7 @@ namespace psycle { namespace host {
     float get_val(int i) const { return ptr_[i]; }
     void set_len(int len) {len_ = len; }
     int len() const { return len_; }
-    int copyfrom(PSArray& src);
+    bool copyfrom(PSArray& src);
     int copyfrom(PSArray& src, int pos);
     void resize(int newsize);
     std::string tostring() const;
