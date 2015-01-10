@@ -241,7 +241,7 @@ namespace psycle { namespace host {
       dest->copyfrom(*src, pos);	   
     } else {
       PSArray* src = *(PSArray **)luaL_checkudata(L, 2, "array_meta");      
-      if (dest->copyfrom(*src)) {
+      if (!dest->copyfrom(*src)) {
         std::ostringstream o;
         o << "size src:" << src->len() << ", dst:" << dest->len() << "not compatible";
         luaL_error(L, o.str().c_str());	
