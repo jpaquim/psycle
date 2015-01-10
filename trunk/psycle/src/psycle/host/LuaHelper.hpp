@@ -3,6 +3,8 @@
 
 #pragma once
 #include <lua.hpp>
+#include "Machine.hpp" // for universalis exception
+#include "canvas.hpp"
 
 #undef GetGValue
 #define GetGValue(rgb) (LOBYTE((rgb) >> 8))
@@ -107,6 +109,11 @@ namespace psycle { namespace host {
       }
     }
 
+    static int chaining(lua_State* L) {
+      lua_pushvalue(L, 1);
+      return 1;
+    }
+
     // needs to be registered with register_userdata
     template <class UserDataType>
 		static void unregister_userdata(lua_State* L, UserDataType* ud) {
@@ -138,12 +145,20 @@ namespace psycle { namespace host {
 		  return 2;
 		}
 
-    // push colorref
-    static int push_cr(lua_State* L, COLORREF cr) {
-       lua_pushnumber(L, GetRValue(cr));
-       lua_pushnumber(L, GetGValue(cr));
-       lua_pushnumber(L, GetBValue(cr));
-       return 3;
+    // push argb
+    static int push_argb(lua_State* L, COLORREF cr) {
+      int r, g, b;
+      r = GetRValue(cr);
+      g = GetGValue(cr);
+      b = GetBValue(cr);     
+      int a = 0;
+      using namespace canvas;
+      ARGB argb = (((ARGB) (b) << 0)  |
+                   ((ARGB) (g) << 8)  |
+                   ((ARGB) (r) << 16) |
+                   ((ARGB) (a) << 24));
+       lua_pushnumber(L, argb);       
+       return 1;
     }
 
 		static void get_proxy(lua_State* L) {

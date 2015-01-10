@@ -41,6 +41,8 @@ namespace host {
 			static PsycleConfig::MachineParam* uiSetting;
 		protected:
       bool DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point);
+      bool PaintLuaGui(CDC &bufferDC, CPaintDC& dc, CRect& rect, CRgn &pRgn, CBitmap* oldbmp, CFont *oldfont);
+      void ComputeLeds(int tweakpar, std::vector<int>& on, int &maxf, int &koffset, int &amp_v, int &x_knob, int &y_knob);
 			Machine* _pMachine;
 
 			int ncol;

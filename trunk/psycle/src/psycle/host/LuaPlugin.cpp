@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+// copyright 2007-2015 members of the psycle project http://psycle.sourceforge.net
 
 ///\file
 ///\brief implementation file for psycle::host::LuaPlugin.
@@ -241,10 +241,8 @@ namespace psycle { namespace host {
                   }
                   catch(const std::exception &e)
                   {
-
                     e;
                     return 0;
-
                   }
                   TriggerDelayCounter[i] = (RetriggerRate[i]*Global::player().SamplesPerRow())/256;
                   int parameter = TriggerDelay[i]._parameter&0x0f;
@@ -280,10 +278,8 @@ namespace psycle { namespace host {
                     }
                     catch(const std::exception &e)
                     {
-
                       e;
                       return 0;
-
                     }
                     ArpeggioCount[i]++;
                     break;
@@ -295,10 +291,8 @@ namespace psycle { namespace host {
                     }
                     catch(const std::exception &e)
                     {
-
                       e;
                       return 0;
-
                     }
                     ArpeggioCount[i]++;
                     break;
@@ -420,7 +414,6 @@ namespace psycle { namespace host {
     for (uint32_t i = 0; i < count; i++) {
       pFile->WriteString(ids[i]);
     }
-
     pFile->Write(size2);
     if(size2)
     {
@@ -464,7 +457,7 @@ namespace psycle { namespace host {
       if( numparam < GetNumParams() ) {
         proxy_.get_parameter_range(numparam, minval, maxval);
       }
-    }catch(std::exception &e) { e; }
+    } catch(std::exception &e) { e; }
   }
 
   int LuaPlugin::GetParamType(int numparam) { 
@@ -476,7 +469,7 @@ namespace psycle { namespace host {
       if( numparam < GetNumParams() ) {
         mpf = proxy_.get_parameter_type(numparam);
       }
-    }catch(std::exception &e) { e; }
+    } catch(std::exception &e) { e; }
     return mpf;
   }
 
@@ -490,14 +483,14 @@ namespace psycle { namespace host {
         std::string name = proxy_.get_parameter_name(numparam);
         std::strcpy(parval, name.c_str());
       } else std::strcpy(parval, "Out of Range");
-    }catch(std::exception &e) { e; std::strcpy(parval, ""); }
+    } catch(std::exception &e) { e; std::strcpy(parval, ""); }
   }
 
   int LuaPlugin::GetParamValue(int numparam){
     if (crashed() || numparam < 0) {
       return 0;
     }
-    if(numparam < GetNumParams()) {
+    if (numparam < GetNumParams()) {
       int minval; int maxval;			  
       try {
         proxy_.get_parameter_range(numparam, minval, maxval);
@@ -516,7 +509,6 @@ namespace psycle { namespace host {
       std::sprintf(psTxt, "%s", par_display);
       return false;
     }
-
     if(numparam >= 0 && numparam < GetNumParams()) {
       try {
         std::string par_display = proxy_.get_parameter_display(numparam);
@@ -569,6 +561,20 @@ namespace psycle { namespace host {
       }
     }
   }
+
+  void LuaPlugin::AfterTweaked(int numparam) {
+    if (crashed() || numparam < 0) {      
+      return;
+    }
+    if(numparam < GetNumParams()) {
+      try {
+        proxy_.call_aftertweaked(numparam);
+      } catch(const std::exception &e) {
+        e;
+        return;
+      }
+    }
+  }
   
   std::string LuaPlugin::help() {
     if (crashed()) {
@@ -608,13 +614,8 @@ namespace psycle { namespace host {
         }
         catch(const std::exception &e)
         {
-#ifndef NDEBUG 
-          throw e;
-          return;
-#else
           e;
           return;
-#endif
         }
       }
     } else if(pData->_note == notecommands::tweakslide)
@@ -670,13 +671,8 @@ namespace psycle { namespace host {
           }
           catch(const std::exception &e)
           {
-#ifndef NDEBUG 
-            throw e;
-            return;
-#else
             e;
             return;
-#endif
           }
           TWSDelta[i] = float((TWSDestination[i]-TWSCurrent[i])*TWEAK_SLIDE_SAMPLES)/Global::player().SamplesPerRow();
           TWSSamples = 0;
@@ -696,13 +692,8 @@ namespace psycle { namespace host {
           }
           catch(const std::exception &e)
           {
-#ifndef NDEBUG 
-            throw e;
-            return;
-#else
             e;
             return;
-#endif
           }
         }
       }

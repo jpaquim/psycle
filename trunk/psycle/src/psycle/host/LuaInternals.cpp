@@ -111,15 +111,15 @@ namespace psycle { namespace host {
       PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
       int key = luaL_checknumber(L, 2);      
       switch (key) {
-        case TOPCOLOR:      rn = LuaHelper::push_cr(L, cfg->macParam().topColor); break;
-        case BOTTOMCOLOR:   rn = LuaHelper::push_cr(L, cfg->macParam().bottomColor); break;
-        case HTOPCOLOR:     rn = LuaHelper::push_cr(L, cfg->macParam().hTopColor); break;
-        case HBOTTOMCOLOR:  rn = LuaHelper::push_cr(L, cfg->macParam().hBottomColor); break;
-        case FTOPCOLOR:     rn = LuaHelper::push_cr(L, cfg->macParam().fontTopColor); break;
-        case FBOTTOMCOLOR:  rn = LuaHelper::push_cr(L, cfg->macParam().fontBottomColor); break;
-        case HFTOPCOLOR:    rn = LuaHelper::push_cr(L, cfg->macParam().fonthTopColor); break;
-        case HFBOTTOMCOLOR: rn = LuaHelper::push_cr(L, cfg->macParam().fonthBottomColor); break;
-        case TITLECOLOR:    rn = LuaHelper::push_cr(L, cfg->macParam().titleColor); break;                
+        case TOPCOLOR:      rn = LuaHelper::push_argb(L, cfg->macParam().topColor); break;
+        case BOTTOMCOLOR:   rn = LuaHelper::push_argb(L, cfg->macParam().bottomColor); break;
+        case HTOPCOLOR:     rn = LuaHelper::push_argb(L, cfg->macParam().hTopColor); break;
+        case HBOTTOMCOLOR:  rn = LuaHelper::push_argb(L, cfg->macParam().hBottomColor); break;
+        case FTOPCOLOR:     rn = LuaHelper::push_argb(L, cfg->macParam().fontTopColor); break;
+        case FBOTTOMCOLOR:  rn = LuaHelper::push_argb(L, cfg->macParam().fontBottomColor); break;
+        case HFTOPCOLOR:    rn = LuaHelper::push_argb(L, cfg->macParam().fonthTopColor); break;
+        case HFBOTTOMCOLOR: rn = LuaHelper::push_argb(L, cfg->macParam().fonthBottomColor); break;
+        case TITLECOLOR:    rn = LuaHelper::push_argb(L, cfg->macParam().titleColor); break;                
         default:;
       }      
     }  else {

@@ -86,6 +86,7 @@ BOOL CMyDialog::DestroyWindow()
     static int setpreferredsize(lua_State* L);
     static int preferredsize(lua_State* L);
     static int setcolor(lua_State* L);
+    static int setskincolor(lua_State* L);
     static int color(lua_State* L);
     static int generate(lua_State* L);
     static int setcapture(lua_State* L);
@@ -109,9 +110,10 @@ BOOL CMyDialog::DestroyWindow()
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int setxy(lua_State *L);
+    static int setxy(lua_State *L);    
     static int pos(lua_State *L);
     static int clientpos(lua_State* L);
+    static int setzoom(lua_State* L);
     static int getfocus(lua_State *L);
     static int getitems(lua_State* L);    
     static int remove(lua_State* L);
@@ -146,22 +148,27 @@ BOOL CMyDialog::DestroyWindow()
    private:
     static int create(lua_State *L);
     static int setpos(lua_State *L);
+    // fill
     static int setcolor(lua_State* L);
-    static int setoutlinecolor(lua_State* L);
+    static int setskincolor(lua_State* L);
+    static int color(lua_State* L);
+    // stroke
+    static int setstrokecolor(lua_State* L);
+    static int setskinstrokecolor(lua_State* L);
+    static int strokecolor(lua_State* L);
+
     static int setxy(lua_State *L);
     static int pos(lua_State *L);
-    static int clientpos(lua_State* L);
-    static int color(lua_State* L);
-    static int outlinecolor(lua_State* L);
+    static int clientpos(lua_State* L);    
     static int parent(lua_State *L);
     static int remove(lua_State* L);
     static int gc(lua_State* L);
-    static int tostring(lua_State* L);
-    static int skin(lua_State* L);
+    static int tostring(lua_State* L);    
     static int setzorder(lua_State* L);
     static int zorder(lua_State* L);
     static int setborder(lua_State* L);
     static int border(lua_State* L);    
+    static int getfocus(lua_State *L);
   };
 
   struct LuaLine : public canvas::Line {
@@ -179,6 +186,8 @@ BOOL CMyDialog::DestroyWindow()
    private:
     static int create(lua_State *L);
     static int setcolor(lua_State* L);
+    static int setskincolor(lua_State* L);
+    static int color(lua_State* L);
     static int setpoints(lua_State* L);
     static int setpoint(lua_State* L);
     static int points(lua_State* L);
@@ -186,6 +195,8 @@ BOOL CMyDialog::DestroyWindow()
     static int gc(lua_State* L);
     static int setxy(lua_State *L);
     static int pos(lua_State *L);
+    static int enablepointerevents(lua_State* L);
+    static int disablepointerevents(lua_State* L);
   };
 
   struct LuaText : public canvas::Text {
@@ -206,6 +217,7 @@ BOOL CMyDialog::DestroyWindow()
     static int settext(lua_State* L);
     static int text(lua_State* L);
     static int setcolor(lua_State* L);
+    static int setskincolor(lua_State* L);
     static int color(lua_State* L);
     static int pos(lua_State *L);
     static int gc(lua_State* L);

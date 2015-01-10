@@ -59,7 +59,7 @@ namespace psycle { namespace host {
     virtual int GetNumOutputPins() const { return samplesV.size(); }
     PluginInfo CallPluginInfo() { return proxy_.call_info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
-    virtual void AfterTweaked(int idx) { proxy_.call_aftertweaked(idx); };
+    virtual void AfterTweaked(int numparam);
     template<class T> void GetMenu(T& f) { proxy_.get_menu(f); }	
     std::string help();
     virtual int GetGuiType() const { return proxy_.gui_type(); }
