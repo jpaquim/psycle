@@ -14,9 +14,7 @@ namespace psycle { namespace host { namespace canvas {
   #define ToCOLORREF(argb) RGB((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, (argb >> 0) & 0xFF)
   #define GetAlpha(argb) (argb>>24) & 0xFF
 
-  struct Item;
-  struct Canvas;
-
+  class Item;  class Canvas;
   struct Event {
     enum Type {
       BUTTON_PRESS,
