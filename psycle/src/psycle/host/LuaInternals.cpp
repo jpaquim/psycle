@@ -863,7 +863,7 @@ namespace psycle { namespace host {
     float* env,
     SingleWorkInterface* master,
     float* pwm) { 
-      if (shape() != WaveOscTables::Shape::RND) {
+      if (shape() != WaveOscTables::RND) {
         resampler_->work(num, data, 0, fm, env, pwm, master);  
       } else {
         for (int i = 0; i < num; ++i) {
