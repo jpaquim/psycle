@@ -197,16 +197,18 @@ void CEnvelopeEditorDlg::SetADSRMode()
 	m_SlADSRSustain.EnableWindow(TRUE);
 	m_SlADSRRelease.EnableWindow(TRUE);
 	XMInstrument::Envelope& env = m_EnvelopeEditor.envelope();
-	float min=env.GetValue(0);
-	float max=env.GetValue(1);
+	XMInstrument::Envelope::ValueType min=env.GetValue(0);
+	XMInstrument::Envelope::ValueType max=env.GetValue(1);
+	float diff = max-min;
 	m_SlADSRBase.SetPos(min*100);
-	if(max!=min) {
-		m_SlADSRMod.SetPos((max-min)*100.f);
+	if(diff > 0.f) {
+		m_SlADSRMod.SetPos(diff*100.f);
 	}
 	else {m_SlADSRMod.SetPos(100);}
 	m_SlADSRAttack.SetPos(m_EnvelopeEditor.AttackTime());
 	m_SlADSRDecay.SetPos(m_EnvelopeEditor.DecayTime());
-	m_SlADSRSustain.SetPos(m_EnvelopeEditor.SustainValue()*100.f);
+
+	m_SlADSRSustain.SetPos((m_EnvelopeEditor.SustainValue()-min)*100/diff);
 	m_SlADSRRelease.SetPos(m_EnvelopeEditor.ReleaseTime());
 
 	m_EnvelopeEditor.Invalidate();
