@@ -131,8 +131,8 @@ void CEnvelopeEditor::AttackTime(int time, bool rezoom)
 }
 void CEnvelopeEditor::DecayTime(int time, bool rezoom)
 {
-	if (time <= 0) time=1; //prevent point swapping.
-	time = m_pEnvelope->GetTime(1)+time;
+	int timestart = m_pEnvelope->GetTime(1);
+	if (time-timestart <= 0) time=timestart+1; //prevent point swapping.
 	int prevDecay = m_pEnvelope->GetTime(2);
 	int diff = time-prevDecay;
 	if (time > prevDecay) {
@@ -149,8 +149,9 @@ void CEnvelopeEditor::DecayTime(int time, bool rezoom)
 }
 void CEnvelopeEditor::ReleaseTime(int time, bool rezoom)
 {
-	if (time <= 0) time=1; //prevent point swapping.
-	m_pEnvelope->SetTime(3, m_pEnvelope->GetTime(2)+time);
+	int timestart = m_pEnvelope->GetTime(2);
+	if (time-timestart <= 0) time=timestart+1; //prevent point swapping.
+	m_pEnvelope->SetTime(3, time);
 	if (rezoom)	FitZoom();
 }
 
@@ -396,7 +397,9 @@ void CEnvelopeEditor::OnMouseMove( UINT nFlags, CPoint point )
 			}
 			switch(m_EditPoint) {
 				case 1: AttackTime((int)((float)m_EditPointX / m_Zoom), false); break;
-				case 2: m_pEnvelope->SetValue(2, val); DecayTime((int)((float)m_EditPointX / m_Zoom), false); break;
+				case 2: m_pEnvelope->SetValue(2, std::max(m_pEnvelope->GetValue(0),std::min(val,m_pEnvelope->GetValue(1))));
+					DecayTime((int)((float)m_EditPointX / m_Zoom), false);
+					break;
 				case 3: ReleaseTime((int)((float)m_EditPointX / m_Zoom), false); break;
 				default:break;
 			}
