@@ -43,7 +43,7 @@ void mi::Init()
 	currentSR = pCB->GetSamplingRate();
 	leftFilter.changeSamplerate(currentSR);
 	rightFilter.changeSamplerate(currentSR);
-
+	memset(Vals,0,sizeof(int));
 }
 
 void mi::Command()
