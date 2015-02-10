@@ -54,24 +54,24 @@ namespace psycle { namespace host {
     lua_setfield(L,-2, "__gc");
     luaL_newlib(L, plugin_methods);
     // define enum
-    int e = 1;
-    lua_pushnumber(L, e++); 
+    int e = 0;
+    lua_pushnumber(L, ++e); 
     lua_setfield(L, -2, "TOPCOLOR");
-    lua_pushnumber(L, e++); 
+    lua_pushnumber(L, ++e); 
     lua_setfield(L, -2, "BOTTOMCOLOR");
-    lua_pushnumber(L, e++); 
+    lua_pushnumber(L, ++e); 
     lua_setfield(L, -2, "HTOPCOLOR");
-    lua_pushnumber(L, e++); 
+    lua_pushnumber(L, ++e); 
     lua_setfield(L, -2, "HBOTTOMCOLOR");
-    lua_pushnumber(L, e++);     
+    lua_pushnumber(L, ++e);     
     lua_setfield(L, -2, "FTOPCOLOR");
-    lua_pushnumber(L, e++);     
+    lua_pushnumber(L, ++e);     
     lua_setfield(L, -2, "FBOTTOMCOLOR");
-    lua_pushnumber(L, e++);
+    lua_pushnumber(L, ++e);
     lua_setfield(L, -2, "HFTOPCOLOR");
-    lua_pushnumber(L, e++);     
+    lua_pushnumber(L, ++e);     
     lua_setfield(L, -2, "HFBOTTOMCOLOR");
-    lua_pushnumber(L, e++);
+    lua_pushnumber(L, ++e);
     lua_setfield(L, -2, "TITLECOLOR");
     return 1;
   }
@@ -144,7 +144,19 @@ namespace psycle { namespace host {
 
   LuaMachine::~LuaMachine() {	
     if (mac_!=0 && !shared_) {
-      delete mac_; 
+      delete mac_;       
+    }    
+  }
+
+  void LuaMachine::lock() const {
+    if (proxy_) {
+      proxy_->lock();
+    }
+  }
+
+  void LuaMachine::unlock() const {
+    if (proxy_) {
+      proxy_->unlock();
     }
   }
 
@@ -211,6 +223,8 @@ namespace psycle { namespace host {
       {"channel", channel},
       {"setnumchannels", set_numchannels},
       {"numchannels", numchannels},
+      {"setnumprograms", set_numprograms},
+      {"numprograms", numprograms},
       {"resize", resize},
       {"setbuffer", setbuffer},
       {"addparameters", add_parameters},
@@ -221,16 +235,22 @@ namespace psycle { namespace host {
       {"shownativegui", show_native_gui},
       {"showcustomgui", show_custom_gui},
       {"parambyid", getparam},
+      {"setpresetmode", setpresetmode},
       {NULL, NULL}
     };
     luaL_newmetatable(L, meta);
     lua_pushcclosure(L, gc, 0);
     lua_setfield(L,-2, "__gc");
     luaL_newlib(L, plugin_methods);
+    // define some enums
     lua_pushnumber(L, 0);
     lua_setfield(L, -2, "FX");
     lua_pushnumber(L, 1);
     lua_setfield(L, -2, "GENERATOR");
+    lua_pushnumber(L, 0);
+    lua_setfield(L, -2, "PRSNATIVE");    
+    lua_pushnumber(L, 1);
+    lua_setfield(L, -2, "PRSCHUNK");
     return 1;
   }
 
@@ -416,7 +436,7 @@ namespace psycle { namespace host {
     int n = lua_gettop(L);
     if (n == 2) {
       LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
-      int size = luaL_checknumber (L, 2);	
+      int size = luaL_checknumber(L, 2);	
       plug->update_num_samples(size);
     }  else {
       luaL_error(L, "Got %d arguments expected 2 (self, size)", n); 
@@ -428,11 +448,11 @@ namespace psycle { namespace host {
     int n = lua_gettop(L);
     if (n == 2) {
       LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta); 
-      int idx = luaL_checknumber (L, 2);	
+      int idx = luaL_checknumber(L, 2);	
       PSArray ** udata = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));	
       PSArray* a = plug->channel(idx);
       *udata = new PSArray(a->data(), a->len());
-      luaL_setmetatable(L, "array_meta");
+      luaL_setmetatable(L, LuaArrayBind::meta);
     }  else {
       luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
     }
@@ -479,11 +499,21 @@ namespace psycle { namespace host {
   }
 
   int LuaMachineBind::set_numcols(lua_State* L) {	
-    return LuaHelper::callstrict1<LuaMachine, int>(L, meta, &LuaMachine::set_numcols);     
+    LuaHelper::callstrict1<LuaMachine, int>(L, meta, &LuaMachine::set_numcols);
+    return LuaHelper::chaining(L);
   }
 
   int LuaMachineBind::numchannels(lua_State* L) {	
     return LuaHelper::getnumber<LuaMachine, int>(L, meta, &LuaMachine::numchannels);	
+  }
+
+  int LuaMachineBind::set_numprograms(lua_State* L) {
+    LuaHelper::callstrict1<LuaMachine, int>(L, meta, &LuaMachine::set_numprograms);    
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaMachineBind::numprograms(lua_State* L) {	
+    return LuaHelper::getnumber<LuaMachine, int>(L, meta, &LuaMachine::numprograms);	
   }
 
   int LuaMachineBind::gc(lua_State* L) {
@@ -498,7 +528,7 @@ namespace psycle { namespace host {
       lua_pushvalue(L, 2);
       std::vector<float*> sampleV;
       for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
-        PSArray* v = *(PSArray **)luaL_checkudata(L, -1, "array_meta");
+        PSArray* v = *(PSArray **)luaL_checkudata(L, -1, LuaArrayBind::meta);
         sampleV.push_back(v->data());		 
       }
       plugin->set_buffer(sampleV);    
@@ -535,8 +565,8 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  int LuaMachineBind::set_parameters(lua_State* L) {	
-    LuaMachine* plugin = LuaHelper::check<LuaMachine>(L, 1, meta); 
+  int LuaMachineBind::set_parameters(lua_State* L) {
+    LuaMachine* plugin = LuaHelper::check<LuaMachine>(L, 1, meta);
     plugin->set_numparams(lua_rawlen(L, 2));
     lua_pushvalue(L, 1);
     lua_pushvalue(L, 2);
@@ -544,6 +574,13 @@ namespace psycle { namespace host {
     return 0;
   }
 
+  int LuaMachineBind::setpresetmode(lua_State* L) {
+    LuaMachine* plugin = LuaHelper::check<LuaMachine>(L, 1, meta);    
+    LuaMachine::PRSType mode = (LuaMachine::PRSType) ((int) luaL_checknumber(L, 2));
+    plugin->setprsmode(mode);
+    return 0;
+  }
+  
   ///////////////////////////////////////////////////////////////////////////////
   // PlayerBind
   ///////////////////////////////////////////////////////////////////////////////
@@ -616,7 +653,7 @@ namespace psycle { namespace host {
       CPlotterDlg* plotter = LuaHelper::check<CPlotterDlg>(L, 1,
         "psyplottermeta");
       plotter->ShowWindow(SW_SHOW);
-      PSArray* x = *(PSArray **)luaL_checkudata(L, -1, "array_meta");
+      PSArray* x = *(PSArray **)luaL_checkudata(L, -1, LuaArrayBind::meta);
       plotter->set_data(x->data(), x->len());
       plotter->UpdateWindow();
     } else {
@@ -628,28 +665,36 @@ namespace psycle { namespace host {
   ///////////////////////////////////////////////////////////////////////////////
   // Delay
   ///////////////////////////////////////////////////////////////////////////////
-  void PSDelay::work(PSArray& x, PSArray& y) {
+  void PSDelay::work(PSArray& x, PSArray& y) {    
     int n = x.len();
     int k = mem.len();
-    float* mp = mem.data();
-    float* xp = x.data();
-    float* yp = y.data();
-    if (k <= n) {
-      for (int i = 0; i < k; i++, ++yp) *yp = (*mp++);
-      for (int i = 0; i < n-k; i++, ++yp) *yp = (*xp++);
-      mp = mem.data();
-      for (int i = 0; i < k; i++, ++mp) *mp = (*xp++);
+    if (n>k) {
+      y.copyfrom(x, k);
+      y.copyfrom(mem, 0);
+      int o = n-k;
+      x.offset(o);
+      mem.copyfrom(x, 0);
+      x.offset(-o);
+    } else
+    if (n==k) {
+      y.copyfrom(mem);
+      mem.copyfrom(x);
     } else {
-      for (int i = 0; i < n; i++, ++yp) *yp = (*mp++);
-      mp = mem.data();
-      for (int i = n; i < k; i++, ++mp) *mp = mp[i];
-      for (int i = 0; i < n; i++, ++mp) *mp = (*xp++);
+      y.copyfrom(mem, 0);
+      PSArray tmp(k, 0);
+      mem.offset(n);
+      tmp.copyfrom(mem, 0);
+      mem.offset(-n);
+      tmp.copyfrom(x, k-n);
+      mem.copyfrom(tmp);
     }
   }
 
   ///////////////////////////////////////////////////////////////////////////////
   // DelayBind
   ///////////////////////////////////////////////////////////////////////////////
+
+  const char* LuaDelayBind::meta = "psydelaymeta";
 
   int  LuaDelayBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
@@ -658,7 +703,7 @@ namespace psycle { namespace host {
       {"tostring", tostring},
       {NULL, NULL}
     };
-    luaL_newmetatable(L, "psydelaymeta");
+    luaL_newmetatable(L, meta);
     lua_pushcclosure(L, gc, 0);
     lua_setfield(L,-2, "__gc");
     lua_pushcclosure(L, tostring, 0);
@@ -674,18 +719,18 @@ namespace psycle { namespace host {
     }
     int k = luaL_checknumber (L, 2);
     luaL_argcheck(L, k >= 0, 2, "negative index not allowed");
-    LuaHelper::new_userdata<PSDelay>(L, "psydelaymeta", new PSDelay(k));
+    LuaHelper::new_userdata<PSDelay>(L, meta, new PSDelay(k));
     return 1;
   }
 
   int LuaDelayBind::work(lua_State* L) {
     int n = lua_gettop(L);
     if (n == 2) {
-      PSDelay* delay = LuaHelper::check<PSDelay>(L, 1, "psydelaymeta");       
-      PSArray* x = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+      PSDelay* delay = LuaHelper::check<PSDelay>(L, 1, meta);       
+      PSArray* x = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);
       PSArray** y = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
       *y = new PSArray(x->len(), 0);
-      luaL_setmetatable(L, "array_meta");
+      luaL_setmetatable(L, LuaArrayBind::meta);
       delay->work(*x, **y);
     }  else {
       luaL_error(L, "Got %d arguments expected 2 (self, arrayinput)", n); 
@@ -694,11 +739,13 @@ namespace psycle { namespace host {
   }
 
   int LuaDelayBind::gc (lua_State *L) {
-    return LuaHelper::delete_userdata<PSDelay>(L, "psydelaymeta");
+    PSDelay* ptr = *(PSDelay **)luaL_checkudata(L, 1, meta);
+	  delete ptr;
+    return 0;
   }
 
   int LuaDelayBind::tostring(lua_State *L) {
-    LuaHelper::check_tostring<PSDelay>(L, "psydelaymeta");
+    LuaHelper::check_tostring<PSDelay>(L, meta);
     std::stringstream r;
     r << "delay";
     lua_pushfstring(L, r.str().c_str());
@@ -814,7 +861,7 @@ namespace psycle { namespace host {
   // WaveOsc (delegator to resampler)
   ///////////////////////////////////////////////////////////////////////////////
 
-  WaveOsc::WaveOsc(WaveOscTables::Shape shape) : shape_(shape), duty_(0.5) {   
+  WaveOsc::WaveOsc(WaveOscTables::Shape shape) : shape_(shape) {    
     if (shape != WaveOscTables::PWM) {
       WaveList<float>::Type tbl = WaveOscTables::getInstance()->tbl(shape);
       resampler_ = new ResamplerWrap<float, 1>(tbl);
@@ -857,15 +904,11 @@ namespace psycle { namespace host {
     }
   }
 
-  void WaveOsc::work(int num,
-    float* data,
-    float* fm,
-    float* env,
-    SingleWorkInterface* master,
-    float* pwm) { 
+  void WaveOsc::work(int num, float* data, SingleWorkInterface* master) { 
       if (shape() != WaveOscTables::RND) {
-        resampler_->work(num, data, 0, fm, env, pwm, master);  
+        resampler_->work(num, data, 0, master);  
       } else {
+        // todo fm, am, pw
         for (int i = 0; i < num; ++i) {
           float r = ((float) rand() / (RAND_MAX))*2-1;  
           *data++ = r;
@@ -888,8 +931,8 @@ namespace psycle { namespace host {
       {"setfrequency", set_base_frequency},
       {"setgain", set_gain},
       {"gain", gain},
-      {"setduty", set_duty},
-      {"duty", duty},
+      {"setpw", setpw},
+      {"pw", pw},
       {"work", work},
       {"stop", stop},
       {"start", start},
@@ -903,6 +946,10 @@ namespace psycle { namespace host {
       {"setsyncfadeout", set_sync_fadeout},
       {"phase", phase},
       {"setphase", setphase},	  
+      {"setpm", setpm},
+      {"setam", setam},
+      {"setfm", setfm},
+      {"setpwm", setpwm},
       { NULL, NULL}
     };
     luaL_newmetatable(L, meta);
@@ -979,12 +1026,12 @@ namespace psycle { namespace host {
     return LuaHelper::getnumber<WaveOsc, float>(L, meta, &WaveOsc::gain);
   }
 
-  int LuaWaveOscBind::set_duty(lua_State* L) {
-    return LuaHelper::callstrict1<WaveOsc, double>(L, meta, &WaveOsc::set_duty);
+  int LuaWaveOscBind::setpw(lua_State* L) {
+    return LuaHelper::callstrict1<WaveOsc, float>(L, meta, &WaveOsc::setpw);
   }
 
-  int LuaWaveOscBind::duty(lua_State* L) {
-    return LuaHelper::getnumber<WaveOsc, double>(L, meta, &WaveOsc::duty);
+  int LuaWaveOscBind::pw(lua_State* L) {
+    return LuaHelper::getnumber<WaveOsc, float>(L, meta, &WaveOsc::pw);
   }
 
   int LuaWaveOscBind::set_shape(lua_State* L) {
@@ -1021,26 +1068,86 @@ namespace psycle { namespace host {
     return LuaHelper::callstrict1<WaveOsc, float>(L, meta, &WaveOsc::set_frequency);
   }
 
+  int LuaWaveOscBind::setpm(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      WaveOsc* osc = LuaHelper::check<WaveOsc>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        osc->setpm(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        osc->setpm(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaWaveOscBind::setfm(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      WaveOsc* osc = LuaHelper::check<WaveOsc>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        osc->setfm(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        osc->setfm(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaWaveOscBind::setam(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      WaveOsc* osc = LuaHelper::check<WaveOsc>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        osc->setam(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        osc->setam(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaWaveOscBind::setpwm(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      WaveOsc* osc = LuaHelper::check<WaveOsc>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        osc->setam(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        osc->setpwm(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
+  }
+
   int LuaWaveOscBind::work(lua_State* L) {
     int n = lua_gettop(L);
     if (n == 2 or n==3 or n==4 or n==5) {
       WaveOsc* osc = LuaHelper::check<WaveOsc>(L, 1, meta);
-      PSArray* data = *(PSArray **)luaL_checkudata(L, 2, "array_meta");   
+      PSArray* data = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);   
       float* fm = 0;
       float* env = 0;
       float* pwm = 0;
       if (n>2 && (!lua_isnil(L,3))) {
-        PSArray*arr = *(PSArray **)luaL_checkudata(L, 3, "array_meta");   
+        PSArray*arr = *(PSArray **)luaL_checkudata(L, 3, LuaArrayBind::meta);   
         fm = arr->data();
       }
       if (n>3 && (!lua_isnil(L,4))) {
-        PSArray* arr = *(PSArray **)luaL_checkudata(L, 4, "array_meta");
+        PSArray* arr = *(PSArray **)luaL_checkudata(L, 4, LuaArrayBind::meta);
         env = arr->data();
-      }
-      if (n==5 && (!lua_isnil(L,5))) {
-        PSArray* arr = *(PSArray **)luaL_checkudata(L, 5, "array_meta");
-        pwm = arr->data();
-      }
+      }      
       // check for master
       LuaSingleWorker* master = 0;
       lua_getfield(L, 1, "sync");
@@ -1050,7 +1157,7 @@ namespace psycle { namespace host {
         lua_pushvalue(L, 1);
         master = new LuaSingleWorker(L);
       }
-      osc->work(data->len(), data->data(), fm, env, master, pwm);
+      osc->work(data->len(), data->data(), master);
       lua_pushnumber(L,  data->len()); // return processed samples
       if (master) {
         delete master;
@@ -1265,13 +1372,13 @@ namespace psycle { namespace host {
       float* vcfc = 0;
       float* vcfr = 0;
       Filter* filter = LuaHelper::check<Filter>(L, 1,  meta);
-      PSArray* x_input = *(PSArray **)luaL_checkudata(L, 2, "array_meta");   
+      PSArray* x_input = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);
       if (n>2) {
-        PSArray* arr = *(PSArray **)luaL_checkudata(L, 3, "array_meta");   
+        PSArray* arr = *(PSArray **)luaL_checkudata(L, 3, LuaArrayBind::meta);   
         vcfc = arr->data();
       }
       if (n>3) {
-        PSArray* arr = *(PSArray **)luaL_checkudata(L, 3, "array_meta");   
+        PSArray* arr = *(PSArray **)luaL_checkudata(L, 3, LuaArrayBind::meta);
         vcfr = arr->data();
       }
       int num = x_input->len();
@@ -1385,11 +1492,11 @@ namespace psycle { namespace host {
     }   
     XMInstrument::WaveData<float>* wave = 
       LuaHelper::check<XMInstrument::WaveData<float>>(L, 1, meta);  
-    PSArray* la = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
+    PSArray* la = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);
     PSArray* ra = 0;
     bool is_stereo = (n==3 );
     if (is_stereo) {
-      ra = *(PSArray **)luaL_checkudata(L, 3, "array_meta");
+      ra = *(PSArray **)luaL_checkudata(L, 3, LuaArrayBind::meta);
     }
     wave->AllocWaveData(la->len(), is_stereo);    
     float* l = wave->pWaveDataL();
@@ -1506,7 +1613,7 @@ namespace psycle { namespace host {
   template <class T, int VOL>
   PWMWrap<T, VOL>::PWMWrap() : 
   ResamplerWrap<T, VOL>(WaveOscTables::getInstance()->tbl(WaveOscTables::SAW)),
-    pw_(0.5) {	
+    pw_(0.5), pwm_(0) {	
       resampler.quality(helpers::dsp::resampler::quality::linear);
       set_frequency(f_);
       wavectrl.Playing(false);
@@ -1523,7 +1630,7 @@ namespace psycle { namespace host {
     last_wave = wave_it != waves_.end() ? wave_it->second : 0;
     if (wave_it != waves_.end()) {
       wavectrl.Init(last_wave, 0, resampler);
-      wavectrl.Position(phase*last_wave->WaveLength());
+      wavectrl.Position2(phase*last_wave->WaveLength());
       double sr = Global::player().SampleRate();
       basef = 440 *std::pow(2.0,
         (notecommands::middleC-last_wave->WaveTune()-
@@ -1533,12 +1640,15 @@ namespace psycle { namespace host {
       wavectrl.Speed(resampler, speed_);
       wavectrl.Playing(true);
     }
-    // phas22
+    // phase2
     wave_it2 = waves_.find(range<double>(f_));
     last_wave2 = wave_it2 != waves_.end() ? wave_it->second : 0;
     if (wave_it2 != waves_.end()) {
       wavectrl2.Init(last_wave2, 0, resampler);
-      wavectrl2.Position((phase+pw_)*last_wave2->WaveLength());
+      double p2 = (phase+pw_);
+      while (p2 >=1) {p2--;}
+      while (p2<0) {p2++;}
+      wavectrl2.Position2(p2*last_wave2->WaveLength());
       double sr = Global::player().SampleRate();
       basef = 440 *std::pow(2.0,
         (notecommands::middleC-last_wave2->WaveTune()-
@@ -1548,7 +1658,6 @@ namespace psycle { namespace host {
       wavectrl2.Speed(resampler, speed_);
       wavectrl2.Playing(true);
     }
-
     last_sgn = 1;
     oldtrigger = 0;
     dostop_ = false;
@@ -1658,16 +1767,35 @@ namespace psycle { namespace host {
         XMSampler::WaveDataController<T>::WorkFunction pWork;
         int pos = wavectrl.Position();	 
         if (wave_it != waves_.end() && speed_ > 0) {
-          int nextsamples = std::min(wavectrl.PreWork(numSamples, &pWork, false),
-            numSamples);
+          int step = 1;
+          if (ph==NULL) {
+            step = numSamples;
+          }
+          for (int z = 0; z < num; z+=step) {
+          if(ph!=0) {
+              double phase = wavectrl.Position2() / last_wave->WaveLength();		 
+              phase += (*ph++);		 
+              while (phase >=1) {--phase;}
+              while (phase<0) {++phase;}
+              wavectrl.Position2(phase*last_wave->WaveLength());
+              double p2 = (phase+pw_);
+              while (p2 >=1) {p2--;}
+              while (p2<0) {p2++;}
+              wavectrl2.Position2(p2*last_wave2->WaveLength());
+          }
+           int nextsamples = std::min(wavectrl.PreWork(
+              ph!=0 ? 1 : numSamples, &pWork, false),
+              ph!=0 ? 1 : numSamples);
           numSamples-=nextsamples;
           while (nextsamples) {
-            if (ph != 0) {
-              double phase = wavectrl.Position2() / last_wave->WaveLength();		 
-              phase += (*ph++);
-              while (phase >=1) {phase--;}
-              while (phase<0) {phase++;}
-              wavectrl2.Position2(phase*last_wave->WaveLength());			 				 
+            if (pwm_!=0) {
+              double phase = wavectrl.Position2() / last_wave->WaveLength();		
+              double pw = pw_+(*pwm_++)*0.5;
+              pw = std::min(1.0, std::max(0.0, pw));
+              double p2 = (phase+pw);
+              while (p2 >=1) {p2--;}
+              while (p2<0) {p2++;}
+              wavectrl2.Position2(p2*last_wave2->WaveLength());                    
             }
             wavectrl2.PreWork(1, &pWork, false);
             pWork(wavectrl2, &left_output2, &right_output2);
@@ -1700,12 +1828,12 @@ namespace psycle { namespace host {
               left_output2 *= v;
               right_output2 *= v;
             }			 			
-            if (pSamplesL) *pSamplesL++ += (left_output-left_output2)*adjust_vol*gain_;
-            if (pSamplesR) *pSamplesR++ += 
-              (right_output-right_output2)*adjust_vol*gain_;
+            if (pSamplesL) *pSamplesL++ += (left_output2-left_output)*adjust_vol*gain_;
+            if (pSamplesR) *pSamplesR++ += (right_output2-right_output)*adjust_vol*gain_;
             nextsamples--;
           }	 
           wavectrl.PostWork();
+          }
         } else {
           numSamples--;
           if (wave_it == waves_.end()) {
@@ -1816,19 +1944,13 @@ namespace psycle { namespace host {
   }
 
   template <class T, int VOL>
-  int ResamplerWrap<T, VOL>::work(int numSamples,
-    float* pSamplesL,
-    float* pSamplesR,
-    float* fm,
-    float* env,
-    float* phase,
-    SingleWorkInterface* master) {
-      if (!master) {
-        return work_samples(numSamples, pSamplesL, pSamplesR, fm, env, phase);
-      } else {
-        return work_trigger(numSamples, pSamplesL, pSamplesR, fm, env, phase,
-          master);
-      }
+  int ResamplerWrap<T, VOL>::work(int num, float* left, float* right,
+      SingleWorkInterface* master) {
+    if (!master) {
+      return work_samples(num, left, right, fm_, am_, pm_);
+    } else {
+      return work_trigger(num, left, right, fm_, am_, pm_, master);
+    }
   }
 
   // hardsync work
@@ -1936,7 +2058,6 @@ namespace psycle { namespace host {
               while (phase<0) {++phase;}
               wavectrl.Position2(phase*last_wave->WaveLength());
             }
-
             int nextsamples = std::min(wavectrl.PreWork(
               ph!=0 ? 1 : numSamples, &pWork, false),
               ph!=0 ? 1 : numSamples);
@@ -2034,7 +2155,7 @@ namespace psycle { namespace host {
 
   PSArray* LuaSingleWorker::work(int numSamples, int val) {
     lua_getfield(L, -1, "syncarray");
-    PSArray* arr = *(PSArray **)luaL_checkudata(L, -1, "array_meta");
+    PSArray* arr = *(PSArray **)luaL_checkudata(L, -1, LuaArrayBind::meta);
     arr->resize(numSamples+val);
     arr->margin(val, val+numSamples);
     arr->fillzero();
@@ -2072,6 +2193,9 @@ namespace psycle { namespace host {
       {"quality", set_quality},
       {"setsync", set_sync},
       {"setsyncfadeout", set_sync_fadeout},
+      {"setpm", setpm},
+      {"setam", setam},
+      {"setfm", setfm},      
       {NULL, NULL}
     };
     luaL_newmetatable(L, meta);
@@ -2179,19 +2303,19 @@ namespace psycle { namespace host {
       lua_pushnumber(L, 0);
       return 1;
     }
-    PSArray* l = *(PSArray **)luaL_checkudata(L, 2, "array_meta");
-    PSArray* r = *(PSArray **)luaL_checkudata(L, 3, "array_meta");
+    PSArray* l = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);
+    PSArray* r = *(PSArray **)luaL_checkudata(L, 3, LuaArrayBind::meta);
 
     float* fm = 0;
     float* env = 0;    
     // frequence modulation -- optional
     if (n>3 && (!lua_isnil(L, 4))) {
-      PSArray*arr = *(PSArray **)luaL_checkudata(L, 4, "array_meta");   
+      PSArray*arr = *(PSArray **)luaL_checkudata(L, 4, LuaArrayBind::meta);
       fm = arr->data();
     }
     // volume envelope -- optional
     if (n>4 && !lua_isnil(L, 5)) {
-      PSArray* arr = *(PSArray **)luaL_checkudata(L, 5, "array_meta");
+      PSArray* arr = *(PSArray **)luaL_checkudata(L, 5, LuaArrayBind::meta);
       env = arr->data();
     }   
     // check for master
@@ -2203,10 +2327,11 @@ namespace psycle { namespace host {
       lua_pushvalue(L, 1);
       master = new LuaSingleWorker(L);
     }
-    int processed = rwrap->work(l->len(), l->data(), r->data(), fm, env, 0,
-      master);
+    int processed = rwrap->work(l->len(), l->data(), r->data(), master);
     lua_pushnumber(L, processed); // return total number of resampled samples
-    if (master) delete master;
+    if (master) {
+      delete master;
+    }
     return 1;
   }
 
@@ -2229,7 +2354,8 @@ namespace psycle { namespace host {
   }
 
   int LuaResamplerBind::noteoff(lua_State* L) {
-    return LuaHelper::call<RWInterface>(L, meta, &RWInterface::NoteOff);   
+    LuaHelper::call<RWInterface>(L, meta, &RWInterface::NoteOff);
+    return 0;
   }
 
   int LuaResamplerBind::start(lua_State* L) {   
@@ -2272,6 +2398,54 @@ namespace psycle { namespace host {
 
   int LuaResamplerBind::gc (lua_State *L) {
     return LuaHelper::delete_userdata<RWInterface>(L, meta);	
+  }
+
+  int LuaResamplerBind::setpm(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      RWInterface* rwrap = LuaHelper::check<RWInterface>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        rwrap->setpm(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        rwrap->setpm(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaResamplerBind::setfm(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      RWInterface* rwrap = LuaHelper::check<RWInterface>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        rwrap->setfm(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        rwrap->setfm(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaResamplerBind::setam(lua_State* L) {
+    int n = lua_gettop(L);    
+    if (n == 2) {
+      RWInterface* rwrap = LuaHelper::check<RWInterface>(L, 1, meta);
+      if (lua_isnil(L, 2)) {
+        rwrap->setam(0);
+      } else {
+        PSArray* v = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);        
+        rwrap->setam(v->data());
+      }
+    } else {
+      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
+    }
+    return LuaHelper::chaining(L);
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -2410,7 +2584,7 @@ namespace psycle { namespace host {
       int num = luaL_checknumber(L, 2);
       env->work(num);
       PSArray ** rv = (PSArray **)lua_newuserdata(L, sizeof(PSArray *));
-      luaL_setmetatable(L, "array_meta");
+      luaL_setmetatable(L, LuaArrayBind::meta);
       *rv = new PSArray(env->out().data(), num);
     }  else {
       luaL_error(L, "Got %d arguments expected 2 (self, num)", n); 
@@ -2425,27 +2599,21 @@ namespace psycle { namespace host {
   }
 
   int LuaEnvelopeBind::release(lua_State *L) {
-    return LuaHelper::call(L, meta, &LEnvelope::release);
-  }
-
-  int LuaEnvelopeBind::start(lua_State *L) {
-    return LuaHelper::call(L, meta, &LEnvelope::start);	
-  }
-
-  int LuaEnvelopeBind::setpeak(lua_State* L) {	
-    int n = lua_gettop(L);
-    if (n ==3) {
-      LEnvelope* env = LuaHelper::check<LEnvelope>(L, 1, meta);       
-      int idx = luaL_checknumber(L, 2);
-      double peak = luaL_checknumber(L, 3);
-      env->setstagepeak(idx-1, peak);
-    } else {
-      luaL_error(L, "Got %d arguments expected 3 (self, index, peak)", n); 
-    }
+    LuaHelper::call(L, meta, &LEnvelope::release);
     return 0;
   }
 
-  int LuaEnvelopeBind::peak(lua_State* L) {
+  int LuaEnvelopeBind::start(lua_State *L) {
+    LuaHelper::call(L, meta, &LEnvelope::start);	
+    return 0;
+  }
+
+  int LuaEnvelopeBind::setpeak(lua_State* L) {	
+    LuaHelper::callstrict2<LEnvelope>(L, meta, &LEnvelope::setstagepeak, true);    
+    return LuaHelper::chaining(L);
+  }
+
+  int LuaEnvelopeBind::peak(lua_State* L) {    
     int n = lua_gettop(L);
     if (n ==2) {
       LEnvelope* env = LuaHelper::check<LEnvelope>(L, 1, meta);       
@@ -2470,27 +2638,20 @@ namespace psycle { namespace host {
   }
 
   int LuaEnvelopeBind::setstagetime(lua_State* L) {
-    int n = lua_gettop(L);
-    if (n ==3) {
-      LEnvelope* env = LuaHelper::check<LEnvelope>(L, 1, meta);       
-      int idx = luaL_checknumber(L, 2);
-      double time = luaL_checknumber(L, 3);
-      env->setstagetime(idx-1, time);
-    } else {
-      luaL_error(L, "Got %d arguments expected 3 (self, index, time)", n); 
-    }
-    return 0;
+    LuaHelper::callstrict2<LEnvelope>(L, meta, &LEnvelope::setstagetime, true);    
+    return LuaHelper::chaining(L);
   }
 
   int LuaEnvelopeBind::setstartvalue(lua_State* L) {
-    return LuaHelper::callstrict1<LEnvelope, float>(L, meta, &LEnvelope::setstartvalue);	
+    LuaHelper::callstrict1<LEnvelope, float>(L, meta, &LEnvelope::setstartvalue);
+    return LuaHelper::chaining(L);
   }
 
   int LuaEnvelopeBind::lastvalue(lua_State *L) {
     return LuaHelper::getnumber<LEnvelope, float>(L, meta, &LEnvelope::lastvalue);
   }
 
-  int LuaEnvelopeBind::gc (lua_State *L) {
+  int LuaEnvelopeBind::gc(lua_State *L) {
     return LuaHelper::delete_userdata<LEnvelope>(L, meta);
   }
 
@@ -2501,8 +2662,6 @@ namespace psycle { namespace host {
     lua_pushfstring(L, r.str().c_str());
     return 1;
   }
-
   
 } // namespace
 } // namespace
-

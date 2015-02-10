@@ -67,12 +67,41 @@ namespace psycle { namespace host {
     canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
     bool OnEvent(canvas::Event* ev);    
     virtual void OnReload();
+    bool LoadBank(const std::string& filename);
+    void SaveBank(const std::string& filename);
+
+    // Bank & Programs    
+    virtual void SetCurrentProgram(int idx);
+		virtual int GetCurrentProgram();
+		virtual void GetCurrentProgramName(char* val) {
+      GetIndexProgramName(0, curr_prg_, val);
+    }
+		virtual void GetIndexProgramName(int bnkidx, int prgIdx, char* val); //{
+			//GetProgramNameIndexed(-1, bnkidx*128 + prgIdx, val);
+		//};
+    virtual int GetNumPrograms();
+		/*virtual int GetTotalPrograms(){ return numPrograms();};
+		virtual void SetCurrentBank(int idx) { SetProgram(idx*128+GetCurrentProgram());};
+		virtual int GetCurrentBank() { try {return GetProgram()/128; } catch(...){return 0;}};
+		virtual void GetCurrentBankName(char* val) {GetIndexBankName(GetCurrentBank(),val);};
+		virtual void GetIndexBankName(int bnkidx, char* val){
+		  if(bnkidx < GetNumBanks())
+		 	  sprintf(val,"Internal %d", bnkidx+1);
+		  else
+				val[0]='\0';
+		}
+		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
 
     std::string dll_path_;
     bool usenoteon_;
+    LuaMachine::PRSType prsmode() const { return proxy_.prsmode(); }
+
+    void lock() const { proxy_.lock(); }
+    void unlock() const { proxy_.unlock(); }
 
   protected:
     LuaProxy proxy_;
+    int curr_prg_;    
 
   private:
     // additions if noteon mode is used

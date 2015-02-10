@@ -53,11 +53,29 @@ namespace psycle { namespace host {
     void resize(int newsize);
     std::string tostring() const;
     void fillzero();
-    void fillzero(int pos);
+    void fillzero(int pos) { fill(0, pos); }
     void fill(float val);
     void fill(float val, int pos);
     void mul(float multi);
-    void mix(PSArray& src, float multi);
+    void mul(PSArray& src);
+    void mix(PSArray& src, float multi);    
+    void add(float addend);
+    void add(PSArray& src);
+    void sub(PSArray& src);
+    void sqrt() { for (int i = 0; i < len_; ++i) ::sqrt(ptr_[i]); }
+    void sqrt(PSArray& src);
+    void sin() { for (int i = 0; i < len_; ++i) ::sin(ptr_[i]); }
+    void cos() { for (int i = 0; i < len_; ++i) ::cos(ptr_[i]); }
+    void tan() { for (int i = 0; i < len_; ++i) ::tan(ptr_[i]); }
+    void floor() { for (int i = 0; i < len_; ++i) ::floor(ptr_[i]); }
+    void ceil() { for (int i = 0; i < len_; ++i) ::ceil(ptr_[i]); }
+    void abs() { for (int i = 0; i < len_; ++i) ::abs(ptr_[i]); }
+    void pow(float exp) { for (int i = 0; i < len_; ++i) ::pow(ptr_[i], exp); }
+    void sgn() { 
+      for (int i = 0; i < len_; ++i) {
+        ptr_[i] = (ptr_[i] > 0) ? 1 : ((ptr_[i] < 0) ? -1 : 0);
+      }
+    }
     float* data() { return ptr_; }
     template<class T>
     void do_op(T&);	
@@ -73,7 +91,6 @@ namespace psycle { namespace host {
       ptr_ += offset;
       can_aligned_ = is_aligned(ptr_);		
     }
-
     void clearmargin() { 
       ptr_ = base_;
       len_ = baselen_;
@@ -94,11 +111,10 @@ namespace psycle { namespace host {
 
   typedef std::vector<PSArray> psybuffer;
 
-  struct LuaArrayBind {
-    static void register_module(lua_State* L);
-    // helper
-    static int open_array(lua_State* L);
+  struct LuaArrayBind {        
+    static int open(lua_State* L);
     static PSArray* create_copy_array(lua_State* L, int idx=1);
+    static const char* meta;
 
     static int array_index(lua_State *L);
     static int array_new_index(lua_State *L);
@@ -108,7 +124,6 @@ namespace psycle { namespace host {
     static int array_copy(lua_State* L);
     static int array_tostring(lua_State *L);
     static int array_gc(lua_State* L);	
-
     // array methods
     static int array_size(lua_State* L);
     static int array_resize(lua_State* L);

@@ -124,23 +124,21 @@ namespace psycle { namespace host {
       lua_settable(L, -3);
     }
  
-		static int luaL_orderednext(lua_State *L)
-		{
+    // c iterator for orderedtable
+		static int luaL_orderednext(lua_State *L) {
 		  luaL_checkany(L, -1);                 // previous key
 		  luaL_checktype(L, -2, LUA_TTABLE);    // self
 		  luaL_checktype(L, -3, LUA_TFUNCTION); // iterator
 		  lua_pop(L, 1);                        // pop the key since 
-												// opair doesn't use it
-
+												                    // opair doesn't use it
 		  // iter(self)
 		  lua_pushvalue(L, -2);
 		  lua_pushvalue(L, -2);
 		  lua_call(L, 1, 2);
 
-		  if(lua_isnil(L, -2))
-		  {
-			lua_pop(L, 2);
-			return 0;
+		  if(lua_isnil(L, -2)) {
+			  lua_pop(L, 2);
+			  return 0;
 		  }
 		  return 2;
 		}
@@ -194,53 +192,71 @@ namespace psycle { namespace host {
 			                const char* meta,
 						    RT (UDT::*pt2ConstMember)() const) { // function ptr
 			int n = lua_gettop(L);
-	        if (n ==1) {
-		      UDT* m = LuaHelper::check<UDT>(L, 1, meta);
+      if (n ==1) {
+		    UDT* m = LuaHelper::check<UDT>(L, 1, meta);
 			  lua_pushnumber(L, (m->*pt2ConstMember)());		      		    			
 			}  else {
-               luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-	        }
+        luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+	    }
+			return 1;
+		}
+
+    template <class UDT, class RT>
+		static int getnumber1(lua_State* L,
+			                    const char* meta,                          
+						              RT (UDT::*pt2ConstMember)() const) { // function ptr
+			int n = lua_gettop(L);
+      if (n == 2) {
+		    UDT* m = LuaHelper::check<UDT>(L, 1, meta);
+        float val = luaL_checknumber(L, 2);
+			  lua_pushnumber(L, (m->*pt2ConstMember)(val));
+			}  else {
+        luaL_error(L, "Got %d arguments expected 2 (self)", n); 
+	    }
 			return 1;
 		}
 		
 		template <class UDT>
-		static int call(lua_State* L,
+		static UDT* call(lua_State* L,
 			                  const char* meta,
 						      void (UDT::*pt2Member)()) { // function ptr
 			int n = lua_gettop(L); 
 			if (n != 1) {
-               luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-            }   
+        luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+      }   
 			UDT* ud = LuaHelper::check<UDT>(L, 1, meta);			
 			(ud->*pt2Member)();
-            return 0;
+      return ud;
 		}
 
 		template <class UDT, class T>
 		static int callstrict1(lua_State* L, const char* meta,
-						       void (UDT::*pt2Member)(T)) { // function ptr
+						       void (UDT::*pt2Member)(T), bool dec1=false) { // function ptr
 			int n = lua_gettop(L); 
 			if (n != 2) {
-               luaL_error(L, "Got %d arguments expected 2 (self, value)", n); 
-            }   
+        luaL_error(L, "Got %d arguments expected 2 (self, value)", n); 
+      }   
 			UDT* ud = LuaHelper::check<UDT>(L, 1, meta);
 			T val = (T) luaL_checknumber(L, 2);
+      if (dec1) val--;
 			(ud->*pt2Member)(val);
-            return 0;
+      return 0;
 		}
 
 		template <class UDT, class T, class T2>
 		static int callstrict2(lua_State* L, const char* meta,
-						       void (UDT::*pt2Member)(T, T2)) { // function ptr
+						       void (UDT::*pt2Member)(T, T2), bool dec1 = false, bool dec2 = false) { // function ptr
 			int n = lua_gettop(L); 
 			if (n != 3) {
-               luaL_error(L, "Got %d arguments expected 3 (self, value, value)", n); 
-            }   
+        luaL_error(L, "Got %d arguments expected 3 (self, value, value)", n); 
+      }   
 			UDT* ud = LuaHelper::check<UDT>(L, 1, meta);
 			T val = luaL_checknumber(L, 2);
 			T2 val2 = luaL_checknumber(L, 3);
+      if (dec1) val--;
+      if (dec2) val2--;
 			(ud->*pt2Member)(val, val2);
-            return 0;
+      return 0;
 		}
 
 		template <class UDT, class T>
@@ -252,45 +268,37 @@ namespace psycle { namespace host {
 				(ud->*pt2Member)(def);
 			} else
 			if (n == 2) {
-			   T val = luaL_checknumber(L, 2);
-			   (ud->*pt2Member)(val);
+			  T val = luaL_checknumber(L, 2);
+			  (ud->*pt2Member)(val);
 			} else {
-               luaL_error(L, "Got %d arguments expected 1 or 2 (self [, value])", n); 
-            }   						
-            return 0;
+        luaL_error(L, "Got %d arguments expected 1 or 2 (self [, value])", n); 
+      }   						
+      return 0;
 		}
 		
 		// useful for debugging to see the stack state
-		static void stackDump (lua_State *L) {
-			int i;
+		static void stackDump (lua_State *L) {			
 			int top = lua_gettop(L);
-			for (i = 1; i <= top; i++) {  /* repeat for each level */
+			for (int i = 1; i <= top; ++i) { // repeat for each level
 				int t = lua_type(L, i);
 				switch (t) {
-
-				case LUA_TSTRING:  /* strings */
-					OutputDebugString(lua_tostring(L, i));
-					//printf("`%s'", lua_tostring(L, i));
+				  case LUA_TSTRING: // strings
+					  OutputDebugString(lua_tostring(L, i));					
 					break;
-
-				case LUA_TBOOLEAN:  /* booleans */
-					OutputDebugString(lua_toboolean(L, i) ? "true" : "false");
+				  case LUA_TBOOLEAN: // booleans
+					  OutputDebugString(lua_toboolean(L, i) ? "true" : "false");
 					break;
-
-				case LUA_TNUMBER:  /* numbers */
-					OutputDebugString("number"); // %g", lua_tonumber(L, i));
+				  case LUA_TNUMBER: // numbers
+					  OutputDebugString("number"); // %g", lua_tonumber(L, i));
 					break;
-
-				default:  /* other values */
-					OutputDebugString(lua_typename(L, t));
+				  default: // other values
+					  OutputDebugString(lua_typename(L, t));
 					break;
-
 				}
-				OutputDebugString("  ");  /* put a separator */
+				OutputDebugString("  "); // put a separator
 			}
-			OutputDebugString("\n");  /* end the listing */
+			OutputDebugString("\n"); // end the listing
 		}	
-
 
 	};
 }  // namespace

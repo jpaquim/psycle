@@ -34,12 +34,11 @@ namespace psycle { namespace host {
 
   LuaProxy::LuaProxy(LuaPlugin* plug, lua_State* state) : plug_(plug) {
     InitializeCriticalSection(&cs);
-    set_state(state);
-    cscount_ = 0;
+    set_state(state);    
   }
 
   LuaProxy::~LuaProxy() {
-    // if (terminal) { delete terminal; terminal = NULL; }
+    // if (terminal) { delete terminal; terminal = NULL; }    
     DeleteCriticalSection(&cs);
   }
 
@@ -53,7 +52,8 @@ namespace psycle { namespace host {
     lua_pop(L, 1);
     luaL_requiref(L, "psycle.midi", LuaMidiHelper::open, 1);  
     lua_pop(L, 1);
-    LuaArrayBind::register_module(L);  
+    luaL_requiref(L, "psycle.array", LuaArrayBind::open, 1);
+    lua_pop(L, 1);  
     luaL_requiref(L, "psycle.dsp.filter", LuaDspFilterBind::open, 1);
     lua_pop(L, 1);
 #if !defined WINAMP_PLUGIN
@@ -76,7 +76,9 @@ namespace psycle { namespace host {
     lua_pop(L, 1);
     luaL_requiref(L, "psycle.config", LuaConfigBind::open, 1);
     lua_pop(L, 1);
-    // canvas binds
+    // ui binds
+    luaL_requiref(L, "psycle.ui.dialog", LuaDialogBind::open, 1);
+    lua_pop(L, 1);
     luaL_requiref(L, "psycle.ui.canvas", LuaCanvasBind::open, 1);
     lua_pop(L, 1);
     luaL_requiref(L, "psycle.ui.canvas.group", LuaGroupBind::open, 1);
@@ -100,19 +102,9 @@ namespace psycle { namespace host {
 
   void LuaProxy::free_state() {
     if (L) {
-      lua_close (L);
+      lua_close(L);
     }
     L = 0;
-  }
-
-  void LuaProxy::lock() const {
-    ::EnterCriticalSection(&cs);
-    cscount_++;
-  }
-
-  void LuaProxy::unlock() const {
-    ::LeaveCriticalSection(&cs);
-    cscount_--;
   }
 
   void LuaProxy::reload() {        
@@ -223,7 +215,9 @@ namespace psycle { namespace host {
     LuaMachine** ud = (LuaMachine**) luaL_checkudata(L, -1, "psypluginmeta");
     (*ud)->set_mac(proxy->plug_);
     proxy->plugimport_ = *ud;
+    proxy->plugimport_->setproxy(proxy);
     lua_pushvalue(L, 1);
+    LuaHelper::register_weakuserdata(L, proxy->plugimport_);
     lua_setfield(L, 2, "proxy");    
     // share samples  
     (*ud)->build_buffer(proxy->plug_->samplesV, 256);
@@ -337,29 +331,32 @@ namespace psycle { namespace host {
     if (lua_istable(L,-1)) {
       size_t len;
       for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
-        const char* key = luaL_checklstring(L, -2, &len);
-        const char* value = luaL_checklstring(L, -1, &len);
+        const char* key = luaL_checklstring(L, -2, &len);        
         if (strcmp(key, "vendor") == 0) {
+          const char* value = luaL_checklstring(L, -1, &len);
           info.vendor = std::string(value);
         } else
           if (strcmp(key, "name") == 0) {
+            const char* value = luaL_checklstring(L, -1, &len);
             info.name = std::string(value);
           } else
             if (strcmp(key, "generator") == 0) {
-              if (std::string(value) == "1") {
+              int value = luaL_checknumber(L, -1);
+              if (value == 1) {
                 info.mode = MACHMODE_GENERATOR;
               }
             } else
               if (strcmp(key, "version") == 0) {
+                const char* value = luaL_checklstring(L, -1, &len);
                 info.version = value;
               } else
                 if (strcmp(key, "api") == 0) {
-                  int v = atoi(value);
-                  info.APIversion = v;
+                  int value = luaL_checknumber(L, -1);                  
+                  info.APIversion = value;
                 } else
                   if (strcmp(key, "noteon") == 0) {
-                    int v = atoi(value);
-                    info.flags = v;
+                    int value = luaL_checknumber(L, -1);
+                    info.flags = value;
                   }
       } 
     }
@@ -530,16 +527,17 @@ namespace psycle { namespace host {
     return "no help found";
   }
 
-  void LuaProxy::call_data(byte* data) {	
+  int LuaProxy::call_data(unsigned char **ptr, bool all) {	
     lock();
     std::string str;
     try {	
       if (!get_method_optional(L, "data")) {
         unlock();
         str = "";
-        return;
+        return 0;
       }
-      int status = lua_pcall(L, 1, 1 ,0);
+      lua_pushboolean(L, all);
+      int status = lua_pcall(L, 2, 1 ,0);
       if (status) {
         CString msg(lua_tostring(L, -1));
         unlock();
@@ -551,13 +549,14 @@ namespace psycle { namespace host {
         unlock();
         throw std::runtime_error(s);
       }
-      str = GetString();	
-      std::copy(str.begin(), str.end(), data);
+      str = GetString();
+      *ptr = new unsigned char[str.size()];
+      std::copy(str.begin(), str.end(), *ptr);
       unlock();
-      return;
+      return str.size();
     } CATCH_WRAP_AND_RETHROW(*plug_)  
       unlock();
-    return;
+    return 0;
   }
 
   uint32_t LuaProxy::call_data_size() {
@@ -589,7 +588,7 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  void LuaProxy::call_putdata(byte* data, int size) {
+  void LuaProxy::call_putdata(unsigned char* data, int size) {
     lock();
     try {	
       if (!get_method_optional(L, "putdata")) {
@@ -634,6 +633,7 @@ namespace psycle { namespace host {
           throw std::runtime_error(s);
         } CATCH_WRAP_AND_RETHROW(*plug_)
       }
+      lua_gc(L, LUA_GCSTEP, 5);
       unlock();
     }
   }
@@ -906,6 +906,80 @@ namespace psycle { namespace host {
     return mpf;
   }
 
+  // call events
+  void LuaProxy::call_setprogram(int idx) {
+    lock();
+    try {	
+      if (!get_method_optional(L, "setprogram")) {
+        unlock();
+        return;
+      }
+      lua_pushnumber(L, idx);
+      int status = lua_pcall(L, 2, 0 ,0);    // pc:sequencertick()
+      if (status) {
+        CString msg(lua_tostring(L, -1));
+        unlock();
+        throw std::runtime_error(msg.GetString());
+      }
+    } CATCH_WRAP_AND_RETHROW(*plug_)
+      unlock();
+  }
+
+  // call events
+  int LuaProxy::get_curr_program() {
+    lock();
+    int n1 = lua_gettop(L);
+    try {	
+      if (!get_method_optional(L, "getprogram")) {
+        unlock();
+        return 0;
+      }      
+      int status = lua_pcall(L, 1, 1, 0);    // pc:sequencertick()
+      if (status) {
+        CString msg(lua_tostring(L, -1));
+        unlock();
+        throw std::runtime_error(msg.GetString());
+      }
+      int prg = luaL_checknumber(L, -1);
+      lua_pop(L, 1);
+      int n2 = lua_gettop(L);
+      unlock();
+      assert(n1==n2);
+      return prg;
+    } CATCH_WRAP_AND_RETHROW(*plug_)
+    unlock();
+  }
+
+  // call events
+  int LuaProxy::call_numprograms() {
+     return plugimport_->numprograms();   
+  }
+
+  std::string LuaProxy::get_program_name(int bnkidx, int idx) {
+    lock();
+    int n1 = lua_gettop(L);
+    try {	
+      if (!get_method_optional(L, "programname")) {
+        unlock();
+        return "";
+      }      
+      lua_pushnumber(L, idx);
+      int status = lua_pcall(L, 2, 1 ,0);    // pc:sequencertick()
+      if (status) {
+        CString msg(lua_tostring(L, -1));
+        unlock();
+        throw std::runtime_error(msg.GetString());
+      }
+      const char* name = luaL_checkstring(L, -1);
+      lua_pop(L, 1);
+      int n2 = lua_gettop(L);
+      unlock();
+      assert(n1==n2);
+      return std::string(name);
+    } CATCH_WRAP_AND_RETHROW(*plug_)
+    unlock();
+  }
+  
   std::string LuaProxy::GetString() {	
     std::string name(lua_tostring(L, -1));
     lua_pop(L, 1);  // pop returned value	

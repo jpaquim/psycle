@@ -152,14 +152,14 @@ namespace psycle { namespace host {
 						}
 						++i;
 					  } else {
-                        CMenu* old = menu;
-						menu = newmenu;
-                        build_menu(t.nodes[k], id);
-						menu = old;
+              CMenu* old = menu;
+						  menu = newmenu;
+              build_menu(t.nodes[k], id);
+						  menu = old;
 					  }
 					}
 				  }
-	            } myfunctor(GetMenu(), this);												
+	       } myfunctor(GetMenu(), this);												
 				((LuaPlugin*)_machine)->GetMenu(myfunctor);
 			}
 
@@ -264,10 +264,11 @@ namespace psycle { namespace host {
           LuaPlugin* lp = (LuaPlugin*) (&machine());
           canvas::Canvas* user_view = lp->GetCanvas();
           if (user_view !=0 && lp->GetGuiType() == 1) {
+            user_view->SetParent(pView);
             user_view->InvalidateSave();
           } else {
             pView->WindowIdle();            
-          }
+          }          
         } else {
 				  pView->WindowIdle();
         }
@@ -297,22 +298,32 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 		{
-      /*if (_machine->_type == MACH_LUA) {
+      if (_machine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-        canvas::Event ev(0,
+        if (user_view !=0 && lp->GetGuiType() == 1) { 
+          UINT flags = 0;
+          if (GetKeyState(VK_SHIFT) & 0x8000) {
+            flags |= MK_SHIFT;
+          }
+          if (GetKeyState(VK_CONTROL) & 0x8000) {
+            flags |= MK_CONTROL;
+          }
+          if (nFlags == 13) {
+            flags |= MK_ALT;
+          }
+          canvas::Event ev(0,
                          canvas::Event::KEY_DOWN, 
                          0,
                          0,
-                         1,
-                         nFlags);
+                         nChar,
+                         flags);
           LuaPlugin* lp = (LuaPlugin*) _machine;
           if (lp->OnEvent(&ev)) {
             return;
           }
         }		    
-      }*/
+      }
 
 			// ignore repeats: nFlags&0x4000
 			const BOOL bRepeat = nFlags&0x4000;
@@ -352,17 +363,27 @@ namespace psycle { namespace host {
       if (_machine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _machine;
         canvas::Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-        canvas::Event ev(0,
+        if (user_view !=0 && lp->GetGuiType() == 1) { 
+          UINT flags = 0;
+          if (GetKeyState(VK_SHIFT) & 0x8000) {
+            flags |= MK_SHIFT;
+          }
+          if (GetKeyState(VK_CONTROL) & 0x8000) {
+            flags |= MK_CONTROL;
+          }
+          if (nFlags == 13) {
+            flags |= MK_ALT;
+          }
+          canvas::Event ev(0,
                          canvas::Event::KEY_UP, 
                          0,
                          0,
-                         1,
-                         nFlags);
+                         nChar,
+                         flags);
           LuaPlugin* lp = (LuaPlugin*) _machine;
           if (lp->OnEvent(&ev)) {
             return;
-          }
+          }        
         }		    
       }
 
@@ -404,12 +425,63 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnProgramsOpenpreset()
-		{
-			MessageBox("Please, use Views->Bank manager with Native Plugins to import presets.","Parameters window");
+		{      
+      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNK) {
+        char tmp[2048];			
+			  CFileDialog dlg(TRUE,
+				  "fxb",
+				  NULL,
+				  OFN_HIDEREADONLY | OFN_FILEMUSTEXIST|OFN_DONTADDTORECENT,
+				  "Effect Bank Files (.fxb)|*.fxb|Effect Program Files (.fxp)|*.fxp|All Files|*.*||");
+			  dlg.m_ofn.lpstrInitialDir = tmp;
+
+			  if (dlg.DoModal() != IDOK)
+				  return;
+
+        LuaPlugin* plug = (LuaPlugin*) this->_machine;
+			  if ( dlg.GetFileExt() == "fxb" )
+			  {				
+				  if (!plug->LoadBank((LPCSTR)(dlg.GetPathName()))) {        				
+					  MessageBox("Error Loading file", NULL, MB_ICONERROR);
+          }
+			  }
+			  else if ( dlg.GetFileExt() == "fxp" )
+			  {
+				  /*CFxProgram p(dlg.GetPathName());
+				  if ( p.Initialized() ) vstmachine().LoadProgram(p);
+				  else
+					  MessageBox("Error Loading file", NULL, MB_ICONERROR);*/
+
+			  }
+			  FillProgramCombobox();
+      } else {
+        MessageBox("Please, use Views->Bank manager with Native Plugins to import presets.","Parameters window");
+      }
 		}
 		void CFrameMachine::OnProgramsSavepreset()
-		{
-			MessageBox("Please, use Views->Bank manager with Native Plugins to export presets.","Parameters window");
+		{			
+      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNK) {
+        char tmp[2048];			
+			  CFileDialog dlg(FALSE,
+				  "fxb",
+				  NULL,
+				  OFN_HIDEREADONLY | OFN_NOCHANGEDIR | OFN_NOREADONLYRETURN |
+				  OFN_OVERWRITEPROMPT,
+				  "Effect Bank Files (.fxb)|*.fxb|Effect Program Files (.fxp)|*.fxp|All Files|*.*||");
+			  dlg.m_ofn.lpstrInitialDir = tmp;
+
+			  if (dlg.DoModal() == IDOK)
+			  {
+          LuaPlugin* plug = (LuaPlugin*) this->_machine;
+				  if (dlg.GetFileExt() == "fxb")
+            plug->SaveBank((LPCSTR)dlg.GetPathName());
+				  else if ( dlg.GetFileExt() == "fxp") {
+					  // SaveProgram((LPCSTR)dlg.GetPathName());
+          }
+			  }
+      } else {
+        MessageBox("Please, use Views->Bank manager with Native Plugins to export presets.","Parameters window");
+      }
 		}
 		void CFrameMachine::OnSetBank(UINT nID)
 		{

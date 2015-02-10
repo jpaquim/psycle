@@ -11,10 +11,10 @@ namespace psycle { namespace host  { namespace canvas {
     Init();
   }
 
-  Item::Item(Group* parent) : parent_(parent), managed_(0), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
+  Item::Item(Group* parent) : parent_(0), managed_(0), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
     Init();
     if (parent) {
-      parent->Add(this);
+      parent->Add(this);      
     }
   }
 
@@ -27,9 +27,22 @@ namespace psycle { namespace host  { namespace canvas {
     fls_rgn_.DeleteObject();
     rgn_.DeleteObject();
     checkbuttonpress();
+    checkfocusitem();
     if (parent_ && !managed_) {
       iterator it = find(parent_->begin(), parent_->end(), this);
       parent_->items_.erase(it);  
+    }
+  }
+
+  void Item::set_zorder(int z) {
+   if (parent()) {
+      parent()->set_zorder(this, z);
+    }
+  }
+
+  void Item::detach() { 
+    if (parent()) {
+      parent_->Erase(this);
     }
   }
 
@@ -40,6 +53,20 @@ namespace psycle { namespace host  { namespace canvas {
       while (bp) {       
         if (bp == this) {
           c->button_press_item_ = 0;
+          break;
+        }
+        bp = bp->parent();
+      }      
+    }
+  }
+
+  void Item::checkfocusitem() {
+    Canvas* c = canvas();
+    if (c) {
+      Item* bp = c->focus_item_;
+      while (bp) {       
+        if (bp == this) {
+          c->focus_item_ = 0;
           break;
         }
         bp = bp->parent();
@@ -66,7 +93,9 @@ namespace psycle { namespace host  { namespace canvas {
 
   void Item::needsupdate() {
     update_ = true;
-    if (parent()) { parent()->needsupdate(); }
+    if (parent()) {
+      parent()->needsupdate();
+    }
   }
 
   void Item::GetFocus() {
@@ -118,6 +147,7 @@ namespace psycle { namespace host  { namespace canvas {
     }
     return x;    
   }
+
   double Item::zoomabsy() const {
     std::vector<const Item*> items;
     items.push_back(this);
@@ -137,7 +167,7 @@ namespace psycle { namespace host  { namespace canvas {
     return y;
   }
 
-  void PaintItem::Draw(CDC* devc, const CRgn& repaint_rgn, class Canvas* widget) {}
+  void PaintItem::Draw(CDC* devc, const CRgn& repaint_rgn, Canvas* widget) {}
 
   Group::Group() : Item(),  widget_(0), x_(0), y_(0), is_root_(false), zoom_(1.0) {}
   Group::Group(Canvas* widget) : Item(), widget_(widget), x_(0), y_(0), is_root_(false), zoom_(1.0) {}
@@ -151,7 +181,7 @@ namespace psycle { namespace host  { namespace canvas {
   }
   
   Group::~Group() {    
-    for (iterator it = items_.begin(); it != items_.end(); ++it ) {
+    for (iterator it = items_.begin(); it != items_.end(); ++it) {
       Item* item = *it;
       if (item->managed()) {
         delete item;
@@ -202,7 +232,8 @@ namespace psycle { namespace host  { namespace canvas {
 
   void Group::Add(Item* item) {
     assert(item);
-    STR();
+    assert(!item->parent());
+    STR();    
     item->set_parent(this);
     items_.push_back(item);    
     FLS();
@@ -210,6 +241,7 @@ namespace psycle { namespace host  { namespace canvas {
 
   void Group::Insert(iterator it, Item* item) {
     assert(item);
+    assert(!item->parent());
     STR();
     item->set_parent(this);
     items_.insert(it, item);    
@@ -223,6 +255,7 @@ namespace psycle { namespace host  { namespace canvas {
     STR();
     items_.erase(it);
     checkbuttonpress();
+    checkfocusitem();
     Canvas* c = canvas();
     if (c) {       
       Item* out = c->out_item_;
@@ -298,19 +331,59 @@ namespace psycle { namespace host  { namespace canvas {
     return z;
   }
 
-  Item* Group::intersect(double x, double y) {    
+  Item* Group::intersect(double x, double y, Event* ev, bool& worked) {    
     Item* found = 0;
+    Item* found_noevent = 0;
     std::vector<Item*>::const_reverse_iterator rev_it = items_.rbegin();
     for ( ; rev_it != items_.rend(); ++rev_it) {
       Item* item = *rev_it;      
       double zoom = 1;
-      item = item->visible() ? item->intersect(x-this->x()*zoom, (y-this->y()*zoom)) : 0;
+      item = item->visible() ? item->intersect(x-this->x()*zoom, (y-this->y()*zoom), ev, worked) : 0;
+      if (worked) return item;
       if (item) {
-        found = item;
-        return item;
-      }  
+        if (work_item_event(item, ev)) {
+          worked = true;
+          return item;
+        } else {
+          if (!found_noevent) {
+             found_noevent = item;
+          }
+         }
+        }  
+      }
+    if (found_noevent) {
+      Canvas* c = canvas();
+      if (c) {
+        found = c->DelegateEvent(ev, found_noevent);
+        if (found) {
+          worked = true;
+          return found;
+        }
+      }
     }
     return found;
+  }
+
+  bool Group::work_item_event(Item* item, Event* ev) {
+    Canvas* c = canvas();
+    if (c) {       
+      if (ev->type() == Event::BUTTON_PRESS || ev->type() == Event::BUTTON_2PRESS) {
+         c->button_press_item_ = item;
+         c->focus_item_ = item;
+      } else {
+         if (ev->type() == Event::MOTION_NOTIFY ) {                    
+            if (!c->button_press_item_ && c->out_item_ && item!=c->out_item_) { // mouseout
+              Event event(c->out_item_, Event::MOTION_OUT, ev->x(), ev->y(),ev->button(), ev->shift());
+              c->DelegateEvent(&event, c->out_item_);
+            }
+            c->out_item_ = item;
+          }                      
+      }
+      Event e(item, ev->type(), ev->x(), ev->y(), ev->button(), ev->shift());
+      bool erg = item->OnEvent(&e);
+      return erg;
+    }
+    return 0;
   }
 
   void Group::intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {
@@ -470,7 +543,7 @@ namespace psycle { namespace host  { namespace canvas {
     }
   }
 
-  Item* Line::intersect(double x, double y) {
+  Item* Line::intersect(double x, double y, Event* ev, bool &worked) {
     double distance_ = 5;
     Point  p1 = PointAt(0);
     Point  p2 = PointAt(1);
@@ -850,7 +923,7 @@ namespace psycle { namespace host  { namespace canvas {
     save_ = true;
     steal_focus_ = managed_ = false;
     bg_image_ = 0;
-    button_press_item_ = out_item_ = 0;
+    button_press_item_ = out_item_ = focus_item_ = 0;
     bg_width_ = bg_height_ = 0;    
     cw_ = pw_ = ch_ = ph_ = 300;
     color_ = skin_= 0;
@@ -906,9 +979,29 @@ namespace psycle { namespace host  { namespace canvas {
 
   Item* Canvas::OnEvent(Event* ev) {
     Item* item = button_press_item_;
+    if (item && ev->type() == Event::KEY_DOWN || item && ev->type() == Event::KEY_UP) {      
+      if (focus_item_) {      
+        Event e(focus_item_, ev->type(), ev->x(), ev->y(), ev->button(), ev->shift());
+        DelegateEvent(&e, focus_item_);
+        item = e.item();
+      }
+    } else
+    if (item && ev->type() == Event::MOTION_NOTIFY ) {
+       Event e(item, ev->type(), ev->x(), ev->y(), ev->button(), ev->shift());
+       DelegateEvent(&e, item);
+       item = e.item();
+    } else {
+       bool worked = false;
+       item = root_->intersect(ev->x(), ev->y(), ev, worked);
+    }
+    if (ev->type() == Event::BUTTON_RELEASE || ev->type() == Event::BUTTON_2PRESS) {
+       button_press_item_ = 0;       
+    }
+    /*
+    Item* item = button_press_item_;
     if (ev->type() == Event::BUTTON_PRESS || ev->type() == Event::BUTTON_2PRESS) {
       item = button_press_item_ = root_->intersect(ev->x(), ev->y());
-    } else
+    } else 
       if (ev->type() == Event::MOTION_NOTIFY ) {        
         item = button_press_item_ ? button_press_item_ : root_->intersect(ev->x(), ev->y());
         if (!button_press_item_ && out_item_ && item!=out_item_) { // mouseout
@@ -919,17 +1012,16 @@ namespace psycle { namespace host  { namespace canvas {
       }     
       if (item) {        
         Event e(item, ev->type(), ev->x(), ev->y(), ev->button(), ev->shift());
-        OutputDebugString("mousemove-2");
         DelegateEvent(&e, item);
         item = e.item();
       }
       if (ev->type() == Event::BUTTON_RELEASE || ev->type() == Event::BUTTON_2PRESS) {
         button_press_item_ = 0;       
-      }
+      }*/
       return item;
   }  
 
-  bool Canvas::DelegateEvent(Event* ev, Item* item) {
+  Item* Canvas::DelegateEvent(Event* ev, Item* item) {    
     bool erg = item->pointerevents() && item->OnEvent(ev);
     while (!erg && item->parent()) {
       item = item->parent();  // redirect event to parent
@@ -940,10 +1032,10 @@ namespace psycle { namespace host  { namespace canvas {
       erg = item->pointerevents() && item->OnEvent(ev);      
       if (steal_focus_) { 
         steal_focus_ = 0;
-        return erg;
+        return item;
       }       
-    }
-    return erg;
+    }    
+    return erg ? item : 0;
   }
 
   void Canvas::Invalidate(CRgn& rgn) {

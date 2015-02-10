@@ -80,6 +80,32 @@ using namespace universalis::stdlib;
 
 	/****************************************************************************/
 
+  inline void SimpleAdd(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples)
+  {
+    #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS    
+		const __m128* psrc = (const __m128*)pSrcSamples;
+		__m128* pdst = (__m128*)pDstSamples;
+		numSamples += 3;
+		numSamples >>= 2;
+		for(int i = 0; i < numSamples; ++i) pdst[i] = _mm_add_ps(pdst[i], psrc[i]);
+    #else
+    for(int i = 0; i < numSamples; ++i) pDstSamples[i] += pSrcSamples[i];
+		#endif
+  }
+
+  inline void SimpleSub(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples)
+  {
+    #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS    
+		const __m128* psrc = (const __m128*)pSrcSamples;
+		__m128* pdst = (__m128*)pDstSamples;
+		numSamples += 3;
+		numSamples >>= 2;
+		for(int i = 0; i < numSamples; ++i) pdst[i] = _mm_sub_ps(pdst[i], psrc[i]);
+    #else
+    for(int i = 0; i < numSamples; ++i) pDstSamples[i] -= pSrcSamples[i];
+		#endif
+  }
+
 	/// mixes two signals. memory should be aligned by 16 in optimized paths.
 	inline void Add(const float * UNIVERSALIS__COMPILER__RESTRICT pSrcSamples, float * UNIVERSALIS__COMPILER__RESTRICT pDstSamples, int numSamples, float vol)
 	{

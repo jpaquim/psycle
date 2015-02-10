@@ -520,6 +520,12 @@
     <ClInclude Include="src\psycle\host\LuaGui.hpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\Dialog_item.h">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Dyn_dialog.h">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -877,6 +883,12 @@
       <Filter>psycle\mfc</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\LuaGui.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Dialog_item.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Dyn_dialog.cpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClCompile>
   </ItemGroup>
