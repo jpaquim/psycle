@@ -18,6 +18,8 @@
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 
 namespace psycle { namespace host {
@@ -26,7 +28,7 @@ namespace psycle { namespace host {
   // Lua
 
   LuaPlugin::LuaPlugin(lua_State* state, int index, bool full)
-    : proxy_(this, state)
+    : curr_prg_(0), proxy_(this, state)
   {		
     _macIndex = index;
     _type = MACH_LUA;
@@ -329,6 +331,7 @@ namespace psycle { namespace host {
 
   bool LuaPlugin::LoadSpecificChunk(RiffFile* pFile, int version)
   {
+    if (proxy_.prsmode() == LuaMachine::PRSType::NATIVE) {
     uint32_t size;
     pFile->Read(size); // size of whole structure
     if(size)
@@ -380,57 +383,133 @@ namespace psycle { namespace host {
       }
     }
     return true;
+    } else {
+      try {
+					UINT size;
+					unsigned char _program;
+					pFile->Read(&size, sizeof size );
+					if(size)
+					{
+						UINT count;
+						pFile->Read(&_program, sizeof _program);
+						pFile->Read(&count, sizeof count);
+						size -= sizeof _program + sizeof count + sizeof(float) * count;
+						if(!size)
+						{
+							/*BeginSetProgram();
+							SetProgram(_program);
+							for(UINT i(0) ; i < count ; ++i)
+							{
+								float temp;
+								pFile->Read(&temp, sizeof temp);
+								SetParameter(i, temp);
+							}
+							EndSetProgram();*/
+						}
+						else
+						{
+							/*BeginSetProgram();
+							SetProgram(_program);
+							EndSetProgram();*/
+							pFile->Skip(sizeof(float) *count);
+              bool b = proxy_.prsmode() == LuaMachine::PRSType::CHUNK;
+							if(b)
+							{
+								unsigned char * data(new unsigned char[size]);
+								pFile->Read(data, size); // Number of parameters
+                proxy_.call_putdata(data, size);
+								zapArray(data);
+							}
+							else
+							{
+								// there is a data chunk, but this machine does not want one.
+								pFile->Skip(size);
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+				catch(...){return false;}
+    }
   }
 
   void LuaPlugin::SaveSpecificChunk(RiffFile * pFile)
   {
-    uint32_t count = GetNumParams();
-    uint32_t size2(0);
-    try
-    {
-      size2 = proxy_.call_data_size();
-    }
-    catch(const std::exception &e)
-    {
-      e;
-      // data won't be saved
-    }
-    uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
-    std::vector<std::string> ids;
-    for (UINT i = 0; i < count; i++) {
-      std::string id = proxy_.get_parameter_id(i);
-      ids.push_back(id);
-      size += id.length()+1;
-    }
-    pFile->Write(size);
-    pFile->Write(count);
-
-    for (uint32_t i = 0; i < count; i++)
-    {
-      int temp = GetParamValue(i);
-      pFile->Write(temp);
-    }
-    // ids
-    for (uint32_t i = 0; i < count; i++) {
-      pFile->WriteString(ids[i]);
-    }
-    pFile->Write(size2);
-    if(size2)
-    {
-      byte * pData = new byte[size2];
+    if (proxy_.prsmode() == LuaMachine::PRSType::NATIVE) {
+      uint32_t count = GetNumParams();
+      uint32_t size2(0);
+      unsigned char * pData = 0;
       try
       {
-        proxy_.call_data(pData); // Internal save
+        size2 = proxy_.call_data(&pData, false);
       }
       catch(const std::exception &e)
       {
         e;
-        // this sucks because we already wrote the size,
-        // so now we have to write the data, even if they are corrupted.
-        throw e;
+        // data won't be saved
       }
-      pFile->Write(pData, size2); // Number of parameters
-      zapArray(pData);
+      uint32_t size = size2 + sizeof(count) + sizeof(int)*count;
+      std::vector<std::string> ids;
+      for (UINT i = 0; i < count; i++) {
+        std::string id = proxy_.get_parameter_id(i);
+        ids.push_back(id);
+        size += id.length()+1;
+      }
+      pFile->Write(size);
+      pFile->Write(count);
+      for (uint32_t i = 0; i < count; i++)
+      {
+        int temp = GetParamValue(i);
+        pFile->Write(temp);
+      }
+      // ids
+      for (uint32_t i = 0; i < count; i++) {
+        pFile->WriteString(ids[i]);
+      }
+      pFile->Write(size2);
+      if(size2)
+      {        
+        pFile->Write(pData, size2); // Number of parameters
+        zapArray(pData);
+      }
+    } else {
+    try {
+			    UINT count(GetNumParams());
+					unsigned char _program=0;
+					UINT size(sizeof _program + sizeof count);
+					UINT chunksize(0);
+					unsigned char * pData(0);
+          bool b = proxy_.prsmode() == LuaMachine::PRSType::CHUNK;
+					if(b)
+					{
+						count=0;
+            chunksize = proxy_.call_data(&pData, true);
+						size+=chunksize;
+					}
+					else
+					{
+						 size+=sizeof(float) * count;
+					}
+					pFile->Write(&size, sizeof size);
+					// _program = static_cast<unsigned char>(GetProgram());
+					pFile->Write(&_program, sizeof _program);
+					pFile->Write(&count, sizeof count);
+
+					if(b)
+					{
+						pFile->Write(pData, chunksize);
+					}
+					else
+					{
+						for(UINT i(0); i < count; ++i)
+						{
+              float temp = proxy_.get_parameter_value(i);
+							pFile->Write(&temp, sizeof temp);
+						}
+					}
+				} catch(...) {
+			}
     }
   }
 
@@ -606,11 +685,12 @@ namespace psycle { namespace host {
         int nv = (pData->_cmd<<8)+pData->_parameter;
         int const min = 0; // always range 0 .. FFFF like vst tweak
         int const max = 0xFFFF;
-        nv += min;
-        if(nv > max) nv = max;
+        nv += min;        
+        if(nv > max) nv = max;                        
+        // quantization done in parameter.lua
         try
         {
-          proxy_.call_parameter(pData->_inst, nv/(double)0xFFFF);
+          proxy_.call_parameter(pData->_inst, double(nv)/0xFFFF);
         }
         catch(const std::exception &e)
         {
@@ -686,6 +766,7 @@ namespace psycle { namespace host {
           int const max = 0xFFFF; //_pInfo->Parameters[pData->_inst]->MaxValue;
           nv += min;
           if (nv > max) nv = max;
+          // quantization done in parameter.lua
           try
           {
             proxy_.call_parameter(pData->_inst, nv/(double)0xFFFF);
@@ -775,6 +856,78 @@ namespace psycle { namespace host {
       trackNote[channel].midichan = 0;
   }
 
+  //Bank & Programs
+  
+   void LuaPlugin::SetCurrentProgram(int idx) {
+     if (crashed()) {
+       return;
+     }
+     try {		
+       proxy_.call_setprogram(idx);
+       curr_prg_ = idx;
+     } catch(const std::exception &e) { e; }     
+   }
+
+   void LuaPlugin::GetIndexProgramName(int bnkidx, int prgIdx, char* val) {     
+     if (crashed()) {
+       std::strcpy(val, "");
+       return;
+     }
+     try {			  
+       std::string name = proxy_.get_program_name(bnkidx, prgIdx);
+       std::strcpy(val, name.c_str());
+     } catch(const std::exception &e) {
+       e; std::strcpy(val, "Out of Range");
+     }
+   }          
+
+   //Bank & Programs
+   int LuaPlugin::GetNumPrograms() {     
+     if (crashed()) {
+       return 0;
+     }
+     try {			  
+       return proxy_.call_numprograms();
+     } catch(const std::exception &e) { e; }
+     return 0;
+   }
+
+   int LuaPlugin::GetCurrentProgram() {     
+     if (crashed()) {
+       return 0;
+     }
+     try {			  
+       return proxy_.get_curr_program();
+     } catch(const std::exception &e) { e; }
+     return 0;
+   }
+
+   void LuaPlugin::SaveBank(const std::string& filename) {
+      unsigned char * pData(0);
+      int chunksize = proxy_.call_data(&pData, true);
+      using namespace std;
+      ofstream ofile(filename, ios::binary);
+      ofile.write((char*)pData, chunksize);
+      ofile.close();
+   }
+
+   bool LuaPlugin::LoadBank(const std::string& filename) {      
+      using namespace std;
+      streampos size;
+      char* pData;
+      ifstream file (filename, ios::in|ios::binary|ios::ate);
+      if (file.is_open()) {
+        size = file.tellg();
+        pData = new char[size];
+        file.seekg (0, ios::beg);
+        file.read(pData, size);
+        file.close();
+        proxy_.call_putdata((unsigned char*)pData, size);
+        delete[] pData;
+        return true;
+      }    
+      return false;
+   }
 
 }   // namespace
 }   // namespace

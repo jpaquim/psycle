@@ -89,9 +89,9 @@ public:
 	std::string get_parameter_label(int numparam);
 	void get_parameter_range(int numparam,int &minval, int &maxval);
 	int get_parameter_type(int numparam);
-	void call_data(byte* data);
+	int call_data(unsigned char **ptr, bool all);  
 	uint32_t call_data_size();
-	void call_putdata(byte* data, int size);
+	void call_putdata(unsigned char* data, int size);
 	// calls from proxy to script
 	void call_run();
 	void call_init();
@@ -105,7 +105,7 @@ public:
   bool call_event(canvas::Event* ev);
 	void call_newline();
 	void call_work(int num, int offset=0);
-    void call_parameter(int numparameter, double val);
+  void call_parameter(int numparameter, double val);
 	void call_stop();
 	void call_sr_changed(int rate);
 	void call_aftertweaked(int idx);
@@ -115,8 +115,14 @@ public:
 	void set_state(lua_State* state);
 	void reload();
 	template<class T> void get_menu(T& func) { func(get_menu_tree()); }
-  int gui_type() const { return plugimport_->gui_type(); }    
-
+  int gui_type() const { return plugimport_->gui_type(); }  
+  void call_setprogram(int idx);
+  int call_numprograms();
+  int get_curr_program();
+  std::string get_program_name(int bnkidx, int idx);
+  LuaMachine::PRSType prsmode() const { return plugimport_->prsmode(); }
+  void lock() const { ::EnterCriticalSection(&cs); }
+  void unlock() const { ::LeaveCriticalSection(&cs); }
 private:
 	void export_c_funcs();
 	// script callbacks
@@ -129,24 +135,20 @@ private:
  
 	void get_method_strict(lua_State* L, const char* method);
 	bool get_method_optional(lua_State* L, const char* method);
-	bool get_param(lua_State* L, int index, const char* method);
+	bool get_param(lua_State* L, int index, const char* method);  
 
 	bool get_menu_tbl();
 	menu get_menu_tree();
-	void build_tree(menu& t);
-	// mutex
-	void lock() const;
-  void unlock() const;
+	void build_tree(menu& t);	
 	std::string GetString();
 	PluginInfo info_;
 	LuaPlugin *plug_;
 	LuaMachine* plugimport_;
-	lua_State* L;
-	mutable CRITICAL_SECTION cs;
+	lua_State* L;	
 	static universalis::os::terminal * terminal;
-  static int gui_type_;
-  mutable int cscount_;
+  static int gui_type_;  
   TDlg test;
+  mutable CRITICAL_SECTION cs;
 };
 
 struct LuaHost {

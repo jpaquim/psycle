@@ -5,6 +5,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Machine.hpp"
 #include "Canvas.hpp"
+#include "Dyn_dialog.h"
 
 struct lua_State;
 struct luaL_Reg;
@@ -39,34 +40,33 @@ struct menuitem {
     static int notify(lua_State* L);
   };
 
-/*
-  class CMyDialog : CDialog
-{
-  CString m_value;
-public:  
-  CString GetValue() const {return m_value;}
-  void SetValue(const CString& value) {m_value = value;}
+  class LuaMachine;
 
-  virtual BOOL OnInitDialog();
-  virtual BOOL DestroyWindow( );
-};
+  struct LuaDialog : public Dynamic_dialog {
+    LuaDialog(lua_State* state, const char* title = 0, int width = 100,
+              int height = 100, int position_x = 0,
+              int position_y = 0) :
+              Dynamic_dialog(title, width, height, position_x, position_y), L(state) {}    
+    virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+    LuaMachine* mac;
+   private:
+     lua_State* L;
+  };
 
-BOOL CMyDialog::OnInitDialog()
-{
-  CDialog::OnInitDialog();
-
-  SetDlgItemText(IDC_EDIT1, m_value);
-
-  return TRUE;
-}
-
-BOOL CMyDialog::DestroyWindow()
-{
-  GetDlgItemText(IDC_EDIT1, m_value);
-
-  return CDialog::DestroyWindow();
-}*/
-
+  struct LuaDialogBind {
+    static int open(lua_State *L);
+    static const char* meta;    
+   private:
+    static int create(lua_State *L);
+    static int gc(lua_State* L);
+    static int show(lua_State* L);
+    static int hide(lua_State* L);
+    static int addtext(lua_State* L);
+    static int addedit(lua_State* L);
+    static int addbutton(lua_State* L);
+    static int editvalue(lua_State* L);
+    static int settext(lua_State* L);
+  };
 
   struct LuaCanvas : public canvas::Canvas {
     LuaCanvas(lua_State* state) : canvas::Canvas(), L(state) {}    

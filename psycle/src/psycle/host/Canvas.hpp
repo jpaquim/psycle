@@ -112,6 +112,11 @@ namespace psycle { namespace host { namespace canvas {
     }    
   };
 
+  class Graphics {
+  public:
+    void DrawRect(int x, int y, int width, int height) {}
+  };
+
   class Item {
   public:
     Item();
@@ -133,7 +138,7 @@ namespace psycle { namespace host { namespace canvas {
     virtual const CRgn& region() const { return rgn_; }
     virtual void Draw(CDC* cr, const CRgn& repaint_region, class Canvas* widget) {}
     virtual void GetBounds(double& x1, double& y1, double& x2, double& y2) const {}
-    virtual Item* intersect(double x, double y) { 
+    virtual Item* intersect(double x, double y, Event* ev, bool& worked) { 
        if (update_) { region(); }    
        CPoint pt(x, y);
        return rgn_.PtInRegion(pt) ? this : 0;
@@ -170,10 +175,13 @@ namespace psycle { namespace host { namespace canvas {
     void FLS();  // invalidate combine new & old region                   
     virtual void needsupdate(); 
     virtual double acczoom() const;
+    virtual void set_zorder(int z);
+    void detach();
   protected:
     mutable bool update_;
     mutable CRgn rgn_;
     void checkbuttonpress();
+    void checkfocusitem();
   private:
     Group* parent_;
     CRgn fls_rgn_;
@@ -201,7 +209,8 @@ namespace psycle { namespace host { namespace canvas {
     virtual void Draw(CDC* cr,
       const CRgn& repaint_region,
     class Canvas* widget);
-    virtual Item* intersect(double x, double y);
+    virtual Item* intersect(double x, double y, Event* ev, bool &worked);
+    bool work_item_event(Item* item, Event* ev);
     virtual void intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2);  
     typedef std::vector<Item*>::iterator iterator;
     virtual iterator begin() { return items_.begin(); }
@@ -373,12 +382,12 @@ namespace psycle { namespace host { namespace canvas {
   public:
     Line() : Item(), color_(0), skin_(0) {}
     Line(Group* parent) : Item(parent), color_(0), skin_(0) {}
-    ~Line() {}
+    virtual ~Line() {}
 
     virtual void Draw(CDC* cr,
       const CRgn& repaint_region,
     class Canvas* widget);
-    virtual Item* intersect(double x, double y);
+    virtual Item* intersect(double x, double y, Event* ev, bool &worked);
     virtual void GetBounds(double& x1, double& y1, double& x2,
       double& y2) const;
     typedef std::vector<std::pair<double,double> > Points;
@@ -399,9 +408,6 @@ namespace psycle { namespace host { namespace canvas {
     double x() const { return pts_.size() > 0 ? pts_[0].first : 0; }
     double y() const { return pts_.size() > 0 ? pts_[0].second : 0; }
     virtual const CRgn& region() const;
-    //virtual void show();
-    //virtual void hide();
-
   private:
     Points pts_;
     ARGB color_;
@@ -530,18 +536,16 @@ namespace psycle { namespace host { namespace canvas {
 		  ::SetCursorPos(point.x, point.y);
     }
   }
-
   protected:
-    void Invalidate(CRgn& rgn);
-    
+    void Invalidate(CRgn& rgn);    
   private:
     Canvas(const Canvas& other) {}
     Canvas& operator=(Canvas rhs) {}
-    bool DelegateEvent(Event* event, Item* item);
+    Item* DelegateEvent(Event* event, Item* item);
     CWnd* parent_;    
     Group* root_;
     bool save_, steal_focus_, managed_;    
-    Item *button_press_item_,  *out_item_;    
+    Item *button_press_item_,  *out_item_, *focus_item_;    
     CBitmap* bg_image_;
     int bg_width_, bg_height_;
     int cw_, ch_, pw_, ph_;
