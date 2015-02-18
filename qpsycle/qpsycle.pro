@@ -157,7 +157,6 @@ HEADERS  += \
            ../psycle-core/src/psycle/core/player.h \
            ../psycle-core/src/psycle/core/playertimeinfo.h \
            ../psycle-core/src/psycle/core/plugin.h \
-           ../psycle-core/src/psycle/core/plugincatcher.h \
            ../psycle-core/src/psycle/core/pluginfinder.h \
            ../psycle-core/src/psycle/core/plugininfo.h \
            ../psycle-core/src/psycle/core/preset.h \
@@ -316,7 +315,6 @@ SOURCES +=\
            ../psycle-core/src/psycle/core/player.cpp \
            ../psycle-core/src/psycle/core/playertimeinfo.cpp \
            ../psycle-core/src/psycle/core/plugin.cpp \
-           ../psycle-core/src/psycle/core/plugincatcher.cpp \
            ../psycle-core/src/psycle/core/pluginfinder.cpp \
            ../psycle-core/src/psycle/core/plugininfo.cpp \
            ../psycle-core/src/psycle/core/preset.cpp \

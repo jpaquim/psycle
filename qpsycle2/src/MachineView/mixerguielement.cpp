@@ -11,7 +11,7 @@ MixerGuiElement::MixerGuiElement(const QPoint& pos, psycle::core::Machine *mac)
     canOutput=false;
     this->setPos(pos);
     background=new QGraphicsPixmapItem(this);
-    background->setPixmap(Statics::theme()->master);
+    background->setPixmap(Globals::theme()->master);
     machine = mac;
 }
 

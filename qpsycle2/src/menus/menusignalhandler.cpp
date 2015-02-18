@@ -1,10 +1,13 @@
-#include "menusignalhandler.h"
-#include <QFileDialog>
 #include "qpsycle2.h"
+
+#include <QFileDialog>
+#include <QGraphicsView>
 #include <iostream>
+
 #include "statics.h"
+#include "menusignalhandler.h"
 #include "MachineView/machineview.h"
-#include "QGraphicsView"
+#include "psycle/core/player.h"
 
 namespace qpsycle{
 MenuSignalHandler::MenuSignalHandler(qpsycle2* window)
@@ -12,20 +15,20 @@ MenuSignalHandler::MenuSignalHandler(qpsycle2* window)
     qpsy = window;
 }
 void MenuSignalHandler::newProject(){
-    Statics::song()->clear();
+    Globals::song()->clear();
     std::cerr<<"cleared";
     emit sigReload();
 }
 
 void MenuSignalHandler::save(){
-    Statics::song()->save(lastfile.toStdString());
+    Globals::song()->save(lastfile.toStdString());
 }
 
 void MenuSignalHandler::open(){
     QString str = QFileDialog::getOpenFileName(qpsy,"Open","~/","Psycle Projects (*.psy)");
     std::cerr<<"loading "<<str.toStdString()<<std::endl;
-    Statics::player()->stop();
-    Statics::song()->load(str.toStdString());
+    Globals::player()->stop();
+    Globals::song()->load(str.toStdString());
     lastfile = str;
     emit sigReload();
     std::cerr<<"loaded "<<str.toStdString()<<std::endl;
@@ -33,7 +36,7 @@ void MenuSignalHandler::open(){
 
 void MenuSignalHandler::saveAs(){
     QString str = QFileDialog::getSaveFileName(qpsy,"Save As","~/","Psycle Projects (*.psy)");
-    Statics::song()->save(str.toStdString(),3);
+    Globals::song()->save(str.toStdString(),3);
     lastfile  = str;
     std::cerr<<"saving as "<<str.toStdString()<<std::endl;
 }
@@ -83,19 +86,20 @@ void MenuSignalHandler::setRecord(bool /*b*/){
 }
 
 void MenuSignalHandler::playFromBeginning(){
-    Statics::audioDriver()->set_started(true);
-    Statics::player()->start(0);
+    Globals::audioDriver()->set_started(true);
+    Globals::audioDriver()->setPlaybackSettings(settings);
+    Globals::player()->start(0);
 }
 
 void MenuSignalHandler::play(){
-    Statics::audioDriver()->set_started(true);
-    Statics::player()->start(Statics::player()->playPos());
+    Globals::audioDriver()->set_started(true);
+    Globals::player()->start(Globals::player()->playPos());
 }
 
 void MenuSignalHandler::stop(){
-    Statics::player()->stop();
-//    Statics::audioDriver()->set_started(false);
-//    settings = Statics::audioDriver()->playbackSettings();
-    playpos = Statics::player()->playPos();
+    Globals::player()->stop();
+//    Globals::audioDriver()->set_started(false);
+    settings = Globals::audioDriver()->playbackSettings();
+    playpos = Globals::player()->playPos();
 }
 }

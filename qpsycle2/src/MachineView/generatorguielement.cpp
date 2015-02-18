@@ -16,10 +16,10 @@ GeneratorGuiElement::GeneratorGuiElement(const QPoint& pos, psycle::core::Machin
     canOutput=true;
     this->setPos(pos);
     background = new QGraphicsPixmapItem(this);
-    background->setPixmap(Statics::theme()->generator);
+    background->setPixmap(Globals::theme()->generator);
     machine = mach;
     text= new QGraphicsSimpleTextItem(QString::fromStdString(mach->GetEditName()), this);
-    text->setPos(Statics::theme()->generatorNameDest.x(),Statics::theme()->generatorNameDest.y());
+    text->setPos(Globals::theme()->generatorNameDest.x(),Globals::theme()->generatorNameDest.y());
     GuiMachineElement();
 
 }

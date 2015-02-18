@@ -13,35 +13,43 @@
 
 #include <QtGui>
 #include <QTabWidget>
+#include <QHBoxLayout>
+#include <QSplitter>
+
+#include "patternmanager.h"
 
 namespace qpsycle{
 qpsycle2::qpsycle2(QWidget *parent)
     : QMainWindow(parent)
 {
     handler = new MenuSignalHandler(this);
-    Statics::Setup();
+    Globals::Setup();
     new FileMenu(this);
     new EditMenu(this);
     ToolBar* toolBar = new ToolBar(handler);
     this->addToolBar(toolBar);
-    QTabWidget* tabs = new QTabWidget(this);
+
+    PatternManager* pm = new PatternManager();
+
+    QTabWidget* tabs = new QTabWidget();
 
     MachineView* mach = new MachineView();
     QGraphicsView* machineView = new QGraphicsView(mach);
     PatternView* pattern = new PatternView();
-    QGraphicsView* patternView = new QGraphicsView(pattern);
+
+    connect( pm, &PatternManager::patternSelected, pattern, &PatternView::showPattern);
 
     tabs->addTab(machineView,"Machine View");
-    tabs->addTab(patternView, "Pattern View");
-    Statics::setMachineView(mach);
-    Statics::setPatternView(pattern);
-    patternView->centerOn(0,0);
-    this->setCentralWidget(tabs);
-    machineView->adjustSize();
+    tabs->addTab(pattern, "Pattern View");
     this->setWindowTitle("QPsycle");
 
-    connect(handler, SIGNAL(sigReload()),mach,SLOT(setup()));
-    connect(handler,SIGNAL(sigReload()),pattern,SLOT(reload()));
+
+    this->setCentralWidget(tabs);
+    this->addDockWidget(Qt::LeftDockWidgetArea, pm);
+
+    connect(handler, &MenuSignalHandler::sigReload, mach, &MachineView::setup );
+    connect(handler, &MenuSignalHandler::sigReload, pattern, &PatternView::reload );
+    connect(handler, &MenuSignalHandler::sigReload, pm, &PatternManager::patternsChanged );
 }
 
 qpsycle2::~qpsycle2()

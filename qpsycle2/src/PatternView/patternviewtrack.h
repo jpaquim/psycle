@@ -32,6 +32,7 @@ private:
     int charHeight = 0;
     QFont font = QFont("Monospace");
     QGraphicsRectItem* selectionRect;
+
 };
 
 }

@@ -2,20 +2,28 @@
 // copyright 2007-2009 members of the psycle project http://psycle.sourceforge.net
 
 #include <psycle/core/detail/project.private.hpp>
+
 #include "pattern.h"
 
 #include "xml.h"
 
 #include <sstream>
 
+bool CompareEventLocations(std::pair<double,int> lhs, std::pair<double,int> rhs){
+    return ( lhs.first < rhs.first ) ||
+            ( lhs.first <= rhs.first && lhs.second < rhs.second );
+}
+
 namespace psycle { namespace core {
 
 Pattern::Pattern() 
-	: id_(-1)
+    : id_(-1),
+      lines_( CompareEventLocations )
 {
-	TimeSignature timeSig;
+    TimeSignature timeSig;
 	timeSig.setCount(4);
 	timeSignatures_.push_back(timeSig);
+
 }
 
 // Explicit copy constructor needed because boost::signal is noncopyable
@@ -249,40 +257,29 @@ Pattern Pattern::Clone(double from, double to, int start_track, int end_track) {
 	Pattern clone_pattern;
 	Pattern::iterator it(lower_bound(from));
 	while (it != end()) {
-		PatternEvent& pattern_event = it->second;
-		if (it->first > to) break;  
-		if (pattern_event.track() >= start_track && 
-			pattern_event.track() <= end_track) {
-				Pattern::iterator cloned_it = clone_pattern.insert(it->first - from, pattern_event);
-				cloned_it->second.set_track(pattern_event.track() - start_track);
-		}
+        PatternEvent& pattern_event = it->second;
+        if (it->first.first > to) break;
+        if (it->first.second >= start_track &&
+            it->first.second <= end_track) {
+                clone_pattern.insert( it->first.first - from, it->first.second - start_track, pattern_event );
+        }
 		++it;
 	}
 	return clone_pattern;
 }
 
 void Pattern::insert(const Pattern& src_pattern, double to, int to_track) {
-	Pattern::const_iterator it(src_pattern.begin());
-	while (it != src_pattern.end()) {
-		const PatternEvent& line = it->second;
-		Pattern::iterator new_it = insert(it->first + to, line);
-		new_it->second.set_track(to_track + line.track());
-		++it;
+    for( auto it = src_pattern.begin(); it != src_pattern.end(); ++it) {
+        const PatternEvent& line = it->second;
+        insert(it->first.first+to, it->first.second + to_track, line );
 	}
 }
-psycle::core::PatternEvent& Pattern::getPatternEvent(int line, int track){
-    iterator eventItr= upper_bound( line );
-    while (eventItr->first == line){
-        if(eventItr->second.track() == track)
-            break;
-        eventItr++;
-    }
-    if(eventItr->first != line){
-        psycle::core::PatternEvent patEvent;
-        patEvent.set_track(track);
-        return insert(line, patEvent)->second;
-    } else
-    return eventItr->second;
+const psycle::core::PatternEvent& Pattern::getPatternEvent(int line, int track){
+
+    static psycle::core::PatternEvent dummyEvent;
+    auto itr = lines_.find({line,track});
+    if( itr == lines_.end() ) return dummyEvent;
+    else return itr->second;
 }
 
 
@@ -290,13 +287,11 @@ psycle::core::PatternEvent& Pattern::getPatternEvent(int line, int track){
 void Pattern::erase(double from, double to, int start_track, int end_track) {
 	Pattern::iterator it(lower_bound(from));
 	while (it != end()) {
-		PatternEvent& patternEvent = it->second;
-		if ( it->first >= to ) break;
-		if(
-			patternEvent.track() <= end_track &&
-			patternEvent.track() >= start_track
-		) it = erase(it);
-		else ++it;
+        if ( it->first.first >= to ) break;
+        if( it->first.second <= end_track &&
+            it->first.second >= start_track ) {
+            it = erase(it);
+        } else ++it;
 	}
 }
 
@@ -305,16 +300,16 @@ void Pattern::Transpose(int delta, double from, double to, int start_track, int 
 	Pattern::iterator it(lower_bound(from));
 	while (it != end()) {
 		PatternEvent& pattern_ev = it->second;
-		if ( it->first >= to ) break;
-		if(
-			pattern_ev.track() <= end_track &&
-			pattern_ev.track() >= start_track
-		) {
+        if ( it->first.first >= to ) break;
+        if(
+            it->first.second <= end_track &&
+            it->first.second >= start_track
+        ) {
 			int note = pattern_ev.note();
 			if (note < 120) {
 				pattern_ev.setNote(std::min(std::max(0, note + delta), 119));
-			}
-		}
+            }
+        }
 		++it;
 	}
 }
@@ -324,14 +319,14 @@ void Pattern::ChangeInst(int new_inst, double from, double to, int start_track, 
 	Pattern::iterator it(lower_bound(from));
 	while (it != end()) {
 		PatternEvent& pattern_ev = it->second;
-		if ( it->first >= to ) break;
-		if(
-			pattern_ev.track() <= end_track &&
-			pattern_ev.track() >= start_track &&
-			pattern_ev.machine() != 255
-		) {
-			pattern_ev.setInstrument(std::min(std::max(0, new_inst), 255));
-		}
+        if ( it->first.first >= to ) break;
+        if(
+            it->first.second<= end_track &&
+            it->first.second >= start_track &&
+            pattern_ev.machine() != 255
+        ) {
+            pattern_ev.setInstrument(std::min(std::max(0, new_inst), 255));
+        }
 		++it;
 	}
 }
@@ -341,14 +336,14 @@ void Pattern::ChangeMac(int new_mac, double from, double to, int start_track, in
 	Pattern::iterator it(lower_bound(from));
 	while (it != end()) {
 		PatternEvent& pattern_ev = it->second;
-		if ( it->first >= to ) break;
-		if(
-			pattern_ev.track() <= end_track &&
-			pattern_ev.track() >= start_track &&
-			pattern_ev.machine() != 255
-		) {
-			pattern_ev.setMachine(std::min(std::max(0, new_mac), 255));
-		}
+        if ( it->first.first >= to ) break;
+        if(
+            it->first.second <= end_track &&
+            it->first.second >= start_track &&
+            pattern_ev.machine() != 255
+        ) {
+            pattern_ev.setMachine(std::min(std::max(0, new_mac), 255));
+        }
 		++it;
 	}
 }

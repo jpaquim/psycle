@@ -71,7 +71,7 @@ void TrackHeader::paintEvent( QPaintEvent *event )
 		}
 	}
 }
-const int TrackHeader::height()
+int TrackHeader::height()
 {
 	return height_;
 }

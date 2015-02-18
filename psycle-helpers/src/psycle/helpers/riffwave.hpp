@@ -10,14 +10,15 @@ Other from Microsoft RIFFNEW.pdf
 	class RiffWaveFmtChunk
 	{
 	public:
-		RiffWaveFmtChunk();
-		RiffWaveFmtChunk(const WaveFormat_Data& config);
-		virtual ~RiffWaveFmtChunk() {};
-	public:
-		static const IffChunkId fmt;
-		static const uint16_t FORMAT_PCM;
-		static const uint16_t FORMAT_FLOAT;
-		static const uint16_t FORMAT_EXTENSIBLE;
+        RiffWaveFmtChunk();
+        RiffWaveFmtChunk(const WaveFormat_Data& config);
+        virtual ~RiffWaveFmtChunk() {}
+
+    public:
+        static const IffChunkId fmt;
+        static const uint16_t FORMAT_PCM=1;
+        static const uint16_t FORMAT_FLOAT=3;
+        static const uint16_t FORMAT_EXTENSIBLE=0xFFFEU;
 		
 		static const std::size_t SIZEOF;
 

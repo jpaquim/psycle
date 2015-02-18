@@ -7,21 +7,12 @@
 namespace psycle { namespace core {
 
 TimeSignature::TimeSignature()
-:
-	numerator_(4),
-	denominator_(4),
-	count_(1),
-	ownerDefined_(false),
-	ownerDefinedBeats_(0)
 {}
 
 TimeSignature::TimeSignature(int numerator, int denominator)
 :
 	numerator_(numerator),
-	denominator_(denominator),
-	count_(1),
-	ownerDefined_(false),
-	ownerDefinedBeats_(0)
+    denominator_(denominator)
 {}
 
 TimeSignature::TimeSignature(float ownerDefinedBeats)

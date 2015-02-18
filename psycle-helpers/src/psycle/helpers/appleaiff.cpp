@@ -14,7 +14,7 @@ namespace psycle
 
 		AppleAIFF::AppleAIFF() {
 		}
-		AppleAIFF::~AppleAIFF() {
+        AppleAIFF::~AppleAIFF() {
 		}
 
 		void AppleAIFF::Open(const std::string& fname)

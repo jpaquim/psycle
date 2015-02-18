@@ -73,7 +73,7 @@ void GuiMachineElement::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
             GuiMachineElement* outMachine = ((GuiMachineElement*)(this->scene()->itemAt(event->scenePos(),QTransform())->parentItem()));
 
             //Try to make the connection
-            activeLine->setWire(Statics::song()->InsertConnection(*machine,*outMachine->getMachine()));
+            activeLine->setWire(Globals::song()->InsertConnection(*machine,*outMachine->getMachine()));
 
 
             if(activeLine->getWire()>-1){ //we have a proper connection.

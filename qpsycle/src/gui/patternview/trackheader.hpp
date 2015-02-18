@@ -36,7 +36,7 @@ public:
 
 	void paintEvent( QPaintEvent *event );
 
-	static const int height();
+    static int height();
 private:
 	PatternDraw* pDraw;
 	static const int height_;

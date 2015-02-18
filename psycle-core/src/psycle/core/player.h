@@ -98,8 +98,8 @@ class PSYCLE__CORE__DECL Player : public MachineCallbacks, private boost::noncop
 			CoreSong& song() { return *song_; }
 			void song(CoreSong & song) {
 				if(song_ && &song != song_) {
-					scoped_lock lock(*song_);
-					scoped_lock lock2(song);
+//					scoped_lock lock(*song_);
+//					scoped_lock lock2(song);
 					song_ = &song;
 					sequencer_.set_song(song);
 				} else {

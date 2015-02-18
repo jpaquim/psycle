@@ -187,7 +187,9 @@ namespace qpsycle {
 
 	void MainWindow::setupSound() {
 		psycle::core::Player::singleton().song(*song_);
-		psycle::core::Player::singleton().setDriver(*Global::configuration()._pOutputDriver);
+        if(Global::configuration()._pOutputDriver != nullptr){
+            psycle::core::Player::singleton().setDriver(*Global::configuration()._pOutputDriver);
+        }
 	}
 
 	void MainWindow::setupGui() {
@@ -881,7 +883,7 @@ namespace qpsycle {
 		playbackTimer_->start( 10 );
 
 		playFromSeqPosAct->setChecked(true);
-		psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
+//		psycle::core::Player::singleton().setLoopSequenceEntry( 0 );
 		psycle::core::Player::singleton().start( 0.0 );
 	}
 

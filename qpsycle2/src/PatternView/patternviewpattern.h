@@ -1,33 +1,48 @@
 #ifndef PATTERNVIEWPATTERN_H
 #define PATTERNVIEWPATTERN_H
 
-#include <QGraphicsItem>
-#include <QList>
-#include "patternviewtrack.h"
-#include "psycle/core/pattern.h"
+#include <QAbstractTableModel>
+
+namespace psycle{
+namespace core{
+class Pattern;
+}
+}
+
+class QFont;
+class QPainter;
 
 namespace qpsycle{
 
-class PatternViewPattern : public QGraphicsItem
+class PatternViewPattern : public QAbstractTableModel
 {
 public:
-    PatternViewPattern(psycle::core::Pattern* pattern, QGraphicsItem *parent = 0);
-    ~PatternViewPattern();
-    QRectF boundingRect() const;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    enum ColumnType{
+        Note,
+        Instrument,
+        Machine,
+        Command,
+        Param,
+        Volume,
+        NColumns
+    };
 
-public slots:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    PatternViewPattern(psycle::core::Pattern* pattern, QObject *parent = nullptr);
+
+
 
 private:
-    QVector<PatternViewTrack*> tracks;
-    psycle::core::Pattern* pattern;
-    QFont* font;
-    int charHeight;
-    int charWidth;
-    int columnSpacerSize;
-    int trackSpacerSize;
+    QString generateHexString(uint8_t string) const;
 
+private:
+    psycle::core::Pattern* pattern;
+
+
+    // QAbstractItemModel interface
+public:
+    int rowCount(const QModelIndex &parent) const override;
+    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 };
 
 }

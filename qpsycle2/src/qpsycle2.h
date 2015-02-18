@@ -2,10 +2,6 @@
 #define QPSYCLE2_H
 
 #include <QMainWindow>
-#include "psycle/core/song.h"
-#include "psycle/core/player.h"
-#include "psycle/core/player.h"
-#include "psycle/audiodrivers/audiodriver.h"
 
 namespace qpsycle{
 class MenuSignalHandler;
@@ -18,6 +14,8 @@ public:
     qpsycle2(QWidget *parent = 0);
     ~qpsycle2();
     MenuSignalHandler* getSignalHandler();
+
+private slots:
 
 private:
     MenuSignalHandler* handler;

@@ -74,41 +74,40 @@ namespace qpsycle {
 		toolBar_->addAction(addPatToSeqAct);
 	}
 
-	void PatternBox::populatePatternTree()
-	{
-		catItems.clear();
-		patternMap.clear();
+    void PatternBox::populatePatternTree()
+    {
+        catItems.clear();
+        patternMap.clear();
 
-		bool isFirst = true;
+        bool isFirst = true;
 
-        psycle::core::Sequence::patterns_type::iterator it = song_->sequence().patterns_begin();
-		std::map<std::string, CategoryItem *> categoryMap;
-        for ( ; it < song_->sequence().patterns_end(); ++it) {
-		  psycle::core::Pattern *pattern = *it;
-		  const std::string& categoryName = pattern->category();
-		  CategoryItem *categoryItem = categoryMap[categoryName];
-		  if (categoryItem == NULL) {
-		    categoryItem = new CategoryItem();
-		    categoryItem->name(categoryName);
-		    categoryMap[categoryName] = categoryItem;
-		    catItems.push_back(categoryItem);
-		    patternTree()->addTopLevelItem( categoryItem );
-		    categoryItem->setText(0, QString::fromStdString(categoryName));
-		    //QColor col = QColorFromLongColor( category->color() );
-		    //categoryItem->setBackground( 0, QBrush( col ) );
-		  }
+        std::map<std::string, CategoryItem *> categoryMap;
+        for (auto it = ++song_->sequence().patterns_begin(); it < song_->sequence().patterns_end(); ++it) {
+            psycle::core::Pattern *pattern = *it;
+            const std::string& categoryName = pattern->category();
+            CategoryItem *categoryItem = categoryMap[categoryName];
+            if (categoryItem == NULL) {
+                categoryItem = new CategoryItem();
+                categoryItem->name(categoryName);
+                categoryMap[categoryName] = categoryItem;
+                catItems.push_back(categoryItem);
+                patternTree()->addTopLevelItem( categoryItem );
+                categoryItem->setText(0, QString::fromStdString(categoryName));
+                //QColor col = QColorFromLongColor( category->color() );
+                //categoryItem->setBackground( 0, QBrush( col ) );
+            }
 
-		  PatternItem *patternItem = new PatternItem();
-		  categoryItem->addChild( patternItem );
-		  patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
-		  patternMap[patternItem] = pattern;
-		  if (isFirst) {
-		    isFirst = false;
-		    patternTree_->setCurrentItem( patternItem );
-		    //QColor color = QColorFromLongColor( category->color() );
-		  }
-		}
-	}
+            PatternItem *patternItem = new PatternItem();
+            categoryItem->addChild( patternItem );
+            patternItem->setText( 0, QString::fromStdString( pattern->name() ) );
+            patternMap[patternItem] = pattern;
+            if (isFirst) {
+                isFirst = false;
+                patternTree_->setCurrentItem( patternItem );
+                //QColor color = QColorFromLongColor( category->color() );
+            }
+        }
+    }
 
 	void PatternBox::newCategory() 
 	{ 
@@ -150,7 +149,7 @@ namespace qpsycle {
 
 			catItem->addChild( patItem );
 			patItem->setText( 0, QString::fromStdString( pattern->name() ) );
-			//item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
+//            item->mouseDoublePress.connect(this,&PatternBox::onPatternItemDblClick);
 			patternMap[patItem] = pattern;
 			patternTree()->setCurrentItem( patItem );
 		}

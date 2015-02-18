@@ -170,8 +170,10 @@ bool Psy3Filter::load(const std::string & fileName, CoreSong & song) {
 							size = static_cast<uint32_t>(file.GetPos() - fileposition);
 					}
 				#else
-                mac = mac;//unused warning.
+                if(mac!=nullptr) {
+                    //unused warning.
 					///\todo
+                }
 				#endif
 			}
 			//else if((version & 0xff00) == 0x0100 ) //and so on
@@ -450,21 +452,17 @@ bool Psy3Filter::LoadPATDv0(RiffFile* file,CoreSong& song,int /*minorversion*/) 
 					event.setParameter(*data); ++data;
 					if(!event.empty()) {
 						if(event.note() == notetypes::tweak) {
-							event.set_track(x);
-							pat.insert(beatpos, event);
+                            pat.insert( beatpos, x, event);
 						} else if(event.note() == notetypes::tweak_slide) {
-							event.set_track(x);
-							pat.insert(beatpos, event);
+                            pat.insert( beatpos, x, event);
 						} else if(event.note() == notetypes::midi_cc) {
-							event.set_track(x);
-							pat.insert(beatpos, event);
+                            pat.insert( beatpos, x, event);
 						///\todo: Also, move the Global commands (tempo, mute..) out of the pattern.
 						} else {
 							if(event.command() == commandtypes::NOTE_DELAY)
 								/// Convert old value (part of line) to new value (part of beat)
 								event.setParameter(event.parameter() / linesPerBeat);
-							event.set_track(x);
-							pat.insert(beatpos, event);
+                            pat.insert( beatpos, x, event);
 						}
 						if(
 							(event.note() <= notetypes::release || event.note() == notetypes::empty) &&

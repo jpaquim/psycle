@@ -33,7 +33,7 @@ void MachineView::setup()
 {
     clear();
     items.clear();
-    psycle::core::Song* song = Statics::song();
+    psycle::core::Song* song = Globals::song();
     psycle::core::Machine* machine;
     psycle::core::MachineKey key;
     psycle::core::PluginInfo info;
@@ -68,7 +68,7 @@ void MachineView::setup()
                 if (mac->_connection[w]) { // a connection exists
                     GuiMachineElement* srcMacGui = items.value(mac);  //find the gui for the generating machine
                         if ( srcMacGui!=0 ) {
-                            psycle::core::Machine *pout = Statics::song()->machine(mac->_outputMachines[w]); //find the receiving machine
+                            psycle::core::Machine *pout = Globals::song()->machine(mac->_outputMachines[w]); //find the receiving machine
                             GuiMachineElement* dstMacGui = items.value(pout);  //and it's gui.
                             if ( dstMacGui != 0 ) {
                                 line = new MachineViewLine(0,0,0,0);//add in the line.
@@ -102,7 +102,7 @@ void MachineView::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event){
             psycle::core::MachineKey key = di->getSelection();
             psycle::core::PluginInfo info = psycle::core::MachineFactory::getInstance().getFinder().info(key);
             psycle::core::Machine* machine = psycle::core::MachineFactory::getInstance().CreateMachine(key);
-            Statics::song()->AddMachine(machine);
+            Globals::song()->AddMachine(machine);
 
             //create the UI elememt
             if(info.role()==psycle::core::MachineRole::GENERATOR||info.role()==psycle::core::MachineRole::CONTROLLER){
