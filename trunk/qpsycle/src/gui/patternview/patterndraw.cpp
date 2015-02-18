@@ -269,10 +269,10 @@ namespace qpsycle {
 		// Construct barRects and beatRects.
 		for (int line = startLineNum; line <= endLineNum; line++ ) 
 		{
-            float position = line /*/ (float) patternView()->beatZoom()*/;
+            float position = line / (float) patternView()->beatZoom();
 			if (!(line == patternView()->playPos() ) || !psycle::core::Player::singleton().playing() ) 
 			{
-                if ( !(line/* % patternView()->beatZoom()*/ ) )
+                if ( !(line % patternView()->beatZoom() ) )
 				{
 					if ( patternView()->pattern()->barStart(position, signature) ) {
 						barRects.append( QRectF( sceneInvalidatedXStart, line*rowHeight(), invalidatedWidth, rowHeight() ) );

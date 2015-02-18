@@ -20,6 +20,8 @@
 * http://aminet.net/mods/smpl/
 */
 
+#include <list>
+
 namespace psycle
 {
 	namespace helpers
@@ -109,7 +111,7 @@ namespace psycle
 			virtual bool Eof() const {return EaIff::Eof();}
 			
 			const VHeader & getformat() { return format; }
-			const bool stereo() { return isStereo; }
+            bool stereo() const { return isStereo; }
 			std::string GetName();
 			uint32_t getLength(int octave=1);
 			uint32_t getLoopStart(int octave=1);

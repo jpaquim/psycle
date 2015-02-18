@@ -9,7 +9,8 @@
 namespace qpsycle{
 
 const double Pi = 3.14159265358979323846264338327950288419717;
-const double TwoPi = 2.0 * Pi;
+const double Pi180 = Pi/180;
+const double ThirdPi = Pi/3;
 
 MachineViewLine::MachineViewLine(qreal x1, qreal y1, qreal x2, qreal y2)
 {
@@ -85,13 +86,13 @@ QPainterPath MachineViewLine::shape() const{
 void MachineViewLine::updateTriangle(){
 
     triangle.clear();
-    QPointF midPoint = QPointF(x1_,y1_) + QPointF((x2_-x1_)/2 + qCos(line().angle()*Pi/180) * arrowSize/2,
-                                                      (y2_-y1_)/2 - qSin(line().angle()*Pi/180) * arrowSize/2);
+    QPointF midPoint = QPointF(x1_,y1_) + QPointF((x2_-x1_)/2 + qCos(line().angle()*Pi180) * arrowSize/2,
+                                                      (y2_-y1_)/2 - qSin(line().angle()*Pi180) * arrowSize/2);
     triangle.append(midPoint);
-    triangle.append(midPoint + QPointF(qSin(line().angle()*Pi/180 - Pi / 3) * arrowSize,
-                                       qCos(line().angle()*Pi/180 - Pi / 3) * arrowSize));
-    triangle.append(midPoint + QPointF(qSin(line().angle()*Pi/180 - Pi + Pi / 3) * arrowSize,
-                                       qCos(line().angle()*Pi/180 - Pi + Pi / 3) * arrowSize));
+    triangle.append(midPoint + QPointF(qSin(line().angle()*Pi180 - ThirdPi ) * arrowSize,
+                                       qCos(line().angle()*Pi180 - ThirdPi ) * arrowSize));
+    triangle.append(midPoint + QPointF(qSin(line().angle()*Pi180 - Pi + ThirdPi ) * arrowSize,
+                                       qCos(line().angle()*Pi180 - Pi + ThirdPi ) * arrowSize));
     triangle.append(midPoint);
 }
 

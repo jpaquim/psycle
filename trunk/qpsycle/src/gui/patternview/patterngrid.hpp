@@ -141,7 +141,7 @@ public:
 	unsigned char convertDigit( int defaultValue, int scanCode, unsigned char oldByte, int col ) const;
 
 	// Geometry.
-	QRectF boundingRect() const;
+    QRectF boundingRect() const;
 	const std::map<int, TrackGeometry> & trackGeometrics() const;
 	int lineHeight() const;
 	bool isNote( int key );
@@ -161,7 +161,7 @@ public:
 	int endTrackNumber() const;
 	int numberOfLines() const;
 	int endLineNumber() const;
-//	int beatZoom() const;
+    int beatZoom() const;
 	int patternStep(); 
 	int navStep();
 	bool ignorePatStepForNav();

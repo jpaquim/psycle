@@ -1,6 +1,8 @@
 #include "amigasvx.hpp"
 #include <psycle/helpers/math/math.hpp>
 
+#include <string.h>
+
 namespace psycle
 {
 	namespace helpers

@@ -88,7 +88,7 @@ void LineNumberColumn::paintEvent( QPaintEvent *event )
 	
 }
 
-const int LineNumberColumn::width()
+int LineNumberColumn::width()
 {
 	return width_;
 }

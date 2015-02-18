@@ -50,12 +50,6 @@ class PSYCLE__CORE__DECL PatternEvent {
 
 		PcmListType & paraCmdList() { return paraCmdList_; }
 
-		int track() const { return track_; }
-		void set_track(int track) { track_ = track; }
-
-		int sequence_track() const { return seq_track_; }
-		void set_sequence(int seq_track) { seq_track_ = seq_track; }
-
 		double time_offset() const { return offset_; }
 		void set_time_offset(double offset) { offset_ = offset; }
 
@@ -68,8 +62,6 @@ class PSYCLE__CORE__DECL PatternEvent {
 		uint8_t param_;
 		uint8_t volume_;
 		PcmListType paraCmdList_;
-		int track_;
-		int seq_track_;
 		double offset_;
 };
 

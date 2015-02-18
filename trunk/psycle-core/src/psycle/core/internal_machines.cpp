@@ -233,7 +233,7 @@ void DuplicatorMac::AllocateVoice(int channel,int machine) {
 void DuplicatorMac::DeallocateVoice(int channel, int machine) {
 	if(allocatedchans[channel][machine] == -1) return;
 	availablechans[macOutput[machine]][allocatedchans[channel][machine]] = true;
-	allocatedchans[channel][machine] =- 1;
+    allocatedchans[channel][machine] = -1;
 }
 
 void DuplicatorMac::GetParamName(int numparam, char * name) const {

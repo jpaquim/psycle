@@ -136,7 +136,6 @@ HEADERS  += src/qpsycle2.h \
            ../psycle-core/src/psycle/core/player.h \
            ../psycle-core/src/psycle/core/playertimeinfo.h \
            ../psycle-core/src/psycle/core/plugin.h \
-           ../psycle-core/src/psycle/core/plugincatcher.h \
            ../psycle-core/src/psycle/core/pluginfinder.h \
            ../psycle-core/src/psycle/core/plugininfo.h \
            ../psycle-core/src/psycle/core/preset.h \
@@ -211,9 +210,9 @@ HEADERS  += src/qpsycle2.h \
            ../psycle-helpers/src/psycle/helpers/math/rint.hpp \
            ../psycle-helpers/src/psycle/helpers/math/round.hpp \
            ../psycle-helpers/src/psycle/helpers/math/sin.hpp \
-           ../psycle-helpers/src/psycle/helpers/math/sincos.hpp \
            ../psycle-helpers/src/psycle/helpers/math/sinseq.hpp \
-           ../psycle-helpers/src/psycle/helpers/math/sse_mathfun.h
+           ../psycle-helpers/src/psycle/helpers/math/sse_mathfun.h \
+             src/patternmanager.h
 
 SOURCES += src/main.cpp\
     src/qpsycle2.cpp \
@@ -275,7 +274,6 @@ SOURCES += src/main.cpp\
            ../psycle-core/src/psycle/core/player.cpp \
            ../psycle-core/src/psycle/core/playertimeinfo.cpp \
            ../psycle-core/src/psycle/core/plugin.cpp \
-           ../psycle-core/src/psycle/core/plugincatcher.cpp \
            ../psycle-core/src/psycle/core/pluginfinder.cpp \
            ../psycle-core/src/psycle/core/plugininfo.cpp \
            ../psycle-core/src/psycle/core/preset.cpp \
@@ -334,6 +332,7 @@ SOURCES += src/main.cpp\
            ../psycle-helpers/src/psycle/helpers/resampler.cpp \
            ../psycle-helpers/src/psycle/helpers/riff.cpp \
            ../psycle-helpers/src/psycle/helpers/riffwave.cpp \
+    src/patternmanager.cpp
 
 
 
@@ -381,6 +380,9 @@ DEPENDPATH += . \
               ../psycle-helpers/src/psycle/helpers \
               ../psycle-helpers/src/psycle/helpers/math
 
+FORMS += \
+    src/patternmanager.ui
+
 
  LIBS += -lz -ldl -lrt -lboost_filesystem -lboost_system -lboost_signals -lboost_thread -lgomp
 
@@ -392,16 +394,9 @@ CONFIG      += link_pkgconfig\
 
 
 QMAKE_CXXFLAGS += -std=c++11 -fopenmp
-
-QMAKE_CFLAGS_DEBUG += -O0
+QMAKE_CXXFLAGS_DEBUG += -std=c++11
 
 DEFINES += PSYCLE__ALSA_AVAILABLE
 DEFINES += PSYCLE__GSTREAMER_AVAILABLE
 DEFINES += PSYCLE__JACK_AVAILABLE
 
-#BUILD_DIR = ++build
-#OBJECTS_DIR = $$BUILD_DIR/objects # Where the .o files go.
-#MOC_DIR = $$BUILD_DIR/moc # Where intermediate moc files go.
-#RCC_DIR = $$BUILD_DIR/rcc # Where intermediate resource files go.
-#UI_DIR = $$BUILD_DIR/uic # Where compiled uic files go.
-#DESTDIR = $$BUILD_DIR # Where the final executable goes.

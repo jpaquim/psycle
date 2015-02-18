@@ -31,12 +31,12 @@ class PSYCLE__CORE__DECL TimeSignature {
 		void set_beats(float beats) { ownerDefined_ = true; ownerDefinedBeats_ = beats; }
 
 	private:
-		int numerator_;
-		int denominator_;
-		int count_;
+        int numerator_ = 4;
+        int denominator_ = 4;
+        int count_ = 1;
 
-		bool ownerDefined_;
-		float ownerDefinedBeats_;
+        bool ownerDefined_ = false;
+        float ownerDefinedBeats_ = 0;
 };
 
 }}

@@ -1,22 +1,27 @@
 #ifndef STATICS_H
 #define STATICS_H
 
-#include "psycle/core/song.h"
-#include "psycle/core/player.h"
-#include "psycle/audiodrivers/audiodriver.h"
-#include "PatternView/patternview.h"
-#include "MachineView/machineview.h"
+#include <QString>
 
-#include "MachineView/machinethemeloader.h"
-#include <QGraphicsView>
+namespace psycle{
+namespace core {
+class Song;
+class Player;
+}
+namespace audiodrivers{
+class AudioDriver;
+}
 
+}
+class QGraphicsView;
 
 namespace qpsycle{
+class MachineThemeLoader;
 
-class Statics
+class Globals
 {
 public:
-    Statics(){}
+    Globals(){}
     static void Setup();
     static psycle::core::Song* song();
     static void newSong();
@@ -27,11 +32,7 @@ public:
     static psycle::core::Player* player();
     static void settingsReader();
     static QString getPluginPath();
-    static MachineView* getMachineView();
-    static void setMachineView(MachineView *view);
-    static PatternView* getPatternView();
-    static void setPatternView(PatternView* view);
-  
+
 private:
     static psycle::core::Song* song_;
     static MachineThemeLoader* theme_;
@@ -39,8 +40,6 @@ private:
     static psycle::core::Player* player_;
     static psycle::audiodrivers::AudioDriver* audioDriver_;
     static QString pluginPath;
-    static MachineView* machineView;
-    static PatternView* patternView;
 
 
 };

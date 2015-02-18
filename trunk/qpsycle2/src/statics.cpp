@@ -1,16 +1,23 @@
 #include "statics.h"
+
+#include "psycle/core/song.h"
+#include "psycle/core/player.h"
+
 #include "psycle/core/machinefactory.h"
 #include "psycle/audiodrivers/gstreamerout.h"
-#include "psycle/audiodrivers/jackout.h"
-#include "psycle/audiodrivers/alsaout.h"
 #include "universalis/os/fs.hpp"
+#include "psycle/audiodrivers/audiodriver.h"
+#include "MachineView/machinethemeloader.h"
+
 
 #include <QFile>
 #include <QTextStream>
+#include <QGraphicsView>
+
 
 namespace qpsycle{
 
-void Statics::Setup(){
+void Globals::Setup(){
 
     //read in settings
     settingsReader();
@@ -22,44 +29,45 @@ void Statics::Setup(){
     psycle::core::MachineFactory::getInstance().setPsyclePath(pluginPath.toStdString());
     psycle::core::MachineFactory::getInstance().setLadspaPath("/usr/lib/ladspa/");
     newSong();
-    player_->song(*Statics::song_);
+    player_->song(*Globals::song_);
     audioDriver_ = new psycle::audiodrivers::GStreamerOut();
     player_->setDriver(*audioDriver_);
     audioDriver()->set_started(true);
+    emit
 
 }
 
-void Statics::loadTheme(QString path){
+void Globals::loadTheme(QString path){
     theme_ = new MachineThemeLoader(path);
 }
 
-MachineThemeLoader* Statics::theme(){
+MachineThemeLoader* Globals::theme(){
     return theme_;
 }
 
-void Statics::newSong(){
+void Globals::newSong(){
     song_ = new psycle::core::Song();
 }
 
-psycle::core::Song* Statics::song(){
+psycle::core::Song* Globals::song(){
    if (song_==0)
         newSong();
    return song_;
 }
 
-psycle::core::Player* Statics::player(){
+psycle::core::Player* Globals::player(){
     return player_;
 }
 
-psycle::audiodrivers::AudioDriver* Statics::audioDriver(){
+psycle::audiodrivers::AudioDriver* Globals::audioDriver(){
     return audioDriver_;
 }
 
-QString Statics::getPluginPath(){
+QString Globals::getPluginPath(){
     return pluginPath;
 }
 
-void Statics::settingsReader(){
+void Globals::settingsReader(){
     //open settings file
     QString fileString = QString::fromStdString(universalis::os::fs::home_app_local("qpsycle").string()+"/config");
     std::cerr<<"configFile: "<<fileString.toStdString()<<std::endl;
@@ -83,31 +91,14 @@ void Statics::settingsReader(){
 
 }
 
-MachineView* Statics::getMachineView() {
-    return machineView;
-}
-
-void Statics::setMachineView(MachineView* view){
-    machineView = view;
-}
-
-PatternView* Statics::getPatternView() {
-    return patternView;
-}
-
-void Statics::setPatternView(PatternView* view){
-    patternView = view;
-}
 
 
 
-psycle::core::Song* Statics::song_ = 0 ;
-MachineThemeLoader* Statics::theme_;
-QString Statics::themePath;
-QString Statics::pluginPath;
-psycle::core::Player* Statics::player_;
-psycle::audiodrivers::AudioDriver* Statics::audioDriver_;
-MachineView* Statics::machineView = 0;
-PatternView* Statics::patternView = 0;
+psycle::core::Song* Globals::song_ = nullptr ;
+MachineThemeLoader* Globals::theme_ = nullptr;
+QString Globals::themePath;
+QString Globals::pluginPath;
+psycle::core::Player* Globals::player_ = nullptr;
+psycle::audiodrivers::AudioDriver* Globals::audioDriver_ = nullptr;
 
 }

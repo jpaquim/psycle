@@ -124,17 +124,17 @@ void PatternGrid::addEvent( const ColumnEvent & event ) {
 
 QRectF PatternGrid::boundingRect() const
 {
-	///\todo this is called by destructor, but our parent patDraw is already dead!
-	if( !patDraw_ )
-		return QRectF();
+    ///\todo this is called by destructor, but our parent patDraw is already dead!
+    if( !patDraw_ )
+        return QRectF();
 
-	if ( patDraw_->patternView()->pattern() ) {
-		int gridWidth = patDraw_->gridWidthByTrack( endTrackNumber() );
-		int gridHeight = numberOfLines()*lineHeight();
-		return QRectF( 0, 0, gridWidth, gridHeight ); 
-	} else {
-		return QRectF( 0, 0, patDraw_->width(), patDraw_->height() );
-	}
+    if ( patDraw_->patternView()->pattern() ) {
+        int gridWidth = patDraw_->gridWidthByTrack( endTrackNumber() );
+        int gridHeight = numberOfLines()*lineHeight();
+        return QRectF( 0, 0, gridWidth, gridHeight );
+    } else {
+        return QRectF( 0, 0, patDraw_->width(), patDraw_->height() );
+    }
 }
 
 void PatternGrid::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
@@ -176,20 +176,20 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 		for ( int curLinenum = startLine; curLinenum <= endLine; curLinenum++ ) {
 
-			if ( it != pattern()->end() ) {
-				//FIXME: This is not perfect. Some data will not be drawn if there's data in another track at a previous
-				// time, within the limits of the current line, because only the first line inside the limits is used.
+            if ( it != pattern()->end() ) {
+                //FIXME: This is not perfect. Some data will not be drawn if there's data in another track at a previous
+                // time, within the limits of the current line, because only the first line inside the limits is used.
                 int liney = (int)(it->first /** beatZoom()*/);
-				while (liney < curLinenum )
-				{
-					it++;
+                while (liney < curLinenum )
+                {
+                    it++;
                     liney = (int)(it->first /** beatZoom()*/);
-				}
-				if (liney == curLinenum ) {
-					line = &it->second;
-					it++;
-				} else line = &emptyLine;
-			} else line = &emptyLine;
+                }
+                if (liney == curLinenum ) {
+                    line = &it->second;
+                    it++;
+                } else line = &emptyLine;
+            } else line = &emptyLine;
 
 
 			if (curLinenum != lastLinenum) {
@@ -197,7 +197,7 @@ void PatternGrid::drawPattern( QPainter *painter, int startLine, int endLine, in
 
 				bool onBeat = false;
 				//bool onBar = false;
-                if ( !(curLinenum /*% beatZoom()*/)) {
+                if ( !(curLinenum % beatZoom())) {
 					if (  it != pattern()->end() && pattern()->barStart(it->first, signature) ) {
 						tColor = QColor( barColor() );
 					} else {
@@ -947,7 +947,7 @@ void PatternGrid::repaintSelection() {
 	int oldHeight = lineHeight() * (oldBottom-oldTop);
 	update( patDraw_->xOffByTrack(selLeft), selTop*lineHeight(), selWidth, selHeight );
 	update( patDraw_->xOffByTrack(oldLeft), oldTop*lineHeight(), oldWidth, oldHeight );
-	oldSelection_ = selection_;
+    oldSelection_ = selection_;
 }
 
 void PatternGrid::repaintCursor() {
@@ -1097,9 +1097,9 @@ int PatternGrid::visibleEvents( int track ) const
 const QFont & PatternGrid::font() const { return font_; }
 void PatternGrid::setFont( QFont font ) { font_ = font; };
 
-//int PatternGrid::beatZoom() const {
-//	return patDraw_->patternView()->beatZoom();
-//}
+int PatternGrid::beatZoom() const {
+    return patDraw_->patternView()->beatZoom();
+}
 
 void PatternGrid::setSeparatorColor( const QColor & color ) {
 	separatorColor_ = color;
@@ -1417,7 +1417,9 @@ QRectF PatternGrid::repaintTrackArea(int startLine,int endLine,int startTrack, i
 	int left   = patDraw_->xOffByTrack( startTrack)  + 0;//absoluteLeft() - dx_;
 	int right  = patDraw_->xEndByTrack( endTrack  )  + 0;//absoluteLeft() - dx_;
 
-	return QRectF( left, top, right - left, bottom - top );
+//	return QRectF( left, top, right - left, bottom - top );
+
+    return this->boundingRect();
 }
 
 int PatternGrid::patternStep()

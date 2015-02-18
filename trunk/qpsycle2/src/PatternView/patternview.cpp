@@ -1,31 +1,43 @@
 #include "patternview.h"
 #include "statics.h"
 
+#include "qheaderview.h"
+
 namespace qpsycle{
 
-PatternView::PatternView(QObject *parent):
-    QGraphicsScene(parent)
+PatternView::PatternView(QWidget *parent):
+    QTableView(parent)
 {
     reload();
-    QBrush backgroundBrush(Qt::black);
-    setBackgroundBrush(backgroundBrush);
+    this->setModel( model );
 }
 
 void PatternView::reload(){
-    foreach(PatternViewPattern* pattern,patternList){
-        delete pattern;
-    }
-    patternList.clear();
-    this->clear();
-    this->song = Statics::song();
-    psycle::core::Sequence::patterns_type::iterator pattern = ++song->sequence().patterns_begin();
-    psycle::core::Sequence::patterns_type::iterator patternsEnd = song->sequence().patterns_end();
-    for(;pattern!=patternsEnd;pattern++){
-        patternList.push_back(new PatternViewPattern(*pattern));
-        this->addItem(patternList.last());
-    }
+    this->setShowGrid( false );
+    this->horizontalHeader()->setVisible( true );
+    this->verticalHeader()->setVisible( true );
+    this->song = Globals::song();
+    showPattern( 1 );
+}
 
-    setSceneRect(itemsBoundingRect());
+void PatternView::showPattern(int patternNum){
+    this->currentPatternNum = patternNum;
+    psycle::core::Pattern *pattern = *(song->sequence().patterns_begin()+patternNum);
+    this->setModel( nullptr );
+    delete model;
+    model = new PatternViewPattern( pattern, this);
+    this->setModel( model );
+    this->resizeColumnsToContents();
+}
+
+void PatternView::paintEvent(QPaintEvent *event)
+{
+    QTableView::paintEvent( event );
+}
+
+void PatternView::keyPressEvent(QKeyEvent *event)
+{
+    QTableView::keyPressEvent( event );
 }
 
 }

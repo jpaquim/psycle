@@ -11,13 +11,8 @@ namespace psycle { namespace helpers {
 	const IffChunkId RiffWave::inst = {'i','n','s','t'};
 
 	const IffChunkId RiffWaveFmtChunk::fmt = {'f','m','t',' '};
-    const uint16_t RiffWaveFmtChunk::FORMAT_PCM = 1;
-    const uint16_t RiffWaveFmtChunk::FORMAT_FLOAT = 3;
-    const uint16_t RiffWaveFmtChunk::FORMAT_EXTENSIBLE = 0xFFFEU;
 	const std::size_t RiffWaveFmtChunk::SIZEOF = 16;
 	const std::size_t RiffWaveFmtChunkExtensible::SIZEOF = 22;
-
-	//////////////////////////////////////////////
 
 	RiffWaveFmtChunk::RiffWaveFmtChunk() {}
 	RiffWaveFmtChunk::RiffWaveFmtChunk(const WaveFormat_Data& config)
@@ -360,7 +355,7 @@ namespace psycle { namespace helpers {
 		Read(smplchunk.extraDataSize);
 		if (smplchunk.numLoops>0){
 			smplchunk.loops = new RiffWaveSmplLoopChunk[smplchunk.numLoops];
-			for (int i=0; i < smplchunk.numLoops;i++) {
+			for (size_t i=0; i < smplchunk.numLoops; ++i) {
 				Read(smplchunk.loops[i].cueId);
 				Read(smplchunk.loops[i].type);
 				Read(smplchunk.loops[i].start);

@@ -37,7 +37,7 @@ public:
 	PatternDraw *patternDraw() { return patternDraw_; }
 
 
-	static const int width();
+    static int width();
 private:
 
 	PatternDraw *patternDraw_;

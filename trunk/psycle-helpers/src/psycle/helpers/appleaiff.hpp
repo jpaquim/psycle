@@ -1,5 +1,6 @@
 #pragma once
 #include "eaiff.hpp"
+#include <map>
 namespace psycle
 {
 	namespace helpers
@@ -64,8 +65,8 @@ namespace psycle
 			virtual ~AppleAIFF();
 
 			virtual void Open(const std::string& fname);
-			virtual void Close() {EaIff::Close(); }
-			virtual bool Eof() const {return EaIff::Eof();}
+            virtual void Close() { EaIff::Close(); }
+            virtual bool Eof() const { return EaIff::Eof();}
 
 			void readInterleavedSamples(void* pSamps, uint32_t maxSamples, CommonChunk* convertTo=NULL);//Only channels and bits checked for converTo
 			void readDeInterleavedSamples(void** pSamps, uint32_t maxSamples, CommonChunk* convertTo=NULL);//Only channels and bits checked for converTo

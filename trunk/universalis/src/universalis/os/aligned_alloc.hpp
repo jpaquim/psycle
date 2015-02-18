@@ -109,7 +109,7 @@ class aligned_allocator {
 		}
 
 		// deallocate storage p of deleted elements
-		void deallocate(pointer p, size_type num) {
+        void deallocate(pointer p, size_type /*num*/) {
 			aligned_memory_dealloc(p);
 		}
 };

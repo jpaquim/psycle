@@ -317,9 +317,9 @@ void Sequence::GetEventsInRange(double start, double length, std::vector<Pattern
 				patEnd = pat.lower_bound(std::min(relativeStart + length, entryEndOffset));
 				patIt != patEnd; ++patIt
 			) {
-				PatternEvent & ev = patIt->second;
-				ev.set_sequence(seqlineidx);
-				ev.set_time_offset(entryStart + patIt->first - entryStartOffset);
+                PatternEvent & ev = patIt->second;
+//				ev.set_sequence(seqlineidx);
+                ev.set_time_offset(entryStart + patIt->first.first - entryStartOffset);
 				CollectEvent(ev);
 				#if 0 ///\todo
 					// Since the player needs to differentiate between tracks of different SequenceEntrys,
@@ -502,7 +502,7 @@ std::string Sequence::toXml() const {
 }
 
 void Sequence::Add(Pattern & pattern) {
-	patterns_.push_back(&pattern);
+    patterns_.push_back(&pattern);
 }
 
 void Sequence::Remove(Pattern & pattern) {

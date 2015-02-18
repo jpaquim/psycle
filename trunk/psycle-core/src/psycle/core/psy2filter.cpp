@@ -180,21 +180,17 @@ bool Psy2Filter::LoadPATD(RiffFile * file, CoreSong & song, int index) {
 				PatternEvent event = convertEntry(entry);
 				if(!event.empty()) {
 					if(event.note() == notetypes::tweak) {
-						event.set_track(x);
-						pat.insert(beatpos, event);
+                        pat.insert(beatpos, x, event);
 					} else if(event.note() == notetypes::tweak_slide) {
-						event.set_track(x);
-						pat.insert(beatpos, event);
+                        pat.insert(beatpos, x, event);
 					} else if(event.note() == notetypes::midi_cc) {
-						event.set_track(x);
-						pat.insert(beatpos, event);
+                        pat.insert(beatpos, x, event);
 					}
 					else {
 						if(event.command() == commandtypes::NOTE_DELAY)
 							/// Convert old value (part of line) to new value (part of beat)
 							event.setParameter(event.parameter()/linesPerBeat);
-						event.set_track(x);
-						pat.insert(beatpos, event);
+                        pat.insert(beatpos, x, event);
 					}
 	
 					if(
