@@ -114,18 +114,18 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			m_nna_combo.AddString("Note Release");
 			m_nna_combo.AddString("None");
 
-			m_filtercombo.AddString("LowPass 2p (old)");
-			m_filtercombo.AddString("HighPass 2p (old)");
-			m_filtercombo.AddString("BandPass 2p (old)");
-			m_filtercombo.AddString("NotchBand 2p (old)");
+			m_filtercombo.AddString("LowPass 2P (old)");
+			m_filtercombo.AddString("HighPass 2P (old)");
+			m_filtercombo.AddString("BandPass 2P (old)");
+			m_filtercombo.AddString("NotchBand 2P (old)");
 			m_filtercombo.AddString("None");
 			m_filtercombo.AddString("Unused");
 			m_filtercombo.AddString("Unused");
 			m_filtercombo.AddString("Unused");
-			m_filtercombo.AddString("LowPass 2p");
-			m_filtercombo.AddString("HighPass 2p");
-			m_filtercombo.AddString("BandPass 2p");
-			m_filtercombo.AddString("NotchBand 2p");
+			m_filtercombo.AddString("LowPass 2P (new)");
+			m_filtercombo.AddString("HighPass 2P (new)");
+			m_filtercombo.AddString("BandPass 2P (new)");
+			m_filtercombo.AddString("NotchBand 2P (new)");
 
 			m_cutoff_slider.SetRange(0,127);
 			m_q_slider.SetRange(0,127);
@@ -816,12 +816,28 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 				int nPos = slider->GetPos();
 				Instrument* pins = Global::song()._pInstrument[Global::song().waveSelected];
 				if (pNMHDR->idFrom == IDC_SLIDER_FCUT) {
-					sprintf(buffer,"%.0fHz",dsp::FilterCoeff::Cutoff(pins->ENV_F_TP, nPos));
+					if (pins->ENV_F_TP != dsp::F_NONE &&
+						pins->ENV_F_TP != dsp::F_ITLOWPASS &&
+						pins->ENV_F_TP != dsp::F_MPTLOWPASSE &&
+						pins->ENV_F_TP != dsp::F_MPTHIGHPASSE ) {
+						sprintf(buffer,"%.0fHz",dsp::FilterCoeff::Cutoff(pins->ENV_F_TP, nPos));
+					}
+					else {
+						sprintf(buffer,"-");
+					}
 					label = IDC_CUTOFF_LBL;
 				}
 				else if (pNMHDR->idFrom == IDC_SLIDER_FRES) {
 					Instrument* pins = Global::song()._pInstrument[si];
-					sprintf(buffer,"%.02fQ",dsp::FilterCoeff::Resonance(pins->ENV_F_TP, m_cutoff_slider.GetPos(),nPos));
+					if (pins->ENV_F_TP != dsp::F_NONE &&
+						pins->ENV_F_TP != dsp::F_ITLOWPASS &&
+						pins->ENV_F_TP != dsp::F_MPTLOWPASSE &&
+						pins->ENV_F_TP != dsp::F_MPTHIGHPASSE ) {
+						sprintf(buffer,"%.02fQ",dsp::FilterCoeff::Resonance(pins->ENV_F_TP, m_cutoff_slider.GetPos(),nPos));
+					}
+					else {
+						sprintf(buffer,"-");
+					}
 					label = IDC_LABELQ;
 				}
 				else if (pNMHDR->idFrom == IDC_SLIDERVOL) {

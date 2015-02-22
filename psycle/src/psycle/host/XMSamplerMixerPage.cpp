@@ -134,7 +134,7 @@ BOOL XMSamplerMixerPage::OnSetActive()
 {
 	m_UpdatingGraphics=true;
 	m_slChannels.SetRangeMax((Global::song().SongTracks()>8)?(Global::song().SongTracks()-8):0); // maxchans-visiblechans
-	if ( m_bShowPlay.GetCheck() == 0 ) { m_bShowChan.SetCheck(1); }
+	if ( m_bShowPlay.GetCheck() == 0 && m_bShowPlayAll.GetCheck() == 0 ) { m_bShowChan.SetCheck(1); }
 	for (int i=0;i<8;i++)
 	{
 		((CSliderCtrl*)GetDlgItem(dlgVol[i]))->SetRangeMax(volumeRange);
@@ -143,18 +143,19 @@ BOOL XMSamplerMixerPage::OnSetActive()
 		((CSliderCtrl*)GetDlgItem(dlgCut[i]))->SetRangeMax(cutoffRange);
 
 		CComboBox* filter = ((CComboBox*)GetDlgItem(dlgFil[i]));
-		filter->AddString("LP 2P(a)");
-		filter->AddString("HP 2P(a)");
-		filter->AddString("BP 2P(a)");
-		filter->AddString("NB 2P(a)");
+		filter->Clear();
+		filter->AddString("LP 2P(o)");
+		filter->AddString("HP 2P(o)");
+		filter->AddString("BP 2P(o)");
+		filter->AddString("NB 2P(o)");
 		filter->AddString("None");
 		filter->AddString("LP IT");
 		filter->AddString("LP MPT");
 		filter->AddString("HP MPT");
-		filter->AddString("LP 2P(b)");
-		filter->AddString("HP 2P(b)");
-		filter->AddString("BP 2P(b)");
-		filter->AddString("NB 2P(b)");
+		filter->AddString("LP 2P(n)");
+		filter->AddString("HP 2P(n)");
+		filter->AddString("BP 2P(n)");
+		filter->AddString("NB 2P(n)");
 
 		UpdateChannel(i);
 	}

@@ -330,8 +330,16 @@ void XMSamplerUIInst::OnBnClickedDeleteins()
 		CExclusiveLock lock(&Global::song().semaphore, 2, true);
 		std::set<int> sampNums =  inst.GetWavesUsed();
 		if (sampNums.size() > 0) {
-			int result = MessageBox(_T("This instrument uses one or more samples. Do you want to ALSO delete the samples?"),
-				_T("Deleting Instrument"),MB_YESNOCANCEL | MB_ICONQUESTION);
+			std::set<int> sharedsamples = GetSharedSamplesOfInstrument(m_InstrumentList.GetCurSel(), sampNums);
+			int result;
+			if (sharedsamples.size() > 0 ) {
+				result = MessageBox(_T("This instrument uses one or more samples.\nSome of those samples are shared with other instruments.\nDo you want to ALSO delete the samples?"),
+					_T("Deleting Instrument"),MB_YESNOCANCEL | MB_ICONQUESTION);
+			}
+			else {
+				result = MessageBox(_T("This instrument uses one or more samples. Do you want to ALSO delete the samples?"),
+					_T("Deleting Instrument"),MB_YESNOCANCEL | MB_ICONQUESTION);
+			}
 			if (result == IDYES) {
 				for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
 					Global::song().samples.RemoveAt(*it);
@@ -345,6 +353,35 @@ void XMSamplerUIInst::OnBnClickedDeleteins()
 		Global::song().DeleteVirtualOfInstrument(m_InstrumentList.GetCurSel(),true);
 		FillInstrumentList(-2);
 		SetInstrumentData(m_iCurrentSelected);
+	}
+}
+
+std::set<int> XMSamplerUIInst::GetSharedSamplesOfInstrument(int instidx, std::set<int> sampNums)
+{
+	const InstrumentList& list = Global::song().xminstruments;
+	const SampleList &samplist =  Global::song().samples;
+	std::set<int> setout;
+
+	if (!list.Exists(instidx)) {
+		return setout;
+	}
+	
+	for (std::set<int>::iterator wavite = sampNums.begin(); wavite != sampNums.end(); ++wavite) {
+		if ( samplist.IsEnabled(*wavite) ) {
+			bool doloop = true;
+			const int curwav = *wavite;
+			for (int i=0;i<XMInstrument::MAX_INSTRUMENT && doloop;i++) {
+				if (i==instidx || !list.IsEnabled(i)) continue;
+
+				const XMInstrument& insttest = list[i];
+				for (int j=0;j<XMInstrument::NOTE_MAP_SIZE && doloop;j++) {
+					if (insttest.NoteToSample(j).second == curwav) {
+						setout.insert(curwav);
+						doloop=false;
+					}
+				}
+			}
+		}
 	}
 }
 

@@ -29,6 +29,7 @@ enum FilterType {
 	F_HIGHPASS12E = 9,
 	F_BANDPASS12E = 10,
 	F_BANDREJECT12E = 11,
+
 	F_NUMFILTERS
 };
 
@@ -93,8 +94,8 @@ class Filter {
 		int _q;
 
 		float _coeff0;
-		float _coeff1;
-		float _coeff2;
+		float _coeff1; //coeff[1] reused in ITFilter as highpass coeff
+		float _coeff2; //coeff[2] not used in ITFilter
 		float _coeff3;
 		float _coeff4;
 		float _x1, _x2, _y1, _y2;
@@ -132,7 +133,7 @@ inline void Filter::WorkStereo(float& l, float& r) {
 
 /*Code from Modplug */
 //This means clip to twice the range (Psycle works in float, but with the -32768 to 32768 range)
-#define ClipFilter(x) math::clip<double>(-65535.0, x, 65535.0)
+#define ClipFilter(x) math::clip<float>(-65535.f, x, 65535.f)
 inline float ITFilter::Work(float sample) {
 	float y = sample * _coeff0 + ClipFilter(_y1) * _coeff3 + ClipFilter(_y2) * _coeff4;
 	_y2 = _y1;
