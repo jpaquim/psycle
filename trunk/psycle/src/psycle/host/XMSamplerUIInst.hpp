@@ -47,6 +47,7 @@ public:
 	void SetActivePage(int index);
 	void UpdateTabNames();
 	void UpdateInstrSamples();
+	std::set<int> GetSharedSamplesOfInstrument(int instidx, std::set<int> sampNums);
 private:
 	bool m_bInitialized;
 	int		m_iCurrentSelected;

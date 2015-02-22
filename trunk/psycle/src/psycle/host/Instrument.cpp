@@ -38,8 +38,8 @@ namespace psycle
 			ENV_F_RT = 16500;
 			
 			ENV_F_CO = 91;
-			ENV_F_RQ = 30;
-			ENV_F_EA = 128;
+			ENV_F_RQ = 11;
+			ENV_F_EA = 0;
 			ENV_F_TP = dsp::F_NONE;
 			
 			_loop = false;

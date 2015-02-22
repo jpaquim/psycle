@@ -896,7 +896,7 @@ namespace psycle
 			m_NNA = rInstrument().NNA();
 
 			ResetVolAndPan(playvol,reset);
-			//Envelopes are not reset with instrument set
+			//A new note does not necessarily mean an envelope reset
 			if (m_AmplitudeEnvelope.Stage() == EnvelopeController::EnvelopeStage::OFF) {
 				m_AmplitudeEnvelope.NoteOn();
 				if (m_AmplitudeEnvelope.Envelope().IsCarry()) {
@@ -2581,6 +2581,14 @@ namespace psycle
 					//Whenever an instrument appears alone in a channel, the values are reset.
 					//todo: It should be reset to the values of the instrument set.
 					currentVoice->ResetVolAndPan(-1,true);
+
+					//Restart also the envelopes
+					//This is an FT2 feature (and compatibles, like Modplug in ft2 mode, cubic player,...),
+					//but it is not done in Impulse tracker (and compatibles, like schismtracker).
+					currentVoice->AmplitudeEnvelope().NoteOn();
+					currentVoice->PanEnvelope().NoteOn();
+					currentVoice->PitchEnvelope().NoteOn();
+					currentVoice->FilterEnvelope().NoteOn();
 				}
 			}
 			// STEP B: Get a new Voice to work with, and initialize it if needed.

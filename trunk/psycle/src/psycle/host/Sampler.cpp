@@ -767,7 +767,10 @@ namespace psycle
 		{
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
 			{
-				if (_voices[i].controller.resampler_data != NULL) _resampler.DisposeResamplerData(_voices[i].controller.resampler_data);
+				if (_voices[i].controller.resampler_data != NULL) {
+					_resampler.DisposeResamplerData(_voices[i].controller.resampler_data);
+					_voices[i].controller.resampler_data = NULL;
+				}
 			}
 			_resampler.quality(quality);
 			for (int i=0; i<SAMPLER_MAX_POLYPHONY; i++)
