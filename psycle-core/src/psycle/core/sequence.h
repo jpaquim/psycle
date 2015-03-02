@@ -100,8 +100,10 @@ namespace psycle { namespace core {
 
 			iterator find(SequenceEntry & entry);
 			void erase(iterator it) { line_.erase(it); }
-			iterator lower_bound(double pos) { return line_.lower_bound(pos); }
-			iterator upper_bound(double pos) { return line_.upper_bound(pos); }
+            iterator lower_bound(double pos) { return line_.lower_bound(pos); }
+            iterator upper_bound(double pos) { return line_.upper_bound(pos); }
+            const_iterator lower_bound(double pos) const { return line_.lower_bound(pos); }
+            const_iterator upper_bound(double pos) const { return line_.upper_bound(pos); }
 
 			std::multimap<double, SequenceEntry*>::size_type size() const { return line_.size(); }
 
