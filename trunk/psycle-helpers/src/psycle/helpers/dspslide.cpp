@@ -1,5 +1,7 @@
 #include "dspslide.hpp"
 
+#include <algorithm>
+
 namespace psycle { namespace helpers { namespace dsp {
 
 	std::size_t Slider::m_length;
@@ -11,7 +13,7 @@ namespace psycle { namespace helpers { namespace dsp {
 		length=std::min((std::size_t)2048,length);
 		if (m_length!=length) {
 			double const resdouble = 1.0/(double)length;
-			for(int i = 0; i <= length; ++i) {
+            for(std::size_t i = 0; i <= length; ++i) {
 				l_table_[i]=static_cast<float>((double)i * resdouble);
 			}
 			m_length=length;

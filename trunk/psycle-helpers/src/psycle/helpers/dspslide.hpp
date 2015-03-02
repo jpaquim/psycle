@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+
 namespace psycle { namespace helpers { namespace dsp {
 
 	class Slider {

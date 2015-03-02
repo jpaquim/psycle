@@ -75,8 +75,8 @@ public:
     reverse_iterator rend() { return lines_.rend(); }
     const_reverse_iterator rend() const { return lines_.rend(); }
 
-    iterator lower_bound(double pos) { return lines_.lower_bound({pos, 0}); }
-    iterator upper_bound(double pos) { return lines_.upper_bound({pos, INT_MAX}); }
+    iterator lower_bound(double pos) { return lines_.lower_bound( {pos, 0} ); }
+    iterator upper_bound(double pos) { return lines_.upper_bound( {pos, INT_MAX} ); }
 
     iterator insert(double pos, int track, const PatternEvent& ev) {
         return lines_.insert({ { pos, track }, ev} );

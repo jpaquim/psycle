@@ -17,31 +17,52 @@ void Sequencer::Work(unsigned int nframes) {
 	///\todo: Need to add the events coming from the MIDI device. (Of course, first we need the MIDI device)
 	///\todo this will not work frame correct for BPM changes for now
 	double beats = nframes / ((time_info()->sampleRate() * 60) / time_info()->bpm());
-	events_.clear();
-	song_->sequence().GetEventsInRange(time_info()->playBeatPos(), beats, events_);
+    const Sequence &seq = song_->sequence();
 	unsigned int rest_frames = nframes;
 	double last_pos = 0;
-	for(std::vector<PatternEvent*>::const_iterator i(events_.begin()), e(events_.end()); i != e; ++i) {
-		PatternEvent & ev = **i;
-		if(ev.IsGlobal()) {
-			double pos = ev.time_offset();
-			unsigned int num = static_cast<int>((pos - last_pos) * time_info()->samplesPerBeat());
-			if(rest_frames < num) {
-				if(loggers::warning()) {
-					std::ostringstream s;
-					s << "wrong global event time offset: " << pos << " beats, exceeds: " << beats << " beats";
-					loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
-				}
-				rest_frames = 0;
-			} else {
-				player_->process(num);
-				rest_frames -= num;
-			}
-			last_pos = pos;
-			process_global_event(ev);
-		}
-		execute_notes(ev.time_offset() - time_info()->playBeatPos(), ev);
-	}
+    for( auto seqIt = seq.begin(); seqIt != seq.end(); ++seqIt ) {
+        const SequenceLine &line = **seqIt;
+        double start = time_info()->playBeatPos();
+        for( SequenceLine::const_reverse_iterator lineIt (line.lower_bound( start + beats ));
+             lineIt != line.rend() &&
+             lineIt->first + lineIt->second->patternBeats() >= start;
+             ++lineIt ){
+            Pattern & pat = lineIt->second->pattern();
+            double entryStart = lineIt->first;
+            double entryStartOffset  = lineIt->second->startPos();
+            double entryEndOffset  = lineIt->second->endPos();
+            double relativeStart = start - entryStart + entryStartOffset;
+            for(Pattern::iterator
+                patIt  = pat.lower_bound(std::min(relativeStart, entryEndOffset)),
+                patEnd = pat.lower_bound(std::min(relativeStart + beats, entryEndOffset));
+                patIt != patEnd; ++patIt
+                ) {
+                PatternEvent ev = patIt->second;
+                ev.set_time_offset(entryStart + patIt->first.first - entryStartOffset);
+                if(ev.IsGlobal()) {
+                    double pos = ev.time_offset();
+                    unsigned int num = static_cast<int>((pos - last_pos) * time_info()->samplesPerBeat());
+                    if(rest_frames < num) {
+                        if(loggers::warning()) {
+                            std::ostringstream s;
+                            s << "wrong global event time offset: " << pos << " beats, exceeds: " << beats << " beats";
+                            loggers::warning()(s.str(), UNIVERSALIS__COMPILER__LOCATION);
+                        }
+                        rest_frames = 0;
+                    } else {
+                        player_->process(num);
+                        rest_frames -= num;
+                    }
+                    last_pos = pos;
+                    process_global_event(ev);
+                }
+               int track = patIt->first.second;
+               execute_notes(ev.time_offset() - time_info()->playBeatPos(), track, ev);
+
+            }
+        }
+
+    }
 	player_->process(rest_frames);
 }
 
@@ -128,15 +149,15 @@ void Sequencer::process_global_event(const PatternEvent& event) {
 	}
 }
 
-void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
+void Sequencer::execute_notes(double beat_offset, int track, PatternEvent& entry) {
 	// WARNING!!! In this function, the events inside the patterline are assumed to be temporary! (thus, modifiable)
 
-	int track = entry.track();
-	int sequence_track = entry.sequence_track();
+    int patTrack = track % MAX_TRACKS;
+    int sequence_track = track-patTrack;
 
 	int mac = entry.machine();
-	if(mac != 255) prev_machines_[track] = mac;
-	else mac = prev_machines_[track];
+    if(mac != 255) prev_machines_[patTrack] = mac;
+    else mac = prev_machines_[patTrack];
 
 	// not a valid machine id?
 	if(mac >= MAX_MACHINES || !song()->machine(mac))
@@ -158,7 +179,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 				entry.setParameter(origin & 0xff);
 				machine.AddEvent(
 					beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-					sequence_track * 1024 + track, entry
+                    sequence_track * 1024 + patTrack, entry
 				);
 				previous = origin;
 				delaysamples += delay;
@@ -170,7 +191,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 						entry.setParameter(origin & 0xff);
 						machine.AddEvent(
 							beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-							sequence_track * 1024 + track, entry
+                            sequence_track * 1024 + patTrack, entry
 						);
 						previous = origin;
 					}
@@ -178,7 +199,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 				}
 			} break;
 			case notetypes::tweak:
-				machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
+                machine.AddEvent(beat_offset, sequence_track * 1024 + patTrack, entry);
 			break;
 			default: ;
 		}
@@ -187,7 +208,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 	// step 2: collect note
 	{
 		// track muted?
-		if(song()->sequence().trackMuted(track)) return;
+        if(song()->sequence().trackMuted(patTrack)) return;
 
 		// not a note ?
 		if(entry.note() > notetypes::release && entry.note() != notetypes::empty) return;
@@ -200,7 +221,7 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 				double delayoffset(entry.parameter() / 256.0);
 				// At least Plucked String works erroneously if the command is not ommited.
 				entry.setCommand(0); entry.setParameter(0);
-				machine.AddEvent(beat_offset + delayoffset, sequence_track * 1024 + track, entry);
+                machine.AddEvent(beat_offset + delayoffset, sequence_track * 1024 + patTrack, entry);
 			} break;
 			case commandtypes::RETRIGGER: {
 				///\todo: delaysamples and rate should be memorized (for RETR_CONT command ). Then set delaysamples to zero in this function.
@@ -208,12 +229,12 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 				int rate = entry.parameter() + 1;
 				int delay = (rate * static_cast<int>(time_info()->samplesPerTick())) >> 8;
 				entry.setCommand(0); entry.setParameter(0);
-				machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
+                machine.AddEvent(beat_offset, sequence_track * 1024 + patTrack, entry);
 				delaysamples += delay;
 				while(delaysamples < time_info()->samplesPerTick()) {
 					machine.AddEvent(
 					beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-					sequence_track * 1024 + track, entry
+                    sequence_track * 1024 + patTrack, entry
 				);
 				delaysamples += delay;
 			}
@@ -229,13 +250,13 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 			entry.setCommand(0); entry.setParameter(0);
 			machine.AddEvent(
 				beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-				sequence_track * 1024 + track, entry
+                sequence_track * 1024 + patTrack, entry
 			);
 			delaysamples += delay;
 			while(delaysamples < time_info()->samplesPerTick()) {
 				machine.AddEvent(
 					beat_offset + static_cast<double>(delaysamples) / time_info()->samplesPerBeat(),
-					sequence_track * 1024 + track, entry
+                    sequence_track * 1024 + patTrack, entry
 				);
 				rate += variation;
 				if(rate < 16)
@@ -256,10 +277,10 @@ void Sequencer::execute_notes(double beat_offset, PatternEvent& entry) {
 			#endif
 		} break;
 		default:
-			machine.TriggerDelay[track].setCommand(0);
-			machine.AddEvent(beat_offset, sequence_track * 1024 + track, entry);
-			machine.TriggerDelayCounter[track] = 0;
-			machine.ArpeggioCount[track] = 0;
+            machine.TriggerDelay[patTrack].setCommand(0);
+            machine.AddEvent(beat_offset, sequence_track * 1024 + patTrack, entry);
+            machine.TriggerDelayCounter[patTrack] = 0;
+            machine.ArpeggioCount[patTrack] = 0;
 		}
 	}
 }
