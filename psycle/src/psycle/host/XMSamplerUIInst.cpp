@@ -383,6 +383,7 @@ std::set<int> XMSamplerUIInst::GetSharedSamplesOfInstrument(int instidx, std::se
 			}
 		}
 	}
+	return setout;
 }
 
 }}

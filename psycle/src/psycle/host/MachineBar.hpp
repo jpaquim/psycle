@@ -1,6 +1,8 @@
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
+#include <psycle/host/XMInstrument.hpp>
+#include <psycle/host/LoaderHelper.hpp>
 
 namespace psycle { namespace host {
 
@@ -13,6 +15,8 @@ namespace psycle { namespace host {
 		friend class CMainFrame;
 	DECLARE_DYNAMIC(MachineBar)
 
+		static int wavFilterSelected;
+		static int insFilterSelected;
 	public:
 		MachineBar(void);
 		virtual ~MachineBar(void);
@@ -52,9 +56,10 @@ namespace psycle { namespace host {
 	protected:
 		int GetNumFromCombo(CComboBox* cb);
 		bool LoadWave(int waveIdx);
-		bool LoadInstrument(int instIdx);
+		bool LoadInstrument(int instIdx, bool indexIsSample);
 		void SaveWave(int waveIdx);
 		void SaveInstrument(int instIdx);
+		int SetupDefaultInstrument(LoaderHelper& loadhelp, const XMInstrument::WaveData<>& wave, int waveIdx);
 	public:
 		CComboBox       m_stepcombo;
 		CComboBox       m_gencombo;

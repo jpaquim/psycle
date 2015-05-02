@@ -7,7 +7,6 @@ namespace psycle
 	namespace helpers
 	{
 		using namespace universalis::stdlib;
-		/*********  IFF file reader comforming to Apple Audio IFF pecifications ****/
 		class FormatDetector {
 		public:
 			//IDS returned by Autodetect

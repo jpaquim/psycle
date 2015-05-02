@@ -51,7 +51,7 @@ namespace psycle
 		{
 		public:
 			uint32_t _id;
-			uint32_t _size; // This one should be ULONGINV (it is, at least, in the files I([JAZ]) have tested)
+			uint32_t _size;
 		};
 
 		/// riff file format.

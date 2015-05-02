@@ -143,8 +143,8 @@ void Player::start_threads(int thread_count) {
 			_playPosition= pos;
 			_playPattern = Global::song().playOrder[_playPosition];
 			if(pos != 0 || line != 0) {
-				int songLength = CalcOrSeek(Global::song(),pos,line);
-				sampleCount=songLength*m_SampleRate;
+				double songLength = CalcOrSeek(Global::song(),pos,line);
+				sampleCount=songLength*(m_SampleRate/1000.0);
 			}
 			else sampleCount=0;
 
@@ -770,7 +770,6 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 					}
 				}
 			}
-			songLength += lineSeconds;
 			if ( seektime_ms > -1 && seektime <= songLength) {
 				Start(playPos,playLine);
 				return round<int>(songLength*1000.0f);
@@ -779,6 +778,7 @@ int Player::CalcOrSeek(Song& song, int seqPos, int patLine, int seektime_ms,bool
 				(patLine == -1 || patLine <= playLine)) {
 				return round<int>(songLength*1000.0f);
 			}
+			songLength += lineSeconds;
 			if ( resetLineSec ) { 
 				lineSeconds = secsPerTick*(extratick_calc+ (static_cast<float>(song.TicksPerBeat())/lpb_calc));
 				resetLineSec = false;

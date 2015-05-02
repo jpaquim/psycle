@@ -4,7 +4,9 @@
 #include "WavFileDlg.hpp"
 #include "Song.hpp"
 #include "ITModule2.h"
+#include <psycle/host/XMSongLoader.hpp>
 #include <psycle/helpers/filetypedetector.hpp>
+#include <psycle/host/LoaderHelper.hpp>
 
 namespace psycle { namespace host {
 
@@ -39,21 +41,38 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				uint32_t selCode;
 				bool play=false;
 
-				if (GetOFN().nFilterIndex == 1) {
+				if (GetOFN().nFilterIndex <= 1 || GetOFN().nFilterIndex >= (sizeof(filterCodes)/4)) {
 					helpers::FormatDetector detect;
 					selCode = detect.AutoDetect(GetPathName().GetString());
 				}
 				else selCode = filterCodes[GetOFN().nFilterIndex-2];
 
 				try {
-					if (selCode == helpers::FormatDetector::WAVE_ID) {
-						play = (m_pSong->WavAlloc(PREV_WAV_INS, GetPathName().GetString()));
+					LoaderHelper loadhelp(m_pSong,true,-1,-1);
+					if (selCode == helpers::FormatDetector::PSYI_ID) {
+						play = m_pSong->LoadPsyInstrument(loadhelp, GetPathName().GetString());
+					}
+					else if (selCode == helpers::FormatDetector::XI_ID) {
+						XMSongLoader xmsong;
+						xmsong.Open(GetPathName().GetString());
+						xmsong.LoadInstrumentFromFile(loadhelp);
+						xmsong.Close();
+						play=true;
+					}
+					else if (selCode == helpers::FormatDetector::IMPI_ID) {
+						ITModule2 itsong;
+						itsong.Open(GetPathName().GetString());
+						itsong.LoadInstrumentFromFile(loadhelp);
+						itsong.Close();
+						play=true;
+					}
+					else if (selCode == helpers::FormatDetector::WAVE_ID) {
+						play = (-1 != m_pSong->WavAlloc(loadhelp, GetPathName().GetString()));
 					}
 					else if (selCode == helpers::FormatDetector::SCRS_ID) {
 						ITModule2 itsong;
 						itsong.Open(GetPathName().GetString());
-						XMInstrument dummy;
-						play = itsong.LoadS3MInstX(*m_pSong, dummy, PREV_WAV_INS);
+						play = itsong.LoadS3MFileS3I(loadhelp);
 						itsong.Close();
 					}
 					else if (selCode == helpers::FormatDetector::IMPS_ID) {
@@ -64,10 +83,10 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 						itsong.Close();
 					}
 					else if (selCode == helpers::FormatDetector::AIFF_ID) {
-						play = (m_pSong->AIffAlloc(PREV_WAV_INS, GetPathName().GetString()));
+						play = (-1 != m_pSong->AIffAlloc(loadhelp, GetPathName().GetString()));
 					}
 					else if (selCode == helpers::FormatDetector::SVX8_ID) {
-						play = (m_pSong->IffAlloc(PREV_WAV_INS, GetPathName().GetString()));
+						play = (-1 != m_pSong->IffAlloc(loadhelp,false, GetPathName().GetString()));
 					}
 				}
 				catch(const std::runtime_error & /*e*/) {

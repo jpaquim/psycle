@@ -1369,7 +1369,7 @@ namespace psycle { namespace host {
 			}
 		}
 
-		CSearchReplaceMode CChildView::SetupSearchReplaceMode(int searchnote, int searchinst, int searchmach, int replnote, int replinst, int replmach)
+		CSearchReplaceMode CChildView::SetupSearchReplaceMode(int searchnote, int searchinst, int searchmach, int replnote, int replinst, int replmach, bool repltweak)
 		{
 			CSearchReplaceMode mode;
 			mode.notereference = static_cast<uint8_t>(searchnote&0xFF);
@@ -1378,6 +1378,7 @@ namespace psycle { namespace host {
 			mode.notereplace = static_cast<uint8_t>(replnote&0xFF);
 			mode.instreplace = static_cast<uint8_t>(replinst&0xFF);
 			mode.machreplace = static_cast<uint8_t>(replmach&0xFF);
+			mode.tweakreplace = notecommands::empty;
 
 			// In search: 1001 empty, 1002 non-empty, 1003 all, other -> exact match
 			switch(searchnote) {
@@ -1414,6 +1415,7 @@ namespace psycle { namespace host {
 				case 1002: mode.machreplacer = CSearchReplaceMode::ReplaceWithCurrent; break;
 				default: mode.machreplacer = CSearchReplaceMode::ReplaceWithNewVal; break;
 			}
+			mode.tweakreplacer = (repltweak) ? CSearchReplaceMode::ReplaceWithEmpty : CSearchReplaceMode::ReplaceWithCurrent;
 			return mode;
 		}
 		CCursor CChildView::SearchInPattern(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode)
@@ -1472,6 +1474,8 @@ namespace psycle { namespace host {
 						entry._note = mode.notereplacer(entry._note, mode.notereplace);
 						entry._inst = mode.instreplacer(entry._inst, mode.instreplace);
 						entry._mach = mode.machreplacer(entry._mach, mode.machreplace);
+						entry._cmd = mode.tweakreplacer(entry._cmd, mode.tweakreplace);
+						entry._parameter = mode.tweakreplacer(entry._parameter, mode.tweakreplace);
 						replaced=true;
 					}
 				}

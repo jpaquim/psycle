@@ -74,14 +74,13 @@ namespace psycle
 
 			return val;
 		}
-		void ITModule2::LoadInstrumentFromFile(Song& song, const int idx)
+		int ITModule2::LoadInstrumentFromFile(LoaderHelper& loadhelp)
 		{
 			itFileH.flags=0;
 			itInsHeader1x inshead;
 			Read(&inshead,sizeof(itInsHeader1x));
-			XMInstrument instr;
-			instr.Init();
-			song.DeleteVirtualOfInstrument(idx,true);
+			int instIdx = -1;
+			XMInstrument& instr = loadhelp.GetNextInstrument(instIdx);
 			if (inshead.trackerV < 0x200 ) {
 				LoadOldITInst(inshead,instr);
 			}
@@ -100,30 +99,44 @@ namespace psycle
 				}
 				Seek(curpos);
 			}
-			int curSample(0);
+			int sample=-1;
+			if (loadhelp.IsPreview()) { // If preview, determine which sample to  load.
+				sample = instr.NoteToSample(notecommands::middleC).second;
+				if (sample == notecommands::empty) {
+					const std::set<int>& samps = instr.GetWavesUsed();
+					if (!samps.empty()) {
+						sample = *samps.begin();
+					}
+				}
+			}
 			std::vector<unsigned char> sRemap;
 			for (unsigned int i(0); i<inshead.noS; i++)
 			{
-				while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
-				XMInstrument::WaveData<> wave;
+				//todo: finish for preview (select appropiate sample)
+				int sampIdx=-1;
+				XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(sampIdx);
 				std::size_t curpos = GetPos();
 				LoadITSample(wave);
 				Seek(curpos+sizeof(itSampleHeader));
 				// Only get REAL samples.
-				if ( wave.WaveLength() > 0 && curSample < MAX_INSTRUMENTS-2 ) {
-					song.samples.SetSample(wave, curSample);
-					sRemap.push_back(curSample);
+				if ( wave.WaveLength() > 0) {
+					sRemap.push_back(sampIdx);
 				}
-				else { sRemap.push_back(255); }
+				else { sRemap.push_back(MAX_INSTRUMENTS-1); }
+				if (i == sample) {
+					break;
+				}
 			}
-
-			for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
-			{
-				XMInstrument::NotePair npair = instr.NoteToSample(i);
-				npair.second=(npair.second<inshead.noS) ? sRemap[npair.second] : 255;
-				instr.NoteToSample(i,npair);
+			if (!loadhelp.IsPreview()) {
+				for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++)
+				{
+					XMInstrument::NotePair npair = instr.NoteToSample(i);
+					npair.second=(npair.second<inshead.noS) ? sRemap[npair.second] : 255;
+					instr.NoteToSample(i,npair);
+				}
 			}
-			song.xminstruments.SetInst(instr,idx);
+			instr.ValidateEnabled();
+			return instIdx;
 		}
 		bool ITModule2::Load(Song &song,CProgressDialog& /*progress*/, bool /*fullopen*/)
 		{
@@ -374,6 +387,7 @@ Special:  Bit 0: On = song message attached.
 						song.xminstruments.SetInst(instr,i);
 					}
 					XMInstrument& instrument = song.xminstruments.get(i);
+					instrument.Name(wave.WaveName());
 					XMInstrument::NotePair npair;
 					npair.second=i;
 					for(int j = 0;j < XMInstrument::NOTE_MAP_SIZE;j++){
@@ -714,7 +728,7 @@ Special:  Bit 0: On = song message attached.
 				for (j = 0; j < iLen; j+=2) {
 					wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+wTmp:wTmp;
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew ^65535;
+					*(const_cast<signed short*>(_wave.pWaveDataL()) + out) = wNew;
 					out++;
 				}
 				if (bstereo) {
@@ -723,20 +737,20 @@ Special:  Bit 0: On = song message attached.
 					for (j = 0; j < iLen; j+=2) {
 						wTmp= ((smpbuf[j]<<lobit) | (smpbuf[j+1]<<hibit))+offset;
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+wTmp:wTmp;
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew ^65535;
+						*(const_cast<signed short*>(_wave.pWaveDataR()) + out) = wNew;
 						out++;
 					}
 				}
 			} else {
 				for (j = 0; j < iLen; j++) {
 					wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset)  ^65535;
+					*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = ((wNew<<8)+offset);
 				}
 				if (bstereo) {
 					Read(smpbuf,iLen);
 					for (j = 0; j < iLen; j++) {
 						wNew=(convert& SampleConvert::IS_DELTA)?wNew+smpbuf[j]:smpbuf[j];
-						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset) ^65535;
+						*(const_cast<signed short*>(_wave.pWaveDataR()) + j) = ((wNew<<8)+offset);
 					}
 				}
 			}
@@ -1335,9 +1349,7 @@ Special:  Bit 0: On = song message attached.
 			for (i=0;i<s3mFileH.insNum;i++)
 			{
 				Seek(pointersi[i]<<4);
-				XMInstrument instr;
-				LoadS3MInstX(song, instr,i);
-				song.xminstruments.SetInst(instr,i);
+				LoadS3MInstX(song, i);
 				if (song.xminstruments.IsEnabled(i)) {
 					s3mtovirtual[i]=virtualInst;
 					song.SetVirtualInstrument(virtualInst++,0,i);
@@ -1356,40 +1368,53 @@ Special:  Bit 0: On = song message attached.
 			return true;
 		}
 
-		//Note: This is also used to load s3i (st3 standalone samples/instruments).
-		bool ITModule2::LoadS3MInstX(Song& song, XMInstrument &xins,uint16_t iSampleIdx)
+		//This is used to load s3i (st3 standalone samples/instruments).
+		int ITModule2::LoadS3MFileS3I(LoaderHelper& loadhelp)
 		{
-			bool result = false;
 			s3mInstHeader curH;
 			Read(&curH,sizeof(curH));
-
-			xins.Init();
-			xins.Name(curH.sName);
+			int result=-1;
 
 			if (curH.tag == SCRS_ID && curH.type == 1) 
 			{
-				if (iSampleIdx < PREV_WAV_INS ) {
-					XMInstrument::WaveData<> wave;
-					if (iSampleIdx != 65535) {
-						song.samples.SetSample(wave,iSampleIdx);
-					}
-					else { iSampleIdx = song.samples.AddSample(wave); }
+				int outsample=-1;
+				XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(outsample);
+				bool res = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH));
+				if (res) {
+					result = outsample;
 				}
-				XMInstrument::WaveData<>& wave = (iSampleIdx < PREV_WAV_INS )?song.samples.get(iSampleIdx):song.wavprev.UsePreviewWave();
-				result = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH));
-
-				XMInstrument::NotePair npair;
-				npair.second=static_cast<uint8_t>(iSampleIdx);
-				for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-					npair.first=i;
-					xins.NoteToSample(i,npair);
-				}
-				xins.ValidateEnabled();
 			}
 			else if (curH.tag == SCRI_ID && curH.type != 0)
 			{
 				//reinterpret_cast<s3madlibheader*>(&curH)
 			}
+			return result;
+		}
+
+		bool ITModule2::LoadS3MInstX(Song& song, uint16_t iSampleIdx)
+		{
+			bool result = false;
+			s3mInstHeader curH;
+			Read(&curH,sizeof(curH));
+			XMInstrument instr;
+			instr.Init();
+			instr.Name(curH.sName);
+
+			if (curH.tag == SCRS_ID && curH.type == 1) 
+			{
+				XMInstrument::WaveData<> wave;
+				result = LoadS3MSampleX(wave,reinterpret_cast<s3mSampleHeader*>(&curH));
+				song.samples.SetSample(wave,iSampleIdx);
+				if (result) {
+					instr.SetDefaultNoteMap(iSampleIdx);
+					instr.ValidateEnabled();
+				}
+			}
+			else if (curH.tag == SCRI_ID && curH.type != 0)
+			{
+				//reinterpret_cast<s3madlibheader*>(&curH)
+			}
+			song.xminstruments.SetInst(instr,iSampleIdx);
 			return result;
 		}
 
@@ -1413,14 +1438,12 @@ Special:  Bit 0: On = song message attached.
 
 			_wave.WaveSampleRate(currHeader->c2speed);
 
-			std::string sName = currHeader->sName;
+			std::string sName = currHeader->filename;
 			_wave.WaveName(sName);
 
 			int newpos=((currHeader->hiMemSeg<<16)+currHeader->lomemSeg)<<4;
 			Seek(newpos);
-			LoadS3MSampleDataX(_wave,currHeader->length,bstereo,b16Bit,currHeader->packed);
-
-			return true;
+			return LoadS3MSampleDataX(_wave,currHeader->length,bstereo,b16Bit,currHeader->packed);
 		}
 
 		bool ITModule2::LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit,bool packed)

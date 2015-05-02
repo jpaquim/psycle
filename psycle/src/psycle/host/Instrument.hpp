@@ -4,12 +4,12 @@
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
 #include "FileIO.hpp"
+#include <psycle/host/XMinstrument.hpp>
 #include <psycle/helpers/filter.hpp>
 namespace psycle
 {
 	namespace host
 	{
-		class SampleList;
 		/// an instrument is a waveform with some extra features added around it.
 		class Instrument
 		{
@@ -20,7 +20,12 @@ namespace psycle
 			void LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int sampleIdx, bool fullopen=true);
 			void LoadWaveSubChunk(RiffFile* pFile,SampleList& samples, int instrIdx, int pan, char * instrum_name, bool fullopen, int loadIdx);
 			void SaveFileChunk(RiffFile* pFile);
-
+			void SetVolEnvFromEnvelope(const XMInstrument::Envelope& penv, float ticktomillis);
+			void SetFilterEnvFromEnvelope(const XMInstrument::Envelope& penv, float ticktomillis);
+			void CopyXMInstrument(const XMInstrument& inst, float ticktomillis);
+		protected:
+			void SetEnvInternal(const XMInstrument::Envelope& penvin, float ticktomillis, int &attack, int& decay, int& sustain, int& release);
+		public:
 			///\name Loop stuff
 			///\{
 			bool _loop;

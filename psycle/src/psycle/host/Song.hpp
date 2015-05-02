@@ -9,6 +9,7 @@
 #include "ExclusiveLock.hpp"
 #include "cpu_time_clock.hpp"
 #include "InstPreview.hpp"
+#include <psycle/host/LoaderHelper.hpp> 
 #include <universalis/stdlib/chrono.hpp>
 #include <universalis/os/loggers.hpp>
 
@@ -140,15 +141,18 @@ namespace psycle
 			///\name wavetable
 			///\{
 			/// Wave Loader
-			int WavAlloc(int iInstr,const std::string & sName);
+			int WavAlloc(LoaderHelper& loadhelp,const std::string & sName);
 			/// Wave allocator
-			int WavAlloc(int iInstr,bool bStereo,uint32_t iSamplesPerChan,const std::string & sFileName);
+			XMInstrument::WaveData<>& WavAlloc(int sampleIdx, bool bStereo, uint32_t iSamplesPerChan, const std::string & sName);
+			XMInstrument::WaveData<>& WavAlloc(LoaderHelper& loadhelp, bool bStereo, uint32_t iSamplesPerChan, const std::string & sName, int &instout);
 			/// SVX Loader
-			int IffAlloc(int instrument,const std::string & sFileName);
+				//instmode=true then create/initialize an instrument (both, sampler and sampulse ones).
+				//returns -1 error, else if instmode= true returns real inst index, else returns real sample idx.
+			int IffAlloc(LoaderHelper& loadhelp, bool instMode, const std::string & sFileName);
 			/// AIFF loader
-			int AIffAlloc(int sampleIdx,const std::string & sFileName);
+			int AIffAlloc(LoaderHelper& loadhelp,const std::string & sFileName);
 			void SavePsyInstrument(const std::string& filename, int instIdx) const;
-			void LoadPsyInstrument(const std::string& filename, int instIdx);
+			bool LoadPsyInstrument(LoaderHelper& loadhelp, const std::string& filename);
 			/// wave preview allocation.  (thread safe)
 			void SetWavPreview(XMInstrument::WaveData<> * wave);
 			/// wave preview allocation.  (thread safe)
@@ -333,6 +337,17 @@ namespace psycle
 				else if ( value > 31 ) m_ExtraTicksPerLine = 31;
 				else m_ExtraTicksPerLine = value;
 			}
+			float tickstomillis(int ticks) {
+				return static_cast<float>(ticks)
+					*60000.f/
+					(m_BeatsPerMin*(m_TicksPerBeat+(m_ExtraTicksPerLine*m_LinesPerBeat)));
+			}
+			float millistoticks(int millis) {
+				return (static_cast<float>(millis)
+					*m_BeatsPerMin*(m_TicksPerBeat+(m_ExtraTicksPerLine*m_LinesPerBeat)))
+					/60000.f;
+			}
+
 			/*Solo/unsolo machine. Use -1 to unset*/
 			void SoloMachine(int macIdx);
 			/// The file name this song was loaded from.

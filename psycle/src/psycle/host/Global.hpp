@@ -6,6 +6,7 @@
 #include "Constants.hpp"
 #include "SongStructs.hpp"
 #include <Shlwapi.h>
+//#include <universalis/os/winutf8wrapper.hpp>
 
 // AVRT is the new "multimedia scheduling stuff"
 typedef HANDLE (WINAPI *FAvSetMmThreadCharacteristics)   (LPCTSTR,LPDWORD);

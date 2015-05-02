@@ -103,7 +103,7 @@ void CInstrNoteMap::RefreshSampleList(int sample){
 	if (sample == -1) {
 		int i = m_SampleList.GetCurSel();
 		m_SampleList.ResetContent();
-		for (int i=0;i<list.size();i++)
+		for (int i=0;i<=list.lastused();i++)
 		{
 			if (list.Exists(i)) {
 				const XMInstrument::WaveData<>& wave = list[i];
@@ -164,7 +164,7 @@ void CInstrNoteMap::RefreshNoteMapList(bool reset/*=true*/){
 void CInstrNoteMap::OnSelchangeSampleList()
 {
 	int maxitems=m_NoteMapList.GetCount();
-	int nosampleidx = Global::song().samples.size();
+	int nosampleidx = Global::song().samples.lastused()+1;
 	if(m_radio_edit.GetCheck()> 0) {
 		if (m_SampleList.GetSelCount()>1) {
 			if (m_NoteMapList.GetSelCount() != m_SampleList.GetSelCount()) {
@@ -272,7 +272,7 @@ void CInstrNoteMap::OnSelchangeNoteList()
 					if (pair.first == noteidx ) {
 						m_NoteMapList.SetSel(inp,true);
 						if (pair.second == 255) {
-							m_SampleList.SetSel(Global::song().samples.size(),true);
+							m_SampleList.SetSel(Global::song().samples.lastused()+1,true);
 						}
 						else {
 							m_SampleList.SetSel(pair.second,true);
@@ -294,7 +294,7 @@ void CInstrNoteMap::OnSelchangeNoteMapList()
 			const XMInstrument::NotePair & pair = copyInstr.NoteToSample(inp);
 			m_NoteList.SetSel(pair.first,true);
 			if (pair.second == 255) {
-				m_SampleList.SetSel(Global::song().samples.size(),true);
+				m_SampleList.SetSel(Global::song().samples.lastused()+1,true);
 			}
 			else {
 				m_SampleList.SetSel(pair.second,true);

@@ -38,6 +38,7 @@ namespace psycle { namespace host {
 			DDX_Control(pDX, IDC_REPLNOTECOMB, m_replacenote);
 			DDX_Control(pDX, IDC_REPLINSTCOMB, m_replaceinst);
 			DDX_Control(pDX, IDC_REPLMACHCOMB, m_replacemach);
+			DDX_Control(pDX, IDC_REPLTWEAKCHECK, m_replacetweak);
 			DDX_Radio(pDX,IDC_APPLYTOSONG, m_applyto);
 			DDX_Control(pDX, IDC_CH_INCLUDEPAT, m_includePatNotInSeq);			
 		}
@@ -207,7 +208,8 @@ namespace psycle { namespace host {
 				m_searchmach.GetItemData(m_searchmach.GetCurSel()),
 				m_replacenote.GetItemData(m_replacenote.GetCurSel()),
 				m_replaceinst.GetItemData(m_replaceinst.GetCurSel()), 
-				m_replacemach.GetItemData(m_replacemach.GetCurSel()));
+				m_replacemach.GetItemData(m_replacemach.GetCurSel()),
+				m_replacetweak.GetCheck());
 
 			bool replaced=false;
 			UpdateData (TRUE);

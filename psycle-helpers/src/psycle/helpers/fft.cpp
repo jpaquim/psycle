@@ -616,7 +616,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 					j = std::max(j,calculatedfftIn[a]);
 					a++;
 				}
-			}//+0.0000000001f is -100dB of power. Used to prevent avaluating powerdB(0.0)
+			}//+0.0000000001f is -100dB of power. Used to prevent evaluating powerdB(0.0)
 			banddBOut[h]=powerdB(j+0.0000000001f)+dbinvSamples;
 		}
 	}

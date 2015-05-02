@@ -387,7 +387,7 @@ namespace psycle { namespace host  { namespace canvas {
   }
 
   void Group::intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {
-    Item* found = 0;
+//    Item* found = 0;
     int size = items.size();
     std::vector<Item*>::const_reverse_iterator rev_it = items_.rbegin();
     for ( ; rev_it != items_.rend(); ++rev_it) {

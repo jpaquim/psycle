@@ -572,6 +572,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\psycle\host\LoaderHelper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\psycle\host\LoaderHelper.hpp"
+					>
+				</File>
+				<File
 					RelativePath="src\psycle\host\PresetIO.cpp"
 					>
 				</File>
@@ -751,6 +759,14 @@
 					RelativePath="src\psycle\host\SongpDlg.hpp"
 					>
 				</File>
+				<File
+					RelativePath="src\psycle\host\wavfiledlg.cpp"
+					>
+				</File>
+				<File
+					RelativePath="src\psycle\host\WavFileDlg.hpp"
+					>
+				</File>
 				<Filter
 					Name="configuration"
 					>
@@ -864,6 +880,22 @@
 					>
 					<File
 						RelativePath="src\psycle\host\BaseParamView.hpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\psycle\host\Dialog_item.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\psycle\host\Dialog_item.h"
+						>
+					</File>
+					<File
+						RelativePath=".\src\psycle\host\Dyn_dialog.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\src\psycle\host\Dyn_dialog.h"
 						>
 					</File>
 					<File
@@ -987,14 +1019,6 @@
 						</File>
 						<File
 							RelativePath="src\psycle\host\GearTracker.hpp"
-							>
-						</File>
-						<File
-							RelativePath="src\psycle\host\wavfiledlg.cpp"
-							>
-						</File>
-						<File
-							RelativePath="src\psycle\host\WavFileDlg.hpp"
 							>
 						</File>
 					</Filter>

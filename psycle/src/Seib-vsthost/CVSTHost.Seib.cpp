@@ -963,25 +963,22 @@ namespace seib {
 			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask && kVstClockValid))
 			{
 				vstTimeInfo.flags |= kVstPpqPosValid;
-				vstTimeInfo.ppqPos = seconds * vstTimeInfo.tempo / 60.L;
+				const double beatpos = seconds * vstTimeInfo.tempo / 60.0;
+				vstTimeInfo.ppqPos = beatpos * 4.0 / static_cast<double>(vstTimeInfo.timeSigDenominator);
 
-				//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar. (ppqpos/sigdenominator ?)
+				//barstartpos,  ( 10.25ppq , 1ppq = 1 beat). ppq pos of the previous bar.
 				if(lMask & kVstBarsValid)
 				{
-					vstTimeInfo.barStartPos= vstTimeInfo.timeSigDenominator* (static_cast<VstInt32>(vstTimeInfo.ppqPos) / vstTimeInfo.timeSigDenominator);
+					vstTimeInfo.barStartPos= vstTimeInfo.timeSigNumerator* (static_cast<VstInt32>(vstTimeInfo.ppqPos) / vstTimeInfo.timeSigNumerator);
 					vstTimeInfo.flags |= kVstBarsValid;
 				}
-				//samplestoNextClock, how many samples from the current position to the next 24ppq.  ( i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
+				//samplestoNextClock, how many samples from the current position to the next clock, (24ppq precision, i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
 				if(lMask & kVstClockValid)
 				{
-//					option 1:
-					const VstInt32 onesampleclock = (60.L * vstTimeInfo.sampleRate) / (vstTimeInfo.tempo*24.L);		// get size of one 24ppq in samples.
-					vstTimeInfo.samplesToNextClock =static_cast<VstInt32>(vstTimeInfo.samplePos) % onesampleclock; // quantize.
-
-//					option 2:
-//					const double ppqclockpos = 24 * (((int)vstTimeInfo.ppqPos / 24)+1);								// Quantize ppqpos
-//					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
-//					vstTimeInfo.samplestoNextClock = sampleclockpos - ppqclockpos;									// get the difference.
+					//Should be "round" instead of cast+1, but this is good enough.
+					const double ppqclockpos = static_cast<VstInt32>(vstTimeInfo.ppqPos*24.0)+1;					// Get the next clock in 24ppqs
+					const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
+					vstTimeInfo.samplesToNextClock = sampleclockpos - vstTimeInfo.samplePos;									// get the difference.
 					vstTimeInfo.flags |= kVstClockValid;
 				}
 			}

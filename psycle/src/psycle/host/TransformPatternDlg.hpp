@@ -27,6 +27,7 @@ namespace psycle { namespace host {
 			CComboBox m_replacenote;
 			CComboBox m_replaceinst;
 			CComboBox m_replacemach;
+			CButton m_replacetweak;
 			int m_applyto;
 			CButton m_includePatNotInSeq;
 		protected:

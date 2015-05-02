@@ -699,15 +699,9 @@ namespace psycle
 					Ressonance(_inst.FilterResonance());
 				}
 			}
-			else if ( rChannel().Cutoff() < 127 || rChannel().Ressonance() > 0)
-			{
+			else {
 				CutOff(rChannel().Cutoff());
 				Ressonance(rChannel().Ressonance());
-			}
-			else
-			{
-				CutOff(127);
-				Ressonance(0);
 			}
 
 			ResetEffects();

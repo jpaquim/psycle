@@ -910,7 +910,7 @@ namespace psycle { namespace host {
 		void CMainFrame::EditQuantizeChange(int diff) { m_machineBar.EditQuantizeChange(diff); }
 		bool CMainFrame::LoadWave(int idx) { return m_machineBar.LoadWave(idx); }
 		void CMainFrame::SaveWave(int idx) { m_machineBar.SaveWave(idx); }
-		bool CMainFrame::LoadInst(int idx) { return m_machineBar.LoadInstrument(idx); }
+		bool CMainFrame::LoadInst(int idx) { return m_machineBar.LoadInstrument(idx, false); }
 		void CMainFrame::SaveInst(int idx) { m_machineBar.SaveInstrument(idx); }
 
 		void CMainFrame::RedrawGearRackList()

@@ -13,6 +13,8 @@ namespace psycle { namespace helpers {
 	const IffChunkId RiffWaveFmtChunk::fmt = {'f','m','t',' '};
 	const std::size_t RiffWaveFmtChunk::SIZEOF = 16;
 	const std::size_t RiffWaveFmtChunkExtensible::SIZEOF = 22;
+	const std::size_t RiffWaveSmplChunk::SIZEOF = 36;
+	const std::size_t RiffWaveInstChunk::SIZEOF = 7;
 
 	RiffWaveFmtChunk::RiffWaveFmtChunk() {}
 	RiffWaveFmtChunk::RiffWaveFmtChunk(const WaveFormat_Data& config)
@@ -235,6 +237,46 @@ namespace psycle { namespace helpers {
 		Write(chunk.wBlockAlign);
 		Write(chunk.wBitsPerSample);
 	}
+	void RiffWave::addSmplChunk(const RiffWaveSmplChunk& smpl)
+	{
+		RiffChunkHeader	header(RiffWave::smpl,RiffWaveSmplChunk::SIZEOF
+				+ smpl.numLoops*sizeof(RiffWaveSmplLoopChunk)/*+smpl.extraDataSize*/);
+		addNewChunk(header);
+		Write(smpl.manufacturer);
+		Write(smpl.product);
+		Write(smpl.samplePeriod);
+		Write(smpl.midiNote);
+		Write(smpl.midiPitchFr);
+		Write(smpl.smpteFormat);
+		Write(smpl.smpteOffset);
+		Write(smpl.numLoops);
+		Write(smpl.extraDataSize);
+		if (smpl.numLoops > 0) {
+			for (int i=0;i< smpl.numLoops;i++) {
+				Write(smpl.loops->cueId);
+				Write(smpl.loops->type);
+				Write(smpl.loops->start);
+				Write(smpl.loops->end);
+				Write(smpl.loops->fraction);
+				Write(smpl.loops->playCount);
+			}
+		}
+		if (smpl.extraDataSize > 0) {
+			//Not implemented.
+		}
+	}
+	void RiffWave::addInstChunk(const RiffWaveInstChunk& inst)
+	{
+		RiffChunkHeader	header(RiffWave::inst,RiffWaveInstChunk::SIZEOF);
+		addNewChunk(header);
+		Write(inst.midiNote);
+		Write(inst.midiCents);
+		Write(inst.gaindB);
+		Write(inst.lowNote);
+		Write(inst.highNote);
+		Write(inst.lowVelocity);
+		Write(inst.highVelocity);
+	}
 
 	void RiffWave::SeekToSample(uint32_t sampleIndex)
 	{
@@ -263,11 +305,18 @@ namespace psycle { namespace helpers {
 			switch(convertTo->nBitsPerSample) 
 			{
 			case 8:readMonoConvertToInteger<uint8_t,assignconverter<uint8_t,uint8_t>,int16touint8,int24touint8,int32touint8,floattouint8,doubletouint8>
-					(reinterpret_cast<uint8_t*>(pSamps),max*formatdata.nChannels,127.0);break;
+					(reinterpret_cast<uint8_t*>(pSamps),max*formatdata.nChannels,127.0);
+				break;
 			case 16:readMonoConvertToInteger<int16_t,uint8toint16,assignconverter<int16_t,int16_t>,int24toint16,int32toint16,floattoint16,doubletoint16>
-					(reinterpret_cast<int16_t*>(pSamps),max*formatdata.nChannels,32767.0);break;
+					(reinterpret_cast<int16_t*>(pSamps),max*formatdata.nChannels,32767.0);
+				break;
 			case 24:break;
-			case 32:break;
+			case 32:if (convertTo->isfloat) {
+					//Finish
+				}
+				else readMonoConvertToInteger<int32_t,uint8toint32,int16toint32,int24toint32,assignconverter<int32_t,int32_t>,floattoint32,doubletoint32>
+					(reinterpret_cast<int32_t*>(pSamps),max,2147483648.0);
+				break;
 			default:break;
 			}
 		}
@@ -321,7 +370,20 @@ namespace psycle { namespace helpers {
 				break;
 			}
 			case 24:break;
-			case 32:break;
+			case 32:
+				if (convertTo->isfloat) {
+					//Finish
+				}
+				else if (formatdata.nChannels ==1) {
+					readMonoConvertToInteger<int32_t,uint8toint32,int16toint32,int24toint32,assignconverter<int32_t,int32_t>,floattoint32,doubletoint32>
+					(reinterpret_cast<int32_t*>(pSamps[0]),max,2147483648.0);
+				}
+				else {
+					readDeintMultichanConvertToInteger<int32_t,uint8toint32,int16toint32,int24toint32,assignconverter<int32_t,int32_t>,floattoint32,doubletoint32>
+					(reinterpret_cast<int32_t**>(pSamps),max,2147483648.0);
+				}
+
+				break;
 			default:break;
 			}
 		}
@@ -484,12 +546,39 @@ namespace psycle { namespace helpers {
 
 
 
-    void RiffWave::writeFromInterleavedSamples(void* /*pSamps*/, uint32_t /*maxSamples*/, WaveFormat_Data* /*convertFrom*/)
+    void RiffWave::writeFromInterleavedSamples(void* pSamps, uint32_t samples, WaveFormat_Data* convertFrom)
 	{
 		if (!currentHeader->matches(data)) {
 			pcmdata_pos = GetPos();
 			RiffChunkHeader header(data,0);
 			addNewChunk(header);
+		}
+		if (convertFrom == NULL || *convertFrom == formatdata)
+		{
+			writeMonoSamples(pSamps, samples*formatdata.nChannels);
+		}
+		else if (convertFrom->nChannels == formatdata.nChannels) {
+			//Finish for other destination bitdepths
+			switch(convertFrom->nBitsPerSample) 
+			{
+			case 8:break;
+			case 16: break;
+			case 24:break;
+			case 32: {
+				if (formatdata.isfloat) {
+				}
+				else {
+				}
+				break;
+			 }
+			default:break;
+			}
+		}
+		else if (convertFrom->nChannels == 1) {
+			//Finish for multichannel (more than two)
+		}
+		else {
+			//Finish for multichannel (more than two)
 		}
 	}
     void RiffWave::writeFromDeInterleavedSamples(void** pSamps, uint32_t samples, WaveFormat_Data* convertFrom)
@@ -531,14 +620,98 @@ namespace psycle { namespace helpers {
 		else {
 			//Finish for multichannel (more than two)
 		}
-
 	}
 
-	void RiffWave::writeMonoSamples(void* /*pSamp*/, uint32_t /*samples*/)
+	void RiffWave::writeMonoSamples(void* pSamp, uint32_t samples)
 	{
+		switch(formatdata.nBitsPerSample)
+		{
+			case 8: {
+				uint8_t* smp8 = static_cast<uint8_t*>(pSamp);
+				WriteArray(smp8, samples);
+				break;
+			}
+			case 16: {
+				int16_t* smp16 = static_cast<int16_t*>(pSamp);
+				WriteArray(smp16, samples);
+				break;
+			}
+			case 24: {
+				if (isLittleEndian) {
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+					Long24LE* samps = static_cast<Long24LE*>(pSamp);
+					WriteArray(samps,samples);
+#elif defined DIVERSALIS__CPU__ENDIAN__BIG
+					Long24BE* samps = static_cast<Long24BE*>(pSamp);
+					WriteWithintegerconverter<Long24BE,Long24LE,endianessconverter<Long24BE,Long24LE> >(samps, samples);
+#endif
+				}
+				else {
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+					Long24LE* samps = static_cast<Long24LE*>(pSamp);
+					WriteWithintegerconverter<Long24LE,Long24BE,endianessconverter<Long24LE,Long24BE> >(samps, samples);
+#elif defined DIVERSALIS__CPU__ENDIAN__BIG
+					Long24BE* samps = static_cast<Long24BE*>(pSamp);
+					WriteArray(samps,samples);
+#endif
+				}
+				break;
+			}
+			case 32: {
+				if (formatdata.isfloat) {
+					float* smp32 = static_cast<float*>(pSamp);
+					WriteArray(smp32, samples);
+				}
+				else {
+					int32_t* smp32 = static_cast<int32_t*>(pSamp);
+					WriteArray(smp32, samples);
+				}
+				break;
+			}
+			case 64: {
+				double* smp32 = static_cast<double*>(pSamp);
+				WriteArray(smp32, samples);
+				break;
+			}
+			default:
+				break;
+		}
+
 	}
-	void RiffWave::writeDeintMultichanSamples(void** /*pSamps*/, uint32_t /*samples*/)
+	void RiffWave::writeDeintMultichanSamples(void** pSamps, uint32_t samples)
 	{
+		switch (formatdata.nBitsPerSample) {
+			case  8: WriteDeinterleaveSamples<uint8_t>(pSamps,formatdata.nChannels, samples);break;
+			case 16: WriteDeinterleaveSamples<int16_t>(pSamps,formatdata.nChannels, samples);break;
+			case 24: {
+				if (isLittleEndian) {
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+					WriteDeinterleaveSamples<Long24LE>(pSamps,formatdata.nChannels, samples);
+#elif defined DIVERSALIS__CPU__ENDIAN__BIG
+					WriteDeinterleaveSamplesendian<Long24LE, Long24BE>(pSamps,formatdata.nChannels, samples);
+#endif
+				}
+				else {
+#if defined DIVERSALIS__CPU__ENDIAN__LITTLE
+					WriteDeinterleaveSamplesendian<Long24BE,Long24LE>(pSamps,formatdata.nChannels, samples);
+#elif defined DIVERSALIS__CPU__ENDIAN__BIG
+					WriteDeinterleaveSamples<Long24BE>(pSamps,formatdata.nChannels, samples);
+#endif
+				}
+				break;
+			}
+			case 32: {
+				if (formatdata.isfloat) {
+					WriteDeinterleaveSamples<float>(pSamps,formatdata.nChannels, samples);
+				}
+				else {
+					WriteDeinterleaveSamples<int32_t>(pSamps,formatdata.nChannels, samples);
+				}
+				break;
+			}
+			case 64: WriteDeinterleaveSamples<double>(pSamps,formatdata.nChannels, samples);break;
+			default: break; ///< \todo should throw an exception
+		}
 	}
 
 

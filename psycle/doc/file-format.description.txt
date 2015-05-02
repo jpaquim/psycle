@@ -3,9 +3,9 @@ Fileformat Documentation of .psy Files
 ======================================
 
 Psycle Version : 1.12
-Document Version: 2.0
+Document Version: 2.1
 PSY3 version: 8
-Date:02-August-2014
+Date:18-April-2015
 
 This file describes the Fileformat "PSY3SONG" of Psycle, used in versions of Psycle 1.7.3 and onwards
 It is Riff-like, with independant versioning for each chunk  (major and minor), and a "total" version number for
@@ -69,7 +69,7 @@ char trackerversion[]; //Null terminated program version used to generate the fi
 
 
 DESCRIPTION:
-Data in the "PSY3SONG" chunk describes the file format.
+Data in the "(PSY3)SONG" chunk describes the file format.
 
 The version field of the SONG chunk is the sum of the version of the chunks known to the program.
 Version 8, described in version 2.0 of this document, is made out of adding:
@@ -247,7 +247,7 @@ HEADER:
 id = "PATD"; 
 version = 1;
 size = sizez77+(4*sizeof(int))+strlen(patternName)+1; // where sizez77 is the size of the compressed pattern. Warning! versions prior to 1.8 saved one less sizeof(int)
-if shareTrackNames then 
+if shareTrackNames is false then 
 	size = size + (strlen(tracknames[track])+1) for each of the patterntracks  // The +1 is for the NULL terminator.
 
 DATA:
@@ -259,10 +259,10 @@ end do;
 
 DESCRIPTION:
 Each PATD chunk contains the description of one pattern. A pattern contains the notes,tweaks and effect commands to play.
-Only the patterns that are used (are in the sequence) get saved.
+Only the patterns that are used (are present in the sequence) get saved.
 Multiple PATD chunks in the file, one for each pattern.
 
-Version 0 sets the name as empty.
+Version 0 sets the track names as empty.
 
 ===================
 MACHINES DATA
@@ -299,7 +299,7 @@ enum MachineType
 };
 
 DATA:
-int index; 			// which machine we are loading
+int index; 			// which machine position we are loading
 int type; 			// The MachineType of the machine being loaded
 char dllname[]&shellIdx; 		// NULL terminated .dll name of the plugin (MACH_PLUGIN, MACH_VST, MACH_VSTFX). NULL in any other case. (truncated to 256)
 				// Since version 1.8.3, shellindex is also saved *inside* the dllname array, in order to allow downward fileformat compatibility.
@@ -309,6 +309,7 @@ char dllname[]&shellIdx; 		// NULL terminated .dll name of the plugin (MACH_PLUG
 				// Common plugin   :  "arguru synth 2f.dll\0"
 				// Shellplugin :  "waveshell-5.0.dllSTHS\0"
 				// So, if the last four letters are not ".dll", they are the shellIdx.
+				// Note for multiplatform: the OS-specific extension (like .so) should be saved in the file as ".dll" always.
 bool bypass; 		// Indicates if the machine has the bypassed status on. (only valid for effects).
 bool mute; 			// Indicates if the machine has the muted status on.
 int pan; 			// Indicates the value of the panning in the machine box. It affects all output wires.
@@ -467,6 +468,7 @@ for 128 maps do		// The Zxx Macro is a macro of 128 positions to remap the 128 h
 end do;
 
 bool m_bAmigaSlides;	//Use Linear (false) or amiga (true) pitch slides. amiga slides increase slower the higher the frequency.
+						//In other words: linear means change the note scale linearly and amiga means change the period linearly.
 bool m_UseFilters;		//Enable the use of filters. if this setting is disabled, sound is not processed by the filters.
 int m_GlobalVolume;		//Global (Mix) volume, range 0..128, where 128 = 0dBFS.
 int m_PanningMode;		//Panning mode. Psycle supports three pan modes, that affect the transition volume between full left and full right.
@@ -495,15 +497,21 @@ size =  5*sizeof(int);
 
 int m_ChannelDefVolume; 	///< (0..200)   &0x100 = Mute. 		// value used at playback start. Mute is included ( you can see the value as 0000MuVo)
 int m_DefaultPanFactor;		//  0..200 .  &0x100 == Surround. 	// value used at playback start. surround is included (you can see the value as 0000SuPa)
-int m_DefaultCutoff;		// 0..127 . 0 is the lowest frequency and 127 is the highest. If both cutoff an ressonance are 127, filter is bypassed.
-int m_DefaultRessonance;	// 0..127 . 0 is the lowest ressonance and 127 is the highest. If both cutoff an ressonance are 127, filter is bypassed.
+int m_DefaultCutoff;		// 0..127 . 0 is the lowest frequency and 127 is the highest. // Used if instrument frequency is 127 and ressonance is 0
+int m_DefaultRessonance;	// 0..127 . 0 is the lowest ressonance and 127 is the highest. // Used if instrument frequency is 127 and ressonance is 0
 uint m_DefaultFilterType;	// Filter type
-							// F_LOWPASS12 = 0 // Simple 4 pole lowpass 
-							// F_HIGHPASS12 = 1 // simple 4 pole highpass
-							// F_BANDPASS12 = 2, // simple 4 pole band pass
-							// F_BANDREJECT12 = 3, // simple 4 pole band reject
+							// F_LOWPASS12_OLD = 0 // Simple 2 pole lowpass (with ressonance range affected by frequency)
+							// F_HIGHPASS12_OLD = 1 // simple 2 pole highpass (with ressonance range affected by frequency)
+							// F_BANDPASS12_OLD = 2, // simple 2 pole band pass (with ressonance range affected by frequency)
+							// F_BANDREJECT12_OLD = 3, // simple 2 pole band reject (with ressonance range affected by frequency)
 							// F_NONE = 4,//This one is kept here because it is used in load/save
 							// F_ITLOWPASS = 5,	// Filter compatible with the one in Impulse Tracker.
+							// F_MPTLOWPASSEXT = 6,	// Filter compatible with the one in OpenMPT Tracker, extended range mode.
+							// F_ITHIGHPASSEXT = 7,	// Filter compatible with the one in Impulse Tracker, extended range mode.
+							// F_LOWPASS12_NEW = 8 // Simple 2 pole lowpass (ressonance independent of frequency)
+							// F_HIGHPASS12_NEW = 9 // simple 2 pole highpass (ressonance independent of frequency)
+							// F_BANDPASS12_NEW = 10, // simple 2 pole band pass (ressonance independent of frequency)
+							// F_BANDREJECT12_NEW = 11, // simple 2 pole band reject (ressonance independent of frequency)
 							// See psycle-helpers/src/psycle/helpers/filter.cpp and filter.hpp
 
 *===================
@@ -680,7 +688,7 @@ Since Psycle 1.11, numwaves can be zero, in which case, the wavedata is located 
 
 Defaults for versions without these fields are: lock_instrument=-1, use_lock=false
 
-Multiple INSD chunks in the file, one for each used instrument.
+Multiple INSD chunks in the file, one for each used (sampler) instrument.
 
 *=================================
 WAVE subchunk  (Legacy)
@@ -698,8 +706,8 @@ unsigned short waveVolume;	// sample volume. values from 0 onwards. 100 = 0db Ps
 unsigned int waveLoopStart;// loop start point (in samples), if enabled.
 unsigned int waveLoopEnd;	// loop end point (in samples), if enabled.
 
-int waveTune;					// Tuning for the center note. values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed with note C-5)
-int waveFinetune;				// Finetuning. range from -256 to 256. 256 = next seminote
+int waveTune;					// Tuning for the center note (value to add to received note). values from -60 to 59. 0 = No offset (i.e. play at original samplerate with note middle C)
+int waveFinetune;				// Finetuning (value to add). range from -256 to 256. 256 = next seminote
 bool waveLoopType;			// Loop type. if enabled forward loop. else, no loop
 bool waveStereo;				// Indicates that this wave is a stereo wave.
 char waveName[];				// Null terminated name for the wave ( filename usually ), truncated to 32. This field was not shown in Psycle.
@@ -771,7 +779,7 @@ Read a SMSB block, but do not read the header, nor the waveIdx field (i.e. an SM
 
 There is zero or one EINS chunk. The chunk contains multiple subchunks for the instruments and samples.
 
-This was also used in 1.11.3 beta as the format for the psycle instrument files. Newer versions use SMID and SMSB chunks.
+This was also used in 1.11.3 beta as the format for the psycle instrument files (.psins). Newer versions use SMID and SMSB chunks.
 
 
 =================================
@@ -802,16 +810,22 @@ bool m_Surround; 		// Is surround enabled?
 byte m_NoteModPanCenter 		/// Note number for center pan position
 signed byte m_NoteModPanSep		/// -32..32. 1/256th of panFactor change per seminote.
 
-byte m_FilterCutoff			/// Cutoff Frequency [0..127]
-byte m_FilterResonance		/// Resonance [0..127]
+byte m_FilterCutoff			/// Cutoff Frequency [0..127] // If frequency is 127 and ressonance is 0, the filter uses then channel values
+byte m_FilterResonance		/// Resonance [0..127] // If frequency is 127 and ressonance is 0, the filter uses then channel values
 ushort unused				// Undefined and unused. It was meant as a filterEnvelopeAmount setting.
 int m_FilterType			// Type of filter
-							// F_LOWPASS12 = 0 // Simple 4 pole lowpass 
-							// F_HIGHPASS12 = 1 // simple 4 pole highpass
-							// F_BANDPASS12 = 2, // simple 4 pole band pass
-							// F_BANDREJECT12 = 3, // simple 4 pole band reject
-							// F_NONE = 4,//This one is kept here because it is used in load/save
+							// F_LOWPASS12_OLD = 0 // Simple 2 pole lowpass (ressonance range affected by frequency)
+							// F_HIGHPASS12_OLD = 1 // simple 2 pole highpass (ressonance range affected by frequency)
+							// F_BANDPASS12_OLD = 2, // simple 2 pole band pass (ressonance range affected by frequency)
+							// F_BANDREJECT12_OLD = 3, // simple 2 pole band reject (ressonance range affected by frequency)
+							// F_CHANNEL_DEFAULT = 4,//If this one is set, the filter uses the one defined as default for this channel.
 							// F_ITLOWPASS = 5,	// Filter compatible with the one in Impulse Tracker.
+							// F_MPTLOWPASSEXT = 6,	// Filter compatible with the one in OpenMPT Tracker, extended range mode.
+							// F_ITHIGHPASSEXT = 7,	// Filter compatible with the one in OpenMPT Tracker, extended range mode.
+							// F_LOWPASS12_NEW = 8 // Simple 2 pole lowpass (ressonance independent of frequency)
+							// F_HIGHPASS12_NEW = 9 // simple 2 pole highpass (ressonance independent of frequency)
+							// F_BANDPASS12_NEW = 10, // simple 2 pole band pass (ressonance independent of frequency)
+							// F_BANDREJECT12_NEW = 11, // simple 2 pole band reject (ressonance independent of frequency)
 							// See psycle-helpers/src/psycle/helpers/filter.cpp and filter.hpp
 
 /// Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
@@ -851,7 +865,7 @@ read a SMIE subchunk for the pitch Envelope   // If you are reading an INST subc
 DESCRIPTION:
 
 The SMID chunk contains the information of one Sampulse instrument. A sampulse instrument also contains four envelope subchunks.
-Pan and pitch envelope are "negative" envelopes, which means that have a range of -1.0 to 1.0. Amplitude and filter have a range of 0.0 to 1.0
+Pan and pitch envelopes are "negative" envelopes, which means that have a range of -1.0 to 1.0. Amplitude and filter have a range of 0.0 to 1.0
 
 Notes: 
 If reading an INST instead of a SMID, do not read instIdx and ignore the value read from m_Lines (set it at zero).
@@ -919,7 +933,7 @@ float m_WaveGlobVolume;				// Gain for the sample (always applied) , range 0.0 t
 ushort m_WaveDefVolume;				// Default volume for this sample if the volume command is not used , range 0.. 0x80 ( -inf to 0dbFS)
 
 uint m_WaveLoopStart;				// Continuous loop start position, in samples (frames)
-uint m_WaveLoopEnd;					// Continuous loop end position, in samples (frames)
+uint m_WaveLoopEnd;					// Continuous loop end position, in samples (frames).
 uint m_WaveLoopType;				// loop type
 				// DO_NOT = 0x0, ///< Do Nothing
 				// NORMAL = 0x1, ///< normal Start --> End ,Start --> End ...
@@ -933,8 +947,8 @@ uint m_WaveSusLoopType;;			// loop type
 				// BIDI = 0x2	  ///< bidirectional Start --> End, End --> Start ...
 
 uint m_WaveSampleRate;		// Samplerate of this sample.  If reading version 0, do not read this field
-short m_WaveTune;			// Tuning for the center note. values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed with note C-5)
-short m_WaveFineTune;		/// [ -100 .. 100] full range = -/+ 1 seminote
+short m_WaveTune;			// Tuning for the center note (value to add to received note). values from -60 to 59. 0 = No offset (i.e. play at original samplerate with note middle C)
+short m_WaveFineTune;		/// finetuning (to add) [ -100 .. 100] full range = -/+ 1 seminote
 
 bool m_WaveStereo;			// indicator of a stereo wave
 bool m_PanEnabled;			// Is the panFactor enabled (and so, in use when playing)
@@ -972,7 +986,7 @@ The unpacked data is an array of type short, with values ranging from -32768 to 
 
 Notes: 
 If reading an SMPD instead of a SMID, do not read waveIdx as it is not present.
-If reading version 0, do not read m_WaveSampleRate nor m_Surround.
+If reading version 0, do not read m_WaveSampleRate (set it to 8363) nor m_Surround.
 If reading version 0 and panFactor is higher than 1.0, set m_Surround to true and substract 1.0 from panFactor. Else set m_Surround to false.
 
 There are multiple SMSB chunks, one for each sampulse sample.
@@ -984,7 +998,7 @@ Virtual Instrument/Generator
 HEADER:
 id = "VIRG";
 version = 0
-size = 12
+size = 3*sizeof(int)
 
 DATA:
 int virtual_inst_idx;		// Number of virtual generator for this sampled instrument. A virtual generator is a number that can be used as a generator, ranging from 129 to 254 (or 0x81 to 0xFE).

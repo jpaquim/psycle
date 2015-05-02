@@ -99,7 +99,7 @@ namespace psycle
 			virtual uint32_t GetInputLatencySamples() const;
 			virtual uint32_t GetOutputLatencySamples() const;
 		private:
-			static void Error(const TCHAR msg[]);
+			static void Error(const char msg[]);
 			static const char* GetError(HRESULT hr);
 			void RefreshPorts(IMMDeviceEnumerator *pEnumerator);
 			void FillPortList(std::vector<PortEnum>& portList, IMMDeviceCollection *pCollection, LPWSTR defaultID);

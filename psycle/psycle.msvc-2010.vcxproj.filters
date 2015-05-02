@@ -133,6 +133,9 @@
     <ClInclude Include="src\psycle\host\KeyPresetIO.hpp">
       <Filter>psycle\file</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\LoaderHelper.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\host\PresetIO.hpp">
       <Filter>psycle\file</Filter>
     </ClInclude>
@@ -561,6 +564,9 @@
     <ClCompile Include="src\psycle\host\KeyPresetIO.cpp">
       <Filter>psycle\file</Filter>
     </ClCompile>
+    <ClCompile Include="src\psycle\host\LoaderHelper.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
     <ClCompile Include="src\psycle\host\PresetIO.cpp">
       <Filter>psycle\file</Filter>
     </ClCompile>
@@ -974,13 +980,24 @@
     <None Include="src\psycle\host\resources\wavedit.ico">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\DeclareDPIAware.manifest" />
-    <None Include="src\psycle\host\resources\master_skin.bmp" />
-    <None Include="src\psycle\host\resources\mixer_skin.bmp" />
-    <None Include="src\psycle\host\resources\Project3.ico" />
-    <None Include="src\psycle\host\resources\splash_screen.bmp" />
-    <None Include="src\psycle\host\resources\Toolbar24Mask.bmp" />
-    <None Include="src\psycle\host\resources\Toolbar24New.bmp" />
+    <None Include="src\psycle\host\resources\master_skin.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\mixer_skin.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Project3.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\splash_screen.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Toolbar24Mask.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Toolbar24New.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="src\psycle\host\resources\DeclareDPIAware.manifest">

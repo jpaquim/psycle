@@ -21,7 +21,7 @@ enum FilterType {
 	F_HIGHPASS12 = 1,
 	F_BANDPASS12 = 2,
 	F_BANDREJECT12 = 3,
-	F_NONE = 4,//This one is kept here because it is used in load/save
+	F_NONE = 4,//This one is kept here because it is used in load/save. Also used in Sampulse instrument filter as "use channel default"
 	F_ITLOWPASS = 5,
 	F_MPTLOWPASSE = 6,
 	F_MPTHIGHPASSE = 7,

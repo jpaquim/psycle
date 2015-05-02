@@ -295,10 +295,21 @@ namespace psycle
 			catch(const std::runtime_error& /*e*/) {
 				return list;
 			}
+			// The documentation seems to suggest that release points work backward
+			// i.e. they say the time until next position, rather than the time to reach the point.
 			numpoints = currentHeader.length() / sizeof(EGPoint);
-			for (int i=0; i< numpoints;i++) {
+			if (numpoints > 0){
 				Read(p.duration);
+				//Ignored, assumed equal to sustain point (last attack point)
 				ReadRaw(&p.dest, sizeof(FixedPointBE));
+				uint16_t prevduration=p.duration.unsignedValue();
+				for (int i=0; i< numpoints;i++) {
+					p.duration.changeValue(prevduration);
+					Read(prevduration);
+					ReadRaw(&p.dest, sizeof(FixedPointBE));
+					list.push_back(p);
+				}
+				p.dest.changeValue(0.f);
 				list.push_back(p);
 			}
 			skipThisChunk();

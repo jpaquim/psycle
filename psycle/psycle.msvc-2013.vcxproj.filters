@@ -133,6 +133,9 @@
     <ClInclude Include="src\psycle\host\KeyPresetIO.hpp">
       <Filter>psycle\file</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\LoaderHelper.hpp">
+      <Filter>psycle\file</Filter>
+    </ClInclude>
     <ClInclude Include="src\psycle\host\PresetIO.hpp">
       <Filter>psycle\file</Filter>
     </ClInclude>
@@ -520,6 +523,12 @@
     <ClInclude Include="src\psycle\host\LuaGui.hpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClInclude>
+    <ClInclude Include="src\psycle\host\Dialog_item.h">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psycle\host\Dyn_dialog.h">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\psycle\host\Global.cpp">
@@ -553,6 +562,9 @@
       <Filter>psycle\file</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\KeyPresetIO.cpp">
+      <Filter>psycle\file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\LoaderHelper.cpp">
       <Filter>psycle\file</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle\host\PresetIO.cpp">
@@ -879,6 +891,12 @@
     <ClCompile Include="src\psycle\host\LuaGui.cpp">
       <Filter>psycle\engine\machine\lua</Filter>
     </ClCompile>
+    <ClCompile Include="src\psycle\host\Dialog_item.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psycle\host\Dyn_dialog.cpp">
+      <Filter>psycle\engine\machine\lua</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\psycle\host\resources\AsioLogo.bmp">
@@ -962,13 +980,24 @@
     <None Include="src\psycle\host\resources\wavedit.ico">
       <Filter>psycle\resources</Filter>
     </None>
-    <None Include="src\psycle\host\resources\DeclareDPIAware.manifest" />
-    <None Include="src\psycle\host\resources\master_skin.bmp" />
-    <None Include="src\psycle\host\resources\mixer_skin.bmp" />
-    <None Include="src\psycle\host\resources\Project3.ico" />
-    <None Include="src\psycle\host\resources\splash_screen.bmp" />
-    <None Include="src\psycle\host\resources\Toolbar24Mask.bmp" />
-    <None Include="src\psycle\host\resources\Toolbar24New.bmp" />
+    <None Include="src\psycle\host\resources\master_skin.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\mixer_skin.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Project3.ico">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\splash_screen.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Toolbar24Mask.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
+    <None Include="src\psycle\host\resources\Toolbar24New.bmp">
+      <Filter>psycle\resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="src\psycle\host\resources\DeclareDPIAware.manifest">
