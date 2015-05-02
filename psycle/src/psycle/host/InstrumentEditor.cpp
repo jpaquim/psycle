@@ -174,7 +174,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		// Auxiliary members
 		BOOL CInstrumentEditor::OnSetActive()
 		{
-			TRACE("in setActive\n");
+			TRACE("in CInstrumentEditor:setActive\n");
 			WaveUpdate();
 			return CPropertyPage::OnSetActive();
 		}

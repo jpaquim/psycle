@@ -46,6 +46,17 @@ M.m.p , where:
 ----------------------------------------------------------------
 Legend :       + = addition        * = change        ! = bugfix
 ----------------------------------------------------------------
+v1.12.1 beta
+-------
++ Possibility to load multiple samples at once: (Only from samples bank, wave editor, or samples list of gear rack)
++ Implemented tweak replace, to allow removing tweak values.
++ LADSPA Host
+* Improvements in the LUA Host.
+* Saving samples to wav now writes the SMPL and INST chunks, keeping information of volume, note tuning and loops. (Also means it uses the helpers implementation now instead of the old riff code)
+* Several changes on loading instruments: Audio preview of instruments, not only samples. Instruments now load to both sampler and sampulse instrument list. Envelopes are copied to sampler ADSR envelope. Samples can be loaded as sampulse intrument, SVX instruments now load as instruments (with the correct note mapping). ADSR conversion (sampulse instrument button to change envelope to ADSR) improved.
+! bug in seeking was setting the wrong sample offset. This caused VSTs that use synchronization to not position to the correct place.
+! changing sampulse instrument name didn't update virtual instrument name.
+
 v1.12.0  (2014-09-28)
 -------
 + Virtual generators. Sampled instruments can be mapped to a machine number (from 81 to FE in hexadecimal) and be used without the need to specify which machine they play on.

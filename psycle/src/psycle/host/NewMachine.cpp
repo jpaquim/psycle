@@ -142,10 +142,10 @@ namespace psycle { namespace host {
 								hitem=hNodes[3]; 
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
-								imgindex = 6; 
+								imgindex = 8; 
 								hitem=hNodes[4]; 
 							}
-							else {
+							else {  // VST
 								imgindex = 4; 
 								hitem=hNodes[2]; 
 							}
@@ -163,11 +163,11 @@ namespace psycle { namespace host {
 								hitem=hNodes[3]; 
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
-								imgindex = 7; 
+								imgindex = 9; 
 								hitem=hNodes[4]; 
 							}
 							else 
-							{ 
+							{   // VST
 								imgindex = 5; 
 								hitem=hNodes[2];
 							}
@@ -175,7 +175,7 @@ namespace psycle { namespace host {
 					}
 					else
 					{
-						imgindex = 8;
+						imgindex = 10;
 						hitem=hNodes[5];
 					}
 					if(pluginName && pInfo->error.empty())
@@ -206,7 +206,7 @@ namespace psycle { namespace host {
 			{
 				hNodes[0] = m_browser.InsertItem("Sound generators (Instruments)",0,0 , TVI_ROOT, TVI_LAST);
 				hNodes[1] = m_browser.InsertItem("Sound Effects (DSP)",1,1,TVI_ROOT,TVI_LAST);
-				hNodes[2] = m_browser.InsertItem("Non-working or not a machine",8,8,TVI_ROOT,TVI_LAST);
+				hNodes[2] = m_browser.InsertItem("Non-working or not a machine",10,10,TVI_ROOT,TVI_LAST);
 				intFxNode = hNodes[1];
 				//nodeindex=2;
 				for(int i(_numPlugins - 1) ; i >= 0 ; --i) // I Search from the end because when creating the array, the deepest dir comes first.
@@ -229,11 +229,11 @@ namespace psycle { namespace host {
 								hitem=hNodes[0]; 
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
-								imgindex = 6; 
+								imgindex = 8; 
 								hitem=hNodes[0]; 
 							}
 							else 
-							{ 
+							{  // VST
 								imgindex = 4; 
 								hitem=hNodes[0]; 
 							}
@@ -251,11 +251,11 @@ namespace psycle { namespace host {
 								hitem=hNodes[1]; 
 							} else if ( pInfo->type == MACH_LADSPA) 
 							{ 
-								imgindex = 7; 
+								imgindex = 9; 
 								hitem=hNodes[1]; 
 							}
 							else 
-							{ 
+							{   // VST
 								imgindex = 5; 
 								hitem=hNodes[1]; 
 							}
@@ -263,7 +263,7 @@ namespace psycle { namespace host {
 					}
 					else
 					{
-						imgindex = 8;
+						imgindex = 10;
 						hitem=hNodes[2];
 					}
 					if(pluginName && pInfo->error.empty())

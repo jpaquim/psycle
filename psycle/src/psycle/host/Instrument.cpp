@@ -67,14 +67,14 @@ namespace psycle
 				_lines = instr.Lines();
 				_loop = true;
 			}
-			if (instr.NNA() == XMInstrument::NewNoteAction::STOP) {
-				_NNA = 0;
-			}
-			else if (instr.NNA() == XMInstrument::NewNoteAction::NOTEOFF) {
+			 if (instr.NNA() == XMInstrument::NewNoteAction::NOTEOFF) {
 				_NNA = 1;
 			}
 			else if (instr.NNA() == XMInstrument::NewNoteAction::CONTINUE) {
 				_NNA = 2;
+			}
+			else {
+				_NNA = 0;
 			}
 			_RCUT = (instr.RandomCutoff() >= 0.5f);
 			_RPAN = (instr.RandomPanning() >= 0.5f);

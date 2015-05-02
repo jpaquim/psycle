@@ -159,6 +159,7 @@ void CInstrumentGenDlg::OnEnChangeInsName()
 		win->FillInstrumentList(-2);
 		CMainFrame* winMain = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 		winMain->UpdateComboIns(true);
+		winMain->UpdateComboGen(true); //for virtual instruments
 	}
 }
 
@@ -319,10 +320,8 @@ void CInstrumentGenDlg::OnBtnEditMapping()
 	map.m_instr = m_instr;
 	map.m_instIdx = m_instIdx;
 	if (map.DoModal() == IDOK) {
-		XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
-		win->FillInstrumentList(-2);
-		m_SampleAssign.Invalidate();
 		ValidateEnabled();
+		m_SampleAssign.Invalidate();
 	}
 }
 
@@ -331,9 +330,11 @@ void CInstrumentGenDlg::ValidateEnabled() {
 	bool prev = m_instr->IsEnabled();
 	m_instr->ValidateEnabled();
 
+	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
+	win->UpdateInstrSamples();
+
 	if (prev == m_instr->IsEnabled()) return;
 
-	XMSamplerUIInst* win = dynamic_cast<XMSamplerUIInst*>(GetParent()->GetParent());
 	win->FillInstrumentList(-2);
 	CMainFrame* winMain = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 	winMain->UpdateComboIns(true);

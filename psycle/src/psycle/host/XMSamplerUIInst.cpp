@@ -130,7 +130,7 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 
 BOOL XMSamplerUIInst::OnSetActive()
 {
-	TRACE("in setActive\n");
+	TRACE("in XMSamplerUIInst:setActive\n");
 	if ( m_bInitialized == false )
 	{
 		FillInstrumentList();
@@ -286,20 +286,9 @@ void XMSamplerUIInst::OnTcnSelchangingTab1(NMHDR *pNMHDR, LRESULT *pResult)
 void XMSamplerUIInst::OnBnClickedLoadins()
 {
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-	bool loaded = win->LoadInst(m_iCurrentSelected);
-
-	if (loaded) {
-		SetInstrumentData(m_iCurrentSelected);
-		char line[48];
-		const XMInstrument& inst = Global::song().xminstruments[m_iCurrentSelected];
-		sprintf(line,"%02X%s: ",m_iCurrentSelected,inst.IsEnabled()?"*":" ");
-		strcat(line,inst.Name().c_str());
-		m_InstrumentList.DeleteString(m_iCurrentSelected);
-		m_InstrumentList.InsertString(m_iCurrentSelected,line);
-		win->UpdateComboIns();
-		win->WaveEditorBackUpdate();
-		win->RedrawGearRackList();
-	}
+	win->LoadInst(m_iCurrentSelected);
+	//LoadInst does a call to refresh the editors, which includes our editor.
+	//Our FillInstrumentList() and SetInstrumentData() will be called.
 }
 
 void XMSamplerUIInst::OnBnClickedSaveins()

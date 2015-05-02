@@ -1031,12 +1031,10 @@ namespace psycle { namespace host {
     canvas::Item* item = LuaHelper::call(L, meta, &canvas::Item::detach);    
     LuaHelper::unregister_userdata<>(L, item);
     return LuaHelper::chaining(L);  
-    return 0;
   }
 
   int LuaRectBind::gc(lua_State* L) {
     return LuaHelper::delete_userdata<LuaRect>(L, meta);
-    return 0;
   }
 
   int LuaRectBind::setcolor(lua_State* L) {

@@ -7,7 +7,7 @@
 	InheritedPropertySheets=".\top_output_dir.vsprops"
 	>
 	<Tool
-		Name="VCLinkerTool"
+		Name="VCLibrarianTool"
 		OutputFile="$(TopOutputDir)/lib/$(RootNameSpace).lib"
 	/>
 </VisualStudioPropertySheet>

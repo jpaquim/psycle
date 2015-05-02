@@ -27,7 +27,7 @@ protected:
 
 
 public:
-	void WaveUpdate();
+	void WaveUpdate(bool force);
 
 protected:
 	DECLARE_MESSAGE_MAP()

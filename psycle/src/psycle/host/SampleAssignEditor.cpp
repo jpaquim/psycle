@@ -2,6 +2,7 @@
 #include "SampleAssignEditor.hpp"
 #include "PsycleConfig.hpp"
 #include "InstrIndividualMap.hpp"
+#include "InstrumentGenDlg.hpp"
 #include <psycle/host/XMInstrument.hpp>
 
 namespace psycle { namespace host {
@@ -283,6 +284,8 @@ void CSampleAssignEditor::OnLButtonUp( UINT nFlags, CPoint point )
 		indDlg.xins = m_pInst;
 		indDlg.DoModal();
 		Invalidate();
+		CInstrumentGenDlg* win = dynamic_cast<CInstrumentGenDlg*>(GetParent());
+		win->ValidateEnabled();
 	}
 }
 void CSampleAssignEditor::OnMouseLeave() {

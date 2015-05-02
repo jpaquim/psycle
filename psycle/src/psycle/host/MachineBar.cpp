@@ -707,14 +707,18 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	bool MachineBar::LoadWave(int waveIdx)
 	{
+		char extrapath[_MAX_PATH*16];
+		extrapath[0]='\0';
 		static const char szFilter[] = "All known samples|*.wav;*.aif;*.aiff;*.s3i;*.its;*.8svx;*.16sv;*.svx;*.iff|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff|All files|*.*||";
 		static uint32_t szDetect[] = {helpers::FormatDetector::WAVE_ID,helpers::FormatDetector::AIFF_ID,helpers::FormatDetector::SCRS_ID,helpers::FormatDetector::IMPS_ID,helpers::FormatDetector::SVX8_ID};
-		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
+		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT | OFN_ALLOWMULTISELECT, szFilter);
 		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		dlg.m_ofn.lCustData = reinterpret_cast<LPARAM>(szDetect);
 		dlg.m_ofn.nFilterIndex = wavFilterSelected;
+		dlg.m_ofn.lpstrFile = extrapath;
+		dlg.m_ofn.nMaxFile = _MAX_PATH*16;
 		bool update=false;
 		if (dlg.DoModal() == IDOK)
 		{
@@ -723,65 +727,85 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			uint32_t selCode;
-
-			if (dlg.GetOFN().nFilterIndex <= 1 || dlg.GetOFN().nFilterIndex >= (sizeof(szDetect)/4)) {
-				helpers::FormatDetector detect;
-				selCode = detect.AutoDetect(dlg.GetPathName().GetString());
-			}
-			else selCode = szDetect[dlg.GetOFN().nFilterIndex-2];
-
-			try {
-				LoaderHelper loadhelp(m_pSong,false,-1,waveIdx);
-				if (selCode == helpers::FormatDetector::WAVE_ID) {
-					int realsample = m_pSong->WavAlloc(loadhelp,dlg.GetPathName().GetString());
-					if (realsample > -1) {
-						update=true;
-					} else {
-						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
-					}
-				}
-				else if (selCode == helpers::FormatDetector::SCRS_ID) {
-					ITModule2 itsong;
-					itsong.Open(dlg.GetPathName().GetString());
-					update = itsong.LoadS3MFileS3I(loadhelp);
-					itsong.Close();
-				}
-				else if (selCode == helpers::FormatDetector::IMPS_ID) {
-					XMInstrument::WaveData<> wave;
-					ITModule2 itsong;
-					itsong.Open(dlg.GetPathName().GetString());
-					update = itsong.LoadITSample(wave);
-					itsong.Close();
-					m_pSong->samples.SetSample(wave,waveIdx);
-				}
-				else if (selCode == helpers::FormatDetector::AIFF_ID) {
-					int realsample = m_pSong->AIffAlloc(loadhelp, dlg.GetPathName().GetString());
-					if (realsample > -1) {
-						update=true;
-					} else {
-						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
-					}
-				}
-				else if (selCode == helpers::FormatDetector::SVX8_ID) {
-					int realsample = m_pSong->IffAlloc(loadhelp,false, dlg.GetPathName().GetString());
-					if (realsample > -1) {
-						update=true;
-					} else {
-						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
-					}
-				}
-			}
-			catch(const std::runtime_error & e) {
-				std::ostringstream os;
-				os <<"Could not finish the operation: " << e.what();
-				MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
-			}
-
-			CString str = dlg.m_ofn.lpstrFile;
-			int index = str.ReverseFind('\\');
-			if (index != -1)
+			
+			int numFiles=0;
+			POSITION pos =dlg.GetStartPosition();
+			while( pos )
 			{
-				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
+				CString csFileName = dlg.GetNextPathName(pos);
+
+				if (dlg.GetOFN().nFilterIndex <= 1 || dlg.GetOFN().nFilterIndex >= (sizeof(szDetect)/4)) {
+					helpers::FormatDetector detect;
+					selCode = detect.AutoDetect(csFileName.GetString());
+				}
+				else selCode = szDetect[dlg.GetOFN().nFilterIndex-2];
+
+				try {
+					if (pos > 0) { waveIdx = -1;}
+					LoaderHelper loadhelp(m_pSong,false,-1,waveIdx);
+					if (selCode == helpers::FormatDetector::WAVE_ID) {
+						int realsample = m_pSong->WavAlloc(loadhelp,csFileName.GetString());
+						if (realsample > -1) {
+							update=true;
+						} else {
+							MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+						}
+					}
+					else if (selCode == helpers::FormatDetector::SCRS_ID) {
+						ITModule2 itsong;
+						itsong.Open(csFileName.GetString());
+						update = itsong.LoadS3MFileS3I(loadhelp);
+						itsong.Close();
+					}
+					else if (selCode == helpers::FormatDetector::IMPS_ID) {
+						ITModule2 itsong;
+						itsong.Open(csFileName.GetString());
+						XMInstrument::WaveData<> wave;
+						update = itsong.LoadITSample(wave);
+						if (update) {
+							 if (waveIdx > 0) {
+								m_pSong->samples.SetSample(wave,waveIdx);
+							}
+							else {
+								m_pSong->samples.AddSample(wave);
+							}
+						}
+						itsong.Close();
+					}
+					else if (selCode == helpers::FormatDetector::AIFF_ID) {
+						int realsample = m_pSong->AIffAlloc(loadhelp, csFileName.GetString());
+						if (realsample > -1) {
+							update=true;
+						} else {
+							MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+						}
+					}
+					else if (selCode == helpers::FormatDetector::SVX8_ID) {
+						int realsample = m_pSong->IffAlloc(loadhelp,false, csFileName.GetString());
+						if (realsample > -1) {
+							update=true;
+						} else {
+							MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+						}
+					}
+				}
+				catch(const std::runtime_error & e) {
+					std::ostringstream os;
+					os <<"Could not finish the operation: " << e.what();
+					MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
+				}
+				numFiles++;
+			}
+			if (numFiles == 1) {
+				CString str = dlg.m_ofn.lpstrFile;
+				int index = str.ReverseFind('\\');
+				if (index != -1)
+				{
+					PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
+				}
+			}
+			else {
+				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(dlg.m_ofn.lpstrFile));
 			}
 		}
 		{

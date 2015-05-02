@@ -269,7 +269,7 @@
 	  08xx	-	Set panning position  0 full left, FF full right. 80 center
 	  09xx	-	Set sample offset  x = 1/256th of the sample length.
 	  0Cxx	-	Set volume  0 = silent. FF = max volume.
-				If using virtual instruments, the aux column can be used for the set volume command.
+				If using virtual instruments, the aux column can be used to set volume command.
 	  0ECx	-	Note cut in x frames  (fixed 6 frames per line)
 	  0EDx	-	Note delay in x frames  (fixed 6 frames per line)
 	  15xy	-	Retrig Command. y = Number of retrigs to do in one line (1 = do one retrig).

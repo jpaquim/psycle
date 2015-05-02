@@ -136,7 +136,12 @@ namespace psycle { namespace host {
 							}
 							if (_pSong.InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 							{
-								MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+								if (tmac->connectedOutputs() >= 12 || dmac->connectedInputs() >= 12) {
+									MessageBox("Couldn't connect the selected machines!\nIf needing more than 12 connections use multiple dummy or mixer machines","Error!", MB_ICONERROR);
+								}
+								else {
+									MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+								}
 							}
 							allowcontextmenu=false;
 						}
@@ -616,7 +621,12 @@ namespace psycle { namespace host {
 						}
 						if (_pSong.InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 						{
-							MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+							if (tmac->connectedOutputs() >= 12 || dmac->connectedInputs() >= 12) {
+								MessageBox("Couldn't connect the selected machines!\nIf needing more than 12 connections use multiple dummy or mixer machines","Error!", MB_ICONERROR);
+							}
+							else {
+								MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+							}
 						}
 					}
 					else if ( smacmode == smac_modes::move && smac != -1 ) // Are we moving a machine?
@@ -1448,7 +1458,12 @@ namespace psycle { namespace host {
 			}
 			if (_pSong.InsertConnectionBlocking(tmac, dmac,0,dsttype)== -1)
 			{
-				MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+				if (tmac->connectedOutputs() >= 12 || dmac->connectedInputs() >= 12) {
+					MessageBox("Couldn't connect the selected machines!\nIf needing more than 12 connections use multiple dummy or mixer machines","Error!", MB_ICONERROR);
+				}
+				else {
+					MessageBox("Couldn't connect the selected machines!","Error!", MB_ICONERROR);
+				}
 			}
 			Repaint();
 		}
