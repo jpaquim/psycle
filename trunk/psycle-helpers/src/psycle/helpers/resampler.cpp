@@ -28,6 +28,10 @@ namespace psycle { namespace helpers { namespace dsp {
     OutputDebugString(ss.str().c_str()); \
 }
 */
+	const double cutoffoffset = 0.95;
+
+	int cubic_resampler::windowtype=2;
+
 
 	bool cubic_resampler::initialized = false;
 	float cubic_resampler::cubic_table_[CUBIC_RESOLUTION*4];
@@ -74,26 +78,33 @@ namespace psycle { namespace helpers { namespace dsp {
 			double valx=math::pi * static_cast<double>(i) * ONEDIVSINC_TBSIZEMINONE;
 			double tempval;
 			//Higher bandwidths means longer stopgap (bad), but also faster sidelobe attenuation (good).
-			#if 0
+			if (windowtype == 0) {
 				// nuttal window. Bandwidth = 2.0212
 				tempval = 0.355768 - 0.487396 * std::cos(math::pi+ valx) + 0.144232 * std::cos(2.0 * valx) - 0.012604 * std::cos(math::pi+ 3.0 * valx);
 				// 0.3635819 , 0.4891775 , 0.1365995 , 0.0106411
-			#elif 1
+			}else if (windowtype == 1) {
+				// kaiser-bessel, alpha~7.5  . From OpenMPT, WindowedFIR
+				tempval = 0.40243 - 0.49804 * std::cos(math::pi + valx) + 0.09831 * std::cos(2.0 * valx) - 0.00122 * cos(math::pi + 3.0 * valx);
+			}else if (windowtype == 2) {
 				// blackman window. Bandwidth = 1.73
 				tempval = 0.42659 - 0.49656 * std::cos(math::pi+ valx) + 0.076849 * std::cos(2.0 * valx);
-			#elif 0
+			}else if (windowtype == 3) {
 				// C.H.Helmrich on Hydrogenaudio: http://www.hydrogenaud.io/forums/index.php?showtopic=105090
 				tempval = 0.79445 * std::cos(0.5*valx) + 0.20555 * std::cos(1.5 * valx);
-			#elif 0
+			}else if (windowtype == 4) {
 				// hann(ing) window. Bandwidth = 1.5
 				tempval = 0.5 * (1.0 - std::cos(math::pi + valx));
-			#elif 0
+			}else if (windowtype == 5) {
 				// hamming window. Bandwidth = 1.37
 				tempval = 0.53836 - 0.46164 * std::cos(math::pi +  valx);
-			#elif 0 
+			}else if (windowtype == 6) {
 				//lanczos (sinc) window. Bandwidth = 1.30
 				tempval = std::sin(valx)/valx;
-			#endif
+			}
+			else {
+				//rectangular
+				tempval = 1.0;
+			}
 
 			#if USE_SINC_DELTA && !(DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS)
 				int write_pos = i;
@@ -106,8 +117,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			tempval /= static_cast<double>(i) * math::pi *ONEDIVSINC_RESOLUTION;
 			window_div_x[write_pos] = tempval;
 			//sinc runs at half speed of SINC_RESOLUTION (i.e. two zero crossing points per period).
-			//This means filter cutoff is at 0.5 (half of samplerate, full bandwidth)
-			sinc_windowed_table[write_pos] = std::sin(static_cast<double>(i) * math::pi *ONEDIVSINC_RESOLUTION) * tempval;
+			sinc_windowed_table[write_pos] = std::sin(static_cast<double>(i)*cutoffoffset * math::pi *ONEDIVSINC_RESOLUTION) * tempval;
 		}
 		helpers::math::erase_all_nans_infinities_and_denormals(sinc_windowed_table,SINC_TABLESIZE);
 #if USE_SINC_DELTA
@@ -173,7 +183,7 @@ namespace psycle { namespace helpers { namespace dsp {
 			sinc_data_t* t = static_cast<sinc_data_t*>(resampler_data);
 			if (speed > 1.0) {
 				t->enabled=true;
-				t->fcpi = math::pi/speed;
+				t->fcpi = cutoffoffset*math::pi/speed;
 				t->fcpidivperiodsize = t->fcpi/SINC_RESOLUTION;
 			}
 			else {

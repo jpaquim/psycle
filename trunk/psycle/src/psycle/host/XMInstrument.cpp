@@ -310,7 +310,7 @@ namespace psycle
 			riffFile.Read(m_WaveStereo);
 			riffFile.Read(m_PanEnabled);
 			riffFile.Read(m_PanFactor);
-			if(version == 1) {
+			if(version >= 1) {
 				riffFile.Read(m_Surround);
 			}
 			else if (m_PanFactor > 1.0f) {
@@ -458,26 +458,55 @@ namespace psycle
 			}
 			m_Mode=_mode;
 		}
-		void XMInstrument::Envelope::SetAdsr(bool enable, bool reset) {
+		void XMInstrument::Envelope::SetAdsr(bool enable, bool allowgain) {
 			if (enable) {
+				float min=1.0f;
+				float max=0.0f;
+				int maxtime=1;
+				int sustainval=0.5;
+				int sustaintime=-1;
+				int endtime=3;
+				//Ensure the correct number of points
 				while(NumOfPoints()< 4) {
 					Insert(NumOfPoints(),0.0f);
 				}
+				for(int i=0;i<NumOfPoints();i++){
+					if (GetValue(i) > max) {
+						max = GetValue(i);
+						maxtime = GetTime(i);
+					}
+					min=std::min(min,GetValue(i));
+				}
+				//Get total length previous to remove extra points.
+				endtime = GetTime(NumOfPoints()-1);
+				if (SustainBegin() != INVALID) {
+					sustaintime = GetTime(SustainBegin());
+					sustainval = GetValue(SustainBegin());
+				}
+				//Remove extra points once made all the calculations
 				while(NumOfPoints()>4) {
 					Delete(NumOfPoints()-1);
 				}
-				float min=1.0f;
-				float max=0.0f;
-				for(int i=0;i<NumOfPoints();i++){
-					min=std::min(min,GetValue(i));
-					max=std::max(max,GetValue(i));
+				if(!allowgain || max<=min) {min=0.0f; max = 1.0f;}
+				if (sustaintime==-1) {
+					sustainval=(max-min)/2.f;
+					sustaintime=maxtime+(endtime-maxtime)/2;
 				}
-				if(reset || max==min) {min=0.0f; max = 1.0f;}
+				if (maxtime <= 0 ) maxtime = 1;
+				if (sustaintime <= maxtime ) sustaintime = maxtime+1;
+				if (endtime <= sustaintime) endtime = sustaintime+1;
 				SetValue(0,min);
+				SetTime(0,0);
 				SetValue(1,max);
+				SetTime(1,maxtime);
+				SetValue(2,sustainval);
+				SetTime(2,sustaintime);
 				SetValue(3,min);
+				SetTime(3,endtime);
 				SustainBegin(2);
 				SustainEnd(2);
+				LoopStart(Envelope::INVALID);
+				LoopEnd(Envelope::INVALID);
 			}
 			m_Adsr = enable;
 		}
@@ -898,11 +927,9 @@ namespace psycle
 		}
 		void XMInstrument::SetDefaultNoteMap(int sample/*=255*/)
 		{
-			NotePair npair;
-			npair.second=sample;
 			for(int i = 0;i < NOTE_MAP_SIZE;i++){
-				npair.first=i;
-				m_AssignNoteToSample[i] = npair;
+				m_AssignNoteToSample[i].first=i;
+				m_AssignNoteToSample[i].second=sample;
 			}
 		}
 

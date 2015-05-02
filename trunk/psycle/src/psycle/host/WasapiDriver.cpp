@@ -45,9 +45,9 @@ namespace psycle
 		const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 		const IID IID_IAudioClock = __uuidof(IAudioClock);
 
-		void WasapiDriver::Error(const TCHAR msg[])
+		void WasapiDriver::Error(const char msg[])
 		{
-			MessageBox(0, msg, _T("Windows WASAPI driver"), MB_OK | MB_ICONERROR);
+			::MessageBox(0, msg, "Windows WASAPI driver", MB_OK | MB_ICONERROR);
 		}
 
 		WasapiSettings::WasapiSettings()

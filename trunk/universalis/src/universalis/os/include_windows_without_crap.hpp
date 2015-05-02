@@ -32,6 +32,7 @@
 	#endif
 
 	#if defined _AFXDLL // when mfc is used
+		DIVERSALIS__MESSAGE("pre-compiling microsoft MFC headers.")
 		#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS // some CString constructors will be explicit
 		#define _AFX_ALL_WARNINGS // turns off mfc's hiding of some common and often safely ignored warning messages
 		#include <afxwin.h> // mfc core and standard components
@@ -44,6 +45,7 @@
 			#include <afxcmn.h>                     // MFC support for Windows Common Controls
 		#endif // _AFX_NO_AFXCMN_SUPPORT
 		#include <afxmt.h> // multithreading?
+		DIVERSALIS__MESSAGE("done pre-compiling microsoft MFC headers.")
 	#else
 		#if !defined WIN32_EXTRA_LEAN
 			#define WIN32_EXTRA_LEAN // for mfc apps, we would get unresolved symbols

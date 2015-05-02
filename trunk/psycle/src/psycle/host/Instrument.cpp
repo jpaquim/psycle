@@ -3,7 +3,6 @@
 
 #include <psycle/host/detail/project.private.hpp>
 #include "Instrument.hpp"
-#include "XMInstrument.hpp"
 #include <psycle/helpers/datacompression.hpp>
 #include <psycle/helpers/value_mapper.hpp>
 #include "Zap.hpp"
@@ -51,6 +50,78 @@ namespace psycle
 			_RCUT = false;
 			_RRES = false;
 		}
+
+		void Instrument::CopyXMInstrument(const XMInstrument& instr, float ticktomillis)
+		{
+			Init();
+			if (instr.AmpEnvelope().IsEnabled()) {
+				SetVolEnvFromEnvelope(instr.AmpEnvelope(), ticktomillis);
+			}
+			if (instr.FilterEnvelope().IsEnabled()) {
+				SetFilterEnvFromEnvelope(instr.FilterEnvelope(), ticktomillis);
+			}
+			ENV_F_TP = instr.FilterType();
+			ENV_F_CO = instr.FilterCutoff();
+			ENV_F_RQ = instr.FilterResonance();
+			if (instr.Lines() > 0 ) {
+				_lines = instr.Lines();
+				_loop = true;
+			}
+			if (instr.NNA() == XMInstrument::NewNoteAction::STOP) {
+				_NNA = 0;
+			}
+			else if (instr.NNA() == XMInstrument::NewNoteAction::NOTEOFF) {
+				_NNA = 1;
+			}
+			else if (instr.NNA() == XMInstrument::NewNoteAction::CONTINUE) {
+				_NNA = 2;
+			}
+			_RCUT = (instr.RandomCutoff() >= 0.5f);
+			_RPAN = (instr.RandomPanning() >= 0.5f);
+			_RRES = (instr.RandomResonance() >= 0.5f);
+		}
+
+		void Instrument::SetVolEnvFromEnvelope(const XMInstrument::Envelope& penvin, float ticktomillis)
+		{
+			XMInstrument::Envelope penv(penvin);
+			// Adapting the point based volume envelope, to the ADSR based one in sampler instrument.
+			penv.SetAdsr(true,false);
+			SetEnvInternal(penv, ticktomillis, ENV_AT, ENV_DT, ENV_SL, ENV_RT);
+		}
+		void Instrument::SetFilterEnvFromEnvelope(const XMInstrument::Envelope& penvin, float ticktomillis)
+		{
+			XMInstrument::Envelope penv(penvin);
+			// Adapting the point based volume envelope, to the ADSR based one in sampler instrument.
+			penv.SetAdsr(true,false);
+			SetEnvInternal(penv, ticktomillis, ENV_F_AT, ENV_F_DT, ENV_F_SL, ENV_F_RT);
+			ENV_F_EA = static_cast<int>( (penv.GetValue(1)-penv.GetValue(0))*128.f );
+		}
+		void Instrument::SetEnvInternal(const XMInstrument::Envelope& penv, float ticktomillis, int &attack, int& decay, int& sustain, int& release){
+
+			float conversion=1.0f;
+			if (penv.Mode() == XMInstrument::Envelope::Mode::TICK) {
+				conversion = ticktomillis;
+			}
+			//Truncate to 220 samples boundaries, and ensure it is not zero.
+			// ATTACK TIME
+			float tmp = penv.GetTime(1)*44.1f*conversion;
+			tmp = (tmp/220.f)*220.f; if (tmp <=0.f) tmp=1.f; 
+			attack = static_cast<int>(tmp);
+
+			// DECAY TIME
+			tmp = penv.GetTime(2)*44.1f*conversion;
+			tmp = (tmp/220.f)*220.f; if (tmp <=0.f) tmp=1.f; 
+			decay = static_cast<int>(tmp);
+			
+			// SUSTAIN LEVEL
+			sustain = static_cast<int>(penv.GetValue(2)*100.f);
+
+			// RELEASE TIME
+			tmp = penv.GetTime(3)*44.1f*conversion;
+			tmp = (tmp/220.f)*220.f; if (tmp <=0.f) tmp=1.f; 
+			release=static_cast<int>(tmp);
+		}
+
 
 		void Instrument::LoadFileChunk(RiffFile* pFile,int version,SampleList& samples, int instrmIdx, bool fullopen)
 		{

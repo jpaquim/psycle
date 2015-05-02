@@ -331,7 +331,7 @@ namespace psycle { namespace host {
 
   bool LuaPlugin::LoadSpecificChunk(RiffFile* pFile, int version)
   {
-    if (proxy_.prsmode() == LuaMachine::PRSType::NATIVE) {
+    if (proxy_.prsmode() == LuaMachine::NATIVEPRS) {
     uint32_t size;
     pFile->Read(size); // size of whole structure
     if(size)
@@ -412,7 +412,7 @@ namespace psycle { namespace host {
 							SetProgram(_program);
 							EndSetProgram();*/
 							pFile->Skip(sizeof(float) *count);
-              bool b = proxy_.prsmode() == LuaMachine::PRSType::CHUNK;
+              bool b = proxy_.prsmode() == LuaMachine::CHUNKPRS;
 							if(b)
 							{
 								unsigned char * data(new unsigned char[size]);
@@ -436,7 +436,7 @@ namespace psycle { namespace host {
 
   void LuaPlugin::SaveSpecificChunk(RiffFile * pFile)
   {
-    if (proxy_.prsmode() == LuaMachine::PRSType::NATIVE) {
+    if (proxy_.prsmode() == LuaMachine::NATIVEPRS) {
       uint32_t count = GetNumParams();
       uint32_t size2(0);
       unsigned char * pData = 0;
@@ -480,7 +480,7 @@ namespace psycle { namespace host {
 					UINT size(sizeof _program + sizeof count);
 					UINT chunksize(0);
 					unsigned char * pData(0);
-          bool b = proxy_.prsmode() == LuaMachine::PRSType::CHUNK;
+          bool b = proxy_.prsmode() == LuaMachine::CHUNKPRS;
 					if(b)
 					{
 						count=0;
@@ -906,7 +906,11 @@ namespace psycle { namespace host {
       unsigned char * pData(0);
       int chunksize = proxy_.call_data(&pData, true);
       using namespace std;
-      ofstream ofile(filename, ios::binary);
+	  #if __cplusplus >= 201103L
+        ofstream ofile(filename, ios::binary);
+      #else
+	    ofstream ofile(filename.c_str(), ios::binary);
+      #endif
       ofile.write((char*)pData, chunksize);
       ofile.close();
    }
@@ -915,7 +919,11 @@ namespace psycle { namespace host {
       using namespace std;
       streampos size;
       char* pData;
-      ifstream file (filename, ios::in|ios::binary|ios::ate);
+	  #if __cplusplus >= 201103L
+        ifstream file (filename, ios::in|ios::binary|ios::ate);
+      #else
+	    ifstream file (filename.c_str(), ios::in|ios::binary|ios::ate);
+      #endif
       if (file.is_open()) {
         size = file.tellg();
         pData = new char[size];

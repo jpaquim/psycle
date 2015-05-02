@@ -1514,9 +1514,9 @@ namespace psycle { namespace host {
 				unsigned long timeInSamps = Global::configuration()._pOutputDriver->GetSamplesPerSec() * silenceDlg.timeInSecs;
 				if(!wdWave)
 				{
-					_pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
-					std::memset(_pSong->samples[wsInstrument].pWaveDataL(), 0, timeInSamps*sizeof(short) );
-					wdLeft = _pSong->samples[wsInstrument].pWaveDataL();
+					XMInstrument::WaveData<>& wave = _pSong->WavAlloc(wsInstrument, false, timeInSamps, "New Waveform");
+					std::memset(wave.pWaveDataL(), 0, timeInSamps*sizeof(short) );
+					wdLeft = wave.pWaveDataL();
 					wdLength=timeInSamps;
 					wdStereo=false;
 					wdWave=true;
@@ -1983,8 +1983,7 @@ namespace psycle { namespace host {
 					//\todo: support different bitdepths
 					if (pFmt->wBitsPerSample == 16)
 					{
-						_pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
-						XMInstrument::WaveData<>& wave = _pSong->samples.get(wsInstrument);
+						XMInstrument::WaveData<>& wave = _pSong->WavAlloc(wsInstrument, (pFmt->nChannels==2) ? true : false, lDataSamps, "Clipboard");
 						wdLength = lDataSamps;
 						wdLeft  = wave.pWaveDataL();
 						if (pFmt->nChannels == 1)

@@ -13,8 +13,8 @@
 * http://netghost.narod.ru/gff/vendspec/iff/iff.txt
 * http://sox.sourceforge.net/AudioFormats-11.html
 * http://aminet.net/package/mus/misc/wavepak
-* http://amigan.1emu.net/reg/8SVX.txt
-* http://wiki.amigaos.net/index.php/8SVX_IFF_8-Bit_Sampled_Voice
+* http://web.archive.org/web/20080828053800/amigan.1emu.net/reg/8SVX.txt  (same as wiki below)
+* http://wiki.amigaos.net/wiki/8SVX_IFF_8-Bit_Sampled_Voice
 *
 * Samples can be found here:
 * http://aminet.net/mods/smpl/
@@ -55,6 +55,7 @@ namespace psycle
 		/*
 		** IFF Riff Header
 		** ----------------
+		Format is Big endian.
 
 		char Id[4]			// "FORM"
 		ULONGBE hlength	// of the data contained in the file (except Id and length)

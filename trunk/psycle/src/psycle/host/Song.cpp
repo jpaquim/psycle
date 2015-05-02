@@ -1169,13 +1169,14 @@ namespace psycle
 				wavprev.UseWave(NULL);
 			}
 		}
-
-		int Song::AIffAlloc(int sampleIdx,const std::string & sFileName)
+		//returns -1 error, else sample idx.
+		int Song::AIffAlloc(LoaderHelper& loadhelp,const std::string & sFileName)
 		{
+			int realsampleIdx = -1;
 #if !defined WINAMP_PLUGIN
 			AppleAIFF file;
 			file.Open(sFileName);
-			if (!file.isValidFile()) { file.Close(); return 0; }
+			if (!file.isValidFile()) { file.Close(); return -1; }
 			boost::filesystem::path path(sFileName);
 			name = path.filename().string();
 			if (name.length() > 32) {
@@ -1183,8 +1184,7 @@ namespace psycle
 			}
 
 			uint32_t datalen= file.commchunk.numSampleFrames.unsignedValue();
-			WavAlloc(sampleIdx,file.commchunk.numChannels.signedValue()==2,datalen,name);
-			XMInstrument::WaveData<>& wave = (sampleIdx == PREV_WAV_INS)? wavprev.UsePreviewWave() : samples.get(sampleIdx);
+			XMInstrument::WaveData<>& wave = WavAlloc(loadhelp,file.commchunk.numChannels.signedValue()==2,datalen,name, realsampleIdx);
 			wave.WaveSampleRate(static_cast<uint32_t>(file.commchunk.sampleRate.value()));
 			Loop loop = file.instchunk.sustainLoop;
 			if ( loop.playMode.signedValue() > 0) {
@@ -1214,15 +1214,17 @@ namespace psycle
 			file.readDeInterleavedSamples(reinterpret_cast<void**>(samps),datalen,&convert16);
 			file.Close();
 #endif
-			return 1;
+			return realsampleIdx;
 		}
-
-		int Song::IffAlloc(int sampleIdx,const std::string & sFileName)
+		//instmode=true then create/initialize an instrument (both, sampler and sampulse ones).
+		//returns -1 error, else if instmode= true returns real inst index, else returns real sample idx.
+		int Song::IffAlloc(LoaderHelper& loadhelp, bool instMode, const std::string & sFileName)
 		{
+			int outputIdx=-1;
 #if !defined WINAMP_PLUGIN
 			AmigaSvx file;
 			file.Open(sFileName);
-			if (!file.isValidFile()) { file.Close(); return 0; }
+			if (!file.isValidFile()) { file.Close(); return -1; }
 			std::string name = file.GetName();
 			if (name.empty()) {
 				boost::filesystem::path path(sFileName);
@@ -1232,12 +1234,36 @@ namespace psycle
 				name = name.substr(0,32);
 			}
 
-			uint32_t datalen= file.getLength(1);
-			WavAlloc(sampleIdx,file.stereo(),datalen,name);
-			//For the preview wav, we play a single sample, so we skip until the last octave (better sound).
-			int startidx=(sampleIdx == PREV_WAV_INS)?file.getformat().numOctaves:1;
+			//This envelope runs in millis.
+			XMInstrument::Envelope volenv;
+			if (instMode) {
+				std::list<helpers::EGPoint> svxEnv = file.getVolumeEnvelope();
+				if (svxEnv.size() > 1) {
+					// Adapting to psycle's envelope
+					int runpos=0;
+					volenv.SetValue(0,0.0f);
+					for (std::list<helpers::EGPoint>::const_iterator ite = svxEnv.begin(); ite != svxEnv.end(); ++ite) {
+						if (ite->duration.signedValue() == -1) { //Sustain point.
+							volenv.SustainBegin(volenv.GetTime(volenv.NumOfPoints()-1));
+							volenv.SustainEnd(volenv.GetTime(volenv.NumOfPoints()-1));
+						}
+						else { //Normal point
+							runpos += ite->duration.unsignedValue();
+							volenv.SetValue(runpos,ite->dest.value());
+						}
+					}
+				}
+			}
+
+			std::list<XMInstrument::NotePair> notes;
+
+			//when loading as sample, we load a single sample, so we skip until the last octave (better sound).
+			int notestart=0;
+			int noteend=XMInstrument::NOTE_MAP_SIZE;
+			int startidx=(instMode)?1:file.getformat().numOctaves;
 			for (int octave=startidx;octave<=file.getformat().numOctaves;octave++) {
-				XMInstrument::WaveData<>& wave = (sampleIdx == PREV_WAV_INS)? wavprev.UsePreviewWave() : samples.get(sampleIdx);
+				uint32_t datalen= file.getLength(octave);
+				XMInstrument::WaveData<>& wave = WavAlloc(loadhelp,file.stereo(),datalen,name, outputIdx);
 				wave.WaveSampleRate(file.getformat().samplesPerSec.unsignedValue());
 				wave.WaveGlobVolume(file.getformat().volume.value());
 				if (file.getPan() < 0.5f || file.getPan() > 0.5f) {
@@ -1250,39 +1276,7 @@ namespace psycle
 					wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
 				}
 				wave.WaveTune(file.getNoteOffsetFor(octave));
-				std::list<helpers::EGPoint> volEnv = file.getVolumeEnvelope();
-				if (volEnv.size() > 1) {
-					// Adapting the point based volume envelope, to the ADSR based one in sampler instrument.
-					float max=0.f, last=1.f;
-					int maxpos=0, runpos=0, tmp=0;
-					for (std::list<helpers::EGPoint>::const_iterator ite = volEnv.begin(); ite != volEnv.end(); ++ite) {
-						if (ite->duration.signedValue() == -1) { //Sustain point.
-							//Truncate to 220 samples boundaries, and ensure it is not zero.
-							tmp = (runpos*44.1f);
-							tmp = (tmp/220)*220; if (tmp <=0) tmp=1; 
-							_pInstrument[sampleIdx]->ENV_AT = tmp;
-							//Truncate to 220 samples boundaries, and ensure it is not zero.
-							tmp = (runpos-maxpos)*44.1f;
-							tmp = (tmp/220)*220; if (tmp <=0) tmp=1; 
-							_pInstrument[sampleIdx]->ENV_DT = tmp;
-							_pInstrument[sampleIdx]->ENV_SL = last*100;
-							maxpos=-1;
-							runpos=0;
-						}
-						else if (maxpos >=0) { //Attack
-							runpos += ite->duration.unsignedValue();
-							last = ite->dest.value();
-							if (last > max) { max = last; maxpos=runpos; }
-						}
-						else { //Release
-							runpos += ite->duration.unsignedValue();
-						}
-					}
-					//Truncate to 220 samples boundaries, and ensure it is not zero.
-					tmp = (runpos*44.1f);
-					tmp = (tmp/220)*220; if (tmp <=0) tmp=1; 
-					_pInstrument[sampleIdx]->ENV_RT=tmp;
-				}
+
 				int16_t * csamples = const_cast<int16_t*>(wave.pWaveDataL());
 				if (file.stereo()) {
 					int16_t * rsamples = const_cast<int16_t*>(wave.pWaveDataR());
@@ -1291,45 +1285,70 @@ namespace psycle
 				else {
 					file.readMonoConvertTo16(csamples,datalen, octave);
 				}
-				if (octave<file.getformat().numOctaves) {
-					datalen= file.getLength(octave+1);
-					sampleIdx = WavAlloc(-1,file.stereo(),datalen,name);
+
+				noteend=(octave<file.getformat().numOctaves) 
+					? std::min(notecommands::middleC + wave.WaveTune() + 12, XMInstrument::NOTE_MAP_SIZE)
+					: XMInstrument::NOTE_MAP_SIZE;
+				for(int j = notestart;j < noteend;j++){
+					XMInstrument::NotePair npair;
+					npair.first=j;
+					npair.second=outputIdx;
+					notes.push_back(npair);
+				}
+				notestart=noteend;
+			}
+			if (instMode) {
+				XMInstrument& inst = loadhelp.GetNextInstrument(outputIdx);
+				inst.Name(name);
+				if (volenv.NumOfPoints() > 0) {
+					inst.AmpEnvelope() = volenv;
+				}
+				for(std::list<XMInstrument::NotePair>::iterator ite =  notes.begin(); ite != notes.end(); ++ite) {
+					inst.NoteToSample(ite->first, *ite);
+				}
+				inst.ValidateEnabled();
+
+				std::set<int> list = inst.GetWavesUsed();
+				for (std::set<int>::iterator ite =list.begin(); ite != list.end(); ++ite) {
+					_pInstrument[*ite]->Init();
+					if (volenv.NumOfPoints() > 0) {
+						_pInstrument[*ite]->SetVolEnvFromEnvelope(volenv,tickstomillis(1));
+					}
 				}
 			}
 			file.Close();
 #endif
-			return 1;
+			return outputIdx;
 		}
 
-		int Song::WavAlloc(int iInstr, bool bStereo, uint32_t iSamplesPerChan, const std::string & sName)
+		XMInstrument::WaveData<>& Song::WavAlloc(int sampleIdx, bool bStereo, uint32_t iSamplesPerChan, const std::string & sName)
 		{
-			int instout=iInstr;
 			assert(iSamplesPerChan<(1<<30)); ///< FIXME: Since in some places, signed values are used, we cannot use the whole range.
-			if (iInstr < PREV_WAV_INS ) {
-				XMInstrument::WaveData<> wave;
-				wave.AllocWaveData(iSamplesPerChan,bStereo);
-				wave.WaveName(sName);
-				if (iInstr < 0) {
-					instout = samples.AddSample(wave);
-				}
-				else {
-					samples.SetSample(wave,iInstr);
-				}
-			}
-			else {
-				XMInstrument::WaveData<> &wave = wavprev.UsePreviewWave();
-				wave.Init();
-				wave.AllocWaveData(iSamplesPerChan,bStereo);
-			}
-			return instout;
+			XMInstrument::WaveData<> wavetmp;
+			samples.SetSample(wavetmp,sampleIdx);
+			XMInstrument::WaveData<>& wave = samples.get(sampleIdx);
+			wave.Init();
+			wave.AllocWaveData(iSamplesPerChan,bStereo);
+			wave.WaveName(sName);
+			return wave;
+		}
+		XMInstrument::WaveData<>& Song::WavAlloc(LoaderHelper& loadhelp, bool bStereo, uint32_t iSamplesPerChan, const std::string & sName, int &instout)
+		{
+			assert(iSamplesPerChan<(1<<30)); ///< FIXME: Since in some places, signed values are used, we cannot use the whole range.
+			XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(instout);
+			wave.AllocWaveData(iSamplesPerChan,bStereo);
+			wave.WaveName(sName);
+			return wave;
 		}
 
-		int Song::WavAlloc(int instrument, const std::string & sFileName)
+		//if sampleidx = -1 then allocate on free pos, if sampleidx = PREV_WAV_INS use wav ins.
+		//returns -1 error, else sample idx.
+		int Song::WavAlloc(LoaderHelper& loadhelp, const std::string & sFileName)
 		{ 
 #if !defined WINAMP_PLUGIN
 			RiffWave file;
 			file.Open(sFileName);
-			if (!file.isValidFile()) { file.Close(); return 0; }
+			if (!file.isValidFile()) { file.Close(); return -1; }
 
 			// Initializes the layer.
 			boost::filesystem::path path(sFileName);
@@ -1339,9 +1358,8 @@ namespace psycle
 			}
 			uint16_t st_type =std::min(static_cast<uint16_t>(2U),file.format().nChannels);
 			uint32_t Datalen(file.numSamples());
-			WavAlloc(instrument, st_type == 2U, Datalen, name);
-
-			XMInstrument::WaveData<>& wave = (instrument < PREV_WAV_INS )?samples.get(instrument):wavprev.UsePreviewWave();
+			int realsampleIdx = -1;
+			XMInstrument::WaveData<>& wave = WavAlloc(loadhelp, st_type == 2U, Datalen, name, realsampleIdx);
 			wave.WaveSampleRate(file.format().nSamplesPerSec);
 			int16_t* samps[]={wave.pWaveDataL(), wave.pWaveDataR()};
 			WaveFormat_Data convert16(file.format().nSamplesPerSec,16,st_type,false);
@@ -1361,34 +1379,40 @@ namespace psycle
 				wave.WaveTune(60-smplchunk.midiNote);
 				int16_t fine = static_cast<int16_t>(smplchunk.midiPitchFr >>24) / 2.56; //Convert to cents.
 				wave.WaveFineTune(fine);
-				if (smplchunk.numLoops > 0 && smplchunk.loops[0].start >= 0 
-						&& smplchunk.loops[0].start < smplchunk.loops[0].end && smplchunk.loops[0].end <= Datalen) {
-					if (smplchunk.loops[0].playCount==0 || smplchunk.loops[0].playCount > 256) {
-						wave.WaveLoopStart(smplchunk.loops[0].start);
-						wave.WaveLoopEnd(smplchunk.loops[0].end);
-						if (smplchunk.loops[0].type==1) {
-							wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
-						}
-						else if (smplchunk.loops[0].type==0 || smplchunk.loops[0].type==2) {
-							wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
-						}
-					}
-					else {
-						wave.WaveSusLoopStart(smplchunk.loops[0].start);
-						wave.WaveSusLoopEnd(smplchunk.loops[0].end);
-						if (smplchunk.loops[0].type==1) {
-							wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
-						}
-						else if (smplchunk.loops[0].type==0 || smplchunk.loops[0].type==2) {
-							wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+				if (smplchunk.numLoops > 0) {
+					for (int l=0;l<smplchunk.numLoops;l++) {
+						RiffWaveSmplLoopChunk loop = smplchunk.loops[l];
+						if (loop.start >= 0 && loop.start < loop.end && loop.end <= Datalen) {
+							if (loop.playCount==0 || loop.playCount > 256) {
+								wave.WaveLoopStart(loop.start);
+								wave.WaveLoopEnd(loop.end);
+								if (loop.type==1) {
+									wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
+								}
+								else if (loop.type==0 || loop.type==2) {
+									wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+								}
+							}
+							else {
+								wave.WaveSusLoopStart(loop.start);
+								wave.WaveSusLoopEnd(loop.end);
+								if (loop.type==1) {
+									wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::BIDI);
+								}
+								else if (loop.type==0 || loop.type==2) {
+									wave.WaveSusLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
+								}
+							}
 						}
 					}
 				}
 			}
 
 			file.Close();
+#else
+			int realsampleIdx=-1;
 #endif //!defined WINAMP_PLUGIN
-			return 1;
+			return realsampleIdx;
 		}
 
 		bool Song::Load(RiffFile* pFile, CProgressDialog& progress, bool fullopen)
@@ -3278,7 +3302,7 @@ namespace psycle
 			}
 			file.Close();
 		}
-		void Song::LoadPsyInstrument(const std::string& filename, int instIdx)
+		bool Song::LoadPsyInstrument(LoaderHelper& loadhelp, const std::string& filename)
 		{
 			char id[5];
 			uint32_t size;
@@ -3286,17 +3310,16 @@ namespace psycle
 			RiffFile file;
 
 			std::map<int, int> sampMap;
-			if ( !xminstruments.Exists(instIdx) ) {
-				XMInstrument instr;
-				xminstruments.SetInst(instr,instIdx);
-			}
-			XMInstrument& instr = xminstruments.get(instIdx);
-			instr.Init();
-			DeleteVirtualOfInstrument(instIdx,true);
+			bool preview = loadhelp.IsPreview();
+			int instIdx=-1;
 
-			file.Open(filename);
-			file.Expect("PSYI",4);
+			if (!file.Open(filename) || !file.Expect("PSYI",4) ) {
+				file.Close();
+				return false;
+			}
+			XMInstrument& instr = loadhelp.GetNextInstrument(instIdx);
 			file.Read(id,4);	id[4]='\0';
+			//Old format, only in 1.11 betas
 			if (strncmp(id,"EINS",4) == 0) {
 				file.Read(size);
 				uint32_t numIns;
@@ -3314,6 +3337,16 @@ namespace psycle
 					}
 					uint32_t numSamps;
 					file.Read(numSamps);
+					int sample=-1;
+					if (preview) { // If preview, determine which sample to  load.
+						sample = instr.NoteToSample(notecommands::middleC).second;
+						if (sample == notecommands::empty) {
+							const std::set<int>& samps = instr.GetWavesUsed();
+							if (!samps.empty()) {
+								sample = *samps.begin();
+							}
+						}
+					}
 					for(uint32_t i=0; i < numSamps && !file.Eof(); i++) {
 						uint32_t sizeSMPD=0;
 						file.Read(id,4); id[4]='\0';
@@ -3322,15 +3355,18 @@ namespace psycle
 						{
 							uint32_t versionSMPD=0;
 							file.Read(versionSMPD);
-							XMInstrument::WaveData<> wavetmp;
-							int idx=samples.AddSample(wavetmp);
-							XMInstrument::WaveData<> & wave = samples.get(idx);
+							int waveidx=-1;
+							XMInstrument::WaveData<> & wave = loadhelp.GetNextSample(waveidx);
 							wave.Load(file, versionSMPD, true);
-							sampMap[i]=idx;
+							sampMap[i]=waveidx;
+							if (i == sample) {
+								break;
+							}
 						}
 					}
 				}
 			}
+			//Current format
 			else if (strncmp(id,"SMID",4) == 0) {
 				file.Read(version);
 				file.Read(size);
@@ -3340,6 +3376,16 @@ namespace psycle
 					uint32_t instidx; // Unused
 					file.Read(instidx);
 					instr.Load(file, version&0xFFFF);
+				}
+				int sample=-1;
+				if (preview) { // If preview, determine which sample to  load.
+					sample = instr.NoteToSample(notecommands::middleC).second;
+					if (sample == notecommands::empty) {
+						const std::set<int>& samps = instr.GetWavesUsed();
+						if (!samps.empty()) {
+							sample = *samps.begin();
+						}
+					}
 				}
 				file.Seek(begins+size);
 				while(!file.Eof()) {
@@ -3353,28 +3399,41 @@ namespace psycle
 						uint32_t sampleidx;
 						file.Read(sampleidx);
 						if (sampleidx < XMInstrument::MAX_INSTRUMENT) {
-							XMInstrument::WaveData<> wavetmp;
-							int idx=samples.AddSample(wavetmp);
-							XMInstrument::WaveData<> & wave = samples.get(idx);
+							int waveidx=-1;
+							XMInstrument::WaveData<> & wave = loadhelp.GetNextSample(waveidx);
 							wave.Load(file, version&0xFFFF);
-							sampMap[sampleidx]=idx;
+							sampMap[sampleidx]=waveidx;
+							if (sampleidx == sample) {
+								break;
+							}
 						}
 					}
 					file.Seek(begins+size);
 				}
 			}
+			else {
+				file.Close();
+				return false;
+			}
 			//Remap 
-			for (int j=0; j<XMInstrument::NOTE_MAP_SIZE;j++) {
-				XMInstrument::NotePair pair = instr.NoteToSample(j);
-				if (pair.second != 255) {
-					if (sampMap.find(pair.second) != sampMap.end()) {
-						pair.second = sampMap[pair.second];
+			if(!preview) {
+				for (int j=0; j<XMInstrument::NOTE_MAP_SIZE;j++) {
+					XMInstrument::NotePair pair = instr.NoteToSample(j);
+					if (pair.second != 255) {
+						if (sampMap.find(pair.second) != sampMap.end()) {
+							pair.second = sampMap[pair.second];
+						}
+						else { pair.second = 255; }
+						instr.NoteToSample(j,pair);
 					}
-					else { pair.second = 255; }
-					instr.NoteToSample(j,pair);
+				}
+				std::set<int> list = instr.GetWavesUsed();
+				for (std::set<int>::iterator ite =list.begin(); ite != list.end(); ++ite) {
+					_pInstrument[*ite]->CopyXMInstrument(instr,tickstomillis(1));
 				}
 			}
 			file.Close();
+			return true;
 		}
 
 		bool Song::IsPatternUsed(int i, bool onlyInSequence/*=false*/) const

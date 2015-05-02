@@ -46,9 +46,6 @@ namespace psycle {
 	#endif
 				while (nextsamples)
 				{
-				//////////////////////////////////////////////////////////////////////////
-				//  Step 1 : Get the unprocessed wave data.
-
 					pWork(controller,&left_output, &right_output);
 
 					*(++pSamplesL)+=left_output*lvol;

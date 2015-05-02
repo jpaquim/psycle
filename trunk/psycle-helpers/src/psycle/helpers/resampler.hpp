@@ -131,6 +131,10 @@ using namespace universalis::stdlib;
 			/*override*/ void DisposeResamplerData(void * resampler_data) const;
 			/*override*/ int requiredPresamples() const;
 			/*override*/ int requiredPostSamples() const;
+			
+			//Call it synchronized
+			static void testreinit () {initTables();}
+			static int windowtype;
 
 		protected:
 			struct sinc_data_t {
@@ -139,7 +143,7 @@ using namespace universalis::stdlib;
 				double fcpidivperiodsize;
 			};
 
-			void initTables();
+			static void initTables();
 
 			// static soxr_t new_soxr();
 

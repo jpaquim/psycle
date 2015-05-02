@@ -189,7 +189,7 @@ namespace psycle { namespace host {
         lua_remove(L, -3);
         lua_newtable(L); // build event table
         WORD wControlID = LOWORD(wParam);
-	      WORD wMessageID = HIWORD(wParam);
+	    //WORD wMessageID = HIWORD(wParam);
         lua_pushnumber(L, wControlID);
         lua_setfield(L, -2, "id");
         int status = lua_pcall(L, 2, 0, 0);      

@@ -215,9 +215,14 @@ void XMSamplerUISample::UpdateSampleInstrs()
 
 BOOL XMSamplerUISample::OnSetActive()
 {
-	RefreshSampleList();
 	int i= Global::song().waveSelected;
-	SetSample(i);
+	if ( i != m_SampleList.GetCurSel()) {
+		WaveUpdate();
+	}
+	else {
+		RefreshSampleList();
+		SetSample(i);
+	}
 	m_Init=true;
 
 	return CPropertyPage::OnSetActive();
@@ -251,6 +256,7 @@ void XMSamplerUISample::SetSample(int sample)
 
 	XMInstrument::WaveData<>& wave = Global::song().samples.get(sample);
 	pWave(&wave);
+
 	RefreshSampleData();
 	UpdateSampleInstrs();
 }

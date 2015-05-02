@@ -980,6 +980,7 @@
 #define IDC_R_SHOWPLAYALL               2428
 #define IDC_FILTERTYPE1                 2429
 #define IDC_FILTERTYPE2                 2430
+#define IDC_REPLTWEAKCHECK              2430
 #define IDC_FILTERTYPE3                 2431
 #define IDC_FILTERTYPE4                 2432
 #define IDC_FILTERTYPE5                 2433
@@ -1204,7 +1205,7 @@
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        346
 #define _APS_NEXT_COMMAND_VALUE         34443
-#define _APS_NEXT_CONTROL_VALUE         2430
+#define _APS_NEXT_CONTROL_VALUE         2431
 #define _APS_NEXT_SYMED_VALUE           65
 #endif
 #endif

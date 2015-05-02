@@ -4,6 +4,7 @@
 #include "XMFile.hpp"
 #include "FileIO.hpp"
 #include "XMInstrument.hpp"
+#include <psycle/host/LoaderHelper.hpp>
 
 namespace psycle { namespace host {
 	class Song;
@@ -17,7 +18,7 @@ namespace psycle { namespace host {
 		virtual ~XMSongLoader(void);
 		/// RIFF 
 		virtual bool Load(Song &song,CProgressDialog& progress, bool fullopen=true);
-		void LoadInstrumentFromFile(Song& song, const int idx);
+		int LoadInstrumentFromFile(LoaderHelper& loadhelp);
 	private:
 		bool IsValid();
 

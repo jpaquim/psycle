@@ -70,7 +70,7 @@ namespace psycle { namespace host { namespace canvas {
       CBitmap* bmp = 0;
       PsycleConfig* cfg = &PsycleGlobal::conf();            
       switch (key) {
-         case BMP::DIALBMP:
+         case Skin::DIALBMP:
            bmp = &cfg-> macParam().dial;
         break;
       default:;
@@ -81,7 +81,7 @@ namespace psycle { namespace host { namespace canvas {
     static void get_size(int key, double &x, double &y) {
       PsycleConfig* cfg = &PsycleGlobal::conf();            
       switch (key) {
-        case SIZE::DIALSIZE: 
+        case Skin::DIALSIZE: 
           x = cfg->macParam().dialwidth;
           y = cfg->macParam().dialheight;
         break;
@@ -93,15 +93,15 @@ namespace psycle { namespace host { namespace canvas {
       PsycleConfig* cfg = &PsycleGlobal::conf();      
       int cr = 0;
       switch (key) {
-        case COLOR::TOPCOLOR:      cr = cfg->macParam().topColor; break;
-        case COLOR::BOTTOMCOLOR:   cr = cfg->macParam().bottomColor; break;
-        case COLOR::HTOPCOLOR:     cr = cfg->macParam().hTopColor; break;
-        case COLOR::HBOTTOMCOLOR:  cr = cfg->macParam().hBottomColor; break;
-        case COLOR::FTOPCOLOR:     cr = cfg->macParam().fontTopColor; break;
-        case COLOR::FBOTTOMCOLOR:  cr = cfg->macParam().fontBottomColor; break;
-        case COLOR::HFTOPCOLOR:    cr = cfg->macParam().fonthTopColor; break;
-        case COLOR::HFBOTTOMCOLOR: cr = cfg->macParam().fonthBottomColor; break;
-        case COLOR::TITLECOLOR:    cr = cfg->macParam().titleColor; break;                
+        case Skin::TOPCOLOR:      cr = cfg->macParam().topColor; break;
+        case Skin::BOTTOMCOLOR:   cr = cfg->macParam().bottomColor; break;
+        case Skin::HTOPCOLOR:     cr = cfg->macParam().hTopColor; break;
+        case Skin::HBOTTOMCOLOR:  cr = cfg->macParam().hBottomColor; break;
+        case Skin::FTOPCOLOR:     cr = cfg->macParam().fontTopColor; break;
+        case Skin::FBOTTOMCOLOR:  cr = cfg->macParam().fontBottomColor; break;
+        case Skin::HFTOPCOLOR:    cr = cfg->macParam().fonthTopColor; break;
+        case Skin::HFBOTTOMCOLOR: cr = cfg->macParam().fonthBottomColor; break;
+        case Skin::TITLECOLOR:    cr = cfg->macParam().titleColor; break;                
         default:;
       }           
       int a = 0;

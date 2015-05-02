@@ -72,7 +72,7 @@ void CEnvelopeEditor::Initialize(XMInstrument::Envelope & pEnvelope, int tpb, in
 }
 void CEnvelopeEditor::ConvertToADSR(bool allowgain) {
 	XMInstrument::Envelope &env = envelope();
-	env.SetAdsr(true, !allowgain);
+	env.SetAdsr(true, allowgain);
 	m_EditPoint = env.NumOfPoints();
 	FitZoom();
 }

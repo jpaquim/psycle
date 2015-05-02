@@ -42,8 +42,8 @@ namespace psycle { namespace host {
   class LuaMachine {
   public:
     enum PRSType {
-      NATIVE = 0,      
-      CHUNK = 1
+      NATIVEPRS = 0,      
+      CHUNKPRS = 1
     };
 
     LuaMachine() 
@@ -54,7 +54,7 @@ namespace psycle { namespace host {
           num_cols_(0),
           gui_type_(0),
           canvas_(0),
-          prsmode_(PRSType::NATIVE),
+          prsmode_(LuaMachine::NATIVEPRS),
           num_programs_(0)
           {}
     ~LuaMachine();    
@@ -198,7 +198,7 @@ namespace psycle { namespace host {
   template <class T, int VOL>
   class ResamplerWrap : public RWInterface {  
   public:  
-    ResamplerWrap(typename WaveList<T>::Type& waves) :
+    ResamplerWrap(const typename WaveList<T>::Type& waves) :
         adjust_vol(1/(float)VOL),
           dostop_(false),
           waves_(waves),

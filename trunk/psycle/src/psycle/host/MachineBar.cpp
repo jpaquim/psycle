@@ -16,12 +16,17 @@
 #include "WavFileDlg.hpp"
 #include "GearRackDlg.hpp"
 #include "WaveEdFrame.hpp"
+#include <psycle/helpers/riffwave.hpp>
 #include <psycle/helpers/filetypedetector.hpp>
 #include <psycle/helpers/pathname_validate.hpp>
 
 namespace psycle{ namespace host{
 	extern CPsycleApp theApp;
 IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
+
+	int MachineBar::wavFilterSelected=0;
+	int MachineBar::insFilterSelected=0;
+
 
 	MachineBar::MachineBar()
 	{
@@ -369,7 +374,13 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 	{
 		if ( m_auxcombo.GetCurSel() == AUX_INSTRUMENT )	// WAVES
 		{
-			m_pSong->auxcolSelected=m_pSong->instSelected;
+			if ( m_pSong->seqBus < MAX_BUSES && m_pSong->_pMachine[m_pSong->seqBus] != NULL
+				&& m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_XMSAMPLER) {
+					m_pSong->auxcolSelected = m_pSong->instSelected;
+			}
+			else {
+				m_pSong->auxcolSelected = m_pSong->waveSelected;
+			}
 		}
 		UpdateComboIns();
 	}
@@ -504,7 +515,13 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
 			m_pSong->paramSelected=m_inscombo.GetCurSel();
 		} else {
-			m_pSong->instSelected=m_inscombo.GetCurSel();
+			if ( m_pSong->seqBus < MAX_BUSES && m_pSong->_pMachine[m_pSong->seqBus] != NULL
+				&& m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_XMSAMPLER) {
+					m_pSong->instSelected = m_inscombo.GetCurSel();
+			}
+			else {
+				m_pSong->waveSelected = m_inscombo.GetCurSel();
+			}
 			m_pParentMain->WaveEditorBackUpdate();
 			m_pParentMain->UpdateInstrumentEditor();
 			m_pParentMain->RedrawGearRackList();
@@ -606,7 +623,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				if (MessageBox("An instrument already exists in this slot. If you continue, it will be ovewritten INCLUDING the samples it has associated. Continue?"
 				,"Sample Loading",MB_YESNO|MB_ICONWARNING) == IDNO)  return;
 			}
-			update=LoadInstrument(si);
+			update=LoadInstrument(si, false);
 		}
 		else {
 			int si = m_pSong->waveSelected;
@@ -614,7 +631,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				if (MessageBox("A sample already exists in this slot. If you continue, it will be ovewritten. Continue?"
 					,"Sample Loading",MB_YESNO|MB_ICONWARNING) == IDNO)  return;
 			}
-			update=LoadWave(si);
+			update=LoadInstrument(si, true);
 		}
 		
 		if (update){
@@ -690,31 +707,34 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	bool MachineBar::LoadWave(int waveIdx)
 	{
-		static const char szFilter[] = "Autodetect Format|*.*|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff||";
+		static const char szFilter[] = "All known samples|*.wav;*.aif;*.aiff;*.s3i;*.its;*.8svx;*.16sv;*.svx;*.iff|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff|All files|*.*||";
 		static uint32_t szDetect[] = {helpers::FormatDetector::WAVE_ID,helpers::FormatDetector::AIFF_ID,helpers::FormatDetector::SCRS_ID,helpers::FormatDetector::IMPS_ID,helpers::FormatDetector::SVX8_ID};
 		CWavFileDlg dlg(true,"wav", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
 		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		dlg.m_ofn.lCustData = reinterpret_cast<LPARAM>(szDetect);
-
+		dlg.m_ofn.nFilterIndex = wavFilterSelected;
 		bool update=false;
 		if (dlg.DoModal() == IDOK)
 		{
+			wavFilterSelected = dlg.m_ofn.nFilterIndex;
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
 			uint32_t selCode;
 
-			if (dlg.GetOFN().nFilterIndex == 1) {
+			if (dlg.GetOFN().nFilterIndex <= 1 || dlg.GetOFN().nFilterIndex >= (sizeof(szDetect)/4)) {
 				helpers::FormatDetector detect;
 				selCode = detect.AutoDetect(dlg.GetPathName().GetString());
 			}
 			else selCode = szDetect[dlg.GetOFN().nFilterIndex-2];
 
 			try {
+				LoaderHelper loadhelp(m_pSong,false,-1,waveIdx);
 				if (selCode == helpers::FormatDetector::WAVE_ID) {
-					if (m_pSong->WavAlloc(waveIdx,dlg.GetPathName().GetString())) {
+					int realsample = m_pSong->WavAlloc(loadhelp,dlg.GetPathName().GetString());
+					if (realsample > -1) {
 						update=true;
 					} else {
 						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
@@ -723,8 +743,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 				else if (selCode == helpers::FormatDetector::SCRS_ID) {
 					ITModule2 itsong;
 					itsong.Open(dlg.GetPathName().GetString());
-					XMInstrument dummy;
-					update = itsong.LoadS3MInstX(*m_pSong, dummy, waveIdx);
+					update = itsong.LoadS3MFileS3I(loadhelp);
 					itsong.Close();
 				}
 				else if (selCode == helpers::FormatDetector::IMPS_ID) {
@@ -736,14 +755,16 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 					m_pSong->samples.SetSample(wave,waveIdx);
 				}
 				else if (selCode == helpers::FormatDetector::AIFF_ID) {
-					if (m_pSong->AIffAlloc(waveIdx, dlg.GetPathName().GetString())) {
+					int realsample = m_pSong->AIffAlloc(loadhelp, dlg.GetPathName().GetString());
+					if (realsample > -1) {
 						update=true;
 					} else {
 						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
 					}
 				}
 				else if (selCode == helpers::FormatDetector::SVX8_ID) {
-					if (m_pSong->IffAlloc(waveIdx,dlg.GetPathName().GetString())) {
+					int realsample = m_pSong->IffAlloc(loadhelp,false, dlg.GetPathName().GetString());
+					if (realsample > -1) {
 						update=true;
 					} else {
 						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
@@ -773,7 +794,8 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::SaveWave(int waveIdx)
 	{
-		WaveFile output;
+		helpers::RiffWave output2;
+
 		static const char szFilter[] = "Wav Files (*.wav)|*.wav|All Files (*.*)|*.*||";
 
 		const XMInstrument::WaveData<> & wave = m_pSong->samples[waveIdx];
@@ -784,69 +806,190 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
 		if (dlg.DoModal() == IDOK)
 		{
-			output.OpenForWrite(dlg.GetPathName(), wave.WaveSampleRate(), 16, (wave.IsWaveStereo()) ? 2 : 1 );
+			output2.Create(dlg.GetPathName().GetString(),true);
+			output2.addFormat(wave.WaveSampleRate(), 16, (wave.IsWaveStereo()) ? 2 : 1, false );
 			if (wave.IsWaveStereo()) {
-				for ( unsigned int c=0; c < wave.WaveLength(); c++)
-				{
-					output.WriteStereoSample( *(wave.pWaveDataL() + c), *(wave.pWaveDataR() + c) );
-				}
+				int16_t* samps[] = {wave.pWaveDataL(), wave.pWaveDataR()};
+				output2.writeFromDeInterleavedSamples(reinterpret_cast<void**>(samps), wave.WaveLength());
 			} else {
-				output.WriteData(wave.pWaveDataL(), wave.WaveLength());
+				output2.writeFromInterleavedSamples(wave.pWaveDataL(), wave.WaveLength());
 			}
-			output.Close();
+			output2.UpdateCurrentChunkSize();
+			RiffWaveSmplChunk smpl;
+			smpl.manufacturer = smpl.product = smpl.smpteFormat = smpl.smpteOffset = smpl.extraDataSize = 0;
+			smpl.samplePeriod = 1000000 / wave.WaveSampleRate();
+			smpl.midiNote =  60 - wave.WaveTune();
+			smpl.midiPitchFr = static_cast<int>(wave.WaveFineTune() * 2.56) << 24;
+			smpl.numLoops = 0;
+			if (wave.WaveLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) smpl.numLoops++;
+			if (wave.WaveSusLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) smpl.numLoops++;
+			int idx = 0;
+			smpl.loops = new RiffWaveSmplLoopChunk[smpl.numLoops];
+			if (wave.WaveLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+				smpl.loops[idx].cueId = 0;
+				smpl.loops[idx].type = (wave.WaveLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL) ? 0 : 1;
+				smpl.loops[idx].playCount = 0;
+				smpl.loops[idx].start = wave.WaveLoopStart();
+				smpl.loops[idx].end = wave.WaveLoopEnd();
+				smpl.loops[idx].fraction = 0;
+				idx++;
+			}
+			if (wave.WaveSusLoopType() != XMInstrument::WaveData<>::LoopType::DO_NOT) {
+				smpl.loops[idx].cueId = 1;
+				smpl.loops[idx].type = (wave.WaveSusLoopType() == XMInstrument::WaveData<>::LoopType::NORMAL) ? 0 : 1;
+				smpl.loops[idx].playCount = 1;
+				smpl.loops[idx].start = wave.WaveSusLoopStart();
+				smpl.loops[idx].end = wave.WaveSusLoopEnd();
+				smpl.loops[idx].fraction = 0;
+			}
+			output2.addSmplChunk(smpl);
+
+			RiffWaveInstChunk inst;
+			inst.midiNote = 60 - wave.WaveTune();
+			inst.midiCents = wave.WaveFineTune();
+			inst.gaindB = static_cast<int>(helpers::dsp::dB(wave.WaveGlobVolume())); // wavevolume too?
+			inst.lowNote = inst.lowVelocity = 1;
+			inst.highNote = inst.highVelocity = 127;
+			output2.addInstChunk(inst);
+			output2.Close();
 		}
 	}
 
-	bool MachineBar::LoadInstrument(int instIdx)
+	bool MachineBar::LoadInstrument(int instIdxInput, bool indexIsSample)
 	{
-		static const char szFilter[] = "All Instruments (*.psins,*.xi,*.iti,*.s3i)|*.psins;*.xi;*.iti;*.s3i|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|ST3 Samples (*.s3i)|(*.s3i)||";
-
-		CFileDialog dlg(true,"psins", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
+		static const char szFilter[] = "All Instruments and samples|*.psins;*.xi;*.iti;*.wav;*.aif;*.aiff;*.its;*.s3i;*.8svx;*.16sv;*.svx;*.iff|Psycle Instrument (*.psins)|*.psins|XM Instruments (*.xi)|*.xi|IT Instruments (*.iti)|*.iti|Wav (PCM) Files (*.wav)|*.wav|Apple AIFF (PCM) Files (*.aif)|*.aif;*.aiff|ST3 Samples (*.s3i)|*.s3i|IT2 Samples (*.its)|*.its|Amiga IFF/SVX Samples (*.svx)|*.8svx;*.16sv;*.svx;*.iff|All files (*.*)|*.*||";
+		static uint32_t szDetect[] = {helpers::FormatDetector::PSYI_ID,helpers::FormatDetector::XI_ID,helpers::FormatDetector::IMPI_ID,helpers::FormatDetector::WAVE_ID,helpers::FormatDetector::AIFF_ID,helpers::FormatDetector::SCRS_ID,helpers::FormatDetector::IMPS_ID,helpers::FormatDetector::SVX8_ID};
+		CWavFileDlg dlg(true,"psins", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST| OFN_DONTADDTORECENT, szFilter);
+		dlg.m_pSong = m_pSong;
 		std::string tmpstr = PsycleGlobal::conf().GetCurrentInstrumentDir();
 		dlg.m_ofn.lpstrInitialDir = tmpstr.c_str();
+		dlg.m_ofn.lCustData = reinterpret_cast<LPARAM>(szDetect);
+		dlg.m_ofn.nFilterIndex = insFilterSelected;
 		bool update=false;
 		if (dlg.DoModal() == IDOK)
 		{
+			insFilterSelected = dlg.m_ofn.nFilterIndex;
 			PsycleGlobal::inputHandler().AddMacViewUndo();
 
 			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
-			if (m_pSong->xminstruments.IsEnabled(instIdx)) {
-				XMInstrument & inst = m_pSong->xminstruments.get(instIdx);
-				std::set<int> sampNums =  inst.GetWavesUsed();
-				for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
-					m_pSong->samples.RemoveAt(*it);
+			uint32_t selCode;
+
+			if (dlg.GetOFN().nFilterIndex <= 1 || dlg.GetOFN().nFilterIndex >= (sizeof(szDetect)/4)) {
+				helpers::FormatDetector detect;
+				selCode = detect.AutoDetect(dlg.GetPathName().GetString());
+			}
+			else selCode = szDetect[dlg.GetOFN().nFilterIndex-2];
+
+			try {
+				int smplIdx = (indexIsSample) ? instIdxInput : -1;
+				int instIdx = (indexIsSample) ? -1 : instIdxInput;
+				LoaderHelper loadhelp(m_pSong,false,instIdx,smplIdx);
+
+				if (instIdx > -1 && m_pSong->xminstruments.IsEnabled(instIdx)) {
+					XMInstrument & inst = m_pSong->xminstruments.get(instIdx);
+					std::set<int> sampNums =  inst.GetWavesUsed();
+					for (std::set<int>::iterator it = sampNums.begin(); it != sampNums.end();++it) {
+						m_pSong->samples.RemoveAt(*it);
+					}
+					inst.Init();
+					Global::song().DeleteVirtualOfInstrument(instIdx,true);
 				}
-				inst.Init();
-				Global::song().DeleteVirtualOfInstrument(instIdx,true);
+
+				if (selCode == helpers::FormatDetector::PSYI_ID) {
+					update = m_pSong->LoadPsyInstrument(loadhelp, dlg.GetPathName().GetString());
+					if (!update) {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
+				else if (selCode == helpers::FormatDetector::XI_ID) {
+					XMSongLoader xmsong;
+					xmsong.Open(dlg.GetPathName().GetString());
+					int realinst = xmsong.LoadInstrumentFromFile(loadhelp);
+					xmsong.Close();
+					if (realinst == -1) {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+					else {
+						std::set<int> list = m_pSong->xminstruments[realinst].GetWavesUsed();
+						for (std::set<int>::iterator ite =list.begin(); ite != list.end(); ++ite) {
+							m_pSong->_pInstrument[*ite]->CopyXMInstrument(m_pSong->xminstruments[realinst],m_pSong->tickstomillis(1));
+						}
+					}
+					update=true;
+				}
+				else if (selCode == helpers::FormatDetector::IMPI_ID) {
+					ITModule2 itsong;
+					itsong.Open(dlg.GetPathName().GetString());
+					int realinst = itsong.LoadInstrumentFromFile(loadhelp);
+					itsong.Close();
+					if (realinst == -1) {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+					else {
+						std::set<int> list = m_pSong->xminstruments[realinst].GetWavesUsed();
+						for (std::set<int>::iterator ite =list.begin(); ite != list.end(); ++ite) {
+							m_pSong->_pInstrument[*ite]->CopyXMInstrument(m_pSong->xminstruments[realinst],m_pSong->tickstomillis(1));
+						}
+					}
+					update=true;
+				}
+				else if (selCode == helpers::FormatDetector::WAVE_ID) {
+					int realsample = m_pSong->WavAlloc(loadhelp,dlg.GetPathName().GetString());
+					if (realsample > -1) {
+						const XMInstrument::WaveData<>& wave = m_pSong->samples[realsample];
+						SetupDefaultInstrument(loadhelp, wave, realsample);
+						update=true;
+					} else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
+				else if (selCode == helpers::FormatDetector::SCRS_ID) {
+					ITModule2 itsong;
+					itsong.Open(dlg.GetPathName().GetString());
+					XMInstrument::WaveData<> wave;
+					int realsample = itsong.LoadS3MFileS3I(loadhelp);
+					itsong.Close();
+					if (realsample > -1) {
+						SetupDefaultInstrument(loadhelp, wave, realsample);
+						update=true;
+					} else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
+				else if (selCode == helpers::FormatDetector::IMPS_ID) {
+					ITModule2 itsong;
+					itsong.Open(dlg.GetPathName().GetString());
+					int realsample = -1; 
+					XMInstrument::WaveData<>& wave = loadhelp.GetNextSample(realsample);
+					update = itsong.LoadITSample(wave);
+					itsong.Close();
+
+					SetupDefaultInstrument(loadhelp, wave, realsample);
+					update=true;
+				}
+				else if (selCode == helpers::FormatDetector::AIFF_ID) {
+					int realsample = m_pSong->AIffAlloc(loadhelp, dlg.GetPathName().GetString());
+					if (realsample > -1) {
+						const XMInstrument::WaveData<>& wave = m_pSong->samples[realsample];
+						SetupDefaultInstrument(loadhelp, wave, realsample);
+						update=true;
+					} else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
+				else if (selCode == helpers::FormatDetector::SVX8_ID) {
+					int realsample = m_pSong->IffAlloc(loadhelp,true, dlg.GetPathName().GetString());
+					if (realsample > -1) {
+						update=true;
+					} else {
+						MessageBox("Could not load the file, unrecognized format","Load Error",MB_ICONERROR);
+					}
+				}
 			}
-			CString CurrExt=dlg.GetFileExt();
-			CurrExt.MakeLower();
-			if ( CurrExt == "psins" ) {
-				m_pSong->LoadPsyInstrument(dlg.GetPathName().GetString(),instIdx);
-				update=true;
-			}
-			else if (CurrExt == "xi") {
-				XMSongLoader xmsong;
-				xmsong.Open(dlg.GetPathName().GetString());
-				xmsong.LoadInstrumentFromFile(*m_pSong,instIdx);
-				xmsong.Close();
-				update=true;
-			}
-			else if (CurrExt == "iti") {
-				ITModule2 itsong;
-				itsong.Open(dlg.GetPathName().GetString());
-				itsong.LoadInstrumentFromFile(*m_pSong,instIdx);
-				itsong.Close();
-				update=true;
-			}
-			else if (CurrExt == "s3i") {
-				ITModule2 itsong;
-				itsong.Open(dlg.GetPathName().GetString());
-				XMInstrument instr;
-				itsong.LoadS3MInstX(*m_pSong, instr,65535);
-				m_pSong->xminstruments.SetInst(instr,instIdx);
-				itsong.Close();
-				update=true;
+			catch(const std::runtime_error & e) {
+				std::ostringstream os;
+				os <<"Could not finish the operation: " << e.what();
+				MessageBox(os.str().c_str(),"Load Error",MB_ICONERROR);
 			}
 
 			CString str = dlg.m_ofn.lpstrFile;
@@ -854,6 +997,11 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			if (index != -1) {
 				PsycleGlobal::conf().SetCurrentInstrumentDir(static_cast<char const *>(str.Left(index)));
 			}
+		}
+		{
+			CExclusiveLock lock(&m_pSong->semaphore, 2, true);
+			// Stopping wavepreview if not stopped.
+			m_pSong->wavprev.Stop();
 		}
 		return update;
 	}
@@ -879,6 +1027,18 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			else if (CurrExt == "iti") {
 			}
 		}
+	}
+
+	int MachineBar::SetupDefaultInstrument(LoaderHelper& loadhelp, const XMInstrument::WaveData<>& wave, int waveIdx)
+	{
+		int outinst=-1;
+		XMInstrument instr = loadhelp.GetNextInstrument(outinst);
+		instr.Name(wave.WaveName());
+		instr.SetDefaultNoteMap(waveIdx);
+		instr.ValidateEnabled();
+		Instrument & smpins = *m_pSong->_pInstrument[waveIdx];
+		smpins.CopyXMInstrument(instr,m_pSong->tickstomillis(1));
+		return outinst;
 	}
 
 	int MachineBar::GetNumFromCombo(CComboBox *cb)

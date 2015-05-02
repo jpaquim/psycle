@@ -426,7 +426,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnProgramsOpenpreset()
 		{      
-      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNK) {
+      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNKPRS) {
         char tmp[2048];			
 			  CFileDialog dlg(TRUE,
 				  "fxb",
@@ -460,7 +460,7 @@ namespace psycle { namespace host {
 		}
 		void CFrameMachine::OnProgramsSavepreset()
 		{			
-      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNK) {
+      if (_machine->_type == MACH_LUA && ((LuaPlugin*)_machine)->prsmode()==LuaMachine::CHUNKPRS) {
         char tmp[2048];			
 			  CFileDialog dlg(FALSE,
 				  "fxb",

@@ -947,7 +947,9 @@ namespace psycle { namespace host {
       assert(n1==n2);
       return prg;
     } CATCH_WRAP_AND_RETHROW(*plug_)
+	//Usually the catch will rethrow, but the debugger can bypass it so we woul reach this point
     unlock();
+    return NULL;
   }
 
   // call events
@@ -977,7 +979,9 @@ namespace psycle { namespace host {
       assert(n1==n2);
       return std::string(name);
     } CATCH_WRAP_AND_RETHROW(*plug_)
+	//Usually the catch will rethrow, but the debugger can bypass it so we woul reach this point
     unlock();
+    return NULL;
   }
   
   std::string LuaProxy::GetString() {	
@@ -1102,7 +1106,7 @@ namespace psycle { namespace host {
 
   bool LuaProxy::call_event(canvas::Event* ev) {
     lock();    
-    bool res;
+    bool res = false;
     try {	      
       if (!get_method_optional(L, "canvas")) {
         unlock();

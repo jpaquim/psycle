@@ -1638,7 +1638,7 @@ namespace psycle { namespace host {
 			, audioSettings(5), store_place_(STORE_USER_REGEDIT)
 		{
 			if(!PsycleConfig::CreatePsyFont(fixedFont,"Consolas",80,false,false)) {
-				PsycleConfig::CreatePsyFont(fixedFont,"Courier New",80,false,false);
+				PsycleConfig::CreatePsyFont(fixedFont,"Lucida Console",80,false,false);
 			}
 			HINSTANCE hinst = GetModuleHandle(NULL);
 			iconless = (HICON)::LoadImage(hinst, MAKEINTRESOURCE(IDI_LESS),IMAGE_ICON,16,16,0);

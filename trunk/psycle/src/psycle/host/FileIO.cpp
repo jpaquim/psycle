@@ -59,6 +59,7 @@ namespace psycle
 			if(!ReadFile(_handle, &_header, sizeof(_header), &bytesRead, 0))
 			{
 				CloseHandle(_handle);
+				_handle = INVALID_HANDLE_VALUE;
 				return false;
 			}
 			return true;
@@ -76,6 +77,7 @@ namespace psycle
 			if(!WriteFile(_handle, &_header, sizeof(_header), &bytesWritten, 0))
 			{
 				CloseHandle(_handle);
+				_handle = INVALID_HANDLE_VALUE;
 				return false;
 			}
 			return true;
@@ -83,6 +85,7 @@ namespace psycle
 
 		bool RiffFile::Close()
 		{
+			if(_handle == INVALID_HANDLE_VALUE) return false;
 			DWORD bytesWritten;
 			if (_modified)
 			{

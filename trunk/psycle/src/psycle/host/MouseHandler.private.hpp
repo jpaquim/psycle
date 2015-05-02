@@ -1607,7 +1607,7 @@ namespace psycle { namespace host {
 			updatePar=popupmacidx;
 			Repaint(draw_modes::machine);
 		}
-		void CChildView::OnUpdateMacOpenParams(CCmdUI* pCmdUI)
+		void CChildView::OnUpdateMacOpenProps(CCmdUI* pCmdUI)
 		{
 			pCmdUI->Enable(_pSong._pMachine[popupmacidx]->_mode != MACHMODE_MASTER );
 		}

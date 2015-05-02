@@ -43,13 +43,13 @@ namespace psycle { namespace helpers {
 			isValid=true;
 			if(littleEndian) {
 				RiffChunkHeader mainhead(RIFF,0);
-				addNewChunk(mainhead);
 				currentHeader=&currentHeaderLE;
+				addNewChunk(mainhead);
 			}
 			else {
 				RifxChunkHeader mainhead(RIFX,0);
-				addNewChunk(mainhead);
 				currentHeader=&currentHeaderBE;
+				addNewChunk(mainhead);
 			}
 		}
 		void MsRiff::Close() { 

@@ -3,6 +3,7 @@
 #include "Global.hpp"
 #include "FileIO.hpp"
 #include "XMInstrument.hpp"
+#include <psycle/host/LoaderHelper.hpp>
 
 namespace psycle { namespace host {
 		class Song;
@@ -383,7 +384,7 @@ namespace psycle { namespace host {
 			bool LoadITModule(Song& song);
 			bool LoadOldITInst(const itInsHeader1x& curH,XMInstrument &xins);
 			bool LoadITInst(const itInsHeader2x& curH,XMInstrument &xins);
-			void LoadInstrumentFromFile(Song& song, const int iInstrIdx);
+			int LoadInstrumentFromFile(LoaderHelper& loadhelp);
 			bool LoadITSample(XMInstrument::WaveData<>& _wave);
 			bool LoadITSampleData(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit, unsigned char convert);
 			bool LoadITCompressedData(int16_t* pWavedata,uint32_t iLen,bool b16Bit,unsigned char convert);
@@ -547,8 +548,9 @@ OFFSET              Count TYPE   Description
 
 		public:
 			bool LoadS3MModuleX(Song& song);
-			//Note: This is also used to load s3i (st3 standalone samples/instruments).
-			bool LoadS3MInstX(Song& song, XMInstrument &xins, uint16_t iSampleIdx);
+			//This is used to load s3i (st3 standalone samples/instruments).
+			int LoadS3MFileS3I(LoaderHelper& loadhelp);
+			bool LoadS3MInstX(Song& song, uint16_t iSampleIdx);
 			bool LoadS3MSampleX(XMInstrument::WaveData<>& _wave,s3mSampleHeader *currHeader);
 			bool LoadS3MSampleDataX(XMInstrument::WaveData<>& _wave,uint32_t iLen,bool bstereo,bool b16Bit,bool packed);
 			bool LoadS3MPatternX(uint16_t patIdx, std::map<int,int>& s3mtovirtual);

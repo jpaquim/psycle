@@ -70,90 +70,130 @@ namespace host{
 	{
 
 	}
-	void XMSongLoader::LoadInstrumentFromFile(Song& song, int idx)
+	int XMSongLoader::LoadInstrumentFromFile(LoaderHelper& loadhelp)
 	{
-		XMINSTRUMENTFILEHEADER fileheader;
-
-		Read(&fileheader,sizeof(XMINSTRUMENTFILEHEADER));
-		if ( !strncmp(fileheader.name,XI_HEADER,sizeof(fileheader.extxi))) return;
-		XMInstrument instr;
-		instr.Init();
-		fileheader.name[22] = 0;
-		instr.Name(fileheader.name);
-
-		XMSAMPLEFILEHEADER _insheader;
-		Read(&_insheader,sizeof(XMSAMPLEFILEHEADER));
-		XMInstrument::WaveData<>::WaveForms::Type exchwave[4]={XMInstrument::WaveData<>::WaveForms::SINUS,
+		XMInstrument::WaveData<>::WaveForms::Type exchwave[4]={
+			XMInstrument::WaveData<>::WaveForms::SINUS,
 			XMInstrument::WaveData<>::WaveForms::SQUARE,
 			XMInstrument::WaveData<>::WaveForms::SAWDOWN,
 			XMInstrument::WaveData<>::WaveForms::SAWUP
 		};
+
+		int instIdx=-1;
+		XMINSTRUMENTFILEHEADER fileheader;
+		Read(&fileheader,sizeof(XMINSTRUMENTFILEHEADER));
+		if ( strncmp(fileheader.extxi,XI_HEADER,sizeof(fileheader.extxi))!=0) return -1;
+		fileheader.name[22] = 0;
+
+		XMSAMPLEFILEHEADER _insheader;
+		Read(&_insheader,sizeof(XMSAMPLEFILEHEADER));
 		
 		XMSAMPLEHEADER _insheaderb;
 		char * _pinsheaderb = reinterpret_cast<char *>(&_insheaderb)+4;
 		memcpy(_pinsheaderb,&_insheader,sizeof(XMSAMPLEFILEHEADER)-2);
+
+		XMInstrument& instr = loadhelp.GetNextInstrument(instIdx);
+		instr.Name(fileheader.name);
 		SetEnvelopes(instr,_insheaderb);
 
 		uint32_t iSampleCount(0);
-		for (uint32_t i=0; i<96; i++)
+		uint32_t i;
+		for (i=0; i<96; i++)
 		{
 			if (_insheader.snum[i] > iSampleCount) iSampleCount = _insheader.snum[i];
 		}
 		iSampleCount++;
 		if (iSampleCount > 32) iSampleCount = 32;
 
-
-		unsigned char *sRemap = new unsigned char[iSampleCount];
-		unsigned int i;
-		int curSample(0);
-		// read instrument data	
-		for(i=0;i<iSampleCount;i++)
+		int sample=-1;
+		if (loadhelp.IsPreview())
 		{
-			while (song.samples.IsEnabled(curSample) && curSample < MAX_INSTRUMENTS-1) curSample++;
-			XMInstrument::WaveData<> wave;
-			LoadSampleHeader(wave,GetPos(),idx,curSample);
-			// Only get REAL samples.
-			if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {
-				sRemap[i]=curSample; 
-				song.samples.SetSample(wave,curSample);
-			}
-			else { sRemap[i]=MAX_INSTRUMENTS-1; }
-		}
-
-		// load individual samples
-		for(i=0;i<iSampleCount;i++)
-		{
-			if ( sRemap[i] < MAX_INSTRUMENTS-1)
+			if (_insheader.snum[48] >= iSampleCount)
 			{
-				XMInstrument::WaveData<>& _wave = song.samples.get(sRemap[i]);
-				LoadSampleData(_wave,GetPos(),idx,sRemap[i]);
-				_wave.VibratoAttack(_insheader.vibsweep==0?0:256-_insheader.vibsweep);
-				_wave.VibratoDepth(_insheader.vibdepth);
-				_wave.VibratoSpeed(_insheader.vibrate);
-				_wave.VibratoType(exchwave[_insheader.vibtype&3]);
+				for (int f=0;f<96;f++) if (_insheader.snum[f] < iSampleCount) {
+					sample = _insheader.snum[f];
+					break;
+				}
+			}
+			else { sample = _insheader.snum[48]; }
+			std::vector<XMInstrument::WaveData<>*> waves(iSampleCount);
+			for(i=0;i<iSampleCount;i++)
+			{
+				waves[i] = new XMInstrument::WaveData<>();
+				LoadSampleHeader(*waves[i],GetPos(),instIdx,i);
+			}
+			// load individual samples
+			for(i=0;i<iSampleCount;i++)
+			{
+				if ( smpLen[i] > 0)
+				{
+					LoadSampleData(*waves[i],GetPos(),instIdx,i);
+					if (i == sample) {
+						int dummy=-1;
+						XMInstrument::WaveData<>& _wave = loadhelp.GetNextSample(dummy);
+						_wave = *waves[i];
+						_wave.VibratoAttack(_insheader.vibsweep==0?0:256-_insheader.vibsweep);
+						_wave.VibratoDepth(_insheader.vibdepth);
+						_wave.VibratoSpeed(_insheader.vibrate);
+						_wave.VibratoType(exchwave[_insheader.vibtype&3]);
+						break;
+					}
+				}
+			}
+			for (i=0;i<iSampleCount;i++)
+			{
+				delete waves[i];
 			}
 		}
+		else {
+			unsigned char *sRemap = new unsigned char[iSampleCount];
+			// read instrument data	
+			for(i=0;i<iSampleCount;i++)
+			{
+				int curSample(0);
+				XMInstrument::WaveData<>& wave =loadhelp.GetNextSample(curSample);
+				LoadSampleHeader(wave,GetPos(),instIdx,curSample);
+				// Only get REAL samples.
+				if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {
+					sRemap[i] = curSample;
+				}
+				else { sRemap[i] = MAX_INSTRUMENTS-1; }
+			}
+			// load individual samples
+			for(i=0;i<iSampleCount;i++)
+			{
+				if ( sRemap[i] < MAX_INSTRUMENTS-1)
+				{
+					XMInstrument::WaveData<>& _wave = loadhelp.GetPreviousSample(sRemap[i]);
+					LoadSampleData(_wave,GetPos(),instIdx,sRemap[i]);
+					_wave.VibratoAttack(_insheader.vibsweep==0?0:256-_insheader.vibsweep);
+					_wave.VibratoDepth(_insheader.vibdepth);
+					_wave.VibratoSpeed(_insheader.vibrate);
+					_wave.VibratoType(exchwave[_insheader.vibtype&3]);
+				}
+			}
 
-		XMInstrument::NotePair npair;
-		if ( _insheader.snum[0] < iSampleCount) npair.second=sRemap[_insheader.snum[0]];
-		else npair.second=255;
-		for(int i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-			npair.first=i;
-			if (i< 12){
-				//npair.second=_samph.snum[0]; implicit.
-				instr.NoteToSample(i,npair);
-			} else if(i < 108){
-				if ( _insheader.snum[i-12] < iSampleCount) npair.second=sRemap[_insheader.snum[i-12]];
-				else npair.second=255;
-				instr.NoteToSample(i,npair);
-			} else {
-				//npair.second=_samph.snum[95]; implicit.
-				instr.NoteToSample(i,npair);
+			XMInstrument::NotePair npair;
+			if ( _insheader.snum[0] < iSampleCount) npair.second=sRemap[_insheader.snum[0]];
+			else npair.second=255;
+			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+				npair.first=i;
+				if (i< 12){
+					//npair.second=_samph.snum[0]; implicit.
+					instr.NoteToSample(i,npair);
+				} else if(i < 108){
+					if ( _insheader.snum[i-12] < iSampleCount) npair.second=sRemap[_insheader.snum[i-12]];
+					else npair.second=255;
+					instr.NoteToSample(i,npair);
+				} else {
+					//npair.second=_samph.snum[95]; implicit.
+					instr.NoteToSample(i,npair);
+				}
 			}
+			instr.ValidateEnabled();
+			delete[] sRemap;
 		}
-		instr.ValidateEnabled();
-		song.xminstruments.SetInst(instr,idx);
-		delete[] sRemap;
+		return instIdx;
 	}
 
 	bool XMSongLoader::Load(Song& song,CProgressDialog& /*progress*/, bool /*fullopen*/)
@@ -856,9 +896,10 @@ namespace host{
 			 // Only get REAL samples.
 			if ( smpLen[curSample] > 0 && curSample < MAX_INSTRUMENTS-2 ) {	
 				song.samples.SetSample(wave,curSample);
-				sRemap[i]=curSample++;
+				sRemap[i] = curSample;
+				curSample++;
 			}
-			else { sRemap[i]=MAX_INSTRUMENTS-1; }
+			else { sRemap[i] = MAX_INSTRUMENTS-1; }
 		}
 		// load individual samples
 		for(i=0;i<iSampleCount;i++)

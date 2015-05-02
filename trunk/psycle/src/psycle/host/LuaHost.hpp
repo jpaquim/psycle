@@ -37,7 +37,7 @@ class TDlg {
 public:
   static UINT TDlg::StartThread (LPVOID param)
 {
-    THREADSTRUCT*    ts = (THREADSTRUCT*)param;
+//    THREADSTRUCT*    ts = (THREADSTRUCT*)param;
 
     //here is the time-consuming process 
     //which interacts with your dialog

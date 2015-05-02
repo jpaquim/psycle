@@ -231,7 +231,7 @@ namespace psycle { namespace host {
 			uint32_t m_WaveSusLoopEnd;
 			LoopType::Type m_WaveSusLoopType;
 			uint32_t m_WaveSampleRate;
-			/// Tuning for the center note. values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed with note C-5)leRate;
+			/// Tuning for the center note (value that is added to the note received). values from -60 to 59. 0 = C-5 (middle C, i.e. play at original speed with note C-5);
 			int16_t m_WaveTune;
 			/// [ -100 .. 100] full range = -/+ 1 seminote
 			int16_t m_WaveFineTune;
@@ -406,7 +406,7 @@ namespace psycle { namespace host {
 			void Mode(const Mode::Type _mode, const int bpm=125, const int tpb=24, const int onemilli=1);
 
 			inline bool IsAdsr() const { return m_Adsr; }
-			void SetAdsr(bool enable, bool reset=false);
+			void SetAdsr(bool enable, bool allowgain=true);
 		
 		private:
 			/// Envelope is enabled or disabled
@@ -633,17 +633,17 @@ namespace psycle { namespace host {
 		virtual ~SampleList(){Clear();}
 		inline unsigned int AddSample(const XMInstrument::WaveData<> &wave)
 		{
-			int pos = size()-1;
-			for (;pos>=0;pos--) {
-				if (m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0) break;
+			int pos = 0;
+			for (;pos<size();pos++) {
+				if (m_waves[pos] == NULL || m_waves[pos]->WaveLength() == 0) break;
 			}
-			pos++;
+			XMInstrument::WaveData<>* wavecopy = new XMInstrument::WaveData<>(wave);
 			if (pos == size()) {
-				XMInstrument::WaveData<>* wavecopy = new XMInstrument::WaveData<>(wave);
 				m_waves.push_back(wavecopy);
 			}
 			else {
-				SetSample(wave,pos);
+				if(m_waves[pos] != NULL) { delete m_waves[pos]; }
+				m_waves[pos]=wavecopy;
 			}
 			return pos;
 		}
@@ -702,9 +702,10 @@ namespace psycle { namespace host {
 			m_waves[pos2]=wave;
 		}
 
-		inline bool Exists(int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL; }
-		inline bool IsEnabled(int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0; }
+		inline bool Exists(unsigned int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL; }
+		inline bool IsEnabled(unsigned int pos) const { return pos < m_waves.size() && m_waves[pos] != NULL && m_waves[pos]->WaveLength() > 0; }
 		unsigned int size() const { return static_cast<unsigned int>(m_waves.size()); }
+		unsigned int lastused() const { int last = size(); while (!IsEnabled(last) && last > 0) last--; return last; }
 		void Clear() {
 			const size_t val = m_waves.size();
 			for (size_t i=0;i<val;i++) {
@@ -767,8 +768,8 @@ namespace psycle { namespace host {
 			m_inst[pos1]=m_inst[pos2];
 			m_inst[pos2]=instr;
 		}
-		inline bool Exists(int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL; }
-		inline bool IsEnabled(int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
+		inline bool Exists(unsigned int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL; }
+		inline bool IsEnabled(unsigned int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
 		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
 		void Clear() { 
 			const size_t val = m_inst.size();

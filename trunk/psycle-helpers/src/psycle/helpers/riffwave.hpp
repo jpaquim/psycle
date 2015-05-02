@@ -92,6 +92,8 @@ played).
 	class RiffWaveSmplChunk
 	{
 	public:
+		static const std::size_t SIZEOF;
+
 		uint32_t manufacturer;  // 0 - 0xFFFFFFFF
 		uint32_t product;		// 0 - 0xFFFFFFFF
 		uint32_t samplePeriod;	// 0 - 0xFFFFFFFF
@@ -108,7 +110,7 @@ played).
 	};
 /*
 Sample Period
-The sample period specifies the duration of time that passes during the playback of one sample in nanoseconds (normally equal to 1 / Samplers Per Second, where Samples Per Second is the value found in the format chunk).
+The sample period specifies the duration of time that passes during the playback of one sample in nanoseconds (normally equal to 1 / Samples Per Second, where Samples Per Second is the value found in the format chunk).
 
 MIDI Unity Note
 Specifies the MIDI note which will replay the sample at original pitch. This
@@ -130,6 +132,7 @@ The sampler data value specifies the number of bytes that will follow this chunk
 	class RiffWaveInstChunk
 	{
 	public:
+		static const std::size_t SIZEOF;
 		uint8_t midiNote;	// 1 - 127
 		int8_t midiCents;	// -50 - +50
 		int8_t gaindB;		// -64 - +64
@@ -210,6 +213,8 @@ public:
 
 	void SeekToSample(uint32_t sampleIndex);
 	void addFormat(uint32_t SamplingRate, uint16_t BitsPerSample, uint16_t NumChannels, bool isFloat);
+	void addSmplChunk(const RiffWaveSmplChunk& smpl);
+	void addInstChunk(const RiffWaveInstChunk& inst);
 	
 	void readInterleavedSamples(void* pSamps, uint32_t maxSamples, WaveFormat_Data* convertTo=NULL);
 	void readDeInterleavedSamples(void** pSamps, uint32_t maxSamples, WaveFormat_Data* convertTo=NULL);

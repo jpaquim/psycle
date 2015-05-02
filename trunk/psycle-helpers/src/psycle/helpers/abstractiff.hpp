@@ -247,6 +247,18 @@ using namespace universalis::stdlib;
 		void ReadWithmultichanfloatconverter(out_type** out, uint16_t chans, uint32_t numsamples, double multi);
 
 
+		template<typename sample_type>
+		inline void WriteDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples);
+		template<typename file_type, typename platform_type>
+		inline void WriteDeinterleaveSamplesendian(void** pSamps, uint16_t chans, uint32_t samples);
+
+		template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+		void WriteWithintegerconverter(in_type* in, uint32_t samples);
+		//Same as above, for multichan
+		template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+		void WriteWithmultichanintegerconverter(in_type** in, uint16_t chans, uint32_t samples);
+
+
 	private:
 		bool write_mode;
 		std::string file_name_;
@@ -789,6 +801,55 @@ using namespace universalis::stdlib;
 			}
 		}
 	}
+
+	template<typename sample_type>
+	inline void AbstractIff::WriteDeinterleaveSamples(void** pSamps, uint16_t chans, uint32_t samples) {
+		sample_type** samps = reinterpret_cast<sample_type**>(pSamps);
+		WriteWithmultichanintegerconverter<sample_type, sample_type,assignconverter<sample_type,sample_type> >(samps, chans, samples);
+	}
+	template<typename file_type, typename platform_type>
+	inline void AbstractIff::WriteDeinterleaveSamplesendian(void** pSamps, uint16_t chans, uint32_t samples) {
+		platform_type** samps = reinterpret_cast<platform_type**>(pSamps);
+		WriteWithmultichanintegerconverter<platform_type,file_type,endianessconverter<platform_type,file_type> >(samps, chans, samples);
+	}
+
+
+	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+	void AbstractIff::WriteWithintegerconverter(in_type* in, uint32_t samples)
+	{
+		out_type samps[32768];
+		uint32_t amount=0;
+		for(uint32_t io = 0; io < samples; io+=amount) {
+			amount = std::min(static_cast<uint32_t>(32768U),samples-io);
+			out_type* psamps = samps;
+			for(uint32_t b = 0 ; b < amount; ++b) {
+				*psamps=converter_func(*in);
+				in++;
+				psamps++;
+			}
+			WriteArray(samps,amount);
+		}
+	}
+	//Same as above, for multichan, deinterlaced
+	template<typename in_type, typename out_type, out_type (*converter_func)(in_type)>
+	void AbstractIff::WriteWithmultichanintegerconverter(in_type** in, uint16_t chans, uint32_t samples)
+	{
+		out_type samps[32768];
+		uint32_t amount=0;
+		for(uint32_t io = 0 ; io < samples ; io+=amount)
+		{
+			amount = std::min(static_cast<uint32_t>(32768U)/chans,samples-io);
+			out_type* psamps = samps;
+			for (uint32_t a=0; a < amount; a++) {
+				for (uint16_t b=0; b < chans; b++) {
+					*psamps=converter_func(in[b][io+a]);
+					psamps++;
+				}
+			}
+			WriteArray(samps, amount*chans);
+		}
+	}
+
 
 
 }}

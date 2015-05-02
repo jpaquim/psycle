@@ -122,12 +122,14 @@ namespace host {
 			replacewith_func notereplacer;
 			replacewith_func instreplacer;
 			replacewith_func machreplacer;
+			replacewith_func tweakreplacer;
 			uint8_t notereference;
 			uint8_t instreference;
 			uint8_t machreference;
 			uint8_t notereplace;
 			uint8_t instreplace;
 			uint8_t machreplace;
+			uint8_t tweakreplace;
 		};
 
 		enum {
@@ -150,6 +152,8 @@ namespace host {
 		class CChildView : public CWnd
 		{
 		public:
+			//ADD_MFC_UTF_METHODS
+
 			friend class CTransformPatternDlg;
 			CChildView();
 			virtual ~CChildView();
@@ -207,7 +211,7 @@ namespace host {
 			
 			// In search: 1001 empty, 1002 non-empty, 1003 all, other -> exact match
 			// In replace: 1001 set empty, 1002 -> keep existing, other -> replace value
-			CSearchReplaceMode SetupSearchReplaceMode(int searchnote, int searchinst, int searchmach, int replnote=-1, int replinst=-1, int replmach=-1);
+			CSearchReplaceMode SetupSearchReplaceMode(int searchnote, int searchinst, int searchmach, int replnote=-1, int replinst=-1, int replmach=-1, bool repltweak=false);
 			CCursor SearchInPattern(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode);
 			bool SearchReplace(int patternIdx, const CSelection& selection, const CSearchReplaceMode& mode);
 
@@ -534,7 +538,7 @@ namespace host {
 			afx_msg void OnPopMacMute();
 			afx_msg void OnPopMacSolo();
 			afx_msg void OnPopMacBypass();
-			afx_msg void OnUpdateMacOpenParams(CCmdUI* pCmdUI);
+			afx_msg void OnUpdateMacOpenProps(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMacReplace(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMacClone(CCmdUI* pCmdUI);
 			afx_msg void OnUpdateMacInsertBefore(CCmdUI* pCmdUI);
