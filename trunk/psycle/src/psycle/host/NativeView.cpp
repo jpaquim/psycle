@@ -515,7 +515,7 @@ namespace psycle { namespace host {
 			_pMachine->GetParamValue(tweakpar, buffer);
 			std::string v(buffer);
 			int const K_XSIZE2=uiSetting->dialwidth;      
-			bool isnumber, hasdescr = false;			
+			bool isnumber=false, hasdescr = false;			
 		  if (v[0]=='*' || v[0]=='~' || v[0]=='b') {						
         hasdescr = true;        
         int i = 0;

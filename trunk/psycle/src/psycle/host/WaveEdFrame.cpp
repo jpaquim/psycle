@@ -274,9 +274,8 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::OnFileLoad()
 		{
 			mainFrame->LoadWave(wsInstrument);
-			wavview.SetViewData(wsInstrument);
-			mainFrame->UpdateInstrumentEditor();
-			AdjustStatusBar(wsInstrument);
+			//LoadWave does a call to refresh the editors, which includes our editor.
+			//Our Notify() will be called.
 		}
 		void CWaveEdFrame::OnFileSave()
 		{

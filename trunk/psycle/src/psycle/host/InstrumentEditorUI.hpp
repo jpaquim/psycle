@@ -35,7 +35,7 @@ class InstrumentEditorUI : public CPropertySheet
 		void Init(InstrumentEditorUI** windowVar);
 		void ShowSampler();
 		void ShowSampulse();
-		void UpdateUI(void);
+		void UpdateUI(bool force);
 		BOOL PreTranslateChildMessage(MSG* pMsg, HWND focusWin, Machine* mac);
 
 	protected:

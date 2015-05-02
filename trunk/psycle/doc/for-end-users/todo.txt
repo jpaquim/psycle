@@ -71,8 +71,6 @@ kSh
 
 ++ undos for wave edit? 
 
-*** <alk_> when Psycle is open hibernate does not work (windows crashes)
-
 *** when you drag pan handle over transparency, it leaves trails.
 
 ++ volume slide command
@@ -122,7 +120,7 @@ Machines
 Sampulse Machine
 ===============
 
-+FF	Instruments Support ( *.xi , *.iti, *.sf2. Maybe more)
++FF	Instruments Support ( *.sf2. Maybe more)
 		 * maybe: samples mapped by velocity?
 +	Improve Filter support.
 		 * twk Control
@@ -134,7 +132,6 @@ Wave Editor
 
 +	ALK waveed: remove silence from start and end of wave
 +	Mystic - import .mp3 format for samples
-+	Easier way to load Samples.
 
 
 =============
@@ -163,14 +160,12 @@ GUI (machines)
 		before releasing mouse button release note, then release mouse.
 		[Could it be InputHandler::KeyToCmd() not understanding the key because of the mouse button?]
 		[KeyToCmd() isn't called when a mouse button is down... ]
+		JAZ: I use this "feature" :)
 *	When changing octave, notes playing should be stopped (because if not, notes playing don't stop)
 		[Problem!!! All key processing is done by InputHandler, so machines don't know when it happens,
 		 and neither does Inputhandler know which machines are playing.
 		 Doing a "player::Stop()" would be a bit hardcore.
 		 I agree]
-*	moving machines makes playback pop - machine interface takes too long to redraw, and moving causes redraw
-		on every frame -
-		[ make bigger buffers and more of them to prevent this from happening * i tried to minimize this ]
 *	<bdzld> when you put a machine on top of each other, the vus always pop to the top?
 		[ could try to set up some sort of clipping rect stack, at the cost of cpu... ]
 *	<alk> move mouse over vu, black flickering (more noticable on the big vus)* transparent only i think
@@ -342,8 +337,6 @@ Importing
 ++ 	.mid import/export
 +	Import machines from song - the (regular) .psy is loaded without erasing the already loaded song ignoring
 		pattern data and other settings, this possible? (yes, but will require new song parser...)
-+ 	<angelus> In this thread I suggest an option to import a XM or IT file into differents
-		Sampler-machines separating by instrument/sample.
 
 ===========
 File Format

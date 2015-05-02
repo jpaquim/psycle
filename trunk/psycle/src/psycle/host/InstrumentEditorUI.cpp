@@ -167,12 +167,17 @@ void InstrumentEditorUI::Init(InstrumentEditorUI** windowVar)
 	AddPage(&m_SampleBank);
 	init = true;
 }
-void InstrumentEditorUI::UpdateUI(void)
+void InstrumentEditorUI::UpdateUI(bool force)
 {
 	if ( !init ) return;
 	if (GetActivePage() == &m_InstrBasic ) m_InstrBasic.WaveUpdate();
-	if (GetActivePage() == &m_InstrSampulse ) m_InstrSampulse.SetInstrumentData(Global::song().instSelected);
-	if (GetActivePage() == &m_SampleBank ) m_SampleBank.WaveUpdate();
+	if (GetActivePage() == &m_InstrSampulse ) {
+		if (force) {
+			m_InstrSampulse.FillInstrumentList(-1);
+		}
+		m_InstrSampulse.SetInstrumentData(Global::song().instSelected);
+	}
+	if (GetActivePage() == &m_SampleBank ) m_SampleBank.WaveUpdate(force);
 }
 
 void InstrumentEditorUI::ShowSampler() {

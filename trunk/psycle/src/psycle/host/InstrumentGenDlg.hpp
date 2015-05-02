@@ -42,9 +42,9 @@ protected:
 public:
 	void AssignGeneralValues(XMInstrument& inst, int instno);
 
+	void ValidateEnabled();
 private:
 	void SetNewNoteAction(const int nna,const int dct,const int dca);
-	void ValidateEnabled();
 	void UpdateVirtInstOptions();
 	void SelectByData(CComboBox& combo,DWORD_PTR data);
 

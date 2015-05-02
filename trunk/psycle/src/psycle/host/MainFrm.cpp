@@ -549,10 +549,10 @@ namespace psycle { namespace host {
 			m_midiMonitorDlg.SetActiveWindow();
 		}
 
-		void CMainFrame::UpdateInstrumentEditor()
+		void CMainFrame::UpdateInstrumentEditor(bool force)
 		{
 			if(m_wndInst != NULL) {
-				m_wndInst->UpdateUI();
+				m_wndInst->UpdateUI(force);
 			}
 		}
 		void CMainFrame::ShowInstrumentEditor()
@@ -585,7 +585,7 @@ namespace psycle { namespace host {
 				m_wndInst->SetActiveWindow();
 			}
 			// Instrument editor
-			m_wndInst->UpdateUI();
+			UpdateInstrumentEditor();
 			m_wndInst->SetActiveWindow();
 		}
 
@@ -908,9 +908,27 @@ namespace psycle { namespace host {
 		void CMainFrame::UpdateComboIns(bool updatelist) { m_machineBar.UpdateComboIns(updatelist); }
 		void CMainFrame::UpdateComboGen(bool updatelist) { m_machineBar.UpdateComboGen(updatelist); }
 		void CMainFrame::EditQuantizeChange(int diff) { m_machineBar.EditQuantizeChange(diff); }
-		bool CMainFrame::LoadWave(int idx) { return m_machineBar.LoadWave(idx); }
+		bool CMainFrame::LoadWave(int idx) { 
+			bool result = m_machineBar.LoadWave(idx);
+			if (result) {
+				UpdateComboIns();
+				WaveEditorBackUpdate();
+				UpdateInstrumentEditor(true);
+				RedrawGearRackList();
+			}
+			return result;
+		}
 		void CMainFrame::SaveWave(int idx) { m_machineBar.SaveWave(idx); }
-		bool CMainFrame::LoadInst(int idx) { return m_machineBar.LoadInstrument(idx, false); }
+		bool CMainFrame::LoadInst(int idx) { 
+			bool result = m_machineBar.LoadInstrument(idx, false);
+			if (result) {
+				UpdateComboIns();
+				WaveEditorBackUpdate();
+				UpdateInstrumentEditor(true);
+				RedrawGearRackList();
+			}
+			return result;
+		}
 		void CMainFrame::SaveInst(int idx) { m_machineBar.SaveInstrument(idx); }
 
 		void CMainFrame::RedrawGearRackList()

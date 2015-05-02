@@ -251,16 +251,16 @@ namespace psycle { namespace host {
 				Global::song().instSelected = Global::song().auxcolSelected=tmac;
 				cc->SetCurSel(AUX_INSTRUMENT);
 				mainFrame->LoadInst(tmac);
-				mainFrame->UpdateComboIns(true);
-				mainFrame->UpdateInstrumentEditor();
+				//LoadInst does a call to refresh the editors, which includes our editor.
+				//Our RedrawList() will be called.
 				break;
 			}
 			case 3:
 				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
 				cc->SetCurSel(AUX_INSTRUMENT);
 				mainFrame->LoadWave(tmac);
-				mainFrame->UpdateComboIns(true);
-				mainFrame->UpdateInstrumentEditor();
+				//LoadWave does a call to refresh the editors, which includes our editor.
+				//Our RedrawList() will be called.
 				break;
 			}
 			RedrawList();
