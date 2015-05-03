@@ -50,12 +50,16 @@ v1.12.1 beta
 -------
 + Possibility to load multiple samples at once: (Only from samples bank, wave editor, or samples list of gear rack)
 + Implemented tweak replace, to allow removing tweak values.
-+ LADSPA Host
-* Improvements in the LUA Host.
++ LADSPA Host (preliminary version).
+* Several fixes and additions to the LUA Host.
 * Saving samples to wav now writes the SMPL and INST chunks, keeping information of volume, note tuning and loops. (Also means it uses the helpers implementation now instead of the old riff code)
-* Several changes on loading instruments: Audio preview of instruments, not only samples. Instruments now load to both sampler and sampulse instrument list. Envelopes are copied to sampler ADSR envelope. Samples can be loaded as sampulse intrument, SVX instruments now load as instruments (with the correct note mapping). ADSR conversion (sampulse instrument button to change envelope to ADSR) improved.
-! bug in seeking was setting the wrong sample offset. This caused VSTs that use synchronization to not position to the correct place.
-! changing sampulse instrument name didn't update virtual instrument name.
+* Several changes on loading instruments: 
+  Audio preview of instruments, not only samples. 
+  Instruments now load to both sampler and sampulse instrument list. 
+  Envelopes are copied to sampler ADSR envelopes. As a side feature of this change, the "ADSR" button in Sampulse Envelopes does a better conversion to ADSR now.
+  Samples can be loaded as sampulse intruments, SVX instruments (multioctave SVXs) now load as instruments (with the correct note mapping).
+! bug in seeking (starting from other places than song begin) was setting the wrong sample offset. This caused VSTs that use synchronization to not position to the correct place.
+! changing sampulse instrument name didn't update virtual instrument name. Several other screen updating fixes and improvements related to samples.
 
 v1.12.0  (2014-09-28)
 -------

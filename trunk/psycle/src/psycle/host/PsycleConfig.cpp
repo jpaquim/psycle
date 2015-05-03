@@ -1394,9 +1394,9 @@ namespace psycle { namespace host {
 					sprintf(buffer, "CmdSet:%04d", it->first);
 
 					int value = 0;
-					store.Read(buffer, value);
-
-					SetCmd(it->first,value>>8,value&0xFF);
+					if (store.Read(buffer, value)) {
+						SetCmd(it->first,value>>8,value&0xFF);
+					}
 				}
 				store.CloseGroup();
 			}

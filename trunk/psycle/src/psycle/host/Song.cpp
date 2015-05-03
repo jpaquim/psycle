@@ -933,11 +933,11 @@ namespace psycle
 		}
 		int Song::GetHighestInstrumentIndex() const
 		{
-			return samples.size()-1;
+			return samples.lastused();
 		}
 		int Song::GetHighestXMInstrumentIndex() const
 		{
-			return xminstruments.size()-1;
+			return xminstruments.lastused();
 		}
 		int Song::GetNumInstruments() const
 		{

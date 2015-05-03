@@ -629,7 +629,7 @@ namespace psycle { namespace host {
 
 	class SampleList{
 	public:
-		SampleList(){m_waves.resize(0);}
+		SampleList(){m_waves.resize(1); m_waves[0]=NULL;}
 		virtual ~SampleList(){Clear();}
 		inline unsigned int AddSample(const XMInstrument::WaveData<> &wave)
 		{
@@ -722,13 +722,24 @@ namespace psycle { namespace host {
 
 	class InstrumentList {
 	public:
-		InstrumentList(){m_inst.resize(0);}
+		InstrumentList(){m_inst.resize(1); m_inst[0]=NULL; }
 		virtual ~InstrumentList(){Clear();}
 		inline unsigned int AddIns(const XMInstrument &ins)
 		{
+			int pos = 0;
+			for (;pos<size();pos++) {
+				if (m_inst[pos] == NULL || !m_inst[pos]->IsEnabled()) break;
+			}
 			XMInstrument* inscopy = new XMInstrument(ins);
-			m_inst.push_back(inscopy);
-			return size()-1;
+			if (pos == size()) {
+				m_inst.push_back(inscopy);
+			}
+			else {
+				if(m_inst[pos] != NULL) { delete m_inst[pos]; }
+				m_inst[pos]=inscopy;
+			}
+			return pos;
+
 		}
 		inline void SetInst(const XMInstrument &inst,int pos)
 		{
@@ -764,6 +775,20 @@ namespace psycle { namespace host {
 		}
 		inline void ExchangeInstruments(int pos1, int pos2)
 		{
+			if (pos1 >= size()) {
+				size_t val = m_inst.size();
+				m_inst.resize(pos1);
+				for (size_t i=val;i<=pos1;i++) {
+					m_inst[i]=NULL;
+				}
+			}
+			if (pos2 >= size()) {
+				size_t val = m_inst.size();
+				m_inst.resize(pos2);
+				for (size_t i=val;i<=pos2;i++) {
+					m_inst[i]=NULL;
+				}
+			}
 			XMInstrument* instr = m_inst[pos1];
 			m_inst[pos1]=m_inst[pos2];
 			m_inst[pos2]=instr;
@@ -771,6 +796,7 @@ namespace psycle { namespace host {
 		inline bool Exists(unsigned int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL; }
 		inline bool IsEnabled(unsigned int pos) const { return pos < m_inst.size() && m_inst[pos] != NULL && m_inst[pos]->IsEnabled(); }
 		inline unsigned int size() const { return static_cast<unsigned int>(m_inst.size()); }
+		unsigned int lastused() const { int last = size(); while (!IsEnabled(last) && last > 0) last--; return last; }
 		void Clear() { 
 			const size_t val = m_inst.size();
 			for (int i=0;i<val;i++) {

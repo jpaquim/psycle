@@ -131,23 +131,34 @@ void XMSamplerUIInst::SetInstrumentData(const int instno)
 BOOL XMSamplerUIInst::OnSetActive()
 {
 	TRACE("in XMSamplerUIInst:setActive\n");
-	if ( m_bInitialized == false )
+	if ( m_bInitialized)
 	{
+		SetInstrumentData(Global::song().instSelected);
+	}
+	else {
 		FillInstrumentList();
 		SetInstrumentData(Global::song().instSelected);
 		m_bInitialized = true;
 	}
-	else {
-		SetInstrumentData(Global::song().instSelected);
-	}
 
 	return CPropertyPage::OnSetActive();
+}
+void  XMSamplerUIInst::WaveUpdate(bool force) {
+	if (m_bInitialized) {
+		if (force) {
+			FillInstrumentList(-1);
+		}
+		else {
+			FillInstrumentList(Global::song().instSelected);
+		}
+		SetInstrumentData(Global::song().instSelected);
+	}
 }
 void XMSamplerUIInst::FillInstrumentList(int instNo/*=-1*/) {
 	char line[48];
 	InstrumentList& list = Global::song().xminstruments;
 	if (instNo == -1) {
-		int i = m_InstrumentList.GetCurSel();
+		int cursel = m_InstrumentList.GetCurSel();
 		m_InstrumentList.ResetContent();
 		for (int i=0;i<XMInstrument::MAX_INSTRUMENT;i++)
 		{
@@ -161,8 +172,8 @@ void XMSamplerUIInst::FillInstrumentList(int instNo/*=-1*/) {
 			}
 			m_InstrumentList.AddString(line);
 		}
-		if (i !=  LB_ERR) {
-			m_InstrumentList.SetCurSel(i);
+		if (cursel !=  LB_ERR) {
+			m_InstrumentList.SetCurSel(cursel);
 		}
 		else {
 			m_InstrumentList.SetCurSel(0);
@@ -237,17 +248,12 @@ void XMSamplerUIInst::UpdateInstrSamples()
 }
 void XMSamplerUIInst::OnLbnSelchangeInstrumentlist()
 {
-	if(m_bInitialized)
-	{
-		m_bInitialized = false;
-		int prevsize=Global::song().xminstruments.size();
-		SetInstrumentData(m_InstrumentList.GetCurSel());
-		CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-		Global::song().auxcolSelected = m_InstrumentList.GetCurSel();
-		win->ChangeIns(m_InstrumentList.GetCurSel());
-		win->UpdateComboIns(prevsize!=Global::song().xminstruments.size());
-		m_bInitialized = true;
-	}
+	int i=m_InstrumentList.GetCurSel();
+	int prevsize=Global::song().xminstruments.size();
+	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
+	win->ChangeIns(i);
+	//ChangeIns calls ours WaveUpdate()
+	win->UpdateComboIns(prevsize!=Global::song().xminstruments.size());
 }
 void XMSamplerUIInst::SetActivePage(int index) {
 	m_tabMain.SetCurSel(index);

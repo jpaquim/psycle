@@ -13,6 +13,7 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 
 		CInstrumentEditor::CInstrumentEditor()
 		: CPropertyPage(CInstrumentEditor::IDD)
+		, m_bInitialized(false)
 		{
 		}
 
@@ -175,18 +176,29 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 		BOOL CInstrumentEditor::OnSetActive()
 		{
 			TRACE("in CInstrumentEditor:setActive\n");
-			WaveUpdate();
+			UpdateWavesCombo();
+			SetInstrument(Global::song().waveSelected);
+			m_bInitialized=true;
 			return CPropertyPage::OnSetActive();
 		}
 		void CInstrumentEditor::WaveUpdate()
 		{
+			if (m_bInitialized) {
+				UpdateWavesCombo();
+				SetInstrument(Global::song().waveSelected);
+			}
+		}
+		void CInstrumentEditor::SetInstrument(int si)
+		{
 			char buffer[64];
-			const int si = Global::song().waveSelected;
-			Instrument *pins = Global::song()._pInstrument[si];
-			XMInstrument::WaveData<> wavetmp;
-			bool enabled = Global::song().samples.IsEnabled(si);
-			const XMInstrument::WaveData<>& wave = (enabled) ? Global::song().samples[si] : wavetmp;
 			Song &song = Global::song();
+			Instrument *pins = song._pInstrument[si];
+			XMInstrument::WaveData<> wavetmp;
+			bool enabled = song.samples.IsEnabled(si);
+			const XMInstrument::WaveData<>& wave = (enabled) ? song.samples[si] : wavetmp;
+
+			UpdateVirtInstOptions();
+
 			m_lockinst_combo.ResetContent();
 			for (int i=0;i<MAX_BUSES;i++) {
 				if (song._pMachine[i] != NULL && song._pMachine[i]->_type == MACH_SAMPLER) {
@@ -196,11 +208,6 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 					m_lockinst_combo.SetItemData(idx, i);
 				}
 			}
-
-
-			UpdateVirtInstOptions();
-
-			UpdateWavesCombo();
 
 			UpdateComboNNA();
 
@@ -482,7 +489,6 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			if (si != Global::song().waveSelected) {
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 				win->ChangeWave(si);
-				Global::song().auxcolSelected=si;
 				win->UpdateComboIns(false);
 			}
 		}
@@ -494,7 +500,6 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 			{
 				CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
 				win->ChangeWave(si-1);
-				Global::song().auxcolSelected=si-1;
 				win->UpdateComboIns(false);
 			}
 		}
@@ -510,12 +515,10 @@ IMPLEMENT_DYNAMIC(CInstrumentEditor, CPropertyPage)
 					wave.Init();
 					Global::song().samples.SetSample(wave,si+1);
 					UpdateWavesCombo();
-					Global::song().auxcolSelected=si+1;
 					win->ChangeWave(si+1);
 					win->UpdateComboIns(true);
 				}
 				else {
-					Global::song().auxcolSelected=si+1;
 					win->ChangeWave(si+1);
 					win->UpdateComboIns(false);
 				}

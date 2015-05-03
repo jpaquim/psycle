@@ -375,13 +375,13 @@ namespace psycle { namespace host {
 		void CWaveEdFrame::OnCloseupCmbWave()
 		{
 			mainFrame->ChangeWave(comboWav.GetCurSel());
-			wsInstrument = _pSong->auxcolSelected = _pSong->waveSelected;
+			wsInstrument = _pSong->waveSelected;
 			mainFrame->UpdateComboIns(false);
 		}
 		void CWaveEdFrame::OnWaveMinus()
 		{
 			mainFrame->ChangeWave(_pSong->waveSelected-1);
-			wsInstrument = _pSong->auxcolSelected = _pSong->waveSelected;
+			wsInstrument = _pSong->waveSelected;
 			mainFrame->UpdateComboIns(false);
 		}
 		void CWaveEdFrame::OnWavePlus()
@@ -398,7 +398,6 @@ namespace psycle { namespace host {
 				comboWav.SetCurSel(wsInstrument);
 			}
 			mainFrame->ChangeWave(wsInstrument);
-			_pSong->auxcolSelected = _pSong->waveSelected;
 			mainFrame->UpdateComboIns(update);
 		}
 

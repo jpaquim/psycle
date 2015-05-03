@@ -279,11 +279,11 @@ void CInstrumentGenDlg::OnBtnPopupSetSample()
 	menu.CreatePopupMenu();
 
 	SampleList & list = Global::song().samples;
-	for (int i = 0; i <list.size() && i < 256 ; i += 16)
+	for (int i = 0; i <list.lastused() && i < 256 ; i += 16)
 	{
 		CMenu popup;
 		popup.CreatePopupMenu();
-		for(int j = i; (j < i + 16) && j < list.size(); j++)
+		for(int j = i; (j < i + 16) && j < list.lastused(); j++)
 		{
 			char s1[64]={'\0'};
 			std::sprintf(s1,"%02X%s: %s",j,list.IsEnabled(j)?"*":" "

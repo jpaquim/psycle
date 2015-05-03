@@ -43,7 +43,7 @@ BOOL CInstrIndividualMap::OnInitDialog()
 	}
 
 	samples->AddString("Not set");
-	for (int i = 0; i<list.size(); i++ ) {
+	for (int i = 0; i<list.lastused()+1; i++ ) {
 		CString strFmt;
 		strFmt.Format("%02X%s", i, list.IsEnabled(i) ? std::string("*:").append(list[i].WaveName()).c_str() : " :");
 		samples->AddString(strFmt);

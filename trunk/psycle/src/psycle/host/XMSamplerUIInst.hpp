@@ -42,6 +42,7 @@ protected:
 	afx_msg void OnBnClickedDeleteins();
 
 public:
+	void WaveUpdate(bool force);
 	void SetInstrumentData(const int instno);
 	void FillInstrumentList(int instNo=-1);
 	void SetActivePage(int index);
