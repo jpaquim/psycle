@@ -1,0 +1,22 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 1999-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+
+#pragma once
+#include "plugin.hpp"
+#define PSYCLE__DECL  PSYCLE__PLUGINS__RESOURCE
+#include <psycle/detail/decl.hpp>
+namespace psycle { namespace plugins {
+
+/// resource plugin
+class PSYCLE__DECL resource : public node {
+	public:
+		resource(class plugin_library_reference &, name_type const &);
+	protected:
+		void do_open() /*override*/;
+		void do_start() /*override*/;
+		void do_stop() /*override*/;
+		void do_close() /*override*/;
+};
+
+}}
+#include <psycle/detail/decl.hpp>
