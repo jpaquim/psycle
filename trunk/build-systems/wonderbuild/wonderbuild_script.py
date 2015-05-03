@@ -31,8 +31,7 @@ else:
 					'psycle-core',
 					'psycle-audiodrivers',
 					'psycle-player',
-					'psycle-plugins',
-					'freepsycle'
+					'psycle-plugins'
 				)
 			]
 			for x in sched_ctx.parallel_wait(*tasks): yield x
