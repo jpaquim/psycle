@@ -11,6 +11,9 @@ namespace psycle { namespace helpers {
 	const IffChunkId RiffWave::inst = {'i','n','s','t'};
 
 	const IffChunkId RiffWaveFmtChunk::fmt = {'f','m','t',' '};
+	const uint16_t RiffWaveFmtChunk::FORMAT_PCM = 1;
+	const uint16_t RiffWaveFmtChunk::FORMAT_FLOAT = 3;
+	const uint16_t RiffWaveFmtChunk::FORMAT_EXTENSIBLE = 0xFFFEU;
 	const std::size_t RiffWaveFmtChunk::SIZEOF = 16;
 	const std::size_t RiffWaveFmtChunkExtensible::SIZEOF = 22;
 	const std::size_t RiffWaveSmplChunk::SIZEOF = 36;
