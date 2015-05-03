@@ -34,7 +34,7 @@ void aligned_memory_alloc(std::size_t alignment, X *& x, std::size_t count) {
 			// note: free with _aligned_free
 	#else
 		// could also try _mm_malloc (#include <xmmintr.h> or <emmintr.h>?)
-		// memalign on SunOS but not BSD (#include both <cstdlib> and <cmalloc>)
+		// memalign on Solaris but not BSD (#include both <cstdlib> and <cmalloc>)
 		// note that memalign is declared obsolete and does not specify how to free the allocated memory.
 		
 		size; // unused
