@@ -1,3 +1,10 @@
-This directory contains configuration files for the buildbot software,
-which can be found on debian/ubuntu as the buildbot package,
-or otherwise at http://buildbot.sourceforge.net
+This directory contains configuration files for the buildbot software, an continuous integration tool.
+
+You can consult the buildbot master instance running for the psycle project at
+http://buildborg.retropaganda.info:8010
+
+Build failures are also notified on the #psycle IRC channel on EFnet,
+and are also sent by mail to the sourceforge users to blame (only works if you unblocked mail on your profile settings).
+
+If you wish to contribute your own slave buildbot instance to this project (e.g. for windows builds, that we currently don't have),
+please send a mail to johan-boule@users.sourceforge.net so that i can attach it to the project's master instance.
