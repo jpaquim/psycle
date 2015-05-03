@@ -78,12 +78,14 @@ namespace psycle
 			) {
 				unsigned int block;
 				unsigned int samples;
-				store.Read("BufferSize", block);
-				store.Read("DriverID", driverID);
-				store.Read("SamplesPerSec", samples);
+				bool ok = store.Read("BufferSize", block);
+				ok &= store.Read("DriverID", driverID);
+				ok &= store.Read("SamplesPerSec", samples);
 				store.CloseGroup();
-				setBlockFrames(block);
-				setSamplesPerSec(samples);
+				if (ok) {
+					setBlockFrames(block);
+					setSamplesPerSec(samples);
+				}
 			}
 		}
 		void ASIODriverSettings::Save(ConfigStorage & store)

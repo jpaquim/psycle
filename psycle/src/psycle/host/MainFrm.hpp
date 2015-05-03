@@ -58,6 +58,7 @@ namespace psycle { namespace host {
 			void ShowPerformanceDlg();
 			void ShowMidiMonitorDlg();
 			void ShowInstrumentEditor();
+			void ShowWaveEditor();
 			void UpdateInstrumentEditor(bool force=false);
 			void StatusBarText(std::string txt);
 			void PsybarsUpdate();

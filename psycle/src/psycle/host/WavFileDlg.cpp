@@ -96,6 +96,7 @@ IMPLEMENT_DYNAMIC(CWavFileDlg, CFileDialog)
 				}
 				if (play) { 
 					_lastFile=GetPathName(); 
+					m_pSong->wavprev.SetDefaultVolume();
 					m_pSong->wavprev.Play();
 				}
 			}

@@ -164,7 +164,14 @@ namespace psycle { namespace host {
 				boost::filesystem::path root_begin = appPath();
 				mypath = root_begin / mypath;
 				mypath.normalize();
-				return mypath.string();
+				std::string res = mypath.string();
+#if defined DIVERSALIS__OS__MICROSOFT
+//Workaround. normalize() converts C:\bla\bla2 into C:/bla\bla2
+				if (res.at(2) == '/') {
+					res[2] = '\\';
+				}
+#endif
+				return res;
 			}
 			else {
 				return dir;

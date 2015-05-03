@@ -30,15 +30,19 @@ namespace psycle {
 			//set Instrument to preview
 			void UseWave(XMInstrument::WaveData<>*  wave) {
 				m_pwave = wave; 
-				if(wave != NULL) {m_vol = wave->WaveGlobVolume() * value_mapper::map_128_1(wave->WaveVolume());}
+				SetDefaultVolume();
 			}
 			XMInstrument::WaveData<> & UsePreviewWave() {
 				m_pwave = &m_prevwave;
+				SetDefaultVolume();
 				return m_prevwave;
 			}
 
 			//get playback volume
 			float	GetVolume()		const	{ return m_vol; }
+			void	SetDefaultVolume()		{ 
+				if(m_pwave != NULL) {m_vol = m_pwave->WaveGlobVolume() * value_mapper::map_128_1(m_pwave->WaveVolume());}
+			}
 			//set playback volume
 			void	SetVolume(float vol)	{ m_vol= vol;}
 			//get current playback position

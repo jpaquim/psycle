@@ -57,6 +57,7 @@ namespace psycle { namespace host {
 
 
 		protected:
+			void SetInstrument(int si);
 			void RefreshEnvelopes();
 			void UpdateNoteLabel();
 			void UpdateComboNNA();
@@ -82,7 +83,7 @@ namespace psycle { namespace host {
 
 			void SelectByData(CComboBox& combo,DWORD_PTR data);
 
-			bool initializingDialog;
+			bool m_bInitialized;
 
 			CButton m_lockinst;
 			CComboBox m_lockinst_combo;

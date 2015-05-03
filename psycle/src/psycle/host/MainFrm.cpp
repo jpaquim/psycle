@@ -588,7 +588,10 @@ namespace psycle { namespace host {
 			UpdateInstrumentEditor();
 			m_wndInst->SetActiveWindow();
 		}
-
+		void CMainFrame::ShowWaveEditor()
+		{
+			m_machineBar.OnWavebut();
+		}
 		void CMainFrame::OnPsyhelp() 
 		{
 			CString helppath(Global::configuration().appPath().c_str());

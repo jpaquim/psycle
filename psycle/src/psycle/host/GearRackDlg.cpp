@@ -198,29 +198,12 @@ namespace psycle { namespace host {
 				tmac += MAX_BUSES;
 				//fallthrough
 			case 0:
-				Global::song().seqBus = tmac;
-				mainFrame->UpdateComboGen();
+				mainFrame->ChangeGen(tmac);
 				break;
 			case 2:
 				//fallthrough
 			case 3:
-				{
-					if (DisplayMode==2) {
-						Global::song().instSelected = Global::song().auxcolSelected=tmac;
-					}
-					else {
-						Global::song().waveSelected = Global::song().auxcolSelected=tmac;
-					}
-					CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
-					if (cc->GetCurSel() == AUX_INSTRUMENT) {
-						mainFrame->UpdateComboIns(false);
-					}
-					else {
-						cc->SetCurSel(AUX_INSTRUMENT);
-						mainFrame->UpdateComboIns(true);
-					}
-					mainFrame->UpdateInstrumentEditor();
-				}
+				mainFrame->ChangeAux(tmac);
 				break;
 			}
 		}
@@ -248,7 +231,6 @@ namespace psycle { namespace host {
 				break;
 			case 2:
 				{
-				Global::song().instSelected = Global::song().auxcolSelected=tmac;
 				cc->SetCurSel(AUX_INSTRUMENT);
 				mainFrame->LoadInst(tmac);
 				//LoadInst does a call to refresh the editors, which includes our editor.
@@ -256,7 +238,6 @@ namespace psycle { namespace host {
 				break;
 			}
 			case 3:
-				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
 				cc->SetCurSel(AUX_INSTRUMENT);
 				mainFrame->LoadWave(tmac);
 				//LoadWave does a call to refresh the editors, which includes our editor.
@@ -343,7 +324,6 @@ namespace psycle { namespace host {
 		void CGearRackDlg::OnProperties() 
 		{
 			int tmac = m_list.GetCurSel();
-			CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			switch (DisplayMode)
 			{
 			case 0:
@@ -371,20 +351,9 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				cc->SetCurSel(AUX_INSTRUMENT);
-				Global::song().instSelected = Global::song().auxcolSelected=tmac;
-				mainFrame->UpdateComboIns(true);
-				mainFrame->UpdateInstrumentEditor();
-				mainFrame->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
-				mainFrame->m_pWndWed->SetActiveWindow();
-				break;
+				//fallthrough
 			case 3:
-				cc->SetCurSel(AUX_INSTRUMENT);
-				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
-				mainFrame->UpdateComboIns(true);
-				mainFrame->UpdateInstrumentEditor();
-				mainFrame->m_pWndWed->ShowWindow(SW_SHOWNORMAL);
-				mainFrame->m_pWndWed->SetActiveWindow();
+				mainFrame->ShowWaveEditor();
 				break;
 			}
 			RedrawList();
@@ -395,7 +364,6 @@ namespace psycle { namespace host {
 			POINT point;
 			GetCursorPos(&point);
 			int tmac = m_list.GetCurSel();
-			CComboBox *cc=(CComboBox *)mainFrame->m_machineBar.GetDlgItem(IDC_AUXSELECT);
 			switch (DisplayMode)
 			{
 			case 0:
@@ -411,20 +379,9 @@ namespace psycle { namespace host {
 				}
 				break;
 			case 2:
-				cc->SetCurSel(AUX_INSTRUMENT);
-				Global::song().instSelected = Global::song().auxcolSelected=tmac;
-				mainFrame->UpdateComboIns(true);
-				mainFrame->UpdateInstrumentEditor();
-				mainFrame->ShowInstrumentEditor();
-				mainFrame->UpdateComboIns(true);
-				break;
+				//fallthrough
 			case 3:
-				cc->SetCurSel(AUX_INSTRUMENT);
-				Global::song().waveSelected = Global::song().auxcolSelected=tmac;
-				mainFrame->UpdateComboIns(true);
-				mainFrame->UpdateInstrumentEditor();
 				mainFrame->ShowInstrumentEditor();
-				mainFrame->UpdateComboIns(true);
 				break;
 			}
 			RedrawList();

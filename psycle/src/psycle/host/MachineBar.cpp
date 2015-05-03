@@ -393,28 +393,30 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::OnBIncAux() 
 	{
+		int target = m_pSong->auxcolSelected+1;
 		if (m_pSong->seqBus < MAX_MACHINES) {
+			//Automatically increase the samples/instruments vector when using increase button. Good for loading samples from toolbar.
 			Machine *tmac = m_pSong->_pMachine[m_pSong->seqBus];
 			if (tmac) {
 				if (tmac->_type == MACH_XMSAMPLER) {
-					if (Global::song().xminstruments.size() <= m_pSong->auxcolSelected+1) {
+					if (Global::song().xminstruments.size() <= target && target < MAX_INSTRUMENTS) {
 						XMInstrument inst;
 						inst.Init();
-						Global::song().xminstruments.SetInst(inst,m_pSong->auxcolSelected+1);
+						Global::song().xminstruments.SetInst(inst,target);
 						UpdateComboIns(true);
 					}
 				}
 				else if (tmac->_type == MACH_SAMPLER) {
-					if (Global::song().samples.size() <= m_pSong->auxcolSelected+1) {
+					if (Global::song().samples.size() <= target && target < MAX_INSTRUMENTS) {
 						XMInstrument::WaveData<> wave;
 						wave.Init();
-						Global::song().samples.SetSample(wave,m_pSong->auxcolSelected+1);
+						Global::song().samples.SetSample(wave,target);
 						UpdateComboIns(true);
 					}
 				}
 			}
-			ChangeAux(m_pSong->auxcolSelected+1);
 		}
+		ChangeAux(target);
 		((CButton*)GetDlgItem(IDC_B_INCWAV))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 	}
@@ -512,22 +514,7 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 
 	void MachineBar::OnSelchangeBarComboins() 
 	{
-		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
-			m_pSong->paramSelected=m_inscombo.GetCurSel();
-		} else {
-			if ( m_pSong->seqBus < MAX_BUSES && m_pSong->_pMachine[m_pSong->seqBus] != NULL
-				&& m_pSong->_pMachine[m_pSong->seqBus]->_type == MACH_XMSAMPLER) {
-					m_pSong->instSelected = m_inscombo.GetCurSel();
-			}
-			else {
-				m_pSong->waveSelected = m_inscombo.GetCurSel();
-			}
-			m_pParentMain->WaveEditorBackUpdate();
-			m_pParentMain->UpdateInstrumentEditor();
-			m_pParentMain->RedrawGearRackList();
-		}
-
-		m_pSong->auxcolSelected=m_inscombo.GetCurSel();
+		ChangeAux(m_inscombo.GetCurSel());
 	}
 
 	void MachineBar::OnCloseupBarComboins()
@@ -542,6 +529,14 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		m_pParentMain->UpdateInstrumentEditor();
 		m_pParentMain->WaveEditorBackUpdate();
 		m_pParentMain->RedrawGearRackList();
+		if ( m_auxcombo.GetCurSel() == AUX_INSTRUMENT ) {
+			int dummy = -1;
+			Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, dummy);
+			if (dummy == -1 && (tmac == NULL || tmac->_type == MACH_SAMPLER)) {
+				m_pSong->auxcolSelected = i;
+				m_inscombo.SetCurSel(m_pSong->auxcolSelected);
+			}
+		}
 	}
 	void MachineBar::ChangeIns(int i)
 	{
@@ -550,10 +545,17 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 		m_pSong->instSelected=i;
 		m_pParentMain->UpdateInstrumentEditor();
 		m_pParentMain->RedrawGearRackList();
+		if ( m_auxcombo.GetCurSel() == AUX_INSTRUMENT ) {
+			int dummy = -1;
+			Machine *tmac = m_pSong->GetMachineOfBus(m_pSong->seqBus, dummy);
+			if (dummy == -1 && tmac != NULL && tmac->_type == MACH_XMSAMPLER) {
+				m_pSong->auxcolSelected = i;
+				m_inscombo.SetCurSel(m_pSong->auxcolSelected);
+			}
+		}
 	}
 	void MachineBar::ChangeAux(int i)	// User Called (Hotkey, button or list change)
 	{
-		if ( m_inscombo.GetCurSel() == i) return;
 		if (i<0 || i >= m_inscombo.GetCount()) return;
 
 		if ( m_auxcombo.GetCurSel() == AUX_PARAMS ) {
@@ -633,12 +635,11 @@ IMPLEMENT_DYNAMIC(MachineBar, CDialogBar)
 			}
 			update=LoadInstrument(si, true);
 		}
-		
 		if (update){
 			UpdateComboIns();
 			m_pParentMain->m_wndStatusBar.SetWindowText("New wave loaded");
 			m_pParentMain->WaveEditorBackUpdate();
-			m_pParentMain->UpdateInstrumentEditor();
+			m_pParentMain->UpdateInstrumentEditor(true);
 			m_pParentMain->RedrawGearRackList();
 		}
 		((CButton*)GetDlgItem(IDC_LOADWAVE))->ModifyStyle(BS_DEFPUSHBUTTON, 0);

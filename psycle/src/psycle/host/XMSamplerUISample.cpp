@@ -215,33 +215,38 @@ void XMSamplerUISample::UpdateSampleInstrs()
 
 BOOL XMSamplerUISample::OnSetActive()
 {
-	WaveUpdate(Global::song().waveSelected != m_SampleList.GetCurSel());
-	m_Init=true;
+	if (m_Init) {
+		SetSample(Global::song().waveSelected);
+	}
+	else {
+		RefreshSampleList();
+		SetSample(Global::song().waveSelected);
+		m_Init=true;
+	}
 
 	return CPropertyPage::OnSetActive();
 }
 void XMSamplerUISample::WaveUpdate(bool force) 
 {
-	TRACE("XMSamplerUISample:waveup\n");
-	if (force) {
-		RefreshSampleList(-1);
+	if (m_Init) {
+		TRACE("XMSamplerUISample:waveup\n");
+		if (force) {
+			RefreshSampleList(-1);
+		}
+		else {
+			RefreshSampleList(Global::song().waveSelected);
+		}
+		SetSample(Global::song().waveSelected);
 	}
-	else {
-		RefreshSampleList(Global::song().waveSelected);
-	}
-	SetSample(Global::song().waveSelected);
 }
 void XMSamplerUISample::OnLbnSelchangeSamplelist()
 {
-	m_Init=false;
 	int i= m_SampleList.GetCurSel();
 	int prevsize=Global::song().samples.size();
 	CMainFrame* win = dynamic_cast<CMainFrame*>(AfxGetMainWnd());
-	Global::song().auxcolSelected=i;
 	win->ChangeWave(i);
 	//ChangeWave calls ours WaveUpdate()
 	win->UpdateComboIns(prevsize!=Global::song().samples.size());
-	m_Init=true;
 }
 
 void XMSamplerUISample::SetSample(int sample)
@@ -254,6 +259,7 @@ void XMSamplerUISample::SetSample(int sample)
 
 	XMInstrument::WaveData<>& wave = Global::song().samples.get(sample);
 	pWave(&wave);
+	m_SampleList.SetCurSel(sample);
 
 	RefreshSampleData();
 	UpdateSampleInstrs();
