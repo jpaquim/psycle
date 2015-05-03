@@ -10,16 +10,15 @@ Other from Microsoft RIFFNEW.pdf
 	class RiffWaveFmtChunk
 	{
 	public:
-        RiffWaveFmtChunk();
-        RiffWaveFmtChunk(const WaveFormat_Data& config);
-        virtual ~RiffWaveFmtChunk() {}
+		RiffWaveFmtChunk();
+		RiffWaveFmtChunk(const WaveFormat_Data& config);
+		virtual ~RiffWaveFmtChunk() {}
 
-    public:
-        static const IffChunkId fmt;
-        static const uint16_t FORMAT_PCM=1;
-        static const uint16_t FORMAT_FLOAT=3;
-        static const uint16_t FORMAT_EXTENSIBLE=0xFFFEU;
-		
+		static const IffChunkId fmt;
+        	static const uint16_t FORMAT_PCM;
+        	static const uint16_t FORMAT_FLOAT;
+        	static const uint16_t FORMAT_EXTENSIBLE;
+
 		static const std::size_t SIZEOF;
 
 		uint16_t wFormatTag;
@@ -36,12 +35,12 @@ Other from Microsoft RIFFNEW.pdf
 	};
 
 	//WAVEFORMAT_EXTENSIBLE
-	typedef struct {
+	struct SubFormatTag_t {
 		uint32_t data1;
 		uint16_t data2;
 		uint16_t data3;
 		char data4[8];
-	} SubFormatTag_t;
+	};
 
 	class RiffWaveFmtChunkExtensible : public RiffWaveFmtChunk
 	{
