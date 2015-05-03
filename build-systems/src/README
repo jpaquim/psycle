@@ -1,0 +1,5 @@
+The build-system/src/ directory doesn't contain any valuable source code,
+it just has private headers files that are used by the various build systems
+to tune global compiler settings and to support pre-compilation.
+
+The main "entry point", i.e. the header that's injected by the build systems is forced-include.private.hpp
