@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+
+<p class="head1">Using sampled sounds in Psycle with one of the internal machines</p>
+<p>
+Psycle is made around the concept of audio generators (machines), which usually
+generate audio by themselves depending on the settings.<br />
+But sometimes, recorded or sampled audio is desired, and Psycle offers two distinct machines
+that are able to play samples, the <a href="Sampler.htm">sampler machine</a>, and <a href="Sampulse.htm">Sampulse</a>.<br />
+Note: Soundfont samples (.sf2) are not supported. You can use the Fluidsynth native plugin, or 3rd party VST instruments for that.
+</p>
+<p>
+The Psycle Sampler is an Internal Machine that is easy to setup and use.
+It loads sampled sounds (.wav, .aiff, .iff/svx, .s3i and .its), defines automatically an instrument
+to which some basic envelopes and loops can be added, and is played straight in the
+pattern.<br />
+It offers just a few pattern commands and it doesn't have any per-channel setup.<br />
+</p>
+<p>The Sampulse sampler is an advanced sampler, which incorporates most of the features and commands
+of the classic trackers of the 90's, such as volume, pan, pitch and filter envelopes,
+per-channel volume and panning, surround, and most of the commands like
+volume slides, pitch slides, pan slides, retrig, arpeggio...<br />
+It is a bit more difficult to configure, because instruments need to be told which wave sample they play,
+(since it is possible that a single instrument uses more than one sample),
+and adds support for .xi and .iti instrument format, plus Psycle's own one, .psins.
+</p>
+<p>
+Notes are entered in the <a href="PatternEditor.htm">Pattern Editor</a> just like with 
+other machines, but the auxiliary column is used to indicate the instrument to play.
+These samples can also be edited in the Wave Editor (see below).
+</p>
+<a href="Sampler_Instruments.htm">Instruments</a>
+<br />
+<a href="InstrumentEditor_Sampler.htm">Sampler Instrument Editor</a>
+<br />
+<a href="InstrumentEditor_Sampulse.htm">Sampulse Instrument Editor</a>
+<br />
+<a href="InstrumentEditor_Waves.htm">Wave data</a>
+<br />
+<a href="Sampler_WaveEditor.htm">The Wave Editor</a>
+<br />
+<a href="Sampler_Using.htm">Using the Sampler in Patterns</a>
+<br />
+<a href="Sampler_Using_Virtual.htm">Using Virtual generators for sampled instruments</a>
+<br />
+<a href="Sampler.htm">Sampler Properties</a>
+<br />
+
+
+</body>
+</html>

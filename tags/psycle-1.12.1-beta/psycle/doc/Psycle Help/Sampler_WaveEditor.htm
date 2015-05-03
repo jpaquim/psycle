@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="InstrumentEditor_Waves.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_Using.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+<p class="head2">Wave Editor</p>
+
+To access the wave editor, make sure your instrument is selected in the
+machine bar, then click on the
+<a href="Sampler_Instruments.htm#settings">Wave Editor</a>
+button, or from the Samples bank in the instrument editor
+<p><img src="wave_editor.png" border="0" alt="" /></p>
+<p><a name="Loop"> To add Loop points</a>, hold Ctrl and left click
+on the waveform to set the loop starting point, and hold Ctrl and right
+click to set the loop end point. To add sustain loop points, hold Shift and left
+click on the waveform to set the loop starting point, and hold Shift and right
+click to set the loop end point.<br />
+ To turn loop points on and off, use the
+<a href="InstrumentEditor_Waves.htm">Instrument Editor</a>.</p>
+<p class="head1"><a name="menufunctions">Menu Functions</a></p>
+<p class="head3">Process</p>
+<b>Amplify Selection...</b> &ndash; Opens a dialogue box with a slider
+that allows you to modify the selection's volume.
+<p><b>Fade In/Out</b> &ndash; Fades the selection in/out.</p>
+<p><b>Insert Silence..</b> &ndash; Adds an user specified amount of
+silence at the beginning, the end or at cursor position.</p>
+<p><b>Normalize</b> &ndash; Amplifies the selection to the maximum
+possible without clipping.</p>
+<p><b>Remove DC</b> &ndash; Removes any offset from the centre
+(remove DC bias).</p>
+<p><b>Reverse</b> &ndash; Reverses the sample.</p>
+<p class="head3">Edit</p>
+<b>Select All</b> &ndash; Selects the whole waveform.
+<p><b>Cut</b> &ndash; Cuts the selection to the internal clipboard</p>
+<p><b>Crop</b> &ndash; Removes everything outside the selection.</p>
+<p><b>Copy</b> &ndash; Copies the selection to the</p>
+<p><b>Paste</b> &ndash; Pastes the waveform from the internal
+clipboard. The different methods allow to add, replace, mix or add while crossfading.</p>
+<p><b>Delete</b> &ndash; Deletes the selection.</p>
+<p><b>Snap to zero</b> &ndash; Puts the cursor only in samples that are
+at the value of zero-crossing (i.e. the middle).</p>
+<p class="head3">View</p>
+<b>Zoom In/Out</b> &ndash; Scales the view down/up. You can also use the buttons and the slider on the bottom right side 
+of the editor window.
+<p><b>Zoom Selection</b> &ndash; Scales the view to fit the current
+selection.</p>
+<p><b>Show All</b> &ndash; Scales the view to show the whole sample.</p>
+<p><b>Visual representation</b> &ndash; Changes the way the waveform is drawn.
+They use the same algorithms than the sampler. Not reconstructed can help to see the
+wave points, and Reconstructed is the most accurate representation.</p>
+<p class="head3">Convert</p>
+<b>Convert to mono</b> &ndash; Converts a stereo sample to mono by
+mixing the left and right channels and reducing the volume.
+<p class="head1"><a name="menufunctions">Toolbar buttons</a></p>
+<p><b>Play from start</b> &ndash; Plays the sample from the start, ignoring the cursor position</p>
+<p><b>Play from cursor</b> &ndash; Plays the sample starting at the cursor positiont</p>
+<p><b>Release note (stop sustain loop)</b> &ndash; When playing and if the sample has a sustain loop, pressing this button will act as a note off (release)</p>
+<p><b>Stop note</b> &ndash; When playing, this button stops it immediately</p>
+<p><b>Move cursor to start/loop</b> &ndash; This button moves the cursor to the left. If the sample has any type of loop, it will also stop on the loop points.</p>
+<p><b>Move cursor to end/loop</b> &ndash; This button moves the cursor to the right. If the sample has any type of loop, it will also stop on the loop points.</p>
+<p><b>Load sample</b> &ndash; Opens the load dialog to load a sample in this position.</p>
+<p><b>Save sample</b> &ndash; Opens the save dialog to save this sample to disk.</p>
+<p><b>Droplist and arrows</b> &ndash; Allows to select the sample that the editor shows. This droplist doesn't show all the positions, so if you want to add a new position, use the right arrow to increase the list entries.</p>
+
+<p class="head1"><a name="menufunctions">Status bar</a></p>
+<p><b>Volume bar</b> &ndash; The blue bar on the bottom left allows to adjust the playback volume. It is set by default to the sample global volume.</p>
+<p><b>Scroll bar</b> &ndash; The center scroll bar allows to move the visualization.</p>
+<p><b>Zoom bar</b> &ndash; The two buttons and small bar on the right is the zomm bar, to increase or decrease the zoom ratio.</p>
+
+<p class="head1"><a name="menufunctions">Popup menu</a></p>
+<p><img src="waveed_popup.png" border="0" alt="" /></p>
+<p><b>Zoom to selection</b> &ndash; Zoom so that what is selected fills the whole window.</p>
+<p><b>Zoom in</b> &ndash; Increase the zoom.</p>
+<p><b>Zoom out</b> &ndash; Decrease the zoom.</p>
+<p><b>Cut/Copy/Paste</b> &ndash; Copy and paste operations.</p>
+<p><b>Delete</b> &ndash; Remove the selected portion.</p>
+<p><b>Set loop to selection</b> &ndash; Create a new loop that corresponds to the selected region.</p>
+<p><b>Set sustain to selection</b> &ndash; Create a new sustain loop that corresponds to the selected region.</p>
+<p><b>Unset loop</b> &ndash; Remove the loop.</p>
+<p><b>Unset sustaion loop</b> &ndash; Remove the sustain loop.</p>
+
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="InstrumentEditor_Waves.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler_Using.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,182 @@
+//////////////////////////////////////////////////////////////////////////////
+//
+//	New Machine API suggestion
+//
+//	by Druttis
+//
+//
+//
+//	Requirements :
+//
+//	1) Being able to develope effects, synths/samplers & sequencers plugins
+//	   also being able to combine all three or parts only.
+//	2) Being able to make plugins with custom GUI
+//	3) Being able to combine
+//
+//
+//
+//	TODO: GUI stuf, gonna refresh my MFC skills a bit first
+//
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	MachineInterfaceV2
+//
+//////////////////////////////////////////////////////////////////////////////
+class MachineInterfaceV2
+{
+public:
+	//	Constructor ( Keep it empty constructor )
+	MachineInterfaceV2() {}
+
+	//	Destructor ( Keep it empty destructor )
+	virtual ~MachineInterfaceV2() {}
+
+	//	Invoked when the DLL is loaded (one time only)
+	//	Initialize static stuf here
+	virtual void OnLoad();
+
+	//	Invoked when the DLL is unloaded (one time only)
+	//	Destroy static stuf here
+	virtual void OnUnload();
+
+	//	Invoked after the machine have been instantiated
+	virtual void Init();
+
+	//	Invoked before the machine have been deleted
+	virtual void Destroy();
+
+	//	Returns the number of parameters
+	virtual int GetNumParameters();
+
+	//	Appends the parameter name of a specific parameter id
+	//	into a char array
+	virtual void GetParameterName(char *txt, int id);
+
+	//	Returns the maximum value of a specific parameter id
+	virtual void GetMaxParameterValue(int id);
+
+	//	Returns the minimum value of a specific parameter id
+	virtual void GetMinParameterValue(int id);
+
+	//	Returns the default value of a specific parameter id
+	virtual void GetDefaultParameterValue(int id);
+
+	//	Appends the parameter value of a specific parameter id
+	//	as a string into a char array
+	virtual void GetParameterValueAsString(char *txt, int id);
+
+	//	Sets the value of a specific parameter id
+	virtual void SetParameterValue(int id, int value);
+
+	//	Invoked when to play (Mostly sequencers find this useful)
+	virtual void Play();
+
+	//	Invoked when to stop playing (Mostly synths & sequencers find this useful)
+	virtual void Stop();
+
+	//	Ticks each tracker line
+	//	track =-1 (this call does not apply to any note at all, just ticking)
+	virtual void Tick(int track, int note, int inst, int cmd, int val);
+
+	//	Generates/Processes sounds
+	virtual void Work(float *psamplesleft, float *psamplesright, int numsamples, int numtracks);
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	Accessable Sample struct
+//
+//////////////////////////////////////////////////////////////////////////////
+
+typedef struct sample_t
+{
+	float	*psamplesleft;
+	float	*psamplesright;
+	int		numsamples;
+	int		samplingrate;
+	// etc..
+	void	*reserved;	// Whenever the sample struct is to be extended
+						// point to the extended data instead. that makes
+						// it possible have the machines version independent
+}
+Sample;
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	Accessable Tracker line struct
+//
+//////////////////////////////////////////////////////////////////////////////
+
+typedef struct line_t
+{
+	int		note;
+	int		inst;
+	int		cmd;
+	int		val;
+	void	*reserved;	// (see Sample.reserved)
+}
+Line;
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//	HostCallbackV2
+//
+//////////////////////////////////////////////////////////////////////////////
+
+class HostCallbackV2
+{
+public:
+
+	virtual BOOL GetSample(int index, Sample *psample); // Note *1
+
+	virtual	int	GetSamplingRate();
+
+	virtual int GetTickLength();
+
+	virtual int GetTicksRemaining();
+
+	virtual int GetBPM();
+
+	virtual int GetTicksPerBeat();
+
+	virtual int GetSongLength();
+
+	virtual int GetSongPosition();
+
+	virtual int GetPatternNumber(int songPosition);
+
+	virtual int GetPatternLength(int patternNumber);
+
+	virtual int GetNumTracks(int patternNumber);
+
+	virtual int GetLineNumber();
+
+	virtual BOOL GetLine(int trackNumber, int lineNumber, Line *pline);
+
+	virtual void Notify(int machineNumber, int type, int argc, int *argv);
+};
+
+//
+// NOTE *1 :
+//
+//	Player should do this
+//	1) LOCK
+//	2) Do the tick calc thing etc
+//	3) Invoke machines
+//	4) UNLOCK
+//
+//	Host should do this when deleting a sample
+//	1) LOCK
+//	2) Delete the sample
+//	3) UNLOCK
+//
+//	Host should do this when loading a sample
+//	1) Load sample
+//	2) LOCK
+//	3) Add sample to sample list
+//	4) UNLOCK
+//
+//	In worst cases the player will be locked when loading, can be fixed with a mute
+//	flag

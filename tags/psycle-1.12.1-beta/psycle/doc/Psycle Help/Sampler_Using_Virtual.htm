@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="StyleSheet" href="psycle.css" type="text/css" media="screen" />
+</head>
+<body>
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_Using.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+<p class="head2">Using virtual Generators for instruments</p>
+<p>Psycle is made around the idea of machines, either generators or effects. They are the elements present in the machine view, and their index number is needed when adding notes in the patterns<br />
+When using sampled instruments, they always need a machine to be played, and this makes using sampled instruments a bit different than using other generators, because the pattern needs more information.<br />
+To simplify this, and be able to use instruments as a generator in the patterns, Virtual Generators were added.</p>
+<p>Virtual generators can be configured in the <a href="InstrumentEditor_Sampler.htm">instrument editor</a><p>
+<p><img src="virtual_sampler.png" border="0" alt="" /></p>
+<p>or <a href="InstrumentEditor_Sampulse.htm">the Sampulse version</a></p>
+<p><img src="virtual_sampulse.png" border="0" alt="" /></p>
+<p>Virtual Generators have an index number from 81 to FE, and this index is associated to a pair of "Sampled instrument" and "Machine index". In essence, a Virtual generator is an alias for a sampler number and instrument number.</p>
+<p>But a Virtual generator is not only an easier way to use a sampled instrument. It also offers another great feature: a volume column.<br />
+Since the auxiliary column remains unused with a virtual generator (because the instrument index is already known), it is possible now to add
+a command here that will get translated as the 0Cxx command if the machine is a sampler, or as the 1Exx command, if the machine is Sampulse.</p>
+<p>So, if 80 is mapped to Sampulse 00 and instrument 01 then, the command on the left is the same than the one on the right</p>
+<table>
+<tr><td width="120px"><code>C-4 25 80 ....</code></td><td width="120px"><code>C-4 01 00 1E25</code></td></tr>
+</table>
+<p class="head3">Exchanging virtual generators</p>
+<p>One good point of using virtual instruments is that this way it is easy to change which sampler machine it uses for output, or even have two virtual generators to use the same instrument with different samplers (which could have different routes for their wires)</p>
+<p>On the other hand, it is not as easy to replace a sampled instrument by another generator, because virtual generator numbers are not selectable from the Gear rack</p>
+<p>In order to help on this, the <a href="PatternEd_Functions.htm">search and replace</a> option has been improved and searches can replace multiple fields at a time.<br /> It should also be possible to change from virtual instrument to sampler as well. </p>
+
+<table width="100%">
+	<col width="50%" />
+	<tr>
+		<td><a href="Sampler_Using.htm"><img
+			src="arrow_side_invert_L.gif" border="0" alt="Previous" /></a></td>
+		<td align="right"><a href="Sampler.htm"><img
+			src="arrow_side_invert_R.gif" border="0" alt="Next" /></a></td>
+	</tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+body {
+	font-family:sans-serif,Arial;
+	font-size: 10pt;
+	background-image: url("psyclewatermark2.bmp");
+	background-color: white;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-attachment: fixed;
+}
+P.head1 { 
+	font-weight: bold;
+	font-size: 16pt;
+	text-align: center;
+	text-decoration: underline;
+}
+P.head2 { 
+	font-weight: bold;
+	font-size: 14pt;
+	text-align: center;
+}
+P.head3 { 
+	font-weight: bold;
+	font-style: italic;
+	font-size: 10pt;
+	text-align: left;
+	text-decoration: underline;
+}
+P.under {
+	font-size: 11pt;
+	text-align: center;
+	color: #666666;
+}
+A:link, A:visited, A:active {
+	text-decoration: none;
+	color: #062498;
+	font-weight: bold;
+}
+li {
+	padding-bottom: 10px;
+}
+.bugfix {
+	font-weight: bold;
+	color: red;
+}
+.addition {
+	font-weight: bold;
+	color:#078d1b
+}
+.change {
+	font-weight: bold;
+	color: blue;
+}
+.versions {
+	border-style: solid;
+	border-width: thin;
+	border-color: black;
+}
+.versions td {
+	border-top-style: solid;
+	border-width: thin;
+	border-color: black;
+}
+th {
+	background-color: buttonface;
+	border-style: solid;
+	border-width: thin;
+	border-color: black;
+}
