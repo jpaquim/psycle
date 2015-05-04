@@ -2,7 +2,7 @@
 
 set -x &&
 
-cd $(dirname $0)/../.. &&
+cd $(dirname $0) &&
 
 # where everything is going to be built/installed
 dest=/tmp/freepsycle-random-notes-test &&
