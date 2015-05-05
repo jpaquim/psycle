@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-# copyright 2009-2011 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
+# copyright 2009-2015 members of the psycle project http://psycle.sourceforge.net ; johan boule <bohan@jabber.org>
 
 
 ##############################################################################
@@ -15,8 +15,16 @@ if __name__ == '__main__':
 	import sys, os
 	dir = os.path.dirname(__file__)
 	sys.argv.append('--src-dir=' + dir)
-	from wonderbuild.main import main
-	main()
+	try: from wonderbuild.main import main
+	except ImportError:
+		dir = os.path.abspath(os.path.join(dir, os.pardir, os.pardir, 'external-packages', 'wonderbuild'))
+		if dir not in sys.path: sys.path.append(dir)
+		try: from wonderbuild.main import main
+		except ImportError:
+			print >> sys.stderr, 'could not import wonderbuild module with path', sys.path
+			sys.exit(1)
+		else: main()
+	else: main()
 
 else:
 	from wonderbuild.script import ScriptTask, ScriptLoaderTask
@@ -25,11 +33,7 @@ else:
 		def __call__(self, sched_ctx):
 			tasks = [
 				ScriptLoaderTask.shared(self.project, self.src_dir.parent.parent / dir) \
-				for dir in (
-					'universalis',
-					'psycle-helpers',
-					'psycle-core',
-					'psycle-audiodrivers',
+				for dir in ( # Note that there's no need to list dependencies (e.g. psycle-core, psycle-helpers etc) since those are pulled automatically
 					'psycle-player',
 					'psycle-plugins'
 				)
