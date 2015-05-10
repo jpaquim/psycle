@@ -157,7 +157,11 @@
 #elif defined _sun
 	#define DIVERSALIS__OS
 	#define DIVERSALIS__OS__UNIX
-	#define DIVERSALIS__OS__SOLARIS
+	#if defined __SVR4
+		#define DIVERSALIS__OS__SOLARIS
+	#else
+		#define DIVERSALIS__OS__SUNOS // ancient system!
+	#endif
 
 ////////////
 // ibm aix
