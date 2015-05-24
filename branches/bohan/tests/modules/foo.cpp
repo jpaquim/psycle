@@ -1,5 +1,5 @@
-import bar;
+#include "foo.hpp"
 
-int foo(int i) {
-	return bar(i);
+int foo::compute(int i) {
+	return bar_.compute(i);
 }
