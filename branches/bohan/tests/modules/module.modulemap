@@ -1,0 +1,9 @@
+module foo {
+	header "foo.hpp"
+	link "foo"
+}
+
+module bar {
+	header "bar.hpp"
+	link "bar"
+}
