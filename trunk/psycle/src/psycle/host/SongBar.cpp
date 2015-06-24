@@ -122,6 +122,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	void SongBar::OnDecTPB()
 	{
 		SetAppSongTpb(-1);
+		SetAppSongBpm(0);
 		((CButton*)GetDlgItem(IDC_DEC_TPB))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 		m_pWndView->Repaint();
@@ -130,6 +131,7 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 	void SongBar::OnIncTPB()
 	{
 		SetAppSongTpb(+1);
+		SetAppSongBpm(0);
 		((CButton*)GetDlgItem(IDC_INC_TPB))->ModifyStyle(BS_DEFPUSHBUTTON, 0);
 		m_pWndView->SetFocus();
 		m_pWndView->Repaint();
@@ -148,26 +150,10 @@ IMPLEMENT_DYNAMIC(SongBar, CDialogBar)
 			m_pParentMain->UpdatePlayOrder(false);
 		}
 		if (Global::player()._playing ) {
-			if (Global::player().ExtraTicks() != 0) {
-				sprintf(buffer,"%d (%d)",Global::player().bpm,Global::player().RealBPM());
-			}
-			else {
-				sprintf(buffer,"%d",Global::player().bpm);
-			}
+			sprintf(buffer,"%d (%.02f)",Global::player().bpm,Global::player().EffectiveBPM());
 		}
 		else {
-			if (Global::song().ExtraTicksPerLine() != 0) {
-				int bpm,tpb,extra,lpb;
-				bpm=Global::song().BeatsPerMin();
-				tpb=Global::song().TicksPerBeat();
-				lpb=Global::song().LinesPerBeat();
-				extra=Global::song().ExtraTicksPerLine();
-				int realbpm = (bpm*tpb)/static_cast<float>(extra*lpb+tpb);
-				sprintf(buffer,"%d (%d)",Global::song().BeatsPerMin(),realbpm);
-			}
-			else {
-				sprintf(buffer,"%d",Global::song().BeatsPerMin());
-			}
+			sprintf(buffer,"%d (%.02f)",Global::song().BeatsPerMin(),Global::song().EffectiveBPM(Global::player().SampleRate()));
 		}
 		m_bpmlabel.SetWindowText(buffer);
 	}

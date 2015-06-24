@@ -409,7 +409,7 @@ int getlength() { return global_.player().CalcOrSeek(global_.song()); }
 int getoutputtime() { return mod.outMod->GetOutputTime(); }
 void setoutputtime(int time_in_ms)
 {
-	global_.player().CalcOrSeek(global_.song(),-1,-1,time_in_ms);
+	global_.player().SeekToPosition(global_.song(),time_in_ms);
 	mod.outMod->Flush(time_in_ms);
 }
 

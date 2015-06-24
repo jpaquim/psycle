@@ -47,13 +47,13 @@ namespace psycle
 
 			///\name Amplitude Envelope overview:
 			///\{
-			/// Attack Time [in Samples at 44.1Khz]
+			/// Attack Time [in Samples at 44.1Khz, independently of the real samplerate]
 			int ENV_AT;	
-			/// Decay Time [in Samples at 44.1Khz]
+			/// Decay Time [in Samples at 44.1Khz, independently of the real samplerate]
 			int ENV_DT;	
 			/// Sustain Level [in %]
 			int ENV_SL;	
-			/// Release Time [in Samples at 44.1Khz]
+			/// Release Time [in Samples at 44.1Khz, independently of the real samplerate]
 			int ENV_RT;	
 			///\}
 			

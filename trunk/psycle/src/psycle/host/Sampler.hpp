@@ -65,6 +65,7 @@ namespace psycle
 		class Envelope
 		{
 		public:
+			Envelope() : sratefactor(1.f) {}
 			inline void TickEnvelope(int decaysamples);
 			void UpdateSRate(float samplerate) {
 				sratefactor = 44100.0f/samplerate;

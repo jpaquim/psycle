@@ -39,9 +39,12 @@ namespace psycle
 		public:
 			/// Function to encapsulate the three functions above.
 			void ExecuteLine();
-			/// Calculates duration (of song or of sequence until position and line), or seeks to time.
-			/// returns number of milliseconds. seektime_ms is in milliseconds too
-			int CalcOrSeek(psycle::host::Song& song, int seqPos=-1, int patLine=-1, int seektime_ms = -1,bool allowLoop=false);
+			/// Calculates position (by line or by time) and returns the samples and the time to that position.
+			/// if all are -1, then it returns total time.
+			int Player::CalcPosition(Song& song, int &inoutseqPos, int& inoutpatLine, int &inoutseektime_ms, int& inoutlinecount, bool allowLoop=false);
+			/// seeks to a position seektime_ms  in milliseconds
+			void SeekToPosition(psycle::host::Song& song, int seektime_ms = -1,bool allowLoop=false);
+			void CalculatePPQforVst();
 			/// Indicates if the playback has moved to a new line. Used for GUI updating.
 			bool _lineChanged;
 			/// Contains the number of samples until a line change comes in.
@@ -63,6 +66,8 @@ namespace psycle
 			int _playTimem;
 			/// the amount of samples elapsed since start to play (this is for the VstHost)
 			double sampleCount;
+			int runninglineCount;
+
 			/// the offset of the machine work()/midi InjectMIDI() call versus this player Work() call.
 			double sampleOffset;
 			/// the current beats per minute at which to play the song.
@@ -108,10 +113,13 @@ namespace psycle
 
 			/// Sets the number of samples that it takes for each row of the pattern to be played
 			void SamplesPerRow(const int samplePerRow) {m_SamplesPerRow = samplePerRow;}
-			int SamplesPerRow() const { return m_SamplesPerRow; }
+			float SamplesPerRow() const { return m_SamplesPerRow; }
 			/// Samples per (tracker) tick.
-			int SamplesPerTick() const { return m_SamplesPerTick; }
+			float SamplesPerTick() const { return m_SamplesPerTick; }
 			int ExtraTicks() const { return m_extraTicks; }
+			//For VST (due to rounding in samples per line, it is not exact)
+			double EffectiveBPM() const;
+			//For display, related to "extraticks".
 			int RealBPM() const;
 			int RealTPB() const;
 
@@ -151,6 +159,7 @@ namespace psycle
 			/// samples per row. (Number of samples that are produced for each line(row) of pattern)
 			/// This is computed from  BeatsPerMin(), LinesPerBeat() and SamplesPerSecond, plus the extra ticks.
 			int m_SamplesPerRow;
+
 			int m_SampleRate;
 			int m_extraTicks; // Patch for tracker mods. It is a replacement for the speed command with a partially different meaning.
 			short _patternjump;

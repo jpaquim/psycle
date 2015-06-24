@@ -15,8 +15,8 @@ CMachineParameter const paraDelay = {"Delay time","Delay time",0,88200,MPF_STATE
 CMachineParameter const paraFeedback = {"Feedback","Feedback",0,256,MPF_STATE,128};
 CMachineParameter const paraDry = {"Dry","Dry",0,256,MPF_STATE,256};
 CMachineParameter const paraWet = {"Wet","Wet",0,256,MPF_STATE,128};
-CMachineParameter const paraTickmode = {"Tick mode","Tick mode",0,1,MPF_STATE,0};
-CMachineParameter const paraTicktweak = {"Ticks","Ticks",0,8,MPF_STATE,3};
+CMachineParameter const paraTickmode = {"Lines mode","Lines mode",0,1,MPF_STATE,0};
+CMachineParameter const paraTicktweak = {"Lines","Lines",0,8,MPF_STATE,3};
 
 CMachineParameter const *pParameters[] = {
 	&paraDelay,

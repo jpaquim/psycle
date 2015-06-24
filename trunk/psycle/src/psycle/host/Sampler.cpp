@@ -371,11 +371,11 @@ namespace psycle
 						// delayed {
 							if ((ite->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF) {
 								//This means there is always 6 ticks per row whatever number of rows.
-								_triggerNoteOff = (Global::player().SamplesPerRow()/6)*(ite->_parameter & 0x0f);
+								_triggerNoteOff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
 							}
 							else if ((ite->_parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEDELAY && (ite->_parameter & 0x0f) != 0) {
 								//This means there is always 6 ticks per row whatever number of rows.
-								_triggerNoteDelay = (Global::player().SamplesPerRow()/6)*(ite->_parameter & 0x0f);
+								_triggerNoteDelay = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
 							}
 						// }
 						} break;
@@ -412,7 +412,7 @@ namespace psycle
 				// Init Amplitude Envelope
 				//
 				_envelope._sustain = static_cast<float>(inst->ENV_SL)*0.01f;
-				_envelope._step = (1.0f/inst->ENV_AT)*(44100.0f/Global::player().SampleRate());
+				_envelope._step = (1.0f/inst->ENV_AT)*_envelope.sratefactor;
 				_envelope._value = 0.0f;
 				controller._lVolCurr = controller._lVolDest;
 				controller._rVolCurr = controller._rVolDest;
@@ -434,7 +434,7 @@ namespace psycle
 				_filter.Type(inst->ENV_F_TP);
 				_coModify = static_cast<float>(inst->ENV_F_EA);
 				_filterEnv._sustain = value_mapper::map_128_1(inst->ENV_F_SL);
-				_filterEnv._step = (1.0f/inst->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
+				_filterEnv._step = (1.0f/inst->ENV_F_AT)*_envelope.sratefactor;
 				_filterEnv._value = 0;
 
 				if (_triggerNoteDelay == 0) {
@@ -616,8 +616,8 @@ namespace psycle
 						effretTicks--;
 						_triggerNoteDelay = _sampleCounter+ effVal;
 
-						_envelope._step = (1.0f/inst->ENV_AT)*(44100.0f/Global::player().SampleRate());
-						_filterEnv._step = (1.0f/inst->ENV_F_AT)*(44100.0f/Global::player().SampleRate());
+						_envelope._step = (1.0f/inst->ENV_AT)*_envelope.sratefactor;
+						_filterEnv._step = (1.0f/inst->ENV_F_AT)*_envelope.sratefactor;
 						controller._pos.QuadPart = 0;
 						if ( effretMode == 1 )
 						{
@@ -705,8 +705,8 @@ namespace psycle
 			{
 				_envelope._stage = ENV_RELEASE;
 				_filterEnv._stage = ENV_RELEASE;
-				_envelope._step = (_envelope._value/inst->ENV_RT)*(44100.0f/Global::player().SampleRate());
-				_filterEnv._step = (_filterEnv._value/inst->ENV_F_RT)*(44100.0f/Global::player().SampleRate());
+				_envelope._step = (_envelope._value/inst->ENV_RT)*_envelope.sratefactor;
+				_filterEnv._step = (_filterEnv._value/inst->ENV_F_RT)*_envelope.sratefactor;
 			}
 			_triggerNoteDelay = 0;
 			_triggerNoteOff = 0;
