@@ -2415,7 +2415,7 @@ namespace psycle
 			SampleCounter(0);
 			m_TickCount=0;
 
-			NextSampleTick(Global::player().SamplesPerTick()+1);// +1 is to avoid one Tick too much at the end, because samplesPerTick is rounded down.
+			NextSampleTick(Global::player().SamplesPerTick());
 
 			for (int channel=0;channel<MAX_TRACKS;channel++)
 			{

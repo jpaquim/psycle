@@ -708,7 +708,12 @@ IMPLEMENT_DYNAMIC(SequenceBar, CDialogBar)
 	{
 
 		char buffer[64];
-		int songLength = Global::player().CalcOrSeek(*m_pSong)/1000;
+		int seq=-1;
+		int pos=-1;
+		int time=-1;
+		int linecountloc=-1;
+		Global::player().CalcPosition(*m_pSong,seq,pos,time, linecountloc);
+		int songLength = time/1000;
 
 		sprintf(buffer, "%02d:%02d", ((int)songLength) / 60, ((int)songLength) % 60);
 		m_duration.SetWindowText(buffer);

@@ -819,7 +819,7 @@ namespace seib {
 
 			lBlockSize = 1024;
 			vstTimeInfo.samplePos = 0.0;
-			vstTimeInfo.sampleRate = 44100.;
+			vstTimeInfo.sampleRate = 44100.0;
 			vstTimeInfo.nanoSeconds = 0.0;
 			vstTimeInfo.ppqPos = 0.0;
 			vstTimeInfo.tempo = 120.0;
@@ -960,8 +960,10 @@ namespace seib {
 
 			const double seconds = vstTimeInfo.samplePos / vstTimeInfo.sampleRate;
 			//ppqPos	(sample pos in 1ppq units)
-			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask && kVstClockValid))
+			if((lMask & kVstPpqPosValid) || (lMask & kVstBarsValid) || (lMask & kVstClockValid))
 			{
+				//Warning: all this assumes constant tempo.
+
 				vstTimeInfo.flags |= kVstPpqPosValid;
 				const double beatpos = seconds * vstTimeInfo.tempo / 60.0;
 				vstTimeInfo.ppqPos = beatpos * 4.0 / static_cast<double>(vstTimeInfo.timeSigDenominator);
@@ -982,7 +984,7 @@ namespace seib {
 					vstTimeInfo.flags |= kVstClockValid;
 				}
 			}
-			//smpteOffset
+			//smpteOffset. This is probably wrong.
 			if(lMask & kVstSmpteValid)
 			{
 				//	24 fps ,  25 fps,	29.97 fps,	30 fps,	29.97 drop, 30 drop , Film 16mm ,  Film 35mm , none, none,

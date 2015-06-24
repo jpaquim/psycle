@@ -63,6 +63,20 @@ namespace psycle
 				//	cyclestart // locator positions in quarter notes.
 				//	cycleend   // locator positions in quarter notes.
 
+				//overriding this to better reflect the real state when bpm changes.
+				if (lMask&(kVstPpqPosValid|kVstBarsValid|kVstClockValid)) {
+					//ppqpos and barstart are automatically calculated.
+					//samplestoNextClock, how many samples from the current position to the next clock, (24ppq precision, i.e. 1/24 beat ) (actually, to the nearest. previous-> negative value)
+					if(lMask & kVstClockValid)
+					{
+						//Should be "round" instead of cast+1, but this is good enough.
+						const double ppqclockpos = static_cast<VstInt32>(vstTimeInfo.ppqPos*24.0)+1;					// Get the next clock in 24ppqs
+						const double sampleclockpos = ppqclockpos * 60.L * vstTimeInfo.sampleRate / vstTimeInfo.tempo;	// convert to samples
+						vstTimeInfo.samplesToNextClock = sampleclockpos - vstTimeInfo.samplePos;									// get the difference.
+						vstTimeInfo.flags |= kVstClockValid;
+					}
+				}
+				lMask&=~(kVstPpqPosValid|kVstBarsValid|kVstClockValid);
 				CVSTHost::CalcTimeInfo(lMask);
 			}
 

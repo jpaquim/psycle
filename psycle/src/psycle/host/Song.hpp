@@ -309,6 +309,16 @@ namespace psycle
 			int SongTracks() const {return SONGTRACKS;}
 			void SongTracks(const int value){ SONGTRACKS = value;}
 
+			//This one is because we truncate samples per line
+			double EffectiveBPM(int samplerate) const
+			{
+				float ticksperline = static_cast<float>(TicksPerBeat())/LinesPerBeat();
+				float sptfloat = (samplerate*60.f)/(static_cast<float>(BeatsPerMin())*TicksPerBeat());
+				int spr = static_cast<int>(sptfloat*(ExtraTicksPerLine()+ticksperline));
+				double effbpm = (static_cast<double>(samplerate)*60.0)/
+					(static_cast<double>(spr)*static_cast<double>(LinesPerBeat()));
+				return effbpm;
+			}
 			int BeatsPerMin() const {return m_BeatsPerMin;}
 			void BeatsPerMin(const int value)
 			{ 
