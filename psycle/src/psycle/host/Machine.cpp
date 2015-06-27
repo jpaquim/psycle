@@ -25,6 +25,7 @@
 #include "VstHost24.hpp"
 #include "LuaHost.hpp"
 #include "LuaPlugin.hpp"
+#include "ladspahost.hpp"
 
 #include <universalis/os/aligned_alloc.hpp>
 #include <psycle/helpers/value_mapper.hpp>
@@ -922,10 +923,9 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 			// assume version 0 for now
 			bool bDeleted(false);
 			Machine* pMachine;
-			MachineType type;//,oldtype;
+			MachineType type;
 			char dllName[256];
 			pFile->Read(&type,sizeof(type));
-			//oldtype=type;
 			pFile->ReadString(dllName,256);
 			switch (type)
 			{
@@ -974,7 +974,54 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 					else pMachine = new Dummy(index);
 				}
 				break;
-				case MACH_LUA:
+			case MACH_LADSPA:
+				{
+					if(fullopen)
+					{
+						std::string sPath;
+						int shellIdx=0;
+						if(!Global::machineload().lookupDllName(dllName,sPath,MACH_LADSPA,shellIdx)) 
+						{
+							// Check Compatibility Table.
+							// Probably could be done with the dllNames lookup.
+							//GetCompatible(psFileName,sPath2) // If no one found, it will return a null string.
+							sPath = dllName;
+						}
+						if(Global::machineload().TestFilename(sPath,shellIdx))
+						{
+							try
+							{
+								pMachine =  LadspaHost::LoadPlugin(sPath,index, shellIdx);
+							}
+							//TODO: Warning! This is not std::exception, but universalis::stdlib::exception
+							catch(const std::exception& e)
+							{
+								loggers::exception()(e.what());
+							}
+							catch(...)
+							{
+	#ifndef NDEBUG 
+								throw;
+	#else
+								loggers::exception()("unknown exception");
+	#endif
+							}
+							if (pMachine == NULL) {
+#if !defined WINAMP_PLUGIN
+							char sError[MAX_PATH + 100];
+							sprintf(sError,"Replacing Ladspa plug-in \"%s\" with Dummy.",dllName);
+							MessageBox(NULL,sError, "Loading Error", MB_OK);
+#endif //!defined WINAMP_PLUGIN
+							pMachine = new Dummy(index);
+							bDeleted = true;
+							}
+						}
+					}
+					else pMachine = new Dummy(index);
+					break;
+				}
+			case MACH_LUA:
+				{
 				  if(fullopen)
 					{
 						std::string sPath;
@@ -1033,7 +1080,8 @@ int Machine::GenerateAudioInTicks(int /*startSample*/, int numsamples) {
 						}
 					}
 					else pMachine = new Dummy(index);				
-				break;			
+				break;
+				}
 			case MACH_VST:
 			case MACH_VSTFX:
 				{

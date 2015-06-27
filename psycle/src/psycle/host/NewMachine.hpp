@@ -41,7 +41,6 @@ namespace psycle { namespace host {
 			int Outputmachine;
 			std::string psOutputDll;
 			int32_t shellIdx;
-			int32_t ladspaIdx;
 			static int pluginOrder;
 			static bool pluginName;
 			static int selectedClass;

@@ -56,9 +56,9 @@ namespace psycle
 		{
 			defaultPatLines = lines;
 		}
-		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx, int32_t ladspaIdx)
+		bool Song::CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx)
 		{
-			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx, ladspaIdx);
+			Machine* pMachine = CreateMachine(type, psPluginDll, songIdx, shellIdx);
 			if (pMachine) {
 				pMachine->_x = x;
 				pMachine->_y = y;
@@ -70,7 +70,7 @@ namespace psycle
 				return false;
 			}
 		}
-		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx, int32_t ladspaIdx)
+		Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx)
 		{
 			Machine* pMachine(0);
 			Plugin* pPlugin(0);
@@ -125,7 +125,7 @@ namespace psycle
 					{
 						try
 						{
-							pMachine =  dynamic_cast<LADSPAMachine*>(LadspaHost::LoadPlugin(psPluginDll,songIdx, ladspaIdx));
+							pMachine =  dynamic_cast<LADSPAMachine*>(LadspaHost::LoadPlugin(psPluginDll,songIdx, shellIdx));
 						}
 						catch(const std::exception& e)
 						{

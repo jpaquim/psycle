@@ -10,6 +10,7 @@
 #include "Plugin.hpp"
 #include "vsthost24.hpp"
 #include "LuaPlugin.hpp"
+#include "ladspamachine.h"
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
 
@@ -544,6 +545,10 @@ namespace psycle { namespace host {
 					_machine->SetParameter(c,dv);
 				}
 			}
+			else if (_machine->_type == MACH_LADSPA)
+			{
+				((LADSPAMachine*)_machine)->SetDefaultsForControls();
+			}
 			Invalidate(false);
 		}
 
@@ -673,6 +678,10 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnMachineAboutthismachine() 
 		{			
+			if ( _machine->_type == MACH_LADSPA) {
+				MessageBox(CString("About ") + CString(machine().GetName()));
+
+			} else
 			if ( _machine->_type == MACH_LUA) {
 				PluginInfo info = ((LuaPlugin*)_machine)->CallPluginInfo();
 				MessageBox(CString("Authors: ") + CString(info.vendor.c_str()),

@@ -35,7 +35,7 @@ Machine* LadspaHost::LoadPlugin(const std::string& dllpath, int macIdx, int key)
 		if (psDescriptor) {
 			LADSPA_Handle handle = Instantiate(psDescriptor);
 			if(handle) {
-				LADSPAMachine * p = new LADSPAMachine(fullPath, macIdx, 0, hInstance, psDescriptor, handle );
+				LADSPAMachine * p = new LADSPAMachine(fullPath, macIdx, key, hInstance, psDescriptor, handle );
 				p->Init();
 				return p;
 			}
@@ -66,29 +66,16 @@ std::vector<PluginInfo> LadspaHost::LoadInfo(const std::string& fileName) { //co
 			pinfo.name = psDescriptor->Name;
 			pinfo.mode = MACHMODE_FX;
 			pinfo.dllname = fileName;
-			pinfo.allow = true;							
-			pinfo.identifier = 0;	
-			//pinfo.FileTime = 0;
+			pinfo.allow = true;
+			//TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.
+			pinfo.identifier = index;
 			pinfo.vendor = psDescriptor->Maker;
-			pinfo.flags = index;
-			if (index > 1) {
-				int i = 10;
-				i = i + 10;
-			}
-			// pinfo.setFileTime(boost::filesystem::last_write_time(boost::filesystem::path(fullName)));
-			//pinfo.setApiVersion( version );
-			//pinfo.setVersion( version );
-			//pinfo.setAuthor( psDescriptor->Maker );
-			//pinfo.setAllow( true );
-			//MachineKey key( hostCode() , fileName, index );
-			//finder.AddInfo(key, pinfo);
-			psDescriptor = pfDescriptorFunction(++index);
+			pinfo.APIversion = 1;
+			pinfo.version = "";
 			infos.push_back(pinfo);
+
+			psDescriptor = pfDescriptorFunction(++index);
 		}
-	}
-	if (infos.size() > 1) {
-		int i = 0;
-		i = 10 +1;
 	}
 
 	UnloadDll(hInstance);
