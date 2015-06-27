@@ -158,36 +158,37 @@ using namespace helpers;
 		{
 			_macIndex = index;
 			_mode = MACHMODE_FX;
-			_type = MACH_LUA;
+			_type = MACH_LADSPA;
 			SetEditName(GetName());
+
 			
-			// SetAudioRange(1.0f);
-			//pOutSamplesL= new LADSPA_Data[MAX_BUFFER_LENGTH];
-			//pOutSamplesR= new LADSPA_Data[MAX_BUFFER_LENGTH];
 			// Step five: Prepare the structures to use the plugin with the program.
 			std::cout << "step five" << std::endl;
-			int indexinput(0),indexoutput(0);
+			numInputs=0;
+			numOutputs=0;
+			_numPars=0;
 			for (unsigned int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
 				LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
+				if (LADSPA_IS_PORT_CONTROL(iPortDescriptor)) {
+					_numPars++;
+				}
 				if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
 				{
-					// Only Stereo for now.
 					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)) {
-						 indexinput++;
-						}
+						 numInputs++;
+					}
 					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor) ) {						
-						indexoutput++;
-						}
+						numOutputs++;
+					}
 				}
 			}
-			int c = std::max(2, std::max(indexinput, indexoutput));
+			//Ensure at least two outputs (Patch for GetRMSVol and WireDlg Scope)
+			int c = std::max(2, std::max(numInputs, numOutputs));
 			InitializeSamplesVector(c);
 			prepareStructures();
-			//defineInputAsStereo();
-			//defineOutputAsStereo();
+
 			// and switch on:
 			std::cout << "step six" << std::endl;
-		
 			if (psDescriptor->activate) psDescriptor->activate(pluginHandle);
 		}
 		
@@ -215,29 +216,32 @@ using namespace helpers;
 		void LADSPAMachine::prepareStructures()
 		{
 			//we're passing addresses within the vector to the plugin.. let's be sure they don't move around						
-			_numPars=0;
-			int indexinput(0),indexoutput(0);
+			values_.resize(_numPars);
+			int indexinput(0),indexoutput(0),indexpar(0);
 			for (unsigned int lPortIndex = 0; lPortIndex < psDescriptor->PortCount; lPortIndex++) {
 				LADSPA_PortDescriptor iPortDescriptor = psDescriptor->PortDescriptors[lPortIndex];
 				if (LADSPA_IS_PORT_CONTROL(iPortDescriptor)) {
 					LadspaParam parameter(iPortDescriptor,psDescriptor->PortRangeHints[lPortIndex],psDescriptor->PortNames[lPortIndex]);
-
-					values_.push_back(parameter);
+					//Copy values
+					values_[indexpar] = parameter;
 					psDescriptor->connect_port(pluginHandle,lPortIndex,
-						values_[_numPars].valueaddress());
-					_numPars++;
+						values_[indexpar].valueaddress());
+					indexpar++;
 				}
 				else if (LADSPA_IS_PORT_AUDIO(iPortDescriptor))
 				{
-					// Only Stereo for now.
 					if (LADSPA_IS_PORT_INPUT(iPortDescriptor)) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
-							 samplesV[indexinput++]);
-						}
+							 samplesV[indexinput]);
+						inportmap[indexinput]=lPortIndex;
+						indexinput++;
+					}
 					else if (LADSPA_IS_PORT_OUTPUT(iPortDescriptor) ) {
 						psDescriptor->connect_port(pluginHandle,lPortIndex,
-							samplesV[indexoutput++]);
-						}
+							samplesV[indexoutput]);
+						outportmap[indexoutput]=lPortIndex;
+						indexoutput++;
+					}
 				}
 			}
 			_nCols = (GetNumParams()/12)+1;
@@ -251,18 +255,24 @@ using namespace helpers;
 		}
 		void LADSPAMachine::Tick(int track, PatternEntry * pData)
 		{
-			/*if ( pEntry.note() == notetypes::tweak || pEntry.note() == notetypes::tweak_slide)
+			if ( pData->_note == notecommands::tweak || pData->_note == notecommands::tweakslide)
 			{
-				SetParameter(pEntry.instrument(),pEntry.command()*0x100+pEntry.parameter());
-			}*/
+				if(pData->_inst < values_.size()) {
+					SetParameter(pData->_inst,pData->_cmd*0x100+pData->_parameter);
+				}
+			}
 		}
 		
 		int LADSPAMachine::GenerateAudioInTicks(int /*startSample*/, int numSamples)
 		{
-			if(!_mute && !_bypass && !_standby)
+			if(!_mute && !_bypass && !_standby) {
+				//Supporting the global delay effects is more complicated here because the poiners
+				//are not passed to the run method.
 				psDescriptor->run(pluginHandle,numSamples);
-			//std::swap(_pSamplesL,pOutSamplesL);
-			//std::swap(_pSamplesR,pOutSamplesR);
+				UpdateVuAndStanbyFlag(numSamples);
+			}
+			else Standby(true);
+
 			return numSamples;
 		}
 		void  LADSPAMachine::GetParamName(int numparam, char * name)

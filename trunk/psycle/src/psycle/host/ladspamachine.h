@@ -10,6 +10,7 @@ namespace psycle { namespace host {
 
 		class LadspaParam {
 			public:
+				LadspaParam() {};
 				LadspaParam(LADSPA_PortDescriptor descriptor,LADSPA_PortRangeHint hint, const char *newname);
 				LADSPA_PortDescriptor descriptor() { return descriptor_; }
 				LADSPA_PortRangeHintDescriptor hint() const { return hint_.HintDescriptor; }
@@ -45,7 +46,6 @@ namespace psycle { namespace host {
 				virtual void Tick(int track, PatternEntry * pData);
 				virtual void Stop(){}
 				inline virtual const char * const GetDllName() const throw() { return dllname_.c_str(); }
-				// virtual const MachineKey& getMachineKey() const {  return key_; }
 				virtual const char * const GetName() const { return (char *) psDescriptor ? psDescriptor->Name : ""; }
 				virtual void GetParamName(int numparam, char * name);
 				virtual void GetParamRange(int numparam,int &minval, int &maxval);
@@ -56,19 +56,41 @@ namespace psycle { namespace host {
 				virtual void SaveSpecificChunk(RiffFile * pFile);
 				virtual int GetParamType(int numparam) { return 2; }
 
+				virtual std::string GetInputPinName(int pin) const {
+					std::map<int,int>::const_iterator iter = inportmap.find(pin);
+					const char* desc = "Unknown";
+					if (iter != inportmap.end() ) {
+						desc = psDescriptor->PortNames[iter->second];
+					}
+					return desc;
+				}
+				virtual int GetNumInputPins() const { return numInputs; }
+				virtual std::string GetOutputPinName(int pin) const {
+					std::map<int,int>::const_iterator iter = outportmap.find(pin);
+					const char* desc = "Unknown";
+					if (iter != outportmap.end() ) {
+						desc = psDescriptor->PortNames[iter->second];
+					}
+					return desc;
+				}
+				virtual int GetNumOutputPins() const { return numOutputs; }
+
+				void SetDefaultsForControls();
 			private:
 				void prepareStructures(void);
 				LADSPA_Data GetMinValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
 				LADSPA_Data GetMaxValue(int lPortIndex, LADSPA_PortRangeHintDescriptor iHintDescriptor);
-				void SetDefaultsForControls();
-				// MachineKey key_;
 				int key_;
 				std::string dllname_;
 				void* libHandle_;
 				const LADSPA_Descriptor * psDescriptor;
 				/*const*/ LADSPA_Handle pluginHandle;
 				std::vector<LadspaParam> values_;
-				std::vector<LadspaParam> controls_;
+				//psycle index, ladspa index
+				std::map<int,int> inportmap;
+				std::map<int,int> outportmap;
+				int numInputs;
+				int numOutputs;
 				float* pOutSamplesL;
 				float* pOutSamplesR;
 		};

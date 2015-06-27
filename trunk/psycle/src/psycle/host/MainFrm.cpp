@@ -833,6 +833,7 @@ namespace psycle { namespace host {
 //					case MACH_LFO:
 //					case MACH_AUTOMATOR:
 					case MACH_MIXER:
+					case MACH_LADSPA:
 					case MACH_PLUGIN:
 					case MACH_LUA:
 					case MACH_VST:

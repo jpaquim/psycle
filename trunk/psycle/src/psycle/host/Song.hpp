@@ -168,10 +168,10 @@ namespace psycle
 			int GetFreeMachine() const ;
 			/// creates a new machine in this song.
 		public:
-			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx, int32_t ladspaIdx=0);
+			Machine* Song::CreateMachine(MachineType type, char const* psPluginDll,int songIdx,int32_t shellIdx);
 		public:
 			/// creates a new machine in this song.
-			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx=0, int32_t ladspaIdx=0);
+			bool CreateMachine(MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx=0);
 			/// Creates a new machine, replacing an existing one.
 			bool ReplaceMachine(Machine* origmac, MachineType type, int x, int y, char const* psPluginDll, int songIdx,int32_t shellIdx=0);
 			/// exchanges the position of two machines.

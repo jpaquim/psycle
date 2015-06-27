@@ -470,7 +470,6 @@ namespace psycle { namespace host {
 
 					shellIdx = pInfo->identifier;
 					psOutputDll = pInfo->dllname;
-					ladspaIdx = pInfo->flags;
 
 					m_Allow.SetCheck(!pInfo->allow);
 					m_Allow.EnableWindow(TRUE);
