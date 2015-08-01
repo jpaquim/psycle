@@ -1,2 +1,2 @@
-exclude, /o3d
-exclude, /opengles-book-samples
+hide, /o3d
+hide, /opengles-book-samples

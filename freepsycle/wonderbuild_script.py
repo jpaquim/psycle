@@ -8,11 +8,11 @@ if __name__ == '__main__':
 	sys.argv.append('--src-dir=' + dir)
 	try: from wonderbuild.main import main
 	except ImportError:
-		dir = os.path.abspath(os.path.join(dir, os.pardir, 'build-systems', 'wonderbuild'))
+		dir = os.path.abspath(os.path.join(dir, os.pardir, 'external-packages', 'wonderbuild'))
 		if dir not in sys.path: sys.path.append(dir)
 		try: from wonderbuild.main import main
 		except ImportError:
-			print >> sys.stderr, 'could not find wonderbuild'
+			print >> sys.stderr, 'could not import wonderbuild module with path', sys.path
 			sys.exit(1)
 		else: main()
 	else: main()
