@@ -1,5 +1,9 @@
--- AHDSR Envelope Generator 
+-- ADSR Envelope Delegator (c) 2013/2014 by psycledelics
 -- File: psycle/ahdsr.lua
+-- copyright 2014 members of the psycle project http://psycle.sourceforge.net
+-- This source is free software ; you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation ; either version 2, or (at your option) any later version.
 
 local ahdsr = {}
 
@@ -9,7 +13,7 @@ function ahdsr:new(a, h, d, s, r, f)
   local e = {}      
   setmetatable(e, self)
   self.__index = self  
-  e.env = env:new({{a, 1}, {h, 1}, {d, s, f}, {r, 0.001, f}}, 4)
+  e.env = env:new({{a, 1, f}, {h, 1}, {d, s, f}, {r, 0.001, f}}, 4)
   e.r = r
   return e
 end

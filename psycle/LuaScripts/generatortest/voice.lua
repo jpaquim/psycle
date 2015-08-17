@@ -58,7 +58,7 @@ function voice:new()
   self.__index = self  
   ahdsr = require("psycle.ahdsr");
   v.ahdsr = ahdsr:new(p.vcaa:val(), p.vcah:val(), p.vcad:val(), p.vcas:norm(),
-	  			    p.vcar:val())
+	  			    p.vcar:val(), ahdsr.LIN)
   v.envf = env:new({{p.pm1t:val(), p.pm1p:val()},
                     {p.pm2t:val(), p.pm2p:val()},
 					{p.pm3t:val(), p.pm3p:val()},
@@ -99,13 +99,13 @@ function voice:noteon(note)
   self.master:start(0)
   self.ahdsr:start()
   self.envf:start()
-  self.lfo:start(0)
-  self.envglide = nil
+  self.lfo:start(0)  
 end
 
 function voice:noteoff()
   self.ahdsr:release()
   self.envf:release()
+  self.lastnote = basenote
 end
 
 function voice:faststop()
@@ -161,7 +161,7 @@ function voice:work(samplelist)
     e = self.ahdsr:work(num) 
     for i=1, #self.oscs do  
       if (self.oscs[i].active == true) then
-        self.oscs[i]:work(samples, fm, e)
+	    self.oscs[i]:setam(e):setfm(fm):work(samples)        
 	  end
     end
     -- check glide end

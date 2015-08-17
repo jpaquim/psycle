@@ -1,3 +1,12 @@
+-- psycle arp
+-- file : psycle/arp.lua
+-- copyright 2014 members of the psycle project http://psycle.sourceforge.net
+-- This source is free software ; you can redistribute it and/or modify it under
+-- the terms of the GNU General Public License as published by the Free Software
+-- Foundation ; either version 2, or (at your option) any later version.
+--
+-- arp like the aguru synth has
+
 local player = require("psycle.player"):new()
 
 local arp = {}
@@ -41,7 +50,12 @@ function arp:new(voice)
 end
 
 function arp:isplaying()
-   return self.voice.ahdsr:isplaying() or self.playing
+   -- first if for compatibility issues only
+   if (self.voice.ahdsr ~= nil) then
+     return self.voice.ahdsr:isplaying() or self.playing
+   else
+     return self.voice:isplaying() or self.playing 
+   end
 end
 
 function arp:noteon(basenote)  

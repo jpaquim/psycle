@@ -172,7 +172,16 @@ function parameter:afternotify()
 end
 
 function parameter:addlistener(listener)
-  self.listener_[#self.listener_+1]=listener
+  local found = false
+  for k=1, #self.listener_ do      
+     if (self.listener_[k]==listener) then	   
+       found = true
+	   break
+	 end
+  end
+  if not found then
+    self.listener_[#self.listener_+1]=listener
+  end
   return self
 end
 
