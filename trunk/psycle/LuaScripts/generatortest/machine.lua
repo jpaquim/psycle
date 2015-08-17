@@ -1,7 +1,7 @@
---[[
-  psycle lua synthdemo
-  file : machine.lua
-]]
+--  psycle lua synthdemo
+--  demo module that demonstrates how to build a basic synth
+--  file : machine.lua
+
 
 -- require('mobdebug').start()
 
@@ -21,7 +21,11 @@ local param = require("psycle.parameter")
   
 -- plugin info
 function machine:info()
-  return  {vendor="psycle", name="luaris", generator=1, version=0, api=0} -- noteon = 1
+  return  {vendor="psycle",
+           name="luaris",
+		   generator=1, --machine.GENERATOR,
+		   version=0,
+		   api=0} -- noteon = 1
 end
 
 -- help text displayed by the host
@@ -33,10 +37,17 @@ function machine:help()
          "C3xx : partomento"
 end
 
-local filtertypes = {"LowPass", "HighPass", "BandPass", "BandReject", "None", "ITLOWPASS"}
+local filtertypes = {"LowPass", "HighPass", "BandPass", "BandReject", "None",
+                     "ITLOWPASS", "MPTLP", "MPTHigh", "LP12E",
+					 "HP12E", "BP12E", "BR12"}
 
 -- plugin constructor
-function machine:init(samplerate) 
+
+
+
+
+
+function machine:init(samplerate)   
   voice.samplerate = samplerate        
   filter = require("psycle.dsp.filter")
   filtercurr = filter:new(filter.LOWPASS)
@@ -45,7 +56,7 @@ function machine:init(samplerate)
   p.mlb = param:newlabel("Master")
   p.vol = param:newknob("vol", "", 0, 1, 100, 0.5)
   p.flb = param:newlabel("Filter")
-  p.ft = param:newknob("FilterType","",0,5,5, 0):addlistener(self)
+  p.ft = param:newknob("FilterType","",0, 11, 11, 0):addlistener(self)
   function p.ft:display()
     return filtertypes[self:val()+1]
   end
@@ -75,7 +86,7 @@ function machine:work()
   for i = 1, numinst do
     arps[i]:work({self:channel(0)})
   end  
-  filtercurr:work(self:channel(0):mul(p.vol:val()))
+  filtercurr:work(self:channel(0):mul(p.vol:val()))        
   self:channel(1):copy(self:channel(0))  
 end
 
@@ -114,7 +125,7 @@ function machine:seqtick(channel, note, ins, cmd, val)
 	  end	    
 	  channels[channel] = self:freevoice()	
 	  curr = arps[self.currvoice];	
-          curr:noteon(note)
+      curr:noteon(note)
     end   
   elseif curr~=nil and note==120 then
      arps[channels[channel]]:noteoff()	 

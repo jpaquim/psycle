@@ -1,4 +1,8 @@
 --[[
+   file : orderedtable.lua
+   source : http://lua-users.org/wiki/OrderedTableSimple
+   modifications : we wrapped it as module
+
    LUA 5.1 compatible
    
    Ordered Table
