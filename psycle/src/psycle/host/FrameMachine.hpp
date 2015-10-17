@@ -4,6 +4,7 @@
 #include <psycle/host/detail/project.hpp>
 #include "Psycle.hpp"
 #include "PresetIO.hpp"
+#include "LuaPlugin.hpp"
 
 namespace psycle {
 namespace host {
@@ -69,10 +70,8 @@ namespace host {
 			int userSelected;
 			int refreshcounter;
 			int lastprogram;
-			int lastnumprogrs;
-			std::map<std::uint16_t, std::string> menuIdMap;
-			std::vector<CMenu*> dynmenus;
-
+			int lastnumprogrs;			
+      LuaMenuBar* custom_menubar;
 		protected:
 			DECLARE_MESSAGE_MAP()
 			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

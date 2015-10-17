@@ -28,7 +28,7 @@ namespace psycle { namespace host {
   // Lua
 
   LuaPlugin::LuaPlugin(lua_State* state, int index, bool full)
-    : curr_prg_(0), proxy_(this, state)
+    : curr_prg_(0), proxy_(this, state), custom_menubar(0)
   {		
     _macIndex = index;
     _type = MACH_LUA;

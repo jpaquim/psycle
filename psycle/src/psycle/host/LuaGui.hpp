@@ -12,20 +12,52 @@ struct luaL_Reg;
 
 namespace psycle { namespace host {
 
-struct menuitem { 	
-    menuitem() {
+
+   struct LuaMenu : public CMenu {   
+     public:
+       void set_label(const std::string& label) { label_ = label; }
+       const std::string& label() const { return label_; }
+     private:
+       std::string label_;
+   };
+
+    struct LuaMenuItem { 	    
+      LuaMenuItem() {
 #if !defined WINAMP_PLUGIN
       menu = 0;
 #endif
-      mid = -1; check = false; }
-    std::string id; std::string label; 
+      check = false;
+     }
+     int id; std::string label; 
 #if !defined WINAMP_PLUGIN
-    CMenu* menu;
+    
 #endif
-    int mid; bool check;
+     CMenu* menu;
+     bool check;
+     static int id_counter;
+     static std::map<std::uint16_t, LuaMenuItem*> menuItemIdMap;
+  };
+
+  struct LuaMenuBarBind {  
+    static int open(lua_State *L);
+    static const char* meta;
+  private:
+    static int create(lua_State *L);
+    static int add(lua_State *L);    
+    static int gc(lua_State* L);    
   };
 
   struct LuaMenuBind {  
+    static int open(lua_State *L);
+    static const char* meta;
+  private:
+    static int create(lua_State *L);
+    static int add(lua_State *L);
+    static int addseparator(lua_State *L);
+    static int gc(lua_State* L);    
+  };
+
+  struct LuaMenuItemBind {  
     static int open(lua_State *L);
     static const char* meta;
   private:
@@ -39,7 +71,7 @@ struct menuitem {
     static int addlistener(lua_State* L);
     static int notify(lua_State* L);
   };
-
+  
   class LuaMachine;
 
   struct LuaDialog : public Dynamic_dialog {

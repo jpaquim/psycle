@@ -60,7 +60,11 @@ namespace psycle { namespace host {
     luaL_requiref(L, "psycle.plotter", LuaPlotterBind::open, 1);
     lua_pop(L, 1);
 #endif //!defined WINAMP_PLUGIN
+    luaL_requiref(L, "psycle.menubar", LuaMenuBarBind::open, 1);
+    lua_pop(L, 1);
     luaL_requiref(L, "psycle.menu", LuaMenuBind::open, 1);
+    lua_pop(L, 1);
+    luaL_requiref(L, "psycle.menuitem", LuaMenuItemBind::open, 1);
     lua_pop(L, 1);
     luaL_requiref(L, "psycle.delay", LuaDelayBind::open, 1);
     lua_pop(L, 1);
@@ -989,34 +993,8 @@ namespace psycle { namespace host {
     lua_pop(L, 1);  // pop returned value	
     return name;
   }
-
-  void LuaProxy::build_tree(menu& t) {	
-    luaL_checktype(L, -1, LUA_TTABLE);
-    // t:opairs()
-    lua_getfield(L, -1, "opairs");
-    lua_pushvalue(L, -2);
-    lua_call(L, 1, 2);
-    size_t len;
-    // iter, self (t), nil
-    for(lua_pushnil(L); LuaHelper::luaL_orderednext(L);)
-    {
-      std::string s = luaL_checklstring(L, -2, &len);
-      menu t1;
-      lua_getfield(L, -1, "__self");
-      menuitem* ptr = *(menuitem **)luaL_checkudata(L, -1, "psymenumeta");		
-      t1.object = ptr;
-      t1.object->id = s;		
-      lua_pop(L, 1);
-      lua_getfield(L, -1, "menus");
-      build_tree(t1);		
-      t.nodes.push_back(t1);
-      lua_pop(L, 1);
-      lua_pop(L, 1);
-    }
-    lua_pop(L, 2);
-  }
-
-  bool LuaProxy::get_menu_tbl() {
+  
+  LuaMenuBar* LuaProxy::get_menu(CMenu* menu) {
     try {
       LuaHelper::get_proxy(L);
     } catch(std::exception &e) {	  
@@ -1027,55 +1005,34 @@ namespace psycle { namespace host {
     if (lua_isnil(L, -1)) {	 
       lua_pop(L, 1);
       unlock();
-      return false;	 
-    }  
-    return true;
-  }
-
-  menu LuaProxy::get_menu_tree() {
-    lock(); 
-    menu t;
-    if (!get_menu_tbl()) return t;
-    build_tree(t);
-    lua_pop(L, 3);  
-    unlock();
-    return t;
-  }
-
-  void LuaProxy::call_menu(const std::string& id) {
-    lock();  
-    if (!get_menu_tbl()) return;
-    typedef boost::tokenizer<boost::char_separator<char> > 
-      tokenizer;
-    boost::char_separator<char> sep(".");
-    tokenizer tokens(id, sep);  
-    std::vector<std::string> fields;
-    for (tokenizer::iterator tok_iter = tokens.begin();
-      tok_iter != tokens.end(); ++tok_iter) {
-        fields.push_back(*tok_iter);
-    }    
-    int n = 0;
-    for (std::vector<std::string>::iterator it = fields.begin();
-      it!=fields.end(); ++it) {
-        std::string field = *it;
-        lua_getfield(L, -1, field.c_str());
-        ++n;
-        bool is_last = (it != fields.end()) && (it + 1 == fields.end());
-        if (!is_last) {
-          lua_getfield(L, -1, "menus");
-          ++n;
-        }
+      return 0;	 
+    } else {  
+      LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, -1, LuaMenuBarBind::meta);        
+      LuaMenuBar::iterator it = menubar->begin();
+      for ( ; it != menubar->end(); ++it) {
+         LuaMenu* m = *it;
+         menu->AppendMenu(MF_POPUP, (UINT_PTR)m->m_hMenu, m->label().c_str());
+      }      
+      return menubar;
     }
-    lua_getfield(L, -1, "notify");
-    lua_pushvalue(L, -2); // self	
-    int status = lua_pcall(L, 1, 0, 0);
-    if (status) {
-      std::string s(lua_tostring(L, -1));	
+  }
+  
+  void LuaProxy::call_menu(UINT id) {
+    lock();    
+    std::map<std::uint16_t, LuaMenuItem*>::iterator it = LuaMenuItem::menuItemIdMap.find(id);
+    if (it != LuaMenuItem::menuItemIdMap.end()) {
+      LuaHelper::find_userdata<>(L, it->second);
+      lua_getfield(L, -1, "notify");
+      lua_pushvalue(L, -2); // self	
+      int status = lua_pcall(L, 1, 0, 0);
+      if (status) {
+        std::string s(lua_tostring(L, -1));	
+        lua_pop(L, 1);
+        unlock();
+        throw std::runtime_error(s);  
+      }  
       lua_pop(L, 1);
-      unlock();
-      throw std::runtime_error(s);  
-    }  
-    lua_pop(L, 3+n);  
+    }    
     unlock();
   }
 

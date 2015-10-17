@@ -59,11 +59,22 @@ namespace psycle { namespace host {
     virtual int GetNumOutputPins() const { return samplesV.size(); }
     PluginInfo CallPluginInfo() { return proxy_.call_info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
-    virtual void AfterTweaked(int numparam);
-    template<class T> void GetMenu(T& f) { proxy_.get_menu(f); }	
+    virtual void AfterTweaked(int numparam);    
+    LuaMenuBar* GetMenu(CMenu* menu) { 
+      if (!custom_menubar) {
+        custom_menubar = proxy_.get_menu(menu);
+      } else {
+        LuaMenuBar::iterator it = custom_menubar->begin();
+        for ( ; it != custom_menubar->end(); ++it) {
+          LuaMenu* m = *it;
+          menu->AppendMenu(MF_POPUP, (UINT_PTR)m->m_hMenu, m->label().c_str());
+        }           
+      }
+      return custom_menubar; 
+    }
     std::string help();
     virtual int GetGuiType() const { return proxy_.gui_type(); }
-    void OnMenu(const std::string& id) { proxy_.call_menu(id); }
+    void OnMenu(UINT id) { proxy_.call_menu(id); }
     canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
     bool OnEvent(canvas::Event* ev);    
     virtual void OnReload();
@@ -124,7 +135,8 @@ namespace psycle { namespace host {
     void SendCommand(unsigned char channel,
       unsigned char inst,
       unsigned char cmd,
-      unsigned char val);        
+      unsigned char val);    
+    LuaMenuBar* custom_menubar;
   };
 
 
