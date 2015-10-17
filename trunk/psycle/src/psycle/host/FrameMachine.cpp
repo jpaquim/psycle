@@ -9,7 +9,6 @@
 #include "MixerFrameView.hpp"
 #include "Plugin.hpp"
 #include "vsthost24.hpp"
-#include "LuaPlugin.hpp"
 #include "ladspamachine.h"
 #include "PresetsDlg.hpp"
 #include "ParamList.hpp"
@@ -118,50 +117,10 @@ namespace psycle { namespace host {
 					((Plugin*)_machine)->GetInfo()->Command);
 			}
 
+      custom_menubar = 0;
 			if (_machine->_type == MACH_LUA)
-			{								
-				struct func {
-				  func(CMenu* m, CFrameMachine* f) : i(0), start(true), menu(m), fm(f) {}
-				  CMenu* menu; int i; bool start; CFrameMachine* fm;
-				  void operator()(psycle::host::menu& t) { build_menu(t, ""); }
-				  void build_menu(psycle::host::menu& t, std::string id) {			  
-					CMenu* newmenu = 0;					
-					if (!start) {					  
-					  id += ((id!="") ? "." : "")+t.object->id;
-					  newmenu = new CMenu();
-					  fm->dynmenus.push_back(newmenu);
-				      newmenu->CreatePopupMenu();					  
-					  menu->AppendMenu(MF_POPUP, (UINT_PTR)newmenu->m_hMenu, t.object->label.c_str());
-					  t.object->menu = newmenu;
-					} else {
-					  newmenu = menu;
-					  start = false;                      
-					}					
-					for (int k = 0; k < t.nodes.size(); ++k) {
-					  if (t.nodes[k].nodes.size() == 0) {						
-						if (t.nodes[k].object->label == "-") {
-						  newmenu->AppendMenu(MF_SEPARATOR);
-						} else {
-					      newmenu->AppendMenu(MF_STRING, ID_DYNAMIC_MENUS_START+i, t.nodes[k].object->label.c_str());
-						}
-						std::string sep = (id!="") ? "." : "";
-						fm->menuIdMap[ID_DYNAMIC_MENUS_START+(i)] = id+sep+t.nodes[k].object->id;
-						t.nodes[k].object->menu = newmenu;
-						t.nodes[k].object->mid = ID_DYNAMIC_MENUS_START+i;
-						if (t.nodes[k].object->check) {
-						  newmenu->CheckMenuItem(ID_DYNAMIC_MENUS_START+i, MF_CHECKED | MF_BYCOMMAND);
-						}
-						++i;
-					  } else {
-              CMenu* old = menu;
-						  menu = newmenu;
-              build_menu(t.nodes[k], id);
-						  menu = old;
-					  }
-					}
-				  }
-	       } myfunctor(GetMenu(), this);												
-				((LuaPlugin*)_machine)->GetMenu(myfunctor);
+			{        
+        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(GetMenu());        
 			}
 
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
@@ -230,12 +189,20 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnClose() 
 		{
+      if (custom_menubar) {
+        int pos = 2;
+        LuaMenuBar::iterator it = custom_menubar->begin();
+        for ( ; it != custom_menubar->end(); ++it, ++pos) {
+          LuaMenu* menu = *it;
+          GetMenu()->RemoveMenu(pos, MF_BYPOSITION);
+        }                 
+      }
 			KillTimer(ID_TIMER_PARAM_REFRESH);
 			CFrameWnd::OnClose();
 		}
 
 		void CFrameMachine::OnDestroy()
-		{
+		{    
 			HICON _icon = GetIcon(false);
 			DestroyIcon(_icon);
 			comboProgram.DestroyWindow();
@@ -245,12 +212,9 @@ namespace psycle { namespace host {
 			{
 				((Plugin*)_machine)->GetCallback()->hWnd = NULL;
 			}
-			std::vector<CMenu*>::iterator it = dynmenus.begin();
-			for ( ; it != dynmenus.end(); ++it) {
-				delete *it;
-			}
 			SaveBarState(_T("VstParamToolbar"));
 		}
+
 		void CFrameMachine::PostNcDestroy() 
 		{
 			if(windowVar!= NULL) *windowVar = NULL;
@@ -1145,7 +1109,7 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnDynamicMenuItems(UINT nID) {			
-			((LuaPlugin*)_machine)->OnMenu(menuIdMap[nID]);
+			((LuaPlugin*)_machine)->OnMenu(nID);
 		}
 
 	}   // namespace

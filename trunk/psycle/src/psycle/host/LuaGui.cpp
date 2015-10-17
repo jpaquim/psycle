@@ -18,12 +18,128 @@
 namespace psycle { namespace host {
 
   ///////////////////////////////////////////////////////////////////////////////
-  // MenuBind
+  // MenuBinds
   ///////////////////////////////////////////////////////////////////////////////
+
+  const char* LuaMenuBarBind::meta = "psymenubarmeta";
+
+  int LuaMenuBarBind::open(lua_State *L) {
+    static const luaL_Reg methods[] = {
+      {"new", create},    
+      {"add", add},      
+      { NULL, NULL }
+    };
+    luaL_newmetatable(L, meta);
+    lua_pushcclosure(L, gc, 0);
+    lua_setfield(L,-2, "__gc");
+    luaL_newlib(L, methods);  
+    return 1;
+  }
+
+  int LuaMenuBarBind::create(lua_State* L) {
+    int n = lua_gettop(L);  // Number of arguments
+    if (n != 1) {
+      return luaL_error(L, "Got %d arguments expected 2 (self)", n); 
+    }    
+    LuaMenuBar* menubar = new LuaMenuBar();            
+    LuaHelper::new_userdata<>(L, meta, menubar);    
+    return 1;
+  }
+
+  int LuaMenuBarBind::add(lua_State* L) {
+    int n = lua_gettop(L);  // Number of arguments
+    if (n != 2) {
+      return luaL_error(L, "Got %d arguments expected 2 (self, menu or menuitem)", n); 
+    }        
+    LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, 1, meta);
+    LuaMenu* menu = LuaHelper::check<LuaMenu>(L, 2, LuaMenuBind::meta);
+    menubar->push_back(menu);
+    return 0;
+    //return LuaHelper::chaining(L);
+  }
+
+  int LuaMenuBarBind::gc(lua_State* L) {
+    LuaMenuBar* menu = LuaHelper::check<LuaMenuBar>(L, 1, meta);    
+    return LuaHelper::delete_userdata<LuaMenuBar>(L, meta);
+  }
 
   const char* LuaMenuBind::meta = "psymenumeta";
 
   int LuaMenuBind::open(lua_State *L) {
+    static const luaL_Reg methods[] = {
+      {"new", create},    
+      {"add", add},
+      {"addseparator", addseparator},
+      { NULL, NULL }
+    };
+    luaL_newmetatable(L, meta);
+    lua_pushcclosure(L, gc, 0);
+    lua_setfield(L,-2, "__gc");
+    luaL_newlib(L, methods);  
+    return 1;
+  }
+
+  int LuaMenuBind::create(lua_State* L) {
+    int n = lua_gettop(L);  // Number of arguments
+    if (n != 2) {
+      return luaL_error(L, "Got %d arguments expected 2 (self, menuname)", n); 
+    }    
+    LuaMenu* menu = new LuaMenu();    
+    menu->CreatePopupMenu();    
+    const char* label = luaL_checkstring(L, 2);
+    menu->set_label(label);
+    LuaHelper::new_userdata<>(L, meta, menu);    
+    return 1;
+  }
+
+  int LuaMenuBind::add(lua_State* L) {
+    int n = lua_gettop(L);  // Number of arguments
+    if (n != 2) {
+      return luaL_error(L, "Got %d arguments expected 2 (self, menu or menuitem)", n); 
+    }        
+    CMenu* menu = LuaHelper::check<CMenu>(L, 1, meta);
+    LuaMenuItem* item = 0;
+    int id = ID_DYNAMIC_MENUS_START+item->id_counter;
+    item = LuaHelper::test<LuaMenuItem>(L, 2, LuaMenuItemBind::meta);
+    if (!item) {
+      LuaMenu* new_menu= LuaHelper::test<LuaMenu>(L, 2, LuaMenuBind::meta);
+      if (new_menu) {        
+        menu->AppendMenu(MF_POPUP, (UINT_PTR)new_menu->m_hMenu, new_menu->label().c_str());
+        LuaHelper::register_userdata<>(L, new_menu);
+      }
+    } else {         
+      menu->AppendMenu(MF_STRING, id, item->label.c_str());
+      if (item->check) {
+		    menu->CheckMenuItem(id, MF_CHECKED | MF_BYCOMMAND);
+      }
+      item->id = id;
+      LuaMenuItem::menuItemIdMap[item->id] = item;
+      item->menu = menu;
+      LuaHelper::register_userdata<>(L, item);
+    }                
+    return 0;
+    //return LuaHelper::chaining(L);
+  }
+
+  int LuaMenuBind::addseparator(lua_State* L) {
+    int n = lua_gettop(L);  // Number of arguments
+    if (n != 1) {
+      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+    }        
+    CMenu* menu = LuaHelper::check<CMenu>(L, 1, meta);
+    menu->AppendMenu(MF_SEPARATOR, 0, "-");    
+    return 0;
+  }
+
+  int LuaMenuBind::gc(lua_State* L) {    
+    return LuaHelper::delete_userdata<LuaMenu>(L, meta);
+  }
+
+  const char* LuaMenuItemBind::meta = "psymenuitemmeta";
+  int LuaMenuItem::id_counter = 0;
+  std::map<std::uint16_t, LuaMenuItem*> LuaMenuItem::menuItemIdMap;
+
+  int LuaMenuItemBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
       {"new", create}, 
       {"label", label},
@@ -42,13 +158,16 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaMenuBind::create(lua_State* L) {	
+  int LuaMenuItemBind::create(lua_State* L) {	
     int n = lua_gettop(L);  // Number of arguments
     if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, wave)", n); 
+      return luaL_error(L, "Got %d arguments expected 2 (self, itemname)", n); 
     }
     const char* label = luaL_checkstring(L, 2);
-    menuitem* menu = new menuitem();
+    LuaMenuItem* menu = new LuaMenuItem();
+    menu->id = menu->id_counter;
+    menu->id_counter++;
+
     menu->label = label;
     LuaHelper::new_userdata<>(L, meta, menu);
     LuaHelper::register_weakuserdata(L, menu);
@@ -64,14 +183,14 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaMenuBind::gc(lua_State* L) {	
-    return LuaHelper::delete_userdata<menuitem>(L, meta);
+  int LuaMenuItemBind::gc(lua_State* L) {	
+    return LuaHelper::delete_userdata<LuaMenuItem>(L, meta);
   }
 
-  int LuaMenuBind::label(lua_State* L) {	
+  int LuaMenuItemBind::label(lua_State* L) {	
     int n = lua_gettop(L);
     if (n ==1) {
-      menuitem* m = LuaHelper::check<menuitem>(L, 1, meta);       	   	   
+      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	   
       lua_pushstring(L, m->label.c_str());
     } else {
       luaL_error(L, "Got %d arguments expected 1 (self)", n); 
@@ -79,28 +198,27 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaMenuBind::id(lua_State* L) {	
+  int LuaMenuItemBind::id(lua_State* L) {	
     int n = lua_gettop(L);
     if (n ==1) {
-      menuitem* m = LuaHelper::check<menuitem>(L, 1, meta);       	   	   
-      lua_pushstring(L, m->id.c_str());
+      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	   
+      lua_pushnumber(L, m->id);
     } else {
       luaL_error(L, "Got %d arguments expected 1 (self)", n); 
     }
     return 1;
   }
 
-  int LuaMenuBind::check(lua_State* L) {	
+  int LuaMenuItemBind::check(lua_State* L) {	
     int n = lua_gettop(L);
     if (n ==1) {
-      menuitem* m = LuaHelper::check<menuitem>(L, 1, meta);       	   	   
-      if (m->mid != -1) {
+      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	         
 #if !defined WINAMP_PLUGIN
-        m->menu->CheckMenuItem(m->mid, MF_CHECKED | MF_BYCOMMAND);		   
-#endif
-      } else {
-        m->check = true;
+      if (m->menu) {
+        m->menu->CheckMenuItem(m->id, MF_CHECKED | MF_BYCOMMAND);
       }
+      m->check = true;
+#endif
     } else {
       luaL_error(L, "Got %d arguments expected 1 (self)", n); 
     }
@@ -108,17 +226,16 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaMenuBind::uncheck(lua_State* L) {	
+  int LuaMenuItemBind::uncheck(lua_State* L) {	
     int n = lua_gettop(L);
     if (n ==1) {
-      menuitem* m = LuaHelper::check<menuitem>(L, 1, meta);       	   	   
-      if (m->mid != -1) {	
+      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	   
 #if !defined WINAMP_PLUGIN
-        m->menu->CheckMenuItem(m->mid, MF_UNCHECKED | MF_BYCOMMAND);
-#endif
-      } else {
+      if (m->menu) {	
+        m->menu->CheckMenuItem(m->id, MF_UNCHECKED | MF_BYCOMMAND);      
         m->check = false;
       }
+#endif
     } else {
       luaL_error(L, "Got %d arguments expected 1 (self)", n); 
     }
@@ -126,19 +243,18 @@ namespace psycle { namespace host {
     return 0;
   }
 
-  int LuaMenuBind::checked(lua_State* L) {	
+  int LuaMenuItemBind::checked(lua_State* L) {	
     int n = lua_gettop(L);
     if (n ==1) {
-      menuitem* m = LuaHelper::check<menuitem>(L, 1, meta);       	   	   
-      lua_pushstring(L, m->id.c_str());
+      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	   
+      lua_pushboolean(L, m->check);
     } else {
       luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }
-    lua_pushvalue(L, 1); // chaining
+    }    
     return 1;
   }
 
-  int LuaMenuBind::addlistener(lua_State* L) {
+  int LuaMenuItemBind::addlistener(lua_State* L) {
     int n = lua_gettop(L);
     if (n ==2) {	   
       lua_getfield(L, 1, "listener_");
@@ -151,7 +267,7 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaMenuBind::notify(lua_State* L) {
+  int LuaMenuItemBind::notify(lua_State* L) {
     int n = lua_gettop(L);
     if (n ==1) {
       lua_getfield(L, 1, "listener_");
