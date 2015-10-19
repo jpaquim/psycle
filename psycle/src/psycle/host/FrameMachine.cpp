@@ -87,7 +87,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
-		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0), barmenu(0)
 		{
 			//Use OnCreate.
 		}
@@ -120,7 +120,8 @@ namespace psycle { namespace host {
       custom_menubar = 0;
 			if (_machine->_type == MACH_LUA)
 			{        
-        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(GetMenu());        
+        barmenu.setcmenu(GetMenu());
+        custom_menubar = ((LuaPlugin*)_machine)->GetMenu(&barmenu);        
 			}
 
 			if (!toolBar.CreateEx(this, TBSTYLE_FLAT|/*TBSTYLE_LIST*|*/TBSTYLE_TRANSPARENT|TBSTYLE_TOOLTIPS|TBSTYLE_WRAPABLE) ||
@@ -177,7 +178,7 @@ namespace psycle { namespace host {
       }
 			return 0;
 		}
-
+    
 		BOOL CFrameMachine::PreCreateWindow(CREATESTRUCT& cs)
 		{
 			if( !CFrameWnd::PreCreateWindow(cs) )
@@ -191,9 +192,8 @@ namespace psycle { namespace host {
 		{
       if (custom_menubar) {
         int pos = 2;
-        LuaMenuBar::iterator it = custom_menubar->begin();
-        for ( ; it != custom_menubar->end(); ++it, ++pos) {
-          LuaMenu* menu = *it;
+        std::vector<LuaMenu*>::iterator it = custom_menubar->items.begin();
+        for ( ; it != custom_menubar->items.end(); ++it, ++pos) {          
           GetMenu()->RemoveMenu(pos, MF_BYPOSITION);
         }                 
       }
@@ -222,7 +222,8 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
-		{
+		{      
+      machine().OnGuiTimer(this);
 			if ( nIDEvent == ID_TIMER_PARAM_REFRESH )
 			{
         if (machine()._type == MACH_LUA) {
@@ -232,7 +233,7 @@ namespace psycle { namespace host {
             user_view->SetParent(pView);
             user_view->InvalidateSave();
           } else {
-            pView->WindowIdle();            
+            pView->WindowIdle();
           }          
         } else {
 				  pView->WindowIdle();
@@ -1109,7 +1110,8 @@ namespace psycle { namespace host {
 		}
 
 		void CFrameMachine::OnDynamicMenuItems(UINT nID) {			
-			((LuaPlugin*)_machine)->OnMenu(nID);
+      LuaPlugin* plug = ((LuaPlugin*)_machine);
+			plug->OnMenu(nID);        
 		}
 
 	}   // namespace

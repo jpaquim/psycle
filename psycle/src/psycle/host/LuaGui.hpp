@@ -12,32 +12,96 @@ struct luaL_Reg;
 
 namespace psycle { namespace host {
 
-
-   struct LuaMenu : public CMenu {   
-     public:
-       void set_label(const std::string& label) { label_ = label; }
-       const std::string& label() const { return label_; }
-     private:
-       std::string label_;
+   class LuaMenuBar {     
+   public:
+     LuaMenuBar() : update(false) {}
+     std::vector<class LuaMenu*> items;
+     bool update;
    };
 
-    struct LuaMenuItem { 	    
-      LuaMenuItem() {
+   struct LuaMenuItem { 	    
+      LuaMenuItem() : id_(-1), check_(false) {
 #if !defined WINAMP_PLUGIN
       menu = 0;
-#endif
-      check = false;
-     }
-     int id; std::string label; 
+#endif      
+     }     
+     void set_id(int id) { id_ = id; }
+     int id() const { return id_; }
+     void set_label(const std::string& label) { 
+       label_ = label; 
 #if !defined WINAMP_PLUGIN
-    
+       if (menu) {
+         menu->ModifyMenu(id(), MF_BYCOMMAND, id(), label.c_str());
+       }
+#endif      
+     }
+     const std::string& label() const { return label_; }
+     void check() { check_ = true; }
+     void uncheck() { check_ = false; }
+     bool checked() const { return check_; }     
+#if !defined WINAMP_PLUGIN     
 #endif
-     CMenu* menu;
-     bool check;
+     CMenu* menu;     
      static int id_counter;
      static std::map<std::uint16_t, LuaMenuItem*> menuItemIdMap;
+    private:
+      int id_;
+      bool check_;      
+      std::string label_;
   };
 
+
+   struct LuaMenu {   
+     public:
+       LuaMenu() : parent_(0), pos_(-1), bar_(0), owner_(true) {
+          menu_ = new CMenu();
+       }
+       LuaMenu(CMenu* menu) : menu_(menu), parent_(0), pos_(-1), bar_(0), owner_(false) {}
+       ~LuaMenu() {
+         if (owner_) delete menu_;
+       }
+       void set_label(const std::string& label) {
+         label_ = label; 
+#if !defined WINAMP_PLUGIN  
+         if (parent()) {
+           parent()->menu()->ModifyMenu(pos_, MF_BYPOSITION, 0, label.c_str());
+           LuaMenuBar* b = bar();
+           if (b) {
+             b->update = true;
+           }
+           return;
+         }         
+       }
+#endif           
+       const std::string& label() const { return label_; }       
+       CMenu* menu() { return menu_; }
+       void setcmenu(CMenu* menu) { menu_ = menu; }
+       void set_parent(LuaMenu* parent) { parent_ = parent; }
+       LuaMenu* parent() { return parent_; }
+       int pos() const { return pos_; }
+       void set_pos(int pos) { pos_ = pos; }
+       void setbar(LuaMenuBar* bar) { bar_ = bar; }
+       LuaMenuBar* bar() { return parent() ? parent()->bar() : bar_; }
+       void add(LuaMenuItem* item) {
+         items.push_back(item);
+       }
+       void remove(LuaMenuItem* item) {
+         std::vector<LuaMenuItem*>::iterator it;     
+         it = std::find(items.begin(), items.end(), item);
+         if (it != items.end()) {
+           items.erase(it);
+         }         
+       }
+     private:
+       std::vector<LuaMenuItem*> items;
+       std::string label_;
+       CMenu* menu_;       
+       LuaMenu* parent_;
+       LuaMenuBar* bar_;
+       bool owner_;       
+       int pos_;
+   };
+   
   struct LuaMenuBarBind {  
     static int open(lua_State *L);
     static const char* meta;
@@ -53,7 +117,9 @@ namespace psycle { namespace host {
   private:
     static int create(lua_State *L);
     static int add(lua_State *L);
+    static int remove(lua_State *L);
     static int addseparator(lua_State *L);
+    static int setlabel(lua_State *L);
     static int gc(lua_State* L);    
   };
 
@@ -63,6 +129,7 @@ namespace psycle { namespace host {
   private:
     static int create(lua_State *L);
     static int id(lua_State *L);
+    static int setlabel(lua_State *L);
     static int label(lua_State *L);
     static int gc(lua_State* L);
     static int check(lua_State* L);
@@ -149,6 +216,7 @@ namespace psycle { namespace host {
     static int getfocus(lua_State *L);
     static int getitems(lua_State* L);    
     static int remove(lua_State* L);
+    static int removeall(lua_State* L);
     static int add(lua_State* L);
     static int show(lua_State* L);
     static int hide(lua_State* L);    
@@ -163,6 +231,7 @@ namespace psycle { namespace host {
     static int intersect(lua_State* L);
     static int intersectrect(lua_State* L);
     static int canvas(lua_State* L);
+    static canvas::Item* test(lua_State* L, int index);
   };
   
   struct LuaRect : public canvas::Rect {
@@ -192,8 +261,7 @@ namespace psycle { namespace host {
     static int setxy(lua_State *L);
     static int pos(lua_State *L);
     static int clientpos(lua_State* L);    
-    static int parent(lua_State *L);
-    static int remove(lua_State* L);
+    static int parent(lua_State *L);    
     static int gc(lua_State* L);
     static int tostring(lua_State* L);    
     static int setzorder(lua_State* L);
@@ -253,8 +321,7 @@ namespace psycle { namespace host {
     static int color(lua_State* L);
     static int pos(lua_State *L);
     static int gc(lua_State* L);
-    static int parent(lua_State *L);
-    static int remove(lua_State* L);
+    static int parent(lua_State *L);    
     static int tostring(lua_State* L);
   };
 

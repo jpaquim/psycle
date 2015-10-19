@@ -70,10 +70,6 @@ public:
 
 class LuaPlugin;
 
-template <class T> struct tree { std::vector<tree> nodes; T object; };
-
-typedef std::vector<LuaMenu*> LuaMenuBar;
-
 class LuaProxy {
 public:    
 	LuaProxy(LuaPlugin* plug, lua_State* state);
@@ -113,9 +109,9 @@ public:
 	std::string call_help();
 	void free_state();
 	void set_state(lua_State* state);
-	void reload();
-	//template<class T> void get_menu(T& func) { func(get_menu_tree()); }
-  LuaMenuBar* get_menu(CMenu* menu);
+	void reload();	
+  void update_menu(void* menu);
+  LuaMenuBar* get_menu(LuaMenu* menu);
   int gui_type() const { return plugimport_->gui_type(); }  
   void call_setprogram(int idx);
   int call_numprograms();

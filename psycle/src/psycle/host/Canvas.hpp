@@ -221,7 +221,8 @@ namespace psycle { namespace host { namespace canvas {
     void set_zorder(Item* item, int z);
     int zorder(Item* item) const;
     void Add(Item* item);
-    void Erase(Item* item);
+    void Remove(Item* item);
+    void RemoveAll();
     void Clear();
     void Clear2() { items_.clear(); }
     void Insert(iterator it, Item* item);

@@ -37,7 +37,31 @@ namespace psycle { namespace host {
 			return *ud;      
 		}
 
-		// creates our own userdata, that supports inheritance
+    template <class UDT>
+    static void require(lua_State* L, const std::string& name)  {      
+      luaL_requiref(L, name.c_str(), UDT::open, 1);
+      lua_pop(L, 1);
+    }
+    
+    static int open(lua_State* L,
+                    const std::string& meta,
+                    const luaL_Reg methods[],
+                    lua_CFunction gc=0,
+                    lua_CFunction tostring=0) {
+      luaL_newmetatable(L, meta.c_str());
+      if (gc) {
+        lua_pushcclosure(L, gc, 0);
+        lua_setfield(L,-2, "__gc");
+      }
+      if (tostring) {
+        lua_pushcclosure(L, tostring, 0);
+        lua_setfield(L,-2, "__tostring");
+      }
+      luaL_newlib(L, methods);  
+      return 1;
+    }
+
+		// creates userdata able to support inheritance
 		template <class UserDataType>
 		static UserDataType* new_userdata(lua_State* L, const std::string& meta, UserDataType* ud, int self=1) {
 			lua_pushvalue(L, self);
@@ -186,6 +210,34 @@ namespace psycle { namespace host {
 	               : LuaHelper::check<UserDataType>(L, 1, meta);
 		}
 		
+    template <class UDT>
+		static int getbool(lua_State* L,
+			                const char* meta,
+						    bool (UDT::*pt2ConstMember)() const) { // function ptr
+			int n = lua_gettop(L);
+      if (n ==1) {
+		    UDT* m = LuaHelper::check<UDT>(L, 1, meta);
+			  lua_pushboolean(L, (m->*pt2ConstMember)());		      		    			
+			}  else {
+        luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+	    }
+			return 1;
+		}
+
+    template <class UDT>
+		static int getstring(lua_State* L,
+			                const char* meta,
+						    const std::string& (UDT::*pt2ConstMember)() const) { // function ptr
+			int n = lua_gettop(L);
+      if (n ==1) {
+		    UDT* m = LuaHelper::check<UDT>(L, 1, meta);
+			  lua_pushstring(L, (m->*pt2ConstMember)().c_str());		      		    			
+			}  else {
+        luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+	    }
+			return 1;
+		}
+
 				
 		template <class UDT, class RT>
 		static int getnumber(lua_State* L,
@@ -273,6 +325,19 @@ namespace psycle { namespace host {
 			} else {
         luaL_error(L, "Got %d arguments expected 1 or 2 (self [, value])", n); 
       }   						
+      return 0;
+		}
+
+    template <class UDT>
+		static int callstrictstr(lua_State* L, const char* meta,
+						       void (UDT::*pt2Member)(const std::string&), bool dec1=false) { // function ptr
+			int n = lua_gettop(L); 
+			if (n != 2) {
+        luaL_error(L, "Got %d arguments expected 2 (self, string)", n); 
+      }   
+			UDT* ud = LuaHelper::check<UDT>(L, 1, meta);
+			const char* str = luaL_checkstring(L, 2);      
+			(ud->*pt2Member)(str);
       return 0;
 		}
 		

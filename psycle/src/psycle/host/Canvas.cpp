@@ -7,11 +7,11 @@
 
 namespace psycle { namespace host  { namespace canvas {
 
-  Item::Item() : parent_(0), managed_(0), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
+  Item::Item() : parent_(0), managed_(false), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
     Init();
   }
 
-  Item::Item(Group* parent) : parent_(0), managed_(0), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
+  Item::Item(Group* parent) : parent_(0), managed_(false), visible_(1), pointer_events_(1), has_store_(false), update_(false) {
     Init();
     if (parent) {
       parent->Add(this);      
@@ -42,7 +42,7 @@ namespace psycle { namespace host  { namespace canvas {
 
   void Item::detach() { 
     if (parent()) {
-      parent_->Erase(this);
+      parent_->Remove(this);
     }
   }
 
@@ -232,7 +232,9 @@ namespace psycle { namespace host  { namespace canvas {
 
   void Group::Add(Item* item) {
     assert(item);
-    assert(!item->parent());
+    if (item->parent()) {
+      throw std::runtime_error("Item already child of a group.");
+    }
     STR();    
     item->set_parent(this);
     items_.push_back(item);    
@@ -248,10 +250,12 @@ namespace psycle { namespace host  { namespace canvas {
     FLS();
   }
 
-  void Group::Erase(Item* item) {
-    assert(item);
+  void Group::Remove(Item* item) {
+    assert(item);    
     iterator it = find(items_.begin(), items_.end(), item);
-    assert(it != items_.end());
+    if (it == items_.end()) {
+      throw std::runtime_error("Item is no child of the group");
+    }
     STR();
     items_.erase(it);
     checkbuttonpress();
@@ -271,8 +275,14 @@ namespace psycle { namespace host  { namespace canvas {
     FLS();
   }
 
+  void Group::RemoveAll() {
+    STR();    
+    items_.clear();    
+    FLS();
+  }
+
   void Group::RaiseToTop(Item* item) {    
-    Erase(item);
+    Remove(item);
     Add(item);
   }
 

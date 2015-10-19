@@ -42,17 +42,14 @@ namespace psycle { namespace host {
   const char* LuaConfigBind::meta = "psyconfigmeta";
   
   int LuaConfigBind::open(lua_State *L) {
-    static const luaL_Reg plugin_methods[] = {
+    static const luaL_Reg methods[] = {
       {"new", create},      
       {"get", get},
       {"name", skinname},
       {"luapath", plugindir},
       {NULL, NULL}
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    luaL_newlib(L, plugin_methods);
+    LuaHelper::open(L, meta, methods,  gc);
     // define enum
     int e = 0;
     lua_pushnumber(L, ++e); 
@@ -216,7 +213,7 @@ namespace psycle { namespace host {
   const char* LuaMachineBind::meta = "psypluginmeta";
 
   int LuaMachineBind::open(lua_State *L) {
-    static const luaL_Reg plugin_methods[] = {
+    static const luaL_Reg methods[] = {
       {"new", create},
       {"work", work},
       {"tick", tick},
@@ -237,12 +234,9 @@ namespace psycle { namespace host {
       {"parambyid", getparam},
       {"setpresetmode", setpresetmode},
       {NULL, NULL}
-    };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    luaL_newlib(L, plugin_methods);
-    // define some enums
+    };        
+    LuaHelper::open(L, meta, methods,  gc);
+    // define enums
     lua_pushnumber(L, 0);
     lua_setfield(L, -2, "FX");
     lua_pushnumber(L, 1);
@@ -513,7 +507,7 @@ namespace psycle { namespace host {
   }
 
   int LuaMachineBind::numprograms(lua_State* L) {	
-    return LuaHelper::getnumber<LuaMachine, int>(L, meta, &LuaMachine::numprograms);	
+    return LuaHelper::getnumber<LuaMachine, int>(L, meta, &LuaMachine::numprograms);
   }
 
   int LuaMachineBind::gc(lua_State* L) {
@@ -585,14 +579,12 @@ namespace psycle { namespace host {
   // PlayerBind
   ///////////////////////////////////////////////////////////////////////////////
   int LuaPlayerBind::open(lua_State *L) {
-    static const luaL_Reg plugin_methods[] = {
+    static const luaL_Reg methods[] = {
       {"new", create},
       {"samplerate", samplerate},
       {NULL, NULL}
     };
-    luaL_newmetatable(L, "psyplayermeta");
-    luaL_newlib(L, plugin_methods);    
-    return 1;
+    return LuaHelper::open(L, "psyplayermeta", methods);    
   }
 
   int LuaPlayerBind::create(lua_State* L) {
@@ -617,12 +609,8 @@ namespace psycle { namespace host {
       {"new", create},
       {"stem", stem },
       { NULL, NULL }
-    };
-    luaL_newmetatable(L, "psyplottermeta");
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    luaL_newlib(L, methods);  
-    return 1;
+    };    
+    return LuaHelper::open(L, "psyplottermeta", methods,  gc);        
   }
 
   int LuaPlotterBind::create(lua_State* L) {	
@@ -703,13 +691,7 @@ namespace psycle { namespace host {
       {"tostring", tostring},
       {NULL, NULL}
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    lua_pushcclosure(L, tostring, 0);
-    lua_setfield(L,-2, "__tostring");
-    luaL_newlib(L, methods);  
-    return 1;
+    return LuaHelper::open(L, meta, methods, gc, tostring);    
   }
 
   int LuaDelayBind::create(lua_State *L) {
@@ -784,11 +766,10 @@ namespace psycle { namespace host {
   }
 
   void WaveOscTables::tri(float* data, int num, int maxharmonic)  {
-    double gain = 0.5 / 0.777;
+    // double gain = 0.5 / 0.777;
     for (int h = 1; h <= maxharmonic; h=h+2) {
       double to_angle = 2*psycle::helpers::math::pi/num*h;
-      for (int i = 0; i < num; ++i) {
-        // 
+      for (int i = 0; i < num; ++i) {        
         data[i] += pow(-1.0,(h-1)/2.0)/(h*h)*::sin(i*to_angle);
       }  
     }  
@@ -925,7 +906,7 @@ namespace psycle { namespace host {
   // changes
 
   int LuaWaveOscBind::open(lua_State *L) {
-    static const luaL_Reg delay_methods[] = {
+    static const luaL_Reg methods[] = {
       {"new", create},
       {"frequency", get_base_frequency},
       {"setfrequency", set_base_frequency},
@@ -952,12 +933,7 @@ namespace psycle { namespace host {
       {"setpwm", setpwm},
       { NULL, NULL}
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, tostring, 0);
-    lua_setfield(L, -2, "__tostring");
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L, -2, "__gc");
-    luaL_newlib(L, delay_methods);
+    LuaHelper::open(L, meta, methods, gc, tostring);
     lua_pushnumber(L, 1);
     lua_setfield(L, -2, "SIN");
     lua_pushnumber(L, 2);
@@ -1139,7 +1115,7 @@ namespace psycle { namespace host {
       PSArray* data = *(PSArray **)luaL_checkudata(L, 2, LuaArrayBind::meta);   
       float* fm = 0;
       float* env = 0;
-      float* pwm = 0;
+      // float* pwm = 0;
       if (n>2 && (!lua_isnil(L,3))) {
         PSArray*arr = *(PSArray **)luaL_checkudata(L, 3, LuaArrayBind::meta);   
         fm = arr->data();
@@ -1311,12 +1287,7 @@ namespace psycle { namespace host {
       {"tostring", tostring},
       { NULL, NULL }
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    lua_pushcclosure(L, tostring, 0);
-    lua_setfield(L,-2, "__tostring");
-    luaL_newlib(L, methods);  
+    LuaHelper::open(L, meta, methods, gc, tostring);    
     lua_pushnumber(L, 0);
     lua_setfield(L, -2, "LOWPASS");
     lua_pushnumber(L, 1);
@@ -1462,10 +1433,7 @@ namespace psycle { namespace host {
       {"copytobank", set_bank},
       { NULL, NULL }
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    luaL_newlib(L, methods);  
+    LuaHelper::open(L, meta, methods, gc);
     lua_pushnumber(L, 0);
     lua_setfield(L, -2, "DO_NOT");
     lua_pushnumber(L, 1);
@@ -2198,10 +2166,7 @@ namespace psycle { namespace host {
       {"setfm", setfm},      
       {NULL, NULL}
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    luaL_newlib(L, methods);  
+    LuaHelper::open(L, meta, methods, gc);
     lua_pushnumber(L, 1);
     lua_setfield(L, -2, "ZEROHOLD");
     lua_pushnumber(L, 2);
@@ -2517,12 +2482,7 @@ namespace psycle { namespace host {
       {"tostring", tostring},
       {NULL, NULL}
     };
-    luaL_newmetatable(L, meta);
-    lua_pushcclosure(L, gc, 0);
-    lua_setfield(L,-2, "__gc");
-    lua_pushcclosure(L, tostring, 0);
-    lua_setfield(L,-2, "__tostring");
-    luaL_newlib(L, methods);    
+    LuaHelper::open(L, meta, methods, gc, tostring);
     lua_pushnumber(L, 0);
     lua_setfield(L, -2, "LIN");
     lua_pushnumber(L, 1);

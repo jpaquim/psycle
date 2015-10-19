@@ -516,8 +516,7 @@ namespace psycle
 					virtual void GetIndexBankName(int bnkidx, char* val){strcpy(val,"Internal");};          
 					virtual int GetNumBanks(){ return 1;};
 					virtual void Tweak(CPreset const & preset);
-					virtual void GetCurrentPreset(CPreset & preset);
-          virtual int GetGuiType() const { return 0; }
+					virtual void GetCurrentPreset(CPreset & preset);         
 
 				public:///\todo private:
 					int _numPars;
@@ -531,6 +530,9 @@ namespace psycle
 					virtual void SetPosX(int x) {_x = x;}
 					virtual int  GetPosY() const { return _y; }
 					virtual void SetPosY(int y) {_y = y;}
+          virtual int GetGuiType() const { return 0; }
+          virtual void OnGuiTimer(void* hnd) {}
+
 				public:///\todo private:
 					int _x;
 					int _y;
