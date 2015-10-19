@@ -72,9 +72,10 @@ namespace host {
 			int lastprogram;
 			int lastnumprogrs;			
       LuaMenuBar* custom_menubar;
+      LuaMenu barmenu;
 		protected:
 			DECLARE_MESSAGE_MAP()
-			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+			afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);      
 			afx_msg void OnClose();
 			afx_msg void OnDestroy();
 			afx_msg void OnTimer(UINT_PTR nIDEvent);

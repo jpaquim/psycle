@@ -60,16 +60,17 @@ namespace psycle { namespace host {
     PluginInfo CallPluginInfo() { return proxy_.call_info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
     virtual void AfterTweaked(int numparam);    
-    LuaMenuBar* GetMenu(CMenu* menu) { 
+    LuaMenuBar* GetMenu(LuaMenu* menu) { 
       if (!custom_menubar) {
-        custom_menubar = proxy_.get_menu(menu);
+        custom_menubar = proxy_.get_menu(menu);        
       } else {
-        LuaMenuBar::iterator it = custom_menubar->begin();
-        for ( ; it != custom_menubar->end(); ++it) {
+        std::vector<LuaMenu*>::iterator it = custom_menubar->items.begin();
+        for ( ; it != custom_menubar->items.end(); ++it) {
           LuaMenu* m = *it;
-          menu->AppendMenu(MF_POPUP, (UINT_PTR)m->m_hMenu, m->label().c_str());
-        }           
+          menu->menu()->AppendMenu(MF_POPUP, (UINT_PTR)m->menu()->m_hMenu, m->label().c_str());
+        }        
       }
+      menu->setbar(custom_menubar);
       return custom_menubar; 
     }
     std::string help();
@@ -102,6 +103,12 @@ namespace psycle { namespace host {
 				val[0]='\0';
 		}
 		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
+    virtual void OnGuiTimer(void* hnd) {      
+      if (custom_menubar && custom_menubar->update) {
+        proxy_.update_menu(hnd);
+        custom_menubar->update = false;
+      }      
+    }    
 
     std::string dll_path_;
     bool usenoteon_;
@@ -109,7 +116,7 @@ namespace psycle { namespace host {
 
     void lock() const { proxy_.lock(); }
     void unlock() const { proxy_.unlock(); }
-
+    
   protected:
     LuaProxy proxy_;
     int curr_prg_;    
@@ -136,7 +143,7 @@ namespace psycle { namespace host {
       unsigned char inst,
       unsigned char cmd,
       unsigned char val);    
-    LuaMenuBar* custom_menubar;
+    LuaMenuBar* custom_menubar;    
   };
 
 

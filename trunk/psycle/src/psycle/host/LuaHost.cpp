@@ -45,57 +45,34 @@ namespace psycle { namespace host {
   void LuaProxy::set_state(lua_State* state) { 
     L = state;
     export_c_funcs();
-    // requiref our c modules  
-    luaL_requiref(L, "psycle.dsp.resampler", LuaResamplerBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.dsp.math", LuaDspMathHelper::open, 1);  
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.midi", LuaMidiHelper::open, 1);  
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.array", LuaArrayBind::open, 1);
-    lua_pop(L, 1);  
-    luaL_requiref(L, "psycle.dsp.filter", LuaDspFilterBind::open, 1);
-    lua_pop(L, 1);
+    // require c modules  
+    LuaHelper::require<LuaResamplerBind>(L, "psycle.dsp.resampler");
+    LuaHelper::require<LuaDspMathHelper>(L, "psycle.dsp.math");
+    LuaHelper::require<LuaDspFilterBind>(L, "psycle.dsp.filter");
+    LuaHelper::require<LuaMidiHelper>(L, "psycle.midi");
+    LuaHelper::require<LuaArrayBind>(L, "psycle.array");        
+    LuaHelper::require<LuaDelayBind>(L, "psycle.delay");
+    LuaHelper::require<LuaMachineBind>(L, "psycle.machine");
+    LuaHelper::require<LuaWaveOscBind>(L, "psycle.osc");
+    LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
+    LuaHelper::require<LuaEnvelopeBind>(L, "psycle.envelope");
+    LuaHelper::require<LuaPlayerBind>(L, "psycle.player");
+    LuaHelper::require<LuaConfigBind>(L, "psycle.config");    
+    // ui binds    
+    LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
+    LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
+    LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");    
+    LuaHelper::require<LuaDialogBind>(L, "psycle.ui.dialog");        
+    LuaHelper::require<LuaCanvasBind>(L, "psycle.ui.canvas");    
+    LuaHelper::require<LuaGroupBind>(L, "psycle.ui.canvas.group");    
+    LuaHelper::require<LuaRectBind>(L, "psycle.ui.canvas.rect");    
+    LuaHelper::require<LuaLineBind>(L, "psycle.ui.canvas.line");    
+    LuaHelper::require<LuaTextBind>(L, "psycle.ui.canvas.text");
+    LuaHelper::require<LuaPixBind>(L, "psycle.ui.canvas.pix");
 #if !defined WINAMP_PLUGIN
-    luaL_requiref(L, "psycle.plotter", LuaPlotterBind::open, 1);
-    lua_pop(L, 1);
-#endif //!defined WINAMP_PLUGIN
-    luaL_requiref(L, "psycle.menubar", LuaMenuBarBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.menu", LuaMenuBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.menuitem", LuaMenuItemBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.delay", LuaDelayBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.machine", LuaMachineBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.osc", LuaWaveOscBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.dsp.wavedata", LuaWaveDataBind::open, 1);  
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.envelope", LuaEnvelopeBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.player", LuaPlayerBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.config", LuaConfigBind::open, 1);
-    lua_pop(L, 1);
-    // ui binds
-    luaL_requiref(L, "psycle.ui.dialog", LuaDialogBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.ui.canvas", LuaCanvasBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.ui.canvas.group", LuaGroupBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.ui.canvas.rect", LuaRectBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.ui.canvas.line", LuaLineBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.ui.canvas.text", LuaTextBind::open, 1);
-    lua_pop(L, 1);
-    luaL_requiref(L, "psycle.ui.canvas.pix", LuaPixBind::open, 1);
-    lua_pop(L, 1);
-#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN
+    LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");    
+#endif //!defined WINAMP_PLUGIN    
+#if defined LUASOCKET_SUPPORT && !defined WINAMP_PLUGIN    
     luaL_requiref(L, "socket", luaopen_socket_core, 1);
     lua_pop(L, 1);
     luaL_requiref(L, "mime", luaopen_mime_core, 1);
@@ -993,8 +970,17 @@ namespace psycle { namespace host {
     lua_pop(L, 1);  // pop returned value	
     return name;
   }
+
+  void LuaProxy::update_menu(void* hnd) {
+    if (hnd) {
+      lock();    
+      CFrameWnd* cwnd = (CFrameWnd*) hnd;
+      cwnd->DrawMenuBar();
+      unlock();
+    }
+  }
   
-  LuaMenuBar* LuaProxy::get_menu(CMenu* menu) {
+  LuaMenuBar* LuaProxy::get_menu(LuaMenu* menu) {
     try {
       LuaHelper::get_proxy(L);
     } catch(std::exception &e) {	  
@@ -1008,10 +994,12 @@ namespace psycle { namespace host {
       return 0;	 
     } else {  
       LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, -1, LuaMenuBarBind::meta);        
-      LuaMenuBar::iterator it = menubar->begin();
-      for ( ; it != menubar->end(); ++it) {
+      std::vector<LuaMenu*>::iterator it = menubar->items.begin();
+      for ( int pos = 2; it != menubar->items.end(); ++it, ++pos) {
          LuaMenu* m = *it;
-         menu->AppendMenu(MF_POPUP, (UINT_PTR)m->m_hMenu, m->label().c_str());
+         menu->menu()->AppendMenu(MF_POPUP, (UINT_PTR)m->menu()->m_hMenu, m->label().c_str());         
+         m->set_parent(menu);
+         m->set_pos(pos); 
       }      
       return menubar;
     }
