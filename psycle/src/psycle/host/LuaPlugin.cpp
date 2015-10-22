@@ -69,8 +69,12 @@ namespace psycle { namespace host {
   }
 
   bool LuaPlugin::OnEvent(canvas::Event* ev) {
-    try {
-       return proxy_.call_event(ev); 
+    try {       
+        if (GetCanvas() !=0 && GetGuiType() == 1) {                    
+          return proxy_.call_event(ev); 
+          return true;
+        }		
+        
       } catch(std::exception &e) { e;
        return false;
     } 

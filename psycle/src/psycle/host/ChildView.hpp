@@ -240,6 +240,7 @@ namespace host {
 			void RestoreRecent();
       void RemoveLuaMenu();
       void LoadLuaExtensions();
+      bool DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point);
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;

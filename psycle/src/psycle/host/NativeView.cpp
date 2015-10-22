@@ -560,16 +560,9 @@ namespace psycle { namespace host {
     }
 
     bool CNativeView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
-      if (_pMachine->_type == MACH_LUA) {
-        LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        using namespace psycle::host::canvas;
-        Canvas* user_view = lp->GetCanvas();
-        if (user_view !=0 && lp->GetGuiType() == 1) {
-          Event ev(0, (Event::Type)type, pt.x, pt.y, button, nFlags);
-          LuaPlugin* lp = (LuaPlugin*) _pMachine;
-          lp->OnEvent(&ev);
-          return true;
-        }		    
+      if (_pMachine->_type == MACH_LUA) {        
+        canvas::Event ev(0, (canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
+        return ((LuaPlugin*) _pMachine)->OnEvent(&ev);        		    
       }
       return false;
     }

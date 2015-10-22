@@ -7,6 +7,8 @@ namespace psycle { namespace host {
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
+      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, point))
+        return;
 
 			SetCapture();
 			
@@ -84,6 +86,8 @@ namespace psycle { namespace host {
 		
 		void CChildView::OnRButtonUp( UINT nFlags, CPoint point )
 		{
+      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 2, nFlags, point))
+        return;
 			ReleaseCapture();
 			allowcontextmenu=true;
 
@@ -266,6 +270,8 @@ namespace psycle { namespace host {
 
 		void CChildView::OnLButtonDown( UINT nFlags, CPoint point )
 		{
+      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 1, nFlags, point))
+        return;
 			SetCapture();
 
 			if(viewMode == view_modes::machine)
@@ -560,6 +566,8 @@ namespace psycle { namespace host {
 
 		void CChildView::OnLButtonUp( UINT nFlags, CPoint point )
 		{
+      if (DelegateLuaEvent(canvas::Event::BUTTON_RELEASE, 1, nFlags, point))
+        return;
 			ReleaseCapture();
 			
 			if (viewMode == view_modes::machine )
@@ -721,6 +729,8 @@ namespace psycle { namespace host {
 
 		void CChildView::OnMouseMove( UINT nFlags, CPoint point )
 		{
+      if (DelegateLuaEvent(canvas::Event::MOTION_NOTIFY, 0, nFlags, point))
+        return;
 			if (viewMode == view_modes::machine)
 			{
 				if (smac > -1 && (nFlags & MK_LBUTTON))
@@ -1048,6 +1058,8 @@ namespace psycle { namespace host {
 
 		void CChildView::OnLButtonDblClk( UINT nFlags, CPoint point )
 		{
+      if (DelegateLuaEvent(canvas::Event::BUTTON_2PRESS, 1, nFlags, point))
+        return;
 			int tmac=-1;
 			
 			switch (viewMode)
@@ -1164,6 +1176,7 @@ namespace psycle { namespace host {
 							break;
 						}            
             pParentMain->ShowMachineGui(tmac, point);                        
+            Repaint();
 					}
 					else
 					{

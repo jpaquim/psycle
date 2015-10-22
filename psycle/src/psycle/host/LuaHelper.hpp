@@ -407,7 +407,7 @@ namespace psycle { namespace host {
 				OutputDebugString("  "); // put a separator
 			}
 			OutputDebugString("\n"); // end the listing
-		}	
+		}	     
 
 	};
 }  // namespace
