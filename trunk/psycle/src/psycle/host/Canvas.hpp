@@ -146,7 +146,8 @@ namespace psycle { namespace host { namespace canvas {
     virtual void intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {}
     virtual bool OnEvent(Event* ev) { return 0; }
     virtual double x() const { return 0; }
-    virtual double y() const { return 0; }    
+    virtual double y() const { return 0; } 
+    void pos(double& xv, double& yv) const { xv = x(); yv = y(); }
     virtual double zoomabsx() const;
     virtual double zoomabsy() const;
     void boundingclientrect(double &x1, double &y1, double &x2, double &y2) {

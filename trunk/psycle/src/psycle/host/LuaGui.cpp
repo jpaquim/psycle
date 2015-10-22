@@ -18,8 +18,28 @@
 namespace psycle { namespace host {
 
   ///////////////////////////////////////////////////////////////////////////////
-  // MenuBinds
+  // Menu + Binds
   ///////////////////////////////////////////////////////////////////////////////
+
+
+  void LuaMenuBar::append(LuaMenu* menu) {
+    int pos = menu->cmenu()->GetMenuItemCount();
+    std::vector<LuaMenu*>::iterator it = items.begin();
+    for ( ; it != items.end(); ++it) {
+      LuaMenu* m = *it;
+      menu->cmenu()->AppendMenu(MF_POPUP, (UINT_PTR)m->cmenu()->m_hMenu, m->label().c_str());
+      m->set_parent(menu);
+      m->set_pos(pos++); 
+    }
+    menu->setbar(this);
+  }
+
+  void LuaMenuBar::remove(CMenu* menu, int pos) {
+     std::vector<LuaMenu*>::iterator it = items.begin();
+     for ( ; it != items.end(); ++it) {          
+       menu->RemoveMenu(pos++, MF_BYPOSITION);
+     } 
+  }
 
   const char* LuaMenuBarBind::meta = "psymenubarmeta";
 
@@ -33,28 +53,66 @@ namespace psycle { namespace host {
   }
 
   int LuaMenuBarBind::create(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 2 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;  
     LuaMenuBar* menubar = new LuaMenuBar();            
-    LuaHelper::new_userdata<>(L, meta, menubar);    
+    LuaHelper::new_userdata<>(L, meta, menubar);       
     return 1;
   }
 
   int LuaMenuBarBind::add(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, menu or menuitem)", n); 
-    }        
+    int err = LuaHelper::check_argnum(L, 2, "self, menu");
+    if (err!=0) return err;    
     LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, 1, meta);
     LuaMenu* menu = LuaHelper::check<LuaMenu>(L, 2, LuaMenuBind::meta);
-    menubar->items.push_back(menu);        
+    menubar->add(menu);
+    LuaHelper::register_userdata<>(L, menu);
     return LuaHelper::chaining(L);
   }
-
+  
   int LuaMenuBarBind::gc(lua_State* L) {    
     return LuaHelper::delete_userdata<LuaMenuBar>(L, meta);
+  }
+
+
+  void LuaMenu::set_label(const std::string& label) {
+    label_ = label; 
+    if (parent()) {
+      parent()->cmenu()->ModifyMenu(pos_, MF_BYPOSITION, 0, label.c_str());
+      LuaMenuBar* b = bar();     
+      b->setupdate(b!=0);
+    }
+  }
+      
+  void LuaMenu::add(LuaMenu* newmenu) {           
+    cmenu_->AppendMenu(MF_POPUP | MF_ENABLED, (UINT_PTR)newmenu->cmenu()->m_hMenu, newmenu->label().c_str());
+    newmenu->set_parent(this);
+    newmenu->set_pos(cmenu_->GetMenuItemCount()-1);
+  }
+  
+  void LuaMenu::add(LuaMenuItem* item) {
+    items.push_back(item);
+    item->set_menu(this);
+    const int id = ID_DYNAMIC_MENUS_START+item->id_counter;
+    item->set_id(id);     
+    LuaMenuItem::menuItemIdMap[item->id()] = item;
+    cmenu_->AppendMenu(MF_STRING, id, item->label().c_str());
+    if (item->checked()) {
+		  cmenu_->CheckMenuItem(id, MF_CHECKED | MF_BYCOMMAND);
+    }      
+  }
+  
+  void LuaMenu::addseparator() {         
+    cmenu_->AppendMenu(MF_SEPARATOR, 0, "-");
+  }
+
+  void LuaMenu::remove(LuaMenuItem* item) {
+    std::vector<LuaMenuItem*>::iterator it;     
+    it = std::find(items.begin(), items.end(), item);
+    if (it != items.end()) {
+      items.erase(it);
+    }   
+    cmenu_->RemoveMenu(item->id(), MF_BYCOMMAND);
   }
 
   const char* LuaMenuBind::meta = "psymenumeta";
@@ -71,24 +129,20 @@ namespace psycle { namespace host {
     return LuaHelper::open(L, meta, methods,  gc);
   }
 
-  int LuaMenuBind::create(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, menuname)", n); 
-    }    
+  int LuaMenuBind::create(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 2, "self, menuname");
+    if (err!=0) return err;
     LuaMenu* menu = new LuaMenu();    
-    menu->menu()->CreatePopupMenu();    
+    menu->cmenu()->CreatePopupMenu();    
     const char* label = luaL_checkstring(L, 2);
     menu->set_label(label);
     LuaHelper::new_userdata<>(L, meta, menu);    
     return 1;
   }
 
-  int LuaMenuBind::remove(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, menu or menuitem)", n); 
-    }        
+  int LuaMenuBind::remove(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 2, "self, menu or menuitem");
+    if (err!=0) return err;
     LuaMenu* menu = LuaHelper::check<LuaMenu>(L, 1, meta);
     LuaMenuItem* item = 0;    
     item = LuaHelper::test<LuaMenuItem>(L, 2, LuaMenuItemBind::meta);
@@ -102,53 +156,35 @@ namespace psycle { namespace host {
         LuaHelper::register_userdata<>(L, new_menu);        
       }*/
     } else {    
-      menu->remove(item);
-      menu->menu()->RemoveMenu(item->id(), MF_BYCOMMAND);
-      LuaHelper::unregister_userdata<>(L, item);    
-      lua_pop(L, 2);    
+      menu->remove(item);      
+      LuaHelper::unregister_userdata<>(L, item);        
     }    
     return LuaHelper::chaining(L);
   }
 
   int LuaMenuBind::add(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, menu or menuitem)", n); 
-    }        
+    int err = LuaHelper::check_argnum(L, 2, "self, menu or menuitem");
+    if (err!=0) return err;
     LuaMenu* menu = LuaHelper::check<LuaMenu>(L, 1, meta);
-    LuaMenuItem* item = 0;
-    int id = ID_DYNAMIC_MENUS_START+item->id_counter;
+    LuaMenuItem* item = 0;    
     item = LuaHelper::test<LuaMenuItem>(L, 2, LuaMenuItemBind::meta);
     if (!item) {
       LuaMenu* new_menu= LuaHelper::test<LuaMenu>(L, 2, LuaMenuBind::meta);
       if (new_menu) {    
-        int pos = menu->menu()->GetMenuItemCount()-1;        
-        menu->menu()->AppendMenu(MF_POPUP, (UINT_PTR)new_menu->menu()->m_hMenu, new_menu->label().c_str());
-        new_menu->set_parent(menu);
-        new_menu->set_pos(pos);
-        LuaHelper::register_userdata<>(L, new_menu);        
+        menu->add(new_menu);
+        LuaHelper::register_userdata<>(L, new_menu);
+      } else {
+        return luaL_error(L, "Argument is no menu or menuitem.");
       }
-    } else {         
-      menu->menu()->AppendMenu(MF_STRING, id, item->label().c_str());
-      menu->add(item);
-      if (item->checked()) {
-		    menu->menu()->CheckMenuItem(id, MF_CHECKED | MF_BYCOMMAND);
-      }
-      item->set_id(id);
-      LuaMenuItem::menuItemIdMap[item->id()] = item;
-      item->menu = menu->menu();
+    } else {               
+      menu->add(item);           
       LuaHelper::register_userdata<>(L, item);
     }    
     return LuaHelper::chaining(L);
   }
 
-  int LuaMenuBind::addseparator(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }        
-    LuaMenu* menu = LuaHelper::check<LuaMenu>(L, 1, meta);
-    menu->menu()->AppendMenu(MF_SEPARATOR, 0, "-");    
+  int LuaMenuBind::addseparator(lua_State* L) {    
+    LuaHelper::call<LuaMenu>(L, meta, &LuaMenu::addseparator);
     return LuaHelper::chaining(L);
   }
 
@@ -160,7 +196,28 @@ namespace psycle { namespace host {
   int LuaMenuBind::gc(lua_State* L) {    
     return LuaHelper::delete_userdata<LuaMenu>(L, meta);
   }
+  
+  void LuaMenuItem::set_label(const std::string& label) { 
+    label_ = label; 
+    if (menu_) {
+       menu_->cmenu()->ModifyMenu(id(), MF_BYCOMMAND, id(), label.c_str());
+    }
+  }  
 
+  void LuaMenuItem::check() {
+    check_ = true;
+    if (menu_) {
+      menu_->cmenu()->CheckMenuItem(id(), MF_CHECKED | MF_BYCOMMAND);
+    }
+  }
+  
+  void LuaMenuItem::uncheck() { 
+    check_ = false;
+    if (menu_) {
+       menu_->cmenu()->CheckMenuItem(id(), MF_UNCHECKED | MF_BYCOMMAND);
+    }
+  }
+  
   const char* LuaMenuItemBind::meta = "psymenuitemmeta";
   int LuaMenuItem::id_counter = 0;
   std::map<std::uint16_t, LuaMenuItem*> LuaMenuItem::menuItemIdMap;
@@ -181,11 +238,9 @@ namespace psycle { namespace host {
     return LuaHelper::open(L, meta, methods,  gc);
   }
 
-  int LuaMenuItemBind::create(lua_State* L) {	
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, itemname)", n); 
-    }
+  int LuaMenuItemBind::create(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 2, "self, itemname");
+    if (err!=0) return err;
     const char* label = luaL_checkstring(L, 2);
     LuaMenuItem* item = new LuaMenuItem();
     item->set_id(item->id_counter);
@@ -219,66 +274,37 @@ namespace psycle { namespace host {
   }
 
   int LuaMenuItemBind::check(lua_State* L) {	
-    int n = lua_gettop(L);
-    if (n ==1) {
-      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	         
-#if !defined WINAMP_PLUGIN
-      if (m->menu) {
-        m->menu->CheckMenuItem(m->id(), MF_CHECKED | MF_BYCOMMAND);
-      }
-      m->check();
-#endif
-    } else {
-      luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }
+    LuaHelper::call<LuaMenuItem>(L, meta, &LuaMenuItem::check);
     return LuaHelper::chaining(L);
   }
 
   int LuaMenuItemBind::uncheck(lua_State* L) {	
-    int n = lua_gettop(L);
-    if (n ==1) {
-      LuaMenuItem* m = LuaHelper::check<LuaMenuItem>(L, 1, meta);       	   	   
-#if !defined WINAMP_PLUGIN
-      if (m->menu) {	
-        m->menu->CheckMenuItem(m->id(), MF_UNCHECKED | MF_BYCOMMAND);      
-        m->uncheck();
-      }
-#endif
-    } else {
-      luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }
+    LuaHelper::call<LuaMenuItem>(L, meta, &LuaMenuItem::uncheck);    
     return LuaHelper::chaining(L);
   }
   
   int LuaMenuItemBind::addlistener(lua_State* L) {
-    int n = lua_gettop(L);
-    if (n ==2) {	   
-      lua_getfield(L, 1, "listener_");
-      lua_pushvalue(L, 2);
-      lua_rawseti(L, -2, lua_rawlen(L, -2)+1); 
-    } else {
-      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
-    }
-    lua_pushvalue(L, 1); // chaining
-    return 1;
+    int err = LuaHelper::check_argnum(L, 2, "self, index");
+    if (err!=0) return err;    
+    lua_getfield(L, 1, "listener_");
+    lua_pushvalue(L, 2);
+    lua_rawseti(L, -2, lua_rawlen(L, -2)+1); 
+    return LuaHelper::chaining(L);    
   }
 
   int LuaMenuItemBind::notify(lua_State* L) {
-    int n = lua_gettop(L);
-    if (n ==1) {
-      lua_getfield(L, 1, "listener_");
-      size_t len = lua_rawlen(L, -1);
-      for (size_t i = 1; i <= len; ++i) {
-        lua_rawgeti(L, 2, i);
-        lua_getfield(L, -1, "onmenu");
-        lua_pushvalue(L, -2);
-        lua_pushvalue(L, 1);
-        lua_pcall(L, 2, 0, 0);
-        lua_pop(L, 1);
-      }
-    } else {
-      luaL_error(L, "Got %d arguments expected 2 (self, index)", n); 
-    }
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
+    lua_getfield(L, 1, "listener_");
+    size_t len = lua_rawlen(L, -1);
+    for (size_t i = 1; i <= len; ++i) {
+      lua_rawgeti(L, 2, i);
+      lua_getfield(L, -1, "onmenu");
+      lua_pushvalue(L, -2);
+      lua_pushvalue(L, 1);
+      lua_pcall(L, 2, 0, 0);
+      lua_pop(L, 1);
+    }    
     return 0;
   }
 
@@ -572,10 +598,8 @@ namespace psycle { namespace host {
   }
 
   int LuaCanvasBind::create(lua_State* L) {	
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;     
     canvas::Canvas* canvas = new LuaCanvas(L);     
     canvas->SetSave(true);
     LuaHelper::new_userdata<>(L, meta, canvas);
@@ -589,42 +613,30 @@ namespace psycle { namespace host {
 
   int LuaCanvasBind::gc(lua_State* L) {
     LuaCanvas** canvas = (LuaCanvas**) luaL_checkudata(L, -1, meta);            
-    LuaHelper::unregister_userdata<>(L, (*canvas)->root());
-    lua_pop(L, 2);    
+    LuaHelper::unregister_userdata<>(L, (*canvas)->root());     
     return LuaHelper::delete_userdata<LuaCanvas>(L, meta);
   }
 
   int LuaCanvasBind::root(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    } 
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err; 
     canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, 1, meta);    
     LuaHelper::find_userdata<>(L, canvas->root());    
     return 1;
   }
 
-  int LuaCanvasBind::size(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    } 
-    canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, 1, meta);
-    lua_pushnumber(L, canvas->cw());
-    lua_pushnumber(L, canvas->ch());
-    return 2;
+  int LuaCanvasBind::size(lua_State* L) {    
+    return LuaHelper::get2numbers<canvas::Canvas, int, int>(L, meta, &canvas::Canvas::cw, &canvas::Canvas::ch);
   }
 
   int LuaCanvasBind::preferredsize(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    } 
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err; 
     canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, 1, meta);
     double w, h;
     canvas->preferredsize(w, h);
     lua_pushnumber(L, w);
-    lua_pushnumber(L, h);
+    lua_pushnumber(L, h);    
     return 2;
   }
 
@@ -638,17 +650,8 @@ namespace psycle { namespace host {
     return LuaHelper::chaining(L);      
   }
 
-  int LuaCanvasBind::color(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
-    LuaCanvas* canvas = LuaHelper::check<LuaCanvas>(L, 1, meta);
-    canvas::ARGB color = canvas->color();    
-    int skin = canvas->skincolor();    
-    lua_pushnumber(L, color);
-    lua_pushnumber(L, skin);    
-    return 2;
+  int LuaCanvasBind::color(lua_State* L) {    
+    return LuaHelper::get2numbers<LuaCanvas,canvas::ARGB, int>(L, meta, &LuaCanvas::color, &LuaCanvas::skincolor);    
   }
 
   int LuaCanvasBind::setpreferredsize(lua_State* L) {
@@ -698,7 +701,7 @@ namespace psycle { namespace host {
   int LuaGroupBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
       {"new", create},      
-      {"setxy", setxy},
+      {"setpos", setpos},
       {"pos", pos},
       {"clientpos", clientpos},
       {"getfocus", getfocus},
@@ -742,10 +745,8 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::canvas(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    } 
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;  
     canvas::Group* group = LuaHelper::check<canvas::Group>(L, 1, meta);
     canvas::Canvas* canvas = group->canvas();    
     LuaHelper::find_weakuserdata(L, canvas);
@@ -798,10 +799,8 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::add(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }        
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;       
     canvas::Group* group = LuaHelper::check<LuaGroup>(L, 1, meta);
     canvas::Item* item = test(L, 2);    
     if (item) {
@@ -837,7 +836,7 @@ namespace psycle { namespace host {
     return LuaHelper::chaining(L);     
   }
 
-  int LuaGroupBind::setxy(lua_State* L) {
+  int LuaGroupBind::setpos(lua_State* L) {
     LuaHelper::callstrict2(L, meta, &canvas::Group::SetXY);    
     return LuaHelper::chaining(L); 
   }
@@ -847,22 +846,13 @@ namespace psycle { namespace host {
     return LuaHelper::chaining(L); 
   }
 
-  int LuaGroupBind::pos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 3 (self)", n); 
-    }    
-    LuaGroup* group = LuaHelper::check<LuaGroup>(L, 1, meta);        
-    lua_pushnumber(L, group->x());
-    lua_pushnumber(L, group->y());    
-    return 2;
+  int LuaGroupBind::pos(lua_State* L) {    
+    return LuaHelper::get2number2<LuaGroup,double>(L, meta, &LuaGroup::pos);    
   }
 
   int LuaGroupBind::bounds(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 3 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;     
     LuaGroup* group = LuaHelper::check<LuaGroup>(L, 1, meta);
     double x1, y1, x2, y2;
     group->GetBounds(x1, y1, x2, y2);
@@ -874,10 +864,8 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::clientpos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
     canvas::Group* item = LuaHelper::check<canvas::Group>(L, 1, meta);
     double x1, y1;
     x1 = item->zoomabsx();
@@ -887,11 +875,9 @@ namespace psycle { namespace host {
     return 2;
   }
 
-  int LuaGroupBind::intersect(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 3) {
-      return luaL_error(L, "Got %d arguments expected 3 or 5 (self, x1, y1 [,x2, y2])", n); 
-    }    
+  int LuaGroupBind::intersect(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 3, "self, self, x1, y1 [,x2, y2]");
+    if (err!=0) return err;
     canvas::Group* item = LuaHelper::check<canvas::Group>(L, 1, meta);    
     double x = luaL_checknumber(L, 2);
     double y = luaL_checknumber(L, 3);
@@ -904,11 +890,9 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaGroupBind::intersectrect(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n!=5) {
-      return luaL_error(L, "Got %d arguments expected 5 (self, x1, y1 ,x2, y2)", n); 
-    }    
+  int LuaGroupBind::intersectrect(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 5, "self, x1, y1 ,x2, y2");
+    if (err!=0) return err;
     canvas::Group* item = LuaHelper::check<canvas::Group>(L, 1, meta);    
     double x1 = luaL_checknumber(L, 2);
     double y1 = luaL_checknumber(L, 3);
@@ -925,15 +909,12 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::getitems(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
-    LuaGroup* group = LuaHelper::check<LuaGroup>(L, 1, meta);
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err; 
+    LuaGroup* group = LuaHelper::check<LuaGroup>(L, 1, meta);    
+    lua_newtable(L); // create item table
     LuaGroup::iterator it = group->begin();
-    lua_newtable(L); // create item table    
-    for (int i= 0;it!=group->end(); ++it, ++i) {
-      canvas::Item* item = *it;
+    for (; it!=group->end(); ++it) {
       LuaHelper::find_userdata<>(L, *it);      
       lua_rawseti(L, 2, lua_rawlen(L, 2)+1); // items[#items+1] = newitem      
     }
@@ -944,10 +925,8 @@ namespace psycle { namespace host {
   int LuaGroupBind::gc(lua_State* L) {
     LuaGroup** group = (LuaGroup**) luaL_checkudata(L, -1, meta);
     LuaGroup::iterator it = (*group)->begin();
-    for ( ; it != (*group)->end(); ++it) {
-      canvas::Item* item = *it;
-      LuaHelper::unregister_userdata<>(L, item);
-      lua_pop(L, 2);
+    for ( ; it != (*group)->end(); ++it) {      
+      LuaHelper::unregister_userdata<>(L, *it);      
     }    
     return LuaHelper::delete_userdata<LuaGroup>(L, meta);   
   }
@@ -959,10 +938,8 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::parent(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err; 
     canvas::Group* g = LuaHelper::check<canvas::Group>(L, 1, meta);        
     canvas::Group* group = g->parent();
     LuaHelper::find_userdata<>(L, group);    
@@ -981,10 +958,8 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::zorder(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     canvas::Item* item = LuaHelper::check<canvas::Item>(L, 1, meta);
     if (item->parent()) {
       int z  = item->parent()->zorder(item);
@@ -1007,15 +982,14 @@ namespace psycle { namespace host {
 
   int LuaRectBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
-      {"new", create},
-      {"setpos", setpos},
+      {"new", create},      
       {"setcolor", setcolor},
       {"setskincolor", setskincolor},
       {"color", color},
       {"setstrokecolor", setstrokecolor},
       {"setskinstrokecolor", setskinstrokecolor},
       {"strokecolor", color},            
-      {"setxy", setxy},
+      {"setpos", setpos},
       {"pos", pos},
       {"clientpos", clientpos},
       {"parent", parent},      
@@ -1030,11 +1004,11 @@ namespace psycle { namespace host {
    return LuaHelper::open(L, meta, methods,  gc);
   }
 
-  int LuaRectBind::create(lua_State* L) {	
+  int LuaRectBind::create(lua_State* L) {    
     int n = lua_gettop(L);  // Number of arguments
-    if (n != 1 and n != 2) {
+    if (n != 2 && n!=1) {
       return luaL_error(L, "Got %d arguments expected 2 (self, group)", n); 
-    }    
+    }  
     LuaRect* rect = 0;
     LuaGroup* group = 0;
     if (n==2) {
@@ -1047,25 +1021,29 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaRectBind::setpos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 5) {
-      return luaL_error(L, "Got %d arguments expected 5 (self, x1, y1, x2, y2)", n); 
+  int LuaRectBind::setpos(lua_State* L) {  
+    const int n = lua_gettop(L);
+    if (n==3) {
+      canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
+      rect->SetXY(luaL_checknumber(L, 2), luaL_checknumber(L, 3));    
+      return LuaHelper::chaining(L); 
+    } else
+    if (n==5) {
+      LuaRect* rect = LuaHelper::check<LuaRect>(L, 1, meta);
+      double x1 = luaL_checknumber(L, 2);
+      double y1 = luaL_checknumber(L, 3);
+      double x2 = luaL_checknumber(L, 4);
+      double y2 = luaL_checknumber(L, 5);                 
+      rect->SetPos(x1, y1, x2, y2);
+    } else {
+       return luaL_error(L, "Wrong number of arguments.");
     }    
-    LuaRect* rect = LuaHelper::check<LuaRect>(L, 1, meta);
-    double x1 = luaL_checknumber(L, 2);
-    double y1 = luaL_checknumber(L, 3);
-    double x2 = luaL_checknumber(L, 4);
-    double y2 = luaL_checknumber(L, 5);                 
-    rect->SetPos(x1, y1, x2, y2);
     return LuaHelper::chaining(L); 
   }
 
-  int LuaRectBind::setborder(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 3) {
-      return luaL_error(L, "Got %d arguments expected 5 (self, x1, y1, x2, y2)", n); 
-    }    
+  int LuaRectBind::setborder(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 3, "self, x1, y1");
+    if (err!=0) return err;
     LuaRect* rect = LuaHelper::check<LuaRect>(L, 1, meta);
     double x1 = luaL_checknumber(L, 2);
     double y1 = luaL_checknumber(L, 3);    
@@ -1074,10 +1052,8 @@ namespace psycle { namespace host {
   }
 
   int LuaRectBind::border(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
     double x1, y1;
     rect->border(x1, y1);
@@ -1085,22 +1061,10 @@ namespace psycle { namespace host {
     lua_pushnumber(L, y1);    
     return 2;
   }
-
-  int LuaRectBind::setxy(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 3) {
-      return luaL_error(L, "Got %d arguments expected 3 (self, x, y)", n); 
-    }    
-    canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
-    rect->SetXY(luaL_checknumber(L, 2), luaL_checknumber(L, 3));    
-    return LuaHelper::chaining(L); 
-  }
-
+  
   int LuaRectBind::pos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
     lua_pushnumber(L, rect->x1());
     lua_pushnumber(L, rect->y1());
@@ -1110,10 +1074,8 @@ namespace psycle { namespace host {
   }
 
   int LuaRectBind::clientpos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err; 
     canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
     double x1, y1;
     x1 = rect->zoomabsx();
@@ -1127,11 +1089,9 @@ namespace psycle { namespace host {
     return 4;
   }
 
-  int LuaRectBind::setzorder(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 2) {
-      return luaL_error(L, "Got %d arguments expected 2 (self, zorder)", n); 
-    }    
+  int LuaRectBind::setzorder(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 2, "self, zorder");
+    if (err!=0) return err;
     int zorder = luaL_checknumber(L, 2);
     canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
     if (rect->parent()) {
@@ -1141,10 +1101,8 @@ namespace psycle { namespace host {
   }
 
   int LuaRectBind::zorder(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err; 
     canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);
     if (rect->parent()) {
       int z  = rect->parent()->zorder(rect);
@@ -1156,10 +1114,8 @@ namespace psycle { namespace host {
   }
  
   int LuaRectBind::parent(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
     canvas::Rect* rect = LuaHelper::check<canvas::Rect>(L, 1, meta);        
     canvas::Group* group = rect->parent();
     LuaHelper::find_userdata<>(L, group);    
@@ -1181,10 +1137,8 @@ namespace psycle { namespace host {
   }
 
   int LuaRectBind::color(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     LuaRect* item = LuaHelper::check<LuaRect>(L, 1, meta);
     canvas::ARGB color = item->fillcolor();    
     int skin = item->skinfillcolor();    
@@ -1204,10 +1158,8 @@ namespace psycle { namespace host {
   }
 
   int LuaRectBind::strokecolor(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
     LuaRect* item = LuaHelper::check<LuaRect>(L, 1, meta);
     canvas::ARGB color = item->strokecolor();    
     int skin = item->skinstrokecolor();    
@@ -1248,7 +1200,7 @@ namespace psycle { namespace host {
       {"setpoints", setpoints},
       {"points", points},
       {"setpoint", setpoint},
-      {"setxy", setxy},
+      {"setpos", setpos},
       {"pos", pos},
       {"enablepointerevents", enablepointerevents},
       {"disablepointerevents", disablepointerevents},
@@ -1321,10 +1273,8 @@ namespace psycle { namespace host {
   }
 
   int LuaLineBind::color(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     LuaLine* item = LuaHelper::check<LuaLine>(L, 1, meta);
     canvas::ARGB color = item->color();    
     int skin = item->skincolor();    
@@ -1333,11 +1283,9 @@ namespace psycle { namespace host {
     return 2;
   }
 
-  int LuaLineBind::setpoint(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 4) {
-      return luaL_error(L, "Got %d arguments expected 1 (self, idx, x, y)", n); 
-    } 
+  int LuaLineBind::setpoint(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 4, "self, idx, x, y");
+    if (err!=0) return err;
     LuaLine* line = LuaHelper::check<LuaLine>(L, 1, meta);
     double idx = luaL_checknumber(L, 2);
     double x = luaL_checknumber(L, 3);
@@ -1348,37 +1296,26 @@ namespace psycle { namespace host {
   }
   
   int LuaLineBind::parent(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
     canvas::Item* item = LuaHelper::check<canvas::Item>(L, 1, meta);        
     canvas::Group* group = item->parent();
     LuaHelper::find_userdata<>(L, group);    
     return 1;
   }
 
-  int LuaLineBind::setxy(lua_State* L) {
+  int LuaLineBind::setpos(lua_State* L) {
     LuaHelper::callstrict2(L, meta, &canvas::Line::SetXY);    
     return LuaHelper::chaining(L);    
   }
 
-  int LuaLineBind::pos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 3 (self)", n); 
-    }    
-    LuaLine* line = LuaHelper::check<LuaLine>(L, 1, meta);        
-    lua_pushnumber(L, line->x());
-    lua_pushnumber(L, line->y());    
-    return 2;
+  int LuaLineBind::pos(lua_State* L) {    
+    return LuaHelper::get2number2<LuaLine,double>(L, meta, &LuaLine::pos);
   }
 
   int LuaLineBind::points(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 3 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     LuaLine* line = LuaHelper::check<LuaLine>(L, 1, meta);
     LuaLine::Points pts = line->points();
     lua_newtable(L);
@@ -1413,7 +1350,7 @@ namespace psycle { namespace host {
       {"setcolor", setcolor},
       {"setskincolor", setskincolor},
       {"color", color},
-      {"setxy", setxy},
+      {"setpos", setpos},
       {"pos", pos},
       {"tostring", tostring},
       {"parent", parent},
@@ -1424,9 +1361,9 @@ namespace psycle { namespace host {
 
   int LuaTextBind::create(lua_State* L) {	
     int n = lua_gettop(L);  // Number of arguments
-    // if (n != 2) {
-    //return luaL_error(L, "Got %d arguments expected 2 (self, group)", n); 
-    //}
+    if (n!=1 && n!=2) {
+      return luaL_error(L, "Too many arguments.", n); 
+    }
     LuaGroup* group = 0;
     if ((n==2 && !lua_isnil(L, 2))) {
       group = LuaHelper::check<LuaGroup>(L, 2, LuaGroupBind::meta);
@@ -1440,20 +1377,13 @@ namespace psycle { namespace host {
     return 1;
   }
 
-  int LuaTextBind::setxy(lua_State* L) {
+  int LuaTextBind::setpos(lua_State* L) {
     LuaHelper::callstrict2(L, meta, &canvas::Text::SetXY);    
     return LuaHelper::chaining(L);    
   }
 
-  int LuaTextBind::pos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 3 (self)", n); 
-    }    
-    LuaText* text = LuaHelper::check<LuaText>(L, 1, meta);        
-    lua_pushnumber(L, text->x());
-    lua_pushnumber(L, text->y());    
-    return 2;
+  int LuaTextBind::pos(lua_State* L) {    
+    return LuaHelper::get2number2<LuaText,double>(L, meta, &LuaText::pos);
   }
 
   int LuaTextBind::settext(lua_State* L) {
@@ -1475,17 +1405,8 @@ namespace psycle { namespace host {
     return LuaHelper::chaining(L);      
   }
 
-  int LuaTextBind::color(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
-    LuaText* item = LuaHelper::check<LuaText>(L, 1, meta);
-    canvas::ARGB color = item->color();    
-    int skin = item->skincolor();    
-    lua_pushnumber(L, color);
-    lua_pushnumber(L, skin);    
-    return 2;
+  int LuaTextBind::color(lua_State* L) {    
+    return LuaHelper::get2numbers<LuaText,canvas::ARGB, int>(L, meta, &LuaText::color, &LuaText::skincolor);
   }
 
   int LuaTextBind::gc(lua_State* L) {
@@ -1499,10 +1420,8 @@ namespace psycle { namespace host {
   }
 
   int LuaTextBind::parent(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     canvas::Text* txt = LuaHelper::check<canvas::Text>(L, 1, meta);        
     canvas::Group* group = txt->parent();
     LuaHelper::find_userdata<>(L, group);    
@@ -1517,8 +1436,7 @@ namespace psycle { namespace host {
 
   int LuaPixBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
-      {"new", create},      
-      {"setxy", setxy},
+      {"new", create},            
       {"pos", pos},
       {"setpos", setpos},
       {"setsource", setsource},
@@ -1533,11 +1451,11 @@ namespace psycle { namespace host {
     return LuaHelper::open(L, meta, methods,  gc);
   }
 
-  int LuaPixBind::create(lua_State* L) {	
+  int LuaPixBind::create(lua_State* L) {
     int n = lua_gettop(L);  // Number of arguments
     if (n != 1 and n != 2) {
       return luaL_error(L, "Got %d arguments expected 2 (self, group)", n); 
-    }        
+    }    
     LuaGroup* group = 0;
     if (n==2) {
       group = LuaHelper::check<LuaGroup>(L, 2, LuaGroupBind::meta);
@@ -1547,22 +1465,15 @@ namespace psycle { namespace host {
     LuaHelper::register_userdata<>(L, pix);
     return 1;
   }
-
-  int LuaPixBind::setxy(lua_State* L) {
-    LuaHelper::callstrict2(L, meta, &canvas::PixBuf::SetXY);    
-    return LuaHelper::chaining(L);     
-  }
-
+  
   int LuaPixBind::setsource(lua_State* L) {
     LuaHelper::callstrict2(L, meta, &canvas::PixBuf::SetSource);    
     return LuaHelper::chaining(L);    
   }
 
-  int LuaPixBind::settransparent(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 4) {
-      return luaL_error(L, "Got %d arguments expected 3 (self, r, g, b)", n); 
-    } 
+  int LuaPixBind::settransparent(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 4, "self, r, g, b");
+    if (err!=0) return err;
     canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
     double r = luaL_checknumber(L, 2);
     double g = luaL_checknumber(L, 3);
@@ -1581,34 +1492,26 @@ namespace psycle { namespace host {
   }
 
   int LuaPixBind::setpixmap(lua_State* L) {
-    canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
-    int n = lua_gettop(L);  // Number of arguments
-    if (n==2) {
-      int skin = luaL_checknumber(L, 2);
-      pix->SetImage(skin);
-    } else {
-      return luaL_error(L, "Got %d arguments expected 2 (self, skin)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 2, "self, skin");
+    if (err!=0) return err;
+    canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);        
+    int skin = luaL_checknumber(L, 2);
+    pix->SetImage(skin);    
     return LuaHelper::chaining(L); 
   }
 
   int LuaPixBind::load(lua_State* L) {
-    canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
-    int n = lua_gettop(L);  // Number of arguments
-    if (n==2) {
-      const char* str = luaL_checkstring(L, 2);
-      pix->Load(str);
-    } else {
-      return luaL_error(L, "Got %d arguments expected 2 (self, filename)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 2, "self, filename");
+    if (err!=0) return err;
+    canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);   
+    const char* str = luaL_checkstring(L, 2);
+    pix->Load(str);    
     return LuaHelper::chaining(L); 
   }
 
   int LuaPixBind::pos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
     lua_pushnumber(L, pix->x());
     lua_pushnumber(L, pix->y());
@@ -1617,19 +1520,24 @@ namespace psycle { namespace host {
     return 4;
   }
 
-  int LuaPixBind::setpos(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 5) {
-      return luaL_error(L, "Got %d arguments expected 5 (self, x1, y1, x2, y2)", n); 
-    }    
-    canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
-    double x1 = luaL_checknumber(L, 2);
-    double y1 = luaL_checknumber(L, 3);
-    double x2 = luaL_checknumber(L, 4);
-    double y2 = luaL_checknumber(L, 5);                 
-    pix->SetXY(x1, y1);
-    pix->SetSize(x2-x1, y2-y1);
-    return LuaHelper::chaining(L); 
+  int LuaPixBind::setpos(lua_State* L) {        
+    const int n = lua_gettop(L);
+    if (n==3) {
+      canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
+      LuaHelper::callstrict2(L, meta, &canvas::PixBuf::SetXY);
+    } else
+    if (n==5) {
+      canvas::PixBuf* pix = LuaHelper::check<canvas::PixBuf>(L, 1, meta);
+      double x1 = luaL_checknumber(L, 2);
+      double y1 = luaL_checknumber(L, 3);
+      double x2 = luaL_checknumber(L, 4);
+      double y2 = luaL_checknumber(L, 5);                 
+      pix->SetXY(x1, y1);
+      pix->SetSize(x2-x1, y2-y1);
+    } else {
+       return luaL_error(L, "Wrong number of arguments.");
+    }
+    return LuaHelper::chaining(L);
   }
 
   int LuaPixBind::tostring(lua_State* L) {
@@ -1639,10 +1547,8 @@ namespace psycle { namespace host {
   }
 
   int LuaPixBind::parent(lua_State* L) {    
-    int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;   
     canvas::Item* item = LuaHelper::check<canvas::Item>(L, 1, meta);        
     canvas::Group* group = item->parent();
     LuaHelper::find_userdata<>(L, group);    

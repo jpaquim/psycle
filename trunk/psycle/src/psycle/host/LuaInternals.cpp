@@ -125,7 +125,7 @@ namespace psycle { namespace host {
     return rn;
   }
 
-  int LuaConfigBind::plugindir(lua_State* L) {        
+  int LuaConfigBind::plugindir(lua_State* L) {            
     PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
     lua_pushstring(L, cfg->GetAbsoluteLuaDir().c_str());    
     return 1;
@@ -231,6 +231,7 @@ namespace psycle { namespace host {
       {"numcols", numcols},
       {"shownativegui", show_native_gui},
       {"showcustomgui", show_custom_gui},
+      {"showchildviewgui", show_childview_gui},
       {"parambyid", getparam},
       {"setpresetmode", setpresetmode},
       {NULL, NULL}
@@ -242,6 +243,8 @@ namespace psycle { namespace host {
     lua_pushnumber(L, 1);
     lua_setfield(L, -2, "GENERATOR");
     lua_pushnumber(L, 0);
+    lua_setfield(L, -2, "HOSTUI");
+    lua_pushnumber(L, 3);
     lua_setfield(L, -2, "PRSNATIVE");    
     lua_pushnumber(L, 1);
     lua_setfield(L, -2, "PRSCHUNK");
@@ -320,13 +323,19 @@ namespace psycle { namespace host {
 
    int LuaMachineBind::show_native_gui(lua_State* L) {
     LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
-    plug->set_gui_type(0);
+    plug->set_gui_type(LuaMachine::GuiType::NATIVE);
     return 0;
   }
 
   int LuaMachineBind::show_custom_gui(lua_State* L) {
     LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
-    plug->set_gui_type(1);
+    plug->set_gui_type(LuaMachine::GuiType::CUSTOMWND);
+    return 0;
+  }
+
+  int LuaMachineBind::show_childview_gui(lua_State* L) {
+    LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
+    plug->set_gui_type(LuaMachine::GuiType::CHILDVIEW);
     return 0;
   }
 

@@ -26,6 +26,8 @@ namespace psycle
 			PluginCatcher* theCatcher;
 		};
 
+    typedef std::vector<PluginInfo*> PluginInfoList;
+
 		class PluginCatcher : public MachineLoader
 		{
 		public:
@@ -36,7 +38,8 @@ namespace psycle
 			/*override*/ void LoadPluginInfo(bool verify=true);
 			/*override*/ void ReScan(bool regenerate=true);
 			/*override*/ bool IsLoaded(){ return _numPlugins>0; }
-			PluginInfo* info(const std::string& name);
+			PluginInfo* info(const std::string& name);      
+      PluginInfoList GetLuaExtensions();
 
 			bool SaveCacheFile();
 			void DestroyPluginInfo();

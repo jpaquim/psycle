@@ -22,6 +22,17 @@ namespace psycle { namespace host {
 			return *ud;      
 		}
 
+    static int check_argnum(lua_State* L, int num, const std::string& names) {    
+      int n = lua_gettop(L);  // Number of arguments
+      if (n != num) {
+        std::stringstream s;
+        s << "Got " << num << " arguments expected ("<< names <<")"; 
+        return luaL_error(L, s.str().c_str(), n); 
+      } else {
+        return 0;
+      }
+    }
+
     // mimics the bahaviour of luaL_testudata for our own userdata structure
 		template <class UserDataType>
 		static UserDataType* test(lua_State* L, int index, const std::string& meta) {
@@ -82,8 +93,8 @@ namespace psycle { namespace host {
 		}
 
     // new userdata needs to be on the top of the stack
-    template <class UserDataType>
-		static void register_userdata(lua_State* L, UserDataType* ud) {
+    template <class UDT>
+		static void register_userdata(lua_State* L, UDT* ud) {
        lua_getglobal(L, "psycle");
        lua_getfield(L, -1, "userdata");
        lua_pushlightuserdata(L, ud);
@@ -105,7 +116,7 @@ namespace psycle { namespace host {
 
      // needs to be registered with register_userdata
     template <class UserDataType>
-		static void find_userdata(lua_State* L, UserDataType* ud) {
+		static void find_userdata(lua_State* L, UserDataType* ud) {      
       lua_getglobal(L, "psycle");
       lua_getfield(L, -1, "userdata");      
       if (!lua_isnil(L, -1)) {
@@ -146,6 +157,7 @@ namespace psycle { namespace host {
       lua_pushlightuserdata(L, ud);
       lua_pushnil(L);
       lua_settable(L, -3);
+      lua_pop(L, 2);
     }
  
     // c iterator for orderedtable
@@ -254,6 +266,23 @@ namespace psycle { namespace host {
 		}
 
     template <class UDT, class RT>
+		static int get2number2(lua_State* L,
+			                const char* meta,
+						    void (UDT::*pt2ConstMember)(RT&, RT&) const) { // function ptr
+			int n = lua_gettop(L);
+      if (n ==1) {
+		    UDT* m = LuaHelper::check<UDT>(L, 1, meta);
+        RT v1, v2;
+        (m->*pt2ConstMember)(v1, v2);
+			  lua_pushnumber(L, v1);
+        lua_pushnumber(L, v2);
+			}  else {
+        luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+	    }
+			return 2;
+		}
+
+    template <class UDT, class RT>
 		static int getnumber1(lua_State* L,
 			                    const char* meta,                          
 						              RT (UDT::*pt2ConstMember)() const) { // function ptr
@@ -266,6 +295,21 @@ namespace psycle { namespace host {
         luaL_error(L, "Got %d arguments expected 2 (self)", n); 
 	    }
 			return 1;
+		}
+
+    template <class UDT, class RT1, class RT2>
+		static int get2numbers(lua_State* L,
+			                     const char* meta,                          
+						               RT1 (UDT::*pt2ConstMember1)() const,
+                           RT2 (UDT::*pt2ConstMember2)() const) { // function ptr			
+      int n = lua_gettop(L);  // Number of arguments
+      if (n != 1) {
+        return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
+      }      
+      UDT* m = LuaHelper::check<UDT>(L, 1, meta);
+      lua_pushnumber(L, (m->*pt2ConstMember1)());
+      lua_pushnumber(L, (m->*pt2ConstMember2)());
+      return 2;
 		}
 		
 		template <class UDT>

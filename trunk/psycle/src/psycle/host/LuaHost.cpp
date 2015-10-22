@@ -320,12 +320,18 @@ namespace psycle { namespace host {
           if (strcmp(key, "name") == 0) {
             const char* value = luaL_checklstring(L, -1, &len);
             info.name = std::string(value);
-          } else
+          } else 
+            if (strcmp(key, "mode") == 0) {
+              int value = luaL_checknumber(L, -1);
+              switch (value) {
+                case 0 : info.mode = MACHMODE_GENERATOR; break;
+                case 3 : info.mode = MACHMODE_LUAUIEXT; break;                
+                default: info.mode = MACHMODE_FX; break;
+              }
+            } else
             if (strcmp(key, "generator") == 0) {
               int value = luaL_checknumber(L, -1);
-              if (value == 1) {
-                info.mode = MACHMODE_GENERATOR;
-              }
+              if (value==0) info.mode = MACHMODE_GENERATOR; else info.mode = MACHMODE_FX;
             } else
               if (strcmp(key, "version") == 0) {
                 const char* value = luaL_checklstring(L, -1, &len);
@@ -364,7 +370,26 @@ namespace psycle { namespace host {
       throw std::runtime_error(msg.GetString());
     }
   }
-  // call events
+
+  // call events  
+  void LuaProxy::call_execute() {
+    lock();
+    try {	
+      if (!get_method_optional(L, "onexecute")) {
+        unlock();
+        return;
+      }
+      int status = lua_pcall(L, 1, 0 ,0);    // pc:sequencertick()
+      if (status) {
+        CString msg(lua_tostring(L, -1));
+        unlock();
+        throw std::runtime_error(msg.GetString());
+      }
+    } CATCH_WRAP_AND_RETHROW(*plug_)
+      unlock();
+  }
+
+
   void LuaProxy::call_newline() {
     lock();
     try {	
@@ -981,6 +1006,7 @@ namespace psycle { namespace host {
   }
   
   LuaMenuBar* LuaProxy::get_menu(LuaMenu* menu) {
+    lock();
     try {
       LuaHelper::get_proxy(L);
     } catch(std::exception &e) {	  
@@ -991,16 +1017,11 @@ namespace psycle { namespace host {
     if (lua_isnil(L, -1)) {	 
       lua_pop(L, 1);
       unlock();
-      return 0;	 
+      return 0;
     } else {  
-      LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, -1, LuaMenuBarBind::meta);        
-      std::vector<LuaMenu*>::iterator it = menubar->items.begin();
-      for ( int pos = 2; it != menubar->items.end(); ++it, ++pos) {
-         LuaMenu* m = *it;
-         menu->menu()->AppendMenu(MF_POPUP, (UINT_PTR)m->menu()->m_hMenu, m->label().c_str());         
-         m->set_parent(menu);
-         m->set_pos(pos); 
-      }      
+      LuaMenuBar* menubar = LuaHelper::check<LuaMenuBar>(L, -1, LuaMenuBarBind::meta);
+      menubar->append(menu);      
+      unlock();
       return menubar;
     }
   }

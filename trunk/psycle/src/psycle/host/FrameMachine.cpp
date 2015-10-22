@@ -87,7 +87,7 @@ namespace psycle { namespace host {
 		END_MESSAGE_MAP()
 
 		CFrameMachine::CFrameMachine(Machine* pMachine, CChildView* wndView_, CFrameMachine** windowVar_)
-		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0), barmenu(0)
+		: _machine(pMachine), wndView(wndView_), windowVar(windowVar_), pView(NULL) , pParamGui(0), refreshcounter(0), lastprogram(0),lastnumprogrs(0), barmenu(0), custom_menubar(0)
 		{
 			//Use OnCreate.
 		}
@@ -116,8 +116,7 @@ namespace psycle { namespace host {
 				GetMenu()->GetSubMenu(1)->ModifyMenu(5, MF_BYPOSITION | MF_STRING, ID_MACHINE_COMMAND, 
 					((Plugin*)_machine)->GetInfo()->Command);
 			}
-
-      custom_menubar = 0;
+      
 			if (_machine->_type == MACH_LUA)
 			{        
         barmenu.setcmenu(GetMenu());
@@ -190,12 +189,8 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnClose() 
 		{
-      if (custom_menubar) {
-        int pos = 2;
-        std::vector<LuaMenu*>::iterator it = custom_menubar->items.begin();
-        for ( ; it != custom_menubar->items.end(); ++it, ++pos) {          
-          GetMenu()->RemoveMenu(pos, MF_BYPOSITION);
-        }                 
+      if (custom_menubar) {        
+        custom_menubar->remove(GetMenu(), 2);        
       }
 			KillTimer(ID_TIMER_PARAM_REFRESH);
 			CFrameWnd::OnClose();

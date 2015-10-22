@@ -82,7 +82,8 @@ namespace host {
 			{
 				machine,
 				pattern,
-				sequence
+				sequence,
+        luaplugin
 			};
 		};
 
@@ -237,6 +238,8 @@ namespace host {
 
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
+      void RemoveLuaMenu();
+      void LoadLuaExtensions();
 		public:
 			//RECENT!!!//
 			HMENU hRecentMenu;
@@ -459,6 +462,10 @@ namespace host {
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];
 
+      class LuaPlugin* active_lua_;
+      class LuaMenu* lua_menu_;
+      std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;
+      std::vector<LuaPlugin*> lua_extensions_;
 
 		public:
 			
@@ -596,6 +603,7 @@ namespace host {
 			afx_msg void OnShowPatternSeq();
 			afx_msg void OnUpdatePatternSeq(CCmdUI* pCmdUI);
 			afx_msg void OnPopInterpolateCurve();
+      afx_msg void OnDynamicMenuItems(UINT nID);
 };
 
 
