@@ -2443,6 +2443,14 @@ namespace psycle { namespace host {
 				pCmdUI->SetCheck(0);	
 		}
 
+    bool CChildView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
+      if (active_lua_ && viewMode == view_modes::luaplugin) {        
+        canvas::Event ev(0, (canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
+        return active_lua_->OnEvent(&ev);        		    
+      }
+      return false;
+    }
+
     void CChildView::RemoveLuaMenu()
     {
       if (pParentMain) {
@@ -2484,7 +2492,7 @@ namespace psycle { namespace host {
           lua_extensions_.push_back(mac); 
           menuItemIdMap[id] = mac;
         } catch (std::exception& e) {
-
+          e;
         }        
       } 
     }
@@ -2504,6 +2512,7 @@ namespace psycle { namespace host {
           ShowScrollBar(SB_BOTH,FALSE);
 			    Invalidate(false);
           active_lua_->InvalidateMenuBar();
+          SetFocus();
         } else {          
           plug->OnExecute(); // notify ext should do sth
         }               
