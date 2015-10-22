@@ -12,90 +12,68 @@ struct luaL_Reg;
 
 namespace psycle { namespace host {
 
-   class LuaMenuBar {     
-   public:
-     LuaMenuBar() : update(false) {}
-     std::vector<class LuaMenu*> items;
-     bool update;
+   class LuaMenu;
+
+   class LuaMenuBar {
+    public:
+     LuaMenuBar() : update_(false) {}
+     void add(LuaMenu* menu) { items.push_back(menu); }
+     void append(LuaMenu* menu);
+     void remove(CMenu* menu, int pos);
+     bool needsupdate() const { return update_; }
+     void setupdate(bool update) { update_ = update; }
+    private:
+     std::vector<LuaMenu*> items;
+     bool update_;
    };
 
-   struct LuaMenuItem { 	    
-      LuaMenuItem() : id_(-1), check_(false) {
-#if !defined WINAMP_PLUGIN
-      menu = 0;
-#endif      
-     }     
+   class LuaMenuItem {
+    public:
+     LuaMenuItem() : menu_(0), id_(-1), check_(false) {}
      void set_id(int id) { id_ = id; }
      int id() const { return id_; }
-     void set_label(const std::string& label) { 
-       label_ = label; 
-#if !defined WINAMP_PLUGIN
-       if (menu) {
-         menu->ModifyMenu(id(), MF_BYCOMMAND, id(), label.c_str());
-       }
-#endif      
-     }
+     void set_label(const std::string& label);
      const std::string& label() const { return label_; }
-     void check() { check_ = true; }
-     void uncheck() { check_ = false; }
-     bool checked() const { return check_; }     
-#if !defined WINAMP_PLUGIN     
-#endif
-     CMenu* menu;     
+     void check();      
+     void uncheck();      
+     bool checked() const { return check_; } 
+     void set_menu(LuaMenu* menu) { menu_ = menu; }
      static int id_counter;
      static std::map<std::uint16_t, LuaMenuItem*> menuItemIdMap;
-    private:
+    private:            
+      LuaMenu* menu_;
       int id_;
       bool check_;      
-      std::string label_;
+      std::string label_;            
   };
 
-
-   struct LuaMenu {   
+  class LuaMenu {   
      public:
        LuaMenu() : parent_(0), pos_(-1), bar_(0), owner_(true) {
-          menu_ = new CMenu();
+          cmenu_ = new CMenu();
        }
-       LuaMenu(CMenu* menu) : menu_(menu), parent_(0), pos_(-1), bar_(0), owner_(false) {}
+       LuaMenu(CMenu* menu) : cmenu_(menu), parent_(0), pos_(-1), bar_(0), owner_(false) {}
        ~LuaMenu() {
-         if (owner_) delete menu_;
+         if (owner_) delete cmenu_;
        }
-       void set_label(const std::string& label) {
-         label_ = label; 
-#if !defined WINAMP_PLUGIN  
-         if (parent()) {
-           parent()->menu()->ModifyMenu(pos_, MF_BYPOSITION, 0, label.c_str());
-           LuaMenuBar* b = bar();
-           if (b) {
-             b->update = true;
-           }
-           return;
-         }         
-       }
-#endif           
+       void set_label(const std::string& label);
        const std::string& label() const { return label_; }       
-       CMenu* menu() { return menu_; }
-       void setcmenu(CMenu* menu) { menu_ = menu; }
+       CMenu* cmenu() { return cmenu_; }
+       void setcmenu(CMenu* menu) { cmenu_ = menu; }
        void set_parent(LuaMenu* parent) { parent_ = parent; }
        LuaMenu* parent() { return parent_; }
        int pos() const { return pos_; }
        void set_pos(int pos) { pos_ = pos; }
        void setbar(LuaMenuBar* bar) { bar_ = bar; }
        LuaMenuBar* bar() { return parent() ? parent()->bar() : bar_; }
-       void add(LuaMenuItem* item) {
-         items.push_back(item);
-       }
-       void remove(LuaMenuItem* item) {
-         std::vector<LuaMenuItem*>::iterator it;     
-         it = std::find(items.begin(), items.end(), item);
-         if (it != items.end()) {
-           items.erase(it);
-         }         
-       }
+       void add(LuaMenu* newmenu);
+       void add(LuaMenuItem* item);
+       void addseparator();
+       void remove(LuaMenuItem* item);
      private:
        std::vector<LuaMenuItem*> items;
        std::string label_;
-       CMenu* menu_;       
+       CMenu* cmenu_;       
        LuaMenu* parent_;
        LuaMenuBar* bar_;
        bool owner_;       
@@ -209,7 +187,7 @@ namespace psycle { namespace host {
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int setxy(lua_State *L);    
+    static int setpos(lua_State *L);    
     static int pos(lua_State *L);
     static int clientpos(lua_State* L);
     static int setzoom(lua_State* L);
@@ -247,8 +225,7 @@ namespace psycle { namespace host {
     static int open(lua_State *L);
     static const char* meta;
    private:
-    static int create(lua_State *L);
-    static int setpos(lua_State *L);
+    static int create(lua_State *L);    
     // fill
     static int setcolor(lua_State* L);
     static int setskincolor(lua_State* L);
@@ -258,7 +235,7 @@ namespace psycle { namespace host {
     static int setskinstrokecolor(lua_State* L);
     static int strokecolor(lua_State* L);
 
-    static int setxy(lua_State *L);
+    static int setpos(lua_State *L);
     static int pos(lua_State *L);
     static int clientpos(lua_State* L);    
     static int parent(lua_State *L);    
@@ -293,7 +270,7 @@ namespace psycle { namespace host {
     static int points(lua_State* L);
     static int parent(lua_State *L);
     static int gc(lua_State* L);
-    static int setxy(lua_State *L);
+    static int setpos(lua_State *L);
     static int pos(lua_State *L);
     static int enablepointerevents(lua_State* L);
     static int disablepointerevents(lua_State* L);
@@ -313,7 +290,7 @@ namespace psycle { namespace host {
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int setxy(lua_State *L);
+    static int setpos(lua_State *L);
     static int settext(lua_State* L);
     static int text(lua_State* L);
     static int setcolor(lua_State* L);
@@ -330,8 +307,7 @@ namespace psycle { namespace host {
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int parent(lua_State *L);
-    static int setxy(lua_State *L);    
+    static int parent(lua_State *L);        
     static int setsource(lua_State* L);
     static int setsize(lua_State* L);
     static int setpixmap(lua_State* L);
@@ -343,9 +319,7 @@ namespace psycle { namespace host {
     static int tostring(lua_State* L);
   };
 
-  struct LuaBitmap {
-
-  };
+  struct LuaBitmap {}; // todo
 
   } // namespace
 } // namespace

@@ -64,18 +64,14 @@ namespace psycle { namespace host {
       if (!custom_menubar) {
         custom_menubar = proxy_.get_menu(menu);        
       } else {
-        std::vector<LuaMenu*>::iterator it = custom_menubar->items.begin();
-        for ( ; it != custom_menubar->items.end(); ++it) {
-          LuaMenu* m = *it;
-          menu->menu()->AppendMenu(MF_POPUP, (UINT_PTR)m->menu()->m_hMenu, m->label().c_str());
-        }        
+        custom_menubar->append(menu);
       }
-      menu->setbar(custom_menubar);
       return custom_menubar; 
     }
     std::string help();
     virtual int GetGuiType() const { return proxy_.gui_type(); }
-    void OnMenu(UINT id) { proxy_.call_menu(id); }
+    void OnMenu(UINT id) { proxy_.call_menu(id); }    
+    void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
     canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
     bool OnEvent(canvas::Event* ev);    
     virtual void OnReload();
@@ -104,9 +100,9 @@ namespace psycle { namespace host {
 		}
 		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
     virtual void OnGuiTimer(void* hnd) {      
-      if (custom_menubar && custom_menubar->update) {
+      if (custom_menubar && custom_menubar->needsupdate()) {
         proxy_.update_menu(hnd);
-        custom_menubar->update = false;
+        custom_menubar->setupdate(false);
       }      
     }    
 
@@ -116,6 +112,8 @@ namespace psycle { namespace host {
 
     void lock() const { proxy_.lock(); }
     void unlock() const { proxy_.unlock(); }
+
+    void InvalidateMenuBar() { if (custom_menubar) custom_menubar->setupdate(true); }
     
   protected:
     LuaProxy proxy_;

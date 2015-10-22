@@ -103,6 +103,7 @@ public:
 	void call_work(int num, int offset=0);
   void call_parameter(int numparameter, double val);
 	void call_stop();
+  void call_execute();
 	void call_sr_changed(int rate);
 	void call_aftertweaked(int idx);
 	void call_menu(UINT id);

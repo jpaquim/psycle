@@ -92,6 +92,7 @@ namespace psycle { namespace host {
 			bool ToggleFollowSong();
 			void UpdatePlayOrder(bool mode);
 			void UpdateSequencer(int bottom = -1);
+      
 			
 			CChildView  m_wndView;
 			//CRebar      m_rebar;
@@ -104,6 +105,7 @@ namespace psycle { namespace host {
 			SequenceBar  m_seqBar;
 			CStatusBar  m_wndStatusBar;
 			std::string		szStatusIdle;
+      int defmainmenuitemcount;
 			
 			CInfoDlg	m_wndInfo;
 			CMidiMonitorDlg	m_midiMonitorDlg;
@@ -111,6 +113,7 @@ namespace psycle { namespace host {
 			InstrumentEditorUI* m_wndInst;
 			CWaveEdFrame*	m_pWndWed;
 			universalis::os::terminal * terminal;
+      
 
 			// Attributes
 		public:

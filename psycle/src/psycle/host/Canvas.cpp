@@ -950,11 +950,14 @@ namespace psycle { namespace host  { namespace canvas {
     save_rgn_.DeleteObject();
   }
 
-  void Canvas::DrawFlush(CDC *devc, const CRgn& rgn) {
-    save_rgn_.CombineRgn(&save_rgn_,&rgn,RGN_OR);
-    Draw(devc, save_rgn_);
-    save_rgn_.DeleteObject();
-    save_rgn_.CreateRectRgn(0, 0, 0, 0);
+  void Canvas::DrawFlush(CDC *devc, const CRgn& rgn) {    
+    if (!rgn.EqualRgn(&save_rgn_)) {
+      save_rgn_.CombineRgn(&save_rgn_,&rgn, RGN_OR);      
+    } else {
+      Draw(devc, save_rgn_);
+      save_rgn_.DeleteObject();
+      save_rgn_.CreateRectRgn(0, 0, 0, 0);
+    }    
   }
 
   void Canvas::Draw(CDC *devc, const CRgn& rgn) {
@@ -965,12 +968,12 @@ namespace psycle { namespace host  { namespace canvas {
       if ((cw_ > bg_width_) || (ch_ > bg_height_)) {
         for (int cx=0; cx<cw_; cx+=bg_width_) {
           for (int cy=0; cy<ch_; cy+=bg_height_) {
-            devc->BitBlt(cx,cy,bg_width_,bg_height_,&memDC,0,0,SRCCOPY);
+            devc->BitBlt(cx, cy, bg_width_, bg_height_, &memDC, 0, 0, SRCCOPY);
           }
         }
       }
       else {
-        devc->BitBlt(0,0,cw_,ch_,&memDC,0,0,SRCCOPY);
+        devc->BitBlt(0, 0, cw_, ch_, &memDC, 0, 0, SRCCOPY);
       }
       memDC.SelectObject(oldbmp);
       memDC.DeleteDC();

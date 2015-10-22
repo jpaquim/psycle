@@ -1162,9 +1162,8 @@ namespace psycle { namespace host {
 
 						case MACHMODE_MASTER:
 							break;
-						}
-						pParentMain->ShowMachineGui(tmac, point);
-		//					Repaint();
+						}            
+            pParentMain->ShowMachineGui(tmac, point);                        
 					}
 					else
 					{

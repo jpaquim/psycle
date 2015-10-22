@@ -46,6 +46,12 @@ namespace psycle { namespace host {
       CHUNKPRS = 1
     };
 
+    enum GuiType {
+      NATIVE = 0,      
+      CUSTOMWND = 1,
+      CHILDVIEW = 2
+    };
+
     LuaMachine() 
         : proxy_(0),
           mac_(0),
@@ -123,6 +129,7 @@ namespace psycle { namespace host {
     static int numcols(lua_State* L);
     static int show_native_gui(lua_State* L);
     static int show_custom_gui(lua_State* L);
+    static int show_childview_gui(lua_State* L);
     static int getparam(lua_State* L);
     static int setpresetmode(lua_State* L);
   };

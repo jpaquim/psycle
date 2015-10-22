@@ -29,14 +29,18 @@
 #include "XMSongExport.hpp"
 #include "Player.hpp"
 #include "VstHost24.hpp" //included because of the usage of a call in the Timer function. It should be standarized to the Machine class.
+#include "LuaPlugin.hpp"
 
 #include <cmath> // SwingFill
+
+
+
 
 namespace psycle { namespace host {
 		int const ID_TIMER_VIEW_REFRESH =39;
 		int const ID_TIMER_AUTOSAVE = 159;
 
-		CMainFrame		*pParentMain;
+		CMainFrame		*pParentMain;    
 
 		char* CChildView::hex_tab[16] = {
 			"0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"
@@ -61,7 +65,7 @@ namespace psycle { namespace host {
 			,ChordModeOffs(0)
 			,updateMode(0)
 			,updatePar(0)
-			,viewMode(view_modes::machine)
+			,viewMode(view_modes::luaplugin) //machine)      
 			,_outputActive(false)
 			,CW(300)
 			,CH(200)
@@ -102,6 +106,7 @@ namespace psycle { namespace host {
 			,patBufferLines(0)
 			,patBufferCopy(false)
 			,_pSong(Global::song())
+      ,active_lua_(0)      
 		{
 			for(int c(0) ; c < MAX_WIRE_DIALOGS ; ++c)
 			{
@@ -114,6 +119,7 @@ namespace psycle { namespace host {
 			note_tab_selected=NULL;
 			MBStart.x=0;
 			MBStart.y=0;
+      lua_menu_ = new LuaMenu(0);
 
 			patView = &PsycleGlobal::conf().patView();
 			macView = &PsycleGlobal::conf().macView();
@@ -138,6 +144,11 @@ namespace psycle { namespace host {
 				bmpDC->DeleteObject();
 				delete bmpDC; bmpDC = 0;
 			}
+      delete lua_menu_;
+      std::vector<LuaPlugin*>::iterator it = lua_extensions_.begin();
+      if (it != lua_extensions_.end()) {
+        delete *it;
+      }
 		}
 
 		BEGIN_MESSAGE_MAP(CChildView,CWnd )
@@ -267,6 +278,7 @@ namespace psycle { namespace host {
 			ON_COMMAND(ID_POPUPMAC_OPENBANKMANAGER, OnPopMacOpenBankManager)
 			ON_COMMAND_RANGE(ID_CONNECTTO_MACHINE0, ID_CONNECTTO_MACHINE64, OnPopMacConnecTo)
 			ON_COMMAND_RANGE(ID_CONNECTIONS_CONNECTION0, ID_CONNECTIONS_CONNECTION24, OnPopMacShowWire)
+      ON_COMMAND_RANGE(ID_DYNAMIC_MENUS_START, ID_DYNAMIC_MENUS_END, OnDynamicMenuItems)
 			ON_COMMAND(ID_POPUPMAC_REPLACEMACHINE, OnPopMacReplaceMac)
 			ON_COMMAND(ID_POPUPMAC_CLONEMACHINE, OnPopMacCloneMac)
 			ON_COMMAND(ID_POPUPMAC_INSERTEFFECTBEFORE, OnPopMacInsertBefore)
@@ -364,6 +376,15 @@ namespace psycle { namespace host {
 				if (viewMode == view_modes::machine)
 				{
 						Repaint(draw_modes::playback);
+				} else
+        if (viewMode == view_modes::luaplugin)
+				{
+          if (active_lua_) {
+            active_lua_->OnGuiTimer(this->pParentFrame);           
+            canvas::Canvas* user_view = active_lua_->GetCanvas();          
+            user_view->SetParent(this);
+            user_view->InvalidateSave();
+          }
 				}
 
 				for(int c=0; c<MAX_MACHINES; c++)
@@ -487,6 +508,10 @@ namespace psycle { namespace host {
 
 		void CChildView::OnPaint() 
 		{
+      CRgn rgn;
+			rgn.CreateRectRgn(0, 0, 0, 0);
+			GetUpdateRgn(&rgn, FALSE);
+
 			if (!GetUpdateRect(NULL) ) return; // If no area to update, exit.
 			CPaintDC dc(this);
 
@@ -543,12 +568,22 @@ namespace psycle { namespace host {
 			{
 				DrawSeqEditor(&bufDC);
 			}
+      else if (active_lua_ && viewMode == view_modes::luaplugin)
+      {
+        LuaPlugin* lp = active_lua_;        
+        canvas::Canvas* user_view = lp->GetCanvas();        
+        if (user_view !=0 && lp->GetGuiType() == LuaMachine::CHILDVIEW) {
+          if (user_view->parent() == 0) user_view->SetParent(this);                              
+          user_view->DrawFlush(&bufDC, rgn);          
+        }      
+      }
 
 			CRect rc;
 			GetClientRect(&rc);
 			dc.BitBlt(0,0,rc.right-rc.left,rc.bottom-rc.top,&bufDC,0,0,SRCCOPY);
 			bufDC.SelectObject(oldbmp);
 			bufDC.DeleteDC();
+      rgn.DeleteObject();
 		}
 
 		void CChildView::Repaint(draw_modes::draw_mode drawMode)
@@ -1047,6 +1082,7 @@ namespace psycle { namespace host {
 		{
 			if (viewMode != view_modes::machine)
 			{
+        RemoveLuaMenu();
 				viewMode = view_modes::machine;
 				ShowScrollBar(SB_BOTH,FALSE);
 
@@ -1076,6 +1112,7 @@ namespace psycle { namespace host {
 		{
 			if (viewMode != view_modes::pattern)
 			{
+        RemoveLuaMenu();
 				RecalcMetrics();
 
 				viewMode = view_modes::pattern;
@@ -2404,6 +2441,75 @@ namespace psycle { namespace host {
 				pCmdUI->SetCheck(1);
 			else
 				pCmdUI->SetCheck(0);	
+		}
+
+    void CChildView::RemoveLuaMenu()
+    {
+      if (pParentMain) {
+        CMenu* main_menu = pParentMain->GetMenu();
+        if (pParentMain->IsWindowVisible()) {
+          const int defcount = pParentMain->defmainmenuitemcount;
+          int count = main_menu->GetMenuItemCount() - defcount;
+          if (count > 0) {
+            for (;count!=0; --count) {
+              pParentMain->GetMenu()->RemoveMenu(defcount, MF_BYPOSITION);
+            }
+            pParentMain->DrawMenuBar();
+          }
+        }
+      }
+    }
+
+    void CChildView::LoadLuaExtensions() {
+      CMenu* view_menu = pParentMain->GetMenu()->GetSubMenu(3);
+      PluginCatcher* plug_catcher = 
+       static_cast<PluginCatcher*>(&Global::machineload()); 
+      PluginInfoList list = plug_catcher->GetLuaExtensions();
+      PluginInfoList::iterator it = list.begin();
+      int pos = 8;      
+      for (; it != list.end(); ++it) {
+        PluginInfo* info = *it;        
+        int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter;        
+        LuaPlugin* mac = 0;
+        try {
+          mac = LuaHost::LoadPlugin(info->dllname.c_str(), 1024);
+          mac->Init();
+          canvas::Canvas* user_view = mac->GetCanvas();
+          if (user_view) {
+            view_menu->InsertMenu(pos++, MF_STRING | MF_BYPOSITION, id, info->name.c_str());            
+          } else {            
+            view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, info->name.c_str());
+          }
+          LuaMenuItem::id_counter++;
+          lua_extensions_.push_back(mac); 
+          menuItemIdMap[id] = mac;
+        } catch (std::exception& e) {
+
+        }        
+      } 
+    }
+
+    void CChildView::OnDynamicMenuItems(UINT nID) {      
+      std::map<std::uint16_t, LuaPlugin*>::iterator it = menuItemIdMap.find(nID);
+      if (it != menuItemIdMap.end()) {
+        RemoveLuaMenu();
+        LuaPlugin* plug = it->second;        
+        canvas::Canvas* user_view = plug->GetCanvas();
+        if (user_view) {
+          // integrate into childview
+          active_lua_ = plug;        
+          viewMode = view_modes::luaplugin;          
+          lua_menu_->setcmenu(pParentMain->GetMenu());        
+          active_lua_->GetMenu(lua_menu_);
+          ShowScrollBar(SB_BOTH,FALSE);
+			    Invalidate(false);
+          active_lua_->InvalidateMenuBar();
+        } else {          
+          plug->OnExecute(); // notify ext should do sth
+        }               
+      } else {        
+			  active_lua_->OnMenu(nID);
+      }
 		}
 
 }}

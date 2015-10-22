@@ -59,6 +59,7 @@ namespace psycle { namespace host {
 			ID_INDICATOR_NOTEOFF,
 			ID_INDICATOR_TWEAKS,
 		};
+   
 
 		CMainFrame::CMainFrame()
 			:m_wndInst(NULL)
@@ -312,7 +313,8 @@ namespace psycle { namespace host {
 		//	m_wndView.Repaint();
 			m_wndView.SetFocus();
 		//	m_wndView.EnableSound();
-			
+      defmainmenuitemcount = GetMenu()->GetMenuItemCount();
+          
 			return 0;
 		}
 		BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
@@ -335,7 +337,7 @@ namespace psycle { namespace host {
 		{
 			CFrameWnd::Dump(dc);
 		}
-	#endif
+	#endif  
 
 		BOOL CMainFrame::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
 		{

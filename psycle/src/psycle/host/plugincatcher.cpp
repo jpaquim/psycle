@@ -154,6 +154,36 @@ namespace psycle
 			return 0;
 		}
 
+    PluginInfoList PluginCatcher::GetLuaExtensions() {
+      PluginInfoList list;
+      std::map<std::string,std::string>::iterator iterator = LuaNames.begin();
+		  for (;iterator != LuaNames.end();++iterator) {
+        std::string result = iterator->second;
+        int shellIdx = 0;
+			  for(int i(0) ; i < _numPlugins ; ++i)
+			  {
+				  PluginInfo * pInfo = _pPlugsInfo[i];
+				  if ((result == pInfo->dllname) &&
+					  (shellIdx == 0 || shellIdx == pInfo->identifier))
+				  {
+				   	// bad plugins always have allow = false
+            if(pInfo->allow && pInfo->mode == MACHMODE_LUAUIEXT) list.push_back(pInfo);
+					/*std::ostringstream s; s
+						<< "Plugin " << name << " is disabled because:" << std::endl
+						<< pInfo->error << std::endl
+						<< "Try to load anyway?";
+					if (::MessageBox(0,s.str().c_str(), "Plugin Warning!", MB_YESNO | MB_ICONWARNING) == IDYES) {
+						return pInfo;
+					}
+					else {
+						return 0;
+					}*/
+				  }
+        }
+      }
+      return list;
+    }
+
 		bool PluginCatcher::TestFilename(const std::string & name, const int32_t shellIdx)
 		{
 			for(int i(0) ; i < _numPlugins ; ++i)
