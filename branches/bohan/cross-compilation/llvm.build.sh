@@ -12,6 +12,6 @@ mkdir -p ++build &&
 cd ++build &&
 
 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_BUILD_TYPE=Release .. &&
-cmake --build . &&
+cmake --build . -- -j8 &&
 cmake --build . --target install -- -j8
 
