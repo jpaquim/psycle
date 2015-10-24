@@ -11,6 +11,7 @@ prefix=$(pwd)/++install &&
 mkdir -p ++build &&
 cd ++build &&
 
-../configure --prefix=$prefix --enable-optimized --disable-assertions --enable-threads "$@"
+cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_BUILD_TYPE=Release .. &&
+cmake --build . &&
+cmake --build . --target install -- -j8
 
-make -j8 install
