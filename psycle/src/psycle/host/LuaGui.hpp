@@ -146,10 +146,11 @@ namespace psycle { namespace host {
   };
 
   struct LuaCanvas : public canvas::Canvas {
-    LuaCanvas(lua_State* state) : canvas::Canvas(), L(state) {}    
+    LuaCanvas(lua_State* state) : canvas::Canvas(), L(state), show_scrollbar(false) {}    
     virtual canvas::Item* OnEvent(canvas::Event* ev);
+    bool show_scrollbar;
    private:
-     lua_State* L;
+     lua_State* L;     
   };
 
   struct LuaCanvasBind {
@@ -162,8 +163,7 @@ namespace psycle { namespace host {
     static int size(lua_State* L);
     static int setpreferredsize(lua_State* L);
     static int preferredsize(lua_State* L);
-    static int setcolor(lua_State* L);
-    static int setskincolor(lua_State* L);
+    static int setcolor(lua_State* L);    
     static int color(lua_State* L);
     static int generate(lua_State* L);
     static int setcapture(lua_State* L);
@@ -171,6 +171,7 @@ namespace psycle { namespace host {
     static int hidecursor(lua_State* L);
     static int showcursor(lua_State* L);
     static int setcursorpos(lua_State* L);
+    static int showscrollbar(lua_State* L);
   };
 
   struct LuaGroup : public canvas::Group {
@@ -227,12 +228,10 @@ namespace psycle { namespace host {
    private:
     static int create(lua_State *L);    
     // fill
-    static int setcolor(lua_State* L);
-    static int setskincolor(lua_State* L);
+    static int setcolor(lua_State* L);    
     static int color(lua_State* L);
     // stroke
-    static int setstrokecolor(lua_State* L);
-    static int setskinstrokecolor(lua_State* L);
+    static int setstrokecolor(lua_State* L);    
     static int strokecolor(lua_State* L);
 
     static int setpos(lua_State *L);
@@ -262,8 +261,7 @@ namespace psycle { namespace host {
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int setcolor(lua_State* L);
-    static int setskincolor(lua_State* L);
+    static int setcolor(lua_State* L);    
     static int color(lua_State* L);
     static int setpoints(lua_State* L);
     static int setpoint(lua_State* L);
@@ -293,8 +291,7 @@ namespace psycle { namespace host {
     static int setpos(lua_State *L);
     static int settext(lua_State* L);
     static int text(lua_State* L);
-    static int setcolor(lua_State* L);
-    static int setskincolor(lua_State* L);
+    static int setcolor(lua_State* L);    
     static int color(lua_State* L);
     static int pos(lua_State *L);
     static int gc(lua_State* L);
@@ -302,6 +299,7 @@ namespace psycle { namespace host {
     static int tostring(lua_State* L);
   };
 
+  /*
   struct LuaPixBind {
     static int open(lua_State *L);
     static const char* meta;
@@ -318,8 +316,58 @@ namespace psycle { namespace host {
     static int setpos(lua_State *L);
     static int tostring(lua_State* L);
   };
+  */
 
-  struct LuaBitmap {}; // todo
+  struct LuaGraphicsBind {
+    static int open(lua_State *L);
+    static int translate(lua_State *L);
+    static int setcolor(lua_State* L);
+    static int color(lua_State* L);
+    static int drawline(lua_State *L);
+    static int drawrect(lua_State *L);
+    static int drawroundrect(lua_State *L);
+    static int drawoval(lua_State* L);
+    static int fillrect(lua_State *L);
+    static int fillroundrect(lua_State *L);
+    static int filloval(lua_State* L);
+    static int copyarea(lua_State* L);
+    static int drawstring(lua_State* L);
+    static const char* meta;
+   private:    
+    static int gc(lua_State* L);
+  };
 
+  class LuaItem : public canvas::Item {
+  public:
+    LuaItem(lua_State* state) : canvas::Item(), L(state) { Init(); }
+    LuaItem(lua_State* state, canvas::Group* parent) :
+        canvas::Item(parent), L(state) { 
+      Init();
+    }
+    virtual bool OnEvent(canvas::Event* ev);
+    virtual void Draw(canvas::Graphics* g, const CRgn& repaint_region,
+      canvas::Canvas* widget);
+    const CRgn& region() const;    
+    // till regions will be bind
+    void SetSize(double w, double h) { STR(); w_ = w; h_ = h; FLS(); }
+   private:
+     void Init() { w_ = h_ = 0; }
+     lua_State* L;
+     int w_, h_;
+  };
+
+  struct LuaItemBind {
+    static int open(lua_State *L);
+    static int create(lua_State *L);
+    static int draw(lua_State* L);
+    static int pos(lua_State *L);
+    static int setpos(lua_State *L);
+    static int setsize(lua_State* L); // till there's a rgn bind
+    static int fls(lua_State *L);
+    static const char* meta;    
+   private:    
+    static int gc(lua_State* L);
+  };
+  
   } // namespace
 } // namespace

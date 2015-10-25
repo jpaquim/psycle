@@ -15,25 +15,30 @@ namespace psycle {namespace host{namespace canvas{class Canvas;}}}
 
 namespace psycle { namespace host {
   
-  struct LuaConfigBind {
-    enum {
-      TOPCOLOR = 1,
-      BOTTOMCOLOR,
-      HTOPCOLOR,
-      HBOTTOMCOLOR,
-      FTOPCOLOR,
-      FBOTTOMCOLOR,
-      HFTOPCOLOR,
-      HFBOTTOMCOLOR,
-      TITLECOLOR,
-    };
+  class ConfigStorage;
+
+  class LuaConfig {
+    public:
+     LuaConfig();
+     LuaConfig(const std::string& group);
+     ~LuaConfig();
+
+     ConfigStorage* store() { return store_; }
+     void OpenGroup(const std::string& group);
+     void CloseGroup();
+    private:
+     ConfigStorage* store_;     
+  };
+
+  struct LuaConfigBind {   
     static int open(lua_State *L);
     static const char* meta;
   private:
     static int create(lua_State* L);  
-    static int get(lua_State* L);
-    static int skinname(lua_State* L);
+    static int get(lua_State* L);    
     static int gc(lua_State* L);
+    static int opengroup(lua_State* L);
+    static int closegroup(lua_State* L);
     static int plugindir(lua_State* L);
   };
 
@@ -138,6 +143,35 @@ namespace psycle { namespace host {
     static int open(lua_State *L);
     static int create(lua_State* L);
     static int samplerate(lua_State* L);
+  };
+
+  struct LuaPatternEvent {
+    int pos;
+    int note;
+    int len;
+  };
+
+  class LuaPatternData {
+  public:
+    LuaPatternData(lua_State* state, unsigned char** data) 
+      : L(state), data_(data) {}    
+    unsigned char** data() { return data_; }
+    inline unsigned char * ptrackline(int ps, int track, int line) {      
+			return data_[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
+	  }
+    int patternLines(int ps);
+
+   private:
+     lua_State* L;  
+     unsigned char** data_;
+  };
+
+  struct LuaPatternDataBind {
+    static int open(lua_State *L);
+    static int create(lua_State* L);
+    static int track(lua_State* L);
+    static int insertevent(lua_State* L);
+    static const char* meta;
   };
 
   template <typename T>

@@ -379,7 +379,7 @@ namespace psycle { namespace host {
 				} else
         if (viewMode == view_modes::luaplugin)
 				{
-          if (active_lua_) {
+          if (active_lua_ && !active_lua_->crashed()) {
             active_lua_->OnGuiTimer(this->pParentFrame);           
             canvas::Canvas* user_view = active_lua_->GetCanvas();          
             user_view->SetParent(this);
@@ -572,9 +572,17 @@ namespace psycle { namespace host {
       {
         LuaPlugin* lp = active_lua_;        
         canvas::Canvas* user_view = lp->GetCanvas();        
-        if (user_view !=0 && lp->GetGuiType() == LuaMachine::CHILDVIEW) {
-          if (user_view->parent() == 0) user_view->SetParent(this);                              
-          user_view->DrawFlush(&bufDC, rgn);          
+        if (user_view !=0) {
+          if (user_view->parent() == 0) user_view->SetParent(this);  
+          mfc::Graphics g(&bufDC);
+          try {
+            user_view->DrawFlush(&g, rgn);          
+          } catch (std::exception& e) {
+             RemoveLuaMenu();
+             lp->custom_menubar = 0; 
+             lp->set_crashed(true);
+             AfxMessageBox(e.what());             
+          }
         }      
       }
 
@@ -2444,7 +2452,7 @@ namespace psycle { namespace host {
 		}
 
     bool CChildView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
-      if (active_lua_ && viewMode == view_modes::luaplugin) {        
+      if (active_lua_ && viewMode == view_modes::luaplugin && !active_lua_->crashed()) {        
         canvas::Event ev(0, (canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
         return active_lua_->OnEvent(&ev);        		    
       }
@@ -2474,10 +2482,10 @@ namespace psycle { namespace host {
        static_cast<PluginCatcher*>(&Global::machineload()); 
       PluginInfoList list = plug_catcher->GetLuaExtensions();
       PluginInfoList::iterator it = list.begin();
-      int pos = 8;      
+      int pos = 8; bool has_ext = false;
       for (; it != list.end(); ++it) {
         PluginInfo* info = *it;        
-        int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter;        
+        int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter++;
         LuaPlugin* mac = 0;
         try {
           mac = LuaHost::LoadPlugin(info->dllname.c_str(), 1024);
@@ -2491,17 +2499,48 @@ namespace psycle { namespace host {
           LuaMenuItem::id_counter++;
           lua_extensions_.push_back(mac); 
           menuItemIdMap[id] = mac;
+          if (user_view) {
+            int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter++;            
+          }          
+          has_ext = true;
         } catch (std::exception& e) {
           e;
-        }        
+        }                
       } 
+      if (has_ext) {
+        view_menu->AppendMenu(MF_SEPARATOR, 0, "-");
+        int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter++;
+        view_menu->AppendMenu(MF_STRING | MF_BYPOSITION, id, "Reload Active Extension");
+        menuItemIdMap[id] = NULL;
+      }
     }
 
     void CChildView::OnDynamicMenuItems(UINT nID) {      
+      if (menuItemIdMap[nID]==NULL) {
+        if (active_lua_) {
+          RemoveLuaMenu();
+          LuaPlugin* lp = active_lua_;
+          lp->custom_menubar = 0;   
+          try {                 
+            lp->proxy().reload();     
+            lua_menu_->setcmenu(pParentMain->GetMenu());        
+            lp->GetMenu(lua_menu_);
+            viewMode = view_modes::luaplugin;
+            lp->set_crashed(false);
+          } catch (std::exception e) {
+            AfxMessageBox(e.what());
+          }        
+          lp->InvalidateMenuBar();
+          Invalidate(false);
+        }
+        return;        
+      }       
+
       std::map<std::uint16_t, LuaPlugin*>::iterator it = menuItemIdMap.find(nID);
       if (it != menuItemIdMap.end()) {
         RemoveLuaMenu();
         LuaPlugin* plug = it->second;        
+        if (plug->crashed()) return;
         canvas::Canvas* user_view = plug->GetCanvas();
         if (user_view) {
           // integrate into childview
@@ -2511,13 +2550,15 @@ namespace psycle { namespace host {
           active_lua_->GetMenu(lua_menu_);
           ShowScrollBar(SB_BOTH,FALSE);
 			    Invalidate(false);
-          active_lua_->InvalidateMenuBar();
+          active_lua_->InvalidateMenuBar();          
           SetFocus();
         } else {          
           plug->OnExecute(); // notify ext should do sth
         }               
       } else {        
-			  active_lua_->OnMenu(nID);
+        if (!active_lua_->crashed()) {
+			    active_lua_->OnMenu(nID);
+        }
       }
 		}
 

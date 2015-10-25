@@ -512,6 +512,7 @@ namespace psycle
 			virtual void RefreshSettings();
 			virtual void RefreshAudio();
 
+      ConfigStorage* CreateStore();
 			bool LoadPsycleSettings();
 			bool SavePsycleSettings();
 			void DeleteStorage(store_t store);

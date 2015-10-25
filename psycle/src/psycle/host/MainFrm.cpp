@@ -595,7 +595,7 @@ namespace psycle { namespace host {
 			m_machineBar.OnWavebut();
 		}
 		void CMainFrame::OnPsyhelp() 
-		{
+		{      
 			CString helppath(Global::configuration().appPath().c_str());
 			helppath +=  "Docs\\psycle.chm";
 			::HtmlHelp(::GetDesktopWindow(),helppath, HH_DISPLAY_TOPIC, 0);

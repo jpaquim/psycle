@@ -264,9 +264,9 @@ namespace psycle
 						}
 					}
 					virtual void OnReload() {}
-          void set_crashed(bool on) { crashed_ = on; crashed_ = true;
-			_bypass = true;
-			_mute = true;}
+          void set_crashed(bool on) {                         
+            crashed_ = _bypass = _mute =  on;            
+          }
 				private:
 					bool                crashed_;
 			///\}

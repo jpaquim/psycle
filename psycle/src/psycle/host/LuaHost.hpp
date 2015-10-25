@@ -91,7 +91,7 @@ public:
 	// calls from proxy to script
 	void call_run();
 	void call_init();
-  canvas::Canvas* call_canvas();
+  LuaCanvas* call_canvas();
 	PluginInfo call_info();
 	void call_seqtick(int /*channel*/, int /*note*/, int /*ins*/, int /*cmd*/, int /*val*/);
 	// calls if noteon modus used
