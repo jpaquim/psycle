@@ -24,6 +24,7 @@ namespace psycle { namespace host {
     LuaPlugin(lua_State* state, int index, bool full=true);
     virtual ~LuaPlugin();
     void Free();
+    LuaProxy& proxy() { return proxy_; }
 
     virtual int GenerateAudioInTicks( int startSample, int numSamples );
     virtual float GetAudioRange() const { return 1.0f; }
@@ -99,11 +100,20 @@ namespace psycle { namespace host {
 				val[0]='\0';
 		}
 		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
-    virtual void OnGuiTimer(void* hnd) {      
-      if (custom_menubar && custom_menubar->needsupdate()) {
-        proxy_.update_menu(hnd);
-        custom_menubar->setupdate(false);
-      }      
+    virtual void OnGuiTimer(void* hnd) {
+      if (!crashed()) {
+        if (custom_menubar && custom_menubar->needsupdate()) {
+          proxy_.update_menu(hnd);
+          custom_menubar->setupdate(false);
+        }      
+        LuaCanvas* canvas = proxy_.call_canvas();
+        if (canvas) {
+          if (canvas->show_scrollbar) {
+             ((CWnd*) hnd)->ShowScrollBar(SB_BOTH,TRUE);
+             canvas->show_scrollbar = false;
+          }
+        }
+      }
     }    
 
     std::string dll_path_;
@@ -141,6 +151,7 @@ namespace psycle { namespace host {
       unsigned char inst,
       unsigned char cmd,
       unsigned char val);    
+    public:
     LuaMenuBar* custom_menubar;    
   };
 

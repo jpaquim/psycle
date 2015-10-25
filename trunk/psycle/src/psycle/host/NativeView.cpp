@@ -548,7 +548,8 @@ namespace psycle { namespace host {
         canvas::Canvas* user_view = lp->GetCanvas();
         if (user_view !=0 && lp->GetGuiType() == 1) {
           if (user_view->parent() == 0) user_view->SetParent(this);
-          user_view->DrawFlush(&bufferDC, pRgn);
+          mfc::Graphics g(&bufferDC);
+          user_view->DrawFlush(&g, pRgn);          
           dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
 		 	    bufferDC.SelectObject(oldbmp);
 			    bufferDC.SelectObject(oldfont);

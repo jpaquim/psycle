@@ -62,7 +62,11 @@ namespace psycle { namespace host {
 
   void LuaPlugin::OnReload() {
     try {
-      proxy_.reload();
+      proxy_.reload();      
+      if (custom_menubar) {
+        delete custom_menubar;
+      }      
+      custom_menubar = 0;
     } CATCH_WRAP_AND_RETHROW(*this)
     /*PluginInfo info = CallPluginInfo();
     _mode = info.mode;*/
@@ -71,13 +75,11 @@ namespace psycle { namespace host {
   bool LuaPlugin::OnEvent(canvas::Event* ev) {
     try {       
         if (GetCanvas() !=0 && GetGuiType() == 1) {                    
-          return proxy_.call_event(ev); 
-          return true;
-        }		
-        
-      } catch(std::exception &e) { e;
-       return false;
+          return proxy_.call_event(ev);           
+        }            
+      } catch(std::exception &e) { e;       
     } 
+    return false;
   }
 
   int LuaPlugin::GenerateAudioInTicks(int /*startSample*/, int numSamples) throw(psycle::host::exception)

@@ -83,7 +83,7 @@ namespace psycle { namespace host {
 			lua_setmetatable(L, -2);
 			lua_pushvalue(L, self);
 			lua_setfield(L, self, "__index");            
-			UserDataType ** udata = (UserDataType **)lua_newuserdata(L, sizeof(UserDataType *));	
+			UserDataType ** udata = (UserDataType **)lua_newuserdata(L, sizeof(UserDataType *));
 			*udata = ud;
 			luaL_getmetatable(L, meta.c_str());
 			lua_setmetatable(L, -2);

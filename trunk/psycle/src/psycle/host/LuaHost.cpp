@@ -57,18 +57,21 @@ namespace psycle { namespace host {
     LuaHelper::require<LuaWaveDataBind>(L, "psycle.dsp.wavedata");
     LuaHelper::require<LuaEnvelopeBind>(L, "psycle.envelope");
     LuaHelper::require<LuaPlayerBind>(L, "psycle.player");
+    LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");
     LuaHelper::require<LuaConfigBind>(L, "psycle.config");    
     // ui binds    
     LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
     LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
     LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");    
     LuaHelper::require<LuaDialogBind>(L, "psycle.ui.dialog");        
-    LuaHelper::require<LuaCanvasBind>(L, "psycle.ui.canvas");    
+    LuaHelper::require<LuaCanvasBind>(L, "psycle.ui.canvas");
     LuaHelper::require<LuaGroupBind>(L, "psycle.ui.canvas.group");    
+    LuaHelper::require<LuaItemBind>(L, "psycle.ui.canvas.item");
     LuaHelper::require<LuaRectBind>(L, "psycle.ui.canvas.rect");    
     LuaHelper::require<LuaLineBind>(L, "psycle.ui.canvas.line");    
     LuaHelper::require<LuaTextBind>(L, "psycle.ui.canvas.text");
-    LuaHelper::require<LuaPixBind>(L, "psycle.ui.canvas.pix");
+    // LuaHelper::require<LuaPixBind>(L, "psycle.ui.canvas.pix");
+    LuaHelper::require<LuaGraphicsBind>(L, "psycle.ui.canvas.graphics");
 #if !defined WINAMP_PLUGIN
     LuaHelper::require<LuaPlotterBind>(L, "psycle.plotter");    
 #endif //!defined WINAMP_PLUGIN    
@@ -1045,7 +1048,7 @@ namespace psycle { namespace host {
     unlock();
   }
 
-  canvas::Canvas* LuaProxy::call_canvas() {    
+  LuaCanvas* LuaProxy::call_canvas() {    
     try {	
       lock();
       if (!get_method_optional(L, "canvas")) {
@@ -1062,7 +1065,7 @@ namespace psycle { namespace host {
         unlock();
         return 0;
       }
-      canvas::Canvas* canvas = LuaHelper::check<canvas::Canvas>(L, -1, LuaCanvasBind::meta);
+      LuaCanvas* canvas = LuaHelper::check<LuaCanvas>(L, -1, LuaCanvasBind::meta);
       lua_pop(L, 1);
       unlock();
       return canvas;

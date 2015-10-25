@@ -238,6 +238,7 @@ namespace host {
 
 			void AppendToRecent(std::string const& fName);
 			void RestoreRecent();
+    public:
       void RemoveLuaMenu();
       void LoadLuaExtensions();
       bool DelegateLuaEvent(int type, int button, UINT nFlags, CPoint point);
@@ -462,8 +463,8 @@ namespace host {
 			COLORREF pvc_fontSel[MAX_TRACKS+1];
 			COLORREF pvc_selectionbeat[MAX_TRACKS+1];
 			COLORREF pvc_selection4beat[MAX_TRACKS+1];
-
-      class LuaPlugin* active_lua_;
+      public:
+      class LuaPlugin* active_lua_;      
       class LuaMenu* lua_menu_;
       std::map<std::uint16_t, LuaPlugin*> menuItemIdMap;
       std::vector<LuaPlugin*> lua_extensions_;

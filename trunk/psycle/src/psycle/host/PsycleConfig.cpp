@@ -1742,6 +1742,63 @@ namespace psycle { namespace host {
 			recent_files_.push_back("");
 		}
 
+    ConfigStorage* PsycleConfig::CreateStore() {      
+      //There is no default setting. If the storage exists, it is used.
+			ConfigStorage* store = NULL;
+			boost::filesystem::path cachedir;
+			bool opened = false;
+			for(int i=0;i < STORE_TYPES; i++) {
+				switch(i) 
+				{
+					case STORE_EXE_DIR:
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->OpenLocation((boost::filesystem::path(appPath()) / PSYCLE__NAME ".ini").string());
+						cachedir = boost::filesystem::path(appPath());
+						break;
+					case STORE_USER_DATA:
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->OpenLocation((universalis::os::fs::home_app_local(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
+						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
+						break;
+					case STORE_USER_REGEDIT:
+						store = new Registry(Registry::HKCU, "");
+						opened = store->OpenLocation(registry_root_path);
+						cachedir = universalis::os::fs::home_app_local(PSYCLE__NAME);
+						break;
+					case STORE_ALL_DATA:
+						store = new WinIniFile(PSYCLE__VERSION);
+						opened = store->OpenLocation((universalis::os::fs::all_users_app_settings(PSYCLE__NAME) / PSYCLE__NAME ".ini").string());
+						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
+						break;
+					case STORE_ALL_REGEDIT:
+						store = new Registry(Registry::HKLM, "");
+						opened = store->OpenLocation(registry_root_path);
+						cachedir = universalis::os::fs::all_users_app_settings(PSYCLE__NAME);
+						break;
+					default:
+						break;
+				}
+				if(!opened) {
+					delete store;
+          store = 0;
+					continue;
+				}
+				// So here we go,
+				// First, try current path since version 1.8.8
+				if(!store->OpenGroup(registry_config_subkey)) {
+					// else, resort to the old path used from versions 1.8.0 to 1.8.6 included
+					if(!store->OpenGroup("configuration--1.8")) {
+						// If neither, return.
+						store->CloseLocation();
+						delete store;
+						return 0;
+					}
+				}	
+        break;
+			}
+			return store;
+    }
+
 		bool PsycleConfig::LoadPsycleSettings()
 		{
 			//There is no default setting. If the storage exists, it is used.

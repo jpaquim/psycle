@@ -46,22 +46,9 @@ namespace psycle { namespace host { namespace canvas {
 
   class Skin {
   public:
-    enum COLOR {
-      TOPCOLOR = 1,
-      BOTTOMCOLOR,
-      HTOPCOLOR,
-      HBOTTOMCOLOR,
-      FTOPCOLOR,
-      FBOTTOMCOLOR,
-      HFTOPCOLOR,
-      HFBOTTOMCOLOR,
-      TITLECOLOR,
-    };
-
     enum SIZE {
       DIALSIZE = 1
     };
-
     enum BMP {
       DIALBMP = 1
     };
@@ -87,40 +74,35 @@ namespace psycle { namespace host { namespace canvas {
         break;
       default:;
       }
-    }
-
-    static ARGB get_color(int key) {
-      PsycleConfig* cfg = &PsycleGlobal::conf();      
-      int cr = 0;
-      switch (key) {
-        case Skin::TOPCOLOR:      cr = cfg->macParam().topColor; break;
-        case Skin::BOTTOMCOLOR:   cr = cfg->macParam().bottomColor; break;
-        case Skin::HTOPCOLOR:     cr = cfg->macParam().hTopColor; break;
-        case Skin::HBOTTOMCOLOR:  cr = cfg->macParam().hBottomColor; break;
-        case Skin::FTOPCOLOR:     cr = cfg->macParam().fontTopColor; break;
-        case Skin::FBOTTOMCOLOR:  cr = cfg->macParam().fontBottomColor; break;
-        case Skin::HFTOPCOLOR:    cr = cfg->macParam().fonthTopColor; break;
-        case Skin::HFBOTTOMCOLOR: cr = cfg->macParam().fonthBottomColor; break;
-        case Skin::TITLECOLOR:    cr = cfg->macParam().titleColor; break;                
-        default:;
-      }           
-      int a = 0;
-      return (((ARGB) (GetBValue(cr)) << 0)  |
-              ((ARGB) (GetGValue(cr)) << 8)  |
-              ((ARGB) (GetRValue(cr)) << 16) |
-              ((ARGB) (a) << 24));
-    }    
+    }  
   };
 
   class Graphics {
   public:
-    void DrawRect(int x, int y, int width, int height) {}
+    Graphics() {}
+    virtual ~Graphics() = 0;
+    
+    virtual void CopyArea(int x, int y, int width, int height, int dx, int dy) = 0;
+    virtual void DrawLine(int x1, int y1, int x2, int y2) = 0;
+    virtual void DrawRect(int x, int y, int width, int height) = 0;
+    virtual void DrawRoundRect(int x, int y, int width, int height, int arc_width, int arch_height) = 0;
+    virtual void DrawOval(int x, int y, int width, int height) = 0;
+    virtual void DrawString(const std::string& str, int x, int y) = 0;    
+    virtual void FillRect(int x, int y, int width, int height) = 0;
+    virtual void FillRoundRect(int x, int y, int width, int height, int arc_width, int arch_height) = 0;
+    virtual void FillOval(int x, int y, int width, int height) = 0;
+    virtual void SetColor(ARGB color) = 0;
+    virtual ARGB color() const = 0;
+    virtual void Translate(double x, double y) = 0;
   };
+
+  inline Graphics::~Graphics() { }
 
   class Item {
   public:
     Item();
     Item(class Group* parent);
+    Item(class Group* parent, double x, double y);
     void Init();
     virtual ~Item();
 
@@ -136,7 +118,7 @@ namespace psycle { namespace host { namespace canvas {
     Group* parent() { return parent_; }
     const Group* parent() const { return parent_; }
     virtual const CRgn& region() const { return rgn_; }
-    virtual void Draw(CDC* cr, const CRgn& repaint_region, class Canvas* widget) {}
+    virtual void Draw(Graphics* g, const CRgn& repaint_region, class Canvas* widget) = 0;
     virtual void GetBounds(double& x1, double& y1, double& x2, double& y2) const {}
     virtual Item* intersect(double x, double y, Event* ev, bool& worked) { 
        if (update_) { region(); }    
@@ -145,8 +127,9 @@ namespace psycle { namespace host { namespace canvas {
     }
     virtual void intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {}
     virtual bool OnEvent(Event* ev) { return 0; }
-    virtual double x() const { return 0; }
-    virtual double y() const { return 0; } 
+    virtual double x() const { return x_; }
+    virtual double y() const { return y_; } 
+    virtual void SetXY(double x, double y) { STR(); x_ = x; y_ = y; FLS(); }
     void pos(double& xv, double& yv) const { xv = x(); yv = y(); }
     virtual double zoomabsx() const;
     virtual double zoomabsy() const;
@@ -183,18 +166,14 @@ namespace psycle { namespace host { namespace canvas {
     mutable CRgn rgn_;
     void checkbuttonpress();
     void checkfocusitem();
+
+    double x_, y_;
   private:
     Group* parent_;
     CRgn fls_rgn_;
     std::string name_;
     bool managed_, visible_, pointer_events_, has_store_;
-    std::vector<Item*> dummy;
-  };
-
-  class PaintItem : public Item {  
-    PaintItem(Group* parent) : Item(parent) {}
-    virtual void Draw(CDC* cr, const CRgn& repaint_region,
-        class Canvas* widget); 
+    std::vector<Item*> dummy;    
   };
 
   class Group : public Item {  
@@ -207,7 +186,7 @@ namespace psycle { namespace host { namespace canvas {
     ~Group();
     
     void GetBounds(double& x1, double& y1, double& x2, double& y2) const;
-    virtual void Draw(CDC* cr,
+    virtual void Draw(Graphics* g,
       const CRgn& repaint_region,
     class Canvas* widget);
     virtual Item* intersect(double x, double y, Event* ev, bool &worked);
@@ -228,14 +207,6 @@ namespace psycle { namespace host { namespace canvas {
     void Clear2() { items_.clear(); }
     void Insert(iterator it, Item* item);
     void RaiseToTop(Item* item);        
-    void SetXY(double x, double y) { 
-      STR();
-      x_ = x;
-      y_ = y;
-      FLS();
-    }
-    double x() const { return x_; }
-    double y() const { return y_; }    
     void setzoom(double zoom) { zoom_ = zoom; }
     virtual double zoom() const { return zoom_; }
     Canvas* widget() { return widget_; }
@@ -252,59 +223,43 @@ namespace psycle { namespace host { namespace canvas {
 
   class Rect : public Item {
   public:
-    Rect();
-    Rect(Group* parent);
+    Rect::Rect() : Item() { Init(); }
+    Rect::Rect(Group* parent) : Item(parent) { Init(); }
     Rect(Group* parent, double x1, double y1, double x2, double y2 );
     virtual ~Rect() {}
-
-    void SetXY(double x, double y);
-    void SetPos(double x1, double y1, double x2, double y2) {   
+    
+    void SetPos(double x1, double y1, double width, double height) {   
       STR();
-      x1_ = x1;
-      y1_ = y1;
-      x2_ = x2;
-      y2_ = y2;    
+      x_ = x1;
+      y_ = y1;
+      width_ = width;
+      height_ = height;
       FLS();
-    }    
-    double x() const { return x1_; }
-    double y() const { return y1_; }
-    double x1() const { return x1_; }
-    double y1() const { return y1_; }
-    double x2() const { return x2_; }
-    double y2() const { return y2_; }    
+    }        
+    double width() const { return width_; }
+    double height() const { return height_; }    
     // fill colors
-    void SetFillColor(ARGB color) { fillcolor_ = color; skin_ = 0; FLS(); }
-    ARGB fillcolor() const { return fillcolor_; }
-    void SetSkinFillColor(int skin) {      
-      fillcolor_ = Skin::get_color(skin);
-      skin_ = skin;
-      FLS();
-    }
-    int skinfillcolor() const { return skin_; }
+    void SetFillColor(ARGB color) { fillcolor_ = color; FLS(); }
+    ARGB fillcolor() const { return fillcolor_; }    
     // stroke colors
-    void SetStrokeColor(ARGB color) { strokecolor_ = color; skin_stroke_ = 0; FLS(); }
-    ARGB strokecolor() const { return strokecolor_; }
-    void SetSkinStrokeColor(int skin) {      
-      fillcolor_ = Skin::get_color(skin);
-      skin_stroke_ = skin;
-      FLS();
-    }
-    int skinstrokecolor() const { return skin_; }    
+    void SetStrokeColor(ARGB color) { strokecolor_ = color; FLS(); }
+    ARGB strokecolor() const { return strokecolor_; }    
     void SetBorder(double bx, double by) { STR(); bx_ = bx; by_ = by; FLS(); }
     void border(double &bx, double &by) const { bx = bx_; by = by_; }    
-    virtual void Draw(CDC* cr, const CRgn& repaint_region,
+    virtual void Draw(Graphics* g, const CRgn& repaint_region,
         class Canvas* widget);
     virtual const CRgn& region() const;    
     virtual void intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2);
     virtual void GetBounds(double& x1, double& y1, double& x2,
       double& y2) const;
   private:
-    double x1_, y1_, x2_, y2_, bx_, by_;
-    ARGB fillcolor_, strokecolor_;    
-    int skin_, skin_stroke_;    
-    bool paintRect(CDC &hdc, RECT dim, COLORREF penCol, COLORREF brushCol, unsigned int opacity);
+    void Init();
+    // bool paintRect(CDC &hdc, RECT dim, COLORREF penCol, COLORREF brushCol, unsigned int opacity);
+    double width_, height_, bx_, by_;
+    ARGB fillcolor_, strokecolor_;        
   };
 
+  /*
   class PixBuf : public Item {
   public:
     PixBuf();
@@ -378,15 +333,15 @@ namespace psycle { namespace host { namespace canvas {
     bool shared_;
     bool pmdone;
     CPngImage image;
-  };
+  };*/
 
   class Line : public Item {
   public:
-    Line() : Item(), color_(0), skin_(0) {}
-    Line(Group* parent) : Item(parent), color_(0), skin_(0) {}
+    Line() : Item(), color_(0) {}
+    Line(Group* parent) : Item(parent), color_(0) {}
     virtual ~Line() {}
 
-    virtual void Draw(CDC* cr,
+    virtual void Draw(Graphics* g,
       const CRgn& repaint_region,
     class Canvas* widget);
     virtual Item* intersect(double x, double y, Event* ev, bool &worked);
@@ -398,57 +353,32 @@ namespace psycle { namespace host { namespace canvas {
     void SetPoint(int idx, const Point& pt) { STR(); pts_[idx] = pt; FLS(); }
     const Points& points() const { return pts_; }
     const Point& PointAt(int index) const { return pts_.at(index); }
-   void SetColor(ARGB color) { color_ = color; skin_ = 0; FLS(); }
-    ARGB color() const { return color_; }
-    void SetSkinColor(int skin) {      
-      color_ = Skin::get_color(skin);
-      skin_ = skin;
-      FLS();
-    }
-    int skincolor() const { return skin_; }
-    void SetXY(double x, double y);
-    double x() const { return pts_.size() > 0 ? pts_[0].first : 0; }
-    double y() const { return pts_.size() > 0 ? pts_[0].second : 0; }
+   void SetColor(ARGB color) { color_ = color; FLS(); }
+    ARGB color() const { return color_; }    
     virtual const CRgn& region() const;
   private:
     Points pts_;
-    ARGB color_;
-    int skin_;    
+    ARGB color_;    
   };
 
   class Text : public Item {
   public:
     Text() : Item() { Init(1.0); }
     Text(Group* parent);
-    Text(Group* parent, const std::string& text);
-    void Init(double zoom);
+    Text(Group* parent, const std::string& text);    
     virtual ~Text() { }
 
     void SetText(const std::string& text) { STR(); text_ = text; FLS(); }
-    const std::string& text() const { return text_; }
-    void SetXY(double x, double y) {
-      STR();
-      x_ = x;
-      y_ = y;    
-      FLS();
-    }
-    double x() const { return x_; }
-    double y() const { return y_; }
-    void SetColor(ARGB color) { color_ = color; skin_ = 0; FLS(); }
-    ARGB color() const { return color_; }
-    void SetSkinColor(int skin) {      
-      color_ = Skin::get_color(skin);
-      skin_ = skin;
-      FLS();
-    }
-    int skincolor() const { return skin_; }
+    const std::string& text() const { return text_; }    
+    void SetColor(ARGB color) { color_ = color; FLS(); }
+    ARGB color() const { return color_; }    
     void SetFont(const CFont& font) {
       LOGFONT lf;
       const_cast<CFont&>(font).GetLogFont(&lf);
       font_.DeleteObject();
       font_.CreateFontIndirect(&lf);
     }
-    virtual void Draw(CDC* cr,
+    virtual void Draw(Graphics* cr,
       const CRgn& repaint_region,
     class Canvas* widget);
     virtual void GetBounds(double& x1, double& y1, double& x2,
@@ -457,10 +387,10 @@ namespace psycle { namespace host { namespace canvas {
     virtual void intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2);
 
   private:    
-    std::string text_;
-    double x_, y_;
-    ARGB color_;
-    int skin_;
+    void Init(double zoom);
+
+    std::string text_;    
+    ARGB color_;    
     CFont font_;
     mutable int text_w, text_h;    
   };
@@ -478,15 +408,10 @@ namespace psycle { namespace host { namespace canvas {
 
     void SetParent(CWnd* parent) {parent_ = parent;}
     Group* root() { return root_; } 
-    void Draw(CDC *devc, const CRgn& rgn);
-    void DrawFlush(CDC *devc, const CRgn& rgn);
-    void SetColor(ARGB color) { color_ = color; skin_ = 0; }
-    ARGB color() const { return color_; }
-    void SetSkinColor(int skin) {
-      color_ = Skin::get_color(skin);
-      skin_ = skin;
-    }
-    int skincolor() const { return skin_; }
+    void Draw(Graphics* g, const CRgn& rgn);
+    void DrawFlush(Graphics* g, const CRgn& rgn);
+    void SetColor(ARGB color) { color_ = color; }
+    ARGB color() const { return color_; }    
         
     void set_bg_image(CBitmap* bg_image, int width, int height) {
       bg_image_ = bg_image;
@@ -538,6 +463,9 @@ namespace psycle { namespace host { namespace canvas {
 		  ::SetCursorPos(point.x, point.y);
     }
   }
+  double zoomabsx() const { return 0; }
+  double zoomabsy() const { return 0; } 
+
   protected:
     void Invalidate(CRgn& rgn);    
   private:
@@ -550,11 +478,119 @@ namespace psycle { namespace host { namespace canvas {
     Item *button_press_item_,  *out_item_, *focus_item_;    
     CBitmap* bg_image_;
     int bg_width_, bg_height_;
-    int cw_, ch_, pw_, ph_;
-    int skin_;
+    int cw_, ch_, pw_, ph_;    
     ARGB color_;    
     CRgn save_rgn_;    
   };
 
 }}}
+
+// MFC dependent implementations
+namespace psycle { namespace host { namespace mfc {
+class Graphics : public canvas::Graphics {
+  public:
+    Graphics(CDC* cr) : cr_(cr), color_(200), brush(ToCOLORREF(200)) {
+       assert(cr);
+       pen.CreatePen(PS_SOLID, 1, ToCOLORREF(color_));
+       cr->SetTextColor(ToCOLORREF(color_));
+       old_pen = cr->SelectObject(&pen);                         
+       old_brush = cr->SelectObject(&brush);       
+       cr_->GetWorldTransform(&rXform);
+       cr_->SetBkMode(TRANSPARENT);     
+       LOGFONT lfLogFont;
+       memset(&lfLogFont, 0, sizeof(lfLogFont));
+       lfLogFont.lfHeight = 12;
+       strcpy(lfLogFont.lfFaceName, "Arial");
+       font.CreateFontIndirect(&lfLogFont);
+       old_font = (CFont*) cr_->SelectObject(&font);
+    }   
+
+    virtual ~Graphics() {
+      cr_->SelectObject(old_pen);
+      pen.DeleteObject();
+      brush.DeleteObject();
+      font.DeleteObject();
+      cr_->SetGraphicsMode(GM_ADVANCED);
+      cr_->SetWorldTransform(&rXform);
+      cr_->SelectObject(old_font);
+      cr_->SetBkMode(OPAQUE);
+    }    
+
+    void DrawString(const std::string& str, int x, int y) {            
+      cr_->TextOut(x, y, str.c_str());      
+    }
+
+    void CopyArea(int x, int y, int width, int height, int dx, int dy) {
+      cr_->BitBlt(x+dx, y+dy, width, height, cr_, x, y, SRCCOPY);
+    }
+
+    void Translate(double x, double y) {            
+        XFORM rXform_new = rXform;
+        rXform_new.eDx = rXform.eDx + x;
+        rXform_new.eDy = rXform.eDy + y;        
+        cr_->SetGraphicsMode(GM_ADVANCED);
+        cr_->SetWorldTransform(&rXform_new);        
+    }
+
+    void SetColor(canvas::ARGB color) {
+      color_ = color;
+      pen.DeleteObject();
+      pen.CreatePen(PS_SOLID, 1, ToCOLORREF(color));
+      cr_->SelectObject(&pen);
+      brush.DeleteObject();
+      brush.CreateSolidBrush(ToCOLORREF(color));
+      cr_->SelectObject(&brush);
+      cr_->SetTextColor(ToCOLORREF(color_));
+    }
+
+    canvas::ARGB color() const { return color_; }
+
+    void DrawLine(int x1, int y1, int x2, int y2) {
+      cr_->MoveTo(x1, y1);
+      cr_->LineTo(x2, y2);
+    }
+
+    void DrawRect(int x, int y, int width, int height) {
+      CRect rc(x, y, x+width, y+height);
+      cr_->FrameRect(rc, &brush);
+    }
+
+    void DrawRoundRect(int x, int y, int width, int height, int arc_width, int arc_height) {
+      cr_->SelectStockObject(NULL_BRUSH);
+      cr_->RoundRect(x, y, x+width, y+width, arc_width, arc_height);
+      cr_->SelectObject(&brush);
+    }
+
+    void DrawOval(int x, int y, int width, int height) {
+      cr_->SelectStockObject(NULL_BRUSH);
+      cr_->Ellipse(x, y, x+width, y+height);
+      cr_->SelectObject(&brush);
+    }    
+
+    void FillRoundRect(int x, int y, int width, int height, int arc_width, int arc_height) {      
+      cr_->RoundRect(x, y, x+width, y+height, arc_width, arc_height);      
+    }
+
+    void FillRect(int x, int y, int width, int height) {
+      cr_->Rectangle(x, y, x+width, y+height);
+    }
+
+    void FillOval(int x, int y, int width, int height) {      
+      cr_->Ellipse(x, y, x+width, y+height);      
+    }
+
+  private:
+    CDC* cr_;
+    CPen pen;
+    CBrush brush;
+    CPen* old_pen;
+    CBrush* old_brush;
+    CFont font;
+    CFont* old_font;
+    canvas::ARGB color_;
+    XFORM rXform;
+  };
+
+}}}
+
 

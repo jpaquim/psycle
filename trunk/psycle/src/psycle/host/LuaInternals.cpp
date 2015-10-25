@@ -36,103 +36,95 @@
 namespace psycle { namespace host {
   
   /////////////////////////////////////////////////////////////////////////////
-  // LuaConfigBind
+  // LuaConfig+Bind
   /////////////////////////////////////////////////////////////////////////////
+
+  LuaConfig::LuaConfig() { 
+    store_ = PsycleGlobal::conf().CreateStore();
+  }
+
+  LuaConfig::LuaConfig(const std::string& group) {
+     store_ = PsycleGlobal::conf().CreateStore();
+     OpenGroup(group);
+  }
+
+  LuaConfig::~LuaConfig() { 
+    delete store_;
+  }
+  
+  void LuaConfig::OpenGroup(const std::string& group) {
+    // Do not open group if loading version 1.8.6
+    if(!store_->GetVersion().empty()) {
+		  store_->OpenGroup(group);
+	  }
+  }
+
+  void LuaConfig::CloseGroup() {
+    // Do not open group if loading version 1.8.6
+    if(!store_->GetVersion().empty()) {
+		  store_->CloseGroup();
+	  }
+  }
 
   const char* LuaConfigBind::meta = "psyconfigmeta";
   
   int LuaConfigBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
       {"new", create},      
-      {"get", get},
-      {"name", skinname},
+      {"get", get},      
+      {"opengroup", opengroup},
+      {"closegroup", closegroup},
       {"luapath", plugindir},
       {NULL, NULL}
     };
-    LuaHelper::open(L, meta, methods,  gc);
-    // define enum
-    int e = 0;
-    lua_pushnumber(L, ++e); 
-    lua_setfield(L, -2, "TOPCOLOR");
-    lua_pushnumber(L, ++e); 
-    lua_setfield(L, -2, "BOTTOMCOLOR");
-    lua_pushnumber(L, ++e); 
-    lua_setfield(L, -2, "HTOPCOLOR");
-    lua_pushnumber(L, ++e); 
-    lua_setfield(L, -2, "HBOTTOMCOLOR");
-    lua_pushnumber(L, ++e);     
-    lua_setfield(L, -2, "FTOPCOLOR");
-    lua_pushnumber(L, ++e);     
-    lua_setfield(L, -2, "FBOTTOMCOLOR");
-    lua_pushnumber(L, ++e);
-    lua_setfield(L, -2, "HFTOPCOLOR");
-    lua_pushnumber(L, ++e);     
-    lua_setfield(L, -2, "HFBOTTOMCOLOR");
-    lua_pushnumber(L, ++e);
-    lua_setfield(L, -2, "TITLECOLOR");
+    LuaHelper::open(L, meta, methods,  gc);    
     return 1;
   }
   
   int LuaConfigBind::create(lua_State *L) {
     int n = lua_gettop(L);  // Number of arguments
-    if (n != 1) {
-      return luaL_error(L, "Got %d arguments expected 1 (self)", n); 
-    }             
-    LuaHelper::new_userdata<PsycleConfig>(L, meta, &PsycleGlobal::conf());          
+    if (n != 1 and n!=2) {
+      return luaL_error(L, "Got %d arguments expected 2 (self or self and group)", n); 
+    }
+    LuaConfig* cfg = (n==1) ?  new LuaConfig() : new LuaConfig(luaL_checkstring(L, 2));    
+    LuaHelper::new_userdata<LuaConfig>(L, meta, cfg); 
     return 1;
   }
+  
+  int LuaConfigBind::opengroup(lua_State *L) {
+    LuaHelper::callstrictstr<LuaConfig>(L, meta, &LuaConfig::OpenGroup);    
+    return LuaHelper::chaining(L);
+  }
 
-  int LuaConfigBind::skinname(lua_State *L) {
-    int skin = luaL_checknumber(L, 2);
-    luaL_requiref(L, "psycle.config", LuaConfigBind::open, 0);
-    size_t len;    
-    std::string key;    
-    for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
-      key = std::string(luaL_checklstring(L, -2, &len));
-      int t = lua_type(L, -1);
-      if (t == LUA_TNUMBER) {
-        int num = luaL_checknumber(L, -1);                  
-        if (num == skin) {
-         break;
-        }      
-      }
-    }
-    lua_pushstring(L, key.c_str());
-    return 1;
+  int LuaConfigBind::closegroup(lua_State *L) {
+    LuaHelper::call<LuaConfig>(L, meta, &LuaConfig::CloseGroup);    
+    return LuaHelper::chaining(L);
   }
 
   int LuaConfigBind::get(lua_State *L) {
-    int n = lua_gettop(L);
-    int rn = 0; // number of arguments returned
-    if (n == 2) {      
-      PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
-      int key = luaL_checknumber(L, 2);      
-      switch (key) {
-        case TOPCOLOR:      rn = LuaHelper::push_argb(L, cfg->macParam().topColor); break;
-        case BOTTOMCOLOR:   rn = LuaHelper::push_argb(L, cfg->macParam().bottomColor); break;
-        case HTOPCOLOR:     rn = LuaHelper::push_argb(L, cfg->macParam().hTopColor); break;
-        case HBOTTOMCOLOR:  rn = LuaHelper::push_argb(L, cfg->macParam().hBottomColor); break;
-        case FTOPCOLOR:     rn = LuaHelper::push_argb(L, cfg->macParam().fontTopColor); break;
-        case FBOTTOMCOLOR:  rn = LuaHelper::push_argb(L, cfg->macParam().fontBottomColor); break;
-        case HFTOPCOLOR:    rn = LuaHelper::push_argb(L, cfg->macParam().fonthTopColor); break;
-        case HFBOTTOMCOLOR: rn = LuaHelper::push_argb(L, cfg->macParam().fonthBottomColor); break;
-        case TITLECOLOR:    rn = LuaHelper::push_argb(L, cfg->macParam().titleColor); break;                
-        default:;
-      }      
-    }  else {
-      luaL_error(L, "Got %d arguments expected 2 (self, key)", n); 
+    int err = LuaHelper::check_argnum(L, 2, "self, key");
+    if (err!=0) return err;    
+    LuaConfig* cfg = LuaHelper::check<LuaConfig>(L, 1, meta);
+    ConfigStorage* store = cfg->store();
+    if (store) {             
+      const char* key = luaL_checkstring(L, 2);
+      COLORREF color;
+      store->Read(key, color);
+      LuaHelper::push_argb(L, color);      
+    } else {
+      return 0;
     }
-    return rn;
-  }
-
-  int LuaConfigBind::plugindir(lua_State* L) {            
-    PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
-    lua_pushstring(L, cfg->GetAbsoluteLuaDir().c_str());    
     return 1;
   }
 
-  int LuaConfigBind::gc(lua_State* L) {
+  int LuaConfigBind::plugindir(lua_State* L) {            
+    //PsycleConfig* cfg = LuaHelper::check<PsycleConfig>(L, 1, meta);
+    //lua_pushstring(L, "todo"); //cfg->GetAbsoluteLuaDir().c_str());    
     return 0;
+  }
+
+  int LuaConfigBind::gc(lua_State* L) {
+    return LuaHelper::delete_userdata<LuaConfig>(L, meta);    
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -607,6 +599,89 @@ namespace psycle { namespace host {
 
   int LuaPlayerBind::samplerate(lua_State* L) {	
     return LuaHelper::getnumber<Player, int>(L, "psyplayermeta", &Player::SampleRate);	
+  }
+
+
+  ///////////////////////////////////////////////////////////////////////////////
+  // LuaPatternData+Bind
+  ///////////////////////////////////////////////////////////////////////////////
+
+   int LuaPatternData::patternLines(int ps) {   
+      return Global::song().patternLines[0];
+    }
+
+  const char* LuaPatternDataBind::meta = "psypatterndatameta";
+
+  int LuaPatternDataBind::open(lua_State *L) {
+    static const luaL_Reg methods[] = {
+      {"new", create},
+      {"track", track},
+      {"insertevent", insertevent},
+      {NULL, NULL}
+    };
+    return LuaHelper::open(L, meta, methods);    
+  }
+
+  int LuaPatternDataBind::create(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;
+    LuaPatternData* pattern = new LuaPatternData(L, Global::song().ppPatternData);
+    LuaHelper::new_userdata<LuaPatternData>(L, meta, pattern);	     
+    return 1;
+  }
+
+  int LuaPatternDataBind::track(lua_State* L) {    
+    LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
+    int trk = luaL_checknumber(L, 2);
+    PatternEntry entry;    
+    lua_newtable(L);    
+    std::vector<LuaPatternEvent> events;
+    LuaPatternEvent* last = 0;
+    int lastpos = 0;
+    int pos = 0;
+    for (size_t i = 0; i < pattern->patternLines(trk); ++i, ++pos) {
+      unsigned char* e = pattern->ptrackline(0, trk, i);
+      int note = static_cast<int>(*e);      
+      if (note == notecommands::empty) continue;      
+      if (last) {        
+         int len = i - lastpos;
+         last->len = len;         
+      }
+      lastpos = i;
+      if (note == notecommands::release) {
+        last = 0;
+      } else {      
+        LuaPatternEvent ev;        
+        ev.note = note;
+        ev.len = 1;
+        ev.pos = pos;
+        events.push_back(ev);
+        last = &events.back();
+      }
+    }
+    int i=0;
+    for (std::vector<LuaPatternEvent>::iterator it = events.begin(); it != events.end(); ++it, ++i) {      
+      lua_newtable(L);
+      LuaPatternEvent& ev = *it;
+      lua_pushnumber(L, ev.pos);
+      lua_rawseti(L, 4, 1);
+      lua_pushnumber(L, ev.note);
+      lua_rawseti(L, 4, 2);
+      lua_pushnumber(L, ev.len);
+      lua_rawseti(L, 4, 3);
+      lua_rawseti(L, 3, i+1);
+    }    
+    return 1;    
+  }
+
+  int LuaPatternDataBind::insertevent(lua_State* L) {    
+    LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
+    int trk = luaL_checknumber(L, 2);
+    int pos = luaL_checknumber(L, 3);
+    int note = luaL_checknumber(L, 4);
+    unsigned char* e = pattern->ptrackline(0, trk, pos);
+    *e = note;
+    return 0;
   }
 
   ///////////////////////////////////////////////////////////////////////////////
