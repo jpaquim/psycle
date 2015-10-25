@@ -12,6 +12,8 @@ mkdir -p ++build &&
 cd ++build &&
 
 cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_BUILD_TYPE=Release .. &&
-cmake --build . -- -j8 &&
-cmake --build . --target install -- -j8
 
+jobs=$(nproc || getconf _NPROCESSORS_ONLN) &&
+
+cmake --build . -- -j $jobs &&
+cmake --build . --target install -- -j $jobs
