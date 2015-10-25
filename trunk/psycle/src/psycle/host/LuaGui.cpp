@@ -540,8 +540,7 @@ namespace psycle { namespace host {
         if (!is_key) {
           lua_pushnumber(L, ev->x());
           lua_setfield(L, -2, "clientx");
-          //lua_pushnumber(L, ev->y());
-          lua_pushnumber(L, that->zoomabsy());
+          lua_pushnumber(L, ev->y());          
           lua_setfield(L, -2, "clienty");
           lua_pushnumber(L, ev->x()-that->zoomabsx());
           lua_setfield(L, -2, "x");
