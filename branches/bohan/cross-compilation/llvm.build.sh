@@ -4,6 +4,8 @@ set -x &&
 
 cd $(dirname $0)/llvm &&
 
+rm -Rf ++build ++install &&
+
 svn up &&
 
 prefix=$(pwd)/++install &&
@@ -17,3 +19,5 @@ jobs=$(nproc || getconf _NPROCESSORS_ONLN) &&
 
 cmake --build . -- -j $jobs &&
 cmake --build . --target install -- -j $jobs
+
+rm -Rf ../++build
