@@ -10,6 +10,8 @@
 
 namespace psycle { namespace host { namespace canvas {
 
+  typedef std::vector<std::pair<double,double> > Points;
+
   typedef int32_t ARGB;
   #define ToCOLORREF(argb) RGB((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, (argb >> 0) & 0xFF)
   #define GetAlpha(argb) (argb>>24) & 0xFF
@@ -23,23 +25,25 @@ namespace psycle { namespace host { namespace canvas {
       MOTION_NOTIFY,
       MOTION_OUT,
       KEY_DOWN,
-      KEY_UP
+      KEY_UP,
+      SCROLL
     };		
-    Event(Item* item, Type type, double x, double y, int button, unsigned int shift) 
-      : item_(item), type_(type), x_(x), y_(y), button_(button), shift_(shift) {}
+    Event(Item* item, Type type, double cx, double cy, int button, unsigned int shift) 
+      : item_(item), type_(type), cx_(cx), cy_(cy), x_(0), y_(0), button_(button), shift_(shift) {}
         
     Type type() const { return type_; }
-    double x() const { return x_; }
-    double y() const { return y_; }
+    double x() const { return cx_; }
+    double y() const { return cy_; }
     unsigned int button() const { return button_; }
     unsigned int shift() const { return shift_; }
+    void setcxy(double cx, double cy) { cx_ = cx; cy_ = cy; }
     void setxy(double x, double y) { x_ = x; y_ = y; }
     void setitem(Item* item) { item_ = item; }
     Item* item() const { return item_; }           
 
   private:
     Type type_;
-    double x_, y_;
+    double cx_, cy_, x_, y_;
     unsigned int button_, shift_;
     Item* item_;            
   };
@@ -77,6 +81,12 @@ namespace psycle { namespace host { namespace canvas {
     }  
   };
 
+  struct Font {
+    Font() : name("Arial"), height(12) {}
+    std::string name;
+    int height;
+  };
+
   class Graphics {
   public:
     Graphics() {}
@@ -94,6 +104,10 @@ namespace psycle { namespace host { namespace canvas {
     virtual void SetColor(ARGB color) = 0;
     virtual ARGB color() const = 0;
     virtual void Translate(double x, double y) = 0;
+    virtual void SetFont(const Font& font) = 0;
+    virtual Font font() const = 0;
+    virtual void DrawPolygon(const Points& points) = 0;
+    virtual void FillPolygon(const Points& points) = 0;
   };
 
   inline Graphics::~Graphics() { }
@@ -127,9 +141,9 @@ namespace psycle { namespace host { namespace canvas {
     }
     virtual void intersect(std::vector<Item*>& items, double x1, double y1, double x2, double y2) {}
     virtual bool OnEvent(Event* ev) { return 0; }
-    virtual double x() const { return x_; }
-    virtual double y() const { return y_; } 
-    virtual void SetXY(double x, double y) { STR(); x_ = x; y_ = y; FLS(); }
+    virtual double x() const;
+    virtual double y() const;
+    virtual void SetXY(double x, double y) { STR(); x_ = x; y_ = y; FLS(); }    
     void pos(double& xv, double& yv) const { xv = x(); yv = y(); }
     virtual double zoomabsx() const;
     virtual double zoomabsy() const;
@@ -167,13 +181,13 @@ namespace psycle { namespace host { namespace canvas {
     void checkbuttonpress();
     void checkfocusitem();
 
-    double x_, y_;
+    double x_, y_;    
   private:
     Group* parent_;
     CRgn fls_rgn_;
     std::string name_;
     bool managed_, visible_, pointer_events_, has_store_;
-    std::vector<Item*> dummy;    
+    std::vector<Item*> dummy;        
   };
 
   class Group : public Item {  
@@ -203,18 +217,18 @@ namespace psycle { namespace host { namespace canvas {
     void Add(Item* item);
     void Remove(Item* item);
     void RemoveAll();
-    void Clear();
-    void Clear2() { items_.clear(); }
+    void Clear();    
     void Insert(iterator it, Item* item);
     void RaiseToTop(Item* item);        
     void setzoom(double zoom) { zoom_ = zoom; }
     virtual double zoom() const { return zoom_; }
     Canvas* widget() { return widget_; }
     virtual Canvas* widget() const { return widget_; }
-    virtual const CRgn& region() const;    
+    virtual const CRgn& region() const;            
   protected:
     std::vector<Item*> items_;
   private:    
+    void Init();
     Canvas* widget_;    
     double x_, y_;    
     bool is_root_;
@@ -346,8 +360,7 @@ namespace psycle { namespace host { namespace canvas {
     class Canvas* widget);
     virtual Item* intersect(double x, double y, Event* ev, bool &worked);
     virtual void GetBounds(double& x1, double& y1, double& x2,
-      double& y2) const;
-    typedef std::vector<std::pair<double,double> > Points;
+      double& y2) const;    
     typedef std::pair<double, double> Point;
     void SetPoints(const Points& pts) {  STR(); pts_ = pts; FLS(); }
     void SetPoint(int idx, const Point& pt) { STR(); pts_[idx] = pt; FLS(); }
@@ -464,7 +477,9 @@ namespace psycle { namespace host { namespace canvas {
     }
   }
   double zoomabsx() const { return 0; }
-  double zoomabsy() const { return 0; } 
+  double zoomabsy() const { return 0; }
+  double x() const { return 0; }
+  double y() const { return 0; } 
 
   protected:
     void Invalidate(CRgn& rgn);    
@@ -501,15 +516,15 @@ class Graphics : public canvas::Graphics {
        memset(&lfLogFont, 0, sizeof(lfLogFont));
        lfLogFont.lfHeight = 12;
        strcpy(lfLogFont.lfFaceName, "Arial");
-       font.CreateFontIndirect(&lfLogFont);
-       old_font = (CFont*) cr_->SelectObject(&font);
+       cfont.CreateFontIndirect(&lfLogFont);
+       old_font = (CFont*) cr_->SelectObject(&cfont);
     }   
 
     virtual ~Graphics() {
       cr_->SelectObject(old_pen);
       pen.DeleteObject();
       brush.DeleteObject();
-      font.DeleteObject();
+      cfont.DeleteObject();
       cr_->SetGraphicsMode(GM_ADVANCED);
       cr_->SetWorldTransform(&rXform);
       cr_->SelectObject(old_font);
@@ -557,7 +572,7 @@ class Graphics : public canvas::Graphics {
 
     void DrawRoundRect(int x, int y, int width, int height, int arc_width, int arc_height) {
       cr_->SelectStockObject(NULL_BRUSH);
-      cr_->RoundRect(x, y, x+width, y+width, arc_width, arc_height);
+      cr_->RoundRect(x, y, x+width, y+height, arc_width, arc_height);
       cr_->SelectObject(&brush);
     }
 
@@ -579,13 +594,55 @@ class Graphics : public canvas::Graphics {
       cr_->Ellipse(x, y, x+width, y+height);      
     }
 
+    void DrawPolygon(const canvas::Points& points) {
+      cr_->SelectStockObject(NULL_BRUSH);
+      std::vector<CPoint> lpPoints;
+      canvas::Points::const_iterator it = points.begin();
+      const int size = points.size();
+      for (; it!=points.end(); ++it) {
+        lpPoints.push_back(CPoint(it->first, it->second));
+      }      
+      cr_->Polygon(&lpPoints[0], size);
+      cr_->SelectObject(&brush);
+    }
+
+    void FillPolygon(const canvas::Points& points) {      
+      std::vector<CPoint> lpPoints;
+      canvas::Points::const_iterator it = points.begin();
+      const int size = points.size();
+      for (; it!=points.end(); ++it) {
+        lpPoints.push_back(CPoint(it->first, it->second));
+      }      
+      cr_->Polygon(&lpPoints[0], size);      
+    }
+
+    void SetFont(const canvas::Font& fnt) {
+      LOGFONT lfLogFont;
+      memset(&lfLogFont, 0, sizeof(lfLogFont));
+      lfLogFont.lfHeight = fnt.height;
+      strcpy(lfLogFont.lfFaceName, fnt.name.c_str());
+      cfont.DeleteObject();
+      cfont.CreateFontIndirect(&lfLogFont);
+      cr_->SelectObject(&cfont);
+    }
+
+    canvas::Font font() const {
+      LOGFONT lfLogFont;
+      memset(&lfLogFont, 0, sizeof(lfLogFont));
+      cfont.GetLogFont(&lfLogFont);
+      canvas::Font fnt;
+      fnt.name = lfLogFont.lfFaceName;
+      fnt.height = lfLogFont.lfHeight;
+      return fnt;
+    }
+
   private:
     CDC* cr_;
     CPen pen;
     CBrush brush;
     CPen* old_pen;
     CBrush* old_brush;
-    CFont font;
+    mutable CFont cfont;
     CFont* old_font;
     canvas::ARGB color_;
     XFORM rXform;

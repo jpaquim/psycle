@@ -218,7 +218,7 @@ namespace psycle { namespace host {
 
 		void CFrameMachine::OnTimer(UINT_PTR nIDEvent) 
 		{      
-      machine().OnGuiTimer(this);
+      machine().OnGuiTimer(this, this);
 			if ( nIDEvent == ID_TIMER_PARAM_REFRESH )
 			{
         if (machine()._type == MACH_LUA) {

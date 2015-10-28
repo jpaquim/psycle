@@ -138,8 +138,7 @@ namespace psycle { namespace host {
     for (int i = 0; i < len_; ++i) ptr_[i] *= s[i];
   }
    
-  void PSArray::sqrt(PSArray& src) {
-    float* s = src.data();
+  void PSArray::sqrt(PSArray& src) {    
     for (int i = 0; i < len_; ++i) ::sqrt(ptr_[i]);
   }
 
@@ -323,7 +322,6 @@ namespace psycle { namespace host {
   int LuaArrayBind::array_method_to_table(lua_State* L) {
     PSArray* rv = *(PSArray **)luaL_checkudata(L, 1, meta);
     lua_newtable(L);    
-    float* ptr = rv->data();
     for (size_t i = 0; i < rv->len(); ++i) {
       lua_pushnumber(L, rv->get_val(i));
       lua_rawseti(L, 2, i+1);      

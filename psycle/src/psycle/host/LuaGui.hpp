@@ -6,6 +6,7 @@
 #include "Machine.hpp"
 #include "Canvas.hpp"
 #include "Dyn_dialog.h"
+#include "InputHandler.hpp"
 
 struct lua_State;
 struct luaL_Reg;
@@ -13,6 +14,7 @@ struct luaL_Reg;
 namespace psycle { namespace host {
 
    class LuaMenu;
+   class LuaMachine;
 
    class LuaMenuBar {
     public:
@@ -116,8 +118,24 @@ namespace psycle { namespace host {
     static int addlistener(lua_State* L);
     static int notify(lua_State* L);
   };
+    
+  class LuaActionListener : public ActionListener {
+  public:
+    LuaActionListener(lua_State* state) : ActionListener(), L(state), mac_(0) {}    
+    virtual void OnNotify(ActionType action);
+    void setmac(LuaMachine* mac) { mac_ = mac; }
+  private:
+    lua_State* L;
+    LuaMachine* mac_;
+  };
   
-  class LuaMachine;
+  struct LuaActionListenerBind {
+    static const char* meta;
+    static int open(lua_State *L);    
+    static int create(lua_State *L);    
+  private:    
+    static int gc(lua_State* L);
+  };    
 
   struct LuaDialog : public Dynamic_dialog {
     LuaDialog(lua_State* state, const char* title = 0, int width = 100,
@@ -209,8 +227,9 @@ namespace psycle { namespace host {
     static int bounds(lua_State* L);   
     static int intersect(lua_State* L);
     static int intersectrect(lua_State* L);
-    static int canvas(lua_State* L);
+    static int canvas(lua_State* L);    
     static canvas::Item* test(lua_State* L, int index);
+    static int fls(lua_State *L);
   };
   
   struct LuaRect : public canvas::Rect {
@@ -332,6 +351,10 @@ namespace psycle { namespace host {
     static int filloval(lua_State* L);
     static int copyarea(lua_State* L);
     static int drawstring(lua_State* L);
+    static int setfont(lua_State* L);
+    static int font(lua_State* L);
+    static int drawpolygon(lua_State* L);
+    static int fillpolygon(lua_State* L);
     static const char* meta;
    private:    
     static int gc(lua_State* L);
@@ -361,7 +384,7 @@ namespace psycle { namespace host {
     static int create(lua_State *L);
     static int draw(lua_State* L);
     static int pos(lua_State *L);
-    static int setpos(lua_State *L);
+    static int setpos(lua_State *L);    
     static int setsize(lua_State* L); // till there's a rgn bind
     static int fls(lua_State *L);
     static const char* meta;    

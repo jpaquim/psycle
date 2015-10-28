@@ -19,6 +19,7 @@ namespace psycle
 	{
 		CMidiInput * PsycleGlobal::pMidiInput(0);
 		InputHandler * PsycleGlobal::pInputHandler(0);
+    ActionHandler * PsycleGlobal::pActions(0);
 		CDPI PsycleGlobal::dpi;
 
 		PsycleGlobal::PsycleGlobal() : Global()
@@ -30,6 +31,7 @@ namespace psycle
 			pPlayer = new Player();
 			pInputHandler = new InputHandler();
 			pMacLoad = new PluginCatcher();
+      pActions = new ActionHandler();
 		}
 
 		PsycleGlobal::~PsycleGlobal()
@@ -43,6 +45,7 @@ namespace psycle
 			delete pMidiInput; pMidiInput = 0;
 			delete pInputHandler; pInputHandler = 0;
 			delete pConfig; pConfig = 0;
+      delete pActions; pActions = 0;
 		}
 	}
 }

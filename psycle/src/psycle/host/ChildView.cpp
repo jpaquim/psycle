@@ -380,7 +380,7 @@ namespace psycle { namespace host {
         if (viewMode == view_modes::luaplugin)
 				{
           if (active_lua_ && !active_lua_->crashed()) {
-            active_lua_->OnGuiTimer(this->pParentFrame);           
+            active_lua_->OnGuiTimer(this->pParentFrame, this);           
             canvas::Canvas* user_view = active_lua_->GetCanvas();          
             user_view->SetParent(this);
             user_view->InvalidateSave();
@@ -1187,6 +1187,7 @@ namespace psycle { namespace host {
 			prevEditPosition=editPosition;
 			Global::player().Start(editPosition,0);
 			pParentMain->StatusBarIdle();
+      ANOTIFY(Actions::play);
 		}
 
 		void CChildView::OnBarplayFromStart() 
@@ -1198,6 +1199,7 @@ namespace psycle { namespace host {
 			prevEditPosition=editPosition;
 			Global::player().Start(0,0);
 			pParentMain->StatusBarIdle();
+      ANOTIFY(Actions::playstart);
 		}
 
 		void CChildView::OnUpdateBarplay(CCmdUI* pCmdUI) 
@@ -1227,6 +1229,7 @@ namespace psycle { namespace host {
 				cb->SetCheck(1);
 			}
 			pParentMain->StatusBarIdle();
+      ANOTIFY(Actions::rec);
 		}
 
 		void CChildView::OnUpdateBarrec(CCmdUI* pCmdUI) 
@@ -1255,6 +1258,7 @@ namespace psycle { namespace host {
 
 			pParentMain->StatusBarIdle();
 			if ( viewMode == view_modes::pattern ) Repaint(draw_modes::pattern);
+      ANOTIFY(Actions::playseq);
 		}
 
 		void CChildView::OnUpdateButtonplayseqblock(CCmdUI* pCmdUI) 
@@ -1287,6 +1291,7 @@ namespace psycle { namespace host {
 					Repaint(draw_modes::cursor); 
 				}
 			}
+      ANOTIFY(Actions::stop);
 		}
 
 		void CChildView::OnRecordWav() 
@@ -2499,9 +2504,7 @@ namespace psycle { namespace host {
           LuaMenuItem::id_counter++;
           lua_extensions_.push_back(mac); 
           menuItemIdMap[id] = mac;
-          if (user_view) {
-            int id = ID_DYNAMIC_MENUS_START+LuaMenuItem::id_counter++;            
-          }          
+          if (user_view) LuaMenuItem::id_counter++;          
           has_ext = true;
         } catch (std::exception& e) {
           e;
@@ -2548,7 +2551,16 @@ namespace psycle { namespace host {
           viewMode = view_modes::luaplugin;          
           lua_menu_->setcmenu(pParentMain->GetMenu());        
           active_lua_->GetMenu(lua_menu_);
-          ShowScrollBar(SB_BOTH,FALSE);
+          //ShowScrollBar(SB_BOTH,FALSE);
+          SCROLLINFO si;
+				  si.cbSize = sizeof(SCROLLINFO);
+				  si.fMask = SIF_PAGE | SIF_RANGE;
+				  si.nMin = 0;
+				  si.nMax = 20; // -VISLINES;
+				  si.nPage = 1;
+				  SetScrollInfo(SB_VERT,&si);
+          //ShowScrollBar(SB_VERT,TRUE);
+				  //ShowScrollBar(SB_HORZ,TRUE);
 			    Invalidate(false);
           active_lua_->InvalidateMenuBar();          
           SetFocus();

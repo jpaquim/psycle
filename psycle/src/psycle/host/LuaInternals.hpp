@@ -115,7 +115,7 @@ namespace psycle { namespace host {
     static int tick(lua_State* L);
     static int channel(lua_State* L);
     static int resize(lua_State* L);
-    static int gc(lua_State* L);	
+    static int gc(lua_State* L);
     static int setbuffer(lua_State* L);
     static int setnorm(lua_State* L);
     static int getnorm(lua_State* L);
@@ -126,6 +126,7 @@ namespace psycle { namespace host {
     static int add_parameters(lua_State* L);
     static int set_parameters(lua_State* L);
     static int set_menus(lua_State* L);
+    static int addhostlistener(lua_State* L);
     static int set_numchannels(lua_State* L);
     static int numchannels(lua_State* L);
     static int set_numprograms(lua_State* L);
@@ -140,17 +141,20 @@ namespace psycle { namespace host {
   };
 
   struct LuaPlayerBind {
+    static const char* meta;
     static int open(lua_State *L);
     static int create(lua_State* L);
     static int samplerate(lua_State* L);
+    static int tpb(lua_State* L);      
   };
 
   struct LuaPatternEvent {
-    int pos;
-    int note;
+    LuaPatternEvent(int v, int l, int p) : val(v), len(l), pos(p) {}
+    int val;
     int len;
+    int pos;        
   };
-
+  
   class LuaPatternData {
   public:
     LuaPatternData(lua_State* state, unsigned char** data) 
@@ -166,12 +170,24 @@ namespace psycle { namespace host {
      unsigned char** data_;
   };
 
+  /*struct LuaPatternBind {
+    static int open(lua_State *L);
+    static int create(lua_State* L);
+    static int track(lua_State* L);
+    static int eventat(lua_State* L);
+    static int insertevent(lua_State* L);
+    static const char* meta;
+    static int createevent(lua_State* L, LuaPatternEvent& ev);
+  };*/
+
   struct LuaPatternDataBind {
     static int open(lua_State *L);
     static int create(lua_State* L);
     static int track(lua_State* L);
+    static int eventat(lua_State* L);
     static int insertevent(lua_State* L);
     static const char* meta;
+    static int createevent(lua_State* L, LuaPatternEvent& ev);
   };
 
   template <typename T>
@@ -583,6 +599,7 @@ namespace psycle { namespace host {
   struct LuaMidiHelper {
     static int open(lua_State *L);
   private:
+    static int gmpercussionnames(lua_State* L);
     static int notename(lua_State* L);
     static int combine(lua_State* L);
   };

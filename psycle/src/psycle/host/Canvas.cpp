@@ -71,6 +71,9 @@ namespace psycle { namespace host  { namespace canvas {
     }
   }
 
+  double Item::x() const { return x_; }
+  double Item::y() const { return y_; } 
+
   void Item::checkfocusitem() {
     Canvas* c = canvas();
     if (c) {
@@ -142,7 +145,7 @@ namespace psycle { namespace host  { namespace canvas {
 
   double Item::zoomabsx() const {    
     std::vector<const Item*> items;
-    items.push_back(this);
+    items.push_back(this);    
     const Group* p = parent();    
     while (p) {      
       items.push_back(p);
@@ -153,17 +156,17 @@ namespace psycle { namespace host  { namespace canvas {
     std::vector<const Item*>::const_reverse_iterator rev_it = items.rbegin();
     for ( ; rev_it != items.rend(); ++rev_it) {
       const Item* item = *rev_it;
-      zoom *= item->parent() ? item->parent()->zoom() : 1.0;
-      x += zoom*item->x();
-    }
+      // zoom *= item->parent() ? item->parent()->zoom() : 1.0;
+      x += item->x();
+    }    
     return x;
   }
 
   double Item::zoomabsy() const {
     std::vector<const Item*> items;
-    items.push_back(this);
+    items.push_back(this);    
     const Group* p = parent();    
-    while (p) {      
+    while (p) {               
       items.push_back(p);
       p = p->parent();
     }
@@ -172,19 +175,16 @@ namespace psycle { namespace host  { namespace canvas {
     std::vector<const Item*>::const_reverse_iterator rev_it = items.rbegin();
     for ( ; rev_it != items.rend(); ++rev_it) {
       const Item* item = *rev_it;
-      zoom *= item->parent() ? item->parent()->zoom() : 1.0;
-      y += zoom*item->y();
+      //zoom *= item->parent() ? item->parent()->zoom() : 1.0;
+      y += item->y();
     }
     return y;
   }
  
-  Group::Group() : Item(),  widget_(0), is_root_(false), zoom_(1.0) {}
-  Group::Group(Canvas* widget) : Item(), widget_(widget), is_root_(false), zoom_(1.0) {}
-  Group::Group(Group* parent, double x, double y) :
-    Item(parent),
-    widget_(0),    
-    is_root_(false) {      
-      zoom_ = 1.0;
+  Group::Group() : Item(),  widget_(0) { Init(); }
+  Group::Group(Canvas* widget) : Item(), widget_(widget) { Init(); }
+  Group::Group(Group* parent, double x, double y) : Item(parent), widget_(0) {
+    Init();
   }
   
   Group::~Group() {    
@@ -196,6 +196,11 @@ namespace psycle { namespace host  { namespace canvas {
         item->set_parent(0);
       }
     }
+  }
+
+  void Group::Init() {    
+    zoom_ = 1;
+    is_root_ = false;
   }
 
   void Group::Clear() {
@@ -215,15 +220,15 @@ namespace psycle { namespace host  { namespace canvas {
       CRgn item_rgn;
       item_rgn.CreateRectRgn(0, 0, 0, 0);
       item_rgn.CopyRgn(&item->region());
-      if (parent()) {
+      if (item->parent()) {
         item_rgn.OffsetRgn(item->zoomabsx(), item->zoomabsy());
       }        
       CRect rc;
       item_rgn.GetRgnBox(&rc);	  
       int erg = item_rgn.CombineRgn(&item_rgn, &repaint_rgn, RGN_AND);
       if (erg != NULLREGION) {        
-        double dx = zoomabsx()+item->x();
-        double dy = zoomabsy()+item->y();
+        double dx = item->zoomabsx();
+        double dy = item->zoomabsy();
         g->Translate(dx, dy);        
         item->Draw(g, repaint_rgn, canvas);        
         g->Translate(-dx, -dy);

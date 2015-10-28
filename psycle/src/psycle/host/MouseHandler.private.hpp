@@ -7,8 +7,9 @@ namespace psycle { namespace host {
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
-      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, point))
+      if (DelegateLuaEvent(canvas::Event::BUTTON_PRESS, 2, nFlags, point)) {         
         return;
+      }
 
 			SetCapture();
 			
@@ -1290,9 +1291,22 @@ namespace psycle { namespace host {
 		}
 
 		void CChildView::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-		{
+		{      
+      if (nSBCode == SB_THUMBTRACK) {        
+        if (viewMode == view_modes::luaplugin) {
+          CPoint pt(0, nPos);
+          DelegateLuaEvent(canvas::Event::SCROLL, 0, 0, pt);
+          SetScrollPos(SB_VERT, nPos, false);
+          CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
+          return;        
+        }
+      }      
+
+      std::stringstream s; s << nPos;
+      OutputDebugString(s.str().c_str());
+
 			if ( viewMode == view_modes::pattern )
-			{
+			{       
 				switch(nSBCode)
 				{
 					case SB_LINEDOWN:
@@ -1373,7 +1387,10 @@ namespace psycle { namespace host {
 
 
 		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
-		{
+		{      
+      CPoint pt(nPos, 0);      
+      if (DelegateLuaEvent(canvas::Event::SCROLL, 0, 0, pt)) return;
+      
 			if ( viewMode == view_modes::pattern )
 			{
 				switch(nSBCode)
