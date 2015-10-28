@@ -47,7 +47,7 @@ namespace psycle { namespace host {
       }
     } catch(std::exception &e) { 
       AfxMessageBox(e.what());  
-    e; } //do nothing.
+    }
   }
 
   LuaPlugin::~LuaPlugin() {    

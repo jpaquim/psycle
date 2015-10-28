@@ -309,6 +309,71 @@ namespace psycle { namespace host {
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  // PsycleActions + Lua Bind
+  /////////////////////////////////////////////////////////////////////////////
+
+  void LuaActionListener::OnNotify(ActionType action) {    
+    if (mac_) mac_->lock();
+    LuaHelper::find_userdata<>(L, this);
+    lua_getfield(L, -1, "onnotify"); 
+    lua_pushvalue(L, -2);
+    lua_remove(L, -3);
+    lua_pushnumber(L, action);      
+    int status = lua_pcall(L, 2, 0, 0);
+    if (status) {
+      if (mac_) mac_->unlock();
+      const char* msg = lua_tostring(L, -1);
+      throw psycle::host::exceptions::library_error::runtime_error(std::string(msg));
+    }                
+    if (mac_) mac_->unlock();        
+  }
+
+  const char* LuaActionListenerBind::meta = "psyactionlistenermeta";  
+
+  int LuaActionListenerBind::open(lua_State *L) {
+    static const luaL_Reg methods[] = {
+      {"new", create},      
+      { NULL, NULL }
+    };
+    LuaHelper::open(L, meta, methods,  gc);    
+    lua_pushnumber(L, 1);
+    lua_setfield(L, -2, "TPB");
+    lua_pushnumber(L, 2);
+    lua_setfield(L, -2, "BPM");
+    lua_pushnumber(L, 3);
+    lua_setfield(L, -2, "TRKNUM");
+    lua_pushnumber(L, 4);
+    lua_setfield(L, -2, "PLAY");    
+    lua_pushnumber(L, 5);
+    lua_setfield(L, -2, "PLAYSTART");
+    lua_pushnumber(L, 6);
+    lua_setfield(L, -2, "PLAYSEQ");    
+    lua_pushnumber(L, 7);
+    lua_setfield(L, -2, "STOP");
+    lua_pushnumber(L, 8);
+    lua_setfield(L, -2, "REC");
+    lua_pushnumber(L, 9);
+    lua_setfield(L, -2, "SEQSEL");
+    lua_pushnumber(L, 10);
+    lua_setfield(L, -2, "SEQFOLLOWSONG");
+    return 1;
+  }
+    
+  int LuaActionListenerBind::create(lua_State* L) {    
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
+    LuaActionListener* listener = new LuaActionListener(L);    
+    LuaHelper::new_userdata<>(L, meta, listener);   
+    LuaHelper::register_userdata<>(L, listener);    
+    return 1;
+  }
+
+  int LuaActionListenerBind::gc(lua_State* L) {	
+    return LuaHelper::delete_userdata<LuaActionListener>(L, meta);
+  }
+
+
+  /////////////////////////////////////////////////////////////////////////////
   // LuaDialogBind
   /////////////////////////////////////////////////////////////////////////////
   const char* LuaDialogBind::meta = "psydialogmeta";
@@ -317,8 +382,7 @@ namespace psycle { namespace host {
   bool CallDialogEvents(lua_State* L, T* that,WPARAM wParam, LPARAM lParam) {         
     int n1 = lua_gettop(L);                  
     LuaHelper::find_weakuserdata<>(L, that);    
-    bool has_event_method = false;
-    bool is_key = false;
+    bool has_event_method = false;    
     if (!lua_isnil(L, -1)) { 
       lua_getfield(L, -1, "onevent");               
       has_event_method = !lua_isnil(L, -1);
@@ -522,36 +586,46 @@ namespace psycle { namespace host {
           is_key = true;
           lua_getfield(L, -1, "onkeyup");
         break;
+        case canvas::Event::SCROLL:
+          lua_getfield(L, -1, "onscroll");
+        break;
         default: return true;
       }        
       has_event_method = !lua_isnil(L, -1);
       if (has_event_method) {
         lua_pushvalue(L, -2);
         lua_remove(L, -3);
-        lua_newtable(L); // build event table           
-        lua_pushnumber(L, ev->shift());
-        lua_setfield(L, -2, "shift");
-        lua_pushboolean(L, MK_SHIFT & ev->shift());
-        lua_setfield(L, -2, "shiftkey");
-        lua_pushboolean(L, MK_CONTROL & ev->shift());
-        lua_setfield(L, -2, "ctrlkey");
-        lua_pushboolean(L, MK_ALT & ev->shift());
-        lua_setfield(L, -2, "altkey");
-        if (!is_key) {
+        lua_newtable(L); // build event table
+        if (ev->type() == canvas::Event::SCROLL) {
           lua_pushnumber(L, ev->x());
-          lua_setfield(L, -2, "clientx");
-          lua_pushnumber(L, ev->y());          
-          lua_setfield(L, -2, "clienty");
-          lua_pushnumber(L, ev->x()-that->zoomabsx());
-          lua_setfield(L, -2, "x");
-          lua_pushnumber(L, ev->y()-that->zoomabsy());
-          lua_setfield(L, -2, "y");
-          lua_pushnumber(L, ev->button());
-          lua_setfield(L, -2, "button");        
+          lua_setfield(L, -2, "hpos");
+          lua_pushnumber(L, ev->y());
+          lua_setfield(L, -2, "vpos");
         } else {
-          // todo key events
-          lua_pushnumber(L, ev->button());
-          lua_setfield(L, -2, "keycode");
+          lua_pushnumber(L, ev->shift());
+          lua_setfield(L, -2, "shift");
+          lua_pushboolean(L, MK_SHIFT & ev->shift());
+          lua_setfield(L, -2, "shiftkey");
+          lua_pushboolean(L, MK_CONTROL & ev->shift());
+          lua_setfield(L, -2, "ctrlkey");
+          lua_pushboolean(L, MK_ALT & ev->shift());
+          lua_setfield(L, -2, "altkey");
+          if (!is_key) {
+            lua_pushnumber(L, ev->x());
+            lua_setfield(L, -2, "clientx");
+            lua_pushnumber(L, ev->y());          
+            lua_setfield(L, -2, "clienty");
+            lua_pushnumber(L, ev->x()-that->zoomabsx());
+            lua_setfield(L, -2, "x");
+            lua_pushnumber(L, ev->y()-that->zoomabsy());
+            lua_setfield(L, -2, "y");
+            lua_pushnumber(L, ev->button());
+            lua_setfield(L, -2, "button");        
+          } else {
+            // todo key events
+            lua_pushnumber(L, ev->button());
+            lua_setfield(L, -2, "keycode");
+          }
         }
         int status = lua_pcall(L, 2, 0, 0);      
         if (status) {
@@ -727,6 +801,7 @@ namespace psycle { namespace host {
       {"canvas", canvas},
       {"intersect", intersect},
       {"intersectrect", intersectrect},
+      {"fls", fls},
       {NULL, NULL}
     };
     return LuaHelper::open(L, meta, methods,  gc);
@@ -842,7 +917,7 @@ namespace psycle { namespace host {
   }
 
   int LuaGroupBind::setpos(lua_State* L) {
-    LuaHelper::callstrict2(L, meta, &canvas::Group::SetXY);    
+    LuaHelper::callstrict2(L, meta, &LuaGroup::SetXY);    
     return LuaHelper::chaining(L); 
   }
 
@@ -908,7 +983,7 @@ namespace psycle { namespace host {
     lua_newtable(L);    
     for (int i = 0; i < res.size(); ++i) {
       LuaHelper::find_userdata(L, res[i]);
-      lua_rawseti(L, -2, i+1);      
+      lua_rawseti(L, -2, i+1);
     } 
     return 1;
   }
@@ -973,6 +1048,11 @@ namespace psycle { namespace host {
       lua_pushnumber(L, -1);
     }    
     return 1;
+  }
+
+  int LuaGroupBind::fls(lua_State* L) { 
+    LuaHelper::call(L, meta, &LuaGroup::FLS);    
+    return LuaHelper::chaining(L);
   }
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -1195,7 +1275,7 @@ namespace psycle { namespace host {
       group = LuaHelper::check<LuaGroup>(L, 2, LuaGroupBind::meta);
     }    
     LuaLine* line = new LuaLine(L, group);    
-    canvas::Line::Points pts;
+    canvas::Points pts;
     pts.push_back(std::pair<double, double>(10, 10));
     pts.push_back(std::pair<double, double>(300, 300));    
     line->SetPoints(pts);
@@ -1286,9 +1366,9 @@ namespace psycle { namespace host {
     int err = LuaHelper::check_argnum(L, 1, "self");
     if (err!=0) return err;   
     LuaLine* line = LuaHelper::check<LuaLine>(L, 1, meta);
-    LuaLine::Points pts = line->points();
+    canvas::Points pts = line->points();
     lua_newtable(L);
-    LuaLine::Points::iterator it = pts.begin();
+    canvas::Points::iterator it = pts.begin();
     int k = 1;
     for (; it != pts.end(); ++it) {
       lua_newtable(L);
@@ -1543,6 +1623,10 @@ namespace psycle { namespace host {
       {"filloval", filloval},
       {"copyarea", copyarea},
       {"drawstring", drawstring},
+      {"setfont", setfont},
+      {"font", font},
+      {"drawpolygon", drawpolygon},
+      {"fillpolygon", fillpolygon},
       { NULL, NULL }
     };
     luaL_newmetatable(L, meta);
@@ -1693,9 +1777,81 @@ namespace psycle { namespace host {
     return LuaHelper::chaining(L);
   }
 
+  int LuaGraphicsBind::setfont(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 2, "self, font");
+    if (err!=0) return err;
+    canvas::Graphics* gr = *(canvas::Graphics **)luaL_checkudata(L, 1, meta);
+    luaL_checktype(L, 2, LUA_TTABLE);
+    lua_getfield(L, 2, "name");
+    lua_getfield(L, 2, "height");
+    const char *name = luaL_checkstring(L, -2);
+    int height = luaL_checknumber(L, -1);
+    canvas::Font font;
+    font.name = name;
+    font.height = height;
+    gr->SetFont(font);
+    return 0;
+  }
+
+  int LuaGraphicsBind::font(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;
+    canvas::Graphics* gr = *(canvas::Graphics **)luaL_checkudata(L, 1, meta);
+    canvas::Font fnt = gr->font();
+    lua_newtable(L);
+    lua_pushstring(L, fnt.name.c_str());
+    lua_setfield(L, 2, "name");
+    lua_pushnumber(L, fnt.height);
+    lua_setfield(L, 2, "height");
+    return 1;
+  }
+
   int LuaGraphicsBind::gc(lua_State* L) {
     return 0; //return LuaHelper::delete_userdata<canvas::Graphics>(L, meta);    
   }
+
+  int LuaGraphicsBind::drawpolygon(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 3, "self, xpoints, ypoints");
+    if (err!=0) return err;
+    canvas::Graphics* g = *(canvas::Graphics **)luaL_checkudata(L, 1, meta);    
+    luaL_checktype(L, 2, LUA_TTABLE);
+    size_t n1 = lua_rawlen(L, 2);
+    size_t n2 = lua_rawlen(L, 2);
+    if (n1!=n2) return luaL_error(L, "Length of x and y points have to be the same size.");
+    canvas::Points points;
+    for (int i=1; i <=n1; ++i) {
+      lua_rawgeti(L, 2, i);
+      lua_rawgeti(L, 3, i);
+      double x = luaL_checknumber(L, -2);
+      double y = luaL_checknumber(L, -1);
+      points.push_back(std::pair<int, int>(x, y));
+      lua_pop(L, 2);
+    }    
+    g->DrawPolygon(points);
+    return 1;
+  }
+  
+  int LuaGraphicsBind::fillpolygon(lua_State* L) {
+    int err = LuaHelper::check_argnum(L, 3, "self, xpoints, ypoints");
+    if (err!=0) return err;
+    canvas::Graphics* g = *(canvas::Graphics **)luaL_checkudata(L, 1, meta);    
+    luaL_checktype(L, 2, LUA_TTABLE);
+    size_t n1 = lua_rawlen(L, 2);
+    size_t n2 = lua_rawlen(L, 2);
+    if (n1!=n2) return luaL_error(L, "Length of x and y points have to be the same size.");
+    canvas::Points points;
+    for (int i=1; i <=n1; ++i) {
+      lua_rawgeti(L, 2, i);
+      lua_rawgeti(L, 3, i);
+      double x = luaL_checknumber(L, -2);
+      double y = luaL_checknumber(L, -1);
+      points.push_back(std::pair<int, int>(x, y));
+      lua_pop(L, 2);
+    }    
+    g->FillPolygon(points);
+    return 1;
+  }
+
 
   ///////////////////////////////////////////////////////////////////////////////
   // LuaItem+Bind
@@ -1735,7 +1891,7 @@ namespace psycle { namespace host {
       {"new", create},
       {"draw", draw},
       {"setpos", setpos},      
-      {"pos", pos},
+      {"pos", pos},      
       {"setsize", setsize},
       {"fls", fls},
       { NULL, NULL }
@@ -1783,5 +1939,5 @@ namespace psycle { namespace host {
     LuaHelper::callstrict2(L, meta, &LuaItem::SetSize);    
     return LuaHelper::chaining(L); 
   }
-
+  
 }}

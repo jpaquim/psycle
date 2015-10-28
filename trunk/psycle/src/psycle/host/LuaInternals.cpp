@@ -226,6 +226,7 @@ namespace psycle { namespace host {
       {"showchildviewgui", show_childview_gui},
       {"parambyid", getparam},
       {"setpresetmode", setpresetmode},
+      {"addhostlistener", addhostlistener},
       {NULL, NULL}
     };        
     LuaHelper::open(L, meta, methods,  gc);
@@ -457,7 +458,7 @@ namespace psycle { namespace host {
   int LuaMachineBind::getparam(lua_State* L) {
     int n = lua_gettop(L);
     if (n == 2) {
-      LuaMachine* plug = LuaHelper::check<LuaMachine>(L, 1, meta);
+      LuaHelper::check<LuaMachine>(L, 1, meta);
       std::string search = luaL_checkstring(L, 2);
       lua_getfield(L, -2, "params");
       size_t len = lua_rawlen(L, -1);
@@ -575,30 +576,46 @@ namespace psycle { namespace host {
     plugin->setprsmode(mode);
     return 0;
   }
-  
+    
+  int LuaMachineBind::addhostlistener(lua_State* L) {    
+    LuaMachine* plugin = LuaHelper::check<LuaMachine>(L, 1, meta); 
+    LuaActionListener* listener = LuaHelper::check<LuaActionListener>(L, 2, LuaActionListenerBind::meta); 
+    listener->setmac(plugin);
+    PsycleGlobal::actionHandler().AddListener(listener);
+    return 0;
+  }  
+
   ///////////////////////////////////////////////////////////////////////////////
   // PlayerBind
   ///////////////////////////////////////////////////////////////////////////////
+
+  const char* LuaPlayerBind::meta = "psyplayermeta";
+
   int LuaPlayerBind::open(lua_State *L) {
     static const luaL_Reg methods[] = {
       {"new", create},
       {"samplerate", samplerate},
+      {"tpb", tpb},
       {NULL, NULL}
     };
-    return LuaHelper::open(L, "psyplayermeta", methods);    
+    return LuaHelper::open(L, meta, methods);    
   }
 
-  int LuaPlayerBind::create(lua_State* L) {
-    int n = lua_gettop(L);  // Number of arguments
-    if (n==1) {
-      LuaHelper::new_userdata<Player>(L, "psyplayermeta", &Global::player());	 
-      return 1;
-    }
+  int LuaPlayerBind::create(lua_State* L) {        
+    LuaHelper::new_userdata<Player>(L, meta, &Global::player());    
     return 1;
   }
 
   int LuaPlayerBind::samplerate(lua_State* L) {	
-    return LuaHelper::getnumber<Player, int>(L, "psyplayermeta", &Player::SampleRate);	
+    return LuaHelper::getnumber<Player, int>(L, meta, &Player::SampleRate);	
+  }
+
+  int LuaPlayerBind::tpb(lua_State* L) {	
+    int err = LuaHelper::check_argnum(L, 1, "self");
+    if (err!=0) return err;    
+    Player* p = LuaHelper::check<Player>(L, 1, meta);
+    lua_pushnumber(L, p->lpb);
+    return 1;
   }
 
 
@@ -616,10 +633,22 @@ namespace psycle { namespace host {
     static const luaL_Reg methods[] = {
       {"new", create},
       {"track", track},
+      {"eventat", eventat},
       {"insertevent", insertevent},
       {NULL, NULL}
     };
     return LuaHelper::open(L, meta, methods);    
+  }
+
+  int LuaPatternDataBind::createevent(lua_State* L, LuaPatternEvent& ev) {    
+    lua_newtable(L);    
+    lua_pushnumber(L, ev.pos);
+    lua_setfield(L, -2, "pos");
+    lua_pushnumber(L, ev.val);
+    lua_setfield(L, -2, "val");
+    lua_pushnumber(L, ev.len);
+    lua_setfield(L, -2, "len");
+    return 1;
   }
 
   int LuaPatternDataBind::create(lua_State* L) {
@@ -628,6 +657,15 @@ namespace psycle { namespace host {
     LuaPatternData* pattern = new LuaPatternData(L, Global::song().ppPatternData);
     LuaHelper::new_userdata<LuaPatternData>(L, meta, pattern);	     
     return 1;
+  }
+
+  int LuaPatternDataBind::eventat(lua_State* L) {
+    LuaPatternData* pattern = LuaHelper::check<LuaPatternData>(L, 1, meta);
+    int trk = luaL_checknumber(L, 2);
+    int pos = luaL_checknumber(L, 3);
+    unsigned char* e = pattern->ptrackline(0, trk, pos);
+    LuaPatternEvent ev(static_cast<int>(*e), 1, pos);    
+    return createevent(L, ev);    
   }
 
   int LuaPatternDataBind::track(lua_State* L) {    
@@ -651,25 +689,17 @@ namespace psycle { namespace host {
       if (note == notecommands::release) {
         last = 0;
       } else {      
-        LuaPatternEvent ev;        
-        ev.note = note;
-        ev.len = 1;
-        ev.pos = pos;
+        LuaPatternEvent ev(note, 1, pos);        
         events.push_back(ev);
         last = &events.back();
       }
-    }
-    int i=0;
+    }    
+    lua_newtable(L);
+    int i=1;
     for (std::vector<LuaPatternEvent>::iterator it = events.begin(); it != events.end(); ++it, ++i) {      
-      lua_newtable(L);
       LuaPatternEvent& ev = *it;
-      lua_pushnumber(L, ev.pos);
-      lua_rawseti(L, 4, 1);
-      lua_pushnumber(L, ev.note);
-      lua_rawseti(L, 4, 2);
-      lua_pushnumber(L, ev.len);
-      lua_rawseti(L, 4, 3);
-      lua_rawseti(L, 3, i+1);
+      createevent(L, ev);
+      lua_rawseti(L, -2, i);
     }    
     return 1;    
   }
@@ -1325,6 +1355,7 @@ namespace psycle { namespace host {
   int LuaMidiHelper::open(lua_State *L) {
     static const luaL_Reg funcs[] = {
       {"notename", notename},
+      {"gmpercussionnames", gmpercussionnames},
       {"combine", combine},	  
       {NULL, NULL}
     };
@@ -1339,6 +1370,29 @@ namespace psycle { namespace host {
     std::stringstream str;
     str << notenames[note%12] << note/12;
     lua_pushstring(L, str.str().c_str());
+    return 1;
+  }
+
+  int LuaMidiHelper::gmpercussionnames(lua_State* L) {    
+    const char* names[]=
+      {"Acoustic Bass Drum","Bass Drum 1","Side Stick","Acoustic Snare",
+       "Hand Clap","Electric Snare","Low Floor Tom","Closed Hi Hat",
+       "High Floor Tom","Pedal Hi-Hat","Low Tom","Open Hi-Hat",
+       "Low-Mid Tom", "Hi Mid Tom", "Crash Cymbal 1", "High Tom",
+       "Ride Cymbal 1", "Chinese Cymbal", "Ride Bell", "Tambourine",
+       "Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibraslap",
+       "Ride Cymbal 2", "Hi Bongo", "Low Bongo", "Mute Hi Conga",
+       "Open Hi Conga", "Low Bongo", "Mute Hi Conga", "Open Hi Conga",
+       "Low Conga", "High Timbale", "Low Timbale", "High Agogo", "Low Agogo",
+       "Cabasa", "Maracas", "Short Whistle", "Long Whistle", "Short Guiro",
+       "Long Guiro", "Claves", "Hi Wood Block", "Low Wood Block",
+       "Mute Cuica", "Open Cuica", "Mute Triangle", "Open Triangle"
+      };    
+    lua_newtable(L);    
+    for (int i = 1; i<128; ++i) {      
+      lua_pushstring(L, i>34 && i<82 ? names[i-35] : "");      
+      lua_rawseti(L, -2, i);
+    }    
     return 1;
   }
 

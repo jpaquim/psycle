@@ -100,16 +100,16 @@ namespace psycle { namespace host {
 				val[0]='\0';
 		}
 		virtual int GetNumBanks(){ return (numPrograms()/128)+1;};*/
-    virtual void OnGuiTimer(void* hnd) {
+    virtual void OnGuiTimer(void* mhnd, void* chnd) {
       if (!crashed()) {
         if (custom_menubar && custom_menubar->needsupdate()) {
-          proxy_.update_menu(hnd);
+          proxy_.update_menu(mhnd);
           custom_menubar->setupdate(false);
         }      
         LuaCanvas* canvas = proxy_.call_canvas();
         if (canvas) {
           if (canvas->show_scrollbar) {
-             ((CWnd*) hnd)->ShowScrollBar(SB_BOTH,TRUE);
+             ((CWnd*) chnd)->ShowScrollBar(SB_BOTH,TRUE);
              canvas->show_scrollbar = false;
           }
         }

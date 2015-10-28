@@ -531,7 +531,7 @@ namespace psycle
 					virtual int  GetPosY() const { return _y; }
 					virtual void SetPosY(int y) {_y = y;}
           virtual int GetGuiType() const { return 0; }
-          virtual void OnGuiTimer(void* hnd) {}
+          virtual void OnGuiTimer(void* mhnd, void* chnd) {}
 
 				public:///\todo private:
 					int _x;

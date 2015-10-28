@@ -60,6 +60,7 @@ namespace psycle { namespace host {
     LuaHelper::require<LuaPatternDataBind>(L, "psycle.pattern");
     LuaHelper::require<LuaConfigBind>(L, "psycle.config");    
     // ui binds    
+    LuaHelper::require<LuaActionListenerBind>(L, "psycle.ui.hostactionlistener");
     LuaHelper::require<LuaMenuBarBind>(L, "psycle.ui.menubar");
     LuaHelper::require<LuaMenuBind>(L, "psycle.ui.menu");
     LuaHelper::require<LuaMenuItemBind>(L, "psycle.ui.menuitem");    

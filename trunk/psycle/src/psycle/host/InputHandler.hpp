@@ -142,5 +142,65 @@ namespace psycle
 			int UndoMacCounter;
 			int UndoMacSaved;
 		};
+    
+    namespace Actions {
+      enum {
+        tpb = 1,
+        bpm = 2,
+        trknum = 3,
+        play = 4,
+        playstart = 5,
+        playseq = 6,
+        stop = 7,
+        rec = 8,
+        seqsel = 9,
+        seqfollowsong = 10     
+      };
+    };
+
+    typedef int ActionType;
+    
+    class ActionListener {
+    public:
+      ActionListener() {};
+      virtual ~ActionListener() = 0;
+      virtual void OnNotify(ActionType action) = 0;
+    };
+
+    typedef std::vector<ActionListener*> ActionListenerList;
+
+    inline ActionListener::~ActionListener() {}
+
+    class ActionHandler {
+    public:
+      ActionHandler() {}
+      void AddListener(ActionListener* listener) {
+        ActionListenerList::iterator it = std::find(listeners_.begin(), listeners_.end(), listener);
+        if (it!=listeners_.end()) {
+          throw std::runtime_error("Listener already in PsycleActions.");
+        }
+        listeners_.push_back(listener);
+      }
+      void RemoveListener(ActionListener* listener) {
+        ActionListenerList::iterator it = std::find(listeners_.begin(), listeners_.end(), listener);
+        if (it!=listeners_.end()) {
+          listeners_.erase(it);
+        }
+      }            
+      void Notify(ActionType action) {
+        ActionListenerList::iterator it = listeners_.begin();
+        for (; it!=listeners_.end(); ++it) {
+          try {
+            (*it)->OnNotify(action);
+          } catch (std::exception& e) {
+            AfxMessageBox(e.what());
+          }
+        }
+      }
+    private:        
+       ActionListenerList listeners_;
+    };
 	}
 }
+
+#define ANOTIFY(action) (PsycleGlobal::actionHandler().Notify(action))

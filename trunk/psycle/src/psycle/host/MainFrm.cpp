@@ -859,12 +859,12 @@ namespace psycle { namespace host {
 		//
 		//SongBar
 		//
-		void CMainFrame::OnSelchangeTrackcombo() { m_songBar.OnSelchangeTrackcombo(); }
+		void CMainFrame::OnSelchangeTrackcombo() { m_songBar.OnSelchangeTrackcombo(); ANOTIFY(Actions::trknum); }
 		void CMainFrame::OnCloseupTrackcombo() { m_songBar.OnCloseupTrackcombo(); }
-		void CMainFrame::OnBpmAddOne() { m_songBar.OnBpmAddOne(); m_seqBar.UpdatePlayOrder(false);}
-		void CMainFrame::OnBpmDecOne() { m_songBar.OnBpmDecOne(); m_seqBar.UpdatePlayOrder(false);}
-		void CMainFrame::OnDecTPB() { m_songBar.OnDecTPB(); m_seqBar.UpdatePlayOrder(false);}
-		void CMainFrame::OnIncTPB() { m_songBar.OnIncTPB(); m_seqBar.UpdatePlayOrder(false);}
+		void CMainFrame::OnBpmAddOne() { m_songBar.OnBpmAddOne(); m_seqBar.UpdatePlayOrder(false); ANOTIFY(Actions::bpm);}
+		void CMainFrame::OnBpmDecOne() { m_songBar.OnBpmDecOne(); m_seqBar.UpdatePlayOrder(false); ANOTIFY(Actions::bpm);}
+		void CMainFrame::OnDecTPB() { m_songBar.OnDecTPB(); m_seqBar.UpdatePlayOrder(false); ANOTIFY(Actions::tpb);}
+    void CMainFrame::OnIncTPB() { m_songBar.OnIncTPB(); m_seqBar.UpdatePlayOrder(false); ANOTIFY(Actions::tpb);}
 		void CMainFrame::OnClickBPM() {
 			CSongpDlg dlg(Global::song());
 			dlg.DoModal();
@@ -947,8 +947,8 @@ namespace psycle { namespace host {
 		//
 		//SequenceBar
 		//
-		void CMainFrame::OnSelchangeSeqlist() { m_seqBar.OnSelchangeSeqlist(); }
-		void CMainFrame::OnDblclkSeqlist() { m_seqBar.OnDblclkSeqlist(); }
+		void CMainFrame::OnSelchangeSeqlist() { m_seqBar.OnSelchangeSeqlist(); ANOTIFY(Actions::seqsel);}
+		void CMainFrame::OnDblclkSeqlist() { m_seqBar.OnDblclkSeqlist(); ANOTIFY(Actions::seqsel); }
 		void CMainFrame::OnIncshort() { m_seqBar.OnIncshort(); }
 		void CMainFrame::OnDecshort() { m_seqBar.OnDecshort(); }
 		void CMainFrame::OnSeqnew() { m_seqBar.OnSeqnew(); }
@@ -965,7 +965,7 @@ namespace psycle { namespace host {
 		void CMainFrame::OnSeqclear() { m_seqBar.OnSeqclear(); }
 		void CMainFrame::OnUpdatepaste(CCmdUI* pCmdUI) {m_seqBar.OnUpdatepaste(pCmdUI);}
 		void CMainFrame::OnUpdatepasteBelow(CCmdUI* pCmdUI) {m_seqBar.OnUpdatepasteBelow(pCmdUI);}
-		void CMainFrame::OnFollow() { m_seqBar.OnFollow(); }
+		void CMainFrame::OnFollow() { m_seqBar.OnFollow(); ANOTIFY(Actions::seqfollowsong); }
 		void CMainFrame::OnRecordNoteoff() { m_seqBar.OnRecordNoteoff(); }
 		void CMainFrame::OnRecordTweaks() { m_seqBar.OnRecordTweaks(); }
 		void CMainFrame::OnShowpattername() { m_seqBar.OnShowpattername(); }
@@ -982,7 +982,7 @@ namespace psycle { namespace host {
 				m_seqBar.m_follow.SetCheck(0);
 				check=false;
 			}
-			m_seqBar.OnFollow();
+			m_seqBar.OnFollow();      
 			return check;
 		}
 		void CMainFrame::UpdatePlayOrder(bool mode) { m_seqBar.UpdatePlayOrder(mode); }
