@@ -11,10 +11,9 @@
 struct lua_State;
 struct luaL_Reg;
 
-namespace psycle {namespace host{namespace canvas{class Canvas;}}}
+namespace psycle {namespace host{namespace ui{namespace canvas{class Canvas;}}}}
 
 namespace psycle { namespace host {
-  
   class ConfigStorage;
 
   class LuaConfig {
@@ -27,18 +26,20 @@ namespace psycle { namespace host {
      void OpenGroup(const std::string& group);
      void CloseGroup();
     private:
-     ConfigStorage* store_;     
+     ConfigStorage* store_;
   };
 
-  struct LuaConfigBind {   
+  struct LuaConfigBind {
     static int open(lua_State *L);
     static const char* meta;
   private:
-    static int create(lua_State* L);  
-    static int get(lua_State* L);    
+    static int create(lua_State* L);
+    static int get(lua_State* L);
     static int gc(lua_State* L);
     static int opengroup(lua_State* L);
     static int closegroup(lua_State* L);
+    static int groups(lua_State* L);
+    static int keys(lua_State* L);
     static int plugindir(lua_State* L);
   };
 
@@ -47,17 +48,17 @@ namespace psycle { namespace host {
   class LuaMachine {
   public:
     enum PRSType {
-      NATIVEPRS = 0,      
+      NATIVEPRS = 0,
       CHUNKPRS = 1
     };
 
     enum GuiType {
-      NATIVE = 0,      
+      NATIVE = 0,
       CUSTOMWND = 1,
       CHILDVIEW = 2
     };
 
-    LuaMachine() 
+    LuaMachine()
         : proxy_(0),
           mac_(0),
           shared_(false),
@@ -68,11 +69,11 @@ namespace psycle { namespace host {
           prsmode_(LuaMachine::NATIVEPRS),
           num_programs_(0)
           {}
-    ~LuaMachine();    
+    ~LuaMachine();
     void lock() const;
     void unlock() const;
     void load(const char* name);
-    void work(int samples);	
+    void work(int samples);
     Machine* mac() { return mac_; }
     void set_mac(Machine* mac) { mac_ = mac; shared_=true; }
     PSArray* channel(int idx) { return &sampleV_[idx]; }
@@ -90,7 +91,7 @@ namespace psycle { namespace host {
     int numchannels() const { return sampleV_.size(); }
     int gui_type() const { return gui_type_; }
     void set_gui_type(int t) { gui_type_ = t; }
-    canvas::Canvas* get_canvas(int idx = 0) { return canvas_; }
+    ui::canvas::Canvas* get_canvas(int idx = 0) { return canvas_; }
     PRSType prsmode() const { return prsmode_; }
     void setprsmode(PRSType prsmode) { prsmode_ = prsmode; }
     void setproxy(class LuaProxy* proxy) { proxy_ = proxy; }
@@ -101,12 +102,12 @@ namespace psycle { namespace host {
     psybuffer sampleV_;
     bool shared_;
     int num_parameter_, num_cols_, gui_type_, num_programs_;
-    canvas::Canvas* canvas_;
+    ui::canvas::Canvas* canvas_;
     PRSType prsmode_;
-    LuaProxy* proxy_;    
+    LuaProxy* proxy_;
   };
 
-  struct LuaMachineBind {  
+  struct LuaMachineBind {
     static int open(lua_State *L);
     static const char* meta;
   private:
@@ -122,7 +123,7 @@ namespace psycle { namespace host {
     static int name(lua_State* L);
     static int label(lua_State* L);
     static int display(lua_State* L);
-    static int getrange(lua_State* L);   
+    static int getrange(lua_State* L);
     static int add_parameters(lua_State* L);
     static int set_parameters(lua_State* L);
     static int set_menus(lua_State* L);
@@ -145,29 +146,34 @@ namespace psycle { namespace host {
     static int open(lua_State *L);
     static int create(lua_State* L);
     static int samplerate(lua_State* L);
-    static int tpb(lua_State* L);      
+    static int tpb(lua_State* L);
+    static int line(lua_State* L);
+    static int playing(lua_State* L);
+    static int ps(lua_State* L);
   };
 
   struct LuaPatternEvent {
     LuaPatternEvent(int v, int l, int p) : val(v), len(l), pos(p) {}
     int val;
     int len;
-    int pos;        
+    int pos;
   };
-  
+
   class LuaPatternData {
   public:
-    LuaPatternData(lua_State* state, unsigned char** data) 
-      : L(state), data_(data) {}    
+    LuaPatternData(lua_State* state, unsigned char** data, Song* song)
+      : L(state), data_(data), song_(song) {}
     unsigned char** data() { return data_; }
-    inline unsigned char * ptrackline(int ps, int track, int line) {      
+    inline unsigned char * ptrackline(int ps, int track, int line) {
 			return data_[ps] + (track*EVENT_SIZE) + (line*MULTIPLY);
 	  }
-    int patternLines(int ps);
+    int numlines(int ps) const;
+    int numtracks() const;
 
    private:
-     lua_State* L;  
+     lua_State* L;
      unsigned char** data_;
+     Song* song_;
   };
 
   /*struct LuaPatternBind {
@@ -180,10 +186,19 @@ namespace psycle { namespace host {
     static int createevent(lua_State* L, LuaPatternEvent& ev);
   };*/
 
+  struct LuaSequenceBarBind {
+    static int open(lua_State *L);
+    static int create(lua_State* L);
+    static int currpattern(lua_State* L);
+    static const char* meta;
+  };
+
   struct LuaPatternDataBind {
     static int open(lua_State *L);
     static int create(lua_State* L);
     static int track(lua_State* L);
+    static int numtracks(lua_State *L);
+    static int numlines(lua_State *L);
     static int eventat(lua_State* L);
     static int insertevent(lua_State* L);
     static const char* meta;
@@ -199,7 +214,7 @@ namespace psycle { namespace host {
     T min() const { return min_; }
     T max() const { return max_; }
   private:
-    T min_, max_;    
+    T min_, max_;
   };
 
   template <typename T>
@@ -219,26 +234,26 @@ namespace psycle { namespace host {
   struct WaveList {
     typedef std::map<range<double>,
       const XMInstrument::WaveData<T>*,
-      left_of_range<double> > Type;  
+      left_of_range<double> > Type;
   };
 
   struct RWInterface {
     virtual ~RWInterface() {}
     virtual int work(int numSamples, float* pSamplesL, float* pSamplesR,
-         SingleWorkInterface* master) = 0 { 
+         SingleWorkInterface* master) = 0 {
       return 0;
-    }    
+    }
     virtual bool Playing() const { return false; }
     virtual void NoteOff() {}
     virtual void Start(double phase=0) {}
     virtual void set_frequency(double f) {}
     virtual double frequency() const { return 0; }
     virtual void set_quality(helpers::dsp::resampler::quality::type quality) {}
-    virtual helpers::dsp::resampler::quality::type quality() const { 
+    virtual helpers::dsp::resampler::quality::type quality() const {
       return helpers::dsp::resampler::quality::linear;
     }
     virtual void Stop(double phase) {}
-    virtual void SetData(WaveList<float>::Type& data) {}  
+    virtual void SetData(WaveList<float>::Type& data) {}
     virtual void set_gain(float gain) { }
     virtual float gain() const { return 1.0; }
     virtual double phase() const { return 0; }
@@ -253,15 +268,15 @@ namespace psycle { namespace host {
   };
 
   template <class T, int VOL>
-  class ResamplerWrap : public RWInterface {  
-  public:  
+  class ResamplerWrap : public RWInterface {
+  public:
     ResamplerWrap(const typename WaveList<T>::Type& waves) :
         adjust_vol(1/(float)VOL),
           dostop_(false),
           waves_(waves),
           speed_(1.0),
           f_(261.63),
-          basef(440),	
+          basef(440),
           last_wave(0),
           gain_(1.0),
           last_sgn(1),
@@ -270,7 +285,7 @@ namespace psycle { namespace host {
           fsize(32),
           lpos_(0),
           lph_(0),
-          oldtrigger(0) {	
+          oldtrigger(0) {
             fm_ = am_ = pm_ = 0;
             resampler.quality(helpers::dsp::resampler::quality::linear);
             set_frequency(f_);
@@ -282,9 +297,9 @@ namespace psycle { namespace host {
         virtual int work(int numSamples, float* pSamplesL, float* pSamplesR,
              SingleWorkInterface* master);
         bool Playing() const { return wavectrl.Playing();  }
-        void Stop(double phase) {	
+        void Stop(double phase) {
           if (wave_it != waves_.end()) {
-            double curr_phase = wavectrl.Position() / 
+            double curr_phase = wavectrl.Position() /
               (double) wave_it->second->WaveLength();
             if (curr_phase == phase) {
               wavectrl.Playing(false);
@@ -299,19 +314,19 @@ namespace psycle { namespace host {
         void NoteOff() { if (wavectrl.Playing()) wavectrl.NoteOff(); }
         void set_frequency(double f);
         double frequency() const { return f_; }
-        void set_quality(helpers::dsp::resampler::quality::type quality) { 
+        void set_quality(helpers::dsp::resampler::quality::type quality) {
           resampler.quality(quality);
-        }  
-        helpers::dsp::resampler::quality::type quality() const { 
+        }
+        helpers::dsp::resampler::quality::type quality() const {
           return resampler.quality();
-        }  
-        virtual void SetData(WaveList<float>::Type& data) { 
+        }
+        virtual void SetData(WaveList<float>::Type& data) {
           assert(sizeof(T)!=sizeof(int16_t));
           waves_ = reinterpret_cast<typename WaveList<T>::Type&>(data);
           wave_it = waves_.find(range<double>(f_));
         }
         void set_gain(float gain) { gain_ = gain; }
-        float gain() const { return gain_; }  
+        float gain() const { return gain_; }
         void set_sync_fadeout_size(int size) { fsize = size; }
         virtual double phase() const {
           if (wave_it != waves_.end() && wavectrl.Playing()) {
@@ -319,7 +334,7 @@ namespace psycle { namespace host {
           }
           return 0;
         }
-        virtual void setphase(double phase) { 
+        virtual void setphase(double phase) {
           if (wave_it != waves_.end() && wavectrl.Playing()) {
             while (phase >=1) {phase--;}
             while (phase<0) {phase++;}
@@ -338,7 +353,7 @@ namespace psycle { namespace host {
       float* fm,
       float* env,
       float* phase,
-      SingleWorkInterface* master);  
+      SingleWorkInterface* master);
     virtual int work_samples(int numSamples,
       float* pSamplesL,
       float* pSamplesR,
@@ -360,8 +375,8 @@ namespace psycle { namespace host {
     float gain_;
     int last_sgn;
     bool startfadeout;
-    int fadeout_sc; 
-    int fsize; 
+    int fadeout_sc;
+    int fsize;
     float* oldtrigger;
     int n;
     double lpos_;
@@ -371,18 +386,18 @@ namespace psycle { namespace host {
 
   // Pulse Width Modulation
   template <class T, int VOL>
-  class PWMWrap : public ResamplerWrap<T, VOL> {  
-  public:  
+  class PWMWrap : public ResamplerWrap<T, VOL> {
+  public:
     PWMWrap();
-    virtual void Start(double phase=0);    
-    virtual void set_frequency(double f);      
-    virtual void SetData(WaveList<float>::Type& data) { 
+    virtual void Start(double phase=0);
+    virtual void set_frequency(double f);
+    virtual void SetData(WaveList<float>::Type& data) {
       assert(sizeof(T)!=sizeof(int16_t));
       waves_ = reinterpret_cast<typename WaveList<T>::Type&>(data);
       wave_it = waves_.find(range<double>(f_));
       wave_it2 = waves_.find(range<double>(f_));
-    }        
-    virtual void setphase(double phase) { 
+    }
+    virtual void setphase(double phase) {
       if (wave_it != waves_.end() && wavectrl.Playing()) {
         wavectrl.Position((int) (phase * wave_it->second->WaveLength()));
       }
@@ -397,26 +412,26 @@ namespace psycle { namespace host {
       float* fm,
       float* env,
       float* phase,
-      SingleWorkInterface* master);  
+      SingleWorkInterface* master);
     virtual void check_wave(double f);
     virtual int work_samples(int numSamples,
       float* pSamplesL,
       float* pSamplesR,
       float* fm,
       float* env,
-      float* phase);    
+      float* phase);
   private:
     XMSampler::WaveDataController<T> wavectrl2;
     typename WaveList<T>::Type::iterator wave_it2;
     const XMInstrument::WaveData<T>* last_wave2;
-    float pw_;    
+    float pw_;
     float *pwm_;
   };
 
   // used by hardsinc
   struct LuaSingleWorker : public SingleWorkInterface {
     LuaSingleWorker(lua_State *s) : L(s) {}
-    ~LuaSingleWorker() {}	
+    ~LuaSingleWorker() {}
     virtual PSArray* work(int numSamples, int val);
   private:
     lua_State *L;
@@ -445,7 +460,7 @@ namespace psycle { namespace host {
     static int setphase(lua_State*);
     static int setpm(lua_State*);
     static int setam(lua_State*);
-    static int setfm(lua_State*);    
+    static int setfm(lua_State*);
     static WaveList<float>::Type check_wavelist(lua_State* L);
   };
 
@@ -455,28 +470,27 @@ namespace psycle { namespace host {
   private:
     static int create(lua_State* L);
     static int gc(lua_State* L);
-    static int stem(lua_State* L);	
+    static int stem(lua_State* L);
   };
 #endif // #if !defined WINAMP_PLUGIN
 
   struct PSDelay {
     PSDelay(int k) : mem(k, 0) {}
     PSArray mem;
-    void work(PSArray& x, PSArray& y);  
+    void work(PSArray& x, PSArray& y);
   };
-
 
   struct LuaDelayBind {
     static int open(lua_State *L);
     static const char* meta;
-  private:    
+  private:
     static int create(lua_State *L);
     static int work(lua_State* L);
     static int tostring(lua_State* L);
-    static int gc(lua_State* L);	
+    static int gc(lua_State* L);
   };
 
-  struct WaveOscTables {	
+  struct WaveOscTables {
     enum Shape {
       SIN = 1,
       SAW = 2,
@@ -491,7 +505,7 @@ namespace psycle { namespace host {
       cleartbl(sin_tbl);
       cleartbl(tri_tbl);
       cleartbl(sqr_tbl);
-      cleartbl(saw_tbl);	  
+      cleartbl(saw_tbl);
     }
   public:
     static WaveOscTables *getInstance() {  // Singleton instance
@@ -504,29 +518,29 @@ namespace psycle { namespace host {
       case SIN : list = getInstance()->sin_tbl; break;
       case SAW : list = getInstance()->saw_tbl; break;
       case SQR : list = getInstance()->sqr_tbl; break;
-      case TRI : list = getInstance()->tri_tbl; break;	   
+      case TRI : list = getInstance()->tri_tbl; break;
       default: list = sin_tbl;
       }
       return list;
     }
     void set_samplerate(int rate);
-  private:   
+  private:
     static void saw(float* data, int num, int maxharmonic);
     static void sqr(float* data, int num, int maxharmonic);
     static void sin(float* data, int num, int maxharmonic);
     static void tri(float* data, int num, int maxharmonic);
     static void ConstructWave(double fh,  XMInstrument::WaveData<float>& wave,
       void (*func)(float*, int, int),
-      int sr);    
+      int sr);
     static void cleartbl(WaveList<float>::Type&);
-    WaveList<float>::Type sin_tbl, saw_tbl, sqr_tbl, tri_tbl, rnd_tbl;  
+    WaveList<float>::Type sin_tbl, saw_tbl, sqr_tbl, tri_tbl, rnd_tbl;
   };
 
   struct WaveOsc {
     WaveOsc(WaveOscTables::Shape shape);
     ~WaveOsc() { delete resampler_; }
     void work(int num, float* data, SingleWorkInterface* master);
-    float base_frequency() const { return resampler_->frequency(); }  
+    float base_frequency() const { return resampler_->frequency(); }
     void set_frequency(float f) { resampler_->set_frequency(f); }
     void setpw(float pw) { resampler_->set_pw(pw); }
     float pw() const { return resampler_->pw(); }
@@ -537,23 +551,23 @@ namespace psycle { namespace host {
     bool IsPlaying() const { return resampler_->Playing(); }
     void set_gain(float gain) { resampler_->set_gain(gain); }
     float gain() const { return resampler_->gain(); }
-    void set_shape(WaveOscTables::Shape shape);  
+    void set_shape(WaveOscTables::Shape shape);
     void set_shape(double shape) {set_shape((WaveOscTables::Shape) (int)shape); }
-    WaveOscTables::Shape shape() const { return shape_; }  
+    WaveOscTables::Shape shape() const { return shape_; }
     void set_quality(helpers::dsp::resampler::quality::type quality) {
       resampler_->set_quality(quality);
     }
     helpers::dsp::resampler::quality::type quality() const {
       return resampler_->quality();
-    }  
-    RWInterface* resampler() { return resampler_; }  
+    }
+    RWInterface* resampler() { return resampler_; }
     void setpm(float* ptr) { resampler_->setpm(ptr); }
     void setfm(float* ptr) { resampler_->setfm(ptr); }
     void setam(float* ptr) { resampler_->setam(ptr); }
     void setpwm(float* ptr) { resampler_->setpwm(ptr); }
-  private:    
+  private:
     RWInterface* resampler_;
-    WaveOscTables::Shape shape_;    
+    WaveOscTables::Shape shape_;
   };
 
   struct LuaWaveOscBind {
@@ -563,17 +577,17 @@ namespace psycle { namespace host {
     static const char* meta;
   private:
     static int create(lua_State *L);
-    static int work(lua_State* L);	
+    static int work(lua_State* L);
     static int tostring(lua_State* L);
-    static int gc(lua_State* L);	
+    static int gc(lua_State* L);
     static int get_base_frequency(lua_State* L);
     static int set_base_frequency(lua_State* L);
     static int stop(lua_State* L);
     static int start(lua_State* L);
-    static int isplaying(lua_State* L);	
-    static int set_gain(lua_State* L);	
-    static int gain(lua_State* L);	
-    static int setpw(lua_State* L);	
+    static int isplaying(lua_State* L);
+    static int set_gain(lua_State* L);
+    static int gain(lua_State* L);
+    static int setpw(lua_State* L);
     static int pw(lua_State* L);
     static int set_shape(lua_State* L);
     static int shape(lua_State* L);
@@ -608,7 +622,7 @@ namespace psycle { namespace host {
     typedef psycle::helpers::dsp::Filter Filter;
     static int open(lua_State *L);
     // store map for samplerate change
-    static std::map<Filter*, Filter*> filters; 
+    static std::map<Filter*, Filter*> filters;
     static void setsamplerate(double sr);
     static const char* meta;
   private:
@@ -617,10 +631,10 @@ namespace psycle { namespace host {
     static int getcutoff(lua_State* L);
     static int setresonance(lua_State* L);
     static int getresonance(lua_State* L);
-    static int setfiltertype(lua_State* L);   
+    static int setfiltertype(lua_State* L);
     static int work(lua_State* L);
     static int tostring(lua_State* L);
-    static int gc(lua_State* L);	
+    static int gc(lua_State* L);
   };
 
   struct LuaWaveDataBind {
@@ -643,7 +657,7 @@ namespace psycle { namespace host {
       const std::vector<int>& types,
       int suspos,
       double startpeak,
-      int samplerate) 
+      int samplerate)
       : out_(256, 0),
       fs_(samplerate),
       sus_(suspos),
@@ -653,7 +667,7 @@ namespace psycle { namespace host {
       peaks_(peaks),
       types_(types),
       up_(false),
-      stage_(peaks.size()) {       
+      stage_(peaks.size()) {
     }
     ~LEnvelope() {};
     void setstartvalue(float val) { startpeak_ = val; }
@@ -679,9 +693,9 @@ namespace psycle { namespace host {
     void set_samplerate(int sr) {
       int newsc = sc_ * static_cast<int>(sr/(double)fs_);
       calcstage(stage_ == 0 ? startpeak_ : peaks_[stage_-1], peaks_[stage_],
-        times_[stage_]);		
+        times_[stage_]);
       sc_ = newsc;
-      fs_ = sr;		
+      fs_ = sr;
     }
 
   private:
@@ -695,7 +709,7 @@ namespace psycle { namespace host {
       nexttime_ = time*fs_;
       lv_ = peakStart;
       sc_ = 0;
-      if (type==1) {		
+      if (type==1) {
         if (peakStart == 0) peakStart = 0.001;
         if (peakEnd == 0) peakEnd = 0.001;
         lv_ = peakStart;
@@ -706,25 +720,24 @@ namespace psycle { namespace host {
         //} else {
         // m_ = 1.0 + (log(peakEnd) - log(peakStart)) / (nexttime_);
         //   lv_ = peakStart;
-        //}	  
+        //}
         //lv_ = peakStart;
         //if (peakStart < peakEnd) {
         m_ = 1.0 + (log(peakEnd) - log(peakStart)) / (nexttime_);
         //} else {
         //m_ = 1.0 + (log(peakEnd) - log(peakStart)) / (nexttime_);
         //}
-
       } else {
-        m_ = (peakEnd-peakStart)/nexttime_;		  
+        m_ = (peakEnd-peakStart)/nexttime_;
       }
     }
   };
 
-  struct LuaEnvelopeBind {   
+  struct LuaEnvelopeBind {
     static int open(lua_State *L);
     static const char* meta;
   private:
-    static int create(lua_State *L);   
+    static int create(lua_State *L);
     static int work(lua_State* L);
     static int release(lua_State* L);
     static int start(lua_State* L);
@@ -735,9 +748,7 @@ namespace psycle { namespace host {
     static int setstagetime(lua_State* L);
     static int time(lua_State* L);
     static int setstartvalue(lua_State* L);
-    static int lastvalue(lua_State* L);   
+    static int lastvalue(lua_State* L);
     static int gc(lua_State* L);
   };
-
-  
 }}  // namespace

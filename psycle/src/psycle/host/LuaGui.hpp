@@ -12,7 +12,6 @@ struct lua_State;
 struct luaL_Reg;
 
 namespace psycle { namespace host {
-
    class LuaMenu;
    class LuaMachine;
 
@@ -36,20 +35,20 @@ namespace psycle { namespace host {
      int id() const { return id_; }
      void set_label(const std::string& label);
      const std::string& label() const { return label_; }
-     void check();      
-     void uncheck();      
-     bool checked() const { return check_; } 
+     void check();
+     void uncheck();
+     bool checked() const { return check_; }
      void set_menu(LuaMenu* menu) { menu_ = menu; }
      static int id_counter;
      static std::map<std::uint16_t, LuaMenuItem*> menuItemIdMap;
-    private:            
+    private:
       LuaMenu* menu_;
       int id_;
-      bool check_;      
-      std::string label_;            
+      bool check_;
+      std::string label_;
   };
 
-  class LuaMenu {   
+  class LuaMenu {
      public:
        LuaMenu() : parent_(0), pos_(-1), bar_(0), owner_(true) {
           cmenu_ = new CMenu();
@@ -59,7 +58,7 @@ namespace psycle { namespace host {
          if (owner_) delete cmenu_;
        }
        void set_label(const std::string& label);
-       const std::string& label() const { return label_; }       
+       const std::string& label() const { return label_; }
        CMenu* cmenu() { return cmenu_; }
        void setcmenu(CMenu* menu) { cmenu_ = menu; }
        void set_parent(LuaMenu* parent) { parent_ = parent; }
@@ -75,23 +74,23 @@ namespace psycle { namespace host {
      private:
        std::vector<LuaMenuItem*> items;
        std::string label_;
-       CMenu* cmenu_;       
+       CMenu* cmenu_;
        LuaMenu* parent_;
        LuaMenuBar* bar_;
-       bool owner_;       
+       bool owner_;
        int pos_;
    };
-   
-  struct LuaMenuBarBind {  
+
+  struct LuaMenuBarBind {
     static int open(lua_State *L);
     static const char* meta;
   private:
     static int create(lua_State *L);
-    static int add(lua_State *L);    
-    static int gc(lua_State* L);    
+    static int add(lua_State *L);
+    static int gc(lua_State* L);
   };
 
-  struct LuaMenuBind {  
+  struct LuaMenuBind {
     static int open(lua_State *L);
     static const char* meta;
   private:
@@ -100,10 +99,10 @@ namespace psycle { namespace host {
     static int remove(lua_State *L);
     static int addseparator(lua_State *L);
     static int setlabel(lua_State *L);
-    static int gc(lua_State* L);    
+    static int gc(lua_State* L);
   };
 
-  struct LuaMenuItemBind {  
+  struct LuaMenuItemBind {
     static int open(lua_State *L);
     static const char* meta;
   private:
@@ -118,30 +117,30 @@ namespace psycle { namespace host {
     static int addlistener(lua_State* L);
     static int notify(lua_State* L);
   };
-    
+
   class LuaActionListener : public ActionListener {
   public:
-    LuaActionListener(lua_State* state) : ActionListener(), L(state), mac_(0) {}    
+    LuaActionListener(lua_State* state) : ActionListener(), L(state), mac_(0) {}
     virtual void OnNotify(ActionType action);
     void setmac(LuaMachine* mac) { mac_ = mac; }
   private:
     lua_State* L;
     LuaMachine* mac_;
   };
-  
+
   struct LuaActionListenerBind {
     static const char* meta;
-    static int open(lua_State *L);    
-    static int create(lua_State *L);    
-  private:    
+    static int open(lua_State *L);
+    static int create(lua_State *L);
+  private:
     static int gc(lua_State* L);
-  };    
+  };
 
   struct LuaDialog : public Dynamic_dialog {
     LuaDialog(lua_State* state, const char* title = 0, int width = 100,
               int height = 100, int position_x = 0,
               int position_y = 0) :
-              Dynamic_dialog(title, width, height, position_x, position_y), L(state) {}    
+              Dynamic_dialog(title, width, height, position_x, position_y), L(state) {}
     virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
     LuaMachine* mac;
    private:
@@ -150,7 +149,7 @@ namespace psycle { namespace host {
 
   struct LuaDialogBind {
     static int open(lua_State *L);
-    static const char* meta;    
+    static const char* meta;
    private:
     static int create(lua_State *L);
     static int gc(lua_State* L);
@@ -163,17 +162,22 @@ namespace psycle { namespace host {
     static int settext(lua_State* L);
   };
 
-  struct LuaCanvas : public canvas::Canvas {
-    LuaCanvas(lua_State* state) : canvas::Canvas(), L(state), show_scrollbar(false) {}    
-    virtual canvas::Item* OnEvent(canvas::Event* ev);
+  struct LuaCanvas : public ui::canvas::Canvas {
+    LuaCanvas(lua_State* state) : ui::canvas::Canvas(),
+                                  L(state),
+                                  show_scrollbar(false),
+                                  nposv(0),
+                                  nposh(0) {}
+    virtual ui::canvas::Item* OnEvent(ui::canvas::Event* ev);
     bool show_scrollbar;
+    int nposv, nposh;
    private:
-     lua_State* L;     
+     lua_State* L;
   };
 
   struct LuaCanvasBind {
     static int open(lua_State *L);
-    static const char* meta;    
+    static const char* meta;
    private:
     static int create(lua_State *L);
     static int gc(lua_State* L);
@@ -181,22 +185,24 @@ namespace psycle { namespace host {
     static int size(lua_State* L);
     static int setpreferredsize(lua_State* L);
     static int preferredsize(lua_State* L);
-    static int setcolor(lua_State* L);    
+    static int setcolor(lua_State* L);
     static int color(lua_State* L);
     static int generate(lua_State* L);
     static int setcapture(lua_State* L);
     static int releasecapture(lua_State* L);
+    static int setcursor(lua_State* L);
     static int hidecursor(lua_State* L);
     static int showcursor(lua_State* L);
     static int setcursorpos(lua_State* L);
     static int showscrollbar(lua_State* L);
+    static int setscrollinfo(lua_State* L);
   };
 
-  struct LuaGroup : public canvas::Group {
-    LuaGroup(lua_State* state) : canvas::Group(), L(state) {}
-    LuaGroup(lua_State* state, canvas::Group* parent) :
-      canvas::Group(parent, 0, 0), L(state) {}
-    virtual bool OnEvent(canvas::Event* ev);
+  struct LuaGroup : public ui::canvas::Group {
+    LuaGroup(lua_State* state) : ui::canvas::Group(), L(state) {}
+    LuaGroup(lua_State* state, ui::canvas::Group* parent) :
+      ui::canvas::Group(parent, 0, 0), L(state) {}
+    virtual bool OnEvent(ui::canvas::Event* ev);
    private:
      lua_State* L;
   };
@@ -206,17 +212,17 @@ namespace psycle { namespace host {
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int setpos(lua_State *L);    
+    static int setpos(lua_State *L);
     static int pos(lua_State *L);
     static int clientpos(lua_State* L);
     static int setzoom(lua_State* L);
     static int getfocus(lua_State *L);
-    static int getitems(lua_State* L);    
+    static int getitems(lua_State* L);
     static int remove(lua_State* L);
     static int removeall(lua_State* L);
     static int add(lua_State* L);
     static int show(lua_State* L);
-    static int hide(lua_State* L);    
+    static int hide(lua_State* L);
     static int enablepointerevents(lua_State* L);
     static int disablepointerevents(lua_State* L);
     static int gc(lua_State* L);
@@ -224,19 +230,19 @@ namespace psycle { namespace host {
     static int tostring(lua_State* L);
     static int setzorder(lua_State* L);
     static int zorder(lua_State* L);
-    static int bounds(lua_State* L);   
-    static int intersect(lua_State* L);
-    static int intersectrect(lua_State* L);
-    static int canvas(lua_State* L);    
-    static canvas::Item* test(lua_State* L, int index);
+    static int boundrect(lua_State* L);
+    static int intersect(lua_State* L);    
+    static int canvas(lua_State* L);
+    static ui::canvas::Item* test(lua_State* L, int index);
     static int fls(lua_State *L);
+    static int setclip(lua_State* L);
   };
-  
-  struct LuaRect : public canvas::Rect {
-    LuaRect(lua_State* state) : Rect(), L(state) {}
-    LuaRect(lua_State* state, canvas::Group* parent, double x1, double y1, double x2, double y2) :
-      canvas::Rect(parent, x1, y1, x2, y2), L(state) {}
-    virtual bool OnEvent(canvas::Event* ev);    
+
+  struct LuaRect : public ui::canvas::Rect {
+    LuaRect(lua_State* state) : ui::canvas::Rect(), L(state) {}
+    LuaRect(lua_State* state, ui::canvas::Group* parent, double x1, double y1, double x2, double y2) :
+      ui::canvas::canvas::Rect(parent, x1, y1, x2, y2), L(state) {}
+    virtual bool OnEvent(ui::canvas::Event* ev);
    private:
      lua_State* L;
   };
@@ -245,32 +251,32 @@ namespace psycle { namespace host {
     static int open(lua_State *L);
     static const char* meta;
    private:
-    static int create(lua_State *L);    
+    static int create(lua_State *L);
     // fill
-    static int setcolor(lua_State* L);    
+    static int setcolor(lua_State* L);
     static int color(lua_State* L);
     // stroke
-    static int setstrokecolor(lua_State* L);    
+    static int setstrokecolor(lua_State* L);
     static int strokecolor(lua_State* L);
 
     static int setpos(lua_State *L);
     static int pos(lua_State *L);
-    static int clientpos(lua_State* L);    
-    static int parent(lua_State *L);    
+    static int clientpos(lua_State* L);
+    static int parent(lua_State *L);
     static int gc(lua_State* L);
-    static int tostring(lua_State* L);    
+    static int tostring(lua_State* L);
     static int setzorder(lua_State* L);
     static int zorder(lua_State* L);
     static int setborder(lua_State* L);
-    static int border(lua_State* L);    
+    static int border(lua_State* L);
     static int getfocus(lua_State *L);
   };
 
-  struct LuaLine : public canvas::Line {
-    LuaLine(lua_State* state) : Line(), L(state) {}
-    LuaLine(lua_State* state, canvas::Group* parent) :
-      canvas::Line(parent), L(state) {}
-    virtual bool OnEvent(canvas::Event* ev);
+  struct LuaLine : public ui::canvas::Line {
+    LuaLine(lua_State* state) : ui::canvas::Line(), L(state) {}
+    LuaLine(lua_State* state, ui::canvas::Group* parent) :
+      ui::canvas::Line(parent), L(state) {}
+    virtual bool OnEvent(ui::canvas::Event* ev);
    private:
      lua_State* L;
   };
@@ -280,7 +286,7 @@ namespace psycle { namespace host {
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int setcolor(lua_State* L);    
+    static int setcolor(lua_State* L);
     static int color(lua_State* L);
     static int setpoints(lua_State* L);
     static int setpoint(lua_State* L);
@@ -293,11 +299,11 @@ namespace psycle { namespace host {
     static int disablepointerevents(lua_State* L);
   };
 
-  struct LuaText : public canvas::Text {
-    LuaText(lua_State* state) : canvas::Text(), L(state) {}
-    LuaText(lua_State* state, canvas::Group* parent) :
-      canvas::Text(parent), L(state) {}
-    virtual bool OnEvent(canvas::Event* ev);
+  struct LuaText : public ui::canvas::Text {
+    LuaText(lua_State* state) : ui::canvas::Text(), L(state) {}
+    LuaText(lua_State* state, ui::canvas::Group* parent) :
+      ui::canvas::Text(parent), L(state) {}
+    virtual bool OnEvent(ui::canvas::Event* ev);
    private:
      lua_State* L;
   };
@@ -310,32 +316,47 @@ namespace psycle { namespace host {
     static int setpos(lua_State *L);
     static int settext(lua_State* L);
     static int text(lua_State* L);
-    static int setcolor(lua_State* L);    
+    static int setcolor(lua_State* L);
     static int color(lua_State* L);
     static int pos(lua_State *L);
     static int gc(lua_State* L);
-    static int parent(lua_State *L);    
+    static int parent(lua_State *L);
     static int tostring(lua_State* L);
   };
 
-  /*
-  struct LuaPixBind {
+  struct LuaPicBind {
     static int open(lua_State *L);
     static const char* meta;
    private:
     static int create(lua_State *L);
-    static int parent(lua_State *L);        
+    static int parent(lua_State *L);
     static int setsource(lua_State* L);
     static int setsize(lua_State* L);
-    static int setpixmap(lua_State* L);
-    static int settransparent(lua_State* L);
-    static int load(lua_State* L);
+    static int setimage(lua_State* L);
     static int gc(lua_State* L);
     static int pos(lua_State *L);
     static int setpos(lua_State *L);
     static int tostring(lua_State* L);
   };
-  */
+
+  struct LuaImageBind {
+    static int open(lua_State *L);
+    static const char* meta;
+   private:
+    static int create(lua_State *L);
+    static int gc(lua_State* L);
+    static int load(lua_State *L);
+    static int settransparent(lua_State* L);
+  };
+
+  struct LuaRegionBind {
+    static int open(lua_State *L);
+    static const char* meta;
+   private:
+    static int create(lua_State *L);
+    static int boundrect(lua_State *L);
+    static int gc(lua_State* L);
+  };
 
   struct LuaGraphicsBind {
     static int open(lua_State *L);
@@ -355,22 +376,24 @@ namespace psycle { namespace host {
     static int font(lua_State* L);
     static int drawpolygon(lua_State* L);
     static int fillpolygon(lua_State* L);
+    static int drawpolyline(lua_State* L);
+    static int drawimage(lua_State* L);
     static const char* meta;
-   private:    
+   private:
     static int gc(lua_State* L);
   };
 
-  class LuaItem : public canvas::Item {
+  class LuaItem : public ui::canvas::Item {
   public:
-    LuaItem(lua_State* state) : canvas::Item(), L(state) { Init(); }
-    LuaItem(lua_State* state, canvas::Group* parent) :
-        canvas::Item(parent), L(state) { 
+    LuaItem(lua_State* state) : ui::canvas::Item(), L(state) { Init(); }
+    LuaItem(lua_State* state, ui::canvas::Group* parent) :
+        ui::canvas::Item(parent), L(state) {
       Init();
     }
-    virtual bool OnEvent(canvas::Event* ev);
-    virtual void Draw(canvas::Graphics* g, const CRgn& repaint_region,
-      canvas::Canvas* widget);
-    const CRgn& region() const;    
+    virtual bool OnEvent(ui::canvas::Event* ev);
+    virtual void Draw(ui::canvas::Graphics* g, ui::canvas::Region& repaint_region,
+      ui::canvas::Canvas* widget);
+    const ui::canvas::Region& region() const;
     // till regions will be bind
     void SetSize(double w, double h) { STR(); w_ = w; h_ = h; FLS(); }
    private:
@@ -384,13 +407,14 @@ namespace psycle { namespace host {
     static int create(lua_State *L);
     static int draw(lua_State* L);
     static int pos(lua_State *L);
-    static int setpos(lua_State *L);    
+    static int clientpos(lua_State* L);
+    static int setpos(lua_State *L);
     static int setsize(lua_State* L); // till there's a rgn bind
     static int fls(lua_State *L);
-    static const char* meta;    
-   private:    
+    static const char* meta;
+    static int canvas(lua_State* L);
+   private:
     static int gc(lua_State* L);
   };
-  
   } // namespace
 } // namespace

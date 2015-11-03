@@ -947,22 +947,22 @@ namespace psycle { namespace host {
 		//
 		//SequenceBar
 		//
-		void CMainFrame::OnSelchangeSeqlist() { m_seqBar.OnSelchangeSeqlist(); ANOTIFY(Actions::seqsel);}
+		void CMainFrame::OnSelchangeSeqlist() { m_seqBar.OnSelchangeSeqlist(); ANOTIFY(Actions::seqsel); }
 		void CMainFrame::OnDblclkSeqlist() { m_seqBar.OnDblclkSeqlist(); ANOTIFY(Actions::seqsel); }
-		void CMainFrame::OnIncshort() { m_seqBar.OnIncshort(); }
-		void CMainFrame::OnDecshort() { m_seqBar.OnDecshort(); }
-		void CMainFrame::OnSeqnew() { m_seqBar.OnSeqnew(); }
-		void CMainFrame::OnSeqduplicate() { m_seqBar.OnSeqduplicate(); }
-		void CMainFrame::OnSeqins() { m_seqBar.OnSeqins(); }
-		void CMainFrame::OnSeqdelete() { m_seqBar.OnSeqdelete(); }
+		void CMainFrame::OnIncshort() { m_seqBar.OnIncshort(); ANOTIFY(Actions::seqsel); }
+		void CMainFrame::OnDecshort() { m_seqBar.OnDecshort(); ANOTIFY(Actions::seqsel); }
+		void CMainFrame::OnSeqnew() { m_seqBar.OnSeqnew(); ANOTIFY(Actions::seqsel); }
+		void CMainFrame::OnSeqduplicate() { m_seqBar.OnSeqduplicate(); ANOTIFY(Actions::seqsel); }
+		void CMainFrame::OnSeqins() { m_seqBar.OnSeqins(); ANOTIFY(Actions::seqsel); }
+		void CMainFrame::OnSeqdelete() { m_seqBar.OnSeqdelete(); ANOTIFY(Actions::seqsel); }
 		void CMainFrame::OnSeqrename() { m_seqBar.OnSeqrename(); }
 		void CMainFrame::OnSeqchange() { m_seqBar.OnSeqchange(); }
-		void CMainFrame::OnSeqcut() { m_seqBar.OnSeqcut(); }
+		void CMainFrame::OnSeqcut() { m_seqBar.OnSeqcut(); ANOTIFY(Actions::seqsel); }
 		void CMainFrame::OnSeqcopy() { m_seqBar.OnSeqcopy(); }
 		void CMainFrame::OnSeqpaste() { m_seqBar.OnSeqpasteAbove(); }
 		void CMainFrame::OnSeqpasteBelow() { m_seqBar.OnSeqpasteBelow(); }
 		void CMainFrame::OnSeqsort() { m_seqBar.OnSeqsort(); }
-		void CMainFrame::OnSeqclear() { m_seqBar.OnSeqclear(); }
+		void CMainFrame::OnSeqclear() { m_seqBar.OnSeqclear(); ANOTIFY(Actions::seqsel); }
 		void CMainFrame::OnUpdatepaste(CCmdUI* pCmdUI) {m_seqBar.OnUpdatepaste(pCmdUI);}
 		void CMainFrame::OnUpdatepasteBelow(CCmdUI* pCmdUI) {m_seqBar.OnUpdatepasteBelow(pCmdUI);}
 		void CMainFrame::OnFollow() { m_seqBar.OnFollow(); ANOTIFY(Actions::seqfollowsong); }

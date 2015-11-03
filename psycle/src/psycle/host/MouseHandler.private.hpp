@@ -4,6 +4,8 @@
 #include <psycle/host/detail/project.hpp>
 namespace psycle { namespace host {
 
+    using namespace ui;
+
 		void CChildView::OnRButtonDown( UINT nFlags, CPoint point )
 		{	
 			//Right mouse button behaviour (OnRButtonDown() and OnRButtonUp()) extended by sampler.
@@ -1388,8 +1390,15 @@ namespace psycle { namespace host {
 
 		void CChildView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		{      
-      CPoint pt(nPos, 0);      
-      if (DelegateLuaEvent(canvas::Event::SCROLL, 0, 0, pt)) return;
+      if (nSBCode == SB_THUMBTRACK) {        
+        if (viewMode == view_modes::luaplugin) {
+          CPoint pt(nPos, 0);
+          DelegateLuaEvent(canvas::Event::SCROLL, 0, 0, pt);
+          SetScrollPos(SB_HORZ, nPos, false);
+          CWnd ::OnVScroll(nSBCode, nPos, pScrollBar);
+          return;        
+        }
+      }   
       
 			if ( viewMode == view_modes::pattern )
 			{
@@ -1755,4 +1764,14 @@ namespace psycle { namespace host {
 			}
 			return true;
 		}
+
+    BOOL CChildView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) {
+      if (active_lua_ && viewMode == view_modes::luaplugin) {
+       canvas::Canvas* user_view = active_lua_->GetCanvas();        
+       if (user_view !=0) { SetCursor(user_view->cursor()); return TRUE; }
+      }
+      return CWnd::OnSetCursor(pWnd, nHitTest, message);
+    }
+
+
 }}

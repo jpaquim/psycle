@@ -18,6 +18,8 @@
 namespace psycle { namespace host {
 
 	extern CPsycleApp theApp;
+
+  using namespace ui;
 		
 	PsycleConfig::MachineParam* CNativeView::uiSetting;
 
@@ -545,11 +547,12 @@ namespace psycle { namespace host {
     bool CNativeView::PaintLuaGui(CDC &bufferDC, CPaintDC& dc, CRect& rect, CRgn &pRgn, CBitmap* oldbmp, CFont *oldfont) {
        if (_pMachine->_type == MACH_LUA) {
         LuaPlugin* lp = (LuaPlugin*) _pMachine;
-        canvas::Canvas* user_view = lp->GetCanvas();
+        ui::canvas::Canvas* user_view = lp->GetCanvas();
         if (user_view !=0 && lp->GetGuiType() == 1) {
-          if (user_view->parent() == 0) user_view->SetParent(this);
+          if (user_view->wnd() == 0) user_view->set_wnd(this);
           mfc::Graphics g(&bufferDC);
-          user_view->DrawFlush(&g, pRgn);          
+          ui::mfc::Region rgn(pRgn);
+          user_view->DrawFlush(&g, rgn);
           dc.BitBlt(0,0,rect.right,rect.bottom,&bufferDC,0,0,SRCCOPY);			
 		 	    bufferDC.SelectObject(oldbmp);
 			    bufferDC.SelectObject(oldfont);
@@ -562,7 +565,7 @@ namespace psycle { namespace host {
 
     bool CNativeView::DelegateLuaEvent(int type, int button, UINT nFlags, CPoint pt) {
       if (_pMachine->_type == MACH_LUA) {        
-        canvas::Event ev(0, (canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
+        ui::canvas::Event ev(0, (ui::canvas::Event::Type)type, pt.x, pt.y, button, nFlags);
         return ((LuaPlugin*) _pMachine)->OnEvent(&ev);        		    
       }
       return false;

@@ -4,7 +4,6 @@
 ///\file
 ///\brief interface file for psycle::host::LuaPlugin.
 
-
 #pragma once
 #include <psycle/host/detail/project.hpp>
 #include "Global.hpp"
@@ -12,12 +11,10 @@
 #include "LuaArray.hpp"
 #include "LuaHost.hpp"
 
-
 struct lua_State;
-namespace psycle { namespace host { namespace canvas { struct Event; }}}
+namespace psycle { namespace host { namespace ui { namespace canvas { struct Event; }}}}
 
 namespace psycle { namespace host {
-
   class LuaPlugin : public Machine
   {
   public:
@@ -60,26 +57,26 @@ namespace psycle { namespace host {
     virtual int GetNumOutputPins() const { return samplesV.size(); }
     PluginInfo CallPluginInfo() { return proxy_.call_info(); }
     virtual void SetSampleRate(int sr) { try {Machine::SetSampleRate(sr); proxy_.call_sr_changed((float)sr); }catch(...){} }
-    virtual void AfterTweaked(int numparam);    
-    LuaMenuBar* GetMenu(LuaMenu* menu) { 
+    virtual void AfterTweaked(int numparam);
+    LuaMenuBar* GetMenu(LuaMenu* menu) {
       if (!custom_menubar) {
-        custom_menubar = proxy_.get_menu(menu);        
+        custom_menubar = proxy_.get_menu(menu);
       } else {
         custom_menubar->append(menu);
       }
-      return custom_menubar; 
+      return custom_menubar;
     }
     std::string help();
     virtual int GetGuiType() const { return proxy_.gui_type(); }
-    void OnMenu(UINT id) { proxy_.call_menu(id); }    
+    void OnMenu(UINT id) { proxy_.call_menu(id); }
     void OnExecute() { proxy_.call_execute(); } // called by HostUI view menu
-    canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
-    bool OnEvent(canvas::Event* ev);    
+    ui::canvas::Canvas* GetCanvas() { return !crashed() ? proxy_.call_canvas() : 0; }
+    bool OnEvent(ui::canvas::Event* ev);
     virtual void OnReload();
     bool LoadBank(const std::string& filename);
     void SaveBank(const std::string& filename);
 
-    // Bank & Programs    
+    // Bank & Programs
     virtual void SetCurrentProgram(int idx);
 		virtual int GetCurrentProgram();
 		virtual void GetCurrentProgramName(char* val) {
@@ -105,16 +102,28 @@ namespace psycle { namespace host {
         if (custom_menubar && custom_menubar->needsupdate()) {
           proxy_.update_menu(mhnd);
           custom_menubar->setupdate(false);
-        }      
+        }
         LuaCanvas* canvas = proxy_.call_canvas();
         if (canvas) {
+          ui::canvas::Event ev(0, ui::canvas::Event::ONTIMER, 0, 0, 0, 0);
+          proxy_.call_event(&ev);
           if (canvas->show_scrollbar) {
-             ((CWnd*) chnd)->ShowScrollBar(SB_BOTH,TRUE);
+             CWnd* view = (CWnd*) chnd;
+             view->ShowScrollBar(SB_BOTH,TRUE);
+             SCROLLINFO si;
+				     si.cbSize = sizeof(SCROLLINFO);
+				     si.fMask = SIF_PAGE | SIF_RANGE;
+				     si.nMin = 0;
+				     si.nMax = canvas->nposv; // -VISLINES;
+				     si.nPage = 1;
+				     view->SetScrollInfo(SB_VERT,&si);
+             si.nMax = canvas->nposh; // -VISLINES;
+             view->SetScrollInfo(SB_HORZ,&si);
              canvas->show_scrollbar = false;
           }
         }
       }
-    }    
+    }
 
     std::string dll_path_;
     bool usenoteon_;
@@ -124,14 +133,14 @@ namespace psycle { namespace host {
     void unlock() const { proxy_.unlock(); }
 
     void InvalidateMenuBar() { if (custom_menubar) custom_menubar->setupdate(true); }
-    
+
   protected:
     LuaProxy proxy_;
-    int curr_prg_;    
+    int curr_prg_;
 
   private:
     // additions if noteon mode is used
-    struct note { 
+    struct note {
       unsigned char key;
       unsigned char midichan;
     };
@@ -150,11 +159,9 @@ namespace psycle { namespace host {
     void SendCommand(unsigned char channel,
       unsigned char inst,
       unsigned char cmd,
-      unsigned char val);    
+      unsigned char val);
     public:
-    LuaMenuBar* custom_menubar;    
+    LuaMenuBar* custom_menubar;
   };
-
-
 }   // namespace
 }   // namespace

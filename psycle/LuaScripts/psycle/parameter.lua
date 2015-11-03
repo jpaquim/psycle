@@ -83,7 +83,7 @@ function parameter:newonoff(name, val)
   return self:new(name, "", 0, 1, 1, val, 5)
 end
 
-function parameter:newknob(name, label, min, max, step, val, hasvel)
+function parameter:newknob(name, label, min, max, step, val, hasvel)  
   local newparam = self:new(name, label, min, max, step, val, parameter.MPFSTATE)
   newparam.hasvel_ = hasvel
   return newparam
@@ -102,6 +102,12 @@ function parameter:id() return self.id_ end
 function parameter:setname(str) self.name_ = str end
 function parameter:name() return self.name_ end
 function parameter:label() return self.label_ end
+function parameter:setmin(min) local tmp = self:val() self.min_ = min if tmp<min then tmp=min end self:setval(tmp) end
+function parameter:min() return self.min_ end
+function parameter:setmax(max) local tmp = self:val() self.max_ = max if tmp>max then tmp=max end self:setval(tmp) end
+function parameter:max() return self.max_ end
+function parameter:setstep(step) local tmp = self:val() self.step_ = step self:setval(tmp) end
+function parameter:step() return self.step_; end
 function parameter:val()
   local tmp = self.val_*(self.max_-self.min_)+self.min_
     if vel == nil then
@@ -160,7 +166,7 @@ function parameter:learn(dolearn)
 	  --setval(velpar:start())	  
 	end
     self.learn_ = dolearn    
-end 
+end
 
 function parameter:afternotify()
   for k, v in pairs(self.listener_) do      

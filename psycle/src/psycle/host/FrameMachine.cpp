@@ -16,7 +16,7 @@
 namespace psycle { namespace host {
 		int const ID_TIMER_PARAM_REFRESH = 2104;
 		extern CPsycleApp theApp;
-
+    using namespace ui;
 		//////////////////////////////////////////////////////////////////////////
 
 		void CMyToolBar::OnBarStyleChange(DWORD dwOldStyle, DWORD dwNewStyle)
@@ -225,7 +225,7 @@ namespace psycle { namespace host {
           LuaPlugin* lp = (LuaPlugin*) (&machine());
           canvas::Canvas* user_view = lp->GetCanvas();
           if (user_view !=0 && lp->GetGuiType() == 1) {
-            user_view->SetParent(pView);
+            user_view->set_wnd(pView);
             user_view->InvalidateSave();
           } else {
             pView->WindowIdle();
